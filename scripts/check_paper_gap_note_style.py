@@ -157,8 +157,10 @@ def _scan_note_text(rel_path: str, text: str) -> list[Finding]:
         add("missing `\\bibliography{references}`")
     if not CITE_RE.search(text):
         add("missing bibliographic citation such as `\\cite{...}`")
-    if "\\ghissue{" not in text and "\\ghpr{" not in text:
-        add("missing GitHub traceability macro `\\ghissue{...}` or `\\ghpr{...}`")
+    if ("\\ghissue{" not in text and "\\ghpr{" not in text
+            and "\\localissue{" not in text):
+        add("missing traceability macro `\\ghissue{...}`, `\\ghpr{...}`, "
+            "or `\\localissue{...}`")
 
     if TEXTTT_TRACE_RE.search(text):
         add("use paper-gap macros instead of `\\texttt{...}` for Lean or source traceability")

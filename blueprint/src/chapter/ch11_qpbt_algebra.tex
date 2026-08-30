@@ -180,8 +180,11 @@ the finite fields with $p$ and $q$ elements; $p$ is the characteristic of
 $\F_q$, and $\F_p$ is its prime subfield.
 
 \begin{definition}[Coordinate map and multiplication tables]\label{def:subfields-kappa}
-	Let $q$ be a prime power and $k$ an integer, so that $\F_q$ is a subfield of
-	$\F_{q^k}$ and $\F_{q^k}$ is a linear space of dimension $k$ over $\F_q$.
+	% The source lets k range over all integers; the extension field exists
+	% only for k >= 1, so that domain condition is made explicit here.
+	Let $q$ be a prime power and $k \ge 1$ an integer, so that $\F_q$ is a
+	subfield of $\F_{q^k}$ and $\F_{q^k}$ is a linear space of dimension $k$
+	over $\F_q$.
 	Fix a basis $\{e_i\}_{i=1}^k$ of $\F_{q^k}$ over $\F_q$. The bijection
 	$\kappa_q : \F_{q^k} \to \F_q^k$ associated with this basis is
 	\[
@@ -245,9 +248,9 @@ test.
 \begin{lemma}[Coordinate maps of self-dual bases]\label{lem:downsize_field}
 	\uses{def:subfields-kappa, def:subfield-trace,
 		def:dual-self-dual-normal-basis, def:dot-product-orthogonal}
-	Let $q$ be a prime power, $k$ an integer, and $\{e_i\}$ a self-dual basis of
-	$\F_{q^k}$ over $\F_q$. The map $\kappa_q$ corresponding to $\{e_i\}$
-	satisfies:
+	Let $q$ be a prime power, $k \ge 1$ an integer, and $\{e_i\}$ a self-dual
+	basis of $\F_{q^k}$ over $\F_q$. The map $\kappa_q$ corresponding to
+	$\{e_i\}$ satisfies:
 	\begin{enumerate}
 		\item for all $x \in \F_{q^k}$,
 		      $\kappa_q(x) = \bigl(\tr_{q^k \to q}(x e_1), \dots,
@@ -346,13 +349,7 @@ test.
 \end{definition}
 
 \begin{lemma}[Schwartz--Zippel lemma~\cite{Sch80,Zip79}]\label{lem:schwartz-zippel}
-	% Same declaration as lem:schwartz-zippel-total-degree (ch03), of which this
-	% node is a restatement: the function-level statement here is the exact
-	% restriction of the MvPolynomial-level theorem to the reduced (individual
-	% degree <= q-1) representatives that def:polynomials-degree attaches
-	% uniquely to each polynomial function.
-	\lean{MIPStarRE.LDT.Preliminaries.schwartzZippel_totalDegree}
-	\leanok
+	% Restatement of lem:schwartz-zippel-total-degree under the source's label.
 	\uses{def:polynomials-degree}
 	Let $f, g : \F_q^m \to \F_q$ be two unequal polynomials of total degree at
 	most $d$. Then
@@ -678,8 +675,10 @@ observables and maximally entangled states over \emph{qubits}
 \begin{lemma}[Qudit-to-qubit isomorphism]\label{lem:pauli-binary}
 	\uses{def:admissible-size, def:binary-representation,
 		def:generalized-pauli, def:EPR}
-	For all admissible field sizes $q = 2^k$ and integers $L$, there exists an
-	isomorphism $\phi : (\C^q)^{\ot L} \to (\C^2)^{\ot Lk}$ such that
+	% The source quantifies over all integers L; the tensor powers require
+	% L >= 1, so that domain condition is made explicit here.
+	For all admissible field sizes $q = 2^k$ and integers $L \ge 1$, there
+	exists an isomorphism $\phi : (\C^q)^{\ot L} \to (\C^2)^{\ot Lk}$ such that
 	\begin{equation}\label{eq:epr-q-to-epr-2}
 		\phi \ot \phi\, \ket{\mathrm{EPR}_q}^{\ot L}
 		= \ket{\mathrm{EPR}_2}^{\ot Lk}
@@ -738,5 +737,8 @@ observables and maximally entangled states over \emph{qubits}
 	In the source statement of Lemma~\ref{lem:pauli-binary} in
 	\cite{Ji2020MIPStar}, the index range of the qubit factor is printed as
 	$j \in \{1, \dots, q\}$; the intended range, used above, is
-	$j \in \{1, \dots, k\}$, as the $i$-th qudit is mapped to $k$ qubits.
+	$j \in \{1, \dots, k\}$, as the $i$-th qudit is mapped to $k$ qubits. The
+	source also quantifies over arbitrary integers $L$; the statement above
+	takes $L \ge 1$, the domain on which the tensor powers $(\C^q)^{\ot L}$
+	are defined.
 \end{remark}

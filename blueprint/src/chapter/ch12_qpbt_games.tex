@@ -25,15 +25,6 @@ This chapter records the vocabulary in which the quantum Pauli basis test and it
 	for every $x$ both marginals are again POVMs.
 \end{definition}
 
-% The declaration MIPStarRE.Quantum.Measurement.postprocess
-% (MIPStarRE/Quantum/Measurement.lean) realizes the operation defined here for each fixed
-% x: it maps a POVM {M_a}_{a in alpha} with finite outcome type alpha and a function
-% f : alpha -> beta with beta finite to the POVM {sum_{a : f(a)=b} M_a}_{b in beta},
-% including the zero value on b outside the image of f (empty fiber sum). The indexing by
-% x is pointwise application of that operation, and the tuple-component notation below is
-% the special case where f is a coordinate projection. Verified against the Lean source
-% on 2026-08-30; decidable-equality instance arguments encode no extra hypothesis over
-% the stated finiteness.
 \begin{definition}[Bracket notation for post-processed measurements]\label{def:bracket}
 	\lean{MIPStarRE.Quantum.Measurement.postprocess}
 	\leanok
@@ -115,16 +106,16 @@ Unless specified otherwise, all strategies considered in what follows are tensor
 
 We often specify symmetric games $\mathfrak G$ and symmetric strategies $\mathcal S$ using a compact notation: we write $\mathfrak G = (\mathcal X, \mathcal A, \mu, D)$ and $\mathcal S = (\ket{\psi}, M)$, where $M$ denotes the set of measurement operators shared by both players.
 
-% The source (references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:94-103) concludes with a
-% strategy of value at least 1-eps; its proof yields only the approximate form stated here, and
-% the supremum defining val* need not be attained. See rem:symmetric-strat-limit.
+% Source statement (references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:94-99) kept in
+% its original form. The proof below records the approximate form the source argument
+% establishes and leaves the final attainment step unproved; see rem:symmetric-strat-limit.
 \begin{lemma}[Symmetrization of strategies for symmetric games]\label{lem:symmetric-strat}
 	\uses{def:symmetric-game, def:tensor-product-value, def:projective-strategy-general}
-	Let $\mathfrak G = (\mathcal X, \mathcal A, \mu, D)$ be a symmetric game such that $\operatorname{val}^*(\mathfrak G) = 1-\eps$ for some $\eps \ge 0$. Then for every $\eps' > \eps$ there exists a symmetric and projective strategy $\mathcal S = (\ket{\psi}, M)$ such that $\operatorname{val}^*(\mathfrak G, \mathcal S) \ge 1-\eps'$.
+	Let $\mathfrak G = (\mathcal X, \mathcal A, \mu, D)$ be a symmetric game such that $\operatorname{val}^*(\mathfrak G) = 1-\eps$ for some $\eps \ge 0$. Then there exists a symmetric and projective strategy $\mathcal S = (\ket{\psi}, M)$ such that $\operatorname{val}^*(\mathfrak G, \mathcal S) \ge 1-\eps$.
 \end{lemma}
 \begin{proof}
 	\uses{thm:naimark}
-	Fix $\eps' > \eps$. Since $\operatorname{val}^*(\mathfrak G)$ is the supremum of the values of all strategies, there exists a strategy $\mathcal S' = (\ket{\psi'}, A, B)$ with $\operatorname{val}^*(\mathfrak G, \mathcal S') \ge 1-\eps'$. Using Naimark dilation (Theorem~\ref{thm:naimark}, in the completed form recorded in Remark~\ref{rem:naimark-for-games}) we may assume without loss of generality that $\ket{\psi'} \in \C^d_{A'} \ot \C^d_{B'}$ for some integer $d$ and that every $A^x$ and $B^x$ is a projective measurement. Let
+	The symmetrization argument establishes the following approximate form of the conclusion: for every $\eps' > \eps$ there exists a symmetric and projective strategy of value at least $1-\eps'$. Indeed, fix $\eps' > \eps$. Since $\operatorname{val}^*(\mathfrak G)$ is the supremum of the values of all strategies, there exists a strategy $\mathcal S' = (\ket{\psi'}, A, B)$ with $\operatorname{val}^*(\mathfrak G, \mathcal S') \ge 1-\eps'$. Using Naimark dilation (Theorem~\ref{thm:naimark}, in the completed form recorded in Remark~\ref{rem:naimark-for-games}) we may assume without loss of generality that $\ket{\psi'} \in \C^d_{A'} \ot \C^d_{B'}$ for some integer $d$ and that every $A^x$ and $B^x$ is a projective measurement. Let
 	\[
 		\ket{\psi} = \frac{1}{\sqrt 2}\, \bigl( \ket{0}_{A}\ket{1}_{B}\ket{\psi'}_{A'B'} + \ket{1}_{A}\ket{0}_{B}\ket{\psi'_\tau}_{A'B'} \bigr) \in \bigl(\C^2_{A} \ot \C^d_{A'}\bigr) \ot \bigl(\C^2_{B} \ot \C^d_{B'}\bigr)\,,
 	\]
@@ -132,11 +123,13 @@ We often specify symmetric games $\mathfrak G$ and symmetric strategies $\mathca
 	\[
 		M^x_a = \ket{0}\bra{0} \ot A^x_a + \ket{1}\bra{1} \ot B^x_a\,,
 	\]
-	and let each player measure $M$ on their pair of registers. Because the decision predicate $D$ of the symmetric game treats the two players symmetrically, the resulting symmetric projective strategy $\mathcal S = (\ket{\psi}, M)$ satisfies $\operatorname{val}^*(\mathfrak G, \mathcal S) = \operatorname{val}^*(\mathfrak G, \mathcal S') \ge 1-\eps'$.
+	and let each player measure $M$ on their pair of registers. Because the decision predicate $D$ of the symmetric game treats the two players symmetrically, the resulting symmetric projective strategy $\mathcal S = (\ket{\psi}, M)$ satisfies $\operatorname{val}^*(\mathfrak G, \mathcal S) = \operatorname{val}^*(\mathfrak G, \mathcal S') \ge 1-\eps'$. Note that this construction preserves the value of the strategy it is applied to exactly.
+
+	The statement asserts more, namely a single symmetric projective strategy of value at least $1-\eps$ itself. Passing from the family of strategies constructed above to one attaining the bound $1-\eps$ is an attainment step which the argument does not supply: the supremum defining $\operatorname{val}^*(\mathfrak G)$ in Definition~\ref{def:tensor-product-value} ranges over strategies of unbounded dimension and need not be attained. This step remains unproved; the obstruction, and the forms of the lemma that the argument does prove, are documented in \cite{gap:qpbt_symmetrization-attainment}. See also Remark~\ref{rem:symmetric-strat-limit}.
 \end{proof}
 
 \begin{remark}[Attainment in the symmetrization lemma]\label{rem:symmetric-strat-limit}
-	The source states the conclusion of Lemma~\ref{lem:symmetric-strat} in the stronger form: there exists a symmetric projective strategy of value at least $1-\eps$. Its proof, reproduced above, produces, for each $\eps' > \eps$, such a strategy of value at least $1-\eps'$, and the stronger form does not follow: the dilated dimension $d$ may grow as $\eps' \downarrow \eps$, and the supremum defining $\operatorname{val}^*(\mathfrak G)$ in Definition~\ref{def:tensor-product-value} need not be attained by any strategy. The statement above therefore records the approximate conclusion, which is what the proof establishes; the stronger form would require an additional attainment or compactness argument.
+	The proof of Lemma~\ref{lem:symmetric-strat} yields, for each $\eps' > \eps$, a symmetric projective strategy of value at least $1-\eps'$. The conclusion as stated, at $\eps' = \eps$, does not follow from this: the dilated dimension $d$ may grow as $\eps' \downarrow \eps$, and the supremum defining $\operatorname{val}^*(\mathfrak G)$ in Definition~\ref{def:tensor-product-value} need not be attained by any strategy. The symmetrization construction itself is value-preserving, so the conclusion does hold whenever the hypothesis supplies an actual strategy of value at least $1-\eps$ rather than only the value of the game; every use of the lemma in the source proceeds from such a strategy, or from a strict lower bound on the value, and therefore consumes only what the proof establishes. The gap and the available repairs are documented in \cite{gap:qpbt_symmetrization-attainment}.
 \end{remark}
 
 \begin{definition}[Commuting strategies]\label{def:comm-strategy}
@@ -200,13 +193,20 @@ We almost always restrict attention to symmetric strategies; in this case consis
 
 A measurement that is consistent on $\ket{\psi}$ in the sense of Definition~\ref{def:consistent-measurement} is $0$-consistent with itself on the same state under the singleton distribution, and vice versa: if $\sum_a \bra{\psi} M_a \ot M_a \ket{\psi} = 1$, then $M_a \ot \Id\, \ket{\psi} = \Id \ot M_a\, \ket{\psi}$ for every $a$, by the equality case of the Cauchy--Schwarz inequality applied outcome by outcome.
 
-\begin{definition}[Distance between POVMs]\label{def:povm-distance}
+% The source (references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:257-274) states this
+% definition for pairs of POVMs but applies the relation to arbitrary operator families:
+% to plain operators at 06:313-330, to sets of matrices at 06:364-380, and to products and
+% commutators, compared against the zero family, at 06:409-445. The general form below,
+% for arbitrary finite families of operators, is the one of the NEEXP source
+% (references/neexp-paper/05_quantum_preliminaries.tex:385-391), from which the distance
+% calculus is imported; the POVM case is singled out after the display.
+\begin{definition}[State-dependent distance between operator families]\label{def:povm-distance}
 	\uses{def:povm-conventions, def:state-distance}
-	Let $\mathcal X$ be a finite set and $\mu$ a distribution on $\mathcal X$. Let $\ket{\psi} \in \mathcal H$ be a quantum state, and for all $x \in \mathcal X$ let $\{M^x_a\}$ and $\{N^x_a\}$ be two POVMs on $\mathcal H$. We say that \emph{$\{M^x_a\}$ and $\{N^x_a\}$ are $\delta$-close on state $\ket{\psi}$ and under distribution $\mu$} if
+	Let $\mathcal X$ and $\mathcal A$ be finite sets and $\mu$ a distribution on $\mathcal X$. Let $\ket{\psi} \in \mathcal H$ be a quantum state, and for all $x \in \mathcal X$ let $\{M^x_a\}_{a \in \mathcal A}$ and $\{N^x_a\}_{a \in \mathcal A}$ be two families of linear operators on $\mathcal H$. We say that \emph{$\{M^x_a\}$ and $\{N^x_a\}$ are $\delta$-close on state $\ket{\psi}$ and under distribution $\mu$} if
 	\[
 		\E_{x \sim \mu} \sum_a \lVert (M^x_a - N^x_a)\, \ket{\psi} \rVert^2 \le O(\delta)\,,
 	\]
-	and we write $M^x_a \approx_\delta N^x_a$ to denote this when the state $\ket{\psi}$ and the distribution $\mu$ are clear from context. This distance is referred to as the \emph{state-dependent} distance.
+	and we write $M^x_a \approx_\delta N^x_a$ to denote this when the state $\ket{\psi}$ and the distribution $\mu$ are clear from context. This distance is referred to as the \emph{state-dependent} distance. The principal case is that in which $\{M^x_a\}$ and $\{N^x_a\}$ are POVMs on $\mathcal H$, and we then speak of the state-dependent distance between the POVMs; but the relation is used for arbitrary operator families --- for instance for products of measurement operators, or for commutators compared against the identically zero family, as in Lemma~\ref{lem:commutation-analysis} below.
 \end{definition}
 
 \begin{definition}[Distance between strategies]\label{def:strategy-distance}
@@ -500,17 +500,21 @@ The marginal functions, factor spaces, and linear maps of a given CL function $L
 	By induction on $k$. The case $k = 0$ follows directly from Definition~\ref{def:cl-func}, since then $L = 0$ and $T$ acts by the single $\ell$-level function $R_0$ on the register subspace $V$. For the inductive step, write $L(x^U) = x^{L_1} + L_{>1,\,x^{L_1}}(x^{U_{>1}})$ with complementary register subspaces $U_1$ and $U_{>1}$ of $U$. For each value $x^{L_1}$, the function $T_{>1,\,x^{L_1}}$ on $U_{>1} \oplus V$ sending $x^{U_{>1} \oplus V}$ to $L_{>1,\,x^{L_1}}(x^{U_{>1}}) + R_{x^{L_1} + x^{L_{>1}}}(x^V)$ is the concatenation of the $(k-1)$-level function $L_{>1,\,x^{L_1}}$ with a family drawn from $\{R_u\}$, hence is $(k+\ell-1)$-level by the induction hypothesis. The claim then follows from Definition~\ref{def:cl-func} applied with first subspace $U_1$ and first linear map $L_1$.
 \end{proof}
 
+% The source (references/qpbt-paper/05_conditionally_linear_functions.tex:315-364) leaves
+% the number m of summands unquantified (m >= 1 is needed for the level max_j ell_j to
+% have an index) and begins its induction at level 1; the level-zero base case is supplied
+% here, since def:cl-func admits 0-level functions and all ell_j may be 0.
 \begin{lemma}[Direct sums of conditionally linear functions]\label{lem:cl-func-prod}
 	\uses{def:cl-func, def:register-subspace}
-	Let $V^{(1)}, V^{(2)}, \dots, V^{(m)}$ be register subspaces of $V$ such that $V = \bigoplus_{j=1}^m V^{(j)}$. Suppose that, for each $j \in \{1, 2, \dots, m\}$, $L^{(j)}$ is an $\ell_j$-level conditionally linear function on $V^{(j)}$. Then the direct sum $L = \bigoplus_{j=1}^m L^{(j)}$, defined by
+	Let $m \ge 1$ be an integer and let $V^{(1)}, V^{(2)}, \dots, V^{(m)}$ be register subspaces of $V$ such that $V = \bigoplus_{j=1}^m V^{(j)}$. Suppose that, for each $j \in \{1, 2, \dots, m\}$, $L^{(j)}$ is an $\ell_j$-level conditionally linear function on $V^{(j)}$. Then the direct sum $L = \bigoplus_{j=1}^m L^{(j)}$, defined by
 	\[
 		L(x) = \sum_{j=1}^m L^{(j)}(x^{(j)})
 	\]
-	for all $x = \sum_{j=1}^m x^{(j)} \in \bigoplus_{j=1}^m V^{(j)}$, is an $\ell$-level CL function on $V$ for $\ell = \max_j \{\ell_j\}$.
+	for all $x = \sum_{j=1}^m x^{(j)} \in \bigoplus_{j=1}^m V^{(j)}$, is an $\ell$-level CL function on $V$ for $\ell = \max_j \{\ell_j\}$; the maximum exists since $m \ge 1$.
 \end{lemma}
 \begin{proof}
 	\uses{def:cl-func}
-	Since an $\ell$-level CL function is also $k$-level conditionally linear for all $k \ge \ell$, it suffices to prove the claim when $\ell_j = \ell$ for all $j$. Proceed by induction on $\ell$. For $\ell = 1$ the functions $L^{(j)}$ are linear and the direct sum of linear maps is linear. For the inductive step, decompose each $L^{(j)}$ into its first-level linear part $L^{(j)}_1$ on $V^{(j)}_1$ and its family of $(\ell-1)$-level remainders $L^{(j)}_{>1,\,v_j}$ on $V^{(j)}_{>1}$. The direct sums of the first-level parts define a linear map on $V_1 = \bigoplus_j V^{(j)}_1$, and, for each prefix value $v = \sum_j v_j$, the direct sums of the remainders are $(\ell-1)$-level conditionally linear on $V_{>1} = \bigoplus_j V^{(j)}_{>1}$ by the induction hypothesis. This exhibits $L$ in the form required by Definition~\ref{def:cl-func}.
+	Since an $\ell$-level CL function is also $k$-level conditionally linear for all $k \ge \ell$, it suffices to prove the claim when $\ell_j = \ell$ for all $j$. Proceed by induction on $\ell$. For $\ell = 0$ every $L^{(j)}$ is the zero function on $V^{(j)}$, so $L$ is the zero function on $V$, which is the unique $0$-level CL function on $V$ (Definition~\ref{def:cl-func}). For the inductive step with $\ell \ge 1$, decompose each $L^{(j)}$ into its first-level linear part $L^{(j)}_1$ on $V^{(j)}_1$ and its family of $(\ell-1)$-level remainders $L^{(j)}_{>1,\,v_j}$ on $V^{(j)}_{>1}$. The direct sums of the first-level parts define a linear map on $V_1 = \bigoplus_j V^{(j)}_1$, and, for each prefix value $v = \sum_j v_j$, the direct sums of the remainders are $(\ell-1)$-level conditionally linear on $V_{>1} = \bigoplus_j V^{(j)}_{>1}$ by the induction hypothesis. This exhibits $L$ in the form required by Definition~\ref{def:cl-func}.
 \end{proof}
 
 \begin{lemma}[Direct sums give product distributions]\label{lem:cl-dist-prod}

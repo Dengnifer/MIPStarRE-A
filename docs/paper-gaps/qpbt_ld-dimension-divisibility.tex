@@ -1,0 +1,251 @@
+\documentclass[11pt]{article}
+
+\usepackage{amsmath,amssymb}
+\usepackage{xurl}
+\usepackage[hidelinks]{hyperref}
+\setlength{\emergencystretch}{2em}
+
+\input{command}
+
+\title{Dimension Divisibility in the Classical Test Instantiation of the
+	Pauli Basis Analysis}
+\author{}
+\date{2026-08-30}
+
+\begin{document}
+\maketitle
+
+\section{At a glance}
+
+\begin{itemize}
+  \item \textbf{Difficulty: medium.}  No analytic estimate is missing.  The
+  obstruction is that the soundness analysis of the Pauli basis test invokes
+  the classical low individual degree game at dimension $2m+2$, and the game's
+  question distribution is undefined at that dimension for the admissible
+  parameters: it requires $2m+2$ to divide $q$, while admissibility supplies
+  only $m \mid q$.  The repair is a statement-level reformulation of an
+  imported theorem, not a new proof.
+  \item \textbf{Estimated weight:} for the recommended route, about
+  \textbf{2--4 new definitions or interfaces} (a line-point distribution with
+  directly sampled index at arbitrary dimension, and a restated soundness
+  import) plus \textbf{3--6 supporting lemmas}, a few hundred lines of formal
+  proof.  The padding fallback is heavier, roughly 6--10 reworked lemmas.
+  \item \textbf{Mathlib/project split:} approximately \textbf{15\% Mathlib}
+  and \textbf{85\% project-local}.  Mathlib supplies uniform distributions on
+  finite types and pushforward identities; the substance is choosing the
+  statement of the imported soundness theorem and rechecking the combining
+  subtree against it.
+  \item \textbf{Key Mathlib inputs:} uniform distributions on finite types
+  and their maps, and elementary divisibility arithmetic on powers of two.
+  The main inputs are project-local: the classical game, its conditionally
+  linear question distribution, and the imported soundness statement.
+  Tracked in \localissue{0002}.
+\end{itemize}
+
+\section{Key theorem forms}
+
+Throughout, $q = 2^k$ with $k$ odd is an admissible field size, the tuple
+$(q,m,d)$ is admissible when moreover $d \ge 1$ and $m \mid q$, and
+$\mathrm{ideg}_{d,m}(\F_q)$ denotes the $m$-variate polynomial representatives
+over $\F_q$ of individual degree at most $d$.  The comparison involves four
+theorem forms.
+\begin{enumerate}
+  \item \textbf{Source theorem form} (the polynomial-pair measurement).  There
+  is a function $\delta_S(\eps,m,d,q) = a(md)^a(\eps^b + q^{-b} + 2^{-bmd})$,
+  for universal constants $a > 1$ and $0 < b < 1$, such that for every
+  admissible $(q,m,d)$ and every projective strategy for the Pauli basis test
+  succeeding with probability at least $1-\eps$, there is a projective
+  measurement $\{\hat S_{g_X,g_Z}\}$ with outcomes pairs of polynomials in
+  $\mathrm{ideg}_{d,m}(\F_q)$ whose evaluations are $\delta_S$-consistent, on
+  average over a uniform point $u \in \F_q^m$ and in both bases
+  $W \in \{X,Z\}$, with the corresponding points measurements
+  $\{\hat M^{(\mathrm{Point},W),u}_a\}$ of the strategy, together with the
+  symmetric counterpart of this relation.
+  \item \textbf{Missing instantiation obligation.}  The classical low
+  individual degree game with parameter tuple $(q,\, 2m+2,\, d,\, 1)$ is well
+  defined, and the combined point and line measurements assembled in the
+  analysis constitute a strategy for it of value at least
+  $1 - \delta_{\mathrm{combine}}$.  The game's question distribution draws
+  its axis and diagonal indices through an index function
+  $\chi_{2m+2}\colon \F_q \to \{1,\ldots,2m+2\}$ with classes of equal size
+  $q/(2m+2)$, so the game exists only when $2m+2$ divides $q$.
+  \item \textbf{Restricted form supported by the present route.}  The source
+  theorem form under the additional hypothesis $2m+2 \mid q$.  Among
+  admissible tuples this hypothesis holds exactly when $m = 1$ and
+  $q \ge 8$; it fails for every admissible tuple with $m \ge 2$ and for
+  $(q,m) = (2,1)$.
+  \item \textbf{Repaired import form} (recommended target).  Quantum
+  soundness of the classical low individual degree game over $\F_q^{m'}$ for
+  every dimension $m' \ge 1$ and admissible $q$, with no divisibility
+  hypothesis, for the variant of the question distribution that samples the
+  axis index, and the diagonal prefix index, uniformly from
+  $\{1,\ldots,m'\}$ directly rather than through an index function on
+  $\F_q$; with error
+  $\delta_{\mathrm{ld}}(\eps,q,m',d,k) = a(dm'k)^a(\eps^b + q^{-b} +
+  2^{-bm'd})$.  When $m' \mid q$ this distribution coincides with the
+  conditionally linear one, so the repaired form extends the present one.
+\end{enumerate}
+
+\section{The source assertion and the obstruction}
+
+We examine the final step of the subsection ``Applying the classical
+low-degree test'' in the analysis of the Pauli basis test in the compression
+paper of Ji, Natarajan, Vidick, Wright, and Yuen (MIP$^{*}$=RE,
+arXiv:2001.04383), whose quantum soundness component builds on the low
+individual degree test of \cite{Ji2020LowIndividualDegree}.%
+\footnote{Tracked in \localissue{0002}.  In the mirror of the source
+consulted here, the polynomial-pair lemma and its proof are at
+\path{references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex},
+lines~1267--1288; the sub-line lemma is at lines~1063--1116 and the combined
+line lemma at lines~1020--1034 of the same file.  The game parametrization
+with its divisibility, the index function, the soundness statement with its
+proof, and admissibility are at
+\path{references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex},
+lines~33--35, 214--219, 413--458, and 958--961.}
+There, the combined point measurements
+$\{\hat Q^{x,z,\alpha,\beta}_c\}$ and combined line measurements
+$\{\hat Q^{\ell}_f\}$, indexed by points of $\F_q^{2m+2}$ and lines in
+$\F_q^{2m+2}$, are asserted to form a strategy for the classical low
+individual degree game with parameters
+\[
+  \mathsf{ldparams} = (q,\, 2m+2,\, d,\, 1)
+  \tag{\path{lem:qld-4-7}}
+\]
+of value $1 - \delta_{\mathrm{combine}}$, and the quantum soundness theorem
+for that game is applied to produce the global polynomial-pair measurement.
+The two lemmas feeding this step are stated for the line-point distribution
+over $\F_q^{2m+2}$.
+
+The game, however, is parametrized by tuples $(q,m',d,k)$ with $q$ an
+admissible field size \emph{and $m'$ dividing $q$}.  The divisibility is not
+incidental: the question distribution is a conditionally linear distribution
+in which a uniform seed coordinate $s \in \F_q$, read as an integer in
+$\{0,\ldots,q-1\}$, determines the axis or diagonal index through the unique
+$\chi(s)$ with
+\[
+  s = (\chi(s)-1)\,\frac{q}{m'} + r, \qquad 0 \le r < \frac{q}{m'},
+  \tag{\path{eq:chi-func}}
+\]
+so that the $m'$ classes $\chi^{-1}(i)$ partition $\F_q$ into sets of equal
+size $q/m'$ and the index is uniform.  For $m' \nmid q$ neither the index
+function nor the line-point distribution built from it is defined.
+
+Admissibility of $(q,m,d)$ supplies only $m \mid q$.  Since an admissible $q$
+is a power of two, $m \mid q$ forces $m = 2^j$.  For $j \ge 1$ the integer
+$m+1 \ge 3$ is odd, so $2m+2 = 2(m+1)$ has an odd factor exceeding $1$ and
+divides no power of two; for $m = 1$ the condition $4 \mid q$ holds for every
+admissible $q$ except $q = 2$.  Thus the instantiation at dimension $2m+2$ is
+undefined for every admissible tuple with $m \ge 2$: for instance
+$(q,m,d) = (8,2,1)$ is admissible, while $6 \nmid 8$.  The source performs
+the instantiation without addressing the divisibility, so its proof route
+establishes the polynomial-pair lemma, and with it the soundness theorem for
+the Pauli basis test that rests on it, only for $m = 1$ and $q \ge 8$.
+
+\section{What the cited soundness theorem actually requires}
+
+The quantum soundness theorem for the classical game inherits the constraint
+$m' \mid q$ solely because it is stated for the game just described; its
+proof fixes an admissible $q$ with $m' \mid q$ and then identifies the game
+with the two-prover tensor-code test for the Reed--Solomon tensor code
+$\mathcal C^{\ot m'}$, concluding by Theorem~4.7 of the same authors'
+\emph{Quantum soundness of testing tensor codes} (arXiv:2111.08131).  The
+identification matches the axis-parallel line-versus-point test, the
+subcube commutation test, and the synchronicity test of the external source;
+the only role of the divisibility in this identification is to make the
+$\chi$-sampled index uniform.
+
+The underlying mathematics does not need the divisibility.  The low
+individual degree test of \cite{Ji2020LowIndividualDegree} samples its axis
+index $i$ uniformly from $\{1,\ldots,m'\}$ directly, with no index function
+on $\F_q$ and no divisibility hypothesis,%
+\footnote{See the test figure in \path{references/ldt-paper/test_definition.tex}.}
+and the tensor-code test is likewise a test about the code
+$\mathcal C^{\ot m'}$, not about an encoding of indices into $\F_q$.  The
+$\chi$-based packaging exists so that the question distribution is
+conditionally linear, which the introspection machinery requires for the
+game the players actually play --- the Pauli basis test at dimension $m$,
+where admissibility does supply the divisibility.  The game at dimension
+$2m+2$ never appears in a verifier; it is an internal analysis device in the
+proof of the polynomial-pair lemma, so nothing there requires its question
+distribution to be conditionally linear.
+
+\section{Candidate repairs}
+
+\paragraph{Direct index sampling (recommended).}
+Define, for arbitrary $m' \ge 1$, the line-point distribution over
+$\F_q^{m'}$ that samples the uniform point, the uniform axis index
+$i \in \{1,\ldots,m'\}$, and the diagonal direction with vanishing first
+$i-1$ coordinates, directly; state the imported soundness theorem for the
+game with this question distribution (form~4 above); and prove the one
+coincidence lemma: when $m' \mid q$, pushing the uniform $s \in \F_q$
+through $\chi$ yields the uniform index, so the two distributions agree.
+The combining subtree is then reread with the direct distribution at
+dimension $2m+2$: every statement becomes well defined for all admissible
+tuples, and the proofs go through unchanged, since they use only the laws of
+the sampled objects and never the conditional linearity of the sampling.
+This follows the subtree protocol for a definition-level mismatch: the
+definition is corrected at the lowest point rather than each downstream
+lemma acquiring a hypothesis.  The one external check is that the
+tensor-code test of arXiv:2111.08131 indeed samples its axes and subcubes
+directly, which should be confirmed against that source when the import is
+formalized.
+
+\paragraph{Padding the dimension.}
+Alternatively, embed the combined polynomial into
+$\mathrm{ideg}_{d,\bar m}(\F_q)$ for $\bar m = 4m$, the least power of two
+with $\bar m \ge 2m+2$, ignoring the $2m-2$ dummy variables.  Then
+$\bar m \mid q$ holds whenever $q \ge 4m$, and the existing game applies at
+dimension $\bar m$.  In the complementary regime $m \in \{q/2,\, q\}$ the
+conclusion is vacuous: $md \ge q/2$ gives
+$\delta_S \ge a(md)^a q^{-b} \ge a\,2^{-a} q^{a-b} \ge a\,2^{-b} \ge 1$
+for $a \ge 2$, while the consistency quantities bounded by the theorem never
+exceed $1$.  This route stays inside the present definitions but reworks the
+sub-line distribution (a fourth coordinate block of dummies), the combining
+map, and the wrong-block Schwartz--Zippel analysis, and it moves the
+combining lemmas away from their source statements at dimension $2m+2$.
+
+\paragraph{Unequal index classes.}
+One could instead define an index function at dimension $2m+2$ with classes
+of sizes $\lfloor q/(2m+2)\rfloor$ and $\lceil q/(2m+2)\rceil$.  The index
+is then only approximately uniform, the identification with the external
+test fails exactly, and every distributional identity in the sub-line
+analysis acquires an error term; this amounts to re-proving the imported
+soundness theorem for a perturbed game and is not recommended.
+
+\section{Comparison with the blueprint}
+
+The blueprint \cite{MIPStarREBlueprint} keeps the sub-line lemma, the
+combined line lemma, and the polynomial-pair lemma in their source-shaped
+statements, with no divisibility hypothesis.  Their proofs retain the source
+constructions and mark the unresolved obligation at the exact steps: the
+first sampling step of the sub-line construction, where $\chi_{2m+2}$ and
+the line-point distribution over $\F_q^{2m+2}$ are invoked, and the
+instantiation step of the polynomial-pair proof, where $(q,2m+2,d,1)$ is
+used as a game parameter tuple.  A chapter remark records the divisibility
+arithmetic and cites this note; the final soundness theorem for the Pauli
+basis test remains open modulo this obligation.  An earlier revision had
+instead added the hypothesis $2m+2 \mid q$ to the three lemmas; that was
+statement drift in the sense of the proof-gap protocol, since the hypothesis
+excludes all admissible $m \ge 2$ and does not appear in the source.
+
+\section{Conclusion}
+
+There is a theorem-level gap in the source proof route: the classical low
+individual degree game invoked at dimension $2m+2$ is undefined for every
+admissible tuple with $m \ge 2$ (and for $(q,m) = (2,1)$), because its
+question distribution requires $2m+2 \mid q$ while admissibility supplies
+only $m \mid q$.  The cited route therefore does not establish the
+polynomial-pair lemma, nor the soundness of the Pauli basis test that
+depends on it, beyond $m = 1$ and $q \ge 8$.  We do not assert that the
+conclusion is false: the underlying tensor-code soundness is insensitive to
+how the axis index is sampled.  The recommended stage-4 route is the direct
+index sampling repair --- restate the imported soundness theorem for the
+directly sampled line-point distribution at arbitrary dimension, prove its
+coincidence with the conditionally linear distribution when the dimension
+divides $q$, and reread the combining subtree against it --- with dimension
+padding as the fallback confined to the present game definition.
+
+\bibliographystyle{alpha}
+\bibliography{references}
+
+\end{document}

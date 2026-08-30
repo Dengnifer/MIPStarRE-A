@@ -205,14 +205,24 @@ this is the source of the terminology.
 	$q \geq 2$, so it is minimized at $q = 2$, where it equals $2^{-3}$;
 	hence the anticommuting probability is at least $2^{-4}$.
 
-	Finally, suppose $m, d \geq 1$. By Bernoulli's inequality,
+	Finally, suppose $m, d \geq 1$, and consider the first inequality of
+	the display, which bounds the anticommuting probability from below.
+	If $md > q$, that lower bound is negative --- it is the product of
+	the positive factors $1 - q^{-m}$, $1 - q^{-1}$, and $\frac12$ with
+	the negative factor $1 - md/q$ --- so the anticommuting probability,
+	being nonnegative, exceeds it. If $md \leq q$, then by Bernoulli's
+	inequality
 	$(1-q^{-1})^{m} \geq 1 - m/q \geq 1 - md/q \geq (1-q^{-m})(1-md/q)$,
-	where the last step is trivial when $1 - md/q < 0$; multiplying by
-	$1 - q^{-1}$ shows that the anticommuting probability is at least the
-	first displayed bound. For the second inequality of the display, since
-	$md \geq 1$ gives $q^{-m} \leq q^{-1} \leq md/q$, expanding the product
-	yields
-	$(1-q^{-m})(1-q^{-1})(1-md/q) \geq 1 - q^{-m} - q^{-1} - md/q \geq 1 - 3md/q$.
+	where the last step multiplies the nonnegative quantity $1 - md/q$
+	by $1 - q^{-m} \leq 1$; multiplying by $1 - q^{-1}$ shows that the
+	anticommuting probability is at least the first displayed bound. For
+	the second inequality of the display, expanding the product shows
+	that $(1-q^{-m})(1-q^{-1})(1-md/q)$ exceeds
+	$1 - q^{-m} - q^{-1} - md/q$ by
+	$q^{-m-1} + \frac{md}{q} \big( q^{-m} + q^{-1} - q^{-m-1} \big)$,
+	a sum of nonnegative terms whatever the sign of $1 - md/q$; since
+	$md \geq 1$ gives $q^{-m} \leq q^{-1} \leq md/q$, the product is
+	therefore at least $1 - 3md/q$.
 	The commuting probability is at least
 	$\frac12 \geq \big(1 - \frac{3md}{q}\big) \cdot \frac12$.
 \end{proof}

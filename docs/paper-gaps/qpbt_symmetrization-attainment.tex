@@ -1,0 +1,217 @@
+\documentclass[11pt]{article}
+
+\usepackage{amsmath,amssymb}
+\usepackage{xurl}
+\usepackage[hidelinks]{hyperref}
+\setlength{\emergencystretch}{2em}
+
+\input{command}
+
+% Local notation matching the source paper (its style file is not shared here).
+\newcommand{\val}{\operatorname{val}}
+\newcommand{\game}{\mathfrak{G}}
+\newcommand{\strategy}{\mathcal{S}}
+
+\title{Attainment in the Symmetrization Lemma}
+\author{}
+\date{2026-08-30}
+
+\begin{document}
+\maketitle
+
+\section{At a glance}
+
+\begin{itemize}
+  \item \textbf{Difficulty: easy.}  The issue is a quantifier exchange between
+  a supremum and an attained maximum in a preliminary lemma on nonlocal games.
+  No analytic estimate is missing; the substance is deciding which statement
+  the symmetrization proof supports and which statement the later arguments
+  consume.
+  \item \textbf{Estimated weight:} about \textbf{1--2 lemma interfaces} and on
+  the order of \textbf{100--300 lines} of formal proof for the value-preserving
+  symmetrization construction.  The attainment step itself should not be
+  formalized as printed (see the Conclusion).
+  \item \textbf{Mathlib/project split:} approximately \textbf{20\% Mathlib}
+  (finite-dimensional inner product spaces, tensor products, block
+  decompositions of $\C^2 \ot \C^d$) and \textbf{80\% project-local} (games,
+  strategies, values, and the Naimark input).
+  \item \textbf{Key mathematical inputs:} the completed projective form of
+  Naimark dilation, \cite[Theorem~5.1]{Ji2020LowIndividualDegree}, and the
+  definitions of symmetric games and tensor product values in the source
+  \cite[Section~5]{Ji2020MIPStar}.  Tracked in \localissue{0002}.
+\end{itemize}
+
+\section{Key theorem forms}
+
+Three statements must be kept apart.  Throughout, $\game$ denotes a symmetric
+two-player one-round game and $\eps \ge 0$ a real parameter; the notation is
+introduced in the next section.
+
+\begin{enumerate}
+  \item \textbf{Source form (attainment form).}  If
+  $\val^*(\game) = 1-\eps$, then there exists a symmetric and projective
+  strategy $\strategy$ with $\val^*(\game, \strategy) \ge 1-\eps$.
+  \item \textbf{Approximate form (what the source proof establishes).}  If
+  $\val^*(\game) = 1-\eps$, then for every $\eps' > \eps$ there exists a
+  symmetric and projective strategy $\strategy$ with
+  $\val^*(\game, \strategy) \ge 1-\eps'$.
+  \item \textbf{Given-strategy form (value-preserving symmetrization).}  If
+  $\strategy'$ is any strategy for $\game$ with
+  $\val^*(\game, \strategy') \ge 1-\eps$, then there exists a symmetric and
+  projective strategy $\strategy$ with
+  $\val^*(\game, \strategy) = \val^*(\game, \strategy') \ge 1-\eps$.
+\end{enumerate}
+
+The source proof consists exactly of a proof of the third form, applied to a
+strategy supplied by the definition of the supremum; this yields the second
+form.  The first form asserts strictly more than the second, and the passage
+from the second to the first is the gap discussed in this note.  Every use of
+the lemma, in the source and in this project, consumes only the second or the
+third form.
+
+\section{The source assertion}
+
+A two-player one-round game
+$\game = (\mathcal X, \mathcal A, \mu, D)$ in compact symmetric notation
+consists of a finite question alphabet $\mathcal X$, a finite answer alphabet
+$\mathcal A$, a symmetric question distribution $\mu$ on
+$\mathcal X \times \mathcal X$, and a decision predicate $D$ treating the two
+players symmetrically.  A tensor product strategy
+$\strategy = (\ket\psi, A, B)$ consists of a unit vector $\ket\psi$ in a
+tensor product $\mathcal H_A \ot \mathcal H_B$ of \emph{finite-dimensional}
+Hilbert spaces together with POVMs $\{A^x_a\}$ and $\{B^x_a\}$ for the two
+players; its value $\val^*(\game, \strategy)$ is the acceptance probability,
+and the value of the game is the supremum
+\begin{equation*}
+  \val^*(\game) = \sup_{\strategy} \val^*(\game, \strategy)
+\end{equation*}
+over all tensor product strategies.  A strategy is projective if all its
+measurements are projective, and symmetric if the state is
+permutation-invariant on $\mathcal H \ot \mathcal H$ and both players use the
+same measurements.
+
+The symmetrization lemma of \cite[Section~5]{Ji2020MIPStar} asserts:%
+\footnote{The statement is at
+\path{references/qpbt-paper/06_nonlocal_games_and_mipstar.tex}, lines~94--99,
+and its proof at lines~101--132.  The blueprint statement restored to this form
+is \path{lem:symmetric-strat} in
+\path{blueprint/src/chapter/ch12_qpbt_games.tex}.}
+if $\game$ is a symmetric game with $\val^*(\game) = 1-\eps$ for some
+$\eps \ge 0$, then
+\begin{equation*}
+  \exists\, \strategy = (\ket{\psi}, M) \text{ symmetric and projective}
+  \quad\text{with}\quad
+  \val^*(\game, \strategy) \ge 1-\eps.
+  \tag{\path{lem:symmetric-strat}}
+\end{equation*}
+
+Its proof runs as follows.  For every $\eps' > \eps$ the definition of the
+supremum supplies a strategy $\strategy' = (\ket{\psi'}, A, B)$ with
+$\val^*(\game, \strategy') \ge 1-\eps'$.  By Naimark dilation in the completed
+projective form of \cite[Theorem~5.1]{Ji2020LowIndividualDegree} one may take
+$\ket{\psi'} \in \C^d_{A'} \ot \C^d_{B'}$ for some integer $d$ with all
+measurements projective.  One then forms the permutation-invariant state
+\begin{equation*}
+  \ket{\psi} = \tfrac{1}{\sqrt 2}
+  \bigl( \ket{0}_A \ket{1}_B \ket{\psi'}_{A'B'}
+       + \ket{1}_A \ket{0}_B \ket{\psi'_\tau}_{A'B'} \bigr)
+\end{equation*}
+on $(\C^2 \ot \C^d) \ot (\C^2 \ot \C^d)$, where $\ket{\psi'_\tau}$ permutes
+the two players' registers, and the block-diagonal projective measurements
+$M^x_a = \ket{0}\!\bra{0} \ot A^x_a + \ket{1}\!\bra{1} \ot B^x_a$.  Symmetry
+of $D$ gives $\val^*(\game, (\ket\psi, M)) = \val^*(\game, \strategy')$.  The
+construction is therefore \emph{value-preserving}: applied to any strategy it
+produces a symmetric projective strategy of exactly the same value.  What the
+proof establishes is thus the given-strategy form, hence the approximate form;
+the printed conclusion is the attainment form.
+
+\section{Why attainment does not follow}
+
+The supremum defining $\val^*(\game)$ ranges over strategies on
+finite-dimensional Hilbert spaces of unbounded dimension.  The strategies
+$\strategy'_{\eps'}$ produced for $\eps' \downarrow \eps$ may require
+dimensions $d(\eps')$ growing without bound, and there is no compactness
+across dimensions from which a limiting finite-dimensional strategy of value
+at least $1-\eps$ could be extracted.  A symmetric projective strategy of
+value at least $1-\eps = \val^*(\game)$ would attain the supremum, so the
+printed conclusion is equivalent, under its hypothesis, to the assertion that
+$\val^*(\game)$ is attained by some strategy.  No general principle supplies
+this: it is known, and recalled in the introduction of the source itself, that
+the set of finite-dimensional quantum correlations is not closed and differs
+from the set of infinite-dimensional spatial correlations, so limits of
+finite-dimensional strategies need not be realized by any finite-dimensional
+strategy.  Whether some symmetric game realizes the failure --- a game whose
+value is attained by no tensor product strategy, presented together with the
+exposing functional as a decision predicate --- is a separate question that
+this note does not need to settle.  The local verdict is about the proof: the
+cited argument proves the approximate form and does not prove the attainment
+form.
+
+\section{Uses of the lemma}
+
+The source invokes the lemma twice.
+
+First, in the soundness proof for the oracularization transformation, the
+argument fixes a strategy $\strategy^{\mathrm{orac}}$ for the oracularized game
+``with value $1-\eps$'' and applies the lemma to assume without loss of
+generality that it is projective.%
+\footnote{\path{references/qpbt-paper/10_oracularization.tex},
+lines~317--321.}
+Here the input is a given strategy, not the value of the game; the
+given-strategy form applies verbatim and preserves the value exactly, so the
+use is justified by what the proof establishes.
+
+Second, in the soundness proof for answer reduction, the argument assumes the
+strict inequality $\val^*(\game) > 1-\eps$ and concludes that there is a
+symmetric projective strategy of value greater than $1-\eps$.%
+\footnote{\path{references/qpbt-paper/11_answer_reduction.tex},
+lines~2322--2332.}
+Writing $\val^*(\game) = 1-\eps_0$ with $\eps_0 < \eps$ and applying the
+approximate form with $\eps' = (\eps+\eps_0)/2$ produces a symmetric
+projective strategy of value at least $1-\eps' > 1-\eps$.  A strict lower
+bound on the supremum thus passes through the approximate form; attainment is
+not used.
+
+In this project, the soundness statements of the Pauli basis test track
+quantify over strategies assumed to succeed with probability at least
+$1-\eps$, so any symmetrization step starts from a given strategy and consumes
+the given-strategy form.  The blueprint currently records the lemma as part of
+the games vocabulary and has no downstream dependency on it; the two source
+uses above belong to transformations outside the scope of the present
+development.  Consequently, no consumer of the lemma --- in the source or here
+--- requires the attainment form.
+
+\section{Comparison with the blueprint}
+
+The blueprint \cite{MIPStarREBlueprint} states the lemma in the source shape.
+Its proof records the value-preserving construction and the approximate form
+that the construction yields, and explicitly marks the remaining attainment
+step as unproved, citing this note; an accompanying remark summarizes the
+obstruction.  An earlier revision of the blueprint had instead weakened the
+source-labelled conclusion to the approximate form; following the project's
+proof-gap protocol, the source-labelled statement is restored and the missing
+step is tracked in the proof rather than absorbed into the statement.  No
+\Lean{} declaration is currently linked to the lemma.
+
+\section{Conclusion}
+
+The verdict is a proof-level gap in the cited lemma: the symmetrization
+argument proves the given-strategy and approximate forms, while the printed
+conclusion additionally asserts that the supremum defining $\val^*(\game)$ is
+attained, which does not follow.  The gap is harmless for the results built on
+the lemma, since both uses in the source, and all planned uses in this
+project, proceed from a given strategy of value at least $1-\eps$ or from a
+strict lower bound on the value, for which the value-preserving construction
+suffices.  For stage~4 (formalization) the recommendation is: formalize the
+given-strategy symmetrization lemma as the workhorse statement; keep the
+source-labelled lemma in source shape with the attainment step an explicit,
+tracked proof obligation; and do not strengthen the source-labelled statement's
+hypotheses or weaken its conclusion silently.  If a later investigation
+settles the counterexample question for symmetric games, the statement should
+then be reclassified from an unproved step to a documented statement
+correction.
+
+\bibliographystyle{alpha}
+\bibliography{references}
+
+\end{document}

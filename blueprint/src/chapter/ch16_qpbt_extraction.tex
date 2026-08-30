@@ -87,7 +87,7 @@ The measurement $\{\hat{S}_{g_X,g_Z}\}$ reads out an $X$-polynomial and a $Z$-po
 	where $\tr((e_j \tilde{u}) \cdot (e_{j'} \tilde{v})) = \tr(e_j e_{j'} (\tilde{u} \cdot \tilde{v}))$.
 \end{lemma}
 \begin{proof}
-	\uses{def:tilde-m-measurement, def:tau-dot-product-projector, def:s-w-marginals, lem:pauli-observable-expansion, lem:twisted-commutation, lem:qld-4-7}
+	\uses{def:tilde-w-observables, def:tilde-m-measurement, def:tau-dot-product-projector, def:s-w-marginals, lem:pauli-observable-expansion, lem:twisted-commutation, lem:qld-4-7}
 	Expanding $\tau^W(e_j \tilde{u}) = \sum_{h} (-1)^{\tr(e_j (\tilde{u} \cdot h))}\, \tau^W_h$ on the right-hand side of \eqref{eq:tildewj-product-form} (Lemma~\ref{lem:pauli-observable-expansion}), grouping the $h$ according to the value $a' = h \cdot \tilde{u}$ into the projectors $\tau^W_{a'}(\tilde{u})$ of \eqref{eq:def-tauwu}, collecting the pairs $(g_X,g_Z)$ with a common value $g_W = g$ into $\hat{S}^W_g$ (Definition~\ref{def:s-w-marginals}), and changing the summation variable to $a = (\mathrm{Dec}(g) \cdot \tilde{u}) - a'$ recovers, by \eqref{eq:tilde_M} and \eqref{eq:def-tildewj}, the operator $\tilde{W}^j(\tilde{u})$; this proves \eqref{eq:tildewj-product-form}. Since the $\hat{S}_{g_X,g_Z}$ are mutually orthogonal projectors summing to the identity (Lemma~\ref{lem:qld-4-7}) and $\tau^W(e_j \tilde{u})$ is a Hermitian involution, the product form exhibits $\tilde{W}^j(\tilde{u})$ as Hermitian with square $\sum_{g_X,g_Z} \hat{S}_{g_X,g_Z} \ot \Id = \Id$. For \eqref{eq:tildew-twisted-commutation}, the two sign-weighted sums of the projectors $\hat{S}_{g_X,g_Z}$ appearing in the product forms of $\tilde{X}^j(\tilde{u})$ and $\tilde{Z}^{j'}(\tilde{v})$ commute with each other, so the commutation phase is that of $\tau^X(e_j \tilde{u})$ and $\tau^Z(e_{j'} \tilde{v})$, which is $(-1)^{\tr((e_j \tilde{u}) \cdot (e_{j'} \tilde{v}))}$ by Lemma~\ref{lem:twisted-commutation}.
 \end{proof}
 
@@ -230,7 +230,7 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 	together with the analogous identity for $V_{\mathrm{A}}$ on registers $\mathrm{A}\mathrm{A}'\mathrm{A}''$.
 \end{lemma}
 \begin{proof}
-	\uses{lem:qld-4-7, lem:tildew-product-form, lem:twisted-commutation, def:tau-dot-product-projector, def:indicator-vector, def:decoding-map, def:generalized-pauli}
+	\uses{lem:qld-4-7, lem:tildew-product-form, lem:twisted-commutation, def:v-swap-unitary, def:tilde-m-measurement, def:tau-dot-product-projector, def:indicator-vector, def:decoding-map, def:generalized-pauli}
 	Since the measurement $\{\hat{S}_{g_X,g_Z}\}$ is projective (Lemma~\ref{lem:qld-4-7}) and the $\tau^X, \tau^Z$ observables are self-inverse,
 	\[
 		V_{\mathrm{A}} V_{\mathrm{A}}^\dagger = \sum_{g_X,g_Z} (\hat{S}_{g_X,g_Z})_{\mathrm{A}\mathrm{A}'} \ot \Id_{\mathrm{A}''} = \Id_{\mathrm{A}\mathrm{A}'\mathrm{A}''}\;,
@@ -277,12 +277,19 @@ We can now prove the soundness theorem for the Pauli basis test, stated as Theor
 
 \begin{proof}
 	\proves{thm:pauli}
-	\uses{lem:qld-unitary, def:v-swap-unitary, thm:naimark, def:projective-strategy-setup, def:expanded-state, def:EPR, def:povm-distance}
+	\uses{lem:qld-unitary, lem:pauli-completeness, thm:naimark, def:projective-strategy-setup, def:expanded-state, def:EPR, def:povm-distance}
 	Let $(\ket{\psi},M)$ be a strategy for $\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$ that succeeds with probability at least $1 - \eps$, where $\ket{\psi}$ is a bipartite state on registers $\mathrm{A}$ and $\mathrm{B}$. By Naimark's theorem (Theorem~\ref{thm:naimark}, as formulated in~\cite[Theorem 5.1]{Ji2020LowIndividualDegree}), at the cost of extending $\ket{\psi}$ by sufficiently many ancilla qubits initialized in the state $\ket{0}$, we may assume that the strategy is projective and that the state is padded as in the conventions of Definition~\ref{def:projective-strategy-setup}. Let $V_{\mathrm{A}}$ be the unitary acting on registers $\mathrm{A}\mathrm{A}'\mathrm{A}''$ given by Lemma~\ref{lem:qld-unitary}, and let $\phi_{\mathrm{A}}$ be the isometry mapping register $\mathrm{A}$ to registers $\mathrm{A}\mathrm{A}'\mathrm{A}''$, where $\mathrm{A}'$ and $\mathrm{A}''$ are isomorphic to $(\C^q)^{\ot M}$, defined by
 	\[
 		\phi_{\mathrm{A}}\colon \ket{\theta}_{\mathrm{A}} \mapsto V_{\mathrm{A}} \bigl(\ket{\theta}_{\mathrm{A}} \ot (\ket{\mathrm{EPR}_q}^{\ot M})_{\mathrm{A}' \mathrm{A}''}\bigr)\;;
 	\]
-	define $\phi_{\mathrm{B}}$ analogously. Since the expanded state $\ket{\hat\psi}$ of Definition~\ref{def:expanded-state} is exactly $\ket{\psi}$ with the halves of $M$ pairs $\ket{\mathrm{EPR}_q}$ appended locally in registers $\mathrm{A}'\mathrm{A}''$ and $\mathrm{B}'\mathrm{B}''$, we have $\phi_{\mathrm{A}} \ot \phi_{\mathrm{B}} \ket{\psi} = V_{\mathrm{A}} \ot V_{\mathrm{B}} \ket{\hat\psi}$. Lemma~\ref{lem:qld-unitary} therefore yields a state $\ket{\mathrm{aux}}$ on registers $\mathrm{A}\mathrm{A}'\mathrm{B}\mathrm{B}'$ such that
+	define $\phi_{\mathrm{B}}$ analogously.
+	% Reliance disclosure added: the proof chain of thm:pauli passes through
+	% lem:qld-4-7, whose source proof (lines 1277--1413 of
+	% 14_analysis_of_the_pauli_basis_test.tex) instantiates the classical low
+	% individual degree test at dimension 2m+2 without a divisibility
+	% hypothesis; the sentence below records the resulting outstanding
+	% obligation.
+	This invocation is where the analysis of the classical low individual degree test enters: Lemma~\ref{lem:qld-unitary} rests on the polynomial-pair measurement of Lemma~\ref{lem:qld-4-7}, whose proof instantiates the classical test in $2m+2$ variables and at present does so only when $2m+2$ divides $q$ --- a divisibility that fails for every admissible tuple with $m \geq 2$ --- so the present proof is complete only modulo the proof obligation documented in \cite{gap:qpbt_ld-dimension-divisibility}. Since the expanded state $\ket{\hat\psi}$ of Definition~\ref{def:expanded-state} is exactly $\ket{\psi}$ with the halves of $M$ pairs $\ket{\mathrm{EPR}_q}$ appended locally in registers $\mathrm{A}'\mathrm{A}''$ and $\mathrm{B}'\mathrm{B}''$, we have $\phi_{\mathrm{A}} \ot \phi_{\mathrm{B}} \ket{\psi} = V_{\mathrm{A}} \ot V_{\mathrm{B}} \ket{\hat\psi}$. Lemma~\ref{lem:qld-unitary} therefore yields a state $\ket{\mathrm{aux}}$ on registers $\mathrm{A}\mathrm{A}'\mathrm{B}\mathrm{B}'$ such that
 	\[
 		\bigl\| \phi_{\mathrm{A}} \ot \phi_{\mathrm{B}} \ket{\psi} - \ket{\mathrm{aux}} \ot \ket{\mathrm{EPR}_q}^{\ot M} \bigr\|^2 \leq \delta_{\mathrm{qld}}\;.
 	\]
