@@ -155,3 +155,20 @@ becomes an issue.
 **Expected effect:** review loops terminate with an explicit, auditable
 decision; stage-appropriate depth disputes move into the tracker instead
 of blocking scaffolding merges indefinitely.
+
+## 2026-08-31 — Merges auto-resolve registry-path conflicts with the base
+
+**Trigger:** PR #0001's merge aborted twice on conflicts confined to
+registry files (`prs/…/pr.md`, telemetry session captures) that the branch
+had accumulated from earlier mis-rooted tool runs; aligning the branch's
+registry to main went stale within minutes because `pr.md` mutates on main
+continuously.
+
+**Change:** `pr_merge.py` completes a conflicted merge automatically when
+every conflicted path lies under `issues/`, `prs/`, or `results/telemetry/`,
+resolving those paths with the base's version — correct by the
+single-instance-registry protocol. Conflicts touching any other path still
+abort untouched.
+
+**Expected effect:** registry residue on branches can never block or
+corrupt a merge; content conflicts remain a human decision.
