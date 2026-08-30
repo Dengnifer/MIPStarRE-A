@@ -4,7 +4,7 @@ branch: "issue-0002-qpbt-blueprint"
 issue: "0002"
 base: "main"
 state: "open"
-head_sha: 1e23f5ceef3906818bb49886a7f951b63abc49b6
+head_sha: 1d93f01dd23d0b48992b45759be3cf73170530f5
 ci_status: success
 review_state: ADJUDICATED
 fix_iterations: 0
