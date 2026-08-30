@@ -6,8 +6,8 @@
 % The paper's subsection labels sec:qld-prelim, sec:commutation and
 % sec:expanding are kept on the sections below for cross-reference fidelity.
 % The source restates thm:pauli verbatim at the head of the appendix under the
-% label thm:pauli-appendix (lines 6-20); no duplicate node is created here,
-% and all references go to thm:pauli in Chapter chap:qpbt-test.
+% label thm:pauli-appendix (lines 6-20); the statement is the same theorem, and
+% all references here are to thm:pauli as stated in Chapter chap:qpbt-test.
 
 This chapter and the two that follow contain the proof of the soundness
 theorem for the Pauli basis test, Theorem~\ref{thm:pauli}, stated in
@@ -127,8 +127,8 @@ field trace $\tr = \tr_{q \to 2} \colon \F_q \to \F_2$
 \begin{definition}[Commuting and anticommuting tuples]
 	\label{def:anticommuting-tuple}
 	% The quantity gamma is introduced in the source at eq:gamma-value, inside
-	% the completeness analysis of the Pauli basis test; that label has no
-	% corresponding node here, so the definition below is self-contained.
+	% the completeness analysis of the Pauli basis test; the definition below
+	% is self-contained and does not depend on that occurrence.
 	\uses{def:low-degree-encoding, def:subfield-trace}
 	For a tuple
 	$\omega = (u_X, u_Z, r_X, r_Z) \in (\F_q^m)^2 \times (\F_q)^2$, let
@@ -150,8 +150,8 @@ this is the source of the terminology.
 
 \begin{lemma}[Probability of anticommuting tuples]
 	\label{fact:omega-anticomm-prob}
-	% The source states this result in a `fact' environment; fact environments
-	% become lemma nodes and the paper label is kept verbatim.
+	% The source states this result in a `fact' environment; it is stated here
+	% as a lemma, and the paper label is kept verbatim.
 	% The exact value of the anticommuting probability and the constant lower
 	% bounds under the hypothesis m <= q are additions relative to the source,
 	% which asserts only the two bounds displayed at the end of the statement;
@@ -335,7 +335,7 @@ weighted sums of those operators.
 	Definition~\ref{def:approx-question-indexed-operators}.
 \end{lemma}
 \begin{proof}
-	\uses{def:povm-distance}
+	\uses{def:povm-distance, def:approx-question-indexed-operators}
 	% The source ends this display with the exact bound |A| * delta; under the
 	% O(.) reading of def:povm-distance the hypothesis only supplies O(delta),
 	% and the constant is retained inside the O(.).
@@ -659,7 +659,7 @@ extracts from the strategy.
 	factors interchanged.
 \end{lemma}
 \begin{proof}
-	\uses{lem:qld-win-implications, lem:povm-to-obs, fact:data-processing, fact:agreement, lem:commutation-analysis, thm:ms-rigidity, fact:add-a-proj}
+	\uses{lem:qld-win-implications, lem:povm-to-obs, fact:data-processing, fact:agreement, lem:commutation-analysis, thm:ms-rigidity, fact:add-a-proj, def:strategy-observables}
 	For~\eqref{eq:pts-obs-consistency}: item~\ref{enu:qld-cons} of
 	Lemma~\ref{lem:qld-win-implications} and the data processing inequality
 	(Lemma~\ref{fact:data-processing}), using that the type
@@ -881,43 +881,102 @@ every tuple $\omega$.
 
 \begin{lemma}[Transfer to symmetric equivalents]
 	\label{lem:symmetric-equivalents-transfer}
-	\uses{def:symmetric-equivalents, def:expanded-state, lem:projective-strategy-setup, def:povm-distance}
-	Every bipartite relation of the form
-	$M_{\mathsf{A}\mathsf{A}'} \approx_\delta N_{\mathsf{B}\mathsf{A}''}$,
-	and every single-party relation of the form
-	$M_{\mathsf{A}\mathsf{A}'} \approx N_{\mathsf{A}\mathsf{A}'}$, that is
-	derived below --- in this chapter and in
-	Chapters~\ref{chap:qpbt-combining} and~\ref{chap:qpbt-extraction} ---
-	from the standing hypotheses on the strategy under analysis, namely
-	its success probability in $\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$
-	and the form~\eqref{eq:def-psihat} of the expanded state, also holds
-	in each of its symmetric-equivalent forms
-	(Definition~\ref{def:symmetric-equivalents}), with the same error
-	parameter.
+	\notready
+	\uses{def:symmetric-equivalents, def:expanded-state, lem:projective-strategy-setup, def:symmetric-game, def:EPR, def:povm-distance}
+	Let $\mathcal{S} = (\ket{\psi}, M)$ be the projective strategy under
+	analysis (Lemma~\ref{lem:projective-strategy-setup} and the convention
+	following it), assumed symmetric in the sense of
+	Definition~\ref{def:symmetric-game}: the state $\ket{\psi}$ is
+	invariant under exchanging registers $\mathsf{A}$ and $\mathsf{B}$, and
+	both players measure the same operators. Let $\ket{\hat{\psi}}$ be the
+	expanded state~\eqref{eq:def-psihat}, let
+	\[
+		\sigma \colon\;
+		\mathsf{A} \leftrightarrow \mathsf{B},\quad
+		\mathsf{A}' \leftrightarrow \mathsf{B}',\quad
+		\mathsf{A}'' \leftrightarrow \mathsf{B}''\,,
+		\qquad\qquad
+		\theta \colon\;
+		\mathsf{A} \leftrightarrow \mathsf{B},\quad
+		\mathsf{A}' \leftrightarrow \mathsf{A}''\,,
+	\]
+	be the two permutations of the six registers
+	$\mathsf{A}\mathsf{A}'\mathsf{A}''\mathsf{B}\mathsf{B}'\mathsf{B}''$
+	given by these transpositions, and let $U_\sigma$ and $U_\theta$ be the
+	corresponding permutation unitaries. Write
+	$\Pi = \{\Id,\, U_\sigma,\, U_\theta,\, U_\sigma U_\theta\}$ and let
+	\[
+		\mathcal{R} = \{\mathsf{A}\mathsf{A}',\; \mathsf{B}\mathsf{A}'',\;
+		\mathsf{B}\mathsf{B}',\; \mathsf{A}\mathsf{B}''\}
+	\]
+	be the four register placements of
+	Definition~\ref{def:symmetric-equivalents}. Then:
+	\begin{enumerate}
+		\item Every $U \in \Pi$ fixes $\ket{\hat{\psi}}$, and the induced
+		action of $\Pi$ on $\mathcal{R}$ is simply transitive.
+		\item Let $P$ and $Q$ be operators on
+		$\hilb \ot (\C^q)^{\ot M}$, where $\hilb$ is the common Hilbert
+		space of registers $\mathsf{A}$ and $\mathsf{B}$, let
+		$\mathsf{C}\mathsf{C}', \mathsf{D}\mathsf{D}' \in \mathcal{R}$ and
+		let $U \in \Pi$. Then
+		\[
+			\bigl\| \bigl( (P)_{\mathsf{C}\mathsf{C}'} - (Q)_{\mathsf{D}\mathsf{D}'} \bigr) \ket{\hat{\psi}} \bigr\|
+			\,=\,
+			\bigl\| \bigl( (P)_{U(\mathsf{C}\mathsf{C}')} - (Q)_{U(\mathsf{D}\mathsf{D}')} \bigr) \ket{\hat{\psi}} \bigr\|\,,
+		\]
+		the placement notation being that of
+		Definition~\ref{def:expanded-observables}. Consequently, for
+		families $\{P^x_a\}$ and $\{Q^x_a\}$ indexed by a question $x$ drawn
+		from a distribution and an answer $a$, and for every $\delta \ge 0$,
+		$(P^x_a)_{\mathsf{C}\mathsf{C}'} \approx_\delta (Q^x_a)_{\mathsf{D}\mathsf{D}'}$
+		holds on $\ket{\hat{\psi}}$ if and only if
+		$(P^x_a)_{U(\mathsf{C}\mathsf{C}')} \approx_\delta (Q^x_a)_{U(\mathsf{D}\mathsf{D}')}$
+		does, with the same $\delta$
+		(Definition~\ref{def:povm-distance}).
+	\end{enumerate}
+	In particular, taking $\mathsf{C}\mathsf{C}' = \mathsf{A}\mathsf{A}'$
+	and $\mathsf{D}\mathsf{D}' = \mathsf{B}\mathsf{A}''$, respectively
+	$\mathsf{D}\mathsf{D}' = \mathsf{A}\mathsf{A}'$, the images under
+	$U_\theta$, $U_\sigma$ and $U_\sigma U_\theta$ are exactly the three
+	symmetric equivalents of Definition~\ref{def:symmetric-equivalents},
+	with the same error parameter.
 \end{lemma}
 \begin{proof}
-	\uses{def:pauli-question-distribution, def:pauli-win-predicate, lem:qld-win-implications, def:expanded-state}
-	The Pauli basis test is symmetric under exchanging the two players:
-	its question distribution samples the ordered type pair uniformly
-	among the orderings of the edges of the type graph and applies the
-	type-determined CL functions to a shared uniform seed
-	(Definition~\ref{def:pauli-question-distribution}), and every clause
-	of the win predicate is evaluated symmetrically in the two players
-	(Definition~\ref{def:pauli-win-predicate}). Consequently the
-	hypotheses supplied by the success of the strategy under analysis ---
-	the winning implications of Lemma~\ref{lem:qld-win-implications} ---
-	hold verbatim with the roles of registers $\mathsf{A}$ and
-	$\mathsf{B}$ exchanged. Likewise, in the expanded
-	state~\eqref{eq:def-psihat} the two ancilla pairs are identically
-	prepared, and each state $\ket{\mathrm{EPR}_q}^{\ot M}$ is invariant
-	under exchanging its two halves, so the exact consistency and
-	commutation properties of the Pauli projections used on registers
-	$\mathsf{A}'\mathsf{A}''$ hold identically on
-	$\mathsf{B}'\mathsf{B}''$, and vice versa. Each of the three register
-	interchanges of Definition~\ref{def:symmetric-equivalents} therefore
-	maps this set of hypotheses to itself, and repeating the derivation of
-	a given relation with the registers appropriately changed yields the
-	interchanged relation with the same error parameter.
+	\uses{def:expanded-state, def:EPR, def:symmetric-game, def:povm-distance}
+	Each of $\sigma$ and $\theta$ transposes registers carrying isomorphic
+	Hilbert spaces --- $\mathsf{A}$ and $\mathsf{B}$ both carry $\hilb$,
+	and the four ancilla registers are all isomorphic to
+	$(\C^q)^{\ot M}$ (Definition~\ref{def:expanded-state}) --- so the
+	permutation unitaries $U_\sigma$ and $U_\theta$ are defined and satisfy
+	$U (P)_{\mathsf{C}\mathsf{C}'} U^\dagger = (P)_{U(\mathsf{C})U(\mathsf{C}')}$
+	for every operator $P$ and every placement.
+
+	For item~1, both generators fix $\ket{\hat{\psi}} = (\ket{\psi})_{\mathsf{A}\mathsf{B}} \ot \ket{\mathrm{EPR}_q}^{\ot M}_{\mathsf{A}'\mathsf{A}''} \ot \ket{\mathrm{EPR}_q}^{\ot M}_{\mathsf{B}'\mathsf{B}''}$:
+	the factor $(\ket{\psi})_{\mathsf{A}\mathsf{B}}$ is invariant under
+	$\mathsf{A} \leftrightarrow \mathsf{B}$ by the symmetry hypothesis;
+	$\sigma$ exchanges the two ancilla factors, which are identical; and
+	$\theta$ leaves $\ket{\mathrm{EPR}_q}^{\ot M}_{\mathsf{B}'\mathsf{B}''}$
+	untouched and exchanges the two halves of each pair in
+	$\ket{\mathrm{EPR}_q}^{\ot M}_{\mathsf{A}'\mathsf{A}''}$, under which
+	$\ket{\mathrm{EPR}_q}$ is invariant (Definition~\ref{def:EPR}). The
+	action on $\mathcal{R}$ sends $\mathsf{A}\mathsf{A}'$ to
+	$\mathsf{A}\mathsf{A}'$, $\mathsf{B}\mathsf{B}'$,
+	$\mathsf{B}\mathsf{A}''$ and $\mathsf{A}\mathsf{B}''$ under $\Id$,
+	$U_\sigma$, $U_\theta$ and $U_\sigma U_\theta$ respectively, so it is
+	simply transitive on the four placements.
+
+	For item~2, insert $U^\dagger U$ and use $U \ket{\hat{\psi}} = \ket{\hat{\psi}}$
+	together with unitary invariance of the norm:
+	\[
+		\bigl\| \bigl( (P)_{\mathsf{C}\mathsf{C}'} - (Q)_{\mathsf{D}\mathsf{D}'} \bigr) \ket{\hat{\psi}} \bigr\|
+		= \bigl\| U \bigl( (P)_{\mathsf{C}\mathsf{C}'} - (Q)_{\mathsf{D}\mathsf{D}'} \bigr) U^\dagger \, U \ket{\hat{\psi}} \bigr\|
+		= \bigl\| \bigl( (P)_{U(\mathsf{C}\mathsf{C}')} - (Q)_{U(\mathsf{D}\mathsf{D}')} \bigr) \ket{\hat{\psi}} \bigr\|\,.
+	\]
+	Summing the squares over the answers $a$ and averaging over the
+	questions $x$ preserves the identity, so the two sides of the asserted
+	equivalence of $\approx_\delta$ relations
+	(Definition~\ref{def:povm-distance}) are equal quantities. The final
+	assertion is item~1 applied to the placements listed there.
 \end{proof}
 
 Several lemmas below conclude by asserting that all symmetric equivalents
