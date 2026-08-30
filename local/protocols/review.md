@@ -378,11 +378,16 @@ error.
 A PR receives at most **four** full review rounds. From the fifth round on,
 the operator may close the loop by adjudication instead of iteration:
 
-1. every remaining finding is either fixed, or ticked `[x]` in the CURRENT
-   head's ledger with a one-line reason and a tracked issue id;
+1. every remaining finding is either fixed, or converted to a tracked issue;
+   the operator writes an **adjudication record**
+   `reviews/<final_head>-adjudication.md` — frontmatter `verdict: ADJUDICATED`
+   plus the last review round's findings ledger with every box ticked and a
+   one-line disposition each (`fixed in <commit>` / `deferred to issue #NNNN:
+   <reason>` / `moot: <reason>`);
 2. `pr.md` records `review_state: ADJUDICATED`;
 3. the merge commit names the adjudication and the issues created;
-4. `pr_merge.py --adjudicated` accepts this state in place of APPROVED.
+4. `pr_merge.py --adjudicated` accepts this state in place of APPROVED
+   (the adjudication record is the current-head verdict file the gate reads).
 
 Nothing is dropped silently: an adjudicated finding lives on as an issue.
 This mirrors the parent's combined bot-fix iteration cap with a single
