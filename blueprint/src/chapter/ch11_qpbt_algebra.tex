@@ -1,0 +1,744 @@
+\chapter{Algebraic preliminaries for the Pauli basis test}
+\label{chap:qpbt-algebra}
+
+This chapter records the algebraic preliminaries needed for the quantum Pauli
+basis test, following the preliminaries of \cite{Ji2020MIPStar}: subspace
+machinery over finite fields (which underlies the conditionally linear question
+distributions of Chapter~\ref{chap:qpbt-games}), field extensions, traces, and
+self-dual bases, the low-degree code, lines in $\F_q^m$, and the generalized
+Pauli observables together with the EPR states they act on. Measurements,
+strategies, and consistency relations for nonlocal games are treated in
+Chapter~\ref{chap:qpbt-games}; the test itself is defined in
+Chapter~\ref{chap:qpbt-test}.
+
+\section{Linear spaces and subspaces}
+% Paper label sec:linear-spaces kept for cross-reference fidelity.
+\label{sec:linear-spaces}
+
+Linear spaces are always of the form $V = \F^n$ for a finite field $\F$ and an
+integer $n \ge 1$, unless explicitly stated otherwise. We write $\hat{E} =
+\{\hat{e}_1, \dots, \hat{e}_n\}$ for the standard basis of $V$, where
+$\hat{e}_i$ has a $1$ in the $i$-th coordinate and $0$'s elsewhere, and
+$\mathrm{End}(V)$ for the set of linear maps from $V$ to itself.
+
+\begin{definition}[Register subspace]\label{def:register-subspace}
+	A \emph{register subspace} $S$ of $V$ is a subspace that is the span of a
+	subset of the standard basis of $V$. Such a subspace is represented by an
+	indicator vector $u \in \{0,1\}^s$, where $s = \dim(V)$, via
+	$S = \mathrm{span}\{\hat{e}_i : u_i = 1\}$.
+\end{definition}
+
+\begin{definition}[Dot product and orthogonal subspace]\label{def:dot-product-orthogonal}
+	For two vectors $u = \sum_{i=1}^n u_i \hat{e}_i$ and
+	$v = \sum_{i=1}^n v_i \hat{e}_i$ in $V = \F^n$, the \emph{dot product} is
+	\[
+		u \cdot v = \sum_{i=1}^n u_i v_i \in \F\;.
+	\]
+	For a subspace $S$ of $V$, the \emph{subspace orthogonal to $S$ in $V$} is
+	\[
+		S^\perp = \bigl\{ u \in V : u \cdot v = 0 \text{ for all } v \in S \bigr\}\;.
+	\]
+	The notation $S^\perp$ leaves the ambient space $V$ implicit.
+\end{definition}
+
+Over finite fields, orthogonality lacks some of the familiar properties it has
+over $\R$ or $\C$; for example, a nonzero subspace may be orthogonal to itself,
+as is $\mathrm{span}\{(1,1)\}$ over $\F_2$. The following dimension identity
+nevertheless holds over every field.
+
+\begin{lemma}\label{lem:perp_perp}
+	\uses{def:dot-product-orthogonal}
+	Let $S$ be a subspace of $V$. Then $\dim(S) + \dim(S^\perp) = \dim(V)$, and
+	\[
+		(S^\perp)^\perp = S\;.
+	\]
+\end{lemma}
+\begin{proof}
+	\uses{def:dot-product-orthogonal}
+	The elements of $S^\perp$ are the solutions of a feasible linear system whose
+	coefficient matrix has $\dim(S)$ linearly independent rows, so the solution
+	space has dimension exactly $\dim(V) - \dim(S)$. Every $u \in S$ is
+	orthogonal to every element of $S^\perp$, so $S \subseteq (S^\perp)^\perp$.
+	Applying the dimension identity twice shows that
+	$\dim\bigl((S^\perp)^\perp\bigr) = \dim(S)$, so the inclusion is an equality.
+\end{proof}
+
+\begin{definition}[Complementary subspaces]\label{def:complementary}
+	Two subspaces $S$ and $T$ of a linear space $V$ form a pair of
+	\emph{complementary subspaces} of $V$ if
+	\[
+		S \cap T = \{0\}\;, \qquad S + T = V\;.
+	\]
+	In this case we write $V = S \oplus T$. Every $x \in V$ can be written
+	uniquely as $x = x^S + x^T$ with $x^S \in S$ and $x^T \in T$; we call $x^S$
+	(resp.\ $x^T$) the \emph{projection of $x$ onto $S$ parallel to $T$} (resp.\
+	onto $T$ parallel to $S$). The unique linear map $L : V \to V$ with
+	$x \mapsto x^S$ is the \emph{projector onto $S$ parallel to $T$}.
+\end{definition}
+
+A subspace may have many complementary subspaces: in $\F_2^2$, the subspace
+$S = \mathrm{span}\{(1,1)\}$ has the distinct complements
+$\mathrm{span}\{(1,0)\}$ and $\mathrm{span}\{(0,1)\}$. Given a basis of $S$,
+one may nevertheless single out a \emph{canonical} complement.
+
+\begin{definition}[Canonical complement]\label{def:canonical-complement}
+	\uses{def:register-subspace}
+	Let $\hat{E}$ be the standard basis of $V = \F^n$ and let
+	$F = \{v_1, \dots, v_m\} \subset V$ be a set of $m$ linearly independent
+	vectors. Write $v_i = \sum_{j=1}^n a_{i,j}\, \hat{e}_j$, and, using a
+	canonical Gaussian-elimination algorithm valid over arbitrary fields,
+	transform the $m \times n$ matrix $(a_{i,j})$ to reduced row echelon form
+	$(b_{i,j})$. Let $J$ be the set of $m$ column indices containing the leading
+	$1$ entry of each row of $(b_{i,j})$. The \emph{canonical complement of $F$}
+	is the set of $n - m$ standard basis vectors
+	\[
+		F^\perp = \{\hat{e}_j : j \notin J\}\;.
+	\]
+	The canonical complement is a \emph{set} of vectors, not a subspace.
+	% Basis-independence made explicit here: the source defines F^perp through
+	% a basis but does not assert dependence on it; uniqueness of the reduced
+	% row echelon form gives dependence on span(F) alone.
+	Although defined through the basis $F$, it depends only on
+	$\mathrm{span}(F)$ and the ambient standard basis: two bases of the same
+	subspace form the rows of row-equivalent matrices, which have the same
+	reduced row echelon form and hence the same pivot set $J$. The presentation
+	through Gaussian elimination, adopted by \cite{Ji2020MIPStar}, makes the
+	canonical complement efficiently computable. If $S$ is a register subspace
+	spanned by $\hat{E}_0 \subseteq \hat{E}$, then the canonical complement of
+	$\hat{E}_0$ is $\hat{E} \setminus \hat{E}_0$, and its span coincides with
+	$S^\perp$.
+\end{definition}
+
+\begin{lemma}\label{lem:canonical-complement}
+	\uses{def:canonical-complement, def:complementary}
+	Let $S$ be the span of linearly independent vectors
+	$F = \{v_1, \dots, v_m\} \subseteq V$, let $F^\perp$ be the canonical
+	complement of $F$, and let $T = \mathrm{span}(F^\perp)$. Then
+	\[
+		S + T = V\;, \qquad S \cap T = \{0\}\;.
+	\]
+\end{lemma}
+\begin{proof}
+	\uses{def:canonical-complement}
+	Let $A = (a_{i,j})$ be the $m \times n$ matrix whose rows are the $v_i$ and
+	write $A = UB$ with $U$ invertible and $B$ in reduced row echelon form, so
+	that the rows of $B$ are linearly independent and span $S$. The restrictions
+	of the rows of $B$ to the columns in $J$ are still linearly independent and
+	span $\F^m$, so for every $u \in V$ there is $v \in S$ that agrees with $u$
+	on the coordinates in $J$. The difference $u - v$ is then supported on the
+	coordinates outside $J$, that is, $u - v \in T$, which proves $S + T = V$.
+	Counting dimensions forces $S \cap T = \{0\}$.
+\end{proof}
+
+\begin{definition}[Canonical linear map with prescribed kernel]\label{def:cl-canonical}
+	\uses{def:canonical-complement, lem:canonical-complement, def:complementary}
+	Let $F \subseteq V$ be a set of linearly independent vectors and let
+	$F^\perp$ be its canonical complement. The \emph{canonical linear map
+	$L \in \mathrm{End}(V)$ with kernel basis $F$} is the projector onto $T$
+	parallel to $S$, where $S = \mathrm{span}(F)$ and
+	$T = \mathrm{span}(F^\perp)$; this is well defined by
+	Lemma~\ref{lem:canonical-complement}. Since the canonical complement
+	depends only on $\mathrm{span}(F)$
+	(Definition~\ref{def:canonical-complement}), so does $L$, and we also call
+	it the \emph{canonical linear map with kernel $S$}. Note that
+	$\ker(L) = S$.
+\end{definition}
+
+\begin{definition}[The map $L^\perp$]\label{def:Lperp}
+	\uses{def:cl-canonical, def:dot-product-orthogonal}
+	Let $L \in \mathrm{End}(V)$ be a linear map and let $F$ be a basis for
+	$\ker(L)^\perp$. Define $L^\perp : V \to V$ as the canonical linear map with
+	kernel basis $F$. (By the basis-independence noted in
+	Definition~\ref{def:canonical-complement}, the map $L^\perp$ depends only
+	on $\ker(L)$ and not on the chosen basis $F$.)
+\end{definition}
+
+\begin{lemma}\label{lem:L_perp_perp}
+	\uses{def:Lperp}
+	Let $L \in \mathrm{End}(V)$ be a linear map, $F$ a basis for
+	$\ker(L)^\perp$, and $L^\perp$ as in Definition~\ref{def:Lperp}. Then
+	$\ker(L^\perp) = \ker(L)^\perp$.
+\end{lemma}
+\begin{proof}
+	\uses{def:Lperp, def:cl-canonical, lem:canonical-complement}
+	Set $S = \mathrm{span}(F) = \ker(L)^\perp$ and $T = \mathrm{span}(F^\perp)$;
+	by Lemma~\ref{lem:canonical-complement} every $v \in V$ decomposes uniquely
+	as $v = v^S + v^T$, and by definition $L^\perp v = v^T$. If
+	$L^\perp v = 0$ then $v = v^S \in S = \ker(L)^\perp$. Conversely, if
+	$v \in S$ then $v^T = 0$, so $L^\perp v = 0$.
+\end{proof}
+
+\section{Finite fields, traces, and self-dual bases}
+% Paper labels sec:finite-fields, sec:subfields, sec:ff-representations kept
+% for cross-reference fidelity.
+\label{sec:finite-fields}
+\label{sec:subfields}
+\label{sec:ff-representations}
+
+Let $p$ be a prime and $q = p^k$ a prime power. We write $\F_p$ and $\F_q$ for
+the finite fields with $p$ and $q$ elements; $p$ is the characteristic of
+$\F_q$, and $\F_p$ is its prime subfield.
+
+\begin{definition}[Coordinate map and multiplication tables]\label{def:subfields-kappa}
+	% The source lets k range over all integers; the extension field exists
+	% only for k >= 1, so that domain condition is made explicit here.
+	Let $q$ be a prime power and $k \ge 1$ an integer, so that $\F_q$ is a
+	subfield of $\F_{q^k}$ and $\F_{q^k}$ is a linear space of dimension $k$
+	over $\F_q$.
+	Fix a basis $\{e_i\}_{i=1}^k$ of $\F_{q^k}$ over $\F_q$. The bijection
+	$\kappa_q : \F_{q^k} \to \F_q^k$ associated with this basis is
+	\[
+		\kappa_q : a \mapsto (a_i)_{i=1}^k\;, \qquad
+		\text{where } a = \sum_{i=1}^k a_i e_i\;.
+	\]
+	The map $\kappa_q$ is an isomorphism of $\F_q$-vector spaces; in particular
+	$\kappa_q(a + b) = \kappa_q(a) + \kappa_q(b)$ for all $a, b \in \F_{q^k}$.
+	Moreover, multiplication by a fixed element corresponds to a linear map:
+	for every $a \in \F_{q^k}$ there is a matrix $K_a \in \Mat_k(\F_q)$, the
+	\emph{multiplication table of $a$ with respect to $\{e_i\}$}, such that
+	$\kappa_q(ab) = K_a\, \kappa_q(b)$ for all $b \in \F_{q^k}$.
+	The map extends coordinatewise to vectors, matrices, and sets: for
+	$v = (v_1, \dots, v_n) \in \F_{q^k}^n$ set
+	$\kappa_q(v) = (\kappa_q(v_i))_{i=1}^n \in \F_q^{kn}$; for
+	$M = (M_{i,j}) \in \Mat_{m,n}(\F_{q^k})$ let
+	$\chi_q(M) \in \Mat_{mk,nk}(\F_q)$ be the block matrix whose $(i,j)$-th
+	block is $K_{M_{i,j}}$; and for a set $S$ of vectors put
+	$\kappa_q(S) = \{\kappa_q(v) : v \in S\}$. When $q = p$ is the field
+	characteristic, the subscript is omitted and we write $\kappa$ and $\chi$.
+\end{definition}
+
+\begin{definition}[Admissible field size]\label{def:admissible-size}
+	A field size $q$ is \emph{admissible} if $q = 2^k$ for an odd integer $k$.
+\end{definition}
+
+Only fields $\F_{2^k}$ with $k$ odd are used in the analysis of the Pauli basis
+test.
+
+\begin{definition}[Trace of $\F_{q^k}$ over $\F_q$]\label{def:subfield-trace}
+	\uses{def:subfields-kappa, def:admissible-size}
+	The \emph{trace of $\F_{q^k}$ over $\F_q$} is the map
+	% Paper equation label kept on the display it names.
+	\begin{equation}\label{eq:def-trace}
+		\tr_{q^k \to q} : a \mapsto \Tr(K_a)
+	\end{equation}
+	for $a \in \F_{q^k}$, where $K_a$ is the multiplication table of $a$ with
+	respect to the basis $\{e_i\}$. The trace is an $\F_q$-linear map from
+	$\F_{q^k}$ to $\F_q$, and it is independent of the choice of basis, as can
+	be seen from the equivalent formula
+	\[
+		\tr_{q^k \to q}(a) = \sum_{j=0}^{k-1} a^{q^j}\;.
+	\]
+	For admissible $q = 2^k$ we use the shorthand $\tr$ for $\tr_{q \to 2}$.
+\end{definition}
+
+\begin{definition}[Dual, self-dual, and normal bases]\label{def:dual-self-dual-normal-basis}
+	\uses{def:subfield-trace}
+	A \emph{dual basis} $\{e_1', \dots, e_k'\}$ of a basis
+	$\{e_1, \dots, e_k\}$ of $\F_{q^k}$ over $\F_q$ is a basis such that
+	$\tr_{q^k \to q}(e^{}_i e'_j) = \delta_{i,j}$ for all
+	$i, j \in \{1, \dots, k\}$. A \emph{self-dual basis} is one equal to its own
+	dual. If for some $\alpha \in \F_{q^k}$ the set
+	$\{\alpha^{q^j}\}_{j=0}^{k-1}$ forms a basis of $\F_{q^k}$ over $\F_q$, that
+	basis is called a \emph{normal basis}. Self-dual and normal bases do not
+	exist for every field extension, but for $q = 2$ and odd $k$ a self-dual
+	normal basis of $\F_{2^k}$ over $\F_2$ always exists; \cite{Ji2020MIPStar}
+	exhibits one through an explicit construction.
+\end{definition}
+
+\begin{lemma}[Coordinate maps of self-dual bases]\label{lem:downsize_field}
+	\uses{def:subfields-kappa, def:subfield-trace,
+		def:dual-self-dual-normal-basis, def:dot-product-orthogonal}
+	Let $q$ be a prime power, $k \ge 1$ an integer, and $\{e_i\}$ a self-dual
+	basis of $\F_{q^k}$ over $\F_q$. The map $\kappa_q$ corresponding to
+	$\{e_i\}$ satisfies:
+	\begin{enumerate}
+		\item for all $x \in \F_{q^k}$,
+		      $\kappa_q(x) = \bigl(\tr_{q^k \to q}(x e_1), \dots,
+		      \tr_{q^k \to q}(x e_k)\bigr)$;
+		\item for all $x, y \in \F_{q^k}$,
+		      $\tr_{q^k \to q}(xy) = \kappa_q(x) \cdot \kappa_q(y)$;
+		\item for all $M \in \Mat_{m,n}(\F_{q^k})$ and $v \in \F_{q^k}^n$,
+		      $\chi_q(M)\, \kappa_q(v) = \kappa_q(Mv)$.
+	\end{enumerate}
+	Items 1 and 2 use self-duality; item 3 holds for an arbitrary basis.
+\end{lemma}
+\begin{proof}
+	\uses{def:subfields-kappa, def:subfield-trace, def:dual-self-dual-normal-basis}
+	For item 1, write $x = \sum_i x_i e_i$, multiply both sides by $e_j$, and
+	take traces: $\tr_{q^k \to q}(x e_j) = \sum_i x_i \tr_{q^k \to q}(e_i e_j)
+	= x_j$ by self-duality. For item 2, expand
+	$xy = \sum_{i,j} x_i y_j e_i e_j$ and take traces; self-duality retains
+	exactly the diagonal terms, giving $\sum_i x_i y_i = \kappa_q(x) \cdot
+	\kappa_q(y)$. For item 3, the $i$-th block of $\kappa_q(Mv)$ equals
+	$\sum_j \kappa_q(M_{i,j} v_j) = \sum_j K_{M_{i,j}}\, \kappa_q(v_j)$, which
+	is the $i$-th block row of $\chi_q(M)$ applied to $\kappa_q(v)$.
+\end{proof}
+
+\begin{lemma}\label{lem:one}
+	\uses{def:subfields-kappa, def:subfield-trace, def:dual-self-dual-normal-basis}
+	Let $k$ be an odd integer and $\{e_i\}_{i=1}^k$ a self-dual normal basis of
+	$\F_{2^k}$ over $\F_2$. Then $\tr(e_i) = 1$ for all $i$, and the
+	representation $\kappa(1)$ of the unit $1 \in \F_{2^k}$ is the all-ones
+	vector in $\F_2^k$.
+\end{lemma}
+\begin{proof}
+	\uses{lem:downsize_field}
+	Normality gives $e_{i+1} = e_i^2$ (indices taken cyclically), and
+	$\tr(b^2) = \tr(b)$ for every $b \in \F_{2^k}$ because squaring permutes the
+	terms of $\tr(b) = \sum_{j=0}^{k-1} b^{2^j}$, using $b^{2^k} = b$. Hence all
+	the values $\tr(e_i)$ coincide. If the common value were $0$, then $\tr$
+	would vanish identically on $\F_{2^k}$ by linearity; but then item 1 of
+	Lemma~\ref{lem:downsize_field} would give $\kappa(b) =
+	(\tr(b e_1), \dots, \tr(b e_k)) = 0$ for every $b$, contradicting the
+	bijectivity of $\kappa$. Thus $\tr(e_i) = 1$ for all $i$, and item 1 of
+	Lemma~\ref{lem:downsize_field} gives
+	$\kappa(1) = (\tr(e_1), \dots, \tr(e_k)) = (1, \dots, 1)$.
+\end{proof}
+
+\begin{definition}[Binary representation of field elements]\label{def:binary-representation}
+	\uses{def:subfields-kappa, def:admissible-size,
+		def:dual-self-dual-normal-basis}
+	Let $q = 2^k$ be an admissible field size. For each odd $k$ we fix, once and
+	for all, a self-dual normal basis $\{e_i\}_{i=1}^k$ of $\F_{2^k}$ over
+	$\F_2$ together with its multiplication tables
+	$\{K_{e_i}\}_{i=1}^k$ (Definition~\ref{def:dual-self-dual-normal-basis});
+	the maps $\kappa$ and $\tr$ always refer to this basis. The \emph{binary
+	representation} of $a \in \F_{2^k}$ is the $k$-bit string
+	$\kappa(a) \in \F_2^k$, the \emph{$\F_2$-representation of $a$}; the two are
+	freely identified. Addition of representations is bitwise addition modulo
+	$2$, and multiplication is determined by the multiplication tables through
+	\begin{equation}\label{eq:eq-mult}
+		\kappa(ab) = \sum_{i=1}^k a_i\, \kappa(e_i b)
+		= \sum_{i=1}^k a_i \bigl(K_{e_i}\, \kappa(b)\bigr)\;,
+	\end{equation}
+	where $\kappa(a) = (a_i)_{i=1}^k$.
+\end{definition}
+
+\section{Polynomials and the low-degree code}
+% Paper label sec:ld-encoding kept for cross-reference fidelity.
+\label{sec:ld-encoding}
+
+\begin{definition}[Individual and total degree]\label{def:polynomials-degree}
+	\uses{def:polyfunc}
+	An $m$-variate polynomial $f$ over $\F_q$ is a function of the form
+	\[
+		f(x_1, \dots, x_m) = \sum_{\alpha \in \{0, 1, \dots, q-1\}^m}
+		c_\alpha\, x_1^{\alpha_1} \cdots x_m^{\alpha_m}
+	\]
+	with coefficients $c_\alpha \in \F_q$; the coefficients are uniquely
+	determined by $f$, since the $q^m$ monomial functions indexed by
+	$\alpha \in \{0, 1, \dots, q-1\}^m$ span the $q^m$-dimensional space of all
+	functions $\F_q^m \to \F_q$ and are therefore linearly independent. The
+	polynomial $f$ has \emph{individual degree (at most) $d$} if
+	$c_\alpha \neq 0$ only when $\alpha_i \le d$ for all $1 \le i \le m$, and
+	\emph{total degree (at most) $d$} if $c_\alpha \neq 0$ only when
+	$\sum_i \alpha_i \le d$. (Affine) \emph{multilinear} polynomials are those
+	of individual degree $1$.
+	% Relationship to def:polyfunc: polyfunc keeps polynomial representatives,
+	% so evaluation identifies it with the function classes above only for
+	% d <= q-1.
+	Definition~\ref{def:polyfunc} introduces the set $\polyfunc{m}{q}{d}$ of
+	polynomials in $\F_q[x_1, \dots, x_m]$ of degree at most $d$ in each
+	variable, identified by their polynomial representatives rather than by the
+	functions they induce. Evaluation maps $\polyfunc{m}{q}{d}$ onto the set of
+	$m$-variate polynomials of individual degree at most $\min(d, q-1)$ in the
+	sense above; for $d \le q-1$ this map is a bijection, while for $d \ge q$
+	distinct representatives, such as $x_1^q$ and $x_1$, induce the same
+	function. Statements phrased in terms of $\polyfunc{m}{q}{d}$ retain the
+	representative convention of Definition~\ref{def:polyfunc}.
+\end{definition}
+
+\begin{lemma}[Schwartz--Zippel lemma~\cite{Sch80,Zip79}]\label{lem:schwartz-zippel}
+	% Restatement of lem:schwartz-zippel-total-degree under the source's label.
+	\uses{def:polynomials-degree}
+	Let $f, g : \F_q^m \to \F_q$ be two unequal polynomials of total degree at
+	most $d$. Then
+	\[
+		\Prb_{\bx \sim \F_q^m}[f(\bx) = g(\bx)] \le \frac{d}{q}\;.
+	\]
+\end{lemma}
+\begin{proof}
+	\uses{lem:schwartz-zippel-total-degree}
+	This is Lemma~\ref{lem:schwartz-zippel-total-degree}, stated and proved in
+	Chapter~\ref{chap:preliminaries}; it is restated here under the label used
+	by \cite{Ji2020MIPStar}.
+\end{proof}
+
+\begin{remark}\label{rem:schwartz-zippel-restated}
+	Lemma~\ref{lem:schwartz-zippel} restates the total-degree bound of
+	Lemma~\ref{lem:schwartz-zippel-total-degree} under the label used by
+	\cite{Ji2020MIPStar}. The individual-degree consequence,
+	Lemma~\ref{lem:schwartz-zippel-individual}, shows that distinct elements of
+	$\polyfunc{m}{q}{d}$ agree on at most an $md/q$ fraction of the points of
+	$\F_q^m$; the analysis of the Pauli basis test uses the bound in this
+	individual-degree form.
+\end{remark}
+
+The Schwartz--Zippel lemma implies that low-degree polynomials form an
+error-correcting code with good distance, the \emph{low-degree code} (a special
+case of the generalized Reed--Muller code).
+
+\begin{definition}[Low-degree encoding]\label{def:low-degree-encoding}
+	\uses{def:polynomials-degree}
+	Fix an integer $m \in \N$ and let $M = 2^m$. For every $y \in \{0,1\}^m$
+	define the $m$-variate multilinear polynomial over $\F_q$
+	\[
+		\mathrm{ind}_{m,y}(x)
+		= \prod_{i : y_i = 1} x_i \cdot \prod_{i : y_i = 0} (1 - x_i)\;,
+	\]
+	identifying $\{0,1\}$ with a subset of $\F_q$. Restricted to the subcube
+	$\{0,1\}^m$, the polynomial $\mathrm{ind}_{m,y}$ vanishes everywhere except
+	at $x = y$, where it equals $1$. For $a \in \F_q^M$, label the coordinates
+	of $a$ as $a_y$ for $y \in \{0,1\}^m$ (identifying $\{0,1\}^m$ with
+	$\{1, \dots, M\}$ by the lexicographic ordering). The \emph{low-degree
+	encoding of $a$} is the multilinear polynomial $g_a : \F_q^m \to \F_q$,
+	% Paper equation label kept on the display it names.
+	\begin{equation}\label{eq:ld-encoding}
+		g_a(x) = \sum_{y \in \{0,1\}^m} a_y \cdot \mathrm{ind}_{m,y}(x)\;.
+	\end{equation}
+	For every $y \in \{0,1\}^m$ one has $g_a(y) = a_y$, and $g_a$ has total
+	degree at most $m$.
+\end{definition}
+
+\begin{definition}[Indicator vector and linearity of the encoding]\label{def:indicator-vector}
+	\uses{def:low-degree-encoding, def:dot-product-orthogonal}
+	For $x \in \F_q^m$, the \emph{indicator vector} is
+	\[
+		\mathrm{ind}_m(x)
+		= \bigl(\mathrm{ind}_{m,y}(x)\bigr)_{y \in \{0,1\}^m} \in \F_q^M\;.
+	\]
+	With this notation the low-degree encoding satisfies, for every
+	$a \in \F_q^M$ and $x \in \F_q^m$,
+	% Paper equation label kept on the display it names.
+	\begin{equation}\label{eq:low-degree-encoding-definition}
+		g_a(x) = a \cdot \mathrm{ind}_m(x)\;;
+	\end{equation}
+	in particular the map $a \mapsto g_a$ is $\F_q$-linear.
+\end{definition}
+
+Since encodings $g_a$ are multilinear, hence of total degree at most $m$, two
+encodings of distinct strings agree on at most an $m/q$ fraction of points of
+$\F_q^m$ by Lemma~\ref{lem:schwartz-zippel}.
+
+\begin{definition}[Decoding maps]\label{def:decoding-map}
+	\uses{def:low-degree-encoding}
+	For $H \subseteq \F_q$, the \emph{decoding map} $\mathrm{Dec}_H$ takes as
+	input a polynomial $g : \F_q^m \to \F_q$ and returns the vector
+	$a \in \F_q^M$ defined by: for all $y \in \{0,1\}^m$, set $a_y = g(y)$ if
+	$g(y) \in H$, and $a_y = 0$ otherwise. For all $a \in H^M$ one has
+	$\mathrm{Dec}_H(g_a) = a$. We write $\mathrm{Dec}(\cdot)$ for the boolean
+	decoding map $\mathrm{Dec}_{\{0,1\}}(\cdot)$.
+\end{definition}
+
+\section{Lines}
+
+The question distributions of the classical low individual degree game and of
+the Pauli basis test (Chapter~\ref{chap:qpbt-test}) sample lines in $\F_q^m$;
+we record here the definition of lines and their canonical representatives.
+
+\begin{definition}[Lines]\label{def:line}
+	A \emph{line} $\ell$ in $\F_q^m$ specified by a pair
+	$(u,v) \in (\F_q^m)^2$ is the subset
+	\begin{equation}\label{eq:line-set}
+		\ell(u,v) = \bigl\{\, u + tv : t \in \F_q \,\bigr\} \subseteq \F_q^m\;.
+	\end{equation}
+	The vector $v$ is called a \emph{direction} of $\ell(u,v)$; the case $v = 0$
+	is explicitly allowed, in which case the line is the singleton $\{u\}$. A
+	line $\ell(u,v)$ is \emph{axis-parallel} if there is a coordinate
+	$i \in \{1, \dots, m\}$ for which $v = e_i$, the $i$-th elementary basis
+	vector of $\F_q^m$; such a line is said to be \emph{parallel to the $i$-th
+	direction}. A line $\ell(u,v)$ is \emph{diagonal} if there exists
+	$i \in \{0, 1, \dots, m-1\}$ such that $v_1 = v_2 = \dots = v_i = 0$ (for
+	$i = 0$ the condition is vacuous, so every line is diagonal).
+\end{definition}
+
+\begin{proposition}\label{prop:line-equiv}
+	\uses{def:line}
+	Let $u, v \in \F_q^m$. Then for all $u' \in \ell(u,v)$, we have
+	$\ell(u,v) = \ell(u',v)$.
+\end{proposition}
+\begin{proof}
+	\uses{def:line}
+	Fix $u' \in \ell(u,v)$, so $u' = u + tv$ for some $t \in \F_q$. Any
+	$a \in \ell(u,v)$ has the form $a = u + sv = u' + (s - t)v$, so
+	$\ell(u,v) \subseteq \ell(u',v)$. The symmetric argument gives the reverse
+	inclusion.
+\end{proof}
+
+Thus, for a fixed direction, a line is an equivalence class of its points: the
+pair $(u,v)$ representing it can use any base point on the line. A canonical
+representation is obtained as follows.
+
+\begin{definition}[Canonical representative of a line]\label{def:line-representative}
+	\uses{def:line, def:cl-canonical, prop:line-equiv}
+	Let $\ell$ be a line in direction $v \neq 0$, and let
+	$L^{\mathrm{Ln}}_v : \F_q^m \to \F_q^m$ denote the canonical linear map with
+	the one-dimensional kernel basis $\{v\}$
+	(Definition~\ref{def:cl-canonical}). The \emph{canonical representative of
+	$\ell$} is the point $u_0 \in \F_q^m$ such that
+	\[
+		u_0 = L^{\mathrm{Ln}}_v(u) \qquad \text{for all } u \in \ell\;.
+	\]
+	This is well defined: since the image and kernel of $L^{\mathrm{Ln}}_v$ are
+	complementary, any $u \in \ell$ decomposes uniquely as $u = u_0 + tv$ with
+	$u_0$ in the image, so $u_0 = u - tv \in \ell$ and
+	$L^{\mathrm{Ln}}_v(u_0) = u_0$; moreover any two points of $\ell$ differ by
+	a multiple of $v$ and therefore have the same image under
+	$L^{\mathrm{Ln}}_v$. A line $\ell = \ell(u,v)$ is henceforth canonically
+	represented by the pair $(u_0, v)$. (For $v = 0$, where the singleton
+	$\{u\}$ leaves no independent kernel basis, we take $L^{\mathrm{Ln}}_0$ to
+	be the identity---the canonical linear map with empty kernel basis---so
+	that $u_0 = u$; the source leaves this case implicit.)
+\end{definition}
+
+\section{Quantum registers and EPR states}
+% Paper label sec:lin-reg kept for cross-reference fidelity.
+\label{sec:lin-reg}
+
+\begin{definition}[State space of a linear register]\label{def:lin-reg}
+	\uses{def:complementary}
+	For a set $V$, we write $\C^V$ for the complex vector space of dimension
+	$|V|$, endowed with the canonical orthonormal basis
+	$\{\ket{x}\}_{x \in V}$. A \emph{quantum state on $V$} is a unit vector
+	$\ket{\psi}_V \in \C^V$. If $V = \bigoplus_{i=1}^k V_i$ is a direct sum of
+	subspaces over $\F$, then $\C^V$ is identified with
+	$\bigotimes_{i=1}^k \C^{V_i}$ by identifying
+	$\ket{x_1 \oplus \dots \oplus x_k}$ with
+	$\ket{x_1} \ot \dots \ot \ket{x_k}$. In particular, a basis $\{e_i\}$ of
+	$V$ yields the decomposition $V = \bigoplus_{i=1}^k (\F e_i)$ and hence
+	$\C^V = \bigotimes_{i=1}^k \C^{|\F|}$; the factors $\C^{|\F|}$ are called
+	the \emph{qudits} of $\C^V$.
+\end{definition}
+
+\begin{definition}[EPR state]\label{def:EPR}
+	\uses{def:lin-reg}
+	For a linear space $V$ over a finite field $\F$, the \emph{EPR state} on
+	$\C^V \ot \C^V$ is
+	\[
+		\ket{\mathrm{EPR}}_V
+		= \frac{1}{\sqrt{|V|}} \sum_{x \in V} \ket{x} \ot \ket{x}\;.
+	\]
+	We write $\ket{\mathrm{EPR}_q}$ for $\ket{\mathrm{EPR}}_{\F_q}$ and
+	$\ket{\mathrm{EPR}}$ for $\ket{\mathrm{EPR}_2}$.
+\end{definition}
+
+\section{Generalized Pauli observables}
+% Paper label sec:generalized-pauli kept for cross-reference fidelity.
+\label{sec:generalized-pauli}
+
+\begin{definition}[Generalized Pauli observables]\label{def:generalized-pauli}
+	\uses{def:subfield-trace, def:lin-reg}
+	Let $p$ be a prime and $\omega = e^{2\pi i/p}$. The \emph{generalized Pauli
+	observables over $\F_p$} are the unitaries on $\C^{\F_p}$ given by
+	\begin{equation}\label{eq:pauli-fp}
+		\sigma^X(a) = \sum_{j \in \F_p} \ket{j + a}\bra{j}
+		\qquad \text{and} \qquad
+		\sigma^Z(b) = \sum_{j \in \F_p} \omega^{bj} \ket{j}\bra{j}
+	\end{equation}
+	for $a, b \in \F_p$, with arithmetic over $\F_p$. For $q = p^k$, the
+	\emph{generalized Pauli observables over $\F_q$} are the unitaries on
+	$\C^{\F_q}$
+	\[
+		\tau^X(a) = \sum_{j \in \F_q} \ket{j + a}\bra{j}
+		\qquad \text{and} \qquad
+		\tau^Z(b) = \sum_{j \in \F_q} \omega^{\tr(bj)} \ket{j}\bra{j}
+	\]
+	for $a, b \in \F_q$, where $\tr$ here denotes $\tr_{q \to p}$
+	(Definition~\ref{def:subfield-trace}); for admissible $q$ this agrees with
+	the standing shorthand, $p = 2$, and $\omega = -1$, so that all phases are
+	signs. All the $\tau^X$ operators commute with one another, as do all the
+	$\tau^Z$ operators. Their common eigenbases consist of the vectors
+	$\ket{e_W}$, labeled by $e \in \F_q$ and $W \in \{X, Z\}$, given by
+	\[
+		\ket{e_X} = \frac{1}{\sqrt{q}} \sum_{j \in \F_q}
+		\omega^{-\tr(ej)} \ket{j}\;, \qquad
+		\ket{e_Z} = \ket{e}\;;
+	\]
+	the Fourier transform
+	\begin{equation}\label{eq:fourier-f}
+		F = \frac{1}{\sqrt{q}} \sum_{a, b \in \F_q}
+		\omega^{-\tr(ab)} \ket{a}\bra{b}
+	\end{equation}
+	maps the computational ($Z$) eigenbasis to the $X$ eigenbasis. We write
+	$\{\tau^W_e\}_{e \in \F_q}$ for the projective measurement whose elements
+	are the rank-one projectors onto the vectors of the $W$ eigenbasis. For
+	systems of $n$ qudits, we write, for $W \in \{X,Z\}$ and $a \in \F_q^n$,
+	\[
+		\tau^W(a) = \tau^W(a_1) \ot \dots \ot \tau^W(a_n)\;, \qquad
+		\ket{e_W} = \ket{(e_1)_W} \ot \dots \ot \ket{(e_n)_W}
+	\]
+	for $e \in \F_q^n$, with associated rank-one projectors $\tau^W_e$.
+\end{definition}
+
+\begin{lemma}[Product and twisted commutation relations]\label{lem:twisted-commutation}
+	\uses{def:generalized-pauli, def:subfield-trace, def:dot-product-orthogonal}
+	Let $q = p^k$, let $n \ge 1$ be an integer, and let $W \in \{X, Z\}$.
+	\begin{enumerate}
+		\item For all $a, a' \in \F_q$ and $b \in \F_p$,
+		      \begin{equation}\label{eq:pauli-product-power}
+			      \tau^W(a)\, \tau^W(a') = \tau^W(a + a')
+			      \qquad \text{and} \qquad
+			      \bigl(\tau^W(a)\bigr)^b = \tau^W(ab)\;;
+		      \end{equation}
+		      in particular $\bigl(\tau^W(a)\bigr)^p = \Id$, so each
+		      $\tau^W(a)$ is a unitary with eigenvalues that are $p$-th roots
+		      of unity.
+		\item For all $a, b \in \F_q^n$,
+		      % Paper equation label kept on the display it names.
+		      \begin{equation}\label{eq:twisted-fq}
+			      \tau^X(a)\, \tau^Z(b)
+			      = \omega^{-\tr(a \cdot b)}\, \tau^Z(b)\, \tau^X(a)\;,
+		      \end{equation}
+		      where $a \cdot b = \sum_{i=1}^n a_i b_i \in \F_q$. The case
+		      $q = p$, $n = 1$ reads
+		      \begin{equation}\label{eq:twisted-fp}
+			      \sigma^X(a)\, \sigma^Z(b)
+			      = \omega^{-ab}\, \sigma^Z(b)\, \sigma^X(a)
+			      \qquad \text{for all } a, b \in \F_p\;.
+		      \end{equation}
+	\end{enumerate}
+\end{lemma}
+\begin{proof}
+	\uses{def:generalized-pauli, def:subfield-trace}
+	All identities are verified on computational basis states. For the product
+	relations with $W = X$, shifting twice by $a'$ and $a$ equals shifting by
+	$a + a'$; with $W = Z$, the phases $\omega^{\tr(aj)}\omega^{\tr(a'j)}$
+	combine by $\F_q$-linearity of the trace, and the power relation follows by
+	iterating. For the scalar twisted commutation,
+	$\tau^X(a)\tau^Z(b)\ket{j} = \omega^{\tr(bj)}\ket{j + a}$, while
+	$\tau^Z(b)\tau^X(a)\ket{j} = \omega^{\tr(b(j+a))}\ket{j + a} =
+	\omega^{\tr(ab)}\,\omega^{\tr(bj)}\ket{j + a}$. The multi-qudit relation
+	follows by applying the scalar relation factor by factor and summing the
+	exponents, using $\tr(a \cdot b) = \sum_i \tr(a_i b_i)$. For $q = p$ the
+	trace is the identity map, which gives \eqref{eq:twisted-fp}.
+\end{proof}
+
+\begin{lemma}[Fourier cancellation over a subspace]\label{lem:cancellation}
+	\uses{def:dot-product-orthogonal, def:subfield-trace}
+	Let $V$ be a subspace of $\F_q^k$ and let $\omega = e^{2\pi i/p}$, where
+	$p$ is the characteristic of $\F_q$ and $\tr = \tr_{q \to p}$. For all
+	$v \notin V^\perp$,
+	\[
+		\E_{\bu \sim V}\, \omega^{\tr(\bu \cdot v)} = 0\;,
+	\]
+	where the expectation is over a uniformly random vector $\bu$ in $V$.
+\end{lemma}
+\begin{proof}
+	This is Fact 3.2 of \cite{Natarajan2018NEEXP}. Since $v \notin V^\perp$,
+	the $\F_q$-linear functional $u \mapsto u \cdot v$ is not identically zero
+	on $V$, hence surjective onto $\F_q$; composing with the nonzero map $\tr$
+	shows that there is $u_0 \in V$ with $\tr(u_0 \cdot v) \neq 0$. Writing $C$
+	for the expectation, translation invariance of the uniform distribution on
+	$V$ gives
+	$C = \E_{\bu \sim V}\, \omega^{\tr((\bu + u_0) \cdot v)}
+	= \omega^{\tr(u_0 \cdot v)}\, C$, and $\omega^{\tr(u_0 \cdot v)} \neq 1$
+	forces $C = 0$.
+\end{proof}
+
+\begin{lemma}[Fourier expansion of Pauli observables]\label{lem:pauli-observable-expansion}
+	\uses{def:generalized-pauli, def:subfield-trace}
+	For every integer $n \ge 1$, all $W \in \{X, Z\}$, and all $a \in \F_q^n$,
+	% Paper equation label kept on the display it names.
+	\begin{equation}\label{eq:pauli-obs-proj}
+		\tau^W(a) = \sum_{b \in \F_q^n} \omega^{\tr(a \cdot b)}\, \tau^W_b\;,
+	\end{equation}
+	and conversely
+	\begin{equation}\label{eq:pauli-inversion-0}
+		\E_{\ba \sim \F_q^n}\, \omega^{-\tr(\ba \cdot b)}\, \tau^W(\ba)
+		= \sum_{b' \in \F_q^n} \E_{\ba \sim \F_q^n}\,
+		\omega^{\tr(\ba \cdot (b' - b))}\, \tau^W_{b'}
+		= \tau^W_b\;.
+	\end{equation}
+\end{lemma}
+\begin{proof}
+	\uses{def:generalized-pauli, lem:cancellation}
+	Each $\ket{b_W}$ is an eigenvector of $\tau^W(a)$ with eigenvalue
+	$\omega^{\tr(a \cdot b)}$: for $W = Z$ this is immediate from the
+	definition, and for $W = X$ it follows from the single-qudit computation
+	$\tau^X(a)\ket{e_X} = \omega^{\tr(ae)}\ket{e_X}$, applied factor by factor.
+	Expanding $\tau^W(a)$ in the orthonormal eigenbasis
+	$\{\ket{b_W}\}_{b \in \F_q^n}$ gives the first display. For the inversion,
+	substitute the first display and exchange the order of summation; by
+	Lemma~\ref{lem:cancellation} applied with $V = \F_q^n$ (so that
+	$V^\perp = \{0\}$), the inner expectation vanishes unless $b' = b$, where
+	it equals $1$.
+\end{proof}
+
+Since only admissible field sizes $q = 2^k$ arise in the Pauli basis test, the
+maximally entangled state $\ket{\mathrm{EPR}_q}$ and the qudit Pauli
+projectors are isomorphic to tensor products of qubit EPR states
+$\ket{\mathrm{EPR}_2}$ and qubit Pauli projectors. This is the content of the
+next lemma, which is what allows the Pauli basis test to self-test Pauli
+observables and maximally entangled states over \emph{qubits}
+(Chapter~\ref{chap:qpbt-test}).
+
+\begin{lemma}[Qudit-to-qubit isomorphism]\label{lem:pauli-binary}
+	\uses{def:admissible-size, def:binary-representation,
+		def:generalized-pauli, def:EPR}
+	% The source quantifies over all integers L; the tensor powers require
+	% L >= 1, so that domain condition is made explicit here.
+	For all admissible field sizes $q = 2^k$ and integers $L \ge 1$, there
+	exists an isomorphism $\phi : (\C^q)^{\ot L} \to (\C^2)^{\ot Lk}$ such that
+	\begin{equation}\label{eq:epr-q-to-epr-2}
+		\phi \ot \phi\, \ket{\mathrm{EPR}_q}^{\ot L}
+		= \ket{\mathrm{EPR}_2}^{\ot Lk}
+	\end{equation}
+	(applying the natural identifications between
+	$(\C^q)^{\ot L} \ot (\C^q)^{\ot L}$ and $(\C^q \ot \C^q)^{\ot L}$, and
+	between $(\C^2)^{\ot Lk} \ot (\C^2)^{\ot Lk}$ and
+	$(\C^2 \ot \C^2)^{\ot Lk}$). Moreover, for all $W \in \{X, Z\}$ and all
+	$u \in \F_q^L$,
+	\begin{equation}\label{eq:pauli-q-to-pauli-2}
+		\tau^W_u = \phi^\dagger\,
+		\Bigl(\bigotimes_{i=1}^L \bigotimes_{j=1}^k
+		\sigma^W_{u_{ij}}\Bigr)\, \phi\;.
+	\end{equation}
+	Here $(u_{ij})_{i,j}$ is the array of $\F_2$ values with
+	$u_i = \sum_j u_{ij} e_j$ for all $i \in \{1, \dots, L\}$, where
+	$\{e_1, \dots, e_k\}$ is the fixed self-dual normal basis of $\F_q$ over
+	$\F_2$ of Definition~\ref{def:binary-representation}; and for
+	$i \in \{1, \dots, L\}$ and $j \in \{1, \dots, k\}$ the $(i,j)$-th factor
+	$\sigma^W_{u_{ij}}$ denotes the projector
+	$\frac{1}{2}\bigl(\Id + (-1)^{u_{ij}} \sigma^W(1)\bigr)$ acting on the
+	$s$-th qubit, where $s = (i-1)k + j$.
+\end{lemma}
+\begin{proof}
+	\uses{lem:pauli-observable-expansion, lem:downsize_field,
+		lem:twisted-commutation}
+	Define the isometry $\theta : \C^q \to (\C^2)^{\ot k}$ by
+	$\theta\ket{a} = \ket{a_1} \ot \dots \ot \ket{a_k}$, where
+	$\kappa(a) = (a_1, \dots, a_k)$ is the binary representation with respect
+	to the fixed basis; since $\kappa$ is a bijection, $\theta$ is a unitary
+	and $\theta \ot \theta\, \ket{\mathrm{EPR}_{2^k}} =
+	\ket{\mathrm{EPR}_2}^{\ot k}$. For $a \in \F_q$ with
+	$\kappa(a) = (a_1, \dots, a_k)$, the inversion formula of
+	Lemma~\ref{lem:pauli-observable-expansion} gives
+	$\tau^W_a = \E_{b \in \F_q} (-1)^{\tr(ab)}\, \tau^W(b)$; writing
+	$b = \sum_j b_j e_j$, self-duality of the basis gives
+	$b_j = \tr(b e_j)$ (item 1 of Lemma~\ref{lem:downsize_field}) and hence
+	$\tr(ab) = \sum_j a_j b_j$. The product relation of
+	Lemma~\ref{lem:twisted-commutation} factors
+	$\tau^W(b) = \prod_j \tau^W(b_j e_j)$, so the expectation factors over
+	independent $b_1, \dots, b_k \in \F_2$. A computation on basis states shows
+	that for all $c \in \F_2$, $\tau^W(c e_j) = \theta^\dagger\,
+	\sigma^{W,j}(c)\, \theta$, where $\sigma^{W,j}(c)$ is the identity for
+	$c = 0$ and the Pauli $W$ observable acting on the $j$-th qubit of
+	$(\C^2)^{\ot k}$ for $c = 1$. Averaging,
+	$\E_{b_j \in \F_2} (-1)^{a_j b_j} \sigma^W(b_j) =
+	\frac{1}{2}\bigl(\Id + (-1)^{a_j}\sigma^W(1)\bigr) = \sigma^W_{a_j}$,
+	whence $\tau^W_a = \theta^\dagger \bigl(\bigotimes_j
+	\sigma^W_{a_j}\bigr) \theta$. Taking $\phi = \theta^{\ot L}$ and tensoring
+	the last identity over the $L$ qudits, using
+	$\tau^W_u = \bigotimes_{i=1}^L \tau^W_{u_i}$, yields both displayed
+	identities.
+\end{proof}
+
+\begin{remark}\label{rem:pauli-binary-source}
+	In the source statement of Lemma~\ref{lem:pauli-binary} in
+	\cite{Ji2020MIPStar}, the index range of the qubit factor is printed as
+	$j \in \{1, \dots, q\}$; the intended range, used above, is
+	$j \in \{1, \dots, k\}$, as the $i$-th qudit is mapped to $k$ qubits. The
+	source also quantifies over arbitrary integers $L$; the statement above
+	takes $L \ge 1$, the domain on which the tensor powers $(\C^q)^{\ot L}$
+	are defined.
+\end{remark}

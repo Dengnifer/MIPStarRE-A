@@ -1,0 +1,482 @@
+\chapter{The Pauli basis test}
+\label{chap:qpbt-test}
+% Paper label sec:pauli-verifier kept for cross-reference fidelity; it resolves to this chapter.
+\label{sec:pauli-verifier}
+
+This chapter defines the two testing primitives underlying the question-reduction step: the \emph{classical low individual degree game}, in its simultaneous form, and the \emph{Pauli basis test}, a nonlocal game built from the classical game together with the Magic Square game. We state the quantum soundness of the classical game (Theorem~\ref{lem:ld-soundness}, imported, with the facts required by the identification, which remain to be proved, recorded in \cite{gap:qpbt_ld-dimension-divisibility}; see Remark~\ref{rem:ld-soundness-provider}), the rigidity of the Magic Square game (Theorem~\ref{thm:ms-rigidity}, imported), completeness of the Pauli basis test (Lemma~\ref{lem:pauli-completeness}), and the main soundness theorem for the Pauli basis test (Theorem~\ref{thm:pauli}), whose proof occupies Chapters~\ref{chap:qpbt-observables}--\ref{chap:qpbt-extraction} and is completed in Chapter~\ref{chap:qpbt-extraction} only modulo the proof obligation documented in \cite{gap:qpbt_ld-dimension-divisibility}. The chapter closes with the qubit form of the soundness statement (Corollary~\ref{cor:pauli-binary}) and the canonical parameter choice with its soundness bound (Definition~\ref{def:introparams}, Lemma~\ref{lem:delta-bound}).
+
+Throughout, the two players are denoted $\mathrm A$ and $\mathrm B$; for $w \in \{\mathrm A,\mathrm B\}$ we write $\overline w$ for the other player. Games, strategies, values, conditionally linear (CL) functions and distributions, typed distributions sampled from the edges of a graph, and the state-dependent approximation $\approx_\delta$ between families of measurement operators are as in Chapter~\ref{chap:qpbt-games}; the algebraic material on lines, canonical linear maps, the low-degree encoding, and generalized Pauli observables is from Chapter~\ref{chap:qpbt-algebra}.
+
+\section{The classical low individual degree game}
+% Paper labels sec:ld-verifier and sec:ld-game kept for cross-reference fidelity.
+\label{sec:ld-verifier}
+\label{sec:ld-game}
+
+The classical low individual degree game is a two-player game based on the low individual degree variant of the multilinearity test of Babai, Fortnow, and Lund. In the basic version, one player (the ``points player'') receives a uniformly random point $u \in \F_q^m$ and answers with a value $a \in \F_q$, while the other player (the ``lines player'') receives a random line through $u$ --- either axis-parallel or diagonal --- and answers with a univariate polynomial describing the restriction of a global function to that line. If the players share a polynomial $g\colon \F_q^m \to \F_q$ of individual degree at most $d$ and answer with $g(u)$ and with the restriction $g|_\ell$, they win with probability $1$; the soundness theorem below states that the converse approximately holds. In the simultaneous version, the players' answers are $k$-tuples, checked coordinatewise against a $k$-tuple of low individual degree polynomials.
+
+\begin{definition}[The classical low individual degree game: parameters and registers]\label{def:ld-game}
+	\uses{def:game, def:admissible-size}
+	% The source fixes \N to be the set of positive integers
+	% (references/qpbt-paper/04_preliminaries.tex:6) and takes m, d, ldc in \N
+	% (references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:33-35),
+	% so the positivity below is the source's implicit domain, stated explicitly.
+	% It is load-bearing: at d = 0 or k = 0 the prefactor a(dmk)^a of delta_ld in
+	% lem:ld-soundness vanishes, and at d = 0 the resulting exact conclusions fail
+	% (e.g. at (q,m,d,k) = (2,1,0,1) with eps = 1). The case k = 0, though it would
+	% hold trivially, is likewise outside the source's domain and is omitted.
+	The game $\mathfrak{G}^{\mathrm{ld}}$ is parametrized by a tuple $\mathsf{ldparams} = (q,m,d,k)$, where $m, d, k \ge 1$ are integers, $q \in \N$ is an admissible field size (Definition~\ref{def:admissible-size}), and $m$ divides $q$. We write $\mathfrak{G}^{\mathrm{ld}}_{\mathsf{ldparams}}$ to emphasize the dependence on the parameter tuple. The type set of $\mathfrak{G}^{\mathrm{ld}}$ is
+	\[
+		\mathcal T^{\mathrm{ld}} = \{\mathsf{Point}, \mathsf{ALine}, \mathsf{DLine}\}\;,
+	\]
+	and the distribution over type pairs $(t_{\mathrm A}, t_{\mathrm B})$ is uniform over $\mathcal T^{\mathrm{ld}} \times \mathcal T^{\mathrm{ld}}$. The ambient space is the direct sum $V = V_X \oplus V_I \oplus V_V$ of three register subspaces: the \emph{point register} $V_X \cong \F_q^m$, the \emph{coordinate register} $V_I \cong \F_q$, and the \emph{direction register} $V_V \cong \F_q^m$. Elements of $V$ are identified with triples $(u,s,v) \in \F_q^m \times \F_q \times \F_q^m$. The question distribution and the win predicate of $\mathfrak{G}^{\mathrm{ld}}$ are specified in Definitions~\ref{def:ld-question-distribution} and~\ref{def:ld-win-predicate} below.
+\end{definition}
+
+\begin{definition}[Question distribution of the classical low individual degree game]\label{def:ld-question-distribution}
+	\uses{def:ld-game, def:cl-func, def:cl-dist, lem:cl-concat, def:cl-canonical, def:line-representative}
+	Let $\mathsf{ldparams} = (q,m,d,k)$ be as in Definition~\ref{def:ld-game}. Define $L_{\mathsf{Point}}$ to be the $1$-level CL function on $V$ that projects onto $V_X$: for every $(u,s,v) \in V$,
+	\begin{equation}
+		\label{eq:cl-ptf}
+		L_{\mathsf{Point}}(u,s,v) = (u,0,0)\;.
+	\end{equation}
+	For $s \in \F_q$, let $\chi(s)$ be the unique integer such that
+	\begin{equation}
+		\label{eq:chi-func}
+		s = (\chi(s)-1)\,\frac{q}{m} + r
+	\end{equation}
+	for some $0 \le r < q/m$, where $s$ is interpreted as an integer in $\{0,1,\ldots,q-1\}$ under the identification of $\F_q$ with binary strings fixed in Chapter~\ref{chap:qpbt-algebra}. Since $m$ divides $q$, when $s$ is uniformly distributed on $\F_q$ the index $\chi(s)$ is uniformly distributed on $\{1,2,\ldots,m\}$. Define $L_{\mathsf{ALine}}$ by
+	\begin{equation}
+		\label{eq:cl-alnf}
+		L_{\mathsf{ALine}}(u,s,v) = \bigl(L^{\mathrm{Ln}}_{e_i}(u),\, s,\, 0\bigr)\quad\text{for all } (u,s,v) \in V\;,
+	\end{equation}
+	where $i = \chi(s)$ and $L^{\mathrm{Ln}}_v$ denotes the canonical linear map with one-dimensional kernel spanned by $v$, used to compute canonical representatives of lines (Definition~\ref{def:line-representative}). The function $L_{\mathsf{ALine}}$ is the concatenation (in the sense of Lemma~\ref{lem:cl-concat}) of the $1$-level CL function projecting $V_I \oplus V_V$ onto $V_I$ with the family of $1$-level CL functions $\{L^{\mathrm{Ln}}_{e_i}\}$ on $V_X$ indexed by $i \in \{1,\ldots,m\}$; thus $L_{\mathsf{ALine}}$ is a $2$-level CL function. Define $L_{\mathsf{DLine}}$ by
+	\begin{equation}
+		\label{eq:cl-dlnf}
+		L_{\mathsf{DLine}}(u,s,v) = \bigl(L^{\mathrm{Ln}}_{\pi_{i-1}(v)}(u),\, s,\, \pi_{i-1}(v)\bigr)\;,
+	\end{equation}
+	where $i = \chi(s)$ and $\pi_{i-1}$ zeroes out the first $i-1$ coordinates of its input. The function $L_{\mathsf{DLine}}$ is the concatenation of (i) the identity on $V_I$, (ii) for each $i$ the $1$-level CL function $v \mapsto \pi_{i-1}(v)$ on $V_V$, and (iii) for each pair $(s,v') \in V_I \oplus V_V$ the $1$-level CL function $L^{\mathrm{Ln}}_{v'}$ on $V_X$; thus $L_{\mathsf{DLine}}$ is a $3$-level CL function.
+
+	The question distribution of $\mathfrak{G}^{\mathrm{ld}}$ is the typed CL distribution obtained as follows: sample a type pair $(t_{\mathrm A}, t_{\mathrm B})$ uniformly from $\mathcal T^{\mathrm{ld}} \times \mathcal T^{\mathrm{ld}}$, sample $z = (u,s,v)$ uniformly from $V$, and send each player $w \in \{\mathrm A,\mathrm B\}$ the question $(t_w, L_{t_w}(z))$.
+\end{definition}
+
+The next two lemmas show that the CL functions $L_{\mathsf{Point}}$, $L_{\mathsf{ALine}}$, $L_{\mathsf{DLine}}$ give rise to the axis-parallel and diagonal line-versus-point distributions.
+
+\begin{lemma}\label{lem:alnf}
+	\uses{def:ld-question-distribution, def:line}
+	Consider the pair $(\ell, u)$ sampled in the following way: first, sample the tuple $\bigl((u_0,s,0),(u,0,0)\bigr)$ from the CL distribution $\mu_{L_{\mathsf{ALine}}, L_{\mathsf{Point}}}$, and let $\ell = \ell(u_0, e_i)$ where $i = \chi(s)$. Then $u$ is a uniformly random point in $\F_q^m$, and $\ell$ is a line that goes through $u$ and is parallel to a uniformly random axis $i \in \{1,2,\ldots,m\}$.
+\end{lemma}
+\begin{proof}
+	\uses{def:line-representative}
+	Since $s$ is uniformly random in $\F_q$ and $m$ divides $q$, the index $i = \chi(s)$ is uniformly random in $\{1,2,\ldots,m\}$, so $(u_0,s)$ specifies a uniformly random axis-parallel line $\ell(u_0,e_i)$. Since $u_0 = L^{\mathrm{Ln}}_{e_i}(u)$ is the canonical representative of the line through $u$ in direction $e_i$, we have $u \in \ell(u_0,e_i)$.
+\end{proof}
+
+\begin{lemma}\label{lem:dlnf}
+	\uses{def:ld-question-distribution, def:line}
+	Consider the pair $(\ell, u)$ sampled in the following way: first, sample the tuple $\bigl((u_0,s,v),(u,0,0)\bigr)$ from the CL distribution $\mu_{L_{\mathsf{DLine}}, L_{\mathsf{Point}}}$, and let $\ell = \ell(u_0, v)$ where $i = \chi(s)$. Then $u$ is a uniformly random point in $\F_q^m$, and $\ell$ is a random diagonal line that goes through $u$ and shares its first $i-1$ coordinates with $u$, for uniformly random $i \in \{1,2,\ldots,m\}$.
+\end{lemma}
+\begin{proof}
+	\uses{lem:alnf}
+	The proof is identical to that of Lemma~\ref{lem:alnf}: uniformity of $s$ makes $i = \chi(s)$ uniform, the direction component of the sampled tuple is $\pi_{i-1}(v)$ for uniform $v$ (so its first $i-1$ coordinates vanish), and $u_0 = L^{\mathrm{Ln}}_{\pi_{i-1}(v)}(u)$ places $u$ on the line $\ell(u_0,\pi_{i-1}(v))$.
+\end{proof}
+
+\begin{definition}[Line-point distributions]\label{def:line-point-dist}
+	\uses{def:ld-question-distribution, lem:alnf, lem:dlnf}
+	The \emph{axis line-point distribution} $D_{\mathsf{ALine}}$ is the distribution $\mu_{L_{\mathsf{ALine}}, L_{\mathsf{Point}}}$ over pairs $(\ell = (u_0,e_i),\, u)$, where we omit the $0$ components for simplicity. The \emph{diagonal line-point distribution} $D_{\mathsf{DLine}}$ is the distribution $\mu_{L_{\mathsf{DLine}}, L_{\mathsf{Point}}}$ over pairs $(\ell = (u_0,s,v),\, u)$. The \emph{line-point distribution} $D_{\mathsf{Line}}$ is the equal mixture of the two: with probability $\tfrac12$ output a sample from $D_{\mathsf{ALine}}$, and with probability $\tfrac12$ output a sample from $D_{\mathsf{DLine}}$.
+\end{definition}
+
+\begin{definition}[Win predicate of the classical low individual degree game]\label{def:ld-win-predicate}
+	\uses{def:ld-game, def:ld-question-distribution, def:line, def:polyfunc}
+	Fix $\mathsf{ldparams} = (q,m,d,k)$. Answers in the game $\mathfrak{G}^{\mathrm{ld}}_{\mathsf{ldparams}}$ take the following forms, depending on the question type; answers not of the prescribed form are rejected.
+	\begin{itemize}
+		\item Type $\mathsf{Point}$, question content $u \in \F_q^m$: the answer is an element of $\F_q^k$.
+		\item Type $\mathsf{ALine}$, question content $(u_0,s) \in \F_q^m \times \F_q$, specifying the axis-parallel line $\ell(u_0,e_i)$ with $i = \chi(s)$: the answer is a $k$-tuple $(f_1,\ldots,f_k)$ of univariate polynomials $f_j\colon \F_q \to \F_q$ of degree at most $d$, each given by its $d+1$ coefficients.
+		\item Type $\mathsf{DLine}$, question content $(u_0,s,v) \in \F_q^m \times \F_q \times \F_q^m$, specifying the diagonal line $\ell(u_0,v')$ with $v' = \pi_{i-1}(v)$ and $i = \chi(s)$: the answer is a $k$-tuple of univariate polynomials of degree at most $md$.
+	\end{itemize}
+	The win predicate $D^{\mathrm{ld}} = D^{\mathrm{ld}}_{\mathsf{ldparams}}$ is the function of the tuple $(t_{\mathrm A}, x_{\mathrm A}, t_{\mathrm B}, x_{\mathrm B}, a_{\mathrm A}, a_{\mathrm B})$ determined by the following clauses, evaluated for $w \in \{\mathrm A,\mathrm B\}$; in all cases where no action is indicated, the predicate accepts.
+	\begin{enumerate}
+		\item (\textbf{Consistency test}) If $t_{\mathrm A} = t_{\mathrm B}$, accept if and only if $a_{\mathrm A} = a_{\mathrm B}$.
+		% The source phrases both clauses with "the" t such that x = u_0 + tv; that phrase
+		% does not determine t on diagonal questions with direction v' = 0, which the
+		% question distribution samples with positive probability. The universal
+		% quantification over t used here is the local correction; see the remark below.
+		\item (\textbf{Axis-parallel line-versus-point test}) If $t_w = \mathsf{ALine}$ and $t_{\overline w} = \mathsf{Point}$, accept if and only if $f_j(t) = (a_{\overline w})_j$ for all $j \in \{1,2,\ldots,k\}$ and all $t \in \F_q$ such that $x_{\overline w} = u_0 + t e_i$, where $i = \chi(s)$.
+		\item (\textbf{Diagonal line-versus-point test}) If $t_w = \mathsf{DLine}$ and $t_{\overline w} = \mathsf{Point}$, accept if and only if $f_j(t) = (a_{\overline w})_j$ for all $j \in \{1,2,\ldots,k\}$ and all $t \in \F_q$ such that $x_{\overline w} = u_0 + t v'$, where $v' = \pi_{i-1}(v)$ and $i = \chi(s)$.
+	\end{enumerate}
+	The game $\mathfrak{G}^{\mathrm{ld}}_{\mathsf{ldparams}}$ is the typed game with type set $\mathcal T^{\mathrm{ld}}$, the question distribution of Definition~\ref{def:ld-question-distribution}, and win predicate $D^{\mathrm{ld}}_{\mathsf{ldparams}}$.
+\end{definition}
+
+\begin{remark}[Diagonal questions with zero direction]\label{rem:ld-win-zero-direction}
+	The source states the two line-versus-point clauses with ``the'' $t \in \F_q$ such that $x_{\overline w} = u_0 + t v$. When the direction is nonzero and $x_{\overline w}$ lies on the line, exactly one such $t$ exists and the formulation above agrees with the source. But zero directions occur: Definition~\ref{def:line} explicitly permits them, and the question distribution of Definition~\ref{def:ld-question-distribution} produces $\mathsf{DLine}$ questions with $v' = \pi_{i-1}(v) = 0$ with positive probability, namely whenever the last $m - i + 1$ coordinates of $v$ vanish. In that case $\ell(u_0, 0) = \{u_0\}$, every $t \in \F_q$ satisfies $x_{\overline w} = u_0 + t v'$ when $x_{\overline w} = u_0$, and the source clause does not determine acceptance for a nonconstant answer polynomial. The universal quantification over $t$ adopted in Definition~\ref{def:ld-win-predicate} makes the predicate a well-defined function of its arguments; it accepts vacuously when no such $t$ exists, a case the question distribution never produces. Completeness is unaffected: the restriction of a polynomial $g$ to the singleton line $\ell(u_0,0)$, expressed through the parameterization $t \mapsto u_0 + t \cdot 0$, is the constant polynomial with value $g(u_0)$, which passes the check for every $t$. Soundness is likewise unaffected: zero directions occur with probability at most $2/(mq)$, so any acceptance convention on this event changes success probabilities by at most that amount; the game-correspondence obligation enumerated in the proof of Theorem~\ref{lem:ld-soundness} accounts for this event explicitly, and an error of this shape is absorbed into the universal constants of $\delta_{\mathrm{ld}}$.
+\end{remark}
+
+The soundness properties of the low individual degree game are expressed in terms of the following class of measurements.
+
+\begin{definition}[Low-degree polynomial measurements]\label{def:ld-meas}
+	\uses{def:polyfunc, def:polymeasurements, def:polynomials-degree}
+	Let $\polymeas{m}{q}{d}$ denote the set of POVM measurements indexed by $\polyfunc{m}{q}{d}$, the polynomial representatives of individual degree at most $d$ in each variable; this is the notion of Definition~\ref{def:polymeasurements}, and the argument order $(m,q,d)$ follows that definition (the paper orders the arguments as $(m,d,q)$). By Definition~\ref{def:polynomials-degree}, evaluation identifies these representatives with the corresponding polynomial functions $g\colon \F_q^m \to \F_q$, bijectively whenever $d \le q-1$; at the canonical parameters (Definition~\ref{def:introparams}, where $d = 1 \le q-1$) the identification is bijective; the general statements of this chapter quantify over all admissible tuples and are read through the representative convention. More generally, for an integer $k$ and tuples $m = (m_1,\ldots,m_k)$, $q = (q_1,\ldots,q_k)$, $d = (d_1,\ldots,d_k)$, let $\mathrm{PolyMeas}(m,q,d,k)$ denote the set of measurements $G = \{G_{g_1,\ldots,g_k}\}$ such that for each $i \in \{1,\ldots,k\}$, the outcome index $g_i$ is a polynomial $g_i\colon \F_{q_i}^{m_i} \to \F_{q_i}$ of individual degree at most $d_i$.
+\end{definition}
+
+Quantum soundness of a version of the classical low-degree test for polynomials of low \emph{total} degree was claimed by Natarajan and Vidick, building on an analysis of a three-prover version of the test by Vidick; there is a known gap in the soundness analysis of that test, and it is not used here. Instead, the construction relies on the low \emph{individual} degree test, whose quantum soundness is proved in~\cite{Ji2020LowIndividualDegree} and generalized in~\cite{Ji2021Quantum}. The statement below is the form most directly useful in what follows.
+
+% The paper states this result in a theorem environment with the label lem:ld-soundness.
+% We keep both the environment and the label verbatim for cross-reference fidelity.
+\begin{theorem}[Quantum soundness of the simultaneous classical low individual degree test]\label{lem:ld-soundness}
+	\uses{def:ld-game, def:ld-question-distribution, def:ld-win-predicate, def:ld-meas, def:projective-strategy-general, def:tensor-product-value, def:consistency, def:bracket}
+	There exists a function
+	\[
+		\delta_{\mathrm{ld}}(\eps, q, m, d, k) = a\,(dmk)^a \bigl(\eps^b + q^{-b} + 2^{-bmd}\bigr)
+	\]
+	for universal constants $a \ge 1$ and $0 < b \le 1$ such that the following holds. For all $\eps > 0$ and every parameter tuple $\mathsf{ldparams} = (q,m,d,k)$ as in Definition~\ref{def:ld-game} (so $m, d, k \ge 1$, $q$ is an admissible field size, and $m$ divides $q$), and for all projective strategies $(\psi, A, B)$ that succeed with probability at least $1-\eps$ in the game $\mathfrak{G}^{\mathrm{ld}}_{\mathsf{ldparams}}$, there exist measurements
+	\[
+		G^w \in \mathrm{PolyMeas}(m,q,d,k)
+	\]
+	on $\hilb_w$ for $w \in \{\mathrm A,\mathrm B\}$, where by slight abuse of notation $m$, $q$, $d$ denote the constant tuples $(m,\ldots,m)$, $(q,\ldots,q)$, $(d,\ldots,d)$ of length $k$, such that
+	\begin{align*}
+		A^{\mathsf{Point},\, u}_{a_1,\ldots,a_k} \ot I_{\mathrm B}
+		&\simeq_{\delta_{\mathrm{ld}}}
+		I_{\mathrm A} \ot G^{\mathrm B}_{[(g_1(u),\ldots,g_k(u)) = (a_1,\ldots,a_k)]}\;,\\
+		G^{\mathrm A}_{[(g_1(u),\ldots,g_k(u)) = (a_1,\ldots,a_k)]} \ot I_{\mathrm B}
+		&\simeq_{\delta_{\mathrm{ld}}}
+		I_{\mathrm A} \ot B^{\mathsf{Point},\, u}_{a_1,\ldots,a_k}\;,\\
+		G^{\mathrm A}_{g_1,\ldots,g_k} \ot I_{\mathrm B}
+		&\simeq_{\delta_{\mathrm{ld}}}
+		I_{\mathrm A} \ot G^{\mathrm B}_{g_1,\ldots,g_k}\;,
+	\end{align*}
+	where $\delta_{\mathrm{ld}} = \delta_{\mathrm{ld}}(\eps,q,m,d,k)$, all three relations are the state-dependent consistency $\simeq$ of Definition~\ref{def:consistency} with respect to the state $\ket{\psi}$, and the bracket notation for post-processed outcomes is that of Definition~\ref{def:bracket}. The first two relations hold on average over the uniform distribution on $u \in \F_q^m$; no question distribution is associated with the third.
+\end{theorem}
+\begin{proof}
+	\uses{def:ld-question-distribution, def:ld-win-predicate, def:ld-meas, def:povm-distance}
+	Let $\Sigma = \F_q$ and let $\code \subseteq \Sigma^q$ be the Reed--Solomon code of degree $d$: the set of all $(p(x_1),\ldots,p(x_q))$ where $p\colon \F_q \to \F_q$ is a univariate polynomial of degree at most $d$ and $x_1,\ldots,x_q$ enumerate $\F_q$. We may assume $d < q$. In the opposite regime the statement is immediate: for $d \ge q$ the prefactor gives $\delta_{\mathrm{ld}} \ge a\,(dmk)^a\, q^{-b} \ge q^{a-b} \ge 1$, using $m, k \ge 1$, while the quantity bounded in Definition~\ref{def:consistency} never exceeds $4$ for families of POVM elements: $\sum_a \lVert (A_a \ot I - I \ot B_a)\ket{\psi}\rVert^2 \le 2\sum_a \bigl(\bra{\psi} A_a^2 \ot I \ket{\psi} + \bra{\psi} I \ot B_a^2 \ket{\psi}\bigr) \le 4$, using $0 \le M_a^2 \le M_a$ and $\sum_a M_a = \Id$ for POVM elements, so the three relations hold for an arbitrary choice of $G^w \in \mathrm{PolyMeas}(m,q,d,k)$. For $d < q$, evaluation is injective on polynomials of degree at most $d$ and a nonzero polynomial of degree at most $d$ vanishes at no more than $d$ of the $q$ points, so $\code$ is a linear $[q,\, d+1,\, q-d]_\Sigma$ code.
+	% The paper prints the parameters as [q, d+1, n-d+1] with an undefined n. With the
+	% intended value n = q the printed distance q-d+1 exceeds the true minimum distance
+	% q-d of the degree-d evaluation code, and the dimension claim d+1 requires d < q.
+	% Both points are corrected above; the regime d >= q, which the parameter tuple of
+	% Definition def:ld-game permits, is handled by the triviality argument. The
+	% boundary values d = 0 and k = 0 are excluded by the parameter domain of
+	% Definition def:ld-game, following the source's convention that \N denotes
+	% the positive integers.
+	% The source asserts a flat identity between its game and the two-prover
+	% tensor-code test and applies Theorem 4.7 of ji2021quantum with the
+	% parameter choice m^3 d
+	% (references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:446-454),
+	% without checking that theorem's hypothesis k >= 12mt on the parameter.
+	% Inspection of the cited test (arXiv:2111.08131, Figures 1 and 2,
+	% Definitions 4.5-4.6, Theorem 4.7) shows the asserted identity is not one:
+	% the question formats, the branch weights, and the zero-direction
+	% convention all differ, and the parameter bound fails at small m. Per the
+	% import policy, this proof states the source's route and enumerates
+	% the facts required by the identification, which remain to be proved, as open obligations; the
+	% detailed comparison and the case arithmetic are in the import-obligations
+	% section of docs/paper-gaps/qpbt_ld-dimension-divisibility.tex.
+	In this regime the statement is imported, and the source's route is as follows: identify the game $\mathfrak{G}^{\mathrm{ld}}_{\mathsf{ldparams}}$ with $k = 1$ with the two-prover tensor-code test for the code $\code^{\ot m}$ of~\cite{Ji2021Quantum} (Figures~1 and~2 there, the roles of the two players being assigned uniformly at random); apply Theorem~4.7 of~\cite{Ji2021Quantum}, instantiated with its auxiliary integer parameter --- denoted $k$ there and unrelated to the simultaneity parameter $k$ of $\mathsf{ldparams}$ --- chosen as $m^3 d$, so that its error function $\mathrm{poly}(m, d+1, m^3d) \cdot \mathrm{poly}(\eps, q^{-1}, e^{-md})$ takes the displayed form of $\delta_{\mathrm{ld}}$; and extend from $k = 1$ to general $k$ by a standard reduction, following exactly the derivation of Theorem~4.43 from Theorem~4.40 in~\cite{Natarajan2018NEEXP}. The import carries two verification obligations, which remain open; they are enumerated here as obligations and detailed, together with candidate repairs, in the import-obligations section of~\cite{gap:qpbt_ld-dimension-divisibility}.
+	\begin{enumerate}
+		\item (\emph{Game correspondence.}) The source asserts that the two games are identical; they are not. In the cited test, the subcube commutation and pair-synchronicity branches send an ordered pair of points of a \emph{hidden} subcube and receive a pair of field values --- a question type that $\mathfrak{G}^{\mathrm{ld}}$ does not have --- its line questions carry no analogue of the seed $s$, its nontrivial cross-tests have mass $1/3$ where the present ones have $2/9$, and it fixes no acceptance convention on the zero-direction event of Remark~\ref{rem:ld-win-zero-direction}, whose probability is at most $\frac1m \sum_{j=1}^m q^{-j} \le \frac{1}{m(q-1)} \le \frac{2}{mq}$ over uniform $(s,v)$. What must be proved is a reduction converting any projective strategy for $\mathfrak{G}^{\mathrm{ld}}$ with success probability $1-\eps$ into a two-prover strategy for the tensor-code test with rejection probability at most $\tfrac32\,\eps + O(1/(mq))$ --- the factor $\tfrac32$ being the target bookkeeping constant from the branch weights, and the $O(1/(mq))$ the zero-direction term. A deficit of this shape is then absorbed into $\delta_{\mathrm{ld}}$ by enlarging the universal constant $a$, since $(x+y)^b \le x^b + y^b$ for $0 < b \le 1$ and $(2/(mq))^b \le 2\,q^{-b}$ for $m \ge 1$, using $dmk \ge 1$.
+		\item (\emph{Parameter bound.}) Theorem~4.7 requires its auxiliary parameter to be at least $12mt$, where $t$ is the interpolation parameter of the base code, equal to $d+1$ for the degree-$d$ Reed--Solomon code $\code$ (blocklength $q$, distance $q-d$). The choice $m^3 d$ satisfies $m^3 d \ge 12m(d+1)$ if and only if $m^2 d \ge 12(d+1)$, which holds for all $d \ge 1$ when $m \ge 5$ and, at $m = 4$, exactly when $d \ge 3$, but fails for every $d$ when $m \le 3$. Over the parameter domain of Definition~\ref{def:ld-game}, where $m$ divides the admissible field size $q$ and is therefore a power of $2$, the bound thus fails exactly at $m \in \{1,2\}$ for every $d$ and at $m = 4$ for $d \in \{1,2\}$; the case check and the candidate repair --- instantiating the parameter as $\max(m^3 d,\, 12m(d+1))$ and re-absorbing the error terms --- are in the note.
+	\end{enumerate}
+	Quantum soundness of the low individual degree test itself is the result of~\cite{Ji2020LowIndividualDegree}; Remark~\ref{rem:ld-soundness-provider} relates the present statement to Theorem~\ref{thm:main-formal}, which proves that result.
+\end{proof}
+
+\begin{remark}[Relation to the low individual degree test of Chapter~\ref{chap:test}]\label{rem:ld-soundness-provider}
+	Theorem~\ref{lem:ld-soundness} is imported: the proof above records the source's reduction to Theorem~4.7 of~\cite{Ji2021Quantum}, instantiated with that theorem's auxiliary parameter chosen as $m^3 d$ and followed by the extension to simultaneous $k$-tuples of~\cite{Natarajan2018NEEXP}, together with the two open facts required by the identification, which remain to be proved, --- the game correspondence and the parameter bound, detailed in~\cite{gap:qpbt_ld-dimension-divisibility}. The result of~\cite{Ji2020LowIndividualDegree} that underlies it is proved here as Theorem~\ref{thm:main-formal}: for every projective strategy passing the $(m,q,d)$ low individual degree test of Definition~\ref{def:low-individual-degree-test} with probability at least $1-\eps$, that theorem produces measurements in $\polymeas{m}{q}{d}$ satisfying consistency relations of the same shape as the three approximations of Theorem~\ref{lem:ld-soundness}. Theorem~\ref{lem:ld-soundness} is not a consequence of Theorem~\ref{thm:main-formal} alone: a derivation from it would require, in addition, an equivalence between the typed game $\mathfrak{G}^{\mathrm{ld}}_{(q,m,d,1)}$ and the $(m,q,d)$ test of Chapter~\ref{chap:test} --- matching the two question distributions, the two win conditions, and the two error functions --- together with the extension from $k = 1$ to general $k$ by the reduction of~\cite{Natarajan2018NEEXP} cited above. Neither implication is proved in this chapter, and the proof of Theorem~\ref{lem:ld-soundness} given above does not invoke Theorem~\ref{thm:main-formal}.
+\end{remark}
+
+\section{The Magic Square game}
+% Paper label sec:ms kept for cross-reference fidelity.
+\label{sec:ms}
+
+We recall the Magic Square game of Mermin and Peres. It is a simple self-test for two EPR pairs, and it allows one to test that a pair of binary observables \emph{anticommutes}; both properties are used in the Pauli basis test. Here it is presented as a binary constraint satisfaction game. Throughout this section and the next, $\sigma^X$ and $\sigma^Z$ denote the single-qubit Pauli observables, with associated two-outcome projective measurements $\{\sigma^W_b\}_{b \in \F_2}$ for $W \in \{X,Z\}$.
+
+\begin{definition}[The Magic Square game]\label{def:ms-game}
+	\uses{def:game, def:graph-distribution}
+	The Magic Square game $\mathfrak{G}^{\mathrm{MS}}$ is the following two-player game. There are $9$ variables $x_1,\ldots,x_9$ taking values in $\F_2$, arranged in a $3 \times 3$ grid: the cell in row $r$ and column $c$ contains the variable $x_{3(r-1)+c}$. There are $6$ linear equations over these variables: for each of the three rows and each of the first two columns, the sum of the three variables in it equals $0$; for the third column, the sum of the three variables in it equals $1$.
+
+	The question types are
+	\begin{align*}
+		\mathcal T^{\mathrm{mc}} &= \{\mathsf{Constraint}_i : i = 1,2,\ldots,6\}\;,\\
+		\mathcal T^{\mathrm{mv}} &= \{\mathsf{Variable}_j : j = 1,2,\ldots,9\}\;,\\
+		\mathcal T^{\mathrm{ms}} &= \mathcal T^{\mathrm{mc}} \cup \mathcal T^{\mathrm{mv}}\;,
+	\end{align*}
+	where $\mathsf{Constraint}_i$ for $i \in \{1,2,3\}$ denotes the constraint of row $i$ (with variables $x_{3(i-1)+1}, x_{3(i-1)+2}, x_{3(i-1)+3}$), $\mathsf{Constraint}_4$ and $\mathsf{Constraint}_5$ denote the constraints of the first two columns, and $\mathsf{Constraint}_6$ denotes the constraint of the third column (with variables $x_{i-3}, x_{i}, x_{i+3}$ for $\mathsf{Constraint}_i$, $i \in \{4,5,6\}$).
+
+	The question distribution is as follows: the verifier samples $\mathsf{Constraint}_i$ uniformly from $\mathcal T^{\mathrm{mc}}$, then samples $\mathsf{Variable}_j$ uniformly among the three variables appearing in the row or column of $\mathsf{Constraint}_i$; one player, chosen uniformly at random, receives $\mathsf{Constraint}_i$ and the other receives $\mathsf{Variable}_j$. Equivalently, the verifier samples a uniformly random edge of the bipartite \emph{type graph} $G^{\mathrm{ms}}$ on vertex sets $\mathcal T^{\mathrm{mc}}$ and $\mathcal T^{\mathrm{mv}}$, whose edges are $\mathsf{Constraint}_i \,\text{---}\, \mathsf{Variable}_{3(i-1)+j}$ for $i,j \in \{1,2,3\}$ and $\mathsf{Constraint}_i \,\text{---}\, \mathsf{Variable}_{(i-3)+3(j-1)}$ for $i \in \{4,5,6\}$, $j \in \{1,2,3\}$ ($18$ edges in total, and no self-loops), and sends one endpoint to a uniformly random player and the other endpoint to the other player.
+
+	The $\mathsf{Constraint}$ player answers with three bits $(\beta_{v_1}, \beta_{v_2}, \beta_{v_3}) \in \F_2^3$, where $(v_1,v_2,v_3)$ are the indices of the three variables of $\mathsf{Constraint}_i$; the $\mathsf{Variable}$ player answers with a single bit $\gamma \in \F_2$. The players win if and only if the $\mathsf{Constraint}$ player's answer satisfies the equation associated with $\mathsf{Constraint}_i$ and $\gamma = \beta_j$.
+\end{definition}
+
+The following theorem records the self-testing (rigidity) properties of the Magic Square game. It is used in the soundness analysis of the Pauli basis test to enforce anticommutation relations between certain pairs of observables.
+
+\begin{theorem}[Rigidity of the Magic Square game]\label{thm:ms-rigidity}
+	\uses{def:ms-game, def:tensor-product-value, def:EPR, def:povm-distance}
+	Let $\mathcal S = (\ket{\psi}, A, B)$ be a strategy that succeeds in the Magic Square game $\mathfrak{G}^{\mathrm{MS}}$ with probability $1-\eps$, where $\ket{\psi} \in \hilb_{\mathrm A} \ot \hilb_{\mathrm B}$. Then there exist local isometries $\phi_{\mathrm A}\colon \hilb_{\mathrm A} \to \hilb_{\mathrm A'} \ot \hilb_{\mathrm A''}$ and $\phi_{\mathrm B}\colon \hilb_{\mathrm B} \to \hilb_{\mathrm B'} \ot \hilb_{\mathrm B''}$, where $\hilb_{\mathrm A'}, \hilb_{\mathrm B'} \cong (\C^2)^{\ot 2}$ and $\hilb_{\mathrm A''}, \hilb_{\mathrm B''}$ are finite dimensional, and a state $\ket{\mathrm{aux}} \in \hilb_{\mathrm A''} \ot \hilb_{\mathrm B''}$, such that:
+	\begin{enumerate}
+		\item $\bigl\| \phi_{\mathrm A} \ot \phi_{\mathrm B} \ket{\psi} - \ket{\mathrm{EPR}_2}^{\ot 2} \ot \ket{\mathrm{aux}} \bigr\| \le O(\sqrt\eps)$;
+		\item letting $\tilde A^x_a = \phi_{\mathrm A} A^x_a \phi_{\mathrm A}^\dagger$ and $\tilde B^y_b = \phi_{\mathrm B} B^y_b \phi_{\mathrm B}^\dagger$,
+		\begin{align*}
+			\tilde A^{\mathsf{Variable}_1}_b \ot I_{\mathrm{B'B''}} &\approx_{\sqrt\eps} (\sigma^X_b)_{\mathrm A'} \ot I_{\mathrm{A''B'B''}}\;,\\
+			\tilde A^{\mathsf{Variable}_5}_b \ot I_{\mathrm{B'B''}} &\approx_{\sqrt\eps} (\sigma^Z_b)_{\mathrm A'} \ot I_{\mathrm{A''B'B''}}\;,\\
+			I_{\mathrm{A'A''}} \ot \tilde B^{\mathsf{Variable}_1}_b &\approx_{\sqrt\eps} I_{\mathrm{A'A''B''}} \ot (\sigma^X_b)_{\mathrm B'}\;,\\
+			I_{\mathrm{A'A''}} \ot \tilde B^{\mathsf{Variable}_5}_b &\approx_{\sqrt\eps} I_{\mathrm{A'A''B''}} \ot (\sigma^Z_b)_{\mathrm B'}\;,
+		\end{align*}
+		where each $\approx_{\sqrt\eps}$ holds with respect to the state $\ket{\mathrm{EPR}_2}^{\ot 2}_{\mathrm{A'B'}} \ot \ket{\mathrm{aux}}_{\mathrm{A''B''}}$ and the answer summation is over $b \in \{0,1\}$, and the approximation bounds carry implicit universal constants.
+	\end{enumerate}
+	As a consequence, letting $\tilde A^{\mathsf{Variable}_1} = \tilde A^{\mathsf{Variable}_1}_0 - \tilde A^{\mathsf{Variable}_1}_1$ and $\tilde A^{\mathsf{Variable}_5} = \tilde A^{\mathsf{Variable}_5}_0 - \tilde A^{\mathsf{Variable}_5}_1$ denote the associated observables, it holds that
+	\begin{align*}
+		\tilde A^{\mathsf{Variable}_1} \tilde A^{\mathsf{Variable}_5} \ot I_{\mathrm{B'B''}} &\approx_{\sqrt\eps} -\, \tilde A^{\mathsf{Variable}_5} \tilde A^{\mathsf{Variable}_1} \ot I_{\mathrm{B'B''}}\;,\\
+		I_{\mathrm{A'A''}} \ot \tilde B^{\mathsf{Variable}_1} \tilde B^{\mathsf{Variable}_5} &\approx_{\sqrt\eps} -\, I_{\mathrm{A'A''}} \ot \tilde B^{\mathsf{Variable}_5} \tilde B^{\mathsf{Variable}_1}\;,
+	\end{align*}
+	where, for operators $M$, $N$ that are not POVM elements, the notation $M \approx_\delta N$ means $\bra{\psi} (M-N)^\dagger (M-N) \ket{\psi} \le O(\delta)$ with respect to the same state.
+\end{theorem}
+\begin{proof}
+	This result is imported from Theorem~6.9 of~\cite{Coladangelo2017Robust}. There are two minor differences between their statement and the one given here. First, they state a robustness of $O(\eps)$, but measure the closeness of the actual and ideal states in trace norm; expressed as the Euclidean distance between $\phi_{\mathrm A} \ot \phi_{\mathrm B}\ket{\psi}$ and $\ket{\mathrm{EPR}_2}^{\ot 2} \ot \ket{\mathrm{aux}}$, this becomes $O(\sqrt\eps)$. Second, their ideal observables for the $\mathsf{Variable}_1$ and $\mathsf{Variable}_5$ questions are $I \ot \sigma^Z$ and $\sigma^Z\sigma^X \ot \sigma^Z\sigma^X$; under a local change of basis these are equivalent to $\sigma^X \ot I$ and $\sigma^Z \ot I$, respectively.
+\end{proof}
+
+The converse construction shows that any pair of anticommuting binary observables yields a perfect strategy for the Magic Square game.
+
+\begin{theorem}\label{thm:ms-from-ac}
+	\uses{def:ms-game, def:consistent-measurement, def:spcc, def:EPR, def:tensor-product-value}
+	Let $A = \{A_b\}_{b \in \F_2}$ and $B = \{B_b\}_{b \in \F_2}$ be two-outcome projective measurements acting on $(\C^q)^{\ot n}$ that are consistent on $\ket{\mathrm{EPR}_q}^{\ot n}$ (Definition~\ref{def:consistent-measurement}), and let $\mathcal O_A = A_0 - A_1$ and $\mathcal O_B = B_0 - B_1$ be the corresponding $\pm 1$-valued observables. Suppose that $\mathcal O_A \mathcal O_B = - \mathcal O_B \mathcal O_A$. Then there exists a symmetric strategy $\mathcal S = (\psi, M)$ for the Magic Square game with the following properties:
+	\begin{enumerate}
+		\item $\mathcal S$ is an SPCC (symmetric, projective, consistent, commuting) strategy of value $1$;
+		\item the state is $\ket{\psi} = \ket{\mathrm{EPR}_q}^{\ot n} \ot \ket{\mathrm{EPR}_2}$;
+		\item for $b \in \{0,1\}$, $M^{\mathsf{Variable}_1}_b = A_b \ot I$ and $M^{\mathsf{Variable}_5}_b = B_b \ot I$.
+	\end{enumerate}
+\end{theorem}
+\begin{proof}
+	\uses{def:consistent-measurement}
+	The strategy is based on the canonical two-qubit operator solution of the Magic Square, with the state $\ket{\psi} = \ket{\mathrm{EPR}_q}^{\ot n} \ot \ket{\mathrm{EPR}_2}$ and the cells of the grid assigned the $\pm 1$-valued observables
+	\[
+		\begin{array}{ccc}
+			\mathcal O_A \ot I & I \ot \sigma^X & \mathcal O_A \ot \sigma^X \\[2pt]
+			I \ot \sigma^Z & \mathcal O_B \ot I & \mathcal O_B \ot \sigma^Z \\[2pt]
+			\mathcal O_A \ot \sigma^Z & \mathcal O_B \ot \sigma^X & \mathcal O_A \mathcal O_B \ot \sigma^Z \sigma^X
+		\end{array}
+	\]
+	on $(\C^q)^{\ot n} \ot \C^2$: on question $\mathsf{Variable}_j$ a player measures the two-outcome projective measurement of the observable in cell $j$, and on question $\mathsf{Constraint}_i$ a player simultaneously performs the three measurements of the corresponding row or column; item~3 holds by construction. Anticommutation of $\mathcal O_A$ and $\mathcal O_B$ gives
+	\begin{equation}\label{eq:am-i-hermitian}
+		\mathcal O_A \mathcal O_B \ot \sigma^Z \sigma^X
+		= - \mathcal O_A \mathcal O_B \ot \sigma^X \sigma^Z
+		= \mathcal O_B \mathcal O_A \ot \sigma^X \sigma^Z
+		= (\mathcal O_A \mathcal O_B \ot \sigma^Z \sigma^X)^\dagger\;,
+	\end{equation}
+	so the bottom-right cell is Hermitian, and it squares to the identity; hence every cell is a genuine $\pm 1$-valued observable. The three observables in each row and each column commute pairwise --- for the third row and third column this again uses Equation~\eqref{eq:am-i-hermitian} --- so the $\mathsf{Constraint}$ measurements are well defined, and the strategy is symmetric, projective, and commuting. A two-outcome projective measurement is consistent on a state if and only if its observable $\mathcal O$ satisfies $\mathcal O \ot I \ket{\psi} = I \ot \mathcal O \ket{\psi}$; since $A$ and $B$ are consistent on $\ket{\mathrm{EPR}_q}^{\ot n}$ by hypothesis and $\sigma^X$, $\sigma^Z$ are consistent on $\ket{\mathrm{EPR}_2}$, each cell observable is a product of consistent, commuting factors and is therefore consistent on $\ket{\psi}$, and consistency of the $\mathsf{Constraint}$ measurements follows from the cellwise consistencies together with commutativity. Finally, the observables in each row and each of the first two columns multiply to $I$, while those of the third column multiply to $-I$; for the measurement $\{S_0, S_1\}$ obtained by measuring a $\mathsf{Constraint}_i$ triple and outputting the sum of the three bits, the observable $S_0 - S_1$ equals the product of the three cell observables, hence $\pm I$, which forces the three answer bits to sum to $0$ (respectively, $1$ for $\mathsf{Constraint}_6$) with certainty. Together with consistency this shows that every check of the Magic Square game is passed with probability $1$, so the strategy has value $1$.
+\end{proof}
+
+\section{The Pauli basis test}
+% Paper label sec:qld-game kept for cross-reference fidelity.
+\label{sec:qld-game}
+
+The Pauli basis test is the quantum low individual degree test of Natarajan and Vidick, in the slightly modified form introduced by Natarajan and Wright~\cite{Natarajan2018NEEXP}. Informally, the test certifies that the players share the state $\ket{\mathrm{EPR}_q}^{\ot M}$, where $M = 2^m$. On a question of type $(\mathsf{Pauli}, W)$ with $W \in \{X,Z\}$, a player is expected to measure the generalized Pauli basis POVM $\{\tau^W_h\}_{h \in \F_q^M}$ of Chapter~\ref{chap:qpbt-algebra} and report the outcome $h$. Most subtests probe limited information about $h$: given a point $u_W \in \F_q^m$, a player is expected to report the evaluation $g_h(u_W)$ of the low-degree encoding $g_h$ of $h$, and for a fixed basis $W$ these probes are checked against each other by the classical low individual degree game of Section~\ref{sec:ld-verifier}. Consistency \emph{between} the two bases is checked through two-outcome probes: given additionally $r_W \in \F_q$, a player reports $\tr(g_h(u_W)\, r_W) \in \F_2$. The two binary measurements obtained in this way for $W = X$ and $W = Z$ either commute or anticommute, according to the value $\gamma \in \F_2$ of Equation~\eqref{eq:gamma-value} below. When $\gamma = 0$ the verifier checks commutation directly by asking for both bits simultaneously; when $\gamma = 1$ the verifier checks anticommutation by playing the Magic Square game, using Theorem~\ref{thm:ms-from-ac}.
+
+\begin{definition}[Admissible parameters]\label{def:admissible}
+	\uses{def:admissible-size}
+	% The source introduces q, m, d in \N with \N the positive integers
+	% (references/qpbt-paper/04_preliminaries.tex:6 and
+	% references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:903-905),
+	% so d >= 1 is implicit in its notion of admissibility (lines 958-961 there);
+	% we state it explicitly. It is load-bearing: at d = 0 the soundness function
+	% delta_qld of thm:pauli vanishes identically while every strategy satisfies
+	% the success hypothesis at eps = 1, and the low-degree check of
+	% def:pauli-win-predicate invokes the classical game at ldparams = (q,m,d,1),
+	% whose domain (Definition def:ld-game) requires d >= 1. The hypothesis
+	% propagates to lem:pauli-completeness, thm:pauli, and cor:pauli-binary
+	% through their quantification over admissible tuples.
+	The tuple $\mathsf{qldparams} = (q,m,d)$ is \emph{admissible} if $d \ge 1$, $q$ is an admissible field size (Definition~\ref{def:admissible-size}), and $m$ divides $q$. Since an admissible field size satisfies $q \ge 2$, the divisibility forces $m \ge 1$, so an admissible tuple has all entries positive.
+\end{definition}
+
+\begin{definition}[Question distribution of the Pauli basis test]\label{def:pauli-question-distribution}
+	\uses{def:admissible, def:ld-question-distribution, def:ms-game, def:cl-func, def:cl-dist, def:graph-distribution}
+	% Admissibility of the full tuple is required here, not only the divisibility m | q:
+	% the source parametrizes the Pauli basis test by the tuple qldparams introduced
+	% together with Definition def:admissible (references/qpbt-paper/
+	% 08_classical_and_quantum_low_degree_tests.tex:958-1075), and both the fixed binary
+	% identification of F_q used by the map chi and the trace tr in eq:gamma-value
+	% require q to be a power of 2.
+	The game $\mathfrak{G}^{\mathrm{Pauli}}$ (also $\mathfrak{G}^{\mathrm{Pauli}}_{\mathsf{qldparams}}$) is parametrized by an admissible tuple $\mathsf{qldparams} = (q,m,d)$ (Definition~\ref{def:admissible}): admissibility makes $q$ a power of $2$, so that the field $\F_q$, its fixed identification with binary strings (Chapter~\ref{chap:qpbt-algebra}), and the trace $\tr\colon \F_q \to \F_2$ used by the win predicate below are defined, and it provides the divisibility $m \mid q$ required by the index map $\chi$ of Definition~\ref{def:ld-question-distribution}. The question type set is
+	\begin{equation}
+		\label{eq:pauli-type}
+		\mathcal T^{\mathrm{pauli}} = \bigl( \{\mathsf{Point}, \mathsf{ALine}, \mathsf{DLine}, \mathsf{Pauli}, \mathsf{Pair}\} \times \{X,Z\} \bigr) \cup \mathcal T^{\mathrm{ms}} \cup \{\mathsf{Pair}\}\;,
+	\end{equation}
+	where $\mathcal T^{\mathrm{ms}}$ is the type set of the Magic Square game (Definition~\ref{def:ms-game}).
+
+	The ambient space is $V^{\mathrm{pauli}} = (\F_q^m)^2 \times \F_q \times \F_q^m \times (\F_q)^2$, decomposed into the register subspaces $V_X, V_Z$ (each $m$-dimensional over $\F_q$), $V_I$ ($1$-dimensional), $V_V$ ($m$-dimensional), and $V_{R_X}, V_{R_Z}$ ($1$-dimensional each); elements of $V^{\mathrm{pauli}}$ are written $(u_X, u_Z, s, v, r_X, r_Z)$. For each type $t \in \mathcal T^{\mathrm{pauli}}$ define a CL function $L_t\colon V^{\mathrm{pauli}} \to V^{\mathrm{pauli}}$ as follows, where $L_{\mathsf{Point}}, L_{\mathsf{ALine}}, L_{\mathsf{DLine}}$ are the CL functions of Definition~\ref{def:ld-question-distribution}:
+	\begin{enumerate}
+		\item for $W \in \{X,Z\}$, $L_{(\mathsf{Point},W)}(u_X,u_Z,s,v,r_X,r_Z) = L_{\mathsf{Point}}(u_W,s,v)$, a $1$-level CL function, where the range $V_W \oplus V_I \oplus V_V$ of $L_{\mathsf{Point}}$ is embedded in $V^{\mathrm{pauli}}$ in the natural way (the same convention applies in items~2 and~3);
+		\item for $W \in \{X,Z\}$, $L_{(\mathsf{ALine},W)}(u_X,u_Z,s,v,r_X,r_Z) = L_{\mathsf{ALine}}(u_W,s,v)$, a $2$-level CL function;
+		\item for $W \in \{X,Z\}$, $L_{(\mathsf{DLine},W)}(u_X,u_Z,s,v,r_X,r_Z) = L_{\mathsf{DLine}}(u_W,s,v)$, a $3$-level CL function;
+		\item for $t \in \mathcal T^{\mathrm{ms}} \cup \{\mathsf{Pair}, (\mathsf{Pair},X), (\mathsf{Pair},Z)\}$, $L_t(u_X,u_Z,s,v,r_X,r_Z) = (u_X,u_Z,0,0,r_X,r_Z)$, the $1$-level CL function projecting onto $V_X \oplus V_Z \oplus V_{R_X} \oplus V_{R_Z}$;
+		\item for $W \in \{X,Z\}$, $L_{(\mathsf{Pauli},W)} = 0$, the identically zero ($0$-level) CL function.
+	\end{enumerate}
+	The maps $L_{(\mathsf{Point},W)}$, $L_{(\mathsf{ALine},W)}$, $L_{(\mathsf{DLine},W)}$ act as the zero function on $V_{\overline W} \oplus V_{R_X} \oplus V_{R_Z}$, where $\overline W$ denotes the basis other than $W$.
+
+	The \emph{type graph} $G^{\mathrm{pauli}}$ has vertex set $\mathcal T^{\mathrm{pauli}}$ and the following edges: all $18$ edges of the Magic Square type graph $G^{\mathrm{ms}}$ (Definition~\ref{def:ms-game}); the edges
+	\begin{align*}
+		&(\mathsf{ALine},X) \,\text{---}\, (\mathsf{Point},X)\;, &&(\mathsf{DLine},X) \,\text{---}\, (\mathsf{Point},X)\;, &&(\mathsf{Point},X) \,\text{---}\, (\mathsf{Pauli},X)\;,\\
+		&(\mathsf{ALine},Z) \,\text{---}\, (\mathsf{Point},Z)\;, &&(\mathsf{DLine},Z) \,\text{---}\, (\mathsf{Point},Z)\;, &&(\mathsf{Point},Z) \,\text{---}\, (\mathsf{Pauli},Z)\;,\\
+		&(\mathsf{Point},X) \,\text{---}\, \mathsf{Variable}_1\;, &&(\mathsf{Point},Z) \,\text{---}\, \mathsf{Variable}_5\;, &&\\
+		&(\mathsf{Point},X) \,\text{---}\, (\mathsf{Pair},X)\;, &&(\mathsf{Pair},X) \,\text{---}\, \mathsf{Pair}\;, &&\\
+		&(\mathsf{Point},Z) \,\text{---}\, (\mathsf{Pair},Z)\;, &&(\mathsf{Pair},Z) \,\text{---}\, \mathsf{Pair}\;; &&
+	\end{align*}
+	and, in addition, a self-loop at every vertex.
+
+	% The type pair is drawn from the graph distribution of Definition
+	% def:graph-distribution, matching the source's formal definition
+	% (references/qpbt-paper/07_types.tex:84-93 together with
+	% references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1115-1120).
+	% Sampling an undirected edge uniformly and then ordering its
+	% endpoints uniformly would be a different distribution here: it gives each self-loop
+	% twice the relative mass of an oriented non-loop pair, and G^pauli has a self-loop
+	% at every vertex.
+	The question distribution of $\mathfrak{G}^{\mathrm{Pauli}}$ is the typed CL distribution on $\mathcal T^{\mathrm{pauli}} \times V^{\mathrm{pauli}} \times \mathcal T^{\mathrm{pauli}} \times V^{\mathrm{pauli}}$ obtained by sampling the type pair $(t_{\mathrm A}, t_{\mathrm B})$ from the graph distribution $\mu_{G^{\mathrm{pauli}}}$ of Definition~\ref{def:graph-distribution}, that is, uniformly at random among all ordered pairs of types whose underlying unordered pair $\{t_{\mathrm A}, t_{\mathrm B}\}$ is an edge of $G^{\mathrm{pauli}}$, self-loops included; sampling $z \in V^{\mathrm{pauli}}$ uniformly at random; and setting $x_w = L_{t_w}(z)$ for $w \in \{\mathrm A,\mathrm B\}$. Explicitly, if $z = (u_X,u_Z,s,v,r_X,r_Z)$, then a player whose type is $(\mathsf{Point},W)$ receives $u_W$; a player whose type is $(\mathsf{ALine},W)$ receives $(u_0, s)$ with $u_0 = L^{\mathrm{Ln}}_{e_i}(u_W)$ and $i = \chi(s)$; a player whose type is $(\mathsf{DLine},W)$ receives $(u_0, s, v')$ with $i = \chi(s)$, $v' = \pi_{i-1}(v)$, and $u_0 = L^{\mathrm{Ln}}_{v'}(u_W)$; a player whose type lies in $\mathcal T^{\mathrm{ms}} \cup \{\mathsf{Pair}, (\mathsf{Pair},X), (\mathsf{Pair},Z)\}$ receives $(u_X, u_Z, r_X, r_Z)$; and a player whose type is $(\mathsf{Pauli},W)$ receives $0$.
+\end{definition}
+
+\begin{definition}[Win predicate of the Pauli basis test]\label{def:pauli-win-predicate}
+	\uses{def:pauli-question-distribution, def:ld-win-predicate, def:ms-game, def:indicator-vector, def:admissible}
+	Fix an admissible tuple $\mathsf{qldparams} = (q,m,d)$ (Definition~\ref{def:admissible}) and let $M = 2^m$. Answers in the game $\mathfrak{G}^{\mathrm{Pauli}}_{\mathsf{qldparams}}$ take the following forms, depending on the question type; answers not of the prescribed form are rejected.
+	% The paper's format table writes the line contents loosely as (u_W, s) and (u_W, s, v);
+	% by the sampling procedure the actual contents are the canonical pairs (u_0, s) and
+	% triples (u_0, s, v') with v' = pi_{i-1}(v). We state the canonical form.
+	\begin{itemize}
+		\item $(\mathsf{Point},W)$: content $y \in \F_q^m$; answer an element of $\F_q$.
+		\item $(\mathsf{ALine},W)$: content $(u_0, s) \in \F_q^m \times \F_q$; answer a univariate polynomial $f\colon \F_q \to \F_q$ of degree at most $d$.
+		\item $(\mathsf{DLine},W)$: content $(u_0, s, v') \in \F_q^m \times \F_q \times \F_q^m$; answer a univariate polynomial $f\colon \F_q \to \F_q$ of degree at most $md$.
+		\item $\mathsf{Pair}$: content $\omega = (u_X, u_Z, r_X, r_Z) \in (\F_q^m)^2 \times \F_q^2$; answer $(\beta_X, \beta_Z) \in \F_2^2$.
+		\item $(\mathsf{Pair},W)$: content $\omega$ as above; answer an element of $\F_2$.
+		\item $\mathsf{Constraint}_i$: content $\omega$ as above; answer $(\alpha_{v_1}, \alpha_{v_2}, \alpha_{v_3}) \in \F_2^3$, indexed by the variable indices $(v_1,v_2,v_3)$ of $\mathsf{Constraint}_i$.
+		\item $\mathsf{Variable}_j$: content $\omega$ as above; answer an element of $\F_2$.
+		\item $(\mathsf{Pauli},W)$: content $0$; answer an element of $\F_q^M$.
+	\end{itemize}
+	The win predicate $D^{\mathrm{pauli}} = D^{\mathrm{pauli}}_{\mathsf{qldparams}}$ is the function of the tuple $(t_{\mathrm A}, x_{\mathrm A}, t_{\mathrm B}, x_{\mathrm B}, a_{\mathrm A}, a_{\mathrm B})$ determined by the following clauses, evaluated for $w \in \{\mathrm A, \mathrm B\}$ and $W \in \{X,Z\}$; in all cases where no action is indicated, the predicate accepts. In the last four clauses, the content of the player whose type lies in $\mathcal T^{\mathrm{ms}} \cup \{\mathsf{Pair}, (\mathsf{Pair},X), (\mathsf{Pair},Z)\}$ is a tuple $(u_X, u_Z, r_X, r_Z)$, from which the predicate first computes
+	\begin{equation}
+		\label{eq:gamma-value}
+		\gamma = \tr\bigl( (\mathrm{ind}_m(u_X) \cdot r_X) \cdot (\mathrm{ind}_m(u_Z) \cdot r_Z) \bigr) \in \F_2\;,
+	\end{equation}
+	where $\mathrm{ind}_m(\cdot) \in \F_q^M$ is the indicator vector of the low-degree encoding (Chapter~\ref{chap:qpbt-algebra}), the inner dot denotes the dot product on $\F_q^M$, and $\tr\colon \F_q \to \F_2$ is the finite-field trace.
+	\begin{enumerate}
+		\item (\textbf{Consistency check}) If $t_{\mathrm A} = t_{\mathrm B}$, accept if and only if $a_{\mathrm A} = a_{\mathrm B}$.
+		\item (\textbf{Low-degree check}) Let $\mathsf{ldparams} = (q,m,d,1)$; admissibility of $\mathsf{qldparams}$ gives $d \ge 1$ and $m \mid q$, so this is a parameter tuple as in Definition~\ref{def:ld-game}.
+		\begin{enumerate}
+			\item If $t_w = (\mathsf{Point},W)$ and $t_{\overline w} = (\mathsf{ALine},W)$, accept if $D^{\mathrm{ld}}_{\mathsf{ldparams}}$ accepts $(\mathsf{Point}, x_w, \mathsf{ALine}, x_{\overline w}, a_w, a_{\overline w})$.
+			\item If $t_w = (\mathsf{Point},W)$ and $t_{\overline w} = (\mathsf{DLine},W)$, accept if $D^{\mathrm{ld}}_{\mathsf{ldparams}}$ accepts $(\mathsf{Point}, x_w, \mathsf{DLine}, x_{\overline w}, a_w, a_{\overline w})$.
+		\end{enumerate}
+		\item (\textbf{Consistency check}) If $t_w = (\mathsf{Point},W)$ and $t_{\overline w} = (\mathsf{Pauli},W)$, accept if $g_{a_{\overline w}}(x_w) = a_w$, where $g_{a_{\overline w}}$ is the low-degree encoding of $a_{\overline w} \in \F_q^M$ (Chapter~\ref{chap:qpbt-algebra}).
+		\item (\textbf{Commutation check}) If $t_w = (\mathsf{Pair},W)$ and $t_{\overline w} = \mathsf{Pair}$, accept if $a_w = \beta_W$ or $\gamma \neq 0$.
+		\item (\textbf{Consistency check}) If $t_w = (\mathsf{Point},W)$ and $t_{\overline w} = (\mathsf{Pair},W)$, accept if $\tr(a_w r_W) = a_{\overline w}$ or $\gamma \neq 0$.
+		\item (\textbf{Magic Square check}) If $t_w = \mathsf{Constraint}_i$ and $t_{\overline w} = \mathsf{Variable}_j$, accept if $\gamma = 0$, or if $a_w$ satisfies the equation of $\mathsf{Constraint}_i$ and $\alpha_j = a_{\overline w}$.
+		\item (\textbf{Consistency check}) If $t_w = (\mathsf{Point},W)$ and $t_{\overline w} = \mathsf{Variable}_j$, accept if $\gamma = 0$, or if $j = 1$, $W = X$, and $\tr(a_w r_X) = a_{\overline w}$, or if $j = 5$, $W = Z$, and $\tr(a_w r_Z) = a_{\overline w}$.
+	\end{enumerate}
+	The game $\mathfrak{G}^{\mathrm{Pauli}}_{\mathsf{qldparams}}$ is the typed game with type set $\mathcal T^{\mathrm{pauli}}$, the question distribution of Definition~\ref{def:pauli-question-distribution}, and win predicate $D^{\mathrm{pauli}}_{\mathsf{qldparams}}$.
+\end{definition}
+
+Note the one-sided gating on $\gamma$: the commutation check and the $\mathsf{Pair}$ consistency check accept automatically when $\gamma \neq 0$, while the Magic Square check and the $\mathsf{Variable}$ consistency check accept automatically when $\gamma = 0$.
+
+\begin{lemma}[Completeness of the Pauli basis test]\label{lem:pauli-completeness}
+	\uses{def:pauli-question-distribution, def:pauli-win-predicate, def:admissible, def:spcc, def:tensor-product-value}
+	For every admissible tuple $\mathsf{qldparams} = (q,m,d)$ (Definition~\ref{def:admissible}), the Pauli basis test $\mathfrak{G}^{\mathrm{Pauli}}_{\mathsf{qldparams}}$ has a value-$1$ SPCC strategy.
+\end{lemma}
+\begin{proof}
+	\uses{thm:ms-from-ac, def:pauli-win-predicate, def:bracket, def:consistent-measurement, def:EPR, def:indicator-vector, lem:pauli-observable-expansion, lem:twisted-commutation}
+	The strategy uses the state $\ket{\psi} = \ket{\mathrm{EPR}_q}^{\ot M} \ot \ket{\mathrm{EPR}_2}$ with $M = 2^m$. On a question $((\mathsf{Point},W), y)$ a player measures the generalized Pauli basis POVM $\{\tau^W_h\}_{h \in \F_q^M}$ and reports $g_h(y)$; on $((\mathsf{ALine},W), \ell)$ or $((\mathsf{DLine},W), \ell)$ they report the restriction of $g_h$ to the line $\ell$, expressed as a univariate polynomial through the canonical parameterization of $\ell$; and on $(\mathsf{Pauli},W)$ they report $h$ itself --- in the bracket notation of Definition~\ref{def:bracket}, these measurements are $\tau^W_{[g_\cdot(y) = a]} \ot I$, $\tau^W_{[(g_\cdot)|_\ell = f]} \ot I$, and $\tau^W_a \ot I$. For a content $\omega = (u_X, u_Z, r_X, r_Z)$, consider the two binary measurements $A_b = \tau^X_{[\tr(g_\cdot(u_X)\, r_X) = b]} \ot I$ and $B_b = \tau^Z_{[\tr(g_\cdot(u_Z)\, r_Z) = b]} \ot I$. Since $g_h(u) = h \cdot \mathrm{ind}_m(u)$ (Chapter~\ref{chap:qpbt-algebra}), the relation between the Pauli projections and observables gives $\mathcal O_A = A_0 - A_1 = \tau^X(\mathrm{ind}_m(u_X)\, r_X) \ot I$ and $\mathcal O_B = \tau^Z(\mathrm{ind}_m(u_Z)\, r_Z) \ot I$, and the twisted commutation relation yields
+	\[
+		\mathcal O_A \mathcal O_B = (-1)^\gamma\, \mathcal O_B \mathcal O_A
+	\]
+	with $\gamma$ as in Equation~\eqref{eq:gamma-value}: the two measurements commute when $\gamma = 0$ and anticommute when $\gamma = 1$. If $\gamma = 0$, define $E^{\mathsf{Pair},\omega}_{\beta_X,\beta_Z} = A_{\beta_X} B_{\beta_Z}$ and $E^{(\mathsf{Pair},X),\omega}_a = A_a$, $E^{(\mathsf{Pair},Z),\omega}_a = B_a$, and let the $\mathsf{Constraint}$ and $\mathsf{Variable}$ measurements be trivial (identity on the all-zeros outcome). If $\gamma = 1$, let the $\mathsf{Constraint}$ and $\mathsf{Variable}$ measurements be those produced by Theorem~\ref{thm:ms-from-ac} from the anticommuting consistent pair $(A, B)$, acting on the auxiliary $\ket{\mathrm{EPR}_2}$ factor, and let the $\mathsf{Pair}$ measurements be trivial. The strategy is symmetric and projective by construction; every measurement is either a post-processed Pauli basis measurement, a measurement supplied by Theorem~\ref{thm:ms-from-ac}, or (in the $\gamma = 0$ case) a product of two commuting consistent measurements, so the strategy is consistent, and commutativity along every edge of $G^{\mathrm{pauli}}$ is checked case by case --- for instance, $(\mathsf{Point},X)$ and $\mathsf{Variable}_1$ commute because both are $X$-basis measurements. Consistency and projectivity give the consistency checks with certainty, and the low-degree checks pass because the answers agree with the strategy determined by the polynomial $g_h$ in the classical game. For the remaining checks: when $\gamma = 0$ the commutation check passes by construction, and when $\gamma = 1$ the Magic Square check passes by Theorem~\ref{thm:ms-from-ac}; the consistency checks 5 and 7 pass with certainty because $\tau^W_{[\tr(g_\cdot(y)\, r_W) = \cdot]} \ot I$ coincides with $E^{(\mathsf{Pair},W),\omega}$, respectively with the embedded $\mathsf{Variable}_1$ and $\mathsf{Variable}_5$ measurements of Theorem~\ref{thm:ms-from-ac} (item~3 there). Hence the strategy has value $1$.
+\end{proof}
+
+We now state the main soundness property of the Pauli basis test; the statement is an adaptation of the self-testing theorem of~\cite{Natarajan2018NEEXP} (Theorem~6.4 there). Unlike Theorem~\ref{lem:ld-soundness}, no projectivity assumption is made on the strategy.
+
+\begin{theorem}[Soundness of the Pauli basis test]\label{thm:pauli}
+	\uses{def:pauli-question-distribution, def:pauli-win-predicate, def:admissible, def:tensor-product-value, def:EPR, lem:pauli-observable-expansion, def:povm-distance}
+	There exists a function
+	\[
+		\delta_{\mathrm{qld}}(\eps, m, d, q) = a\,(md)^a \bigl( \eps^b + q^{-b} + 2^{-bmd} \bigr)
+	\]
+	for universal constants $a \ge 1$ and $0 < b < 1$ such that the following holds. For all admissible parameter tuples $\mathsf{qldparams} = (q,m,d)$ and for all strategies $\mathcal S = (\ket\psi, A, B)$ for the game $\mathfrak{G}^{\mathrm{Pauli}}_{\mathsf{qldparams}}$ that succeed with probability at least $1 - \eps$, there exist local isometries $\phi_{\mathrm A}\colon \hilb_{\mathrm A} \to \hilb_{\mathrm A'} \ot \hilb_{\mathrm A''}$ and $\phi_{\mathrm B}\colon \hilb_{\mathrm B} \to \hilb_{\mathrm B'} \ot \hilb_{\mathrm B''}$, where $\ket\psi \in \hilb_{\mathrm A} \ot \hilb_{\mathrm B}$ and $\hilb_{\mathrm A''}, \hilb_{\mathrm B''} \cong (\C^q)^{\ot M}$ with $M = 2^m$, and a state $\ket{\mathrm{aux}} \in \hilb_{\mathrm A'} \ot \hilb_{\mathrm B'}$, such that:
+	\begin{enumerate}
+		\item $\bigl\| \phi_{\mathrm A} \ot \phi_{\mathrm B} \ket\psi - \ket{\mathrm{aux}} \ot \ket{\mathrm{EPR}_q}^{\ot M} \bigr\| \le \delta_{\mathrm{qld}}(\eps, m, d, q)$;
+		% The paper here has the typo "phi_alice \ot phi_B"; both maps are the isometries above.
+		\item letting $\tilde A^x_a = \phi_{\mathrm A} A^x_a \phi_{\mathrm A}^\dagger$ and $\tilde B^y_b = \phi_{\mathrm B} B^y_b \phi_{\mathrm B}^\dagger$, for $W \in \{X, Z\}$,
+		\begin{align*}
+			\tilde A^{(\mathsf{Pauli},W)}_u \ot I_{\mathrm{B'B''}} &\approx_{\delta_{\mathrm{qld}}} (\tau^W_u)_{\mathrm A''} \ot I_{\mathrm{A'B'B''}}\;,\\
+			I_{\mathrm{A'A''}} \ot \tilde B^{(\mathsf{Pauli},W)}_u &\approx_{\delta_{\mathrm{qld}}} I_{\mathrm{A'A''B'}} \ot (\tau^W_u)_{\mathrm B''}\;,
+		\end{align*}
+		where the $\approx_{\delta_{\mathrm{qld}}}$ statements hold with respect to the state $\ket{\mathrm{aux}}_{\mathrm{A'B'}} \ot \ket{\mathrm{EPR}_q}^{\ot M}_{\mathrm{A''B''}}$ and the answer summation is over $u \in \F_q^M$.
+	\end{enumerate}
+\end{theorem}
+
+The proof of Theorem~\ref{thm:pauli} is the adaptation, to low individual degree, of the analysis of the quantum low-degree test of Natarajan and Vidick; it is developed in Chapters~\ref{chap:qpbt-observables} and~\ref{chap:qpbt-combining} and concluded in Chapter~\ref{chap:qpbt-extraction}, where the argument is complete only modulo the unresolved divisibility obligation documented in \cite{gap:qpbt_ld-dimension-divisibility}. It relies on the classical soundness theorem (Theorem~\ref{lem:ld-soundness}) and on the rigidity of the Magic Square game (Theorem~\ref{thm:ms-rigidity}).
+
+The strategies appearing in Lemma~\ref{lem:pauli-completeness} and in the conclusion of Theorem~\ref{thm:pauli} are phrased in terms of qudit Pauli measurements and maximally entangled states of $q$-dimensional qudits. For the intended application it is more convenient to work with qubits: since the field sizes $q$ used here are powers of $2$, the conclusions can be restated in terms of qubit EPR pairs and qubit Pauli measurements.
+
+\begin{corollary}[Qubit form of the soundness of the Pauli basis test]\label{cor:pauli-binary}
+	\uses{def:pauli-question-distribution, def:pauli-win-predicate, def:admissible, def:tensor-product-value, def:EPR, def:povm-distance}
+	There exists a function
+	\[
+		\delta_{\mathrm{qld}}(\eps, m, d, q) = a\,(md)^a \bigl( \eps^b + q^{-b} + 2^{-bmd} \bigr)
+	\]
+	% The paper's displayed function here writes the argument order (eps, q, m, d); the
+	% formula is the same, and its own item 1 reverts to (eps, m, d, q). See the remark below.
+	for universal constants $a \ge 1$ and $0 < b < 1$ such that the following holds. For all admissible parameter tuples $\mathsf{qldparams} = (q,m,d)$ and for all strategies $\mathcal S = (\ket\psi, A, B)$ for the game $\mathfrak{G}^{\mathrm{Pauli}}_{\mathsf{qldparams}}$ that succeed with probability at least $1 - \eps$, there exist local isometries $\phi_{\mathrm A}\colon \hilb_{\mathrm A} \to \hilb_{\mathrm A'} \ot \hilb_{\mathrm A''}$ and $\phi_{\mathrm B}\colon \hilb_{\mathrm B} \to \hilb_{\mathrm B'} \ot \hilb_{\mathrm B''}$, where $\ket\psi \in \hilb_{\mathrm A} \ot \hilb_{\mathrm B}$ and $\hilb_{\mathrm A''}, \hilb_{\mathrm B''} \cong (\C^2)^{\ot M \log q}$ with $M = 2^m$, and a state $\ket{\mathrm{aux}} \in \hilb_{\mathrm A'} \ot \hilb_{\mathrm B'}$, such that:
+	\begin{enumerate}
+		\item $\bigl\| \phi_{\mathrm A} \ot \phi_{\mathrm B} \ket\psi - \ket{\mathrm{aux}} \ot \ket{\mathrm{EPR}_2}^{\ot M \log q} \bigr\| \le \delta_{\mathrm{qld}}(\eps, m, d, q)$;
+		\item letting $\tilde A^x_a = \phi_{\mathrm A} A^x_a \phi_{\mathrm A}^\dagger$ and $\tilde B^y_b = \phi_{\mathrm B} B^y_b \phi_{\mathrm B}^\dagger$, for $W \in \{X, Z\}$,
+		\begin{align*}
+			\tilde A^{(\mathsf{Pauli},W)}_u \ot I_{\mathrm{B'B''}} &\approx_{\delta_{\mathrm{qld}}} (\sigma^W_u)_{\mathrm A''} \ot I_{\mathrm{A'B'B''}}\;,\\
+			I_{\mathrm{A'A''}} \ot \tilde B^{(\mathsf{Pauli},W)}_u &\approx_{\delta_{\mathrm{qld}}} I_{\mathrm{A'A''B'}} \ot (\sigma^W_u)_{\mathrm B''}\;,
+		\end{align*}
+		where the $\approx_{\delta_{\mathrm{qld}}}$ statements hold with respect to the state $\ket{\mathrm{aux}}_{\mathrm{A'B'}} \ot \ket{\mathrm{EPR}_2}^{\ot M \log q}_{\mathrm{A''B''}}$ and the answer summation is over $u \in \F_q^M$. Here $\sigma^W_u$ denotes the tensor product of single-qubit Pauli measurements
+		\[
+			\bigotimes_{i=1}^{M} \bigotimes_{j=1}^{\log q} \sigma^W_{u_{ij}}\;,
+		\]
+		where $\kappa(u_i) = (u_{ij})_{1 \le j \le \log q}$ under the bijection $\kappa\colon \F_q \to \F_2^{\log q}$ of Chapter~\ref{chap:qpbt-algebra}.
+	\end{enumerate}
+\end{corollary}
+\begin{proof}
+	\uses{thm:pauli, lem:pauli-binary}
+	By Lemma~\ref{lem:pauli-binary}, since $q$ is a power of $2$ there are local isometries that map $\ket{\mathrm{EPR}_q}^{\ot M}$ to $\ket{\mathrm{EPR}_2}^{\ot M \log q}$ and map the generalized Pauli measurements $\tau^W_u$ to the qubit tensor products $\bigotimes_{i=1}^M \bigotimes_{j=1}^{\log q} \sigma^W_{u_{ij}}$, where $\kappa(u_i) = (u_{i1},\ldots,u_{i \log q})$. Composing these isometries with those produced by Theorem~\ref{thm:pauli} gives the statement.
+\end{proof}
+
+\begin{remark}[Notational drift in the soundness functions]\label{rem:delta-qld-argument-order}
+	The paper writes the soundness function of the Pauli basis test with two different argument orders: $\delta_{\mathrm{qld}}(\eps, m, d, q)$ in Theorem~\ref{thm:pauli} and Lemma~\ref{lem:delta-bound}, and $\delta_{\mathrm{qld}}(\eps, q, m, d)$ in the displayed function of Corollary~\ref{cor:pauli-binary}, whose own item~1 reverts to $\delta_{\mathrm{qld}}(\eps, m, d, q)$; the formula is the same throughout, and here the order $(\eps, m, d, q)$ is used everywhere. Note also two deliberate asymmetries with the classical soundness function of Theorem~\ref{lem:ld-soundness}: there the polynomial prefactor is $a(dmk)^a$ and the exponent satisfies $0 < b \le 1$, while in Theorems~\ref{thm:pauli} and Corollary~\ref{cor:pauli-binary} the prefactor is $a(md)^a$ and the exponent satisfies the strict inequality $0 < b < 1$.
+\end{remark}
+
+\section{Canonical parameters of the Pauli basis test}
+% Paper label sec:qld-complexity kept for cross-reference fidelity (the complexity
+% statements of that subsection are outside the scope of this development).
+\label{sec:qld-complexity}
+
+We specify a canonical setting of the parameter tuple $\mathsf{qldparams}$ as a function of an integer $R$, and bound the resulting soundness function. All logarithms are base $2$.
+
+\begin{definition}[Canonical parameters of the Pauli basis test]\label{def:introparams}
+	\uses{thm:pauli}
+	Let $a, b$ be the universal constants of Theorem~\ref{thm:pauli}, and let $c$ be the smallest \emph{even} integer that is at least $(b+a)/b$. For every integer $R \ge 4$, define the tuple $\mathsf{introparams}(R) = (q, m, d)$ by
+	\begin{itemize}
+		\item $q = 2^k$ for $k = c \lceil \log \log R \rceil + 1$,
+		\item $m = 2^j$, where $j$ is the unique integer with $2^j \le c \lceil \log R \rceil + 1 < 2^{j+1}$,
+		\item $d = 1$.
+	\end{itemize}
+	The letter $k$ here denotes the exponent of the field size and is unrelated to the simultaneity parameter $k$ of the classical game. With this choice the Pauli basis test certifies the presence of an $M = 2^m$-qudit maximally entangled state of local dimension $q$, equivalently an $(M \log q)$-qubit EPR state, and the choice $d = 1$ runs the low individual degree test multilinearly.
+\end{definition}
+
+\begin{lemma}[Soundness bound for the canonical parameters]\label{lem:delta-bound}
+	\uses{def:introparams, def:admissible, thm:pauli}
+	For all integers $R \ge 4$, the parameter tuple $\mathsf{introparams}(R) = (q,m,d)$ is admissible (Definition~\ref{def:admissible}) and satisfies $2^m \ge R$. Furthermore, there exist universal constants $a' \ge 1$ and $0 < b' \le 1$ such that the function $\delta_{\mathrm{qld}}(\eps, m, d, q)$ of Theorem~\ref{thm:pauli} is at most
+	\[
+		a' \bigl( (\log R)^{a'} \cdot \eps^{b'} + (\log R)^{-b'} \bigr)\;.
+	\]
+\end{lemma}
+\begin{proof}
+	\uses{def:introparams, def:admissible, def:admissible-size, thm:pauli}
+	Since $c$ is even, the exponent $k = c \lceil \log\log R \rceil + 1$ is odd, so $q = 2^k$ is an admissible field size; $m$ divides $q$ because $2^j \le c \lceil \log R \rceil + 1 \le 2 \log^c R \le 2^k$, so $j \le k$ and both are powers of $2$; and $d = 1 \ge 1$. Hence the tuple is admissible. Since $m = 2^j \ge (c/2) \log R$, we get $2^m \ge R^{c/2} \ge R$, using $c \ge 2$.
+
+	For the soundness bound, write $\delta_{\mathrm{qld}}(\eps,m,d,q) = a(md)^a \eps^b + a(md)^a q^{-b} + a(md)^a 2^{-bmd}$ and use $d = 1$, $m \le 2c \log R$, and $q = 2^k \ge \log^c R$. The first term is at most $a(2c)^a (\log R)^a \eps^b$. The second term is at most $a(2c)^a (\log R)^{a - cb} \le a(2c)^a (\log R)^{-b}$, since $cb - a \ge b$ by the choice of $c$. For the third term, $m \ge (c/2) \log R \ge \log R$ gives $2^{-bm} \le R^{-b}$, so
+	\[
+		a(md)^a\, 2^{-bm}
+		\le a(2c)^a (\log R)^a R^{-b}
+		= a(2c)^a \bigl( (\log R)^{a+b} R^{-b} \bigr) (\log R)^{-b}
+		\le a(2c)^a\, C\, (\log R)^{-b}\;,
+	\]
+	where $C = \sup_{R' \ge 4} (\log R')^{a+b} (R')^{-b}$ is finite --- the function is continuous in $R'$ and tends to $0$ as $R' \to \infty$ --- and depends only on the universal constants $a$ and $b$. Summing the three bounds, the statement follows with $a' = a(2c)^a (1 + C)$ and $b' = b$.
+\end{proof}
+
+\begin{remark}[A comparison of exponents in the source proof of Lemma~\ref{lem:delta-bound}]\label{rem:delta-bound-exponent-comparison}
+	The source proof bounds the third term of $\delta_{\mathrm{qld}}$ by asserting $2^{-bmd} \le q^{-b}$ ``because $k \le m$'', comparing the field exponent $k = c \lceil \log\log R \rceil + 1$ with $m = 2^j$. The inequality $k \le m$ does not follow from Definition~\ref{def:introparams}: if the universal constants of Theorem~\ref{thm:pauli} were $a = 1$ and $b = 1/2$, then $c = 4$, and $R = 5$ gives $k = 9$ and $m = 8$. The proof above instead bounds $2^{-bm} \le R^{-b}$ directly from $m \ge (c/2) \log R \ge \log R$, which yields the same conclusion after enlarging the universal constant $a'$.
+\end{remark}

@@ -1,0 +1,571 @@
+\chapter{Games, strategies, and conditionally linear distributions}
+\label{chap:qpbt-games}
+% Paper label sec:games kept for cross-reference fidelity; resolves to the chapter number.
+\label{sec:games}
+
+This chapter records the vocabulary in which the quantum Pauli basis test and its analysis are phrased: two-player one-round games and tensor product strategies, the consistency and state-dependent distance calculus for families of measurements, and conditionally linear functions and distributions, the class of question distributions used by the tests of Chapter~\ref{chap:qpbt-test}. The presentation follows \cite{Ji2020MIPStar}; the distance calculus is imported there from \cite{Natarajan2018NEEXP} and \cite{Ji2020LowIndividualDegree}.
+
+\section{Measurements and observables}
+
+\begin{definition}[POVMs, sub-measurements, and observables]\label{def:povm-conventions}
+	\uses{def:submeasurement}
+	% Finiteness of the outcome set is stated explicitly here; the source leaves it implicit,
+	% and the measurement and submeasurement definitions referenced below assume finite
+	% outcome sets.
+	Quantum measurements are modeled as positive operator-valued measures (POVMs). A \emph{POVM} on a finite-dimensional Hilbert space $\mathcal H$ is a family of positive semidefinite operators $\{M_a\}_{a \in S}$ indexed by outcomes $a$ ranging over a finite set $S$ such that $\sum_a M_a = \Id$; if the latter condition is relaxed to $\sum_a M_a \le \Id$, then $\{M_a\}$ is a \emph{sub-measurement}. (POVMs and sub-measurements are thus exactly the measurements and submeasurements of Definition~\ref{def:submeasurement}.) The probability that the measurement returns outcome $a$ on a state $\ket{\psi}$ is
+	\[
+		\Prb(a) = \bra{\psi} M_a \ket{\psi}\,.
+	\]
+	A POVM $M = \{M_a\}$ is \emph{projective} if each operator $M_a$ is a projector ($M_a^2 = M_a$); this automatically implies that $M_a M_b = M_b M_a = 0$ for distinct outcomes $a \ne b$. An \emph{observable} is a unitary matrix. A \emph{binary observable} is an observable $O$ such that $O^2 = \Id$, i.e.\ $O$ has eigenvalues in $\{-1,1\}$.
+
+	Subscripts of a measurement index the outcome, and superscripts index different measurements. When the outcome of a measurement $\{M^x_{a,\,b}\}$ consists of two parts $a$ and $b$, we write $\{M^x_a\}$ and $\{M^x_b\}$ for its \emph{marginals}
+	\[
+		M^x_a = \sum_b M^x_{a,\,b}\,, \qquad M^x_b = \sum_a M^x_{a,\,b}\,;
+	\]
+	for every $x$ both marginals are again POVMs.
+\end{definition}
+
+\begin{definition}[Bracket notation for post-processed measurements]\label{def:bracket}
+	\lean{MIPStarRE.Quantum.Measurement.postprocess}
+	\leanok
+	\uses{def:povm-conventions, def:post-processing}
+	Let $\mathcal A$ and $\mathcal B$ be finite sets, let $\{M^x_a\}_{a \in \mathcal A}$ be a family of POVMs indexed by $x \in \mathcal X$, and let $f \colon \mathcal A \to \mathcal B$ be an arbitrary function. We write $\bigl\{ M^x_{[f(\cdot)=b]} \bigr\}$ for the POVM derived from $\{M^x_a\}$ by applying the function $f$ to the outcome before returning it:
+	\[
+		M^x_{[f(\cdot)=b]} = \sum_{a\,:\,f(a)=b} M^x_a\,,
+	\]
+	and $M^x_{[f(\cdot)=b]} = 0$ when $b$ is not in the image of $f$. When the outcome $a$ has a natural interpretation as a tuple $(a_1,\dots,a_k)$, we also write, for $i \in \{1,\dots,k\}$,
+	\[
+		M^x_{[a_i=b]} = \sum_{(a_1,\dots,a_k)\,:\,a_i=b} M^x_{(a_1,\dots,a_k)}\,.
+	\]
+	For each fixed $x$ this is the post-processing operation of Definition~\ref{def:post-processing}.
+\end{definition}
+
+\begin{remark}[Naimark dilation for strategies]\label{rem:naimark-for-games}
+	The symmetrization argument of Lemma~\ref{lem:symmetric-strat} below invokes Naimark dilation in the form of Theorem~\ref{thm:naimark} (stated and proved in Chapter~\ref{chap:projective}): a bipartite state together with two sub-measurement families can be replaced, without changing any of the correlations $\bra{\psi} A^x_a \ot B^y_b \ket{\psi}$, by a product-extended state together with projective sub-measurements on the enlarged spaces. When the input families are complete measurements, the dilated projective sub-measurements can be completed by assigning the residual projector of each family to one fixed outcome; the resulting projective measurements reproduce the same correlations on the extended state, since the correlation-preservation identity forces the extended state to lie in the range of the total projector of each dilated family. This completed form, with genuinely projective measurements, is the one used in Lemma~\ref{lem:symmetric-strat}; for the proof the source refers to Theorem 5.1 of \cite{Ji2020LowIndividualDegree}, which is stated for complete measurements. The source follows its statement of the dilation theorem with a sentence announcing an ``orthogonalization lemma'' from the literature that is never actually stated there; nothing in this chapter depends on it.
+\end{remark}
+
+\section{Games and strategies}
+% Paper subsection label sec:strat kept for cross-reference fidelity.
+\label{sec:strat}
+
+\begin{definition}[Two-player one-round games]\label{def:game}
+	A \emph{two-player one-round game} $\mathfrak G$ is specified by a tuple $(\mathcal X, \mathcal Y, \mathcal A, \mathcal B, \mu, D)$ where
+	\begin{enumerate}
+		\item $\mathcal X$ and $\mathcal Y$ are finite sets, called the \emph{question alphabets},
+		\item $\mathcal A$ and $\mathcal B$ are finite sets, called the \emph{answer alphabets},
+		\item $\mu$ is a probability distribution over $\mathcal X \times \mathcal Y$, called the \emph{question distribution}, and
+		\item $D \colon \mathcal X \times \mathcal Y \times \mathcal A \times \mathcal B \to \{0,1\}$ is a function, called the \emph{decision predicate}.
+	\end{enumerate}
+\end{definition}
+
+\begin{definition}[Tensor product strategies]\label{def:tensor-product-strategy}
+	\uses{def:game, def:povm-conventions}
+	A \emph{tensor product strategy} $\mathcal S$ for a game $\mathfrak G = (\mathcal X, \mathcal Y, \mathcal A, \mathcal B, \mu, D)$ is a tuple $(\ket{\psi}, A, B)$ where
+	\begin{itemize}
+		\item $\ket{\psi}$ is a pure quantum state, i.e.\ a unit vector in $\mathcal H_A \ot \mathcal H_B$ for finite-dimensional complex Hilbert spaces $\mathcal H_A$, $\mathcal H_B$,
+		\item $A$ is a set $\{A^x\}$ such that for every $x \in \mathcal X$, $A^x = \{A^x_a\}_{a \in \mathcal A}$ is a POVM on $\mathcal H_A$, and
+		\item $B$ is a set $\{B^y\}$ such that for every $y \in \mathcal Y$, $B^y = \{B^y_b\}_{b \in \mathcal B}$ is a POVM on $\mathcal H_B$.
+	\end{itemize}
+\end{definition}
+
+\begin{definition}[Tensor product value]\label{def:tensor-product-value}
+	\uses{def:tensor-product-strategy}
+	The \emph{tensor product value} of a tensor product strategy $\mathcal S = (\ket{\psi}, A, B)$ with respect to a game $\mathfrak G = (\mathcal X, \mathcal Y, \mathcal A, \mathcal B, \mu, D)$ is
+	\[
+		\operatorname{val}^*(\mathfrak G, \mathcal S) = \sum_{x,\,y,\,a,\,b} \mu(x,y)\, D(x,y,a,b)\, \bra{\psi} A^x_a \ot B^y_b \ket{\psi}\,.
+	\]
+	For $v \in [0,1]$ we say that the strategy $\mathcal S$ \emph{passes (or wins) $\mathfrak G$ with probability $v$} if $\operatorname{val}^*(\mathfrak G, \mathcal S) \ge v$. The \emph{tensor product value} of $\mathfrak G$ is
+	\[
+		\operatorname{val}^*(\mathfrak G) = \sup_{\mathcal S} \operatorname{val}^*(\mathfrak G, \mathcal S)\,,
+	\]
+	where the supremum is taken over all tensor product strategies $\mathcal S$ for $\mathfrak G$.
+\end{definition}
+
+Unless specified otherwise, all strategies considered in what follows are tensor product strategies, and we simply call them \emph{strategies}; similarly, we refer to $\operatorname{val}^*(\mathfrak G)$ as the \emph{value} of the game $\mathfrak G$.
+
+% The source labels this definition def:projective-strategy. That label is already carried
+% by the low individual degree test track (Chapter 2), where it names the strategy format
+% specific to that test, so a distinct label is used here; see the following remark.
+\begin{definition}[Projective strategies]\label{def:projective-strategy-general}
+	\uses{def:tensor-product-strategy, def:povm-conventions}
+	A strategy $\mathcal S = (\ket{\psi}, A, B)$ is \emph{projective} if all the measurements $\{A^x_a\}_a$ and $\{B^y_b\}_b$ are projective.
+\end{definition}
+
+\begin{remark}[Two uses of the term ``projective strategy'']\label{rem:projective-strategy-relation}
+	Definition~\ref{def:projective-strategy-general} is the general notion: a strategy for an arbitrary nonlocal game all of whose measurements are projective. The low individual degree chapters use the same term for the concrete data of a two-prover strategy for the $(m,q,d)$ low individual degree test (Definition~\ref{def:projective-strategy} in Chapter~\ref{chap:test}); that definition is the specialization of the present notion to the question format of that particular test. The two usages occur in disjoint contexts.
+\end{remark}
+
+\begin{definition}[Symmetric games and symmetric strategies]\label{def:symmetric-game}
+	% Paper label: rem:symmetric-games (a definition environment carrying a rem: label in the
+	% source); relabeled here to match the environment kind.
+	\uses{def:game, def:tensor-product-strategy}
+	A game $\mathfrak G = (\mathcal X, \mathcal Y, \mathcal A, \mathcal B, \mu, D)$ is \emph{symmetric} if the question and answer alphabets are the same for both players (i.e.\ $\mathcal X = \mathcal Y$ and $\mathcal A = \mathcal B$), the distribution $\mu$ is symmetric (i.e.\ $\mu(x,y) = \mu(y,x)$ for all $x,y$), and the decision predicate $D$ treats both players symmetrically (i.e.\ $D(x,y,a,b) = D(y,x,b,a)$ for all $x,y,a,b$).
+
+	A strategy $\mathcal S = (\ket{\psi}, A, B)$ is \emph{symmetric} if $\ket{\psi}$ is a (pure) state in $\mathcal H \ot \mathcal H$, for some Hilbert space $\mathcal H$, that is invariant under permutation of the two factors, and the measurement operators of both players are identical.
+\end{definition}
+
+We often specify symmetric games $\mathfrak G$ and symmetric strategies $\mathcal S$ using a compact notation: we write $\mathfrak G = (\mathcal X, \mathcal A, \mu, D)$ and $\mathcal S = (\ket{\psi}, M)$, where $M$ denotes the set of measurement operators shared by both players.
+
+% Source statement (references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:94-99) kept in
+% its original form. The proof below records the approximate form the source argument
+% establishes and leaves the final attainment step unproved; see rem:symmetric-strat-limit.
+\begin{lemma}[Symmetrization of strategies for symmetric games]\label{lem:symmetric-strat}
+	\uses{def:symmetric-game, def:tensor-product-value, def:projective-strategy-general}
+	Let $\mathfrak G = (\mathcal X, \mathcal A, \mu, D)$ be a symmetric game such that $\operatorname{val}^*(\mathfrak G) = 1-\eps$ for some $\eps \ge 0$. Then there exists a symmetric and projective strategy $\mathcal S = (\ket{\psi}, M)$ such that $\operatorname{val}^*(\mathfrak G, \mathcal S) \ge 1-\eps$.
+\end{lemma}
+\begin{proof}
+	\uses{thm:naimark}
+	The symmetrization argument establishes the following approximate form of the conclusion: for every $\eps' > \eps$ there exists a symmetric and projective strategy of value at least $1-\eps'$. Indeed, fix $\eps' > \eps$. Since $\operatorname{val}^*(\mathfrak G)$ is the supremum of the values of all strategies, there exists a strategy $\mathcal S' = (\ket{\psi'}, A, B)$ with $\operatorname{val}^*(\mathfrak G, \mathcal S') \ge 1-\eps'$. Using Naimark dilation (Theorem~\ref{thm:naimark}), each dilated sub-measurement being completed to a projective measurement by assigning to one fixed outcome the residual projector of its family --- which changes no correlation on the extended state, as described in Remark~\ref{rem:naimark-for-games} above --- we may assume without loss of generality that $\ket{\psi'} \in \C^d_{A'} \ot \C^d_{B'}$ for some integer $d$ and that every $A^x$ and $B^x$ is a projective measurement. Let
+	\[
+		\ket{\psi} = \frac{1}{\sqrt 2}\, \bigl( \ket{0}_{A}\ket{1}_{B}\ket{\psi'}_{A'B'} + \ket{1}_{A}\ket{0}_{B}\ket{\psi'_\tau}_{A'B'} \bigr) \in \bigl(\C^2_{A} \ot \C^d_{A'}\bigr) \ot \bigl(\C^2_{B} \ot \C^d_{B'}\bigr)\,,
+	\]
+	where $\ket{\psi'_\tau}$ is obtained from $\ket{\psi'}$ by permuting the two players' registers; then $\ket{\psi}$ is invariant under permutation of the register pairs $AA'$ and $BB'$. For each question $x \in \mathcal X$ define the projective measurement $M^x = \{M^x_a\}_{a \in \mathcal A}$ on $\C^2 \ot \C^d$ by
+	\[
+		M^x_a = \ket{0}\bra{0} \ot A^x_a + \ket{1}\bra{1} \ot B^x_a\,,
+	\]
+	and let each player measure $M$ on their pair of registers. Because the decision predicate $D$ of the symmetric game treats the two players symmetrically, the resulting symmetric projective strategy $\mathcal S = (\ket{\psi}, M)$ satisfies $\operatorname{val}^*(\mathfrak G, \mathcal S) = \operatorname{val}^*(\mathfrak G, \mathcal S') \ge 1-\eps'$. Note that this construction preserves the value of the strategy it is applied to exactly.
+
+	The statement asserts more, namely a single symmetric projective strategy of value at least $1-\eps$ itself. Passing from the family of strategies constructed above to one attaining the bound $1-\eps$ is an attainment step which the argument does not supply: the supremum defining $\operatorname{val}^*(\mathfrak G)$ in Definition~\ref{def:tensor-product-value} ranges over strategies of unbounded dimension and need not be attained. This step remains unproved; the obstruction, and the forms of the lemma that the argument does prove, are documented in \cite{gap:qpbt_symmetrization-attainment}. See also Remark~\ref{rem:symmetric-strat-limit}.
+\end{proof}
+
+\begin{remark}[Attainment in the symmetrization lemma]\label{rem:symmetric-strat-limit}
+	The proof of Lemma~\ref{lem:symmetric-strat} yields, for each $\eps' > \eps$, a symmetric projective strategy of value at least $1-\eps'$. The conclusion as stated, at $\eps' = \eps$, does not follow from this: the dilated dimension $d$ may grow as $\eps' \downarrow \eps$, and the supremum defining $\operatorname{val}^*(\mathfrak G)$ in Definition~\ref{def:tensor-product-value} need not be attained by any strategy. The symmetrization construction itself is value-preserving, so the conclusion does hold whenever the hypothesis supplies an actual strategy of value at least $1-\eps$ rather than only the value of the game; every use of the lemma in the source proceeds from such a strategy, or from a strict lower bound on the value, and therefore consumes only what the proof establishes. The gap and the available repairs are documented in \cite{gap:qpbt_symmetrization-attainment}.
+\end{remark}
+
+\begin{definition}[Commuting strategies]\label{def:comm-strategy}
+	\uses{def:game, def:tensor-product-strategy}
+	Let $\mathfrak G = (\mathcal X, \mathcal Y, \mathcal A, \mathcal B, \mu, D)$ be a game, and let $\mathcal S = (\ket{\psi}, A, B)$ be a strategy for $\mathfrak G$ such that $\mathcal H_A = \mathcal H_B$. We say that $\mathcal S$ is a \emph{commuting strategy for $\mathfrak G$} if for all question pairs $(x,y)$ in the support of $\mu$ (i.e.\ all $(x,y)$ with $\mu(x,y) > 0$) we have
+	\[
+		[A^x_a, B^y_b] = 0 \qquad \text{for all } a \in \mathcal A,\ b \in \mathcal B\,,
+	\]
+	where $[A,B] = AB - BA$ denotes the commutator.
+\end{definition}
+
+\begin{definition}[Consistent measurements]\label{def:consistent-measurement}
+	\uses{def:povm-conventions}
+	Let $\mathcal A$ be a finite set, let $\ket{\psi} \in \mathcal H \ot \mathcal H$ be a state, and let $\{M_a\}_{a \in \mathcal A}$ be a projective measurement on $\mathcal H$. We say that \emph{$\{M_a\}_{a \in \mathcal A}$ is consistent on $\ket{\psi}$} if and only if
+	\[
+		\forall a \in \mathcal A\,, \qquad M_a \ot \Id_B\, \ket{\psi} = \Id_A \ot M_a\, \ket{\psi}\,.
+	\]
+	When the state $\ket{\psi}$ is clear from context we simply say that $\{M_a\}_{a \in \mathcal A}$ is consistent.
+\end{definition}
+
+The terminology arises from the fact that when the measurement $\{M_a\}$ is performed on both registers of $\ket{\psi}$, the probability of obtaining twice the same outcome is
+\[
+	\sum_a \bra{\psi} M_a \ot M_a \ket{\psi} = \sum_a \bra{\psi} \Id_A \ot (M_a)^2 \ket{\psi} = \sum_a \bra{\psi} \Id_A \ot M_a \ket{\psi} = 1\,,
+\]
+where the first equality is by the definition of consistency, the second uses that $\{M_a\}$ is projective, and the last uses $\sum_a M_a = \Id$.
+
+\begin{definition}[Consistent strategies]\label{def:consistent-strategy}
+	\uses{def:consistent-measurement, def:projective-strategy-general}
+	Let $\mathcal S = (\ket{\psi}, A, B)$ be a projective strategy with state $\ket{\psi} \in \mathcal H \ot \mathcal H$, for some Hilbert space $\mathcal H$, defined on question alphabets $\mathcal X$ and $\mathcal Y$ and answer alphabets $\mathcal A$ and $\mathcal B$, respectively. We say that $\mathcal S$ is \emph{consistent} if for all $x \in \mathcal X$ the measurement $\{A^x_a\}_{a \in \mathcal A}$ is consistent on $\ket{\psi}$, and for all $y \in \mathcal Y$ the measurement $\{B^y_b\}_{b \in \mathcal B}$ is consistent on $\ket{\psi}$.
+\end{definition}
+
+We almost always restrict attention to symmetric strategies; in this case consistency implies that whenever both players are sent the same question, they provide the same answer.
+
+\begin{definition}[PCC and SPCC strategies]\label{def:spcc}
+	\uses{def:projective-strategy-general, def:consistent-strategy, def:comm-strategy, def:symmetric-game}
+	We say that a strategy $\mathcal S$ for a game $\mathfrak G$ is \emph{PCC} if it is projective, consistent, and commuting for $\mathfrak G$. Additionally, we say that a PCC strategy $\mathcal S$ is \emph{SPCC} if it is furthermore symmetric.
+\end{definition}
+
+\section{Distance measures}
+
+\begin{definition}[Distance between states]\label{def:state-distance}
+	Let $\{\ket{\psi_n}\}_{n \in \N}$ and $\{\ket{\psi'_n}\}_{n \in \N}$ be two families of states in the same space $\mathcal H$. For a function $\delta \colon \N \to [0,1]$ we say that $\{\ket{\psi_n}\}$ and $\{\ket{\psi'_n}\}$ are \emph{$\delta$-close}, denoted $\ket{\psi} \approx_\delta \ket{\psi'}$, if
+	\[
+		\lVert \ket{\psi_n} - \ket{\psi'_n} \rVert^2 = O(\delta(n))\,.
+	\]
+	The dependence of the states and of $\delta$ on the indexing parameter $n$ is generally left implicit; we write, e.g., $\ket{\psi}$ for $\ket{\psi_n}$.
+\end{definition}
+
+\begin{definition}[Consistency between POVMs]\label{def:consistency}
+	\uses{def:povm-conventions, def:state-distance}
+	Let $\mathcal X$ be a finite set and $\mu$ a distribution on $\mathcal X$. Let $\ket{\psi} \in \mathcal H_A \ot \mathcal H_B$ be a quantum state, and for all $x \in \mathcal X$ let $\{A^x_a\}$ and $\{B^x_a\}$ be POVMs. We write
+	\[
+		A^x_a \ot \Id_B \simeq_\delta \Id_A \ot B^x_a
+	\]
+	on state $\ket{\psi}$ and distribution $\mu$ if
+	\[
+		\E_{x \sim \mu} \sum_{a \ne b} \bra{\psi} A^x_a \ot B^x_b \ket{\psi} = O(\delta)\,.
+	\]
+	In this case we say that $\{A^x_a\}$ and $\{B^x_a\}$ are \emph{$\delta$-consistent} on $\ket{\psi}$. As in Definition~\ref{def:state-distance}, the $O(\cdot)$ refers to families of POVMs and states indexed by an implicit parameter $n \in \N$, and is taken as $n \to \infty$.
+\end{definition}
+
+A measurement that is consistent on $\ket{\psi}$ in the sense of Definition~\ref{def:consistent-measurement} is $0$-consistent with itself on the same state under the singleton distribution, and vice versa: if $\sum_a \bra{\psi} M_a \ot M_a \ket{\psi} = 1$, then $M_a \ot \Id\, \ket{\psi} = \Id \ot M_a\, \ket{\psi}$ for every $a$, by the equality case of the Cauchy--Schwarz inequality applied outcome by outcome.
+
+% The source (references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:257-274) states this
+% definition for pairs of POVMs but applies the relation to arbitrary operator families:
+% to plain operators at 06:313-330, to sets of matrices at 06:364-380, and to products and
+% commutators, compared against the zero family, at 06:409-445. The general form below,
+% for arbitrary finite families of operators, is the one of the NEEXP source
+% (references/neexp-paper/05_quantum_preliminaries.tex:385-391), from which the distance
+% calculus is imported; the POVM case is singled out after the display.
+\begin{definition}[State-dependent distance between operator families]\label{def:povm-distance}
+	\uses{def:povm-conventions, def:state-distance}
+	Let $\mathcal X$ and $\mathcal A$ be finite sets and $\mu$ a distribution on $\mathcal X$. Let $\ket{\psi} \in \mathcal H$ be a quantum state, and for all $x \in \mathcal X$ let $\{M^x_a\}_{a \in \mathcal A}$ and $\{N^x_a\}_{a \in \mathcal A}$ be two families of linear operators on $\mathcal H$. We say that \emph{$\{M^x_a\}$ and $\{N^x_a\}$ are $\delta$-close on state $\ket{\psi}$ and under distribution $\mu$} if
+	\[
+		\E_{x \sim \mu} \sum_a \lVert (M^x_a - N^x_a)\, \ket{\psi} \rVert^2 \le O(\delta)\,,
+	\]
+	and we write $M^x_a \approx_\delta N^x_a$ to denote this when the state $\ket{\psi}$ and the distribution $\mu$ are clear from context. This distance is referred to as the \emph{state-dependent} distance. The principal case is that in which $\{M^x_a\}$ and $\{N^x_a\}$ are POVMs on $\mathcal H$, and we then speak of the state-dependent distance between the POVMs; but the relation is used for arbitrary operator families --- for instance for products of measurement operators, or for commutators compared against the identically zero family, as in Lemma~\ref{lem:commutation-analysis} below.
+\end{definition}
+
+\begin{definition}[Distance between strategies]\label{def:strategy-distance}
+	\uses{def:tensor-product-strategy, def:state-distance, def:povm-distance}
+	Let $\mathfrak G = (\mathcal X, \mathcal Y, \mathcal A, \mathcal B, \mu, D)$ be a nonlocal game and let $\mathcal S = (\psi, A, B)$ and $\mathcal S' = (\psi', A', B')$ be strategies for $\mathfrak G$. For $\delta \in [0,1]$ we say that \emph{$\mathcal S$ is $\delta$-close to $\mathcal S'$} if the following conditions hold.
+	\begin{enumerate}
+		\item The states $\ket{\psi}, \ket{\psi'}$ are states in the same Hilbert space $\mathcal H_A \ot \mathcal H_B$ and are $\delta$-close.
+		\item For all $x \in \mathcal X$ and $y \in \mathcal Y$, we have $A^x_a \approx_\delta (A')^x_a$ and $B^y_b \approx_\delta (B')^y_b$, with the approximations holding under the distribution $\mu$ (i.e.\ under its corresponding marginals), on either $\ket{\psi}$ or $\ket{\psi'}$.
+	\end{enumerate}
+\end{definition}
+
+\begin{remark}[Asymptotic reading of the distance relations]\label{rem:asymptotic-distance}
+	Definitions~\ref{def:state-distance}, \ref{def:consistency}, and \ref{def:povm-distance} are asymptotic: every $\approx_\delta$ and $\simeq_\delta$ statement refers to families of states and measurement families indexed by an implicit parameter $n \in \N$, and the $O(\cdot)$ is taken as $n \to \infty$. None of these relations is a pointwise inequality with an explicit constant. By contrast, the corresponding relations used in the low individual degree chapters (Definitions~\ref{def:simeq} and~\ref{def:approx_delta}) carry no hidden constant. Any explicit quantitative version of the present relations therefore retains the constants absorbed into the $O(\cdot)$; for instance, the triangle inequality of Lemma~\ref{fact:triangle} carries a factor $2$ inside the $O(\cdot)$.
+\end{remark}
+
+We record several useful facts about the consistency measure and the state-dependent distance. For the statements imported without proof, readers are referred to Sections~4.4 and~4.5 of \cite{Natarajan2018NEEXP}.
+
+\begin{lemma}[Consistency versus closeness; Facts 4.13 and 4.14 in \cite{Natarajan2018NEEXP}]\label{fact:agreement}
+	\uses{def:consistency, def:povm-distance}
+	For POVMs $\{A^x_a\}$ and $\{B^x_a\}$, the following hold.
+	\begin{enumerate}
+		\item If $A^x_a \ot \Id_B \simeq_\delta \Id_A \ot B^x_a$, then $A^x_a \ot \Id_B \approx_\delta \Id_A \ot B^x_a$.
+		\item If $A^x_a \ot \Id_B \approx_\delta \Id_A \ot B^x_a$ \emph{and} $\{A^x_a\}$ and $\{B^x_a\}$ are projective measurements, then $A^x_a \ot \Id_B \simeq_\delta \Id_A \ot B^x_a$.
+		\item If $A^x_a \ot \Id_B \approx_\delta \Id_A \ot B^x_a$ and either $\{A^x_a\}$ or $\{B^x_a\}$ is a projective measurement, then $A^x_a \ot \Id_B \simeq_{\delta^{1/2}} \Id_A \ot B^x_a$.
+	\end{enumerate}
+\end{lemma}
+\begin{proof}
+	Stated in the source without proof; these are Facts 4.13 and 4.14 of \cite{Natarajan2018NEEXP}. For the first item, expand each term $\lVert (A^x_a \ot \Id - \Id \ot B^x_a)\ket{\psi} \rVert^2$ and use $ (A^x_a)^2 \le A^x_a$, $(B^x_a)^2 \le B^x_a$ together with completeness of the two POVMs: summing over $a$ and averaging over $x$ bounds the total by at most twice the off-diagonal mass, which is $O(\delta)$ by hypothesis. When both families are projective the two operator inequalities hold with equality, so the expansion equals exactly twice the off-diagonal mass; reading this identity in the other direction gives the second item. For the third item, write the off-diagonal mass $\sum_{a \ne b} \bra{\psi} A^x_a \ot B^x_b \ket{\psi}$ as an inner product involving $(A^x_a \ot \Id - \Id \ot B^x_a)\ket{\psi}$, using projectivity of one of the two families, and apply the Cauchy--Schwarz inequality; this route costs a square root in the error.
+\end{proof}
+
+\begin{lemma}[Fact 4.20 in \cite{Natarajan2018NEEXP}]\label{fact:add-a-proj}
+	\uses{def:povm-distance}
+	Let $\mathcal A, \mathcal B, \mathcal C$ be finite sets, and let $\mu$ be a distribution over question pairs $(x,y)$. Let $\{A^x_{a,\,b}\}$ and $\{B^x_{a,\,b}\}$ be operators whose outcomes range over the product set $\mathcal A \times \mathcal B$. Suppose a set of operators $\{C^y_{a,\,c}\}$, whose outcomes range over the product set $\mathcal A \times \mathcal C$, satisfies the condition $\sum_c (C^y_{a,\,c})^\dagger C^y_{a,\,c} \le \Id$ for all $a$ and all $y$. If $A^x_{a,\,b} \approx_\delta B^x_{a,\,b}$ on average over $x$ sampled from the corresponding marginal of the distribution $\mu$, then $C^y_{a,\,c} A^x_{a,\,b} \approx_\delta C^y_{a,\,c} B^x_{a,\,b}$ on average over $(x,y)$ sampled from $\mu$.
+\end{lemma}
+\begin{proof}
+	Fix questions $x, y$ and answers $a \in \mathcal A$, $b \in \mathcal B$. Then
+	\begin{align*}
+		\sum_c \bigl\lVert (C^y_{a,\,c} A^x_{a,\,b} - C^y_{a,\,c} B^x_{a,\,b})\, \ket{\psi} \bigr\rVert^2
+		&= \bra{\psi} (A^x_{a,\,b} - B^x_{a,\,b})^\dagger \Bigl( \sum_c (C^y_{a,\,c})^\dagger C^y_{a,\,c} \Bigr) (A^x_{a,\,b} - B^x_{a,\,b}) \ket{\psi}\\
+		&\le \bigl\lVert (A^x_{a,\,b} - B^x_{a,\,b})\, \ket{\psi} \bigr\rVert^2\,,
+	\end{align*}
+	where the inequality uses the assumption $\sum_c (C^y_{a,\,c})^\dagger C^y_{a,\,c} \le \Id$. Summing over $a, b$ and averaging over $(x,y) \sim \mu$ yields the conclusion.
+\end{proof}
+
+\begin{lemma}[Multiplying by function-indexed operators]\label{fact:add-a-proj2}
+	\uses{def:povm-distance}
+	Let $\mathcal X, \mathcal A$ be finite sets, and let $\mathcal G$ be a set of functions $g \colon \mathcal X \to \mathcal A$. Let $\{A^x_a\}$ and $\{B^x_a\}$ be POVMs indexed by $\mathcal X$ with outcomes in $\mathcal A$. Let $\{S^x_g\}_{x \in \mathcal X,\, g \in \mathcal G}$ be a set of operators such that for all $x \in \mathcal X$, $\sum_g (S^x_g)^\dagger S^x_g \le \Id$. If $A^x_a \approx_\delta B^x_a$ on average over $x$, then $S^x_g A^x_{g(x)} \approx_\delta S^x_g B^x_{g(x)}$.
+\end{lemma}
+\begin{proof}
+	Expand the left-hand side and group the sum over $g$ according to the value $a = g(x)$:
+	\[
+		\E_x \sum_g \bigl\lVert S^x_g (A^x_{g(x)} - B^x_{g(x)})\, \ket{\psi} \bigr\rVert^2
+		= \E_x \sum_a \bra{\psi} (A^x_a - B^x_a)^\dagger \Bigl( \sum_{g\,:\,g(x)=a} (S^x_g)^\dagger S^x_g \Bigr) (A^x_a - B^x_a) \ket{\psi}\,.
+	\]
+	% The source (references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:347-361) ends with
+	% "at most delta by assumption"; under def:povm-distance the hypothesis only bounds this
+	% quantity by O(delta), which is what the conclusion requires.
+	Since $\sum_{g\,:\,g(x)=a} (S^x_g)^\dagger S^x_g \le \sum_g (S^x_g)^\dagger S^x_g \le \Id$, this is at most $\E_x \sum_a \lVert (A^x_a - B^x_a)\ket{\psi} \rVert^2$, which is $O(\delta)$ by the hypothesis $A^x_a \approx_\delta B^x_a$ (Definition~\ref{def:povm-distance}); this is exactly the bound required for the conclusion.
+\end{proof}
+
+\begin{lemma}[Absorbing an approximating family into a projective sum]\label{lem:cool-closeness-fact}
+	\uses{def:povm-distance, def:povm-conventions}
+	Let $\mathcal X$ and $\mathcal A$ be finite sets and $\mu$ a distribution on $\mathcal X$. Let $\{A^x_a\}_{a \in \mathcal A}$ be a projective measurement and let $\{B^x_a\}_{a \in \mathcal A}$ be a set of matrices. If $A^x_a \approx_\delta B^x_a$, then for all subsets $S \subseteq \mathcal A$ we have
+	\[
+		\sum_{a \in S} A^x_a \approx_\delta \sum_{a \in S} A^x_a \cdot B^x_a\,.
+	\]
+\end{lemma}
+\begin{proof}
+	By projectivity, $\sum_{a \in S} (A^x_a - A^x_a B^x_a) = \sum_{a \in S} A^x_a (A^x_a - B^x_a)$. Expanding the squared norm of the corresponding vector, the cross terms for distinct $a \ne a' \in S$ vanish because $A^x_a A^x_{a'} = 0$, so
+	\begin{align*}
+		\E_x \Bigl\lVert \sum_{a \in S} \bigl(A^x_a - A^x_a B^x_a\bigr) \ket{\psi} \Bigr\rVert^2
+		&= \E_x \sum_{a \in S} \bra{\psi} (A^x_a - B^x_a)^\dagger A^x_a (A^x_a - B^x_a) \ket{\psi}\\
+		&\le \E_x \sum_a \lVert (A^x_a - B^x_a)\ket{\psi} \rVert^2\,,
+	\end{align*}
+	% Under def:povm-distance the closeness hypothesis bounds the final quantity by
+	% O(delta), not by delta itself; the source
+	% (references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:364-380) elides this.
+	where the last step uses $A^x_a \le \Id$. All expectations are taken according to $\mu$, and the last quantity is $O(\delta)$ by the assumption $A^x_a \approx_\delta B^x_a$ (Definition~\ref{def:povm-distance}), which is the bound required for the conclusion.
+\end{proof}
+
+\begin{lemma}[Triangle inequality; Fact 4.28 in \cite{Natarajan2018NEEXP}]\label{fact:triangle}
+	\uses{def:povm-distance}
+	If $A^x_a \approx_\delta B^x_a$ and $B^x_a \approx_{\eps} C^x_a$, then $A^x_a \approx_{\delta+\eps} C^x_a$.
+\end{lemma}
+\begin{proof}
+	\uses{def:povm-distance}
+	Stated in the source without proof; it is Fact 4.28 of \cite{Natarajan2018NEEXP}. For every $x$ and $a$, $\lVert (A^x_a - C^x_a)\ket{\psi} \rVert^2 \le 2\lVert (A^x_a - B^x_a)\ket{\psi} \rVert^2 + 2\lVert (B^x_a - C^x_a)\ket{\psi} \rVert^2$. Averaging over $x$ and summing over $a$ gives the claim; the factor $2$ is absorbed by the $O(\cdot)$ in Definition~\ref{def:povm-distance}.
+\end{proof}
+
+\begin{lemma}[Triangle inequality for ``$\simeq$''; Proposition 4.29 in \cite{Ji2020LowIndividualDegree}]\label{fact:triangle-for-simeq}
+	\uses{def:consistency}
+	If $A^x_a \ot \Id_B \simeq_{\eps} \Id_A \ot B^x_a$, and $C^x_a \ot \Id_B \simeq_\delta \Id_A \ot B^x_a$, and $C^x_a \ot \Id_B \simeq_\gamma \Id_A \ot D^x_a$, then
+	\[
+		A^x_a \ot \Id_B \simeq_{\eps + 2\sqrt{\delta+\gamma}} \Id_A \ot D^x_a\,.
+	\]
+\end{lemma}
+\begin{proof}
+	\uses{fact:agreement}
+	Stated in the source without proof; it is Proposition 4.29 of \cite{Ji2020LowIndividualDegree}. The two hypotheses involving $C$ convert, via Lemma~\ref{fact:agreement}, into state-dependent closeness of $C^x_a \ot \Id_B$ to both $\Id_A \ot B^x_a$ and $\Id_A \ot D^x_a$, hence of $\Id_A \ot B^x_a$ to $\Id_A \ot D^x_a$ at cost $O(\delta+\gamma)$. The first consistency then transfers from $B$ to $D$ by expanding the off-diagonal mass and applying the Cauchy--Schwarz inequality, which turns the squared-distance bound into the term $2\sqrt{\delta+\gamma}$.
+\end{proof}
+
+\begin{lemma}[Data processing; Fact 4.26 in \cite{Natarajan2018NEEXP}]\label{fact:data-processing}
+	\uses{def:consistency, def:bracket}
+	Suppose $A^x_a \ot \Id_B \simeq_\delta \Id_A \ot B^x_a$. Then for any function $f$ on the outcome set,
+	\[
+		A^x_{[f(\cdot)=b]} \ot \Id_B \simeq_\delta \Id_A \ot B^x_{[f(\cdot)=b]}\,.
+	\]
+\end{lemma}
+\begin{proof}
+	Stated in the source without proof; it is Fact 4.26 of \cite{Natarajan2018NEEXP}. Every off-diagonal pair $(b, b')$ with $b \ne b'$ of the post-processed families pulls back to pairs $(a, a')$ with $f(a) = b \ne b' = f(a')$, and in particular $a \ne a'$. Coarse-graining therefore only merges terms of the off-diagonal sum, so the post-processed off-diagonal mass is at most the original one.
+\end{proof}
+
+The state-dependent distance is the right tool for reasoning about the closeness of measurement operators in a strategy. The following lemma converts joint consistency with a single projective measurement into an approximate commutation relation.
+
+\begin{lemma}[Approximate commutation from joint consistency]\label{lem:commutation-analysis}
+	\uses{def:povm-distance, def:povm-conventions}
+	Let $\{A^x_{a,\,b}\}$, $\{B^x_{a,\,b,\,c}\}$, $\{C^x_{a,\,c}\}$ be POVMs. Suppose $\{B^x_{a,\,b,\,c}\}$ is projective, and
+	\begin{align*}
+		A^x_{a,\,b} \ot \Id_B &\approx_\delta \Id_A \ot B^x_{a,\,b}\,,\\
+		C^x_{a,\,c} \ot \Id_B &\approx_\delta \Id_A \ot B^x_{a,\,c}\,,
+	\end{align*}
+	where $B^x_{a,\,b} = \sum_c B^x_{a,\,b,\,c}$ and $B^x_{a,\,c} = \sum_b B^x_{a,\,b,\,c}$ are the marginals of Definition~\ref{def:povm-conventions}. Then the following approximate commutation relation holds:
+	\[
+		[A^x_{a,\,b},\, C^x_{a,\,c}] \ot \Id_B \approx_\delta 0\,.
+	\]
+\end{lemma}
+\begin{proof}
+	\uses{fact:add-a-proj, fact:triangle}
+	Applying Lemma~\ref{fact:add-a-proj} to $C^x_{a,\,c} \ot \Id_B \approx_\delta \Id_A \ot B^x_{a,\,c}$ with the multiplier family $\{A^x_{a,\,b} \ot \Id_B\}$, we have
+	\begin{equation}\label{eq:commutation-analysis-1}
+		A^x_{a,\,b}\, C^x_{a,\,c} \ot \Id_B \approx_\delta A^x_{a,\,b} \ot B^x_{a,\,c}\,.
+	\end{equation}
+	Similarly, applying Lemma~\ref{fact:add-a-proj} to $A^x_{a,\,b} \ot \Id_B \approx_\delta \Id_A \ot B^x_{a,\,b}$ with the multiplier family $\{\Id_A \ot B^x_{a,\,c}\}$, and using that $\{B^x_{a,\,b,\,c}\}$ is projective,
+	\begin{equation}\label{eq:commutation-analysis-2}
+		A^x_{a,\,b} \ot B^x_{a,\,c} \approx_\delta \Id_A \ot B^x_{a,\,c}\, B^x_{a,\,b} = \Id_A \ot B^x_{a,\,b,\,c}\,.
+	\end{equation}
+	Combining \eqref{eq:commutation-analysis-1} and \eqref{eq:commutation-analysis-2} via Lemma~\ref{fact:triangle},
+	\begin{equation}\label{eq:commutation-analysis-3}
+		A^x_{a,\,b}\, C^x_{a,\,c} \ot \Id_B \approx_\delta \Id_A \ot B^x_{a,\,b,\,c}\,.
+	\end{equation}
+	A symmetric argument gives
+	\begin{equation}\label{eq:commutation-analysis-4}
+		C^x_{a,\,c}\, A^x_{a,\,b} \ot \Id_B \approx_\delta \Id_A \ot B^x_{a,\,b,\,c}\,.
+	\end{equation}
+	The claim follows by subtracting \eqref{eq:commutation-analysis-3} and \eqref{eq:commutation-analysis-4}.
+\end{proof}
+
+% The source (references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:465-495) leaves the
+% set Y unquantified (finiteness and nonemptiness are needed for the uniform sampling of
+% y) and places no finiteness condition on the targets R_i (needed for the post-processed
+% families below to fall under def:bracket); both hypotheses are made explicit here. The
+% NEEXP original (references/neexp-paper/05_quantum_preliminaries.tex:952-973, label
+% fact:low-degree-sandwich) instead samples the evaluation point from a specified
+% question distribution.
+\begin{lemma}[Sandwiched simultaneous measurement; modified from Fact 4.34 in \cite{Natarajan2018NEEXP}]\label{lem:ld-sandwich}
+	\uses{def:consistency, def:bracket, def:povm-conventions}
+	Let $k \ge 0$ be an integer and let $\eps > 0$. Let $\mathcal X$ be a finite set and $\mu$ a distribution over $\mathcal X$, and let $\mathcal Y$ be a finite nonempty set; all statements below that sample $y \in \mathcal Y$ refer to the uniform distribution on $\mathcal Y$. For each $1 \le i \le k$ let $\mathcal R_i$ be a finite set, let $\mathcal G_i$ be a finite set of functions $g_i \colon \mathcal Y \to \mathcal R_i$, and for each $x \in \mathcal X$ let $\{G^{i,\,x}_g\}_{g \in \mathcal G_i}$ be a projective measurement. Suppose that for all $i \in \{1,\dots,k\}$ the set $\mathcal G_i$ satisfies the following property: for any two $g_i \ne g_i' \in \mathcal G_i$, the probability that $g_i(y) = g_i'(y)$ over a uniformly random $y \in \mathcal Y$ is at most $\eps$.
+
+	Let $\bigl\{ A^x_{g_1,\,g_2,\,\dots,\,g_k} \bigr\}$ be a projective measurement with outcomes $(g_1,\dots,g_k) \in \mathcal G_1 \times \cdots \times \mathcal G_k$. Here $\operatorname{eval}_y$ denotes the evaluation map $g \mapsto g(y)$, so that $A^x_{[\operatorname{eval}_y(\cdot)_i = a_i]}$ post-processes the outcome tuple by evaluating its $i$-th component at $y$; since the outcome sets $\mathcal G_1 \times \cdots \times \mathcal G_k$ and $\mathcal G_i$ and the targets $\mathcal R_i$ are finite, these are post-processings in the sense of Definition~\ref{def:bracket}. For each $1 \le i \le k$, suppose that on average over $x \sim \mu$ and $y \in \mathcal Y$ sampled uniformly at random,
+	\begin{equation}\label{eq:ld-sandwich-1}
+		A^x_{[\operatorname{eval}_y(\cdot)_i = a_i]} \ot \Id_B \simeq_{\delta} \Id_A \ot G^{i,\,x}_{[\operatorname{eval}_y(\cdot) = a_i]}\,.
+	\end{equation}
+	% The source (references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:465-495) prints the
+	% transposed pairing G^{k,x}_{g_1} ... G^{1,x}_{g_k} ... G^{k,x}_{g_1}, which is undefined
+	% when the outcome sets differ; the pairing below is the one of Fact 4.34 in the NEEXP
+	% source. The empty product for k = 0 is also made explicit here. See
+	% rem:ld-sandwich-indexing.
+	Define the POVM family $\{C^x_{g_1,\,g_2,\,\dots,\,g_k}\}$, for $x \in \mathcal X$, by
+	\[
+		C^x_{g_1,\,g_2,\,\dots,\,g_k} = G^{k,\,x}_{g_k} \cdots G^{2,\,x}_{g_2}\; G^{1,\,x}_{g_1}\; G^{2,\,x}_{g_2} \cdots G^{k,\,x}_{g_k}\,;
+	\]
+	for $k = 0$ the empty product is understood as the identity, so that $C^x$ is the measurement whose single outcome, the empty tuple, carries the operator $\Id$. Then on average over $x \sim \mu$ and $y \in \mathcal Y$ sampled uniformly at random,
+	\begin{equation}\label{eq:ld-sandwich-2}
+		A^x_{[\operatorname{eval}_y(\cdot) = (a_1,\,a_2,\,\dots,\,a_k)]} \ot \Id_B \simeq_{k(\delta+\eps)^{1/2}} \Id_A \ot C^x_{[\operatorname{eval}_y(\cdot) = (a_1,\,a_2,\,\dots,\,a_k)]}\,.
+	\end{equation}
+\end{lemma}
+\begin{proof}
+	The source proof is a citation: the argument is identical to the proof of Fact 4.34 in \cite{Natarajan2018NEEXP}, with the only modification being the insertion of the dependence on the question $x$ for all measurements considered. In outline, the consistency hypotheses \eqref{eq:ld-sandwich-1} allow one to insert the projective factors $G^{i,\,x}$ next to $A^x$ one index at a time, and the $\eps$-bound on the pairwise agreement of distinct functions in $\mathcal G_i$ controls the events on which two different outcomes collide at the sampled point $y$. Each of the $k$ insertions costs $(\delta+\eps)^{1/2}$ by the Cauchy--Schwarz inequality, producing the sandwich $C^x$ with total error $k(\delta+\eps)^{1/2}$.
+\end{proof}
+
+\begin{remark}[Index pairing in the sandwich]\label{rem:ld-sandwich-indexing}
+	As printed in the source, the sandwich in Lemma~\ref{lem:ld-sandwich} pairs the $i$-th measurement with the outcome $g_{k+1-i}$: the outermost factor $G^{k,\,x}$ carries the outcome $g_1$ and the innermost factor $G^{1,\,x}$ carries $g_k$. Since the measurement $\{G^{i,\,x}_g\}$ is indexed by $g \in \mathcal G_i$, the operator $G^{k,\,x}_{g_1}$ is undefined whenever $\mathcal G_1 \ne \mathcal G_k$, so the printed pairing is a typographical slip. The statement above instead uses the pairing $G^{k,\,x}_{g_k} \cdots G^{1,\,x}_{g_1} \cdots G^{k,\,x}_{g_k}$ of Fact 4.34 in \cite{Natarajan2018NEEXP}, from which the lemma is imported. The source also leaves the case $k = 0$ implicit; with the empty-product convention recorded in the statement, both sides of \eqref{eq:ld-sandwich-2} are then the identity on the single empty-tuple outcome and the conclusion holds with error zero.
+\end{remark}
+
+% The source (references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:504-505) quantifies
+% the pairwise-agreement hypothesis over every pair (x, y_1), including pairs carrying
+% probability zero under D, on which no conditional distribution of y_2 is defined; the
+% hypothesis is restated here over the pairs of positive marginal probability, the only
+% pairs the sampling in the hypothesis can refer to and the only ones the averaged
+% conclusion depends on. The NEEXP original (references/neexp-paper/
+% 05_quantum_preliminaries.tex:1000-1008, label fact:low-degree-sandwich-on-steroids)
+% conditions on a fixed question tuple with the same restriction left implicit.
+\begin{lemma}[Pasting two consistent measurements; Fact 4.35 in \cite{Natarajan2018NEEXP}]\label{lem:pasting}
+	\uses{def:consistency, def:bracket, def:povm-conventions}
+	Let $\mathcal D$ be a distribution on $(x, y_1, y_2) \in \mathcal X \times \mathcal Y_1 \times \mathcal Y_2$. For $i \in \{1,2\}$ let $\mathcal G_i$ be a collection of functions $g_i \colon \mathcal Y_i \to \mathcal R_i$ and let $\{(G_i)^x_g\}_{g \in \mathcal G_i}$ be families of measurements such that $\{(G_2)^x_g\}_g$ is projective for every $x$. Suppose further that for every pair $(x, y_1)$ of positive probability under the marginal of $\mathcal D$ on $\mathcal X \times \mathcal Y_1$ (the only pairs for which the conditional distribution of $y_2$ under $\mathcal D$ is defined; pairs of marginal probability zero are subject to no requirement) it holds that for $g_2 \ne g_2' \in \mathcal G_2$ the probability, on average over $y_2$ chosen from $\mathcal D$ conditioned on $(x, y_1)$, that $g_2(y_2) = g_2'(y_2)$ is at most $\eta$. Let $\{A^{x,y_1,y_2}_{a_1,\,a_2}\}$ be a family of projective measurements with outcomes $(a_1, a_2) \in \mathcal R_1 \times \mathcal R_2$ such that for $i \in \{1,2\}$,
+	\begin{equation}\label{eq:pasting-1}
+		A^{x,y_1,y_2}_{a_i} \ot \Id \simeq_\delta \Id \ot (G_i)^x_{[\operatorname{eval}_{y_i}(\cdot)=a_i]}
+	\end{equation}
+	and
+	\begin{equation}\label{eq:pasting-2}
+		A^{x,y_1,y_2}_{a_1,\,a_2} \ot \Id \simeq_\delta \Id \ot A^{x,y_1,y_2}_{a_1,\,a_2}\,,
+	\end{equation}
+	where $A^{x,y_1,y_2}_{a_i}$ denotes the marginal on the $i$-th part of the outcome (Definition~\ref{def:povm-conventions}). Define a family of measurements $\{J^x_{g_1,\,g_2}\}$ by
+	\begin{equation}\label{eq:pasting-2a}
+		J^x_{g_1,\,g_2} = (G_2)^x_{g_2}\, (G_1)^x_{g_1}\, (G_2)^x_{g_2}\,.
+	\end{equation}
+	Then there is a
+	\begin{equation}\label{eq:def-deltap}
+		\delta_{\mathrm{pasting}} = \delta_{\mathrm{pasting}}(\eta, \delta) = \poly(\eta, \delta)
+	\end{equation}
+	such that
+	\begin{equation}\label{eq:pasting-3}
+		A^{x,y_1,y_2}_{a_1,\,a_2} \ot \Id \simeq_{\delta_{\mathrm{pasting}}} \Id \ot J^x_{[\operatorname{eval}_{y_1}(\cdot)=a_1,\, \operatorname{eval}_{y_2}(\cdot)=a_2]}\,.
+	\end{equation}
+	Neither the exponent nor the constant in $\poly(\eta, \delta)$ is made explicit in the source; both are universal constants inherited from the proof of Fact 4.35 in \cite{Natarajan2018NEEXP}.
+\end{lemma}
+\begin{proof}
+	Stated in the source without proof, as an import of Fact 4.35 of \cite{Natarajan2018NEEXP}. The measurement $J^x$ sandwiches the family $(G_1)^x$ between two copies of the projective family $(G_2)^x$. The consistency hypotheses \eqref{eq:pasting-1} and the self-consistency \eqref{eq:pasting-2} allow the joint measurement $A^{x,y_1,y_2}$ to be compared with the sandwiched product one factor at a time, and the $\eta$-bound on the pairwise agreement of distinct functions in $\mathcal G_2$ controls the error terms arising when two different outcomes $g_2 \ne g_2'$ agree at the sampled point $y_2$.
+\end{proof}
+
+\begin{lemma}[Close strategies have close values; Fact 4.32 in \cite{Natarajan2018NEEXP}]\label{lem:close-strategies-have-close-values}
+	\uses{def:strategy-distance, def:tensor-product-value, def:projective-strategy-general}
+	Let $\mathfrak G$ be a nonlocal game, and let $\mathcal S$, $\mathcal S'$ be two strategies that are $\delta$-close in the sense of Definition~\ref{def:strategy-distance}, for some $\delta \in [0,1]$, and that use the same state $\ket{\psi}$. If either $\mathcal S$ or $\mathcal S'$ is projective, then
+	\[
+		\bigl| \operatorname{val}^*(\mathfrak G, \mathcal S) - \operatorname{val}^*(\mathfrak G, \mathcal S') \bigr| \le O(\delta^{1/2})\,.
+	\]
+\end{lemma}
+\begin{proof}
+	Stated in the source without proof; it is Fact 4.32 of \cite{Natarajan2018NEEXP}. Write the value difference as an average over $(x,y) \sim \mu$ of sums of terms of the form $\bra{\psi} (A^x_a - (A')^x_a) \ot B^y_b \ket{\psi}$ and $\bra{\psi} (A')^x_a \ot (B^y_b - (B')^y_b) \ket{\psi}$, replacing one player's measurements at a time. The Cauchy--Schwarz inequality bounds each group by the square root of the corresponding averaged squared state-dependent distance, and projectivity of one of the two strategies keeps the accompanying operator sums bounded, giving the total bound $O(\delta^{1/2})$.
+\end{proof}
+
+\section{Conditionally linear functions and distributions}
+% Paper subsection label sec:cl kept for cross-reference fidelity.
+\label{sec:cl}
+
+Conditionally linear functions specify the question distributions of the games considered in the following chapters in a form that can be ``introspected''. Intuitively, a conditionally linear function takes as input an element $x \in V = \F^n$ and applies linear maps $L_j$ sequentially to $x^{V_j}$, where $V_1, V_2, \dots$ is a sequence of complementary register subspaces such that both the linear map $L_j$ and the subspace $V_j$, for $j \ge 2$, may depend on the values taken by the previous linear maps $L_1(x^{V_1})$, $L_2(x^{V_2})$, and so on.
+
+Throughout this section $V$ denotes the linear space $\F^n$ for some integer $n \ge 0$, and all the distinguished subspaces of $V$ are register subspaces (Definition~\ref{def:register-subspace}). If $V_1, V_2, \dots, V_\ell$ are fixed subspaces of $V$ and $k \in \{1, 2, \dots, \ell\}$, we use the subscript range notation
+\[
+	V_{<k} = \bigoplus_{j\,:\,1 \le j < k} V_j\,, \qquad V_{>k} = \bigoplus_{j\,:\,\ell \ge j > k} V_j\,,
+\]
+and $V_{\le k}$, $V_{\ge k}$ are understood to be $V_{<k+1}$ and $V_{>k-1}$, respectively. For a register subspace $V'$ of $V$, the symbol $x^{V'}$ denotes the projection of $x$ onto $V'$ parallel to the complementary register subspace (Definition~\ref{def:complementary}). Moreover, if $F \colon V' \to V'$ is a function and $x \in V$, we write $x^F$ for $F(x^{V'})$; for example, in the following definition $x^{L_1}$ is shorthand for $L_1(x^{V_1})$.
+
+\begin{definition}[Conditionally linear functions]\label{def:cl-func}
+	\uses{def:register-subspace, def:complementary}
+	Let $V$ be $\F^n$ for some $n \ge 0$. For all integers $\ell \ge 0$ the collection of \emph{$\ell$-level conditionally linear functions} (implicitly, \emph{on $V$}) is defined inductively as follows.
+	\begin{enumerate}
+		\item There is a single $0$-level conditionally linear function, which is the $0$ function on $V$.
+		\item Let $\ell \ge 1$ and suppose the collection of $(\ell-1)$-level conditionally linear functions has been defined. The collection of $\ell$-level conditionally linear functions on $V$ consists of all functions $L$ on $V$ that can be expressed in the following form: there exist complementary register subspaces $V_1$ and $V_{>1}$ of $V$, a linear function $L_1$ on $V_1$, and, for all $v \in L_1(V_1)$, an $(\ell-1)$-level conditionally linear function $L_{>1,\,v}$ on $V_{>1}$, such that for all $x \in V$,
+		\[
+			L(x) = x^{L_1} + L_{>1,\,x^{L_1}}(x^{V_{>1}})\,.
+		\]
+	\end{enumerate}
+\end{definition}
+
+We abbreviate ``conditionally linear'' as \emph{CL}. Operationally, an $\ell$-level CL function first applies $L_1$ to $x^{V_1}$; conditioned on the value $x^{L_1}$ it selects a register subspace $V_2$ and a linear map $L_2$ and applies $L_2$ to $x^{V_2}$; and so on, finally outputting $\sum_{k=1}^{\ell} x^{L_k}$. Every $1$-level CL function is linear, and conversely every linear map on $V$ is a $1$-level CL function. Moreover, for every $\ell \ge 1$ the collection of $\ell$-level CL functions contains the collection of $(\ell-1)$-level CL functions.
+
+\begin{definition}[Conditionally linear distributions]\label{def:cl-dist}
+	\uses{def:cl-func}
+	Let $L, R \colon V \to V$ be conditionally linear functions. The \emph{conditionally linear distribution $\mu_{L,R}$ corresponding to $(L,R)$} is the distribution over pairs $(L(x), R(x)) \in V \times V$ for $x$ drawn uniformly at random from $V$.
+\end{definition}
+
+Note that both players' questions are generated from the \emph{same} uniformly random seed $x$; this shared-seed structure is what the introspection technique exploits. The following lemma elucidates the structural properties of $\ell$-level CL functions. Recall that $x^{L_{<k}}$ and $x^{L_k}$ denote $L_{<k}(x)$ and $L_{k,\,u}(x^{V_{k,\,u}})$ where $u = L_{<k}(x)$.
+
+\begin{lemma}[Structure of conditionally linear functions]\label{lem:cl-kth}
+	\uses{def:cl-func, def:register-subspace}
+	Let $\ell \ge 1$ and $V = \F^n$ for some integer $n \ge 0$. A function $L \colon V \to V$ is an $\ell$-level CL function if and only if the following collection of functions and subspaces exists:
+	\begin{enumerate}
+		\item[(i)] for each $k \in \{1, 2, \dots, \ell\}$, a function $L_{\le k} \colon V \to V$, called the \emph{$k$-th marginal of $L$};
+		\item[(ii)] for each $k \in \{1, 2, \dots, \ell\}$ and $u \in L_{<k}(V)$, a register subspace $V_{k,\,u}$ of $V$, called the \emph{$k$-th factor space with prefix $u$};
+		\item[(iii)] for each $k \in \{1, 2, \dots, \ell\}$ and $u \in L_{<k}(V)$, a linear map $L_{k,\,u} \colon V_{k,\,u} \to V_{k,\,u}$, called the \emph{$k$-th linear map of $L$ with prefix $u$};
+	\end{enumerate}
+	such that the following conditions hold for all $k \in \{1, 2, \dots, \ell\}$:
+	\begin{enumerate}
+		\item $L_{\le k}$ is a $k$-level CL function on $V$;
+		\item $V = \bigoplus_{i=1}^{\ell} V_{i,\,x^{L_{<i}}}$ for all $x \in V$;
+		\item $L_{\le k}(x) = \sum_{i=1}^{k} x^{L_i}$ for all $x \in V$, where $L_i$ is shorthand notation for $L_{i,\,x^{L_{<i}}}$;
+		\item $L = L_{\le \ell}$.
+	\end{enumerate}
+	As in condition 3, we sometimes use $V_k$ and $L_k$ to denote $V_{k,\,u}$ and $L_{k,\,u}$ respectively, leaving the prefix $u$ implicit.
+\end{lemma}
+\begin{proof}
+	\uses{def:cl-func}
+	For the ``if'' direction, conditions 1 and 4 immediately exhibit $L$ as an $\ell$-level CL function. For the ``only if'' direction one constructs the marginals, factor spaces, and linear maps by induction on $\ell$. In the base case $\ell = 1$ take $L_{\le 1} = L$, $V_1 = V$, and $L_1 = L$. For the inductive step, write $L(x) = x^{L_1} + L_{>1,\,x^{L_1}}(x^{V_{>1}})$ as in Definition~\ref{def:cl-func} and apply the inductive hypothesis to each $(\ell-1)$-level function $L_{>1,\,v}$, obtaining its marginals, factor spaces, and linear maps over $V_{>1}$. Define $L_{\le 1} = L_1$ with first factor space $V_1$, and for $k \ge 2$ define $L_{\le k}(x) = x^{L_1} + L'_{x^{L_1},\,<k}(x^{V_{>1}})$, with the $k$-th factor space and linear map of $L$ with prefix $u$ given by those of $L_{>1,\,v}$ at index $k-1$ with prefix $w$, where $v = u^{V_1}$ and $w = u^{V_{>1}}$. Conditions 1--4 are then verified directly from the inductive hypothesis: the direct-sum decomposition of $V_{>1}$ extends to $V$ by adjoining $V_1$, and the sum formula for $L_{\le k}$ follows by unfolding the inductive marginals.
+\end{proof}
+
+The marginal functions, factor spaces, and linear maps of a given CL function $L$ need not be unique. For example, the identity function on $V = \F^n$ is a $1$-level CL function, but it can also be viewed as a $k$-level CL function for any $k \in \{2, \dots, n\}$ with an arbitrary partition of $V$ into factor spaces.
+
+\begin{lemma}[Concatenation of conditionally linear functions]\label{lem:cl-concat}
+	\uses{def:cl-func}
+	Let $\ell, k \ge 0$ be integers and let $U = \F^n$, $V = \F^m$ be linear spaces. Suppose $L$ is a $k$-level CL function on $U$ and, for each $u \in L(U)$, $R_u$ is an $\ell$-level CL function on $V$. Then the \emph{concatenation} $T$ of $L$ and $\{R_u\}_u$, defined by
+	\[
+		T(x) = L(x^U) + R_{L(x^U)}(x^V)\,,
+	\]
+	is a $(k+\ell)$-level conditionally linear function on $U \oplus V$.
+\end{lemma}
+\begin{proof}
+	\uses{def:cl-func}
+	By induction on $k$. The case $k = 0$ follows directly from Definition~\ref{def:cl-func}, since then $L = 0$ and $T$ acts by the single $\ell$-level function $R_0$ on the register subspace $V$. For the inductive step, write $L(x^U) = x^{L_1} + L_{>1,\,x^{L_1}}(x^{U_{>1}})$ with complementary register subspaces $U_1$ and $U_{>1}$ of $U$. For each value $x^{L_1}$, the function $T_{>1,\,x^{L_1}}$ on $U_{>1} \oplus V$ sending $x^{U_{>1} \oplus V}$ to $L_{>1,\,x^{L_1}}(x^{U_{>1}}) + R_{x^{L_1} + x^{L_{>1}}}(x^V)$ is the concatenation of the $(k-1)$-level function $L_{>1,\,x^{L_1}}$ with a family drawn from $\{R_u\}$, hence is $(k+\ell-1)$-level by the induction hypothesis. The claim then follows from Definition~\ref{def:cl-func} applied with first subspace $U_1$ and first linear map $L_1$.
+\end{proof}
+
+% The source (references/qpbt-paper/05_conditionally_linear_functions.tex:315-364) leaves
+% the number m of summands unquantified (m >= 1 is needed for the level max_j ell_j to
+% have an index) and begins its induction at level 1; the level-zero base case is supplied
+% here, since def:cl-func admits 0-level functions and all ell_j may be 0.
+\begin{lemma}[Direct sums of conditionally linear functions]\label{lem:cl-func-prod}
+	\uses{def:cl-func, def:register-subspace}
+	Let $m \ge 1$ be an integer and let $V^{(1)}, V^{(2)}, \dots, V^{(m)}$ be register subspaces of $V$ such that $V = \bigoplus_{j=1}^m V^{(j)}$. Suppose that, for each $j \in \{1, 2, \dots, m\}$, $L^{(j)}$ is an $\ell_j$-level conditionally linear function on $V^{(j)}$. Then the direct sum $L = \bigoplus_{j=1}^m L^{(j)}$, defined by
+	\[
+		L(x) = \sum_{j=1}^m L^{(j)}(x^{(j)})
+	\]
+	for all $x = \sum_{j=1}^m x^{(j)} \in \bigoplus_{j=1}^m V^{(j)}$, is an $\ell$-level CL function on $V$ for $\ell = \max_j \{\ell_j\}$; the maximum exists since $m \ge 1$.
+\end{lemma}
+\begin{proof}
+	\uses{def:cl-func}
+	Since an $\ell$-level CL function is also $k$-level conditionally linear for all $k \ge \ell$, it suffices to prove the claim when $\ell_j = \ell$ for all $j$. Proceed by induction on $\ell$. For $\ell = 0$ every $L^{(j)}$ is the zero function on $V^{(j)}$, so $L$ is the zero function on $V$, which is the unique $0$-level CL function on $V$ (Definition~\ref{def:cl-func}). For the inductive step with $\ell \ge 1$, decompose each $L^{(j)}$ into its first-level linear part $L^{(j)}_1$ on $V^{(j)}_1$ and its family of $(\ell-1)$-level remainders $L^{(j)}_{>1,\,v_j}$ on $V^{(j)}_{>1}$. The direct sums of the first-level parts define a linear map on $V_1 = \bigoplus_j V^{(j)}_1$, and, for each prefix value $v = \sum_j v_j$, the direct sums of the remainders are $(\ell-1)$-level conditionally linear on $V_{>1} = \bigoplus_j V^{(j)}_{>1}$ by the induction hypothesis. This exhibits $L$ in the form required by Definition~\ref{def:cl-func}.
+\end{proof}
+
+\begin{lemma}[Direct sums give product distributions]\label{lem:cl-dist-prod}
+	\uses{def:cl-dist, lem:cl-func-prod}
+	For each $i \in \{1, \dots, m\}$ let $L^{(i)}, R^{(i)} \colon V^{(i)} \to V^{(i)}$ be $\ell_i$-level conditionally linear functions, and let $L, R \colon V \to V$ be the direct sums $L = \bigoplus_i L^{(i)}$ and $R = \bigoplus_i R^{(i)}$, as defined in Lemma~\ref{lem:cl-func-prod}. Then the conditionally linear distribution $\mu_{L,R}$ is the product distribution $\prod_{i=1}^m \mu_{L^{(i)},\,R^{(i)}}$ over $V \times V$.
+\end{lemma}
+\begin{proof}
+	A uniformly random $x \in V$ has independent components $x^{(i)}$, each uniformly distributed in $V^{(i)}$. Hence the pair $(L(x), R(x)) = \bigl( (L^{(i)}(x^{(i)}))_{i=1}^m,\, (R^{(i)}(x^{(i)}))_{i=1}^m \bigr)$ is distributed exactly as the product of the distributions $\mu_{L^{(i)},\,R^{(i)}}$ for $i = 1, 2, \dots, m$.
+\end{proof}
+
+\section{Typed conditionally linear distributions}
+% Paper section label sec:types kept for cross-reference fidelity. Only the mathematical
+% typed material (typed CL functions and distributions, graph distributions) is stated
+% here; the typed sampler and verifier machinery of the source is outside the scope of
+% the mathematical development.
+\label{sec:types}
+
+The question distribution of the Pauli basis test is \emph{typed}: each question is a pair consisting of a type, drawn together with the other player's type from the edges of a fixed \emph{type graph}, and a question content, drawn from a CL distribution determined by the pair of types.
+
+\begin{definition}[Typed conditionally linear functions]\label{def:typed-cl-functions}
+	\uses{def:cl-func}
+	Let $\mathcal T$ be a finite set (the \emph{type set}) and let $V$ be $\F^n$ for some integer $n \ge 0$. A \emph{$\mathcal T$-typed family of $\ell$-level conditionally linear functions} (implicitly, \emph{on $V$}) is a collection $\{L_t\}_{t \in \mathcal T}$ such that, for each $t \in \mathcal T$, $L_t$ is an $\ell$-level conditionally linear function on $V$.
+\end{definition}
+
+% Nonemptiness of the edge set is stated explicitly here: with E empty, m = k = 0 and the
+% normalization 1/(2m-k) below is undefined. The source
+% (references/qpbt-paper/07_types.tex:65-82) leaves this boundary hypothesis implicit.
+\begin{definition}[Graph distribution]\label{def:graph-distribution}
+	Let $G = (U, E)$ be an undirected graph with vertex set $U$ and nonempty edge set $E$. Edges in $E$ are written as multisets $\{u, v\}$ of two vertices; the case $u = v$ represents a self-loop. Suppose there are $m \ge 1$ edges, $k$ of which are self-loops. Then the \emph{graph distribution $\mu_G$ of $G$} is the distribution over $U \times U$ such that for every $(u,v) \in U \times U$,
+	\[
+		\mu_G(u, v) =
+		\begin{cases}
+			1/(2m-k) & \text{if } \{u,v\} \in E\,,\\
+			0 & \text{otherwise}\,.
+		\end{cases}
+	\]
+	This is identical to the uniform distribution over ordered pairs $(u,v) \in U \times U$ such that $\{u,v\} \in E$: each edge that is not a self-loop contributes two ordered pairs, and each self-loop contributes one, whence the normalization $2m-k$.
+\end{definition}
+
+% The nonempty-edge hypothesis on G is inherited from def:graph-distribution, where it is
+% needed for the graph distribution mu_G to be defined; the source
+% (references/qpbt-paper/07_types.tex:84-93) leaves it implicit here as well.
+\begin{definition}[Typed conditionally linear distributions]\label{def:typed-cl-distributions}
+	\uses{def:typed-cl-functions, def:graph-distribution, def:cl-dist}
+	Let $\mathcal T$ be a type set and let $L = \{L_u\}_{u \in \mathcal T}$ and $R = \{R_v\}_{v \in \mathcal T}$ be $\mathcal T$-typed families of conditionally linear functions on $V$. Let $G = (\mathcal T, E)$ be a graph with vertex set $\mathcal T$ and nonempty edge set $E$, so that the graph distribution $\mu_G$ of Definition~\ref{def:graph-distribution} is defined. The \emph{$(\mathcal T, G)$-typed conditionally linear distribution $\mu^G_{L,\,R}$ corresponding to $(L, R)$} is the distribution over pairs $\bigl( (u, x), (v, y) \bigr)$, where the type pair $(u,v)$ is drawn from the graph distribution $\mu_G$ and the content pair $(x,y)$ is drawn from $\mu_{L_u,\,R_v}$.
+\end{definition}

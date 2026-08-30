@@ -1,0 +1,473 @@
+\documentclass[11pt]{article}
+
+\usepackage{amsmath,amssymb}
+\usepackage{xurl}
+\usepackage[hidelinks]{hyperref}
+\setlength{\emergencystretch}{2em}
+
+\input{command}
+
+\title{Dimension Divisibility in the Classical Test Instantiation of the
+	Pauli Basis Analysis}
+\author{}
+\date{2026-08-30}
+
+\begin{document}
+\maketitle
+
+\section{At a glance}
+
+\begin{itemize}
+  \item \textbf{Difficulty: medium.}  Two related matters are recorded.
+  First, the soundness analysis of the Pauli basis test invokes the
+  classical low individual degree game at dimension $2m+2$, and the game's
+  question distribution is undefined at that dimension for the admissible
+  parameters: it requires $2m+2$ to divide $q$, while admissibility supplies
+  only $m \mid q$; the repair is a statement-level reformulation of an
+  imported theorem, not a new proof.  Second, the import of the classical
+  game's quantum soundness from the tensor-code paper carries two open
+  verification obligations at every dimension: the asserted identity with
+  the cited tensor-code test is not an identity and must be replaced by a
+  reduction with a value bound, and the source's instantiation of the
+  theorem's auxiliary parameter violates its lower bound at small
+  dimensions (Section~\ref{sec:import-obligations}).
+  \item \textbf{Estimated weight:} for the recommended direction, about
+  \textbf{3--5 new definitions or interfaces} (a line-point distribution with
+  directly sampled index at arbitrary dimension, the directly indexed game,
+  and a restated soundness import) plus \textbf{7--10 supporting lemmas},
+  including the strategy-transport layer between the directly indexed game
+  and the $\chi$-based game (parsing pullback, seed-fiber averaging with
+  its open synchronicity-branch control, and a dilation--compression round
+  trip of the soundness conclusion); several hundred lines of formal proof.
+  Discharging the import obligations of
+  Section~\ref{sec:import-obligations} adds the pair-measurement
+  construction with its distributional matching, the branch-weight value
+  bound, and the parameter-bound case split.  The padding fallback is
+  heavier, roughly 6--10 reworked lemmas.
+  \item \textbf{Mathlib/project split:} approximately \textbf{15\% Mathlib}
+  and \textbf{85\% project-local}.  Mathlib supplies uniform distributions on
+  finite types and pushforward identities; the substance is choosing the
+  statement of the imported soundness theorem and rechecking the combining
+  subtree against it.
+  \item \textbf{Key Mathlib inputs:} uniform distributions on finite types
+  and their maps, and elementary divisibility arithmetic on powers of two.
+  The main inputs are project-local: the classical game, its conditionally
+  linear question distribution, and the imported soundness statement.
+  Tracked in \localissue{0002}.
+\end{itemize}
+
+\section{Key theorem forms}
+
+Throughout, $q = 2^k$ with $k$ odd is an admissible field size, the tuple
+$(q,m,d)$ is admissible when moreover $d \ge 1$ and $m \mid q$, and
+$\mathrm{ideg}_{d,m}(\F_q)$ denotes the $m$-variate polynomial representatives
+over $\F_q$ of individual degree at most $d$.  The comparison involves four
+theorem forms.
+\begin{enumerate}
+  \item \textbf{Source theorem form} (the polynomial-pair measurement).  There
+  is a function $\delta_S(\eps,m,d,q) = a(md)^a(\eps^b + q^{-b} + 2^{-bmd})$,
+  for universal constants $a > 1$ and $0 < b < 1$, such that for every
+  admissible $(q,m,d)$ and every projective strategy for the Pauli basis test
+  succeeding with probability at least $1-\eps$, there is a projective
+  measurement $\{\hat S_{g_X,g_Z}\}$ with outcomes pairs of polynomials in
+  $\mathrm{ideg}_{d,m}(\F_q)$ whose evaluations are $\delta_S$-consistent, on
+  average over a uniform point $u \in \F_q^m$ and in both bases
+  $W \in \{X,Z\}$, with the corresponding points measurements
+  $\{\hat M^{(\mathrm{Point},W),u}_a\}$ of the strategy, together with the
+  symmetric counterpart of this relation.
+  \item \textbf{Missing instantiation obligation.}  The classical low
+  individual degree game with parameter tuple $(q,\, 2m+2,\, d,\, 1)$ is well
+  defined, and the combined point and line measurements assembled in the
+  analysis constitute a strategy for it of value at least
+  $1 - \delta_{\mathrm{combine}}$.  The game's question distribution draws
+  its axis and diagonal indices through an index function
+  $\chi_{2m+2}\colon \F_q \to \{1,\ldots,2m+2\}$ with classes of equal size
+  $q/(2m+2)$, so the game exists only when $2m+2$ divides $q$.
+  \item \textbf{Restricted form supported by the present route.}  The source
+  theorem form under the additional hypothesis $2m+2 \mid q$.  Among
+  admissible tuples this hypothesis holds exactly when $m = 1$ and
+  $q \ge 8$; it fails for every admissible tuple with $m \ge 2$ and for
+  $(q,m) = (2,1)$.
+  \item \textbf{Repaired import form} (recommended target).  Quantum
+  soundness of the directly indexed variant of the classical low individual
+  degree game over $\F_q^{m'}$, for every dimension $m' \ge 1$ and
+  admissible $q$, with no divisibility hypothesis: the question
+  distribution samples the axis index, and the diagonal prefix index,
+  uniformly from $\{1,\ldots,m'\}$ directly rather than through an index
+  function on $\F_q$, and line questions carry the sampled index itself in
+  place of the seed $s \in \F_q$; the error is
+  $\delta_{\mathrm{ld}}(\eps,q,m',d,k) = a(dm'k)^a(\eps^b + q^{-b} +
+  2^{-bm'd})$.  This is a candidate target form, not an established one:
+  proving it carries the same two import obligations as the $\chi$-based
+  import (Section~\ref{sec:import-obligations}), and deriving the present
+  form from it when $m' \mid q$ requires the strategy transport described
+  under the candidate repairs below, whose synchronicity step is an open
+  obligation.
+\end{enumerate}
+
+\section{The source assertion and the obstruction}
+
+We examine the final step of the subsection ``Applying the classical
+low-degree test'' in the analysis of the Pauli basis test in the compression
+paper of Ji, Natarajan, Vidick, Wright, and Yuen (MIP$^{*}$=RE,
+arXiv:2001.04383), whose quantum soundness component builds on the low
+individual degree test of \cite{Ji2020LowIndividualDegree}.%
+\footnote{Tracked in \localissue{0002}.  In the mirror of the source
+consulted here, the polynomial-pair lemma and its proof are at
+\path{references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex},
+lines~1267--1288; the sub-line lemma is at lines~1063--1116 and the combined
+line lemma at lines~1020--1034 of the same file.  The game parametrization
+with its divisibility, the index function, the soundness statement with its
+proof, and admissibility are at
+\path{references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex},
+lines~33--35, 214--219, 413--458, and 958--961.}
+There, the combined point measurements
+$\{\hat Q^{x,z,\alpha,\beta}_c\}$ and combined line measurements
+$\{\hat Q^{\ell}_f\}$, indexed by points of $\F_q^{2m+2}$ and lines in
+$\F_q^{2m+2}$, are asserted to form a strategy for the classical low
+individual degree game with parameters
+\[
+  \mathsf{ldparams} = (q,\, 2m+2,\, d,\, 1)
+  \tag{\path{lem:qld-4-7}}
+\]
+of value $1 - \delta_{\mathrm{combine}}$, and the quantum soundness theorem
+for that game is applied to produce the global polynomial-pair measurement.
+The two lemmas feeding this step are stated for the line-point distribution
+over $\F_q^{2m+2}$.
+
+The game, however, is parametrized by tuples $(q,m',d,k)$ with $q$ an
+admissible field size \emph{and $m'$ dividing $q$}.  The divisibility is not
+incidental: the question distribution is a conditionally linear distribution
+in which a uniform seed coordinate $s \in \F_q$, read as an integer in
+$\{0,\ldots,q-1\}$, determines the axis or diagonal index through the unique
+$\chi(s)$ with
+\[
+  s = (\chi(s)-1)\,\frac{q}{m'} + r, \qquad 0 \le r < \frac{q}{m'},
+  \tag{\path{eq:chi-func}}
+\]
+so that the $m'$ classes $\chi^{-1}(i)$ partition $\F_q$ into sets of equal
+size $q/m'$ and the index is uniform.  For $m' \nmid q$ neither the index
+function nor the line-point distribution built from it is defined.
+
+Admissibility of $(q,m,d)$ supplies only $m \mid q$.  Since an admissible $q$
+is a power of two, $m \mid q$ forces $m = 2^j$.  For $j \ge 1$ the integer
+$m+1 \ge 3$ is odd, so $2m+2 = 2(m+1)$ has an odd factor exceeding $1$ and
+divides no power of two; for $m = 1$ the condition $4 \mid q$ holds for every
+admissible $q$ except $q = 2$.  Thus the instantiation at dimension $2m+2$ is
+undefined for every admissible tuple with $m \ge 2$: for instance
+$(q,m,d) = (8,2,1)$ is admissible, while $6 \nmid 8$.  The source performs
+the instantiation without addressing the divisibility, so its proof route
+establishes the polynomial-pair lemma, and with it the soundness theorem for
+the Pauli basis test that rests on it, only for $m = 1$ and $q \ge 8$.
+
+\section{What the cited soundness theorem requires: the import obligations}
+\label{sec:import-obligations}
+
+The quantum soundness theorem for the classical game inherits the constraint
+$m' \mid q$ solely because it is stated for the game just described; its
+proof fixes an admissible $q$ with $m' \mid q$, asserts that the game with
+simultaneity parameter $1$ is \emph{identical} to the two-prover tensor-code
+test for the Reed--Solomon tensor code $\mathcal C^{\ot m'}$ of the same
+authors' \emph{Quantum soundness of testing tensor codes} (arXiv:2111.08131)
+\cite{Ji2021Quantum}, and concludes by Theorem~4.7 there, instantiated with
+that theorem's auxiliary integer parameter --- denoted $k$ in that source,
+and written $K$ here to avoid clashing with the field exponent and the
+simultaneity parameter --- chosen as $(m')^3 d$.  Neither
+the asserted identity nor the instantiation is complete as stated, so the
+import carries two verification obligations, which this section details and
+which the blueprint's proof node for the soundness statement records as
+open.  Both obligations are independent of the divisibility question: they
+arise at every dimension, for the $\chi$-based game where it is defined and
+equally for the directly indexed variant proposed under the candidate
+repairs.
+
+\paragraph{The cited test.}
+In the two-prover tensor-code test (Figures~1 and~2 of
+\cite{Ji2021Quantum}; the two-prover strategy format and the goodness
+measure are Definitions~4.5 and~4.6 there), the referee performs one of
+three subtests with probability $1/3$ each, assigning the two roles of each
+subtest to the two provers uniformly at random.  \emph{Axis-parallel lines
+test}: sample a uniform point $u \in [n]^{m'}$ and a uniform axis
+$j \in \{1,\ldots,m'\}$; send the axis-parallel line $\ell$ through $u$ in
+direction $j$ to one prover, who answers a codeword $g \in \mathcal C$;
+send $u$ to the other, who answers a field value $a$; accept iff
+$g(u_j) = a$.  \emph{Subcube commutation test}: sample
+$j \in \{1,\ldots,m'\}$ and a subcube $H \subseteq [n]^{m'}$ by fixing the
+last $j-1$ coordinates uniformly; sample $u, v$ independently and uniformly
+in $H$ and a uniform order bit; send the ordered pair $(u,v)$ or $(v,u)$ to
+one prover, who answers a pair $(b_u, b_v)$ of field values; send $u$ to
+the other, who answers $a$; accept iff $b_u = a$.  \emph{Synchronicity
+test}: send one identical question --- a line, a point, or an ordered
+pair, with probability $1/3$ each --- to both provers and accept iff their
+answers agree.  Theorem~4.7 supposes a two-prover strategy passing this
+test with probability $1-\eps$ together with an integer parameter
+$K \ge 12 m' t$, where $t$ is the interpolation parameter of the base code
+--- for the degree-$d$ Reed--Solomon code, of blocklength $n = q$ and
+distance $q-d$, one has $t = d+1$ --- and produces projective measurements
+$\{G_c\}$ and $\{\tilde G_c\}$ with outcomes in $\mathcal C^{\ot m'}$,
+consistent with one prover's points measurements, with the other prover's
+lines measurements, and with each other, up to
+$\eta'(m',t,K,\eps,n^{-1}) = \mathrm{poly}(m',t,K) \cdot
+\mathrm{poly}(\eps, n^{-1}, e^{-K/(m')^2})$.
+
+\paragraph{Obligation 1: the game correspondence.}
+The source asserts that the $\chi$-based game at parameters $(q,m',d,1)$
+is this test.  It is not, in four respects.
+(i)~The game has no pair questions.  A pair question of the test reveals
+two points of a \emph{hidden} subcube --- the subcube itself is not sent
+--- and is answered by two field values, while the game's diagonal-line
+question reveals a full line description and is answered by a degree-$m'd$
+polynomial.  A reduction must construct the pair measurements from the
+diagonal-line measurements by post-processing (measure a line through $u$
+and $v$ and evaluate the answered polynomial at the two parameters), and
+both directions of the information mismatch matter: the game's line
+description carries an index and a seed, neither of which is a function of
+the pair $(u,v)$, so the constructed measurement must average over the
+compatible indices and seeds; and the game's diagonal lines fix the
+\emph{first} $i-1$ coordinates where the test's subcubes fix the
+\emph{last} $j-1$, so the coordinate conventions must be aligned.  The
+construction must preserve projectivity and must match the law of the
+hidden-subcube pair with the law induced by the game's diagonal sampling.
+(ii)~The game's line questions carry the seed $s \in \F_q$; the test's
+carry only the line.  A strategy may depend on the seed beyond its class
+$\chi^{-1}(i)$, and removing this dependence runs into the fiber-averaging
+difficulty made explicit under the candidate repairs: averaging preserves
+the line-versus-point branches exactly but not the synchronicity branches.
+(iii)~The branch weights differ: each nontrivial cross-test has mass $1/3$
+in the test against $2/9$ in the game.  Once the per-branch predicates are
+matched, the intended bookkeeping bound is that the constructed strategy's
+rejection probability in the test is at most $\tfrac32$ times the game's
+rejection probability, up to the $O(1/(m'q))$ of item~(iv); this bound is
+the target of the obligation, not an established fact.
+(iv)~The game's predicate fixes an acceptance convention on diagonal
+questions with zero direction --- an event of probability at most
+$2/(m'q)$, recorded in the blueprint's remark on zero directions --- for
+which the test has no counterpart branch.
+Finally, the displayed conclusions of Theorem~4.7 pair one prover's points
+measurements with the other prover's tensor-codeword measurement, and the
+first prover's tensor-codeword measurement with the second prover's lines
+measurements, while the game-level statement asserts the point consistency
+in both directions; deriving the stated form uses the role symmetrization
+of the test and belongs to the correspondence.  None of these steps is
+difficult to state, but none is carried out in the source, and together
+they replace the asserted one-line identity by a reduction carrying its
+own value bound.
+
+\paragraph{Obligation 2: the parameter bound.}
+Theorem~4.7 requires $K \ge 12 m' t = 12 m' (d+1)$.  The source
+instantiates $K = (m')^3 d$, which meets the bound iff
+$(m')^2 d \ge 12(d+1)$: this holds for all $d \ge 1$ when $m' \ge 5$,
+holds at $m' = 4$ exactly when $d \ge 3$, and fails for every $d$ when
+$m' \le 3$.  In the game's parameter domain the dimension divides the
+admissible field size and is therefore a power of two, so the source's
+instantiation violates the hypothesis exactly at $m' \in \{1,2\}$ for
+every $d$ and at $m' = 4$ for $d \in \{1,2\}$ --- in particular, in the
+multilinear regime $d = 1$, at every dimension $m' \le 4$.  A candidate
+repair is to instantiate $K = \max((m')^3 d,\, 12 m'(d+1))$; the open
+obligation is then to re-absorb the error, that is, to check that
+$\mathrm{poly}(m',t,K)$ and $e^{-K/(m')^2}$ still collapse to the form
+$a(dm')^a(\eps^b + q^{-b} + 2^{-bm'd})$ in the small-$m'$ cases where the
+maximum is $12m'(d+1)$ --- plausible, since there
+$e^{-K/(m')^2} = e^{-12(d+1)/m'}$ decays in $d$ at a rate comparable to
+$2^{-m'd}$ for $m' \le 4$, but not checked here.
+
+In the correspondence of Obligation~1, the only role of the divisibility
+$m' \mid q$ is to make the $\chi$-sampled index uniform.  The underlying
+mathematics does not need the divisibility.  The low
+individual degree test of \cite{Ji2020LowIndividualDegree} samples its axis
+index $i$ uniformly from $\{1,\ldots,m'\}$ directly, with no index function
+on $\F_q$ and no divisibility hypothesis,%
+\footnote{See the test figure in \path{references/ldt-paper/test_definition.tex}.}
+and the tensor-code test is likewise a test about the code
+$\mathcal C^{\ot m'}$, not about an encoding of indices into $\F_q$.  The
+$\chi$-based packaging exists so that the question distribution is
+conditionally linear, which the introspection machinery requires for the
+game the players actually play --- the Pauli basis test at dimension $m$,
+where admissibility does supply the divisibility.  The game at dimension
+$2m+2$ never appears in a verifier; it is an internal analysis device in the
+proof of the polynomial-pair lemma, so nothing there requires its question
+distribution to be conditionally linear.
+
+\section{Candidate repairs}
+
+\paragraph{Direct index sampling (candidate direction, recommended).}
+Define, for arbitrary $m' \ge 1$, the line-point distribution over
+$\F_q^{m'}$ that samples the uniform point, the uniform axis index
+$i \in \{1,\ldots,m'\}$, and the diagonal direction with vanishing first
+$i-1$ coordinates, directly; define the \emph{directly indexed game} with
+this question distribution, whose line questions carry the index $i$ (and,
+for diagonal lines, the projected direction) in place of the seed
+$s \in \F_q$; and state the imported soundness theorem for that game
+(form~4 above).  This removes the divisibility obstruction and nothing
+else: the directly indexed game still asks for polynomials on revealed
+lines, has no pair questions, and weighs its branches as the present game
+does, so establishing form~4 carries the same two import obligations as
+the $\chi$-based import (Section~\ref{sec:import-obligations}), now at
+arbitrary dimension.
+
+The relation to the present game when $m' \mid q$ must moreover be proved
+at the level of games, not merely of question distributions, because the
+two games have different question alphabets: an $\mathsf{ALine}$ question
+of the $\chi$-based game is a pair $(u_0, s)$ and a $\mathsf{DLine}$
+question a triple $(u_0, s, v')$, so a strategy may select different
+measurements for seeds $s \ne s'$ with $\chi(s) = \chi(s')$, and equality
+of the induced laws of the geometric data does not by itself transport
+such a strategy.  The transport layer decomposes into the following
+obligations, none of which is carried out here.
+\begin{itemize}
+  \item \emph{Distribution lemma.}  When $m' \mid q$, the image of the
+  conditionally linear question distribution under the parsing map
+  $(u_0,s) \mapsto (u_0,\chi(s))$, $(u_0,s,v') \mapsto (u_0,\chi(s),v')$
+  is the direct distribution, and conditioned on the parsed question the
+  seed is uniform on the class $\chi^{-1}(i)$, independently of everything
+  else.
+  \item \emph{Parsing pullback.}  A strategy for the directly indexed game
+  composed with the parsing map is a seed-oblivious strategy for the
+  $\chi$-based game.  Since the win predicate depends on the question only
+  through the parsed data, and a seed-oblivious strategy answers
+  identically across each fiber --- in particular on the synchronicity
+  branches, where both players hold the same seed --- the value should be
+  preserved exactly on every branch, and projectivity is preserved.  This
+  is the direction the combining subtree needs.
+  \item \emph{Seed-fiber averaging: what it preserves and what it does
+  not.}  In the opposite direction, average each line measurement over its
+  seed fiber: attach to a direct question $(u_0,i)$, respectively
+  $(u_0,i,v')$, the average over uniform $s \in \chi^{-1}(i)$ of the
+  measurements attached to $(u_0,s)$, respectively $(u_0,s,v')$, leaving
+  the points measurements unchanged.  By the conditional uniformity of the
+  seed this preserves the value of every \emph{line-versus-point} branch
+  exactly: there the paired question carries no seed, so the branch value
+  is an average over the fiber of per-seed values, which the averaged
+  measurement computes.  It does \emph{not} preserve the synchronicity
+  branches.  There both players hold the same seed, so the $\chi$-based
+  branch value is the diagonal average
+  $\E_{s}\sum_f \langle M^{(u_0,s)}_f \ot \widetilde M^{(u_0,s)}_f
+  \rangle$, while the averaged strategy realizes the double average
+  $\E_{s,s'}\sum_f \langle M^{(u_0,s)}_f \ot \widetilde M^{(u_0,s')}_f
+  \rangle$ over independent seeds in the fiber; the two differ whenever
+  the players' measurements vary across a fiber in a correlated way (if
+  both apply a common seed-dependent relabelling, every diagonal term is
+  large and the cross terms are not), and neither quantity dominates the
+  other in general.  An earlier revision of this note claimed that the
+  averaging preserves the exact value, and with it synchronicity; that
+  claim was wrong and is withdrawn.  What needs proof is control of the
+  synchronicity branches under de-seeding.  Candidate approaches: show
+  that a strategy of value $1-\eps$ in the $\chi$-based game is, with
+  polynomial loss, close to a seed-oblivious one; or state form~4 with a
+  synchronicity hypothesis in the doubled-average form and re-derive it on
+  the tensor-code side.  Choosing and proving one of these is an open
+  obligation.
+  \item \emph{Projectivity round trip.}  The averaged strategy is a POVM
+  strategy even when the given one is projective, while the imported
+  theorem, like the present one, takes projective strategies.  The
+  intended round trip is: dilate the averaged strategy to a projective one
+  (Naimark preserves all product correlations
+  $\langle X \ot Y \rangle$ of the given strategy against the dilated
+  state --- hence the value of every branch the averaging preserved ---
+  but nothing restores the diagonal seed correlations once the averaging
+  has been performed); apply form~4; and compress the resulting polynomial
+  measurement along the dilation isometry back to a POVM in the required
+  measurement class on the original space.  That this compression
+  preserves the consistency conclusions must itself be proved; it is
+  stated here as an obligation, not established.  (Alternatively, form~4
+  may be stated for POVM strategies outright, moving the dilation inside
+  the import.)
+\end{itemize}
+
+The combining subtree would then be reread with the direct distribution
+and the directly indexed game at dimension $2m+2$: every statement becomes
+well defined for all admissible tuples, and the expectation is that the
+proofs survive unchanged, because the measurements constructed there are
+indexed by the geometric data --- points, lines, and polynomials on them
+--- and so constitute a strategy for the directly indexed game outright,
+with no fiber averaging.  Verifying, lemma by lemma, that those proofs use
+only the laws of the sampled objects and never the conditional linearity
+of the sampling is part of this direction's obligations.  This follows the
+subtree protocol for a definition-level mismatch: the definition is
+corrected at the lowest point rather than each downstream lemma acquiring
+a hypothesis.  The transport layer costs one parsing-map definition, the
+distribution lemma, the pullback lemma, whichever synchronicity control is
+chosen, and the dilation--compression lemma; the first three are an
+estimated one to two hundred lines on top of the restated import, with the
+blueprint's existing Naimark interface supplying the dilation, while the
+synchronicity control is the step whose weight is genuinely uncertain.
+The external check that the tensor-code test of arXiv:2111.08131 samples
+its axes and subcubes directly has been made against that source: Figure~1
+there draws the axis index and the subcube data uniformly and directly,
+with no index encoding into $\F_q$.
+
+\paragraph{Padding the dimension.}
+Alternatively, embed the combined polynomial into
+$\mathrm{ideg}_{d,\bar m}(\F_q)$ for $\bar m = 4m$, the least power of two
+with $\bar m \ge 2m+2$, ignoring the $2m-2$ dummy variables.  Then
+$\bar m \mid q$ holds whenever $q \ge 4m$, and the existing game applies at
+dimension $\bar m$.  In the complementary regime $m \in \{q/2,\, q\}$ the
+conclusion is vacuous: $md \ge q/2$ gives
+$\delta_S \ge a(md)^a q^{-b} \ge a\,2^{-a} q^{a-b} \ge a\,2^{-b} \ge 1$
+for $a \ge 2$, while the consistency quantities bounded by the theorem never
+exceed $1$.  This route stays inside the present definitions but reworks the
+sub-line distribution (a fourth coordinate block of dummies), the combining
+map, and the wrong-block Schwartz--Zippel analysis, and it moves the
+combining lemmas away from their source statements at dimension $2m+2$.
+
+\paragraph{Unequal index classes.}
+One could instead define an index function at dimension $2m+2$ with classes
+of sizes $\lfloor q/(2m+2)\rfloor$ and $\lceil q/(2m+2)\rceil$.  The index
+is then only approximately uniform, the identification with the external
+test fails exactly, and every distributional identity in the sub-line
+analysis acquires an error term; this amounts to re-proving the imported
+soundness theorem for a perturbed game and is not recommended.
+
+\section{Comparison with the blueprint}
+
+The blueprint \cite{MIPStarREBlueprint} keeps the sub-line lemma, the
+combined line lemma, and the polynomial-pair lemma in their source-shaped
+statements, with no divisibility hypothesis.  Their proofs retain the source
+constructions and mark the unresolved obligation at the exact steps: the
+first sampling step of the sub-line construction, where $\chi_{2m+2}$ and
+the line-point distribution over $\F_q^{2m+2}$ are invoked, and the
+instantiation step of the polynomial-pair proof, where $(q,2m+2,d,1)$ is
+used as a game parameter tuple.  A chapter remark records the divisibility
+arithmetic and cites this note; the final soundness theorem for the Pauli
+basis test remains open modulo this obligation.  The blueprint's proof node
+for the classical soundness import itself states the source's route --- the
+identification with the two-prover tensor-code test and the application of
+Theorem~4.7 --- and enumerates the two obligations of
+Section~\ref{sec:import-obligations} as open, citing this note for the
+detailed comparison and the case arithmetic.  An earlier revision had
+instead added the hypothesis $2m+2 \mid q$ to the three lemmas; that was
+statement drift in the sense of the proof-gap protocol, since the hypothesis
+excludes all admissible $m \ge 2$ and does not appear in the source.
+
+\section{Conclusion}
+
+There is a theorem-level gap in the source proof route: the classical low
+individual degree game invoked at dimension $2m+2$ is undefined for every
+admissible tuple with $m \ge 2$ (and for $(q,m) = (2,1)$), because its
+question distribution requires $2m+2 \mid q$ while admissibility supplies
+only $m \mid q$.  The cited route therefore does not establish the
+polynomial-pair lemma, nor the soundness of the Pauli basis test that
+depends on it, beyond $m = 1$ and $q \ge 8$.  Independently of the
+divisibility, the import of the classical game's quantum soundness carries
+the two open verification obligations of
+Section~\ref{sec:import-obligations}: the asserted identity with the
+two-prover tensor-code test must be replaced by a reduction carrying a
+value bound, and the source's instantiation of the auxiliary parameter
+violates the theorem's lower bound at the small dimensions listed there.
+We do not assert that any conclusion is false: the underlying tensor-code
+soundness is insensitive to how the axis index is sampled, and both import
+obligations concern verification, not counterexample.  For the divisibility
+repair, the recommended candidate direction is direct index sampling ---
+restate the imported soundness theorem for the directly indexed game at
+arbitrary dimension; prove the distribution and parsing-pullback lemmas;
+settle the synchronicity control for de-seeding together with the
+dilation--compression round trip, so that the present soundness statement
+would follow from the repaired import; and reread the combining subtree
+against the directly indexed game --- a direction whose open obligations
+are enumerated under the candidate repairs, not an established route, with
+dimension padding as the fallback confined to the present game definition.
+
+\bibliographystyle{alpha}
+\bibliography{references}
+
+\end{document}

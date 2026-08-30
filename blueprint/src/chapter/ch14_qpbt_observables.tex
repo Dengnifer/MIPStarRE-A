@@ -1,0 +1,1241 @@
+\chapter{Strategy observables and the expanded space}
+\label{chap:qpbt-observables}
+% This chapter covers the first three subsections of the source appendix
+% ``Analysis of the Pauli basis test''
+% (references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex, lines 1-679).
+% The paper's subsection labels sec:qld-prelim, sec:commutation and
+% sec:expanding are kept on the sections below for cross-reference fidelity.
+% The source restates thm:pauli verbatim at the head of the appendix under the
+% label thm:pauli-appendix (lines 6-20); the statement is the same theorem, and
+% all references here are to thm:pauli as stated in Chapter chap:qpbt-test.
+
+This chapter and the two that follow contain the proof of the soundness
+theorem for the Pauli basis test, Theorem~\ref{thm:pauli}, stated in
+Chapter~\ref{chap:qpbt-test}. Starting from a strategy that succeeds in the
+game $\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$ with high probability, the proof
+constructs a representation of the Pauli group on the players' Hilbert space
+in several stages. In Section~\ref{sec:commutation} the strategy measurements
+are used to define a set of observables that correspond to a subset of the
+Pauli $X$ and $Z$ observables, and these observables are shown to
+approximately satisfy the associated Pauli group relations. In
+Section~\ref{sec:expanding}, ancillary registers containing EPR states are
+adjoined to the players' state, and a new set of approximately commuting
+observables acting on the expanded state is defined.
+Chapter~\ref{chap:qpbt-combining} combines the approximately commuting
+observables into a strategy for the \emph{classical} low individual degree
+test and applies the soundness theorem of that test to construct a single
+projective measurement that simultaneously measures all of them.
+Chapter~\ref{chap:qpbt-extraction} uses this simultaneous measurement to
+construct an exact representation of the Pauli group, shows that it is close
+to the original strategy observables on the expanded state, and deduces
+Theorem~\ref{thm:pauli}. Section~\ref{sec:qld-prelim} below collects
+preliminary definitions and lemmas used throughout the analysis.
+
+\section{Preliminaries}
+\label{sec:qld-prelim}
+
+\begin{definition}[Individual and total degree polynomial classes]
+	\label{def:ideg-deg-polynomials}
+	\uses{def:line, def:line-representative, def:polyfunc}
+	Given integers $d, m \geq 0$ and a prime power $q$, denote by
+	$\mathrm{ideg}_{d,m}(\F_q)$ the set of polynomials in $m$ variables over
+	$\F_q$ with \emph{individual} degree at most $d$ in each variable. When
+	the field is clear from context we write $\mathrm{ideg}_{d,m}$, and when
+	the number of variables is also clear from context, $\mathrm{ideg}_d$. We
+	denote by $\deg_d$ the set of polynomials with \emph{total} degree at
+	most $d$.
+	% The line-restricted classes below are introduced only implicitly in the
+	% source, in the statement of the lemma labelled lem:qld-comm-line-cons,
+	% which reads them as polynomials "defined on the line". The coefficient
+	% reading adopted here follows the answer format of the decision procedure
+	% of the low individual degree game (source figure fig:ld-decider) and the
+	% representative convention of def:polyfunc; see the remark following this
+	% definition.
+	For a line $\ell \subseteq \F_q^m$ (Definition~\ref{def:line}) presented
+	by a base point $u_0$ and a direction $v$ --- for the lines arising as
+	question contents, the pair read off the line's description, whose base
+	point is the canonical representative of
+	Definition~\ref{def:line-representative} --- and an integer $c \geq 0$,
+	we write $\deg_c(\ell)$ for the set of univariate polynomials of degree
+	at most $c$, each given by its list of $c+1$ coefficients and identified
+	by its polynomial representative rather than by the function it induces,
+	as in Definition~\ref{def:polyfunc}; the argument $\ell$ records the
+	line to which such an answer refers, through the parameterization
+	$t \mapsto u_0 + tv$. The cases used below are $\deg_d(\ell)$ and
+	$\deg_{md}(\ell)$; whenever $d \leq md$, extending coefficient lists by
+	zeros gives the inclusion $\deg_d(\ell) \subseteq \deg_{md}(\ell)$. For
+	$f \in \deg_c(\ell)$, $u \in \ell$, and $a \in \F_q$, we say that $f$
+	\emph{evaluates to $a$ at $u$}, written $f(u) = a$, if $f(t) = a$ for
+	every $t \in \F_q$ with $u = u_0 + tv$. When $v \neq 0$ this $t$ is
+	unique, so every $f$ evaluates at every point of $\ell$; when $v = 0$,
+	so that $\ell = \{u_0\}$, exactly those $f$ that induce a constant
+	function on $\F_q$ evaluate at $u_0$, to their constant value. An
+	operator indexed by $f(u)$ is understood to be the zero operator when
+	$f$ does not evaluate at $u$, and for a family $\{N_f\}$ indexed by
+	$f \in \deg_c(\ell)$ we write
+	$N_{[\mathrm{eval}_u(\cdot)=a]} = \sum_{f \colon f(u) = a} N_f$; when
+	$v = 0$ the classes indexed by $a \in \F_q$ form a sub-measurement
+	rather than a partition of the outcomes. The \emph{completed} family of
+	evaluation classes is the family indexed by $a \in \F_q \cup \{\bot\}$
+	obtained by adjoining the additional class
+	$N_{[\mathrm{eval}_u(\cdot)=\bot]} = \sum_{f} N_f$, the sum over those
+	$f$ that do not evaluate at $u$; when $\{N_f\}$ is a POVM,
+	respectively a projective measurement, the completed classes form one
+	as well, and when $v \neq 0$ the class
+	$N_{[\mathrm{eval}_u(\cdot)=\bot]}$ is the zero operator.
+\end{definition}
+
+\begin{remark}[Line answers as coefficient lists]
+	\label{rem:deg-line-representatives}
+	The source refers to the elements of $\deg_{md}(\ell)$ as polynomials
+	``defined on the line $\ell$'', that is, as functions on the point set
+	of $\ell$, while its decision procedure expects each line answer as a
+	list of coefficients. The two readings differ. When $md \geq q$,
+	distinct coefficient lists induce the same function $\F_q \to \F_q$;
+	and when $\ell$ has direction $v = 0$ --- a case the question
+	distributions produce with positive probability
+	(Remark~\ref{rem:ld-win-zero-direction}) --- the point set of $\ell$ is
+	the singleton $\{u_0\}$, so a function on $\ell$ retains only a single
+	field element of the answer. Definition~\ref{def:ideg-deg-polynomials}
+	therefore adopts the coefficient reading, under which the strategy's
+	line measurements are indexed by exactly the answers of the prescribed
+	form, and its evaluation convention reproduces the universal
+	quantification of the line-versus-point clauses of the win predicates
+	(Definition~\ref{def:ld-win-predicate}).
+\end{remark}
+
+Throughout this chapter $q = 2^k$ with $k$ odd is an admissible field size
+(Definition~\ref{def:admissible-size}) and $M = 2^m$ is the number of
+$q$-ary qudits tested for per player, as in
+Chapters~\ref{chap:qpbt-test} and~\ref{chap:qpbt-extraction}. (The letter
+$M$ also denotes the measurement operators of the strategy under analysis,
+as in the tuple $\mathcal{S} = (\ket{\psi}, M)$ below and in the
+super- and subscripted individual operators such as
+$M^{(\mathrm{Point},W),u}_a$; the meaning is determined by context, as in
+the source.) Recall from
+Chapter~\ref{chap:qpbt-algebra} the low-degree code
+(see Definition~\ref{def:low-degree-encoding}), which maps each vector
+$h \in \F_q^{M}$, with
+coordinates indexed by binary strings of length $m$, to a polynomial
+$g_h \in \mathrm{ideg}_{d,m}(\F_q)$ such that $g_h(u) = h_u$ for every
+$u \in \{0,1\}^m$; for $x \in \F_q^m$ the associated vector
+$\mathrm{ind}_m(x) \in \F_q^{M}$ satisfies
+$g_h(x) = h \cdot \mathrm{ind}_m(x)$ for all $h$. Recall also the finite
+field trace $\tr = \tr_{q \to 2} \colon \F_q \to \F_2$
+(see Definition~\ref{def:subfield-trace}).
+
+\begin{definition}[Commuting and anticommuting tuples]
+	\label{def:anticommuting-tuple}
+	% The quantity gamma is introduced in the source at eq:gamma-value, inside
+	% the completeness analysis of the Pauli basis test; the definition below
+	% is self-contained and does not depend on that occurrence.
+	\uses{def:low-degree-encoding, def:subfield-trace}
+	For a tuple
+	$\omega = (u_X, u_Z, r_X, r_Z) \in (\F_q^m)^2 \times (\F_q)^2$, let
+	\[
+		\gamma(\omega) \,=\, \tr\big( (r_X \cdot \mathrm{ind}_m(u_X)) \cdot (r_Z \cdot \mathrm{ind}_m(u_Z)) \big)\,,
+	\]
+	where $r_W \cdot \mathrm{ind}_m(u_W)$ is the scalar multiple of the
+	vector $\mathrm{ind}_m(u_W) \in \F_q^{M}$, the middle $\cdot$ is the
+	$\F_q$-inner product of two vectors in $\F_q^{M}$, and
+	$\tr = \tr_{q \to 2}$. The tuple $\omega$ is called \emph{anticommuting}
+	if $\gamma(\omega) \neq 0$, and \emph{commuting} if $\gamma(\omega) = 0$.
+\end{definition}
+
+The sign $(-1)^{\gamma(\omega)}$ is exactly the sign with which the
+generalized Pauli observables $\tau^X(r_X \cdot \mathrm{ind}_m(u_X))$ and
+$\tau^Z(r_Z \cdot \mathrm{ind}_m(u_Z))$ commute
+(see Lemma~\ref{lem:twisted-commutation});
+this is the source of the terminology.
+
+\begin{lemma}[Probability of anticommuting tuples]
+	\label{fact:omega-anticomm-prob}
+	% The source states this result in a `fact' environment; it is stated here
+	% as a lemma, and the paper label is kept verbatim.
+	% The exact value of the anticommuting probability and the constant lower
+	% bounds under the hypothesis m <= q are additions relative to the source,
+	% which asserts only the two bounds displayed at the end of the statement;
+	% the source states those bounds without the hypothesis m, d >= 1, under
+	% which alone they hold (see the remark following this lemma). The
+	% unconditional constant bounds are what the proof of the lemma labelled
+	% lem:qld-win-implications uses.
+	\uses{def:anticommuting-tuple}
+	A tuple $\omega = (u_X,u_Z,r_X,r_Z)$ sampled uniformly at random from
+	$(\F_q^m)^2 \times (\F_q)^2$ is anticommuting with probability exactly
+	\[
+		\big(1 - q^{-1}\big)^{m+1} \cdot \frac{1}{2}\,,
+	\]
+	and commuting with the complementary probability, which is at least
+	$\frac12$. In particular, if $m \leq q$, then $\omega$ is anticommuting
+	with probability at least $2^{-4}$ and commuting with probability at
+	least $\frac12$. If $m, d \geq 1$, then the probability that $\omega$ is
+	anticommuting is at least
+	\[
+		(1 - q^{-m}) \cdot (1 - q^{-1}) \cdot \Big(1 - \frac{md}{q}\Big) \cdot \frac{1}{2}
+		\,\geq\, \Big(1 - \frac{3md}{q}\Big) \cdot \frac{1}{2}\,,
+	\]
+	and the probability that $\omega$ is commuting is also at least
+	$\big(1 - \frac{3md}{q}\big) \cdot \frac{1}{2}$.
+\end{lemma}
+\begin{proof}
+	\uses{def:low-degree-encoding, def:indicator-vector, def:admissible-size, def:binary-representation, lem:downsize_field, lem:one}
+	By the definition of the indicator vector
+	(Definition~\ref{def:indicator-vector}), expanding the product over the
+	coordinates $i \in \{1, \dots, m\}$ into a sum over $y \in \{0,1\}^m$
+	gives
+	\[
+		\mathrm{ind}_m(u_X) \cdot \mathrm{ind}_m(u_Z)
+		\,=\, \sum_{y \in \{0,1\}^m} \mathrm{ind}_{m,y}(u_X)\, \mathrm{ind}_{m,y}(u_Z)
+		\,=\, \prod_{i=1}^{m} \big( u_{X,i}\, u_{Z,i} + (1 - u_{X,i})(1 - u_{Z,i}) \big)\,,
+	\]
+	and since $\F_q$ has characteristic $2$, the $i$-th factor equals
+	$1 + u_{X,i} + u_{Z,i}$. Hence
+	\[
+		\gamma(\omega) \,=\, \tr\Big( (r_X r_Z) \cdot \prod_{i=1}^{m} (1 + u_{X,i} + u_{Z,i}) \Big)\,.
+	\]
+	For any fixed $u_X$, the $m$ factors $1 + u_{X,i} + u_{Z,i}$ are
+	independent and uniformly distributed in $\F_q$ over the choice of
+	$u_Z$, so all of them are nonzero with probability $(1-q^{-1})^m$;
+	independently, $r_X \neq 0$ with probability $1 - q^{-1}$. If $r_X = 0$
+	or some factor vanishes, then $\gamma(\omega) = 0$. Otherwise, over the
+	uniform choice of $r_Z$, the argument of the trace is a uniformly random
+	element of $\F_q$. Since $q = 2^k$ is admissible, the trace of an
+	element of $\F_q$ equals the coordinate sum of its binary
+	representation: writing $\kappa$ for the binary representation with
+	respect to the fixed self-dual normal basis
+	(Definition~\ref{def:binary-representation}), item~2 of
+	Lemma~\ref{lem:downsize_field} gives
+	$\tr(c) = \tr(c \cdot 1) = \kappa(c) \cdot \kappa(1)$, and $\kappa(1)$
+	is the all-ones vector by Lemma~\ref{lem:one}. As $\kappa$ is a
+	bijection onto $\F_2^k$, a uniformly random element of $\F_q$ has trace
+	$0$ with probability exactly $\frac12$. Combining, the probability that
+	$\gamma(\omega) \neq 0$ is exactly $(1-q^{-1})^{m+1} \cdot \frac12$, and
+	the probability that $\omega$ is commuting is the complement, which is
+	at least $\frac12$.
+
+	If $m \leq q$, then
+	$(1-q^{-1})^{m+1} \geq (1-q^{-1})^{q+1} = (1-q^{-1})^{q} \cdot (1-q^{-1})$,
+	a product of two positive functions of $q$ that are nondecreasing for
+	$q \geq 2$, so it is minimized at $q = 2$, where it equals $2^{-3}$;
+	hence the anticommuting probability is at least $2^{-4}$.
+
+	Finally, suppose $m, d \geq 1$, and consider the first inequality of
+	the display, which bounds the anticommuting probability from below.
+	If $md > q$, that lower bound is negative --- it is the product of
+	the positive factors $1 - q^{-m}$, $1 - q^{-1}$, and $\frac12$ with
+	the negative factor $1 - md/q$ --- so the anticommuting probability,
+	being nonnegative, exceeds it. If $md \leq q$, then by Bernoulli's
+	inequality
+	$(1-q^{-1})^{m} \geq 1 - m/q \geq 1 - md/q \geq (1-q^{-m})(1-md/q)$,
+	where the last step multiplies the nonnegative quantity $1 - md/q$
+	by $1 - q^{-m} \leq 1$; multiplying by $1 - q^{-1}$ shows that the
+	anticommuting probability is at least the first displayed bound. For
+	the second inequality of the display, expanding the product shows
+	that $(1-q^{-m})(1-q^{-1})(1-md/q)$ exceeds
+	$1 - q^{-m} - q^{-1} - md/q$ by
+	$q^{-m-1} + \frac{md}{q} \big( q^{-m} + q^{-1} - q^{-m-1} \big)$,
+	a sum of nonnegative terms whatever the sign of $1 - md/q$; since
+	$md \geq 1$ gives $q^{-m} \leq q^{-1} \leq md/q$, the product is
+	therefore at least $1 - 3md/q$.
+	The commuting probability is at least
+	$\frac12 \geq \big(1 - \frac{3md}{q}\big) \cdot \frac12$.
+\end{proof}
+
+\begin{remark}[Source correction: the anticommuting probability]
+	\label{rem:omega-anticomm-prob-correction}
+	In the source, the statement corresponding to
+	Lemma~\ref{fact:omega-anticomm-prob} asserts only the two bounds of the
+	final display, without the hypothesis $m, d \geq 1$, and its proof
+	begins with the claims that $\mathrm{ind}_m(u_X)$ vanishes if and only
+	if $u_X = 0$ and that $u_X = 0$ forces $\omega$ to be commuting. Both
+	claims are incorrect: the coordinates of $\mathrm{ind}_m(u)$ sum to $1$
+	for every $u \in \F_q^m$, so $\mathrm{ind}_m(u)$ never vanishes, and for
+	$(q,m,d) = (2,1,0)$ the tuple $\omega = (0,0,1,1)$ is anticommuting.
+	For $d = 0$ the bounds themselves fail: with $(q,m,d) = (2,1,0)$ ---
+	a tuple with admissible field size and $m \mid q$, excluded from
+	Definition~\ref{def:admissible} only by the requirement $d \geq 1$
+	that the source leaves implicit --- the exact anticommuting
+	probability
+	$(1-q^{-1})^{m+1} \cdot \frac12 = \frac18$ is smaller than the claimed
+	lower bound $\big(1 - \frac{3md}{q}\big) \cdot \frac12 = \frac12$. The
+	proof given above therefore computes the probability exactly, using the
+	characteristic-two product formula for
+	$\mathrm{ind}_m(u_X) \cdot \mathrm{ind}_m(u_Z)$, in place of the
+	source's argument via the Schwartz--Zippel lemma; the exact value also
+	supplies the unconditional constant lower bounds used in the proof of
+	Lemma~\ref{lem:qld-win-implications}.
+\end{remark}
+
+\begin{definition}[Closeness of question-indexed operators]
+	\label{def:approx-question-indexed-operators}
+	\uses{def:povm-distance}
+	Let $\{A^x\}$ and $\{B^x\}$ be families of operators (not necessarily
+	POVM elements) indexed by questions $x \in \mathcal{X}$ but not by
+	answers, let $\mu$ be a distribution over $\mathcal{X}$, and let
+	$\ket{\psi}$ be a state, both fixed by context. Write
+	$A^x \approx_\delta B^x$ to denote
+	\[
+		\E_{x \sim \mu} \bra{\psi} (A^x - B^x)^\dagger (A^x - B^x) \ket{\psi} \,\leq\, O(\delta)\,.
+	\]
+	This extends the answer-indexed closeness of
+	Definition~\ref{def:povm-distance} to answer-free families of operators,
+	such as observables; as there, the right-hand side allows a hidden
+	universal constant.
+\end{definition}
+
+The following two lemmas relate the closeness between sets of operators and
+weighted sums of those operators.
+
+\begin{lemma}
+	\label{lem:avg-closeness}
+	\uses{def:approx-question-indexed-operators}
+	Let $\{A^x\}$ and $\{B^x\}$ be operators indexed by a finite set
+	$\mathcal{X}$, let $\mu$ be a probability distribution over
+	$\mathcal{X}$, and let $\{\alpha_x\}$ be complex numbers with
+	$|\alpha_x| \leq 1$. If $A^x \approx_\delta B^x$ on average over
+	$x \sim \mu$, then $A \approx_\delta B$ for the single operators
+	$A = \E_{x} \alpha_x A^x$ and $B = \E_{x} \alpha_x B^x$, regarded as
+	indexed by a one-element question set; quantitatively,
+	% The closeness of Definition def:approx-question-indexed-operators
+	% carries a hidden universal constant on both sides; the quantitative
+	% sentence records the constant-free inequality the proof establishes.
+	\[
+		\big\| (A - B) \ket{\psi} \big\|^2
+		\,\leq\, \E_x \big\| (A^x - B^x) \ket{\psi} \big\|^2\,,
+	\]
+	so the conclusion holds with the same implicit constant as the
+	hypothesis.
+\end{lemma}
+\begin{proof}
+	Expand
+	\[
+		\Big\| \E_x \alpha_x (A^x - B^x) \ket{\psi} \Big\|^2
+		\,\leq\, \Big( \E_x \big\| (A^x - B^x) \ket{\psi} \big\| \Big)^2
+		\,\leq\, \E_x \big\| (A^x - B^x) \ket{\psi} \big\|^2\,,
+	\]
+	using the triangle inequality followed by Jensen's inequality; the
+	right-hand side is at most $O(\delta)$ by the hypothesis, with the same
+	implicit constant.
+\end{proof}
+
+\begin{lemma}
+	\label{lem:povm-to-obs}
+	\uses{def:approx-question-indexed-operators, def:povm-distance}
+	Let $\mathcal{A}$ be a finite set, let $\{A^x_a\}_{a \in \mathcal{A}}$
+	and $\{B^x_a\}_{a \in \mathcal{A}}$ be POVMs, and let
+	$\{\alpha_a\}_{a \in \mathcal{A}}$ be complex numbers on the unit
+	circle. Let $A^x = \sum_a \alpha_a A^x_a$ and
+	$B^x = \sum_a \alpha_a B^x_a$. Then
+	\[
+		A^x_a \approx_\delta B^x_a \quad\text{implies}\quad A^x \approx_{\delta'} B^x
+	\]
+	for $\delta' = |\mathcal{A}| \cdot \delta$, where the hypothesis is the
+	answer-indexed closeness of Definition~\ref{def:povm-distance} and the
+	conclusion is the question-indexed closeness of
+	Definition~\ref{def:approx-question-indexed-operators}.
+\end{lemma}
+\begin{proof}
+	\uses{def:povm-distance, def:approx-question-indexed-operators}
+	% The source ends this display with the exact bound |A| * delta; under the
+	% O(.) reading of def:povm-distance the hypothesis only supplies O(delta),
+	% and the constant is retained inside the O(.).
+	Expand
+	\[
+		\E_x \Big\| \sum_a \alpha_a (A^x_a - B^x_a) \ket{\psi} \Big\|^2
+		\,\leq\, \E_x \Big( \sum_a \big\| (A^x_a - B^x_a) \ket{\psi} \big\| \Big)^2
+		\,\leq\, |\mathcal{A}| \cdot \E_x \sum_a \big\| (A^x_a - B^x_a) \ket{\psi} \big\|^2
+		\,\leq\, O\big( |\mathcal{A}| \cdot \delta \big)\,,
+	\]
+	using the triangle inequality followed by the Cauchy--Schwarz
+	inequality; the last step is the hypothesis
+	$A^x_a \approx_\delta B^x_a$, whose bound carries a hidden universal
+	constant (Definition~\ref{def:povm-distance}), and the conclusion
+	holds with the same implicit constant.
+\end{proof}
+
+The following lemma shows that POVMs that are approximately projective, in
+the sense of being self-consistent, are close to exact projective
+measurements.
+
+\begin{lemma}[Orthonormalization lemma]
+	\label{lem:ortho}
+	\uses{def:consistency, def:povm-distance}
+	Let $0 \leq \delta \leq 1$. There exists a function
+	$\eta_{\mathrm{ortho}}(\delta) = O\big(\delta^{1/4}\big)$ such that the
+	following holds. Let $\ket{\psi}$ be a state on
+	$\hilb_{\mathsf{A}} \ot \hilb_{\mathsf{B}}$ where $\hilb_{\mathsf{A}}$
+	and $\hilb_{\mathsf{B}}$ are finite dimensional, and let $\{Q_a\}$ and
+	$\{R_a\}$ be POVMs on $\hilb_{\mathsf{A}}$ and $\hilb_{\mathsf{B}}$
+	respectively such that
+	\begin{equation}\label{eq:cons-cond}
+		Q_a \ot \Id_{\mathsf{B}} \,\simeq_\delta\, \Id_{\mathsf{A}} \ot R_a\,.
+	\end{equation}
+	Then there exists a projective measurement $\{P_a\}$ on
+	$\hilb_{\mathsf{A}}$ such that, with respect to $\ket{\psi}$,
+	\begin{equation}\label{eq:cons-ccl}
+		P_a \ot \Id_{\mathsf{B}} \,\approx_{\eta_{\mathrm{ortho}}(\delta)}\, Q_a \ot \Id_{\mathsf{B}}\,.
+	\end{equation}
+\end{lemma}
+\begin{proof}
+	This lemma is imported: it first appears in~\cite{KV11}, and a
+	self-contained proof is given in the reference [ML20] cited
+	in~\cite{Ji2020MIPStar}. The proof is not reproduced here.
+\end{proof}
+
+\section{Strategies}
+\label{sec:commutation}
+
+% In the source this setup --- fixing the parameter tuple, the strategy and
+% its success probability, and making the measurements projective via
+% Naimark's theorem --- is untitled prose at the head of the subsection
+% (references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex, lines
+% 155-171), not a numbered environment. It is recorded here as a standing
+% convention paragraph together with a lemma for the one mathematical step
+% it contains, the reduction to a projective strategy.
+\paragraph{The strategy under analysis.}
+For the remainder of this chapter, as well as in
+Chapters~\ref{chap:qpbt-combining} and~\ref{chap:qpbt-extraction}, we fix
+an admissible parameter tuple $(q,m,d)$
+(Definition~\ref{def:admissible}) and a strategy
+$\mathcal{S} = (\ket{\psi}, M)$ for the game
+$\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$ that succeeds with probability
+at least $1 - \eps$, for some $\eps \geq 0$, where $\ket{\psi}$ is a
+bipartite state on registers $\mathsf{A}$ and $\mathsf{B}$ with associated
+Hilbert spaces $\hilb_{\mathsf{A}}$ and $\hilb_{\mathsf{B}}$. The symbol
+$M$ denotes the measurement operators of both players; which player is
+meant is indicated by the register on which the operator acts (for
+example, $M^{(\mathrm{Point},W),u}_a \ot \Id_{\mathsf{B}}$ indicates that
+$M^{(\mathrm{Point},W),u}_a$ is viewed as an operator acting on register
+$\mathsf{A}$).
+
+The analysis requires the measurements of $\mathcal{S}$ to be projective;
+the following lemma shows that this may be assumed without loss of
+generality.
+
+\begin{lemma}[Reduction to a projective strategy]
+	\label{lem:projective-strategy-setup}
+	\uses{def:admissible, def:pauli-question-distribution, def:pauli-win-predicate, def:tensor-product-strategy, def:tensor-product-value, def:projective-strategy-general}
+	Let $(q,m,d)$ be an admissible parameter tuple
+	(Definition~\ref{def:admissible}) and let
+	$\mathcal{S} = (\ket{\psi}, M)$ be a strategy for the game
+	$\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$, where $\ket{\psi}$ is a
+	bipartite state on registers $\mathsf{A}$ and $\mathsf{B}$. Then there
+	exists a projective strategy
+	(Definition~\ref{def:projective-strategy-general}) for
+	$\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$ whose success probability
+	equals that of $\mathcal{S}$ and whose state is the extension
+	\[
+		(\ket{\psi} \ot \ket{0\cdots 0} \ot \ket{0\cdots 0})_{\mathsf{A}\mathsf{B}}
+	\]
+	of $\ket{\psi}$ by finitely many ancilla qubits initialized in the
+	state $\ket{0}$, adjoined to each of the two registers.
+\end{lemma}
+\begin{proof}
+	\uses{thm:naimark, def:tensor-product-value, def:tensor-product-strategy}
+	Naimark's theorem (Theorem~\ref{thm:naimark}), applied with the
+	families of all of the first player's measurements on register
+	$\mathsf{A}$ and all of the second player's on register $\mathsf{B}$,
+	yields an auxiliary space and a projective sub-measurement replacing
+	each family on each register, together with a product auxiliary state,
+	such that every correlation
+	$\bra{\psi} M^{x}_a \ot M^{y}_b \ket{\psi}$ of $\mathcal{S}$ is
+	reproduced on the extended state. Each auxiliary space embeds into a
+	register of finitely many qubits; extend each dilated sub-measurement
+	to the enlarged register by adding to one fixed outcome both the
+	projector onto the orthogonal complement of the embedded subspace and
+	the residual projector of the sub-measurement. The outcome operators
+	remain mutually orthogonal projectors, now summing to the identity,
+	and no correlation changes: the complement projector annihilates the
+	extended state, which is supported in the embedded subspace, and so
+	does each residual projector, because for each question pair the
+	reproduced correlations sum to one --- the original families being
+	POVMs (Definition~\ref{def:tensor-product-strategy}) --- which forces
+	the projector $\Id$ minus the sum of each dilated sub-measurement to
+	have zero mass on the extended state. Finally, since the auxiliary
+	state is a product state, a unitary acting on each player's ancilla
+	qubits alone carries it to $\ket{0 \cdots 0} \ot \ket{0 \cdots 0}$;
+	conjugating the projective measurements by the same unitaries
+	preserves projectivity and all correlations. The success probability
+	of a strategy is a linear combination of its correlations, weighted by
+	the question distribution and the win predicate
+	(Definition~\ref{def:tensor-product-value}), and is therefore
+	unchanged.
+\end{proof}
+
+In view of Lemma~\ref{lem:projective-strategy-setup} we assume from here
+on, replacing $\mathcal{S}$ by the projective strategy provided by that
+lemma, that all measurements in $\mathcal{S}$ are projective; the
+extended state
+$(\ket{\psi} \ot \ket{0\cdots 0} \ot \ket{0\cdots 0})_{\mathsf{A}\mathsf{B}}$
+is again denoted $\ket{\psi}$. All statements below refer to this
+projective strategy on the extended state, and references to ``the
+state $\ket{\psi}$ of the strategy under analysis'' refer to this
+convention.
+
+The strategy $\mathcal{S}$ contains measurement operators for each of the
+question types and question contents of the Pauli basis test
+(Definition~\ref{def:pauli-win-predicate}), such as
+$\{M^{(\mathrm{Point},W),u}_a\}_{a \in \F_q}$ for all $u \in \F_q^m$.
+
+\begin{definition}[Strategy observables]
+	\label{def:strategy-observables}
+	\uses{lem:projective-strategy-setup, def:pauli-win-predicate, def:subfield-trace, def:line, def:line-representative}
+	For ``line'' questions we write $\mathrm{Line}$ for either of the
+	types $\mathrm{ALine}$ and $\mathrm{DLine}$: a statement about the
+	type $\mathrm{Line}$ applies to both types, and the intended type is
+	determined by the line description $\ell$. Moreover,
+	$\ell$ denotes the description of either an axis-parallel line, given by
+	a pair $\ell = (u_0, s)$, or a diagonal line, given by a triple
+	$\ell = (u_0, s, v)$ (Definition~\ref{def:line-representative}). For
+	every $u \in \F_q^m$, $r \in \F_q$, and $W \in \{X, Z\}$, define
+	\begin{equation}\label{eq:qld-strat-obs}
+		W^r(u) \,=\, \sum_{a \in \F_q} (-1)^{\tr(ar)} \, M^{(\mathrm{Point},W),u}_a\,.
+	\end{equation}
+	Since the measurement $\{M^{(\mathrm{Point},W),u}_a\}_{a \in \F_q}$ is
+	projective and $(-1)^{\tr(ar)} \in \{\pm 1\}$, the operator $W^r(u)$ is
+	an observable with eigenvalues $\pm 1$. It acts on register $\mathsf{A}$
+	or $\mathsf{B}$ according to which player's operator
+	$M^{(\mathrm{Point},W),u}_a$ denotes.
+\end{definition}
+
+The observable $W^r(u)$ is the candidate for the generalized Pauli
+observable $\tau^W(r \cdot \mathrm{ind}_m(u))$ that the analysis eventually
+extracts from the strategy.
+
+\begin{lemma}[Winning implications]
+	\label{lem:qld-win-implications}
+	\uses{lem:projective-strategy-setup, def:anticommuting-tuple, def:pauli-question-distribution, def:pauli-win-predicate, def:line-point-dist, def:consistency, def:povm-distance, def:ms-game, def:tensor-product-value, def:low-degree-encoding, def:ideg-deg-polynomials}
+	Assume that $\mathcal{S}$ succeeds in $\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$
+	with probability at least $1 - \eps$, for some $\eps \geq 0$. Then the
+	following hold, with respect to the state $\ket{\psi}$ of the strategy
+	under analysis (Lemma~\ref{lem:projective-strategy-setup} and the
+	convention following it).
+	\begin{enumerate}
+		\item \label{enu:qld-cons} (\textbf{Consistency check}) On average
+		over $(\mathsf{t},x)$ sampled from the question distribution of
+		$\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$
+		(Definition~\ref{def:pauli-question-distribution}), we have
+		$M^{\mathsf{t},x}_a \ot \Id_{\mathsf{B}} \simeq_\eps \Id_{\mathsf{A}} \ot M^{\mathsf{t},x}_a$.
+		\item \label{enu:qld-ld} (\textbf{Low-degree check}) For all
+		$W \in \{X,Z\}$, on average over $(\ell,u)$ drawn from the
+		line-point distribution (Definition~\ref{def:line-point-dist}), we
+		have
+		% The source states this item with answer summation over F_q only,
+		% implicitly reading the evaluation classes of the line measurement
+		% as a complete measurement; see the paragraph after the item list
+		% and the remark rem:qld-win-implications-typos.
+		$M^{(\mathrm{Line},W),\ell}_{[\mathrm{eval}_u(\cdot)=a]} \ot \Id_{\mathsf{B}} \simeq_\eps \Id_{\mathsf{A}} \ot M^{(\mathrm{Point},W),u}_a$,
+		where the answer summation is over the completed outcome set
+		$a \in \F_q \cup \{\bot\}$ described after the item list.
+		\item \label{enu:qld-pauli-basis-cons} (\textbf{Pauli basis
+		consistency check}) For all $W \in \{X,Z\}$, on average over
+		uniformly random $u \in \F_q^m$, we have
+		$M^{(\mathrm{Point},W),u}_a \ot \Id_{\mathsf{B}} \simeq_\eps \Id_{\mathsf{A}} \ot M^{(\mathrm{Pauli},W)}_{[g_h(u)=a]}$,
+		where
+		$M^{(\mathrm{Pauli},W)}_{[g_h(u)=a]} = \sum_{h \in \F_q^{M} \colon g_h(u)=a} M^{(\mathrm{Pauli},W)}_h$
+		and $g_h$ is the low-degree encoding of $h$
+		(see Definition~\ref{def:low-degree-encoding}).
+		\item \label{enu:qld-comm} (\textbf{Commutation check}) For all
+		$W \in \{X,Z\}$, on average over commuting
+		$\omega = (u_X,u_Z,r_X,r_Z)$ (that is, over a uniformly random
+		$\omega$ conditioned on being commuting), we have
+		$M^{(\mathrm{Pair},W),\omega}_a \ot \Id_{\mathsf{B}} \simeq_\eps \Id_{\mathsf{A}} \ot M^{\mathrm{Pair},\omega}_{[\beta_W=a]}$,
+		where the answer summation is over $a \in \F_2$.
+		\item \label{enu:qld-comm-cons} (\textbf{Commutation consistency
+		check}) For all $W \in \{X,Z\}$, on average over commuting
+		$\omega$, we have
+		$M^{(\mathrm{Point},W),u_W}_{[\tr(\cdot\,r_W)=a]} \ot \Id_{\mathsf{B}} \simeq_\eps \Id_{\mathsf{A}} \ot M^{(\mathrm{Pair},W),\omega}_a$,
+		where the answer summation is over $a \in \F_2$.
+		\item \label{enu:qld-ms} (\textbf{Magic square check}) For any
+		anticommuting $\omega$, let $\Lambda_\omega$ be the value of the
+		strategy
+		$\big( \ket{\psi}, \{M^{\mathrm{Constraint}_i,\omega}_{\alpha_1,\alpha_2,\alpha_3}\} \cup \{M^{\mathrm{Variable}_j,\omega}_a\} \big)$
+		in the Magic Square game $\mathfrak{G}^{\mathrm{MS}}$
+		(Definition~\ref{def:ms-game}). Then
+		$\E_\omega \Lambda_\omega = 1 - O(\eps)$, where the expectation is
+		over a uniformly random $\omega$ conditioned on being
+		anticommuting.
+		\item \label{enu:qld-ms-cons} (\textbf{Magic square consistency
+		check}) For all $W \in \{X,Z\}$, on average over anticommuting
+		$\omega$,
+		\begin{gather*}
+			M^{(\mathrm{Point},X),u_X}_{[\tr(\cdot\,r_X)=a]} \ot \Id_{\mathsf{B}} \,\simeq_\eps\, \Id_{\mathsf{A}} \ot M^{\mathrm{Variable}_1,\omega}_a\,,\\
+			M^{(\mathrm{Point},Z),u_Z}_{[\tr(\cdot\,r_Z)=a]} \ot \Id_{\mathsf{B}} \,\simeq_\eps\, \Id_{\mathsf{A}} \ot M^{\mathrm{Variable}_5,\omega}_a\,,
+		\end{gather*}
+		where the answer summations are over $\F_2$.
+	\end{enumerate}
+	Here
+	$M^{(\mathrm{Point},W),u}_{[\tr(\cdot\,r)=a]} = \sum_{a' \in \F_q \colon \tr(a'r)=a} M^{(\mathrm{Point},W),u}_{a'}$
+	for $a \in \F_2$; in item~\ref{enu:qld-ld} the two families are the
+	following POVMs indexed by $\F_q \cup \{\bot\}$, as the relation
+	$\simeq_\eps$ of Definition~\ref{def:consistency} requires: on the left,
+	the completed family of evaluation classes of
+	Definition~\ref{def:ideg-deg-polynomials}, whose class
+	$M^{(\mathrm{Line},W),\ell}_{[\mathrm{eval}_u(\cdot)=\bot]}$ carries the
+	line answers with no evaluation at $u$ and is nonzero only for a
+	zero-direction line, where the classes indexed by $a \in \F_q$ form
+	only a sub-measurement; on the right, the point measurement completed
+	by the zero operator $M^{(\mathrm{Point},W),u}_{\bot} = 0$; the answer
+	to a question of type $\mathrm{Pair}$ is a
+	pair $(\beta_X,\beta_Z) \in \F_2 \times \F_2$, and
+	$M^{\mathrm{Pair},\omega}_{[\beta_W=a]}$ denotes its coarse-graining
+	onto the $W$-component. Furthermore, all of the approximations above
+	also hold with $\approx_\eps$ in place of $\simeq_\eps$, and with the
+	tensor factors interchanged.
+\end{lemma}
+\begin{proof}
+	\uses{fact:omega-anticomm-prob, fact:agreement, def:admissible, def:pauli-question-distribution, def:pauli-win-predicate, def:ld-win-predicate, def:ideg-deg-polynomials, def:consistency}
+	The question types are sampled according to the type graph of the Pauli
+	basis test (Definition~\ref{def:pauli-question-distribution}), which has
+	constant size, so each subtest of the win predicate
+	(Definition~\ref{def:pauli-win-predicate}) is executed with probability
+	bounded below by a universal constant.
+	Items~\ref{enu:qld-cons},~\ref{enu:qld-ld}
+	and~\ref{enu:qld-pauli-basis-cons} then follow directly from the
+	corresponding subtests and the assumption that $\mathcal{S}$ succeeds
+	with probability at least $1-\eps$, where item~\ref{enu:qld-ld} follows
+	from the consistency subtest of the low individual degree game executed
+	inside the Pauli basis test. In more detail for item~\ref{enu:qld-ld}:
+	the disagreement mass of the two completed families is rejection mass
+	of the line-versus-point clauses
+	(Definition~\ref{def:ld-win-predicate}, invoked by the low-degree
+	check of Definition~\ref{def:pauli-win-predicate}). An outcome pair
+	$(a,b)$ with $a \neq b$ in $\F_q$ is a line answer evaluating at $u$
+	to $a$ against the point answer $b$, which the clause rejects; a pair
+	$(\bot,b)$ is a line answer with no evaluation at $u$, which the
+	universally quantified clause rejects against every point answer $b$
+	(Remark~\ref{rem:ld-win-zero-direction} and
+	Remark~\ref{rem:deg-line-representatives}); and the pairs $(a,\bot)$
+	contribute no mass, since the class
+	$M^{(\mathrm{Point},W),u}_{\bot}$ is the zero operator. The subtests underlying
+	items~\ref{enu:qld-comm} and~\ref{enu:qld-comm-cons} accept vacuously
+	unless the sampled tuple $\omega$ is commuting, and those underlying
+	items~\ref{enu:qld-ms} and~\ref{enu:qld-ms-cons} accept vacuously
+	unless $\omega$ is anticommuting. Since the parameter tuple $(q,m,d)$
+	is admissible (Definition~\ref{def:admissible}), $m$ divides $q$, so
+	$1 \leq m \leq q$, and Lemma~\ref{fact:omega-anticomm-prob} shows that
+	a uniformly sampled tuple $\omega$ is commuting with probability at
+	least $\frac12$ and anticommuting with probability at least $2^{-4}$.
+	Conditioning on either event therefore increases the failure
+	probability of the corresponding subtest by a factor of at most $2^4$,
+	and items~\ref{enu:qld-comm},~\ref{enu:qld-comm-cons}
+	and~\ref{enu:qld-ms-cons} follow from the corresponding subtests.
+	Item~\ref{enu:qld-ms} follows in the same way, because the Magic Square
+	check is executed with constant probability over the choice of a pair
+	of questions and the anticommuting event has probability at least
+	$2^{-4}$. Finally, that all approximations
+	also hold with $\approx_\eps$ in place of $\simeq_\eps$ is immediate
+	from Lemma~\ref{fact:agreement}.
+\end{proof}
+
+\begin{lemma}[Winning implications for observables]
+	\label{lem:qld-win-implications-obs}
+	% The source labels this lemma `len:qld-win-implications-obs'; the prefix
+	% `len' is a typo for `lem'. The label above is the corrected form.
+	\uses{def:strategy-observables, def:approx-question-indexed-operators, def:anticommuting-tuple, lem:projective-strategy-setup}
+	The following hold for the observables $W^r(u)$ of
+	Definition~\ref{def:strategy-observables}, with respect to the state
+	$\ket{\psi}$ of the strategy under analysis
+	(Lemma~\ref{lem:projective-strategy-setup} and the convention
+	following it).
+	\begin{enumerate}
+		\item For all $W \in \{X,Z\}$ and $r \in \F_q$, on average over
+		uniformly random $u \in \F_q^m$,
+		\begin{equation}\label{eq:pts-obs-consistency}
+			W^r(u) \ot \Id_{\mathsf{B}} \,\approx_\eps\, \Id_{\mathsf{A}} \ot W^r(u)\,.
+		\end{equation}
+		\item On average over uniformly random
+		$\omega = (u_X,u_Z,r_X,r_Z) \in (\F_q^m)^2 \times (\F_q)^2$,
+		\begin{equation}\label{eq:pts-obs-commutation}
+			X^{r_X}(u_X)\, Z^{r_Z}(u_Z) \ot \Id_{\mathsf{B}}
+			\,\approx_{\sqrt{\eps}}\,
+			(-1)^{\gamma(\omega)}\, Z^{r_Z}(u_Z)\, X^{r_X}(u_X) \ot \Id_{\mathsf{B}}\,,
+		\end{equation}
+		where
+		$\gamma(\omega) = \tr((r_X \cdot \mathrm{ind}_m(u_X)) \cdot (r_Z \cdot \mathrm{ind}_m(u_Z)))$
+		as in Definition~\ref{def:anticommuting-tuple}.
+	\end{enumerate}
+	Furthermore, all of the approximations above also hold with the tensor
+	factors interchanged.
+\end{lemma}
+\begin{proof}
+	\uses{lem:qld-win-implications, lem:povm-to-obs, fact:data-processing, fact:agreement, lem:commutation-analysis, thm:ms-rigidity, fact:add-a-proj, def:strategy-observables}
+	For~\eqref{eq:pts-obs-consistency}: item~\ref{enu:qld-cons} of
+	Lemma~\ref{lem:qld-win-implications} and the data processing inequality
+	(Lemma~\ref{fact:data-processing}), using that the type
+	$(\mathrm{Point},W)$ is sampled with constant probability, give the
+	self-consistency of the coarse-grained measurements
+	$\{M^{(\mathrm{Point},W),u}_{[\tr(\cdot\,r)=a]}\}_{a \in \F_2}$ on
+	average over $u$; Lemma~\ref{lem:povm-to-obs}, applied with
+	$\mathcal{A} = \F_2$ and $\alpha_a = (-1)^a$, converts this
+	to~\eqref{eq:pts-obs-consistency}. For the commuting case
+	of~\eqref{eq:pts-obs-commutation}: chaining
+	items~\ref{enu:qld-comm-cons},~\ref{enu:qld-comm}
+	and~\ref{enu:qld-cons} of Lemma~\ref{lem:qld-win-implications} via
+	Lemma~\ref{fact:agreement} gives, on average over commuting $\omega$,
+	$M^{(\mathrm{Point},W),u_W}_{[\tr(\cdot\,r_W)=a]} \ot \Id_{\mathsf{B}} \approx_\eps \Id_{\mathsf{A}} \ot M^{\mathrm{Pair},\omega}_{[\beta_W=a]}$;
+	since the measurement
+	$\{M^{\mathrm{Pair},\omega}_{\beta_X,\beta_Z}\}$ is projective,
+	Lemma~\ref{lem:commutation-analysis}, applied with the $X$- and
+	$Z$-point projections and the $\mathrm{Pair}$ measurement, yields the
+	approximate commutation of the projections
+	$M^{(\mathrm{Point},X),u_X}_{[\tr(\cdot\,r_X)=b]}$ and
+	$M^{(\mathrm{Point},Z),u_Z}_{[\tr(\cdot\,r_Z)=c]}$; expanding
+	$W^r(u) = \Id - 2 M^{(\mathrm{Point},W),u}_{[\tr(\cdot\,r)=1]}$
+	transfers this to the observables with error $\eps$. For the
+	anticommuting case: item~\ref{enu:qld-ms-cons} of
+	Lemma~\ref{lem:qld-win-implications} together with
+	Lemma~\ref{lem:povm-to-obs} relates $X^{r_X}(u_X)$ and $Z^{r_Z}(u_Z)$
+	to the Magic Square observables
+	$M^{\mathrm{Variable}_j,\omega} = M^{\mathrm{Variable}_j,\omega}_0 - M^{\mathrm{Variable}_j,\omega}_1$
+	for $j \in \{1,5\}$; for each anticommuting $\omega$, the Magic Square
+	rigidity theorem (Theorem~\ref{thm:ms-rigidity}) applied with
+	$\eps_\omega = 1 - \Lambda_\omega$ gives
+	$\Id \ot M^{\mathrm{Variable}_1,\omega} M^{\mathrm{Variable}_5,\omega} \approx_{\sqrt{\eps_\omega}} - \Id \ot M^{\mathrm{Variable}_5,\omega} M^{\mathrm{Variable}_1,\omega}$;
+	averaging over anticommuting $\omega$ with Jensen's inequality
+	($\E \eps_\omega^{1/2} \leq (\E \eps_\omega)^{1/2} = O(\eps^{1/2})$,
+	using item~\ref{enu:qld-ms}) and transferring across the tensor factor
+	with Lemma~\ref{fact:add-a-proj}, applied twice, yields the
+	anticommutation with error $\sqrt{\eps}$. The two cases combine into
+	the $(-1)^{\gamma(\omega)}$-signed statement over uniformly random
+	$\omega$, since the uniform average is bounded by the sum of the two
+	conditional averages.
+\end{proof}
+
+\begin{remark}[Source corrections]
+	\label{rem:qld-win-implications-typos}
+	Two typographical slips in the source are corrected above. In
+	item~\ref{enu:qld-ms} of Lemma~\ref{lem:qld-win-implications} the
+	source writes the expectation over $\omega$ subject to the condition
+	$\tr((r_X \cdot u_X) \cdot (r_Z \cdot u_Z)) \neq 0$, omitting the map
+	$\mathrm{ind}_m$; the intended condition, consistent with the
+	surrounding text and with Definition~\ref{def:anticommuting-tuple}, is
+	$\gamma(\omega) \neq 0$, that is, $\omega$ anticommuting, and this is
+	the form stated above. In the source proof of
+	Lemma~\ref{lem:qld-win-implications-obs}, one display reads
+	$Z^{r_X}(u_X)\,X^{r_Z}(u_Z)$ where $Z^{r_Z}(u_Z)\,X^{r_X}(u_X)$ is
+	meant.
+	% A third slip in the source, the label prefix `len' in place of `lem'
+	% on the lemma corresponding to lem:qld-win-implications-obs, is
+	% recorded in the comment at that lemma; no alias label is defined.
+	In addition, the source proof of Lemma~\ref{lem:qld-win-implications}
+	restricts attention to the case $6md \leq q$ and disposes of the
+	remaining parameters by an appeal to Theorem~\ref{thm:pauli}, the
+	theorem whose proof the lemma is part of; that argument does not
+	establish the unrestricted statement of the lemma, and for $d = 0$ the
+	probability bound it invokes is false
+	(Remark~\ref{rem:omega-anticomm-prob-correction}). The proof given
+	above instead uses the lower bounds of
+	Lemma~\ref{fact:omega-anticomm-prob} on the probabilities of the
+	commuting and anticommuting events, which are universal constants for
+	every admissible parameter tuple, so no restriction on the parameters
+	is needed.
+	Finally, the source states item~\ref{enu:qld-ld} of
+	Lemma~\ref{lem:qld-win-implications} with answer summation over
+	$a \in \F_q$ only, implicitly reading the evaluation classes of the
+	line measurement as a complete measurement. Under the coefficient
+	reading of Definition~\ref{def:ideg-deg-polynomials}
+	(Remark~\ref{rem:deg-line-representatives}) the classes indexed by
+	$a \in \F_q$ form only a sub-measurement when the line has zero
+	direction --- a case the question distribution produces with positive
+	probability (Remark~\ref{rem:ld-win-zero-direction}) --- while the
+	relation $\simeq_\eps$ of Definition~\ref{def:consistency} is defined
+	for POVMs. Item~\ref{enu:qld-ld} therefore completes both families by
+	an explicit $\bot$ outcome; the same implicit completeness assumption
+	occurs in the source proof of the statement corresponding to
+	Lemma~\ref{lem:qld-comm-line-cons}, whose proof below invokes the
+	completed families instead.
+\end{remark}
+
+\section{Expanding the Hilbert space and defining commuting observables}
+\label{sec:expanding}
+
+The next step of the analysis adjoins ancillary EPR registers to the
+players' state and lifts the strategy observables and measurements to the
+expanded state. The point of the construction is that the ancilla factor of
+each lifted observable carries the \emph{exact} Pauli commutation sign, so
+that the signs cancel and the lifted observables approximately commute for
+every tuple $\omega$.
+
+\begin{definition}[Expanded state]
+	\label{def:expanded-state}
+	\uses{lem:projective-strategy-setup, def:EPR}
+	Recall that $M = 2^m$. Introduce registers $\mathsf{A}', \mathsf{A}'',
+	\mathsf{B}', \mathsf{B}''$, each with Hilbert space isomorphic to
+	$(\C^q)^{\ot M}$, and define the state
+	\begin{equation}\label{eq:def-psihat}
+		\ket{\hat{\psi}}_{\mathsf{A}\mathsf{A}'\mathsf{A}''\mathsf{B}\mathsf{B}'\mathsf{B}''}
+		\,=\, (\ket{\psi})_{\mathsf{A}\mathsf{B}}
+		\ot \ket{\mathrm{EPR}_q}^{\ot M}_{\mathsf{A}'\mathsf{A}''}
+		\ot \ket{\mathrm{EPR}_q}^{\ot M}_{\mathsf{B}'\mathsf{B}''}\,,
+	\end{equation}
+	where $\ket{\psi}$ is the extended strategy state of the strategy
+	under analysis (Lemma~\ref{lem:projective-strategy-setup} and the
+	convention following it) and
+	$\ket{\mathrm{EPR}_q}$ is the maximally entangled state on
+	$\C^q \ot \C^q$ (Definition~\ref{def:EPR}). For the remainder of this
+	chapter, as well as in Chapters~\ref{chap:qpbt-combining}
+	and~\ref{chap:qpbt-extraction}, all approximations $\approx$ and
+	$\simeq$ are evaluated with respect to the state $\ket{\hat{\psi}}$,
+	unless stated otherwise.
+\end{definition}
+
+\begin{definition}[Expanded observables]
+	\label{def:expanded-observables}
+	\uses{def:strategy-observables, def:expanded-state, lem:twisted-commutation}
+	For all $W \in \{X,Z\}$, $r \in \F_q$, and $u \in \F_q^m$, define the
+	observable
+	\begin{equation}\label{eq:lc-23}
+		\hat{W}^r(u) \,=\, W^r(u) \ot \tau^W(r \cdot \mathrm{ind}_m(u))\,,
+	\end{equation}
+	where $W^r(u)$ is the strategy observable of~\eqref{eq:qld-strat-obs}
+	and $\tau^W(r \cdot \mathrm{ind}_m(u))$ is the generalized Pauli
+	observable acting on $(\C^q)^{\ot M}$, introduced in
+	Chapter~\ref{chap:qpbt-algebra}
+	(see Lemma~\ref{lem:twisted-commutation}). As a product
+	of two observables with eigenvalues $\pm 1$ acting on disjoint
+	registers, $\hat{W}^r(u)$ is itself an observable with eigenvalues
+	$\pm 1$. If $W^r(u)$ is viewed as acting on register $\mathsf{A}$, then
+	$\hat{W}^r(u)$ is viewed as acting on registers
+	$\mathsf{A}\mathsf{A}'$, with the $\tau^W$ factor acting on
+	$\mathsf{A}'$. The registers are generally indicated by subscripts, as
+	in $(\hat{W}^r(u))_{\mathsf{A}\mathsf{A}'}$ or
+	$(\hat{W}^r(u))_{\mathsf{B}\mathsf{A}''}$, the latter having the
+	strategy factor on $\mathsf{B}$ and the Pauli factor on
+	$\mathsf{A}''$.
+\end{definition}
+
+\begin{definition}[Expanded point measurements]
+	\label{def:expanded-point-measurement}
+	\uses{def:expanded-observables, lem:pauli-observable-expansion, def:low-degree-encoding, def:subfield-trace}
+	For $W \in \{X,Z\}$, $u \in \F_q^m$ and $a \in \F_q$, define
+	\[
+		\hat{M}^{(\mathrm{Point},W),u}_a \,=\, \E_{r \in \F_q} (-1)^{\tr(ar)} \, \hat{W}^r(u)\,,
+	\]
+	and define the projector
+	\begin{equation}\label{eq:qld-point-obs-def}
+		\tau^{W,u}_a \,=\, \tau^W_{[g_\cdot(u) = a]}
+		\,=\, \sum_{h \in \F_q^{M} \colon h \cdot \mathrm{ind}_m(u) = a} \tau^W_h\,,
+	\end{equation}
+	where $\{\tau^W_h\}_{h \in \F_q^{M}}$ are the joint eigenprojectors of
+	the generalized Pauli $W$-observables
+	(see Lemma~\ref{lem:pauli-observable-expansion}).
+	Expanding both tensor factors of $\hat{W}^r(u)$
+	by~\eqref{eq:qld-strat-obs} and by the Fourier expansion of the
+	generalized Pauli observables
+	(see Lemma~\ref{lem:pauli-observable-expansion}), and
+	averaging over $r$, gives the equivalent convolution form
+	\[
+		\hat{M}^{(\mathrm{Point},W),u}_a
+		\,=\, \sum_{\substack{a',a'' \in \F_q \\ a' + a'' = a}}
+		M^{(\mathrm{Point},W),u}_{a'} \ot \tau^{W,u}_{a''}\,.
+	\]
+	In particular each $\hat{M}^{(\mathrm{Point},W),u}_a$ is a projection
+	and $\{\hat{M}^{(\mathrm{Point},W),u}_a\}_{a \in \F_q}$ is a projective
+	measurement.
+\end{definition}
+
+\begin{definition}[Trace-coarse-grained point projections]
+	\label{def:expanded-point-trace-projection}
+	\uses{def:expanded-point-measurement, def:expanded-observables, def:subfield-trace}
+	For fixed $u \in \F_q^m$, $r \in \F_q$ and $b \in \F_2$, define the
+	projection
+	\begin{equation}\label{eq:qld-def-mptur}
+		\hat{M}^{(\mathrm{Point},W),u,r}_b \,=\, \sum_{a \in \F_q \colon \tr(ar) = b} \hat{M}^{(\mathrm{Point},W),u}_a\,,
+	\end{equation}
+	which can be equivalently written as
+	\begin{equation}\label{eq:lc-22}
+		\hat{M}^{(\mathrm{Point},W),u,r}_b \,=\, \frac{1}{2} \Big( \Id + (-1)^b\, \hat{W}^r(u) \Big)\,.
+	\end{equation}
+	The register conventions are those of
+	Definition~\ref{def:expanded-observables}.
+\end{definition}
+
+\begin{definition}[Symmetric equivalents]
+	\label{def:symmetric-equivalents}
+	\uses{def:expanded-state}
+	For the remainder of this chapter, as well as in
+	Chapters~\ref{chap:qpbt-combining} and~\ref{chap:qpbt-extraction}, the
+	six registers
+	$\mathsf{A}\mathsf{A}'\mathsf{A}''\mathsf{B}\mathsf{B}'\mathsf{B}''$
+	are partitioned into two ``parties'' in two different ways. The first
+	scheme takes $\mathsf{A}\mathsf{A}'$ as one party and
+	$\mathsf{B}\mathsf{A}''$ as the other; the second scheme takes
+	$\mathsf{B}\mathsf{B}'$ as the first party and
+	$\mathsf{A}\mathsf{B}''$ as the second. The \emph{symmetric
+	equivalents} of a bipartite relation of the form
+	$M_{\mathsf{A}\mathsf{A}'} \approx_\delta N_{\mathsf{B}\mathsf{A}''}$
+	are the three relations
+	\[
+		N_{\mathsf{A}\mathsf{A}'} \approx_\delta M_{\mathsf{B}\mathsf{A}''}\,,\qquad
+		M_{\mathsf{B}\mathsf{B}'} \approx_\delta N_{\mathsf{A}\mathsf{B}''}\,,\qquad
+		N_{\mathsf{B}\mathsf{B}'} \approx_\delta M_{\mathsf{A}\mathsf{B}''}\,,
+	\]
+	obtained by passing to the second bipartitioning scheme and by
+	interchanging the first and second party; the symmetric equivalents of
+	a single-party relation of the form
+	$M_{\mathsf{A}\mathsf{A}'} \approx N_{\mathsf{A}\mathsf{A}'}$ are the
+	same relation on the register pairs $\mathsf{B}\mathsf{A}''$,
+	$\mathsf{B}\mathsf{B}'$ and $\mathsf{A}\mathsf{B}''$.
+\end{definition}
+
+\begin{lemma}[Transfer to symmetric equivalents]
+	\label{lem:symmetric-equivalents-transfer}
+	\notready
+	\uses{def:symmetric-equivalents, def:expanded-state, lem:projective-strategy-setup, def:symmetric-game, def:EPR, def:povm-distance}
+	Let $\mathcal{S} = (\ket{\psi}, M)$ be the projective strategy under
+	analysis (Lemma~\ref{lem:projective-strategy-setup} and the convention
+	following it), assumed symmetric in the sense of
+	Definition~\ref{def:symmetric-game}: the state $\ket{\psi}$ is
+	invariant under exchanging registers $\mathsf{A}$ and $\mathsf{B}$, and
+	both players measure the same operators. Let $\ket{\hat{\psi}}$ be the
+	expanded state~\eqref{eq:def-psihat}, let
+	\[
+		\sigma \colon\;
+		\mathsf{A} \leftrightarrow \mathsf{B},\quad
+		\mathsf{A}' \leftrightarrow \mathsf{B}',\quad
+		\mathsf{A}'' \leftrightarrow \mathsf{B}''\,,
+		\qquad\qquad
+		\theta \colon\;
+		\mathsf{A} \leftrightarrow \mathsf{B},\quad
+		\mathsf{A}' \leftrightarrow \mathsf{A}''\,,
+	\]
+	be the two permutations of the six registers
+	$\mathsf{A}\mathsf{A}'\mathsf{A}''\mathsf{B}\mathsf{B}'\mathsf{B}''$
+	given by these transpositions, and let $U_\sigma$ and $U_\theta$ be the
+	corresponding permutation unitaries. Write
+	$\Pi = \{\Id,\, U_\sigma,\, U_\theta,\, U_\sigma U_\theta\}$ and let
+	\[
+		\mathcal{R} = \{\mathsf{A}\mathsf{A}',\; \mathsf{B}\mathsf{A}'',\;
+		\mathsf{B}\mathsf{B}',\; \mathsf{A}\mathsf{B}''\}
+	\]
+	be the four register placements of
+	Definition~\ref{def:symmetric-equivalents}. Then:
+	\begin{enumerate}
+		\item Every $U \in \Pi$ fixes $\ket{\hat{\psi}}$, and the induced
+		action of $\Pi$ on $\mathcal{R}$ is simply transitive.
+		\item Let $P$ and $Q$ be operators on
+		$\hilb \ot (\C^q)^{\ot M}$, where $\hilb$ is the common Hilbert
+		space of registers $\mathsf{A}$ and $\mathsf{B}$, let
+		$\mathsf{C}\mathsf{C}', \mathsf{D}\mathsf{D}' \in \mathcal{R}$ and
+		let $U \in \Pi$. Then
+		\[
+			\bigl\| \bigl( (P)_{\mathsf{C}\mathsf{C}'} - (Q)_{\mathsf{D}\mathsf{D}'} \bigr) \ket{\hat{\psi}} \bigr\|
+			\,=\,
+			\bigl\| \bigl( (P)_{U(\mathsf{C}\mathsf{C}')} - (Q)_{U(\mathsf{D}\mathsf{D}')} \bigr) \ket{\hat{\psi}} \bigr\|\,,
+		\]
+		the placement notation being that of
+		Definition~\ref{def:expanded-observables}. Consequently, for
+		families $\{P^x_a\}$ and $\{Q^x_a\}$ indexed by a question $x$ drawn
+		from a distribution and an answer $a$, and for every $\delta \ge 0$,
+		$(P^x_a)_{\mathsf{C}\mathsf{C}'} \approx_\delta (Q^x_a)_{\mathsf{D}\mathsf{D}'}$
+		holds on $\ket{\hat{\psi}}$ if and only if
+		$(P^x_a)_{U(\mathsf{C}\mathsf{C}')} \approx_\delta (Q^x_a)_{U(\mathsf{D}\mathsf{D}')}$
+		does, with the same $\delta$
+		(Definition~\ref{def:povm-distance}).
+	\end{enumerate}
+	In particular, taking $\mathsf{C}\mathsf{C}' = \mathsf{A}\mathsf{A}'$
+	and $\mathsf{D}\mathsf{D}' = \mathsf{B}\mathsf{A}''$, respectively
+	$\mathsf{D}\mathsf{D}' = \mathsf{A}\mathsf{A}'$, the images under
+	$U_\theta$, $U_\sigma$ and $U_\sigma U_\theta$ are exactly the three
+	symmetric equivalents of Definition~\ref{def:symmetric-equivalents},
+	with the same error parameter.
+\end{lemma}
+\begin{proof}
+	\uses{def:expanded-state, def:EPR, def:symmetric-game, def:povm-distance}
+	Each of $\sigma$ and $\theta$ transposes registers carrying isomorphic
+	Hilbert spaces --- $\mathsf{A}$ and $\mathsf{B}$ both carry $\hilb$,
+	and the four ancilla registers are all isomorphic to
+	$(\C^q)^{\ot M}$ (Definition~\ref{def:expanded-state}) --- so the
+	permutation unitaries $U_\sigma$ and $U_\theta$ are defined and satisfy
+	$U (P)_{\mathsf{C}\mathsf{C}'} U^\dagger = (P)_{U(\mathsf{C})U(\mathsf{C}')}$
+	for every operator $P$ and every placement.
+
+	For item~1, both generators fix $\ket{\hat{\psi}} = (\ket{\psi})_{\mathsf{A}\mathsf{B}} \ot \ket{\mathrm{EPR}_q}^{\ot M}_{\mathsf{A}'\mathsf{A}''} \ot \ket{\mathrm{EPR}_q}^{\ot M}_{\mathsf{B}'\mathsf{B}''}$:
+	the factor $(\ket{\psi})_{\mathsf{A}\mathsf{B}}$ is invariant under
+	$\mathsf{A} \leftrightarrow \mathsf{B}$ by the symmetry hypothesis;
+	$\sigma$ exchanges the two ancilla factors, which are identical; and
+	$\theta$ leaves $\ket{\mathrm{EPR}_q}^{\ot M}_{\mathsf{B}'\mathsf{B}''}$
+	untouched and exchanges the two halves of each pair in
+	$\ket{\mathrm{EPR}_q}^{\ot M}_{\mathsf{A}'\mathsf{A}''}$, under which
+	$\ket{\mathrm{EPR}_q}$ is invariant (Definition~\ref{def:EPR}). The
+	action on $\mathcal{R}$ sends $\mathsf{A}\mathsf{A}'$ to
+	$\mathsf{A}\mathsf{A}'$, $\mathsf{B}\mathsf{B}'$,
+	$\mathsf{B}\mathsf{A}''$ and $\mathsf{A}\mathsf{B}''$ under $\Id$,
+	$U_\sigma$, $U_\theta$ and $U_\sigma U_\theta$ respectively, so it is
+	simply transitive on the four placements.
+
+	For item~2, insert $U^\dagger U$ and use $U \ket{\hat{\psi}} = \ket{\hat{\psi}}$
+	together with unitary invariance of the norm:
+	\[
+		\bigl\| \bigl( (P)_{\mathsf{C}\mathsf{C}'} - (Q)_{\mathsf{D}\mathsf{D}'} \bigr) \ket{\hat{\psi}} \bigr\|
+		= \bigl\| U \bigl( (P)_{\mathsf{C}\mathsf{C}'} - (Q)_{\mathsf{D}\mathsf{D}'} \bigr) U^\dagger \, U \ket{\hat{\psi}} \bigr\|
+		= \bigl\| \bigl( (P)_{U(\mathsf{C}\mathsf{C}')} - (Q)_{U(\mathsf{D}\mathsf{D}')} \bigr) \ket{\hat{\psi}} \bigr\|\,.
+	\]
+	Summing the squares over the answers $a$ and averaging over the
+	questions $x$ preserves the identity, so the two sides of the asserted
+	equivalence of $\approx_\delta$ relations
+	(Definition~\ref{def:povm-distance}) are equal quantities. The final
+	assertion is item~1 applied to the placements listed there.
+\end{proof}
+
+Several lemmas below conclude by asserting that all symmetric equivalents
+of the stated approximations also hold, in each case by
+Lemma~\ref{lem:symmetric-equivalents-transfer}; later chapters invoke
+exactly these variants.
+
+\begin{lemma}[Consistency and approximate commutation of the expanded point measurements]
+	\label{lem:qld-comm-cons}
+	\uses{def:expanded-point-measurement, def:expanded-point-trace-projection, def:expanded-state, def:approx-question-indexed-operators, def:povm-distance, def:symmetric-equivalents}
+	There exists a function $\delta_{\mathrm{Anticom}}(\eps) = \poly(\eps)$
+	such that the following holds, with respect to the state
+	$\ket{\hat{\psi}}$ of Definition~\ref{def:expanded-state}.
+	\begin{enumerate}
+		\item (\textbf{Self-consistency}) For all $W \in \{X,Z\}$, on
+		average over $r \in \F_q$ and $u \in \F_q^m$ (the relation does not
+		depend on $r$), we have
+		\[
+			(\hat{M}^{(\mathrm{Point},W),u}_a)_{\mathsf{A}\mathsf{A}'}
+			\,\approx_\eps\,
+			(\hat{M}^{(\mathrm{Point},W),u}_a)_{\mathsf{B}\mathsf{A}''}\,,
+		\]
+		where the answer summation is over $a \in \F_q$.
+		\item (\textbf{Approximate commutation}) For all $b, b' \in \F_2$,
+		on average over uniformly random
+		$\omega = (u_X,u_Z,r_X,r_Z) \in (\F_q^m)^2 \times (\F_q)^2$, we
+		have
+		\[
+			(\hat{M}^{(\mathrm{Point},X),u_X,r_X}_{b}\,
+			\hat{M}^{(\mathrm{Point},Z),u_Z,r_Z}_{b'})_{\mathsf{A}\mathsf{A}'}
+			\,\approx_{\delta_{\mathrm{Anticom}}}\,
+			(\hat{M}^{(\mathrm{Point},Z),u_Z,r_Z}_{b'}\,
+			\hat{M}^{(\mathrm{Point},X),u_X,r_X}_{b})_{\mathsf{A}\mathsf{A}'}\,.
+		\]
+	\end{enumerate}
+	Furthermore, all symmetric equivalents of these approximations also
+	hold, and the proof yields $\delta_{\mathrm{Anticom}}(\eps) = \sqrt{\eps}$.
+\end{lemma}
+\begin{proof}
+	\uses{lem:qld-win-implications, lem:qld-win-implications-obs, fact:data-processing, lem:twisted-commutation, def:expanded-point-measurement, def:expanded-point-trace-projection, def:expanded-observables, lem:symmetric-equivalents-transfer}
+	For item~1: the original point measurements
+	$\{M^{(\mathrm{Point},W),u}_a\}$ are $\eps$-self-consistent between
+	registers $\mathsf{A}$ and $\mathsf{B}$ in $\ket{\hat{\psi}}$
+	(item~\ref{enu:qld-cons} of Lemma~\ref{lem:qld-win-implications}), the
+	Pauli projections $\{\tau^{W,u}_a\}$ are perfectly self-consistent
+	between registers $\mathsf{A}'$ and $\mathsf{A}''$ on the EPR ancillas,
+	and the data processing inequality (Lemma~\ref{fact:data-processing})
+	combines the two through the convolution form of
+	Definition~\ref{def:expanded-point-measurement}. For item~2:
+	by~\eqref{eq:lc-22}, each side expands as
+	$\frac14 \big( \Id + (-1)^b \hat{X}^{r_X}(u_X) + (-1)^{b'} \hat{Z}^{r_Z}(u_Z) + (-1)^{b+b'} \hat{X}^{r_X}(u_X) \hat{Z}^{r_Z}(u_Z) \big)$
+	respectively its reverse-ordered analogue, so it suffices to commute
+	the two expanded observables. By~\eqref{eq:lc-23},
+	$\hat{X}^{r_X}(u_X)\hat{Z}^{r_Z}(u_Z) = X^{r_X}(u_X) Z^{r_Z}(u_Z) \ot \tau^X(r_X \cdot \mathrm{ind}_m(u_X)) \tau^Z(r_Z \cdot \mathrm{ind}_m(u_Z))$;
+	the strategy observables approximately commute or anticommute with sign
+	$(-1)^{\gamma(\omega)}$ and error $\sqrt{\eps}$
+	(\eqref{eq:pts-obs-commutation} of
+	Lemma~\ref{lem:qld-win-implications-obs}), while the generalized Pauli
+	observables exactly commute or anticommute with the same sign
+	(see Lemma~\ref{lem:twisted-commutation}). The two signs cancel, so
+	$\hat{X}^{r_X}(u_X)\hat{Z}^{r_Z}(u_Z) \approx_{\sqrt{\eps}} \hat{Z}^{r_Z}(u_Z)\hat{X}^{r_X}(u_X)$
+	on average over uniformly random $\omega$, giving the approximate
+	commutation with $\delta_{\mathrm{Anticom}} = \sqrt{\eps}$. The
+	symmetric equivalents follow from
+	Lemma~\ref{lem:symmetric-equivalents-transfer}.
+\end{proof}
+
+\begin{definition}[Expanded line measurements]
+	\label{def:expanded-line-measurement}
+	% In the source this measurement is defined inside the proof of the lemma
+	% labelled lem:qld-comm-line-cons (lines 552-556); it is recorded as a
+	% standalone definition because Chapter chap:qpbt-combining uses the
+	% concrete measurement, not merely its existence.
+	\uses{lem:projective-strategy-setup, def:expanded-state, def:expanded-observables, def:ideg-deg-polynomials, def:low-degree-encoding, lem:pauli-observable-expansion, def:line, def:pauli-win-predicate}
+	For $W \in \{X,Z\}$, a line $\ell$, and $f \in \deg_{md}(\ell)$,
+	define
+	\[
+		\hat{M}^{(\mathrm{Line},W),\ell}_f
+		\,=\, \sum_{\substack{f',f'' \in \deg_{md}(\ell) \\ f' + f'' = f}}
+		M^{(\mathrm{Line},W),\ell}_{f'} \ot \tau^{W,\ell}_{f''}\,,
+	\]
+	where the projector $\tau^{W,\ell}_{f''}$, acting on register
+	$\mathsf{A}'$ (or on $\mathsf{A}''$, following the register conventions
+	of Definition~\ref{def:expanded-observables}), is the outcome-$f''$
+	projector of the following projective measurement: measure all $M$
+	qudits in the basis $W$, obtaining an outcome $h \in \F_q^{M}$, and
+	return the polynomial $f''$ obtained by substituting the
+	parameterization of $\ell$ into the low-degree encoding
+	$g_h \colon \F_q^m \to \F_q$
+	(see Definition~\ref{def:low-degree-encoding}): writing $(u_0,v)$ for
+	the base point and direction of $\ell$, the outcome $f''$ is
+	$g_h(u_0 + tv)$, expanded as a polynomial in the variable $t$ from the
+	coefficient representation of $g_h$. Since $g_h$ has individual degree
+	at most $d$, hence total degree at most $md$, the substituted
+	polynomial has degree at most $md$ in $t$, so
+	$f'' \in \deg_{md}(\ell)$. The strategy measurement
+	$\{M^{(\mathrm{Line},W),\ell}_{f'}\}$ is indexed by the answers of the
+	prescribed form (Definition~\ref{def:pauli-win-predicate}): for a
+	diagonal line these are the elements of $\deg_{md}(\ell)$, and for an
+	axis-parallel line the elements of $\deg_d(\ell)$, regarded as a
+	measurement with outcomes in $\deg_{md}(\ell)$ through the inclusion
+	$\deg_d(\ell) \subseteq \deg_{md}(\ell)$ of
+	Definition~\ref{def:ideg-deg-polynomials}, with the zero operator
+	assigned to outcomes outside $\deg_d(\ell)$. For an axis-parallel
+	$\ell$, with direction $e_i$, the substituted polynomial also has
+	degree at most $d$ in $t$ --- its degree is the individual degree of
+	$g_h$ in the $i$-th variable --- so
+	$\hat{M}^{(\mathrm{Line},W),\ell}_f = 0$ unless $f \in \deg_d(\ell)$.
+	In all cases
+	$\{\hat{M}^{(\mathrm{Line},W),\ell}_f\}_{f \in \deg_{md}(\ell)}$ is a
+	projective measurement.
+\end{definition}
+
+\begin{lemma}[Consistency of the expanded line measurements]
+	\label{lem:qld-comm-line-cons}
+	\uses{def:expanded-point-measurement, def:expanded-line-measurement, def:expanded-state, def:line-point-dist, def:approx-question-indexed-operators, def:povm-distance, def:ideg-deg-polynomials, def:symmetric-equivalents}
+	There exists a function $\delta_{\mathrm{Line}}(\eps) = \poly(\eps)$
+	such that the following holds, with respect to the state
+	$\ket{\hat{\psi}}$ of Definition~\ref{def:expanded-state}. For all
+	$W \in \{X,Z\}$ and lines $\ell$ there exists a projective measurement
+	$\{\hat{M}^{(\mathrm{Line},W),\ell}_f\}_{f \in \deg_{md}(\ell)}$,
+	acting on registers $\mathsf{A}\mathsf{A}'$ or
+	$\mathsf{B}\mathsf{A}''$, such that:
+	\begin{enumerate}
+		\item \label{enu:qld-comm-line-self-cons}
+		(\textbf{Self-consistency}) For all $W \in \{X,Z\}$ and
+		$r \in \F_q$ (the relation does not depend on $r$), on average over
+		a uniformly random pair $(\ell,u)$ drawn from the line-point
+		distribution (Definition~\ref{def:line-point-dist}),
+		\[
+			(\hat{M}^{(\mathrm{Line},W),\ell}_f)_{\mathsf{A}\mathsf{A}'}
+			\,\approx_{\delta_{\mathrm{Line}}}\,
+			(\hat{M}^{(\mathrm{Line},W),\ell}_f)_{\mathsf{B}\mathsf{A}''}\,,
+		\]
+		where the answer summation is over $f \in \deg_{md}(\ell)$.
+		\item \label{eq:qld-comm-line-pt-cons}
+		(\textbf{Consistency with points measurements I}) On average over
+		a uniformly random pair $(\ell,u)$ drawn from the line-point
+		distribution,
+		\[
+			(\hat{M}^{(\mathrm{Line},W),\ell}_f)_{\mathsf{A}\mathsf{A}'}
+			\,\approx_{\delta_{\mathrm{Line}}}\,
+			(\hat{M}^{(\mathrm{Line},W),\ell}_f)_{\mathsf{A}\mathsf{A}'}
+			\ot (\hat{M}^{(\mathrm{Point},W),u}_{f(u)})_{\mathsf{B}\mathsf{A}''}\,,
+		\]
+		where the answer summation is over $f \in \deg_{md}(\ell)$.
+		\item \label{eq:qld-comm-line-pt-cons2}
+		(\textbf{Consistency with points measurements II}) On average over
+		a uniformly random pair $(\ell,u)$ drawn from the line-point
+		distribution,
+		\[
+			(\hat{M}^{(\mathrm{Line},W),\ell}_{[\mathrm{eval}_u(\cdot)=a]})_{\mathsf{A}\mathsf{A}'}
+			\,\approx_{\delta_{\mathrm{Line}}}\,
+			(\hat{M}^{(\mathrm{Point},W),u}_a)_{\mathsf{B}\mathsf{A}''}\,,
+		\]
+		where
+		$\hat{M}^{(\mathrm{Line},W),\ell}_{[\mathrm{eval}_u(\cdot)=a]} = \sum_{f \in \deg_{md}(\ell) \colon f(u)=a} \hat{M}^{(\mathrm{Line},W),\ell}_f$
+		and the answer summation is over $a \in \F_q$.
+	\end{enumerate}
+	Furthermore, all symmetric equivalents of these approximations also
+	hold. The proof exhibits the measurements of
+	Definition~\ref{def:expanded-line-measurement} as witnesses, with
+	item~\ref{eq:qld-comm-line-pt-cons} holding with error $\eps$ and
+	items~\ref{enu:qld-comm-line-self-cons}
+	and~\ref{eq:qld-comm-line-pt-cons2} with
+	$\delta_{\mathrm{Line}}(\eps) = \sqrt{\eps}$.
+\end{lemma}
+\begin{proof}
+	\uses{def:expanded-line-measurement, def:expanded-point-measurement, lem:qld-win-implications, fact:data-processing, fact:add-a-proj2, fact:agreement, def:line-point-dist, def:ideg-deg-polynomials, def:pauli-win-predicate, lem:symmetric-equivalents-transfer}
+	Take $\{\hat{M}^{(\mathrm{Line},W),\ell}_f\}$ to be the measurement of
+	Definition~\ref{def:expanded-line-measurement}.
+	Item~\ref{enu:qld-comm-line-self-cons} follows from the fact that the
+	original line measurements $\{M^{(\mathrm{Line},W),\ell}_f\}$ are
+	$\eps$-self-consistent between registers $\mathsf{A}$ and $\mathsf{B}$
+	in $\ket{\hat{\psi}}$ (item~\ref{enu:qld-cons} of
+	Lemma~\ref{lem:qld-win-implications}), the Pauli projections
+	$\{\tau^{W,\ell}_{f''}\}$ are perfectly self-consistent between
+	registers $\mathsf{A}'$ and $\mathsf{A}''$, and the data processing
+	inequality (Lemma~\ref{fact:data-processing}). For
+	item~\ref{eq:qld-comm-line-pt-cons}: for the outcomes $f'$ that
+	evaluate at $u$, insert the projection
+	$M^{(\mathrm{Line},W),\ell}_{[\mathrm{eval}_u(\cdot)=f'(u)]}$ by
+	projectivity, replace it by
+	$(M^{(\mathrm{Point},W),u}_{f'(u)})_{\mathsf{B}\mathsf{A}''}$ using the
+	line-point consistency (item~\ref{enu:qld-ld} of
+	Lemma~\ref{lem:qld-win-implications}) together with
+	Lemma~\ref{fact:add-a-proj2}, adjoin the exactly consistent projector
+	$\tau^{W,u}_{f''(u)}$ on register $\mathsf{A}''$, and recombine by the
+	convolution form of Definition~\ref{def:expanded-point-measurement}.
+	Outcomes without an evaluation at $u$ occur only when $\ell$ has zero
+	direction, where $\tau^{W,\ell}_{f''}$ vanishes unless $f''$ is a
+	constant polynomial, so that $f = f' + f''$ evaluates at $u$ exactly
+	when $f'$ does; for these outcomes the right-hand side of
+	item~\ref{eq:qld-comm-line-pt-cons} carries the zero operator
+	(Definition~\ref{def:ideg-deg-polynomials}), and their total mass
+	satisfies
+	\[
+		\E_{(\ell,u)} \sum_{f' \text{ without an evaluation at } u}
+		\bra{\hat{\psi}}\, M^{(\mathrm{Line},W),\ell}_{f'} \ot \Id\,
+		\ket{\hat{\psi}} \,\leq\, O(\eps)\,,
+	\]
+	because the left-hand side is exactly the mass of the class
+	$M^{(\mathrm{Line},W),\ell}_{[\mathrm{eval}_u(\cdot)=\bot]}$ of the
+	completed family in item~\ref{enu:qld-ld} of
+	Lemma~\ref{lem:qld-win-implications} --- its value on
+	$\ket{\hat{\psi}}$ coincides with its value on $\ket{\psi}$, the
+	operator acting trivially on the ancilla registers --- whose partner
+	class $M^{(\mathrm{Point},W),u}_{\bot}$ is the zero operator, so that
+	the whole of this mass is disagreement mass of that consistency
+	statement.
+	This gives item~\ref{eq:qld-comm-line-pt-cons} with error $\eps$. For
+	item~\ref{eq:qld-comm-line-pt-cons2}, the data processing inequality
+	does not apply directly, since the bound of
+	item~\ref{eq:qld-comm-line-pt-cons} is stated with $\approx$ rather
+	than $\simeq$ and its right-hand side is not of the form
+	$\Id \ot B$; instead, a direct computation from
+	item~\ref{eq:qld-comm-line-pt-cons} together with projectivity gives
+	% The source ends this display with the exact upper bound eps; the bound
+	% inherited from item 2 carries the hidden universal constant of
+	% def:povm-distance, which is retained inside the O(.).
+	\[
+		\E_{(\ell,u)} \sum_{a \in \F_q}
+		\bra{\hat{\psi}}\, \hat{M}^{(\mathrm{Line},W),\ell}_{[\mathrm{eval}_u(\cdot)=a]}
+		\ot \big( \Id - \hat{M}^{(\mathrm{Point},W),u}_a \big) \ket{\hat{\psi}}
+		\,\leq\, O(\eps)\,,
+	\]
+	while the mass bound of the previous paragraph controls the outcomes
+	omitted from every class,
+	$\E_{(\ell,u)} \bra{\hat{\psi}} \big( \Id - \sum_a
+	\hat{M}^{(\mathrm{Line},W),\ell}_{[\mathrm{eval}_u(\cdot)=a]} \big)
+	\ot \Id \ket{\hat{\psi}} \leq O(\eps)$; both terms are needed because
+	for a zero-direction $\ell$ the classes
+	$[\mathrm{eval}_u(\cdot)=a]$ need not exhaust $\deg_{md}(\ell)$.
+	An elementary bound for projective sub-measurements $\{A_i\}$,
+	$\{B_i\}$ and a state $\ket{\varphi}$, namely
+	$\sum_i \bra{\varphi}(A_i - B_i)\ket{\varphi} \leq 2 \big( \sum_i \big\|(A_i - B_i)\ket{\varphi}\big\|^2 \big)^{1/2}$,
+	upgrades these two bounds to
+	$\Id \approx_{\sqrt{\eps}} \sum_a \hat{M}^{(\mathrm{Line},W),\ell}_{[\mathrm{eval}_u(\cdot)=a]} \ot \hat{M}^{(\mathrm{Point},W),u}_a$.
+	A second elementary fact about projective measurements --- if
+	$\Id \approx_\delta \sum_i A^x_i \ot B^x_i$ for families of projective
+	measurements $\{A^x_i\}$ and $\{B^x_i\}$ acting on separate registers
+	of a bipartite state, then $A^x_i \ot \Id \simeq_\delta \Id \ot B^x_i$,
+	and hence $A^x_i \ot \Id \approx_\delta \Id \ot B^x_i$ by item~1 of
+	Lemma~\ref{fact:agreement} --- is then applied to the two families
+	completed as in Definition~\ref{def:ideg-deg-polynomials}: the
+	evaluation classes of the expanded line measurement together with
+	$\hat{M}^{(\mathrm{Line},W),\ell}_{[\mathrm{eval}_u(\cdot)=\bot]}$,
+	and the expanded point measurement together with
+	$\hat{M}^{(\mathrm{Point},W),u}_{\bot} = 0$. Both completed families
+	are projective measurements, and the completion leaves the sum in the
+	hypothesis unchanged, since the term for the outcome $\bot$ vanishes.
+	Restricted to the outcomes in $\F_q$, the conclusion yields
+	item~\ref{eq:qld-comm-line-pt-cons2} with error $\sqrt{\eps}$, so that
+	$\delta_{\mathrm{Line}}(\eps) = \sqrt{\eps}$. The symmetric
+	equivalents follow from
+	Lemma~\ref{lem:symmetric-equivalents-transfer}.
+\end{proof}
+
+The expanded point and line measurements constructed in this section, being
+approximately consistent and approximately commuting, are combined into a
+single strategy for the classical low individual degree test in
+Chapter~\ref{chap:qpbt-combining}.

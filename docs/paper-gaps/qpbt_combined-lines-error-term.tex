@@ -1,0 +1,318 @@
+\documentclass[11pt]{article}
+
+\usepackage{amsmath,amssymb}
+\usepackage{xurl}
+\usepackage[hidelinks]{hyperref}
+\setlength{\emergencystretch}{2em}
+
+\input{command}
+
+% Local notation for this note.
+\DeclareMathOperator{\poly}{poly}
+\newcommand{\Id}{\mathrm{Id}}
+
+\title{The Error Term of the Combined-Lines Consistency Lemma}
+\author{}
+\date{2026-08-30}
+
+\begin{document}
+\maketitle
+
+\section{At a glance}
+
+\begin{itemize}
+  \item \textbf{Difficulty: easy.}  No step of the retained proof route is
+  in doubt.  The obstruction is that the error function claimed in the
+  statement of the combined-lines lemma of the Pauli basis analysis,
+  $\poly(m^2\eps, md/q)$, is not delivered by either of the two
+  derivations printed in its source proof: one route establishes
+  $m \cdot \poly(\eps, md/q)$, the other would give
+  $m^2 \cdot \poly(\eps, md/q)$ and rests in addition on a distributional
+  decomposition that the stated sub-line lemma does not supply.  The
+  substance is deciding which error form the statement should carry and
+  confirming that the sole consumer tolerates it.
+  \item \textbf{Key Mathlib inputs:} the
+  Cauchy--Schwarz inequality for state-dependent operator distances
+  (project-local, blueprint Chapter 12), mixture decompositions of
+  question distributions, and elementary averaging over restricted
+  line distributions; no new Mathlib surface beyond finite
+  expectations and inner-product estimates already used by the
+  low individual degree development.
+  \item \textbf{Estimated weight:} a \textbf{statement-level error-form
+  decision} plus about \textbf{one lemma interface} of checking that the
+  consumer absorbs an $m$ prefactor into its constants; the three chained
+  claims behind the retained route are ordinary Cauchy--Schwarz estimates,
+  on the order of \textbf{a few hundred lines} of formal proof in total
+  when that part of the development is reached.
+  \item \textbf{Mathlib/project split:} essentially \textbf{100\%
+  project-local}.  The estimates use only the project's state-dependent
+  distance calculus, the sub-line distribution, and elementary
+  probability on finite sets.
+  \item \textbf{Key inputs:} the combined point and line measurements and
+  the sub-line distribution of the Pauli basis analysis in
+  \cite{Ji2020MIPStar}, and the error function of the classical soundness
+  theorem imported from \cite{Ji2020LowIndividualDegree}, into which the
+  corrected error form must be absorbed.  Tracked in \localissue{0002}.
+\end{itemize}
+
+\section{Key theorem forms}
+
+Throughout, $(q,m,d)$ is an admissible parameter tuple of the Pauli basis
+test, $\ket{\hat\psi}$ is the expanded state of the projective strategy
+under analysis, succeeding with probability at least $1-\eps$, and all
+approximations are with respect to $\ket{\hat\psi}$.  For lines
+$\ell_X, \ell_Z$ in $\F_q^m$, the POVM $\{T^{\ell_X,\ell_Z}_{f_X,f_Z}\}$,
+with outcomes pairs of polynomials of degree at most $md$ on the two
+lines, is the two-basis combined line measurement, and
+$\{\hat Q^{x,z}_{a,b}\}$ is the combined point measurement; their
+consistency errors are $\delta_P = \poly(\eps, md/q)$ and
+$\delta_Q = \poly(\eps)$ respectively, and
+$\delta_{\mathrm{Line}} = \poly(\eps)$ is the line--point consistency
+error of the strategy.  The lemma under discussion asserts that a
+measurement $\{\hat Q^{\ell}_f\}$, built for each line $\ell$ in
+$\F_q^{2m+2}$, is $\delta_{\mathrm{combine}}$-consistent, on average over
+the line-point distribution over $\F_q^{2m+2}$, with the combined point
+measurement on the extended coordinates, together with the
+register-swapped counterpart.%
+\footnote{In the mirror of the source consulted here,
+\path{references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex}: the
+lemma statement, with the error form $\poly(m^2\eps, md/q)$, is at
+lines~1020--1034 (label \path{lem:qld-4-13}); the central display with
+the first-route bound at lines~1134--1137
+(label \path{eq:qld-combined-lines-consistency}); the three claims at
+lines~1140--1239 (labels \path{claim:17-1}--\path{claim:17-3}); the
+second-route conclusion $O(m^2\delta_P)$ at lines~1241--1245, preceded by
+a duplicated sentence whose second copy carries a malformed reference;
+the product-distribution estimate invoked there at lines~1055--1061
+(label \path{eq:qld-xz-lines-restricted}); and the sub-line lemma at
+lines~1063--1116 (label \path{lem:qld-sublines}).}
+The comparison involves four forms of the error function
+$\delta_{\mathrm{combine}}(\eps,m,d,q)$.
+\begin{enumerate}
+  \item \textbf{Source form.}
+  $\delta_{\mathrm{combine}} = \poly(m^2\eps,\, md/q)$.  This is the form
+  printed in the statement.  Neither printed derivation supports it.
+  \item \textbf{Established form (first route).}
+  $\delta_{\mathrm{combine}}
+  = O\big(m\,(\eps^{1/4} + \delta_P^{1/4} + \delta_Q^{1/4}
+  + \delta_{\mathrm{Line}}^{1/2})\big)$, a function of the form
+  $m \cdot \poly(\eps,\, md/q)$.
+  \item \textbf{Second-route form (conditional).}
+  $\delta_{\mathrm{combine}} = O(m^2 \delta_P)
+  = m^2 \cdot \poly(\eps,\, md/q)$, conditional on a joint-law
+  decomposition that the sub-line lemma, as stated, does not provide.
+  \item \textbf{Consumer requirement.}  The unique consumer, the
+  polynomial-pair lemma, feeds $\delta_{\mathrm{combine}}$ into an error
+  of the form
+  $a(md)^a(\delta_{\mathrm{combine}}^b + q^{-b} + 2^{-bmd})$ imported
+  from \cite{Ji2020LowIndividualDegree}; any bound
+  $m^{O(1)} \cdot \poly(\eps, md/q)$ is absorbed by enlarging $a$ and
+  shrinking $b$, so forms~2 and~3 both suffice downstream.
+\end{enumerate}
+
+\section{The source assertion and the two routes}
+
+The source proof in \cite{Ji2020MIPStar} constructs $\hat Q^{\ell}_f$ by
+averaging, over a distribution $D$ on tuples $(\ell, \ell_X, \ell_Z)$
+provided by its sub-line lemma, the pushforward of
+$T^{\ell_X,\ell_Z}$ along a combining map, and reduces the lemma to a
+bound on the scalar consistency defect
+\begin{equation}
+  \Lambda \,=\,
+  \E_{(\ell,\ell_X,\ell_Z) \sim D}\
+  \E_{(x,z,\alpha,\beta) \in \ell}
+  \sum_{f_X,f_Z} \bra{\hat\psi}
+  \big(T^{\ell_X,\ell_Z}_{f_X,f_Z}\big)_{\mathsf{A}\mathsf{A}'} \ot
+  \big(\Id - \hat{Q}^{x,z}_{f_X(x),f_Z(z)}\big)_{\mathsf{B}\mathsf{A}''}
+  \ket{\hat\psi}\,,
+  \tag{\path{eq:qld-combined-lines-consistency}}
+\end{equation}
+in which the point $(x,z,\alpha,\beta)$ is uniform on $\ell$ and the sum
+ranges over pairs of line polynomials.  The proof then bounds $\Lambda$
+twice, by different routes and with different results, and the printed
+record is internally inconsistent: the display introducing $\Lambda$
+asserts the first-route bound, while the closing lines assert the
+second-route bound as the operative one; the lemma statement claims a
+third form matching neither.
+
+\paragraph{The first route.}
+Three claims are chained.  The combined point measurement
+$\hat Q^{x,z}$ is replaced by the ordered product of the two point
+measurements at cost $\delta_Q^{1/2}$; the $X$-point factor is removed at
+cost $m\,\delta_{\mathrm{Line}}^{1/2}$; and the remaining $Z$-point
+correlation is shown to be within
+$\sqrt{m}\,(\delta_P^{1/4} + \delta_Q^{1/4} + \eps^{1/4})$ of one.  The
+factors of $m$ enter through the mixture structure of the sub-line
+distribution: each restricted line distribution carries mixture weight
+$1/(2m)$ in the line-point distribution, so an average bounded by
+$\delta$ over the full distribution is bounded only by $2m\delta$ over a
+restricted component and by $4m^2\delta$ over a product of two
+components, and the Cauchy--Schwarz steps halve the exponents.  Chaining
+the claims gives
+\begin{equation*}
+  \Lambda \,=\, O\big(m\,(\eps^{1/4} + \delta_P^{1/4} + \delta_Q^{1/4}
+  + \delta_{\mathrm{Line}}^{1/2})\big)
+  \,=\, m \cdot \poly(\eps,\, md/q)\,.
+\end{equation*}
+One intermediate assertion needs a harmless correction: the final line
+of the proof of the second claim asserts the bound
+$O(m^2 \delta_{\mathrm{Line}})$ for a consistency term that is close to
+one, rather than for its deficit.  Read as a bound on the deficit ---
+which is what the surrounding Cauchy--Schwarz argument requires and what
+the invoked line--point consistency provides after the mixture
+inflation --- the claim and its use are correct, with the square root of
+the deficit giving the stated cost $m\,\delta_{\mathrm{Line}}^{1/2}$.
+
+\paragraph{The second route.}
+After the chain, the source restarts: it asserts that, by Property~2 of
+its sub-line lemma, $\Lambda$ is a mixture, over types
+$\mathrm{v}_1, \mathrm{v}_2 \in \{\mathrm{ALine}, \mathrm{DLine}\}$ and
+indices $i, j \in \{1, \dots, m\}$, of terms
+\begin{equation*}
+  \E_{(\ell_X, x) \sim D_{\mathrm{v}_1,i}}\
+  \E_{(\ell_Z, z) \sim D_{\mathrm{v}_2,j}}
+  \sum_{f_X,f_Z} \bra{\hat\psi}
+  \big(T^{\ell_X,\ell_Z}_{f_X,f_Z}\big)_{\mathsf{A}\mathsf{A}'} \ot
+  \big(\Id - \hat{Q}^{x,z}_{f_X(x),f_Z(z)}\big)_{\mathsf{B}\mathsf{A}''}
+  \ket{\hat\psi}
+\end{equation*}
+over two \emph{independently} sampled restricted line-point pairs,
+bounds each term by $O(m^2\delta_P)$ using the restricted-distribution
+consequence of the two-basis line lemma, and concludes
+$\Lambda = O(m^2\delta_P)$.  The invoked decomposition concerns the
+\emph{joint} law of the pair $((\ell_X, x), (\ell_Z, z))$, where $x$ and
+$z$ are the two blocks of the single point sampled on $\ell$.  Property~2
+of the sub-line lemma does not assert this joint law: it asserts the
+component-wise product law of the pair of \emph{lines}
+$(\ell_X, \ell_Z)$, and the conditional uniformity of each point on its
+line separately --- equivalently, the laws of the two pairs
+$((\ell_X, x), (\ell_Z, z'))$ and $((\ell_X, x'), (\ell_Z, z))$ in which
+the \emph{other} point is resampled independently.  These marginal
+statements are exactly what the first route's claims consume, each
+involving one point at a time; the joint decomposition used by the
+second route is a strictly stronger property and is not established by
+the lemma it is attributed to.
+
+\section{Why neither route yields the stated form}
+
+The stated error form is $\poly(m^2\eps, md/q)$, a function of the two
+quantities $m^2\eps$ and $md/q$ that vanishes as both vanish.  The
+first-route bound is not dominated by any such function: along the
+scaling $\eps = m^{-4}$ with $q/(md) \to \infty$, both $m^2\eps = m^{-2}$
+and $md/q$ tend to $0$, while the term $m\,\eps^{1/4} = 1$ does not.
+Hence the established derivation supports no bound of the claimed form.
+The second-route bound, even granting the missing decomposition, carries
+the separate prefactor $m^2$: writing $\delta_P = \poly(\eps, md/q)$
+with some fixed positive exponents, the contribution
+$m^2 (md/q)^{c}$ is not dominated by any vanishing function of $m^2\eps$
+and $md/q$, as the scaling $\eps = 0$, $md/q = m^{-2/c}$ shows, and the
+$\eps$-contribution fails similarly for sublinear exponents.  Neither
+observation asserts that the \emph{conclusion} of the lemma is false for
+some error function of the claimed form; the defect is that the printed
+proof does not deliver it.
+
+For orientation, the algebraic identity
+$m\,\eps^{1/2} = (m^2\eps)^{1/2}$ shows what a derivation of the claimed
+$\eps$-dependence would need: a chain that loses only square roots in the
+$\eps$-type quantities \emph{after} the restricted-distribution
+inflation would produce terms of the shape $(m^2\eps)^{1/2}$.  The
+printed chain loses fourth roots, through two nested Cauchy--Schwarz
+steps applied to already square-rooted quantities, and its
+$md/q$-dependence enters as $m\,\delta_P^{1/4}$, which the claimed form
+cannot absorb.
+
+\section{Candidate repairs}
+
+The following are candidate directions, with their open obligations; none
+of the routes below is claimed as established.
+
+\paragraph{Correcting the error form (recommended direction).}
+Adopt $\delta_{\mathrm{combine}} = m \cdot \poly(\eps, md/q)$ ---
+concretely, the first-route bound --- as the operative error form.  Open
+obligations: (i)~verify that every consumer tolerates the prefactor; in
+the source and in the blueprint the only consumer is the polynomial-pair
+lemma, whose imported error
+$a(md)^a(\delta_{\mathrm{combine}}^b + q^{-b} + 2^{-bmd})$ absorbs
+$m^{O(1)}$ prefactors by enlarging $a$ and shrinking $b$, and this
+absorption must be carried out with explicit constants when the lemma is
+formalized; (ii)~record the correction against the source-labelled
+statement in accordance with the proof-gap protocol, rather than
+silently substituting the corrected form --- the blueprint currently
+retains the source statement and carries the corrected bound in the
+proof; (iii)~confirm the three chained claims at the required level of
+detail, including the corrected deficit reading of the second claim.
+
+\paragraph{Repairing the second route.}
+Strengthen Property~2 of the sub-line lemma to the joint product law: in
+each mixture component, the pairs $(\ell_X, x)$ and $(\ell_Z, z)$ are
+independent with the stated restricted-distribution laws.  The sampling
+procedure makes this plausible, since in each component the two pairs
+are built from disjoint collections of the independent ingredients (the
+two blocks of the uniform point, the direction blocks, and the fresh
+auxiliary choices).  Open obligations: (i)~state and prove the
+strengthened property for every component, including lines whose
+direction blocks vanish and degenerate to singletons; (ii)~re-derive the
+mixture decomposition of $\Lambda$ from the strengthened property;
+(iii)~note that even then the route delivers only
+$O(m^2\delta_P) = m^2 \cdot \poly(\eps, md/q)$, so this direction removes
+the unsupported step of the printed proof but still requires the
+error-form decision of the previous direction, with $m^2$ in place of
+$m$.
+
+\paragraph{Establishing the claimed form.}
+Re-derive the chain so that every factor of $m$ enters jointly with
+$\eps$ as $m^2\eps$, in the sense of the orientation identity above.
+Open obligations: (i)~find a chaining that avoids one of the two nested
+square-root losses, or prove restricted-distribution versions of the
+underlying consistency lemmas directly at their inflated errors;
+(ii)~handle the $md/q$-dependence, since a residual term
+$m (md/q)^{c}$ is incompatible with the claimed form for the current
+exponents.  No derivation along these lines is known here, and the
+direction may be infeasible; in that case the corrected error form of
+the first direction stands.
+
+\section{Comparison with the blueprint}
+
+The blueprint \cite{MIPStarREBlueprint} keeps the combined-lines lemma in
+its source shape, error form $\poly(m^2\eps, md/q)$ included, and marks
+in the proof that this form remains unproved: the proof derives the
+first route only, records the established bound
+$m \cdot \poly(\eps, md/q)$, and uses that bound in the sequel.  The
+three claims are stated as separate lemmas with the corrected deficit
+assertion for the second; the sub-line lemma states Property~2 at the
+level of the two marginal laws and expressly disclaims the joint
+conditional law of the two points, so the blueprint statement does not
+license the second route; and the polynomial-pair lemma's proof absorbs
+the $m$ prefactor into the constants of the imported soundness error.  A
+chapter remark summarizes the discrepancy and cites this note.%
+\footnote{The blueprint statements are \path{lem:qld-4-13},
+\path{lem:qld-sublines}, \path{lem:claim-17-1}--\path{lem:claim-17-3},
+\path{lem:qld-4-7}, and the remark
+\path{rem:qld-4-13-source-defects}, all in
+\path{blueprint/src/chapter/ch15_qpbt_combining.tex}.  No Lean
+declaration is currently linked to any of them.}
+
+\section{Conclusion}
+
+There is a proof-level gap in the cited lemma, together with an
+intermediate inconsistency: the printed proof asserts two different
+bounds for the same consistency defect, the first-route bound
+$O(m(\eps^{1/4} + \delta_P^{1/4} + \delta_Q^{1/4} +
+\delta_{\mathrm{Line}}^{1/2}))$ and the second-route bound
+$O(m^2\delta_P)$, the second resting on a joint-law decomposition that
+the sub-line lemma as stated does not supply; and the error form claimed
+in the lemma statement, $\poly(m^2\eps, md/q)$, follows from neither.
+The first route is sound after a harmless deficit correction in its
+second claim and establishes $m \cdot \poly(\eps, md/q)$.  The
+discrepancy is harmless downstream, since the sole consumer absorbs
+polynomial-in-$m$ prefactors into its constants.  The recommended
+resolution is to treat the corrected error form as operative while the
+source-labelled statement retains its printed form with the missing step
+explicitly tracked; strengthening the sub-line lemma to license the
+second route is optional, and no route to the claimed form is currently
+known.  We do not assert that the claimed form is false.
+
+\bibliographystyle{alpha}
+\bibliography{references}
+
+\end{document}
