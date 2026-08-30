@@ -429,16 +429,43 @@ def merge_pr(args: argparse.Namespace) -> int:
         try:
             git(repo_root, "merge", "--no-ff", "--no-edit", "-m", message, record.branch)
         except LayerError as exc:
-            # Leave no half-merged tree behind: a conflicted merge must not
-            # look like a partially applied one, and none of the bookkeeping
-            # below has run yet.
-            git(repo_root, "merge", "--abort", check=False)
-            raise GateFailure(
-                f"the merge of {record.branch} into {base} conflicts; the working "
-                "tree was restored and nothing was recorded. Rebase or merge "
-                f"{base} into the branch, re-run local/bin/ci.sh and "
-                f"local/bin/review.sh on the new head, then try again.\n{exc}"
-            ) from exc
+            # The registry (issues/, prs/, results/telemetry/) is
+            # single-instance on the base branch by protocol
+            # (local/protocols/issues-prs.md; EVOLUTION.md "Registry root
+            # resolves to the primary checkout"), so a conflict confined to
+            # registry paths is resolved with the base's version and the
+            # merge completes.  Any conflict touching a non-registry path
+            # aborts as before: content conflicts are for humans.
+            conflicted = [
+                line[3:]
+                for line in git(repo_root, "status", "--porcelain",
+                                check=False).splitlines()
+                if line.startswith("UU ") or line.startswith("AA ")
+            ]
+            registry_prefixes = ("issues/", "prs/", "results/telemetry/")
+            if conflicted and all(
+                path.startswith(registry_prefixes) for path in conflicted
+            ):
+                for path in conflicted:
+                    git(repo_root, "checkout", "--ours", "--", path)
+                    git(repo_root, "add", "--", path)
+                git(repo_root, "commit", "--no-edit", "--no-verify")
+                sys.stdout.write(
+                    "registry-path merge conflicts resolved with the base's "
+                    f"version ({len(conflicted)} file(s)); see "
+                    "local/protocols/issues-prs.md\n"
+                )
+            else:
+                # Leave no half-merged tree behind: a conflicted merge must
+                # not look like a partially applied one, and none of the
+                # bookkeeping below has run yet.
+                git(repo_root, "merge", "--abort", check=False)
+                raise GateFailure(
+                    f"the merge of {record.branch} into {base} conflicts; the working "
+                    "tree was restored and nothing was recorded. Rebase or merge "
+                    f"{base} into the branch, re-run local/bin/ci.sh and "
+                    f"local/bin/review.sh on the new head, then try again.\n{exc}"
+                ) from exc
         merge_commit = git(repo_root, "rev-parse", "HEAD")
         sys.stdout.write(f"merged as {merge_commit}\n")
 
