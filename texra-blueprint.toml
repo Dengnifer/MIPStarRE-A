@@ -1,0 +1,38 @@
+# Configuration for the shared texra-blueprint tooling.
+# https://github.com/LionSR/texra-blueprint
+
+[paper_gaps]
+dir         = "docs/paper-gaps"
+site_base   = "https://sirui-lu.com/MIPStarRE"
+blob_base   = "https://github.com/LionSR/MIPStarRE/blob/main/docs/paper-gaps"
+bib_author  = "The {MIPStarRE} contributors"
+institution = "MIPStarRE"
+title       = "MIPStarRE paper-gap notes"
+scan_roots  = ["MIPStarRE", "blueprint/src", "docs"]
+skip        = ["command.tex", "template.tex"]
+
+# The source-key registry. A note is named `<key>_<topic>.tex` (or, in the
+# hyphenated house style here, `<key>-<topic>.tex`), and the shared tool
+# resolves the key by longest registered prefix followed by a separator.
+# Nearly every note audits the one source paper of this project,
+# arXiv:2009.12982 (quantum soundness of the classical low individual degree
+# test): under `issue` for the issue-anchored stems, `naimark` for the
+# Naimark-dilation note, and `truncation-combinatorics` for the
+# small-overlaps bound. The longer key `issue-458` carves out the one note
+# whose source is the formal development itself, not the paper.
+# Enforced by `texra-blueprint paper-gaps check`.
+[paper_gaps.sources]
+issue = "arXiv:2009.12982 (quantum soundness of the classical low individual degree test; issue-anchored notes)"
+issue-458 = "internal foundation-layer formalization design audit"
+naimark = "arXiv:2009.12982 (Naimark dilation: projective-submeasurement form and bipartite assembly)"
+truncation-combinatorics = "arXiv:2009.12982 (truncation combinatorics: the small-overlaps bound)"
+# The protocol document is instructional, not a source audit; the tool's one
+# policy slot is taken by policy.tex, so this key admits it into the site
+# index as a listed document until upstream supports several policy pages.
+proof-gap = "protocol for source-faithful formalization (instructional document, not a source audit)"
+
+# Slugs published before a rename keep resolving: the site serves the old
+# PDF URL as a copy of the target note, and `check` accepts references to
+# the old name.
+[paper_gaps.aliases]
+naimark = "naimark-dilation"

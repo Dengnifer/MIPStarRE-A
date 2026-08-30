@@ -1,0 +1,254 @@
+import MIPStarRE.LDT.Commutativity.ScalarApproximation.Pointwise
+
+/-!
+# Section 11 commutativity: `G`-stability overlap (step one)
+
+First overlap-averaging step for the `G`-stability argument: averaging the
+common overlap term over `Point params.next` reduces to a single-coordinate
+integral.
+
+## References
+
+- `references/ldt-paper/commutativity-G.tex`
+- `blueprint/src/chapter/ch08_commutativity.tex`
+-/
+
+namespace MIPStarRE.LDT.Commutativity
+
+open MIPStarRE.LDT
+open MIPStarRE.LDT.ExpansionHypercubeGraph
+open MIPStarRE.LDT.CommutativityPoints
+open scoped BigOperators MatrixOrder Matrix ComplexOrder
+
+variable {ι : Type*} [Fintype ι] [DecidableEq ι]
+/-- Averaging the common overlap term over `Point params.next` depends only on
+the final coordinate `x : F_q`. -/
+private lemma gCommOverlap_avgOver_point
+    (params : Parameters)
+    [FieldModel params.q]
+    (strategy : SymStrat params.next ι)
+    (G : Fq params → SubMeas (Polynomial params) ι) :
+    avgOver (uniformDistribution (Point params.next))
+      (fun w => gCommOverlapTerm params strategy G (pointHeight params w)) =
+    avgOver (uniformDistribution (Fq params))
+      (fun x => gCommOverlapTerm params strategy G x) := by
+  exact CommutativityPoints.avgOver_uniform_pointNext_height params
+    (fun x => gCommOverlapTerm params strategy G x)
+
+/-- Averaging the overlap term over evaluated-slice questions through the
+first point coordinate marginalizes to the uniform `x : F_q` average. -/
+lemma gCommOverlap_avgOver_fst
+    (params : Parameters)
+    [FieldModel params.q]
+    (strategy : SymStrat params.next ι)
+    (G : Fq params → SubMeas (Polynomial params) ι) :
+    avgOver (uniformDistribution (EvaluatedSliceQuestion params))
+      (fun q => gCommOverlapTerm params strategy G (pointHeight params q.1)) =
+    avgOver (uniformDistribution (Fq params))
+      (fun x => gCommOverlapTerm params strategy G x) := by
+  calc
+    avgOver (uniformDistribution (EvaluatedSliceQuestion params))
+        (fun q => gCommOverlapTerm params strategy G (pointHeight params q.1))
+      = avgOver (uniformDistribution (Point params.next))
+          (fun w => gCommOverlapTerm params strategy G (pointHeight params w)) := by
+            exact avgOver_uniform_fst
+              (f := fun w => gCommOverlapTerm params strategy G (pointHeight params w))
+    _ = avgOver (uniformDistribution (Fq params))
+          (fun x => gCommOverlapTerm params strategy G x) :=
+          gCommOverlap_avgOver_point params strategy G
+
+/-- The common overlap term is always at most `1`. -/
+private lemma gCommOverlapTerm_le_one
+    (params : Parameters)
+    [FieldModel params.q]
+    (strategy : SymStrat params.next ι)
+    (hnorm : strategy.state.IsNormalized)
+    (G : Fq params → SubMeas (Polynomial params) ι)
+    (x : Fq params) :
+    gCommOverlapTerm params strategy G x ≤ 1 := by
+  unfold gCommOverlapTerm
+  have hmono :
+      opTensor (1 - (G x).total) ((G x).total) ≤
+        leftTensor (ι₂ := ι) (1 - (G x).total) := by
+    exact opTensor_le_leftTensor
+      (sub_nonneg.mpr (G x).total_le_one)
+      (G x).total_le_one
+  calc
+    ev strategy.state
+        (leftTensor (ι₂ := ι) (1 - (G x).total) *
+          rightTensor (ι₁ := ι) ((G x).total))
+      = ev strategy.state
+          (opTensor (1 - (G x).total) ((G x).total)) := by
+            rw [leftTensor_mul_rightTensor_eq_opTensor]
+    _ ≤ ev strategy.state
+          (leftTensor (ι₂ := ι) (1 - (G x).total)) := by
+            exact ev_mono strategy.state _ _ hmono
+    _ ≤ ev strategy.state (1 : MIPStarRE.Quantum.Op (ι × ι)) := by
+            exact ev_mono strategy.state _ _ <|
+              leftTensor_le_one (ι₂ := ι)
+                (sub_le_self (1 : MIPStarRE.Quantum.Op ι) (G x).total_nonneg)
+    _ = 1 := ev_one_of_isNormalized strategy.state hnorm
+
+/-- Any pointwise defect bound by the common overlap term inherits a raw
+`zeta / 2` estimate after marginalizing to the slice SSC defect of `G`. -/
+lemma gCommStability_raw_le_half_of
+    (params : Parameters)
+    [FieldModel params.q]
+    (strategy : SymStrat params.next ι)
+    (zeta : Error)
+    (family : IdxPolyFamily params ι)
+    (G : Fq params → SubMeas (Polynomial params) ι)
+    (hG : ∀ x, G x = (family.meas x).toSubMeas)
+    (hself : family.StronglySelfConsistent strategy.state zeta)
+    {Outcome : Type*} [Fintype Outcome]
+    (A B : IdxOpFamily (EvaluatedSliceQuestion params) Outcome (ι × ι))
+    (point : EvaluatedSliceQuestion params → Point params.next)
+    (hmarg :
+      avgOver (uniformDistribution (EvaluatedSliceQuestion params))
+        (fun q => gCommOverlapTerm params strategy G (pointHeight params (point q))) =
+      avgOver (uniformDistribution (Fq params))
+        (fun x => gCommOverlapTerm params strategy G x))
+    (hpointwise : ∀ q,
+      qSDDOp strategy.state (A q) (B q) ≤
+        gCommOverlapTerm params strategy G (pointHeight params (point q))) :
+    sddErrorOp strategy.state
+      (uniformDistribution (EvaluatedSliceQuestion params))
+      A B ≤
+    zeta / 2 := by
+  have hsliceSSC := gCommStability_sliceSSC params strategy zeta family G hG hself
+  have hssc_point := gCommStability_ssc_point params strategy G
+  calc
+    sddErrorOp strategy.state
+        (uniformDistribution (EvaluatedSliceQuestion params))
+        A B
+      ≤ avgOver (uniformDistribution (EvaluatedSliceQuestion params))
+          (fun q => gCommOverlapTerm params strategy G (pointHeight params (point q))) := by
+            unfold sddErrorOp
+            exact avgOver_mono _ _ _ hpointwise
+    _ = avgOver (uniformDistribution (Fq params))
+          (fun x => gCommOverlapTerm params strategy G x) := hmarg
+    _ ≤ avgOver (uniformDistribution (Fq params))
+          (fun x => qBipartiteSSCDefect strategy.state (G x)) := by
+            exact avgOver_mono _ _ _ hssc_point
+    _ = bipartiteSSCError strategy.state (uniformDistribution (Fq params)) G := by
+          rfl
+    _ ≤ zeta / 2 := hsliceSSC.overlapBound
+
+/-- Any pointwise defect bound by the common overlap term is trivially at most
+`1`. -/
+lemma gCommStability_raw_le_one_of
+    (params : Parameters)
+    [FieldModel params.q]
+    (strategy : SymStrat params.next ι)
+    (hnorm : strategy.state.IsNormalized)
+    (G : Fq params → SubMeas (Polynomial params) ι)
+    {Outcome : Type*} [Fintype Outcome]
+    (A B : IdxOpFamily (EvaluatedSliceQuestion params) Outcome (ι × ι))
+    (point : EvaluatedSliceQuestion params → Point params.next)
+    (hpointwise : ∀ q,
+      qSDDOp strategy.state (A q) (B q) ≤
+        gCommOverlapTerm params strategy G (pointHeight params (point q))) :
+    sddErrorOp strategy.state
+      (uniformDistribution (EvaluatedSliceQuestion params))
+      A B ≤
+    1 := by
+  calc
+    sddErrorOp strategy.state
+        (uniformDistribution (EvaluatedSliceQuestion params))
+        A B
+      ≤ avgOver (uniformDistribution (EvaluatedSliceQuestion params))
+          (fun q => gCommOverlapTerm params strategy G (pointHeight params (point q))) := by
+            unfold sddErrorOp
+            exact avgOver_mono _ _ _ hpointwise
+    _ ≤ 1 := by
+          exact avgOver_uniform_le_const
+            (fun q => gCommOverlapTerm params strategy G (pointHeight params (point q)))
+            1
+            (fun q => gCommOverlapTerm_le_one
+              params strategy hnorm G (pointHeight params (point q)))
+
+/-- Upgrade raw `zeta / 2` and `1` bounds to the displayed `sqrt zeta` relation. -/
+lemma sddOpRel_of_sqrt_bound_from_half_one
+    {Question Outcome : Type*}
+    [Fintype Outcome]
+    (ψ : QuantumState ι)
+    (𝒟 : Distribution Question)
+    (A B : IdxOpFamily Question Outcome ι)
+    (zeta : Error)
+    (hz_nonneg : 0 ≤ zeta)
+    (hhalf : sddErrorOp ψ 𝒟 A B ≤ zeta / 2)
+    (hone : sddErrorOp ψ 𝒟 A B ≤ 1) :
+    SDDOpRel ψ 𝒟 A B (Real.sqrt zeta) := by
+  constructor
+  by_cases hz1 : zeta ≤ 1
+  · have hsmall : zeta / 2 ≤ Real.sqrt zeta := by
+      have hsqrt_nonneg : 0 ≤ Real.sqrt zeta := Real.sqrt_nonneg _
+      nlinarith [Real.sq_sqrt hz_nonneg]
+    exact le_trans hhalf hsmall
+  · have hbig : 1 ≤ Real.sqrt zeta := by
+      have hz_one : 1 ≤ zeta := by linarith
+      have hsqrt_nonneg : 0 ≤ Real.sqrt zeta := Real.sqrt_nonneg _
+      nlinarith [Real.sq_sqrt hz_nonneg]
+    exact le_trans hone hbig
+
+/-- Overlap-only version of the first stability estimate.
+
+This is not the paper's boundedness-driven scalar proof of
+`clm:g-comm-stability`: it bounds the current SDD package through the slice SSC
+overlap term `⟨ψ,(I-G^y)⊗G^y ψ⟩`. It remains useful as an internal overlap
+lemma while the scalar-chain API is being completed. -/
+theorem gCommStability_overlap
+    (params : Parameters)
+    [FieldModel params.q]
+    (strategy : SymStrat params.next ι)
+    (zeta : Error)
+    (hnorm : strategy.state.IsNormalized)
+    (family : IdxPolyFamily params ι)
+    (G : Fq params → SubMeas (Polynomial params) ι)
+    (hG : ∀ x, G x = (family.meas x).toSubMeas)
+    (hself : family.StronglySelfConsistent strategy.state zeta) :
+    SDDOpRel strategy.state
+      (uniformDistribution (EvaluatedSliceQuestion params))
+      (commDataProcessedGStabilityOneLeft params strategy family G)
+      (commDataProcessedGStabilityOneRight params strategy family G)
+      (Real.sqrt zeta) := by
+  have hz_nonneg : 0 ≤ zeta := by
+    exact le_trans
+      (sddError_nonneg strategy.state
+        (uniformDistribution (Fq params))
+        (IdxSubMeas.liftLeft (IdxProjSubMeas.toIdxSubMeas family.meas))
+        (IdxSubMeas.liftRight (IdxProjSubMeas.toIdxSubMeas family.meas)))
+      hself.sliceSelfConsistency.squaredDistanceBound
+  have hraw_le_half :=
+    gCommStability_raw_le_half_of params strategy zeta family G hG hself
+      (commDataProcessedGStabilityOneLeft params strategy family G)
+      (commDataProcessedGStabilityOneRight params strategy family G)
+      Prod.snd
+      (by
+        calc
+          avgOver (uniformDistribution (EvaluatedSliceQuestion params))
+              (fun q => gCommOverlapTerm params strategy G (pointHeight params q.2))
+            = avgOver (uniformDistribution (Point params.next))
+                (fun w => gCommOverlapTerm params strategy G (pointHeight params w)) := by
+                  exact avgOver_uniform_snd
+                    (f := fun w => gCommOverlapTerm params strategy G (pointHeight params w))
+          _ = avgOver (uniformDistribution (Fq params))
+                (fun x => gCommOverlapTerm params strategy G x) :=
+                gCommOverlap_avgOver_point params strategy G)
+      (gCommStability_pointwise_bound params strategy family G hG)
+  have hraw_le_one :=
+    gCommStability_raw_le_one_of params strategy hnorm G
+      (commDataProcessedGStabilityOneLeft params strategy family G)
+      (commDataProcessedGStabilityOneRight params strategy family G)
+      Prod.snd
+      (gCommStability_pointwise_bound params strategy family G hG)
+  exact
+    sddOpRel_of_sqrt_bound_from_half_one
+      strategy.state
+      (uniformDistribution (EvaluatedSliceQuestion params))
+      (commDataProcessedGStabilityOneLeft params strategy family G)
+      (commDataProcessedGStabilityOneRight params strategy family G)
+      zeta hz_nonneg hraw_le_half hraw_le_one
+
+
+end MIPStarRE.LDT.Commutativity

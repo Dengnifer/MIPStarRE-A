@@ -1,0 +1,54 @@
+name: Bug Report
+description: Report a broken proof, type error, sorry regression, statement mismatch, or CI failure
+labels: ["bug"]
+body:
+  - type: input
+    id: file
+    attributes:
+      label: File(s) affected
+      description: Path to the Lean file(s) with the issue
+      placeholder: "e.g., MIPStarRE/LDT/Preliminaries.lean"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What is broken? Include error messages, sorry locations, or the mathematical mismatch.
+      placeholder: |
+        `lake build` fails with:
+        ```
+        error: unknown identifier 'foo'
+        ```
+    validations:
+      required: true
+
+  - type: textarea
+    id: source_location
+    attributes:
+      label: Mathematical source, if relevant
+      description: Cite the paper or blueprint path, line number, label, and a short quotation or precise paraphrase when the bug concerns a mathematical statement.
+      placeholder: |
+        - `references/ldt-paper/preliminaries.tex:88`, label `lem:...`.
+          Paraphrase: ...
+        - `blueprint/src/chapter/ch03_preliminaries.tex:120`, label `prop:...`.
+    validations:
+      required: false
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What should the Lean statement, proof, or build do instead?
+    validations:
+      required: false
+
+  - type: input
+    id: toolchain
+    attributes:
+      label: Lean toolchain
+      description: Output of `cat lean-toolchain`
+      placeholder: "e.g., leanprover/lean4:v4.16.0"
+    validations:
+      required: false

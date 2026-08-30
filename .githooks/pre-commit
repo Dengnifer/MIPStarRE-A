@@ -1,0 +1,68 @@
+#!/bin/sh
+set -eu
+
+if [ "${MIPSTARRE_SKIP_HOOKS:-}" = "1" ]; then
+  echo "MIPStarRE pre-commit hook skipped by MIPSTARRE_SKIP_HOOKS=1."
+  exit 0
+fi
+
+ROOT="$(git rev-parse --show-toplevel)"
+cd "$ROOT"
+GIT_LOCAL_ENV_VARS="$(git rev-parse --local-env-vars)"
+
+run_without_git_local_env() (
+  # Git exports repository-local variables while running hooks.  Several script
+  # tests create temporary repositories; keep those tests independent of this
+  # checkout.
+  unset $GIT_LOCAL_ENV_VARS
+  "$@"
+)
+
+STAGED_FILES="$(git diff --cached --name-only --diff-filter=ACMR)"
+if [ -z "$STAGED_FILES" ]; then
+  exit 0
+fi
+
+echo "MIPStarRE pre-commit: checking staged whitespace."
+git diff --cached --check
+
+if printf '%s\n' "$STAGED_FILES" | grep -Eq '^scripts/(.*\.py|tests/.*)$'; then
+  echo "MIPStarRE pre-commit: running scripts/tests unit tests."
+  run_without_git_local_env python3 -m unittest discover -s scripts/tests -p 'test_*.py'
+fi
+
+if printf '%s\n' "$STAGED_FILES" | grep -Eq \
+  '^(blueprint/src/.*\.(tex|sty|cls)|scripts/(check_blueprint_latex|tex_utils)\.py|scripts/tests/test_check_blueprint_latex\.py|\.githooks/pre-commit)$'; then
+  echo "MIPStarRE pre-commit: checking blueprint LaTeX conventions."
+  python3 scripts/check_blueprint_latex.py --root blueprint/src
+fi
+
+if ! printf '%s\n' "$STAGED_FILES" | grep -Eq \
+  '^(MIPStarRE/|MIPStarRE\.lean|blueprint/src/|blueprint/lean_decls|scripts/(audit_new_proof_obligation_metadata|audit_paper_facing_proof_debt|audit_conclusion_shaped_hypotheses|audit_unfaithful_markers|audit_lean_axiom_declarations|check_blueprint_latex|check_paper_gap_note_style|check_statement_paper_origin|check_source_statement_changes|blueprint_lean_sync|lean_header_utils|tex_utils)\.py|docs/(CONTRIBUTING|project_conventions|anti_patterns|blueprint_style_guide|formalization-patterns|proof_frontier_review)\.md|docs/paper-gaps/|\.github/(actions|prompts|workflows)/|AGENTS\.md)'; then
+  echo "MIPStarRE pre-commit: no statement-integrity files staged."
+  exit 0
+fi
+
+echo "MIPStarRE pre-commit: checking changed paper-gap note structure."
+python3 scripts/check_paper_gap_note_style.py --root . --staged --ci
+
+echo "MIPStarRE pre-commit: checking statement-like paper-origin citations."
+python3 scripts/check_statement_paper_origin.py --root .
+
+echo "MIPStarRE pre-commit: checking new proof-obligation metadata."
+python3 scripts/audit_new_proof_obligation_metadata.py --root . --staged --ci
+
+echo "MIPStarRE pre-commit: checking paper-facing proof-debt headers."
+echo "MIPStarRE pre-commit: do not close proof gaps by adding non-paper bridge/package hypotheses."
+python3 scripts/audit_paper_facing_proof_debt.py --root . --ci
+
+echo "MIPStarRE pre-commit: checking conclusion-shaped hypotheses."
+python3 scripts/audit_conclusion_shaped_hypotheses.py --root . --ci
+
+echo "MIPStarRE pre-commit: checking unfaithful-dependency markers."
+python3 scripts/audit_unfaithful_markers.py --root . --ci
+
+echo "MIPStarRE pre-commit: checking explicit LDT axiom declarations."
+python3 scripts/audit_lean_axiom_declarations.py --root . --ci
+
+echo "MIPStarRE pre-commit: ok."

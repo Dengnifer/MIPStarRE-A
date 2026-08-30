@@ -1,0 +1,14 @@
+{
+  "extraKnownMarketplaces": {
+    "texra-lean-skills": {
+      "source": {
+        "source": "github",
+        "repo": "texra-ai/texra-lean-skills",
+        "ref": "v0.2.4"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "texra-lean-skills@texra-lean-skills": true
+  }
+}

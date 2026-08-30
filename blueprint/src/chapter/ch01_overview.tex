@@ -1,0 +1,84 @@
+\chapter{Overview}
+\label{chap:overview}
+
+This blueprint records the formalization plan for the low individual degree
+test paper of Ji, Natarajan, Vidick, Wright, and Yuen
+\cite{Ji2020LowIndividualDegree}.  The paper is available as
+arXiv:2009.12982.
+
+\begin{theorem}[Raz--Safra]\label{thm:raz-safra}
+	\uses{def:polyfunc}
+	Suppose Provers~$\mathrm{A}$ and~$\mathrm{B}$ pass the $k=2$ surface-versus-point low-degree test with probability $1-\eps$. Then there exists a degree-$d$ polynomial $g \colon \F_q^m \to \F_q$ such that
+	\[
+		\Prb_{u \sim \F_q^m}[g(u)=a] \ge 1-\eps-\poly(m)\cdot\poly(d/q).
+	\]
+	Here $a$ denotes the prover's point answer.
+\end{theorem}
+\begin{remark}
+	The paper theorem is an external classical soundness input and is not used by
+	the current low individual degree test formalization route.
+\end{remark}
+\begin{proof}
+	\uses{def:polyfunc}
+	See Raz--Safra [RS97].
+\end{proof}
+
+% External classical source theorem recorded for orientation; the Lean-facing
+% conditional interface is stated immediately below.
+\begin{theorem}[Polishchuk--Spielman]\label{thm:classical-test-soundness}
+	\uses{def:low-individual-degree-test}
+	Suppose Provers~$\mathrm{A}$ and~$\mathrm{B}$ pass the low individual degree test with probability $1-\eps$. Then there exists a polynomial $g \colon \F_q^m \to \F_q$ with individual degree $d$ such that
+	\[
+		\Prb_{u \sim \F_q^m}[g(u)=a] \ge 1-\poly(m)\cdot\bigl(\poly(\eps)+\poly(d/q)\bigr).
+	\]
+	Here $a$ denotes the prover's point answer.
+\end{theorem}
+\begin{remark}
+	The paper theorem is an external classical soundness input.  The nearby Lean
+	corollary below records the specialized conditional interface currently present
+	in the repository; it is not used to mark this source theorem as formalized.
+\end{remark}
+\begin{proof}
+	See Polishchuk--Spielman [PS94].
+\end{proof}
+
+\begin{proposition}[Conditional Polishchuk--Spielman corollary]\label{prop:lean-classical-test-soundness-interface}
+	\lean{MIPStarRE.LDT.Test.TwoProverClassicalLIDPassCondition, MIPStarRE.LDT.Test.PolishchukSpielmanClassicalSoundnessStatement, MIPStarRE.LDT.Test.classicalTestSoundness}
+	\leanok
+	\uses{thm:classical-test-soundness}
+	The Lean theorem \texttt{MIPStarRE.LDT.Test.classicalTestSoundness} is a
+	conditional corollary of the quoted Polishchuk--Spielman theorem.  It assumes
+	the modeled deterministic low individual degree test pass condition
+	\texttt{MIPStarRE.LDT.Test.TwoProverClassicalLIDPassCondition} and a
+	specialized external hypothesis
+	\texttt{MIPStarRE.LDT.Test.PolishchukSpielmanClassicalSoundnessStatement}
+	at the caller's chosen slack bound.  Under these hypotheses it returns a
+	repository polynomial whose evaluations agree with the point answers up to
+	that slack.
+\end{proposition}
+\begin{proof}
+	\leanok
+	The Lean proof applies the specialized external Polishchuk--Spielman
+	hypothesis to the modeled low individual degree test pass condition.
+\end{proof}
+
+% Paper source: references/ldt-paper/introduction.tex, lines 236--264.
+\begin{remark}[A degree-$(d+1)$ strategy that passes with probability $1-\frac{1}{m}$]\label{ex:bad-individual-degree-example}
+		Fix the polynomial $h(x_1, \ldots, x_m) = x_1^{d+1}$. Consider the following classical strategy for the degree-$d$ low individual degree test. On a point query $u \in \F_q^m$, Prover~$\mathrm{A}$ answers $a = h(u)$. On an axis-parallel line query $\ell = \{u + x e_i : x \in \F_q\}$, Prover~$\mathrm{B}$ returns the restriction $h\vert_{\ell}$ when $i \neq 1$, since $h$ is then constant along $\ell$, and returns the zero polynomial when $i = 1$.
+
+		The verifier certainly accepts whenever $i \neq 1$, which happens with probability $1 - \frac{1}{m}$. Thus the strategy passes the degree-$d$ test with probability at least $1-\eps$ for $\eps = \frac{1}{m}$. However, Prover~$\mathrm{A}$ is answering according to a polynomial whose individual degree in the first variable is $d+1$. By Schwartz--Zippel, any polynomial $g$ of individual degree at most $d$ agrees with $h$ on at most a $\frac{d+1}{q}$ fraction of all inputs, so
+		\[
+			\Prb_{u \sim \F_q^m}[g(u)=a] \le 1 - m\eps + \frac{d+1}{q}.
+		\]
+		This shows that the $m$-dependent slack in Theorems~\ref{thm:classical-test-soundness} and~\ref{thm:main-informal} is unavoidable up to polynomial factors.
+\end{remark}
+
+% Informal source theorem; its proof points to the formal theorem below.
+\begin{theorem}[Main theorem, informal]\label{thm:main-informal}
+	\uses{def:low-individual-degree-test, def:projective-strategy, def:polymeasurements}
+	If $d > 0$ and a two-prover projective strategy passes the $(m,q,d)$ low individual degree test with probability $1-\eps$, then there are global polynomial measurements whose evaluations agree with the point answers except with error $\poly(m)(\poly(\eps)+\poly(d/q))$.
+\end{theorem}
+\begin{proof}
+	\uses{thm:main-formal}
+	This is the informal form of Theorem~\ref{thm:main-formal}.
+\end{proof}

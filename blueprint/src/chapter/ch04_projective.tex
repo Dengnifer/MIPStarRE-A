@@ -1,0 +1,1460 @@
+\chapter{Making measurements projective}
+\label{chap:projective}
+
+% Source background theorem. The orthonormalization route below is the one used
+% downstream for state-dependent consistency estimates.
+\begin{theorem}[Naimark dilation]\label{thm:naimark}
+	\lean{MIPStarRE.LDT.MakingMeasurementsProjective.NaimarkTensorProductCorrelationStatement}
+	\lean{MIPStarRE.LDT.MakingMeasurementsProjective.naimarkTensorProductCorrelation}
+	\leanok
+	% The Lean declaration constructs the Naimark data from the checked
+	% one-measurement theorem and the two-sided trace identity
+	% OneMeasNaimarkData.twoSidedCorrelationPreservation.
+	\uses{def:submeasurement}
+	Let $\ket{\psi}$ be a state in $\mathcal H_{\mathrm A} \ot \mathcal H_{\mathrm B}$.
+	Let $A = \{A^x_a\}$ be a sub-measurement acting on $\mathcal H_{\mathrm A}$
+	and $B=\{B^y_b\}$ be a sub-measurement acting on $\mathcal H_{\mathrm B}$.
+	Then there exist Hilbert spaces $\mathcal H_{\mathrm A_{\mathsf{aux}}}$ and $\mathcal H_{\mathrm B_{\mathsf{aux}}}$,
+	a state $\ket{\mathsf{aux}} \in \mathcal H_{\mathrm A_{\mathsf{aux}}} \ot \mathcal H_{\mathrm B_{\mathsf{aux}}}$,
+	and projective sub-measurements $\widehat{A} = \{\widehat{A}^x_a\}$ and $\widehat{B}=\{\widehat{B}^y_b\}$
+	acting on $\mathcal H_{\mathrm A} \ot \mathcal H_{\mathrm A_{\mathsf{aux}}}$
+	and $\mathcal H_{\mathrm B} \ot \mathcal H_{\mathrm B_{\mathsf{aux}}}$, respectively,
+	such that, if $\ket{\widehat{\psi}} = \ket{\psi} \ot \ket{\mathsf{aux}}$, then for all $x,y,a,b$,
+	\[
+		\bra{\psi} A^x_a \ot B^y_b \ket{\psi}
+		=
+		\bra{\widehat{\psi}} \widehat{A}^x_a \ot \widehat{B}^y_b \ket{\widehat{\psi}}.
+	\]
+	In addition, $\ket{\mathsf{aux}}$ is a product state.
+	The word ``measurement'' in the source statement is read here in the
+	projective-submeasurement sense used by Lemma~\ref{lem:naimark-helper}: for a
+	general sub-measurement, the residual mass is carried by the additional
+	\(\bot\) outcome in the auxiliary construction, so the original outcomes need
+	not sum to the identity.
+\end{theorem}
+\begin{proof}
+	\uses{lem:naimark-helper}
+	\leanok
+
+	For each question $x$, choose a local auxiliary state
+	$\ket{\mathsf{aux}_{\mathrm A,x}}$ of dimension one larger than the number of
+	outcomes of $A^x$, and apply Lemma~\ref{lem:naimark-helper} to obtain a
+	projective sub-measurement $\widetilde A^x$. Do the same for each question $y$
+	on Bob's side, obtaining auxiliary states $\ket{\mathsf{aux}_{\mathrm B,y}}$
+	and projective sub-measurements $\widetilde B^y$.
+
+	Let
+	\[
+		\ket{\mathsf{aux}}
+		=
+		\Big(\bigotimes_x \ket{\mathsf{aux}_{\mathrm A,x}}\Big)
+		\ot
+		\Big(\bigotimes_y \ket{\mathsf{aux}_{\mathrm B,y}}\Big),
+		\qquad
+		\ket{\widehat{\psi}} = \ket{\psi} \ot \ket{\mathsf{aux}},
+	\]
+	and let $\widehat A^x_a$ and $\widehat B^y_b$ be obtained by letting
+	$\widetilde A^x_a$ or $\widetilde B^y_b$ act on the relevant auxiliary factor
+	and the identity act on every other auxiliary factor. Because the auxiliary
+	state is a product state and the two dilations act on disjoint tensor factors,
+	the correlation for fixed $(x,y)$ reduces to the compression identity from
+	Lemma~\ref{lem:naimark-helper} on the $x$- and $y$-registers. Hence
+	\[
+		\bra{\widehat{\psi}} \widehat A^x_a \ot \widehat B^y_b \ket{\widehat{\psi}}
+		=
+		\bra{\psi} A^x_a \ot B^y_b \ket{\psi}.
+	\]
+\end{proof}
+
+\begin{remark}[Lean questionwise Naimark interface]\label{rem:lean-questionwise-naimark}
+	In addition to Theorem~\ref{thm:naimark}, Lean records the questionwise
+	one-measurement interface obtained from Lemma~\ref{lem:naimark-helper}.  For
+	every indexed family \(A^x\) and \(B^y\), it produces local dilation data for
+	each question and proves the corresponding single-outcome
+	marginal-preservation identities.  This is a useful Lean-only auxiliary
+	interface for downstream arguments, not a substitute for the full
+	tensor-product correlation theorem, which is proved separately by
+	\texttt{naimarkTensorProductCorrelation}.
+\end{remark}
+
+\begin{remark}[Lean auxiliary declarations for Naimark]\label{rem:lean-naimark-auxiliary-declarations}
+	The checked Lean proof of Theorem~\ref{thm:naimark} uses the standard
+	one-measurement auxiliary register
+	\[
+		\mathrm{Option}(\mathcal A),
+	\]
+	with the all-\(\bot\) vector as the initial auxiliary state.  A separate
+	Naimark unitary is chosen for each question, so the proof does not need a
+	distinct auxiliary tensor factor for every question.  This is equivalent for
+	the theorem's conclusion, since no commutation relation between different
+	questions' dilated measurements is required.  The declaration
+	\texttt{OneMeasNaimarkData.twoSidedCorrelationPreservation} proves the
+	four-register trace identity which turns the two local compression identities
+	into the bipartite correlation-preservation identity used by
+	\texttt{naimarkTensorProductCorrelation}.
+\end{remark}
+
+\begin{theorem}[Orthogonalization lemma]\label{thm:orthonormalization}
+	\lean{MIPStarRE.LDT.MakingMeasurementsProjective.orthonormalization}
+	\leanok
+	% The theorem now proves the paper constant and is axiom-clean.  Issue #1032
+	% still tracks the heterogeneous proof of
+	% Lemma~\ref{lem:orthonormalization-main-lemma}, which is a separate
+	% auxiliary lemma and is not used as a proof dependency here.
+	% In Lean, normalization is an explicit hypothesis because the ambient state
+	% record contains positive semidefinite density matrices of arbitrary
+	% normalized trace; this matches the paper's convention that a state is
+	% normalized.
+	% The paper states the constant $100\zeta^{1/4}$, and Lean now proves
+	% this source theorem directly.  The completion-route variant with the
+	% weaker $120\zeta^{1/4}$ bound is recorded separately as
+	% `orthonormalizationCompletionRoute`.
+	\uses{def:strong-self-consistency, def:approx_delta}
+	Let $\ket{\psi}$ be a permutation-invariant state,
+	and let $A = \{A_a\}$ be a sub-measurement with strong self-consistency
+	\[
+		\sum_a \bra{\psi} A_a \ot A_a \ket{\psi}
+		\geq
+		\sum_a \bra{\psi} A_a \ot I \ket{\psi} - \zeta.
+	\]
+	Then there exists a projective sub-measurement $P = \{P_a\}$ such that
+	\[
+		A_a \ot I \approx_{100 \zeta^{1/4}} P_a \ot I.
+	\]
+\end{theorem}
+\begin{proof}
+	\lean{MIPStarRE.LDT.MakingMeasurementsProjective.orthonormalization}
+	\leanok
+	\uses{lem:orthonormalization-main-lemma, lem:locality-preserving-projectivization,
+		prop:other-two-notions-of-self-consistency,
+		prop:triangle-inequality-for-approx_delta}
+	Complete the sub-measurement by adding the missing outcome and use
+	permutation invariance to convert strong self-consistency into the
+	cross-consistency hypothesis of
+	Lemma~\ref{lem:orthonormalization-main-lemma}.  Applying the
+	locality-preserving projectivization repair gives the required projective
+	sub-measurement with the paper constant \(100\zeta^{1/4}\).
+\end{proof}
+
+\begin{remark}[Lean right-register completion helpers]\label{rem:lean-right-register-completion-helpers}
+	The inductive-step application of the orthogonalization lemma uses
+	completion on both tensor factors.  The formal development records the
+	analytic completion statement on the left register; the shared preliminary
+	helper compares right- and left-tensor placements at the level of the
+	underlying state-dependent-distance form.  Its submeasurement and indexed
+	lemmas transport state-dependent distance to the right register under the
+	permutation-invariance hypothesis on the state.  The last linked declaration
+	is a Lean-only construction from two already constructed
+	orthonormalize-and-complete statements and a pre-projective consistency
+	proof.  It is not a source theorem and it is not an additional hypothesis of
+	Theorem~\ref{thm:main-formal}; it records only the tensor-factor bookkeeping
+	needed to form the later line-156 projectivization transition.
+\end{remark}
+
+\begin{remark}[Lean line-169 projectivization match-mass declarations]\label{rem:lean-line169-projectivization-match-mass}
+	Lean exposes the quantitative obstruction at the projectivization transition used
+	in the inductive step.  The existing line-156 transition gives only the generic
+	consequence of Proposition~\ref{prop:triangle-sub}: from
+	$G^{\mathrm A}\simeq_{\zeta_1}G^{\mathrm B}$ and
+	$G^{\mathrm A}\approx_{\zeta_2}Q^{\mathrm A}$ one obtains
+	$Q^{\mathrm A}\simeq_{\zeta_1+\sqrt{\zeta_2}}G^{\mathrm B}$, and similarly
+	on the other tensor factor.  This direct square-root-loss route is an
+	immediate specialization of the general Lean declarations
+	\texttt{MIPStarRE.LDT.Preliminaries.triangleSub} and
+	\texttt{MIPStarRE.LDT.Preliminaries.triangleSub\_right} to the handoff
+	fields, and is no longer maintained as separate named projectivization API.
+
+	Lean also proves a more local repaired transport that keeps the comparison at
+	the pre-completion stage.  If $P^{\mathrm A}$ is the orthonormalized
+	projective sub-measurement with $G^{\mathrm A}\approx_{\epsilon}P^{\mathrm A}$,
+	then Proposition~\ref{prop:easy-approx-from-approx-delta} bounds the diagonal
+	match-mass loss by $\sqrt{\epsilon}$, and canonical completion can only add
+	nonnegative diagonal match mass.  Thus the declarations
+	\texttt{leftConsistency\_of\_completion\_and\_sdd} and
+	\texttt{rightConsistency\_of\_completion\_and\_sdd} prove
+	$Q^{\mathrm A}\simeq_{\zeta_1+\sqrt{\epsilon}}G^{\mathrm B}$ and its Bob-side
+	mirror from the pre-projective $\zeta_1$ consistency plus the
+	pre-completion $\approx_{\epsilon}$ comparison.  In particular, substituting
+	the checked orthonormalization error
+	$\epsilon=100\zeta_1^{1/4}$ yields the repaired line-169 bound
+	$\zeta_1+10\zeta_1^{1/8}$ recorded by
+	\texttt{leftConsistency\_with\_orthonormalization\_loss} and its mirror.
+	This is much sharper than the direct completion-level
+	$\zeta_1+\sqrt{\zeta_2}$ route, but it is still not the paper's exact
+	$\zeta_1$.
+
+	Lean also isolates the completion fact used inside this sharper repair: the
+	canonical completion of a projective submeasurement can only increase its
+	diagonal match mass against a fixed partner submeasurement.  This is the formal
+	declaration
+	\texttt{ProjectivizationMatchMassMonotonicity.completeAtOutcomeProj\_left\_matchMass\_ge}.
+	The sharper route therefore pays its square-root loss before completion and then
+	uses completion only in this monotone direction, with no additional match-mass
+	penalty.
+
+	The older exact-$\zeta_1$ construction-level monotonicity statement has been
+	retired.  The current Section~5 API proves the checked repaired transport above,
+	and the active orthonormalization route now uses those repaired completion-transport estimates rather
+	than a separate exact match-mass witness.
+\end{remark}
+
+\subsection{Naimark dilation}\label{sec:naimark}
+
+\begin{lemma}\label{lem:naimark-helper}
+	\lean{MIPStarRE.LDT.MakingMeasurementsProjective.oneMeasNaimark}
+	\leanok
+	\uses{def:submeasurement}
+	Let $A = \{A_a\}$ be a sub-measurement with $k$ distinct outcomes $a \in \mathcal A$, and let $\ket{\mathsf{aux}} \in \C^{k+1}$ be any state. Then there exists a projective sub-measurement $\widehat{A} = \{\widehat{A}_a\}$ such that for each outcome $a$,
+	\[
+		(I \ot \bra{\mathsf{aux}}) \cdot \widehat{A}_a \cdot (I \ot \ket{\mathsf{aux}})
+		=
+		A_a.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	Consider an orthonormal basis for $\C^{k+1}$ consisting of vectors $\ket{a}$ for $a \in \mathcal A$ and the vector $\ket{\bot}$. Let $U$ be any unitary such that for each vector $\ket{\phi}$,
+	\[
+		U \cdot (\ket{\phi} \ot \ket{\mathsf{aux}})
+		=
+		\sum_{a \in \mathcal A} ((A_a)^{1/2}\ket{\phi}) \ot \ket{a}
+		+
+		((I-A)^{1/2}\ket{\phi}) \ot \ket{\bot},
+	\]
+	where $A=\sum_a A_a$. Then
+	\[
+		U \cdot (I \ot \ket{\mathsf{aux}})
+		=
+		\sum_{a \in \mathcal A} (A_a)^{1/2} \ot \ket{a}
+		+
+		(I-A)^{1/2} \ot \ket{\bot},
+	\]
+	so for any $a \in \mathcal A$,
+	\[
+		(I \ot \bra{a}) \cdot U \cdot (I \ot \ket{\mathsf{aux}})
+		=
+		(A_a)^{1/2}.
+	\]
+	Define
+	\[
+		\widehat{A}_a = U^\dagger \cdot (I \ot \ket{a}\bra{a}) \cdot U.
+	\]
+	Each $\widehat{A}_a$ is a projector, and
+	\begin{align*}
+		(I \ot \bra{\mathsf{aux}}) \cdot \widehat{A}_a \cdot (I \ot \ket{\mathsf{aux}})
+		 & =
+		(I \ot \bra{\mathsf{aux}}) \cdot U^\dagger \cdot (I \ot \ket{a}) \cdot (I \ot \bra{a}) \cdot U \cdot (I \ot \ket{\mathsf{aux}}) \\
+		 & =
+		(A_a)^{1/2} \cdot (A_a)^{1/2}
+		=
+		A_a.
+	\end{align*}
+\end{proof}
+
+% Paper source: references/ldt-paper/orthonormalization.tex, lines 189--271.
+\begin{remark}[Naimark dilation does not preserve $\approx_\delta$]\label{ex:easy-but-long}
+		Let $\ket{\psi}$ be any state in $\C^d \ot \C^d$, and consider the two-outcome measurements $A = \{A_0, A_1\}$ and $B = \{B_0, B_1\}$ with
+		\[
+			A_0 = A_1 = B_0 = B_1 = \tfrac{1}{2} I.
+		\]
+		For each outcome $a \in \{0,1\}$, the operators $A_a \ot I$ and $I \ot B_a$ are both equal to $\tfrac{1}{2} I \ot I$, so $A_a \ot I \approx_0 I \ot B_a$ on the state $\ket{\psi}$.
+
+		Now apply the Naimark construction with a qubit auxiliary space on each side and auxiliary state $\ket{+} = \tfrac{1}{\sqrt 2}(\ket{0}+\ket{1})$. Since $A$ and $B$ are genuine measurements rather than sub-measurements, the extra $\ket{\bot}$ direction from \ref{lem:naimark-helper} is unnecessary in this example. The unitary from \ref{lem:naimark-helper} can then be taken to be the identity, so the dilated measurements are
+		\[
+			\widehat A_a = I \ot \ket{a}\bra{a}, \qquad \widehat B_a = I \ot \ket{a}\bra{a}.
+		\]
+		If $\ket{\widehat{\psi}} = \ket{\psi} \ot \ket{+} \ot \ket{+}$, then a direct calculation gives
+		\[
+			\sum_{a \in \{0,1\}} \bigl\lVert (\widehat A_a \ot I - I \ot \widehat B_a) \ket{\widehat{\psi}} \bigr\rVert^2 = 1.
+		\]
+		Thus on the state $\ket{\widehat{\psi}}$ the dilated family satisfies $\widehat A_a \ot I \approx_\delta I \ot \widehat B_a$ only for $\delta \ge 1$, even though the original family satisfied the same relation with $\delta = 0$. This is why we use Theorem~\ref{thm:orthonormalization} rather than simply applying Theorem~\ref{thm:naimark}: Naimark preserves the outcome probabilities, but it need not preserve the state-dependent $\approx_\delta$ estimates needed later.
+\end{remark}
+
+\subsection{Orthogonalization lemma}\label{sec:orthogonalization}
+
+\begin{lemma}[Orthogonalization lemma for measurements]\label{lem:orthonormalization-main-lemma}
+	\lean{MIPStarRE.LDT.MakingMeasurementsProjective.orthonormalizationMainLemma}
+	\leanok
+	\uses{def:simeq, def:approx_delta}
+	Let $\ket{\psi}$ be a state, and let $A = \{A_a\}$ and $B = \{B_a\}$ be measurements such that
+	\[
+		A_a \ot I \simeq_\zeta I \ot B_a
+	\]
+	on state $\ket{\psi}$. Here $\ket{\psi}$ is not assumed to be permutation-invariant.
+	Then there exists a projective sub-measurement $P = \{P_a\}$ such that
+	\[
+		A_a \ot I \approx_{84 \zeta^{1/4}} P_a \ot I.
+	\]
+\end{lemma}
+
+\begin{lemma}[Formalized orthogonalization envelope for measurements]\label{lem:orthonormalization-main-lemma-formalized-envelope}
+	\lean{MIPStarRE.LDT.MakingMeasurementsProjective.orthonormalizationMeasurement_of_consistency_from_projectivizationRepair}
+	\leanok
+	\uses{lem:orthonormalization-main-lemma, lem:locality-preserving-projectivization, def:simeq, def:approx_delta}
+	This same-space corollary weakens Lemma~\ref{lem:orthonormalization-main-lemma}
+	to the public orthonormalization envelope \(100\zeta^{1/4}\).  Thus, if \(A=\{A_a\}\) and
+	\(B=\{B_a\}\) are measurements on the same finite-dimensional space satisfying
+	\[
+		A_a \ot I \simeq_\zeta I \ot B_a
+	\]
+	on a normalized bipartite state \(\ket{\psi}\), then there exists a projective
+	sub-measurement \(P=\{P_a\}\) such that
+	\[
+		A_a \ot I \approx_{100\zeta^{1/4}} P_a \ot I .
+	\]
+	This is the corrected Lean theorem proved from the Section~5
+	projectivization repair construction.  The sharper heterogeneous source
+	statement \(84\zeta^{1/4}\) is now formalized as
+	Lemma~\ref{lem:orthonormalization-main-lemma}.
+\end{lemma}
+\begin{proof}
+	\lean{MIPStarRE.LDT.MakingMeasurementsProjective.orthonormalizationMeasurement_of_consistency_from_projectivizationRepair}
+	\leanok
+	\uses{lem:orthonormalization-main-lemma, lem:locality-preserving-projectivization,
+		prop:simeq-for-measurements, prop:triangle-inequality-for-approx_delta}
+	The consistency hypothesis first gives the source almost-projective estimate
+	for \(A_a\ot I\).  The locality-preserving projectivization repair then
+	produces a projective sub-measurement on the original space, and the scalar
+	bounds convert the \(84\)-constant repair estimate into the public
+	\(100\zeta^{1/4}\) envelope.
+\end{proof}
+
+\begin{remark}[Lean auxiliary declarations for the orthogonalization lemma]
+	\label{rem:lean-orthonormalization-main-declarations}
+	The Lean declaration
+	\texttt{MIPStarRE.LDT.MakingMeasurementsProjective.orthonormalizationMainLemma}
+	proves Lemma~\ref{lem:orthonormalization-main-lemma} without adding
+	spectral-truncation or repair hypotheses.  The proof first converts the
+	cross-consistency hypothesis into the source almost-projective estimate for
+	the measurement \(A_a \otimes I\), and then applies the locality-preserving
+	\(Q/X/\widehat X/P\) construction in its heterogeneous left-register form.
+	Lemma~\ref{lem:orthonormalization-main-lemma-formalized-envelope} remains as
+	the same-space corollary with the weaker public \(100\zeta^{1/4}\) envelope.
+	The measurement-level declarations
+	\texttt{orthonormalizationMeasurement\_of\_consistency} and
+	\texttt{orthonormalizationMeasurement} are proved corollaries, not
+	conditional wrappers: they derive the projective submeasurement from the
+	displayed consistency or self-consistency hypotheses.
+\end{remark}
+
+\begin{lemma}[Locality-preserving projectivization]\label{lem:locality-preserving-projectivization}
+	\lean{MIPStarRE.LDT.MakingMeasurementsProjective.leftLiftedProjectivizationRepair}
+	\uses{lem:projective-non-measurement, def:approx_delta}
+	\leanok
+	Paper origin: \texttt{references/ldt-paper/orthonormalization.tex} lines 534--860 (rank reduction and the $Q$-side setup, including \ref{lem:xa-t} and \ref{lem:qa-restated}) and 862--1194 (the $X/\widehat X/P$ algebra: \ref{lem:X-squared}, \ref{lem:X-hat-squared}, \ref{lem:X-times-X-hat}, \ref{lem:squared-difference}, \ref{lem:P-projectivity}, \ref{lem:P-Q-approx}, plus the final triangle-inequality calculation producing the $84\zeta^{1/4}$ bound). Together these are the late repair stage of the orthogonalization-lemma proof.
+
+	Given a normalized bipartite state $\ket{\psi}$, a measurement
+	$A = \{A_a\}$, and the source almost-projective estimate for the
+	left-lifted family $\{A_a \ot I\}$, there exists a locality-preserving
+	projective sub-measurement with error $84\zeta^{1/4}$.
+
+	More precisely, if $\ket{\psi}$ is a normalized bipartite state, if
+	$A = \{A_a\}$ is a measurement, and if
+	\[
+		\sum_a \bra{\psi} \bigl((A_a \ot I) - (A_a \ot I)^2\bigr) \ket{\psi} \le \zeta,
+	\]
+	then there exists a projective sub-measurement $P = \{P_a\}$ on the underlying
+	space such that
+	\[
+		A_a \ot I \approx_{84\zeta^{1/4}} P_a \ot I.
+	\]
+	The locality-preserving form -- output $P_a \ot I$ rather than an arbitrary
+	lifted family -- is recorded in
+	Remark~\ref{rem:lean-orthonormalization-main-declarations} and is the form
+	required by the unconditional orthonormalization theorem
+	(\ref{thm:orthonormalization}).
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:projective-non-measurement, lem:projective-low-rank-sum,
+		lem:xa-t, lem:qa-restated, lem:X-squared, lem:X-hat-squared,
+		lem:X-times-X-hat, lem:squared-difference, lem:P-projectivity, lem:P-Q-approx,
+		prop:triangle-inequality-for-approx_delta}
+	Pass to the left marginal state, apply the rank-reduction and
+	$Q/X/\widehat X/P$ construction there, and transport the resulting
+	$\approx_{84\zeta^{1/4}}$ estimate back to left lifts via the left-marginal
+	expectation formula.
+\end{proof}
+
+\begin{proposition}[Measurement-level orthogonalization from consistency]\label{prop:orthonormalization-measurement-of-consistency}
+	\lean{MIPStarRE.LDT.MakingMeasurementsProjective.orthonormalizationMeasurement_of_consistency}
+	\leanok
+	\uses{def:strong-self-consistency, def:approx_delta, lem:orthonormalization-main-lemma}
+	This is the same-space measurement corollary recorded in
+	Remark~\ref{rem:lean-orthonormalization-main-declarations}.  Let
+	\(\ket{\psi}\) be a normalized bipartite state, let \(A=\{A_a\}\) and
+	\(B=\{B_a\}\) be measurements on the same finite-dimensional space, and
+	let \(0 \leq \zeta\).  Assume the bipartite consistency estimate
+	\[
+		A_a \ot I \simeq_{\zeta} I \ot B_a .
+	\]
+	Then there exists a projective sub-measurement \(P=\{P_a\}\) such that
+	\[
+		A_a \ot I \approx_{100\zeta^{1/4}} P_a \ot I .
+	\]
+\end{proposition}
+\begin{proof}
+	\leanok
+	\uses{lem:orthonormalization-main-lemma}
+	The proof applies Lemma~\ref{lem:orthonormalization-main-lemma} and weakens
+	the \(84\zeta^{1/4}\) estimate to the public orthonormalization envelope.
+	The spectral-truncation and locality-preserving repair steps are internal to
+	that proof; they are not hypotheses of this declaration.
+\end{proof}
+
+\begin{proposition}[Measurement-level orthogonalization from self-consistency]\label{prop:orthonormalization-measurement}
+	\lean{MIPStarRE.LDT.MakingMeasurementsProjective.orthonormalizationMeasurement}
+	\leanok
+	\uses{def:strong-self-consistency, def:approx_delta,
+		prop:orthonormalization-measurement-of-consistency}
+	This is the self-consistency specialization of
+	Proposition~\ref{prop:orthonormalization-measurement-of-consistency}.
+	Let \(\ket{\psi}\) be a normalized bipartite state, let \(A=\{A_a\}\) be a
+	measurement, and let \(0\leq\zeta\).  If \(A\) is bipartite strongly
+	self-consistent with error \(\zeta\), then there exists a projective
+	sub-measurement \(P=\{P_a\}\) such that
+	\[
+		A_a \ot I \approx_{100 \zeta^{1/4}} P_a \ot I.
+	\]
+\end{proposition}
+\begin{proof}
+	\leanok
+	\uses{prop:orthonormalization-measurement-of-consistency}
+	Since \(A\) is complete, the self-consistency defect is the consistency
+	defect of \(A\) with itself.  The proof therefore applies the consistency
+	corollary with \(B=A\).  No spectral-truncation witness or repair witness is
+	assumed at this interface.
+\end{proof}
+
+\begin{proposition}[Completion-route orthonormalization]\label{prop:orthonormalization-completion-route}
+	\lean{MIPStarRE.LDT.MakingMeasurementsProjective.orthonormalizationCompletionRoute}
+	\leanok
+	\uses{def:strong-self-consistency, def:approx_delta, prop:other-two-notions-of-self-consistency,
+		lem:locality-preserving-projectivization}
+
+	The paper theorem \ref{thm:orthonormalization} is proved in Lean with the
+	\(100\zeta^{1/4}\) constant.  The declaration checked here is the
+	completion-route theorem with the weaker bound
+	\(120\zeta^{1/4}\), recorded in
+	\texttt{orthonormalizationCompletionRouteError}.  See
+	\cite{gap:issue-1032-orthonormalization-constant}.
+
+	Let \(\ket{\psi}\) be a normalized permutation-invariant state, and let
+	\(A=\{A_a\}_{a\in\mathcal A}\) be a sub-measurement which is bipartite
+	strongly self-consistent with error \(\zeta\).  Then there exists a
+	projective sub-measurement \(P=\{P_a\}_{a\in\mathcal A}\) such that
+	\[
+		A_a \ot I \approx_{120\zeta^{1/4}} P_a \ot I.
+	\]
+\end{proposition}
+\begin{proof}
+	\leanok
+	\uses{prop:other-two-notions-of-self-consistency, lem:locality-preserving-projectivization}
+	Write \(A=\sum_a A_a\).  The strong self-consistency assumption implies
+	\[
+		\bra{\psi} A \ot A \ket{\psi}
+		\geq
+		\bra{\psi} A \ot I \ket{\psi} - \zeta,
+	\]
+	so
+	\[
+		\bra{\psi} A \ot (I-A) \ket{\psi} \leq \zeta.
+	\]
+	Rearranging once more gives
+	\[
+		\bra{\psi} (I-A) \ot (I-A) \ket{\psi}
+		\geq
+		\bra{\psi} (I-A) \ot I \ket{\psi} - \zeta.
+	\]
+
+	Complete \(A\) to the measurement
+	\(\widehat A=\{\widehat A_a\}_{a \in \widehat{\mathcal A}}\) on
+	\(\widehat{\mathcal A}=\mathcal A \cup \{\bot\}\) by setting
+	\(\widehat A_a=A_a\) for \(a \in \mathcal A\) and
+	\(\widehat A_{\bot}=I-A\).  Adding the two preceding inequalities shows
+	that \(\widehat A\) is \(2\zeta\)-strongly self-consistent.  By
+	\ref{prop:other-two-notions-of-self-consistency}, this gives the source
+	almost-projective estimate
+	\[
+		\sum_a \bra{\psi}
+		\bigl((\widehat A_a\ot I)-(\widehat A_a\ot I)^2\bigr)
+		\ket{\psi}
+		\le 4\zeta.
+	\]
+	Apply \ref{lem:locality-preserving-projectivization} to obtain a projective
+	sub-measurement \(\widehat P\) such that
+	\[
+		\widehat A_a \ot I \approx_{84(4\zeta)^{1/4}} \widehat P_a \ot I.
+	\]
+	Discard the extra outcome and set \(P_a=\widehat P_a\) for
+	\(a \in \mathcal A\).  Then
+	\[
+		A_a \ot I \approx_{84(4\zeta)^{1/4}} P_a \ot I,
+	\]
+	and \(84 \cdot 4^{1/4} \leq 120\), so the completion-route bound follows.
+\end{proof}
+
+\begin{proof}[Proof of \ref{lem:orthonormalization-main-lemma}]
+	\proves{lem:orthonormalization-main-lemma}
+	\lean{MIPStarRE.LDT.MakingMeasurementsProjective.orthonormalizationMainLemma}
+	\leanok
+	\uses{prop:simeq-for-measurements, lem:projective-non-measurement, lem:projective-low-rank-sum, lem:Q-completeness, lem:sqrt-Q-completeness, lem:q-almost-projective, lem:xa-t, lem:qa-restated, lem:X-squared, lem:X-expression-to-Q-expression, lem:pa-restated, lem:X-hat-squared, lem:X-times-X-hat, lem:squared-difference, lem:P-projectivity, lem:P-Q-approx, prop:triangle-inequality-for-approx_delta}
+	The statement is trivial when $\zeta > 1/4$, so assume
+	\begin{equation}\label{eq:assumption-on-zeta}
+		\zeta \leq 1/4.
+	\end{equation}
+	By \ref{prop:simeq-for-measurements},
+	\[
+		\sum_a \bra{\psi} A_a \ot B_a \ket{\psi} \geq 1-\zeta.
+	\]
+	Apply Cauchy--Schwarz to
+	\[
+		\sum_a \bra{\psi} (A_a \ot I)\cdot(I \ot B_a)\ket{\psi}
+	\]
+	to obtain
+	\[
+		\sum_a \bra{\psi} (A_a)^2 \ot I \ket{\psi} \geq (1-\zeta)^2 \geq 1-2\zeta.
+	\]
+	Because $A$ is a measurement, this rewrites as
+	\begin{equation}\label{eq:A-looks-projective}
+		\sum_a \bra{\psi} (A_a-(A_a)^2) \ot I \ket{\psi} \leq 2\zeta.
+	\end{equation}
+
+	\begin{lemma}\label{lem:trunc-inequality}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.truncationInequality}
+		\leanok
+		For any $x \in [0, 1]$,
+		\begin{equation*}
+			(x - \mathsf{trunc}_\delta(x))^2 \leq \frac{1}{\delta} \cdot (x - x^2).
+		\end{equation*}
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		If $x \geq 1-\delta$, then $\mathsf{trunc}_\delta(x)=1$. Since $\delta \leq 1/2$ below, one also has $x \geq \delta$, so
+		\[
+			(x-\mathsf{trunc}_\delta(x))^2
+			=
+			(1-x)^2
+			\leq
+			(1-x)\frac{x}{\delta}
+			=
+			\frac{1}{\delta}(x-x^2).
+		\]
+		If $x < 1-\delta$, then $\mathsf{trunc}_\delta(x)=0$, and similarly
+		\[
+			(x-\mathsf{trunc}_\delta(x))^2
+			=
+			x^2
+			\leq
+			x\frac{1-x}{\delta}
+			=
+			\frac{1}{\delta}(x-x^2).
+		\]
+	\end{proof}
+
+	\begin{lemma}[Rounding to projectors]\label{lem:projective-non-measurement}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.projectiveNonMeasurement}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.projectiveNonMeasurement_of_sourceAlmostProjective_full}
+		\leanok
+		There exists a set of projective matrices $\{R_a\}$ such that
+		\begin{equation*}
+			A_a \ot I \approx_{2\sqrt{\zeta}} R_a \ot I.
+		\end{equation*}
+		and
+		\begin{equation*}
+			R:= \sum_a R_a \leq (1+2\sqrt{\zeta}) \cdot I.
+		\end{equation*}
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		\uses{lem:trunc-inequality}
+		Write the eigendecomposition of $A_a$ as
+		\[
+			A_a = \sum_i \lambda_{a,i}\ket{u_{a,i}}\bra{u_{a,i}}.
+		\]
+		Choose
+		\begin{equation}\label{eq:bound-on-delta}
+			0 < \delta \leq 1/2,
+		\end{equation}
+		define $\mathsf{trunc}_\delta:[0,1] \to \{0,1\}$ by $\mathsf{trunc}_\delta(x)=1$ when $x \geq 1-\delta$ and $0$ otherwise, and set
+		\[
+			R_a = \mathsf{trunc}_\delta(A_a)
+			=
+			\sum_i \mathsf{trunc}_\delta(\lambda_{a,i}) \ket{u_{a,i}}\bra{u_{a,i}}.
+		\]
+		By \ref{lem:trunc-inequality},
+		\[
+			(A_a-R_a)^2
+			\leq
+			\frac{1}{\delta}(A_a-(A_a)^2).
+		\]
+		Summing expectations and using \ref{eq:A-looks-projective} gives
+		\[
+			\sum_a \Vert (A_a-R_a)\ot I \ket{\psi}\Vert^2
+			\leq
+			\frac{2\zeta}{\delta},
+		\]
+		so $A_a \ot I \approx_{2\zeta/\delta} R_a \ot I$.
+
+		For every $x \in [0,1]$, one has $\mathsf{trunc}_\delta(x) \leq x/(1-\delta)$, hence
+		\[
+			R_a \leq \frac{1}{1-\delta} A_a.
+		\]
+		Summing over $a$ and using that $A$ is a measurement,
+		\[
+			R = \sum_a R_a \leq \frac{1}{1-\delta} I \leq (1+2\delta)I,
+		\]
+		where the last estimate uses $\delta \leq 1/2$. Setting $\delta=\sqrt{\zeta}$ gives the claim, and \ref{eq:assumption-on-zeta} ensures $\delta \leq 1/2$.
+	\end{proof}
+
+	\begin{remark}[Lean auxiliary declarations for rounding to projectors]\label{rem:lean-projective-non-measurement-auxiliary}
+		The source-facing Lean declarations for
+		Lemma~\ref{lem:projective-non-measurement} are the proposition
+		\texttt{projectiveNonMeasurement} and the construction theorem
+		\texttt{projectiveNonMeasurement\_of\_sourceAlmostProjective\_full}.
+		The declarations listed here are the endpoint and regime splits, the
+		\texttt{AlmostProjMeasStatement} witness forms, and the spectral-truncation
+		statement conversions used by later Section~5 arguments.  They are not additional
+		hypotheses in the paper statement of
+		Lemma~\ref{lem:projective-non-measurement}.
+	\end{remark}
+
+	\begin{lemma}[Combinatorial averaging for the $r > d$ branch]\label{lem:small-overlap-averaging}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.Truncation.exists_large_subset_ordered}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.Truncation.card_mul_sum_small_le}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.Truncation.card_univ_mul_sum_compl_le}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.Truncation.sum_small_le_four_sqrt}
+		\leanok
+		Let $f : \alpha \to \mathbb{R}$ be a function on a finite index set $\alpha$ with
+		$|\alpha| = r$, and let $L \subseteq \alpha$ with $|L| = d$ and $d < r$. Write
+		$S = L^\complement$ and assume $f(s) \leq f(l)$ for every $s \in S$ and $l \in L$.
+		Then the pairwise double-counting inequality
+		\[
+			|L|\, \sum_{s \in S} f(s) \leq |S|\, \sum_{l \in L} f(l)
+		\]
+		holds, and hence also
+		\[
+			r\, \sum_{s \in S} f(s) \leq |S|\, \sum_{x \in \alpha} f(x).
+		\]
+		If in addition $r \leq (1+2\sqrt{\zeta})\,d$, $\sum_{x \in \alpha} f(x) \leq
+		1 + 2\sqrt{\zeta}$, and $0 \leq \zeta \leq 1/4$, then
+		\[
+			\sum_{s \in S} f(s) \leq 4\sqrt{\zeta}.
+		\]
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		Choose $L$ to be a set of $d$ indices on which the sum of $f$ is maximal. If some $s \in S$ and $l \in L$ satisfied $f(l) < f(s)$, replacing $l$ by $s$ would increase this sum, so every small index is bounded by every large index. Summing the inequalities $f(s) \leq f(l)$ over all pairs $(s,l) \in S \times L$ gives
+		\[
+			|L|\sum_{s \in S} f(s) \leq |S|\sum_{l \in L} f(l).
+		\]
+		Since $\alpha$ is the disjoint union of $L$ and $S$, adding $|S|\sum_{s \in S} f(s)$ to both sides yields
+		\[
+			r\sum_{s \in S} f(s) \leq |S|\sum_{x \in \alpha} f(x).
+		\]
+		The hypotheses $|L|=d$ and $r \leq (1+2\sqrt{\zeta})d$ imply $|S|/r \leq 2\sqrt{\zeta}$. Dividing by $r$ and using $\sum_{x \in \alpha} f(x) \leq 1+2\sqrt{\zeta}$ gives
+		\[
+			\sum_{s \in S} f(s) \leq 2\sqrt{\zeta}(1+2\sqrt{\zeta}).
+		\]
+		Finally, $\zeta \leq 1/4$ implies $\sqrt{\zeta} \leq 1/2$, and hence $2\sqrt{\zeta}(1+2\sqrt{\zeta}) \leq 4\sqrt{\zeta}$.
+	\end{proof}
+
+
+	\begin{lemma}[Rank reduction]\label{lem:projective-low-rank-sum}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.projectiveLowRankSum}
+		\leanok
+		There exists a set of projection matrices $\{Q_a\}$ such that
+		\begin{equation*}
+			A_a \ot I \approx_{12\sqrt{\zeta}} Q_a \ot I.
+		\end{equation*}
+		and
+		\begin{equation*}
+			Q:= \sum_a Q_a \leq (1+2\sqrt{\zeta}) \cdot I.
+		\end{equation*}
+		Furthermore,
+		\begin{equation*}
+			\sum_a \mathrm{rank}(Q_a) \leq d.
+		\end{equation*}
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		\uses{lem:projective-non-measurement, lem:small-overlap-averaging, prop:triangle-inequality-for-approx_delta}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.projectiveLowRankSum_of_projectors}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.projectiveLowRankSum_of_rank_bound}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.projectiveLowRankSum_of_spectralTruncationStatement}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.projectiveLowRankSum_truncate}
+		Let $\{R_a\}$ be given by \ref{lem:projective-non-measurement}. Write $r_a=\mathrm{rank}(R_a)$ and $r=\sum_a r_a$. If $r \leq d$, take $Q_a=R_a$. Otherwise,
+		\begin{equation}\label{eq:bound-on-r}
+			r
+			=
+			\sum_a r_a
+			=
+			\sum_a \Tr(R_a)
+			=
+			\Tr(R)
+			\leq
+			(1+2\sqrt{\zeta})d.
+		\end{equation}
+		Let $\ket{v_{a,1}},\ldots,\ket{v_{a,r_a}}$ be an orthonormal basis for the range of $R_a$, so
+		\[
+			R_a = \sum_{i=1}^{r_a} \ket{v_{a,i}}\bra{v_{a,i}}.
+		\]
+		Define the overlaps
+		\[
+			o_{a,i} = \bra{\psi} (\ket{v_{a,i}}\bra{v_{a,i}} \ot I)\ket{\psi}.
+		\]
+		Their total satisfies
+		\begin{equation}\label{eq:total-overlap}
+			\sum_a \sum_{i=1}^{r_a} o_{a,i}
+			=
+			\bra{\psi} R \ot I \ket{\psi}
+			\leq
+			1+2\sqrt{\zeta}.
+		\end{equation}
+		Let $\mathsf{Large}$ be the set of the $d$ largest overlaps $o_{a,i}$, breaking ties arbitrarily, and let $\mathsf{Small}$ be the complement. Then
+		\begin{equation}\label{eq:size-of-small-is-small}
+			|\mathsf{Small}|
+			=
+			r-d
+			\leq
+			2\sqrt{\zeta}\,d
+			\leq
+			2\sqrt{\zeta}\,r,
+		\end{equation}
+		by \ref{eq:bound-on-r}. Averaging the overlaps over the $r$ indices gives
+		\begin{equation}\label{eq:small-overlaps}
+			\sum_{(a,i)\in \mathsf{Small}} o_{a,i}
+			\leq
+			\frac{|\mathsf{Small}|}{r}\sum_{a,i} o_{a,i}
+			\leq
+			4\sqrt{\zeta},
+		\end{equation}
+		using \ref{eq:size-of-small-is-small}, \ref{eq:total-overlap}, and \ref{eq:assumption-on-zeta}.
+
+		For each $a$, let $\mathsf{Large}_a=\{i : (a,i)\in \mathsf{Large}\}$ and define
+		\[
+			Q_a = \sum_{i \in \mathsf{Large}_a} \ket{v_{a,i}}\bra{v_{a,i}}.
+		\]
+		Then $\sum_a \mathrm{rank}(Q_a)=|\mathsf{Large}| \leq d$, and $Q_a \leq R_a$ for every $a$, so
+		\[
+			Q = \sum_a Q_a \leq \sum_a R_a = R \leq (1+2\sqrt{\zeta})I.
+		\]
+		Also,
+		\[
+			R_a-Q_a = \sum_{i \in \mathsf{Small}_a} \ket{v_{a,i}}\bra{v_{a,i}}
+		\]
+		is a projector, hence
+		\[
+			\sum_a \Vert (R_a-Q_a)\ot I \ket{\psi}\Vert^2
+			=
+			\sum_{(a,i)\in\mathsf{Small}} o_{a,i}
+			\leq
+			4\sqrt{\zeta}
+		\]
+		by \ref{eq:small-overlaps}. Therefore $R_a \ot I \approx_{4\sqrt{\zeta}} Q_a \ot I$. Combining this with \ref{lem:projective-non-measurement} and the triangle inequality for $\approx_\delta$ gives
+		\[
+			A_a \ot I \approx_{12\sqrt{\zeta}} Q_a \ot I.
+		\]
+	\end{proof}
+
+	Henceforth let $Q=\{Q_a\}$ be the family given by \ref{lem:projective-low-rank-sum}.
+
+	\begin{lemma}[Completeness of~$Q$]\label{lem:Q-completeness}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.qCompleteness}
+		\leanok
+		\begin{equation*}
+			\bra{\psi} Q \ot I \ket{\psi}
+			\geq
+			1 - 11 \zeta^{1/4}.
+		\end{equation*}
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		\uses{lem:projective-low-rank-sum}
+		Since each $Q_a$ is projective,
+		\begin{equation}\label{eq:Q-for-an-A}
+			\bra{\psi} Q \ot I \ket{\psi}
+			=
+			\sum_a \bra{\psi} (Q_a)^2 \ot I \ket{\psi}
+			\approx_{5\zeta^{1/4}}
+			\sum_a \bra{\psi} (Q_a \cdot A_a)\ot I \ket{\psi}.
+		\end{equation}
+		By Cauchy--Schwarz,
+		\[
+			\sum_a \bra{\psi} (Q_a)^2 \ot I \ket{\psi} \leq 1+2\sqrt{\zeta}
+			\quad\text{and}\quad
+			\sum_a \bra{\psi} (Q_a-A_a)^2 \ot I \ket{\psi} \leq 12\sqrt{\zeta}
+		\]
+		from \ref{lem:projective-low-rank-sum}.
+		A second Cauchy--Schwarz estimate yields
+		\begin{equation}\label{eq:another-Q-for-A}
+			\sum_a \bra{\psi} (Q_a \cdot A_a)\ot I \ket{\psi}
+			\approx_{4\zeta^{1/4}}
+			\sum_a \bra{\psi} (A_a)^2 \ot I \ket{\psi}.
+		\end{equation}
+		Combining \ref{eq:Q-for-an-A} and \ref{eq:another-Q-for-A} with \ref{eq:A-looks-projective} gives
+		\[
+			\bra{\psi} Q \ot I \ket{\psi}
+			\geq
+			\sum_a \bra{\psi} A_a \ot I \ket{\psi} - 2\zeta - 9\zeta^{1/4}
+			=
+			1 - 11\zeta^{1/4},
+		\]
+		since $\zeta \leq \zeta^{1/4}$ under \ref{eq:assumption-on-zeta}.
+	\end{proof}
+
+	\begin{lemma}[Completeness of~$\sqrt{Q}$]\label{lem:sqrt-Q-completeness}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.sqrtQCompleteness}
+		\leanok
+		\begin{equation*}
+			\bra{\psi} \sqrt{Q} \ot I \ket{\psi}
+			\geq
+			1 - 12 \zeta^{1/4}.
+		\end{equation*}
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		\uses{lem:Q-completeness, lem:projective-low-rank-sum}
+		Diagonalize $Q=\sum_i \nu_i \ket{u_i}\bra{u_i}$. Because $Q \leq (1+2\sqrt{\zeta})I$ by \ref{lem:projective-low-rank-sum}, each $\nu_i$ is at most $1+2\sqrt{\zeta}$. Therefore
+		\[
+			\sqrt{Q}
+			=
+			\sum_i \sqrt{\nu_i}\ket{u_i}\bra{u_i}
+			\geq
+			\frac{1}{\sqrt{1+2\sqrt{\zeta}}} Q.
+		\]
+		The scalar estimate
+		\[
+			\frac{1}{\sqrt{1+2\sqrt{\zeta}}} \geq 1-\sqrt{\zeta}
+		\]
+		gives $\sqrt{Q} \geq (1-\sqrt{\zeta})Q$. Hence \ref{lem:Q-completeness} implies
+		\[
+			\bra{\psi} \sqrt{Q} \ot I \ket{\psi}
+			\geq
+			(1-\sqrt{\zeta})(1-11\zeta^{1/4})
+			\geq
+			1-12\zeta^{1/4}.
+		\]
+	\end{proof}
+
+	\begin{lemma}[$Q$ is almost projective]\label{lem:q-almost-projective}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.qAlmostProjective}
+		\leanok
+		\begin{equation*}
+			\sum_a (Q_a \cdot Q \cdot Q_a - Q_a) \leq 4\sqrt{\zeta} \cdot I.
+		\end{equation*}
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		\uses{lem:projective-low-rank-sum}
+		Since $Q \leq (1+2\sqrt{\zeta})I$ by \ref{lem:projective-low-rank-sum},
+		\begin{align*}
+			\sum_a Q_a \cdot Q \cdot Q_a - \sum_a Q_a
+			 & \leq
+			(1+2\sqrt{\zeta}) \sum_a Q_a \cdot I \cdot Q_a - \sum_a Q_a \\
+			 & =
+			(1+2\sqrt{\zeta})Q - Q                                      \\
+			 & =
+			2\sqrt{\zeta}\,Q                                            \\
+			 & \leq
+			2\sqrt{\zeta}(1+2\sqrt{\zeta})I                             \\
+			 & \leq
+			4\sqrt{\zeta}\,I,
+		\end{align*}
+		using \ref{eq:assumption-on-zeta} in the last step.
+	\end{proof}
+
+	\begin{definition}[Matrix decomposition of~$Q_a$]\label{def:matrix-decomposition-Q}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.matrixDecompositionQ, MIPStarRE.LDT.MakingMeasurementsProjective.sigmaProjMeas, MIPStarRE.LDT.MakingMeasurementsProjective.sigmaFinProjMeas, MIPStarRE.LDT.MakingMeasurementsProjective.sigmaRangeEmbedding, MIPStarRE.LDT.MakingMeasurementsProjective.sigmaFinRangeEmbedding}
+		\lean{MIPStarRE.Quantum.ProjectorRangeONB.rankOne_mulVec_vec}
+		\lean{MIPStarRE.Quantum.ProjectorRangeONB.mulVec_vec}
+		\leanok
+		\uses{lem:projective-low-rank-sum}
+		For each $a$, let
+		\[
+			m_a = \mathrm{rank}(Q_a),
+		\]
+		and let $\ket{v_{a,1}},\ldots,\ket{v_{a,m_a}}$ be an orthonormal basis for the range of $Q_a$, so that
+		\[
+			Q_a = \sum_{i=1}^{m_a} \ket{v_{a,i}}\bra{v_{a,i}}.
+		\]
+		Let
+		\[
+			m = \sum_a m_a,
+		\]
+		and let $\{\ket{a,i}\}$ be an orthonormal basis of $\C^m$, indexed by all $a$ and all
+		$1 \leq i \leq m_a$. For each $a$, define
+		\[
+			X_a = \sum_{i=1}^{m_a} \ket{a,i}\bra{v_{a,i}},
+			\qquad
+			T_a = \sum_{i=1}^{m_a} \ket{a,i}\bra{a,i},
+		\]
+		and define
+		\begin{equation}\label{eq:looks-like-singular-value-decomposition}
+			X = \sum_a X_a = \sum_a \sum_{i=1}^{m_a} \ket{a,i}\bra{v_{a,i}}.
+		\end{equation}
+		Let $T = \{T_a\}$. Then $T$ is a projective measurement on $\C^m$.
+	\end{definition}
+	\begin{proof}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.matrixDecompositionQ,
+			MIPStarRE.LDT.MakingMeasurementsProjective.sigmaProjMeas,
+			MIPStarRE.LDT.MakingMeasurementsProjective.sigmaFinProjMeas,
+			MIPStarRE.LDT.MakingMeasurementsProjective.sigmaRangeEmbedding,
+			MIPStarRE.LDT.MakingMeasurementsProjective.sigmaFinRangeEmbedding}
+		\leanok
+		\uses{lem:projective-low-rank-sum}
+		Choose an orthonormal basis of the range of each projector \(Q_a\).
+		The rank-one expansion gives the displayed decomposition, and the
+		orthogonality of the labelled basis vectors makes the family \(T\)
+		a projective measurement.
+	\end{proof}
+
+	\begin{definition}[SVD of~$X$]\label{def:svd-of-X}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.svdOfX}
+		\leanok
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.rectangularSvdX}
+		\leanok
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.rectangularSvdXHat}
+		\leanok
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.rectangularSvdDomainMiddle}
+		\leanok
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.rectangularSvdRangeMiddle}
+		\leanok
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.sigmaRangeCarrier}
+		\leanok
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.QXPLayerData.ofRankReductionAndSvdIdentities}
+		\leanok
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.QXPLayerData.ofSigmaRangeAndSvdIdentities}
+		\leanok
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.QXPLayerData.ofRankReductionAndRectangularSvdUnitaryGroup}
+		\leanok
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.QXPLayerData.ofSigmaRangeAndRectangularSvdUnitaryGroup}
+		\leanok
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.exists_qxpLayerData_ofRankReductionSigmaRangeAndSvdIdentities}
+		\leanok
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.exists_qxpLayerData_ofRankReductionSigmaRangeAndSvdIdentities_with_x_coisometry}
+		\leanok
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.exists_qxpLayerData_ofRankReductionSigmaRangeAndRectangularSvdUnitaryGroup}
+		\leanok
+		\uses{def:matrix-decomposition-Q}
+		The paper presents this step by choosing a singular value decomposition
+		\[
+			X = U \cdot \Sigma_{m \times d} \cdot V^\dagger.
+		\]
+		The formalization has two closely related auxiliary declarations.  The reduced
+		datum records the downstream consequences of the choice: the matrices $X$
+		and $\widehat X$, the identities $X^\dagger X=Q$,
+		$\widehat X\widehat X^\dagger=I$, and $X^\dagger\widehat X=\sqrt Q$,
+		together with the $Q_a=X^\dagger T_aX$ restatement.  The rectangular-SVD
+		lemmas take explicit matrices $U,V,\Sigma,I_{m\times d}$ and derive the
+		two stored $\widehat X$ identities from the matrix calculation below.
+	\end{definition}
+	\begin{proof}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.svdOfX,
+			MIPStarRE.LDT.MakingMeasurementsProjective.QXPLayerData.ofRankReductionAndSvdIdentities,
+			MIPStarRE.LDT.MakingMeasurementsProjective.QXPLayerData.ofSigmaRangeAndSvdIdentities,
+			MIPStarRE.LDT.MakingMeasurementsProjective.QXPLayerData.ofRankReductionAndRectangularSvdUnitaryGroup,
+			MIPStarRE.LDT.MakingMeasurementsProjective.QXPLayerData.ofSigmaRangeAndRectangularSvdUnitaryGroup,
+			MIPStarRE.LDT.MakingMeasurementsProjective.exists_qxpLayerData_ofRankReductionSigmaRangeAndSvdIdentities,
+			MIPStarRE.LDT.MakingMeasurementsProjective.exists_qxpLayerData_ofRankReductionSigmaRangeAndRectangularSvdUnitaryGroup}
+		\leanok
+		\uses{def:matrix-decomposition-Q}
+		Apply the finite-dimensional singular value decomposition to \(X\) and
+		record exactly the consequences used later: the identities for
+		\(X^\dagger X\), \(\widehat X\widehat X^\dagger\),
+		\(X^\dagger\widehat X\), and the restatement of the \(Q_a\)'s.  The
+		unitary-group constructors are the same rectangular-SVD calculation, with
+		the square factors taken as elements of the relevant unitary groups
+		rather than as matrices accompanied by separate unitarity equations.  In
+		the sigma-range specialization, the auxiliary row space is the lifted
+		finite-enumeration carrier associated to the ranks of the \(Q_a\)'s, which
+		is definitionally the carrier of the canonical sigma-range \(Q\)-layer.
+	\end{proof}
+
+	\begin{remark}[Formalization support for orthogonal projector families]\label{rem:motivation-for-P}
+		If the family $\{Q_a\}$ were a projective measurement, then the vectors
+		$\ket{v_{a,i}}$, over all $a$ and all $1 \leq i \leq m_a$, would be orthonormal.
+		Then \eqref{eq:looks-like-singular-value-decomposition} would already be a singular value
+		decomposition of $X$, with $\Sigma = I_{m \times d}$. Equivalently,
+		\[
+			X = U \cdot I_{m \times d} \cdot V^\dagger.
+		\]
+		This motivates replacing $\Sigma$ by $I$ in the definition of $\widehat X$ and $P$.
+	\end{remark}
+
+	\begin{definition}[Definition of~$P$]\label{def:projective-P}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.projectiveP}
+		\leanok
+		\uses{def:matrix-decomposition-Q, def:svd-of-X}
+		The paper defines
+		\[
+			\widehat{X} = U \cdot I_{m \times d} \cdot V^\dagger.
+		\]
+		We take $\widehat X$ to be the reduced matrix supplied by the stored datum.
+		For each $a$, define
+		\[
+			\widehat{X}_a = T_a \cdot \widehat{X},
+			\qquad
+			P_a = \widehat{X}_a^\dagger \cdot \widehat{X}_a.
+		\]
+	\end{definition}
+	\begin{proof}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.projectiveP}
+		\leanok
+		\uses{def:matrix-decomposition-Q, def:svd-of-X}
+		The definition is the formal \(Q/X/\widehat X/P\) construction: once
+		\(\widehat X\) is chosen from the stored singular-value data, each
+		\(P_a\) is defined as the positive operator
+		\(\widehat X_a^\dagger\widehat X_a\).
+	\end{proof}
+
+	\begin{lemma}\label{lem:xa-t}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.xa_t}
+		\leanok
+		\uses{def:matrix-decomposition-Q}
+		For each $a$,
+		\[
+			X_a = T_a \cdot X.
+		\]
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		Multiply the definition of $X$ by $T_a$ on the left and use that $T_a$ selects exactly the basis vectors $\ket{a,i}$:
+		\[
+			T_a \cdot X
+			=
+			\Big(\sum_{i=1}^{m_a} \ket{a,i}\bra{a,i}\Big)
+			\Big(\sum_b \sum_{j=1}^{m_b} \ket{b,j}\bra{v_{b,j}}\Big)
+			=
+			\sum_{i=1}^{m_a} \ket{a,i}\bra{v_{a,i}}
+			=
+			X_a.
+		\]
+	\end{proof}
+
+	\begin{lemma}[$Q_a$ restated]\label{lem:qa-restated}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.sigmaRangeEmbedding_qa_eq, MIPStarRE.LDT.MakingMeasurementsProjective.sigmaFinRangeEmbedding_qa_eq, MIPStarRE.LDT.MakingMeasurementsProjective.qaRestated}
+		\leanok
+		For each $a$,
+		\begin{equation*}
+			Q_a = X_a^\dagger \cdot X_a = X^\dagger \cdot T_a \cdot X = X_a^\dagger \cdot X.
+		\end{equation*}
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		\uses{lem:xa-t}
+		The identity $X_a^\dagger X_a = Q_a$ follows by expanding the basis sums. The remaining equalities come from \ref{lem:xa-t} and the projectivity of $T$:
+		\[
+			X_a^\dagger \cdot X_a
+			=
+			(X^\dagger \cdot T_a)(T_a \cdot X)
+			=
+			X^\dagger \cdot T_a \cdot X
+			=
+			X_a^\dagger \cdot X.
+		\]
+	\end{proof}
+
+	\begin{lemma}[$X$ squared]\label{lem:X-squared}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.xSquared_of_qa_eq, MIPStarRE.LDT.MakingMeasurementsProjective.sigmaFinRangeEmbedding_gram_right}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.qtotal_posSemidef_of_x_squared}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.qtotal_eigenvalues_nonneg_of_x_squared}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.sqrt_eq_sum_sqrt_eigenvalues_vecMulVec}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.positiveGramSpectrumRightRows}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.positive_gram_spectrum_right_rows_mul_conjTranspose}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.positive_gram_spectrum_image_rows_mixed_eq_sqrt}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.matrix_image_eq_zero_of_nonpositive_gram_eigenvalue}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.adjoint_image_eq_zero_of_orthogonal_positive_gram_images}
+		\leanok
+		\begin{equation*}
+			X^\dagger \cdot X = Q.
+		\end{equation*}
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		\uses{lem:qa-restated}
+		Use that $T$ is a measurement and then \ref{lem:qa-restated}:
+		\[
+			X^\dagger \cdot X
+			=
+			\sum_a X^\dagger \cdot T_a \cdot X
+			=
+			\sum_a Q_a
+			=
+			Q.
+		\]
+		The additional paper identities involving $U,V,\Sigma$ are the usual SVD
+		computations.  The Lean development also records the spectral calculation
+		which will identify the mixed positive-Gram-image product with
+		$\sqrt Q$: the positive eigenvalues give the nonzero columns, while the
+		zero eigenspace has zero coefficient in the square-root expansion and is
+		killed by $X$.  The conjugate right-eigenvector rows over the positive
+		spectrum are also orthonormal.  Equivalently, any row-space vector
+		orthogonal to the positive Gram images is killed by $X^\dagger$.
+	\end{proof}
+
+	\begin{lemma}\label{lem:X-expression-to-Q-expression}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.xExpressionToQExpression}
+		\leanok
+		For each $a$,
+		\begin{equation*}
+			X_a^\dagger \cdot (X \cdot X^\dagger - I_{m \times m})^2 \cdot X_a
+			=
+			Q_a \cdot Q \cdot Q_a - Q_a.
+		\end{equation*}
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		\uses{lem:X-squared, lem:qa-restated}
+		Expand the square and apply \ref{lem:X-squared} and \ref{lem:qa-restated} term by term:
+		\[
+			X_a^\dagger (X \cdot X^\dagger \cdot X \cdot X^\dagger) X_a
+			=
+			Q_a \cdot Q \cdot Q_a,
+		\]
+		while
+		\[
+			X_a^\dagger (X \cdot X^\dagger) X_a
+			=
+			(X_a^\dagger \cdot X)(X^\dagger \cdot X_a)
+			=
+			Q_a \cdot Q_a
+			=
+			Q_a,
+		\]
+		and $X_a^\dagger I_{m \times m} X_a = X_a^\dagger X_a = Q_a$. Substituting these identities into
+		\[
+			(X \cdot X^\dagger - I_{m \times m})^2
+			=
+			X \cdot X^\dagger \cdot X \cdot X^\dagger - 2X \cdot X^\dagger + I_{m \times m}
+		\]
+		gives the claim.
+	\end{proof}
+
+	\begin{lemma}[$P_a$ restated]\label{lem:pa-restated}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.paRestated}
+		\leanok
+		For each $a$,
+		\begin{equation*}
+			P_a = \widehat{X}^\dagger \cdot T_a \cdot \widehat{X} = \widehat{X}_a^\dagger \cdot \widehat{X}.
+		\end{equation*}
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		\uses{def:projective-P}
+		Since $T$ is projective,
+		\[
+			P_a
+			=
+			\widehat{X}_a^\dagger \cdot \widehat{X}_a
+			=
+			(\widehat{X}^\dagger \cdot T_a)(T_a \cdot \widehat{X})
+			=
+			\widehat{X}^\dagger \cdot T_a \cdot \widehat{X}
+			=
+			\widehat{X}_a^\dagger \cdot \widehat{X}.
+		\]
+	\end{proof}
+
+	\begin{lemma}[$\widehat{X}$ squared]\label{lem:X-hat-squared}
+		\lean{Matrix.mul_conjTranspose_eq_one_of_orthonormal_rows}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.orthonormal_normalized_image_of_adjoint_comp_eigenvectors}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.orthonormal_normalized_matrix_image_of_gram_eigenvectors}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.orthonormal_normalized_matrix_image_of_positive_gram_spectrum}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.normalizedMatrixImageRows}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.positiveGramSpectrumImageRows}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.normalized_matrix_image_rows_mul_conjTranspose}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.normalized_matrix_image_rows_transpose_mixed}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.normalized_matrix_image_rows_mul_conjTranspose_of_positive_gram_spectrum}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.positive_gram_spectrum_image_rows_transpose_mixed}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.positive_gram_spectrum_card_le_rows}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.exists_unitaryGroup_rows_extending_orthonormal}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.exists_unitaryGroup_with_positive_gram_spectrum_rows}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.exists_unitaryGroup_with_positive_gram_spectrum_rows_of_card}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.exists_rectangular_coisometry_extending_orthonormal_rows}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.exists_rectangular_coisometry_with_positive_gram_spectrum_right_rows}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.transpose_unitaryGroup_mul_rectangular_coisometry}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.unitaryGroup_mul_rectangular_coisometry}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.rectangular_coisometry_mul_conjTranspose_unitaryGroup}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.exists_unitaryGroup_with_qxp_positive_gram_spectrum_rows}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.xHat_of_positive_gram_spectrum_unitaryGroup_choices}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.qtotal_isHermitian_of_x_squared}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.rectangularSvd_xHat_coisometry_unitaryGroup}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.exists_xHat_of_positive_gram_spectrum}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.exists_xHat_of_sigmaFinRangeEmbedding_positiveGram}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.exists_qxpLayerData_ofRankReductionSigmaRangePositiveGram}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.exists_qxpLayerData_ofRankReductionSigmaRangePositiveGram_with_x_coisometry}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.exists_sigmaFin_xHat_coisometry_of_sum_le}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.sigmaFinXHatCoisometry_spec}
+		\leanok
+		\uses{def:svd-of-X}
+		\begin{equation*}
+			\widehat{X} \cdot \widehat{X}^\dagger = I_{m \times m}.
+		\end{equation*}
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		The paper proves this by multiplying out
+		$\widehat{X}=U\cdot I_{m\times d}\cdot V^\dagger$ and using the unitarity of
+		$U$ and $V$.  In Lean, the dimension hypothesis $m\leq d$ already gives a
+		rectangular matrix with orthonormal rows on the sigma auxiliary space; the
+		chosen matrix \texttt{sigmaFinXHatCoisometry} and its specification record this
+		existence result as a hypothesis for the future construction.  The formal lemma
+		\texttt{orthonormal\_normalized\_image\_of\_adjoint\_comp\_eigenvectors}
+		records the singular-vector normalization calculation, while
+		\texttt{normalized\_matrix\_image\_rows\_mul\_conjTranspose} combines the
+		corresponding row-coisometry identity, and
+		\texttt{positive\_gram\_spectrum\_image\_rows\_transpose\_mixed} records the
+		adjoint action $X^\dagger(\lambda^{-1/2}Xv)=\lambda^{1/2}v$ on the positive
+		spectral part of the Gram operator.  The formal lemma
+		\texttt{exists\_unitaryGroup\_with\_positive\_gram\_spectrum\_rows} records the
+		next finite-dimensional step: after choosing distinct row positions for the
+		positive spectrum, these normalized image rows extend to a square unitary
+		group element on the row space.  The companion lemma
+		\texttt{exists\_rectangular\_coisometry\_extending\_orthonormal\_rows}
+		records the analogous rectangular completion for prescribed right rows
+		when the dimension bound permits it.  The formal lemma
+		\texttt{unitaryGroup\_mul\_rectangular\_coisometry} and its right-multiplication
+		companion
+		\texttt{rectangular\_coisometry\_mul\_conjTranspose\_unitaryGroup} record the
+		two unitary-preservation steps in the paper's multiplication.  The formal
+		lemma \texttt{rectangularSvd\_xHat\_coisometry\_unitaryGroup} applies these
+		preservation steps to the rectangular-SVD expression.  The
+		unconditional positive-Gram route is
+		\texttt{exists\_xHat\_of\_sigmaFinRangeEmbedding\_positiveGram}, which
+		constructs $\widehat X$ from the rank-reduction witness and proves
+		$\widehat X\widehat X^\dagger=I$ together with the mixed square-root
+		identity below.
+	\end{proof}
+
+	\begin{lemma}[$X$ times $\widehat{X}$]\label{lem:X-times-X-hat}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.adjoint_image_eq_zero_of_unitary_positive_gram_completion_row}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.positive_gram_selected_left_unitary_mixed_column}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.positive_gram_completion_left_unitary_mixed_column_eq_zero}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.positive_gram_polar_extension_mixed_eq_positive_rows}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.positive_gram_polar_extension_mixed_eq_sqrt_unitaryGroup}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.rectangularSvd_xHat_mixed_raw_unitaryGroup}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.rectangularSvd_xHat_mixed_raw}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.rectangularSvd_x_mul_xHat_conjTranspose_raw_unitaryGroup}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.rectangularSvd_x_mul_xHat_conjTranspose_raw}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.exists_xHat_of_positive_gram_spectrum}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.exists_xHat_of_sigmaFinRangeEmbedding_positiveGram}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.rectangularSvd_xHat_mixed_of_sqrtQ_unitaryGroup}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.exists_xHat_of_rectangularSvd_unitaryGroup}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.rectangularSvd_middle_eq_sqrt_of_square}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.x_mul_xHat_adjoint_spectral_theorem}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.QXPLayerData.ofRankReductionAndRectangularSvdSquareRootUnitaryGroup}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.QXPLayerData.ofSigmaRangeAndRectangularSvdSquareRootUnitaryGroup}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.exists_qxpLayerData_ofRankReductionSigmaRangeAndRectangularSvdSquareRootUnitaryGroup}
+		\leanok
+		\begin{equation*}
+			X \cdot \widehat{X}^\dagger =
+			U \cdot \Sigma_{m \times m} \cdot U^\dagger,
+			\quad
+			X^\dagger \cdot \widehat{X} = \sqrt{Q}.
+		\end{equation*}
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		\uses{lem:X-squared}
+		The paper obtains this from the SVD formula for $X$ and the definition of
+		$\widehat X$.  In Lean, the unconditional QXP data first proves that
+		$X\widehat X^\dagger$ is Hermitian and positive.  The formal lemma
+		\texttt{x\_mul\_xHat\_adjoint\_spectral\_theorem} then applies Mathlib's
+		spectral theorem for Hermitian matrices, giving the displayed
+		$U\Sigma U^\dagger$ form with the Mathlib eigenvector unitary and the
+		diagonal matrix of real eigenvalues.  The auxiliary lemma
+		\texttt{rectangularSvd\_x\_mul\_xHat\_conjTranspose\_raw} records the same
+		calculation under explicit rectangular-SVD data, where the middle factor
+		\(S I_{m\times d}^\dagger\) is the formal square matrix
+		\(\Sigma_{m\times m}\).  The formal lemma
+		\texttt{rectangularSvd\_xHat\_mixed\_of\_sqrtQ\_unitaryGroup} records the
+		second matrix calculation in the form whose square-root target is the
+		operator $Q$ supplied by the QXP construction.  The formal lemma
+		\texttt{rectangularSvd\_middle\_eq\_sqrt\_of\_square} records the spectral
+		step: a positive middle factor whose square is $Q$ is the positive square
+		root of $Q$.  The reduced datum then records this mixed-product
+		identity as a primitive consequence, which is exactly the part needed in
+		\ref{lem:squared-difference} and \ref{lem:P-Q-approx}.
+	\end{proof}
+
+	\begin{remark}[Lean status for the QXP algebra]\label{rem:qxp-layer-lean-status}
+		The Lean declarations linked in Lemmas~\ref{lem:X-squared},
+		\ref{lem:X-hat-squared}, and~\ref{lem:X-times-X-hat} expose the
+		corresponding matrix identities as construction theorems.  These
+		declarations prove the identities from the \(Q\)-layer, the sigma-range
+		realization, and the positive-Gram spectral construction, with the
+		rectangular-SVD calculation retained as an auxiliary comparison.  Thus the
+		local \(X/\widehat X/P\) algebra is formalized; the remaining chapter-level
+		work is to compose this construction with the preceding orthonormalization
+		step from the paper hypotheses.
+	\end{remark}
+
+	\begin{lemma}[Squared difference]\label{lem:squared-difference}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.xHat_adjoint_mul_x_eq_sqrt}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.x_mul_xHat_adjoint_isHermitian}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.x_mul_xHat_adjoint_sq}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.x_mul_xHat_adjoint_nonneg}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.squaredDifference}
+		\leanok
+		\begin{equation*}
+			(X - \widehat{X}) \cdot (X - \widehat{X})^\dagger \leq (X \cdot X^\dagger - I_{m \times m})^2.
+		\end{equation*}
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		\uses{lem:X-squared, lem:X-hat-squared, lem:X-times-X-hat}
+		The paper diagonalizes the positive operator $X\widehat X^\dagger$ using the
+		SVD notation.  The formal proof avoids storing that SVD explicitly: set
+		$Y=X\widehat X^\dagger$.  The primitive identities imply that $Y$ is
+		hermitian, nonnegative, and satisfies $Y^2=XX^\dagger$.  Hence
+		$(X-\widehat X)(X-\widehat X)^\dagger=(Y-I)^2$, and positivity of $Y$ gives
+		$(Y-I)^2\leq(Y^2-I)^2=(XX^\dagger-I)^2$.
+	\end{proof}
+
+	\begin{lemma}[Projectivity of~$P$]\label{lem:P-projectivity}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.pProjectivity}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.sum_pa_eq_xHat_adjoint_mul_xHat}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.qxpProjSubMeas_total_eq_xHat_adjoint_mul_xHat}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.qxpProjSubMeas_total_ev_eq_sum_pa_ev}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.qxpProjSubMeas_total_le_of_outcome_le}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.QXPLayerTotalDomination}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.QXPLayerTotalDomination.of_outcome_le}
+		\leanok
+		$P = \{P_a\}$ forms a projective sub-measurement.
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		\uses{lem:pa-restated, lem:X-hat-squared}
+		For outcomes $a,b$,
+		\begin{align*}
+			P_a \cdot P_b
+			 & =
+			(\widehat{X}^\dagger \cdot T_a \cdot \widehat{X})
+			(\widehat{X}^\dagger \cdot T_b \cdot \widehat{X})                              \\
+			 & =
+			\widehat{X}^\dagger \cdot T_a \cdot I_{m \times m} \cdot T_b \cdot \widehat{X} \\
+			 & =
+			\widehat{X}^\dagger \cdot T_a \cdot \widehat{X} \cdot \bone[a=b]               \\
+			 & =
+			P_a \cdot \bone[a=b],
+		\end{align*}
+		where the second line uses \ref{lem:X-hat-squared}, the third uses that $T$ is projective, and the last uses \ref{lem:pa-restated}. Summing over $a$ shows $\sum_a P_a \leq I$, so $P$ is a projective sub-measurement.  The formalization also records the sharper identity
+		\[
+			\sum_a P_a=\widehat X^\dagger\widehat X,
+		\]
+		and the resulting total-domination estimates used later in the monotone-total self-improvement route.
+	\end{proof}
+
+	\begin{lemma}[$P$ is close to~$Q$]\label{lem:P-Q-approx}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.qxpMixedCrossSum_eq_sqrt}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.pQApprox}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.pQApprox_ofRankReductionSigmaRangeAndSvdIdentities}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.pQApprox_ofRankReductionSigmaRangePositiveGram}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.pQApprox_ofRankReductionSigmaRangePositiveGram_with_x_coisometry}
+		\lean{MIPStarRE.LDT.MakingMeasurementsProjective.pQApprox_ofRankReductionSigmaRangeAndRectangularSvdSquareRootUnitaryGroup}
+		\leanok
+		\begin{equation*}
+			Q_a \ot I \approx_{30\zeta^{1/4}} P_a \ot I.
+		\end{equation*}
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		\uses{lem:projective-low-rank-sum, lem:q-almost-projective, lem:sqrt-Q-completeness, lem:xa-t, lem:qa-restated, lem:X-expression-to-Q-expression, lem:pa-restated, lem:X-hat-squared, lem:X-times-X-hat, lem:squared-difference, lem:P-projectivity}
+		The formal proof follows this argument directly from the primitive
+		$X$, $\widehat X$, and $P$ identities; the $30\zeta^{1/4}$ estimate is
+		derived here rather than stored as part of the reduced datum.  The
+		unitary-group rectangular-SVD lemma combines the same estimate with the
+		positive-square identification of the middle factor from
+		\ref{lem:X-times-X-hat}; the square unitary factors are again carried as
+		elements of the relevant unitary groups.  The
+		positive-Gram sigma-space lemma also records the coisometry
+		\(X X^\dagger=I\) for the original sigma embedding when the projective
+		\(Q\)-family is subnormalized; this is the construction-level hypothesis
+		later used to obtain the QXP-internal fresh-outcome comparison
+		\(Q_{\mathrm{none}} \leq P_{\mathrm{none}}\).  An additional
+		source-to-\(Q\) comparison is still needed for source-facing residual
+		domination.
+		The quantity to bound is
+		\begin{equation}\label{eq:P-Q-thing-to-bound}
+			\sum_a \bra{\psi} (Q_a-P_a)^2 \ot I \ket{\psi}
+			=
+			\bra{\psi} Q \ot I \ket{\psi}
+			+
+			\bra{\psi} P \ot I \ket{\psi}
+			-
+			\sum_a \bra{\psi} Q_aP_a \ot I \ket{\psi}
+			-
+			\sum_a \bra{\psi} P_aQ_a \ot I \ket{\psi},
+		\end{equation}
+		using the projectivity of $Q$ and $P$. The first term is at most $1+2\sqrt{\zeta}$ by \ref{lem:projective-low-rank-sum}, and the second is at most $1$ because $P$ is a sub-measurement.
+
+		For the last two terms,
+		\begin{equation}\label{eq:complex-conjugates}
+			\sum_a \bra{\psi} Q_aP_a \ot I \ket{\psi}
+			+
+			\sum_a \bra{\psi} P_aQ_a \ot I \ket{\psi}
+			=
+			2 \cdot \mathfrak{R}\Big(\sum_a \bra{\psi} Q_aP_a \ot I \ket{\psi}\Big).
+		\end{equation}
+		By \ref{lem:qa-restated},
+		\[
+			\sum_a \bra{\psi} Q_aP_a \ot I \ket{\psi}
+			=
+			\sum_a \bra{\psi} (X_a^\dagger \cdot X \cdot P_a) \ot I \ket{\psi}.
+		\]
+		The main estimate is
+		\begin{equation}\label{eq:add-a-hat}
+			\sum_a \bra{\psi} (X_a^\dagger \cdot X \cdot P_a)\ot I \ket{\psi}
+			\approx_{2\zeta^{1/4}}
+			\sum_a \bra{\psi} (X_a^\dagger \cdot \widehat{X} \cdot P_a)\ot I \ket{\psi}.
+		\end{equation}
+		This follows by Cauchy--Schwarz:
+		\[
+			\Big|\sum_a \bra{\psi} ((X_a^\dagger \cdot (X-\widehat X)) \ot I)\cdot(P_a \ot I)\ket{\psi}\Big|
+		\]
+		is bounded by the square root of
+		\[
+			\sum_a \bra{\psi} \big(X_a^\dagger \cdot (X-\widehat X)(X-\widehat X)^\dagger \cdot X_a\big)\ot I \ket{\psi},
+		\]
+		times the square root of $\sum_a \bra{\psi}(P_a)^2 \ot I \ket{\psi} \leq 1$. The first factor is at most $4\sqrt{\zeta}$ by \ref{lem:squared-difference}, \ref{lem:X-expression-to-Q-expression}, and \ref{lem:q-almost-projective}, so the total error is at most $2\zeta^{1/4}$.
+
+		The right-hand side of \ref{eq:add-a-hat} is real, because
+		\[
+			\sum_a \bra{\psi} (X_a^\dagger \cdot \widehat{X} \cdot P_a)\ot I \ket{\psi}
+			=
+			\bra{\psi} (X^\dagger \cdot \widehat{X}) \ot I \ket{\psi}
+			=
+			\bra{\psi} \sqrt{Q} \ot I \ket{\psi},
+		\]
+		where the first equality uses \ref{lem:xa-t}, \ref{lem:pa-restated}, and \ref{lem:X-hat-squared} and that $T$ is a measurement, and the second uses \ref{lem:X-times-X-hat}. Hence \ref{lem:sqrt-Q-completeness} and \ref{eq:add-a-hat} imply
+		\[
+			\mathfrak{R}\Big(\sum_a \bra{\psi} Q_aP_a \ot I \ket{\psi}\Big)
+			\geq
+			1-14\zeta^{1/4}.
+		\]
+		Substituting this into \ref{eq:complex-conjugates} and then into \ref{eq:P-Q-thing-to-bound} gives
+		\[
+			\sum_a \bra{\psi} (Q_a-P_a)^2 \ot I \ket{\psi}
+			\leq
+			(1+2\sqrt{\zeta}) + 1 - 2(1-14\zeta^{1/4})
+			=
+			2\sqrt{\zeta} + 28\zeta^{1/4}
+			\leq
+			30\zeta^{1/4}.
+		\]
+	\end{proof}
+
+	Finally, \ref{lem:projective-low-rank-sum} gives
+	\[
+		A_a \ot I \approx_{12\sqrt{\zeta}} Q_a \ot I,
+	\]
+	and \ref{lem:P-Q-approx} gives
+	\[
+		Q_a \ot I \approx_{30\zeta^{1/4}} P_a \ot I.
+	\]
+	The triangle inequality for $\approx_\delta$ yields
+	\[
+		A_a \ot I \approx_{84\zeta^{1/4}} P_a \ot I.
+	\]
+\end{proof}

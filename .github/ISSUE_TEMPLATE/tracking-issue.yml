@@ -1,0 +1,64 @@
+name: Tracking Issue
+description: Create an umbrella issue for a mathematical chapter, theorem family, or proof stage
+labels: ["tracking"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Tracking Issue
+        Use this template for a group of related mathematical statements or proof obligations.
+        Attach each tracked issue as a GitHub sub-issue after creating the
+        parent. The body can keep a prose index, but markdown checkboxes and
+        retired tasklist fences do not create native sub-issue relationships.
+
+  - type: input
+    id: area
+    attributes:
+      label: Mathematical area
+      description: Which chapter, theorem family, or construction does this issue organize?
+      placeholder: "e.g., Chapter 9 pasting, Section 7 self-improvement, projective measurements"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Mathematical objective
+      description: State the theorem family or proof stage, with paper or blueprint locations and labels.
+      placeholder: |
+        Organizes the formalization of the sandwich-chain estimates in Chapter 9.
+        Sources:
+        - `references/ldt-paper/ld-pasting.tex:210`, label `lem:sandwich-chain`.
+          Paraphrase: ...
+        - `blueprint/src/chapter/ch09_pasting.tex:98`, label `lem:sandwich-chain`.
+    validations:
+      required: true
+
+  - type: textarea
+    id: sub_issues
+    attributes:
+      label: GitHub sub-issues
+      description: |
+        List issue references that should be attached as GitHub sub-issues.
+        After creation, add them through the issue sidebar or the sub-issues API.
+        This field is a prose index only; it is not a Markdown tasklist.
+      value: |
+        ### Sub-issues to attach
+        - #
+        - #
+        - #
+      placeholder: |
+        ### Sub-issues to attach
+        - #42
+        - #43
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Mathematical notes
+      description: Dependencies, theorem labels, source locations, or order constraints.
+      placeholder: "Optional notes; cite paper or blueprint locations when possible."
+    validations:
+      required: false

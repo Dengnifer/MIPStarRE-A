@@ -1,0 +1,39 @@
+# Blueprint support script coverage
+
+Issue #925 asks for a single place that says which Python helpers are part of the blueprint-support surface, how they are tested, and which workflow path filters must move with them.
+
+## Scope decision
+
+A script is in scope when it directly parses or validates `blueprint/src/**/*.tex`, checks `\lean{...}` / `\leanok` annotations, or is a wrapper/shared Python utility imported by those checks.
+
+| Script | Blueprint role | Unit-test coverage | Workflow path filters |
+|---|---|---|---|
+| `scripts/blueprint_lean_sync.py` | Name-level `\lean{...}` / `\leanok` sync and `blueprint/lean_decls` drift checker. | `scripts/tests/test_blueprint_lean_sync.py` | the `blueprint-sync` job of `.github/workflows/pr-ci.yml`, the `blueprint-render` job of `.github/workflows/pr-ci.yml` |
+| `scripts/blueprint_leanok_axioms.py` | Lean axiom-closure checker for proof-level `\leanok` claims. | `scripts/tests/test_blueprint_leanok_axioms.py` | the `blueprint-sync` job of `.github/workflows/pr-ci.yml` |
+| `scripts/blueprint_axiom_audit_needed.py` | Path and diff classifier deciding when `pr-ci.yml` (`blueprint-sync` job) must run the Lean build and `\leanok` axiom audit. | `scripts/tests/test_blueprint_axiom_audit_needed.py` | the `blueprint-sync` job of `.github/workflows/pr-ci.yml` |
+| `scripts/audit_blueprint_high_risk_links.py` | Audit that blueprint-linked declarations with bridge-, obligation-, repair-, witness-, statement-, slackness-, or dominance-shaped names have explicit coverage in `MIPStarRE/LDT/Test/AxiomAudit.lean`. | `scripts/tests/test_audit_blueprint_high_risk_links.py` | Manual/local audit; not wired into a workflow in this PR. |
+| `scripts/audit_dependency_graph_status.py` | Audit selected generated dependency-graph node statuses after `leanblueprint web`, so retired successor nodes and unfinished frontier nodes are not displayed as completed graph nodes. | `scripts/tests/test_audit_dependency_graph_status.py` | Manual/local audit; not wired into a workflow in this PR. |
+| `scripts/check_blueprint_latex.py` | Blueprint LaTeX convention lint, forbidding active `cleveref` / `\Cref` uses and proof-bearing metadata on remarks. | `scripts/tests/test_check_blueprint_latex.py` | `.githooks/pre-commit` is the active gate (it runs the LaTeX scan and, when any `scripts/*.py` is staged, the helper unit tests). the `blueprint-render` job of `.github/workflows/pr-ci.yml` is retained for blueprint render and sync, not for this lint. |
+| `scripts/tex_utils.py` | Shared active-TeX-line parsing helper used by both lint and sync scripts. | Covered through `scripts/tests/test_blueprint_lean_sync.py` and `scripts/tests/test_check_blueprint_latex.py`. | the `blueprint-sync` job of `.github/workflows/pr-ci.yml`, the `blueprint-render` job of `.github/workflows/pr-ci.yml` |
+
+`pr-ci.yml` (`blueprint-sync` job) watches `scripts/tests/**`, and both blueprint workflows
+watch their own workflow files, so changes to tests or path-filter policy re-run
+the relevant checks.
+
+## Intentionally outside this surface
+
+These scripts may have their own tests or workflows, but they are not part of the blueprint-support surface above:
+
+- `scripts/generate_badges.py` generates repository status badges in `.github/workflows/badges.yml`; it does not parse blueprint LaTeX or enforce blueprint/Lean sync.
+- `scripts/audit_conclusion_shaped_hypotheses.py`, `scripts/audit_readme_freshness.py`, `scripts/audit_stale_issues.py`, and `scripts/lean_linter_warning_report.py` are independent audit/reporting tools.
+- `scripts/assemble-pages-site.sh` and `scripts/fetch-latest-artifact.sh` support artifact-based Pages deployment; they are not Python validation helpers.
+- `scripts/Checkdecls.lean` is a Lean executable used by CI, so it is outside the Python-unit-test convention.
+
+## Convention for new blueprint-support helpers
+
+When adding or renaming a blueprint-support Python helper:
+
+1. Add or update a focused unit test under `scripts/tests/` in the same PR.
+2. Update the relevant workflow `paths:` filters so edits to the helper, its shared utilities, `scripts/tests/**`, and the workflow itself trigger CI.
+3. Update the table above and the meta-test in `scripts/tests/test_blueprint_script_surface.py` so the documented support surface and CI filters stay synchronized.
+4. If a helper is intentionally excluded from this surface, document the exclusion in the previous section rather than relying on reviewer memory.

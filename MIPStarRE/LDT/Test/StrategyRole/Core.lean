@@ -1,0 +1,386 @@
+import MIPStarRE.LDT.Test.StrategyCore
+
+/-!
+# Role-register tensor algebra for the low individual degree test
+
+Role-register operators and strategy symmetrization infrastructure extracted from
+`MIPStarRE.LDT.Test.Strategy`.
+-/
+
+namespace MIPStarRE.LDT
+
+open scoped BigOperators MatrixOrder Matrix ComplexOrder
+
+/-! ### Role-register tensor algebra -/
+
+lemma sum_role_eq_add {α : Type*} [AddCommMonoid α] (f : Role → α) :
+    (∑ r : Role, f r) = f Role.A + f Role.B := by
+  rw [Fintype.sum_eq_add Role.A Role.B (by decide)
+    (by
+      intro r hr
+      cases r <;> simp at hr)]
+
+/-- Basis projector onto the role sector `r`. -/
+def roleProj (r : Role) : MIPStarRE.Quantum.Op Role :=
+  Matrix.single r r (1 : ℂ)
+
+/-- The basis projector onto a role sector is positive semidefinite. -/
+lemma roleProj_nonneg (r : Role) : 0 ≤ roleProj r := by
+  refine Matrix.nonneg_iff_posSemidef.mpr ?_
+  let col : Matrix Role Unit ℂ := Matrix.single r () 1
+  simpa [roleProj, col] using Matrix.posSemidef_self_mul_conjTranspose col
+
+@[simp] lemma roleProj_mul_self (r : Role) :
+    roleProj r * roleProj r = roleProj r := by
+  ext i j
+  change
+    Finset.sum ({Role.A, Role.B} : Finset Role)
+      (fun x => roleProj r i x * roleProj r x j) = roleProj r i j
+  cases r <;> cases i <;> cases j <;> simp [roleProj]
+
+@[simp] lemma roleProj_A_mul_B :
+    roleProj Role.A * roleProj Role.B = 0 := by
+  ext i j
+  change
+    Finset.sum ({Role.A, Role.B} : Finset Role)
+      (fun x => roleProj Role.A i x * roleProj Role.B x j) = 0
+  cases i <;> cases j <;> simp [roleProj]
+
+@[simp] lemma roleProj_B_mul_A :
+    roleProj Role.B * roleProj Role.A = 0 := by
+  ext i j
+  change
+    Finset.sum ({Role.A, Role.B} : Finset Role)
+      (fun x => roleProj Role.B i x * roleProj Role.A x j) = 0
+  cases i <;> cases j <;> simp [roleProj]
+
+/-- Tensor an operator with the role projector selecting the `r` block. -/
+noncomputable def roleCond {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (r : Role) (X : MIPStarRE.Quantum.Op ι) :
+    MIPStarRE.Quantum.Op (Role × ι) :=
+  opTensor (roleProj r) X
+
+/-- Principal role block of an operator on the role-register local space. -/
+noncomputable def roleBlock {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (r : Role) (Y : MIPStarRE.Quantum.Op (Role × ι)) :
+    MIPStarRE.Quantum.Op ι :=
+  Y.submatrix (fun i => (r, i)) (fun i => (r, i))
+
+lemma roleCond_nonneg {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (r : Role) {X : MIPStarRE.Quantum.Op ι} (hX : 0 ≤ X) :
+    0 ≤ roleCond r X :=
+  opTensor_nonneg (roleProj_nonneg r) hX
+
+@[simp] lemma roleCond_mul_same {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (r : Role) (X Y : MIPStarRE.Quantum.Op ι) :
+    roleCond r X * roleCond r Y = roleCond r (X * Y) := by
+  simp [roleCond, opTensor_mul, roleProj_mul_self]
+
+@[simp] lemma roleCond_A_mul_B {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (X Y : MIPStarRE.Quantum.Op ι) :
+    roleCond Role.A X * roleCond Role.B Y = 0 := by
+  rw [roleCond, roleCond, opTensor_mul, roleProj_A_mul_B]
+  simp [opTensor]
+
+@[simp] lemma roleCond_B_mul_A {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (X Y : MIPStarRE.Quantum.Op ι) :
+    roleCond Role.B X * roleCond Role.A Y = 0 := by
+  rw [roleCond, roleCond, opTensor_mul, roleProj_B_mul_A]
+  simp [opTensor]
+
+lemma roleCond_finset_sum {α ι : Type*}
+    [Fintype ι] [DecidableEq ι]
+    (r : Role) (s : Finset α) (f : α → MIPStarRE.Quantum.Op ι) :
+    Finset.sum s (fun a => roleCond r (f a)) = roleCond r (Finset.sum s f) := by
+  classical
+  induction s using Finset.induction_on with
+  | empty =>
+      simp [roleCond, opTensor]
+  | insert a s ha ih =>
+      rw [Finset.sum_insert ha, Finset.sum_insert ha, ih]
+      simp [roleCond, opTensor, Matrix.kronecker_add]
+
+@[simp] lemma roleCond_one_sum {ι : Type*} [Fintype ι] [DecidableEq ι] :
+    roleCond Role.A (1 : MIPStarRE.Quantum.Op ι) + roleCond Role.B 1 = 1 := by
+  ext i j
+  rcases i with ⟨ri, ii⟩
+  rcases j with ⟨rj, ij⟩
+  cases ri <;> cases rj <;> simp [roleCond, roleProj, opTensor, Matrix.one_apply]
+
+/-- Reassociate the role and local-space indices for the role-register symmetrization. -/
+def roleRegisterPairLocalEquiv (ι : Type*) :
+    ((Role × Role) × (ι × ι)) ≃ ((Role × ι) × (Role × ι)) where
+  toFun x := ((x.1.1, x.2.1), (x.1.2, x.2.2))
+  invFun x := ((x.1.1, x.2.1), (x.1.2, x.2.2))
+  left_inv := fun ⟨⟨_, _⟩, ⟨_, _⟩⟩ => rfl
+  right_inv := fun ⟨⟨_, _⟩, ⟨_, _⟩⟩ => rfl
+
+/-- Basis projector onto a pair of role sectors. -/
+noncomputable def rolePairProj (rL rR : Role) : MIPStarRE.Quantum.Op (Role × Role) :=
+  opTensor (roleProj rL) (roleProj rR)
+
+/-- Distinct role-pair sectors have zero product. -/
+theorem rolePairProj_mul_eq_zero_of_ne (rL rR sL sR : Role)
+    (h : (rL, rR) ≠ (sL, sR)) :
+    rolePairProj rL rR * rolePairProj sL sR = 0 := by
+  rw [rolePairProj, rolePairProj, opTensor_mul]
+  cases rL <;> cases rR <;> cases sL <;> cases sR <;>
+    simp [opTensor] at h ⊢
+
+/-- Orthogonal role-pair sectors `AB` and `BA` have zero product. -/
+@[simp] theorem rolePairProj_AB_mul_BA :
+    rolePairProj Role.A Role.B * rolePairProj Role.B Role.A = 0 := by
+  exact rolePairProj_mul_eq_zero_of_ne Role.A Role.B Role.B Role.A (by decide)
+
+/-- Orthogonal role-pair sectors `BA` and `AB` have zero product. -/
+@[simp] theorem rolePairProj_BA_mul_AB :
+    rolePairProj Role.B Role.A * rolePairProj Role.A Role.B = 0 := by
+  exact rolePairProj_mul_eq_zero_of_ne Role.B Role.A Role.A Role.B (by decide)
+
+/-- Reindex a bipartite local-space operator into the `(Role × ι)` local spaces and
+restrict it to the selected role sector. -/
+noncomputable def rolePairCond {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (rL rR : Role) (X : MIPStarRE.Quantum.Op (ι × ι)) :
+    MIPStarRE.Quantum.Op ((Role × ι) × (Role × ι)) :=
+  Matrix.reindex (roleRegisterPairLocalEquiv ι) (roleRegisterPairLocalEquiv ι)
+    (opTensor (rolePairProj rL rR) X)
+
+/-- The projection onto a pair of role sectors is positive semidefinite. -/
+lemma rolePairProj_nonneg (rL rR : Role) : 0 ≤ rolePairProj rL rR :=
+  opTensor_nonneg (roleProj_nonneg rL) (roleProj_nonneg rR)
+
+private lemma rolePairCond_nonneg {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (rL rR : Role) {X : MIPStarRE.Quantum.Op (ι × ι)} (hX : 0 ≤ X) :
+    0 ≤ rolePairCond rL rR X :=
+  MIPStarRE.Quantum.reindex_nonneg (roleRegisterPairLocalEquiv ι)
+    (opTensor_nonneg (rolePairProj_nonneg rL rR) hX)
+
+@[simp] private lemma swapDensity_leftTensor {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (M : MIPStarRE.Quantum.Op ι) :
+    swapDensity (leftTensor (ι₂ := ι) M) = rightTensor (ι₁ := ι) M := by
+  simpa [leftTensor, rightTensor, opTensor, Matrix.kronecker] using
+    (swapDensity_opTensor M (1 : MIPStarRE.Quantum.Op ι))
+
+/-- Swapping the density of a rank-one pure state swaps the underlying state
+vector. -/
+lemma swapDensity_pureDensity {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (ψ : (ι × ι) → ℂ) :
+    swapDensity (pureDensity ψ) = pureDensity (swapVector ψ) := by
+  ext x y
+  rcases x with ⟨i₁, i₂⟩
+  rcases y with ⟨j₁, j₂⟩
+  simp [pureDensity, swapVector, swapDensity, Matrix.vecMulVec]
+
+private lemma swapDensity_nonneg {ι : Type*} [Finite ι]
+    {X : MIPStarRE.Quantum.Op (ι × ι)} (hX : 0 ≤ X) :
+    0 ≤ swapDensity X := by
+  simpa [swapDensity_eq_reindex] using
+    MIPStarRE.Quantum.reindex_nonneg (Equiv.prodComm ι ι) hX
+
+/-- Classical role-register symmetrization of a bipartite state.
+
+The `A/B` sector carries the original state, while the `B/A` sector carries the
+swapped state. The scalar `2` on each occupied role sector compensates for the
+normalized-trace convention on the enlarged ambient space. -/
+noncomputable def classicalRoleSymmState {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (ψ : QuantumState (ι × ι)) :
+    QuantumState ((Role × ι) × (Role × ι)) where
+  density :=
+    (2 : Error) • rolePairCond Role.A Role.B ψ.density +
+      (2 : Error) • rolePairCond Role.B Role.A (swapDensity ψ.density)
+  density_psd := add_nonneg
+    (smul_nonneg zero_le_two
+      (rolePairCond_nonneg Role.A Role.B ψ.density_psd))
+    (smul_nonneg zero_le_two
+      (rolePairCond_nonneg Role.B Role.A (swapDensity_nonneg ψ.density_psd)))
+
+@[simp] theorem classicalRoleSymmState_density_fixed {ι : Type*}
+    [Fintype ι] [DecidableEq ι] (ψ : QuantumState (ι × ι)) :
+    swapDensity (classicalRoleSymmState ψ).density = (classicalRoleSymmState ψ).density := by
+  have hrolePair (rL rR : Role) (X : MIPStarRE.Quantum.Op (ι × ι)) :
+      swapDensity (rolePairCond rL rR X) = rolePairCond rR rL (swapDensity X) := by
+    ext x y
+    rcases x with ⟨⟨sL, iL⟩, ⟨sR, iR⟩⟩
+    rcases y with ⟨⟨tL, jL⟩, ⟨tR, jR⟩⟩
+    cases rL <;> cases rR <;> cases sL <;> cases sR <;> cases tL <;> cases tR <;>
+      simp [swapDensity, rolePairCond, rolePairProj, roleProj, opTensor, roleRegisterPairLocalEquiv]
+  calc
+    swapDensity (classicalRoleSymmState ψ).density
+      = (2 : Error) • swapDensity (rolePairCond Role.A Role.B ψ.density) +
+          (2 : Error) • swapDensity
+            (rolePairCond Role.B Role.A (swapDensity ψ.density)) := by
+              ext x y
+              rcases x with ⟨iL, iR⟩
+              rcases y with ⟨jL, jR⟩
+              simp [classicalRoleSymmState, swapDensity]
+    _ = (2 : Error) • rolePairCond Role.B Role.A (swapDensity ψ.density) +
+          (2 : Error) • rolePairCond Role.A Role.B (swapDensity (swapDensity ψ.density)) := by
+              simp [hrolePair]
+    _ = (2 : Error) • rolePairCond Role.B Role.A (swapDensity ψ.density) +
+          (2 : Error) • rolePairCond Role.A Role.B ψ.density := by
+              simp
+    _ = (classicalRoleSymmState ψ).density := by
+          simp [classicalRoleSymmState, add_comm]
+
+/-- The normalized trace of a two-role sector projection is `1 / 4`. -/
+lemma normalizedTrace_rolePairProj (rL rR : Role) :
+    MIPStarRE.Quantum.normalizedTrace (rolePairProj rL rR) = (1 / 4 : ℂ) := by
+  have hRole : Fintype.card Role = 2 := by decide
+  calc
+    MIPStarRE.Quantum.normalizedTrace (rolePairProj rL rR)
+      = MIPStarRE.Quantum.normalizedTrace (roleProj rL) *
+          MIPStarRE.Quantum.normalizedTrace (roleProj rR) :=
+            normalizedTrace_opTensor (roleProj rL) (roleProj rR)
+    _ = (1 / 2 : ℂ) * (1 / 2 : ℂ) := by
+          cases rL <;> cases rR <;>
+            simp [MIPStarRE.Quantum.normalizedTrace, roleProj, hRole]
+    _ = (1 / 4 : ℂ) := by norm_num
+
+private lemma normalizedTrace_rolePairCond {ι : Type*} [Fintype ι] [DecidableEq ι]
+    [Nonempty ι]
+    (rL rR : Role) (X : MIPStarRE.Quantum.Op (ι × ι)) :
+    MIPStarRE.Quantum.normalizedTrace (rolePairCond rL rR X) =
+      (1 / 4 : ℂ) * MIPStarRE.Quantum.normalizedTrace X := by
+  calc
+    MIPStarRE.Quantum.normalizedTrace (rolePairCond rL rR X)
+      = MIPStarRE.Quantum.normalizedTrace (opTensor (rolePairProj rL rR) X) := by
+          rw [rolePairCond]
+          exact MIPStarRE.Quantum.normalizedTrace_reindex (roleRegisterPairLocalEquiv ι) _
+    _ = MIPStarRE.Quantum.normalizedTrace (rolePairProj rL rR) *
+          MIPStarRE.Quantum.normalizedTrace X := by
+            simpa using normalizedTrace_opTensor (rolePairProj rL rR) X
+    _ = (1 / 4 : ℂ) * MIPStarRE.Quantum.normalizedTrace X := by
+          rw [normalizedTrace_rolePairProj]
+
+lemma normalizedTrace_two_smul_rolePairCond {ι : Type*}
+    [Fintype ι] [DecidableEq ι] [Nonempty ι]
+    (rL rR : Role) (X : MIPStarRE.Quantum.Op (ι × ι)) :
+    MIPStarRE.Quantum.normalizedTrace ((2 : Error) • rolePairCond rL rR X) =
+      (1 / 2 : ℂ) * MIPStarRE.Quantum.normalizedTrace X := by
+  rw [show (2 : Error) • rolePairCond rL rR X =
+      rolePairCond rL rR X + rolePairCond rL rR X by
+    ext i j
+    change ((2 : ℂ) * rolePairCond rL rR X i j) =
+      rolePairCond rL rR X i j + rolePairCond rL rR X i j
+    ring]
+  rw [MIPStarRE.Quantum.normalizedTrace_add, normalizedTrace_rolePairCond]
+  ring_nf
+
+lemma normalizedTrace_re_two_smul_rolePairCond {ι : Type*}
+    [Fintype ι] [DecidableEq ι] [Nonempty ι]
+    (rL rR : Role) (X : MIPStarRE.Quantum.Op (ι × ι)) :
+    Complex.re (MIPStarRE.Quantum.normalizedTrace ((2 : Error) • rolePairCond rL rR X)) =
+      (2 : Error)⁻¹ * Complex.re (MIPStarRE.Quantum.normalizedTrace X) := by
+  calc
+    Complex.re
+        (MIPStarRE.Quantum.normalizedTrace ((2 : Error) • rolePairCond rL rR X))
+      = Complex.re ((1 / 2 : ℂ) * MIPStarRE.Quantum.normalizedTrace X) := by
+          exact congrArg Complex.re
+            (normalizedTrace_two_smul_rolePairCond rL rR X)
+    _ = (2 : Error)⁻¹ * Complex.re (MIPStarRE.Quantum.normalizedTrace X) := by
+          norm_num [Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im]
+
+theorem permInvState_of_density_fixed {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (ψ : QuantumState (ι × ι))
+    (hfix : swapDensity ψ.density = ψ.density) :
+    PermInvState ψ := by
+  refine ⟨hfix, ?_⟩
+  intro M
+  unfold ev
+  apply congrArg Complex.re
+  calc
+    MIPStarRE.Quantum.normalizedTrace (ψ.density * leftTensor (ι₂ := ι) M)
+      = MIPStarRE.Quantum.normalizedTrace
+          (swapDensity (ψ.density * leftTensor (ι₂ := ι) M)) := by
+            symm
+            exact normalizedTrace_swapDensity _
+    _ = MIPStarRE.Quantum.normalizedTrace
+          (swapDensity ψ.density * swapDensity (leftTensor (ι₂ := ι) M)) := by
+            rw [swapDensity_mul]
+    _ = MIPStarRE.Quantum.normalizedTrace (ψ.density * rightTensor (ι₁ := ι) M) := by
+            rw [hfix, swapDensity_leftTensor]
+
+/-- A vector-level SWAP-invariant pure state induces the mixed-state symmetry API
+used throughout the current development. -/
+theorem PureState.isSwapInvariant_density_fixed {ι : Type*}
+    [Fintype ι] [DecidableEq ι] [Nonempty ι]
+    (ψ : PureState (ι × ι)) (hψ : ψ.IsSwapInvariant) :
+    swapDensity ((ψ : QuantumState (ι × ι)).density) = (ψ : QuantumState (ι × ι)).density := by
+  change swapDensity (pureDensity ψ.vector) = pureDensity ψ.vector
+  rw [swapDensity_pureDensity, hψ]
+
+/-- A vector-level SWAP-invariant pure state automatically satisfies
+`PermInvState`. This is the intended bridge from the paper's pure-state symmetry
+assumption to the density-matrix API used in Lean. -/
+theorem PureState.isSwapInvariant_permInvState {ι : Type*}
+    [Fintype ι] [DecidableEq ι] [Nonempty ι]
+    (ψ : PureState (ι × ι)) (hψ : ψ.IsSwapInvariant) :
+    PermInvState (ψ : QuantumState (ι × ι)) :=
+  permInvState_of_density_fixed (ψ := (ψ : QuantumState (ι × ι)))
+    (ψ.isSwapInvariant_density_fixed hψ)
+
+/-- The classical role-register symmetrized state is permutation-invariant. -/
+theorem classicalRoleSymmState_permInvState {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (ψ : QuantumState (ι × ι)) :
+    PermInvState (classicalRoleSymmState ψ) :=
+  permInvState_of_density_fixed (classicalRoleSymmState ψ)
+    (classicalRoleSymmState_density_fixed ψ)
+
+/-- The classical role-register symmetrized state preserves normalization. -/
+theorem classicalRoleSymmState_isNormalized {ι : Type*} [Fintype ι] [DecidableEq ι]
+    [Nonempty ι]
+    (ψ : QuantumState (ι × ι)) (hψ : ψ.IsNormalized) :
+    (classicalRoleSymmState ψ).IsNormalized := by
+  unfold QuantumState.IsNormalized classicalRoleSymmState
+  rw [MIPStarRE.Quantum.normalizedTrace_add]
+  change MIPStarRE.Quantum.normalizedTrace ((2 : ℂ) • rolePairCond Role.A Role.B ψ.density) +
+      MIPStarRE.Quantum.normalizedTrace
+        ((2 : ℂ) • rolePairCond Role.B Role.A (swapDensity ψ.density)) = 1
+  rw [MIPStarRE.Quantum.normalizedTrace_smul,
+    MIPStarRE.Quantum.normalizedTrace_smul,
+    normalizedTrace_rolePairCond,
+    normalizedTrace_rolePairCond]
+  rw [normalizedTrace_swapDensity, hψ]
+  norm_num
+
+/-- The role-register symmetrized state has the same total expectation as the
+original state. -/
+theorem ev_classicalRoleSymmState_one {ι : Type*}
+    [Fintype ι] [DecidableEq ι] [Nonempty ι]
+    (ψ : QuantumState (ι × ι)) :
+    ev (classicalRoleSymmState ψ) (1 : MIPStarRE.Quantum.Op ((Role × ι) × (Role × ι))) =
+      ev ψ (1 : MIPStarRE.Quantum.Op (ι × ι)) := by
+  unfold ev classicalRoleSymmState
+  rw [mul_one, MIPStarRE.Quantum.normalizedTrace_add]
+  have hAB :
+      MIPStarRE.Quantum.normalizedTrace
+          ((2 : Error) • rolePairCond Role.A Role.B ψ.density) =
+        (1 / 2 : ℂ) * MIPStarRE.Quantum.normalizedTrace ψ.density :=
+    normalizedTrace_two_smul_rolePairCond Role.A Role.B ψ.density
+  have hBA :
+      MIPStarRE.Quantum.normalizedTrace
+          ((2 : Error) • rolePairCond Role.B Role.A (swapDensity ψ.density)) =
+        (1 / 2 : ℂ) * MIPStarRE.Quantum.normalizedTrace (swapDensity ψ.density) :=
+    normalizedTrace_two_smul_rolePairCond Role.B Role.A (swapDensity ψ.density)
+  rw [hAB, hBA, normalizedTrace_swapDensity, mul_one]
+  ring_nf
+
+
+noncomputable def swapQuantumState {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (ψ : QuantumState (ι × ι)) : QuantumState (ι × ι) where
+  density := swapDensity ψ.density
+  density_psd := swapDensity_nonneg ψ.density_psd
+
+lemma ev_swapQuantumState {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (ψ : QuantumState (ι × ι)) (Z : MIPStarRE.Quantum.Op (ι × ι)) :
+    ev (swapQuantumState ψ) Z = ev ψ (swapDensity Z) := by
+  unfold swapQuantumState ev
+  apply congrArg Complex.re
+  calc
+    MIPStarRE.Quantum.normalizedTrace (swapDensity ψ.density * Z)
+      = MIPStarRE.Quantum.normalizedTrace (swapDensity (ψ.density * swapDensity Z)) := by
+          rw [swapDensity_mul, swapDensity_swapDensity]
+    _ = MIPStarRE.Quantum.normalizedTrace (ψ.density * swapDensity Z) :=
+          normalizedTrace_swapDensity _
+
+end MIPStarRE.LDT

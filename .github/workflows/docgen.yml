@@ -1,0 +1,221 @@
+name: Full documentation
+
+on:
+  schedule:
+    # Run weekly on Sunday at 06:00 UTC
+    - cron: '0 6 * * 0'
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Branch to build docs from (default: main)'
+        required: false
+        default: 'main'
+
+concurrency:
+  group: docgen-build
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  build_project:
+    runs-on: ubuntu-latest
+    name: Build project and generate docs
+    timeout-minutes: 330
+    steps:
+      - name: Cleanup to free disk space
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # main as of 2026-04-13
+        with:
+          tool-cache: false
+          android: true
+          dotnet: false
+          haskell: false
+          large-packages: false
+          docker-images: false
+          swap-storage: false
+
+      - name: Checkout project
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.ref || 'main' }}
+
+      - name: Set up Lean toolchain
+        # Use lean-action (not curl | sh) to install elan safely.
+        # build/use-mathlib-cache/use-github-cache are all disabled so this step
+        # only installs elan and does not touch the cache lifecycle managed by
+        # the Build step below (avoids a partial cache save or restore-then-
+        # overwrite that could negate the ProofWidgets workaround).
+        uses: leanprover/lean-action@v1
+        with:
+          build: false
+          use-mathlib-cache: false
+          use-github-cache: false
+
+      - name: Workaround ProofWidgets prune bug
+        # `lake exe cache get` (inside the Build step) runs `lake update`, whose
+        # mathlib post-update hook tries to prune
+        # .lake/packages/proofwidgets/.lake/build/lib before fetching a new cloud
+        # release.  On a fresh runner the directory does not exist, which causes an
+        # uncaught exception that aborts the whole cache fetch.
+        # Fix: run `lake update` once here (allowing failure), then create the
+        # missing directory *only if* proofwidgets was actually checked out, so the
+        # hook's prune succeeds when `lake update` runs again inside lean-action.
+        run: |
+          lake update 2>&1 || true
+          if [ -d .lake/packages/proofwidgets ]; then
+            mkdir -p .lake/packages/proofwidgets/.lake/build/lib
+          fi
+
+      - name: Build project
+        uses: leanprover/lean-action@v1
+        with:
+          build: true
+          # See pr-ci.yml: per-run lake caches evict the main
+          # build cache from the repository cache budget.
+          use-github-cache: false
+
+      - name: Install TeX and graphviz
+        uses: texra-ai/lean-env-action/blueprint-system-deps@v1
+        with:
+          cache-suffix: pdf-v1
+          extra-packages: texlive-xetex texlive-science latexmk
+
+      - name: Install leanblueprint
+        uses: texra-ai/lean-env-action/leanblueprint@v1
+        with:
+          extra-pip-packages: 'git+https://github.com/LionSR/texra-blueprint@v0.3.8'
+
+      # web.bbl is not committed: this regenerates it from the \cite keys in
+      # the blueprint sources, with slug-shaped labels for paper-gap entries.
+      - name: Build blueprint bibliography
+        run: texra-blueprint bbl
+
+      - name: Build blueprint
+        working-directory: blueprint
+        run: |
+          tmp_output_file="$(mktemp)"
+
+          set -o pipefail
+          {
+            leanblueprint pdf
+            pdf_status=$?
+            if [ "$pdf_status" -ne 0 ]; then
+              exit "$pdf_status"
+            fi
+            if [ ! -s print/print.pdf ]; then
+              echo "::error::leanblueprint pdf produced no output"
+              exit 1
+            fi
+            # texra-blueprint web wraps leanblueprint web and fails when the
+            # renderer meets a command it does not know; the log is kept for
+            # the label checks below.
+            texra-blueprint web
+          } 2>&1 | tee "$tmp_output_file"
+
+          if grep -q "^ERROR:" "$tmp_output_file"; then
+            echo "::error::Blueprint has unresolved labels (see ERROR lines above)"
+            exit 1
+          fi
+          if grep -q "WARNING: File not found:" "$tmp_output_file"; then
+            echo "::error::Blueprint has missing files (see WARNING lines above)"
+            exit 1
+          fi
+
+      - name: Check paper-gap note names and references
+        run: texra-blueprint --root . paper-gaps check
+
+      - name: Build paper-gap PDFs
+        run: texra-blueprint --root . paper-gaps build
+
+      - name: Package paper-gap notes
+        run: texra-blueprint --root . paper-gaps site site-docs/paper-gaps
+
+      - name: Restore docbuild cache
+        uses: actions/cache@v4
+        with:
+          path: docbuild/.lake/build
+          key: docbuild-${{ runner.os }}-${{ hashFiles('docbuild/lean-toolchain', 'docbuild/lake-manifest.json') }}
+          restore-keys: docbuild-${{ runner.os }}-
+
+      - name: Generate API docs
+        run: |
+          cd docbuild
+          lake build MIPStarRE:docs
+
+      - name: Package blueprint component
+        uses: ./.github/actions/package-blueprint-component
+
+      - name: Package docs component
+        run: |
+          mkdir -p site-docs
+          cp -r docbuild/.lake/build/doc site-docs/docs
+
+      - name: Upload blueprint component
+        uses: actions/upload-artifact@v4
+        with:
+          name: site-blueprint
+          path: site-blueprint
+          retention-days: 30
+
+      - name: Upload docs component
+        uses: actions/upload-artifact@v4
+        with:
+          name: site-docs
+          path: site-docs
+          retention-days: 90
+
+  deploy:
+    name: Deploy Pages site
+    needs: build_project
+    uses: ./.github/workflows/deploy-pages.yml
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+      actions: read
+
+  report_failure:
+    name: Open issue on failure
+    needs: [build_project, deploy]
+    if: ${{ always() && (needs.build_project.result == 'failure' || needs.deploy.result == 'failure') }}
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Open issue on failure
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const date = new Date().toISOString().split('T')[0];
+            const title = `docgen CI failure — ${date}`;
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            // For workflow_dispatch with a custom ref input, context.ref is the
+            // trigger ref (e.g. refs/heads/main), not the checked-out ref.
+            const builtRef = context.payload.inputs?.ref || context.ref;
+            const body = [
+              `The **Full documentation** workflow failed and the GitHub Pages docs are stale.`,
+              ``,
+              `**Run:** [${context.runId}](${runUrl})`,
+              `**Triggered by:** ${context.eventName}`,
+              `**Built ref:** \`${builtRef}\``,
+            ].join('\n');
+
+            const open = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'bug',
+              per_page: 100,
+            });
+            const duplicate = open.find(i => i.title.startsWith('docgen CI failure'));
+            if (!duplicate) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: ['bug'],
+              });
+            }

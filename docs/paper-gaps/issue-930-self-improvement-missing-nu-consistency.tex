@@ -1,0 +1,136 @@
+\documentclass{article}
+
+\usepackage{amsmath,amssymb}
+\usepackage{xurl}
+\usepackage[hidelinks]{hyperref}
+\setlength{\emergencystretch}{2em}
+
+\input{command}
+
+\title{Resolved Missing $\nu$-Consistency Hypothesis in the Self-Improvement Theorem}
+\author{}
+\date{2026-05-01}
+
+\begin{document}
+\maketitle
+
+\section{At a glance}
+
+\begin{itemize}
+  \item \textbf{Status: resolved.}  The statement-level discrepancy is resolved:
+  the Lean theorem \leanid{selfImprovement} contains the paper's
+  $\nu$-consistency hypothesis.  The proof-level gap described in the original
+  note has also been closed: \leanid{selfImprovement} and the induction-section
+  reformulation are now proved from the corrected source-facing hypotheses.
+  Thus issue~\#1515 is historical for the current Lean tree.
+  \item \textbf{Difficulty: low as a statement repair, substantial as the
+  former proof construction.}  The missing hypothesis was easy to identify from
+  the paper statement.  The later proof closure required the Section~9 helper,
+  semidefinite-programming, orthonormalization, and final-field constructions.
+  \item \textbf{Estimated weight:} no remaining proof construction is expected
+  for this note.  It remains as documentation of the former statement-level
+  discrepancy and its resolution.
+  \item \textbf{Mathlib/project split:} roughly \textbf{25\% Mathlib} and
+  \textbf{75\% project-local} for the proof route that closed the issue.
+  Mathlib supplies finite-dimensional operator and matrix order infrastructure;
+  the project supplies the LDT self-improvement interfaces and transports.
+  \item \textbf{Key Mathlib inputs:} positive semidefinite matrices, finite
+  sums of matrix-valued effects, trace and operator inequalities, and the
+  finite-dimensional SDP infrastructure used by the Section~9 proof.
+\end{itemize}
+
+\section{Key theorem forms}
+
+The self-improvement step in \cite[Section~9]{Ji2020LowIndividualDegree}
+takes a measurement $G\in\polymeas{m}{q}{d}$, where $m$ is the number
+of variables, $q$ the field size, and $d$ the degree bound of the
+low individual degree test.  The surrounding strategy is an
+$(\eps,\delta,\gamma)$-good symmetric strategy; its data includes a
+projective measurement family $A=\{A^{\bu}\}_{\bu\in\F_q^{\,m}}$ with
+outcomes in $\F_q$ and a bipartite state $\ket\psi$.  The function $g$
+maps a point $\bu$ to its evaluation, and $[g(\bu)=a]$ selects the outcome
+indexed by $a$.  The paper's self-improvement theorem then assumes the
+following consistency hypothesis on $G$: on average over $\bu\in\F_q^{\,m}$,
+\begin{equation}
+  \label{eq:paper-nu-consistency}
+  A_a^{\bu}\ot I \simeq_{\nu} I \ot G_{[g(\bu)=a]}.
+\end{equation}
+Here $\simeq_{\nu}$ is the paper's approximation relation comparing two
+families of measurements by the expectation of their difference: for a
+bipartite state $\ket\psi$, the expectation difference is at most $\nu$.
+The theorem produces an output measurement $H$ and a dual certificate
+operator $Z$ dominating the averaged $A$-operators.
+The parameter $\zeta$ is set to
+$\zeta = 3000\,m\,(\eps^{1/32}+\delta^{1/32}+(d/q)^{1/32})$.
+Under \eqref{eq:paper-nu-consistency} the theorem concludes completeness
+$\bra\psi H\ot I\ket\psi \ge (1-\nu)-\zeta$, point consistency of $H$,
+strong self-consistency of $H$ at level $\zeta$, and the operator bound
+$\bra\psi Z\ot(I-H)\ket\psi \le \zeta$.\footnote{The paper passages are
+\path{references/ldt-paper/self_improvement.tex}, lines~635--671 (theorem)
+and lines~24--60 (helper lemma); the corresponding induction-section theorem is in
+\path{references/ldt-paper/inductive_step.tex}, lines~249--286. This note
+is part of the retrospective audit in \ghissue{930}. The discrepancy is
+tracked for resolution in \ghissue{931}.}
+
+\section{The formal statement}
+
+The Lean declaration \leanid{MIPStarRE.LDT.SelfImprovement.selfImprovement}
+now includes the consistency hypothesis
+\eqref{eq:paper-nu-consistency}.  The former obligation bundle
+\leanid{SelfImprovementObligations} and the conditional theorem that used it
+have been removed.  Thus the discrepancy recorded in this note has been
+resolved at the level of the public theorem statement.
+
+The proof-level gap recorded by the original version of this note has since
+been discharged.  The current theorem proves the source-shaped statement
+directly, rather than representing the missing work by an explicit
+\leanid{sorry} or by extra hypotheses on a conditional substitute for the
+theorem.
+
+The induction-step theorem
+\leanid{MIPStarRE.LDT.MainInductionStep.selfImprovementInInductionSection}
+has the same status: its statement includes the input consistency hypothesis,
+and the Section~9 work needed by that reformulation is now checked.
+
+\section{Mathematical consequence}
+
+The previous theorem statement was too weak to express the paper's claim,
+because $\nu$ was not related to the input measurement.  The present theorem
+statement no longer has that defect.  The helper strong self-consistency
+estimate, the orthonormalization step, and the final-field transport are now
+derived inside the checked proof rather than supplied as auxiliary source
+hypotheses.
+
+\section{Blueprint status}
+
+The blueprint entry now points to the theorem \leanid{selfImprovement}.  No
+top-level conditional obligation theorem is recorded as the formalization of
+the paper theorem.  The former proof-level gap tracked by issue~\#1515 is
+historical for the current code.
+
+\section{Error coefficients}
+
+The paper's helper lemma carries its own error parameter
+$\widehat\zeta = 100\,m\,(\eps^{1/2}+\delta^{1/2}+(d/q)^{1/2})$;
+the orthonormalization step contributes a further error
+$\widehat\zeta_{\text{ortho}} = 100\,\widehat\zeta^{\,1/4}$.
+All error constants match the paper when the obligations are discharged.
+The helper error matches
+$\widehat\zeta$; the orthogonalization error delegates to the
+orthonormalization infrastructure, which uses the paper's $100\widehat\zeta^{\,1/4}$;
+the data-processing error $8\widehat\zeta+8\sqrt{\widehat\zeta_{\text{ortho}}}$
+matches the paper; and the final self-improvement error
+$\zeta = 3000\,m\,(\eps^{1/32}+\delta^{1/32}+(d/q)^{1/32})$ matches the paper.
+
+\section{Conclusion}
+
+The paper's self-improvement theorem requires an approximation hypothesis
+$\simeq_{\nu}$ linking the input measurement $G$ to the parent measurement
+$A$.  The Lean statement now contains this hypothesis, and the corresponding
+proof is checked without reintroducing the missing work as auxiliary
+hypotheses.
+
+\bibliographystyle{alpha}
+\bibliography{references}
+
+\end{document}

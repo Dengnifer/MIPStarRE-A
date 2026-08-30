@@ -1,0 +1,689 @@
+import Lean
+import MIPStarRE.LDT.ExpansionHypercubeGraph.MatrixRealization.TraceForms
+import MIPStarRE.LDT.GlobalVariance.Theorems.MainTheorems
+import MIPStarRE.LDT.MainInductionStep.Theorems.MainTheorems.Successor
+import MIPStarRE.LDT.MakingMeasurementsProjective.NaimarkFull
+import MIPStarRE.LDT.MakingMeasurementsProjective.Orthonormalization
+import MIPStarRE.LDT.MakingMeasurementsProjective.LocalityPreservingRepair
+import MIPStarRE.LDT.MakingMeasurementsProjective.ProjectivizationChain.Line169Repair
+import MIPStarRE.LDT.MakingMeasurementsProjective.ProjectivizationChain.Output
+import MIPStarRE.LDT.Pasting.Bernoulli.Final
+import MIPStarRE.LDT.SelfImprovement.Theorems.Results.HelperCompleteness.Bracketed
+import MIPStarRE.LDT.Test.Classical
+import MIPStarRE.LDT.SelfImprovement.Theorems.Results.SelfImprovementTop.Core
+import MIPStarRE.LDT.Test.MainTheorem.MainFormal
+import MIPStarRE.LDT.Test.StrategyBiProjRoleAverage.Final
+import MIPStarRE.LDT.Test.StrategyBiProjUnsymmetrization
+
+/-!
+# Axiom audits for classical low-individual-degree soundness
+
+Regression checks for the issue-#408 replacement of the former ambient
+Polishchuk--Spielman axiom by the explicit hypothesis
+`PolishchukSpielmanClassicalSoundnessStatement`.
+
+The audits for
+`MakingMeasurementsProjective.orthonormalizationCompletionRoute` and
+`MakingMeasurementsProjective.orthonormalization` require the standard Lean
+axioms only: the locality-preserving repair theorem in
+`MakingMeasurementsProjective/LocalityPreservingRepair.lean` has been discharged for both the
+documented completion-route construction and the paper-facing
+`100\zeta^{1/4}` theorem.
+
+The audit for `MakingMeasurementsProjective.orthonormalizationMainLemma`
+requires the standard Lean axioms only: the source-facing
+`84\zeta^{1/4}` measurement orthogonalization lemma is proved from the
+left-lifted projectivization repair and no longer has any hidden repair input.
+The source rounding-to-projectors proposition `projectiveNonMeasurement` and
+its constructive theorem
+`projectiveNonMeasurement_of_sourceAlmostProjective_full` are also checked
+not to import `sorryAx`; the latter is the formal construction linked from
+`\label{lem:projective-non-measurement}`, not an additional hypothesis of that
+source lemma.
+
+The audit for the full Naimark theorem separates the Lean statement of the
+paper's projective-submeasurement tensor correlation theorem from the checked
+questionwise interface.  The theorem
+`MakingMeasurementsProjective.oneMeasNaimark` and
+`MakingMeasurementsProjective.naimarkTensorProductCorrelation` are now
+axiom-clean: the one-measurement theorem is proved by the finite-dimensional
+isometry-extension construction, and the four-register trace identity
+`OneMeasNaimarkData.twoSidedCorrelationPreservation` has been discharged from
+the checked one-measurement compression identity.  The theorem
+`MakingMeasurementsProjective.questionwiseNaimark` remains a separate
+axiom-clean Lean-only interface entry.
+
+The audit for `SelfImprovement.selfImprovement` requires the standard Lean axioms
+only: the issue-#1230 SDP slackness dependency has been discharged by the
+canonical finite-dimensional SDP strong-duality argument.
+
+The audit also checks the full selection-dependent `lem:add-in-u`
+formalization.  The structure `SelfImprovement.AddInUFullStatement` records the
+paper's universally quantified transfer inequality, while
+`SelfImprovement.addInUFullStatement_of_isGood` constructs it from the standing
+good-strategy hypotheses by using the selected Cauchy--Schwarz chain and the
+global-variance estimate.  The reduced `addInU` lemma remains only a downstream
+specialization.
+
+The audit for `Test.mainFormal` records that the current two-space, corrected
+large-`k` interface has no connection, residual, repair, data, or obligation
+hypotheses.  The large-`k` and `k > 0` scalar-cascade boundary is documented in
+`docs/paper-gaps/issue-906-main-formal-k-bound.tex` and
+`docs/paper-gaps/issue-422-main-formal-zero-k-boundary.tex`.  Its proof routes
+through the heterogeneous role-register symmetrization and the checked theorem
+`MainInductionStep.mainInduction`.
+
+The base case of the induction theorem is proved by `mainInductionBaseCase`,
+while the arbitrary non-base branch merely decomposes the parameters and invokes
+the native successor-step theorem `mainInductionSuccessorNext`, whose nontrivial
+branch is the named construction theorem
+`mainInductionSuccessorNext_ofSmallErrorConstruction`.  That ordinary successor
+theorem now has no direct `sorry`; it calls the internal simultaneous
+answer-valued induction theorem `MainInductionStep.answerMainInduction`.  The
+answer-valued pasting theorem
+`MainInductionStep.answerLdPastingInInductionSectionOfSmallError` is now a
+checked reduction through discharged answer-valued estimates:
+`answerComMainForCarrier_ofAnswerGood`, the proved
+`answerLdPastingInInductionSectionDegreeZeroOfSmallError`, and the proved
+`answerLdPastingInInductionError_le_mainInductionError_of_smallError`.  The
+predecessor answer-valued induction argument is supplied inside
+`MainInductionStep.answerMainInduction`, not asserted as a standalone theorem
+hypothesis.  The former degree-zero family branch has been removed from the
+active frontier because the predecessor induction hypothesis no longer assumes
+`0 < d`; in the nontrivial branch, `1 ≤ k` is derived from
+`mainInductionError < 1`.  The
+answer-valued self-improvement data are constructed by the
+standard-axiom-clean carrier route.  The answer-valued base case
+`MainInductionStep.answerMainInductionBaseCase` is standard-axiom clean, using
+the same one-dimensional axis-parallel-line construction as the ordinary base
+case.  The answer-valued large-error branch
+`MainInductionStep.answerMainInductionOfOneLeError` is also standard-axiom
+clean, using the same distinguished trivial polynomial measurement as the
+ordinary large-error branch.  The answer-valued successor slice theorem
+`MainInductionStep.answerSuccessorRestrictedSliceConclusions` now performs the
+local recursive application to every restricted slice once the predecessor
+answer-valued induction hypothesis is in scope.  Thus the former transitive
+`sorryAx` dependency has been removed from the current `mainFormal` path.  The
+final theorem proves the saturated-error branch, while its small-error branch
+calls the checked role-register scalar-boundary theorem under the corrected
+nonzero sampling hypothesis.  The zero-sampling boundary tracked by #422 is
+removed from the source theorem statement by the explicit hypothesis `0 < k`.
+
+The audit for `GlobalVariance.globalVarianceOfPoints` now requires the standard
+Lean axioms only: the issue-#1456 six-step local transport estimate is supplied
+by `GlobalVariance.localVarianceTransportChainBound`, so the paper-facing theorem
+no longer carries a `sorryAx` dependency.
+
+The audit for `MainInductionStep.selfImprovementInInductionSection` records
+standard Lean axioms only: the measurement-valued realization of
+`thm:self-improvement-in-induction-section` no longer inherits any issue-#1230
+SDP slackness proof debt.
+
+The audit for `MainInductionStep.mainInduction` records that the corrected
+large-`k` Lean interface to `thm:main-induction` is now proved.  The
+source-labelled blueprint theorem uses the same corrected hypothesis
+`k ≥ 400 m d`.  The scalar side-condition discrepancy is recorded in
+`docs/paper-gaps/issue-906-main-formal-k-bound.tex` as a confirmed statement
+gap in the printed theorem statement.
+
+The audit for
+`MainInductionStep.mainInductionSuccessorNext_ofSmallErrorConstruction` records
+that the small-error successor construction for the native Section 6 step is
+now standard-axiom clean.  The
+public successor theorem `MainInductionStep.mainInductionSuccessorNext` calls it
+only after splitting off the already proved large-error branch.  This theorem
+is now proved from the internal answer-valued induction theorem
+`MainInductionStep.answerMainInduction` and the checked answer-carrier
+successor reduction.  The direct `sorryAx` site is no longer the ordinary
+successor theorem, nor the answer-valued successor corollary; the answer-valued
+pasting theorem is also proved by the answer-valued commutativity route.  The
+degree-zero branch and scalar absorption have been discharged.
+The predecessor induction argument is supplied by the strong-induction proof
+of `MainInductionStep.answerMainInduction`.  The checked reduction
+`MainInductionStep.answerMainInductionSuccessorNext_ofRecursiveHypothesisAndAnswerPasting`
+reduces the successor branch to the answer-valued pasting theorem
+`MainInductionStep.answerLdPastingInInductionSectionOfSmallError`, which is now
+standard-axiom clean.
+The transitive audit also records the exact downstream Section 6 handoff:
+`mainInductionSuccessor` and `mainInduction` are standard-axiom clean.
+
+The answer-carrier reductions
+`MainInductionStep.mainInductionSuccessorNext_ofAnswerCarrier`,
+`MainInductionStep.mainInductionSuccessorNext_ofAnswerCarrierFromSuccessorBound`
+are also standard-axiom clean.  They are not paper theorems; they are internal
+successor reductions from the predecessor answer-valued induction hypothesis.
+They remove the answer-valued slice-transport input from the active successor
+route: the needed self-improvement data are constructed directly from
+`AnswerSelfImprovementData.ofAnswerCarrier`, and the successor-bound form derives
+the predecessor large-`k` side condition from the successor large-`k` hypothesis.
+The answer-valued recursive slice restriction
+`MainInductionStep.xRestrictedAnswerSymStratOfAnswer` and its
+restricted-probability theorem
+`MainInductionStep.answerSuccessorRestrictedProbabilities` are also
+standard-axiom clean; they are constructions toward the simultaneous
+answer-valued induction argument, not added hypotheses of the paper theorem.
+The named stage-data constructors used by these reductions are also checked not
+to import `sorryAx`; they are bookkeeping and transport constructions, not
+hidden proof assumptions for the paper theorem.
+
+The Section 3 final-theorem witness constructors have the same separation.
+Base-case role witnesses, the successor-dependent role witness, and
+projective-completion transport are standard-axiom clean.  They are constructed
+from the corrected induction theorem and do not introduce added final-theorem
+witness hypotheses.
+
+The audit for `Pasting.ldPasting` now requires the standard Lean axioms only:
+the unrestricted paper-facing theorem no longer depends on a dedicated
+degree-zero `sorryAx`, because issue #1622 has been discharged by the direct
+degree-zero construction in `Pasting/Bernoulli/Final.lean`.
+
+The audits for `CommutativityPoints.commutativityPoints`,
+`Commutativity.commDataProcessedG`, and `Commutativity.comMain` require the
+standard Lean axioms only.  The boundedness data consumed by the latter two
+is the formal record for the boundedness witnesses `Z^x` appearing explicitly
+in `references/ldt-paper/commutativity-G.tex`; it is not an additional bridge
+or residual hypothesis.
+
+The audit for `ExpansionHypercubeGraph.laplacianSpectralGapOrdered` now
+requires the standard Lean axioms only: the ordered-eigenvalue statement of
+`cor:laplacian-spectral-gap` is proved by connecting the Fourier
+diagonalization to the ordered roots of the characteristic polynomial, so the
+former issue-#1497 `sorryAx` dependency is gone.
+
+The axiom expectation is attached to each declaration separately.  The current
+paper-facing route is audited with the standard Lean axioms only; if a future
+declaration is temporarily audited with a larger expected set, its status must
+be justified at that declaration rather than inferred from nearby checks.
+
+The audit for the helper strong self-consistency assembly now requires the
+standard Lean axioms only: the issue-#1514 local estimate is proved by the
+`HelperSSC` chain.  The audit for `SelfImprovement.selfImprovementHelper` also
+requires the standard Lean axioms only: the issue-#1230 SDP slackness dependency
+has been discharged.
+
+The audit for `SelfImprovement.sdp_statement_with_slackness` requires the
+standard Lean axioms only.  The theorem states and proves the SDP strong-duality
+and complementary-slackness conclusion of `lem:sdp` from the canonical
+finite-dimensional semidefinite-programming argument.  The same audit covers
+the abstract slackness structures, the matrix-level slackness statement, the
+canonical-to-abstract extraction theorem, and the displayed measurement witness
+used by the helper proof.
+
+The audit for
+`Test.TwoProverClassicalLIDStrategy.lowIndividualDegreeAcceptanceProbability_eq_branchAverage`
+requires the standard Lean axioms only.  It is the definitional branch-average
+calculation for the displayed low-individual-degree test figure.
+
+The blueprint-linked auxiliary declarations whose names contain words such as
+`Input`, `Repair`, `Residual`, `Package`, `Hypotheses`, `Obligations`, `Bridge`,
+`Producer`, `Statement`, `Slackness`, or `Dominance` are all covered by explicit
+assertions in this file.  These names are not by themselves proof defects: some
+are direct encodings of paper hypotheses, some are construction theorems, and
+some are auxiliary comparison statements.  The audit records whether each checked
+declaration uses only the standard Lean axioms, has exactly the expected Section
+6 dependency when explicitly documented, or does not itself import `sorryAx`.
+
+This module is built explicitly in CI rather than imported from the umbrella
+library modules, so the axiom audits stay out of normal downstream imports
+while still acting as regression tests.
+-/
+
+open Lean Elab Command
+
+private def resolveDeclIdent (id : TSyntax `ident) : CommandElabM Name := do
+  liftCoreM <| Lean.Elab.realizeGlobalConstNoOverloadWithInfo id
+
+elab "assert_standard_axioms " id:ident : command => do
+  let declName ← resolveDeclIdent id
+  let axioms := (← Lean.collectAxioms declName).qsort Name.lt
+  let expected := #[``propext, ``Classical.choice, ``Quot.sound].qsort Name.lt
+  unless axioms == expected do
+    throwError
+      m!"'{declName}' depends on axioms {axioms.toList}, expected exactly " ++
+        m!"{expected.toList}"
+
+elab "assert_no_sorry_axiom " id:ident : command => do
+  let declName ← resolveDeclIdent id
+  let axioms := (← Lean.collectAxioms declName).qsort Name.lt
+  if axioms.contains ``sorryAx then
+    throwError m!"'{declName}' unexpectedly depends on `sorryAx`; axioms: {axioms.toList}"
+
+assert_standard_axioms MIPStarRE.LDT.Test.PolishchukSpielmanClassicalSoundnessStatement
+assert_standard_axioms MIPStarRE.LDT.Test.classicalTestSoundness
+assert_no_sorry_axiom
+  MIPStarRE.LDT.MakingMeasurementsProjective.NaimarkTensorProductCorrelationStatement
+assert_no_sorry_axiom MIPStarRE.LDT.MakingMeasurementsProjective.NaimarkStatement
+assert_standard_axioms MIPStarRE.LDT.MakingMeasurementsProjective.oneMeasNaimark
+assert_standard_axioms MIPStarRE.LDT.MakingMeasurementsProjective.questionwiseNaimark
+assert_standard_axioms
+  MIPStarRE.LDT.MakingMeasurementsProjective.OneMeasNaimarkData.twoSidedCorrelationPreservation
+assert_standard_axioms
+  MIPStarRE.LDT.MakingMeasurementsProjective.naimarkTensorProductCorrelation
+assert_standard_axioms
+  MIPStarRE.LDT.ProjStrat.roleRegisterSymmStrategy_sourceMainInduction
+assert_standard_axioms
+  MIPStarRE.LDT.ProjStrat.sourceRoleRegisterPointConsistency_ofSymConsistency
+assert_standard_axioms
+  MIPStarRE.LDT.ProjStrat.pointAgreementFailureProbability_le_three_mul
+assert_standard_axioms
+  MIPStarRE.LDT.Preliminaries.simeqToApprox_heterogeneous
+assert_standard_axioms
+  MIPStarRE.LDT.Preliminaries.approxToSimeq_heterogeneous
+assert_standard_axioms
+  MIPStarRE.LDT.Preliminaries.triangleSub_right_heterogeneous
+assert_standard_axioms
+  MIPStarRE.LDT.Preliminaries.triangleSub_heterogeneous
+assert_standard_axioms
+  MIPStarRE.LDT.Preliminaries.simeqTriangleInequality_heterogeneous
+assert_standard_axioms
+  MIPStarRE.LDT.Preliminaries.polynomialCollisionMass_le_mdq
+assert_standard_axioms
+  MIPStarRE.LDT.Test.mainFormalStep5_selfConsistency_ofExpansionBound
+assert_standard_axioms
+  MIPStarRE.LDT.ProjStrat.sourceRoleRegisterFullPolynomialSelfConsistency_ofPointConsistency
+assert_standard_axioms
+  MIPStarRE.LDT.ProjStrat.sourceRoleRegisterLeftProjectiveSubmeasurement_ofFullConsistency
+assert_standard_axioms
+  MIPStarRE.LDT.ProjStrat.sourceRoleRegisterRightProjectiveSubmeasurement_ofFullConsistency
+assert_standard_axioms
+  MIPStarRE.LDT.ProjStrat.completedProjectiveMeasurements_ofTwoSidedSubmeasurements
+assert_standard_axioms
+  MIPStarRE.LDT.ProjStrat.completedProjectiveMeasurementsAndLine169_ofTwoSidedSubmeasurements
+assert_standard_axioms
+  MIPStarRE.LDT.ProjStrat.completedProjectiveConsistency_ofFullConsistency
+assert_standard_axioms
+  MIPStarRE.LDT.Test.consRel_constPolynomialEvaluation_heterogeneous
+assert_standard_axioms
+  MIPStarRE.LDT.Test.projectiveEvaluationConsistency_ofFullPolynomialConsistency_heterogeneous
+assert_standard_axioms
+  MIPStarRE.LDT.Test.mainFormalError_zero_k
+assert_standard_axioms
+  MIPStarRE.LDT.ProjStrat.sourceRoleRegisterUnsymmetrizedPointConsistency
+assert_standard_axioms
+  MIPStarRE.LDT.ProjStrat.sourceRoleRegisterCompletePolynomialSelfConsistency
+assert_standard_axioms
+  MIPStarRE.LDT.ProjStrat.sourceRoleRegisterLeftProjectiveSubmeasurement
+assert_standard_axioms
+  MIPStarRE.LDT.ProjStrat.sourceRoleRegisterTwoSidedProjectiveSubmeasurements
+assert_standard_axioms
+  MIPStarRE.LDT.ProjStrat.sourceRoleRegisterCompletedProjectiveMeasurements
+assert_standard_axioms
+  MIPStarRE.LDT.ProjStrat.sourceRoleRegisterFinalPointConsistency
+assert_standard_axioms
+  MIPStarRE.LDT.Test.mainFormalConclusion_ofRoleRegisterScalarBoundary
+assert_standard_axioms MIPStarRE.LDT.Test.mainFormal_smallErrorConclusion
+assert_standard_axioms MIPStarRE.LDT.Test.mainFormalConclusion
+assert_standard_axioms MIPStarRE.LDT.Test.mainFormal
+
+/-! Chapter 2 interfaces used by the final-theorem route.  These are
+foundational definitions and elementary API statements; the regression check is
+that none of them hides a proof-hole dependency. -/
+assert_no_sorry_axiom MIPStarRE.LDT.Role
+assert_no_sorry_axiom MIPStarRE.LDT.Role.other
+assert_no_sorry_axiom MIPStarRE.LDT.ProjStrat
+assert_no_sorry_axiom MIPStarRE.LDT.ProjStrat.lowIndividualDegreeFailureProbability
+assert_no_sorry_axiom MIPStarRE.LDT.ProjStrat.PassesLowIndividualDegreeTest
+assert_no_sorry_axiom MIPStarRE.LDT.SymStrat
+assert_no_sorry_axiom MIPStarRE.LDT.SymStrat.IsGood
+assert_no_sorry_axiom MIPStarRE.LDT.answer_diagonalFailureProbability_nonneg
+assert_no_sorry_axiom MIPStarRE.LDT.answer_eps_nonneg_of_isGood
+assert_no_sorry_axiom MIPStarRE.LDT.answer_delta_nonneg_of_isGood
+assert_no_sorry_axiom MIPStarRE.LDT.answer_gamma_nonneg_of_isGood
+assert_no_sorry_axiom MIPStarRE.LDT.ProjStrat.localDirectSumBlock_nonneg
+assert_no_sorry_axiom MIPStarRE.LDT.ProjStrat.roleBlock_mul
+assert_no_sorry_axiom MIPStarRE.LDT.ProjStrat.roleBlock_nonneg
+assert_no_sorry_axiom MIPStarRE.LDT.ProjStrat.localPairABBlock_nonneg
+assert_no_sorry_axiom MIPStarRE.LDT.ProjStrat.localPairBABlock_nonneg
+assert_no_sorry_axiom MIPStarRE.LDT.ProjStrat.heterogeneousSwapDensity_nonneg
+assert_no_sorry_axiom MIPStarRE.LDT.ProjStrat.heterogeneousSwapDensity_mul
+assert_no_sorry_axiom MIPStarRE.LDT.ProjStrat.rolePairDirectSumCond_nonneg
+assert_no_sorry_axiom MIPStarRE.LDT.ProjStrat.rolePairDirectSumCond_mul_same
+assert_no_sorry_axiom MIPStarRE.LDT.ProjStrat.rolePairDirectSumCond_mul_eq_zero_of_ne
+assert_no_sorry_axiom MIPStarRE.LDT.ProjStrat.rolePairDirectSumCond_AB_mul_BA
+assert_no_sorry_axiom MIPStarRE.LDT.ProjStrat.rolePairDirectSumCond_BA_mul_AB
+assert_no_sorry_axiom MIPStarRE.LDT.ProjStrat.roleRegisterSymmState
+assert_no_sorry_axiom MIPStarRE.LDT.ProjStrat.roleRegisterSymmState_density_fixed
+assert_no_sorry_axiom MIPStarRE.LDT.ProjStrat.roleRegisterSymmState_permInvState
+assert_no_sorry_axiom MIPStarRE.LDT.ProjStrat.roleRegisterSymmState_isNormalized
+assert_no_sorry_axiom MIPStarRE.LDT.ProjStrat.ev_roleRegisterSymmState_rolePairDirectSumCond_AA
+assert_no_sorry_axiom MIPStarRE.LDT.ProjStrat.ev_roleRegisterSymmState_rolePairDirectSumCond_BB
+assert_no_sorry_axiom MIPStarRE.LDT.ProjStrat.roleRegisterProjMeas
+assert_no_sorry_axiom MIPStarRE.LDT.ProjStrat.roleRegisterPointMeasurement
+assert_no_sorry_axiom MIPStarRE.LDT.ProjStrat.roleRegisterAxisParallelMeasurement
+assert_no_sorry_axiom MIPStarRE.LDT.ProjStrat.roleRegisterDiagonalMeasurement
+assert_no_sorry_axiom MIPStarRE.LDT.ProjStrat.roleRegisterAxisParallelTransportInvariant
+assert_no_sorry_axiom MIPStarRE.LDT.ProjStrat.roleRegisterDiagonalTransportInvariant
+assert_no_sorry_axiom MIPStarRE.LDT.ProjStrat.roleRegisterSymmStrategy
+assert_no_sorry_axiom
+  MIPStarRE.LDT.ProjStrat.roleRegisterSymmStrategy_selfConsistency_eq_pointAgreement
+assert_no_sorry_axiom MIPStarRE.LDT.ProjStrat.roleRegisterSymmStrategy_axisParallel_eq_roleAverage
+assert_no_sorry_axiom MIPStarRE.LDT.ProjStrat.roleRegisterSymmStrategy_diagonal_eq_roleAverage
+assert_no_sorry_axiom MIPStarRE.LDT.ProjStrat.axisParallelRoleAverage_nonneg
+assert_no_sorry_axiom MIPStarRE.LDT.ProjStrat.pointAgreementFailureProbability_nonneg
+assert_no_sorry_axiom MIPStarRE.LDT.ProjStrat.diagonalRoleAverage_nonneg
+assert_no_sorry_axiom MIPStarRE.LDT.ProjStrat.roleRegisterSymmStrategy_is_good_three_mul
+assert_no_sorry_axiom MIPStarRE.LDT.ProjStrat.extractRoleRegisterAliceBlock_nonneg
+assert_no_sorry_axiom MIPStarRE.LDT.ProjStrat.extractRoleRegisterBobBlock_nonneg
+assert_no_sorry_axiom MIPStarRE.LDT.SubMeas.extractRoleRegisterAlice
+assert_no_sorry_axiom MIPStarRE.LDT.SubMeas.extractRoleRegisterBob
+assert_no_sorry_axiom MIPStarRE.LDT.Measurement.extractRoleRegisterAlice
+assert_no_sorry_axiom MIPStarRE.LDT.Measurement.extractRoleRegisterBob
+assert_no_sorry_axiom
+  MIPStarRE.LDT.ProjStrat.qBipartiteMatchMass_roleRegisterProjMeas_arbitrary_eq_average
+assert_no_sorry_axiom
+  MIPStarRE.LDT.ProjStrat.qBipartiteConsDefect_roleRegisterProjMeas_arbitrary_eq_average
+assert_no_sorry_axiom
+  MIPStarRE.LDT.ProjStrat.qBipartiteConsDefect_extractRoleRegisterBob_le_two_symm
+assert_no_sorry_axiom
+  MIPStarRE.LDT.ProjStrat.qBipartiteConsDefect_extractRoleRegisterAlice_le_two_symm
+assert_no_sorry_axiom
+  MIPStarRE.LDT.ProjStrat.polynomialEvaluationFamily_extractRoleRegisterAlice
+assert_no_sorry_axiom MIPStarRE.LDT.ProjStrat.polynomialEvaluationFamily_extractRoleRegisterBob
+assert_no_sorry_axiom
+  MIPStarRE.LDT.ProjStrat.polynomialEvaluationFamily_measurement_extractRoleRegisterAlice
+assert_no_sorry_axiom
+  MIPStarRE.LDT.ProjStrat.polynomialEvaluationFamily_measurement_extractRoleRegisterBob
+assert_no_sorry_axiom MIPStarRE.LDT.lastDirectionLine
+assert_no_sorry_axiom MIPStarRE.LDT.lastDirectionMeasurementFamily
+assert_no_sorry_axiom MIPStarRE.LDT.RestrictedDiagonalSample
+assert_no_sorry_axiom MIPStarRE.LDT.Test.mainFormal_trivial_witness
+assert_no_sorry_axiom
+  MIPStarRE.LDT.MainInductionStep.RestrictedSymStrat.diagonalFailureProbability
+
+namespace MIPStarRE.LDT.Test.TwoProverClassicalLIDStrategy
+
+assert_standard_axioms lowIndividualDegreeAcceptanceProbability_eq_branchAverage
+
+end MIPStarRE.LDT.Test.TwoProverClassicalLIDStrategy
+
+namespace MIPStarRE.LDT.MakingMeasurementsProjective
+
+assert_standard_axioms orthonormalizationCompletionRoute
+assert_standard_axioms orthonormalizationMainLemma
+assert_no_sorry_axiom projectiveNonMeasurement
+assert_no_sorry_axiom projectiveNonMeasurement_of_sourceAlmostProjective_full
+assert_no_sorry_axiom spectralTruncationStatement_of_sourceAlmostProjective
+assert_standard_axioms projectiveLowRankSum_of_spectralTruncationStatement
+-- Issue #1032 has been repaired: `orthonormalization` now uses only the
+-- standard kernel axioms.
+assert_standard_axioms orthonormalization
+
+end MIPStarRE.LDT.MakingMeasurementsProjective
+
+assert_no_sorry_axiom MIPStarRE.LDT.SelfImprovement.AddInUFullStatement
+assert_no_sorry_axiom
+  MIPStarRE.LDT.SelfImprovement.addInUFullStatement_of_isGood
+-- Issue #1230 has been repaired for the public self-improvement theorem.
+assert_standard_axioms MIPStarRE.LDT.SelfImprovement.selfImprovement
+assert_standard_axioms MIPStarRE.LDT.GlobalVariance.globalVarianceOfPoints
+-- Issue #1230 has also been repaired for the induction-section theorem.
+assert_standard_axioms MIPStarRE.LDT.MainInductionStep.selfImprovementInInductionSection
+assert_standard_axioms
+  MIPStarRE.LDT.SelfImprovement.selfImprovement_of_axisParallel_selfConsistency
+assert_no_sorry_axiom MIPStarRE.LDT.CommutativityPoints.answerCommutativityPoints
+
+namespace MIPStarRE.LDT.MainInductionStep
+
+assert_standard_axioms
+  selfImprovementInInductionSection_of_axisParallel_selfConsistency
+assert_standard_axioms answerLdPastingInInductionSectionOfSmallError
+assert_no_sorry_axiom answerComMainForCarrier_ofAnswerGood
+assert_no_sorry_axiom answerLdPastingInInductionSectionDegreeZeroOfSmallError
+assert_no_sorry_axiom answerLdPastingInInductionError_le_mainInductionError_of_smallError
+assert_standard_axioms answerMainInductionSuccessorNext_ofRecursiveHypothesisAndAnswerPasting
+assert_standard_axioms answerMainInduction
+assert_standard_axioms mainInductionSuccessorNext_ofSmallErrorConstruction
+assert_standard_axioms mainInductionSuccessorNext
+assert_standard_axioms mainInductionSuccessor
+assert_standard_axioms mainInductionSuccessorNext_ofAnswerCarrier
+assert_standard_axioms mainInductionSuccessorNext_ofAnswerCarrierFromSuccessorBound
+assert_no_sorry_axiom SliceRestrictionData
+assert_no_sorry_axiom AnswerSliceRestrictionData
+assert_no_sorry_axiom PerSliceInductionData
+assert_no_sorry_axiom AnswerPerSliceInductionData
+assert_no_sorry_axiom SelfImprovementData
+assert_no_sorry_axiom SelfImprovementData.SliceStrategyTransport
+assert_no_sorry_axiom AnswerSelfImprovementData
+assert_no_sorry_axiom AnswerSelfImprovementData.SliceStrategyTransport
+assert_no_sorry_axiom dummyDiagonalCovariantMeasurement
+assert_no_sorry_axiom answerSelfImprovementCarrier
+assert_no_sorry_axiom AveragedPastingData
+assert_no_sorry_axiom RestrictedSymStrat
+assert_no_sorry_axiom xRestrictedStrategy
+assert_no_sorry_axiom AnswerMainInductionConclusion
+assert_no_sorry_axiom AnswerMainInductionHypothesis
+assert_no_sorry_axiom averageRestrictedAxisParallelError
+assert_no_sorry_axiom averageRestrictedSelfConsistencyError
+assert_no_sorry_axiom averageRestrictedDiagonalError
+assert_no_sorry_axiom RestrictedProbabilitiesStatement.ofWeightedBounds
+assert_no_sorry_axiom weighted_axisParallel_bound
+assert_no_sorry_axiom weighted_diagonal_bound
+assert_no_sorry_axiom restrictedProbabilities
+assert_no_sorry_axiom AnswerSuccessorRestrictedProbabilitiesStatement
+assert_no_sorry_axiom answerSuccessor_weighted_axisParallel_bound
+assert_no_sorry_axiom answerSuccessor_weighted_diagonal_bound
+assert_no_sorry_axiom answerSuccessorRestrictedProbabilities
+assert_no_sorry_axiom answerSuccessorRestrictedSliceConclusions
+assert_no_sorry_axiom mainInductionBaseCase
+assert_no_sorry_axiom answerMainInductionBaseCase
+assert_no_sorry_axiom mainInductionOfOneLeError
+assert_no_sorry_axiom answerMainInductionOfOneLeError
+assert_no_sorry_axiom selfImprovementInInductionSectionConclusion_ofSelfImprovementConclusion
+assert_no_sorry_axiom selfImprovementInInductionError_le_one_of_mainInductionError_lt_one
+assert_no_sorry_axiom answer_eps_le_one_of_mainInductionError_lt_one
+assert_no_sorry_axiom answer_delta_le_one_of_mainInductionError_lt_one
+assert_no_sorry_axiom answer_gamma_le_one_of_mainInductionError_lt_one
+assert_no_sorry_axiom answer_dq_le_q_of_mainInductionError_lt_one
+assert_no_sorry_axiom answer_three_le_k_sq_mul_next_m_of_hsmall
+assert_no_sorry_axiom answer_selfImprovementInInductionError_le_mainInductionNu
+assert_no_sorry_axiom answer_selfImprovementInInductionError_le_one_of_mainInductionError_lt_one
+assert_no_sorry_axiom average_answerSuccessorSliceSelfImprovementError_le
+assert_no_sorry_axiom average_answerSuccessorSliceMainInductionNu_le
+assert_no_sorry_axiom average_answerSuccessorSliceMainInductionError_le
+assert_no_sorry_axiom answerSuccessorRecursiveSliceMeasurements_ofMainInductionHypothesis
+assert_no_sorry_axiom answerSuccessorSelfImprovementOutputs_ofMainInductionHypothesis
+assert_no_sorry_axiom AnswerSliceRestrictionData.ofRestrictedProbabilities
+assert_no_sorry_axiom AnswerPerSliceInductionData.ofPerSliceInductionData
+assert_no_sorry_axiom AnswerPerSliceInductionData.ofMainInductionHypothesis
+assert_no_sorry_axiom PerSliceInductionData.ofAnswer
+
+end MIPStarRE.LDT.MainInductionStep
+
+namespace MIPStarRE.LDT.MainInductionStep
+
+assert_no_sorry_axiom
+  SelfImprovementData.SliceStrategyTransport.averagedPoint_eq_of_pointMeasurement_eq
+assert_no_sorry_axiom
+  SelfImprovementData.SliceStrategyTransport.ofPointMeasurementEq
+assert_no_sorry_axiom
+  SelfImprovementData.SliceStrategyTransport.good_of_restrictedGood
+assert_no_sorry_axiom
+  SelfImprovementData.SliceStrategyTransport.ofMeasurementEq
+assert_no_sorry_axiom
+  SelfImprovementData.ofSelfImprovementInInductionSection
+assert_no_sorry_axiom SelfImprovementData.slice_outputs_ofSliceStrategyTransport
+assert_no_sorry_axiom SelfImprovementData.ofSliceStrategyTransport
+assert_no_sorry_axiom SelfImprovementData.ofAnswerForPerSliceInductionData
+assert_no_sorry_axiom SelfImprovementData.ofAnswer
+assert_no_sorry_axiom AnswerSelfImprovementData.ofSelfImprovementData
+assert_no_sorry_axiom
+  AnswerSelfImprovementData.SliceStrategyTransport.averagedPoint_eq_of_pointMeasurement_eq
+assert_no_sorry_axiom
+  AnswerSelfImprovementData.SliceStrategyTransport.ofPointMeasurementEq
+assert_no_sorry_axiom
+  AnswerSelfImprovementData.SliceStrategyTransport.good_of_restrictedGood
+assert_no_sorry_axiom
+  AnswerSelfImprovementData.SliceStrategyTransport.ofMeasurementEq
+assert_no_sorry_axiom AnswerSelfImprovementData.slice_outputs_ofSliceStrategyTransport
+
+end MIPStarRE.LDT.MainInductionStep
+
+assert_no_sorry_axiom
+  MIPStarRE.LDT.MainInductionStep.restrictAnswerDiagonalAnswerMeasurement
+assert_no_sorry_axiom
+  MIPStarRE.LDT.MainInductionStep.xRestrictedAnswerSymStratOfAnswer
+assert_no_sorry_axiom
+  MIPStarRE.LDT.MainInductionStep.AnswerSelfImprovementData.ofSelfImprovementInInductionSection
+assert_no_sorry_axiom
+  MIPStarRE.LDT.MainInductionStep.AnswerSelfImprovementData.ofSliceStrategyTransport
+assert_no_sorry_axiom
+  MIPStarRE.LDT.MainInductionStep.AnswerSelfImprovementData.slice_outputs_ofAnswerCarrier
+assert_no_sorry_axiom
+  MIPStarRE.LDT.MainInductionStep.AnswerSelfImprovementData.ofAnswerCarrier
+assert_no_sorry_axiom
+  MIPStarRE.LDT.MainInductionStep.answer_family_pointConsistencyError_eq_avg
+assert_no_sorry_axiom
+  MIPStarRE.LDT.MainInductionStep.answer_family_consistency_of_slice_bounds
+assert_no_sorry_axiom
+  MIPStarRE.LDT.MainInductionStep.family_answerRestrictedPointConsistencyError_eq_avg
+assert_no_sorry_axiom
+  MIPStarRE.LDT.MainInductionStep.idxPolyFamily_averagedMass_eq_avg
+assert_no_sorry_axiom
+  MIPStarRE.LDT.MainInductionStep.idxPolyFamily_complete_of_slice_bounds
+assert_no_sorry_axiom
+  MIPStarRE.LDT.MainInductionStep.idxPolyFamily_stronglySelfConsistent_of_slice_bounds
+assert_no_sorry_axiom
+  MIPStarRE.LDT.MainInductionStep.idxPolyFamily_sliceBoundednessInput_of_slice_bounds
+assert_no_sorry_axiom
+  MIPStarRE.LDT.MainInductionStep.answerSuccessorAveragedFamilyFields_ofMainInductionHypothesis
+assert_no_sorry_axiom
+  MIPStarRE.LDT.MainInductionStep.answerLdPastingInInductionSectionOfComMainAndErrorBound
+assert_no_sorry_axiom
+  MIPStarRE.LDT.MainInductionStep.average_answerSliceSelfImprovementError_le
+assert_no_sorry_axiom
+  MIPStarRE.LDT.MainInductionStep.average_answerSliceError_le
+assert_no_sorry_axiom
+  MIPStarRE.LDT.MainInductionStep.AnswerSelfImprovementData.complete_of_slice_bounds
+assert_no_sorry_axiom
+  MIPStarRE.LDT.MainInductionStep.AnswerSelfImprovementData.consistentWithPoints_of_slice_bounds
+assert_no_sorry_axiom
+  MIPStarRE.LDT.MainInductionStep.AnswerSelfImprovementData.stronglySelfConsistent_of_slice_bounds
+assert_no_sorry_axiom
+  MIPStarRE.LDT.MainInductionStep.AnswerSelfImprovementData.sliceBoundednessInput_of_slice_bounds
+assert_no_sorry_axiom
+  MIPStarRE.LDT.MainInductionStep.mainInductionFromAnswerStageDataOfSmallErrorDirect
+assert_no_sorry_axiom MIPStarRE.LDT.MainInductionStep.AveragedPastingData.invokeLdPasting
+assert_no_sorry_axiom MIPStarRE.LDT.MainInductionStep.assembleAveragedPastingData
+assert_no_sorry_axiom
+  MIPStarRE.LDT.MainInductionStep.assembleAveragedPastingDataOfSmallError
+assert_no_sorry_axiom MIPStarRE.LDT.MainInductionStep.ldPastingInInductionSection
+assert_no_sorry_axiom MIPStarRE.LDT.MainInductionStep.mainInductionFromStageData
+assert_no_sorry_axiom
+  MIPStarRE.LDT.MainInductionStep.mainInductionFromAnswerStageDataOfSmallError
+assert_standard_axioms MIPStarRE.LDT.MainInductionStep.mainInduction
+assert_standard_axioms MIPStarRE.LDT.Pasting.ldPastingDegreeZeroBranch
+assert_no_sorry_axiom MIPStarRE.LDT.Pasting.pointVerticalLineSdd_of_axis_self
+assert_no_sorry_axiom MIPStarRE.LDT.Pasting.ldGbcon_of_axis_self
+assert_no_sorry_axiom MIPStarRE.LDT.Pasting.ldGbcon_liftedVerticalLine_of_axis_self
+assert_no_sorry_axiom
+  MIPStarRE.LDT.Pasting.ldSandwichLineOnePoint_endpoint_ldGbcon_of_axis_self
+assert_no_sorry_axiom
+  MIPStarRE.LDT.Pasting.ldSandwichLineOnePoint_endpoint_ldGbcon_lift_of_axis_self
+assert_no_sorry_axiom
+  MIPStarRE.LDT.Pasting.ldSandwichLineOnePoint_core_of_axis_self
+assert_no_sorry_axiom
+  MIPStarRE.LDT.Pasting.ldSandwichLineOnePoint_ofGHatFacts_of_axis_self
+assert_no_sorry_axiom
+  MIPStarRE.LDT.Pasting.hBConsistency_ofLinePointBounds_of_axis_self
+assert_no_sorry_axiom
+  MIPStarRE.LDT.Pasting.hAConsistency_submeas_from_lineConsistency_of_axis_self
+assert_no_sorry_axiom
+  MIPStarRE.LDT.Pasting.hAConsistency_submeas_ofLinePointBounds_of_axis_self
+assert_no_sorry_axiom
+  MIPStarRE.LDT.Pasting.hAConsistency_submeas_ofGHatFacts_of_axis_self
+assert_no_sorry_axiom
+  MIPStarRE.LDT.Pasting.gHatFacts_ofComMainAndSelfConsistency
+assert_no_sorry_axiom
+  MIPStarRE.LDT.Pasting.hAConsistency_submeas_ofComMain_of_axis_self
+assert_no_sorry_axiom MIPStarRE.LDT.Pasting.overAllOutcomes_ofLinePointBounds
+assert_no_sorry_axiom MIPStarRE.LDT.Pasting.overAllOutcomes_ofGHatFacts_of_axis_self
+assert_no_sorry_axiom MIPStarRE.LDT.Pasting.overAllOutcomes_ofComMain_of_axis_self
+assert_no_sorry_axiom MIPStarRE.LDT.Pasting.fromHToG_ofGHatFacts
+assert_no_sorry_axiom MIPStarRE.LDT.Pasting.fromHToG_ofComMain
+assert_no_sorry_axiom
+  MIPStarRE.LDT.Pasting.ldPastingNCompleteness_of_overAllOutcomes_fromHToG_tail
+assert_no_sorry_axiom
+  MIPStarRE.LDT.Pasting.ldPastingNCompleteness_ofComMain_of_axis_self
+assert_no_sorry_axiom MIPStarRE.LDT.Pasting.degreeZeroPastedPointConsistency_of_axis_self
+assert_standard_axioms MIPStarRE.LDT.Pasting.ldPastingNontrivialPublicBranch
+-- Issue #1622 has been repaired for unrestricted `ldPasting`.
+assert_standard_axioms MIPStarRE.LDT.Pasting.ldPasting
+assert_standard_axioms MIPStarRE.LDT.CommutativityPoints.commutativityPoints
+assert_standard_axioms MIPStarRE.LDT.CommutativityPoints.answerCommutativityPoints
+assert_standard_axioms MIPStarRE.LDT.Commutativity.commDataProcessedG_of_commutativityPoints
+assert_standard_axioms MIPStarRE.LDT.Commutativity.commDataProcessedG
+assert_standard_axioms MIPStarRE.LDT.Commutativity.comMain_of_commutativityPoints
+assert_standard_axioms MIPStarRE.LDT.Commutativity.comMain
+-- Issue #1497 has been repaired for the ordered Laplacian spectral gap.
+assert_standard_axioms
+  MIPStarRE.LDT.ExpansionHypercubeGraph.laplacianSpectralGapOrdered
+assert_standard_axioms
+  MIPStarRE.LDT.SelfImprovement.helper_strong_self_consistency_of_helper_conclusion
+-- Issue #1230 has been repaired for the self-improvement helper.
+assert_standard_axioms MIPStarRE.LDT.SelfImprovement.selfImprovementHelper
+
+namespace MIPStarRE.LDT.SelfImprovement
+
+assert_no_sorry_axiom SdpOptimalPairWithSlackness
+assert_no_sorry_axiom SdpOptimalPairWithSlackness.primalMeasurement
+assert_no_sorry_axiom SdpStatementWithSlackness
+assert_no_sorry_axiom sdpStrictDualWitness
+assert_no_sorry_axiom sdpStrictDualWitness_nonneg
+assert_no_sorry_axiom one_le_sdpStrictDualWitness
+assert_no_sorry_axiom matrixSdpStrictDualWitness
+assert_no_sorry_axiom matrixSdpStrictDualWitness_nonneg
+assert_no_sorry_axiom one_le_matrixSdpStrictDualWitness
+assert_no_sorry_axiom matrixSdpStrictDualWitness_dualFeasible
+assert_no_sorry_axiom one_le_matrixSdpStrictDualWitness_dualSlack
+assert_no_sorry_axiom MatrixSdpStatementWithSlackness
+assert_no_sorry_axiom MatrixSdpCanonicalOptimalPair
+assert_no_sorry_axiom matrixSdpOptimalWitness_of_canonicalSaturatedComplementarySlackness
+assert_no_sorry_axiom matrixSdpOptimalWitness_of_canonicalFeasibleSaturatedComplementarySlackness
+assert_no_sorry_axiom matrixSdpStatementWithSlackness_of_canonicalSaturatedComplementarySlackness
+assert_no_sorry_axiom
+  matrixSdpStatementWithSlackness_of_canonicalFeasibleSaturatedComplementarySlackness
+assert_no_sorry_axiom MatrixSdpCanonicalOptimalPair.toMatrixSdpStatementWithSlackness
+assert_no_sorry_axiom matrixSdpComplementarySlacknessEquation
+assert_no_sorry_axiom MatrixSdpStatementWithSlackness.toSdpStatementWithSlackness
+assert_no_sorry_axiom SdpStatementWithSlackness.exists_measurement_witness
+assert_no_sorry_axiom matrixSdpPointRealization_statementWithSlackness
+assert_no_sorry_axiom matrixSdpCanonicalComplementarySlackness_of_strongDuality
+assert_no_sorry_axiom matrixSdpComplementarySlacknessDefect_of_canonical
+assert_no_sorry_axiom matrixSdpComplementarySlacknessDefect_extracted_of_canonical
+assert_no_sorry_axiom matrixSdpCanonicalSlack_mul_dual_of_complementarySlackness
+
+end MIPStarRE.LDT.SelfImprovement
+
+-- Issue #1230 has been repaired for the SDP complementary-slackness statement.
+assert_standard_axioms MIPStarRE.LDT.SelfImprovement.sdp_statement_with_slackness
+assert_standard_axioms MIPStarRE.LDT.SelfImprovement.sdp_slackness_measurement
+
+namespace MIPStarRE.LDT.MakingMeasurementsProjective
+
+assert_no_sorry_axiom leftLiftedProjectivizationRepair
+assert_no_sorry_axiom orthonormalizationMeasurement_of_consistency_from_projectivizationRepair
+assert_no_sorry_axiom
+  orthonormalizationMeasurement_of_consistency_from_projectivizationRepair_heterogeneous
+assert_no_sorry_axiom
+  orthonormalizationMeasurement_right_of_consistency_from_projectivizationRepair_heterogeneous
+assert_no_sorry_axiom OrthonormalizeAndCompleteStatement.completedCloseness_liftRight
+assert_no_sorry_axiom
+  ProjectivizationSelfConsistencyHandoff.ofOrthonormalizeAndCompleteStatements
+assert_no_sorry_axiom projectiveLowRankSum_of_spectralTruncationStatement
+assert_no_sorry_axiom SpectralTruncationStatement.toRoundingToProjectorsWitness
+assert_no_sorry_axiom ProjectivizationLine169Repair.leftConsistency_of_completion_and_sdd
+assert_no_sorry_axiom ProjectivizationLine169Repair.rightConsistency_of_completion_and_sdd
+assert_no_sorry_axiom
+  ProjectivizationLine169Repair.leftConsistency_with_orthonormalization_loss
+assert_no_sorry_axiom
+  ProjectivizationLine169Repair.rightConsistency_with_orthonormalization_loss
+
+end MIPStarRE.LDT.MakingMeasurementsProjective
+
+assert_no_sorry_axiom
+  MIPStarRE.LDT.IdxPolyFamily.SliceBoundednessInput.storedBoundedResidualBound
+assert_no_sorry_axiom
+  MIPStarRE.LDT.IdxPolyFamily.SliceBoundednessInput.averagedPoint_le_witness
+assert_no_sorry_axiom
+  MIPStarRE.LDT.SelfImprovement.HelperStrongSelfConsistencyBounds
+assert_no_sorry_axiom MIPStarRE.LDT.Test.CascadeHypotheses

@@ -1,0 +1,56 @@
+% Shared macros for both pdf and web versions of the blueprint.
+% Note: the style guide recommends against \begin{proposition}, but this blueprint uses it throughout for paper fidelity.
+
+
+% ── Theorem-like environments (these define the dependency graph nodes) ──
+\newtheorem{theorem}{Theorem}[chapter]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+% ── Mathematical notation ──
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\F}{\mathbb{F}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Prb}{\mathbb{P}}
+\newcommand{\id}{\mathrm{Id}}
+\newcommand{\Id}{\mathrm{Id}}
+\newcommand{\tr}{\operatorname{tr}}
+\DeclareMathOperator{\Tr}{Tr}
+\newcommand{\Mat}{\operatorname{Mat}}
+\newcommand{\code}{\mathcal{C}}
+\newcommand{\hilb}{\mathcal{H}}
+\newcommand{\algebra}{\mathcal{A}}
+\newcommand{\eps}{\varepsilon}
+\newcommand{\mainFormalError}{\nu_{\mathrm{main}}}
+\newcommand{\ot}{\otimes}
+\newcommand{\ket}[1]{\lvert #1 \rangle}
+\newcommand{\bra}[1]{\langle #1 \rvert}
+\newcommand{\braket}[2]{\langle #1 \mid #2 \rangle}
+\newcommand{\bone}[1]{\mathbf{1}\!\left[#1\right]}
+\newcommand{\polyfunc}[3]{\mathcal{P}(#1,#2,#3)}
+\newcommand{\polysub}[3]{\mathrm{PolySub}(#1,#2,#3)}
+\newcommand{\polymeas}[3]{\mathrm{PolyMeas}(#1,#2,#3)}
+\DeclareMathOperator{\poly}{poly}
+
+% ── Bold random-variable notation (from the paper's wright.sty) ──
+\newcommand{\ba}{\boldsymbol{a}}
+\newcommand{\bg}{\boldsymbol{g}}
+\newcommand{\bh}{\boldsymbol{h}}
+\newcommand{\bi}{\boldsymbol{i}}
+\newcommand{\br}{\boldsymbol{r}}
+\newcommand{\bs}{\boldsymbol{s}}
+\newcommand{\bu}{\boldsymbol{u}}
+\newcommand{\bv}{\boldsymbol{v}}
+\newcommand{\bw}{\boldsymbol{w}}
+\newcommand{\bx}{{\boldsymbol{x}}}
+\newcommand{\by}{\boldsymbol{y}}
+\newcommand{\bz}{\boldsymbol{z}}
