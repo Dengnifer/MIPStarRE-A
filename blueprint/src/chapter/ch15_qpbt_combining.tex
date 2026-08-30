@@ -49,8 +49,11 @@ For a line $\ell$ (Definition~\ref{def:line}) and $k \in \N$ we write
 $\deg_k(\ell)$ for the set of polynomial functions on $\ell$ of degree at most
 $k$ in the line parameter, and
 $\mathrm{ideg}_{d,m}(\F_q) = \polyfunc{m}{q}{d}$
-(Definition~\ref{def:polyfunc}) for the $m$-variate polynomials over $\F_q$ of
-individual degree at most $d$; the restriction of an element of
+(Definition~\ref{def:polyfunc}) for the $m$-variate polynomial representatives
+over $\F_q$ of individual degree at most $d$, identified with the induced
+polynomial functions via evaluation (Definition~\ref{def:polynomials-degree};
+the identification is bijective for $d \le q-1$, which holds throughout this
+chapter's parameter regime); the restriction of an element of
 $\mathrm{ideg}_{d,m}(\F_q)$ to a line has total degree at most $md$.
 
 \section{Combined point measurements}
@@ -106,16 +109,15 @@ assembled by Fourier averaging.
 	Remark~\ref{rem:linearity-import}.
 \end{proof}
 
-\begin{remark}[Import status of the quantum linearity test]
+\begin{remark}[Properties of the quantum linearity theorem used below]
 	\label{rem:linearity-import}
-	Theorem~\ref{thm:linearity} is imported from
-	\cite{Natarajan2017Linearity} and is not proved in the present
-	development; its formalization is a separate work item. Two features of
-	the statement are load-bearing for the proof of
-	Lemma~\ref{lem:qld-4-10}: the error is preserved exactly ($\delta$ in the
-	hypothesis equals $\delta$ in the conclusion), and the linearity of the
-	$\{\mathcal{L}^u\}$ is exact and holds for all pairs $(u,u')$, not merely
-	on average.
+	Theorem~\ref{thm:linearity} is the quantum linearity theorem of
+	Natarajan and Vidick~\cite{Natarajan2017Linearity}, used here as an
+	external result. Two features of the statement are load-bearing for the
+	proof of Lemma~\ref{lem:qld-4-10}: the error is preserved exactly
+	($\delta$ in the hypothesis equals $\delta$ in the conclusion), and the
+	linearity of the $\{\mathcal{L}^u\}$ is exact and holds for all pairs
+	$(u,u')$, not merely on average.
 \end{remark}
 
 \begin{lemma}[Combined point measurements]
@@ -270,19 +272,23 @@ assembled by Fourier averaging.
 	which forms a valid POVM; since the lines measurements come from a valid
 	strategy for the low-degree test, on an axis-parallel line $\ell_W$ the
 	outcome $f_W$ lies in $\deg_d(\ell_W)$, and this property is inherited by
-	$T$. As intermediate consistency relations, applying
+	$T$. As intermediate consistency relations, write
+	$\hat{Q}^{x,z}_{a,\bullet} = \sum_b \hat{Q}^{x,z}_{a,b}$ and
+	$\hat{Q}^{x,z}_{\bullet,b} = \sum_a \hat{Q}^{x,z}_{a,b}$ for the two
+	marginals of the combined point measurement of
+	Lemma~\ref{lem:qld-4-10}. Applying
 	Lemma~\ref{fact:add-a-proj} to \eqref{eq:qld-q-cons-m-hat-zx} and then
 	Lemma~\ref{lem:cool-closeness-fact} gives, on average over uniform
 	$x, z$,
-	$(\hat{Q}^{x,z}_{a})_{\mathsf{A}\mathsf{A}'}
+	$(\hat{Q}^{x,z}_{a,\bullet})_{\mathsf{A}\mathsf{A}'}
 	\approx_\delta
 	\sum_b (\hat{Q}^{x,z}_{a,b})_{\mathsf{A}\mathsf{A}'}
 	(\hat{M}^{(\mathrm{Point},Z),z}_{b})_{\mathsf{B}\mathsf{A}''}$,
 	and a direct norm computation from this display and
 	\eqref{eq:qld-q-cons-m-hat-zx} yields the marginal consistencies
-	$(\hat{Q}^{x,z}_{a})_{\mathsf{A}\mathsf{A}'} \approx_{\delta_Q}
+	$(\hat{Q}^{x,z}_{a,\bullet})_{\mathsf{A}\mathsf{A}'} \approx_{\delta_Q}
 	(\hat{M}^{(\mathrm{Point},X),x}_{a})_{\mathsf{B}\mathsf{A}''}$ and
-	$(\hat{Q}^{x,z}_{b})_{\mathsf{A}\mathsf{A}'} \approx_{\delta_Q}
+	$(\hat{Q}^{x,z}_{\bullet,b})_{\mathsf{A}\mathsf{A}'} \approx_{\delta_Q}
 	(\hat{M}^{(\mathrm{Point},Z),z}_{b})_{\mathsf{B}\mathsf{A}''}$.
 	From items 1 and 3 of Lemma~\ref{lem:qld-comm-line-cons}, converting
 	between $\approx$ and $\simeq$ with Lemma~\ref{fact:agreement} and
@@ -290,7 +296,7 @@ assembled by Fourier averaging.
 	measurements are consistent with the points measurements, and combining
 	with the marginal consistencies gives, on average over the line-point
 	distribution,
-	$(\hat{Q}^{x,z}_{a})_{\mathsf{A}\mathsf{A}'} \simeq_{\delta_Q}
+	$(\hat{Q}^{x,z}_{a,\bullet})_{\mathsf{A}\mathsf{A}'} \simeq_{\delta_Q}
 	(\hat{M}^{(\mathrm{Line},X),\ell_X}
 	_{[\mathrm{eval}_x(\cdot)=a]})_{\mathsf{B}\mathsf{A}''}$
 	together with the analogous relation for $Z$. The conclusion now follows
@@ -618,7 +624,8 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\end{align*}
 \end{lemma}
 \begin{proof}
-	\uses{lem:qld-4-10, lem:qld-sublines, def:line-point-dist}
+	\uses{lem:qld-4-10, lem:qld-sublines, lem:qld-xz-lines,
+		def:line-point-dist}
 	Write
 	$W^{x,z}_{a,b} = \hat{Q}^{x,z}_{a,b}
 	- \hat{M}^{(\mathrm{Point},Z),z}_{b}
@@ -670,7 +677,7 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	Lemma~\ref{lem:qld-comm-line-cons}.
 \end{lemma}
 \begin{proof}
-	\uses{lem:qld-comm-line-cons, lem:qld-sublines,
+	\uses{lem:qld-comm-line-cons, lem:qld-sublines, lem:qld-xz-lines,
 		lem:restricted-line-mixture-bounds, def:ith-restricted-line,
 		def:expanded-line-measurement}
 	By Cauchy--Schwarz, the difference of the two sides is bounded by the
@@ -767,8 +774,7 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 \begin{proof}[Proof of Lemma~\ref{lem:qld-4-13}]
 	\proves{lem:qld-4-13}
 	\uses{lem:qld-xz-lines, lem:qld-sublines, def:combine-map,
-		lem:qld-4-12, lem:claim-17-1, lem:claim-17-2, lem:claim-17-3,
-		lem:restricted-line-mixture-bounds}
+		lem:qld-4-12, lem:claim-17-1, lem:claim-17-2, lem:claim-17-3}
 	Let $D$ be the distribution of Lemma~\ref{lem:qld-sublines} and let
 	$D_{|\ell}$ denote $D$ conditioned on the first element being $\ell$.
 	For every line $\ell$ in $\F_q^{2m+2}$ and $f \in \deg_{md+1}(\ell)$
@@ -806,13 +812,11 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 		= O\big(m\,(\eps^{1/4} + \delta_P^{1/4} + \delta_Q^{1/4}
 		+ \delta_{\mathrm{Line}}^{1/2})\big)\,;
 	\end{equation}
-	alternatively, by Property~2 of Lemma~\ref{lem:qld-sublines} the
-	left-hand side of \eqref{eq:qld-combined-lines-consistency} is a mixture
-	of restricted-distribution terms, each bounded by
-	\eqref{eq:qld-xz-lines-restricted}, which gives the bound
-	$O(m^2 \delta_P)$ for the same quantity (see
-	Remark~\ref{rem:qld-4-13-source-defects}); the function
-	$\delta_{\mathrm{combine}} = \poly(m^2\eps, md/q)$ dominates both. Now
+	the function
+	$\delta_{\mathrm{combine}} = \poly(m^2\eps, md/q)$ dominates this
+	bound. (The source states a second bound for the same quantity, whose
+	derivation is not supported by the properties proved for the sub-line
+	distribution; see Remark~\ref{rem:qld-4-13-source-defects}.) Now
 	if the pair $(f_X, f_Z)$ evaluates to $(a, b)$ at $(x, z)$, then
 	$\mathrm{combine}_{f_X,f_Z}$ evaluates to $\alpha a + \beta b$ at
 	$(x, z, \alpha, \beta)$; hence the consistency of $T$ with
@@ -834,16 +838,26 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	$O(m(\eps^{1/4} + \delta_P^{1/4} + \delta_Q^{1/4} +
 	\delta_{\mathrm{Line}}^{1/2}))$, obtained by chaining the three claims
 	(Lemmas~\ref{lem:claim-17-1}--\ref{lem:claim-17-3}), and
-	$O(m^2 \delta_P)$, obtained from \eqref{eq:qld-xz-lines-restricted}; a
+	$O(m^2 \delta_P)$, obtained by decomposing the left-hand side of
+	\eqref{eq:qld-combined-lines-consistency} into restricted-distribution
+	terms and bounding each by \eqref{eq:qld-xz-lines-restricted}; a
 	sentence is also duplicated at the corresponding point of the source,
-	the second copy with a malformed reference. Both bounds are compatible
-	with the stated form
-	$\delta_{\mathrm{combine}} = \poly(m^2\eps, md/q)$, since
+	the second copy with a malformed reference. The second route requires
+	the joint law of the pair $((\ell_X, x), (\ell_Z, z))$, for
+	$(\ell, \ell_X, \ell_Z) \sim D$ and $(x,z,\alpha,\beta)$ uniform on
+	$\ell$, to be a mixture of the product distributions
+	$D_{\mathrm{v}_1,i} \times D_{\mathrm{v}_2,j}$, since
+	\eqref{eq:qld-xz-lines-restricted} averages over two independently
+	sampled line-point pairs; Property~2 of Lemma~\ref{lem:qld-sublines}
+	determines only the two marginal laws of $(\ell_X, \ell_Z, x)$ and of
+	$(\ell_X, \ell_Z, z)$ separately, not the joint law of
+	$((\ell_X, x), (\ell_Z, z))$, so the decomposition invoked by the
+	source is not established there. The proof above therefore uses only
+	the first route, whose bound is dominated by the stated form
+	$\delta_{\mathrm{combine}} = \poly(m^2\eps, md/q)$ since
 	$\delta_P = \poly(\eps, md/q)$, $\delta_Q = \poly(\eps)$ and
-	$\delta_{\mathrm{Line}} = \poly(\eps)$, but a formal proof should fix
-	one route and define $\delta_{\mathrm{combine}}$ explicitly. In
-	addition, the final line of the source proof of
-	Lemma~\ref{lem:claim-17-2} asserts the bound
+	$\delta_{\mathrm{Line}} = \poly(\eps)$. In addition, the final line of
+	the source proof of Lemma~\ref{lem:claim-17-2} asserts the bound
 	$O(m^2\delta_{\mathrm{Line}})$ for a consistency term that is close to
 	one rather than for its deficit; the statements and sketches above
 	record the corrected assertions.
@@ -898,7 +912,16 @@ projective measurement whose outcomes are pairs of global polynomials.
 	parameters $(q, 2m+2, d, 1)$ succeeding with probability
 	$1 - \delta_{\mathrm{combine}}$; the axis-parallel clause of
 	Lemma~\ref{lem:qld-4-13} supplies the degree-$d$ answer format that the
-	game requires on axis-parallel lines. Since $\{\hat{Q}^{\ell}_{f}\}$ is
+	game requires on axis-parallel lines.
+	% Caveat added locally: the source applies the classical soundness
+	% theorem at dimension 2m+2 without the divisibility hypothesis that
+	% def:ld-game requires; see rem:qld-4-7-divisibility.
+	(Definition~\ref{def:ld-game} is stated only when its dimension
+	parameter divides $q$; the divisibility of $q$ by $2m+2$ needed here
+	does not follow from admissibility of $(q,m,d)$ and in general fails,
+	so this instantiation, which follows the source, is not covered by
+	Theorem~\ref{lem:ld-soundness} as stated; see
+	Remark~\ref{rem:qld-4-7-divisibility}.) Since $\{\hat{Q}^{\ell}_{f}\}$ is
 	only a POVM, it is first made projective by Naimark dilation
 	(Theorem~\ref{thm:naimark}), which preserves the $\simeq$ conclusions of
 	Lemma~\ref{lem:qld-4-13}. The quantum soundness of the classical test
@@ -959,6 +982,34 @@ projective measurement whose outcomes are pairs of global polynomials.
 	opposite-order correlation, and entirely analogous calculations with
 	the registers swapped yield \eqref{eq:qld-s-point-con-bob}.
 \end{proof}
+
+% This remark records a defect of the source argument; it is not a statement
+% from the paper.
+\begin{remark}[Divisibility hypothesis in the application of the classical
+	soundness theorem]
+	\label{rem:qld-4-7-divisibility}
+	Definition~\ref{def:ld-game} defines the classical low individual
+	degree game only when its dimension parameter divides $q$: the index
+	function $\chi$ of the question distribution
+	(Definition~\ref{def:ld-question-distribution}) partitions $\F_q$ into
+	classes of equal size, one for each coordinate. The proof of
+	Lemma~\ref{lem:qld-4-7} instantiates the game, and
+	Theorem~\ref{lem:ld-soundness}, at dimension $2m+2$, while
+	admissibility of $(q,m,d)$ (Definition~\ref{def:admissible}) supplies
+	only that $m$ divides $q$. An admissible field size
+	(Definition~\ref{def:admissible-size}) is a power of two, so $m$
+	dividing $q$ forces $m$ to be a power of two; for $m \ge 2$ the
+	integer $2m+2 = 2(m+1)$ then has the odd factor $m+1 \ge 3$ and does
+	not divide $q$. The same divisibility hypothesis underlies the
+	line-point distribution over $\F_q^{2m+2}$
+	(Definition~\ref{def:line-point-dist} instantiated at dimension
+	$2m+2$) used in Lemmas~\ref{lem:qld-sublines} and~\ref{lem:qld-4-13}.
+	The source proof in \cite{Ji2020MIPStar} makes the same instantiation
+	without addressing the divisibility; a complete proof requires a
+	formulation of the game, of its question distribution, and of
+	Theorem~\ref{lem:ld-soundness} that applies to dimensions not dividing
+	$q$. No local correction is recorded here.
+\end{remark}
 
 \begin{remark}[Constant regimes in the quotation of the classical soundness
 	theorem]

@@ -9,7 +9,10 @@ This chapter records the vocabulary in which the quantum Pauli basis test and it
 
 \begin{definition}[POVMs, sub-measurements, and observables]\label{def:povm-conventions}
 	\uses{def:submeasurement}
-	Quantum measurements are modeled as positive operator-valued measures (POVMs). A \emph{POVM} on a finite-dimensional Hilbert space $\mathcal H$ is a family of positive semidefinite operators $\{M_a\}_{a \in S}$ indexed by outcomes $a \in S$ such that $\sum_a M_a = \Id$; if the latter condition is relaxed to $\sum_a M_a \le \Id$, then $\{M_a\}$ is a \emph{sub-measurement}. (POVMs and sub-measurements are thus exactly the measurements and submeasurements of Definition~\ref{def:submeasurement}.) The probability that the measurement returns outcome $a$ on a state $\ket{\psi}$ is
+	% Finiteness of the outcome set is stated explicitly here; the source leaves it implicit,
+	% and the measurement and submeasurement definitions referenced below assume finite
+	% outcome sets.
+	Quantum measurements are modeled as positive operator-valued measures (POVMs). A \emph{POVM} on a finite-dimensional Hilbert space $\mathcal H$ is a family of positive semidefinite operators $\{M_a\}_{a \in S}$ indexed by outcomes $a$ ranging over a finite set $S$ such that $\sum_a M_a = \Id$; if the latter condition is relaxed to $\sum_a M_a \le \Id$, then $\{M_a\}$ is a \emph{sub-measurement}. (POVMs and sub-measurements are thus exactly the measurements and submeasurements of Definition~\ref{def:submeasurement}.) The probability that the measurement returns outcome $a$ on a state $\ket{\psi}$ is
 	\[
 		\Prb(a) = \bra{\psi} M_a \ket{\psi}\,.
 	\]
@@ -24,7 +27,7 @@ This chapter records the vocabulary in which the quantum Pauli basis test and it
 
 \begin{definition}[Bracket notation for post-processed measurements]\label{def:bracket}
 	\uses{def:povm-conventions, def:post-processing}
-	Let $\{M^x_a\}_{a \in \mathcal A}$ be a family of POVMs indexed by $x \in \mathcal X$, and let $f \colon \mathcal A \to \mathcal B$ be an arbitrary function. We write $\bigl\{ M^x_{[f(\cdot)=b]} \bigr\}$ for the POVM derived from $\{M^x_a\}$ by applying the function $f$ to the outcome before returning it:
+	Let $\mathcal A$ and $\mathcal B$ be finite sets, let $\{M^x_a\}_{a \in \mathcal A}$ be a family of POVMs indexed by $x \in \mathcal X$, and let $f \colon \mathcal A \to \mathcal B$ be an arbitrary function. We write $\bigl\{ M^x_{[f(\cdot)=b]} \bigr\}$ for the POVM derived from $\{M^x_a\}$ by applying the function $f$ to the outcome before returning it:
 	\[
 		M^x_{[f(\cdot)=b]} = \sum_{a\,:\,f(a)=b} M^x_a\,,
 	\]
@@ -101,13 +104,16 @@ Unless specified otherwise, all strategies considered in what follows are tensor
 
 We often specify symmetric games $\mathfrak G$ and symmetric strategies $\mathcal S$ using a compact notation: we write $\mathfrak G = (\mathcal X, \mathcal A, \mu, D)$ and $\mathcal S = (\ket{\psi}, M)$, where $M$ denotes the set of measurement operators shared by both players.
 
+% The source (references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:94-103) concludes with a
+% strategy of value at least 1-eps; its proof yields only the approximate form stated here, and
+% the supremum defining val* need not be attained. See rem:symmetric-strat-limit.
 \begin{lemma}[Symmetrization of strategies for symmetric games]\label{lem:symmetric-strat}
 	\uses{def:symmetric-game, def:tensor-product-value, def:projective-strategy-general}
-	Let $\mathfrak G = (\mathcal X, \mathcal A, \mu, D)$ be a symmetric game such that $\operatorname{val}^*(\mathfrak G) = 1-\eps$ for some $\eps \ge 0$. Then there exists a symmetric and projective strategy $\mathcal S = (\ket{\psi}, M)$ such that $\operatorname{val}^*(\mathfrak G, \mathcal S) \ge 1-\eps$.
+	Let $\mathfrak G = (\mathcal X, \mathcal A, \mu, D)$ be a symmetric game such that $\operatorname{val}^*(\mathfrak G) = 1-\eps$ for some $\eps \ge 0$. Then for every $\eps' > \eps$ there exists a symmetric and projective strategy $\mathcal S = (\ket{\psi}, M)$ such that $\operatorname{val}^*(\mathfrak G, \mathcal S) \ge 1-\eps'$.
 \end{lemma}
 \begin{proof}
 	\uses{thm:naimark}
-	By definition, for any $\eps' > \eps$ there exists a strategy $\mathcal S' = (\ket{\psi'}, A, B)$ with $\operatorname{val}^*(\mathfrak G, \mathcal S') \ge 1-\eps'$. Using Naimark dilation (Theorem~\ref{thm:naimark}, in the completed form recorded in Remark~\ref{rem:naimark-for-games}) we may assume without loss of generality that $\ket{\psi'} \in \C^d_{A'} \ot \C^d_{B'}$ for some integer $d$ and that every $A^x$ and $B^x$ is a projective measurement. Let
+	Fix $\eps' > \eps$. Since $\operatorname{val}^*(\mathfrak G)$ is the supremum of the values of all strategies, there exists a strategy $\mathcal S' = (\ket{\psi'}, A, B)$ with $\operatorname{val}^*(\mathfrak G, \mathcal S') \ge 1-\eps'$. Using Naimark dilation (Theorem~\ref{thm:naimark}, in the completed form recorded in Remark~\ref{rem:naimark-for-games}) we may assume without loss of generality that $\ket{\psi'} \in \C^d_{A'} \ot \C^d_{B'}$ for some integer $d$ and that every $A^x$ and $B^x$ is a projective measurement. Let
 	\[
 		\ket{\psi} = \frac{1}{\sqrt 2}\, \bigl( \ket{0}_{A}\ket{1}_{B}\ket{\psi'}_{A'B'} + \ket{1}_{A}\ket{0}_{B}\ket{\psi'_\tau}_{A'B'} \bigr) \in \bigl(\C^2_{A} \ot \C^d_{A'}\bigr) \ot \bigl(\C^2_{B} \ot \C^d_{B'}\bigr)\,,
 	\]
@@ -115,11 +121,11 @@ We often specify symmetric games $\mathfrak G$ and symmetric strategies $\mathca
 	\[
 		M^x_a = \ket{0}\bra{0} \ot A^x_a + \ket{1}\bra{1} \ot B^x_a\,,
 	\]
-	and let each player measure $M$ on their pair of registers. Because the decision predicate $D$ of the symmetric game treats the two players symmetrically, the resulting symmetric projective strategy $\mathcal S = (\ket{\psi}, M)$ satisfies $\operatorname{val}^*(\mathfrak G, \mathcal S) = \operatorname{val}^*(\mathfrak G, \mathcal S')$. The passage from a value of at least $1-\eps'$ for every $\eps' > \eps$ to a value of at least $1-\eps$ is discussed in Remark~\ref{rem:symmetric-strat-limit}.
+	and let each player measure $M$ on their pair of registers. Because the decision predicate $D$ of the symmetric game treats the two players symmetrically, the resulting symmetric projective strategy $\mathcal S = (\ket{\psi}, M)$ satisfies $\operatorname{val}^*(\mathfrak G, \mathcal S) = \operatorname{val}^*(\mathfrak G, \mathcal S') \ge 1-\eps'$.
 \end{proof}
 
-\begin{remark}[Limit step in the symmetrization lemma]\label{rem:symmetric-strat-limit}
-	The construction in the proof of Lemma~\ref{lem:symmetric-strat} produces, for every $\eps' > \eps$, a symmetric projective strategy of value at least $1-\eps'$; the source asserts the conclusion for $\eps$ itself without giving the limiting argument. Since the dilated dimension $d$ may grow as $\eps' \downarrow \eps$, this final step is not immediate; it requires an additional compactness or limit argument, or else the conclusion should be read as: for every $\eps' > \eps$ there exists a symmetric projective strategy of value at least $1-\eps'$.
+\begin{remark}[Attainment in the symmetrization lemma]\label{rem:symmetric-strat-limit}
+	The source states the conclusion of Lemma~\ref{lem:symmetric-strat} in the stronger form: there exists a symmetric projective strategy of value at least $1-\eps$. Its proof, reproduced above, produces, for each $\eps' > \eps$, such a strategy of value at least $1-\eps'$, and the stronger form does not follow: the dilated dimension $d$ may grow as $\eps' \downarrow \eps$, and the supremum defining $\operatorname{val}^*(\mathfrak G)$ in Definition~\ref{def:tensor-product-value} need not be attained by any strategy. The statement above therefore records the approximate conclusion, which is what the proof establishes; the stronger form would require an additional attainment or compactness argument.
 \end{remark}
 
 \begin{definition}[Commuting strategies]\label{def:comm-strategy}
@@ -202,7 +208,7 @@ A measurement that is consistent on $\ket{\psi}$ in the sense of Definition~\ref
 \end{definition}
 
 \begin{remark}[Asymptotic reading of the distance relations]\label{rem:asymptotic-distance}
-	Definitions~\ref{def:state-distance}, \ref{def:consistency}, and \ref{def:povm-distance} are asymptotic: every $\approx_\delta$ and $\simeq_\delta$ statement refers to families of states and measurement families indexed by an implicit parameter $n \in \N$, and the $O(\cdot)$ is taken as $n \to \infty$. None of these relations is a pointwise inequality with an explicit constant. By contrast, the corresponding relations used in the low individual degree chapters (Definitions~\ref{def:simeq} and~\ref{def:approx_delta}) carry no hidden constant. A formalization of the present chapter must therefore fix concrete-constant versions of the relations and re-verify the constant in each conversion fact below; for instance, the triangle inequality of Lemma~\ref{fact:triangle} hides a factor $2$ in the $O(\cdot)$.
+	Definitions~\ref{def:state-distance}, \ref{def:consistency}, and \ref{def:povm-distance} are asymptotic: every $\approx_\delta$ and $\simeq_\delta$ statement refers to families of states and measurement families indexed by an implicit parameter $n \in \N$, and the $O(\cdot)$ is taken as $n \to \infty$. None of these relations is a pointwise inequality with an explicit constant. By contrast, the corresponding relations used in the low individual degree chapters (Definitions~\ref{def:simeq} and~\ref{def:approx_delta}) carry no hidden constant. Any explicit quantitative version of the present relations therefore retains the constants absorbed into the $O(\cdot)$; for instance, the triangle inequality of Lemma~\ref{fact:triangle} carries a factor $2$ inside the $O(\cdot)$.
 \end{remark}
 
 We record several useful facts about the consistency measure and the state-dependent distance. For the statements imported without proof, readers are referred to Sections~4.4 and~4.5 of \cite{Natarajan2018NEEXP}.
@@ -269,6 +275,7 @@ We record several useful facts about the consistency measure and the state-depen
 	If $A^x_a \approx_\delta B^x_a$ and $B^x_a \approx_{\eps} C^x_a$, then $A^x_a \approx_{\delta+\eps} C^x_a$.
 \end{lemma}
 \begin{proof}
+	\uses{def:povm-distance}
 	Stated in the source without proof; it is Fact 4.28 of \cite{Natarajan2018NEEXP}. For every $x$ and $a$, $\lVert (A^x_a - C^x_a)\ket{\psi} \rVert^2 \le 2\lVert (A^x_a - B^x_a)\ket{\psi} \rVert^2 + 2\lVert (B^x_a - C^x_a)\ket{\psi} \rVert^2$. Averaging over $x$ and summing over $a$ gives the claim; the factor $2$ is absorbed by the $O(\cdot)$ in Definition~\ref{def:povm-distance}.
 \end{proof}
 
@@ -338,11 +345,16 @@ The state-dependent distance is the right tool for reasoning about the closeness
 	\begin{equation}\label{eq:ld-sandwich-1}
 		A^x_{[\operatorname{eval}_y(\cdot)_i = a_i]} \ot \Id_B \simeq_{\delta} \Id_A \ot G^{i,\,x}_{[\operatorname{eval}_y(\cdot) = a_i]}\,.
 	\end{equation}
+	% The source (references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:465-495) prints the
+	% transposed pairing G^{k,x}_{g_1} ... G^{1,x}_{g_k} ... G^{k,x}_{g_1}, which is undefined
+	% when the outcome sets differ; the pairing below is the one of Fact 4.34 in the NEEXP
+	% source. The empty product for k = 0 is also made explicit here. See
+	% rem:ld-sandwich-indexing.
 	Define the POVM family $\{C^x_{g_1,\,g_2,\,\dots,\,g_k}\}$, for $x \in \mathcal X$, by
 	\[
-		C^x_{g_1,\,g_2,\,\dots,\,g_k} = G^{k,\,x}_{g_1} \cdots G^{2,\,x}_{g_{k-1}}\; G^{1,\,x}_{g_k}\; G^{2,\,x}_{g_{k-1}} \cdots G^{k,\,x}_{g_1}\,.
+		C^x_{g_1,\,g_2,\,\dots,\,g_k} = G^{k,\,x}_{g_k} \cdots G^{2,\,x}_{g_2}\; G^{1,\,x}_{g_1}\; G^{2,\,x}_{g_2} \cdots G^{k,\,x}_{g_k}\,;
 	\]
-	Then on average over $x \sim \mu$ and $y \in \mathcal Y$ sampled uniformly at random,
+	for $k = 0$ the empty product is understood as the identity, so that $C^x$ is the measurement whose single outcome, the empty tuple, carries the operator $\Id$. Then on average over $x \sim \mu$ and $y \in \mathcal Y$ sampled uniformly at random,
 	\begin{equation}\label{eq:ld-sandwich-2}
 		A^x_{[\operatorname{eval}_y(\cdot) = (a_1,\,a_2,\,\dots,\,a_k)]} \ot \Id_B \simeq_{k(\delta+\eps)^{1/2}} \Id_A \ot C^x_{[\operatorname{eval}_y(\cdot) = (a_1,\,a_2,\,\dots,\,a_k)]}\,.
 	\end{equation}
@@ -352,7 +364,7 @@ The state-dependent distance is the right tool for reasoning about the closeness
 \end{proof}
 
 \begin{remark}[Index pairing in the sandwich]\label{rem:ld-sandwich-indexing}
-	As printed in the source, the sandwich in Lemma~\ref{lem:ld-sandwich} pairs the $i$-th measurement with the outcome $g_{k+1-i}$: the outermost factor $G^{k,\,x}$ carries the outcome $g_1$ and the innermost factor $G^{1,\,x}$ carries $g_k$. In Fact 4.34 of \cite{Natarajan2018NEEXP}, from which the lemma is imported, the natural pairing $G^{k,\,x}_{g_k} \cdots G^{1,\,x}_{g_1} \cdots G^{k,\,x}_{g_k}$ is used. The transposed indices appear to be a typographical slip in the source; the statement above records the source text as written, and any use of the lemma should confirm the intended pairing against \cite{Natarajan2018NEEXP}.
+	As printed in the source, the sandwich in Lemma~\ref{lem:ld-sandwich} pairs the $i$-th measurement with the outcome $g_{k+1-i}$: the outermost factor $G^{k,\,x}$ carries the outcome $g_1$ and the innermost factor $G^{1,\,x}$ carries $g_k$. Since the measurement $\{G^{i,\,x}_g\}$ is indexed by $g \in \mathcal G_i$, the operator $G^{k,\,x}_{g_1}$ is undefined whenever $\mathcal G_1 \ne \mathcal G_k$, so the printed pairing is a typographical slip. The statement above instead uses the pairing $G^{k,\,x}_{g_k} \cdots G^{1,\,x}_{g_1} \cdots G^{k,\,x}_{g_k}$ of Fact 4.34 in \cite{Natarajan2018NEEXP}, from which the lemma is imported. The source also leaves the case $k = 0$ implicit; with the empty-product convention recorded in the statement, both sides of \eqref{eq:ld-sandwich-2} are then the identity on the single empty-tuple outcome and the conclusion holds with error zero.
 \end{remark}
 
 \begin{lemma}[Pasting two consistent measurements; Fact 4.35 in \cite{Natarajan2018NEEXP}]\label{lem:pasting}
@@ -445,6 +457,7 @@ Note that both players' questions are generated from the \emph{same} uniformly r
 	As in condition 3, we sometimes use $V_k$ and $L_k$ to denote $V_{k,\,u}$ and $L_{k,\,u}$ respectively, leaving the prefix $u$ implicit.
 \end{lemma}
 \begin{proof}
+	\uses{def:cl-func}
 	For the ``if'' direction, conditions 1 and 4 immediately exhibit $L$ as an $\ell$-level CL function. For the ``only if'' direction one constructs the marginals, factor spaces, and linear maps by induction on $\ell$. In the base case $\ell = 1$ take $L_{\le 1} = L$, $V_1 = V$, and $L_1 = L$. For the inductive step, write $L(x) = x^{L_1} + L_{>1,\,x^{L_1}}(x^{V_{>1}})$ as in Definition~\ref{def:cl-func} and apply the inductive hypothesis to each $(\ell-1)$-level function $L_{>1,\,v}$, obtaining its marginals, factor spaces, and linear maps over $V_{>1}$. Define $L_{\le 1} = L_1$ with first factor space $V_1$, and for $k \ge 2$ define $L_{\le k}(x) = x^{L_1} + L'_{x^{L_1},\,<k}(x^{V_{>1}})$, with the $k$-th factor space and linear map of $L$ with prefix $u$ given by those of $L_{>1,\,v}$ at index $k-1$ with prefix $w$, where $v = u^{V_1}$ and $w = u^{V_{>1}}$. Conditions 1--4 are then verified directly from the inductive hypothesis: the direct-sum decomposition of $V_{>1}$ extends to $V$ by adjoining $V_1$, and the sum formula for $L_{\le k}$ follows by unfolding the inductive marginals.
 \end{proof}
 
@@ -459,6 +472,7 @@ The marginal functions, factor spaces, and linear maps of a given CL function $L
 	is a $(k+\ell)$-level conditionally linear function on $U \oplus V$.
 \end{lemma}
 \begin{proof}
+	\uses{def:cl-func}
 	By induction on $k$. The case $k = 0$ follows directly from Definition~\ref{def:cl-func}, since then $L = 0$ and $T$ acts by the single $\ell$-level function $R_0$ on the register subspace $V$. For the inductive step, write $L(x^U) = x^{L_1} + L_{>1,\,x^{L_1}}(x^{U_{>1}})$ with complementary register subspaces $U_1$ and $U_{>1}$ of $U$. For each value $x^{L_1}$, the function $T_{>1,\,x^{L_1}}$ on $U_{>1} \oplus V$ sending $x^{U_{>1} \oplus V}$ to $L_{>1,\,x^{L_1}}(x^{U_{>1}}) + R_{x^{L_1} + x^{L_{>1}}}(x^V)$ is the concatenation of the $(k-1)$-level function $L_{>1,\,x^{L_1}}$ with a family drawn from $\{R_u\}$, hence is $(k+\ell-1)$-level by the induction hypothesis. The claim then follows from Definition~\ref{def:cl-func} applied with first subspace $U_1$ and first linear map $L_1$.
 \end{proof}
 
@@ -471,6 +485,7 @@ The marginal functions, factor spaces, and linear maps of a given CL function $L
 	for all $x = \sum_{j=1}^m x^{(j)} \in \bigoplus_{j=1}^m V^{(j)}$, is an $\ell$-level CL function on $V$ for $\ell = \max_j \{\ell_j\}$.
 \end{lemma}
 \begin{proof}
+	\uses{def:cl-func}
 	Since an $\ell$-level CL function is also $k$-level conditionally linear for all $k \ge \ell$, it suffices to prove the claim when $\ell_j = \ell$ for all $j$. Proceed by induction on $\ell$. For $\ell = 1$ the functions $L^{(j)}$ are linear and the direct sum of linear maps is linear. For the inductive step, decompose each $L^{(j)}$ into its first-level linear part $L^{(j)}_1$ on $V^{(j)}_1$ and its family of $(\ell-1)$-level remainders $L^{(j)}_{>1,\,v_j}$ on $V^{(j)}_{>1}$. The direct sums of the first-level parts define a linear map on $V_1 = \bigoplus_j V^{(j)}_1$, and, for each prefix value $v = \sum_j v_j$, the direct sums of the remainders are $(\ell-1)$-level conditionally linear on $V_{>1} = \bigoplus_j V^{(j)}_{>1}$ by the induction hypothesis. This exhibits $L$ in the form required by Definition~\ref{def:cl-func}.
 \end{proof}
 
@@ -496,8 +511,11 @@ The question distribution of the Pauli basis test is \emph{typed}: each question
 	Let $\mathcal T$ be a finite set (the \emph{type set}) and let $V$ be $\F^n$ for some integer $n \ge 0$. A \emph{$\mathcal T$-typed family of $\ell$-level conditionally linear functions} (implicitly, \emph{on $V$}) is a collection $\{L_t\}_{t \in \mathcal T}$ such that, for each $t \in \mathcal T$, $L_t$ is an $\ell$-level conditionally linear function on $V$.
 \end{definition}
 
+% Nonemptiness of the edge set is stated explicitly here: with E empty, m = k = 0 and the
+% normalization 1/(2m-k) below is undefined. The source
+% (references/qpbt-paper/07_types.tex:65-82) leaves this boundary hypothesis implicit.
 \begin{definition}[Graph distribution]\label{def:graph-distribution}
-	Let $G = (U, E)$ be an undirected graph with vertex set $U$ and edge set $E$. Edges in $E$ are written as multisets $\{u, v\}$ of two vertices; the case $u = v$ represents a self-loop. Suppose there are $m$ edges, $k$ of which are self-loops. Then the \emph{graph distribution $\mu_G$ of $G$} is the distribution over $U \times U$ such that for every $(u,v) \in U \times U$,
+	Let $G = (U, E)$ be an undirected graph with vertex set $U$ and nonempty edge set $E$. Edges in $E$ are written as multisets $\{u, v\}$ of two vertices; the case $u = v$ represents a self-loop. Suppose there are $m \ge 1$ edges, $k$ of which are self-loops. Then the \emph{graph distribution $\mu_G$ of $G$} is the distribution over $U \times U$ such that for every $(u,v) \in U \times U$,
 	\[
 		\mu_G(u, v) =
 		\begin{cases}

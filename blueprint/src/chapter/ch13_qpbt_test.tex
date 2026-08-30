@@ -86,17 +86,25 @@ The next two lemmas show that the CL functions $L_{\mathsf{Point}}$, $L_{\mathsf
 	The win predicate $D^{\mathrm{ld}} = D^{\mathrm{ld}}_{\mathsf{ldparams}}$ is the function of the tuple $(t_{\mathrm A}, x_{\mathrm A}, t_{\mathrm B}, x_{\mathrm B}, a_{\mathrm A}, a_{\mathrm B})$ determined by the following clauses, evaluated for $w \in \{\mathrm A,\mathrm B\}$; in all cases where no action is indicated, the predicate accepts.
 	\begin{enumerate}
 		\item (\textbf{Consistency test}) If $t_{\mathrm A} = t_{\mathrm B}$, accept if and only if $a_{\mathrm A} = a_{\mathrm B}$.
-		\item (\textbf{Axis-parallel line-versus-point test}) If $t_w = \mathsf{ALine}$ and $t_{\overline w} = \mathsf{Point}$, accept if and only if $f_j(t) = (a_{\overline w})_j$ for all $j \in \{1,2,\ldots,k\}$, where $t \in \F_q$ is such that $x_{\overline w} = u_0 + t e_i$ with $i = \chi(s)$.
-		\item (\textbf{Diagonal line-versus-point test}) If $t_w = \mathsf{DLine}$ and $t_{\overline w} = \mathsf{Point}$, accept if and only if $f_j(t) = (a_{\overline w})_j$ for all $j \in \{1,2,\ldots,k\}$, where $t \in \F_q$ is such that $x_{\overline w} = u_0 + t v'$ with $v' = \pi_{i-1}(v)$ and $i = \chi(s)$.
+		% The source phrases both clauses with "the" t such that x = u_0 + tv; that phrase
+		% does not determine t on diagonal questions with direction v' = 0, which the
+		% question distribution samples with positive probability. The universal
+		% quantification over t used here is the local correction; see the remark below.
+		\item (\textbf{Axis-parallel line-versus-point test}) If $t_w = \mathsf{ALine}$ and $t_{\overline w} = \mathsf{Point}$, accept if and only if $f_j(t) = (a_{\overline w})_j$ for all $j \in \{1,2,\ldots,k\}$ and all $t \in \F_q$ such that $x_{\overline w} = u_0 + t e_i$, where $i = \chi(s)$.
+		\item (\textbf{Diagonal line-versus-point test}) If $t_w = \mathsf{DLine}$ and $t_{\overline w} = \mathsf{Point}$, accept if and only if $f_j(t) = (a_{\overline w})_j$ for all $j \in \{1,2,\ldots,k\}$ and all $t \in \F_q$ such that $x_{\overline w} = u_0 + t v'$, where $v' = \pi_{i-1}(v)$ and $i = \chi(s)$.
 	\end{enumerate}
 	The game $\mathcal G^{\mathrm{ld}}_{\mathsf{ldparams}}$ is the typed game with type set $\mathcal T^{\mathrm{ld}}$, the question distribution of Definition~\ref{def:ld-question-distribution}, and win predicate $D^{\mathrm{ld}}_{\mathsf{ldparams}}$.
 \end{definition}
 
+\begin{remark}[Diagonal questions with zero direction]\label{rem:ld-win-zero-direction}
+	The source states the two line-versus-point clauses with ``the'' $t \in \F_q$ such that $x_{\overline w} = u_0 + t v$. When the direction is nonzero and $x_{\overline w}$ lies on the line, exactly one such $t$ exists and the formulation above agrees with the source. But zero directions occur: Definition~\ref{def:line} explicitly permits them, and the question distribution of Definition~\ref{def:ld-question-distribution} produces $\mathsf{DLine}$ questions with $v' = \pi_{i-1}(v) = 0$ with positive probability, namely whenever the last $m - i + 1$ coordinates of $v$ vanish. In that case $\ell(u_0, 0) = \{u_0\}$, every $t \in \F_q$ satisfies $x_{\overline w} = u_0 + t v'$ when $x_{\overline w} = u_0$, and the source clause does not determine acceptance for a nonconstant answer polynomial. The universal quantification over $t$ adopted in Definition~\ref{def:ld-win-predicate} makes the predicate a well-defined function of its arguments; it accepts vacuously when no such $t$ exists, a case the question distribution never produces. Completeness is unaffected: the restriction of a polynomial $g$ to the singleton line $\ell(u_0,0)$, expressed through the parameterization $t \mapsto u_0 + t \cdot 0$, is the constant polynomial with value $g(u_0)$, which passes the check for every $t$.
+\end{remark}
+
 The soundness properties of the low individual degree game are expressed in terms of the following class of measurements.
 
 \begin{definition}[Low-degree polynomial measurements]\label{def:ld-meas}
-	\uses{def:polyfunc, def:polymeasurements}
-	Let $\polymeas{m}{q}{d}$ denote the set of POVM measurements whose outcomes correspond to polynomials $g\colon \F_q^m \to \F_q$ of individual degree at most $d$, that is, measurements indexed by $\polyfunc{m}{q}{d}$; this is the notion of Definition~\ref{def:polymeasurements}, and the argument order $(m,q,d)$ follows that definition (the paper orders the arguments as $(m,d,q)$). More generally, for an integer $k$ and tuples $m = (m_1,\ldots,m_k)$, $q = (q_1,\ldots,q_k)$, $d = (d_1,\ldots,d_k)$, let $\mathrm{PolyMeas}(m,q,d,k)$ denote the set of measurements $G = \{G_{g_1,\ldots,g_k}\}$ such that for each $i \in \{1,\ldots,k\}$, the outcome index $g_i$ is a polynomial $g_i\colon \F_{q_i}^{m_i} \to \F_{q_i}$ of individual degree at most $d_i$.
+	\uses{def:polyfunc, def:polymeasurements, def:polynomials-degree}
+	Let $\polymeas{m}{q}{d}$ denote the set of POVM measurements indexed by $\polyfunc{m}{q}{d}$, the polynomial representatives of individual degree at most $d$ in each variable; this is the notion of Definition~\ref{def:polymeasurements}, and the argument order $(m,q,d)$ follows that definition (the paper orders the arguments as $(m,d,q)$). By Definition~\ref{def:polynomials-degree}, evaluation identifies these representatives with the corresponding polynomial functions $g\colon \F_q^m \to \F_q$, bijectively whenever $d \le q-1$; the parameter regimes of this chapter (Definition~\ref{def:introparams} fixes $d = 1$, and admissibility gives $q \ge 2$) always satisfy this. More generally, for an integer $k$ and tuples $m = (m_1,\ldots,m_k)$, $q = (q_1,\ldots,q_k)$, $d = (d_1,\ldots,d_k)$, let $\mathrm{PolyMeas}(m,q,d,k)$ denote the set of measurements $G = \{G_{g_1,\ldots,g_k}\}$ such that for each $i \in \{1,\ldots,k\}$, the outcome index $g_i$ is a polynomial $g_i\colon \F_{q_i}^{m_i} \to \F_{q_i}$ of individual degree at most $d_i$.
 \end{definition}
 
 Quantum soundness of a version of the classical low-degree test for polynomials of low \emph{total} degree was claimed by Natarajan and Vidick, building on an analysis of a three-prover version of the test by Vidick; there is a known gap in the soundness analysis of that test, and it is not used here. Instead, the construction relies on the low \emph{individual} degree test, whose quantum soundness is proved in~\cite{Ji2020LowIndividualDegree} and generalized in~\cite{Ji2021Quantum}. The statement below is the form most directly useful in what follows.
@@ -128,14 +136,18 @@ Quantum soundness of a version of the classical low-degree test for polynomials 
 	where $\delta_{\mathrm{ld}} = \delta_{\mathrm{ld}}(\eps,q,m,d,k)$, all three approximations are with respect to the state $\ket{\psi}$, and the bracket notation for post-processed outcomes is that of Definition~\ref{def:bracket}. The first two approximations hold on average over the uniform distribution on $u \in \F_q^m$; no question distribution is associated with the third.
 \end{theorem}
 \begin{proof}
-	\uses{thm:main-formal}
-	Let $\Sigma = \F_q$ and let $\code \subseteq \Sigma^q$ be the Reed--Solomon code of degree $d$: the set of all $(p(x_1),\ldots,p(x_q))$ where $p\colon \F_q \to \F_q$ is a univariate polynomial of degree at most $d$ and $x_1,\ldots,x_q$ enumerate $\F_q$; it is a linear $[q,\, d+1,\, q-d+1]_\Sigma$ code.
-	% The paper writes the distance as n-d+1 with an undefined n; the intended value is n=q.
-	The two-prover tensor-code test for the code $\code^{\ot m}$, as described in Figures~1 and~2 of~\cite{Ji2021Quantum}, coincides with the game $\mathcal G^{\mathrm{ld}}$ with parameters $\mathsf{ldparams}$ and $k=1$: the axis-parallel line-versus-point test is their axis-parallel lines test, with the roles of the two players chosen uniformly at random, which is consistent with the two-prover variant of the tensor-code test from Section~4.1 there; the diagonal line-versus-point test is their subcube commutation test, again with the added symmetrization between the players; and the consistency test is their synchronicity test. Theorem~4.7 of~\cite{Ji2021Quantum}, instantiated with its internal parameter $k$ chosen as $m^3 d$ (this parameter is unrelated to the simultaneity parameter $k$ of $\mathsf{ldparams}$), therefore yields the present statement for $k = 1$. The case of general $k$ follows by a standard reduction, following exactly the derivation of Theorem~4.43 from Theorem~4.40 in~\cite{Natarajan2018NEEXP}. Quantum soundness of the low individual degree test itself is the result of~\cite{Ji2020LowIndividualDegree}; in this development it is carried by Theorem~\ref{thm:main-formal}, and Remark~\ref{rem:ld-soundness-provider} records the interface.
+	\uses{def:ld-question-distribution, def:ld-win-predicate, def:ld-meas, def:povm-distance}
+	Let $\Sigma = \F_q$ and let $\code \subseteq \Sigma^q$ be the Reed--Solomon code of degree $d$: the set of all $(p(x_1),\ldots,p(x_q))$ where $p\colon \F_q \to \F_q$ is a univariate polynomial of degree at most $d$ and $x_1,\ldots,x_q$ enumerate $\F_q$. We may assume $d < q$. In the opposite regime the statement is immediate: for $k \ge 1$ and $d \ge q$ the prefactor gives $\delta_{\mathrm{ld}} \ge a\,(dmk)^a\, q^{-b} \ge q^{a-b} \ge 1$, while the quantity bounded in Definition~\ref{def:povm-distance} never exceeds $2$ for families of POVM elements, so the three approximations hold for an arbitrary choice of $G^w \in \mathrm{PolyMeas}(m,q,d,k)$; and for $k = 0$ every answer tuple is empty, all measurements involved are single-outcome, and the approximations hold with error zero. For $d < q$, evaluation is injective on polynomials of degree at most $d$ and a nonzero polynomial of degree at most $d$ vanishes at no more than $d$ of the $q$ points, so $\code$ is a linear $[q,\, d+1,\, q-d]_\Sigma$ code.
+	% The paper prints the parameters as [q, d+1, n-d+1] with an undefined n. With the
+	% intended value n = q the printed distance q-d+1 exceeds the true minimum distance
+	% q-d of the degree-d evaluation code, and the dimension claim d+1 requires d < q.
+	% Both points are corrected above; the regime d >= q, which the parameter tuple of
+	% Definition def:ld-game permits, is handled by the triviality argument.
+	The two-prover tensor-code test for the code $\code^{\ot m}$, as described in Figures~1 and~2 of~\cite{Ji2021Quantum}, coincides with the game $\mathcal G^{\mathrm{ld}}$ with parameters $\mathsf{ldparams}$ and $k=1$: the axis-parallel line-versus-point test is their axis-parallel lines test, with the roles of the two players chosen uniformly at random, which is consistent with the two-prover variant of the tensor-code test from Section~4.1 there; the diagonal line-versus-point test is their subcube commutation test, again with the added symmetrization between the players; and the consistency test is their synchronicity test. Theorem~4.7 of~\cite{Ji2021Quantum}, instantiated with its internal parameter $k$ chosen as $m^3 d$ (this parameter is unrelated to the simultaneity parameter $k$ of $\mathsf{ldparams}$), therefore yields the present statement for $k = 1$. The case of general $k$ follows by a standard reduction, following exactly the derivation of Theorem~4.43 from Theorem~4.40 in~\cite{Natarajan2018NEEXP}. Quantum soundness of the low individual degree test itself is the result of~\cite{Ji2020LowIndividualDegree}; Remark~\ref{rem:ld-soundness-provider} relates the present statement to Theorem~\ref{thm:main-formal}, which proves that result.
 \end{proof}
 
-\begin{remark}[Import status of Theorem~\ref{lem:ld-soundness}]\label{rem:ld-soundness-provider}
-	Theorem~\ref{lem:ld-soundness} is an imported result: the paper derives it by reduction to the two-prover tensor-code test of~\cite{Ji2021Quantum} (Theorem~4.7 there, applied with its internal parameter $k$ chosen as $m^3 d$), followed by the standard extension to simultaneous $k$-tuples. The intended provider here is Theorem~\ref{thm:main-formal}, the quantum soundness of the low individual degree test (Definition~\ref{def:low-individual-degree-test} of Chapter~\ref{chap:test}), which formalizes the result of~\cite{Ji2020LowIndividualDegree}. The exact derivation of the present statement from the consistency conclusions of Theorem~\ref{thm:main-formal} --- including the correspondence between the parameter tuple $\mathsf{ldparams} = (q,m,d,k)$ with $k=1$ and the $(m,q,d)$ test of Chapter~\ref{chap:test}, the treatment of the typed question distribution, and the extension to general $k$ --- remains to be carried out and is recorded as a separate work item.
+\begin{remark}[Relation to the low individual degree test of Chapter~\ref{chap:test}]\label{rem:ld-soundness-provider}
+	Theorem~\ref{lem:ld-soundness} is imported: the proof above reduces it to Theorem~4.7 of~\cite{Ji2021Quantum}, instantiated with its internal parameter $k$ chosen as $m^3 d$, followed by the extension to simultaneous $k$-tuples of~\cite{Natarajan2018NEEXP}. The result of~\cite{Ji2020LowIndividualDegree} that underlies it is proved here as Theorem~\ref{thm:main-formal}: for every projective strategy passing the $(m,q,d)$ low individual degree test of Definition~\ref{def:low-individual-degree-test} with probability at least $1-\eps$, that theorem produces measurements in $\polymeas{m}{q}{d}$ satisfying consistency relations of the same shape as the three approximations of Theorem~\ref{lem:ld-soundness}. Theorem~\ref{lem:ld-soundness} is not a consequence of Theorem~\ref{thm:main-formal} alone: a derivation from it would require, in addition, an equivalence between the typed game $\mathcal G^{\mathrm{ld}}_{(q,m,d,1)}$ and the $(m,q,d)$ test of Chapter~\ref{chap:test} --- matching the two question distributions, the two win conditions, and the two error functions --- together with the extension from $k = 1$ to general $k$ by the reduction of~\cite{Natarajan2018NEEXP} cited above. Neither implication is proved in this chapter, and the proof of Theorem~\ref{lem:ld-soundness} given above does not invoke Theorem~\ref{thm:main-formal}.
 \end{remark}
 
 \section{The Magic Square game}
@@ -232,7 +244,13 @@ The Pauli basis test is the quantum low individual degree test of Natarajan and 
 
 \begin{definition}[Question distribution of the Pauli basis test]\label{def:pauli-question-distribution}
 	\uses{def:admissible, def:ld-question-distribution, def:ms-game, def:cl-func, def:cl-dist, def:graph-distribution}
-	The game $\mathcal G^{\mathrm{pauli}}$ (also $\mathcal G^{\mathrm{pauli}}_{\mathsf{qldparams}}$) is parametrized by a tuple $\mathsf{qldparams} = (q,m,d)$ with $q,m,d \in \N$; whenever the question distribution below is used we assume that $m$ divides $q$, which is part of admissibility (Definition~\ref{def:admissible}). The question type set is
+	% Admissibility of the full tuple is required here, not only the divisibility m | q:
+	% the source parametrizes the Pauli basis test by the tuple qldparams introduced
+	% together with Definition def:admissible (references/qpbt-paper/
+	% 08_classical_and_quantum_low_degree_tests.tex:958-1075), and both the fixed binary
+	% identification of F_q used by the map chi and the trace tr in eq:gamma-value
+	% require q to be a power of 2.
+	The game $\mathcal G^{\mathrm{pauli}}$ (also $\mathcal G^{\mathrm{pauli}}_{\mathsf{qldparams}}$) is parametrized by an admissible tuple $\mathsf{qldparams} = (q,m,d)$ (Definition~\ref{def:admissible}): admissibility makes $q$ a power of $2$, so that the field $\F_q$, its fixed identification with binary strings (Chapter~\ref{chap:qpbt-algebra}), and the trace $\tr\colon \F_q \to \F_2$ used by the win predicate below are defined, and it provides the divisibility $m \mid q$ required by the index map $\chi$ of Definition~\ref{def:ld-question-distribution}. The question type set is
 	\begin{equation}
 		\label{eq:pauli-type}
 		\mathcal T^{\mathrm{pauli}} = \bigl( \{\mathsf{Point}, \mathsf{ALine}, \mathsf{DLine}, \mathsf{Pauli}, \mathsf{Pair}\} \times \{X,Z\} \bigr) \cup \mathcal T^{\mathrm{ms}} \cup \{\mathsf{Pair}\}\;,
@@ -259,12 +277,20 @@ The Pauli basis test is the quantum low individual degree test of Natarajan and 
 	\end{align*}
 	and, in addition, a self-loop at every vertex.
 
-	The question distribution of $\mathcal G^{\mathrm{pauli}}$ is the typed CL distribution on $\mathcal T^{\mathrm{pauli}} \times V^{\mathrm{pauli}} \times \mathcal T^{\mathrm{pauli}} \times V^{\mathrm{pauli}}$ obtained by sampling a uniformly random edge $(t_{\mathrm A}, t_{\mathrm B})$ of the graph $G^{\mathrm{pauli}}$, self-loops included, with the two endpoints assigned to the players in uniformly random order; sampling $z \in V^{\mathrm{pauli}}$ uniformly at random; and setting $x_w = L_{t_w}(z)$ for $w \in \{\mathrm A,\mathrm B\}$. Explicitly, if $z = (u_X,u_Z,s,v,r_X,r_Z)$, then a player whose type is $(\mathsf{Point},W)$ receives $u_W$; a player whose type is $(\mathsf{ALine},W)$ receives $(u_0, s)$ with $u_0 = L^{\mathrm{Ln}}_{e_i}(u_W)$ and $i = \chi(s)$; a player whose type is $(\mathsf{DLine},W)$ receives $(u_0, s, v')$ with $i = \chi(s)$, $v' = \pi_{i-1}(v)$, and $u_0 = L^{\mathrm{Ln}}_{v'}(u_W)$; a player whose type lies in $\mathcal T^{\mathrm{ms}} \cup \{\mathsf{Pair}, (\mathsf{Pair},X), (\mathsf{Pair},Z)\}$ receives $(u_X, u_Z, r_X, r_Z)$; and a player whose type is $(\mathsf{Pauli},W)$ receives $0$.
+	% The type pair is drawn from the graph distribution of Definition
+	% def:graph-distribution, matching the source's formal definition
+	% (references/qpbt-paper/07_types.tex:84-93 together with
+	% references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1115-1120).
+	% Sampling an undirected edge uniformly and then ordering its
+	% endpoints uniformly would be a different distribution here: it gives each self-loop
+	% twice the relative mass of an oriented non-loop pair, and G^pauli has a self-loop
+	% at every vertex.
+	The question distribution of $\mathcal G^{\mathrm{pauli}}$ is the typed CL distribution on $\mathcal T^{\mathrm{pauli}} \times V^{\mathrm{pauli}} \times \mathcal T^{\mathrm{pauli}} \times V^{\mathrm{pauli}}$ obtained by sampling the type pair $(t_{\mathrm A}, t_{\mathrm B})$ from the graph distribution $\mu_{G^{\mathrm{pauli}}}$ of Definition~\ref{def:graph-distribution}, that is, uniformly at random among all ordered pairs of types whose underlying unordered pair $\{t_{\mathrm A}, t_{\mathrm B}\}$ is an edge of $G^{\mathrm{pauli}}$, self-loops included; sampling $z \in V^{\mathrm{pauli}}$ uniformly at random; and setting $x_w = L_{t_w}(z)$ for $w \in \{\mathrm A,\mathrm B\}$. Explicitly, if $z = (u_X,u_Z,s,v,r_X,r_Z)$, then a player whose type is $(\mathsf{Point},W)$ receives $u_W$; a player whose type is $(\mathsf{ALine},W)$ receives $(u_0, s)$ with $u_0 = L^{\mathrm{Ln}}_{e_i}(u_W)$ and $i = \chi(s)$; a player whose type is $(\mathsf{DLine},W)$ receives $(u_0, s, v')$ with $i = \chi(s)$, $v' = \pi_{i-1}(v)$, and $u_0 = L^{\mathrm{Ln}}_{v'}(u_W)$; a player whose type lies in $\mathcal T^{\mathrm{ms}} \cup \{\mathsf{Pair}, (\mathsf{Pair},X), (\mathsf{Pair},Z)\}$ receives $(u_X, u_Z, r_X, r_Z)$; and a player whose type is $(\mathsf{Pauli},W)$ receives $0$.
 \end{definition}
 
 \begin{definition}[Win predicate of the Pauli basis test]\label{def:pauli-win-predicate}
-	\uses{def:pauli-question-distribution, def:ld-win-predicate, def:ms-game, def:indicator-vector}
-	Fix $\mathsf{qldparams} = (q,m,d)$ and let $M = 2^m$. Answers in the game $\mathcal G^{\mathrm{pauli}}_{\mathsf{qldparams}}$ take the following forms, depending on the question type; answers not of the prescribed form are rejected.
+	\uses{def:pauli-question-distribution, def:ld-win-predicate, def:ms-game, def:indicator-vector, def:admissible}
+	Fix an admissible tuple $\mathsf{qldparams} = (q,m,d)$ (Definition~\ref{def:admissible}) and let $M = 2^m$. Answers in the game $\mathcal G^{\mathrm{pauli}}_{\mathsf{qldparams}}$ take the following forms, depending on the question type; answers not of the prescribed form are rejected.
 	% The paper's format table writes the line contents loosely as (u_W, s) and (u_W, s, v);
 	% by the sampling procedure the actual contents are the canonical pairs (u_0, s) and
 	% triples (u_0, s, v') with v' = pi_{i-1}(v). We state the canonical form.
@@ -303,8 +329,8 @@ The Pauli basis test is the quantum low individual degree test of Natarajan and 
 Note the one-sided gating on $\gamma$: the commutation check and the $\mathsf{Pair}$ consistency check accept automatically when $\gamma \neq 0$, while the Magic Square check and the $\mathsf{Variable}$ consistency check accept automatically when $\gamma = 0$.
 
 \begin{lemma}[Completeness of the Pauli basis test]\label{lem:pauli-completeness}
-	\uses{def:pauli-question-distribution, def:pauli-win-predicate, def:spcc, def:tensor-product-value}
-	The Pauli basis test $\mathcal G^{\mathrm{pauli}}_{\mathsf{qldparams}}$ has a value-$1$ SPCC strategy.
+	\uses{def:pauli-question-distribution, def:pauli-win-predicate, def:admissible, def:spcc, def:tensor-product-value}
+	For every admissible tuple $\mathsf{qldparams} = (q,m,d)$ (Definition~\ref{def:admissible}), the Pauli basis test $\mathcal G^{\mathrm{pauli}}_{\mathsf{qldparams}}$ has a value-$1$ SPCC strategy.
 \end{lemma}
 \begin{proof}
 	\uses{thm:ms-from-ac, def:bracket, def:consistent-measurement, def:EPR, def:indicator-vector, lem:pauli-observable-expansion, lem:twisted-commutation}
@@ -399,5 +425,18 @@ We specify a canonical setting of the parameter tuple $\mathsf{qldparams}$ as a 
 \end{lemma}
 \begin{proof}
 	\uses{def:introparams, def:admissible, def:admissible-size, thm:pauli}
-	Since $c$ is even, the exponent $k = c \lceil \log\log R \rceil + 1$ is odd, so $q = 2^k$ is an admissible field size; and $m$ divides $q$ because $2^j \le c \lceil \log R \rceil + 1 \le 2 \log^c R \le 2^k$, so $j \le k$ and both are powers of $2$. Since $m = 2^j \ge (c/2) \log R$, we get $2^m \ge R^{c/2} \ge R$, using $c \ge 2$. For the soundness bound, first observe that $k \le m$ gives $2^{-bmd} \le q^{-b}$, so $\delta_{\mathrm{qld}}(\eps,m,d,q) \le a (md)^a (\eps^b + 2 q^{-b})$. Using $d = 1$, $m \le 2c \log R$, and $q \ge \log^c R$, this is at most $2a(2c)^a \bigl( (\log R)^a \eps^b + (\log R)^{a - cb} \bigr)$; and since $cb - a \ge b \ge 0$ by the choice of $c$, the second exponent is at most $-b$. The statement follows with $a' = 2a(2c)^a$ and $b' = b$.
+	Since $c$ is even, the exponent $k = c \lceil \log\log R \rceil + 1$ is odd, so $q = 2^k$ is an admissible field size; and $m$ divides $q$ because $2^j \le c \lceil \log R \rceil + 1 \le 2 \log^c R \le 2^k$, so $j \le k$ and both are powers of $2$. Since $m = 2^j \ge (c/2) \log R$, we get $2^m \ge R^{c/2} \ge R$, using $c \ge 2$.
+
+	For the soundness bound, write $\delta_{\mathrm{qld}}(\eps,m,d,q) = a(md)^a \eps^b + a(md)^a q^{-b} + a(md)^a 2^{-bmd}$ and use $d = 1$, $m \le 2c \log R$, and $q = 2^k \ge \log^c R$. The first term is at most $a(2c)^a (\log R)^a \eps^b$. The second term is at most $a(2c)^a (\log R)^{a - cb} \le a(2c)^a (\log R)^{-b}$, since $cb - a \ge b$ by the choice of $c$. For the third term, $m \ge (c/2) \log R \ge \log R$ gives $2^{-bm} \le R^{-b}$, so
+	\[
+		a(md)^a\, 2^{-bm}
+		\le a(2c)^a (\log R)^a R^{-b}
+		= a(2c)^a \bigl( (\log R)^{a+b} R^{-b} \bigr) (\log R)^{-b}
+		\le a(2c)^a\, C\, (\log R)^{-b}\;,
+	\]
+	where $C = \sup_{R' \ge 4} (\log R')^{a+b} (R')^{-b}$ is finite --- the function is continuous in $R'$ and tends to $0$ as $R' \to \infty$ --- and depends only on the universal constants $a$ and $b$. Summing the three bounds, the statement follows with $a' = a(2c)^a (1 + C)$ and $b' = b$.
 \end{proof}
+
+\begin{remark}[A comparison of exponents in the source proof of Lemma~\ref{lem:delta-bound}]\label{rem:delta-bound-exponent-comparison}
+	The source proof bounds the third term of $\delta_{\mathrm{qld}}$ by asserting $2^{-bmd} \le q^{-b}$ ``because $k \le m$'', comparing the field exponent $k = c \lceil \log\log R \rceil + 1$ with $m = 2^j$. The inequality $k \le m$ does not follow from Definition~\ref{def:introparams}: if the universal constants of Theorem~\ref{thm:pauli} were $a = 1$ and $b = 1/2$, then $c = 4$, and $R = 5$ gives $k = 9$ and $m = 8$. The proof above instead bounds $2^{-bm} \le R^{-b}$ directly from $m \ge (c/2) \log R \ge \log R$, which yields the same conclusion after enlarging the universal constant $a'$.
+\end{remark}

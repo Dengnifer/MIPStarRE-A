@@ -94,11 +94,19 @@ one may nevertheless single out a \emph{canonical} complement.
 	\[
 		F^\perp = \{\hat{e}_j : j \notin J\}\;.
 	\]
-	The canonical complement is a \emph{set} of vectors, not a subspace, and it
-	depends on the set $F$ and not only on $\mathrm{span}(F)$. If $S$ is a
-	register subspace spanned by $\hat{E}_0 \subseteq \hat{E}$, then the
-	canonical complement of $\hat{E}_0$ is $\hat{E} \setminus \hat{E}_0$, and its
-	span coincides with $S^\perp$.
+	The canonical complement is a \emph{set} of vectors, not a subspace.
+	% Basis-independence made explicit (review code-F1): the source defines
+	% F^perp through a basis but does not assert dependence on it; uniqueness of
+	% the reduced row echelon form gives dependence on span(F) alone.
+	Although defined through the basis $F$, it depends only on
+	$\mathrm{span}(F)$ and the ambient standard basis: two bases of the same
+	subspace form the rows of row-equivalent matrices, which have the same
+	reduced row echelon form and hence the same pivot set $J$. The presentation
+	through Gaussian elimination, adopted by \cite{Ji2020MIPStar}, makes the
+	canonical complement efficiently computable. If $S$ is a register subspace
+	spanned by $\hat{E}_0 \subseteq \hat{E}$, then the canonical complement of
+	$\hat{E}_0$ is $\hat{E} \setminus \hat{E}_0$, and its span coincides with
+	$S^\perp$.
 \end{definition}
 
 \begin{lemma}\label{lem:canonical-complement}
@@ -129,17 +137,20 @@ one may nevertheless single out a \emph{canonical} complement.
 	$L \in \mathrm{End}(V)$ with kernel basis $F$} is the projector onto $T$
 	parallel to $S$, where $S = \mathrm{span}(F)$ and
 	$T = \mathrm{span}(F^\perp)$; this is well defined by
-	Lemma~\ref{lem:canonical-complement}. When the basis $F$ for $S$ is clear
-	from context, we call this map the \emph{canonical linear map with kernel
-	$S$}. Note that $\ker(L) = S$.
+	Lemma~\ref{lem:canonical-complement}. Since the canonical complement
+	depends only on $\mathrm{span}(F)$
+	(Definition~\ref{def:canonical-complement}), so does $L$, and we also call
+	it the \emph{canonical linear map with kernel $S$}. Note that
+	$\ker(L) = S$.
 \end{definition}
 
 \begin{definition}[The map $L^\perp$]\label{def:Lperp}
 	\uses{def:cl-canonical, def:dot-product-orthogonal}
 	Let $L \in \mathrm{End}(V)$ be a linear map and let $F$ be a basis for
 	$\ker(L)^\perp$. Define $L^\perp : V \to V$ as the canonical linear map with
-	kernel basis $F$. (The map $L^\perp$ depends on the chosen basis $F$, which
-	the notation leaves implicit.)
+	kernel basis $F$. (By the basis-independence noted in
+	Definition~\ref{def:canonical-complement}, the map $L^\perp$ depends only
+	on $\ker(L)$ and not on the chosen basis $F$.)
 \end{definition}
 
 \begin{lemma}\label{lem:L_perp_perp}
@@ -311,13 +322,27 @@ test.
 		f(x_1, \dots, x_m) = \sum_{\alpha \in \{0, 1, \dots, q-1\}^m}
 		c_\alpha\, x_1^{\alpha_1} \cdots x_m^{\alpha_m}
 	\]
-	with coefficients $c_\alpha \in \F_q$. It has \emph{individual degree (at
-	most) $d$} if $c_\alpha \neq 0$ only when $\alpha_i \le d$ for all
-	$1 \le i \le m$, and \emph{total degree (at most) $d$} if $c_\alpha \neq 0$
-	only when $\sum_i \alpha_i \le d$. (Affine) \emph{multilinear} polynomials
-	are those of individual degree $1$. The set of $m$-variate polynomials of
-	individual degree at most $d$, viewed as functions $\F_q^m \to \F_q$, is
-	the set $\polyfunc{m}{q}{d}$ of Definition~\ref{def:polyfunc}.
+	with coefficients $c_\alpha \in \F_q$; the coefficients are uniquely
+	determined by $f$, since the $q^m$ monomial functions indexed by
+	$\alpha \in \{0, 1, \dots, q-1\}^m$ span the $q^m$-dimensional space of all
+	functions $\F_q^m \to \F_q$ and are therefore linearly independent. The
+	polynomial $f$ has \emph{individual degree (at most) $d$} if
+	$c_\alpha \neq 0$ only when $\alpha_i \le d$ for all $1 \le i \le m$, and
+	\emph{total degree (at most) $d$} if $c_\alpha \neq 0$ only when
+	$\sum_i \alpha_i \le d$. (Affine) \emph{multilinear} polynomials are those
+	of individual degree $1$.
+	% Relationship to def:polyfunc corrected (review code-F17): polyfunc keeps
+	% polynomial representatives, so evaluation identifies it with the function
+	% classes above only for d <= q-1.
+	Definition~\ref{def:polyfunc} introduces the set $\polyfunc{m}{q}{d}$ of
+	polynomials in $\F_q[x_1, \dots, x_m]$ of degree at most $d$ in each
+	variable, identified by their polynomial representatives rather than by the
+	functions they induce. Evaluation maps $\polyfunc{m}{q}{d}$ onto the set of
+	$m$-variate polynomials of individual degree at most $\min(d, q-1)$ in the
+	sense above; for $d \le q-1$ this map is a bijection, while for $d \ge q$
+	distinct representatives, such as $x_1^q$ and $x_1$, induce the same
+	function. Statements phrased in terms of $\polyfunc{m}{q}{d}$ retain the
+	representative convention of Definition~\ref{def:polyfunc}.
 \end{definition}
 
 \begin{lemma}[Schwartz--Zippel lemma~\cite{Sch80,Zip79}]\label{lem:schwartz-zippel}
@@ -336,14 +361,13 @@ test.
 \end{proof}
 
 \begin{remark}\label{rem:schwartz-zippel-restated}
-	The chapters on the classical low individual degree test already carry the
-	Schwartz--Zippel lemma as Lemma~\ref{lem:schwartz-zippel-total-degree},
-	together with its individual-degree consequence
-	Lemma~\ref{lem:schwartz-zippel-individual}: distinct elements of
-	$\polyfunc{m}{q}{d}$ agree on at most an $md/q$ fraction of points. The
-	Pauli basis test chapters invoke those nodes where the individual-degree
-	form is needed; Lemma~\ref{lem:schwartz-zippel} only preserves the label of
-	\cite{Ji2020MIPStar}.
+	Lemma~\ref{lem:schwartz-zippel} restates the total-degree bound of
+	Lemma~\ref{lem:schwartz-zippel-total-degree} under the label used by
+	\cite{Ji2020MIPStar}. The individual-degree consequence,
+	Lemma~\ref{lem:schwartz-zippel-individual}, shows that distinct elements of
+	$\polyfunc{m}{q}{d}$ agree on at most an $md/q$ fraction of the points of
+	$\F_q^m$; the analysis of the Pauli basis test uses the bound in this
+	individual-degree form.
 \end{remark}
 
 The Schwartz--Zippel lemma implies that low-degree polynomials form an
