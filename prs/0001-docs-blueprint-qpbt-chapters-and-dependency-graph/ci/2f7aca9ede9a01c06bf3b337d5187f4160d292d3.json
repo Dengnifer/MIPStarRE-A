@@ -1,0 +1,109 @@
+{
+  "schema": 1,
+  "generator": "local/bin/ci.sh",
+  "replaces": ".github/workflows/pr-ci.yml",
+  "pr": "0001",
+  "pr_dir": "0001-docs-blueprint-qpbt-chapters-and-dependency-graph",
+  "branch": "issue-0002-qpbt-blueprint",
+  "base": "main",
+  "base_ref": "origin/main",
+  "merge_base": "c744e92a45536cb074e51741191dbf5355147ae0",
+  "head_sha": "2f7aca9ede9a01c06bf3b337d5187f4160d292d3",
+  "worktree": "/Users/dengnifer/Documents/ghz/ldt/MIPStarRE-dev/.worktrees/issue-0002-qpbt-blueprint",
+  "started": "2026-08-30T14:18:03+0800",
+  "finished": "2026-08-30T14:18:32+0800",
+  "seconds": 29,
+  "conclusion": "success",
+  "partial": false,
+  "areas": {
+    "lean": false,
+    "mip_lean": false,
+    "ldt_lean": false,
+    "blueprint": true,
+    "blueprint_src": true,
+    "tex_chapter": true,
+    "paper_gaps": true,
+    "scripts": false,
+    "comparator": false,
+    "workflow": false
+  },
+  "changed_files": [
+    "blueprint/src/chapter/ch11_qpbt_algebra.tex",
+    "blueprint/src/chapter/ch12_qpbt_games.tex",
+    "blueprint/src/chapter/ch13_qpbt_test.tex",
+    "blueprint/src/chapter/ch14_qpbt_observables.tex",
+    "blueprint/src/chapter/ch15_qpbt_combining.tex",
+    "blueprint/src/chapter/ch16_qpbt_extraction.tex",
+    "blueprint/src/content.tex",
+    "blueprint/src/references.bib"
+  ],
+  "warnings": [
+    "blueprint axiom audit is required for this diff: run 'python3 scripts/blueprint_leanok_axioms.py --ci' in a Lean environment"
+  ],
+  "steps": [
+    {
+      "step": "build",
+      "outcome": "skipped",
+      "seconds": 0,
+      "log_path": "/Users/dengnifer/.cache/mipstarre-dev/ci-logs/0001/2f7aca9ede9a01c06bf3b337d5187f4160d292d3/build.log",
+      "blocking": true,
+      "note": "no changes under lean|comparator|workflow"
+    },
+    {
+      "step": "blueprint-render",
+      "outcome": "success",
+      "seconds": 13,
+      "log_path": "/Users/dengnifer/.cache/mipstarre-dev/ci-logs/0001/2f7aca9ede9a01c06bf3b337d5187f4160d292d3/blueprint-render.log",
+      "blocking": true,
+      "note": ""
+    },
+    {
+      "step": "paper-gaps",
+      "outcome": "success",
+      "seconds": 0,
+      "log_path": "/Users/dengnifer/.cache/mipstarre-dev/ci-logs/0001/2f7aca9ede9a01c06bf3b337d5187f4160d292d3/paper-gaps.log",
+      "blocking": true,
+      "note": ""
+    },
+    {
+      "step": "blueprint-sync",
+      "outcome": "success",
+      "seconds": 13,
+      "log_path": "/Users/dengnifer/.cache/mipstarre-dev/ci-logs/0001/2f7aca9ede9a01c06bf3b337d5187f4160d292d3/blueprint-sync.log",
+      "blocking": true,
+      "note": ""
+    },
+    {
+      "step": "file-length",
+      "outcome": "skipped",
+      "seconds": 0,
+      "log_path": "/Users/dengnifer/.cache/mipstarre-dev/ci-logs/0001/2f7aca9ede9a01c06bf3b337d5187f4160d292d3/file-length.log",
+      "blocking": true,
+      "note": "no changes under mip_lean|scripts|workflow"
+    },
+    {
+      "step": "proof-debt",
+      "outcome": "success",
+      "seconds": 3,
+      "log_path": "/Users/dengnifer/.cache/mipstarre-dev/ci-logs/0001/2f7aca9ede9a01c06bf3b337d5187f4160d292d3/proof-debt.log",
+      "blocking": true,
+      "note": ""
+    },
+    {
+      "step": "proof-evasion",
+      "outcome": "skipped",
+      "seconds": 0,
+      "log_path": "/Users/dengnifer/.cache/mipstarre-dev/ci-logs/0001/2f7aca9ede9a01c06bf3b337d5187f4160d292d3/proof-evasion.log",
+      "blocking": true,
+      "note": "no changes under mip_lean|scripts|workflow"
+    },
+    {
+      "step": "statement-origin",
+      "outcome": "skipped",
+      "seconds": 0,
+      "log_path": "/Users/dengnifer/.cache/mipstarre-dev/ci-logs/0001/2f7aca9ede9a01c06bf3b337d5187f4160d292d3/statement-origin.log",
+      "blocking": true,
+      "note": "no changes under ldt_lean|scripts|workflow"
+    }
+  ]
+}

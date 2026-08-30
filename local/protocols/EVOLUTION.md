@@ -104,3 +104,18 @@ external sources do not.
 
 **Expected effect:** mirrors commit unmodified; the fidelity claim in each
 mirror README stays checkable forever.
+
+## 2026-08-30 — Registry root resolves to the primary checkout
+
+**Trigger:** running `ci.sh` from inside a PR worktree wrote the CI manifest
+and `pr.md` updates to the worktree's own copy of `prs/` — a forked registry
+(events.md would call this a split-brain record; caught during the stage-3
+blueprint PR).
+
+**Change:** `ci.sh`, `review.sh`, `autofix.sh`, `agent.sh` re-point their
+repo root at the primary checkout via `git rev-parse --git-common-dir`
+(same resolution `cache-warmer.sh` and `telemetry.py` already used), so the
+registry stays single-instance regardless of the invocation directory.
+
+**Expected effect:** identical registry writes from any worktree; no forked
+issue/PR records.

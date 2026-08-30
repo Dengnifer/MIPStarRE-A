@@ -38,6 +38,16 @@ set -euo pipefail
 
 PROG="autofix.sh"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+# The registry (issues/, prs/, results/telemetry/) is single-instance and
+# lives in the PRIMARY checkout. When this script is invoked from a linked
+# worktree copy, re-point the root at the primary (same resolution as
+# cache-warmer.sh resolve_primary_repo; EVOLUTION.md 2026-08-30).
+_common="$(git -C "$ROOT" rev-parse --path-format=absolute --git-common-dir 2>/dev/null || true)"
+case "$_common" in
+  */.git) ROOT="$(dirname "$_common")" ;;
+esac
+unset _common
+
 CACHE="${MIPSTARRE_CACHE_ROOT:-$HOME/.cache/mipstarre-dev}"
 TRUSTED_REF="${MIPSTARRE_TRUSTED_REF:-main}"
 DISPATCH="$ROOT/local/bin/dispatch.sh"
