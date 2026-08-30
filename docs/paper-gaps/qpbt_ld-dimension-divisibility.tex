@@ -26,10 +26,14 @@
   only $m \mid q$.  The repair is a statement-level reformulation of an
   imported theorem, not a new proof.
   \item \textbf{Estimated weight:} for the recommended route, about
-  \textbf{2--4 new definitions or interfaces} (a line-point distribution with
-  directly sampled index at arbitrary dimension, and a restated soundness
-  import) plus \textbf{3--6 supporting lemmas}, a few hundred lines of formal
-  proof.  The padding fallback is heavier, roughly 6--10 reworked lemmas.
+  \textbf{3--5 new definitions or interfaces} (a line-point distribution with
+  directly sampled index at arbitrary dimension, the directly indexed game,
+  and a restated soundness import) plus \textbf{6--9 supporting lemmas},
+  including the strategy-transport layer between the directly indexed game
+  and the $\chi$-based game (parsing pullback, seed-fiber averaging with
+  value preservation, and a dilation--compression round trip of the
+  soundness conclusion); several hundred lines of formal proof.  The padding
+  fallback is heavier, roughly 6--10 reworked lemmas.
   \item \textbf{Mathlib/project split:} approximately \textbf{15\% Mathlib}
   and \textbf{85\% project-local}.  Mathlib supplies uniform distributions on
   finite types and pushforward identities; the substance is choosing the
@@ -75,15 +79,18 @@ theorem forms.
   $q \ge 8$; it fails for every admissible tuple with $m \ge 2$ and for
   $(q,m) = (2,1)$.
   \item \textbf{Repaired import form} (recommended target).  Quantum
-  soundness of the classical low individual degree game over $\F_q^{m'}$ for
-  every dimension $m' \ge 1$ and admissible $q$, with no divisibility
-  hypothesis, for the variant of the question distribution that samples the
-  axis index, and the diagonal prefix index, uniformly from
-  $\{1,\ldots,m'\}$ directly rather than through an index function on
-  $\F_q$; with error
+  soundness of the directly indexed variant of the classical low individual
+  degree game over $\F_q^{m'}$, for every dimension $m' \ge 1$ and
+  admissible $q$, with no divisibility hypothesis: the question
+  distribution samples the axis index, and the diagonal prefix index,
+  uniformly from $\{1,\ldots,m'\}$ directly rather than through an index
+  function on $\F_q$, and line questions carry the sampled index itself in
+  place of the seed $s \in \F_q$; the error is
   $\delta_{\mathrm{ld}}(\eps,q,m',d,k) = a(dm'k)^a(\eps^b + q^{-b} +
-  2^{-bm'd})$.  When $m' \mid q$ this distribution coincides with the
-  conditionally linear one, so the repaired form extends the present one.
+  2^{-bm'd})$.  When $m' \mid q$ the image of the conditionally linear
+  question distribution under the parsing map is exactly the direct
+  distribution, and the strategy transport described under the recommended
+  repair below makes the repaired form yield the present one.
 \end{enumerate}
 
 \section{The source assertion and the obstruction}
@@ -152,7 +159,13 @@ $\mathcal C^{\ot m'}$, concluding by Theorem~4.7 of the same authors'
 identification matches the axis-parallel line-versus-point test, the
 subcube commutation test, and the synchronicity test of the external source;
 the only role of the divisibility in this identification is to make the
-$\chi$-sampled index uniform.
+$\chi$-sampled index uniform.  The source asserts the identification as an
+identity of games, which already glosses a question-format difference: the
+game's line questions carry the seed $s$ itself, while the external test's
+questions carry only the geometric data, so a strategy that depends on $s$
+beyond its class $\chi^{-1}(i)$ is not literally a strategy for the
+external test.  The transport that closes this step is the seed-fiber
+averaging made explicit under the recommended repair below.
 
 The underlying mathematics does not need the divisibility.  The low
 individual degree test of \cite{Ji2020LowIndividualDegree} samples its axis
@@ -175,17 +188,66 @@ distribution to be conditionally linear.
 Define, for arbitrary $m' \ge 1$, the line-point distribution over
 $\F_q^{m'}$ that samples the uniform point, the uniform axis index
 $i \in \{1,\ldots,m'\}$, and the diagonal direction with vanishing first
-$i-1$ coordinates, directly; state the imported soundness theorem for the
-game with this question distribution (form~4 above); and prove the one
-coincidence lemma: when $m' \mid q$, pushing the uniform $s \in \F_q$
-through $\chi$ yields the uniform index, so the two distributions agree.
-The combining subtree is then reread with the direct distribution at
-dimension $2m+2$: every statement becomes well defined for all admissible
-tuples, and the proofs go through unchanged, since they use only the laws of
-the sampled objects and never the conditional linearity of the sampling.
-This follows the subtree protocol for a definition-level mismatch: the
-definition is corrected at the lowest point rather than each downstream
-lemma acquiring a hypothesis.  The one external check is that the
+$i-1$ coordinates, directly; define the \emph{directly indexed game} with
+this question distribution, whose line questions carry the index $i$ (and,
+for diagonal lines, the projected direction) in place of the seed
+$s \in \F_q$; and state the imported soundness theorem for that game
+(form~4 above).
+
+The relation to the present game when $m' \mid q$ must then be proved at
+the level of games, not merely of question distributions, because the two
+games have different question alphabets: an $\mathsf{ALine}$ question of
+the $\chi$-based game is a pair $(u_0, s)$ and a $\mathsf{DLine}$ question
+a triple $(u_0, s, v')$, so a strategy may select different measurements
+for seeds $s \ne s'$ with $\chi(s) = \chi(s')$, and equality of the
+induced laws of the geometric data does not by itself transport such a
+strategy.  The required layer consists of the distribution lemma --- when
+$m' \mid q$, the image of the conditionally linear question distribution
+under the parsing map $(u_0,s) \mapsto (u_0,\chi(s))$,
+$(u_0,s,v') \mapsto (u_0,\chi(s),v')$ is the direct distribution, and
+conditioned on the parsed question the seed is uniform on the class
+$\chi^{-1}(i)$, independently of everything else --- together with a
+two-way strategy transport around it, chosen so that the soundness
+statement round-trips.  Pulling back, a strategy for the directly indexed
+game composed with the parsing map is a seed-oblivious strategy for the
+$\chi$-based game of exactly the same value, since the win predicate
+depends on the question only through the parsed data; this direction
+preserves projectivity, and it is the one the combining subtree uses.
+Pushing forward, a strategy for the $\chi$-based game is averaged over the
+seed fiber: the line measurement attached to a direct question $(u_0,i)$,
+respectively $(u_0,i,v')$, is the average over uniform
+$s \in \chi^{-1}(i)$ of the measurements attached to $(u_0,s)$,
+respectively $(u_0,s,v')$, and the points measurements are unchanged.  By
+the conditional uniformity of the seed the averaged strategy has exactly
+the value of the given one, but it is a POVM strategy even when the given
+one is projective, while the imported theorem, like the present one,
+takes projective strategies.  The derivation of the present soundness
+statement from the repaired import is therefore a round trip: dilate the
+averaged strategy to a projective one (Naimark, preserving the value and
+leaving the points measurements in the form $M \ot \mathrm{Id}$ on the
+extended space), apply form~4, and compress the resulting polynomial
+measurement back along the dilation isometry, which yields a POVM in the
+required measurement class on the original space and preserves the
+consistency conclusions, since these compare the polynomial measurement
+against operators of the form $M \ot \mathrm{Id}$ on a product state.
+(Alternatively, form~4 may be stated for POVM strategies outright, moving
+the dilation inside the import.)
+
+The combining subtree is then reread with the direct distribution and the
+directly indexed game at dimension $2m+2$: every statement becomes well
+defined for all admissible tuples, and the proofs go through unchanged,
+because the measurements constructed there are indexed by the geometric
+data --- points, lines, and polynomials on them --- so they constitute a
+strategy for the directly indexed game outright, with no fiber averaging,
+and the proofs use only the laws of the sampled objects, never the
+conditional linearity of the sampling.  This follows the subtree protocol
+for a definition-level mismatch: the definition is corrected at the lowest
+point rather than each downstream lemma acquiring a hypothesis.  The
+transport layer costs one parsing-map definition, the distribution lemma,
+two value-preservation lemmas (parsing pullback and seed-fiber averaging),
+and the dilation--compression lemma --- an estimated one to two hundred
+lines on top of the restated import, with the blueprint's existing Naimark
+interface supplying the dilation.  The one external check is that the
 tensor-code test of arXiv:2111.08131 indeed samples its axes and subcubes
 directly, which should be confirmed against that source when the import is
 formalized.
@@ -240,9 +302,13 @@ depends on it, beyond $m = 1$ and $q \ge 8$.  We do not assert that the
 conclusion is false: the underlying tensor-code soundness is insensitive to
 how the axis index is sampled.  The recommended stage-4 route is the direct
 index sampling repair --- restate the imported soundness theorem for the
-directly sampled line-point distribution at arbitrary dimension, prove its
-coincidence with the conditionally linear distribution when the dimension
-divides $q$, and reread the combining subtree against it --- with dimension
+directly indexed game at arbitrary dimension; prove that when the dimension
+divides $q$ the parsing map carries the conditionally linear question
+distribution onto the direct one; transport strategies between the two
+games, by parsing pullback in one direction and by seed-fiber averaging
+with a dilation--compression round trip in the other, so that the present
+soundness statement follows from the repaired import; and reread the
+combining subtree against the directly indexed game --- with dimension
 padding as the fallback confined to the present game definition.
 
 \bibliographystyle{alpha}

@@ -12,7 +12,7 @@
 This chapter and the two that follow contain the proof of the soundness
 theorem for the Pauli basis test, Theorem~\ref{thm:pauli}, stated in
 Chapter~\ref{chap:qpbt-test}. Starting from a strategy that succeeds in the
-game $G^{\mathrm{Pauli}}_{(q,m,d)}$ with high probability, the proof
+game $\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$ with high probability, the proof
 constructs a representation of the Pauli group on the players' Hilbert space
 in several stages. In Section~\ref{sec:commutation} the strategy measurements
 are used to define a set of observables that correspond to a subset of the
@@ -75,7 +75,14 @@ preliminary definitions and lemmas used throughout the analysis.
 	$f \in \deg_c(\ell)$ we write
 	$N_{[\mathrm{eval}_u(\cdot)=a]} = \sum_{f \colon f(u) = a} N_f$; when
 	$v = 0$ the classes indexed by $a \in \F_q$ form a sub-measurement
-	rather than a partition of the outcomes.
+	rather than a partition of the outcomes. The \emph{completed} family of
+	evaluation classes is the family indexed by $a \in \F_q \cup \{\bot\}$
+	obtained by adjoining the additional class
+	$N_{[\mathrm{eval}_u(\cdot)=\bot]} = \sum_{f} N_f$, the sum over those
+	$f$ that do not evaluate at $u$; when $\{N_f\}$ is a POVM,
+	respectively a projective measurement, the completed classes form one
+	as well, and when $v \neq 0$ the class
+	$N_{[\mathrm{eval}_u(\cdot)=\bot]}$ is the zero operator.
 \end{definition}
 
 \begin{remark}[Line answers as coefficient lists]
@@ -98,14 +105,21 @@ preliminary definitions and lemmas used throughout the analysis.
 \end{remark}
 
 Throughout this chapter $q = 2^k$ with $k$ odd is an admissible field size
-(Definition~\ref{def:admissible-size}) and $n = 2^m$. Recall from
+(Definition~\ref{def:admissible-size}) and $M = 2^m$ is the number of
+$q$-ary qudits tested for per player, as in
+Chapters~\ref{chap:qpbt-test} and~\ref{chap:qpbt-extraction}. (The letter
+$M$ also denotes the measurement operators of the strategy under analysis,
+as in the tuple $\mathcal{S} = (\ket{\psi}, M)$ below and in the
+super- and subscripted individual operators such as
+$M^{(\mathrm{Point},W),u}_a$; the meaning is determined by context, as in
+the source.) Recall from
 Chapter~\ref{chap:qpbt-algebra} the low-degree code
 (see Definition~\ref{def:low-degree-encoding}), which maps each vector
-$h \in \F_q^{n}$, with
+$h \in \F_q^{M}$, with
 coordinates indexed by binary strings of length $m$, to a polynomial
 $g_h \in \mathrm{ideg}_{d,m}(\F_q)$ such that $g_h(u) = h_u$ for every
 $u \in \{0,1\}^m$; for $x \in \F_q^m$ the associated vector
-$\mathrm{ind}_m(x) \in \F_q^{n}$ satisfies
+$\mathrm{ind}_m(x) \in \F_q^{M}$ satisfies
 $g_h(x) = h \cdot \mathrm{ind}_m(x)$ for all $h$. Recall also the finite
 field trace $\tr = \tr_{q \to 2} \colon \F_q \to \F_2$
 (see Definition~\ref{def:subfield-trace}).
@@ -122,8 +136,8 @@ field trace $\tr = \tr_{q \to 2} \colon \F_q \to \F_2$
 		\gamma(\omega) \,=\, \tr\big( (r_X \cdot \mathrm{ind}_m(u_X)) \cdot (r_Z \cdot \mathrm{ind}_m(u_Z)) \big)\,,
 	\]
 	where $r_W \cdot \mathrm{ind}_m(u_W)$ is the scalar multiple of the
-	vector $\mathrm{ind}_m(u_W) \in \F_q^{n}$, the middle $\cdot$ is the
-	$\F_q$-inner product of two vectors in $\F_q^{n}$, and
+	vector $\mathrm{ind}_m(u_W) \in \F_q^{M}$, the middle $\cdot$ is the
+	$\F_q$-inner product of two vectors in $\F_q^{M}$, and
 	$\tr = \tr_{q \to 2}$. The tuple $\omega$ is called \emph{anticommuting}
 	if $\gamma(\omega) \neq 0$, and \emph{commuting} if $\gamma(\omega) = 0$.
 \end{definition}
@@ -370,28 +384,95 @@ measurements.
 \section{Strategies}
 \label{sec:commutation}
 
-\begin{definition}[The strategy under analysis]
+% In the source this setup --- fixing the parameter tuple, the strategy and
+% its success probability, and making the measurements projective via
+% Naimark's theorem --- is untitled prose at the head of the subsection
+% (references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex, lines
+% 155-171), not a numbered environment. It is recorded here as a standing
+% convention paragraph together with a lemma for the one mathematical step
+% it contains, the projectivization of the strategy. The lemma keeps the
+% label def:projective-strategy-setup, under which later chapters cite this
+% setup; earlier revisions recorded the whole setup as a definition
+% environment under that label.
+\paragraph{The strategy under analysis.}
+For the remainder of this chapter, as well as in
+Chapters~\ref{chap:qpbt-combining} and~\ref{chap:qpbt-extraction}, we fix
+an admissible parameter tuple $(q,m,d)$
+(Definition~\ref{def:admissible}) and a strategy
+$\mathcal{S} = (\ket{\psi}, M)$ for the game
+$\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$ that succeeds with probability
+at least $1 - \eps$, for some $\eps \geq 0$, where $\ket{\psi}$ is a
+bipartite state on registers $\mathsf{A}$ and $\mathsf{B}$ with associated
+Hilbert spaces $\hilb_{\mathsf{A}}$ and $\hilb_{\mathsf{B}}$. The symbol
+$M$ denotes the measurement operators of both players; which player is
+meant is indicated by the register on which the operator acts (for
+example, $M^{(\mathrm{Point},W),u}_a \ot \Id_{\mathsf{B}}$ indicates that
+$M^{(\mathrm{Point},W),u}_a$ is viewed as an operator acting on register
+$\mathsf{A}$).
+
+The analysis requires the measurements of $\mathcal{S}$ to be projective;
+the following lemma shows that this may be assumed without loss of
+generality.
+
+\begin{lemma}[Projectivization of the strategy under analysis]
 	\label{def:projective-strategy-setup}
-	\uses{def:admissible, def:pauli-question-distribution, def:pauli-win-predicate, def:tensor-product-strategy, def:tensor-product-value, def:projective-strategy-general, thm:naimark}
-	Fix an admissible parameter tuple $(q,m,d)$
-	(Definition~\ref{def:admissible}) and a strategy
-	$\mathcal{S} = (\ket{\psi}, M)$ for the game
-	$G^{\mathrm{Pauli}}_{(q,m,d)}$ that succeeds with probability at least
-	$1 - \eps$, where $\ket{\psi}$ is a bipartite state on registers
-	$\mathsf{A}$ and $\mathsf{B}$ with associated Hilbert spaces
-	$\hilb_{\mathsf{A}}$ and $\hilb_{\mathsf{B}}$. The symbol $M$ denotes
-	the measurement operators of both players; which player is meant is
-	indicated by the register on which the operator acts (for example,
-	$M^{(\mathrm{Point},W),u}_a \ot \Id_{\mathsf{B}}$ indicates that
-	$M^{(\mathrm{Point},W),u}_a$ is viewed as an operator acting on register
-	$\mathsf{A}$). By Naimark's theorem (Theorem~\ref{thm:naimark}), at the
-	cost of extending $\ket{\psi}$ by sufficiently many ancilla qubits
-	initialized in the state $\ket{0}$, all measurements in $\mathcal{S}$
-	may be assumed projective; the extended state
-	$(\ket{\psi} \ot \ket{0\cdots 0} \ot \ket{0\cdots 0})_{\mathsf{A}\mathsf{B}}$
-	is again denoted $\ket{\psi}$. All statements below refer to this
-	projective strategy on the extended state.
-\end{definition}
+	\uses{def:admissible, def:pauli-question-distribution, def:pauli-win-predicate, def:tensor-product-strategy, def:tensor-product-value, def:projective-strategy-general}
+	Let $(q,m,d)$ be an admissible parameter tuple
+	(Definition~\ref{def:admissible}) and let
+	$\mathcal{S} = (\ket{\psi}, M)$ be a strategy for the game
+	$\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$, where $\ket{\psi}$ is a
+	bipartite state on registers $\mathsf{A}$ and $\mathsf{B}$. Then there
+	exists a projective strategy
+	(Definition~\ref{def:projective-strategy-general}) for
+	$\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$ whose success probability
+	equals that of $\mathcal{S}$ and whose state is the extension
+	\[
+		(\ket{\psi} \ot \ket{0\cdots 0} \ot \ket{0\cdots 0})_{\mathsf{A}\mathsf{B}}
+	\]
+	of $\ket{\psi}$ by finitely many ancilla qubits initialized in the
+	state $\ket{0}$, adjoined to each of the two registers.
+\end{lemma}
+\begin{proof}
+	\uses{thm:naimark, def:tensor-product-value, def:tensor-product-strategy}
+	Naimark's theorem (Theorem~\ref{thm:naimark}), applied with the
+	families of all of the first player's measurements on register
+	$\mathsf{A}$ and all of the second player's on register $\mathsf{B}$,
+	yields an auxiliary space and a projective sub-measurement replacing
+	each family on each register, together with a product auxiliary state,
+	such that every correlation
+	$\bra{\psi} M^{x}_a \ot M^{y}_b \ket{\psi}$ of $\mathcal{S}$ is
+	reproduced on the extended state. Each auxiliary space embeds into a
+	register of finitely many qubits; extend each dilated sub-measurement
+	to the enlarged register by adding to one fixed outcome both the
+	projector onto the orthogonal complement of the embedded subspace and
+	the residual projector of the sub-measurement. The outcome operators
+	remain mutually orthogonal projectors, now summing to the identity,
+	and no correlation changes: the complement projector annihilates the
+	extended state, which is supported in the embedded subspace, and so
+	does each residual projector, because for each question pair the
+	reproduced correlations sum to one --- the original families being
+	POVMs (Definition~\ref{def:tensor-product-strategy}) --- which forces
+	the projector $\Id$ minus the sum of each dilated sub-measurement to
+	have zero mass on the extended state. Finally, since the auxiliary
+	state is a product state, a unitary acting on each player's ancilla
+	qubits alone carries it to $\ket{0 \cdots 0} \ot \ket{0 \cdots 0}$;
+	conjugating the projective measurements by the same unitaries
+	preserves projectivity and all correlations. The success probability
+	of a strategy is a linear combination of its correlations, weighted by
+	the question distribution and the win predicate
+	(Definition~\ref{def:tensor-product-value}), and is therefore
+	unchanged.
+\end{proof}
+
+In view of Lemma~\ref{def:projective-strategy-setup} we assume from here
+on, replacing $\mathcal{S}$ by the projective strategy provided by that
+lemma, that all measurements in $\mathcal{S}$ are projective; the
+extended state
+$(\ket{\psi} \ot \ket{0\cdots 0} \ot \ket{0\cdots 0})_{\mathsf{A}\mathsf{B}}$
+is again denoted $\ket{\psi}$. All statements below refer to this
+projective strategy on the extended state, and references to ``the
+state $\ket{\psi}$ of the strategy under analysis'' refer to this
+convention.
 
 The strategy $\mathcal{S}$ contains measurement operators for each of the
 question types and question contents of the Pauli basis test
@@ -426,28 +507,34 @@ extracts from the strategy.
 \begin{lemma}[Winning implications]
 	\label{lem:qld-win-implications}
 	\uses{def:projective-strategy-setup, def:anticommuting-tuple, def:pauli-question-distribution, def:pauli-win-predicate, def:line-point-dist, def:consistency, def:povm-distance, def:ms-game, def:tensor-product-value, def:low-degree-encoding, def:ideg-deg-polynomials}
-	Assume that $\mathcal{S}$ succeeds in $G^{\mathrm{Pauli}}_{(q,m,d)}$
+	Assume that $\mathcal{S}$ succeeds in $\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$
 	with probability at least $1 - \eps$, for some $\eps \geq 0$. Then the
-	following hold, with respect to the state $\ket{\psi}$ of
-	Definition~\ref{def:projective-strategy-setup}.
+	following hold, with respect to the state $\ket{\psi}$ of the strategy
+	under analysis (Lemma~\ref{def:projective-strategy-setup} and the
+	convention following it).
 	\begin{enumerate}
 		\item \label{enu:qld-cons} (\textbf{Consistency check}) On average
 		over $(\mathsf{t},x)$ sampled from the question distribution of
-		$G^{\mathrm{Pauli}}_{(q,m,d)}$
+		$\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$
 		(Definition~\ref{def:pauli-question-distribution}), we have
 		$M^{\mathsf{t},x}_a \ot \Id_{\mathsf{B}} \simeq_\eps \Id_{\mathsf{A}} \ot M^{\mathsf{t},x}_a$.
 		\item \label{enu:qld-ld} (\textbf{Low-degree check}) For all
 		$W \in \{X,Z\}$, on average over $(\ell,u)$ drawn from the
 		line-point distribution (Definition~\ref{def:line-point-dist}), we
 		have
+		% The source states this item with answer summation over F_q only,
+		% implicitly reading the evaluation classes of the line measurement
+		% as a complete measurement; see the paragraph after the item list
+		% and the remark rem:qld-win-implications-typos.
 		$M^{(\mathrm{Line},W),\ell}_{[\mathrm{eval}_u(\cdot)=a]} \ot \Id_{\mathsf{B}} \simeq_\eps \Id_{\mathsf{A}} \ot M^{(\mathrm{Point},W),u}_a$,
-		where the answer summation is over $a \in \F_q$.
+		where the answer summation is over the completed outcome set
+		$a \in \F_q \cup \{\bot\}$ described after the item list.
 		\item \label{enu:qld-pauli-basis-cons} (\textbf{Pauli basis
 		consistency check}) For all $W \in \{X,Z\}$, on average over
 		uniformly random $u \in \F_q^m$, we have
 		$M^{(\mathrm{Point},W),u}_a \ot \Id_{\mathsf{B}} \simeq_\eps \Id_{\mathsf{A}} \ot M^{(\mathrm{Pauli},W)}_{[g_h(u)=a]}$,
 		where
-		$M^{(\mathrm{Pauli},W)}_{[g_h(u)=a]} = \sum_{h \in \F_q^{n} \colon g_h(u)=a} M^{(\mathrm{Pauli},W)}_h$
+		$M^{(\mathrm{Pauli},W)}_{[g_h(u)=a]} = \sum_{h \in \F_q^{M} \colon g_h(u)=a} M^{(\mathrm{Pauli},W)}_h$
 		and $g_h$ is the low-degree encoding of $h$
 		(see Definition~\ref{def:low-degree-encoding}).
 		\item \label{enu:qld-comm} (\textbf{Commutation check}) For all
@@ -465,7 +552,7 @@ extracts from the strategy.
 		anticommuting $\omega$, let $\Lambda_\omega$ be the value of the
 		strategy
 		$\big( \ket{\psi}, \{M^{\mathrm{Constraint}_i,\omega}_{\alpha_1,\alpha_2,\alpha_3}\} \cup \{M^{\mathrm{Variable}_j,\omega}_a\} \big)$
-		in the Magic Square game $G^{\mathrm{MS}}$
+		in the Magic Square game $\mathfrak{G}^{\mathrm{MS}}$
 		(Definition~\ref{def:ms-game}). Then
 		$\E_\omega \Lambda_\omega = 1 - O(\eps)$, where the expectation is
 		over a uniformly random $\omega$ conditioned on being
@@ -481,13 +568,17 @@ extracts from the strategy.
 	\end{enumerate}
 	Here
 	$M^{(\mathrm{Point},W),u}_{[\tr(\cdot\,r)=a]} = \sum_{a' \in \F_q \colon \tr(a'r)=a} M^{(\mathrm{Point},W),u}_{a'}$
-	for $a \in \F_2$; the coarse-graining
-	$M^{(\mathrm{Line},W),\ell}_{[\mathrm{eval}_u(\cdot)=a]}$ in
-	item~\ref{enu:qld-ld} is the one of
-	Definition~\ref{def:ideg-deg-polynomials}, so that for a zero-direction
-	line the classes indexed by $a \in \F_q$ form a sub-measurement, whose
-	omitted outcomes the line-versus-point clauses reject against every
-	point answer; the answer to a question of type $\mathrm{Pair}$ is a
+	for $a \in \F_2$; in item~\ref{enu:qld-ld} the two families are the
+	following POVMs indexed by $\F_q \cup \{\bot\}$, as the relation
+	$\simeq_\eps$ of Definition~\ref{def:consistency} requires: on the left,
+	the completed family of evaluation classes of
+	Definition~\ref{def:ideg-deg-polynomials}, whose class
+	$M^{(\mathrm{Line},W),\ell}_{[\mathrm{eval}_u(\cdot)=\bot]}$ carries the
+	line answers with no evaluation at $u$ and is nonzero only for a
+	zero-direction line, where the classes indexed by $a \in \F_q$ form
+	only a sub-measurement; on the right, the point measurement completed
+	by the zero operator $M^{(\mathrm{Point},W),u}_{\bot} = 0$; the answer
+	to a question of type $\mathrm{Pair}$ is a
 	pair $(\beta_X,\beta_Z) \in \F_2 \times \F_2$, and
 	$M^{\mathrm{Pair},\omega}_{[\beta_W=a]}$ denotes its coarse-graining
 	onto the $W$-component. Furthermore, all of the approximations above
@@ -495,7 +586,7 @@ extracts from the strategy.
 	tensor factors interchanged.
 \end{lemma}
 \begin{proof}
-	\uses{fact:omega-anticomm-prob, fact:agreement, def:admissible, def:pauli-question-distribution, def:pauli-win-predicate}
+	\uses{fact:omega-anticomm-prob, fact:agreement, def:admissible, def:pauli-question-distribution, def:pauli-win-predicate, def:ld-win-predicate, def:ideg-deg-polynomials, def:consistency}
 	The question types are sampled according to the type graph of the Pauli
 	basis test (Definition~\ref{def:pauli-question-distribution}), which has
 	constant size, so each subtest of the win predicate
@@ -506,7 +597,19 @@ extracts from the strategy.
 	corresponding subtests and the assumption that $\mathcal{S}$ succeeds
 	with probability at least $1-\eps$, where item~\ref{enu:qld-ld} follows
 	from the consistency subtest of the low individual degree game executed
-	inside the Pauli basis test. The subtests underlying
+	inside the Pauli basis test. In more detail for item~\ref{enu:qld-ld}:
+	the disagreement mass of the two completed families is rejection mass
+	of the line-versus-point clauses
+	(Definition~\ref{def:ld-win-predicate}, invoked by the low-degree
+	check of Definition~\ref{def:pauli-win-predicate}). An outcome pair
+	$(a,b)$ with $a \neq b$ in $\F_q$ is a line answer evaluating at $u$
+	to $a$ against the point answer $b$, which the clause rejects; a pair
+	$(\bot,b)$ is a line answer with no evaluation at $u$, which the
+	universally quantified clause rejects against every point answer $b$
+	(Remark~\ref{rem:ld-win-zero-direction} and
+	Remark~\ref{rem:deg-line-representatives}); and the pairs $(a,\bot)$
+	contribute no mass, since the class
+	$M^{(\mathrm{Point},W),u}_{\bot}$ is the zero operator. The subtests underlying
 	items~\ref{enu:qld-comm} and~\ref{enu:qld-comm-cons} accept vacuously
 	unless the sampled tuple $\omega$ is commuting, and those underlying
 	items~\ref{enu:qld-ms} and~\ref{enu:qld-ms-cons} accept vacuously
@@ -534,7 +637,9 @@ extracts from the strategy.
 	\uses{def:strategy-observables, def:approx-question-indexed-operators, def:anticommuting-tuple, def:projective-strategy-setup}
 	The following hold for the observables $W^r(u)$ of
 	Definition~\ref{def:strategy-observables}, with respect to the state
-	$\ket{\psi}$ of Definition~\ref{def:projective-strategy-setup}.
+	$\ket{\psi}$ of the strategy under analysis
+	(Lemma~\ref{def:projective-strategy-setup} and the convention
+	following it).
 	\begin{enumerate}
 		\item For all $W \in \{X,Z\}$ and $r \in \F_q$, on average over
 		uniformly random $u \in \F_q^m$,
@@ -627,6 +732,21 @@ extracts from the strategy.
 	commuting and anticommuting events, which are universal constants for
 	every admissible parameter tuple, so no restriction on the parameters
 	is needed.
+	Finally, the source states item~\ref{enu:qld-ld} of
+	Lemma~\ref{lem:qld-win-implications} with answer summation over
+	$a \in \F_q$ only, implicitly reading the evaluation classes of the
+	line measurement as a complete measurement. Under the coefficient
+	reading of Definition~\ref{def:ideg-deg-polynomials}
+	(Remark~\ref{rem:deg-line-representatives}) the classes indexed by
+	$a \in \F_q$ form only a sub-measurement when the line has zero
+	direction --- a case the question distribution produces with positive
+	probability (Remark~\ref{rem:ld-win-zero-direction}) --- while the
+	relation $\simeq_\eps$ of Definition~\ref{def:consistency} is defined
+	for POVMs. Item~\ref{enu:qld-ld} therefore completes both families by
+	an explicit $\bot$ outcome; the same implicit completeness assumption
+	occurs in the source proof of the statement corresponding to
+	Lemma~\ref{lem:qld-comm-line-cons}, whose proof below invokes the
+	completed families instead.
 \end{remark}
 
 \section{Expanding the Hilbert space and defining commuting observables}
@@ -642,17 +762,18 @@ every tuple $\omega$.
 \begin{definition}[Expanded state]
 	\label{def:expanded-state}
 	\uses{def:projective-strategy-setup, def:EPR}
-	Let $n = 2^m$. Introduce registers $\mathsf{A}', \mathsf{A}'',
+	Recall that $M = 2^m$. Introduce registers $\mathsf{A}', \mathsf{A}'',
 	\mathsf{B}', \mathsf{B}''$, each with Hilbert space isomorphic to
-	$(\C^q)^{\ot n}$, and define the state
+	$(\C^q)^{\ot M}$, and define the state
 	\begin{equation}\label{eq:def-psihat}
 		\ket{\hat{\psi}}_{\mathsf{A}\mathsf{A}'\mathsf{A}''\mathsf{B}\mathsf{B}'\mathsf{B}''}
 		\,=\, (\ket{\psi})_{\mathsf{A}\mathsf{B}}
-		\ot \ket{\mathrm{EPR}_q}^{\ot n}_{\mathsf{A}'\mathsf{A}''}
-		\ot \ket{\mathrm{EPR}_q}^{\ot n}_{\mathsf{B}'\mathsf{B}''}\,,
+		\ot \ket{\mathrm{EPR}_q}^{\ot M}_{\mathsf{A}'\mathsf{A}''}
+		\ot \ket{\mathrm{EPR}_q}^{\ot M}_{\mathsf{B}'\mathsf{B}''}\,,
 	\end{equation}
-	where $\ket{\psi}$ is the extended strategy state of
-	Definition~\ref{def:projective-strategy-setup} and
+	where $\ket{\psi}$ is the extended strategy state of the strategy
+	under analysis (Lemma~\ref{def:projective-strategy-setup} and the
+	convention following it) and
 	$\ket{\mathrm{EPR}_q}$ is the maximally entangled state on
 	$\C^q \ot \C^q$ (Definition~\ref{def:EPR}). For the remainder of this
 	chapter, as well as in Chapters~\ref{chap:qpbt-combining}
@@ -671,7 +792,7 @@ every tuple $\omega$.
 	\end{equation}
 	where $W^r(u)$ is the strategy observable of~\eqref{eq:qld-strat-obs}
 	and $\tau^W(r \cdot \mathrm{ind}_m(u))$ is the generalized Pauli
-	observable acting on $(\C^q)^{\ot n}$, introduced in
+	observable acting on $(\C^q)^{\ot M}$, introduced in
 	Chapter~\ref{chap:qpbt-algebra}
 	(see Lemma~\ref{lem:twisted-commutation}). As a product
 	of two observables with eigenvalues $\pm 1$ acting on disjoint
@@ -696,9 +817,9 @@ every tuple $\omega$.
 	and define the projector
 	\begin{equation}\label{eq:qld-point-obs-def}
 		\tau^{W,u}_a \,=\, \tau^W_{[g_\cdot(u) = a]}
-		\,=\, \sum_{h \in \F_q^{n} \colon h \cdot \mathrm{ind}_m(u) = a} \tau^W_h\,,
+		\,=\, \sum_{h \in \F_q^{M} \colon h \cdot \mathrm{ind}_m(u) = a} \tau^W_h\,,
 	\end{equation}
-	where $\{\tau^W_h\}_{h \in \F_q^{n}}$ are the joint eigenprojectors of
+	where $\{\tau^W_h\}_{h \in \F_q^{M}}$ are the joint eigenprojectors of
 	the generalized Pauli $W$-observables
 	(see Lemma~\ref{lem:pauli-observable-expansion}).
 	Expanding both tensor factors of $\hat{W}^r(u)$
@@ -840,8 +961,8 @@ every tuple $\omega$.
 	where the projector $\tau^{W,\ell}_{f''}$, acting on register
 	$\mathsf{A}'$ (or on $\mathsf{A}''$, following the register conventions
 	of Definition~\ref{def:expanded-observables}), is the outcome-$f''$
-	projector of the following projective measurement: measure all $n$
-	qudits in the basis $W$, obtaining an outcome $h \in \F_q^{n}$, and
+	projector of the following projective measurement: measure all $M$
+	qudits in the basis $W$, obtaining an outcome $h \in \F_q^{M}$, and
 	return the polynomial $f''$ obtained by substituting the
 	parameterization of $\ell$ into the low-degree encoding
 	$g_h \colon \F_q^m \to \F_q$
@@ -957,11 +1078,16 @@ every tuple $\omega$.
 		\bra{\hat{\psi}}\, M^{(\mathrm{Line},W),\ell}_{f'} \ot \Id\,
 		\ket{\hat{\psi}} \,\leq\, O(\eps)\,,
 	\]
-	because the line-versus-point subtest is executed with probability
-	bounded below by a universal constant and rejects a line answer with
-	no evaluation at $u$ against every point answer
-	(Definition~\ref{def:pauli-win-predicate}). This gives
-	item~\ref{eq:qld-comm-line-pt-cons} with error $\eps$. For
+	because the left-hand side is exactly the mass of the class
+	$M^{(\mathrm{Line},W),\ell}_{[\mathrm{eval}_u(\cdot)=\bot]}$ of the
+	completed family in item~\ref{enu:qld-ld} of
+	Lemma~\ref{lem:qld-win-implications} --- its value on
+	$\ket{\hat{\psi}}$ coincides with its value on $\ket{\psi}$, the
+	operator acting trivially on the ancilla registers --- whose partner
+	class $M^{(\mathrm{Point},W),u}_{\bot}$ is the zero operator, so that
+	the whole of this mass is disagreement mass of that consistency
+	statement.
+	This gives item~\ref{eq:qld-comm-line-pt-cons} with error $\eps$. For
 	item~\ref{eq:qld-comm-line-pt-cons2}, the data processing inequality
 	does not apply directly, since the bound of
 	item~\ref{eq:qld-comm-line-pt-cons} is stated with $\approx$ rather
@@ -994,7 +1120,15 @@ every tuple $\omega$.
 	measurements $\{A^x_i\}$ and $\{B^x_i\}$ acting on separate registers
 	of a bipartite state, then $A^x_i \ot \Id \simeq_\delta \Id \ot B^x_i$,
 	and hence $A^x_i \ot \Id \approx_\delta \Id \ot B^x_i$ by item~1 of
-	Lemma~\ref{fact:agreement} --- then yields
+	Lemma~\ref{fact:agreement} --- is then applied to the two families
+	completed as in Definition~\ref{def:ideg-deg-polynomials}: the
+	evaluation classes of the expanded line measurement together with
+	$\hat{M}^{(\mathrm{Line},W),\ell}_{[\mathrm{eval}_u(\cdot)=\bot]}$,
+	and the expanded point measurement together with
+	$\hat{M}^{(\mathrm{Point},W),u}_{\bot} = 0$. Both completed families
+	are projective measurements, and the completion leaves the sum in the
+	hypothesis unchanged, since the term for the outcome $\bot$ vanishes.
+	Restricted to the outcomes in $\F_q$, the conclusion yields
 	item~\ref{eq:qld-comm-line-pt-cons2} with error $\sqrt{\eps}$, so that
 	$\delta_{\mathrm{Line}}(\eps) = \sqrt{\eps}$.
 \end{proof}

@@ -12,10 +12,10 @@ Chapter~\ref{chap:qpbt-observables}: a projective strategy for the Pauli basis
 test game succeeds with probability at least $1-\eps$, and all operators act
 relative to the expanded state $\ket{\hat\psi}$ on registers
 $\mathsf{A}\,\mathsf{A}'\,\mathsf{A}''\,\mathsf{B}\,\mathsf{B}'\,\mathsf{B}''$
-(Definition~\ref{def:expanded-state}), where $n$ denotes the number of ancilla
-qudit registers, each isomorphic to $\C^q$, appended on each side. We write
-$q = 2^t$ (Definition~\ref{def:admissible-size}) and $\tr:\F_q\to\F_2$ for the
-subfield trace. The points measurements
+(Definition~\ref{def:expanded-state}), where $M = 2^m$ denotes the number of
+ancilla qudit registers, each isomorphic to $\C^q$, appended on each side.
+We write $q = 2^t$ (Definition~\ref{def:admissible-size}) and
+$\tr:\F_q\to\F_2$ for the subfield trace. The points measurements
 $\hat{M}^{(\mathrm{Point},W),u}_a$ for $W \in \{X,Z\}$
 (Definition~\ref{def:expanded-point-measurement}), their binary refinements
 \[
@@ -74,6 +74,14 @@ Vidick~\cite{Natarajan2017Linearity} converts approximate linearity into exact
 linearity, from which a projective measurement with outcomes in $\F_q^2$ is
 assembled by Fourier averaging.
 
+% Statement as in Theorem 10 of the cited source \cite{Natarajan2017Linearity}
+% (arXiv:1610.03574): the exact linearity holds for all pairs (u, u'), while
+% the closeness of L^u to O^u is guaranteed on average over uniformly random u
+% (E_u d_{psi'}(L^u, O^u)^2 <= delta there). The mirror's quotation
+% (references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:713-725)
+% places both conclusions under the quantifier "for all u, u' in F_2^t", a
+% strengthening of the cited theorem that is not reproduced here; see
+% rem:linearity-import.
 \begin{theorem}[Quantum linearity test~\cite{Natarajan2017Linearity}]
 	\label{thm:linearity}
 	\uses{def:povm-distance}
@@ -93,11 +101,14 @@ assembled by Fourier averaging.
 	in an extended space
 	$\hilb_{\mathsf{A}} \ot \hilb_{\mathsf{B}} \ot \hilb_{\mathsf{A}'}$ and
 	observables $\{\mathcal{L}^u\}$ acting on
-	$\hilb_{\mathsf{A}} \ot \hilb_{\mathsf{A}'}$ such that for all
-	$u, u' \in \F_2^t$,
+	$\hilb_{\mathsf{A}} \ot \hilb_{\mathsf{A}'}$ with the following two
+	properties: the exact linearity
 	\[
 		\mathcal{L}^u \, \mathcal{L}^{u'} = \mathcal{L}^{u+u'}
-		\qquad \text{and} \qquad
+	\]
+	holds for all $u, u' \in \F_2^t$, and on average over $u$ chosen
+	uniformly at random from $\F_2^t$,
+	\[
 		(\mathcal{L}^u)_{\mathsf{A}\mathsf{A}'}
 		\approx_\delta (\mathcal{O}^u)_{\mathsf{A}}\,,
 	\]
@@ -105,7 +116,7 @@ assembled by Fourier averaging.
 	$\mathcal{L}^u = \Id$ when $u = 0$.
 \end{theorem}
 \begin{proof}
-	This is the quantum linearity test of Natarajan and
+	This is Theorem~10 of Natarajan and
 	Vidick~\cite{Natarajan2017Linearity}; no proof is given in
 	\cite{Ji2020MIPStar}, which invokes the result directly. The statement is
 	imported here as an external result; see
@@ -116,11 +127,21 @@ assembled by Fourier averaging.
 	\label{rem:linearity-import}
 	Theorem~\ref{thm:linearity} is the quantum linearity theorem of
 	Natarajan and Vidick~\cite{Natarajan2017Linearity}, used here as an
-	external result. Two features of the statement are load-bearing for the
-	proof of Lemma~\ref{lem:qld-4-10}: the error is preserved exactly
-	($\delta$ in the hypothesis equals $\delta$ in the conclusion), and the
-	linearity of the $\{\mathcal{L}^u\}$ is exact and holds for all pairs
-	$(u,u')$, not merely on average.
+	external result. Three features of the statement are load-bearing for
+	the proof of Lemma~\ref{lem:qld-4-10}: the error is preserved without
+	polynomial loss ($\delta$ in the hypothesis becomes $\delta$ in the
+	conclusion, up to the constant absorbed by
+	Definition~\ref{def:povm-distance}); the linearity of the
+	$\{\mathcal{L}^u\}$ is exact and holds for all pairs $(u,u')$, not
+	merely on average; and the closeness of $\mathcal{L}^u$ to
+	$\mathcal{O}^u$ is guaranteed on average over a uniformly random $u$
+	only. The averaged form suffices because the $\mathcal{L}^u$ enter the
+	proof of Lemma~\ref{lem:qld-4-10} only through averages over $u$. The
+	quotation of the theorem in \cite{Ji2020MIPStar} places the closeness
+	conclusion, together with the exact linearity, under the quantifier
+	``for all $u, u' \in \F_2^t$''; that pointwise closeness is a
+	strengthening of the theorem proved in \cite{Natarajan2017Linearity}
+	and is neither reproduced nor used here.
 \end{remark}
 
 \begin{lemma}[Combined point measurements]
@@ -131,7 +152,7 @@ assembled by Fourier averaging.
 	following holds. For every $x, z \in \F_q^m$ and
 	$\hilb \in \{\hilb_{\mathsf{A}}, \hilb_{\mathsf{B}}\}$ there are
 	projective measurements $\{\hat{Q}^{x,z}_{a,b}\}_{a,b \in \F_q}$ acting
-	on $\hilb \ot (\C^q)^{\ot n}$ such that:
+	on $\hilb \ot (\C^q)^{\ot M}$ such that:
 	\begin{enumerate}
 		\item (\textbf{Self-consistency}) On average over uniformly random
 		$x, z \in \F_q^m$,
@@ -210,9 +231,14 @@ assembled by Fourier averaging.
 	\approx_\delta \mathcal{O}^{x,z,r+r',s+s'}$
 	on average; identifying $\F_q \cong \F_2^t$ so that the pair $(r,s)$
 	ranges over $\F_2^{2t}$, Theorem~\ref{thm:linearity} applied for each
-	fixed $(x,z)$ yields exactly linear observables
-	$\{\mathcal{L}^{x,z,r,s}\}$ that are $\delta$-close to the
-	$\{\mathcal{O}^{x,z,r,s}\}$ on average over $x, z, r, s$; no further
+	fixed $(x,z)$ --- with hypothesis error the conditional average of the
+	approximate-linearity defect given $(x,z)$ --- yields exactly linear
+	observables $\{\mathcal{L}^{x,z,r,s}\}$ that are close to the
+	$\{\mathcal{O}^{x,z,r,s}\}$ on average over $(r,s)$, with the same
+	error; taking the expectation over $(x,z)$ shows that the two families
+	are $\delta$-close on average over $x, z, r, s$, the averaged form of
+	closeness being the one Theorem~\ref{thm:linearity} supplies and the
+	only one used below (Remark~\ref{rem:linearity-import}); no further
 	extension of the state is needed because $\ket{\hat\psi}$ is padded with
 	sufficiently many ancilla qubits in the zero state. Define
 	$\hat{Q}^{x,z}_{a,b}
@@ -245,7 +271,7 @@ assembled by Fourier averaging.
 	that the following holds. For
 	$\hilb \in \{\hilb_{\mathsf{A}}, \hilb_{\mathsf{B}}\}$ and every pair of
 	lines $\ell_X$ and $\ell_Z$ in $\F_q^m$ there exists a POVM
-	$\{T^{\ell_X,\ell_Z}_{f_X,f_Z}\}$ acting on $\hilb \ot (\C^q)^{\ot n}$,
+	$\{T^{\ell_X,\ell_Z}_{f_X,f_Z}\}$ acting on $\hilb \ot (\C^q)^{\ot M}$,
 	with answers consisting of pairs of polynomials
 	$(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$, such that on
 	average over pairs $(\ell_X, x)$ and $(\ell_Z, z)$ independently sampled
@@ -377,7 +403,7 @@ analyzed, together with candidate repairs, in
 	$\hilb \in \{\hilb_{\mathsf{A}}, \hilb_{\mathsf{B}}\}$ there exists a
 	projective measurement
 	$\{\hat{Q}^{x,z,\alpha,\beta}_{c}\}_{c \in \F_q}$ acting on
-	$\hilb \ot (\C^q)^{\ot n}$ such that the following holds, where
+	$\hilb \ot (\C^q)^{\ot M}$ such that the following holds, where
 	$\delta_Q$ is the function of Lemma~\ref{lem:qld-4-10}:
 	\begin{enumerate}
 		\item (\textbf{Self-consistency}) On average over uniformly random
@@ -440,7 +466,7 @@ analyzed, together with candidate repairs, in
 	such that the following holds. For
 	every line $\ell$ in $\F_q^{2m+2}$ and
 	$\hilb \in \{\hilb_{\mathsf{A}}, \hilb_{\mathsf{B}}\}$ there exists a
-	POVM $\{\hat{Q}^{\ell}_{f}\}$ acting on $\hilb \ot (\C^q)^{\ot n}$ with
+	POVM $\{\hat{Q}^{\ell}_{f}\}$ acting on $\hilb \ot (\C^q)^{\ot M}$ with
 	outcomes $f \in \deg_{md+1}(\ell)$ such that on average over a uniformly
 	random pair $(\ell, (x,z,\alpha,\beta))$ drawn from the line-point
 	distribution over $\F_q^{2m+2}$,
@@ -1056,7 +1082,7 @@ projective measurement whose outcomes are pairs of global polynomials.
 	holds. For
 	$\hilb \in \{\hilb_{\mathsf{A}}, \hilb_{\mathsf{B}}\}$ there
 	exists a projective measurement $\{\hat{S}_{g_X,g_Z}\}$ acting on
-	$\hilb \ot (\C^q)^{\ot n}$, with outcomes consisting of pairs
+	$\hilb \ot (\C^q)^{\ot M}$, with outcomes consisting of pairs
 	$(g_X, g_Z)$ of polynomials, each in $\mathrm{ideg}_{d,m}(\F_q)$, such
 	that for $W \in \{X, Z\}$, on average over uniformly random
 	$u \in \F_q^m$,
