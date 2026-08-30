@@ -2,7 +2,7 @@
 pr: 0001
 kind: adjudication
 branch: issue-0002-qpbt-blueprint
-head_sha: 7918baecf5bcded58649471baa9076b4bf39b48e
+head_sha: 1e23f5ceef3906818bb49886a7f951b63abc49b6
 verdict: ADJUDICATED
 review_state: ADJUDICATED
 basis: round-6 reviews at 39753e7304367b108d60e2a886fbb4349e0fc785 (code + prose)
@@ -14,7 +14,10 @@ generated: 2026-08-30T17:00:40Z
 
 Operator adjudication under review.md §12 after six full review rounds
 (finding counts 33, 26, 18, 12, 17, 15; see results/telemetry/events.md).
-Dispositions of every round-6 finding:
+The head advanced past the reviewed SHA only by the registry-alignment
+commit 1e23f5c (no blueprint/docs content change; prs/, issues/,
+results/telemetry/ made identical to main) and the merge of main
+(7918bae). Dispositions of every round-6 finding:
 
 ## Findings
 
