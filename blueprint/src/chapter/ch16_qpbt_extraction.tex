@@ -164,7 +164,11 @@ The next lemma shows that the pulled-apart measurements are consistent with the 
 	is symmetric under exchanging $(g,h)$ with $(g',h')$: since $\mathrm{Dec}$ is linear with $\mathrm{Dec}(g_{h}) = h$ for all $h \in \F_q^M$ (Remark~\ref{rem:qld-decoding-identity}), the constraint $g' - g_{h'} = g - g_h$ implies $\mathrm{Dec}(g) - h = \mathrm{Dec}(g') - h'$, so the two constraint sets coincide. The same derivation therefore bounds the distance of the displayed expression to $(\tilde{M}^{W,\tilde{u}}_a)_{\mathrm{B}\mathrm{B}'\mathrm{B}''}$, and \eqref{eq:qld-pulling-cons} follows after absorbing the error terms $O(\sqrt{\eps})$ and $O(md/q)$ into $\delta_S$. Finally, since $\{\tilde{M}^{W,\tilde{u}}_a\}$ is projective, Item~2 of Lemma~\ref{fact:agreement}, data processing along the map $a \mapsto \tr(e_j a)$ (Lemma~\ref{fact:data-processing}), and Item~1 of Lemma~\ref{fact:agreement} yield $(\tilde{M}^{W,\tilde{u}}_{[\tr(e_j \cdot) = b]})_{\mathrm{A}\mathrm{A}'\mathrm{A}''} \approx_{\delta_S} (\tilde{M}^{W,\tilde{u}}_{[\tr(e_j \cdot) = b]})_{\mathrm{B}\mathrm{B}'\mathrm{B}''}$ with answer summation over $b \in \F_2$, and Lemma~\ref{lem:povm-to-obs} converts this into the claimed self-consistency of the observables $\tilde{W}^j(\tilde{u})$.
 \end{proof}
 
-The following lemma was used in several derivations above. It is stated after Lemma~\ref{lem:qld-construct-the-paulis} to follow the source, but its proof depends only on Lemma~\ref{lem:qld-4-7} and Lemma~\ref{lem:qld-comm-cons}, so there is no circularity.
+% Following the source, the next lemma is stated after
+% lem:qld-construct-the-paulis, whose proof invokes it; its own proof
+% depends only on lem:qld-4-7 and lem:qld-comm-cons, so there is no
+% circularity.
+Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two estimates, which were used in the proof of Lemma~\ref{lem:qld-construct-the-paulis}.
 
 \begin{lemma}[The marginals absorb the point measurements]\label{lem:qld-constructing-the-paulis-helper}
 	\uses{def:s-w-marginals, def:expanded-point-measurement, def:expanded-state, def:povm-distance, lem:qld-4-7, def:symmetric-equivalents}
@@ -273,22 +277,47 @@ We can now prove the soundness theorem for the Pauli basis test, stated as Theor
 
 \begin{proof}
 	\proves{thm:pauli}
-	\uses{lem:qld-unitary, def:v-swap-unitary, thm:naimark, def:projective-strategy-setup, def:expanded-state, def:EPR}
+	\uses{lem:qld-unitary, def:v-swap-unitary, thm:naimark, def:projective-strategy-setup, def:expanded-state, def:EPR, def:povm-distance}
 	Let $(\ket{\psi},M)$ be a strategy for $\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$ that succeeds with probability at least $1 - \eps$, where $\ket{\psi}$ is a bipartite state on registers $\mathrm{A}$ and $\mathrm{B}$. By Naimark's theorem (Theorem~\ref{thm:naimark}, as formulated in~\cite[Theorem 5.1]{Ji2020LowIndividualDegree}), at the cost of extending $\ket{\psi}$ by sufficiently many ancilla qubits initialized in the state $\ket{0}$, we may assume that the strategy is projective and that the state is padded as in the conventions of Definition~\ref{def:projective-strategy-setup}. Let $V_{\mathrm{A}}$ be the unitary acting on registers $\mathrm{A}\mathrm{A}'\mathrm{A}''$ given by Lemma~\ref{lem:qld-unitary}, and let $\phi_{\mathrm{A}}$ be the isometry mapping register $\mathrm{A}$ to registers $\mathrm{A}\mathrm{A}'\mathrm{A}''$, where $\mathrm{A}'$ and $\mathrm{A}''$ are isomorphic to $(\C^q)^{\ot M}$, defined by
 	\[
 		\phi_{\mathrm{A}}\colon \ket{\theta}_{\mathrm{A}} \mapsto V_{\mathrm{A}} \bigl(\ket{\theta}_{\mathrm{A}} \ot (\ket{\mathrm{EPR}_q}^{\ot M})_{\mathrm{A}' \mathrm{A}''}\bigr)\;;
 	\]
 	define $\phi_{\mathrm{B}}$ analogously. Since the expanded state $\ket{\hat\psi}$ of Definition~\ref{def:expanded-state} is exactly $\ket{\psi}$ with the halves of $M$ pairs $\ket{\mathrm{EPR}_q}$ appended locally in registers $\mathrm{A}'\mathrm{A}''$ and $\mathrm{B}'\mathrm{B}''$, we have $\phi_{\mathrm{A}} \ot \phi_{\mathrm{B}} \ket{\psi} = V_{\mathrm{A}} \ot V_{\mathrm{B}} \ket{\hat\psi}$. Lemma~\ref{lem:qld-unitary} therefore yields a state $\ket{\mathrm{aux}}$ on registers $\mathrm{A}\mathrm{A}'\mathrm{B}\mathrm{B}'$ such that
 	\[
-		\bigl\| \phi_{\mathrm{A}} \ot \phi_{\mathrm{B}} \ket{\psi} - \ket{\mathrm{aux}} \ot \ket{\mathrm{EPR}_q}^{\ot M} \bigr\|^2 \leq \delta_{\mathrm{qld}}
+		\bigl\| \phi_{\mathrm{A}} \ot \phi_{\mathrm{B}} \ket{\psi} - \ket{\mathrm{aux}} \ot \ket{\mathrm{EPR}_q}^{\ot M} \bigr\|^2 \leq \delta_{\mathrm{qld}}\;.
 	\]
-	and, for $W \in \{X,Z\}$,
+	% Transfer step added: the source (lines 1864--1875 of
+	% 14_analysis_of_the_pauli_basis_test.tex) passes directly from the
+	% conjugation estimates of lem:qld-unitary, which concern the
+	% unitarily conjugated operators V (M_h ot Id) V^dagger, to the
+	% corresponding estimates for the isometry phi, whose conjugation
+	% inserts the projection onto its range; the range-projection
+	% argument below supplies the missing step.
+	Item~2 of Lemma~\ref{lem:qld-unitary} concerns the unitarily conjugated operators $N^W_h = V_{\mathrm{A}} \, (M^{(\mathrm{Pauli},W)}_h)_{\mathrm{A}} \, V_{\mathrm{A}}^\dagger$, whereas conjugation by the isometry $\phi_{\mathrm{A}}$ additionally inserts the projection $Q_{\mathrm{A}} = \phi_{\mathrm{A}} \phi_{\mathrm{A}}^\dagger = V_{\mathrm{A}} \, \bigl(\ket{\mathrm{EPR}_q}\bra{\mathrm{EPR}_q}^{\ot M}\bigr)_{\mathrm{A}'\mathrm{A}''} \, V_{\mathrm{A}}^\dagger$ onto the range of $\phi_{\mathrm{A}}$: since $(M^{(\mathrm{Pauli},W)}_h)_{\mathrm{A}}$ and $\bigl(\ket{\mathrm{EPR}_q}\bra{\mathrm{EPR}_q}^{\ot M}\bigr)_{\mathrm{A}'\mathrm{A}''}$ act on disjoint registers and hence commute,
+	\[
+		\phi_{\mathrm{A}} \, (M^{(\mathrm{Pauli},W)}_h)_{\mathrm{A}} \, \phi_{\mathrm{A}}^\dagger
+		= V_{\mathrm{A}} \, \Bigl( (M^{(\mathrm{Pauli},W)}_h)_{\mathrm{A}} \ot \bigl(\ket{\mathrm{EPR}_q}\bra{\mathrm{EPR}_q}^{\ot M}\bigr)_{\mathrm{A}'\mathrm{A}''} \Bigr) \, V_{\mathrm{A}}^\dagger
+		= N^W_h \, Q_{\mathrm{A}} = Q_{\mathrm{A}} \, N^W_h\;.
+	\]
+	The estimates transfer from $N^W_h$ to $\phi_{\mathrm{A}} \, (M^{(\mathrm{Pauli},W)}_h)_{\mathrm{A}} \, \phi_{\mathrm{A}}^\dagger$ as follows. Write $\ket{\Delta} = \ket{\mathrm{aux}} \ot \ket{\mathrm{EPR}_q}^{\ot M}$ and $\ket{\vartheta} = \phi_{\mathrm{A}} \ot \phi_{\mathrm{B}} \ket{\psi}$. Since $\phi_{\mathrm{A}}^\dagger \phi_{\mathrm{A}} = \Id$, the projection $\Id - Q_{\mathrm{A}}$ annihilates $\ket{\vartheta}$, so the displayed bound above gives
+	\[
+		\bigl\| (\Id - Q_{\mathrm{A}}) \ket{\Delta} \bigr\|^2
+		= \bigl\| (\Id - Q_{\mathrm{A}}) (\ket{\Delta} - \ket{\vartheta}) \bigr\|^2
+		\leq \bigl\| \ket{\Delta} - \ket{\vartheta} \bigr\|^2
+		\leq \delta_{\mathrm{qld}}\;.
+	\]
+	Since the strategy is projective, the operators $N^W_h$, for $h \in \F_q^M$, are mutually orthogonal projectors summing to the identity, so $\sum_h \| N^W_h \ket{\xi} \|^2 = \| \ket{\xi} \|^2$ for every vector $\ket{\xi}$. Decomposing
+	\[
+		\bigl( \phi_{\mathrm{A}} \, (M^{(\mathrm{Pauli},W)}_h)_{\mathrm{A}} \, \phi_{\mathrm{A}}^\dagger - (\tau^W_h)_{\mathrm{A}''} \bigr) \ket{\Delta}
+		= \bigl( N^W_h - (\tau^W_h)_{\mathrm{A}''} \bigr) \ket{\Delta} - N^W_h (\Id - Q_{\mathrm{A}}) \ket{\Delta}
+	\]
+	and summing the squared norms over $h$ via $\| \xi - \xi' \|^2 \leq 2\|\xi\|^2 + 2\|\xi'\|^2$, the first terms contribute $O(\delta_{\mathrm{qld}})$ by Item~2 of Lemma~\ref{lem:qld-unitary} and the second terms contribute at most $2 \| (\Id - Q_{\mathrm{A}}) \ket{\Delta} \|^2 \leq 2\delta_{\mathrm{qld}}$; hence, for $W \in \{X,Z\}$,
 	\[
 		\phi_{\mathrm{A}} \, (M^{(\mathrm{Pauli},W)}_h)_{\mathrm{A}} \, \phi_{\mathrm{A}}^\dagger \approx_{\delta_{\mathrm{qld}}} (\tau^W_h)_{\mathrm{A}''}
-		\qquad \text{and} \qquad
+		\qquad \text{and, by the identical argument,} \qquad
 		\phi_{\mathrm{B}} \, (M^{(\mathrm{Pauli},W)}_h)_{\mathrm{B}} \, \phi_{\mathrm{B}}^\dagger \approx_{\delta_{\mathrm{qld}}} (\tau^W_h)_{\mathrm{B}''}\;,
 	\]
-	where the $\approx$ statements hold with respect to the state $\ket{\mathrm{aux}} \ot \ket{\mathrm{EPR}_q}^{\ot M}$ and the answer summation is over $h \in \F_q^M$. This shows that the game $\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$ is a self-test, with robustness $\delta_{\mathrm{qld}}(\eps,m,d,q)$, for the canonical Pauli strategy of Lemma~\ref{lem:pauli-completeness}. Identifying the registers $\mathrm{A}\mathrm{A}'$ with $\mathrm{A}'$ and $\mathrm{B}\mathrm{B}'$ with $\mathrm{B}'$ matches the statement of Theorem~\ref{thm:pauli}, in which $\phi_{\mathrm{A}}\colon \mathcal{H}_{\mathrm{A}} \to \mathcal{H}_{\mathrm{A}'} \ot \mathcal{H}_{\mathrm{A}''}$. Finally, unpacking the dependence on the parameters $\eps, m, d, q$, the function $\delta_{\mathrm{qld}}(\eps,m,d,q) = O(\delta_S^{1/4} + md/q)$ has the form $a(md)^a(\eps^b + q^{-b} + 2^{-bmd})$ for universal constants $a > 1$ and $0 < b < 1$; see Remark~\ref{rem:pauli-robustness-form} for the reconciliation of this form with the statement of Theorem~\ref{thm:pauli}.
+	where the $\approx$ statements hold with respect to the state $\ket{\mathrm{aux}} \ot \ket{\mathrm{EPR}_q}^{\ot M}$ and the answer summation is over $h \in \F_q^M$; the constant implicit in $\approx_{\delta_{\mathrm{qld}}}$ (Definition~\ref{def:povm-distance}) absorbs the factors accumulated above. This shows that the game $\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$ is a self-test, with robustness $\delta_{\mathrm{qld}}(\eps,m,d,q)$, for the canonical Pauli strategy of Lemma~\ref{lem:pauli-completeness}. Identifying the registers $\mathrm{A}\mathrm{A}'$ with $\mathrm{A}'$ and $\mathrm{B}\mathrm{B}'$ with $\mathrm{B}'$ matches the statement of Theorem~\ref{thm:pauli}, in which $\phi_{\mathrm{A}}\colon \mathcal{H}_{\mathrm{A}} \to \mathcal{H}_{\mathrm{A}'} \ot \mathcal{H}_{\mathrm{A}''}$. Finally, unpacking the dependence on the parameters $\eps, m, d, q$, the function $\delta_{\mathrm{qld}}(\eps,m,d,q) = O(\delta_S^{1/4} + md/q)$ has the form $a(md)^a(\eps^b + q^{-b} + 2^{-bmd})$ for universal constants $a > 1$ and $0 < b < 1$; see Remark~\ref{rem:pauli-robustness-form} for the reconciliation of this form with the statement of Theorem~\ref{thm:pauli}.
 \end{proof}
 
 \begin{remark}[Norm conventions in the robustness bound]\label{rem:pauli-robustness-form}

@@ -25,7 +25,18 @@ This chapter records the vocabulary in which the quantum Pauli basis test and it
 	for every $x$ both marginals are again POVMs.
 \end{definition}
 
+% The declaration MIPStarRE.Quantum.Measurement.postprocess
+% (MIPStarRE/Quantum/Measurement.lean) realizes the operation defined here for each fixed
+% x: it maps a POVM {M_a}_{a in alpha} with finite outcome type alpha and a function
+% f : alpha -> beta with beta finite to the POVM {sum_{a : f(a)=b} M_a}_{b in beta},
+% including the zero value on b outside the image of f (empty fiber sum). The indexing by
+% x is pointwise application of that operation, and the tuple-component notation below is
+% the special case where f is a coordinate projection. Verified against the Lean source
+% on 2026-08-30; decidable-equality instance arguments encode no extra hypothesis over
+% the stated finiteness.
 \begin{definition}[Bracket notation for post-processed measurements]\label{def:bracket}
+	\lean{MIPStarRE.Quantum.Measurement.postprocess}
+	\leanok
 	\uses{def:povm-conventions, def:post-processing}
 	Let $\mathcal A$ and $\mathcal B$ be finite sets, let $\{M^x_a\}_{a \in \mathcal A}$ be a family of POVMs indexed by $x \in \mathcal X$, and let $f \colon \mathcal A \to \mathcal B$ be an arbitrary function. We write $\bigl\{ M^x_{[f(\cdot)=b]} \bigr\}$ for the POVM derived from $\{M^x_a\}$ by applying the function $f$ to the outcome before returning it:
 	\[
@@ -250,7 +261,10 @@ We record several useful facts about the consistency measure and the state-depen
 		\E_x \sum_g \bigl\lVert S^x_g (A^x_{g(x)} - B^x_{g(x)})\, \ket{\psi} \bigr\rVert^2
 		= \E_x \sum_a \bra{\psi} (A^x_a - B^x_a)^\dagger \Bigl( \sum_{g\,:\,g(x)=a} (S^x_g)^\dagger S^x_g \Bigr) (A^x_a - B^x_a) \ket{\psi}\,.
 	\]
-	Since $\sum_{g\,:\,g(x)=a} (S^x_g)^\dagger S^x_g \le \sum_g (S^x_g)^\dagger S^x_g \le \Id$, this is at most $\E_x \sum_a \lVert (A^x_a - B^x_a)\ket{\psi} \rVert^2 \le \delta$.
+	% The source (references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:347-361) ends with
+	% "at most delta by assumption"; under def:povm-distance the hypothesis only bounds this
+	% quantity by O(delta), which is what the conclusion requires.
+	Since $\sum_{g\,:\,g(x)=a} (S^x_g)^\dagger S^x_g \le \sum_g (S^x_g)^\dagger S^x_g \le \Id$, this is at most $\E_x \sum_a \lVert (A^x_a - B^x_a)\ket{\psi} \rVert^2$, which is $O(\delta)$ by the hypothesis $A^x_a \approx_\delta B^x_a$ (Definition~\ref{def:povm-distance}); this is exactly the bound required for the conclusion.
 \end{proof}
 
 \begin{lemma}[Absorbing an approximating family into a projective sum]\label{lem:cool-closeness-fact}
@@ -267,7 +281,10 @@ We record several useful facts about the consistency measure and the state-depen
 		&= \E_x \sum_{a \in S} \bra{\psi} (A^x_a - B^x_a)^\dagger A^x_a (A^x_a - B^x_a) \ket{\psi}\\
 		&\le \E_x \sum_a \lVert (A^x_a - B^x_a)\ket{\psi} \rVert^2\,,
 	\end{align*}
-	where the last step uses $A^x_a \le \Id$. All expectations are taken according to $\mu$, and the last quantity is at most $\delta$ by assumption.
+	% Under def:povm-distance the closeness hypothesis bounds the final quantity by
+	% O(delta), not by delta itself; the source
+	% (references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:364-380) elides this.
+	where the last step uses $A^x_a \le \Id$. All expectations are taken according to $\mu$, and the last quantity is $O(\delta)$ by the assumption $A^x_a \approx_\delta B^x_a$ (Definition~\ref{def:povm-distance}), which is the bound required for the conclusion.
 \end{proof}
 
 \begin{lemma}[Triangle inequality; Fact 4.28 in \cite{Natarajan2018NEEXP}]\label{fact:triangle}
@@ -337,11 +354,18 @@ The state-dependent distance is the right tool for reasoning about the closeness
 	The claim follows by subtracting \eqref{eq:commutation-analysis-3} and \eqref{eq:commutation-analysis-4}.
 \end{proof}
 
+% The source (references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:465-495) leaves the
+% set Y unquantified (finiteness and nonemptiness are needed for the uniform sampling of
+% y) and places no finiteness condition on the targets R_i (needed for the post-processed
+% families below to fall under def:bracket); both hypotheses are made explicit here. The
+% NEEXP original (references/neexp-paper/05_quantum_preliminaries.tex:952-973, label
+% fact:low-degree-sandwich) instead samples the evaluation point from a specified
+% question distribution.
 \begin{lemma}[Sandwiched simultaneous measurement; modified from Fact 4.34 in \cite{Natarajan2018NEEXP}]\label{lem:ld-sandwich}
 	\uses{def:consistency, def:bracket, def:povm-conventions}
-	Let $k \ge 0$ be an integer and let $\eps > 0$. Let $\mathcal X$ be a finite set and $\mu$ a distribution over $\mathcal X$. For each $1 \le i \le k$ let $\mathcal G_i$ be a finite set of functions $g_i \colon \mathcal Y \to \mathcal R_i$, and for each $x \in \mathcal X$ let $\{G^{i,\,x}_g\}_{g \in \mathcal G_i}$ be a projective measurement. Suppose that for all $i \in \{1,\dots,k\}$ the set $\mathcal G_i$ satisfies the following property: for any two $g_i \ne g_i' \in \mathcal G_i$, the probability that $g_i(y) = g_i'(y)$ over a uniformly random $y \in \mathcal Y$ is at most $\eps$.
+	Let $k \ge 0$ be an integer and let $\eps > 0$. Let $\mathcal X$ be a finite set and $\mu$ a distribution over $\mathcal X$, and let $\mathcal Y$ be a finite nonempty set; all statements below that sample $y \in \mathcal Y$ refer to the uniform distribution on $\mathcal Y$. For each $1 \le i \le k$ let $\mathcal R_i$ be a finite set, let $\mathcal G_i$ be a finite set of functions $g_i \colon \mathcal Y \to \mathcal R_i$, and for each $x \in \mathcal X$ let $\{G^{i,\,x}_g\}_{g \in \mathcal G_i}$ be a projective measurement. Suppose that for all $i \in \{1,\dots,k\}$ the set $\mathcal G_i$ satisfies the following property: for any two $g_i \ne g_i' \in \mathcal G_i$, the probability that $g_i(y) = g_i'(y)$ over a uniformly random $y \in \mathcal Y$ is at most $\eps$.
 
-	Let $\bigl\{ A^x_{g_1,\,g_2,\,\dots,\,g_k} \bigr\}$ be a projective measurement with outcomes $(g_1,\dots,g_k) \in \mathcal G_1 \times \cdots \times \mathcal G_k$. Here $\operatorname{eval}_y$ denotes the evaluation map $g \mapsto g(y)$, so that $A^x_{[\operatorname{eval}_y(\cdot)_i = a_i]}$ post-processes the outcome tuple by evaluating its $i$-th component at $y$ (Definition~\ref{def:bracket}). For each $1 \le i \le k$, suppose that on average over $x \sim \mu$ and $y \in \mathcal Y$ sampled uniformly at random,
+	Let $\bigl\{ A^x_{g_1,\,g_2,\,\dots,\,g_k} \bigr\}$ be a projective measurement with outcomes $(g_1,\dots,g_k) \in \mathcal G_1 \times \cdots \times \mathcal G_k$. Here $\operatorname{eval}_y$ denotes the evaluation map $g \mapsto g(y)$, so that $A^x_{[\operatorname{eval}_y(\cdot)_i = a_i]}$ post-processes the outcome tuple by evaluating its $i$-th component at $y$; since the outcome sets $\mathcal G_1 \times \cdots \times \mathcal G_k$ and $\mathcal G_i$ and the targets $\mathcal R_i$ are finite, these are post-processings in the sense of Definition~\ref{def:bracket}. For each $1 \le i \le k$, suppose that on average over $x \sim \mu$ and $y \in \mathcal Y$ sampled uniformly at random,
 	\begin{equation}\label{eq:ld-sandwich-1}
 		A^x_{[\operatorname{eval}_y(\cdot)_i = a_i]} \ot \Id_B \simeq_{\delta} \Id_A \ot G^{i,\,x}_{[\operatorname{eval}_y(\cdot) = a_i]}\,.
 	\end{equation}
@@ -526,7 +550,10 @@ The question distribution of the Pauli basis test is \emph{typed}: each question
 	This is identical to the uniform distribution over ordered pairs $(u,v) \in U \times U$ such that $\{u,v\} \in E$: each edge that is not a self-loop contributes two ordered pairs, and each self-loop contributes one, whence the normalization $2m-k$.
 \end{definition}
 
+% The nonempty-edge hypothesis on G is inherited from def:graph-distribution, where it is
+% needed for the graph distribution mu_G to be defined; the source
+% (references/qpbt-paper/07_types.tex:84-93) leaves it implicit here as well.
 \begin{definition}[Typed conditionally linear distributions]\label{def:typed-cl-distributions}
 	\uses{def:typed-cl-functions, def:graph-distribution, def:cl-dist}
-	Let $\mathcal T$ be a type set and let $L = \{L_u\}_{u \in \mathcal T}$ and $R = \{R_v\}_{v \in \mathcal T}$ be $\mathcal T$-typed families of conditionally linear functions on $V$. Let $G = (\mathcal T, E)$ be a graph with vertex set $\mathcal T$. The \emph{$(\mathcal T, G)$-typed conditionally linear distribution $\mu^G_{L,\,R}$ corresponding to $(L, R)$} is the distribution over pairs $\bigl( (u, x), (v, y) \bigr)$, where the type pair $(u,v)$ is drawn from the graph distribution $\mu_G$ and the content pair $(x,y)$ is drawn from $\mu_{L_u,\,R_v}$.
+	Let $\mathcal T$ be a type set and let $L = \{L_u\}_{u \in \mathcal T}$ and $R = \{R_v\}_{v \in \mathcal T}$ be $\mathcal T$-typed families of conditionally linear functions on $V$. Let $G = (\mathcal T, E)$ be a graph with vertex set $\mathcal T$ and nonempty edge set $E$, so that the graph distribution $\mu_G$ of Definition~\ref{def:graph-distribution} is defined. The \emph{$(\mathcal T, G)$-typed conditionally linear distribution $\mu^G_{L,\,R}$ corresponding to $(L, R)$} is the distribution over pairs $\bigl( (u, x), (v, y) \bigr)$, where the type pair $(u,v)$ is drawn from the graph distribution $\mu_G$ and the content pair $(x,y)$ is drawn from $\mu_{L_u,\,R_v}$.
 \end{definition}

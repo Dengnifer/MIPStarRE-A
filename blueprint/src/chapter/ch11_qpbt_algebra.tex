@@ -95,9 +95,9 @@ one may nevertheless single out a \emph{canonical} complement.
 		F^\perp = \{\hat{e}_j : j \notin J\}\;.
 	\]
 	The canonical complement is a \emph{set} of vectors, not a subspace.
-	% Basis-independence made explicit (review code-F1): the source defines
-	% F^perp through a basis but does not assert dependence on it; uniqueness of
-	% the reduced row echelon form gives dependence on span(F) alone.
+	% Basis-independence made explicit here: the source defines F^perp through
+	% a basis but does not assert dependence on it; uniqueness of the reduced
+	% row echelon form gives dependence on span(F) alone.
 	Although defined through the basis $F$, it depends only on
 	$\mathrm{span}(F)$ and the ambient standard basis: two bases of the same
 	subspace form the rows of row-equivalent matrices, which have the same
@@ -331,9 +331,9 @@ test.
 	\emph{total degree (at most) $d$} if $c_\alpha \neq 0$ only when
 	$\sum_i \alpha_i \le d$. (Affine) \emph{multilinear} polynomials are those
 	of individual degree $1$.
-	% Relationship to def:polyfunc corrected (review code-F17): polyfunc keeps
-	% polynomial representatives, so evaluation identifies it with the function
-	% classes above only for d <= q-1.
+	% Relationship to def:polyfunc: polyfunc keeps polynomial representatives,
+	% so evaluation identifies it with the function classes above only for
+	% d <= q-1.
 	Definition~\ref{def:polyfunc} introduces the set $\polyfunc{m}{q}{d}$ of
 	polynomials in $\F_q[x_1, \dots, x_m]$ of degree at most $d$ in each
 	variable, identified by their polynomial representatives rather than by the
@@ -346,6 +346,13 @@ test.
 \end{definition}
 
 \begin{lemma}[Schwartz--Zippel lemma~\cite{Sch80,Zip79}]\label{lem:schwartz-zippel}
+	% Same declaration as lem:schwartz-zippel-total-degree (ch03), of which this
+	% node is a restatement: the function-level statement here is the exact
+	% restriction of the MvPolynomial-level theorem to the reduced (individual
+	% degree <= q-1) representatives that def:polynomials-degree attaches
+	% uniquely to each polynomial function.
+	\lean{MIPStarRE.LDT.Preliminaries.schwartzZippel_totalDegree}
+	\leanok
 	\uses{def:polynomials-degree}
 	Let $f, g : \F_q^m \to \F_q$ be two unequal polynomials of total degree at
 	most $d$. Then

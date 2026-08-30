@@ -36,7 +36,7 @@ preliminary definitions and lemmas used throughout the analysis.
 
 \begin{definition}[Individual and total degree polynomial classes]
 	\label{def:ideg-deg-polynomials}
-	\uses{def:line}
+	\uses{def:line, def:line-representative, def:polyfunc}
 	Given integers $d, m \geq 0$ and a prime power $q$, denote by
 	$\mathrm{ideg}_{d,m}(\F_q)$ the set of polynomials in $m$ variables over
 	$\F_q$ with \emph{individual} degree at most $d$ in each variable. When
@@ -44,13 +44,58 @@ preliminary definitions and lemmas used throughout the analysis.
 	the number of variables is also clear from context, $\mathrm{ideg}_d$. We
 	denote by $\deg_d$ the set of polynomials with \emph{total} degree at
 	most $d$.
-	% The following usage is introduced only implicitly in the source, in the
-	% statement of the lemma labelled lem:qld-comm-line-cons.
-	For a line $\ell \subseteq \F_q^m$ (Definition~\ref{def:line}) we write
-	$\deg_{md}(\ell)$ for the set of functions $\ell \to \F_q$ given by a
-	univariate polynomial of degree at most $md$ in a parameterization of
-	$\ell$.
+	% The line-restricted classes below are introduced only implicitly in the
+	% source, in the statement of the lemma labelled lem:qld-comm-line-cons,
+	% which reads them as polynomials "defined on the line". The coefficient
+	% reading adopted here follows the answer format of the decision procedure
+	% of the low individual degree game (source figure fig:ld-decider) and the
+	% representative convention of def:polyfunc; see the remark following this
+	% definition.
+	For a line $\ell \subseteq \F_q^m$ (Definition~\ref{def:line}) presented
+	by a base point $u_0$ and a direction $v$ --- for the lines arising as
+	question contents, the pair read off the line's description, whose base
+	point is the canonical representative of
+	Definition~\ref{def:line-representative} --- and an integer $c \geq 0$,
+	we write $\deg_c(\ell)$ for the set of univariate polynomials of degree
+	at most $c$, each given by its list of $c+1$ coefficients and identified
+	by its polynomial representative rather than by the function it induces,
+	as in Definition~\ref{def:polyfunc}; the argument $\ell$ records the
+	line to which such an answer refers, through the parameterization
+	$t \mapsto u_0 + tv$. The cases used below are $\deg_d(\ell)$ and
+	$\deg_{md}(\ell)$; whenever $d \leq md$, extending coefficient lists by
+	zeros gives the inclusion $\deg_d(\ell) \subseteq \deg_{md}(\ell)$. For
+	$f \in \deg_c(\ell)$, $u \in \ell$, and $a \in \F_q$, we say that $f$
+	\emph{evaluates to $a$ at $u$}, written $f(u) = a$, if $f(t) = a$ for
+	every $t \in \F_q$ with $u = u_0 + tv$. When $v \neq 0$ this $t$ is
+	unique, so every $f$ evaluates at every point of $\ell$; when $v = 0$,
+	so that $\ell = \{u_0\}$, exactly those $f$ that induce a constant
+	function on $\F_q$ evaluate at $u_0$, to their constant value. An
+	operator indexed by $f(u)$ is understood to be the zero operator when
+	$f$ does not evaluate at $u$, and for a family $\{N_f\}$ indexed by
+	$f \in \deg_c(\ell)$ we write
+	$N_{[\mathrm{eval}_u(\cdot)=a]} = \sum_{f \colon f(u) = a} N_f$; when
+	$v = 0$ the classes indexed by $a \in \F_q$ form a sub-measurement
+	rather than a partition of the outcomes.
 \end{definition}
+
+\begin{remark}[Line answers as coefficient lists]
+	\label{rem:deg-line-representatives}
+	The source refers to the elements of $\deg_{md}(\ell)$ as polynomials
+	``defined on the line $\ell$'', that is, as functions on the point set
+	of $\ell$, while its decision procedure expects each line answer as a
+	list of coefficients. The two readings differ. When $md \geq q$,
+	distinct coefficient lists induce the same function $\F_q \to \F_q$;
+	and when $\ell$ has direction $v = 0$ --- a case the question
+	distributions produce with positive probability
+	(Remark~\ref{rem:ld-win-zero-direction}) --- the point set of $\ell$ is
+	the singleton $\{u_0\}$, so a function on $\ell$ retains only a single
+	field element of the answer. Definition~\ref{def:ideg-deg-polynomials}
+	therefore adopts the coefficient reading, under which the strategy's
+	line measurements are indexed by exactly the answers of the prescribed
+	form, and its evaluation convention reproduces the universal
+	quantification of the line-versus-point clauses of the win predicates
+	(Definition~\ref{def:ld-win-predicate}).
+\end{remark}
 
 Throughout this chapter $q = 2^k$ with $k$ odd is an admissible field size
 (Definition~\ref{def:admissible-size}) and $n = 2^m$. Recall from
@@ -182,8 +227,11 @@ this is the source of the terminology.
 	claims are incorrect: the coordinates of $\mathrm{ind}_m(u)$ sum to $1$
 	for every $u \in \F_q^m$, so $\mathrm{ind}_m(u)$ never vanishes, and for
 	$(q,m,d) = (2,1,0)$ the tuple $\omega = (0,0,1,1)$ is anticommuting.
-	For $d = 0$ the bounds themselves fail: with $(q,m,d) = (2,1,0)$, an
-	admissible parameter tuple, the exact anticommuting probability
+	For $d = 0$ the bounds themselves fail: with $(q,m,d) = (2,1,0)$ ---
+	a tuple with admissible field size and $m \mid q$, excluded from
+	Definition~\ref{def:admissible} only by the requirement $d \geq 1$
+	that the source leaves implicit --- the exact anticommuting
+	probability
 	$(1-q^{-1})^{m+1} \cdot \frac12 = \frac18$ is smaller than the claimed
 	lower bound $\big(1 - \frac{3md}{q}\big) \cdot \frac12 = \frac12$. The
 	proof given above therefore computes the probability exactly, using the
@@ -263,15 +311,21 @@ weighted sums of those operators.
 	Definition~\ref{def:approx-question-indexed-operators}.
 \end{lemma}
 \begin{proof}
+	% The source ends this display with the exact bound |A| * delta; under the
+	% O(.) reading of def:povm-distance the hypothesis only supplies O(delta),
+	% and the constant is retained inside the O(.).
 	Expand
 	\[
 		\E_x \Big\| \sum_a \alpha_a (A^x_a - B^x_a) \ket{\psi} \Big\|^2
 		\,\leq\, \E_x \Big( \sum_a \big\| (A^x_a - B^x_a) \ket{\psi} \big\| \Big)^2
 		\,\leq\, |\mathcal{A}| \cdot \E_x \sum_a \big\| (A^x_a - B^x_a) \ket{\psi} \big\|^2
-		\,\leq\, |\mathcal{A}| \cdot \delta\,,
+		\,\leq\, O\big( |\mathcal{A}| \cdot \delta \big)\,,
 	\]
 	using the triangle inequality followed by the Cauchy--Schwarz
-	inequality.
+	inequality; the last step is the hypothesis
+	$A^x_a \approx_\delta B^x_a$, whose bound carries a hidden universal
+	constant (Definition~\ref{def:povm-distance}), and the conclusion
+	holds with the same implicit constant.
 \end{proof}
 
 The following lemma shows that POVMs that are approximately projective, in
@@ -337,9 +391,10 @@ $\{M^{(\mathrm{Point},W),u}_a\}_{a \in \F_q}$ for all $u \in \F_q^m$.
 \begin{definition}[Strategy observables]
 	\label{def:strategy-observables}
 	\uses{def:projective-strategy-setup, def:pauli-win-predicate, def:subfield-trace, def:line, def:line-representative}
-	For ``line'' questions, of type $\mathrm{ALine}$ or $\mathrm{DLine}$,
-	we use $\mathrm{Line}$ as a formal placeholder for either type; which
-	type is meant will be clear from the nature of the line. Moreover,
+	For ``line'' questions we write $\mathrm{Line}$ for either of the
+	types $\mathrm{ALine}$ and $\mathrm{DLine}$: a statement about the
+	type $\mathrm{Line}$ applies to both types, and the intended type is
+	determined by the line description $\ell$. Moreover,
 	$\ell$ denotes the description of either an axis-parallel line, given by
 	a pair $\ell = (u_0, s)$, or a diagonal line, given by a triple
 	$\ell = (u_0, s, v)$ (Definition~\ref{def:line-representative}). For
@@ -360,7 +415,7 @@ extracts from the strategy.
 
 \begin{lemma}[Winning implications]
 	\label{lem:qld-win-implications}
-	\uses{def:projective-strategy-setup, def:anticommuting-tuple, def:pauli-question-distribution, def:pauli-win-predicate, def:line-point-dist, def:consistency, def:povm-distance, def:ms-game, def:tensor-product-value, def:low-degree-encoding}
+	\uses{def:projective-strategy-setup, def:anticommuting-tuple, def:pauli-question-distribution, def:pauli-win-predicate, def:line-point-dist, def:consistency, def:povm-distance, def:ms-game, def:tensor-product-value, def:low-degree-encoding, def:ideg-deg-polynomials}
 	Assume that $\mathcal{S}$ succeeds in $G^{\mathrm{Pauli}}_{(q,m,d)}$
 	with probability at least $1 - \eps$, for some $\eps \geq 0$. Then the
 	following hold, with respect to the state $\ket{\psi}$ of
@@ -416,7 +471,13 @@ extracts from the strategy.
 	\end{enumerate}
 	Here
 	$M^{(\mathrm{Point},W),u}_{[\tr(\cdot\,r)=a]} = \sum_{a' \in \F_q \colon \tr(a'r)=a} M^{(\mathrm{Point},W),u}_{a'}$
-	for $a \in \F_2$; the answer to a question of type $\mathrm{Pair}$ is a
+	for $a \in \F_2$; the coarse-graining
+	$M^{(\mathrm{Line},W),\ell}_{[\mathrm{eval}_u(\cdot)=a]}$ in
+	item~\ref{enu:qld-ld} is the one of
+	Definition~\ref{def:ideg-deg-polynomials}, so that for a zero-direction
+	line the classes indexed by $a \in \F_q$ form a sub-measurement, whose
+	omitted outcomes the line-versus-point clauses reject against every
+	point answer; the answer to a question of type $\mathrm{Pair}$ is a
 	pair $(\beta_X,\beta_Z) \in \F_2 \times \F_2$, and
 	$M^{\mathrm{Pair},\omega}_{[\beta_W=a]}$ denotes its coarse-graining
 	onto the $W$-component. Furthermore, all of the approximations above
@@ -540,9 +601,10 @@ extracts from the strategy.
 	the form stated above. In the source proof of
 	Lemma~\ref{lem:qld-win-implications-obs}, one display reads
 	$Z^{r_X}(u_X)\,X^{r_Z}(u_Z)$ where $Z^{r_Z}(u_Z)\,X^{r_X}(u_X)$ is
-	meant. The source also labels
-	Lemma~\ref{lem:qld-win-implications-obs} with the prefix ``len''
-	rather than ``lem''; the original label is preserved as an alias.
+	meant.
+	% A third slip in the source, the label prefix `len' in place of `lem'
+	% on the lemma corresponding to lem:qld-win-implications-obs, is
+	% recorded in the comment at that lemma; no alias label is defined.
 	In addition, the source proof of Lemma~\ref{lem:qld-win-implications}
 	restricts attention to the case $6md \leq q$ and disposes of the
 	remaining parameters by an appeal to Theorem~\ref{thm:pauli}, the
@@ -757,7 +819,7 @@ every tuple $\omega$.
 	% labelled lem:qld-comm-line-cons (lines 552-556); it is recorded as a
 	% standalone definition because Chapter chap:qpbt-combining uses the
 	% concrete measurement, not merely its existence.
-	\uses{def:projective-strategy-setup, def:expanded-state, def:expanded-observables, def:ideg-deg-polynomials, def:low-degree-encoding, lem:pauli-observable-expansion, def:line}
+	\uses{def:projective-strategy-setup, def:expanded-state, def:expanded-observables, def:ideg-deg-polynomials, def:low-degree-encoding, lem:pauli-observable-expansion, def:line, def:pauli-win-predicate}
 	For $W \in \{X,Z\}$, a line $\ell$, and $f \in \deg_{md}(\ell)$,
 	define
 	\[
@@ -770,12 +832,29 @@ every tuple $\omega$.
 	of Definition~\ref{def:expanded-observables}), is the outcome-$f''$
 	projector of the following projective measurement: measure all $n$
 	qudits in the basis $W$, obtaining an outcome $h \in \F_q^{n}$, and
-	return the restriction $f''$ of the low-degree encoding
+	return the polynomial $f''$ obtained by substituting the
+	parameterization of $\ell$ into the low-degree encoding
 	$g_h \colon \F_q^m \to \F_q$
-	(see Definition~\ref{def:low-degree-encoding}) to the line
-	$\ell$. Since $g_h$ has individual degree at most $d$, hence total
-	degree at most $md$, its restriction to $\ell$ lies in
-	$\deg_{md}(\ell)$, and
+	(see Definition~\ref{def:low-degree-encoding}): writing $(u_0,v)$ for
+	the base point and direction of $\ell$, the outcome $f''$ is
+	$g_h(u_0 + tv)$, expanded as a polynomial in the variable $t$ from the
+	coefficient representation of $g_h$. Since $g_h$ has individual degree
+	at most $d$, hence total degree at most $md$, the substituted
+	polynomial has degree at most $md$ in $t$, so
+	$f'' \in \deg_{md}(\ell)$. The strategy measurement
+	$\{M^{(\mathrm{Line},W),\ell}_{f'}\}$ is indexed by the answers of the
+	prescribed form (Definition~\ref{def:pauli-win-predicate}): for a
+	diagonal line these are the elements of $\deg_{md}(\ell)$, and for an
+	axis-parallel line the elements of $\deg_d(\ell)$, regarded as a
+	measurement with outcomes in $\deg_{md}(\ell)$ through the inclusion
+	$\deg_d(\ell) \subseteq \deg_{md}(\ell)$ of
+	Definition~\ref{def:ideg-deg-polynomials}, with the zero operator
+	assigned to outcomes outside $\deg_d(\ell)$. For an axis-parallel
+	$\ell$, with direction $e_i$, the substituted polynomial also has
+	degree at most $d$ in $t$ --- its degree is the individual degree of
+	$g_h$ in the $i$-th variable --- so
+	$\hat{M}^{(\mathrm{Line},W),\ell}_f = 0$ unless $f \in \deg_d(\ell)$.
+	In all cases
 	$\{\hat{M}^{(\mathrm{Line},W),\ell}_f\}_{f \in \deg_{md}(\ell)}$ is a
 	projective measurement.
 \end{definition}
@@ -835,7 +914,7 @@ every tuple $\omega$.
 	$\delta_{\mathrm{Line}}(\eps) = \sqrt{\eps}$.
 \end{lemma}
 \begin{proof}
-	\uses{def:expanded-line-measurement, def:expanded-point-measurement, lem:qld-win-implications, fact:data-processing, fact:add-a-proj2, fact:agreement, def:line-point-dist}
+	\uses{def:expanded-line-measurement, def:expanded-point-measurement, lem:qld-win-implications, fact:data-processing, fact:add-a-proj2, fact:agreement, def:line-point-dist, def:ideg-deg-polynomials, def:pauli-win-predicate}
 	Take $\{\hat{M}^{(\mathrm{Line},W),\ell}_f\}$ to be the measurement of
 	Definition~\ref{def:expanded-line-measurement}.
 	Item~\ref{enu:qld-comm-line-self-cons} follows from the fact that the
@@ -846,7 +925,8 @@ every tuple $\omega$.
 	$\{\tau^{W,\ell}_{f''}\}$ are perfectly self-consistent between
 	registers $\mathsf{A}'$ and $\mathsf{A}''$, and the data processing
 	inequality (Lemma~\ref{fact:data-processing}). For
-	item~\ref{eq:qld-comm-line-pt-cons}: insert the projection
+	item~\ref{eq:qld-comm-line-pt-cons}: for the outcomes $f'$ that
+	evaluate at $u$, insert the projection
 	$M^{(\mathrm{Line},W),\ell}_{[\mathrm{eval}_u(\cdot)=f'(u)]}$ by
 	projectivity, replace it by
 	$(M^{(\mathrm{Point},W),u}_{f'(u)})_{\mathsf{B}\mathsf{A}''}$ using the
@@ -854,24 +934,50 @@ every tuple $\omega$.
 	Lemma~\ref{lem:qld-win-implications}) together with
 	Lemma~\ref{fact:add-a-proj2}, adjoin the exactly consistent projector
 	$\tau^{W,u}_{f''(u)}$ on register $\mathsf{A}''$, and recombine by the
-	convolution form of Definition~\ref{def:expanded-point-measurement};
-	this gives item~\ref{eq:qld-comm-line-pt-cons} with error $\eps$. For
+	convolution form of Definition~\ref{def:expanded-point-measurement}.
+	Outcomes without an evaluation at $u$ occur only when $\ell$ has zero
+	direction, where $\tau^{W,\ell}_{f''}$ vanishes unless $f''$ is a
+	constant polynomial, so that $f = f' + f''$ evaluates at $u$ exactly
+	when $f'$ does; for these outcomes the right-hand side of
+	item~\ref{eq:qld-comm-line-pt-cons} carries the zero operator
+	(Definition~\ref{def:ideg-deg-polynomials}), and their total mass
+	satisfies
+	\[
+		\E_{(\ell,u)} \sum_{f' \text{ without an evaluation at } u}
+		\bra{\hat{\psi}}\, M^{(\mathrm{Line},W),\ell}_{f'} \ot \Id\,
+		\ket{\hat{\psi}} \,\leq\, O(\eps)\,,
+	\]
+	because the line-versus-point subtest is executed with probability
+	bounded below by a universal constant and rejects a line answer with
+	no evaluation at $u$ against every point answer
+	(Definition~\ref{def:pauli-win-predicate}). This gives
+	item~\ref{eq:qld-comm-line-pt-cons} with error $\eps$. For
 	item~\ref{eq:qld-comm-line-pt-cons2}, the data processing inequality
 	does not apply directly, since the bound of
 	item~\ref{eq:qld-comm-line-pt-cons} is stated with $\approx$ rather
 	than $\simeq$ and its right-hand side is not of the form
 	$\Id \ot B$; instead, a direct computation from
 	item~\ref{eq:qld-comm-line-pt-cons} together with projectivity gives
+	% The source ends this display with the exact upper bound eps; the bound
+	% inherited from item 2 carries the hidden universal constant of
+	% def:povm-distance, which is retained inside the O(.).
 	\[
 		\E_{(\ell,u)} \sum_{a \in \F_q}
 		\bra{\hat{\psi}}\, \hat{M}^{(\mathrm{Line},W),\ell}_{[\mathrm{eval}_u(\cdot)=a]}
 		\ot \big( \Id - \hat{M}^{(\mathrm{Point},W),u}_a \big) \ket{\hat{\psi}}
-		\,\leq\, \eps\,.
+		\,\leq\, O(\eps)\,,
 	\]
+	while the mass bound of the previous paragraph controls the outcomes
+	omitted from every class,
+	$\E_{(\ell,u)} \bra{\hat{\psi}} \big( \Id - \sum_a
+	\hat{M}^{(\mathrm{Line},W),\ell}_{[\mathrm{eval}_u(\cdot)=a]} \big)
+	\ot \Id \ket{\hat{\psi}} \leq O(\eps)$; both terms are needed because
+	for a zero-direction $\ell$ the classes
+	$[\mathrm{eval}_u(\cdot)=a]$ need not exhaust $\deg_{md}(\ell)$.
 	An elementary bound for projective sub-measurements $\{A_i\}$,
 	$\{B_i\}$ and a state $\ket{\varphi}$, namely
 	$\sum_i \bra{\varphi}(A_i - B_i)\ket{\varphi} \leq 2 \big( \sum_i \big\|(A_i - B_i)\ket{\varphi}\big\|^2 \big)^{1/2}$,
-	upgrades this to
+	upgrades these two bounds to
 	$\Id \approx_{\sqrt{\eps}} \sum_a \hat{M}^{(\mathrm{Line},W),\ell}_{[\mathrm{eval}_u(\cdot)=a]} \ot \hat{M}^{(\mathrm{Point},W),u}_a$.
 	A second elementary fact about projective measurements --- if
 	$\Id \approx_\delta \sum_i A^x_i \ot B^x_i$ for families of projective

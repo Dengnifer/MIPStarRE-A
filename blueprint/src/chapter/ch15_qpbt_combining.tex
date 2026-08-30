@@ -324,7 +324,10 @@ merged into a single measurement returning a pair of global polynomials that
 encode the $X$-basis and the $Z$-basis information simultaneously. This is
 done by encoding the pair as one polynomial in $2m+2$ variables and invoking
 the quantum soundness of the classical low individual degree test
-(Theorem~\ref{lem:ld-soundness}).
+(Theorem~\ref{lem:ld-soundness}). The instantiation at dimension $2m+2$
+requires that $2m+2$ divide $q$; the statements below carry this hypothesis
+explicitly, and Remark~\ref{rem:qld-4-7-divisibility} discusses its
+relationship to the admissibility of $(q,m,d)$.
 
 \begin{definition}[The combining map]
 	\label{def:combine-map}
@@ -416,9 +419,17 @@ the quantum soundness of the classical low individual degree test
 	\label{lem:qld-4-13}
 	\uses{lem:qld-4-12, def:line, def:line-point-dist, def:consistency,
 		def:bracket, def:expanded-state}
+	% The source states delta_combine(eps,m,d,q) = poly(m^2 eps, md/q)
+	% (references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex,
+	% lem:qld-4-13); neither of its two proof routes delivers that form,
+	% and the route retained here yields m * poly(eps, md/q). See
+	% rem:qld-4-13-source-defects. The divisibility hypothesis is required
+	% for the line-point distribution over F_q^{2m+2}; see
+	% rem:qld-4-7-divisibility.
 	There exists a function
-	$\delta_{\mathrm{combine}}(\eps,m,d,q) = \poly(m^2\eps, md/q)$ such that
-	the following holds. For every line $\ell$ in $\F_q^{2m+2}$ and
+	$\delta_{\mathrm{combine}}(\eps,m,d,q) = m \cdot \poly(\eps, md/q)$
+	such that the following holds. Assume that $2m+2$ divides $q$. For
+	every line $\ell$ in $\F_q^{2m+2}$ and
 	$\hilb \in \{\hilb_{\mathsf{A}}, \hilb_{\mathsf{B}}\}$ there exists a
 	POVM $\{\hat{Q}^{\ell}_{f}\}$ acting on $\hilb \ot (\C^q)^{\ot n}$ with
 	outcomes $f \in \deg_{md+1}(\ell)$ such that on average over a uniformly
@@ -467,8 +478,9 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 
 \begin{lemma}[Restricted line distributions and error inflation]
 	\label{lem:restricted-line-mixture-bounds}
-	% This node corresponds to unlabelled prose in the source (the discussion
-	% following def:ith-restricted-line, lines 1049-1061 of the paper file).
+	% Source: unlabelled prose in the paper --- the discussion following
+	% def:ith-restricted-line at lines 1049-1061 of
+	% references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex.
 	\uses{def:ith-restricted-line, def:line-point-dist, lem:qld-xz-lines,
 		lem:qld-4-10, def:expanded-state}
 	The distribution $D_{\mathrm{ALine}}$ is a uniform mixture of the
@@ -520,23 +532,52 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 \begin{lemma}[The sub-line distribution]
 	\label{lem:qld-sublines}
 	\uses{def:line, def:line-point-dist, def:ith-restricted-line}
-	There exists a distribution $D$ over tuples $(\ell, \ell_X, \ell_Z)$,
-	where $\ell$ is a line in $\F_q^{2m+2}$ and $\ell_X, \ell_Z$ are lines in
-	$\F_q^m$, with the following properties:
+	% Hypothesis added: the line-point distribution over F_q^{2m+2} is built
+	% from the index function chi of def:ld-question-distribution at
+	% dimension 2m+2, which requires 2m+2 to divide q; the source
+	% (references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex,
+	% lem:qld-sublines) instantiates it without this hypothesis. See
+	% rem:qld-4-7-divisibility.
+	Assume that $2m+2$ divides $q$. Then there exists a distribution $D$
+	over tuples $(\ell, \ell_X, \ell_Z)$, where $\ell$ is a line in
+	$\F_q^{2m+2}$ and $\ell_X, \ell_Z$ are lines in $\F_q^m$, with the
+	following properties:
 	\begin{enumerate}
 		\item The marginal distribution over $\ell$ is the same as the
 		marginal of the line-point distribution over $\F_q^{2m+2}$.
+		% The source phrases the next property as: the marginal over
+		% (ell_X, ell_Z) is "a mixture of the product distributions
+		% D_{ALine,i} x D_{ALine,j} and D_{DLine,i} x D_{DLine,j}". Those
+		% products are distributions over pairs of line-point pairs, not
+		% over pairs of lines, so the phrase does not type-check as
+		% written; the formulation below states the mixture at the level
+		% of the joint law of (ell_X, ell_Z, u), which is what the proofs
+		% of lem:claim-17-2 and lem:claim-17-3 use.
 		\item For any point of the form $u = (u_X, u_Z, \alpha, \beta)$
 		lying on $\ell$, it holds that $u_X \in \ell_X$ and
-		$u_Z \in \ell_Z$. Moreover, for $u$ chosen uniformly at random on
-		$\ell$, the marginal distribution over $(\ell_X, \ell_Z, u_X)$
-		(resp.\ over $(\ell_X, \ell_Z, u_Z)$) is such that the marginal over
-		$(\ell_X, \ell_Z)$ is a mixture of the product distributions
-		$D_{\mathrm{ALine},i} \times D_{\mathrm{ALine},j}$ and
-		$D_{\mathrm{DLine},i} \times D_{\mathrm{DLine},j}$ for
-		$i, j \in \{1, \dots, m\}$, and, conditioned on
-		$(\ell_X, \ell_Z)$, the point $u_X$ is uniformly random on $\ell_X$
-		(resp.\ $u_Z$ is uniformly random on $\ell_Z$).
+		$u_Z \in \ell_Z$. Moreover, the joint distribution of
+		$(\ell_X, \ell_Z, u)$, for $(\ell, \ell_X, \ell_Z) \sim D$ and
+		$u$ chosen uniformly at random on $\ell$, is a mixture of
+		components indexed by a type
+		$\mathrm{v} \in \{\mathrm{ALine}, \mathrm{DLine}\}$ and indices
+		$i, j \in \{1, \dots, m\}$ with the following two properties
+		within the component $(\mathrm{v}, i, j)$: the pair
+		$(\ell_X, \ell_Z)$ is distributed according to the product of the
+		marginal distributions on lines of $D_{\mathrm{v},i}$ and of
+		$D_{\mathrm{v},j}$, and, conditioned on $(\ell_X, \ell_Z)$, the
+		point $u_X$ is uniformly distributed on $\ell_X$ and likewise the
+		point $u_Z$ is uniformly distributed on $\ell_Z$. Equivalently,
+		since under each restricted distribution the point is uniformly
+		distributed on the line conditionally on the line: within the
+		component $(\mathrm{v}, i, j)$, the pair
+		$((\ell_X, u_X), (\ell_Z, z'))$, where $z'$ is a uniformly random
+		point of $\ell_Z$ sampled independently of $u$, is distributed
+		according to $D_{\mathrm{v},i} \times D_{\mathrm{v},j}$, and
+		symmetrically the pair $((\ell_X, x'), (\ell_Z, u_Z))$, with $x'$
+		a uniformly random point of $\ell_X$ sampled independently of
+		$u$, is distributed according to
+		$D_{\mathrm{v},i} \times D_{\mathrm{v},j}$. (No assertion is made
+		about the joint conditional law of the pair $(u_X, u_Z)$.)
 		\item If $\ell$ is axis-parallel, then $\ell_X$ and $\ell_Z$ are
 		axis-parallel.
 	\end{enumerate}
@@ -545,12 +586,26 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 \end{lemma}
 \begin{proof}
 	\uses{def:line-representative, def:ld-question-distribution,
-		def:line-point-dist, def:ith-restricted-line}
+		def:line-point-dist, def:ith-restricted-line, def:line,
+		prop:line-equiv}
 	The distribution $D$ is described by a sampling procedure. First sample
 	$(\ell, u)$ from the line-point distribution over $\F_q^{2m+2}$ and write
 	$u = (u_X, u_Z, \alpha, \beta)$, so that Property~1 holds by
-	construction. If $\ell$ is axis-parallel, $\ell = (v, e_j)$ with
-	$v = (v_X, v_Z, \alpha_0, \beta_0)$, set
+	construction; all auxiliary randomness introduced below is sampled
+	independently of $(\ell, u)$. We write $\chi$ for the index function of
+	Definition~\ref{def:ld-question-distribution} at dimension $m$, whose
+	classes $\chi^{-1}(i)$ for $i \in \{1, \dots, m\}$ partition $\F_q$
+	into sets of equal size $q/m$, and $\chi_{2m+2}$ for the index function
+	at dimension $2m+2$, defined because $2m+2$ divides $q$. By a
+	\emph{fresh diagonal direction pair} we mean a pair $(s', w')$ with
+	$s'$ uniformly random in $\F_q$ and $w' \in \F_q^m$ having coordinates
+	$1, \dots, \chi(s')-1$ equal to $0$ and the remaining coordinates
+	uniformly random; this is exactly the law of the coordinate--direction
+	data of the diagonal component of the line-point distribution over
+	$\F_q^m$ (Definition~\ref{def:line-point-dist}).
+
+	If $\ell$ is axis-parallel, $\ell = (v, e_j)$ with
+	$v = (v_X, v_Z, \alpha_0, \beta_0)$ and $j \in \{1, \dots, 2m+2\}$, set
 	$\ell_X = (v'_X, e_{i_X})$ and $\ell_Z = (v'_Z, e_{i_Z})$ where: for
 	$1 \le j \le m$, $i_X = j$ and $i_Z$ is uniformly random in
 	$\{1,\dots,m\}$; for $m+1 \le j \le 2m$, $i_X$ is uniformly random and
@@ -558,28 +613,104 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 	uniformly random; and $v'_X, v'_Z$ are the canonical line
 	representatives of $v_X, v_Z$ for the chosen directions
 	(Definition~\ref{def:line-representative}), so that $v_X \in \ell_X$
-	and $v_Z \in \ell_Z$. If $\ell$ is diagonal, $\ell = (v, s, w)$ with
-	direction $w = (w_X, w_Z, \gamma, \delta)$ whose first nonzero
-	coordinate has index $j = \chi(s)$, sample
-	$\ell_X = (v'_X, s_X, w'_X)$ and $\ell_Z = (v'_Z, s_Z, w'_Z)$ where: for
-	$1 \le j \le m$, $w'_X = w_X$ and $w'_Z = w_Z$ with $s_X, s_Z$ chosen so
-	that $\chi(s_X) = j$ and $\chi(s_Z) = 1$; for $m+1 \le j \le 2m$,
-	$w'_X$ is a uniformly random diagonal direction (with $s_X$ chosen
-	accordingly) and $w'_Z = w_Z$ with $\chi(s_Z) = j - m$; for
-	$2m+1 \le j \le 2m+2$, both directions are uniformly random with
-	$s_X, s_Z$ chosen accordingly; and again $v'_X, v'_Z$ are the canonical
-	representatives. In each case a uniformly random point $u$ on $\ell$
-	projects to a uniformly random point $u_X$ on $\ell_X$ (resp.\ $u_Z$ on
-	$\ell_Z$), and a case analysis over $j$ shows that the marginal over
-	$(\ell_X, \ell_Z)$ is a mixture of the required product distributions:
-	for instance, in the axis-parallel case with $1 \le j \le m$, the
-	marginal over $(\ell_X, u_X)$ conditioned on $j$ equals
-	$D_{\mathrm{ALine},j}$, and even conditioned on $(\ell_X, u_X)$ the line
-	$\ell_Z$ is distributed as $D_{\mathrm{ALine},i_Z}$ for uniformly random
-	$i_Z$; the remaining cases are analogous, differing only in how the
-	indices are chosen. This gives Property~2. Property~3 is immediate from
-	the procedure: when $\ell$ is axis-parallel, both $\ell_X$ and $\ell_Z$
-	are constructed to be axis-parallel.
+	and $v_Z \in \ell_Z$.
+
+	If $\ell$ is diagonal, $\ell = (v, s, w)$, then by the construction of
+	the diagonal component of the line-point distribution
+	(Definition~\ref{def:ld-question-distribution} instantiated at
+	dimension $2m+2$) the direction $w = (w_X, w_Z, \gamma, \delta)$ has
+	coordinates $1, \dots, j-1$ equal to $0$, where $j = \chi_{2m+2}(s)$,
+	and its remaining coordinates are uniformly random. These remaining
+	coordinates may also vanish, so $w$ need not have a nonzero coordinate
+	at index $j$ and may be the zero vector, in which case $\ell$ is a
+	singleton (Definition~\ref{def:line}).
+	% The source proof describes w as "a direction vector whose first
+	% nonzero coordinate is j = chi(s)"
+	% (references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex, proof
+	% of lem:qld-sublines); the distribution delivers only the weaker
+	% property recorded here, which is the one the argument uses. The
+	% source also leaves the laws of s_X and s_Z unspecified ("chosen such
+	% that chi(s_X) = j"); the uniform choices below are needed for the
+	% exact marginals claimed in Property 2.
+	Sample $\ell_X = (v'_X, s_X, w'_X)$ and $\ell_Z = (v'_Z, s_Z, w'_Z)$
+	where: for $1 \le j \le m$, $w'_X = w_X$ and $w'_Z = w_Z$, with $s_X$
+	uniformly random in the class $\chi^{-1}(j)$ and $s_Z$ uniformly
+	random in the class $\chi^{-1}(1)$; for $m+1 \le j \le 2m$, the pair
+	$(s_X, w'_X)$ is a fresh diagonal direction pair and $w'_Z = w_Z$,
+	with $s_Z$ uniformly random in the class $\chi^{-1}(j-m)$; for
+	$2m+1 \le j \le 2m+2$, both $(s_X, w'_X)$ and $(s_Z, w'_Z)$ are fresh
+	diagonal direction pairs, sampled independently; and $v'_X, v'_Z$ are
+	the canonical representatives of $v_X, v_Z$ for the directions
+	$w'_X, w'_Z$.
+
+	Property~3 is immediate from the procedure: when $\ell$ is
+	axis-parallel, both $\ell_X$ and $\ell_Z$ are constructed to be
+	axis-parallel. The containments in Property~2 hold for every point
+	$u^\dagger = (u^\dagger_X, u^\dagger_Z, \alpha^\dagger,
+	\beta^\dagger)$ of $\ell$: the block $u^\dagger_X$ differs from $v_X$
+	by a multiple of the direction of $\ell_X$ when that direction is
+	inherited from $\ell$ (namely $e_j$ for axis-parallel $\ell$ with
+	$1 \le j \le m$, and $w_X$ for diagonal $\ell$ with $1 \le j \le m$),
+	and equals $v_X$ in all other cases, since then the corresponding
+	block of the direction of $\ell$ vanishes; in either case
+	$u^\dagger_X \in \ell_X$ because $v_X \in \ell_X$, and symmetrically
+	$u^\dagger_Z \in \ell_Z$.
+
+	For the distributional part of Property~2, observe first that
+	$(\ell_X, \ell_Z)$ is a function of $\ell$ and of the auxiliary
+	randomness alone: the directions used are either read off from the
+	direction data of $\ell$ or freshly sampled, and by
+	Proposition~\ref{prop:line-equiv} the canonical representatives
+	$v'_X, v'_Z$ do not depend on which base point of $\ell$ is used to
+	compute them. Under both components of the line-point distribution the
+	point $u$ is uniformly distributed on $\F_q^{2m+2}$ and, conditioned
+	on the line $\ell$, uniformly distributed on the points of $\ell$
+	(each of the $q$ values of the line parameter, or the single point
+	when the direction vanishes, being equally likely). Hence, conditioned
+	on $(\ell, \ell_X, \ell_Z)$, the sampled point $u$ is uniformly
+	distributed on $\ell$, and it suffices to establish the claimed
+	mixture description for the tuple $(\ell_X, \ell_Z, u)$ produced by
+	the procedure itself.
+
+	Condition on the component of the line-point distribution
+	(axis-parallel or diagonal) and on $j$; the mixture of Property~2 is
+	over these choices together with the fresh index choices, and the
+	blocks $u_X, u_Z$ of $u$ are independent and uniform on $\F_q^m$,
+	independent of all direction data. In the axis-parallel case with
+	$1 \le j \le m$, the pair $(\ell_X, u_X)$ consists of the uniformly
+	random point $u_X$ together with the canonical axis-parallel line
+	through it in direction $e_j$, so
+	$(\ell_X, u_X) \sim D_{\mathrm{ALine},j}$, while, conditioned
+	additionally on $i_Z$, the pair $(\ell_Z, u_Z)$ consists of the
+	uniformly random point $u_Z$ together with the canonical line through
+	it in direction $e_{i_Z}$, so
+	$(\ell_Z, u_Z) \sim D_{\mathrm{ALine},i_Z}$; the two pairs are
+	functions of the disjoint independent data $u_X$ and $(u_Z, i_Z)$,
+	hence independent. In the diagonal case with $1 \le j \le m$, the
+	triple $(u_X, w_X, s_X)$ has $u_X$ uniform, $w_X$ with coordinates
+	$1, \dots, j-1$ equal to $0$ and the remaining coordinates uniform,
+	and $s_X$ uniform in $\chi^{-1}(j)$, which is exactly the law
+	generating $D_{\mathrm{DLine},j}$; hence
+	$(\ell_X, u_X) \sim D_{\mathrm{DLine},j}$, and similarly
+	$(\ell_Z, u_Z) \sim D_{\mathrm{DLine},1}$ since $w_Z$ is uniform and
+	$s_Z$ is uniform in $\chi^{-1}(1)$; the two pairs are functions of the
+	disjoint independent data $(u_X, w_X, s_X)$ and $(u_Z, w_Z, s_Z)$,
+	hence independent. The remaining cases are analogous: each of
+	$(\ell_X, u_X)$ and $(\ell_Z, u_Z)$ is either built from the inherited
+	direction block as above, or from a fresh axis index or fresh diagonal
+	direction pair, in which case it is distributed as the uniform mixture
+	over $i$ of $D_{\mathrm{v},i}$ for the corresponding type
+	$\mathrm{v}$; and the two pairs are always functions of disjoint
+	independent collections of the variables $u_X$, $u_Z$, the direction
+	blocks, and the fresh auxiliary choices, hence independent conditioned
+	on the component. Within each component this yields exactly the
+	description of Property~2: the pair $(\ell_X, \ell_Z)$ is
+	product-distributed according to the line marginals of
+	$D_{\mathrm{v},i}$ and $D_{\mathrm{v},j}$, and, conditioned on
+	$(\ell_X, \ell_Z)$, each of $u_X$ and $u_Z$ is uniformly distributed
+	on its line, because under each restricted distribution the point is
+	uniform on the line conditionally on the line. The equivalent product
+	formulations follow from the same conditional uniformity.
 \end{proof}
 
 \begin{remark}[Property~3 of the sub-line distribution]
@@ -593,7 +724,8 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 \end{remark}
 
 The proof of Lemma~\ref{lem:qld-4-13} rests on three scalar estimates, stated
-next. In all three, $D$ is the distribution of Lemma~\ref{lem:qld-sublines},
+next. In all three, $2m+2$ is assumed to divide $q$, $D$ is the distribution
+of Lemma~\ref{lem:qld-sublines},
 $T^{\ell_X,\ell_Z}$ is the measurement of Lemma~\ref{lem:qld-xz-lines} placed
 on registers $\mathsf{A}\mathsf{A}'$, the second tensor factor is placed on
 registers $\mathsf{B}\mathsf{A}''$, and the sums range over
@@ -812,9 +944,12 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 		= O\big(m\,(\eps^{1/4} + \delta_P^{1/4} + \delta_Q^{1/4}
 		+ \delta_{\mathrm{Line}}^{1/2})\big)\,;
 	\end{equation}
-	the function
-	$\delta_{\mathrm{combine}} = \poly(m^2\eps, md/q)$ dominates this
-	bound. (The source states a second bound for the same quantity, whose
+	since
+	$\delta_P = \poly(\eps, md/q)$, $\delta_Q = \poly(\eps)$, and
+	$\delta_{\mathrm{Line}} = \poly(\eps)$, the right-hand side is a
+	function of the form $m \cdot \poly(\eps, md/q)$, and
+	$\delta_{\mathrm{combine}}$ is taken to be such a function dominating
+	it. (The source states a second bound for the same quantity, whose
 	derivation is not supported by the properties proved for the sub-line
 	distribution; see Remark~\ref{rem:qld-4-13-source-defects}.) Now
 	if the pair $(f_X, f_Z)$ evaluates to $(a, b)$ at $(x, z)$, then
@@ -853,10 +988,22 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	$(\ell_X, \ell_Z, z)$ separately, not the joint law of
 	$((\ell_X, x), (\ell_Z, z))$, so the decomposition invoked by the
 	source is not established there. The proof above therefore uses only
-	the first route, whose bound is dominated by the stated form
-	$\delta_{\mathrm{combine}} = \poly(m^2\eps, md/q)$ since
-	$\delta_P = \poly(\eps, md/q)$, $\delta_Q = \poly(\eps)$ and
-	$\delta_{\mathrm{Line}} = \poly(\eps)$. In addition, the final line of
+	the first route. Neither route, moreover, delivers the error form
+	$\poly(m^2\eps, md/q)$ claimed in the source. The first route proves
+	the bound $O(m(\eps^{1/4} + \delta_P^{1/4} + \delta_Q^{1/4} +
+	\delta_{\mathrm{Line}}^{1/2}))$, a function of the form
+	$m \cdot \poly(\eps, md/q)$, and no function of $m^2\eps$ and $md/q$
+	alone that vanishes as its arguments vanish dominates it: at
+	$\eps = m^{-4}$, and with $q$ taken large, both $m^2\eps$ and $md/q$
+	tend to $0$ while the term $m\,\eps^{1/4} = 1$ does not, so the
+	derivation does not support the claimed form. Even granting the
+	decomposition required by the second route, the bound obtained there
+	is $O(m^2\delta_P) = m^2 \cdot \poly(\eps, md/q)$, which again carries
+	a separate prefactor polynomial in $m$. The statement of
+	Lemma~\ref{lem:qld-4-13} above accordingly records the error as
+	$m \cdot \poly(\eps, md/q)$; this form suffices for
+	Lemma~\ref{lem:qld-4-7}, whose error function absorbs the prefactor
+	$m$ into $(md)^a$. In addition, the final line of
 	the source proof of Lemma~\ref{lem:claim-17-2} asserts the bound
 	$O(m^2\delta_{\mathrm{Line}})$ for a consistency term that is close to
 	one rather than for its deficit; the statements and sketches above
@@ -872,10 +1019,17 @@ projective measurement whose outcomes are pairs of global polynomials.
 	\label{lem:qld-4-7}
 	\uses{def:polyfunc, def:expanded-state, def:expanded-point-measurement,
 		def:consistency, def:bracket}
+	% Hypothesis added: the proof instantiates the classical low individual
+	% degree game, and Theorem lem:ld-soundness, at dimension 2m+2, which
+	% def:ld-game admits only when the dimension divides q; the source
+	% (references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex,
+	% lem:qld-4-7) performs the instantiation without this hypothesis. See
+	% rem:qld-4-7-divisibility.
 	There exists a function
 	$\delta_S(\eps,m,d,q) = a(md)^a(\eps^b + q^{-b} + 2^{-bmd})$, for some
 	universal constants $a > 1$ and $0 < b < 1$, such that the following
-	holds. For $\hilb \in \{\hilb_{\mathsf{A}}, \hilb_{\mathsf{B}}\}$ there
+	holds. Assume that $2m+2$ divides $q$. For
+	$\hilb \in \{\hilb_{\mathsf{A}}, \hilb_{\mathsf{B}}\}$ there
 	exists a projective measurement $\{\hat{S}_{g_X,g_Z}\}$ acting on
 	$\hilb \ot (\C^q)^{\ot n}$, with outcomes consisting of pairs
 	$(g_X, g_Z)$ of polynomials, each in $\mathrm{ideg}_{d,m}(\F_q)$, such
@@ -913,15 +1067,15 @@ projective measurement whose outcomes are pairs of global polynomials.
 	$1 - \delta_{\mathrm{combine}}$; the axis-parallel clause of
 	Lemma~\ref{lem:qld-4-13} supplies the degree-$d$ answer format that the
 	game requires on axis-parallel lines.
-	% Caveat added locally: the source applies the classical soundness
-	% theorem at dimension 2m+2 without the divisibility hypothesis that
-	% def:ld-game requires; see rem:qld-4-7-divisibility.
-	(Definition~\ref{def:ld-game} is stated only when its dimension
-	parameter divides $q$; the divisibility of $q$ by $2m+2$ needed here
-	does not follow from admissibility of $(q,m,d)$ and in general fails,
-	so this instantiation, which follows the source, is not covered by
-	Theorem~\ref{lem:ld-soundness} as stated; see
-	Remark~\ref{rem:qld-4-7-divisibility}.) Since $\{\hat{Q}^{\ell}_{f}\}$ is
+	% The divisibility hypothesis of the statement licenses this
+	% instantiation; the source performs it without the hypothesis. See
+	% rem:qld-4-7-divisibility.
+	(The hypothesis that $2m+2$ divides $q$ makes $(q, 2m+2, d, 1)$ a
+	valid parameter tuple for Definition~\ref{def:ld-game}, whose
+	dimension parameter is required to divide $q$; admissibility of
+	$(q,m,d)$ alone supplies only that $m$ divides $q$, and
+	Remark~\ref{rem:qld-4-7-divisibility} records the resulting
+	constraint.) Since $\{\hat{Q}^{\ell}_{f}\}$ is
 	only a POVM, it is first made projective by Naimark dilation
 	(Theorem~\ref{thm:naimark}), which preserves the $\simeq$ conclusions of
 	Lemma~\ref{lem:qld-4-13}. The quantum soundness of the classical test
@@ -975,7 +1129,9 @@ projective measurement whose outcomes are pairs of global polynomials.
 	$\Id - \sum_{g_X,g_Z} \hat{S}_{g_X,g_Z}$ to an arbitrary element costs a
 	further $\delta_{\mathcal{G}}$, and the resulting error
 	$\delta_S = O(\delta_{\mathrm{ld}} + \delta_Q^{1/2} + md/q)$ has the
-	stated form for suitable universal constants; an application of
+	stated form for suitable universal constants (the prefactor $m$ in
+	$\delta_{\mathrm{combine}} = m \cdot \poly(\eps, md/q)$ is absorbed
+	into $(md)^a$ after enlarging $a$ and shrinking $b$); an application of
 	Lemma~\ref{fact:data-processing} then gives
 	\eqref{eq:qld-s-point-con-alice} for $W = X$. For $W = Z$ the same
 	steps are performed with $X$ and $Z$ interchanged, starting from the
@@ -992,23 +1148,30 @@ projective measurement whose outcomes are pairs of global polynomials.
 	degree game only when its dimension parameter divides $q$: the index
 	function $\chi$ of the question distribution
 	(Definition~\ref{def:ld-question-distribution}) partitions $\F_q$ into
-	classes of equal size, one for each coordinate. The proof of
-	Lemma~\ref{lem:qld-4-7} instantiates the game, and
-	Theorem~\ref{lem:ld-soundness}, at dimension $2m+2$, while
-	admissibility of $(q,m,d)$ (Definition~\ref{def:admissible}) supplies
-	only that $m$ divides $q$. An admissible field size
-	(Definition~\ref{def:admissible-size}) is a power of two, so $m$
-	dividing $q$ forces $m$ to be a power of two; for $m \ge 2$ the
-	integer $2m+2 = 2(m+1)$ then has the odd factor $m+1 \ge 3$ and does
-	not divide $q$. The same divisibility hypothesis underlies the
-	line-point distribution over $\F_q^{2m+2}$
+	classes of equal size, one for each coordinate. The same divisibility
+	underlies the line-point distribution over $\F_q^{2m+2}$
 	(Definition~\ref{def:line-point-dist} instantiated at dimension
-	$2m+2$) used in Lemmas~\ref{lem:qld-sublines} and~\ref{lem:qld-4-13}.
-	The source proof in \cite{Ji2020MIPStar} makes the same instantiation
-	without addressing the divisibility; a complete proof requires a
+	$2m+2$). For this reason Lemmas~\ref{lem:qld-sublines},
+	\ref{lem:qld-4-13} and~\ref{lem:qld-4-7} carry the explicit hypothesis
+	that $2m+2$ divides $q$, under which their proofs go through as
+	written. This hypothesis does not follow from admissibility of
+	$(q,m,d)$ (Definition~\ref{def:admissible}), which supplies only that
+	$m$ divides $q$; indeed the two conditions are jointly satisfiable
+	only in a degenerate range: an admissible field size
+	(Definition~\ref{def:admissible-size}) is a power of two, so $m$
+	dividing $q$ forces $m$ to be a power of two, while
+	$2m+2 = 2(m+1)$ divides the power of two $q$ only if $m+1$ is also a
+	power of two, and both conditions hold only for $m = 1$ (in which case
+	$2m+2 = 4$ divides every admissible $q \ge 4$). The source proof in
+	\cite{Ji2020MIPStar} makes the instantiation at dimension $2m+2$
+	without addressing the divisibility. Consequently, for admissible
+	parameters with $m \ge 2$ the hypothesis fails, the statement of
+	Lemma~\ref{lem:qld-4-7} is vacuous, and the conclusion of that lemma
+	is not established for such parameters, here or in the source; a
+	proof covering every admissible parameter tuple requires a
 	formulation of the game, of its question distribution, and of
 	Theorem~\ref{lem:ld-soundness} that applies to dimensions not dividing
-	$q$. No local correction is recorded here.
+	$q$.
 \end{remark}
 
 \begin{remark}[Constant regimes in the quotation of the classical soundness
