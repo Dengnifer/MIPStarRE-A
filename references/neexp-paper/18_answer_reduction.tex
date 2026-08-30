@@ -1,0 +1,745 @@
+\section{Answer reduction}\label{sec:answer-reduction}
+
+In this section, we carry out the answer reduction.
+Our main result will be to take the $\poly(n)$ question complexity, $O(2^n)$ answer complexity $\MIP^*$ protocol for $\succinctsquared$
+given by \Cref{cor:succinct-sat-protocol-with-big-answer-size}
+and convert it to one whose answer complexity is also $\poly(n)$;
+this is \Cref{thm:main} below.
+
+Our answer reduction will apply to any game with a value-$1$ real commuting EPR strategy.
+We will require two properties of these strategies:
+first, that they can be extended to strategies that pass subset tests with probability~$1$, as in \Cref{def:testing-a-code};
+and second, that they are ``oracularizable".
+We explain this second property in the next section. 
+
+\subsection{Oracularization}
+
+Our technique will not work for all entangled games but only for a
+subset, for which a single prover can simulate both prover's actions
+if required to. We call such games ``oracularizable'' games.
+
+
+\begin{definition}
+Given a two-player entangled game~$\game$,
+its \emph{oracularization} is the game $C_{\mathrm{oracle}}(\game)$ given in \Cref{fig:oracle}.
+If $\game$ is value-$1$,
+then we call it \emph{oracularizable}, if $\val{C_{\mathrm{oracle}}(\game)} = 1$ as well. 
+We also note that for \emph{any} game~$\game$, if $\val{\game} \leq 1 -
+  \delta$, then $\val{C_{\mathrm{oracle}}(\game)} \leq 1 - O(\delta)$.
+\end{definition}
+
+{
+  \floatstyle{boxed}
+  \restylefloat{figure}
+  \begin{figure}
+    Given a game $\game$, sample a tuple $(\bx_0, \bx_1, \bC) \sim
+    \game$, and flip two unbiased coins $\bb, \bc \sim \{0,1\}$.
+    With probability $\tfrac{1}{2}$ each, perform one of the following two tests. 
+    \begin{enumerate}
+      \item \textbf{Verify:} Distribute the questions as follows:
+      	\begin{itemize}
+	\item[$\circ$] Player~$\bb$: send the pair $(\bx_0, \bx_1)$ and receive answers $(\ba_0, \ba_1)$.
+	\item[$\circ$] Player~$\overline{\bb}$: send $\bx_{\bc}$ and receive an answer $\ba_2$.
+	\end{itemize}
+	\item \textbf{Consistency:} Play the consistency game with question $\bx_0, \bx_1$.
+    \end{enumerate}
+    Accept if $\ba_2 = \ba_{\bc}$ and $V(\bx_0, \bx_1, \ba_0, \ba_1) = 1$.
+    \caption{The oracularized game $C_{\mathrm{oracle}}(\game)$.\label{fig:oracle}}
+  \end{figure}
+  }
+  
+\noindent
+A real commuting EPR strategy allows ``Player~$\bb$" to sample both questions~$\bx_0$ and~$\bx_1$ simultaneously.
+As a result, if a game~$\game$ has a value-$1$ real commuting EPR strategy, then it is oracularizable.
+
+The value of oracularization is that when the verifier checks $V(\bx_0, \bx_1, \ba_0, \ba_1) = 1$,
+both~$\ba_0$ and~$\ba_1$ come from the same prover rather than two different provers.
+This seems like a minor change, but in fact it makes all the difference.
+Our goal is to reduce the verifier's runtime by having the provers encode their answers using PCP technology.
+When the answers come from \emph{both} provers,
+the relevant piece of PCP technology is a \emph{distributed} PCP,
+but it is known by a simple argument of Reingold that distributed PCPs do not exist
+(see the discussion in~\cite{ARW17}).
+The key difficulty comes from the fact that Alice needs to prepare her PCP proof without
+knowing Bob's question and answer, and vice versa, and this turns out to be impossible in general.
+On the other hand,
+when the answers come from a single prover,
+we can use traditional PCPs to implement the answer reduction, of which we have a variety of constructions.
+We note that oracularized games \emph{do} still have checks between players,
+but these are equality checks and will be easy to implement in the answer reduction regime.
+
+\subsection{Probabilistically checkable proofs of proximity}
+
+In this section, we introduce the main PCP technology we will use for our answer reduction.
+In the oracularized game,
+the provers want to convince us not just that $V(\cdot, \cdot, \cdot, \cdot)$
+is satisfiable---which we already know to be true by construction---but that $(\bx_0, \bx_1, \ba_0, \ba_1)$
+is a particular assignment which satisfies it.
+For this, we need a stronger notion of a PCP called a \emph{probabilistically checkable proof of proximity (PCPP)}.
+These allow one to check that an input~$x$ is close to a satisfying assignment of a circuit~$C$ (hence the ``proximity")
+by making a small number of queries to~$x$.
+These were originally introduced in the independent works of~\cite{BGH+06}
+and~\cite{DR06} (where they were called \emph{assignment testers}).
+
+In our case, we will need even stronger PCPPs in which the verifier is not only query-efficient but \emph{time}-efficient as well.
+The history of these time-efficient PCPPs goes back to the original proof of $\MIP = \nexp$ and the various attempts to ``scale it down"~\cite{OD05}.
+The most famous line of research considered proof systems in which the verifier's query complexity is restricted,
+and this eventually led to the proof of the PCP theorem~\cite{AS98,ALM+98}.
+A parallel line of research considered proof systems in which the verifier's runtime is restricted (so-called ``transparent" proofs)~\cite{BFLS91}.
+The latter of these was revisited in the work of Ben-Sasson et al.~\cite{BGH+05},
+who showed that both lines of research could be remerged in the ``scaled down" setting
+by constructing a PCPP in which the verifier is both query-efficient \emph{and} time-efficient.
+Though their main result is actually sufficient for our purposes,
+we will cite the work of Mie~\cite{Mie09}, which improves on their result in the regime we care about.
+Finally, we note the work of Meir~\cite{Mei14}, who reproves the bounds of Ben-Sasson et al.~\cite{BGH+05} using combinatorial methods.
+
+To our knowledge, ours is the first use of a time-efficient PCPP specifically for its time-efficient properties in the quantum literature.
+Natarajan and Vidick~\cite{NV18a} used the time-efficient PCPP of~\cite{BGH+05} to prove the quantum games PCP conjecture,
+but the property they needed was not that it was time-efficient,
+but that the bits of the proof are linear functions of the bits of the assignment.
+We note that we do not need this property here.
+
+In this literature, it is common to consider ``pair languages" consisting of strings $(x, y)$
+in which~$x$ is small and given to the verifier and~$y$ is large and accessible only through query access.
+This maps perfectly onto our scenario,
+in which the verifier supplies the ``small" questions $\bx_0, \bx_1$
+and the prover supplies the ``large" answers $\ba_0, \ba_1$.
+
+\begin{definition}
+A \emph{pair language} $L$ is a subset of $\{0, 1\}^* \times \{0, 1\}^*$.
+Given $x \in \{0, 1\}^*$, we write $L_x = \{y \in \{0, 1\}^* \mid (x,y) \in L\}$.
+\end{definition}
+
+The next two definitions state the notion of an efficient PCPP verifier.
+
+\begin{definition}[{\cite[Definition 2.1]{BGH+05}}]
+Let $r, q:\Z^+ \rightarrow \Z^+$ and $t:\Z^+ \times \Z^+ \rightarrow \Z^+$.
+An \emph{$(r, q, t)$-restricted PCPP verifier} is a probabilistic machine that, given a string~$x$ (called the \emph{explicit input})
+and a number~$K$ (in binary) as well as oracle access to an \emph{implicit input} $y \in \{0, 1\}^{K}$ and to a \emph{proof oracle} $\pi \in \{0, 1\}^*$,
+tosses $r(|x|+K)$ coins, queries the oracles $(y, \pi)$ for a total of $q(|x|+K)$ symbols,
+runs in time $t(|x|, K)$, and outputs a Boolean verdict in $\{\mathrm{accept}, \mathrm{reject}\}$.
+\end{definition}
+
+\begin{definition}[{\cite[Definition 2.2]{BGH+05}}]
+For functions $r, q:\Z^+ \rightarrow \Z^+$, $t:\Z^+\times \Z^+ \rightarrow \Z^+$,
+and constants
+$s, \gamma \in  [0, 1]$,
+a pair language $L \subseteq \{0, 1\}^* \times \{0, 1\}^*$ is in $\mathrm{PCPP}_{s, \gamma}[r, q, t]$
+if there exists an $(r, q, t)$-restricted PCPP verifier~$V$ with the following properties:
+\begin{itemize}
+\item[$\circ$] \textbf{Completeness:} If $(x, y) \in L$ then there exists a $\pi$ such that $\Pr_R[\text{$V^{y, \pi}(x, |y|; R)$ accepts}] = 1$,
+	where $V^{y, \pi}(x, |y|; R)$ denotes the decision $V$ on input $(x, |y|)$,
+	oracle access to $(y, \pi)$, and coin tosses $R$.
+\item[$\circ$] \textbf{Soundness:} If $(x, y)$ is such that $y$ is $\gamma$-far from $L_x \cap \Sigma^{|y|}$,
+	then for every $\pi$ it holds that $\Pr_R[\text{$V^{y, \pi}(x, |y|;R)$ accepts}] \leq s$.
+\end{itemize}
+\end{definition}
+
+Mie's time-efficient PCPP is states as follows.
+
+\begin{theorem}[{\cite[Theorem 1]{Mie09}}]\label{thm:pcpp-mie}
+Suppose that $L$ is a pair language in $\ntime(T)$
+for some non-decreasing function $T : \Z^+ \rightarrow \Z^+$.
+Then, for every two constants $s, \gamma >0$,
+we have $L \in \mathrm{PCPP}_{s, \gamma}[r, q, t]$, for
+\begin{itemize}
+\item[$\circ$] Randomness complexity $r(m) = \log_2 T(m) + O(\log\log T(m))$.
+\item[$\circ$] Query complexity $q(m) = O(1)$,
+\item[$\circ$] Verification time $t(n, K) = \poly(n, \log K, \log T(n + K))$.
+\end{itemize}
+\end{theorem}
+
+We note that this is in fact a much stronger than what we will actually need.
+In particular, we will only apply this to languages $L$ in \emph{deterministic} $\mathsf{TIME}(T)$,
+which are trivially in $\ntime(T)$.
+
+\subsection{Composing with an error-correcting code}\label{sec:composing-with-an-error-correcting-code}
+
+The verifier in a PCPP rejects any input which is $\gamma$-far from an accepting input,
+but of course we want our verifier to reject \emph{all} non-accepting inputs, no matter their distance.
+To do this, we will (i) encode the verifier's inputs using an error-correcting code
+and (ii) check that the inputs are properly encoded (using, for example, the low-degree test).
+This approach of composing a PCPP with an error-correcting code is standard
+and stretches back in spirit to the transparent proofs of~\cite{BFLS91} (see the discussion of this in~\cite{BGH+06}).
+
+Now we show how to compose an $\MIP^*$ game with an error-correcting code.
+
+\begin{definition}[Error-correcting the provers' answers]\label{def:error-correcting-answers}
+Let $V = (\mathrm{Alg}_{\mathrm{Q}}, \mathrm{Alg}_{\mathrm{A}})$ be an $\MIP^*$ verifier (the language it verifies is not important).
+Suppose on inputs of size~$n$ it has question length~$\ell_{\mathrm{Q}}(n)$ answer length~$\ell_{\mathrm{A}}(n)$.
+Write $L_{\mathrm{A}}$ for the language decided by $\mathrm{Alg}_{\mathrm{A}}$.
+Let $\codec_k = (\codee_k,\coded_k, \codes_k)$ be a $(k, m, q, \eta, t_{\mathrm{Dec}}, t_{\mathrm{Emb}})$-efficient code family with decoding algorithm $\mathrm{Alg}_{\mathrm{Dec}}$.
+Then $L_{\mathrm{A}} \circ \codec$ is a new language defined as follows:
+suppose $(\mathsf{input}, x_0, x_1, y_0, y_1) \in L_{\mathrm{A}}$.
+Let $n$ be the length of $\mathsf{input}$ and $\ell = \ell_{\mathrm{A}}(n)$.
+Then $(\mathsf{input}, x_0, x_1, \codee_{\ell}(y_0), \codee_{\ell}(y_1)) \in L_{\mathrm{A}} \circ \mathsf{Code}$.
+\end{definition}
+
+Now, we prove a couple of properties about the composed verifier.
+First, we show that its runtime is not much slower than the original verifier's.
+
+\begin{proposition}[Runtime of the composed verifier]\label{prop:composed-runtime}
+Let~$V$ and~$\codec_k$ be as in \Cref{def:error-correcting-answers}.
+Suppose $\mathrm{Alg}_{\mathrm{A}}$ runs in time $T(n)$.
+Then there is an algorithm, which we denote $\mathrm{Alg}_{\mathrm{A}} \circ \mathsf{Code}$,
+deciding the language $L_{\mathrm{A}} \circ \mathsf{Code}$.
+In addition, on inputs $(\mathsf{input}, x_0, x_1, z_0, z_1)$
+in which $|\mathsf{input}| = n$,
+$|x_0| = |x_1| = \ell_{\mathrm{Q}}(n)$,
+and $|z_0| = |z_1| = m(\ell_{\mathrm{A}}(n))$,
+the algorithm runs
+in time $T(n) + t_{\mathrm{Dec}}(\ell_{\mathrm{A}}(n))$.
+\end{proposition}
+
+\begin{proof}
+On input $(\mathsf{input}, x_0, x_1, z_0, z_1)$, we define the action of $\mathrm{Alg}_{\mathrm{A}} \circ \mathsf{Code}$ as follows.
+\begin{enumerate}
+\item Compute $n$, the length of $\mathsf{input}$. Set $\ell := \ell_{\mathrm{A}}(n)$.
+\item Check that~$z_0$ and~$z_1$ have length~$m(\ell)$. If they don't, reject.
+\item Compute $y_0 = \mathrm{Alg}_{\coded}(\ell, z_0)$ and $y_1 = \mathrm{Alg}_{\coded}(\ell, z_1)$. If either $y_0$ or $y_1$ is $\bot$, reject.\label{item:decode-that-string}
+\item Otherwise, we know that $y_0, y_1 \in \{0, 1\}^\ell$.  Run $\mathrm{Alg}_{\mathrm{A}}(\mathsf{input}, x_0, x_1, y_0, y_1)$. Accept if it accepts, and reject if it rejects.\label{item:run-that-algorithm}
+\end{enumerate}
+It is immediate that $\mathrm{Alg}_{\mathrm{A}} \circ \mathsf{Code}$ computes $L_{\mathrm{A}} \circ \mathsf{Code}$.
+As for the time complexity, \Cref{item:decode-that-string} runs in time $t_{\mathrm{Dec}}(\ell_{\mathrm{A}}(n))$ 
+and \Cref{item:run-that-algorithm} runs in time $T(n)$.
+Combined, these two give the bound in the proposition statement.
+\end{proof}
+
+Next, we show that this construction solves the ``problem" discussed at the beginning of the section,
+namely that if we perform answer reduction by replacing $\mathrm{Alg}_{\mathrm{A}} \circ \mathsf{Code}$ with a PCPP verifier,
+rather than just $\mathrm{Alg}_{\mathrm{A}}$, then the verifier will reject \emph{all} inputs which are not in the language,
+not just those which are $\delta$-far, provided that those inputs are encoded as per \Cref{def:error-correcting-answers}.
+
+\begin{proposition}\label{prop:new-soundness}
+Let~$V$ and~$\codec_k$ be as in \Cref{def:error-correcting-answers}.
+Let $s, \gamma > 0$ be constants,
+and let $V_{\mathrm{PCPP}}$ be the PCPP verifier for the language $L_{\mathrm{A}} \circ \mathsf{Code}$
+guaranteed by \Cref{thm:pcpp-mie} with these parameters.
+Suppose that $1-\eta(k) \geq 2\gamma$ for all~$k$.
+Then we have the following soundness condition.
+\begin{itemize}
+\item[$\circ$] \textbf{Soundness:} Consider $(\mathsf{input}, x_0, x_1, z_0, z_1)$ for $\mathsf{input}$ of length~$n$, $x_0$ and~$x_1$ of length~$\ell_{\mathrm{Q}}(n)$,
+	and $z_0, z_1 \in \codes_{\ell}$, for $\ell := \ell_{\mathrm{A}}(n)$.
+	Suppose this does not correspond to the encoding of an accepting assignment in $L_{\mathrm{A}}$.
+	In other words, suppose that there are no $y_0, y_1 \in \{0, 1\}^\ell$ such that $(\mathsf{input}, x_0, x_1, y_0, y_1)$ is in $L_{\mathrm{A}}$
+	and $z_0 = \codee_{\ell}(y_0), z_1 = \codee_{\ell}(y_1)$.
+	Then $V_{\mathrm{PCPP}}$ accepts $(\mathsf{input}, x_0, x_1, z_0, z_1)$ with probability at most~$s$.
+	In math, for every $\pi$ it holds that
+	\begin{equation*}
+		\Pr_R[\text{$V_{\mathrm{PCPP}}^{z_0, z_1, \pi}(\mathsf{input}, x_0, x_1, |z_0| + |z_1|; R)$ accepts}] \leq s.
+	\end{equation*}
+\end{itemize}
+\end{proposition}
+\begin{proof}
+Given $(\mathsf{input}, x_0, x_1, z_0, z_1)$, write $A:= (L_{\mathrm{A}} \circ \mathsf{Code})_{\mathsf{input}, x_0, x_1} \cap \F_{q(\ell)}^{|z_0| + |z_1|}$.
+By assumption, $(z_0, z_1)$ is not in~$A$.
+Using this, we would like to show that $(z_0, z_1)$ is in fact $\gamma$-far from~$A$, in which case the PCPP verifier accepts with probability at most~$s$.
+
+To do this, suppose $(z_0', z_1') \in A$.
+By design, there exists $y_0', y_1' \in \{0, 1\}^\ell$ such that $z_0' = \codee(y_0')$ and $z_1' = \codee(y_1')$.
+This means that $z_0', z_1' \in \codes_{\ell}$.
+On the other hand, since~$(z_0, z_1)$ is not in~$A$, we must have either $z_0' \neq z_0$ or $z_1' \neq z_1$ (or both).
+We will assume the first without loss of generality.
+Then by the distance property of the code, since $z_0, z_0' \in \codes_{\ell}$,
+their normalized Hamming distance is at least $1-\eta(\ell) \geq 2\gamma$.
+This immediately means that $(z_0,z_1)$ and $(z_0', z_1')$.
+are at least $\gamma$-far apart, and we are done.
+\end{proof}
+
+
+\subsection{The answer reduction protocol}
+
+We are almost ready to state the answer reduction protocol.
+Before doing so, we discuss one final nuisance, which is that we will also need the prover to encode their \emph{proof} with an error-correcting code. 
+The reason is that we would like to query the proof on a view~$\bJ$ sampled by the PCPP verifier.
+However, the prover might cheat and respond based only on the view~$\bJ$ rather than a global proof~$\pi$.
+To prevent this, we force them to commit to a global error-correcting encoding of their proof~$\pi$ using a tester as in \Cref{def:testing-a-code}.
+Then, we use the fact that the error-correcting code \emph{embeds} their string to allow us to extract the view~$\bJ$ by asking for the coordinates in~$\mu(\bJ)$.
+
+We now state the answer reduction protocol.
+
+\begin{definition}\label{def:answer-reduction-game}
+We instantiate the answer-reduced $\mip^*$ protocol with the following algorithms and parameters.
+\begin{itemize}
+\item[$\circ$] Let $V = (\mathrm{Alg}_{\mathrm{Q}}, \mathrm{Alg}_{\mathrm{A}})$ be an $\MIP^*$ verifier for a language~$L$.
+		Write $L_{\mathrm{A}}$ for the language decided by $\mathrm{Alg}_{\mathrm{A}}$.
+		Suppose on inputs of size~$n$, the verifier~$V$ has question length~$\ell_{V,\mathrm{Q}}(n)$, answer length~$\ell_{V,\mathrm{A}}(n)$,
+		question time~$t_{V,\mathrm{Q}}(n)$, and answer time~$t_{V,\mathrm{A}}(n)$.
+\item[$\circ$] Let $\codec_k = (\codee_k,\coded_k, \codes_k)$ be a $(k, m, q, \eta, t_{\mathrm{Dec}}, t_{\mathrm{Emb}})$-efficient code family
+		with decoding algorithm $\mathrm{Alg}_{\mathrm{Dec}}$ and embedding $\mu_k$.
+\item[$\circ$] Let $\game_k$ be a game which tests for $\codec_k$ with robustness $\chi_k(\eps)$.
+		Suppose it has question length~$\ell_{\game, \mathrm{Q}}(k)$, answer length~$\ell_{\game,\mathrm{A}}(k)$,
+		question time~$t_{\game,\mathrm{Q}}(k)$, and answer time~$t_{\game,\mathrm{A}}(k)$.
+\item[$\circ$] Let $s, \delta > 0$ be constants, and let $V_{\mathrm{PCPP}}$ be the PCPP verifier for the language $L_{\mathrm{A}} \circ \mathsf{Code}$
+			guaranteed by \Cref{thm:pcpp-mie} with these parameters.
+			Suppose on inputs of size~$n$ it has proof length~$\ell_\pi(n)$.
+			By \Cref{prop:composed-runtime}, $L_{\mathrm{A}} \circ \codec$ is in time
+			$t_{\mathrm{compose}}(n) = t_{V, \mathrm{A}}(n) + t_{\mathrm{Dec}}(\ell_{V,\mathrm{A}}(n))$.
+			We can therefore write $V_{\mathrm{PCPP}}$'s verification time as
+			\begin{equation*}
+				t_{\mathrm{PCPP}}(n) = \poly(n + \ell_{V, \mathrm{Q}}(n), \log(m(\ell_{V, \mathrm{A}}(n))), \log(t_{\mathrm{compose}}(n))).
+			\end{equation*}
+			Finally, $\ell_\pi(n) = t_{\mathrm{compose}}(n) \cdot \mathrm{poly log}(t_{\mathrm{compose}}(n))$.
+\end{itemize}
+Write $\ell_1 := \ell_{V, \mathrm{A}}(n)$ and $\ell_2 := \ell_\pi(n)$.
+Then the \emph{answer reduction game} $\game_{\mathrm{answer}}(\mathsf{input};V, \codec, \game, s, \delta)$
+is given in \Cref{fig:answer-reduction}.
+We write $V_{\mathrm{answer}}$ for the corresponding verifier.
+\end{definition}
+
+{
+	\floatstyle{boxed}
+	\restylefloat{figure}
+	\begin{figure}Flip two unbiased coins $\bb, \bc \sim \{0, 1\}$. 
+    		Sample questions $(\bx_0, \bx_1) \sim \mathrm{Alg}_{\mathrm{Q}}(\mathsf{input})$.
+		Sample a view $\bI_0, \bI_1, \bJ \sim V_{\mathrm{PCPP}}(\mathsf{input}, \bx_0, \bx_1)$.
+		Set $\bJ' = \mu_{\ell_2}(\bJ)$.
+		Select $\bi_0, \bi_1 \in [m(\ell_1)]$ and $\bj \in [m(\ell_\pi(n))]$ uniformly at random.
+		Set $\bT_0 = \bI_0 \cup \{\bi_0\}$, $\bT_1 = \bI_1 \cup \{\bi_1\}$, and $\bU = \bJ' \cup \{\bj\}$.
+	With probability $\frac{1}{8}$ each, perform one of the following eight tests.
+	\begin{enumerate}
+	\item \textbf{Verify:}
+		Distribute the question as follows:
+			\begin{itemize}
+			\item[$\circ$] Player~$\bb$: give $(\bx_0, \bx_1)$, $\bT_0, \bT_1, \bU$; receive $\ba_0, \ba_1, \ba_2$.
+			\end{itemize}
+		Accept if $V_{\mathrm{PCPP}}(\mathsf{instance}, \bx_0, \bx_1)$ accepts on $\ba_0|_{\bI_0}, \ba_1|_{\bI_1}, \ba_2|_{\bJ'}$.
+	\item \textbf{Cross checks:}
+	\begin{enumerate}
+	\item \textbf{Consistency test:} Distribute the questions as follows:
+			\begin{itemize}
+			\item[$\circ$] Player~$\bb$: give $(\bx_0, \bx_1)$, $\bT_0, \bT_1, \bU$; receive $\ba_0, \ba_1, \ba_2$.
+			\item[$\circ$] Player~$\overline{\bb}$: give $(\bx_0, \bx_1)$, $\bT_0, \bT_1, \bU$; receive $\ba_0', \ba_1', \ba_2'$.
+			\end{itemize}
+		Accept if $\ba_0 = \ba_0'$, $\ba_1 = \ba_1'$, and $\ba_2 = \ba_2'$.
+	\item \textbf{Answer cross-check:} Distribute the questions as follows:
+			\begin{itemize}
+			\item[$\circ$] Player~$\bb$: give $(\bx_0, \bx_1)$, $\bT_0, \bT_1, \bU$; receive $\ba_0, \ba_1, \ba_2$.
+			\item[$\circ$] Player~$\overline{\bb}$: give $\bx_{\bc}, \bT_{\bc}'$; receive $\ba_{\bc}'$.
+			\end{itemize}
+		Accept if $\ba_{\bc} = \ba_{\bc}'$.
+	\item \textbf{Proof cross-check:} Distribute the questions as follows:
+			\begin{itemize}
+			\item[$\circ$] Player~$\bb$: give $(\bx_0, \bx_1)$, $\bT_0, \bT_1, \bU$; receive $\ba_0, \ba_1, \ba_2$.
+			\item[$\circ$] Player~$\overline{\bb}$: give $\bx_0, \bx_1, \bU$; receive $\ba_{2}'$.
+			\end{itemize}
+		Accept if $\ba_2 = \ba_2'$.
+	\end{enumerate}
+	\item \textbf{Code checks:}
+	\begin{enumerate}
+	\item \textbf{Answer code check:}
+		Sample questions $(\bw_0, \bw_1) \sim \game_{\ell_1}(\bT_{\bc})$.
+		Distribute the questions as follows:
+			\begin{itemize}
+			\item[$\circ$] Player~$\bb$: give $\bx_{\bc}, \bw_{0}$; receive $\ba_0$.
+			\item[$\circ$] Player~$\overline{\bb}$: give $\bx_{\bc}, \bw_{1}$; receive $\ba_1$.
+			\end{itemize}
+		Accept if $\game_{\ell_1}(\bT_{\bc})$ accepts on $\ba_0, \ba_1$.
+	\item \textbf{Proof code check:}
+		Sample questions $(\bw_0, \bw_1) \sim \game_{\ell_2}(\bU)$.
+		Distribute the questions as follows:
+			\begin{itemize}
+			\item[$\circ$] Player~$\bb$: give $\bx_0, \bx_1$, $\bw_{0}$; receive $\ba_0$.
+			\item[$\circ$] Player~$\overline{\bb}$: give $\bx_0, \bx_1$, $\bw_{1}$; receive $\ba_1$.
+			\end{itemize}
+		Accept if $\game_{\ell_2}(\bU)$ accepts on $\ba_0, \ba_1$.
+	\end{enumerate}
+    \end{enumerate}
+    \caption{The answer reduction game $\game_{\mathrm{answer}}(\mathsf{input};V, \codec, \game, s, \delta)$.\label{fig:answer-reduction}}
+  \end{figure}
+}
+
+\begin{theorem}\label{thm:answer-reduction}
+Suppose~$V$, $\codec$, $\game$, and $V_{\mathrm{PCPP}}$ are as in \Cref{def:answer-reduction-game}.
+Suppose $s, \gamma$ are chosen to be constants such that $\eta(k) \geq 2\gamma$ for all~$k$.
+Suppose further that~$V$ has the following property: for any input in~$L$,
+the provers have a real commuting EPR strategy with value~$1$.
+Then~$V_{\mathrm{answer}}$ is also an $\MIP^*$ verifier for~$L$ with the following two conditions:
+\begin{itemize}
+\item[$\circ$] (Completeness) If $\mathsf{input} \in L$, then there is a value-$1$ strategy.
+\item[$\circ$] (Soundness) Given $\mathsf{input}$, suppose there is a strategy with value $1-\eps$.
+			Then there is a strategy for~$V$ on input $\mathsf{input}$ with value $1-\delta(\eps)$, where $\delta(\eps)$ is given by
+\begin{equation*}
+\delta(\eps) := \poly(\chi_{\ell_1}(\poly(\eps)), \chi_{\ell_2}(\poly(\eps)), \eta(\ell_1), \eta(\ell_2)).
+\end{equation*}
+\end{itemize}
+Hence, if we choose our parameters so that $1-\delta(\eps)$ is greater than the soundness of~$V$,
+this implies that $V_{\mathrm{answer}}$ is an $\MIP^*$ verifier for~$L$ with soundness $1-\eps$.
+
+Furthermore, the question and answer lengths and runtimes are dominated by two subroutines: the ``Verify" subroutine $S_1$ 
+and the ``Code Check" subroutine $S_2$ (consisting of both the answer code check and the proof code check).
+The complexity of the Verify subroutine is
+\begin{align*}
+\qlength{S_1} &= O(\ell_{V, \mathrm{Q}}(n) + \log(m(\ell_{V,\mathrm{A}}(n)))+ \log(m(\ell_{\pi}(n)))),\\
+\alength{S_1} &= O(\log(q(\ell_{V,\mathrm{A}}(n))) + \log(q(\ell_\pi(n)))),\\
+\qtime{S_1} &= O\left(t_{V,\mathrm{Q}}(n) + t_{\mathrm{PCPP}}(n) + t_{\mathrm{Emb}}(\ell_{\pi}(n))\right),\\
+\atime{S_1} &= O(t_{\mathrm{PCPP}}(n)).
+\end{align*}
+In addition, the complexity of the Code Check subroutine is
+\begin{align*}
+\qlength{S_2} &= O(\ell_{\game, \mathrm{Q}}(\ell_{V, \mathrm{A}}(n)) + \ell_{\game, \mathrm{Q}}(\ell_\pi(n)) + \ell_{V, \mathrm{Q}}(n)),\\
+\alength{S_2} &= O(\ell_{\game, \mathrm{A}}(\ell_{V, \mathrm{A}}(n)) + \ell_{\game, \mathrm{A}}(\ell_\pi(n))),\\
+\qtime{S_2} &=  O(t_{\game, \mathrm{Q}}(\ell_{V, \mathrm{A}}(n)) + t_{\game, \mathrm{Q}}(\ell_\pi(n)) + t_{V, \mathrm{Q}}(n) + t_{\mathrm{Emb}}(\ell_{\pi}(n))),\\
+\atime{S_2} &= O(t_{\game, \mathrm{A}}(\ell_{V, \mathrm{A}}(n)) + t_{\game, \mathrm{A}}(\ell_\pi(n))).
+\end{align*}
+Thus, the complexity of the overall protocol is the sum of these two.
+\end{theorem}
+\begin{proof}
+The fact  that~$S_1$ and~$S_2$ dominate the lengths and runtimes of the protocol
+is because~$S_1$ dominates the lengths and runtimes of the two cross-check subroutines,
+whose questions and answers are subsets of those in~$S_1$.
+Now we compute the complexity of~$S_1$.
+\begin{itemize}
+\item[$\circ$] \textbf{Question length:} The pair $(\bx_0, \bx_1)$ has total length $\ell_{V,\mathrm{Q}}(n)$ by definition.
+		The pair $\bI_0, \bI_1$ are subsets of indices of constant size into each of the implicit inputs of $L_{\mathrm{A}} \circ \codec$,
+		which are supposed to be encodings of strings of size $\ell_{V, \mathrm{A}}(n)$.
+		Hence, the encodings have size $m(\ell_{V, \mathrm{A}}(n))$, and so each input is specified with the log of this many bits.
+		Finally, $\bJ$ is a constant-sized set of indices into a proof of size $\ell_{\pi}(n)$, and $\mu(\bJ)$ converts these into indices into an encoding of of this proof.
+		As the encoding has length $m(\ell_{\pi}(n))$, each index can be specified with the log of this many bits.
+\item[$\circ$] \textbf{Answer length:} The strings $\ba_0, \ba_1$ contains values from an error-correcting code with alphabet $q(\ell_{V, \mathrm{A}}(n))$,
+		and the string~$\ba_2$ contains values from an error-correcting code with alphabet $q(\ell_{\pi}(n))$.
+\item[$\circ$] \textbf{Question time:} The running time of $\mathrm{Alg}_{\mathrm{Q}}$ is $t_{V,\mathrm{Q}}(n)$.
+		The running time of $V_{\mathrm{PCPP}}$ is $t_{\mathrm{PCPP}}(n)$.
+		Finally, the running time to compute $\mu(\bJ)$ given~$\bJ$ is $t_{\mathrm{Emb}}(\ell_{\pi}(n))$.
+\item[$\circ$] \textbf{Answer time:} The running time is simply the running time of $V_{\mathrm{PCPP}}$, i.e.\ $t_{\mathrm{PCPP}}(n)$.
+\end{itemize}
+As for the complexity of~$S_2$, it just performs the code tester~$\game_k$ for message lengths $k = \ell_{V, \mathrm{A}}(n)$ and $\ell_\pi(n)$ and so inherits the lengths and runtimes of the tester for these two values of~$k$, except on top of that it also has to sample~$(\bx_0, \bx_1)$ and compute~$\bJ'$.
+Sampling~$(\bx_0, \bx_1)$ takes time~$t_{V,\mathrm{Q}}(n)$ and contributes $O(\ell_{V, \mathrm{Q}}(n))$ to the question lengths,
+and computing~$\bJ'$ takes time~$t_{\mathrm{Emb}}(\ell_{\pi}(n))$.
+
+\paragraph{Completeness.}
+Suppose $\mathsf{input}$ is in~$L$.
+Then there is a real commuting EPR strategy $(\psi, M)$ with value~$1$ for~$V$ on $\mathsf{input}$.
+We will use this to demonstrate a value-$1$ strategy for $V_{\mathrm{answer}}$.
+This will be the strategy $(\psi, G)$ which uses the same EPR state $\ket{\psi}$ and has measurement matrices~$G$ defined as follows.
+
+Fix questions $x_0, x_1$, $T_0, T_1$, and $U$.  We begin by defining the simplest measurement,
+\begin{equation}\label{eq:i-dont-know-what-to-call-this}
+G^{x_c, T_c}_{a_c} := M^{x_c}_{[\codee_{\ell_1}(z_c)|_{T_c} = a_c]}.
+\end{equation}
+If Alice and Bob measure with $M^{x_0}$ and $M^{x_1}$ and receive strings $z_0, z_1$,
+then because this strategy is value~$1$,
+we will always have $V(\mathsf{input}, x_0, x_1, z_0, z_1) = 1$.
+As a result, there always exists \emph{some} proof for $V_{\mathrm{PCPP}}$
+that $(\mathsf{input}, x_0, x_1, \codee_{\ell_1}(z_0), \codee_{\ell_1}(z_1))$ is in $L_{\mathrm{A}} \circ \mathsf{Code}$.
+We denote this proof $\pi(x_0, x_1, z_0, z_1)$; if there are multiple such proofs, we pick one arbitrarily.
+Then we define the measurement
+\begin{equation}\label{eq:i-dont-know-what-to-call-this-part-two-return-of-the-bat}
+G^{x_0, x_1, U}_{a_2} := (M^{x_0} \cdot M^{x_1})_{[\codee_{\ell_2}(\pi(x_0, x_1, z_0, z_1))|_{U} = a_2}.
+\end{equation}
+Next, we define the measurement
+\begin{equation*}
+G^{x_0, x_1, T_0, T_1, U}_{a_0, a_1, a_2}
+:= (M^{x_0}\cdot M^{x_1})_{[\codee_{\ell_1}(z_0)|_{T_0}, \codee_{\ell_1}(z_1)|_{T_1}, \codee_{\ell_2}(\pi(x_0, x_1, z_0, z_1))|_{U} = a_0, a_1, a_2]}.
+\end{equation*}
+Now, via \Cref{eq:i-dont-know-what-to-call-this,eq:i-dont-know-what-to-call-this-part-two-return-of-the-bat},
+the~$G$ measurement is exactly of the form required by \Cref{def:testing-a-code}.
+As a result, it can be extended to a measurement which passes the answer and proof code checks with probability~$1$.
+Performing this extension concludes the design of the strategy.
+
+By construction, this strategy passes the answer and proof code checks with probability~$1$.
+As for the remaining tests, let us begin with the answer cross-check in the case of $\bc = 0$, the other case being symmetric.
+Because~$M$ is a real commuting EPR strategy,
+by \Cref{fact:heh-heh-heh-gonna-make-anand-prove-this-so-i-can-take-the-day-off}
+we have that $M^x_a \otimes I_{\reg{Bob}} \consistency_0 I_{\reg{Alice}} \otimes M^x_a$ for any distribution on~$x$.
+If we consider the measurement $(M^{x_0} \cdot M^{x_1})_{z_0, z_1}$, then $(M^{x_0} \cdot M^{x_1})_{z_0} = M^{x_0}_{z_0}$. As a result,
+\begin{equation*}
+(M^{x_0} \cdot M^{x_1})_{z_0} \otimes I_{\reg{Bob}}
+\consistency_0 I_{\reg{Alice}} \otimes M^{x_0}_{z_0}.
+\end{equation*}
+Finally, by data processing (\Cref{fact:specialize-the-simeq}), this implies that
+\begin{equation*}
+(M^{x_0} \cdot M^{x_1})_{[\codee_{\ell_1}(z_0)|_{T_0}=a_0]} \otimes I_{\reg{Bob}}
+\consistency_0 I_{\reg{Alice}} \otimes M^{x_0}_{[\codee_{\ell_1}(z_0')|_{T_0} = a_0]}.
+\end{equation*}
+But this is equivalent to saying that $G^{x_0, x_1, T_0, T_1, U}_{a_0} \otimes I_{\reg{Bob}} \consistency_0 I_{\reg{Alice}} \otimes G^{x_0, T_0}_{a_0}$,
+which implies passing the cross-check test with probability~$1$.
+A similar argument holds for the other tests, with the exception of the verification step.
+
+Consider the measurement $M^{x_0}_{z_0} \cdot M^{x_1}_{z_1}$.
+By construction and the properties of the PCPP verifier, if this measurement always outputs~$z_0, z_1$ such that $V(\mathsf{input}, x_0, x_1, z_0, z_1) = 1$,
+then the~$G$ strategy always passes the verify step.
+But because~$M$ is a real commuting EPR strategy,
+$M^x_z \otimes I_{\reg{Bob}} \consistency_0 I_{\reg{Alice}} \otimes M^x_z$,
+which implies that
+\begin{equation*}
+M^{x_0}_{z_0} \otimes M^{x_1}_{z_1}
+\approx_0 M^{x_0}_{z_0} \cdot M^{x_1}_{z_1} \otimes I_{\reg{Bob}}.
+\end{equation*}
+Thus, these two measurements have the same output distribution.
+But the left-hand side always outputs~$z_0, z_1$ which satisfy the verifier, because this strategy passes the verifier with probability~$1$.
+This concludes the completeness step.
+
+
+\paragraph{Soundness.}
+Suppose $\mathsf{input}$ is not in~$L$.
+Let $(\psi, M)$ be a strategy that passes with probability $1-\eps$.
+
+
+\paragraph{Code checks.}
+Passing the overall test with probability $1-\eps$
+means the strategy passes the answer code check with probability $1-8\eps$.
+Given values $c $, $x_{c}$, write $1-\eps_{c, x_{c}}$ for the probability the code check passes conditioned on these values.
+Then with probability at least $1-8\eps^{1/2}$, $\eps_{c, x_{c}} \leq \eps^{1/2}$.
+When this occurs, \Cref{thm:low-degree-code-tester} implies that there exists a measurement $\{G^{x_c}_w\}_w$ with outcomes in $\codes_{\ell_1}$ such that
+\begin{equation*}
+M^{x_c, T_c}_a \otimes I_{\reg{Bob}}\consistency_{\delta(\eps)} I_{\reg{Alice}} \otimes G^{x_c}_{[w|_{T_c} = a]}
+\end{equation*}
+with respect to the distribution of~$\bT_c$ conditioned on~$c$ and~${x}_{c}$.
+When this does \emph{not} occur, we still can assume such a measurement so that
+\begin{equation*}
+M^{x_c, T_c}_a \otimes I_{\reg{Bob}}\consistency_{1} I_{\reg{Alice}} \otimes G^{x_c}_{[w|_{T_c} = a]}
+\end{equation*}
+trivially, by \Cref{fact:trivial-upper-bound-approx-delta}. Thus, if we average over $\bc$ and $\bx_{\bc}$,
+\begin{equation}\label{eq:almost-at-tweedledee}
+M^{x_c, T_c}_a \otimes I_{\reg{Bob}}\consistency_{\delta(\eps)} I_{\reg{Alice}} \otimes G^{x_c}_{[w|_{T_c} = a]}
+\end{equation}
+with respect to the distribution on $\bc, \bx_{\bc}, \bT_{\bc}$.
+A similar argument with respect to the consistency guarantee of \Cref{thm:low-degree-code-tester} implies that
+\begin{equation}\label{eq:consistency-of-the-encoding}
+G^{x_c}_w \otimes I_{\reg{Bob}} \consistency_{\delta(\eps)} I_{\reg{Alice}} \otimes G^{x_c}_w.
+\end{equation}
+By \Cref{fact:specialize-the-simeq}, this implies that
+\begin{equation*}
+G^{x_c}_{[w|_{T_c} = a]} \otimes I_{\reg{Bob}} \consistency I_{\reg{Alice}} \otimes G^{x_c}_{[w|_{T_c} = a]}.
+\end{equation*}
+As a result, if we apply \Cref{fact:agreement} to this and \Cref{eq:almost-at-tweedledee} and then use the triangle inequality (\Cref{fact:triangle}), we conclude
+\begin{equation}\label{eq:tweedledee}
+M^{x_c, I_c}_a \otimes I_{\reg{Bob}}\approx_{\delta(\eps)}G^{x_c}_{[w|_{I_c} = a]} \otimes  I_{\reg{Bob}}
+\end{equation}
+with respect to the distribution on $\bc, \bx_{\bc}, \bI_{\bc}$.
+
+Applying a similar argument yet again, this time to the proof code check, implies that for every $x_0, x_1$,
+there exists a measurement $\{H^{x_0, x_1}_w\}_w$ with outcomes in $\codes_{\ell_2}$ such that
+\begin{equation}\label{eq:tweedledum}
+M^{x_0, x_1, U}_a \otimes I_{\reg{Bob}} \approx_{\delta(\eps)} H^{x_0, x_1}_{[w|_{U} = a]} \otimes I_{\reg{Bob}}
+\end{equation}
+with respect to the distribution on~$\bx_0, \bx_1, \bU$.
+Thus, by \Cref{fact:approx-delta-game-value}, we can assume that \Cref{eq:tweedledee,eq:tweedledum} hold with equality
+with a loss of only $\delta(\eps)$ in the game value.
+In addition, by \Cref{thm:naimark}, we can assume that the~$G$ and~$H$ measurements are all projective,
+possibly replacing~$\psi$ with a different state.
+
+\paragraph{Cross checks.}
+Our next step is to apply the cross-checks. Passing these with probability $1-\delta(\eps)$ implies the bounds
+\begin{equation}\label{eq:apply-the-cross-checks}
+M^{x_0, x_1, T_0, T_1, U}_{a_0} \otimes I_{\reg{Bob}}\simeq_{\delta(\eps)} I_{\reg{Alice}} \otimes M^{x_0, T_0}_{a_0}
+= I_{\reg{Alice}} \otimes G^{x_0}_{[w|_{T_0} = a_0]},
+\end{equation}
+\begin{equation}\label{eq:apply-the-cross-checks-2}
+M^{x_0, x_1, T_0, T_1, U}_{a_1} \otimes I_{\reg{Bob}}\simeq_{\delta(\eps)} I_{\reg{Alice}} \otimes  M^{x_1, T_1}_{a_1}
+= I_{\reg{Alice}} \otimes G^{x_1}_{[w|_{T_1} = a_1]},
+\end{equation}
+\begin{equation*}
+M^{x_0, x_1, T_0, T_1, U}_{a_2} \otimes I_{\reg{Bob}}\simeq_{\delta(\eps)} I_{\reg{Alice}} \otimes  M^{x_0, x_1, U}_{a_2}
+= I_{\reg{Alice}} \otimes H^{x_0, x_1}_{[w|_{U} = a_2]},
+\end{equation*}
+\begin{equation}\label{eq:Ms-self-consistency}
+M^{x_0, x_1, T_0, T_1, U}_{a_0, a_1, a_2} \otimes I_{\reg{Bob}}\simeq_{\delta(\eps)} I_{\reg{Alice}} \otimes  M^{x_0, x_1, T_0, T_1, U}_{a_0, a_1, a_2}.
+\end{equation}
+At this point, we would like to apply \Cref{fact:low-degree-sandwich-on-steroids}.
+To do so, we have to verify the distance property of our functions,
+and this will follow from the fact that we augmented our index sets $\bI_0$, $\bI_1$, and $\bJ'$ with an additional uniformly random index.
+To see this, consider two nonequal $w$ and $w'$ in $\codes_{\ell_1}$.
+Then for them to agree on $\bT_0$, they must agree on $\bi_0$, and this happens only $\eta(\ell_1)$ fraction of the time.
+The same holds for $\bU$, with the bound of $\eta(\ell_2)$.
+As a result, \Cref{fact:low-degree-sandwich-on-steroids} implies the following:
+consider the POVM measurement $\{\Lambda^{x_0, x_1}_{w_0, w_1, \pi}\}$
+with outcomes~$w_0, w_1$ in $\codes_{\ell_1}$ and~$\pi$ in $\codes_{\ell_2}$
+defined as
+\begin{equation}\label{eq:dont-touch-me-bro}
+\Lambda^{x_0, x_1}_{w_0, w_1, \pi}
+:= G^{x_0}_{w_0} \cdot G^{x_1}_{w_1} \cdot H^{x_0, x_1}_{\pi} \cdot G^{x_1}_{w_1} \cdot G^{x_0}_{w_0}.
+\end{equation}
+Then
+\begin{equation}\label{eq:gonna-use-this-once}
+M^{x_0, x_1, T_0, T_1, U}_{a_0, a_1, a_2} \otimes I_{\reg{Bob}}\consistency_{\delta(\eps)}
+I_{\reg{Alice}} \otimes \Lambda^{x_0, x_1}_{[w_0|_{T_0}, w_1|_{T_1}, \pi|_{U} = a_0, a_1, a_2]}.
+\end{equation}
+From this, \Cref{eq:Ms-self-consistency} implies
+\begin{equation}\label{eq:gonna-use-this-once}
+M^{x_0, x_1, T_0, T_1, U}_{a_0, a_1, a_2} \otimes I_{\reg{Bob}}\approx_{\delta(\eps)}
+\Lambda^{x_0, x_1}_{[w_0|_{T_0}, w_1|_{T_1}, \pi|_{U} = a_0, a_1, a_2]} \otimes I_{\reg{Bob}}.
+\end{equation}
+Thus, by \Cref{fact:approx-delta-game-value}, we can assume that \Cref{eq:gonna-use-this-once} holds with equality by replacing~$M$ with~$G$,
+incurring a loss of only $\delta(\eps)$ in the game value.
+(Unlike before, here we do \emph{not} invoke \Cref{thm:naimark} on~$J^{x_0, x_1}$ to make it a projective measurement,
+as that would likely change the structure in \Cref{eq:dont-touch-me-bro}, which we will need later.)
+
+\paragraph{Verification.}
+The strategy passes the verify check with probability $1-\delta(\eps)$.  
+By \Cref{eq:gonna-use-this-once}
+(which we now assume is equality),
+this is the same probability as if we (i) sample~$\bx_0, \bx_1$,
+(ii) use~$\Lambda$ to draw $\bw_0, \bw_1, \bpi$,
+(iii) draw $\bI_0, \bI_1, \bJ$ conditioned on~$\bx_0, \bx_1$,
+(iv) then draw $\bT_0, \bT_1, \bU$ conditioned on~$\bI_0, \bI_1, \bJ$,
+(v) compute $\ba_0 = \bw_0|_{\bT_0}$, $\ba_1 = \bw_1|_{\bT_1}$, and $\ba_2 = \bw_2|_{\bU}$,
+and (vi) give $\ba_0|_{\bI_0}, \ba_1|_{\bI_1}, \ba_2|_{\bJ}$ to $V_{\mathrm{PCPP}}$ and accept if it accepts.
+
+Condition on a fixed choice of~$x_0, x_1$ and a draw for~$w_0, w_1, \pi$.
+The PCPP verifier receives answers to its~$\bI_0$ and~$\bI_1$ queries based on~$w_0$ and~$w_1$, which are in~$\codes_{\ell_1}$.
+In addition, although~$\pi$ is in~$\codes_{\ell_2}$ and may not correspond to the encoding of an actual proof string,
+the verifier only queries it at points in the image of the embedding~$\mu_{\ell_2}$.
+As a result, the answers $V_{\mathrm{PCPP}}$ receives to its~$J$ queries are consistent with \emph{some} fixed proof string.
+Thus, by \Cref{prop:new-soundness}, since $1-\eta(k) \geq 2\gamma$ for all~$k$, if the probability
+the verifier accepts is greater than~$s$, then there are strings $y_0, y_1 \in \{0, 1\}^{\ell_1}$
+such that $w_0 = \codee_{\ell_1}(y_0)$, $w_1 = \codee_{\ell_1}(y_1)$
+and $V(\mathsf{input}, x_0, x_1, y_0, y_1) = 1$.
+Averaging over all~$\bx_0, \bx_1$ and~$\bw_0, \bw_1, \bpi$, we conclude that
+\begin{equation}\label{eq:absolute-unit-of-a-strategy}
+\Pr[V(\mathsf{input}, \bx_0, \bx_1, \coded_{\ell_1}(\bw_0), \coded_{\ell_1}(\bw_1)) = 1] \geq \frac{1-\delta(\eps)-s}{1-s} = 1-\delta(\eps).
+\end{equation}
+Recall that the decoding map is one-to-one except on those strings not in the range of the encoding map, which it maps to~$\bot$ instead.
+As we can assume that the verifier~$V$ always rejects when it receives~$\bot$ for an answer,
+this tells us that $\coded_{\ell_1}(\bw_0), \coded_{\ell_1}(\bw_1) \neq \bot$ with probability at least $1-\delta(\eps)$.
+
+\paragraph{Wrapping it up.}
+Now we give a strategy for causing the verifier~$V$ to accept with high probability on~$\mathsf{input}$.
+It uses state~$\psi$, and given question~$x$ it applies the measurement $\{A^x_a\}_a$ defined as
+\begin{equation*}
+A^x_a := G^x_{[\coded_{\ell_1}(w) = a]}.
+\end{equation*}
+Consider the verifier~$V'$ which samples $(\bx_0, \bx_1)$, gives them to Alice and Bob, receives~$\bw_0, \bw_1$,
+and accepts if $V(\mathsf{input}, \bx_0, \bx_1, \coded_{\ell_1}(\bw_0), \coded_{\ell_1}(\bw_1)) = 1$.
+Then~$V$ accepts on strategy~$A$ with the same probability that~$V'$ accepts on strategy~$G$.
+In other words, if we define $S(x_0, x_1)$ to be the set of $(w_0, w_1)$
+such that
+\begin{equation*}
+V(\mathsf{input}, x_0, x_1, \coded_{\ell_1}(w_0), \coded_{\ell_1}(w_1))=1,
+\end{equation*}
+then the probability that~$V'$ accepts on strategy~$G$ is
+\begin{equation}\label{eq:its-the-final-countdown}
+\E_{(\bx_0, \bx_1)} \sum_{w_0, w_1 \in S(\bx_0, \bx_1)} \bra{\psi} G^{x_0}_{w_0} \otimes G^{x_1}_{w_1}\ket{\psi}.
+\end{equation}
+
+To show this is large, we begin by showing that the~$G$'s commute with each other.
+To see this, note that \Cref{eq:apply-the-cross-checks,eq:apply-the-cross-checks-2} implies that for a fixed $c \in \{0, 1\}$,
+\begin{equation*}
+\Lambda^{x_0, x_1}_{[w_c|_{T_c} = a_c]} \otimes I_{\reg{Bob}}\simeq_{\delta(\eps)}
+ I_{\reg{Alice}} \otimes G^{x_c}_{[w_c'|_{T_c} = a_c]}.
+\end{equation*}
+However, by~the distance properties of our code and the fact that $\bT_c$ contains a uniformly random index, this implies that
+\begin{equation}\label{eq:dont-copy-that-floppy}
+\Lambda^{x_0, x_1}_{w_c} \otimes I_{\reg{Bob}}\simeq_{\delta(\eps)}
+ I_{\reg{Alice}} \otimes G^{x_c}_{w_c}.
+\end{equation}
+As a result,
+\begin{align*}
+G^{x_0}_{w_0} \cdot G^{x_1}_{w_1} \otimes I_{\reg{Bob}}
+&\approx_{\delta(\eps)} G^{x_0}_{w_0} \otimes \Lambda^{x_0, x_1}_{w_1}\\
+&\approx_{\delta(\eps)} I_{\reg{Alice}} \otimes \Lambda^{x_0, x_1}_{w_1}\cdot \Lambda^{x_0, x_1}_{w_0}\\
+&\approx_{\delta(\eps)} I_{\reg{Alice}} \otimes \Lambda^{x_0, x_1}_{w_0}\cdot \Lambda^{x_0, x_1}_{w_1}\\
+&\approx_{\delta(\eps)} G^{x_1}_{w_1} \otimes \Lambda^{x_0, x_1}_{w_0}\\
+&\approx_{\delta(\eps)}  G^{x_1}_{w_1} \cdot G^{x_0}_{w_0} \otimes I_{\reg{Bob}}.
+\end{align*}
+A similar argument as the one establishing~\eqref{eq:dont-copy-that-floppy} implies that
+\begin{equation*}
+G^{x_c}_{w_c} \otimes I_{\reg{Bob}}\simeq_{\delta(\eps)}
+ I_{\reg{Alice}} \otimes G^{x_c}_{w_c}.
+\end{equation*}
+Thus,
+\begin{align*}
+G^{x_0}_{w_0} \otimes G^{x_1}_{w_1}
+&= G^{x_0}_{w_0} \cdot G^{x_0}_{w_0} \otimes G^{x_1}_{w_1}\\
+&\approx_{\delta(\eps)} G^{x_0}_{w_0} \cdot G^{x_0}_{w_0} \cdot G^{x_1}_{w_1} \otimes I_{\reg{Bob}}\\
+&\approx_{\delta(\eps)} G^{x_0}_{w_0} \cdot G^{x_1}_{w_1} \cdot G^{x_0}_{w_0} \otimes I_{\reg{Bob}}\\
+&= \Lambda^{x_0, x_1}_{w_0, w_1} \otimes I_{\reg{Bob}}.
+\end{align*}
+As a result, by \Cref{fact:approx-delta-generalized-game-value},  \Cref{eq:its-the-final-countdown} is at least $1-\delta(\eps)$ by \Cref{eq:absolute-unit-of-a-strategy}.
+This concludes the proof of the theorem.
+\end{proof}
+
+\subsection{Applying the answer reduction protocol}
+
+In this section, we instantiate \Cref{thm:answer-reduction} with the low-degree code
+and then apply it to our $\neexp$ protocol.
+
+\begin{theorem}\label{thm:applied-with-low-degree-code}
+Let $V = (\mathrm{Alg}_{\mathrm{Q}}, \mathrm{Alg}_{\mathrm{A}})$ be an $\MIP^*$ verifier for a language~$L$.
+		Write $L_{\mathrm{A}}$ for the language decided by $\mathrm{Alg}_{\mathrm{A}}$.
+		Suppose on inputs of size~$n$, the verifier~$V$ has question length~$\ell_{V,\mathrm{Q}}(n)$, answer length~$\ell_{V,\mathrm{A}}(n)$,
+		question time~$t_{V,\mathrm{Q}}(n)$, and answer time~$t_{V,\mathrm{A}}(n)$.
+		Then there exists another $\MIP^*$ verifier $V_{\mathrm{ans}}$ for~$L$ with the following parameters.
+\begin{align*}
+\qlength{V_{\mathrm{ans}}} &= O(\ell_{V, \mathrm{Q}}(n) + \log(\ell_{V,\mathrm{A}}(n))+ \log(t_{V, \mathrm{A}}(n))),\\
+\alength{V_{\mathrm{ans}}} &= O(\mathrm{poly log}(\ell_{V, \mathrm{A}}(n)) + \mathrm{poly log}(t_{V, \mathrm{A}}(n))),\\
+\qtime{V_{\mathrm{ans}}} &= O\left(t_{V,\mathrm{Q}}(n)) + \poly(n + \ell_{V, \mathrm{Q}}(n), \log(\ell_{V, \mathrm{A}}(n)), \log(t_{V, \mathrm{A}}(n))\right),\\
+\atime{V_{\mathrm{ans}}} &= \poly(n + \ell_{V, \mathrm{Q}}(n), \log(\ell_{V, \mathrm{A}}(n)), \log(t_{V, \mathrm{A}}(n))).
+\end{align*}
+\end{theorem}
+\begin{proof}
+We instantiate the low-degree code in \Cref{fact:low-degree-code-is-efficient}.
+It gives an error correcting code with parameters $(n, \poly(n), \mathrm{poly log}(n), \mathrm{poly log}(n)^{-1},\poly(n), \mathrm{polylog}(n))$
+and a $c$-subset test~$\game_k$ with robustness $\chi_k(\eps) = \poly(\eps, \log(k)^{-1})$ such that
+\begin{equation*}
+\qtime{\game_k} = \poly(\log k, c),
+\quad
+\atime{\game_k} = \poly(\log(k)^c),
+\end{equation*}
+\begin{equation*}
+\qlength{\game_k} = O(c \log k),
+\quad
+\alength{\game_k} = O(\log(k)^{2c}).
+\end{equation*}
+We then apply \Cref{thm:answer-reduction} with $s, \gamma = \tfrac{1}{10}$.
+At this point, the theorem follows immediately,
+but as deriving it can be cumbersome, we fill in the details.
+
+By construction, $t_{\mathrm{Dec}}(n) = \poly(n)$.
+As a result,
+\begin{equation*}
+t_{\mathrm{compose}}(n)
+= t_{V, \mathrm{A}}(n) + t_{\mathrm{Dec}}(\ell_{V,\mathrm{A}}(n))
+= t_{V, \mathrm{A}}(n) + \poly(\ell_{V,\mathrm{A}}(n)).
+\end{equation*}
+Thus,
+\begin{equation*}
+\ell_\pi(n)
+= t_{\mathrm{compose}}(n) \cdot \mathrm{poly log}(t_{\mathrm{compose}}(n))
+= \poly(t_{V, \mathrm{A}}(n), \ell_{V,\mathrm{A}}(n)).
+\end{equation*}
+Now, $m(n) = \poly(n)$. Thus,
+\begin{align*}
+t_{\mathrm{PCPP}}(n)
+&= \poly(n + \ell_{V, \mathrm{Q}}(n), \log(m(\ell_{V, \mathrm{A}}(n))), \log(t_{\mathrm{compose}}(n)))\\
+&= \poly(n + \ell_{V, \mathrm{Q}}(n), \log(\ell_{V, \mathrm{A}}(n)), \log(t_{V, \mathrm{A}}(n))).
+\end{align*}
+Furthermore, $q(n) = \mathrm{polylog}(n)$ and $t_{\mathrm{Emb}}(n) = \mathrm{poly log}(n)$.
+As a result,
+\begin{align*}
+\log(m(\ell_\pi(n))) &= O(\log(\ell_{V,\mathrm{A}}(n))+ \log(t_{V, \mathrm{A}}(n))),\\
+\log(q(\ell_\pi(n))) &= O(\log \log(\ell_{V,\mathrm{A}}(n))+ \log \log(t_{V, \mathrm{A}}(n))),\\
+t_{\mathrm{Emb}}(\ell_\pi(n)) &= \poly(\log(\ell_{V, \mathrm{A}}(n)), \log(t_{V, \mathrm{A}}(n))).
+\end{align*}
+The theorem now follows from applying these bounds to \Cref{thm:answer-reduction}.
+\end{proof}
+
+Crucially, although polynomial factors of $t_{V,Q}(n)$ and $\ell_{V, Q}(n)$ appear in \Cref{thm:applied-with-low-degree-code},
+only the \emph{logarithms} of $t_{V,A}(n)$ and $\ell_{V, A}(n)$ appear in this theorem.
+As a result, if we apply this to \Cref{cor:succinct-sat-protocol-with-big-answer-size}, we arrive at our main result.
+
+\begin{theorem}
+  \label{thm:main}
+There is an $\MIP^*$ verifier~$\game$ for $\succinctsquared$ with parameters
+\begin{equation*}
+\qlength{\game} =O(n), \quad
+\alength{\game} = \poly(n),
+\end{equation*}
+\begin{equation*}
+\qtime{\game} = \poly(n), \quad
+\atime{\game} = \poly(n).
+\end{equation*}
+\end{theorem}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End:
+%%%---------- close: answer-reduction
+
+
+
+
+
+

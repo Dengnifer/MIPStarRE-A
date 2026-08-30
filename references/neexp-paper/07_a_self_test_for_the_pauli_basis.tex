@@ -1,0 +1,273 @@
+\section{A self test for the Pauli basis}\label{sec:self-test-pauli}
+
+In this section, we give a self test for the Pauli basis measurement.
+Given~$W \in \{X, Z\}$, this test compels the prover
+to measure an EPR register in the~$W$ basis
+and return the outcome to the verifier.
+
+\begin{definition}
+The \emph{Pauli basis strategy with parameters $n$ and $q$} (a prime power),
+denoted $\paulistrat{n}{q}$, is the partial strategy
+with the state $\ket{\mathrm{EPR}_q^n}$ and measurement matrices $\tau^W_u$ for each $W \in \{X,Z\}, u \in \F_q^n$.
+\end{definition}
+
+The main result of this section is the following self-test for the case when~$q$ is a power of~$2$.
+
+\begin{theorem}\label{thm:basis-test}
+Let $\bW \sim \{X, Z\}$ uniformly at random.  Let $n$, $q$, $\eta$ satisfy the Pauli basis condition.
+Then there is a self-test $\game_{\mathrm{basis}} := \game_{\mathrm{basis}}(n,q)$ for $\paulistrat{n}{q}$ over~$\bW$
+with robustness $\delta(\eps) = \poly(\eps, \eta)$.
+Moreover, there is a value-$1$ real commuting EPR strategy with auxiliary state $\ket{\mathrm{EPR}_2}$.
+Finally,
+\begin{equation*}
+\qlength{\game_{\mathrm{basis}}} = O\left(\log(n)\right),
+\quad
+\alength{\game_{\mathrm{basis}}} = \poly(n),
+\end{equation*}
+\begin{equation*}
+\qtime{\game_{\mathrm{basis}}} = O\left(\log(n)\right),
+\quad
+\atime{\game_{\mathrm{basis}}} = \poly(n).
+\end{equation*}
+\end{theorem}
+
+We prove this by a straightforward reduction to the quantum low-degree test of~\cite{NV18a}.
+
+\subsection{The quantum low-degree test}
+
+The goal of the quantum low-degree test of~\cite{NV18a}
+is to force the provers to use a ``compressed" version of the Pauli basis strategy.
+Given~$\bW$, they should measure their register in the $\bW$ basis, receiving $\bu \in \F_q^n$.
+However, $\bu$, a length-$n$ string, might be prohibitively expensive to communicate to the verifier,
+so they should instead compute the low degree encoding $g_{\bu}$
+and return its evaluation at a single point $\bw \in \F_q^m$ of the verifier's choosing.
+(The point of this section is to ``uncompress" their protocol.)
+
+\begin{definition}
+Fix parameters for the low-degree encoding $\params := (q = p^t, h, H, m, n, \pi)$
+satisfying the ``low-degree conditions"
+$h \leq q$, and $n \leq h^m$.
+For any string $u \in \F_q^n$,
+these parameters give a low-degree encoding $g_u:\F_q^m \rightarrow \F_q$.
+
+The \emph{low-degree Pauli strategy with parameters~$\params$},
+denoted $\mathcal{LD}(\params)$, is the partial strategy
+with state $\ket{\mathrm{EPR}^n_q}$ and measurement matrices
+\begin{equation*}
+\tau^{W, w}_a :=
+\tau^{W}_{[g_u(w) = a]} =
+\sum_{u : g_u(w) = a} \tau^W_u
+\end{equation*}
+for each $W \in \{X, Z\}, w \in \F_q^m, a \in \F_q$.
+Equivalently, this is the strategy where we perform the Pauli $W$-basis measurement
+and output the low-degree encoding of the outcome~$u$ evaluated at the point~$w$, i.e.\ the value $g_u(w)$.
+\end{definition}
+
+The main result of~\cite{NV18a} is the following.
+
+\begin{theorem}[{\cite[Theorem 3.2]{NV18a}}]\label{thm:anand-thomas-low-degree}
+Fix low-degree parameters~$\params$ with $p = 2$ (so that $q = 2^t$) and $m \geq 2$, 
+and let $\calD$ be the uniform distribution over $(W, w)$ with $W \in \{X, Z\}, w \in \F_q^m$.
+Then there is a self-test $\game_{\mathrm{Qlowdeg}} := \game_{\mathrm{Qlowdeg}}(\params)$
+for $\mathcal{LD}(\params)$ over~$\calD$
+with robustness
+$
+\delta(\epsilon) = \mathrm{poly}(\epsilon,md/q^c),
+$
+with $c > 0$.
+%\ainnote{TODO: Propagate to the rest of the document!!}
+Moreover, there is a value-$1$ real commuting EPR strategy with auxiliary state $\ket{\mathrm{EPR}_2}$.
+Finally,
+\begin{equation*}
+\qlength{\game_{\mathrm{Qlowdeg}}} = O(m \log q),
+\quad
+\alength{\game_{\mathrm{Qlowdeg}}} = O(d^2 \log (q)),
+\end{equation*}
+\begin{equation*}
+\qtime{\game_{\mathrm{Qlowdeg}}} = O(m \log q),
+\quad
+\atime{\game_{\mathrm{Qlowdeg}}} = \poly(m, d, \log q).
+\end{equation*}
+\end{theorem}
+
+(We note that this result is stated in \cite{NV18a} for general primes~$p$.
+However, the $p \neq 2$ case relied on a self-testing result for a generalization of the Magic Square game
+which was recently discovered to contain a bug. 
+Fortunately, the $p=2$ case needs only a self-testing result for the
+``traditional" binary Magic Square game, and this follows
+from~\cite{WBMS16}.)
+
+\begin{remark}
+We note that the quantum low-degree test, as stated in \cite{NV18a}, does \emph{not} have value-$1$ real commuting EPR strategies.
+This is because it uses as a subroutine the standard magic square game,
+and the magic square game does not have value-$1$ real commuting EPR strategies.
+Its value-$1$ strategies \emph{are} EPR strategies,
+and they \emph{are} real (all observables are either $X$ or $Z$, with the sole exception of the $Y \otimes Y$ observable,
+which can be rewritten as $Y \otimes Y = -(X \otimes X) \cdot (Z \otimes Z)$, manifestly real).
+But they are not commuting, because each row and column have at least one pair of noncommuting observables.
+
+Consider instead the following ``oracularized" version of the magic square game:
+one player is given a random row or column (and is expected to play as in the normal magic square game),
+and the other player is given a random cell in that row or column,
+and the verifier simply checks that they agree on that cell.
+In addition, with some constant probability, both players are given the same cell and their answers are checked against each other.
+In this case, all observables measured are commuting, and so this variant has a value-$1$ real commuting EPR strategy.
+In addition, it certifies the same state and measurements as the normal magic square game,
+and so we can use it as a subroutine in the quantum low-degree test instead.
+\end{remark}
+
+\begin{remark}
+We note again that the soundness case in our definition of a self-test is quite different from the one given in \cite[Definition~$2.5$]{NV18a},
+and it is not clear that a self-test in their sense implies a self-test in our sense.
+However, for the quantum low-degree test, their soundness case \emph{does} match ours.
+By~\cite[Lemma~$4.1$]{NV18a}, there is a local isometry~$\phi = \phi_1 \otimes \phi_2$ such that
+\begin{equation}\label{eq:anand-testing-state}
+\Vert \phi \ket{\overline{\psi}} - \ket{\psi}\ket{\mathrm{aux}} \Vert^2 \leq \delta(\epsilon).
+\end{equation}
+and
+\begin{equation}\label{eq:anand-testing-state}
+\E_{(\bW, \bw)} \sum_a \Vert \phi \cdot (\overline{M}^{\bW, \bw}_{a} \otimes I_{\reg{Bob}}) \ket{\overline{\psi}}
+	 - (\tau_{a}^{\bW, \bw} \otimes I_{\reg{aux}})  \otimes I_{\reg{Bob}} \ket{\psi} \ket{\mathrm{aux}} \Vert^2
+\leq \delta(\eps).
+\end{equation}
+The key difference from our self-test definition is that, as stated, their local isometry need not be symmetric (i.e.\ $\phi_1 \neq \phi_2$),
+but their construction actually \emph{does} give a symmetric isometry with $\phi_1 = \phi_2$.
+Then, from \Cref{eq:anand-testing-state} it is easy to derive \Cref{eq:cite-once-then-never-again} using \Cref{eq:anand-testing-state} and the triangle inequality (\Cref{fact:triangle}).
+\end{remark}
+
+\subsection{Proof of \Cref{thm:basis-test}: the Pauli basis test}
+
+We now state the Pauli basis test.
+
+\begin{definition}
+Let $n,q,\eta$ be as in \Cref{thm:basis-test}.
+Fix the remaining low-degree parameters~$\params$ as follows:
+\begin{equation*}
+h = \lceil q^{1/2}\rceil, \qquad m = 2\cdot \left\lceil \frac{\log(n)}{\log(q)}\right\rceil,
+\qquad d = m \cdot (h-1).
+\end{equation*}
+Then the \emph{Pauli basis game}~$\game_{\mathrm{basis}}(n,q)$ is given by~\Cref{fig:pauli-basis}.
+\end{definition}
+
+{
+\floatstyle{boxed} 
+\restylefloat{figure}
+\begin{figure}
+With probability~$\tfrac{1}{2}$ each, perform one of the following two tests.
+\begin{enumerate}
+\item \textbf{Low-degree:} Perform $\game_{\mathrm{Qlowdeg}}(\params)$. \label{item:qlowdeg-test}
+\item \textbf{Cross-check:}  Draw $\bW \sim \{X, Z\}$, $\bw \sim \F_q^m$. Flip an unbiased coin $\bb \sim \{0, 1\}$.
+	Distribute the questions as follows:
+	\begin{itemize}
+	\item[$\circ$] Player~$\bb$: Give $\bW$; receive $\bu \in \F_q^n$.
+	\item[$\circ$] Player~$\overline{\bb}$: give $(\bW,\bw)$; receive $\ba$.
+	\end{itemize}
+	Accept if $g_{\bu}(\bw) = \ba$.
+\end{enumerate} \label{item:check-with-qlowdeg}
+\caption{The game $\game_{\mathrm{basis}}(n,q)$.\label{fig:pauli-basis}}
+\end{figure}
+}
+
+These parameters are chosen so that they are valid low-degree parameters
+(guaranteeing the existence of the low-degree code),
+which is necessary for the quantum low-degree test.
+In particular, these satisfy (i) $h \leq q$ and (ii) $n \leq h^m$.
+The first of these is immediate; as for the second,
+\begin{equation*}
+h^m \geq (q^{1/2})^{2 \cdot \log(n)/\log(q)} = q^{\log(n)/\log(q)} = n.
+\end{equation*}
+In addition, the code has relative distance $d/q \leq mh/q \leq \eta$.
+\begin{equation*}
+\frac{d}{q} = \frac{m \cdot(h-1)}{q} \leq \frac{m h}{q} \leq 8\cdot \frac{\log(n)}{\log(q)} \cdot \frac{q^{1/2}}{q} \leq \frac{8 \log(n)}{q^{1/2}} \leq \eta,
+\end{equation*}
+where the final step is because $n, q, \eta$ satisfy the Pauli basis condition.
+Finally, we note that even if~$q$ is a large polynomial of~$n$, $m$ is always at least~$2$, which permits us to use the quantum low-degree test.
+We now prove \Cref{thm:basis-test}.
+
+\begin{proof}[Proof of \Cref{thm:basis-test}]
+The question lengths and times of both the quantum low-degree test and the cross-check are given by
+\begin{equation*}
+m \log(q) = 2\cdot \left\lceil \frac{\log(n)}{\log(q)}\right\rceil  \cdot \log(q) = O(\log(n)).
+\end{equation*}
+As for the answer lengths and times, these are bounded by $\poly(n)$ for both the quantum low-degree test and the cross-check.
+We now consider the completeness and soundness cases separately.
+\paragraph{Completeness.}
+Let~$(\psi, M)$ be the value-$1$ commuting EPR strategy for the quantum low-degree test guaranteed by \Cref{thm:anand-thomas-low-degree}.
+This has state $\ket{\psi} = \ket{\mathrm{EPR}_q^n} \ket{\mathrm{EPR}_2}$ and measurement matrices $M^{W,w}_a = \tau^{W,w}_a \otimes I_{\reg{aux}}$.
+If we add in the measurement matrices $M^W_u = \tau^W_u \otimes I_{\reg{aux}}$,
+then this strategy passes the cross-check with probability~$1$.
+This is because after Player~$\bb$ measures~$\bu$,
+the state collapses to $\ket{\tau^{\bW}_{\bu}}\ket{\tau^{\bW}_{\bu}} \ket{\mathrm{EPR}_2}$,
+and so Player~$\overline{\bb}$ will measure $\ba = g_{\bu}(\bw)$.
+As a result, this is a value-$1$ strategy.
+Furthermore, it is a commuting EPR strategy because the cross-check measurements $M^W$ and $M^{W,w}$ commute.
+Finally, this strategy extends the Pauli basis strategy.
+This proves the completeness case.
+
+\paragraph{Soundness.}
+Throughout the soundness, we will use $\delta(\eps)$ to denote a function of the form $\poly(\eps, \eta)$ which may change from use to use.
+The $\delta(\eps)$ in \Cref{thm:anand-thomas-low-degree} is of this form because $d/q\leq \eta$.
+
+Let $\overline{\calS} = (\overline{\psi}, \overline{M})$ be a strategy with $\valstrat{\game_{\mathrm{basis}}}{\overline{\calS}} = 1-\eps$.
+Then this strategy must pass $\game_{\mathrm{Qlowdeg}}$ with probability at least $1-2\eps$.
+By \Cref{thm:anand-thomas-low-degree} this gives us a local isometry
+$\phi = \phi_{\mathrm{local}}\otimes \phi_{\mathrm{local}}$ and a state $\ket{\mathrm{aux}}$
+with the following properties:
+if we define the new strategy $\calS$
+in which $\ket{\psi} = \phi \ket{\overline{\psi}}$
+and $M_a^x = \phi_{\mathrm{local}}\cdot \overline{M}_a^x \cdot \phi_{\mathrm{local}}^\dagger$, then
+\begin{equation}\label{eq:cant-think-of-a-good-name}
+\Vert \ket{\psi} - \ket{\mathrm{EPR}_q^n} \ket{\reg{aux}} \Vert^2 \leq \delta(\eps),
+\qquad
+M_a^{W,w} \otimes I_{\reg{Bob}}
+\approx_{\delta(\eps)}
+(\tau_a^{W,w} \otimes I_{\reg{aux}}) \otimes I_{\reg{Bob}},
+\end{equation}
+on state $\ket{\psi}$ and distribution $\calD$.
+Because $\calS$ is just a rotated version of $\overline{\calS}$,
+it also passes $\game_{\mathrm{basis}}$ with probability $1-\eps$.
+As a result, $\calS$ passes the cross-check in \Cref{item:check-with-qlowdeg} with probability at least $1-2\eps$.
+By \Cref{fact:agreement}, we conclude that
+\begin{equation}\label{eq:worth-studying}
+M^W_{[g_u(w)=a]} \otimes I_{\reg{Bob}}
+\approx_{\eps}
+I_{\reg{Alice}} \otimes M^{W,w}_a
+\approx_{\delta(\eps)} I_{\reg{Alice}} \otimes (\tau^{W,w}_a \otimes I_{\reg{aux}})
+= I_{\reg{Alice}} \otimes (\tau^{W}_{[g_v(w)=a]} \otimes I_{\reg{aux}})
+\end{equation}
+on state $\ket{\psi}$.
+By \Cref{fact:almost-agreement} and the fact that the~$\tau$ measurements are projective, this implies that
+\begin{equation*}
+M^W_{[g_u(w)=a]} \otimes I_{\reg{Bob}}
+\consistency_{\delta(\eps)} I_{\reg{Alice}} \otimes (\tau^{W}_{[g_v(w)=a]} \otimes I_{\reg{aux}})
+\end{equation*}
+Now by
+\Cref{prop:same-on-point-same-on-subspace} (where we let~$\bs$ be the singleton distribution on the ``trivial" subspace $\bs = \F_q^m$)
+and the fact that $d/q \leq \eta$, we can conclude that
+\begin{equation*}
+M^W_{u} \otimes I_{\reg{Bob}}
+\consistency_{\delta(\eps)} I_{\reg{Alice}} \otimes (\tau^{W}_{u} \otimes I_{\reg{aux}}).
+\end{equation*}
+Applying \Cref{fact:agreement} again, this yields
+\begin{equation}\label{eq:almost-there-almost-there}
+M_{u}^{W} \otimes I_{\reg{Bob}}
+\approx_{\delta(\eps)} I_{\reg{Alice}} \otimes (\tau_{u}^{W} \otimes I_{\reg{aux}})
+\approx_{\delta(\eps)} (\tau_{u}^W \otimes I_{\reg{aux}}) \otimes I_{\reg{Bob}}
+\end{equation}
+on state $\ket{\psi}$, where the last step uses \Cref{fact:the-ol-state-y-swaperoonie}
+to combine \Cref{fact:the-ol-pauli-swaperoonie} with \Cref{eq:cant-think-of-a-good-name}.
+The analogous statement for the state $\ket{\mathrm{EPR}_q^n}$ follows from~\Cref{fact:the-ol-state-y-swaperoonie}.
+This establishes the theorem.
+\end{proof}
+
+  
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End:
+%%%---------- close: pauli-basis
+
+%%%%%%%%%%% jump to pauli-basis-layer
+%%%---------- open: pauli-basis-layer
+%!TEX root = main.tex
+

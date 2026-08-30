@@ -1,0 +1,383 @@
+\section{Testing error-correcting codes}\label{sec:error}
+
+In \Cref{sec:answer-reduction} below,
+rather than the prover sending the verifier their entire ``large" answer~$a$,
+they will instead encode it into $\codee(a)$ using an error correcting code
+and allow the verifier to query individual bits of the encoding.
+(The fact that the verifier is allowed to query bits of the encoding rather than the original string
+stems from the PCPP technology we use. See \Cref{sec:composing-with-an-error-correcting-code} for more details.)
+In this section, we develop the tests which verify that provers are performing this task honestly,
+so that when we query a subset of the bits~$I$,
+they respond based on the bits of a codeword which was sampled independently of~$I$.
+We will develop such a test for the low-degree code (\Cref{sec:testing-low-deg}).
+
+Our proofs are entirely standard: we start with the known property tester for this code (i.e..\ \Cref{thm:anand-thomas-classical-low-degree}),
+which allows us to query the prover's codeword at a uniformly random location.
+Then we use the local decodability properties of this code to allow us to query arbitrary subsets of coordinates.
+We begin by stating a slightly nonstandard definition of error-correcting codes relevant to our application.
+
+\begin{definition}[Error-correcting codes]\label{def:error-correcting-code}
+Let $m$ and $q$ be integers,
+and let $\eta \in [0, 1]$.
+An \emph{$(n, m, q, \eta)$-error-correcting code} $\codec = (\codee,\coded,\codes)$ is defined as follows.
+\begin{itemize}
+\item[$\circ$] $\codes$ is a subset of $\F_q^m$ such that for each $x \neq y \in \codes$, $x$ and $y$ have normalized Hamming agreement at most~$\eta$
+		(i.e.\ the probability, over a uniformly random $\bi \in [m]$, that $x_{\bi} = y_{\bi}$ is at most $\eta$).
+\item[$\circ$] $\codee:\{0, 1\}^n \rightarrow \codes \subseteq \F_q^m$ is the \emph{encoding map}.
+\item[$\circ$] $\coded: \F_q^m \rightarrow \{0, 1\}^n \cup \{\bot\}$ is the \emph{decoding map}.
+		For each $x \in \{0, 1\}^n$, $\coded(\codee(x)) = x$.
+		In addition, for every~$w$ not in the range of~$\codee$, $\coded(w) = \bot$.
+\end{itemize}
+\end{definition}
+
+\begin{remark}
+The purpose of the subset $\codes$ is this:
+in this section, we are designing games which test that a prover responds according to an error-correcting code.
+This means that the prover should respond based on the encoding $\codee(x)$ of some string~$x \in \{0, 1\}^n$.
+However, the games we design may only be able to test if the prover responds based on a string in~$\codes$,
+which contains the encodings $\codee(x)$ but may include other strings as well.
+This definition ensures that these other strings are still far from each other in Hamming distance.
+\end{remark}
+
+The next definition defines a subset tester.
+
+\begin{definition}\label{def:testing-a-code}
+Let $\codec = (\codee, \coded, \codes)$ be an $(n, m, q, \eta)$-error-correcting code.
+Let~$k$ be an integer.
+Given a game~$\game(\cdot)$  whose inputs are from the set of subsets of~$[m]$ of size~$k$
+and a probability distribution~$\calD$ over this set,
+we write $\game(\calD)$ for the game in which we first sample $\bI \sim \calD$ and then play~$\game(\bI)$.
+Then $\game$ is a \emph{$k$-subset tester with robustness $\delta(\eps)$} for $\codec$ if it satisfies the following two properties.
+\begin{itemize}
+\item[$\circ$] \textbf{Completeness:}
+Let $(\psi, M)$ be an EPR strategy in which $\{M_w\}$ is a measurement with outcomes in~$\{0, 1\}^n$.
+Consider the partial strategy $(\psi, G)$ in which
+\begin{equation*}
+	G^I_{a_1, \ldots, a_k} := M_{[\codee(w)|_I = a_1, \ldots, a_k]}.
+\end{equation*}
+Then this can be extended to a (full) real commuting EPR strategy which, for each~$I$, passes $\game(I)$ with probability~$1$.
+\item[$\circ$] \textbf{Soundness:} For any distribution~$\calD$, consider a strategy $(\psi, M)$ which passes $\game(\calD)$ with probability $1-\eps$.
+Then there exists a measurement $\{G_w\}_{w}$ with outcomes~$w$ in~$\codes$ such that
+\begin{equation*}
+	M^I_{a_1, \ldots, a_k} \otimes I_{\reg{Bob}} \consistency_{\delta(\eps)} I_{\reg{Alice}} \otimes G_{[w|_I = a_1, \ldots, a_k]}.
+\end{equation*}
+\end{itemize}
+\end{definition}
+
+\subsection{Testing the low-degree code}\label{sec:testing-low-deg}
+
+In this section, we show how to test the low-degree code.
+This is essentially an exercise in generalizing \Cref{thm:anand-thomas-classical-low-degree} to arbitrary subsets.
+We begin with some notation.
+
+\begin{notation}
+We write $\mathcal{F}_{q, k}^{m}$ for the family
+$\displaystyle
+\mathcal{F}^m_{q, k} = \{F \subseteq \F_q^m \mid |F| \leq k\}
+$.
+\end{notation}
+
+Now we define the low-degree code tester.
+
+\begin{definition}
+Let $m$, $q$, and~$d$ be integers.  Let~$k$ be an integer, and let~$F$ be an element of~$\mathcal{F}^m_{q, k}$.
+Then $\game_{\mathrm{LDsubset}}(m, q, d, F)$ is the game defined in \Cref{fig:classical-subset}.
+\end{definition}
+
+{
+\floatstyle{boxed} 
+\restylefloat{figure}
+\begin{figure}
+With probability~$\tfrac{1}{2}$ each, perform one of the following two tests.
+\begin{enumerate}
+	\item \textbf{Low-degree:} Perform $\game_{\mathrm{Surface}}(m, d, q,2)$. \label{item:low-deg-point}
+	\item \textbf{Cross-check:}
+			Flip an unbiased coin $\bb \sim \{0, 1\}$.
+			Let~$\bs$ be a uniformly random subspace of dimension $k+1$ containing the points in~$F$.
+			 With probability $\tfrac{1}{2}$ each:
+			\begin{enumerate}
+			\item Let $\bw$ be a uniformly random point in~$\bs$. Distribute the questions as follows:\label{item:bootstrapping-to-subspaces}
+				\begin{itemize}
+				\item[$\circ$] Player~$\bb$: give $\bw$; receive a value $\by \in \F_q$.
+				\item[$\circ$] Player~$\overline{\bb}$: give $\bs$; receive a degree-$d$ polynomial $\bg:\bs \rightarrow \F_q$.
+				\end{itemize}
+				Accept if $\bg(\bw) = \by$.
+			\item Distribute the questions as follows: \label{item:boosting-to-subsets}
+				\begin{itemize}
+				\item[$\circ$] Player~$\bb$: give $\bs$; receive a degree-$d$ polynomial $\bg:\bs \rightarrow \F_q$.
+				\item[$\circ$] Player~$\overline{\bb}$: give $F$; receive a function $\boldf:\bF \rightarrow \F_q$.
+				\end{itemize}
+				Accept if $\bg|_{F} = \boldf$.
+			\end{enumerate}
+	\end{enumerate}
+	\caption{The game $\game_{\mathrm{LDsubset}}(m, q, d, F)$. \label{fig:classical-subset}}
+\end{figure}
+}
+
+The performance of the low-degree subset game is given by the following theorem.
+
+\begin{theorem}\label{thm:low-degree-code-tester}
+Consider low-degree parameters $\params = (n, q, h, H, m, \calS, \pi)$. Set $d = m(h-1)$.
+Set $m' = q^m$.  We will identify strings in $\F_q^{m'}$ with functions $g:\F_q^m \rightarrow \F_q$.
+Given $a \in \{0, 1\}^n$, define $\codee(a) = g_a$ and $\coded(g_a) = a$.
+For all other $g:\F_q^m \rightarrow \F_q$ (i.e.\ those which are not the low-degree encoding of a string~$a$),
+define $\coded(g) = \bot$.
+Finally, define $\codes$ to be the set of degree~$d$ polynomials~$g:\F_q^m \rightarrow\F_q$.
+Then $\codec = (\codee, \coded, \codes)$ is an $(n, m', q, d/q)$-error-correcting code.
+
+Furthermore, there exists a constant $c > 0$ and a function $\delta(\eps) = \poly(\eps, dm/q^c)$ such that the following holds.
+Let~$k$ be an integer.
+Then $\game_{\mathrm{LDsubset}} := \game_{\mathrm{LDsubset}}(m, q, d, \cdot)$ is a $k$-subset tester for $\mathrm{LDCode}$ with robustness $\delta(\eps)$.
+
+Finally,
+\begin{equation*}
+\qtime{\game_{\mathrm{LDsubset}}} = \poly(m, k,\log q),
+\quad
+\atime{\game_{\mathrm{LDsubset}}} = \poly(m, d^k, \log q),
+\end{equation*}
+\begin{equation*}
+\qlength{\game_{\mathrm{LDsubset}}} = O(k m \log q),
+\quad
+\alength{\game_{\mathrm{LDsubset}}} = O(d^k \log (q)).
+\end{equation*}
+\end{theorem}
+
+Before proving this, we need the following proposition.
+
+\begin{proposition}\label{prop:almost-uniform}
+Let $F \subseteq \F_q^m$ be of size at most~$k$. Consider the distribution $\calD_{\mathrm{twostep}}$ on points~$x\in\F_q^m$ generated by the following two-step process:
+(i) let $\bs$ be a uniformly random subspace of size~$k+1$ containing~$F$, and (ii) draw $\bx$ uniformly at random from~$\bs$.
+Let $\calD_{\mathrm{unif}}$ be the uniform distribution on~$\F_q^m.$
+Then $d_\mathrm{TV}(\calD_{\mathrm{twostep}}, \calD_{\mathrm{unif}}) \leq 1/q$.
+\end{proposition}
+\begin{proof}
+Let $x_1, \ldots, x_\ell$ be a maximal set of linearly independent elements from~$F$.
+A uniformly random subspace of size~$k+1$ containing~$F$ can be generated as follows:
+first, pick a uniformly random nonzero vector $\by_{\ell+1}$ linearly independent from~$F$,
+then pick a uniformly random nonzero vector $\by_{\ell+2}$ linearly independent from~$F\cup\{\by_{\ell+1}\}$,
+and so forth. Set $\bs = \mathrm{span}\{x_1, \ldots, x_\ell, \by_{\ell+1}, \ldots, \by_{k+1}\}$.
+A uniformly random point in~$\bs$ will be of the form 
+\begin{equation*}
+\bx = \bt_1 x_1 + \cdots + \bt_\ell x_\ell + \bt_{\ell+1} \by_{\ell+1} + \cdots + \bt_{k+1} \by_{k+1},
+\end{equation*}
+where each $\bt_{i}$ is a uniformly random element in $\F_q$.
+Because all the $\by_i$'s are linearly independent,
+the linear combination $\bt_{\ell+1} \by_{\ell+1} + \cdots + \bt_{k+1} \by_{k+1}$
+is zero only when $\bt_{\ell+1} = \cdots = \bt_{k+1} = 0$.
+Otherwise, this linear combination is distributed as a uniformly random nonzero vector linearly independent from~$F$.
+Thus, with probability $(q^{k+1-\ell})^{-1}$, $\bx$ is distributed as a uniformly random vector in the span of~$F$,
+and otherwise it is distributed as a uniformly random vector outside the span of~$F$.
+Given that the span of~$F$ has $q^{\ell}$ points, the total variation distance is
+\begin{equation*}
+\frac{1}{2} \left| \frac{q^{\ell}}{q^m} - \frac{1}{q^{k+1-\ell}}\right|
++ \frac{1}{2} \left| \frac{q^m- q^{\ell}}{q^m} - \left(1- \frac{1}{q^{k+1-\ell}}\right)\right|
+= q^{\ell}\left(\frac{1}{q^{k+1}} - \frac{1}{q^m}\right)
+\leq \frac{1}{q}.\qedhere
+\end{equation*}
+\end{proof}
+
+Now we prove \Cref{thm:low-degree-code-tester}.
+
+\begin{proof}[Proof of \Cref{thm:low-degree-code-tester}]
+The fact that $\codec$ is an $(n, m', q, d/q)$-error-correcting code follows from Schwartz-Zippel (\Cref{lem:schwartz-zippel}).
+
+\paragraph{Completeness.}
+Let $(\psi, M)$ be an EPR strategy in which $\{M_w\}$ is a measurement with outcomes in~$\{0, 1\}^n$.
+Consider the strategy $(\psi, G)$ in which for any subset of points~$F = \{y_1, \ldots, y_\ell\}$,
+\begin{equation*}
+	G^I_{a_1, \ldots, a_\ell} := M_{[g_x(y_1), \ldots, g_x(y_\ell) = a_1, \ldots, a_\ell]}.
+\end{equation*}
+(This covers the case of points ($\ell = 1$) and subsets~$F$ ($\ell = k$).)
+In addition, for any subspace~$s$,
+\begin{equation*}
+	G^s_{f} := M_{[g_x|_s = f]}.
+\end{equation*}
+(This covers the case of the $2$-dimensional subspaces used in $\game_{\mathrm{Point}}$
+and the $(k+1)$-dimensional subspaces used for the local decoding.)
+By construction, $(\psi, G)$ is an EPR strategy,
+and it is easy to see that it is a \emph{commuting} one as well.
+
+We claim that $(\psi, G)$ passes $\game_{\mathrm{LDsubset}}(m, q, d, \calD)$ with probability~$1$.
+We begin with the low-degree test.
+By \Cref{fact:heh-heh-heh-gonna-make-anand-prove-this-so-i-can-take-the-day-off},
+$M_w \otimes I_{\reg{Bob}} \consistency_0 I_{\reg{Alice}} \otimes M_w$.
+Then by \Cref{fact:specialize-the-simeq},
+\begin{equation*}
+M_{[g_x(w) = b]} \otimes I_{\reg{Bob}}
+\consistency_{0} I_{\reg{Alice}} \otimes M_{[g_x(w) = b]}.
+\end{equation*}
+This implies passing the low-degree test with probability~$1$, because
+\begin{equation*}
+G^s_{[f(w) = b]} \otimes I_{\reg{Bob}}
+= M_{[g_x(w) = b]} \otimes I_{\reg{Bob}}
+\consistency_{0} I_{\reg{Alice}} \otimes M_{[g_x(w) = b]} = I_{\reg{Alice}} \otimes G^w_b.
+\end{equation*}
+A similar argument shows the other tests pass with probability~$1$ as well.
+
+\paragraph{Soundness.}
+
+Let~$\calD$ be a distribution,
+and let $(\psi, M)$ be a strategy which passes $\game_{\mathrm{LDsubset}}(m, q, d, \calD)$ with probability $1-\eps$.
+The outline of the proof is as follows:
+first we will use the low degree test in \Cref{item:low-deg-point} to ensure the test correctly answers low-degree point queries.
+\Cref{item:bootstrapping-to-subspaces} will then bootstrap this to subspaces,
+and \Cref{item:boosting-to-subsets} will further bootstrap this to subsets, proving the theorem.
+
+\paragraph{Using the low-degree test.}
+Passing the test with probability $1-\epsilon$ means passing the low-degree test with probability at least $1-2\epsilon$.
+By \Cref{thm:anand-thomas-classical-low-degree}, this means that there exists a POVM measurement $G \in \polymeas{m}{d}{q}$ such that
+\begin{equation}\label{eq:just-applied-low-degree}
+M^w_b \otimes I_{\reg{Bob}} \consistency_{\delta(\eps)} I_{\reg{Alice}} \otimes G_{[g(w) = b]},
+\qquad G_g \otimes I_{\reg{Bob}} \consistency_{\delta(\eps)} I_{\reg{Alice}} \otimes G_g,
+\end{equation}
+where the first is on the uniform distribution over $\F_q^m$.
+
+\paragraph{Bootstrapping to subspaces.}
+Define $\calD_{\mathrm{twostep}}$ to be the two-step sampling process $(\bF, \bs, \bw)$ as in \Cref{item:bootstrapping-to-subspaces}.
+By \Cref{prop:almost-uniform}, the marginal distribution on~$\bw$ has total variation distance at most~$1/q$ with $\calD_{\mathrm{unif}}$.
+As a result, we can apply \Cref{fact:swap-dists} to \Cref{eq:just-applied-low-degree}, yielding
+\begin{equation}\label{eq:gonna-triangle-the-shit-outta-this}
+M^w_b \otimes I_{\reg{Bob}} \consistency_{\delta(\eps)} I_{\reg{Alice}} \otimes G_{[g(w) = b]}
+\end{equation}
+on distribution $\calD_{\mathrm{twostep}}$.
+Similarly, by \Cref{fact:specialize-the-simeq},
+\begin{equation}\label{eq:incoming-triangle}
+G_{[g(w) = b]} \otimes I_{\reg{Bob}} \consistency_{\delta(\eps)} I_{\reg{Alice}} \otimes G_{[g(w) = b]}
+\end{equation}
+on distribution $\calD_{\mathrm{twostep}}$.
+
+
+Next, because the strategy passes the test in \Cref{item:bootstrapping-to-subspaces} with probability at least $1-4\epsilon$,
+\begin{equation}\label{eq:watch-out-for-the-triangle}
+M^{w}_y \otimes I_{\reg{Bob}} \consistency_{\epsilon} I_{\reg{Alice}} \otimes M^s_{[g(w) = y]}.
+\end{equation}
+on distribution $\calD_{\mathrm{twostep}}$.
+Combining \Cref{eq:gonna-triangle-the-shit-outta-this,eq:incoming-triangle,eq:watch-out-for-the-triangle} with our second triangle inequality (\Cref{fact:triangle-like}),
+\begin{equation*}
+M^s_{[g(w) = y]} \otimes I_{\reg{Bob}}
+\consistency_{\delta(\eps)} I_{\reg{Alice}} \otimes G_{[g(w) = b]}.
+\end{equation*}
+By~\Cref{prop:same-on-point-same-on-subspace}, we conclude that
+\begin{equation}\label{eq:finished-with-subspaces}
+M^s_{f} \otimes I_{\reg{Bob}}
+\consistency_{\delta(\eps)} I_{\reg{Alice}} \otimes G_{[g|_s = f]}.
+\end{equation}
+
+\paragraph{Concluding with subsets.}
+The strategy passes the test in \Cref{item:boosting-to-subsets} with probability at least $1-4\epsilon$. As a result,
+\begin{equation*}
+M^F_f \otimes I_{\reg{Bob}}
+\consistency_{\epsilon}
+I_{\reg{Alice}} \otimes M^s_{[g|_F = f]}.
+\end{equation*}
+Applying \Cref{fact:specialize-the-simeq} to \Cref{eq:finished-with-subspaces},
+\begin{equation*}
+M^s_{[g|_F=f]} \otimes I_{\reg{Bob}}
+\consistency_{\delta(\eps)} I_{\reg{Alice}} \otimes G_{[h|_F = h]}.
+\end{equation*}
+Similarly, applying \Cref{fact:specialize-the-simeq} to \Cref{eq:just-applied-low-degree},
+\begin{equation*}
+G_{[h|_F = f]} \otimes I_{\reg{Bob}} \consistency_{\delta(\eps)} I_{\reg{Alice}} \otimes G_{[h|_F=f]}
+\end{equation*}
+Applying the triangle inequality (\Cref{fact:triangle-like}) to these three equations,
+we get
+\begin{equation*}
+M^F_f \otimes I_{\reg{Bob}}
+\consistency_{\delta(\epsilon)}
+I_{\reg{Alice}} \otimes G_{[g|_{F} = f]}
+\end{equation*}
+with respect to distribution $\calD_{\mathrm{twostep}}$,
+and therefore, by \Cref{fact:close-on-marginal}, with respect to $\calD$.
+\end{proof}
+
+\subsection{Efficiently decodable codes}
+
+Our application requires error-correcting codes with two further properties.
+The first property is that the decoding map $\coded(\cdot)$ be efficiently computable.
+(The encoding map, on the other hand, is allowed arbitrary complexity.
+This is because we will leave the task of computing the encoding maps to the provers.) 
+The second, more technical property is
+we require that the code \emph{embed} the codeword, in the following sense:
+the encoding $\codee(x)$ of a string~$x$ should actually \emph{contain} the string~$x$,
+and the function for where to find each bit of~$x$ in $\codee(x)$ should be efficiently computable.
+
+\begin{definition}[Efficiently-decodable error-correcting codes]\label{def:efficient-codes}
+Let $m, q:\Z^+\rightarrow \Z^+$,
+and let $\eta:\Z^+\rightarrow [0, 1]$.
+Let $t_{\mathrm{Dec}}, t_{\mathrm{Emb}}:\Z^+ \rightarrow \Z^+$.
+We say that $\codec_n=(\codee_n, \coded_n, \codes_n)$ is an \emph{$(n, m, q, \eta, t_{\mathrm{Dec}}, t_{\mathrm{Emb}})$-efficient code family}
+if the following three conditions are true.
+\begin{itemize}
+\item[$\circ$] For each~$n$, $(\codee_n, \coded_n, \codes_n)$ is an $(n, m(n), q(n), \eta(n))$-error-correcting code.
+\item[$\circ$] There exists an algorithm $\mathrm{Alg}_{\coded}$ which, on input $(n, w)$, outputs $\coded_n(w)$.
+			Furthermore, $\mathrm{Alg}_{\coded}$ runs in time $t_{\mathrm{Dec}}(n)$.
+\item[$\circ$] There exists an embedding $\mu_n:[n] \rightarrow [m(n)]$ such that for each $i \in [n]$, $x_i = (\codee_n(x))_{\mu_n(i)}$.
+			Furthermore, there is an algorithm $\mathrm{Alg}_{\mathrm{Emb}}$ which, on input $(n, i)$, computes $\mu_n(i)$ in time
+			 $t_{\mathrm{Emb}}(n)$.
+\end{itemize}
+\end{definition}
+
+Now, we show that the low-degree code is efficiently-decodable.
+The decoding algorithm follows a simple strategy:
+assuming that the input is a proper encoding of a message,
+they can directly read off the message from the input.
+Then they compute the encoding of the purported message and check that it equals the input.
+
+\begin{fact}\label{fact:low-degree-code-is-efficient}
+There is a $(n, m', q, \eta, t_{\mathrm{Dec}}, t_{\mathrm{Emb}})$-error-correcting code $\codec$ with parameters set as follows:
+\begin{equation*}
+m'(n) = \poly(n), \quad q(n) = \mathrm{polylog}(n), \quad \eta(n) = \frac{1}{\mathrm{polylog}(n)},
+\end{equation*}
+\begin{equation*}
+t_{\mathrm{Dec}}(n) = \poly(n), \qquad t_{\mathrm{Emb}}(n) = \mathrm{polylog}(n).
+\end{equation*}
+In addition, $\codec$ has a $k$-subset test~$\game$ with robustness $\delta(\eps) = \poly(\eps, 1/\log(n))$ such that
+\begin{equation*}
+\qtime{\game} = \poly(\log n, k),
+\quad
+\atime{\game} = \poly(\log(n)^k),
+\end{equation*}
+\begin{equation*}
+\qlength{\game} = O(k \log n),
+\quad
+\alength{\game} = O(\log(n)^{2k}).
+\end{equation*}
+\end{fact}
+\begin{proof}
+We instantiate the canonical low-degree encoding from \Cref{def:canonical-low-degree} with the ``rule of thumb" parameters from \Cref{eq:parameters}:
+\begin{equation*}
+h(n) = \Theta(\log(n)),
+\qquad
+m(n) = \Theta\left(\frac{\log(n)}{\log\log(n)}\right),
+\qquad
+q(n) = \mathrm{polylog}(n).
+\end{equation*}
+If we set $d(n) = m(n)\cdot (h(n) - 1)$, then this is a code with distance $\eta(n) = 1-d(n)/q(n) = 1-1/\mathrm{polylog}(n)$.
+In addition, it has length $m'(n) = q(n)^{m(n)} = \poly(n)$.
+Finally, the canonical low-degree encoding gives us the embedding $\mu_{\mathrm{Emb}} := \sigma_{m, t_1, t_2}$.
+By \Cref{prop:canonical-time}, it takes time $t_{\mathrm{Emb}}(n) = \mathrm{poly log}(n)$ to compute.
+
+Now we design the decoding algorithm $\mathrm{Alg}_{\coded}$.
+On input $(n, w)$, it rejects if~$w$ is not length~$m'$.
+Otherwise, it interprets~$w$ as a function $f:\F_q^m\rightarrow \F_q$.
+It queries~$g$ on the points $\pi(1), \ldots, \pi(n)$.
+Let $a \in \{0, 1\}^n$ be the received answers.
+If~$g$ is a codeword, it equals the low-degree function~$g_a$.
+So the algorithm simply iterates over all~$x \in \F_q^m$ and checks that $f(x) = g_a(x)$.
+By \Cref{prop:canonical-time}, computing $g_a(x)$ can be done in time $\poly(n)$,
+and so this takes time $t_{\mathrm{Dec}}(n) = \poly(n)$ in total.
+
+Finally, the performance of the subset tester follows from \Cref{thm:low-degree-code-tester} with our setting of parameters.
+\end{proof}
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End:
+%%%---------- close: error-correcting-code-test
+
+%%%%%%%%%%% jump to answer-reduction
+%%%---------- open: answer-reduction
+%!TEX root = main.tex
+

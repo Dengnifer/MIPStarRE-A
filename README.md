@@ -12,9 +12,10 @@ served from the local component store.
 
 - **Active (QPBT)**: the quantum Pauli basis test —
   arXiv:2001.04383, *MIP\*=RE* (§7 "Classical and Quantum Low-degree Tests"
-  and §"Analysis of the Pauli basis test"), with arXiv:1904.05870,
-  *NEEXP in MIP\** as secondary source. Paper mirrors:
-  `references/qpbt-paper/`, `references/neexp-paper/` (populated in stage 2).
+  and appendix "Analysis of the Pauli basis test"), with arXiv:1904.05870,
+  *NEEXP in MIP\** as secondary source. Per-section paper mirrors:
+  `references/qpbt-paper/`, `references/neexp-paper/` (see their READMEs for
+  the file/line manifests; split by `scripts/split_reference_paper.py`).
 - **Inherited (LDT)**: arXiv:2009.12982, *Quantum soundness of the classical
   low individual degree test*; mirror at `references/ldt-paper/`.
 

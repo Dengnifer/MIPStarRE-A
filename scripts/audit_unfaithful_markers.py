@@ -36,7 +36,7 @@ from lean_header_utils import ldt_lean_files, line_number
 
 
 PAPER_CITATION_RE = re.compile(
-    r"(?:\b(?:thm|lem|prop|cor|def|rem):[A-Za-z0-9_.:-]+|references/ldt-paper/)"
+    r"(?:\b(?:thm|lem|prop|cor|def|rem):[A-Za-z0-9_.:-]+|references/(?:ldt|qpbt|neexp)-paper/)"
 )
 TRACKER_RE = re.compile(r"(?:#\d+|docs/paper-gaps/[A-Za-z0-9_.:/-]+\.tex)")
 

@@ -1,0 +1,266 @@
+\section{Compiling games with the Pauli basis test}\label{sec:pauli-basis-compiler}
+
+In this section, we show how to use the Pauli basis test to implement the compiler $\calC_{\mathrm{semi}\rightarrow (k-1)}$.
+Our construction is given in the following definition.
+
+\begin{definition}
+Let $\game_{\mathrm{semi}}$ be a $(k,n,q)$-semiregister game.
+Then its compiled version is the game $\calC_{\mathrm{semi} \rightarrow (k-1)}(\game_{\mathrm{semi}})$ defined in \Cref{fig:one-to-zero}.
+\end{definition}
+{
+\floatstyle{boxed} 
+\restylefloat{figure}
+\begin{figure}
+Flip an unbiased coin $\bb \sim \{0, 1\}$. 
+With probability~$\tfrac{1}{4}$ each, perform one of the following four tests.
+\begin{enumerate}
+	\item \textbf{Pauli basis:} Draw $(\bx, \bx') \sim \game_{\mathrm{basis}}(n_k, q_k, \eta)$.\label{item:first-layer-pauli-basis}
+			Distribute the questions as follows:
+				\begin{itemize}
+				\item[$\circ$] Player~$\bb$: give $(\hideq^{k-1}, \bx)$; receive $\ba = (\ba_1, \ba_2)$.
+				\item[$\circ$] Player~$\overline{\bb}$: give $(\hideq^{k-1}, \bx')$; receive $\ba' = (\ba_1', \ba_2')$.
+				\end{itemize}
+			Accept if $\ba_2$ and $\ba_2'$ are accepting answers to the Pauli basis test.
+	\item \textbf{Cross-check:} Draw $(\bx, \bx') \sim \game_{\mathrm{semi}}$. Write $\bx = (\bx_1, \bx_2)$
+			with $\bx_1 = (\bW_1, \ldots, \bW_k)$.
+			\label{item:first-layer-cross-check}
+			Distribute the questions as follows:
+				\begin{itemize}
+				\item[$\circ$] Player~$\bb$: give $\bx$; receive $\ba = (\ba_1, \ba_2)$,
+							where $\ba_1 = (\bu_1, \ldots, \bu_k)$.
+				\item[$\circ$] Player~$\overline{\bb}$: give $(\hideq^{k-1}, \bW_k)$;
+							receive strings $\ba_1' = (\bu_1', \ldots, \bu_k')$, $\bu_i' \in \F_q^n$.
+				\end{itemize}
+				If $\bW_k \in \{X, Z\}$, accept if $\bu_k = \bu_k'$.  Otherwise, accept if $\bu_k = \varnothing$.
+	\item \textbf{Consistency check:} Draw $(\bx, \bx') \sim \game_{\mathrm{semi}}$.
+			Distribute the questions as follows:
+				\begin{itemize}
+				\item[$\circ$] Player~$\bb$: give $\bx$; receive $\ba$
+				\item[$\circ$] Player~$\overline{\bb}$: give $\bx$; receive $\ba'$.
+				\end{itemize}
+				Accept if $\ba = \ba'$.
+	\item \textbf{Play game:} Perform $\game_{\mathrm{semi}}$.
+	\end{enumerate}
+	\caption{The game $\calC_{\mathrm{semi} \rightarrow (k-1)}(\game_{\mathrm{semi}})$.\label{fig:one-to-zero}}
+\end{figure}
+}
+
+In words, the provers might try to ``trick" the verifier by using one of their $(k-1)$ existing EPR registers to answer queries meant for the new $k$-th register.
+To prevent this, the verifier performs the Pauli basis test with the first $k-1$ registers hidden, forcing the provers to introduce a new EPR register.
+It then cross-checks the provers' answers in the Pauli basis test with their answers in the game $\game_{\mathrm{semi}}$.
+The performance of the compiler is given by the following theorem.
+
+\begin{theorem}\label{theorem:one-to-zero-compiler}
+Let $\register = (k, n, q)$, and let $n_k$, $q_k$, and $\eta$ satisfy the Pauli basis condition.
+Suppose $\game_{\mathrm{semi}}$ is a $\register$-semiregister game,
+and consider the $\shorten{\register}{k-1}$-register game $\game_{k-1} = \calC_{\mathrm{semi} \rightarrow (k-1)}(\game_{\mathrm{semi}})$.
+\begin{itemize}
+\item[$\circ$] \textbf{Completeness:} Suppose there is a value-$1$ $\register$-semiregister strategy for $\game_{\mathrm{semi}}$ which is also a real commuting EPR strategy.
+	Then there is a value-$1$ $\shorten{\register}{k-1}$-register strategy for $\game_{k-1}$ which is also a real commuting EPR strategy.
+\item[$\circ$] \textbf{Soundness:} If $\valreg{\shorten{\register}{k-1}}{\game_{k-1}}\geq 1-\eps$ then $\valsemi{\register}{\game_{\mathrm{semi}}} \geq 1 -\delta(\eps)$, where $\delta(\eps) = \mathrm{poly}(\eps, \eta)$.
+\end{itemize}
+Furthermore,
+\begin{align*}
+\qlength{\game_{k-1}} &= \qlength{\game_{\mathrm{semi}}} + O(\log(n)),  \\
+\qtime{\game_{k-1}} &= \qtime{\game_{\mathrm{semi}}} + O(\log(n)), \\
+\alength{\game_{k-1}} &= \alength{\game_{\mathrm{semi}}} + \poly(n),\\
+\atime{\game_{k-1}} &= \atime{\game_{\mathrm{semi}}} + \poly(n).
+\end{align*}
+\end{theorem}
+
+\begin{proof}
+The communication and time complexities are the result of combining
+the communication and time complexities from $\game_{\mathrm{semi}}$ with the values for the Pauli basis test from \Cref{thm:basis-test}.
+
+\paragraph{Completeness.}
+Let $(\psi, M)$ be a value-$1$ $\register$-semiregister strategy for $\game_{\mathrm{semi}}$ which is also a real commuting EPR strategy. 
+Then $\ket{\psi} = \ket{r_1} \cdots \ket{r_k} \ket{\mathrm{aux}}$, where each $\ket{r_i} = \ket{\mathrm{EPR}_{q_i}^{n_i}}$ and $\ket{\mathrm{aux}}$ is an EPR state.
+In addition, let $(\psi', M')$ be the value-$1$ real commuting EPR strategy for $\game_{\mathrm{basis}}$ guaranteed by \Cref{thm:basis-test}.
+Then $\ket{\psi'} = \ket{\mathrm{EPR}_{q_k}^{n_k}} \ket{\mathrm{aux}'}$, where $\ket{\mathrm{aux}'}$ is an EPR state.
+
+Consider the following strategy for $\game_{k-1}$.
+For its state, it uses $\ket{r_1}\cdots \ket{r_k}\ket{\mathrm{aux}}\ket{\mathrm{aux}'}$.
+For inputs drawn from $\game_{\mathrm{semi}}$, it uses the matrices in~$M$ applied to all but the $\ket{\mathrm{aux}'}$ register.
+For inputs of the form $(H^{k-1}, x)$, where $x$ is sampled from $\game_{\mathrm{basis}}$, it outputs $\varnothing^{k-1}$ along with the result of applying $M'$ to $\ket{r_k}$ and $\ket{\mathrm{aux}'}$.
+Finally, for inputs of the form $(H^{k-1}, \hideq)$ and $(H^{k-1}, \noop)$, it outputs $\varnothing^k$.
+This forms a valid $\shorten{\register}{k-1}$-register strategy for $\game_{k-1}$.
+In addition, its ``auxiliary register" is $\ket{r_k} \ket{\mathrm{aux}}\ket{\mathrm{aux}'}$, which is an EPR state.
+Now we show that it has value~$1$.
+
+By construction, this strategy passes the Pauli basis test and $\game_{\mathrm{semi}}$ with probability~$1$.
+As for the cross-check, when $\bW_k \in \{\hideq, \noop\}$, the strategy always succeeds because $(\psi, M)$ is a $\register$-semiregister strategy.
+On the other hand, when $\bW_k \in \{X, Z\}$, this implies that~$\bu_k$ is the result of applying the $\tau^{\bW_k}$ measurement to $\ket{r_k}$,
+putting it in state $\ket{\tau^{\bW_k}_{\bu_k}}\ket{\tau^{\bW_k}_{\bu_k}}$.
+But then because $(\psi', M')$ implements the Pauli basis strategy on $\ket{r_k}$, the outcome $\bu_k'$ is also the result of applying the $\tau^{\bW_k}$ measurement to $\ket{r_k}$.
+As a result, $\bu_k' = \bu_k$.
+
+Finally, it is clear that this forms an EPR strategy.
+As a result, by \Cref{fact:heh-heh-heh-gonna-make-anand-prove-this-so-i-can-take-the-day-off},
+the consistency check passes with probability~$1$.
+Thus, the strategy passes the overall test with probability~$1$.
+Next, we show that this gives a \emph{commuting} EPR strategy.
+For the questions that arise in the Pauli basis test, the consistency check, and~$\game_{\mathrm{semi}}$,
+commutation follows because~$M$ and~$M'$ are commuting.
+As for the cross-check, consider the case when $\bW_k \in \{X, Z\}$.
+Then  the first (i.e.\ Player~$\bb$'s) measurement is given by
+\begin{equation*}
+(M^{x_1, x_2}_{a_1, a_2})_{\reg{1, \ldots, k, aux}} \otimes I_{\reg{aux'}}
+= \tau^{W_k}_{u_k} \otimes (A^{x_1, x_2}_{u_1, \ldots, u_{k-1}, a_2})_{\reg{1, \ldots, k-1, aux, aux'}},
+\end{equation*}
+where~$A$ is some measurement.
+This follows because~$M$ is a $\register$-semiregister strategy.
+Similarly, the second (i.e., Player~$\overline{\bb}$'s) measurement is given by
+\begin{equation*}
+(\tau_{\varnothing}^H \otimes \cdots \otimes \tau^H_{\varnothing})_{\reg{1, \ldots, k-1}}
+\otimes (M'^{W_k}_{u_k'})_{\reg{k, aux'}} \otimes I_{\reg{aux}}
+= \tau^{W_k}_{u_k'} \otimes I_{\reg{1, \ldots, k-1, aux, aux'}}.
+\end{equation*}
+By inspection, these two commute.
+On the other hand, when $\bW_k \in \{H, \bot\}$,
+then Player~$\overline{\bb}$ always outputs $\varnothing^k$.
+Their measurement for this outcome is the matrix $I_{\reg{1, \ldots, k, aux, aux'}}$,
+and is the zero matrix for every other outcome.
+These clearly commute with any strategy for Player~$\bb$.
+
+Finally, because~$M$ and~$M'$ are real strategies,
+this strategy is also real.
+As a result, this gives a value-$1$ real commuting EPR strategy.
+
+\paragraph{Soundness.}
+
+Suppose $\calS_{\mathrm{reg}} = (\psi_{\mathrm{reg}}, M_{\mathrm{reg}})$ is a  $\shorten{\register}{k-1}$-register strategy for $\game_{k-1}$ with value $1-\epsilon$.
+By \Cref{lem:proj-suffices}, we can assume without loss of generality that~$M$ is projective.
+For $1 \leq i \leq k$, write $\ket{r_i} := \ket{\mathrm{EPR}_{q_i}^{n_i}}$.
+By definition, $\ket{\psi_{\mathrm{reg}}} = \ket{r_1} \otimes \cdots \otimes \ket{r_{k-1}} \otimes \ket{\mathrm{aux}_{\mathrm{reg}}}$.
+Our goal will be to decode $\calS_{\mathrm{reg}}$ into a $\register$-semiregister strategy $\calS_{\mathrm{semi}}$ for $\game_{\mathrm{semi}}$ with nearly the same value.
+
+\paragraph{Using the Pauli basis test.}
+Passing the overall test with probability $1-\epsilon$
+means that $\calS_{\mathrm{reg}}$ must pass the test in \Cref{item:first-layer-pauli-basis} with probability $1-4\epsilon$.
+This test only involves measurements of the form $\{(M_{\mathrm{reg}})^{\hideq,\ldots, \hideq, x}_{a_1, a_2}\}_{a_1, a_2}$.
+Because the first $k-1$ coordinates are hidden, \Cref{eq:hide-coords-in-S} allows us to write
+\begin{equation*}
+(M_{\mathrm{reg}})^{\hideq, \ldots, \hideq, x}_{a_2} = I_{\reg{1, \ldots, k-1}} \otimes (A^x_{a_2})_{\reg{aux}},
+\end{equation*}
+where $\{A^x_a\}_x$ is some set of measurements.
+As a result, the state $\ket{\mathrm{aux}_{\mathrm{reg}}}$ and measurements $\{A^x_a\}_x$ form a strategy 
+for the game $\game_{\mathrm{basis}}(n_k, q_k, \eta)$ which succeeds with probability $1-4\epsilon$.
+By \Cref{thm:basis-test} this gives us a local isometry
+$\phi = \phi_{\mathrm{local}}\otimes \phi_{\mathrm{local}}$ and a state $\ket{\mathrm{aux}}$ such that
+\begin{equation}\label{eq:applied-that-fact}
+\Vert \phi \ket{\mathrm{aux}_{\mathrm{reg}}} - \ket{r_k} \ket{\mathrm{aux}} \Vert^2 \leq \delta(\eps),
+\end{equation}
+\begin{equation}\label{eq:applied-that-fact-dos}
+(\phi_{\mathrm{local}}\cdot A_{u}^{W} \cdot \phi_{\mathrm{local}}^\dagger)_{\reg{Alice}}\otimes I_{\reg{Bob}}
+\approx_{\delta(\eps)}
+(\tau_{u}^{W} \otimes I_{\reg{aux}})_{\reg{Alice}} \otimes I_{\reg{Bob}},
+\end{equation}
+on state $\ket{r_k} \ket{\mathrm{aux}}$ and the uniform distribution on $\{X,Z\}$.
+
+Define the new strategy $\calS$ in which $\ket{\psi} = \ket{r_1} \otimes \cdots \otimes \ket{r_{k-1}} \otimes (\phi \ket{\mathrm{aux}_{\mathrm{reg}}})$
+and 
+\begin{equation*}
+M^x_a = (I_{\reg{1, \ldots, k-1}} \otimes (\phi_{\mathrm{local}})_{\reg{aux}})
+	\cdot (M_{\mathrm{reg}})^x_a
+		\cdot (I_{\reg{1, \ldots, k-1}} \otimes (\phi^\dagger_{\mathrm{local}})_{\reg{aux}}).
+\end{equation*}
+Then \Cref{eq:applied-that-fact,eq:applied-that-fact-dos} implies that
+\begin{equation}\label{eq:applied-the-fact-again}
+\Vert  \ket{\psi} - \ket{r_1}\otimes \cdots \otimes \ket{r_k} \ket{\mathrm{aux}} \Vert^2 \leq \delta(\eps),
+\end{equation}
+\begin{equation}\label{eq:applied-the-fact-again-dos}
+(M^{H, \ldots, H, W}_u)_{\reg{Alice}} \otimes I_{\reg{Bob}}
+\approx_{\delta(\eps)}
+(I_{\reg{1, \ldots, k-1}} \otimes \tau_{u}^{W} \otimes I_{\reg{aux}})_{\reg{Alice}} \otimes I_{\reg{Bob}},
+\end{equation}
+on state $\ket{\psi}$ and the uniform distribution on $\{X,Z\}$.
+Because $\calS$ is just a rotated version of $\calS_{\mathrm{reg}}$,
+it also passes  $\game_{k-1}$ with probability $1-\eps$.
+In addition, it is also a $\shorten{\register}{k-1}$-register strategy.
+
+\paragraph{Performing the cross-check.}
+To analyze the cross-check, we begin with a definition.
+Given $W \in \{X, Z, \hideq, \noop\}$
+and $u \in \F_{q_k}^{n_k} \cup \{\varnothing\}$, define
+$\mathrm{null}_{W}(u) = u$ if $W \in \{X, Z\}$ and $\varnothing$ otherwise.
+The cross-check in \Cref{item:first-layer-cross-check} checks equality between
+$\bu_k$ and $\mathrm{null}_{\bW_k}(\bu_k')$.
+As a result,
+\begin{equation*}
+(M^x_{u_k})_{\reg{Alice}} \otimes I_{\reg{Bob}}
+\approx_{\eps} I_{\reg{Alice}} \otimes (M^{\hideq, \ldots, \hideq, W_k}_{[\mathrm{null}_{W_k}(u_k') = u_k]})_{\reg{Bob}}.
+\end{equation*}
+Next, we note that when $W_k \in \{\hideq, \noop\}$,
+\begin{equation*}
+M^{\hideq, \ldots, \hideq, W_k}_{[\mathrm{null}_{W_k}(u_k') = u_k]}
+= I_{\reg{1, \ldots, k-1}} \otimes \tau^{W_k}_{u_k} \otimes I_{\reg{aux}},
+\end{equation*}
+because both sides are the identity when $u_k = \varnothing$ and zero otherwise.
+On the other hand, when $W_k \in \{X, Z\}$, these two are close due to \Cref{eq:applied-the-fact-again-dos}.
+Applying~\Cref{fact:average-over-dists} and \Cref{fact:triangle}, we get
+\begin{equation}\label{eq:looks-like-tau}
+(M^x_{u_k})_{\reg{Alice}} \otimes I _{\reg{Bob}}
+\consistency_{\delta(\eps)} I_{\reg{Alice}} \otimes (I_{\reg{1, \ldots, k-1}} \otimes \tau^{W_k}_{u_k} \otimes I_{\reg{aux}})_{\reg{Bob}},
+\end{equation}
+where we have also applied \Cref{fact:agreement} to switch to the ``$\consistency_{\delta(\eps)}$" notation.
+
+\paragraph{Extracting a strategy.}
+
+Now we use this to define a $\register$-semiregister strategy $\calS_{\mathrm{semi}}$ for $\game_{\mathrm{semi}}$.
+This strategy will have state $\ket{\psi_{\mathrm{semi}}} = \ket{r_1}\cdots\ket{r_k} \ket{\mathrm{aux}}$.
+In addition, for each input $x = (x_1, x_2)$ and output $a = (a_1, a_2)$, it will have a matrix
+\begin{equation*}
+\Lambda_{a_1, a_2}^{x_1, x_2} := (I_{\reg{1, \ldots, k-1}} \otimes \tau^{W_k}_{u_k} \otimes I_{\reg{aux}})\cdot
+M_{(u_1, \ldots, u_{k-1}),a_2}^{x_1, x_2} \cdot (I_{\reg{1, \ldots, k-1}} \otimes \tau^{W_k}_{u_k} \otimes I_{\reg{aux}}).
+\end{equation*}
+First, it follows from $M$ being a $\register|_{k-1}$-strategy that this is indeed a $\register$-semiregister strategy.
+This is because
+\begin{align*}
+\Lambda_{a_1}^{x_1, x_2}
+&= (I_{\reg{1, \ldots, k-1}} \otimes \tau^{W_k}_{u_k} \otimes I_{\reg{aux}})\cdot
+	M_{u_1, \ldots, u_{k-1}}^{x_1, x_2} \cdot (I_{\reg{1, \ldots, k-1}} \otimes \tau^{W_k}_{u_k} \otimes I_{\reg{aux}})\\
+&= (I_{\reg{1, \ldots, k-1}} \otimes \tau^{W_k}_{u_k} \otimes I_{\reg{aux}})\cdot
+	(\tau^{W_1}_{u_1} \otimes \cdots \otimes \tau^{W_{k-1}}_{u_{k-1}} \otimes I_{\reg{k, aux}})
+	\cdot (I_{\reg{1, \ldots, k-1}} \otimes \tau^{W_k}_{u_k} \otimes I_{\reg{aux}})\\
+&= \tau^{W_1}_{u_1} \otimes \cdots \otimes \tau^{W_k}_{u_k} \otimes I_{\reg{aux}}.
+\end{align*}
+In addition, if $S = \{i \neq k \mid W_i = H\}$, then
+\begin{equation*}
+\Lambda_{a_1, a_2}^{x_1, x_2}
+= (I_{\reg{1, \ldots, k-1}} \otimes \tau^{W_k}_{u_k} \otimes I_{\reg{aux}})\cdot
+(I_S \otimes A_{\overline{S}}) \cdot (I_{\reg{1, \ldots, k-1}} \otimes \tau^{W_k}_{u_k} \otimes I_{\reg{aux}})
+= I_S \otimes A'_{\overline{S}},
+\end{equation*}
+where~$A$ and~$A'$ are matrices acting on the registers not in~$S$ and on the auxiliary register.
+
+Next, we show that this has good value.
+Write $\calD$ for the marginal distribution of questions given to player~$1$ in $\game_{\mathrm{semi}}$.
+By the consistency check,
+\begin{equation*}
+(M_{(u_1, \ldots, u_{k-1}),a_2}^{x_1, x_2})_{\reg{Alice}} \otimes I_{\reg{Bob}}
+\consistency_{\delta(\eps)} I_{\reg{Alice}} \otimes (M_{(u_1, \ldots, u_{k-1}),a_2}^{x_1, x_2})_{\reg{Bob}}
+\end{equation*}
+with respect to~$\calD$.
+As a result, \Cref{eq:looks-like-tau} and \Cref{fact:sandwich} imply that
+\begin{equation*}
+(\Lambda_a^x)_{\reg{Alice}} \otimes I_{\reg{Bob}}
+\approx_{\delta(\eps)} I_{\reg{Alice}} \otimes (M_a^x)_{\reg{Bob}}
+\approx_{\delta(\eps)} (M_a^x)_{\reg{Alice}} \otimes I_{\reg{Bob}},
+\end{equation*}
+where the last step uses the self-consistency of~$M$.
+Applying \Cref{fact:approx-delta-game-value}, $\calS_{\mathrm{semi}}$ passes $\game_{\mathrm{semi}}$ with probability at least $\valstrat{\game_{k-1}}{\calS} - \delta(\eps)$.  
+Thus, $\valsemi{\register}{\game_{\mathrm{semi}}} \geq 1 - \delta(\eps)$, and we are done.
+\end{proof}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End:
+%%%---------- close: pauli-basis-layer
+
+%%%%%%%%%%% jump to data-hiding
+%%%---------- open: data-hiding
+%!TEX root = main.tex
+
+\def\bpm#1\epm{\begin{pmatrix}#1\end{pmatrix}}
+

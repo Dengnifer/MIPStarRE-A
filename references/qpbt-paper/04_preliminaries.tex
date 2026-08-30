@@ -1,0 +1,1265 @@
+\section{Preliminaries}
+\label{sec:prelim}
+
+\paragraph{Notation.}
+We use $\Sigma$ to denote a finite alphabet.
+$\N$ is the set of positive integers.
+For $w\in\{0,1\}$, $\overline{w}$ denotes $1-w$.
+For $w\in\{\alice,\bob\}$, $\overline{w}=\bob$ if $w=\alice$ and
+$\overline{w}=\alice$ otherwise.
+(For notational convenience we often implicitly make the identifications
+$1\leftrightarrow \alice$ and $2\leftrightarrow \bob$.)
+We use $\F$ to denote a finite field.
+We write $M_n(\F)$ to denote the set of $n\times n$ matrices over $\F$.
+We write $I$ to denote the identity operator on a vector space.
+We write $\Tr(\cdot)$ for the matrix trace.
+We write $\mH$ to denote a separable Hilbert space.
+For a linear operator $T$, $\|T\|$ denotes the operator norm.
+
+\paragraph{Asymptotics.}
+All logarithms are base $2$.
+We use the notation $O(\cdot)$, $\poly(\cdot)$, and $\polylog(\cdot)$ in the
+following way.
+For $f,g:\N\to\R_+$ we write $f(n)=O(g(n))$ (omitting the integer $n$ when it is
+clear from context) to mean that there exists a constant $C>0$ such that for all
+$n\in\N$, $f(n)\leq C g(n)$.
+When we write $f(a_1,\ldots,a_k) = \poly(a_1,\ldots,a_k)$, this indicates that
+there exists a universal constant $C > 0$ (which may vary each time the notation
+is used in the paper) such that $f(a_1,\ldots,a_k) \leq C( a_1 \cdots a_k)^C$
+for all positive $a_1,\ldots,a_k$.
+Similarly, when we write $f(a_1,\ldots,a_k) = \polylog(a_1,\ldots,a_k)$, there
+exists a universal constant $C$ such that $f(a_1,\ldots,a_k) \leq C\prod_{i =
+  1}^k \log^C (1+ a_i)$ for all positive $a_1,\ldots,a_k$.
+Finally, we write $\log(a_1,\ldots,a_k)$ as short hand for $\prod_{i = 1}^k \log
+(1 + a_i)$.\footnote{The additional $1$ in the argument of the $\log(\cdot)$ is
+  to ensure that this quantity is strictly positive.}
+
+\subsection{Turing machines}
+\label{sec:tms}
+
+Turing machines are a model of computation introduced
+in~\cite{turing1937computable}, and play a central role in our modeling of verifiers for nonlocal
+games. Here we give an overview of certain aspects of Turing machines that are relevant for
+this paper. For an in-depth treatment of Turing machines, we refer the reader to the textbooks of 
+Papadimitriou~\cite{Pap94} or Sipser~\cite{sipser2012introduction}.
+
+The tapes of a Turing machine are infinite one-dimensional arrays of cells that
+are indexed by natural numbers.
+A \emph{$k$-input} Turing machine $\cal{M}$ has $k$ input tapes, one work tape,
+and one output tape. 
+Each cell of a tape has symbols taken either from the set $\{0,1\}$ or the blank
+symbol $\sqcup$.
+At the start of the execution of a Turing machine, the work and output tapes are
+initialized to have all blank symbols.
+A Turing machine \emph{halts} when it enters a designated halt state.
+The \emph{output} of a Turing machine, when it halts, is the binary string that
+occupies the longest initial stretch of the output tape that does not have a
+blank symbol.
+If there are only blank symbols on the output tape, then by convention we say
+that the Turing machine's output is $0$.
+
+Every $k$-input Turing machine $\cal{M}$ computes a (partial) function $f: (\{0,
+1\}^*)^k \to \{0,1\}^*$ where the function is only defined on subset $S
+\subseteq (\{0,1\}^*)^k$ of inputs $x$ on which $\machine$ halts.
+We use $\cal{M}(x_1, x_2, \ldots, x_k)$ to denote the output of a $k$-input
+Turing machine $\cal{M}$ when $x_i \in \{0,1\}^*$ is written on the $i$-th input
+tape for $i \in \{1, 2, \ldots, k\}$.
+If $\cal{M}$ does not halt on an input $x$, then we define $\cal{M}(x)$ to be
+$\bot$.
+
+
+The \emph{time complexity} of a Turing machine $\cal{M}$ on input $x = (x_1,
+x_2, \ldots, x_k)$, denoted by $\TIME_{\cal{M},\, x}$, is the number of time
+steps that $\cal{M}$ takes on input $x$ before it enters its designated halt
+state; if $\cal{M}$ never halts on input $x$, then we define $\TIME_{\cal{M},x}
+= \infty$.
+
+Every Turing machine $\cal{M}$ has a canonical encoding as a bit string $\desc{\cal{M}} \in \{0, 1\}^*$, called
+the \emph{canonical description of $\cal{M}$}. The canonical encoding describes the 
+finite number of states and transition rules of $\cal{M}$. The details of this 
+encoding are not important for this paper; we assume that some ``reasonable'' encoding scheme is
+used where the bit length of the encoding is at most some fixed polynomial in the number of 
+states. The length of the description
+$\desc{\cal{M}}$ is denoted by $|\desc{\cal{M}}|$. 
+For every integer $k \in \N$ and every string $\alpha \in \{0, 1\}^*$, the
+$k$-input Turing machine described by $\alpha$ is denoted $[\alpha]_k$.
+
+Throughout this paper we frequently give high-level descriptions of Turing machines in English language, 
+rather than explicitly describing them in terms of states and transition functions. In doing so we implicitly assume that all such descriptions can be formally converted into a description in terms of states and transition functions such that there is no hidden blow-up in the complexity of the representation. 
+
+
+
+
+We elaborate on several properties of Turing machines that are implicitly used throughout the paper.
+
+
+\paragraph{Turing machine simulation.} We frequently describe Turing machines as running or simulating other Turing machines as
+``subroutines''. We assume that such simulations can be performed with a polynomial overhead in terms of the time complexity. 
+For example, suppose $\cal{A}$ is a $1$-input Turing machine that has the following high-level
+description: on input $x$ (interpreted as an integer) it runs a $2$-input Turing machine $\cal{B}$ on the input $(x,x^2)$ and obtains an output $y$ (if $\cal{B}$ halts),
+and then finally $\cal{A}$ returns the output $y$. We assume that $\cal{A}$ can efficiently simulate the Turing
+machine $\cal{B}$, even though $\cal{B}$ 
+has a different number of input tapes. This is because every
+$k$-input Turing machine $\cal{M}$ can be efficiently simulated 
+by a single \emph{tape} Turing machine, as given by the following result~\cite{hartmanis1965computational}.
+We assume that there is an unambiguous, binary encoding
+$\mathrm{enc}_k(x)$ of $k$-tuples $x \in (\{0,1\}^*)^k$ that is computable in
+time $O(k + |x_1| + \cdots + |x_k|)$ where $x_i$ is the $i$-th component of the
+tuple $x$.\footnote{A canonical choice of such an encoding is the following: a
+  tuple $(x_1,\ldots,x_k)$ is in encoded into a concatenation of a ``dual rail''
+  encoding of each $x_i$: every bit of $x_i$ is expanded via the map $0 \mapsto
+  01$, $1 \mapsto 10$, and the end of the string $x_i$ is indicated by $00$.}
+ 
+
+
+
+\begin{theorem}[Efficient universal Turing machine~\cite{hartmanis1965computational}]
+  \label{thm:universal-tm}
+ For all $k \in \N$ there exists a single tape Turing machine $\cal{U}_k$ (called a \emph{universal Turing machine}) with such
+  that for every $x \in (\{0,1\}^*)^k$ and $\alpha \in \{0,1\}^*$, if the tape of 
+  the Turing machine $\cal{U}_k$ is initialized with $\mathrm{enc}_{k+1}(\alpha,x_1,\ldots,x_k)$ and 
+  $[\alpha]_k$ halts within $T$ steps on input $x$ then $\cal{U}_k$ halts in at most $C(k \cdot |\alpha| \cdot |x| \cdot T)^c$ steps and the contents
+    of its tape is $[\alpha]_k(x)$. Here, $C, c \geq 1$ are universal constants, and $|x|$ denotes the sum of lengths $|x_1| + \cdots + |x_k|$. 
+    
+\end{theorem}
+
+Thus, the Turing machine $\cal{A}$ can simulate $\cal{B}$ on input $(x,x^2)$ as follows: it first computes
+the encoding $\mathrm{enc}_3(\desc{\cal{B}},x,x^2)$ and writes this on a segment of the work tape. Then, it runs
+the Turing machine $\cal{U}_k$ from \Cref{thm:universal-tm} on this segment of the work tape, obtaining 
+output $y = \cal{B}(x,x^2)$ (if it eventually halts). Then, it writes $y$ onto the output tape of
+$\cal{A}$. The total time complexity of $\cal{A}$ on input $x$ then includes the time complexity 
+of computing the encoding, running Turing machine $\cal{U}_k$, and writing the final output. 
+
+We also assume that the length of the canonical description of $\cal{A}$ 
+depends only linearly on the canonical description of the Turing machine $\cal{B}$, so that
+$|\desc{\cal{A}}| = O(|\desc{\cal{B}}|)$; the constant in the $O(\cdot)$ notation hides
+the dependence on the description of the universal Turing machine $\cal{U}_k$, the computation
+of the encoding map $\mathrm{enc}_3(\cdot)$, etc. 
+
+
+
+
+
+
+\paragraph{Hardwiring constants.} 
+Throughout this paper, we often define Turing machines $\cal{M}$
+with some number $k$ of inputs, and then for some string $a \in \{0,1\}^*$
+define a $(k-1)$-input Turing machine $\cal{M}_a$ whose behavior on input
+$(y_1,\ldots,y_{k-1})$ is to execute $\cal{M}$ on input
+$(a,y_1,\ldots,y_{k-1})$.
+Informally, the Turing machine $\cal{M}_a$ ``hardwires'' the input $a$ onto the
+first tape of $\cal{M}$.
+We  informally write $\cal{M}_a(y_1,\ldots,y_{k-1}) =
+\cal{M}(a,y_1,\ldots,y_{k-1})$.
+
+More precisely, the Turing machine $\cal{M}_a$ on input $(y_1,\ldots,y_{k-1})$ first
+computes the encoding $e = \mathrm{enc}_{k+1}(\desc{\cal{M}},a,y_1,\ldots,y_{k-1})$, and then runs the
+universal Turing machine $\cal{U}_k$ on input $e$.
+The description of $\cal{M}_a$ can be computed from $\desc{\cal{M}}$ and $a$ in
+time $O(|a| + |\cal{M}| + O(1))$, where the $O(1)$ comes from the description
+length of the universal Turing machine $\cal{U}_k$.
+
+Furthermore, the time complexity of the Turing machine $\cal{M}_a$ on input
+$(y_1,\ldots,y_{k-1})$ is at most \\ $\poly(|a|,|y_1|,\ldots,|y_{k-1}|,T)$ where $T$
+is the time complexity of $\cal{M}$ on input $(a,y_1,\ldots,y_{k-1})$.
+This bound comes from the complexity of encoding the inputs from the $k$ tapes
+into the $\mathrm{enc}_{k+1}(\cdot)$ format, and then simulating $\cal{M}$ on input
+$(\desc{\cal{M}},a,y_1,\ldots,y_{k-1})$.
+
+
+
+\paragraph{Description complexity bounds.} When we bound the description lengths of
+the Turing machines presented in this paper, we do not worry about the exact
+details of how Turing machines are represented as binary strings -- as mentioned we assume that
+\emph{some} reasonable encoding is used -- but instead
+we distinguish between whether the Turing machine 
+description depends on any parameters used elsewhere in the paper. Note that whether the \emph{description} depends on any parameters is different from whether the Turing machine takes parameters as \emph{input}. For example, consider the following (high-level) descriptions of Turing machines $\cal{A}$ and $\cal{B}$:
+
+\begin{enumerate}
+	\item Turing machine $\cal{A}$ takes two inputs $(\alpha,x)$ and outputs the integer $\alpha \times x$ where $\alpha, x$ are interpreted as positive integers written in binary. 
+	\item Turing machine $\cal{B}$ takes one input $x$ and outputs the integer $\beta \times x$ where $\beta$ is a fixed positive integer.
+\end{enumerate}
+
+The description of $\cal{A}$ does not depend on any ``external'' parameters, so its description length $|\desc{\cal{A}}|$ is some universal constant, which we express as $O(1)$. On the other hand, the description of $\cal{B}$ depends on some fixed integer $\beta$; in other words, the parameter $\beta$ is ``hard-wired'' into $\cal{B}$'s description. The description of $\cal{B}$ can be taken to be the following: $\cal{B}$ (which is a $1$-input Turing machine) simulates the execution of the $2$-input Turing machine $\cal{A}$ where the first input tape of $\cal{A}$ has the binary representation of $\beta$ written onto it and the second input tape has $x$ (which is provided as input to $B$) written into it. Thus the description of $\cal{B}$ includes the binary representation of $\beta$, the description of $\cal{A}$ (whose length is a universal constant), and the description of the universal Turing machine (whose length is a universal constant). Thus the description length of $\cal{B}$ is $O(\log \beta) + O(1) = O(\log \beta)$.
+
+
+
+\paragraph{Time complexity bounds.} When we bound the time complexity of the Turing machines presented in this paper, we similarly do not worry about the exact
+implementation details, but instead we assume that basic computations such as integer arithmetic, string comparisons, etc.\ are all performed
+using reasonably efficient algorithms that run in polynomial time in the length of the input. When running other Turing machines as subroutines, we assume that there is some polynomial overhead due to \Cref{thm:universal-tm}.
+
+
+\paragraph{Timeout counters.} We sometimes define Turing machines that are required to halt if 
+either the Turing machine or some subroutine takes a number of time steps that exceeds some specified threshold. For example, we may write ``Let $\cal{M}$ be the Turing machine that on input the description $\ol{\cal{R}}$ of a Turing machine $\cal{R}$ and an integer $T$, simulates $\cal{R}$ on the empty tape and halts if more than $T$ steps are performed.''
+
+This is useful for establishing an \emph{a priori} bound on the time complexity of the Turing machine. In particular we will be able to claim that $\cal{M}$, as described above, always runs in time at most $\poly(T,|\ol{\cal{R}}|$, irrespective of the running time of $\cal{R}$ itself.
+
+We explain how such a Turing machine can be realized formally. We use a variant of the universal Turing machine of \Cref{thm:universal-tm}. Using the theorem, it is straightforward to show that given a (single tape) Turing machine $\cal{R}$ there exists another two-tape Turing machine $\cal{M}'$ such that, whenever the second tape is initialized to the binary representation of $T$, $\cal{M}'$ simulates $\cal{R}$ and in-between every simulated step of $\cal{R}$, decrements the second tape and checks if it reaches zero. If it does, then $\cal{M}'$ halts and rejects. Otherwise, it continues. 
+
+The time complexity of $\cal{M}'$ is, by definition, at most $O(T \log T)$ for all inputs. The description length of $\cal{M}'$ is at most $O(|\ol{\cal{R}}|)$, because this is the description size of the universal Turing machine, whose initial tape has been hardwired with $\ol{\cal{R}}$.
+To convert back to a single tape Turing machine and obtain $\cal{M}$ from $\cal{M}$' we can use \Cref{thm:universal-tm} again, at the cost of a polynomial blow-up in the time complexity.
+
+
+\paragraph{Input representations.} 
+Although the inputs and outputs of a Turing machine are strictly speaking
+  binary strings, we oftentimes slightly abuse notation and specify Turing
+  machines that treat their inputs and outputs as objects with more structure,
+  such as finite field elements, integers, symbols from a larger alphabet, and
+  so on.
+  In this case we implicitly assume that the Turing machine specification uses a
+  consistent convention to represent these structured objects as binary strings.
+  Conventions for objects such as integers are straightforward.
+  For representations of finite field elements, we refer the reader to
+  Section~\ref{sec:ff-representations}.
+
+
+\subsection{Linear spaces}
+\label{sec:linear-spaces}
+
+Linear spaces considered in the paper generally take the form $V = \F^n$ for a
+finite field $\F$ and integer $n \geq 1$.
+In particular, when we write ``let $V$ be a linear space'', unless explicitly
+stated otherwise we always mean a space of the form $\F^n$.
+Let $\hat{E} = \{ \hat{e}_1, \hat{e}_2, \ldots, \hat{e}_n\}$ denote the standard basis of $V$, where for
+$i \in\{ 1, 2, \ldots, n\}$,
+\begin{equation*}
+  \hat{e}_i = (0, \ldots, 0, 1, 0, \ldots, 0)
+\end{equation*}
+has a $1$ in the $i$-th coordinate and $0$'s elsewhere.
+We write $\End(V)$ to denote the set of linear transformations from $V$ to
+itself.
+\begin{definition}[Register subspace]
+  A \emph{register subspace} $S$ of $V$ is a subspace that is the span of a
+  subset of the standard basis of $V$.\footnote{The use of the term ``register''
+    is meant to create an analogy for how the space of multiple qubits is often
+    partitioned into ``registers'' containing a few qubits each.}
+  We often represent such a subspace as an indicator vector $u\in \{0,1\}^s$,
+  where $s=\dim(V)$, such that if $\{\hat{e}_1,\ldots,\hat{e}_s\}$ is the standard basis of
+  $V$ then $S = \text{span}\{\hat{e}_i|\,u_i=1\}$.
+\end{definition}
+
+\begin{definition}
+  Let $\hat{E} = \{ \hat{e}_i\}$ be the standard basis of $V = \F^n$.
+  For two vectors $u = \sum_{i=1}^n u_i \hat{e}_i$, $v = \sum_{i=1}^n v_i \hat{e}_i$ in $V$,
+  define the \emph{dot product}
+  \begin{equation*}
+    u \cdot v = \sum_{i=1}^n u_i v_i \in \F\;.
+  \end{equation*}
+  Let $S$ be a subspace of $V$. The \emph{subspace orthogonal to $S$ in $V$} is
+  \begin{equation*}
+    S^\perp \,=\, \big\{ u \in V : u \cdot v = 0
+    \text{ for all }  v \in S \big\}\;.
+  \end{equation*}
+  Although the notation $S^\perp$ does not explicitly refer to $V$, the ambient
+  space will always be clear from context.
+\end{definition}
+
+We note that over finite fields, the notion of orthogonality does not possess
+all of the same intuitive properties of orthogonality over fields such as $\R$
+or $\C$; for example, a non-zero subspace $S$ may be orthogonal to itself (e.g.\
+$\mathrm{span} \{ (1,1) \}$ over $\F_2$).
+However, the following remains true over all fields.
+
+\begin{lemma}
+  \label{lem:perp_perp}
+  Suppose $S$ is a subspace of $V$. Then $\dim(S) + \dim(S^\perp) =
+  \dim(V)$, and 
+  \begin{equation*}
+    (S^\perp)^\perp = S\;.
+  \end{equation*}
+\end{lemma}
+
+\begin{proof}
+  The statement about the dimensions follows from the fact that vectors in $S^\perp$ are
+  the solution to a feasible linear system of equations with $\dim(S)$ linearly
+  independent rows; this implies that the solution space has dimension exactly
+  $\dim(V) - \dim(S)$.
+  Next, we argue that $S \subseteq (S^\perp)^\perp$.
+  Let $u \in S$.
+  Since all vectors $v \in S^\perp$ are orthogonal to every vector in $S$,
+  in particular $u$, this implies that $u \in (S^\perp)^\perp$.
+  By dimension counting, it follows that $(S^\perp)^\perp = S$.
+\end{proof}
+
+\begin{definition}\label{def:complementary}
+  Given a linear space $V$, two subspaces $S$ and $T$ of $V$ are said to form a
+  pair of \emph{complementary subspaces} of $V$ if
+\begin{equation*}
+  S \cap T = \{ 0 \}, \quad S + T = V\;.
+\end{equation*}
+In this case, we write $V = S \oplus T$.
+Any $x\in V$ can be written as $x = x^S + x^T$ for $x^S \in S$ and $x^T \in T$
+in a unique way.
+We refer to $x^S$ (resp.~$x^T$) as the \emph{projection of $x$ onto $S$ parallel
+  to $T$} (resp.~\emph{onto $T$ parallel to $S$}).
+We call the unique linear map $L: V \to V$ that maps $x \mapsto x^S$ the
+\emph{projector onto $S$ parallel to $T$}.
+\end{definition}
+
+A given subspace may have many different complementary subspaces: consider the
+example of $S = \mathrm{span}\{(1,1) \}$ in $\F_2^2$.
+Different complementary subspaces include $T = \mathrm{span}\{(1,0)\}$ and
+$T' = \mathrm{span}\{(0,1)\}$.
+It is convenient to define the notion of a \emph{canonical complement} of a
+subspace $S$, given a basis for $S$.
+
+\begin{definition}
+  \label{def:canonical-complement}
+  Let $E$ be the standard basis of linear space $V = \F^n$.
+  Let $F = \{v_1, v_2, \ldots, v_m\} \subset V$ be a set of $m$ linearly
+  independent vectors in $V$.
+  The \emph{canonical complement $F^\perp$ of $F$} is the set of $n-m$ independent
+  vectors defined as follows.
+  Write $v_i = \sum_{j=1}^n a_{i, j}\, \hat{e}_j$.
+	Using a canonical algorithm for Gaussian elimination that works over arbitrary
+  fields, transform the $m\times n$ matrix $(a_{i, j})$ to reduced row echelon
+  form $(b_{i, j})$.
+  Let $J$ be the set of $m$ column indices of the leading $1$ entry in each row
+  of $(b_{i, j})$.
+  The canonical complement is defined as $F^\perp = \{ \hat{e}_j : j \not\in J \}$.
+\end{definition}
+
+
+\begin{remark}
+We emphasize that the canonical complement $F^\perp$ is a \emph{set} (rather than
+a subspace), and it is defined with respect to a \emph{set} of linearly
+independent vectors $F$. While there are equivalent ways of defining
+a canonical complement of a \emph{subspace} in a basis-independent manner, 
+we use this particular definition because it makes it clear that
+the canonical complement of a set $F$ is efficiently computable. 
+\end{remark}
+
+\begin{remark}
+  Let $\hat{E}$ be the standard basis of $V$.
+  Suppose subspace $S$ is a register subspace of $V$ spanned by
+  $\hat{E}_0 \subseteq \hat{E}$.
+  Then it is not hard to verify that the canonical complement of $\hat{E}_{0}$ is
+  $\hat{E}\setminus \hat{E}_0$ and the span of the canonical complement coincides with
+  $S^\perp$.
+\end{remark}
+
+
+\begin{lemma}
+  \label{lem:canonical-complement}
+  Let $S$ be the span of linearly independent vectors $F = \{v_1,\ldots,v_m \}
+  \subseteq V$ and let $F^\perp$ be the canonical complement of $F$ as defined
+  in Definition~\ref{def:canonical-complement}.
+  Let $T = \mathrm{span}(F^\perp)$.
+  Then
+  \begin{equation*}
+   \qquad S + T = V\;,  S \cap T = \{ 0 \} \;.
+  \end{equation*}
+\end{lemma}
+
+\begin{proof}
+To show the first item, we must show that every vector in $V$ can be
+written as a sum of an element of $S$ and an element of $T$. To do
+this, let $A = (a_{i, j})$ be the $m\times n$ matrix over $\F$ whose
+rows are the vectors $v_i$, as in Definition~\ref{def:canonical-complement}.
+  Write $A = U B$ where $U$ is invertible and $B$ is in reduced row echelon
+  form.
+  Let $J$ be the set of column indices of the leading 1 entries in
+  $B$, as in Definition~\ref{def:canonical-complement}.  
+  Now, the rows of $B$ are linearly independent and span the subpsace $S$, and the restriction of
+  these rows to the columns in $J$ are still linearly independent and
+  span $\F^m$. Thus, for any vector $u \in V$, there is some linear
+  combination $v$ of rows of $B$ such that $u$ and $v$ agree
+  restricted to the columns in $J$. In other words, there exists $v
+  \in S$ such that $u_j = v_j$ for all $j \in J$. Hence, $u = v + w$
+  for $w \in T$, where $T$ is the canonical complement.
+  This shows $S + T = V$.
+  Counting dimensions shows that necessarily $S\cap T =
+  \{0\}$.
+\end{proof}
+
+\begin{definition}
+  \label{def:cl-canonical}
+  Let $F \subseteq V$ be a set of linearly independent vectors.
+  Let $F^\perp$ be the canonical complement of $F$.
+  Define the \emph{canonical linear map $L \in \End(V)$ with kernel basis $F$}
+  as the projector onto $T$ parallel to $S$, where $S = \mathrm{span}(F)$ and $T
+  = \mathrm{span}(F^\perp)$.
+  When the basis $F$ for $S$ is clear from context, we refer to this map as the
+  \emph{canonical linear map with kernel $S$.}
+\end{definition}
+
+\begin{definition}
+  \label{def:Lperp}
+  Let $L \in \End(V)$ be a linear map, and let $F$ be a basis for
+  $\ker(L)^\perp$.
+  Define $L^\perp : V \rightarrow V$ as the canonical linear map with kernel
+  basis $F$.
+\end{definition}
+
+\begin{lemma}
+  \label{lem:L_perp_perp}
+  Let $L \in \End(V)$ be a linear map and $F$ a basis for $\ker(L)^\perp$.
+  Let $L^\perp \in \End(V)$ be the linear map defined in
+  Definition~\ref{def:Lperp}.
+  Then $\ker(L^\perp) = \ker(L)^\perp$.
+\end{lemma}
+
+\begin{proof}
+  First, to set notation, let $S = \mathrm{span}(F) = \ker(L)^\perp$ and $T =
+  \mathrm{span}(F^\perp)$. By Lemma~\ref{lem:canonical-complement},
+  any vector $v \in V$ can be uniquely decomposed as $v = v^S +
+  v^T$. 
+
+  Now we will show the lemma.  First we show that if $\ker(L^\perp) \subseteq \ker(L)^\perp$. Let
+  $v \in \ker(L^\perp)$, and write $v = v^S + v^T$.  By the definition
+  of $L^\perp$, it follows that $v^T = 0$, and hence $v \in S = \ker(L)^\perp$.
+
+  It remains to show the other direction, that is $\ker(L)^\perp \subseteq
+  \ker(L^\perp)$. Let $v \in \ker(L)^\perp = S$. Then $v = v^S + v^T$
+  where $v^T = 0$, and hence by the definition of $L^\perp$, $L^\perp
+  v = 0$. Hence $v \in \ker(L^\perp)$.
+
+  
+\end{proof}
+
+\subsection{Finite fields}
+\label{sec:finite-fields}
+
+Let $p$ be a prime and $q = p^k$ be a prime power.
+We denote the finite fields of $p$ and $q$ elements by $\Fp$ and $\Fq$
+respectively.
+The prime $p$ is the characteristic of field $\Fq$, and field $\Fp$ is the
+\emph{prime subfield} of $\Fq$.
+We sometimes omit the subscript and simply use $\F$ to denote the finite field
+when the size of the field is implicit from context.
+For general background on finite fields, and explicit algorithms for elementary
+arithmetic operations, we refer to~\cite{mullen2013handbook}.
+
+\subsubsection{Subfields and bases}
+\label{sec:subfields}
+Let $q$ be a prime power and $k$ an integer. 
+The field $\Fq$ is a subfield of $\F_{q^k}$ and $\F_{q^k}$ is a linear space of
+dimension $k$ over $\Fq$.
+Let $\{ e_i \}_{i=1}^k$ be a basis of $\F_{q^k}$ as a linear space over $\Fq$.
+Introduce a bijection $\downsize_q : \F_{q^k} \rightarrow \Fq^k$ between
+$\F_{q^k}$ and $\Fq^k$ defined with respect to the basis $\{ e_i \}_{i=1}^k$ by
+\begin{equation*}
+  \downsize_q : a \mapsto (a_i)_{i=1}^k
+\end{equation*}
+where $a = \sum_{i=1}^k a_i e_i$.
+This map satisfies several nice properties.
+First, the map is an isomorphism of $\Fq$-vector spaces: it is $\Fq$-linear and addition in $\F_{q^k}$
+naturally corresponds to vector addition in $\Fq^k$.
+Namely, for all $a,b \in \F_{q^k}$,
+\begin{equation*}
+	\downsize_q (a + b) = \downsize_q(a) + \downsize_q(b)\;.
+\end{equation*}
+Second, multiplication by a field element in $\F_{q^k}$ corresponds to a linear
+map on $\F_{q}^k$.
+For all $a \in \F_{q^k}$, there exists a matrix $K_a \in \Matrix_k (\Fq)$ such
+that for all $b \in \F_{q^k}$,
+\begin{equation*}
+	\downsize_q (a b) = K_a \, \downsize_q(b)\;.
+\end{equation*}
+The matrix $K_a$ is called the \emph{multiplication table of $a$ with respect to
+  basis $\{e_i\}_{i=1}^k$}.
+
+We extend the map $\downsize_q$ to vectors, matrices and sets over $\F_{q^k}$.
+For $v = (v_1, v_2, \ldots, v_n) \in \F_{q^k}^n$, define
+\begin{equation*}
+  \downsize_q (v) = \bigl( \downsize_q (v_i) \bigr)_{i=1}^n \in \Fq^{kn}\;.
+\end{equation*}
+Similarly, for matrix $M = (M_{i, j}) \in \Matrix_{m, n}(\F_{q^k})$, define
+\begin{equation*}
+  \downsizem_q (M) = \bigl( K_{M_{i, j}} \bigr) \in \Matrix_{mk, nk} (\Fq)\;,
+\end{equation*}
+the block matrix whose $(i,j)$-th block is the multiplication table $K_{M_{i,
+    j}}$ of $M_{i, j}$ with respect to basis $\{e_i\}_{i=1}^k$.
+For a set $S$ of vectors in $\F_{q^k}^n$, define
+\begin{equation*}
+	\downsize_q(S) = \{ \downsize_q(v) : v \in S \}\;.
+\end{equation*}
+We omit the subscript and write $\downsize$ and $\downsizem$ for $\downsize_q$
+and $\downsizem_q$ respectively when $q$ equals to $p$, the characteristic of
+the field.
+
+The \emph{trace of\/ $\F_{q^k}$ over\/ $\Fq$} is defined as
+\begin{equation}\label{eq:def-trace}
+  \tr_{q^k \to q} :\; a \,\mapsto \, \Tr(K_a)
+\end{equation}
+for $a \in \F_{q^k}$, where $\Tr(K_a)$ is the trace of the multiplication table
+of $a$ with respect to the basis $\{e_i\}$.
+By definition, the trace is an $\Fq$-linear map from $\F_{q^k}$ to
+$\Fq$. The trace is in fact independent of the choice of basis, which
+can be seen from the following equivalent definition~\cite[Definition 2.1.80]{mullen2013handbook}:
+\[
+	\tr_{q^k \to q}(a) = \sum_{j = 0}^{k-1} a^{q^j}\;.
+\]
+
+A \emph{dual basis} $\{e_1', e_2', \ldots, e_k' \}$ of $\{e_1, e_2, \ldots,
+e_k\}$ is a basis such that $\tr_{q^k \to q}(e^{}_i e'_j) = \delta_{i,j}$ for
+all $i, j \in \{1, 2, \ldots, k\}$.
+A \emph{self-dual basis} is one that is equal to its dual.
+If for some $\alpha \in \F_{q^k}$ the set $\{ \alpha^{q^j} \}_{j=0}^{k-1}$ forms a
+basis of $\F_{q^k}$ over $\Fq$, the basis is called a \emph{normal
+  basis}. Self-dual and normal bases do not exist for all fields but are guaranteed to exist under
+certain conditions; in particular, if $q = 2$ and $k$ is odd, as will
+be shown in \Cref{lem:efficient_basis}.
+
+We record some convenient facts about the maps $\downsize(\cdot)$ and
+$\downsizem(\cdot)$ for self-dual bases.
+
+\begin{lemma}
+  \label{lem:downsize_field}
+  Let $q$ be a prime power, $k$ an integer and $\{e_i\}$ a self-dual basis for
+  $\F_{q^k}$ over $\F_q$.
+  The map $\downsize_q(\cdot)$ corresponding to $\{e_i\}$ satisfies the
+  following properties:
+  \begin{enumerate}
+  \item For all $x \in \F_{q^k}$, $\downsize_q(x) = \bigl( \tr_{q^k \to
+      q}(xe_1),\ldots,\tr_{q^k \to q}(xe_k) \bigr)$.
+  \item For all $x,y \in \F_{q^k}$, $\tr_{q^k \to q}(xy) = \downsize_q(x) \cdot
+    \downsize_q(y)$.
+  \item For all $M \in \Matrix_{m, n}(\F_{q^k})$ and $v \in
+    \F_{q^k}^n$, we have $\downsizem_q(M) \downsize_q(v) = \downsize_q(Mv)$.
+  \end{enumerate}
+\end{lemma}
+ 
+\begin{proof}
+  We show each property by direct calculation.
+  \begin{enumerate}
+    \item Let $\downsize_q(x) = (x_1, \dots, x_k)$. Then by the definition of
+    $\downsize_q$, $x = \sum_i x_i e_i$. Multiplying both sides by $e_j$
+    and taking the trace yields $\tr_{q^k \to q}(x e_j) = \sum_i x_i
+    \tr_{q^k \to q}(e_i e_j) = x_j$, where the last equality is by
+    self-duality of the basis.
+    \item Write $\downsize_q(x) = (x_1, \dots, x_k)$ and $\downsize_q(y) =
+      (y_1, \dots, y_k)$. Then
+      \begin{align*}
+        \tr_{q^k \to q} (xy) &= \tr_{q^k \to q}(\sum_{ij} x_i y_j e_i
+                               e_j) \\
+                             &= \sum_{ij} x_i y_j \tr_{q^k \to q}(  e_i
+                               e_j) \\
+                             &= \downsize_q(x) \cdot \downsize_q(y),
+      \end{align*}
+      where the last equality uses the self-duality of the basis.
+    \item
+      We compute the $i$th $\F_q^k$-block of $\downsize_q(Mv)$:
+      \begin{align*}
+        \downsize_q(Mv)_i &= \sum_{ij} \downsize_q(M_{ij} v_j) \\
+                          &= \sum_{ij} K_{M_{ij}} \downsize_q(v_j) \\
+                          &= \downsizem_q(M)_{ij} \downsize_q(v_j) ,
+      \end{align*}
+      where we have applied the definition of the multiplication table
+      $K_{M_{ij}}$ and the map $\downsizem_q(\cdot)$.
+  \end{enumerate}
+\end{proof}
+
+For $z\in \F^n$ and $V,W$ a pair of complementary subspaces, recall from
+Definition~\ref{def:complementary} the notation $z^V$ for the projection of $z$
+onto $V$ and parallel to $W$.
+
+\begin{lemma}
+  \label{lem:downsize_subspace}
+  Let $\downsize_q(\cdot)$ denote the map corresponding to a
+  basis $\{e_i\}$ for $\F_{q^k}$ over $\F_q$.
+  Let $V$ be a subspace of $\F_{q^k}^n$ with linearly independent basis
+  $\{b_1,\ldots,b_t\} \subseteq \F_{q^k}^n$.
+  Then the following hold:
+  \begin{enumerate}
+ 	\item $\downsize_q(V)$ is a subspace of $\,\F_{q}^{nk}$.
+	\item $\{ \downsize_q(e_i b_j) \}_{i,j}$ is a linearly independent basis of
+    $\downsize_q(V)$ over $\F_q$.
+	\item Let $V, W$ be complementary subspaces of $\F_{q^k}^n$.
+    Then $V' = \downsize_q(V)$ and $W' = \downsize_q(W)$ are complementary
+    subspaces of $\F_q^{kn}$, and furthermore for all vectors $z \in
+    \F_{q^k}^n$, we have $\downsize_q(z^V) = \downsize_q(z)^{V'}$ and
+    $\downsize_q(z^W) = \downsize_q(z)^{W'}$.
+  \end{enumerate}
+\end{lemma}
+
+\begin{proof}
+  For the first item, we first verify that $\downsize_q(V)$ is a subspace.
+  Since $V$ is a subspace, it contains $0 \in \F_{q^k}^n$, and therefore $\downsize_q(0)
+  = 0$ is also in $\downsize_q(V)$.
+  Let $u', v' \in \downsize_q(V)$.
+  Using that $\downsize_q$ is a bijection there exist $u,v \in \F_{q^k}^n$ such that
+  $u' = \downsize_q(u)$ and $v' = \downsize_q(v)$. Therefore
+  \[
+    u' + v' = \downsize_q(u) + \downsize_q(v) =
+    \downsize_q(u + v) \in \downsize_q(V)\;,
+  \]
+  where the inclusion follows because $V$ is a subspace and thus contains $u +
+  v$.
+  Finally, for all $x' \in \F_{q}$, for all $v \in V$, we have that $x'
+  \downsize_q(v) = \downsize_q(x' v)\in \downsize_q(V)$ where we used that $V$
+  is closed under scalar multiplication by $\F_{q^k}$ and thus by $\F_q$ (since
+  $\F_q$ is a subfield of $\F_{q^k}$).
+  Thus $\downsize_q(V)$ is closed under scalar multiplication by $\F_{q}$.
+
+  For the second item, note that an element $v \in V$ can be expressed uniquely
+  as $v = \sum_{i = 1}^t v_i b_i$ for $v_i \in \F_{q^k}$.
+  The element $v_i$ can further be written as $\sum_j v_{i, j} e_j$ where $v_{i,
+    j} \in \F_q$.
+  Thus $v$ is a linear combination of the vectors $\{ e_j b_i \}$, and therefore
+  $\downsize_q(v)$ is a linear combination of the vectors $\{ \downsize_q (e_j
+  b_i) \}$.
+  To establish that the vectors $\{ \downsize_q(e_j b_i) \}$ are linearly
+  independent, suppose towards contradiction that they are not.
+  Then there would exist $\alpha_{i, j} \in \F_q$ such that at least one
+  $\alpha_{i, j}$ is nonzero and
+  \begin{align*}
+    0 & = \sum_{i,j} \alpha_{i, j} \downsize_q(e_j b_i) \\
+      & = \downsize_q \Bigl( \sum_i \bigl (\sum_j \alpha_{i, j}
+        e_j \bigr) b_i \Bigr) \\
+      & = \downsize_q \left ( \sum_i \beta_i b_i \right ),
+  \end{align*}
+  where we define $\beta_i = \sum_j \alpha_{i, j} e_j$.
+  Since at least one $\alpha_{i, j} \neq 0$ and the $\{e_j\}$ are linearly
+  independent over $\F_q$, there exists $i$ such that $\beta_i \neq 0$, which
+  means that there is a non-trivial linear combination of the basis elements
+  $b_i$ that equals $0$ under $\downsize_q(\cdot)$.
+  Since $\downsize_q(\cdot)$ is injective, we get a contradiction with linear
+  independence of the $\{b_i\}$.
+
+  For the third item, we observe that $\downsize_q(V)$ and $\downsize_q(W)$ must
+  be complementary because $\downsize_q(\cdot)$ is a linear map as well as a
+  bijection.
+  Let $\{v_1,\ldots,v_m\}$ and $\{v_{m+1},\ldots,v_n\}$ denote bases for $V$ and
+  $W$, respectively.
+  Thus the set $\{v_1,\ldots,v_n\}$ forms a basis for $\F_{q^k}^n$, and from the
+  previous item, the set $\{ \downsize_q(e_j v_i) \}_{i,\, j}$ is a basis for
+  $\F_q^{kn}$.
+  Furthermore, the sets $\{ \downsize_q(e_j v_i) \}_{j,\,i = 1,\ldots m}$ and
+  $\{ \downsize_q(e_j v_i) \}_{j,\, i = m+1,\ldots n}$ are bases for
+  $\downsize_q(V)$ and $\downsize_q(W)$, respectively.
+
+  There is a unique choice of coefficients $\alpha_{i, j} \in \F_q$ such that
+  $\downsize_q(z) = \sum_{i, j} \alpha_{i, j} \downsize_q(e_j v_i)$.
+  But then
+  \begin{align*}
+    \downsize_q(z) & = \downsize_q \Bigl( \sum_i \bigl ( \sum_j
+                     \alpha_{i, j} e_j \bigr) v_i \Bigr) \\
+                   & = \downsize_q \Bigl( \sum_i \alpha_i v_i \Bigr)\;,
+  \end{align*}
+  where we define $\alpha_i = \sum_j \alpha_{i, j} e_j$.
+  Since $\downsize_q(\cdot)$ is a bijection, this implies that $z = \sum_i
+  \alpha_i v_i$, and therefore $z^V = \sum_{i=1}^m \alpha_i v_i$ (and similarly
+  $z^W = \sum_{i=m+1}^n \alpha_i v_i$).
+  This implies that
+  \begin{equation*}
+	  \downsize_q(z)^{V'} = \sum_{i=1}^m \sum_{j} \alpha_{i, j}
+    \downsize_q(e_j v_i) = \downsize_q (z^V)\;,
+  \end{equation*}
+  and similarly $\downsize_q(z)^{W'} = \downsize_q(z^W)$.
+  This completes the proof of the lemma.
+\end{proof}
+
+\subsubsection{Bit string representations}
+\label{sec:ff-representations}
+
+As mentioned at the end of \Cref{sec:tms}, we sometimes treat the
+inputs and outputs of Turing machines as representing elements of a finite
+field, or a vector space over a finite field.
+We discuss some important details about bit representations of finite field
+elements and arithmetic over finite fields.
+
+In the paper we only consider fields $\F_{2^k}$ where $k$ is odd. 
+
+\begin{definition}\label{def:admissible-size}
+  A field size $q$ is called an \emph{admissible} field size if $q=2^k$ for odd
+  $k$.
+\end{definition}
+
+Elements of $\F_2$ are naturally represented using bits. 
+To represent elements of $\F_{2^k}$ as binary strings we require the
+specification of a basis of $\F_{2^k}$ over $\F_2$.
+Given a basis $\{e_i\}_{i=1}^k$ of $\F_{2^k}$, every element $a \in \F_{2^k}$
+has a unique expansion $a = \sum_{i=1}^k a_i e_i$ and can be represented as the
+$k$-bit string corresponding to $\downsize(a) \in \F_2^k$.
+Note that we omitted the subscript $2$ of $\downsize$ as it maps to the linear
+space over the prime subfield $\F_2$.
+Thus the \emph{binary representation} of $a \in \F_{2^k}$ is defined as the
+natural binary representation of $\downsize(a) \in \F_2^k$ (which in turn is the
+\emph{$\F_2$-representation of $a$}).
+Throughout the paper we freely associate between the binary representation of a
+field element $a \in \F_{2^k}$ and its $\F_2$-representation,
+although---technically speaking---these are distinct objects.
+
+Given the representations $\downsize(a), \downsize(b)$ of $a, b \in \F_{2^k}$, to
+compute the binary representation of $a+b$ it suffices to compute the addition
+bit-wise, modulo $2$.
+Computing the multiplication of elements $a, b$ requires the specification of
+the multiplication tables $\{K_{e_i} \in \Matrix_k (\F_2)\}_{i=1}^k $ for the
+basis $\{e_i\}$.
+Given representations $\downsize(a) = (a_i)_{i=1}^k$, $\downsize(b) =
+(b_i)_{i=1}^k$ for $a, b \in \F_{2^k}$ respectively, the representation
+$\downsize(ab)$ of the product $ab$ is computed as
+\begin{equation}
+  \label{eq:eq-mult}
+  \downsize(ab) = \sum_{i=1}^k \, a_i \, \downsize \bigl( e_i b \bigr) =
+  \sum_{i=1}^k \, a_i \bigl( K_{e_i}\, \downsize (b) \bigr)\;.
+\end{equation}
+Thus, using our representation for field elements, efficiently performing finite
+field arithmetic in $\F_{2^k}$ reduces to having access to the multiplication
+table of some basis of $\F_{2^k}$ over $\F_2$.
+
+The following fact provides an efficient deterministic algorithm for computing a
+self-dual normal basis for $\F_{2^k}$ over $\F_2$ and the corresponding
+multiplication tables for any odd $k$.
+
+\begin{lemma}
+  \label{lem:efficient_basis}
+  There exists a deterministic algorithm that given an odd integer $k > 0$,
+  outputs a self-dual normal basis of $\F_{2^k}$ over $\F_2$ and the
+  multiplication tables of the basis in $\poly(k)$ time.
+\end{lemma}
+
+\begin{proof}
+	The algorithm of Shoup~\cite[Theorem 3.2]{shoup1990new} shows that for prime
+  $p$, an irreducible polynomial in $\Fp[X]$ of degree $k$ can be computed in
+  time $\poly(p, k)$.
+  Then, the algorithm of Lenstra~\cite[Theorem 1.1]{lenstra1991finding} shows
+  that given such an irreducible polynomial, the multiplication table of a
+  normal basis of $\F_{p^k}$ over $\Fp$ can be computed in $\poly(k,\log p)$
+  time.
+  Finally, the algorithm of Wang~\cite{wang1989algorithm} shows that for odd $k$
+  and a multiplication table $K$ of a normal basis of $\F_{2^k}$ over $\F_2$, a
+  multiplication table $K'$ for a self-dual normal basis of $\F_{2^k}$ over
+  $\F_2$ can be computed in $\poly(k)$ time.
+  Putting these three algorithms together yields the claimed statement.
+\end{proof}
+
+For $q=2^k$ for $k$ odd (i.e.\ $q$ is an admissible field size) we use the shorthand $\tr$ for $\tr_{q\to 2}$.
+
+\begin{lemma}
+  \label{lem:one}
+  Let $k$ be an odd integer and $\{e_i\}_{i=1}^k$ be a self-dual normal basis of
+  $\F_{2^k}$ over $\F_2$.
+  Then $\tr(e_i) = 1$ for all $i$, and furthermore the representation
+  $\downsize(1)$ of the unit $1 \in \F_{2^k}$ is the all ones vector in
+  $\F_2^k$.
+\end{lemma}
+
+\begin{proof}
+  Since $\{e_i \}$ is a normal basis, $e_i = \alpha^{2^i}$ for some element
+  $\alpha \in \F_{2^k}$.
+  Furthermore, for every element $b \in \F_{2^k}$, we have that $\tr(b^2) =
+  \tr(b)$.
+  This is because
+  \[
+    \tr(b^2) = \sum_{i=0}^{k-1} b^{2^{i+1}} =
+    \sum_{i = 0}^{k-1} b^{2^i} = \tr(b)\;,
+  \]
+  where we use that $b^{2^k} = b$ for all $b \in \F_{2^k}$.
+  Since $e_{i+1} = e_i^2$, we get that $\tr(e_i) = \tr(e_j)$ for all $i,j$.
+  It cannot be the case that $\tr(e_i) = 0$ for all $i$.
+  Suppose that this were the case.
+  This would imply that $\tr(b) = 0$ for all $b \in \F_{2^k}$.
+  But then for all $j \in \{1, \ldots, k\}$ and for some $b \neq 0$, we would
+  also have by item 1 of \Cref{lem:downsize_field} that $b_j = \tr(b e_j) = 0$ where $b = \sum_j b_j e_j$ with $b_j \in
+  \F_2$.
+  This implies that $b$ is the all zero element of $\F_{2^k}$, which is a
+  contradiction.
+  Thus $\tr(e_i) = 1$ for all $i=1, 2, \ldots, k$.
+
+	The ``furthermore'' part follows item 1 of
+        \Cref{lem:downsize_field}:
+        \begin{equation*}
+          \downsize(1) = (\tr(1 \cdot e_1), \dots, \tr(1 \cdot e_k))
+          = (1, \dots, 1).
+        \end{equation*}
+\end{proof}
+
+\begin{lemma}
+  \label{lem:efficient_arithmetic}
+  For any odd integer $k$, let $\{e_i\}_{i=1}^k$ denote the self-dual normal basis
+  of $\F_{2^k}$ over $\F_2$ that is returned by the algorithm specified in
+  Lemma~\ref{lem:efficient_basis} on input $k$.
+  Then the following can be computed in time $\poly(k)$ on input $k$:
+  \begin{enumerate}
+  \item The representation $\downsize(a+b)$ of the sum $a+b$ given the
+    representations $\downsize(a)$ and $\downsize(b)$ of $a, b \in \F_{2^k}$.
+	\item The representation $\downsize(ab)$ of the product $ab$ given the
+    representations $\downsize(a)$ and $\downsize(b)$ of $a, b \in \F_{2^k}$.
+  \item The multiplication table $K_a \in \Matrix_k(\F_2)$ given the
+    representation $\downsize(a)$ of  $a\in \F_{2^k}$.
+  \item The representation $\downsize(a^{-1})$ of the multiplicative inverse of
+    $a \in \F_{2^k}$, given the representation $\downsize(a)$.
+	\item The trace $\tr(a)$ given the multiplication table $K_a$ of $a \in \F_{2^k}$.
+  \end{enumerate}
+  Furthermore, for all integers $n$, the representations of projections
+  $\downsize(x^S)$ and $\downsize(x^T)$ of $x \in \F_{2^k}^n$ for complementary
+  subspaces $S,T$ of $\F_{2^k}^n$ can be computed in $\poly(k,n)$ time, given
+  the representations $\downsize(x)$, $\{\downsize(v_1), \downsize(v_2), \ldots,
+  \downsize(v_m)\}$ and $\{\downsize(w_1), \downsize(w_2), \ldots,
+  \downsize(w_{n - m})\}$ where $\{v_i\}$ and $\{w_j\}$ are bases for $S$ and
+  $T$ respectively.
+\end{lemma}
+
+\begin{proof}
+  Given an odd integer $k$ as input, by Lemma~\ref{lem:efficient_basis} it is
+  possible to compute the self-dual normal basis $\{e_i\}_{i=1}^k$ together with the
+  multiplication tables $K_{e_i}$ for $i = 1, 2, \ldots, k$.
+  Addition is performed component-wise, and multiplication is done
+  using Eq.~\eqref{eq:eq-mult}.
+  For the multiplication table $K_a$ it suffices to compute the $k$ products
+  $\downsize(a e_i)$ for $i\in\{1,\ldots,k\}$.
+  To compute inverses, observe that $\downsize(1) = \downsize(aa^{-1}) = K_a
+  \downsize(a^{-1})$.
+  The matrices $K_a$ are invertible over $\F_2$, so therefore $\downsize(a^{-1}) =
+  K_a^{-1} \downsize(1)$; moreover, $\kappa(1)$ is the all-ones vector
+  by Lemma~\ref{lem:one} and can thus be efficiently computed.
+  Inverting the matrix can be done in $\poly(k)$ time via Gaussian elimination.
+  The trace of an element $a \in \F_{2^k}$ is by definition the trace of the
+  multiplication table $K_a$.
+
+  For the ``Furthermore'' part, we observe that since $\{v_1, v_2, \ldots, v_m
+  \} \cup \{w_1, w_2, \ldots, w_{n-m} \}$ forms a basis for $\F_{2^k}^n$, there
+  is a unique way to write $x$ as a $\F_{2^k}$ linear combination of $\{ v_i\}$
+  and $\{w_j\}$.
+  Via Gaussian elimination over $\F_{2^k}$, the $\F_2$-representation of the
+  coefficients of this linear combination can be computed in $\poly(n,k)$ time.
+  Here we use that addition, multiplication and division over $\F_{2^k}$ can be
+  performed in time $\poly(k)$ using the previous items of the Lemma.
+\end{proof}
+
+\begin{remark}
+  \label{rmk:tm_fields}
+  Throughout this paper, whenever we refer to Turing machines that perform
+  computations with elements of a field $\F_q$ for an admissible field size $q =
+  2^k$, we mean that that the Turing machines are representing elements of
+  $\F_q$ as vectors in $\{0,1\}^{k}$ using the basis specified by the
+  algorithm of Lemma~\ref{lem:efficient_basis} and performing arithmetic as
+  described in Lemma~\ref{lem:efficient_arithmetic}.
+\end{remark}
+
+\subsection{Polynomials and the low-degree code}
+\label{sec:ld-encoding}
+
+In this section, we introduce some basic definitions about polynomials over finite fields. 
+An $m$-variate polynomial $f$ over $\F_q$ is a function of the form
+\[
+	f(x_1,\ldots,x_m) = \sum_{\alpha \in \{0,1,\ldots,q-1\}^m} c_\alpha
+  x_1^{\alpha_1} \cdots x_m^{\alpha_m}
+\]
+where $\{c_\alpha\}$ is a collection of coefficients in $\F_q$.
+We say that $f$ has \emph{individual degree (at most) $d$} if $c_\alpha\neq 0$ only if
+$\alpha_i \leq d $ for all $1\leq i\leq m$, and that it has \emph{total degree
+  (at most) $d$} if $c_\alpha\neq 0$ only if $\sum_i \alpha_i \leq d$.
+(Affine) \emph{multilinear} polynomials are polynomials with individual degree
+$1$.
+
+Low-degree polynomials play an important role in this paper.
+For one, the classical and quantum low-degree tests of \Cref{sec:ldt} are
+nonlocal games that efficiently certify that the players' answers are consistent
+with low-degree polynomials.
+Low-degree polynomials are also crucial in the probabilistically checkable
+proofs (PCP) construction that are used in ``answer reduction'' transformation
+(\Cref{sec:ans}).
+
+We recall the Schwartz-Zippel lemma: 
+
+\begin{lemma}[Schwartz-Zippel lemma~\cite{Sch80,Zip79}]
+  \label{lem:schwartz-zippel}
+  Let $f, g: \F_q^m \to \F_q$ be two unequal polynomials with total degree at most $d$. Then
+  \begin{equation*}
+    \Pr_{x \sim \F_q^m}[f(x) = g(x)] \leq d/q\;.
+  \end{equation*}
+\end{lemma}
+
+
+\paragraph{The low-degree code.}
+The Schwartz-Zippel lemma implies that the set of low-degree polynomials form an
+error-correcting code with good distance, which we call the \emph{low-degree
+  code}.\footnote{It is also known as the \emph{generalized Reed-Muller code} in
+  the coding theory literature.}
+
+Fix an integer $m \in \N$ and let $M = 2^m$.
+For every $y \in \{0,1\}^m$ define the following $m$-variate multilinear
+polynomial over $\F_q$:
+\[
+	\ind_{m,y}(x) = \prod_{i: y_i = 1} x_i \cdot \prod_{i: y_i = 0} (1 - x_i) \;.
+\]
+Here, we identify $\{0,1\}$ as a subset of $\F_q$.
+Notice that, when restricted to the subcube $\{0,1\}^m$, $\ind_{m, y}$ is zero
+everywhere except for when $x = y$.
+For $a\in \F_q^M$, label the coordinates of $a$ as $a_y$ for $y\in \{0,1\}^m$
+(identifying the latter set with $\{1,\ldots,M\}$ using, say, the lexicographic
+ordering on strings).
+For any such $a$ define the multilinear polynomial $g_a: \F_q^m \to \F_q$,
+called the \emph{low-degree encoding of $a$}, as follows:
+\begin{equation}
+\label{eq:ld-encoding}
+	 g_a(x) = \sum_{y \in \{0,1\}^m} a_y \cdot \ind_{m,y}(x)\;.
+\end{equation}
+Note that for any $y \in \{0,1\}^m$, $g_a(y) = a_y$.
+Furthermore, the map $a\mapsto g_a$ is linear: for every $x \in \F_q^m$,
+\begin{equation}
+\label{eq:low-degree-encoding-definition}
+	g_a(x) = a \cdot \ind_m(x)\;,
+\end{equation}
+where $\ind_m(x)$ is the vector $(\ind_{m,y}(x))_{y \in \{0,1\}^m}\in\F_q^M$.
+
+\begin{lemma}
+\label{lem:ld-encoding-complexity}
+Let $q$ be an admissible field size, and let $M = 2^m$ for some integer $m$.
+The complexity of computing the evaluation of the low-degree encoding $g_a(x)$,
+given $a \in \F_q^M$ and $x \in \F_q^m$ represented in binary, is $\poly(M,\log
+q)$.
+\end{lemma}
+\begin{proof}
+	Computing $g_a(x)$ requires computing the sum of products $a_y \cdot
+  \ind_{m,y}(x)$ over all $y \in \{0,1\}^m$.
+  Via \Cref{lem:efficient_arithmetic}, evaluating $\ind_{m,y}(x)$ takes time
+  $\poly(m,\log q)$ because it requires performing $m$ multiplications of $\F_q$
+  elements, and therefore the product $a_y \cdot \ind_{m,y}(x)$ requires
+  $\poly(m,\log q)$ time.
+  Computing the sum over all $y \in \{0,1\}^m$ requires $M \cdot \poly(m,\log q)
+  = \poly(M,\log q)$ time, as claimed.
+\end{proof}
+
+Finally, for any $H \subseteq \F_q$ we define the \emph{decoding} map
+$\coded_H(\cdot)$ which takes as input a polynomial $g : \F_q^m \to \F_q$ and
+returns the following vector $a \in \F_q^M$: for all $y \in \{0,1\}^m$, if $g(y)
+\in H$, then set $a_y = g(y)$, and otherwise set $a_y = 0$.
+Note that for all $a \in H^M$ we have $\coded_H(g_a) = a$ where $g_a$ is the
+low-degree encoding of $a$.
+For notational brevity we often write $\coded(\cdot)$ to denote the boolean
+decoding map $\coded_{\{0,1\}}(\cdot)$.
+
+\subsection{Linear spaces and registers}
+\label{sec:lin-reg}
+
+For a set $V$, we write $\C^V$ for the complex vector space of dimension $|V|$.
+The space $\C^V$ is endowed with a canonical orthonormal basis
+$\{\ket{x}\}_{x\in V}$.
+By ``a quantum state on $V$'' we mean a unit vector
+\begin{equation*}
+  \ket{\psi}_V \in \complex^V\;.
+\end{equation*}
+If $V = \bigoplus_{i=1}^k V_k$ is the direct sum of subspaces $V_k$ over $\F$,
+then $\complex^V$ can be identified with $\bigotimes_{i=1}^k
+\complex^{V_i}$, by the identification of $\ket{x_1 \oplus \dots \oplus
+  x_k}$ with $\ket{x_1} \otimes \dots \otimes \ket{x_k}$.
+As a special case, if $\{e_i\}$ is a basis of $V$ the decomposition $V =
+\bigoplus_{i=1}^k ( \F e_i)$ yields the tensor product decomposition $\C^V =
+\bigotimes_{i=1}^k \C^{\abs{\F}}$.
+We sometimes refer to the spaces $\C^{\abs{\F}}$ as the ``qudits'' of $\C^V$ (or
+of a state on it).
+
+\begin{definition}
+  \label{def:EPR}
+  For a linear space $V$ over a finite field $\F$, define the \EPR state on $\C^V
+  \otimes \C^V$ by
+  \begin{equation*}
+    \ket{\EPR}_V = \frac{1}{\sqrt{\abs{V}}} \sum_{x\in V}\ket {x}\otimes \ket{x}\;.
+  \end{equation*}
+  We also write $\ket{\EPR}_{\F_q}$ as $\ket{\EPR_q}$ and $\ket{\EPR_2}$ as
+  $\ket{\EPR}$.
+\end{definition}
+
+\subsection{Measurements and observables}
+
+Quantum measurements are modeled as positive operator-valued
+measures (POVMs).
+A POVM consists of a set of positive semidefinite operators $\{ M_a \}_{a\in S}$
+indexed by outcomes $a\in S$ that satisfy the condition $\sum_a M_a = I$. If the latter condition is relaxed to $\sum_a M_a \leq I$ then we refer to $\{M_a\}$ as a \emph{sub-measurement}.
+We sometimes use the same letter $M$ to refer to the collection of operators
+defining the POVM.
+The probability that the measurement returns outcome $a$ on state $\ket{\psi}$
+is given by
+\begin{equation*}
+  \Pr(a) = \bra{\psi} M_a \ket{\psi}\;.
+\end{equation*}
+A POVM $M=\{M_a\}$ is said to be \emph{projective} if each operator $M_a$ is a
+projector ($M_a^2 = M_a$). This automatically implies that operators
+$M_a, M_b$ for distinct outcomes $a \neq b$ are orthogonal ($M_a M_b =
+M_b M_a = 0$). An \emph{observable} is a unitary matrix.
+A \emph{binary observable} is an observable $O$ such that $O^2 = \Id$, i.e.\ $O$
+has eigenvalues in $\{-1,1\}$.
+
+We follow the convention that subscripts of the measurement index
+the outcome and superscripts of the measurement are used to index different
+measurements.
+For example, we use $\{M^x_{a,\, b}\}$ to represent a measurement indexed by $x$
+whose outcome consists of two parts $a$ and $b$.
+In this case, by slightly abusing the notation, we use $\{M^x_a\}$ and $\{M^x_b\}$
+to denote
+\begin{equation*}
+  M^x_a = \sum_b M^x_{a,\, b}\;, \quad M^x_b = \sum_a M^x_{a,\, b}\;.
+\end{equation*}
+For any $x$, $\{M^x_a\}$ and $\{M^x_b\}$ are POVMs sometimes referred to as the
+``marginals'' of $\{M^x_{a,\, b}\}$.
+
+\begin{definition}
+  \label{def:bracket}
+  Let $\{M^x_a\}_{a\in A}$ be a family of POVMs indexed by $x\in \cal{X}$.
+  Let $f:A\to B$ be an arbitrary function.
+  We write $\bigl\{ M^x_{[f(\cdot)=b]} \bigr\}$ for the POVM derived from
+  $\{M^x_a\}$ by applying the function $f$ before returning the outcome.
+  More precisely,
+\begin{equation*}
+  M^x_{[f(\cdot) = b]} = \sum_{a : f(a)=b} M^x_a\;.
+\end{equation*}
+If $b$ is not in the image of $f$, then we define $M^x_{[f(\cdot) = b]}$ to be
+$0$. In cases where the outcome $a$ has a natural interpretation as a tuple $(a_1,\ldots,a_k)$ we sometimes slightly abuse notation and write $M^x_{[a_i=b]}$ for some $i\in \{1,\ldots,k\}$ to denote 
+\[ M^x_{[a_i=b]} \,=\,\sum_{(a_1,\ldots,a_k):\,a_i=b} M^x_{(a_1,\ldots,a_k)}\;.\]
+\end{definition}
+
+We will make frequent use of Naimark dilation. In our setting, it can be formulated as follows. For a proof, see~\cite[Theorem 5.1]{ML20}
+
+\begin{theorem}[Naimark dilation]\label{thm:naimark}
+Let $\ket{\psi}$ be a state in $\mH_{\mathrm{A}} \ot \mH_{\mathrm{B}}$.
+Let $A = \{A^x_a\}$ be a sub-measurement acting on $\mH_{\mathrm{A}}$
+and $B=\{B^y_b\}$ be a sub-measurement acting on $\mH_{\mathrm{B}}$.
+Then there exists
+\begin{enumerate}
+\item Hilbert spaces $\mH_{\mathrm{A}_{\mathsf{aux}}}$ and $\mH_{\mathrm{B}_{\mathsf{aux}}}$,
+\item a state $\ket{\mathsf{aux}} \in \mH_{\mathrm{A}_{\mathsf{aux}}} \ot \mH_{\mathrm{B}_{\mathsf{aux}}}$,
+\item and two measurements  $\widehat{A} = \{\widehat{A}^x_a\}$ and $\widehat{B}=\{\widehat{B}^y_b\}$
+acting on $\mH_{\mathrm{A}} \ot \mH_{\mathrm{A}_{\mathsf{aux}}}$
+and $\mH_{\mathrm{B}} \ot \mH_{\mathrm{B}_{\mathsf{aux}}}$,
+respectively,
+\end{enumerate}
+such that the following is true.
+If we write $\ket{\widehat{\psi}} = \ket{\psi} \otimes \ket{\mathsf{aux}}$,
+then for all $x,y, a, b$,
+ \begin{equation*}
+ \bra{\psi} A^x_a \ot B^y_b \ket{\psi}
+ = \bra{\widehat{\psi}} \widehat{A}^x_a \ot \widehat{B}^y_b \ket{\widehat{\psi}}.
+ \end{equation*}
+ In addition, $\ket{\mathsf{aux}}$ is a \emph{product state},
+ meaning that we can write it as
+ \begin{equation*}
+ \ket{\mathsf{aux}}= \ket{\mathsf{aux}_{\mathrm{A}}} \ot \ket{\mathsf{aux}_{\mathrm{B}}},
+ \end{equation*}
+for $\ket{\mathsf{aux}_{\mathrm{A}}}$ in $\mH_{\mathrm{A}_{\mathsf{aux}}}$
+and $\ket{\mathsf{aux}_{\mathrm{B}}}$ in $\mH_{\mathrm{B}_{\mathsf{aux}}}$.
+\end{theorem}
+The second of these is the ``orthogonalization lemma" from~\cite{KV11}.
+In the setting of symmetric strategies, it states the following.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\subsection{Generalized Pauli observables}
+\label{sec:generalized-pauli}
+
+
+For prime number $p$, the generalized Pauli operators over $\Fp$ are a
+collection of observables indexed by a basis setting $X$ or $Z$ and an element
+$a$ or $b$ of $\Fp$, with eigenvalues that are $p$-th roots of unity.
+They are given by
+\begin{equation}
+  \label{eq:pauli-fp}
+  \sigma^X(a) = \sum_{j \in \Fp} \ket{j + a} \bra{j}\qquad \text{and} \qquad
+  \sigma^Z(b) = \sum_{j \in \Fp} \omega^{bj} \ket{j} \bra{j}\;,
+\end{equation}
+where $\omega = e^{\frac{2\pi i}{p}}$, and addition and multiplication are over
+$\Fp$.
+These observables obey the ``twisted commutation'' relations
+\begin{equation}
+  \label{eq:twisted-fp}
+  \forall a,b\in\Fp\;,\qquad \sigma^X(a)\, \sigma^Z(b) =
+  \omega^{-ab} \,\sigma^Z(b)\,\sigma^X(a)\;.
+\end{equation}
+Similarly, over a field $\Fq$ with $q$ a power of $p$, we can consider a set of generalized Pauli
+operators, indexed by a basis setting $X$ or $Z$ and an element of $\Fq$ and
+with eigenvalues that are $p$-th roots of unity.
+For $a, b\in\Fq$ they are given by
+\begin{equation*}
+  \qp^X(a) = \sum_{j \in \Fq} \ket{j+a}\bra{j} \qquad \text{and} \qquad
+  \qp^Z(b)= \sum_{j \in \Fq} \omega^{\tr(b j)} \ket{j}\bra{j}\;,
+\end{equation*}
+where addition and multiplication are over $\Fq$.
+For all $W \in \{X,Z\}$, $a, a' \in \Fq$, and $b \in \Fp$, powers of these
+observables obey the relations
+\begin{equation*}\label{eq:pauli-product-power}
+  \bigl(\qp^W(a)\qp^W(a')\bigr) = \qp^W(a+a') \qquad \text{and}
+  \qquad \bigl( \qp^W(a) \bigr)^b = \qp^W(a b) \;.
+\end{equation*}
+In particular, since $pa=0$ for any $a\in \Fq$ we get that that $(\qp^W(a))^p =
+I$ for any $a\in\Fq$.
+The observables obey analogous ``twisted commutation'' relations
+to~\eqref{eq:twisted-fp},
+\begin{equation}
+  \label{eq:twisted-fq}
+  \forall a, b \in \Fq\;, \qquad \qp^X(a)\, \qp^Z(b) =
+  \omega^{-\tr(a b)} \, \qp^Z(b)\, \qp^X(a)\;.
+\end{equation}
+It is clear from the definition that all of the $\qp^X$ operators commute with
+each other, and similarly all the $\qp^Z$ operators commute with each other.
+Thus, it is meaningful to speak of a common eigenbasis for all $\qp^X$
+operators, and a common eigenbasis for all $\qp^Z$ operators.
+The common eigenbasis for the $\qp^Z$ operators is the computational
+basis $\{\ket{j}\}_{j \in \F_q}$.
+To map this basis to the common eigenbasis of the $\qp^X$ operators, one can
+apply the Fourier transform
+\begin{equation}
+  \label{eq:fourier-f}
+  F \,=\, \frac{1}{\sqrt{q}} \sum_{a, b\in \Fq} \omega^{-\tr(ab)}
+  \ket{a}\bra{b}\;.
+\end{equation}
+Explicitly, the eigenbases consist of the vectors $\ket{e_W}$ labeled by an
+element $e \in \Fq$ and $W \in \{X, Z\}$, given by
+\begin{equation*}
+  \ket{e_X} = \frac{1}{\sqrt{q}} \sum_j \omega^{- \tr(e j)} \ket{j}\;, \qquad
+  \ket{e_Z}   = \ket{e}\;.
+\end{equation*}
+We denote the POVM whose elements are projectors onto basis vectors of the
+eigenbasis associated with the observables $\qp^W$ by $\{\qp^W_e\}_e$.
+Then for all $W \in \{X,Z\}$ and $a\in \Fq$, the observables $\qp^W(a)$ can be
+written as
+\begin{equation}\label{eq:pauli-obs-proj-single}
+  \qp^W(a) = \sum_{b \in \Fq} \omega^{\tr(a b)} \qp^W_b\;.
+\end{equation}
+
+To invert this relation, we first quote the following useful Fourier fact.
+\begin{lemma}[Fact 3.2 of \cite{NW19}]
+  \label{lem:cancellation}
+  Let $V$ be a subspace of $\F^k$. For all $v \not\in V^\perp$, 
+  \begin{equation*}
+    \E_{u \sim V} \omega^{\tr(u \cdot v)} = 0\;,
+  \end{equation*}
+  where the expectation is over a uniformly random vector $u$ from $V$.
+\end{lemma}
+
+We may now invert~\Cref{eq:pauli-obs-proj-single}:
+\begin{equation}\label{eq:pauli-inversion-0-single}
+  \E_{a\in \F_q} \omega^{-\tr(ab)} \qp^W(a) = \sum_{b'\in \F_q} \E_{a\in \F_q}
+  \omega^{\tr(a(b'-b))} \qp^W_{b'} = \qp^W_b\;,
+\end{equation}
+where the second step follows from Lemma~\ref{lem:cancellation}.
+
+For systems with many qudits, we will consider tensor products of the operators
+$\qp^W$.
+Slightly abusing notation, for $W \in \{X, Z\}$ and $a \in \Fq^n$ we denote by
+$\qp^W(a)$ the tensor product $\qp^W(a_1) \ot \dots \ot \qp^W(a_n)$.
+These obey the twisted commutation relations
+\begin{equation*}
+  \forall a,b\in \Fq^n,\qquad \qp^X(a)\, \qp^Z(b) \,=\, \omega^{-\tr (a \cdot
+    b)}\, \qp^Z(b)\, \qp^X(a)\;,
+\end{equation*}
+where $a \cdot b = \sum_{i=1}^{n} a_i b_i \in \Fq$.
+For $W\in\{X,Z\}$ and $e \in \Fq^n$ define the eigenstates
+\[ \ket{e_W} = \ket{(e_1)_W} \ot \dots \ot \ket{(e_n)_W}\;, \]
+and associated rank-$1$ projectors $\qp^W_e$. Analogous versions of \Cref{eq:pauli-obs-proj-single}
+and \Cref{eq:pauli-inversion-0-single} relate the multi-qubit observables
+and projectors:
+\begin{align}
+  \qp^W(a) &= \sum_{b \in \Fq^n} \omega^{\tr(a \cdot b)}
+  \qp^W_b\;, \label{eq:pauli-obs-proj} \\
+    \E_{a\in \F_q^n} \omega^{-\tr(a \cdot b)} \qp^W(a) &= \sum_{b'\in \F_q^n} \E_{a\in \F_q^n}
+  \omega^{\tr(a\cdot (b'-b))} \qp^W_{b'} = \qp^W_b\;. \label{eq:pauli-inversion-0}
+\end{align}
+
+Since we only consider finite fields $\F_q$ such that $q = 2^k$ the maximally
+entangled state $\ket{\EPR_q}$ and the corresponding qudit Pauli
+observables/projectors are isomorphic to a tensor product of maximally entangled
+states $\ket{\EPR_2}$ and \emph{qubit} Pauli observables/projectors
+respectively; this is shown in the next lemma.
+This is used to argue that the Pauli basis test (described in
+Section~\ref{sec:pauli-verifier}) gives a self-test for Pauli observables and
+maximally entangled states over qubits.
+
+\begin{lemma}
+  \label{lem:pauli-binary}
+  For all admissible field sizes $q = 2^k$ and integers $L$, there exists
+  an isomorphism $\phi: (\C^q)^{\otimes L} \to (\C^2)^{\otimes L k}$
+  such that\footnote{ Here we have applied the natural identifications between
+  $(\C^q)^{\ot L} \ot (\C^q)^{\ot L}$ and $(\C^q \ot \C^q)^{\ot L}$,
+  and between $(\C^2)^{\ot L k} \ot (C^2)^{\ot Lk}$ and $(\C^2 \ot
+  \C^2)^{\ot Lk}$.}
+\begin{equation}
+    \label{eq:epr-q-to-epr-2}
+    \phi \otimes \phi \, \ket{\EPR_q}^{\otimes L} =
+    \ket{\EPR_2}^{\otimes L k}\;.
+  \end{equation}
+  Moreover, for all $W \in \{X,Z\}$ and for all $u \in \F_q^L$
+	\begin{equation}
+	\label{eq:pauli-q-to-pauli-2}
+  	\tau^W_u = \phi^\dagger\, \Bigl (\bigotimes_{i=1}^L
+    \bigotimes_{j=1}^{k} \sigma^{W}_{u_{ij}} \Bigr) \, \phi\;.
+	\end{equation}
+	Here, the $(u_{ij})_{i,j}$ denotes a vector of $\F_2$ values such that $u_i =
+  \sum_j u_{ij} e_j$ for all $i \in \{1,\ldots,L\}$ with
+  $\{e_1,\ldots,e_{k}\}$ being the self-dual normal basis of $\F_q$ over $\F_2$
+  specified by Lemma~\ref{lem:efficient_basis}.
+  For $i\in\{1,\ldots,L\}$ and $j\in\{1,\ldots,q\}$ the $(i,j)$-th factor
+  $\sigma^{W}_{u_{ij}}$ denotes the projector $\frac{1}{2} \left ( \Id +
+    (-1)^{u_{ij}} \sigma^W(1) \right)$ acting on the $s$-th qubit of
+  $\ket{\EPR_2}^{\otimes L k}$, where $s = (i-1) k + j$.
+\end{lemma}
+
+\begin{proof}
+Define the isometry $\theta : \C^q \to (\C^2)^{\otimes k}$ as $\theta\,
+  \ket{a} = \ket{a_1} \otimes \ket{ a_2} \cdots \ket{a_k}$ where $\kappa(a) = (a_1, a_2, \ldots, a_k)
+  \in \F_2^k$ is the bijection introduced in Section~\ref{sec:finite-fields}
+  corresponding to the basis $\{e_1,\ldots,e_k\}$. Observe that
+  $\theta \otimes \theta \ket{\EPR_{2^k}} = \ket{\EPR_2}^{\ot k}$.
+
+  Let $a \in \F_q$, and let $\kappa(a) = (a_1,\ldots,a_k) \in \F_2^k$.
+  Then from~\eqref{eq:pauli-inversion-0}, we get
+  \begin{equation}
+    \label{eq:qudit-to-qubit-pauli-1}
+    \begin{split}
+      \tau^W_a
+      & = \E_{b \in \F_q} (-1)^{\tr(a b)} \, \tau^W(b) \\
+      & = \E_{b \in \F_q} (-1)^{\tr(\sum_j a_j e_j b)} \, \tau^W(b) \\
+      & = \E_{b \in \F_q} (-1)^{\sum_j a_j b_j} \,
+      \tau^W \left ( \sum_j b_j e_j \right) \;,
+    \end{split}
+  \end{equation}
+  where $b = \sum_j b_j e_j$; since the basis $\{e_j \}$ is self-dual, we have
+  that $b_j = \tr(b e_j)$. From~\eqref{eq:qudit-to-qubit-pauli-1} and
+  the product relation in~\eqref{eq:pauli-product-power} we get that
+  \begin{equation}
+		\label{eq:qudit-to-qubit-pauli}
+    \begin{split}
+      \tau^W_a & = \E_{b_1,\, \ldots,\, b_k \in \F_2}\,
+      \prod_{j=1}^k (-1)^{a_j b_j} \, \tau^W(b_j e_j) \\
+      & = \prod_{j=1}^k \E_{b_j \in \F_2} (-1)^{a_j b_j} \, \tau^W(b_j e_j)\;,
+    \end{split}
+  \end{equation}
+  where we have the used the fact that the expectation is over iid
+  $b_1, \dots, b_k$ to take it inside the product in the second line.
+  Next we claim that for all $c \in \F_2$, we have $\tau^W(c e_j) =
+  \theta^\dagger \sigma^{W,j} (c) \theta$ where $\sigma^{W,j}(c) = \Id$ if $c =
+  0$, and otherwise is the Pauli $W$ observable acting on the $j$-th qubit of
+  $(\C^2)^{\otimes k}$. This can be verified by comparing the actions of both
+  operators on the basis states of $\C^q$.
+  
+  Thus we obtain that the right-hand side of~\eqref{eq:qudit-to-qubit-pauli} is
+  equal to
+  \begin{align}
+		\prod_{j=1}^k \E_{b_j \in \F_2} (-1)^{a_j b_j} \,
+    \Big [ \theta^\dagger \sigma^{W,j}(b_j) \theta \Big ]
+    & = \theta^\dagger \, \bigotimes_{j=1}^k
+      \Big ( \E_{b_j \in \F_2} (-1)^{a_j b_j} \, \sigma^{W}(b_j) \Big) \theta \\
+		& = \theta^\dagger \Big (\bigotimes_{j=1}^k \sigma^W_{b_j} \Big) \theta.
+		\label{eq:qudit-to-qubit-pauli-2}
+  \end{align}
+  Define $\phi = \theta^{\otimes L}$. It is evident
+  that~\eqref{eq:epr-q-to-epr-2} holds for this choice of $\phi$, and
+  it remains to show~\eqref{eq:pauli-q-to-pauli-2}. The projector $\tau^W_u$ can be
+  decomposed as the tensor product $\bigotimes_{i=1}^L \tau^{W}_{u_i}$
+  where $\tau^{W}_{u_i}$ acts on the $i$-th factor of $(\C^q)^{\otimes L}$.
+  Express each $u_i$ as $\sum_j u_{ij} e_j$ where $u_{ij} \in \F_2$. Then from
+  Equation~\eqref{eq:qudit-to-qubit-pauli-2} we get that
+  \begin{equation}
+  	\tau^W_u = \bigotimes_{i=1}^L \tau^W_{u_i}
+    = \phi^\dagger \left( \bigotimes_{i=1}^L
+      \bigotimes_{j=1}^k \sigma^W_{u_{ij}} \right) \phi,
+  \end{equation}
+  which establishes Equation~\eqref{eq:pauli-q-to-pauli-2}. 
+\end{proof}
+
+
+ 

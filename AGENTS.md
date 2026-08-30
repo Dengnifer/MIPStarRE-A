@@ -19,9 +19,14 @@ workflow actions; the `## Local Operations` section below summarizes the rules.
 
 Key locations:
 
-- `references/ldt-paper/` — in-repo TeX source mirror for LDT;
-  `references/qpbt-paper/` and `references/neexp-paper/` — mirrors for the
-  QPBT sources (populated in project stage 2)
+- `references/qpbt-paper/` — per-section TeX mirror of MIP\*=RE
+  (arXiv:2001.04383); the QPBT lives in
+  `08_classical_and_quantum_low_degree_tests.tex` and
+  `14_analysis_of_the_pauli_basis_test.tex`
+- `references/neexp-paper/` — per-section TeX mirror of NEEXP in MIP\*
+  (arXiv:1904.05870); secondary source
+  (`07_a_self_test_for_the_pauli_basis.tex`)
+- `references/ldt-paper/` — in-repo TeX source mirror for LDT
 - `blueprint/src/` — active LaTeX blueprint with Lean cross-references
   (`\lean{}`, `\leanok`)
 - `MIPStarRE/` — Lean codebase matching the blueprint

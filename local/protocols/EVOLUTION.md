@@ -88,3 +88,19 @@ of the parent CI's restore-by-key-prefix (pr-ci.yml:144-160); the subsequent
 
 **Expected effect:** the initial warm costs minutes, not a duplicate
 multi-hour compile; same mechanism covers re-seeding after a cache wipe.
+
+## 2026-08-30 — Whitespace gate exempts byte-faithful paper mirrors
+
+**Trigger:** the stage-2 commit of `references/qpbt-paper/` and
+`references/neexp-paper/` was rejected by the pre-commit whitespace check:
+the arXiv sources carry trailing whitespace and blank lines at EOF, and
+normalizing them would break the mirrors' byte-identity claim (their whole
+point). The LDT-era mirror never collided with the gate because it was
+imported already-clean.
+
+**Change:** `.githooks/pre-commit` runs `git diff --cached --check` with
+`':(exclude)references/'`. Project prose and code keep the gate; verbatim
+external sources do not.
+
+**Expected effect:** mirrors commit unmodified; the fidelity claim in each
+mirror README stays checkable forever.

@@ -24,7 +24,12 @@ if [ -z "$STAGED_FILES" ]; then
 fi
 
 echo "MIPStarRE pre-commit: checking staged whitespace."
-git diff --cached --check
+# Paper mirrors under references/ are byte-faithful captures of external
+# arXiv sources (see references/*/README.md); their inherited trailing
+# whitespace is part of the fidelity claim and must not be "fixed", so they
+# are exempt from the whitespace gate (local/protocols/EVOLUTION.md,
+# 2026-08-30).
+git diff --cached --check -- ':(exclude)references/'
 
 if printf '%s\n' "$STAGED_FILES" | grep -Eq '^scripts/(.*\.py|tests/.*)$'; then
   echo "MIPStarRE pre-commit: running scripts/tests unit tests."

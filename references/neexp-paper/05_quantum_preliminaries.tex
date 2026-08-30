@@ -1,0 +1,1569 @@
+\section{Quantum preliminaries}  \label{sec:prelims}
+\subsection{Quantum measurements}
+The most general notion of a quantum measurement is a POVM
+measurement, which consists of a set of Hermitian operators $\{M_a\}_{a \in S}$
+indexed by outcomes $a$ from a set $S$. These satisfy the
+conditions
+\[ \forall a,\; M_a \succeq 0, \qquad \sum_a M_a = I. \]
+To refer to the measurement as a whole
+we will use the letter $M$, without the subscript indicating the
+outcome. For a state $\ket{\psi}$, the
+probability that the measurement $M$ returns outcome $a$ is
+\[ \Pr[\ba] = \bra{\psi} M_{\ba} \ket{\psi}. \]
+A POVM is said to be \emph{projective} if each element $M_a$ is an
+orthogonal projector, i.e. $M_a^2 = M_a$. Note that this implies that
+$M_a M_b = 0$ for any $a \neq b$, i.e. that the projectors are
+pairwise orthogonal. Naimark's theorem says that any POVM measurement
+can be simulated by a projective measurement on an enlarged space.
+\begin{theorem}[Naimark]\label{thm:naimark}
+  Suppose $\{M_a\}$ is a POVM acting on a Hilbert space $\calH$. Then
+  there exists a projective measurement $\{M'_a\}$ acting on the space
+  $\calH \ot \calH_{\rmaux}$ together with a state $\ket{\rmaux}$ such
+  that for all states $\ket{\psi} \in \calH$ and all outcomes $a$, the
+  post-measurement state after applying $M$ and $M'$ is the same:
+  \begin{equation} \sqrt{M_a} \ket{\psi}\bra{\psi} \sqrt{M_a} = \tr_{\reg{aux}}(M'_a (\ket{\psi}\bra{\psi}
+    \ot \ket{\rmaux}\bra{\rmaux})M'_a). \label{eq:naimark}\end{equation}
+  As a consequence, $M$ and $N$ induce the same distribution over
+  outcome probabilities:
+  \[ \bra{\psi} M_a \ket{\psi} = (\bra{\psi} \ot \bra{\rmaux}) N_a
+    (\ket{\psi} \ot \ket{\rmaux}). \]
+  Moreover, given any upper-bound $n$ on the number of outcomes of
+  $M_a$, there is a universal choice of the state $\ket{\rmaux}$ that
+  works for all POVMs $M_a$ with at most $n$ outcomes. The projective measurement
+  $M'_a$ and state $\ket{\rmaux}$ together constitute a \emph{Naimark
+    dilation} of the POVM $M_a$.
+\end{theorem}
+
+  \begin{theorem}[Partial Naimark]\label{thm:partial-naimark}
+    Suppose $\{M_{a_1, a_2}\}$ is a POVM acting on a tensor product
+  Hilbert space $\calH = \calH_1 \ot \calH_2$ of the form $M_{a_1,
+    a_2} = \Pi_{a_1} \ot A^{a_1}_{a_2}$, where the operators $\{\Pi_{a_1}\}_{a_1}$ is a
+  projective measurement. Then there is a Naimark dilation $M'_{a_1,
+    a_2}$ and a state $\ket{\rmaux}$ as above, with the property that
+  $M'_{a_1, a_2} = \Pi_{a_1} \ot A'^{a_1}_{a_2}$ for projectors
+  $A'^{a_1}_{a_2}$ acting on $\calH_2 \ot \calH_{\rmaux}$.
+\end{theorem}
+\begin{proof}
+  The condition that $\{\Pi_{a_1}\}$ forms a projective measurement
+  implies that for each $a_1$, $\{A^{a_1}_{a_2}\}$ is a
+  POVM. By~\Cref{thm:naimark}, for each $a_1$ there exists a POVM
+  $A'^{a_1}_{a_2}$ dilating $A^{a_1}_{a_2}$, and all of these POVMs
+  act on the same universal auxiliary state $\ket{\rmaux}$. Now,
+  define $M'_{a_1, a_1} = \Pi_{a_1} \ot A'^{a_1}_{a_2}$. For every
+  state $\ket{\psi}$, we have that
+  \begin{align*}
+    \tr_{\reg{aux}}(M'_{a_1, a_2} (\ket{\psi}\bra{\psi}) M'_{a_1,
+    a_2}) &= \tr_{\reg{aux}}( A'^{a_1}_{a_2} (\Pi_{a_1} \ket{\psi}
+            \bra{\psi} \Pi_{a_1} \ot \ket{\rmaux} \bra{\rmaux}) A'^{a_1}_{a_2}) \\
+          &= \sqrt{A^{a_1}_{a_2}} (\Pi_{a_1} \ket{\psi} \bra{\psi}
+            \Pi_{a_1}) \sqrt{A^{a_1}_{a_2}} \\
+          &= \sqrt{M_{a_1, a_2}} \ket{\psi} \bra{\psi} \sqrt{M_{a_1,
+            a_2}},
+  \end{align*}
+  where in going from the first to the second line we used~\Cref{thm:naimark}.
+\end{proof}
+
+
+For the purposes of this paper, we will need to specialize the POVM
+notation introduced above in several ways. First, we will often work
+with families of POVM measurements indexed by questions in an
+interactive proof protocol. These will be denoted $\{M^q_a\}$, where
+$q$ indexes the question and $a$ the outcome.
+(We note that the reverse convention ``$\{M_q^a\}$", which we will \emph{not} use, is also common in the literature.)
+In many cases, the outcomes will consist of
+tuples of elements, some of which we may wish to discard. We use the
+convention that if an outcome element is not written, it
+is understood to be \emph{summed} over. Thus, if $\{M^{x}_{a,b}\}$
+is a family of POVMs, we would have
+\begin{equation}\label{eq:spider-man}
+M^{x}_{a} := \sum_b M^{x}_{a,b}.
+\end{equation}
+
+\begin{notation}\label{not:marginalize}
+We will also often consider situations where some of the information
+in a measurement outcome is discarded. In particular, given a
+POVM $\{M_f\}$ whose outcomes are functions $f:U \to V$ over some
+domain $U$, and given a point $x \in U$, we will denote by $\{M_{f(x)=
+  y}\}_{y \in V}$ the measurement corresponding to applying $M$ to
+obtain a function $f$, and returning the value of $f$ at
+$x$. Formally, the POVM elements of this measurement are given by
+\[ M_{[f(x) = a]} = \sum_{f: f(x) = a} M_f. \]
+(We note that \Cref{eq:spider-man} can be viewed as a special case
+in which the ``discarding function"~$f$ simply removes the second coordinate.
+For this case, it is simpler to use the convenient notation in \Cref{eq:spider-man}
+than the more cumbersome bracket notation given here.)
+\end{notation}
+
+The following lemma contains a useful fact about marginalized
+projective measurements.
+\begin{lemma}\label{lem:marginal-tensor-product}
+  Let $M_{a,b}$ be a projective measurement on a tensor product
+  Hilbert space $\calH_1 \ot \calH_2$, and suppose that for all $a$, $M_{a} = A_a
+  \ot B_a$ where $A_a$ is a rank-one matrix on $\calH_1$. Then for all
+  $a, b$, $M_{a,b} = A_a \ot C_{a,b}$ with $C_{a,b}$ projectors.
+\end{lemma}
+\begin{proof}
+  By the Schmidt decomposition, we can write $M_{a,b}$ as
+  \begin{align*}
+    M_{a,b} &= \sum_j \ket{\psi_{a,b,j}}\bra{\psi_{a,b,j}} \\
+    &= \sum_{j,k}  \sigma_{jk}              \ket{u_{a,b,j,k}}\bra{u_{a,b,j,k}}
+      \ot\ket{v_{a,b,j,k}}\bra{v_{a,b,jk}}.
+  \end{align*}
+  Write the rank-one matrix $A_a$ as an outer product
+  $\ket{\psi_a}\bra{\psi_a}$. Then we have
+  \[ \sum_b M_{a,b} = \sum_{j,k, b} \sigma_{jk}              \ket{u_{a,b,j,k}}\bra{u_{a,b,j,k}}
+      \ot\ket{v_{a,b,j,k}}\bra{v_{a,b,jk}} = 
+      \ket{\psi_a}\bra{\psi_a} \ot B_a. \]
+    Taking the partial trace on the $B$ system, we have
+    \[  \tr_B(\sum_b M_{a,b}) = \sum_{j,k,b} \sigma_{jk}
+      \ket{u_{a,b,j,k}}\bra{u_{a,b,j,k}} =
+      \ket{\psi_a}\bra{\psi_a}. \]
+    Suppose we multiply on the left by $\bra{v}$ and on the right by
+    $\ket{v}$, for $\ket{v}$ orthogonal to $\ket{\psi_a}$. Then the
+    RHS is 0 while the LHS is a sum $\sum_{j,k,b} \sigma_{jk}
+    |\braket{v |u_{a,b,j,k}}|^2$ of nonnegative terms. Hence, each of
+    these terms must be zero. Thus, the equation can only hold if all
+    the vectors $\ket{u_{a,b,j,k}}$ are multiples of
+    $\ket{\psi_a}$. This implies that
+    \[ M_{a,b} = \ket{\psi_a} \bra{\psi_a} \ot C_{a,b}\]
+    for some $C_{a,b}$ as desired.
+\end{proof}
+
+\subsection{Nonlocal games and $\MIP^*$}
+
+Now, we augment \Cref{def:two-player-one-round,def:mip-protocols}
+to allow for provers to share quantum resources.
+
+\begin{definition}
+Given a game~$\game$, a \emph{quantum strategy}
+is one in which Alice and Bob are allowed to share entanglement but not to communicate.
+We can model their behavior with the \emph{strategy} $\calS= (\rho, A, B)$.
+Here,
+\begin{itemize}
+\itemsep -.5pt
+\item[$\circ$] Write $\mathcal{H}_A$ for Alice's local Hilbert space and $\mathcal{H}_B$ for Bob's.
+		Then $\rho$ is a (possibly entangled) state in $\mathcal{L}(\mathcal{H}_A \otimes \mathcal{H}_B)$.
+\item[$\circ$] The set $A$ contains a matrix $A_a^x$ for each question~$x$ and answer~$a$,
+		with the guarantee that for each question~$x$, $A^x := \{A_a^x\}_a$ is a POVM. (Likewise for~$B$.)
+\end{itemize} 
+Alice and Bob perform their strategy as follows:
+given question~$x$, Alice performs the POVM $\{A_a^x\}_a$ and returns her measurement outcome to the verifier.
+Bob plays similarly.
+The \emph{value} of their strategy, denoted $\valstrat{\game}{\calS}$, is the probability that they pass the test,
+over the randomness in~$\game$ and in their measurement outcomes.
+\begin{align*}
+\valstrat{\game}{\calS}
+&= \E_{(\bx_0, \bx_1) \sim \mathrm{Alg}_{\mathrm{Q}}} \Pr_{\ba_0, \ba_1}[\mathrm{Alg}_{\mathrm{A}}(\bx_0, \bx_1, \ba_0, \ba_1) = 1]\\
+&= \E_{(\bx_0, \bx_1) \sim \mathrm{Alg}_{\mathrm{Q}}} \sum_{\substack{a_0, a_1,\\\mathrm{Alg}_{\mathrm{A}}(\bx_0, \bx_1, a_0, a_1) = 1}}
+	\tr(A_{a_0}^{\bx_0} \otimes A_{a_1}^{\bx_1} \cdot \rho),
+\end{align*}
+where in the first line, $(\ba_0, \ba_1)$ is the distribution on answers given questions~$\bx_0, \bx_1$.
+We write $\val{\game}$ for the infimum of $\valstrat{\game}{\calS}$ over all strategies~$\calS$.
+We define value analogously for interactive proofs.
+
+We say that $L \in \MIP_{c, s}^*$ if there is an quantum interactive proof~$\game$ that decides it.
+This means that the following three conditions are true.
+\begin{itemize}
+\item[$\circ$] (Completeness) Suppose $\mathsf{input} \in L$.  Then there is a quantum strategy for~$\game$ with value at least~$c$.
+\item[$\circ$] (Soundness) Suppose $\mathsf{input} \notin L$.  Then every quantum strategy for~$\game$ has value at most~$s$.
+\item[$\circ$] All of $\qlength{\game}$, $\alength{\game}$, $\qtime{\game}$, and $\atime{\game}$ are $\poly(n)$.
+\end{itemize}
+If $c - s$ is a constant, then we will suppress the dependence on them and just say that $L \in \MIP^*$.
+\end{definition}
+
+\begin{remark}
+A game~$\game$ is \emph{symmetric} if its distribution on questions treats Alice and Bob symmetrically.
+In this case, we may assume without loss of generality that Alice and Bob's strategies are also symmetric,
+i.e.\ that $A_a^x = B_a^x$ for all questions~$x$ and answers~$a$.
+This allows us to represent their measurements by a single set of matrices $M$ (for which $M_a^x = A_a^x = B_a^x$).
+As a further simplification, by applying Naimark's dilation theorem to Alice and Bob's strategy 
+we can assume that their shared state~$\psi$ is pure and their measurements are projectors.
+\end{remark}
+
+Occasionally, it will be useful to speak of the distribution over
+measurement outcomes induced by a strategy independently of any
+particular game. For this, we introduce the notion of a bipartite correlation
+\begin{definition}
+  Given a strategy $\calS = (\rho, A, B)$, the bipartite correlation produced by it is
+  the function $P(a, b | x, y) = \tr(A^x_a \ot B^x_y \cdot \rho)$.
+\end{definition}
+If two strategies produce the same bipartite correlation, they have
+the same value for any game they are used for. Naimark's theorem
+(\Cref{thm:naimark}) implies for any strategy $\calS$, there exists a
+strategy $\calS'$ using only projective measurements that produces the
+same correlation:
+
+\begin{corollary}[Naimark's theorem for strategies]\label{cor:bipartite-naimark}
+  Suppose $\{M_a\}$ and $\{N_b\}$ are two POVMs acting on the $A$ and
+  $B$ factors of a tensor Hilbert space $\calH_{A} \ot \calH_{B}$,
+  respectively. Then for any Naimark dilation of $\{M_a\}$ given by
+  projectors $M'_a$ and an auxiliary state $\ket{\rmaux_A} \in
+  \calH_{\rmaux_A}$, and any Naimark dilation of $\{N_b\}$ given by
+  projectors $\N'_b$ and an auxiliary state
+  $\ket{\rmaux_B} \in \calH_{\rmaux_B}$, it holds that for any bipartite state $\ket{\psi} \in
+  \calH_{A} \ot \calH_{b}$, the post-measurement state after applying
+  $M \ot N$ to $\ket{\psi}$ and $M' \ot N'$ to $\ket{\psi} \ot
+  \ket{\rmaux_A} \ot \ket{\rmaux_B}$ is the same:
+  \[ \sqrt{M_a} \ot \sqrt{N_b}  \ket{\psi} \bra{\psi}  \sqrt{M_a} \ot
+    \sqrt{N_b} = \tr_{\rmaux}[ (M'_a \ot N'_b) (\ket{\psi}\bra{\psi}
+    \ot \ket{\rmaux_{A}}\bra{\rmaux_{A}} \ot
+    \ket{\rmaux_B}\bra{\rmaux_B} )(M'_a \ot N'_b)]. \]
+  Moreover, such dilations exist by \Cref{thm:naimark}.
+  As a consequence, $M, N$ and $M', N'$ induce the same joint
+  distribution over outcome probabilities:
+  \[ \bra{\psi} M_a \ot N_b \ket{\psi} = (\bra{\psi} \ot
+    \ket{\rmaux_A} \ot \ket{\rmaux_B}) M'_a \ot N'_b (\ket{\psi} \ot
+    \ket{\rmaux_A} \ot \ket{\rmaux_B}). \]
+\end{corollary}
+\begin{proof}
+  The existence of such dilations follows immediately
+  from~\Cref{thm:naimark}. To deduce the equality of post-measurement
+  states, we apply~\Cref{eq:naimark} twice, and use the fact that the partial
+  trace composes, i.e. that $\tr_{\rmaux}[\cdot] = \tr_{\rmaux_B}[\tr_{\rmaux_A}[\cdot]]$.
+  \begin{align*}
+    &\tr_{\rmaux}[ (M'_a \ot N'_b) (\ket{\psi}\bra{\psi}
+    \ot \ket{\rmaux_{A}}\bra{\rmaux_{A}} \ot
+      \ket{\rmaux_B}\bra{\rmaux_B}) (M'_a \ot N'_b)]\\
+    &\qquad= \tr_{\rmaux_B}[
+                                                    \sqrt{M_a \ot I}
+                                                    ((I \ot N'_b) \ket{\psi}
+                                                    \ket{\rmaux_A}
+                                                    \bra{\rmaux_A}
+                                                    \bra{\psi} (I \ot
+                                                    N'_b)) \sqrt{M_a
+                                                    \ot I}] \\
+    &\qquad= \sqrt{I \ot N_b} \sqrt{M_a \ot I} \ket{\psi} \bra{\psi}
+      \sqrt{M_a \ot I} \sqrt{I \ot N_b}.\qedhere 
+  \end{align*}
+\end{proof}
+
+
+\subsection{Pauli matrices and the EPR state}
+\label{sec:paulis}
+Over a finite field $\F_q$ with order $q = p^t$ for prime $p$, the single-qudit Pauli matrices are a set
+of unitary matrices acting on $\mathbb{C}^q$. Every Pauli matrix can
+be uniquely written as a product $\omega^{a} X(x) Z(z)$, where $\omega$ is the $p$-th root
+$\omega = e^{2\pi/p}$, and $X(x)$ and $Z(z)$ are the matrices
+\begin{equation}
+  X(x) = \sum_{j \in \F_q} \ket{j+x}\bra{j}, \qquad Z(z) =
+  \sum_{j \in \F_q} \omega^{\tr[z j]}\ket{j}
+  \bra{j}, \label{eq:pauli-definition} \end{equation}
+where the arguments $x, z$ are in $\F_q$, $\tr: \F_q \to \F_p$ is the finite field
+trace. The set of all Pauli matrices form a group, known as the Pauli
+group or the Weyl-Heisenberg group. For the most part,
+in this paper, it will suffice to consider only the group elements of
+the form
+$\omega^a X(x)$ (``$X$-type'' Paulis) and $Z(z)$ (``$Z$-type''
+Paulis). Elements of the form $\omega^a X(x)Z(z)$ for $x, z \neq 0$
+are sometimes called ``$Y$-type''.
+
+The eigenvalues of $X(x)$ and $Z(z)$ for
+all $x, z$ are powers
+of $\omega$, as can be seen from the facts $X(x)^p = Z(z)^p =
+I$. Any unitary with this property is known as a \emph{(generalized)
+  observable}. Every generalized observable $U$ induces a projective
+measurement with $p$ outcomes, corresponding to the $p$ possible eigenvalues of
+$U$. As a convenient shorthand, we will refer to performing this projective
+measurement as ``measuring $U$.''  In the case of of the $X$ and $Z$
+operators, the
+eigenvectors $\ket{\tau^X_u}$ and $\ket{\tau^Z_u}$ of $X(1)$ and $Z(1)$ are indexed by elements $u$ of $\F_q$,
+with eigenvalue $\tr[u]$; thus, each eigenvalue occurs with
+multiplicity $q/p$. Explicitly, they are given by
+\begin{equation}\label{eq:pauli-eigenstates}
+  \ket{\tau^X_u} = \frac{1}{\sqrt{q}} \sum_{v \in \F_q}
+  \omega^{-\tr[uv]} \ket{v},\qquad \ket{\tau^Z_u} = \ket{u}.
+  \end{equation}
+We denote the projectors onto these eigenvectors by $\tau^X_u$ and
+$\tau^Z_u$, respectively. These eigenvectors are also the eigenvectors
+of the remaining $X(x), Z(z)$ observables, as shown by the following fact.
+\begin{fact}
+  For $W \in \{X, Z\}$, the observables $W(v)$ are related to the
+  projectors $\tau^W_u$ by
+  \begin{align}
+    W(v) &= \sum_{u} \omega^{\tr[u \cdot v]}
+           \tau^W_u \label{eq:pauli-obs-to-proj} \\
+    \tau^W_u &= \E_{\bv} \omega^{-\tr[u \cdot \bv]} W(\bv). \label{eq:pauli-proj-to-obs}
+  \end{align}
+\end{fact}
+\begin{proof}
+  We start with~\Cref{eq:pauli-obs-to-proj}. For $W = Z$, the relation
+  follows immediately from the definitions. For $W = X$, by
+  calculation we have:
+  \begin{align*}
+    \sum_{u} \omega^{\tr[u \cdot x]} \tau^X_u &= \frac{1}{q} \sum_{u,
+                                                v, v'} \omega^{\tr[u
+                                                \cdot x]}
+                                                \omega^{\tr[u(v -
+                                                v')]} \ket{v'}\bra{v}
+    \\
+    &= \sum_{v, v'} \E_{\bu} \omega^{\tr[\bu \cdot (x + v - v')]}\ket{v'}\bra{v}\\
+                                              &= \sum_{v} \ket{v+x}
+                                                \bra{v} \\
+                                              &= X(x),
+  \end{align*}
+  where we have applied \Cref{fact:averages-to-zero} in passing from
+  the second to the third line.
+  Now we show \Cref{eq:pauli-proj-to-obs}:
+  \begin{equation*}
+    \E_{\bv} \omega^{-\tr[u\cdot \bv]} W(\bv) = \E_{\bv} \sum_{a}
+                                         \omega^{-\tr[u \cdot \bv]}
+                                         \omega^{\tr[\bv \cdot a]}
+                                         \tau^W_{a}
+                                         = \E_{\bv} \sum_{a}
+                                         \omega^{\tr[(a - u) \cdot \bv]}
+                                         \tau^W_{a}
+                                       = \tau^W_{u},
+  \end{equation*}
+  where we first applied \Cref{eq:pauli-obs-to-proj} in the first
+  equality, and then used \Cref{fact:averages-to-zero} to perform the
+  expectation over $\bv$.
+\end{proof}
+The Pauli matrices obey the commutation
+relation
+\begin{equation}\label{eq:commutation-relations}
+ X(x)Z(z) = \omega^{-\tr[xz]} Z(z)X(x).
+ \end{equation}
+This follows directly from \Cref{eq:pauli-definition}. It follows from
+this that all of the Pauli matrices (including the $Y$-type matrices)
+are generalized observables.
+
+The maximally entangled state, or EPR state, over qudits of dimension
+$q$ is the state
+\[ \ket{\epr_q} = \frac{1}{\sqrt{q}} \sum_{u \in \F_q} \ket{u} \ot \ket{u}. \]
+We will write $\ket{\epr_q^n}$ for $\ket{\epr_q}^{\otimes n}$.
+This state obeys the stabilizer relations
+\begin{align}
+  X(x) \ot X(x) \ket{\epr_q} &= Z(z) \ot Z(-z) \ket{\epr_q} =
+                             \ket{\epr_q} \label{eq:epr-stab} \\
+  \tau^X_u \ot I \ket{\epr_q} &= I \ot \tau^X_{-u}
+                              \ket{\epr_q} \label{eq:epr-stab-x} \\
+  \tau^Z_u \ot I \ket{\epr_q} &= I \ot \tau^Z_{u} \ket{\epr_q} \label{eq:epr-stab-z}.
+\end{align}
+Relations~\eqref{eq:epr-stab-x} and~\eqref{eq:epr-stab-z} imply that
+measuring $X(x)$ on both halves of an EPR state will yield two
+outcomes $a,b$ satisfying $a = -b$, and measuring $Z(z)$ on both
+halves will yield two outcomes $a,b$ that are equal.
+
+In the important special case of finite fields with characteristic $2$
+(i.e. $\F_q$ for even $q$), $u = -u$ for all $u \in \F_q$, and thus
+measuring any of the $X$ and $Z$ operators on both sides of the state
+will always yield the same outcome. 
+
+  
+\subsection{State dependent distances}
+
+In this section, we introduce two state-dependent distances.
+To motivate them, we first define the consistency game, perhaps the simplest nontrivial two-player game.
+
+\begin{definition}
+The \emph{consistency game with question~$x$}, denoted $\game_{\mathrm{con}}(x)$ is defined as follows.
+The question~$x$ is given to Alice and Bob, who respond with answers~$\ba$ and~$\ba'$, respectively.
+The verifier accepts if~$\ba = \ba'$.
+\end{definition}
+
+We will typically play the consistency game when~$\bx$, rather than being a fixed question, is drawn from some distribution.
+Our first state-dependent distance quantifies the players` success probability in this case.
+
+\begin{definition}
+Let $\{A^x_a\}$ and $\{B^x_a\}$ be sets of matrices in $\mathcal{L}(\mathcal{H}_A)$ and $\mathcal{L}(\mathcal{H}_B)$, respectively.
+Let~$\calD$ be a distribution on questions~$x$ and $\ket{\psi}$ be a state in $\mathcal{H}_A \otimes \mathcal{H}_B$.
+Consider the game in which the verifier selects $\bx \sim \calD$ and then plays $\game_{\mathrm{con}}(\bx)$.
+We say that
+\begin{equation*}
+A^x_a \otimes I_{\reg{Bob}} \consistency_{\delta} I_{\reg{Alice}} \otimes B^x_a
+\end{equation*}
+\emph{on state $\ket{\psi}$ and distribution $\calD$} if
+Alice and Bob win with probability~$1-O(\delta)$ using the measurements~$A$ and~$B$, respectively.
+\end{definition}
+
+We will sometimes leave the state or distribution unspecified, as they are often clear from context.
+This distance has a clear operational interpretation.
+Our second state-dependent distance,
+defined next,
+is more analytic.
+
+\begin{definition}
+Let $\{Q^x_a\}$ and $\{R^x_a\}$ be sets of matrices in $\mathcal{L}(\mathcal{H})$.
+Let $\calD$ be a distribution on the variables~$x$ and $\ket{\psi}$ be a state in $\mathcal{H}$.
+Then we say that \emph{$Q^x_a \approx_{\delta} R^x_a$ on state $\ket{\psi}$ and distribution $\calD$} if
+\begin{equation*}
+\E_{\bx \sim \calD} \sum_a \Vert (Q_{a}^{\bx} - R_{a}^{\bx} ) \ket{\psi}\Vert^2 = O(\delta).
+\end{equation*}
+\end{definition}
+
+As above, we will sometimes leave the state or distribution unspecified when clear from context.
+This is sometimes referred to as \emph{the} state-dependence distance,
+whereas our first distance measure is often referred to as the ``consistency".
+A typical setting of parameters is $\mathcal{H} = \mathcal{H}_A \otimes \mathcal{H}_B$,
+$Q^x_a := A^x_a \otimes I_{\reg{Bob}}$,
+and $R^x_a := I_{\reg{Alice}} \otimes B^x_a$.
+In this case, we have the following relationship between the two state-dependent distances.
+
+\begin{fact}\label{fact:agreement}
+Let $\{A^x_a\}$ and $\{B^x_a\}$ be POVM measurements.
+The following two facts hold.
+\begin{enumerate}
+\item If $A^x_a \otimes I_{\reg{Bob}} \consistency_{\delta} I_{\reg{Alice}} \otimes B^x_a$
+	then $A^x_a \otimes I_{\reg{Bob}} \approx_{\delta} I_{\reg{Alice}} \otimes B^x_a$.
+\item If $A^x_a \otimes I_{\reg{Bob}} \approx_{\delta} I_{\reg{Alice}} \otimes B^x_a$ \emph{and} $\{A^x_a\}$ and $\{B^x_a\}$ are projective measurements,
+	then $A^x_a \otimes I_{\reg{Bob}} \consistency_{\delta} I_{\reg{Alice}} \otimes B^x_a$.\label{item:partial-converse}
+\end{enumerate}
+\end{fact}
+\begin{proof}
+Suppose that $A^x_a \otimes I_{\reg{Bob}} \consistency_{\delta} I_{\reg{Alice}} \otimes B^x_a$.
+This is equivalent to the statement
+\begin{equation}\label{eq:i-derived-a-formula}
+\E_{\bx} \sum_a \bra{\psi} A^{\bx}_a \otimes B^{\bx}_a \ket{\psi} \geq 1- O(\delta).
+\end{equation}
+As a result, using the fact that~$A$ and~$B$ are POVMs,
+\begin{align}
+\E_{\bx} \sum_a \Vert (A_{a}^{\bx}\otimes I - I \otimes B_{a}^{\bx} ) \ket{\psi}\Vert^2 
+& = \E_{\bx} \sum_a \bra{\psi} ((A_{a}^{\bx})^2\otimes I + I \otimes (B_{a}^{\bx})^2 - 2 A_a^{\bx} \otimes B_{a}^{\bx}) \ket{\psi}\nonumber\\
+& \leq \E_{\bx} \sum_a \bra{\psi} (A_{a}^{\bx}\otimes I + I \otimes B_{a}^{\bx} - 2 A_a^{\bx} \otimes B_{a}^{\bx}) \ket{\psi}\label{eq:sometimes-tight}\\
+& = 2 - 2 \E_{\bx} \sum_a \bra{\psi} A_a^{\bx} \otimes B_{a}^{\bx} \ket{\psi}\nonumber.
+\end{align}
+By \Cref{eq:i-derived-a-formula}, this is $O(\delta)$.
+As a result, $A^x_a \otimes I_{\reg{Bob}} \approx_{\delta} I_{\reg{Alice}} \otimes B^x_a$.
+The reverse statement holds when~$A$ and~$B$ are projective measurements
+because \Cref{eq:sometimes-tight} is an equality in this case.
+\end{proof}
+
+The following fact shows that we can derive a weaker converse in the case when only one of~$A$ or~$B$ is projective.
+
+\begin{fact}\label{fact:almost-agreement}
+Suppose $\{A^x_a\}$ and $\{B^x_a\}$ are two measurements such that $A^x_a \otimes I_{\reg{Bob}} \approx_{\delta} I_{\reg{Alice}} \otimes B^x_a$.
+Suppose further that either~$A$ or~$B$ is a projective measurement (and the other is a POVM measurement).
+Then $A^x_a \otimes I_{\reg{Bob}} \consistency_{\delta^{1/2}} I_{\reg{Alice}} \otimes B^x_a$.
+\end{fact}
+\begin{proof}
+Our goal is to upper bound the expression
+\begin{equation}\label{eq:anand-is-a-stable-genius-yet-again}
+1 - \E_\bx \sum_a \bra{\psi} A^{\bx}_a \otimes B^{\bx}_a \ket{\psi}.
+\end{equation}
+We begin by rewriting the number~$1$.
+Here we use the fact that because~$A$ is projective, $(A^x_a)^2 = A^x_a$,
+and so $\sum_a (A^x_a)^2 = I$.
+This gives us:
+\begin{align}
+\eqref{eq:anand-is-a-stable-genius-yet-again}
+& = \E_\bx \sum_a \bra{\psi} (A^{\bx}_a)^2 \otimes I_{\reg{Bob}} \ket{\psi} - \E_\bx \sum_a \bra{\psi} A^{\bx}_a \otimes B^{\bx}_a \ket{\psi}\nonumber\\
+& = \E_\bx \sum_a \bra{\psi} (A^{\bx}_a \otimes I_{\reg{Bob}}) \cdot (A^{\bx}_a \otimes I_{\reg{Bob}} - I_{\reg{Alice}} \otimes B^{\bx}_a) \ket{\psi}\nonumber\\
+& \leq \E_\bx \sum_a \Vert A^{\bx}_a \otimes I_{\reg{Bob}} \ket{\psi}\Vert \cdot \Vert(A^{\bx}_a \otimes I_{\reg{Bob}} - I_{\reg{Alice}} \otimes B^{\bx}_a) \ket{\psi}\Vert\label{eq:anand-continues-to-be-a-stable-genius}
+\end{align}
+Now we apply Cauchy-Schwarz and then Jensen's inequality:
+\begin{equation*}
+\eqref{eq:anand-continues-to-be-a-stable-genius}
+\leq  \sqrt{\E_\bx \sum_a \Vert A^{\bx}_a \otimes I_{\reg{Bob}} \ket{\psi}\Vert^2
+	\cdot \sum_a \Vert(A^{\bx}_a \otimes I_{\reg{Bob}} - I_{\reg{Alice}} \otimes B^{\bx}_a) \ket{\psi}\Vert^2}
+\end{equation*}
+The first of these terms we bound by~$1$, and the second is~$O(\delta)$ by assumption.
+\end{proof}
+
+\begin{remark}\label{remark:fraction-of-identity}
+We note that the requirement in \Cref{fact:almost-agreement}
+that one of the two measurements be projective is necessary.
+Consider the measurements $\{A^x_a\}$ and $\{B^x_a\}$ with~$m$ separate outcomes~$a$
+in which $A^x_a = B^x_a = I/m$ for all~$x$ and~$a$. Then $A^x_a \otimes I_{\reg{Bob}} \approx_{0} I_{\reg{Alice}} \otimes B^x_a$, but as $m \rightarrow \infty$,
+\begin{equation*}
+1- \E_\bx \sum_a \bra{\psi} A^{\bx}_a \otimes B^{\bx}_a \ket{\psi} \rightarrow 1.
+\end{equation*}
+\end{remark}
+
+Thus, when one of the measurements is projective,
+the ``$\approx_\delta$" distance is roughly equivalent to the ``$\consistency_\delta$" distance,
+up to a polynomial factor (which we can tolerate losing in our proofs).
+More generally, however, the ``$\approx_\delta$" distance
+can be viewed as a weakening of the ``$\consistency_\delta$" distance.
+In spite of this, we will spend much of the paper dealing with the ``$\approx_\delta$" distance,
+as it is easier to manipulate but still strong enough to reach our desired consequences.
+(See \cite[Section~$2.3.1$]{Vid11} for a further defense of this distance.)
+We note that even when~$\ket{\psi}$ is a bipartite state,
+the ``$\approx_\delta$" distance is defined for matrices~$Q$ and~$R$
+which are not necessarily tensor products over the bipartition.
+Such matrices will often be useful to pass through during intermediate steps of our proofs.
+
+A common use case for these distances is when the verifier (i) samples a pair of questions~$\bx = (\bx_0, \bx_1)$,
+(ii) hands~$\bx_0$ to Alice and~$\bx_1$ second to Bob,
+(iii) receives their answers $\ba_0$ and~$\ba_1$
+and (iv) accepts if $f(\bx, \ba_0) = g(\bx, \ba_1)$ for some functions~$f$ and~$g$.
+Write $\{A^{x_0}_{a_0}\}_{a_0}$ and $\{B^{x_1}_{a_1}\}_{a_1}$ for Alice and Bob's measurements, respectively.
+We can view these as measurements which receive the pair~$(\bx_0, \bx_1)$ and simply ignore one coordinate.
+Suppose the verifier accepts with probability $1-\delta$.
+Using \Cref{not:marginalize}, we can view this as performing the consistency game
+between the measurements $A^{x_0}_{[f(x, a_0) = b]}$ and  $B^{x_1}_{[f(x, a_1) = b]}$.
+Hence, we can derive the following two facts:
+\begin{equation*}
+A^{x_0}_{[f(x, a_0) = b]} \otimes I_{\reg{Bob}}
+\consistency_{\delta} I_{\reg{Alice}} \otimes B^{x_1}_{[f(x, a_1) = b]},
+\quad
+\text{and}
+\quad
+A^{x_0}_{[f(x, a_0) = b]} \otimes I_{\reg{Bob}}
+\approx_{\delta} I_{\reg{Alice}} \otimes B^{x_1}_{[f(x, a_1) = b]}.
+\end{equation*}
+This generic format will be the most common use of these notations.
+
+\Cref{remark:fraction-of-identity} highlights the importance of \emph{projective} measurements when dealing with the~``$\approx_\delta$" distance.
+This, and several other key facts about the ``$\approx_\delta$" distance, are true only for projective measurements.
+As a result, we will sometimes apply Naimark's theorem (\Cref{thm:naimark})
+during our proofs to ``round" POVM measurements into projective measurements.
+However, there is a subtlety in doing so, namely that 
+because Naimark's theorem preserves measurement outcomes,
+any ``$\consistency_\delta$" statements we have derived about our measurement operators will remain true,
+but Naimark's theorem is \emph{not} guaranteed to preserve ``$\approx_\delta$" statements.
+In this work, we will be able to dispense with this subtlety and assume all ``$\approx_\delta$" statements \emph{are} preserved,
+because \emph{all ``$\approx_\delta$" statements in our proofs will be derived from ``$\consistency_\delta$" statements},
+and so they will remain true after performing Naimark's theorem, since we could simply rederive them.
+
+\subsection{Miscellaneous properties of the state-dependent distances}
+
+In this section, we record some facts about the ``$\approx_\delta$" notation which we will use repeatedly throughout the paper.
+A good rule of thumb is that everything one expects to be true about the ``$\approx_\delta$" notation actually \emph{is}  true,
+except for those things which are not. 
+As a result, we will be overly pedantic in this section in order to call attention to these cases.
+
+\subsubsection{Simple state-dependent distance facts}
+
+\begin{fact}\label{fact:obvious-vector-fact}
+For two vectors $\ket{\psi_1}, \ket{\psi_2}$, 
+$\displaystyle
+\Vert \ket{\psi_1} + \ket{\psi_2} \Vert^2 \leq 2 \Vert \ket{\psi_1} \Vert^2 + 2 \Vert \ket{\psi_2} \Vert^2.
+$
+\end{fact}
+
+\begin{fact}\label{fact:measurement-sub-measurement-switcheroo}
+Let $\{A_a\}$ be a measurement. Then
+\begin{equation*}
+\sum_a \Vert A_{a} \ket{\psi}\Vert^2 \leq\Vert \ket{\psi} \Vert^2.
+\end{equation*}
+\end{fact}
+\begin{proof}
+If $\{A_a\}$ is a measurement, then
+\begin{equation*}
+\sum_a \Vert A_{a} \ket{\psi}\Vert^2
+= \sum_a \tr( A_a A_{a} \ket{\psi}\bra{\psi})
+\leq \tr(I \cdot \ket{\psi}\bra{\psi}) = \Vert \ket{\psi}\Vert^2.\qedhere
+\end{equation*}
+\end{proof}
+
+\begin{fact}\label{fact:easy-bound}
+Let $\{A_a\}$, $\{B_a\}$ be measurements. Then for any state~$\ket{\psi}$,
+\begin{equation*}
+\sum_a \Vert (A_{a} - B_{a} ) \ket{\psi}\Vert^2 \leq 4 \cdot \Vert \ket{\psi} \Vert^2.
+\end{equation*}
+\end{fact}
+\begin{proof}
+By \Cref{fact:obvious-vector-fact},
+\begin{equation*}
+\sum_a \Vert (A_{a} - B_{a} ) \ket{\psi}\Vert^2 \leq 2 \sum_a \Vert A_{a} \ket{\psi}\Vert^2 + 2 \sum_a \Vert  B_{a} \ket{\psi}\Vert^2.
+\end{equation*}
+The fact now follows from \Cref{fact:measurement-sub-measurement-switcheroo}.
+\end{proof}
+
+\begin{fact}\label{fact:trivial-upper-bound-approx-delta}
+Let $\{A^x_a\}$ and $\{B^x_a\}$ be POVM measurements.
+Then $A^x_a \approx_1 B^x_a$.
+\end{fact}
+
+\begin{fact}\label{fact:add-a-proj}
+Let $\{A_a^{x}\}$ and $\{B_a^{x}\}$ be matrices.
+Let $\{C_b^{y}\}$ be matrices such that $\sum_b (C_b^y)^\dagger C_b^y \leq I$ for all~$y$.
+(This includes the case when $\{C_b^y\}$ form projective or POVM measurements.) Then
+\begin{equation*}
+\text{$A_a^{x} \approx_{\delta} B_a^x$ implies $C_b^y A_a^x \approx_{\delta} C_b^y B_a^x$.}
+\end{equation*}
+\end{fact}
+\begin{proof}
+Fix questions~$x, y$ and answers~$a$. Because of our property on $\{C_b^y\}_b$,
+\begin{align*}
+\sum_{b} \Vert (C_b^{y} A_a^{x} - C_b^{y} B_a^{x})\ket{\psi}\Vert^2
+&= \sum_{b} \bra{\psi} (A_a^x - B_a^x)^\dagger (C_b^y)^\dagger (C_b^y) (A_a^{x} -  B_a^{x})\ket{\psi}\\
+&\leq \bra{\psi} (A_a^x - B_a^x)^\dagger (A_a^x - B_a^x) \ket{\psi}
+ = \Vert (A_a^{x} -B_a^{x})\ket{\psi}\Vert^2
+\end{align*}
+We can therefore derive our desired conclusion:
+\begin{equation*}
+\E_{\bx, \by} \sum_{a, b} \Vert (C_b^{\by} A_a^{\bx} - C_b^{\by} B_a^{\bx}) \ket{\psi} \Vert^2
+\leq \E_{\bx, \by} \sum_{a} \Vert (A_a^{\bx} - B_a^{\bx}) \ket{\psi} \Vert^2
+= \delta.\qedhere
+\end{equation*}
+\end{proof}
+
+\begin{fact}\label{fact:swap-dists}
+Let $\calD, \calD'$ be two distributions such that $d_{\mathrm{TV}}(\calD, \calD') \leq \epsilon$.
+Let $\{A_a^x\}$ and $\{B_a^x\}$ be measurements,
+and suppose $A_a^x \approx_\delta B_a^x$ with respect to~$\calD$. Then $A_a^x \approx_{\delta + \epsilon} B_a^x$ with respect to~$\calD'$.
+\end{fact}
+\begin{proof}
+By the definition of total variation distance,
+for any set of numbers $\{\nu_x\}$ satisfying $0 \leq \nu_x \leq c$,
+the expectations under the two distributions are similar:
+\begin{equation*}
+|\E_{\bx \sim \calD} [\nu_\bx] - \E_{\bx \sim \calD'}[\nu_{\bx}]| \leq c \cdot \epsilon.
+\end{equation*}
+We will take for our numbers $\nu_x = \sum_a \Vert (A_{a}^{x} - B_{a}^{x} ) \ket{\psi}\Vert^2$,
+which is always less than~$4$ by \Cref{fact:easy-bound}.
+As a result,
+\begin{equation*}
+\E_{\bx \sim \calD'} \nu_{\bx} \leq \E_{\bx \sim \calD} \nu_{\bx} + 4 \eps \leq \delta + 4 \eps.
+\end{equation*}
+This is $O(\delta + \epsilon)$, which proves the fact.
+\end{proof}
+
+\begin{fact}\label{fact:the-ol-state-y-swaperoonie}
+Suppose $A_a^x \approx_{\delta} B_a^x$ on state $\ket{\psi}$, and suppose $\Vert \ket{\psi} - \ket{\overline{\psi}} \Vert^2 \leq \epsilon$.
+Then $A_a^x \approx_{\delta+\epsilon} B_a^x$ on state $\ket{\overline{\psi}}$.
+\end{fact}
+\begin{proof}
+Applying \Cref{fact:obvious-vector-fact} to $(A_{a}^{x} - B_{a}^{x} ) \ket{\psi}$ and $(A_{a}^{x} - B_{a}^{x} ) (\ket{\overline{\psi}} - \ket{\psi})$,
+\begin{equation*}
+\E_{\bx \sim \calD} \sum_a \Vert (A_{a}^{\bx} - B_{a}^{\bx} ) \ket{\overline{\psi}}\Vert^2
+\leq \E_{\bx \sim \calD} \sum_a \Vert (A_{a}^{\bx} - B_{a}^{\bx} ) \ket{\psi}\Vert^2 + \E_{\bx \sim \calD} \sum_a \Vert (A_{a}^{\bx} - B_{a}^{\bx} ) (\ket{\overline{\psi}}-\ket{\psi})\Vert^2.
+\end{equation*}
+The first of these is bounded by $O(\delta)$ by the assumption, and the second of these is bounded by $4\epsilon$ by the assumption and \Cref{fact:easy-bound}.
+\end{proof}
+
+\begin{fact}\label{fact:close-on-marginal}
+Suppose $A_a^{x_1} \approx_{\delta} B_a^{x_1}$ with respect to a distribution $\calD_{\mathrm{margin}}$ on $x_1$.
+Let $\calD$ be a distribution on $(x_1, x_2)$ such that the marginal distribution on~$x_1$ is $\calD_{\mathrm{margin}}$.
+Then $A_a^{x_1} \approx_{\delta} B_a^{x_1}$ with respect to~$\calD$.
+\end{fact}
+\begin{proof}
+This is a simple calculation involving \Cref{not:marginalize}.
+\end{proof}
+
+\begin{fact}\label{fact:average-over-dists}
+Let $k$ be a constant, and consider distributions over questions $\calD_1, \ldots, \calD_k$.
+Let $\calD$ be a mixture of these distributions,
+meaning that there is a probability distribution $p = (p_1, \ldots, p_k)$
+such that a draw from $\calD$ can be simulated as follows: draw $\bi \sim p$ and output $\bx$ sampled from $\calD_{\bi}$.
+Suppose $A^x_a \approx_{\delta} B^{x}_a$ with respect to $\calD_i$, for all $i \in [k]$.
+Then $A^x_a \approx_{\delta} B^{x}_a$ with respect to $\calD$.
+\end{fact}
+\begin{proof}
+By definition, for each $i \in [k]$ there is some constant $C_i$ such that 
+\begin{equation*}
+\E_{\bx \sim \calD_i} \sum_{a} \Vert (A^{\bx}_a - B^{\bx}_b) \ket{\psi} \Vert^2 \leq C_k \cdot \delta.
+\end{equation*}
+Then we can bound the mixture with
+\begin{equation*}
+\E_{\bx \sim \calD} \sum_{a} \Vert (A^{\bx}_a - B^{\bx}_b) \ket{\psi} \Vert^2
+= \E_{\bi \sim p} \E_{\bx \sim \calD_{\bi}} \sum_{a} \Vert (A^{\bx}_a - B^{\bx}_b) \ket{\psi} \Vert^2
+\leq \E_{\bi \sim p} C_{\bi} \cdot \delta \leq \max_{i}\{C_i\} \cdot \delta = O(\delta).\qedhere
+\end{equation*}
+\end{proof}
+
+\begin{fact}\label{fact:sub-zero}
+Suppose $\{A^x_a\}$ is a projective measurement and $\{B^x_a\}$ is a set of matrices such that
+each~$B^x_a$ is positive semidefinite
+and $\sum_{a}B^x_a \preceq I$.
+Define $C^x_a$ such that for each~$x$, there exists an~$a$ such that $C^x_a := B^x_a + (I - \sum_{a'} B^x_{a'})$
+and for all other~$a' \neq a$, $C^x_{a'} := B^x_{a'}$.
+Thus, $C^x$ is a POVM for each~$x$.
+If $A^x_a \approx_{\eps} B^x_a$ then $A^x_a \approx_{\eps^{1/2}} C^x_a$.
+\end{fact}
+\begin{proof}
+By \Cref{fact:obvious-vector-fact},
+\begin{equation*}
+\E_{\bx} \sum_a \Vert (A^{\bx}_a - C^{\bx}_a) \ket{\psi} \Vert^2
+\leq 2\E_{\bx} \sum_a \Vert (A^{\bx}_a - B^{\bx}_a) \ket{\psi} \Vert^2 + 2 \E_{\bx}\Vert (I - \sum_a B^{\bx}_a) \ket{\psi}\Vert^2.
+\end{equation*}
+The first of these terms we can bound by $O(\eps)$.  As for the second, 
+\begin{multline*}
+\E_{\bx}\Vert (I - \sum_a B^{\bx}_a) \ket{\psi}\Vert^2
+= \E_{\bx} \bra{\psi} (I-\sum_a B^{\bx}_a)^2 \ket{\psi}
+\leq \E_{\bx} \bra{\psi} (I-\sum_a B^{\bx}_a) \ket{\psi}\\
+= 1- \E_{\bx} \sum_a\bra{\psi}  B^{\bx}_a \ket{\psi}
+\leq1- \E_{\bx} \sum_a\bra{\psi}  (B^{\bx}_a)^2 \ket{\psi}.
+\end{multline*}
+Now, we write $1 = \E_{\bx} \sum_a \bra{\psi} (A^{\bx}_a)^2 \ket{\psi}$,
+which holds because~$A$ is a projective measurement.
+We bound the result as follows.
+\begin{multline*}
+\E_{\bx} \sum_a \bra{\psi} ((A^{\bx}_a)^2  - (B^{\bx}_a)^2)\ket{\psi}
+= \Re\left(\E_{\bx} \sum_a \bra{\psi} (A^{\bx}_a  + B^{\bx}_a)(A^{\bx}_a - B^{\bx}_a)\ket{\psi}\right)\\
+\leq \E_{\bx} \sqrt{\sum_a \Vert (A^{\bx}_a + B^{\bx}_a) \ket{\psi}\Vert^2}
+	\cdot \sqrt{\sum_a \Vert (A^{\bx}_a - B^{\bx}_a)\ket{\psi} \Vert^2}.
+\end{multline*}
+For each~$\bx$,
+we can bound the first square root by $O(1)$
+due to \Cref{fact:obvious-vector-fact} and \Cref{fact:measurement-sub-measurement-switcheroo}.
+Having done so, we can move the expectation into the second square root by Jensen's inequality.
+The result is $O(\eps^{1/2})$ by assumption. This proves the fact.
+\end{proof}
+
+\subsubsection{Data processing}
+
+In this section, we show a simple data processing inequality for the ``$\consistency_\delta$" distance.
+We also observe that one does \emph{not} hold for the ``$\approx_\delta$" distance.
+
+\begin{fact}\label{fact:specialize-the-simeq}
+Suppose that $A^x_a \otimes I_{\reg{Bob}} \consistency_\delta I_{\reg{Alice}} \otimes B^x_a$.
+Then $A^x_{[f(a) = b]} \otimes I_{\reg{Bob}} \consistency_\delta I_{\reg{Alice}} \otimes B^x_{[f(a) = b]}$.
+\end{fact}
+\begin{proof}
+Given question~$\bx$, if Alice and Bob return~$\ba$ and~$\ba'$ in which $\ba = \ba'$, then $f(\ba) = f(\ba')$.
+As a result, applying~$f$ to their answers cannot decrease the probability they agree.
+\end{proof}
+
+\begin{remark}
+We note that the same fact is \emph{not} true for the ``$\approx_\delta$" distance.
+Consider answers of the form $a = (b, i)$, where $b \in \{0, 1\}$ and $i \in [m]$.
+Suppose $A^x_{b, i} = I/(2m)$ for all~$a$, whereas $B^x_{0, i} = I/m$ and $B^x_{1, i} = 0$ for all~$i$.
+Consider the function $f(b, i) = b$.
+It can be checked that in this case, $A^x_a \otimes I_{\reg{Bob}} \approx_{1/2m} I_{\reg{Alice}} \otimes B^x_a$
+but $A^x_{[f(a) = b]} \otimes I_{\reg{Bob}} \approx_{1/2} I_{\reg{Alice}} \otimes B^x_{[f(a) = b]}$.
+\end{remark}
+
+\subsubsection{Triangle inequalities}
+
+In this section, we give two triangle inequalities. Our first is for the state-dependent distance.
+
+\begin{fact}[Triangle inequality]\label{fact:triangle}
+Suppose $A_a^x \approx_\delta B_a^x$ and $B_a^x \approx_\epsilon C_a^x$. Then $A_a^x \approx_{\delta + \epsilon} C_a^x$.
+\end{fact}
+\begin{proof}
+Applying \Cref{fact:obvious-vector-fact} to $(A_{a}^{x} - B_{a}^{x} ) \ket{\psi}$ and $(B_{a}^{x} - C_{a}^{x} ) \ket{\psi}$,
+\begin{align*}
+\E_{\bx \sim \calD} \sum_a \Vert (A_{a}^{\bx} - C_{a}^{\bx} ) \ket{\psi}\Vert^2
+&\leq 2 \E_{\bx \sim \calD} \sum_a \Vert (A_{a}^{\bx} - B_{a}^{\bx} ) \ket{\psi}\Vert^2 + 2 \E_{\bx \sim \calD} \sum_a \Vert (B_{a}^{\bx} - C_{a}^{\bx} ) \ket{\psi}\Vert^2\\
+&\leq 2 (\delta + \epsilon).\qedhere
+\end{align*}
+\end{proof}
+
+Note that this does \emph{not} show that if
+\begin{equation*}
+A^x_a \otimes I_{\reg{Bob}} \approx_\delta I_{\reg{Alice}} \otimes B^x_a
+\quad\text{and}\quad
+B^x_a \otimes I_{\reg{Bob}} \approx_\delta I_{\reg{Alice}} \otimes C^x_a
+\end{equation*}
+then $A^x_a \otimes I_{\reg{Bob}} \approx_\delta I_{\reg{Alice}} \otimes C^x_a$.
+This would only follow if, for example, we also knew that $D^x_a \otimes I_{\reg{Bob}} \approx_\delta I_{\reg{Alice}} \otimes D^x_a$,
+for $D$ equal to one of~$A$, $B$, or $C$.
+We do, however, always have the following triangle-like inequalities.
+
+\begin{fact}[Triangle-like inequalities]\label{fact:triangle-like}
+The following two facts are true.
+\begin{enumerate}
+\item Suppose $A^x_a \otimes I_{\reg{Bob}} \consistency_\delta I_{\reg{Alice}} \otimes B^x_a$,
+	$B^x_a \otimes I_{\reg{Bob}} \consistency_\delta I_{\reg{Alice}} \otimes C^x_a$,
+	and $C^x_a \otimes I_{\reg{Bob}} \consistency_\delta I_{\reg{Alice}} \otimes D^x_a$.
+	Then $A^x_a \otimes I_{\reg{Bob}} \consistency_\delta I_{\reg{Alice}} \otimes D^x_a$.
+\item Suppose $A^x_a \otimes I_{\reg{Bob}} \approx_\delta I_{\reg{Alice}} \otimes B^x_a$,
+	$B^x_a \otimes I_{\reg{Bob}} \approx_\delta I_{\reg{Alice}} \otimes C^x_a$,
+	and $C^x_a \otimes I_{\reg{Bob}} \approx_\delta I_{\reg{Alice}} \otimes D^x_a$.
+	Then $A^x_a \otimes I_{\reg{Bob}} \approx_\delta I_{\reg{Alice}} \otimes D^x_a$.
+\end{enumerate}
+\end{fact}
+
+Before proving this, we need the following fact from linear algebra.
+
+\begin{fact}\label{fact:fun-matrix-fact}
+Suppose $0 \preceq A, B, C, D \preceq I$.  Then
+\begin{equation*}
+1- \bra{\psi} A \otimes D \ket{\psi}
+\leq (1 - \bra{\psi} A \otimes B \ket{\psi}) + (1 - \bra{\psi} B \otimes C \ket{\psi}) + (1 - \bra{\psi} C \otimes D \ket{\psi}).
+\end{equation*}
+\end{fact}
+\begin{proof}
+Rearranging, we want to show that
+\begin{equation*}
+\bra{\psi} A \otimes B \ket{\psi} + \bra{\psi} B \otimes C \ket{\psi} + \bra{\psi} C \otimes D \ket{\psi} - \bra{\psi} A \otimes D \ket{\psi}
+\leq 2.
+\end{equation*}
+Or, equivalently
+\begin{equation*}
+\tr(\ket{\psi}\bra{\psi} \cdot (A \otimes B + B \otimes C + C \otimes D - A \otimes D)) \leq 2.
+\end{equation*}
+The left-hand side is at most the maximum eigenvalue of $A \otimes B + B \otimes C + C \otimes D - A \otimes D$.
+To bound this maximum eigenvalue, we note that $A \otimes B \preceq A \otimes I$, $B \otimes C \preceq I \otimes I$, and $C \otimes D \preceq I \otimes D$.
+As a result, 
+\begin{equation*}
+A \otimes B + B \otimes C + C \otimes D - A \otimes D
+\preceq A \otimes I + I \otimes I + I \otimes D - A \otimes D.
+\end{equation*}
+Next, $I \otimes D - A \otimes D = (I - A) \otimes D \preceq (I-A) \otimes I$ because $A \preceq I$.
+Thus,
+\begin{equation*}
+A \otimes I + I \otimes I + I \otimes D - A \otimes D
+\preceq A \otimes I + I \otimes I  + (I-A) \otimes I = 2 \cdot I \otimes I.
+\end{equation*}
+But the maximum eigenvalue of this is~$2$.
+\end{proof}
+
+
+Now we prove \Cref{fact:triangle-like}.
+\begin{proof}[Proof of \Cref{fact:triangle-like}]
+The second fact follows from several applications of \Cref{fact:triangle}.
+As for the first fact, we can write the consistency as
+\begin{equation*}
+\E_\bx \sum_a ( 1- \bra{\psi} A^{\bx}_a \otimes D^{\bx}_a \ket{\psi})
+\end{equation*}
+Applying \Cref{fact:fun-matrix-fact}, this is at most
+\begin{equation*}
+\E_\bx \sum_a (1 - \bra{\psi} A^\bx_a \otimes B^\bx_a \ket{\psi}) + (1 - \bra{\psi} B^\bx_a \otimes C^\bx_a \ket{\psi}) + (1 - \bra{\psi} C^\bx_a \otimes D^\bx_a \ket{\psi})
+\end{equation*}
+Averaging over questions and summing over answers, each of these terms is at most~$\delta$, by assumption.
+\end{proof}
+
+\subsubsection{Close strategies have close game values}
+
+In this section, we will show that two strategies which are close in state-dependent distance are also close in value for any game~$\game$.
+We note crucially that one of the two strategies must be \emph{projective} to apply this fact.
+
+\begin{fact}\label{fact:approx-delta-generalized-game-value}
+Let $\calD$ be a distribution on questions~$x$, and for each~$x$ let $\mathrm{acc}(x)$ be a set of ``accepting" answers.
+Given a state~$\psi$ and a strategy $\{A^x_a\}$ define
+\begin{equation*}
+\mathrm{val}(A) = \E_{\bx \sim \calD} \sum_{a \in \mathrm{acc}(x)} \bra{\psi} A^{\bx}_a \ket{\psi}.
+\end{equation*}
+Suppose $\{A^x_a\}$ and $\{B^x_a\}$ are two strategies such that $A^x_a \approx_\delta B^x_a$ on state~$\psi$ and distribution~$\calD$.
+Suppose further that either~$A$ or~$B$ is a projective measurement (and the other is a POVM measurement).
+Then
+\begin{equation*}
+\mathrm{val}(A) - O(\delta^{1/2}) \leq \mathrm{val}(B) \leq \mathrm{val}(A) + O(\delta^{1/2}).
+\end{equation*}
+\end{fact}
+\begin{proof}
+Assume without loss of generality that~$A$ is a projective measurement and~$B$ is a POVM measurement.
+We will prove the fact by showing the following stronger statement:
+for each~$x$, let~$S(x)$ be any set of answers~$a$,
+and define
+\begin{equation*}
+\mathrm{val}(A,S) := \E_\bx \sum_{a \in S(x)} \bra{\psi} A^{\bx}_a\ket{\psi}.
+\end{equation*}
+Then $\mathrm{val}(A,S) \leq \mathrm{val}(B,S) + O(\delta^{1/2})$.
+By taking $S(x) := \mathrm{acc}(x)$ this implies the lower bound $\mathrm{val}(A) - O(\delta^{1/2}) \leq \mathrm{val}(B)$,
+and by taking $S(x) := \mathrm{rej}(x)$, defined to be the set of answers \emph{not} in $\mathrm{acc}(x)$,
+then this implies the upper bound $\mathrm{val}(B) \leq \mathrm{val}(A) + O(\delta^{1/2})$.
+
+If we write $\ket{u_a^x} = A_{a}^{x}  \ket{\psi}$
+	and $\ket{w_a^x} = (B_{a}^{x} - A_{a}^{x}) \ket{\psi}$, then
+\begin{equation*}
+\Vert B_{a}^{x} \ket{\psi} \Vert^2
+= \Vert \ket{u_a^x} + \ket{v_a^x} \Vert^2
+ = \Vert\ket{u_a^x}\Vert^2 + \Vert\ket{w_a^x}\Vert^2
+ + \braket{u_a^x \mid w_a^x} + \braket{w_a^x \mid u_a^x}.
+\end{equation*}
+By definition,
+\begin{align*}
+\mathrm{val}(B)
+& = \E_{\bx} \sum_{a\in S(\bx)} \bra{\psi} B_{a}^{\bx} \ket{\psi}\\
+& \geq \E_{\bx} \sum_{a\in S(\bx)} \bra{\psi} (B_{a}^{\bx})^2 \ket{\psi}\tag{because~$B$ is a POVM}\\
+& = \E_{\bx} \sum_{a\in S(\bx)}\Vert B_{a}^{\bx} \ket{\psi} \Vert^2\\
+& = \E_{\bx} \sum_{a\in S(\bx)} \Vert\ket{u_a^{\bx}}\Vert^2 + \Vert\ket{w_a^{\bx}}\Vert^2
+		 + \braket{u_a^{\bx} \mid w_a^{\bx}} + \braket{w_a^{\bx} \mid u_a^{\bx}}.
+\end{align*}
+Averaging over questions and summing over answers, the first term is exactly $\mathrm{val}(A)$ because~$A$ is projective.
+The second term is always nonnegative, so we lower bound it by zero.
+As for the last two terms,
+\begin{equation}\label{eq:our-powers-combined--wind!}
+\braket{u_a^x \mid w_a^x} + \braket{w_a^x \mid u_a^x}
+\geq - 2 \cdot |\braket{u_a^x \mid w_a^x}| 
+\geq -2 \cdot \Vert u_a^x \Vert \cdot \Vert w_a^x \Vert.
+\end{equation}
+Applying Cauchy-Schwarz,
+Jensen's inequality,
+and \Cref{fact:measurement-sub-measurement-switcheroo},
+\begin{equation}\label{eq:our-powers-combined--heart!}
+\E_{\bx} \sum_{a \in S(\bx)} \Vert u_a^{\bx} \Vert \cdot \Vert w_a^{\bx} \Vert
+\leq \E_{\bx} \sqrt{\sum_{a \in S(\bx)} \Vert u_a^{\bx} \Vert^2 \cdot  \sum_{a \in S(\bx)}\Vert w_a^{\bx}\Vert^2 }
+\leq \sqrt{\E_{\bx} \sum_{a \in S(\bx)}\Vert w_a^{\bx}\Vert^2 }.
+\end{equation}
+But the expectation inside the root is at most $O(\delta)$ because $A^{x}_a \approx_{\delta} B^{x}_a$.
+Combining \Cref{eq:our-powers-combined--wind!,eq:our-powers-combined--heart!} completes the proof.
+\end{proof}
+
+We will typically, though not always,
+apply \Cref{fact:approx-delta-generalized-game-value} in the following special case.
+
+\begin{fact}\label{fact:approx-delta-game-value}
+Let $\game$ be a game whose questions $(\bx_1, \bx_2) \sim \game$ have marginal distribution $\bx_1 \sim \calD$.
+Suppose $\{A_a^x\}$
+and $\{B_a^x\}$ are measurements such that
+$
+A_a^x  \otimes I \approx_\delta B_a^x \otimes I
+$
+on state $\psi$ and distribution~$\calD$.
+Consider the strategies $\calS_A = \{\psi, A\}$ and $\calS_B = \{\psi, B\}$.
+If either~$A$ or~$B$ is a projective measurement (and the other is a POVM measurement), then
+\begin{equation*}
+\valstrat{\game}{\calS_A} - O(\delta^{1/2}) \leq \valstrat{\game}{\calS_B} \leq \valstrat{\game}{\calS_A} + O(\delta^{1/2}).
+\end{equation*}
+\end{fact}
+\begin{proof}
+First, we observe that
+\begin{equation*}
+A^{x_1}_{a_1} \otimes A^{x_2}_{a_2}
+\approx_{\delta} A^{x_1}_{a_1} \otimes B^{x_2}_{a_2}
+\approx_{\delta} B^{x_1}_{a_1} \otimes B^{x_2}_{a_2}
+\end{equation*}
+by \Cref{fact:add-a-proj}.
+The result follows by applying \Cref{fact:approx-delta-game-value} with
+``$A$" set to $A^{x_1}_{a_1} \otimes A^{x_2}_{a_2}$,
+``$B$" set to $B^{x_1}_{a_1} \otimes B^{x_2}_{a_2}$,
+and ``$\calD$" set to the distribution on $(\bx_1, \bx_2)$.
+We note that ``$\mathrm{val}(A)$" there is equal to $\valstrat{\game}{\calS_A}$ here and
+``$\mathrm{val}(B)$" there is equal to $\valstrat{\game}{\calS_B}$ here.
+\end{proof}
+
+\subsubsection{Generating new measurements}
+
+In this section, we show how to combine multiple measurements into a single measurement by ``sandwiching" them together.
+
+\begin{fact}\label{fact:sandwich}
+Let $k \geq 0$ be a constant.
+Let $\{A^x_{a_1, \ldots, a_k}\}$ be a projective measurement.
+For each $1 \leq i \leq k$, let $\{(B_i)^x_{a_i}\}$ be a projective measurement, and suppose that
+\begin{equation}\label{eq:no-take-only-throw}
+(A^x_{a_i})_{\reg{Alice}} \otimes I_{\reg{Bob}} \simeq_{\delta} I_{\reg{Alice}} \otimes ((B_i)^x_{a_i})_{\reg{Bob}}.
+\end{equation}
+Define the POVM measurement $\{J^x_{g_1, \ldots, g_k}\}$ as
+\begin{equation*}
+J^x_{a_1, \ldots, a_k} := (B_k)^x_{a_k} \cdots (B_2)^x_{a_2} \cdot (B_1)^x_{a_1} \cdot (B_2)^x_{a_2} \cdots (B_k)^x_{a_k}.
+\end{equation*}
+Then
+\begin{equation*}
+(A^x_{a_1, \ldots, a_k})_{\reg{Alice}} \otimes I_{\reg{Bob}} \simeq_{\delta^{1/2}} I_{\reg{Alice}} \otimes (J^x_{a_1, \ldots, a_k})_{\reg{Bob}}.
+\end{equation*}
+\end{fact}
+\begin{proof}
+For each $1 \leq i \leq k$, 
+\Cref{eq:no-take-only-throw} implies that
+\begin{equation*}
+(A^x_{a_i})_{\reg{Alice}} \otimes I_{\reg{Bob}} \approx_{\delta} I_{\reg{Alice}} \otimes ((B_i)^x_{a_i})_{\reg{Bob}}.
+\end{equation*}
+Now, we repeatedly apply this using \Cref{fact:add-a-proj}:
+\begin{align*}
+(A^x_{a_1, \ldots, a_k})_{\reg{Alice}} \otimes I_{\reg{Bob}}
+& = (A^x_{a_k} \cdots A^x_{a_2} \cdot A^x_{a_1} \cdot A^x_{a_2} \cdots A^x_{a_{k}})_{\reg{Alice}} \otimes I_{\reg{Bob}}\\
+& \approx_{\delta} (A^x_{a_k} \cdots A^x_{a_2} \cdot A^x_{a_1} \cdot A^x_{a_2} \cdots A^x_{a_{k-1}})_{\reg{Alice}} \otimes ((B_k)^x_{a_k})_{\reg{Bob}}\\
+&\qquad\qquad\qquad \qquad \qquad \qquad \cdots\\
+& \approx_{\delta} I_{\reg{Alice}} \otimes ((B_k)^x_{a_k} \cdots (B_2)^x_{a_2} \cdot (B_1)^x_{a_1} \cdot (B_2)^x_{a_2} \cdots (B_k)^x_{a_k})_{\reg{Bob}}\\
+& = I_{\reg{Alice}} \otimes (J^x_{a_1, \ldots, a_k})_{\reg{Bob}}.
+\end{align*}
+The fact now follows from \Cref{fact:almost-agreement} and the fact that~$A$ is a projective measurement.
+\end{proof}
+
+Next, we extend \Cref{fact:sandwich} to the case of polynomial measurements (see \Cref{sec:classical-q-low-deg} below).
+These are structured measurements in which the prover returns the evaluation of a function sampled independently from their input.
+The goal is to retain this structure even after ``sandwiching" them together.
+
+\begin{fact}\label{fact:low-degree-sandwich}
+Let $k \geq 0$ be a constant.
+Let $\calD$ be a distribution on questions $x \in \calX$.
+For each $1 \leq i \leq k$, let $\calG_i$ be a set of functions $g_i : \calX \rightarrow \calR_i$.
+and let $\{G^i_g\}$ be a projective measurement with outcomes from this set.
+Suppose that the set $\calG_i$ has the following distance property:
+for any two nonequal $g_i, g_i' \in \calG_i$, the probability that $g_i(\bx) = g_i'(\bx)$, over a random $\bx \sim \calD$, is at most $\eps$.
+
+Let $\{A_{g_1, \ldots, g_k}\}$ be a projective measurement with outcomes $g_i \in \calF_i$.
+For each $1 \leq i \leq k$, suppose that
+\begin{equation}\label{eq:treat-yo-self}
+(A_{[g_i(x) = a_i]})_{\reg{Alice}} \otimes I_{\reg{Bob}} \simeq_{\delta} I_{\reg{Alice}} \otimes (G^i_{[g_i(x)=a_i]})_{\reg{Bob}}.
+\end{equation}
+Define the POVM measurement $\{J_{g_1, \ldots, g_k}\}$ as
+\begin{equation*}
+J_{g_1, \ldots, g_k} := G^k_{g_k} \cdots G^2_{g_2} \cdot G^1_{g_1} \cdot G^2_{g_2} \cdots G^k_{g_k}.
+\end{equation*}
+Then
+\begin{equation*}
+(A_{[g_1(x), \ldots, g_k(x) = a_1, \ldots, a_k]})_{\reg{Alice}} \otimes I_{\reg{Bob}} \simeq_{(\delta+\eps)^{1/2}} I_{\reg{Alice}} \otimes (J_{[g_1(x), \ldots, g_k(x) = a_1, \ldots, a_k]})_{\reg{Bob}}.
+\end{equation*}
+\end{fact}
+\begin{proof}
+Let $1 \leq i \leq k$.
+By~\Cref{eq:treat-yo-self},
+if Alice measures with~$A$, producing~$\bg_i$, and Bob measures with~$G^i$, producing~$\bg_i'$,
+then the probability that $\bg_i(\bx) \neq \bg_i'(\bx)$ is $O(\delta)$.
+Write $\eta$ for the probability that $\bg_i \neq \bg_i'$.
+Then we have the expression $\eta \cdot (1-\eps) \leq O(\delta)$ or, equivalently, $\eta \leq O(\delta/(1-\eps))$.
+When $\eps < 1/2$, this gives the bound $\eta \leq O(\delta)$, and when $\eps \geq 1/2$, we have the trivial bound $\eta \leq O(\eps)$.
+As a result, $\eta = O(\delta + \eps)$.
+
+In conclusion,
+\begin{equation*}
+(A_{g_i})_{\reg{Alice}} \otimes I_{\reg{Bob}} \simeq_{\delta + \eps} I_{\reg{Alice}} \otimes (G^i_{g_i})_{\reg{Bob}}.
+\end{equation*}
+We can now apply \Cref{fact:sandwich} to $A_{g_1, \ldots, g_k}$ and the $G^i_{g_i}$ measurements.
+It implies that
+\begin{equation*}
+(A_{g_1, \ldots, g_k})_{\reg{Alice}} \otimes I_{\reg{Bob}} \simeq_{(\delta+\eps)^{1/2}} I_{\reg{Alice}} \otimes (J_{g_1, \ldots, g_k})_{\reg{Bob}}.
+\end{equation*}
+The fact now follows from the data processing inequality \Cref{fact:specialize-the-simeq}.
+\end{proof}
+
+In our next fact, we show that \Cref{fact:low-degree-sandwich} holds even when we drop the structured assumption on the~$A$ matrix.
+The tradeoff is that we must now assume that the~$k$ different measurements act on different parts of the input string.
+In this case, the distance condition becomes slightly more cumbersome to state.
+
+\begin{fact}\label{fact:low-degree-sandwich-on-steroids}
+Let $k \geq 0$ be a constant.
+Let $\calD$ be a distribution on questions $(x, y_1, \ldots, y_k)$, where each $y_i \in \calY_i$.
+For each $1 \leq i \leq k$, let $\calG_i$ be a set of functions $g_i : \calY_i \rightarrow \calR_i$.
+and let $\{(G_i)^x_g\}$ be a projective measurement with outcomes from this set.
+(For the $i=1$ case, we also allow this measurement to be a POVM.)
+Suppose that the set $\calG_i$ has the following distance property:
+fix a question $z = (x, y_1, \ldots, y_{i-1}, y_{i+1}, \ldots, y_k)$, and let $\calD_z$ be the distribution on~$y_i$ conditioned on the other outcomes~$z$.
+Then for any two nonequal $g_i, g_i' \in \calG_i$, the probability that $g_i(\by_i) = g_i'(\by_i)$, over a random $\by_i \sim \calD_z$, is at most $\eps$.
+
+Let $\{A^{x, y_1, \ldots, y_k}_{a_1, \ldots, a_k} \}$ be a projective measurement with outcomes $g_i \in \calF_i$.
+For each $1 \leq i \leq k$, suppose that
+\begin{equation}\label{eq:gonna-compare-like-a-pear}
+(A^{x, y_1, \ldots, y_k}_{a_i})_{\reg{Alice}} \otimes I_{\reg{Bob}} \simeq_{\delta} I_{\reg{Alice}} \otimes ((G_i)^x_{[g_i(y_i)=a_i]})_{\reg{Bob}}.
+\end{equation}
+Suppose also that
+\begin{equation}\label{eq:spend-some-time-reflecting}
+(A^{x, y_1, \ldots, y_k}_{a_1, \ldots, a_k})_{\reg{Alice}} \otimes I_{\reg{Bob}}
+	\simeq_{\delta} I_{\reg{Alice}} \otimes (A^{x, y_1, \ldots, y_k}_{a_1, \ldots, a_k})_{\reg{Bob}}.
+\end{equation}
+Define the POVM measurement $\{J^x_{g_1, \ldots, g_k}\}$ as
+\begin{equation*}
+J^x_{g_1, \ldots, g_k} := (G_k)^x_{g_k} \cdots (G_2)^x_{g_2} \cdot (G_1)^x_{g_1} \cdot (G_2)^x_{g_2} \cdots (G_k)^x_{g_k}.
+\end{equation*}
+Then
+\begin{equation*}
+(A^{x, y_1, \ldots, y_k}_{a_1, \ldots, a_k})_{\reg{Alice}} \otimes I_{\reg{Bob}}
+	\simeq_{\poly(\delta, \eps)} I_{\reg{Alice}} \otimes (J^x_{[g_1(y_1), \ldots, g_k(y_k) = a_1, \ldots, a_k]})_{\reg{Bob}}.
+\end{equation*}
+\end{fact}
+\begin{proof}
+First, we show how to reduce this to the $k = 2$ case. Then we prove it for that case.
+Assume the fact holds when $k = 2$.  Define the POVM measurement $\{(J_i)^x_{g_1, \ldots, g_i}\}$ as
+\begin{equation*}
+(J_i)^x_{g_1, \ldots, g_i} := (G_i)^x_{g_i} \cdots (G_2)^x_{g_2} \cdot (G_1)^x_{g_1} \cdot (G_2)^x_{g_2} \cdots (G_i)^x_{g_i}.
+\end{equation*}
+We will show by induction that 
+\begin{equation}\label{eq:hi-i-work-in-graphics-but-not-that-graphics}
+(A^{x, y_1, \ldots, y_k}_{a_1, \ldots, a_i})_{\reg{Alice}} \otimes I_{\reg{Bob}}
+	\simeq_{\poly(\delta, \eps)} I_{\reg{Alice}} \otimes ((J_i)^x_{[g_1(y_1), \ldots, g_i(y_i) = a_1, \ldots, a_i]})_{\reg{Bob}},
+\end{equation}
+the base case being trivial. Assume this holds for~$i$.
+We apply the $k = 2$ case as follows:
+consider the question tuple $(y_1, \ldots, y_i)$ as a single question
+and consider functions of the form $(y_1, \ldots, y_i) \mapsto (g_1(y_1), \ldots, g_i(y_i))$.
+Then the first POVM measurement is $J_i$, which satisfies \Cref{eq:gonna-compare-like-a-pear} due to \Cref{eq:hi-i-work-in-graphics-but-not-that-graphics}.
+The second measurement is the projector $G_{i+1}$.
+Then the $k = 2$ case immediately implies the $i+1$ case of \Cref{eq:hi-i-work-in-graphics-but-not-that-graphics}.
+
+Now we prove the $k = 2$ case.
+Our goal is to show that
+\begin{equation}\label{eq:food-rakes}
+\E_{\bx, \by_1, \by_2} \sum_{a_1, g_2} \bra{\psi} (A^{\bx, \by_1, \by_2}_{a_1, g_2(\by_2)})_{\reg{Alice}}
+\otimes ((G_2)^{\bx}_{g_2} \cdot (G_1)^{\bx}_{[g_1(\by_1) = a_1]} \cdot (G_2)^{\bx}_{g_2})_{\reg{Bob}} \ket{\psi}
+\end{equation}
+is at least $1- \poly(\delta, \eps)$.
+We will do this by showing that
+\begin{equation}\label{eq:what-a-johnnie-wants}
+((G_1)^x_{[g_1(y_1)=a_1]} \cdot (G_2)^x_{g_2})_{\reg{Alice}} \otimes I_{\reg{Bob}}
+\approx_{\poly(\delta, \eps)} ((G_2)^x_{g_2} \cdot (G_1)^x_{[g_1(y_1)=a_1]})_{\reg{Alice}} \otimes I_{\reg{Bob}}.
+\end{equation}
+is at most $\poly(\delta, \eps)$.
+To see that this is sufficient, note that the related expression
+\begin{equation*}
+\E_{\bx, \by_1, \by_2} \sum_{a_1, g_2} \bra{\psi} (A^{\bx, \by_1, \by_2}_{a_1, g_2(\by_2)})_{\reg{Alice}}
+\otimes ((G_2)^{\bx}_{g_2} \cdot (G_2)^{\bx}_{g_2} \cdot (G_1)^{\bx}_{[g_1(\by_1) = a_1]})_{\reg{Bob}} \ket{\psi}
+\end{equation*}
+is exactly equal to~$1$ because $G_2$ is a projector.
+Taking the difference between this and \Cref{eq:food-rakes}, we get
+\begin{equation*}
+\E_{\bx, \by_1, \by_2} \sum_{a_1, g_2} \bra{\psi} (A^{\bx, \by_1, \by_2}_{a_1, g_2(\by_2)})_{\reg{Alice}}
+\otimes ((G_2)^{\bx}_{g_2} \cdot ((G_1)^{\bx}_{[g_1(\by_1) = a_1]} \cdot (G_2)^{\bx}_{g_2}- (G_2)^{\bx}_{g_2} \cdot (G_1)^{\bx}_{[g_1(\by_1) = a_1]}))_{\reg{Bob}} \ket{\psi}.
+\end{equation*}
+Cauchy-Schwarz allows us to bound this by
+\begin{multline*}
+\leq \E_{\bx, \by_1, \by_2} \sqrt{ \sum_{a_1, g_2}\Vert (A^{\bx, \by_1, \by_2}_{a_1, g_2(\by_2)})_{\reg{Alice}} \otimes ((G_2)^{\bx}_{g_2})_{\reg{Bob}} \ket{\psi} \Vert^2}\\
+	\cdot \sqrt{ \sum_{a_1, g_2}\Vert I_{\reg{Alice}} \otimes ((G_1)^{\bx}_{[g_1(\by_1) = a_1]} \cdot (G_2)^{\bx}_{g_2}- (G_2)^{\bx}_{g_2} \cdot (G_1)^{\bx}_{[g_1(\by_1) = a_1]})_{\reg{Bob}} \ket{\psi} \Vert^2}.
+\end{multline*}
+The expression inside the first square root is always at most~$1$.
+This allows us to bring the expectation into the second square root by Jensen's inequality,
+and the resulting expression we can bound due to \Cref{eq:what-a-johnnie-wants}.
+
+Now we bound \Cref{eq:what-a-johnnie-wants}.
+Showing this is small is equivalent to showing
+\begin{equation*}
+\E_{\bx, \by_1, \by_2}
+\sum_{a_1, g_2}\Vert ((G_1)^{\bx}_{[g_1(\by_1) = a_1]}
+	\cdot (G_2)^{\bx}_{g_2}- (G_2)^{\bx}_{g_2} \cdot (G_1)^{\bx}_{[g_1(\by_1) = a_1]})_{\reg{Alice}} \otimes I_{\reg{Bob}} \ket{\psi} \Vert^2
+\end{equation*}
+is small.  Expanding this, we get
+\begin{align}
+\E_{\bx, \by_1, \by_2} \sum_{a_1, g_2} \bra{\psi}\big(
+	&(G_2)^{\bx}_{g_2} \cdot (G_1)^{\bx}_{[g_1(\by_1) = a_1]} \cdot (G_1)^{\bx}_{[g_1(\by_1) = a_1]} \cdot (G_2)^{\bx}_{g_2} \otimes I_{\reg{Bob}}\nonumber\\
+	+ &(G_1)^{\bx}_{[g_1(\by_1) = a_1]} \cdot (G_2)^{\bx}_{g_2} \cdot (G_2)^{\bx}_{g_2} \cdot (G_1)^{\bx}_{[g_1(\by_1) = a_1]} \otimes I_{\reg{Bob}}\nonumber\\
+	- &(G_2)^{\bx}_{g_2} \cdot (G_1)^{\bx}_{[g_1(\by_1) = a_1]} \cdot (G_2)^{\bx}_{g_2} \cdot (G_1)^{\bx}_{[g_1(\by_1) = a_1]} \otimes I_{\reg{Bob}}\nonumber\\
+	- &(G_1)^{\bx}_{[g_1(\by_1) = a_1]} \cdot (G_2)^{\bx}_{g_2} \cdot (G_1)^{\bx}_{[g_1(\by_1) = a_1]} \cdot (G_2)^{\bx}_{g_2} \otimes I_{\reg{Bob}} \big)\ket{\psi}.\label{eq:burger-king}
+\end{align}
+We \emph{do} know that $G_1$ and $G_2$ satisfy some form of commutation.
+Because they satisfy \Cref{eq:gonna-compare-like-a-pear} and~$A$ is a projector, 
+we know that
+\begin{equation*}
+((G_1)^x_{[g_1(y_1)=a_1]} \cdot (G_2)^x_{[g_2(y_2) = a_2]})_{\reg{Alice}} \otimes I_{\reg{Bob}}
+\approx_{\delta} ((G_2)^x_{[g_2(y_2) = a_2]} \cdot (G_1)^x_{[g_1(y_1)=a_1]})_{\reg{Alice}} \otimes I_{\reg{Bob}}.
+\end{equation*}
+Expanding this as above, we can bound the following expression by~$\delta$:
+\begin{align}
+\E_{\bx, \by_1, \by_2} \sum_{a_1, a_2} \bra{\psi}\big(
+	&(G_2)^\bx_{[g_2(\by_2) = a_2]} \cdot (G_1)^{\bx}_{[g_1(\by_1) = a_1]} \cdot (G_1)^{\bx}_{[g_1(\by_1) = a_1]} \cdot (G_2)^\bx_{[g_2(\by_2) = a_2]} \otimes I_{\reg{Bob}}\nonumber\\
+	+ &(G_1)^{\bx}_{[g_1(\by_1) = a_1]} \cdot (G_2)^\bx_{[g_2(\by_2) = a_2]} \cdot (G_2)^\bx_{[g_2(\by_2) = a_2]} \cdot (G_1)^{\bx}_{[g_1(\by_1) = a_1]} \otimes I_{\reg{Bob}}\nonumber\\
+	- &(G_2)^\bx_{[g_2(\by_2) = a_2]} \cdot (G_1)^{\bx}_{[g_1(\by_1) = a_1]} \cdot (G_2)^\bx_{[g_2(\by_2) = a_2]} \cdot (G_1)^{\bx}_{[g_1(\by_1) = a_1]} \otimes I_{\reg{Bob}}\nonumber\\
+	- &(G_1)^{\bx}_{[g_1(\by_1) = a_1]} \cdot (G_2)^\bx_{[g_2(\by_2) = a_2]} \cdot (G_1)^{\bx}_{[g_1(\by_1) = a_1]} \cdot (G_2)^\bx_{[g_2(\by_2) = a_2]}\otimes I_{\reg{Bob}} \big)\ket{\psi}.\label{eq:what-to-do-with-this}
+\end{align}
+We can therefore show \Cref{eq:burger-king} is small by
+upper-bounding (\Cref{eq:burger-king}$ - $\Cref{eq:what-to-do-with-this}).
+There are four terms in this difference;
+write $\Delta_i$ for the $i$-th term in \Cref{eq:burger-king} minus the $i$-th term in \Cref{eq:what-to-do-with-this}.
+We will bound each $\Delta_i$ one-by-one.
+
+The first term in the difference, $\Delta_1$, is
+\begin{multline*}
+\E_{\bx, \by_1, \by_2} \sum_{a_1}\sum_{g_2} \bra{\psi}
+	(G_2)^{\bx}_{g_2}
+	\cdot (G_1)^{\bx}_{[g_1(\by_1) = a_1]} \cdot (G_1)^{\bx}_{[g_1(\by_1) = a_1]} \cdot (G_2)^{\bx}_{g_2} \otimes I_{\reg{Bob}} \ket{\psi}\\
+-\E_{\bx, \by_1, \by_2} \sum_{a_1, a_2} \bra{\psi}
+	(G_2)^{\bx}_{[g_2(\by_2) = a_2]}
+	\cdot (G_1)^{\bx}_{[g_1(\by_1) = a_1]} \cdot (G_1)^{\bx}_{[g_1(\by_1) = a_1]} \cdot (G_2)^{\bx}_{[g_2(\by_2) = a_2]} \otimes I_{\reg{Bob}} \ket{\psi}.
+\end{multline*}
+The first of these terms is at most~$1$, and so we just have to show that the second term is close to~$1$ as well.
+Note that by repeated applications of \Cref{eq:gonna-compare-like-a-pear}, we have that 
+\begin{equation*}
+(G_2)^{\bx}_{[g_2(\by_2) = a_2]}
+	\cdot (G_1)^{\bx}_{[g_1(\by_1) = a_1]} \cdot (G_1)^{\bx}_{[g_1(\by_1) = a_1]} \cdot (G_2)^{\bx}_{[g_2(\by_2) = a_2]} \otimes I_{\reg{Bob}}
+	\approx_{\delta} I_{\reg{Alice}} \otimes A^{\bx, \by_1, \by_2}_{a_1, a_2}.
+\end{equation*}
+But then by \Cref{fact:approx-delta-generalized-game-value}, the expression we want to lower-bound is $O(\delta^{1/2})$-close to
+\begin{equation*}
+\E_{\bx, \by_1, \by_2} \sum_{a_1, a_2} \bra{\psi} I_{\reg{Alice}} \otimes A^{\bx, \by_1, \by_2}_{a_1, a_2} \ket{\psi},
+\end{equation*}
+which is exactly~$1$. As a result, $\Delta_1$ is at most $O(\delta^{1/2})$.
+
+The second term in the difference, $\Delta_2$, can be written as
+\begin{equation*}
+-\E_{\bx, \by_1, \by_2} \sum_{a_1}\sum_{\substack{g_2\neq g_2',\\g_2(\by_2) = g_2'(\by_2)}} \bra{\psi}(
+	(G_1)^{\bx}_{[g_1(\by_1) = a_1]} \cdot (G_2)^{\bx}_{g_2} \cdot (G_2)^{\bx}_{g_2'} \cdot (G_1)^{\bx}_{[g_1(\by_1) = a_1]} \otimes I_{\reg{Bob}})\ket{\psi}.
+\end{equation*}
+This is zero because $G_2$ is a projector.
+
+The third and fourth terms in \Cref{eq:burger-king} are complex conjugates of each other,
+as are the third and fourth terms in \Cref{eq:what-to-do-with-this}.
+As a result, it suffices to bound the magnitude of $\Delta_4$, and this will serve to bound $\Delta_3$ as well.
+We begin by manipulating the fourth term in \Cref{eq:burger-king};
+specifically, we will show that it is close to
+\begin{equation}\label{eq:cloud}
+-\E_{\bx, \by_1, \by_2} \sum_{a_1, g_2} \bra{\psi}
+	 (G_1)^{\bx}_{[g_1(\by_1) = a_1]} \cdot (G_2)^{\bx}_{g_2} \cdot (G_1)^{\bx}_{[g_1(\by_1) = a_1]} \otimes (G_2)^{\bx}_{g_2} \ket{\psi}.
+\end{equation}
+To do so, we take their difference:
+\begin{multline*}
+\E_{\bx, \by_1, \by_2} \sum_{a_1, g_2} \bra{\psi}
+	 ((G_1)^{\bx}_{[g_1(\by_1) = a_1]} \cdot (G_2)^{\bx}_{g_2} \cdot (G_1)^{\bx}_{[g_1(\by_1) = a_1]} \otimes I_{\reg{Bob}})\\
+	\cdot (I_{\reg{Alice}} \otimes  (G_2)^{\bx}_{g_2} - (G_2)^{\bx}_{g_2} \otimes I_{\reg{Bob}}) \ket{\psi}.
+\end{multline*}
+To bound the magnitude, we apply Cauchy-Schwarz:
+\begin{multline*}
+\E_{\bx, \by_1, \by_2}
+	\sqrt{\sum_{a_1, g_1} \Vert  ((G_1)^{\bx}_{[g_1(\by_1) = a_1]} \cdot (G_2)^{\bx}_{g_2} \cdot (G_1)^{\bx}_{[g_1(\by_1) = a_1]} \otimes I_{\reg{Bob}}) \ket{\psi} \Vert^2}\\
+	\cdot \sqrt{\sum_{a_1, g_1} \Vert ((G_1)^{\bx}_{[g_1(\by_1) = a_1]} \otimes I_{\reg{Bob}})
+	\cdot (I_{\reg{Alice}} \otimes  (G_2)^{\bx}_{g_2} - (G_2)^{\bx}_{g_2} \otimes I_{\reg{Bob}}) \ket{\psi} \Vert^2}.
+\end{multline*}
+The expression inside the first square root is always at most~$1$.
+This allows us to bring the expectation into the second square root by Jensen's inequality.
+Because $G_1$ is a POVM, we can bound the resulting expectation by
+\begin{equation}\label{eq:majora}
+\E_{\bx, \by_1, \by_2} \sum_{g_1} \Vert (I_{\reg{Alice}} \otimes  (G_2)^{\bx}_{g_2} - (G_2)^{\bx}_{g_2} \otimes I_{\reg{Bob}}) \ket{\psi} \Vert^2.
+\end{equation}
+To bound this, we note that \Cref{eq:gonna-compare-like-a-pear,eq:spend-some-time-reflecting} along with \Cref{fact:triangle-like} imply that
+\begin{equation*}
+(G_2)^{x}_{[g_2(y_2) = a_2]} \otimes I_{\reg{Bob}}
+\consistency_{\delta} I_{\reg{Bob}} \otimes (G_2)^{x}_{[g_2(y_2) = a_2]}.
+\end{equation*}
+Using the distance properties of $\calG_2$, this implies that
+\begin{equation*}
+(G_2)^{x}_{g_2} \otimes I_{\reg{Bob}}
+\consistency_{\delta + \eps} I_{\reg{Bob}} \otimes (G_2)^{x}_{g_2}.
+\end{equation*}
+Hence, \Cref{eq:majora} is at most $O((\delta+\eps)^{1/2})$.
+A similar argument shows that the fourth term in \Cref{eq:what-to-do-with-this}
+is $O(\delta^{1/2})$-close to
+\begin{equation}\label{eq:strife}
+-\E_{\bx, \by_1, \by_2} \sum_{a_1, a_2} \bra{\psi}
+(G_1)^{\bx}_{[g_1(\by_1) = a_1]} \cdot (G_2)^\bx_{[g_2(\by_2) = a_2]} \cdot (G_1)^{\bx}_{[g_1(\by_1) = a_1]} \otimes (G_2)^\bx_{[g_2(\by_2) = a_2]} \ket{\psi}.
+\end{equation}
+
+Now, we compute \Cref{eq:cloud} minus \Cref{eq:strife}:
+\begin{align*}
+&\E_{\bx, \by_1, \by_2} \sum_{a_1}\sum_{\substack{g_2, g_2'\\g_2(\by_2) \neq g_2'(\by_2)}} \bra{\psi}
+	 (G_1)^{\bx}_{[g_1(\by_1) = a_1]} \cdot (G_2)^{\bx}_{g_2} \cdot (G_1)^{\bx}_{[g_1(\by_1) = a_1]} \otimes (G_2)^{\bx}_{g_2'} \ket{\psi}\\
+=&\E_{\bx, \by_1, \by_2} \sum_{a_1}\sum_{g_2, g_2'} \bra{\psi}
+	 (G_1)^{\bx}_{[g_1(\by_1) = a_1]} \cdot (G_2)^{\bx}_{g_2} \cdot (G_1)^{\bx}_{[g_1(\by_1) = a_1]} \otimes (G_2)^{\bx}_{g_2'} \ket{\psi}
+	 	\cdot \bone(g_2, g_2', \by_2),
+\end{align*}
+where $\bone(g_2, g_2', \by_2)$ is the indicator that $g_2 \neq g_2'$ but $g_2(\by_2) = g_2'(\by_2)$.
+This is the only part of the expression that depends on $\by_2$, and by our distance assumption it is at most $\eps$ in expectation.
+Since the rest of the expression is guaranteed to be positive, we can upper-bound this by
+\begin{equation*}
+\E_{\bx, \by_1} \sum_{a_1}\sum_{g_2, g_2'} \bra{\psi}
+	 (G_1)^{\bx}_{[g_1(\by_1) = a_1]} \cdot (G_2)^{\bx}_{g_2} \cdot (G_1)^{\bx}_{[g_1(\by_1) = a_1]} \otimes (G_2)^{\bx}_{g_2'} \ket{\psi} \cdot \eps.
+\end{equation*}
+But the remaining part of the expression is at most~$1$, and so in total we can upper-bound it by~$\eps$.
+This completes the proof.
+\end{proof}
+
+\subsection{Commuting EPR strategies}
+
+In this section, we introduce a class of strategies important for our proof.
+
+\begin{definition}
+A strategy $\calS = (\psi, M)$ is called an \emph{EPR strategy} if it satisfies the following two properties.
+First, there is an integer~$k$ and powers of two $q_1, \ldots, q_k$ such that
+\begin{equation*}
+\ket{\psi} = \ket{\mathrm{EPR}_{q_1}} \otimes \ket{\mathrm{EPR}_{q_2}} \otimes \cdots \otimes \ket{\mathrm{EPR}_{q_k}}.
+\end{equation*}
+Second, for each question~$x$, $M^x$ is a projective measurement. If
+for all questions $x$ and answers $a$, $M^x_a$ is a real-valued
+matrix, we say that the strategy is \emph{real}
+
+In addition, given a game~$\game$, we say that a real EPR strategy $\calS$ is a \emph{real
+  commuting EPR strategy (with respect to~$\game$)}
+if for every~$(x_1, x_2)$ in the support of~$\calS$ and every~$a_1, a_2$, $M^{x_1}_{a_1}$ commutes with $M^{x_2}_{a_2}$.
+We denote the set of real commuting EPR strategies by $\comstrat{\game}$.
+\end{definition}
+
+Real commuting EPR strategies are motivated by the \emph{completeness} cases that arise in this work.
+We give a series of transformations which modify games to make them sound against increasingly broader sets of strategies.
+Unfortunately, these transformations are not complete for all strategies, in the sense that value-$1$ strategies may be mapped to value-less-than-1 strategies,
+but we will be careful to ensure that they \emph{are} complete for all commuting EPR strategies.
+For the majority of the paper, the one property of commuting EPR strategies that we will use, not shared by all value-$1$ strategies, is the following.
+
+\begin{fact}\label{fact:heh-heh-heh-gonna-make-anand-prove-this-so-i-can-take-the-day-off}
+Let $(\psi, M)$ be a real EPR strategy.
+Then $M^x_a \otimes I_{\reg{Bob}} \consistency_0 I_{\reg{Alice}} \otimes M^x_a$ for every distribution on~$x$.
+\end{fact}
+\begin{proof}
+  From the definition of EPR strategies, we know that $\ket{\psi} =
+  \ket{\epr_{q_1}} \ot \dots \ot \ket{\epr_{q_k}} \in (\C^{q_1 \cdot
+    q_2 \cdot \dots \cdot q_k})^{\ot 2}$. We may choose a basis
+  $\{\ket{i} : 1 \leq i \leq q_1 \cdot q_2 \cdot \dots \cdot q_k\}$
+  for $\C^{q_1 \cdot \dots \cdot q_k}$, so that
+  \[ \ket{\psi} = \sum_{i} \ket{i}_{\reg{Alice}} \ot
+    \ket{i}_{\reg{Bob}} . \]
+  
+Let us denote the components of $M^x_a$ by the notation
+$(M^x_a)_{ij}$, so that $M^x_a = \sum_{ij} (M^x_a)_{ij}
+\ket{i}\bra{j}$.  Now, for an arbitrary pair $x, a$, we can compute
+the post-measurement states from applying $M^x_a$ on Alice's and Bob's systems.
+\begin{align*}
+  M^x_a \ot I_{\reg{Bob}} \ket{\psi} &= (M^x_a \ot I_{\reg{Bob}}) \sum_{i} \ket{i}_{\reg{Alice}}
+                                       \ot \ket{i}_{\reg{Bob}} \\
+                                     &= \sum_{ij} (M^x_a)_{ij} \ket{i}
+                                       \ot \ket{j} \\
+                                     &= \sum_{ij} (M^x_a)_{ji} \ket{i}
+                                       \ot \ket{j} \\
+                                     &= (I_{\reg{Alice}} \ot M^x_a) \ket{\psi},
+\end{align*}
+where in going from the second to the third line, we have used the
+fact that $M^x_a$ is real and Hermitian, and thus symmetric.
+\end{proof}
+
+The following fact is a useful special case.
+
+\begin{fact}\label{fact:the-ol-pauli-swaperoonie}
+Let $n > 0$, $q = 2^t$, and $W \in \{X, Z\}$.
+Then $\tau^W_u \otimes I \approx_0 I \otimes \tau^W_u$ on the state $\ket{\mathrm{EPR}_q^n}$.
+\end{fact}
+\begin{proof}
+By \Cref{eq:pauli-eigenstates}, we can write 
+\begin{equation*}
+  \ket{\tau^X_u} = \frac{1}{\sqrt{q}} \sum_{v \in \F_q}
+  \omega^{-\tr[uv]} \ket{v},\qquad \ket{\tau^Z_u} = \ket{u}.
+\end{equation*}
+The second of these self-evidently has real-valued coefficients.
+As for the first, $q = 2^t$ implies that $p = 2$.
+This means that $\omega = -1$ and $\tr[uv] \in \{0, 1\}$ for all $u, v$.
+As a result, it too has real-valued coefficients.
+The fact then follows from \Cref{fact:heh-heh-heh-gonna-make-anand-prove-this-so-i-can-take-the-day-off}.
+\end{proof}
+
+This property of real commuting strategies is useful for answer
+reduction because it allows us to perform oracularization, giving one
+prover both questions~$x_1$ and~$x_2$ so that they may simulate the
+action of both provers by simultaneously measuring $M^{x_1}$ and $M^{x_2}$.
+For more details, see \Cref{part:answer}.
+
+\subsection{Quantum soundness of the classical low-degree test}\label{sec:classical-q-low-deg}
+
+An important tool for quantum protocols
+is a version of the Raz-Safra theorem (\Cref{thm:raz-safra})
+in which the soundness of the low-degree test is extended to hold even in the case when the provers are allowed to share entanglement.
+For the plane-versus-point test, this was first developed by Vidick in~\cite{Vid16}, but for technical reasons he could only show it for the case of three or more quantum provers.
+In~\cite{NV18b}, this was improved to hold for the two-prover case, and this is the result we use in this work.
+We begin by defining the class of polynomial measurements.
+
+\begin{definition}
+Define $\mathrm{PolyMeas}(m, d, q)$ to be the set of POVM measurements whose outcomes correspond to degree-$d$, $\F_q$-valued polynomials.
+In other words, $G \in \polymeas{m}{d}{q}$ if $G = \{G_g\}_g$ with outcomes degree-$d$ polynomials $g:\F_q^m \rightarrow \F_q$.
+More generally, we let $\simulpolymeas{m}{d}{q}{\ell}$ be the set of measurements $G = \{G_{g_1, \ldots, g_\ell}\}$ outputting~$\ell$ degree-$d$ polynomials $g_i:\F_q^m \rightarrow \F_q$.
+\end{definition}
+
+The following theorem establishes the quantum soundness of the classical low-degree test in the $k = 2$ case.
+
+\begin{theorem}[Quantum soundness of the classical low-degree test~{\cite[Theorem 2]{NV18b}}]\label{thm:anand-thomas-classical-low-degree}
+There exists a constant $c > 0$ and a function $\delta(\eps) = \mathrm{poly}(\epsilon, dm/q^c)$ such that the following holds.
+Suppose Alice and Bob are entangled provers who pass $\game_{\mathrm{Surface}}(m,d,q,2)$ with probability at least $1-\eps$
+using the strategy $(\psi, M)$, where~$M$ consists of projective measurements.
+Then there exists a POVM measurement $G \in \polymeas{m}{d}{q}$ such that
+\begin{equation*}
+M^w_b \otimes I_{\reg{Bob}} \consistency_{\delta(\eps)} I_{\reg{Alice}} \otimes G_{[g(w)=b]},
+\qquad
+G_g \otimes I_{\reg{Bob}} \consistency_{\delta(\eps)} I_{\reg{Alice}} \otimes G_g,
+\end{equation*}
+where the first is on the uniform distribution over $\F_q^m$.
+\end{theorem}
+
+\begin{remark}
+The statement of \Cref{thm:anand-thomas-classical-low-degree} is modified from how it appears in \cite[Theorem 2]{NV18b} to better suit our needs.
+In this remark, we show how to derive our version from theirs,
+which is stated as follows.
+\begin{itemize}
+\item[$\circ$] There exists a constant $c >0$ and a function $\delta(\eps) = \mathrm{poly}(\eps)$ such that the following holds.
+		Suppose $q \geq (dm/\eps)^c$. Then if Alice and Bob pass the surface-versus-point test with probability $1-\eps$, there is a measurement $G \in \polymeas{m}{d}{q}$
+		such that
+		\begin{equation}\label{eq:what-anand-and-thomas-proved}
+		\E_{\bs} \sum_g \sum_{f \neq g|_s} \bra{\psi} M^{\bs}_f \otimes G_g \ket{\psi} \leq \delta(\eps),\qquad
+		\sum_g \bra{\psi} G_g \otimes (I - G_g) \ket{\psi} \leq \delta(\eps).
+		\end{equation}
+\end{itemize}
+These are equivalent to the statements
+\begin{equation*}
+M^s_f \otimes I_{\reg{Bob}} \consistency_{\delta(\eps)} I_{\reg{Alice}} \otimes G_{[g|_s=f]},
+\qquad
+G_g \otimes I_{\reg{Bob}} \consistency_{\delta(\eps)} I_{\reg{Alice}} \otimes G_g,
+\end{equation*}
+where the first is on the uniform distribution over surface in $\F_q^m$.
+The second of these matches the corresponding statement above.
+Next, by \Cref{fact:specialize-the-simeq} we derive
+\begin{equation*}
+M^s_{[f(w) = b]} \otimes I_{\reg{Bob}} \consistency_{\delta(\eps)} I_{\reg{Alice}} \otimes G_{[g(w)=b]}
+\qquad
+\text{and}
+\qquad
+G_{[g(w) = b]} \otimes I_{\reg{Bob}} \consistency_{\delta(\eps)} I_{\reg{Alice}} \otimes G_{[g(w) = b]}.
+\end{equation*}
+with respect to the distribution $(\bs, \bw)$ from $\game_{\mathrm{Surface}}(m,d,q,2)$.
+On top of that, since the strategy passes the test with probability $1-\eps$,
+\begin{equation*}
+M^w_b \otimes I_{\reg{Bob}} \consistency_{\eps} I_{\reg{Alice}} \otimes M^s_{[f(w) = b]}
+\end{equation*}
+As a result, if we use \Cref{fact:agreement} to switch these to ``$\approx_\delta$" statements, then
+\begin{equation*}
+M^w_b \otimes I_{\reg{Bob}}
+\approx_{\eps} I_{\reg{Alice}} \otimes M^s_{[f(w) = b]}
+\approx_{\delta(\eps)} G_{[g(w)=b]} \otimes  I_{\reg{Bob}} 
+\approx_{\delta(\eps)} I_{\reg{Alice}} \otimes G_{[g(w) = b]}.
+\end{equation*}
+The result now follows from the triangle inequality (\Cref{fact:triangle}) followed by \Cref{fact:almost-agreement} and the fact that~$M$ was assumed to be projective.
+
+Finally, we remove the condition on~$q$ using a trick from~\cite{NV18a}. If $q < (dm/\eps)^c$, then we select $\eps' > \eps$ such that $q = (dm/\eps')^c$.
+Alice and Bob also pass the plane-versus-point test with probability $1-\eps'$ because $1-\eps' < 1-\eps$, and so we can apply the theorem with these parameters,
+giving a robustness of $\delta(\eps') = \delta(dm/q^{1/c})$.
+(In the case when $\eps' > 1$, which is not allowed, this bound trivially still holds because $dm/q^{1/c} > 1$.)
+In general, then, we can remove the condition on~$q$ so long as we replace the robustness of $\poly(\eps)$ with $\poly(\eps, dm/q^{1/c})$, which holds in both cases.
+\end{remark}
+
+We will use the following proposition about polynomial measurements several times.
+
+\begin{proposition}\label{prop:same-on-point-same-on-subspace}
+Let $d > 0$ be an integer.
+Consider a distribution $\calD$ on pairs $(\bs, \bu)$, where~$\bs$ is a subspace in $\F_q^m$ and~$\bu$ is a uniformly random point in~$\bs$.
+Let $\{M^s_f\}$ be a measurement whose outcomes are degree-$d$ polynomials $f:s \rightarrow \F_q$,
+and let $G \in \polymeas{m}{d}{q}$.
+Suppose that
+\begin{equation*}
+M^s_{[f(u) = b]} \otimes I_{\reg{Bob}} \consistency_\delta I_{\reg{Alice}} \otimes G_{[g(u) = b]}
+\end{equation*}
+with respect to~$\calD$. Then
+\begin{equation*}
+M^s_{f} \otimes I_{\reg{Bob}} \consistency_{\delta+d/q} I_{\reg{Alice}} \otimes G_{[g|_s = f]}
+\end{equation*}
+with respect to~$\calD$.
+\end{proposition}
+\begin{proof}
+Suppose the verifier (i)  samples $(\bs, \bu) \sim \calD$,
+(ii) gives Alice~$\bs$, who measures with $M^{\bs}$ and returns her outcome~$\boldf : \bs \rightarrow \F_q$,
+(iii) receives~$\bg : \F_q^m \rightarrow \F_q$ from Bob, sampled via~$G$,
+and (iv) accepts if $\boldf(\bu) = \bg(\bu)$.
+Then by assumption, the verifier accepts with probability at least $1-O(\delta)$.
+
+We can use this to bound the probability that $\boldf$ and $\bg$ disagree on the subspace~$\bs$.
+By Schwartz-Zippel (\Cref{lem:schwartz-zippel}), conditioned on $\boldf$ and $\bg$ disagreeing,
+the probability they disagree on a random point $\bu \sim \bs$  is at least $1-d/q$.
+This gives us the inequality $\Pr[\boldf \neq \bg|_{\bs}] \cdot (1-d/q) \leq O(\delta)$.
+Now, assume first that $q \geq 2d$. Then this bound implies, via \Cref{fact:agreement}, that
+\begin{equation}\label{eq:almost-there-almost-there}
+M^s_f \otimes I_{\reg{Bob}} \approx_{\delta + d/q} I_{\reg{Alice}} \otimes G_{[g|_{s} = f]}.
+\end{equation}
+On the other hand, when $q \geq 2d$, then this bound is also true for trivial reasons.
+This is because we can pick $\delta(\cdot)$ such that $\delta(\eps) \geq 1$ in this case.
+\end{proof}
+
+\subsection{Quantum soundness of the classical simultaneous low-degree test}\label{sec:q-simultaneous}
+
+We would now like to use \Cref{thm:anand-thomas-classical-low-degree}
+to show quantum soundness for the simultaneous classical low-degree test.
+This will be done using the same reduction presented in~\Cref{sec:simultaneous-classical}.
+The main result is the following.
+
+\begin{theorem}[Quantum soundness of the simultaneous classical
+  low-degree test]
+  \label{thm:simultaneous-ldt}
+There exists a constant $c > 0$ and a function $\delta(\eps) = \mathrm{poly}(\epsilon, d (m + \ell)/q^c)$ such that the following holds.
+Suppose Alice and Bob are entangled provers who pass $\game_{\mathrm{Surface}}^\ell(m,d,q,2)$ with probability at least $1-\eps$
+using the strategy $(\psi, M)$, where~$M$ consists of projective measurements.
+Then there exists a measurement $G \in \simulpolymeas{m}{d}{q}{\ell}$ such that
+\begin{equation*}
+M^w_{b_1, \ldots, b_\ell} \otimes I_{\reg{Bob}} \consistency_{\delta(\eps)} I_{\reg{Alice}} \otimes G_{[g_1(w), \ldots, g_\ell(w) = b_1, \ldots, b_\ell]},
+\qquad
+G_{g_1, \ldots, g_\ell} \otimes I_{\reg{Bob}}
+\consistency_{\delta(\eps)}
+I_{\reg{Alice}} \otimes G_{g_1, \ldots, g_\ell},
+\end{equation*}
+where the first is on the uniform distribution over $\F_q^m$.
+\end{theorem}
+
+\begin{proof}
+Suppose Alice and Bob pass $\game_{\mathrm{Surface}}^\ell(m, d, q,2)$ with probability at least $1-\eps$.
+We will use them to simulate two provers, ``Combined Alice" and ``Combined Bob", who pass
+the single-function low-degree test $\game_{\mathrm{Surface}}(\ell + m, d+1, q,2)$ with probability at least $1-\eps$.
+They are specified as follows:
+\begin{itemize}
+\item[$\circ$] \textbf{Combined Alice:} Given $\bs \subseteq \F_q^{\ell + m}$, draw $\bs' \sim_2 \bs_{\mathrm{proj}}$.  Give it to Alice, who responds with $\boldf_1, \ldots, \boldf_{\ell}: \bs' \rightarrow \F_q$.  Output the function $\mathrm{combine}_{\boldf}|_{\bs}$.
+\item[$\circ$] \textbf{Combined Bob:} Given $(\bx, \by) \in \F_q^{\ell + m}$, compute $\by \in \F_q^m$. Give it to Bob, who responds with $\bb_1, \ldots, \bb_\ell \in \F_q$.
+			Return $\mathrm{combine}_{\bb}(\bx) \in \F_q$.
+\end{itemize}
+By \Cref{prop:really-the-same-dist}, $\bs'$ and $\by$ are distributed as the questions in $\game_{\mathrm{Surface}}^\ell(m, d, q,2)$.
+Using our assumption on Alice and Bob, this means that $\boldf_1(\by) = \bb_1$, \ldots, $\boldf_\ell(\by) = \bb_\ell$ with probability at least $1-\eps$.
+As a result, $(\mathrm{combine}_{\boldf}|_{\bs})(\bx, \by) = \mathrm{combine}_{\bb}(\by)$ with probability at least~$1-\eps$.
+By \Cref{prop:sub-subspace}, $\mathrm{combine}_{\boldf}|_{\bs}$ is a degree-$(d+1)$ function on~$\bs$,
+and so it is a valid response to subspace queries.
+This means Combined Alice and Bob pass~$\game_{\mathrm{Surface}}(\ell + m, d+1, q, 2)$ with probability at least~$1-\eps$.
+
+Thus, we can apply \Cref{thm:anand-thomas-classical-low-degree}.
+It gives a measurement $G \in \polymeas{\ell+m}{d+1}{q}$ such that
+\begin{equation}\label{eq:g-meas-equals-combine-meas}
+M^y_{[\mathrm{combine}_b(x)=\nu]} \otimes I_{\reg{Bob}}
+\consistency_{\delta(\eps)} I_{\reg{Alice}} \otimes G_{[g(x, y) = \nu]},
+\qquad
+G_g \otimes I_{\reg{Bob}} \consistency_{\delta(\eps)} I_{\reg{Alice}} \otimes G_g,
+\end{equation}
+where $\delta(\eps) = \poly(\eps, (d+1)(\ell+m)/q^c)$.
+This means that if we give Alice~$\by$ and she returns~$\bb$, and Bob simply returns~$\bg$,
+then $\mathrm{combine}_{\bb}(\bx) = g(\bx, \by)$ with probability at least~$1-\delta(\eps)$.
+
+We would like to show that~$\bg$ is exactly linear in~$x$ with high probability, over the randomness in the measurement~$G$.
+Let us condition on a $\bg$ which is not exactly linear.
+By \Cref{prop:exactly-linear-prop}, the probability that $\bg|_{\by}$ is not exactly linear is at least $1-(d+1)/q$.
+On the other hand, because $\mathrm{combine}_{\bb}(\bx)$ is always exactly linear by construction,
+the probability that $\bg|_{\by}(\bx) = \mathrm{combine}_{\bb}(\bx)$ is at most $(d+1)/q$ by Schwartz-Zippel (\Cref{lem:schwartz-zippel}).
+As a result, the probability that $\bg(\bx, \by) = \mathrm{combine}_{\bb}(\bx)$ is at most $(d+1)/q + (d+1)/q$.
+Thus, if we write $\mu_{\mathrm{linear}}$ for the probability that $\bg$ is exactly linear, we have equality at most $\mu_{\mathrm{linear}} + 2(d+1)/q$ fraction of the time.
+Rearranging, $\bg$ is exactly linear with probability
+\begin{equation*}
+\mu_{\mathrm{linear}} \geq 1 - 2\delta(\eps) - 2(d+1)/q.
+\end{equation*}
+Define a new measurement $\{H_{g_1, \ldots, g_\ell}\} \in \simulpolymeas{m}{d}{q}{\ell}$ operationally as follows: first, measure~$G$ and receive~$\bg$.
+If it is exactly linear, it can be written as $\sum_i x_i \cdot \bg_i(y)$, and so output $\bg_1, \ldots, \bg_\ell$.
+If~$\bg$ is \emph{not} exactly linear, output any arbitrary degree-$d$ polynomials instead.
+When~$\bg$ is exactly linear, we have $\mathrm{combine}_{\bg_1, \ldots, \bg_\ell}(x, y) = \bg(x, y)$.
+Since this happens with probability at least $1-\delta(\eps)$,
+we can replace~$G$ with~$H$ in \Cref{eq:g-meas-equals-combine-meas}, yielding
+\begin{equation}\label{eq:no-name-is-a-bad-name}
+M^y_{[\mathrm{combine}_b(x)=\nu]} \otimes I_{\reg{Bob}}
+\consistency_{\delta(\eps)} I_{\reg{Alice}} \otimes H_{[\mathrm{combine}_g(x, y) = \nu]},
+\end{equation}
+On the other hand, because~$H$ is just~$G$ with data processing applied to its output,
+we can apply \Cref{fact:specialize-the-simeq} to \Cref{eq:g-meas-equals-combine-meas}. This produces the equation
+\begin{equation*}
+H_{g_1, \ldots, g_\ell} \otimes I_{\reg{Bob}} \consistency_{\delta(\eps)} I_{\reg{Alice}} \otimes H_{g_1, \ldots, g_\ell}.
+\end{equation*}
+
+Consider $\bg_1, \ldots, \bg_\ell$ drawn by Bob using~$H$.
+For any fixed~$b$ and~$y$, if it is not the case that $g_1(y) = b_1$, \ldots, $g_\ell(y) = b_\ell$,
+then the probability that $\mathrm{combine}_{\bg}(\bx, y) = \mathrm{combine}_{b}(\bx)$
+over a random~$\bx$ is at most $1/q$ by Schwartz-Zippel, since both are exactly linear functions.
+Thus, if Alice draws~$\bb_1, \ldots, \bb_\ell$ given~$\by$,
+and we write~$\eta$ for the probability that $\bg_1(\by) = \bb_1$, \ldots, $\bg_\ell(\by) = \bb_\ell$,
+then the probability that $\mathrm{combine}_{\bg}(\bx, \by) = \mathrm{combine}_{\bb}(\bx)$ is at most
+$\eta +  (1-\eta) \cdot 1/q$.
+Combined with \Cref{eq:no-name-is-a-bad-name}, this implies that
+\begin{equation*}
+\Pr[\bg_1(\by) = \bb_1, \ldots, \bg_\ell(\by) = \bb_\ell] \geq 1- \delta(\eps) - 1/q.
+\end{equation*}
+Or, equivalently,
+\begin{equation*}
+M^y_{b_1, \ldots, b_\ell} \otimes I_{\reg{Bob}}
+\consistency_{\delta(\eps)} I_{\reg{Alice}} \otimes G_{[g_1(y), \ldots, g_\ell(y) = b_1, \ldots, b_\ell]}.\qedhere
+\end{equation*}
+\end{proof}
+
+\subsection{Self-testing}
+
+The games presented in \Cref{sec:classical-q-low-deg,sec:q-simultaneous} might be referred to as ``measurement testers":
+if a strategy passes them with high probability, then we can extract some property on its measurements.
+In this section, we will introduce a significantly stronger notion of testing called \emph{self-testing}.
+A self-tester is a game in which if a prover passes with high probability,
+then not only do we do exactly which measurements the prover must be performing,
+we also know which exactly state it must be performing them on (up to local isometry).
+(We note that some works use ``self-testing" to refer both to ``measurement testing" and what we refer to as ``self-testing"~\cite{NV18a}.
+In this work, we will reserve the term exclusively for the latter.) We begin with a definition.
+
+\begin{definition}
+We say that $\mathcal{S} = (\psi, M)$ is a \emph{partial strategy} for $\game$
+if $M$ contains the POVM $M^x$ for only a subset of the questions in~$\game$.
+We call this set of questions $\mathcal{S}$'s \emph{question set}.
+A strategy $\mathcal{S}' = (\psi, M')$ \emph{extends} $\mathcal{S}$ if $(M')^x = M^x$ for every~$x$ in $\mathcal{S}$'s question set.
+\end{definition}
+
+Next, we define self-testing.
+
+\begin{definition}[Self-testing]
+Let $\mathcal{S} = (\psi, G)$ be a partial strategy and $\mathcal{D}$ be a distribution over its question set.
+A game $\game$ is a \emph{self-test for $\mathcal{S}$ over $\mathcal{D}$ with robustness $\delta(\epsilon)$}
+if it satisfies the following two conditions.
+\begin{itemize}
+\itemsep -.5pt
+\item[$\circ$] \textbf{Completeness:} There exists a (full) strategy $\mathcal{S}_{\mathrm{full}}$ consistent with $\mathcal{S}$ which passes~$\game$ with probability~$1$.
+\item[$\circ$] \textbf{Soundness:} Let $\overline{\mathcal{S}} = (\overline{\psi}, \overline{M})$ be a strategy which passes~$\game$ with probability $1-\eps$.
+	Then there exists a local isometry $\phi = \phi_{\mathrm{local}} \otimes \phi_{\mathrm{local}}$ and a state $\ket{\mathrm{aux}}$ such that
+	\begin{equation*}
+		\Vert \phi \ket{\overline{\psi}} - \ket{\psi}\ket{\mathrm{aux}} \Vert^2 \leq \delta(\epsilon).
+	\end{equation*}
+	\ignore{and
+	\begin{equation*}
+		\E_{(\bx, \bx') \sim\game} \sum_{a, a'} \Vert \phi (M_a^{\bx} \otimes M_{a'}^{\bx'} \ket{\psi'})
+				- (M^x_a \otimes M^x_{a'} \ket{\psi}) \ket{\mathrm{aux}} \Vert^2 \leq \delta(\epsilon).
+	\end{equation*}}
+	Furthermore, if we define the new matrices $M_a^x := \phi_{\mathrm{local}} \cdot \overline{M}_a^x \cdot (\phi_{\mathrm{local}})^\dagger$, then
+	\begin{equation}\label{eq:cite-once-then-never-again}
+	M_a^x \otimes I_{\reg{Bob}} \approx_{\delta(\epsilon)} (G_a^x \otimes I_{\mathrm{aux}}) \otimes I_{\reg{Bob}},
+	\end{equation}
+	on states $\ket{\psi}\ket{\mathrm{aux}}$ and $\ket{\psi'}$ and distribution $\bx \sim \calD$.
+\end{itemize}
+\end{definition}
+
+We note that this definition of self-testing differs in several key places from the one given in \cite[Definition~$2.5$]{NV18a}.
+We will explain these differences in more detail when we cite the quantum low-degree test in \Cref{sec:self-test-pauli}.
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End:
+%%%---------- close: prelims-quantum
+
+\part{Implementing the registers}
+
+\label{part:stack}
+
+%%%%%%%%%%% jump to register-overview
+%%%---------- open: register-overview
+%!TEX root = main.tex
+

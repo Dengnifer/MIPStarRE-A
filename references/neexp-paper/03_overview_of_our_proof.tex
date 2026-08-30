@@ -1,0 +1,397 @@
+\section{Overview of our proof}  \label{sec:overview}
+
+In this section we give a more detailed overview of the technical
+parts of the paper.
+
+\subsection{Basic quantum notation and qudits}
+While the main body of the paper contains a more complete set of
+quantum preliminaries in~\Cref{sec:prelims}, for the purposes of this
+introduction we define some basic notation, aimed at the reader who is
+familiar with the standard quantum computing formalism over qubits but
+is less familiar with \emph{qudits}: quantum systems of dimension not equal to $2$.
+In this paper, we make extensive use of such qudits: in particular, for a finite field $\F_Q$, we will
+consider qudits of dimension $Q$, with a basis state $\ket{i}$ for
+every element $i \in \F_Q$. Under tensor product, we obtain a basis
+for the space of $M$ qudits of dimension $Q$ where each basis state
+$\ket{x}$ corresponds to a vector $x \in \F_Q^M$.
+
+The basic resource state used in our protocols will be the EPR state
+over $2M$ qudits of dimension $Q$. The qudits are split into two
+registers of $M$ qudits each, held by the two provers Alice and Bob,
+respectively.
+\[ \ket{\epr_Q^M} = \frac{1}{\sqrt{Q^M}} \sum_{x \in \F_Q^M} \ket{x}_{\reg{Alice}}
+  \ot \ket{x}_{\reg{Bob}}. \]
+This state is a \emph{maximally entangled} state between Alice and
+Bob.
+
+Acting on this state, we will ask the provers to perform measurements
+from a special class called \emph{Pauli basis measurements}. To define
+these over a general field $\F_Q$ requires the introduction of some
+finite field technology, in particular the finite field trace
+function. For simplicity, in this overview we will imagine that $Q$ is
+prime, allowing the addition in $\F_Q$ to be identified with the
+additive group $\mathbb{Z}_Q$, and simplifying the definition of the
+Paulis; in the main body of the paper, we will work with $Q$ a power
+of $2$. For a single qudit of dimension $Q$, the Pauli $X$ and $Z$
+bases are the sets $\{\ket{\tau^X_u}\}_{u \in \F_Q}$ and $\{\ket{\tau^Z_u}\}_{u
+  \in \F_Q}$ of vectors
+\[ \ket{\tau^X_u} = \frac{1}{\sqrt{Q}}\sum_{x \in \F_Q}  \omega^{x u} \ket{x}, \qquad
+  \ket{\tau^Z_u} = \ket{u}, \]
+where $\omega = \exp(2\pi i/Q)$ is the $Q$-th root of unity. We denote
+the projectors onto these basis states by $\tau^X_u$ and $\tau^Z_u$,
+respectively. For a system of $M$ qudits, the Pauli
+$X$ and $Z$ observables are a set of \emph{generalized observables}
+indexed by elements of $\F_Q^M$: a generalized observable is a
+Hermitian matrix with eigenvalues that are $Q$-th roots of unity.
+They are given by
+\[ X(v) =\sum_{u \in \F_Q^M} \omega^{u \cdot v} \tau^X_{u_1} \ot \dots
+  \ot \tau^Z_{u_M}, 
+  \qquad Z(v) = \sum_{u \in \F_Q^M} \omega^{u \cdot v} \tau^Z_{u_1}
+  \ot \dots \ot \tau^Z_{u_M},\]
+where $u_1, \dots, u_M$ are the components of the vector $u$, and
+$u\cdot v$ is the dot product $\sum_{i=1}^{M} u_i \cdot
+v_i$. Measuring a generalized observable means performing a projective
+measurement onto the eigenvectors of the observable, with the
+outcome $a$ corresponding to the eigenvector with eigenvalue
+$\omega^{a}$. 
+
+
+
+\subsection{Our starting point: a classical interactive proof for
+  $\NEEXP$}
+
+We start with a classical multiprover interactive proof protocol for
+$\NEEXP$. The equality $\MIP = \NEXP$ was originally shown by Babai,
+Fortnow, and Lund~\cite{BFL91} using a protocol based on the \emph{multilinearity
+  test}: the idea is that an exponentially-long witness for a problem
+in $\NEXP$ is encoded in the truth-table of a multivariate polynomial
+function over a finite field, which is linear in each of the variables
+individually. The verifier is able to verify the witness
+by evaluating the multilinear polynomial over appropriately chosen
+points and subspaces. To scale up to $\NEEXP$, we use a much more
+efficient version of the same idea, replacing the multilinearity test
+with the \emph{low-degree test}, which works with multivariate
+polynomials of low total degree. This more efficient construction
+comes from the PCP literature. We give a relatively self-contained
+presentation of the protocol in~\Cref{sec:classical-pcp}. For the
+purposes of this overview, it is sufficient to know the following: any
+problem in $\NEEXP$ can be reduced to satisfiability for a doubly exponentially long 3Sat
+formula, succinctly encoded by a polynomial-sized circuit. (We refer
+to this problem as $\succinctsquared$). Given a 3Sat formula
+$\psi$, we would like the provers to prove to us that they have a
+satisfying assignment $a$ to this formula. Instead of reading the
+assignment directly, we will ask the provers to
+encode their assignment as a multivariate polynomial $g_a: \F_Q^M \to
+\F_Q$, where the number of variables $M$ and the finite field size $Q$
+are appropriately chosen parameters, and return evaluations of this polynomial. To check that $a$
+satisfies $\psi$, the verifier first uses a technique called
+arithmetization to convert the
+formula $\psi$ into a multivariate polynomial $g_{\psi}: \F_Q^{3M + k}
+\to \F_Q$. The polynomial $g_{\psi}$ is chosen such that the assignment $a$
+satisfies $\psi$ if and only if the expression
+\[ \mathrm{sat}_{\psi,a}(x,b, w) := g_{\psi}(x,b,w) \cdot (g_a(x_1)
+  -b_1)(g_a(x_2) - b_2)(g_a(x_3) - b_3) \]
+is equal to $0$ at every point in a particular subset $H \subseteq \F_Q^{3M
+  +k}$. Our classical protocol for $\NEEXP$ checks this condition:
+\begin{infthm}[\Cref{sec:classical-pcp} in the body]
+There exists a protocol $\game_0$ for $\mathsf{Succinct}$-$\mathsf{Succinct}$-$\mathsf{3Sat}$ (and hence
+$\NEEXP$), where the verifier's questions to the provers are
+constant-dimension subspaces of $\F_Q^{M}$, and the provers' responses
+are evaluations of degree-$D$ $M$-variate polynomials on these
+subspaces. The parameters $M, Q, D$ are all chosen to be $\exp(n)$,
+and hence the question and answer lengths as well as the runtime of
+the verifier in this protocol are
+$\exp(n)$. 
+\end{infthm}
+The distribution over subspaces sent to the provers in $\game_0$ is
+relatively simple, and in fact is independent of the instance of
+$\succinctsquared$ being tested. For the purposes of this overview, the
+reader can take the distribution over pairs of questions to be the
+\emph{plane-point distribution} $\calD$. A pair $(\bs, \bu) \sim
+\calD$ consists of a uniformly random affine plane $\bs \subseteq
+\F_Q^M$, which is sent to Alice, and a uniformly random point $\bu
+\in \bs$ which is sent to Bob. The full distribution over
+questions in $\game_0$ is more complicated than this but the essential
+ideas of our protocol will be illustrated by restricting to this case.
+\subsection{Restricting the strategies: registers and compilers}
+One of the main challenges in working with entangled provers is
+showing soundness against general entangled strategies. An important
+technique in this area is to force the provers to use a particular
+state and class of measurements by playing a type of game known as a
+\emph{self-test}.
+\begin{infdef}
+  A game $\game_{\mathrm{test}}$ is a \emph{self-test} for a state
+  $\ket{\psi}$ and measurements $M^x$ if any strategy that succeeds in
+  $\game_{\mathrm{test}}$ with probability $1- \eps$ must use a state
+  $\ket{\psi'}$ and measurements $(M')^x$ that are
+  $\delta(\eps)$-close, in the appropriate metric, to $\ket{\psi}$ and $M^x$.
+\end{infdef}
+Some of the earliest self-tests include the famous CHSH game, which
+self-tests the Pauli $X$ and $Z$ operators on a single EPR pair (of
+qubits). Self-testing technology has greatly advanced over the years,
+and in this paper we design a highly efficient self-test based on the
+low-degree test of~\cite{NV18a}.
+\begin{infthm}[\Cref{thm:basis-test} in the body]
+  The Pauli basis test $\paulistrat{n}{q}$ is a self-test for the
+  state $\ket{\epr_q^n}$ and the Pauli $X$ and $Z$ basis
+  measurements. This test sends the players questions of length
+  $O(\log(n))$ and receives answers of length $O(\poly(n))$.
+\end{infthm}
+The Pauli $X$ and $Z$ measurements are ``complete'' measurements, and
+as a consequence, there is no nontrivial measurement on a set $n$
+qudits that can be measured jointly with both the Pauli $X$ and $Z$
+measurements on those qudits. Using this property, we design a game
+called the \emph{data-hiding game}, which certifies that a prover's
+measurements act trivially on a specified set of qudits.
+\begin{infthm}[\Cref{thm:data-hiding-game} in the body]
+  The data-hiding game $\game_{\mathrm{hide}}$ is a self test for
+  states $\ket{\psi} = \ket{\epr_q^n} \ot \ket{\rmaux}$ and
+  measurements $M^x$ of the form $M^x = I \ot (M')^x_{\reg{aux}}$. It
+  has questions of length $O(\log(n))$ and answers of length $O(\poly(n))$.
+\end{infthm}
+Together, the Pauli basis test and the data-hiding game allow us to restrict our analysis of our protocols to a
+class of strategies we call \emph{register strategies}: strategies for
+which the shared state is a collection of $\ell$ registers, each in an
+EPR state, together with some auxiliary register:
+\[ \ket{\psi} = \ket{\epr_{q_1}^{n_1}} \ot \dots \ot
+  \ket{\epr_{q_\ell}^{n_\ell}} \ot \ket{\rmaux}, \]
+and where the provers can be commanded to perform either (1) Pauli basis measurements on specified subsets of the
+registers, or (2) measurements that do \emph{not} act on specified
+subset of the EPR registers (but act on the auxiliary register or the
+remaining EPR registers). We formalize this by designing a \emph{compiler},
+which takes in a protocol $\game$ that is complete and sound for register
+strategies, and produces a new protocol $\game'$ which is complete and
+sound over all strategies.
+\begin{infthm}[\Cref{theorem:one-to-zero-compiler}
+  and~\Cref{theorem:two-to-one-compiler} in the body]\label{thm:compileroonie}
+  Suppose $\game$ is a protocol for a computation problem for which completeness and soundness
+  hold for register strategies, with $O(1)$ many registers of size
+  $n$. (That is, for YES instances of the problem, there exists a
+  register strategy achieving value $1$, and for NO instances, no
+  register strategy achieves value greater than $1/2$). Let the
+  questions in $\game$ be of length $Q$ and the answers be of length
+  $A$. Then there exists a protocol $\game'$ which is complete and
+  sound for general strategies, and for which the question length is $Q
+  + \log(n)$ and the answer length is $A + \poly(n)$.
+\end{infthm}
+The compiled protocol $\game'$ either runs the original protocol
+$\game$, or, with some probability, runs the Pauli basis test, the
+data-hiding game, or a consistency test.
+
+
+\subsection{Question reduction through introspection}
+
+With our compiler in place, we have now given the verifier the power
+to command the provers to perform Pauli basis measurements on a set of
+EPR pairs.
+We would like to use this to reduce the question size of the classical protocol $\game_0$ for $\NEEXP$ described above
+from $\exp(n)$ to $\poly(n)$.
+We will do so by forcing the provers, rather than the verifier, to sample the protocol's $\exp(n)$-length questions,
+a technique we call ``introspection".
+That is, we would like to force the provers to
+sample pairs $(\bs, \bu)$ from the plane-vs-point distribution $\calD$, where $\bs$ is a uniformly random
+affine plane in $\F_Q^M$, and $\bu$ a uniformly random point on
+$\bs$.
+
+To design a scheme to sample from this distribution, let us first fix
+a representation of affine planes. We will represent an affine plane
+by an \emph{intercept} $u \in \F_Q^M$ and two \emph{slopes} $v_1, v_2
+\in \F_Q^M$. The plane given by $u, v_1, v_2$ is the set $s_u^v = \{ u +
+\lambda_1 v_1 + \lambda_2 v_2 : \lambda_1, \lambda_2 \in \F_Q\}$. As a
+first attempt, we may try the following scheme:
+\begin{enumerate}
+  \item Alice and Bob share three registers, each of which contains an
+    EPR state, so their shared state is
+    \[ \ket{\psi_0} = \ket{\epr_Q^M}_{R_0} \ot \ket{\epr_Q^M}_{R_1} \ot
+      \ket{\epr_Q^M}_{R_2}. \]
+  \item Alice first measures her half of registers $R_1$ and $R_2$ in
+    the Pauli $Z$-basis, to obtain uniformly random outcomes $\bv_1,
+    \bv_2$. The shared state is now
+    \[ \ket{\psi_1} = \ket{\epr_Q^M}_{R_0} \ot
+      (\ket{\bv_1}_{\reg{Alice}} \ot \ket{\bv_1}_{\reg{Bob}})_{R_1} \ot
+      (\ket{\bv_2}_{\reg{Alice}} \ot \ket{\bv_2}_{\reg{Bob}})_{R_2}. \]
+  \item Now, Alice and Bob both measure register $R_0$ in the Pauli
+    $Z$-basis, both obtaining the same outcome $\bu$. The shared state
+    is now
+    \[ \ket{\psi_2} = (\ket{\bu}_{\reg{Alice}} \ot
+      \ket{\bu}_{\reg{Bob}})_{R_0}    \ot  (\ket{\bv_1}_{\reg{Alice}} \ot \ket{\bv_1}_{\reg{Bob}})_{R_1} \ot
+      (\ket{\bv_2}_{\reg{Alice}} \ot \ket{\bv_2}_{\reg{Bob}})_{R_2}. \]
+    Alice sets her plane $\bs$ to be $s_{\bu}^{\bv}$ and Bob sets his point to be $\bu$.
+  \end{enumerate}
+  Indeed, the pair $(\bs, \bu)$ generated by this procedure is
+  distributed according to $\calD$. However, there is a problem:
+  through her measurement, Alice obtains additional side information,
+  specifically the value of Bob's point $\bu$. Can we command Alice to
+  erase the side information? In fact, we can, using the
+  \emph{Heisenberg uncertainty principle}: if two observables
+  anticommute, then measuring one completely destroys information
+  about the other. Using this idea, we modify our protocol as follows:
+  \begin{enumerate}
+  \item As above.
+  \item As above. At this point,  applying the definition of
+    $\ket{\epr_Q^M}$, we can write the shared state as
+    \[ \ket{\psi_1} \propto \sum_{u \in \F_Q^M} (\ket{u}_{\reg{Alice}}
+      \ot \ket{u}_{\reg{Bob}})_{R_0} \ot
+      (\ket{\bv_1}_{\reg{Alice}} \ot \ket{\bv_1}_{\reg{Bob}})_{R_1} \ot
+      (\ket{\bv_2}_{\reg{Alice}} \ot \ket{\bv_2}_{\reg{Bob}})_{R_2}. \]
+  \item {\bf New:} Intuitively, we would like Alice to be
+    \emph{prevented} from measuring the component of the intercept
+    along the directions $\bv_1, \bv_2$. This information would be
+    obtained by measuring the observables\footnote{Strictly speaking,
+      this is only true when $\bv_1 \cdot \bv_1 \neq 0$ and $\bv_2
+      \cdot \bv_2 \neq 0$. A more rigorous treatment of this is given
+      in~\Cref{sec:rotated-data-hiding}.} $Z(\bv_1), Z(\bv_2)$. To
+    destroy it, we will ask Alice to measure the \emph{complementary}
+    Pauli observables $X(\bv_1),
+    X(\bv_2)$ on register $R_0$, obtaining outcomes $\balpha_1, \balpha_2
+    \in \F_Q$. The shared state is now
+    \begin{align*}
+      \ket{\psi_2'} &\propto \sum_{u} \sum_{\lambda, \mu} \left(
+                      \omega^{\balpha_1 \lambda + \balpha_2 \mu}
+          \ket{\underbrace{u + \lambda \bv_1 + \mu \bv_2}_{u'}}_{\reg{Alice}}
+        \ket{u}_{\reg{Bob}}\right)_{R_0} 
+            (\ket{\bv_1}_{\reg{Alice}} \ot
+                      \ket{\bv_1}_{\reg{Bob}})_{R_1} \\
+      &\qquad\qquad\qquad\qquad\ot
+        (\ket{\bv_2}_{\reg{Alice}} \ot \ket{\bv_2}_{\reg{Bob}})_{R_2}.
+    \end{align*}
+    where, as above, $\omega = \exp(2\pi i / Q)$ is a $Q$-th root of
+    unity. Alice and Bob's state on $R_0$ is now a uniform 
+    superposition over pairs $u, u'$ of points lying on the same
+    affine subspace with slopes $\bv_1, \bv_2$.
+  \item Alice and Bob both measure register $R_0$ in the $Z$ basis,
+    obtaining outcomes $\bu$ and $\bu'$, respectively. The shared
+    state is now
+        \[ \ket{\psi_3'} = (\ket{\bu}_{\reg{Alice}} \ot
+      \ket{\bu'}_{\reg{Bob}})_{R_0}    \ot  (\ket{\bv_1}_{\reg{Alice}} \ot \ket{\bv_1}_{\reg{Bob}})_{R_1} \ot
+      (\ket{\bv_2}_{\reg{Alice}} \ot \ket{\bv_2}_{\reg{Bob}})_{R_2}. \]
+Alice sets her
+    plane to be $s^{\bv}_{\bu}$ and Bob sets his point to be
+    $\bu'$. 
+  \end{enumerate}
+  Now, from the calculation performed above, it's clear that Bob's
+  point $\bu'$ is uncorrelated with Alice's intercept $\bu$, apart
+  from lying in the plane $s^{\bv}_{\bu}$, and hence there is no
+  further information about Bob's point that Alice can learn by
+  measuring her portion of the final state $\ket{\psi_3'}$. But Alice still obtains
+  some additional information from her measurements along the way, in particular the
+  outcomes $\alpha_1, \alpha_2$ of the $X$ measurements. And moreover,
+  how can we certify that the $X$ measurements were performed
+  correctly, since they are not Pauli basis measurements as given to
+  us by the compiler? To answer these questions, we define a new game
+  called the \emph{partial data-hiding game} (\Cref{thm:partial-data-hiding-game}), which certifies that
+  Alice and Bob perform the steps described above and that no
+  extra information is leaked. Building on this game, we can now
+  design a protocol for $\NEEXP$ with small question size:
+
+ \begin{infthm}[\Cref{thm:main-result-of-this-part} in the body]\label{thm:small-quest}
+There is an $\MIP^*$ protocol $\game_{1}$ for $\NEEXP$ with questions
+of length $\poly(n)$, and answers of length $\exp(n)$. The verifier can
+generate the questions in $\poly(n)$ time but needs $\exp(n)$ time to
+verify the answers.
+\end{infthm}
+
+\subsection{Answer reduction through PCP composition}
+We have succeeded in obtaining a game with short questions, but the
+answers are now exponentially long. In the last step, we will use
+composition with a classical probabilistically checkable proof (PCP)
+to delegate verification of the answers to the provers.
+
+Schematically, the protocol $\game_{1}$ consists of the following
+steps:
+\begin{enumerate}
+  \item The verifier sends Alice a question $\bx$ and Bob a question
+    $\by$.
+  \item Alice returns an (exponentially-long) answer $\bA$ and Bob an
+    exponetially-long answer $\bB$.
+  \item The verifier computes a verification predicate $V(\bx, \by,
+    \bA, \bB)$ in exponential time.
+  \end{enumerate}
+  We would like to delegate the last step to the provers by asking
+  them to compute a PCP proof that $V(\bx, \by,\bA,\bB) = 1$, which
+  the verifier can check by communicating only polynomially many bits
+  with the provers. However, we face
+  an obstacle: Alice cannot know $\by$ and $\bB$, and neither can Bob
+  know $\bx$ and $\bA$, and distributed PCPs (where neither party
+  knows the entire assignment) are known to be
+  impossible~\cite{ARW17}. To proceed, we will first have to modify
+  $\game_{1}$ by \emph{oracularizing} it:
+  \begin{enumerate}
+    \item The verifier sends Alice the questions $\bx, \by$, and Bob
+      either $\bx$ or $\by$, chosen uniformly at random.
+    \item Alice returns exponentially-long answers $\bA, \bB$, and
+      Bob returns an answer $\bC$.
+    \item The verifier computes a verification predicate $V(\bx,
+      \by, \bA, \bB)$ on Alice's questions and answers, and further
+      checks that $\bA = \bC$, if Bob received $\bx$, or that $\bB =
+      \bC$, if Bob received $\by$.
+    \end{enumerate}
+    The idea is that the new Alice simulates both Alice and Bob from
+    the original protocol, and the new Bob certifies that the new
+    Alice does not take advantage of her access to both questions to cheat.
+    It is well-known that oracularization does not harm the soundness
+    of interactive protocols, be they classical or quantum. However,
+    in the quantum world, it is not necessarily the case that the
+    oracularized protocol retains \emph{completeness}. This is because
+    Alice and Bob may have been asked to perform non-compatible
+    measurements in the original protocol, rendering it impossible for
+    the new Alice to simulate both the original Alice and
+    Bob. Fortunately for us, the honest strategy for protocol
+    $\game_1$ is such that completeness under oracularization.
+    
+    Now that a single prover is in possession of all inputs to the
+    verification predicate $V$, we can implement our idea of using a
+    PCP proof. Classically, this idea is known as PCP
+    \emph{composition}, and is extensively used in the PCP
+    literature. In the quantum case, the requirement to maintain soundness against
+    entanglement makes composition technically difficult, and we defer
+    the details to \Cref{part:answer} of the paper. Once the
+    composition is performed, we reach our main result.
+    \begin{infthm}[\Cref{thm:main} in the body]\label{thm:whatevewre}
+      There is an $\MIP^*$ protocol $\game_{2}$ for $\mathsf{Succinct}$-$\mathsf{Succinct}$-$\mathsf{3Sat}$
+      (and hence for $\NEEXP$) with
+      question size, answer, and verifier runtime $\poly(n)$.
+    \end{infthm}
+    
+\subsection{Organization}
+
+The paper is organized into five parts.  The first part is the introduction and this overview. The remaining parts are organized as follows.
+\begin{itemize}
+\item \Cref{part:prelims} contains two sections of preliminaries, one containing the classical background and another the quantum background.
+\item \Cref{part:stack} contains the register compiler, i.e.\ the proof of \Cref{thm:compileroonie}.
+	This involves designing the Pauli basis test (\Cref{sec:self-test-pauli}) and the data hiding test (\Cref{sec:data-hiding-layer}).
+	\Cref{sec:register-overview} serves as an introduction to this part and contains more details on the organization.
+\item \Cref{part:neexp} contains the ``introspection" question reduction step, i.e.\ the proof of \Cref{thm:small-quest}.
+	To begin, we sketch the classical $\mip$ protocol for $\succinct$ in \Cref{sec:classical-pcp}.
+	Then we give the introspected, i.e.\ ``big", low-degree test in \Cref{sec:big-degree},
+	and finish by giving the entire small-question $\neexp$ protocol in \Cref{sec:big-neexp-protocol}.
+	\Cref{sec:intersection} contains a test necessary for the protocol called the ``intersecting lines test".
+	It allows us carry over the results of the low-degree test from one register to another.
+\item \Cref{part:answer} contains the answer reduction, i.e.\ the proof of \Cref{thm:whatevewre}.
+	The construction involves composing PCP protocols with error-correcting codes, and so \Cref{sec:error} surveys the properties we need of an error-correcting code.
+	Finally, \Cref{sec:answer-reduction} contains the actual proof of the answer reduction step.
+\end{itemize}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End:
+%%%---------- close: overview
+
+
+
+
+
+
+\part{Preliminaries}
+
+\label{part:prelims}
+
+%%%%%%%%%%% jump to prelims-classical
+%%%---------- open: prelims-classical
+%!TEX root = main.tex
+\newcommand{\tstep}{\mathrm{twostep}}
+\newcommand{\unif}{\mathrm{uniform}}
+\newcommand{\tv}{\mathrm{TV}}
+\renewcommand{\ol}{\overline}
+

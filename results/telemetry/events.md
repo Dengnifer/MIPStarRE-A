@@ -56,6 +56,16 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   Lesson: every "restore" mechanism needs an answer for the empty-store case;
   cold paths that silently recompute for hours are duplicate-compilation bugs
   even when they terminate correctly.
+- **Silent CRLF normalization defeated the split verifier.** Symptom: the
+  paper-mirror splitter reported byte-identity, but `cmp` against the arXiv
+  source showed every line differing. Diagnosis: the source ships CRLF line
+  endings; Python's `read_text` silently normalizes them, so the in-script
+  string comparison saw two normalized copies while the emitted files (LF)
+  differed from the original (CRLF) by one byte per line. Fix: read bytes,
+  normalize CRLF→LF deliberately, verify at byte level modulo exactly that
+  normalization, record it in the mirror README. Lesson: verification must
+  compare at the representation level of the claim — a byte-level claim needs
+  a byte-level check; text-mode I/O is not neutral.
 - **`elan show` errors on this machine.** `~/.elan/toolchains/stable` is a
   stale non-symlink directory (Jan 2025); pinned-toolchain resolution is
   unaffected. Left untouched; scripts must not depend on `elan show`.

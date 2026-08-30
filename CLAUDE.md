@@ -9,8 +9,8 @@ proof-integrity rules.** This repository has a single, consolidated agent guide 
 
 ## Claude-specific notes
 
-- When stuck, read the original paper source in `references/` (LDT:
-  `ldt-paper/`; QPBT: `qpbt-paper/` and `neexp-paper/` once populated).
+- When stuck, read the original paper source in `references/` (QPBT:
+  `qpbt-paper/`, secondary `neexp-paper/`; LDT: `ldt-paper/`).
 - Lean files in this repo often exceed Claude's context window; use `rg`/`grep` to
   locate definitions and search for lemmas in `.lake/packages/mathlib/`.
 - Prefer `lake env lean MIPStarRE/Path/To/File.lean` for fast iteration; only run

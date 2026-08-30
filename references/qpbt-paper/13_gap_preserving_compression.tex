@@ -1,0 +1,937 @@
+\section{Gap-Preserving Compression}
+\label{sec:compression}
+
+We combine the transformations from the previous sections (the introspection
+games, answer reduction, and parallel repetition) to obtain our
+main technical result, a \emph{gap-preserving compression theorem}
+(\cref{thm:compression}) for normal form verifiers.
+
+Recall from Definition~\ref{def:lambda} that a verifier $\verifier = (\sampler,
+\decider)$ is $\lambda$-bounded if the description length $\abs{\overline{\verifier}}= \max \{ |\sampler|,|\decider| \}$ is at most
+$\lambda$ and the time complexity bounds $\TIME_\sampler(n)$ and
+$\TIME_\decider(n)$ are at most $n^\lambda$ for all $n \ge 2$.
+The compression theorem states the existence of an efficient ``compression
+procedure'' $\Compress$ that achieves the following.
+Given as input a $\lambda$-bounded verifier $\verifier$ and the parameter
+$\lambda$, the procedure returns a ``compressed verifier'' $\verifier^\compr$
+such that the $n$-th game $\verifier^\compr_n$ simulates (in a sense to be made precise shortly) the $N$-th game
+$\verifier_N$ for $N = 2^n$, and furthermore both the sampler time complexity
+and the decider time complexity of $\verifier^\compr_n$ can be exponentially
+smaller than those of $\verifier_N$, which can be as large as $N^\lambda$.
+We note that the time complexity bounds of the compressed verifier hold without
+the assumption that the input verifier is $\lambda$-bounded.
+The completeness and soundness bounds of the theorem require the
+$\lambda$-boundedness of the input verifier $\verifier$.
+
+\begin{theorem}[Compression theorem]
+  \label{thm:compression}
+  There exists a universal constant $C_0 > 0$ and a polynomial-time Turing machine $\Compress$ that takes as input a
+  tuple $(\verifier, \lambda)$ where $\verifier = (\sampler,\decider)$ is a pair of Turing machines and $\lambda > 0$ is an integer, and outputs a $9$-level normal form verifier $\verifier^\compr = (\sampler^\compr,\decider^\compr)$.
+  The time complexities of $\sampler^\compr,\decider^\compr$ satisfy
+  \begin{equation*}
+    \begin{split}
+      \TIME_{\sampler^\compr}(n) & = \poly (n, \lambda),\\
+      \TIME_{\decider^\compr}(n) & = \poly (n, \lambda).
+    \end{split}
+  \end{equation*}
+  The description of $\sampler^\compr$ is independent of $\verifier$ and is
+  computable from the binary representation of $\lambda$ in time $\polylog
+  (\lambda)$.	
+  If furthermore $\verifier$ is a $\lambda$-bounded, $9$-level normal form verifier, then 
+  $\verifier^\compr$ satisfies the following: for all $n \geq C_0$ and $N = 2^n$,
+
+
+\begin{enumerate}
+  \item \label{enu:compr-completeness} (\textbf{Completeness}) If $\verifier_{N}$
+    has a value-$1$ PCC strategy, then $\verifier^\compr_n$ has a value-$1$ PCC
+    strategy.
+\item \label{enu:compr-soundness} (\textbf{Soundness})
+    $\Ent(\verifier_{n}^\compr,\frac{1}{2}) \geq \max \left \{
+      \Ent(\verifier_{N}, \frac{1}{2}), 2^{N^{\lambda}-1}
+    \right \}$.
+  \end{enumerate}
+\end{theorem}
+
+\subsection{Proof of Theorem~\ref{thm:compression}}
+
+Recall the following Turing machines. 
+\begin{enumerate}
+\item $\ComputeIntroVerifier$ takes as input a tuple $(\verifier, \lambda,
+  \ell)$ and returns in polynomial time a description of the
+  introspective verifier $\verifier^\intro$ corresponding to the verifier
+  $\verifier$ and parameters $(\lambda, \ell)$. (See \Cref{thm:introspection}.)
+
+\item $\ComputeAnsVerifier$ takes input $(\verifier, \lambda, \mu, \gamma)$ and returns
+  in polynomial time a description of the answer reduced verifier
+  $\verifier^\ar$ corresponding to $\verifier$ and parameters $(\lambda, \mu, \gamma)$. (See \Cref{thm:ar}.)
+
+\item $\ComputeParrepVerifier$ takes input $(\verifier, \lambda, \tau)$ and returns in
+  polynomial time a description of the anchored repeated verifier $\verifier^\rep$
+  corresponding to $\verifier$ and a number of repetitions $k(n) = (\lambda n)^\tau$. (See \Cref{thm:repetition}.)
+\end{enumerate}
+
+We specify the Turing machine $\Compress$ in \cref{fig:compress}. The universal constants $\mu$ and $\gamma$ are specified in \cref{eq:mu-gamma}, and the universal constant $\tau$ is specified in \cref{eq:c_rep}.
+
+\begin{figure}[H]
+  \centering
+  \begin{gamespec}
+  	Input: $(\verifier, \lambda)$ where $\verifier = (\sampler,\decider)$ is a pair of Turing machines and $\lambda$ is an integer.
+    \begin{enumerate}
+
+
+		\item \label{enu:compress-intro} Compute $\verifier^{(1)} =
+      \ComputeIntroVerifier(\verifier, \lambda, 9)$.
+
+		\item \label{enu:compress-ans} Compute $\verifier^{(2)} =
+      \ComputeAnsVerifier(\verifier^{(1)}, \lambda, \mu, \gamma)$.
+
+
+
+		\item \label{enu:compress-rep} Compute $\verifier^{(3)} =
+      \ComputeParrepVerifier(\verifier^{(2)}, \lambda, \tau)$.
+
+		\item Return $\verifier^\compr = \verifier^{(3)}$.
+	\end{enumerate}
+  \end{gamespec}
+  \caption{The definition of the Turing machine $\Compress$, where the universal constants $\mu$ and $\gamma$ are specified in \cref{eq:mu-gamma}, and the universal constant $\tau$ is specified in \cref{eq:c_rep}.}
+  \label{fig:compress}
+\end{figure}
+
+
+
+
+
+
+
+
+
+\begin{lemma}
+  \label{lem:compress-independent-samplers}
+  Let $\Compress$ be the Turing machine specified in \cref{fig:compress}.
+  For all pairs of Turing machines $\verifier = (\sampler,\decider)$ and integer $\lambda$, the output of
+  $\Compress(\verifier, \lambda)$ is a normal form verifier $\verifier^\compr =
+  (\sampler^\compr, \decider^\compr)$ such that $\sampler^\compr$ does not
+  depend on $\verifier$ but only on the parameter $\lambda$.
+  Furthermore, there is a Turing machine $\ComputeSampler$ that on input
+  $\lambda$ outputs the description of the compressed sampler $\sampler^\compr$
+  in time $\polylog(\lambda)$.
+\end{lemma}
+
+\begin{proof}
+  The verifier $\verifier^\compr = \verifier^{(3)}$ is a normal form verifier
+  because the introspective verifier $\verifier^{(1)}$ is a normal form verifier (even if
+  the input $\verifier$ is not; see Remark~\ref{rk:intro-normalform}), and 
+  the verifier transformations $\ComputeAnsVerifier$, $\ComputeParrepVerifier$ preserve 
+  the normal form (by \cref{thm:ar,thm:repetition}).  
+
+
+  The introspective verifier computed in Step~\ref{enu:compress-intro} of
+  Figure~\ref{fig:compress} has a sampler $\sampler^{(1)}$ that only depends on
+  the parameter $\lambda$, as implied by
+  Lemma~\ref{lem:intro-sampler-complexity}.
+  The answer reduced verifier from Step~\ref{enu:compress-ans} has a sampler $\sampler^{(2)}$ 
+  that, according to \cref{thm:ar}, only depends on the sampler $\sampler^{(1)}$, the parameter tuple $(\lambda,\mu,\gamma)$, 
+  and the description length $|\decider^{(1)}|$. Note that $\sampler^{(1)}$ only depends on $\lambda$, the parameters $(\mu,\gamma)$ are universal constants, and the description length
+  of $\decider^{(1)}$ is at most the time complexity of $\ComputeIntroVerifier$ on input $(\verifier^{(0)}, \lambda,9)$, which is polynomial in $\lambda$. Thus $\sampler^{(2)}$ only depends on $\lambda$. Similarly, the sampler $\sampler^{(3)}$ of the repeated verifier from Step~\ref{enu:compress-rep} only depends on the sampler $\sampler^{(2)}$, the parameter $\lambda$, and the universal constant $\tau$, as implied by \cref{thm:repetition}. Therefore the final sampler $\sampler^\compr = \sampler^{(3)}$ only depends on $\lambda$.
+  
+  
+
+
+  Let $\verifier^*$ be the pair of trivial Turing machines $(0,0)$. Define $\ComputeSampler$ as the Turing machine that on input $\lambda$
+  computes $(\sampler, \decider^{\gamestyle{Dummy}}) =
+  \Compress(\verifier^*, \lambda)$ and returns the description of $\sampler$ as
+  the output. By the above discussion, the description of $\sampler$ is the same
+  as that of $\sampler^\compr$ and the time complexity of $\ComputeSampler$ is 
+  $\polylog(\lambda)$ as $\Compress$ runs in polynomial time: this follows from
+  the fact that the Turing machines $\ComputeIntroVerifier$,
+  $\ComputeAnsVerifier$, and $\ComputeParrepVerifier$ all run in polynomial time.
+\end{proof}
+
+\begin{proof}[Proof of Theorem~\ref{thm:compression}]
+  We evaluate the parameters of the verifiers generated in each step of the
+  $\Compress$ procedure. 
+  These parameters are summarized in \cref{tab:params} and are explained in the
+  following. Let $(\verifier, \lambda)$ be the input to the Turing machine $\Compress$. We write $N$ to denote $2^n$. 
+
+  \begin{table}[!htb]
+    \centering
+    \footnotesize
+    \vspace{1em}
+    \begin{tabularx}{\linewidth}{b{.03\linewidth}m{.1\linewidth}m{.1\linewidth}
+      m{.03\linewidth}m{.1\linewidth}m{.5\linewidth}}
+    \toprule \multirow{2}[2]{.03\linewidth}{} & \multicolumn{2}{c}{Time
+      complexity} & \multirow{2}[2]{.1\linewidth}{Level} &
+    \multirow{2}[2]{.1\linewidth}{Completeness}
+    & \multirow{2}[2]{.1\linewidth}{Soundness}\\
+    \cmidrule(lr){2-3}
+    & Sampler & Decider\\
+    \midrule $\verifier^{(1)}$ & $\poly(n, \lambda)$ & $\poly(N^\lambda)$ & $5$
+    & value-$1$ PCC & $\Ent \big(
+    \verifier_n^{(1)}, 1 - \eps_1 \big) \geq \max \big
+    \{\Ent(\verifier_N, \frac{1}{2}), 2^{N^\lambda - 1} \big \}$\\
+    \midrule $\verifier^{(2)}$ & $\poly(n, \lambda)$ & $\poly(n,
+    \lambda)$ & $7$ & value-$1$ PCC &
+    $\Ent \bigl(
+    \verifier_n^{(2)}, 1 - \eps_2 \bigr) \geq \Ent \bigl(\verifier_n^{(1)}, 1 - \eps_1 \bigr)$\\
+    \midrule $\verifier^{(3)}$ & $\poly(n, \lambda)$ & $\poly(n,
+    \lambda)$ & $9$ & value-$1$ PCC &
+    $\Ent \bigl(
+    \verifier_n^{(3)}, \frac{1}{2} \bigr) \geq \Ent \bigl(\verifier_n^{(2)}, 1 - \eps_2 \bigr)$\\
+    \bottomrule
+    \end{tabularx}
+    \caption{Parameters and properties of the input verifier $\verifier$,
+      introspective verifier $\verifier^{(1)}$, answer reduced verifier
+      $\verifier^{(2)}$, and parallel repeated verifier $\verifier^{(3)}$
+      computed by $\Compress$.
+      The quantities $\eps_1,\eps_2$ (which are functions of $n$) are specified below in the main text.}
+\label{tab:params}
+  \end{table}
+
+
+
+
+
+
+
+  
+  \paragraph{Introspection.}
+  The verifier $\verifier^{(1)} = (\sampler^{(1)}, \decider^{(1)})$ is the
+  introspective verifier corresponding to $\verifier$ and parameters $\lambda$
+  and $\ell = 9$ computed by $\ComputeIntroVerifier$.
+  We state its parameters and properties in the second row of \cref{tab:params}
+  in terms of the index $n \in \N$.
+
+
+  The complexity bounds and the number of levels of the introspective verifier are given by
+  Theorem~\ref{thm:introspection}. Using that the argument $\ell$ in $\ComputeIntroVerifier$ is set to $9$, 
+  there exists a universal constant $C_\intro \geq 1$ such that for all $\lambda\in \N$ and for all $n \geq C_\intro$, we have
+  \begin{equation}
+    \label{eq:c_intro}
+    \begin{split}
+    \TIME_{\sampler^{(1)}}(n) & \le (\lambda \cdot n)^{C_\intro},\\
+    \TIME_{\decider^{(1)}}(n) & \le 2^{C_\intro \lambda\,n}~, \\
+    |\decider^{(1)}| &\le C_\intro \, \lambda^{C_\intro}~.
+    \end{split}
+  \end{equation}
+  By Theorem~\ref{thm:introspection} these bounds hold for all inputs $(\verifier,
+  \lambda, 9)$ (in particular these bounds do not assume that the input $\verifier$ is $\lambda$-bounded or is even a normal form verifier).
+
+  The statements in the completeness and soundness entries of the row assume that the input
+  verifier $\verifier$ is $9$-level and $\lambda$-bounded. 
+  The completeness entry follows from \cref{thm:introspection} because in the completeness case we assume the verifier $\verifier$ has a value-$1$ PCC strategy, and thus the resulting introspective verifier has a value-$1$ PCC strategy. We deduce the soundness entry as follows. 
+Let the function $\delta(\eps,n)$ from \cref{thm:introspection} be denoted by $\delta_1(\eps_1,n)$. Let $a_1 > 0, 0 < b_1 < 1$ be the universal constants such that
+   \begin{equation}
+    \label{eq:re-delta-1}
+    \delta_1(\eps_1, n) = a_1 \Bigl((\lambda n)^{a_1} \cdot \eps_1^{b_1} +
+    ( \lambda n )^{-b_1} \Bigr)
+  \end{equation}
+  By setting
+  \begin{equation}
+  \label{eq:re-eps-1}
+  	\eps_1 = \Bigl( \frac{1}{8 a_1 (\lambda n)^{a_1}} \Bigr)^{1/b_1}, \qquad \qquad C_1 = ( 4 a_1 )^{1/b_1}
+  \end{equation}
+  we get for all $n \geq C_1$, 
+  \begin{equation*}
+    \begin{split}
+      \delta_1(\eps_1,n) &= a_1 \Bigl( (\lambda n)^{a_1} \cdot (\eps_1)^{b_1}+
+      ( \lambda n)^{-b_1} \Bigr) \\
+      & \le a_1 \Bigl( (\lambda n)^{a_1} \cdot (\eps_1)^{b_1}
+      \Bigr) + \frac{1}{4} \\
+      & \le a_1 \Bigl( \frac{1}{8 a_1} \Bigr) + \frac{1}{4}\\
+      & < \frac{1}{2} \;,
+    \end{split}
+  \end{equation*}
+  where we used the fact that $\lambda \ge 1$ in the second line. Thus by the soundness guarantee of \cref{thm:introspection} we get that
+  \[
+  	\Ent \big(
+    \verifier_n^{(1)}, 1 - \eps_1 \big) \geq \max \big
+    \{\Ent(\verifier_N, \frac{1}{2}), 2^{N^\lambda - 1} \big \}
+  \]
+  for all $n \geq C_1$ as desired.
+	
+  
+
+
+
+
+
+
+
+
+
+
+  \paragraph{Answer reduction.} 
+  Let $\verifier^{(2)} = (\sampler^{(2)}, \decider^{(2)})$ denote the answer
+  reduced verifier corresponding to $\verifier^{(1)}$ and parameters $(\lambda,
+\mu, \gamma)$ computed by $\ComputeAnsVerifier$ where we define $\mu$ and $\gamma$ as
+  \begin{equation}
+  \label{eq:mu-gamma}
+  	\mu = \lceil C_\intro \rceil \;, \qquad \gamma = \Bigl\lceil \frac{2 a_1}{b_1 b_2} \Bigr\rceil
+\end{equation}
+where $a_1,b_1$ are the universal constants defining $\delta_1$ in \cref{eq:re-delta-1}, and $b_2$ is defined below in \cref{eq:re-b-2}. 
+The third row in \cref{tab:params} gives the properties of
+  the answer reduced verifier.
+
+
+  The bounds on the number of levels and the time complexities follow
+  from \cref{thm:ar}: the number of levels of the introspective verifier $\verifier^{(1)}$ is $5$, and therefore the number of levels of the sampler $\sampler^{(2)}$ is $7$. Furthermore, using the bounds on the complexities of $\sampler^{(1)}$, $\decider^{(1)}$, and the bound on the description length $|\decider^{(1)}|$ from \cref{eq:c_intro}, we get that assumption~\eqref{eq:ar-time-assumption} is satisfied and thus by \cref{thm:ar}
+  there exists a universal
+  constant $C_{\ar} \geq 1$ such that for all $n \geq C_{\ar}$,
+\begin{equation}
+    \label{eq:c_ar}
+      \max \Bigl\{  \TIME_{\sampler^{(2)}}(n),  \TIME_{\decider^{(2)}}(n)
+      \Bigr\} \le (\lambda \cdot n)^{C_\ar}~.
+  \end{equation}
+  The constant $C_\ar$ depends on the universal constants $\mu,\gamma$. Again, these time complexities do not depend on whether the starting verifier $\verifier$ is $\lambda$-bounded.
+
+  For the soundness and completeness entries, we assume that the starting verifier $\verifier$ is $\lambda$-bounded. If we further assume that $\verifier$ has a value-$1$ PCC strategy, then $\verifier^{(1)}$ has a value-$1$ PCC strategy (by the completeness guarantee of the introspective verifier), and then the completeness part of \cref{thm:ar} guarantees that $\verifier^{(2)}$ also has a value-$1$ PCC strategy.
+  
+The soundness entry is argued as follows. Define $\delta_2(\eps_2,n)$ to be the function $\delta(\eps,n)$ from \cref{thm:ar}; write it as \begin{equation}\label{eq:lambda2-15}
+    \delta_2(\eps_2, n) = a' \cdot \gamma^{a'} \cdot \Bigl( (\lambda \cdot |\decider^{(1)}| \cdot n)^{\mu a'} \cdot \eps_2^{b'} +
+    (\lambda \cdot |\decider^{(1)}| \cdot n)^{-\mu b' \gamma} \Bigr)
+  \end{equation}
+	for universal constants $a' > 0$ and $0< b' < 1$. By our bound on the description length of $\decider^{(1)}$ from \cref{eq:c_intro}, we have that $\delta_2$ can be bounded by
+  \begin{align*}
+  	\delta_2(\eps_2, n) \leq a_2 \Bigl( (\lambda  n)^{a_2} \cdot \eps_2^{b_2} +
+    (\lambda n)^{-c_2} \Bigr)
+  \end{align*}
+  where we set 
+  \begin{equation}
+  \label{eq:re-b-2} 
+  	a_2 = \max \{ a' \gamma^{a'}, a' \gamma^{a'} (C_\intro)^{\mu a'}, (1+C_\intro) \mu a' \} ~, \qquad b_2 = b' ~, \qquad c_2= \mu b' \gamma~.
+\end{equation}
+Since $a',b',\mu,\gamma$ and $C_\intro$ are universal constants, so are $a_2,b_2,c_2$. 
+    By setting
+  \begin{equation}
+  \label{eq:re-eps-2}
+  	\eps_2 = \Bigl(\frac{\eps_1}{8a_2(\lambda n)^{a_2}}\Bigr)^{1/b_2}~, \qquad C_2 = (4a_2)^{b_1/a_1} (8a_1)^{1/a_1}~,
+  \end{equation}   
+  we get for all $n \geq C_2$, 
+  \begin{align*}
+      \delta_2(\eps_2, n) & \leq a_2 \Bigl( (\lambda n)^{a_2} \cdot \eps_2^{b_2} + (\lambda
+      n)^{-b_2 \gamma} \Bigr) & \text{($\mu \geq 1$)}\\
+      & = a_2 \cdot (\lambda n)^{a_2} \cdot \eps_2^{b_2} + a_2 \cdot (\lambda
+      n)^{-b_2 \gamma } \eps_1^{-1} \cdot \eps_1\\
+      & = a_2 \cdot (\lambda n)^{a_2} \cdot \eps_2^{b_2} + a_2 \cdot (\lambda
+      n)^{-(b_2 \gamma - a_1/b_1)} (8a_1)^{1/b_1} \cdot \eps_1 & \text{(Definition of $\eps_1$)}\\
+      & \leq a_2 \cdot (\lambda n)^{a_2} \cdot \eps_2^{b_2} + a_2 \cdot (\lambda
+      n)^{-a_1/b_1} (8a_1)^{1/b_1} \cdot \eps_1 & \text{(Definition of $\gamma$)} \\
+      & \le a_2 \Bigl( \frac{\eps_1}{8 a_2} \Bigr) + \frac{\eps_1}{4} & \text{($n \geq C_2$, $\lambda \geq 1$, def. of $\eps_2$)} \\
+      & < \eps_1~.
+  \end{align*}
+Thus by the soundness guarantee of \cref{thm:ar} we get that
+  \[
+  	\Ent \big(
+    \verifier_n^{(2)}, 1 - \eps_2 \big) \geq \Ent(\verifier_n^{(1)}, 1 - \eps_1)
+  \]
+  for all $n \geq C_2$ as desired.  
+  	
+
+
+
+  \paragraph{Parallel repetition.}
+  Let $\verifier^{(3)} = (\sampler^{(3)},\decider^{(3)})$ denote the anchored
+  repetition (see Section~\ref{sec:anchored-repetition}) of $\verifier^{(2)}$
+  computed by $\ComputeParrepVerifier$, with parameters $\lambda$ and $\tau$ defined below in \cref{eq:c_rep}. 
+  We state the parameters and properties of $\verifier^{(3)}$ in the fourth row
+  of \cref{tab:params}. 
+  
+  The number of levels of $\sampler^{(3)}$ is $9$ by Item~\ref{enu:pr-complexity} of \Cref{thm:repetition}, because the number of levels of $\verifier^{(2)}$ is $7$. The time complexities of $\sampler^{(3)}$ and $\decider^{(3)}$ follow from
+  \cref{enu:pr-complexity} of Theorem~\ref{thm:repetition} and the
+  complexity upper bounds on $\sampler^{(2)}$ and $\decider^{(2)}$ specified in
+  the third row of \cref{tab:params}; in particular this uses the fact that $\TIME_{\decider^{(2)}}(n) \leq (\lambda \cdot n)^{C_\ar} \leq (\lambda \cdot n)^{\tau}$ by the way we set $\tau$ in~\cref{eq:c_rep}. 
+  These bounds only depend on the bounds stated for verifier $\verifier^{(2)}$
+  in the third row of \cref{tab:params}, and again do not depend on whether the
+  input verifier $\verifier$ is $\lambda$-bounded.
+
+  For the soundness and completeness entries, we assume that the starting verifier $\verifier$ is $\lambda$-bounded. The statement in the completeness entry follows from
+  Item~\ref{enu:pr-completeness} of Theorem~\ref{thm:repetition}, where we assume that $\verifier$ and thus $\verifier^{(1)}$ and thus $\verifier^{(2)}$ all have value-$1$ PCC strategies; therefore $\verifier^{(3)}$ would have a value-$1$ PCC strategy as well.
+  
+  The soundness entry is argued as follows. Let $c_3,c_3' > 0$ denote the universal constants $c,c'$ from  \cref{enu:pr-soundness} of Theorem~\ref{thm:repetition}. Recalling that $\eps_2$ (defined in \cref{eq:re-eps-2}) is a function of $n$ and $\lambda$, define $\tau$ to be the minimum integer satisfying $\tau \geq C_\ar$ and
+\begin{equation}
+\label{eq:c_rep}
+  		(\lambda n)^{\tau} \geq \frac{1}{c_3 \eps_2^{17}} \, \ln \frac{8}{\eps_2}
+\end{equation}
+for all $n \geq \tau$ and for all integer $\lambda \geq 1$. The integer $\tau$ is well-defined because the right-hand side is upper-bounded by a fixed polynomial in $\lambda$. Setting $k(n) = (\lambda n)^{(1 + c_3')\tau}$, we have that for all $n \geq \max \{ \tau, C_\ar \}$
+  \begin{align*}
+  		\frac{4}{\eps_2} \exp \left ( - c_3 \, \eps_2^{17} \, k(n)/(\lambda n)^{\tau c_3'} \right) &= \frac{4}{\eps_2} \exp \left ( - c_3 \, \eps_2^{17} \, (\lambda n)^{\tau} \right) < \frac{1}{2}
+  \end{align*}
+  where we used our definition of $k(n)$ and the definition of $\tau$. 
+Thus by the soundness guarantee of \cref{thm:repetition} we get that
+  \[
+  	\Ent \big(
+    \verifier_n^{(3)}, \frac{1}{2} \big) \geq \Ent(\verifier_n^{(2)}, 1 - \eps_2)
+  \]
+  for all $n \geq \max \{ \tau, C_\ar \}$ as desired.  
+  
+
+
+  \paragraph{Putting everything together.}
+  The verifier $\verifier^\compr$ is $\verifier^{(3)}$.
+  We now put together the bounds and parameters from \cref{tab:params} to obtain
+  the conclusions stated in Theorem~\ref{thm:compression}.
+
+The claim that the Turing machine $\Compress$ is polynomial time follows from
+  the fact that the Turing machines $\ComputeIntroVerifier$, $\ComputeAnsVerifier$, and $\ComputeParrepVerifier$ all run in polynomial time.
+
+The claimed number of levels and time complexity of the sampler
+  $\sampler^\compr$ follows from the complexity bounds in \cref{tab:params},
+  which in turn only depend on the parameter $\lambda$.
+In particular the sampler $\sampler^\compr$ is {independent} of the input
+  verifier $\verifier$, as shown in
+  Lemma~\ref{lem:compress-independent-samplers}.
+  Finally, the claimed time complexity to compute the description of
+  $\sampler^\compr$ also follows from \cref{lem:compress-independent-samplers}.
+
+  The claimed time complexity of $\decider^\compr$ in the theorem statement
+  also follows from \cref{tab:params}. 
+
+  We now establish the completeness and soundness properties of
+  $\verifier^\compr$.
+  Assume that the input verifier $\verifier$ is $9$-level and $\lambda$-bounded. 
+The completeness property (\cref{enu:compr-completeness} in
+  Theorem~\ref{thm:compression}) follows from chaining together the completeness
+  properties of $\verifier^{(3)}_n$, $\verifier^{(2)}_n$, $\verifier^{(1)}_n$
+  and the assumption that $\verifier_N$ has a value-$1$ PCC strategy.
+
+  We now establish the soundness property (\cref{enu:compr-soundness} in
+  Theorem~\ref{thm:compression}). Set 
+    \begin{equation}
+  \label{eq:c_0-recursive}
+  	C_0 = \max \{ C_1, C_2, C_\ar,\tau \} \;.
+  \end{equation}
+  Since $C_1, C_2, C_\ar, \tau$ are all universal constants, $C_0$ is also a universal constant.
+ By chaining together the soundness properties of $\verifier^{(3)}_n$, $\verifier^{(2)}_n$, $\verifier^{(1)}_n$, 
+ we get that 
+ \[
+ 	\Ent \big(
+    \verifier_n^{(3)}, \frac{1}{2} \big) \geq \Ent(\verifier_n^{(2)}, 1 - \eps_2)
+ \geq \Ent(\verifier_n^{(1)}, 1 - \eps_1) \geq \max \big
+    \{\Ent(\verifier_N, \frac{1}{2}), 2^{N^\lambda - 1} \big \}
+ \]
+ for all $n \geq C_0$ as desired. This concludes the proof of the theorem.
+\end{proof}
+
+\subsection{An $\mathsf{MIP}^*$ protocol for the Halting problem}
+\label{sec:halt}
+
+For every Turing machine $\cal{M}$, we construct a nonlocal game $\game$ such
+that $\val^*(\game) = 1$ if $\cal{M}$ halts and $\val^*(\game) \le \frac{1}{2}$
+otherwise.  In what follows, to explicitly disambiguate between 
+a Turing machine (which is a tuple consisting of a set of states, transition rules, etc) and its description 
+(which is a binary string), we use calligraphic letters to denote the Turing machine $\cal{M}$ and
+an overline $\overline{\cal{M}}$ to denote a \emph{description} of $\cal{M}$ (see 
+\Cref{sec:tms} for a discussion of Turing machines and their descriptions).
+
+\begin{figure}[!htp]
+  \centering
+  \begin{gamespec}
+    Input: $(\desc{R}, \desc{M}, \lambda, n, x, y, a, b)$ where $\desc{R}$ is
+    the description of an $8$-input Turing machine and $\desc{M}$ is a
+    description of a Turing machine $\cal{M}$.
+
+    \begin{enumerate}
+    \item Run $\cal{M}$ on the blank input for $n$ steps.
+      Accept if it halts and continue otherwise.
+    \item Compute the description $\overline{\decider}$ of the $5$-input Turing
+      machine $\decider$ defined as follows:
+      \[
+      	\decider(n',x',y',a',b') = \cal{R}(\desc{R}, \desc{M}, \lambda, n', x', y', a', b')
+      \]
+      i.e., on input $(n', x', y', a', b')$ runs $\cal{R}$ with
+      input $(\desc{R}, \desc{M}, \lambda, n', x', y', a', b')$.
+    \item Compute the description $\overline{\sampler} =
+      \ComputeSampler(\lambda)$.
+    \item Compute the description
+      $\overline{\verifier^\compr} = \Compress(\overline{\verifier}, \lambda)$
+      where $\overline{\verifier} = (\overline{\sampler}, \overline{\decider})$.
+    \item Accepts if the decider $\decider^\compr$ of verifier
+      $\verifier^\compr$ accepts $(n, x, y, a, b)$.
+    \end{enumerate}
+  \end{gamespec}
+  \caption{Description of Turing machine $\cal{F}$.
+    The Turing machines $\ComputeSampler$ and $\Compress$ are given in
+    \cref{lem:compress-independent-samplers,thm:compression}.}
+  \label{fig:halt_f}
+\end{figure}
+
+
+
+
+
+First, we define a Turing machine $\cal{F}$ as in \cref{fig:halt_f}.
+For all Turing machines $\cal{M}$ and parameters $\lambda\in\mathbb{N}$ we define the decider
+$\decider^\halt_{\cal{M}, \lambda}$ to be the $5$-input Turing machine 
+\[
+\decider^\halt_{\cal{M}, \lambda}(n,x,y,a,b) = \cal{F}(\desc{F}, \desc{M},
+\lambda, n, x, y, a, b)
+\]
+i.e., on
+input $(n, x, y, a, b)$ runs $\cal{F}$ with input $(\desc{F}, \desc{M},
+\lambda, n, x, y, a, b)$.
+We generally omit the subscripts $\cal{M}, \lambda$ for notational simplicity
+and denote the decider as $\decider^\halt$.
+Define $\sampler^\halt = \ComputeSampler(\lambda)$ and $\verifier^\halt =
+(\sampler^\halt, \decider^\halt)$.
+By inspecting the definition of the Turing machine $\cal{F}$ in \cref{fig:halt_f},
+one can see that the description $\overline{\decider}$ computed by
+$\decider^\halt$ at Step 2 is the description of $\decider^\halt$
+itself.\footnote{Alternatively, we can use Kleene's recursion
+  theorem~\cite{Kleene1954} here so that $\decider^\halt$ is the fixed point of
+  a Turing machine similarly defined as $\cal{F}$.
+  This approach was taken in an earlier version of the paper.
+  We choose to present the proof without resorting to Kleene's recursion theorem
+  for the sake of simplicity.}
+Therefore, the input to the $\Compress$ Turing machine at Step 4 is the description of
+$\verifier^\halt$ and $\lambda$.
+
+ We note that for all Turing machines $\cal{M}$ and integers $\lambda$, the Turing 
+machine $\decider^\halt$ halts on all inputs. This is because each step of $\cal{F}$ terminates in some finite time. This 
+uses that the procedures $\ComputeSampler$ and $\Compress$ both terminate in finite time, and the decider
+$\decider^\compr$ terminates in finite time (as given by \Cref{thm:compression}), regardless of what input is given
+to $\Compress$.  Furthermore, the output of $\ComputeSampler$ is always a sampler, which means that $\verifier^\halt = (\sampler^\halt,\decider^\halt)$ is by construction a normal form verifier. We have the following lemma for $\verifier^\halt$.
+
+
+
+
+
+
+
+
+
+\begin{lemma}\label{lem:dhalt-values}
+  Let $\cal{M}$ be a Turing machine and $\lambda$ integer.
+  Then the verifier $\verifier^\halt$ corresponding to $\cal{M}$ and $\lambda$ has the following properties. For all $n \in \N$,
+  \begin{enumerate}
+  \item If $\cal{M}$ halts in $n$ steps then
+    $\val^*(\verifier^\halt_n)=1$.
+   In this case, there is a value-$1$ PCC strategy for the game
+    $\verifier^\halt_n$.
+  \item If $\cal{M}$ does not halt in $n$ steps then
+    $\verifier^\halt_n$ has a value-$1$ PCC strategy if and only if
+    $\verifier^\compr_n$ does.
+    Furthermore, under the same assumption (that $\cal{M}$ does not halt in $n$ steps) it holds that 
+    \begin{equation*}
+      \Ent\big(\verifier^\halt_n, \frac{1}{2}\big) \,=\,
+      \Ent\big(\verifier^\compr_n, \frac{1}{2}\big)\;.
+    \end{equation*}
+  \end{enumerate}
+\end{lemma}
+		
+\begin{proof}
+  Suppose $\cal{M}$ halts in $n$ steps.
+  Then from the definition of $\cal{F}$ and $\decider^\halt$, it follows that
+  $\decider^{\halt}$ accepts on input $(n, x, y, a, b)$ for all $x,y,a,b$, and
+  hence $\val^*(\verifier^\halt_n) = 1$. A value-$1$ PCC
+  strategy for $\verifier^\halt_n$ is the following trivial strategy: for all questions, the players always
+  return a fixed answer (e.g. $0$). 
+  
+  
+  If $\cal{M}$ does not halt in $n$ steps, then $\decider^{\halt}$ accepts on
+  input $(n, x, y, a,b)$ if and only if $\decider^\compr$ accepts on $(n, x, y,
+  a,b)$. \hnote{added dec 30, 2021:}  Since $\verifier^\halt_n$ and $\verifier^\compr_n$ use the same sampler $\sampler^\halt = \ComputeSampler(\lambda)$
+  by construction, any strategy for $\verifier^\halt_n$ is a strategy (with the same winning proabbility) for $\verifier^\compr_n$ and vice versa. This implies that there is a value-$1$ PCC strategy for $\verifier^\halt_n$ if and only if
+  there is a value-$1$ PCC strategy for $\verifier^\compr_n$. The ``Furthermore'' statement also follows directly from this.
+\end{proof}
+
+We show in Lemma~\ref{lem:lambda} below that for all Turing machine $\cal{M}$ there is a choice of
+$\lambda$ such that the corresponding $\verifier^\halt = (\sampler^\halt, \decider^\halt)$ is
+$\lambda$-bounded. We first show a technical
+lemma.
+
+\begin{lemma}
+  \label{lem:lambda-bound}
+  \hnote{redid this lemma}
+  Suppose $C, C' \in \N$ are integers. 
+  Then for all $\lambda \ge 4 \max \{ (4C)^{8C}, C \log C' \} $ and $n \ge 2$,
+  \begin{equation*}
+    C(C' \cdot \lambda n)^C \le n^\lambda.
+  \end{equation*}
+\end{lemma}
+
+\begin{proof}
+We aim to find a function $f(C,C')$ such that for all $\lambda \geq f(C,C')$, it holds that $C(C' \cdot \lambda n)^C \le n^\lambda$ for all $n \geq 2$. For this it suffices that 
+\begin{equation}
+\label{eq:lambda-bound-1}
+	\lambda \geq 4 \max \{ \log C, C, C \log C', C \log \lambda \} \qquad \text{for all $\lambda \geq f(C,C')$}
+\end{equation}
+This is because~\eqref{eq:lambda-bound-1} implies that $\lambda \geq \log C + C + C\log C' + C\log \lambda$ which, by exponentiating both sides, gives
+\[
+	2^\lambda \geq 2^{\log C + C + C\log C' + C\log \lambda} = C \cdot 2^C \cdot (C' \lambda)^C\;.
+\]
+Since $n^{\lambda - C} \geq 2^{\lambda -C}$ for all $n \geq 2$, we get that $n^{\lambda - C} \geq C (C' \lambda)^C$ which is the desired inequality. It is easy to verify that for all $\lambda \geq (4C)^{8C}$, we have $\lambda \geq 4 C \log \lambda$. Thus, setting
+\[
+	f(C,C') = 4 \max \{ (4C)^{8C}, C \log C' \}~,
+\]
+we obtain~\eqref{eq:lambda-bound-1}, which concludes the lemma.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:lambda}
+  There is an integer parameter $\lambda$, polynomial-time computable from the
+  description of the Turning machine $\cal{M}$, and
+  scaling as $\poly(|\overline{\machine}|)$, such that the verifier
+  $\verifier^\halt$ corresponding to $\cal{M}$ and parameter $\lambda$ is
+  $\lambda$-bounded and moreover $\TIME_{\decider^\halt}(n),\TIME_{\sampler^\halt}(n) = \poly(n, \abs{\overline{\cal{M}}})$.
+\end{lemma}
+
+\begin{proof}
+
+  We first do an accounting of the time complexity of $\decider^\halt$.
+  By definition, for all $\cal{M}$ and $\lambda$, the decider $\decider^\halt$
+  runs $\cal{F}$ on input $(\desc{F}, \desc{M}, \lambda, n, x, y, a, b)$.
+  Its running time is therefore a polynomial in the time bounds of
+  the following steps.
+
+  \begin{enumerate}
+  \item Simulating $\cal{M}$: this takes $\poly(\abs{\overline{\machine}}, n)$ time.
+  \item \label{enu:d} Computing the description $\overline{\decider}$: this
+    takes $\poly(\abs{\overline{\machine}}, \abs{\overline{\cal{F}}},\log \lambda)$ time.
+  \item Computing the description $\overline{\sampler^\compr}$: this takes
+    $\polylog(\lambda)$ time (by \Cref{lem:compress-independent-samplers}). 
+  \item \label{enu:cdc} Computing the description $\overline{\decider^\compr}$: this takes
+    $\poly(\abs{\overline{\verifier}}, \log\lambda)$ time (by \Cref{thm:compression}). 
+  \item \label{enu:rdc} Executing $\decider^\compr$ on input $(n,x,y,a,b)$: this
+    takes $\poly(n, \lambda)$ time (by \Cref{thm:compression}).
+  \end{enumerate}
+
+  As $\overline{\decider}$ is computed in time $\poly(\abs{\overline{\machine}},
+  \abs{\overline{\cal{F}}},\log \lambda)$, we have that the description length of $\decider$ is bounded by $\abs{\overline{\decider}} \le
+  \poly(\abs{\overline{\cal{M}}}, \abs{\overline{\cal{F}}},\log \lambda)$.
+  Similarly, the description length of the sampler is bounded by $\abs{\overline{\sampler}} \le \polylog(\lambda)$ as
+  $\ComputeSampler$ runs in polynomial time in the bit-length of $\lambda$.
+  Therefore, the size of the verifier $\abs{\overline{\verifier}}$ is bounded by
+  $\poly(\abs{\overline{\cal{M}}}, \abs{\overline{\cal{F}}}, \log \lambda)$.
+  So the time complexity bound in \cref{enu:cdc} is at most
+  $\poly(\abs{\overline{\cal{M}}}, \abs{\overline{\cal{F}}}, \log \lambda)$. We emphasize that we did not use the $\lambda$-boundedness of the verifier
+  $\verifier$, as this is what we want to prove here!
+  Overall the total time complexity of $\decider^\halt$ can be bounded by
+  \begin{equation}\label{eq:125-dec}
+    \TIME_{\decider^\halt}(n) \le C_{\labelstyle{D}} \bigl( \abs{\overline{\cal{M}}}
+    \cdot \abs{\overline{\cal{F}}} \cdot \lambda \cdot n \bigr)^{C_{\labelstyle{D}}},
+  \end{equation}
+  for some universal constant $C_{\labelstyle{D}} > 0$. 
+  By \cref{lem:lambda-bound}, we have for all $\lambda \ge \lambda_{0} := 4 \max \{ (4C_{\labelstyle{D}})^{8C_{\labelstyle{D}}} , C_\labelstyle{D} \log (\abs{\overline{\cal{M}}} \cdot \abs{\overline{\cal{F}}}) \}$ and $n \ge 2$, we have $\TIME_{\decider^\halt}(n) \le n^\lambda$.
+
+  Similarly, by \Cref{thm:compression} the sampler $\sampler^\halt$ has running time $\poly(n, \lambda)$
+  and therefore there is a universal constant $C_{\labelstyle{S}}>0$ such that
+  \begin{equation}\label{eq:125-samp}
+    \TIME_{\sampler^\halt}(n) \le C_{\labelstyle{S}}(\lambda \cdot n)^{C_{\labelstyle{S}}},
+  \end{equation}
+  which, again by \cref{lem:lambda-bound}, is at most $n^\lambda$ for $\lambda
+  \ge \lambda_1 := 4 \cdot (4C_{\labelstyle{S}})^{8C_{\labelstyle{S}}}$ and $n \ge 2$.
+
+  As we have shown $\abs{\overline{\verifier}} = \poly(\abs{\overline{\cal{M}}}, \abs{\overline{\cal{F}}}, \log
+  \lambda)$ and the description of the verifier $\verifier$ is the same as that
+  of $\verifier^\halt$, there exists an integer $C_{\labelstyle{V}}>0$ such that
+  \begin{equation*}
+    \abs{\verifier^\halt} \le C_{\labelstyle{V}}(\abs{\overline{\cal{M}}} \cdot \abs{\overline{\cal{F}}} \cdot \log
+    \lambda)^{C_{\labelstyle{V}}}.
+  \end{equation*}
+  Define $\lambda_2 := (\abs{\overline{\cal{M}}} \cdot \abs{\overline{\cal{F}}})^{2 C_{\labelstyle{V}}} \cdot 2^{2 C_{\labelstyle{V}}}$. One can verify that 
+  for all $\lambda \geq \lambda_2$, we have that $\abs{\verifier^\halt}  \leq \lambda$.
+
+  Finally, taking $\lambda = \big\lceil\max\{\lambda_0,\lambda_1,\lambda_2 \} \big \rceil$ completes the proof.
+	The quantity $\abs{\overline{\cal{F}}}$ is a universal constant, because the Turing machine $\cal{F}$ does not depend on $\lambda$ or $\cal{M}$. The quantities $	C_{\labelstyle{D}}, C_{\labelstyle{S}}, C_{\labelstyle{V}}$ are universal constants; therefore $\lambda_0, \lambda_1, \lambda_2$ and thus $\lambda$ can be computed from $|\overline{\machine}|$. It is clear that $\lambda = \poly(|\overline{\machine}|)$. Finally, for this value of $\lambda$ one immediately verifies from~\eqref{eq:125-dec} and~\eqref{eq:125-dec} that $\TIME_{\decider^\halt}(n),\TIME_{\sampler^\halt}(n) = \poly(n, \abs{\overline{\cal{M}}})$, as claimed. 
+	
+\end{proof}
+
+
+Putting things together we obtain the following result. 
+
+\begin{theorem}
+  \label{thm:halting}
+  There exists a polynomial-time computable map from Turing machines $\machine$ to games $\game$ that satisfies the ``efficiency'' requirement from Definition~\ref{def:mipstar} and is
+	such that
+	\begin{enumerate}
+  \item If $\machine$ halts on the empty input, then $\val^*(\game) = 1$. Moreover, in this case there is a (finite-dimensional) PCC strategy for the players in $\game$ that wins with certainty. 
+  \item If $\machine$ does not halt on the empty input, then $\val^*(\game) \leq
+    \frac{1}{2}$.
+	\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+  The map from Turing machines to games is computed as follows. 
+  Given a Turing machine $\machine$, first compute the parameter $\lambda$ as given by
+  \Cref{lem:lambda}. This takes time at most $\poly(|\overline{\machine}|)$, and furthermore $\lambda = \poly(|\overline{\machine}|)$. 
+  Then, compute the description of the verifier $\verifier^\halt = (\sampler^\halt,\decider^\halt)$ corresponding to $\machine$ and $\lambda$ 
+  by first computing the description of $\sampler^\halt = \ComputeSampler(\lambda)$ and then computing the description of the Turing machine $\decider^\halt$ that computes
+  \[
+  	\decider^\halt(n,x,y,a,b) = \cal{F}(\overline{\cal{F}},\overline{\cal{M}},n,x,y,a,b)~.
+  \]
+  Computing the description of $\verifier^\halt$ thus takes time $\polylog(\lambda) + \poly(|\overline{\machine}|)$ which is $\poly(|\overline{\machine}|)$. Finally,
+ 	output the description of the game $\game = \verifier^\halt_{C_0}$ where $C_0$ is the universal constant given by \Cref{thm:compression}. Clearly this computation takes $\poly(|\overline{\machine}|)$ time in total and, according to the ``moreover'' part of \Cref{lem:lambda}, returns a sampler and decider for $\game$ that run in time $\poly(\abs{\overline{\machine}})$, as required. 
+  
+
+
+	Now fix a Turing machine $\machine$ and let $\game_n$ denote the $n$-th game $\verifier^\halt_n$ of the verifier $\verifier^\halt$ computed by the aforementioned map (so in particular the output game $\game$ is $\game_{C_0}$). Suppose that $\machine$ halts on the empty input; let $T$ be the minimum number
+  of time steps required for $\machine$ to halt on the empty input.
+  Observe that for all $n \geq T$, by Lemma~\ref{lem:dhalt-values} it holds that
+  $\game_n$ has a value-$1$ PCC strategy.
+  We will use this to show inductively that $\game_n$ also has a value-$1$ PCC
+  strategy, for all $ C_0 \leq n < T$.
+
+  \begin{claim}
+    Let $ C_0 \leq n < T$. Suppose that $\game_{m}$ has a value $1$ PCC
+    strategy for all
+    $m > n$. Then $\game_n$ also has a value-$1$ PCC strategy.
+    \label{claim:induction-game}
+  \end{claim}
+  \begin{proof}
+    Since by assumption $\cal{M}$ does not halt in $n$ steps, by
+    Lemma~\ref{lem:dhalt-values} it holds that $\game_n$ has a value-$1$ PCC
+    strategy if $\game^{\compr}_n$ does.
+    Since $\verifier^\halt$ is $\lambda$-bounded (by \Cref{lem:lambda}) and $n \geq C_0$, by
+    \cref{thm:compression} it follows that $\game^{\compr}_n$ has a value-$1$ PCC
+    strategy if $\game_{2^n}$ does.
+    Since $2^n > n$, this is true by the hypothesis of the claim.
+    Thus, $\game_n$ has a value-$1$ PCC strategy as claimed.
+  \end{proof}
+  By \cref{claim:induction-game} and downwards induction on $n$ (with the base
+  case $n = T$), we have that $\game_n$ has a value-$1$ PCC strategy for all $n
+  \geq C_0$.
+  In particular, we have $\val^*(\game) = \val^*(\game_{C_0}) = 1$.
+  This shows the first item in the theorem statement.
+
+	Now suppose that $\machine$ does not halt on the empty input.
+  We have that for all $n \in \N$:
+  \begin{equation*}
+		\Ent\big(\game_n,\frac{1}{2}\big) = \Ent\big(\game^\compr_n,\frac{1}{2}\big) \geq
+    \Ent\big(\game_{N},\frac{1}{2}\big)\;,
+  \end{equation*}
+	where the equality follows from Lemma~\ref{lem:dhalt-values} and the
+  inequality follows from Theorem~\ref{thm:compression} (again using the
+  $\lambda$-bounded property of $\verifier^\halt$).
+  By induction, we get that for all $k \in \N$,
+  \begin{equation*}
+		\Ent\big(\game,\frac{1}{2}\big) = \Ent\big(\game_{C_0}, \frac{1}{2}\big) \geq
+    \Ent \Bigl( \game_{g^{(k)}(C_0)}, \frac{1}{2} \Bigr) =
+    \Ent \Bigl( \game^\compr_{g^{(k)}(C_0)}, \frac{1}{2} \Bigr) \geq
+    \frac{1}{2} \, 2^{(g^{(k+1)}(C_0))^\lambda }\;,
+  \end{equation*}
+	where $g^{(k)}(\cdot)$ is the $k$-fold composition of the function $g(n) =
+  2^{n}$ and the second inequality follows from Theorem~\ref{thm:compression}
+  again.
+  Since $g(\cdot)$ is a strictly monotonically increasing function this implies that there is no finite upper bound on
+  $\Ent(\game,\frac{1}{2})$ and therefore every finite dimensional strategy for the
+  game $\game$ must have success probability at most $\frac{1}{2}$.
+\end{proof}
+
+Recall the definition of the complexity class $\mathsf{RE}$, which stands for
+the set of \emph{recursively enumerable} languages (also called
+\emph{Turing-recognizable} languages).
+Precisely, a language $L \subseteq \{0,1\}^*$ is in $\RE$ if and only if there
+exists a Turing machine $\cal{M}$ such that if $x \in L$, then $\cal{M}(x)$
+halts and outputs $1$, and if $x \notin L$, then either $\cal{M}(x)$ outputs~$0$
+or it does not halt.
+The Halting Problem is the language that contains descriptions of Turing
+machines that halt on the empty input input.
+The following well-known lemma shows that the Halting Problem is complete for
+$\RE$, meaning that every language $L \in \RE$ can be polynomial-time reduced
+to the Halting Problem. We include the simple proof for convenience. 
+
+\begin{lemma}
+  The Halting Problem is complete for $\RE$ via Karp reductions.\footnote{A \emph{Karp reduction} between languages $L$ and $K$ is a polynomial-time Turing machine $R$ such that $x \in L$ if and only if $R(x) \in K$ for all instances $x \in \{0,1\}^*$.}
+\end{lemma}
+
+\begin{proof}
+  To see that the Halting Problem is in $\RE$, define $\cal{M}$ to take as input
+  an $x$ that represents a Turing machine $\cal{N} = [x]$, and runs the
+  universal Turing machine to simulate $\cal{N}$ on the empty input; if $\cal{N}$
+  halts with a $1$ then so does $\cal{M}$.
+
+  To show that the Halting problem is complete for $\RE$, let $L\in \RE$ and
+  $\cal{M}$ a Turing machine such that if $x \in L$, then $\cal{M}(x)$ halts and
+  outputs $1$.
+  For an input $x$, let $\cal{N}_x$ be the following Turing machine.
+  $\cal{N}_x$ first runs $\cal{M}$ on input $x$.
+  If $\cal{M}$ accepts, then $\cal{N}_x$ accepts.
+  On all other outcomes, $\cal{N}_x$ goes into an infinite loop.
+  Thus $\cal{N}_x$ halts if and only if $x \in L$. 
+\end{proof}
+
+\begin{corollary}\label{cor:mip-re}
+	$\mathsf{MIP}^* = \mathsf{RE}$.
+\end{corollary}
+\begin{proof}
+	Since the Halting Problem is complete for $\mathsf{RE}$, and by
+  Theorem~\ref{thm:halting} is contained in $\mathsf{MIP}^*_{1,1/2}\subseteq \MIP^*$ (see Definition~\ref{def:mipstar}), we have the
+  inclusion $\mathsf{RE} \subseteq \mathsf{MIP}^*$.
+  The reverse inclusion $\mathsf{MIP}^* \subseteq \mathsf{RE}$ follows from the
+  following observation.
+  Let $L \in \mathsf{MIP}^*$ .
+  From the definition of $\MIP^*$ (see e.g.~\cite[Section
+  6.1]{vidick2016quantum}, from which we borrow the terminology used here) it
+  follows that there exists a polynomial-time Turing machine $\cal{R}$ such that
+  for all $x \in \{0,1\}^*$, $\cal{R}(x)$ is the description of an $m$-turn
+  verifier $V_x$ interacting with $k$ provers, where $m$ and $k$ are both
+  polynomial functions of $|x|$ and such that
+	\begin{gather*}
+		\val^*(V_x) \geq 2/3 \qquad \text{ if $x \in L$ } \\
+		\val^*(V_x)	\leq 1/3 \qquad \text{ if $x \notin L$ }
+	\end{gather*}
+	Consider the following Turing machine $\cal{A}$: on input $x$, it computes
+  $V_x = \cal{R}(x)$, and then exhaustively searches over tensor-product
+  strategies of increasing dimension and increasing accuracy to evaluate a lower
+  bound on $\val^*(V_x)$.
+  If $\val^*(V_x) \geq 2/3$, then for arbitrarily small $\delta$ there exists a
+  finite dimensional tensor-product strategy for the players that achieves value
+  $2/3 - \delta > 1/3$.
+  When the Turing machine $\cal{A}$ identifies such a strategy it terminates,
+  outputting $1$.
+  If there is no such strategy, then $\cal{A}$ never halts.
+  This implies that $L \in \mathsf{RE}$.
+\end{proof}
+	
+\subsection{An explicit separation}
+\label{sec:separation}
+
+As discussed in Section~\ref{sec:consequences}, Theorem~\ref{thm:halting}
+implies that $C_{qa}$, the set of approximately finite-dimensional correlations,
+is a strict subset of $C_{qc}$, the set of commuting-operator correlations.
+This is because if $C_{qa} = C_{qc}$, then there exists an algorithm to
+approximate the entangled value of a given nonlocal game $\game$ to arbitrary
+accuracy.
+On the other hand, Theorem~\ref{thm:halting} shows that deciding whether a game
+has entangled value $1$ or at most $1/2$, promised that one is the case, is
+undecidable.
+Therefore the correlation sets must be different. 
+
+In fact, Theorem~\ref{thm:halting} implies that there is an infinite family
+$\mathscr{M}$ of Turing machines that do not halt on an empty input such
+that for all $\cal{M} \in \mathscr{M}$, the corresponding game $\game_\machine$
+has $\val^*(\game_\machine) < \valco(\game_\machine)$, where recall that
+$\valco(\game_\machine)$ denotes the \emph{commuting-operator value} of
+$\game_\machine$, which is the supremum of success probabilities over all
+commuting-operator strategies for $\game_\machine$.\footnote{To see why this
+  holds, observe that if it were the case that $\val^*(\game_\machine) =
+  \valco(\game_\machine)$ for all but finitely many non-halting $\machine$
+  then we could construct an algorithm $\cal{A}$ to decide the Halting problem
+  as follows.
+  On input $\cal{M}$, $\cal{A}$ first checks if $\cal{M}$ is one of the finitely
+  many Turing machines for which $\val^*(\game_\machine) <
+  \valco(\game_\machine)$; if so, then it outputs a hard-coded answer for
+  whether $\cal{M}$ halts on the empty tape or not.
+  Otherwise, $\cal{A}$ computes the nonlocal game $\game_\machine$ and executes
+  the aforementioned algorithm for approximating the entangled value of games
+  assuming that $C_{qa} = C_{qc}$.
+}
+However, it is not immediately clear, given a \emph{specific} non-halting Turing
+machine $\cal{M}$, whether the associated game $\game_\machine$ separates the
+commuting-operator model from the tensor product model of strategies.
+While Theorem~\ref{thm:halting} implies that $\val^*(\game_\machine) \leq
+\frac{1}{2}$, it could also be the case that $\valco(\game_\machine) =
+\val^*(\game_\machine)$ in that particular instance.
+We conjecture that $\valco(\game_\machine) = 1$ for \emph{all} non-halting
+Turing machines $\cal{M}$, but it appears to be difficult to identify an
+explicit value-$1$ commuting operator strategy that demonstrates this.
+
+In this section we identify an explicit game $\game$ that separates the tensor
+product model from the commuting-operator model; we show that $\val^*(\game)
+\leq \frac{1}{2}$ but $\valco(\game) = 1$.
+Interestingly, the proof does not exhibit an explicit value-$1$
+commuting-operator strategy for $\game$.
+
+We construct the separating game in a similar manner to the games constructed in
+Section~\ref{sec:halt}.
+Let $\cal{A}$ denote the following $1$-input Turing machine: it takes as input a
+description of a nonlocal game $\game$ and runs the semidefinite programming
+hierarchy of~\cite{navascues2008convergent,doherty2008quantum} to compute a
+non-increasing sequence $\alpha_1,\alpha_2,\ldots$ of upper bounds on
+$\valco(\game)$ such that $\lim_{n \to \infty} \alpha_n = \valco(\game)$.
+The Turing machine $\cal{A}$ halts if it obtains a bound $\alpha_n < 1$.
+Thus this algorithm eventually halts whenever $\valco(\game) < 1$, and
+otherwise it runs forever.
+
+Consider the Turing machine $\cal{N}$ in Figure~\ref{fig:separation}.
+We follow the same steps as in Section~\ref{sec:halt}.
+Let $\decider^\sep_\lambda$ be the decider that on input $(n, x, y, a, b)$,
+runs $\cal{N}$ on input $(\desc{\cal{N}}, \lambda, n, x, y, a, b)$. We
+sometimes leave the parameter $\lambda$ implicit.
+Define $\sampler^\sep = \ComputeSampler(\lambda)$ and $\verifier^\sep =
+(\sampler^\sep, \decider^\sep)$. By the definition of Turing machine $\cal{N}$
+in \cref{fig:separation}, the description $\overline{\verifier}$ computed by
+$\decider^\sep$ is the description of $\verifier^\sep$ itself and the input to
+$\Compress$ is the description of $\verifier^\sep$ and $\lambda$.
+Define the game $\game^\sep = \verifier^\sep_{C_0}$ where $C_0$ is the constant
+from \cref{thm:compression}.
+Then $\game^\sep$ is the game $\game$ computed in $\decider^\sep$.
+
+A similar argument to that of \cref{lem:lambda} shows that there exist choices
+of $\lambda$ (computable from the description of $\cal{A}$) such that
+$\verifier^\sep$ is $\lambda$-bounded.
+
+
+
+\begin{figure}[!htb]
+  \centering
+  \begin{gamespec}
+    Input: $(\desc{R}, \lambda, n, x, y, a, b)$ where $\desc{R}$ is
+    the description of a $7$-input Turing machine.
+    \begin{enumerate}
+    \item Compute the description $\overline{\sampler} = \ComputeSampler(\lambda)$.
+    \item Compute the description $\overline{\decider}$ of the $5$-input Turing
+      machine $\decider$ that on input $(n', x', y', a', b')$ runs $\cal{R}$ with
+      input $(\desc{R}, \lambda, n', x', y', a', b')$.
+      Let $\overline{\verifier} = (\overline{\sampler}, \overline{\decider})$.
+    \item Compute the description of the game $\game = \verifier_{C_0}$ where
+      $C_0$ is the integer from Theorem~\ref{thm:compression}.
+    \item Simulate $\cal{A}$ on input $\game$ for $n$ steps and accept if
+      $\cal{A}$ halts.
+    \item Compute the description $\overline{\verifier^\compr} =
+      \Compress(\overline{\verifier}, \lambda)$.
+    \item Accept if the decider $\decider^\compr$ of verifier
+      $\verifier^\compr$ accepts $(n, x, y, a, b)$.
+    \end{enumerate}
+  \end{gamespec}
+  \caption{Description of Turing machine $\cal{N}$.
+    The Turing machines $\ComputeSampler$ and $\Compress$ are given in
+    \cref{lem:compress-independent-samplers,thm:compression}.}
+  \label{fig:separation}
+\end{figure}
+
+
+
+\begin{theorem}
+  \label{thm:separation}
+  For the game $\game^\sep = \verifier^\sep_{C_0}$ it holds that
+  $\val^*(\game^\sep) \leq \frac{1}{2}$ and $\valco(\game^\sep) = 1$.
+\end{theorem}
+\begin{proof}
+  Suppose that $\valco(\game^\sep) = 1$.
+  The invocation of the Turing machine $\cal{A}$ on input $\game^\sep$ never
+  halts, and therefore the decider $\decider^\sep$ never accepts in Step 4 of
+  Figure~\ref{fig:separation}.
+  Applying Theorem~\ref{thm:compression}, we get that
+  $\Ent(\verifier^\sep_{n},\frac{1}{2}) \geq
+  \Ent(\verifier^\sep_{2^n},\frac{1}{2})$ and
+  \begin{equation*}
+    \Ent \Bigl( \verifier^\sep_n, \frac{1}{2} \Bigr) \geq 2^{2^{\lambda n}-1}
+  \end{equation*}
+  for all $n \geq C_0$.
+  An inductive argument implies that there is no finite upper bound on
+  $\Ent(\verifier^\sep_{n},\frac{1}{2})$, and thus $\val^*(\game^\sep) =
+  \val^*(\verifier^\sep_{C_0}) \leq \frac{1}{2}$, which implies the theorem.
+
+  On the other hand, suppose that $\valco(\game^\sep) < 1$.
+  Then there exists some $m \geq C_0$ such that $\cal{A}$ halts on input
+  $\game^\sep$ after $m$ steps, so $\verifier^\sep_n$ has a value-$1$ PCC
+  strategy for all $n \geq m$ (i.e.
+  the players do not respond with any answers).
+  Thus by the completeness statement of Theorem~\ref{thm:compression} and an
+  induction argument analogous to the one in the proof of \Cref{thm:halting}, we have that $\verifier^\sep_n$ has a value-$1$ PCC
+  strategy for all $n \geq C_0$, which implies that $\val^*(\game^\sep) = 1$, a
+  contradiction because of $\val^*(\game^\sep) \leq \valco(\game^\sep)$.
+  This completes the theorem.
+\end{proof}
+
+%
+ 
+\appendix
+
+\newcommand{\ideg}{\mathrm{ideg}}
+\newcommand{\Obs}{\mathcal{O}}
+\newcommand{\calH}{\mathcal{H}}
+\newcommand{\combine}{\mathrm{combine}}
+\newcommand{\nqubits}{M}
+

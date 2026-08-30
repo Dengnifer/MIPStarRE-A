@@ -1,0 +1,407 @@
+\section{Oracularization}
+\label{sec:oracle}
+
+\newcommand{\tvora}{\hat{\verifier}^\ora}
+\newcommand{\tsora}{\hat{\sampler}^\ora}
+\newcommand{\tdora}{\hat{\decider}^\ora}
+
+\subsection{Overview}
+
+In this section we introduce the \emph{oracularization} transformation.
+At a high level, the oracularization $\game^\ora$ of a nonlocal game $\game$ is
+intended to implement the following: one player (called the \emph{oracle
+  player}) is supposed to receive questions $(x,y)$ meant for both players in
+the original game $\game$, and the other player (called the \emph{isolated
+  player}) only receives either $x$ or $y$ (but not both), along with a label
+indicating which player in the original game the question is associated with (we
+refer to such players as the \emph{original} players, e.g.\ ``original $\alice$
+player'' and ``original $\bob$ player'').
+The oracle player is supposed to respond with an answer pair $(a,b)$, and the
+other player is supposed to respond with an answer $c$.
+The oracle and isolated player win the oracularized game if $(x,y,a,b)$
+satisfies the predicate of the original game $\game$ and the isolated player's
+answer is consistent with the oracle player's answer.
+
+The oracularization step is needed in preparation to the next section, in which
+we perform answer reduction on the introspection game.
+To implement answer reduction we need at least one player to be able to compute
+a proof, in the form of a PCP, that the decider of the original game would have
+accepted the questions $(x,y)$ and answers $(a,b)$.
+This requires the player to have access to both questions, and be able to
+compute both answers.
+
+\subsection{Oracularizing normal form verifiers}
+\label{sec:orac-def}
+
+Let $\verifier = (\sampler,\decider)$ be a normal form verifier such that
+$\sampler$ is an $\ell$-level sampler for some $\ell \geq 0$.
+We specify the \emph{typed oracularized verifier} $\tvora =
+(\tsora,\tdora)$ associated with $\verifier$ as follows. 
+
+
+\paragraph{Sampler.}
+Define the type set $\type^\ora = \{\oracle,\alice,\bob\}$.
+(In the remainder of this section we refer to the types in $\type^\ora$ as
+\emph{roles}.)
+Define the type graph $G^\ora$ that is the complete graph on vertex set
+$\type^\ora$ (including self-loops on all vertices).
+Define the $\type^\ora$-type sampler $\tsora$ as follows.
+For a fixed index $n \in \N$, let $V$ be the ambient space of $\sampler$ and
+$L^w$ for $w \in \ab $ be the pair of CL functions of $\sampler$ on index $n$.
+
+Define two $\type^\ora$-typed families of CL functions $\{ L^{w}_\tvar: V \to V
+\}$, for $w \in \{\alice,\bob\}$ and $\tvar \in \type^\ora$, as follows:
+\begin{equation*}
+	L^{w}_\tvar =
+  \begin{cases}
+		L^\tvar & \text { if $\tvar \in \{\alice,\bob\}$ }, \\
+		\mathrm{Id} & \text { if $\tvar = \oracle$ }.
+	\end{cases}
+\end{equation*}
+In other words, if a player gets the type $\tvar \in \{\alice,\bob\}$, then they
+get the question that original player $\tvar$ would have received in the game
+played by $\verifier_n$.
+If they get type $\tvar = \oracle$, then they get the entire seed $z$ that is
+used by the sampler $\sampler$, from which they can compute both $L^\alice(z)$
+and $L^\bob(z)$, the pair of questions sampled for the players in game
+$\verifier_n$.
+
+
+By definition, the sampler distribution $\mu_{\tsora,\, n}$ has the
+following properties.
+\begin{enumerate}
+\item Conditioned on both players receiving the $\oracle$ role, both players
+  receive $z$ for a uniformly random $z \in V$.
+		
+\item Conditioned on both players receiving the isolated player role, the
+  player(s) with role $\alice$ (respectively,~$\bob$) receives $L^\alice(z)$
+  (respectively, $L^\bob(z)$) for a uniformly random $z \in V$.
+		
+\item Conditioned on player $w\in\{\alice,\bob\}$ receiving the $\oracle$ role
+  and player $\overline{w}$ receiving the isolated player role, their question
+  tuple is distributed according to $\bigl( (\oracle,z), (v,L^v(z)) \bigr)$ if
+  $w=\alice$ and $\bigl( (v, L^v(z)), (\oracle,z) \bigr)$ if $w=\bob$, where $z
+  \in V$ is uniformly random and $v$ indicates the role of player
+  $\overline{w}$.
+\end{enumerate}
+
+\paragraph{Decider.}
+The typed decider $\tdora$ is specified in Figure~\ref{fig:oracle-decider}.
+
+\begin{figure}[!htb]
+  \centering
+  \begin{gamespec}
+    Input to decider $\tdora$: $(n, \tvar_\alice, x_\alice , \tvar_\bob,
+    x_\bob ,a_\alice, a_\bob)$.
+    For $w \in \{\alice,\bob\}$, if $\tvar_w = \oracle$, then parse $a_w$ as a
+    pair $(a_{w, \alice}, a_{w, \bob})$.
+    Perform the following steps sequentially.
+
+    \begin{enumerate}
+    \item (\textbf{Game check}).
+      \label{enu:oracle-game}
+      For all $w \in \{\alice,\bob\}$, if $\tvar_w = \oracle$, then compute
+      $x_{w,v} = L^v(x_w)$ for $v \in \{\alice,\bob\}$.
+      If $\decider$ rejects $(n,
+      x_{w,\alice},x_{w,\bob},a_{w,\alice},a_{w,\bob})$, then reject.
+
+    \item (\textbf{Consistency checks}).
+      \label{enu:oracle-full-consistency}
+      \begin{enumerate}[nosep]
+      \item \label{enu:check-same} If $\tvar_\alice = \tvar_\bob$ and $a_\alice
+        \neq a_\bob$, then reject.
+      \item \label{enu:oracle-versus-player} If for some $w \in
+        \{\alice,\bob\}$, $\tvar_w = \oracle$, $\tvar_{\overline{w}} \in
+        \{\alice,\bob\}$, and $a_{w,\, \tvar_{\overline{w}}} \neq
+        a_{\overline{w}}$, then reject.
+      \end{enumerate}
+    \item \label{enu:oracle-acc} Accept if none of the preceding steps rejects.
+    \end{enumerate}
+  \end{gamespec}
+  \caption{Specification of the typed decider $\tdora$.}
+  \label{fig:oracle-decider}
+\end{figure}
+
+\subsection{Completeness and complexity of the oracularized verifier}
+
+We determine the complexity of the oracularized verifier and
+establish the completeness property.
+
+\begin{theorem}[Completeness and complexity of the oracularized verifier]
+  \label{thm:oracle-completeness}
+  Let $\verifier = (\sampler, \decider)$ be a normal form verifier.
+  Let $\tvora = (\tsora,\tdora)$ be the corresponding
+  typed oracularized verifier.
+  Then the following hold.
+  \begin{itemize}
+  \item (\textbf{Completeness}) For all $n \in \N$, if $\verifier_n$ has a PCC
+    strategy of value $1$, then $\tvora_n$ has an
+    SPCC strategy of value $1$.
+  
+  \item (\textbf{Sampler complexity}) The sampler $\tsora$ depends only
+    on $\sampler$ (and not on $\decider$).
+    Moreover, the time complexity of $\tsora$ satisfies
+    \begin{equation*}
+      \TIME_{\tsora}(n) = O \left (\TIME_{\sampler}(n)
+      \right),
+    \end{equation*}
+    Furthermore, if $\sampler$ is an $\ell$-level sampler, then
+    $\tsora$ is a $\ell$-level typed sampler.
+
+  \item (\textbf{Decider complexity}) The time complexity of $\tdora$
+    satisfies
+    \begin{equation*}
+      \TIME_{\tdora}(n) = \poly \left (\TIME_{\decider}(n),
+        \TIME_\sampler(n) \right)\;.
+    \end{equation*}
+
+	\item (\textbf{Efficient computability}) There is a Turing machine
+    $\ComputeOracleVerifier$ which takes as input $\verifier =
+    (\sampler,\decider)$ and returns $\tvora = ( \tsora,
+    \tdora)$ in time $\poly(\abs{\verifier})$.
+  \end{itemize}
+\end{theorem}
+
+
+\begin{remark}
+Unlike with the Introspection transformation, we do not detype the oracularized verifier $\tvora$; this is because the analysis of the Answer Reduction transformation in \Cref{sec:ans} \emph{directly} reduces to the analysis of the typed oracularized verifier $\tvora$ defined here.
+\end{remark}
+
+\begin{proof}
+  We analyze the completeness and complexity properties of the typed verifier
+  $\tvora$.
+
+  \paragraph{Completeness.}
+  For $n \in \N$, let $\strategy = (\ket{\psi},A,B)$ be a PCC strategy for
+  $\verifier_n$ with value $1$.
+  Consider the following symmetric strategy $\strategy^\ora = (\ket{\psi}, M)$
+  for $\tvora_n$.
+  Depending on the role received, each player performs the following:
+  \begin{enumerate}
+	\item Suppose the player receives role $v \in \{\alice,\bob\}$ and question
+    $x$.
+    Then the player performs the measurement that player $v$ would on question
+    $x$ according to strategy $\strategy$ to obtain outcome $a$ (either
+    $\{A^{x}_a\}$ or $\{B^x_a\}$, depending on $v$).
+    The player replies with $a$.
+		\label{enu:oracle-honest-isolated}
+		
+	\item Suppose the player receives role $v = \oracle$ and question $x$.
+    The player first computes $y_w = L^w(x)$ for $w \in \{\alice,\bob\}$ where
+    for $w\in \ab$, $L^w$ is the CL functions of $\sampler$ corresponding to
+    player $w$.
+    Then, the player measures using the POVM $\{ M^{\Oracle,\, x}_{a_\alice,\,
+      a_\bob}\}$ where
+    \begin{equation}
+      \label{eq:oracle-honest}
+      M^{\oracle,\, x}_{a_\alice,\, a_\bob} = B^{y_\bob}_{a_\bob}\,
+      A^{y_\alice}_{a_\alice}\;.
+    \end{equation}
+    The projectors $A^{y_\alice}_{a_\alice}$ and $B^{y_\bob}_{a_\bob}$
+    commute because $(y_\alice, y_\bob)$ is distributed according to
+    $\mu_{\sampler,\, n}$ (over the choice of $x$) and $\strategy$ is a
+    commuting strategy for $\verifier_n$.
+    Thus $M^{\oracle,\, x}_{a_\alice,\, a_\bob}$ is a projector.
+    The player replies with $(a_\alice, a_\bob)$.
+		\label{enu:oracle-honest-oracle}
+  \end{enumerate}
+
+  The strategy $\strategy^\ora$ is symmetric and projective by construction, and
+  consistency follows from the consistency of $\strategy$.
+  We now argue that the strategy is commuting and has value $1$ in the game
+  $\tvora_n$.
+  We consider all possible pairs of roles.
+
+  \begin{enumerate}
+  \item ({Oracle, isolated}) Suppose without loss of generality that player
+    $w=\alice$ gets the $\oracle$ role and player $\overline{w}=\bob$ gets the
+    isolated player $\bob$ role.
+    Then player $w$ gets question $x$ and player $\overline{w}$ gets question
+    $L^\bob(x)$, where $x$ is uniformly sampled from $V$.
+    The oracle player computes $y_v = L^v(x)$ for all $v \in \ab$.
+    Notice that $(y_\alice, y_\bob)$ is distributed according to
+    $\mu_{\sampler,\, n}$.
+    The two players return $\bigl( (a_\alice, a_\bob), a'_\bob \bigr)$ with
+    probability
+    \begin{align*}
+      \bra{\psi} M^{\oracle,\, x}_{a_\alice,\, a_\bob} \otimes
+      B^{y_\bob}_{a'_\bob} \ket{\psi}
+      & = \bra{\psi} B^{y_\bob}_{a_\bob} A^{y_\alice}_{a_\alice} \otimes
+        B^{y_\bob}_{a'_\bob} \ket{\psi}\\
+      & = \bra{\psi}  A^{y_\alice}_{a_\alice} \otimes
+        B^{y_\bob}_{a_\bob} B^{y_\bob}_{a'_\bob} \ket{\psi}\\
+      & = \delta_{a_\bob,\, a'_\bob}\, \bra{\psi} A^{y_\alice}_{a_\alice} \otimes
+        B^{y_\bob}_{a_\bob} \ket{\psi}\;,
+    \end{align*}
+    where the first equality uses the definition of $M^{\oracle,\,
+      x}_{a_\alice,\, a_\bob}$ from Eq.~\eqref{eq:oracle-honest}, the second
+    equality uses the consistency of $\strategy$, and the third equality uses
+    the projectivity of $\strategy$.
+    Notice that when $a_\bob = a'_\bob$, this is exactly the probability of
+    obtaining answers $(a_\alice,a_\bob)$ when player $\alice$ and player $\bob$
+    get question pair $(y_\alice,y_\bob)$ in the game $\verifier_n$.
+    Since $\strategy$ is value-$1$, the answers satisfy the decision procedure
+    of $\verifier_n$ with probability $1$.
+    Thus the oracle's answers pass the ``Game check'' of the oracularized
+    decider with certainty, and furthermore the oracle's answers are consistent
+    with the isolated player's answers and thus pass the ``Consistency check''
+    with certainty as well.
+	
+    Commutativity of $M^{\Oracle,\, x}_{a_\alice,\, a_\bob}$ and
+    $B^{y_\bob}_{a_\bob}$ follows from the commutativity of $\strategy$ for the
+    game $\verifier_n$.
+
+  \item ({Both oracle}) If both players get the $\oracle$ role, then both
+    players receive the same question $x \in V$.
+    Using a similar analysis as for the previous item, the players return the
+    same answer pair (thus passing the ``Consistency check'') and pass the
+    ``Game check''.
+    Both players' measurements commute because they are identical.
+
+  \item ({Both isolated}) Suppose that both players receive the same isolated
+    player role (e.g., they both receive the isolated player role $\alice$).
+    They then perform the same measurements, which produce the same outcomes due
+    to the consistency of the strategy $\strategy$, and thus they pass the
+    ``Consistency check''.
+    Otherwise, suppose that one player receives the $\alice$ role and the other
+    player receives the $\bob$ role.
+    Then the decider $\tdora$ automatically accepts.
+    Furthermore, their measurements commute because their questions are
+    distributed according to $\mu_{\sampler,\, n}$, and $\strategy$ is a
+    commuting strategy with respect to $\mu_{\sampler,\, n}$.
+  \end{enumerate}
+
+  \paragraph{Complexity.}
+  It is clear from the definition that $\tsora$ depends only on
+  $\sampler$.
+  The time complexity of the sampler $\tsora$ is dominated by those of
+  the sampler $\sampler$.
+  The complexity of $\tdora$ is dominated by the complexity of both $\sampler$ and $\decider$
+  and performing consistency checks.
+  The sampler $\tsora$ is a $\max\{\ell,1\}$-level sampler because
+  $\sampler$ is an $\ell$-level sampler and the new CL functions for
+  $\tvar=\oracle$ are $1$-level.
+
+  \paragraph{Efficient computability.}
+  The description of $\tsora$ can be computed, in polynomial time, from
+  the description of $\sampler$ alone.
+  The description of $\tdora$ can be computed in polynomial time from the
+  descriptions of $\sampler$ and $\decider$.
+  Moreover, in each case the computation amounts to copying the description of
+  $\sampler$ and $\decider$ respectively, and adding constant-sized additional
+  instructions.
+
+\end{proof}
+
+\subsection{Soundness of the oracularized verifier}
+
+\begin{theorem}[Soundness of the oracularized verifier]
+  \label{thm:oracle-soundness}
+  Let $\verifier = (\sampler, \decider)$ be a normal form verifier and
+  $\tvora = (\tsora,\tdora)$ be the corresponding typed
+  oracularized verifier.
+  Then there exists a function $\delta(\eps) = \poly(\eps)$ such that for all $n
+  \in \N$ the following hold.
+  \begin{enumerate}
+  \item If $\val^*(\tvora_n) > 1 - \eps$, then $\val^*(\verifier_n) \geq
+    1 - \delta(\eps)$.
+	\item For all $\eps > 0$, we have that
+    \begin{equation*}
+      \Ent \bigl( \tvora_n, 1 - \eps \bigr) \geq
+      \Ent(\verifier_{n}, 1 - \delta(\eps))
+    \end{equation*}
+    where $\Ent(\cdot)$ is as in \cref{def:ent}.
+  \end{enumerate}
+\end{theorem}
+
+\begin{proof}
+	Fix $n \in \N$.
+  Let $\strategy^\ora = \bigl( \ket{\psi}, A, B \bigr)$ be a strategy
+  for $\tvora_n$ with value $1 - \eps$ for some $0 < \eps \leq 1$. Using Lemma~\ref{lem:symmetric-strat} we may without loss of generality assume that $\strategy^\ora$ is projective. 
+  Let $(\tvar,x) \in \type^\ora \times V$ be a question to player $w=\alice$.
+  In the event that $\tvar = \oracle$ (which occurs with probability $1/3$), let
+  $y_v = L^v(x)$ for each $v \in \{\alice,\bob\}$.
+  From the consistency check performed by $\tdora$ and
+  item~\ref{item:consistency-implies-approx} of Fact~\ref{fact:agreement}, we
+  have that for all $v \in \{\alice,\bob\}$ and on average over $x$ sampled by
+  $\tsora$,
+  \begin{equation}
+    \label{eq:oracle-1}
+    A^{\oracle,\, x}_{a_v} \otimes \Id_\bob  \approx_\eps
+    \Id_\alice \otimes B^{v,\, y_v}_{a_v}\;.
+  \end{equation}     
+  Here, we used that with probability $1/9$ player $w=\alice$ gets the $\oracle$
+  role and player $\overline{w}=\bob$ gets the isolated player $v$ role;
+  conditioned on this, player $\bob$ gets question $y_v$.
+	
+	Using 
+	Fact~\ref{fact:add-a-proj} on~\eqref{eq:oracle-1}, with the $C$ operators from  Fact~\ref{fact:add-a-proj} chosen as $\{A^{\oracle,\, x}_{a_\alice,\,
+    a_\bob}\}$ here we get
+		  \begin{align}
+   A^{\oracle,\, x}_{a_\alice,a_\bob} \otimes \Id_\bob  &=  A^{\oracle,\, x}_{a_\alice,a_\bob} \cdot\big( A^{\oracle,\, x}_{a_\bob} \otimes \Id_\bob \big) \notag\\
+	&\approx_\eps
+   A^{\oracle,\, x}_{a_\alice,a_\bob}\cdot\big( \Id_\alice \otimes B^{\bob,\, y_\bob}_{a_\bob}\big) \notag\\
+	&= A^{\oracle,\, x}_{a_\alice,a_\bob}\otimes B^{\bob,\, y_\bob}_{a_\bob}\;,   \label{eq:oracle-1b}
+  \end{align}   
+		where for the first equality we used that the POVM elements $\{A^{\oracle,\, x}_{a_\alice,\,
+    a_\bob}\}$ are projective. Using a similar calculation for the second and third approximations below we get
+  \begin{equation}
+    \label{eq:oracle-2}
+    \begin{split}
+      A^{\oracle,\, x}_{a_\alice,\, a_\bob} \otimes \Id_\bob
+      & \approx_{\eps} A^{\oracle,\, x}_{a_\alice,\, a_\bob}  \otimes
+      B^{\bob,\, y_\bob}_{a_\bob} \\
+      &\approx_{\eps} A^{\oracle,\, x}_{a_\alice} \otimes
+      B^{\bob,\, y_\bob}_{a_\bob} \\
+      & \approx_\eps \Id_\alice \otimes
+      B^{\bob,\, y_\bob}_{a_\bob} B^{\alice,\, y_\alice}_{a_\alice} \\
+      & \approx_\eps \Id_\alice \otimes
+      B^{\alice,\, y_\alice}_{a_\alice} B^{\bob,\, y_\bob}_{a_\bob}\;,
+    \end{split}
+  \end{equation}
+	where the last line uses that starting from $A^{\oracle,\, x}_{a_\alice,\, a_\bob} \otimes \Id_\bob$ we may perform all operations leading to the before-last line hwile reversing the order in which $B^\bob$ and $B^\alice$ are introduced. 
+	
+  Using \cref{enu:check-same} of the consistency check, we have that on
+  average over a random $y = L^\alice(x) \in L^\alice(V)$,
+  \begin{equation}
+    \label{eq:oracle-3}
+    A^{\alice,\, y}_{a} \otimes I_\bob \approx_\eps
+    \Id_\alice \otimes B^{\alice,\, y}_{a}\;.
+  \end{equation}
+  Define, for all $y \in L^\alice(V)$, measurement operators $\{C^y_a\}_a$ where
+  $C^y_a = A^{\alice,\, y}_a$.
+  Similarly, define $D^y_a = B^{\bob,\, y}_a$.
+  This defines a strategy $\strategy = (\ket{\psi},C,D)$ for the game
+  $\verifier_n$ that we now argue succeeds with high probability.
+    
+  Let $x \in V$ be uniformly random.
+  Let $y_\alice = L^\alice(x)$ and $y_\bob =L^\bob(x)$.
+  \begin{align*}
+    A^{\oracle,\, x}_{a_\alice,\, a_\bob} \otimes \Id_\bob
+    & \approx_\eps \Id_\alice \otimes
+      B^{\bob,\, y_\bob}_{a_\bob} B^{\alice,\, y_\alice}_{a_\alice} \\
+    & \approx_{\eps} A^{\alice,\, y_\alice}_{a_\alice} \otimes
+      B^{\bob,\, y_\bob}_{a_\bob} \\
+    & = C^{y_\alice}_{a_\alice} \otimes D^{y_\bob}_{a_\bob}\;.
+  \end{align*}
+	The first approximation follows from Equation~\eqref{eq:oracle-2}.
+  The second approximation follows from Equation~\eqref{eq:oracle-3} and
+  Fact~\ref{fact:add-a-proj} (where we let $C^y_b$ in Fact~\ref{fact:add-a-proj}
+  represent $\Id\ot B^{\bob,\, y_\bob}_{a_\bob}$).
+  The last equality follows from definition of $C^{y_\alice}_{a_\alice}$ and
+  $D^{y_\bob}_{a_\bob}$.
+  The pair of questions $(y_\alice, y_\bob) \in V \times V$ is distributed
+  according to $\mu_{\sampler,\, n}$.
+
+  The game check part of $\tdora$ succeeds with probability $1 -
+  O(\eps)$, which implies that the answer pair $(a_\alice, a_\bob)$ that arises
+  from the measurement $A^{\oracle,\, x}_{a_\alice,\, a_\bob} \otimes \Id_\bob$
+  is accepted by the decider $\decider$ on question pair $(y_\alice,y_\bob)$
+  with probability $1 - O(\eps)$.
+  This in turn implies that the strategy $\strategy = (\ket{\psi},C,D)$ succeeds
+  with probability $1 - O(\sqrt{\eps})$ in the game $\verifier_n$.
+  As an additional consequence, the Schmidt rank of $\ket{\psi}$ must be at
+  least $\Ent(\verifier_n, 1 - O(\sqrt{\eps}))$.
+\end{proof}
+
+ 

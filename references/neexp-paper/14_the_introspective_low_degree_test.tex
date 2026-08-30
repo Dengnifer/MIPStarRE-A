@@ -1,0 +1,781 @@
+\section{The introspective low-degree test}\label{sec:big-degree}
+
+In this section, we give the introspective low-degree test.
+This is an introspection game which simulates the classic surface-versus-point test,
+but is able to reduce the question complexity by making the provers sample the questions themselves.
+We allow for a fully general $k$-dimensional surface,
+though in our application we will only use $k = 1$ (lines) and $k=2$ (planes).
+
+Given an integer $n > 0$ and a power of two~$q$,
+the introspective low-degree test is a $(k+1, n, q)$-register game.
+In other words, the provers share a state of the following form:
+\begin{equation*}
+\ket{\psi}
+=
+\ket{\mathrm{EPR}_q^n}_{\reg{0}}
+\otimes \ket{\mathrm{EPR}_q^n}_{\reg{1}}
+\otimes
+\cdots
+\otimes
+\ket{\mathrm{EPR}_q^n}_{\reg{k}}
+\otimes
+\ket{\mathrm{aux}}_{\reg{aux}}.
+\end{equation*}
+The intended behavior is this: the ``points" prover should measure the point $\bu \in \F_q^n$ from register~$0$.
+The ``surface"  prover should measure directions $\bv = \{\bv_1, \ldots, \bv_k\}$ from registers~$1$ through~$k$
+and then should receive their surface~$\bs$ from the surface measurement $\{\Pi^{\bv}_s\}_{s\in \surfaces{\bv}}$ on register~$0$.
+If the provers act honestly, then~$\bu$ will be a uniformly random point in~$\bs$,
+generating the same distribution as the questions in the surface-versus-point low-degree test.
+
+The key difficulty is preventing the surface prover from fully
+measuring the register~$0$ and thus learning the value of the point~$\bu$.
+In this section, we design a test to enforce this behavior on the
+surface prover, using an introspected version of the partial data-hiding game developed in \Cref{sec:rotated-data-hiding}.
+This game lets us command the
+surface prover to erase all information about $\bu$ except its value
+modulo linear combinations of the directions $\bv_1, \dots, \bv_k$;
+we give it in \Cref{sec:ihide} below.
+We use this test in  \Cref{sec:big-low-degree-subsection} to design the introspective
+low-degree test and prove its soundness.
+
+
+\subsection{Introspected partial data-hiding}
+\label{sec:ihide}
+
+In this section, we give an introspected version of the partial
+data-hiding game, which will be used to implement the surface and
+intercept-scrambling measurements described above.
+
+\begin{definition}
+Let $k, n >0$ be integers, let~$q$ be a power of~$2$,
+and let $\lambda = (k+1, n, q)$ be register parameters.
+Let~$x$ be an arbitrary query.
+Then the \emph{introspected partial data-hiding game}~$\game_{\mathrm{IntroHide}}(\lambda, x)$ is given in~\Cref{fig:ihide}.
+\end{definition}
+
+
+{
+\floatstyle{boxed} 
+\restylefloat{figure}
+\begin{figure}[htbp]
+  Flip an unbiased coin $\bb \sim \{0, 1\}$, and perform one of the following three tests with
+  probability $1/3$ each.
+  \begin{enumerate}
+    \item Distribute the questions as follows:\label{item:did-you-give-me-the-right-surface-or-not}
+      \begin{itemize}
+      \item[$\circ$] Player~$\bb$: Give $(\bot, \ktimes{Z}{k}, x)$; receive
+        $(\varnothing, \bv_1, \dots, \bv_k, \ba_2)$.
+      \item[$\circ$] Player~$\ol{\bb}$: Give $(Z, \ktimes{Z}{k}, x)$; receive
+        $(\ba'_1, \bv_1, \dots, \bv_k, \ba'_2)$.
+      \end{itemize}
+      Accept if $\ba_2 = \ba'_2$
+    \item Distribute the questions as follows:
+      \begin{itemize}
+        \item[$\circ$] Player~$\bb$: Give $(\bot, \ktimes{Z}{k}, x)$; receive
+          $(\varnothing,\bv_1, \dots, \bv_k, \ba_2)$.
+        \item[$\circ$] Player~$\ol{\bb}$: Give $(\bot, \ktimes{Z}{k}, x,
+          \{X\})$; receive $(\varnothing, \bv_1, \dots, \bv_k, \ba'_2, \{\ba_{1,1}', \dots, \ba_{1,k}'\})$.
+        \end{itemize}
+        Accept if $\ba_2 = \ba_2'$.
+      \item Distribute the questions as follows:
+        \begin{itemize}
+        \item[$\circ$] Player~$\bb$: Give $(X, \ktimes{Z}{k}, \varnothing)$;
+          receive $(\ba_1, \bv_1, \dots, \bv_k, \varnothing)$.
+        \item[$\circ$] Player~$\overline{\bb}$: Give $(\bot, \ktimes{Z}{k}, \bot, \{X\})$; receive
+        $(\varnothing, \bv'_1, \dots, \bv'_k, \varnothing, \{\ba_{1,1}', \dots \ba_{1,k}'\})$. 
+        \end{itemize}
+        Accept if $\bv_i = \bv'_i$ and $\ba'_{1,i} = \bv_i \cdot \ba_1$ for all $i \in \{1,
+        \dots, k\}$.
+      \item 
+        Distribute the questions as follows:
+        \begin{itemize}
+          \item[$\circ$] Player~$\bb$: Give $(\bot, x, \ktimes{Z}{k}, \{X\})$;
+            receive $(\varnothing, \bv_1, \dots, \bv_k, \ba_2, \{\ba_{1,1}, \dots,
+            \ba_{1,k}\})$.
+          \item[$\circ$] Player~$\overline{\bb}$: give $(\bot,
+            \bot, \ktimes{Z}{k}, \{X\})$; receive $(\varnothing,
+            \bv'_1, \dots, \bv'_k
+            \varnothing, \{\ba'_{1,1}, \dots, \ba'_{1,k}\})$.
+          \end{itemize}
+          Accept if $\ba_{1,i}  = \ba_{1,i}'$ for all $i \in \{1,
+          \dots, k\}$.
+    \end{enumerate}
+\caption{The introspected partial data-hiding game $\game_{\mathrm{IntroHide}}(\lambda, x)$.\label{fig:ihide}}
+\end{figure}
+}
+
+The performance of the introspected partial data-hiding game is given in the following theorem.
+
+\begin{theorem}  \label{thm:ihide}
+Let $k, n >0$ be integers, let~$q$ be a power of~$2$,
+and let $\lambda = (k+1, n, q)$ be register parameters.
+Let~$x$ be an arbitrary query.
+Then $\game_{\mathrm{IntroHide}} := \game_{\mathrm{IntroHide}}(\lambda, x)$
+satisfies the following two properties.
+  \begin{itemize}
+  \item[$\circ$]\textbf{Completeness:}
+    Let $\calS_{\mathrm{partial}} = (\psi, M^{\bot, Z, \dots, Z, x})$ be a partial
+    $\lambda$-register strategy for~$\game_{\mathrm{IntroHide}}$, which
+    is also a real commuting EPR strategy, and for which
+    \[ M^{\bot, Z, \dots, Z, x}_{\varnothing, v_1, \dots, v_k, a_2} =
+      \sum_{s \in \surfaces{v}} \Pi^{v}_s \ot \tau^Z_{v_1} \ot \dots \ot
+      \tau^Z_{v_k} \ot A^{x,s,v}_{a_2}, \]
+    for some measurement $A^{x,s,v}_{a_2}$ acting only on the
+    $\reg{aux}$ register. Then there is a value-$1$ $\lambda$-register strategy for $\game_{\mathrm{IntroHide}}$
+    extending $\calS_{\mathrm{partial}}$ which is also a real commuting EPR strategy.
+    \ignore{
+    there is a $\lambda$-register strategy~$\calS$ extending
+    $\calS_{\mathrm{partial}}$ which is a real commuting EPR strategy
+    for which
+    $\valstrat{\game_{\mathrm{ihide}}}{\calS} = 1$.}
+    \item[$\circ$]\textbf{Soundness:}
+      Let $\calS = (\psi, M)$ be a projective
+      $\lambda$-register strategy
+      passing $\game_{\mathrm{IntroHide}}$ with probability at least $1-\eps$.
+      Then there exists an ideal measurement $M'^x_{v_1, \ldots, v_k, a_2}$ with
+      the property that
+      \[ M'^{ x}_{v_1, \dots, v_k, a_2} = 
+        \tau^Z_{v_1} \ot \dots \ot \tau^Z_{v_k} \ot \left( \sum_{s \in \surfaces{v}} \Pi^{v}_s \ot
+          (M^{x, s, v}_{a_2})_{\reg{aux}}\right), \]
+      such that  the measurement $M^{\bot, Z\dots, Z, x}_{\varnothing,
+        v_1, \dots, v_k, a_2}$ used by strategy $\calS$ in
+      response to the query $(\bot, \ktimes{Z}{k}, x)$  is close to
+      $M'^x_{v_1, \dots, v_k, a_2}$:
+      \[ (M_{a_2}^{\bot, Z, \dots, Z, x})_{\reg{Alice}} \otimes I_{\reg{Bob}} \approx_\eps (M'^x_{a_2})_{\reg{Alice}} \otimes I_{\reg{Bob}}. \]
+    \end{itemize}
+  \end{theorem}
+  \begin{proof}
+    We first show completeness. Very similarly to the non-introspected
+    partial data-hiding game, we introduce measurements for the
+    remaining questions as follows:
+    \begin{align*}
+      M^{Z, Z, \dots, Z, x}_{a_1, v_1, \dots, v_k, a_2} &= \sum_{s \in
+                                                          \surfaces{v}}
+                                                          (\Pi^{v}_s \cdot
+                                                          \tau^Z_{a_1})
+                                                          \ot
+                                                          \tau^Z_{v_1}
+                                                          \ot \dots
+                                                          \ot
+                                                          \tau^Z_{v_k}
+                                                          \ot
+                                                          A^{x,s,v}_{a_2},
+      \\
+      M^{X, Z, \dots, Z}_{a_1, v_1, \dots, v_k} &= \tau^X_{a_1} \ot
+                                                  \tau^Z_{v_1} \ot
+                                                  \dots \ot
+                                                  \tau^Z_{v_k} \ot I_{\reg{aux}},\\
+      M^{\bot, Z, \dots, Z, x, \{X\}}_{\varnothing, v_1, \dots, v_k,
+      a_2, \{a_{1,1}, \dots, a_{1,k}\}} &= \sum_{s \in \surfaces{v}}
+                                         ( \Pi^{v}_s \cdot \tau^X_{[\forall
+                                          i,  a_1 \cdot v_i = a_{1, i}]})
+                                          \ot \tau^Z_{v_1} \ot \dots
+                                          \ot \tau^Z_{v_k} \ot
+                                          A^{x,s,v}_{a_2,} \\
+      M^{\bot, Z, \dots, Z, \{X\}}_{\varnothing, v_1, \dots, v_k,
+      \varnothing, \{a_{1,1}, \dots, a_{1,k}\}} &=\tau^X_{[\forall i,
+                                                  a_1 \cdot v_i = a_{1,i}]} \ot \tau^Z_{v_1}
+                                                  \ot \dots
+                                                  \tau^Z_{v_k} .
+    \end{align*}
+    By essentially the same arguments as in the proof of \Cref{thm:partial-data-hiding-game}, it
+    follows that these measurements define a value-$1$ real commuting
+    EPR strategy for $\game_{\mathrm{IntroHide}}$.
+
+    We now show soundness. Suppose that the provers succeed in the game
+    with probability $1 - \eps$ using a $\lambda$-register
+    strategy. From the definition of a register strategy, we know that the measurement operators
+    used by the provers have the following form.
+    \begin{align*}
+      M^{\bot, Z, \dots, Z, x}_{\varnothing, v_1, \dots, v_k, a_2} &=
+      (A^{x, v_1, \dots, v_k}_{a_2})_{\reg{1, aux}} \ot \tau^Z_{v_1}
+                                                                     \ot \cdots \ot \tau^Z_{v_k}, \\
+      M^{\bot, Z, \dots, Z, x, \{X\}}_{\varnothing, v_1, \dots, v_k,
+      a_2, \{a'_{1,1}, \dots, a'_{1,k}\}} &= (B^{x, v_1, \dots,
+      v_k}_{a_2, \{a'_{1,1}, \dots, a'_{1,k}\}})_{\reg{1,aux}}
+                                            \ot \tau^Z_{v_1} \ot \cdots  \ot \tau^Z_{v_k}, \\
+      M^{Z, Z \dots, Z, x}_{a_1, v_1, \ldots, v_k, a_2} &= \tau^Z_{a_1}
+                                                         \ot
+                                                         \tau^Z_{v_1} \ot
+                                                         \cdots \ot
+                                                         \tau^Z_{v_k}
+                                                         \ot (C^{x,
+                                                         a_1, v_1,
+                                                          \dots,
+                                                          v_k}_{a_2})_{\reg{aux}},\\
+      M^{\bot, Z, \dots, Z, \bot, \{X\}}_{\varnothing, v_1, \dots,
+      v_k, \varnothing, \{a_{1,1}, \dots, a_{1,k}\}} &=  (D^{v_1,
+                                                       \dots, v_k}_{a_{1,1},
+                                                       \dotsm
+                                                       a_{1,k}})_{\reg{1,aux}}
+                                                       \ot
+                                                       \tau^Z_{v_1}
+                                                       \ot \dots \ot \tau^Z_{v_k}.
+    \end{align*}
+    where the operators $\{A^{x, v_1, \dots, v_k}_{a_2}\}$,
+    $\{B^{x, v_1, \dots, v_k}_{a_2, \{a'_{1,1}, \dots, a'_{1,k}\}}\}$,
+    $\{C^{x, a_1, v_1, \ldots, v_k}_{a_2}\}$, and $\{D^{v_1, \dots,
+      v_k}_{a_{1,1}, \dots, a_{1,k}}\}$ form
+    valid POVMs for every choice of $x, a_1, v_1, \dots, v_k$. We further
+    know that the shared state of the provers is of the form
+    \[ \
+\ket{\psi}
+=
+\ket{\mathrm{EPR}_q^n}_{\reg{0}}
+\otimes \ket{\mathrm{EPR}_q^n}_{\reg{1}}
+\otimes
+\cdots
+\otimes
+\ket{\mathrm{EPR}_q^n}_{\reg{k}}
+\otimes
+\ket{\mathrm{aux}}_{\reg{aux}}. \]
+
+    
+    From success in the four parts of the test, we may also deduce the
+    following conditions:
+    \begin{align*}
+      (M^{\bot, Z, \dots ,Z, x}_{a_2, v_1, \dots, v_k})_{\reg{Alice}} \otimes I_{\reg{Bob}} &\simeq_{\eps}
+                                       I_{\reg{Alice}} \otimes (M^{Z,Z, \dots, Z, x}_{v_1,
+                             \dots, v_k, 
+                                a_2})_{\reg{Bob}}, \\
+      (M^{\bot, Z,\dots, Z, x}_{a_2, v_1, \dots, v_k})_{\reg{Alice}} \otimes I_{\reg{Bob}} &\simeq_{\eps} 
+ 	                     I_{\reg{Alice}} \otimes (M^{\bot,Z ,\dots, Z,  x, \{X\}}_{a_2, v_1,
+                             \dots, v_k}), \\
+      (M^{\bot, Z,\dots, Z,  \bot, \{X\}}_{v_1, \dots v_k, \{a_{1,1}, \dots,
+                                                                    a_{1, k}\}})_{\reg{Alice}} \otimes I_{\reg{Bob}} &\simeq_{\eps}
+      			I_{\reg{Alice}} \otimes (\tau^X_{[\forall i, a_1 \cdot v_i = a_{1, i}]} \ot \tau^{Z}_{v_1} \ot \dots \ot \tau^{Z}_{v_k} \ot
+                                                                                                                       I_{\reg{aux}})_{\reg{Bob}}, \\
+      (M^{\bot, Z, \dots, Z, \bot, \{X\}}_{v_1, \dots, v_k, \{a_{1,1},
+      \dots, a_{1,k}\}})_{\reg{Alice}} \ot I_{\reg{Bob}}
+                                                                                            &\simeq_{\eps}
+                                                                                              I_{\reg{Alice}}
+                                                                                              \ot
+                                                                                              (M^{\bot,
+                                                                                              Z,
+                                                                                              \dots,
+                                                                                              Z,
+                                                                                              x,
+                                                                                              \{X\}}_{v_1,
+                                                                                              \dots,
+                                                                                              v_k, a_2,
+                                                                                              \{a_{1,1},
+                                                                                              \dots,
+                                                                                              a_{1,k}\}} )_{\reg{Bob}}.
+    \end{align*}
+    
+    We would now like to argue that the operators $A,
+    B, C, D$ form a good strategy for the partial data-hiding game. By
+    \Cref{fact:introspectivize-it}, it holds that under the uniform
+    distribution over $v_1, \dots, v_k$,
+    \begin{align*}
+      (A^{x, v_1,\dots, v_k}_{a_2})_{\reg{Alice}} \otimes I_{\reg{Bob}}&\simeq_{\eps} I_{\reg{Alice}} \otimes \big(\sum_{a_1}
+                                    \tau^Z_{a_1} \ot C^{x,
+                                    a_1, v_1, \dots, v_k}_{a_2}\big)_{\reg{Bob}}, \\
+      (A^{x, v_1, \dots, v_k}_{a_2})_{\reg{Alice}} \otimes I_{\reg{Bob}} &\simeq_{\eps} I_{\reg{Alice}} \otimes \big(
+      				B^{x, v_1, \dots,
+                                                                           v_k}_{a_2}\big)_{\reg{Bob}}, \\
+      (B^{x, v_1, \dots, v_k}_{\{a_{1,1}, \dots,
+      a_{1,k}\}})_{\reg{Alice}} \otimes I_{\reg{Bob}} &\simeq
+                                                        I_{\reg{Alice}}
+                                                        \ot (D^{v_1,
+                                                        \dots,
+                                                        v_k}_{\{a_{1,1},
+                                                        \dots,
+                                                        a_{1,k}\}})_{\reg{Bob}} \\
+     (D^{ v_1, \dots, v_k}_{\{a'_{1,1}, \dots, a'_{1,k}\}})_{\reg{Alice}} \otimes I_{\reg{Bob}}
+                                  &\simeq_{\eps} I_{\reg{Alice}} \otimes (\tau^X_{[a_1 \cdot
+                                    v_1 = a'_{1,1}, \dots, a_1 \cdot
+                                    v_k = a'_{1,k}]} \otimes
+                                    I_{\reg{aux}})_{\reg{Bob}},
+    \end{align*}
+    as well as the same conditions with the Alice and Bob registers
+    exchanged.
+    
+    These are precisely the conditions of winning the partial data-hiding game
+    $\game_{\mathrm{hide}}(S,x)$, where $S$ is the set of all tuples
+    $v_1, \dots, v_k$ in $\F_q^n$, with probability $1 -
+    O(\eps)$. Hence, by~\Cref{thm:partial-data-hiding-game}, it follows
+    that there exists a measurement $A'^{x, v_1, \dots, v_k}_{a_2}$
+    such that
+    \begin{align*}
+      A'^{x,v _1, \dots, v_k}_{a_2} &= \sum_{s \in
+                                                       \surfaces{v}}
+                                                       \Pi^{v}_s \ot
+                                                       A^{s,x,v}_a,\\
+      (A^{x,v_1, \dots, v_k}_{a_2})_{\reg{Alice}} \ot I_{\reg{Bob}} &\approx_{\eps} (A'^{x, v_1,
+                                                      \dots, v_k}_{a_2})_{\reg{Alice}} \ot I_{\reg{Bob}}.
+    \end{align*}
+    The operator $M'$ in the conclusion of the theorem can then be
+    taken to be
+    \[M'^{\bot, Z, \dots, Z, x}_{a_2, v_1, \dots, v_k}  =
+    (A'^{x,v_1, \dots, v_k}_{a_2}) \ot \tau^Z_{v_1} \ot \dots \ot
+    \tau^Z_{v_k}. \qedhere\]
+  \end{proof}
+
+\subsection{An introspective surface sampler}
+
+In this section, we will use the introspective data hiding game
+to implement the ``surface prover".
+This is a prover who samples a surface~$\bs$ from register~$0$ using the $\Pi^{\bv}$ measurement
+and then reports back~$\bs$ to the verifier, along with a degree-$d$ polynomial $\boldf:\bs \rightarrow \F_q$.
+As above, the prover is expected \emph{not} to measure register~$0$ any further, so that~$\boldf$ depends only on~$\bs$ and~$\bv$.
+We can enforce this by running the introspective data hiding game and interpreting the provers' answers as $\ba_2 = \{\bs, \boldf\}$.
+However, we must also verify that~$\bs$ corresponds to the actual surface measured by the prover in the~$0$-th register
+and not some other surface.
+We do this with a slight modification to the introspective data hiding game we call the ``introspective surface sampling game".
+
+\begin{definition}
+Let $k, n, d>0$ be integers, let~$q$ be a power of~$2$,
+and let $\lambda = (k+1, n, q)$ be register parameters.
+Then the \emph{introspective surface sampling game}~$\game_{\mathrm{IntroSurfSamp}}(\lambda, d)$ is given in~\Cref{fig:big-plane}.
+\end{definition}
+
+{
+\floatstyle{boxed} 
+\restylefloat{figure}
+\begin{figure}[htbp]
+  \begin{itemize}
+  \item[$\circ$] Play the game $\game_{\mathrm{IntroHide}}(\lambda, x)$ with $x =
+    \text{``surface"}$, and with the answer $a_2$ taking the form
+    $\{\bs,\boldf\}$, where $\bs$ is a surface and
+                  $\boldf$ is a degree-$d$ function $\boldf:\bs\rightarrow \F_q$.
+  \item[$\circ$] Consider the test in \Cref{item:did-you-give-me-the-right-surface-or-not} of $\game_{\mathrm{IntroHide}}(\lambda, x)$.
+  	Here, Player~$\bb$ replies with the answer
+		$(\varnothing, \bv_1, \ldots, \bv_k, \{\bs, \boldf\})$,
+		and Player~$\overline{\bb}$ replies with
+		$(\ba_1', \bv_1, \ldots, \bv_k, \{\bs', \boldf'\})$.
+   In the case where this test is chosen, accept if $\game_{\mathrm{IntroHide}}(\lambda, x)$ accepts and also if
+   $\bs$ is the surface $\{\ba_1' +
+    \sum_{i=1}^{k} \lambda_i \bv_i : \lambda_1,
+    \dots, \lambda_k \in \F_q\}$.
+    (We call this additional check the ``Correct Surface Check".)
+    If this query is not given to the
+    provers, then accept if $\game_{\mathrm{IntroHide}}(\lambda, x)$ accepts.
+  \end{itemize}
+  \caption{The game $\game_{\mathrm{IntroSurfSamp}}(\lambda,d)$.\label{fig:big-plane}}
+\end{figure}
+}
+
+\begin{notation}
+In the case when a prover is given the question $(\bot, Z, \ldots, Z, \mathrm{``surface"})$,
+we refer to it as the \emph{surface prover}.  
+It has the following intended behavior.
+\begin{enumerate}
+\item \textbf{Surface prover:}  
+  \begin{description}[align=left]
+  \item [Input:] Pauli basis queries $(\bot, \ktimes{Z}{k})$ and
+    an auxiliary query ``surface''.
+  \item [Output:] Pauli basis answers $\varnothing$ and $v_1,
+    \ldots, v_k \in \F_q^{n}$, a $k$-dimensional surface~$s$, and the coefficients of
+    a degree-$d$ polynomial function $f: \F_q^k \rightarrow \F_q$, where
+    the domain of $f$ is to interpreted as $s$.
+  \item [Goal:] The prover measures $\Pi^v$ on register~$0$ and sets~$s$ to be its outcome.
+  		They then set $f = g|_s$, where $g: \F_q^n \rightarrow \F_q$ is a global degree-$d$ polynomial
+		selected independently of~$s$ or~$v$.
+  \end{description}
+\end{enumerate}
+In the case when $k = 1$, we may also refer to it as the \emph{lines} prover,
+and in the case when $k = 2$, we may also refer to it as the \emph{planes} prover.
+We will also refer to the \emph{surface prover's measurement},
+which refers to the measurement $\{A_{v_1, \ldots, v_k, s, f}\}$ given by
+\[A_{v_1, \ldots, v_k, s, f} = M^{\bot, Z, \dots, Z,
+    \text{``surface"}}_{\varnothing, v_1, \dots, v_k, s,
+    f}.\]
+\end{notation}
+
+The following theorem shows that the introspective surface sampling game
+forces the surface prover to output the correct surface~$s$. 
+
+\begin{theorem}\label{thm:big-planes}
+Let $k, n, d>0$ be integers, let~$q$ be a power of~$2$,
+and let $\lambda = (k+1, n, q)$ be register parameters.
+Write $\{A_{v_1, \ldots, v_k, s, f}\}$ for the surface prover's measurement.
+Then $\game_{\mathrm{IntroSurfSamp}} := \game_{\mathrm{IntroSurfSamp}}(\lambda, d)$ has the following two properties.
+  \begin{itemize}
+  \item[$\circ$] \textbf{Completeness:}
+    		Suppose there is a degree-$d$ polynomial $g:\F_q^{n}\rightarrow \F_q$ such that
+		\begin{equation*}
+			A_{v_1 \ldots, v_k,s,f} = \Pi^{v}_s \otimes \tau^Z_{v_1} \otimes
+                        \cdots \otimes \tau^{Z}_{v_k} \otimes I_{\reg{aux}} \cdot \bone[f = g|_{s}].
+		\end{equation*}
+		Then there is a value-$1$ $\lambda$-register strategy
+                for $\game_{\mathrm{IntroSurfSamp}}$ with~$A$ as the
+                surface prover's measurement.
+  \item[$\circ$]\textbf{Soundness:}
+Let $\calS$ be a projective $\register$-register strategy which passes $\game_{\mathrm{IntroSurfSamp}}$ with probability at least $1-\eps$.
+Then there exists an ideal measurement $A'$ of the form
+\[ A'_{v, s, f} =\Pi^v_s \otimes  \tau^Z_{v_1} \ot
+  \dots \ot \tau^Z_{v_k} \ot 
+    (M^{s,v}_{f})_{\reg{aux}}, \]
+with $M^{s, v}_{f}$ an arbitrary measurement on the
+$\reg{aux}$ register, such that $A'$ is close to the surface provers'
+measurement $A$ in $\calS$:
+\begin{equation*}
+(A_{v, s, f})_{\reg{Alice}} \otimes I_{\reg{Bob}}
+\approx_{\mathrm{poly}(\eps)} (A'_{v,
+  s, f})_{\reg{Alice}} \otimes I_{\reg{Bob}}.
+\end{equation*}
+In particular, the surface output by~$A'$ is the same surface measured by~$A'$ in register~$0$.
+\end{itemize}
+\end{theorem}
+
+
+\begin{proof}
+First, the completeness follows immediately from
+the completeness guarantee of~\Cref{thm:ihide}.
+
+Next, we show soundness.
+Passing with probability~$1-\eps$
+implies passing $\game_{\mathrm{IntroHide}}(\lambda, \mathrm{``surface"})$ with probability~$1-\eps$.
+By~\Cref{thm:ihide}, this implies an ideal measurement $M'^x_{v_1, \ldots, v_k, s, f}$ with
+      the property that
+      \begin{equation*} M'_{v_1, \dots, v_k, s, f} = 
+        \tau^Z_{v_1} \ot \cdots \ot \tau^Z_{v_k} \ot \left( \sum_{s' \in \surfaces{v}} \Pi^{v}_{s'} \ot
+          (M^{s', v}_{s, f})_{\reg{aux}}\right), \end{equation*}
+      \[ (A_{v_1, \ldots, v_k,s, f})_{\reg{Alice}}
+      		\otimes I_{\reg{Bob}} \approx_\eps (M'_{v_1, \ldots, v_k, s, f})_{\reg{Alice}} \otimes I_{\reg{Bob}}. \]
+(Note that the measured surface~$s'$ in $M'$ is allowed to be different than the output surface~$s$.)
+Next, set
+$
+B_{v_1, \ldots, v_k, s} := \Pi^v_{s} \otimes \tau^Z_{v_1} \otimes \cdots \otimes \tau^Z_{v_k} \otimes I_{\reg{aux}}.
+$
+Then passing the Correct Surface Check with probability $1-O(\eps)$ implies that
+\begin{equation*}
+(A_{v, s})_{\reg{Alice}} \otimes I_{\reg{Bob}}
+\approx_{\eps} I_{\reg{Alice}} \otimes (B_{v, s})_{\reg{Bob}}.
+\end{equation*}
+Note that $M'_{v, s, f}$ and $B_{v, s}$ commute.
+Thus, if we define $C_{v, s, f} := M'_{v, s, f} \cdot B_{v, s} = B_{v, s} \cdot M'_{v, s, f}$, then by \Cref{fact:add-a-proj},
+\begin{align*}
+(A_{v, s, f})_{\reg{Alice}} \otimes I_{\reg{Bob}}
+&= (A_{v, s, f} \cdot A_{v, s})_{\reg{Alice}} \otimes I_{\reg{Bob}}\\
+&\approx_\eps (A_{v, s, f})_{\reg{Alice}} \otimes (B_{v, s})_{\reg{Bob}}\\
+&\approx_\eps (M'_{v, s, f})_{\reg{Alice}} \otimes (B_{v, s})_{\reg{Bob}}\\
+&\approx_\eps (M'_{v, s, f} \cdot B_{v, s})_{\reg{Alice}} \otimes I_{\reg{Bob}}\\
+&= (C_{v, s, f})_{\reg{Alice}} \otimes I_{\reg{Bob}},
+\end{align*}
+where the second-to-last step is by \Cref{fact:the-ol-pauli-swaperoonie}.
+Now, set $C^{s, v}_f := M^{s, v}_{s, f}$. Then we can write
+\begin{equation*}
+C_{v_1, \dots, v_k, s, f} = \Pi^v_s \otimes
+	\tau^Z_{v_1} \ot \cdots \ot \tau^Z_{v_k} \ot (C^{s, v}_{f})_{\reg{aux}}.
+\end{equation*}
+These matrices are almost of the form guaranteed by the theorem,
+except they do not necessarily form a measurement because the matrices
+$C^{s, v}_f$ do not necessarily sum to the identity.
+However, this is still sufficient to imply the theorem by~\Cref{fact:sub-zero}.
+\end{proof}
+
+\subsection{The introspective cross-check}
+In this section, we introduce the other subroutine in the introspective low-degree test.
+In this subroutine, known as the ``introspective cross-check",
+we introduce a new prover known as the ``points prover".
+This is a prover who samples a point~$\bu$ from register~$0$ 
+and then reports back a value~$\bnu \in \F_q$
+interpreted as their assignment to the point~$\bu$.
+By data hiding, we can assume the points prover does not read registers~$1$ through~$k$.
+Then the introspective cross-check queries the points prover and the surface prover
+and checks that their outputs agree on the point~$\bu$.
+
+
+\begin{definition}
+Let $k, n, d>0$ be integers, let~$q$ be a power of~$2$,
+and let $\lambda = (k+1, n, q)$ be register parameters.
+The \emph{introspective cross-check}, denoted $\game_{\mathrm{IntroCross}}(\lambda, d)$, is defined in \Cref{fig:big-cross-check}.
+\end{definition}
+{
+\floatstyle{boxed} 
+\restylefloat{figure}
+\begin{figure}
+Flip an unbiased coin $\bb \sim \{0, 1\}$.
+Distribute the questions as follows. \label{item:big-low-degree-test}
+		\begin{itemize}
+		\item[$\circ$] Player~$\bb$: Give $(\bot, \ktimes{Z}{k}, \mathrm{``surface"})$; receive
+        $(\varnothing, \bv_1, \dots, \bv_k, \bs, \boldf)$.
+		\item[$\circ$] Player~$\overline{\bb}$: Give $(Z, \ktimes{\hideq}{k}, \mathrm{``point"})$;
+				receive $(\bu, \ktimes{\varnothing}{k}, \bnu)$, where $\bnu \in \F_q$.
+		\end{itemize}
+		Accept if $\boldf(\bu) = \bnu$.
+	\caption{The game $\game_{\mathrm{IntroCross}}(\lambda, d)$.\label{fig:big-cross-check}}
+\end{figure}
+}
+
+\begin{notation}
+In the case when a prover is given the question $(Z, \hideq, \ldots, \hideq, \mathrm{``point"})$,
+we refer to it as the \emph{points prover}.  
+It has the following intended behavior.
+\begin{enumerate}
+\setcounter{enumi}{1}
+\item \textbf{Points prover:}
+	\begin{description}[align=left]
+	\item [Input:] Pauli basis queries $(Z, \hideq, \ldots, \hideq)$
+          and auxiliary query ``point''.
+	\item [Output:] String $u \in \F_q^{n}$ and $\varnothing,\ldots,  \varnothing$. A number $\nu \in \F_q$.
+	\item [Goal:] The prover sets $\nu = g(u)$, where $g: \F_q^n \rightarrow \F_q$ is a global degree-$d$ polynomial
+		selected independently of~$u$.
+	\end{description}
+\end{enumerate}
+We will also refer to the \emph{point prover's measurement},
+which refers to the measurement $\{B_{u, \nu}\}$ given by
+\[B_{u, \nu} = M^{Z, \hideq, \dots, \hideq,
+    \text{``point"}}_{u, \varnothing, \dots, \varnothing, \nu}.\]
+\end{notation}
+
+Our next lemma shows that if the surface prover's measurement for~$\boldf$ depends only on the surface~$\bs$ and directions~$\bv$
+and not on the point~$\bu$, then we can relate the value of the introspective
+cross-check to its non-introspected variant, $\game_{\mathrm{surface}}$.
+\begin{lemma}\label{lem:big-cross-check}
+Let $k, n, d>0$ be integers, let~$q$ be a power of~$2$,
+and let $\lambda = (k+1, n, q)$ be register parameters.
+Let $\calS$ be a $\register$-register strategy for $\game_{\mathrm{IntroCross}} := \game_{\mathrm{IntroCross}}(\lambda, d)$.
+Let $\{A_{v, s, f}\}$ be the surface prover's measurement
+and $\{B_{u, \nu}\}$ be the point prover's measurement,
+and write $\ket{\mathrm{aux}}$ for the auxiliary state.
+Suppose
+\begin{align*}
+A_{ v,s, f} &= \Pi^{v}_s \otimes \tau_{v_1}^Z \otimes \dots \otimes
+\tau_{v_k}^Z \otimes A^{s,v}_f,\\
+B_{u, \nu} &= \tau_u^Z \otimes \oktimes{I}{k} \otimes B^u_\nu,
+\end{align*}
+where $\{A^{s, v}_f\}$ and $\{B^u_\nu\}$ are POVM measurements on the auxiliary register.
+Consider the strategy $\calS_{\mathrm{surface}} = (\mathrm{aux}, \{A^{s, v}, B^u\})$ for the game $\game_{\mathrm{surface}}  := \game_{\mathrm{surface}}(n, q, k, d)$.
+Then
+\begin{equation*}
+\valstrat{\game_{\mathrm{surface}}}{\calS_{\mathrm{surface}}}
+= \valstrat{\game_{\mathrm{IntroCross}}}{\calS}.
+\end{equation*}
+\end{lemma}
+\begin{proof}
+  By the definition of $\Pi^{v}_s$ and $\tau^Z_u$, it follows that for
+  any choice of $k$ vectors $v$, if
+  Alice and Bob each measure their half of register~$0$
+  using the measurements $\Pi^v_s$ and $\tau^Z_u$, respectively, then
+  the measurement outcomes obtained will be pairs $(\bs, \bu)$ where $\bs$
+  is a uniformly random surface in $\surfaces{\bv}$ and $\bu$ is a uniformly
+  random point in $\bs$. Moreover, if Alice measures her half of registers~$1$ through~$k$,
+  she will obtain a uniformly random $k$-tuple $\bv = \{\bv_1,
+  \dots, \bv_k\} \subseteq \F_q^n$. Combining these facts, we see that
+  if Alice measures her half of registers~$0$ through~$k$ with
+  $\Pi^v_s \ot \tau^Z_{v_1} \ot \dots \ot \tau^Z_{v_k}$, and Bob
+  measure his half with $\tau^Z_u \ot \oktimes{I}{k}$, they obtain a
+  pair of outcomes $(\bx_A = (\bs, \bv), \bx_B = \bu)$ distributed exactly
+  according to the question distribution in
+  $\game_{\mathrm{surface}}$. Thus, applying~\Cref{fact:introspective-outrospective}, we conclude
+that $\valstrat{\game_{\mathrm{surface}}}{\calS_{\mathrm{surface}}} = \valstrat{\game_{\mathrm{IntroCross}}}{\calS}$.
+\end{proof}
+
+\subsection{The introspective low-degree test}\label{sec:big-low-degree-subsection}
+
+In this section, we state the completed introspective low-degree test.
+
+\begin{definition}
+Let $k, n, d>0$ be integers, let~$q$ be a power of~$2$,
+and let $\lambda = (k+1, n, q)$ be register parameters.
+The \emph{introspective surface-versus-point low-degree test},
+denoted $\game:=\game_{\mathrm{IntroLowDeg}}(\lambda, d)$, is defined in \Cref{fig:big-low-degree}.
+It has the following properties:
+\begin{equation*}
+\qlength{\game} = O(1), \quad
+\alength{\game} = O(k n \log(q) + (d+k)^k \log(q)),
+\end{equation*}
+\begin{equation*}
+\qtime{\game} = O(1), \quad
+\atime{\game} = \poly(k n \log(q), (d+k)^k \log(q)).
+\end{equation*}
+\end{definition}
+{
+\floatstyle{boxed} 
+\restylefloat{figure}
+\begin{figure}
+With probability~$\tfrac{1}{2}$ each, perform one of the following three tests.
+\begin{enumerate}
+	\item \textbf{Surface sampler test:} Play $\game_{\mathrm{IntroSurfSamp}}(\lambda, d)$.
+	\item \textbf{Cross-check test:} Play $\game_{\mathrm{IntroCross}}(\lambda, d)$.
+	\end{enumerate}
+	\caption{The game $\game_{\mathrm{IntroLowDeg}}(\lambda, d)$.\label{fig:big-low-degree}}
+\end{figure}
+}
+
+The question complexities are immediate.
+As for the answer length, the provers return $(k+1)$ elements of $\F_q^{n}$ and degree-$d$ polynomials on $k$-surfaces,
+encoded as $\F_q$-valued strings of length $d[k] \leq (d+k)^k$.
+Finally, all operations made by the verifier, such as polynomial evaluation, are efficient, so the answer time complexity is polynomial in the answer length.
+
+Naturally, we analyze the introspective low-degree test
+via introspection.
+This involves a reduction to the non-introspected version of the game,
+i.e.\ the ``normal'' surface-versus-point low-degree test.
+By \Cref{thm:anand-thomas-classical-low-degree} we know quantum soundness for this test in the $k = 2$ (i.e.\ planes) case.
+As a result, we get soundness for the introspective low-degree test in this case as well.
+
+\begin{theorem}\label{thm:big-planes-low-degree}
+Fix $k = 2$.
+Let $n, d>0$ be integers, let~$q$ be a power of~$2$,
+and let $\lambda = (k+1, n, q)$ be register parameters.
+Write $\game := \game_{\mathrm{IntroLowDeg}}(\lambda, d)$.
+\begin{itemize}
+\item[$\circ$] \textbf{Completeness:}
+		Suppose there is a degree-$d$ polynomial $g:\F_q^{n}\rightarrow \F_q$ such that
+		\begin{equation*}
+			B_{u, \nu} = \tau_u^Z \otimes I_{\reg{1}} \otimes I_{\reg{2}} \otimes I_{\reg{aux}} \cdot \bone[\nu = g(u)].
+		\end{equation*}
+		Then there is a value-$1$ $\lambda$-register real
+                commuting EPR strategy for $\game$ with~$B$ as the point prover's measurement.
+\item[$\circ$] \textbf{Soundness:}
+		There exists a constant $c > 0$ and a function $\delta(\eps) = \poly(\eps, dm/q^c)$ such that the following holds.
+		Suppose $\calS$ is a projective $\lambda$-register strategy with value $1-\eps$.
+		Write $\{B_{u, \nu}\}$ for the point prover's measurement.
+		Then there exists a POVM $\{G_g\}$
+                in~$\polymeas{n}{d}{q}$ such that
+		\begin{equation*}
+			(B_{u, \nu})_{\reg{Alice}} \otimes I_{\reg{Bob}}
+				\approx_{\delta(\eps)} (\tau^Z_{u}\otimes I_{\reg{1}} \otimes I_{\reg{2}}
+					\otimes (G_{[g(u) = \nu]})_{\reg{aux}})_{\reg{Alice}} \otimes I_{\reg{Bob}}.
+		\end{equation*}
+\end{itemize}
+\end{theorem}
+
+\begin{proof}
+Throughout this proof, we will write $\{A_{v, s, f}\}$ for the surface prover's measurement.
+We first show completeness.
+Assign the surface prover's measurement as follows:
+\begin{equation*}
+A_{v,s, f}  := \Pi^{v}_s \otimes \tau^Z_{v_1} \otimes \tau^Z_{v_2} \otimes I_{\reg{aux}} \cdot \bone[f = g|_{s}].
+\end{equation*}
+This is clearly a $\lambda$-register strategy. By the completeness
+case of \Cref{thm:big-planes}, this can be extended into a real
+commuting EPR strategy that passes $\game_{\mathrm{IntroSurfSamp}}(\lambda, d)$ with
+probability~$1$. By~\Cref{lem:big-cross-check}, the strategy using $A$
+and $B$ passes the cross check with the same probability as the
+honest classical strategy to $\game_{\mathrm{surface}}(n, q, k, d)$ answering according
+to the low-degree polynomial $g$, which is $1$. Hence, this strategy
+passes both parts of $\game$ with probability~$1$.
+
+Now, we show soundness.
+The strategy $\calS$ is a $\lambda$-register strategy, so we can write the points prover's measurement as
+\begin{equation*}
+B_{u, \nu} = \tau^Z_u \otimes I_{\reg{1}} \otimes I_{\reg{2}} \otimes (B^u_{\nu})_{\reg{aux}}.
+\end{equation*}
+Passing $\game_{\mathrm{IntroSurfSamp}}(\lambda, d)$ with probability $1-2\eps$
+implies via \Cref{thm:big-planes} a measurement $A'_{u, v, f}$ such that
+\begin{equation*}
+A'_{ v,s, f} = \Pi^{v}_s \otimes \tau^Z_{v_1} \otimes \tau^Z_{v_2} \otimes ((A')^{s, v}_f)_{\reg{aux}},
+\end{equation*}
+\begin{equation*}
+(A_{v, s, f})_{\reg{Alice}} \otimes I_{\reg{Bob}}
+\approx_{\poly(\eps)}  (A'_{v, s, f})_{\reg{Alice}} \otimes I_{\reg{Bob}},
+\end{equation*}
+where $\{(A')^{s,v}_f\}_{f}$ is a measurement on the auxiliary
+register. By assumption, the measurement $\{A_{v,s,f}\}$ is
+projective, so
+we can apply~\Cref{fact:approx-delta-generalized-game-value} to deduce
+that replacing $A_{v,s,f}$ by $A'_{v,s,f}$ changes the game value by
+at most $\poly(\eps)$. Moreover, by applying~\Cref{thm:partial-naimark}, we can, by
+performing a dilation of the auxiliary space, simulate the
+$A'_{v,s,f}$ measurements by a projective measurement of the form
+\[ A''_{v,s,f} = \Pi^v_s \ot \tau^Z_{v_1} \ot \tau^Z_{v_2} \ot
+  ((A'')^{s,v}_f)_{\reg{aux}}, \]
+where $(A'')^{s,v}_f$ is a projective measurement on the (expanded)
+aux register. (Note that a direct invocation of Naimark's
+theorem~\Cref{thm:naimark} would not have sufficed as the dilated
+measurement would not necessarily act as desired on the non-aux
+registers.) Using the dilated $A''$ measurements instead of $A'$ does
+not change the value of the game. Thus, we deduce that the projective strategy
+using measurements $B_{u,\nu}$ and $A''_{v,s,f}$ passes
+$\game_{\mathrm{IntroCross}}(\lambda, d)$ with probability
+$1-\poly(\eps)$.
+
+Now we are in a position to reduce to the soundness of the non-introspective game. Define the strategy $\calS_{\mathrm{Plane}} := (\mathrm{aux}, \{B^u, (A'')^{s, v}\})$.
+Then by \Cref{lem:big-cross-check}, $\calS_{\mathrm{Plane}}$ also passes $\game_{\mathrm{Plane}}$ with probability $1-\poly(\eps)$.
+Applying~\Cref{thm:anand-thomas-classical-low-degree}, we have that
+there exists a measurement $\{G_g\}$ in $\polymeas{n}{d}{q}$ such that
+\begin{equation*}
+B^u_{\nu}\otimes I \approx_{\delta(\eps)} G_{[\nu = g(u)]}\otimes I
+\end{equation*}
+on state $\ket{\mathrm{aux}}$.
+
+The theorem then follows from~\Cref{fact:introspectivize-it}.
+\end{proof}
+
+\subsection{The introspective simultaneous low-degree test}
+
+In this section, we extend the introspective low-degree test to handle multiple functions at once.
+This is the  introspective version of the simultaneous low-degree test from \Cref{def:simultaneous-plane-v-point}.
+
+\begin{definition}
+Let $m \geq 1$.
+Let $k, n, d>0$ be integers, let~$q$ be a power of~$2$,
+and let $\lambda = (k+1, n, q)$ be register parameters.
+The \emph{introspective simultaneous low-degree test}, denoted $\game :=\game_{\mathrm{IntroLowDeg}}(\lambda, d, m)$,
+is defined by the following modifications to the introspective low-degree test.
+First, the prover roles are modified as follows.
+\begin{itemize}
+\item[$\circ$] \textbf{Surface prover:} Rather than returning a function $f:s\rightarrow \F_q$, it should return~$m$ functions $f_1, \ldots, f_m : s\rightarrow \F_q$.
+			The intent is that $f_i = g_i |_{s}$ for each $i$, where each $g_i :\F_q^n \rightarrow \F_q$ is a global degree-$d$ polynomial
+				selected independently of~$s$ or~$v$.
+\item[$\circ$] \textbf{Points prover:} Rather than returning a single number $\nu \in \F_q$, it should return~$m$ numbers $\nu_1, \ldots, \nu_m \in \F_q$.
+			The intent is that $\nu_i = g_i(u)$ for each $i$, where each~$g_i$ is selected independently of~$u$.
+\end{itemize}
+Next, the subroutines are modified as follows.
+\begin{itemize}
+\item[$\circ$] \textbf{Introspective surface sampling game:} The answer $\ba_2$ has the
+  form $\bs, \boldf_1, \ldots, \boldf_m$ (rather than $\bs, \boldf$
+  for a single function $\boldf$).
+\item[$\circ$] \textbf{Introspective cross-check:} Receive $\boldf_1, \ldots, \boldf_m : \bs \rightarrow \F_q$ from the surface prover and $\bnu_1, \ldots, \bnu_m \in \F_q$ from the points prover
+				(rather than a single~$\boldf$ and~$\bnu$). Check that $\boldf_i(\bu) = \bnu_i$ for all $i$.
+\end{itemize}
+It has the following properties:
+\begin{equation*}
+\qlength{\game} = O(1), \quad
+\alength{\game} = O(k n \log(q) + m (d+k)^k \log(q)),
+\end{equation*}
+\begin{equation*}
+\qtime{\game} = O(1), \quad
+\atime{\game} = \poly(k n \log(q), m (d+k)^k \log(q)).
+\end{equation*}
+\end{definition}
+
+The following theorem gives the performance of the introspective simultaneous low-degree test in the case of $k=2$ (i.e.\ planes).
+
+\begin{theorem}\label{thm:big-simultaneous-planes-low-degree}
+Fix $k = 2$.
+Let $n, d, m>0$ be integers, let~$q$ be a power of~$2$,
+and let $\lambda = (k+1, n, q)$ be register parameters.
+Write $\game := \game_{\mathrm{IntroLowDeg}}(\lambda, d, m)$.
+\begin{itemize}
+\item[$\circ$] \textbf{Completeness:}
+		Suppose there are degree-$d$ polynomials $g_1, \ldots, g_m:\F_q^{n}\rightarrow \F_q$ such that
+		\begin{equation*}
+			B_{u, \nu_1, \ldots, \nu_m} = \tau_u^Z \otimes I_{\reg{1}} \otimes I_{\reg{2}} \otimes I_{\reg{aux}} \cdot \bone[\forall i,~\nu_i = g_i(u)].
+		\end{equation*}
+		Then there is a value-$1$ $\lambda$-register real
+                commuting EPR strategy for $\game$ with~$B$ as the point prover's measurement.
+\item[$\circ$] \textbf{Soundness:}
+		There exists a constant $c > 0$ and a function $\delta(\eps) = \poly(\eps, d(n+m)/q^c)$ such that the following holds.
+		Suppose $\calS$ is a projective $\lambda$-register strategy with value $1-\eps$.
+		Write $\{B_{u, \nu_1, \ldots, \nu_m}\}$ for the point prover's measurement.
+		Then there exists a POVM $\{G_{g_1, \ldots, g_m}\}$
+                in~$\simulpolymeas{n}{d}{q}{m}$ such that
+		\begin{equation*}
+			(B_{u, \nu_1, \ldots, \nu_m})_{\reg{Alice}} \otimes I_{\reg{Bob}}
+				\approx_{\delta(\eps)} (\tau^Z_{u}\otimes I_{\reg{1}} \otimes I_{\reg{2}}
+					\otimes (G_{[g_1(u), \ldots, g_m(u) = \nu_1, \ldots, \nu_m]})_{\reg{aux}})_{\reg{Alice}} \otimes I_{\reg{Bob}}.
+		\end{equation*}
+\end{itemize}
+\end{theorem}
+
+The proof, which we omit,
+is analogous to the proof of \Cref{thm:big-planes-low-degree},
+except rather than reducing to \Cref{thm:anand-thomas-classical-low-degree},
+we reduce to the soundness of the non-introspective simultaneous low-degree test given by \Cref{thm:simultaneous-ldt}.
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End:
+%%%---------- close: big-low-degree
+
+%%%%%%%%%%% jump to big-transfer
+%%%---------- open: big-transfer
+%!TEX root = main.tex
+

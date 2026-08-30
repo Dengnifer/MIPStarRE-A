@@ -18,7 +18,7 @@ identifier ends in ``Statement`` (and similar proof-obligation suffixes
 *immediately preceding docstring or comment block* (after skipping blank lines)
 for one of three citation forms:
 
-1. A paper line reference of the form ``references/ldt-paper/.../*.tex``
+1. A paper line reference of the form ``references/<mirror>-paper/.../*.tex``
    optionally followed by a colon and line range.
 2. A LaTeX cross-reference ``\\label{<kind>:...}`` where ``<kind>`` is one of
    ``lem``, ``thm``, ``prop``, ``cor``, ``def``, ``eq``, ``sec``.
@@ -106,7 +106,7 @@ DECL_RE = re.compile(
     r"(?P<name>[A-Za-z_][A-Za-z0-9_']*)"
 )
 
-PAPER_PATH_RE = re.compile(r"references/ldt-paper/[^\s`]+\.tex")
+PAPER_PATH_RE = re.compile(r"references/(?:ldt|qpbt|neexp)-paper/[^\s`]+\.tex")
 PAPER_GAP_RE = re.compile(r"docs/paper-gaps/[^\s`]+\.tex")
 LATEX_LABEL_RE = re.compile(r"\\label\{(?:lem|thm|prop|cor|def|eq|sec):[^}]+\}")
 
@@ -269,7 +269,7 @@ def main(argv: list[str] | None = None) -> int:
         "preceding docstring/comment block):",
         file=sys.stderr,
     )
-    print("  - references/ldt-paper/<file>.tex  (optionally with :line-range)",
+    print("  - references/<mirror>-paper/<file>.tex  (optionally with :line-range)",
           file=sys.stderr)
     print(r"  - \label{lem:...} / \label{thm:...} / \label{prop:...} /"
           r" \label{cor:...} / \label{def:...} / \label{eq:...} /"

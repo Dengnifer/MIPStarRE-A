@@ -1,0 +1,689 @@
+\section{Nonlocal Games and $\MIP^*$}
+\label{sec:games}
+
+We introduce definitions associated with nonlocal games and strategies that will
+be used throughout.
+
+\subsection{Games and strategies}
+\label{sec:strat}
+
+\begin{definition}[Two-player one-round games]
+  \label{def:game}
+  A \emph{two-player one-round game} $\game$ is specified by a tuple
+  $(\cal{X}, \cal{Y}, \cal{A}, \cal{B}, \mu, D)$ where
+  \begin{enumerate}
+  \item $\cal{X}$ and $\cal{Y}$ are finite sets (called the \emph{question
+      alphabets}),
+  \item $\cal{A}$ and $\cal{B}$ are finite sets (called the \emph{answer
+      alphabets}),
+  \item $\mu$ is a probability distribution over $\cal{X} \times \cal{Y}$
+    (called the \emph{question distribution}), and
+  \item $D: \cal{X} \times \cal{Y} \times \cal{A} \times \cal{B} \to \{0,1\}$ is
+    a function (called the \emph{decision predicate}).
+  \end{enumerate}
+\end{definition}
+
+\begin{definition}[Tensor product strategies]
+  \label{def:tensor-product-strategy}
+  A \emph{tensor product strategy} $\strategy$ for a game $\game = (\cal{X},
+  \cal{Y}, \cal{A}, \cal{B}, \mu, D)$ is a tuple $(\ket{\psi}, A, B)$ where
+  \begin{itemize}
+	\item $\ket{\psi}$ is a pure quantum state, i.e.\ a unit vector in $\mH_A \otimes \mH_B$ for finite
+    dimensional complex Hilbert spaces $\mH_A, \mH_B$,
+	\item $A$ is a set $\{A^x\}$ such that for every $x \in \cal{X}$, $A^x =
+    \{A^x_a \}_{a \in \cal{A}}$ is a POVM over $\mH_A$, and
+	\item $B$ is a set $\{B^y\}$ such that for every $y \in \cal{Y}$, $B^y =
+    \{B^y_b \}_{b \in \cal{B}}$ is a POVM over $\mH_B$.
+\end{itemize}
+\end{definition}
+
+\begin{definition}[Tensor product value]
+  \label{def:tensor-product-value}
+	The \emph{tensor product value} of a tensor product strategy $\strategy =
+  (\ket{\psi}, A, B)$  with respect to a game $\game=(\cal{X}, \cal{Y}, \cal{A},
+  \cal{B}, \mu, D)$ is defined as
+  \begin{equation*}
+		\val^*(\game, \strategy) = \sum_{x,\, y,\, a,\, b} \, \mu(x,y)\, D(x,y,a,b)\,
+    \bra{\psi} A^x_a \otimes B^y_b\, \ket{\psi}\;.
+  \end{equation*}
+	For $v\in[0,1]$ we say that the strategy $\strategy$ \emph{passes (or wins)
+    $\game$ with probability $v$ if} $\val^*(\game, \strategy) \geq v$.
+  The \emph{tensor product value} of $\game$ is defined as
+  \begin{equation*}
+		\val^*(\game) = \sup_\strategy \val^*(\game, \strategy)\;,
+  \end{equation*}
+	where the supremum is taken over all tensor product strategies $\strategy$ for
+  $\game$.
+\end{definition}
+
+
+\begin{remark}
+  Unless specified otherwise, all strategies considered in this paper are tensor
+  product strategies, and we simply call them \emph{strategies}.
+  Similarly, we refer to $\val^*(\game)$ as the \emph{value} of the game
+  $\game$.
+\end{remark}
+
+
+\begin{definition}[Projective strategies]
+  \label{def:projective-strategy}
+  We say that a strategy $\strategy = (\ket{\psi}, A, B)$ is \emph{projective} if
+  all the measurements $\{A^x_a\}_a$ and $\{B^y_b\}_b$ are projective.
+\end{definition}
+
+\begin{definition}\label{rem:symmetric-games}
+	A game $\game = (\cal{X}, \cal{Y}, \cal{A}, \cal{B}, \mu, D)$ is
+  \emph{symmetric} if the question and answer alphabets are the same for both
+  players (i.e.\
+  $\cal{X} = \cal{Y}$ and $\cal{A} = \cal{B}$), the distribution $\mu$ is
+  symmetric (i.e.\
+  $\mu(x,y) = \mu(y,x)$), and the decision predicate $D$ treats both players
+  symmetrically (i.e.\ for all $x,y,a,b$, $D(x,y,a,b) = D(y,x,b,a)$).
+ 
+We call a strategy $\strategy = (\ket{\psi}, A, B)$
+  \emph{symmetric} if $\ket{\psi}$ is a (pure) state in $\mH \otimes \mH$, for some
+  Hilbert space $\mH$, that is invariant under permutation of the two factors,
+  and the measurement operators of both players are identical.
+\end{definition}
+
+We often specify symmetric games $\game$ and symmetric strategies $\strategy$ using
+  a compact notation: we write $\game = (\cal{X}, \cal{A}, \mu, D)$ and
+  $\strategy = (\ket{\psi}, M)$ where $M$ denotes the set of measurement
+  operators for both players.
+
+\begin{lemma}\label{lem:symmetric-strat}
+  Let $\game = (\cal{X}, \cal{A},  \mu, D)$ be a symmetric game
+  such that $\val^*(\game) = 1-\eps$ for some $\eps\geq 0$.
+  Then there exists a symmetric and projective strategy
+  $\strategy=(\ket{\psi},M)$ such that $\val^*(\game,\strategy)\geq 1-\eps$.
+\end{lemma}
+
+\begin{proof}
+  By definition for any $\eps'>\eps$ there exists a strategy $\strategy'= (\ket{\psi'},A,B)$ such
+  that $\val^*(\game,\strategy')\geq 1-\eps'$.
+Using Naimark's theorem (Theorem~\ref{thm:naimark}) we can assume
+without loss of generality that $\ket{\psi'}\in\C_{\alice'}^d\otimes \C_{\bob'}^d$ for some integer $d$
+  and that for every $x$, $A^x$ and $B^x$ are projective measurements.
+Let
+  \[
+    \ket{\psi} = \frac{1}{\sqrt{2}} \big( \ket{0}_\alice \ket{1}_\bob
+    \ket{\psi'}_{\alice'\bob'} + \ket{1}_\alice \ket{0}_\bob
+    \ket{\psi'_\tau}_{\alice'\bob'}\big) \in (\C_{\alice}^2 \otimes
+    \C_{\alice'}^d) \otimes (\C_\bob^2 \otimes \C_{\bob'}^d)\;,
+  \]
+  where $\ket{\psi'_\tau}$ is obtained from $\ket{\psi}$ by permuting the two
+  players' registers.
+  Observe that $\ket{\psi}$ is invariant under permutation of $\alice\alice'$
+  and $\bob\bob'$.
+
+  For any question $x\in \cal{X}$ define the measurement $M^x = \{M^x_a\}_{a \in \cal{A}}$
+  acting on the Hilbert space $\C^2 \otimes \C^d$ as follows:
+  \[
+  	M^x_a = \ketbra{0}{0} \otimes A^x_a + \ketbra{1}{1} \otimes B^x_a \;,
+  \]
+	i.e.\ for $\ket{\varphi} \in \C^d$, $M^x_a(\ket{0}\ket{\varphi})=\ket{0}A^x_a\ket{\varphi}$ and $M^x_a(\ket{1}\ket{\varphi})=\ket{1}B^x_a\ket{\varphi}$.
+  When Alice receives question $x$, she measures $M^x$ on registers $\alice \alice'$, and when Bob receives 
+  question $y$, he measures $M^y$ on registers $\bob \bob'$.
+Using that by assumption the decision predicate $D$ for $\game$ is symmetric,
+  it is not hard to verify that $\val^*(\game,\strategy) =
+  \val^*(\game,\strategy')$.
+\end{proof}
+
+\begin{definition}
+  \label{def:comm-strategy}
+  Let $\game = (\cal{X}, \cal{Y}, \cal{A}, \cal{B}, \mu, D)$ be a game, and let
+  $\strategy = (\ket{\psi}, A, B)$ be a strategy for $\game$ such that  $\mH_A = \mH_B$.
+  Let $S \subseteq \cal{X} \times \cal{Y}$ denote the support of the question
+  distribution $\mu$, i.e.\ the set of $(x,y)$ such that $\mu(x,y)>0$.
+  We say that $\strategy$ is a \emph{commuting strategy for $\game$} if for all
+  question pairs $(x, y) \in S$, we have $[A^x_a, B^y_b] = 0$ 
+  for all $a
+  \in \cal{A}, b \in \cal{B}$, where $[A, B] = AB - BA$ denotes the commutator.
+\end{definition}
+
+\begin{definition}[Consistent measurements]
+  \label{def:consistent-measurement}
+  Let $\cal{A}$ be a finite set, let $\ket{\psi} \in \mH \otimes \mH$ be a
+  state, and let $\{ M_a \}_{a \in \cal{A}}$ be a projective measurement on
+  $\mH$.
+  We say that \emph{$\{M_a\}_{a \in \cal{A}}$ is consistent on $\ket{\psi}$} if
+  and only if
+  \begin{equation*}
+    \forall a \in \mA\;,\quad M_a \otimes \Id_\bob\, \ket{\psi}
+    = \Id_\alice \otimes M_a\, \ket{\psi}\;.
+  \end{equation*}
+	When the state $\ket{\psi}$ is clear from context we simply say that \emph{$\{M_a\}_{a \in \cal{A}}$ is consistent}.
+\end{definition}
+
+The terminology ``consistent'' arises from the fact that when the measurement $\{M_a\}$ is performed on both registers of $\ket{\psi}$, the probability of obtaining twice the same outcome is 
+\[ \sum_a \bra{\psi} M_a \otimes M_a \ket{\psi}\,=\, \sum_a \bra{\psi} \Id_\alice \otimes (M_a)^2 \ket{\psi} \,=\, \sum_a \bra{\psi} \Id_\alice \otimes M_a \ket{\psi} \,=\,1\;,\]
+where the first equality is by definition of consistency, the second uses that $\{M_a\}$ is projective, and the last uses $\sum_a M_a=\Id$. 
+
+\begin{definition}[Consistent strategies]
+  \label{def:consistent-strategy}
+	Let $\strategy = (\ket{\psi}, A, B)$ be a projective strategy with state
+  $\ket{\psi} \in \mH \otimes \mH$, for some Hilbert space~$\mH$, which is
+  defined on question alphabets $\cal{X}$ and~$\cal{Y}$ and answer alphabets
+  $\cal{A}$ and~$\cal{B}$, respectively.
+  We say that the strategy $\strategy$ is \emph{consistent} if for all $x \in
+  \cal{X}$, the measurement $\{A^x_a\}_{a \in \cal{A}}$ is consistent on
+  $\ket{\psi}$ and if for all $y \in \cal{Y}$, the measurement $\{B^y_b\}_{b \in
+    \cal{B}}$ is consistent on $\ket{\psi}$.
+\end{definition}
+
+We almost always restrict our attention to symmetric strategies. In this case, consistency implies that whenever both players are sent the same question, they provide the same answer. 
+
+\begin{definition}
+  \label{def:spcc}
+  We say that a strategy $\strategy$ for a game $\game$ is \emph{PCC} if it is projective, consistent, and commuting for $\game$.
+  Additionally, we say that a PCC strategy $\strategy$ is \emph{SPCC} if it is furthermore symmetric.
+\end{definition}
+
+
+Recall that for a (pure) state $\ket{\psi}\in \mH_\alice \otimes \mH_\bob$, the \emph{Schmidt rank} of $\ket{\psi}$ is the smallest integer $k$ such that 
+\[ \ket{\psi} = \sum_{i=1}^k\, \alpha_i \ket{u_i}\otimes \ket{v_i}\;,\]
+for some orthonormal families $\{\ket{u_i}\}\subset \mH_\alice$ and $\{\ket{v_i}\}\subset\mH_\bob$ and $\alpha_i>0$. The coefficients $\alpha_i$ are uniquely defined by $\ket{\psi}$ and called \emph{Schmidt coefficients}. The state $\ket{\psi}$ is called \emph{maximally entangled} if $\alpha_i=\frac{1}{\sqrt{k}}$ for all $i=1,\ldots,k$.  
+
+
+\begin{definition}[Entanglement requirements of a game]
+  \label{def:ent}
+	For all games $\game$ and $\nu \in [0, 1]$, let $\Ent(\game, \nu)$ denote the
+  minimum integer $d$ such that there exists a finite dimensional tensor product
+  strategy $\strategy$ that achieves success probability at least $\nu$ in the
+  game $\game$ with a state $\ket{\psi}$ whose Schmidt rank is at most $d$.
+  If there is no finite dimensional strategy that achieves success probability
+  $\nu$, then define $\Ent(\game, \nu)$ to be $\infty$.
+\end{definition}
+
+
+
+\begin{remark}
+  A strategy $\strategy = (\ket{\psi},A,B)$ for a symmetric game $\game =
+  (\cal{X}, \cal{X}, \cal{A}, \cal{A}, \mu, D)$ is called \emph{synchronous} if
+  it holds that for every $x\in \cal{X}$ and $a\neq b \in \cal{A}$, $\bra{\psi}
+  A^x_a \otimes B^x_b \ket{\psi} = 0$; in other words,
+  the players never return different answers when simultaneously asked the same
+  question.
+  As shown in~\cite{paulsen2016estimating} the condition for a
+  finite-dimensional strategy of being synchronous is equivalent to the
+  condition that it is projective, consistent, and moreover $\ket{\psi}$ is a
+  maximally entangled state.
+  (The equivalence is extended to infinite-dimensional strategies, as well as
+  correlations induced by limits of finite-dimensional strategies,
+  in~\cite{kim2018synchronous}.)
+\end{remark}
+\subsection{Distance measures}
+
+We introduce several distance measures that are used throughout.
+
+\begin{definition}[Distance between states]
+  \label{def:state-distance}
+
+	Let $\{\ket{\psi_n}\}_{n\in \N}$ and $\{\ket{\psi'_n}\}_{n\in \N}$ be two
+  families of states in the same space $\mH$.
+  For some function $\delta : \N \to [0,1]$ we say that $\{ \ket{\psi_n} \}$ and
+  $\{ \ket{\psi'_n} \}$ are \emph{$\delta$-close}, denoted as $\ket{\psi}
+  \approx_\delta \ket{\psi'}$, if $ \norm{\ket{\psi_n} - \ket{\psi'_n}}^2 =
+  O(\delta(n))$.
+  (For convenience we generally leave the dependence of the states and $\delta$
+  on the indexing parameter $n$ implicit, writing e.g.\ $\ket{\psi}$ for $\ket{\psi_n}$.)
+\end{definition}
+
+\begin{definition}[Consistency between POVMs]
+  \label{def:consistency}
+	Let $\mX$ be a finite set and $\mu$ a distribution on $\mX$.
+  Let $\ket{\psi} \in \cal{H}_A \otimes \cal{H}_B$ be a quantum state, and for
+  all $x\in \mX$, $\{A^x_a\}$ and $\{B^x_a\}$ POVMs.
+  We write
+  \begin{equation*}
+    A^x_a \otimes I_\bob \simeq_\delta I_\alice \otimes B^x_a
+  \end{equation*}
+  on state $\ket{\psi}$ and distribution $\mu$ if
+  \begin{equation*}
+    \E_{x\sim \mu} \sum_{a\ne b} \bra{\psi} A^x_a \otimes B^x_b \ket{\psi}
+    = O(\delta)\;.\footnote{Here the use of the $O(\cdot)$ notation refers to the fact that the notation will often be used to measure consistency for \emph{famillies} of POVM and states indexed by an implicit parameter $n\in \mathbb{N}$, which will always be clear from context but omitted for legibility, see Definition~\ref{def:state-distance}. The $O(\cdot)$ is taken as $n\to\infty$.}
+  \end{equation*}
+  In this case, we say that $\{A^x_a\}$ and $\{B^x_a\}$ are
+  \emph{$\delta$-consistent} on $\ket{\psi}$.
+\end{definition}
+
+Note that a consistent measurement on $\ket{\psi}$ according to
+Definition~\ref{def:consistent-measurement} is $0$-consistent with itself on the same $\ket{\psi}$ and under
+the singleton distribution, according to Definition~\ref{def:consistency} (and
+vice-versa). This is because 
+\[ \sum_a \bra{\psi} M_a \otimes M_a \ket{\psi} =1 \,\implies \, \forall a\;,\;\Id\otimes M_a \ket{\psi} = M_a \otimes \Id \ket{\psi}\;,\]
+because using that $\{M_a\}$ is a POVM there must be equality in the Cauchy-Schwarz inequality
+\[ 1 = \sum_a \bra{\psi} M_a \otimes M_a \ket{\psi}\, \leq\, \Big(\sum_a \|\Id\otimes M_a \ket{\psi}\|^2 \Big)\Big(\sum_a \|M_a\otimes \Id \ket{\psi}\|^2 \Big)^{1/2} \,\leq\,1 \;.\]
+
+\begin{definition}[Distance between POVMs]
+  \label{def:povm-distance}
+	Let $\mX$ be a finite set and $\mu$ a distribution on $\mX$. 
+  Let $\ket{\psi} \in \cal{H}$ be a quantum state, and for all $x\in \mX$,
+  $\{M^x_a\}$ and $\{N^x_a\}$ two POVMs on $\mH$.
+  We say that \emph{$\{M^x_a\}$ and $\{N^x_a\}$ are $\delta$-close on state
+    $\ket{\psi}$ and under distribution $\mu$} if
+  \begin{equation*}
+    \E_{x\sim \mu} \sum_a \norm{ (M^x_a - N^x_a) \ket{\psi} }^2 \leq O(\delta)\;,
+  \end{equation*}
+  and we write $M^x_a \approx_\delta N^x_a$ to denote this when the state
+  $\ket{\psi}$ and distribution $\mu$ are clear from context.
+  This distance is referred to as the \emph{state-dependent} distance.
+\end{definition}
+
+\begin{definition}[Distance between strategies]
+  \label{def:strategy-distance}
+  Let $\game = (\cal{X}, \cal{Y}, \cal{A}, \cal{B}, \mu, D)$ be a nonlocal game
+  and let $\strategy = (\psi, A, B)$, $\strategy' = (\psi', A', B')$ be 
+  strategies for $\game$.
+  For $\delta\in[0,1]$ we say that \emph{$\strategy$ is $\delta$-close to
+    $\strategy'$} if the following conditions hold.
+  \begin{enumerate}
+	\item The states $\ket{\psi}, \ket{\psi'}$ are states in the same
+    Hilbert space $\mH_A \otimes \mH_B$ and are $\delta$-close.
+	\item For all $x \in \cal{X}, y \in \cal{Y}$, we have $A^x_a \approx_\delta
+    (A')^x_a$ and $B^y_b \approx_\delta (B')^y_b$, with the approximations
+    holding under the distribution $\mu$, and on either $\ket{\psi}$ or
+    $\ket{\psi'}$.
+  \end{enumerate}
+\end{definition}
+
+We record several useful facts about the consistency measure and the
+state-dependent distance without proof.
+Readers are referred to Sections 4.4 and 4.5 in~\cite{NW19} for additional
+discussion and proofs.
+
+\begin{fact}[Fact 4.13 and Fact 4.14 in~\cite{NW19}]
+  \label{fact:agreement}
+  For POVMs $\{A^x_a\}$ and $\{B^x_a\}$, the following hold.
+  \begin{enumerate}
+  \item If $A^x_a \otimes I_\bob \simeq_\delta I_\alice \otimes B^x_a$ then
+    $A^x_a \otimes I_\bob \approx_\delta I_\alice \otimes B^x_a$.
+    \label{item:consistency-implies-approx}
+  \item If $A^x_a \otimes I_\bob \approx_\delta I_\alice \otimes B^x_a$
+    \emph{and} $\{A^x_a\}$ and $\{B^x_a\}$ are projective measurements, then
+    $A^x_a \otimes I_\bob \simeq_\delta I_\alice \otimes B^x_a$.
+    \label{item:both-projectors-implies-consistency}
+  \item If $A^x_a \otimes I_\bob \approx_\delta I_\alice \otimes B^x_a$ and
+    either $\{A^x_a\}$ or $\{B^x_a\}$ is a projective measurement, then
+    $A^x_a \otimes I_\bob \simeq_{\delta^{1/2}} I_\alice \otimes B^x_a$.
+    \label{item:one-projector-implies-consistency}
+  \end{enumerate}
+\end{fact}
+
+\begin{fact}[Fact 4.20 in~\cite{NW19}]
+  \label{fact:add-a-proj}
+  Let $\cal{A},\cal{B},\cal{C}$ be finite sets, and let $\mu$ be a distribution
+  over question pairs $(x,y)$.
+  Let $\{A_{a,b}^x\}$ and $\{B_{a,b}^x\}$ be operators whose outcomes range over the
+  product set $\cal{A} \times \cal{B}$.
+  Suppose a set of operators $\{C_{a,c}^y\}$, whose outcomes range over the
+  product set $\cal{A} \times \cal{C}$, satisfies the condition $\sum_{c}
+  (C_{a,c}^y)^\dagger C_{a,c}^y \leq \Id$ for all $a$ and all $y$.
+  If $A_{a,b}^x \approx_\delta B_{a,b}^x$ on average over $x$ sampled from the
+  corresponding marginal of distribution $\mu$, then $C^y_{a,c} A^x_{a,b}
+  \approx_\delta C^y_{a,c} B^x_{a,b}$ on average over $(x,y)$ sampled from $\mu$.
+\end{fact}
+\begin{proof}
+  Fix questions $x,y$ and answers $a \in \cal{A},b \in \cal{B}$. We have then that
+  \begin{align}
+    \sum_{c} \left \| (C^y_{a,c} A^x_{a,b} - C^y_{a,c} B^x_{a,b} ) \ket{\psi} \right \|^2
+    & = \sum_{c} \bra{\psi} (A^x_{a,b} - B^x_{a,b})^\dagger (C^y_{a,c})^\dagger (C^y_{a,c})
+      (A^x_{a,b} - B^x_{a,b} ) \ket{\psi}\\
+    & \leq \bra{\psi} (A^x_{a,b} - B^x_{a,b})^\dagger
+      (A^x_{a,b} - B^x_{a,b} ) \ket{\psi} \\
+    & = \left \| (A^x_{a,b} - B^x_{a,b})\ket{\psi} \right \|^2
+  \end{align}
+  where the inequality follows from the assumption that $\sum_c (C_{a,c}^y)^\dagger
+  C_{a,c}^y \leq \Id$.
+  Thus we obtain the desired conclusion
+  \begin{equation*}
+    \E_{(x,y) \sim \mu} \sum_{a,b,c} \left \| (C^y_{a,c} A^x_{a,b} - C^y_{a,c} B^x_{a,b} )
+      \ket{\psi} \right \|^2 	\leq \E_{(x,y) \sim \mu} \sum_{a,b}
+    \left \| (A^x_{a,b} - B^x_{a,b})\ket{\psi} \right \|^2 \leq \delta.
+  \end{equation*}
+\end{proof}
+
+
+\begin{fact}
+\label{fact:add-a-proj2}
+Let $\mathcal{X},\mathcal{A}$ denote finite sets, and let $\mathcal{G}$ denote a set of functions $g: \mathcal{X} \to \mathcal{A}$. Let $\{A^x_a \}$, $\{B^x_a\}$ be POVMs indexed by $\mathcal{X}$ and outcomes in $\mathcal{A}$. Let $\{ S_g^x \}_{x\in \mathcal{X}, g\in\mathcal{G}}$ denote a set of operators such that for all $x \in \mathcal{X}$, $\sum_g (S_g^x)^\dagger S_g^x \leq \Id$. 
+If $A^x_a \approx_\delta B^x_a$ on average over $x$, then $S_g^x A^x_{g(x)} \approx_\delta S_g^x B^x_{g(x)}$. 
+\end{fact}
+\begin{proof}
+	We expand:
+	\begin{align*}
+		\E_x \sum_g \norm{ S^x_g (A^x_{g(x)} - B^x_{g(x)}) \ket{\psi}}^2 &= \E_x \sum_g \bra{\psi} (A^x_{g(x)} - B^x_{g(x)})^\dagger  (S_g^x)^\dagger S_g^x (A^x_{g(x)} - B^x_{g(x)}) \ket{\psi} \\
+		&= \E_x \sum_a \bra{\psi} (A^x_a - B^x_a)^\dagger  \Big(\sum_{g: g(x) = a} (S_g^x)^\dagger S_g^x \Big) (A^x_a - B^x_a) \ket{\psi} \\
+		&\leq \E_x \sum_a \bra{\psi} (A^x_a - B^x_a)^\dagger (A^x_a - B^x_a) \ket{\psi} \\
+		&= \E_x \sum_a \norm{ (A^x_a - B^x_a) \ket{\psi} }^2.
+	\end{align*}
+	The inequality follows from the fact that $\sum_{g: g(x) = a} (S_g^x)^\dagger S_g^x \leq \sum_g (S_g^x)^\dagger (S_g^x) \leq \Id$. The last line is at most $\delta$ by assumption, and we obtain the desired conclusion.
+\end{proof}
+
+
+\begin{lemma}
+\label{lem:cool-closeness-fact}
+Let $\mathcal{X}$ and $\mathcal{A}$ be finite sets and $\mu$ a distribution on $\mX$. Let $\{A^x_a\}_{a \in \mathcal{A}}$ be a projective measurement and let $\{B^x_a\}_{a \in \mathcal{A}}$ be a set of matrices. If $A^x_a \approx_\delta B^x_a$, then for all subsets $S \subseteq \mathcal{A}$, we have
+\[
+	\sum_{a \in S} A^x_a \approx_\delta \sum_{a \in S} A^x_a \cdot B^x_a.
+\]
+\end{lemma}
+\begin{proof}
+We expand:
+\begin{align*}
+	\E_x \norm{ \sum_{a \in S} \Big(A^x_a - A^x_a \cdot B^x_a\Big) \ket{\psi}}^2 &= \E_x \norm{ \sum_{a \in S} A^x_a \cdot \Big(A^x_a - B^x_a\Big) \ket{\psi}}^2 \\
+	&= \E_x \sum_{a \in S} \bra{\psi} (A^x_a - B^x_a)^\dagger A^x_a (A^x_a - B^x_a) \ket{\psi} \\
+	&\leq \E_x \sum_a \norm{ (A^x_a -  B^x_a) \ket{\psi}}^2\;,
+\end{align*}
+where all expectations are taken according to $\mu$. 
+In the second line we used the projectivity of $\{ A^x_a \}$, and in the third line we used that $A^x_a \leq \Id$.
+\end{proof}
+
+
+\begin{fact}[Triangle inequality, Fact 4.28 in~\cite{NW19}]
+  \label{fact:triangle}
+  If $A_a^x \approx_\delta B_a^x$ and $B_a^x \approx_\epsilon C_a^x$, then
+  $A_a^x \approx_{\delta + \epsilon} C_a^x$.
+\end{fact}
+
+\begin{fact}[Triangle inequality for ``$\simeq$", Proposition 4.29 in~\cite{ML20}]
+ \label{fact:triangle-for-simeq}
+ If $A_a^x \otimes I_\bob \simeq_\eps I_\alice \otimes B_a^x$,
+ $C_a^x \otimes I_\bob \simeq_\delta I_\alice \otimes  B_a^x$,
+ and $C_a^x \otimes I_\bob \simeq_\gamma I_\alice \otimes  D_a^x$,
+ then $A_a^x \otimes I_\bob \simeq_{\eps + 2\sqrt{\delta + \gamma}} I_\alice \otimes  D_a^x$.
+\end{fact}
+
+\begin{fact}[Data processing, Fact 4.26 in~\cite{NW19}]
+  \label{fact:data-processing}
+  Suppose $A^x_a \abc B^x_a$.
+  Then $A^x_{[f(\cdot) = b]} \abc B^x_{[f(\cdot) = b]}$.
+\end{fact}
+
+
+The state-dependent distance is the right tool for reasoning about the closeness
+of measurement operators in a strategy.
+The following lemma ensures that, when two families of measurements are close on a
+state, changing from one family of measurement to the other only introduces
+a small error to the value of the strategy.
+
+\begin{lemma}
+  \label{lem:commutation-analysis}
+  Let $\{A^x_{a,\, b}\}$, $\{B^x_{a,\, b,\, c}\}$, $\{C^x_{a,\, c}\}$ be POVMs.
+  Suppose $\{B^x_{a,\, b,\, c}\}$ is projective, and
+  \begin{align*}
+    A^x_{a,\, b} \otimes \Id_\bob &\approx_\delta \Id_\alice \otimes B^x_{a,\, b}\;,\\
+    C^x_{a,\, c} \otimes \Id_\bob &\approx_\delta \Id_\alice \otimes B^x_{a,\, c}\;,
+  \end{align*}
+	where recall that $B^x_{a,\, b} = \sum_c B^x_{a,b,c}$ and similarly $B^x_{a,\, c}=\sum_b B^x_{a,b,c}$. 
+  Then the following approximate commutation relation holds:
+  \begin{equation*}
+    [A^x_{a,\, b}, C^x_{a,\, c}] \otimes I_\bob \approx_\delta 0\;.
+  \end{equation*}
+\end{lemma}
+
+\begin{proof}
+  Applying Fact~\ref{fact:add-a-proj} to $C^x_{a,\, c} \otimes \Id_\bob
+  \approx_\delta \Id_\alice \otimes B^x_{a,\, c}$ and $\{A^x_{a,b} \otimes
+  \Id_\bob \}$, we have
+  \begin{equation}
+    \label{eq:commutation-analysis-1}
+    A^x_{a,\, b} C^x_{a,\, c} \otimes \Id_\bob
+    \approx_\delta A^x_{a,\, b} \otimes B^x_{a,\, c}\,.
+  \end{equation}
+  Similarly, applying Fact~\ref{fact:add-a-proj} to $A^x_{a,\, b} \otimes
+  \Id_\bob \approx_\delta \Id_\alice \otimes B^x_{a,\, b}$ and $\{\Id_\alice
+  \otimes B^x_{a,c}\}$, and using the fact that $\{B^x_{a,b,c}\}$ is projective,
+  we have
+  \begin{equation}
+    \label{eq:commutation-analysis-2}
+    \begin{split}
+      A^x_{a,\, b} \otimes B^x_{a,\, c}
+      & \approx_\delta \Id_\alice \otimes B^x_{a,\, c} B^x_{a,\, b}\\
+      & =_{\phantom{\delta}} \Id_\alice \otimes B^x_{a,\, b,\, c}\,.
+    \end{split}
+  \end{equation}
+  Combining Equations~\eqref{eq:commutation-analysis-1}
+  and~\eqref{eq:commutation-analysis-2}, we have
+  \begin{equation}
+    \label{eq:commutation-analysis-3}
+    A^x_{a,\, b} C^x_{a,\, c} \otimes \Id_\bob \approx_\delta
+    \Id_\alice \otimes B^x_{a,\, b,\, c}\,.
+  \end{equation}
+  A similar argument gives
+  \begin{equation}
+    \label{eq:commutation-analysis-4}
+    C^x_{a,\, c} A^x_{a,\, b} \otimes \Id_\bob \approx_\delta
+    \Id_\alice \otimes B^x_{a,\, b,\, c}\,.
+  \end{equation}
+  The claim follows from Equations~\eqref{eq:commutation-analysis-3}
+  and~\eqref{eq:commutation-analysis-4}.
+\end{proof}
+
+
+
+The following lemma is a slightly modified version of~\cite[Fact~4.34]{NW19}.
+\begin{lemma}\label{lem:ld-sandwich}
+  Let $k \geq 0$ be an integer and let $\eps>0$.
+  Let $\mX$ be a finite set and $\mu$ a distribution over $\mX$.
+  For each $1 \leq i \leq k$ let $\mG_i$ be a finite set of functions $g_i : \mY
+  \rightarrow \mR_i$ and for each $x \in \mX$ let $\{G^{i,\, x}_g\}_{g\in
+    \mG_i}$ be a projective measurement.
+  Suppose that for all $i\in \{1,\ldots,k\}$, $\mG_i$ satisfies the following
+  property: for any two $g_i \neq g_i' \in \mG_i$, the probability that $g_i(y)
+  = g_i'(y)$ over a uniformly random $y \in \mY$ is at most $\eps$.
+
+  Let $\bigl\{ A^{x}_{g_1,\, g_2,\, \ldots\,,\, g_k} \bigr\}$ be a projective
+  measurement with outcomes $(g_1,\ldots,g_k) \in \mG_1\times\cdots\times
+  \mG_k$.
+  For each $1 \leq i \leq k$, suppose that on average over $x \sim \mu$ and
+  $y\in \mY$ sampled uniformly at random,
+  \begin{equation}\label{eq:ld-sandwich-1}
+    A^{x}_{[\eval_y(\cdot)_i = a_i]} \abc G^{i,\, x}_{[\eval_y(\cdot)=a_i]}\;.
+  \end{equation}
+  Define the POVM family $\{C^x_{g_1,\, g_2,\, \ldots\,,\, g_k}\}$, for $x\in \mX$, by
+  \begin{equation*}
+    C^x_{g_1,\, g_2,\, \ldots\,,\, g_k} = G^{k,\, x}_{g_1} \cdots
+    G^{2,\, x}_{g_{k-1}} \, G^{1,\, x}_{g_k} \, G^{2,\, x}_{g_{k-1}} \cdots
+    G^{k,\, x}_{g_1}\;.
+  \end{equation*}
+  Then on average over $x\sim \mu$ and $y\in \mY$ sampled uniformly at random,
+  \begin{equation}\label{eq:ld-sandwich-2}
+    A^x_{[\eval_y(\cdot) = (a_1,\, a_2,\, \ldots,\, a_k)]} \abc[k(\delta+\eps)^{1/2}]
+    C^x_{[\eval_y(\cdot) = (a_1,\, a_2,\, \ldots,\, a_k)]}\;.
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+  The proof is identical to the one given in \cite[Fact~4.34]{NW19}, with the
+  only modification needed to insert the dependence on $x$ for all measurements
+  considered.
+\end{proof}
+
+
+\begin{lemma}[Fact 4.35 in~\cite{NW19}]\label{lem:pasting}
+Let $\mathcal{D}$ be a distribution on $(x,y_1,y_2)\in \mathcal{X}\times \mathcal{Y}_1\times \mathcal{Y}_2$. For $i\in \{1,2\}$ let $\mathcal{G}_i$ be a collection of functions $g_i: \mathcal{Y}_i \to \mathcal{R}_i$ and let $\{(G_i)^{x}_{g}\}_{g\in \mathcal{G}_i}$ be families of measurements such that $\{(G_2)^x_g\}_g$ is projective for every $x$. Suppose further that for every $(x,y_1)$ it holds that for $g_2\neq g'_2 \in \mathcal{G}_2$ the probability, on average over $y_2$ chosen from $\mathcal{D}$ conditioned on $(x,y_1)$, that $g_2(y_2)=g'_2(y_2)$  is at most $\eta$. 
+Let $\{A^{x,y_1,y_2}_{a_1,a_2}\}$ be a family of projective measurements with outcomes $(a_1,a_2)\in \mathcal{R}_1 \times \mathcal{R}_2$ such that for $i\in \{1,2\}$,
+\begin{equation}\label{eq:pasting-1}
+ A^{x,y_1,y_2}_{a_i} \otimes \Id \simeq_\delta \Id \otimes (G_i)^x_{[\eval_{y_i}(\cdot)=a_i]}
+\end{equation}
+and 
+\begin{equation}\label{eq:pasting-2}
+ A^{x,y_1,y_2}_{a_1,a_2} \otimes \Id \simeq_\delta \Id \otimes  A^{x,y_1,y_2}_{a_1,a_2}\;.
+\end{equation}
+Define a family of measurements $\{J^x_{g_1,g_2}\}$ as
+\begin{equation}\label{eq:pasting-2a}
+ J^x_{g_1,g_2} \,=\, (G_2)^x_{g_2} (G_1)^x_{g_1} (G_2)^x_{g_2}\;.
+\end{equation}
+Then there is a 
+\begin{equation}\label{eq:def-deltap}
+\delta_{pasting} \,=\, \delta_{pasting}(\eta,\delta)\,=\, \poly(\eta,\delta)
+\end{equation} such that 
+\begin{equation}\label{eq:pasting-3}
+ A^{x,y_1,y_2}_{a_1,a_2} \otimes \Id \simeq_{\delta_{pasting}} \Id \otimes J^x_{[\eval_{y_1}(\cdot)=a_1,\eval_{y_2}(\cdot) = a_2]}\;.
+\end{equation}
+\end{lemma}
+
+
+
+
+
+\begin{lemma}[Fact~4.32 of \cite{NW19}]
+  \label{lem:close-strategies-have-close-values}
+  Let $\game$ be a nonlocal game, and let $\strategy, \strategy'$ be
+  two strategies that are $\delta$-close (in the sense of
+  \Cref{def:strategy-distance}) for $\delta \in [0,1]$, and use the
+  same state $\ket{\psi}$. If either $\strategy$ or $\strategy'$ is
+  projective, then $|\val^*(\game,\strategy) - \val^*(\game,
+  \strategy')| \leq O(\delta^{1/2})$.
+\end{lemma}
+
+\subsection{The class $\MIP^*$}
+
+The complexity class $\MIP^*$ of \emph{multi-prover interactive proof
+  systems with entangled provers} is the class of languages that can be
+decided by a \emph{proof system} in which a polynomial-time classical
+\emph{verifier} interacts with noncommunicating, computationally unbounded
+ \emph{provers} who may share a \emph{finite-dimensional} entangled state. In general there may be polynomially many provers,
+and the verifier may interact with them over polynomially many
+rounds. In each round, the verifier generates a question for
+each prover and receives a response from them. At the end of
+the interaction the verifier 
+decides to either accept or reject. A language $L$ is in $\MIP^*$ if for
+every input $z \in L$, there exists a strategy that the provers can
+use to convince the verifier to accept with high probability ($\geq 2/3$), and for every input $z \not\in L$, there is
+\emph{no} strategy that the provers can use to convince the verifier
+to accept with more than low probability ($\geq 1/3$). The former
+property is called \emph{completeness} of the proof system, and the
+latter \emph{soundness}. The
+completeness and soundness probabilities $2/3$ and $1/3$ may be
+amplified by sequentially repeating the protocol. 
+
+For a formal definition of the class $\MIP^*$, see e.g.~\cite[Section
+  6.1]{vidick2016quantum}. 
+The main result of this paper is a lower bound, and for this purpose,
+it suffices  to restrict our attention to proof
+systems which involve only two provers, one round of interaction, and
+completeness probability $1$. This class is often denoted $\MIP^*_{1,1/2}(2,1)$. A formal definition for this restricted setting follows. 
+
+\begin{definition}\label{def:mipstar}
+  A language $L$ is in $\MIP^*_{1,1/2}$ if and only if there exist two randomized Turing machines
+  $\sampler$ and $\decider$ with the following properties.
+  \begin{enumerate}
+    \item \textbf{Efficiency:} For every $z\in\{0,1\}^*$ there is
+      a game $\game_z = (\cal{X}, \cal{Y}, \cal{A}, \cal{B}, \mu, D)$
+      such that:
+      \begin{enumerate}
+      \item The Turing machine $\sampler$ given input $z$ runs in time $\poly(|z|)$ and returns a
+      pair $(x,y) \in \cal{X} \times \cal{Y}$ such that the distribution of $(x,y)$, over the random choices of $\sampler$, is $\mu$.
+    \item The Turing machine $\decider$ given as input $z$ and a tuple $(x,y,a,b)
+      \in \cal{X} \times \cal{Y} \times \cal{A} \times \cal{B}$ runs in time $\poly(|z|)$ and returns $D(x,y,a,b)$.\footnote{Note that the running time of $\decider$ should be $\poly(|z|)$, even for long inputs $a,b$. This can be ensured by having $D$ return $0$ whenever $x,y,a,b$ are too long with respect to $|z|$.}
+    \end{enumerate}
+  \item \textbf{Completeness:} If $z \in L$, then $\val^*(\game_z) = 1$
+  \item \textbf{Soundness:} If $z \not\in L$, then $\val^*(\game_z) \leq 1/2$.
+  \end{enumerate}
+  We say that the pair $(\sampler, \decider)$ form an $\MIP^*$
+  \emph{verifier} for the language $L$, and the associated family of
+  games $\game_z$ are an $\MIP^*$ protocol for $L$.
+\end{definition}
+
+  It is clear that $\MIP^*_{1,1/2}(2,1) \subseteq \MIP^*$ (the
+  probability $1/2$ of acceptance of inputs not in the language may be
+  reduced to $1/3$ by sequential repetition as noted above). The main result of this paper is that $\RE
+  \subseteq \MIP^*_{1,1/2}(2,1)$. Since it is known that $\MIP*\subseteq \RE$ it follows
+  that $\MIP^*_{1,1/2}(2,1) = \MIP^* = \RE$. 
+
+ To show our lower bound it will suffice to consider an even more restricted class of $\MIP^*$
+  verifiers, for which the Turing machines $\sampler$ and
+  $\decider$ have a special structure which we refer to as
+  \emph{normal form}. This is defined in the following subsection.
+	
+\subsection{Normal form verifiers}
+\label{sec:normal-form}
+
+We introduce a normal form for verifiers in nonlocal games.
+The normal form uses Turing machines to specify the two actions performed by the
+verifier in a game: the generation of questions and the verification of answers.
+For the generation of questions, we use the formalism of samplers introduced in
+Section~\ref{sec:cls}.
+The normal form for verifiers gives a uniform method to specify an infinite
+family of nonlocal games.
+
+\begin{definition}[Decider]
+  \label{def:decider}
+  A \emph{decider} is a $5$-input Turing machine $\decider$ that on all inputs
+  of the form $(n,x,y,a,b)$ where $n$ is an integer and $x,y,a,b \in \{0,1\}^*$,
+  $\decider$ halts and returns a single bit.
+  Let $\TIME_\decider(n)$ denote the maximum time complexity of $\decider$ over
+  all inputs of the form $(n,x,y,a,b)$.
+	When the decider $\decider$ outputs $0$ we say that it \emph{rejects},
+  otherwise we say that it \emph{accepts}.
+  Furthermore, we call the input $n$ to a decider the \emph{index}.
+\end{definition}
+
+\begin{definition}
+  \label{def:normal-ver}
+  A \emph{normal form verifier} is a pair $\verifier = (\sampler, \decider)$
+  where $\sampler$ is a sampler with field size $q(n) = 2$ and $\decider$ is a
+  decider.
+  The description length of $\verifier$ is defined to be $\abs{\verifier} =
+  \max \{ \abs{\sampler} ,  \abs{\decider} \}$, the maximum of the description lengths of
+  $\sampler$ and $\decider$.
+  The number of levels of verifier $\verifier$ is defined to be the number of
+  levels of its sampler $\sampler$.
+\end{definition}
+
+Next we introduce a notion of \emph{bounded normal form
+  verifiers}, in which a single parameter (in this case, an integer $\lambda$)
+specifies a bound on the time complexity of $\verifier$, as well as on the
+description length of the verifier.
+
+\begin{definition}[$\lambda$-bounded verifiers]
+  \label{def:lambda}
+  Let $\lambda \in \N$ be an integer.
+  A normal form verifier $\verifier = (\sampler, \decider)$ is
+  \emph{$\lambda$-bounded} if the following two conditions hold
+  \begin{enumerate}
+  \item The time complexity bounds of the verifier $\TIME_\sampler(n)$,
+    $\TIME_\decider(n)$ are at most $n^\lambda$ for $n \ge 2$.\footnote{We do
+      not require the bound to hold for $n=1$ as $n^\lambda$ is always $1$ and
+      hence it is usually not satisfied.
+    }
+  \item The description length of the verifier $\abs{\verifier}$ is bounded by $\lambda$.
+  \end{enumerate}
+\end{definition}
+
+
+Normal form verifiers specify an infinite family of nonlocal games indexed by
+natural numbers in the following way.
+
+\begin{definition}
+  \label{def:normal-game}
+  Let $\verifier = (\sampler, \decider)$ be a normal form verifier.
+  For $n \in \N$, we define the following nonlocal game $\verifier_{n}$ to be
+  the \emph{$n$-th game corresponding to the verifier $\verifier$}.
+  The question sets $\cal{X}$ and $\cal{Y}$ are $\{0,1\}^{\TIME_\sampler(n)}$.
+  The answer sets $\cal{A}$ and $\cal{B}$ are $\{0,1\}^{\TIME_\decider(n)}$.
+  The question distribution is the distribution $\mu_{\sampler,\, n}$ specified
+  in Definition~\ref{def:sampler-sample}.
+  The decision predicate is the function computed by
+  $\decider(n,\cdot,\cdot,\cdot,\cdot)$, when the last four inputs are
+  restricted to $\cal{X}\times \cal{Y}\times\cal{A}\times\cal{B}$.
+  The value of the game is denoted by $\val^*(\verifier_{n})$.
+\end{definition}
+
+We note that the game $\verifier_n$ is well-defined since for a normal form
+verifier the distribution $\mu_{\sampler,\, n}$ is supported on
+$\{0,1\}^{\TIME_\sampler(n)}\times \{0,1\}^{\TIME_\sampler(n)}$ and a normal
+form decider always halts with a single-bit output.
+
+\begin{definition}[Verifier with commuting strategy]
+  \label{def:comm-with-checker}
+  Let $\verifier = (\sampler, \decider)$ be a normal form verifier.
+  For $v:\N\to [0,1]$ say that $\verifier$ has a \emph{value-$v$ commuting
+    strategy} if for all $n \in \N$, the game $\verifier_n$ has a value-$v(n)$
+  commuting strategy.
+\end{definition}
+
+
+ 

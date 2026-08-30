@@ -1,0 +1,2589 @@
+\section{Introspection Games}
+\label{sec:introspection}
+
+\newcommand{\ai}[1][y,\, a]{A^\Intro_{#1}}
+\newcommand{\bs}[1][z,\, a]{B^\Sample_{#1}}
+\newcommand{\br}[1][y,y^\perp, a]{B^\Read_{#1}}
+\newcommand{\ahk}[1][y_{<k}]{A^{\Hide{k}}_{#1}}
+\newcommand{\ahp}[1][y_{\le k}]{A^{\Hide{k+1}}_{#1}}
+\newcommand{\bhk}[1][y_{<k}]{B^{\Hide{k}}_{#1}}
+\newcommand{\bhp}[1][y_{\le k}]{B^{\Hide{k+1}}_{#1}}
+\newcommand{\z}[1][z]{\sigma^Z_{#1}}
+\newcommand{\x}[1][x]{\sigma^X_{#1}}
+
+\newcommand{\La}{[L(\cdot) = y]}
+\newcommand{\Lk}[1][k]{[L_{#1,\, y_{<#1}}(\cdot) = y_{#1}]}
+\newcommand{\Llk}[1][k]{[L_{<#1}(\cdot) = y_{<#1}]}
+\newcommand{\Llek}[1][k]{[L_{\le #1}(\cdot) = y_{\le #1}]}
+\newcommand{\Lperpk}[1][k]{[L_{#1,\, y_{<#1}}^\perp (\cdot) = y_{#1}^\perp]}
+
+\newcommand{\aigek}[1][y_{\ge k},\, a]{A^{\Intro,\, y_{<k}}_{#1}}
+\newcommand{\aigk}[1][y_{> k},\, a]{A^{\Intro,\, y_{\le k}}_{#1}}
+\newcommand{\bsL}{\bs[\La,\, a]}
+\newcommand{\zL}{\z[\La]}
+\newcommand{\zLk}[1][k]{\sigma^{Z}_{\Lk[#1]}}
+\newcommand{\zLlk}[1][k]{\z[{\Llk[#1]}]}
+\newcommand{\zLlek}{\z[\Llek]}
+\newcommand{\xLperpk}[1][k]{\sigma^{X}_{\Lperpk[#1]}}
+
+\newcommand{\aizk}[1][y,\, a]{A^{\Intro,\, Z_{<k}}_{#1}}
+
+\subsection{Overview}
+\label{sec:intro-overview}
+
+Consider a normal form verifier $\verifier = (\sampler, \decider)$ (see
+Definition~\ref{def:normal-game}).
+In this section we design a normal form verifier $\verifier^\intro =
+(\sampler^\intro, \decider^\intro)$ (called the \emph{introspective verifier})
+such that in the $n$-th game $\verifier^\intro_n$ (called the
+\emph{introspection game}; see Definition~\ref{def:normal-game} for the
+definition of the $n$-th game associated with a normal form verifier) the
+verifier expects the players to sample for themselves questions $x$ and $y$
+distributed as their questions in the game $\verifier_N$ for index $N =
+2^n$---this is the ``introspection'' step.
+Note the exponential separation of the indices of the introspection game versus
+the original game!
+Our construction of the introspection game generalizes the introspection
+technique of~\cite{NW19}.
+
+Recall the execution of the $N$-th game corresponding to the ``original''
+verifier $\verifier$ (see Definition~\ref{def:normal-game}).
+Let $n\geq 1$, $N=2^n$, and suppose that the CL functions of $\sampler$ on index
+$N$ are $L^\alice,L^\bob$ acting on an ambient space $V$.
+In the game $\verifier_N$, the verifier first samples $z \in V$ uniformly at
+random and gives each player $w\in\AB$ the question $x_w = L^w(z)$.
+In this context, the string $z$ is referred to as the ``seed''.
+The players respond with answers $a_\alice$ and $a_\bob$, respectively, and the
+verifier accepts or rejects according to the output of $\decider(N, x_\alice,
+x_\bob, a_\alice, a_\bob)$.
+
+In the introspection game, with some constant probability independent of $n$,
+the verifier $\verifier^\intro_n$ sends the question pair $(\Introspect,\alice)$
+to player $w$ and $(\Introspect,\bob)$ to the other player $\overline{w}$, where
+$w \in \AB$ and recall that $\overline{w}=\bob$ if $w=\alice$ and
+$\overline{w}=\alice$ otherwise.
+The verifier expects player $w$ to measure their share of the state
+$\ket{\EPR}_V$ using a coarse-grained $Z$-basis measurement whose outcomes range
+over $L^\alice(V)$, and similarly player $\overline{w}$ measures the state
+$\ket{\EPR}_V$ using a coarse-grained $Z$-basis measurement with outcomes that
+range over $L^\bob(V)$.
+If the players perform these measurements honestly, then the outcomes
+$(x_\alice,x_\bob)$ are distributed exactly according to $\mu_{\sampler,\, N}$, the
+question distribution of the game $\verifier_N$.
+Players $w$ and $\overline{w}$ are then expected to respond with the question
+$x_w$ and $x_{\ol{w}}$ that they each sampled, together with strings $a_w$ and
+$a_{\overline{w}}$, respectively, which are intended to be the answers for the
+question pair $(x_\alice,x_\bob)$ in the game $\verifier_N$.
+In other words, the players introspectively sample the question pair
+$(x_\alice,x_\bob)$ and then respond with the question itself and an answer for
+it.
+
+To facilitate comprehension, we call the players that interact with the
+introspective verifier $\verifier^\intro$ the ``introspecting players'', and the
+players that interact with the ``original'' verifier $\verifier$ the ``original
+players''.
+To ensure that the introspecting players follow the above procedure honestly,
+the introspective verifier $\verifier^\intro_n$ first uses the (binary) Pauli
+basis test described in Section~\ref{sec:pauli-verifier} to force the
+introspecting players to share the state $\ket{\EPR}_{V}$.
+The Pauli basis test also ensures that the players measure $\sigma^W$ and report
+the outcome honestly when they receive questions $(\Pauli, W)$ for $W \in \{X,
+Z\}$.
+For $v\in\{\alice,\bob\}$ the verifier cross-checks the question pairs
+$(\Introspect, \trole)$ and $(\Pauli, Z)$ to enforce that the honest measurement
+is performed for question $(\Introspect, \trole)$.
+
+The main difficulty in the soundness analysis is to ensure that the answer of
+player $w$ who received question $(\Introspect, \trole)$ depends only on
+$L^\trole(z)$ and not on any other information about the string $z$.
+First assume for simplicity that $L^\trole$ is a linear function.
+As shown below (based on Lemma~\ref{lem:why-didnt-i-think-of-this-before}),
+$L^\trole(z)$ can be obtained by measuring a specific collection of~$\sigma^Z$
+observables; namely, the set
+\begin{equation}
+  \label{eq:intro-overview-z}
+  \{\sigma^Z(u) : u \in \ker(L^\trole)^\perp\}.
+\end{equation}
+To prevent the player from obtaining any additional information the verifier
+needs to enforce that the player does \emph{not} additionally measure any
+$\sigma^Z(u)$ for $u \notin \ker(L^\trole)^\perp$.
+(We refer to any such $\sigma^Z$ as a ``prohibited'' $\sigma^Z$.)
+
+The introspective verifier achieves this by sometimes sending the $\Read$ type
+question $(\Read, \trole)$ or $\Hide{k}$ type questions $(\Hide{k}, \trole)$ to the
+players.
+When receiving the $\Read$ question, the players are required to also measure
+observables from the set
+\begin{equation}
+  \label{eq:intro-overview-x}
+  \{\sigma^X(r) : r \in \ker(L^\trole)\},
+\end{equation}
+which (as shown in Lemma~\ref{lem:commute} below) commute with every $Z$-basis
+measurement in~\eqref{eq:intro-overview-z}.
+On the other hand, any prohibited $\sigma^Z(u)$ must anticommute with at least
+one of the $\sigma^X(r)$, as otherwise $u$ would be in $\ker(L^\trole)^\perp$.
+As a result, honestly measuring the~$\sigma^X$ observables
+of~\eqref{eq:intro-overview-x} has the effect of preventing the player from
+measuring any of the prohibited~$\sigma^Z$ observables, so that the answer $a$
+can effectively only depend on the question $L^\trole(z)$.
+(In the protocol, the verifier asks the player to measure the function
+$(L^\trole)^\perp(z)$ in the $X$ basis, rather than all of the~$\sigma^X$
+observables.
+By Lemma~\ref{lem:why-didnt-i-think-of-this-before} the two are equivalent.)
+Similarly to how questions $(\Pauli, Z)$ and $(\Introspect, \trole)$ are
+cross-checked, the questions $(\Pauli, X)$, $(\Hide{k}, \trole)$ and $(\Read,
+\trole)$ are cross-checked in order to ensure that the honest $X$-basis
+measurements are performed for the $\Hide{k}$ questions and the $\Read$ questions.
+
+When the CL functions $L^\trole$ are $\ell$-level for $\ell > 1$, the
+introspective verifier sends one of $O(\ell)$ different hiding questions to the
+players, chosen at random; together these hiding checks ensure that each of the
+constituent linear maps of $L^\trole$ are honestly measured.
+Intuitively, these hiding questions ``interpolate'' between questions
+$(\Pauli,Z)$, $(\Introspect,\trole)$ and $(\Pauli,X)$ in a way that, for all
+pairs of questions asked by the verifier, the honest measurements commute.
+(See Figure~\ref{fig:intro-honest} for an overview of the honest measurements.)
+This strong commuting property of the strategy is essential for the
+oracularization transformation in \cref{sec:oracle} to be possible.
+
+A key property of the introspection game is that the distribution of questions
+(which include the Pauli basis test questions as well as the introspection
+questions and the hiding questions) is also conditionally linear.
+This means that the introspection game can be ultimately specified by a normal
+form verifier $\verifier^\intro = (\sampler^\intro,\decider^\intro)$, which is
+crucial for recursive compression of games.
+Moreover, while the time complexity of the introspective verifier's decider
+$\decider^\intro$ remains polynomially related to that of $\decider$ on index
+$N$, the time complexity of the sampler $\sampler^\intro$ is $\polylog(N)$
+(exponentially smaller), due to the efficiency of the Pauli basis test.
+Finally, $\sampler^\intro$ only depends on $\verifier$ through the number of
+levels $\ell$ of $\sampler$ as well as upper bounds on the time complexities of
+$\sampler$ and $\decider$.
+
+\subsection{The introspective verifier}
+\label{sec:intro-verifier}
+
+\def\tsint{\hat{\sampler}^\intro}
+\def\tdint{\hat{\decider}^\intro}
+\def\tvint{\hat{\verifier}^\intro}
+\def\sint{\sampler^\intro}
+\def\dint{\decider^\intro}
+\def\vint{\verifier^\intro}
+
+Let $\verifier = (\sampler, \decider)$ be an $\ell$-level normal form verifier.
+We call $\verifier$, $\sampler$, and $\decider$ the ``original'' verifier,
+sampler, and decider, respectively.
+For all original verifier $\verifier$, we define the introspective verifier
+$\vint$ in this section.
+We use $N = 2^n$ to denote the index of the original verifier $\verifier$ that
+is simulated by the introspective verifier $\vint$ on index $n$.
+
+
+
+
+
+The \emph{introspective verifier corresponding to $\verifier$ and parameters
+  $(\lambda,\ell)$} is a \emph{typed} normal form verifier $\tvint
+=(\tsint, \tdint)$, sketched in
+Section~\ref{sec:intro-overview} and specified in detail in the present section
+(see Section~\ref{sec:types} for the definition of typed normal form verifiers).
+In the following descriptions of the sampler $\tsint$ and decider
+$\tdint$, all parameters are functions of the index $n$, the number of
+levels $\ell$ of the sampler $\sampler$, and the parameter $\lambda$; we often
+leave this dependence implicit.
+
+Let $R = N^\lambda$, and let $\introparams(R) =
+(q,m,d)$ denote the parameter tuple specified in
+Section~\ref{sec:qld-complexity}.
+Note that $\introparams$ is implicitly a function of $n$ (since $R$ is a
+function of $n$).
+The associated parameter tuple $\introparams$ is intended to parametrize a Pauli
+basis test that certifies the \hnote{edited in response to LB comments:} presence of $Q = 2^m \log q$-qubit EPR states; intuitively, these qubits are meant to serve as the source of randomness for the CL functions of the
+original sampler $\sampler$. Since we will assume that the original verifier $\verifier$ is $\lambda$-bounded, the original sampler $\sampler$ on index $N$ has time complexity at most $R$, and therefore the amount of randomness needed is at most $R$. By \Cref{lem:delta-bound}, the number of qubits $Q$ in the EPR states is at least $R$, and thus the EPR qubits can be used to properly introspect the original game. 
+
+Recall that the players in the introspection game are referred to as
+``introspecting players'' and the players in the original game are referred to
+as ``original players''.
+We use the following notation in order to distinguish between questions and
+answers meant for the introspecting players versus the original players.
+The questions and answers of the introspecting players are denoted by hatted
+variables (e.g., $\hat{x}$ and $\hat{a}$).
+Similarly, the associated question types are denoted using hatted variables
+$\hat{\tvar}$.
+The questions and answers of the original players in the original game
+$\verifier_N$ are denoted using non-hatted variables (e.g.\ $x$, $a$, and so
+on).
+
+\paragraph{Types and type graph.}
+The type set $\type^\intro$ for the introspective verifier $\tvint$ is
+\begin{gather*}
+  \type^\intro = \type^\pauli \cup \Big( \Big(\big\{ \Introspect, \Sample,
+  \Read \big\} \cup \Big(\, \bigcup_{k=1}^{\ell} \bigl\{ \Hide{k} \bigr\} \,
+  \Big) \Big) \times \ab \Big) \;,
+\end{gather*}
+where $\type^\pauli$ is the type set of the Pauli basis test, defined in
+Section~\ref{sec:pauli-verifier}.
+The type graph $G^\intro$ is specified in Figure~\ref{fig:type-graph-intro}.
+
+\begin{figure}[!htbp]
+  \centering
+  \begin{tikzpicture}[scale=.8]
+
+    \tikzset{type/.style args={[#1]#2}{
+        draw,circle,fill,scale=0.25,
+        label={[font=\scriptsize, label distance=1pt]#1:#2}
+      }}
+
+
+
+    \foreach \i in {1,...,6} \draw (0,8-9/8*\i)
+    coordinate (Constraint-\i)
+    node[type={[180]$\Constraint_\i$}] {};
+
+    \foreach \i in {1,...,9} \draw (2.5,9-\i)
+    coordinate (Variable-\i)
+    node[type={[330]$\Variable_\i$}] {};
+
+    \foreach \i in {1,...,3} \foreach \j in {1,...,3}
+    \pgfmathsetmacro{\k}{(\i-1)*3+\j}
+    \draw (Constraint-\i) -- (Variable-\k);
+
+    \foreach \i in {4,...,6} \foreach \j in {1,...,3}
+    \pgfmathsetmacro{\k}{\i-3+(\j-1)*3}
+    \draw (Constraint-\i) -- (Variable-\k);
+
+
+
+    \draw (6,9) coordinate (DLine-X) node[type={[90]$(\DLine, X)$}] {};
+    \draw (8,9) coordinate (Plane-X) node[type={[90]$(\ALine, X)$}] {};
+    \draw (7,8) coordinate (Point-X) node[type={[315]$(\Point, X)$}] {};
+    \draw (9.5,8) coordinate (Pauli-X) node[type={[0]$(\Pauli, X)$}] {};
+    \draw (6,3) coordinate (DLine-Z) node[type={[270]$(\DLine, Z)$}] {};    
+    \draw (8,3) coordinate (Plane-Z) node[type={[270]$(\ALine, Z)$}] {};
+    \draw (7,4) coordinate (Point-Z) node[type={[45]$(\Point, Z)$}] {};
+    \draw (9.5,4) coordinate (Pauli-Z) node[type={[0]$(\Pauli, Z)$}] {};
+    \draw (8,6) coordinate (Pair) node[type={[0]$\Pair$}] {};
+    \draw (7.3,6.8) coordinate (Pair-X) node[type={[0]$(\Pair,X)$}] {};
+    \draw (7.3,5.2) coordinate (Pair-Z) node[type={[0]$(\Pair,Z)$}] {};
+
+
+
+    \draw (10.5,8.7) coordinate (Hide-1-A) node[type={[90]$(\Hide{1}, \alice)$}] {};
+    \draw (12.5,8.7) coordinate (Hide-2-A) node[type={[90]$(\Hide{2}, \alice)$}] {};
+    \draw (13.8,8.7) node {$\cdots$};
+    \draw (15,8.7) coordinate (Hide-l-A) node[type={[90]$(\Hide{\ell}, \alice)$}] {};
+
+    \draw (10.5,7.3) coordinate (Hide-1-B) node[type={[270]$(\Hide{1}, \bob)$}] {};
+    \draw (12.5,7.3) coordinate (Hide-2-B) node[type={[270]$(\Hide{2}, \bob)$}] {};
+    \draw (13.8,7.3) node {$\cdots$};
+    \draw (15,7.3) coordinate (Hide-l-B) node[type={[270]$(\Hide{\ell}, \bob)$}] {};
+
+    \draw (10.5,3.3) coordinate (Sample-A) node[type={[270]$(\Sample, \alice)$}] {};
+    \draw (12.75,3.3) coordinate (Intro-A) node[type={[270]$(\Introspect, \alice)$}] {};
+    \draw (15,3.3) coordinate (Read-A) node[type={[270]$(\Read, \alice)$}] {};
+
+    \draw (10.5,4.7) coordinate (Sample-B) node[type={[90]$(\Sample, \bob)$}] {};
+    \draw (12.75,4.7) coordinate (Intro-B) node[type={[90]$(\Introspect, \bob)$}] {};
+    \draw (15,4.7) coordinate (Read-B) node[type={[90]$(\Read, \bob)$}] {};
+
+
+
+    \foreach \from/\to in {DLine-X/Point-X, Plane-X/Point-X, Point-X/Pauli-X,
+      DLine-Z/Point-Z, Plane-Z/Point-Z, Point-Z/Pauli-Z,
+      Point-X/Variable-1, Point-Z/Variable-5,
+      Hide-2-A/Hide-1-A,
+      Hide-2-B/Hide-1-B,
+      Sample-A/Intro-A, Intro-A/Read-A,
+      Sample-B/Intro-B, Intro-B/Read-B,
+      Intro-A/Intro-B}
+    \draw (\from) -- (\to);
+
+    \draw (Pauli-X) to [out=60,in=180] (Hide-1-A);
+    \draw (Pauli-X) to [out=300,in=180] (Hide-1-B);
+    \draw (Pauli-Z) to [out=60,in=180] (Sample-B);
+    \draw (Pauli-Z) to [out=300,in=180] (Sample-A);
+    \draw [rounded corners=8] (Hide-l-A) to +(2.2,0) to +(2.2,-5.4) to (Read-A);
+    \draw [rounded corners=8] (Hide-l-B) to +(1.2,0) to +(1.2,-2.6) to (Read-B);
+    \draw (Point-X) to [out=275,in=120] (Pair-X) to [out=300,in=140] (Pair);
+    \draw (Point-Z) to [out=85,in=240] (Pair-Z) to [out=60,in=220] (Pair);
+
+  \end{tikzpicture}
+  \caption{Type graph $G^\intro$ for the introspection game.
+    Each vertex also has a self-loop which is not drawn in the figure for
+    clarity. }
+  \label{fig:type-graph-intro}
+\end{figure}
+
+\paragraph{Sampler.}
+We first define a $3$-level $(\type^\intro,G^\intro)$-typed sampler
+$\tilde{\sampler}^\intro$, which has field size $q(n)$ and dimension $3m(n) +
+3$, where $q(n)$ and $m(n)$ are specified by $\introparams(R)$.
+\hnote{clarified sentence in response to Bowen comments} Note that the dimension matches that of the space $V^\pauli$ of the CL
+functions of the Pauli basis test parameterized by $\introparams(R)$, specified in
+Section~\ref{sec:qld-game}. 
+
+Fix $n \in \N$.
+We specify the CL functions of $\tilde{\sampler}^\intro$ on index $n$.
+Since the functions $L_{\hat{\tvar}}^{\alice,\, n}$ and
+$L_{\hat{\tvar}}^{\bob,\, n}$ are identical for all $n$ and $\hat{\tvar}$, we
+omit the superscripts $\alice$ and $\bob$.
+For types $\hat{\tvar} \in \type^\pauli$, the CL functions $L_{\hat{\tvar}}^n$
+are given by those specified in Section~\ref{sec:qld-game}, parameterized by
+$\introparams(R)$.
+For types $\hat{\tvar} \in \type^\intro \setminus \type^\pauli$, the associated
+CL functions are defined to be $0$-level CL functions (i.e., they are the $0$
+map).
+This means that for question types such as $\hat{\tvar}=(\Introspect, \trole)$
+or $\hat{\tvar}=(\Sample, \trole)$ for $\trole\in\{\alice,\bob\}$ the associated question is solely comprised
+of the question type label.
+
+Finally, we define the typed sampler $\tsint$ to be
+$\downsize(\tilde{\sampler}^\intro)$, the downsized sampler
+(\cref{def:downsize-typed-sampler}) corresponding to $\tilde{\sampler}^\intro$.
+The typed CL functions associated with
+the Pauli basis test are $3$-level; using \cref{rk:higher-level,lem:cl-downsize}
+it follows that $\tsint$ is a $3$-level typed sampler.
+
+The following lemma establishes the complexity of the sampler $\tsint$
+as well as the complexity of computing a {description} of it from the parameters
+$(\lambda,\ell)$.
+\begin{lemma}
+  \label{lem:intro-sampler-complexity}
+  There exists a $2$-input Turing machine $\ComputeIntroSampler$ that
+  on input $(\lambda,\ell)$ outputs a description of the sampler
+  $\tsint$ (corresponding to parameters $\lambda,\ell$) in time $\polylog(\lambda,\ell)$.
+  Furthermore, 
+  \begin{enumerate}
+  \item $\TIME_{\tsint}(n) = \poly(n, \lambda, \ell)$, and
+	\item $\tsint$  is a $3$-level typed sampler.
+  \end{enumerate}
+\end{lemma}
+
+\begin{proof}
+  Define the following $9$-input Turing machine
+  $\RawIntroSampler$, that does not depend on any parameters (so that its description length is constant). 
+  On input $(\lambda', \ell', n', x_1', \ldots, x_6')$, the Turing machine $\RawIntroSampler$
+  computes the output of the typed sampler $\tsint$ (parameterized by
+  $(\lambda, \ell)$) with input tapes set to $(n', x_1', \ldots, x_6')$.
+  In more detail, the Turing machine $\RawIntroSampler$ first computes
+  $\introparams(R)$ for $R= 2^{\lambda' n'}$.
+  Using \cref{lem:introparams-complexity}, this computation takes time
+  $\poly\log(R)$.
+  Next, depending on the contents of the last $7$ input tapes of
+  $\RawIntroSampler$, the Turing machine evaluates the dimension of
+  $\tsint$ (which can easily be computed from $\introparams(R)$), or
+  one of the CL functions, or returns a representation of a factor space of
+  $\tsint$.
+  If the type passed as input is $\hat{\tvar} \in \type^\pauli$ then by
+  Lemma~\ref{lem:qld-complexity} this takes time $\polylog(R)$.
+  If $\hat{\tvar} \in \type^\intro\backslash\type^\pauli$ then this can be done
+  in $O(\log \ell')$ time (to read the input type).
+  Overall, $\RawIntroSampler$ runs in time $\poly\log(R,\ell')$.
+  
+  We now define the Turing machine $\ComputeIntroSampler$ as follows.
+  On input $(\lambda,\ell)$, $\ComputeIntroSampler$ outputs the description of
+  $\RawIntroSampler$ with the first two input tapes hardwired to $\lambda$ and
+  $\ell$, respectively, yielding the sampler $\tsint$ corresponding to
+  parameters $(\lambda,\ell)$.
+  Computing this description takes $O(\log \lambda + \log \ell)$ time.
+  
+  The time complexity of $\tsint$ follows from the time complexity of
+  $\RawIntroSampler$ and the number of levels is by construction.
+\end{proof}
+
+\paragraph{Decider.}
+The typed decider $\tdint$ is specified in
+Figure~\ref{fig:intro-decider}.
+We explain how to interpret the figure, including the notation.
+(It may also be helpful to review the description of the intended strategy for
+the players in the game, described in Section~\ref{sec:intro-completeness}.)
+
+\begin{figure}[!htbp]
+  \begin{gamespec}
+    \begin{table}[H]
+      \centering
+      \small
+      \begin{tabularx}{.7\textwidth}{l X}
+        \toprule
+        Type \hspace{6em} & Answer format\\
+        \midrule
+        $(\Introspect, \trole)$ & $(y,a) \in V \times \{0,1\}^*$ \\
+        $(\Sample, \trole)$ &  $(z,a) \in V \times \{0,1\}^*$ \\
+        $(\Read, \trole)$ & $(y,y^{\perp},a) \in V \times V \times \{0,1\}^*$\\
+        $(\Hide{k}, \trole)$ & $(y,y^{\perp},x) \in V \times V \times V$\\
+        \bottomrule
+      \end{tabularx}
+    \end{table}
+    In the following, whenever $\sampler$ or $\decider$ is called as a subroutine,
+    $\tdint$ aborts and rejects if the subroutine takes more than
+    $N^\lambda$ time steps.
+    On input $(n, \hat{\tvar}_\alice, \hat{x}_\alice, \hat{\tvar}_\bob,
+    \hat{x}_\bob, \hat{a}_\alice, \hat{a}_\bob)$, the decider $\tdint$
+    first computes the dimension $s(N)$ of $V$ by calling the original sampler
+    $\sampler$ on input $(N,\gamestyle{dimension})$.
+    The decider rejects if $s(N) > N^\lambda$, or if \hnote{edited:} $\max \bigl\{ \abs{\hat{a}_\alice},
+    \abs{\hat{a}_\bob} \bigr\} \geq 3 \cdot 2^m \cdot \log q$ where $\introparams(N^\lambda) = (q,m,d)$. Otherwise, it performs the following tests for all $w,\trole \in \AB$.
+    (If no test applies, the decider accepts.) 
+    
+
+\begin{enumerate}[itemsep=2pt, parsep=2pt]
+    \item (\textbf{Pauli test}).
+      \label{enu:pauli}
+      If $\hat{\tvar}_\alice, \hat{\tvar}_\bob \in \type^\pauli$, the decider
+      accepts if $\decider^\pauli_\introparams$ accepts the input
+      $(\hat{\tvar}_\alice, \hat{x}_\alice, \hat{\tvar}_\bob, \hat{x}_\bob,
+      \hat{a}_\alice, \hat{a}_\bob)$.
+    \item (\textbf{Sampling tests}).
+      \label{enu:sampling}
+      \begin{enumerate}
+      \item If $\hat{\tvar}_w = (\Pauli,Z)$ and $\hat{\tvar}_{\overline{w}} =
+        (\Sample, \trole)$, accept if $\hat{a}_w^V = z_{\overline{w}}$.
+        \label{enu:sampling-pauli}
+
+      \item If $\hat{\tvar}_w = (\Introspect, \trole)$,
+        $\hat{\tvar}_{\overline{w}} = (\Sample, \trole)$, accept if $y_{w} =
+        L^\trole(z_{\overline{w}})$ and $a_w=a_{\overline{w}}$.
+        \label{enu:sampling-intro}
+      \end{enumerate}
+
+    \item (\textbf{Hiding tests}).
+      \label{enu:hiding}
+      \begin{enumerate}
+
+      \item If $\hat{\tvar}_w = (\Introspect, \trole)$,
+        $\hat{\tvar}_{\overline{w}} = (\Read, \trole)$, accept if $y_{w} =
+        y_{\overline{w}}$ and $a_w = a_{\overline{w}}$.
+        \label{enu:hiding-intro}
+
+      \item If $\hat{\tvar}_w = (\Hide{\ell}, \trole)$,
+        $\hat{\tvar}_{\overline{w}} = (\Read, \trole)$, accept if $y_{w,\,
+          <\ell} = y_{\overline{w},\, <\ell}$, and $y^{\perp}_w =
+        y^{\perp}_{\overline{w}}$.
+        \label{enu:hiding-read}
+        
+      \item \label{enu:hiding-same} If $\hat{\tvar}_w = (\Hide{k}, \trole)$,
+        $\hat{\tvar}_{\overline{w}} = (\Hide{k+1}, \trole)$ for some $k \in \{ 1,
+        2, \ldots, \ell-1 \}$, accept if
+        \begin{equation*}
+          y_{w,\, <k} = y_{\overline{w},\, <k}\;, \quad
+          y^{\perp}_{w,\, \le k} = y^{\perp}_{\overline{w},\, \le k}\;, \quad
+          x_{w,\, >k+1} = x_{\overline{w},\, >k+1}\;,
+        \end{equation*}
+        and $y^{\perp}_{\overline{w},\, k+1} = \big( L^{\trole}_{k+1,\, u} \big)^\perp
+        (x_{w,\, k+1})$ where $u = y_{\overline{w},\, \le k}$.
+      \item If $\hat{\tvar}_w = (\Pauli,X)$, $\hat{\tvar}_{\overline{w}} =
+        (\Hide{1}, \trole)$, accept if $y^\perp_{\overline{w},\, 1} =
+        \bigl( L^{\trole}_1 \bigr)^\perp (\hat{a}_w^{V_1})$ and $\hat{a}_w^{V_{> 1}} =
+        x_{\overline{w},\, >1}$.
+        \label{enu:hiding-pauli}
+      \end{enumerate}
+
+    \item (\textbf{Game test}).
+      \label{enu:intro-game}
+      If $\hat{\tvar}_w = (\Introspect, \alice)$ and $\hat{\tvar}_{\overline{w}}
+      = (\Introspect, \bob)$, accept if $\decider$ accepts $(N, y_w,
+      y_{\overline{w}}, a_w, a_{\overline{w}})$.
+
+    \item (\textbf{Consistency test}).
+      \label{enu:intro-consistency}
+      If $\hat{\tvar}_\alice = \hat{\tvar}_\bob$, accept if and only if
+      $\hat{a}_\alice = \hat{a}_\bob$.
+    \end{enumerate}
+  \end{gamespec}
+  \caption{The typed decider $\tdint$ for the introspective verifier,
+    parameterized by integers $\lambda, \ell$, on index $n$.
+    $N$ denotes $2^n$, $V$ is the ambient space for $\sampler$, and
+    $\{L^\trole\}_{\trole\in\{\alice,\bob\}}$ the associated CL functions on
+    index $N$.}
+  \label{fig:intro-decider}
+\end{figure}
+
+\medskip
+\emph{Question and answer format.}
+The decider takes as input a tuple $(n, \hat{\tvar}_\alice, \hat{x}_\alice,
+\hat{\tvar}_\bob, \hat{x}_\bob, \hat{a}_\alice, \hat{a}_\bob)$ where
+$(\hat{\tvar}_w,\hat{x}_w)$ denotes the question for introspecting player $w \in
+\AB$, and $\hat{a}_w$ denotes their answer.
+As in the specification of the Pauli basis test, in
+Figure~\ref{fig:intro-decider} we include an ``answer key'' indicating how the
+players' answers are parsed, depending on the question type.
+When the question type is from $\type^\pauli$, the question and answer format
+are as described in Figure~\ref{fig:decider_pauli}.
+When the question type is in $\type^\intro \setminus \type^\pauli$, the answer
+format is described in the table at the top of
+Figure~\ref{fig:intro-decider}.\footnote{There is no question format
+  specification for the question types in $\type^\intro \setminus \type^\pauli$,
+  because the question is solely comprised of the question type label.}
+For each such question, there is an associated variable $\trole \in \AB$ that
+indicates to the introspecting player which {original player} it is supposed to
+impersonate in the introspection game.
+
+In the figure, $V$ denotes the ambient space of the original sampler $\sampler$
+on index $N = 2^n$. \hnote{added:} We assume that the original verifier $\verifier$ is $\lambda$-bounded and in particular the running time of the original sampler $\sampler$ (and therefore its dimension) is at most $R = N^\lambda$. If the dimension were larger than $N^\lambda$, the decider $\hat{\decider}^\intro$ would always reject in the beginning. 
+
+Since $V$ is isomorphic to $\F_2^{s(N)}$, where $s(N)$ is the dimension of
+$\sampler$, the space $V$ is identified in a canonical way as the register
+subspace of $\F_2^Q$ spanned by $e_1,\ldots,e_{s(N)}$ where $e_i$ is the $i$-th
+elementary basis vector.
+For example, if $\hat{\tvar}_w = (\Read,\trole)$, then syntactically the
+player's answer is a triple $(y,y^\perp,a)$ in $\F_2^Q \times \F_2^Q
+\times \{0,1\}^*$.
+We assume that the decider $\hat{\decider}^\intro$ computes the dimension $s(N)$ of the
+subspace $V$ by calling $\sampler$ on input $(N,\gamestyle{dimension})$, and
+ if $y,y^\perp$ are not presented as vectors in the subspace $V$,
+then the decider rejects. Thus in the analysis we directly consider $y,y^\perp$ as vectors in $V$.
+In \Cref{fig:intro-decider}, the components of the players' answers are
+subscripted by the player index.
+For example, if player $w$ receives question $(\Hide{k},\trole)$, then their
+answers are denoted by $(y_w,y_w^\perp,x_w)$.
+
+The notation used in the ``answer key'' is meant to give an indication of the
+intended meaning of the players' answers.
+We use $y$ to denote a vector that is supposed to be the result of measuring a
+CL function $L^\trole$; $y^\perp$ is supposed to be the result of measuring
+``dual'' linear maps $L^\perp$ (as used in Step~\ref{enu:hiding} in
+Figure~\ref{fig:intro-decider}); $x$ is supposed to be the result of $\sigma^X$
+measurements, and $z$ is supposed to be the result of $\sigma^Z$ measurements.
+We use $a$ to denote the introspected answers meant for the original decider
+$\decider$.
+
+\medskip
+\emph{CL functions and factor spaces.}
+For $\trole \in \AB$, let $L^\trole = L^{\trole,\, N}$ denote the CL function
+for original player $\trole$ specified by $\sampler$ on index $N = 2^n$.
+For $z \in V$, the decider $\hat{\decider}^\intro$ computes $L^\trole(z)$ by calling
+$\sampler$ on input $(N, \trole, \gamestyle{marginal}, \ell, z)$.
+
+For $y \in V$ and $k \in \{1,\ldots,\ell\}$ we define register subspaces
+$V_{k}^\trole (y)$ by induction on $k$.
+For $k=1$, $V_1^\trole(y)$ is the first factor space\footnote{See
+  Lemma~\ref{lem:cl-kth} for the definitions of factor spaces of a CL function.}
+of $L^\trole$ and is independent of $y$.
+Suppose $V_j^\trole(y)$ has been defined for all $j < k$.
+Then we define the marginal space $V_{< k}^\trole(y) = \bigoplus_{j=1}^{k-1}
+V_k^\trole(y)$, and define $V_k^\trole(y)$ as the $k$-th factor space $V_{k,\,
+  u}^\trole$ of $L^\trole$ with prefix $u = L_{<k}^\trole(y)$.
+We also define $V^\trole_{\leq k}(y) = V^\trole_{< k+1}(y)$, and $V^\trole_{>
+  k}(y)$ to be the complementary register subspace to $V^\trole_{\leq k}(y)$
+within $V$.
+
+The decider $\tdint$ computes factor spaces $V_j^\trole(y)$ from $y \in
+V$ in the following sequential manner: first, the indicator vector for the
+factor space $V^\trole_1$ is computed by calling the original sampler $\sampler$
+on input $(N,\trole,\gamestyle{factor},1,0)$.
+Let $y_1$ denote $L_1^\trole(y)$.
+Then, for $j \in \{2,\ldots,\ell\}$, the factor space $V^\trole_j(y)$ is
+computed by calling $\sampler$ on input $(N,\trole,\gamestyle{factor},j,y_{\le
+  j-1})$, where $y_{\le j-1} = L^\trole_{\leq j-1}(y)$.
+
+Finally, \Cref{lem:cl-kth} implies that the CL function $L^\trole$ gives rise to functions $\{ L_{k,u}^\trole \}$ where for all $k$ and prefixes $u$, $L_{k,u}^\trole$ is a map from $V_{k,u}^\trole$ to $V_{k,u}^\trole$.
+
+\medskip
+\emph{Detailed explanation of the steps of $\tdint$.}
+We give more details on the implementation of decider $\tdint$
+specified in Figure~\ref{fig:intro-decider}.
+
+\begin{enumerate}
+\item The decider $\tdint$ first checks that the answers are not too
+  long; \hnote{added some clarifications about answer-length check:} the maximum-length answer should be a tuple $(y, y^\perp, a)$ in response to question $(\Read,v)$ 
+  where $y, y^\perp \in V$ and $a$ is an answer intended for the original
+  decider $\decider$ on index $N$ (which we assume runs in time at most
+  $N^\lambda$), or a tuple $(y,y^\perp,x) \in V \times V \times V$ in response to question $(\Hide{k},v)$. Either way, the maximum answer length should be $3Q = 3 \cdot 2^m \cdot \log q = \poly(R)$ bits long. 
+  This check is necessary in order to ensure that the decider $\tdint$
+  halts in time that is a fixed polynomial of $R = N^\lambda$.
+
+
+\item If the question types for the players are both in $\type^\pauli$,
+  $\tdint$ executes the decision procedure $\decider^\pauli$ for the
+  Pauli basis test parametrized by $\introparams(R) = (q,m,d)$ (see
+  Section~\ref{sec:qld-game} for the definition of $\decider^\pauli$).
+  \hnote{edited, in response to Bowen comments} The Pauli basis test is intended to ensure that the players share at least $Q \geq R$ EPR pairs, where $Q = 2^m \log q$. This number of EPR pairs is chosen
+  so that, under the assumption that the original verifier $\verifier$ is $\lambda$-bounded (see \Cref{def:lambda}), 
+  the time complexity of $\sampler$ on index $N$ (and therefore its dimension) is at most $R = N^\lambda$. 
+	When analyzing the Completeness, Soundness, and Entanglement properties of the introspective verifier $\verifier^\intro$,
+	we assume that the original verifier $\verifier$ is $\lambda$-bounded (see \Cref{thm:introspection}). 
+   
+
+
+\item In Step~\ref{enu:sampling-pauli} of $\tdint$, player
+  $w\in\{\alice,\bob\}$ receives question $(\Pauli,Z)$ and player $\overline{w}$
+  receives question $(\Sample,\trole)$, for some $v\in\{\alice,\bob\}$.
+  According to the answer key, player $w$ is expected to return an answer
+  $\hat{a}_w\in \F_2^Q$ and player $\overline{w}$ is expected to respond with a
+  pair $(y_{\overline{w}},a_{\overline{w}}) \in V \times \{0,1\}^*$.
+  Thus, the dimension of answer $\hat{a}_w$ may be larger than that of
+  $y_{\overline{w}}$; this is the reason that Step~\ref{enu:sampling-pauli}
+  checks consistency between $y_{\overline{w}}$ and the projection of
+  $\hat{a}_w$ to $V$.
+
+
+
+\item In Step~\ref{enu:sampling-intro} of $\tdint$, player $w \in \ab$
+  receives question $(\Introspect,\trole)$ and player $\overline{w}$ receives
+  question $(\Sample,\trole)$.
+  As specified by the ``answer key'', player $w$ responds with $(y_w,a_w) \in V
+  \times \{0,1\}^*$ and player $\overline{w}$ responds with
+  $(z_{\overline{w}},a_{\overline{w}}) \in V \times \{0,1\}^*$.
+  The decider $\tdint$ checks that $a_w = a_{\overline{w}}$ and $y_w =
+  L^\trole(z_{\overline{w}})$ where $L^\trole$ denotes the CL function for
+  player $\trole$ specified by $\sampler$ for index $N = 2^n$.
+  The CL function is computed by calling $\sampler$ on input
+  $(N, \trole, \gamestyle{marginal}, \ell, z)$.
+
+\item In Step~\ref{enu:hiding-read}, $\tdint$ checks that the answer of
+  player $w$ who received $(\Hide{\ell},\trole)$ is consistent with the answer
+  of player $\overline{w}$ who received $(\Read,\trole)$. One of the checks is
+  that $y_{w,< \ell} = y_{\overline{w},<\ell}$~; these are, respectively, 
+  $L^\trole_{< \ell}(y_w)$ and $L^\trole_{< \ell}(y_{\overline{w}})$.
+  
+
+
+\item\label{enu:decider-perp}
+  \def\Lfunc{L^{\trole}_{k+1,\, y_{\overline{w},\, \le k}}}
+
+  In Steps~\ref{enu:hiding-same}, the vectors $x_{w,\, >k+1}$ and
+  $x_{\overline{w},\, >k+1}$ denote the projections of $x_w$ and
+  $x_{\overline{w}}$ to the factor spaces $V^\trole_{> k+1}(y_w)$ and $V^\trole_{>
+    k+1}(y_{\overline{w}})$, respectively.
+  Similarly, $y_{\overline{w},\, k+1}^\perp$ denotes the projection of
+  $y_{\overline{w}}^\perp$ to the factor space $V^\trole_{k+1} (y_{\overline{w}})$ and
+  $x_{w,\, k+1}$ denotes the projection of $x_{w}$ to
+ the factor space $V^\trole_{k+1}(y_{\overline{w}})$. We emphasize that the latter
+ factor space depends on $y_{\overline{w}}$ and not $y_w$.\footnote{ This is because it is the $\overline{w}$ player
+ who receives the $(\Hide{k+1},\trole)$ question, and in the ``honest'' strategy (described in \Cref{sec:intro-completeness}) 
+ they are supposed to measure $k$ registers to obtain a sequence of values $(y_{\overline{w},1},y_{\overline{w},2},\ldots,y_{\overline{w},k})$ 
+ which specify the $(k+1)$-st factor subspace, whereas the $w$ player is only supposed to measure $k-1$ registers.
+ }
+
+
+  The decider also has to compute $( \Lfunc )^\perp (x_{w,\, k+1})$.
+  According to Definition~\ref{def:Lperp}, this requires specifying a basis for
+  $\ker( \Lfunc )^\perp$.
+  To compute the value, the decider performs the following steps:
+	\begin{enumerate}
+  \item Call $\sampler$ on input $(N, \trole, \gamestyle{factor}, k+1, y_{\overline{w},\, \le k})$ to
+    obtain a subset $H = \{h_1,\ldots,h_m\}$ of the canonical basis for
+    $\F_2^{s(N)}$ that is a basis of the register subspace $V^\trole_{k+1}(y_{\overline{w}})$.
+  \item For $i \in \{1, 2, \ldots, m\}$ compute $c_i = \sampler(N, \trole,
+    \gamestyle{linear}, k+1, y_{\overline{w},\, \le k}, h_i)$.
+    Compute a matrix representation $M$ for $ \Lfunc $ in the basis
+    $H$, whose columns are the vectors $c_1, \ldots, c_m$ as elements of
+    $V^\trole_{k+1}(y_{\overline{w}})$.
+
+  \item Using a canonical algorithm for Gaussian elimination, compute a basis
+    $F$ for $\ker(M)$.
+
+  \item Compute the canonical complement $S$ of $F$, as in
+    Definition~\ref{def:canonical-complement}.
+    $S$ is a basis for $\ker( \Lfunc )^\perp$.
+
+  \item To compute $(\Lfunc)^\perp$ on input
+    $x_{w,\, k+1}$, compute the canonical linear map with kernel basis
+    $S$ (see Definition~\ref{def:cl-canonical}) on input $x_{w,\,
+      k+1}$.
+  \end{enumerate}
+
+\item In Step~\ref{enu:hiding-pauli}, the player $w$ that receives $(\Pauli,X)$
+  is expected to return an answer $\hat{a}_w$ in $\F_2^Q$.
+  Part of this step checks that the projection of $\hat{a}_w$ to $V_{>1}$ is
+  equal to $x_{\overline{w},\, >1}$ (which is the projection to $V_{>1}$ of the
+  third component of the answer triple of player $\overline{w}$ that receives
+  question $(\Hide{1},\trole)$).
+\end{enumerate}
+
+\subsubsection{Complexity of the introspective verifier}
+\label{sec:intro-complexity}
+
+In this section we determine the complexity of the introspective verifier.
+The following lemma establishes the complexity of the decider $\tdint$
+as well as the complexity of computing a {description} of it from the parameters
+$(\lambda,\ell)$ and the description of the original verifier $\verifier =
+(\sampler,\decider)$.
+
+\begin{lemma}
+  \label{lem:intro-decider-complexity}
+  There exists a polynomial time Turing machine $\ComputeIntroDecider$ that
+  on input $(\verifier, \lambda, \ell)$ outputs a description of a Turing machine where:
+  \begin{enumerate}
+  		\item   \hnote{jan 27, 2022: added this item} Its description length is at most $\poly(\lambda, \ell)$.
+		\item Its time complexity is at most $\TIME_{\tdint}(n) = \poly(2^{\lambda n} , \ell)$.
+  \end{enumerate}
+  Furthermore, if $|\verifier| \leq \lambda$, then the output of $\ComputeIntroDecider$ is the introspective decider 
+  $\tdint$ corresponding to verifier $\verifier$ and parameters $(\lambda,\ell)$. 
+\end{lemma}
+
+\begin{proof}
+  Define the following $10$-input Turing machine $\RawIntroDecider$, \hnote{jan 27, 2022: added} which is 
+  a universal Turing machine that computes the same function as the introspection decider $\tdint$, except
+  it also takes as input extra inputs to specify the sampler, decider, and the parameters $\lambda, \ell$ that are 
+  used in $\tdint$. Since $\RawIntroDecider$ is a universal Turing machine, its description length is constant.
+  More formally, on input
+  \begin{equation*}
+    (\verifier', \lambda', \ell', n', x_1', x_2', \ldots, x_6'),
+  \end{equation*}
+    \hnote{jan 27, 2022, edited:} the Turing machine $\RawIntroDecider$ computes the output of the decider $\tdint$
+    corresponding to $\verifier', \lambda', \ell'$ with input tapes set to $(n',x_1',\ldots,x_6')$.
+In more detail, the Turing machine $\hat{\cal{D}}^{\intro}$ first computes
+  $\introparams(R)$ for $R=2^{\lambda' n'}$. 
+  Using Lemma~\ref{lem:introparams-complexity}, this computation takes time
+  \hnote{edited in response to LB comment} $\polylog(R)$.
+  It then executes the tests described in Figure~\ref{fig:intro-decider}.
+  Write $\verifier' = (\sampler', \decider')$.
+  The complexity of performing the entire procedure is subsumed by the
+  complexity of the following steps:
+	\begin{enumerate}
+  \item Running the decider $\decider^\pauli$, which takes time $\poly(R)$ by
+    Lemma~\ref{lem:qld-complexity};
+  \item Running the decider $\decider'$ (on index $N' = 2^{n'}$) for at most
+    $2^{\lambda' n'}$ steps;
+  \item Running the sampler $\sampler'$ (on index $N'$) in order to
+    compute the dimension $s(N')$ and the marginal and factor spaces, and the CL
+    functions as described in Section~\ref{sec:intro-verifier}.
+    $\sampler'$ is called at most $\poly(s(N'),\ell')$ times; due to the timeout,
+    each call takes time at most $2^{\lambda' n'}$.
+  \item Computing $(L^\trole_{k,\, u})^\perp(x_{\overline{w},\, k})$ in
+    Step~\ref{enu:hiding-same}.
+    This only requires to perform Gaussian elimination and other simple finite
+    field manipulations that can be implemented in $\poly(s(N'))$
+    time.
+	\end{enumerate}
+  All other tests are elementary.
+  Thus the time complexity of $\RawIntroDecider$ is $\poly(R,\ell')$.
+  Note that the bound is independent of $\verifier'$: due to the abort
+  condition in the definition of $\tdint$, the Turing machine
+  $\hat{\decider}^\intro$ aborts if the runtime of $\sampler'$ or $\decider'$ is
+  larger than $2^{\lambda' n'}$. 
+
+  \hnote{jan 27, 2022: edited this part: }We now define the Turing machine $\ComputeIntroDecider$: on input
+  $(\verifier,\lambda,\ell)$, it first determines whether the description length
+	$|\verifier|$ of the verifier is at most $\lambda$.\footnote{This can be done by keeping a counter of $O(\log \lambda)$ bits, and incrementing it as the input $\verifier$ is being scanned through. If at any point the counter exceeds $\lambda$, the scanning stops.} If it isn't, then it sets $\verifier' = (\sampler',\decider')$ 
+	where $\sampler',\decider'$ are the trivial Turing machine whose description is $0$. Otherwise,
+  $\ComputeIntroDecider$ sets $\verifier' = \verifier$. Note that by construction, the description length of $\verifier'$ is at most $\lambda$, 
+  and that the time complexity of computing the description of $\verifier'$ is polynomial in $|\verifier|$ and $\log \lambda$.
+  
+  Then $\ComputeIntroDecider$ outputs the description of
+  $\RawIntroDecider$ with the first three input tapes hardwired to
+  $\verifier'$, $\lambda$, and $\ell$, respectively, yielding the decider
+  $\tdint$ corresponding to the verifier $\verifier'$ and
+  parameters $(\lambda, \ell)$. 
+  Computing this description takes $\poly(\abs{\verifier}, \log\lambda, \log
+  \ell)$ time. Thus overall the complexity of $\ComputeIntroDecider$ is $\poly(\abs{\verifier},\log \lambda,\log \ell)$, which is polynomial in its input length.
+  
+  \hnote{jan 27, 2022: added} The description length of $\tdint$ is simply the description length of $\RawIntroDecider$ (which is a universal constant),
+  plus the description length of $\verifier'$ (which is at most $\lambda$), plus the description lengths of $\lambda$ and $\ell$, which altogether
+  totals $\poly(\lambda, \ell)$ as desired. The time complexity of $\tdint$ follows from the time complexity of $\RawIntroDecider$, which we established is $\poly(R, \ell) = \poly(2^{\lambda n},\ell)$.
+  
+  Finally, we note that if $|\verifier| \leq \lambda$, then by construction the output of $\ComputeIntroDecider$ is the decider $\tdint$ corresponding to the verifier $\verifier$ and parameters $(\lambda,\ell)$.
+\end{proof}
+
+\subsubsection{Introspection theorem}
+\label{sec:intro-theorem}
+
+We are now ready to state the introspection theorem.
+
+\begin{theorem}[Introspection theorem]
+  \label{thm:introspection}
+  There is a polynomial time Turing machine $\ComputeIntroVerifier$ which takes
+  as input a tuple $(\verifier, \lambda, \ell)$ for $\lambda, \ell \in \N$ and
+  returns the description of the introspective verifier $\vint$.
+  For all $\ell \in \N$, $\vint$ is a $5$-level normal-form verifier
+  with complexity measures
+  \begin{equation*}
+    \begin{split}
+      \TIME_{\sint}(n) & = \poly \big (n, \lambda, \ell \big),\\
+      \TIME_{\dint}(n) & = \poly \big (2^{\lambda n}, \ell \big),\\
+      |\dint| &= \poly(\lambda,\ell).
+    \end{split}
+  \end{equation*}
+  Moreover, for all $\ell$, there exist constants $a>0$, \, $0 < b < 1$ (depending on $\ell$),
+  and a function $\delta(\eps, n) = a \bigl( (\lambda n)^a\eps^b + (\lambda
+  n)^{-b} \bigr)$ such that for all $n \in \N$ and $\eps \ge 0$ the following
+  statements hold if $\verifier$ is a $\lambda$-bounded $\ell$-level verifier.
+  \begin{enumerate}
+  \item (\textbf{Completeness}) If $\verifier_{2^n}$ has a projective, consistent,
+    and commuting (PCC) strategy with value $1$ then $\vint_n$ also
+    has a PCC strategy with value $1$.
+
+  \item (\textbf{Soundness}) If $\val^*(\vint_n) > 1 - \eps$, then
+    $\val^*(\verifier_{2^n}) \geq 1 - \delta(\eps,n)$.
+  \item (\textbf{Entanglement}) The entanglement bound $\Ent$ defined
+    in \Cref{def:ent} satisfies
+    \begin{equation*}
+      \Ent(\vint_n, 1 - \eps) \geq \max
+      \left \{ \Ent(\verifier_{2^n}, 1 - \delta(\eps,n)),
+        (1 - \delta(\eps,n))\, 2^{2^{\lambda n}} \right \}\;.
+    \end{equation*}
+  \end{enumerate}
+\end{theorem}
+
+\begin{proof}
+  The Turing machine $\ComputeIntroVerifier$ does the following on input
+  $(\verifier, \ell)$: it first computes
+  \begin{align*}
+    \tsint & = \ComputeIntroSampler(\lambda,\ell)\;,\\
+    \tdint & = \ComputeIntroDecider(\verifier, \lambda, \ell)\;,
+  \end{align*}
+  using \cref{lem:intro-sampler-complexity,lem:intro-decider-complexity}, runs
+  the detyping procedure from \cref{def:detyped-verifier} to compute
+  \begin{equation*}
+    \vint = \detype(\tvint)
+  \end{equation*}
+  where $\tvint = (\tsint,\tdint)$ and then outputs the resulting detyped verifier.
+  This takes time $\poly(\abs{\verifier}, \log\lambda, \log\ell)$, which is polynomial
+  in the input length of $\ComputeIntroVerifier$. 
+  The complexity parameters of the typed sampler $\tsint$ and typed decider
+  $\tdint$ follow from
+  \cref{lem:intro-sampler-complexity,lem:intro-decider-complexity}.
+  The complexity parameters of the detyped verifier $\vint$ then follow from
+  \cref{lem:detyping-verifiers}.
+  As $\tvint$ is a $3$-level verifier, $\vint$ is $5$-level as detyping will
+  increase the number of levels by at most $2$.
+
+  The completeness part of the theorem is proven in \cref{sec:intro-completeness} and
+  the soundness and entanglement properties are proven in \cref{sec:intro-soundness}.
+\end{proof}
+
+
+\subsection{Completeness of the introspective verifier}
+\label{sec:intro-completeness}
+
+In this section we establish the completeness property of the introspection
+game: if for $N = 2^n$, $\verifier_N$ has a PCC strategy (see
+Definition~\ref{def:spcc}) with value $1$, then so does $\vint_n$.
+For this we describe the actions that are expected of the players in the
+introspection game (i.e.\ the ``honest strategy'').
+We first prove several preliminary lemmas that will be used in both the
+completeness and soundness analysis.
+
+\subsubsection{Preliminary lemmas}
+
+The lemmas in this section are stated for general fields $\F$ and generalized
+Pauli observables and projectors, although in the application to introspection
+games we use $\F = \F_2$, $\omega = -1$, and qubit Pauli observables and
+projectors.
+Furthermore, the Pauli observables $\tau^W(v)$ and projectors $\tau^W_u$ act on
+$\C^{\F^k}$ for some integer $k$ (in our application, we set $k=R$).
+
+
+
+The following lemma generalizes Eq.~\eqref{eq:pauli-inversion-0}.
+
+\begin{lemma}\label{lem:why-didnt-i-think-of-this-before}
+Let $L: \F^k \to \F^k$ be a linear map, and let $W \in \{X, Z\}$.
+For each $a$ in the range of $L$, let $u_a \in \F^k$ be such that $L(u_a) = a$. 
+\begin{enumerate}
+\item For each $v \in \ker(L)^\perp$, 
+\begin{equation*}
+\tau^W(v) = \sum_{a \in \F^k} \omega^{\tr(u_a \cdot v)} \tau^W_{[L(\cdot)=a]}\;.
+\end{equation*}
+\item For all $a$ in the range of $L$,
+\begin{equation*}
+\tau^W_{[L(\cdot)=a]} = \E_{v \sim \ker(L)^\perp} \omega^{-\tr(v \cdot u_a)} \tau^W(v)\;.
+\end{equation*}
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+  Let $V$ denote the image of $\F^k$ under $L$.
+  Let $a\in V$, $v \in \ker(L)^\perp$.
+  For all $u, u' \in L^{-1}(a)$, we have that $u-u'\in \ker(L)$ and thus $\tr(u
+  \cdot v) = \tr(u' \cdot v)$.
+  As a result, using~\eqref{eq:pauli-obs-proj}, for any $v\in\ker(L)^\perp$ it
+  holds that
+  \begin{equation*}
+    \tau^W(v)
+    = \sum_{u \in \F^k} \omega^{\tr(u \cdot v)} \tau^W_u
+    = \sum_{a \in V} \sum_{u \in L^{-1}(a)} \omega^{\tr(u \cdot v)} \tau^W_u
+    = \sum_{a \in V} \omega^{\tr(u_a \cdot v)} \tau^W_{[L(\cdot)=a]}
+    = \sum_{a \in \F^k} \omega^{\tr(u_a \cdot v)} \tau^W_{[L(\cdot)=a]}\;,
+  \end{equation*}
+  where in the last equality we used that for $a \notin V$, the projector
+  $\tau^W_{[L(\cdot)=a]}$ vanishes.
+  This shows the first item.
+  For the second item,
+  \begin{align*}
+    \tau^W_{[L(\cdot)=a]}
+    & = \sum_{u  \in L^{-1}(a)} \tau^W_u\\
+    & =  \sum_{u  \in L^{-1}(a)} \E_{v \sim \F^k} \Bigl(
+      \omega^{-\tr(u \cdot v)} \tau^W(v) \Bigr) && \\
+    & =  \sum_{u \in \ker(L)} \E_{v \sim \F^k} \Bigl(
+      \omega^{-\tr((u_a + u) \cdot v)} \tau^W(v) \Bigr)\\
+    & = \frac{|\ker(L)|}{|\F^k|} \sum_{v \in \F^k} \biggl( \Big(
+      \E_{u \sim \ker(L)} \omega^{-\tr(u \cdot v)} \Big)\,
+      \omega^{-\tr(u_a \cdot v)}  \tau^W(v) \biggr)\\
+    & = \E_{v \in \ker(L)^\perp} \omega^{-\tr(v \cdot u_a)} \tau^W(v)\;,
+\end{align*}
+where the second equality follows from~\eqref{eq:pauli-inversion-0} and the last
+uses the fact that $|\F^k|=|\ker(L)||\ker(L)^\perp|$, as shown in
+Lemma~\ref{lem:perp_perp}, and Lemma~\ref{lem:cancellation} applied to the
+expectation over~$u$.
+\end{proof}
+
+
+\begin{lemma}[Commuting~$X$ and~$Z$ measurements]
+  \label{lem:commute} 
+	For all linear maps $L,R: \F^k \to \F^k$ such that
+  \begin{equation*}
+    \ker (R)^\perp \subseteq \ker (L)\;,
+  \end{equation*}
+  the measurements
+  $\big\{ \tau^Z_{[L(\cdot)=b]} \big\}_{b\in \F^k}$ and $\big\{ \tau^X_{[R(\cdot) = d]}
+  \big\}_{d\in \F^k}$ commute.
+\end{lemma}
+\begin{proof}
+  Let $b,d\in \F_k$.
+  If either $b$ is not in the range of $L$, or $d$ is not in the range of $R$,
+  then at least one of $\tau^Z_{[L(\cdot) = b]}$ or $\tau^X_{[R(\cdot) = d]}$ is
+  $0$, and thus the operators trivially commute.
+  Otherwise, both $b$ and $d$ are in the range of $L$ and $R$, respectively.
+  Let $a_0 \in L^{-1}(b)$, $c_0 \in R^{-1}(d)$.
+  By Lemma~\ref{lem:why-didnt-i-think-of-this-before},
+  \begin{equation*}
+    \tau^Z_{[L(\cdot)=b]} = \E_{u \in \ker(L)^\perp}
+    \omega^{-\tr(u \cdot a_0)} \tau^Z(u)\;,
+  \end{equation*}
+  \begin{equation*}
+    \tau^X_{[R(\cdot)=d]} = \E_{v \in \ker(R)^\perp}
+    \omega^{-\tr(v \cdot c_0)} \tau^X(v)\;.
+  \end{equation*}
+  For any $v \in \ker(R)^\perp$, by assumption $v\in \ker(L)$, so for $u \in
+  \ker(L)^\perp$ it holds that $u\cdot v=0$.
+  Thus $\tau^Z(u)$ and $\tau^X(v)$ commute, and it follows that
+  $\tau^Z_{[L(\cdot)=b]}$ and $\tau^X_{[R(\cdot)=d]}$ commute as well.
+\end{proof}
+
+\subsubsection{Completeness of the introspective verifier}
+\label{sec:intro-completeness-sub}
+
+
+
+
+
+
+
+
+
+
+
+
+
+\begin{proof}[Proof of the completeness part of \cref{thm:introspection}]
+  We analyze the completeness of the \emph{typed}
+  verifier $\tvint$; the corresponding completeness of the
+  \emph{detyped} verifier $\vint = \detype(\tvint)$ follows from
+  Lemma~\ref{lem:detyping-verifiers}, and the fact that the type set
+  $\type^\intro$ has size $O(\ell)$.
+
+  \paragraph{Completeness.}
+  We first show completeness.
+  Let $n\geq 1$ be an index for $\tvint$ and $N = 2^n$ be the corresponding
+  index for $\verifier$.
+  Since we assume that the verifier $\verifier$ is $\lambda$-bounded, we have
+  that
+  \begin{equation}
+    \label{eq:intro-complexity-assump}
+    \max \big\{ \TIME_\sampler(N), \, \TIME_\decider(N) \big\} \leq N^\lambda = R\;.
+  \end{equation}
+  This assumption on the time complexity of $\verifier$ ensures that
+  $\tdint$ never aborts due to a timeout.
+	Let $L^\trole = L^{\trole,\, N}$ denote the CL function of the original
+  sampler $\sampler$ on index $N$ corresponding to player $\trole \in \AB$.
+  Let $R = N^\lambda$, and let $\introparams(R) =
+  (q,m,d)$, as in Section~\ref{sec:intro-verifier}.
+  Set $Q = M\log q$ where $M=2^m$\,; this represents the number of qubits that are
+  certified by the Pauli basis test parameterized by $\introparams(R)$.
+  
+  Let $\strategy = (\ket{\aux}, A, B)$ be a PCC strategy for $\verifier_N$ with
+  value~$1$.
+  We first construct a PCC strategy $\strategy^\intro_n$ for the typed verifier
+  $\tvint_n$ with value $1$.
+  We then conclude using Lemma~\ref{lem:detyping-verifiers}.
+
+  \begin{figure}[htb!]
+    \centering
+    \begin{gamespec}
+      \newcolumntype{M}{>{\arraybackslash $}X<{$}}
+      \renewcommand{\arraystretch}{1.6}
+      \begin{tabularx}{\textwidth}{*{6}M}
+        \toprule
+        & \phantom{I1} V^\trole_1
+        & \phantom{I1} V^\trole_2 & \phantom{I1} V^\trole_3 & \aux \\
+        \midrule
+        (\Introspect, \trole) & \sigma^Z_{L_1} & \sigma^Z_{L_2} &
+        \sigma^Z_{L_3} & A^x/B^x \\
+        (\Sample, \trole) & \sigma^Z & \sigma^Z & \sigma^Z & A^x/B^x \\
+        (\Read, \trole) & \sigma^Z_{L_1^{\phantom{\perp}}}\;
+        \sigma^X_{L_1^\perp} &
+        \sigma^Z_{L_2^{\phantom{\perp}}}\;
+        \sigma^X_{L_2^\perp} &
+        \sigma^Z_{L_3^{\phantom{\perp}}}\;
+        \sigma^X_{L_3^\perp} & A^x/B^x \\
+        \midrule
+        (\Hide{3}, \trole) & \sigma^Z_{L_1^{\phantom{\perp}}}\;
+        \sigma^X_{L_1^\perp} &
+        \sigma^Z_{L_2^{\phantom{\perp}}}\;
+        \sigma^X_{L_2^\perp} &
+        \phantom{\sigma^Z_{L_3^{\phantom{\perp}}}\;}
+        \sigma^X_{L_3^\perp} & I \\
+        (\Hide{2}, \trole) & \sigma^Z_{L_1^{\phantom{\perp}}}\;
+        \sigma^X_{L_1^\perp}
+        & \phantom{\sigma^Z_{L_1^{\phantom{\perp}}}\;}
+        \sigma^X_{L_2^\perp}
+        & \sigma^X & I \\
+        (\Hide{1}, \trole) & \phantom{\sigma^Z_{L_1^{\phantom{\perp}}}\;}
+        \sigma^X_{L_1^\perp} & \sigma^X & \sigma^X & I \\
+        \midrule
+      \end{tabularx}
+      The left-most column denotes the introspection/hiding questions that a
+      player may receive.
+      The top row denotes the registers corresponding to the factor spaces of a
+      CL function $L^\trole$ (we note that the partition of the registers depends
+      on the prefixes), as well as the register corresponding to the state
+      $\ket{\aux}$ coming from the original PCC strategy $\strategy$.
+      We use $\sigma^Z_{L_j}$ as shorthand for $\sigma^Z_{[ L^\trole_{j,\,
+          x_{<j}} (\cdot) = x_j ]}$ and similarly $\sigma^X_{L^\perp_j}$ for $
+      \sigma^X_{[ (L^\trole_{j,\, x_{<j}})^\perp (\cdot)=x_j^\perp]}$.
+      A symbol $I$ means that the register is left unmeasured.
+    \end{gamespec}
+    \caption{Summary of the honest strategy $\strategy_n^\intro$ for
+      $\hat{\verifier}_n^\intro$ for a $3$-level sampler.}
+    \label{fig:intro-honest}
+  \end{figure}
+
+  \begin{remark}
+    \label{rk:downsizing}
+    Note that by definition in $\verifier_n^\intro$ the players receive
+    questions $(x,y)$ that are sampled according to the distribution
+    $\mu_{\tsint,\, n}^{G^\intro}$ associated with the downsized typed
+    sampler $\downsize(\tilde{\sampler}^\intro)$.
+    Using the definition of the downsized typed sampler,
+    Definition~\ref{def:downsize-typed-sampler}, and
+    Lemma~\ref{lem:downsize-cl-dist} the distribution is identical to the
+    distribution $\mu_{\tilde{\sampler}^\intro,\, n}^{G^\intro}$, up to the
+    bijective mapping $\downsize$.
+    This mapping can be computed by the players themselves.
+    Therefore, we construct a strategy for players that receive questions from
+    $\mu_{\tilde{\sampler}^\intro,\, n}^{G^\intro}$, and a strategy for
+    questions from $\mu_{\tsint,\, n}^{G^\intro}$ follows immediately.
+  \end{remark}
+
+  The strategy $\strategy^\intro_n$ uses the state $\ket{\EPR_2}^{\otimes (Q+1)}
+  \otimes \ket{\aux}$, where recall that $\ket{\EPR_2} =
+  \frac{1}{\sqrt{2}}(\ket{00}+\ket{11})$.
+  For all register subspaces $K \subseteq \F_2^{Q}$ (see
+  Definition~\ref{def:cl-func} for the definition of register subspace),
+  whenever we refer to ``register $K$'', we mean the qubits of
+  $\ket{\EPR_2}^{\otimes Q}$ corresponding to $K$ (see
+  Section~\ref{sec:lin-reg}).
+  The most frequent register subspace we consider is~$V$, spanned by $e_1,
+  \ldots, e_{s(N)}$.
+  We write $\overline{V}$ for the complement of~$V$, i.e.
+  the register subspace spanned by $e_{s(N)+1}, \ldots, e_{Q}$.
+  (Note that $s(N) \leq R$ by
+  assumption~\eqref{eq:intro-complexity-assump}, \hnote{added:} and by \Cref{lem:delta-bound} we have $R \leq M \leq Q$.)
+  Then $\ket{\EPR_2}^{\otimes Q} = \ket{\EPR}_V \otimes
+  \ket{\EPR}_{\overline{V}}$.
+
+  Let $\strategy^\pauli_n$ be the honest Pauli strategy with respect to
+  $\introparams$ defined in the proof of \cref{lem:pauli-completeness}. Using the 
+  isomorphism between $\C^q$ and $(\C^2)^{\otimes \log q}$ specified by \Cref{lem:pauli-binary},
+ the measurements   of $\strategy^\pauli_n$ can be treated as qubit Pauli measurements acting on the
+  maximally entangled state over qubits. Furthermore the questions and answer labels
+  of the measurements can be viewed as binary strings
+ using the bijection $\kappa: \F_q \to \F_2^{\log q}$ specified in \Cref{sec:finite-fields}.
+  For a question with a type from $\type^\pauli$ the player measures the shared state
+  $\ket{\EPR_2}^{\otimes (Q+1)}$ using the measurements specified by
+  $\strategy^\pauli_n$, and reports the measurement outcomes.
+  When a player receives questions of type $\hat{\tvar} \in \type^\intro
+  \setminus \type^\pauli$, they perform measurements described as follows.
+  (Below, whenever we write a Pauli operator $\sigma^W_a$ the register on which
+  the operator acts should always be clear from context, and is implicit from
+  the space in which the outcome $a$ ranges.)
+  The reader may find it helpful to consult Figure~\ref{fig:intro-honest} to see
+  a summary of the honest strategy $\strategy^\intro_n$ for the special case
+  when $\ell = 3$.
+
+  \begin{description}
+  \item $(\Introspect, \trole)$: The player performs the measurement
+    \begin{equation}
+      \label{eq:main-measurement}
+      \bigl\{ \sigma^Z_{[L^\trole(\cdot) = y]} \bigr\}
+    \end{equation}
+    to obtain an $y\in V$.
+    Intuitively, the player has now introspectively sampled the question $y$ for
+    original player $\trole$ in game~$\verifier_N$.
+    The player then measures $\ket{\aux}$ using player $\alice$'s
+    measurement~$\{A^y_a\}$ from $\strategy$ if $v = \alice$ and using player
+    $\bob$'s measurement~$\{B^y_a\}$ if $\trole = \bob$ to obtain an answer~$a$.
+    The player replies with $(y,a)$.
+  \item $(\Sample, \trole)$: The player measures their share of $\ket{\EPR}_V$
+    in the $Z$ basis to obtain $z \in V$.
+    Using this, they compute the question $y = L^\trole(z)$.
+    The player then uses player $v$'s strategy and question $y$ to measure
+    $\ket{\aux}$ and obtain outcome $a$.
+    The player replies with $(z, a)$.
+  \item $(\Read, \trole)$: The player first performs all measurements as in the
+    $(\Introspect, \trole)$ question for player $\trole$ and records the
+    outcomes as $y\in L(V)$ and $a\in\{0,1\}^*$.
+    For $j\in \{1, 2, \ldots, \ell\}$, the player measures their share of the state
+    $\ket{\EPR}_V$ with the measurement
+\begin{equation}
+      \label{eq:perp-measurement}
+      \big\{\sigma^X_{[L_j^\perp (\cdot) = y_j^\perp]} \big\}_{y_j^\perp}
+    \end{equation}
+    to obtain $y^\perp = y_1^\perp + \cdots + y_\ell^\perp$.
+    Here $L_j^\perp$ is shorthand for the function $(L^{\trole}_{j,\,
+      y_{<j}})^\perp$ defined in Item~\ref{enu:decider-perp} of the decider
+    description in Section~\ref{sec:intro-verifier}.
+    (That these operators are simultaneously measurable with the measurement
+    in~\eqref{eq:main-measurement} follows from Lemma~\ref{lem:commute} and the
+    fact that $\ker(L^\perp_{j})^\perp = \ker(L_{j})$ by
+    Lemma~\ref{lem:perp_perp} and the definition of $L^\perp_{j}$ in
+    Section~\ref{sec:intro-verifier}.)
+    
+    The player measures $\ket{\aux}$ with player $\trole$'s measurement strategy
+    in $\strategy$ for question $y$ to obtain $a$ and replies with
+    $(y,y^\perp,a)$.
+
+  \item $(\Hide{k}, \trole)$:
+    The player performs the following sequence of measurements: first measure
+    $\{ \sigma^Z_{[L^\trole_{1}(\cdot) = y_{1}]} \}$ on register $V_1^v$ to
+    obtain $y_1$.
+    Then, use $y_1$ to specify the second linear function
+    $L^\trole_{2,\, y_1}(\cdot)$ and measure register $V^\trole_{2,\,y_1}$ using
+    $\{ \sigma^Z_{[L^\trole_{2,\, y_1}(\cdot) = y_{2}]} \}$ to obtain $y_2$.
+    This process continues until the $(k-1)$-th linear map $L_{k-1,\, y_{<
+        k-1}}^\trole(\cdot)$ has been measured to obtain $y_{k-1}$ in factor
+    space $V_{k-1,\, y_{< k-1}}^\trole$.
+    Let $y = y_1 + y_2 + \cdots + y_{k-1}$.
+    
+    Next, for $j \in \{1, 2, \ldots, k\}$ the player measures
+    \begin{equation*}
+      \Big \{ \sigma^X_{[L_{j}^\perp(\cdot) = y^\perp_{j}]} \Big \}_{y^\perp_j}\;,
+    \end{equation*}
+    where $L_j^\perp$ denotes the linear map $(L^\trole_{j,\, y_{<j}})^\perp$ as in
+    the case $(\Read, \trole)$.
+    Let $y^\perp = y_1^\perp + y_2^\perp + \cdots + y_k^\perp$, where each
+    $y_j^\perp$ is a vector in the factor space $V^\trole_{j,\, y_{<j}}$.
+    Finally, the player measures register $V_{> k}^\trole(y)$ using
+    $\{\sigma^X_{x_{>k}}\}$ to obtain outcome $x_{> k}$.
+    Let $x = x_{> k}$.
+    The player replies with $(y,y^\perp,x)$.
+\end{description}
+
+By definition, when player $w$ performs the honest measurement for question
+$(\Introspect, \alice)$ and player $\overline{w}$ performs the honest
+measurement for question $(\Introspect, \bob)$, the joint outcome $(y, y')$ has
+distribution $\mu_{\sampler,\, N}$.
+In this case, the players play according to strategy~$\strategy$ and succeed
+with probability~$1$.
+In all other cases, it is straightforward to verify that the players succeed in
+all tests performed by $\tdint$ (Figure~\ref{fig:intro-decider}) with
+probability~$1$.
+As a result, the value of this strategy is~$1$. 
+
+The strategy $\strategy^\intro$ is projective by construction.
+It is also consistent because of the assumed consistency of the strategy
+$\strategy$ as well as consistency of the honest Pauli strategy $\strategy^\pauli$.
+Furthermore, note that $\strategy^\intro$ only calls $\strategy$ for both
+players on question pairs such that both types are in
+$\{\Introspect,\Sample,\Read\}$.
+In all these cases, $\strategy$ is called on a pair of questions $(y,y')$
+distributed as $(L^\trole(z),L^{\trole'}(z))$ for
+$\trole,\trole'\in\{\alice,\bob\}$ and $z$ uniform in $V$.
+When $v \neq v'$, any such pair by definition has positive probability under
+$\mu_{\sampler,\, n}$, and so by assumption the associated measurements from
+$\strategy$ commute.
+On the other hand, when $v = v'$, then the players apply the same measurements
+from $\strategy$, and because $\strategy$ only uses projective measurements,
+their measurements commute as well.
+Examining all other cases, it follows by direct inspection that the strategy
+commutes on all question pairs whose corresponding types appear as an edge in
+the graph $G^\intro$.
+Thus the strategy commutes with respect to the support of the distribution
+$\mu_{\tsint,\, n}$.
+\end{proof}
+
+\begin{remark}\label{rk:intro-normalform}
+  For future reference, we note that on any input $(\verifier, \lambda, \ell)$,
+the Turing machine $\ComputeIntroVerifier$ \emph{always} returns a normal form verifier $\tvint =
+  (\tsint,\tdint)$ --- even if $\verifier$ itself is not the description of a normal form verifier. 
+  This is because, for any two integer $\lambda,\ell$,
+  $\ComputeIntroSampler(\lambda,\ell)$ returns a sampler with field size $2$,
+  and for any $\verifier = (\sampler,\decider), \lambda$ and $\ell$ the decider $\tdint$ specified in
+  Figure~\ref{fig:intro-decider} takes $7$ inputs and always halts with a
+  single-bit output, even if $\sampler$ or $\decider$ themselves do not halt.
+\end{remark}
+
+\subsection{Soundness of the introspective verifier}
+\label{sec:intro-soundness}
+
+The main result of this section is the soundness part of
+\cref{thm:introspection}.
+
+
+
+
+
+\subsubsection{The Pauli twirl}
+
+A key tool in the proof of soundness is the \emph{Pauli twirl}.
+In this section we introduce the Pauli twirl and establish several of its
+properties.
+The section closely follows Sections~$8$ and~$10$ of~\cite{NW19}. 
+
+To begin, we define the twirl with respect to an arbitrary distribution over
+unitaries.
+
+\begin{definition}[Twirl]
+  \label{def:mixing}
+  Let $\mu$ be a probability distribution over a finite set of unitary matrices.
+  Then for any matrix $A$, the \emph{twirl of~$A$ with respect to~$\mu$},
+  denoted $\mathscr{T}_\mu(A)$, is defined as
+  \begin{equation*}
+    \mathscr{T}_\mu (A) = \E_{U \sim \mu} \bigl( U A U^\dagger \bigr)\;.
+  \end{equation*}
+\end{definition}
+
+In the next two lemmas we consider the Pauli twirl, in which the distribution
+$\mu$ is over subsets of Pauli observables.
+First, we show how the Pauli twirl acts on Pauli matrices.
+Then, using this, we derive an expression for the Pauli twirl applied to general
+matrices.
+
+\begin{lemma}[Pauli twirl of Pauli matrices]
+  \label{lem:twirl-pauli}
+  Let $V$ be a subspace of $\F^k$, let $W \in \{X, Z\}$, and let $\mu$ be the
+  uniform distribution over~$\{\tau^W(w) : w \in V\}$.
+  Let $W'\neq W$ and $u\in \F^k$.
+  Then
+  \begin{equation*}
+    \mathscr{T}_\mu(\tau^{W'}(u)) =
+    \begin{cases}
+      \tau^{W'}(u)&\text{ if }u \in V^{\perp}\;,\\
+      0 &\text{ if }u \notin V^{\perp}\;.
+    \end{cases}
+  \end{equation*}
+\end{lemma}
+
+\begin{proof}
+  Let $u\in \F^k$.
+  Let $c = 1$ if $W = Z$ and let $c = -1$ if $W = X$.
+  Then
+  \begin{align*}
+    \mathscr{T}_\mu(\tau^{W'}(u))
+    &= \E_{z \sim V} (\tau^W(z)  \tau^{W'}(u) \tau^W(z)^\dagger)\\
+    &= \E_{z \sim V} (\omega^{c\cdot \tr(u \cdot z)} \tau^{W'}(u) \tau^W(z)
+      \tau^W(z)^\dagger)\\
+    &= \Big(\E_{z \sim V} \omega^{c\cdot \tr(u \cdot z)}\Big) \tau^{W'}(u)\;.
+  \end{align*}
+  The lemma now follows from Lemma~\ref{lem:cancellation}
+  and the fact that $c \cdot u \in V^\perp$ if and only if~$u\in V^\perp$.
+\end{proof}
+
+\begin{lemma}[Pauli twirl of general matrices]
+  \label{lem:mixing-L}
+  Let $V= \F^k$, and let $L : V \rightarrow V$ be a linear map.
+  Let $\zeta$ be the uniform distribution over $\{\tau^Z(z) \mid z \in V\}$ and
+  $\chi$ the uniform distribution over $\{\tau^X(x) \mid x \in \ker(L)\}$.
+  Let~$M$ be a matrix acting on $\C^V \otimes \mH_\alice$, where $\mH_\alice$ is
+  a finite dimensional Hilbert space.
+  Then there exist matrices $\{M^y\}_{y\in L(V)}$ acting on $\mH_\alice$ such
+  that the twirl of~$M$ with respect to~$\zeta$ and~$\chi$ is given by
+  \begin{equation}
+    \label{eq:mixing-L-0}
+    (\mathscr{T}_{\chi} \circ \mathscr{T}_{\zeta} \otimes \Id_A)(M) = \sum_{y\in
+      V} \tau^Z_{[L(\cdot)= y]} \otimes M^y\;.
+  \end{equation}
+	Moreover, if we apply~\eqref{eq:mixing-L-0} to each element of a POVM
+  measurement $\{M_a\}$, then for each $y \in V$, the set $\{M^y_a\}$ also forms
+  a POVM measurement.
+\end{lemma}
+
+\begin{proof}
+  The collection $\{\tau^X(x)\tau^Z(z)\}_{x, z \in V}$ forms a basis for the
+  complex linear space of matrices acting on $\C^V$.
+  As a result, we can write
+  \begin{equation*}
+    M = \sum_{x, z \in V} \tau^X(x) \tau^Z(z) \otimes M_{x, z}\;,
+  \end{equation*}
+  for matrices $M_{x,z}$ on $\mH_\alice$.
+  We now use Lemma~\ref{lem:twirl-pauli} to compute the twirl first with respect
+  to $\zeta$ and then with respect to $\zeta$ and $\chi$:
+  \begin{align*}
+    (\mathscr{T}_{\zeta} \otimes \Id_{A})(M)
+    &= \sum_{x, z \in V} \mathscr{T}_{\zeta}(\tau^X(x)) \tau^Z(z) \otimes M_{x, z}
+      = \sum_{z \in V} \tau^Z(z) \otimes M_{0, z}\;,\\
+    (\mathscr{T}_{\chi} \circ \mathscr{T}_{\zeta} \otimes \Id_{A})(M)
+    &= \sum_{z \in V} \mathscr{T}_{\chi}(\tau^Z(z)) \otimes M_{0, z}
+      =  \sum_{z \in \ker(L)^\perp} \tau^Z(z) \otimes M_{0, z}\;.
+  \end{align*}
+  For all $y \in V$, let $u_y$ denote an arbitrary element of $L^{-1}(y)$ if $y$
+  is in the image of $L$; otherwise, set $u_y = 0$.
+  Expanding $\tau^Z(z)$ using the first part of
+  Lemma~\ref{lem:why-didnt-i-think-of-this-before},
+  \begin{align}
+    \label{eq:post-twirl-matrix}
+    \sum_{z \in \ker(L)^\perp} \tau^Z(z) \otimes M_{0, z}
+    & = \sum_{z \in \ker(L)^\perp} \,\, \sum_{y} \omega^{\tr(u_y \cdot z)}
+      \tau^Z_{[L(\cdot)=y]} \otimes M_{0, z} \notag \\
+    & =  \sum_{y} \tau^Z_{[L(\cdot)=y]} \otimes \Big(\sum_{z \in \ker(L)^\perp}
+      \omega^{\tr(u_y \cdot z)}  M_{0, z}\Big)\;.
+  \end{align}
+  Equation~\eqref{eq:mixing-L-0} follows by setting $M^y = \sum_{z \in
+    \ker(L)^\perp} \omega^{\tr(u_y \cdot z)} M_{0, z}$.
+
+  For the ``moreover'' part, note first that whenever $M \geq 0$ it holds that
+  any twirl satisfies $0 \leq \mathscr{T}_{\mu}(M)$.
+  As a result, each matrix $M^y$ must be positive semi-definite due to
+  Equation~\eqref{eq:post-twirl-matrix} and the fact that the
+  $\{\tau^Z_{[L(\cdot)=y]}\}_y$ matrices are orthogonal projections.
+  Next, suppose $\{M_a\}$ is a POVM measurement, and write $N = \sum_a M_a$ for
+  the identity matrix.
+  Then by linearity, for each $y \in V$, $\sum_a M_a^y = N^y$.
+  In addition, $N_{0, 0} = \Id$, and $N_{x, z} = 0$ otherwise.
+  As a result, $N^y = N_{0, 0} = \Id$, and so $\{M_a^y\}$ also forms a POVM.
+\end{proof}
+
+In the next few lemmas we derive a sufficient condition for a measurement to be
+close to its own Pauli twirl, namely that it satisfies certain commutation
+relations with the Pauli basis measurements.
+
+\begin{lemma}[Commuting with Pauli basis implies commuting with Pauli observables]
+  \label{lem:W} 
+  Let~$\cal{X},\cal{A}$ be finite sets and~$D$ be a distribution over $\cal{X}$.
+  For each~$x \in \cal{X}$, let $V_x$ be a register subspace of $V = \F^k$, and
+  let $L_x:V_x \to V_x$ be a linear map.
+
+  Consider a state $\ket{\psi} = \ket{\EPR}_V \otimes \ket{\aux}$, where
+  $\ket{\EPR}_{V} \in \mH_\alice \otimes \mH_\bob$, for $\mH_\alice,\mH_\bob
+  \cong \C^{V}$, is defined in Definition~\ref{def:EPR} and $\ket{\aux}\in
+  \mH_{\alice'} \otimes \mH_{\bob'}$ is arbitrary.
+  For each~$x \in \cal{X}$, let $\{M^{x}_a\}_{a \in \cal{A}}$ be a measurement
+  on $\mH_{\alice} \otimes \mH_{\alice'}$.
+  Let $W\in\{X,Z\}$.
+  Then the following are equivalent on the state $\ket{\psi}$:
+	\begin{itemize}
+	\item On average over $x\sim D$, 
+    \begin{equation*}
+      \big[ M^x_a \,,\, \big(\tau^W_{[L_x(\cdot)=y]} \otimes \Id_{\overline{V_x}}
+      \otimes \Id_{\alice'}\big) \big]  \otimes \Id_\bob \approx_\eps 0\;.
+    \end{equation*}
+  \item On average over $x \sim D$ and $v$ drawn uniformly from $\ker
+    (L_x)^\perp$,
+    \begin{equation*}
+      \big[ M^x_a \,,\, \big( \tau^W(v) \otimes \Id_{\overline{V_x}} \otimes
+      \Id_{\alice'} \big) \big]  \otimes \Id_\bob \approx_\eps 0\;.
+    \end{equation*}
+	\end{itemize}
+	In the equations above, for each $x \in \cal{X}$ we decompose $\mH_\alice = \C^{V_x} \otimes \C^{\overline{V_x}}$ and interpret $\tau^W_{[L_x(\cdot)=y]}$ and $\tau^W(v)$ for $v \in \ker(L_x)^\perp$ as acting on $\C^{V_x}$. 
+\end{lemma}
+
+\begin{proof}
+  For $x\in \cal{X}$, $a\in \cal{A}$, $y$ in the range of $L_x$, and $v\in \F^k$
+  define
+  \begin{equation*}
+    \Delta^x_{a,y} = \big[ M^x_a \,,\, \big(\tau^W_{[L_x(\cdot)=y]} \otimes
+    \Id_{\overline{V_x}} \otimes \Id_{\alice'}\big) \big]\otimes \Id_\bob\:,
+  \end{equation*}
+  \begin{equation*}
+    \Delta^x_a(v) = \big[ M^x_a \,,\, \big( \tau^W(v) \otimes
+    \Id_{\overline{V_x}} \otimes \Id_{\alice'} \big) \big]  \otimes \Id_\bob\:.
+  \end{equation*}
+  By the first item of Lemma~\ref{lem:why-didnt-i-think-of-this-before}, for
+  each $v \in \ker(L_x)^\perp$,
+  \begin{equation*}
+    \Delta^x_a(v) = \sum_{y \in V_x} \omega^{\tr(u_y \cdot v)} \Delta^x_{a,y}\;,
+  \end{equation*}
+	where for every $y$ in the range of $L_x$, $u_y$ is a fixed element in
+  $L_x^{-1}(y)$.
+  The expression for the closeness of $\Delta^x_a$ to $0$ on average over $x
+  \sim D$ and $v \sim \ker(L_x)^\perp$ (i.e.\ the second quantity of the Lemma
+  statement), is equal to
+  \begin{equation*}
+    \E_{x\sim D} \E_{v \sim \ker(L_x)^\perp} \sum_a\, \bigl \| \Delta^x_a (v)
+  \ket{\psi}\bigr \|^2,
+  \end{equation*}
+  and can be expanded as
+  \begin{equation}\label{eq:lemW-1}
+    \E_{x\sim D} \E_{v \sim \ker(L_x)^\perp} \sum_a\, \bra{\psi} \sum_{y,y'}
+    \omega^{\tr ((u_y'-u_y) \cdot v)} \bigl( \Delta^x_{a,y} \bigr)^\dagger
+    \Delta^x_{a,y'} \ket{\psi}\;.
+  \end{equation}
+  If $y \neq y'$, then by definition $L_x(u_y) \neq L_x(u_{y'})$, and so $u_y' -
+  u_y$ is not in $\ker(L_x)$.
+  Lemma~\ref{lem:cancellation} (with $V = \ker(L_x)^\perp$) thus implies
+  that~\eqref{eq:lemW-1} equals
+  \begin{equation*}
+    \E_{x\sim D} \sum_a\, \bra{\psi} \sum_{y} \bigl( \bigl( \Delta^x_{a,y}
+    \bigr)^\dagger \Delta^x_{a,y} \bigr) \ket{\psi} = \E_{x\sim D} \sum_{a, y}
+    \, \bigl \|\Delta^x_{a,y} \ket{\psi} \bigr \|^2
+  \end{equation*}
+  which is the closeness of $\Delta^x_{a,y}$ to $0$ on average over $x \sim D$.
+  Thus, $\Delta^x_a(v) \approx_\eps 0$ on average over $x$ and $v$ if and only
+  if $\Delta^x_{a,y} \approx_\eps 0$ on average over $x$.
+\end{proof}
+
+\begin{lemma}[Commuting implies twirl]
+  \label{lem:mixing-U}
+	Let $\cal{X}$ be a finite set and $D$ a distribution on $\cal{X}$. 
+  For each~$x\in \cal{X}$, let $\{ M^x_a \}$ be a POVM on $\mH_\alice$, and let
+  $\mu_x$ be a distribution over unitary matrices acting on $\mH_\alice$.
+  Suppose that on average over $x \sim D$ and $U \sim \mu_x$ it holds that
+  \begin{equation*}
+    \bigl[ M^x_a , U^\dagger \bigr] \otimes \Id_\bob \approx_{\eps} 0\;,
+  \end{equation*}
+  where the commutator is evaluated on a state $\ket{\psi} \in \mH_\alice
+  \otimes \mH_\bob$.
+  Then on average over $x\sim D$,
+  \begin{equation*}
+    M^x_a \otimes \Id_\bob \approx_\eps \mathscr{T}_{\mu_x} ( M^x_a ) \otimes
+    \Id_\bob \;.
+  \end{equation*}
+\end{lemma}
+
+\begin{proof}
+  Observe that
+  \begin{equation}
+    \E_{x\sim D} \sum_a \, \bigl\| \bigl( \mathscr{T}_{\mu_x} (M^x_a) - M^x_a
+    \bigr) \otimes \Id_\bob \ket{\psi} \bigr\|^2 =
+    \E_{x\sim D} \sum_a \, \bigl\| \E_{U\sim \mu_x} \bigl( U \big[ M^x_a, U^\dagger
+    \bigr] \bigr) \otimes \Id_\bob \ket{\psi} \bigr\|^2.
+    \label{eq:twirl2}
+  \end{equation}
+	Applying Jensen's inequality, the right-hand side of~\eqref{eq:twirl2} is at
+  most
+  \begin{equation*}
+    \E_{x\sim D} \E_{U\sim \mu_x} \sum_a \, \bigl\| \bigl( U \big[ M^x_a, U^\dagger
+    \bigr] \bigr) \otimes \Id_\bob \ket{\psi} \bigr\|^2
+    = \E_{x\sim D} \E_{U\sim \mu_x} \sum_a \, \bigl\| \big[ M^x_a, U^\dagger
+    \bigr]  \otimes \Id_\bob \ket{\psi} \bigr\|^2,
+  \end{equation*}
+  using the unitary invariance of the Euclidean norm.
+  This last quantity is $O(\eps)$, by assumption.
+\end{proof}
+
+\begin{lemma}[Commuting with each implies commuting with both]
+  \label{lem:commute-with-both}
+  Let $\cal{X}$ be a finite set and $D$ a distribution on $\cal{X}$.
+  For each~$x\in \cal{X}$, let $\{ M^x_a \}$ be a POVM on $\mH_\alice$ and let
+  $\mu_{x,1}, \mu_{x,2}$ be two distributions over unitary matrices acting on
+  $\mH_\alice$.
+  Suppose that for each $i \in \{1, 2\}$, on average over $x \sim D$ and $U_i
+  \sim \mu_{x,i}$,
+  \begin{equation}\label{eq:to-be-tagged}
+    \bigl[ M^x_a , U_i^\dagger \bigr] \otimes \Id_\bob \approx_{\eps} 0,
+  \end{equation}
+  where the expression is evaluated on some state $\ket{\psi} \in
+  \mH_\alice\otimes\mH_\bob$, where $\mH_\bob \cong \mH_\alice$.
+  Suppose further that on average over $x \sim D$ and $U_2 \sim \mu_{x, 2}$,
+  \begin{equation}\label{eq:to-be-tagged-dos}
+    U_2^\dagger \otimes \Id_\bob \approx_{\eps} \Id_A \otimes U_2\;.
+  \end{equation}
+  (The corresponding statement for $i = 1$ is not needed.)
+  Then on average over $x \sim D$, $U_1 \sim \mu_{x, 1}$, and $U_2 \sim \mu_{x,
+    2}$,
+  \begin{equation*}
+    \bigl[ M^x_a , U_1^\dagger U_2^\dagger \bigr] \otimes \Id_\bob
+    \approx_{\eps} 0\;.
+  \end{equation*} 
+\end{lemma}
+
+\begin{proof}
+  The claim follows from the following sequence of approximations:
+  \begin{align*}
+    M^x_a U_1^\dagger U_2^\dagger \otimes \Id_\bob
+    & \approx_{\eps} M^x_a U_1^\dagger \otimes U_2
+      \tag{by~\eqref{eq:to-be-tagged-dos}}\\
+    & \approx_{\eps} U_1^\dagger M^x_a  \otimes U_2
+      \tag{by~\eqref{eq:to-be-tagged} for $i = 1$}\\
+    & \approx_{\eps} U_1^\dagger M^x_a U_2^\dagger \otimes \Id_\bob
+      \tag{by~\eqref{eq:to-be-tagged-dos}}\\
+    & \approx_{\eps} U_1^\dagger U_2^\dagger M^x_a \otimes \Id_\bob
+      \tag{by~\eqref{eq:to-be-tagged} for $i = 2$}\;,
+  \end{align*}
+  where each step also uses Fact~\ref{fact:add-a-proj}.
+  This is equivalent to $\bigl[ M^x_a , U_1^\dagger U_2^\dagger \bigr] \otimes
+  \Id_\bob \approx_{\eps} 0$, completing the proof.
+\end{proof}
+
+The following is a slight generalization of~\cite[Fact~4.25]{NW19},
+and we give a similar proof.
+
+\begin{lemma}[Close to sub-measurement implies close to measurement]
+  \label{lem:replace-with-measurement}
+  Let $\cal{X},\cal{A}$ be finite sets and $D$ be a distribution on $\cal{X}$.
+  Suppose that for each $x\in \cal{X}$, $\{A^x_a\}_{a\in \cal{A}}$ is a
+  projective measurement and $\{B^x_a\}_{a\in \cal{A}}$ is a set of matrices
+  such that each~$B^x_a$ is positive semidefinite and $\sum_{a}B^x_a \leq \Id$.
+  Suppose $\{C^x_a\}_{a \in \cal{A}}$ is a POVM such that $C^x_a \geq B^x_a$ for
+  all~$x$ and~$a$.
+  Then if, on average over $x\sim D$, $A^x_a \approx_{\eps} B^x_a$, then, on
+  average over $x\sim D$, $A^x_a \approx_{\eps^{1/2}} C^x_a$.
+\end{lemma}
+
+\begin{proof}
+  By the triangle inequality,
+  \begin{equation*}
+    \E_{x} \sum_a \Vert (A^{x}_a - C^{x}_a) \ket{\psi} \Vert^2
+    \leq 2\E_{x} \sum_a \Vert (A^{x}_a - B^{x}_a) \ket{\psi} \Vert^2
+    + 2 \E_{x}\ \sum_a \Vert (C^x_a - B^x_a) \ket{\psi}\Vert^2.
+\end{equation*}
+The first term on the right-hand side is $O(\eps)$ by assumption.
+For the second,
+\begin{multline*}
+  \E_{x}\ \sum_a \Vert (C^x_a - B^x_a) \ket{\psi}\Vert^2
+  = \E_{x}\ \sum_a \bra{\psi} (C^x_a - B^x_a)^2 \ket{\psi}
+  \leq \E_{x}\ \sum_a \bra{\psi} (C^x_a - B^x_a) \ket{\psi}\\
+  = 1- \E_{x} \sum_a\bra{\psi}  B^{x}_a \ket{\psi}
+  \leq1- \E_{x} \sum_a\bra{\psi}  (B^{x}_a)^2 \ket{\psi}\;,
+\end{multline*}
+where the middle inequality uses $0\leq C^x_a-B^x_a\leq \Id$ for all $x,a$. 
+Write $1 = \E_{x} \sum_a \bra{\psi} (A^{x}_a)^2 \ket{\psi}$, which holds
+because~$A$ is a projective measurement.
+Then
+\begin{multline*}
+  \E_{x} \sum_a \bra{\psi} ((A^{x}_a)^2  - (B^{x}_a)^2)\ket{\psi}
+  = \Re\Big(\E_{x} \sum_a \bra{\psi} (A^{x}_a  + B^{x}_a)(A^{x}_a - B^{x}_a)
+  \ket{\psi}\Big)\\
+  \leq \E_{x} \sqrt{\sum_a \Vert (A^{x}_a + B^{x}_a) \ket{\psi}\Vert^2}
+	\cdot \sqrt{\sum_a \Vert (A^{x}_a - B^{x}_a)\ket{\psi} \Vert^2}
+\end{multline*}
+where the first equality follows from the fact that $A^x_a$ and $B^x_a$ are
+Hermitian.
+For each~$x\in X$ the first square root is $O(1)$.
+This allows us to move the expectation into the second square root by Jensen's
+inequality.
+The result is $O(\eps^{1/2})$ by assumption. 
+\end{proof}
+
+Now we put everything together to show the main result of this section. 
+
+\begin{lemma}
+  \label{lem:mixing}
+  Let~$\cal{X},\cal{A}$ be a finite sets and~$D$ be a distribution over
+  $\cal{X}$.
+  For each~$x \in \cal{X}$, let $V_x$ be a register subspace of $V = \F^k$, let
+  $U_x$ be a register subspace of~$V_x$, and let $L_x:U_x \to U_x$ be a linear
+  map.
+
+  Consider a state $\ket{\psi} = \ket{\EPR}_V \otimes \ket{\aux}$, where
+  $\ket{\EPR}_{V} \in \mH_\alice \otimes \mH_\bob$, for $\mH_\alice,\mH_\bob
+  \cong \C^{V}$, is defined in Definition~\ref{def:EPR} and $\ket{\aux}\in
+  \mH_{\alice'} \otimes \mH_{\bob'}$ is arbitrary.
+  For each~$x \in \cal{X}$, let $\{M^{x}_{y,a}\}_{y \in U_x,\, a\in \cal{A}}$ be
+  a projective measurement on $\mH_{V_x} \otimes \mH_{\alice'}$.
+  Suppose that on average over~$x \sim D$ the following conditions hold.
+  \begin{alignat*}{2}
+    \text{(Consistency):} && \quad
+    \bigl( M^{x}_{y} \otimes \Id_{\overline{V_x}} - \tau^Z_{[L_x(\cdot) = y]}
+    \otimes \Id_{\overline{U_x}} \otimes \Id_{\alice'}\bigr) \otimes \Id_\bob
+    \approx_\eps 0\;, &\\
+    \text{(Commutation):} && \quad
+      \bigl[ M^{x}_{y,\, a} \otimes \Id_{\overline{V_x}}\,,\, \tau^Z_{z} \otimes
+      \Id_{\overline{U_x}}   \otimes \Id_{\alice'} \bigr] \otimes
+      \Id_\bob\approx_\eps 0\;, &\\
+      && \quad
+      \bigl[ M^{x}_{y,\, a}\otimes \Id_{\overline{V_x}}\,,\,
+      \tau^X_{[L_x^\perp(\cdot) = y^\perp]}  \otimes \Id_{\overline{U_x}}
+      \otimes \Id_{\alice'} \bigr]  \otimes \Id_\bob  \approx_\eps 0\;.&
+  \end{alignat*}
+  Here, the projector $\tau^Z_{[L_x(\cdot) = y]}$ acts on the register subspace
+  $\mH_{U_x}$, and $\overline{U_x}$ and $\overline{V_x}$ denote the
+  complementary register subspaces of $U_x$ and $V_x$, respectively, within $V$. Furthermore, the answer summations are over all $y, z \in U_x$ and $a \in \cal{A}$.
+  
+  
+  Then for each $x\in \cal{X}$ and $y \in U_x$, there exists a POVM measurement
+  $\bigl\{ M^{x,\, y}_a \bigr\}_{a \in \cal{A}} $ on $\mH_{V_x \setminus
+    U_x}\otimes \mH_{\alice'}$ such that on average over $x \sim D$,
+  \begin{equation*}
+    (M^{x}_{y,\, a} \otimes \Id_{\overline{V_x}}) \otimes \Id_{B}
+    \approx_{\eps^{1/2}} \Bigl(\tau^Z_{[L_x(\cdot) = y]} \otimes M^{x,\, y}_a
+    \otimes \Id_{\overline{V_x}}\Bigr) \otimes \Id_\bob\;.
+  \end{equation*}
+\end{lemma}
+
+\begin{proof}
+  For each~$x \in X$, let $\zeta_{x}$ be the uniform distribution over $U_x$ and
+  $\chi_{x}$ be the uniform distribution over $\ker(L_x)$.
+  \hnote{In response to Bowen comments from second file, item 15c, elaborating on how Lemma 8.12 is applied.} Applying \Cref{lem:W} to the first commutation assumption (letting ``$L_x$'' in \Cref{lem:W} be the identity map on $U_x$, and letting ``$D$'' be the uniform distribution over $\ker(L_x)^\perp = U_x$), we get that on average over $x \sim \cal{X}$ and $v \sim \zeta_x$, we have
+  \begin{equation*}
+    \bigl[ M^{x}_{y,\, a} \otimes \Id_{\overline{V_x}} \,,\, \tau^Z(v) \otimes
+    \Id_{\overline{U_x}} \otimes \Id_{\alice'} \bigr]  \otimes \Id_\bob
+    \approx_\eps 0\;.
+  \end{equation*}
+  Applying \Cref{lem:W} to the second commutation assumption (letting ``$L_x$'' in \Cref{lem:W} be the $L_x^\perp$ in the statement of \Cref{lem:mixing} and letting $D$ be the uniform distribution over $\ker(L_x^\perp)^\perp$, which is $\ker(L_x)$ by Lemma~\ref{lem:L_perp_perp}), we get 
+on average over $x \sim \cal{X}$ and $v \sim \xi_x$, we have
+  \begin{equation*}
+    \bigl[ M^{x}_{y,\, a} \otimes \Id_{\overline{V_x}} \,,\, \tau^X(v) \otimes
+    \Id_{\overline{U_x}} \otimes \Id_{\alice'} \bigr]  \otimes \Id_\bob
+    \approx_\eps 0\;.
+  \end{equation*}    
+By Lemma~\ref{lem:commute-with-both}, this implies that on average over $x
+  \sim D$, $u \sim \zeta_{x}$, and~$v \sim \chi_{x}$,
+  \begin{equation*}
+    \bigl[ M^{x}_{y,\, a} \otimes \Id_{\overline{V_x}} \,,\, \tau^Z(u) \tau^X(v)
+    \otimes \Id_{\overline{U_x}} \otimes \Id_{\alice'} \bigr] \otimes \Id_\bob
+    \approx_\eps 0\;.
+  \end{equation*}
+  By Lemma~\ref{lem:mixing-U} and Lemma~\ref{lem:mixing-L},
+  this implies that on average over $x\sim D$,
+  \begin{align}
+    M^{x}_{y,\, a} \otimes \Id_{\overline{V_x}} \otimes \Id_\bob
+    & \approx_\eps \bigl( \mathscr{T}_{\chi_{x}} \circ \mathscr{T}_{\zeta_{x}} (
+      M^{x}_{y,\, a}) \bigr) \otimes \Id_{\overline{V_x}} \otimes
+      \Id_\bob\notag\\
+    & = \Big(\sum_{y' \in V_x} \tau^Z_{[L_x(\cdot) = y']} \otimes  M^{x,\,
+      y'}_{y,\, a} \Big) \otimes \Id_{\overline{V_x}} \otimes
+      \Id_\bob\;,\label{eq:mixing-eq-1}
+  \end{align}
+	for some POVM measurement $\{M^{x,\, y'}_{y,\, a} \}$ on $\mH_{V_x \setminus
+    U_x} \otimes \mH_{\alice'}$.
+	
+	In the following sequence of equations, whenever an operator does not act on a
+  subsystem it should be assumed that it is appropriately tensored with the
+  identity.
+  For clarity, we explicitly indicate using a subscript $\alice$ or $\bob$
+  whether a Pauli operator acts on $\mH_\alice$ or $\mH_\bob$.
+  Then on average over $x\sim D$ we have
+  \begin{align*}
+    M^{x}_{y, \, a}
+    & =  M^{x}_{y, \, a} \cdot M^{x}_y  \tag{$M^x$ is projective}\\
+    & \approx_\eps  M^{x}_{y, \, a} \cdot \big(
+      \tau^Z_{[L_x(\cdot)=y]}\big)_\alice
+      \tag{Consistency assumption}\\
+    & \approx_0 M^x_{y, \, a} \otimes \big(\tau^Z_{[L_x(\cdot)=y]}\big)_\bob
+      \tag{Paulis are self-consistent}\\
+    & \approx_\eps \Big( \sum_{y'} \big(\tau^Z_{[L_x(\cdot) = y']}\big)_\alice
+      \otimes  M^{x,\, y'}_{y,\, a} \Big) \otimes \big(\tau^Z_{[L_x(\cdot)=y]}
+      \big)_\bob \tag{Equation~\eqref{eq:mixing-eq-1}}\\
+    & \approx_0 \sum_{y'} \big(\tau^Z_{[L_x(\cdot) =
+      y']}\tau^Z_{[L_x(\cdot)=y]}\big)_\alice \otimes  M^{x,\, y'}_{y,\, a}
+      \tag{Paulis are self-consistent} \\
+    & = \big( \tau^Z_{[L_x(\cdot) = y]} \big)_\alice
+      \otimes M^{x,\, y}_{y,\, a} \;,
+  \end{align*}
+  where $\approx_0$ indicates equality with respect to the state $\ket{\EPR}_{V}
+  \otimes \ket{\aux}$, and we have repeatedly used Fact~\ref{fact:add-a-proj}.
+  This is essentially the statement promised by the lemma, except that
+  $\{M^{x,\, y}_{y,\, a}\}_a$ does not necessarily sum to identity (since we
+  only sum over~$a$).
+  To remedy this, define $M^{x,\, y}_a = \sum_{y'} M^{x,\, y}_{y',\, a}$ and note
+  that $M^{x,\, y}_{a} \geq M^{x,\, y}_{y,\, a}$, so
+  by~Lemma~\ref{lem:replace-with-measurement} and the fact that~$M^x$ is
+  projective,
+  \begin{equation}\label{eq:mixing-eq-2}
+    (M^{x}_{y,\, a} \otimes \Id_{\overline{V_x}}) \otimes \Id_{B} \approx_{\eps^{1/2}}
+    \Bigl(\tau^Z_{[L_x(\cdot) = y]} \otimes M^{x,\, y}_a \otimes \Id_{\overline{V_x}}\Bigr)
+    \otimes \Id_\bob\;.
+  \end{equation}
+  $\{M^{x\,y}_a\}$ is the POVM measurement guaranteed in the lemma statement,
+  which concludes the proof.
+\end{proof}
+
+
+\subsubsection{Preliminary lemmas}
+
+We show a few simple lemmas that allow us to argue about measurements that
+have a decomposition across a tensor product of two Hilbert spaces, within the
+space of a single player.
+
+\def\ha{\mH_{\alice}}
+\def\hb{\mH_{\bob}}
+\def\haq{\mH_{\alice,\, a}}
+\def\haa{\mH_{\alice',\, a}}
+\def\hbq{\mH_{\bob,\, a}}
+\def\hba{\mH_{\bob',\, a}}
+\def\sq{\ket{\psi_{\textsc{que},\, a}}}
+\def\sa{\ket{\psi_{\textsc{ans},\, a}}}
+
+\begin{lemma}
+  \label{lem:conditional}
+	Let $\cal{A}, \cal{B}$ be finite sets.
+	Let $\ket{\psi} \in \ha \otimes \hb$ be a state.
+  Consider the following: for all $a \in \cal{A}$,
+  \begin{enumerate}
+  \item Let $\haq$, $\hbq$, $\haa$, and $\hba$ be Hilbert spaces such that
+    \begin{equation*}
+  		\ha = \haq \otimes \haa\quad
+      \text{and}\quad
+      \hb = \hbq \otimes \hba\;,
+		\end{equation*}
+    and let $\sq \in \haq \otimes \hbq$ be a ``question state'' and $\sa \in
+    \haa \otimes \hba$ be an ``answer state'' such that $\ket{\psi} = \sq
+    \otimes \sa$.
+  \item Let $Q_a$ be projectors on $\haq$ such that $\{Q_a \otimes
+    \Id_{\haa}\}$ forms a projective measurement on $\ha$ and let
+    $\{A^{a}_b\}_{b \in \cal{B}}$ and $\{B^{a}_b\}_{b \in \cal{B}}$ be matrices
+    acting on $\haa$.
+  \item Let $D$ be the distribution on~$\cal{A}$ obtained by measuring
+    $\ket{\psi}$ using $\{ Q_a \otimes I_{\haa}\}_{a \in \cal{A}}$.
+  \end{enumerate}
+  Then the following are equivalent:
+	\begin{itemize}
+	\item On average over $a\sim D$ and with respect to state $\ket{\psi}$,
+    \begin{equation*}
+      (\Id_{\haq} \otimes A^{a}_b) \otimes \Id_\bob \approx_\eps
+      (\Id_{\hbq} \otimes B^{a}_b) \otimes \Id_\bob\;.
+    \end{equation*}
+  \item $\bigl( Q_a \otimes A^{a}_b \bigr) \otimes \Id_{\bob} \approx_\eps
+    \bigl( Q_a \otimes B^{a}_b \bigr) \otimes \Id_{\bob}$ on state $\ket{\psi}$.
+	\end{itemize}
+\end{lemma}
+
+\begin{proof}
+ Expand
+  \begin{align*}
+    & \sum_{a,b} \norm{ (Q_a \otimes A^a_b - Q_a \otimes B^a_b) \otimes
+      \Id_{\bob} \cdot \sq \otimes \sa }^2\\
+    = & \sum_{a,b} \norm{ Q_a \otimes (A^a_b -  B^a_b) \otimes
+        \Id_{\bob} \cdot \sq \otimes \sa}^2\\
+    = & \sum_{a, b} \norm{ Q_a \otimes I_{\hbq} \sq}^2 \cdot
+        \norm{  (A^a_b -  B^a_b) \otimes \Id_{\hba} \sa }^2\\
+	= & \sum_{a, b} \norm{ Q_a \otimes \Id_{\bob} \ket{\psi}}^2 \cdot
+      \norm{  (A^a_b -  B^a_b) \otimes \Id_{\hba} \sa }^2\\
+    = & \E_{a \sim D} \sum_{b}
+        \norm{  (A^a_b -  B^a_b) \otimes \Id_{\hba} \sa }^2\\
+    = & \E_{a \sim D} \sum_{b}
+      \norm{  \Id_{\haq} \otimes (A^a_b -  B^a_b) \otimes
+        \Id_{\bob} \cdot \sq \otimes \sa }^2\;.
+  \end{align*}
+  In going from the third to the fourth line we used the fact that
+  \[
+    \norm{ Q_a \otimes I_{\hbq} \sq }^2 =
+    \norm{ Q_a \otimes \Id_{\haa} \otimes I_{\bob} \sq \otimes \sa }^2
+    = \norm{ Q_a \otimes \Id_{\haa} \otimes \Id_{\bob} \ket{\psi} }^2\;.
+  \]
+  Hence, the first line is $O(\eps)$ if and only if the last one is.
+\end{proof}
+
+\begin{lemma}\label{lem:commutation-simplification}
+  Let $\mA,\mB,\mC$ be finite sets.
+  Let $\ket{\psi} \in \ha \otimes \hb$ be a state, and let $\{A_{a,\, b}\}_{a
+    \in \mA, b \in \cal{B}}$ and $\{B_{a,\, c}\}_{a \in \mA, c \in \cal{C}}$ be
+  POVMs acting on $\ha$.
+  Suppose further that:
+  \begin{enumerate}
+  \item The measurements approximately commute,
+    i.e.\, \label{item:almost-compute}
+    \begin{equation*}
+      \bigl[ A_{a,\, b}, B_{a,\, c} \bigr] \otimes \Id_\bob \approx_\delta 0\;,
+    \end{equation*}
+    where the approximation holds with respect to the state $\ket{\psi}$. 
+  \item For all $a \in \cal{A}$, there exist Hilbert spaces $\haq$, $\haa$,
+    $\hbq$, $\hba$, and states $\sq \in \haq \otimes
+    \hbq$, $\sa \in \haa \otimes \hba$ such that
+    \begin{align*}
+      \ha & = \haq \otimes \haa\;,\\
+      \hb & = \hbq \otimes \hba\;,\\
+      \ket{\psi} & = \sq \otimes \sa\;.
+    \end{align*}
+  \item \label{item:weird-decomposition} For all $a \in \cal{A}$, there exist
+    projectors $Q_a$ on $\haq$ and matrices $\{A^{a}_b\}_{b \in
+      \cal{B}}$, $\{B^{a}_c\}_{c \in \cal{C}}$ acting on $\haa$
+    such that $\{Q_a \otimes \Id_{\haa}\}$ is a projective
+    measurement on $\ha$ and
+    \begin{equation*}
+      A_{a, \, b} = Q_a \otimes A^a_b\;, \quad
+      B_{a, \, c} = Q_a \otimes B^a_c\;.
+    \end{equation*}
+  \end{enumerate}
+  Then
+  \begin{equation*}
+    \bigl[ \Id_{\haq} \otimes A^{a}_b \,,\, \Id_{\haq}
+    \otimes B^{a}_c \bigr] \otimes \Id_\bob \approx_\delta 0\;,
+  \end{equation*}
+  on average over $a \sim D$ where $D$ is the distribution on~$\cal{A}$ obtained
+  by measuring $\ket{\psi}$ using $\{ Q_a \otimes I_{\haa} \}_{a \in \cal{A}}$.
+\end{lemma}
+ 
+\begin{proof}
+  The assumptions of the lemma imply that
+  \begin{align*}
+    (Q_a \otimes A^a_b B^a_c) \otimes \Id_\bob
+    & = ((Q_a \otimes A^a_b) \cdot (Q_a \otimes B^a_c)) \otimes \Id_\bob
+      \tag{$Q_a$ is a projector}\\
+    & = (A_{a, b} \cdot B_{a, c}) \otimes \Id_\bob
+      \tag{Item~\ref{item:weird-decomposition}}\\
+    & \approx_\delta (B_{a, c} \cdot A_{a, b}) \otimes \Id_\bob
+      \tag{Item~\ref{item:almost-compute}}\\
+    & = ((Q_a \otimes B^a_c) \cdot (Q_a \otimes A^a_b)) \otimes \Id_\bob
+      \tag{Item~\ref{item:weird-decomposition}}\\
+    & = (Q_a \otimes B^a_c A^a_b) \otimes \Id_\bob\;.
+      \tag{$Q_a$ is a projector}
+  \end{align*}
+  We apply Lemma~\ref{lem:conditional} as follows.
+  The set ``$\mA$'' in Lemma~\ref{lem:conditional} is the same as $\cal{A}$
+  here, and the set ``$\mB$'' is the product set $\mB \times \mC$ here.
+  The matrices ``$\{A^a_b\}$'' are $\{A^a_{b}B^a_c\}$ here and ``$\{B^{a}_b\}$''
+  are $\{B^a_c A^a_{b}\}$ here.
+  We then obtain, on average over $a \sim
+  D$,
+  \begin{equation*}
+    (\Id_{\mH_{\alice, a}}\otimes A^{a}_b B^a_c) \otimes \Id_\bob
+    \approx_\delta (\Id_{\mH_{\alice, a}} \otimes B^{a}_c A^a_b) \otimes \Id_\bob\;.
+  \end{equation*}
+  This implies the conclusion of the lemma.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:conditional-consistency}
+	Let $ \cal{Y}$ be a finite set and for all $y\in \cal{Y}$ let $\{A^y_{x,\, z}\}$ be a POVM on $\mH_\alice$. Let 
+  $\{B_{x,\, y,\, z}\}$ be a projective measurement on $\mH_\bob$.
+  Suppose that
+  \begin{equation}\label{eq:cc-1}
+    \sum_{x,\, y,\, z} \bra{\psi} A^y_{x,\, z} \otimes B_{x,\, y,\, z}
+    \ket{\psi} \ge 1 - \delta\;.
+  \end{equation}
+  Then with respect to state $\ket{\psi}$,
+  \begin{equation*}
+    \ia \otimes B_{x,\, y,\, z} \approx_\delta A^y_{x,\, z} \otimes B_{x,\,
+      y}\;.
+  \end{equation*}
+\end{lemma}
+
+\begin{proof}
+  Using the fact that $\{B_{x,\, y,\, z}\}$ is projective, we have $B_{x,\, y,\, z} =
+  B_{x,\, y} B_z$ for all $x,y,z$, so that~\eqref{eq:cc-1} implies
+  \begin{equation*}
+    \sum_{x,\, y,\, z} \bra{\psi} A^y_{x,\, z} \otimes B_{x,\, y} B_{z}
+    \ket{\psi} \ge 1 - \delta\;.
+  \end{equation*}
+  Define $\hat{A}_z = \sum_{x,\, y} A^y_{x,\, z} \otimes B_{x,\, y}$ and
+  $\hat{B}_z = \ia \otimes B_z$.
+  The above equation simplifies to
+  \begin{equation*}
+    \sum_{y,\, z} \bra{\psi} \hat{A}_z \hat{B}_z \ket{\psi} \ge 1 - \delta\;.
+  \end{equation*}
+  This implies that $\hat{A}_z \approx_\delta \hat{B}_z$ as
+  \begin{equation*}
+    \sum_z \norm{(\hat{A}_z - \hat{B}_z) \ket{\psi}}^2 = \sum_z \bra{\psi}
+    \hat{A}_z^2 + \hat{B}_z^2 \ket{\psi} - 2 \bra{\psi} \hat{A}_z \hat{B}_z
+    \ket{\psi} \le 2 \delta\;,
+  \end{equation*}
+  where the equality uses the fact that $\hat{A}_z$ and $\hat{B}_z$ commute.
+  To conclude the proof, we have
+  \begin{equation*}
+    \ia \otimes B_{x,\, y,\, z} = \ia \otimes B_{x,\, y} B_z \approx_\delta (\ia
+    \otimes B_{x,\, y}) \sum_{x',\, y'} A^{y'}_{x',\, z} \otimes B_{x',\, y'} =
+    A^y_{x,\, z} \otimes B_{x,\, y},
+  \end{equation*}
+  where the approximation follows from $\hat{A}_z \approx_\delta \hat{B}_z$ and
+  \cref{fact:add-a-proj}.
+
+\end{proof}
+
+\subsubsection{Soundness proof}
+
+We analyze the soundness of the introspective verifier.
+
+\begin{proof}[Proof of the soundness part of Theorem~\ref{thm:introspection}]
+  Let $\verifier=(\sampler, \decider)$ be a normal form verifier such that
+  $\sampler$ is an $\ell$-level sampler.
+  Recall the definition of the introspective verifier $\tvint =
+  (\tsint, \tdint)$ corresponding to $\verifier$ from
+  Section~\ref{sec:intro-verifier}.
+  Fix an index $n\geq 1$ and let $N = 2^n$.
+  Let $R = N^\lambda$ and $\introparams(R) = (q,m,d)$,
+  as in Section~\ref{sec:intro-verifier}.
+ 
+  As in the proof of completeness part of \cref{thm:introspection}, we make the
+  following simplifications.
+  First, we analyze the soundness of the typed introspective verifier
+  $\tvint$; the soundness of the detyped verifier
+  $\vint = \detype(\tvint)$ follows from Lemma~\ref{lem:detyping-verifiers}
+  and the fact that the type set $\type^\intro$ has size $O(\ell)$.
+  Second, analogously to Remark~\ref{rk:downsizing} without loss of generality
+  for notational simplicity we consider strategies for questions sampled from
+  $\tilde{\sampler}^\intro$ rather than the downsized sampler
+  ${\sampler}^\intro$.
+
+  Suppose that $\val^*(\verifier_n^\intro) > 1-\eps$ for some $0 < \eps < 1$,
+  and let $\strategy = (\ket{\hat{\psi}}, \hat{A}, \hat{B})$ be a strategy for
+  $\tvint_n$ with value at least~$1-\eps$.
+  Since $\strategy$ has success probability that is strictly positive, the
+  decider $\tdint$ does not automatically reject, which means that
+	\begin{equation}\label{eq:intro-sound-lambda}
+	s(N) \,\leq\, N^\lambda\;.
+	\end{equation}
+	We analyze each of the tests performed by $\tdint$ (see
+  Figure~\ref{fig:intro-decider}) in sequence, and state consequences of each
+  test.
+  We start with Item~\ref{enu:pauli}, the Pauli test.
+	
+  \begin{lemma}\label{lem:intro-pauli-strat}
+    There exists a function $\delta_1(\eps,R) = a( (\log R)^a \eps^{b} + (\log R)^{-b})$ for universal constants $a > 1$ and $0 < b < 1$ such that the following holds.
+    Let $Q = M \log q$, where $M=2^m$.
+    There is a projective strategy $\strategy'=(\ket{\psi},A,B)$ for
+    $\tvint_n$ that succeeds with probability at least $1-\delta_1$
+    and furthermore
+    \begin{equation}
+      \label{eq:intro-state-a}
+      \ket{\psi}_{\alice\bob} =  \ket{\EPR_2}_{\alice'\bob'}^{\otimes Q} \otimes
+      \ket{\aux}_{\alice''\bob''}
+    \end{equation}
+    for some  bipartite state $\ket{\aux}$, and for all $W\in\{X,Z\}$,
+    \begin{equation}\label{eq:intro-sound-paulia}
+      A^{\Pauli,W}_x = \sigma^W_x \;,\qquad B^{\Pauli,W}_x = \sigma^W_x \;,
+    \end{equation}
+    where $\sigma^W_x$ acts on the first $s(N)$ qubits of player $\alice$'s
+    share (resp.
+    $\bob$'s share) of $\ket{\EPR_2}^{\otimes Q}$.
+  \end{lemma}
+	
+  \begin{proof}
+    Given the definition of the type graph $G^\intro$, for
+    $((\hat{t}_\alice,\hat{x}_\alice),(\hat{t}_\bob,\hat{x}_\bob))$ sampled
+    according to $\mu_{\tsint,n}$ it holds that
+    $(\hat{t}_\alice,\hat{t}_\bob) \in \type^\pauli \times \type^\pauli$ with
+    constant probability.
+    Therefore, conditioned on the Pauli test, Item~\ref{enu:pauli}, being
+    executed, $\strategy$ must succeed in the test with probability $1-O(\eps)$.
+
+    Observe that conditioned on the test being executed, the distribution of
+    $((\hat{t}_\alice,\hat{x}_\alice),(\hat{t}_\bob,\hat{x}_\bob))$ is, by
+    definition, exactly the distribution of questions in the Pauli basis game
+    with parameters $\qldparams$, as described in Section~\ref{sec:qld-game}.
+    By \Cref{cor:pauli-binary} it follows that there exists a local isometry
+    $\phi = \phi_\alice \otimes \phi_\bob$ and a state $\ket{\aux}\in
+    \mH_{\alice''}\otimes \mH_{\bob''}$ such that
+    \begin{equation}\label{eq:intro-sound-0}
+      \Vert \phi (\ket{\hat{\psi}}) - \ket{\EPR_2}^{\otimes Q} \otimes
+      \ket{\aux} \Vert^2 \leq \delta'(\eps,R)\;,
+    \end{equation}
+    where $\delta'(\eps,R)$ is an upper bound on $\delta_\qld(O(\eps),q,m,d)$
+    that only depends on $\eps$ and $R$, as stated in
+    Lemma~\ref{lem:delta-bound}.
+    In addition, defining $A^{\hat{x}}_{\hat{a}} = \phi_\alice~
+    \hat{A}^{\hat{x}}_{\hat{a}}~\phi_\alice^\dagger$ for all questions $\hat{x}$ and answers
+    $\hat{a}$, for $W \in \{X, Z\}$ it holds that
+    \begin{equation}
+      \label{eq:intro-sound-pauli}
+      A^{\Pauli,W}_x \otimes \Id_\bob \approx_{\delta'(\eps,R)}
+      \sigma^W_x \otimes \Id_\bob\;,
+    \end{equation}
+    and a similar set of equations hold for operators associated with the second
+    player.
+    Using Naimark's theorem as formulated in~\cite[Theorem 5.1]{ML20}, at the
+    cost of extending the state $\ket{\aux}$ we may assume that the measurements
+    are projective without loss of generality.
+    Define the strategy $\strategy'$ which uses the state $\ket{\EPR_2}^{\otimes
+      Q} \otimes \ket{\aux}$ and measurement operators $\{ A^{\hat{x}}_{\hat{a}}
+    \}$ and $\{ B^{\hat{x}}_{\hat{a}} \}$ for all questions $\hat{x}$, except
+    for $(\Pauli,W)$-type questions where instead the Pauli measurements
+    $\sigma^W_{\hat{a}}$ are used.
+    Using~\eqref{eq:intro-sound-0} and~\eqref{eq:intro-sound-pauli} the strategy
+    $\strategy'$ succeeds in $\tvint_n$ with probability at least
+    $1-\delta'(\eps,R)$.
+	
+    The claimed bound on $\delta_1$ follows from the bound given in
+    Lemma~\ref{lem:delta-bound}.
+  \end{proof}
+	
+  In the remainder of the proof we analyze the strategy $\strategy'$ from
+  Lemma~\ref{lem:intro-pauli-strat}.
+  We use the following notation conventions:
+  \begin{enumerate}
+  \item We use indices $\alice$ and $\bob$ to label each player's Hilbert space
+    after application of the isometry $\phi$ from
+    Lemma~\ref{lem:intro-pauli-strat}.
+
+  \item We write~$V$ for the register subspace of $\F_2^{Q}$ spanned by $e_1,
+    \ldots, e_{s(N)}$ and $\overline{V}$ for its complement.
+    (Note that by definition of $\introparams$ in
+    Section~\ref{sec:qld-complexity} it holds that $s(N)\leq R \leq Q$, where
+    the first inequality follows from~\eqref{eq:intro-sound-lambda}.)
+
+  \item Whenever we write a Pauli operator $\sigma^W_a$ the register on which
+    the operator acts should always be clear from context, and is implicit from
+    the space in which the outcome $a$ ranges.
+  
+  \item For measurement operators in the introspection game, the variables for
+    the measurement outcomes follow the specification of the ``answer key'' in
+    Figure~\ref{fig:decider_pauli} (for $\type^\Pauli$-type questions) and
+    Figure~\ref{fig:intro-decider} (for all other question types).
+    For example, the measurement operators $\{A_x^{\Pauli,W} \}$ corresponding
+    to question type $(\Pauli,W)$ are indexed by vectors $x \in \F_q^Q$ where $Q
+    = M \log q$ where $M = 2^m$.
+    The measurement operators corresponding to question type $(\Intro,\trole)$
+    for $\trole \in \AB$ are indexed by pairs $(y,a) \in V \times \{0,1\}^{\leq
+      3Q}$.\footnote{Technically the answer $a$ may be a binary string of any
+      length; however, if $a$ is too long the decider rejects due to the answer
+      length check.
+      Thus we assume without loss of generality that the answer $a$ is a binary
+      string of length at most $3Q = 3\cdot 2^m \cdot \log q$.}
+    We often refer to marginalized measurement operators, e.g., the operator
+    $A^{\Intro,\trole}_{y}$ denotes marginalizing $A^{\Intro,\trole}_{y,\, a}$ over
+    all $a$.
+    In these cases, the part of the answer that is marginalized over will be
+    clear from context.
+		
+  \item We use the notation $\delta$ to denote a function which is polynomial in
+    $\delta_1$, although the exact expression may differ from occurrence to
+    occurrence.
+    The polynomial itself may depend on $\ell$, but we leave this dependence
+    implicit; due to the use of inductive steps that involve taking the square
+    root of the error $\ell$ times in sequence (e.g.
+    Lemma~\ref{lem:intro-sound-induction}) the exponent generally depends on
+    $\ell$.
+  \end{enumerate}
+
+  The next two lemma derive conditions implied by Items~\ref{enu:sampling}
+  and~\ref{enu:hiding} of the checks performed by the decider $\tdint$
+  described in Figure~\ref{fig:intro-decider}.
+  As these two parts are performed independently for the two possible values of
+  $\trole\in\{\alice,\bob\}$, we only discuss the case where $\trole = \alice$.
+  For notational simplicity, whenever possible we omit $v$ when referring to the
+  measurement operators.
+  For example $L$, $\ai$ and $\bs$ are used as shorthand notation
+  for $L^\alice$, $A^{\Intro,\, \alice}_{y,\, a}$, and $B^{\Sample,\,
+    \alice}_{z,\, a}$ respectively.
+
+  \begin{lemma}[Sampling test, Item~\ref{enu:sampling} of
+    Figure~\ref{fig:intro-decider}]
+    \label{lem:intro-sound-1}
+    For each $k\in\{ 1, 2, \ldots, \ell\}$,
+    \begin{align}
+      \ia \otimes \bs[z]
+      & \simeq_\delta \sigma^Z_z \otimes \ib\;,
+        \label{eq:intro-sound-1} \\
+      \ai[y_{\leq k},\, a] \otimes \ib
+      & \simeq_\delta \ia \otimes \bs[\Llek,\, a]\;,
+        \label{eq:intro-sound-3b}
+    \end{align}
+    where $z$ ranges over $V$ and $y_{\leq k}$ ranges over $L_{\leq k}(V)$.
+    Moreover, analogous equations hold with operators acting on the other side
+    of the tensor product.
+  \end{lemma}
+	
+  \begin{proof}
+    When $((\hat{t}_\alice,\hat{x}_\alice),(\hat{t}_\bob,\hat{x}_\bob))$ is
+    sampled according to $\mu_{\tsint,n}$, each check in
+    Item~\ref{enu:sampling} of Figure~\ref{fig:intro-decider} is executed with
+    probability $\Omega(1/\ell)$ (this is due to the number of types in
+    $\type^\intro$ and the structure of the type graph $G^\intro$).
+    Therefore, in each of the checks specified by Items~\ref{enu:sampling-pauli}
+    and~\ref{enu:sampling-intro}, the strategy $\strategy'$ succeeds with
+    probability at least $1 - O(\ell \delta)$, conditioned on the test being
+    executed.
+    Item~\ref{enu:sampling-pauli} for $w=\alice$ combined
+    with~\eqref{eq:intro-sound-paulia} implies~\eqref{eq:intro-sound-1}.
+    Item~\ref{enu:sampling-intro} for $w=\alice$, combined with
+    Fact~\ref{fact:data-processing}, implies~\eqref{eq:intro-sound-3b}.
+    The lemma follows from repeating the same argument with the tensor factors
+    interchanged.
+  \end{proof}
+
+  \begin{lemma}[Hiding test, Item~\ref{enu:hiding} of
+    Figure~\ref{fig:intro-decider}]\label{lem:intro-sound-2}
+    For each $k \in \{1, \ldots, \ell+1\}$,
+    \begin{equation}\label{eq:intro-sound-4letter-before-a}
+      \ai[y_{< k},\, a] \abc \br[y_{< k},\, a]\;,
+    \end{equation}
+    and if $k\leq \ell$,
+    \begin{equation}\label{eq:intro-sound-4a-2}
+      \ia \otimes \bhk  \approx_\delta \zLlk \otimes \ib\;.
+    \end{equation}
+    Furthermore, for all $j,k \in \{1,\ldots,\ell -1 \}$ such that $j \leq k$,
+    we have
+    \begin{equation}
+      \label{eq:hide-chain}
+      \ahk[y_{<j},\, y_{\leq j}^\perp] \otimes \ib \approx_\delta
+      \ahp[y_{<j},\, y_{\leq j}^\perp] \otimes \ib\;.
+    \end{equation}
+    Analogous equations
+    to~\eqref{eq:intro-sound-4letter-before-a},~\eqref{eq:intro-sound-4a-2},
+    and~\eqref{eq:hide-chain} hold with operators acting on the other side of
+    the tensor product.
+  \end{lemma}
+	
+  \begin{proof}
+    When $((\hat{t}_\alice,\hat{x}_\alice),(\hat{t}_\bob,\hat{x}_\bob))$ is
+    sampled according to $\mu_{\tsint,n}$, each check in
+    Item~\ref{enu:hiding} of Figure~\ref{fig:intro-decider} is executed with
+    probability $\Omega(1/\ell)$.
+    Therefore, in each of the checks specified by
+    Items~\ref{enu:hiding-intro},~\ref{enu:hiding-read}, and~\ref{enu:hiding-same}
+    (conditioned on the right types) the strategy
+    $\strategy'$ succeeds with probability at least $1 - O(\ell \delta)$.
+
+    Item~\ref{enu:hiding-intro} for $w=\alice$ combined with
+    Fact~\ref{fact:data-processing}
+    implies~\eqref{eq:intro-sound-4letter-before-a}.
+    Combining \cref{eq:intro-sound-1,eq:intro-sound-3b} with
+    \eqref{eq:intro-sound-4letter-before-a} yields
+    \begin{equation}
+      \label{eq:intro-sound-4a}
+      \ia \otimes \br[y_{< k}] \approx_\delta \zLlk \otimes \ib\;.
+    \end{equation}
+    The fact that $\strategy'$ is projective and succeeds in
+    Items~\ref{enu:hiding-read} and~\ref{enu:hiding-same} of
+    Figure~\ref{fig:intro-decider} with probability $1 - O(\ell \delta)$,
+    along with Item~\ref{item:consistency-implies-approx} of
+    \Cref{fact:agreement}, imply~\eqref{eq:intro-sound-4a-2}.
+  
+    We now establish the ``Furthermore'' part of the lemma statement.
+    Let $1 \leq j \leq k \leq \ell-1$.
+    Item~\ref{enu:hiding-same}, \Cref{item:consistency-implies-approx} of
+    \Cref{fact:agreement}, and \Cref{fact:data-processing} imply that
+    \begin{equation}
+      \ahk[y_{<j},\, y_{\leq j}^\perp] \otimes \ib \approx_\delta
+      \ia \otimes \bhp[y_{<j},\, y_{\leq j}^\perp].
+    \end{equation}
+    Item~\ref{enu:intro-consistency} and \Cref{fact:data-processing} imply
+    \begin{equation}
+      \ahp[y_{<j},\, y_{\leq j}^\perp] \otimes \ib \simeq_\delta
+      \ia \otimes \bhp[y_{<j},\, y_{\leq j}^\perp]\;.
+    \end{equation}
+    This proves~\eqref{eq:hide-chain}.
+
+    The lemma follows from repeating the same arguments with the tensor factors
+    interchanged.
+	\end{proof}
+	
+	We exploit the tests performed in Item~\ref{enu:hiding} further to show the
+  following lemma.
+
+  \begin{lemma}
+    \label{lem:hide-rigidity}
+    For all $k \in \{1, 2, \ldots, \ell\}$,
+    \begin{equation*}
+      \ia \otimes \bhk[y_{<k},\, y^\perp_k,\, x_{>k}] \approx_\delta
+      \bigl( \zLlk \otimes \xLperpk \otimes \x[x_{>k}] \bigr) \otimes \ib\;,
+    \end{equation*}
+    and an analogous equation holds with operators acting on the other side of
+    the tensor product.
+  \end{lemma}
+
+  \begin{proof}
+    The proof is by induction on $k$. We first show the case $k=1$.
+    Under the distribution $\mu_{\tsint,n}$, the check in
+    \cref{enu:hiding-pauli} of \cref{fig:intro-decider} is executed with
+    probablity $\Omega(1/\ell)$. That part of the check for $w=\alice$ together
+    with \cref{eq:intro-sound-paulia} implies that
+    \begin{equation}
+      \label{eq:base-case-hide}
+      \ia \otimes B^{\Hide{1}}_{y_1^\perp,\, x_{>1}} \approx_\delta \bigl(
+      \xLperpk[1] \otimes \x[x_{>1}] \bigr) \otimes \ib\;.
+    \end{equation}
+    This proves the case for $k=1$.
+    Next we perform the induction step.
+    Assume that the lemma holds for some $k \in \{1, 2, \ldots, \ell-1\}$.
+    The check of \cref{enu:hiding-same} is executed with probablity
+    $\Omega(1/\ell)$; using that $\strategy'$ succeeds in \cref{enu:hiding-same}
+    (conditioned on the right types having been sampled) with probablity at least $1 - O(\ell
+    \delta)$, we have
+    \begin{equation*}
+      \sum_{y_{\le k},\, y^\perp_{k+1},\, x_{>k+1}}
+      \bra{\psi} \ahk[{y_{<k},\, [L^\perp_{k+1,\, y_{\le k}}
+      (\cdot ) = y^\perp_{k+1}],\, x_{>k+1}}] \otimes \bhp[y_{\le k},\,
+      y^\perp_{k+1},\, x_{>k+1}] \ket{\psi} \ge 1 - O(\ell \delta)\;.
+    \end{equation*}
+
+    We now apply \cref{lem:conditional-consistency}, choosing the measurements
+    $A$, $B$ and outcomes $x$, $y$, $z$ in the lemma as follows:
+    \begin{gather*}
+      \text{``$A$''}: \ahk[{y_{<k},\, [L^\perp_{k+1,\, y_{\le k}}(\cdot) =
+          y^\perp_{k+1}],\, x_{>k+1}}]\;, \quad
+      \text{``$B$''}: \bhp[y_{\le k},\, y^\perp_{k+1},\, x_{>k+1}]\;, \\
+      \text{``$x$''}: y_{<k}\;, \quad
+      \text{``$y$''}: y_k\;, \quad
+      \text{``$z$''}: (y^\perp_{k+1},\, x_{>k+1})\;.
+    \end{gather*}
+		Note that here $A$ does not depend on $y$, so we use the same $A$ for all values of $y$. 
+    \Cref{lem:conditional-consistency} with the above choices of parameters
+    implies that
+    \begin{equation*}
+      \begin{split}
+        \ia \otimes \bhp[y_{\le k},\, y^\perp_{k+1},\, x_{>k+1}]
+        & \approx_\delta \ahk[{y_{<k},\, [L^\perp_{k+1,\, y_{\le k}}(\cdot) =
+          y^\perp_{k+1}],\, x_{>k+1}}] \otimes \bhp[y_{\le k}]\\
+        & \approx_\delta  \bigl( \zLlk \otimes \xLperpk[k+1] \otimes \x[x_{>k+1}]
+        \bigr) \otimes \bhp[y_{\le k}]\\
+        & \approx_\delta \bigl( \zLlk \zLlek \otimes \xLperpk[k+1] \otimes \x[x_{>k+1}]
+        \bigr) \otimes \ib,\\
+        & \approx_0 \bigl( \zLlk[k+1] \otimes \xLperpk[k+1] \otimes \x[x_{>k+1}]
+        \bigr) \otimes \ib,
+      \end{split}
+    \end{equation*}
+    where the input to $L^\perp_{k+1,\, y_{<k+1}}(\cdot)$ is $x_{k+1}$.
+    The second approximation uses the induction hypothesis,
+    \cref{fact:data-processing}, \cref{fact:agreement}, and
+    \cref{fact:add-a-proj}.
+    The third approximation follows from \cref{eq:intro-sound-4a-2} and
+    \cref{fact:add-a-proj}.
+    The fourth approximation follows from the definition of CL functions.
+    This completes the induction.
+  \end{proof}
+
+  \begin{lemma}
+    For all $k \in \{1, \ldots, \ell\}$,
+	  \begin{equation}
+      \label{eq:intro-sound-4}
+      \ia \otimes \br[y_{<k},\, y_k^\perp] \approx_\delta
+      \bigl( \zLlk \otimes \xLperpk \bigr) \otimes \ib \;.
+    \end{equation}
+    Moreover, analogous equations hold with operators acting on the other side
+    of the tensor product.
+  \end{lemma}
+
+  \begin{proof}
+    \Cref{lem:hide-rigidity,fact:data-processing} imply that
+    \begin{equation}\label{eq:intro-sound-3d}
+      \ahk[y_{<k},\, y^\perp_k] \otimes \ib \approx_\delta
+      \Bigl( \zLlk \otimes \xLperpk \Bigr) \otimes \ib\:.
+    \end{equation}
+    Since the strategy $\strategy'$ succeeds in Item~\ref{enu:hiding-read} with
+    probability at least $1 - O(\ell \delta)$ it follows from
+    \Cref{fact:data-processing} that
+    \begin{equation}\label{eq:intro-sound-3e}
+      A^{\Hide{\ell}}_{y_{<\ell},\, y^\perp_{\leq \ell}} \otimes \ib
+      \approx_\delta \ia \otimes \br[y_{<\ell},\, y^\perp_{\leq
+          \ell}].
+    \end{equation}
+    An inductive argument applied to~\eqref{eq:hide-chain} of
+    Lemma~\ref{lem:intro-sound-2}, combined with \Cref{fact:data-processing},
+    implies that for all $1 \leq k \leq \ell$ we have
+    \begin{equation}\label{eq:intro-sound-3f}
+      A^{\Hide{k}}_{y_{<k},\, y^\perp_{k}} \otimes \ib \approx_\delta A^{\Hide{
+          \ell}}_{y_{<k},\, y^\perp_{k}} \otimes \ib.
+    \end{equation}
+    Equations~\eqref{eq:intro-sound-3d},~\eqref{eq:intro-sound-3e},
+    and~\eqref{eq:intro-sound-3f}, combined with \Cref{fact:data-processing},
+    then establishes the lemma statement.
+  \end{proof}
+
+  \begin{lemma}
+    \label{lem:intro-sound-induction}
+    For each $k\in \{1, 2, \ldots, \ell+1\}$, there exists a product state
+    $\ket{\ancilla_k} = \ket{\ancilla_{k,\alice}} \otimes
+    \ket{\ancilla_{k,\bob}} \in \mH_{\alice'_k} \otimes \mH_{\bob'_k}$ and, for
+    each $y_{<k} \in L_{<k}(V)$, a projective measurement $\bigl\{\aigek
+    \bigr\}$ that acts on $\mH_{\alice} \otimes \mH_{\alice'_k}$ such that the
+    following holds.
+		First, for all $y \in V$, the operator $\aigek$ acts as identity on the
+    register subspace spanned by basis vectors for the subspace $V_{<
+      k}(y_{<k})$, and as a consequence the operator
+    \begin{equation}\label{eq:intro-sound-4aa}
+      \aizk = \zLlk \otimes \aigek\;
+    \end{equation}
+    is well-defined.
+    Second, let $\strategy''_k$ be the strategy defined as follows.
+    The state is $\ket{\EPR_2}^{\otimes Q} \otimes \ket{\aux} \otimes
+    \ket{\ancilla_k}$.
+    The measurements are identical to those in $\strategy'$ defined in
+    Lemma~\ref{lem:intro-pauli-strat}, except that $\bigl\{ \ai \bigr\}$ is
+    replaced with $\bigl\{ \aizk \bigr\}$.
+    Then $\strategy''_k$ succeeds with probability at least $1-\delta$ in the
+    game $\verifier_n^\intro$.
+  \end{lemma}
+  
+  \begin{proof}
+
+    The proof is by induction on $k$ from $1$ to $\ell+1$.
+    The case $k=1$ is trivial by setting $A_{y_{\geq 1},\, a}^{\Intro,\, y_{<1}}
+    = \ai[y,\, a]$ for all $y,a$.
+    Assume that for some $k \in \{1, 2, \ldots, \ell\}$ there exist projective
+    measurements $\bigl\{\aigek \bigr\}$ for every $y_{< k}$ and a strategy
+    $\strategy''_k$ satisfying the conditions of the lemma statement.
+    We show the statement of the lemma for $k+1$.
+
+    \paragraph{Commutation with $Z$-basis measurements.}
+    We first prove that on average over $y_{< k}$, the measurement operator
+    $\aigek$, which comes from the inductive assumption, commutes with the
+    projective measurement $\{\sigma^Z_{z_k}\}$ where the outcomes $z_k$ range
+    over the factor space $V_k(y_{<k})$.
+
+    To do so, we first apply Lemma~\ref{lem:commutation-analysis} where we
+    choose the measurements ``$A$'', ``$B$'', and~``$C$'' and outcomes ``$a$'',
+    ``$b$'', and~``$c$'' in the lemma as follows:
+    \begin{gather*}
+      \text{``$A$''}: \{\aizk\}\;,\quad
+      \text{``$B$''}: \{\bs[z, \, a]\}\;,\quad
+      \text{``$C$''}: \{\z  \}\;, \\
+      \text{``$a$''}: y_{< k} \;, \quad
+      \text{``$b$''}: (y_{\geq k},a) \;, \quad
+      \text{``$c$''}: z \;.
+    \end{gather*}
+    To make sense of how the ``$B$'' POVM is indexed by ``$a$'', ``$b$'', and
+    ``$c$'' as described above, we use the following relabelling: for all
+    $(z,a)$, identify $\bs[z,\, a]$ with $\bs[y,\, a,\, z]$ where $y =
+    L(z)$.
+    Similarly, for the ``$C$'' POVM, we identify $\sigma^Z_z$ with the operator
+    $\sigma^Z_{y_{<k},\, z}$ where $y_{<k} = L_{<k}(z)$.
+    By applying Lemma~\ref{lem:intro-sound-1} to $\strategy_k''$ (the strategy
+    given by the inductive hypothesis) with ``$k$'' in
+    Lemma~\ref{lem:intro-sound-1} set to $\ell$, we have that
+    \begin{equation}
+      \label{eq:intro-sound-bsL2}
+      \aizk \otimes \ib \approx_\delta \ia \otimes \bs[y,\, a]\;
+    \end{equation}
+    where $\bs[y,\, a] = \sum_{z: L(z) = y} \bs[z,\, a]$.
+    Equations~\eqref{eq:intro-sound-1} and~\eqref{eq:intro-sound-bsL2} imply that the
+    conditions of Lemma~\ref{lem:commutation-analysis} are satisfied, and thus
+    we obtain
+    \begin{equation}\label{eq:commute-with-Z}
+      \bigl[\aizk \,,\, \z \bigr] \otimes \ib \approx_\delta 0\;
+    \end{equation}
+    where in the answer summation, $y$ is a deterministic function of $z$.
+    We now apply Lemma~\ref{lem:commutation-simplification}, choosing the
+    measurements ``$A$'', ``$B$'', ``$Q$'' and outcomes ``$a$'', ``$b$'',
+    ``$c$'' in the lemma as follows:
+    \begin{gather*}
+      \text{``$A$''}: \{\aizk\}\;,\quad
+      \text{``$B$''}: \{\z[\Llk] \otimes \z[z_k] \}\;, \quad
+      \text{``$Q$''}: \{\z[\Llk] \}\;, \\
+      \text{``$a$''}: y_{< k} \;, \quad
+      \text{``$b$''}: (y_{\geq k}, a) \;, \quad
+      \text{``$c$''}: z_k \;.
+    \end{gather*}
+    \hnote{Added in response to Bowen comments, second file, item 20} Here, we write $\z[\Llk] \otimes \z[z_k]$ to denote
+    \[
+    	\sum_{\substack{z' \in V: \\ L_{<k}(z') = y_{<k} \\ (z')^{V_k(y_{<k})} = z_k}} \sigma^Z_{z'}.
+    \]
+    We choose the Hilbert spaces ``$\mH_{\alice,a}$'' and ``$\mH_{\bob,a}$'' as
+    the register subspace $ V_{<k}(y_{<k})$, and ``$\mH_{\alice',a}$'' and
+    ``$\mH_{\bob',a}$'' as the register subspace $V_{\geq k}(y_{<k})$ tensored
+    with $\mH_{\alice''} \otimes \mH_{\bob''}$, the Hilbert space of the state
+    $\ket{\aux}$.
+    Thus for every $y_{<k}$, the state $\ket{\EPR}^{\otimes Q} \otimes
+    \ket{\aux}$ of the strategy $\strategy_k''$ can be decomposed into a tensor
+    product of a ``question state'' and an ``answer state'' as follows:
+    \[
+      \Big ( \ket{\EPR_2}_{V_{<k}(y_{<k})} \Big)_{\mH_{\alice,a} \mH_{\bob,a}}
+      \otimes \Big ( \ket{\EPR_2}_{V_{\geq k}(y_{<k})} \otimes \ket{\aux}
+      \Big)_{\mH_{\alice',a} \mH_{\bob',a}}\;.
+    \]
+
+    Let $\mu_{L_{<k}}$ denote the distribution over outcomes $y_{< k}$ generated
+    by performing the ``$Q$'' measurement on the state $\ket{\EPR}^{\otimes Q}$,
+    which is equivalent to the distribution generated by the following
+    procedure: (1) sample a uniformly random $z \in V$; (2) compute $y = L(z)$;
+    (3) return $y_{<k}$.
+    Then, since Equation~\eqref{eq:commute-with-Z} and the inductive hypothesis
+    about the structure of $A^{\Intro\,,Z_{<k}}_{y_{\leq k},\,a}$ satisfy the
+    conditions of Lemma~\ref{lem:commutation-simplification}, we obtain on
+    average over $y_{< k} \sim \mu_{L_{< k}}$
+    \begin{equation}
+      \label{eq:intro-sound-5}
+      \bigl[ \aigek \,,\, \z[z_k] \bigr] \otimes \ib \approx_\delta 0 \;.
+    \end{equation}
+    Here, the measurement outcomes $z_k$ range over $V_k(y_{<k})$.
+
+    \paragraph{Commutation with $X$-basis measurements.}
+    Next, we first prove that on average over $y_{< k}$, the measurement
+    operator $\aigek$ commutes with the projective measurement
+    $\bigl\{ \xLperpk \bigr\}$ where the
+    outcomes $y_k^\perp$ are elements of the factor space $V_k(y_{<k})$.
+  
+    We again apply Lemma~\ref{lem:commutation-analysis}, choosing the
+    measurements and outcomes in the lemma as follows:
+    \begin{gather*}
+      \text{``$A$''}: \{\aizk\}\;,\quad
+      \text{``$B$''}: \{ \br[y,\, y^\perp_k,\, a] \}\;,\quad
+      \text{``$C$''}: \{ \z[\Llk] \otimes \xLperpk \}\;, \\
+      \text{``$a$''}: y_{< k} \;, \quad
+      \text{``$b$''}: (y_{\geq k},a) \;, \quad
+      \text{``$c$''}: y_k^\perp \;.
+    \end{gather*}
+    Equations~\eqref{eq:intro-sound-4letter-before-a} (with ``$k$'' in
+    Lemma~\ref{lem:intro-sound-2} chosen to be $\ell+1$)
+    and~\eqref{eq:intro-sound-4} imply the conditions of
+    Lemma~\ref{lem:commutation-analysis}, so we obtain
+    \begin{equation}\label{eq:commute-with-some-X}
+      \Bigl[ \aizk \,,\,  \zLlk \otimes \xLperpk \Bigr] \otimes
+      \ib \approx_\delta 0\;.
+    \end{equation}
+    We then apply Lemma~\ref{lem:commutation-simplification} with the following
+    choice of measurements and outcomes:
+    \begin{gather*}
+      \text{``$A$''}: \{\aizk\}\;,\quad
+      \text{``$B$''}: \{\zLlk \otimes \xLperpk \}\;, \quad
+      \text{``$Q$''}: \{\zLlk \}\;, \\
+      \text{``$a$''}: y_{< k} \;, \quad
+      \text{``$b$''}: (y_{\geq k},a) \;, \quad
+      \text{``$c$''}: y_k^\perp \;.
+    \end{gather*}
+    The Hilbert space and state decomposition are the same as in the previous
+    invocation of Lemma~\ref{lem:commutation-simplification}.
+    Equation~\eqref{eq:commute-with-some-X} and the inductive hypothesis satisfy
+    the conditions of Lemma~\ref{lem:commutation-simplification}, and we
+    similarly obtain that on average over $y_{< k} \sim \mu_{L_{<k}}$,
+    \begin{equation}
+      \label{eq:intro-sound-6}
+      \bigl[ \aigek \,,\, \xLperpk \bigr] \otimes \ib
+      \approx_\delta 0\;,
+    \end{equation}
+
+    \paragraph{Applying the Pauli twirl.}
+    The last step is to apply the Pauli twirl to decompose the family of
+    measurements $\{\aigek \}$ into a tensor product measurement, with the first
+    part of the tensor product measuring the $k$-th linear map of $L$.
+
+    Again applying Lemma~\ref{lem:intro-sound-1} to $\strategy_k''$, and using
+    Facts~\ref{fact:data-processing} and~\ref{fact:agreement}, we obtain that
+    \begin{equation*}
+      \aizk[y_{\le k}] \otimes \ib \approx_\delta \zLlek \otimes \ib\;
+    \end{equation*}
+    which is equivalent to, by the inductive hypothesis,
+    \begin{equation}\label{eq:intro-sound-8}
+      \zLlk \otimes \aigek[y_k] \otimes \ib \approx_\delta \zLlk \otimes \zLk
+      \otimes \ib\;.
+    \end{equation}
+    Applying Lemma~\ref{lem:conditional} to Equation~\eqref{eq:intro-sound-8},
+    we conclude that
+    \begin{equation}\label{eq:consistency-equation}
+      \aigek[y_k] \otimes \ib \approx_\delta
+      \zLk \otimes \ib\;,
+    \end{equation}
+    on average over $y_{<k} \sim \mu_{L_{<k}}$.
+  
+    Now we apply Lemma~\ref{lem:mixing} with the following identification:
+    \begin{gather*}
+      \text{``$x$''}: y_{< k} \;, \quad
+      \text{``$y$''}: y_{k} \;, \quad
+      \text{``$a$''}: (y_{> k}, a) \;, \quad
+      \text{``$L_x$''}: L_{k,\, y_{<k}} \;,\\
+      \text{``$U_x$''}: V_k(y_{< k}) \;, \quad
+      \text{``$M^{x}_{y,\, a}$''}: \aigek \;, \quad
+      \text{``$M^{x,\, y}_a$''}: \aigk \;.
+    \end{gather*}
+    The ``Consistency'' condition is implied by
+    Equation~\eqref{eq:consistency-equation} and the ``Commutation'' conditions
+    are implied by Equations~\eqref{eq:intro-sound-5}
+    and~\eqref{eq:intro-sound-6}.
+    We obtain that for all $y_{\leq k}$ there exists POVM measurements $\bigl\{
+    \aigk \bigr\}$ that act as identity on the register subspace spanned by
+    basis vectors for the subspace $V_{< k}(y_{<k})$ and, on average over
+    $y_{<k} \sim \mu_{L_{<k}}$, we have
+    \begin{equation}\label{eq:intro-sound-7}
+      \aigek \otimes \ib
+      \approx_\delta \Bigl( \zLk \otimes \aigk  \Bigr)
+      \otimes \ib\;.
+    \end{equation}
+    Using the inductive assumption on the structure of $A^{\intro,\,
+      Z_{<k}}_{y,\, a} $ from~\eqref{eq:intro-sound-4aa}, we get
+    \begin{align}
+      \aizk \otimes \ib
+      & = \Bigl( \zLlk \otimes \aigek \Bigr) \otimes \ib \\
+      & \approx_\delta \bigl( \zLlek \otimes \aigk \bigr) \otimes \ib\;.
+        \label{eq:whatever}
+    \end{align}
+    where the second line follows from~\eqref{eq:intro-sound-7} and
+    Lemma~\ref{lem:conditional}.
+    By~\eqref{eq:whatever}, replacing the projective measurement $\bigl\{\aizk
+    \bigr\}$ with the POVM
+    \begin{equation*}
+      \bigl\{\zLlek \otimes \aigk \bigr\}
+    \end{equation*}
+    in the strategy $\strategy''_k$ results in a strategy that succeeds with
+    probability at least $1 - \delta$.
+    To show that $\{\aigk\}$ can furthermore be turned into a projective
+    measurement we use Naimark's theorem as formulated in~\cite[Theorem
+    5.1]{ML20}. In particular, we see that the state
+    $\ket{\ancilla'}$ it produces is a product state with no entanglement.
+    This yields a strategy $\strategy_{k+1}''$ with ancilla state
+    $\ket{\ancilla_{k+1}} = \ket{\ancilla_k}\ket{\ancilla'}$, which establishes
+    the induction hypothesis for $k+1$.
+    This completes the proof of Lemma~\ref{lem:intro-sound-induction}.
+  \end{proof}
+
+  Taking $k = \ell+1$ in Lemma~\ref{lem:intro-sound-induction} we obtain a
+  strategy $\strategy''=\strategy''_{\ell+1}$ with value~$1-\delta$ in which,
+  given question $(\Introspect, \alice)$, player~$\alice$ performs the
+  measurement
+  \begin{equation}
+    \label{eq:intro-sound-final}
+    \bigl\{ \z[{[L^\alice(\cdot)=y]}] \otimes A^{\Intro,\, y}_a \bigr\} \;,
+  \end{equation}
+  for a family of measurements $\bigl\{ A^{\Intro,\, y}_a \bigr\}$ acting on the
+  state $\ket{\EPR}_{\overline{V}} \otimes \ket{\aux} \otimes \ket{\ancilla}$
+where $\ket{\ancilla}=\ket{\ancilla_{\ell+1}}$ is unentangled.
+  An analogous argument for Player~$\bob$'s measurements shows that we may
+  additionally assume Player~$\bob$ responds to the question~$(\Introspect,
+  \bob)$ using the measurement
+  \begin{equation}
+    \label{eq:intro-sound-final-bob}
+    \bigl\{\sigma^Z_{[L^\bob(\cdot)=y]} \otimes
+    B^{\Intro,\, y}_a\bigr\}\;,  
+  \end{equation}
+  for a family of measurements $\bigl\{ B^{\Intro,\, y}_a \bigr\}$ acting on the
+  state $\ket{\EPR}_{\overline{V}} \otimes\ket{\aux} \otimes \ket{\ancilla'}$,
+  where $\ket{\ancilla'}$ is unentangled.
+  Summarizing, the strategy $\strategy''$ uses the state
+  \begin{equation*}
+    \ket{\theta} = \ket{\EPR}^{\otimes Q} \otimes \ket{\aux} \otimes
+    \ket{\ancilla} \otimes \ket{\ancilla'}\;,
+  \end{equation*}
+  and the measurements given by Equations~\eqref{eq:intro-sound-final}
+  and~\eqref{eq:intro-sound-final-bob}.
+  
+	To conclude the proof of the soundness part of the theorem we analyze
+  Item~\ref{enu:intro-game} in Figure~\ref{fig:intro-decider}.
+  The test in Item~\ref{enu:intro-game} is executed with probability
+  $\Omega(1/\ell)$, so the strategy $\strategy''$ succeeds with probability at
+  least $1 - \delta$ in that test, conditioned on the right types (here we
+  absorb factors of $O(\ell)$ into $\delta$).
+  Using~\eqref{eq:intro-sound-final} and~\eqref{eq:intro-sound-final-bob},
+  conditioned on the test being executed the distribution of the
+  part~$(y_\alice, y_\bob)$ of the players' answers in the test is exactly the
+  distribution $\mu_{\sampler, N}$ associated with game~$\verifier_N$.
+  As a result, the strategy which uses the state $\ket{\EPR}_{\overline{V}}
+  \otimes \ket{\aux} \otimes \ket{\ancilla} \otimes \ket{\ancilla'}$ and
+  measurements $ \{ A^{\Intro,\, y}_a \},\{ B^{\Intro,\, y}_a \}$ succeeds with
+  probability at least~$1- \delta$ in the game~$\verifier_N$.
+  Thus, $\val^*(\verifier_N) \geq 1- \delta$.
+  It remains to show that $\delta$ has the required form. 
+  As $\delta = \poly(\delta')$, $\delta'(\eps, R) = a' \bigl( (\log
+  R)^{a'}\eps^{b'} + (\log R)^{-b'} \bigr)$, and $R = (2^n)^\lambda$, there is a
+  constant $C \ge 1$ such that
+  \begin{equation*}
+    \begin{split}
+      \delta(\eps, n) & \le C \Bigl( a' \bigl( (\lambda n)^{a'} \eps^{b'} +
+      (\lambda n)^{-b'} \bigr) \Bigr)^{\frac{1}{C}}\\
+      & \le C (a')^{1/C} \bigl(  (\lambda n)^{a'/C} \cdot \eps^{b'/C} + (\lambda n)^{-b'/C} \bigr)\\
+      & \le a \bigl( (\lambda n)^a \cdot \eps^b + (\lambda n)^{-b} \bigr)\;,
+    \end{split}
+  \end{equation*}
+  for $a = \max \bigl\{ C (a')^{1/C}, a'/C \bigr\}$, and $b = b'/C$, where the
+  second line uses the inequality $(x+y)^{1/C} \le x^{1/C} + y^{1/C}$ for
+  $x,y>0$ and $C\ge 1$. 
+  
+  
+  This establishes the soundness part of the theorem.
+
+  To show the entanglement bound, we observe that local isometries do not change
+  the Schmidt rank of a state.
+  Define $\ket{\psi'} = \phi(\ket{\psi}) \otimes \ket{\ancilla} \otimes
+  \ket{\ancilla'}$.
+  Since the strategy $(\ket{\psi'}, \{ A^{\Intro,\, y}_a \},\{ B^{\Intro, y}_a
+  \})$ is $\delta$-close to $(\ket{\theta}, \{ A^{\Intro,\, y}_a \},\{
+  B^{\Intro,\, y}_a \})$ which has value $1 - \delta$, the strategy
+  $(\ket{\psi'}, \{ A^{\Intro,\, y}_a \},\{ B^{\Intro,\, y}_a \})$ has value at
+  least $1 - 2\delta$ in the game $\verifier_N$, and therefore the Schmidt rank
+  of $\phi(\ket{\psi})$ (and thus of $\ket{\psi}$) must be at least
+  $\Ent(\verifier_N,1 - 2\delta)$.
+  Here, we use the fact that ancilla states are product states and therefore
+  have Schmidt rank~$1$.
+  
+  Moreover, recall that $\phi(\ket{\psi})$ is $\delta$-close to
+  $\ket{\EPR_2}^{\otimes Q} \otimes \ket{\aux}$ whose Schmidt coefficients are
+  all at most $2^{-Q/2}$.
+  For any bipartite state $\ket{a}$ with Schmidt rank at most $R$ and $\ket{b}$
+  whose Schmidt coefficients are all at most $\beta$, it follows from the
+  Cauchy-Schwarz inequality that $|\langle a | b \rangle|^2 \leq R \beta^2$.
+  Therefore the Schmidt rank of $\phi(\ket{\psi})$ (and thus of $\ket{\psi}$) is
+  at least
+  \[
+  	\left (1 - \delta \right)^2 \cdot 2^{Q} \geq \left
+      (1 - \delta \right)^2 \cdot 2^{N^\lambda}\;,
+  \]
+  where we used that $Q = M \log q \geq R$ (using the canonical parameter
+  settings of Definition~\ref{def:introparams}) and $\delta \geq \|
+  \phi(\ket{\psi}) - \ket{\theta} \|^2 = 2 - 2\Re \bra{\theta}
+  \phi(\ket{\psi})$.
+  Combining the two lower bounds on the Schmidt rank of $\ket{\psi}$ shows the
+  desired lower bound on $\Ent(\tvint_n,1 - \eps)$.
+\end{proof}
+
+ 

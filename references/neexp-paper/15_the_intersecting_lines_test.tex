@@ -1,0 +1,316 @@
+\section{The intersecting lines test}\label{sec:intersection}
+
+The introspective low-degree test forces a prover to sample a point from a register and return the evaluation of a global function at that point.
+In our eventual protocol, we will want the prover to use the same global function to answer point queries sampled from \emph{multiple} different registers.
+In this section, we design a game which allows us to ``transfer" global functions used from one register  to another.
+We keep in mind the following picture:
+\begin{equation*}
+\ket{\psi} = \ket{\mathrm{EPR}^n_q}_{\reg{1}} \otimes \ket{\mathrm{EPR}^n_q}_{\reg{2}} \otimes \ket{\mathrm{aux}}_{\reg{aux}}.
+\end{equation*}
+We view register~$1$ as the register with the global function
+and register~$2$ as the register we would like to transfer this global function to.
+
+To accomplish this, we introduce a new test called the ``intersecting lines test".
+This involves performing two introspective line-versus-point low-degree tests.
+The first uses register~$1$ as its point register and register~$2$ as its slope register.
+This gives us a points prover who samples~$\bu$ from register~$1$ and returns a label on it
+and a line prover who samples $\bv$ from register~$2$ and returns a function on the line $\{\bu + \lambda \bv\}$,
+and we know that if the points prover labels their point using a low-degree polynomial~$g$, 
+then the line prover must label their line with the same polynomial~$g$.
+The second low-degree test uses register~$2$ as its point register and register~$1$ as its slope register.
+This gives a second line prover who returns a function on the line $\{\bv + \lambda \bu\}$.
+Noting that the point $\bu + \bv$ is contained in both line provers' lines,
+we can check consistency between their functions
+by comparing them on this point,
+forcing the second line prover to label their line using~$g$ as well.
+This then entails that the second line prover from the second low-degree test must also 
+label their point~$\bv$ using~$g$.
+Thus, we have successfully ``transferred" the function~$g$ from the first register to the second.
+
+In \Cref{sec:intersecting-lines}, we first introduce the intersecting lines test and prove soundness.
+Following that, in \Cref{sec:introspective-lines-transfer}
+we introduce an introspective version of this test which will later be used in our $\neexp$ protocol.
+
+\subsection{The intersecting lines test}\label{sec:intersecting-lines}
+
+\begin{definition}[Intersecting lines test]
+Let $n, d > 0$ be integers, and let~$q$ be a power of~$2$.
+The \emph{intersecting lines test}, denoted $\game_{\mathrm{intersect}}(n, q, d)$, is defined as follows.
+Sample $\bu, \bv$ uniformly at random from $\F_q^n$,
+and let $\bell$ and $\bell'$ be the two lines
+$\bell := \{\bu + \lambda \bv : \lambda \in \F_q\}$
+and $\bell' := \{\bv + \lambda \bu : \lambda \in \F_q\}$.
+The test is performed as follows.
+\begin{itemize}
+\itemsep -.5pt
+\item[$\circ$] The line $\bell$ and~$\bv$ are given to Alice, who responds with a degree-$d$ polynomial $\boldf: \bell \rightarrow \F_q$.
+\item[$\circ$] The line $\bell'$ and~$\bu$ are given to Bob, who responds with a degree-$d$ polynomial $\boldf':\bell' \rightarrow  \F_q$.
+\end{itemize}
+Alice and Bob pass the test if $\boldf(\bu + \bv) = \boldf'(\bu + \bv)$.
+\end{definition}
+
+We begin by showing that although Bob knows~$\bu$, since he doesn't know~$\bv$,
+the point $\bu + \bv$ looks like a uniform point in $\bell'$ to him.
+
+\begin{fact}\label{fact:easy-peasy-lemon-peasy}
+Conditioned on $\bell'$ and~$\bu$, the point~$\bu+\bv$ is distributed as a uniformly random element in $\bell'$.
+\end{fact}
+\begin{proof}
+Let $\bw$ be a point in $\F_q^n$ such that $\bell' = \{\bw + \lambda \bu : \lambda \in \F_q\}$. 
+Then for any $c \in \F_q$, $\bell'$ is also equal to the set
+$\{(\bw + c\bu) + (\lambda-c) \bu : \lambda \in \F_q\}$.
+Hence, $\bv$ is equally likely to be any element in the set $\{\bw + c \bu : c \in \F_q\}$,
+and therefore so is $\bu + \bv$.
+Since this set is also equal to $\bell'$, this proves the fact.
+\end{proof}
+
+We will be interested in the case when Alice responds using a global function~$g:\F_q^n \rightarrow \F_q$,
+always setting $\boldf = g|_{\bell}$.
+In this case, the following lemma shows that to succeed with high probability,
+Bob must usually play the same global function as Alice.
+
+\begin{lemma}\label{lem:intersecting-lines}
+Let $(\psi, M)$ be a POVM strategy for the intersecting lines game
+with value $1-\eps$.
+Suppose further that there is a measurement $\{G_g\}_g$ in $\mathrm{PolyMeas}(n,d,q)$ such that
+$M^{\ell, v}_{f} = G_{[g|_{\ell}=f]}$. Then
+\begin{equation*}
+(M^{\ell', u}_{f})_{\reg{Alice}} \otimes I_{\reg{Bob}} \consistency_{\eps + d/q} I_{\reg{Alice}} \otimes (G_{[g|_{\ell'}=f]})_{\reg{Bob}}.
+\end{equation*}
+\end{lemma}
+\begin{proof}
+Success on the test implies that
+\begin{equation*}
+(G_{[g(u + v) = \nu]})_{\reg{Alice}} \otimes I_{\reg{Bob}}
+\consistency_{\eps} I_{\reg{Alice}} \otimes (M^{\ell', u}_{[f(u + v) = \nu]})_{\reg{Bob}}.
+\end{equation*}
+But by \Cref{fact:easy-peasy-lemon-peasy}, conditioned on~$\bell'$ and~$\bu$, $\bu + \bv$
+is distributed as a uniformly random point in~$\bell'$.
+As a result, if we let~$\bw$ be a uniformly random point in~$\bell'$, then
+\begin{equation*}
+(G_{[g(w) = \nu]})_{\reg{Alice}} \otimes I_{\reg{Bob}}
+\consistency_{\eps} I_{\reg{Alice}} \otimes (M^{\ell', u}_{[f(w) = \nu]})_{\reg{Bob}}.
+\end{equation*}
+The lemma then follows from \Cref{prop:same-on-point-same-on-subspace}.
+\end{proof}
+
+\subsection{The introspective intersecting lines test}\label{sec:introspective-lines-transfer}
+
+Now we introduce the introspective intersecting lines test.
+This will be an introspective version of the intersecting lines test.
+
+\begin{definition}
+Let $n, d> 0$ be integers, let~$q$ be a power of~$2$, and let $\lambda = (2, n, q)$ be register parameters.
+The \emph{introspective intersecting lines test}, denoted $\game_{\mathrm{IntroIntersect}}(\lambda, d)$,
+is a $\lambda$-register game involving two registers, named ``$1$" and ``$2$", and a possible third auxiliary register.
+It involves two line-versus point low-degree tests, instantiated as follows.
+\begin{itemize}
+\item[$\circ$] Let $\calG_1$ be a copy of $\game_{\mathrm{IntroLowDeg}}(\lambda, d)$
+		using register~$1$ as the point register and register~$2$ as the slope register.
+	Write $\mathsf{Lines}_1$ for the surface prover in $\calG_1$ and write $\mathsf{Points}_1$ for the points prover.
+\item[$\circ$] Let $\calG_2$ be a copy of $\game_{\mathrm{IntroLowDeg}}(\lambda, d)$
+		using register~$2$ as the point register and register~$1$ as the slope register.
+	Write $\mathsf{Lines}_2$ for the surface prover in $\calG_2$ and write $\mathsf{Points}_2$ for the points prover.
+\end{itemize}
+Then $\game_{\mathrm{IntroIntersect}}(\lambda, d)$ is defined in \Cref{fig:big-transfer}.
+\end{definition}
+
+{
+\floatstyle{boxed} 
+\restylefloat{figure}
+\begin{figure}
+With probability~$\tfrac{1}{4}$ each, perform one of the following four tests.
+\begin{enumerate}
+	\item \textbf{Low degree test 1:} Play $\game_1$.
+	\item \textbf{Low degree test 2:} Play $\game_2$.
+	\item \textbf{Intersecting lines test:} Flip an unbiased coin $\bb \sim \{0, 1\}$.
+		Assign the first role to Player~$\bb$ and the second role to Player~$\overline{\bb}$.
+		\begin{itemize}
+		\item[$\circ$] $\mathsf{Lines}_1$: Receive $\bell$, $\bv$, $\boldf:\bell\rightarrow \F_q$.
+		\item[$\circ$] $\mathsf{Lines}_2$: Receive $\bell'$, $\bu$, $\boldf':\bell'\rightarrow \F_q$.
+		\end{itemize}
+		Accept if $\bell$ and $\bell'$ both contain $\bu + \bv$ and $\boldf(\bu + \bv) = \boldf'(\bu + \bv)$.
+	\item \textbf{Consistency test:} Assign the first role to Player~$1$ and the second role to Player~$2$.
+		\begin{itemize}
+		\item[$\circ$] $\mathsf{Points}_1$: Receive $\bnu$.
+		\item[$\circ$] $\mathsf{Points}_1$: Receive $\bnu'$.
+		\end{itemize}
+		Accept if $\bnu = \bnu'$.
+	\end{enumerate}
+	\caption{The game $\game_{\mathrm{IntroIntersect}}(\lambda, d)$.\label{fig:big-transfer}}
+\end{figure}
+}
+
+\begin{remark}
+We remark that although the test runs two separate introspective low-degree tests,
+we cannot from these alone conclude that either of the points provers answers according to a global function.
+This is because we use the lines $(k=1)$ introspective low-degree test,
+whereas from \Cref{thm:big-planes-low-degree} we only know soundness for the planes $(k=2)$ introspective low-degree test.
+Hence, proving soundness for the introspective intersecting lines test will require an additional assumption,
+i.e.\ that one of the two points provers already answers queries according to a global function.
+\end{remark}
+
+Our main result about the introspective intersecting lines test is the following theorem.
+
+\begin{theorem}\label{thm:big-transfer}
+Let $n, d> 0$ be integers, let~$q$ be a power of~$2$, and let $\lambda = (2, n, q)$ be register parameters.
+Write $\game := \game_{\mathrm{IntroIntersect}}(\lambda, d)$.
+Write $A$ for the point prover's measurement in~$\game_1$,
+and write~$B$ for the point prover's measurement in~$\game_2$.
+\begin{itemize}
+\item[$\circ$] \textbf{Completeness:}
+		Suppose there is a degree-$d$ polynomial $g:\F_q^{n}\rightarrow \F_q$ such that
+		\begin{equation*}
+			A_{u, \nu} = \tau_u^Z \otimes I_{\reg{2}} \otimes I_{\reg{aux}} \cdot \bone[\nu = g(u)],
+			\quad
+			B_{v, \nu} = I_{\reg{1}} \otimes \tau_v^Z \otimes I_{\reg{aux}} \cdot \bone[\nu = g(v)].
+		\end{equation*}
+		Then there is a value-$1$ $\lambda$-register real commuting EPR strategy strategy for $\game$
+		extending~$A$ and~$B$.
+\item[$\circ$] \textbf{Soundness:}
+		There exists a function $\delta(\eps) = \mathrm{poly}(\eps, d/q)$ such that the following holds.
+		Let $\calS$ be a projective $\lambda$-register strategy which passes~$\game$ with probability $1-\eps$.
+		Further, suppose that there exists a projective measurement
+		$\{G_g\}_g$ in $\mathrm{PolyMeas}(n, d, q)$ acting on the auxiliary register such that
+		\begin{equation*}
+		A_{u, \nu} = \tau_u^Z \otimes I_{\reg{2}} \otimes G_{[g(u)= \nu]}.
+		\end{equation*}
+		Then
+		\begin{equation*}
+		(B_{v, \nu})_{\reg{Alice}} \otimes I_{\reg{Bob}}
+			\approx_{\delta(\eps)} (I_{\reg{1}} \otimes \tau_v^Z \otimes G_{[g(v)=\nu]} )_{\reg{Alice}}\otimes I_{\reg{Bob}}.
+		\end{equation*}
+\end{itemize}
+Furthermore,
+\begin{equation*}
+\qlength{\game} = O(1), \quad
+\alength{\game} = O(n \log(q) + d \log(q)),
+\end{equation*}
+\begin{equation*}
+\qtime{\game} = O(1), \quad
+\atime{\game} = \poly(n \log(q), d \log(q)).
+\end{equation*}
+\end{theorem}
+
+
+\begin{proof}[Proof of \Cref{thm:big-transfer}.]
+The runtime and communication complexities follows from the $k=1$ case of the low-degree test.
+The completeness follows immediately from the completeness of the introspective low-degree test.
+
+Now, we show soundness.
+Write $C$ for the line prover's measurement in~$\game_1$,
+and write~$E$ for the line prover's measurement in~$\game_2$.
+We can write the point provers' measurements as
+\begin{equation*}
+A_{u, \nu} = \tau_u^Z \otimes I_{\reg{2}} \otimes G_{[g(u)=\nu]},
+\qquad B_{v, \nu} = I_{\reg{1}} \otimes \tau_v^Z \otimes B^v_\nu.
+\end{equation*}
+The strategy passes the consistency test with probability $1-\delta(\eps)$. As a result,
+\begin{equation*}
+A_{u, \nu} \otimes I_{\reg{Bob}} \consistency_{\delta(\eps)} I_{\reg{Alice}} \otimes A_{u, \nu}.
+\end{equation*}
+By \Cref{fact:introspective-outrospective}, this implies that
+\begin{equation}\label{eq:to-use-at-the-very-end-when-you-least-expect-it}
+G_{[g(u)=\nu]} \otimes I_{\reg{Bob}} \consistency_{\delta(\eps)} I_{\reg{Alice}} \otimes G_{[g(u)=\nu]}
+\end{equation}
+on state~$\ket{\mathrm{aux}}$ and the uniform distribution on $\F_q^n$.
+By \Cref{fact:specialize-the-simeq}, this implies that
+\begin{equation}\label{eq:dunno-what-to-name-this-honestly}
+G_{[g|_{\ell}=f]} \otimes I_{\reg{Bob}} \consistency_{\delta(\eps)} I_{\reg{Alice}} \otimes G_{[g|_{\ell}=f]},
+\end{equation}
+where $\ell$ is distributed as $\bell = \{\bu + \lambda \bv : \lambda \in \F_q\}$ for uniformly random $\bu, \bv \in \F_q^n$.
+
+Next, the strategy passes both introspective low-degree tests $\game_1$ and $\game_2$ with probability~$1-\delta(\eps)$.
+By~\Cref{thm:big-planes}, this implies measurements $\{C^{\ell,v}_f\}$ and $\{E^{\ell', u}_{f'}\}$ on the auxiliary register such that
+\begin{equation}\label{eq:doggone-it-one}
+(C_{\ell, v, f})_{\reg{Alice}} \otimes I_{\reg{Bob}}
+\approx_{\delta(\eps)} \left(\Pi^v_\ell \otimes \tau_v^Z \otimes C^{\ell,v}_f\right)_{\reg{Alice}} \otimes I_{\reg{Bob}},
+\end{equation}
+\begin{equation}\label{eq:doggone-it-two}
+(E_{\ell', u, f'})_{\reg{Alice}} \otimes I_{\reg{Bob}}
+\approx_{\delta(\eps)} \left(\tau_u^Z \otimes \Pi_{\ell'}^u \otimes E^{\ell',u}_{f'}\right)_{\reg{Alice}} \otimes I_{\reg{Bob}}.
+\end{equation}
+By \Cref{fact:approx-delta-game-value}, we can assume \Cref{eq:doggone-it-one} holds with equality, incurring a loss of only~$\delta(\eps)$ in the game value. (We will do the same for \Cref{eq:doggone-it-two} later.)
+
+The strategy is now in a form that allows us to apply \Cref{lem:big-cross-check}
+to the introspective cross-check in $\game_1$.
+This implies that the measurements $G_{[g(u) = \nu]}$ and $C^{\ell, v}_f$ give a good strategy for the line-versus point test. In other words,
+\begin{equation*}
+C^{\ell,v}_{[f(u) = \nu]} \otimes I_{\reg{Bob}} \consistency_{\delta(\eps)} I_{\reg{Alice}} \otimes G_{[g(u)=\nu]}.
+\end{equation*}
+on state $\ket{\mathrm{aux}}$. By \Cref{prop:same-on-point-same-on-subspace}, this implies that
+\begin{equation*}
+C^{\ell,v}_{f} \otimes I_{\reg{Bob}} \consistency_{\delta(\eps)} I_{\reg{Alice}} \otimes G_{[g|_{\ell} = f]}.
+\end{equation*}
+Via~\Cref{eq:dunno-what-to-name-this-honestly}, this implies
+\begin{equation*}
+C^{\ell,v}_{f} \otimes I_{\reg{Bob}}
+\approx_{\delta(\eps)} I_{\reg{Alice}} \otimes G_{[g|_{\ell} = f]}
+\approx_{\delta(\eps)} G_{[g|_{\ell} = f]} \otimes I_{\reg{Bob}}.
+\end{equation*}
+As a result, by \Cref{fact:introspectivize-it},
+\begin{equation*}
+(C_{\ell, v, f})_{\reg{Alice}} \otimes I_{\reg{Bob}} \approx_{\delta(\eps)} (\Pi_{\ell}^v \otimes \tau_v^Z \otimes G_{[g|_{\ell}=f]})_{\reg{Alice}} \otimes I_{\reg{Bob}}.
+\end{equation*}
+By assumption, the right-hand side is projective.
+As a result, by \Cref{fact:approx-delta-game-value}, we can assume this expression holds with equality, incurring a loss of only~$\delta(\eps)$ in the game value.
+Following this, we apply \Cref{fact:approx-delta-game-value} again to assume \Cref{eq:doggone-it-two} holds with equality.
+
+The distribution given by on $(\ell, v)$ and $(\ell', u)$ when we measure with~$C$ and~$E$ is exactly
+the question distribution of the (non-introspective) intersecting lines test.
+As a result, \Cref{fact:introspective-outrospective} implies that
+the measurements $G_{[g_{\ell} = f]}$ and $E^{\ell', u}_{f'}$ pass the intersecting lines test with probability $1-\delta(\eps)$.
+In other words,
+\begin{equation*}
+E^{\ell',u}_{[f'(u+v) = \nu]} \otimes I_{\reg{Alice}}
+\consistency_{\delta(\eps)} I_{\reg{Bob}} \otimes G_{[g(u+v) = \nu]}.
+\end{equation*}
+on state $\ket{\mathrm{aux}}$.
+Then by~\Cref{lem:intersecting-lines}, 
+\begin{equation*}
+E^{\ell',u}_{f'} \otimes I_{\reg{Bob}}
+\consistency_{\delta(\eps)} I_{\reg{Alice}} \otimes G_{[g|_{\ell'} = f']}.
+\end{equation*}
+Via~\Cref{eq:dunno-what-to-name-this-honestly}, this implies
+\begin{equation*}
+E^{\ell',u}_{f'} \otimes I_{\reg{Bob}}
+\approx_{\delta(\eps)} I_{\reg{Alice}} \otimes G_{[g|_{\ell} = f']}
+\approx_{\delta(\eps)} G_{[g|_{\ell} = f']} \otimes I_{\reg{Bob}}.
+\end{equation*}
+Thus, \Cref{fact:introspectivize-it} implies that
+\begin{equation*}
+(E_{\ell', u, f'})_{\reg{Alice}} \otimes I_{\reg{Bob}}
+\approx_{\delta(\eps)} \left(\tau_u^Z \otimes \Pi_{\ell}^u \otimes G_{[g|_{\ell'} = f']}\right)_{\reg{Alice}} \otimes I_{\reg{Bob}}.
+\end{equation*}
+By assumption, the right-hand side is projective.
+As a result, by \Cref{fact:approx-delta-game-value}, we can assume this expression holds with equality, incurring a loss of only~$\delta(\eps)$ in the game value.
+
+The strategy is now in a form that allows us to apply \Cref{lem:big-cross-check}
+to the introspective cross-check in $\game_2$.
+This implies that the measurements $B^v_{\nu}$ and $G_{[g|_{\ell'}(v) = \nu]} = G_{[g(v) = \nu]}$  give a good strategy for the line-versus-point low-degree test. In other words,
+\begin{equation*}
+B^v_{\nu} \otimes I_{\reg{Bob}} \consistency_{\delta(\eps)} I_{\reg{Alice}} \otimes G_{[g(v)=\nu]}.
+\end{equation*}
+on state $\ket{\mathrm{aux}}$.
+Via~\Cref{eq:to-use-at-the-very-end-when-you-least-expect-it}, this implies
+\begin{equation*}
+B^{v}_{\nu} \otimes I_{\reg{Bob}}
+\approx_{\delta(\eps)} I_{\reg{Alice}} \otimes G_{[g(v) = \nu]}
+\approx_{\delta(\eps)} G_{[g(v) = \nu]} \otimes I_{\reg{Bob}}.
+\end{equation*}
+As a result, by \Cref{fact:introspectivize-it},
+\begin{equation*}
+(B_{v, \nu})_{\reg{Alice}} \otimes I_{\reg{Bob}} \approx_{\delta(\eps)} (I_{\reg{1}} \otimes \tau_v^Z \otimes G_{[g(v) = \nu]})_{\reg{Alice}} \otimes I_{\reg{Bob}}.
+\end{equation*}
+This completes the proof of the theorem.
+\end{proof}
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End:
+%%%---------- close: big-transfer
+
+%%%%%%%%%%% jump to big-neexp-protocol
+%%%---------- open: big-neexp-protocol
+%!TEX root = main.tex
+

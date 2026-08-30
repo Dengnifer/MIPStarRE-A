@@ -1,0 +1,290 @@
+\section{Register overview}\label{sec:register-overview}
+
+In this part, we implement the quantum registers.
+Our goal is force Alice and Bob to share a state of the following form:
+\newcommand{\attemptedwidth}{1cm}
+\begin{center}
+\begin{tabular}{|K{\attemptedwidth}|K{\attemptedwidth}|K{\attemptedwidth}|K{\attemptedwidth}|K{\attemptedwidth}|K{.5cm}|K{\attemptedwidth}|}
+\cline{1-2}\cline{4-5}\cline{7-7}
+$r_1$ & $r_2$ & $\cdots$ & $r_{k-1}$ & $r_k$ & $\otimes$ & $\mathrm{aux}$\\
+\cline{1-2}\cline{4-5}\cline{7-7}
+\end{tabular}~,
+\end{center}
+in which each register $r_i$ contains an EPR state,
+and $\mathrm{aux}$ is a symmetric auxiliary state.
+In addition, we want the verifier to be able to (i) force
+the provers to perform Pauli basis queries on some of these registers and report back the outcomes
+and (ii) ``hide" the remaining registers from the provers so that they do not measure them at all.
+
+\subsection{Definitions}\label{sec:protocol-defs}
+
+In this section,
+we will begin by defining quantum registers
+for \emph{nonuniform} games.
+Defining registers for uniform games~$\game$ is a little more
+complicated because we allow the number and size of registers for $\game(\mathsf{input})$
+to depend on $\mathsf{input}$.
+We detail this below in \Cref{sec:uniform-registers}.
+
+\begin{definition}\label{def:register}
+Let $k \geq 0$ be an integer, and let $n = (n_1, \ldots, n_k)$ and $q = (q_1, \ldots, q_k)$ be $k$-tuples of integers.
+A \emph{$(k, n, q)$-register game} $\game$ is defined as follows.
+\begin{itemize}
+\itemsep -.5pt
+\item[$\circ$] Questions~$x$ are formatted into two blocks $x = (x_1, x_2)$. The first block contains a list of~$k$ Pauli basis queries
+			$x_1 = (W_1, \ldots, W_k)$, where each $W_i \in \{X, Z, \hideq, \noop\}$.
+\item[$\circ$] Answers~$a$ are formatted into two blocks $a = (a_1, a_2)$. The first block contains a list of answers to the Pauli basis queries $a_1 = (u_1, \ldots, u_k)$.
+			Here each $u_i  \in \F_{q_i}^{n_i} \cup \{\varnothing\}$.
+\end{itemize}
+An \emph{$(k, n, q)$-register strategy} $\calS$ is defined as follows.
+\begin{itemize}
+\itemsep -.5pt
+\item[$\circ$] Alice and Bob share a state
+\begin{equation*}
+\ket{\psi} = \ket{r_1} \otimes \cdots \otimes \ket{r_k} \otimes \ket{\mathrm{aux}}.
+\end{equation*}
+Here, $\ket{r_i} = \ket{\mathrm{EPR}_{q_i}^{n_i}}$ for each~$i$, and $\ket{\mathrm{aux}}$ is an arbitrary symmetric shared state.
+\item[$\circ$] Given a question $x = (x_1, x_2)$ with first block $x_1 = (W_1, \ldots, W_k)$, Alice and Bob act as follows.
+	Let $i \in [k]$.
+	\begin{itemize}
+	\item If $W_i \in \{X, Z\}$, they measure $\tau^{W}$ on the $i$-th EPR register and set $u_i$ to be the outcome.
+	\item If $W_i \in \{\hideq, \noop\}$, they set $u_i = \varnothing$.
+	\end{itemize}
+	Introduce the notation $\tau_{\varnothing}^W = I$ for $W \in \{\hideq, \noop\}$.
+	We can write their measurement as
+	\begin{equation}\label{eq:in-math}
+		M^{x_1, x_2}_{a_1} = \tau^{W_1}_{u_1} \otimes \cdots \otimes \tau^{W_k}_{u_k} \otimes I_{\reg{aux}}.
+	\end{equation}
+	To produce the second part of their answer~$a_2$, Alice and Bob can measure any part of their state except the EPR registers which have been ``hidden".	
+	This entails the following: let $S = \{i \mid W_i = \hideq\}$.  Then for any answer~$a$, the corresponding POVM acts as follows:
+	\begin{equation}\label{eq:hide-coords-in-S}
+	M_a^x = M_{\overline{S}} \otimes I_{S}.
+	\end{equation}
+	Here, $I_{S}$ is the identity matrix on the EPR registers in~$S$,
+	whereas $M_{\overline{S}}$ is a POVM acting on the EPR registers in~$\overline{S}$ as well as the state~$\ket{\mathrm{aux}}$.
+\end{itemize}
+We define $\valreg{k,n,q}{\game}$ to be the maximum over $\valstrat{\game}{\calS}$, where $\calS$ is any $(k, n, q)$-register strategy.
+\end{definition}
+
+The~$X$ and~$Z$ questions specify the corresponding Pauli basis measurement,
+and the~$\hideq$ question specifies that the register is to be hidden.
+The~$\noop$ question is a ``no-op" and does not restrict Alice and Bob at all, other than making them respond with the ``no-op" answer $\varnothing$.
+Thus, unlike with the data hiding question, they are allowed to measure the register as they see fit.
+This will be useful later when we want Alice and Bob to measure both~$X$ \emph{and}~$Z$ observables on the same register.
+
+In designing our compiler,
+it will be convenient to define a set of strategies called ``semiregister strategies".
+These will be strategies which are intermediate between $(k-1)$-register strategies and $k$-register strategies
+in the sense that they have Pauli basis queries implemented on the final ($k$-th) register but not data hiding queries.
+These are defined as follows.
+
+\begin{definition}
+A \emph{$(k, n, q)$-semiregister strategy} is defined just as a $(k, n, q)$-register strategy, with the following modification:
+the set~$S$ used in \Cref{eq:hide-coords-in-S} is changed to be $S = \{i \neq k \mid W_i = \hideq\}$.
+We define $\valsemi{k,n,q}{\game}$ to be the maximum over $\valstrat{\game}{\calS}$, where $\calS$ is any $(k, n, q)$-semiregister strategy.
+\end{definition}
+\noindent
+Thus, querying the $k$-th register of a semiregister strategy with
+a~$\hideq$ is the same as querying it with a~$\noop$.
+
+The following lemma shows that we can restrict to \emph{projective}
+register strategies without loss of generality.
+\begin{lemma}\label{lem:proj-suffices}
+  Let $\calS$ be a $(k, n,q)$-register strategy. Then there exists a
+  $(k,n,q)$-register strategy $\calS'$ in which all measurements are
+  projective, and which produces the same bipartite correlation as $\calS$.
+\end{lemma}
+\begin{proof}
+  Start with the strategy $\calS$, and let the measurements be denoted
+  $M^{x_1, x_2}_{a_1, a_2}$. From the definition of register
+  strategies, we know that for every set of questions $x_1, x_2$, the
+  corresponding measurement can be written as a product
+  \[ M^{x_1, x_2}_{a_1,a_2} = (\tau^{W_{x_1}}_{a_1})_{S} \ot (A^{x_1, x_2, a_1}_{a_2})_{\ol{S}}, \]
+  where $S$ is the set of registers which receive a Pauli basis query
+  in the set $X, Z, H$, $\ol{S}$ is its complement, and the operators
+  $\{A^{x_1, x_2, a_1}_{a_2}\}$  form valid POVMs with outcomes $a_2$
+  for every choice of $x_1, x_2, a_1$.
+  We will apply Naimark's theorem~\Cref{thm:naimark} using the
+  universal auxiliary state $\ket{\rmaux}$ to the $A$ operator to produce projectors
+  $A'^{x_1, x_2, a_1}_{a_2}$. Using these, we define a projective measurement
+  \[ M'^{x_1, x_2}_{a_1, a_2} = (\tau^{W_{x_1}}_{a_1})_{S} \ot
+    (A'^{x_1, x_2, a_1}_{a_2})_{\ol{S}}. \]
+  It is not hard to see that $M'$ and $\ket{\rmaux}$ form a valid
+  Naimark dilation of $M$.
+  Let $\calS'$ be the strategy $\calS$ with the shared state
+  $\ket{\psi}$ replaced by $\ket{\psi} \ot \ket{\rmaux_A} \ot
+  \ket{\rmaux_B}$ and the measurements $M$ replaced by $M'$. By
+  construction, $\calS'$ is a projective strategy. Further,
+  from~\Cref{cor:bipartite-naimark}, it follows that the bipartite
+  correlations produced by the strategies $\calS'$ and $\calS$ are the same.
+\end{proof}
+\subsection{Results}\label{sec:register-results}
+
+The key elements of our compiler are two new nonlocal games
+called the Pauli basis test and the data hiding game.
+The Pauli basis test ensures that the provers share an EPR state and honestly answer Pauli basis queries to this state.
+The data hiding game allows us to ``hide" this state from the provers, ensuring that they do not use this register unless we ask them to.
+
+Our compiler operates a register at a time and involves two subroutines, $\calC_{k \rightarrow \mathrm{semi}}$ and $\calC_{\mathrm{semi}\rightarrow k-1}$.
+Given a $k$-register game, $\calC_{k\rightarrow \mathrm{semi}}$ produces a $k$-semiregister game.
+To do so, it removes the guarantee that the provers data hide the $k$-th register and replaces it by playing the data hiding game on this register.
+Thus, although the provers are no longer forced to hide the $k$-th register, they will have to do so anyway if they want to pass the data hiding game.
+Similarly, given a $k$-semiregister game, $\calC_{\mathrm{semi}\rightarrow k-1}$ produces a $(k-1)$-register game.
+To do so, it removes the guarantee that the provers have a $k$-th EPR register and replaces it by playing the Pauli basis test.
+Thus, by alternating these two subroutines, we can compile a $k$-register game into a $0$-register game, i.e.\ a general game.
+
+
+Before giving the properties of the Pauli basis compiler, we will need two definitions.
+
+\begin{definition}
+Given a string $x = (x_1, \ldots, x_k)$ and an integer $0 \leq \ell \leq k$, write $\shorten{x}{\ell} := (x_1, \ldots, x_\ell)$.
+We extend this to register parameters $\tau = (k, n, q)$ by setting 
+$\shorten{\tau}{\ell} := (\ell, \shorten{n}{\ell}, \shorten{q}{\ell})$.
+Thus, $\shorten{\tau}{\ell}$ is the register parameters for the first~$\ell$ registers of~$\tau$.
+\end{definition}
+
+\begin{definition}
+Let~$n$ and~$q$ be integers and~$\eta$ be a real number. We say they \emph{satisfy the Pauli basis condition} if
+\begin{equation*}
+q = 2^t,\qquad
+\frac{1}{\mathrm{\poly}(n)} \leq \eta \leq \frac{1}{2},
+\qquad \frac{64 \log(n)^2}{\eta^2} \leq q \leq \poly(n).
+\end{equation*}
+\end{definition}
+
+The following theorem describes the Pauli basis compiler.
+
+\begin{theorem}\label{theorem:semi-to-k-1-layer}
+Let $\register = (k, n, q)$, and let $n_k$, $q_k$, and $\eta$ satisfy the Pauli basis condition.
+Suppose $\game_{\mathrm{semi}}$ is a $\register$-semiregister game,
+and consider the $\shorten{\register}{k-1}$-register game $\game_{k-1} = \calC_{\mathrm{semi} \rightarrow (k-1)}(\game_{\mathrm{semi}})$.
+\begin{itemize}
+\item[$\circ$] \textbf{Completeness:} Suppose there is a value-$1$ $\register$-semiregister strategy for $\game_{\mathrm{semi}}$ which is also a real commuting EPR strategy.
+	Then there is a value-$1$ $\shorten{\register}{k-1}$-register strategy for $\game_{k-1}$ which is also a real commuting EPR strategy.
+\item[$\circ$] \textbf{Soundness:} If $\valreg{\shorten{\register}{k-1}}{\game_{k-1}}\geq 1-\eps$ then $\valsemi{\register}{\game_{\mathrm{semi}}} \geq 1 -\delta(\eps)$, where $\delta(\eps) = \mathrm{poly}(\eps, \eta)$.
+\end{itemize}
+Furthermore,
+\begin{align*}
+\qtime{\game_{k-1}} &= \qtime{\game_{\mathrm{semi}}} + O(\log(n_k)), \\
+\qlength{\game_{k-1}} &= \qlength{\game_{\mathrm{semi}}} + O(\log(n_k)),  \\
+\atime{\game_{k-1}} &= \atime{\game_{\mathrm{semi}}} + \poly(n_k),\\
+\alength{\game_{k-1}} &= \alength{\game_{\mathrm{semi}}} + O(n_k \cdot \log \log(n_k)).
+\end{align*}
+\end{theorem}
+
+The following theorem describes the data hiding compiler.
+
+\begin{theorem}\label{theorem:k-to-semi-layer}
+Suppose $\game_k$ is a $(k, n, q)$-register game,
+and consider the $(k, n, q)$-semiregister game $\game_{\mathrm{semi}} = \calC_{k \rightarrow \mathrm{semi}}(\game_k)$.
+\begin{itemize}
+\item[$\circ$] \textbf{Completeness:} 
+	Suppose there is a value-$1$ $(k,n,q)$-register strategy for $\game_{k}$ which is also a real commuting EPR strategy.
+	Then there is a value-$1$ $(k,n,q)$-semiregister strategy for $\game_{\mathrm{semi}}$ which is also a real commuting EPR strategy.
+\item[$\circ$] \textbf{Soundness:} If $\valsemi{k,n,q}{\game_{\mathrm{semi}}} \geq 1-\eps$ then $\valreg{k,n,q}{\game_{k}} \geq 1 -\delta(\eps)$, where $\delta(\eps) = \mathrm{poly}(\eps)$.
+\end{itemize}
+Furthermore,
+\begin{equation*}
+\qtime{\game_{\mathrm{semi}}} = O(\qtime{\game_k}), \quad
+\atime{\game_{\mathrm{semi}}} = O(\atime{\game_k}),
+\end{equation*}
+\begin{equation*}
+\qlength{\game_{\mathrm{semi}}} = O(\qlength{\game_k}), \quad
+\alength{\game_{\mathrm{semi}}} = O(\alength{\game_k}).
+\end{equation*}
+\end{theorem}
+
+Combining \Cref{theorem:semi-to-k-1-layer,theorem:k-to-semi-layer} gives us the main result of \Cref{part:stack},
+a compiler~$\calC$ which compiles $k$-register games into general games.
+
+\begin{theorem}\label{thm:registers}
+Let $\game_k$ be a $(k, n, q)$-register game. 
+Let $\eta = (\eta_1, \ldots, \eta_k)$, and suppose $n_i$, $q_i$, and $\eta_i$ pass the Pauli basis condition for all $i \in [k]$.
+Write
+\begin{equation*}
+\game = \calC(\game_k) :=
+\calC_{\mathrm{semi}\rightarrow 0}(\calC_{\mathrm{1} \rightarrow \mathrm{semi}}(~\cdots~
+	\calC_{\mathrm{semi}\rightarrow k-1}(\calC_{\mathrm{k \rightarrow \mathrm{semi}}}(\game_k)))).
+\end{equation*}
+\begin{itemize}
+\item[$\circ$] \textbf{Completeness:} Suppose there is a value-$1$ $(k,n,q)$-register strategy for $\game_{k}$ which is also a real commuting EPR strategy.
+	Then there is a real commuting EPR strategy for~$\game$ with value~$1$.
+\item[$\circ$] \textbf{Soundness:} If $\val{\game}\geq 1-\eps$ then $\valreg{(k,n,q)}{\game_{k}} \geq 1 -\delta(\eps)$, where $\delta(\eps) = \mathrm{poly}(\eps, \eta_1, \ldots, \eta_k)$.
+\end{itemize}
+Furthermore,
+\begin{align*}
+\qtime{\game} &= \qtime{\game_k} + O(\log(n_1))+ \cdots + O(\log(n_k)), \\
+\qlength{\game} &= \qlength{\game_k} + O(\log(n_1)) + \cdots + O(\log(n_k)),  \\
+\atime{\game} &= \atime{\game_k} + \poly(n_1) + \cdots + \poly(n_k),\\
+\alength{\game} &= \alength{\game_k} + O(n_1 \cdot \log \log(n_1)) + \cdots O(n_k \cdot \log \log(n_k)).
+\end{align*}
+\end{theorem}
+
+\subsection{Registers for uniform games}\label{sec:uniform-registers}
+
+In this section, we generalize the notion of registers to the case of uniform games,
+in which a different set of register parameters might be used for each input.
+To compile these games, we will need for the register parameters themselves to be uniformly generated.
+
+\begin{definition}\label{def:reg-params-generator}
+Let $M_{\mathrm{Params}}$ be a Turing machine which,
+given an input $\mathsf{input}$, outputs $\lambda = (k, n, q)$.
+Let $\game$ be a (nonuniform) game.
+Then we say $M_{\mathrm{Params}}$ \emph{outputs the register parameters of $\game$}
+if for every $\mathsf{input}$, $\game(\mathsf{input})$ is a $M_{\mathrm{Params}}(\mathsf{input})$-register game.
+\end{definition}
+
+Given this, our compiler for uniform games is given as follows.
+
+\begin{corollary}\label{thm:uniform-registers}
+Let $\game(\cdot)$ be a (uniform) game,
+and let $M_{\mathrm{Params}}$ be a Turing machine which outputs its register parameters.
+Then there exists a (uniform) game $\game_{\mathrm{Compile}}(\cdot)$ with the following properties.
+Given an input $\mathsf{input}$, write $\game:=\game(\mathsf{input})$,
+$\game_{\mathrm{Compile}} := \game_{\mathrm{Compile}}(\mathsf{input})$,
+and $\lambda = (k, n, q) := M_{\mathrm{Params}}(\mathsf{input})$.
+\begin{itemize}
+\item[$\circ$] \textbf{Completeness:} Suppose there is a value-$1$ $(k,n,q)$-register strategy for $\game$ which is also a real commuting EPR strategy.
+	Then there is a real commuting EPR strategy for~$\game_{\mathrm{Compile}}$ with value~$1$.
+\item[$\circ$] \textbf{Soundness:}
+Let $\eta = (\eta_1, \ldots, \eta_k)$, and suppose $n_i$, $q_i$, and $\eta_i$ pass the Pauli basis condition for all $i \in [k]$.
+If $\val{\game_{\mathrm{Compile}}}\geq 1-\eps$ then $\valreg{\lambda}{\game} \geq 1 -\delta(\eps)$, where $\delta(\eps) = \mathrm{poly}(\eps, \eta_1, \ldots, \eta_k)$.
+\end{itemize}
+Furthermore,
+\begin{align*}
+\qtime{\game} &= \qtime{\game_k} + O(\log(n_1))+ \cdots + O(\log(n_k)) + \mathsf{time}(M_{\mathrm{Params}}(\mathsf{input})), \\
+\qlength{\game} &= \qlength{\game_k} + O(\log(n_1)) + \cdots + O(\log(n_k)),  \\
+\atime{\game} &= \atime{\game_k} + \poly(n_1) + \cdots + \poly(n_k)+ \mathsf{time}(M_{\mathrm{Params}}(\mathsf{input})),\\
+\alength{\game} &= \alength{\game_k} + O(n_1 \cdot \log \log(n_1)) + \cdots O(n_k \cdot \log \log(n_k)).
+\end{align*}
+\end{corollary}
+
+\begin{proof}
+We first compute $\lambda = M_{\mathrm{Params}}(\mathsf{input})$
+in time $\mathsf{time}(M_{\mathrm{Params}}(\mathsf{input}))$.
+Then it can be checked that the compiled game $\calC(\game(\mathsf{input}))$ from \Cref{thm:registers}
+can be efficiently simulated given the register parameters~$\lambda$.
+\end{proof}
+
+\subsection{Organization}
+
+The remainder of \Cref{part:stack} is organized as follows.
+\begin{itemize}
+\item In \Cref{sec:self-test-pauli}, we introduce the Pauli basis self-test and prove its correctness.
+\item \Cref{sec:pauli-basis-compiler} implements the Pauli basis compiler.
+\item In \Cref{sec:data-hiding-layer}, we introduce the data hiding game.
+\item \Cref{sec:compile-sec} implements the data hiding compiler.
+\item \Cref{sec:rotated-data-hiding} contains a generalization of the data hiding game which allows us to hide more general sets of Pauli observables.
+		This is not needed to implement the quantum registers, but it will be needed in \Cref{part:neexp} when designing the $\neexp$ protocol.
+\end{itemize}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End:
+%%%---------- close: register-overview
+
+%%%%%%%%%%% jump to pauli-basis
+%%%---------- open: pauli-basis
+%!TEX root = main.tex
+
