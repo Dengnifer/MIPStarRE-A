@@ -1,0 +1,231 @@
+\chapter{Extracting the Pauli observables}
+\label{chap:qpbt-extraction}
+% Paper subsection label sec:separating kept for cross-reference fidelity.
+\label{sec:separating}
+% Source: references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex,
+% lines 1415--1877 (subsection ``Pulling the X and Z measurements apart''
+% and the closing proof of the soundness theorem).
+
+This chapter completes the analysis of the Pauli basis test~\cite{Ji2020MIPStar}. Throughout, $(q,m,d)$ is an admissible parameter tuple (Definition~\ref{def:admissible}), $q = 2^t$, and $M = 2^m$ denotes the number of $q$-ary qudits tested for per player. (The letter $M$ also denotes measurement operators, always carrying super- and subscripts; the meaning is determined by context, as in the source.) We fix a projective strategy for the Pauli basis test game $\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$ that succeeds with probability at least $1-\eps$, in the setting of Chapter~\ref{chap:qpbt-observables}: the shared state $\ket{\psi}$ on registers $\mathrm{A}$, $\mathrm{B}$ is assumed padded with sufficiently many ancilla qubits in the state $\ket{0}$ (Definition~\ref{def:projective-strategy-setup}), and $\ket{\hat\psi}$ denotes the expanded state on the six registers $\mathrm{A}\mathrm{A}'\mathrm{A}''\mathrm{B}\mathrm{B}'\mathrm{B}''$, obtained by adjoining to each player the two halves of $M$ pairs $\ket{\mathrm{EPR}_q}$ (Definition~\ref{def:expanded-state}). Unless stated otherwise, every $\approx_\delta$ and $\simeq_\delta$ statement below is taken with respect to the state $\ket{\hat\psi}$, over the question distribution named in the statement, with register placements indicated by subscripts; ``all symmetric equivalents'' refers to the register interchanges of Remark~\ref{def:symmetric-equivalents}.
+
+We use the following objects from the preceding chapters: the combined point projectors $\hat{M}^{(\mathrm{Point},W),u}_a$ acting on the expanded space (Definition~\ref{def:expanded-point-measurement}); the projective polynomial-pair measurement $\{\hat{S}_{g_X,g_Z}\}$ of Lemma~\ref{lem:qld-4-7}, with outcomes pairs of polynomials in $\mathrm{ideg}_{d,m}(\F_q)$ and error function
+\[
+	\delta_S(\eps,m,d,q) = a(md)^a\bigl(\eps^b + q^{-b} + 2^{-bmd}\bigr)
+\]
+for universal constants $a > 1$, $0 < b < 1$; the decoding map $\mathrm{Dec}\colon \mathrm{ideg}_{d,m}(\F_q) \to \F_q^{M}$ of the low-degree code (Definition~\ref{def:decoding-map}), which maps a polynomial $g$ to the string of its evaluations on the hypercube $\{0,1\}^m$; and the low-degree encoding $h \mapsto g_h$ together with the vectors $\mathrm{ind}_m(u) \in \F_q^M$, characterized by $h \cdot \mathrm{ind}_m(u) = g_h(u)$ for all $u \in \F_q^m$ \eqref{eq:low-degree-encoding-definition}. The map $h \mapsto g_h$ is linear, and $\mathrm{Dec}(g) \cdot \mathrm{ind}_m(u) = g(u)$ for every $g \in \mathrm{ideg}_{d,m}(\F_q)$.
+
+\section{The pulled-apart measurements and observables}
+
+The measurement $\{\hat{S}_{g_X,g_Z}\}$ reads out an $X$-polynomial and a $Z$-polynomial simultaneously. We now separate the two readings again, this time as commuting actions on distinct registers: the polynomial outcome is measured on the players' original registers, while a genuine Pauli measurement acts on the EPR register $\mathrm{A}''$ (resp.\ $\mathrm{B}''$).
+
+\begin{definition}[Single-basis marginals of the polynomial-pair measurement]\label{def:s-w-marginals}
+	\uses{lem:qld-4-7}
+	Let $\{\hat{S}_{g_X,g_Z}\}$ be the projective measurement of Lemma~\ref{lem:qld-4-7}. For every $g \in \mathrm{ideg}_{d,m}(\F_q)$ define
+	\[
+		\hat{S}^X_g = \sum_{g_Z} \hat{S}_{g,g_Z}
+		\qquad \text{and} \qquad
+		\hat{S}^Z_g = \sum_{g_X} \hat{S}_{g_X,g}\;,
+	\]
+	the sums ranging over $\mathrm{ideg}_{d,m}(\F_q)$. Since $\{\hat{S}_{g_X,g_Z}\}$ is projective, its elements are mutually orthogonal projectors; hence each $\hat{S}^W_g$, for $W \in \{X,Z\}$, is a projector, and $\{\hat{S}^W_g\}_{g}$ is a projective measurement with outcomes in $\mathrm{ideg}_{d,m}(\F_q)$.
+\end{definition}
+
+\begin{definition}[Pauli dot-product projectors]\label{def:tau-dot-product-projector}
+	\uses{def:generalized-pauli}
+	For $W \in \{X,Z\}$ and $h \in \F_q^{M}$ let $\tau^W_h$ denote the projector corresponding to measuring $(\C^q)^{\ot M}$ in the $W$ basis and obtaining the outcome $h$ (Definition~\ref{def:generalized-pauli}). For all $W \in \{X,Z\}$, $\tilde{u} \in \F_q^{M}$, and $a \in \F_q$, define the projector
+	\begin{equation}\label{eq:def-tauwu}
+		\tau^{W}_{a}(\tilde{u}) = \sum_{h \in \F_q^{M} \,:\, h \cdot \tilde{u} = a} \tau^W_{h}\;.
+	\end{equation}
+	For each fixed $\tilde{u}$, the family $\{\tau^W_a(\tilde{u})\}_{a \in \F_q}$ is a projective measurement on $(\C^q)^{\ot M}$.
+\end{definition}
+
+\begin{definition}[Pulled-apart Pauli basis measurements]\label{def:tilde-m-measurement}
+	\uses{def:s-w-marginals, def:tau-dot-product-projector, def:decoding-map}
+	For all $W \in \{X,Z\}$ and $\tilde{u} \in \F_q^{M}$ define the measurement $\{\tilde{M}^{W,\tilde{u}}_a\}_{a \in \F_q}$ by
+	\begin{equation}\label{eq:tilde_M}
+		\tilde{M}^{W,\tilde{u}}_a = \sum_{g} \hat{S}^W_g \ot \tau_{(\mathrm{Dec}(g) \cdot \tilde{u}) - a}^W(\tilde{u})\;,
+	\end{equation}
+	the sum ranging over $g \in \mathrm{ideg}_{d,m}(\F_q)$. If $\hat{S}^W_g$ is viewed as an operator acting on registers $\mathrm{A}\mathrm{A}'$ (resp.\ $\mathrm{B}\mathrm{B}'$), then $\tilde{M}^{W,\tilde{u}}_a$ acts on registers $\mathrm{A}\mathrm{A}'\mathrm{A}''$ (resp.\ $\mathrm{B}\mathrm{B}'\mathrm{B}''$), the $\tau^W$ factor acting on $\mathrm{A}''$ (resp.\ $\mathrm{B}''$). Each family $\{\tilde{M}^{W,\tilde{u}}_a\}_{a \in \F_q}$ is a projective measurement, because the $\hat{S}^W_g$ and the $\tau^W$ projectors are projective and, for each $g$, the projectors $\tau^W_{(\mathrm{Dec}(g)\cdot\tilde{u})-a}(\tilde{u})$ sum to the identity as $a$ ranges over $\F_q$.
+\end{definition}
+
+\begin{definition}[Pulled-apart Pauli observables]\label{def:tilde-w-observables}
+	\uses{def:tilde-m-measurement, def:dual-self-dual-normal-basis, def:subfield-trace, def:generalized-pauli, lem:qld-4-7}
+	Let $\{e_j\}_{j \in \{1,\ldots,t\}}$ be the self-dual basis for $\F_q$ over $\F_2$ of Definition~\ref{def:dual-self-dual-normal-basis}, and let $\tr = \tr_{q \to 2} \colon \F_q \to \F_2$ be the subfield trace. For all $W \in \{X,Z\}$, $\tilde{u} \in \F_q^M$, and $j \in \{1,\ldots,t\}$ define the observable
+	\begin{equation}\label{eq:def-tildewj}
+		\tilde{W}^j(\tilde{u}) = \sum_{a \in \F_q} (-1)^{\tr(e_j a)} \, \tilde{M}_a^{W,\tilde{u}}\;,
+	\end{equation}
+	acting on the same registers as $\tilde{M}^{W,\tilde{u}}_a$. Let $\tau^W(\cdot)$ denote the generalized Pauli $W$ observable (Definition~\ref{def:generalized-pauli}). Expanding $\tau^W(e_j \tilde{u})$ over the projectors $\tau^W_h$, grouping the $h$ according to the value $a = h \cdot \tilde{u}$, and changing variables yields the exact identity
+	\begin{equation}\label{eq:tildewj-product-form}
+		\tilde{W}^j(\tilde{u})
+		= \Big( \sum_{g_X,g_Z} (-1)^{\tr(e_j (\mathrm{Dec}(g_W) \cdot \tilde{u}))} \, \hat{S}_{g_X,g_Z} \Big) \ot \tau^W(e_j \tilde{u})\;,
+	\end{equation}
+	where $g_W$ denotes $g_X$ if $W = X$ and $g_Z$ if $W = Z$. In particular $\tilde{W}^j(\tilde{u})$ is Hermitian and squares to the identity, because the measurement $\{\hat{S}_{g_X,g_Z}\}$ is projective. Moreover, a direct calculation from \eqref{eq:tildewj-product-form} shows that these observables satisfy exactly the relations of the generalized Pauli group: for all $j,j' \in \{1,\ldots,t\}$ and $\tilde{u},\tilde{v} \in \F_q^M$,
+	\[
+		\tilde{X}^j(\tilde{u})\, \tilde{Z}^{j'}(\tilde{v}) =
+		\begin{cases}
+			\tilde{Z}^{j'}(\tilde{v})\, \tilde{X}^j(\tilde{u}) & j \neq j'\;, \\
+			(-1)^{\tr((e_j \tilde{u}) \cdot (e_j \tilde{v}))}\, \tilde{Z}^{j}(\tilde{v})\, \tilde{X}^j(\tilde{u}) & j = j'\;.
+		\end{cases}
+	\]
+\end{definition}
+
+\section{Consistency with the points measurements}
+
+The next lemma shows that the pulled-apart measurements are consistent with the original points measurements of the strategy, and self-consistent. In its statement, and for the remainder of the chapter, $\delta_S$ denotes the function of Lemma~\ref{lem:qld-4-7}, enlarged by an adjustment of the universal constants $a$ and $b$ so as to also dominate additional error terms of order $\sqrt{\eps}$, $\eps$, and $md/q$ that the source absorbs into $\delta_S$ along the way; such an adjustment is possible since, after shrinking $b$ to at most $1/2$, the term $\eps^b$ dominates $\sqrt{\eps}$ and $\eps$ for $\eps \leq 1$, while $(md)^a q^{-b}$ dominates $md/q$.
+
+\begin{lemma}[Consistency and self-consistency of the pulled-apart measurements]\label{lem:qld-construct-the-paulis}
+	\uses{def:tilde-m-measurement, def:tilde-w-observables, def:projective-strategy-setup, def:expanded-state, def:consistency, def:povm-distance, lem:qld-4-7, def:indicator-vector}
+	The measurements $\{\tilde{M}^{W,\tilde{u}}_a\}_{a \in \F_q}$ and observables $\tilde{W}^j(\tilde{u})$ satisfy the following properties.
+	% The paper's statement also quantifies item 1 over j, but j does not occur
+	% in item 1; the vacuous quantifier is dropped here.
+	\begin{enumerate}
+		\item (\textbf{Consistency with points measurements}) For all $W \in \{X,Z\}$, on average over uniformly random $u \in \F_q^m$,
+		\[
+			\Id_{\mathrm{A}\mathrm{A}'\mathrm{A}''} \ot \tilde{M}^{W,\mathrm{ind}_m(u)}_a \simeq_{\delta_S} M^{(\mathrm{Point},W),u}_a \ot \Id_{\mathrm{B}\mathrm{B}'\mathrm{B}''}
+		\]
+		and
+		\[
+			\tilde{M}^{W,\mathrm{ind}_m(u)}_a \ot \Id_{\mathrm{B}\mathrm{B}'\mathrm{B}''} \simeq_{\delta_S} \Id_{\mathrm{A}\mathrm{A}'\mathrm{A}''} \ot M^{(\mathrm{Point},W),u}_a\;,
+		\]
+		with the answer summation over $a \in \F_q$.
+		\item (\textbf{Self-consistency}) For all $W \in \{X,Z\}$ and $j \in \{1,\ldots,t\}$, on average over uniformly random $\tilde{u} \in \F_q^{M}$,
+		\[
+			\tilde{W}^j(\tilde{u}) \ot \Id_{\mathrm{B}\mathrm{B}'\mathrm{B}''} \approx_{\delta_S} \Id_{\mathrm{A}\mathrm{A}'\mathrm{A}''} \ot \tilde{W}^j(\tilde{u})\;.
+		\]
+	\end{enumerate}
+\end{lemma}
+\begin{proof}
+	\uses{lem:qld-4-7, lem:qld-constructing-the-paulis-helper, def:expanded-point-measurement, lem:qld-win-implications, lem:qld-comm-cons, fact:add-a-proj, fact:agreement, fact:data-processing, def:bracket, lem:povm-to-obs, lem:schwartz-zippel-total-degree}
+	For the first item, in the case where $M^{(\mathrm{Point},W),u}_a$ acts on register $\mathrm{A}$ and $\tilde{M}^{W,\mathrm{ind}_m(u)}_a$ on $\mathrm{B}\mathrm{B}'\mathrm{B}''$, expanding \eqref{eq:tilde_M}, using the definition of the combined projectors $\hat{M}^{(\mathrm{Point},W),u}_a$ (Definition~\ref{def:expanded-point-measurement}) and the identity $\mathrm{Dec}(g)\cdot\mathrm{ind}_m(u) = g(u)$, gives
+	\[
+		\E_{u \in \F_q^m} \sum_a \bra{\hat\psi} M^{(\mathrm{Point},W),u}_a \ot \tilde{M}^{W,\mathrm{ind}_m(u)}_a \ket{\hat\psi}
+		= \E_{u \in \F_q^m} \sum_g \bra{\hat\psi} (\hat{M}^{(\mathrm{Point},W),u}_{g(u)})_{\mathrm{A}\mathrm{B}''} \ot (\hat{S}^W_g)_{\mathrm{B}\mathrm{B}'} \ket{\hat\psi}
+		\geq 1 - \delta_S
+	\]
+	by Lemma~\ref{lem:qld-4-7}, and the register-interchanged relation follows analogously. For the second item one first shows that, on average over uniformly random $\tilde{u} \in \F_q^M$,
+	\begin{equation}\label{eq:qld-pulling-cons}
+		\bigl( \tilde{M}^{W,\tilde{u}}_a \bigr)_{\mathrm{A}\mathrm{A}'\mathrm{A}''} \approx_{\delta_S} \bigl( \tilde{M}^{W,\tilde{u}}_a \bigr)_{\mathrm{B}\mathrm{B}'\mathrm{B}''}\;:
+	\end{equation}
+	right-multiplying by the resolution $\sum_g (\hat{S}^W_g)_{\mathrm{A}\mathrm{A}'} \ot (\hat{M}^{(\mathrm{Point},W),u}_{g(u)})_{\mathrm{B}\mathrm{A}''} \approx_{\delta_S} \Id$ of Lemma~\ref{lem:qld-constructing-the-paulis-helper} (with Lemma~\ref{fact:add-a-proj}) and expanding the products of $\tau^W$ projectors via \eqref{eq:def-tauwu} and $h \cdot \mathrm{ind}_m(u) = g_h(u)$ places $(\tilde{M}^{W,\tilde{u}}_a)_{\mathrm{A}\mathrm{A}'\mathrm{A}''}$ within $O(\delta_S)$ of a sum over pairs $(g,h)$ with $(\mathrm{Dec}(g)-h)\cdot\tilde{u} = a$. One then applies, in turn, the self-consistency of the points measurements (Lemma~\ref{lem:qld-win-implications}) at cost $\eps$; the exact identity $\ket{\hat\psi} = \sum_{h'} (\tau^W_{h'})_{\mathrm{B}'} \ot (\tau^W_{h'})_{\mathrm{B}''} \ket{\hat\psi}$ of the EPR registers; Lemma~\ref{lem:qld-constructing-the-paulis-helper} twice more (once through a Cauchy--Schwarz detour of cost $O(\sqrt{\eps})$ using the self-consistency of the $\hat{M}^{(\mathrm{Point},W),u}_a$, Lemma~\ref{lem:qld-comm-cons}); and finally a Schwartz--Zippel step (Lemma~\ref{lem:schwartz-zippel-total-degree}, for polynomials of total degree at most $md$) which replaces the event $(g'-g_{h'})(u) = (g-g_h)(u)$ by the polynomial identity $g'-g_{h'} = g-g_h$ at cost $md/q$. The resulting expression
+	\[
+		\sum_{\substack{g,h,g',h': \\ g' - g_{h'} = g - g_h \\ (\mathrm{Dec}(g)-h)\cdot \tilde{u} = a}}
+		\Bigl((\hat{S}^W_g)_{\mathrm{A}\mathrm{A}'} \ot (\tau_h^W)_{\mathrm{A}''} \Bigr) \cdot \Bigl( (\hat{S}^W_{g'})_{\mathrm{B}\mathrm{B}'} \ot (\tau_{h'}^W)_{\mathrm{B}''} \Bigr)
+	\]
+	is symmetric under exchanging $(g,h)$ with $(g',h')$, so the same derivation bounds its distance to $(\tilde{M}^{W,\tilde{u}}_a)_{\mathrm{B}\mathrm{B}'\mathrm{B}''}$, and \eqref{eq:qld-pulling-cons} follows after absorbing the error terms $O(\sqrt{\eps})$ and $O(md/q)$ into $\delta_S$. Finally, since $\{\tilde{M}^{W,\tilde{u}}_a\}$ is projective, Item~2 of Lemma~\ref{fact:agreement}, data processing along the map $a \mapsto \tr(e_j a)$ (Lemma~\ref{fact:data-processing}), and Item~1 of Lemma~\ref{fact:agreement} yield $(\tilde{M}^{W,\tilde{u}}_{[\tr(e_j \cdot) = b]})_{\mathrm{A}\mathrm{A}'\mathrm{A}''} \approx_{\delta_S} (\tilde{M}^{W,\tilde{u}}_{[\tr(e_j \cdot) = b]})_{\mathrm{B}\mathrm{B}'\mathrm{B}''}$ with answer summation over $b \in \F_2$, and Lemma~\ref{lem:povm-to-obs} converts this into the claimed self-consistency of the observables $\tilde{W}^j(\tilde{u})$.
+\end{proof}
+
+The following lemma was used in several derivations above. It is stated after Lemma~\ref{lem:qld-construct-the-paulis} to follow the source, but its proof depends only on Lemma~\ref{lem:qld-4-7} and Lemma~\ref{lem:qld-comm-cons}, so there is no circularity.
+
+\begin{lemma}[The marginals absorb the point measurements]\label{lem:qld-constructing-the-paulis-helper}
+	\uses{def:s-w-marginals, def:expanded-point-measurement, def:expanded-state, def:povm-distance, lem:qld-4-7, def:symmetric-equivalents}
+	For $W \in \{X,Z\}$, on average over uniformly random $u \in \F_q^m$,
+	\begin{equation}\label{eq:qld-sg-cons}
+		\sum_g (\hat{S}^W_g)_{\mathrm{A}\mathrm{A}'} \ot (\hat{M}^{(\mathrm{Point},W),u}_{g(u)})_{\mathrm{B}\mathrm{A}''} \approx_{\delta_S} \Id
+	\end{equation}
+	and
+	\begin{equation}\label{eq:qld-sg-cons2}
+		\bigl(\hat{S}^W_g \cdot (\Id - \hat{M}^{(\mathrm{Point}, W), u}_{g(u)})\bigr)_{\mathrm{A}\mathrm{A}'} \approx_{\delta_S} 0\;,
+	\end{equation}
+	where the answer summation is over $g \in \mathrm{ideg}_{d,m}(\F_q)$, and where in \eqref{eq:qld-sg-cons2} an additional error term of order $\eps$ is absorbed into $\delta_S$. Furthermore, all symmetric equivalents of these approximations also hold (Remark~\ref{def:symmetric-equivalents}).
+\end{lemma}
+\begin{proof}
+	\uses{lem:qld-4-7, fact:agreement, fact:add-a-proj, def:bracket, lem:qld-comm-cons}
+	The point-consistency conclusion of Lemma~\ref{lem:qld-4-7} states that, on average over $u \in \F_q^m$,
+	\[
+		\bra{\hat\psi} \sum_g (\hat{S}^W_g)_{\mathrm{A}\mathrm{A}'} \ot (\hat{M}^{(\mathrm{Point}, W), u}_{g(u)})_{\mathrm{B}\mathrm{A}''} \ket{\hat\psi} \geq 1 - \delta_S\;,
+	\]
+	which says exactly that the operator on the left-hand side of \eqref{eq:qld-sg-cons} is $\delta_S$-consistent with $\Id$; Lemma~\ref{fact:agreement} upgrades this $\simeq_{\delta_S}$ statement to the $\approx_{\delta_S}$ statement \eqref{eq:qld-sg-cons}. For \eqref{eq:qld-sg-cons2}, the same consistency, written with the coarse-graining $\hat{S}^W_{[g(u)=a]} = \sum_{g : g(u) = a} \hat{S}^W_g$ as $(\hat{S}^W_{[g(u)=a]})_{\mathrm{A}\mathrm{A}'} \approx_{\delta_S} (\hat{M}^{(\mathrm{Point}, W), u}_{a})_{\mathrm{B}\mathrm{A}''}$ with answer summation over $a \in \F_q$, is left-multiplied by $(\hat{S}^W_{[g(u)=a]})_{\mathrm{A}\mathrm{A}'}$ using Lemma~\ref{fact:add-a-proj}; moving $\hat{M}^{(\mathrm{Point}, W), u}_a$ from registers $\mathrm{B}\mathrm{A}''$ to $\mathrm{A}\mathrm{A}'$ costs a further $\eps$ by Cauchy--Schwarz together with the self-consistency of the $\hat{M}^{(\mathrm{Point}, W), u}_a$ (Lemma~\ref{lem:qld-comm-cons}), giving
+	\[
+		(\hat{S}^W_{[g(u)=a]})_{\mathrm{A}\mathrm{A}'} \approx_{O(\delta_S + \eps)} (\hat{S}^W_{[g(u)=a]} \cdot \hat{M}^{(\mathrm{Point}, W), u}_{a})_{\mathrm{A}\mathrm{A}'}\;.
+	\]
+	Expanding
+	\[
+		\E_u \sum_g \bigl\| (\hat{S}^W_{g} \cdot (\Id - \hat{M}^{(\mathrm{Point}, W), u}_{g(u)}))_{\mathrm{A}\mathrm{A}'} \ket{\hat\psi} \bigr\|^2
+		= \E_u \sum_a \bra{\hat\psi} \bigl((\Id - \hat{M}^{(\mathrm{Point}, W), u}_{a}) \cdot \hat{S}^W_{[g(u)=a]} \cdot (\Id - \hat{M}^{(\mathrm{Point}, W), u}_{a})\bigr)_{\mathrm{A}\mathrm{A}'} \ket{\hat\psi}
+	\]
+	and bounding the right-hand side by $O(\delta_S + \eps)$ using the two approximations above yields \eqref{eq:qld-sg-cons2} after absorbing $\eps$ into $\delta_S$. The symmetric equivalents follow by the same argument with the register bipartitions interchanged.
+\end{proof}
+
+\section{The swap unitaries and the extraction of the Pauli group}
+
+\begin{definition}[The swap unitaries]\label{def:v-swap-unitary}
+	\uses{lem:qld-4-7, def:generalized-pauli, def:decoding-map, def:tilde-w-observables, def:tilde-m-measurement, def:indicator-vector}
+	Define the linear map
+	\[
+		V_{\mathrm{A}} = \sum_{g_X,g_Z} (\hat{S}_{g_X,g_Z})_{\mathrm{A}\mathrm{A}'} \ot \bigl(\tau^X(\mathrm{Dec}(g_Z)) \, \tau^Z(\mathrm{Dec}(g_X))\bigr)_{\mathrm{A}''}\;,
+	\]
+	where $\tau^X(\cdot)$ and $\tau^Z(\cdot)$ are the generalized Pauli observables acting on $(\C^q)^{\ot M}$; note that the argument of $\tau^X$ is $\mathrm{Dec}(g_Z)$ and the argument of $\tau^Z$ is $\mathrm{Dec}(g_X)$. Since the measurement $\{\hat{S}_{g_X,g_Z}\}$ is projective and the $\tau^X, \tau^Z$ observables are self-inverse,
+	\[
+		V_{\mathrm{A}} V_{\mathrm{A}}^\dagger = \sum_{g_X,g_Z} (\hat{S}_{g_X,g_Z})_{\mathrm{A}\mathrm{A}'} \ot \Id_{\mathrm{A}''} = \Id_{\mathrm{A}\mathrm{A}'\mathrm{A}''}\;,
+	\]
+	so $V_{\mathrm{A}}$ is a unitary acting on registers $\mathrm{A}\mathrm{A}'\mathrm{A}''$. The unitary $V_{\mathrm{B}}$ on $\mathrm{B}\mathrm{B}'\mathrm{B}''$ is defined analogously. The conjugation action of these unitaries is exact. First, from the anti-commutation relation
+	\[
+		\tau^X(\mathrm{Dec}(g_Z)) \, \tau^Z(\mathrm{Dec}(g_X)) \, \tau^W(e_j \tilde{u}) = (-1)^{\tr( e_j(\mathrm{Dec}(g_W) \cdot \tilde{u}))} \, \tau^W(e_j \tilde{u}) \, \tau^X(\mathrm{Dec}(g_Z)) \, \tau^Z(\mathrm{Dec}(g_X))
+	\]
+	and the product form \eqref{eq:tildewj-product-form} one computes, for all $W \in \{X,Z\}$, $j \in \{1,\ldots,t\}$, and $\tilde{u} \in \F_q^M$,
+	\[
+		V_{\mathrm{A}} \, \tilde{W}^j(\tilde{u}) \, V_{\mathrm{A}}^\dagger = \Id_{\mathrm{A}\mathrm{A}'} \ot \bigl( \tau^W(e_j \tilde{u}) \bigr)_{\mathrm{A}''}
+		\qquad \text{and} \qquad
+		V_{\mathrm{B}} \, \tilde{W}^j(\tilde{u}) \, V_{\mathrm{B}}^\dagger = \Id_{\mathrm{B}\mathrm{B}'} \ot \bigl( \tau^W(e_j \tilde{u}) \bigr)_{\mathrm{B}''}\;.
+	\]
+	Second, using the identities $\tau^X(s)\, \tau^Z_h \,\tau^X(s)^\dagger = \tau^Z_{h+s}$ and $\tau^Z(s)\, \tau^X_h\, \tau^Z(s)^\dagger = \tau^X_{h+s}$, the fact that $\F_q$ has characteristic $2$, and the linearity of the low-degree encoding $h \mapsto g_h$ \eqref{eq:low-degree-encoding-definition}, one computes, for all $u \in \F_q^m$ and $a \in \F_q$,
+	\begin{equation}\label{eq:qld-unitary-6}
+		V_{\mathrm{B}} \, \tilde{M}^{W,\mathrm{ind}_m(u)}_a \, V_{\mathrm{B}}^\dagger = \Id_{\mathrm{B}\mathrm{B}'} \ot (\tau^W_{[g_h(u)=a]})_{\mathrm{B}''}\;,
+		\qquad
+		\tau^W_{[g_h(u)=a]} = \sum_{h \,:\, g_h(u) = a} \tau^W_h\;,
+	\end{equation}
+	and the same computation on registers $\mathrm{A}\mathrm{A}'\mathrm{A}''$ gives the analogous identity for $V_{\mathrm{A}}$.
+\end{definition}
+
+\begin{lemma}[Extraction of the EPR state and the Pauli observables]\label{lem:qld-unitary}
+	\uses{lem:qld-4-7, def:v-swap-unitary, def:expanded-state, def:projective-strategy-setup, def:generalized-pauli, def:EPR, def:povm-distance}
+	There exists a function $\delta_{\mathrm{qld}}(\eps,m,d,q) = O(\delta_S^{1/4} + md/q)$, where $\delta_S$ is the function of Lemma~\ref{lem:qld-4-7}, and there exist unitaries $V_{\mathrm{A}}$ acting on registers $\mathrm{A}\mathrm{A}'\mathrm{A}''$ and $V_{\mathrm{B}}$ acting on registers $\mathrm{B}\mathrm{B}'\mathrm{B}''$, such that the following hold.
+	\begin{enumerate}
+		\item There exists a state $\ket{\mathrm{aux}}$ on registers $\mathrm{A}\mathrm{A}'\mathrm{B}\mathrm{B}'$ such that
+		\[
+			\bigl\| V_{\mathrm{A}} \ot V_{\mathrm{B}} \ket{\hat{\psi}}_{\mathrm{A}\mathrm{A}'\mathrm{A}''\mathrm{B}\mathrm{B}'\mathrm{B}''} - \ket{\mathrm{aux}}_{\mathrm{A}\mathrm{A}'\mathrm{B}\mathrm{B}'} \ot \ket{\mathrm{EPR}_q}^{\ot M}_{\mathrm{A}''\mathrm{B}''} \bigr\|^2 \leq \delta_{\mathrm{qld}}\;.
+		\]
+		\item For $W \in \{X,Z\}$,
+		\begin{align*}
+			V_{\mathrm{A}} \, \bigl(M^{(\mathrm{Pauli},W)}_h \bigr)_{\mathrm{A}} \, V_{\mathrm{A}}^\dagger &\approx_{\delta_{\mathrm{qld}}} \Id_{\mathrm{A}\mathrm{A}'} \ot (\tau^W_h)_{\mathrm{A}''}\;, \\
+			V_{\mathrm{B}} \, \bigl(M^{(\mathrm{Pauli},W)}_h \bigr)_{\mathrm{B}} \, V_{\mathrm{B}}^\dagger &\approx_{\delta_{\mathrm{qld}}} \Id_{\mathrm{B}\mathrm{B}'} \ot (\tau^W_h)_{\mathrm{B}''}\;,
+		\end{align*}
+		where the $\approx$ statements hold with respect to the state $\ket{\mathrm{aux}}_{\mathrm{A}\mathrm{A}'\mathrm{B}\mathrm{B}'} \ot \ket{\mathrm{EPR}_q}^{\ot M}_{\mathrm{A}''\mathrm{B}''}$, with the answer summation over $h \in \F_q^{M}$ and no average over questions.
+	\end{enumerate}
+	The unitaries may be taken to be $V_{\mathrm{A}}$ and $V_{\mathrm{B}}$ of Definition~\ref{def:v-swap-unitary}.
+\end{lemma}
+\begin{proof}
+	\uses{def:v-swap-unitary, lem:qld-construct-the-paulis, lem:qld-win-implications, fact:triangle-for-simeq, def:bracket, lem:cancellation, lem:schwartz-zippel-total-degree, lem:qld-4-7}
+	For the first item, the self-consistency of the observables $\tilde{W}^j$ (Item~2 of Lemma~\ref{lem:qld-construct-the-paulis}) is equivalent to $\E_{j \in \{1,\ldots,t\}} \E_{\tilde{u} \in \F_q^M} \bra{\hat\psi} \tilde{W}^j(\tilde{u}) \ot \tilde{W}^j(\tilde{u}) \ket{\hat\psi} \geq 1 - \delta_S/2$; setting $\ket{\vartheta} = V_{\mathrm{A}} \ot V_{\mathrm{B}} \ket{\hat\psi}$ and using the exact conjugation identities of Definition~\ref{def:v-swap-unitary}, this becomes $\bra{\vartheta} H_W \ket{\vartheta} \geq 1 - \delta_S/2$ for $W \in \{X,Z\}$, where $H_W = \E_j \E_{\tilde{u}} \, \tau^W(e_j \tilde{u}) \ot \tau^W(e_j \tilde{u}) = \bigl( \E_{s \in \F_q} \tau^W(s) \ot \tau^W(s) \bigr)^{\ot M}$ by the tensor factorization of $\tau^W(\tilde{u})$ and the invariance of the uniform average over $s$ under $s \mapsto e_j s$. By Lemma~\ref{lem:cancellation}, $\E_{s,s'} \tau^X(s)\tau^Z(s') \ot \tau^X(s)\tau^Z(s') = \ket{\mathrm{EPR}_q}\bra{\mathrm{EPR}_q}$ on each pair of qudits, whence $H_X H_Z = \ket{\mathrm{EPR}_q}\bra{\mathrm{EPR}_q}^{\ot M}$. The bounds $\| (\Id - H_W)\ket{\vartheta} \|^2 \leq \delta_S$ and $\bra{\vartheta} H_W^2 \ket{\vartheta} \geq 1 - 2\delta_S$, combined through the triangle inequality (see Remark~\ref{rem:qld-unitary-triangle-slip}), give $\bra{\vartheta} \Id_{\mathrm{A}\mathrm{A}'\mathrm{B}\mathrm{B}'} \ot (\ket{\mathrm{EPR}_q}\bra{\mathrm{EPR}_q}^{\ot M})_{\mathrm{A}''\mathrm{B}''} \ket{\vartheta} \geq 1 - 2\delta_S - \sqrt{\delta_S}$; defining $\ket{\mathrm{aux}}$ as the normalization of $(\bra{\mathrm{EPR}_q}^{\ot M})_{\mathrm{A}''\mathrm{B}''} \ket{\vartheta}$, the overlap of $\ket{\vartheta}$ with $\ket{\mathrm{aux}} \ot \ket{\mathrm{EPR}_q}^{\ot M}$ is at least $\sqrt{1 - 2\delta_S - \sqrt{\delta_S}} \geq 1 - O(\sqrt{\delta_S})$, which yields the first item with a bound of $O(\sqrt{\delta_S})$. For the second item, Lemma~\ref{lem:qld-win-implications} gives, on average over $u \in \F_q^m$, $M^{(\mathrm{Pauli},W)}_{[g_h(u)=a]} \ot \Id \simeq_\eps \Id \ot M^{(\mathrm{Point},W),u}_a$ and $\Id \ot M^{(\mathrm{Point},W),u}_a \simeq_\eps M^{(\mathrm{Point},W),u}_a \ot \Id$, where $M^{(\mathrm{Pauli},W)}_{[g_h(u)=a]} = \sum_{h : g_h(u) = a} M^{(\mathrm{Pauli},W)}_h$; combining these with Item~1 of Lemma~\ref{lem:qld-construct-the-paulis} by Lemma~\ref{fact:triangle-for-simeq}, using $\delta_S \geq \eps$, yields $M^{(\mathrm{Pauli},W)}_{[g_h(u)=a]} \ot \Id \simeq_{\sqrt{\delta_S}} \Id \ot \tilde{M}^{W,\mathrm{ind}_m(u)}_a$. Writing $\ket{\Delta} = \ket{\mathrm{aux}} \ot \ket{\mathrm{EPR}_q}^{\ot M}$, the quantity to be bounded for the $\mathrm{A}$-side relation equals $2 - 2\sum_h \bra{\Delta} V_{\mathrm{A}} M^{(\mathrm{Pauli},W)}_h V_{\mathrm{A}}^\dagger \ot (\tau^W_h)_{\mathrm{B}''} \ket{\Delta}$, since $(\tau^W_h)_{\mathrm{A}''} \ket{\mathrm{EPR}_q}^{\ot M} = (\tau^W_h)_{\mathrm{B}''} \ket{\mathrm{EPR}_q}^{\ot M}$. Replacing $(\tau^W_h)_{\mathrm{B}''}$ by the averaged coarse-graining $\E_u \sum_{h' : g_{h'}(u) = g_h(u)} (\tau^W_{h'})_{\mathrm{B}''}$ costs at most $md/q$ by Lemma~\ref{lem:schwartz-zippel-total-degree} (distinct $h \neq h'$ have distinct encodings $g_h \neq g_{h'}$, of total degree at most $md$), and by \eqref{eq:qld-unitary-6} the resulting sum equals $\E_u \sum_{a} \bra{\Delta} V_{\mathrm{A}} M^{(\mathrm{Pauli},W)}_{[g_h(u)=a]} V_{\mathrm{A}}^\dagger \ot V_{\mathrm{B}} \tilde{M}^{W,\mathrm{ind}_m(u)}_a V_{\mathrm{B}}^\dagger \ket{\Delta}$. Exchanging $\ket{\Delta}$ for $\ket{\vartheta}$ costs $O(\delta_S^{1/4})$ by the first item, and the resulting expression $\E_u \sum_a \bra{\hat\psi} M^{(\mathrm{Pauli},W)}_{[g_h(u)=a]} \ot \tilde{M}^{W,\mathrm{ind}_m(u)}_a \ket{\hat\psi}$ is at least $1 - O(\sqrt{\delta_S})$ by the $\simeq_{\sqrt{\delta_S}}$ relation above. Altogether the distance is $O(\delta_S^{1/4} + md/q)$; the $\mathrm{B}$-side relation is proved identically.
+\end{proof}
+
+\begin{remark}[A triangle-inequality step in the source argument]\label{rem:qld-unitary-triangle-slip}
+	In the source proof of Lemma~\ref{lem:qld-unitary}, the triangle inequality gives $\| H_X \ket{\vartheta} - H_Z \ket{\vartheta} \| \leq \| (\Id - H_X)\ket{\vartheta} \| + \| (\Id - H_Z)\ket{\vartheta} \| \leq 2\sqrt{\delta_S}$, so that $\| H_X \ket{\vartheta} - H_Z \ket{\vartheta} \|^2 \leq 4\delta_S$; the source instead asserts the bound $2\sqrt{\delta_S}$ for the \emph{squared} norm, which holds only when $\sqrt{\delta_S} \leq 1/2$, and carries the term $\sqrt{\delta_S}$ into the overlap bound $1 - 2\delta_S - \sqrt{\delta_S}$. Either form of the bound yields an overlap of $1 - O(\sqrt{\delta_S})$ and leaves the final bound $\delta_{\mathrm{qld}} = O(\delta_S^{1/4} + md/q)$ unchanged asymptotically; a formalization should re-derive the intermediate constants.
+\end{remark}
+
+\section{Proof of the soundness of the Pauli basis test}
+
+We can now prove the soundness theorem for the Pauli basis test, stated as Theorem~\ref{thm:pauli} in Chapter~\ref{chap:qpbt-test}.
+
+\begin{proof}
+	\proves{thm:pauli}
+	\uses{lem:qld-unitary, def:v-swap-unitary, thm:naimark, def:projective-strategy-setup, def:expanded-state, def:EPR}
+	Let $(\ket{\psi},M)$ be a strategy for $\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$ that succeeds with probability at least $1 - \eps$, where $\ket{\psi}$ is a bipartite state on registers $\mathrm{A}$ and $\mathrm{B}$. By Naimark's theorem (Theorem~\ref{thm:naimark}, as formulated in~\cite[Theorem 5.1]{Ji2020LowIndividualDegree}), at the cost of extending $\ket{\psi}$ by sufficiently many ancilla qubits initialized in the state $\ket{0}$, we may assume that the strategy is projective and that the state is padded as in the conventions of Definition~\ref{def:projective-strategy-setup}. Let $V_{\mathrm{A}}$ be the unitary acting on registers $\mathrm{A}\mathrm{A}'\mathrm{A}''$ given by Lemma~\ref{lem:qld-unitary}, and let $\phi_{\mathrm{A}}$ be the isometry mapping register $\mathrm{A}$ to registers $\mathrm{A}\mathrm{A}'\mathrm{A}''$, where $\mathrm{A}'$ and $\mathrm{A}''$ are isomorphic to $(\C^q)^{\ot M}$, defined by
+	\[
+		\phi_{\mathrm{A}}\colon \ket{\theta}_{\mathrm{A}} \mapsto V_{\mathrm{A}} \bigl(\ket{\theta}_{\mathrm{A}} \ot (\ket{\mathrm{EPR}_q}^{\ot M})_{\mathrm{A}' \mathrm{A}''}\bigr)\;;
+	\]
+	define $\phi_{\mathrm{B}}$ analogously. Since the expanded state $\ket{\hat\psi}$ of Definition~\ref{def:expanded-state} is exactly $\ket{\psi}$ with the halves of $M$ pairs $\ket{\mathrm{EPR}_q}$ appended locally in registers $\mathrm{A}'\mathrm{A}''$ and $\mathrm{B}'\mathrm{B}''$, we have $\phi_{\mathrm{A}} \ot \phi_{\mathrm{B}} \ket{\psi} = V_{\mathrm{A}} \ot V_{\mathrm{B}} \ket{\hat\psi}$. Lemma~\ref{lem:qld-unitary} therefore yields a state $\ket{\mathrm{aux}}$ on registers $\mathrm{A}\mathrm{A}'\mathrm{B}\mathrm{B}'$ such that
+	\[
+		\bigl\| \phi_{\mathrm{A}} \ot \phi_{\mathrm{B}} \ket{\psi} - \ket{\mathrm{aux}} \ot \ket{\mathrm{EPR}_q}^{\ot M} \bigr\|^2 \leq \delta_{\mathrm{qld}}
+	\]
+	and, for $W \in \{X,Z\}$,
+	\[
+		\phi_{\mathrm{A}} \, (M^{(\mathrm{Pauli},W)}_h)_{\mathrm{A}} \, \phi_{\mathrm{A}}^\dagger \approx_{\delta_{\mathrm{qld}}} (\tau^W_h)_{\mathrm{A}''}
+		\qquad \text{and} \qquad
+		\phi_{\mathrm{B}} \, (M^{(\mathrm{Pauli},W)}_h)_{\mathrm{B}} \, \phi_{\mathrm{B}}^\dagger \approx_{\delta_{\mathrm{qld}}} (\tau^W_h)_{\mathrm{B}''}\;,
+	\]
+	where the $\approx$ statements hold with respect to the state $\ket{\mathrm{aux}} \ot \ket{\mathrm{EPR}_q}^{\ot M}$ and the answer summation is over $h \in \F_q^M$. This shows that the game $\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$ is a self-test, with robustness $\delta_{\mathrm{qld}}(\eps,m,d,q)$, for the canonical Pauli strategy of Lemma~\ref{lem:pauli-completeness}. Identifying the registers $\mathrm{A}\mathrm{A}'$ with $\mathrm{A}'$ and $\mathrm{B}\mathrm{B}'$ with $\mathrm{B}'$ matches the statement of Theorem~\ref{thm:pauli}, in which $\phi_{\mathrm{A}}\colon \mathcal{H}_{\mathrm{A}} \to \mathcal{H}_{\mathrm{A}'} \ot \mathcal{H}_{\mathrm{A}''}$. Finally, unpacking the dependence on the parameters $\eps, m, d, q$, the function $\delta_{\mathrm{qld}}(\eps,m,d,q) = O(\delta_S^{1/4} + md/q)$ has the form $a(md)^a(\eps^b + q^{-b} + 2^{-bmd})$ for universal constants $a > 1$ and $0 < b < 1$; see Remark~\ref{rem:pauli-robustness-form} for the reconciliation of this form with the statement of Theorem~\ref{thm:pauli}.
+\end{proof}
+
+\begin{remark}[Norm conventions in the robustness bound]\label{rem:pauli-robustness-form}
+	The proof above, following the source, establishes the first conclusion of Theorem~\ref{thm:pauli} in the squared form $\| \phi_{\mathrm{A}} \ot \phi_{\mathrm{B}} \ket{\psi} - \ket{\mathrm{aux}} \ot \ket{\mathrm{EPR}_q}^{\ot M} \|^2 \leq \delta_{\mathrm{qld}}$, whereas the theorem bounds the unsquared norm by $\delta_{\mathrm{qld}}(\eps,m,d,q)$. The two are reconciled by replacing the exponent $b$ with $b/2$ and enlarging $a$, since the class of functions $a(md)^a(\eps^b + q^{-b} + 2^{-bmd})$ is closed under square roots up to such adjustments of the universal constants. Similarly, the closing sentence of the source proof asserts constants $a > 1$ and $0 < b < 1$, while Theorem~\ref{thm:pauli} requires only $a \geq 1$ and $0 < b < 1$; the former implies the latter.
+\end{remark}
