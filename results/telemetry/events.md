@@ -66,6 +66,23 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   normalization, record it in the mirror README. Lesson: verification must
   compare at the representation level of the claim — a byte-level claim needs
   a byte-level check; text-mode I/O is not neutral.
+- **Machine slept mid-fleet (stage 3 extraction).** Three readers died with
+  "Your computer went to sleep mid-response"; a fourth stalled on retries. The
+  two survivors (sec8, sec14a) returned complete inventories. Fix: hold a
+  `caffeinate -is` assertion for long agent runs; re-run failed readers via
+  workflow resume (cached successes reused) with FILE-based output — large
+  inline structured returns remain fragile (second occurrence; the rule from
+  the study-fleet incident now also covers agent outputs, not just inputs).
+- **First codex review caught three real process defects (PR #0002).** On a
+  one-file deletion, the reviewer verified the deletion mathematically (git
+  blob identity, alias config, retained note vs paper source) and flagged:
+  unfilled Motivation/Description/Testing template in `pr.md`, unfilled bug
+  template in the issue, and an `Addresses`/`Closes` divergence between
+  the PR record and the commit that would have left the completed issue
+  open after merge. All three fixed; verdict machinery
+  (CHANGES_REQUESTED → ledger → merge-gate block) worked as specified.
+  Lesson: the commit message is not the record — the PR/issue files are
+  authoritative for merge bookkeeping, and the reviewer reads them.
 - **`elan show` errors on this machine.** `~/.elan/toolchains/stable` is a
   stale non-symlink directory (Jan 2025); pinned-toolchain resolution is
   unaffected. Left untouched; scripts must not depend on `elan show`.
