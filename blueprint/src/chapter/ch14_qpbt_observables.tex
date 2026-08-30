@@ -335,6 +335,7 @@ weighted sums of those operators.
 	Definition~\ref{def:approx-question-indexed-operators}.
 \end{lemma}
 \begin{proof}
+	\uses{def:povm-distance}
 	% The source ends this display with the exact bound |A| * delta; under the
 	% O(.) reading of def:povm-distance the hypothesis only supplies O(delta),
 	% and the constant is retained inside the O(.).
@@ -390,10 +391,7 @@ measurements.
 % (references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex, lines
 % 155-171), not a numbered environment. It is recorded here as a standing
 % convention paragraph together with a lemma for the one mathematical step
-% it contains, the projectivization of the strategy. The lemma keeps the
-% label def:projective-strategy-setup, under which later chapters cite this
-% setup; earlier revisions recorded the whole setup as a definition
-% environment under that label.
+% it contains, the reduction to a projective strategy.
 \paragraph{The strategy under analysis.}
 For the remainder of this chapter, as well as in
 Chapters~\ref{chap:qpbt-combining} and~\ref{chap:qpbt-extraction}, we fix
@@ -414,8 +412,8 @@ The analysis requires the measurements of $\mathcal{S}$ to be projective;
 the following lemma shows that this may be assumed without loss of
 generality.
 
-\begin{lemma}[Projectivization of the strategy under analysis]
-	\label{def:projective-strategy-setup}
+\begin{lemma}[Reduction to a projective strategy]
+	\label{lem:projective-strategy-setup}
 	\uses{def:admissible, def:pauli-question-distribution, def:pauli-win-predicate, def:tensor-product-strategy, def:tensor-product-value, def:projective-strategy-general}
 	Let $(q,m,d)$ be an admissible parameter tuple
 	(Definition~\ref{def:admissible}) and let
@@ -464,7 +462,7 @@ generality.
 	unchanged.
 \end{proof}
 
-In view of Lemma~\ref{def:projective-strategy-setup} we assume from here
+In view of Lemma~\ref{lem:projective-strategy-setup} we assume from here
 on, replacing $\mathcal{S}$ by the projective strategy provided by that
 lemma, that all measurements in $\mathcal{S}$ are projective; the
 extended state
@@ -481,7 +479,7 @@ $\{M^{(\mathrm{Point},W),u}_a\}_{a \in \F_q}$ for all $u \in \F_q^m$.
 
 \begin{definition}[Strategy observables]
 	\label{def:strategy-observables}
-	\uses{def:projective-strategy-setup, def:pauli-win-predicate, def:subfield-trace, def:line, def:line-representative}
+	\uses{lem:projective-strategy-setup, def:pauli-win-predicate, def:subfield-trace, def:line, def:line-representative}
 	For ``line'' questions we write $\mathrm{Line}$ for either of the
 	types $\mathrm{ALine}$ and $\mathrm{DLine}$: a statement about the
 	type $\mathrm{Line}$ applies to both types, and the intended type is
@@ -506,11 +504,11 @@ extracts from the strategy.
 
 \begin{lemma}[Winning implications]
 	\label{lem:qld-win-implications}
-	\uses{def:projective-strategy-setup, def:anticommuting-tuple, def:pauli-question-distribution, def:pauli-win-predicate, def:line-point-dist, def:consistency, def:povm-distance, def:ms-game, def:tensor-product-value, def:low-degree-encoding, def:ideg-deg-polynomials}
+	\uses{lem:projective-strategy-setup, def:anticommuting-tuple, def:pauli-question-distribution, def:pauli-win-predicate, def:line-point-dist, def:consistency, def:povm-distance, def:ms-game, def:tensor-product-value, def:low-degree-encoding, def:ideg-deg-polynomials}
 	Assume that $\mathcal{S}$ succeeds in $\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$
 	with probability at least $1 - \eps$, for some $\eps \geq 0$. Then the
 	following hold, with respect to the state $\ket{\psi}$ of the strategy
-	under analysis (Lemma~\ref{def:projective-strategy-setup} and the
+	under analysis (Lemma~\ref{lem:projective-strategy-setup} and the
 	convention following it).
 	\begin{enumerate}
 		\item \label{enu:qld-cons} (\textbf{Consistency check}) On average
@@ -634,11 +632,11 @@ extracts from the strategy.
 	\label{lem:qld-win-implications-obs}
 	% The source labels this lemma `len:qld-win-implications-obs'; the prefix
 	% `len' is a typo for `lem'. The label above is the corrected form.
-	\uses{def:strategy-observables, def:approx-question-indexed-operators, def:anticommuting-tuple, def:projective-strategy-setup}
+	\uses{def:strategy-observables, def:approx-question-indexed-operators, def:anticommuting-tuple, lem:projective-strategy-setup}
 	The following hold for the observables $W^r(u)$ of
 	Definition~\ref{def:strategy-observables}, with respect to the state
 	$\ket{\psi}$ of the strategy under analysis
-	(Lemma~\ref{def:projective-strategy-setup} and the convention
+	(Lemma~\ref{lem:projective-strategy-setup} and the convention
 	following it).
 	\begin{enumerate}
 		\item For all $W \in \{X,Z\}$ and $r \in \F_q$, on average over
@@ -761,7 +759,7 @@ every tuple $\omega$.
 
 \begin{definition}[Expanded state]
 	\label{def:expanded-state}
-	\uses{def:projective-strategy-setup, def:EPR}
+	\uses{lem:projective-strategy-setup, def:EPR}
 	Recall that $M = 2^m$. Introduce registers $\mathsf{A}', \mathsf{A}'',
 	\mathsf{B}', \mathsf{B}''$, each with Hilbert space isomorphic to
 	$(\C^q)^{\ot M}$, and define the state
@@ -772,7 +770,7 @@ every tuple $\omega$.
 		\ot \ket{\mathrm{EPR}_q}^{\ot M}_{\mathsf{B}'\mathsf{B}''}\,,
 	\end{equation}
 	where $\ket{\psi}$ is the extended strategy state of the strategy
-	under analysis (Lemma~\ref{def:projective-strategy-setup} and the
+	under analysis (Lemma~\ref{lem:projective-strategy-setup} and the
 	convention following it) and
 	$\ket{\mathrm{EPR}_q}$ is the maximally entangled state on
 	$\C^q \ot \C^q$ (Definition~\ref{def:EPR}). For the remainder of this
@@ -857,34 +855,75 @@ every tuple $\omega$.
 	\label{def:symmetric-equivalents}
 	\uses{def:expanded-state}
 	For the remainder of this chapter, as well as in
-	Chapter~\ref{chap:qpbt-combining}, the six registers
+	Chapters~\ref{chap:qpbt-combining} and~\ref{chap:qpbt-extraction}, the
+	six registers
 	$\mathsf{A}\mathsf{A}'\mathsf{A}''\mathsf{B}\mathsf{B}'\mathsf{B}''$
 	are partitioned into two ``parties'' in two different ways. The first
 	scheme takes $\mathsf{A}\mathsf{A}'$ as one party and
 	$\mathsf{B}\mathsf{A}''$ as the other; the second scheme takes
 	$\mathsf{B}\mathsf{B}'$ as the first party and
-	$\mathsf{A}\mathsf{B}''$ as the second. Thanks to the symmetry of the
-	Pauli basis test under exchanging the two players, and the symmetry of
-	the ancilla states in registers $\mathsf{A}'\mathsf{A}''$ and
-	$\mathsf{B}'\mathsf{B}''$, every bipartite consistency relation of the
-	form
+	$\mathsf{A}\mathsf{B}''$ as the second. The \emph{symmetric
+	equivalents} of a bipartite relation of the form
 	$M_{\mathsf{A}\mathsf{A}'} \approx_\delta N_{\mathsf{B}\mathsf{A}''}$
-	derived below also yields, by the same derivation with the registers
-	appropriately changed, the three relations
+	are the three relations
 	\[
 		N_{\mathsf{A}\mathsf{A}'} \approx_\delta M_{\mathsf{B}\mathsf{A}''}\,,\qquad
 		M_{\mathsf{B}\mathsf{B}'} \approx_\delta N_{\mathsf{A}\mathsf{B}''}\,,\qquad
-		N_{\mathsf{B}\mathsf{B}'} \approx_\delta M_{\mathsf{A}\mathsf{B}''}\,.
+		N_{\mathsf{B}\mathsf{B}'} \approx_\delta M_{\mathsf{A}\mathsf{B}''}\,,
 	\]
-	Similarly, every single-party relation of the form
-	$M_{\mathsf{A}\mathsf{A}'} \approx N_{\mathsf{A}\mathsf{A}'}$ also
-	holds on the register pairs $\mathsf{B}\mathsf{A}''$,
-	$\mathsf{B}\mathsf{B}'$ and $\mathsf{A}\mathsf{B}''$. These variants
-	are called the \emph{symmetric equivalents} of the derived relation.
-	Several lemmas below conclude by asserting that all symmetric
-	equivalents also hold, and later chapters invoke exactly these
-	variants.
+	obtained by passing to the second bipartitioning scheme and by
+	interchanging the first and second party; the symmetric equivalents of
+	a single-party relation of the form
+	$M_{\mathsf{A}\mathsf{A}'} \approx N_{\mathsf{A}\mathsf{A}'}$ are the
+	same relation on the register pairs $\mathsf{B}\mathsf{A}''$,
+	$\mathsf{B}\mathsf{B}'$ and $\mathsf{A}\mathsf{B}''$.
 \end{definition}
+
+\begin{lemma}[Transfer to symmetric equivalents]
+	\label{lem:symmetric-equivalents-transfer}
+	\uses{def:symmetric-equivalents, def:expanded-state, lem:projective-strategy-setup, def:povm-distance}
+	Every bipartite relation of the form
+	$M_{\mathsf{A}\mathsf{A}'} \approx_\delta N_{\mathsf{B}\mathsf{A}''}$,
+	and every single-party relation of the form
+	$M_{\mathsf{A}\mathsf{A}'} \approx N_{\mathsf{A}\mathsf{A}'}$, that is
+	derived below --- in this chapter and in
+	Chapters~\ref{chap:qpbt-combining} and~\ref{chap:qpbt-extraction} ---
+	from the standing hypotheses on the strategy under analysis, namely
+	its success probability in $\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$
+	and the form~\eqref{eq:def-psihat} of the expanded state, also holds
+	in each of its symmetric-equivalent forms
+	(Definition~\ref{def:symmetric-equivalents}), with the same error
+	parameter.
+\end{lemma}
+\begin{proof}
+	\uses{def:pauli-question-distribution, def:pauli-win-predicate, lem:qld-win-implications, def:expanded-state}
+	The Pauli basis test is symmetric under exchanging the two players:
+	its question distribution samples the ordered type pair uniformly
+	among the orderings of the edges of the type graph and applies the
+	type-determined CL functions to a shared uniform seed
+	(Definition~\ref{def:pauli-question-distribution}), and every clause
+	of the win predicate is evaluated symmetrically in the two players
+	(Definition~\ref{def:pauli-win-predicate}). Consequently the
+	hypotheses supplied by the success of the strategy under analysis ---
+	the winning implications of Lemma~\ref{lem:qld-win-implications} ---
+	hold verbatim with the roles of registers $\mathsf{A}$ and
+	$\mathsf{B}$ exchanged. Likewise, in the expanded
+	state~\eqref{eq:def-psihat} the two ancilla pairs are identically
+	prepared, and each state $\ket{\mathrm{EPR}_q}^{\ot M}$ is invariant
+	under exchanging its two halves, so the exact consistency and
+	commutation properties of the Pauli projections used on registers
+	$\mathsf{A}'\mathsf{A}''$ hold identically on
+	$\mathsf{B}'\mathsf{B}''$, and vice versa. Each of the three register
+	interchanges of Definition~\ref{def:symmetric-equivalents} therefore
+	maps this set of hypotheses to itself, and repeating the derivation of
+	a given relation with the registers appropriately changed yields the
+	interchanged relation with the same error parameter.
+\end{proof}
+
+Several lemmas below conclude by asserting that all symmetric equivalents
+of the stated approximations also hold, in each case by
+Lemma~\ref{lem:symmetric-equivalents-transfer}; later chapters invoke
+exactly these variants.
 
 \begin{lemma}[Consistency and approximate commutation of the expanded point measurements]
 	\label{lem:qld-comm-cons}
@@ -918,7 +957,7 @@ every tuple $\omega$.
 	hold, and the proof yields $\delta_{\mathrm{Anticom}}(\eps) = \sqrt{\eps}$.
 \end{lemma}
 \begin{proof}
-	\uses{lem:qld-win-implications, lem:qld-win-implications-obs, fact:data-processing, lem:twisted-commutation, def:expanded-point-measurement, def:expanded-point-trace-projection}
+	\uses{lem:qld-win-implications, lem:qld-win-implications-obs, fact:data-processing, lem:twisted-commutation, def:expanded-point-measurement, def:expanded-point-trace-projection, def:expanded-observables, lem:symmetric-equivalents-transfer}
 	For item~1: the original point measurements
 	$\{M^{(\mathrm{Point},W),u}_a\}$ are $\eps$-self-consistent between
 	registers $\mathsf{A}$ and $\mathsf{B}$ in $\ket{\hat{\psi}}$
@@ -941,7 +980,9 @@ every tuple $\omega$.
 	(see Lemma~\ref{lem:twisted-commutation}). The two signs cancel, so
 	$\hat{X}^{r_X}(u_X)\hat{Z}^{r_Z}(u_Z) \approx_{\sqrt{\eps}} \hat{Z}^{r_Z}(u_Z)\hat{X}^{r_X}(u_X)$
 	on average over uniformly random $\omega$, giving the approximate
-	commutation with $\delta_{\mathrm{Anticom}} = \sqrt{\eps}$.
+	commutation with $\delta_{\mathrm{Anticom}} = \sqrt{\eps}$. The
+	symmetric equivalents follow from
+	Lemma~\ref{lem:symmetric-equivalents-transfer}.
 \end{proof}
 
 \begin{definition}[Expanded line measurements]
@@ -950,7 +991,7 @@ every tuple $\omega$.
 	% labelled lem:qld-comm-line-cons (lines 552-556); it is recorded as a
 	% standalone definition because Chapter chap:qpbt-combining uses the
 	% concrete measurement, not merely its existence.
-	\uses{def:projective-strategy-setup, def:expanded-state, def:expanded-observables, def:ideg-deg-polynomials, def:low-degree-encoding, lem:pauli-observable-expansion, def:line, def:pauli-win-predicate}
+	\uses{lem:projective-strategy-setup, def:expanded-state, def:expanded-observables, def:ideg-deg-polynomials, def:low-degree-encoding, lem:pauli-observable-expansion, def:line, def:pauli-win-predicate}
 	For $W \in \{X,Z\}$, a line $\ell$, and $f \in \deg_{md}(\ell)$,
 	define
 	\[
@@ -1045,7 +1086,7 @@ every tuple $\omega$.
 	$\delta_{\mathrm{Line}}(\eps) = \sqrt{\eps}$.
 \end{lemma}
 \begin{proof}
-	\uses{def:expanded-line-measurement, def:expanded-point-measurement, lem:qld-win-implications, fact:data-processing, fact:add-a-proj2, fact:agreement, def:line-point-dist, def:ideg-deg-polynomials, def:pauli-win-predicate}
+	\uses{def:expanded-line-measurement, def:expanded-point-measurement, lem:qld-win-implications, fact:data-processing, fact:add-a-proj2, fact:agreement, def:line-point-dist, def:ideg-deg-polynomials, def:pauli-win-predicate, lem:symmetric-equivalents-transfer}
 	Take $\{\hat{M}^{(\mathrm{Line},W),\ell}_f\}$ to be the measurement of
 	Definition~\ref{def:expanded-line-measurement}.
 	Item~\ref{enu:qld-comm-line-self-cons} follows from the fact that the
@@ -1130,7 +1171,9 @@ every tuple $\omega$.
 	hypothesis unchanged, since the term for the outcome $\bot$ vanishes.
 	Restricted to the outcomes in $\F_q$, the conclusion yields
 	item~\ref{eq:qld-comm-line-pt-cons2} with error $\sqrt{\eps}$, so that
-	$\delta_{\mathrm{Line}}(\eps) = \sqrt{\eps}$.
+	$\delta_{\mathrm{Line}}(\eps) = \sqrt{\eps}$. The symmetric
+	equivalents follow from
+	Lemma~\ref{lem:symmetric-equivalents-transfer}.
 \end{proof}
 
 The expanded point and line measurements constructed in this section, being

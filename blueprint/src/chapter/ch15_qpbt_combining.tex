@@ -12,8 +12,12 @@ Chapter~\ref{chap:qpbt-observables}: a projective strategy for the Pauli basis
 test game succeeds with probability at least $1-\eps$, and all operators act
 relative to the expanded state $\ket{\hat\psi}$ on registers
 $\mathsf{A}\,\mathsf{A}'\,\mathsf{A}''\,\mathsf{B}\,\mathsf{B}'\,\mathsf{B}''$
-(Definition~\ref{def:expanded-state}), where $M = 2^m$ denotes the number of
-ancilla qudit registers, each isomorphic to $\C^q$, appended on each side.
+(Definition~\ref{def:expanded-state}), where each of the four ancilla
+registers $\mathsf{A}'$, $\mathsf{A}''$, $\mathsf{B}'$, and $\mathsf{B}''$
+--- two appended per player, the pair $\mathsf{A}'\mathsf{A}''$
+(respectively $\mathsf{B}'\mathsf{B}''$) holding $M$ EPR pairs of local
+dimension $q$ --- is a register of $M = 2^m$ qudits with Hilbert space
+isomorphic to $(\C^q)^{\ot M}$.
 We write $q = 2^t$ (Definition~\ref{def:admissible-size}) and
 $\tr:\F_q\to\F_2$ for the subfield trace. The points measurements
 $\hat{M}^{(\mathrm{Point},W),u}_a$ for $W \in \{X,Z\}$
@@ -39,7 +43,7 @@ distances $\approx_\delta$ (Definition~\ref{def:povm-distance}) and
 $\simeq_\delta$ (Definition~\ref{def:consistency}) are taken with respect to
 $\ket{\hat\psi}$ and averaged over the stated question distribution, and
 ``all symmetric equivalents'' of an approximation is meant in the sense of
-Remark~\ref{def:symmetric-equivalents}. Between scalars, $\alpha
+Definition~\ref{def:symmetric-equivalents}. Between scalars, $\alpha
 \approx_\delta \beta$ means $|\alpha - \beta| \le O(\delta)$. For sums of
 measurement operators over outcomes satisfying a predicate we use the bracket
 notation of Definition~\ref{def:bracket}; for instance
@@ -75,73 +79,113 @@ linearity, from which a projective measurement with outcomes in $\F_q^2$ is
 assembled by Fourier averaging.
 
 % Statement as in Theorem 10 of the cited source \cite{Natarajan2017Linearity}
-% (arXiv:1610.03574): the exact linearity holds for all pairs (u, u'), while
-% the closeness of L^u to O^u is guaranteed on average over uniformly random u
-% (E_u d_{psi'}(L^u, O^u)^2 <= delta there). The mirror's quotation
+% (arXiv:1610.03574): hypothesis as in its display (7), conclusion as in its
+% display (8). The provider imposes no upper bound on delta, asserts the
+% exact linearity for all pairs (u, u'), and guarantees the closeness of L^u
+% to O^u on average over uniformly random u only, in mean squared
+% state-dependent distance with the error delta preserved; it is stated for
+% an arbitrary density operator rho on a single Hilbert space, with the
+% index group written {0,1}^n under bitwise XOR (here F_2^t, additively) and
+% Obs(H) denoting the Hermitian unitaries, i.e. the binary observables of
+% def:povm-conventions. In the closeness conclusion an operator on H is
+% compared with an operator on the extension via its ampliation S ot Id. The
+% mirror's quotation
 % (references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:713-725)
-% places both conclusions under the quantifier "for all u, u' in F_2^t", a
-% strengthening of the cited theorem that is not reproduced here; see
-% rem:linearity-import.
+% inserts the restriction 0 <= delta <= 1, places the closeness conclusion,
+% together with the exact linearity, under the quantifier "for all u, u' in
+% F_2^t", and appends "L^u = Id when u = 0"; none of these is part of the
+% cited theorem, and none is reproduced here. See rem:linearity-import.
 \begin{theorem}[Quantum linearity test~\cite{Natarajan2017Linearity}]
 	\label{thm:linearity}
-	\uses{def:povm-distance}
-	Let $0 \le \delta \le 1$, let $t$ be a positive integer, and let
-	$\ket{\psi}$ be a state in a Hilbert space
-	$\hilb_{\mathsf{A}} \ot \hilb_{\mathsf{B}}$. Let $\{\mathcal{O}^u\}$ be a
-	set of observables indexed by $u \in \F_2^t$ acting on
-	$\hilb_{\mathsf{A}}$, and suppose that on average over $u, u'$ chosen
-	uniformly at random from $\F_2^t$ the approximate linearity
+	\uses{def:povm-conventions}
+	Let $t$ be a positive integer and $\delta \ge 0$. Let $\rho$ be a
+	density operator on a Hilbert space $\hilb$ and let
+	$\{\mathcal{O}^u\}$ be a set of binary observables indexed by
+	$u \in \F_2^t$ acting on $\hilb$, such that on average over $u, u'$
+	chosen uniformly at random from $\F_2^t$,
 	\[
-		(\mathcal{O}^u \, \mathcal{O}^{u'})_{\mathsf{A}}
-		\approx_\delta (\mathcal{O}^{u+u'})_{\mathsf{A}}
+		\E_{u,u'} \Tr\big(\mathcal{O}^u \, \mathcal{O}^{u'} \,
+		\mathcal{O}^{u+u'} \, \rho\big) \ge 1 - \delta\,.
 	\]
-	holds with respect to $\ket{\psi}$. Then there exist an extended state
-	$\ket{\psi'}_{\mathsf{A}\mathsf{A}'\mathsf{B}}
-	= \ket{\psi}_{\mathsf{A}\mathsf{B}} \ot \ket{0}_{\mathsf{A}'}$
-	in an extended space
-	$\hilb_{\mathsf{A}} \ot \hilb_{\mathsf{B}} \ot \hilb_{\mathsf{A}'}$ and
-	observables $\{\mathcal{L}^u\}$ acting on
-	$\hilb_{\mathsf{A}} \ot \hilb_{\mathsf{A}'}$ with the following two
-	properties: the exact linearity
+	Then there exist a Hilbert space $\hilb'$, a pure state
+	$\ket{\mathrm{anc}} \in \hilb'$, and binary observables
+	$\{\mathcal{L}^u\}$ indexed by $u \in \F_2^t$ acting on
+	$\hilb \ot \hilb'$ such that, writing
+	$\rho' = \rho \ot \ket{\mathrm{anc}}\bra{\mathrm{anc}}$, the exact
+	linearity
 	\[
 		\mathcal{L}^u \, \mathcal{L}^{u'} = \mathcal{L}^{u+u'}
 	\]
-	holds for all $u, u' \in \F_2^t$, and on average over $u$ chosen
-	uniformly at random from $\F_2^t$,
+	holds for all $u, u' \in \F_2^t$, and
 	\[
-		(\mathcal{L}^u)_{\mathsf{A}\mathsf{A}'}
-		\approx_\delta (\mathcal{O}^u)_{\mathsf{A}}\,,
+		\E_{u} \, d_{\rho'}\big(\mathcal{L}^u,\ \mathcal{O}^u \ot
+		\Id_{\hilb'}\big)^2 \le \delta\,,
 	\]
-	the latter with respect to $\ket{\psi'}$. Furthermore,
-	$\mathcal{L}^u = \Id$ when $u = 0$.
+	where the expectation is over $u$ chosen uniformly at random from
+	$\F_2^t$ and
+	$d_{\sigma}(S,T)
+	= \big(\Tr\big((S-T)^\dagger (S-T)\, \sigma\big)\big)^{1/2}$
+	denotes the state-dependent distance with respect to a density
+	operator $\sigma$.
 \end{theorem}
 \begin{proof}
 	This is Theorem~10 of Natarajan and
-	Vidick~\cite{Natarajan2017Linearity}; no proof is given in
-	\cite{Ji2020MIPStar}, which invokes the result directly. The statement is
-	imported here as an external result; see
-	Remark~\ref{rem:linearity-import}.
+	Vidick~\cite{Natarajan2017Linearity}, imported as an external result;
+	no proof is given in \cite{Ji2020MIPStar}, which invokes the result
+	directly. The verification obligations attached to the import at its
+	point of use --- the correspondence between the correlation hypothesis
+	above and the relation $\approx_\delta$ of
+	Definition~\ref{def:povm-distance}, the instantiation of $\rho$ as a
+	reduced state of $\ket{\hat\psi}$, the absorption of the ancilla
+	register into padding of the strategy state, and the identity
+	$\mathcal{L}^0 = \Id$ --- are enumerated in
+	Remark~\ref{rem:linearity-import} and addressed in the proof of
+	Lemma~\ref{lem:qld-4-10}.
 \end{proof}
 
-\begin{remark}[Properties of the quantum linearity theorem used below]
+\begin{remark}[Obligations of the linearity-theorem import]
 	\label{rem:linearity-import}
-	Theorem~\ref{thm:linearity} is the quantum linearity theorem of
-	Natarajan and Vidick~\cite{Natarajan2017Linearity}, used here as an
-	external result. Three features of the statement are load-bearing for
-	the proof of Lemma~\ref{lem:qld-4-10}: the error is preserved without
+	Theorem~\ref{thm:linearity} is stated in the form proved in
+	\cite{Natarajan2017Linearity}. Three features are load-bearing for the
+	proof of Lemma~\ref{lem:qld-4-10}: the error is preserved without
 	polynomial loss ($\delta$ in the hypothesis becomes $\delta$ in the
-	conclusion, up to the constant absorbed by
-	Definition~\ref{def:povm-distance}); the linearity of the
-	$\{\mathcal{L}^u\}$ is exact and holds for all pairs $(u,u')$, not
-	merely on average; and the closeness of $\mathcal{L}^u$ to
+	conclusion); the linearity of the $\{\mathcal{L}^u\}$ is exact and
+	holds for all pairs $(u,u')$, not merely on average; and the
+	hypothesis carries no upper bound on $\delta$, so the theorem may be
+	applied separately for each pair $(x,z)$ with hypothesis error the
+	conditional linearity defect given $(x,z)$, a quantity for which no a
+	priori bound is available. The closeness of $\mathcal{L}^u$ to
 	$\mathcal{O}^u$ is guaranteed on average over a uniformly random $u$
-	only. The averaged form suffices because the $\mathcal{L}^u$ enter the
-	proof of Lemma~\ref{lem:qld-4-10} only through averages over $u$. The
-	quotation of the theorem in \cite{Ji2020MIPStar} places the closeness
-	conclusion, together with the exact linearity, under the quantifier
-	``for all $u, u' \in \F_2^t$''; that pointwise closeness is a
-	strengthening of the theorem proved in \cite{Natarajan2017Linearity}
-	and is neither reproduced nor used here.
+	only; this averaged form suffices because the $\mathcal{L}^u$ enter
+	the proof of Lemma~\ref{lem:qld-4-10} only through averages over $u$.
+	The quotation of the theorem in \cite{Ji2020MIPStar} differs from the
+	cited statement in three respects: it inserts the restriction
+	$0 \le \delta \le 1$, which would block the fiberwise application
+	just described; it places the closeness conclusion, together with the
+	exact linearity, under the quantifier ``for all $u, u' \in \F_2^t$'',
+	a strengthening of the theorem proved in
+	\cite{Natarajan2017Linearity}; and it appends the identity
+	$\mathcal{L}^u = \Id$ for $u = 0$. None of the three is reproduced
+	here: the restriction is dropped, the pointwise closeness is not
+	used, and the appended identity is instead derived from the
+	conclusion, since exact linearity at $u = u' = 0$ gives
+	$(\mathcal{L}^0)^2 = \mathcal{L}^0$, and an idempotent unitary equals
+	the identity. The import carries two conversion obligations,
+	discharged in the proof of Lemma~\ref{lem:qld-4-10}: the theorem is
+	instantiated with $\rho$ the reduced density operator of
+	$\ket{\hat\psi}$ on the registers carrying the observables, so that
+	traces against $\rho$ are expectation values in $\ket{\hat\psi}$; and
+	the correlation hypothesis and the squared-distance conclusion are
+	converted to and from the relation $\approx_\delta$ of
+	Definition~\ref{def:povm-distance} by expanding the square, using
+	unitarity of the observables, and relabelling the averaged index
+	pair, at the cost of the constant factors absorbed by that
+	definition. One obligation remains open and is flagged where it
+	arises: the ancilla register $\hilb'$ and its state
+	$\ket{\mathrm{anc}}$ produced by the theorem, which may depend on the
+	pair $(x,z)$, must be absorbed --- uniformly in $(x,z)$ --- into
+	zero-state padding of the strategy state, padding that the source
+	assumes present without construction.
 \end{remark}
 
 \begin{lemma}[Combined point measurements]
@@ -223,29 +267,64 @@ assembled by Fourier averaging.
 	$\{\hat{M}^{(\mathrm{Point},W),u}_a\}$), which transfers, on average over
 	$x, z, r, r', s, s'$, to an approximate linearity of the
 	$\{\hat{R}^{\omega}_{a,b}\}$ in the index pair $(r,s)$ and then to the
-	$\{\hat{L}^{\omega}_{a,b}\}$. Consequently the observables
+	$\{\hat{L}^{\omega}_{a,b}\}$. Consequently the binary observables
 	$\mathcal{O}^{\omega}
 	= \sum_{a,b \in \F_2} (-1)^{a+b} \hat{L}^{\omega}_{a,b}$
 	satisfy
 	$\mathcal{O}^{x,z,r,s} \mathcal{O}^{x,z,r',s'}
 	\approx_\delta \mathcal{O}^{x,z,r+r',s+s'}$
-	on average; identifying $\F_q \cong \F_2^t$ so that the pair $(r,s)$
-	ranges over $\F_2^{2t}$, Theorem~\ref{thm:linearity} applied for each
-	fixed $(x,z)$ --- with hypothesis error the conditional average of the
-	approximate-linearity defect given $(x,z)$ --- yields exactly linear
-	observables $\{\mathcal{L}^{x,z,r,s}\}$ that are close to the
-	$\{\mathcal{O}^{x,z,r,s}\}$ on average over $(r,s)$, with the same
-	error; taking the expectation over $(x,z)$ shows that the two families
-	are $\delta$-close on average over $x, z, r, s$, the averaged form of
-	closeness being the one Theorem~\ref{thm:linearity} supplies and the
-	only one used below (Remark~\ref{rem:linearity-import}); no further
-	extension of the state is needed because $\ket{\hat\psi}$ is padded with
-	sufficiently many ancilla qubits in the zero state. Define
+	on average over $x, z, r, r', s, s'$. Identify $\F_q \cong \F_2^t$ so
+	that the pair $(r,s)$ ranges over $\F_2^{2t}$, and let $\rho$ be the
+	reduced density operator of $\ket{\hat\psi}$ on the registers carrying
+	the $\mathcal{O}^{\omega}$, so that $\Tr(S\rho)$ is the expectation
+	value of $S$ in $\ket{\hat\psi}$ for every operator $S$ on those
+	registers. For fixed $(x,z)$ let $\delta_{x,z}$ denote the
+	conditional average, given $(x,z)$, of the squared linearity defect
+	$\lVert (\mathcal{O}^{x,z,r,s} \mathcal{O}^{x,z,r',s'}
+	- \mathcal{O}^{x,z,r+r',s+s'}) \ket{\hat\psi} \rVert^2$, so that
+	$\E_{x,z}\, \delta_{x,z} = O(\delta)$; expanding the square, using
+	unitarity of the observables, and relabelling the averaged index pair
+	shows that, for each $(x,z)$, the correlation hypothesis of
+	Theorem~\ref{thm:linearity} holds in the form
+	$\E\, \Tr(\mathcal{O}^{x,z,r,s} \mathcal{O}^{x,z,r',s'}
+	\mathcal{O}^{x,z,r+r',s+s'} \rho)
+	= 1 - \tfrac{1}{2}\delta_{x,z}$,
+	the average being over $(r,s)$ and $(r',s')$ uniform in $\F_2^{2t}$.
+	Since Theorem~\ref{thm:linearity} imposes no upper bound on its error
+	parameter, it applies for every fixed $(x,z)$ with
+	$\delta := \tfrac{1}{2}\delta_{x,z}$ and yields binary observables
+	$\{\mathcal{L}^{x,z,r,s}\}$, exactly linear in $(r,s)$ for all pairs,
+	acting on an extension by an ancilla register in a pure state, with
+	$\E_{r,s}\, d\big(\mathcal{L}^{x,z,r,s},\ \mathcal{O}^{x,z,r,s} \ot
+	\Id\big)^2 \le \tfrac{1}{2}\delta_{x,z}$
+	in the state-dependent distance of the extended state; taking the
+	expectation over $(x,z)$ shows that the two families are
+	$\delta$-close, in the sense of Definition~\ref{def:povm-distance},
+	on average over $x, z, r, s$, the averaged form of closeness being
+	the one Theorem~\ref{thm:linearity} supplies and the only one used
+	below (Remark~\ref{rem:linearity-import}).
+	% Import obligation (see rem:linearity-import): the ancilla register
+	% and its pure state produced by thm:linearity may depend on (x,z);
+	% following the source ("By assuming that |hat psi> has sufficiently
+	% many ancilla zero qubits, we do not need to extend the state
+	% further", references/qpbt-paper/
+	% 14_analysis_of_the_pauli_basis_test.tex:832), they are to be
+	% absorbed, uniformly in (x,z), into zero-state padding of the
+	% strategy state, so that the L^{x,z,r,s} act on hilb ot (C^q)^{ot M}
+	% as the statement requires. The source assumes this padding without
+	% construction; the absorption is an unresolved obligation of the
+	% import, not established here.
+	The ancilla register and its state are absorbed into zero-state
+	padding of the strategy state, an obligation of the import recorded
+	in Remark~\ref{rem:linearity-import}. Define
 	$\hat{Q}^{x,z}_{a,b}
 	= \E_{r,s} (-1)^{\tr(ra+sb)} \mathcal{L}^{x,z,r,s}$
 	for $a, b \in \F_q$: exact linearity makes each $\hat{Q}^{x,z}_{a,b}$ a
 	projection, and the family sums to the identity because
-	$\mathcal{L}^{x,z,0,0} = \Id$, so $\{\hat{Q}^{x,z}_{a,b}\}$ is a
+	$\sum_{a,b} \hat{Q}^{x,z}_{a,b} = \mathcal{L}^{x,z,0,0} = \Id$, the
+	latter identity because exact linearity at $(r,s) = (r',s') = (0,0)$
+	makes $\mathcal{L}^{x,z,0,0}$ an idempotent unitary; so
+	$\{\hat{Q}^{x,z}_{a,b}\}$ is a
 	projective measurement recovering $\F_q$-valued outcomes from the binary
 	data by Fourier averaging over $(r,s)$. Its self-consistency
 	\eqref{eq:qld-q-self-cons} follows from Lemma~\ref{lem:avg-closeness}
@@ -458,8 +537,9 @@ analyzed, together with candidate repairs, in
 	% error form poly(m^2 eps, md/q); neither of the source's two proof
 	% routes delivers that form, and the route retained below establishes
 	% m * poly(eps, md/q), which is the form the sequel uses. See
-	% rem:qld-4-13-source-defects. The line-point distribution over
-	% F_q^{2m+2} presupposes that 2m+2 divides q; see
+	% rem:qld-4-13-source-defects and the analysis in
+	% docs/paper-gaps/qpbt_combined-lines-error-term.tex. The line-point
+	% distribution over F_q^{2m+2} presupposes that 2m+2 divides q; see
 	% rem:qld-4-7-divisibility.
 	There exists a function
 	$\delta_{\mathrm{combine}}(\eps,m,d,q) = \poly(m^2\eps, md/q)$
@@ -997,9 +1077,10 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	bound is not of the stated form $\poly(m^2\eps, md/q)$, and no
 	function of that form dominates it, so the error function claimed in
 	the statement remains unproved along this route; the source's second
-	route rests on a decomposition not supported by the properties proved
-	for the sub-line distribution, and the established bound is the one
-	used in the sequel (Remark~\ref{rem:qld-4-13-source-defects}). Now
+	route rests on a joint-law decomposition not provided by Property~2 of
+	Lemma~\ref{lem:qld-sublines}, and the established bound is the one
+	used in the sequel (Remark~\ref{rem:qld-4-13-source-defects}; the two
+	routes are analyzed in \cite{gap:qpbt_combined-lines-error-term}). Now
 	if the pair $(f_X, f_Z)$ evaluates to $(a, b)$ at $(x, z)$, then
 	$\mathrm{combine}_{f_X,f_Z}$ evaluates to $\alpha a + \beta b$ at
 	$(x, z, \alpha, \beta)$; hence the consistency of $T$ with
@@ -1015,50 +1096,33 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	analogous argument with the registers swapped.
 \end{proof}
 
-\begin{remark}[Two error routes in the source proof of
+\begin{remark}[The error term in the source proof of
 	Lemma~\ref{lem:qld-4-13}]
 	\label{rem:qld-4-13-source-defects}
-	The source proof in \cite{Ji2020MIPStar} states two different bounds for
-	the quantity \eqref{eq:qld-combined-lines-consistency}:
+	The statement of Lemma~\ref{lem:qld-4-13} retains the source error
+	form $\delta_{\mathrm{combine}} = \poly(m^2\eps, md/q)$, which
+	remains unproved. The source proof in \cite{Ji2020MIPStar} asserts
+	two different bounds for the quantity
+	\eqref{eq:qld-combined-lines-consistency}: the bound
 	$O(m(\eps^{1/4} + \delta_P^{1/4} + \delta_Q^{1/4} +
-	\delta_{\mathrm{Line}}^{1/2}))$, obtained by chaining the three claims
-	(Lemmas~\ref{lem:claim-17-1}--\ref{lem:claim-17-3}), and
-	$O(m^2 \delta_P)$, obtained by decomposing the left-hand side of
-	\eqref{eq:qld-combined-lines-consistency} into restricted-distribution
-	terms and bounding each by \eqref{eq:qld-xz-lines-restricted}; a
-	sentence is also duplicated at the corresponding point of the source,
-	the second copy with a malformed reference. The second route requires
-	the joint law of the pair $((\ell_X, x), (\ell_Z, z))$, for
-	$(\ell, \ell_X, \ell_Z) \sim D$ and $(x,z,\alpha,\beta)$ uniform on
-	$\ell$, to be a mixture of the product distributions
-	$D_{\mathrm{v}_1,i} \times D_{\mathrm{v}_2,j}$, since
-	\eqref{eq:qld-xz-lines-restricted} averages over two independently
-	sampled line-point pairs; Property~2 of Lemma~\ref{lem:qld-sublines}
-	determines only the two marginal laws of $(\ell_X, \ell_Z, x)$ and of
-	$(\ell_X, \ell_Z, z)$ separately, not the joint law of
-	$((\ell_X, x), (\ell_Z, z))$, so the decomposition invoked by the
-	source is not established there. The proof above therefore uses only
-	the first route. Neither route, moreover, delivers the error form
-	$\poly(m^2\eps, md/q)$ claimed in the source. The first route proves
-	the bound $O(m(\eps^{1/4} + \delta_P^{1/4} + \delta_Q^{1/4} +
-	\delta_{\mathrm{Line}}^{1/2}))$, a function of the form
-	$m \cdot \poly(\eps, md/q)$, and no function of $m^2\eps$ and $md/q$
-	alone that vanishes as its arguments vanish dominates it: at
-	$\eps = m^{-4}$, and with $q$ taken large, both $m^2\eps$ and $md/q$
-	tend to $0$ while the term $m\,\eps^{1/4} = 1$ does not, so the
-	derivation does not support the claimed form. Even granting the
-	decomposition required by the second route, the bound obtained there
-	is $O(m^2\delta_P) = m^2 \cdot \poly(\eps, md/q)$, which again carries
-	a separate prefactor polynomial in $m$. The statement of
-	Lemma~\ref{lem:qld-4-13} above retains the source error form
-	$\poly(m^2\eps, md/q)$, which therefore remains unproved; the bound
-	established by the proof is $m \cdot \poly(\eps, md/q)$, a form
-	sufficient for Lemma~\ref{lem:qld-4-7}, whose error function absorbs
-	the prefactor $m$ into $(md)^a$. In addition, the final line of
-	the source proof of Lemma~\ref{lem:claim-17-2} asserts the bound
-	$O(m^2\delta_{\mathrm{Line}})$ for a consistency term that is close to
-	one rather than for its deficit; the statements and sketches above
-	record the corrected assertions.
+	\delta_{\mathrm{Line}}^{1/2}))$, obtained by chaining the three
+	claims (Lemmas~\ref{lem:claim-17-1}--\ref{lem:claim-17-3}), and the
+	bound $O(m^2 \delta_P)$, whose derivation decomposes
+	\eqref{eq:qld-combined-lines-consistency} into
+	restricted-distribution terms bounded by
+	\eqref{eq:qld-xz-lines-restricted}. The second derivation requires a
+	joint product law for the pair $((\ell_X, x), (\ell_Z, z))$ that
+	Property~2 of Lemma~\ref{lem:qld-sublines} does not provide, and
+	neither bound is dominated by a function of $m^2\eps$ and $md/q$
+	alone that vanishes as its arguments vanish. The proof above
+	therefore follows the first route only and establishes the bound
+	$m \cdot \poly(\eps, md/q)$, which is the form consumed by
+	Lemma~\ref{lem:qld-4-7}, whose error function absorbs the prefactor
+	$m$ into $(md)^a$. The full analysis --- the two routes, the scalings
+	showing that the claimed form follows from neither, the corrected
+	deficit assertion in the proof of Lemma~\ref{lem:claim-17-2}, and the
+	candidate repairs with their open obligations --- is given in
+	\cite{gap:qpbt_combined-lines-error-term}.
 \end{remark}
 
 The measurements of Lemma~\ref{lem:qld-4-12} and Lemma~\ref{lem:qld-4-13}

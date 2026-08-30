@@ -6,7 +6,7 @@
 % lines 1415--1877 (subsection ``Pulling the X and Z measurements apart''
 % and the closing proof of the soundness theorem).
 
-This chapter completes the analysis of the Pauli basis test~\cite{Ji2020MIPStar}. Throughout, $(q,m,d)$ is an admissible parameter tuple (Definition~\ref{def:admissible}), $q = 2^t$, and $M = 2^m$ denotes the number of $q$-ary qudits tested for per player. (The letter $M$ also denotes measurement operators, always carrying super- and subscripts; the meaning is determined by context, as in the source.) We fix a projective strategy for the Pauli basis test game $\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$ that succeeds with probability at least $1-\eps$, in the setting of Chapter~\ref{chap:qpbt-observables}: the shared state $\ket{\psi}$ on registers $\mathrm{A}$, $\mathrm{B}$ is assumed padded with sufficiently many ancilla qubits in the state $\ket{0}$ (Lemma~\ref{def:projective-strategy-setup} and the convention following it), and $\ket{\hat\psi}$ denotes the expanded state on the six registers $\mathrm{A}\mathrm{A}'\mathrm{A}''\mathrm{B}\mathrm{B}'\mathrm{B}''$, obtained by adjoining to each player the two halves of $M$ pairs $\ket{\mathrm{EPR}_q}$ (Definition~\ref{def:expanded-state}). Unless stated otherwise, every $\approx_\delta$ and $\simeq_\delta$ statement below is taken with respect to the state $\ket{\hat\psi}$, over the question distribution named in the statement, with register placements indicated by subscripts; ``all symmetric equivalents'' refers to the register interchanges of Remark~\ref{def:symmetric-equivalents}.
+This chapter completes the analysis of the Pauli basis test~\cite{Ji2020MIPStar}. Throughout, $(q,m,d)$ is an admissible parameter tuple (Definition~\ref{def:admissible}), $q = 2^t$, and $M = 2^m$ denotes the number of $q$-ary qudits tested for per player. (The letter $M$ also denotes measurement operators, always carrying super- and subscripts; the meaning is determined by context, as in the source.) We fix a projective strategy for the Pauli basis test game $\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$ that succeeds with probability at least $1-\eps$, in the setting of Chapter~\ref{chap:qpbt-observables}: the shared state $\ket{\psi}$ on registers $\mathrm{A}$, $\mathrm{B}$ is assumed padded with sufficiently many ancilla qubits in the state $\ket{0}$ (Lemma~\ref{lem:projective-strategy-setup} and the convention following it), and $\ket{\hat\psi}$ denotes the expanded state on the six registers $\mathrm{A}\mathrm{A}'\mathrm{A}''\mathrm{B}\mathrm{B}'\mathrm{B}''$, obtained by adjoining to each player the two halves of $M$ pairs $\ket{\mathrm{EPR}_q}$ (Definition~\ref{def:expanded-state}). Unless stated otherwise, every $\approx_\delta$ and $\simeq_\delta$ statement below is taken with respect to the state $\ket{\hat\psi}$, over the question distribution named in the statement, with register placements indicated by subscripts; ``all symmetric equivalents'' refers to the register interchanges of Definition~\ref{def:symmetric-equivalents}.
 
 We use the following objects from the preceding chapters: the combined point projectors $\hat{M}^{(\mathrm{Point},W),u}_a$ acting on the expanded space (Definition~\ref{def:expanded-point-measurement}); the projective polynomial-pair measurement $\{\hat{S}_{g_X,g_Z}\}$ of Lemma~\ref{lem:qld-4-7}, with outcomes pairs of polynomials in $\mathrm{ideg}_{d,m}(\F_q)$ and error function
 \[
@@ -30,7 +30,7 @@ For a $g$ that is not an encoding the two sides of this identity are the evaluat
 
 \section{The pulled-apart measurements and observables}
 
-The measurement $\{\hat{S}_{g_X,g_Z}\}$ reads out an $X$-polynomial and a $Z$-polynomial simultaneously. We now separate the two readings again, this time as commuting actions on distinct registers: the polynomial outcome is measured on the players' original registers, while a genuine Pauli measurement acts on the EPR register $\mathrm{A}''$ (resp.\ $\mathrm{B}''$).
+The measurement $\{\hat{S}_{g_X,g_Z}\}$ reads out an $X$-polynomial and a $Z$-polynomial simultaneously. We now separate the two readings again, this time as commuting actions on distinct registers: the polynomial outcome is measured on registers $\mathrm{A}\mathrm{A}'$ (resp.\ $\mathrm{B}\mathrm{B}'$), while a genuine Pauli measurement acts on the EPR register $\mathrm{A}''$ (resp.\ $\mathrm{B}''$).
 
 \begin{definition}[Single-basis marginals of the polynomial-pair measurement]\label{def:s-w-marginals}
 	\uses{lem:qld-4-7}
@@ -103,7 +103,7 @@ The measurement $\{\hat{S}_{g_X,g_Z}\}$ reads out an $X$-polynomial and a $Z$-po
 The next lemma shows that the pulled-apart measurements are consistent with the original points measurements of the strategy, and self-consistent. In its statement, and for the remainder of the chapter, $\delta_S$ denotes the function of Lemma~\ref{lem:qld-4-7}, enlarged by an adjustment of the universal constants $a$ and $b$ so as to also dominate additional error terms of order $\sqrt{\eps}$, $\eps$, and $md/q$ that the source absorbs into $\delta_S$ along the way; such an adjustment is possible since, after shrinking $b$ to at most $1/2$, the term $\eps^b$ dominates $\sqrt{\eps}$ and $\eps$ for $\eps \leq 1$, while $(md)^a q^{-b}$ dominates $md/q$.
 
 \begin{lemma}[Consistency and self-consistency of the pulled-apart measurements]\label{lem:qld-construct-the-paulis}
-	\uses{def:tilde-m-measurement, def:tilde-w-observables, def:projective-strategy-setup, def:expanded-state, def:consistency, def:povm-distance, lem:qld-4-7, def:indicator-vector}
+	\uses{def:tilde-m-measurement, def:tilde-w-observables, lem:projective-strategy-setup, def:expanded-state, def:consistency, def:povm-distance, lem:qld-4-7, def:indicator-vector}
 	The measurements $\{\tilde{M}^{W,\tilde{u}}_a\}_{a \in \F_q}$ and observables $\tilde{W}^j(\tilde{u})$ satisfy the following properties.
 	% The paper's statement also quantifies item 1 over j, but j does not occur
 	% in item 1; the vacuous quantifier is dropped here.
@@ -180,7 +180,7 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 	\begin{equation}\label{eq:qld-sg-cons2}
 		\bigl(\hat{S}^W_g \cdot (\Id - \hat{M}^{(\mathrm{Point}, W), u}_{g(u)})\bigr)_{\mathrm{A}\mathrm{A}'} \approx_{\delta_S} 0\;,
 	\end{equation}
-	where the answer summation is over $g \in \mathrm{ideg}_{d,m}(\F_q)$, and where in \eqref{eq:qld-sg-cons2} an additional error term of order $\eps$ is absorbed into $\delta_S$. Furthermore, all symmetric equivalents of these approximations also hold (Remark~\ref{def:symmetric-equivalents}).
+	where the answer summation is over $g \in \mathrm{ideg}_{d,m}(\F_q)$, and where in \eqref{eq:qld-sg-cons2} an additional error term of order $\eps$ is absorbed into $\delta_S$. Furthermore, all symmetric equivalents of these approximations also hold (Definition~\ref{def:symmetric-equivalents}).
 \end{lemma}
 \begin{proof}
 	\uses{lem:qld-4-7, fact:agreement, fact:add-a-proj, def:bracket, lem:qld-comm-cons}
@@ -243,7 +243,7 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 \end{proof}
 
 \begin{lemma}[Extraction of the EPR state and the Pauli observables]\label{lem:qld-unitary}
-	\uses{lem:qld-4-7, def:v-swap-unitary, def:expanded-state, def:projective-strategy-setup, def:generalized-pauli, def:EPR, def:povm-distance}
+	\uses{lem:qld-4-7, def:v-swap-unitary, def:expanded-state, lem:projective-strategy-setup, def:generalized-pauli, def:EPR, def:povm-distance}
 	There exists a function $\delta_{\mathrm{qld}}(\eps,m,d,q) = O(\delta_S^{1/4} + md/q)$, where $\delta_S$ is the function of Lemma~\ref{lem:qld-4-7}, and there exist unitaries $V_{\mathrm{A}}$ acting on registers $\mathrm{A}\mathrm{A}'\mathrm{A}''$ and $V_{\mathrm{B}}$ acting on registers $\mathrm{B}\mathrm{B}'\mathrm{B}''$, such that the following hold.
 	\begin{enumerate}
 		\item There exists a state $\ket{\mathrm{aux}}$ on registers $\mathrm{A}\mathrm{A}'\mathrm{B}\mathrm{B}'$ such that
@@ -277,8 +277,8 @@ We can now prove the soundness theorem for the Pauli basis test, stated as Theor
 
 \begin{proof}
 	\proves{thm:pauli}
-	\uses{lem:qld-unitary, lem:pauli-completeness, thm:naimark, def:projective-strategy-setup, def:expanded-state, def:EPR, def:povm-distance}
-	Let $(\ket{\psi},M)$ be a strategy for $\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$ that succeeds with probability at least $1 - \eps$, where $\ket{\psi}$ is a bipartite state on registers $\mathrm{A}$ and $\mathrm{B}$. By Naimark's theorem (Theorem~\ref{thm:naimark}, as formulated in~\cite[Theorem 5.1]{Ji2020LowIndividualDegree}), at the cost of extending $\ket{\psi}$ by sufficiently many ancilla qubits initialized in the state $\ket{0}$, we may assume that the strategy is projective and that the state is padded as in the conventions of Lemma~\ref{def:projective-strategy-setup} and the convention following it. Let $V_{\mathrm{A}}$ be the unitary acting on registers $\mathrm{A}\mathrm{A}'\mathrm{A}''$ given by Lemma~\ref{lem:qld-unitary}, and let $\phi_{\mathrm{A}}$ be the isometry mapping register $\mathrm{A}$ to registers $\mathrm{A}\mathrm{A}'\mathrm{A}''$, where $\mathrm{A}'$ and $\mathrm{A}''$ are isomorphic to $(\C^q)^{\ot M}$, defined by
+	\uses{lem:qld-unitary, lem:pauli-completeness, thm:naimark, lem:projective-strategy-setup, def:expanded-state, def:EPR, def:povm-distance}
+	Let $(\ket{\psi},M)$ be a strategy for $\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$ that succeeds with probability at least $1 - \eps$, where $\ket{\psi}$ is a bipartite state on registers $\mathrm{A}$ and $\mathrm{B}$. By Naimark's theorem (Theorem~\ref{thm:naimark}, as formulated in~\cite[Theorem 5.1]{Ji2020LowIndividualDegree}), at the cost of extending $\ket{\psi}$ by sufficiently many ancilla qubits initialized in the state $\ket{0}$, we may assume that the strategy is projective and that the state is padded as in the conventions of Lemma~\ref{lem:projective-strategy-setup} and the convention following it. Let $V_{\mathrm{A}}$ be the unitary acting on registers $\mathrm{A}\mathrm{A}'\mathrm{A}''$ given by Lemma~\ref{lem:qld-unitary}, and let $\phi_{\mathrm{A}}$ be the isometry mapping register $\mathrm{A}$ to registers $\mathrm{A}\mathrm{A}'\mathrm{A}''$, where $\mathrm{A}'$ and $\mathrm{A}''$ are isomorphic to $(\C^q)^{\ot M}$, defined by
 	\[
 		\phi_{\mathrm{A}}\colon \ket{\theta}_{\mathrm{A}} \mapsto V_{\mathrm{A}} \bigl(\ket{\theta}_{\mathrm{A}} \ot (\ket{\mathrm{EPR}_q}^{\ot M})_{\mathrm{A}' \mathrm{A}''}\bigr)\;;
 	\]
