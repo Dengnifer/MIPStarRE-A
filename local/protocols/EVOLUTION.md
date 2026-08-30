@@ -134,6 +134,28 @@ the entries in `blueprint/src/references.bib`.
 **Expected effect:** reviewers and tooling treat repo-path citations as the
 sanctioned local form; no dangling public URLs.
 
+## 2026-08-30 — Review round cap with operator adjudication
+
+**Trigger:** events.md, "Review loop non-convergent at the tail (PR #0001)":
+five review rounds with finding counts 33, 26, 18, 12, 17 — the tail
+oscillates because each round's fresh reviewer re-audits new text at
+unbounded depth and cannot see prior adjudications.
+
+**Change:** `local/protocols/review.md` gains: after **four** full review
+rounds on one PR, the operator may adjudicate the remaining findings
+instead of iterating — each remaining finding is either fixed, or ticked
+in the current ledger with a written reason and converted to a tracked
+issue; the merge may then proceed with `review_state: ADJUDICATED`
+recorded in `pr.md` and the merge commit citing the adjudication. The
+analogous parent mechanism is the combined bot-fix iteration cap with one
+terminal review (pr-review.yml:69-72): iteration is bounded, the tail is
+a human decision, and nothing is silently dropped — every unfixed finding
+becomes an issue.
+
+**Expected effect:** review loops terminate with an explicit, auditable
+decision; stage-appropriate depth disputes move into the tracker instead
+of blocking scaffolding merges indefinitely.
+
 ## 2026-08-31 — Merges auto-resolve registry-path conflicts with the base
 
 **Trigger:** PR #0001's merge aborted twice on conflicts confined to
