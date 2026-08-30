@@ -4,11 +4,11 @@ title: "Tracking: QPBT formalization"
 state: "open"
 state_reason: null
 parent: null
-children: ["0002"]
+children: ["0002", "0004", "0005"]
 labels: ["formalization", "qpbt-test", "tracking"]
 pinned: false
 created: "2026-08-30T03:03:48Z"
-updated: "2026-08-30T03:06:41Z"
+updated: "2026-08-30T16:28:23Z"
 agent_session: null
 ---
 
