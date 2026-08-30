@@ -3,15 +3,15 @@ id: "0002"
 branch: "issue-0003-remove-naimark-duplicate"
 issue: "0003"
 base: "main"
-state: "open"
-head_sha: 0c8322c366b63a6a362d75f18f0d0028714d7494
-ci_status: success
-review_state: APPROVED
+state: "merged"
+head_sha: "0c8322c366b63a6a362d75f18f0d0028714d7494"
+ci_status: "success"
+review_state: "APPROVED"
 fix_iterations: 0
 auto_fix: true
 labels: ["bug", "cleanup", "documentation"]
 created: "2026-08-30T05:57:37Z"
-merged_commit: null
+merged_commit: "c744e92a45536cb074e51741191dbf5355147ae0"
 ---
 
 # docs(paper-gaps): remove duplicate note naimark.tex

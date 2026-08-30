@@ -518,6 +518,16 @@ done
 # ---------------------------------------------------------------------------
 
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+# The registry (issues/, prs/, results/telemetry/) is single-instance and
+# lives in the PRIMARY checkout. When this script is invoked from a linked
+# worktree copy, re-point the root at the primary (same resolution as
+# cache-warmer.sh resolve_primary_repo; EVOLUTION.md 2026-08-30).
+_common="$(git -C "$REPO_ROOT" rev-parse --path-format=absolute --git-common-dir 2>/dev/null || true)"
+case "$_common" in
+  */.git) REPO_ROOT="$(dirname "$_common")" ;;
+esac
+unset _common
+
 [ -d "$REPO_ROOT/.git" ] || [ -f "$REPO_ROOT/.git" ] || die "$REPO_ROOT is not a git repository"
 
 # Invariant 9 (bracket-free naming): the parent automation broke on ] in ids
