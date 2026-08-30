@@ -45,6 +45,17 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   PASS → full no-ff merge with bookkeeping. Lesson: multi-agent drafts need an
   adversarial cross-cutting verifier; per-builder self-tests missed every
   cross-script contract break.
+- **First warmer run headed for a duplicate 7-hour compile.** Symptom: on its
+  first invocation `cache-warmer.sh` cloned the primary repo into
+  `hot-main/repo` with an empty `.lake` and would have compiled the whole
+  library from source, duplicating the seed build finished the same morning.
+  Diagnosis: the drafted warmer had no first-run seeding path — the parent CI
+  never needed one because its first cache save came from an ordinary main
+  run. Fix: killed the run, added `seed_hot_repo_lake` (copy-on-write clone
+  of the primary checkout's `.lake` under a matching keyhash), reran.
+  Lesson: every "restore" mechanism needs an answer for the empty-store case;
+  cold paths that silently recompute for hours are duplicate-compilation bugs
+  even when they terminate correctly.
 - **`elan show` errors on this machine.** `~/.elan/toolchains/stable` is a
   stale non-symlink directory (Jan 2025); pinned-toolchain resolution is
   unaffected. Left untouched; scripts must not depend on `elan show`.

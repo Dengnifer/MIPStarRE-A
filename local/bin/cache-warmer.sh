@@ -453,6 +453,37 @@ cow_copy() { # <src-dir> <dst-dir>
   cp -R "$1" "$2"
 }
 
+# First-run seeding: when the hot checkout has no .lake/build but the PRIMARY
+# checkout holds one under the same keyhash, clone it copy-on-write instead of
+# recompiling ~9000 modules from source.  This is the local analogue of the
+# parent CI's restore-by-key-prefix (pr-ci.yml:144-160): an older-than-target
+# build is fine, Lake rebuilds the delta by trace hash; a keyhash mismatch
+# (toolchain/manifest/lakefile moved) means the build is unusable and the cold
+# path is correct.  Only .lake is copied — the hot checkout's git state stays
+# authoritative.
+seed_hot_repo_lake() { # <primary-repo>
+  local primary="$1"
+  [ -d "$HOT_REPO/.lake/build" ] && return 0
+  [ -d "$primary/.lake/build" ] || return 0
+  if [ "$(compute_keyhash "$primary")" != "$(compute_keyhash "$HOT_REPO")" ]; then
+    warn "primary checkout keyhash differs from the hot checkout; not seeding .lake from it"
+    return 0
+  fi
+  log "seeding $HOT_REPO/.lake from the primary checkout's built tree (copy-on-write)"
+  mkdir -p "$HOT_REPO/.lake"
+  if ! cow_copy "$primary/.lake/build" "$HOT_REPO/.lake/build"; then
+    warn "seeding .lake/build from $primary failed; building from source instead"
+    rm -rf "$HOT_REPO/.lake/build"
+    return 0
+  fi
+  if [ ! -d "$HOT_REPO/.lake/packages" ] && [ -d "$primary/.lake/packages" ]; then
+    if ! cow_copy "$primary/.lake/packages" "$HOT_REPO/.lake/packages"; then
+      warn "seeding .lake/packages failed; lake exe cache get will fetch them"
+      rm -rf "$HOT_REPO/.lake/packages"
+    fi
+  fi
+}
+
 # rename(2) over an existing symlink.  `mv` is NOT usable here: BSD mv stat()s the
 # destination, follows the old `current` symlink to its directory, and would move
 # the new link *inside* the snapshot instead of replacing it.
@@ -649,6 +680,7 @@ main() {
   rc=0
 
   log "building $sha in $HOT_REPO (log: $logfile)"
+  seed_hot_repo_lake "$primary"
   proofwidgets_fresh_state_workaround "$HOT_REPO"
   printf '=== cache-warmer %s sha=%s keyhash=%s ===\n' "$(iso_now)" "$sha" "$keyhash" > "$logfile"
 

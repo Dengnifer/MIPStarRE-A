@@ -71,3 +71,20 @@ report archived in the session telemetry for 2026-08-30.
 PRs it was specified to accept; every full build contends on one mutex.
 
 **Outcome (same day):** post-fix smoke reruns pass (see events.md).
+
+## 2026-08-30 — Warmer seeds its first build from the primary checkout
+
+**Trigger:** first live run of `cache-warmer.sh`: it cloned the primary repo
+into `hot-main/repo` and was about to recompile ~9000 modules from source,
+although the primary checkout already held a complete built `.lake` for the
+same keyhash (events.md, "first warmer run").
+
+**Change:** `cache-warmer.sh` gains `seed_hot_repo_lake`: when the hot
+checkout lacks `.lake/build` and the primary checkout has one under the same
+keyhash, `.lake/build` (and `.lake/packages` if absent) are cloned
+copy-on-write before `lake exe cache get`/`lake build` — the local analogue
+of the parent CI's restore-by-key-prefix (pr-ci.yml:144-160); the subsequent
+`lake build` reduces to a trace check.
+
+**Expected effect:** the initial warm costs minutes, not a duplicate
+multi-hour compile; same mechanism covers re-seeding after a cache wipe.
