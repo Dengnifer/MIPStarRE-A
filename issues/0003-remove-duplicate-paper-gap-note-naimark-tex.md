@@ -1,14 +1,14 @@
 ---
 id: "0003"
 title: "Remove duplicate paper-gap note naimark.tex"
-state: "open"
-state_reason: null
+state: "closed"
+state_reason: "completed"
 parent: null
 children: []
 labels: ["bug", "cleanup", "documentation"]
 pinned: false
 created: "2026-08-30T05:57:34Z"
-updated: "2026-08-30T05:57:34Z"
+updated: "2026-08-30T06:17:44Z"
 agent_session: null
 ---
 
@@ -53,3 +53,5 @@ the alias; `texra-blueprint --root . paper-gaps check` exits 0.
 Applied by `local/bin/issue_new.py` (deterministic keyword pass, no model): No automatic label was clear from the title or body.
 
 ## Activity
+
+- 2026-08-30T06:17:44Z — Issue closed as completed — closed by the merge of PR #0002.

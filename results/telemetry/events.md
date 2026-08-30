@@ -83,6 +83,33 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   (CHANGES_REQUESTED → ledger → merge-gate block) worked as specified.
   Lesson: the commit message is not the record — the PR/issue files are
   authoritative for merge bookkeeping, and the reviewer reads them.
+- **Registry fork recurred via a stale worktree script copy.** After the
+  registry-root fix landed on main, a CI+review chain invoked from inside
+  the blueprint worktree ran the branch's pre-fix copies of the scripts and
+  forked the registry again. Fix: artifacts relocated; operational rule
+  added to `local/README.md` — always invoke workflow tools via the primary
+  checkout's path. Lesson: a protocol fix in versioned tooling is not
+  deployed until every live branch carries it; invocation discipline (or a
+  merge into open branches) bridges the gap.
+- **Review-fix loop reached the faithfulness layer (stage 3).** Rounds:
+  33 → 26 → 18 findings. Round 1 was mostly writer errors; round 2 mostly
+  boundary domains plus register violations introduced by round-1 fixers;
+  round 3 exposed two genuine source obstructions (the classical-test
+  instantiation at dimension 2m+2 vs the m | q admissibility, and
+  supremum attainment in the symmetrization lemma), which per the
+  faithfulness policy became the first QPBT paper-gap notes rather than
+  silent statement conditioning. The codex reviewer independently enforced
+  the parent project's statement-drift discipline.
+- **Review loop non-convergent at the tail (PR #0001).** Finding counts by
+  round: 33, 26, 18, 12, 17. Rounds 1-2 removed real defects; by round 5 the
+  reviewer audited proof sketches of imported theorems at formalization
+  depth, invented obligations for heuristic repair sketches in gap notes,
+  and relitigated a policy sanctioned in a ledger it cannot see from the
+  branch. Diagnosis: a fresh reviewer per round has no memory of prior
+  adjudications and unbounded depth on new text; iteration alone does not
+  terminate. Fix: review.md gains a round-cap/operator-adjudication rule
+  (see EVOLUTION.md) mirroring the parent's bot-fix iteration-cap
+  philosophy.
 - **`elan show` errors on this machine.** `~/.elan/toolchains/stable` is a
   stale non-symlink directory (Jan 2025); pinned-toolchain resolution is
   unaffected. Left untouched; scripts must not depend on `elan show`.

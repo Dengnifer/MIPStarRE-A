@@ -120,6 +120,20 @@ registry stays single-instance regardless of the invocation directory.
 **Expected effect:** identical registry writes from any worktree; no forked
 issue/PR records.
 
+## 2026-08-30 — Paper-gap bibliography entries cite repository paths
+
+**Trigger:** review round 4 of PR #0001 flagged the new `gap:` bibliography
+entries for using repository paths where the parent policy expects published
+site URLs.
+
+**Change:** localized convention — with no public site, `gap:` entries'
+`note` fields carry the in-repository note path (`docs/paper-gaps/…`);
+`local/bin/site.sh` serves rendered notes locally. Recorded as a comment at
+the entries in `blueprint/src/references.bib`.
+
+**Expected effect:** reviewers and tooling treat repo-path citations as the
+sanctioned local form; no dangling public URLs.
+
 ## 2026-08-30 — Review round cap with operator adjudication
 
 **Trigger:** events.md, "Review loop non-convergent at the tail (PR #0001)":

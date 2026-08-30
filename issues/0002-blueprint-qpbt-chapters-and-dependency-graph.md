@@ -14,32 +14,39 @@ agent_session: null
 
 ### Precise mathematical statement
 
-<!-- required -->
-Name the theorem, lemma, definition, or construction and state its content.
-For example: Lemma 5.3 (Pauli basis test soundness), with the hypotheses on the
-number of qubits, the error parameter, and the strategy stated explicitly.
+Blueprint (not Lean) deliverable: a dependency-tracked LaTeX blueprint for
+the quantum Pauli basis test — the game $\mathfrak G^{\mathrm{Pauli}}_{(q,m,d)}$,
+its completeness (`lem:pauli-completeness`), the soundness/self-testing
+theorem `thm:pauli` with soundness function
+$\delta_{\mathrm{qld}}(\eps,m,d,q) = a(md)^a(\eps^b + q^{-b} + 2^{-bmd})$,
+the qubit form `cor:pauli-binary`, canonical parameters `def:introparams`
+with `lem:delta-bound`, and the full soundness analysis.
 
 ### Mathematical source
 
-<!-- required: path, line, label, and a short quotation or precise paraphrase.
-     Replace the placeholders with a real file under references/ (use
-     `ls references/*/` for the live mirror layout) and a real blueprint
-     chapter; the stale-issue audit flags citations to files that do not
-     exist. -->
-- Paper: `references/<paper-mirror>/<section>.tex:NNN`, label `thm:...`.
-  Paraphrase: ...
-- Blueprint: `blueprint/src/chapter/<chapter>.tex:NN`, label `thm:...`.
+- Paper: `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex`
+  (test definition; `thm:pauli` at source lines 1426–1447) and
+  `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex`
+  (the soundness analysis, six subsections).
+- Secondary: `references/neexp-paper/07_a_self_test_for_the_pauli_basis.tex`.
+- Blueprint: `blueprint/src/chapter/ch11_qpbt_algebra.tex` …
+  `ch16_qpbt_extraction.tex` (this issue's deliverable).
 
 ### Target Lean declaration
 
-Expected Lean name and file path, e.g.
-`MIPStarRE.Quantum.pauliBasisTest_sound` in `MIPStarRE/Quantum/PauliBasisTest.lean`.
+None in this issue — the blueprint carries no `\lean` tags at this stage
+(one exception: a verified statement-level tag on a restated node backed by
+the existing LDT development). Lean skeletons and proofs are stage-4 issues
+under this tracking parent.
 
 ### Mathematical dependencies
 
-- Blueprint label `prop:...`.
-- Lean declaration `MIPStarRE.Quantum....`.
-- Sub-issue #NNNN, proving the estimate used in the paper proof.
+- The LDT track's `thm:main-formal` (quantum soundness of the classical low
+  individual degree test) as the intended in-repo provider for
+  `lem:ld-soundness`; the derivation is open and documented in the blueprint.
+- Two source obstructions documented as paper-gap notes:
+  `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex` and
+  `docs/paper-gaps/qpbt_symmetrization-attainment.tex`.
 
 ### Proof plan
 

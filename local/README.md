@@ -41,5 +41,9 @@ issue  →  branch + worktree  →  agent session(s)  →  local CI  →  review
   goes through the machine-wide lock (`warm-worktree.sh`/`ci.sh` handle it).
 - One session never reviews its own diff.
 - Sessions are dispatched, resumed, and archived only via `dispatch.sh`.
+- Invoke workflow tools through the primary checkout's path
+  (`/…/MIPStarRE-dev/local/bin/…`), never through a worktree's copy — a
+  branch's copy can predate protocol fixes, and before the registry-root
+  fix it forked the registry (EVOLUTION.md, 2026-08-30).
 - Friction with any protocol → log it in `results/telemetry/events.md`;
   propose amendments per `protocols/meta.md`.
