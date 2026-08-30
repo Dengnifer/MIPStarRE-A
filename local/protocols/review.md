@@ -371,3 +371,19 @@ error.
   allow-list only approximated.
 * **`id-token`/OAuth plumbing, `LionSR/agent-ci-actions`, plugin marketplaces.**
   Local codex configuration replaces them (`.codex/`, `local/protocols/sessions.md`).
+
+
+## 12. Round cap and operator adjudication (2026-08-30)
+
+A PR receives at most **four** full review rounds. From the fifth round on,
+the operator may close the loop by adjudication instead of iteration:
+
+1. every remaining finding is either fixed, or ticked `[x]` in the CURRENT
+   head's ledger with a one-line reason and a tracked issue id;
+2. `pr.md` records `review_state: ADJUDICATED`;
+3. the merge commit names the adjudication and the issues created;
+4. `pr_merge.py --adjudicated` accepts this state in place of APPROVED.
+
+Nothing is dropped silently: an adjudicated finding lives on as an issue.
+This mirrors the parent's combined bot-fix iteration cap with a single
+terminal review (pr-review.yml:69-72). See EVOLUTION.md for the trigger.

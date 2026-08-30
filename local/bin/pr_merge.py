@@ -114,7 +114,8 @@ def _pid_alive(pid: int) -> bool:
     return True
 
 
-def check_review_verdict(record_dir: Path, head_sha: str, review_state: str) -> None:
+def check_review_verdict(record_dir: Path, head_sha: str, review_state: str,
+                         *, adjudicated: bool = False) -> None:
     """Approve, or accept a commented review with no open findings."""
     reviews = record_dir / "reviews"
     if not reviews.is_dir():
@@ -133,10 +134,20 @@ def check_review_verdict(record_dir: Path, head_sha: str, review_state: str) -> 
         )
     if review_state == "APPROVED":
         return
-    if review_state != "COMMENTED":
+    accepted = {"COMMENTED"}
+    if adjudicated:
+        # local/protocols/review.md section 12: after four review rounds the
+        # operator may adjudicate the remaining findings — every one ticked in
+        # the current head's ledger with a reason and a tracked issue — and
+        # merge with review_state ADJUDICATED under the explicit flag.
+        accepted.add("ADJUDICATED")
+    if review_state not in accepted:
         raise GateFailure(
-            f"review_state is {review_state!r}; the gate accepts APPROVED, or "
-            "COMMENTED with zero unchecked findings."
+            f"review_state is {review_state!r}; the gate accepts APPROVED, "
+            "COMMENTED with zero unchecked findings"
+            + (", or ADJUDICATED (--adjudicated)" if adjudicated else
+               " (or ADJUDICATED with --adjudicated; review.md section 12)")
+            + "."
         )
     open_findings = 0
     for verdict in verdicts:
@@ -187,7 +198,8 @@ def check_fix_gates(repo_root: Path, record_dir: Path, meta: dict) -> None:
         )
 
 
-def run_gate(repo_root: Path, record: track.PullRequest, *, allow_unreviewed: bool) -> str:
+def run_gate(repo_root: Path, record: track.PullRequest, *, allow_unreviewed: bool,
+             adjudicated: bool = False) -> str:
     """Raise ``GateFailure`` unless the PR may merge; return the head SHA."""
     meta = record.meta
     record_dir = record.path.parent
@@ -261,7 +273,8 @@ def run_gate(repo_root: Path, record: track.PullRequest, *, allow_unreviewed: bo
             f"{record.id} on the current head SHA."
         )
     else:
-        check_review_verdict(record_dir, str(head_sha), str(review_state))
+        check_review_verdict(record_dir, str(head_sha), str(review_state),
+                             adjudicated=adjudicated)
 
     check_fix_gates(repo_root, record_dir, meta)
     return str(head_sha)
@@ -392,7 +405,8 @@ def merge_pr(args: argparse.Namespace) -> int:
     with track.pr_lock(pr_id):
         record = track.load_pr(repo_root, pr_id)
         base = str(record.meta.get("base") or "main")
-        head_sha = run_gate(repo_root, record, allow_unreviewed=args.allow_unreviewed)
+        head_sha = run_gate(repo_root, record, allow_unreviewed=args.allow_unreviewed,
+                            adjudicated=args.adjudicated)
         ensure_mergeable_worktree(repo_root, base)
         sys.stdout.write(
             f"gate passed: PR #{pr_id} {record.branch} @ {head_sha[:12]} -> {base}\n"
@@ -474,6 +488,9 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("pr", metavar="ID", help="PR record id, e.g. 0007")
     parser.add_argument("--check-only", action="store_true",
                         help="run the gate and report, merge nothing")
+    parser.add_argument("--adjudicated", action="store_true",
+                        help="accept review_state ADJUDICATED (operator adjudication "
+                             "after the round cap; local/protocols/review.md section 12)")
     parser.add_argument("--allow-unreviewed", action="store_true",
                         help="only meaningful with LOCAL_REVIEW_ENABLED=false: "
                              "merge without a verdict and say so")
