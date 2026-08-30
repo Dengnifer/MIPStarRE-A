@@ -1,14 +1,14 @@
 ---
 id: "0002"
 title: "Blueprint: QPBT chapters and dependency graph"
-state: "open"
-state_reason: null
+state: "closed"
+state_reason: "completed"
 parent: "0001"
 children: []
 labels: ["blueprint-only", "documentation", "formalization", "qpbt-test"]
 pinned: false
 created: "2026-08-30T03:03:48Z"
-updated: "2026-08-30T03:03:48Z"
+updated: "2026-08-30T19:59:25Z"
 agent_session: null
 ---
 
@@ -64,3 +64,6 @@ conclusion / strengthened conclusion (docs/CONTRIBUTING.md:155-172).
 Applied by `local/bin/issue_new.py` (deterministic keyword pass, no model): `documentation`, `qpbt-test`
 
 ## Activity
+
+- 2026-08-30T19:46:25Z — PR #0001 (*docs(blueprint): QPBT chapters and dependency graph*) addressing this issue has been merged. See 0001-docs-blueprint-qpbt-chapters-and-dependency-graph/pr.md for what was accomplished and what remains.
+- 2026-08-30T19:59:25Z — Issue closed as completed.

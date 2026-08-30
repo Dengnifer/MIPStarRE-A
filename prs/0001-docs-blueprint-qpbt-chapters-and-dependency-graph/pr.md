@@ -3,15 +3,15 @@ id: "0001"
 branch: "issue-0002-qpbt-blueprint"
 issue: "0002"
 base: "main"
-state: "open"
-head_sha: 1d93f01dd23d0b48992b45759be3cf73170530f5
-ci_status: success
-review_state: ADJUDICATED
+state: "merged"
+head_sha: "1d93f01dd23d0b48992b45759be3cf73170530f5"
+ci_status: "success"
+review_state: "ADJUDICATED"
 fix_iterations: 0
 auto_fix: true
 labels: ["blueprint-only", "documentation", "formalization", "qpbt-test"]
 created: "2026-08-30T03:06:41Z"
-merged_commit: null
+merged_commit: "330ef8dd238283d61f22e99e9f170a983889301e"
 ---
 
 # docs(blueprint): QPBT chapters and dependency graph
