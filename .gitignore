@@ -44,3 +44,7 @@ blueprint/lean_decls
 !.claude/settings.json
 .worktrees/
 __pycache__/
+# Local-workflow runtime scratch (telemetry lives in results/telemetry/ instead)
+/tmp/
+# Reference paper mirrors may ship precompiled bibliographies that must build offline
+!references/**/*.bbl

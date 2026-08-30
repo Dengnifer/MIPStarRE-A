@@ -1,29 +1,22 @@
-# MIPStarRE
+# MIPStarRE-dev
 
-[![PR CI](https://github.com/LionSR/MIPStarRE/actions/workflows/pr-ci.yml/badge.svg)](https://github.com/LionSR/MIPStarRE/actions/workflows/pr-ci.yml)
-[![Compile blueprint](https://github.com/LionSR/MIPStarRE/actions/workflows/blueprint.yml/badge.svg)](https://github.com/LionSR/MIPStarRE/actions/workflows/blueprint.yml)
-![sorries](https://img.shields.io/endpoint?url=https://sirui-lu.com/MIPStarRE/badges/sorries.json)
-![axioms](https://img.shields.io/endpoint?url=https://sirui-lu.com/MIPStarRE/badges/axioms.json)
-![Lean](https://img.shields.io/endpoint?url=https://sirui-lu.com/MIPStarRE/badges/lean.json)
-![Mathlib](https://img.shields.io/endpoint?url=https://sirui-lu.com/MIPStarRE/badges/mathlib.json)
-![blueprint: no \leanok](https://img.shields.io/endpoint?url=https://sirui-lu.com/MIPStarRE/badges/blueprint_no_leanok.json)
-![blueprint: not ready](https://img.shields.io/endpoint?url=https://sirui-lu.com/MIPStarRE/badges/blueprint_not_ready.json)
-
-<p align="center">
-  <a href="https://sirui-lu.com/MIPStarRE/blueprint/">Blueprint</a> ·
-  <a href="https://sirui-lu.com/MIPStarRE/docs/">Documentation</a> ·
-  <a href="https://sirui-lu.com/MIPStarRE/paper-gaps/">Paper-gap notes</a>
-</p>
-
-Formalization project for mathematics around $\mathrm{MIP}^*=\mathrm{RE}$.
+Formalization project for mathematics around $\mathrm{MIP}^*=\mathrm{RE}$ —
+the **local-only continuation** of
+[LionSR/MIPStarRE](https://github.com/LionSR/MIPStarRE). All workflow
+operations (CI, review, issues, PRs, site) run locally; see
+[`local/README.md`](local/README.md) and [`local/DESIGN.md`](local/DESIGN.md).
+Badges and the published site are replaced by `local/bin/site.sh` output
+served from the local component store.
 
 ## Active paper track
 
-The current active proof-following track is:
-
-- arXiv:2009.12982, *Quantum soundness of the classical low individual degree test* (LDT).
-
-The in-repo paper source mirror lives at `references/ldt-paper/`.
+- **Active (QPBT)**: the quantum Pauli basis test —
+  arXiv:2001.04383, *MIP\*=RE* (§7 "Classical and Quantum Low-degree Tests"
+  and §"Analysis of the Pauli basis test"), with arXiv:1904.05870,
+  *NEEXP in MIP\** as secondary source. Paper mirrors:
+  `references/qpbt-paper/`, `references/neexp-paper/` (populated in stage 2).
+- **Inherited (LDT)**: arXiv:2009.12982, *Quantum soundness of the classical
+  low individual degree test*; mirror at `references/ldt-paper/`.
 
 ## Source-of-truth order (LDT)
 
@@ -71,10 +64,13 @@ re-exports `MIPStarRE.Quantum` and `MIPStarRE.LDT`.
 Top-level directories:
 
 - `MIPStarRE/` — Lean source (see above)
-- `blueprint/src/` — active LDT blueprint (chapters under `blueprint/src/chapter/`)
-- `references/ldt-paper/` — in-repo TeX source for the LDT paper
+- `blueprint/src/` — active blueprint (chapters under `blueprint/src/chapter/`)
+- `references/` — in-repo TeX mirrors of the source papers
 - `docs/` — contributor guides, style, naming, proof integrity, CI notes
 - `audits/` — dated chapter-by-chapter dependency-scouting reports
+- `local/` — the local workflow layer (protocols, personas, executables)
+- `issues/`, `prs/` — local issue tree and PR registry
+- `results/telemetry/` — session/build/stage telemetry (research data)
 
 ## Recommended proof-filling order
 
@@ -132,7 +128,8 @@ MIPStarRE-local references:
 | `docs/project_conventions.md` | MIPStarRE-local addenda to the shared conventions (linter warnings, source-faithfulness review, proof integrity) |
 | `docs/mathematical_language.md` | Project-local mathematical language rules for Lean names and documentation |
 | `docs/blueprint_style_guide.md` | Blueprint notation and section conventions |
-| `docs/ci-automation.md` | CI/CD workflow details |
+| `docs/ci-automation.md` | GitHub-era CI/CD reference (mechanisms now live in `local/`) |
+| `local/README.md` | Local workflow: lifecycle, commands, ground rules |
 | `audits/` | Chapter-by-chapter Mathlib dependency scouting reports |
 
 When adding or completing a declaration, update the corresponding blueprint entry in `blueprint/src/chapter/`: add `\lean{DeclName}` and `\leanok` for new results, or `\leanok` on `\begin{proof}` for newly proven results.

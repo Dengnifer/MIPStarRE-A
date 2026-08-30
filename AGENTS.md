@@ -7,24 +7,32 @@ source of truth** for agent conventions. Claude Code agents should also read
 ## Project Overview
 
 This repository is a Lean 4 + Mathlib formalization project for mathematics
-around $MIP^* = RE$ (arXiv:2009.12982). The active formalization track is the
-**low individual degree test (LDT)** paper — *Quantum soundness of the
-classical low individual degree test*.
+around $MIP^* = RE$. It is the **local-only continuation** of
+[LionSR/MIPStarRE](https://github.com/LionSR/MIPStarRE): the inherited track is
+the **low individual degree test (LDT)** paper (arXiv:2009.12982); the active
+track is the **quantum Pauli basis test (QPBT)** from *MIP\*=RE*
+(arXiv:2001.04383, primary) and *NEEXP in MIP\** (arXiv:1904.05870, secondary).
+
+This repository has **no GitHub remote operations**: CI, review, issues, and
+PRs all run locally. Read `local/README.md` and `local/DESIGN.md` before doing
+workflow actions; the `## Local Operations` section below summarizes the rules.
 
 Key locations:
 
-- `references/ldt-paper/` — in-repo TeX source mirror; the mathematical
-  ground truth
+- `references/ldt-paper/` — in-repo TeX source mirror for LDT;
+  `references/qpbt-paper/` and `references/neexp-paper/` — mirrors for the
+  QPBT sources (populated in project stage 2)
 - `blueprint/src/` — active LaTeX blueprint with Lean cross-references
   (`\lean{}`, `\leanok`)
 - `MIPStarRE/` — Lean codebase matching the blueprint
 - `audits/` — dated audit reports, scouting notes, and repair plans
+- `local/`, `issues/`, `prs/`, `results/telemetry/` — the local workflow layer
 
 A legacy 2111 tensor track exists under `blueprint/legacy/` — do not modify it.
 
 **Canonical source hierarchy** (use in this order):
 
-1. `references/ldt-paper/` — TeX source of the paper
+1. `references/` paper mirrors — TeX source of the papers
 2. `blueprint/src/chapter/` — active LaTeX blueprint
 3. `MIPStarRE/` — Lean scaffold
 
@@ -512,6 +520,11 @@ the lean-conventions `PROOF_INTEGRITY` reference and `docs/project_conventions.m
 
 ## PR and Commit Conventions
 
+PRs are local records under `prs/NNNN-slug/` (created by
+`local/bin/pr_open.py`, merged by `local/bin/pr_merge.py`); `#N` in PR bodies
+and commit messages refers to the local issue `issues/NNNN-*.md`. Titles,
+bodies, and commit rules below are unchanged from the parent project.
+
 ### PR title format
 
 ```
@@ -559,7 +572,9 @@ Use `Addresses #N` (keeps the issue open) or `Closes #N` (auto-closes on merge).
 
 ## Review Process
 
-Every PR touching Lean code should be reviewed against these criteria:
+Every PR touching Lean code is reviewed by a dedicated local reviewer session
+(`local/bin/review.sh`, dispatched after green local CI; a session never
+reviews its own diff) against these criteria:
 
 1. **Proof correctness** — No unexplained `sorry`. No `axiom` unless discussed.
 2. **Mathlib style** — Follow the lean-conventions `MATHLIB_naming` and `MATHLIB_doc` references.
@@ -634,10 +649,36 @@ Use this file together with:
 | `docs/paper-gaps/proof-gap-protocol.tex` | Protocol distinguishing source theorems, proof obligations, and conditional helpers |
 | `docs/formalization-patterns.md` | Conditional scaffolding, blueprint sync, split imports, and bridge records |
 | `docs/external-lemmas-pedagogy.md` | Pedagogical notes on Mathlib and external lemmas |
-| `docs/ci-automation.md` | CI/CD workflow details |
-| `docs/pr_review_management.md` | Review thread workflow and bot integration |
+| `docs/ci-automation.md` | GitHub-era CI/CD reference (inactive; see `local/`) |
+| `docs/pr_review_management.md` | GitHub-era review-bot reference (lessons still apply; mechanism replaced by `local/protocols/review.md`) |
+| `local/DESIGN.md` | Local operations architecture and invariants |
+| `local/protocols/` | Normative local protocols (meta, build cache, CI, review, auto-fix, issues/PRs, sessions) |
+| `local/personas/` | System prompts for locally dispatched agent roles |
 | `audits/` | Chapter-by-chapter scouting reports |
 | Pinned memories (external agent tooling) | Agent session memory maintained by the agent runtime; not a directory in the repository checkout. Pinned memories contain accumulated project lessons |
+
+## Local Operations
+
+This repository runs its whole workflow locally. The short version every
+agent must know:
+
+- **Build reuse.** A hot main cache lives under `~/.cache/mipstarre-dev/`;
+  fresh worktrees get it via `local/bin/worktree-setup.sh` (which also
+  installs git hooks and resets dirty vendored packages). Never run
+  `lake update`; never write to the cache; at most one full `lake build`
+  runs machine-wide (the scripts take the lock for you).
+- **Lifecycle.** issue (`issues/`) → branch `issue-NNNN-slug` + worktree →
+  agent sessions → `local/bin/ci.sh` → `local/bin/review.sh` → optional
+  `local/bin/autofix.sh` → `local/bin/pr_merge.py`. Details:
+  `local/README.md`.
+- **Sessions.** Dispatch, resume, and archive agent sessions only via
+  `local/bin/dispatch.sh` (roles: orc, prover, reviewer, simplifier,
+  blueprint, splitter, scout) so token/time telemetry stays complete.
+- **Telemetry duty.** Incidents go to `results/telemetry/events.md`;
+  protocol changes follow `local/protocols/meta.md` and are ledgered in
+  `local/protocols/EVOLUTION.md`.
+- **Fix commits** are prefixed `[codex-auto-fix]` / `[codex-review-fix]`
+  exactly; issue titles, slugs, and branch names stay bracket-free.
 
 ## Practical Defaults for Agents
 

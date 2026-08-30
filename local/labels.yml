@@ -1,0 +1,222 @@
+# Machine-readable label taxonomy for the local operations layer.
+#
+# Ports docs/CONTRIBUTING.md section 4 (docs/CONTRIBUTING.md:285-360), which
+# declared "GitHub is the source of truth" for labels.  There is no GitHub here,
+# so THIS FILE is the source of truth: every writer of issue frontmatter
+# (local/bin/issue_new.py) validates against it before applying a label, and
+# local/bin/validate_tree.py rejects any issue carrying a name absent from it.
+#
+# That validation is the local form of the guard at
+# .github/workflows/issue-automation.yml:172-179 ("Fetch existing repo labels so
+# we don't fail on nonexistent labels ... Use paginate so all labels are seen"):
+# the parent workflow learned the hard way that emitting a label that does not
+# exist aborts the whole classification step.
+#
+# LDT chapter/theorem-family labels are replaced by QPBT-appropriate names: the
+# active track is the quantum Pauli basis test of arXiv:2001.04383 (primary) and
+# arXiv:1904.05870 (secondary), not the low individual degree test.
+#
+# Format: a deliberately small YAML subset (scalars, block sequences of
+# mappings, `[a, b]` flow lists) so the stdlib-only parser in
+# local/bin/track.py can read it without PyYAML.  Keep it that way.
+
+version: 1
+
+# Paper-id aliases are matched case-insensitively as plain substrings of issue
+# text by the deterministic classifier in local/bin/issue_new.py.  The parent
+# hard-coded its paper list inline (issue-automation.yml:162-168) and drifted
+# out of sync with the live taxonomy; here the classifier reads the aliases
+# below instead, so the list has exactly one home.
+
+labels:
+  # ---------------------------------------------------------------------
+  # Core work-type labels (CONTRIBUTING.md:290-302, ported verbatim)
+  # ---------------------------------------------------------------------
+  - name: formalization
+    category: type
+    description: Lean formalization of a mathematical statement
+
+  - name: documentation
+    category: type
+    description: Documentation-only work
+
+  - name: infrastructure
+    category: type
+    description: Foundational definitions, shared APIs, or supporting layers
+
+  - name: cleanup
+    category: type
+    description: Small cleanup, consistency, or style fix
+
+  - name: refactor
+    category: type
+    description: Structural change without intended behavior change
+
+  - name: ci
+    category: type
+    description: Local automation or gate change (was CI/CD workflow change)
+
+  - name: bug
+    category: type
+    description: Broken proof, type error, sorry regression, or statement mismatch
+
+  # ---------------------------------------------------------------------
+  # Theorem-family labels — QPBT placeholders replacing the LDT chapter set
+  # (ldt-basic / preliminaries / commutativity / pasting / main-induction)
+  # ---------------------------------------------------------------------
+  - name: qpbt-test
+    category: family
+    description: The quantum Pauli basis test itself — game definition, questions, answers, and scoring
+    aliases: ["pauli basis test", "qpbt", "basis test"]
+
+  - name: qpbt-analysis
+    category: family
+    description: Soundness/rigidity analysis of the Pauli basis test — self-testing bounds and error terms
+    aliases: ["pauli analysis", "rigidity", "self-test", "self-testing"]
+
+  - name: proof
+    category: family
+    description: Issue is primarily about proving an existing result
+
+  - name: proof-infra
+    category: family
+    description: Intermediate lemmas or definitions that mainly support proofs
+
+  - name: sorry-elimination
+    category: family
+    description: Explicitly aimed at discharging remaining `sorry` sites
+
+  - name: statement-fix
+    category: family
+    description: Paper-to-Lean statement correction, weakening, or realignment
+
+  - name: mismatch
+    category: family
+    description: Explicit paper-code mismatch audit or repair
+
+  - name: blueprint
+    category: family
+    description: Blueprint authoring or blueprint-expansion work
+
+  - name: blueprint-sync
+    category: family
+    description: Blueprint to Lean synchronization issue
+
+  # ---------------------------------------------------------------------
+  # Paper labels (CONTRIBUTING.md:326-332, retargeted to the QPBT track)
+  # ---------------------------------------------------------------------
+  - name: paper-2001.04383
+    category: paper
+    description: MIP*=RE (arXiv:2001.04383) — the primary paper of this track
+    aliases: ["2001.04383", "mip*=re", "mip star = re"]
+
+  - name: paper-1904.05870
+    category: paper
+    description: NEEXP in MIP* (arXiv:1904.05870) — secondary source for the Pauli basis test
+    aliases: ["1904.05870", "neexp in mip*", "neexp"]
+
+  # ---------------------------------------------------------------------
+  # Blueprint provenance (CONTRIBUTING.md:334-340)
+  # ---------------------------------------------------------------------
+  - name: blueprint-only
+    category: provenance
+    description: Content exclusive to the blueprint, not present in the source paper
+
+  # ---------------------------------------------------------------------
+  # Tracking / follow-up (CONTRIBUTING.md:342-350)
+  # ---------------------------------------------------------------------
+  - name: tracking
+    category: tracking
+    description: Umbrella issue whose children are tracked via parent/children frontmatter
+
+  - name: chapter-tracking
+    category: tracking
+    description: Long-lived section-level progress tracker
+
+  - name: follow-up
+    category: tracking
+    description: A mathematical obligation split out of a merged PR
+
+  # ---------------------------------------------------------------------
+  # Automation / operational labels (CONTRIBUTING.md:352-358)
+  # ---------------------------------------------------------------------
+  - name: standup
+    category: automation
+    description: Machine-generated daily digest; excluded from every activity feed
+    automation_written: true
+
+  - name: scout
+    category: automation
+    description: Requests a Mathlib scouting report for this issue
+
+  - name: auto-fix-codex
+    category: automation
+    description: Automation-managed queue for codex auto-fix follow-ups
+    automation_written: true
+
+  # ---------------------------------------------------------------------
+  # Standard labels (CONTRIBUTING.md:360-363); `bug` is listed above as a type
+  # ---------------------------------------------------------------------
+  - name: enhancement
+    category: standard
+    description: Improvement that is not a formalization obligation
+
+  - name: good first issue
+    category: standard
+    description: Suitable as an entry point for a new contributor
+
+  - name: help wanted
+    category: standard
+    description: Explicitly seeking outside input
+
+  - name: question
+    category: standard
+    description: Open question rather than a work item
+
+  - name: duplicate
+    category: standard
+    description: Superseded by another issue
+
+  - name: invalid
+    category: standard
+    description: Not actionable as filed
+
+  - name: wontfix
+    category: standard
+    description: Deliberately not being done
+
+# Labels that must NEVER be applied.  Two distinct lessons from the parent
+# repository, both recorded in CONTRIBUTING.md:
+#   * `all-resolved` was retired when the track job started posting a
+#     "ready to close" note instead of labeling (CONTRIBUTING.md:217-219);
+#   * the remaining names are dead taxonomy that survived in prose and in
+#     ci-synced sibling workflows (CONTRIBUTING.md:292-294).
+# local/bin/validate_tree.py reports these with a distinct message so the
+# reason is visible at the point of failure.
+banned:
+  - name: all-resolved
+    reason: retired; the tracking parent gets a "ready to close" activity note instead
+
+  - name: self-improvement
+    reason: legacy LDT taxonomy, not part of the live label set
+
+  - name: expansion-graph
+    reason: legacy LDT taxonomy, not part of the live label set
+
+  - name: quantum-foundations
+    reason: legacy LDT taxonomy, not part of the live label set
+
+  - name: automation
+    reason: legacy LDT taxonomy, not part of the live label set
+
+  - name: auto-fix-claude
+    reason: the local fix loop runs under codex; use auto-fix-codex
+
+  - name: campaign-5
+    reason: historical LDT campaign label; the QPBT track has no session-5 campaign
+
+  - name: wolf-ch1
+    reason: sibling-repo chapter taxonomy imported by ci-sync drift; never lived here
+
+  - name: 2009.12982
+    reason: the LDT paper of the parent repository; this track formalizes QPBT

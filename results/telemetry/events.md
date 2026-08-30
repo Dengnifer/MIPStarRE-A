@@ -1,0 +1,50 @@
+# Incident and observation log
+
+Dated bullets, one incident each: symptom → diagnosis → fix → lesson.
+This file is the raw feed for `local/protocols/EVOLUTION.md`.
+
+## 2026-08-30
+
+- **Stale seed clone.** Symptom: files copied from the sibling `../MIPStarRE`
+  checkout were dated Jul 5 while upstream main was Aug 25. Diagnosis: the
+  local clone's fetched refs were two months old; `git status` against a stale
+  `origin/main` looked clean. Fix: `git fetch`, then `git archive origin/main`
+  overlay plus replay of upstream deletions. Lesson: verify snapshot freshness
+  against the remote SHA (`gh api .../branches/main`) before seeding, not
+  against local tracking refs.
+- **Warm-cache invalidation by toolchain bump.** The upstream snapshot moved
+  to Lean v4.32.0 while the copied `.lake` was built on v4.31.0; the planned
+  zero-cost cache seed became a full rebuild (25,052 s, see `builds.jsonl`).
+  Lesson: the hot-cache keyhash (lean-toolchain + lake-manifest.json +
+  lakefile.toml) is the first thing to check when estimating seed cost.
+- **Dirty vendored package blocks `lake exe cache get`.** Symptom: cache
+  fetch aborted with "Your local changes ... would be overwritten by
+  checkout" for `.lake/packages/proofwidgets/widget/js/lake.trace`.
+  Diagnosis: past builds mutate files inside the vendored package's git tree;
+  a CoW-copied `.lake` carries that dirt. Fix: `git reset --hard` inside the
+  package. Lesson: worktree bootstrap must reset vendored package trees
+  before cache fetch (ported into `worktree-setup.sh`).
+- **Mathlib cache partial miss.** 20 of ~9k cache files failed to download;
+  `lake build` compiled those modules locally. No action needed; noted as a
+  normal degraded mode of `lake exe cache get`.
+- **Workflow critic stalled on oversized prompt.** Symptom: the study
+  workflow's final critic agent made no progress for 6×180 s and the run
+  failed after its 7 readers had finished. Diagnosis: the critic prompt
+  embedded the full 180 KB merged JSON of all reader results. Fix: harvested
+  reader results from the journal; the main session performed the critique
+  itself over a rendered digest. Lesson: pass large fan-in data to agents by
+  file path, not inline; cap inline context in synthesis prompts.
+- **Verification pass caught four live defects in the drafted layer.** The
+  7-builder Opus draft passed syntax/smoke on the data layer, but the Fable
+  verifier live-demonstrated: (1) the merge gate could never accept a reviewed
+  PR (verdict-file glob mismatch); (2) the cap-time forced review was a
+  guaranteed no-op (review refused under the fix lock its own caller held);
+  (3) three uncoordinated machine-wide build locks; (4) `printf '%04d'` octal
+  crash on ids 0008/0009. All fixed same day (`EVOLUTION.md` entry); post-fix
+  smoke rerun: issue → PR → green CI fixture → review verdict → merge gate
+  PASS → full no-ff merge with bookkeeping. Lesson: multi-agent drafts need an
+  adversarial cross-cutting verifier; per-builder self-tests missed every
+  cross-script contract break.
+- **`elan show` errors on this machine.** `~/.elan/toolchains/stable` is a
+  stale non-symlink directory (Jan 2025); pinned-toolchain resolution is
+  unaffected. Left untouched; scripts must not depend on `elan show`.

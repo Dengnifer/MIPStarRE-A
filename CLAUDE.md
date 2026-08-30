@@ -9,17 +9,20 @@ proof-integrity rules.** This repository has a single, consolidated agent guide 
 
 ## Claude-specific notes
 
-- When stuck, read the original paper source in `references/ldt-paper/*.tex`.
+- When stuck, read the original paper source in `references/` (LDT:
+  `ldt-paper/`; QPBT: `qpbt-paper/` and `neexp-paper/` once populated).
 - Lean files in this repo often exceed Claude's context window; use `rg`/`grep` to
   locate definitions and search for lemmas in `.lake/packages/mathlib/`.
 - Prefer `lake env lean MIPStarRE/Path/To/File.lean` for fast iteration; only run
-  `lake build` before pushing.
-- The `AGENTS.md` and `CLAUDE.md` files are consumed by the Claude Code
-  agent; keep them under 200 lines total.
+  `lake build` before handing a worktree back for merge (the scripts serialize
+  full builds machine-wide).
+- The `AGENTS.md` and `CLAUDE.md` files are consumed by coding agents
+  (Claude Code and codex CLI); keep this file minimal and keep `AGENTS.md`
+  from growing beyond a session-start read (~700 lines today).
 
 ## Toolchain upgrade notes
 
-- **Current**: Lean v4.31.0 / Mathlib v4.31.0 (from `lean-toolchain`
+- **Current**: Lean v4.32.0 / Mathlib v4.32.0 (from `lean-toolchain`
   and `lakefile.toml`)
 - For future toolchain bumps: if any file-scope
   `set_option backward.isDefEq.respectTransparency false` usages are introduced
