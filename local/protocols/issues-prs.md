@@ -22,6 +22,12 @@ retried blindly. Ambiguous mutations use stable hidden markers followed by an
 authoritative read-back. A marker may be adopted only when its event, exact
 commit, and complete body match.
 
+An idempotent mutating command issues at most one POST or PATCH per invocation.
+After a transient or otherwise ambiguous mutation result, it polls only the
+authoritative read surface and fails ambiguous when the expected marker-bound
+state does not appear. It never resolves ambiguity by sending the mutation a
+second time.
+
 ## Issues
 
 Create an issue with:
@@ -72,11 +78,18 @@ marker-bound manifest comment for a complete run. `local/bin/review.sh
 set. Runtime logs live beneath `~/.cache/mipstarre-dev/`.
 
 `local/bin/pr_merge.py <pr-number>` accepts only an open, non-draft, mergeable
-PR whose local branch and GitHub head are the same exact 40- or 64-hex SHA. It
-requires every canonical CI status, a matching clean review ledger, a
-successful review summary, no later adverse review, no live fix lock, and a
-complete within-cap commit history. GitHub approval is not a gate. A clean
-exact-head `COMMENT` review is sufficient with the other review evidence.
+PR whose local branch and GitHub head are the same full 40- or 64-hex SHA and
+whose trusted local base matches the PR's full base SHA. It holds the per-PR
+review lock through the merge and reserves the branch fix lock. One fail-closed
+gate evaluator runs both before merge preparation and immediately before the
+merge mutation. Each evaluation binds the unchanged head and base and requires
+the exact-head per-step CI statuses plus their same-run manifest, a strictly
+parsed clean `COMMENT` attestation plus its same-run/digest status and matching
+reviewer completion telemetry, no newer adverse exact-head review, fix-lock
+quiescence, and complete within-cap fix history.
+
+GitHub approval and `reviewDecision` are not gates. A clean independent
+exact-head `COMMENT` review is sufficient with the other evidence above.
 
 Adjudicated merges additionally require the repository adjudication label and
 a current-head marker-bound `ADJUDICATION` comment with dispositions. The only

@@ -56,6 +56,7 @@ PROSE_MODEL="${MIPSTARRE_PROSE_MODEL:-$REVIEW_MODEL}"
 LOCK_WAIT="${MIPSTARRE_REVIEW_LOCK_WAIT:-1800}"
 DIFF_MAX_LINES="${MIPSTARRE_DIFF_MAX_LINES:-4000}"
 BOT_PREFIX_RE='^\[(codex-auto-fix|codex-review-fix)\]'
+SESSION_TELEMETRY="$ROOT/results/telemetry/sessions.jsonl"
 
 LOCK_HELD=""
 RUN_TMP=""
@@ -219,33 +220,17 @@ run_agent() {
     fi
     args[${#args[@]}]="--"
     args[${#args[@]}]="$task_text"
-    # One retry for pre-model failures: a dispatch that dies within seconds
-    # with zero tokens never reached the model (transient CLI/API hiccup;
-    # observed on PR #0003, events.md 2026-08-31), so retrying cannot
-    # duplicate a review.
-    local attempt started ended tokens
-    for attempt in 1 2; do
-      started="$(date +%s)"
-      set +e
-      if [ -n "$model" ]; then
-        MIPSTARRE_AUTOMATION=1 MIPSTARRE_CODEX_MODEL="$model" \
-          "$DISPATCH" "${args[@]}" >"$dlog"
-      else
-        MIPSTARRE_AUTOMATION=1 "$DISPATCH" "${args[@]}" >"$dlog"
-      fi
-      rc=$?
-      set -e
-      ended="$(date +%s)"
-      tokens="$(sed -n 's/^tokens_total: //p' "$dlog" | tail -1)"
-      if [ "$rc" -ne 0 ] && [ "$attempt" -eq 1 ] \
-         && [ "$(( ended - started ))" -lt 15 ] \
-         && [ "${tokens:-0}" = "0" ]; then
-        warn "dispatch failed pre-model (rc=$rc, $(( ended - started ))s, 0 tokens); retrying once"
-        sleep 10
-        continue
-      fi
-      break
-    done
+    # A nonzero dispatch is final for this review run. Retrying here would let
+    # one failed reviewer disappear behind a later session.
+    set +e
+    if [ -n "$model" ]; then
+      MIPSTARRE_AUTOMATION=1 MIPSTARRE_CODEX_MODEL="$model" \
+        "$DISPATCH" "${args[@]}" >"$dlog"
+    else
+      MIPSTARRE_AUTOMATION=1 "$DISPATCH" "${args[@]}" >"$dlog"
+    fi
+    rc=$?
+    set -e
     last="$(sed -n 's/^last_message: //p' "$dlog" | tail -1)"
     if [ -n "$last" ] && [ -f "$last" ]; then
       cp "$last" "$out"
@@ -304,7 +289,7 @@ RUN_TMP="$(mktemp -d "${TMPDIR:-/tmp}/mipstarre-review.XXXXXX")"
 PULL_JSON="$RUN_TMP/pull.json"
 python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" pull "$PR_NUM" >"$PULL_JSON" ||
   die "cannot read authoritative GitHub PR #$PR_NUM"
-IFS="$(printf '\t')" read -r PR_STATE BRANCH BASE HEAD_SHA < <(
+IFS="$(printf '\t')" read -r PR_STATE BRANCH BASE HEAD_SHA BASE_SHA < <(
   python3 - "$PULL_JSON" <<'PY'
 import json
 import re
@@ -315,12 +300,14 @@ try:
     state = str(pull["state"])
     branch = str(pull["head"]["ref"])
     base = str(pull["base"]["ref"])
-    sha = str(pull["head"]["sha"]).lower()
+    head_sha = str(pull["head"]["sha"]).lower()
+    base_sha = str(pull["base"]["sha"]).lower()
 except (KeyError, TypeError):
     raise SystemExit("invalid pull response")
-if not re.fullmatch(r"(?:[0-9a-f]{40}|[0-9a-f]{64})", sha):
-    raise SystemExit("invalid exact pull head SHA")
-print(state, branch, base, sha, sep="\t")
+sha_re = r"(?:[0-9a-f]{40}|[0-9a-f]{64})"
+if not re.fullmatch(sha_re, head_sha) or not re.fullmatch(sha_re, base_sha):
+    raise SystemExit("invalid exact pull head/base SHA")
+print(state, branch, base, head_sha, base_sha, sep="\t")
 PY
 )
 [ "$PR_STATE" = open ] || die "GitHub PR #$PR_NUM is not open (state=$PR_STATE)"
@@ -337,6 +324,9 @@ LOCAL_SHA="$(git -C "$WORKTREE" rev-parse HEAD 2>/dev/null || true)"
 BASE_REF="refs/remotes/github/$BASE"
 git -C "$WORKTREE" rev-parse --verify --quiet "$BASE_REF^{commit}" >/dev/null ||
   die "$BASE_REF does not resolve; run local/bin/github-sync.sh refs --base '$BASE'"
+LOCAL_BASE_SHA="$(git -C "$WORKTREE" rev-parse "$BASE_REF^{commit}" 2>/dev/null || true)"
+[ "$LOCAL_BASE_SHA" = "$BASE_SHA" ] ||
+  die "local base ref $BASE_REF is ${LOCAL_BASE_SHA:-unreadable}, not GitHub base $BASE_SHA"
 
 # ------------------------------------------------------------------- CI gate
 # pr-review.yml:59-61 — a non-success CI conclusion FAILS the gate.  It must
@@ -349,8 +339,8 @@ gate_block() {
 }
 
 python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" --no-probe \
-  require-ci "$HEAD_SHA" >/dev/null ||
-  gate_block "the complete canonical local-ci/* status set is not successful on $HEAD_SHA"
+  ci-evidence "$PR_NUM" "$HEAD_SHA" "$BASE_SHA" >/dev/null ||
+  gate_block "canonical local-ci/* statuses and manifest are not one successful exact-head/base run"
 
 # ------------------------------------------------------------ bot-commit gate
 # pr-review.yml:69-79 — skip auto-fix bot commits so the review -> fix -> review
@@ -389,19 +379,26 @@ fi
 CUR_PULL_JSON="$RUN_TMP/queued-pull.json"
 python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" --no-probe \
   pull "$PR_NUM" >"$CUR_PULL_JSON" || die "cannot re-read PR #$PR_NUM after queuing"
-CUR_HEAD_SHA="$(python3 - "$CUR_PULL_JSON" <<'PY'
+IFS="$(printf '\t')" read -r CUR_HEAD_SHA CUR_BASE_SHA < <(
+  python3 - "$CUR_PULL_JSON" <<'PY'
 import json
 import sys
-print(str((json.load(open(sys.argv[1], encoding="utf-8")).get("head") or {}).get("sha") or "").lower())
+pull = json.load(open(sys.argv[1], encoding="utf-8"))
+print(
+    str((pull.get("head") or {}).get("sha") or "").lower(),
+    str((pull.get("base") or {}).get("sha") or "").lower(),
+    sep="\t",
+)
 PY
-)"
-if [ "$CUR_HEAD_SHA" != "$HEAD_SHA" ]; then
-  log "head SHA moved from $HEAD_SHA to $CUR_HEAD_SHA while this review was queued; exiting without a verdict"
+)
+if [ "$CUR_HEAD_SHA" != "$HEAD_SHA" ] || [ "$CUR_BASE_SHA" != "$BASE_SHA" ]; then
+  log "head/base moved while this review was queued; exiting without a verdict"
   exit 0
 fi
 BRANCH_SHA="$(git -C "$WORKTREE" rev-parse HEAD 2>/dev/null || true)"
-if [ -n "$BRANCH_SHA" ] && [ "$BRANCH_SHA" != "$HEAD_SHA" ]; then
-  log "branch $BRANCH is at $BRANCH_SHA but GitHub head is $HEAD_SHA; exiting stale"
+QUEUED_BASE_SHA="$(git -C "$WORKTREE" rev-parse "$BASE_REF^{commit}" 2>/dev/null || true)"
+if [ "$BRANCH_SHA" != "$HEAD_SHA" ] || [ "$QUEUED_BASE_SHA" != "$BASE_SHA" ]; then
+  log "local head/base no longer match the queued GitHub comparison; exiting stale"
   exit 0
 fi
 
@@ -753,10 +750,9 @@ python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" --no-probe \
   die "could not publish pending local-review/summary on $HEAD_SHA"
 
 # The two review lanes are independent per head: dispatch them CONCURRENTLY
-# (EVOLUTION.md 2026-08-31, "Review lanes run in parallel").  Parsing stays
-# sequential below, and the failure semantics are unchanged: a code-lane
-# crash blocks the PR (and reaps the still-running prose lane); a prose-lane
-# failure only warns.
+# (EVOLUTION.md 2026-08-31, "Review lanes run in parallel"). Parsing stays
+# sequential below. Every dispatched lane must complete successfully with
+# matching session telemetry; output from a failed process is never evidence.
 log "running code review for PR $PR_NUM @ ${HEAD_SHA:0:12}"
 CODE_OUT="$RUN_DIR/code-last-message.md"
 rm -f "$CODE_OUT"
@@ -784,19 +780,36 @@ fi
 
 wait "$CODE_LANE_PID" 2>/dev/null || true
 CODE_RC="$(cat "$CODE_RC_FILE" 2>/dev/null || echo 1)"
-if [ "$CODE_RC" -ne 0 ] && [ ! -s "$CODE_OUT" ]; then
+if [ "$CODE_RC" -ne 0 ]; then
   [ -n "$PROSE_LANE_PID" ] && kill "$PROSE_LANE_PID" 2>/dev/null || true
+  [ -n "$PROSE_LANE_PID" ] && wait "$PROSE_LANE_PID" 2>/dev/null || true
   python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" --no-probe \
     post-status "$HEAD_SHA" local-review/summary error \
-    "code reviewer failed without output" >/dev/null || true
-  die "the code reviewer exited $CODE_RC and produced no review; review_state=blocked for PR $PR_NUM"
+    "local review run=$RUN_ID code reviewer exited $CODE_RC" >/dev/null || true
+  die "the code reviewer exited $CODE_RC; output cannot override a failed reviewer session"
 fi
-[ "$CODE_RC" -eq 0 ] ||
-  warn "the code reviewer exited $CODE_RC but left a final message; parsing it"
+
+CODE_LANE_JSON="$RUN_DIR/code-lane.json"
+if ! python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" --no-probe \
+    review-session "$CODE_OUT.dispatch.log" "$SESSION_TELEMETRY" code \
+    "$PR_NUM" "$WORKTREE" "$CODE_RC" >"$CODE_LANE_JSON"; then
+  [ -n "$PROSE_LANE_PID" ] && kill "$PROSE_LANE_PID" 2>/dev/null || true
+  [ -n "$PROSE_LANE_PID" ] && wait "$PROSE_LANE_PID" 2>/dev/null || true
+  python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" --no-probe \
+    post-status "$HEAD_SHA" local-review/summary error \
+    "local review run=$RUN_ID has invalid code session telemetry" >/dev/null || true
+  die "the code reviewer lacks clean, matching completion telemetry"
+fi
+CODE_SESSION_NAME="$(python3 - "$CODE_LANE_JSON" <<'PY'
+import json
+import sys
+print(json.load(open(sys.argv[1], encoding="utf-8"))["name"])
+PY
+)"
 
 CODE_RESULT=""
 if ! CODE_RESULT="$(write_review code "$CODE_OUT" "$REVIEWS_DIR/$HEAD_SHA-code.md" \
-      "$(sed -n 's/^name: //p' "$CODE_OUT.dispatch.log" 2>/dev/null | tail -1)" \
+      "$CODE_SESSION_NAME" \
       "$REVIEW_MODEL")"; then
   [ -n "$PROSE_LANE_PID" ] && kill "$PROSE_LANE_PID" 2>/dev/null || true
   python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" --no-probe \
@@ -812,25 +825,45 @@ log "code review: $CODE_VERDICT ($CODE_UNRESOLVED unresolved findings) -> $REVIE
 
 # -------------------------------------------------------------- prose review
 PROSE_VERDICT=""
+PROSE_UNRESOLVED=0
+PROSE_LANE_JSON=""
 if [ "$TOUCHES_BLUEPRINT" -eq 1 ]; then
   wait "$PROSE_LANE_PID" 2>/dev/null || true
   PROSE_RC="$(cat "$PROSE_RC_FILE" 2>/dev/null || echo 1)"
-  # pr-review.yml:218-224 — prose-review SKIPS where code-review FAILS.  The
-  # split is deliberate: a prose failure must not block a PR whose code review
-  # already produced a verdict.
-  if [ "$PROSE_RC" -ne 0 ] && [ ! -s "$PROSE_OUT" ]; then
-    warn "the prose reviewer exited $PROSE_RC with no output; keeping the code-review verdict and leaving no prose file"
-  else
-    PROSE_RESULT=""
-    if PROSE_RESULT="$(write_review prose "$PROSE_OUT" "$REVIEWS_DIR/$HEAD_SHA-prose.md" \
-          "$(sed -n 's/^name: //p' "$PROSE_OUT.dispatch.log" 2>/dev/null | tail -1)" \
-          "$PROSE_MODEL")"; then
-      PROSE_VERDICT="$(printf '%s\n' "$PROSE_RESULT" | sed -n 's/^verdict=//p')"
-      log "prose review: $PROSE_VERDICT -> $REVIEWS_DIR/$HEAD_SHA-prose.md"
-    else
-      warn "the prose review returned no verdict trailer; keeping the code-review verdict (raw output at $PROSE_OUT)"
-    fi
+  if [ "$PROSE_RC" -ne 0 ]; then
+    python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" --no-probe \
+      post-status "$HEAD_SHA" local-review/summary error \
+      "local review run=$RUN_ID prose reviewer exited $PROSE_RC" >/dev/null || true
+    die "the prose reviewer exited $PROSE_RC; output cannot override a failed reviewer session"
   fi
+  PROSE_LANE_JSON="$RUN_DIR/prose-lane.json"
+  if ! python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" --no-probe \
+      review-session "$PROSE_OUT.dispatch.log" "$SESSION_TELEMETRY" prose \
+      "$PR_NUM" "$WORKTREE" "$PROSE_RC" >"$PROSE_LANE_JSON"; then
+    python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" --no-probe \
+      post-status "$HEAD_SHA" local-review/summary error \
+      "local review run=$RUN_ID has invalid prose session telemetry" >/dev/null || true
+    die "the prose reviewer lacks clean, matching completion telemetry"
+  fi
+  PROSE_SESSION_NAME="$(python3 - "$PROSE_LANE_JSON" <<'PY'
+import json
+import sys
+print(json.load(open(sys.argv[1], encoding="utf-8"))["name"])
+PY
+)"
+  PROSE_RESULT=""
+  if ! PROSE_RESULT="$(write_review prose "$PROSE_OUT" \
+      "$REVIEWS_DIR/$HEAD_SHA-prose.md" "$PROSE_SESSION_NAME" \
+      "$PROSE_MODEL")"; then
+    python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" --no-probe \
+      post-status "$HEAD_SHA" local-review/summary error \
+      "local review run=$RUN_ID prose verdict is unusable" >/dev/null || true
+    die "the prose review returned no usable verdict"
+  fi
+  PROSE_VERDICT="$(printf '%s\n' "$PROSE_RESULT" | sed -n 's/^verdict=//p')"
+  PROSE_UNRESOLVED="$(printf '%s\n' "$PROSE_RESULT" | sed -n 's/^unresolved=//p')"
+  log "prose review: $PROSE_VERDICT ($PROSE_UNRESOLVED unresolved findings)" \
+    "-> $REVIEWS_DIR/$HEAD_SHA-prose.md"
 else
   log "the diff does not touch blueprint/; skipping the prose review"
 fi
@@ -853,48 +886,57 @@ case "$WORST" in
   *)                                    REVIEW_STATE=blocked ;;
 esac
 
-UNRESOLVED_TOTAL="$( { grep -h '^- \[ \] F' "$REVIEWS_DIR"/*.md 2>/dev/null || true; } |
-  wc -l | tr -d ' ')"
-
-FINAL_PULL_JSON="$RUN_TMP/final-pull.json"
-REMOTE_FINAL_SHA=""
-if python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" --no-probe \
-    pull "$PR_NUM" >"$FINAL_PULL_JSON"; then
-  REMOTE_FINAL_SHA="$(python3 - "$FINAL_PULL_JSON" <<'PY'
-import json
-import sys
-print(str((json.load(open(sys.argv[1], encoding="utf-8")).get("head") or {}).get("sha") or "").lower())
-PY
-)"
-fi
-LOCAL_FINAL_SHA="$(git -C "$WORKTREE" rev-parse HEAD 2>/dev/null || true)"
-if [ "$REMOTE_FINAL_SHA" != "$HEAD_SHA" ] || [ "$LOCAL_FINAL_SHA" != "$HEAD_SHA" ]; then
-  python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" --no-probe \
-    post-status "$HEAD_SHA" local-review/summary error \
-    "local review run $RUN_ID is obsolete: head moved" >/dev/null || true
-  die "head moved during review (start=$HEAD_SHA local=${LOCAL_FINAL_SHA:-unreadable} remote=${REMOTE_FINAL_SHA:-unreadable}); refusing publication"
-fi
+case "$CODE_UNRESOLVED:$PROSE_UNRESOLVED" in
+  *[!0-9:]*) die "reviewer ledger counts are not nonnegative integers" ;;
+esac
+UNRESOLVED_TOTAL=$((CODE_UNRESOLVED + PROSE_UNRESOLVED))
 
 if [ "$UNRESOLVED_TOTAL" -eq 0 ] && [ "$REVIEW_STATE" != CHANGES_REQUESTED ]; then
   SUMMARY_STATE=success
   REVIEW_EVENT=COMMENT
-  SUMMARY_DESCRIPTION="clean exact-head local review"
 else
   SUMMARY_STATE=failure
   REVIEW_EVENT=REQUEST_CHANGES
-  SUMMARY_DESCRIPTION="$UNRESOLVED_TOTAL unresolved local review finding(s)"
 fi
+REVIEW_FALLBACK=none
 
-if [ "$REVIEW_EVENT" = REQUEST_CHANGES ]; then
-  REVIEW_FALLBACK=COMMENT
-else
-  REVIEW_FALLBACK=none
-fi
-REVIEW_MARKER="<!-- mipstarre:review-ledger pr=$PR_NUM head=$HEAD_SHA run=$RUN_ID event=$REVIEW_EVENT fallback=$REVIEW_FALLBACK -->"
+ATTESTATION_JSON="$RUN_DIR/review-attestation.json"
+python3 - "$ATTESTATION_JSON" "$PR_NUM" "$HEAD_SHA" "$BASE_SHA" \
+    "$RUN_ID" "$UNRESOLVED_TOTAL" "$REVIEW_EVENT" "$REVIEW_FALLBACK" \
+    "$CODE_LANE_JSON" "$PROSE_LANE_JSON" <<'PY'
+import json
+import sys
+
+(destination, pr, head, base, run_id, findings, event, fallback,
+ code_path, prose_path) = sys.argv[1:11]
+lanes = [json.load(open(code_path, encoding="utf-8"))]
+if prose_path:
+    lanes.append(json.load(open(prose_path, encoding="utf-8")))
+if len({lane["name"] for lane in lanes}) != len(lanes):
+    raise SystemExit("reviewer session names are not distinct")
+if len({lane["thread_id"] for lane in lanes}) != len(lanes):
+    raise SystemExit("reviewer thread_ids are not distinct")
+payload = {
+    "schema": 1,
+    "pr": int(pr),
+    "head_sha": head,
+    "base_sha": base,
+    "run_id": run_id,
+    "canonical_findings": int(findings),
+    "event": event,
+    "fallback": fallback,
+    "lanes": lanes,
+}
+with open(destination, "w", encoding="utf-8") as stream:
+    json.dump(payload, stream, indent=2, ensure_ascii=False, sort_keys=True)
+    stream.write("\n")
+PY
+
 REVIEW_BODY="$RUN_DIR/review-body.md"
 {
   printf '# Local review ledger for PR #%s\n\n' "$PR_NUM"
   printf 'Exact head: `%s`\n\n' "$HEAD_SHA"
+  printf 'Exact base: `%s`\n\n' "$BASE_SHA"
   printf 'Combined verdict: `%s`; unresolved findings: `%s`.\n\n' \
     "$REVIEW_STATE" "$UNRESOLVED_TOTAL"
   printf '## Code review lane\n\n'
@@ -903,16 +945,66 @@ REVIEW_BODY="$RUN_DIR/review-body.md"
     printf '\n## Blueprint prose review lane\n\n'
     cat "$REVIEWS_DIR/$HEAD_SHA-prose.md"
   fi
-  printf '\n%s\n' "$REVIEW_MARKER"
+  printf '\n## Review attestation\n\n```json\n'
+  cat "$ATTESTATION_JSON"
+  printf '```\n\n'
 } >"$REVIEW_BODY"
+
+REVIEW_DIGEST="$(python3 - "$REVIEW_BODY" <<'PY'
+import hashlib
+import sys
+print(hashlib.sha256(open(sys.argv[1], "rb").read()).hexdigest())
+PY
+)"
+REVIEW_MARKER="<!-- mipstarre:review-attestation pr=$PR_NUM head=$HEAD_SHA \
+base=$BASE_SHA run=$RUN_ID findings=$UNRESOLVED_TOTAL event=$REVIEW_EVENT \
+fallback=$REVIEW_FALLBACK digest=$REVIEW_DIGEST -->"
+printf '%s\n' "$REVIEW_MARKER" >>"$REVIEW_BODY"
+
+# Rebind both sides of the comparison before each gate-satisfying publication.
+comparison_matches_attestation() {
+  local pull_json="$1" remote_head="" remote_base="" local_head local_base
+  if python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" --no-probe \
+      pull "$PR_NUM" >"$pull_json"; then
+    IFS="$(printf '\t')" read -r remote_head remote_base < <(
+      python3 - "$pull_json" <<'PY'
+import json
+import sys
+pull = json.load(open(sys.argv[1], encoding="utf-8"))
+print(
+    str((pull.get("head") or {}).get("sha") or "").lower(),
+    str((pull.get("base") or {}).get("sha") or "").lower(),
+    sep="\t",
+)
+PY
+    )
+  fi
+  local_head="$(git -C "$WORKTREE" rev-parse HEAD 2>/dev/null || true)"
+  local_base="$(git -C "$WORKTREE" rev-parse "$BASE_REF^{commit}" 2>/dev/null || true)"
+  [ "$remote_head" = "$HEAD_SHA" ] \
+    && [ "$local_head" = "$HEAD_SHA" ] \
+    && [ "$remote_base" = "$BASE_SHA" ] \
+    && [ "$local_base" = "$BASE_SHA" ]
+}
+
+if ! comparison_matches_attestation "$RUN_TMP/pre-review-publication-pull.json"; then
+  python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" --no-probe \
+    post-status "$HEAD_SHA" local-review/summary error \
+    "local review run=$RUN_ID is obsolete: head/base moved" >/dev/null || true
+  die "head/base moved during review; refusing publication of stale evidence"
+fi
 
 python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" --no-probe \
   review-once "$PR_NUM" "$HEAD_SHA" "$REVIEW_BODY" "$REVIEW_EVENT" \
   "$REVIEW_MARKER" >/dev/null ||
   die "could not publish the exact-head marker-bound review ledger"
+comparison_matches_attestation "$RUN_TMP/pre-status-publication-pull.json" ||
+  die "head/base moved after review publication; refusing a stale summary status"
 python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" --no-probe \
   post-status "$HEAD_SHA" local-review/summary "$SUMMARY_STATE" \
-  "$SUMMARY_DESCRIPTION" >/dev/null ||
+  "local review digest=$REVIEW_DIGEST run=$RUN_ID \
+$( [ "$SUMMARY_STATE" = success ] && printf clean || printf 'findings=%s' "$UNRESOLVED_TOTAL" )" \
+  >/dev/null ||
   die "review was published but local-review/summary could not be finalized"
 
 log "PR #$PR_NUM review event=$REVIEW_EVENT summary=$SUMMARY_STATE"

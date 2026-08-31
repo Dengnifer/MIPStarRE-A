@@ -256,3 +256,24 @@ and successful summary is sufficient; GitHub approval is not a gate.
 **Expected effect:** remote outages fail closed without creating shadow state,
 ambiguous mutations reconcile against GitHub, and every lifecycle consumer
 observes one authoritative issue/PR history.
+
+## 2026-09-01 — Merge evidence is one full-SHA run contract
+
+**Trigger:** the issue 0007 post-audit incident recorded in
+`results/telemetry/events.md`, "Post-audit merge evidence admitted incomplete
+bindings," together with the owner's decision that independent clean review is
+published as a GitHub `COMMENT` and never requires approval or
+`reviewDecision`.
+
+**Change:** CI manifests and statuses bind one run to the full PR head and base.
+Review attestations additionally bind the canonical body digest, findings,
+event, and two successful distinct dispatcher sessions with matching completion
+telemetry. A clean attestation uses `COMMENT` with no fallback. The merge gate
+holds the review lock, reserves the fix lock, and applies the same strict
+evaluator before preparation and immediately before guarded merge. Idempotent
+POST/PATCH operations make at most one mutation attempt and reconcile ambiguous
+results only by authoritative read-back.
+
+**Expected effect:** stale bases, mixed runs, reused or failed reviewer sessions,
+late adverse reviews, concurrent fix activity, and ambiguous duplicate writes
+fail closed without reintroducing GitHub approval as a gate.

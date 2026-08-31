@@ -150,32 +150,34 @@ def _create_or_recover(
     for assignee in assignees:
         arguments.extend(["--assignee", assignee])
 
-    last: GitHubError | None = None
-    for attempt in range(client.retries + 1):
-        try:
-            result = client.run(arguments, retry=False)
-            created = _parse_created_issue(client, result.stdout)
-            return (
-                _validate_issue(
-                    client,
-                    created,
-                    marker=marker,
-                    title=title,
-                    body=body,
-                ),
-                False,
-            )
-        except GitHubError as exc:
-            last = exc
-            if not exc.transient:
-                raise
+    try:
+        result = client.run(arguments, retry=False)
+        created = _parse_created_issue(client, result.stdout)
+        return (
+            _validate_issue(
+                client,
+                created,
+                marker=marker,
+                title=title,
+                body=body,
+            ),
+            False,
+        )
+    except GitHubError as exc:
+        if not exc.transient:
+            raise
+        for attempt in range(client.retries + 1):
             existing = _find_by_marker(client, marker, title=title, body=body)
             if existing is not None:
                 return existing, True
-            if attempt >= client.retries:
-                break
-            time.sleep(client.retry_delay * (2**attempt))
-    raise last or GitHubError("issue creation failed")
+            if attempt < client.retries:
+                time.sleep(client.retry_delay * (2**attempt))
+        raise GitHubError(
+            "issue creation outcome is ambiguous after authoritative read-back; "
+            "refusing to create a second issue",
+            status=exc.status,
+            transient=True,
+        ) from exc
 
 
 def _attach_parent(client: GitHub, parent: int, child: dict[str, Any]) -> None:

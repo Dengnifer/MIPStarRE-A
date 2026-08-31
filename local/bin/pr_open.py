@@ -140,20 +140,18 @@ def _create_pull(
         "--body",
         body,
     ]
-    last: GitHubError | None = None
-    for attempt in range(client.retries + 1):
-        try:
-            result = client.run(arguments, retry=False)
-            created = exact(_parse_created_pull(client, result.stdout))
-            if created is None:
-                raise GitHubError(
-                    "created PR does not retain its marker-bound title, body, head, and base"
-                )
-            return created, False
-        except GitHubError as exc:
-            last = exc
-            if not exc.transient:
-                raise
+    try:
+        result = client.run(arguments, retry=False)
+        created = exact(_parse_created_pull(client, result.stdout))
+        if created is None:
+            raise GitHubError(
+                "created PR does not retain its marker-bound title, body, head, and base"
+            )
+        return created, False
+    except GitHubError as exc:
+        if not exc.transient:
+            raise
+        for attempt in range(client.retries + 1):
             existing = _open_pulls(client, branch)
             if len(existing) == 1:
                 adopted = exact(existing[0])
@@ -164,11 +162,17 @@ def _create_pull(
                     )
                 return adopted, True
             if len(existing) > 1:
-                raise GitHubError(f"more than one open PR has head branch {branch!r}")
-            if attempt >= client.retries:
-                break
-            time.sleep(client.retry_delay * (2**attempt))
-    raise last or GitHubError("PR creation failed")
+                raise GitHubError(
+                    f"more than one open PR has head branch {branch!r}"
+                )
+            if attempt < client.retries:
+                time.sleep(client.retry_delay * (2**attempt))
+        raise GitHubError(
+            "PR creation outcome is ambiguous after authoritative read-back; "
+            "refusing to create a second PR",
+            status=exc.status,
+            transient=True,
+        ) from exc
 
 
 def _split(values: Sequence[str]) -> list[str]:

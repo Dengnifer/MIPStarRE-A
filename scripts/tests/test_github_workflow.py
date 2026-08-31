@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import contextlib
+import hashlib
 import io
 import json
 import os
@@ -92,6 +93,8 @@ if args[:3] == ["pr", "merge", "--help"]:
     raise SystemExit(0)
 
 if args[:2] == ["issue", "create"]:
+    if state.pop("fail_issue_create_before_once", False):
+        fail("HTTP 503 Service Unavailable")
     number = next_number("issues")
     body = option("--body")
     labels = []
@@ -116,6 +119,8 @@ if args[:2] == ["issue", "create"]:
     raise SystemExit(0)
 
 if args[:2] == ["pr", "create"]:
+    if state.pop("fail_pr_create_before_once", False):
+        fail("HTTP 503 Service Unavailable")
     number = next_number("pulls")
     row = {
         "id": 2000 + number,
@@ -126,7 +131,10 @@ if args[:2] == ["pr", "create"]:
         "draft": False,
         "mergeable": True,
         "head": {"ref": option("--head"), "sha": state.get("local_head", "a" * 40)},
-        "base": {"ref": option("--base")},
+        "base": {
+            "ref": option("--base"),
+            "sha": state.get("base_sha", "b" * 40),
+        },
         "labels": [],
         "commits": 1,
         "html_url": f"https://github.com/o/r/pull/{number}",
@@ -219,9 +227,15 @@ if len(tail) == 2 and tail[0] == "pulls":
         fail("HTTP 404 Not Found")
     if method == "GET":
         sequence = state.get("pull_head_sequence", [])
+        base_sequence = state.get("pull_base_sequence", [])
         count = int(state.get("pull_read_count", 0))
         if sequence:
             row["head"]["sha"] = sequence[min(count, len(sequence) - 1)]
+        if base_sequence:
+            row["base"]["sha"] = base_sequence[
+                min(count, len(base_sequence) - 1)
+            ]
+        if sequence or base_sequence:
             state["pull_read_count"] = count + 1
         emit(row)
     if method == "PATCH":
@@ -289,6 +303,20 @@ if len(tail) == 3 and tail[0] == "pulls" and tail[2] == "reviews":
     number = tail[1]
     reviews = state.setdefault("reviews", {}).setdefault(number, [])
     if method == "GET":
+        read_count = int(state.get("review_read_count", 0))
+        if state.get("inject_adverse_review_at") == read_count:
+            pull = state.setdefault("pulls", {}).get(number, {})
+            reviews.append(
+                {
+                    "id": 9000 + read_count,
+                    "body": "same-head race",
+                    "commit_id": str((pull.get("head") or {}).get("sha") or ""),
+                    "state": "CHANGES_REQUESTED",
+                    "submitted_at": "2099-01-01T00:00:00Z",
+                }
+            )
+            state["inject_adverse_review_at"] = None
+        state["review_read_count"] = read_count + 1
         emit(page(reviews, parsed.query))
     if method == "POST":
         event = str((payload or {}).get("event", ""))
@@ -359,7 +387,13 @@ def issue_row(number: int, *, title: str = "Issue", body: str = "") -> dict:
     }
 
 
-def pull_row(number: int, sha: str, branch: str = "issue-7-test") -> dict:
+def pull_row(
+    number: int,
+    sha: str,
+    branch: str = "issue-7-test",
+    *,
+    base_sha: str = "0" * 40,
+) -> dict:
     return {
         "id": 2000 + number,
         "number": number,
@@ -370,7 +404,7 @@ def pull_row(number: int, sha: str, branch: str = "issue-7-test") -> dict:
         "mergeable": True,
         "mergeable_state": "clean",
         "head": {"ref": branch, "sha": sha},
-        "base": {"ref": "main"},
+        "base": {"ref": "main", "sha": base_sha},
         "labels": [],
         "commits": 1,
         "merged": False,
@@ -456,6 +490,172 @@ class FakeGhCase(unittest.TestCase):
         run_git(repository, "commit", "-m", "Feature")
         head_sha = run_git(repository, "rev-parse", "HEAD")
         return repository, remote, base_sha, head_sha
+
+    def append_sessions(self, root: Path, rows: list[dict]) -> None:
+        path = root / "results" / "telemetry" / "sessions.jsonl"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("a", encoding="utf-8") as stream:
+            for row in rows:
+                stream.write(json.dumps(row) + "\n")
+
+    def ci_bundle(
+        self,
+        head_sha: str,
+        base_sha: str,
+        *,
+        run_id: str = "ci-test",
+        outcomes: dict[str, str] | None = None,
+        comment_id: int = 1,
+        created_at: str = "2026-01-01T00:01:00Z",
+    ) -> tuple[dict, list[dict]]:
+        outcomes = outcomes or {}
+        steps = []
+        statuses = []
+        for index, step_name in enumerate(github_api.CANONICAL_CI_STEPS):
+            outcome = outcomes.get(step_name, "success")
+            step = {"step": step_name, "outcome": outcome, "note": ""}
+            steps.append(step)
+            state, description = github_api.ci_status_description(run_id, step)
+            context = f"local-ci/{step_name}"
+            statuses.append(
+                {
+                    "id": index + 1,
+                    "sha": head_sha,
+                    "context": context,
+                    "state": state,
+                    "description": github_api.render_status_description(
+                        head_sha, context, state, description
+                    ),
+                    "created_at": created_at,
+                }
+            )
+        conclusion = "success"
+        if any(step["outcome"] == "failure" for step in steps):
+            conclusion = "failure"
+        elif any(step["outcome"] == "error" for step in steps):
+            conclusion = "error"
+        manifest = {
+            "schema": 1,
+            "pr": "1",
+            "base_sha": base_sha,
+            "head_sha": head_sha,
+            "run_id": run_id,
+            "partial": False,
+            "conclusion": conclusion,
+            "steps": steps,
+        }
+        marker = (
+            f"<!-- mipstarre:ci-manifest pr=1 head={head_sha} "
+            f"run={run_id} -->"
+        )
+        body = "```json\n" + json.dumps(manifest) + "\n```\n\n" + marker + "\n"
+        comment = {"id": comment_id, "body": body, "created_at": created_at}
+        return comment, statuses
+
+    def review_bundle(
+        self,
+        root: Path,
+        head_sha: str,
+        base_sha: str,
+        *,
+        run_id: str = "review-test",
+        worktree: Path | None = None,
+        findings: int = 0,
+        review_id: int = 1,
+        status_id: int = 100,
+        submitted_at: str = "2026-01-01T00:02:00Z",
+        thread_id: str | None = None,
+        session_name: str | None = None,
+    ) -> tuple[dict, dict, list[dict], str, str]:
+        worktree_text = str((worktree or root).resolve())
+        safe_run = re.sub(r"[^A-Za-z0-9._-]", "-", run_id)
+        session_name = session_name or f"reviewer-pr1-{safe_run}"
+        thread_id = thread_id or f"thread-{safe_run}-code"
+        lane = {
+            "lane": "code",
+            "name": session_name,
+            "thread_id": thread_id,
+            "exit": 0,
+            "worktree": worktree_text,
+            "start": "2026-01-01T00:00:00+00:00",
+            "end": "2026-01-01T00:01:00+00:00",
+        }
+        finding_lines = [
+            f"- [ ] F{index} (changes) `path.py:{index}` - defect {index}"
+            for index in range(1, findings + 1)
+        ]
+        ledger = "\n".join(finding_lines) if finding_lines else "<!-- no findings -->"
+        event = "COMMENT" if findings == 0 else "REQUEST_CHANGES"
+        attestation = {
+            "schema": 1,
+            "pr": 1,
+            "head_sha": head_sha,
+            "base_sha": base_sha,
+            "run_id": run_id,
+            "canonical_findings": findings,
+            "event": event,
+            "fallback": "none",
+            "lanes": [lane],
+        }
+        prefix = (
+            "# Local review ledger\n\n"
+            "## Code review lane\n\n"
+            "<!-- findings:begin -->\n"
+            f"{ledger}\n"
+            "<!-- findings:end -->\n\n"
+            "## Review attestation\n\n"
+            "```json\n"
+            + json.dumps(attestation, indent=2, sort_keys=True)
+            + "\n```\n\n"
+        )
+        digest = hashlib.sha256(prefix.encode("utf-8")).hexdigest()
+        marker = (
+            f"<!-- mipstarre:review-attestation pr=1 head={head_sha} "
+            f"base={base_sha} run={run_id} findings={findings} event={event} "
+            f"fallback=none digest={digest} -->"
+        )
+        body = prefix + marker + "\n"
+        state = "COMMENTED" if findings == 0 else "CHANGES_REQUESTED"
+        review = {
+            "id": review_id,
+            "body": body,
+            "commit_id": head_sha,
+            "state": state,
+            "submitted_at": submitted_at,
+        }
+        status_state = "success" if findings == 0 else "failure"
+        verdict = "clean" if findings == 0 else f"findings={findings}"
+        description = f"local review digest={digest} run={run_id} {verdict}"
+        status = {
+            "id": status_id,
+            "sha": head_sha,
+            "context": github_api.REVIEW_CONTEXT,
+            "state": status_state,
+            "description": github_api.render_status_description(
+                head_sha,
+                github_api.REVIEW_CONTEXT,
+                status_state,
+                description,
+            ),
+            "created_at": submitted_at,
+        }
+        session = {
+            "name": session_name,
+            "role": "reviewer",
+            "issue": "pr1",
+            "pr": "1",
+            "thread_id": thread_id,
+            "start": lane["start"],
+            "end": lane["end"],
+            "wall_s": 60,
+            "usage": {},
+            "turns": 1,
+            "exit": 0,
+            "dispatcher": "test",
+            "worktree": worktree_text,
+            "status": "done",
+        }
+        return review, status, [session], body, marker
 
 
 class IssueLifecycleTests(FakeGhCase):
@@ -563,7 +763,7 @@ class PullRequestLifecycleTests(FakeGhCase):
         self.assertNotIn("--all", (BIN_DIR / "pr_open.py").read_text(encoding="utf-8"))
 
     def test_ambiguous_pr_create_and_empty_diff_refusal(self) -> None:
-        repository, _remote, _base_sha, head_sha = self.make_repository()
+        repository, _remote, base_sha, head_sha = self.make_repository()
         self.write_state(ambiguous_pr_create_once=True, local_head=head_sha)
         args = [
             "--branch",
@@ -710,6 +910,65 @@ class SharedGitHubLayerTests(FakeGhCase):
                 github_api.normalize_sha(value)
         self.assertEqual(github_api.normalize_sha("A" * 64), "a" * 64)
 
+    def test_ambiguous_absent_mutations_never_issue_a_second_write(self) -> None:
+        sha = "6" * 40
+        self.write_state(
+            failures={
+                f"POST statuses/{sha}": {
+                    "remaining": 1,
+                    "message": "HTTP 503 Service Unavailable",
+                }
+            }
+        )
+        with self.assertRaises(github_api.GitHubError) as caught:
+            self.client().post_status(sha, "local-ci/build", "success", "passed")
+        self.assertIn("refusing to issue a second mutation", str(caught.exception))
+        posts = [
+            call
+            for call in self.state()["calls"]
+            if call["args"][:3] == ["api", "--method", "POST"]
+            and call["args"][3].endswith(f"statuses/{sha}")
+        ]
+        self.assertEqual(len(posts), 1)
+        self.assertEqual(self.state()["statuses"].get(sha, []), [])
+
+        self.write_state(fail_issue_create_before_once=True)
+        with contextlib.redirect_stderr(io.StringIO()):
+            result = issue_new.main(
+                ["--title", "Ambiguous absent", "--repo-root", str(self.root)]
+            )
+        self.assertEqual(result, 2)
+        creates = [
+            call for call in self.state()["calls"]
+            if call["args"][:2] == ["issue", "create"]
+        ]
+        self.assertEqual(len(creates), 1)
+        self.assertEqual(self.state()["issues"], {})
+
+        issue = issue_row(1)
+        self.write_state(
+            issues={"1": issue},
+            failures={
+                "PATCH issues/1": {
+                    "remaining": 1,
+                    "message": "HTTP 503 Service Unavailable",
+                }
+            },
+        )
+        with contextlib.redirect_stderr(io.StringIO()):
+            result = issue_close.main(
+                ["1", "--reason", "completed", "--repo-root", str(self.root)]
+            )
+        self.assertEqual(result, 2)
+        patches = [
+            call
+            for call in self.state()["calls"]
+            if call["args"][:3] == ["api", "--method", "PATCH"]
+            and call["args"][3].endswith("issues/1")
+        ]
+        self.assertEqual(len(patches), 1)
+        self.assertEqual(self.state()["issues"]["1"]["state"], "open")
+
     def test_successful_publications_validate_exact_return_values(self) -> None:
         sha = "b" * 40
         client = self.client()
@@ -723,10 +982,9 @@ class SharedGitHubLayerTests(FakeGhCase):
         with self.assertRaises(github_api.GitHubError):
             client.comment_once(1, body, marker)
 
-        review_marker = github_api.stable_marker(
-            "test-review", head=sha, event="COMMENT", fallback="none"
+        _review, _status, _sessions, review_body, review_marker = self.review_bundle(
+            self.root, sha, "a" * 40
         )
-        review_body = "ledger\n" + review_marker
         self.write_state(corrupt_review_response=True)
         with self.assertRaises(github_api.GitHubError):
             client.review_once(1, sha, review_body, "COMMENT", review_marker)
@@ -735,25 +993,32 @@ class SharedGitHubLayerTests(FakeGhCase):
 class CIPublicationTests(FakeGhCase):
     """Group 4: exact-head statuses, partial refusal, manifest, and races."""
 
-    def prepare_ci(self) -> tuple[Path, str]:
-        repository, _remote, _base_sha, head_sha = self.make_repository()
+    def prepare_ci(self) -> tuple[Path, str, str]:
+        repository, _remote, base_sha, head_sha = self.make_repository()
         local_bin = repository / "local" / "bin"
         local_bin.mkdir(parents=True)
         shutil.copy2(BIN_DIR / "ci.sh", local_bin / "ci.sh")
         shutil.copy2(BIN_DIR / "github_api.py", local_bin / "github_api.py")
-        pull = pull_row(1, head_sha)
+        pull = pull_row(1, head_sha, base_sha=base_sha)
         self.write_state(
             pulls={"1": pull},
             issues={"1": {**pull, "pull_request": {"url": pull["html_url"]}}},
             commits={"1": [{"sha": head_sha, "commit": {"message": "Feature"}}]},
         )
-        return repository, head_sha
+        return repository, base_sha, head_sha
 
     def run_ci(self, repository: Path, *extra: str) -> subprocess.CompletedProcess[str]:
         environment = os.environ.copy()
         environment["MIPSTARRE_CACHE_ROOT"] = str(self.root / "cache")
         return subprocess.run(
-            ["bash", str(repository / "local/bin/ci.sh"), "1", "--worktree", str(repository), *extra],
+            [
+                "bash",
+                str(repository / "local/bin/ci.sh"),
+                "1",
+                "--worktree",
+                str(repository),
+                *extra,
+            ],
             cwd=repository,
             env=environment,
             text=True,
@@ -762,7 +1027,7 @@ class CIPublicationTests(FakeGhCase):
         )
 
     def test_complete_skipped_lane_publishes_all_contexts_and_manifest(self) -> None:
-        repository, head_sha = self.prepare_ci()
+        repository, _base_sha, head_sha = self.prepare_ci()
         result = self.run_ci(repository)
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
         state = self.state()
@@ -778,13 +1043,17 @@ class CIPublicationTests(FakeGhCase):
         self.client().ci_manifest(1, head_sha)
 
     def test_partial_run_publishes_nothing_and_remote_race_has_no_success(self) -> None:
-        repository, head_sha = self.prepare_ci()
+        repository, base_sha, head_sha = self.prepare_ci()
         partial = self.run_ci(repository, "--only", "build")
         self.assertEqual(partial.returncode, 0, partial.stderr + partial.stdout)
         self.assertEqual(self.state()["statuses"], {})
         self.assertEqual(self.state()["comments"], {})
 
-        self.write_state(pull_head_sequence=[head_sha, "c" * 40], pull_read_count=0)
+        self.write_state(
+            pull_head_sequence=[head_sha, "c" * 40],
+            pull_base_sequence=[base_sha, base_sha],
+            pull_read_count=0,
+        )
         moved = self.run_ci(repository)
         self.assertNotEqual(moved.returncode, 0)
         rows = self.state()["statuses"][head_sha]
@@ -793,57 +1062,74 @@ class CIPublicationTests(FakeGhCase):
         self.assertIn('REMOTE_FINAL_SHA" != "$HEAD_SHA', source)
         self.assertIn('LOCAL_FINAL_SHA" != "$HEAD_SHA', source)
 
+    def test_remote_base_race_has_no_success_or_manifest(self) -> None:
+        repository, base_sha, head_sha = self.prepare_ci()
+        self.write_state(
+            pull_head_sequence=[head_sha, head_sha],
+            pull_base_sequence=[base_sha, "c" * 40],
+            pull_read_count=0,
+        )
+        moved = self.run_ci(repository)
+        self.assertNotEqual(moved.returncode, 0)
+        rows = self.state()["statuses"][head_sha]
+        self.assertFalse(any(row["state"] == "success" for row in rows))
+        self.assertEqual(self.state()["comments"], {})
+
 
 class ReviewPublicationTests(FakeGhCase):
     """Group 5: exact-commit review events, fallback, ledger, and head checks."""
 
-    def test_review_events_idempotency_and_self_review_fallback(self) -> None:
-        sha = "d" * 40
+    def test_clean_comment_attestation_is_idempotent_without_approval(self) -> None:
+        sha, base_sha = "d" * 40, "a" * 40
         client = self.client()
-        clean_marker = github_api.stable_marker(
-            "test-review", head=sha, event="COMMENT", fallback="none"
+        review, status, sessions, body, marker = self.review_bundle(
+            self.root, sha, base_sha
         )
-        clean_body = "## Findings\n\nNone.\n\n" + clean_marker
-        row, event = client.review_once(1, sha, clean_body, "COMMENT", clean_marker)
+        row, event = client.review_once(1, sha, body, "COMMENT", marker)
         self.assertEqual((row["commit_id"], event), (sha, "COMMENT"))
-        client.review_once(1, sha, clean_body, "COMMENT", clean_marker)
+        client.review_once(1, sha, body, "COMMENT", marker)
         self.assertEqual(len(self.state()["reviews"]["1"]), 1)
+        self.assertNotEqual(row["state"], "APPROVED")
+        self.write_state(statuses={sha: [status]})
+        self.append_sessions(self.root, sessions)
+        evidence = client.review_evidence(1, sha, base_sha)
+        self.assertEqual(evidence.attestation.event, "COMMENT")
+        self.assertEqual(evidence.attestation.findings, 0)
 
-        self.write_state(
-            review_422="Cannot request changes on your own pull request"
+    def test_request_changes_rejection_is_not_retried_as_comment(self) -> None:
+        sha, base_sha = "e" * 40, "b" * 40
+        _review, _status, _sessions, body, marker = self.review_bundle(
+            self.root, sha, base_sha, findings=1
         )
-        marker = github_api.stable_marker(
-            "test-review", head=sha, event="REQUEST_CHANGES", fallback="COMMENT"
-        )
-        body = "## Findings\n\n- [ ] F1 defect\n\n" + marker
-        _row, used = client.review_once(1, sha, body, "REQUEST_CHANGES", marker)
-        self.assertEqual(used, "COMMENT")
-        client.post_status(sha, github_api.REVIEW_CONTEXT, "failure", "findings")
-
-    def test_unrelated_422_fails_and_wrapper_contains_moved_head_recheck(self) -> None:
-        sha = "e" * 40
         self.write_state(review_422="Validation Failed: commit is not part of pull")
-        marker = github_api.stable_marker(
-            "test-review", head=sha, event="REQUEST_CHANGES", fallback="COMMENT"
-        )
-        body = "ledger\n" + marker
         with self.assertRaises(github_api.GitHubError):
             self.client().review_once(1, sha, body, "REQUEST_CHANGES", marker)
+        posts = [
+            call
+            for call in self.state()["calls"]
+            if call["args"][:3] == ["api", "--method", "POST"]
+            and call["args"][3].endswith("pulls/1/reviews")
+        ]
+        self.assertEqual(len(posts), 1)
         source = (BIN_DIR / "review.sh").read_text(encoding="utf-8")
-        self.assertIn("head moved during review", source)
-        self.assertIn('REMOTE_FINAL_SHA" != "$HEAD_SHA', source)
-        self.assertIn('LOCAL_FINAL_SHA" != "$HEAD_SHA', source)
-        self.assertLess(source.index("head moved during review"), source.index("review-once"))
+        self.assertIn("head/base moved during review", source)
+        self.assertIn('"$remote_head" = "$HEAD_SHA"', source)
+        self.assertIn('"$local_head" = "$HEAD_SHA"', source)
+        self.assertIn('"$remote_base" = "$BASE_SHA"', source)
+        self.assertIn('"$local_base" = "$BASE_SHA"', source)
+        self.assertLess(
+            source.index("head/base moved during review"),
+            source.index("review-once"),
+        )
         self.assertIn("latest-review-ledger", source)
         self.assertIn('"$REVIEW_CONTEXT"', source)
 
     def test_marker_collision_and_event_mismatch_fail_closed(self) -> None:
-        sha = "9" * 40
+        sha, base_sha = "9" * 40, "8" * 40
         client = self.client()
-        marker = github_api.stable_marker(
-            "test-review", head=sha, event="COMMENT", fallback="none"
+        _review, _status, _sessions, body, marker = self.review_bundle(
+            self.root, sha, base_sha
         )
-        body = "ledger\n" + marker
         self.write_state(
             reviews={
                 "1": [
@@ -878,17 +1164,172 @@ class ReviewPublicationTests(FakeGhCase):
         with self.assertRaises(github_api.GitHubError):
             client.review_ledger(1, sha)
 
+    def test_digest_run_base_commit_findings_and_status_mismatches_fail(self) -> None:
+        sha, base_sha = "7" * 40, "6" * 40
+        review, status, sessions, _body, _marker = self.review_bundle(
+            self.root, sha, base_sha
+        )
+        self.append_sessions(self.root, sessions)
+        client = self.client()
+
+        tampered = {**review, "body": review["body"].replace("# Local", "# Altered", 1)}
+        self.write_state(reviews={"1": [tampered]}, statuses={sha: [status]})
+        with self.assertRaises(github_api.GitHubError):
+            client.review_evidence(1, sha, base_sha)
+
+        wrong_commit = {**review, "commit_id": "5" * 40}
+        self.write_state(reviews={"1": [wrong_commit]}, statuses={sha: [status]})
+        with self.assertRaises(github_api.GitHubError):
+            client.review_evidence(1, sha, base_sha)
+
+        self.write_state(reviews={"1": [review]}, statuses={sha: [status]})
+        with self.assertRaises(github_api.GitHubError):
+            client.review_evidence(1, sha, "4" * 40)
+
+        wrong_status = {**status, "description": "different run and digest"}
+        self.write_state(reviews={"1": [review]}, statuses={sha: [wrong_status]})
+        with self.assertRaises(github_api.GitHubError):
+            client.review_evidence(1, sha, base_sha)
+
+        wrong_findings = {
+            **review,
+            "body": review["body"].replace("findings=0 event=", "findings=1 event="),
+        }
+        self.write_state(reviews={"1": [wrong_findings]}, statuses={sha: [status]})
+        with self.assertRaises(github_api.GitHubError):
+            client.review_evidence(1, sha, base_sha)
+
+    def test_invalid_reused_and_nonzero_reviewer_sessions_fail(self) -> None:
+        sha, base_sha = "3" * 40, "2" * 40
+        review, status, sessions, _body, _marker = self.review_bundle(
+            self.root, sha, base_sha
+        )
+        self.write_state(reviews={"1": [review]}, statuses={sha: [status]})
+        telemetry = self.root / "results/telemetry/sessions.jsonl"
+
+        invalid = {**sessions[0], "role": "prover"}
+        self.append_sessions(self.root, [invalid])
+        with self.assertRaises(github_api.GitHubError):
+            self.client().review_evidence(1, sha, base_sha)
+
+        telemetry.write_text("", encoding="utf-8")
+        reused = {
+            **sessions[0],
+            "name": "reviewer-pr1-reused",
+            "issue": "pr1",
+        }
+        self.append_sessions(self.root, [sessions[0], reused])
+        with self.assertRaises(github_api.GitHubError):
+            self.client().review_evidence(1, sha, base_sha)
+
+        telemetry.write_text("", encoding="utf-8")
+        self.append_sessions(self.root, [sessions[0], sessions[0]])
+        with self.assertRaises(github_api.GitHubError):
+            self.client().review_evidence(1, sha, base_sha)
+
+        telemetry.write_text("", encoding="utf-8")
+        failed = {**sessions[0], "exit": 7, "status": "failed"}
+        self.append_sessions(self.root, [failed])
+        dispatch_log = self.root / "dispatch.log"
+        dispatch_log.write_text(
+            f"name: {failed['name']}\n"
+            f"thread_id: {failed['thread_id']}\n"
+            "last_message: output.md\n"
+            "exit: 7\n",
+            encoding="utf-8",
+        )
+        (self.root / "output.md").write_text("usable-looking output\n", encoding="utf-8")
+        with self.assertRaises(github_api.GitHubError):
+            github_api.validate_reviewer_session(
+                dispatch_log,
+                telemetry,
+                lane="code",
+                number=1,
+                worktree=self.root,
+                expected_exit=7,
+            )
+        source = (BIN_DIR / "review.sh").read_text(encoding="utf-8")
+        self.assertLess(
+            source.index('if [ "$CODE_RC" -ne 0 ]'),
+            source.index('CODE_RESULT=""'),
+        )
+        self.assertNotIn("retrying once", source)
+        self.assertNotIn("for attempt in 1 2", source)
+        self.assertEqual(source.count("comparison_matches_attestation \"$RUN_TMP/"), 2)
+
+    def test_same_head_reruns_select_matching_latest_run(self) -> None:
+        sha, base_sha = "1" * 40, "a" * 40
+        old_review, old_status, old_sessions, _body, _marker = self.review_bundle(
+            self.root,
+            sha,
+            base_sha,
+            run_id="review-old",
+            review_id=1,
+            status_id=101,
+            submitted_at="2026-01-01T00:01:00Z",
+        )
+        new_review, new_status, new_sessions, _body, _marker = self.review_bundle(
+            self.root,
+            sha,
+            base_sha,
+            run_id="review-new",
+            review_id=2,
+            status_id=102,
+            submitted_at="2026-01-01T00:02:00Z",
+        )
+        old_comment, old_ci_statuses = self.ci_bundle(
+            sha,
+            base_sha,
+            run_id="ci-old",
+            comment_id=1,
+            created_at="2026-01-01T00:01:00Z",
+        )
+        new_comment, new_ci_statuses = self.ci_bundle(
+            sha,
+            base_sha,
+            run_id="ci-new",
+            comment_id=2,
+            created_at="2026-01-01T00:02:00Z",
+        )
+        self.append_sessions(self.root, [*old_sessions, *new_sessions])
+        self.write_state(
+            reviews={"1": [old_review, new_review]},
+            comments={"1": [old_comment, new_comment]},
+            statuses={
+                sha: [
+                    *old_ci_statuses,
+                    old_status,
+                    *new_ci_statuses,
+                    new_status,
+                ]
+            },
+        )
+        self.assertEqual(
+            self.client().review_evidence(1, sha, base_sha).attestation.run_id,
+            "review-new",
+        )
+        self.assertEqual(
+            self.client().ci_evidence(1, sha, base_sha).run_id,
+            "ci-new",
+        )
+
+        self.write_state(
+            statuses={sha: [*new_ci_statuses, old_status]},
+        )
+        with self.assertRaises(github_api.GitHubError):
+            self.client().review_evidence(1, sha, base_sha)
+
 
 class AutoFixTests(FakeGhCase):
     """Auto-fix: opt-in, exact-head evidence, complete count, and cap action."""
 
     def prepare_autofix(self) -> tuple[Path, str, dict]:
-        repository, _remote, _base_sha, head_sha = self.make_repository()
+        repository, _remote, base_sha, head_sha = self.make_repository()
         local_bin = repository / "local" / "bin"
         local_bin.mkdir(parents=True)
         shutil.copy2(BIN_DIR / "autofix.sh", local_bin / "autofix.sh")
         shutil.copy2(BIN_DIR / "github_api.py", local_bin / "github_api.py")
-        pull = pull_row(1, head_sha)
+        pull = pull_row(1, head_sha, base_sha=base_sha)
         issue = {**pull, "pull_request": {"url": pull["html_url"]}}
         self.write_state(
             pulls={"1": pull},
@@ -927,21 +1368,12 @@ class AutoFixTests(FakeGhCase):
     def test_cap_removes_opt_in_and_posts_one_marker_comment(self) -> None:
         repository, head_sha, pull = self.prepare_autofix()
         pull["labels"] = [{"name": github_api.AUTO_FIX_LABEL}]
-        manifest = {
-            "pr": "1",
-            "head_sha": head_sha,
-            "partial": False,
-            "steps": [
-                {
-                    "step": step,
-                    "outcome": "failure" if step == "build" else "success",
-                    "log_path": "",
-                }
-                for step in github_api.CANONICAL_CI_STEPS
-            ],
-        }
-        marker = f"<!-- mipstarre:ci-manifest pr=1 head={head_sha} run=cap -->"
-        body = "```json\n" + json.dumps(manifest) + "\n```\n\n" + marker
+        comment, statuses = self.ci_bundle(
+            head_sha,
+            pull["base"]["sha"],
+            run_id="cap",
+            outcomes={"build": "failure"},
+        )
         commits = [
             {
                 "sha": f"{index + 1:040x}",
@@ -954,7 +1386,8 @@ class AutoFixTests(FakeGhCase):
         self.write_state(
             pulls={"1": pull},
             issues={"1": issue},
-            comments={"1": [{"id": 1, "body": body, "created_at": "2026-01-01Z"}]},
+            comments={"1": [comment]},
+            statuses={head_sha: statuses},
             commits={"1": commits},
         )
         result = self.run_autofix(repository)
@@ -971,53 +1404,36 @@ class AutoFixTests(FakeGhCase):
 class MergeGateTests(FakeGhCase):
     """Group 6: status/review/lock/cap/adjudication gate refusals."""
 
-    def green_state(self, sha: str) -> dict:
-        statuses = [
-            {
-                "id": index + 1,
-                "sha": sha,
-                "context": context,
-                "state": "success",
-                "description": "ok",
-                "created_at": f"2026-01-01T00:00:{index:02d}Z",
-            }
-            for index, context in enumerate(github_api.CANONICAL_CI_CONTEXTS)
-        ]
-        statuses.append(
-            {
-                "id": 50,
-                "sha": sha,
-                "context": github_api.REVIEW_CONTEXT,
-                "state": "success",
-                "description": "clean",
-                "created_at": "2026-01-01T00:01:00Z",
-            }
+    def green_state(
+        self, sha: str, base_sha: str = "e" * 40, *, root: Path | None = None
+    ) -> dict:
+        root = root or self.root
+        comment, statuses = self.ci_bundle(sha, base_sha)
+        review, review_status, sessions, _body, _marker = self.review_bundle(
+            root, sha, base_sha, worktree=root
         )
-        marker = (
-            f"<!-- mipstarre:review-ledger pr=1 head={sha} run=test "
-            "event=COMMENT fallback=none -->"
-        )
-        review = {
-            "id": 1,
-            "body": "## Findings\n\nNo unresolved findings.\n\n" + marker,
-            "commit_id": sha,
-            "state": "COMMENTED",
-            "submitted_at": "2026-01-01T00:01:00Z",
+        self.append_sessions(root, sessions)
+        return {
+            "statuses": {sha: [*statuses, review_status]},
+            "comments": {"1": [comment]},
+            "reviews": {"1": [review]},
         }
-        return {"statuses": {sha: statuses}, "reviews": {"1": [review]}}
 
     def test_missing_failing_stale_and_adverse_review_refuse(self) -> None:
         sha = "f" * 40
+        base_sha = "e" * 40
         client = self.client()
         with self.assertRaises(pr_merge.GateFailure):
-            pr_merge.require_statuses(client, sha)
-        state = self.green_state(sha)
-        state["statuses"][sha][0]["state"] = "failure"
+            pr_merge.require_ci(client, 1, sha, base_sha)
+        comment, statuses = self.ci_bundle(
+            sha, base_sha, outcomes={"build": "failure"}
+        )
+        state = {"comments": {"1": [comment]}, "statuses": {sha: statuses}}
         self.write_state(**state)
         with self.assertRaises(pr_merge.GateFailure):
-            pr_merge.require_statuses(client, sha)
+            pr_merge.require_ci(client, 1, sha, base_sha)
 
-        state = self.green_state(sha)
+        state = self.green_state(sha, base_sha)
         state["reviews"]["1"].append(
             {
                 "id": 2,
@@ -1029,7 +1445,7 @@ class MergeGateTests(FakeGhCase):
         )
         self.write_state(**state)
         with self.assertRaises(pr_merge.GateFailure):
-            pr_merge.require_review(client, 1, sha)
+            pr_merge.require_review(client, 1, sha, base_sha)
 
     def test_live_lock_history_cap_and_adjudication_are_fail_closed(self) -> None:
         cache = self.root / "cache"
@@ -1061,54 +1477,23 @@ class MergeGateTests(FakeGhCase):
 class GuardedMergeTests(FakeGhCase):
     """Group 7: one exact-head guarded gh merge and no direct main push."""
 
-    def test_valid_gate_invokes_only_guarded_gh_merge(self) -> None:
-        repository, _remote, _base_sha, head_sha = self.make_repository()
-        pull = pull_row(1, head_sha)
-        manifest = {
-            "pr": "1",
-            "head_sha": head_sha,
-            "partial": False,
-            "steps": [
-                {"step": step, "outcome": "success"}
-                for step in github_api.CANONICAL_CI_STEPS
-            ],
-        }
-        ci_marker = f"<!-- mipstarre:ci-manifest pr=1 head={head_sha} run=test -->"
-        ci_body = "```json\n" + json.dumps(manifest) + "\n```\n\n" + ci_marker
-        review_marker = (
-            f"<!-- mipstarre:review-ledger pr=1 head={head_sha} run=test "
-            "event=COMMENT fallback=none -->"
+    def prepare_valid_merge(
+        self,
+    ) -> tuple[Path, str, str, argparse.Namespace]:
+        repository, _remote, base_sha, head_sha = self.make_repository()
+        pull = pull_row(1, head_sha, base_sha=base_sha)
+        ci_comment, statuses = self.ci_bundle(head_sha, base_sha)
+        review, review_status, sessions, _body, _marker = self.review_bundle(
+            repository, head_sha, base_sha, worktree=repository
         )
-        statuses = []
-        for index, context in enumerate(
-            (*github_api.CANONICAL_CI_CONTEXTS, github_api.REVIEW_CONTEXT)
-        ):
-            statuses.append(
-                {
-                    "id": index + 1,
-                    "sha": head_sha,
-                    "context": context,
-                    "state": "success",
-                    "description": "ok",
-                    "created_at": f"2026-01-01T00:00:{index:02d}Z",
-                }
-            )
+        statuses.append(review_status)
+        self.append_sessions(repository, sessions)
         self.write_state(
             pulls={"1": pull},
             issues={"1": {**pull, "pull_request": {"url": pull["html_url"]}}},
             statuses={head_sha: statuses},
-            comments={"1": [{"id": 1, "body": ci_body, "created_at": "2026-01-01Z"}]},
-            reviews={
-                "1": [
-                    {
-                        "id": 1,
-                        "body": "## Findings\n\nClean.\n\n" + review_marker,
-                        "commit_id": head_sha,
-                        "state": "COMMENTED",
-                        "submitted_at": "2026-01-01Z",
-                    }
-                ]
-            },
+            comments={"1": [ci_comment]},
+            reviews={"1": [review]},
             commits={"1": [{"sha": head_sha, "commit": {"message": "Feature"}}]},
             merge_sha="2" * 40,
         )
@@ -1119,7 +1504,13 @@ class GuardedMergeTests(FakeGhCase):
             fix_cap=5,
             repo_root=repository,
         )
-        with mock.patch.object(pr_merge, "fast_forward_base"), mock.patch.object(
+        return repository, base_sha, head_sha, args
+
+    def test_valid_gate_invokes_only_guarded_gh_merge(self) -> None:
+        repository, _base_sha, head_sha, args = self.prepare_valid_merge()
+        with mock.patch.dict(
+            os.environ, {"MIPSTARRE_CACHE_ROOT": str(self.root / "cache")}
+        ), mock.patch.object(pr_merge, "fast_forward_base"), mock.patch.object(
             pr_merge, "cleanup_feature"
         ):
             self.assertEqual(pr_merge.run(args), 0)
@@ -1141,6 +1532,47 @@ class GuardedMergeTests(FakeGhCase):
         source = (BIN_DIR / "pr_merge.py").read_text(encoding="utf-8")
         self.assertNotIn('"push", "github"', source)
         self.assertNotIn("--admin", source)
+
+    def test_base_movement_between_evaluations_blocks_merge(self) -> None:
+        _repository, base_sha, head_sha, args = self.prepare_valid_merge()
+        self.write_state(
+            pull_head_sequence=[head_sha] * 6,
+            pull_base_sequence=[base_sha] * 4 + ["f" * 40],
+            pull_read_count=0,
+        )
+        with mock.patch.dict(
+            os.environ, {"MIPSTARRE_CACHE_ROOT": str(self.root / "cache")}
+        ), mock.patch.object(pr_merge, "fast_forward_base"), mock.patch.object(
+            pr_merge, "cleanup_feature"
+        ):
+            with self.assertRaises(pr_merge.GateFailure):
+                pr_merge.run(args)
+        merge_calls = [
+            call for call in self.state()["calls"]
+            if call["args"][:2] == ["pr", "merge"] and "--help" not in call["args"]
+        ]
+        self.assertEqual(merge_calls, [])
+
+    def test_final_same_head_adverse_review_race_blocks_merge(self) -> None:
+        _repository, _base_sha, _head_sha, args = self.prepare_valid_merge()
+        self.write_state(inject_adverse_review_at=2, review_read_count=0)
+        with mock.patch.dict(
+            os.environ, {"MIPSTARRE_CACHE_ROOT": str(self.root / "cache")}
+        ), mock.patch.object(pr_merge, "fast_forward_base"), mock.patch.object(
+            pr_merge, "cleanup_feature"
+        ):
+            with self.assertRaisesRegex(
+                pr_merge.GateFailure, "later exact-head CHANGES_REQUESTED"
+            ):
+                pr_merge.run(args)
+        merge_calls = [
+            call for call in self.state()["calls"]
+            if call["args"][:2] == ["pr", "merge"] and "--help" not in call["args"]
+        ]
+        self.assertEqual(merge_calls, [])
+        locks = self.root / "cache" / "locks"
+        self.assertFalse((locks / "review-1.lock").exists())
+        self.assertFalse((locks / "fix-issue-7-test.lock").exists())
 
 
 class SnapshotTests(FakeGhCase):

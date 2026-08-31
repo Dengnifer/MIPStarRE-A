@@ -295,8 +295,10 @@ def build_manifest(args: argparse.Namespace) -> dict:
         "branch": args.branch,
         "base": args.base,
         "base_ref": args.base_ref,
+        "base_sha": args.base_sha,
         "merge_base": args.merge_base,
         "head_sha": args.head_sha,
+        "run_id": args.run_id,
         "worktree": args.worktree,
         "started": args.started,
         "finished": args.finished,
@@ -353,8 +355,10 @@ def build_parser() -> argparse.ArgumentParser:
     manifest.add_argument("--branch", required=True)
     manifest.add_argument("--base", required=True)
     manifest.add_argument("--base-ref", required=True)
+    manifest.add_argument("--base-sha", required=True)
     manifest.add_argument("--merge-base", required=True)
     manifest.add_argument("--head-sha", required=True)
+    manifest.add_argument("--run-id", required=True)
     manifest.add_argument("--worktree", required=True)
     manifest.add_argument("--started", required=True)
     manifest.add_argument("--finished", required=True)
@@ -462,7 +466,7 @@ if ! python3 "$SCRIPT_DIR/github_api.py" --repo-root "$REPO_ROOT" pull "$PR_ID" 
   die "cannot read authoritative GitHub PR #$PR_ID"
 fi
 
-IFS="$(printf '\t')" read -r PR_STATE PR_DRAFT BRANCH BASE REMOTE_HEAD_SHA < <(
+IFS="$(printf '\t')" read -r PR_STATE PR_DRAFT BRANCH BASE REMOTE_HEAD_SHA REMOTE_BASE_SHA < <(
   python3 - "$PULL_JSON" <<'PY'
 import json
 import re
@@ -474,14 +478,20 @@ draft = "true" if pull.get("draft") else "false"
 try:
     branch = str(pull["head"]["ref"])
     base = str(pull["base"]["ref"])
-    sha = str(pull["head"]["sha"]).lower()
+    head_sha = str(pull["head"]["sha"]).lower()
+    base_sha = str(pull["base"]["sha"]).lower()
 except (KeyError, TypeError):
     raise SystemExit("pull response lacks head/base data")
-if not branch or not base or not re.fullmatch(r"(?:[0-9a-f]{40}|[0-9a-f]{64})", sha):
-    raise SystemExit("pull response contains an invalid exact head SHA or ref")
+if (
+    not branch
+    or not base
+    or not re.fullmatch(r"(?:[0-9a-f]{40}|[0-9a-f]{64})", head_sha)
+    or not re.fullmatch(r"(?:[0-9a-f]{40}|[0-9a-f]{64})", base_sha)
+):
+    raise SystemExit("pull response contains an invalid exact head/base SHA or ref")
 if any(ch in branch + base for ch in "[] \t\r\n"):
     raise SystemExit("pull response contains an unsafe branch or base ref")
-print(state, draft, branch, base, sha, sep="\t")
+print(state, draft, branch, base, head_sha, base_sha, sep="\t")
 PY
 )
 [ "$PR_STATE" = open ] || die "GitHub PR #$PR_ID is not open (state=$PR_STATE)"
@@ -528,6 +538,10 @@ HEAD_SHA="$(git -C "$WORKTREE" rev-parse HEAD 2>/dev/null || true)"
 BASE_REF="refs/remotes/github/$BASE"
 git -C "$WORKTREE" rev-parse --verify --quiet "$BASE_REF^{commit}" >/dev/null 2>&1 || \
   die "$BASE_REF does not resolve; run local/bin/github-sync.sh refs --base '$BASE'"
+LOCAL_BASE_SHA="$(git -C "$WORKTREE" rev-parse "$BASE_REF^{commit}")"
+[ "$LOCAL_BASE_SHA" = "$REMOTE_BASE_SHA" ] || \
+  die "local base ref $BASE_REF is $LOCAL_BASE_SHA, not GitHub PR base $REMOTE_BASE_SHA"
+BASE_SHA="$REMOTE_BASE_SHA"
 
 MERGE_BASE="$(git -C "$WORKTREE" merge-base "$BASE_REF" "$HEAD_SHA" 2>/dev/null || true)"
 [ -n "$MERGE_BASE" ] || die "no merge base between $BASE_REF and $HEAD_SHA"
@@ -1036,27 +1050,43 @@ fi
 HEAD_STABLE=1
 if [ "$PARTIAL" = 0 ]; then
   LOCAL_FINAL_SHA="$(git -C "$WORKTREE" rev-parse HEAD 2>/dev/null || true)"
+  LOCAL_FINAL_BASE_SHA="$(git -C "$WORKTREE" rev-parse "$BASE_REF^{commit}" 2>/dev/null || true)"
   FINAL_PULL_JSON="$RUN_TMP/final-pull.json"
   if ! python3 "$SCRIPT_DIR/github_api.py" --repo-root "$REPO_ROOT" --no-probe \
       pull "$PR_ID" > "$FINAL_PULL_JSON"; then
     HEAD_STABLE=0
     REMOTE_FINAL_SHA=unreadable
+    REMOTE_FINAL_BASE_SHA=unreadable
   else
-    REMOTE_FINAL_SHA="$(python3 - "$FINAL_PULL_JSON" <<'PY'
+    IFS="$(printf '\t')" read -r REMOTE_FINAL_SHA REMOTE_FINAL_BASE_SHA < <(
+      python3 - "$FINAL_PULL_JSON" <<'PY'
 import json
 import sys
 
 pull = json.load(open(sys.argv[1], encoding="utf-8"))
-print(str((pull.get("head") or {}).get("sha") or "").lower())
+print(
+    str((pull.get("head") or {}).get("sha") or "").lower(),
+    str((pull.get("base") or {}).get("sha") or "").lower(),
+    sep="\t",
+)
 PY
-)"
+    )
   fi
-  if [ "$LOCAL_FINAL_SHA" != "$HEAD_SHA" ] || [ "$REMOTE_FINAL_SHA" != "$HEAD_SHA" ]; then
+  if [ "$LOCAL_FINAL_SHA" != "$HEAD_SHA" ] \
+      || [ "$REMOTE_FINAL_SHA" != "$HEAD_SHA" ] \
+      || [ "$LOCAL_FINAL_BASE_SHA" != "$BASE_SHA" ] \
+      || [ "$REMOTE_FINAL_BASE_SHA" != "$BASE_SHA" ]; then
     HEAD_STABLE=0
   fi
   if [ "$HEAD_STABLE" = 0 ]; then
     CONCLUSION=error
-    note_warning "head moved or became unreadable during CI (start=$HEAD_SHA local=${LOCAL_FINAL_SHA:-unreadable} remote=${REMOTE_FINAL_SHA:-unreadable}); no success statuses or manifest comment will be published"
+    note_warning \
+      "head/base moved or became unreadable during CI (head=$HEAD_SHA" \
+      "local_head=${LOCAL_FINAL_SHA:-unreadable}" \
+      "remote_head=${REMOTE_FINAL_SHA:-unreadable} base=$BASE_SHA" \
+      "local_base=${LOCAL_FINAL_BASE_SHA:-unreadable}" \
+      "remote_base=${REMOTE_FINAL_BASE_SHA:-unreadable}); no success statuses" \
+      "or manifest comment will be published"
   fi
 fi
 
@@ -1068,8 +1098,10 @@ helper manifest \
   --branch "$BRANCH" \
   --base "$BASE" \
   --base-ref "$BASE_REF" \
+  --base-sha "$BASE_SHA" \
   --merge-base "$MERGE_BASE" \
   --head-sha "$HEAD_SHA" \
+  --run-id "$RUN_ID" \
   --worktree "$WORKTREE" \
   --started "$RUN_STARTED" \
   --finished "$RUN_FINISHED" \
@@ -1101,19 +1133,19 @@ elif [ "$PARTIAL" = 0 ]; then
     case "$OUTCOME" in
       skipped)
         STATUS_STATE=success
-        STATUS_DESCRIPTION="skipped: ${NOTE:-not applicable}"
+        STATUS_DESCRIPTION="local CI run=$RUN_ID skipped: ${NOTE:-not applicable}"
         ;;
       success)
         STATUS_STATE=success
-        STATUS_DESCRIPTION="local CI run $RUN_ID passed"
+        STATUS_DESCRIPTION="local CI run=$RUN_ID passed"
         ;;
       failure)
         STATUS_STATE=failure
-        STATUS_DESCRIPTION="local CI run $RUN_ID failed${NOTE:+: $NOTE}"
+        STATUS_DESCRIPTION="local CI run=$RUN_ID failed${NOTE:+: $NOTE}"
         ;;
       error|*)
         STATUS_STATE=error
-        STATUS_DESCRIPTION="local CI run $RUN_ID could not run${NOTE:+: $NOTE}"
+        STATUS_DESCRIPTION="local CI run=$RUN_ID could not run${NOTE:+: $NOTE}"
         ;;
     esac
     if ! publish_status "$STEP" "$STATUS_STATE" "$STATUS_DESCRIPTION"; then

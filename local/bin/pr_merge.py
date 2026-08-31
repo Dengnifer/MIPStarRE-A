@@ -6,32 +6,76 @@ from __future__ import annotations
 import argparse
 import os
 import re
+import shutil
 import subprocess
 import sys
+from contextlib import contextmanager
+from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any, Iterator, Sequence
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from github_api import (  # noqa: E402
     ADJUDICATION_LABEL,
-    CANONICAL_CI_CONTEXTS,
-    REVIEW_CONTEXT,
+    CIManifestEvidence,
     GitHub,
     GitHubError,
+    PullIdentity,
+    ReviewEvidence,
     fix_iteration_count,
     normalize_number,
     normalize_sha,
-    pull_head,
+    pull_identity,
 )
 
 
 DEFAULT_FIX_CAP = 5
-UNRESOLVED_RE = re.compile(r"^\s*[-*]\s*\[ \]\s+F\d+", re.MULTILINE)
 DISPOSITION_RE = re.compile(r"^Disposition:\s*\S.*$", re.MULTILINE)
 
 
 class GateFailure(RuntimeError):
     """A merge-gate refusal with an operator-facing explanation."""
+
+
+@dataclass(frozen=True)
+class GateExpectation:
+    """The immutable PR comparison accepted for this merge invocation."""
+
+    branch: str
+    base: str
+    head_sha: str
+    base_sha: str
+
+
+@dataclass(frozen=True)
+class GateSnapshot:
+    """One complete evaluation of all merge evidence."""
+
+    pull: dict[str, Any]
+    identity: PullIdentity
+    worktree: Path
+    ci: CIManifestEvidence
+    review: ReviewEvidence
+    iterations: int
+
+
+@dataclass(frozen=True)
+class HeldLock:
+    path: Path
+    pid: int
+
+    def require_owned(self, *, reject_cancel: bool = False) -> None:
+        try:
+            recorded = int((self.path / "pid").read_text(encoding="utf-8").strip())
+        except (OSError, ValueError) as exc:
+            raise GateFailure(f"reserved lock {self.path} lost its owner record") from exc
+        if not self.path.is_dir() or recorded != self.pid:
+            raise GateFailure(f"reserved lock {self.path} is no longer owned by this merge")
+        if reject_cancel and (self.path / "cancel").exists():
+            raise GateFailure(
+                f"an auto-fix attempted to supersede the reserved merge lock {self.path}"
+            )
 
 
 def git(root: Path, *arguments: str, check: bool = True) -> str:
@@ -79,7 +123,7 @@ def exact_local_head(root: Path, branch: str) -> tuple[str, Path]:
     return normalize_sha(git(worktree, "rev-parse", "HEAD")), worktree
 
 
-def require_open_mergeable(pull: dict[str, Any], number: int) -> tuple[str, str, str]:
+def require_open_mergeable(pull: dict[str, Any], number: int) -> PullIdentity:
     if str(pull.get("state") or "").casefold() != "open":
         raise GateFailure(f"PR #{number} is not open")
     if bool(pull.get("draft")):
@@ -87,46 +131,61 @@ def require_open_mergeable(pull: dict[str, Any], number: int) -> tuple[str, str,
     if pull.get("mergeable") is not True:
         state = pull.get("mergeable_state") or "unknown"
         raise GateFailure(f"PR #{number} is not proven mergeable (state={state})")
-    return pull_head(pull)
+    return pull_identity(pull)
 
 
-def require_statuses(client: GitHub, sha: str) -> dict[str, dict[str, Any]]:
-    latest = client.latest_statuses(sha)
-    failures: list[str] = []
-    for context in CANONICAL_CI_CONTEXTS:
-        state = str(
-            (latest.get(context.casefold()) or {}).get("state") or "missing"
-        ).casefold()
-        if state != "success":
-            failures.append(f"{context}={state}")
+def require_ci(
+    client: GitHub, number: int, head_sha: str, base_sha: str
+) -> CIManifestEvidence:
+    try:
+        evidence = client.ci_evidence(number, head_sha, base_sha)
+    except GitHubError as exc:
+        raise GateFailure(f"invalid exact-head CI evidence: {exc}") from exc
+    manifest = evidence.manifest
+    if str(manifest.get("conclusion") or "") != "success":
+        raise GateFailure("the exact-run CI manifest conclusion is not success")
+    failures = [
+        f"{step.get('step')}={step.get('outcome')}"
+        for step in manifest.get("steps") or []
+        if str(step.get("outcome") or "") not in {"success", "skipped"}
+    ]
     if failures:
         raise GateFailure("exact-head CI gate failed: " + ", ".join(failures))
-    return latest
+    return evidence
 
 
-def row_order(row: dict[str, Any]) -> tuple[str, int]:
-    return (
-        str(row.get("submitted_at") or row.get("created_at") or ""),
-        int(row.get("id") or 0),
-    )
-
-
-def require_review(client: GitHub, number: int, sha: str) -> None:
-    latest = client.latest_statuses(sha)
-    summary = latest.get(REVIEW_CONTEXT.casefold()) or {}
-    if str(summary.get("state") or "").casefold() != "success":
-        raise GateFailure(
-            f"{REVIEW_CONTEXT} is not successful on exact head {sha}"
-        )
+def row_order(row: dict[str, Any]) -> tuple[datetime, int]:
+    raw_timestamp = str(row.get("submitted_at") or row.get("created_at") or "")
+    identifier = row.get("id")
+    if type(identifier) is not int or identifier <= 0 or not raw_timestamp:
+        raise GateFailure("review ordering evidence lacks an id or timestamp")
     try:
-        ledger = client.review_ledger(number, sha)
+        timestamp = datetime.fromisoformat(raw_timestamp.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise GateFailure("review ordering evidence has an invalid timestamp") from exc
+    if timestamp.utcoffset() is None:
+        raise GateFailure("review ordering evidence has a timezone-free timestamp")
+    return timestamp, identifier
+
+
+def require_review(
+    client: GitHub, number: int, sha: str, base_sha: str | None = None
+) -> ReviewEvidence:
+    try:
+        evidence = client.review_evidence(number, sha, base_sha)
     except GitHubError as exc:
-        raise GateFailure(f"no valid exact-head review ledger: {exc}") from exc
-    body = str(ledger.get("body") or "")
-    if str(ledger.get("state") or "").upper() != "COMMENTED":
-        raise GateFailure("the clean exact-head review ledger is not a COMMENT review")
-    if UNRESOLVED_RE.search(body):
-        raise GateFailure("the latest exact-head review ledger has unresolved findings")
+        raise GateFailure(f"no valid exact-head review attestation: {exc}") from exc
+    attestation = evidence.attestation
+    ledger = attestation.row
+    if (
+        attestation.event != "COMMENT"
+        or attestation.fallback != "none"
+        or attestation.findings != 0
+        or str(ledger.get("state") or "").upper() != "COMMENTED"
+    ):
+        raise GateFailure(
+            "the selected exact-head review is not a clean COMMENT attestation"
+        )
     ledger_order = row_order(ledger)
     for review in client.reviews(number):
         if str(review.get("commit_id") or "").lower() != sha:
@@ -135,6 +194,7 @@ def require_review(client: GitHub, number: int, sha: str) -> None:
             continue
         if row_order(review) > ledger_order:
             raise GateFailure("a later exact-head CHANGES_REQUESTED review is unresolved")
+    return evidence
 
 
 def require_adjudication(
@@ -178,6 +238,39 @@ def require_no_live_fix(cache: Path, branch: str) -> None:
     raise GateFailure(f"live auto-fix lock {lock} is held by pid {pid}")
 
 
+@contextmanager
+def reserve_runtime_lock(path: Path, label: str) -> Iterator[HeldLock]:
+    """Atomically reserve one known runtime lock and release only our lease."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        path.mkdir()
+    except FileExistsError as exc:
+        try:
+            holder = int((path / "pid").read_text(encoding="utf-8").strip())
+        except (OSError, ValueError):
+            holder = None
+        state = f"live pid {holder}" if holder is not None else "unproven owner"
+        if holder is not None:
+            try:
+                os.kill(holder, 0)
+            except OSError:
+                state = f"stale pid {holder}"
+        raise GateFailure(f"cannot reserve runtime lock {path} ({state})") from exc
+    held = HeldLock(path=path, pid=os.getpid())
+    try:
+        (path / "pid").write_text(f"{held.pid}\n", encoding="utf-8")
+        (path / "label").write_text(label + "\n", encoding="utf-8")
+        held.require_owned()
+        yield held
+    finally:
+        try:
+            owner = int((path / "pid").read_text(encoding="utf-8").strip())
+        except (OSError, ValueError):
+            owner = None
+        if owner == held.pid:
+            shutil.rmtree(path)
+
+
 def require_merge_capability(client: GitHub) -> None:
     result = client.run(["pr", "merge", "--help"], retry=False)
     if "--match-head-commit" not in result.stdout:
@@ -186,18 +279,96 @@ def require_merge_capability(client: GitHub) -> None:
         )
 
 
-def recheck_head(
-    client: GitHub, number: int, expected: str, root: Path, branch: str
-) -> dict[str, Any]:
-    pull = client.get_pull(number)
-    _, _, remote = pull_head(pull)
-    local, _ = exact_local_head(root, branch)
-    if remote != expected or local != expected:
+def exact_local_base(root: Path, base: str) -> str:
+    reference = f"refs/remotes/github/{base}^{{commit}}"
+    try:
+        return normalize_sha(git(root, "rev-parse", "--verify", reference))
+    except (GateFailure, GitHubError) as exc:
+        raise GateFailure(f"fetched GitHub base ref does not resolve: {reference}") from exc
+
+
+def _require_expected(identity: PullIdentity, expected: GateExpectation) -> None:
+    observed = GateExpectation(
+        branch=identity.branch,
+        base=identity.base,
+        head_sha=identity.head_sha,
+        base_sha=identity.base_sha,
+    )
+    if observed != expected:
         raise GateFailure(
-            f"head moved during gate evaluation (expected={expected}, "
-            f"remote={remote}, local={local})"
+            "PR head/base changed during merge gating "
+            f"(expected={expected}, observed={observed})"
         )
-    return pull
+
+
+def evaluate_gate(
+    client: GitHub,
+    number: int,
+    expected: GateExpectation,
+    root: Path,
+    review_lock: HeldLock,
+    fix_lock: HeldLock,
+    cap: int,
+    *,
+    adjudicated: bool,
+) -> GateSnapshot:
+    """Evaluate the complete fail-closed gate from authoritative state."""
+    review_lock.require_owned()
+    pull = client.get_pull(number)
+    identity = require_open_mergeable(pull, number)
+    _require_expected(identity, expected)
+    local_head, worktree = exact_local_head(root, expected.branch)
+    local_base = exact_local_base(root, expected.base)
+    if local_head != expected.head_sha or local_base != expected.base_sha:
+        raise GateFailure(
+            "local head/base do not match the immutable GitHub comparison "
+            f"(local_head={local_head}, local_base={local_base})"
+        )
+
+    ci = require_ci(client, number, expected.head_sha, expected.base_sha)
+    fix_lock.require_owned(reject_cancel=True)
+    commits = client.pull_commits(number)
+    iterations = fix_iteration_count(commits)
+    if iterations > cap:
+        raise GateFailure(
+            f"fix iteration count {iterations} exceeds configured cap {cap}"
+        )
+    if adjudicated:
+        require_adjudication(client, pull, number, expected.head_sha)
+
+    # Rebind the comparison after all potentially paginated reads. The review
+    # check is last so a same-head adverse review introduced during evaluation
+    # cannot be hidden by an earlier clean-ledger read.
+    final_pull = client.get_pull(number)
+    final_identity = require_open_mergeable(final_pull, number)
+    _require_expected(final_identity, expected)
+    final_local_head, final_worktree = exact_local_head(root, expected.branch)
+    final_local_base = exact_local_base(root, expected.base)
+    if (
+        final_local_head != expected.head_sha
+        or final_local_base != expected.base_sha
+        or final_worktree.resolve() != worktree.resolve()
+    ):
+        raise GateFailure("local head/base/worktree changed during gate evaluation")
+    fix_lock.require_owned(reject_cancel=True)
+    review = require_review(
+        client, number, expected.head_sha, expected.base_sha
+    )
+    attested_worktree = Path(review.attestation.lanes[0].worktree).resolve()
+    if attested_worktree != worktree.resolve():
+        raise GateFailure(
+            "review session telemetry is bound to a different feature worktree"
+        )
+    review_lock.require_owned()
+    fix_lock.require_owned(reject_cancel=True)
+    return GateSnapshot(
+        pull=final_pull,
+        identity=final_identity,
+        worktree=worktree,
+        ci=ci,
+        review=review,
+        iterations=iterations,
+    )
 
 
 def fast_forward_base(root: Path, base: str) -> None:
@@ -263,57 +434,74 @@ def run(args: argparse.Namespace) -> int:
 
     client = GitHub(repo_root=root)
     client.probe_authentication()
-    pull = client.get_pull(number)
-    branch, base, sha = require_open_mergeable(pull, number)
-    local_sha, feature_worktree = exact_local_head(root, branch)
-    if local_sha != sha:
-        raise GateFailure(f"local branch tip {local_sha} does not equal GitHub head {sha}")
-
-    require_statuses(client, sha)
-    try:
-        client.ci_manifest(number, sha)
-        client.review_ledger(number, sha)
-    except GitHubError as exc:
-        raise GateFailure(str(exc)) from exc
-    if args.adjudicated:
-        require_adjudication(client, pull, number, sha)
-    else:
-        require_review(client, number, sha)
-
-    require_no_live_fix(cache, branch)
-    commits = client.pull_commits(number)
-    iterations = fix_iteration_count(commits)
-    if iterations > cap:
-        raise GateFailure(
-            f"fix iteration count {iterations} exceeds configured cap {cap}"
-        )
     require_merge_capability(client)
-    pull = recheck_head(client, number, sha, root, branch)
-    require_open_mergeable(pull, number)
-
-    command = [
-        "pr",
-        "merge",
-        str(number),
-        "--repo",
-        client.repo,
-        "--merge",
-        "--match-head-commit",
-        sha,
-    ]
-    if args.dry_run:
-        print("gate passed; would run: gh " + " ".join(command))
-        return 0
-
-    client.run(command, retry=False)
-    merged = client.get_pull(number)
-    if not merged.get("merged"):
-        raise GateFailure("gh returned success but GitHub does not report the PR merged")
-    merge_sha = normalize_sha(
-        str(merged.get("merge_commit_sha") or ""), kind="merge commit SHA"
-    )
-    fast_forward_base(root, base)
-    cleanup_feature(root, branch, feature_worktree, merge_sha)
+    review_path = cache / "locks" / f"review-{number}.lock"
+    with reserve_runtime_lock(review_path, f"merge review pr={number}") as review_lock:
+        pull = client.get_pull(number)
+        identity = require_open_mergeable(pull, number)
+        expected = GateExpectation(
+            branch=identity.branch,
+            base=identity.base,
+            head_sha=identity.head_sha,
+            base_sha=identity.base_sha,
+        )
+        fix_path = (
+            cache
+            / "locks"
+            / f"fix-{expected.branch.replace('/', '-')}.lock"
+        )
+        with reserve_runtime_lock(
+            fix_path, f"merge fix-reservation pr={number} branch={expected.branch}"
+        ) as fix_lock:
+            first = evaluate_gate(
+                client,
+                number,
+                expected,
+                root,
+                review_lock,
+                fix_lock,
+                cap,
+                adjudicated=args.adjudicated,
+            )
+            command = [
+                "pr",
+                "merge",
+                str(number),
+                "--repo",
+                client.repo,
+                "--merge",
+                "--match-head-commit",
+                expected.head_sha,
+            ]
+            # The same evaluator runs again as the final operation before the
+            # guarded merge, catching same-head evidence and base races.
+            final = evaluate_gate(
+                client,
+                number,
+                expected,
+                root,
+                review_lock,
+                fix_lock,
+                cap,
+                adjudicated=args.adjudicated,
+            )
+            if first.worktree.resolve() != final.worktree.resolve():
+                raise GateFailure("feature worktree changed between gate evaluations")
+            if args.dry_run:
+                print("gate passed; would run: gh " + " ".join(command))
+                return 0
+            client.run(command, retry=False)
+            merged = client.get_pull(number)
+            if not merged.get("merged"):
+                raise GateFailure(
+                    "gh returned success but GitHub does not report the PR merged"
+                )
+            merge_sha = normalize_sha(
+                str(merged.get("merge_commit_sha") or ""), kind="merge commit SHA"
+            )
+            feature_worktree = final.worktree
+    fast_forward_base(root, expected.base)
+    cleanup_feature(root, expected.branch, feature_worktree, merge_sha)
     print(f"merged GitHub PR #{number} at {merge_sha}")
     return 0
 

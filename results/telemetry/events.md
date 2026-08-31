@@ -150,3 +150,18 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 
 - Write-through adapter superseded during implementation. Symptom: the first issue-0007 orchestrator had begun adding a durable local GitHub-operation journal when the owner rejected retaining any local issue/PR fallback. Diagnosis: the earlier step-0 brief preserved registry machinery that no longer matched the owner's desired GitHub-only authority. Fix: stopped the session before commit, reverted its partial edit, verified and moved all 60 issue/PR files byte-identically into results/telemetry/registry-archive in the isolated c8f1999 commit, and re-scoped issue 0007 to read live GitHub gate evidence. Lesson: when eliminating an operational registry, archive research evidence before rewriting consumers, and treat an explicit owner authority decision as a protocol amendment rather than extending the superseded design.
 - Codex resume dispatch rejected the worktree option. Symptom: dispatch.sh allocated orc-0007-20260831-02, but codex exec resume exited 2 with 'unexpected argument -C' before producing an event. Diagnosis: the dispatcher assembles fresh and resumed codex invocations in the same option order even though this CLI requires global worktree options before the resume subcommand. Fix: retained the zero-usage failed session record and started orc-0007-20260831-03 as a fresh sanctioned session with the committed brief. Lesson: dispatch.sh needs an explicit resume-mode argv test; telemetry-complete failure handling does not imply the resume command itself is compatible.
+
+## 2026-09-01
+
+- Post-audit merge evidence admitted incomplete bindings. Symptom: reviewer
+  output could survive a nonzero lane exit, review evidence did not bind the
+  base, run, canonical body digest, and dispatcher completion record as one
+  object, and the merge gate did not reserve both workflow locks through a
+  repeated final evaluation. Ambiguous mutation retries could also send a
+  second POST or PATCH. Diagnosis: independently reasonable idempotence and
+  exact-head checks were composed without a single strict evidence contract.
+  Fix: issue 0007 now uses full-SHA run/digest attestations, exact reviewer
+  telemetry, one-mutation read-back, and the same fail-closed evaluator before
+  and immediately before guarded merge. Lesson: exact-head evidence is useful
+  only when every producer, parser, status, session, and final consumer agrees
+  on the same immutable run identity.

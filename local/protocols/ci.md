@@ -3,9 +3,9 @@
 Normative. Read `local/protocols/meta.md` and `issues-prs.md` first.
 
 Run `local/bin/ci.sh <github-pr-number>`. The command reads the PR base, head
-branch, and full head SHA from GitHub through `github_api.py`, resolves the
-registered local worktree for that branch, and requires the local tip to match
-the remote head before work starts.
+branch, and full head and base SHAs from GitHub through `github_api.py`, resolves
+the registered local worktree for that branch, and requires the local head and
+trusted local base to match those remote SHAs before work starts.
 
 ## Canonical gates
 
@@ -30,16 +30,19 @@ write runtime logs but publish no gate-satisfying status set or manifest.
 
 ## Publication
 
-Before final publication, CI rereads both the local branch tip and GitHub PR
-head. Movement on either side makes the run stale and returns nonzero. A
+Immediately before final publication, CI rereads the local and GitHub head and
+base SHAs. Movement on either side makes the run stale and returns nonzero. A
 complete stable run posts a full JSON manifest as an immutable PR comment with
-exact PR, head, and run markers. Marker adoption requires the entire body to
-match.
+exact PR, full head, full base, and run markers. Marker adoption requires the
+entire body to match. Every canonical status description names that same run,
+and a consumer must reject a manifest unless the latest exact-head status for
+every step names the manifest run and agrees with its result.
 
-Status creation is digest-idempotent. If the POST result is ambiguous, the
-client reads all statuses on the exact SHA and adopts only the matching
-casefolded context, state, and description digest. It never blindly repeats a
-status mutation.
+Status creation is digest-idempotent. Each invocation issues at most one
+mutation. If the POST result is ambiguous, the client polls statuses on the
+exact SHA and adopts only the matching casefolded context, state, and
+description digest. It fails ambiguous if read-back does not establish the
+mutation and never sends a second POST.
 
 Logs and manifests are runtime state under `~/.cache/mipstarre-dev/`. Build
 events remain append-only in `results/telemetry/builds.jsonl`. No committed
@@ -53,5 +56,6 @@ by `build-cache.md`. Never run `lake update`, and never write back to the hot
 main cache.
 
 The merge and review gates require the latest status for every canonical
-context on the current exact head to be `success`; GitHub's combined status is
-not sufficient.
+context on the current exact head to be `success`, to name one manifest run,
+and to agree with that run's exact full head and base. GitHub's combined status
+is not sufficient.
