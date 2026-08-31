@@ -211,3 +211,25 @@ GitHub monorepo Dengnifer/MIPStarRE-qpbt as the MIPStarRE-A/ subtree.
 **Expected effect:** identical workflow semantics on the new host; the
 model-family switch of the operator is a recorded telemetry datum, not a
 protocol change.
+
+## 2026-08-31 — Re-hybridization: GitHub-native issues/PRs for track A
+
+**Trigger:** owner decision after the repository restructure (standalone
+`Dengnifer/MIPStarRE-A` with its own PR space; umbrella
+`MIPStarRE-qpbt` aggregates A and B as submodules). The founding
+localization replaced GitHub because it was unavailable as a surface;
+with it restored, the owner chose GitHub-native records.
+
+**Change:** issues/PRs move to GitHub (seed migration:
+`results/telemetry/github-migration-map.md`); CI and reviews continue to
+EXECUTE locally and will post statuses/verdicts to the PR once the
+tooling adaptation (HANDOFF.md step 0, owned by the incoming main
+session) lands; `github-sync.sh` becomes a plain retry-hardened push;
+the local registry becomes a write-through offline fallback,
+authoritative in conflicts until the adaptation completes.
+
+**Expected effect:** familiar review surfaces and separate per-track PR
+management, at the cost of link-dependence for record operations — an
+accepted trade recorded as a workflow-evolution datum: localization and
+re-hybridization are both responses to the environment, which is the
+paper's thesis in miniature.

@@ -62,13 +62,15 @@ model-agnostic and binds you identically.
   adjudication; dispatch mechanical work at lower effort. Watch quota —
   it is a scheduling constraint (events.md 2026-08-31).
 
-## GitHub mirror (surface only — the workflow stays local)
+## GitHub (native issue/PR management as of 2026-08-31)
 
-`local/bin/github-sync.sh` pushes this repo's main as the `MIPStarRE-A/`
-subtree of the private monorepo `Dengnifer/MIPStarRE-qpbt` (SSH deploy
-key, repo-scoped). Run it after every merge to main. GitHub carries no
-issues, no PRs, no CI for this project — the local registry remains
-authoritative. `MIPStarRE-B/` belongs to the user; never touch it.
+The repository lives standalone at `Dengnifer/MIPStarRE-A`; issues and
+PRs are managed on GitHub (HANDOFF.md step 0 covers the tooling
+adaptation you own). CI and reviews still EXECUTE locally on this server
+and post their results to the PR. `local/bin/github-sync.sh` pushes after
+merges. The umbrella repo `Dengnifer/MIPStarRE-qpbt` and track B
+(`Dengnifer/MIPStarRE-B`, `/home/drx/MIPStarRE-auto`, a different agent)
+are not yours to modify.
 
 ## Where the project stands and what is next
 
