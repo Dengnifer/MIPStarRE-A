@@ -172,3 +172,18 @@ abort untouched.
 
 **Expected effect:** registry residue on branches can never block or
 corrupt a merge; content conflicts remain a human decision.
+
+## 2026-08-31 — Review lanes run in parallel
+
+**Trigger:** stage-3 telemetry: ~30 h of PR #0001's wall time was the
+review-fix loop, and each round ran the code and prose lanes sequentially
+although they are independent per head SHA.
+
+**Change:** `review.sh` dispatches the code and prose reviewer sessions
+concurrently and parses sequentially. Failure semantics unchanged: a
+code-lane crash blocks the PR (and reaps the still-running prose lane);
+a prose-lane failure only warns. The parent ran the two as separate
+parallel CI jobs (pr-review.yml), so this restores parent-level
+concurrency the local port had serialized.
+
+**Expected effect:** review wall time per round approximately halves.

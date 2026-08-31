@@ -874,14 +874,40 @@ if [ "$DRY_RUN" -eq 1 ]; then
   exit 0
 fi
 
+# The two review lanes are independent per head: dispatch them CONCURRENTLY
+# (EVOLUTION.md 2026-08-31, "Review lanes run in parallel").  Parsing stays
+# sequential below, and the failure semantics are unchanged: a code-lane
+# crash blocks the PR (and reaps the still-running prose lane); a prose-lane
+# failure only warns.
 log "running code review for PR $PR_NUM @ ${HEAD_SHA:0:12}"
 CODE_OUT="$RUN_DIR/code-last-message.md"
 rm -f "$CODE_OUT"
-CODE_RC=0
-run_agent reviewer read-only "$WORKTREE" "$CODE_PERSONA_PATH" \
-  "$RUN_DIR/code-task.md" "$RUN_DIR/code-standalone.md" \
-  "$RUN_DIR/diff.sanitized.txt" "$CODE_OUT" "$REVIEW_MODEL" || CODE_RC=$?
+CODE_RC_FILE="$RUN_DIR/code.rc"
+( rc=0
+  run_agent reviewer read-only "$WORKTREE" "$CODE_PERSONA_PATH" \
+    "$RUN_DIR/code-task.md" "$RUN_DIR/code-standalone.md" \
+    "$RUN_DIR/diff.sanitized.txt" "$CODE_OUT" "$REVIEW_MODEL" || rc=$?
+  printf '%s\n' "$rc" > "$CODE_RC_FILE" ) &
+CODE_LANE_PID=$!
+
+PROSE_LANE_PID=""
+PROSE_RC_FILE="$RUN_DIR/prose.rc"
+if [ "$TOUCHES_BLUEPRINT" -eq 1 ]; then
+  log "the diff touches blueprint/; running the prose review in parallel"
+  PROSE_OUT="$RUN_DIR/prose-last-message.md"
+  rm -f "$PROSE_OUT"
+  ( rc=0
+    run_agent reviewer read-only "$WORKTREE" "$PROSE_PERSONA_PATH" \
+      "$RUN_DIR/prose-task.md" "$RUN_DIR/prose-standalone.md" \
+      "$RUN_DIR/diff.sanitized.txt" "$PROSE_OUT" "$PROSE_MODEL" || rc=$?
+    printf '%s\n' "$rc" > "$PROSE_RC_FILE" ) &
+  PROSE_LANE_PID=$!
+fi
+
+wait "$CODE_LANE_PID" 2>/dev/null || true
+CODE_RC="$(cat "$CODE_RC_FILE" 2>/dev/null || echo 1)"
 if [ "$CODE_RC" -ne 0 ] && [ ! -s "$CODE_OUT" ]; then
+  [ -n "$PROSE_LANE_PID" ] && kill "$PROSE_LANE_PID" 2>/dev/null || true
   fm_set "$PR_MD" review_state blocked
   die "the code reviewer exited $CODE_RC and produced no review; review_state=blocked for PR $PR_NUM"
 fi
@@ -893,6 +919,7 @@ CODE_RESULT=""
 if ! CODE_RESULT="$(write_review code "$CODE_OUT" "$REVIEWS_DIR/$HEAD_SHA-code.md" \
       "$(sed -n 's/^name: //p' "$CODE_OUT.dispatch.log" 2>/dev/null | tail -1)" \
       "$REVIEW_MODEL")"; then
+  [ -n "$PROSE_LANE_PID" ] && kill "$PROSE_LANE_PID" 2>/dev/null || true
   fm_set "$PR_MD" review_state blocked
   printf '%s: %s\n' "$PROG" \
     "the code review produced no usable verdict; review_state=blocked (raw output kept at $CODE_OUT)" >&2
@@ -905,13 +932,8 @@ log "code review: $CODE_VERDICT ($CODE_UNRESOLVED unresolved findings) -> $REVIE
 # -------------------------------------------------------------- prose review
 PROSE_VERDICT=""
 if [ "$TOUCHES_BLUEPRINT" -eq 1 ]; then
-  log "the diff touches blueprint/; running the blueprint sync and prose review"
-  PROSE_OUT="$RUN_DIR/prose-last-message.md"
-  rm -f "$PROSE_OUT"
-  PROSE_RC=0
-  run_agent reviewer read-only "$WORKTREE" "$PROSE_PERSONA_PATH" \
-    "$RUN_DIR/prose-task.md" "$RUN_DIR/prose-standalone.md" \
-    "$RUN_DIR/diff.sanitized.txt" "$PROSE_OUT" "$PROSE_MODEL" || PROSE_RC=$?
+  wait "$PROSE_LANE_PID" 2>/dev/null || true
+  PROSE_RC="$(cat "$PROSE_RC_FILE" 2>/dev/null || echo 1)"
   # pr-review.yml:218-224 — prose-review SKIPS where code-review FAILS.  The
   # split is deliberate: a prose failure must not block a PR whose code review
   # already produced a verdict.
