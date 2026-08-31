@@ -26,7 +26,25 @@ self-evolving formalization workflows.
 
 ## Immediate next steps (in order)
 
-1. **PR #0003**: review round 1 is DONE at head `db4327a` —
+0. **Adopt GitHub-native issue/PR management** (owner decision,
+   2026-08-31; EVOLUTION.md "Re-hybridization"). The repository now lives
+   standalone at `git@github.com:Dengnifer/MIPStarRE-A.git` (remote
+   `github`; deploy key for pushes). Seeded already: GitHub issues #1–#4
+   map to local issues #0001/#0004/#0005/#0006
+   (`results/telemetry/github-migration-map.md`), and GitHub PR #5 is
+   local PR #0003. Your adaptation task, as a normal tracked change:
+   adapt `issue_new.py`/`issue_close.py`/`pr_open.py`/`pr_merge.py` to
+   create/update GitHub issues/PRs via `gh` (retry-hardened — the link
+   drops), have `ci.sh` post commit statuses and `review.sh` post review
+   verdicts to the PR, and retire the local registry to a write-through
+   offline fallback. NEEDS: the owner must mint a fine-grained PAT
+   (repos: MIPStarRE-A, MIPStarRE-B optional; permissions: Issues RW,
+   Pull requests RW, Commit statuses RW, Contents RW) and place it via
+   `gh auth login` on ghz — ask for it in your first report if absent.
+   Until the adaptation lands, keep BOTH records in sync manually
+   (local registry remains authoritative in any conflict).
+
+1. **PR #0003 (= GitHub PR #5)**: review round 1 is DONE at head `db4327a` —
    CHANGES_REQUESTED with 17 findings in
    `prs/0003-*/reviews/db4327a...-code.md` (no prose lane: the diff has no
    blueprint files). Adjudicate each finding against the blueprint/source
@@ -85,8 +103,11 @@ stack via pip --user (`leanblueprint`, `plastex`, `texra-blueprint` 0.3.8;
 `~/.local/lib/python3.10/site-packages/tomllib.py`); TeX native; 128 cores
 (full `lake build` is fast — still honor the mutex). `PATH` needs
 `$HOME/.elan/bin` and `$HOME/.local/bin`. Git hooks: run
-`scripts/install_git_hooks.sh` in every fresh worktree. GitHub mirror via
-`local/bin/github-sync.sh` (deploy key `~/.ssh/id_ed25519_mipstarre_qpbt`).
+`scripts/install_git_hooks.sh` in every fresh worktree. GitHub: standalone repo `Dengnifer/MIPStarRE-A` (remote `github`, deploy
+key `~/.ssh/id_ed25519_mipstarre_qpbt`); `local/bin/github-sync.sh` pushes
+after merges. The umbrella `Dengnifer/MIPStarRE-qpbt` aggregates A and B
+as submodules (pointer bumps are occasional and owner-driven). Track B
+(`/home/drx/MIPStarRE-auto`, another agent) is out of scope.
 
 ## Telemetry so far (for the paper)
 
