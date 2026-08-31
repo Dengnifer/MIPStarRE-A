@@ -332,6 +332,8 @@ if len(tail) == 3 and tail[0] == "pulls" and tail[2] == "reviews":
             "submitted_at": f"2026-01-01T00:00:{len(reviews):02d}Z",
         }
         reviews.append(row)
+        if state.pop("ambiguous_review_once", False):
+            fail("HTTP 503 Service Unavailable")
         if state.pop("corrupt_review_response", False):
             emit({**row, "commit_id": "0" * 40})
         emit(row)
@@ -566,6 +568,7 @@ class FakeGhCase(unittest.TestCase):
         submitted_at: str = "2026-01-01T00:02:00Z",
         thread_id: str | None = None,
         session_name: str | None = None,
+        comment_fallback: bool = False,
     ) -> tuple[dict, dict, list[dict], str, str]:
         worktree_text = str((worktree or root).resolve())
         safe_run = re.sub(r"[^A-Za-z0-9._-]", "-", run_id)
@@ -586,6 +589,7 @@ class FakeGhCase(unittest.TestCase):
         ]
         ledger = "\n".join(finding_lines) if finding_lines else "<!-- no findings -->"
         event = "COMMENT" if findings == 0 else "REQUEST_CHANGES"
+        fallback = "none" if findings == 0 else "COMMENT"
         attestation = {
             "schema": 1,
             "pr": 1,
@@ -594,7 +598,7 @@ class FakeGhCase(unittest.TestCase):
             "run_id": run_id,
             "canonical_findings": findings,
             "event": event,
-            "fallback": "none",
+            "fallback": fallback,
             "lanes": [lane],
         }
         prefix = (
@@ -612,10 +616,10 @@ class FakeGhCase(unittest.TestCase):
         marker = (
             f"<!-- mipstarre:review-attestation pr=1 head={head_sha} "
             f"base={base_sha} run={run_id} findings={findings} event={event} "
-            f"fallback=none digest={digest} -->"
+            f"fallback={fallback} digest={digest} -->"
         )
         body = prefix + marker + "\n"
-        state = "COMMENTED" if findings == 0 else "CHANGES_REQUESTED"
+        state = "COMMENTED" if findings == 0 or comment_fallback else "CHANGES_REQUESTED"
         review = {
             "id": review_id,
             "body": body,
@@ -1096,7 +1100,64 @@ class ReviewPublicationTests(FakeGhCase):
         self.assertEqual(evidence.attestation.event, "COMMENT")
         self.assertEqual(evidence.attestation.findings, 0)
 
-    def test_request_changes_rejection_is_not_retried_as_comment(self) -> None:
+    def test_exact_self_review_422_falls_back_once_with_adverse_evidence(self) -> None:
+        sha, base_sha = "e" * 40, "b" * 40
+        client = self.client()
+        _review, status, sessions, body, marker = self.review_bundle(
+            self.root, sha, base_sha, findings=1
+        )
+        self.write_state(
+            review_422="Review Can not request changes on your own pull request."
+        )
+        row, used_event = client.review_once(
+            1, sha, body, "REQUEST_CHANGES", marker
+        )
+        self.assertEqual((used_event, row["state"]), ("COMMENT", "COMMENTED"))
+        posts = [
+            call
+            for call in self.state()["calls"]
+            if call["args"][:3] == ["api", "--method", "POST"]
+            and call["args"][3].endswith("pulls/1/reviews")
+        ]
+        self.assertEqual(
+            [call["input"]["event"] for call in posts],
+            ["REQUEST_CHANGES", "COMMENT"],
+        )
+        self.assertIn(
+            "findings=1 event=REQUEST_CHANGES fallback=COMMENT", row["body"]
+        )
+
+        self.write_state(statuses={sha: [status]})
+        self.append_sessions(self.root, sessions)
+        evidence = client.review_evidence(1, sha, base_sha)
+        self.assertEqual(
+            (
+                evidence.attestation.event,
+                evidence.attestation.fallback,
+                evidence.attestation.findings,
+                evidence.status["state"],
+            ),
+            ("REQUEST_CHANGES", "COMMENT", 1, "failure"),
+        )
+        self.assertEqual(evidence.attestation.head_sha, sha)
+        self.assertEqual(evidence.attestation.base_sha, base_sha)
+        self.assertEqual(evidence.attestation.run_id, "review-test")
+        self.assertEqual(evidence.attestation.lanes[0].name, sessions[0]["name"])
+        self.assertEqual(client.latest_review_ledger(1)["body"], body)
+
+        adopted, adopted_event = client.review_once(
+            1, sha, body, "REQUEST_CHANGES", marker
+        )
+        self.assertEqual((adopted["id"], adopted_event), (row["id"], "COMMENT"))
+        posts = [
+            call
+            for call in self.state()["calls"]
+            if call["args"][:3] == ["api", "--method", "POST"]
+            and call["args"][3].endswith("pulls/1/reviews")
+        ]
+        self.assertEqual(len(posts), 2)
+
+    def test_unrelated_request_changes_422_is_one_post_refusal(self) -> None:
         sha, base_sha = "e" * 40, "b" * 40
         _review, _status, _sessions, body, marker = self.review_bundle(
             self.root, sha, base_sha, findings=1
@@ -1111,6 +1172,7 @@ class ReviewPublicationTests(FakeGhCase):
             and call["args"][3].endswith("pulls/1/reviews")
         ]
         self.assertEqual(len(posts), 1)
+        self.assertEqual(posts[0]["input"]["event"], "REQUEST_CHANGES")
         source = (BIN_DIR / "review.sh").read_text(encoding="utf-8")
         self.assertIn("head/base moved during review", source)
         self.assertIn('"$remote_head" = "$HEAD_SHA"', source)
@@ -1123,6 +1185,54 @@ class ReviewPublicationTests(FakeGhCase):
         )
         self.assertIn("latest-review-ledger", source)
         self.assertIn('"$REVIEW_CONTEXT"', source)
+
+    def test_ambiguous_and_transient_review_writes_never_fall_back(self) -> None:
+        sha, base_sha = "c" * 40, "a" * 40
+        _review, _status, _sessions, body, marker = self.review_bundle(
+            self.root, sha, base_sha, findings=1
+        )
+        self.write_state(ambiguous_review_once=True)
+        row, used_event = self.client().review_once(
+            1, sha, body, "REQUEST_CHANGES", marker
+        )
+        self.assertEqual((row["state"], used_event), ("CHANGES_REQUESTED", "REQUEST_CHANGES"))
+        posts = [
+            call
+            for call in self.state()["calls"]
+            if call["args"][:3] == ["api", "--method", "POST"]
+            and call["args"][3].endswith("pulls/1/reviews")
+        ]
+        self.assertEqual([call["input"]["event"] for call in posts], ["REQUEST_CHANGES"])
+
+        other_sha = "d" * 40
+        _review, _status, _sessions, other_body, other_marker = self.review_bundle(
+            self.root, other_sha, base_sha, findings=1, run_id="review-transient"
+        )
+        self.write_state(
+            reviews={},
+            calls=[],
+            failures={
+                "POST pulls/1/reviews": {
+                    "remaining": 1,
+                    "message": (
+                        "HTTP 503 Cannot request changes on your own pull request"
+                    ),
+                }
+            },
+        )
+        with self.assertRaisesRegex(
+            github_api.GitHubError, "refusing to issue a second mutation"
+        ):
+            self.client().review_once(
+                1, other_sha, other_body, "REQUEST_CHANGES", other_marker
+            )
+        posts = [
+            call
+            for call in self.state()["calls"]
+            if call["args"][:3] == ["api", "--method", "POST"]
+            and call["args"][3].endswith("pulls/1/reviews")
+        ]
+        self.assertEqual([call["input"]["event"] for call in posts], ["REQUEST_CHANGES"])
 
     def test_marker_collision_and_event_mismatch_fail_closed(self) -> None:
         sha, base_sha = "9" * 40, "8" * 40
@@ -1323,8 +1433,22 @@ class ReviewPublicationTests(FakeGhCase):
 class AutoFixTests(FakeGhCase):
     """Auto-fix: opt-in, exact-head evidence, complete count, and cap action."""
 
-    def prepare_autofix(self) -> tuple[Path, str, dict]:
+    def prepare_autofix(
+        self, *, with_review_prompts: bool = False
+    ) -> tuple[Path, str, dict]:
         repository, _remote, base_sha, head_sha = self.make_repository()
+        if with_review_prompts:
+            prompts = repository / ".github/prompts"
+            prompts.mkdir(parents=True)
+            (prompts / "auto-fix-review-system-prompt.md").write_text(
+                "Trusted review fixer persona.\n", encoding="utf-8"
+            )
+            (prompts / "auto-fix-review-prompt.md").write_text(
+                "Address the attached findings.\n", encoding="utf-8"
+            )
+            run_git(repository, "add", ".github/prompts")
+            run_git(repository, "commit", "-m", "Add test review prompts")
+            head_sha = run_git(repository, "rev-parse", "HEAD")
         local_bin = repository / "local" / "bin"
         local_bin.mkdir(parents=True)
         shutil.copy2(BIN_DIR / "autofix.sh", local_bin / "autofix.sh")
@@ -1338,17 +1462,63 @@ class AutoFixTests(FakeGhCase):
         )
         return repository, head_sha, pull
 
-    def run_autofix(self, repository: Path) -> subprocess.CompletedProcess[str]:
+    def run_autofix(
+        self,
+        repository: Path,
+        *,
+        mode: str = "ci",
+        dry_run: bool = False,
+        trusted_ref: str | None = None,
+    ) -> subprocess.CompletedProcess[str]:
         environment = os.environ.copy()
         environment["MIPSTARRE_CACHE_ROOT"] = str(self.root / "cache")
+        if trusted_ref is not None:
+            environment["MIPSTARRE_TRUSTED_REF"] = trusted_ref
+        command = [
+            "bash",
+            str(repository / "local/bin/autofix.sh"),
+            "1",
+            "--mode",
+            mode,
+        ]
+        if dry_run:
+            command.append("--dry-run")
         return subprocess.run(
-            ["bash", str(repository / "local/bin/autofix.sh"), "1", "--mode", "ci"],
+            command,
             cwd=repository,
             env=environment,
             text=True,
             capture_output=True,
             check=False,
         )
+
+    def test_adverse_comment_fallback_is_consumed_by_review_autofix(self) -> None:
+        repository, head_sha, pull = self.prepare_autofix(with_review_prompts=True)
+        pull["labels"] = [{"name": github_api.AUTO_FIX_LABEL}]
+        review, status, sessions, _body, _marker = self.review_bundle(
+            repository,
+            head_sha,
+            pull["base"]["sha"],
+            findings=1,
+            comment_fallback=True,
+        )
+        self.append_sessions(repository, sessions)
+        self.write_state(
+            pulls={"1": pull},
+            issues={"1": {**pull, "pull_request": {"url": pull["html_url"]}}},
+            reviews={"1": [review]},
+            statuses={head_sha: [status]},
+            commits={"1": [{"sha": head_sha, "commit": {"message": "Feature"}}]},
+        )
+        result = self.run_autofix(
+            repository,
+            mode="review",
+            dry_run=True,
+            trusted_ref="HEAD",
+        )
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        self.assertIn("dry run: the review fix prompt", result.stderr)
+        self.assertNotIn("requires a valid marker-bound exact-head review ledger", result.stderr)
 
     def test_opt_in_and_missing_evidence_fail_closed(self) -> None:
         repository, _head_sha, pull = self.prepare_autofix()
@@ -1446,6 +1616,24 @@ class MergeGateTests(FakeGhCase):
         self.write_state(**state)
         with self.assertRaises(pr_merge.GateFailure):
             pr_merge.require_review(client, 1, sha, base_sha)
+
+    def test_adverse_comment_fallback_is_valid_evidence_but_blocks_merge(self) -> None:
+        sha, base_sha = "a" * 40, "b" * 40
+        review, status, sessions, _body, _marker = self.review_bundle(
+            self.root,
+            sha,
+            base_sha,
+            findings=1,
+            comment_fallback=True,
+        )
+        self.append_sessions(self.root, sessions)
+        self.write_state(reviews={"1": [review]}, statuses={sha: [status]})
+        evidence = self.client().review_evidence(1, sha, base_sha)
+        self.assertEqual(evidence.attestation.event, "REQUEST_CHANGES")
+        self.assertEqual(evidence.attestation.fallback, "COMMENT")
+        self.assertEqual(evidence.attestation.row["state"], "COMMENTED")
+        with self.assertRaisesRegex(pr_merge.GateFailure, "not a clean COMMENT"):
+            pr_merge.require_review(self.client(), 1, sha, base_sha)
 
     def test_live_lock_history_cap_and_adjudication_are_fail_closed(self) -> None:
         cache = self.root / "cache"

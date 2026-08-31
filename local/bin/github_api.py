@@ -53,7 +53,7 @@ _REVIEW_MARKER_RE = re.compile(
     r"<!-- mipstarre:review-attestation pr=(\d+) "
     r"head=((?:[0-9a-f]{40}|[0-9a-f]{64})) "
     r"base=((?:[0-9a-f]{40}|[0-9a-f]{64})) run=([^<>\s]+) "
-    r"findings=(\d+) event=(COMMENT|REQUEST_CHANGES) fallback=(none) "
+    r"findings=(\d+) event=(COMMENT|REQUEST_CHANGES) fallback=(none|COMMENT) "
     r"digest=([0-9a-f]{64}) -->"
 )
 _REVIEW_ATTESTATION_RE = re.compile(
@@ -87,6 +87,19 @@ _RATE_LIMIT_TEXT = (
     "secondary rate limit",
     "retry-after",
     "retry after",
+)
+_SELF_REVIEW_REQUEST_CHANGES_PATTERNS = (
+    re.compile(
+        r"\b(?:you\s+)?(?:cannot|can\s+not|can't)\s+request\s+changes\s+on\s+"
+        r"your\s+own\s+(?:pull\s+request|pr)\b",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"\b(?:the\s+)?(?:pull\s+request|pr)\s+authors?\s+"
+        r"(?:cannot|can\s+not|can't)\s+request\s+changes"
+        r"(?:\s+on\s+(?:their|the)\s+own\s+(?:pull\s+request|pr))?\b",
+        re.IGNORECASE,
+    ),
 )
 _MARKER_RE = re.compile(r"^<!-- mipstarre:[a-z0-9-]+(?: [^<>\r\n]+)* -->$")
 _SHA_RE = re.compile(r"(?:[0-9a-fA-F]{40}|[0-9a-fA-F]{64})")
@@ -243,6 +256,14 @@ def _is_transient(stderr: str, status: int | None) -> bool:
     if status == 403 and any(fragment in lowered for fragment in _RATE_LIMIT_TEXT):
         return True
     return any(fragment in lowered for fragment in _TRANSIENT_TEXT)
+
+
+def _is_self_review_request_changes_422(error: GitHubError) -> bool:
+    """Recognize only GitHub's explicit PR-author request-changes prohibition."""
+    if error.status != 422:
+        return False
+    detail = f"{error}\n{error.stdout}"
+    return any(pattern.search(detail) for pattern in _SELF_REVIEW_REQUEST_CHANGES_PATTERNS)
 
 
 def stable_digest(payload: Any, *, length: int = 24) -> str:
@@ -627,9 +648,14 @@ def _review_attestation_from_row(
             raise GitHubError(
                 "a clean review must be a zero-finding COMMENT with fallback=none"
             )
-    elif marker_findings <= 0 or marker_fallback != "none" or state != "CHANGES_REQUESTED":
+    elif (
+        marker_findings <= 0
+        or marker_fallback != "COMMENT"
+        or state not in {"CHANGES_REQUESTED", "COMMENTED"}
+    ):
         raise GitHubError(
-            "a changes-requested review must carry findings and fallback=none"
+            "an adverse review must be a positive-finding REQUEST_CHANGES "
+            "with fallback=COMMENT and an adverse-compatible state"
         )
     return ReviewAttestation(
         number=number,
@@ -1273,22 +1299,26 @@ class GitHub:
         _validated_marker(marker, body)
         if event not in {"COMMENT", "REQUEST_CHANGES"}:
             raise GitHubError(f"invalid review event {event!r}")
-        expected_state = "COMMENTED" if event == "COMMENT" else "CHANGES_REQUESTED"
+        requested_state = "COMMENTED" if event == "COMMENT" else "CHANGES_REQUESTED"
         requested = _review_attestation_from_row(
             {
                 "body": body,
                 "commit_id": commit_id,
-                "state": expected_state,
+                "state": requested_state,
             },
             number,
         )
         marker_match = _REVIEW_MARKER_RE.search(body)
         if marker_match is None or marker_match.group(0) != marker:
             raise GitHubError("review marker does not match the canonical attestation")
-        if requested.event != event or requested.fallback != "none":
+        required_fallback = "none" if event == "COMMENT" else "COMMENT"
+        if requested.event != event or requested.fallback != required_fallback:
             raise GitHubError("review event and fallback do not match the attestation")
 
+        used_event = event
+
         def lookup() -> dict[str, Any] | None:
+            nonlocal used_event
             for row in self.reviews(number):
                 adopted_body = str(row.get("body") or "")
                 if marker not in adopted_body:
@@ -1303,22 +1333,35 @@ class GitHub:
                         "review marker collision: authoritative body differs from "
                         "the requested ledger"
                     )
-                state = str(row.get("state") or "").upper()
-                if state != expected_state:
-                    raise GitHubError(
-                        f"adopted review has state {state or 'missing'}, not an "
-                        f"allowed result for {event}"
-                    )
+                adopted = _review_attestation_from_row(row, number)
+                used_event = (
+                    "COMMENT"
+                    if str(adopted.row.get("state") or "").upper() == "COMMENTED"
+                    else "REQUEST_CHANGES"
+                )
                 return row
             return None
 
         def mutate() -> dict[str, Any]:
-            payload = self.api(
-                f"/repos/{self.repo}/pulls/{number}/reviews",
-                method="POST",
-                data={"body": body, "event": event, "commit_id": commit_id},
-                retry=False,
-            )
+            nonlocal used_event
+            endpoint = f"/repos/{self.repo}/pulls/{number}/reviews"
+            try:
+                payload = self.api(
+                    endpoint,
+                    method="POST",
+                    data={"body": body, "event": event, "commit_id": commit_id},
+                    retry=False,
+                )
+            except GitHubError as exc:
+                if event != "REQUEST_CHANGES" or not _is_self_review_request_changes_422(exc):
+                    raise
+                used_event = "COMMENT"
+                payload = self.api(
+                    endpoint,
+                    method="POST",
+                    data={"body": body, "event": used_event, "commit_id": commit_id},
+                    retry=False,
+                )
             if not isinstance(payload, dict):
                 raise GitHubError("review creation returned a non-object response")
             return payload
@@ -1329,11 +1372,17 @@ class GitHub:
         if str(row.get("body") or "") != body:
             raise GitHubError("review publication returned a different authoritative body")
         adopted_state = str(row.get("state") or "").upper()
+        expected_state = (
+            "COMMENTED" if used_event == "COMMENT" else "CHANGES_REQUESTED"
+        )
         if adopted_state != expected_state:
             raise GitHubError(
                 f"review publication returned unexpected state {adopted_state or 'missing'}"
             )
-        return row, event
+        published = _review_attestation_from_row(row, number)
+        if published.event != event or published.fallback != required_fallback:
+            raise GitHubError("published review does not retain its attested semantics")
+        return row, used_event
 
 
 def pull_identity(pull: dict[str, Any]) -> PullIdentity:

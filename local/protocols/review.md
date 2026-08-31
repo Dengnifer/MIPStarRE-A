@@ -29,15 +29,22 @@ produces no review evidence.
 
 The wrapper submits one marker-bound review with the exact `commit_id`. The
 attestation binds the full PR number, full head and base SHAs, run id, canonical
-findings count, event, `fallback=none`, and both reviewer lanes' names, thread
-ids, exits, worktree, and timestamps. Its digest covers the complete canonical
-ledger body before the final marker. The event is determined as follows:
+findings count, event and fallback policy, and both reviewer lanes' names,
+thread ids, exits, worktree, and timestamps. Its digest covers the complete
+canonical ledger body before the final marker. The event is determined as
+follows:
 
-- a clean verdict uses `COMMENT`;
-- unresolved findings use `REQUEST_CHANGES`.
+- a clean verdict uses `COMMENT` with `fallback=none`;
+- unresolved findings use `REQUEST_CHANGES` first and attest
+  `fallback=COMMENT`.
 
-There is no event fallback. A rejected mutation fails publication rather than
-changing the event, and each invocation issues at most one review POST.
+Only an HTTP 422 response that explicitly says the pull-request author cannot
+request changes on their own PR permits one `COMMENT` fallback POST. Unrelated
+422 responses fail immediately. Transient and ambiguous writes use
+authoritative read-back only and never trigger the fallback. The fallback body
+retains positive canonical findings, `event=REQUEST_CHANGES`,
+`fallback=COMMENT`, and the original exact head, base, run, digest, and reviewer
+session evidence; only GitHub's represented state becomes `COMMENTED`.
 
 It separately posts `local-review/summary` on that SHA: `success` for a clean
 ledger and `failure` for unresolved findings. The status description binds the
@@ -49,6 +56,10 @@ successful exact-head summary status plus a strictly parsed clean `COMMENT`
 attestation whose reviewer session telemetry matches, with no later exact-head
 `CHANGES_REQUESTED` review. This supports the common case where the repository
 operator is also the PR author and GitHub forbids self-approval.
+
+An adverse `REQUEST_CHANGES` attestation represented by a fallback `COMMENTED`
+review remains valid ledger evidence for review-fix consumers, but its summary
+is `failure` and it never satisfies the clean merge gate.
 
 A failed CI run blocks review explicitly. Kill switches disable only when set
 to the literal string `false`; unset means enabled. A reviewer session must be

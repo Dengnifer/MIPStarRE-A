@@ -22,11 +22,15 @@ retried blindly. Ambiguous mutations use stable hidden markers followed by an
 authoritative read-back. A marker may be adopted only when its event, exact
 commit, and complete body match.
 
-An idempotent mutating command issues at most one POST or PATCH per invocation.
-After a transient or otherwise ambiguous mutation result, it polls only the
-authoritative read surface and fails ambiguous when the expected marker-bound
-state does not appear. It never resolves ambiguity by sending the mutation a
-second time.
+An idempotent mutating command normally issues at most one POST or PATCH per
+invocation. The sole exception is `review_once`: after GitHub definitively
+rejects `REQUEST_CHANGES` with HTTP 422 and an explicit prohibition against a
+pull-request author requesting changes on their own PR, it may issue one
+`COMMENT` fallback carrying the same adverse attestation. Unrelated 422
+responses and transient or ambiguous failures never authorize that fallback.
+After an ambiguous mutation result, the command polls only the authoritative
+read surface and fails ambiguous when the expected marker-bound state does not
+appear. It never resolves ambiguity by repeating the same mutation.
 
 ## Issues
 
