@@ -60,6 +60,19 @@ These points are adjudicated. Do not leave them as OPEN items.
   fields. At minimum retain the GitHub number, URL, and whether synchronization
   is `synced` or `pending`; retain the numeric GitHub issue id when needed for
   the sub-issue API.
+- Do not use one coarse synchronization flag for the entire record. Store
+  pending/synced state beside the operation's durable local evidence: issue
+  object/state/parent operations with the issue record, PR object/post-merge
+  operations with the PR record, commit-status publication with the per-SHA CI
+  manifest or a same-directory sidecar, and review publication with a per-SHA
+  review sidecar. Reconciliation must be able to distinguish these operations
+  after a process dies between any two of them.
+- The per-entity operation journal must use deterministic keys and retain a
+  payload digest, prerequisites, state (`pending`, `applying`, `synced`,
+  `superseded`, or `conflict`), attempt count, relevant remote id, timestamps,
+  and a classified last error. Distinguish at least `issue.ensure`,
+  `issue.parent`, `pr.head`, `pr.ensure`, `ci:<sha>:<context>`,
+  `review:<sha>:<digest>`, and `merge.main:<merge-sha>`.
 - Seed the existing mappings from
   `results/telemetry/github-migration-map.md`; never recreate those records.
 - Every remotely created object carries a hidden stable marker based on the
@@ -83,12 +96,21 @@ These points are adjudicated. Do not leave them as OPEN items.
   and retain `Dengnifer/MIPStarRE-A` as the documented default.
 - Retry bounded transient failures with short exponential backoff. Tests must
   be able to set delays to zero.
-- Validate CLI presence and `gh auth status` separately. Missing CLI,
-  authentication, or connectivity is a loud pending-sync state, not silent
-  success and not loss of the local record.
+- Retry connection failures, timeouts, `429`, and `5xx`; retain permanent
+  authentication, validation, and other `4xx` failures as pending or conflict
+  without wasting the full retry budget.
+- Validate CLI presence and API capability separately. Use a harmless
+  authenticated API probe rather than trusting `gh auth status`: the installed
+  `gh 2.4.0` reports a valid fine-grained PAT as invalid even though
+  `gh api user` succeeds. Missing CLI, authentication, or connectivity is a
+  loud pending-sync state, not silent success and not loss of the local record.
 - Add an explicit reconciliation command that can sync one issue, one PR, or
   all pending records. Reconciliation is the recovery path after an offline or
   ambiguous operation.
+- This adapter does not import arbitrary human edits made directly on GitHub.
+  Lifecycle scripts remain the mutation entry points for tool-owned title,
+  body, label, state, and gate fields. Document that boundary rather than
+  inventing an implicit last-writer-wins policy.
 
 ### 4. Issue lifecycle
 
@@ -111,6 +133,8 @@ These points are adjudicated. Do not leave them as OPEN items.
 
 - Preserve the current operating loop in which the local PR record may be
   opened before the implementation commit exists.
+- Enforce one open local PR record per branch. A repeated invocation must reuse
+  or report the existing record rather than allocate a second local identity.
 - GitHub rejects a PR whose head has no commits ahead of its base. In that case
   `pr_open.py` creates the local record, marks remote creation pending, and says
   exactly why. It is not an error and must not manufacture a placeholder
@@ -131,6 +155,8 @@ These points are adjudicated. Do not leave them as OPEN items.
 - Partial/debug runs must not publish a success status.
 - Before posting, ensure the commit exists in the remote repository. Never
   attach a result to a different or merely current branch head.
+- Recheck the actual local branch tip immediately before final publication;
+  re-reading only `pr.md` is insufficient if a commit lands during CI.
 - An ambiguous status POST is reconciled by reading the latest status with the
   same SHA and context before retrying.
 - A remote publication failure does not rewrite the local CI conclusion. It
@@ -147,6 +173,8 @@ These points are adjudicated. Do not leave them as OPEN items.
 - Include the exact commit id in the review API request and verify the remote PR
   head first. A mismatch is a refused/pending publication, never a review on a
   stale or different head.
+- Recheck both `pr.md` and the actual local branch tip after the reviewers
+  finish, before updating local review state or publishing remotely.
 - Include a stable local-PR/head/digest marker. Repeating an identical publish
   is a no-op; a materially different rerun on the same head remains auditable.
 - Preserve code/prose lane artifacts locally. The GitHub summary may combine
@@ -156,6 +184,13 @@ These points are adjudicated. Do not leave them as OPEN items.
 
 - `pr_merge.py` continues to run the unchanged local gate and perform the local
   no-fast-forward merge. No remote operation may bypass `run_gate`.
+- Strengthen `run_gate` to parse the exact CI manifest and verify its SHA,
+  `partial: false`, and successful conclusion. Existence alone is not evidence.
+  If `--allow-unreviewed` is used, record that waiver durably as its help text
+  promises.
+- Before changing history, persist a merge intent containing the base tip and
+  reviewed head. Reconciliation may complete publication of that merge but
+  must never execute the merge a second time.
 - Replace `github-sync.sh`'s broad `git push --all` with a bounded,
   retry-hardened push of explicit intended refs. Feature-head publication is
   owned by the adapter; the post-merge default is `main`.
@@ -165,6 +200,9 @@ These points are adjudicated. Do not leave them as OPEN items.
 - If the post-merge push fails, keep the local merge and record remote sync as
   pending. Report that the merge already happened and direct the operator to
   reconciliation; do not invite a second merge attempt.
+- Resolve an ambiguous push by comparing remote `main` with the recorded merge
+  commit. Retry only when the remote is safely behind; mark divergence as a
+  conflict rather than forcing an update.
 - Do not delete a remote feature branch until GitHub recognizes the merge. A
   local branch/worktree may be removed under the existing cleanup rules once
   recovery metadata is durable.
@@ -195,13 +233,16 @@ Cover at least:
 2. PR create/update, the empty-diff deferred case, local-to-GitHub footer
    translation, and recovery of a previously created PR by marker.
 3. Missing CLI, unauthenticated CLI, transient retry exhaustion, required-online
-   failure, and best-effort pending state.
+   failure, best-effort pending state, and independent pending operations on one
+   record.
 4. Pending and final same-head commit statuses, identical retry suppression,
    and no success publication for a partial CI run.
 5. Review publication with `event=COMMENT`, exact `commit_id`, identical retry
    suppression, worst-verdict combination, and remote-head mismatch refusal.
 6. Merge gate still refuses stale CI/review evidence; `github-sync.sh` pushes
-   only explicit refs and retries bounded failures.
+   only explicit refs and retries bounded failures. Also cover manifest-content
+   validation, branch-tip races, branch-record uniqueness, durable merge intent,
+   ambiguous main pushes, and remote divergence.
 7. Seed mappings for GitHub issues `#1` through `#4` and PR `#5` are adopted
    without create calls.
 8. `local/bin/validate_tree.py` still accepts the extended record schema.

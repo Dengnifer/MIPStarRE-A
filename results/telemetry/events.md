@@ -135,3 +135,13 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   was then allocated once. Lesson: authorize the runtime lock root for main
   lifecycle commands and never bypass the locks merely because the repository
   itself is writable.
+- **Old `gh auth status` falsely rejected a valid fine-grained PAT.**
+  Symptom: after `gh 2.4.0` accepted the token, `gh auth status` reported that
+  it was no longer valid, prompting an attempted client upgrade over a link
+  transferring only about 10 KiB/s. Diagnosis: this client predates
+  fine-grained PATs; a direct read-only `gh api user --jq .login` call
+  authenticated successfully as `Dengnifer`. Fix: stopped the unnecessary
+  release download and adopted a functional API capability probe for issue
+  `#0007` instead of treating `auth status` as authoritative. Lesson:
+  authenticate by exercising the required API surface; a legacy client's
+  credential-format diagnostic can be a false negative.
