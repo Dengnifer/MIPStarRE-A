@@ -39,20 +39,12 @@ The tool is **report-only** — it never edits or closes issues and never
 posts comments.  Its output is intended for human review by a maintainer
 doing periodic triage before launching a proof-closing round.
 
-## Offline-first inputs and scheduled audit
+## Exported inputs and local audit
 
 The script reads pre-exported JSON from `gh issue list` instead of calling
-GitHub directly.  That keeps the audit easy to run locally, easy to test
-without credentials, and safe to wrap in automation.
-
-The weekly GitHub Actions wrapper
-the `stale-audit` job of [`.github/workflows/housekeeping.yml`](../.github/workflows/housekeeping.yml)
-automates exactly that documented export-and-audit sequence: it lists open
-issues with `gh issue list`, writes a JSON audit report, and uploads the
-report as an artifact only when at least one stale citation is flagged.  The
-workflow has read-only `contents` and `issues` permissions and preserves the
-script's report-only contract: it never closes, labels, edits, or comments on
-issues.
+GitHub directly. The shared exporter performs authenticated, paginated reads
+through `local/bin/github_api.py`; tests substitute a fake `gh`. The audit
+remains report-only and never closes, labels, edits, or comments on issues.
 
 ## Usage
 
@@ -60,25 +52,12 @@ issues.
 
 ```bash
 # 1. Export open issues that plausibly reference code.
-gh issue list --repo LionSR/MIPStarRE --state open --limit 500 \
-  --json number,title,body,url,labels \
-  > /tmp/mipstarre-open-issues.json
+python3 local/bin/export_issues.py --state open --limit 500 \
+  --output /tmp/mipstarre-open-issues.json
 
 # 2. Run the audit.  Default output lists only flagged issues.
 python3 scripts/audit_stale_issues.py \
   --issues /tmp/mipstarre-open-issues.json
-```
-
-### Narrower scope (sorry trackers only)
-
-```bash
-gh issue list --repo LionSR/MIPStarRE --state open --limit 500 \
-  --label sorry-elimination \
-  --json number,title,body,url,labels \
-  > /tmp/mipstarre-sorry-issues.json
-
-python3 scripts/audit_stale_issues.py \
-  --issues /tmp/mipstarre-sorry-issues.json
 ```
 
 ### Machine-readable output

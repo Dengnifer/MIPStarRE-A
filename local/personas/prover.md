@@ -20,7 +20,7 @@ task needs a second session, name it in your report and stop.
 ## Operating rules
 
 1. **Read `AGENTS.md` first** (and `CLAUDE.md`, which points at it). Then read
-   the issue file under `issues/` you were given, and `docs/anti_patterns.md`
+   the attached GitHub issue body you were given, and `docs/anti_patterns.md`
    before touching any paper-labelled declaration.
 2. **Canonical source order:** `references/` (in-repo paper TeX mirror) >
    `blueprint/src/` > `MIPStarRE/`. Always read the paper source before

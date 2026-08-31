@@ -233,3 +233,26 @@ management, at the cost of link-dependence for record operations — an
 accepted trade recorded as a workflow-evolution datum: localization and
 re-hybridization are both responses to the environment, which is the
 paper's thesis in miniature.
+
+## 2026-08-31 — GitHub is the sole active workflow authority
+
+**Trigger:** owner decision 2026-08-31, follow-on to the re-hybridization entry;
+see `results/telemetry/events.md`, "Write-through adapter superseded during
+implementation."
+
+**Change:** the write-through fallback is retired. GitHub numbers, labels,
+sub-issue relations, pull-request metadata, exact-head statuses, reviews, and
+merge state are the only active lifecycle records. Local execution retains
+runtime locks/logs and append-only research telemetry. The former issue/PR
+trees remain immutable under `results/telemetry/registry-archive/`; atomic
+GitHub snapshots are audit data and never mutation authority.
+
+All lifecycle commands use one retry-classifying, marker-idempotent shared
+GitHub layer. CI and review publish exact-head evidence, auto-fix counts complete
+GitHub-visible commit history, and merge uses a final head recheck plus
+`--match-head-commit`. A clean exact-head `COMMENT` review with a clean ledger
+and successful summary is sufficient; GitHub approval is not a gate.
+
+**Expected effect:** remote outages fail closed without creating shadow state,
+ambiguous mutations reconcile against GitHub, and every lifecycle consumer
+observes one authoritative issue/PR history.

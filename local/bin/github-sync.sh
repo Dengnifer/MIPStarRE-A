@@ -1,16 +1,51 @@
 #!/usr/bin/env bash
-# github-sync.sh — push this repository to its GitHub home,
-# git@github.com:Dengnifer/MIPStarRE-A.git (standalone repo since the
-# 2026-08-31 restructure; the old subtree-into-monorepo flow is retired,
-# see EVOLUTION.md). Run after every merge to main.
+# Synchronize explicit GitHub refs and refresh the read-only audit snapshot.
 set -euo pipefail
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-_common="$(git -C "$ROOT" rev-parse --path-format=absolute --git-common-dir 2>/dev/null || true)"
-case "$_common" in */.git) ROOT="$(dirname "$_common")" ;; esac
-cd "$ROOT"
-git remote get-url github >/dev/null 2>&1 || git remote add github git@github.com:Dengnifer/MIPStarRE-A.git
-for i in 1 2 3 4 5; do
-  git push github --all && { echo "github-sync: pushed $(git rev-parse --short main)"; exit 0; }
-  echo "github-sync: push attempt $i failed; retrying" >&2; sleep 15
+
+PROG=github-sync.sh
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="${MIPSTARRE_REPO_ROOT:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+MODE=all
+BASE=main
+
+usage() {
+  cat <<'EOF'
+usage: local/bin/github-sync.sh [refs|snapshot|all] [--base BRANCH]
+
+Fetches only the named base ref into refs/remotes/github/<base> and/or writes
+the paginated open-issue/open-PR audit snapshot. It never pushes any ref.
+EOF
+}
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    refs|snapshot|all) MODE="$1"; shift ;;
+    --base) [ "$#" -ge 2 ] || { usage >&2; exit 2; }; BASE="$2"; shift 2 ;;
+    -h|--help) usage; exit 0 ;;
+    *) printf '%s: unknown argument: %s\n' "$PROG" "$1" >&2; exit 2 ;;
+  esac
 done
-echo "github-sync: all push attempts failed" >&2; exit 1
+
+case "$BASE" in
+  ""|*'['*|*']'*|*' '*|*~*|*^*|*:*|*\?*|*\**|*\\*)
+    printf '%s: unsafe base ref: %s\n' "$PROG" "$BASE" >&2
+    exit 2
+    ;;
+esac
+
+python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" probe >/dev/null
+
+if [ "$MODE" = refs ] || [ "$MODE" = all ]; then
+  git -C "$ROOT" remote get-url github >/dev/null
+  git -C "$ROOT" fetch --no-tags github \
+    "refs/heads/$BASE:refs/remotes/github/$BASE"
+  printf '%s: fetched github/%s at %s\n' \
+    "$PROG" "$BASE" "$(git -C "$ROOT" rev-parse --short "refs/remotes/github/$BASE")"
+fi
+
+if [ "$MODE" = snapshot ] || [ "$MODE" = all ]; then
+  DEST="$ROOT/results/telemetry/github-snapshot"
+  python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" --no-probe \
+    snapshot "$DEST" >/dev/null
+  printf '%s: refreshed %s\n' "$PROG" "$DEST"
+fi

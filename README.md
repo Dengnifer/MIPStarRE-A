@@ -1,9 +1,10 @@
 # MIPStarRE-dev
 
 Formalization project for mathematics around $\mathrm{MIP}^*=\mathrm{RE}$ —
-the **local-only continuation** of
-[LionSR/MIPStarRE](https://github.com/LionSR/MIPStarRE). All workflow
-operations (CI, review, issues, PRs, site) run locally; see
+the continuation of
+[LionSR/MIPStarRE](https://github.com/LionSR/MIPStarRE). GitHub holds active
+issue and pull-request state; CI, model review, cache, and telemetry run on the
+local machine and publish exact-head evidence. See
 [`local/README.md`](local/README.md) and [`local/DESIGN.md`](local/DESIGN.md).
 Badges and the published site are replaced by `local/bin/site.sh` output
 served from the local component store.
@@ -70,8 +71,8 @@ Top-level directories:
 - `docs/` — contributor guides, style, naming, proof integrity, CI notes
 - `audits/` — dated chapter-by-chapter dependency-scouting reports
 - `local/` — the local workflow layer (protocols, personas, executables)
-- `issues/`, `prs/` — local issue tree and PR registry
-- `results/telemetry/` — session/build/stage telemetry (research data)
+- `results/telemetry/` — session/build/stage telemetry, atomic GitHub snapshots,
+  and the immutable retired-registry archive
 
 ## Recommended proof-filling order
 

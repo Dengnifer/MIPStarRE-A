@@ -110,8 +110,8 @@ def default_base_ref() -> str:
     if env_base := os.environ.get("BASE_REF"):
         return env_base
     if github_base := os.environ.get("GITHUB_BASE_REF"):
-        return f"origin/{github_base}"
-    return "origin/main"
+        return f"refs/remotes/github/{github_base}"
+    return "refs/remotes/github/main"
 
 
 def write_github_output(name: str, value: str) -> None:

@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
 #
-# agent.sh — human-invoked codex session on a PR or issue branch.
+# agent.sh — human-invoked codex session on a GitHub PR or issue branch.
 #
 # Usage:
-#   local/bin/agent.sh <pr-id|issue-id> "instruction" [--role ROLE]
+#   local/bin/agent.sh <github-number> "instruction" [--role ROLE]
 #                      [--read-only] [--dry-run]
 #
-#   <pr-id|issue-id>  A PR registry id ("7", "0007", "0007-slug") if a PR record
-#                     exists, otherwise an issue id ("42", "0042", "0042-slug").
+#   <github-number>   GitHub issue or pull-request number.
 #   "instruction"     What you want done, in one argument.  This is the whole
 #                     authorization: there is no @-mention trigger and no
 #                     author_association gate locally — you are the gate.
@@ -41,11 +40,9 @@
 set -euo pipefail
 
 PROG="agent.sh"
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-# The registry (issues/, prs/, results/telemetry/) is single-instance and
-# lives in the PRIMARY checkout. When this script is invoked from a linked
-# worktree copy, re-point the root at the primary (same resolution as
-# cache-warmer.sh resolve_primary_repo; EVOLUTION.md 2026-08-30).
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+# Session telemetry is single-instance in the primary checkout.
 _common="$(git -C "$ROOT" rev-parse --path-format=absolute --git-common-dir 2>/dev/null || true)"
 case "$_common" in
   */.git) ROOT="$(dirname "$_common")" ;;
@@ -53,10 +50,12 @@ esac
 unset _common
 
 CACHE="${MIPSTARRE_CACHE_ROOT:-$HOME/.cache/mipstarre-dev}"
-TRUSTED_REF="${MIPSTARRE_TRUSTED_REF:-main}"
+TRUSTED_REF="${MIPSTARRE_TRUSTED_REF:-refs/remotes/github/main}"
 DISPATCH="$ROOT/local/bin/dispatch.sh"
 AGENT_MODEL="${MIPSTARRE_AGENT_MODEL:-}"
 PERSONA_PATH=".github/prompts/claude-code-system-prompt.md"
+RUN_TMP="$(mktemp -d "${TMPDIR:-/tmp}/mipstarre-agent.XXXXXX")"
+trap 'rm -rf "$RUN_TMP"' EXIT INT TERM
 
 log()  { printf '%s: %s\n' "$PROG" "$*" >&2; }
 warn() { printf '%s: warning: %s\n' "$PROG" "$*" >&2; }
@@ -65,29 +64,6 @@ die()  { printf '%s: error: %s\n' "$PROG" "$*" >&2; exit 1; }
 # ---------------------------------------------------------------- utilities
 
 now_utc() { date -u +%Y-%m-%dT%H:%M:%SZ; }
-
-fm_get() {
-  python3 - "$1" "$2" <<'PY'
-import sys
-path, key = sys.argv[1], sys.argv[2]
-try:
-    lines = open(path, encoding="utf-8").read().split("\n")
-except OSError:
-    sys.exit(1)
-if not lines or lines[0].strip() != "---":
-    sys.exit(1)
-for line in lines[1:]:
-    if line.strip() == "---":
-        break
-    if not line.startswith(key + ":"):
-        continue
-    value = line[len(key) + 1:].strip()
-    if len(value) >= 2 and value[0] == value[-1] and value[0] in "'\"":
-        value = value[1:-1]
-    print(value)
-    break
-PY
-}
 
 # sanitize_to <src> <dest> <max-lines> — the issue or PR body is written by
 # humans and agents; it is quoted to the session as data (DESIGN.md invariant 6).
@@ -233,65 +209,54 @@ fi
 
 # ---------------------------------------------------------- resolve the target
 
-KIND=""
-TARGET_DIR=""
-TARGET_FILE=""
-BRANCH=""
-PAD=""
 case "$TARGET" in
-  *[!0-9]*) PAD="" ;;
-  *)        PAD="$(printf '%04d' "$((10#$TARGET))")" ;;
+  ''|*[!0-9]*) die "target must be a positive GitHub issue or PR number" ;;
 esac
+NUMBER="$TARGET"
+while [ "${#NUMBER}" -gt 1 ] && [ "${NUMBER#0}" != "$NUMBER" ]; do
+  NUMBER="${NUMBER#0}"
+done
+[ "$NUMBER" != 0 ] || die "target number must be positive"
+TARGET_JSON="$RUN_TMP/target.json"
+python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" target "$NUMBER" >"$TARGET_JSON" ||
+  die "cannot read GitHub issue or PR #$NUMBER"
+CONTEXT_SRC="$RUN_TMP/github-context.md"
+IFS="$(printf '\t')" read -r KIND STATE BRANCH BASE HEAD_SHA < <(
+  python3 - "$TARGET_JSON" "$CONTEXT_SRC" <<'PY'
+import json
+import sys
 
-if [ -d "$ROOT/prs/$TARGET" ]; then
-  KIND=pr
-  TARGET_DIR="$ROOT/prs/$TARGET"
-elif [ -n "$PAD" ] && [ -d "$ROOT/prs" ]; then
-  for cand in "$ROOT/prs/$PAD"-*; do
-    [ -d "$cand" ] || continue
-    [ -z "$TARGET_DIR" ] || die "PR id $PAD is ambiguous: $TARGET_DIR and $cand"
-    KIND=pr
-    TARGET_DIR="$cand"
-  done
-fi
+data = json.load(open(sys.argv[1], encoding="utf-8"))
+issue = data["issue"]
+kind = data["kind"]
+branch = base = sha = ""
+if kind == "pr":
+    pull = data["pull"]
+    branch = str(pull["head"]["ref"])
+    base = str(pull["base"]["ref"])
+    sha = str(pull["head"]["sha"]).lower()
+labels = [
+    str(item.get("name") if isinstance(item, dict) else item)
+    for item in (issue.get("labels") or [])
+]
+with open(sys.argv[2], "w", encoding="utf-8") as stream:
+    stream.write(f"# GitHub {kind} #{issue.get('number')}\n\n")
+    stream.write(f"Title: {issue.get('title') or ''}\n")
+    stream.write(f"State: {issue.get('state') or ''}\n")
+    stream.write(f"URL: {issue.get('html_url') or issue.get('url') or ''}\n")
+    stream.write(f"Labels: {', '.join(labels)}\n\n")
+    stream.write(str(issue.get("body") or ""))
+    stream.write("\n")
+print(kind, issue.get("state") or "", branch, base, sha, sep="\t")
+PY
+)
 
-if [ -z "$KIND" ]; then
-  if [ -f "$ROOT/issues/$TARGET.md" ]; then
-    KIND=issue
-    TARGET_FILE="$ROOT/issues/$TARGET.md"
-  elif [ -n "$PAD" ] && [ -d "$ROOT/issues" ]; then
-    for cand in "$ROOT/issues/$PAD"-*.md; do
-      [ -f "$cand" ] || continue
-      [ -z "$TARGET_FILE" ] || die "issue id $PAD is ambiguous: $TARGET_FILE and $cand"
-      KIND=issue
-      TARGET_FILE="$cand"
-    done
-  fi
-fi
-
-[ -n "$KIND" ] ||
-  die "no PR record under $ROOT/prs and no issue under $ROOT/issues matches '$TARGET'"
-
-SCOPE=""
-CONTEXT_SRC=""
 if [ "$KIND" = pr ]; then
-  TARGET_FILE="$TARGET_DIR/pr.md"
-  [ -f "$TARGET_FILE" ] || die "$TARGET_FILE is missing; the PR record is incomplete"
-  PR_ID="$(fm_get "$TARGET_FILE" id || true)"
-  BRANCH="$(fm_get "$TARGET_FILE" branch || true)"
-  BASE="$(fm_get "$TARGET_FILE" base || true)"
-  HEAD_SHA="$(fm_get "$TARGET_FILE" head_sha || true)"
-  STATE="$(fm_get "$TARGET_FILE" state || true)"
-  [ -n "$PR_ID" ] || die "pr.md has no 'id'"
-  [ -n "$BRANCH" ] || die "pr.md has no 'branch'"
+  PR_ID="$NUMBER"
   SCOPE="pr$PR_ID"
-  CONTEXT_SRC="$TARGET_FILE"
 else
-  ISSUE_ID="$(fm_get "$TARGET_FILE" id || true)"
-  [ -n "$ISSUE_ID" ] || die "$TARGET_FILE has no 'id' in its frontmatter"
-  STATE="$(fm_get "$TARGET_FILE" state || true)"
+  ISSUE_ID="$NUMBER"
   SCOPE="$ISSUE_ID"
-  CONTEXT_SRC="$TARGET_FILE"
   # An issue has no branch of its own until somebody makes one.  Prefer an
   # existing issue-<id>-* / codex/issue-<id>-* branch; otherwise work on the
   # trusted ref's checkout and let the human create the branch.
@@ -301,8 +266,11 @@ else
     break
   done
   if [ -z "$BRANCH" ]; then
-    BRANCH="$TRUSTED_REF"
-    warn "issue $ISSUE_ID has no issue-$ISSUE_ID-* branch yet; the session will run on '$TRUSTED_REF'. Create the branch first if it should produce commits (local/protocols/issues-prs.md)."
+    if [ "$SANDBOX" != read-only ]; then
+      die "GitHub issue #$ISSUE_ID has no issue-$ISSUE_ID-* branch; create one before a write-enabled session"
+    fi
+    BRANCH=main
+    warn "issue #$ISSUE_ID has no feature branch; the read-only session will inspect main"
   fi
 fi
 
@@ -353,8 +321,8 @@ EOF
 
 # Local execution contract
 
-You are a human-directed working session on a local git repository.  There is
-no GitHub here, and no CI is watching you.
+You are a human-directed working session in a local worktree. The lifecycle
+wrapper, not this session, owns GitHub publication.
 
 - Do NOT run \`gh\`, \`git push\`, or any mcp__github__* tool; they do not exist.
 - You MAY commit on $BRANCH when the work warrants it.  Do NOT use the
@@ -362,8 +330,8 @@ no GitHub here, and no CI is watching you.
   machine fixes, and the reviewer skips commits that carry them.  A commit you
   make is a human-directed commit and must be reviewable.
 - Do NOT rewrite published history (no amend, rebase or reset of commits that
-  are already on the branch), and do not touch prs/, issues/ or
-  results/telemetry/ — those records are maintained by the lifecycle scripts.
+  are already on the branch), and do not alter workflow telemetry or archived
+  registry data.
 - Validate with \`lake build\` (or a single-file \`lake env lean\` check) when
   you change Lean.  At most one full \`lake build\` machine-wide.
 - Say plainly in your final message what you changed, what you did not, and
@@ -372,7 +340,7 @@ no GitHub here, and no CI is watching you.
 
 Session context:
   Target            $KIND $SCOPE
-  Record            $CONTEXT_SRC
+  Authority         GitHub $KIND #$NUMBER
   Branch            $BRANCH
   Worktree          $WORKTREE
   Invoked           $(now_utc)
@@ -430,20 +398,7 @@ if [ -x "$DISPATCH" ]; then
   RC=$?
   set -e
 else
-  warn "local/bin/dispatch.sh not found; falling back to a direct 'codex exec'. This session will NOT appear in results/telemetry/sessions.jsonl, so the study loses it."
-  command -v codex >/dev/null 2>&1 ||
-    die "codex CLI not found on PATH and no local/bin/dispatch.sh to delegate to"
-  set +e
-  if [ -n "$AGENT_MODEL" ]; then
-    codex exec --sandbox "$SANDBOX" -C "$WORKTREE" -m "$AGENT_MODEL" \
-      -o "$OUT" -- "$(cat "$STANDALONE")"
-  else
-    codex exec --sandbox "$SANDBOX" -C "$WORKTREE" \
-      -o "$OUT" -- "$(cat "$STANDALONE")"
-  fi
-  RC=$?
-  set -e
-  log "final message: $OUT"
+  die "local/bin/dispatch.sh is required; direct codex execution would lose session telemetry"
 fi
 
 POST_HEAD="$(git -C "$WORKTREE" rev-parse HEAD)"
@@ -451,21 +406,17 @@ if [ "$POST_HEAD" != "$PRE_HEAD" ]; then
   log "the session committed on $BRANCH: $PRE_HEAD -> $POST_HEAD"
   git -C "$WORKTREE" --no-pager log --oneline "$PRE_HEAD".."$POST_HEAD" >&2 || true
   if git -C "$WORKTREE" log --format=%s "$PRE_HEAD".."$POST_HEAD" |
-      grep -qE '^\[(claude|codex)-(auto|review)-fix\]'; then
-    warn "one of those commits carries a bot fix prefix. review.sh will SKIP it (pr-review.yml:69-79). Reword it with 'git commit --amend' before anyone relies on a review."
+      grep -qE '^\[(codex-auto-fix|codex-review-fix)\]'; then
+    warn "one of those commits carries a bot fix prefix. review.sh will skip it under local/protocols/review.md. Reword it with 'git commit --amend' before anyone relies on a review."
   fi
   if [ "$KIND" = pr ]; then
-    log "next: run local/bin/ci.sh $PR_ID, then local/bin/review.sh $PR_ID"
-    log "  (pr.md head_sha is left for ci.sh to update — it owns that field)"
+    log "next: publish refs/heads/$BRANCH explicitly, then run local/bin/ci.sh $PR_ID"
   else
-    # claude.yml's auto-create-issue-pr analogue.  Creating the PR record is
-    # pr_open.py's job, not this script's: it owns the id sequence and the
-    # branch-name lint.
-    log "next: open a PR record for this branch, e.g."
+    log "next: publish and open a GitHub PR for this branch, e.g."
     log "  python3 local/bin/pr_open.py --issue $SCOPE --branch $BRANCH --title \"...\""
-    log "  then run local/bin/ci.sh on the new PR id."
+    log "  then run local/bin/ci.sh on the GitHub PR number."
     if [ ! -f "$ROOT/local/bin/pr_open.py" ]; then
-      warn "local/bin/pr_open.py is not present; create prs/<id>-<slug>/pr.md by hand per local/protocols/issues-prs.md before CI or review can see this branch."
+      warn "local/bin/pr_open.py is not present; publish the explicit feature ref and create the PR with gh."
     fi
   fi
 else

@@ -1,293 +1,277 @@
 #!/usr/bin/env python3
-"""Open a PR record in the local ``prs/`` registry.
-
-Replaces "open a pull request on GitHub" plus the record-shaping half of
-``.github/workflows/pr-cleanup.yml``, which used a model to rewrite bot PR
-titles into ``type(scope): desc``, turn the body into a self-contained
-mathematical note, copy labels from the linked issue, and add ``Addresses #N``.
-The mechanical parts of that job — the body skeleton, the link footer, and the
-label copy — are done here deterministically; the prose-rewriting part is left
-as a hook (see ``NORMALIZATION HOOK`` below).
-
-The branch-name lint is the load-bearing piece.  ``track.py`` recovers the
-linked issue from a branch through the ``issue-(\\d+)`` regex ported from
-issue-automation.yml:463-466, so a branch that does not embed its issue id is
-invisible to every progress note downstream; and docs/CONTRIBUTING.md:122-124
-records that ``]`` in a generated name broke part of the parent's automation
-stack.  Both are rejected here rather than discovered at merge time.
-
-Usage:
-    pr_open.py --issue 0042 --branch issue-0042-pauli-soundness \
-               --title "feat(Quantum): prove the Pauli basis test soundness bound"
-    pr_open.py --issue 0042 --branch codex/issue-0042-pauli-soundness \
-               --title "..." --closes
-    pr_open.py --help
-"""
+"""Push one feature ref and create or update its GitHub pull request."""
 
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import subprocess
 import sys
+import time
+import urllib.parse
 from pathlib import Path
+from typing import Any, Sequence
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-try:
-    import track
-except ModuleNotFoundError as exc:  # pragma: no cover - defensive
-    sys.stderr.write(
-        "pr_open.py: cannot import local/bin/track.py, which holds the PR "
-        f"data layer ({exc}).\n"
-    )
-    raise SystemExit(2)
-
-from track import LayerError  # noqa: E402
+from github_api import (  # noqa: E402
+    GitHub,
+    GitHubError,
+    create_marker,
+    normalize_number,
+)
 
 
-#: DESIGN.md:106-107 — ``issue-<id>-<slug>`` for human/orchestrator branches,
-#: ``codex/issue-<id>-<slug>`` for agent-created ones.  ``claude/`` is accepted
-#: with a warning because branches imported from the parent workflow carry it
-#: and ``track.skip_pr_opened_announcement`` still recognizes the prefix.
-BRANCH_RE = re.compile(r"^(?:(codex|claude)/)?issue-(\d+)-([a-z0-9][a-z0-9-]*)$")
+DEFAULT_BODY = """### Motivation
 
-PR_BODY_TEMPLATE = """\
-# {title}
-
-### Motivation
-
-<!-- Why this mathematical or documentation change is needed. Cite the issue
-     and, when applicable, the paper/blueprint file, line, and label. -->
+- Explain why this change is needed and cite the GitHub issue and source.
 
 ### Description
 
-<!-- State precisely what changed: definitions introduced, lemmas/theorems
-     proved, blueprint labels updated, and any deliberate difference from the
-     paper statement. -->
+- State precisely what changed.
 
 ### Testing
 
-<!-- What was verified and how, e.g.
-     lake env lean MIPStarRE/Quantum/PauliBasisTest.lean
-     lake build MIPStarRE
-     rg -n "sorry|axiom" MIPStarRE/Quantum/PauliBasisTest.lean || true -->
-
----
-{footer}
+- List the checks that were run.
 """
+FORBIDDEN_BRANCH = re.compile(r"[][~^:?*\\\s]")
 
 
-def lint_branch(branch: str, issue_id: str) -> None:
-    """Reject a branch name that cannot carry its issue link safely."""
-    if not branch:
-        raise LayerError("--branch is required and must be non-empty")
-    track.check_bracket_free(branch, "branch name", track.FORBIDDEN_REF_CHARS)
-    if branch.endswith(".lock") or ".." in branch or branch.startswith("/") \
-            or branch.endswith("/") or "@{" in branch:
-        raise LayerError(
-            f"branch {branch!r} is not a valid git refname "
-            "(no '..', '@{', leading/trailing '/', or '.lock' suffix)"
-        )
-    match = BRANCH_RE.match(branch)
+def _root(value: Path | None) -> Path:
+    if value:
+        return value.resolve()
+    override = os.environ.get("MIPSTARRE_REPO_ROOT")
+    return Path(override).resolve() if override else Path.cwd().resolve()
+
+
+def _git(root: Path, *arguments: str, check: bool = True) -> str:
+    result = subprocess.run(
+        ["git", "-C", str(root), *arguments],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if check and result.returncode != 0:
+        raise GitHubError(result.stderr.strip() or f"git {' '.join(arguments)} failed")
+    return result.stdout.strip()
+
+
+def _base_ref(root: Path, base: str) -> str:
+    candidate = f"refs/remotes/github/{base}"
+    if _git(root, "rev-parse", "--verify", "--quiet", f"{candidate}^{{commit}}", check=False):
+        return candidate
+    raise GitHubError(
+        f"fetched GitHub base {candidate!r} does not resolve locally; fetch it first"
+    )
+
+
+def _open_pulls(client: GitHub, branch: str) -> list[dict[str, Any]]:
+    head = urllib.parse.quote(f"{client.owner}:{branch}", safe=":")
+    return client.paginate(f"/repos/{client.repo}/pulls?state=open&head={head}")
+
+
+def _parse_created_pull(client: GitHub, output: str) -> dict[str, Any]:
+    match = re.search(r"https://github\.com/[^/]+/[^/]+/pull/(\d+)", output)
     if not match:
-        raise LayerError(
-            f"branch {branch!r} does not match the local convention "
-            "'issue-<id>-<slug>' or 'codex/issue-<id>-<slug>' (DESIGN.md:106-107).\n"
-            "The embedded id is what track.py's issue-(\\d+) regex reads to attach "
-            "progress notes; a branch without it drops out of every tracking count."
-        )
-    prefix, embedded, _slug = match.groups()
-    if prefix == "claude":
-        sys.stderr.write(
-            "warning: 'claude/' is a parent-workflow prefix; new agent branches "
-            "should use 'codex/' (DESIGN.md:106-107).\n"
-        )
-    if track.normalize_id(embedded) != issue_id:
-        raise LayerError(
-            f"branch {branch!r} embeds issue {track.normalize_id(embedded)} but "
-            f"--issue says {issue_id}; the two must agree or the merge-time "
-            "progress notes land on the wrong issue"
-        )
+        raise GitHubError("gh pr create succeeded but returned no recognizable PR URL")
+    return client.get_pull(int(match.group(1)))
 
 
-def git(repo_root: Path, *args: str) -> str | None:
-    """Run a read-only git command; return stripped stdout, or None on failure."""
-    try:
-        result = subprocess.run(
-            ["git", *args], cwd=str(repo_root),
-            capture_output=True, text=True, check=False,
-        )
-    except FileNotFoundError:
-        sys.stderr.write("warning: git is not on PATH; skipping branch resolution\n")
-        return None
-    if result.returncode != 0:
-        return None
-    return result.stdout.strip() or None
+def _create_pull(
+    client: GitHub,
+    branch: str,
+    base: str,
+    title: str,
+    body: str,
+) -> tuple[dict[str, Any], bool]:
+    def exact(row: dict[str, Any]) -> dict[str, Any] | None:
+        number = row.get("number")
+        if not isinstance(number, int):
+            raise GitHubError("adopted PR lacks a numeric GitHub number")
+        pull = client.get_pull(number)
+        head = pull.get("head") if isinstance(pull.get("head"), dict) else {}
+        target = pull.get("base") if isinstance(pull.get("base"), dict) else {}
+        if str(head.get("ref") or "") != branch or str(target.get("ref") or "") != base:
+            raise GitHubError("adopted PR has a different head or base branch")
+        if str(pull.get("title") or "") != title or str(pull.get("body") or "") != body:
+            return None
+        return pull
+
+    existing = _open_pulls(client, branch)
+    if len(existing) > 1:
+        raise GitHubError(f"more than one open PR has head branch {branch!r}")
+    if existing:
+        number = int(existing[0]["number"])
+        found = exact(existing[0])
+        if found is not None:
+            return found, True
+
+        def lookup() -> dict[str, Any] | None:
+            return exact({"number": number})
+
+        def mutate() -> dict[str, Any]:
+            payload = client.api(
+                f"/repos/{client.repo}/pulls/{number}",
+                method="PATCH",
+                data={"title": title, "body": body, "base": base},
+                retry=False,
+            )
+            if not isinstance(payload, dict):
+                raise GitHubError("PR update returned a non-object response")
+            return payload
+
+        client._idempotent_mutation(lookup=lookup, mutate=mutate)
+        updated = lookup()
+        if updated is None:
+            raise GitHubError("GitHub did not retain the requested PR title/body/base")
+        return updated, True
+
+    arguments = [
+        "pr",
+        "create",
+        "--repo",
+        client.repo,
+        "--head",
+        branch,
+        "--base",
+        base,
+        "--title",
+        title,
+        "--body",
+        body,
+    ]
+    last: GitHubError | None = None
+    for attempt in range(client.retries + 1):
+        try:
+            result = client.run(arguments, retry=False)
+            created = exact(_parse_created_pull(client, result.stdout))
+            if created is None:
+                raise GitHubError(
+                    "created PR does not retain its marker-bound title, body, head, and base"
+                )
+            return created, False
+        except GitHubError as exc:
+            last = exc
+            if not exc.transient:
+                raise
+            existing = _open_pulls(client, branch)
+            if len(existing) == 1:
+                adopted = exact(existing[0])
+                if adopted is None:
+                    raise GitHubError(
+                        "ambiguous PR create found the branch but its marker-bound "
+                        "title or body does not match"
+                    )
+                return adopted, True
+            if len(existing) > 1:
+                raise GitHubError(f"more than one open PR has head branch {branch!r}")
+            if attempt >= client.retries:
+                break
+            time.sleep(client.retry_delay * (2**attempt))
+    raise last or GitHubError("PR creation failed")
 
 
-def build_footer(issue_id: str, closes: bool) -> str:
-    """``Closes #N`` auto-closes on merge; ``Addresses #N`` keeps it open.
-
-    docs/CONTRIBUTING.md:61-62.  ``pr_merge.py`` reads this footer through
-    ``track.linked_issues``, so the exact keyword decides whether the issue is
-    closed by the merge or merely receives a progress note.
-    """
-    return f"{'Closes' if closes else 'Addresses'} #{issue_id}"
+def _split(values: Sequence[str]) -> list[str]:
+    return [item.strip() for value in values for item in value.split(",") if item.strip()]
 
 
-# --------------------------------------------------------------------------
-# NORMALIZATION HOOK (not wired)
-# --------------------------------------------------------------------------
-#
-# pr-cleanup.yml ran a model over ``claude/``/``codex/`` PRs to rewrite the
-# title into conventional-commit form and expand the body into a self-contained
-# mathematical note.  To wire it here:
-#
-#   1. gate on ``os.environ.get("MIPSTARRE_LLM_ENABLED") != "false"`` and on
-#      ``BRANCH_RE`` reporting a ``codex``/``claude`` prefix, matching the
-#      upstream ``startsWith`` gate at pr-cleanup.yml:17-21;
-#   2. read .github/prompts/pr-cleanup-prompt.md from the committed main
-#      worktree, never from the branch being described (DESIGN.md:76-77);
-#   3. pass the diff and the current body through ``track.sanitize`` — the
-#      upstream job sanitized before interpolation for the same reason;
-#   4. rewrite only the ``### Motivation``/``### Description`` sections and the
-#      title in the record; never touch the footer, which is machine-read.
-
-
-def create_pr(args: argparse.Namespace) -> int:
-    repo_root = args.repo_root.resolve()
-    issue_id = track.normalize_id(args.issue)
-    issue = track.load_issue(repo_root, issue_id)
-    if issue.state != "open":
-        sys.stderr.write(
-            f"warning: issue #{issue_id} is {issue.state}; opening a PR against a "
-            "closed issue is unusual\n"
-        )
-
-    lint_branch(args.branch, issue_id)
-
-    title = track.sanitize(args.title, track.TITLE_LIMIT).strip()
-    if not title:
-        raise LayerError("--title is empty after sanitization")
-    track.check_bracket_free(title, "PR title")
-    slug = track.slugify(title)
-
-    taxonomy = track.load_taxonomy(repo_root)
-    labels = sorted({name for name in issue.labels if name in taxonomy})
-    for chunk in args.labels:
-        for name in (part.strip() for part in chunk.split(",")):
-            if not name:
-                continue
-            if name in taxonomy.banned:
-                raise LayerError(f"label {name!r} is banned: {taxonomy.banned[name]}")
-            if name not in taxonomy:
-                raise LayerError(f"label {name!r} is not defined in local/labels.yml")
-            if name not in labels:
-                labels.append(name)
-    labels = sorted(labels)
-
-    head_sha = git(repo_root, "rev-parse", "--verify", f"{args.branch}^{{commit}}")
-    if head_sha is None:
-        sys.stderr.write(
-            f"warning: branch {args.branch!r} does not resolve in this repository; "
-            "head_sha stays null and pr_merge.py will refuse until ci.sh records "
-            "one.\n"
-        )
-
-    directory = track.prs_dir(repo_root)
-    directory.mkdir(parents=True, exist_ok=True)
-
-    with track.file_lock("prs-seq"):
-        existing = [p.id for p in track.iter_prs(repo_root)]
-        if args.dry_run:
-            pr_id = f"{(max([int(e) for e in existing], default=0) + 1):04d}"
-        else:
-            pr_id = track.next_sequence_id(directory / ".seq", existing)
-
-    record_dir = directory / f"{pr_id}-{slug}"
-    path = record_dir / "pr.md"
-    if path.exists():
-        raise LayerError(f"{path} already exists; refusing to overwrite")
-
-    meta = {
-        "id": pr_id,
-        "branch": args.branch,
-        "issue": issue_id,
-        "base": args.base,
-        "state": "open",
-        "head_sha": head_sha,
-        "ci_status": None,
-        "review_state": None,
-        "fix_iterations": 0,
-        "auto_fix": not args.no_auto_fix,
-        "labels": labels,
-        "created": track.utcnow(),
-        "merged_commit": None,
-    }
-    # The title lives in the body as its H1: DESIGN.md:101-105 fixes the PR
-    # frontmatter fields and does not include one.
-    body = PR_BODY_TEMPLATE.format(
-        title=title, footer=build_footer(issue_id, args.closes)
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--branch", required=True)
+    parser.add_argument("--base", default="main")
+    parser.add_argument("--title", required=True)
+    body = parser.add_mutually_exclusive_group()
+    body.add_argument("--body")
+    body.add_argument("--body-file", type=Path)
+    parser.add_argument("--label", "--labels", action="append", default=[])
+    parser.add_argument(
+        "--issue",
+        "--closing-issue",
+        dest="issue",
+        help="GitHub issue number closed by the PR footer",
     )
-    record = track.PullRequest(path, meta, body)
-
-    if args.dry_run:
-        sys.stdout.write(f"[dry-run] would create {path}\n\n{record.render()}\n")
-        return 0
-
-    record_dir.mkdir(parents=True, exist_ok=True)
-    # Per-SHA CI manifests and review verdicts (DESIGN.md:103-105) live here;
-    # pr_merge.py refuses to merge when either directory is missing, so create
-    # them up front and leave a marker explaining what belongs in each.
-    for name, purpose in (
-        ("ci", "one <head_sha>.json manifest per CI run, written by local/bin/ci.sh"),
-        ("reviews", "one <head_sha>.md verdict per review, written by local/bin/review.sh"),
-    ):
-        sub = record_dir / name
-        sub.mkdir(exist_ok=True)
-        marker = sub / ".gitkeep"
-        if not marker.exists():
-            track.atomic_write(marker, f"# {purpose}\n")
-
-    track.atomic_write(path, record.render())
-    sys.stdout.write(f"created {path.relative_to(repo_root)} (PR #{pr_id})\n")
-    sys.stdout.write(f"PR #{pr_id}: labels {labels} copied from #{issue_id}\n")
-
-    return track.on_pr_opened(repo_root, pr_id, dry_run=False)
+    parser.add_argument("--repo-root", type=Path)
+    return parser
 
 
-def _parse_args(argv: list[str]) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        prog="pr_open.py",
-        description=__doc__,
-        formatter_class=argparse.RawDescriptionHelpFormatter,
+def run(args: argparse.Namespace) -> int:
+    root = _root(args.repo_root)
+    branch = args.branch.strip()
+    base = args.base.strip()
+    title = args.title.strip()
+    if not branch or FORBIDDEN_BRANCH.search(branch):
+        raise GitHubError(f"unsafe branch name {branch!r}")
+    if branch == base:
+        raise GitHubError("feature branch and base branch must differ")
+    _git(root, "check-ref-format", "--branch", branch)
+    branch_ref = f"refs/heads/{branch}"
+    if not _git(root, "rev-parse", "--verify", "--quiet", f"{branch_ref}^{{commit}}", check=False):
+        raise GitHubError(f"local branch {branch!r} does not exist")
+    base_ref = _base_ref(root, base)
+    ahead = int(_git(root, "rev-list", "--count", f"{base_ref}..{branch_ref}"))
+    if ahead == 0:
+        raise GitHubError(
+            f"branch {branch!r} has no commits ahead of {base!r}; refusing a placeholder PR"
+        )
+
+    issue = normalize_number(args.issue, kind="closing issue number") if args.issue else None
+    source_body = (
+        args.body_file.read_text(encoding="utf-8")
+        if args.body_file
+        else (args.body if args.body is not None else DEFAULT_BODY)
     )
-    parser.add_argument("--issue", required=True, metavar="ID",
-                        help="issue this PR addresses")
-    parser.add_argument("--branch", required=True,
-                        help="branch name; must embed the issue id")
-    parser.add_argument("--title", required=True,
-                        help="conventional-commit title, e.g. 'feat(Quantum): ...'")
-    parser.add_argument("--base", default="main", help="merge target (default: main)")
-    parser.add_argument("--closes", action="store_true",
-                        help="use 'Closes #N' (auto-close on merge) instead of "
-                             "'Addresses #N' (keep open)")
-    parser.add_argument("--labels", action="append", default=[],
-                        help="extra labels beyond those copied from the issue")
-    parser.add_argument("--no-auto-fix", action="store_true",
-                        help="record auto_fix: false so the fix loop skips this PR")
-    parser.add_argument("--repo-root", type=Path, default=track.default_repo_root(),
-                        help="repository root (default: two levels above this script)")
-    parser.add_argument("--dry-run", action="store_true",
-                        help="print the record that would be written, write nothing")
-    return parser.parse_args(argv)
+    if issue is not None:
+        source_body = source_body.rstrip() + f"\n\n---\nCloses #{issue}\n"
+    labels = _split(args.label)
+
+    client = GitHub(repo_root=root)
+    client.probe_authentication()
+    labels = client.validate_labels(labels)
+    if issue is not None:
+        client.get_issue(issue)
+    marker = create_marker(
+        "pr",
+        {
+            "repository": client.repo,
+            "branch": branch,
+            "base": base,
+            "title": title,
+            "body": source_body,
+            "labels": sorted(labels),
+            "issue": issue,
+        },
+    )
+    full_body = source_body.rstrip() + "\n\n" + marker + "\n"
+
+    # Publish exactly one explicit feature ref. Never push all refs or main.
+    _git(root, "push", "github", f"{branch_ref}:{branch_ref}")
+    pull, adopted = _create_pull(client, branch, base, title, full_body)
+    number = int(pull["number"])
+    if labels:
+        client.api(
+            f"/repos/{client.repo}/issues/{number}/labels",
+            method="PUT",
+            data={"labels": labels},
+            retry=True,
+        )
+        authoritative = client.get_issue(number)
+        adopted_labels = {
+            str(row.get("name") or "")
+            for row in authoritative.get("labels", [])
+            if isinstance(row, dict)
+        }
+        if adopted_labels != set(labels):
+            raise GitHubError("GitHub did not retain the requested PR labels exactly")
+    action = "adopted/updated" if adopted else "created"
+    url = pull.get("html_url") or pull.get("url")
+    print(f"{action} GitHub PR #{number}: {url}")
+    return 0
 
 
-def main(argv: list[str] | None = None) -> int:
-    args = _parse_args(sys.argv[1:] if argv is None else argv)
+def main(argv: Sequence[str] | None = None) -> int:
     try:
-        return create_pr(args)
-    except LayerError as exc:
+        return run(build_parser().parse_args(argv))
+    except (GitHubError, OSError, ValueError) as exc:
         sys.stderr.write(f"pr_open.py: {exc}\n")
         return 2
 

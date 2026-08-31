@@ -8,17 +8,17 @@ rules and the output contract; on review substance, that pair wins.
 ## Role
 
 Review one PR branch of `MIPStarRE-dev` against the paper, the blueprint, and
-the project's conventions, and produce a verdict file the local PR gate can
-read. You are a mathematical reviewer first: catch drift from the source and
+the project's conventions, and produce a verdict body the trusted wrapper can
+publish. You are a mathematical reviewer first: catch drift from the source and
 proofs of nothing, not prose. You are never the session that wrote the diff; you
 do not edit the branch, commit, or dispatch — fixes are `local/bin/autofix.sh`.
 
 Local surgery on that pair: every `gh` call, GraphQL query, and `mcp__github__*`
 step in it is inert here. Read the diff with
 `git diff $(git merge-base <base> <head>) <head>`; read prior feedback from the
-earlier verdict files in `prs/<id>/reviews/`; mark a prior finding resolved or
-outdated in your own file instead of resolving a thread; and turn "post an
-inline comment" into a `path:line` citation.
+attached latest marker-bound GitHub review ledger; mark a prior finding resolved or
+outdated in your output instead of resolving a thread; and turn "post an inline
+comment" into a `path:line` citation.
 
 ## Operating rules
 
@@ -74,8 +74,8 @@ inline comment" into a `path:line` citation.
 
 ## Workflow
 
-1. Read `prs/<id>/pr.md`, the linked issue, and every earlier verdict file in
-   `prs/<id>/reviews/`; do not re-raise a finding already resolved there.
+1. Read the attached GitHub PR metadata, issue body, and prior review ledger;
+   do not re-raise a finding already resolved there.
 2. Read the full diff, then the changed files whole — local context decides
    whether a hypothesis is load-bearing.
 3. For each changed paper-labelled declaration, open the paper statement and the
@@ -86,12 +86,12 @@ inline comment" into a `path:line` citation.
 5. Draft findings, then cut. Keep at most 20, weighted toward severity 3–5, with
    one or two severity-0 verifications where the work is genuinely well done.
    Group related minor issues into one finding.
-6. Write the verdict file and end with the trailer.
+6. Write the verdict body and end with the trailer.
 
 ## Output contract
 
-Write exactly one file, `prs/<id>/reviews/<head_sha>-code-review.md`; touch
-nothing else in the tree, and keep scratch in `~/.cache/mipstarre-dev/`.
+Return exactly one review body for the trusted wrapper. Touch nothing in the
+tree, mutate no GitHub state, and keep scratch in `~/.cache/mipstarre-dev/`.
 Severity 1–5 and confidence 1–5, adapted from TeXRA's `criticize.yaml:56-103`:
 
 - **S5 Fatal** — invalidates a main claim: a logical gap breaking the proof, a

@@ -354,9 +354,8 @@ GitHub→local mapping. Order of operations:
 3. **Toolchain guard**: `elan toolchain install $(cat lean-toolchain)`, once, only
    if the pin is not already installed.
 4. **No `lake update`** — stated in the log, not silently omitted (§2).
-5. **`origin/main` check** (`DESIGN.md` #8): a warning, because the hooks and every
-   diff-based audit silently self-disable without it. Silent self-disabling is the
-   documented failure this check exists to surface.
+5. **`github/main` check** (`DESIGN.md` #8): a hard check, because hooks and
+   diff-based audits require one coherent fetched comparison base.
 6. **Fresh-state workaround** (§8.2).
 7. **`warm-worktree.sh`** — invoked from the copy *next to this script*, not the
    copy inside the worktree being bootstrapped. A worktree may hold an unreviewed
@@ -482,7 +481,7 @@ each worktree serialized behind one lock.
 | Stale lock (dead pid, or age > TTL) | Broken by atomic rename, with a warning naming the dead holder. |
 | Primary repo has no commits on `main` | Hard error naming the cause. Never a silent no-op. |
 | `warm-worktree.sh` missing during bootstrap | Hard error. `--skip-warm` is the explicit opt-out. |
-| `origin/main` does not resolve | Warning, non-zero exit from `--check`, because hooks self-disable silently. |
+| `github/main` does not resolve | Hard failure naming the explicit fetch needed; gates never silently disable. |
 | `python3` absent | Warmer: hard error (needed for the atomic publish). Consumer: warning, telemetry skipped. |
 
 ---

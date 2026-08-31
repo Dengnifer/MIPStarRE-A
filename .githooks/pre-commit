@@ -37,6 +37,12 @@ if printf '%s\n' "$STAGED_FILES" | grep -Eq '^scripts/(.*\.py|tests/.*)$'; then
 fi
 
 if printf '%s\n' "$STAGED_FILES" | grep -Eq \
+  '^(local/bin/(github_api\.py|issue_new\.py|issue_close\.py|pr_open\.py|ci\.sh|review\.sh|autofix\.sh|pr_merge\.py|agent\.sh|housekeeping\.sh|github-sync\.sh|export_issues\.py|worktree-setup\.sh|cache-warmer\.sh)|local/protocols/|local/personas/|scripts/(blueprint_lean_sync\.py|tests/test_github_workflow\.py)|\.githooks/)'; then
+  echo "MIPStarRE pre-commit: running GitHub-native workflow tests."
+  run_without_git_local_env python3 -m unittest scripts.tests.test_github_workflow
+fi
+
+if printf '%s\n' "$STAGED_FILES" | grep -Eq \
   '^(blueprint/src/.*\.(tex|sty|cls)|scripts/(check_blueprint_latex|tex_utils)\.py|scripts/tests/test_check_blueprint_latex\.py|\.githooks/pre-commit)$'; then
   echo "MIPStarRE pre-commit: checking blueprint LaTeX conventions."
   python3 scripts/check_blueprint_latex.py --root blueprint/src

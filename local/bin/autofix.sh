@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 #
-# autofix.sh — serialized, capped auto-fix loop for a local PR.
+# autofix.sh — serialized, capped auto-fix loop for a GitHub PR.
 #
 # Usage:
-#   local/bin/autofix.sh <pr-id> --mode {ci|blueprint|review|auto} [--dry-run]
+#   local/bin/autofix.sh <github-pr-number> --mode {ci|blueprint|review|auto} [--dry-run]
 #
-#   <pr-id>     PR registry id: "7", "0007", or "0007-qpbt-basis-shift".
+#   <github-pr-number> Positive GitHub pull-request number.
 #   --mode ci         fix Lean build errors, if the CI manifest says build failed
 #          blueprint  fix blueprint compilation, if that CI step failed
-#          review     fix unresolved review findings (needs auto_fix: true)
+#          review     fix unresolved review findings (needs the auto-fix label)
 #          auto       dispatch from the CI manifest and run every applicable fix
 #                     strictly in the order ci -> blueprint -> review
 #   --dry-run   Resolve the dispatch and build the prompts, then stop.
@@ -37,11 +37,9 @@
 set -euo pipefail
 
 PROG="autofix.sh"
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-# The registry (issues/, prs/, results/telemetry/) is single-instance and
-# lives in the PRIMARY checkout. When this script is invoked from a linked
-# worktree copy, re-point the root at the primary (same resolution as
-# cache-warmer.sh resolve_primary_repo; EVOLUTION.md 2026-08-30).
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+# Session telemetry remains single-instance in the primary checkout.
 _common="$(git -C "$ROOT" rev-parse --path-format=absolute --git-common-dir 2>/dev/null || true)"
 case "$_common" in
   */.git) ROOT="$(dirname "$_common")" ;;
@@ -49,7 +47,7 @@ esac
 unset _common
 
 CACHE="${MIPSTARRE_CACHE_ROOT:-$HOME/.cache/mipstarre-dev}"
-TRUSTED_REF="${MIPSTARRE_TRUSTED_REF:-main}"
+TRUSTED_REF="${MIPSTARRE_TRUSTED_REF:-refs/remotes/github/main}"
 DISPATCH="$ROOT/local/bin/dispatch.sh"
 FIX_MODEL="${MIPSTARRE_FIX_MODEL:-}"
 FIX_CAP="${MIPSTARRE_FIX_CAP:-5}"
@@ -66,6 +64,7 @@ BOT_NAME="${MIPSTARRE_BOT_NAME:-codex[bot]}"
 BOT_EMAIL="${MIPSTARRE_BOT_EMAIL:-codex-bot@localhost}"
 
 LOCK_HELD=""
+RUN_TMP=""
 
 log()  { printf '%s: %s\n' "$PROG" "$*" >&2; }
 warn() { printf '%s: warning: %s\n' "$PROG" "$*" >&2; }
@@ -74,6 +73,7 @@ die()  { printf '%s: error: %s\n' "$PROG" "$*" >&2; exit 1; }
 cleanup() {
   local rc=$?
   release_fix_lock
+  if [ -n "$RUN_TMP" ] && [ -d "$RUN_TMP" ]; then rm -rf "$RUN_TMP"; fi
   exit "$rc"
 }
 trap cleanup EXIT INT TERM
@@ -93,60 +93,6 @@ release_fix_lock() {
 # ---------------------------------------------------------------- utilities
 
 now_utc() { date -u +%Y-%m-%dT%H:%M:%SZ; }
-
-fm_get() {
-  python3 - "$1" "$2" <<'PY'
-import sys
-path, key = sys.argv[1], sys.argv[2]
-try:
-    lines = open(path, encoding="utf-8").read().split("\n")
-except OSError:
-    sys.exit(1)
-if not lines or lines[0].strip() != "---":
-    sys.exit(1)
-for line in lines[1:]:
-    if line.strip() == "---":
-        break
-    if not line.startswith(key + ":"):
-        continue
-    value = line[len(key) + 1:].strip()
-    if len(value) >= 2 and value[0] == value[-1] and value[0] in "'\"":
-        value = value[1:-1]
-    print(value)
-    break
-PY
-}
-
-fm_set() {
-  python3 - "$1" "$2" "$3" <<'PY'
-import os, sys, tempfile
-path, key, value = sys.argv[1], sys.argv[2], sys.argv[3]
-text = open(path, encoding="utf-8").read()
-lines = text.split("\n")
-if not lines or lines[0].strip() != "---":
-    sys.stderr.write("no YAML frontmatter in %s\n" % path)
-    sys.exit(1)
-end = None
-for i, line in enumerate(lines[1:], start=1):
-    if line.strip() == "---":
-        end = i
-        break
-if end is None:
-    sys.stderr.write("unterminated YAML frontmatter in %s\n" % path)
-    sys.exit(1)
-new = "%s: %s" % (key, value)
-for i in range(1, end):
-    if lines[i].startswith(key + ":"):
-        lines[i] = new
-        break
-else:
-    lines.insert(end, new)
-fd, tmp = tempfile.mkstemp(dir=os.path.dirname(os.path.abspath(path)))
-with os.fdopen(fd, "w", encoding="utf-8") as fh:
-    fh.write("\n".join(lines))
-os.replace(tmp, path)
-PY
-}
 
 # sanitize_to <src> <dest> <max-lines> — DESIGN.md invariant 6.  Build logs and
 # review findings never reach an agent unsanitized.  dispatch.sh sanitizes its
@@ -220,7 +166,7 @@ superseded() {
 
 lint_branch_name() {
   case "$1" in
-    "") die "empty branch name in the PR record" ;;
+    "") die "empty branch name in the GitHub PR response" ;;
   esac
   if printf '%s' "$1" | LC_ALL=C grep -q '[]~^:?* \]'; then
     die "branch name '$1' contains a character that broke the parent automation ( ] ~ ^ : ? * space backslash ); see CONTRIBUTING.md:122-124"
@@ -236,7 +182,7 @@ fetch_trusted() {
 }
 
 # resolve_worktree <branch> — same resolution order as ci.sh: git's own
-# registry first, then the .worktrees/<branch> convention.
+# worktree registry first, then the .worktrees/<branch> convention.
 resolve_worktree() {
   local branch="$1" found="" safe dest have
   found="$(git -C "$ROOT" worktree list --porcelain 2>/dev/null |
@@ -307,20 +253,7 @@ run_agent() {
     return "$rc"
   fi
 
-  warn "local/bin/dispatch.sh not found; falling back to a direct 'codex exec'. This session will NOT appear in results/telemetry/sessions.jsonl."
-  command -v codex >/dev/null 2>&1 ||
-    die "codex CLI not found on PATH and no local/bin/dispatch.sh to delegate to"
-  set +e
-  if [ -n "$model" ]; then
-    MIPSTARRE_AUTOMATION=1 codex exec --sandbox "$sandbox" -C "$wt" \
-      -m "$model" -o "$out" -- "$(cat "$standalone")" >"$dlog"
-  else
-    MIPSTARRE_AUTOMATION=1 codex exec --sandbox "$sandbox" -C "$wt" \
-      -o "$out" -- "$(cat "$standalone")" >"$dlog"
-  fi
-  rc=$?
-  set -e
-  return "$rc"
+  die "local/bin/dispatch.sh is required; direct codex execution would lose session telemetry"
 }
 
 # ------------------------------------------------------------------ arguments
@@ -379,74 +312,86 @@ fi
 
 # ------------------------------------------------------------- resolve the PR
 
-[ -d "$ROOT/prs" ] ||
-  die "PR registry $ROOT/prs not found; open the PR record first (local/bin/pr_open.py, local/protocols/issues-prs.md)"
-
-PR_DIR=""
-if [ -d "$ROOT/prs/$PR_ARG" ]; then
-  PR_DIR="$ROOT/prs/$PR_ARG"
-else
-  case "$PR_ARG" in
-    *[!0-9]*) die "PR id '$PR_ARG' is neither a registry directory name nor a number" ;;
-  esac
-  PR_PAD="$(printf '%04d' "$((10#$PR_ARG))")"
-  for cand in "$ROOT/prs/$PR_PAD"-*; do
-    [ -d "$cand" ] || continue
-    [ -z "$PR_DIR" ] || die "PR id $PR_PAD is ambiguous: $PR_DIR and $cand"
-    PR_DIR="$cand"
-  done
-fi
-[ -n "$PR_DIR" ] || die "no PR record for '$PR_ARG' under $ROOT/prs"
-
-PR_MD="$PR_DIR/pr.md"
-[ -f "$PR_MD" ] || die "$PR_MD is missing; the PR record is incomplete"
-
-PR_NUM="$(fm_get "$PR_MD" id || true)"
-BRANCH="$(fm_get "$PR_MD" branch || true)"
-BASE="$(fm_get "$PR_MD" base || true)"
-HEAD_SHA="$(fm_get "$PR_MD" head_sha || true)"
-PR_STATE="$(fm_get "$PR_MD" state || true)"
-AUTO_FIX="$(fm_get "$PR_MD" auto_fix || true)"
-FIX_ITERATIONS="$(fm_get "$PR_MD" fix_iterations || true)"
-
-[ -n "$PR_NUM" ]   || die "pr.md has no 'id'"
-[ -n "$BRANCH" ]   || die "pr.md has no 'branch'"
-[ -n "$HEAD_SHA" ] || die "pr.md has no 'head_sha'; run local/bin/ci.sh $PR_ARG first"
-BASE="${BASE:-main}"
-case "$FIX_ITERATIONS" in
-  ""|*[!0-9]*) FIX_ITERATIONS=0 ;;
+case "$PR_ARG" in
+  ''|*[!0-9]*) die "PR number must be a positive GitHub number: $PR_ARG" ;;
 esac
+PR_NUM="$PR_ARG"
+while [ "${#PR_NUM}" -gt 1 ] && [ "${PR_NUM#0}" != "$PR_NUM" ]; do
+  PR_NUM="${PR_NUM#0}"
+done
+[ "$PR_NUM" != 0 ] || die "PR number must be positive"
+
+RUN_TMP="$(mktemp -d "${TMPDIR:-/tmp}/mipstarre-autofix.XXXXXX")"
+PULL_JSON="$RUN_TMP/pull.json"
+python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" pull "$PR_NUM" >"$PULL_JSON" ||
+  die "cannot read authoritative GitHub PR #$PR_NUM"
+IFS="$(printf '\t')" read -r PR_STATE BRANCH BASE HEAD_SHA AUTO_FIX < <(
+  python3 - "$PULL_JSON" <<'PY'
+import json
+import re
+import sys
+
+pull = json.load(open(sys.argv[1], encoding="utf-8"))
+try:
+    state = str(pull["state"])
+    branch = str(pull["head"]["ref"])
+    base = str(pull["base"]["ref"])
+    sha = str(pull["head"]["sha"]).lower()
+except (KeyError, TypeError):
+    raise SystemExit("invalid pull response")
+if not re.fullmatch(r"(?:[0-9a-f]{40}|[0-9a-f]{64})", sha):
+    raise SystemExit("invalid exact pull head SHA")
+labels = {
+    str(item.get("name") if isinstance(item, dict) else item)
+    for item in (pull.get("labels") or [])
+}
+print(state, branch, base, sha, "true" if "auto-fix-codex" in labels else "false", sep="\t")
+PY
+)
+FIX_ITERATIONS="$(python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" \
+  --no-probe fix-count "$PR_NUM")" ||
+  die "cannot prove complete PR commit history for the auto-fix cap"
 lint_branch_name "$BRANCH"
 
-if [ "$BRANCH" = "$TRUSTED_REF" ]; then
-  die "refusing to auto-fix '$BRANCH': it is the trusted prompt ref"
+if [ "$BRANCH" = "$BASE" ]; then
+  die "refusing to auto-fix base branch '$BRANCH'"
 fi
-if [ -n "$PR_STATE" ] && [ "$PR_STATE" != "open" ]; then
+if [ "$PR_STATE" != "open" ]; then
   log "PR $PR_NUM is '$PR_STATE', not open; nothing to fix"
   exit 0
 fi
+if [ "$AUTO_FIX" != "true" ]; then
+  log "GitHub label auto-fix-codex is absent; no automatic fix is authorized"
+  exit 0
+fi
 
-git -C "$ROOT" rev-parse --verify --quiet "$HEAD_SHA^{commit}" >/dev/null ||
-  die "head_sha $HEAD_SHA does not resolve in this repository"
+WORKTREE="$(resolve_worktree "$BRANCH")"
+[ -d "$WORKTREE" ] || die "worktree resolution failed for branch $BRANCH"
+LOCAL_HEAD="$(git -C "$WORKTREE" rev-parse HEAD 2>/dev/null || true)"
+[ "$LOCAL_HEAD" = "$HEAD_SHA" ] ||
+  die "local branch tip ${LOCAL_HEAD:-unreadable} does not equal GitHub PR head $HEAD_SHA"
 
 # ------------------------------------------------------------ setup dispatch
 # auto-fix.yml:101-114 — only the Lean build and the blueprint render are
 # auto-fixable.  The blueprint-sync job and every audit guard are deliberately
 # excluded, and so is an "error" outcome: ci.sh reports that when a step could
 # not run at all (missing tool, build lock timeout), which no fixer can repair.
-CI_MANIFEST="$PR_DIR/ci/$HEAD_SHA.json"
+CI_MANIFEST="$RUN_TMP/ci-manifest.json"
 CI_FIX=0
 BLUEPRINT_FIX=0
 EXCLUDED=""
 INFRA=""
 CI_LOG=""
 BLUEPRINT_LOG=""
+CI_MANIFEST_VALID=0
 
-if [ -f "$CI_MANIFEST" ]; then
-  MANIFEST_ENV="$(python3 - "$CI_MANIFEST" "$PR_DIR" "$ROOT" <<'PY'
+if python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" --no-probe \
+    ci-manifest "$PR_NUM" "$HEAD_SHA" >"$CI_MANIFEST" 2>"$RUN_TMP/ci-manifest.err"; then
+  CI_MANIFEST_VALID=1
+  MANIFEST_ENV="$(python3 - "$CI_MANIFEST" "$ROOT" <<'PY'
 import json, os, shlex, sys
 
-manifest, pr_dir, root = sys.argv[1], sys.argv[2], sys.argv[3]
+manifest, root = sys.argv[1], sys.argv[2]
 try:
     data = json.load(open(manifest, encoding="utf-8"))
 except Exception as exc:
@@ -494,10 +439,9 @@ INFRA_FAIL = {"error", "timed_out", "cancelled", "canceled"}
 def resolve(path):
     if not path:
         return ""
-    for base in (pr_dir, root):
-        cand = path if os.path.isabs(path) else os.path.join(base, path)
-        if os.path.isfile(cand):
-            return os.path.abspath(cand)
+    cand = path if os.path.isabs(path) else os.path.join(root, path)
+    if os.path.isfile(cand):
+        return os.path.abspath(cand)
     return ""
 
 
@@ -535,7 +479,7 @@ PY
   esac
   eval "$MANIFEST_ENV"
 else
-  warn "no CI manifest at $CI_MANIFEST; run local/bin/ci.sh $PR_NUM first. Only review-fix can be dispatched without one."
+  warn "no valid exact-head CI manifest comment"
 fi
 
 if [ -n "$EXCLUDED" ]; then
@@ -547,22 +491,33 @@ if [ -n "$INFRA" ]; then
   log "  these are infrastructure failures, not code failures; no fixer is dispatched for them"
 fi
 
-# Review-fix precondition: unresolved findings plus the per-PR opt-in flag (the
-# auto-fix-claude label analogue, auto-fix.yml:116-126).
-REVIEWS_DIR="$PR_DIR/reviews"
+# Review-fix precondition: unresolved findings plus the GitHub opt-in label.
+REVIEW_BODY="$RUN_TMP/review-ledger.md"
 UNRESOLVED=0
-if [ -d "$REVIEWS_DIR" ]; then
-  UNRESOLVED="$( { grep -h '^- \[ \] F' "$REVIEWS_DIR"/*.md 2>/dev/null || true; } |
+REVIEW_LEDGER_VALID=0
+if python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" --no-probe \
+    review-ledger "$PR_NUM" "$HEAD_SHA" >"$REVIEW_BODY" 2>"$RUN_TMP/review-ledger.err"; then
+  REVIEW_LEDGER_VALID=1
+  UNRESOLVED="$( { grep '^- \[ \] F' "$REVIEW_BODY" 2>/dev/null || true; } |
     wc -l | tr -d ' ')"
 fi
 REVIEW_FIX=0
 if [ "$UNRESOLVED" -gt 0 ]; then
-  if [ "$AUTO_FIX" = "true" ]; then
-    REVIEW_FIX=1
-  else
-    log "$UNRESOLVED unresolved review findings, but pr.md has auto_fix='$AUTO_FIX'; review-fix is opt-in (set auto_fix: true in $PR_MD to enable it)"
-  fi
+  REVIEW_FIX=1
 fi
+
+case "$MODE" in
+  ci|blueprint|auto)
+    [ "$CI_MANIFEST_VALID" -eq 1 ] ||
+      die "mode '$MODE' requires a valid marker-bound exact-head CI manifest"
+    ;;
+esac
+case "$MODE" in
+  review)
+    [ "$REVIEW_LEDGER_VALID" -eq 1 ] ||
+      die "mode 'review' requires a valid marker-bound exact-head review ledger"
+    ;;
+esac
 
 WANT_CI=0; WANT_BLUEPRINT=0; WANT_REVIEW=0
 case "$MODE" in
@@ -581,16 +536,22 @@ fi
 LOCK_DIR="$CACHE/locks/fix-$(printf '%s' "$BRANCH" | tr '/' '-').lock"
 acquire_fix_lock "$LOCK_DIR" "$LOCK_WAIT" "autofix pr=$PR_NUM branch=$BRANCH mode=$MODE"
 
-CUR_HEAD_SHA="$(fm_get "$PR_MD" head_sha || true)"
+CUR_PULL_JSON="$RUN_TMP/queued-pull.json"
+python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" --no-probe \
+  pull "$PR_NUM" >"$CUR_PULL_JSON" || die "cannot re-read PR #$PR_NUM after queuing"
+CUR_HEAD_SHA="$(python3 - "$CUR_PULL_JSON" <<'PY'
+import json
+import sys
+print(str((json.load(open(sys.argv[1], encoding="utf-8")).get("head") or {}).get("sha") or "").lower())
+PY
+)"
 if [ "$CUR_HEAD_SHA" != "$HEAD_SHA" ]; then
   log "the head SHA moved from $HEAD_SHA to $CUR_HEAD_SHA while queuing; exiting so the newer run dispatches from the newer manifest"
   exit 0
 fi
 
-WORKTREE="$(resolve_worktree "$BRANCH")"
-[ -d "$WORKTREE" ] || die "worktree resolution failed for branch $BRANCH"
-
-RUN_DIR="$CACHE/autofix/$PR_NUM/$HEAD_SHA"
+RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)-$$"
+RUN_DIR="$CACHE/autofix/$PR_NUM/$HEAD_SHA/$RUN_ID"
 mkdir -p "$RUN_DIR"
 
 # ------------------------------------------------------------- iteration cap
@@ -600,38 +561,41 @@ mkdir -p "$RUN_DIR"
 # (pr-review.yml:69-72 — "we only want to review human-authored pushes and the
 # final bot-fix result, detected by iteration cap").
 cap_reached() {
-  local marker="<!-- autofix:cap-reached -->"
+  local marker="<!-- mipstarre:autofix-cap pr=$PR_NUM head=$HEAD_SHA cap=$FIX_CAP -->"
+  local body="$RUN_DIR/cap-comment.md"
   log "combined fix-iteration cap reached ($FIX_ITERATIONS/$FIX_CAP) for PR $PR_NUM"
-  fm_set "$PR_MD" auto_fix false
-  if grep -qF "$marker" "$PR_MD"; then
-    log "the human-attention note is already in $PR_MD; not appending it again"
-  else
-    {
-      printf '\n%s\n' "$marker"
-      printf '\n## Human attention required\n\n'
-      printf 'The combined auto-fix iteration cap (%s) was reached at %s.\n\n' "$FIX_CAP" "$(now_utc)"
-      printf '`auto_fix` has been cleared: no further automated fix runs on this\n'
-      printf 'branch until a human resets it.  Read the fix commits, the CI\n'
-      printf 'manifests under `ci/`, and the findings ledger under `reviews/`\n'
-      printf 'before re-enabling.  Repeated cap hits are protocol evidence —\n'
-      printf 'record them in `results/telemetry/events.md`.\n'
-    } >>"$PR_MD"
-  fi
+  python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" --no-probe \
+    remove-label "$PR_NUM" auto-fix-codex >/dev/null ||
+    die "could not remove the auto-fix-codex label at the cap"
+  {
+    printf '## Human attention required\n\n'
+    printf 'The combined auto-fix iteration cap (%s) was reached at %s on `%s`.\n\n' \
+      "$FIX_CAP" "$(now_utc)" "$HEAD_SHA"
+    printf 'The `auto-fix-codex` label was removed. Inspect the exact-head CI\n'
+    printf 'manifest and review ledger before opting in again.\n\n%s\n' "$marker"
+  } >"$body"
+  python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" --no-probe \
+    comment-once "$PR_NUM" "$body" "$marker" >/dev/null ||
+    die "could not publish the idempotent cap comment"
   # One forced review of the final bot-fix result: without it the last fix
   # commit would be the only commit on the branch nobody ever reviewed.
   # Release the fix lock FIRST — review.sh refuses to review a branch whose
   # fix lock has a live holder, and that holder would be us.  No further fix
   # work happens after this point, so dropping the lock is safe.
   release_fix_lock
-  if [ -x "$ROOT/local/bin/review.sh" ]; then
+  if [ -x "$SCRIPT_DIR/review.sh" ]; then
     log "running the terminal forced review of the final bot-fix result"
-    "$ROOT/local/bin/review.sh" "$PR_NUM" --force-review ||
+    "$SCRIPT_DIR/review.sh" "$PR_NUM" --force-review ||
       warn "the terminal forced review exited nonzero; PR $PR_NUM needs a human reviewer"
   else
     warn "local/bin/review.sh not found: the final bot-fix commit on $BRANCH is UNREVIEWED. Review it by hand."
   fi
   exit 0
 }
+
+if [ "$FIX_ITERATIONS" -ge "$FIX_CAP" ]; then
+  cap_reached
+fi
 
 # ------------------------------------------------------------ prompt builder
 # build_fix_task <kind> <trusted-task-file> <dest>
@@ -654,18 +618,16 @@ EOF
 
 # Local execution contract (authoritative where it conflicts with the above)
 
-This fix runs on a local git repository.  There is no GitHub here.
+This fix runs in a local worktree. The trusted wrapper owns GitHub publication.
 
 - Do NOT run \`gh\`, \`git push\`, or any mcp__github__* tool; they do not exist.
-  Wherever the task prompt tells you to post a PR comment or resolve a review
-  thread, put that text in your final message instead: it is kept with the fix
-  and read by the operator.
+  Put any proposed PR comment or review-thread disposition in your final message.
 - Do NOT commit.  Leave your changes in the working tree of $WORKTREE.
   autofix.sh makes one commit whose subject starts with "$prefix";
   that exact prefix is what stops the reviewer from re-reviewing bot commits,
   so the commit has to be made by the script.
 - Do NOT amend, rebase, reset or otherwise rewrite history, and do not touch
-  prs/, issues/ or results/telemetry/.
+  workflow telemetry or archived registry data.
 - Validate with \`lake build\` (or a single-file \`lake env lean\` check) as the
   task prompt requires.  At most one full \`lake build\` machine-wide.
 - If the fix cannot be made without changing a paper-labelled statement, STOP,
@@ -673,8 +635,7 @@ This fix runs on a local git repository.  There is no GitHub here.
   worse than none: this loop is capped, and the next iteration is not free.
 
 Local fix context:
-  PR id             $PR_NUM
-  PR record         $PR_DIR/pr.md
+  GitHub PR         #$PR_NUM
   Branch            $BRANCH
   Base              $BASE
   Head SHA          $HEAD_SHA
@@ -717,7 +678,8 @@ run_phase() {
   local persona_path task_dest standalone out prefix pre_head iteration rc=0
 
   if [ "$FIX_ITERATIONS" -ge "$FIX_CAP" ]; then
-    cap_reached
+    log "fix cap reached during this serialized run; no further phase will start"
+    return 10
   fi
   if superseded; then
     log "superseded by a newer autofix run; stopping cleanly before the $kind fix"
@@ -796,12 +758,6 @@ run_phase() {
 
   HEAD_SHA="$(git -C "$WORKTREE" rev-parse HEAD)"
   FIX_ITERATIONS=$((FIX_ITERATIONS + 1))
-  fm_set "$PR_MD" head_sha "$HEAD_SHA"
-  fm_set "$PR_MD" fix_iterations "$FIX_ITERATIONS"
-  # The new head has no CI result and no review yet; a stale green must never
-  # survive a fix commit.
-  fm_set "$PR_MD" ci_status pending
-  fm_set "$PR_MD" review_state pending
   log "the $kind fix is committed as $HEAD_SHA (fix_iterations=$FIX_ITERATIONS)"
   return 0
 }
@@ -864,24 +820,9 @@ if [ "$WANT_REVIEW" -eq 1 ] && [ "$PHASE_FAILED" -eq 0 ]; then
   RAW="$RUN_DIR/review-findings.raw.md"
   CTX="$RUN_DIR/review-findings.txt"
   {
-    printf 'Unresolved findings ("- [ ]") from the local findings ledger.\n'
-    printf 'Resolved ("- [x]") and outdated ("- [-]") findings are omitted:\n'
-    printf 'they are not yours to reopen.\n\n'
-    for f in "$REVIEWS_DIR"/*.md; do
-      [ -f "$f" ] || continue
-      if grep -q '^- \[ \] F' "$f"; then
-        printf '### %s\n' "${f##*/}"
-        grep '^- \[ \] F' "$f" || true
-        printf '\n'
-      fi
-    done
-    printf '\n--- reviewer prose for the reviewed head SHA ---\n\n'
-    for f in "$REVIEWS_DIR/$CUR_HEAD_SHA-code.md" "$REVIEWS_DIR/$CUR_HEAD_SHA-prose.md"; do
-      [ -f "$f" ] || continue
-      printf '### %s\n' "${f##*/}"
-      cat "$f"
-      printf '\n'
-    done
+    printf 'Marker-bound exact-head review ledger. Only unresolved `- [ ]`\n'
+    printf 'findings are fix targets; do not reopen resolved or outdated entries.\n\n'
+    cat "$REVIEW_BODY"
   } >"$RAW"
   sanitize_to "$RAW" "$CTX" 1200
   rc=0
@@ -897,14 +838,21 @@ fi
 
 # ------------------------------------------------------------------ post-fix
 if [ "$FIXED_ANY" -eq 1 ]; then
-  if [ -x "$ROOT/local/bin/ci.sh" ]; then
+  log "publishing the explicit feature ref for the new head $HEAD_SHA"
+  git -C "$WORKTREE" push github \
+    "refs/heads/$BRANCH:refs/heads/$BRANCH" ||
+    die "could not push the explicit feature ref; CI will not run on an unpublished head"
+  if [ -x "$SCRIPT_DIR/ci.sh" ]; then
     log "re-running local CI on the new head $HEAD_SHA"
-    "$ROOT/local/bin/ci.sh" "$PR_NUM" ||
+    "$SCRIPT_DIR/ci.sh" "$PR_NUM" ||
       warn "local/bin/ci.sh reported a failure for $HEAD_SHA; run autofix again if that failure is auto-fixable"
   else
     warn "local/bin/ci.sh not found: PR $PR_NUM keeps ci_status=pending on $HEAD_SHA and will NOT be reviewed until CI runs (local/protocols/ci.md)"
   fi
   log "done: fix_iterations=$FIX_ITERATIONS of $FIX_CAP"
+  if [ "$FIX_ITERATIONS" -ge "$FIX_CAP" ]; then
+    cap_reached
+  fi
 fi
 
 if [ "$PHASE_FAILED" -eq 1 ]; then

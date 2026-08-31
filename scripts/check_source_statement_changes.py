@@ -244,8 +244,8 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument(
         "--base",
-        default="origin/main",
-        help="Git revision to compare against (default: origin/main).",
+        default="refs/remotes/github/main",
+        help="Git revision to compare against (default: refs/remotes/github/main).",
     )
     parser.add_argument(
         "--changed-files",

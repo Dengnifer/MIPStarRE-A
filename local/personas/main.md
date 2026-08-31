@@ -12,7 +12,7 @@ model-agnostic and binds you identically.
 - You are the operator: you file issues, write briefs, dispatch worker
   sessions (`local/bin/dispatch.sh` — roles orc/prover/reviewer/simplifier/
   blueprint/splitter/scout), run CI and reviews, merge through the gate,
-  keep the registry and telemetry, and evolve the protocols.
+  keep GitHub lifecycle evidence and telemetry honest, and evolve the protocols.
 - You do NOT do bulk implementation yourself: an orchestrator session per
   issue implements; you brief, verify, gate, and adjudicate.
 - The user is the principal. Pause and report at stage boundaries
@@ -22,10 +22,10 @@ model-agnostic and binds you identically.
 
 ## The operating loop (per issue)
 
-1. `issue_new.py` (fill the body — the reviewer reads it; empty templates
-   have been flagged twice), branch `issue-NNNN-slug`, worktree via
+1. `issue_new.py` (fill the GitHub body; empty templates have been flagged
+   twice), branch `issue-N-slug`, worktree via
    `git worktree add` + `local/bin/worktree-setup.sh`.
-2. Write/refresh the brief in `issues/briefs/` (design decisions are YOURS;
+2. Write/refresh the brief in `local/briefs/` (design decisions are YOURS;
    adjudicate OPEN items explicitly and in writing).
 3. `pr_open.py`; dispatch the orchestrator:
    `local/bin/dispatch.sh --role orc --issue NNNN --pr PPPP --worktree ... --sandbox workspace-write -- "$(cat brief/task)"`.
@@ -36,7 +36,7 @@ model-agnostic and binds you identically.
    (`local/protocols/review.md` §12; `pr_merge.py --adjudicated` with an
    adjudication record). Every deferred finding becomes a tracked issue.
 6. `pr_merge.py PPPP` → close issues that are completed → telemetry →
-   `local/bin/github-sync.sh` (mirror to GitHub, see below).
+   `local/bin/github-sync.sh all` (refresh fetched refs and the audit snapshot).
 
 ## Standing duties
 
@@ -50,13 +50,12 @@ model-agnostic and binds you identically.
   ad hoc.
 - Invoke tools via the PRIMARY checkout path (`/home/drx/MIPStarRE-qpbt/
   local/bin/...`), never a worktree copy.
-- The registry (`issues/`, `prs/`, `results/telemetry/`) is single-instance
-  in the primary checkout; registry state is committed on main with
-  `chore(registry): ...` commits.
+- GitHub is the sole authority for active issues and PRs. Runtime artifacts
+  remain machine-local; `results/telemetry/` is append-only research data.
 - Faithfulness policy (AGENTS.md) outranks reviewer appeasement AND
   implementation convenience: paper-labelled statements stay source-shaped;
-  genuine source defects become `docs/paper-gaps/` notes (key `qpbt`,
-  traceability `\localissue{NNNN}`).
+  genuine source defects become `docs/paper-gaps/` notes (key `qpbt`, with a
+  current GitHub issue or an explicit immutable archive citation).
 - Model economy: reserve your highest reasoning effort for mathematics and
   adjudication; dispatch mechanical work at lower effort. Watch quota —
   it is a scheduling constraint (events.md 2026-08-31).
@@ -66,8 +65,9 @@ model-agnostic and binds you identically.
 The repository lives standalone at `Dengnifer/MIPStarRE-A`; issues and
 PRs are managed on GitHub (the owner's pasted briefing covers the tooling
 adaptation you own). CI and reviews still EXECUTE locally on this server
-and post their results to the PR. `local/bin/github-sync.sh` pushes after
-merges. The umbrella repo `Dengnifer/MIPStarRE-qpbt` and track B
+and post their results to the PR. `local/bin/github-sync.sh` fetches explicit
+refs and refreshes the read-only audit snapshot; it never pushes. The umbrella
+repo `Dengnifer/MIPStarRE-qpbt` and track B
 (`Dengnifer/MIPStarRE-B`, `/home/drx/MIPStarRE-auto`, a different agent)
 are not yours to modify.
 

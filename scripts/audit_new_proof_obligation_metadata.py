@@ -278,7 +278,7 @@ def _new_high_risk_declarations(
 def find_metadata_findings(
     root: Path,
     *,
-    base: str = "origin/main",
+    base: str = "refs/remotes/github/main",
     staged: bool = False,
     changed_files: list[str] | None = None,
 ) -> list[Finding]:
@@ -318,7 +318,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument(
         "--base",
-        default="origin/main",
+        default="refs/remotes/github/main",
         help="Git revision to compare against unless --staged is set.",
     )
     parser.add_argument(
@@ -343,7 +343,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    if args.staged and args.base != "origin/main":
+    if args.staged and args.base != "refs/remotes/github/main":
         parser.error("--base is not used with --staged")
     if args.ci and args.warn_only:
         parser.error("--ci and --warn-only cannot both be set")

@@ -151,7 +151,7 @@ python scripts/blueprint_lean_sync.py --root . --ci
 To check whether a pull request needs the proof-level axiom audit:
 
 ```bash
-python scripts/blueprint_axiom_audit_needed.py --base-ref origin/main
+python scripts/blueprint_axiom_audit_needed.py --base-ref refs/remotes/github/main
 ```
 
 To verify the check actually fails on drift, temporarily replace the proof of

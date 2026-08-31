@@ -18,8 +18,10 @@ from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SCRIPT_DIR))
+sys.path.insert(0, str(SCRIPT_DIR.parent / "local" / "bin"))
 
 import blueprint_lean_sync  # noqa: E402
+import github_api  # noqa: E402
 from blueprint_lean_sync import (  # noqa: E402
     BlueprintEntry,
     HeaderLeanokWithoutProofLeanok,
@@ -28,11 +30,6 @@ from blueprint_lean_sync import (  # noqa: E402
     _BLUEPRINT_COVERAGE_COMMENT_MARKER,
     _append_missing_blueprint_step_summary,
     _chapter_stats,
-    _create_pr_comment,
-    _delete_pr_comment,
-    _find_bot_pr_comment,
-    _github_api_request,
-    _github_api_request_paginated,
     _leanok_placement,
     _line_has_leanok_marker,
     _missing_blueprint_summary_command,
@@ -40,7 +37,6 @@ from blueprint_lean_sync import (  # noqa: E402
     _pr_comment_body,
     _strip_tex_comment,
     _try_post_pr_comment,
-    _update_pr_comment,
     _write_json_report,
     collect_blueprint_entries,
     collect_file_lean_decls,
@@ -484,7 +480,7 @@ class MissingBlueprintStepSummaryTests(unittest.TestCase):
                     [self._decl("Foo.paperFacing")],
                     command=(
                         "python3 scripts/blueprint_lean_sync.py --root . "
-                        "--warn-missing-blueprint --diff-base origin/main "
+                        "--warn-missing-blueprint --diff-base refs/remotes/github/main "
                         "--changed-files MIPStarRE/Fake.lean"
                     ),
                 )
@@ -518,7 +514,7 @@ class MissingBlueprintStepSummaryTests(unittest.TestCase):
 
     def test_summary_command_includes_nondefault_diff_head(self) -> None:
         command = _missing_blueprint_summary_command(
-            diff_base="origin/main",
+            diff_base="refs/remotes/github/main",
             diff_head="feature/head",
             changed_files=["MIPStarRE/Fake.lean"],
         )
@@ -527,7 +523,7 @@ class MissingBlueprintStepSummaryTests(unittest.TestCase):
 
     def test_summary_command_omits_default_diff_head(self) -> None:
         command = _missing_blueprint_summary_command(
-            diff_base="origin/main",
+            diff_base="refs/remotes/github/main",
             diff_head="HEAD",
             changed_files=["MIPStarRE/Fake.lean"],
         )
@@ -825,8 +821,7 @@ class LeanokPlacementReportingTests(unittest.TestCase):
 
 
 class PRCommentTests(unittest.TestCase):
-    """Tests for --post-pr-comment: comment body rendering, marker, idempotent
-    selection, and graceful error handling."""
+    """Tests for blueprint coverage comment rendering and PR discovery."""
 
     def _decl(self, name: str) -> LeanDecl:
         return LeanDecl(
@@ -895,328 +890,28 @@ class PRCommentTests(unittest.TestCase):
             with mock.patch.dict(os.environ, {"GITHUB_REF": ""}, clear=False):
                 self.assertIsNone(_parse_pr_number_from_env())
 
-    # ── find_bot_pr_comment idempotent selection ──────────────────────────
-
-    def _make_comment(self, cid: int, body: str, *, user: str = "github-actions[bot]") -> dict:
-        return {"id": cid, "body": body, "user": {"login": user}}
-
-    def _mock_api_response(self, status: int = 200, body: object = None) -> mock.MagicMock:
-        """Build a mock ``urlopen`` context manager that returns the given status/body."""
-        if body is None:
-            content = b"[]"
-        elif isinstance(body, (dict, list)):
-            content = json.dumps(body).encode("utf-8")
-        else:
-            content = str(body).encode("utf-8")
-        cm = mock.MagicMock()
-        cm.__enter__.return_value.status = status
-        cm.__enter__.return_value.read.return_value = content
-        return cm
-
-    def test_find_bot_comment_returns_id_when_marker_present(self) -> None:
-        comments = [
-            self._make_comment(1, "regular comment"),
-            self._make_comment(2, f"Bot report {_BLUEPRINT_COVERAGE_COMMENT_MARKER}"),
-            self._make_comment(3, "another comment"),
-        ]
-        with mock.patch(
-            "blueprint_lean_sync._github_api_request_paginated", return_value=comments
-        ):
-            cid = _find_bot_pr_comment("o", "r", 1, "tok")
-        self.assertEqual(cid, 2)
-
-    def test_find_bot_comment_returns_none_when_marker_absent(self) -> None:
-        comments = [
-            self._make_comment(1, "regular comment"),
-            self._make_comment(2, "another regular"),
-        ]
-        with mock.patch(
-            "blueprint_lean_sync._github_api_request_paginated", return_value=comments
-        ):
-            cid = _find_bot_pr_comment("o", "r", 1, "tok")
-        self.assertIsNone(cid)
-
-    def test_find_bot_comment_returns_none_when_no_comments(self) -> None:
-        with mock.patch(
-            "blueprint_lean_sync._github_api_request_paginated", return_value=[]
-        ):
-            cid = _find_bot_pr_comment("o", "r", 1, "tok")
-        self.assertIsNone(cid)
-
-    def test_find_bot_comment_rejects_non_bot_author(self) -> None:
-        """A comment with the marker but authored by a regular user is ignored."""
-        comments = [
-            self._make_comment(
-                1, f"User comment {_BLUEPRINT_COVERAGE_COMMENT_MARKER}",
-                user="some-user",
-            ),
-        ]
-        with mock.patch(
-            "blueprint_lean_sync._github_api_request_paginated", return_value=comments
-        ):
-            cid = _find_bot_pr_comment("o", "r", 1, "tok")
-        self.assertIsNone(cid)
-
-    def test_find_bot_comment_paginates_across_pages(self) -> None:
-        """When first page is full (100 items) but no marker, it queries page 2."""
-        page1 = [self._make_comment(i, f"comment {i}") for i in range(100)]
-        page2 = [
-            self._make_comment(200, f"Bot {_BLUEPRINT_COVERAGE_COMMENT_MARKER}"),
-        ]
-        with mock.patch(
-            "blueprint_lean_sync._github_api_request_paginated",
-            return_value=page1 + page2,
-        ):
-            cid = _find_bot_pr_comment("o", "r", 1, "tok")
-        self.assertEqual(cid, 200)
-
-    # ── _try_post_pr_comment orchestration ────────────────────────────────
-
-    def test_try_post_pr_comment_creates_new_comment_when_none_exists(self) -> None:
-        with mock.patch(
-            "blueprint_lean_sync._find_bot_pr_comment", return_value=None
-        ) as mock_find, mock.patch(
-            "blueprint_lean_sync._create_pr_comment", return_value=42
-        ) as mock_create, mock.patch(
-            "blueprint_lean_sync._update_pr_comment"
-        ) as mock_update, mock.patch(
-            "blueprint_lean_sync._delete_pr_comment"
-        ) as mock_delete:
+    def test_publication_uses_shared_marker_bound_client(self) -> None:
+        declaration = self._decl("Foo.bar")
+        client = mock.MagicMock()
+        client.comment_once.return_value = {"id": 42}
+        with mock.patch.object(github_api, "GitHub", return_value=client):
             _try_post_pr_comment(
-                [self._decl("Foo.bar")],
-                pr_number=1,
-                owner="o",
-                repo="r",
-                token="tok",
+                [declaration],
+                root=SCRIPT_DIR.parent,
+                command="python3 scripts/blueprint_lean_sync.py --ci",
+                pr_number=7,
             )
-        mock_find.assert_called_once()
-        mock_create.assert_called_once()
-        mock_update.assert_not_called()
-        mock_delete.assert_not_called()
+        client.probe_authentication.assert_called_once_with()
+        client.comment_once.assert_called_once()
+        number, body, marker = client.comment_once.call_args.args
+        self.assertEqual(number, 7)
+        self.assertEqual(body.count(marker), 1)
+        self.assertIn("mipstarre:blueprint-coverage", marker)
+        self.assertIn("`Foo.bar`", body)
 
-    def test_try_post_pr_comment_updates_existing_comment_when_present(self) -> None:
-        with mock.patch(
-            "blueprint_lean_sync._find_bot_pr_comment", return_value=99
-        ) as mock_find, mock.patch(
-            "blueprint_lean_sync._create_pr_comment"
-        ) as mock_create, mock.patch(
-            "blueprint_lean_sync._update_pr_comment"
-        ) as mock_update, mock.patch(
-            "blueprint_lean_sync._delete_pr_comment"
-        ) as mock_delete:
-            _try_post_pr_comment(
-                [self._decl("Foo.bar")],
-                pr_number=1,
-                owner="o",
-                repo="r",
-                token="tok",
-            )
-        mock_find.assert_called_once()
-        mock_update.assert_called_once_with("o", "r", 99, mock.ANY, "tok")
-        mock_create.assert_not_called()
-        mock_delete.assert_not_called()
-
-    def test_try_post_pr_comment_deletes_existing_comment_when_no_warnings(self) -> None:
-        with mock.patch(
-            "blueprint_lean_sync._find_bot_pr_comment", return_value=99
-        ) as mock_find, mock.patch(
-            "blueprint_lean_sync._create_pr_comment"
-        ) as mock_create, mock.patch(
-            "blueprint_lean_sync._update_pr_comment"
-        ) as mock_update, mock.patch(
-            "blueprint_lean_sync._delete_pr_comment"
-        ) as mock_delete:
-            _try_post_pr_comment(
-                [],
-                pr_number=1,
-                owner="o",
-                repo="r",
-                token="tok",
-            )
-        mock_find.assert_called_once()
-        mock_delete.assert_called_once_with("o", "r", 99, "tok")
-        mock_create.assert_not_called()
-        mock_update.assert_not_called()
-
-    def test_try_post_pr_comment_does_nothing_when_no_warnings_and_no_comment(self) -> None:
-        with mock.patch(
-            "blueprint_lean_sync._find_bot_pr_comment", return_value=None
-        ) as mock_find, mock.patch(
-            "blueprint_lean_sync._create_pr_comment"
-        ) as mock_create, mock.patch(
-            "blueprint_lean_sync._update_pr_comment"
-        ) as mock_update, mock.patch(
-            "blueprint_lean_sync._delete_pr_comment"
-        ) as mock_delete:
-            _try_post_pr_comment(
-                [],
-                pr_number=1,
-                owner="o",
-                repo="r",
-                token="tok",
-            )
-        mock_find.assert_called_once()
-        mock_create.assert_not_called()
-        mock_update.assert_not_called()
-        mock_delete.assert_not_called()
-
-    # ── graceful error handling ───────────────────────────────────────────
-
-    def test_try_post_skips_when_token_missing(self) -> None:
-        with mock.patch(
-            "blueprint_lean_sync._find_bot_pr_comment"
-        ) as mock_find, mock.patch(
-            "blueprint_lean_sync._create_pr_comment"
-        ) as mock_create:
-            _try_post_pr_comment(
-                [self._decl("Foo.bar")],
-                pr_number=1,
-                owner="o",
-                repo="r",
-                token=None,
-            )
-        mock_find.assert_not_called()
-        mock_create.assert_not_called()
-
-    def test_try_post_skips_when_owner_missing(self) -> None:
-        with mock.patch(
-            "blueprint_lean_sync._find_bot_pr_comment"
-        ) as mock_find, mock.patch(
-            "blueprint_lean_sync._create_pr_comment"
-        ) as mock_create:
-            _try_post_pr_comment(
-                [self._decl("Foo.bar")],
-                pr_number=1,
-                owner=None,
-                repo="r",
-                token="tok",
-            )
-        mock_find.assert_not_called()
-        mock_create.assert_not_called()
-
-    def test_try_post_skips_when_pr_number_missing(self) -> None:
-        with mock.patch(
-            "blueprint_lean_sync._find_bot_pr_comment"
-        ) as mock_find, mock.patch(
-            "blueprint_lean_sync._create_pr_comment"
-        ) as mock_create:
-            _try_post_pr_comment(
-                [self._decl("Foo.bar")],
-                pr_number=None,
-                owner="o",
-                repo="r",
-                token="tok",
-            )
-        mock_find.assert_not_called()
-        mock_create.assert_not_called()
-
-    def test_try_post_continues_when_api_fails(self) -> None:
-        """If the API call raises, the function must not propagate the exception."""
-        with mock.patch(
-            "blueprint_lean_sync._find_bot_pr_comment",
-            side_effect=RuntimeError("network error"),
-        ):
-            # Must not raise
-            _try_post_pr_comment(
-                [self._decl("Foo.bar")],
-                pr_number=1,
-                owner="o",
-                repo="r",
-                token="tok",
-            )
-
-    # ── GitHub API request helper ─────────────────────────────────────────
-
-    def test_github_api_request_get_parses_json_list(self) -> None:
-        with mock.patch("urllib.request.urlopen") as mock_urlopen:
-            mock_urlopen.return_value = self._mock_api_response(
-                200, [{"id": 1}, {"id": 2}]
-            )
-            result = _github_api_request("GET", "https://api.github.com/test", "tok")
-        self.assertEqual(result, [{"id": 1}, {"id": 2}])
-
-    def test_github_api_request_delete_returns_none_on_204(self) -> None:
-        cm = mock.MagicMock()
-        cm.__enter__.return_value.status = 204
-        cm.__enter__.return_value.read.return_value = b""
-        with mock.patch("urllib.request.urlopen", return_value=cm):
-            result = _github_api_request(
-                "DELETE", "https://api.github.com/test", "tok"
-            )
-        self.assertIsNone(result)
-
-    def test_github_api_request_raises_on_http_error(self) -> None:
-        import urllib.error
-
-        with mock.patch("urllib.request.urlopen") as mock_urlopen:
-            fp = mock.MagicMock()
-            fp.read.return_value = b'{"message": "Not Found"}'
-            mock_urlopen.side_effect = urllib.error.HTTPError(
-                "https://api.github.com/test", 404, "Not Found", {}, fp
-            )
-            with self.assertRaises(RuntimeError) as ctx:
-                _github_api_request("GET", "https://api.github.com/test", "tok")
-            self.assertIn("404", str(ctx.exception))
-
-    # ── paginated request helper ──────────────────────────────────────────
-
-    def test_paginated_returns_concatenated_pages(self) -> None:
-        """Multiple pages are concatenated."""
-        with mock.patch(
-            "blueprint_lean_sync._github_api_request"
-        ) as mock_req:
-            mock_req.side_effect = [
-                [{"id": i} for i in range(100)],   # page 1 (full)
-                [{"id": i} for i in range(100, 150)],  # page 2 (partial)
-            ]
-            result = _github_api_request_paginated(
-                "https://api.github.com/repos/o/r/issues/1/comments", "tok"
-            )
-        self.assertEqual(len(result), 150)
-
-    def test_paginated_stops_on_empty_page(self) -> None:
-        with mock.patch(
-            "blueprint_lean_sync._github_api_request"
-        ) as mock_req:
-            mock_req.side_effect = [[{"id": 1}], []]
-            result = _github_api_request_paginated(
-                "https://api.github.com/repos/o/r/issues/1/comments", "tok",
-                per_page=1,
-            )
-        self.assertEqual(len(result), 1)
-        self.assertEqual(mock_req.call_count, 2)
-
-    def test_paginated_stops_on_dict_response(self) -> None:
-        """A dict response (GitHub error object) stops pagination cleanly."""
-        with mock.patch(
-            "blueprint_lean_sync._github_api_request"
-        ) as mock_req:
-            # First request succeeds; second returns an error dict.
-            mock_req.side_effect = [
-                [{"id": 1}],
-                {"message": "Bad credentials", "documentation_url": "..."},
-            ]
-            result = _github_api_request_paginated(
-                "https://api.github.com/repos/o/r/issues/1/comments", "tok",
-                per_page=1,
-            )
-        # Should return only the items from the first (successful) page.
-        self.assertEqual(result, [{"id": 1}])
-        self.assertEqual(mock_req.call_count, 2)
-
-    def test_paginated_stops_on_none_response(self) -> None:
-        with mock.patch(
-            "blueprint_lean_sync._github_api_request"
-        ) as mock_req:
-            mock_req.side_effect = [[{"id": 1}], None]
-            result = _github_api_request_paginated(
-                "https://api.github.com/repos/o/r/issues/1/comments", "tok",
-                per_page=1,
-            )
-        self.assertEqual(result, [{"id": 1}])
-        self.assertEqual(mock_req.call_count, 2)
-
-
+    def test_publication_requires_a_pull_request_number(self) -> None:
+        with self.assertRaises(RuntimeError):
+            _try_post_pr_comment([], root=SCRIPT_DIR.parent, pr_number=None)
 
 
 class HeaderLeanokWithoutProofLeanokTests(unittest.TestCase):

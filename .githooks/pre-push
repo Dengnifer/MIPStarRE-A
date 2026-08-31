@@ -16,6 +16,11 @@ BLUEPRINT_WEB_SMOKE_RAN=0
 
 ZERO_SHA="0000000000000000000000000000000000000000"
 
+if ! git rev-parse --verify refs/remotes/github/main >/dev/null 2>&1; then
+  echo "MIPStarRE pre-push: refs/remotes/github/main is required; run local/bin/github-sync.sh refs." >&2
+  exit 1
+fi
+
 run_outside_git_env() (
   for name in $(git rev-parse --local-env-vars); do
     unset "$name"
@@ -35,11 +40,7 @@ do
   fi
 
   if [ "$REMOTE_SHA" = "$ZERO_SHA" ]; then
-    if git rev-parse --verify origin/main >/dev/null 2>&1; then
-      BASE_SHA="$(git merge-base "$LOCAL_SHA" origin/main)"
-    else
-      BASE_SHA="$(git rev-list --max-parents=0 "$LOCAL_SHA" | tail -n 1)"
-    fi
+    BASE_SHA="$(git merge-base "$LOCAL_SHA" refs/remotes/github/main)"
   else
     BASE_SHA="$REMOTE_SHA"
   fi
@@ -67,6 +68,11 @@ if [ -s "$CHANGED_LEAN_FILE_LIST" ]; then
     done < "$CHANGED_LEAN_FILE_LIST"
 fi
 
+if grep -Eq '^(local/bin/(github_api\.py|issue_new\.py|issue_close\.py|pr_open\.py|ci\.sh|review\.sh|autofix\.sh|pr_merge\.py|agent\.sh|housekeeping\.sh|github-sync\.sh|export_issues\.py|worktree-setup\.sh|cache-warmer\.sh)|local/protocols/|local/personas/|scripts/(blueprint_lean_sync\.py|tests/test_github_workflow\.py)|\.githooks/)' "$CHANGED_FILE_LIST"; then
+  echo "MIPStarRE pre-push: checking GitHub-native workflow regression suite."
+  run_outside_git_env python3 -m unittest scripts.tests.test_github_workflow
+fi
+
 if [ -s "$CHANGED_LEAN_FILE_LIST" ] ||
     grep -Eq '^scripts/(check_oversized_lean_files\.py|tests/test_check_oversized_lean_files\.py)$' \
       "$CHANGED_FILE_LIST"; then
@@ -91,22 +97,23 @@ if grep -Eq '^(MIPStarRE/|MIPStarRE\.lean$|blueprint/src/|blueprint/lean_decls|s
     --changed-files-file "$CHANGED_FILE_LIST" \
     --ci
   run_outside_git_env python3 scripts/check_statement_paper_origin.py --root .
-  if git rev-parse --verify origin/main >/dev/null 2>&1; then
+  if git rev-parse --verify refs/remotes/github/main >/dev/null 2>&1; then
     if [ -s "$CHANGED_LEAN_FILE_LIST" ]; then
       run_outside_git_env python3 scripts/audit_new_proof_obligation_metadata.py \
         --root . \
-        --base origin/main \
+        --base refs/remotes/github/main \
         --changed-files $(cat "$CHANGED_LEAN_FILE_LIST") \
         --ci
     else
       run_outside_git_env python3 scripts/audit_new_proof_obligation_metadata.py \
         --root . \
-        --base origin/main \
+        --base refs/remotes/github/main \
         --changed-files \
         --ci
     fi
   else
-    echo "MIPStarRE pre-push: origin/main not found; skipping new proof-obligation metadata guard."
+    echo "MIPStarRE pre-push: refs/remotes/github/main not found; refusing to skip the metadata guard."
+    exit 1
   fi
   run_outside_git_env python3 scripts/audit_paper_facing_proof_debt.py --root . --ci
   run_outside_git_env python3 scripts/audit_conclusion_shaped_hypotheses.py --root . --ci
@@ -115,14 +122,15 @@ if grep -Eq '^(MIPStarRE/|MIPStarRE\.lean$|blueprint/src/|blueprint/lean_decls|s
 fi
 
 if [ -s "$CHANGED_LEAN_FILE_LIST" ]; then
-  if git rev-parse --verify origin/main >/dev/null 2>&1; then
+  if git rev-parse --verify refs/remotes/github/main >/dev/null 2>&1; then
     echo "MIPStarRE pre-push: checking source-labelled statement headers."
     run_outside_git_env python3 scripts/check_source_statement_changes.py \
       --root . \
-      --base origin/main \
+      --base refs/remotes/github/main \
       --changed-files $(cat "$CHANGED_LEAN_FILE_LIST")
   else
-    echo "MIPStarRE pre-push: origin/main not found; skipping source statement header guard."
+    echo "MIPStarRE pre-push: refs/remotes/github/main not found; refusing to skip the source statement guard."
+    exit 1
   fi
 fi
 
@@ -157,15 +165,16 @@ if grep -Eq '^(MIPStarRE/|MIPStarRE\.lean$|blueprint/|scripts/(blueprint_lean_sy
   echo "MIPStarRE pre-push: checking blueprint and Lean declaration sync."
   run_outside_git_env python3 scripts/blueprint_lean_sync.py --root . --ci
   if [ -s "$CHANGED_LEAN_FILE_LIST" ]; then
-    if git rev-parse --verify origin/main >/dev/null 2>&1; then
+    if git rev-parse --verify refs/remotes/github/main >/dev/null 2>&1; then
       echo "MIPStarRE pre-push: warning on changed Lean declarations missing blueprint tags."
       run_outside_git_env python3 scripts/blueprint_lean_sync.py \
         --root . \
         --warn-missing-blueprint \
-        --diff-base origin/main \
+        --diff-base refs/remotes/github/main \
         --changed-files $(cat "$CHANGED_LEAN_FILE_LIST")
     else
-      echo "MIPStarRE pre-push: origin/main not found; skipping reverse blueprint coverage warning."
+      echo "MIPStarRE pre-push: refs/remotes/github/main not found; refusing to skip reverse blueprint coverage."
+      exit 1
     fi
 
     echo "MIPStarRE pre-push: refreshing compiled Lean modules for checkdecls."

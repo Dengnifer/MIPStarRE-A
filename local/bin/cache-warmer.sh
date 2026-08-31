@@ -520,13 +520,16 @@ ensure_hot_repo() { # <primary-repo> <ref> -> prints the resolved sha
     sha="$(run_outside_git_env git -C "$HOT_REPO" rev-parse --verify "${SHA}^{commit}" 2>/dev/null || true)"
     [ -n "$sha" ] || die "commit '$SHA' does not resolve in $HOT_REPO"
   else
-    # DESIGN.md #8: origin/main must resolve.  Prefer it; accept a local branch.
-    for candidate in "origin/$ref" "$ref"; do
-      sha="$(run_outside_git_env git -C "$HOT_REPO" rev-parse --verify "${candidate}^{commit}" 2>/dev/null || true)"
-      [ -n "$sha" ] && break
-    done
+    # The fetched GitHub base is the sole diff/build baseline.
+    candidate="refs/remotes/github/$ref"
+    sha="$(run_outside_git_env git -C "$primary" rev-parse --verify \
+      "${candidate}^{commit}" 2>/dev/null || true)"
     [ -n "$sha" ] || die \
-      "neither origin/$ref nor $ref resolves in $HOT_REPO. If $primary has no commits yet, make the first commit on '$ref' before warming."
+      "$candidate does not resolve in $primary; run local/bin/github-sync.sh refs --base '$ref'"
+    if ! run_outside_git_env git -C "$HOT_REPO" cat-file -e "$sha^{commit}" 2>/dev/null; then
+      run_outside_git_env git -C "$HOT_REPO" fetch --no-tags origin "$sha" >/dev/null 2>&1 || \
+        die "failed to fetch GitHub base commit $sha into $HOT_REPO"
+    fi
   fi
 
   # .lake/ is gitignored, so a forced checkout never touches the build tree, and

@@ -24,8 +24,6 @@ import re
 import shlex
 import subprocess
 import sys
-import urllib.error
-import urllib.request
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -1067,210 +1065,43 @@ def _pr_comment_body(
     )
 
 
-def _github_api_request(
-    method: str,
-    url: str,
-    token: str,
-    data: dict | None = None,
-) -> dict | list | None:
-    """Make a GitHub API request with the given token.
-
-    Returns the parsed JSON response, or ``None`` for 204 No Content.
-    Raises :exc:`RuntimeError` on HTTP errors.
-    """
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Accept": "application/vnd.github+json",
-        "X-GitHub-Api-Version": "2022-11-28",
-        "User-Agent": "blueprint-lean-sync (MIPStarRE CI)",
-    }
-    body = None
-    if data is not None:
-        body = _json.dumps(data).encode("utf-8")
-        headers["Content-Type"] = "application/json"
-
-    req = urllib.request.Request(url, data=body, headers=headers, method=method)
-    try:
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            if resp.status == 204:  # No Content
-                return None
-            return _json.loads(resp.read().decode("utf-8"))
-    except urllib.error.HTTPError as exc:
-        error_body = exc.read().decode("utf-8", errors="replace")
-        raise RuntimeError(
-            f"GitHub API request failed: {method} {url} → {exc.code} {error_body}"
-        ) from exc
-
-
-def _github_api_request_paginated(
-    url: str,
-    token: str,
-    *,
-    per_page: int = 100,
-) -> list[dict]:
-    """Make a GET request that follows page-number pagination.
-
-    Returns the concatenated list of all items across pages.  Stops when a
-    page returns fewer than ``per_page`` items (the last page).
-    """
-    items: list[dict] = []
-    page = 1
-    while True:
-        sep = "&" if "?" in url else "?"
-        paged_url = f"{url}{sep}per_page={per_page}&page={page}"
-        resp = _github_api_request("GET", paged_url, token)
-        if resp is None:
-            break
-        if not isinstance(resp, list):
-            # Non-list response (dict, string, …) is unexpected from the
-            # GitHub API for a collection endpoint; treat as end-of-data
-            # rather than wrapping into a one-item list, which would mask
-            # error responses.
-            break
-        if len(resp) == 0:
-            break
-        items.extend(resp)
-        if len(resp) < per_page:
-            break
-        page += 1
-    return items
-
-
-def _find_bot_pr_comment(
-    owner: str,
-    repo: str,
-    pr_number: int,
-    token: str,
-) -> int | None:
-    """Return the ID of the existing bot comment, or ``None`` if not found.
-
-    Only considers comments authored by ``github-actions[bot]`` (the
-    identity used when authenticating with ``GITHUB_TOKEN``) that
-    contain the hidden marker.  This prevents user comments from being
-    overwritten.
-    """
-    url = (
-        f"https://api.github.com/repos/{owner}/{repo}"
-        f"/issues/{pr_number}/comments"
-    )
-    comments = _github_api_request_paginated(url, token)
-    for comment in comments:
-        if not isinstance(comment, dict):
-            continue
-        user = comment.get("user", {})
-        if isinstance(user, dict) and user.get("login") == "github-actions[bot]":
-            if _BLUEPRINT_COVERAGE_COMMENT_MARKER in comment.get("body", ""):
-                return comment["id"]
-    return None
-
-
-def _create_pr_comment(
-    owner: str,
-    repo: str,
-    pr_number: int,
-    body: str,
-    token: str,
-) -> int:
-    """Create a new issue comment on the PR.  Returns the comment ID."""
-    url = f"https://api.github.com/repos/{owner}/{repo}/issues/{pr_number}/comments"
-    result = _github_api_request("POST", url, token, data={"body": body})
-    if not isinstance(result, dict) or "id" not in result:
-        raise RuntimeError(f"Unexpected response when creating PR comment: {result!r}")
-    return result["id"]
-
-
-def _update_pr_comment(
-    owner: str,
-    repo: str,
-    comment_id: int,
-    body: str,
-    token: str,
-) -> None:
-    """Update an existing PR comment."""
-    url = f"https://api.github.com/repos/{owner}/{repo}/issues/comments/{comment_id}"
-    _github_api_request("PATCH", url, token, data={"body": body})
-
-
-def _delete_pr_comment(
-    owner: str,
-    repo: str,
-    comment_id: int,
-    token: str,
-) -> None:
-    """Delete an existing PR comment."""
-    url = f"https://api.github.com/repos/{owner}/{repo}/issues/comments/{comment_id}"
-    _github_api_request("DELETE", url, token)
-
-
-def _try_post_pr_comment(  # noqa: PLR0913
+def _try_post_pr_comment(
     missing: list[LeanDecl],
     *,
+    root: Path,
     command: str | None = None,
     pr_number: int | None = None,
-    owner: str | None = None,
-    repo: str | None = None,
-    token: str | None = None,
 ) -> None:
-    """Try to post or update a sticky PR comment with reverse-coverage warnings.
+    """Publish one immutable, marker-bound reverse-coverage comment.
 
-    * If there are warnings, creates or updates the bot comment.
-    * If there are no warnings, deletes any existing bot comment.
-    * Gracefully handles missing token/context by printing an info message and
-      continuing (does **not** fail the build).
+    The flag is online-required: failure to establish authoritative GitHub
+    state is a build failure, never a silently skipped publication.
     """
-    if not token:
-        print(
-            "info: --post-pr-comment: GITHUB_TOKEN not set, skipping comment",
-            file=sys.stderr,
-        )
-        return
-
-    if not owner or not repo:
-        print(
-            "info: --post-pr-comment: GITHUB_REPOSITORY not set, skipping comment",
-            file=sys.stderr,
-        )
-        return
-
     if pr_number is None:
-        print(
-            "info: --post-pr-comment: could not determine PR number, skipping comment",
-            file=sys.stderr,
+        raise RuntimeError(
+            "--post-pr-comment requires --pr-number or a pull-request GITHUB_REF"
         )
-        return
 
-    try:
-        existing_id = _find_bot_pr_comment(owner, repo, pr_number, token)
+    shared_dir = root / "local" / "bin"
+    if str(shared_dir) not in sys.path:
+        sys.path.insert(0, str(shared_dir))
+    from github_api import GitHub, stable_digest, stable_marker
 
-        if missing:
-            body = _pr_comment_body(missing, command=command)
-            if existing_id is not None:
-                _update_pr_comment(owner, repo, existing_id, body, token)
-                print(
-                    f"info: updated existing PR comment #{existing_id} "
-                    "with reverse-coverage warnings",
-                    file=sys.stderr,
-                )
-            else:
-                new_id = _create_pr_comment(owner, repo, pr_number, body, token)
-                print(
-                    f"info: posted PR comment #{new_id} "
-                    "with reverse-coverage warnings",
-                    file=sys.stderr,
-                )
-        else:
-            if existing_id is not None:
-                _delete_pr_comment(owner, repo, existing_id, token)
-                print(
-                    f"info: deleted PR comment #{existing_id} "
-                    "(no reverse-coverage warnings remaining)",
-                    file=sys.stderr,
-                )
-    except Exception as exc:
-        print(
-            f"warning: failed to post/update PR comment: {exc}",
-            file=sys.stderr,
-        )
+    payload = {
+        "command": command or "",
+        "declarations": [decl.fqn for decl in missing],
+    }
+    marker = stable_marker(
+        "blueprint-coverage", pr=pr_number, id=stable_digest(payload)
+    )
+    body = _pr_comment_body(missing, command=command) + "\n" + marker + "\n"
+    client = GitHub(repo_root=root)
+    client.probe_authentication()
+    comment = client.comment_once(pr_number, body, marker)
+    print(
+        f"info: published blueprint coverage comment #{comment.get('id', 'unknown')}",
+        file=sys.stderr,
+    )
 
 
 def print_missing_blueprint_warnings(
@@ -1784,9 +1615,8 @@ def main() -> None:
         "--post-pr-comment",
         action="store_true",
         help=(
-            "When running in a PR context, post or update a sticky PR comment "
-            "with the reverse-coverage warning table.  Requires GITHUB_TOKEN and "
-            "repository context (GITHUB_REPOSITORY, GITHUB_REF or --pr-number)."
+            "Publish a marker-bound PR comment with the reverse-coverage warning "
+            "table through the shared GitHub client. Publication is online-required."
         ),
     )
     parser.add_argument(
@@ -1842,16 +1672,11 @@ def main() -> None:
         )
         if args.post_pr_comment:
             pr_number = args.pr_number or _parse_pr_number_from_env()
-            repo_slug = os.environ.get("GITHUB_REPOSITORY", "")
-            owner, _, repo = repo_slug.partition("/") if "/" in repo_slug else ("", "", "")
-            token = os.environ.get("GITHUB_TOKEN")
             _try_post_pr_comment(
                 missing,
+                root=args.root,
                 command=summary_command,
                 pr_number=pr_number,
-                owner=owner or None,
-                repo=repo or None,
-                token=token,
             )
         if args.fail_on_missing_blueprint and missing:
             sys.exit(1)

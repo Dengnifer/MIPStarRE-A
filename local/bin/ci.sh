@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
 #
-# usage: local/bin/ci.sh <pr-id> [options]
+# usage: local/bin/ci.sh <github-pr-number> [options]
 #
 #   Local replacement for .github/workflows/pr-ci.yml.  Runs the same eight
 #   jobs (build, blueprint-render, paper-gaps, blueprint-sync, file-length,
 #   proof-debt, proof-evasion, statement-origin) against the worktree of the
-#   PR's branch, with the same per-area change gating, and records a per-step
-#   result manifest that local/bin/review.sh and local/bin/autofix.sh consume.
+#   PR's branch, with the same per-area change gating. GitHub commit statuses
+#   are the gate, and the full manifest is published as a marker-bound comment.
 #
-#   <pr-id>            PR id: 7, 0007, 0007-slug, or a prs/ directory name.
+#   <github-pr-number> Positive GitHub pull-request number.
 #
 #   --worktree PATH    Use PATH as the branch worktree instead of resolving it
 #                      from `git worktree list` / .worktrees/<branch>.
-#   --base REF         Override the base branch from the PR record (default:
+#   --base REF         Override the base branch from GitHub (default:
 #                      the record's `base`, else main).
 #   --only STEP        Run only STEP (repeatable).  Gating still applies unless
 #                      --force-all is given.  Makes the run PARTIAL.
@@ -25,14 +25,14 @@
 #   -h, --help         This message.
 #
 # Outputs
-#   prs/<pr-dir>/ci/<head_sha>.json        per-step manifest (committed)
-#   ~/.cache/mipstarre-dev/ci-logs/<id>/<sha>/<step>.log    step logs (runtime)
-#   prs/<pr-dir>/pr.md                     frontmatter ci_status + head_sha
+#   GitHub local-ci/<step> statuses        exact starting SHA, complete runs only
+#   GitHub PR comment                      marker-bound full manifest
+#   ~/.cache/mipstarre-dev/ci/<id>/<sha>/<run>/manifest.json
+#   ~/.cache/mipstarre-dev/ci-logs/<id>/<sha>/<run>/<step>.log
 #   results/telemetry/builds.jsonl         one ci-build line when build ran
 #
-#   A PARTIAL run (--only / --skip-build) writes <head_sha>.partial.json
-#   instead and never touches pr.md: a debugging run must not be able to hand
-#   the review or merge gate a verdict it did not earn.
+#   A PARTIAL run (--only / --skip-build) stays entirely in runtime storage and
+#   publishes no statuses or comments: debugging cannot satisfy a gate.
 #
 # Exit status
 #   0  every gating step passed or was legitimately skipped
@@ -193,21 +193,19 @@ cleanup() {
 trap cleanup EXIT INT TERM
 
 # ---------------------------------------------------------------------------
-# Embedded Python helper (stdlib only): manifest assembly, atomic frontmatter
-# rewriting, telemetry append.
+# Embedded Python helper (stdlib only): manifest assembly and telemetry append.
 # ---------------------------------------------------------------------------
 
 write_helper() {
   cat > "$1" <<'PYHELPER'
 #!/usr/bin/env python3
-"""Manifest, frontmatter and telemetry helper for local/bin/ci.sh.
+"""Runtime-manifest and telemetry helper for local/bin/ci.sh.
 
 Three subcommands, all writing atomically (tempfile in the destination
 directory + os.replace) so a crashed or killed CI run never leaves a
-half-written manifest or a truncated PR record behind:
+half-written manifest or a truncated authoritative record behind:
 
-  manifest        assemble prs/<id>/ci/<head_sha>.json from a step TSV
-  frontmatter     read or set one scalar key in a markdown YAML frontmatter
+  manifest        assemble an exact-head runtime manifest from a step TSV
   telemetry       append one JSON line to results/telemetry/*.jsonl
 """
 
@@ -220,9 +218,6 @@ import sys
 import tempfile
 from pathlib import Path
 from typing import Sequence
-
-FENCE = "---"
-
 
 # ---------------------------------------------------------------------------
 # Atomic write
@@ -247,56 +242,6 @@ def atomic_write(path: Path, text: str) -> None:
         except OSError:
             pass
         raise
-
-
-# ---------------------------------------------------------------------------
-# Frontmatter
-# ---------------------------------------------------------------------------
-
-
-def split_frontmatter(text: str):
-    """Return (opening, body_lines, rest) or None when there is no frontmatter."""
-    lines = text.splitlines(keepends=True)
-    if not lines or lines[0].strip() != FENCE:
-        return None
-    for index in range(1, len(lines)):
-        if lines[index].strip() == FENCE:
-            return lines[:1], lines[1:index], lines[index:]
-    return None
-
-
-def frontmatter_get(path: Path, key: str) -> str | None:
-    split = split_frontmatter(path.read_text(encoding="utf-8"))
-    if split is None:
-        return None
-    _, body, _ = split
-    prefix = key + ":"
-    for line in body:
-        if line.startswith(prefix):
-            value = line[len(prefix):].strip()
-            if len(value) >= 2 and value[0] == value[-1] and value[0] in "'\"":
-                value = value[1:-1]
-            return value
-    return None
-
-
-def frontmatter_set(path: Path, pairs: Sequence[tuple[str, str]]) -> None:
-    text = path.read_text(encoding="utf-8")
-    split = split_frontmatter(text)
-    if split is None:
-        raise SystemExit(f"{path}: no YAML frontmatter to update")
-    opening, body, rest = split
-    for key, value in pairs:
-        prefix = key + ":"
-        replaced = False
-        for index, line in enumerate(body):
-            if line.startswith(prefix):
-                body[index] = f"{key}: {value}\n"
-                replaced = True
-                break
-        if not replaced:
-            body.append(f"{key}: {value}\n")
-    atomic_write(path, "".join(opening) + "".join(body) + "".join(rest))
 
 
 # ---------------------------------------------------------------------------
@@ -377,31 +322,6 @@ def cmd_manifest(args: argparse.Namespace) -> int:
     return 0
 
 
-def cmd_frontmatter(args: argparse.Namespace) -> int:
-    path = Path(args.file)
-    if not path.exists():
-        print(f"{path}: no such file", file=sys.stderr)
-        return 3
-    if args.set:
-        pairs = []
-        for item in args.set:
-            key, _, value = item.partition("=")
-            if not key:
-                print(f"bad --set argument: {item!r}", file=sys.stderr)
-                return 3
-            pairs.append((key, value))
-        frontmatter_set(path, pairs)
-        return 0
-    if args.get:
-        value = frontmatter_get(path, args.get)
-        if value is None:
-            return 1
-        print(value)
-        return 0
-    print("frontmatter: pass --get or --set", file=sys.stderr)
-    return 3
-
-
 def cmd_telemetry(args: argparse.Namespace) -> int:
     record = {}
     for item in args.field or []:
@@ -446,12 +366,6 @@ def build_parser() -> argparse.ArgumentParser:
     manifest.add_argument("--partial", type=int, default=0, choices=(0, 1))
     manifest.set_defaults(func=cmd_manifest)
 
-    frontmatter = subparsers.add_parser("frontmatter", help="read or set frontmatter keys")
-    frontmatter.add_argument("--file", required=True)
-    frontmatter.add_argument("--get")
-    frontmatter.add_argument("--set", action="append", metavar="KEY=VALUE")
-    frontmatter.set_defaults(func=cmd_frontmatter)
-
     telemetry = subparsers.add_parser("telemetry", help="append one JSONL record")
     telemetry.add_argument("--out", required=True)
     telemetry.add_argument("--field", action="append", default=[], metavar="KEY=VALUE")
@@ -481,7 +395,6 @@ usage() {
 
 PR_ARG=""
 WORKTREE_OVERRIDE=""
-BASE_OVERRIDE=""
 ONLY_STEPS=""
 FORCE_ALL=0
 SKIP_BUILD=0
@@ -491,7 +404,6 @@ while [ $# -gt 0 ]; do
   case "$1" in
     -h|--help) usage; exit 0 ;;
     --worktree) [ $# -ge 2 ] || die "--worktree needs a path"; WORKTREE_OVERRIDE="$2"; shift 2 ;;
-    --base) [ $# -ge 2 ] || die "--base needs a ref"; BASE_OVERRIDE="$2"; shift 2 ;;
     --only) [ $# -ge 2 ] || die "--only needs a step name"; ONLY_STEPS="$ONLY_STEPS $2"; shift 2 ;;
     --force-all) FORCE_ALL=1; shift ;;
     --skip-build) SKIP_BUILD=1; shift ;;
@@ -504,7 +416,7 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-[ -n "$PR_ARG" ] || { usage >&2; die "a PR id is required"; }
+[ -n "$PR_ARG" ] || { usage >&2; die "a GitHub PR number is required"; }
 
 for _only in $ONLY_STEPS; do
   case " $STEP_NAMES " in
@@ -514,14 +426,12 @@ for _only in $ONLY_STEPS; do
 done
 
 # ---------------------------------------------------------------------------
-# Resolution: repository, PR record, worktree, base
+# Resolution: repository, authoritative GitHub PR, worktree, base
 # ---------------------------------------------------------------------------
 
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
-# The registry (issues/, prs/, results/telemetry/) is single-instance and
-# lives in the PRIMARY checkout. When this script is invoked from a linked
-# worktree copy, re-point the root at the primary (same resolution as
-# cache-warmer.sh resolve_primary_repo; EVOLUTION.md 2026-08-30).
+# Build telemetry remains single-instance in the primary checkout. When this
+# script runs from a linked worktree, resolve that primary checkout here.
 _common="$(git -C "$REPO_ROOT" rev-parse --path-format=absolute --git-common-dir 2>/dev/null || true)"
 case "$_common" in
   */.git) REPO_ROOT="$(dirname "$_common")" ;;
@@ -530,43 +440,15 @@ unset _common
 
 [ -d "$REPO_ROOT/.git" ] || [ -f "$REPO_ROOT/.git" ] || die "$REPO_ROOT is not a git repository"
 
-# Invariant 9 (bracket-free naming): the parent automation broke on ] in ids
-# and branch names (docs/CONTRIBUTING.md:122-124).  Refuse them at the door.
 case "$PR_ARG" in
-  *'['*|*']'*|*' '*|*'*'*) die "PR id contains a forbidden character (brackets/space/glob): $PR_ARG" ;;
+  ''|*[!0-9]*) die "PR number must be a positive GitHub number: $PR_ARG" ;;
 esac
-
-PR_DIR=""
-if [ -d "$REPO_ROOT/prs/$PR_ARG" ]; then
-  PR_DIR="$REPO_ROOT/prs/$PR_ARG"
-else
-  case "$PR_ARG" in
-    ''|*[!0-9]*) die "PR id must be numeric or an existing prs/ directory name: $PR_ARG" ;;
-  esac
-  # Strip leading zeros before padding: bash printf reads 0009 as octal.
-  _num="$PR_ARG"
-  while [ "${#_num}" -gt 1 ] && [ "${_num#0}" != "$_num" ]; do
-    _num="${_num#0}"
-  done
-  PR_ID_PADDED="$(printf '%04d' "$_num")"
-  if [ -d "$REPO_ROOT/prs/$PR_ID_PADDED" ]; then
-    PR_DIR="$REPO_ROOT/prs/$PR_ID_PADDED"
-  else
-    for _candidate in "$REPO_ROOT/prs/$PR_ID_PADDED"-*; do
-      [ -d "$_candidate" ] || continue
-      [ -z "$PR_DIR" ] || die "PR id $PR_ID_PADDED matches more than one directory under prs/"
-      PR_DIR="$_candidate"
-    done
-  fi
-fi
-
-[ -n "$PR_DIR" ] || die "no PR record found for '$PR_ARG' under $REPO_ROOT/prs/ (create it with the PR lifecycle scripts first)"
-
-PR_MD="$PR_DIR/pr.md"
-[ -f "$PR_MD" ] || die "$PR_MD is missing; a PR record without pr.md has no branch to test"
-
-PR_DIR_NAME="$(basename "$PR_DIR")"
-PR_ID="${PR_DIR_NAME%%-*}"
+_num="$PR_ARG"
+while [ "${#_num}" -gt 1 ] && [ "${_num#0}" != "$_num" ]; do
+  _num="${_num#0}"
+done
+[ "$_num" != 0 ] || die "PR number must be positive"
+PR_ID="$_num"
 
 RUN_TMP="$(mktemp -d "${TMPDIR:-/tmp}/mipstarre-ci.XXXXXX")"
 PY_HELPER="$RUN_TMP/ci_helper.py"
@@ -575,21 +457,34 @@ write_helper "$PY_HELPER"
 command -v python3 >/dev/null 2>&1 || die "python3 is not on PATH; every audit job and the manifest writer need it"
 
 helper() { python3 "$PY_HELPER" "$@"; }
+PULL_JSON="$RUN_TMP/pull.json"
+if ! python3 "$SCRIPT_DIR/github_api.py" --repo-root "$REPO_ROOT" pull "$PR_ID" > "$PULL_JSON"; then
+  die "cannot read authoritative GitHub PR #$PR_ID"
+fi
 
-fm_get() {
-  # Prints the value of frontmatter key $1, or nothing when absent.
-  helper frontmatter --file "$PR_MD" --get "$1" 2>/dev/null || true
-}
+IFS="$(printf '\t')" read -r PR_STATE PR_DRAFT BRANCH BASE REMOTE_HEAD_SHA < <(
+  python3 - "$PULL_JSON" <<'PY'
+import json
+import re
+import sys
 
-BRANCH="$(fm_get branch)"
-[ -n "$BRANCH" ] || die "$PR_MD has no 'branch' key in its frontmatter"
-case "$BRANCH" in
-  *'['*|*']'*|*' '*) die "branch name contains a forbidden character (invariant 9): $BRANCH" ;;
-esac
-
-BASE="$(fm_get base)"
-[ -n "$BASE" ] || BASE="main"
-[ -z "$BASE_OVERRIDE" ] || BASE="$BASE_OVERRIDE"
+pull = json.load(open(sys.argv[1], encoding="utf-8"))
+state = str(pull.get("state") or "")
+draft = "true" if pull.get("draft") else "false"
+try:
+    branch = str(pull["head"]["ref"])
+    base = str(pull["base"]["ref"])
+    sha = str(pull["head"]["sha"]).lower()
+except (KeyError, TypeError):
+    raise SystemExit("pull response lacks head/base data")
+if not branch or not base or not re.fullmatch(r"(?:[0-9a-f]{40}|[0-9a-f]{64})", sha):
+    raise SystemExit("pull response contains an invalid exact head SHA or ref")
+if any(ch in branch + base for ch in "[] \t\r\n"):
+    raise SystemExit("pull response contains an unsafe branch or base ref")
+print(state, draft, branch, base, sha, sep="\t")
+PY
+)
+[ "$PR_STATE" = open ] || die "GitHub PR #$PR_ID is not open (state=$PR_STATE)"
 
 # Worktree: prefer git's own registry, fall back to the .worktrees/ convention.
 WORKTREE=""
@@ -620,24 +515,19 @@ fi
 [ -d "$WORKTREE" ] || die "resolved worktree $WORKTREE does not exist"
 
 _wt_branch="$(git -C "$WORKTREE" symbolic-ref --quiet --short HEAD 2>/dev/null || true)"
-if [ -n "$_wt_branch" ] && [ "$_wt_branch" != "$BRANCH" ]; then
-  warn "worktree $WORKTREE is on '$_wt_branch' but the PR record says '$BRANCH'"
+if [ "$_wt_branch" != "$BRANCH" ]; then
+  die "worktree $WORKTREE is on '${_wt_branch:-detached}' but GitHub PR #$PR_ID uses '$BRANCH'"
 fi
 
 HEAD_SHA="$(git -C "$WORKTREE" rev-parse HEAD 2>/dev/null || true)"
 [ -n "$HEAD_SHA" ] || die "$WORKTREE has no commits to test"
+[ "$HEAD_SHA" = "$REMOTE_HEAD_SHA" ] || die "local branch tip $HEAD_SHA does not equal GitHub PR head $REMOTE_HEAD_SHA"
 
-# Invariant 8: origin/main must resolve.  The diff-based audits and the change
-# gating below silently self-disable without a base, which is exactly the
-# "checks stopped running and nobody noticed" failure the parent repo hit.
-BASE_REF=""
-for _cand in "origin/$BASE" "$BASE"; do
-  if git -C "$WORKTREE" rev-parse --verify --quiet "$_cand^{commit}" >/dev/null 2>&1; then
-    BASE_REF="$_cand"
-    break
-  fi
-done
-[ -n "$BASE_REF" ] || die "neither origin/$BASE nor $BASE resolves in $WORKTREE; local convention is a main branch plus a refs/remotes/origin/main alias maintained by pr_merge.py (DESIGN.md invariant 8)"
+# The fetched GitHub base is the one coherent diff contract for hooks, CI, and
+# statement audits. github-sync.sh and worktree-setup.sh maintain this ref.
+BASE_REF="refs/remotes/github/$BASE"
+git -C "$WORKTREE" rev-parse --verify --quiet "$BASE_REF^{commit}" >/dev/null 2>&1 || \
+  die "$BASE_REF does not resolve; run local/bin/github-sync.sh refs --base '$BASE'"
 
 MERGE_BASE="$(git -C "$WORKTREE" merge-base "$BASE_REF" "$HEAD_SHA" 2>/dev/null || true)"
 [ -n "$MERGE_BASE" ] || die "no merge base between $BASE_REF and $HEAD_SHA"
@@ -693,7 +583,15 @@ while IFS= read -r _file; do
   if match_globs "$_file" 'scripts/comparator/*'; then A_comparator=1; fi
   # 'workflow' is the local translation of "the CI definition itself changed":
   # the frozen reference workflow, this driver, or its protocol.
-  if match_globs "$_file" '.github/workflows/pr-ci.yml' 'local/bin/ci.sh' 'local/protocols/ci.md'; then A_workflow=1; fi
+  if match_globs "$_file" '.github/workflows/pr-ci.yml' '.githooks/*' \
+      'local/bin/github_api.py' 'local/bin/issue_new.py' 'local/bin/issue_close.py' \
+      'local/bin/pr_open.py' 'local/bin/ci.sh' 'local/bin/review.sh' \
+      'local/bin/autofix.sh' 'local/bin/pr_merge.py' 'local/bin/agent.sh' \
+      'local/bin/housekeeping.sh' 'local/bin/github-sync.sh' \
+      'local/bin/export_issues.py' 'local/bin/worktree-setup.sh' \
+      'local/bin/cache-warmer.sh' 'local/protocols/*' 'local/personas/*'; then
+    A_workflow=1
+  fi
 done < "$CHANGED_FILES"
 
 step_gate() {
@@ -727,19 +625,17 @@ step_gate_paths() {
 # Run bookkeeping
 # ---------------------------------------------------------------------------
 
-LOG_DIR="$CACHE_ROOT/ci-logs/$PR_ID/$HEAD_SHA"
+RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)-$$"
+RUN_DIR="$CACHE_ROOT/ci/$PR_ID/$HEAD_SHA/$RUN_ID"
+LOG_DIR="$CACHE_ROOT/ci-logs/$PR_ID/$HEAD_SHA/$RUN_ID"
+MANIFEST="$RUN_DIR/manifest.json"
 
 # A run that was told to skip jobs cannot produce a merge-gate verdict.  It
-# writes a clearly-named side manifest and never touches pr.md, so a debugging
-# --only run can never leave the review gate a green ci_status it did not earn.
+# writes only runtime data and publishes nothing, so a debugging --only run can
+# never leave the review or merge gate a verdict it did not earn.
 PARTIAL=0
 if [ -n "$ONLY_STEPS" ] || [ "$SKIP_BUILD" = 1 ]; then
   PARTIAL=1
-fi
-if [ "$PARTIAL" = 1 ]; then
-  MANIFEST="$PR_DIR/ci/$HEAD_SHA.partial.json"
-else
-  MANIFEST="$PR_DIR/ci/$HEAD_SHA.json"
 fi
 STEPS_TSV="$RUN_TMP/steps.tsv"
 WARN_FILE="$RUN_TMP/warnings.txt"
@@ -776,7 +672,7 @@ if [ "$DRY_RUN" = 1 ]; then
     if [ "$_step" = build ] && [ "$SKIP_BUILD" = 1 ]; then _plan="skip (--skip-build)"; fi
     printf '  %-18s %s\n' "$_step" "$_plan"
   done
-  info "manifest would be $MANIFEST"
+  info "runtime manifest would be $MANIFEST"
   exit 0
 fi
 
@@ -789,18 +685,19 @@ if ! acquire_lock "$PR_LOCK" 0 "$BUILD_LOCK_STALE_S" "ci.sh pr=$PR_ID sha=$HEAD_
   die "another ci.sh run for PR $PR_ID is in progress (lock $PR_LOCK, pid $(head -n 1 "$PR_LOCK/owner" 2>/dev/null || echo '?')); wait for it or break the lock by hand"
 fi
 
-mkdir -p "$LOG_DIR" "$PR_DIR/ci"
+mkdir -p "$LOG_DIR" "$RUN_DIR"
 
-# Mark the record as running before anything can fail: a crashed run must never
-# leave a stale `success` behind for the review gate to trust.
 if [ "$PARTIAL" = 1 ]; then
-  info "partial run (--only/--skip-build): pr.md ci_status will NOT be updated, and the manifest goes to $(basename "$MANIFEST")"
-else
-  helper frontmatter --file "$PR_MD" --set "ci_status=running" --set "head_sha=$HEAD_SHA"
+  info "partial run (--only/--skip-build): no GitHub statuses or comments will be published"
 fi
 
 RUN_STARTED="$(iso_now)"
 RUN_START_EPOCH="$(epoch_now)"
+
+publish_status() {
+  python3 "$SCRIPT_DIR/github_api.py" --repo-root "$REPO_ROOT" --no-probe \
+    post-status "$HEAD_SHA" "local-ci/$1" "$2" "$3" >/dev/null
+}
 
 # ---------------------------------------------------------------------------
 # Step bodies.  Each runs in a subshell with cwd = the branch worktree, stdout
@@ -1038,6 +935,11 @@ BUILD_SECONDS=0
 for STEP in $STEP_NAMES; do
   LOG="$LOG_DIR/$STEP.log"
 
+  if [ "$PARTIAL" = 0 ]; then
+    publish_status "$STEP" pending "local CI run $RUN_ID is pending" || \
+      die "could not publish pending status local-ci/$STEP on $HEAD_SHA"
+  fi
+
   if [ -n "$ONLY_STEPS" ]; then
     case " $ONLY_STEPS " in
       *" $STEP "*) ;;
@@ -1117,7 +1019,7 @@ for STEP in $STEP_NAMES; do
 done
 
 # ---------------------------------------------------------------------------
-# Manifest, PR record, telemetry
+# Exact-head recheck, manifest, GitHub publication, telemetry
 # ---------------------------------------------------------------------------
 
 RUN_FINISHED="$(iso_now)"
@@ -1131,11 +1033,38 @@ else
   CONCLUSION=success
 fi
 
+HEAD_STABLE=1
+if [ "$PARTIAL" = 0 ]; then
+  LOCAL_FINAL_SHA="$(git -C "$WORKTREE" rev-parse HEAD 2>/dev/null || true)"
+  FINAL_PULL_JSON="$RUN_TMP/final-pull.json"
+  if ! python3 "$SCRIPT_DIR/github_api.py" --repo-root "$REPO_ROOT" --no-probe \
+      pull "$PR_ID" > "$FINAL_PULL_JSON"; then
+    HEAD_STABLE=0
+    REMOTE_FINAL_SHA=unreadable
+  else
+    REMOTE_FINAL_SHA="$(python3 - "$FINAL_PULL_JSON" <<'PY'
+import json
+import sys
+
+pull = json.load(open(sys.argv[1], encoding="utf-8"))
+print(str((pull.get("head") or {}).get("sha") or "").lower())
+PY
+)"
+  fi
+  if [ "$LOCAL_FINAL_SHA" != "$HEAD_SHA" ] || [ "$REMOTE_FINAL_SHA" != "$HEAD_SHA" ]; then
+    HEAD_STABLE=0
+  fi
+  if [ "$HEAD_STABLE" = 0 ]; then
+    CONCLUSION=error
+    note_warning "head moved or became unreadable during CI (start=$HEAD_SHA local=${LOCAL_FINAL_SHA:-unreadable} remote=${REMOTE_FINAL_SHA:-unreadable}); no success statuses or manifest comment will be published"
+  fi
+fi
+
 helper manifest \
   --out "$MANIFEST" \
   --steps-tsv "$STEPS_TSV" \
   --pr "$PR_ID" \
-  --pr-dir "$PR_DIR_NAME" \
+  --pr-dir "github-pr-$PR_ID" \
   --branch "$BRANCH" \
   --base "$BASE" \
   --base-ref "$BASE_REF" \
@@ -1161,10 +1090,53 @@ helper manifest \
   --partial "$PARTIAL" \
   > /dev/null
 
-if [ "$PARTIAL" = 1 ]; then
-  info "partial run: prs/$PR_DIR_NAME/pr.md left untouched (ci_status still reflects the last complete run)"
-else
-  helper frontmatter --file "$PR_MD" --set "ci_status=$CONCLUSION" --set "head_sha=$HEAD_SHA"
+PUBLISH_FAILED=0
+if [ "$PARTIAL" = 0 ] && [ "$HEAD_STABLE" = 0 ]; then
+  for STEP in $STEP_NAMES; do
+    publish_status "$STEP" error "local CI run $RUN_ID is obsolete: PR head moved" || \
+      warn "could not replace pending local-ci/$STEP with an error status"
+  done
+elif [ "$PARTIAL" = 0 ]; then
+  while IFS="$(printf '\t')" read -r STEP OUTCOME _SECONDS _LOG _BLOCKING NOTE; do
+    case "$OUTCOME" in
+      skipped)
+        STATUS_STATE=success
+        STATUS_DESCRIPTION="skipped: ${NOTE:-not applicable}"
+        ;;
+      success)
+        STATUS_STATE=success
+        STATUS_DESCRIPTION="local CI run $RUN_ID passed"
+        ;;
+      failure)
+        STATUS_STATE=failure
+        STATUS_DESCRIPTION="local CI run $RUN_ID failed${NOTE:+: $NOTE}"
+        ;;
+      error|*)
+        STATUS_STATE=error
+        STATUS_DESCRIPTION="local CI run $RUN_ID could not run${NOTE:+: $NOTE}"
+        ;;
+    esac
+    if ! publish_status "$STEP" "$STATUS_STATE" "$STATUS_DESCRIPTION"; then
+      warn "could not publish final status local-ci/$STEP=$STATUS_STATE"
+      PUBLISH_FAILED=1
+    fi
+  done < "$STEPS_TSV"
+
+  if [ "$PUBLISH_FAILED" = 0 ]; then
+    CI_MARKER="<!-- mipstarre:ci-manifest pr=$PR_ID head=$HEAD_SHA run=$RUN_ID -->"
+    COMMENT_FILE="$RUN_TMP/manifest-comment.md"
+    {
+      printf 'Local CI manifest for PR #%s at exact head `%s`.\n\n' "$PR_ID" "$HEAD_SHA"
+      printf '```json\n'
+      cat "$MANIFEST"
+      printf '```\n\n%s\n' "$CI_MARKER"
+    } > "$COMMENT_FILE"
+    if ! python3 "$SCRIPT_DIR/github_api.py" --repo-root "$REPO_ROOT" --no-probe \
+        comment-once "$PR_ID" "$COMMENT_FILE" "$CI_MARKER" >/dev/null; then
+      warn "could not publish the marker-bound CI manifest comment"
+      PUBLISH_FAILED=1
+    fi
+  fi
 fi
 
 # meta.md telemetry duty: every full build lands in builds.jsonl.
@@ -1189,5 +1161,7 @@ if [ -s "$WARN_FILE" ]; then
   sed 's/^/  - /' "$WARN_FILE"
 fi
 
+[ "$HEAD_STABLE" = 1 ] || exit 1
+[ "$PUBLISH_FAILED" = 0 ] || exit 1
 [ "$CONCLUSION" = success ] || exit 1
 exit 0

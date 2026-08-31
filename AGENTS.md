@@ -13,9 +13,10 @@ the **low individual degree test (LDT)** paper (arXiv:2009.12982); the active
 track is the **quantum Pauli basis test (QPBT)** from *MIP\*=RE*
 (arXiv:2001.04383, primary) and *NEEXP in MIP\** (arXiv:1904.05870, secondary).
 
-This repository has **no GitHub remote operations**: CI, review, issues, and
-PRs all run locally. Read `local/README.md` and `local/DESIGN.md` before doing
-workflow actions; the `## Local Operations` section below summarizes the rules.
+GitHub is the authority for active issues and pull requests. CI, model-backed
+review, cache management, and telemetry execute on the local machine and
+publish exact-head evidence through the shared GitHub client. Read
+`local/README.md` and `local/DESIGN.md` before workflow actions.
 
 Key locations:
 
@@ -31,7 +32,7 @@ Key locations:
   (`\lean{}`, `\leanok`)
 - `MIPStarRE/` — Lean codebase matching the blueprint
 - `audits/` — dated audit reports, scouting notes, and repair plans
-- `local/`, `issues/`, `prs/`, `results/telemetry/` — the local workflow layer
+- `local/`, `results/telemetry/` — local execution and research telemetry
 
 A legacy 2111 tensor track exists under `blueprint/legacy/` — do not modify it.
 
@@ -525,10 +526,9 @@ the lean-conventions `PROOF_INTEGRITY` reference and `docs/project_conventions.m
 
 ## PR and Commit Conventions
 
-PRs are local records under `prs/NNNN-slug/` (created by
-`local/bin/pr_open.py`, merged by `local/bin/pr_merge.py`); `#N` in PR bodies
-and commit messages refers to the local issue `issues/NNNN-*.md`. Titles,
-bodies, and commit rules below are unchanged from the parent project.
+GitHub PRs are opened by `local/bin/pr_open.py` and merged through the guarded
+`local/bin/pr_merge.py` gate. `#N` in PR bodies and commit messages is a GitHub
+issue or PR number. Titles, bodies, and commit rules remain unchanged.
 
 ### PR title format
 
@@ -664,18 +664,19 @@ Use this file together with:
 
 ## Local Operations
 
-This repository runs its whole workflow locally. The short version every
-agent must know:
+This repository executes its workflow locally while GitHub holds active issue
+and PR state. The short version every agent must know:
 
 - **Build reuse.** A hot main cache lives under `~/.cache/mipstarre-dev/`;
   fresh worktrees get it via `local/bin/worktree-setup.sh` (which also
   installs git hooks and resets dirty vendored packages). Never run
   `lake update`; never write to the cache; at most one full `lake build`
   runs machine-wide (the scripts take the lock for you).
-- **Lifecycle.** issue (`issues/`) → branch `issue-NNNN-slug` + worktree →
-  agent sessions → `local/bin/ci.sh` → `local/bin/review.sh` → optional
-  `local/bin/autofix.sh` → `local/bin/pr_merge.py`. Details:
-  `local/README.md`.
+- **Lifecycle.** GitHub issue → `issue-N-slug` branch + worktree → agent
+  sessions → exact-head `local/bin/ci.sh <pr>` → `local/bin/review.sh <pr>` →
+  optional auto-fix → guarded GitHub merge. Active tools use
+  `local/bin/github_api.py`; snapshots and the archived registry are never
+  lifecycle input. Details: `local/README.md`.
 - **Sessions.** Dispatch, resume, and archive agent sessions only via
   `local/bin/dispatch.sh` (roles: orc, prover, reviewer, simplifier,
   blueprint, splitter, scout) so token/time telemetry stays complete.

@@ -23,7 +23,7 @@ You were dispatched by `local/bin/dispatch.sh` and dispatch nothing further.
 
 ## Operating rules
 
-1. **Read `AGENTS.md` first**, then the issue file you were given. The paper
+1. **Read `AGENTS.md` first**, then the attached GitHub issue body. The paper
    mirrors under `references/` are the project's ground truth; treat them with
    the care due to a primary source.
 2. **Canonical source order:** `references/` (in-repo paper TeX mirror) >
@@ -101,8 +101,8 @@ You were dispatched by `local/bin/dispatch.sh` and dispatch nothing further.
 10. If a later annotation pass over these files is planned — a review that
     writes `\criticize{comment}{severity}{confidence}` into the TeX rather than
     into a markdown findings file — add `\usepackage{xcolor}` and the
-    `\criticize` definition to the preamble first. The local review lane writes
-    markdown under `prs/<id>/reviews/`, so do this only when the issue asks.
+    `\criticize` definition to the preamble first. Review output is runtime
+    data published only by the trusted wrapper, so do this only when asked.
 
 ## Output contract
 

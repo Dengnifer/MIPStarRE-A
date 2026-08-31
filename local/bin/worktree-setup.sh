@@ -135,20 +135,25 @@ assert_lake() {
   command -v python3 >/dev/null 2>&1 || warn "python3 not found; the audit scripts and build telemetry will not run"
 }
 
-# DESIGN.md #8: the hooks and every diff-based audit silently self-disable when
-# origin/main does not resolve.  Surface it loudly rather than let a worktree run
-# with half its gates switched off.
-check_origin_main() { # <worktree>
+# The hooks and every diff-based audit use the fetched GitHub base. Surface a
+# missing ref loudly rather than let a worktree run with half its gates off.
+check_github_main() { # <worktree>
   local tree="$1"
-  if run_outside_git_env git -C "$tree" rev-parse --verify origin/main >/dev/null 2>&1; then
-    log "origin/main resolves"
+  if run_outside_git_env git -C "$tree" rev-parse --verify \
+      refs/remotes/github/main >/dev/null 2>&1; then
+    log "refs/remotes/github/main resolves"
     return 0
   fi
-  warn "origin/main does not resolve in $tree."
-  warn "The pre-push audits that diff against a base will SKIP themselves, and the"
-  warn "PR machinery expects refs/remotes/origin/main to exist (DESIGN.md #8)."
-  warn "Fix it with the local convention: a 'main' branch plus an origin/main alias"
-  warn "maintained by local/bin/pr_merge.py."
+  if [ "$CHECK_ONLY" -eq 0 ] && run_outside_git_env git -C "$tree" remote \
+      get-url github >/dev/null 2>&1; then
+    log "fetching the explicit GitHub main ref"
+    if run_outside_git_env git -C "$tree" fetch --no-tags github \
+        refs/heads/main:refs/remotes/github/main; then
+      return 0
+    fi
+  fi
+  warn "refs/remotes/github/main does not resolve in $tree."
+  warn "Run local/bin/github-sync.sh refs before using diff-based hooks or CI."
   return 1
 }
 
@@ -287,8 +292,8 @@ main() {
   log "under the hot-cache keyhash and mutate the vendored package trees."
   log "Mathlib bumps are a separate, human-invoked operation."
 
-  # 4. origin/main sanity (DESIGN.md #8).
-  check_origin_main "$WORKTREE" || status=1
+  # 4. fetched GitHub base sanity.
+  check_github_main "$WORKTREE" || status=1
 
   # 5. Fresh-state workaround, before anything runs `lake exe cache get`.
   proofwidgets_fresh_state_workaround "$WORKTREE" || status=1

@@ -158,9 +158,9 @@ def _scan_note_text(rel_path: str, text: str) -> list[Finding]:
     if not CITE_RE.search(text):
         add("missing bibliographic citation such as `\\cite{...}`")
     if ("\\ghissue{" not in text and "\\ghpr{" not in text
-            and "\\localissue{" not in text):
+            and "\\archivedlocalissue{" not in text):
         add("missing traceability macro `\\ghissue{...}`, `\\ghpr{...}`, "
-            "or `\\localissue{...}`")
+            "or `\\archivedlocalissue{...}{...}`")
 
     if TEXTTT_TRACE_RE.search(text):
         add("use paper-gap macros instead of `\\texttt{...}` for Lean or source traceability")
@@ -188,7 +188,7 @@ def scan_changed_notes(root: Path, changed_files: list[str]) -> list[Finding]:
 def _parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=Path("."))
-    parser.add_argument("--base", default="origin/main")
+    parser.add_argument("--base", default="refs/remotes/github/main")
     parser.add_argument("--staged", action="store_true")
     parser.add_argument("--changed-files", nargs="*")
     parser.add_argument("--changed-files-file", type=Path)
