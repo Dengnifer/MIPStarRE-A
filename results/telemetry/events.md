@@ -145,3 +145,7 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   `#0007` instead of treating `auth status` as authoritative. Lesson:
   authenticate by exercising the required API surface; a legacy client's
   credential-format diagnostic can be a false negative.
+
+## 2026-08-31
+
+- Write-through adapter superseded during implementation. Symptom: the first issue-0007 orchestrator had begun adding a durable local GitHub-operation journal when the owner rejected retaining any local issue/PR fallback. Diagnosis: the earlier step-0 brief preserved registry machinery that no longer matched the owner's desired GitHub-only authority. Fix: stopped the session before commit, reverted its partial edit, verified and moved all 60 issue/PR files byte-identically into results/telemetry/registry-archive in the isolated c8f1999 commit, and re-scoped issue 0007 to read live GitHub gate evidence. Lesson: when eliminating an operational registry, archive research evidence before rewriting consumers, and treat an explicit owner authority decision as a protocol amendment rather than extending the superseded design.
