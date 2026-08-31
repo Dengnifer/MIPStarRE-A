@@ -20,7 +20,7 @@ self-evolving formalization workflows.
 | 1 — workflow skeleton (`local/`, registry, telemetry, hot cache) | DONE |
 | 2 — per-section paper mirrors (`references/qpbt-paper`, `neexp-paper`) | DONE |
 | 3 — blueprint ch11–ch16, ~250 nodes, 3 paper-gap notes | DONE (PR #0001, §12-adjudicated after 6 review rounds) |
-| 4.1 — minimal Lean skeleton (`MIPStarRE/QPBT/`, thm:pauli + 39-node closure, 167 decls, 16 proof-position sorries, build green) | IMPLEMENTED on branch `issue-0006-qpbt-minimal-skeleton` (commit `db4327a`), PR #0003 — **review pending** (see Immediate next steps) |
+| 4.1 — minimal Lean skeleton (`MIPStarRE/QPBT/`, thm:pauli + 39-node closure, 167 decls, 16 proof-position sorries, build green) | IMPLEMENTED on branch `issue-0006-qpbt-minimal-skeleton` (commit `db4327a`), PR #0003 — review round 1 done, 17 findings (see Immediate next steps) |
 | 4.2 — full skeleton of all blueprint nodes (sorry proofs) | Briefs DRAFTED (`issues/briefs/42-*.md`), OPEN items need adjudication |
 | 4.3 — proofs | Not started; parallelization plan below |
 
