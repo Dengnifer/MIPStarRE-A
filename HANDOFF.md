@@ -81,6 +81,18 @@ self-evolving formalization workflows.
    issues #0004, #0005; blueprint `\uses` sync gaps listed in the 4.1
    orchestrator report (`results/telemetry/sessions/orc-0006-20260831-01.last.md`).
 
+## Worktree parallelism (owner guidance, 2026-08-31)
+
+Codex-native worktree isolation MAY be used for intra-orchestrator
+fan-out, but only WRAPPED: any worktree an agent creates must run
+local/bin/worktree-setup.sh before Lean work (warm .lake, vendored-package
+resets, hooks), and sub-sessions still start only via dispatch.sh
+(locks, telemetry, sanitization, trusted personas). Never a raw codex
+worktree with a cold .lake. Lane count: full builds are ~10 min on this
+host, so scale prover lanes past the old 4-6 target if codex quota and
+review throughput allow; batch PRs per module remain the review-side
+mitigation.
+
 ## Hard-won operational lessons (do not relearn these)
 
 - Fill issue/PR record bodies — the reviewer audits them (twice flagged).
