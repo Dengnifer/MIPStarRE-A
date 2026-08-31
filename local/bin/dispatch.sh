@@ -475,11 +475,17 @@ DISPATCHER="${MIPSTARRE_SESSION:-${USER:-unknown}@local}"
 sanitize_untrusted() {
   # `|| true`: head closes the pipe on truncation, which SIGPIPEs the upstream
   # filters; under `set -o pipefail` that would abort prompt composition.
+  # The byte-level truncation must not split a multibyte character: codex
+  # rejects any argv that is not valid UTF-8 (events.md 2026-08-31, PR #0003 —
+  # a Unicode-dense Lean diff cut by `head -c` broke every review dispatch).
+  # The python pass truncates at the last complete character within the cap.
   LC_ALL=C tr -d '\000-\010\013\014\016-\037\177' <"$1" \
     | sed -e 's/^\([[:space:]]*\)```/\1 ```/' \
           -e 's/^\([[:space:]]*\)~~~/\1 ~~~/' \
           -e 's/UNTRUSTED-DATA/UNTRUSTED_DATA/g' \
-    | head -c "$MAX_CONTEXT_BYTES" || true
+    | head -c "$MAX_CONTEXT_BYTES" \
+    | python3 -c 'import sys; sys.stdout.write(sys.stdin.buffer.read().decode("utf-8", "ignore"))' \
+    || true
 }
 
 {

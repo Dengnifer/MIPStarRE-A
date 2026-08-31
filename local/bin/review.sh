@@ -275,15 +275,33 @@ run_agent() {
     fi
     args[${#args[@]}]="--"
     args[${#args[@]}]="$task_text"
-    set +e
-    if [ -n "$model" ]; then
-      MIPSTARRE_AUTOMATION=1 MIPSTARRE_CODEX_MODEL="$model" \
-        "$DISPATCH" "${args[@]}" >"$dlog"
-    else
-      MIPSTARRE_AUTOMATION=1 "$DISPATCH" "${args[@]}" >"$dlog"
-    fi
-    rc=$?
-    set -e
+    # One retry for pre-model failures: a dispatch that dies within seconds
+    # with zero tokens never reached the model (transient CLI/API hiccup;
+    # observed on PR #0003, events.md 2026-08-31), so retrying cannot
+    # duplicate a review.
+    local attempt started ended tokens
+    for attempt in 1 2; do
+      started="$(date +%s)"
+      set +e
+      if [ -n "$model" ]; then
+        MIPSTARRE_AUTOMATION=1 MIPSTARRE_CODEX_MODEL="$model" \
+          "$DISPATCH" "${args[@]}" >"$dlog"
+      else
+        MIPSTARRE_AUTOMATION=1 "$DISPATCH" "${args[@]}" >"$dlog"
+      fi
+      rc=$?
+      set -e
+      ended="$(date +%s)"
+      tokens="$(sed -n 's/^tokens_total: //p' "$dlog" | tail -1)"
+      if [ "$rc" -ne 0 ] && [ "$attempt" -eq 1 ] \
+         && [ "$(( ended - started ))" -lt 15 ] \
+         && [ "${tokens:-0}" = "0" ]; then
+        warn "dispatch failed pre-model (rc=$rc, $(( ended - started ))s, 0 tokens); retrying once"
+        sleep 10
+        continue
+      fi
+      break
+    done
     last="$(sed -n 's/^last_message: //p' "$dlog" | tail -1)"
     if [ -n "$last" ] && [ -f "$last" ]; then
       cp "$last" "$out"
