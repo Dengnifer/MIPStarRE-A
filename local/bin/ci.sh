@@ -26,6 +26,7 @@
 #
 # Outputs
 #   GitHub local-ci/<step> statuses        exact starting SHA, complete runs only
+#   GitHub local-ci/summary                required digest-bound gate status
 #   GitHub PR comment                      marker-bound full manifest
 #   ~/.cache/mipstarre-dev/ci/<id>/<sha>/<run>/manifest.json
 #   ~/.cache/mipstarre-dev/ci-logs/<id>/<sha>/<run>/<step>.log
@@ -771,6 +772,20 @@ publish_status() {
   fi
 }
 
+invalidate_ci_publication() {
+  local _step
+  for _step in $STEP_NAMES summary; do
+    publish_status "$_step" error \
+      "local CI run $RUN_ID failed evidence-integrity checks" unguarded || \
+      warn "could not invalidate local-ci/$_step after publication abort"
+  done
+}
+
+if [ "$PARTIAL" = 0 ]; then
+  publish_status summary pending "local CI run=$RUN_ID is pending" ||
+    die "could not publish pending status local-ci/summary on $HEAD_SHA"
+fi
+
 # ---------------------------------------------------------------------------
 # Step bodies.  Each runs in a subshell with cwd = the branch worktree, stdout
 # and stderr redirected to its log.  Exit 0 = pass, EXIT_TOOL_MISSING = the
@@ -1181,11 +1196,7 @@ helper manifest \
 PUBLISH_FAILED=0
 PUBLICATION_ABORTED=0
 if [ "$PARTIAL" = 0 ] && [ "$HEAD_STABLE" = 0 ]; then
-  for STEP in $STEP_NAMES; do
-    publish_status "$STEP" error \
-      "local CI run $RUN_ID failed evidence-integrity checks" unguarded || \
-      warn "could not replace pending local-ci/$STEP with an error status"
-  done
+  invalidate_ci_publication
 elif [ "$PARTIAL" = 0 ]; then
   while IFS="$(printf '\t')" read -r STEP OUTCOME _SECONDS _LOG _BLOCKING NOTE; do
     if ! worktree_is_clean; then
@@ -1226,12 +1237,12 @@ elif [ "$PARTIAL" = 0 ]; then
   fi
 
   if [ "$PUBLICATION_ABORTED" = 1 ]; then
-    for STEP in $STEP_NAMES; do
-      publish_status "$STEP" error \
-        "local CI run $RUN_ID failed evidence-integrity checks" unguarded || \
-        warn "could not invalidate local-ci/$STEP after publication abort"
-    done
-  elif [ "$PUBLISH_FAILED" = 0 ]; then
+    invalidate_ci_publication
+  elif [ "$PUBLISH_FAILED" != 0 ]; then
+    HEAD_STABLE=0
+    PUBLICATION_ABORTED=1
+    invalidate_ci_publication
+  else
     CI_MARKER="<!-- mipstarre:ci-manifest pr=$PR_ID head=$HEAD_SHA run=$RUN_ID -->"
     COMMENT_FILE="$RUN_TMP/manifest-comment.md"
     {
@@ -1247,11 +1258,15 @@ elif [ "$PARTIAL" = 0 ]; then
       PUBLISH_FAILED=1
       HEAD_STABLE=0
       PUBLICATION_ABORTED=1
-      for STEP in $STEP_NAMES; do
-        publish_status "$STEP" error \
-          "local CI run $RUN_ID failed evidence-integrity checks" unguarded || \
-          warn "could not invalidate local-ci/$STEP after manifest publication failed"
-      done
+      invalidate_ci_publication
+    elif ! python3 "$SCRIPT_DIR/github_api.py" --repo-root "$REPO_ROOT" --no-probe \
+        ci-finalize "$PR_ID" "$HEAD_SHA" "$BASE_SHA" "$RUN_ID" \
+        --guard-file "$PUBLICATION_GUARD" >/dev/null; then
+      warn "manifest read-back or local-ci/summary finalization failed"
+      PUBLISH_FAILED=1
+      HEAD_STABLE=0
+      PUBLICATION_ABORTED=1
+      invalidate_ci_publication
     fi
   fi
 fi

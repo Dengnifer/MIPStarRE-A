@@ -198,3 +198,19 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   Lesson: exact-head evidence is trustworthy only when the local committed
   state and every transition to publication are bound as rigorously as the
   remote marker.
+- Final merge-integrity audit found that client evidence and server enforcement
+  were still separate contracts. Symptom: CI had no digest-bound required
+  summary, adverse local reviews could attempt sticky `REQUEST_CHANGES`, merge
+  did not validate the actual base's protection and effective rules, and the
+  free-form adjudication path did not prove its review rounds or dispositions.
+  The merge mutation also needed an explicit no-retry ambiguity path and a CI
+  lease alongside the review/fix leases. Diagnosis: exact-head client checks
+  alone do not close the final interval in which GitHub evaluates required
+  checks, base freshness, and merge policy. Fix: publish pending then
+  read-back-bound CI/review summaries; use `COMMENT` for every local review;
+  validate zero-approval strict protection and nonweakening effective rules;
+  require four exact-comparison adjudication rounds with exhaustive fixed or
+  open-issue dispositions; and issue one match-head merge under all three
+  leases, reconciling a transient result by read-back only. Lesson: the last
+  merge checkpoint must make producer evidence, operator adjudication, local
+  serialization, and GitHub's server gate one auditable contract.

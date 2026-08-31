@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
+import json
 import os
 import re
 import shutil
@@ -18,20 +20,30 @@ from typing import Any, Iterator, Sequence
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from github_api import (  # noqa: E402
     ADJUDICATION_LABEL,
+    CI_SUMMARY_CONTEXT,
     CIManifestEvidence,
     GitHub,
     GitHubError,
     PullIdentity,
+    REVIEW_CONTEXT,
+    ReviewAttestation,
     ReviewEvidence,
     fix_iteration_count,
     normalize_number,
     normalize_sha,
     pull_identity,
+    render_status_description,
 )
 
 
 DEFAULT_FIX_CAP = 5
-DISPOSITION_RE = re.compile(r"^Disposition:\s*\S.*$", re.MULTILINE)
+REQUIRED_STATUS_CONTEXTS = {CI_SUMMARY_CONTEXT, REVIEW_CONTEXT}
+ADJUDICATION_MARKER_RE = re.compile(
+    r"<!-- mipstarre:adjudication pr=(\d+) "
+    r"head=((?:[0-9a-f]{40}|[0-9a-f]{64})) "
+    r"base=((?:[0-9a-f]{40}|[0-9a-f]{64})) review=(\d+) "
+    r"run=([^<>\s]+) digest=([0-9a-f]{64}) body=([0-9a-f]{64}) -->"
+)
 
 
 class GateFailure(RuntimeError):
@@ -56,8 +68,18 @@ class GateSnapshot:
     identity: PullIdentity
     worktree: Path
     ci: CIManifestEvidence
-    review: ReviewEvidence
+    review: ReviewEvidence | AdjudicationEvidence
     iterations: int
+
+
+@dataclass(frozen=True)
+class AdjudicationEvidence:
+    """A unique, unedited adjudication bound to its latest source review."""
+
+    comment: dict[str, Any]
+    payload: dict[str, Any]
+    source: ReviewAttestation
+    digest: str
 
 
 @dataclass(frozen=True)
@@ -123,6 +145,159 @@ def exact_local_head(root: Path, branch: str) -> tuple[str, Path]:
     return normalize_sha(git(worktree, "rev-parse", "HEAD")), worktree
 
 
+def require_clean_worktree(worktree: Path) -> None:
+    dirty = git(
+        worktree,
+        "status",
+        "--porcelain=v1",
+        "--untracked-files=all",
+    )
+    if dirty:
+        raise GateFailure(
+            f"merge worktree {worktree} is dirty at a gate boundary"
+        )
+
+
+def _contexts_from_classic(value: dict[str, Any]) -> set[str]:
+    raw_contexts = value.get("contexts")
+    raw_checks = value.get("checks")
+    context_sets: list[set[str]] = []
+    if raw_contexts is not None:
+        if not isinstance(raw_contexts, list) or not all(
+            isinstance(item, str) and item for item in raw_contexts
+        ):
+            raise GateFailure("classic required status contexts are malformed")
+        context_sets.append({item.casefold() for item in raw_contexts})
+    if raw_checks is not None:
+        if not isinstance(raw_checks, list) or not all(
+            isinstance(item, dict)
+            and isinstance(item.get("context"), str)
+            and item.get("context")
+            for item in raw_checks
+        ):
+            raise GateFailure("classic required status checks are malformed")
+        context_sets.append(
+            {str(item["context"]).casefold() for item in raw_checks}
+        )
+    if not context_sets or any(value != context_sets[0] for value in context_sets[1:]):
+        raise GateFailure("classic required status context representations disagree")
+    return context_sets[0]
+
+
+def _empty_actor_allowances(value: Any) -> bool:
+    return (
+        isinstance(value, dict)
+        and set(value) == {"users", "teams", "apps"}
+        and all(value.get(key) == [] for key in ("users", "teams", "apps"))
+    )
+
+
+def _require_zero_approval_rule(value: dict[str, Any], *, source: str) -> None:
+    approvals = value.get("required_approving_review_count")
+    code_owner_key = (
+        "require_code_owner_reviews"
+        if "require_code_owner_reviews" in value
+        else "require_code_owner_review"
+    )
+    if type(approvals) is not int or approvals != 0:
+        raise GateFailure(f"{source} must require exactly zero approvals")
+    if value.get(code_owner_key) is not False:
+        raise GateFailure(f"{source} must not require code-owner review")
+    if value.get("require_last_push_approval") is not False:
+        raise GateFailure(f"{source} must not require last-push approval")
+
+
+def require_server_policy(client: GitHub, base: str) -> None:
+    """Validate classic protection and every active effective ruleset."""
+    try:
+        protection = client.branch_protection(base)
+        rules = client.branch_rules(base)
+    except GitHubError as exc:
+        raise GateFailure(
+            f"cannot validate server policy for actual base {base!r}: {exc}"
+        ) from exc
+
+    status_rule = protection.get("required_status_checks")
+    if not isinstance(status_rule, dict) or status_rule.get("strict") is not True:
+        raise GateFailure("classic branch protection must use strict required checks")
+    if _contexts_from_classic(status_rule) != {
+        context.casefold() for context in REQUIRED_STATUS_CONTEXTS
+    }:
+        raise GateFailure(
+            "classic branch protection must require exactly local-ci/summary "
+            "and local-review/summary"
+        )
+    admins = protection.get("enforce_admins")
+    if not isinstance(admins, dict) or admins.get("enabled") is not True:
+        raise GateFailure("classic branch protection must enforce administrators")
+    reviews = protection.get("required_pull_request_reviews")
+    if not isinstance(reviews, dict):
+        raise GateFailure("classic branch protection needs a pull-request review rule")
+    _require_zero_approval_rule(reviews, source="classic pull-request review rule")
+    if not _empty_actor_allowances(reviews.get("bypass_pull_request_allowances")):
+        raise GateFailure("classic pull-request bypass allowances must be empty")
+    for field, label in (
+        ("allow_force_pushes", "force pushes"),
+        ("allow_deletions", "branch deletions"),
+    ):
+        value = protection.get(field)
+        if not isinstance(value, dict) or value.get("enabled") is not False:
+            raise GateFailure(f"classic branch protection must disable {label}")
+
+    ruleset_ids: set[int] = set()
+    for rule in rules:
+        rule_type = str(rule.get("type") or "")
+        parameters = rule.get("parameters")
+        if rule_type == "merge_queue":
+            raise GateFailure("an active merge queue is incompatible with one-shot merge")
+        if rule_type == "required_status_checks":
+            if not isinstance(parameters, dict):
+                raise GateFailure("effective required-status rule is malformed")
+            raw_checks = parameters.get("required_status_checks")
+            if not isinstance(raw_checks, list) or not all(
+                isinstance(item, dict)
+                and isinstance(item.get("context"), str)
+                and item.get("context")
+                for item in raw_checks
+            ):
+                raise GateFailure("effective required-status contexts are malformed")
+            contexts = {str(item["context"]).casefold() for item in raw_checks}
+            if (
+                parameters.get("strict_required_status_checks_policy") is not True
+                or not {item.casefold() for item in REQUIRED_STATUS_CONTEXTS}
+                <= contexts
+            ):
+                raise GateFailure(
+                    "effective required-status rules weaken strict summary checks"
+                )
+        if rule_type == "pull_request":
+            if not isinstance(parameters, dict):
+                raise GateFailure("effective pull-request rule is malformed")
+            _require_zero_approval_rule(
+                parameters, source="effective pull-request rule"
+            )
+            methods = parameters.get("allowed_merge_methods")
+            if methods is not None and (
+                not isinstance(methods, list) or "merge" not in methods
+            ):
+                raise GateFailure("effective rules do not permit a merge commit")
+        ruleset_id = rule.get("ruleset_id")
+        if ruleset_id is not None:
+            if type(ruleset_id) is not int or ruleset_id <= 0:
+                raise GateFailure("effective rule has an invalid ruleset id")
+            ruleset_ids.add(ruleset_id)
+
+    for ruleset_id in ruleset_ids:
+        try:
+            ruleset = client.ruleset(ruleset_id)
+        except GitHubError as exc:
+            raise GateFailure(f"cannot validate effective ruleset {ruleset_id}: {exc}") from exc
+        if ruleset.get("enforcement") != "active":
+            raise GateFailure(f"effective ruleset {ruleset_id} is not provably active")
+        if ruleset.get("bypass_actors") != []:
+            raise GateFailure(f"effective ruleset {ruleset_id} has bypass actors")
+
+
 def require_open_mergeable(pull: dict[str, Any], number: int) -> PullIdentity:
     if str(pull.get("state") or "").casefold() != "open":
         raise GateFailure(f"PR #{number} is not open")
@@ -138,7 +313,7 @@ def require_ci(
     client: GitHub, number: int, head_sha: str, base_sha: str
 ) -> CIManifestEvidence:
     try:
-        evidence = client.ci_evidence(number, head_sha, base_sha)
+        evidence = client.ci_success_evidence(number, head_sha, base_sha)
     except GitHubError as exc:
         raise GateFailure(f"invalid exact-head CI evidence: {exc}") from exc
     manifest = evidence.manifest
@@ -197,30 +372,255 @@ def require_review(
     return evidence
 
 
+def adjudication_status_description(evidence: AdjudicationEvidence) -> str:
+    review_id = evidence.source.row.get("id")
+    return (
+        f"local adjudication review={review_id} run={evidence.source.run_id} "
+        f"source={evidence.source.digest} body={evidence.digest}"
+    )
+
+
+def _required_nonempty_text(value: Any, *, field: str) -> str:
+    if not isinstance(value, str) or value != value.strip() or not value:
+        raise GateFailure(f"adjudication {field} must be a nonempty trimmed string")
+    if len(value) > 1000 or any(ord(character) < 32 for character in value):
+        raise GateFailure(f"adjudication {field} contains invalid text")
+    return value
+
+
 def require_adjudication(
-    client: GitHub, pull: dict[str, Any], number: int, sha: str
-) -> None:
+    client: GitHub,
+    pull: dict[str, Any],
+    number: int,
+    sha: str,
+    base_sha: str,
+    *,
+    require_status: bool,
+) -> AdjudicationEvidence:
     labels = {
         str(item.get("name") if isinstance(item, dict) else item)
         for item in (pull.get("labels") or [])
     }
     if ADJUDICATION_LABEL not in labels:
         raise GateFailure(f"adjudicated merge requires label {ADJUDICATION_LABEL!r}")
-    marker = f"<!-- mipstarre:adjudication pr={number} head={sha} -->"
-    matches: list[dict[str, Any]] = []
-    for row in client.comments(number):
-        body = str(row.get("body") or "")
-        if body.startswith("ADJUDICATION") and marker in body:
-            matches.append(row)
-    if not matches:
-        raise GateFailure("no current-head ADJUDICATION comment with a stable marker")
-    matches.sort(key=row_order, reverse=True)
-    body = str(matches[0].get("body") or "")
-    if body.count(marker) != 1 or not DISPOSITION_RE.search(body):
-        raise GateFailure(
-            "the adjudication comment must contain one exact-head marker and a "
-            "nonempty 'Disposition:' line"
+    adjudications = [
+        row
+        for row in client.comments(number)
+        if str(row.get("body") or "").startswith("ADJUDICATION\n")
+    ]
+    if len(adjudications) != 1:
+        raise GateFailure("the PR must contain exactly one ADJUDICATION comment")
+    comment = adjudications[0]
+    created = str(comment.get("created_at") or "")
+    updated = str(comment.get("updated_at") or "")
+    if not created or created != updated:
+        raise GateFailure("the ADJUDICATION comment must be unedited")
+    row_order(comment)
+
+    body = str(comment.get("body") or "")
+    marker_matches = list(ADJUDICATION_MARKER_RE.finditer(body))
+    if (
+        len(marker_matches) != 1
+        or body.count("<!-- mipstarre:adjudication ") != 1
+    ):
+        raise GateFailure("the ADJUDICATION comment has an ambiguous marker")
+    marker_match = marker_matches[0]
+    marker = marker_match.group(0)
+    if body[marker_match.start() :] not in {marker, marker + "\n"}:
+        raise GateFailure("the adjudication marker must be the final body line")
+    prefix = body[: marker_match.start()]
+    body_digest = hashlib.sha256(prefix.encode("utf-8")).hexdigest()
+    if marker_match.group(7) != body_digest:
+        raise GateFailure("the adjudication body digest does not match")
+    fenced = re.fullmatch(
+        r"ADJUDICATION\n\n```json\n(.*?)\n```\n\n", prefix, re.DOTALL
+    )
+    if fenced is None or prefix.count("```json") != 1:
+        raise GateFailure("the ADJUDICATION comment has no canonical JSON body")
+    try:
+        payload = json.loads(fenced.group(1))
+    except json.JSONDecodeError as exc:
+        raise GateFailure("the ADJUDICATION JSON is invalid") from exc
+    if fenced.group(1) != json.dumps(payload, indent=2, sort_keys=True):
+        raise GateFailure("the ADJUDICATION JSON is not canonically serialized")
+    expected_keys = {
+        "schema",
+        "pr",
+        "head_sha",
+        "base_sha",
+        "source_review",
+        "rounds",
+        "dispositions",
+    }
+    if not isinstance(payload, dict) or set(payload) != expected_keys:
+        raise GateFailure("the ADJUDICATION JSON has a noncanonical schema")
+    if type(payload.get("schema")) is not int or payload.get("schema") != 1:
+        raise GateFailure("the ADJUDICATION schema version is invalid")
+    try:
+        payload_head = normalize_sha(
+            str(payload.get("head_sha") or ""), kind="adjudication head SHA"
         )
+        payload_base = normalize_sha(
+            str(payload.get("base_sha") or ""), kind="adjudication base SHA"
+        )
+        marker_head = normalize_sha(marker_match.group(2))
+        marker_base = normalize_sha(marker_match.group(3))
+    except GitHubError as exc:
+        raise GateFailure(str(exc)) from exc
+    if (
+        type(payload.get("pr")) is not int
+        or payload.get("pr") != number
+        or int(marker_match.group(1)) != number
+        or payload_head != sha
+        or marker_head != sha
+        or payload_base != base_sha
+        or marker_base != base_sha
+    ):
+        raise GateFailure("the ADJUDICATION comment names a different comparison")
+
+    try:
+        attestations = client.review_attestations(number)
+    except GitHubError as exc:
+        raise GateFailure(f"adjudication review rounds are invalid: {exc}") from exc
+    if not attestations:
+        raise GateFailure("adjudication has no validated source review")
+    source = max(attestations, key=lambda item: row_order(item.row))
+    source_id = source.row.get("id")
+    source_payload = payload.get("source_review")
+    source_keys = {"review_id", "run_id", "digest"}
+    if not isinstance(source_payload, dict) or set(source_payload) != source_keys:
+        raise GateFailure("adjudication source_review is noncanonical")
+    if (
+        type(source_id) is not int
+        or source_id <= 0
+        or type(source_payload.get("review_id")) is not int
+        or source.head_sha != sha
+        or source.base_sha != base_sha
+        or source.findings <= 0
+        or source_payload.get("review_id") != source_id
+        or source_payload.get("run_id") != source.run_id
+        or source_payload.get("digest") != source.digest
+        or int(marker_match.group(4)) != source_id
+        or marker_match.group(5) != source.run_id
+        or marker_match.group(6) != source.digest
+    ):
+        raise GateFailure("adjudication is not bound to the latest source review")
+    source_order = row_order(source.row)
+    for review in client.reviews(number):
+        if str(review.get("commit_id") or "").lower() != sha:
+            continue
+        if row_order(review) > source_order:
+            raise GateFailure("a later exact-head review supersedes the adjudication source")
+
+    raw_rounds = payload.get("rounds")
+    if not isinstance(raw_rounds, list) or len(raw_rounds) < 4:
+        raise GateFailure("adjudication requires at least four validated review rounds")
+    by_id = {item.row.get("id"): item for item in attestations}
+    rounds: list[ReviewAttestation] = []
+    round_ids: set[int] = set()
+    round_runs: set[str] = set()
+    round_digests: set[str] = set()
+    for raw_round in raw_rounds:
+        if not isinstance(raw_round, dict) or set(raw_round) != source_keys:
+            raise GateFailure("adjudication contains a noncanonical review round")
+        review_id = raw_round.get("review_id")
+        if type(review_id) is not int or review_id not in by_id:
+            raise GateFailure("adjudication names an unknown review round")
+        attestation = by_id[review_id]
+        if (
+            attestation.head_sha != sha
+            or attestation.base_sha != base_sha
+            or raw_round.get("run_id") != attestation.run_id
+            or raw_round.get("digest") != attestation.digest
+            or review_id in round_ids
+            or attestation.run_id in round_runs
+            or attestation.digest in round_digests
+        ):
+            raise GateFailure("adjudication review rounds are duplicated or mismatched")
+        round_ids.add(review_id)
+        round_runs.add(attestation.run_id)
+        round_digests.add(attestation.digest)
+        rounds.append(attestation)
+    if rounds[-1] is not source or rounds != sorted(
+        rounds, key=lambda item: row_order(item.row)
+    ):
+        raise GateFailure("adjudication rounds must be ordered and end at the source")
+
+    eligible = {
+        finding.key
+        for finding in source.finding_rows
+        if finding.state == "unresolved"
+    }
+    raw_dispositions = payload.get("dispositions")
+    if not isinstance(raw_dispositions, list):
+        raise GateFailure("adjudication dispositions must be a list")
+    disposed: set[str] = set()
+    for disposition in raw_dispositions:
+        if not isinstance(disposition, dict):
+            raise GateFailure("adjudication contains a malformed disposition")
+        finding = disposition.get("finding")
+        outcome = disposition.get("outcome")
+        if not isinstance(finding, str) or finding in disposed:
+            raise GateFailure("adjudication repeats or malforms a finding disposition")
+        disposed.add(finding)
+        if outcome == "fixed":
+            if set(disposition) != {"finding", "outcome", "reason", "evidence"}:
+                raise GateFailure("fixed dispositions need exactly reason and evidence")
+            _required_nonempty_text(disposition.get("reason"), field="fixed reason")
+            _required_nonempty_text(
+                disposition.get("evidence"), field="fixed evidence"
+            )
+        elif outcome == "tracked":
+            if set(disposition) != {"finding", "outcome", "issue"}:
+                raise GateFailure("tracked dispositions need exactly one issue number")
+            issue_number = disposition.get("issue")
+            if type(issue_number) is not int or issue_number <= 0:
+                raise GateFailure("tracked disposition issue must be positive")
+            try:
+                issue = client.get_issue(issue_number)
+            except GitHubError as exc:
+                raise GateFailure(
+                    f"tracked disposition issue #{issue_number} is unreadable: {exc}"
+                ) from exc
+            expected_url = f"https://github.com/{client.repo}/issues/{issue_number}"
+            if (
+                str(issue.get("state") or "").casefold() != "open"
+                or "pull_request" in issue
+                or str(issue.get("html_url") or "") != expected_url
+            ):
+                raise GateFailure(
+                    f"tracked disposition issue #{issue_number} is not an open "
+                    "same-repository issue"
+                )
+        else:
+            raise GateFailure("adjudication outcome must be exactly fixed or tracked")
+    if disposed != eligible:
+        raise GateFailure(
+            "adjudication dispositions do not exactly cover eligible unresolved findings"
+        )
+
+    evidence = AdjudicationEvidence(
+        comment=comment,
+        payload=payload,
+        source=source,
+        digest=body_digest,
+    )
+    if require_status:
+        status = client.latest_statuses(sha).get(REVIEW_CONTEXT.casefold()) or {}
+        expected = render_status_description(
+            sha,
+            REVIEW_CONTEXT,
+            "success",
+            adjudication_status_description(evidence),
+        )
+        if (
+            str(status.get("state") or "").casefold() != "success"
+            or str(status.get("description") or "") != expected
+        ):
+            raise GateFailure(
+                "local-review/summary is not the exact validated adjudication success"
+            )
+    return evidence
 
 
 def require_no_live_fix(cache: Path, branch: str) -> None:
@@ -259,6 +659,9 @@ def reserve_runtime_lock(path: Path, label: str) -> Iterator[HeldLock]:
     held = HeldLock(path=path, pid=os.getpid())
     try:
         (path / "pid").write_text(f"{held.pid}\n", encoding="utf-8")
+        (path / "owner").write_text(
+            f"{held.pid}\nmerge-reservation\n{label}\n", encoding="utf-8"
+        )
         (path / "label").write_text(label + "\n", encoding="utf-8")
         held.require_owned()
         yield held
@@ -272,7 +675,7 @@ def reserve_runtime_lock(path: Path, label: str) -> Iterator[HeldLock]:
 
 
 def require_merge_capability(client: GitHub) -> None:
-    result = client.run(["pr", "merge", "--help"], retry=False)
+    result = client.run(["pr", "merge", "--help"], retry=True)
     if "--match-head-commit" not in result.stdout:
         raise GateFailure(
             "installed gh lacks 'pr merge --match-head-commit'; upgrade before merging"
@@ -308,15 +711,20 @@ def evaluate_gate(
     root: Path,
     review_lock: HeldLock,
     fix_lock: HeldLock,
+    ci_lock: HeldLock,
     cap: int,
     *,
     adjudicated: bool,
+    require_adjudication_status: bool = True,
 ) -> GateSnapshot:
     """Evaluate the complete fail-closed gate from authoritative state."""
     review_lock.require_owned()
+    ci_lock.require_owned()
+    fix_lock.require_owned(reject_cancel=True)
     pull = client.get_pull(number)
     identity = require_open_mergeable(pull, number)
     _require_expected(identity, expected)
+    require_server_policy(client, identity.base)
     local_head, worktree = exact_local_head(root, expected.branch)
     local_base = exact_local_base(root, expected.base)
     if local_head != expected.head_sha or local_base != expected.base_sha:
@@ -324,6 +732,7 @@ def evaluate_gate(
             "local head/base do not match the immutable GitHub comparison "
             f"(local_head={local_head}, local_base={local_base})"
         )
+    require_clean_worktree(worktree)
 
     ci = require_ci(client, number, expected.head_sha, expected.base_sha)
     fix_lock.require_owned(reject_cancel=True)
@@ -333,15 +742,13 @@ def evaluate_gate(
         raise GateFailure(
             f"fix iteration count {iterations} exceeds configured cap {cap}"
         )
-    if adjudicated:
-        require_adjudication(client, pull, number, expected.head_sha)
-
     # Rebind the comparison after all potentially paginated reads. The review
     # check is last so a same-head adverse review introduced during evaluation
     # cannot be hidden by an earlier clean-ledger read.
     final_pull = client.get_pull(number)
     final_identity = require_open_mergeable(final_pull, number)
     _require_expected(final_identity, expected)
+    require_server_policy(client, final_identity.base)
     final_local_head, final_worktree = exact_local_head(root, expected.branch)
     final_local_base = exact_local_base(root, expected.base)
     if (
@@ -350,17 +757,31 @@ def evaluate_gate(
         or final_worktree.resolve() != worktree.resolve()
     ):
         raise GateFailure("local head/base/worktree changed during gate evaluation")
+    require_clean_worktree(final_worktree)
     fix_lock.require_owned(reject_cancel=True)
-    review = require_review(
-        client, number, expected.head_sha, expected.base_sha
-    )
-    attested_worktree = Path(review.attestation.lanes[0].worktree).resolve()
+    if adjudicated:
+        review: ReviewEvidence | AdjudicationEvidence = require_adjudication(
+            client,
+            final_pull,
+            number,
+            expected.head_sha,
+            expected.base_sha,
+            require_status=require_adjudication_status,
+        )
+        attested_worktree = Path(review.source.lanes[0].worktree).resolve()
+    else:
+        review = require_review(
+            client, number, expected.head_sha, expected.base_sha
+        )
+        attested_worktree = Path(review.attestation.lanes[0].worktree).resolve()
     if attested_worktree != worktree.resolve():
         raise GateFailure(
             "review session telemetry is bound to a different feature worktree"
         )
     review_lock.require_owned()
+    ci_lock.require_owned()
     fix_lock.require_owned(reject_cancel=True)
+    require_clean_worktree(final_worktree)
     return GateSnapshot(
         pull=final_pull,
         identity=final_identity,
@@ -369,6 +790,39 @@ def evaluate_gate(
         review=review,
         iterations=iterations,
     )
+
+
+def merge_once(
+    client: GitHub,
+    number: int,
+    expected: GateExpectation,
+    command: Sequence[str],
+) -> tuple[dict[str, Any], str]:
+    """Issue one merge mutation and reconcile its result by read-back only."""
+    mutation_error: GitHubError | None = None
+    try:
+        client.run(command, retry=False)
+    except GitHubError as exc:
+        mutation_error = exc
+
+    merged = client.get_pull(number)
+    if merged.get("merged") is not True:
+        if mutation_error is not None and mutation_error.transient:
+            raise GateFailure(
+                "merge outcome is ambiguous after authoritative read-back; "
+                "the merge mutation was not retried"
+            ) from mutation_error
+        if mutation_error is not None:
+            raise mutation_error
+        raise GateFailure("gh returned success but GitHub does not report the PR merged")
+    if str(merged.get("state") or "").casefold() != "closed":
+        raise GateFailure("GitHub reports merged=true but the PR is not closed")
+    merged_identity = pull_identity(merged)
+    _require_expected(merged_identity, expected)
+    merge_sha = normalize_sha(
+        str(merged.get("merge_commit_sha") or ""), kind="merge commit SHA"
+    )
+    return merged, merge_sha
 
 
 def fast_forward_base(root: Path, base: str) -> None:
@@ -453,53 +907,101 @@ def run(args: argparse.Namespace) -> int:
         with reserve_runtime_lock(
             fix_path, f"merge fix-reservation pr={number} branch={expected.branch}"
         ) as fix_lock:
-            first = evaluate_gate(
-                client,
-                number,
-                expected,
-                root,
-                review_lock,
-                fix_lock,
-                cap,
-                adjudicated=args.adjudicated,
-            )
-            command = [
-                "pr",
-                "merge",
-                str(number),
-                "--repo",
-                client.repo,
-                "--merge",
-                "--match-head-commit",
-                expected.head_sha,
-            ]
-            # The same evaluator runs again as the final operation before the
-            # guarded merge, catching same-head evidence and base races.
-            final = evaluate_gate(
-                client,
-                number,
-                expected,
-                root,
-                review_lock,
-                fix_lock,
-                cap,
-                adjudicated=args.adjudicated,
-            )
-            if first.worktree.resolve() != final.worktree.resolve():
-                raise GateFailure("feature worktree changed between gate evaluations")
-            if args.dry_run:
-                print("gate passed; would run: gh " + " ".join(command))
-                return 0
-            client.run(command, retry=False)
-            merged = client.get_pull(number)
-            if not merged.get("merged"):
-                raise GateFailure(
-                    "gh returned success but GitHub does not report the PR merged"
+            ci_path = cache / "locks" / f"ci-{number}.lock"
+            with reserve_runtime_lock(
+                ci_path, f"merge ci-reservation pr={number}"
+            ) as ci_lock:
+                first = evaluate_gate(
+                    client,
+                    number,
+                    expected,
+                    root,
+                    review_lock,
+                    fix_lock,
+                    ci_lock,
+                    cap,
+                    adjudicated=args.adjudicated,
+                    require_adjudication_status=not args.adjudicated,
                 )
-            merge_sha = normalize_sha(
-                str(merged.get("merge_commit_sha") or ""), kind="merge commit SHA"
-            )
-            feature_worktree = final.worktree
+                command = [
+                    "pr",
+                    "merge",
+                    str(number),
+                    "--repo",
+                    client.repo,
+                    "--merge",
+                    "--match-head-commit",
+                    expected.head_sha,
+                ]
+                if args.dry_run:
+                    prefix = "gate passed; would publish adjudication status and " \
+                        if args.adjudicated else "gate passed; would "
+                    print(prefix + "run: gh " + " ".join(command))
+                    return 0
+
+                if args.adjudicated:
+                    if not isinstance(first.review, AdjudicationEvidence):
+                        raise GateFailure("adjudication gate returned the wrong evidence")
+                    initial_adjudication = first.review
+
+                    def revalidate_adjudication() -> None:
+                        current = evaluate_gate(
+                            client,
+                            number,
+                            expected,
+                            root,
+                            review_lock,
+                            fix_lock,
+                            ci_lock,
+                            cap,
+                            adjudicated=True,
+                            require_adjudication_status=False,
+                        )
+                        if (
+                            not isinstance(current.review, AdjudicationEvidence)
+                            or current.review.digest != initial_adjudication.digest
+                            or current.review.source.run_id
+                            != initial_adjudication.source.run_id
+                            or current.review.source.digest
+                            != initial_adjudication.source.digest
+                        ):
+                            raise GateFailure(
+                                "adjudication changed before summary publication"
+                            )
+
+                    client.post_status(
+                        expected.head_sha,
+                        REVIEW_CONTEXT,
+                        "success",
+                        adjudication_status_description(initial_adjudication),
+                        before_mutation=revalidate_adjudication,
+                    )
+
+                # The same evaluator runs again as the final operation before
+                # the guarded merge, catching evidence, policy, tree, and base races.
+                final = evaluate_gate(
+                    client,
+                    number,
+                    expected,
+                    root,
+                    review_lock,
+                    fix_lock,
+                    ci_lock,
+                    cap,
+                    adjudicated=args.adjudicated,
+                )
+                if first.worktree.resolve() != final.worktree.resolve():
+                    raise GateFailure(
+                        "feature worktree changed between gate evaluations"
+                    )
+                review_lock.require_owned()
+                fix_lock.require_owned(reject_cancel=True)
+                ci_lock.require_owned()
+                require_clean_worktree(final.worktree)
+                _merged, merge_sha = merge_once(
+                    client, number, expected, command
+                )
+                feature_worktree = final.worktree
     fast_forward_base(root, expected.base)
     cleanup_feature(root, expected.branch, feature_worktree, merge_sha)
     print(f"merged GitHub PR #{number} at {merge_sha}")

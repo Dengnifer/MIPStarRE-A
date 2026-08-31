@@ -5,8 +5,8 @@ Normative. Read `local/protocols/meta.md`, `issues-prs.md`, and `ci.md` first.
 `local/bin/review.sh <github-pr-number>` runs only from a complete CI evidence
 set for the current full head and base SHAs. The manifest conclusion must be
 `success`, every canonical step must be `success` or `skipped`, and all eight
-matching statuses must be `success`. A readable failure or error manifest does
-not authorize review.
+matching statuses plus the digest-bound `local-ci/summary` must be `success`.
+A readable failure or error manifest does not authorize review.
 
 ## Tree and prompt integrity
 
@@ -85,29 +85,21 @@ repeats the full check around any intervening reviewer-identity or summary-statu
 read, then finishes with a fast local lease/tree check immediately before the
 write. Movement or loss of ownership makes the run stale.
 
-The wrapper submits one marker-bound review with the exact `commit_id`. The
+The wrapper publishes `local-review/summary=pending` under both leases before
+dispatch. It then submits one marker-bound `COMMENT` review with the exact
+`commit_id`. Clean and adverse reviews alike use `event=COMMENT` and
+`fallback=none`; local review never publishes `REQUEST_CHANGES`. The
 attestation binds the full PR number, full head and base SHAs, run id, canonical
-findings count, event and fallback policy, and each dispatched review lane's
-name, thread id, exit, worktree, and timestamps. Its digest covers the complete
-canonical ledger body before the final marker. The event is determined as
-follows:
+findings count, event, and each dispatched review lane's name, thread id, exit,
+worktree, and timestamps. Its digest covers the complete canonical ledger body
+before the final marker.
 
-- a clean verdict uses `COMMENT` with `fallback=none`;
-- unresolved findings use `REQUEST_CHANGES` first and attest
-  `fallback=COMMENT`.
-
-Only an HTTP 422 response that explicitly says the pull-request author cannot
-request changes on their own PR permits one `COMMENT` fallback POST. Unrelated
-422 responses fail immediately. Transient and ambiguous writes use
-authoritative read-back only and never trigger the fallback. The fallback body
-retains positive canonical findings, `event=REQUEST_CHANGES`,
-`fallback=COMMENT`, and the original exact head, base, run, digest, and reviewer
-session evidence; only GitHub's represented state becomes `COMMENTED`.
-
-It separately posts `local-review/summary` on that SHA: `success` for a clean
-ledger and `failure` for unresolved findings. The status description binds the
-same run and ledger digest. Publication is idempotent only when the full
-attestation, digest, body, commit, event/state, and status agree.
+The wrapper separately finalizes `local-review/summary` on that SHA: `success`
+only for a zero-finding clean `COMMENT` attestation and `failure` for unresolved
+findings. The status description binds the same run and ledger digest.
+Publication is idempotent only when the full attestation, digest, body, commit,
+event/state, and status agree. Transient and ambiguous review writes use
+authoritative read-back and never issue a second review mutation.
 
 A valid review attestation is deliberately distinct from complete merge
 evidence. Structural parsing, the exact commit and base, the body digest,
@@ -133,9 +125,10 @@ attestation whose reviewer session telemetry matches, with no later exact-head
 `CHANGES_REQUESTED` review. This supports the common case where the repository
 operator is also the PR author and GitHub forbids self-approval.
 
-An adverse `REQUEST_CHANGES` attestation represented by a fallback `COMMENTED`
-review remains valid ledger evidence for review-fix consumers, but its summary
-is `failure` and it never satisfies the clean merge gate.
+An adverse `COMMENTED` attestation remains valid raw ledger evidence for
+review-fix consumers, but its summary is `failure` and it never satisfies the
+clean merge gate. Raw attestation validation and review-summary merge
+eligibility are deliberately separate decisions.
 
 Kill switches disable only when set to the literal string `false`; unset means
 enabled. A reviewer session must be different from every author session and

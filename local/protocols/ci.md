@@ -27,6 +27,10 @@ is first `pending`, then `success`, `failure`, or `error`. A non-applicable step
 is `success` with a description stating that it was skipped. Context matching
 is case-insensitive, because GitHub status contexts are case-insensitive.
 
+`local-ci/summary` is the required aggregate context, not a ninth executable
+step. A complete run publishes it as `pending` before any CI work. Its final
+description binds the exact manifest run and canonical JSON digest.
+
 `--only`, `--skip-build`, and `--dry-run` are diagnostic partial runs. They
 write runtime logs but publish no gate-satisfying status set or manifest.
 
@@ -34,9 +38,10 @@ There are two evidence levels. A complete, exact-head and exact-base manifest
 with matching canonical statuses is readable evidence even when its conclusion
 is `failure` or `error`; auto-fix uses such evidence to classify a repair. CI
 satisfies the review and merge prerequisite only when the manifest conclusion
-is `success`, every canonical step outcome is `success` or `skipped`, and the
-latest matching status for every canonical context is `success`. Thus a
-well-formed failed run remains diagnostic evidence but is never green evidence.
+is `success`, every canonical step outcome is `success` or `skipped`, every
+matching step status is `success`, and the latest `local-ci/summary` is the
+successful state for that manifest's exact run and digest. Thus a well-formed
+failed run remains diagnostic evidence but is never green evidence.
 
 ## Publication
 
@@ -55,8 +60,13 @@ its readable manifest for diagnosis and auto-fix.
 A complete stable run posts a full JSON manifest as an immutable PR comment
 with exact PR, full head, full base, and run markers. Marker adoption requires
 the entire body to match. Every canonical status description names that same
-run, and a consumer must reject a manifest unless the latest exact-head status
-for every step names the manifest run and agrees with its result.
+run, and a consumer rejects a manifest unless the latest exact-head status for
+every step names the manifest run and agrees with its result. Only after the
+comment and all step statuses have been read back authoritatively does CI post
+the digest-bound final `local-ci/summary`, then it rereads both the manifest and
+summary. A publication failure invalidates the step and summary contexts with
+`error`; a prior success can never survive as the latest summary for the failed
+run.
 
 Status creation is digest-idempotent. Each invocation issues at most one
 mutation. If the POST result is ambiguous, the client polls statuses on the
@@ -76,5 +86,6 @@ by `build-cache.md`. Never run `lake update`, and never write back to the hot
 main cache.
 
 The merge and review gates require the success-level evidence described above,
-bound to the current full head and base SHAs. GitHub's combined status is not
-sufficient.
+bound to the current full head and base SHAs. Classic branch protection also
+requires only `local-ci/summary` and `local-review/summary`, with strict base
+freshness. GitHub's combined status is not sufficient.

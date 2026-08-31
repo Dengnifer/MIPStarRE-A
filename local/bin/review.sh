@@ -925,7 +925,8 @@ fi
 
 python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" --no-probe \
   post-status "$HEAD_SHA" local-review/summary pending \
-  "local review run=$RUN_ID is pending" >/dev/null ||
+  "local review run=$RUN_ID is pending" \
+  --guard-file "$PUBLICATION_GUARD" >/dev/null ||
   die "could not publish pending local-review/summary on $HEAD_SHA"
 
 review_boundary "$RUN_TMP/pre-dispatch-pull.json" ||
@@ -1075,13 +1076,11 @@ UNRESOLVED_TOTAL=$((CODE_UNRESOLVED + PROSE_UNRESOLVED))
 
 if [ "$UNRESOLVED_TOTAL" -eq 0 ] && [ "$REVIEW_STATE" != CHANGES_REQUESTED ]; then
   SUMMARY_STATE=success
-  REVIEW_EVENT=COMMENT
-  REVIEW_FALLBACK=none
 else
   SUMMARY_STATE=failure
-  REVIEW_EVENT=REQUEST_CHANGES
-  REVIEW_FALLBACK=COMMENT
 fi
+REVIEW_EVENT=COMMENT
+REVIEW_FALLBACK=none
 
 ATTESTATION_JSON="$RUN_DIR/review-attestation.json"
 python3 - "$ATTESTATION_JSON" "$PR_NUM" "$HEAD_SHA" "$BASE_SHA" \

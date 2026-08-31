@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import contextlib
 import hashlib
 import io
@@ -87,6 +88,19 @@ def next_number(key):
     return max([int(value) for value in rows] + [0]) + 1
 
 
+def require_runtime_locks(key, observed_key):
+    paths = [str(value) for value in state.get(key, [])]
+    for path in paths:
+        if not (
+            os.path.isdir(path)
+            and os.path.isfile(os.path.join(path, "pid"))
+            and os.path.isfile(os.path.join(path, "owner"))
+        ):
+            fail("HTTP 409 required workflow lock is not held: " + path)
+    if paths:
+        state[observed_key] = paths
+
+
 if args[:3] == ["pr", "merge", "--help"]:
     sys.stdout.write("usage: gh pr merge --merge --match-head-commit SHA\n")
     save()
@@ -155,9 +169,57 @@ if args[:2] == ["pr", "merge"]:
     row = state.setdefault("pulls", {}).get(number)
     if row is None:
         fail("HTTP 404 Not Found")
+    state["merge_call_count"] = int(state.get("merge_call_count", 0)) + 1
+    if state.pop("fail_merge_before_once", False):
+        fail("HTTP 503 Service Unavailable before merge")
+    race = state.pop("merge_race", {}) or {}
+    if race.get("head_sha"):
+        row.setdefault("head", {})["sha"] = str(race["head_sha"])
+    if race.get("base_sha"):
+        row.setdefault("base", {})["sha"] = str(race["base_sha"])
+    if race.get("base_tip"):
+        base_name = str((row.get("base") or {}).get("ref") or "")
+        state.setdefault("branch_tips", {})[base_name] = str(race["base_tip"])
+    if race.get("status"):
+        head = str((row.get("head") or {}).get("sha") or "")
+        state.setdefault("statuses", {}).setdefault(head, []).append(race["status"])
+    if "--merge" not in args or "--admin" in args or "--auto" in args:
+        fail("HTTP 422 merge invocation bypassed strict server gates")
+    matched_head = option("--match-head-commit")
+    current_head = str((row.get("head") or {}).get("sha") or "")
+    if matched_head != current_head:
+        fail("HTTP 409 head commit no longer matches")
+    base = str((row.get("base") or {}).get("ref") or "")
+    base_sha = str((row.get("base") or {}).get("sha") or "")
+    protection = state.setdefault("branch_protections", {}).get(base, {})
+    required = protection.get("required_status_checks") or {}
+    if required.get("strict") is not True:
+        fail("HTTP 409 base does not use strict required checks")
+    contexts = {str(item).casefold() for item in required.get("contexts", [])}
+    expected_contexts = {"local-ci/summary", "local-review/summary"}
+    if contexts != expected_contexts:
+        fail("HTTP 409 required summary contexts are not exact")
+    if state.setdefault("branch_tips", {}).get(base, base_sha) != base_sha:
+        fail("HTTP 409 pull request is not current with the protected base")
+    latest = {}
+    status_rows = list(state.setdefault("statuses", {}).get(current_head, []))
+    status_rows.sort(
+        key=lambda item: (str(item.get("created_at", "")), int(item.get("id", 0))),
+        reverse=True,
+    )
+    for status in status_rows:
+        context = str(status.get("context") or "").casefold()
+        if context and context not in latest:
+            latest[context] = status
+    if any(str((latest.get(name) or {}).get("state") or "").casefold() != "success"
+           for name in expected_contexts):
+        fail("HTTP 409 required summary status is not successful")
+    require_runtime_locks("required_merge_locks", "merge_locks_observed")
     row["merged"] = True
     row["state"] = "closed"
     row["merge_commit_sha"] = state.get("merge_sha", "b" * 40)
+    if state.pop("ambiguous_merge_success_once", False):
+        fail("HTTP 503 Service Unavailable after merge")
     emit({"merged": True})
 
 if not args or args[0] != "api":
@@ -187,6 +249,23 @@ if tail == ["slow"]:
 
 if not tail and method == "GET":
     emit(state.get("repo", {"id": 1, "full_name": "o/r"}))
+
+if len(tail) >= 3 and tail[0] == "branches" and tail[-1] == "protection":
+    branch = urllib.parse.unquote("/".join(tail[1:-1]))
+    protection = state.setdefault("branch_protections", {}).get(branch)
+    if protection is None:
+        fail("HTTP 404 Branch not protected")
+    emit(protection)
+
+if len(tail) >= 3 and tail[:2] == ["rules", "branches"] and method == "GET":
+    branch = urllib.parse.unquote("/".join(tail[2:]))
+    emit(state.setdefault("branch_rules", {}).get(branch, []))
+
+if len(tail) == 2 and tail[0] == "rulesets" and method == "GET":
+    ruleset = state.setdefault("rulesets", {}).get(tail[1])
+    if ruleset is None:
+        fail("HTTP 404 Ruleset not found")
+    emit(ruleset)
 
 if tail == ["labels"] and method == "GET":
     emit(page(state.get("labels", []), parsed.query))
@@ -287,6 +366,7 @@ if len(tail) == 3 and tail[0] == "issues" and tail[2] == "comments":
             "id": len(comments) + 1,
             "body": str((payload or {}).get("body", "")),
             "created_at": f"2026-01-01T00:00:{len(comments):02d}Z",
+            "updated_at": f"2026-01-01T00:00:{len(comments):02d}Z",
         }
         comments.append(row)
         if state.pop("corrupt_comment_response", False):
@@ -372,15 +452,13 @@ if len(tail) == 3 and tail[0] == "pulls" and tail[2] == "reviews":
         emit(page(reviews, parsed.query))
     if method == "POST":
         event = str((payload or {}).get("event", ""))
-        rejection = state.get("review_422")
-        if event == "REQUEST_CHANGES" and rejection:
-            state["review_422"] = ""
-            fail("HTTP 422 " + rejection)
+        if event != "COMMENT":
+            fail("HTTP 422 local review attestations must use COMMENT")
         row = {
             "id": len(reviews) + 1,
             "body": str((payload or {}).get("body", "")),
             "commit_id": str((payload or {}).get("commit_id", "")),
-            "state": "CHANGES_REQUESTED" if event == "REQUEST_CHANGES" else "COMMENTED",
+            "state": "COMMENTED",
             "submitted_at": f"2026-01-01T00:00:{len(reviews):02d}Z",
         }
         reviews.append(row)
@@ -419,6 +497,14 @@ if len(tail) == 3 and tail[0] == "commits" and tail[2] == "statuses":
 if len(tail) == 2 and tail[0] == "statuses" and method == "POST":
     sha = tail[1]
     if (
+        str((payload or {}).get("context", "")).casefold()
+        == "local-review/summary"
+        and str((payload or {}).get("state", "")).casefold() == "success"
+    ):
+        require_runtime_locks(
+            "required_adjudication_locks", "adjudication_locks_observed"
+        )
+    if (
         state.get("fail_review_summary_final_once")
         and str((payload or {}).get("context", "")).casefold()
         == "local-review/summary"
@@ -433,7 +519,7 @@ if len(tail) == 2 and tail[0] == "statuses" and method == "POST":
         "context": str((payload or {}).get("context", "")),
         "state": str((payload or {}).get("state", "")),
         "description": str((payload or {}).get("description", "")),
-        "created_at": f"2026-01-01T00:00:{len(rows):02d}Z",
+        "created_at": f"2098-01-01T00:00:{len(rows):02d}Z",
     }
     rows.append(row)
     if state.pop("ambiguous_status_once", False):
@@ -677,6 +763,33 @@ def pull_row(
     }
 
 
+def classic_protection() -> dict:
+    """Return the exact classic-protection contract required by the merge gate."""
+    contexts = [github_api.CI_SUMMARY_CONTEXT, github_api.REVIEW_CONTEXT]
+    return {
+        "required_status_checks": {
+            "strict": True,
+            "contexts": contexts,
+            "checks": [
+                {"context": context, "app_id": None} for context in contexts
+            ],
+        },
+        "enforce_admins": {"enabled": True},
+        "required_pull_request_reviews": {
+            "required_approving_review_count": 0,
+            "require_code_owner_reviews": False,
+            "require_last_push_approval": False,
+            "bypass_pull_request_allowances": {
+                "users": [],
+                "teams": [],
+                "apps": [],
+            },
+        },
+        "allow_force_pushes": {"enabled": False},
+        "allow_deletions": {"enabled": False},
+    }
+
+
 class FakeGhCase(unittest.TestCase):
     def setUp(self) -> None:
         self.temp = tempfile.TemporaryDirectory()
@@ -711,6 +824,11 @@ class FakeGhCase(unittest.TestCase):
             "statuses": {},
             "commits": {},
             "sub_issues": {},
+            "branch_protections": {"main": classic_protection()},
+            "branch_rules": {"main": []},
+            "rulesets": {},
+            "branch_tips": {},
+            "merge_call_count": 0,
             "calls": [],
             "failures": {},
         }
@@ -834,6 +952,31 @@ class FakeGhCase(unittest.TestCase):
         )
         body = "```json\n" + json.dumps(manifest) + "\n```\n\n" + marker + "\n"
         comment = {"id": comment_id, "body": body, "created_at": created_at}
+        digest = github_api.ci_manifest_digest(manifest)
+        summary_state = conclusion
+        verdict = {
+            "success": "passed",
+            "failure": "failed",
+            "error": "could not run",
+        }[conclusion]
+        summary_description = (
+            f"local CI digest={digest} run={run_id} {verdict}"
+        )
+        statuses.append(
+            {
+                "id": len(statuses) + 1,
+                "sha": head_sha,
+                "context": github_api.CI_SUMMARY_CONTEXT,
+                "state": summary_state,
+                "description": github_api.render_status_description(
+                    head_sha,
+                    github_api.CI_SUMMARY_CONTEXT,
+                    summary_state,
+                    summary_description,
+                ),
+                "created_at": created_at,
+            }
+        )
         return comment, statuses
 
     def review_bundle(
@@ -850,7 +993,6 @@ class FakeGhCase(unittest.TestCase):
         submitted_at: str = "2026-01-01T00:02:00Z",
         thread_id: str | None = None,
         session_name: str | None = None,
-        comment_fallback: bool = False,
         extra_prose: str = "",
         ledger_override: str | None = None,
     ) -> tuple[dict, dict, list[dict], str, str]:
@@ -876,8 +1018,8 @@ class FakeGhCase(unittest.TestCase):
             if ledger_override is not None
             else "\n".join(finding_lines) if finding_lines else "- none"
         )
-        event = "COMMENT" if findings == 0 else "REQUEST_CHANGES"
-        fallback = "none" if findings == 0 else "COMMENT"
+        event = "COMMENT"
+        fallback = "none"
         attestation = {
             "schema": 1,
             "pr": 1,
@@ -908,12 +1050,11 @@ class FakeGhCase(unittest.TestCase):
             f"fallback={fallback} digest={digest} -->"
         )
         body = prefix + marker + "\n"
-        state = "COMMENTED" if findings == 0 or comment_fallback else "CHANGES_REQUESTED"
         review = {
             "id": review_id,
             "body": body,
             "commit_id": head_sha,
-            "state": state,
+            "state": "COMMENTED",
             "submitted_at": submitted_at,
         }
         status_state = "success" if findings == 0 else "failure"
@@ -949,6 +1090,88 @@ class FakeGhCase(unittest.TestCase):
             "status": "done",
         }
         return review, status, [session], body, marker
+
+    def adjudication_bundle(
+        self,
+        root: Path,
+        head_sha: str,
+        base_sha: str,
+        *,
+        round_count: int = 4,
+        first_review_id: int = 1,
+        first_round_head_sha: str | None = None,
+        dispositions: list[dict] | None = None,
+    ) -> tuple[list[dict], list[dict], list[dict], dict, dict]:
+        """Build canonical, independently attested rounds and one adjudication."""
+        reviews: list[dict] = []
+        statuses: list[dict] = []
+        sessions: list[dict] = []
+        rounds: list[dict] = []
+        for offset in range(round_count):
+            index = offset + 1
+            review_id = first_review_id + offset
+            run_id = f"adjudication-round-{review_id}"
+            review, status, round_sessions, _body, marker = self.review_bundle(
+                root,
+                first_round_head_sha if offset == 0 and first_round_head_sha else head_sha,
+                base_sha,
+                run_id=run_id,
+                worktree=root,
+                findings=1,
+                review_id=review_id,
+                status_id=200 + review_id,
+                submitted_at=f"2026-01-01T00:03:{index:02d}Z",
+            )
+            digest_match = re.search(r"digest=([0-9a-f]{64})", marker)
+            assert digest_match is not None
+            rounds.append(
+                {
+                    "review_id": review_id,
+                    "run_id": run_id,
+                    "digest": digest_match.group(1),
+                }
+            )
+            reviews.append(review)
+            statuses.append(status)
+            sessions.extend(round_sessions)
+
+        source = rounds[-1]
+        payload = {
+            "schema": 1,
+            "pr": 1,
+            "head_sha": head_sha,
+            "base_sha": base_sha,
+            "source_review": dict(source),
+            "rounds": rounds,
+            "dispositions": dispositions
+            if dispositions is not None
+            else [
+                {
+                    "finding": "code:F1",
+                    "outcome": "fixed",
+                    "reason": "The source finding was repaired in the exact head.",
+                    "evidence": "Focused regression coverage exercises the repair.",
+                }
+            ],
+        }
+        prefix = (
+            "ADJUDICATION\n\n```json\n"
+            + json.dumps(payload, indent=2, sort_keys=True)
+            + "\n```\n\n"
+        )
+        body_digest = hashlib.sha256(prefix.encode("utf-8")).hexdigest()
+        marker = (
+            f"<!-- mipstarre:adjudication pr=1 head={head_sha} base={base_sha} "
+            f"review={source['review_id']} run={source['run_id']} "
+            f"digest={source['digest']} body={body_digest} -->"
+        )
+        comment = {
+            "id": 500,
+            "body": prefix + marker + "\n",
+            "created_at": "2026-01-01T00:10:00Z",
+            "updated_at": "2026-01-01T00:10:00Z",
+        }
+        return reviews, statuses, sessions, comment, payload
 
 
 class IssueLifecycleTests(FakeGhCase):
@@ -1339,14 +1562,76 @@ class CIPublicationTests(FakeGhCase):
         state = self.state()
         rows = state["statuses"][head_sha]
         contexts = {row["context"].casefold() for row in rows}
-        self.assertEqual(contexts, set(github_api.CANONICAL_CI_CONTEXTS))
+        expected_contexts = {
+            *github_api.CANONICAL_CI_CONTEXTS,
+            github_api.CI_SUMMARY_CONTEXT,
+        }
+        self.assertEqual(contexts, expected_contexts)
         latest = self.client().latest_statuses(head_sha)
         self.assertTrue(all(row["state"] == "success" for row in latest.values()))
-        self.assertTrue(all("skipped" in row["description"] for row in latest.values()))
+        self.assertTrue(
+            all(
+                "skipped" in latest[context.casefold()]["description"]
+                for context in github_api.CANONICAL_CI_CONTEXTS
+            )
+        )
+        self.assertIn(
+            "digest=", latest[github_api.CI_SUMMARY_CONTEXT.casefold()]["description"]
+        )
         comments = state["comments"]["1"]
         self.assertEqual(len(comments), 1)
         self.assertIn("mipstarre:ci-manifest", comments[0]["body"])
         self.client().ci_manifest(1, head_sha)
+        calls = state["calls"]
+        pending_index = next(
+            index
+            for index, call in enumerate(calls)
+            if call["args"][:3] == ["api", "--method", "POST"]
+            and call["args"][3].endswith(f"statuses/{head_sha}")
+            and call["input"].get("context") == github_api.CI_SUMMARY_CONTEXT
+            and call["input"].get("state") == "pending"
+        )
+        comment_index = next(
+            index
+            for index, call in enumerate(calls)
+            if call["args"][:3] == ["api", "--method", "POST"]
+            and call["args"][3].endswith("issues/1/comments")
+            and "mipstarre:ci-manifest" in call["input"].get("body", "")
+        )
+        success_index = next(
+            index
+            for index, call in enumerate(calls)
+            if call["args"][:3] == ["api", "--method", "POST"]
+            and call["args"][3].endswith(f"statuses/{head_sha}")
+            and call["input"].get("context") == github_api.CI_SUMMARY_CONTEXT
+            and call["input"].get("state") == "success"
+        )
+        first_step_index = next(
+            index
+            for index, call in enumerate(calls)
+            if call["args"][:3] == ["api", "--method", "POST"]
+            and call["args"][3].endswith(f"statuses/{head_sha}")
+            and call["input"].get("context") == "local-ci/build"
+            and call["input"].get("state") == "pending"
+        )
+        self.assertLess(pending_index, first_step_index)
+        self.assertLess(pending_index, comment_index)
+        self.assertLess(comment_index, success_index)
+        between = calls[comment_index + 1 : success_index]
+        self.assertTrue(
+            any(
+                call["args"][:3] == ["api", "--method", "GET"]
+                and call["args"][3].startswith("repos/o/r/issues/1/comments")
+                for call in between
+            )
+        )
+        self.assertTrue(
+            any(
+                call["args"][:3] == ["api", "--method", "GET"]
+                and call["args"][3].startswith(f"repos/o/r/commits/{head_sha}/statuses")
+                for call in between
+            )
+        )
 
     def test_partial_run_publishes_nothing_and_remote_race_has_no_success(self) -> None:
         repository, base_sha, head_sha = self.prepare_ci()
@@ -1362,7 +1647,7 @@ class CIPublicationTests(FakeGhCase):
         )
         moved = self.run_ci(repository)
         self.assertNotEqual(moved.returncode, 0)
-        rows = self.state()["statuses"][head_sha]
+        rows = self.state()["statuses"].get(head_sha, [])
         self.assertFalse(any(row["state"] == "success" for row in rows))
 
     def test_remote_base_race_has_no_success_or_manifest(self) -> None:
@@ -1374,7 +1659,7 @@ class CIPublicationTests(FakeGhCase):
         )
         moved = self.run_ci(repository)
         self.assertNotEqual(moved.returncode, 0)
-        rows = self.state()["statuses"][head_sha]
+        rows = self.state()["statuses"].get(head_sha, [])
         self.assertFalse(any(row["state"] == "success" for row in rows))
         self.assertEqual(self.state()["comments"], {})
 
@@ -1398,7 +1683,7 @@ class CIPublicationTests(FakeGhCase):
                 self.assertEqual(self.state()["statuses"].get(head_sha), None)
                 self.assertEqual(self.state()["comments"], {})
 
-    def test_tree_dirtied_at_final_recheck_invalidates_all_statuses(self) -> None:
+    def test_tree_dirtied_at_publication_boundary_never_leaves_success(self) -> None:
         repository, _base_sha, head_sha = self.prepare_ci(name="ci-final-dirty")
         dirty_path = repository / "late-untracked.txt"
         self.write_state(
@@ -1411,8 +1696,7 @@ class CIPublicationTests(FakeGhCase):
         result = self.run_ci(repository)
         self.assertNotEqual(result.returncode, 0)
         latest = self.client().latest_statuses(head_sha)
-        self.assertEqual(set(latest), set(github_api.CANONICAL_CI_CONTEXTS))
-        self.assertTrue(all(row["state"] == "error" for row in latest.values()))
+        self.assertFalse(any(row["state"] == "success" for row in latest.values()))
         self.assertEqual(self.state()["comments"], {})
 
     def test_tree_dirtied_during_comment_lookup_blocks_manifest(self) -> None:
@@ -1429,13 +1713,16 @@ class CIPublicationTests(FakeGhCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertTrue(dirty_path.exists())
         latest = self.client().latest_statuses(head_sha)
-        self.assertEqual(set(latest), set(github_api.CANONICAL_CI_CONTEXTS))
+        self.assertEqual(
+            set(latest),
+            {*github_api.CANONICAL_CI_CONTEXTS, github_api.CI_SUMMARY_CONTEXT},
+        )
         self.assertTrue(all(row["state"] == "error" for row in latest.values()))
         self.assertEqual(self.state()["comments"].get("1", []), [])
 
 
 class ReviewPublicationTests(FakeGhCase):
-    """Group 5: exact-commit review events, fallback, ledger, and head checks."""
+    """Group 5: exact-commit COMMENT attestations, ledger, and head checks."""
 
     def prepare_review_shell(
         self,
@@ -1664,6 +1951,7 @@ class ReviewPublicationTests(FakeGhCase):
         )
         reviews = self.state()["reviews"]["1"]
         self.assertEqual(len(reviews), 1)
+        self.assertEqual(reviews[0]["state"], "COMMENTED")
         for line in lines:
             self.assertIn(line, reviews[0]["body"])
         dispatched_task = (
@@ -1676,6 +1964,37 @@ class ReviewPublicationTests(FakeGhCase):
             1, head_sha, base_sha
         )
         self.assertEqual(attestation.findings, 1)
+        self.assertEqual((attestation.event, attestation.fallback), ("COMMENT", "none"))
+        latest = self.client(repository).latest_statuses(head_sha)[
+            github_api.REVIEW_CONTEXT.casefold()
+        ]
+        self.assertEqual(latest["state"], "failure")
+        calls = self.state()["calls"]
+        pending_index = next(
+            index
+            for index, call in enumerate(calls)
+            if call["args"][:3] == ["api", "--method", "POST"]
+            and call["args"][3].endswith(f"statuses/{head_sha}")
+            and call["input"].get("context") == github_api.REVIEW_CONTEXT
+            and call["input"].get("state") == "pending"
+        )
+        review_index = next(
+            index
+            for index, call in enumerate(calls)
+            if call["args"][:3] == ["api", "--method", "POST"]
+            and call["args"][3].endswith("pulls/1/reviews")
+        )
+        failure_index = next(
+            index
+            for index, call in enumerate(calls)
+            if call["args"][:3] == ["api", "--method", "POST"]
+            and call["args"][3].endswith(f"statuses/{head_sha}")
+            and call["input"].get("context") == github_api.REVIEW_CONTEXT
+            and call["input"].get("state") == "failure"
+        )
+        self.assertLess(pending_index, review_index)
+        self.assertLess(review_index, failure_index)
+        self.assertEqual(calls[review_index]["input"]["event"], "COMMENT")
 
     def test_attestation_rejects_noncanonical_finding_location(self) -> None:
         sha, base_sha = "b" * 40, "a" * 40
@@ -2044,18 +2363,13 @@ class ReviewPublicationTests(FakeGhCase):
         self.assertEqual(evidence.attestation.event, "COMMENT")
         self.assertEqual(evidence.attestation.findings, 0)
 
-    def test_exact_self_review_422_falls_back_once_with_adverse_evidence(self) -> None:
+    def test_adverse_findings_publish_one_comment_and_failure_summary(self) -> None:
         sha, base_sha = "e" * 40, "b" * 40
         client = self.client()
         _review, status, sessions, body, marker = self.review_bundle(
             self.root, sha, base_sha, findings=1
         )
-        self.write_state(
-            review_422="Review Can not request changes on your own pull request."
-        )
-        row, used_event = client.review_once(
-            1, sha, body, "REQUEST_CHANGES", marker
-        )
+        row, used_event = client.review_once(1, sha, body, "COMMENT", marker)
         self.assertEqual((used_event, row["state"]), ("COMMENT", "COMMENTED"))
         posts = [
             call
@@ -2065,11 +2379,9 @@ class ReviewPublicationTests(FakeGhCase):
         ]
         self.assertEqual(
             [call["input"]["event"] for call in posts],
-            ["REQUEST_CHANGES", "COMMENT"],
+            ["COMMENT"],
         )
-        self.assertIn(
-            "findings=1 event=REQUEST_CHANGES fallback=COMMENT", row["body"]
-        )
+        self.assertIn("findings=1 event=COMMENT fallback=none", row["body"])
 
         self.write_state(statuses={sha: [status]})
         self.append_sessions(self.root, sessions)
@@ -2081,7 +2393,7 @@ class ReviewPublicationTests(FakeGhCase):
                 evidence.attestation.findings,
                 evidence.status["state"],
             ),
-            ("REQUEST_CHANGES", "COMMENT", 1, "failure"),
+            ("COMMENT", "none", 1, "failure"),
         )
         self.assertEqual(evidence.attestation.head_sha, sha)
         self.assertEqual(evidence.attestation.base_sha, base_sha)
@@ -2089,9 +2401,7 @@ class ReviewPublicationTests(FakeGhCase):
         self.assertEqual(evidence.attestation.lanes[0].name, sessions[0]["name"])
         self.assertEqual(client.latest_review_ledger(1)["body"], body)
 
-        adopted, adopted_event = client.review_once(
-            1, sha, body, "REQUEST_CHANGES", marker
-        )
+        adopted, adopted_event = client.review_once(1, sha, body, "COMMENT", marker)
         self.assertEqual((adopted["id"], adopted_event), (row["id"], "COMMENT"))
         posts = [
             call
@@ -2099,15 +2409,14 @@ class ReviewPublicationTests(FakeGhCase):
             if call["args"][:3] == ["api", "--method", "POST"]
             and call["args"][3].endswith("pulls/1/reviews")
         ]
-        self.assertEqual(len(posts), 2)
+        self.assertEqual(len(posts), 1)
 
-    def test_unrelated_request_changes_422_is_one_post_refusal(self) -> None:
+    def test_request_changes_publication_is_rejected_before_post(self) -> None:
         sha, base_sha = "e" * 40, "b" * 40
         _review, _status, _sessions, body, marker = self.review_bundle(
             self.root, sha, base_sha, findings=1
         )
-        self.write_state(review_422="Validation Failed: commit is not part of pull")
-        with self.assertRaises(github_api.GitHubError):
+        with self.assertRaisesRegex(github_api.GitHubError, "only COMMENT"):
             self.client().review_once(1, sha, body, "REQUEST_CHANGES", marker)
         posts = [
             call
@@ -2115,26 +2424,23 @@ class ReviewPublicationTests(FakeGhCase):
             if call["args"][:3] == ["api", "--method", "POST"]
             and call["args"][3].endswith("pulls/1/reviews")
         ]
-        self.assertEqual(len(posts), 1)
-        self.assertEqual(posts[0]["input"]["event"], "REQUEST_CHANGES")
+        self.assertEqual(posts, [])
 
-    def test_ambiguous_and_transient_review_writes_never_fall_back(self) -> None:
+    def test_ambiguous_and_transient_comment_writes_never_repeat(self) -> None:
         sha, base_sha = "c" * 40, "a" * 40
         _review, _status, _sessions, body, marker = self.review_bundle(
             self.root, sha, base_sha, findings=1
         )
         self.write_state(ambiguous_review_once=True)
-        row, used_event = self.client().review_once(
-            1, sha, body, "REQUEST_CHANGES", marker
-        )
-        self.assertEqual((row["state"], used_event), ("CHANGES_REQUESTED", "REQUEST_CHANGES"))
+        row, used_event = self.client().review_once(1, sha, body, "COMMENT", marker)
+        self.assertEqual((row["state"], used_event), ("COMMENTED", "COMMENT"))
         posts = [
             call
             for call in self.state()["calls"]
             if call["args"][:3] == ["api", "--method", "POST"]
             and call["args"][3].endswith("pulls/1/reviews")
         ]
-        self.assertEqual([call["input"]["event"] for call in posts], ["REQUEST_CHANGES"])
+        self.assertEqual([call["input"]["event"] for call in posts], ["COMMENT"])
 
         other_sha = "d" * 40
         _review, _status, _sessions, other_body, other_marker = self.review_bundle(
@@ -2155,16 +2461,14 @@ class ReviewPublicationTests(FakeGhCase):
         with self.assertRaisesRegex(
             github_api.GitHubError, "refusing to issue a second mutation"
         ):
-            self.client().review_once(
-                1, other_sha, other_body, "REQUEST_CHANGES", other_marker
-            )
+            self.client().review_once(1, other_sha, other_body, "COMMENT", other_marker)
         posts = [
             call
             for call in self.state()["calls"]
             if call["args"][:3] == ["api", "--method", "POST"]
             and call["args"][3].endswith("pulls/1/reviews")
         ]
-        self.assertEqual([call["input"]["event"] for call in posts], ["REQUEST_CHANGES"])
+        self.assertEqual([call["input"]["event"] for call in posts], ["COMMENT"])
 
     def test_marker_collision_and_event_mismatch_fail_closed(self) -> None:
         sha, base_sha = "9" * 40, "8" * 40
@@ -2467,7 +2771,7 @@ class AutoFixTests(FakeGhCase):
             pull_base_sequence=[],
         )
 
-    def test_adverse_comment_fallback_is_consumed_by_review_autofix(self) -> None:
+    def test_adverse_comment_attestation_is_consumed_by_review_autofix(self) -> None:
         repository, head_sha, pull = self.prepare_autofix(with_review_prompts=True)
         pull["labels"] = [{"name": github_api.AUTO_FIX_LABEL}]
         review, _status, sessions, _body, _marker = self.review_bundle(
@@ -2475,7 +2779,6 @@ class AutoFixTests(FakeGhCase):
             head_sha,
             pull["base"]["sha"],
             findings=1,
-            comment_fallback=True,
         )
         self.append_sessions(repository, sessions)
         self.write_state(
@@ -2535,7 +2838,6 @@ class AutoFixTests(FakeGhCase):
             pull["base"]["sha"],
             run_id="review-old-findings",
             findings=1,
-            comment_fallback=True,
             submitted_at="2026-01-01T00:01:00Z",
         )
         new_review, _status, new_sessions, _body, _marker = self.review_bundle(
@@ -2905,6 +3207,19 @@ class MergeGateTests(FakeGhCase):
         client = self.client()
         with self.assertRaises(pr_merge.GateFailure):
             pr_merge.require_ci(client, 1, sha, base_sha)
+        green_comment, green_statuses = self.ci_bundle(sha, base_sha)
+        step_only = [
+            status
+            for status in green_statuses
+            if status["context"] != github_api.CI_SUMMARY_CONTEXT
+        ]
+        self.write_state(
+            comments={"1": [green_comment]}, statuses={sha: step_only}
+        )
+        with self.assertRaises(pr_merge.GateFailure):
+            pr_merge.require_ci(client, 1, sha, base_sha)
+        with self.assertRaises(github_api.GitHubError):
+            github_api.require_ci_success(client, 1, sha, base_sha)
         comment, statuses = self.ci_bundle(
             sha, base_sha, outcomes={"build": "failure"}
         )
@@ -2927,23 +3242,249 @@ class MergeGateTests(FakeGhCase):
         with self.assertRaises(pr_merge.GateFailure):
             pr_merge.require_review(client, 1, sha, base_sha)
 
-    def test_adverse_comment_fallback_is_valid_evidence_but_blocks_merge(self) -> None:
+    def test_adverse_comment_is_valid_evidence_but_blocks_merge(self) -> None:
         sha, base_sha = "a" * 40, "b" * 40
         review, status, sessions, _body, _marker = self.review_bundle(
             self.root,
             sha,
             base_sha,
             findings=1,
-            comment_fallback=True,
         )
         self.append_sessions(self.root, sessions)
         self.write_state(reviews={"1": [review]}, statuses={sha: [status]})
         evidence = self.client().review_evidence(1, sha, base_sha)
-        self.assertEqual(evidence.attestation.event, "REQUEST_CHANGES")
-        self.assertEqual(evidence.attestation.fallback, "COMMENT")
+        self.assertEqual(evidence.attestation.event, "COMMENT")
+        self.assertEqual(evidence.attestation.fallback, "none")
         self.assertEqual(evidence.attestation.row["state"], "COMMENTED")
         with self.assertRaisesRegex(pr_merge.GateFailure, "not a clean COMMENT"):
             pr_merge.require_review(self.client(), 1, sha, base_sha)
+
+    def test_server_policy_requires_exact_zero_approval_classic_protection(self) -> None:
+        client = self.client()
+        pr_merge.require_server_policy(client, "main")
+
+        invalid: list[tuple[str, dict]] = []
+        protection = classic_protection()
+        protection["required_status_checks"]["strict"] = False
+        invalid.append(("nonstrict", protection))
+        protection = classic_protection()
+        protection["required_status_checks"]["contexts"].append("legacy/check")
+        protection["required_status_checks"]["checks"].append(
+            {"context": "legacy/check", "app_id": None}
+        )
+        invalid.append(("extra-check", protection))
+        protection = classic_protection()
+        protection["enforce_admins"]["enabled"] = False
+        invalid.append(("admins", protection))
+        protection = classic_protection()
+        protection["required_pull_request_reviews"][
+            "required_approving_review_count"
+        ] = 1
+        invalid.append(("approval", protection))
+        protection = classic_protection()
+        protection["required_pull_request_reviews"][
+            "require_code_owner_reviews"
+        ] = True
+        invalid.append(("code-owner", protection))
+        protection = classic_protection()
+        protection["required_pull_request_reviews"][
+            "require_last_push_approval"
+        ] = True
+        invalid.append(("last-push", protection))
+        protection = classic_protection()
+        protection["required_pull_request_reviews"][
+            "bypass_pull_request_allowances"
+        ]["users"] = [{"login": "owner"}]
+        invalid.append(("bypass", protection))
+        protection = classic_protection()
+        protection["allow_force_pushes"]["enabled"] = True
+        invalid.append(("force-push", protection))
+        protection = classic_protection()
+        protection["allow_deletions"]["enabled"] = True
+        invalid.append(("deletion", protection))
+
+        for name, candidate in invalid:
+            with self.subTest(name=name):
+                self.write_state(
+                    branch_protections={"main": candidate},
+                    branch_rules={"main": []},
+                    rulesets={},
+                )
+                with self.assertRaises(pr_merge.GateFailure):
+                    pr_merge.require_server_policy(client, "main")
+
+    def test_server_policy_rejects_weak_effective_rules_and_bypasses(self) -> None:
+        client = self.client()
+        status_rule = {
+            "type": "required_status_checks",
+            "ruleset_id": 7,
+            "parameters": {
+                "strict_required_status_checks_policy": True,
+                "required_status_checks": [
+                    {"context": github_api.CI_SUMMARY_CONTEXT},
+                    {"context": github_api.REVIEW_CONTEXT},
+                ],
+            },
+        }
+        review_rule = {
+            "type": "pull_request",
+            "ruleset_id": 7,
+            "parameters": {
+                "required_approving_review_count": 0,
+                "require_code_owner_review": False,
+                "require_last_push_approval": False,
+                "allowed_merge_methods": ["merge"],
+            },
+        }
+        active = {"enforcement": "active", "bypass_actors": []}
+        self.write_state(
+            branch_protections={"main": classic_protection()},
+            branch_rules={"main": [status_rule, review_rule]},
+            rulesets={"7": active},
+        )
+        pr_merge.require_server_policy(client, "main")
+
+        candidates = {
+            "merge-queue": [{"type": "merge_queue", "parameters": {}}],
+            "nonstrict-status": [
+                {
+                    **status_rule,
+                    "parameters": {
+                        **status_rule["parameters"],
+                        "strict_required_status_checks_policy": False,
+                    },
+                }
+            ],
+            "positive-approval": [
+                {
+                    **review_rule,
+                    "parameters": {
+                        **review_rule["parameters"],
+                        "required_approving_review_count": 1,
+                    },
+                }
+            ],
+        }
+        for name, rules in candidates.items():
+            with self.subTest(name=name):
+                self.write_state(
+                    branch_rules={"main": rules},
+                    rulesets={"7": active},
+                )
+                with self.assertRaises(pr_merge.GateFailure):
+                    pr_merge.require_server_policy(client, "main")
+
+        self.write_state(
+            branch_rules={"main": [status_rule]},
+            rulesets={
+                "7": {
+                    "enforcement": "active",
+                    "bypass_actors": [{"actor_type": "OrganizationAdmin"}],
+                }
+            },
+        )
+        with self.assertRaisesRegex(pr_merge.GateFailure, "bypass actors"):
+            pr_merge.require_server_policy(client, "main")
+
+    def test_adjudication_accepts_exact_fixed_and_open_tracked_dispositions(self) -> None:
+        sha, base_sha = "2" * 40, "3" * 40
+        pull = pull_row(1, sha, base_sha=base_sha)
+        pull["labels"] = [{"name": github_api.ADJUDICATION_LABEL}]
+        reviews, _statuses, sessions, comment, _payload = (
+            self.adjudication_bundle(self.root, sha, base_sha)
+        )
+        self.append_sessions(self.root, sessions)
+        self.write_state(pulls={"1": pull}, reviews={"1": reviews}, comments={"1": [comment]})
+        evidence = pr_merge.require_adjudication(
+            self.client(), pull, 1, sha, base_sha, require_status=False
+        )
+        self.assertEqual(evidence.source.finding_rows[0].key, "code:F1")
+
+        tracked = [{"finding": "code:F1", "outcome": "tracked", "issue": 7}]
+        reviews, _statuses, sessions, comment, _payload = self.adjudication_bundle(
+            self.root,
+            sha,
+            base_sha,
+            first_review_id=10,
+            dispositions=tracked,
+        )
+        self.append_sessions(self.root, sessions)
+        self.write_state(
+            pulls={"1": pull},
+            reviews={"1": reviews},
+            comments={"1": [comment]},
+            issues={"7": issue_row(7)},
+        )
+        pr_merge.require_adjudication(
+            self.client(), pull, 1, sha, base_sha, require_status=False
+        )
+
+    def test_adjudication_rejects_edited_duplicate_short_and_inexact_records(self) -> None:
+        sha, base_sha = "4" * 40, "5" * 40
+        pull = pull_row(1, sha, base_sha=base_sha)
+        pull["labels"] = [{"name": github_api.ADJUDICATION_LABEL}]
+
+        for index, case in enumerate(
+            (
+                "edited",
+                "duplicate",
+                "short",
+                "stale-round",
+                "missing",
+                "bad-fixed",
+                "closed-tracked",
+            ),
+            start=1,
+        ):
+            with self.subTest(case=case):
+                dispositions = None
+                round_count = 4
+                issues: dict[str, dict] = {}
+                if case == "short":
+                    round_count = 3
+                elif case == "missing":
+                    dispositions = []
+                elif case == "bad-fixed":
+                    dispositions = [
+                        {
+                            "finding": "code:F1",
+                            "outcome": "fixed",
+                            "reason": "No evidence is provided.",
+                        }
+                    ]
+                elif case == "closed-tracked":
+                    dispositions = [
+                        {"finding": "code:F1", "outcome": "tracked", "issue": 9}
+                    ]
+                    issues = {"9": {**issue_row(9), "state": "closed"}}
+                reviews, _statuses, sessions, comment, _payload = (
+                    self.adjudication_bundle(
+                        self.root,
+                        sha,
+                        base_sha,
+                        round_count=round_count,
+                        first_review_id=100 + index * 10,
+                        first_round_head_sha=("6" * 40 if case == "stale-round" else None),
+                        dispositions=dispositions,
+                    )
+                )
+                self.append_sessions(self.root, sessions)
+                comments = [comment]
+                if case == "edited":
+                    comment = {**comment, "updated_at": "2026-01-01T00:11:00Z"}
+                    comments = [comment]
+                elif case == "duplicate":
+                    comments = [comment, {**comment, "id": 501}]
+                self.write_state(
+                    pulls={"1": pull},
+                    reviews={"1": reviews},
+                    comments={"1": comments},
+                    issues=issues,
+                )
+                with self.assertRaises(pr_merge.GateFailure):
+                    pr_merge.require_adjudication(
+                        self.client(), pull, 1, sha, base_sha, require_status=False
+                    )
 
     def test_live_lock_history_cap_and_adjudication_are_fail_closed(self) -> None:
         cache = self.root / "cache"
@@ -2969,16 +3510,18 @@ class MergeGateTests(FakeGhCase):
         pull["labels"] = [{"name": github_api.ADJUDICATION_LABEL}]
         self.write_state(pulls={"1": pull}, comments={"1": []})
         with self.assertRaises(pr_merge.GateFailure):
-            pr_merge.require_adjudication(self.client(), pull, 1, sha)
+            pr_merge.require_adjudication(
+                self.client(), pull, 1, sha, pull["base"]["sha"], require_status=False
+            )
 
 
 class GuardedMergeTests(FakeGhCase):
     """Group 7: one exact-head guarded gh merge and no direct main push."""
 
     def prepare_valid_merge(
-        self,
+        self, *, name: str = "repository"
     ) -> tuple[Path, str, str, argparse.Namespace]:
-        repository, _remote, base_sha, head_sha = self.make_repository()
+        repository, _remote, base_sha, head_sha = self.make_repository(name=name)
         pull = pull_row(1, head_sha, base_sha=base_sha)
         ci_comment, statuses = self.ci_bundle(head_sha, base_sha)
         review, review_status, sessions, _body, _marker = self.review_bundle(
@@ -2993,6 +3536,14 @@ class GuardedMergeTests(FakeGhCase):
             comments={"1": [ci_comment]},
             reviews={"1": [review]},
             commits={"1": [{"sha": head_sha, "commit": {"message": "Feature"}}]},
+            branch_tips={"main": base_sha},
+            required_merge_locks=[
+                str(self.root / "cache/locks/review-1.lock"),
+                str(self.root / "cache/locks/fix-issue-7-test.lock"),
+                str(self.root / "cache/locks/ci-1.lock"),
+            ],
+            calls=[],
+            merge_call_count=0,
             merge_sha="2" * 40,
         )
         args = argparse.Namespace(
@@ -3013,8 +3564,14 @@ class GuardedMergeTests(FakeGhCase):
         ):
             self.assertEqual(pr_merge.run(args), 0)
         calls = self.state()["calls"]
-        merge_calls = [row["args"] for row in calls if row["args"][:2] == ["pr", "merge"]]
-        self.assertIn(
+        merge_calls = [
+            row["args"]
+            for row in calls
+            if row["args"][:2] == ["pr", "merge"] and "--help" not in row["args"]
+        ]
+        self.assertEqual(
+            merge_calls,
+            [
             [
                 "pr",
                 "merge",
@@ -3024,9 +3581,13 @@ class GuardedMergeTests(FakeGhCase):
                 "--merge",
                 "--match-head-commit",
                 head_sha,
+            ]
             ],
-            merge_calls,
         )
+        self.assertEqual(self.state()["merge_call_count"], 1)
+        self.assertEqual(len(self.state()["merge_locks_observed"]), 3)
+        self.assertNotIn("--admin", merge_calls[0])
+        self.assertNotIn("--auto", merge_calls[0])
         source = (BIN_DIR / "pr_merge.py").read_text(encoding="utf-8")
         self.assertNotIn('"push", "github"', source)
         self.assertNotIn("--admin", source)
@@ -3071,6 +3632,117 @@ class GuardedMergeTests(FakeGhCase):
         locks = self.root / "cache" / "locks"
         self.assertFalse((locks / "review-1.lock").exists())
         self.assertFalse((locks / "fix-issue-7-test.lock").exists())
+        self.assertFalse((locks / "ci-1.lock").exists())
+
+    def test_merge_mutation_rejects_head_base_and_required_status_races_once(self) -> None:
+        cases = {
+            "head": {"head_sha": "8" * 40},
+            "base": {"base_tip": "9" * 40},
+            "status": {
+                "status": {
+                    "id": 999,
+                    "sha": "unused",
+                    "context": github_api.REVIEW_CONTEXT,
+                    "state": "failure",
+                    "description": "injected race",
+                    "created_at": "2099-01-01T00:00:00Z",
+                }
+            },
+        }
+        for name, race in cases.items():
+            with self.subTest(name=name):
+                _repository, _base_sha, _head_sha, args = self.prepare_valid_merge(
+                    name=f"merge-race-{name}"
+                )
+                self.write_state(merge_race=race)
+                with mock.patch.dict(
+                    os.environ,
+                    {"MIPSTARRE_CACHE_ROOT": str(self.root / "cache")},
+                ), mock.patch.object(pr_merge, "fast_forward_base"), mock.patch.object(
+                    pr_merge, "cleanup_feature"
+                ):
+                    with self.assertRaises((github_api.GitHubError, pr_merge.GateFailure)):
+                        pr_merge.run(args)
+                self.assertEqual(self.state()["merge_call_count"], 1)
+                merge_calls = [
+                    call
+                    for call in self.state()["calls"]
+                    if call["args"][:2] == ["pr", "merge"]
+                    and "--help" not in call["args"]
+                ]
+                self.assertEqual(len(merge_calls), 1)
+
+    def test_ambiguous_merge_success_is_read_back_without_retry(self) -> None:
+        _repository, _base_sha, _head_sha, args = self.prepare_valid_merge(
+            name="merge-ambiguous-success"
+        )
+        self.write_state(ambiguous_merge_success_once=True)
+        with mock.patch.dict(
+            os.environ, {"MIPSTARRE_CACHE_ROOT": str(self.root / "cache")}
+        ), mock.patch.object(pr_merge, "fast_forward_base"), mock.patch.object(
+            pr_merge, "cleanup_feature"
+        ):
+            self.assertEqual(pr_merge.run(args), 0)
+        self.assertEqual(self.state()["merge_call_count"], 1)
+        self.assertTrue(self.state()["pulls"]["1"]["merged"])
+
+    def test_ambiguous_unmerged_outcome_is_not_retried(self) -> None:
+        _repository, _base_sha, _head_sha, args = self.prepare_valid_merge(
+            name="merge-ambiguous-absent"
+        )
+        self.write_state(fail_merge_before_once=True)
+        with mock.patch.dict(
+            os.environ, {"MIPSTARRE_CACHE_ROOT": str(self.root / "cache")}
+        ), mock.patch.object(pr_merge, "fast_forward_base"), mock.patch.object(
+            pr_merge, "cleanup_feature"
+        ):
+            with self.assertRaisesRegex(pr_merge.GateFailure, "not retried"):
+                pr_merge.run(args)
+        self.assertEqual(self.state()["merge_call_count"], 1)
+        self.assertFalse(self.state()["pulls"]["1"]["merged"])
+
+    def test_adjudicated_merge_publishes_exact_success_under_all_locks(self) -> None:
+        repository, base_sha, head_sha, args = self.prepare_valid_merge(
+            name="merge-adjudicated"
+        )
+        state = self.state()
+        pull = state["pulls"]["1"]
+        pull["labels"] = [{"name": github_api.ADJUDICATION_LABEL}]
+        reviews, statuses, sessions, comment, payload = self.adjudication_bundle(
+            repository,
+            head_sha,
+            base_sha,
+            first_review_id=10,
+        )
+        self.append_sessions(repository, sessions)
+        state["pulls"]["1"] = pull
+        state["issues"]["1"] = {
+            **pull,
+            "pull_request": {"url": pull["html_url"]},
+        }
+        state["comments"]["1"].append(comment)
+        state["reviews"]["1"].extend(reviews)
+        state["statuses"][head_sha].extend(statuses)
+        state["required_adjudication_locks"] = state["required_merge_locks"]
+        self.write_state(**state)
+        args.adjudicated = True
+        with mock.patch.dict(
+            os.environ, {"MIPSTARRE_CACHE_ROOT": str(self.root / "cache")}
+        ), mock.patch.object(pr_merge, "fast_forward_base"), mock.patch.object(
+            pr_merge, "cleanup_feature"
+        ):
+            self.assertEqual(pr_merge.run(args), 0)
+        final_state = self.state()
+        self.assertEqual(final_state["merge_call_count"], 1)
+        self.assertEqual(len(final_state["adjudication_locks_observed"]), 3)
+        latest = self.client(repository).latest_statuses(head_sha)[
+            github_api.REVIEW_CONTEXT.casefold()
+        ]
+        self.assertEqual(latest["state"], "success")
+        self.assertIn(
+            f"review={payload['source_review']['review_id']}",
+            latest["description"],
+        )
 
 
 class SnapshotTests(FakeGhCase):

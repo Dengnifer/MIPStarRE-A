@@ -22,20 +22,19 @@ retried blindly. Ambiguous mutations use stable hidden markers followed by an
 authoritative read-back. A marker may be adopted only when its event, exact
 commit, and complete body match.
 
-An idempotent mutating command normally issues at most one POST or PATCH per
-invocation. The sole exception is `review_once`: after GitHub definitively
-rejects `REQUEST_CHANGES` with HTTP 422 and an explicit prohibition against a
-pull-request author requesting changes on their own PR, it may issue one
-`COMMENT` fallback carrying the same adverse attestation. Unrelated 422
-responses and transient or ambiguous failures never authorize that fallback.
+An idempotent mutating command issues at most one POST or PATCH per invocation.
+Every local review, clean or adverse, is a `COMMENT`; unresolved findings are
+represented by a failing summary rather than a sticky `REQUEST_CHANGES` review.
 After an ambiguous mutation result, the command polls only the authoritative
 read surface and fails ambiguous when the expected marker-bound state does not
 appear. It never resolves ambiguity by repeating the same mutation.
 
 The shared parsers distinguish a valid publication from gate-complete evidence.
-A complete exact-head and exact-base CI manifest with all matching statuses is
-readable when its conclusion is `success`, `failure`, or `error`; review and
-merge accept only `success` with canonical step outcomes `success` or `skipped`.
+A complete exact-head and exact-base CI manifest with all matching step
+statuses is readable when its conclusion is `success`, `failure`, or `error`.
+Review and merge additionally require a successful `local-ci/summary` whose
+description binds the manifest run and digest; they accept only `success` with
+canonical step outcomes `success` or `skipped`.
 A review attestation can likewise be structurally and session-valid before its
 summary status is final, so prior-ledger and auto-fix consumers may read it.
 Merge requires the exact matching final summary. Neither distinction creates a
@@ -85,13 +84,16 @@ forbidden. Fix commits begin exactly `[codex-auto-fix]` or
 
 ## Exact-head gates
 
-`local/bin/ci.sh <pr-number>` publishes all eight `local-ci/*` statuses and one
-marker-bound manifest comment for a complete run. `local/bin/review.sh
-<pr-number>` publishes a commit-bound ledger review and
-`local-review/summary`. Partial or moved-head runs publish no gate-satisfying
-set. CI and review additionally require a clean committed feature worktree,
-including no tracked, staged, or untracked changes, at startup and final
-publication boundaries. Runtime logs live beneath `~/.cache/mipstarre-dev/`.
+`local/bin/ci.sh <pr-number>` publishes `local-ci/summary=pending` before a
+complete run, all eight `local-ci/*` step statuses, and one marker-bound
+manifest comment. Only after authoritative manifest and status read-back may it
+replace the summary with its digest-bound final state. `local/bin/review.sh
+<pr-number>` publishes `local-review/summary=pending` at review start, then a
+commit-bound `COMMENT` ledger and `success` for a clean attestation or `failure`
+for findings. Partial or moved-head runs publish no gate-satisfying set. CI and
+review require a clean committed feature worktree, including no tracked,
+staged, or untracked changes, at startup and final publication boundaries.
+Runtime logs live beneath `~/.cache/mipstarre-dev/`.
 
 Review holds the per-PR review lock and the ownership-stamped branch fix lock
 from before reading the feature tree through publication. It may recover a
@@ -103,23 +105,45 @@ distinct attestations for the same PR.
 
 `local/bin/pr_merge.py <pr-number>` accepts only an open, non-draft, mergeable
 PR whose local branch and GitHub head are the same full 40- or 64-hex SHA and
-whose trusted local base matches the PR's full base SHA. It holds the per-PR
-review lock through the merge and reserves the branch fix lock. One fail-closed
-gate evaluator runs both before merge preparation and immediately before the
-merge mutation. Each evaluation binds the unchanged head and base and requires
-the success-level exact-head and exact-base per-step CI statuses plus their
-same-run manifest, a strictly parsed clean `COMMENT` attestation plus its exact
-same-run/digest final status and matching reviewer completion telemetry, no
-newer adverse exact-head review, fix-lock quiescence, and complete within-cap
-fix history.
+whose trusted local base matches the PR's full base SHA. It reserves the
+per-PR review lock, branch fix lock, and per-PR CI lock through gate publication
+and the merge mutation. The feature worktree must be clean at each gate
+boundary. One fail-closed evaluator runs before preparation and immediately
+before merge. Each evaluation binds the unchanged head and base and requires
+the success-level exact-head and exact-base CI manifest, step statuses, and
+digest-bound summary; a strictly parsed clean `COMMENT` attestation plus its
+exact same-run/digest summary and reviewer completion telemetry; no newer
+adverse exact-head review; and complete within-cap fix history.
+
+The evaluator reads classic protection for the PR's actual base. Required
+checks must be strict and exactly `local-ci/summary` and
+`local-review/summary`; administrators must be enforced; a pull-request review
+rule must be present with zero required approvals, no code-owner or last-push
+approval, and empty user/team/app bypass allowances; force pushes and deletions
+must be disabled. Every effective branch rule is also read. Active merge queues,
+nonstrict or missing summary rules, approval requirements, unavailable merge
+commits, inactive referenced rulesets, or nonempty ruleset bypass actors block
+the merge.
 
 GitHub approval and `reviewDecision` are not gates. A clean independent
 exact-head `COMMENT` review is sufficient with the other evidence above.
 
-Adjudicated merges additionally require the repository adjudication label and
-a current-head marker-bound `ADJUDICATION` comment with dispositions. The only
-merge operation is guarded `gh pr merge --merge --match-head-commit <sha>`.
-After GitHub reports success, the trusted local base may be fetched and
+Adjudicated merges require the current `adjudicated` label and exactly one
+unedited PR comment beginning `ADJUDICATION`. Its canonical JSON and final
+digest marker bind the PR, head, base, and latest source review id, run, and
+digest. It cites at least four ordered, distinct, session-valid review rounds
+for that same head and base. Its dispositions exactly cover every unresolved
+source finding: `fixed` records need nonempty reason and evidence, while
+`tracked` records name an open, non-PR issue in the same repository. After a
+full revalidation under all three locks, the gate publishes the exact
+adjudication as `local-review/summary=success` and rereads it before merge.
+
+The only merge mutation is one guarded
+`gh pr merge --merge --match-head-commit <sha>` call, without `--admin` or
+`--auto`. GitHub's strict required checks and base-freshness rule remain the
+server-side last gate. A transient result triggers authoritative PR read-back,
+never a second merge call; only the exact PR/head/base reported merged and
+closed is accepted. After success, the trusted local base may be fetched and
 fast-forwarded; feature cleanup then follows the worktree safeguards.
 
 ## Snapshots and reporting

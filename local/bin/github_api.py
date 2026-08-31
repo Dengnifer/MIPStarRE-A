@@ -40,6 +40,7 @@ CANONICAL_CI_STEPS = (
     "statement-origin",
 )
 CANONICAL_CI_CONTEXTS = tuple(f"local-ci/{step}" for step in CANONICAL_CI_STEPS)
+CI_SUMMARY_CONTEXT = "local-ci/summary"
 REVIEW_CONTEXT = "local-review/summary"
 AUTO_FIX_PREFIXES = ("[codex-auto-fix]", "[codex-review-fix]")
 AUTO_FIX_LABEL = "auto-fix-codex"
@@ -53,7 +54,7 @@ _REVIEW_MARKER_RE = re.compile(
     r"<!-- mipstarre:review-attestation pr=(\d+) "
     r"head=((?:[0-9a-f]{40}|[0-9a-f]{64})) "
     r"base=((?:[0-9a-f]{40}|[0-9a-f]{64})) run=([^<>\s]+) "
-    r"findings=(\d+) event=(COMMENT|REQUEST_CHANGES) fallback=(none|COMMENT) "
+    r"findings=(\d+) event=(COMMENT) fallback=(none) "
     r"digest=([0-9a-f]{64}) -->"
 )
 _REVIEW_ATTESTATION_RE = re.compile(
@@ -93,19 +94,6 @@ _RATE_LIMIT_TEXT = (
     "secondary rate limit",
     "retry-after",
     "retry after",
-)
-_SELF_REVIEW_REQUEST_CHANGES_PATTERNS = (
-    re.compile(
-        r"\b(?:you\s+)?(?:cannot|can\s+not|can't)\s+request\s+changes\s+on\s+"
-        r"your\s+own\s+(?:pull\s+request|pr)\b",
-        re.IGNORECASE,
-    ),
-    re.compile(
-        r"\b(?:the\s+)?(?:pull\s+request|pr)\s+authors?\s+"
-        r"(?:cannot|can\s+not|can't)\s+request\s+changes"
-        r"(?:\s+on\s+(?:their|the)\s+own\s+(?:pull\s+request|pr))?\b",
-        re.IGNORECASE,
-    ),
 )
 _MARKER_RE = re.compile(r"^<!-- mipstarre:[a-z0-9-]+(?: [^<>\r\n]+)* -->$")
 _SHA_RE = re.compile(r"(?:[0-9a-fA-F]{40}|[0-9a-fA-F]{64})")
@@ -159,6 +147,33 @@ class ReviewLaneEvidence:
 
 
 @dataclass(frozen=True)
+class ReviewFinding:
+    """One canonical finding from an attested reviewer lane."""
+
+    lane: str
+    identifier: int
+    state: str
+    severity: str
+    location: str
+    summary: str
+
+    @property
+    def key(self) -> str:
+        return f"{self.lane}:F{self.identifier}"
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "key": self.key,
+            "lane": self.lane,
+            "identifier": self.identifier,
+            "state": self.state,
+            "severity": self.severity,
+            "location": self.location,
+            "summary": self.summary,
+        }
+
+
+@dataclass(frozen=True)
 class ReviewAttestation:
     """Strictly parsed marker-bound local review publication."""
 
@@ -171,6 +186,7 @@ class ReviewAttestation:
     fallback: str
     digest: str
     lanes: tuple[ReviewLaneEvidence, ...]
+    finding_rows: tuple[ReviewFinding, ...]
     row: dict[str, Any]
 
     def as_dict(self) -> dict[str, Any]:
@@ -184,6 +200,7 @@ class ReviewAttestation:
             "fallback": self.fallback,
             "digest": self.digest,
             "lanes": [lane.as_dict() for lane in self.lanes],
+            "findings": [finding.as_dict() for finding in self.finding_rows],
         }
 
 
@@ -206,6 +223,7 @@ class CIManifestEvidence:
     head_sha: str
     base_sha: str
     run_id: str
+    digest: str
     row: dict[str, Any]
     manifest: dict[str, Any]
     statuses: dict[str, dict[str, Any]]
@@ -216,6 +234,7 @@ class CIManifestEvidence:
             "head_sha": self.head_sha,
             "base_sha": self.base_sha,
             "run_id": self.run_id,
+            "digest": self.digest,
             "manifest": self.manifest,
             "statuses": self.statuses,
         }
@@ -262,14 +281,6 @@ def _is_transient(stderr: str, status: int | None) -> bool:
     if status == 403 and any(fragment in lowered for fragment in _RATE_LIMIT_TEXT):
         return True
     return any(fragment in lowered for fragment in _TRANSIENT_TEXT)
-
-
-def _is_self_review_request_changes_422(error: GitHubError) -> bool:
-    """Recognize only GitHub's explicit PR-author request-changes prohibition."""
-    if error.status != 422:
-        return False
-    detail = f"{error}\n{error.stdout}"
-    return any(pattern.search(detail) for pattern in _SELF_REVIEW_REQUEST_CHANGES_PATTERNS)
 
 
 def stable_digest(payload: Any, *, length: int = 24) -> str:
@@ -332,11 +343,60 @@ def review_status_description(attestation: ReviewAttestation) -> str:
     )
 
 
+def review_summary_state(attestation: ReviewAttestation) -> str:
+    """Return the summary state without conflating it with raw validity."""
+    if (
+        attestation.event == "COMMENT"
+        and attestation.fallback == "none"
+        and attestation.findings == 0
+        and str(attestation.row.get("state") or "").upper() == "COMMENTED"
+    ):
+        return "success"
+    return "failure"
+
+
 def review_pending_description(run_id: str) -> str:
     """Return the canonical pending description for one review run."""
     if not _RUN_ID_RE.fullmatch(run_id):
         raise GitHubError("review run id is invalid")
     return f"local review run={run_id} is pending"
+
+
+def ci_pending_description(run_id: str) -> str:
+    """Return the canonical pending description for one complete CI run."""
+    if not _RUN_ID_RE.fullmatch(run_id):
+        raise GitHubError("CI run id is invalid")
+    return f"local CI run={run_id} is pending"
+
+
+def ci_manifest_digest(manifest: dict[str, Any]) -> str:
+    """Hash the parsed manifest independently of comment JSON formatting."""
+    return hashlib.sha256(
+        json.dumps(
+            manifest, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+        ).encode("utf-8")
+    ).hexdigest()
+
+
+def ci_summary_description(evidence: CIManifestEvidence) -> str:
+    conclusion = str(evidence.manifest.get("conclusion") or "")
+    verdict = {
+        "success": "passed",
+        "failure": "failed",
+        "error": "could not run",
+    }.get(conclusion)
+    if verdict is None:
+        raise GitHubError("CI evidence has an invalid summary conclusion")
+    return (
+        f"local CI digest={evidence.digest} run={evidence.run_id} {verdict}"
+    )
+
+
+def ci_summary_state(evidence: CIManifestEvidence) -> str:
+    conclusion = str(evidence.manifest.get("conclusion") or "")
+    if conclusion not in {"success", "failure", "error"}:
+        raise GitHubError("CI evidence has an invalid summary conclusion")
+    return conclusion
 
 
 def ci_status_description(run_id: str, step: dict[str, Any]) -> tuple[str, str]:
@@ -645,7 +705,9 @@ def _review_attestation_from_row(
     if len(canonical_sections) != len(lanes):
         raise GitHubError("review body does not contain one canonical ledger per lane")
     canonical_findings = 0
-    for section in canonical_sections:
+    finding_rows: list[ReviewFinding] = []
+    states = {" ": "unresolved", "x": "resolved", "-": "outdated"}
+    for lane, section in zip(lanes, canonical_sections, strict=True):
         lines = section.splitlines()
         if lines == ["- none"]:
             continue
@@ -660,6 +722,16 @@ def _review_attestation_from_row(
             if identifier in identifiers:
                 raise GitHubError("review ledger repeats a finding identifier")
             identifiers.add(identifier)
+            finding_rows.append(
+                ReviewFinding(
+                    lane=lane.lane,
+                    identifier=identifier,
+                    state=states[match.group(1)],
+                    severity=match.group(3),
+                    location=match.group(4),
+                    summary=match.group(5),
+                )
+            )
             if match.group(1) == " ":
                 canonical_findings += 1
     if canonical_findings != marker_findings:
@@ -670,20 +742,13 @@ def _review_attestation_from_row(
     )
     if commit_id != marker_head:
         raise GitHubError("review attestation commit_id differs from its full head SHA")
-    state = str(row.get("state") or "").upper()
-    if marker_event == "COMMENT":
-        if marker_findings != 0 or marker_fallback != "none" or state != "COMMENTED":
-            raise GitHubError(
-                "a clean review must be a zero-finding COMMENT with fallback=none"
-            )
-    elif (
-        marker_findings <= 0
-        or marker_fallback != "COMMENT"
-        or state not in {"CHANGES_REQUESTED", "COMMENTED"}
+    if (
+        marker_event != "COMMENT"
+        or marker_fallback != "none"
+        or str(row.get("state") or "").upper() != "COMMENTED"
     ):
         raise GitHubError(
-            "an adverse review must be a positive-finding REQUEST_CHANGES "
-            "with fallback=COMMENT and an adverse-compatible state"
+            "local review attestations must use COMMENT with fallback=none"
         )
     return ReviewAttestation(
         number=number,
@@ -695,6 +760,7 @@ def _review_attestation_from_row(
         fallback=marker_fallback,
         digest=digest,
         lanes=tuple(lanes),
+        finding_rows=tuple(finding_rows),
         row=row,
     )
 
@@ -908,6 +974,39 @@ class GitHub:
         payload = self.api(f"/repos/{self.repo}/pulls/{number}")
         if not isinstance(payload, dict):
             raise GitHubError(f"pull request #{number} response is not a JSON object")
+        return payload
+
+    def branch_protection(self, branch: str) -> dict[str, Any]:
+        """Read classic protection for one exact base branch."""
+        encoded = urllib.parse.quote(branch, safe="")
+        payload = self.api(
+            f"/repos/{self.repo}/branches/{encoded}/protection"
+        )
+        if not isinstance(payload, dict):
+            raise GitHubError(
+                f"classic protection for branch {branch!r} is not a JSON object"
+            )
+        return payload
+
+    def branch_rules(self, branch: str) -> list[dict[str, Any]]:
+        """Read the active rules GitHub says apply to one base branch."""
+        encoded = urllib.parse.quote(branch, safe="")
+        payload = self.api(f"/repos/{self.repo}/rules/branches/{encoded}")
+        if not isinstance(payload, list) or not all(
+            isinstance(row, dict) for row in payload
+        ):
+            raise GitHubError(
+                f"effective rules for branch {branch!r} are not a JSON list"
+            )
+        return payload
+
+    def ruleset(self, identifier: int) -> dict[str, Any]:
+        """Read one repository ruleset referenced by an effective branch rule."""
+        if type(identifier) is not int or identifier <= 0:
+            raise GitHubError("ruleset id must be a positive integer")
+        payload = self.api(f"/repos/{self.repo}/rulesets/{identifier}")
+        if not isinstance(payload, dict):
+            raise GitHubError(f"ruleset {identifier} response is not a JSON object")
         return payload
 
     def publication_guard(
@@ -1221,6 +1320,7 @@ class GitHub:
             head_sha=sha,
             base_sha=manifest_base,
             run_id=marker_run,
+            digest=ci_manifest_digest(manifest),
             row=row,
             manifest=manifest,
             statuses=statuses,
@@ -1244,7 +1344,76 @@ class GitHub:
                 "exact-run CI manifest has non-success canonical steps: "
                 + ", ".join(failures)
             )
+        statuses = self.latest_statuses(evidence.head_sha)
+        summary = statuses.get(CI_SUMMARY_CONTEXT.casefold()) or {}
+        expected_description = render_status_description(
+            evidence.head_sha,
+            CI_SUMMARY_CONTEXT,
+            "success",
+            ci_summary_description(evidence),
+        )
+        if (
+            str(summary.get("state") or "").casefold() != "success"
+            or str(summary.get("description") or "") != expected_description
+        ):
+            raise GitHubError(
+                f"{CI_SUMMARY_CONTEXT} does not match CI run "
+                f"{evidence.run_id} and digest {evidence.digest}"
+            )
         return evidence
+
+    def finalize_ci_status(
+        self,
+        number: int,
+        sha: str,
+        base_sha: str,
+        run_id: str,
+        *,
+        before_mutation: Callable[[], None] | None = None,
+        before_write: Callable[[], None] | None = None,
+    ) -> CIManifestEvidence:
+        """Publish a summary only after authoritative manifest read-back."""
+        if not _RUN_ID_RE.fullmatch(run_id):
+            raise GitHubError("CI finalization run id is invalid")
+        evidence = self.ci_evidence(number, sha, base_sha)
+        if evidence.run_id != run_id:
+            raise GitHubError("CI finalization run does not match the latest manifest")
+        state = ci_summary_state(evidence)
+
+        def assert_finalizable() -> None:
+            if before_mutation is not None:
+                before_mutation()
+            current = self.ci_evidence(number, sha, base_sha)
+            if current.run_id != run_id or current.digest != evidence.digest:
+                raise GitHubError("CI manifest changed before summary publication")
+            if before_mutation is not None:
+                before_mutation()
+            if before_write is not None:
+                before_write()
+
+        self.post_status(
+            evidence.head_sha,
+            CI_SUMMARY_CONTEXT,
+            state,
+            ci_summary_description(evidence),
+            before_mutation=assert_finalizable,
+        )
+        current = self.ci_evidence(number, sha, base_sha)
+        summary = self.latest_statuses(sha).get(CI_SUMMARY_CONTEXT.casefold()) or {}
+        expected = render_status_description(
+            sha,
+            CI_SUMMARY_CONTEXT,
+            state,
+            ci_summary_description(current),
+        )
+        if (
+            current.run_id != run_id
+            or current.digest != evidence.digest
+            or str(summary.get("state") or "").casefold() != state
+            or str(summary.get("description") or "") != expected
+        ):
+            raise GitHubError("CI summary failed authoritative final read-back")
+        return current
 
     def ci_manifest(
         self, number: int, sha: str, base_sha: str | None = None
@@ -1312,7 +1481,7 @@ class GitHub:
         self._validate_attestation_sessions(attestation)
         statuses = self.latest_statuses(attestation.head_sha)
         status = statuses.get(REVIEW_CONTEXT.casefold()) or {}
-        state = "success" if attestation.event == "COMMENT" else "failure"
+        state = review_summary_state(attestation)
         expected_description = render_status_description(
             attestation.head_sha,
             REVIEW_CONTEXT,
@@ -1338,6 +1507,13 @@ class GitHub:
         selected = next(item for item in attestations if item.row is latest)
         self._validate_attestation_sessions(selected)
         return selected
+
+    def review_attestations(self, number: int) -> list[ReviewAttestation]:
+        """Return every structurally and session-valid attestation for a PR."""
+        attestations = self._review_attestations(number)
+        for attestation in attestations:
+            self._validate_attestation_sessions(attestation)
+        return attestations
 
     def review_attestation(
         self, number: int, sha: str, base_sha: str | None = None
@@ -1376,7 +1552,7 @@ class GitHub:
         attestation = next(item for item in matches if item.row is selected_row)
         self._validate_attestation_sessions(attestation)
         status = self.latest_statuses(sha).get(REVIEW_CONTEXT.casefold())
-        final_state = "success" if attestation.event == "COMMENT" else "failure"
+        final_state = review_summary_state(attestation)
         expected_final = render_status_description(
             sha,
             REVIEW_CONTEXT,
@@ -1440,7 +1616,7 @@ class GitHub:
             return self._complete_review_evidence(attestation)
         if publication.get("state") != "recoverable":
             raise GitHubError("review publication is not finalizable")
-        state = "success" if attestation.event == "COMMENT" else "failure"
+        state = review_summary_state(attestation)
 
         def assert_finalizable() -> None:
             if before_mutation is not None:
@@ -1631,22 +1807,20 @@ class GitHub:
         number = normalize_number(number, kind="PR number")
         commit_id = normalize_sha(commit_id, kind="review commit SHA")
         _validated_marker(marker, body)
-        if event not in {"COMMENT", "REQUEST_CHANGES"}:
-            raise GitHubError(f"invalid review event {event!r}")
-        requested_state = "COMMENTED" if event == "COMMENT" else "CHANGES_REQUESTED"
+        if event != "COMMENT":
+            raise GitHubError("local review publication permits only COMMENT")
         requested = _review_attestation_from_row(
             {
                 "body": body,
                 "commit_id": commit_id,
-                "state": requested_state,
+                "state": "COMMENTED",
             },
             number,
         )
         marker_match = _REVIEW_MARKER_RE.search(body)
         if marker_match is None or marker_match.group(0) != marker:
             raise GitHubError("review marker does not match the canonical attestation")
-        required_fallback = "none" if event == "COMMENT" else "COMMENT"
-        if requested.event != event or requested.fallback != required_fallback:
+        if requested.event != "COMMENT" or requested.fallback != "none":
             raise GitHubError("review event and fallback do not match the attestation")
 
         requested_identity = (
@@ -1683,10 +1857,7 @@ class GitHub:
 
         assert_identity_available()
 
-        used_event = event
-
         def lookup() -> dict[str, Any] | None:
-            nonlocal used_event
             for row in self.reviews(number):
                 adopted_body = str(row.get("body") or "")
                 if marker not in adopted_body:
@@ -1701,49 +1872,25 @@ class GitHub:
                         "review marker collision: authoritative body differs from "
                         "the requested ledger"
                     )
-                adopted = _review_attestation_from_row(row, number)
-                used_event = (
-                    "COMMENT"
-                    if str(adopted.row.get("state") or "").upper() == "COMMENTED"
-                    else "REQUEST_CHANGES"
-                )
+                _review_attestation_from_row(row, number)
                 return row
             return None
 
         def mutate() -> dict[str, Any]:
-            nonlocal used_event
             endpoint = f"/repos/{self.repo}/pulls/{number}/reviews"
-            try:
-                if before_mutation is not None:
-                    before_mutation()
-                assert_identity_available()
-                if before_mutation is not None:
-                    before_mutation()
-                if before_write is not None:
-                    before_write()
-                payload = self.api(
-                    endpoint,
-                    method="POST",
-                    data={"body": body, "event": event, "commit_id": commit_id},
-                    retry=False,
-                )
-            except GitHubError as exc:
-                if event != "REQUEST_CHANGES" or not _is_self_review_request_changes_422(exc):
-                    raise
-                used_event = "COMMENT"
-                if before_mutation is not None:
-                    before_mutation()
-                assert_identity_available()
-                if before_mutation is not None:
-                    before_mutation()
-                if before_write is not None:
-                    before_write()
-                payload = self.api(
-                    endpoint,
-                    method="POST",
-                    data={"body": body, "event": used_event, "commit_id": commit_id},
-                    retry=False,
-                )
+            if before_mutation is not None:
+                before_mutation()
+            assert_identity_available()
+            if before_mutation is not None:
+                before_mutation()
+            if before_write is not None:
+                before_write()
+            payload = self.api(
+                endpoint,
+                method="POST",
+                data={"body": body, "event": "COMMENT", "commit_id": commit_id},
+                retry=False,
+            )
             if not isinstance(payload, dict):
                 raise GitHubError("review creation returned a non-object response")
             return payload
@@ -1754,17 +1901,14 @@ class GitHub:
         if str(row.get("body") or "") != body:
             raise GitHubError("review publication returned a different authoritative body")
         adopted_state = str(row.get("state") or "").upper()
-        expected_state = (
-            "COMMENTED" if used_event == "COMMENT" else "CHANGES_REQUESTED"
-        )
-        if adopted_state != expected_state:
+        if adopted_state != "COMMENTED":
             raise GitHubError(
                 f"review publication returned unexpected state {adopted_state or 'missing'}"
             )
         published = _review_attestation_from_row(row, number)
-        if published.event != event or published.fallback != required_fallback:
+        if published.event != "COMMENT" or published.fallback != "none":
             raise GitHubError("published review does not retain its attested semantics")
-        return row, used_event
+        return row, "COMMENT"
 
 
 def pull_identity(pull: dict[str, Any]) -> PullIdentity:
@@ -1800,20 +1944,11 @@ def fix_iteration_count(commits: Sequence[dict[str, Any]]) -> int:
     return count
 
 
-def require_ci_success(client: GitHub, sha: str) -> None:
-    sha = normalize_sha(sha)
-    latest = client.latest_statuses(sha)
-    failures = []
-    for context in CANONICAL_CI_CONTEXTS:
-        state = str(
-            (latest.get(context.casefold()) or {}).get("state") or "missing"
-        ).casefold()
-        if state != "success":
-            failures.append(f"{context}={state}")
-    if failures:
-        raise GitHubError(
-            f"exact-head CI is not green for {sha}: " + ", ".join(failures)
-        )
+def require_ci_success(
+    client: GitHub, number: int, sha: str, base_sha: str
+) -> CIManifestEvidence:
+    """Require the complete manifest and digest-bound CI summary contract."""
+    return client.ci_success_evidence(number, sha, base_sha)
 
 
 def _atomic_write(path: Path, payload: Any) -> None:
@@ -1923,7 +2058,9 @@ def build_parser() -> argparse.ArgumentParser:
     status_list.add_argument("sha")
 
     require_ci = sub.add_parser("require-ci")
+    require_ci.add_argument("number")
     require_ci.add_argument("sha")
+    require_ci.add_argument("base_sha")
 
     post_status = sub.add_parser("post-status")
     post_status.add_argument("sha")
@@ -1942,7 +2079,7 @@ def build_parser() -> argparse.ArgumentParser:
     review.add_argument("number")
     review.add_argument("commit_id")
     review.add_argument("body_file")
-    review.add_argument("event", choices=("COMMENT", "REQUEST_CHANGES"))
+    review.add_argument("event", choices=("COMMENT",))
     review.add_argument("marker")
     review.add_argument("--guard-file", type=Path)
 
@@ -1965,6 +2102,13 @@ def build_parser() -> argparse.ArgumentParser:
     ci_evidence.add_argument("number")
     ci_evidence.add_argument("sha")
     ci_evidence.add_argument("base_sha")
+
+    ci_finalize = sub.add_parser("ci-finalize")
+    ci_finalize.add_argument("number")
+    ci_finalize.add_argument("sha")
+    ci_finalize.add_argument("base_sha")
+    ci_finalize.add_argument("run_id")
+    ci_finalize.add_argument("--guard-file", type=Path)
 
     review_ledger = sub.add_parser("review-ledger")
     review_ledger.add_argument("number")
@@ -2035,7 +2179,12 @@ def cli(argv: Sequence[str] | None = None) -> int:
     elif args.command == "statuses":
         print(json.dumps(client.statuses(args.sha)))
     elif args.command == "require-ci":
-        require_ci_success(client, args.sha)
+        require_ci_success(
+            client,
+            normalize_number(args.number),
+            args.sha,
+            args.base_sha,
+        )
         print(args.sha)
     elif args.command == "post-status":
         guard = client.publication_guard(args.guard_file) if args.guard_file else None
@@ -2089,6 +2238,22 @@ def cli(argv: Sequence[str] | None = None) -> int:
     elif args.command == "ci-evidence":
         evidence = client.ci_success_evidence(
             normalize_number(args.number), args.sha, args.base_sha
+        )
+        print(json.dumps(evidence.as_dict(), ensure_ascii=False))
+    elif args.command == "ci-finalize":
+        guard = client.publication_guard(args.guard_file) if args.guard_file else None
+        local_guard = (
+            client.publication_guard(args.guard_file, authoritative=False)
+            if args.guard_file
+            else None
+        )
+        evidence = client.finalize_ci_status(
+            normalize_number(args.number),
+            args.sha,
+            args.base_sha,
+            args.run_id,
+            before_mutation=guard,
+            before_write=local_guard,
         )
         print(json.dumps(evidence.as_dict(), ensure_ascii=False))
     elif args.command == "review-ledger":

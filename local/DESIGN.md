@@ -27,7 +27,7 @@ GitHub snapshot is recovery telemetry and is likewise never lifecycle input.
 |---|---|
 | Issue identity, labels, parentage, state | GitHub issues and sub-issue API |
 | PR metadata, branch/head, reviews, merge | GitHub pull requests |
-| CI gate | exact-head `local-ci/*` commit statuses plus marker-bound manifest |
+| CI gate | exact-head manifest, step statuses, and digest-bound `local-ci/summary` |
 | Review gate | exact-head clean ledger plus `local-review/summary=success` |
 | Auto-fix count | complete GitHub-visible PR commit history |
 | Runtime logs, locks, intermediate output | `~/.cache/mipstarre-dev/` |
@@ -61,6 +61,9 @@ mutations. There is no offline mutation mode.
     atomically and are not caches for lifecycle tools.
 11. The faithful-formalization policy in `AGENTS.md` applies unchanged.
 12. A reviewer is a different session and thread from every author session.
+13. Merge holds the CI, review, and fix leases through its one exact-head
+    mutation and validates strict classic protection plus every effective rule
+    on the PR's actual base.
 
 ## Identity and telemetry
 

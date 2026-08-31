@@ -19,14 +19,16 @@ GitHub issue -> branch/worktree -> agent sessions -> exact-head CI -> review
 4. Dispatch every agent through `local/bin/dispatch.sh`; never invoke the model
    runner directly.
 5. Run `local/bin/ci.sh <pr-number>`. Complete runs publish all canonical
-   `local-ci/*` statuses and a marker-bound exact-head manifest comment.
+   `local-ci/*` statuses, a marker-bound exact-head manifest comment, and then
+   the digest-bound `local-ci/summary` gate.
 6. Run `local/bin/review.sh <pr-number>`. A clean commit-bound `COMMENT` review
    plus `local-review/summary=success` is sufficient; GitHub approval is not a
    gate.
 7. Optionally run `local/bin/autofix.sh <pr-number> --mode auto` when the PR has
    the opt-in label.
 8. Merge with `local/bin/pr_merge.py <pr-number>`, which invokes only guarded
-   `gh pr merge --merge --match-head-commit` after all evidence is current.
+   `gh pr merge --merge --match-head-commit` after all evidence and strict
+   protection on the actual base are current.
 
 `local/bin/github-sync.sh` creates an atomic audit snapshot under
 `results/telemetry/github-snapshot/`. Lifecycle commands never read snapshots

@@ -305,3 +305,24 @@ line number or the literal `-`.
 lost or cancelled leases, unrelated pending statuses, prompt-ref aliases, and
 reviewer-session replay all fail closed without creating a local registry or
 duplicating an already published review.
+
+## 2026-09-01 - Merge integrity is server-enforced without approval
+
+**Trigger:** owner decision follow-on for issue 0007 and the incident recorded
+in `results/telemetry/events.md`, "Final merge-integrity audit found that client
+evidence and server enforcement were still separate contracts."
+
+**Change:** CI now publishes a pending summary before work and finalizes its
+run/digest status only after immutable manifest and step-status read-back.
+Every local review is a `COMMENT`; findings produce a failing summary, while a
+clean attestation produces success. Merge validates exact zero-approval classic
+protection and all effective rules on the actual base, holds CI/review/fix
+leases through publication and merge, and uses one match-head mutation with
+read-back-only recovery. Adjudication is an unedited exact-comparison record of
+at least four distinct validated review rounds whose unresolved source findings
+have exhaustive fixed-with-evidence or tracked-to-open-issue dispositions.
+
+**Expected effect:** approval is neither requested nor counted, while stale
+bases, weak protection, bypass actors, mixed adjudication rounds, incomplete
+dispositions, concurrent producers, and ambiguous duplicate merges fail
+closed against GitHub's sole authoritative state.
