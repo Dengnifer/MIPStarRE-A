@@ -29,14 +29,11 @@ if [ "${1:-}" = "--resume" ]; then
   exec codex -C "$ROOT" resume --last
 fi
 
-PROMPT="You are the MAIN SESSION of this project. Before anything else,
-read these three files in full, in this order:
-1. HANDOFF.md            (state of the project and immediate next steps)
-2. local/personas/main.md (your persona: role, operating loop, duties)
-3. local/README.md        (the workflow layer's operator tour)
-Then read AGENTS.md. Confirm to the user what stage the project is in and
-what you will do next, then proceed per the checkpoint discipline. Your
-working directory is the repository root: $ROOT — all workflow tools are
-invoked as local/bin/<tool> from there."
+PROMPT="You are the MAIN SESSION of this project. Read, in order:
+local/personas/main.md (your persona), local/README.md, AGENTS.md. The
+owner will paste the project-state briefing into this session; treat it
+as authoritative for state and next steps. Your working directory is the
+repository root: $ROOT — all workflow tools are invoked as
+local/bin/<tool> from there."
 
 exec codex -C "$ROOT" "$PROMPT"
