@@ -4,9 +4,9 @@ branch: "issue-0006-qpbt-minimal-skeleton"
 issue: "0006"
 base: "main"
 state: "open"
-head_sha: "ec46d58b7497f349a5136232b80c0b49d7dbaa61"
-ci_status: null
-review_state: null
+head_sha: db4327a7c8f6eb5e5dbd3dc234267bd76cabaa97
+ci_status: success
+review_state: CHANGES_REQUESTED
 fix_iterations: 0
 auto_fix: true
 labels: ["formalization", "qpbt-test"]

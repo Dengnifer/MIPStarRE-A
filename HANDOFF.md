@@ -26,10 +26,14 @@ self-evolving formalization workflows.
 
 ## Immediate next steps (in order)
 
-1. **PR #0003**: run/re-run `local/bin/ci.sh 0003` and `local/bin/review.sh
-   0003` on ghz (the Mac-side review at migration time may not have
-   completed; its verdict, if present under `prs/0003-*/reviews/`, stands).
-   Handle findings per the loop; merge; close #0006; telemetry.
+1. **PR #0003**: review round 1 is DONE at head `db4327a` —
+   CHANGES_REQUESTED with 17 findings in
+   `prs/0003-*/reviews/db4327a...-code.md` (no prose lane: the diff has no
+   blueprint files). Adjudicate each finding against the blueprint/source
+   before fixing (reviewers can be wrong — see events.md); dispatch a
+   repair session (`dispatch.sh --role prover` or an orc), commit, re-run
+   `ci.sh 0003` + `review.sh 0003`; round cap 4, then §12 adjudication.
+   Merge; close #0006; telemetry.
 2. **Adjudicate the 4.2 brief OPEN items** (all four briefs in
    `issues/briefs/42-*.md`; the fleet's cross-brief notes are summarized in
    each). The consequential ones:
