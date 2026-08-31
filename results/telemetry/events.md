@@ -115,3 +115,23 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   unaffected. Left untouched; scripts must not depend on `elan show`.
 - **Fable 5 usage limit hit (2026-08-31).** All four 4.2 brief-drafter agents failed at dispatch with the account limit message; the main session continued. Mitigation: subagent fleets fall back to Opus (the standing model policy makes this the default for non-frontier reasoning anyway); codex sessions unaffected. Lesson for the paper: multi-model quotas are a real scheduling constraint — parallelism plans need a per-model budget column.
 - **Invalid UTF-8 argv broke every review dispatch of PR #0003.** Symptom: codex exited 2 in ~1 s with "invalid UTF-8 was detected in one or more arguments"; the pre-model retry failed identically. Diagnosis: `dispatch.sh` truncates untrusted attachments with `head -c`, which cuts at a byte boundary; the QPBT Lean diff is dense with mathematical Unicode, and the cut split a multibyte character — stage-3 TeX diffs were ASCII-heavy, so the latent defect never fired. Fix: UTF-8-safe truncation (decode with errors=ignore after the byte cap). Lesson: byte-capped truncation of UTF-8 text must always be followed by a decode-boundary repair; and a failing dispatch should be reproduced with the REAL payload, not a toy probe (the toy probe passed and misdirected the first diagnosis to transience).
+- **GitHub CLI discovery and API authentication were separate prerequisites.**
+  Symptom: `gh` was not on the main session's `PATH`, Ubuntu reported no
+  installed package, and a system install attempt could not obtain `sudo`;
+  inspection then found an existing binary at `~/.local/bin/gh`. Diagnosis:
+  the handoff's required user-local path was absent from this shell, while
+  `gh auth status` independently reported no authenticated GitHub host; the
+  repository deploy key authenticates Git transport, not GitHub API calls.
+  Fix: use the explicit user-local binary for preflight and leave API writes
+  pending until the owner completes `gh auth login` with the scoped PAT.
+  Lesson: migration preflight must check user-local binary discovery, API
+  authentication, and SSH Git access separately before attempting installation.
+- **The main-session sandbox initially denied the workflow lock root.**
+  Symptom: the first `issue_new.py` invocation failed before allocation with
+  `EROFS` for `~/.cache/mipstarre-dev/locks/issues-seq.lock`. Diagnosis: the
+  workspace sandbox admitted repository writes but not the shared runtime
+  cache required by the lifecycle's concurrency protocol. Fix: rerun the same
+  sanctioned command with explicit access to the cache root; issue `#0007`
+  was then allocated once. Lesson: authorize the runtime lock root for main
+  lifecycle commands and never bypass the locks merely because the repository
+  itself is writable.
