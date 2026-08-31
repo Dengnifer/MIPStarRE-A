@@ -187,3 +187,27 @@ parallel CI jobs (pr-review.yml), so this restores parent-level
 concurrency the local port had serialized.
 
 **Expected effect:** review wall time per round approximately halves.
+
+## 2026-08-31 — Migration to ghz; main session handed to codex; GitHub mirror
+
+**Trigger:** user directive: migrate the project to ghz:/home/drx/MIPStarRE-qpbt,
+hand the orchestrating main-session role to a codex session there (GPT
+models in place of Claude models), and mirror the repository to the private
+GitHub monorepo Dengnifer/MIPStarRE-qpbt as the MIPStarRE-A/ subtree.
+
+**Change:**
+- `local/personas/main.md`: the main-session persona (operator role,
+  operating loop, standing duties) — model-agnostic by construction.
+- `HANDOFF.md`: state snapshot and immediate next steps at handoff.
+- `local/bin/main-session.sh`: starts/resumes the interactive codex main
+  session anchored at the repository root.
+- `local/bin/github-sync.sh`: git-subtree mirror of main to GitHub
+  (repo-scoped deploy key; full history under MIPStarRE-A/). The mirror is
+  a surface only: issues, PRs, CI, reviews, and the registry remain local
+  and authoritative; run the sync after each merge to main.
+- macOS-only operational bits (caffeinate wake assertions) retire; the
+  server does not sleep.
+
+**Expected effect:** identical workflow semantics on the new host; the
+model-family switch of the operator is a recorded telemetry datum, not a
+protocol change.
