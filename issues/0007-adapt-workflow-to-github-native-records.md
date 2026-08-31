@@ -8,7 +8,7 @@ children: []
 labels: ["bug", "ci", "documentation", "infrastructure"]
 pinned: false
 created: "2026-08-31T13:48:38Z"
-updated: "2026-08-31T13:48:38Z"
+updated: "2026-08-31T14:22:05Z"
 agent_session: null
 ---
 
@@ -83,3 +83,6 @@ mode, not a reason to bypass the tracked adaptation.
 Applied by `local/bin/issue_new.py` (deterministic keyword pass, no model): `bug`, `ci`, `documentation`
 
 ## Activity
+
+- GitHub issue [#6](https://github.com/Dengnifer/MIPStarRE-A/issues/6) was
+  created from this local record during the write-through adapter transition.
