@@ -59,7 +59,13 @@ _REVIEW_MARKER_RE = re.compile(
 _REVIEW_ATTESTATION_RE = re.compile(
     r"## Review attestation\n\n```json\n(.*?)\n```\n\n$", re.DOTALL
 )
-_CANONICAL_FINDING_RE = re.compile(r"^- \[ \] F\d+\s", re.MULTILINE)
+_CANONICAL_FINDING_LINE_RE = re.compile(
+    r"^- \[( |x|-)\] F([1-9]\d*) "
+    r"\((blocker|changes|advisory)\) "
+    r"`(-|(?:(?!\.{1,2}/)[A-Za-z0-9._+-]+/)*"
+    r"(?!\.{1,2}:)[A-Za-z0-9._+-]+:[1-9]\d*)` "
+    r"— (\S(?:.*\S)?)$"
+)
 _SESSION_NAME_RE = re.compile(r"^reviewer-[A-Za-z0-9._-]+$")
 _THREAD_ID_RE = re.compile(r"^[A-Za-z0-9._:-]{8,200}$")
 _RUN_ID_RE = re.compile(r"^[A-Za-z0-9._:-]{1,28}$")
@@ -324,6 +330,13 @@ def review_status_description(attestation: ReviewAttestation) -> str:
         f"local review digest={attestation.digest} "
         f"run={attestation.run_id} {verdict}"
     )
+
+
+def review_pending_description(run_id: str) -> str:
+    """Return the canonical pending description for one review run."""
+    if not _RUN_ID_RE.fullmatch(run_id):
+        raise GitHubError("review run id is invalid")
+    return f"local review run={run_id} is pending"
 
 
 def ci_status_description(run_id: str, step: dict[str, Any]) -> tuple[str, str]:
@@ -631,9 +644,24 @@ def _review_attestation_from_row(
     )
     if len(canonical_sections) != len(lanes):
         raise GitHubError("review body does not contain one canonical ledger per lane")
-    canonical_findings = sum(
-        len(_CANONICAL_FINDING_RE.findall(section)) for section in canonical_sections
-    )
+    canonical_findings = 0
+    for section in canonical_sections:
+        lines = section.splitlines()
+        if lines == ["- none"]:
+            continue
+        if not lines:
+            raise GitHubError("review ledger must contain '- none' or canonical findings")
+        identifiers: set[int] = set()
+        for line in lines:
+            match = _CANONICAL_FINDING_LINE_RE.fullmatch(line)
+            if match is None:
+                raise GitHubError("review body contains a malformed canonical finding")
+            identifier = int(match.group(2))
+            if identifier in identifiers:
+                raise GitHubError("review ledger repeats a finding identifier")
+            identifiers.add(identifier)
+            if match.group(1) == " ":
+                canonical_findings += 1
     if canonical_findings != marker_findings:
         raise GitHubError("review attestation findings count does not match the ledger")
 
@@ -882,6 +910,109 @@ class GitHub:
             raise GitHubError(f"pull request #{number} response is not a JSON object")
         return payload
 
+    def publication_guard(
+        self, path: Path, *, authoritative: bool = True
+    ) -> Callable[[], None]:
+        """Build an in-process committed-comparison guard for a publication."""
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise GitHubError(f"cannot read publication guard {path}: {exc}") from exc
+        expected_keys = {
+            "schema",
+            "pr",
+            "branch",
+            "base",
+            "head_sha",
+            "base_sha",
+            "worktree",
+            "pid",
+            "owner",
+            "locks",
+        }
+        if not isinstance(payload, dict) or set(payload) != expected_keys:
+            raise GitHubError("publication guard has a noncanonical schema")
+        number = normalize_number(payload.get("pr"), kind="publication guard PR number")
+        branch = str(payload.get("branch") or "")
+        base = str(payload.get("base") or "")
+        head_sha = normalize_sha(payload.get("head_sha"), kind="guard head SHA")
+        base_sha = normalize_sha(payload.get("base_sha"), kind="guard base SHA")
+        worktree = Path(str(payload.get("worktree") or "")).resolve()
+        pid = str(payload.get("pid") or "")
+        owner = str(payload.get("owner") or "")
+        raw_locks = payload.get("locks")
+        if (
+            payload.get("schema") != 1
+            or not branch
+            or not base
+            or not worktree.is_dir()
+            or not isinstance(raw_locks, list)
+            or len(raw_locks) not in {0, 2}
+        ):
+            raise GitHubError("publication guard contains invalid values")
+        locks = tuple(Path(str(item)).resolve() for item in raw_locks)
+        if locks and (not pid.isdigit() or not owner or len(set(locks)) != 2):
+            raise GitHubError("publication guard contains invalid lease values")
+
+        def assert_leases() -> None:
+            for lock in locks:
+                try:
+                    lock_pid = (lock / "pid").read_text(encoding="utf-8").strip()
+                    lock_owner = (lock / "owner").read_text(encoding="utf-8").strip()
+                except OSError as exc:
+                    raise GitHubError(f"publication lease is unreadable: {lock}") from exc
+                if lock_pid != pid or lock_owner != owner or (lock / "cancel").exists():
+                    raise GitHubError(
+                        f"publication lease was lost or cancelled: {lock}"
+                    )
+
+        def git_output(*arguments: str) -> str:
+            result = subprocess.run(
+                ["git", "-C", str(worktree), *arguments],
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            if result.returncode:
+                raise GitHubError(
+                    "cannot validate the worktree immediately before publication"
+                )
+            return result.stdout.strip()
+
+        def guard() -> None:
+            assert_leases()
+            pull = self.get_pull(number) if authoritative else None
+            local_branch = git_output("symbolic-ref", "--quiet", "--short", "HEAD")
+            local_head = git_output("rev-parse", "HEAD")
+            local_base = git_output(
+                "rev-parse", f"refs/remotes/github/{base}^{{commit}}"
+            )
+            dirty = git_output("status", "--porcelain=v1", "--untracked-files=all")
+            assert_leases()
+            if (
+                (
+                    pull is not None
+                    and (
+                        str(pull.get("state") or "") != "open"
+                        or str((pull.get("head") or {}).get("ref") or "") != branch
+                        or str((pull.get("base") or {}).get("ref") or "") != base
+                        or str((pull.get("head") or {}).get("sha") or "").lower()
+                        != head_sha
+                        or str((pull.get("base") or {}).get("sha") or "").lower()
+                        != base_sha
+                    )
+                )
+                or local_branch != branch
+                or local_head != head_sha
+                or local_base != base_sha
+                or dirty
+            ):
+                raise GitHubError(
+                    "comparison or worktree changed immediately before publication"
+                )
+
+        return guard
+
     def labels(self) -> list[dict[str, Any]]:
         return self.paginate(f"/repos/{self.repo}/labels")
 
@@ -1095,8 +1226,31 @@ class GitHub:
             statuses=statuses,
         )
 
-    def ci_manifest(self, number: int, sha: str) -> tuple[dict[str, Any], dict[str, Any]]:
-        evidence = self.ci_evidence(number, sha)
+    def ci_success_evidence(
+        self, number: int, sha: str, base_sha: str
+    ) -> CIManifestEvidence:
+        """Return a complete exact-comparison CI run that satisfies the gate."""
+        evidence = self.ci_evidence(number, sha, base_sha)
+        manifest = evidence.manifest
+        if str(manifest.get("conclusion") or "") != "success":
+            raise GitHubError("exact-run CI manifest conclusion is not success")
+        failures = [
+            f"{step.get('step')}={step.get('outcome')}"
+            for step in manifest.get("steps") or []
+            if str(step.get("outcome") or "") not in {"success", "skipped"}
+        ]
+        if failures:
+            raise GitHubError(
+                "exact-run CI manifest has non-success canonical steps: "
+                + ", ".join(failures)
+            )
+        return evidence
+
+    def ci_manifest(
+        self, number: int, sha: str, base_sha: str | None = None
+    ) -> tuple[dict[str, Any], dict[str, Any]]:
+        """Return readable exact-head CI evidence, including failed/error runs."""
+        evidence = self.ci_evidence(number, sha, base_sha)
         return evidence.row, evidence.manifest
 
     def _review_attestations(self, number: int) -> list[ReviewAttestation]:
@@ -1106,11 +1260,40 @@ class GitHub:
             if "mipstarre:review-attestation" not in body:
                 continue
             attestations.append(_review_attestation_from_row(row, number))
+        session_owners: dict[str, tuple[str, str, str, str]] = {}
+        thread_owners: dict[str, tuple[str, str, str, str]] = {}
+        run_owners: dict[str, tuple[str, str, str, str]] = {}
+        for attestation in attestations:
+            identity = (
+                attestation.head_sha,
+                attestation.base_sha,
+                attestation.run_id,
+                attestation.digest,
+            )
+            prior = run_owners.setdefault(attestation.run_id, identity)
+            if prior != identity:
+                raise GitHubError(
+                    f"review run {attestation.run_id!r} is replayed across "
+                    "distinct review attestations"
+                )
+            for lane in attestation.lanes:
+                prior = session_owners.setdefault(lane.name, identity)
+                if prior != identity:
+                    raise GitHubError(
+                        f"reviewer session {lane.name!r} is replayed across "
+                        "distinct review attestations"
+                    )
+                prior = thread_owners.setdefault(lane.thread_id, identity)
+                if prior != identity:
+                    raise GitHubError(
+                        f"reviewer thread {lane.thread_id!r} is replayed across "
+                        "distinct review attestations"
+                    )
         return attestations
 
-    def _complete_review_evidence(
+    def _validate_attestation_sessions(
         self, attestation: ReviewAttestation
-    ) -> ReviewEvidence:
+    ) -> None:
         records = _read_session_records(
             self.repo_root / "results" / "telemetry" / "sessions.jsonl"
         )
@@ -1122,6 +1305,11 @@ class GitHub:
                 number=attestation.number,
                 worktree=worktree,
             )
+
+    def _complete_review_evidence(
+        self, attestation: ReviewAttestation
+    ) -> ReviewEvidence:
+        self._validate_attestation_sessions(attestation)
         statuses = self.latest_statuses(attestation.head_sha)
         status = statuses.get(REVIEW_CONTEXT.casefold()) or {}
         state = "success" if attestation.event == "COMMENT" else "failure"
@@ -1141,18 +1329,19 @@ class GitHub:
             )
         return ReviewEvidence(attestation=attestation, status=status)
 
-    def latest_review_evidence(self, number: int) -> ReviewEvidence | None:
+    def latest_review_attestation(self, number: int) -> ReviewAttestation | None:
         attestations = self._review_attestations(number)
         if not attestations:
             return None
         rows = [attestation.row for attestation in attestations]
         latest = self._latest(rows, "submitted_at")
         selected = next(item for item in attestations if item.row is latest)
-        return self._complete_review_evidence(selected)
+        self._validate_attestation_sessions(selected)
+        return selected
 
-    def review_evidence(
+    def review_attestation(
         self, number: int, sha: str, base_sha: str | None = None
-    ) -> ReviewEvidence:
+    ) -> ReviewAttestation:
         sha = normalize_sha(sha)
         expected_base = normalize_sha(base_sha, kind="pull-request base SHA") if base_sha else None
         matches = [
@@ -1165,17 +1354,148 @@ class GitHub:
             [attestation.row for attestation in matches], "submitted_at"
         )
         selected = next(item for item in matches if item.row is selected_row)
+        self._validate_attestation_sessions(selected)
+        return selected
+
+    def review_publication_state(
+        self, number: int, sha: str, base_sha: str
+    ) -> dict[str, Any]:
+        """Classify exact-attestation summary evidence for rerun recovery."""
+        sha = normalize_sha(sha)
+        base_sha = normalize_sha(base_sha, kind="pull-request base SHA")
+        matches = [
+            item
+            for item in self._review_attestations(number)
+            if item.head_sha == sha and item.base_sha == base_sha
+        ]
+        if not matches:
+            return {"state": "absent"}
+        selected_row = self._latest(
+            [attestation.row for attestation in matches], "submitted_at"
+        )
+        attestation = next(item for item in matches if item.row is selected_row)
+        self._validate_attestation_sessions(attestation)
+        status = self.latest_statuses(sha).get(REVIEW_CONTEXT.casefold())
+        final_state = "success" if attestation.event == "COMMENT" else "failure"
+        expected_final = render_status_description(
+            sha,
+            REVIEW_CONTEXT,
+            final_state,
+            review_status_description(attestation),
+        )
+        if status is not None and (
+            str(status.get("state") or "").casefold() == final_state
+            and str(status.get("description") or "") == expected_final
+        ):
+            return {
+                "state": "complete",
+                "summary_state": final_state,
+                "attestation": attestation.as_dict(),
+            }
+        expected_pending = render_status_description(
+            sha,
+            REVIEW_CONTEXT,
+            "pending",
+            review_pending_description(attestation.run_id),
+        )
+        if status is None or (
+            str(status.get("state") or "").casefold() == "pending"
+            and str(status.get("description") or "") == expected_pending
+        ):
+            return {
+                "state": "recoverable",
+                "summary_state": final_state,
+                "attestation": attestation.as_dict(),
+            }
+        raise GitHubError(
+            "latest review summary belongs to a different run or does not "
+            "match the exact review attestation"
+        )
+
+    def finalize_review_status(
+        self,
+        number: int,
+        sha: str,
+        base_sha: str,
+        run_id: str,
+        digest: str,
+        *,
+        before_mutation: Callable[[], None] | None = None,
+        before_write: Callable[[], None] | None = None,
+    ) -> ReviewEvidence:
+        """Revalidate one exact attestation and idempotently finalize its status."""
+        if not _RUN_ID_RE.fullmatch(run_id):
+            raise GitHubError("review finalization run id is invalid")
+        if re.fullmatch(r"[0-9a-f]{64}", digest) is None:
+            raise GitHubError("review finalization digest is invalid")
+        publication = self.review_publication_state(number, sha, base_sha)
+        if publication.get("state") == "absent":
+            raise GitHubError("cannot finalize a missing exact review attestation")
+        attestation = self.review_attestation(number, sha, base_sha)
+        if attestation.run_id != run_id or attestation.digest != digest:
+            raise GitHubError(
+                "review finalization identity does not match the latest exact attestation"
+            )
+        if publication.get("state") == "complete":
+            return self._complete_review_evidence(attestation)
+        if publication.get("state") != "recoverable":
+            raise GitHubError("review publication is not finalizable")
+        state = "success" if attestation.event == "COMMENT" else "failure"
+
+        def assert_finalizable() -> None:
+            if before_mutation is not None:
+                before_mutation()
+            current = self.review_publication_state(number, sha, base_sha)
+            current_attestation = current.get("attestation") or {}
+            if (
+                current.get("state") != "recoverable"
+                or current_attestation.get("run_id") != run_id
+                or current_attestation.get("digest") != digest
+            ):
+                raise GitHubError(
+                    "review summary changed before final status publication"
+                )
+            if before_mutation is not None:
+                before_mutation()
+            if before_write is not None:
+                before_write()
+
+        self.post_status(
+            attestation.head_sha,
+            REVIEW_CONTEXT,
+            state,
+            review_status_description(attestation),
+            before_mutation=assert_finalizable,
+        )
+        return self.review_evidence(number, sha, base_sha)
+
+    def latest_review_evidence(self, number: int) -> ReviewEvidence | None:
+        selected = self.latest_review_attestation(number)
+        return self._complete_review_evidence(selected) if selected else None
+
+    def review_evidence(
+        self, number: int, sha: str, base_sha: str | None = None
+    ) -> ReviewEvidence:
+        selected = self.review_attestation(number, sha, base_sha)
         return self._complete_review_evidence(selected)
 
     def latest_review_ledger(self, number: int) -> dict[str, Any] | None:
-        evidence = self.latest_review_evidence(number)
-        return evidence.attestation.row if evidence else None
+        attestation = self.latest_review_attestation(number)
+        return attestation.row if attestation else None
 
-    def review_ledger(self, number: int, sha: str) -> dict[str, Any]:
-        return self.review_evidence(number, sha).attestation.row
+    def review_ledger(
+        self, number: int, sha: str, base_sha: str | None = None
+    ) -> dict[str, Any]:
+        return self.review_attestation(number, sha, base_sha).row
 
     def post_status(
-        self, sha: str, context: str, state: str, description: str
+        self,
+        sha: str,
+        context: str,
+        state: str,
+        description: str,
+        *,
+        before_mutation: Callable[[], None] | None = None,
     ) -> dict[str, Any]:
         sha = normalize_sha(sha)
         context = context.strip()
@@ -1204,6 +1524,8 @@ class GitHub:
             return None
 
         def mutate() -> dict[str, Any]:
+            if before_mutation is not None:
+                before_mutation()
             payload = self.api(
                 f"/repos/{self.repo}/statuses/{sha}",
                 method="POST",
@@ -1254,7 +1576,14 @@ class GitHub:
                 stdout=exc.stdout,
             ) from exc
 
-    def comment_once(self, number: int, body: str, marker: str) -> dict[str, Any]:
+    def comment_once(
+        self,
+        number: int,
+        body: str,
+        marker: str,
+        *,
+        before_mutation: Callable[[], None] | None = None,
+    ) -> dict[str, Any]:
         _validated_marker(marker, body)
 
         def lookup() -> dict[str, Any] | None:
@@ -1271,6 +1600,8 @@ class GitHub:
             return None
 
         def mutate() -> dict[str, Any]:
+            if before_mutation is not None:
+                before_mutation()
             payload = self.api(
                 f"/repos/{self.repo}/issues/{number}/comments",
                 method="POST",
@@ -1293,6 +1624,9 @@ class GitHub:
         body: str,
         event: str,
         marker: str,
+        *,
+        before_mutation: Callable[[], None] | None = None,
+        before_write: Callable[[], None] | None = None,
     ) -> tuple[dict[str, Any], str]:
         number = normalize_number(number, kind="PR number")
         commit_id = normalize_sha(commit_id, kind="review commit SHA")
@@ -1314,6 +1648,40 @@ class GitHub:
         required_fallback = "none" if event == "COMMENT" else "COMMENT"
         if requested.event != event or requested.fallback != required_fallback:
             raise GitHubError("review event and fallback do not match the attestation")
+
+        requested_identity = (
+            requested.head_sha,
+            requested.base_sha,
+            requested.run_id,
+            requested.digest,
+        )
+        def assert_identity_available() -> None:
+            for existing in self._review_attestations(number):
+                existing_identity = (
+                    existing.head_sha,
+                    existing.base_sha,
+                    existing.run_id,
+                    existing.digest,
+                )
+                if existing_identity == requested_identity:
+                    continue
+                if existing.run_id == requested.run_id:
+                    raise GitHubError(
+                        "review run id is already bound to a distinct attestation"
+                    )
+                existing_names = {lane.name for lane in existing.lanes}
+                existing_threads = {lane.thread_id for lane in existing.lanes}
+                if any(lane.name in existing_names for lane in requested.lanes):
+                    raise GitHubError(
+                        "reviewer session name is already bound to a distinct "
+                        "attestation"
+                    )
+                if any(lane.thread_id in existing_threads for lane in requested.lanes):
+                    raise GitHubError(
+                        "reviewer thread id is already bound to a distinct attestation"
+                    )
+
+        assert_identity_available()
 
         used_event = event
 
@@ -1346,6 +1714,13 @@ class GitHub:
             nonlocal used_event
             endpoint = f"/repos/{self.repo}/pulls/{number}/reviews"
             try:
+                if before_mutation is not None:
+                    before_mutation()
+                assert_identity_available()
+                if before_mutation is not None:
+                    before_mutation()
+                if before_write is not None:
+                    before_write()
                 payload = self.api(
                     endpoint,
                     method="POST",
@@ -1356,6 +1731,13 @@ class GitHub:
                 if event != "REQUEST_CHANGES" or not _is_self_review_request_changes_422(exc):
                     raise
                 used_event = "COMMENT"
+                if before_mutation is not None:
+                    before_mutation()
+                assert_identity_available()
+                if before_mutation is not None:
+                    before_mutation()
+                if before_write is not None:
+                    before_write()
                 payload = self.api(
                     endpoint,
                     method="POST",
@@ -1548,11 +1930,13 @@ def build_parser() -> argparse.ArgumentParser:
     post_status.add_argument("context")
     post_status.add_argument("state", choices=("pending", "success", "failure", "error"))
     post_status.add_argument("description")
+    post_status.add_argument("--guard-file", type=Path)
 
     comment = sub.add_parser("comment-once")
     comment.add_argument("number")
     comment.add_argument("body_file")
     comment.add_argument("marker")
+    comment.add_argument("--guard-file", type=Path)
 
     review = sub.add_parser("review-once")
     review.add_argument("number")
@@ -1560,6 +1944,7 @@ def build_parser() -> argparse.ArgumentParser:
     review.add_argument("body_file")
     review.add_argument("event", choices=("COMMENT", "REQUEST_CHANGES"))
     review.add_argument("marker")
+    review.add_argument("--guard-file", type=Path)
 
     comments = sub.add_parser("comments")
     comments.add_argument("number")
@@ -1574,6 +1959,7 @@ def build_parser() -> argparse.ArgumentParser:
     ci_manifest = sub.add_parser("ci-manifest")
     ci_manifest.add_argument("number")
     ci_manifest.add_argument("sha")
+    ci_manifest.add_argument("base_sha", nargs="?")
 
     ci_evidence = sub.add_parser("ci-evidence")
     ci_evidence.add_argument("number")
@@ -1583,6 +1969,25 @@ def build_parser() -> argparse.ArgumentParser:
     review_ledger = sub.add_parser("review-ledger")
     review_ledger.add_argument("number")
     review_ledger.add_argument("sha")
+    review_ledger.add_argument("base_sha", nargs="?")
+
+    review_attestation = sub.add_parser("review-attestation")
+    review_attestation.add_argument("number")
+    review_attestation.add_argument("sha")
+    review_attestation.add_argument("base_sha")
+
+    review_state = sub.add_parser("review-state")
+    review_state.add_argument("number")
+    review_state.add_argument("sha")
+    review_state.add_argument("base_sha")
+
+    review_finalize = sub.add_parser("review-finalize")
+    review_finalize.add_argument("number")
+    review_finalize.add_argument("sha")
+    review_finalize.add_argument("base_sha")
+    review_finalize.add_argument("run_id")
+    review_finalize.add_argument("digest")
+    review_finalize.add_argument("--guard-file", type=Path)
 
     review_evidence = sub.add_parser("review-evidence")
     review_evidence.add_argument("number")
@@ -1633,19 +2038,38 @@ def cli(argv: Sequence[str] | None = None) -> int:
         require_ci_success(client, args.sha)
         print(args.sha)
     elif args.command == "post-status":
-        client.post_status(args.sha, args.context, args.state, args.description)
+        guard = client.publication_guard(args.guard_file) if args.guard_file else None
+        client.post_status(
+            args.sha,
+            args.context,
+            args.state,
+            args.description,
+            before_mutation=guard,
+        )
     elif args.command == "comment-once":
+        guard = client.publication_guard(args.guard_file) if args.guard_file else None
         row = client.comment_once(
-            normalize_number(args.number), _read_body(args.body_file), args.marker
+            normalize_number(args.number),
+            _read_body(args.body_file),
+            args.marker,
+            before_mutation=guard,
         )
         print(json.dumps(row))
     elif args.command == "review-once":
+        guard = client.publication_guard(args.guard_file) if args.guard_file else None
+        local_guard = (
+            client.publication_guard(args.guard_file, authoritative=False)
+            if args.guard_file
+            else None
+        )
         row, event = client.review_once(
             normalize_number(args.number),
             args.commit_id,
             _read_body(args.body_file),
             args.event,
             args.marker,
+            before_mutation=guard,
+            before_write=local_guard,
         )
         print(json.dumps({"review": row, "event": event}))
     elif args.command == "comments":
@@ -1658,16 +2082,51 @@ def cli(argv: Sequence[str] | None = None) -> int:
         rows = client.pull_commits(normalize_number(args.number))
         print(fix_iteration_count(rows))
     elif args.command == "ci-manifest":
-        _, manifest = client.ci_manifest(normalize_number(args.number), args.sha)
+        _, manifest = client.ci_manifest(
+            normalize_number(args.number), args.sha, args.base_sha
+        )
         print(json.dumps(manifest, ensure_ascii=False))
     elif args.command == "ci-evidence":
-        evidence = client.ci_evidence(
+        evidence = client.ci_success_evidence(
             normalize_number(args.number), args.sha, args.base_sha
         )
         print(json.dumps(evidence.as_dict(), ensure_ascii=False))
     elif args.command == "review-ledger":
-        row = client.review_ledger(normalize_number(args.number), args.sha)
+        row = client.review_ledger(
+            normalize_number(args.number), args.sha, args.base_sha
+        )
         print(str(row.get("body") or ""))
+    elif args.command == "review-attestation":
+        attestation = client.review_attestation(
+            normalize_number(args.number), args.sha, args.base_sha
+        )
+        payload = {
+            **attestation.as_dict(),
+            "body": str(attestation.row.get("body") or ""),
+        }
+        print(json.dumps(payload, ensure_ascii=False))
+    elif args.command == "review-state":
+        state = client.review_publication_state(
+            normalize_number(args.number), args.sha, args.base_sha
+        )
+        print(json.dumps(state, ensure_ascii=False))
+    elif args.command == "review-finalize":
+        guard = client.publication_guard(args.guard_file) if args.guard_file else None
+        local_guard = (
+            client.publication_guard(args.guard_file, authoritative=False)
+            if args.guard_file
+            else None
+        )
+        evidence = client.finalize_review_status(
+            normalize_number(args.number),
+            args.sha,
+            args.base_sha,
+            args.run_id,
+            args.digest,
+            before_mutation=guard,
+            before_write=local_guard,
+        )
+        print(json.dumps(evidence.as_dict(), ensure_ascii=False))
     elif args.command == "review-evidence":
         evidence = client.review_evidence(
             normalize_number(args.number), args.sha, args.base_sha

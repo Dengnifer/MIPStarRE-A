@@ -277,3 +277,31 @@ results only by authoritative read-back.
 **Expected effect:** stale bases, mixed runs, reused or failed reviewer sessions,
 late adverse reviews, concurrent fix activity, and ambiguous duplicate writes
 fail closed without reintroducing GitHub approval as a gate.
+
+## 2026-09-01 — Evidence binds clean committed comparisons
+
+**Trigger:** the issue 0007 incident in `results/telemetry/events.md`,
+"Post-hardening audit found evidence could outlive its committed comparison."
+
+**Change:** `ci.md`, `review.md`, `autofix.md`, and `issues-prs.md` now make a
+clean feature worktree part of CI and review evidence, distinguish readable
+failure or incomplete attestations from gate-complete success, specify strict
+state-preserving review output, and permit only same-run summary recovery.
+Review and auto-fix share ownership-stamped branch leases; reviewer identities
+and run ids cannot cross distinct attestations; final mutations repeat their
+guards after idempotency lookup; trusted refs resolve to commits; and
+auto-fix retains the original full remote head/base and fetched local base
+through every dispatch, commit, and leased push while tracking intentional
+local head advancement. Review-fix consumes its canonical count and body from
+one attestation snapshot. A superseded fixer stops before local advancement;
+after a wrapper-owned commit, it starts no new phase and completes only the
+original-comparison leased publication handoff, including any phase already in
+progress. Explicit phase failures and signal exits remain failures while owned
+locks are cleaned up. Findings and verdict sentinels reject prefix lookalikes,
+and a canonical finding location is a relative repository path with a positive
+line number or the literal `-`.
+
+**Expected effect:** dirt, failed CI, malformed reviewer output, stale bases,
+lost or cancelled leases, unrelated pending statuses, prompt-ref aliases, and
+reviewer-session replay all fail closed without creating a local registry or
+duplicating an already published review.

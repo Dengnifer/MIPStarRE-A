@@ -235,8 +235,31 @@ if len(tail) == 2 and tail[0] == "pulls":
             row["base"]["sha"] = base_sequence[
                 min(count, len(base_sequence) - 1)
             ]
-        if sequence or base_sequence:
-            state["pull_read_count"] = count + 1
+        dirty = state.get("dirty_worktree_on_pull_read") or {}
+        if int(dirty.get("at", -1)) == count:
+            target = str(dirty.get("path", ""))
+            if target:
+                os.makedirs(os.path.dirname(target), exist_ok=True)
+                with open(target, "w", encoding="utf-8") as stream:
+                    stream.write(str(dirty.get("content", "dirty\n")))
+            state["dirty_worktree_on_pull_read"] = {}
+        status_injection = state.get("inject_review_status_on_pull_read") or {}
+        if int(status_injection.get("at", -1)) == count:
+            injected = dict(status_injection.get("row") or {})
+            sha = str((row.get("head") or {}).get("sha") or "")
+            if injected and sha:
+                state.setdefault("statuses", {}).setdefault(sha, []).append(injected)
+            state["inject_review_status_on_pull_read"] = {}
+        cancellation = state.get("cancel_lock_on_pull_read") or {}
+        if int(cancellation.get("at", -1)) == count:
+            target = str(cancellation.get("path", ""))
+            if target:
+                os.makedirs(os.path.dirname(target), exist_ok=True)
+                with open(target, "w", encoding="utf-8") as stream:
+                    stream.write("test late supersession\n")
+            state["cancel_lock_on_pull_read"] = {}
+            state["cancel_lock_on_pull_read_fired"] = count
+        state["pull_read_count"] = count + 1
         emit(row)
     if method == "PATCH":
         row.update({key: value for key, value in (payload or {}).items() if key != "base"})
@@ -248,6 +271,16 @@ if len(tail) == 3 and tail[0] == "issues" and tail[2] == "comments":
     number = tail[1]
     comments = state.setdefault("comments", {}).setdefault(number, [])
     if method == "GET":
+        read_count = int(state.get("comment_read_count", 0))
+        dirty = state.get("dirty_worktree_on_comment_read") or {}
+        if int(dirty.get("at", -1)) == read_count:
+            target = str(dirty.get("path", ""))
+            if target:
+                os.makedirs(os.path.dirname(target), exist_ok=True)
+                with open(target, "w", encoding="utf-8") as stream:
+                    stream.write(str(dirty.get("content", "dirty\n")))
+            state["dirty_worktree_on_comment_read"] = {}
+        state["comment_read_count"] = read_count + 1
         emit(page(comments, parsed.query))
     if method == "POST":
         row = {
@@ -304,6 +337,25 @@ if len(tail) == 3 and tail[0] == "pulls" and tail[2] == "reviews":
     reviews = state.setdefault("reviews", {}).setdefault(number, [])
     if method == "GET":
         read_count = int(state.get("review_read_count", 0))
+        review_injection = state.get("inject_review_on_review_read") or {}
+        if int(review_injection.get("at", -1)) == read_count:
+            injected = dict(review_injection.get("row") or {})
+            if injected:
+                reviews.append(injected)
+            state["inject_review_on_review_read"] = {}
+        movement = state.get("move_pull_base_on_review_read") or {}
+        if int(movement.get("at", -1)) == read_count:
+            pull = state.setdefault("pulls", {}).get(number, {})
+            pull.setdefault("base", {})["sha"] = str(movement.get("sha", ""))
+            state["move_pull_base_on_review_read"] = {}
+        cancellation = state.get("cancel_lock_on_review_read") or {}
+        if int(cancellation.get("at", -1)) == read_count:
+            target = str(cancellation.get("path", ""))
+            if target:
+                os.makedirs(os.path.dirname(target), exist_ok=True)
+                with open(target, "w", encoding="utf-8") as stream:
+                    stream.write("test publication cancellation\n")
+            state["cancel_lock_on_review_read"] = {}
         if state.get("inject_adverse_review_at") == read_count:
             pull = state.setdefault("pulls", {}).get(number, {})
             reviews.append(
@@ -340,10 +392,40 @@ if len(tail) == 3 and tail[0] == "pulls" and tail[2] == "reviews":
 
 if len(tail) == 3 and tail[0] == "commits" and tail[2] == "statuses":
     sha = tail[1]
+    read_count = int(state.get("status_read_count", 0))
+    movement = state.get("move_pull_base_on_status_read") or {}
+    if int(movement.get("at", -1)) == read_count:
+        for pull in state.setdefault("pulls", {}).values():
+            if str((pull.get("head") or {}).get("sha") or "") == sha:
+                pull.setdefault("base", {})["sha"] = str(movement.get("sha", ""))
+        state["move_pull_base_on_status_read"] = {}
+    status_injection = state.get("inject_review_status_on_status_read") or {}
+    if int(status_injection.get("at", -1)) == read_count:
+        injected = dict(status_injection.get("row") or {})
+        if injected:
+            state.setdefault("statuses", {}).setdefault(sha, []).append(injected)
+        state["inject_review_status_on_status_read"] = {}
+    cancellation = state.get("cancel_lock_on_status_read") or {}
+    if int(cancellation.get("at", -1)) == read_count:
+        target = str(cancellation.get("path", ""))
+        if target:
+            os.makedirs(os.path.dirname(target), exist_ok=True)
+            with open(target, "w", encoding="utf-8") as stream:
+                stream.write("test publication cancellation\n")
+        state["cancel_lock_on_status_read"] = {}
+    state["status_read_count"] = read_count + 1
     emit(page(state.setdefault("statuses", {}).get(sha, []), parsed.query))
 
 if len(tail) == 2 and tail[0] == "statuses" and method == "POST":
     sha = tail[1]
+    if (
+        state.get("fail_review_summary_final_once")
+        and str((payload or {}).get("context", "")).casefold()
+        == "local-review/summary"
+        and str((payload or {}).get("state", "")).casefold() in {"success", "failure"}
+    ):
+        state["fail_review_summary_final_once"] = False
+        fail("HTTP 503 injected final review status failure")
     rows = state.setdefault("statuses", {}).setdefault(sha, [])
     row = {
         "id": len(rows) + 1,
@@ -361,6 +443,187 @@ if len(tail) == 2 and tail[0] == "statuses" and method == "POST":
     emit(row)
 
 fail("HTTP 404 unsupported fake endpoint " + key)
+'''
+
+
+FAKE_DISPATCH = r'''#!/usr/bin/env python3
+import json
+import os
+import pathlib
+import signal
+import subprocess
+import sys
+
+
+def option(name, default=""):
+    try:
+        return sys.argv[sys.argv.index(name) + 1]
+    except (ValueError, IndexError):
+        return default
+
+
+cache = pathlib.Path(os.environ["MIPSTARRE_CACHE_ROOT"])
+cache.mkdir(parents=True, exist_ok=True)
+counter_path = cache / "fake-dispatch-count"
+count = int(counter_path.read_text(encoding="utf-8") if counter_path.exists() else "0") + 1
+counter_path.write_text(str(count), encoding="utf-8")
+(cache / "fake-dispatch-observed").write_text(str(count), encoding="utf-8")
+if "--" in sys.argv and sys.argv.index("--") + 1 < len(sys.argv):
+    task = sys.argv[sys.argv.index("--") + 1]
+    (cache / ("fake-dispatch-task-%d.md" % count)).write_text(
+        task, encoding="utf-8"
+    )
+
+role = option("--role")
+issue = option("--issue")
+pr = option("--pr")
+worktree = pathlib.Path(option("--worktree")).resolve()
+branch = os.environ.get("MIPSTARRE_TEST_BRANCH", "issue-7-test").replace("/", "-")
+fix_lock = cache / "locks" / ("fix-" + branch + ".lock")
+if fix_lock.is_dir() and (fix_lock / "pid").exists() and (fix_lock / "owner").exists():
+    (cache / "fake-fix-lock-observed").write_text("yes", encoding="utf-8")
+
+action = os.environ.get("MIPSTARRE_TEST_LOCK_ACTION", "")
+if action == "cancel":
+    (fix_lock / "cancel").write_text("test supersession\n", encoding="utf-8")
+elif action == "steal":
+    (fix_lock / "owner").write_text("different-owner\n", encoding="utf-8")
+signal_target = os.environ.get("MIPSTARRE_TEST_SIGNAL_PARENT")
+if signal_target == "TERM":
+    os.kill(os.getppid(), signal.SIGTERM)
+elif signal_target == "TERM_REVIEW_WRAPPER":
+    parent = os.getppid()
+    with open("/proc/%d/status" % parent, encoding="utf-8") as stream:
+        grandparent = next(
+            int(line.split()[1])
+            for line in stream
+            if line.startswith("PPid:")
+        )
+    os.kill(grandparent, signal.SIGTERM)
+
+if role == "reviewer":
+    guard_action = os.environ.get("MIPSTARRE_TEST_GUARD_ACTION", "")
+    state_path = os.environ.get("FAKE_GH_STATE")
+    if state_path and guard_action in {
+        "cancel-review-post",
+        "cancel-status-post",
+        "move-base-review-post",
+        "move-base-status-post",
+    }:
+        with open(state_path, encoding="utf-8") as stream:
+            state = json.load(stream)
+        if guard_action == "cancel-review-post":
+            counter_key = "review_read_count"
+            injection_key = "cancel_lock_on_review_read"
+            injection = {
+                "at": int(state.get(counter_key, 0)) + 1,
+                "path": str(fix_lock / "cancel"),
+            }
+        elif guard_action == "cancel-status-post":
+            counter_key = "status_read_count"
+            injection_key = "cancel_lock_on_status_read"
+            injection = {
+                "at": int(state.get(counter_key, 0)) + 1,
+                "path": str(fix_lock / "cancel"),
+            }
+        elif guard_action == "move-base-review-post":
+            counter_key = "review_read_count"
+            injection_key = "move_pull_base_on_review_read"
+            injection = {
+                "at": int(state.get(counter_key, 0)) + 2,
+                "sha": "f" * 40,
+            }
+        else:
+            counter_key = "status_read_count"
+            injection_key = "move_pull_base_on_status_read"
+            injection = {
+                "at": int(state.get(counter_key, 0)) + 2,
+                "sha": "f" * 40,
+            }
+        state[injection_key] = injection
+        temporary = state_path + ".tmp"
+        with open(temporary, "w", encoding="utf-8") as stream:
+            json.dump(state, stream)
+        os.replace(temporary, state_path)
+    output = os.environ.get(
+        "MIPSTARRE_TEST_REVIEW_OUTPUT",
+        "## Findings\n\n- none\n\n## Review\n\nNo findings.\n\nVERDICT: APPROVED\n",
+    )
+    message = cache / ("review-message-%d.md" % count)
+    message.write_text(output, encoding="utf-8")
+    name = "reviewer-pr%s-test-%d" % (pr, count)
+    thread = "thread-review-test-%08d" % count
+    start = "2026-01-01T00:00:%02d+00:00" % min(count, 59)
+    end = "2026-01-01T00:01:%02d+00:00" % min(count, 59)
+    telemetry = worktree / "results" / "telemetry" / "sessions.jsonl"
+    telemetry.parent.mkdir(parents=True, exist_ok=True)
+    row = {
+        "name": name,
+        "role": "reviewer",
+        "issue": issue,
+        "pr": pr,
+        "thread_id": thread,
+        "start": start,
+        "end": end,
+        "wall_s": 60,
+        "usage": {},
+        "turns": 1,
+        "exit": 0,
+        "dispatcher": "fake",
+        "worktree": str(worktree),
+        "status": "done",
+    }
+    with telemetry.open("a", encoding="utf-8") as stream:
+        stream.write(json.dumps(row) + "\n")
+    print("name: " + name)
+    print("thread_id: " + thread)
+    print("last_message: " + str(message))
+    print("exit: 0")
+else:
+    relative = os.environ.get("MIPSTARRE_TEST_FIX_FILE", "README.md")
+    target = worktree / relative
+    with target.open("a", encoding="utf-8") as stream:
+        stream.write(os.environ.get("MIPSTARRE_TEST_FIX_TEXT", "fixed\n"))
+    state_path = os.environ.get("FAKE_GH_STATE")
+    if state_path and os.environ.get("MIPSTARRE_TEST_CANCEL_DURING_PRE_PUSH"):
+        with open(state_path, encoding="utf-8") as stream:
+            state = json.load(stream)
+        state["cancel_lock_on_pull_read"] = {
+            "at": int(state.get("pull_read_count", 0)) + 2,
+            "path": str(fix_lock / "cancel"),
+        }
+        temporary = state_path + ".tmp"
+        with open(temporary, "w", encoding="utf-8") as stream:
+            json.dump(state, stream)
+        os.replace(temporary, state_path)
+    moved_base = os.environ.get("MIPSTARRE_TEST_MOVE_BASE_AFTER_DISPATCH")
+    if state_path and moved_base:
+        with open(state_path, encoding="utf-8") as stream:
+            state = json.load(stream)
+        state["pulls"][pr]["base"]["sha"] = moved_base
+        temporary = state_path + ".tmp"
+        with open(temporary, "w", encoding="utf-8") as stream:
+            json.dump(state, stream)
+        os.replace(temporary, state_path)
+    moved_local_base = os.environ.get("MIPSTARRE_TEST_MOVE_LOCAL_BASE_AFTER_DISPATCH")
+    if moved_local_base:
+        subprocess.run(
+            [
+                "git",
+                "-C",
+                str(worktree),
+                "update-ref",
+                "refs/remotes/github/main",
+                moved_local_base,
+            ],
+            check=True,
+        )
+    message = cache / ("fix-message-%d.md" % count)
+    message.write_text("fix complete\n", encoding="utf-8")
+    print("name: prover-pr%s-test-%d" % (pr, count))
+    print("thread_id: thread-prover-test-%08d" % count)
+    print("last_message: " + str(message))
+    print("exit: 0")
 '''
 
 
@@ -462,15 +725,34 @@ class FakeGhCase(unittest.TestCase):
     def client(self, root: Path | None = None) -> github_api.GitHub:
         return github_api.GitHub(repo_root=root or self.root)
 
-    def make_repository(self) -> tuple[Path, Path, str, str]:
-        repository = self.root / "repository"
-        remote = self.root / "github.git"
+    def make_repository(
+        self,
+        *,
+        name: str = "repository",
+        base_sources: dict[str, Path] | None = None,
+        base_text: dict[str, str] | None = None,
+    ) -> tuple[Path, Path, str, str]:
+        repository = self.root / name
+        remote = self.root / f"{name}-github.git"
         repository.mkdir()
         run_git(repository, "init", "-b", "main")
         run_git(repository, "config", "user.name", "Workflow Test")
         run_git(repository, "config", "user.email", "workflow@example.invalid")
         (repository / "README.md").write_text("base\n", encoding="utf-8")
-        run_git(repository, "add", "README.md")
+        (repository / ".gitignore").write_text(
+            "results/telemetry/sessions.jsonl\n", encoding="utf-8"
+        )
+        for relative, source in (base_sources or {}).items():
+            destination = repository / relative
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source, destination)
+        for relative, content in (base_text or {}).items():
+            destination = repository / relative
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_text(content, encoding="utf-8")
+            if destination.suffix == ".sh":
+                destination.chmod(0o755)
+        run_git(repository, "add", "-A")
         run_git(repository, "commit", "-m", "Initial")
         base_sha = run_git(repository, "rev-parse", "HEAD")
         subprocess.run(
@@ -569,6 +851,8 @@ class FakeGhCase(unittest.TestCase):
         thread_id: str | None = None,
         session_name: str | None = None,
         comment_fallback: bool = False,
+        extra_prose: str = "",
+        ledger_override: str | None = None,
     ) -> tuple[dict, dict, list[dict], str, str]:
         worktree_text = str((worktree or root).resolve())
         safe_run = re.sub(r"[^A-Za-z0-9._-]", "-", run_id)
@@ -584,10 +868,14 @@ class FakeGhCase(unittest.TestCase):
             "end": "2026-01-01T00:01:00+00:00",
         }
         finding_lines = [
-            f"- [ ] F{index} (changes) `path.py:{index}` - defect {index}"
+            f"- [ ] F{index} (changes) `path.py:{index}` — defect {index}"
             for index in range(1, findings + 1)
         ]
-        ledger = "\n".join(finding_lines) if finding_lines else "<!-- no findings -->"
+        ledger = (
+            ledger_override
+            if ledger_override is not None
+            else "\n".join(finding_lines) if finding_lines else "- none"
+        )
         event = "COMMENT" if findings == 0 else "REQUEST_CHANGES"
         fallback = "none" if findings == 0 else "COMMENT"
         attestation = {
@@ -603,7 +891,8 @@ class FakeGhCase(unittest.TestCase):
         }
         prefix = (
             "# Local review ledger\n\n"
-            "## Code review lane\n\n"
+            + (extra_prose.rstrip() + "\n\n" if extra_prose else "")
+            + "## Code review lane\n\n"
             "<!-- findings:begin -->\n"
             f"{ledger}\n"
             "<!-- findings:end -->\n\n"
@@ -997,17 +1286,30 @@ class SharedGitHubLayerTests(FakeGhCase):
 class CIPublicationTests(FakeGhCase):
     """Group 4: exact-head statuses, partial refusal, manifest, and races."""
 
-    def prepare_ci(self) -> tuple[Path, str, str]:
-        repository, _remote, base_sha, head_sha = self.make_repository()
-        local_bin = repository / "local" / "bin"
-        local_bin.mkdir(parents=True)
-        shutil.copy2(BIN_DIR / "ci.sh", local_bin / "ci.sh")
-        shutil.copy2(BIN_DIR / "github_api.py", local_bin / "github_api.py")
+    def prepare_ci(self, *, name: str = "repository") -> tuple[Path, str, str]:
+        repository, _remote, base_sha, head_sha = self.make_repository(
+            name=name,
+            base_sources={
+                "local/bin/ci.sh": BIN_DIR / "ci.sh",
+                "local/bin/github_api.py": BIN_DIR / "github_api.py",
+            }
+        )
         pull = pull_row(1, head_sha, base_sha=base_sha)
         self.write_state(
             pulls={"1": pull},
             issues={"1": {**pull, "pull_request": {"url": pull["html_url"]}}},
             commits={"1": [{"sha": head_sha, "commit": {"message": "Feature"}}]},
+            comments={},
+            reviews={},
+            statuses={},
+            calls=[],
+            pull_read_count=0,
+            pull_head_sequence=[],
+            pull_base_sequence=[],
+            dirty_worktree_on_pull_read={},
+            comment_read_count=0,
+            dirty_worktree_on_comment_read={},
+            status_read_count=0,
         )
         return repository, base_sha, head_sha
 
@@ -1062,9 +1364,6 @@ class CIPublicationTests(FakeGhCase):
         self.assertNotEqual(moved.returncode, 0)
         rows = self.state()["statuses"][head_sha]
         self.assertFalse(any(row["state"] == "success" for row in rows))
-        source = (BIN_DIR / "ci.sh").read_text(encoding="utf-8")
-        self.assertIn('REMOTE_FINAL_SHA" != "$HEAD_SHA', source)
-        self.assertIn('LOCAL_FINAL_SHA" != "$HEAD_SHA', source)
 
     def test_remote_base_race_has_no_success_or_manifest(self) -> None:
         repository, base_sha, head_sha = self.prepare_ci()
@@ -1079,9 +1378,654 @@ class CIPublicationTests(FakeGhCase):
         self.assertFalse(any(row["state"] == "success" for row in rows))
         self.assertEqual(self.state()["comments"], {})
 
+    def test_dirty_tracked_staged_and_untracked_trees_publish_nothing(self) -> None:
+        for index, kind in enumerate(("tracked", "staged", "untracked"), start=1):
+            with self.subTest(kind=kind):
+                repository, _base_sha, head_sha = self.prepare_ci(
+                    name=f"ci-dirty-{index}"
+                )
+                if kind == "untracked":
+                    (repository / "untracked.txt").write_text("dirty\n", encoding="utf-8")
+                else:
+                    (repository / "README.md").write_text(
+                        "base\nfeature\ndirty\n", encoding="utf-8"
+                    )
+                    if kind == "staged":
+                        run_git(repository, "add", "README.md")
+                result = self.run_ci(repository)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("worktree", result.stderr)
+                self.assertEqual(self.state()["statuses"].get(head_sha), None)
+                self.assertEqual(self.state()["comments"], {})
+
+    def test_tree_dirtied_at_final_recheck_invalidates_all_statuses(self) -> None:
+        repository, _base_sha, head_sha = self.prepare_ci(name="ci-final-dirty")
+        dirty_path = repository / "late-untracked.txt"
+        self.write_state(
+            dirty_worktree_on_pull_read={
+                "at": 1,
+                "path": str(dirty_path),
+                "content": "late dirt\n",
+            }
+        )
+        result = self.run_ci(repository)
+        self.assertNotEqual(result.returncode, 0)
+        latest = self.client().latest_statuses(head_sha)
+        self.assertEqual(set(latest), set(github_api.CANONICAL_CI_CONTEXTS))
+        self.assertTrue(all(row["state"] == "error" for row in latest.values()))
+        self.assertEqual(self.state()["comments"], {})
+
+    def test_tree_dirtied_during_comment_lookup_blocks_manifest(self) -> None:
+        repository, _base_sha, head_sha = self.prepare_ci(name="ci-comment-dirty")
+        dirty_path = repository / "comment-window-untracked.txt"
+        self.write_state(
+            dirty_worktree_on_comment_read={
+                "at": 0,
+                "path": str(dirty_path),
+                "content": "dirty during comment lookup\n",
+            }
+        )
+        result = self.run_ci(repository)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertTrue(dirty_path.exists())
+        latest = self.client().latest_statuses(head_sha)
+        self.assertEqual(set(latest), set(github_api.CANONICAL_CI_CONTEXTS))
+        self.assertTrue(all(row["state"] == "error" for row in latest.values()))
+        self.assertEqual(self.state()["comments"].get("1", []), [])
+
 
 class ReviewPublicationTests(FakeGhCase):
     """Group 5: exact-commit review events, fallback, ledger, and head checks."""
+
+    def prepare_review_shell(
+        self,
+        *,
+        name: str = "review-shell",
+        outcomes: dict[str, str] | None = None,
+    ) -> tuple[Path, str, str, dict]:
+        repository, _remote, base_sha, head_sha = self.make_repository(
+            name=name,
+            base_sources={
+                "local/bin/review.sh": BIN_DIR / "review.sh",
+                "local/bin/github_api.py": BIN_DIR / "github_api.py",
+            },
+            base_text={
+                "local/bin/dispatch.sh": FAKE_DISPATCH,
+                ".github/prompts/claude-code-review-system-prompt.md": (
+                    "Review committed workflow changes.\n"
+                ),
+                ".github/prompts/claude-code-review-prompt.md": (
+                    "Report canonical findings and a final verdict.\n"
+                ),
+            },
+        )
+        pull = pull_row(1, head_sha, base_sha=base_sha)
+        comment, statuses = self.ci_bundle(
+            head_sha,
+            base_sha,
+            outcomes=outcomes,
+        )
+        self.write_state(
+            pulls={"1": pull},
+            issues={"1": {**pull, "pull_request": {"url": pull["html_url"]}}},
+            comments={"1": [comment]},
+            reviews={},
+            statuses={head_sha: statuses},
+            commits={"1": [{"sha": head_sha, "commit": {"message": "Feature"}}]},
+            calls=[],
+            pull_read_count=0,
+            pull_head_sequence=[],
+            pull_base_sequence=[],
+            dirty_worktree_on_pull_read={},
+            review_read_count=0,
+            status_read_count=0,
+            cancel_lock_on_review_read={},
+            cancel_lock_on_status_read={},
+            move_pull_base_on_review_read={},
+            move_pull_base_on_status_read={},
+            inject_review_status_on_status_read={},
+            fail_review_summary_final_once=False,
+            inject_review_status_on_pull_read={},
+        )
+        return repository, base_sha, head_sha, pull
+
+    def review_cache(self, repository: Path) -> Path:
+        return self.root / f"cache-{repository.name}"
+
+    def run_review(
+        self,
+        repository: Path,
+        *,
+        output: str | None = None,
+        trusted_ref: str | None = None,
+        extra_env: dict[str, str] | None = None,
+    ) -> subprocess.CompletedProcess[str]:
+        environment = os.environ.copy()
+        environment.update(
+            {
+                "MIPSTARRE_CACHE_ROOT": str(self.review_cache(repository)),
+                "MIPSTARRE_REVIEW_LOCK_WAIT": "0",
+                "MIPSTARRE_TEST_BRANCH": "issue-7-test",
+            }
+        )
+        if output is not None:
+            environment["MIPSTARRE_TEST_REVIEW_OUTPUT"] = output
+        if trusted_ref is not None:
+            environment["MIPSTARRE_TRUSTED_REF"] = trusted_ref
+        environment.update(extra_env or {})
+        return subprocess.run(
+            ["bash", str(repository / "local/bin/review.sh"), "1"],
+            cwd=repository,
+            env=environment,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+
+    def dispatch_count(self, repository: Path) -> int:
+        path = self.review_cache(repository) / "fake-dispatch-count"
+        return int(path.read_text(encoding="utf-8")) if path.exists() else 0
+
+    def review_posts(self) -> list[dict]:
+        return [
+            call
+            for call in self.state()["calls"]
+            if call["args"][:3] == ["api", "--method", "POST"]
+            and call["args"][3].endswith("pulls/1/reviews")
+        ]
+
+    def test_review_refuses_failed_ci_before_dispatch(self) -> None:
+        repository, _base_sha, _head_sha, _pull = self.prepare_review_shell(
+            outcomes={"build": "failure"}
+        )
+        result = self.run_review(repository)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("not one successful exact-head/base run", result.stderr)
+        self.assertEqual(self.dispatch_count(repository), 0)
+        self.assertEqual(self.review_posts(), [])
+
+    def test_review_refuses_dirty_tracked_staged_and_untracked_trees(self) -> None:
+        for index, kind in enumerate(("tracked", "staged", "untracked"), start=1):
+            with self.subTest(kind=kind):
+                repository, _base_sha, _head_sha, _pull = self.prepare_review_shell(
+                    name=f"review-dirty-{index}"
+                )
+                if kind == "untracked":
+                    (repository / "untracked.txt").write_text(
+                        "dirty\n", encoding="utf-8"
+                    )
+                else:
+                    (repository / "README.md").write_text(
+                        "base\nfeature\ndirty\n", encoding="utf-8"
+                    )
+                    if kind == "staged":
+                        run_git(repository, "add", "README.md")
+                result = self.run_review(repository)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("dirty", result.stderr)
+                self.assertEqual(self.dispatch_count(repository), 0)
+                self.assertEqual(self.review_posts(), [])
+
+    def test_reviewer_output_parser_rejects_every_noncanonical_shape(self) -> None:
+        finding = "- [ ] F1 (changes) `README.md:2` — defect"
+        malformed = {
+            "missing-findings": "## Review\n\nText.\n\nVERDICT: APPROVED\n",
+            "duplicate-findings": (
+                "## Findings\n\n- none\n\n## Findings\n\n- none\n\n"
+                "VERDICT: APPROVED\n"
+            ),
+            "malformed-duplicate-findings": (
+                "## Findings\n\n- none\n\n### findings\n\n- none\n\n"
+                "VERDICT: APPROVED\n"
+            ),
+            "punctuated-duplicate-findings": (
+                "## Findings\n\n- none\n\n## Findings:\n\n"
+                "- [ ] F1 (changes) `README.md:2` — hidden defect\n\n"
+                "VERDICT: APPROVED\n"
+            ),
+            "word-character-duplicate-findings": (
+                "## Findings\n\n- none\n\n## Findings_hidden\n\n"
+                "- [ ] F1 (changes) `README.md:2` — hidden defect\n\n"
+                "VERDICT: APPROVED\n"
+            ),
+            "malformed-finding": (
+                "## Findings\n\n- [ ] F1 (changes) `README.md:2` - defect\n\n"
+                "VERDICT: CHANGES_REQUESTED\n"
+            ),
+            "missing-location-line": (
+                "## Findings\n\n- [ ] F1 (changes) `README.md` — defect\n\n"
+                "VERDICT: CHANGES_REQUESTED\n"
+            ),
+            "location-with-spaces": (
+                "## Findings\n\n"
+                "- [ ] F1 (changes) `anything with spaces:2` — defect\n\n"
+                "VERDICT: CHANGES_REQUESTED\n"
+            ),
+            "location-outside-repository": (
+                "## Findings\n\n"
+                "- [ ] F1 (changes) `../README.md:2` — defect\n\n"
+                "VERDICT: CHANGES_REQUESTED\n"
+            ),
+            "mixed-none": (
+                f"## Findings\n\n- none\n{finding}\n\n"
+                "VERDICT: CHANGES_REQUESTED\n"
+            ),
+            "missing-verdict": "## Findings\n\n- none\n",
+            "duplicate-verdict": (
+                "## Findings\n\n- none\n\nVERDICT: APPROVED\n"
+                "VERDICT: APPROVED\n"
+            ),
+            "nonfinal-verdict": (
+                "## Findings\n\n- none\n\nVERDICT: APPROVED\ntrailing text\n"
+            ),
+            "malformed-verdict": (
+                "## Findings\n\n- none\n\nVerdict: APPROVED\n"
+            ),
+            "malformed-extra-verdict": (
+                "## Findings\n\n- none\n\nVerdict: COMMENTED\n\n"
+                "VERDICT: APPROVED\n"
+            ),
+            "word-character-extra-verdict": (
+                "## Findings\n\n- none\n\nVERDICT_COMMENTED\n\n"
+                "VERDICT: APPROVED\n"
+            ),
+        }
+        for index, (case, output) in enumerate(malformed.items(), start=1):
+            with self.subTest(case=case):
+                repository, _base_sha, head_sha, _pull = self.prepare_review_shell(
+                    name=f"review-parser-{index}"
+                )
+                result = self.run_review(repository, output=output)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertEqual(self.dispatch_count(repository), 1)
+                self.assertEqual(self.review_posts(), [])
+                latest = self.client().latest_statuses(head_sha).get(
+                    github_api.REVIEW_CONTEXT.casefold(), {}
+                )
+                self.assertNotEqual(latest.get("state"), "success")
+
+    def test_reviewer_output_preserves_all_canonical_checkbox_states(self) -> None:
+        repository, base_sha, head_sha, _pull = self.prepare_review_shell()
+        lines = [
+            "- [ ] F1 (changes) `README.md:2` — unresolved defect",
+            "- [x] F2 (advisory) `README.md:1` — resolved note",
+            "- [-] F3 (blocker) `README.md:3` — outdated location",
+        ]
+        output = (
+            "## Findings\n\n"
+            + "\n".join(lines)
+            + "\n\n## Review\n\nOne finding remains.\n\nVERDICT: COMMENTED\n"
+        )
+        result = self.run_review(repository, output=output)
+        self.assertEqual(result.returncode, 1, result.stderr + result.stdout)
+        self.assertEqual(self.dispatch_count(repository), 1)
+        self.assertTrue(
+            (self.review_cache(repository) / "fake-fix-lock-observed").exists()
+        )
+        reviews = self.state()["reviews"]["1"]
+        self.assertEqual(len(reviews), 1)
+        for line in lines:
+            self.assertIn(line, reviews[0]["body"])
+        dispatched_task = (
+            self.review_cache(repository) / "fake-dispatch-task-1.md"
+        ).read_text(encoding="utf-8")
+        self.assertIn("`[ ]` unresolved", dispatched_task)
+        self.assertIn("`[x]` resolved", dispatched_task)
+        self.assertIn("`[-]` outdated", dispatched_task)
+        attestation = self.client(repository).review_attestation(
+            1, head_sha, base_sha
+        )
+        self.assertEqual(attestation.findings, 1)
+
+    def test_attestation_rejects_noncanonical_finding_location(self) -> None:
+        sha, base_sha = "b" * 40, "a" * 40
+        review, _status, sessions, _body, _marker = self.review_bundle(
+            self.root,
+            sha,
+            base_sha,
+            findings=1,
+            ledger_override=(
+                "- [ ] F1 (changes) `anything with spaces:2` — defect"
+            ),
+        )
+        self.append_sessions(self.root, sessions)
+        self.write_state(reviews={"1": [review]}, statuses={})
+        with self.assertRaisesRegex(github_api.GitHubError, "malformed"):
+            self.client().review_attestation(1, sha, base_sha)
+
+    def test_review_recovers_matching_missing_summary_without_reposting(self) -> None:
+        repository, base_sha, head_sha, _pull = self.prepare_review_shell()
+        self.write_state(fail_review_summary_final_once=True)
+        first = self.run_review(repository)
+        self.assertNotEqual(first.returncode, 0)
+        self.assertEqual(self.dispatch_count(repository), 1)
+        self.assertEqual(len(self.review_posts()), 1)
+        state = self.client(repository).review_publication_state(
+            1, head_sha, base_sha
+        )
+        self.assertEqual(state["state"], "recoverable")
+
+        second = self.run_review(repository)
+        self.assertEqual(second.returncode, 0, second.stderr + second.stdout)
+        self.assertEqual(self.dispatch_count(repository), 1)
+        self.assertEqual(len(self.review_posts()), 1)
+        self.client(repository).review_evidence(1, head_sha, base_sha)
+
+    def test_review_does_not_recover_unrelated_pending_run(self) -> None:
+        repository, base_sha, head_sha, _pull = self.prepare_review_shell()
+        first = self.run_review(repository)
+        self.assertEqual(first.returncode, 0, first.stderr + first.stdout)
+        self.client(repository).post_status(
+            head_sha,
+            github_api.REVIEW_CONTEXT,
+            "pending",
+            github_api.review_pending_description("unrelated-run"),
+        )
+        before_dispatch = self.dispatch_count(repository)
+        before_posts = len(self.review_posts())
+        second = self.run_review(repository)
+        self.assertNotEqual(second.returncode, 0)
+        self.assertEqual(self.dispatch_count(repository), before_dispatch)
+        self.assertEqual(len(self.review_posts()), before_posts)
+
+    def test_recovery_reclassifies_status_after_its_final_boundary(self) -> None:
+        repository, _base_sha, head_sha, _pull = self.prepare_review_shell(
+            name="review-recovery-race"
+        )
+        self.write_state(fail_review_summary_final_once=True)
+        first = self.run_review(repository)
+        self.assertNotEqual(first.returncode, 0)
+        before_dispatch = self.dispatch_count(repository)
+        before_posts = len(self.review_posts())
+        unrelated = {
+            "id": 999,
+            "sha": head_sha,
+            "context": github_api.REVIEW_CONTEXT,
+            "state": "pending",
+            "description": github_api.render_status_description(
+                head_sha,
+                github_api.REVIEW_CONTEXT,
+                "pending",
+                github_api.review_pending_description("race-run"),
+            ),
+            "created_at": "2099-01-01T00:00:00Z",
+        }
+        self.write_state(
+            status_read_count=0,
+            inject_review_status_on_status_read={"at": 3, "row": unrelated},
+        )
+        second = self.run_review(repository)
+        self.assertNotEqual(second.returncode, 0)
+        self.assertEqual(self.dispatch_count(repository), before_dispatch)
+        self.assertEqual(len(self.review_posts()), before_posts)
+        latest = self.client(repository).latest_statuses(head_sha)[
+            github_api.REVIEW_CONTEXT.casefold()
+        ]
+        self.assertEqual(latest["description"], unrelated["description"])
+
+    def test_same_head_stale_base_attestation_is_not_recovered(self) -> None:
+        repository, base_sha, head_sha, pull = self.prepare_review_shell()
+        first = self.run_review(repository)
+        self.assertEqual(first.returncode, 0, first.stderr + first.stdout)
+        new_base = run_git(
+            repository,
+            "commit-tree",
+            f"{base_sha}^{{tree}}",
+            "-p",
+            base_sha,
+            "-m",
+            "Moved base",
+        )
+        run_git(repository, "update-ref", "refs/remotes/github/main", new_base)
+        pull["base"]["sha"] = new_base
+        comment, ci_statuses = self.ci_bundle(
+            head_sha, new_base, run_id="ci-moved-base", comment_id=2
+        )
+        old_review_status = {
+            **self.client(repository).latest_statuses(head_sha)[
+                github_api.REVIEW_CONTEXT.casefold()
+            ],
+            "id": 0,
+            "created_at": "2025-01-01T00:00:00Z",
+        }
+        self.write_state(
+            pulls={"1": pull},
+            issues={"1": {**pull, "pull_request": {"url": pull["html_url"]}}},
+            comments={"1": [comment]},
+            statuses={head_sha: [*ci_statuses, old_review_status]},
+            pull_read_count=0,
+            calls=[],
+        )
+        second = self.run_review(repository)
+        self.assertEqual(second.returncode, 0, second.stderr + second.stdout)
+        self.assertEqual(self.dispatch_count(repository), 2)
+        self.assertEqual(len(self.review_posts()), 1)
+        reviews = self.state()["reviews"]["1"]
+        self.assertEqual(len(reviews), 2)
+        self.assertIn(f'"base_sha": "{new_base}"', reviews[-1]["body"])
+
+    def test_trusted_ref_resolving_to_reviewed_head_is_rejected(self) -> None:
+        repository, _base_sha, _head_sha, _pull = self.prepare_review_shell()
+        result = self.run_review(repository, trusted_ref="HEAD")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("reviewed head is the trusted prompt commit", result.stderr)
+        self.assertEqual(self.dispatch_count(repository), 0)
+        self.assertEqual(self.review_posts(), [])
+
+    def test_review_aborts_when_branch_reservation_is_cancelled_or_stolen(self) -> None:
+        for action in ("cancel", "steal"):
+            with self.subTest(action=action):
+                repository, _base_sha, head_sha, _pull = self.prepare_review_shell(
+                    name=f"review-lock-{action}"
+                )
+                result = self.run_review(
+                    repository,
+                    extra_env={"MIPSTARRE_TEST_LOCK_ACTION": action},
+                )
+                self.assertNotEqual(result.returncode, 0)
+                self.assertEqual(self.dispatch_count(repository), 1)
+                self.assertTrue(
+                    (self.review_cache(repository) / "fake-fix-lock-observed").exists()
+                )
+                self.assertEqual(self.review_posts(), [])
+                latest = self.client().latest_statuses(head_sha)[
+                    github_api.REVIEW_CONTEXT.casefold()
+                ]
+                self.assertNotEqual(latest["state"], "success")
+
+    def test_review_term_signal_exits_nonzero_and_releases_owned_locks(self) -> None:
+        repository, _base_sha, head_sha, _pull = self.prepare_review_shell(
+            name="review-term-signal"
+        )
+        result = self.run_review(
+            repository,
+            extra_env={"MIPSTARRE_TEST_SIGNAL_PARENT": "TERM_REVIEW_WRAPPER"},
+        )
+        self.assertEqual(result.returncode, 143, result.stderr + result.stdout)
+        cache = self.review_cache(repository)
+        self.assertFalse((cache / "locks/review-1.lock").exists())
+        self.assertFalse((cache / "locks/fix-issue-7-test.lock").exists())
+        self.assertEqual(self.review_posts(), [])
+        latest = self.client().latest_statuses(head_sha)[
+            github_api.REVIEW_CONTEXT.casefold()
+        ]
+        self.assertEqual(latest["state"], "pending")
+
+    def test_review_cancel_during_idempotency_lookup_blocks_review_post(self) -> None:
+        repository, _base_sha, head_sha, _pull = self.prepare_review_shell(
+            name="review-cancel-before-post"
+        )
+        result = self.run_review(
+            repository,
+            extra_env={"MIPSTARRE_TEST_GUARD_ACTION": "cancel-review-post"},
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(self.dispatch_count(repository), 1)
+        self.assertEqual(self.review_posts(), [])
+        latest = self.client().latest_statuses(head_sha)[
+            github_api.REVIEW_CONTEXT.casefold()
+        ]
+        self.assertEqual(latest["state"], "pending")
+
+    def test_review_cancel_during_status_lookup_blocks_final_status(self) -> None:
+        repository, _base_sha, head_sha, _pull = self.prepare_review_shell(
+            name="review-cancel-before-status"
+        )
+        result = self.run_review(
+            repository,
+            extra_env={"MIPSTARRE_TEST_GUARD_ACTION": "cancel-status-post"},
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(self.dispatch_count(repository), 1)
+        self.assertEqual(len(self.review_posts()), 1)
+        latest = self.client().latest_statuses(head_sha)[
+            github_api.REVIEW_CONTEXT.casefold()
+        ]
+        self.assertEqual(latest["state"], "pending")
+
+    def test_review_base_move_during_identity_lookup_blocks_review_post(self) -> None:
+        repository, _base_sha, _head_sha, _pull = self.prepare_review_shell(
+            name="review-base-before-post"
+        )
+        result = self.run_review(
+            repository,
+            extra_env={"MIPSTARRE_TEST_GUARD_ACTION": "move-base-review-post"},
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(self.dispatch_count(repository), 1)
+        self.assertEqual(self.review_posts(), [])
+
+    def test_review_base_move_during_reclassification_blocks_final_status(self) -> None:
+        repository, _base_sha, head_sha, _pull = self.prepare_review_shell(
+            name="review-base-before-status"
+        )
+        result = self.run_review(
+            repository,
+            extra_env={"MIPSTARRE_TEST_GUARD_ACTION": "move-base-status-post"},
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(self.dispatch_count(repository), 1)
+        self.assertEqual(len(self.review_posts()), 1)
+        latest = self.client().latest_statuses(head_sha)[
+            github_api.REVIEW_CONTEXT.casefold()
+        ]
+        self.assertEqual(latest["state"], "pending")
+
+    def test_statusless_attestation_is_valid_but_not_merge_evidence(self) -> None:
+        sha, base_sha = "b" * 40, "a" * 40
+        review, _status, sessions, body, _marker = self.review_bundle(
+            self.root, sha, base_sha
+        )
+        self.append_sessions(self.root, sessions)
+        self.write_state(reviews={"1": [review]}, statuses={})
+        self.assertEqual(self.client().review_ledger(1, sha, base_sha)["body"], body)
+        with self.assertRaises(github_api.GitHubError):
+            self.client().review_evidence(1, sha, base_sha)
+
+    def test_reviewer_session_and_thread_cannot_cross_attestations(self) -> None:
+        sha, base_sha = "c" * 40, "a" * 40
+        original, _status, sessions, _body, _marker = self.review_bundle(
+            self.root, sha, base_sha, run_id="original"
+        )
+        self.append_sessions(self.root, sessions)
+
+        duplicate = {**original, "id": 2, "submitted_at": "2026-01-01T00:03:00Z"}
+        self.write_state(reviews={"1": [original, duplicate]})
+        self.assertEqual(
+            self.client().latest_review_attestation(1).run_id, "original"
+        )
+
+        reused_name, _status, _sessions, _body, _marker = self.review_bundle(
+            self.root,
+            sha,
+            base_sha,
+            run_id="reused-name",
+            review_id=3,
+            submitted_at="2026-01-01T00:04:00Z",
+            session_name=sessions[0]["name"],
+            thread_id="thread-reused-name",
+        )
+        self.write_state(reviews={"1": [original, reused_name]})
+        with self.assertRaisesRegex(github_api.GitHubError, "reviewer session"):
+            self.client().latest_review_attestation(1)
+
+        reused_thread, _status, _sessions, _body, _marker = self.review_bundle(
+            self.root,
+            sha,
+            base_sha,
+            run_id="reused-thread",
+            review_id=4,
+            submitted_at="2026-01-01T00:05:00Z",
+            session_name="reviewer-pr1-reused-thread",
+            thread_id=sessions[0]["thread_id"],
+        )
+        self.write_state(reviews={"1": [original, reused_thread]})
+        with self.assertRaisesRegex(github_api.GitHubError, "thread"):
+            self.client().latest_review_attestation(1)
+
+    def test_review_run_id_cannot_cross_attestations_or_bases(self) -> None:
+        sha, old_base, new_base = "c" * 40, "a" * 40, "b" * 40
+        original, _status, original_sessions, _body, _marker = self.review_bundle(
+            self.root, sha, old_base, run_id="shared-run"
+        )
+        replay, _status, replay_sessions, replay_body, replay_marker = (
+            self.review_bundle(
+                self.root,
+                sha,
+                new_base,
+                run_id="shared-run",
+                review_id=2,
+                submitted_at="2026-01-01T00:03:00Z",
+                session_name="reviewer-pr1-shared-run-new-base",
+                thread_id="thread-shared-run-new-base",
+            )
+        )
+        self.write_state(reviews={"1": [original]}, calls=[])
+        with self.assertRaisesRegex(github_api.GitHubError, "review run id"):
+            self.client().review_once(
+                1, sha, replay_body, "COMMENT", replay_marker
+            )
+        self.assertEqual(self.review_posts(), [])
+
+        self.append_sessions(self.root, [*original_sessions, *replay_sessions])
+        self.write_state(reviews={"1": [original, replay]})
+        with self.assertRaisesRegex(github_api.GitHubError, "review run"):
+            self.client().review_publication_state(1, sha, new_base)
+
+    def test_review_publication_rejects_identity_replay_before_post(self) -> None:
+        sha, base_sha = "d" * 40, "a" * 40
+        original, _status, sessions, _body, _marker = self.review_bundle(
+            self.root, sha, base_sha, run_id="published"
+        )
+        reused_name, _status, _sessions, name_body, name_marker = self.review_bundle(
+            self.root,
+            sha,
+            base_sha,
+            run_id="new-name-replay",
+            session_name=sessions[0]["name"],
+            thread_id="thread-new-name",
+        )
+        self.write_state(reviews={"1": [original]}, calls=[])
+        with self.assertRaisesRegex(github_api.GitHubError, "session name"):
+            self.client().review_once(1, sha, name_body, "COMMENT", name_marker)
+        self.assertEqual(self.review_posts(), [])
+
+        reused_thread, _status, _sessions, thread_body, thread_marker = (
+            self.review_bundle(
+                self.root,
+                sha,
+                base_sha,
+                run_id="new-thread-replay",
+                session_name="reviewer-pr1-new-thread",
+                thread_id=sessions[0]["thread_id"],
+            )
+        )
+        self.write_state(reviews={"1": [original]}, calls=[])
+        with self.assertRaisesRegex(github_api.GitHubError, "thread id"):
+            self.client().review_once(
+                1, sha, thread_body, "COMMENT", thread_marker
+            )
+        self.assertEqual(self.review_posts(), [])
 
     def test_clean_comment_attestation_is_idempotent_without_approval(self) -> None:
         sha, base_sha = "d" * 40, "a" * 40
@@ -1173,18 +2117,6 @@ class ReviewPublicationTests(FakeGhCase):
         ]
         self.assertEqual(len(posts), 1)
         self.assertEqual(posts[0]["input"]["event"], "REQUEST_CHANGES")
-        source = (BIN_DIR / "review.sh").read_text(encoding="utf-8")
-        self.assertIn("head/base moved during review", source)
-        self.assertIn('"$remote_head" = "$HEAD_SHA"', source)
-        self.assertIn('"$local_head" = "$HEAD_SHA"', source)
-        self.assertIn('"$remote_base" = "$BASE_SHA"', source)
-        self.assertIn('"$local_base" = "$BASE_SHA"', source)
-        self.assertLess(
-            source.index("head/base moved during review"),
-            source.index("review-once"),
-        )
-        self.assertIn("latest-review-ledger", source)
-        self.assertIn('"$REVIEW_CONTEXT"', source)
 
     def test_ambiguous_and_transient_review_writes_never_fall_back(self) -> None:
         sha, base_sha = "c" * 40, "a" * 40
@@ -1358,14 +2290,6 @@ class ReviewPublicationTests(FakeGhCase):
                 worktree=self.root,
                 expected_exit=7,
             )
-        source = (BIN_DIR / "review.sh").read_text(encoding="utf-8")
-        self.assertLess(
-            source.index('if [ "$CODE_RC" -ne 0 ]'),
-            source.index('CODE_RESULT=""'),
-        )
-        self.assertNotIn("retrying once", source)
-        self.assertNotIn("for attempt in 1 2", source)
-        self.assertEqual(source.count("comparison_matches_attestation \"$RUN_TMP/"), 2)
 
     def test_same_head_reruns_select_matching_latest_run(self) -> None:
         sha, base_sha = "1" * 40, "a" * 40
@@ -1434,25 +2358,43 @@ class AutoFixTests(FakeGhCase):
     """Auto-fix: opt-in, exact-head evidence, complete count, and cap action."""
 
     def prepare_autofix(
-        self, *, with_review_prompts: bool = False
+        self,
+        *,
+        name: str = "repository",
+        with_review_prompts: bool = False,
     ) -> tuple[Path, str, dict]:
-        repository, _remote, base_sha, head_sha = self.make_repository()
+        base_text = {
+            "local/bin/dispatch.sh": FAKE_DISPATCH,
+            ".github/prompts/auto-fix-ci-system-prompt.md": (
+                "Repair the committed CI failure.\n"
+            ),
+            ".github/prompts/auto-fix-ci-prompt.md": (
+                "Make the smallest validated repair.\n"
+            ),
+        }
         if with_review_prompts:
-            prompts = repository / ".github/prompts"
-            prompts.mkdir(parents=True)
-            (prompts / "auto-fix-review-system-prompt.md").write_text(
-                "Trusted review fixer persona.\n", encoding="utf-8"
-            )
-            (prompts / "auto-fix-review-prompt.md").write_text(
-                "Address the attached findings.\n", encoding="utf-8"
-            )
-            run_git(repository, "add", ".github/prompts")
-            run_git(repository, "commit", "-m", "Add test review prompts")
-            head_sha = run_git(repository, "rev-parse", "HEAD")
-        local_bin = repository / "local" / "bin"
-        local_bin.mkdir(parents=True)
-        shutil.copy2(BIN_DIR / "autofix.sh", local_bin / "autofix.sh")
-        shutil.copy2(BIN_DIR / "github_api.py", local_bin / "github_api.py")
+            base_text.update({
+                ".github/prompts/auto-fix-review-system-prompt.md": (
+                    "Trusted review fixer persona.\n"
+                ),
+                ".github/prompts/auto-fix-review-prompt.md": (
+                    "Address the attached findings.\n"
+                ),
+            })
+        repository, _remote, base_sha, head_sha = self.make_repository(
+            name=name,
+            base_sources={
+                "local/bin/autofix.sh": BIN_DIR / "autofix.sh",
+                "local/bin/github_api.py": BIN_DIR / "github_api.py",
+            },
+            base_text=base_text,
+        )
+        run_git(
+            repository,
+            "push",
+            "github",
+            f"{head_sha}:refs/heads/issue-7-test",
+        )
         pull = pull_row(1, head_sha, base_sha=base_sha)
         issue = {**pull, "pull_request": {"url": pull["html_url"]}}
         self.write_state(
@@ -1469,11 +2411,20 @@ class AutoFixTests(FakeGhCase):
         mode: str = "ci",
         dry_run: bool = False,
         trusted_ref: str | None = None,
+        extra_env: dict[str, str] | None = None,
     ) -> subprocess.CompletedProcess[str]:
         environment = os.environ.copy()
-        environment["MIPSTARRE_CACHE_ROOT"] = str(self.root / "cache")
+        environment.update(
+            {
+                "MIPSTARRE_CACHE_ROOT": str(
+                    self.root / f"cache-{repository.name}"
+                ),
+                "MIPSTARRE_TEST_BRANCH": "issue-7-test",
+            }
+        )
         if trusted_ref is not None:
             environment["MIPSTARRE_TRUSTED_REF"] = trusted_ref
+        environment.update(extra_env or {})
         command = [
             "bash",
             str(repository / "local/bin/autofix.sh"),
@@ -1492,10 +2443,34 @@ class AutoFixTests(FakeGhCase):
             check=False,
         )
 
+    def autofix_dispatch_count(self, repository: Path) -> int:
+        path = self.root / f"cache-{repository.name}" / "fake-dispatch-count"
+        return int(path.read_text(encoding="utf-8")) if path.exists() else 0
+
+    def configure_failed_ci(self, repository: Path, head_sha: str, pull: dict) -> None:
+        pull["labels"] = [{"name": github_api.AUTO_FIX_LABEL}]
+        comment, statuses = self.ci_bundle(
+            head_sha,
+            pull["base"]["sha"],
+            outcomes={"build": "failure"},
+        )
+        self.write_state(
+            pulls={"1": pull},
+            issues={"1": {**pull, "pull_request": {"url": pull["html_url"]}}},
+            comments={"1": [comment]},
+            reviews={},
+            statuses={head_sha: statuses},
+            commits={"1": [{"sha": head_sha, "commit": {"message": "Feature"}}]},
+            calls=[],
+            pull_read_count=0,
+            pull_head_sequence=[],
+            pull_base_sequence=[],
+        )
+
     def test_adverse_comment_fallback_is_consumed_by_review_autofix(self) -> None:
         repository, head_sha, pull = self.prepare_autofix(with_review_prompts=True)
         pull["labels"] = [{"name": github_api.AUTO_FIX_LABEL}]
-        review, status, sessions, _body, _marker = self.review_bundle(
+        review, _status, sessions, _body, _marker = self.review_bundle(
             repository,
             head_sha,
             pull["base"]["sha"],
@@ -1507,18 +2482,353 @@ class AutoFixTests(FakeGhCase):
             pulls={"1": pull},
             issues={"1": {**pull, "pull_request": {"url": pull["html_url"]}}},
             reviews={"1": [review]},
-            statuses={head_sha: [status]},
+            statuses={},
             commits={"1": [{"sha": head_sha, "commit": {"message": "Feature"}}]},
         )
         result = self.run_autofix(
             repository,
             mode="review",
             dry_run=True,
-            trusted_ref="HEAD",
         )
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
         self.assertIn("dry run: the review fix prompt", result.stderr)
         self.assertNotIn("requires a valid marker-bound exact-head review ledger", result.stderr)
+
+    def test_review_autofix_uses_structured_canonical_finding_count(self) -> None:
+        repository, head_sha, pull = self.prepare_autofix(
+            name="autofix-structured-findings",
+            with_review_prompts=True,
+        )
+        pull["labels"] = [{"name": github_api.AUTO_FIX_LABEL}]
+        review, _status, sessions, _body, _marker = self.review_bundle(
+            repository,
+            head_sha,
+            pull["base"]["sha"],
+            findings=0,
+            extra_prose=(
+                "Historical example outside the canonical ledger:\n"
+                "- [ ] F99 (changes) `old.py:1` — no longer a finding"
+            ),
+        )
+        self.append_sessions(repository, sessions)
+        self.write_state(
+            pulls={"1": pull},
+            issues={"1": {**pull, "pull_request": {"url": pull["html_url"]}}},
+            reviews={"1": [review]},
+            statuses={},
+            commits={"1": [{"sha": head_sha, "commit": {"message": "Feature"}}]},
+        )
+        result = self.run_autofix(repository, mode="review", dry_run=True)
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        self.assertIn("nothing to fix", result.stderr)
+        self.assertEqual(self.autofix_dispatch_count(repository), 0)
+
+    def test_review_autofix_reads_count_and_body_from_one_snapshot(self) -> None:
+        repository, head_sha, pull = self.prepare_autofix(
+            name="autofix-review-snapshot",
+            with_review_prompts=True,
+        )
+        pull["labels"] = [{"name": github_api.AUTO_FIX_LABEL}]
+        old_review, _status, old_sessions, _body, _marker = self.review_bundle(
+            repository,
+            head_sha,
+            pull["base"]["sha"],
+            run_id="review-old-findings",
+            findings=1,
+            comment_fallback=True,
+            submitted_at="2026-01-01T00:01:00Z",
+        )
+        new_review, _status, new_sessions, _body, _marker = self.review_bundle(
+            repository,
+            head_sha,
+            pull["base"]["sha"],
+            run_id="review-new-clean",
+            review_id=2,
+            submitted_at="2026-01-01T00:02:00Z",
+        )
+        self.append_sessions(repository, [*old_sessions, *new_sessions])
+        self.write_state(
+            pulls={"1": pull},
+            issues={"1": {**pull, "pull_request": {"url": pull["html_url"]}}},
+            reviews={"1": [old_review]},
+            statuses={},
+            commits={"1": [{"sha": head_sha, "commit": {"message": "Feature"}}]},
+            review_read_count=0,
+            inject_review_on_review_read={"at": 0, "row": new_review},
+        )
+        result = self.run_autofix(repository, mode="review", dry_run=True)
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        self.assertIn("nothing to fix", result.stderr)
+        self.assertEqual(self.state()["review_read_count"], 1)
+        self.assertEqual(self.autofix_dispatch_count(repository), 0)
+
+    def test_error_ci_manifest_is_readable_but_never_dispatches_autofix(self) -> None:
+        repository, head_sha, pull = self.prepare_autofix(
+            name="autofix-ci-error"
+        )
+        pull["labels"] = [{"name": github_api.AUTO_FIX_LABEL}]
+        comment, statuses = self.ci_bundle(
+            head_sha,
+            pull["base"]["sha"],
+            outcomes={"build": "error"},
+        )
+        self.write_state(
+            pulls={"1": pull},
+            issues={"1": {**pull, "pull_request": {"url": pull["html_url"]}}},
+            comments={"1": [comment]},
+            statuses={head_sha: statuses},
+            commits={"1": [{"sha": head_sha, "commit": {"message": "Feature"}}]},
+        )
+        client = self.client(repository)
+        _row, manifest = client.ci_manifest(
+            1, head_sha, pull["base"]["sha"]
+        )
+        self.assertEqual(manifest["conclusion"], "error")
+        with self.assertRaisesRegex(github_api.GitHubError, "not success"):
+            client.ci_success_evidence(1, head_sha, pull["base"]["sha"])
+
+        result = self.run_autofix(repository)
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        self.assertIn("infrastructure failures, not code failures", result.stderr)
+        self.assertIn("nothing to fix", result.stderr)
+        self.assertEqual(self.autofix_dispatch_count(repository), 0)
+
+    def test_ci_autofix_rejects_same_head_manifest_for_other_base(self) -> None:
+        repository, head_sha, pull = self.prepare_autofix()
+        pull["labels"] = [{"name": github_api.AUTO_FIX_LABEL}]
+        comment, statuses = self.ci_bundle(
+            head_sha,
+            "f" * 40,
+            outcomes={"build": "failure"},
+        )
+        self.write_state(
+            pulls={"1": pull},
+            issues={"1": {**pull, "pull_request": {"url": pull["html_url"]}}},
+            comments={"1": [comment]},
+            statuses={head_sha: statuses},
+            commits={"1": [{"sha": head_sha, "commit": {"message": "Feature"}}]},
+        )
+        result = self.run_autofix(repository, dry_run=True)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("requires a valid marker-bound exact-head CI manifest", result.stderr)
+        self.assertEqual(self.autofix_dispatch_count(repository), 0)
+
+    def test_same_head_base_movement_stops_before_autofix_dispatch(self) -> None:
+        repository, head_sha, pull = self.prepare_autofix(name="autofix-pre-dispatch")
+        self.configure_failed_ci(repository, head_sha, pull)
+        base_sha = pull["base"]["sha"]
+        self.write_state(
+            pull_base_sequence=[base_sha, base_sha, base_sha, "f" * 40],
+            pull_read_count=0,
+        )
+        result = self.run_autofix(repository)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("before the ci dispatch", result.stderr)
+        self.assertEqual(self.autofix_dispatch_count(repository), 0)
+        self.assertEqual(run_git(repository, "rev-parse", "HEAD"), head_sha)
+
+    def test_base_movement_after_dispatch_stops_before_commit(self) -> None:
+        repository, head_sha, pull = self.prepare_autofix(name="autofix-post-dispatch")
+        self.configure_failed_ci(repository, head_sha, pull)
+        result = self.run_autofix(
+            repository,
+            extra_env={"MIPSTARRE_TEST_MOVE_BASE_AFTER_DISPATCH": "e" * 40},
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("after the ci dispatch", result.stderr)
+        self.assertEqual(self.autofix_dispatch_count(repository), 1)
+        self.assertEqual(run_git(repository, "rev-parse", "HEAD"), head_sha)
+
+    def test_fetched_base_movement_after_dispatch_stops_before_commit(self) -> None:
+        repository, head_sha, pull = self.prepare_autofix(name="autofix-local-base")
+        self.configure_failed_ci(repository, head_sha, pull)
+        result = self.run_autofix(
+            repository,
+            extra_env={
+                "MIPSTARRE_TEST_MOVE_LOCAL_BASE_AFTER_DISPATCH": head_sha,
+            },
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("after the ci dispatch", result.stderr)
+        self.assertEqual(self.autofix_dispatch_count(repository), 1)
+        self.assertEqual(run_git(repository, "rev-parse", "HEAD"), head_sha)
+
+    def test_autofix_cancel_and_owner_theft_abort_before_commit(self) -> None:
+        for action in ("cancel", "steal"):
+            with self.subTest(action=action):
+                repository, head_sha, pull = self.prepare_autofix(
+                    name=f"autofix-lock-{action}"
+                )
+                self.configure_failed_ci(repository, head_sha, pull)
+                result = self.run_autofix(
+                    repository,
+                    extra_env={"MIPSTARRE_TEST_LOCK_ACTION": action},
+                )
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("ownership was lost or superseded", result.stderr)
+                self.assertEqual(self.autofix_dispatch_count(repository), 1)
+                self.assertEqual(run_git(repository, "rev-parse", "HEAD"), head_sha)
+                remote_head = run_git(
+                    repository,
+                    "ls-remote",
+                    "github",
+                    "refs/heads/issue-7-test",
+                ).split()[0]
+                self.assertEqual(remote_head, head_sha)
+                lock = (
+                    self.root
+                    / f"cache-{repository.name}"
+                    / "locks/fix-issue-7-test.lock"
+                )
+                if action == "steal":
+                    self.assertTrue(lock.is_dir())
+                    self.assertEqual(
+                        (lock / "owner").read_text(encoding="utf-8").strip(),
+                        "different-owner",
+                    )
+                else:
+                    self.assertFalse(lock.exists())
+
+    def test_base_movement_at_commit_boundary_prevents_commit(self) -> None:
+        repository, head_sha, pull = self.prepare_autofix(name="autofix-pre-commit")
+        self.configure_failed_ci(repository, head_sha, pull)
+        base_sha = pull["base"]["sha"]
+        self.write_state(
+            pull_base_sequence=[base_sha] * 6 + ["d" * 40],
+            pull_read_count=0,
+        )
+        result = self.run_autofix(repository)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("immediately before the ci commit", result.stderr)
+        self.assertEqual(self.autofix_dispatch_count(repository), 1)
+        self.assertEqual(run_git(repository, "rev-parse", "HEAD"), head_sha)
+
+    def test_base_movement_at_push_boundary_leaves_bot_commit_unpushed(self) -> None:
+        repository, head_sha, pull = self.prepare_autofix(name="autofix-pre-push")
+        self.configure_failed_ci(repository, head_sha, pull)
+        base_sha = pull["base"]["sha"]
+        self.write_state(
+            pull_base_sequence=[base_sha] * 7 + ["c" * 40],
+            pull_read_count=0,
+        )
+        result = self.run_autofix(repository)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("immediately before push", result.stderr)
+        local_head = run_git(repository, "rev-parse", "HEAD")
+        remote_head = run_git(
+            repository, "rev-parse", "refs/remotes/github/issue-7-test"
+        )
+        self.assertNotEqual(local_head, head_sha)
+        self.assertEqual(remote_head, head_sha)
+
+    def test_successful_autofix_push_uses_original_comparison_identity(self) -> None:
+        repository, head_sha, pull = self.prepare_autofix(name="autofix-success")
+        self.configure_failed_ci(repository, head_sha, pull)
+        base_sha = pull["base"]["sha"]
+        result = self.run_autofix(repository)
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        local_head = run_git(repository, "rev-parse", "HEAD")
+        remote_head = run_git(
+            repository, "ls-remote", "github", "refs/heads/issue-7-test"
+        ).split()[0]
+        self.assertNotEqual(local_head, head_sha)
+        self.assertEqual(remote_head, local_head)
+        message = run_git(repository, "show", "-s", "--format=%B", local_head)
+        self.assertIn("[codex-auto-fix] fix Lean build errors", message)
+        self.assertIn(f"Evidence head SHA: {head_sha}", message)
+        self.assertIn(f"PR base SHA: {base_sha}", message)
+        self.assertIn(f"Parent feature tip: {head_sha}", message)
+
+    def test_post_commit_cancel_hands_off_only_the_committed_tip(self) -> None:
+        repository, head_sha, pull = self.prepare_autofix(name="autofix-handoff")
+        self.configure_failed_ci(repository, head_sha, pull)
+        hook = repository / ".git/hooks/post-commit"
+        hook.write_text(
+            "#!/bin/sh\n"
+            'lock="$MIPSTARRE_CACHE_ROOT/locks/fix-issue-7-test.lock"\n'
+            'printf "test supersession\\n" >"$lock/cancel"\n',
+            encoding="utf-8",
+        )
+        hook.chmod(0o755)
+        result = self.run_autofix(repository)
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        self.assertIn("publishing only the already committed tip", result.stderr)
+        local_head = run_git(repository, "rev-parse", "HEAD")
+        remote_head = run_git(
+            repository, "ls-remote", "github", "refs/heads/issue-7-test"
+        ).split()[0]
+        self.assertNotEqual(local_head, head_sha)
+        self.assertEqual(remote_head, local_head)
+
+    def test_late_post_commit_cancel_does_not_strand_the_committed_tip(self) -> None:
+        repository, head_sha, pull = self.prepare_autofix(
+            name="autofix-late-handoff"
+        )
+        self.configure_failed_ci(repository, head_sha, pull)
+        result = self.run_autofix(
+            repository,
+            extra_env={"MIPSTARRE_TEST_CANCEL_DURING_PRE_PUSH": "1"},
+        )
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        self.assertIsInstance(
+            self.state().get("cancel_lock_on_pull_read_fired"), int
+        )
+        local_head = run_git(repository, "rev-parse", "HEAD")
+        remote_head = run_git(
+            repository, "ls-remote", "github", "refs/heads/issue-7-test"
+        ).split()[0]
+        self.assertNotEqual(local_head, head_sha)
+        self.assertEqual(remote_head, local_head)
+
+    def test_staging_failure_is_not_converted_to_success(self) -> None:
+        repository, head_sha, pull = self.prepare_autofix(
+            name="autofix-stage-failure"
+        )
+        self.configure_failed_ci(repository, head_sha, pull)
+        index_lock = repository / ".git/index.lock"
+        index_lock.write_text("test lock\n", encoding="utf-8")
+        result = self.run_autofix(repository)
+        self.assertEqual(result.returncode, 2, result.stderr + result.stdout)
+        self.assertIn("could not stage the ci fix", result.stderr)
+        self.assertEqual(run_git(repository, "rev-parse", "HEAD"), head_sha)
+        remote_head = run_git(
+            repository, "ls-remote", "github", "refs/heads/issue-7-test"
+        ).split()[0]
+        self.assertEqual(remote_head, head_sha)
+
+    def test_term_signal_exits_nonzero_and_releases_owned_lock(self) -> None:
+        repository, head_sha, pull = self.prepare_autofix(
+            name="autofix-term-signal"
+        )
+        self.configure_failed_ci(repository, head_sha, pull)
+        result = self.run_autofix(
+            repository,
+            extra_env={"MIPSTARRE_TEST_SIGNAL_PARENT": "TERM"},
+        )
+        self.assertEqual(result.returncode, 143, result.stderr + result.stdout)
+        lock = (
+            self.root
+            / f"cache-{repository.name}"
+            / "locks/fix-issue-7-test.lock"
+        )
+        self.assertFalse(lock.exists())
+        self.assertEqual(run_git(repository, "rev-parse", "HEAD"), head_sha)
+
+    def test_exact_push_lease_rejects_a_stale_remote_feature_ref(self) -> None:
+        repository, head_sha, pull = self.prepare_autofix(name="autofix-lease")
+        self.configure_failed_ci(repository, head_sha, pull)
+        base_sha = pull["base"]["sha"]
+        remote = self.root / f"{repository.name}-github.git"
+        run_git(remote, "update-ref", "refs/heads/issue-7-test", base_sha)
+        result = self.run_autofix(repository)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("could not push the explicit feature ref", result.stderr)
+        local_head = run_git(repository, "rev-parse", "HEAD")
+        remote_head = run_git(
+            repository, "ls-remote", "github", "refs/heads/issue-7-test"
+        ).split()[0]
+        self.assertNotEqual(local_head, head_sha)
+        self.assertEqual(remote_head, base_sha)
 
     def test_opt_in_and_missing_evidence_fail_closed(self) -> None:
         repository, _head_sha, pull = self.prepare_autofix()

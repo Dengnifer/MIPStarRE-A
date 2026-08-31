@@ -165,3 +165,36 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   and immediately before guarded merge. Lesson: exact-head evidence is useful
   only when every producer, parser, status, session, and final consumer agrees
   on the same immutable run identity.
+- Post-hardening audit found evidence could outlive its committed comparison.
+  Symptom: CI and review could begin or publish from a dirty feature worktree;
+  review accepted failed CI and permissively normalized malformed reviewer
+  output; incomplete review publication could not be recovered without another
+  review; and auto-fix did not bind the fetched base through dispatch, commit,
+  and push. Reviewer identities and trusted refs also admitted replay or
+  unlike-string equality gaps. Diagnosis: full-SHA markers protected remote
+  objects, but the producer-side tree, lock lease, parser grammar, evidence
+  completion state, and base comparison were not one contract. Fix: require a
+  clean committed tree at producer boundaries, ownership-stamped shared fix
+  leases, success-only CI review gating, strict state-preserving findings
+  parsing, attestation-only consumers plus exact summary recovery, resolved
+  trusted commits, cross-attestation identity uniqueness, and full head/base
+  checks throughout auto-fix. The final implementation audit also found that a
+  cancel arriving after a wrapper commit could strand the unpublished local
+  tip; the fix stops further dispatches but permits its ownership-checked,
+  original-head leased publication handoff. A second final audit found boundary
+  tail, idempotency-lookup, replay preflight, run-id, and summary
+  reclassification races; in-process mutation guards, pre-POST identity
+  validation, unique attestation run ids, structured findings consumption, and
+  one guarded finalizer close them. The closing shell audit additionally found
+  that review-fix read its count and body in separate snapshots, a late cancel
+  could strand a wrapper commit, phase failures could be masked by Bash's
+  conditional `errexit` semantics, and signal traps could report success. It
+  also exposed findings/trailer prefix lookalikes and arbitrary backticked text
+  passing as canonical locations. Fix: consume one parsed attestation snapshot,
+  make cancellation ownership-only for every boundary after local advancement,
+  test fallible phase commands explicitly, preserve signal exit status during
+  owned-lock cleanup, and require prefix-safe section/trailer sentinels plus
+  relative path-and-line locations.
+  Lesson: exact-head evidence is trustworthy only when the local committed
+  state and every transition to publication are bound as rigorously as the
+  remote marker.

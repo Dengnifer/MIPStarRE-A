@@ -32,6 +32,16 @@ After an ambiguous mutation result, the command polls only the authoritative
 read surface and fails ambiguous when the expected marker-bound state does not
 appear. It never resolves ambiguity by repeating the same mutation.
 
+The shared parsers distinguish a valid publication from gate-complete evidence.
+A complete exact-head and exact-base CI manifest with all matching statuses is
+readable when its conclusion is `success`, `failure`, or `error`; review and
+merge accept only `success` with canonical step outcomes `success` or `skipped`.
+A review attestation can likewise be structurally and session-valid before its
+summary status is final, so prior-ledger and auto-fix consumers may read it.
+Merge requires the exact matching final summary. Neither distinction creates a
+local authority: the publications and statuses remain GitHub records, while
+runtime copies are diagnostic only.
+
 ## Issues
 
 Create an issue with:
@@ -79,7 +89,17 @@ forbidden. Fix commits begin exactly `[codex-auto-fix]` or
 marker-bound manifest comment for a complete run. `local/bin/review.sh
 <pr-number>` publishes a commit-bound ledger review and
 `local-review/summary`. Partial or moved-head runs publish no gate-satisfying
-set. Runtime logs live beneath `~/.cache/mipstarre-dev/`.
+set. CI and review additionally require a clean committed feature worktree,
+including no tracked, staged, or untracked changes, at startup and final
+publication boundaries. Runtime logs live beneath `~/.cache/mipstarre-dev/`.
+
+Review holds the per-PR review lock and the ownership-stamped branch fix lock
+from before reading the feature tree through publication. It may recover a
+valid exact-head and exact-base attestation whose matching summary is missing
+or canonically pending by posting only the final status. It cannot recover an
+unrelated pending run, a conflicting status, or a stale-base attestation, and
+one review run id, reviewer session name, or thread cannot be replayed across
+distinct attestations for the same PR.
 
 `local/bin/pr_merge.py <pr-number>` accepts only an open, non-draft, mergeable
 PR whose local branch and GitHub head are the same full 40- or 64-hex SHA and
@@ -87,10 +107,11 @@ whose trusted local base matches the PR's full base SHA. It holds the per-PR
 review lock through the merge and reserves the branch fix lock. One fail-closed
 gate evaluator runs both before merge preparation and immediately before the
 merge mutation. Each evaluation binds the unchanged head and base and requires
-the exact-head per-step CI statuses plus their same-run manifest, a strictly
-parsed clean `COMMENT` attestation plus its same-run/digest status and matching
-reviewer completion telemetry, no newer adverse exact-head review, fix-lock
-quiescence, and complete within-cap fix history.
+the success-level exact-head and exact-base per-step CI statuses plus their
+same-run manifest, a strictly parsed clean `COMMENT` attestation plus its exact
+same-run/digest final status and matching reviewer completion telemetry, no
+newer adverse exact-head review, fix-lock quiescence, and complete within-cap
+fix history.
 
 GitHub approval and `reviewDecision` are not gates. A clean independent
 exact-head `COMMENT` review is sufficient with the other evidence above.

@@ -102,6 +102,25 @@ run_outside_git_env() (
   "$@"
 )
 
+worktree_status() {
+  git -C "$WORKTREE" status --porcelain=v1 --untracked-files=all 2>/dev/null
+}
+
+require_clean_worktree() {
+  local _status
+  _status="$(worktree_status)" || die "cannot inspect worktree cleanliness at $WORKTREE"
+  if [ -n "$_status" ]; then
+    printf '%s\n' "$_status" | sed 's/^/  /' >&2
+    die "worktree $WORKTREE is dirty; CI requires committed tracked, staged, and untracked state"
+  fi
+}
+
+worktree_is_clean() {
+  local _status
+  _status="$(worktree_status)" || return 1
+  [ -z "$_status" ]
+}
+
 # Locks are advisory mkdir-based lease directories, matching the hot-main
 # writer lease convention in local/protocols/build-cache.md.
 HELD_LOCKS=""
@@ -190,7 +209,9 @@ cleanup() {
     rm -rf "$RUN_TMP"
   fi
 }
-trap cleanup EXIT INT TERM
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
 
 # ---------------------------------------------------------------------------
 # Embedded Python helper (stdlib only): manifest assembly and telemetry append.
@@ -543,6 +564,8 @@ LOCAL_BASE_SHA="$(git -C "$WORKTREE" rev-parse "$BASE_REF^{commit}")"
   die "local base ref $BASE_REF is $LOCAL_BASE_SHA, not GitHub PR base $REMOTE_BASE_SHA"
 BASE_SHA="$REMOTE_BASE_SHA"
 
+require_clean_worktree
+
 MERGE_BASE="$(git -C "$WORKTREE" merge-base "$BASE_REF" "$HEAD_SHA" 2>/dev/null || true)"
 [ -n "$MERGE_BASE" ] || die "no merge base between $BASE_REF and $HEAD_SHA"
 
@@ -701,6 +724,34 @@ fi
 
 mkdir -p "$LOG_DIR" "$RUN_DIR"
 
+# The helper repeats the exact comparison and clean-tree check inside every
+# gate-relevant mutation, after its idempotency lookup and immediately before
+# the POST. Error invalidation deliberately bypasses this guard so a dirty run
+# can replace any already-published pending or success status.
+PUBLICATION_GUARD="$RUN_TMP/publication-guard.json"
+python3 - "$PUBLICATION_GUARD" "$PR_ID" "$BRANCH" "$BASE" "$HEAD_SHA" \
+    "$BASE_SHA" "$WORKTREE" <<'PY'
+import json
+import sys
+
+destination, number, branch, base, head_sha, base_sha, worktree = sys.argv[1:]
+payload = {
+    "schema": 1,
+    "pr": int(number),
+    "branch": branch,
+    "base": base,
+    "head_sha": head_sha,
+    "base_sha": base_sha,
+    "worktree": worktree,
+    "pid": "",
+    "owner": "",
+    "locks": [],
+}
+with open(destination, "w", encoding="utf-8") as stream:
+    json.dump(payload, stream, sort_keys=True)
+    stream.write("\n")
+PY
+
 if [ "$PARTIAL" = 1 ]; then
   info "partial run (--only/--skip-build): no GitHub statuses or comments will be published"
 fi
@@ -709,8 +760,15 @@ RUN_STARTED="$(iso_now)"
 RUN_START_EPOCH="$(epoch_now)"
 
 publish_status() {
-  python3 "$SCRIPT_DIR/github_api.py" --repo-root "$REPO_ROOT" --no-probe \
-    post-status "$HEAD_SHA" "local-ci/$1" "$2" "$3" >/dev/null
+  local _guard_mode="${4:-guarded}"
+  if [ "$_guard_mode" = guarded ]; then
+    python3 "$SCRIPT_DIR/github_api.py" --repo-root "$REPO_ROOT" --no-probe \
+      post-status "$HEAD_SHA" "local-ci/$1" "$2" "$3" \
+      --guard-file "$PUBLICATION_GUARD" >/dev/null
+  else
+    python3 "$SCRIPT_DIR/github_api.py" --repo-root "$REPO_ROOT" --no-probe \
+      post-status "$HEAD_SHA" "local-ci/$1" "$2" "$3" >/dev/null
+  fi
 }
 
 # ---------------------------------------------------------------------------
@@ -950,7 +1008,8 @@ for STEP in $STEP_NAMES; do
   LOG="$LOG_DIR/$STEP.log"
 
   if [ "$PARTIAL" = 0 ]; then
-    publish_status "$STEP" pending "local CI run $RUN_ID is pending" || \
+    publish_status "$STEP" pending \
+      "local CI run $RUN_ID is pending" unguarded || \
       die "could not publish pending status local-ci/$STEP on $HEAD_SHA"
   fi
 
@@ -1047,19 +1106,12 @@ else
   CONCLUSION=success
 fi
 
-HEAD_STABLE=1
-if [ "$PARTIAL" = 0 ]; then
-  LOCAL_FINAL_SHA="$(git -C "$WORKTREE" rev-parse HEAD 2>/dev/null || true)"
-  LOCAL_FINAL_BASE_SHA="$(git -C "$WORKTREE" rev-parse "$BASE_REF^{commit}" 2>/dev/null || true)"
-  FINAL_PULL_JSON="$RUN_TMP/final-pull.json"
-  if ! python3 "$SCRIPT_DIR/github_api.py" --repo-root "$REPO_ROOT" --no-probe \
-      pull "$PR_ID" > "$FINAL_PULL_JSON"; then
-    HEAD_STABLE=0
-    REMOTE_FINAL_SHA=unreadable
-    REMOTE_FINAL_BASE_SHA=unreadable
-  else
-    IFS="$(printf '\t')" read -r REMOTE_FINAL_SHA REMOTE_FINAL_BASE_SHA < <(
-      python3 - "$FINAL_PULL_JSON" <<'PY'
+publication_snapshot_matches() {
+  local _pull_json="$1" _remote_head="" _remote_base="" _local_head _local_base
+  if python3 "$SCRIPT_DIR/github_api.py" --repo-root "$REPO_ROOT" --no-probe \
+      pull "$PR_ID" >"$_pull_json"; then
+    IFS="$(printf '\t')" read -r _remote_head _remote_base < <(
+      python3 - "$_pull_json" <<'PY'
 import json
 import sys
 
@@ -1072,21 +1124,25 @@ print(
 PY
     )
   fi
-  if [ "$LOCAL_FINAL_SHA" != "$HEAD_SHA" ] \
-      || [ "$REMOTE_FINAL_SHA" != "$HEAD_SHA" ] \
-      || [ "$LOCAL_FINAL_BASE_SHA" != "$BASE_SHA" ] \
-      || [ "$REMOTE_FINAL_BASE_SHA" != "$BASE_SHA" ]; then
+  _local_head="$(git -C "$WORKTREE" rev-parse HEAD 2>/dev/null || true)"
+  _local_base="$(git -C "$WORKTREE" rev-parse "$BASE_REF^{commit}" 2>/dev/null || true)"
+  [ "$_remote_head" = "$HEAD_SHA" ] \
+    && [ "$_remote_base" = "$BASE_SHA" ] \
+    && [ "$_local_head" = "$HEAD_SHA" ] \
+    && [ "$_local_base" = "$BASE_SHA" ] \
+    && worktree_is_clean
+}
+
+HEAD_STABLE=1
+if [ "$PARTIAL" = 0 ]; then
+  if ! publication_snapshot_matches "$RUN_TMP/final-pull.json"; then
     HEAD_STABLE=0
   fi
   if [ "$HEAD_STABLE" = 0 ]; then
     CONCLUSION=error
     note_warning \
-      "head/base moved or became unreadable during CI (head=$HEAD_SHA" \
-      "local_head=${LOCAL_FINAL_SHA:-unreadable}" \
-      "remote_head=${REMOTE_FINAL_SHA:-unreadable} base=$BASE_SHA" \
-      "local_base=${LOCAL_FINAL_BASE_SHA:-unreadable}" \
-      "remote_base=${REMOTE_FINAL_BASE_SHA:-unreadable}); no success statuses" \
-      "or manifest comment will be published"
+      "head/base moved, the comparison became unreadable, or the worktree became dirty" \
+      "during CI; no success statuses or manifest comment will be published"
   fi
 fi
 
@@ -1123,13 +1179,21 @@ helper manifest \
   > /dev/null
 
 PUBLISH_FAILED=0
+PUBLICATION_ABORTED=0
 if [ "$PARTIAL" = 0 ] && [ "$HEAD_STABLE" = 0 ]; then
   for STEP in $STEP_NAMES; do
-    publish_status "$STEP" error "local CI run $RUN_ID is obsolete: PR head moved" || \
+    publish_status "$STEP" error \
+      "local CI run $RUN_ID failed evidence-integrity checks" unguarded || \
       warn "could not replace pending local-ci/$STEP with an error status"
   done
 elif [ "$PARTIAL" = 0 ]; then
   while IFS="$(printf '\t')" read -r STEP OUTCOME _SECONDS _LOG _BLOCKING NOTE; do
+    if ! worktree_is_clean; then
+      warn "worktree became dirty during final status publication"
+      HEAD_STABLE=0
+      PUBLICATION_ABORTED=1
+      break
+    fi
     case "$OUTCOME" in
       skipped)
         STATUS_STATE=success
@@ -1154,7 +1218,20 @@ elif [ "$PARTIAL" = 0 ]; then
     fi
   done < "$STEPS_TSV"
 
-  if [ "$PUBLISH_FAILED" = 0 ]; then
+  if [ "$PUBLICATION_ABORTED" = 0 ] \
+      && ! publication_snapshot_matches "$RUN_TMP/pre-manifest-pull.json"; then
+    warn "comparison or worktree changed immediately before manifest publication"
+    HEAD_STABLE=0
+    PUBLICATION_ABORTED=1
+  fi
+
+  if [ "$PUBLICATION_ABORTED" = 1 ]; then
+    for STEP in $STEP_NAMES; do
+      publish_status "$STEP" error \
+        "local CI run $RUN_ID failed evidence-integrity checks" unguarded || \
+        warn "could not invalidate local-ci/$STEP after publication abort"
+    done
+  elif [ "$PUBLISH_FAILED" = 0 ]; then
     CI_MARKER="<!-- mipstarre:ci-manifest pr=$PR_ID head=$HEAD_SHA run=$RUN_ID -->"
     COMMENT_FILE="$RUN_TMP/manifest-comment.md"
     {
@@ -1164,9 +1241,17 @@ elif [ "$PARTIAL" = 0 ]; then
       printf '```\n\n%s\n' "$CI_MARKER"
     } > "$COMMENT_FILE"
     if ! python3 "$SCRIPT_DIR/github_api.py" --repo-root "$REPO_ROOT" --no-probe \
-        comment-once "$PR_ID" "$COMMENT_FILE" "$CI_MARKER" >/dev/null; then
+        comment-once "$PR_ID" "$COMMENT_FILE" "$CI_MARKER" \
+        --guard-file "$PUBLICATION_GUARD" >/dev/null; then
       warn "could not publish the marker-bound CI manifest comment"
       PUBLISH_FAILED=1
+      HEAD_STABLE=0
+      PUBLICATION_ABORTED=1
+      for STEP in $STEP_NAMES; do
+        publish_status "$STEP" error \
+          "local CI run $RUN_ID failed evidence-integrity checks" unguarded || \
+          warn "could not invalidate local-ci/$STEP after manifest publication failed"
+      done
     fi
   fi
 fi

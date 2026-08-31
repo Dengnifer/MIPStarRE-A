@@ -5,7 +5,9 @@ Normative. Read `local/protocols/meta.md` and `issues-prs.md` first.
 Run `local/bin/ci.sh <github-pr-number>`. The command reads the PR base, head
 branch, and full head and base SHAs from GitHub through `github_api.py`, resolves
 the registered local worktree for that branch, and requires the local head and
-trusted local base to match those remote SHAs before work starts.
+trusted local base to match those remote SHAs before work starts. The feature
+worktree must also be completely clean: tracked changes, staged changes, and
+untracked files all make the run ineligible.
 
 ## Canonical gates
 
@@ -28,15 +30,33 @@ is case-insensitive, because GitHub status contexts are case-insensitive.
 `--only`, `--skip-build`, and `--dry-run` are diagnostic partial runs. They
 write runtime logs but publish no gate-satisfying status set or manifest.
 
+There are two evidence levels. A complete, exact-head and exact-base manifest
+with matching canonical statuses is readable evidence even when its conclusion
+is `failure` or `error`; auto-fix uses such evidence to classify a repair. CI
+satisfies the review and merge prerequisite only when the manifest conclusion
+is `success`, every canonical step outcome is `success` or `skipped`, and the
+latest matching status for every canonical context is `success`. Thus a
+well-formed failed run remains diagnostic evidence but is never green evidence.
+
 ## Publication
 
-Immediately before final publication, CI rereads the local and GitHub head and
-base SHAs. Movement on either side makes the run stale and returns nonzero. A
-complete stable run posts a full JSON manifest as an immutable PR comment with
-exact PR, full head, full base, and run markers. Marker adoption requires the
-entire body to match. Every canonical status description names that same run,
-and a consumer must reject a manifest unless the latest exact-head status for
-every step names the manifest run and agrees with its result.
+CI checks cleanliness after binding the initial comparison and again at every
+final-publication boundary. Immediately before final statuses and the manifest,
+it rereads the local and GitHub head and base SHAs and the complete worktree
+status. The shared client repeats this full guard inside each final-status and
+manifest mutation, after its idempotency lookup and immediately before the
+POST. Movement, an unreadable comparison, or any dirt makes the run stale and
+returns nonzero. It publishes no marker-bound manifest; after detecting a
+mid-publication change it invalidates that run's contexts with `error`, so the
+latest statuses cannot form a successful set. A dirty run therefore cannot
+leave gate-satisfying evidence, while a clean, stable failure or error run keeps
+its readable manifest for diagnosis and auto-fix.
+
+A complete stable run posts a full JSON manifest as an immutable PR comment
+with exact PR, full head, full base, and run markers. Marker adoption requires
+the entire body to match. Every canonical status description names that same
+run, and a consumer must reject a manifest unless the latest exact-head status
+for every step names the manifest run and agrees with its result.
 
 Status creation is digest-idempotent. Each invocation issues at most one
 mutation. If the POST result is ambiguous, the client polls statuses on the
@@ -55,7 +75,6 @@ uses the advisory lock and a worktree-local copy-on-write cache clone described
 by `build-cache.md`. Never run `lake update`, and never write back to the hot
 main cache.
 
-The merge and review gates require the latest status for every canonical
-context on the current exact head to be `success`, to name one manifest run,
-and to agree with that run's exact full head and base. GitHub's combined status
-is not sufficient.
+The merge and review gates require the success-level evidence described above,
+bound to the current full head and base SHAs. GitHub's combined status is not
+sufficient.
