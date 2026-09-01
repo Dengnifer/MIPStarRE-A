@@ -5,8 +5,8 @@ Deliverable: Lean skeleton (all proofs `sorry`, definitions real) for
 `sec:separating`). Paper mirror:
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex`, lines 1415–1877
 (per-node ranges in the table of (c); docstrings must cite them).
-Baseline: `issues/briefs/0006-minimal-skeleton-brief.md` (stage 4.1) — its naming table is
-FROZEN and reused verbatim. Sibling: `issues/briefs/42-ch15-brief.md` (ch16 is ch15's only
+Baseline: `local/briefs/0006-minimal-skeleton-brief.md` (stage 4.1) — its naming table is
+FROZEN and reused verbatim. Sibling: `local/briefs/42-ch15-brief.md` (ch16 is ch15's only
 consumer). Conventions: `AGENTS.md`; every statement-like docstring cites the blueprint
 `\label` and the qpbt-paper file/lines.
 

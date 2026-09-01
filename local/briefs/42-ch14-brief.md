@@ -5,12 +5,12 @@ Deliverable: Lean skeleton (all proofs `sorry`, all definitions real) for
 `sec:qld-prelim`, `sec:commutation`, `sec:expanding`). Paper mirror:
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex` lines 47–679 (per-node
 ranges in the table below; every statement-like docstring cites the blueprint `\label`
-plus that file and line range). Baseline: `issues/briefs/0006-minimal-skeleton-brief.md`
+plus that file and line range). Baseline: `local/briefs/0006-minimal-skeleton-brief.md`
 (stage 4.1) — its naming table is FROZEN and reused verbatim. Conventions: `AGENTS.md`.
 
 **Wave position.** ch14 is wave A; ch15 and ch16 (wave B) consume its signatures.
 Rows marked **INTERFACE** in (c) are the parallel-wave contract and are stated in (e).
-The sibling brief `issues/briefs/42-ch15-brief.md` was read; its RECONCILE-1/-2/-3 and
+The sibling brief `local/briefs/42-ch15-brief.md` was read; its RECONCILE-1/-2/-3 and
 OPEN-2/-3 requests are answered here (see (e) and OPEN-6).
 
 Scope check: **no ch14 node is in the 4.1 closure** (checked against the 4.1 39-node

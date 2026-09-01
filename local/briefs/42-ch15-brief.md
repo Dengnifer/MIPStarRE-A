@@ -5,7 +5,7 @@ Deliverable: a Lean skeleton for `blueprint/src/chapter/ch15_qpbt_combining.tex`
 node `sorry`, every definitional node real. Paper mirror:
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:680-1414`; per-node
 line anchors are given in (c) and belong in the docstrings verbatim.
-Baseline: `issues/briefs/0006-minimal-skeleton-brief.md` (stage 4.1). Its naming table
+Baseline: `local/briefs/0006-minimal-skeleton-brief.md` (stage 4.1). Its naming table
 is FROZEN and reused verbatim; nothing below renames a 4.1 declaration. Anything this
 brief must assume about 4.1 or about a sibling 4.2 chapter is under `RECONCILE:`.
 Conventions: `AGENTS.md` (Mathlib naming, module docstrings, 100-col, explicit types);

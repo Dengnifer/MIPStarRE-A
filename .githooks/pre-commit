@@ -32,8 +32,10 @@ INFRA_CHANGED="$(git diff --cached --numstat -- local/ .githooks/ scripts/tests/
   | awk '{added=$1; deleted=$2; if (added != "-") total+=added+deleted} END {print total+0}')"
 if [ "${INFRA_CHANGED:-0}" -gt 400 ] && [ "${MIPSTARRE_INFRA_OVERRIDE:-}" != "1" ]; then
   echo "MIPStarRE pre-commit: staged workflow-layer change is ${INFRA_CHANGED} lines (budget: 400)."
-  echo "Scope control (local/personas/main.md): split the change, or ask the owner"
-  echo "to authorize this commit with MIPSTARRE_INFRA_OVERRIDE=1."
+  echo "Scope control (local/personas/main.md): the budget is PER EPISODE, not per"
+  echo "commit — serial oversized commits are the same violation and show in the"
+  echo "telemetry. Shrink the change, or ask the OWNER to authorize this commit"
+  echo "with MIPSTARRE_INFRA_OVERRIDE=1 (self-granting it is a protocol breach)."
   exit 1
 fi
 

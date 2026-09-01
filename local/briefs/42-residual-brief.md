@@ -7,7 +7,7 @@ Deliverable: Lean skeleton (all proofs `sorry`, definitions real) for **every no
 + `06_nonlocal_games_and_mipstar.tex` + `07_types.tex` (ch12),
 `08_classical_and_quantum_low_degree_tests.tex` (ch13); exact per-node line ranges are
 pinned in docstrings at implementation time. Baseline:
-`issues/briefs/0006-minimal-skeleton-brief.md` (stage 4.1) — its naming table is **FROZEN**
+`local/briefs/0006-minimal-skeleton-brief.md` (stage 4.1) — its naming table is **FROZEN**
 and reused verbatim; nothing below renames or redefines a 4.1 declaration. Conventions:
 `AGENTS.md`; every statement-like docstring cites the blueprint `\label` and the
 qpbt-paper file/lines, and every Lean-only auxiliary says so explicitly.

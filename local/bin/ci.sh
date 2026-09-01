@@ -628,9 +628,12 @@ while IFS= read -r _file; do
   if match_globs "$_file" 'docs/paper-gaps/*' 'texra-blueprint.toml' 'MIPStarRE/*.lean' 'blueprint/src/*' 'docs/*.md'; then A_paper_gaps=1; fi
   if match_globs "$_file" 'scripts/*'; then A_scripts=1; fi
   if match_globs "$_file" 'scripts/comparator/*'; then A_comparator=1; fi
-  # 'workflow' is the local translation of "the CI definition itself changed":
-  # the frozen reference workflow, this driver, or its protocol.
-  if match_globs "$_file" '.github/workflows/pr-ci.yml' 'local/bin/ci.sh' 'local/protocols/ci.md'; then A_workflow=1; fi
+  # 'workflow' is the local translation of "the CI definition itself changed".
+  # It covers the WHOLE workflow layer, not just this driver: any local/bin or
+  # hook change must trigger every step, including the unit suite that tests it
+  # (PR 7 review, F13 — a gh_common.py-only change previously ran nothing).
+  if match_globs "$_file" '.github/workflows/pr-ci.yml' 'local/bin/*' \
+      'local/protocols/*' '.githooks/*'; then A_workflow=1; fi
 done < "$CHANGED_FILES"
 
 step_gate() {
@@ -748,10 +751,18 @@ if [ "$PARTIAL" = 1 ]; then
   info "partial run (--only/--skip-build): no commit statuses and no manifest comment; the manifest goes to $(basename "$MANIFEST")"
 else
   [ "$HEAD_SHA" = "$GH_HEAD_SHA" ] || die "worktree head $HEAD_SHA is not PR #$PR_ID's head $GH_HEAD_SHA; push the branch (local/bin/github-sync.sh) or check out the pushed commit — CI evidence is only ever bound to the SHA GitHub knows"
+  # The bytes must BE the SHA: a dirty worktree would let uncommitted repairs
+  # pass CI for code GitHub has never seen (PR 7 review, F1).
+  DIRTY="$(git -C "$WORKTREE" status --porcelain)"
+  [ -z "$DIRTY" ] || die "worktree $WORKTREE is dirty; commit or stash before a publishing CI run:
+$DIRTY"
+  # Invalidate the previous roll-up first so nothing can read a stale green
+  # summary while this run is in flight (PR 7 review, F3).
+  post_status "$HEAD_SHA" "local-ci/summary" pending "rerun in progress (local/bin/ci.sh)"
   for _step in $STEP_NAMES; do
     post_status "$HEAD_SHA" "local-ci/$_step" pending "queued by local/bin/ci.sh"
   done
-  info "posted 8 pending local-ci/* statuses on $SHORT_SHA"
+  info "posted pending local-ci/* statuses (summary + 8 steps) on $SHORT_SHA"
 fi
 
 RUN_STARTED="$(iso_now)"

@@ -504,6 +504,12 @@ TOUCHES_BLUEPRINT=0
 if grep -q '^blueprint/' "$RUN_DIR/files.txt"; then TOUCHES_BLUEPRINT=1; fi
 
 WORKTREE="$(resolve_worktree "$BRANCH")"
+# The reviewer also reads worktree FILES, not just the diff: dirty bytes could
+# hide or fabricate findings for a verdict bound to the clean head (PR 7, F2).
+REVIEW_DIRTY="$(git -C "$WORKTREE" status --porcelain)"
+[ -z "$REVIEW_DIRTY" ] ||
+  die "worktree $WORKTREE is dirty; commit or stash before reviewing PR #$PR_NUM:
+$REVIEW_DIRTY"
 [ -d "$WORKTREE" ] || die "worktree resolution failed for branch $BRANCH"
 
 # Lane ledgers and the combined body that is published as the review.

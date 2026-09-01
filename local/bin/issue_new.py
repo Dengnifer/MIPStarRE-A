@@ -48,7 +48,7 @@ except ModuleNotFoundError as exc:  # pragma: no cover - defensive
     )
     raise SystemExit(2)
 
-from wf_util import BODY_LIMIT, TITLE_LIMIT, LayerError, sanitize  # noqa: E402
+from wf_util import slugify, BODY_LIMIT, TITLE_LIMIT, LayerError, sanitize  # noqa: E402
 
 
 def flatten_labels(chunks: list[str]) -> tuple[str, ...]:
@@ -89,8 +89,11 @@ def create(args: argparse.Namespace) -> int:
         )
         return 0
 
+    # Every create is adoption-safe: without an explicit --key the slug is the
+    # key, so a retried create after an ambiguous failure adopts, never duplicates.
     number = gh_common.issue_create(
-        title, body, labels=labels, parent=args.parent, key=args.key
+        title, body, labels=labels, parent=args.parent,
+        key=args.key or slugify(title)
     )
     # Bare number on stdout: shell callers capture it with $(...).
     sys.stdout.write(f"{number}\n")

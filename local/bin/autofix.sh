@@ -580,8 +580,24 @@ cap_reached() {
   # fix lock has a live holder, and that holder would be us.  No further fix
   # work happens after this point, so dropping the lock is safe.
   release_fix_lock
-  if [ -x "$ROOT/local/bin/review.sh" ]; then
-    log "running the terminal forced review of the final bot-fix result"
+  # The final fix commit must reach GitHub BEFORE the terminal review: review.sh
+  # refuses when the local tip is not the PR head, and an unpushed last commit
+  # would otherwise be stranded unreviewed and statusless (PR 7 review, F6).
+  CAP_PUSHED=0
+  for _attempt in 1 2 3; do
+    if git -C "$ROOT" push github "refs/heads/$BRANCH:refs/heads/$BRANCH"; then
+      CAP_PUSHED=1
+      break
+    fi
+    warn "cap push attempt $_attempt of 3 for $BRANCH failed; retrying in 10s"
+    sleep 10
+  done
+  if [ "$CAP_PUSHED" -ne 1 ]; then
+    warn "could not push $BRANCH at the cap: the final fix commit is local-only and UNREVIEWED. Push by hand (local/bin/github-sync.sh $BRANCH), run ci.sh $PR_NUM, then review.sh $PR_NUM --force-review."
+  elif [ -x "$ROOT/local/bin/ci.sh" ] && [ -x "$ROOT/local/bin/review.sh" ]; then
+    log "running CI, then the terminal forced review of the final bot-fix result"
+    "$ROOT/local/bin/ci.sh" "$PR_NUM" ||
+      warn "ci.sh reported a failure for the final fix commit; the review below still runs"
     "$ROOT/local/bin/review.sh" "$PR_NUM" --force-review ||
       warn "the terminal forced review exited nonzero; PR $PR_NUM needs a human reviewer"
   else

@@ -34,6 +34,7 @@ import shutil
 import subprocess
 import sys
 import time
+import urllib.parse
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -194,7 +195,8 @@ def pr_view(number: int) -> dict:
 def pr_for_branch(branch: str) -> dict | None:
     """The unique open PR whose head is *branch*, or None."""
     owner = repo_slug().split("/")[0]
-    rows = api(f"pulls?state=open&head={owner}:{branch}", paginate=True)
+    head = urllib.parse.quote(f"{owner}:{branch}", safe=":")
+    rows = api(f"pulls?state=open&head={head}", paginate=True)
     if len(rows) > 1:
         raise LayerError(f"multiple open PRs for head {branch!r}")
     return rows[0] if rows else None
@@ -347,7 +349,7 @@ def issue_create(title: str, body: str, labels: tuple[str, ...] = (),
 
 
 def _find_issue_by_marker(marker: str) -> int | None:
-    rows = api(f"issues?state=all&per_page={PAGE}&sort=created&direction=desc")
+    rows = api("issues?state=all&sort=created&direction=desc", paginate=True)
     for row in rows or []:
         if "pull_request" in row:
             continue

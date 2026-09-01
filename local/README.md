@@ -12,12 +12,12 @@ issue  →  branch + worktree  →  agent session(s)  →  local CI  →  review
   →  (auto-fix loop)  →  merge gate  →  main  →  cache warmer refresh
 ```
 
-1. **File an issue**: `local/bin/issue_new.py --title "..." --label ...` opens
+1. **File an issue**: `local/bin/issue_new.py --title "..." --body-file b.md --label ...` opens
    a GitHub issue and prints its number; `--parent N` attaches it as a native
    sub-issue. The brief for it goes in `local/briefs/`.
 2. **Open a PR**: create branch `issue-<number>-slug`, worktree under
    `.worktrees/`, run `local/bin/worktree-setup.sh` there, then
-   `local/bin/pr_open.py --branch issue-<number>-slug --title "..." --issue N`,
+   `local/bin/pr_open.py --branch issue-<number>-slug --title "..." --body-file pr.md --issue N` (the body follows the PR template in `local/protocols/issues-prs.md`),
    which pushes the branch and opens the GitHub PR.
 3. **Dispatch agents**: only via `local/bin/dispatch.sh --role prover
    --issue NNNN --worktree .worktrees/<name> -- "task"`. Session telemetry

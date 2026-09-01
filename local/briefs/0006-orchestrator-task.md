@@ -6,7 +6,7 @@ skeleton for the quantum Pauli basis test in this worktree
 
 ## Authority and inputs, in order
 
-1. `issues/briefs/0006-minimal-skeleton-brief.md` — the design brief: the
+1. `local/briefs/0006-minimal-skeleton-brief.md` — the design brief: the
    39-node closure, the 13-file tree under `MIPStarRE/QPBT/`, the
    node→declaration mapping with REUSE/NEW decisions and signature
    sketches. Follow it; signature sketches may be adjusted where Lean

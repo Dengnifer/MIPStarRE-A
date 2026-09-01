@@ -232,9 +232,17 @@ mkdir -p "$RECORD_DIR"
 BRANCH=""
 KIND=pr
 if ! gh_common pr-view "$NUM" >"$RECORD_DIR/record.json" 2>"$RECORD_DIR/pr-view.err"; then
+  # Fall back to the issue endpoint ONLY on a proven "it is not a PR" (404).
+  # A transport/auth/5xx failure must die instead: /issues/N also answers for
+  # pull requests, so a blind fallback could classify a PR as an issue and
+  # hand a write-enabled agent the wrong branch (PR 7 review, F8).
+  grep -qi "404\|not found" "$RECORD_DIR/pr-view.err" ||
+    die "could not read PR #$NUM from GitHub (not a 404): $(tail -1 "$RECORD_DIR/pr-view.err" 2>/dev/null || true)"
   KIND=issue
   gh_common issue-view "$NUM" >"$RECORD_DIR/record.json" ||
     die "GitHub has neither a PR nor an issue numbered $NUM (PR read: $(tail -1 "$RECORD_DIR/pr-view.err" 2>/dev/null || true))"
+  python3 -c "import json,sys; sys.exit(1 if \"pull_request\" in json.load(open(sys.argv[1])) else 0)" "$RECORD_DIR/record.json" ||
+    die "GitHub says #$NUM is a pull request, but its PR endpoint failed; refusing to classify it as an issue"
 fi
 
 CONTEXT_SRC="$RECORD_DIR/record.md"

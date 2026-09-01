@@ -31,8 +31,8 @@ Locally there are no events.  A fix run is started by one of:
 | Parent trigger | Local caller |
 |---|---|
 | PR CI failed | the operator (or the PR lifecycle) after `ci.sh` returns non-zero |
-| PR Review completed + `auto-fix-claude` label | the operator after `review.sh` leaves unresolved findings |
-| label `auto-fix-claude` added (retroactive probe) | `autofix.sh <id> --mode auto`, which re-reads the head's statuses and the review ledger |
+| PR Review completed + `auto-fix-codex` label | the operator after `review.sh` leaves unresolved findings |
+| label `auto-fix-codex` added (retroactive probe) | `autofix.sh <id> --mode auto`, which re-reads the head's statuses and the review ledger |
 
 The retroactive probe is the interesting one.  On GitHub it queried the
 *latest completed* PR CI run for the exact head SHA (`per_page: 1`,

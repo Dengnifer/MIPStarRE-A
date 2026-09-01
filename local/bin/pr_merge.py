@@ -71,7 +71,7 @@ FIX_COMMIT_PREFIXES = ("[codex-auto-fix]", "[codex-review-fix]")
 #: resolve/resolves/resolved) — the gate must see every issue GitHub will close on
 #: merge.  ``Addresses`` keeps an issue open and imposes no dependency
 #: (CONTRIBUTING.md:61-62).  Keep in sync with pr_open.py CLOSES_RE.
-CLOSES_RE = re.compile(r"\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#(\d+)", re.IGNORECASE)
+CLOSES_RE = re.compile(r"\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?):?\s+#(\d+)", re.IGNORECASE)
 
 
 class GateFailure(LayerError):
@@ -201,8 +201,9 @@ def check_review(number: int, head_sha: str, reviews: list[dict], statuses: dict
     passed(f"gate 4 adjudicated at {head_sha[:12]} ({where})")
 
 
-def check_fix_gates(repo_root: Path, branch: str, base: str, head_sha: str) -> None:
-    """Gate 6 — refuse while the serialized fix loop is mid-flight or over its cap."""
+def check_fix_gates(repo_root: Path, branch: str, base: str, head_sha: str) -> str:
+    """Gate 6 — refuse while the serialized fix loop is mid-flight or over its cap.
+    Returns the merge base (gate 7 scans the same commit range)."""
     # autofix.sh holds a mkdir-based lease keyed on the BRANCH (autofix.sh:580,
     # locks/fix-<branch with / -> ->.lock, holder pid in <lock>/pid).  Probe the same lock
     # the same way; a dead holder's lock does not block the merge.
@@ -237,11 +238,22 @@ def check_fix_gates(repo_root: Path, branch: str, base: str, head_sha: str) -> N
                           "ci/blueprint/review fixes (DESIGN.md:70-72); a PR past it needs human "
                           "attention, not another merge attempt.")
     passed(f"gate 6 fix loop idle, {iterations}/{cap} fix commits")
+    return merge_base
 
 
-def check_dependencies(number: int, body: str) -> None:
-    """Gate 7 — nothing this PR closes may still have open children."""
-    closes = list(dict.fromkeys(CLOSES_RE.findall(body or "")))
+def check_dependencies(repo_root: Path, number: int, body: str,
+                       merge_base: str, head_sha: str) -> None:
+    """Gate 7 — nothing this PR closes may still have open children.
+
+    GitHub honors closing keywords in the PR body AND in commit messages that
+    land on the default branch, so both surfaces are scanned.  (Qualified
+    ``owner/repo#N`` references are out of scope: single-repo project.)
+    """
+    surfaces = [body or ""]
+    surfaces.append(git(repo_root, "log", "--format=%B", f"{merge_base}..{head_sha}",
+                        check=False))
+    closes = list(dict.fromkeys(n for text in surfaces
+                                for n in CLOSES_RE.findall(text)))
     for ident in closes:
         children = gh_common.open_sub_issues(int(ident))
         if children:
@@ -259,9 +271,10 @@ def run_gate(repo_root: Path, number: int, *, adjudicated: bool) -> dict:
     if state != "open" or pr.get("merged"):
         raise GateFailure(f"gate 1 (open PR): PR #{number} is state={state!r} "
                           f"merged={bool(pr.get('merged'))}, required open and unmerged.")
-    if pr.get("draft"):
-        raise GateFailure(f"gate 1 (open PR): PR #{number} is a draft, required draft=false. "
-                          "Mark it ready for review on GitHub first.")
+    if pr.get("draft") is not False:
+        raise GateFailure(f"gate 1 (open PR): PR #{number} reports draft={pr.get('draft')!r}, "
+                          "required exactly false. (A missing field means the API response "
+                          "changed shape — fail closed, don't guess.)")
     head = pr.get("head") or {}
     head_sha = str(head.get("sha") or "")
     branch = str(head.get("ref") or "")
@@ -285,30 +298,34 @@ def run_gate(repo_root: Path, number: int, *, adjudicated: bool) -> dict:
                           f"review(s) by {who} on {head_sha[:12]}, required none. Adjudication "
                           "never overrides this: dismiss it on GitHub, or fix and re-review.")
     passed("gate 5 no CHANGES_REQUESTED review on this head")
-    check_fix_gates(repo_root, branch, base, head_sha)
-    check_dependencies(number, str(pr.get("body") or ""))
+    merge_base = check_fix_gates(repo_root, branch, base, head_sha)
+    check_dependencies(repo_root, number, str(pr.get("body") or ""), merge_base, head_sha)
     return {"pr": pr, "head_sha": head_sha, "branch": branch, "base": base}
 
 
 # ------------------------------------- post-merge tail: best effort, non-fatal
 
-def fast_forward_base(repo_root: Path, base: str) -> None:
+def fast_forward_base(repo_root: Path, base: str) -> bool:
     """Move local ``base`` onto the merge GitHub just made, if it is strictly behind: a
-    local commit GitHub has not seen is somebody's unpushed work, not this tail's call."""
+    local commit GitHub has not seen is somebody's unpushed work, not this tail's call.
+    Returns True only when local ``base`` verifiably sits on the fetched remote."""
     remote = f"github/{base}"
     if not git_ok(repo_root, "rev-parse", "--verify", "--quiet", f"{remote}^{{commit}}"):
         sys.stderr.write(f"warning: {remote} does not resolve after the fetch; local {base} "
                          "left where it was\n")
-    elif not git_ok(repo_root, "merge-base", "--is-ancestor", base, remote):
+        return False
+    if not git_ok(repo_root, "merge-base", "--is-ancestor", base, remote):
         sys.stderr.write(f"warning: local {base} is not an ancestor of {remote}, so it is not "
                          "moved — diverged history is a human's call, and the merge is already "
                          "recorded on GitHub\n")
-    elif git_ok(repo_root, "merge", "--ff-only", remote):
+        return False
+    if git_ok(repo_root, "merge", "--ff-only", remote):
         sys.stdout.write(f"{base} fast-forwarded to "
                          f"{git(repo_root, 'rev-parse', '--short', base, check=False)}\n")
-    else:
-        sys.stderr.write(f"warning: could not fast-forward {base}; by hand: git merge "
-                         f"--ff-only {remote}\n")
+        return True
+    sys.stderr.write(f"warning: could not fast-forward {base}; by hand: git merge "
+                     f"--ff-only {remote}\n")
+    return False
 
 
 def update_origin_alias(repo_root: Path, base: str) -> None:
@@ -367,12 +384,23 @@ def remove_branch_and_worktree(repo_root: Path, branch: str) -> None:
 
 
 def post_merge(repo_root: Path, base: str, branch: str, *, warm_cache: bool) -> None:
-    """Housekeeping after a proven merge; every failure is a warning, not an exit."""
+    """Housekeeping after a proven merge; every failure is a warning, not an exit.
+
+    Order matters: the origin alias, the cache warmer and the branch cleanup all
+    assume local ``base`` sits on the merge.  When the fast-forward is refused
+    (diverged local history), running them anyway would bind the alias and the
+    warm cache to the WRONG main and silently skew every diff-based audit — so
+    everything downstream of the fast-forward is gated on it.
+    """
     if not git_ok(repo_root, "fetch", "github", base):
         sys.stderr.write(f"warning: 'git fetch github {base}' failed; local {base}, the "
                          "origin alias and the branch cleanup are left to you.\n")
         return
-    fast_forward_base(repo_root, base)
+    if not fast_forward_base(repo_root, base):
+        sys.stderr.write(f"warning: local {base} was not fast-forwarded; skipping the origin "
+                         "alias refresh, the cache warmer and the branch cleanup — resolve "
+                         f"local {base} first, then rerun them by hand.\n")
+        return
     update_origin_alias(repo_root, base)
     if warm_cache:
         spawn_cache_warmer(repo_root)

@@ -37,7 +37,7 @@ BRANCH_RE = re.compile(r"^(?:(codex|claude)/)?issue-(\d+)-([a-z0-9][a-z0-9-]*)$"
 #: the issue, so the footer is appended only when the body carries none.  GitHub's
 #: nine auto-closing keywords, exactly; keep in sync with pr_merge.py CLOSES_RE so
 #: every reference this footer honors is one the dependency gate also sees.
-CLOSES_RE = re.compile(r"(?i)\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#(\d+)")
+CLOSES_RE = re.compile(r"(?i)\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?):?\s+#(\d+)")
 
 
 def git(repo_root: Path, *args: str, check: bool = True) -> str:
