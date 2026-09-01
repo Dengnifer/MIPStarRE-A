@@ -28,6 +28,8 @@ namespace MIPStarRE.QPBT
 open MIPStarRE.LDT
 open MIPStarRE.Quantum
 
+noncomputable section
+
 /-- The Pauli-test error scale.  The argument order is `(a, b, ε, m, d, q)`;
 the powers are real `rpow`s and the asymptotic constants are absorbed into `a`,
 as specified by `thm:pauli` (`blueprint/src/chapter/ch13_qpbt_test.tex:386-403`,
@@ -222,9 +224,10 @@ noncomputable def pauliOperatorDistanceB
 
 /-- `thm:pauli`: every sufficiently successful Pauli basis test strategy admits
 local isometries and an auxiliary unit state for which the state and both
-operator families are close at scale `deltaQld`.  The theorem is stated over
-the fixed self-dual-normal field model stored in `AdmissibleParams`, not over a
-freshly quantified field identification.  Blueprint
+operator families are close at scale `deltaQld`.  The theorem uses the
+once-and-for-all self-dual-normal field model selected by `fixedFieldModel` for
+each admissible size, rather than a freshly quantified field identification.
+Blueprint
 `blueprint/src/chapter/ch13_qpbt_test.tex:386-403`; paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1426-1447`.
 
@@ -244,5 +247,7 @@ theorem pauli_soundness :
             (∀ W : PauliKind,
               pauliOperatorDistanceB P S w W ≤ deltaQld a b ε P.m P.d P.q) := by
   sorry
+
+end
 
 end MIPStarRE.QPBT

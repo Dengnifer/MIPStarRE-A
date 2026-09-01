@@ -26,8 +26,12 @@ namespace MIPStarRE.QPBT
 
 open MIPStarRE.LDT
 
-/-- Parameters for the low-degree game, including the fixed field model used by
-the ambient coefficient space.  This is the Lean carrier for `def:ld-game` in
+noncomputable section
+
+/-- Numerical parameters for the low-degree game.  The ambient coefficient
+space uses the once-and-for-all model `fixedFieldModel P.q P.hq`, rather than a
+model supplied by each parameter record.  This is the Lean carrier for
+`def:ld-game` in
 `blueprint/src/chapter/ch13_qpbt_test.tex:17-105`, with paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
 -/
@@ -41,13 +45,21 @@ structure LdParams where
   hk : 1 ≤ k
   hq : IsAdmissibleSize q
   hdvd : m ∣ q
-  model : FixedFieldModel q
+
+/-- The fixed model accessor for an `LdParams` record.  It is a compatibility
+view of the global `fixedFieldModel` selector, not an independently quantified
+parameter.  Blueprint `ch13_qpbt_test.tex:17-31`; paper origin
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
+-/
+noncomputable def LdParams.model (P : LdParams) : FixedFieldModel P.q :=
+  fixedFieldModel P.q P.hq
 
 /-- The scalar carrier selected by an `LdParams` record; this is the fixed
-field carrier in `def:ld-game`, blueprint `ch13_qpbt_test.tex:17-31`, paper
-origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
+field carrier in `def:ld-game`, selected globally by `LdParams.model`.
+Blueprint `ch13_qpbt_test.tex:17-31`, paper origin
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
 -/
-abbrev ScalarQ (P : LdParams) := P.model.K
+abbrev ScalarQ (P : LdParams) := (P.model).K
 
 /-- The three low-degree question types of `def:ld-game`, blueprint
 `blueprint/src/chapter/ch13_qpbt_test.tex:17-31`, paper origin
@@ -74,19 +86,19 @@ abbrev LdSpace (P : LdParams) := LdIndex P → ScalarQ P
 /-- The point coordinates of an ambient low-degree vector in
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
 -/
-def LdSpace.point (z : LdSpace P) : Fin P.m → ScalarQ P :=
+def LdSpace.point {P : LdParams} (z : LdSpace P) : Fin P.m → ScalarQ P :=
   fun i => z (.inl (.inl i))
 
 /-- The shared scalar coordinate of an ambient low-degree vector in
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
 -/
-def LdSpace.seed (z : LdSpace P) : ScalarQ P :=
+def LdSpace.seed {P : LdParams} (z : LdSpace P) : ScalarQ P :=
   z (.inl (.inr ()) )
 
 /-- The direction coordinates of an ambient low-degree vector in
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
 -/
-def LdSpace.direction (z : LdSpace P) : Fin P.m → ScalarQ P :=
+def LdSpace.direction {P : LdParams} (z : LdSpace P) : Fin P.m → ScalarQ P :=
   fun i => z (.inr i)
 
 /-- The integer-coordinate map `χ` from the fixed field representation.  This
@@ -99,14 +111,13 @@ noncomputable def chiIndex (P : LdParams) (s : ScalarQ P) : Fin P.m := by
     exact Nat.ne_of_gt (lt_of_lt_of_le Nat.zero_lt_one P.hm)⟩
   exact Fin.ofNat P.m ((binaryRepresentation P.model s).val / (P.q / P.m))
 
-/-- The source uses the block quotient of the fixed integer representation.  The
-`Fin.ofNat` wrapper supplies the totalized boundary behavior for the temporary
- skeleton's proof-irrelevant zero-dimension branch.  This is the projection
- clause of `def:ld-question-distribution`, blueprint
- `blueprint/src/chapter/ch13_qpbt_test.tex:38-49`, paper origin
- `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
+/-- The projection used in the diagonal-line map zeroes coordinates before the
+chosen index and retains the suffix of the direction vector.  This is the
+prefix restriction in `def:ld-question-distribution`, blueprint
+`blueprint/src/chapter/ch13_qpbt_test.tex:38-49`, paper origin
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
 -/
-def prefixProjection (i : Fin P.m) (v : Fin P.m → ScalarQ P) :
+def prefixProjection {P : LdParams} (i : Fin P.m) (v : Fin P.m → ScalarQ P) :
     Fin P.m → ScalarQ P :=
   fun j => if j.val < i.val then 0 else v j
 
@@ -272,7 +283,7 @@ Lean encoding of the rejection clause in `def:ld-win-predicate`, blueprint
 `ch13_qpbt_test.tex:56-105`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
 -/
-def validLdAnswer (t : LdType) (a : LdAnswer P) : Bool :=
+def validLdAnswer {P : LdParams} (t : LdType) (a : LdAnswer P) : Bool :=
   match t, a with
   | .point, .pointVals _ => true
   | .aline, .alinePolys _ => true
@@ -340,5 +351,7 @@ noncomputable def ldGame (P : LdParams) : Game where
   μ := ldQuestionDistribution P
   μ_prob := by sorry
   decide := ldWinPredicate P
+
+end
 
 end MIPStarRE.QPBT

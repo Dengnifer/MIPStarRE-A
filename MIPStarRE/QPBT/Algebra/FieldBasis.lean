@@ -36,7 +36,9 @@ theorem.  This is the Lean carrier for `def:binary-representation`, blueprint
 `blueprint/src/chapter/ch11_qpbt_algebra.tex:298-315`, paper origin
 `references/qpbt-paper/04_preliminaries.tex:653-728`.
 -/
-structure FixedFieldModel (q : ℕ) extends MIPStarRE.LDT.FieldModel q where
+/- The finite-field carrier is specialized to `Type 0`, as are the finite
+models used by the surrounding Euclidean-space API. -/
+structure FixedFieldModel (q : ℕ) extends MIPStarRE.LDT.FieldModel.{0} q where
   /-- Scalar restriction from `ZMod 2` to the chosen field. -/
   algebra : Algebra (ZMod 2) K
   /-- Dimension of the chosen basis over the prime subfield. -/
@@ -65,6 +67,38 @@ structure FixedFieldModel (q : ℕ) extends MIPStarRE.LDT.FieldModel q where
     if i = j then 1 else 0
   /-- Normality of the chosen basis, recorded by a Frobenius generator. -/
   normal : ∃ α : K, ∀ i, basis i = α ^ (2 ^ i.1)
+
+/-!
+The paper fixes the field representation and self-dual normal basis once for
+each admissible field size.  We expose that choice through a single global
+selector rather than carrying a potentially different model in every game
+parameter record.  Existence is a named stage-4.3 proof obligation; the
+selector itself is the resulting noncomputable choice.
+-/
+
+/-- An admissible binary field size admits the fixed self-dual normal model used
+by the Pauli basis test.  This is the existence assertion implicit in
+`def:dual-self-dual-normal-basis` and `def:binary-representation`, blueprint
+`blueprint/src/chapter/ch11_qpbt_algebra.tex:277-315`, paper origin
+`references/qpbt-paper/04_preliminaries.tex:653-680`.
+
+The construction of the basis and its natural coding is deferred to the
+algebra stage; keeping it as a named theorem makes the proof obligation visible
+without adding a model hypothesis to the source-facing test statements.
+-/
+theorem exists_fixedFieldModel (q : ℕ) (hq : IsAdmissibleSize q) :
+    Nonempty (FixedFieldModel q) := by
+  sorry
+
+/-- The once-and-for-all field model selected for an admissible size.  Every
+QPBT parameter record uses this same choice, matching the paper's fixed
+self-dual normal-basis identification rather than quantifying over arbitrary
+representations.  Blueprint `ch11_qpbt_algebra.tex:298-315`; paper origin
+`references/qpbt-paper/04_preliminaries.tex:653-680`.
+-/
+noncomputable def fixedFieldModel (q : ℕ) (hq : IsAdmissibleSize q) :
+    FixedFieldModel q :=
+  Classical.choice (exists_fixedFieldModel q hq)
 
 instance {q : ℕ} (F : FixedFieldModel q) : Field F.K := F.toFieldModel.instField
 instance {q : ℕ} (F : FixedFieldModel q) : Fintype F.K := F.toFieldModel.instFintype

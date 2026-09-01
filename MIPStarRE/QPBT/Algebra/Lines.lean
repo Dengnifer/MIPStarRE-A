@@ -27,7 +27,7 @@ The affine line through `u` in direction `v`, including the singleton case
 paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:106-124`.
 -/
-def linePoints {m : ℕ} [Fintype (Fin m)] [DecidableEq (Fin m)]
+def linePoints {m : ℕ}
     (u v : Fin m → K) : Set (Fin m → K) :=
   {x | ∃ t : K, x = u + t • v}
 
@@ -35,7 +35,7 @@ def linePoints {m : ℕ} [Fintype (Fin m)] [DecidableEq (Fin m)]
 `def:line`; blueprint `ch11_qpbt_algebra.tex:439-453`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:106-124`.
 -/
-def coordinateDirection {m : ℕ} [DecidableEq (Fin m)]
+def coordinateDirection {m : ℕ}
     (i : Fin m) : Fin m → K :=
   Pi.single i 1
 
@@ -44,7 +44,7 @@ def coordinateDirection {m : ℕ} [DecidableEq (Fin m)]
 the axis-parallel clause of `def:line` (blueprint lines 445-450; paper
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:106-124`).
 -/
-def IsAxisParallel {m : ℕ} [DecidableEq (Fin m)] (v : Fin m → K) : Prop :=
+def IsAxisParallel {m : ℕ} (v : Fin m → K) : Prop :=
   ∃ i : Fin m, v = coordinateDirection i
 
 /--
@@ -60,7 +60,7 @@ Changing the base point to another point on a line leaves the line unchanged.
 This is `prop:line-equiv` in `blueprint/src/chapter/ch11_qpbt_algebra.tex:455-466`,
 with paper origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:128-132`.
 -/
-theorem linePoints_eq_of_mem {m : ℕ} [Fintype (Fin m)] [DecidableEq (Fin m)]
+theorem linePoints_eq_of_mem {m : ℕ}
     (u v u' : Fin m → K) (h : u' ∈ linePoints u v) :
     linePoints u v = linePoints u' v := by
   sorry
@@ -72,7 +72,7 @@ so the resulting map is the identity.  Blueprint `def:line-representative`,
 `blueprint/src/chapter/ch11_qpbt_algebra.tex:472-492`; paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:143-174`.
 -/
-noncomputable def lineRepMap {m : ℕ} [Fintype (Fin m)] [DecidableEq (Fin m)]
+noncomputable def lineRepMap {m : ℕ}
     (v : Fin m → K) : (Fin m → K) →ₗ[K] (Fin m → K) :=
   canonicalProjOfKernel (Submodule.span K ({v} : Set (Fin m → K)))
 
@@ -82,7 +82,7 @@ canonical representative in `def:line-representative`. -/
 `blueprint/src/chapter/ch11_qpbt_algebra.tex:472-492`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:166-174`.
 -/
-noncomputable def lineRep {m : ℕ} [Fintype (Fin m)] [DecidableEq (Fin m)]
+noncomputable def lineRep {m : ℕ}
     (u v : Fin m → K) : Fin m → K :=
   lineRepMap v u
 
