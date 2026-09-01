@@ -33,7 +33,7 @@ ignored. Commit statuses retain GitHub's global latest-row precedence: the
 latest context is selected before its creator is checked, so a later untrusted
 row blocks instead of falling back to an older trusted success.
 
-An idempotent mutating command issues at most one POST or PATCH per invocation.
+An idempotent mutating command issues at most one write mutation per invocation.
 Every local review, clean or adverse, is a `COMMENT`; unresolved findings are
 represented by a failing summary rather than a sticky `REQUEST_CHANGES` review.
 After an ambiguous mutation result, the command polls only the authoritative
@@ -88,6 +88,12 @@ adopts the unique open PR for that head branch. Repeated invocation validates
 the adopted PR and updates its requested metadata. Issue footers use GitHub
 numbers directly.
 
+Requested PR labels use exact-set replacement. The client reads the current
+authoritative set, performs at most one retry-free `PUT` when it differs, and
+then reconciles by authoritative read-back. A transient or ambiguous response
+never causes a blind second replacement, which could overwrite a concurrent
+label update.
+
 Branches normally use `issue-<github-number>-<slug>` or
 `codex/issue-<github-number>-<slug>`. Brackets and Git-ref metacharacters are
 forbidden. Fix commits begin exactly `[codex-auto-fix]` or
@@ -114,11 +120,19 @@ a creator, by posting only the trusted final status. It cannot recover an
 unrelated pending run, a conflicting trusted status, or a stale-base
 attestation. Ordinary reruns adopt complete evidence; `--new-round` explicitly
 dispatches another fully guarded attestation for the same exact comparison.
+Pending and pre-attestation error statuses canonically bind the full base by a
+cryptographic fingerprint together with the run and attempt state. Only
+`--new-round` may treat such a trusted current-base status with no corresponding
+attestation as aborted and dispatch again. Ordinary reruns, wrong-base
+attempts, and arbitrary trusted conflicts fail closed, while an attestation
+missing only its final summary is always finalized without redispatch.
 One review run id, reviewer session name, or thread cannot be replayed across a
 distinct attestation for the same PR.
 
-`local/bin/pr_merge.py <pr-number>` accepts only an open, non-draft, mergeable
-PR whose local branch and GitHub head are the same full 40- or 64-hex SHA and
+`local/bin/pr_merge.py <pr-number>` accepts only an open PR whose `draft` field
+is exactly the JSON boolean `false` and whose `mergeable` field is exactly
+`true`. A missing, null, numeric, or string draft value fails closed. The local
+branch and GitHub head must be the same full 40- or 64-hex SHA, and
 whose trusted local base matches the PR's full base SHA. It reserves the
 per-PR review lock, branch fix lock, and per-PR CI lock through gate publication
 and the merge mutation. The feature worktree must be clean at each gate
@@ -138,8 +152,10 @@ force pushes and deletions must be disabled. The classic `checks` rows must
 bind both summaries to PAT publication with `app_id` null or `-1`. Every
 effective branch rule is also read, and each required status row must likewise
 have `integration_id` null or `-1`. The repository setting must allow merge
-commits. Classic `required_linear_history.enabled` and every effective
-`required_linear_history` rule are incompatible with that merge-only policy.
+commits. When classic protection includes `required_linear_history`, it must be
+a well-formed object with `enabled=false`; absent remains acceptable, while
+present `null` or malformed values fail closed. Every effective
+`required_linear_history` rule is incompatible with the merge-only policy.
 Active merge queues, linear-history requirements, nonstrict or missing summary
 rules, approval requirements, unavailable merge commits, malformed or non-PAT
 producers, inactive referenced rulesets, or nonempty ruleset bypass actors
@@ -176,17 +192,31 @@ GitHub may advance it to the new base tip. Instead, the reported
 `merge_commit_sha` must resolve through the Git Data API to exactly two parents,
 the frozen base then the frozen head. An already-merged response with different
 identity or topology is classified external/nonconforming, not successful
-local execution, and receives no cleanup. After success, the trusted local base
-may be fetched and fast-forwarded; feature cleanup then follows the worktree
-safeguards.
+local execution, and receives no cleanup. After topology-verified remote
+success, the merge result is final. Fetching and fast-forwarding the trusted
+local base and cleaning the feature worktree/branch are separate best-effort
+maintenance steps. Dirt such as newly written telemetry or any other local
+failure warns and defers that step; it never reports the proven GitHub merge as
+failed. Remote identity or topology nonconformance remains fatal and receives
+no cleanup.
 
-Merge reservations use PID-stamped runtime directories and never weaken live
-lock exclusion. A directory without a readable live PID may be a stale partial
-lock or a process between `mkdir` and PID publication, so the merge gate does
-not delete it automatically. The operator must verify that no CI, review,
-auto-fix, or merge process owns the exact path from the error, remove an empty
-partial with `rmdir <absolute-lock-path>` or move a nonempty stale directory
-aside for inspection, and rerun the gate.
+Merge reserves the CI, review, and fix runtime directories through the same
+helper as their ordinary owners. Each claim contains the directory device/inode
+identity, PID, random UUID token, and digest of structured owner metadata. The
+persistent sibling `flock` serializes creation, validation, cancellation,
+explicit recovery, and release. Under it, any transition based on a prior
+observation must match the complete claim before the canonical path is renamed
+or a cancellation is written. Cleanup deletes only the verified private
+tombstone.
+
+Acquisition never deletes any existing complete record, including a same-host
+dead parent whose descendants may survive. After verifying that the recorded
+process and every descendant have stopped, the operator may explicitly break
+that exact complete claim through the helper. A directory without a complete
+valid owner may be a partial lock or interrupted initializer, so it also is
+never deleted automatically, regardless of age. Foreign-host records fail
+closed. Manual recovery must target only the exact path from the error after
+verifying that no CI, review, auto-fix, agent, merge, or build process owns it.
 
 ## Snapshots and reporting
 

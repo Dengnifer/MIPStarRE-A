@@ -11,10 +11,12 @@ import io
 import json
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import sys
 import tempfile
+import threading
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -29,6 +31,7 @@ import issue_close  # noqa: E402
 import issue_new  # noqa: E402
 import pr_merge  # noqa: E402
 import pr_open  # noqa: E402
+import runtime_lock  # noqa: E402
 
 
 FAKE_GH = r'''#!/usr/bin/env python3
@@ -91,12 +94,20 @@ def next_number(key):
 def require_runtime_locks(key, observed_key):
     paths = [str(value) for value in state.get(key, [])]
     for path in paths:
-        if not (
-            os.path.isdir(path)
-            and os.path.isfile(os.path.join(path, "pid"))
-            and os.path.isfile(os.path.join(path, "owner"))
+        required = ("pid", "token", "identity", "owner")
+        if not os.path.isdir(path) or not all(
+            os.path.isfile(os.path.join(path, name)) for name in required
         ):
             fail("HTTP 409 required workflow lock is not held: " + path)
+        try:
+            with open(os.path.join(path, "owner"), encoding="utf-8") as stream:
+                owner = json.load(stream)
+            if set(owner) != {
+                "schema", "pid", "token", "identity", "owner", "host", "created_at"
+            }:
+                raise ValueError("noncanonical owner metadata")
+        except (OSError, ValueError, TypeError, json.JSONDecodeError):
+            fail("HTTP 409 required workflow lock is malformed: " + path)
     if paths:
         state[observed_key] = paths
 
@@ -362,7 +373,9 @@ if len(tail) == 2 and tail[0] == "pulls":
             if target:
                 os.makedirs(os.path.dirname(target), exist_ok=True)
                 with open(target, "w", encoding="utf-8") as stream:
-                    stream.write("test late supersession\n")
+                    stream.write(
+                        str(cancellation.get("content", "test late supersession\n"))
+                    )
             state["cancel_lock_on_pull_read"] = {}
             state["cancel_lock_on_pull_read_fired"] = count
         state["pull_read_count"] = count + 1
@@ -431,10 +444,14 @@ if len(tail) == 3 and tail[0] == "issues" and tail[2] == "labels":
     if row is None:
         fail("HTTP 404 Not Found")
     if method == "PUT":
+        if state.pop("fail_label_put_before_once", False):
+            fail("HTTP 503 Service Unavailable")
         row["labels"] = [{"name": name} for name in (payload or {}).get("labels", [])]
         issue = state.setdefault("issues", {}).get(number)
         if issue is not None:
             issue["labels"] = row["labels"]
+        if state.pop("ambiguous_label_put_once", False):
+            fail("HTTP 503 Service Unavailable")
         emit(row["labels"])
 
 if len(tail) == 3 and tail[0] == "pulls" and tail[2] == "commits":
@@ -462,7 +479,9 @@ if len(tail) == 3 and tail[0] == "pulls" and tail[2] == "reviews":
             if target:
                 os.makedirs(os.path.dirname(target), exist_ok=True)
                 with open(target, "w", encoding="utf-8") as stream:
-                    stream.write("test publication cancellation\n")
+                    stream.write(
+                        str(cancellation.get("content", "test publication cancellation\n"))
+                    )
             state["cancel_lock_on_review_read"] = {}
         if state.get("inject_adverse_review_at") == read_count:
             pull = state.setdefault("pulls", {}).get(number, {})
@@ -491,6 +510,15 @@ if len(tail) == 3 and tail[0] == "pulls" and tail[2] == "reviews":
             "user": dict(state.get("user", {"login": "o"})),
         }
         reviews.append(row)
+        readback_failures = int(
+            state.pop("ambiguous_review_readback_failures_once", 0)
+        )
+        if readback_failures > 0:
+            state.setdefault("failures", {})["GET pulls/1/reviews"] = {
+                "remaining": readback_failures,
+                "message": "HTTP 503 injected review readback outage",
+            }
+            fail("HTTP 503 Service Unavailable")
         if state.pop("ambiguous_review_once", False):
             fail("HTTP 503 Service Unavailable")
         if state.pop("corrupt_review_response", False):
@@ -518,7 +546,9 @@ if len(tail) == 3 and tail[0] == "commits" and tail[2] == "statuses":
         if target:
             os.makedirs(os.path.dirname(target), exist_ok=True)
             with open(target, "w", encoding="utf-8") as stream:
-                stream.write("test publication cancellation\n")
+                stream.write(
+                    str(cancellation.get("content", "test publication cancellation\n"))
+                )
         state["cancel_lock_on_status_read"] = {}
     state["status_read_count"] = read_count + 1
     emit(page(state.setdefault("statuses", {}).get(sha, []), parsed.query))
@@ -533,6 +563,15 @@ if len(tail) == 2 and tail[0] == "statuses" and method == "POST":
         require_runtime_locks(
             "required_adjudication_locks", "adjudication_locks_observed"
         )
+    if (
+        state.get("fail_review_aborted_status_once")
+        and str((payload or {}).get("context", "")).casefold()
+        == "local-review/summary"
+        and str((payload or {}).get("state", "")).casefold() == "error"
+        and "state=aborted" in str((payload or {}).get("description", ""))
+    ):
+        state["fail_review_aborted_status_once"] = False
+        fail("HTTP 503 injected aborted review status failure")
     if (
         state.get("fail_review_summary_final_once")
         and str((payload or {}).get("context", "")).casefold()
@@ -570,6 +609,8 @@ import signal
 import subprocess
 import sys
 
+sys.dont_write_bytecode = True
+
 
 def option(name, default=""):
     try:
@@ -599,11 +640,68 @@ fix_lock = cache / "locks" / ("fix-" + branch + ".lock")
 if fix_lock.is_dir() and (fix_lock / "pid").exists() and (fix_lock / "owner").exists():
     (cache / "fake-fix-lock-observed").write_text("yes", encoding="utf-8")
 
+sys.path.insert(0, str(worktree / "local" / "bin"))
+import runtime_lock
+
+
+def cancellation_content():
+    observed = runtime_lock.inspect_lock(fix_lock)
+    if observed.record is None:
+        raise RuntimeError("test cancellation needs a complete lock claim")
+    claim = observed.record.claim
+    return json.dumps(
+        {
+            "schema": 1,
+            "identity": claim.identity.render(),
+            "pid": claim.pid,
+            "token": claim.token,
+            "owner_digest": claim.owner_digest,
+            "requester": "workflow regression test",
+            "requested_at": "2026-01-01T00:00:00Z",
+        },
+        sort_keys=True,
+        separators=(",", ":"),
+    ) + "\n"
+
+
+def request_valid_cancellation():
+    observed = runtime_lock.inspect_lock(fix_lock)
+    if observed.record is None:
+        raise RuntimeError("test cancellation needs a complete lock claim")
+    result = runtime_lock.request_cancellation(
+        fix_lock,
+        observed.record.claim,
+        "workflow regression test",
+        required_owner_prefix="autofix ",
+    )
+    if result.state != "cancel-requested":
+        raise RuntimeError("could not request test cancellation: " + result.state)
+
+
+def install_replacement_claim():
+    observed = runtime_lock.inspect_lock(fix_lock)
+    if observed.record is None:
+        raise RuntimeError("test replacement needs a complete lock claim")
+    released = runtime_lock.release_owned_lock(fix_lock, observed.record.claim)
+    if released.state != "released":
+        raise RuntimeError("could not release test claim: " + released.state)
+    acquired = runtime_lock.acquire_lock(
+        fix_lock,
+        os.getpid(),
+        runtime_lock.new_token(),
+        "autofix replacement-test",
+    )
+    if acquired.state != "acquired":
+        raise RuntimeError("could not install replacement claim: " + acquired.state)
+
+
 action = os.environ.get("MIPSTARRE_TEST_LOCK_ACTION", "")
 if action == "cancel":
+    request_valid_cancellation()
+elif action == "malformed-cancel":
     (fix_lock / "cancel").write_text("test supersession\n", encoding="utf-8")
 elif action == "steal":
-    (fix_lock / "owner").write_text("different-owner\n", encoding="utf-8")
+    install_replacement_claim()
 signal_target = os.environ.get("MIPSTARRE_TEST_SIGNAL_PARENT")
 if signal_target == "TERM":
     os.kill(os.getppid(), signal.SIGTERM)
@@ -618,6 +716,8 @@ elif signal_target == "TERM_REVIEW_WRAPPER":
     os.kill(grandparent, signal.SIGTERM)
 
 if role == "reviewer":
+    if os.environ.get("MIPSTARRE_TEST_REVIEW_DISPATCH_FAIL") == "1":
+        raise SystemExit(17)
     guard_action = os.environ.get("MIPSTARRE_TEST_GUARD_ACTION", "")
     state_path = os.environ.get("FAKE_GH_STATE")
     if state_path and guard_action in {
@@ -634,6 +734,7 @@ if role == "reviewer":
             injection = {
                 "at": int(state.get(counter_key, 0)) + 1,
                 "path": str(fix_lock / "cancel"),
+                "content": cancellation_content(),
             }
         elif guard_action == "cancel-status-post":
             counter_key = "status_read_count"
@@ -641,6 +742,7 @@ if role == "reviewer":
             injection = {
                 "at": int(state.get(counter_key, 0)) + 1,
                 "path": str(fix_lock / "cancel"),
+                "content": cancellation_content(),
             }
         elif guard_action == "move-base-review-post":
             counter_key = "review_read_count"
@@ -707,6 +809,7 @@ else:
         state["cancel_lock_on_pull_read"] = {
             "at": int(state.get("pull_read_count", 0)) + 2,
             "path": str(fix_lock / "cancel"),
+            "content": cancellation_content(),
         }
         temporary = state_path + ".tmp"
         with open(temporary, "w", encoding="utf-8") as stream:
@@ -1216,6 +1319,484 @@ class FakeGhCase(unittest.TestCase):
         return reviews, statuses, sessions, comment, payload
 
 
+class RuntimeLockTests(FakeGhCase):
+    """Stable transition mutexes preserve replacements and serialize breakers."""
+
+    def acquire_record(
+        self, path: Path, pid: int, owner: str
+    ) -> runtime_lock.LockRecord:
+        result = runtime_lock.acquire_lock(
+            path,
+            pid,
+            runtime_lock.new_token(),
+            owner,
+        )
+        self.assertEqual(result.state, "acquired", result.detail)
+        self.assertIsNotNone(result.record)
+        return result.record  # type: ignore[return-value]
+
+    def test_blocked_breaker_revalidates_replacement_before_rename(self) -> None:
+        lock = self.root / "locks" / "ci-1.lock"
+        stale = self.acquire_record(lock, 999_999_999, "stale ci owner")
+        replacement_source = self.root / "locks" / "replacement-source.lock"
+        replacement_record = self.acquire_record(
+            replacement_source, os.getpid(), "live replacement"
+        )
+        started = threading.Event()
+        result: list[runtime_lock.TransitionResult] = []
+
+        with runtime_lock.transition_mutex(lock):
+            worker = threading.Thread(
+                target=lambda: result.append(
+                    runtime_lock.break_stale_lock(
+                        lock, stale.claim, before_mutex=started.set
+                    )
+                )
+            )
+            worker.start()
+            self.assertTrue(started.wait(timeout=2))
+            displaced = lock.with_name("ci-1.lock.displaced")
+            lock.rename(displaced)
+            replacement_source.rename(lock)
+            replacement = replacement_record.identity
+        worker.join(timeout=2)
+
+        self.assertFalse(worker.is_alive())
+        self.assertEqual([item.state for item in result], ["changed"])
+        self.assertEqual(runtime_lock.directory_identity(lock), replacement)
+        with self.assertRaises(pr_merge.GateFailure):
+            with pr_merge.reserve_runtime_lock(lock, "contender"):
+                self.fail(
+                    "a contender acquired a replacement owned by a live process"
+                )
+
+    def test_acquire_requires_explicit_recovery_for_every_complete_record(
+        self,
+    ) -> None:
+        lock = self.root / "locks" / "complete-dead.lock"
+        owner = self.acquire_record(lock, 999_999_999, "completed parent")
+
+        contender = runtime_lock.acquire_lock(
+            lock,
+            os.getpid(),
+            runtime_lock.new_token(),
+            "contender",
+        )
+
+        self.assertEqual(contender.state, "busy")
+        self.assertIn("descendants may survive", contender.detail)
+        self.assertEqual(runtime_lock.directory_identity(lock), owner.identity)
+        self.assertEqual(
+            runtime_lock.break_stale_lock(lock, owner.claim).state,
+            "broken",
+        )
+
+    def test_oversized_complete_owner_pid_is_nonthrowing_and_fail_closed(
+        self,
+    ) -> None:
+        lock = self.root / "locks" / "oversized-pid.lock"
+        owner = self.acquire_record(lock, 10**50, "oversized owner")
+
+        contender = runtime_lock.acquire_lock(
+            lock,
+            os.getpid(),
+            runtime_lock.new_token(),
+            "contender",
+        )
+
+        self.assertEqual(contender.state, "busy")
+        self.assertEqual(runtime_lock.directory_identity(lock), owner.identity)
+
+    def test_two_breakers_serialize_and_only_one_contender_enters(self) -> None:
+        lock = self.root / "locks" / "ci-2.lock"
+        stale = self.acquire_record(lock, 999_999_999, "stale ci owner")
+        barrier = threading.Barrier(3)
+        results: list[str] = []
+
+        def breaker() -> None:
+            result = runtime_lock.break_stale_lock(
+                lock,
+                stale.claim,
+                before_mutex=barrier.wait,
+            )
+            results.append(result.state)
+
+        breakers = [threading.Thread(target=breaker) for _ in range(2)]
+        for worker in breakers:
+            worker.start()
+        barrier.wait(timeout=2)
+        for worker in breakers:
+            worker.join(timeout=2)
+        self.assertEqual(results.count("broken"), 1)
+        self.assertEqual(len(results), 2)
+
+        entered: list[str] = []
+        holder_entered = threading.Event()
+        release_holder = threading.Event()
+
+        def contender(name: str) -> None:
+            try:
+                with pr_merge.reserve_runtime_lock(lock, name):
+                    entered.append(name)
+                    holder_entered.set()
+                    release_holder.wait(timeout=2)
+            except pr_merge.GateFailure:
+                pass
+
+        first = threading.Thread(target=contender, args=("first",))
+        second = threading.Thread(target=contender, args=("second",))
+        first.start()
+        self.assertTrue(holder_entered.wait(timeout=2))
+        second.start()
+        second.join(timeout=2)
+        release_holder.set()
+        first.join(timeout=2)
+        self.assertEqual(entered, ["first"])
+
+    def test_merge_cleanup_never_renames_whole_directory_replacement(self) -> None:
+        lock = self.root / "locks" / "review-1.lock"
+        displaced = lock.with_name("review-1.lock.displaced")
+        replacement_source = self.root / "locks" / "replacement-source.lock"
+        replacement_record = self.acquire_record(
+            replacement_source, os.getpid(), "replacement owner"
+        )
+        with pr_merge.reserve_runtime_lock(lock, "merge cleanup") as held:
+            lock.rename(displaced)
+            replacement_source.rename(lock)
+            self.assertNotEqual(replacement_record.identity, held.identity)
+
+        self.assertEqual(
+            runtime_lock.directory_identity(lock), replacement_record.identity
+        )
+        self.assertTrue(displaced.is_dir())
+        self.assertEqual(list(lock.parent.glob("review-1.lock.release.*")), [])
+
+    def test_blocked_cancellation_preserves_replacement(self) -> None:
+        lock = self.root / "locks" / "fix-branch.lock"
+        original = self.acquire_record(lock, os.getpid(), "original autofix")
+        replacement_source = self.root / "locks" / "cancel-replacement.lock"
+        replacement = self.acquire_record(
+            replacement_source, os.getpid(), "replacement autofix"
+        )
+        started = threading.Event()
+        results: list[runtime_lock.TransitionResult] = []
+
+        with runtime_lock.transition_mutex(lock):
+            worker = threading.Thread(
+                target=lambda: results.append(
+                    runtime_lock.request_cancellation(
+                        lock,
+                        original.claim,
+                        "new autofix",
+                        before_mutex=started.set,
+                    )
+                )
+            )
+            worker.start()
+            self.assertTrue(started.wait(timeout=2))
+            lock.rename(lock.with_name("fix-branch.lock.displaced"))
+            replacement_source.rename(lock)
+        worker.join(timeout=2)
+
+        self.assertFalse(worker.is_alive())
+        self.assertEqual([item.state for item in results], ["changed"])
+        self.assertEqual(
+            runtime_lock.directory_identity(lock), replacement.identity
+        )
+        self.assertFalse((lock / "cancel").exists())
+
+    def test_cancellation_is_bound_to_the_complete_owner_claim(self) -> None:
+        lock = self.root / "locks" / "fix-cancel.lock"
+        owner = self.acquire_record(lock, os.getpid(), "autofix pr=1")
+
+        requested = runtime_lock.request_cancellation(
+            lock,
+            owner.claim,
+            "superseding autofix",
+            required_owner_prefix="autofix ",
+        )
+        self.assertEqual(requested.state, "cancel-requested")
+        self.assertEqual(
+            runtime_lock.validate_owned_lock(lock, owner.claim).state, "owned"
+        )
+        self.assertEqual(
+            runtime_lock.validate_owned_lock(
+                lock, owner.claim, reject_cancel=True
+            ).state,
+            "cancelled",
+        )
+        self.assertEqual(
+            runtime_lock.release_owned_lock(lock, owner.claim).state, "released"
+        )
+
+        agent_lock = self.root / "locks" / "fix-agent.lock"
+        agent = self.acquire_record(
+            agent_lock,
+            os.getpid(),
+            "agent.sh target=pr#1 branch=issue-7-test",
+        )
+        refused = runtime_lock.request_cancellation(
+            agent_lock,
+            agent.claim,
+            "superseding autofix",
+            required_owner_prefix="autofix ",
+        )
+        self.assertEqual(refused.state, "not-cancellable")
+        self.assertFalse((agent_lock / "cancel").exists())
+
+    def test_signal_traps_exit_conventionally_and_release_exact_claims(
+        self,
+    ) -> None:
+        for name in ("housekeeping.sh", "cache-warmer.sh", "warm-worktree.sh"):
+            with self.subTest(script=name):
+                source = (BIN_DIR / name).read_text(encoding="utf-8")
+                self.assertIn("trap cleanup EXIT", source)
+                self.assertIn("trap 'exit 130' INT", source)
+                self.assertIn("trap 'exit 143' TERM", source)
+                self.assertNotIn("trap cleanup EXIT INT TERM", source)
+                self.assertIn("runtime_lock.py\" release-owned", source)
+
+    def test_partial_owner_records_fail_closed(self) -> None:
+        fields = ("pid", "token", "identity", "owner")
+        for count in range(len(fields)):
+            with self.subTest(files=fields[:count]):
+                lock = self.root / "partial" / f"lock-{count}"
+                lock.mkdir(parents=True)
+                identity = runtime_lock.directory_identity(lock)
+                self.assertIsNotNone(identity)
+                values = {
+                    "pid": f"{os.getpid()}\n",
+                    "token": f"{runtime_lock.new_token()}\n",
+                    "identity": f"{identity.render()}\n",  # type: ignore[union-attr]
+                    "owner": "{}\n",
+                }
+                for field in fields[:count]:
+                    (lock / field).write_text(values[field], encoding="utf-8")
+                result = runtime_lock.acquire_lock(
+                    lock,
+                    os.getpid(),
+                    runtime_lock.new_token(),
+                    "contender",
+                )
+                self.assertEqual(result.state, "unsafe")
+                self.assertTrue(lock.is_dir())
+
+    def test_full_build_participants_use_one_compatible_lock_contract(self) -> None:
+        participants = {
+            "ci.sh": ("ci.sh pr=", "ci.sh pr=1"),
+            "warm-worktree.sh": (
+                "warm-worktree.sh $WORKTREE",
+                "warm-worktree.sh test",
+            ),
+            "cache-warmer.sh": (
+                "cache-warmer.sh $purpose",
+                "cache-warmer.sh full-lake-build",
+            ),
+            "housekeeping.sh": (
+                "housekeeping.sh linter-sweep",
+                "housekeeping.sh linter-sweep",
+            ),
+        }
+        shared_path = "MIPSTARRE_FULL_BUILD_LOCK:-$CACHE_ROOT/.full-build-lock"
+        forbidden_mutations = (
+            'mkdir "$FULL_BUILD_LOCK"',
+            'mv "$FULL_BUILD_LOCK"',
+            'rm -rf "$FULL_BUILD_LOCK"',
+        )
+        for script, (source_owner, _record_owner) in participants.items():
+            source = (BIN_DIR / script).read_text(encoding="utf-8")
+            self.assertIn("runtime_lock.py", source)
+            self.assertIn(shared_path, source)
+            self.assertIn(source_owner, source)
+            for mutation in forbidden_mutations:
+                self.assertNotIn(mutation, source)
+
+        lock = self.root / "cache" / ".full-build-lock"
+        record_owners = [value[1] for value in participants.values()]
+        held = self.acquire_record(lock, os.getpid(), record_owners[0])
+        for owner in record_owners[1:]:
+            result = runtime_lock.acquire_lock(
+                lock,
+                os.getpid(),
+                runtime_lock.new_token(),
+                owner,
+            )
+            self.assertEqual(result.state, "busy")
+            self.assertEqual(result.record.claim, held.claim)  # type: ignore[union-attr]
+        released = runtime_lock.release_owned_lock(lock, held.claim)
+        self.assertEqual(released.state, "released")
+        replacement = self.acquire_record(
+            lock, os.getpid(), participants["cache-warmer.sh"][1]
+        )
+        self.assertNotEqual(replacement.claim, held.claim)
+
+
+class DispatchShellTests(FakeGhCase):
+    """Dispatcher argv preserves parent-option placement for fresh and resumed runs."""
+
+    def test_resume_places_exec_only_options_before_subcommand(self) -> None:
+        repository, _remote, _base_sha, _head_sha = self.make_repository(
+            name="dispatch-shell",
+            base_sources={
+                "local/bin/dispatch.sh": BIN_DIR / "dispatch.sh",
+                "local/bin/runtime_lock.py": BIN_DIR / "runtime_lock.py",
+                "local/bin/telemetry.py": BIN_DIR / "telemetry.py",
+            },
+            base_text={"AGENTS.md": "# Test agent instructions\n"},
+        )
+        fake_bin = self.root / "fake-bin"
+        fake_bin.mkdir()
+        fake_codex = fake_bin / "codex"
+        fake_codex.write_text("#!/bin/sh\nexit 99\n", encoding="utf-8")
+        fake_codex.chmod(0o755)
+        environment = os.environ.copy()
+        environment.update(
+            {
+                "MIPSTARRE_CACHE_ROOT": str(self.root / "dispatch-cache"),
+                "PATH": str(fake_bin) + os.pathsep + environment.get("PATH", ""),
+            }
+        )
+
+        def dry_run(*extra: str) -> list[str]:
+            result = subprocess.run(
+                [
+                    "bash",
+                    str(repository / "local/bin/dispatch.sh"),
+                    "--role",
+                    "scout",
+                    "--issue",
+                    "dispatch-argv-test",
+                    "--worktree",
+                    str(repository),
+                    "--sandbox",
+                    "read-only",
+                    "--no-persona",
+                    "--skip-hook-check",
+                    "--dry-run",
+                    *extra,
+                    "--",
+                    "Inspect only.",
+                ],
+                cwd=repository,
+                env=environment,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+            command = next(
+                line.removeprefix("command:").strip()
+                for line in result.stdout.splitlines()
+                if line.startswith("command:")
+            )
+            return shlex.split(command)
+
+        prefix = [
+            "codex",
+            "exec",
+            "-C",
+            str(repository.resolve()),
+            "--sandbox",
+            "read-only",
+        ]
+        fresh = dry_run()
+        self.assertEqual(fresh[: len(prefix)], prefix)
+        self.assertNotIn("resume", fresh)
+        self.assertEqual(fresh[-2:], ["--", "<prompt>"])
+
+        thread_id = "01a05b58-ff5d-7302-b38d-1d61f575a435"
+        resumed = dry_run("--resume", thread_id)
+        self.assertEqual(resumed[: len(prefix) + 1], [*prefix, "resume"])
+        self.assertEqual(resumed[-3:], ["--", thread_id, "<prompt>"])
+
+
+class AgentShellTests(FakeGhCase):
+    """Human write sessions reserve the branch; read-only sessions only observe it."""
+
+    def prepare_agent(self) -> tuple[Path, str]:
+        repository, _remote, base_sha, head_sha = self.make_repository(
+            name="agent-shell",
+            base_sources={
+                "local/bin/agent.sh": BIN_DIR / "agent.sh",
+                "local/bin/github_api.py": BIN_DIR / "github_api.py",
+                "local/bin/runtime_lock.py": BIN_DIR / "runtime_lock.py",
+            },
+            base_text={
+                "local/bin/dispatch.sh": FAKE_DISPATCH,
+                ".github/prompts/claude-code-system-prompt.md": (
+                    "Trusted human-directed session persona.\n"
+                ),
+            },
+        )
+        pull = pull_row(1, head_sha, base_sha=base_sha)
+        self.write_state(
+            pulls={"1": pull},
+            issues={
+                "1": {**pull, "pull_request": {"url": pull["html_url"]}}
+            },
+        )
+        return repository, head_sha
+
+    def run_agent(
+        self, repository: Path, cache: Path, *, read_only: bool = False
+    ) -> subprocess.CompletedProcess[str]:
+        command = [
+            "bash",
+            str(repository / "local/bin/agent.sh"),
+            "1",
+            "Inspect the workflow boundary.",
+        ]
+        if read_only:
+            command.append("--read-only")
+        environment = os.environ.copy()
+        environment.update(
+            {
+                "MIPSTARRE_CACHE_ROOT": str(cache),
+                "MIPSTARRE_TEST_BRANCH": "issue-7-test",
+            }
+        )
+        return subprocess.run(
+            command,
+            cwd=repository,
+            env=environment,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+
+    def test_workspace_write_holds_branch_lease_through_dispatch(self) -> None:
+        repository, _head_sha = self.prepare_agent()
+        cache = self.root / "cache-agent-write"
+        result = self.run_agent(repository, cache)
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        self.assertTrue((cache / "fake-fix-lock-observed").is_file())
+        self.assertFalse((cache / "locks/fix-issue-7-test.lock").exists())
+
+    def test_read_only_does_not_reserve_or_cancel_branch_lease(self) -> None:
+        repository, _head_sha = self.prepare_agent()
+        cache = self.root / "cache-agent-read"
+        lock = cache / "locks/fix-issue-7-test.lock"
+        held = runtime_lock.acquire_lock(
+            lock,
+            os.getpid(),
+            runtime_lock.new_token(),
+            "autofix pr=1 branch=issue-7-test mode=ci",
+        )
+        self.assertEqual(held.state, "acquired")
+
+        result = self.run_agent(repository, cache, read_only=True)
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        self.assertIsNotNone(held.record)
+        claim = held.record.claim  # type: ignore[union-attr]
+        self.assertEqual(
+            runtime_lock.validate_owned_lock(lock, claim).state,
+            "owned",
+        )
+        self.assertFalse((lock / "cancel").exists())
+
+
 class IssueLifecycleTests(FakeGhCase):
     """Group 1: create/recover, labels, sub-issues, and close reasons."""
 
@@ -1319,6 +1900,13 @@ class PullRequestLifecycleTests(FakeGhCase):
             run_git(remote, "rev-parse", "refs/heads/issue-7-test"), head_sha
         )
         self.assertNotIn("--all", (BIN_DIR / "pr_open.py").read_text(encoding="utf-8"))
+        label_puts = [
+            call
+            for call in state["calls"]
+            if call["args"][:3] == ["api", "--method", "PUT"]
+            and call["args"][3].endswith("issues/1/labels")
+        ]
+        self.assertEqual(len(label_puts), 1)
 
     def test_ambiguous_pr_create_and_empty_diff_refusal(self) -> None:
         repository, _remote, base_sha, head_sha = self.make_repository()
@@ -1350,6 +1938,77 @@ class PullRequestLifecycleTests(FakeGhCase):
         run_git(repository, "checkout", "issue-7-test")
         run_git(repository, "update-ref", "-d", "refs/remotes/github/main")
         self.assertEqual(pr_open.main(args), 2)
+
+    def test_ambiguous_label_replace_is_adopted_without_a_second_put(self) -> None:
+        repository, _remote, _base_sha, head_sha = self.make_repository(
+            name="ambiguous-labels"
+        )
+        self.write_state(
+            labels=[{"name": "formalization"}],
+            issues={"7": issue_row(7)},
+            local_head=head_sha,
+            ambiguous_label_put_once=True,
+        )
+        result = pr_open.main(
+            [
+                "--branch",
+                "issue-7-test",
+                "--title",
+                "feat(local): reconcile labels",
+                "--label",
+                "formalization",
+                "--issue",
+                "7",
+                "--repo-root",
+                str(repository),
+            ]
+        )
+        self.assertEqual(result, 0)
+        puts = [
+            call
+            for call in self.state()["calls"]
+            if call["args"][:3] == ["api", "--method", "PUT"]
+            and call["args"][3].endswith("issues/1/labels")
+        ]
+        self.assertEqual(len(puts), 1)
+        self.assertEqual(
+            self.state()["issues"]["1"]["labels"],
+            [{"name": "formalization"}],
+        )
+
+    def test_absent_label_replace_outcome_is_not_retried(self) -> None:
+        repository, _remote, _base_sha, head_sha = self.make_repository(
+            name="failed-labels"
+        )
+        self.write_state(
+            labels=[{"name": "formalization"}],
+            issues={"7": issue_row(7)},
+            local_head=head_sha,
+            fail_label_put_before_once=True,
+        )
+        result = pr_open.main(
+            [
+                "--branch",
+                "issue-7-test",
+                "--title",
+                "feat(local): refuse label replay",
+                "--label",
+                "formalization",
+                "--issue",
+                "7",
+                "--repo-root",
+                str(repository),
+            ]
+        )
+        self.assertEqual(result, 2)
+        puts = [
+            call
+            for call in self.state()["calls"]
+            if call["args"][:3] == ["api", "--method", "PUT"]
+            and call["args"][3].endswith("issues/1/labels")
+        ]
+        self.assertEqual(len(puts), 1)
+        self.assertEqual(self.state()["issues"]["1"]["labels"], [])
 
 
 class SharedGitHubLayerTests(FakeGhCase):
@@ -1575,6 +2234,84 @@ class SharedGitHubLayerTests(FakeGhCase):
         with self.assertRaises(github_api.GitHubError):
             client.review_once(1, sha, review_body, "COMMENT", review_marker)
 
+    def test_publication_guards_run_after_write_response_and_adoption(self) -> None:
+        sha = "c" * 40
+        base_sha = "a" * 40
+        client = self.client()
+
+        status_observations: list[int] = []
+
+        def status_guard() -> None:
+            status_observations.append(
+                len(self.state().get("statuses", {}).get(sha, []))
+            )
+
+        client.post_status(
+            sha,
+            "local-ci/build",
+            "success",
+            "passed",
+            before_mutation=status_guard,
+        )
+        client.post_status(
+            sha,
+            "local-ci/build",
+            "success",
+            "passed",
+            before_mutation=status_guard,
+        )
+        self.assertEqual(status_observations, [0, 1, 1])
+
+        marker = github_api.stable_marker("guarded-comment", id="one")
+        body = "guarded body\n\n" + marker
+        comment_observations: list[int] = []
+
+        def comment_guard() -> None:
+            comment_observations.append(
+                len(self.state().get("comments", {}).get("1", []))
+            )
+
+        client.comment_once(1, body, marker, before_mutation=comment_guard)
+        client.comment_once(1, body, marker, before_mutation=comment_guard)
+        self.assertEqual(comment_observations, [0, 1, 1])
+
+        _review, _status, _sessions, review_body, review_marker = (
+            self.review_bundle(self.root, sha, base_sha)
+        )
+        review_observations: list[int] = []
+        local_observations: list[int] = []
+
+        def review_guard() -> None:
+            review_observations.append(
+                len(self.state().get("reviews", {}).get("1", []))
+            )
+
+        def local_guard() -> None:
+            local_observations.append(
+                len(self.state().get("reviews", {}).get("1", []))
+            )
+
+        client.review_once(
+            1,
+            sha,
+            review_body,
+            "COMMENT",
+            review_marker,
+            before_mutation=review_guard,
+            before_write=local_guard,
+        )
+        client.review_once(
+            1,
+            sha,
+            review_body,
+            "COMMENT",
+            review_marker,
+            before_mutation=review_guard,
+            before_write=local_guard,
+        )
+        self.assertEqual(review_observations, [0, 0, 1, 1])
+        self.assertEqual(local_observations, [0, 1, 1])
+
 
 class CIPublicationTests(FakeGhCase):
     """Group 4: exact-head statuses, partial refusal, manifest, and races."""
@@ -1585,6 +2322,7 @@ class CIPublicationTests(FakeGhCase):
             base_sources={
                 "local/bin/ci.sh": BIN_DIR / "ci.sh",
                 "local/bin/github_api.py": BIN_DIR / "github_api.py",
+                "local/bin/runtime_lock.py": BIN_DIR / "runtime_lock.py",
             }
         )
         pull = pull_row(1, head_sha, base_sha=base_sha)
@@ -1705,7 +2443,7 @@ class CIPublicationTests(FakeGhCase):
             )
         )
 
-    def test_ci_preserves_nascent_merge_lock_and_recovers_old_partial(self) -> None:
+    def test_ci_preserves_partial_and_requires_explicit_dead_owner_recovery(self) -> None:
         repository, _base_sha, _head_sha = self.prepare_ci(name="ci-lock-race")
         lock = self.root / "cache" / "locks" / "ci-1.lock"
         lock.mkdir(parents=True)
@@ -1715,6 +2453,28 @@ class CIPublicationTests(FakeGhCase):
         self.assertTrue(lock.is_dir())
 
         os.utime(lock, (1, 1))
+        old_partial = self.run_ci(repository)
+        self.assertNotEqual(old_partial.returncode, 0)
+        self.assertTrue(lock.is_dir())
+
+        lock.rmdir()
+        stale = runtime_lock.acquire_lock(
+            lock,
+            999_999_999,
+            runtime_lock.new_token(),
+            "stale ci test",
+        )
+        self.assertEqual(stale.state, "acquired")
+        blocked = self.run_ci(repository)
+        self.assertNotEqual(blocked.returncode, 0)
+        self.assertTrue(lock.is_dir())
+        self.assertIsNotNone(stale.record)
+        broken = runtime_lock.break_stale_lock(
+            lock,
+            stale.record.claim,  # type: ignore[union-attr]
+        )
+        self.assertEqual(broken.state, "broken")
+
         recovered = self.run_ci(repository)
         self.assertEqual(recovered.returncode, 0, recovered.stderr + recovered.stdout)
         self.assertFalse(lock.exists())
@@ -1821,6 +2581,7 @@ class ReviewPublicationTests(FakeGhCase):
             base_sources={
                 "local/bin/review.sh": BIN_DIR / "review.sh",
                 "local/bin/github_api.py": BIN_DIR / "github_api.py",
+                "local/bin/runtime_lock.py": BIN_DIR / "runtime_lock.py",
             },
             base_text={
                 "local/bin/dispatch.sh": FAKE_DISPATCH,
@@ -2144,6 +2905,81 @@ class ReviewPublicationTests(FakeGhCase):
         self.assertEqual(len({item.run_id for item in attestations}), 4)
         self.assertEqual(len(self.review_posts()), 4)
 
+    def test_failed_dispatch_round_requires_explicit_new_round(self) -> None:
+        for publication_fails in (False, True):
+            with self.subTest(publication_fails=publication_fails):
+                repository, base_sha, head_sha, _pull = self.prepare_review_shell(
+                    name=f"review-dispatch-retry-{publication_fails}"
+                )
+                initial = self.run_review(repository)
+                self.assertEqual(initial.returncode, 0, initial.stderr + initial.stdout)
+                if publication_fails:
+                    self.write_state(fail_review_aborted_status_once=True)
+                failed = self.run_review(
+                    repository,
+                    options=("--new-round",),
+                    extra_env={"MIPSTARRE_TEST_REVIEW_DISPATCH_FAIL": "1"},
+                )
+                self.assertNotEqual(failed.returncode, 0)
+                self.assertEqual(self.dispatch_count(repository), 2)
+                self.assertEqual(len(self.review_posts()), 1)
+                latest = self.client(repository).latest_statuses(head_sha)[
+                    github_api.REVIEW_CONTEXT.casefold()
+                ]
+                self.assertEqual(
+                    latest["state"], "pending" if publication_fails else "error"
+                )
+                attempt = github_api.parse_review_attempt_status(latest, head_sha)
+                self.assertIsNotNone(attempt)
+                self.assertEqual(
+                    attempt["base_fingerprint"],
+                    github_api.stable_digest({"base_sha": base_sha}, length=32),
+                )
+
+                ordinary = self.run_review(repository)
+                self.assertNotEqual(ordinary.returncode, 0)
+                self.assertEqual(self.dispatch_count(repository), 2)
+
+                recovered = self.run_review(repository, options=("--new-round",))
+                self.assertEqual(
+                    recovered.returncode, 0, recovered.stderr + recovered.stdout
+                )
+                self.assertEqual(self.dispatch_count(repository), 3)
+                self.assertEqual(len(self.review_posts()), 2)
+                adopted = self.run_review(repository)
+                self.assertEqual(adopted.returncode, 0, adopted.stderr + adopted.stdout)
+                self.assertEqual(self.dispatch_count(repository), 3)
+
+    def test_failed_parser_round_requires_explicit_new_round(self) -> None:
+        malformed = "review output without the canonical findings grammar\n"
+        for publication_fails in (False, True):
+            with self.subTest(publication_fails=publication_fails):
+                repository, _base_sha, _head_sha, _pull = self.prepare_review_shell(
+                    name=f"review-parser-retry-{publication_fails}"
+                )
+                initial = self.run_review(repository)
+                self.assertEqual(initial.returncode, 0, initial.stderr + initial.stdout)
+                if publication_fails:
+                    self.write_state(fail_review_aborted_status_once=True)
+                failed = self.run_review(
+                    repository,
+                    output=malformed,
+                    options=("--new-round",),
+                )
+                self.assertEqual(failed.returncode, 4)
+                self.assertEqual(self.dispatch_count(repository), 2)
+                self.assertEqual(len(self.review_posts()), 1)
+
+                ordinary = self.run_review(repository)
+                self.assertNotEqual(ordinary.returncode, 0)
+                self.assertEqual(self.dispatch_count(repository), 2)
+                recovered = self.run_review(repository, options=("--new-round",))
+                self.assertEqual(
+                    recovered.returncode, 0, recovered.stderr + recovered.stdout
+                )
+                self.assertEqual(self.dispatch_count(repository), 3)
+                self.assertEqual(len(self.review_posts()), 2)
+
     def test_review_recovers_untrusted_summary_but_rejects_trusted_conflict(self) -> None:
         for index, creator in enumerate(({"login": "Mallory"}, None), start=1):
             with self.subTest(creator=creator):
@@ -2186,7 +3022,7 @@ class ReviewPublicationTests(FakeGhCase):
             head_sha,
             github_api.REVIEW_CONTEXT,
             "pending",
-            github_api.review_pending_description("trusted-conflict"),
+            "trusted summary conflict without canonical attempt binding",
         )
         before_dispatch = self.dispatch_count(repository)
         conflict = self.run_review(repository, options=("--new-round",))
@@ -2201,7 +3037,7 @@ class ReviewPublicationTests(FakeGhCase):
             head_sha,
             github_api.REVIEW_CONTEXT,
             "pending",
-            github_api.review_pending_description("unrelated-run"),
+            github_api.review_pending_description(base_sha, "unrelated-run"),
         )
         before_dispatch = self.dispatch_count(repository)
         before_posts = len(self.review_posts())
@@ -2209,6 +3045,25 @@ class ReviewPublicationTests(FakeGhCase):
         self.assertNotEqual(second.returncode, 0)
         self.assertEqual(self.dispatch_count(repository), before_dispatch)
         self.assertEqual(len(self.review_posts()), before_posts)
+
+    def test_review_rejects_wrong_base_attempt_even_with_new_round(self) -> None:
+        repository, base_sha, head_sha, _pull = self.prepare_review_shell(
+            name="review-wrong-base-attempt"
+        )
+        first = self.run_review(repository)
+        self.assertEqual(first.returncode, 0, first.stderr + first.stdout)
+        wrong_base = "f" * 40
+        self.client(repository).post_status(
+            head_sha,
+            github_api.REVIEW_CONTEXT,
+            "error",
+            github_api.review_aborted_description(wrong_base, "wrong-base"),
+        )
+        before_dispatch = self.dispatch_count(repository)
+        rejected = self.run_review(repository, options=("--new-round",))
+        self.assertNotEqual(rejected.returncode, 0)
+        self.assertEqual(self.dispatch_count(repository), before_dispatch)
+        self.assertNotEqual(base_sha, wrong_base)
 
     def test_recovery_reclassifies_status_after_its_final_boundary(self) -> None:
         repository, _base_sha, head_sha, _pull = self.prepare_review_shell(
@@ -2228,7 +3083,7 @@ class ReviewPublicationTests(FakeGhCase):
                 head_sha,
                 github_api.REVIEW_CONTEXT,
                 "pending",
-                github_api.review_pending_description("race-run"),
+                github_api.review_pending_description(_base_sha, "race-run"),
             ),
             "created_at": "2099-01-01T00:00:00Z",
             "creator": {"login": "o"},
@@ -2245,6 +3100,33 @@ class ReviewPublicationTests(FakeGhCase):
             github_api.REVIEW_CONTEXT.casefold()
         ]
         self.assertEqual(latest["description"], unrelated["description"])
+
+    def test_accepted_review_readback_outage_is_adopted_on_rerun(self) -> None:
+        repository, _base_sha, head_sha, _pull = self.prepare_review_shell(
+            name="review-accepted-readback-outage"
+        )
+        self.write_state(ambiguous_review_readback_failures_once=9)
+
+        first = self.run_review(repository)
+
+        self.assertNotEqual(first.returncode, 0)
+        self.assertEqual(self.dispatch_count(repository), 1)
+        self.assertEqual(len(self.review_posts()), 1)
+        latest = self.client(repository).latest_statuses(head_sha)[
+            github_api.REVIEW_CONTEXT.casefold()
+        ]
+        self.assertEqual(latest["state"], "pending")
+        self.assertNotIn("state=aborted", latest["description"])
+
+        second = self.run_review(repository)
+
+        self.assertEqual(second.returncode, 0, second.stderr + second.stdout)
+        self.assertEqual(self.dispatch_count(repository), 1)
+        self.assertEqual(len(self.review_posts()), 1)
+        final = self.client(repository).latest_statuses(head_sha)[
+            github_api.REVIEW_CONTEXT.casefold()
+        ]
+        self.assertEqual(final["state"], "success")
 
     def test_same_head_stale_base_attestation_is_not_recovered(self) -> None:
         repository, base_sha, head_sha, pull = self.prepare_review_shell()
@@ -2332,9 +3214,12 @@ class ReviewPublicationTests(FakeGhCase):
         latest = self.client().latest_statuses(head_sha)[
             github_api.REVIEW_CONTEXT.casefold()
         ]
-        self.assertEqual(latest["state"], "pending")
+        self.assertEqual(latest["state"], "error")
+        attempt = github_api.parse_review_attempt_status(latest, head_sha)
+        self.assertIsNotNone(attempt)
+        self.assertEqual(attempt["attempt_state"], "aborted")
 
-    def test_review_cancel_during_idempotency_lookup_blocks_review_post(self) -> None:
+    def test_invoked_review_post_guard_failure_retains_pending_attempt(self) -> None:
         repository, _base_sha, head_sha, _pull = self.prepare_review_shell(
             name="review-cancel-before-post"
         )
@@ -2349,6 +3234,9 @@ class ReviewPublicationTests(FakeGhCase):
             github_api.REVIEW_CONTEXT.casefold()
         ]
         self.assertEqual(latest["state"], "pending")
+        attempt = github_api.parse_review_attempt_status(latest, head_sha)
+        self.assertIsNotNone(attempt)
+        self.assertEqual(attempt["attempt_state"], "pending")
 
     def test_review_cancel_during_status_lookup_blocks_final_status(self) -> None:
         repository, _base_sha, head_sha, _pull = self.prepare_review_shell(
@@ -2606,6 +3494,41 @@ class ReviewPublicationTests(FakeGhCase):
         ]
         self.assertEqual([call["input"]["event"] for call in posts], ["COMMENT"])
 
+        reconciled_sha = "f" * 40
+        _review, _status, _sessions, reconciled_body, reconciled_marker = (
+            self.review_bundle(
+                self.root,
+                reconciled_sha,
+                base_sha,
+                findings=1,
+                run_id="review-reconciled",
+            )
+        )
+        self.write_state(
+            reviews={},
+            calls=[],
+            failures={},
+            ambiguous_review_readback_failures_once=3,
+        )
+        reconciled, reconciled_event = self.client().review_once(
+            1,
+            reconciled_sha,
+            reconciled_body,
+            "COMMENT",
+            reconciled_marker,
+        )
+        self.assertEqual(
+            (reconciled["state"], reconciled_event),
+            ("COMMENTED", "COMMENT"),
+        )
+        posts = [
+            call
+            for call in self.state()["calls"]
+            if call["args"][:3] == ["api", "--method", "POST"]
+            and call["args"][3].endswith("pulls/1/reviews")
+        ]
+        self.assertEqual(len(posts), 1)
+
         other_sha = "d" * 40
         _review, _status, _sessions, other_body, other_marker = self.review_bundle(
             self.root, other_sha, base_sha, findings=1, run_id="review-transient"
@@ -2760,6 +3683,35 @@ class ReviewPublicationTests(FakeGhCase):
                 expected_exit=7,
             )
 
+    def test_archived_reviewer_session_keeps_exact_attestation_valid(self) -> None:
+        sha, base_sha = "b" * 40, "a" * 40
+        review, status, sessions, _body, _marker = self.review_bundle(
+            self.root, sha, base_sha
+        )
+        self.write_state(reviews={"1": [review]}, statuses={sha: [status]})
+        completion = sessions[0]
+        archived = {
+            **completion,
+            "status": "archived",
+            "status_ts": "2026-01-01T00:03:00+00:00",
+            "note": "review retained",
+        }
+        telemetry = self.root / "results/telemetry/sessions.jsonl"
+        self.append_sessions(self.root, [completion, archived])
+        evidence = self.client().review_evidence(1, sha, base_sha)
+        self.assertEqual(evidence.attestation.run_id, "review-test")
+
+        telemetry.write_text("", encoding="utf-8")
+        changed_identity = {**archived, "worktree": str(self.root / "other")}
+        self.append_sessions(self.root, [completion, changed_identity])
+        with self.assertRaises(github_api.GitHubError):
+            self.client().review_evidence(1, sha, base_sha)
+
+        telemetry.write_text("", encoding="utf-8")
+        self.append_sessions(self.root, [archived, completion])
+        with self.assertRaises(github_api.GitHubError):
+            self.client().review_evidence(1, sha, base_sha)
+
     def test_same_head_reruns_select_matching_latest_run(self) -> None:
         sha, base_sha = "1" * 40, "a" * 40
         old_review, old_status, old_sessions, _body, _marker = self.review_bundle(
@@ -2855,6 +3807,7 @@ class AutoFixTests(FakeGhCase):
             base_sources={
                 "local/bin/autofix.sh": BIN_DIR / "autofix.sh",
                 "local/bin/github_api.py": BIN_DIR / "github_api.py",
+                "local/bin/runtime_lock.py": BIN_DIR / "runtime_lock.py",
             },
             base_text=base_text,
         )
@@ -2934,6 +3887,37 @@ class AutoFixTests(FakeGhCase):
             pull_read_count=0,
             pull_head_sequence=[],
             pull_base_sequence=[],
+        )
+
+    def test_autofix_never_cancels_a_human_agent_branch_lease(self) -> None:
+        repository, head_sha, pull = self.prepare_autofix(
+            name="autofix-agent-owner"
+        )
+        self.configure_failed_ci(repository, head_sha, pull)
+        cache = self.root / f"cache-{repository.name}"
+        lock = cache / "locks/fix-issue-7-test.lock"
+        lock.parent.mkdir(parents=True)
+        held = runtime_lock.acquire_lock(
+            lock,
+            os.getpid(),
+            runtime_lock.new_token(),
+            "agent.sh target=pr#1 branch=issue-7-test",
+        )
+        self.assertEqual(held.state, "acquired")
+
+        result = self.run_autofix(
+            repository,
+            extra_env={"MIPSTARRE_FIX_LOCK_WAIT": "0"},
+        )
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("non-autofix writer", result.stderr)
+        self.assertFalse((lock / "cancel").exists())
+        self.assertIsNotNone(held.record)
+        claim = held.record.claim  # type: ignore[union-attr]
+        self.assertEqual(
+            runtime_lock.validate_owned_lock(lock, claim).state,
+            "owned",
         )
 
     def test_adverse_comment_attestation_is_consumed_by_review_autofix(self) -> None:
@@ -3120,41 +4104,87 @@ class AutoFixTests(FakeGhCase):
         self.assertEqual(self.autofix_dispatch_count(repository), 1)
         self.assertEqual(run_git(repository, "rev-parse", "HEAD"), head_sha)
 
-    def test_autofix_cancel_and_owner_theft_abort_before_commit(self) -> None:
-        for action in ("cancel", "steal"):
-            with self.subTest(action=action):
-                repository, head_sha, pull = self.prepare_autofix(
-                    name=f"autofix-lock-{action}"
-                )
-                self.configure_failed_ci(repository, head_sha, pull)
-                result = self.run_autofix(
-                    repository,
-                    extra_env={"MIPSTARRE_TEST_LOCK_ACTION": action},
-                )
-                self.assertNotEqual(result.returncode, 0)
-                self.assertIn("ownership was lost or superseded", result.stderr)
-                self.assertEqual(self.autofix_dispatch_count(repository), 1)
-                self.assertEqual(run_git(repository, "rev-parse", "HEAD"), head_sha)
-                remote_head = run_git(
-                    repository,
-                    "ls-remote",
-                    "github",
-                    "refs/heads/issue-7-test",
-                ).split()[0]
-                self.assertEqual(remote_head, head_sha)
-                lock = (
-                    self.root
-                    / f"cache-{repository.name}"
-                    / "locks/fix-issue-7-test.lock"
-                )
-                if action == "steal":
-                    self.assertTrue(lock.is_dir())
-                    self.assertEqual(
-                        (lock / "owner").read_text(encoding="utf-8").strip(),
-                        "different-owner",
-                    )
-                else:
-                    self.assertFalse(lock.exists())
+    def test_cancel_during_running_autofix_commits_and_pushes_cleanly(self) -> None:
+        repository, head_sha, pull = self.prepare_autofix(
+            name="autofix-lock-cancel"
+        )
+        self.configure_failed_ci(repository, head_sha, pull)
+        result = self.run_autofix(
+            repository,
+            extra_env={"MIPSTARRE_TEST_LOCK_ACTION": "cancel"},
+        )
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        self.assertIn("publishing only the already committed tip", result.stderr)
+        self.assertEqual(self.autofix_dispatch_count(repository), 1)
+        local_head = run_git(repository, "rev-parse", "HEAD")
+        remote_head = run_git(
+            repository, "ls-remote", "github", "refs/heads/issue-7-test"
+        ).split()[0]
+        self.assertNotEqual(local_head, head_sha)
+        self.assertEqual(remote_head, local_head)
+        self.assertIn(
+            "[codex-auto-fix]",
+            run_git(repository, "show", "-s", "--format=%s", local_head),
+        )
+        self.assertEqual(
+            run_git(repository, "status", "--porcelain=v1", "--untracked-files=all"),
+            "",
+        )
+        lock = (
+            self.root
+            / f"cache-{repository.name}"
+            / "locks/fix-issue-7-test.lock"
+        )
+        self.assertFalse(lock.exists())
+
+    def test_autofix_owner_theft_aborts_and_preserves_replacement(self) -> None:
+        repository, head_sha, pull = self.prepare_autofix(
+            name="autofix-lock-steal"
+        )
+        self.configure_failed_ci(repository, head_sha, pull)
+        result = self.run_autofix(
+            repository,
+            extra_env={"MIPSTARRE_TEST_LOCK_ACTION": "steal"},
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("fix-lock ownership was lost", result.stderr)
+        self.assertEqual(self.autofix_dispatch_count(repository), 1)
+        self.assertEqual(run_git(repository, "rev-parse", "HEAD"), head_sha)
+        remote_head = run_git(
+            repository, "ls-remote", "github", "refs/heads/issue-7-test"
+        ).split()[0]
+        self.assertEqual(remote_head, head_sha)
+        lock = (
+            self.root
+            / f"cache-{repository.name}"
+            / "locks/fix-issue-7-test.lock"
+        )
+        self.assertTrue(lock.is_dir())
+        replacement = runtime_lock.inspect_lock(lock)
+        self.assertEqual(replacement.state, "held")
+        self.assertIsNotNone(replacement.record)
+        self.assertEqual(replacement.record.owner, "autofix replacement-test")
+
+    def test_malformed_autofix_cancellation_fails_closed(self) -> None:
+        repository, head_sha, pull = self.prepare_autofix(
+            name="autofix-lock-malformed"
+        )
+        self.configure_failed_ci(repository, head_sha, pull)
+        result = self.run_autofix(
+            repository,
+            extra_env={"MIPSTARRE_TEST_LOCK_ACTION": "malformed-cancel"},
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("unsafe fix-lock state", result.stderr)
+        self.assertEqual(run_git(repository, "rev-parse", "HEAD"), head_sha)
+        remote_head = run_git(
+            repository, "ls-remote", "github", "refs/heads/issue-7-test"
+        ).split()[0]
+        self.assertEqual(remote_head, head_sha)
+        self.assertEqual(
+            run_git(repository, "status", "--porcelain=v1", "--untracked-files=all"),
+            "M README.md",
+        )
 
     def test_base_movement_at_commit_boundary_prevents_commit(self) -> None:
         repository, head_sha, pull = self.prepare_autofix(name="autofix-pre-commit")
@@ -3213,7 +4243,14 @@ class AutoFixTests(FakeGhCase):
         hook.write_text(
             "#!/bin/sh\n"
             'lock="$MIPSTARRE_CACHE_ROOT/locks/fix-issue-7-test.lock"\n'
-            'printf "test supersession\\n" >"$lock/cancel"\n',
+            'helper="$PWD/local/bin/runtime_lock.py"\n'
+            'claim="$(python3 "$helper" inspect "$lock")" || exit 1\n'
+            'identity="$(printf "%s\\n" "$claim" | cut -d "|" -f 2)"\n'
+            'pid="$(printf "%s\\n" "$claim" | cut -d "|" -f 3)"\n'
+            'token="$(printf "%s\\n" "$claim" | cut -d "|" -f 4)"\n'
+            'digest="$(printf "%s\\n" "$claim" | cut -d "|" -f 5)"\n'
+            'python3 "$helper" request-cancel "$lock" "$identity" "$pid" '
+            '"$token" "$digest" "post-commit test" --owner-prefix "autofix "\n',
             encoding="utf-8",
         )
         hook.chmod(0o755)
@@ -3350,6 +4387,30 @@ class AutoFixTests(FakeGhCase):
 
 class MergeGateTests(FakeGhCase):
     """Group 6: status/review/lock/cap/adjudication gate refusals."""
+
+    def test_merge_preflight_requires_draft_to_be_exactly_false(self) -> None:
+        sha = "d" * 40
+        base_sha = "b" * 40
+        accepted = pull_row(1, sha, base_sha=base_sha)
+        self.assertEqual(
+            pr_merge.require_open_mergeable(accepted, 1).head_sha,
+            sha,
+        )
+        for value in (None, 0, "false", True):
+            with self.subTest(draft=value):
+                rejected = {**accepted, "draft": value}
+                with self.assertRaisesRegex(
+                    pr_merge.GateFailure,
+                    "draft state is not exactly false",
+                ):
+                    pr_merge.require_open_mergeable(rejected, 1)
+        missing = dict(accepted)
+        missing.pop("draft")
+        with self.assertRaisesRegex(
+            pr_merge.GateFailure,
+            "draft state is not exactly false",
+        ):
+            pr_merge.require_open_mergeable(missing, 1)
 
     def green_state(
         self, sha: str, base_sha: str = "e" * 40, *, root: Path | None = None
@@ -3523,6 +4584,11 @@ class MergeGateTests(FakeGhCase):
         self.write_state(branch_protections={"main": protection})
         pr_merge.require_server_policy(client, "main")
 
+        protection = classic_protection()
+        protection["required_linear_history"] = {"enabled": False}
+        self.write_state(branch_protections={"main": protection})
+        pr_merge.require_server_policy(client, "main")
+
         invalid: list[tuple[str, dict]] = []
         protection = classic_protection()
         protection["required_status_checks"]["strict"] = False
@@ -3585,6 +4651,10 @@ class MergeGateTests(FakeGhCase):
         protection = classic_protection()
         protection["required_linear_history"] = {"enabled": True}
         invalid.append(("linear-history", protection))
+        for malformed in (None, [], {}, {"enabled": None}):
+            protection = classic_protection()
+            protection["required_linear_history"] = malformed
+            invalid.append((f"linear-history-malformed-{malformed!r}", protection))
 
         for name, candidate in invalid:
             with self.subTest(name=name):
@@ -3900,7 +4970,9 @@ class MergeGateTests(FakeGhCase):
         lock.rmdir()
         with pr_merge.reserve_runtime_lock(lock, "test live") as held:
             held.require_owned()
-            with self.assertRaisesRegex(pr_merge.GateFailure, "live pid"):
+            with self.assertRaisesRegex(
+                pr_merge.GateFailure, "owner pid .*not proven dead"
+            ):
                 with pr_merge.reserve_runtime_lock(lock, "test contender"):
                     self.fail("a live lock must exclude a contender")
         self.assertFalse(lock.exists())
@@ -3993,6 +5065,34 @@ class GuardedMergeTests(FakeGhCase):
         source = (BIN_DIR / "pr_merge.py").read_text(encoding="utf-8")
         self.assertNotIn('"push", "github"', source)
         self.assertNotIn("--admin", source)
+
+    def test_local_post_merge_failures_warn_and_defer_after_remote_success(self) -> None:
+        _repository, _base_sha, _head_sha, args = self.prepare_valid_merge(
+            name="merge-local-cleanup-deferred"
+        )
+        stderr = io.StringIO()
+        stdout = io.StringIO()
+        with mock.patch.dict(
+            os.environ, {"MIPSTARRE_CACHE_ROOT": str(self.root / "cache")}
+        ), mock.patch.object(
+            pr_merge,
+            "fast_forward_base",
+            side_effect=pr_merge.GateFailure("dirty local telemetry"),
+        ) as refresh, mock.patch.object(
+            pr_merge,
+            "cleanup_feature",
+            side_effect=OSError("worktree cleanup unavailable"),
+        ) as cleanup, contextlib.redirect_stderr(stderr), contextlib.redirect_stdout(
+            stdout
+        ):
+            self.assertEqual(pr_merge.run(args), 0)
+
+        refresh.assert_called_once()
+        cleanup.assert_called_once()
+        self.assertTrue(self.state()["pulls"]["1"]["merged"])
+        self.assertIn("local base refresh is deferred", stderr.getvalue())
+        self.assertIn("local feature cleanup is deferred", stderr.getvalue())
+        self.assertIn("merged GitHub PR #1", stdout.getvalue())
 
     def test_base_movement_between_evaluations_blocks_merge(self) -> None:
         _repository, base_sha, head_sha, args = self.prepare_valid_merge()
@@ -4317,15 +5417,39 @@ class RepositoryGuardTests(FakeGhCase):
                     f"{path.relative_to(REPO_ROOT)}: {pattern.pattern}",
                 )
 
-        hooks = (
-            (REPO_ROOT / ".githooks/pre-commit").read_text(encoding="utf-8")
-            + (REPO_ROOT / ".githooks/pre-push").read_text(encoding="utf-8")
-        )
+        hook_sources = [
+            (REPO_ROOT / ".githooks/pre-commit").read_text(encoding="utf-8"),
+            (REPO_ROOT / ".githooks/pre-push").read_text(encoding="utf-8"),
+        ]
+        for hook_source in hook_sources:
+            self.assertIn(".github/", hook_source)
+            self.assertIn("results/telemetry/registry-archive/", hook_source)
+            self.assertIn("--no-renames", hook_source)
+            self.assertNotIn("--diff-filter=ACMR", hook_source)
+        hooks = "".join(hook_sources)
         self.assertIn("scripts.tests.test_github_workflow", hooks)
         self.assertIn("github_api", hooks)
         self.assertIn("refs/remotes/github/main", hooks)
-        for name in ("worktree-setup", "cache-warmer", "blueprint_lean_sync"):
+        for name in (
+            "worktree-setup",
+            "cache-warmer",
+            "runtime_lock",
+            "warm-worktree",
+            "blueprint_lean_sync",
+        ):
             self.assertIn(name, hooks)
+        ci_source = (REPO_ROOT / "local/bin/ci.sh").read_text(encoding="utf-8")
+        self.assertIn("local/bin/runtime_lock.py", ci_source)
+        self.assertIn("local/bin/warm-worktree.sh", ci_source)
+        self.assertIn("'.github/*'", ci_source)
+        self.assertIn("'results/telemetry/registry-archive/*'", ci_source)
+        dispatch_source = (REPO_ROOT / "local/bin/dispatch.sh").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("runtime_lock.py", dispatch_source)
+        self.assertIn("release-owned", dispatch_source)
+        self.assertNotIn('kill -0 "$owner"', dispatch_source)
+        self.assertNotIn('rm -rf "$dir"', dispatch_source)
 
         self.write_state(failures={"GET ": {"remaining": 1, "message": "HTTP 401"}})
         result = issue_new.main(
@@ -4336,12 +5460,54 @@ class RepositoryGuardTests(FakeGhCase):
         self.assertFalse((self.root / "prs").exists())
 
     def test_archive_and_frozen_precedent_are_unmodified(self) -> None:
+        archival_commit = "c8f1999"
+        resolved = subprocess.run(
+            [
+                "git",
+                "-C",
+                str(REPO_ROOT),
+                "rev-parse",
+                "--verify",
+                f"{archival_commit}^{{commit}}",
+            ],
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(resolved.returncode, 0, resolved.stderr)
         for path in ("results/telemetry/registry-archive", ".github"):
             result = subprocess.run(
-                ["git", "-C", str(REPO_ROOT), "diff", "--quiet", "--", path],
+                [
+                    "git",
+                    "-C",
+                    str(REPO_ROOT),
+                    "diff",
+                    "--quiet",
+                    archival_commit,
+                    "--",
+                    path,
+                ],
                 check=False,
             )
             self.assertEqual(result.returncode, 0, path)
+            dirty = subprocess.run(
+                [
+                    "git",
+                    "-C",
+                    str(REPO_ROOT),
+                    "status",
+                    "--porcelain=v1",
+                    "--untracked-files=all",
+                    "--ignored=matching",
+                    "--",
+                    path,
+                ],
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertEqual(dirty.returncode, 0, dirty.stderr)
+            self.assertEqual(dirty.stdout, "", f"dirty or untracked: {path}")
 
 
 if __name__ == "__main__":

@@ -43,15 +43,22 @@ as authority. `local/bin/housekeeping.sh standup` writes reports under
 - Never run `lake update`, write to the hot cache, or run an unlocked full
   build.
 - One session never reviews its own work.
-- Invoke lifecycle tools from the prepared worktree. The shared GitHub client
-  discovers `gh` and the `github` remote and fails closed when unavailable.
+- Invoke lifecycle tools through the primary checkout's `local/bin/` path and
+  pass the prepared feature worktree where the command accepts `--worktree`.
+  This keeps append-only telemetry single-instance while the shared GitHub
+  client discovers `gh` and the `github` remote or fails closed.
 - `MIPSTARRE_GITHUB_ACTOR` is the sole evidence publisher and defaults to the
   repository owner (`Dengnifer` here). The authenticated `gh` user must match;
   changing marker text or posting from another account grants no authority.
-- A partial merge lock with no proven PID is never deleted automatically. After
-  verifying that no CI, review, auto-fix, or merge process owns the exact path
-  printed by the error, use `rmdir <absolute-lock-path>` when it is empty, or
-  move a nonempty stale directory aside for inspection, then retry.
+- No existing workflow lock is reclaimed by acquisition, including a complete
+  same-host record whose PID is dead: its descendants may still be running.
+  Complete locks record `pid`, a random UUID `token`, directory `identity`, and
+  structured `owner` metadata; transitions use the persistent sibling
+  `.<lock-name>.transition` mutex. After proving the owner and every descendant
+  have stopped, recover a complete dead-owner claim explicitly with
+  `runtime_lock.py break-stale`. Ownerless, malformed, partial, and foreign-host
+  records fail closed. After the same process audit, an incomplete record may
+  be removed manually at the exact path printed by the error.
 - The retired registry under `results/telemetry/registry-archive/` is immutable
   research data, never workflow input.
 - Record protocol friction in `results/telemetry/events.md`, then amend

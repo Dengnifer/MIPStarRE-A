@@ -18,7 +18,7 @@ run_without_git_local_env() (
   "$@"
 )
 
-STAGED_FILES="$(git diff --cached --name-only --diff-filter=ACMR)"
+STAGED_FILES="$(git diff --cached --name-only --no-renames)"
 if [ -z "$STAGED_FILES" ]; then
   exit 0
 fi
@@ -37,7 +37,7 @@ if printf '%s\n' "$STAGED_FILES" | grep -Eq '^scripts/(.*\.py|tests/.*)$'; then
 fi
 
 if printf '%s\n' "$STAGED_FILES" | grep -Eq \
-  '^(local/bin/(github_api\.py|issue_new\.py|issue_close\.py|pr_open\.py|ci\.sh|review\.sh|autofix\.sh|pr_merge\.py|agent\.sh|housekeeping\.sh|github-sync\.sh|export_issues\.py|worktree-setup\.sh|cache-warmer\.sh)|local/protocols/|local/personas/|scripts/(blueprint_lean_sync\.py|tests/test_github_workflow\.py)|\.githooks/)'; then
+  '^(local/bin/(github_api\.py|issue_new\.py|issue_close\.py|pr_open\.py|ci\.sh|review\.sh|autofix\.sh|pr_merge\.py|agent\.sh|housekeeping\.sh|github-sync\.sh|export_issues\.py|worktree-setup\.sh|cache-warmer\.sh|runtime_lock\.py|warm-worktree\.sh)|local/protocols/|local/personas/|scripts/(blueprint_lean_sync\.py|tests/test_github_workflow\.py)|\.githooks/|\.github/|results/telemetry/registry-archive/)'; then
   echo "MIPStarRE pre-commit: running GitHub-native workflow tests."
   run_without_git_local_env python3 -m unittest scripts.tests.test_github_workflow
 fi

@@ -87,6 +87,16 @@ one-line built-in frame — enough to run, not enough for load-bearing work.
 - Names are stable identifiers: they appear in the registry, in capture file
   names, in the `dispatcher` field of child sessions, and in `audits/` reports.
   Never reuse one.
+- Invoke `dispatch.sh` through the primary checkout's `local/bin/` path, even
+  when `--worktree` names a linked feature checkout. The primary checkout owns
+  the session registry and capture directory; a feature copy has a divergent
+  scan and can allocate an already-owned name despite the shared sequence lock.
+- If bootstrap work nevertheless creates two uncommitted sessions with one
+  name, do not append both rows or overwrite either capture. Preserve both
+  original bundles under `results/telemetry/session-collision-archive/`, keep
+  the primary allocation canonical, and assign the next free sequence to a
+  byte-identical copy of the other bundle. Record the incident and recovery in
+  `events.md` before committing either record.
 
 ## 4. Lifecycle
 
@@ -195,6 +205,11 @@ local/bin/dispatch.sh --role prover --issue 0042 \
   -- "The build now fails at line 88; fix that and re-run the ladder."
 ```
 
+`dispatch.sh` passes the worktree and sandbox as parent `codex exec` options
+before the `resume` subcommand. The installed CLI does not accept `-C` or
+`--sandbox` after `resume`; argument ordering is therefore part of the tested
+session-accounting boundary.
+
 Semantics:
 
 - A resume is a **new session**: new name, new sequence number, new capture
@@ -262,8 +277,11 @@ An oversized prompt has already cost this project one stalled agent
   Read-only sessions are never blocked. Parallel work means parallel
   worktrees, not parallel sessions in one worktree.
 - **Locks live in `~/.cache/mipstarre-dev/locks/`**, never in the repository,
-  and are `mkdir`-based (macOS has no `flock(1)`). A lock whose owning pid is
-  gone is broken automatically, with a notice.
+  and use the shared complete-claim runtime helper. Acquisition never reclaims
+  an existing record merely because its parent PID is gone: dispatched
+  descendants may survive. Complete dead-owner records require explicit
+  recovery after a descendant audit; malformed, partial, ownerless, and
+  foreign-host records fail closed.
 - **Telemetry appends are locked** inside `telemetry.py`, so concurrent
   sessions cannot interleave a half-written JSON line.
 - Do not defend against collisions with a single global lock. The parent

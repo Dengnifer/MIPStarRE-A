@@ -78,20 +78,28 @@ usage() {
 }
 
 # ---------------------------------------------------------------------------
-# Locking (mkdir is the portable atomic primitive; macOS has no flock(1))
+# Locking (runtime_lock.py owns every directory transition)
 # ---------------------------------------------------------------------------
 
-LOCKS_HELD=()
+LOCK_DIRS=()
+LOCK_IDENTITIES=()
+LOCK_PIDS=()
+LOCK_TOKENS=()
+LOCK_DIGESTS=()
 
 release_locks() {
-  local dir
-  if [ "${#LOCKS_HELD[@]}" -gt 0 ]; then
-    for dir in "${LOCKS_HELD[@]}"; do
-      rm -f "$dir/pid" "$dir/since" 2>/dev/null || true
-      rmdir "$dir" 2>/dev/null || true
-    done
-  fi
-  LOCKS_HELD=()
+  local index
+  for ((index = 0; index < ${#LOCK_DIRS[@]}; index++)); do
+    python3 "$RUNTIME_LOCK" release-owned \
+      "${LOCK_DIRS[$index]}" "${LOCK_IDENTITIES[$index]}" \
+      "${LOCK_PIDS[$index]}" "${LOCK_TOKENS[$index]}" \
+      "${LOCK_DIGESTS[$index]}" >/dev/null 2>&1 || true
+  done
+  LOCK_DIRS=()
+  LOCK_IDENTITIES=()
+  LOCK_PIDS=()
+  LOCK_TOKENS=()
+  LOCK_DIGESTS=()
 }
 
 cleanup() {
@@ -112,26 +120,38 @@ acquire_lock() {
   # acquire_lock <name> <wait-seconds> <purpose>
   local name="$1" wait_s="$2" purpose="$3"
   local dir="$LOCK_DIR/$name.lock"
-  local waited=0 owner=""
+  local waited=0 token result rc state identity owner observed_token digest detail
   mkdir -p "$LOCK_DIR"
-  while ! mkdir "$dir" 2>/dev/null; do
-    owner="$(cat "$dir/pid" 2>/dev/null || true)"
-    if [ -n "$owner" ] && ! kill -0 "$owner" 2>/dev/null; then
-      note "breaking stale lock $dir (pid $owner is gone)"
-      rm -rf "$dir"
-      continue
+  token="$(python3 "$RUNTIME_LOCK" new-token)" || \
+    die 5 "cannot allocate a runtime-lock token for $purpose"
+  while :; do
+    rc=0
+    result="$(python3 "$RUNTIME_LOCK" acquire \
+      "$dir" "$$" "$token" "dispatch.sh $purpose")" || rc=$?
+    IFS='|' read -r state identity owner observed_token digest detail <<EOF
+$result
+EOF
+    if [ "$state" = acquired ]; then
+      LOCK_DIRS[${#LOCK_DIRS[@]}]="$dir"
+      LOCK_IDENTITIES[${#LOCK_IDENTITIES[@]}]="$identity"
+      LOCK_PIDS[${#LOCK_PIDS[@]}]="$owner"
+      LOCK_TOKENS[${#LOCK_TOKENS[@]}]="$observed_token"
+      LOCK_DIGESTS[${#LOCK_DIGESTS[@]}]="$digest"
+      return 0
+    fi
+    if [ "$state" = unsafe ] || [ "$rc" -eq 2 ]; then
+      die 5 "$purpose has an unsafe runtime lock ($dir: ${detail:-unknown}).
+  Recover that exact path explicitly; no dispatcher may delete it automatically."
     fi
     if [ "$waited" -ge "$wait_s" ]; then
       die 5 "$purpose is locked by pid ${owner:-unknown} ($dir).
   Another dispatch is writing there. Wait, or pass --lock-wait SECONDS.
-  Only one writing session per worktree (DESIGN.md invariant 1, single writer)."
+  Only one writing session per worktree (DESIGN.md invariant 1, single writer).
+  Complete dead-owner records also require explicit recovery because descendants may survive."
     fi
     sleep 2
     waited=$((waited + 2))
   done
-  printf '%s\n' "$$" >"$dir/pid"
-  date +%Y-%m-%dT%H:%M:%S%z >"$dir/since"
-  LOCKS_HELD[${#LOCKS_HELD[@]}]="$dir"
 }
 
 trap cleanup EXIT
@@ -241,6 +261,7 @@ TELEMETRY_DIR="$REPO_ROOT/results/telemetry"
 REGISTRY="$TELEMETRY_DIR/sessions.jsonl"
 CAPTURE_DIR="$TELEMETRY_DIR/sessions"
 TELEMETRY_PY="$SCRIPT_DIR/telemetry.py"
+RUNTIME_LOCK="$SCRIPT_DIR/runtime_lock.py"
 HOOK_SCRIPT="$REPO_ROOT/scripts/install_git_hooks.sh"
 
 CACHE_ROOT="${MIPSTARRE_CACHE_ROOT:-$HOME/.cache/mipstarre-dev}"
@@ -248,6 +269,7 @@ LOCK_DIR="$CACHE_ROOT/locks"
 
 [ -f "$REPO_ROOT/AGENTS.md" ] || die 4 "no AGENTS.md at $REPO_ROOT — dispatch.sh must live in <repo>/local/bin/"
 [ -f "$TELEMETRY_PY" ] || die 4 "missing $TELEMETRY_PY (the telemetry writer); dispatch cannot record the session"
+[ -f "$RUNTIME_LOCK" ] || die 4 "missing $RUNTIME_LOCK (the runtime-lock helper)"
 command -v codex >/dev/null 2>&1 || die 4 "codex CLI not found on PATH.
   Install it, or put it on PATH for this shell; dispatch.sh will not run an
   agent it cannot account for."
@@ -573,14 +595,14 @@ PROMPT_TEXT="$(cat "$PROMPT_FILE")"
 # ---------------------------------------------------------------------------
 
 CODEX_ARGS=(exec)
-if [ -n "$RESUME_ID" ]; then
-  CODEX_ARGS[${#CODEX_ARGS[@]}]="resume"
-fi
-CODEX_ARGS[${#CODEX_ARGS[@]}]="--json"
 CODEX_ARGS[${#CODEX_ARGS[@]}]="-C"
 CODEX_ARGS[${#CODEX_ARGS[@]}]="$WORKTREE_ABS"
 CODEX_ARGS[${#CODEX_ARGS[@]}]="--sandbox"
 CODEX_ARGS[${#CODEX_ARGS[@]}]="$SANDBOX"
+if [ -n "$RESUME_ID" ]; then
+  CODEX_ARGS[${#CODEX_ARGS[@]}]="resume"
+fi
+CODEX_ARGS[${#CODEX_ARGS[@]}]="--json"
 CODEX_ARGS[${#CODEX_ARGS[@]}]="-o"
 CODEX_ARGS[${#CODEX_ARGS[@]}]="$LAST_MESSAGE"
 if [ -n "${MIPSTARRE_CODEX_MODEL:-}" ]; then

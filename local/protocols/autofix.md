@@ -40,12 +40,13 @@ Before local advancement, the fixer revalidates its ownership token, absence of
 a supersession cancel, the unchanged GitHub branch/base refs, the original
 remote head and base SHAs, and the fetched local base immediately after locking,
 before every dispatch, after every dispatch, and immediately before every
-commit. Once this wrapper has made a fix commit, a cancel prevents the next
-phase from starting. A phase already running may finish its one wrapper commit;
-the remaining boundaries continue to require ownership and the unchanged full
-comparison while ignoring only the cancel signal, then perform the leased push.
-Same-head base movement therefore stops the run before dispatch, commit, or
-push.
+commit. The final pre-dispatch cancellation check is the phase-start
+linearization point. A canonical cancellation bound to that exact claim and
+written after this point may let the active phase finish one wrapper commit and
+the leased push; it prevents every later phase. The remaining boundaries still
+require exact ownership and the unchanged full comparison. Lost ownership or a
+malformed, unbound, or changed cancellation record fails closed. Same-head base
+movement therefore stops the run before dispatch, commit, or push.
 
 Auto-fix is the one workflow allowed to advance the local feature tip before
 publication. It tracks that expected local tip after each prefixed commit while
@@ -57,17 +58,29 @@ comparison for later CI.
 ## Lock and cap
 
 A machine-local per-branch lock under `~/.cache/mipstarre-dev/locks/` prevents
-concurrent fixers and reviews of the same feature tree. The ownership-stamped
-layout is shared with review; a newer fixer can request supersession through
-the lock's cancel file. Loss of ownership stops the holder at a boundary.
+concurrent fixers, reviews, merges, and human write sessions on the same feature
+tree. A workspace-write `agent.sh` invocation reserves that lock before
+dispatch and holds it through dispatch completion; a read-only invocation need
+not reserve it. The ownership-stamped layout is shared with review and merge:
+PID, random UUID token, directory identity, and a digest of complete structured
+owner metadata. A newer fixer receives the current complete claim from the
+serialized acquisition attempt, then revalidates both that exact claim and an
+`autofix ` owner prefix under the persistent sibling mutex before writing a
+claim-bound cancellation record. A human-agent, review, or merge owner is never
+cancelled. If the directory or owner changed in between, the replacement is
+not cancelled. Loss of ownership or a malformed owner/cancellation record stops
+the holder at a boundary.
 Cancellation before local advancement stops it cleanly; cancellation after a
 wrapper-owned commit starts no new phase. Any phase already running completes
 at most its one wrapper commit, after which only ownership/comparison checks and
 the original-head leased push remain, so no committed tip is stranded. Shell
 command failures remain nonzero even inside phase-status handling; interrupt
 and termination signals release only the owned lease and retain their signal
-exit status. Cleanup never removes another process's lease. No lock file is
-committed.
+exit status. Cap-time release and signal cleanup use the same exact claim and
+never remove another process's lease. Complete dead-parent records remain held
+until explicit recovery because descendants may survive. Ownerless, malformed,
+partial, and foreign-host locks also remain for explicit operator recovery. No
+lock file is committed.
 
 The combined iteration count is derived from the complete GitHub-visible PR
 commit history. Only subjects beginning exactly with the two fix prefixes

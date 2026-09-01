@@ -63,6 +63,10 @@ STATUS_ONLY=0
 LOCK_TIMEOUT="${MIPSTARRE_FULL_BUILD_LOCK_TIMEOUT:-43200}"
 
 FULL_BUILD_LOCK_HELD=0
+FULL_BUILD_LOCK_IDENTITY=""
+FULL_BUILD_LOCK_PID=""
+FULL_BUILD_LOCK_TOKEN=""
+FULL_BUILD_LOCK_DIGEST=""
 INCOMING_DIR=""
 
 # ---------------------------------------------------------------------- helpers
@@ -139,86 +143,35 @@ ensure_lean_on_path() {
 }
 
 # --------------------------------------------------------------- lock primitives
-# Same protocol and same lock directory as cache-warmer.sh: mkdir(2) to acquire,
-# rename-then-delete to break a stale holder so exactly one breaker wins.
-
-lock_info_field() { # <lockdir> <key>
-  local dir="$1" key="$2" line
-  [ -f "$dir/info" ] || { printf ''; return 0; }
-  while IFS= read -r line; do
-    case "$line" in
-      "$key="*) printf '%s' "${line#*=}"; return 0 ;;
-    esac
-  done < "$dir/info"
-  printf ''
-}
-
-# Portable directory mtime, used as a last-resort acquisition time for a lock
-# written by another script in a different metadata layout.
-lock_dir_mtime() { # <lockdir>
-  stat -f %m "$1" 2>/dev/null || stat -c %Y "$1" 2>/dev/null || printf ''
-}
-
-# local/bin/ci.sh records the holder as `owner` (pid / ISO time / tag, one per
-# line) rather than `info`.  Read both layouts, so that neither script mistakes a
-# live lock held by the other for an unreadable — and therefore breakable — one.
-lock_pid() { # <lockdir>
-  local dir="$1" pid
-  pid="$(lock_info_field "$dir" pid)"
-  if [ -z "$pid" ] && [ -f "$dir/owner" ]; then
-    pid="$(head -n 1 "$dir/owner" 2>/dev/null || true)"
-  fi
-  printf '%s' "$pid"
-}
-
-lock_is_stale() { # <lockdir> <ttl-seconds>
-  local dir="$1" ttl="$2" pid host started age
-  pid="$(lock_pid "$dir")"
-  host="$(lock_info_field "$dir" host)"
-  # An absent host field means the lock came from a script that does not record
-  # one; on a single-machine setup that is this host, so pid liveness stays
-  # authoritative and a live holder is never broken.
-  if [ -n "$pid" ] && { [ -z "$host" ] || [ "$host" = "$(hostname)" ]; }; then
-    case "$pid" in
-      ''|*[!0-9]*) ;;
-      *)
-        if kill -0 "$pid" 2>/dev/null; then
-          return 1
-        fi
-        return 0
-        ;;
-    esac
-  fi
-  started="$(lock_info_field "$dir" started_epoch)"
-  case "$started" in
-    ''|*[!0-9]*) started="$(lock_dir_mtime "$dir")" ;;
-  esac
-  case "$started" in
-    ''|*[!0-9]*) return 0 ;;
-  esac
-  age=$(( $(epoch_now) - started ))
-  [ "$age" -gt "$ttl" ]
-}
-
-break_lock() { # <lockdir>
-  local dir="$1" doomed
-  doomed="$1.stale.$$.$(epoch_now)"
-  if mv "$dir" "$doomed" 2>/dev/null; then
-    warn "broke stale lock $dir (pid=$(lock_pid "$doomed") held since $(lock_info_field "$doomed" started)$(lock_info_field "$doomed" purpose))"
-    rm -rf "$doomed"
-  fi
-}
+# Shared with ci.sh and cache-warmer.sh through runtime_lock.py.
 
 acquire_full_build_lock() { # <timeout-seconds; 0 = wait forever>
-  local timeout="$1" waited=0 announced=0 ttl="${MIPSTARRE_LEASE_TTL:-43200}"
+  local timeout="$1" waited=0 announced=0 token result rc=0
+  local state identity holder observed_token digest detail
   mkdir -p "$CACHE_ROOT"
-  while ! mkdir "$FULL_BUILD_LOCK" 2>/dev/null; do
-    if lock_is_stale "$FULL_BUILD_LOCK" "$ttl"; then
-      break_lock "$FULL_BUILD_LOCK"
-      continue
+  token="$(python3 "$SCRIPT_DIR/runtime_lock.py" new-token)" || return 2
+  while :; do
+    rc=0
+    result="$(python3 "$SCRIPT_DIR/runtime_lock.py" acquire \
+      "$FULL_BUILD_LOCK" "$$" "$token" "warm-worktree.sh $WORKTREE")" || rc=$?
+    IFS='|' read -r state identity holder observed_token digest detail <<EOF
+$result
+EOF
+    if [ "$state" = acquired ]; then
+      FULL_BUILD_LOCK_HELD=1
+      FULL_BUILD_LOCK_IDENTITY="$identity"
+      FULL_BUILD_LOCK_PID="$holder"
+      FULL_BUILD_LOCK_TOKEN="$observed_token"
+      FULL_BUILD_LOCK_DIGEST="$digest"
+      [ -z "$detail" ] || warn "$detail at $FULL_BUILD_LOCK"
+      return 0
+    fi
+    if [ "$state" = unsafe ] || [ "$rc" -eq 2 ]; then
+      warn "unsafe full-build lock: ${detail:-helper failure}; manual recovery required"
+      return 2
     fi
     if [ "$announced" -eq 0 ]; then
-      log "waiting for the machine-wide full-build lock (held by pid=$(lock_pid "$FULL_BUILD_LOCK"))"
+      log "waiting for the machine-wide full-build lock (held by pid=${holder:-unknown})"
       announced=1
     fi
     if [ "$timeout" -ne 0 ] && [ "$waited" -ge "$timeout" ]; then
@@ -227,22 +180,14 @@ acquire_full_build_lock() { # <timeout-seconds; 0 = wait forever>
     sleep 10
     waited=$((waited + 10))
   done
-  {
-    printf 'pid=%s\n' "$$"
-    printf 'host=%s\n' "$(hostname)"
-    printf 'started=%s\n' "$(iso_now)"
-    printf 'started_epoch=%s\n' "$(epoch_now)"
-    printf 'purpose=consumer-full-build\n'
-  } > "$FULL_BUILD_LOCK/info"
-  # Also publish the holder in the layout local/bin/ci.sh reads.
-  printf '%s\n%s\n%s\n' "$$" "$(iso_now)" "warm-worktree $WORKTREE" > "$FULL_BUILD_LOCK/owner"
-  FULL_BUILD_LOCK_HELD=1
-  return 0
 }
 
 release_full_build_lock() {
   if [ "$FULL_BUILD_LOCK_HELD" -eq 1 ]; then
-    rm -rf "$FULL_BUILD_LOCK"
+    python3 "$SCRIPT_DIR/runtime_lock.py" release-owned \
+      "$FULL_BUILD_LOCK" "$FULL_BUILD_LOCK_IDENTITY" "$FULL_BUILD_LOCK_PID" \
+      "$FULL_BUILD_LOCK_TOKEN" "$FULL_BUILD_LOCK_DIGEST" \
+      >/dev/null 2>&1 || true
     FULL_BUILD_LOCK_HELD=0
   fi
 }
@@ -255,7 +200,9 @@ cleanup() {
   release_full_build_lock
   exit "$rc"
 }
-trap cleanup EXIT INT TERM
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
 
 # ------------------------------------------------------------------- telemetry
 
@@ -273,14 +220,30 @@ resolve_primary_repo() {
 }
 
 append_build_telemetry() { # <kind> <outcome> <seconds> <trigger> <sha> <note>
-  local dir file waited=0
+  local dir file waited=0 held=0 token result rc=0
+  local state identity holder observed_token digest detail
   dir="${MIPSTARRE_TELEMETRY_DIR:-$(resolve_primary_repo)/results/telemetry}"
   file="$dir/builds.jsonl"
   if ! mkdir -p "$dir" 2>/dev/null; then
     warn "cannot create the telemetry directory $dir; build record dropped"
     return 0
   fi
-  while ! mkdir "$TELEMETRY_LOCK" 2>/dev/null; do
+  token="$(python3 "$SCRIPT_DIR/runtime_lock.py" new-token 2>/dev/null || true)"
+  while [ -n "$token" ]; do
+    rc=0
+    result="$(python3 "$SCRIPT_DIR/runtime_lock.py" acquire \
+      "$TELEMETRY_LOCK" "$$" "$token" "warm-worktree.sh telemetry")" || rc=$?
+    IFS='|' read -r state identity holder observed_token digest detail <<EOF
+$result
+EOF
+    if [ "$state" = acquired ]; then
+      held=1
+      break
+    fi
+    if [ "$state" = unsafe ] || [ "$rc" -eq 2 ]; then
+      warn "telemetry lock is unsafe; appending without serialization and requiring manual recovery"
+      break
+    fi
     if [ "$waited" -ge 5 ]; then
       warn "telemetry lock busy; appending without serialization"
       break
@@ -319,7 +282,11 @@ PY
   then
     warn "failed to append build telemetry to $file"
   fi
-  rmdir "$TELEMETRY_LOCK" 2>/dev/null || true
+  if [ "$held" -eq 1 ]; then
+    python3 "$SCRIPT_DIR/runtime_lock.py" release-owned \
+      "$TELEMETRY_LOCK" "$identity" "$holder" "$observed_token" "$digest" \
+      >/dev/null 2>&1 || true
+  fi
 }
 
 # ---------------------------------------------------------------- snapshot store
@@ -494,7 +461,8 @@ full_build() { # <trigger>
   # DESIGN.md #7: at most one full `lake build` machine-wide.  Single-file
   # `lake env lean` checks (the pre-push hook's per-file gate) take no lock.
   if ! acquire_full_build_lock "$LOCK_TIMEOUT"; then
-    die "timed out after ${LOCK_TIMEOUT}s waiting for the machine-wide full-build lock $FULL_BUILD_LOCK"
+    die "timed out after ${LOCK_TIMEOUT}s waiting for the machine-wide \
+full-build lock $FULL_BUILD_LOCK"
   fi
   log "running a full lake build in $WORKTREE (log: $logfile)"
   started="$(epoch_now)"

@@ -10,10 +10,11 @@ A readable failure or error manifest does not authorize review.
 
 An ordinary rerun adopts a complete exact-head and exact-base attestation.
 `--new-round` explicitly requests another adjudication round for that same
-comparison. It changes only complete-attestation idempotency: incomplete
-publication is still finalized without redispatch, and all comparison,
-session, CI, bot-commit, and lock guards remain in force. Repeating the guarded
-mode after an initial review can therefore produce the four distinct rounds
+comparison. It changes complete-attestation idempotency and is also the only
+way to supersede a canonically aborted pre-attestation attempt. Incomplete
+publication of an existing attestation is still finalized without redispatch,
+and all comparison, session, CI, bot-commit, and lock guards remain in force.
+Repeating the guarded mode can therefore produce the four distinct rounds
 required for operator adjudication.
 
 ## Tree and prompt integrity
@@ -21,9 +22,12 @@ required for operator adjudication.
 After reading the GitHub PR identity, review takes the per-PR review lock and
 atomically reserves the same per-branch fix lock used by auto-fix. It holds both
 from before its first feature-tree read through review and summary publication.
-The shared branch lease records a PID, an ownership token, and an optional
-supersession cancellation. Review aborts if either lock is no longer owned or a
-cancel file appears; cleanup removes only leases still owned by that process.
+Both leases carry a PID, random UUID token, directory identity, and a digest of
+their complete structured owner metadata. Every ownership check and release is
+serialized by the persistent sibling transition mutex. Review aborts if either
+exact claim is lost or has a valid cancellation request; malformed owner or
+cancellation records also fail closed. Cleanup can remove only the exact claims
+acquired by that process, so a whole-directory replacement is preserved.
 
 The local feature head and fetched local base must equal the GitHub full head
 and base SHAs. The feature worktree must have no tracked, staged, or untracked
@@ -41,9 +45,14 @@ persona bindings use the resolved trusted commit, never the feature branch.
 
 Each dispatched lane must have a nonempty session name and thread id distinct
 from the other lane, exit zero, and have exactly matching clean completion
-telemetry. The matching record binds the reviewer role, PR/issue number,
-worktree, thread id, start and end timestamps, and `done` status. Output from a
-nonzero reviewer process is diagnostic only and can never satisfy the gate.
+telemetry. Its lineage contains exactly one original `done` completion row and
+may contain later `archived` status projections. An archival projection may
+change only `status`, `status_ts`, and `note`; every bound identity, role,
+PR/issue number, worktree, thread id, process result, and completion timestamp
+remains equal to the original row. Changed identity, multiple original
+completions, any other projection status, or thread reuse by a different
+session name is invalid. Output from a nonzero reviewer process is diagnostic
+only and can never satisfy the gate.
 
 Within one PR, a reviewer session name or thread id may identify only one
 distinct attestation. Re-reading or idempotently adopting that same attestation
@@ -91,11 +100,22 @@ and the local and GitHub full head and base SHAs immediately before each
 attestation or final-summary mutation. After its idempotency lookup, the client
 repeats the full check around any intervening reviewer-identity or summary-status
 read, then finishes with a fast local lease/tree check immediately before the
-write. Movement or loss of ownership makes the run stale.
+write. The full authoritative and fast local guards run again after a write
+response or authoritative adoption, and after the final evidence readback.
+Movement or loss of ownership makes the run stale.
 
 The wrapper publishes `local-review/summary=pending` under both leases before
-dispatch. It then submits one marker-bound `COMMENT` review with the exact
-`commit_id`. Clean and adverse reviews alike use `event=COMMENT` and
+dispatch. Pending and pre-attestation diagnostic error descriptions bind a
+cryptographic fingerprint of the full current base SHA, the run id, and the
+attempt state. The status digest additionally binds the exact head, context,
+and GitHub state, and the status creator must be trusted. Every pre-attestation
+failure after pending publication, but before the review POST may have started,
+attempts the same canonical `error`/`aborted` status. Once review submission may
+have started, an ambiguous outcome retains `pending`: it must never be
+overwritten with `aborted`, because GitHub may have accepted the attestation.
+The wrapper then submits one marker-bound `COMMENT`
+review with the exact `commit_id`. Clean and adverse reviews alike use
+`event=COMMENT` and
 `fallback=none`; local review never publishes `REQUEST_CHANGES`. The
 attestation binds the full PR number, full head and base SHAs, run id, canonical
 findings count, event, and each dispatched review lane's name, thread id, exit,
@@ -107,7 +127,9 @@ only for a zero-finding clean `COMMENT` attestation and `failure` for unresolved
 findings. The status description binds the same run and ledger digest.
 Publication is idempotent only when the full attestation, digest, body, commit,
 event/state, and status agree. Transient and ambiguous review writes use
-authoritative read-back and never issue a second review mutation.
+authoritative read-back and never issue a second review mutation. Transient
+reconciliation lookup failures are retried; an unresolved ambiguity is adopted
+idempotently on a later rerun if the exact attestation exists.
 
 The review `COMMENT` row must have `user.login` equal to the configured trusted
 actor, and its latest summary must have the same actor in `creator.login`.
@@ -138,6 +160,15 @@ comparison after that read, and then performs the fast local lease/tree check
 before the POST; normal publication uses the same path. A pending status for a
 different run, any conflicting trusted status, or an attestation for a stale
 base is not recoverable as the current run.
+
+When there is no corresponding exact-comparison attestation, a trusted
+canonical pending or aborted status for the current base is classified as an
+aborted attempt only for a caller that explicitly enables `--new-round`
+recovery. Ordinary reruns remain fail-closed. A wrong-base attempt, arbitrary
+trusted conflict, malformed description, or attempt run already owned by an
+attestation is never recoverable through this path. A completed attestation for
+an earlier base is historical evidence rather than an aborted attempt and does
+not prevent a fresh review after the comparison base advances.
 
 GitHub approval and `reviewDecision` are never required. The normal gate is a
 successful exact-head summary status plus a strictly parsed clean `COMMENT`

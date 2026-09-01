@@ -109,12 +109,18 @@ All runtime state lives under `MIPSTARRE_CACHE_ROOT`, default
 ```
 ~/.cache/mipstarre-dev/
 ├── .full-build-lock/            # machine-wide: one full `lake build` at a time
-│   └── info                     # pid, host, started, started_epoch, purpose
+│   ├── pid                      # positive process id
+│   ├── token                    # random UUID4 token
+│   ├── identity                 # directory device/inode
+│   └── owner                    # structured JSON owner metadata
 ├── .telemetry-lock/             # short-lived; serializes JSONL appends
 ├── logs/                        # captured build logs (warm-*.log, worktree-build-*.log)
 └── hot-main/
     ├── .writer-lease/           # only the warmer holds this
-    │   └── info
+    │   ├── pid
+    │   ├── token
+    │   ├── identity
+    │   └── owner
     ├── repo/                    # the always-warm detached checkout of main
     ├── snapshots/
     │   ├── snap-<utc>-<sha12>/
@@ -157,29 +163,25 @@ local/bin/cache-warmer.sh [--ref main | --sha <sha>] [--force] [--keep N]
                           [--lease-ttl S] [--gc-only] [--status]
 ```
 
+`--lease-ttl` remains accepted for command-line compatibility. Runtime-lock
+staleness is never age-based.
+
 ### 5.1 Writer lease
 
-Acquired by `mkdir hot-main/.writer-lease` — `mkdir(2)` is the atomic
-test-and-set. The lease directory holds an `info` file with `pid`, `host`,
-`started`, `started_epoch`, `purpose`.
+The warmer acquires `hot-main/.writer-lease` through
+`local/bin/runtime_lock.py`, using the complete claim described in §7. The
+helper serializes acquisition and explicit recovery on the lease's persistent
+sibling mutex. Acquisition never breaks an existing complete record, even when
+its same-host PID is proven dead, because descendants may survive their
+recorded parent. A complete dead-owner claim may be broken only by an explicit
+recovery operation after the operator has ruled out surviving descendants. A
+foreign-host, ownerless, malformed, or partial record fails closed for manual
+recovery.
 
-Staleness is decided in this order:
-
-* **Same host**: the holder's liveness is authoritative (`kill -0 pid`). A dead
-  pid means stale immediately; a live pid means *not* stale regardless of age.
-* **Different host, or no pid**: fall back to age > TTL (default 43200 s).
-
-The TTL is deliberately much larger than the study map's suggested 3 h: this
-repository's own cold full build took **25052 s** (`results/telemetry/builds.jsonl`,
-2026-08-30). An age-only rule with a short TTL would break a live warmer's lease
-mid-build and produce exactly the concurrent-writer situation the lease exists to
-prevent.
-
-**Breaking a stale lock is done by renaming, not deleting.** Two processes that
-both judge a lock stale will both attempt `mv lockdir lockdir.stale.<pid>.<epoch>`;
-`rename(2)` is atomic, so exactly one succeeds and proceeds to delete and
-re-acquire, while the loser loops and finds the lock freshly held. A
-`rm -rf && mkdir` sequence has no such guarantee.
+Explicit recovery renames and removes a dead-owner lease only after
+revalidating the exact directory identity and complete owner record under that
+mutex. Concurrent recovery attempts therefore serialize, and no observation
+made before taking the mutex authorizes a rename.
 
 ### 5.2 Build
 
@@ -314,9 +316,14 @@ a CI job dropped Lean setup entirely and now only emits a notice
 (`pr-ci.yml:314`). Locally the binding resource is RAM during a Mathlib-scale
 build; the lock is the analog of a concurrency group.
 
-Both locks use the same mkdir/rename-to-break protocol described in §5.1, with
-the same liveness-first staleness rule, so a consumer and the warmer agree on
-what a stale lock is.
+Both locks use `local/bin/runtime_lock.py`. A complete lease records a PID,
+random UUID token, directory device/inode identity, and structured owner
+metadata whose digest is part of the immutable claim. Creation, explicit
+recovery, owned release, and claim validation are serialized on a persistent
+sibling `flock`. Acquisition refuses every complete existing record. A
+same-host record with a provably dead PID is eligible only for explicit
+recovery after checking for descendants; ownerless, malformed, partial, or
+foreign-host records require manual recovery.
 
 ### 7.1 Interoperating with `local/bin/ci.sh`
 
@@ -331,13 +338,23 @@ compatibility hazards follow, and both are handled here:
   sweep on a third flock — *two different paths are two independent mutexes,
   and the invariant is silently void*; unified 2026-08-30, see
   `local/protocols/EVOLUTION.md`.)
-* **Metadata layout.** `ci.sh` records its holder in `<lock>/owner` (pid, ISO
-  time, tag — one per line); these scripts record `<lock>/info` as `key=value`.
-  A script that cannot read the other's holder would conclude "no pid, therefore
-  stale" and break a *live* lock mid-build. Therefore: every acquisition here
-  writes **both** files, and staleness detection reads `info` first, then
-  `owner`, and falls back to the lock directory's mtime for age. An absent `host`
-  field is read as "this host", which keeps pid liveness authoritative.
+* **Metadata layout.** All four takers call the same helper and require the same
+  `pid`, `token`, `identity`, and structured JSON `owner` files. The owner JSON
+  repeats the first three fields and records the tool label, host, and creation
+  time. No participant interprets legacy `info`, age, or directory mtime as
+  authority. A complete dead record still blocks acquisition until explicit
+  recovery under the transition mutex; any incomplete or inconsistent record
+  fails closed with its exact path.
+
+The warmer's independent writer lease and the best-effort telemetry mutex use
+the same ownership primitive. Telemetry retains its five-second fallback to an
+unserialized append, but even that fallback never removes an unowned or
+replacement mutex directory.
+
+`cache-warmer.sh`, `warm-worktree.sh`, and the housekeeping linter sweep map
+`INT` and `TERM` to 130 and 143. Their `EXIT` cleanup removes only the private
+staging directory and releases only the exact recorded claims; signal cleanup
+cannot delete a replacement lease.
 
 ---
 
@@ -428,9 +445,10 @@ Three properties are load-bearing:
   worktree, the scripts resolve `git rev-parse --git-common-dir` back to the
   primary repository, so an append-only JSONL does not fork per worktree and
   produce merge conflicts. Override with `MIPSTARRE_TELEMETRY_DIR`.
-* **Appends are serialized** by a short-lived `mkdir` lock, and give up after 5 s
-  rather than delaying a build. Telemetry never blocks or fails a build; every
-  failure path degrades to a warning.
+* **Appends are serialized** through the shared runtime-lock helper, and give up
+  after 5 s rather than delaying a build. Telemetry never blocks or fails a
+  build; every failure path degrades to a warning. The fallback append is
+  unserialized but never renames or removes a lock it does not own.
 * **`note` is sanitized** — non-printable characters stripped, truncated to 400
   characters — because notes may quote build output, and compiler output is
   untrusted text regardless of where it was produced (`DESIGN.md` #6).
@@ -478,7 +496,8 @@ each worktree serialized behind one lock.
 | `cp -c` unsupported (non-APFS, cross-volume) | Warn, fall back to `cp -R`. Correct, just slower and larger. |
 | `lake exe cache get` fails | Warn; tier 2 gets compiled from source. Non-fatal. |
 | Full-build lock held | Wait; the warmer waits indefinitely by default, consumers time out per `--lock-timeout`. |
-| Stale lock (dead pid, or age > TTL) | Broken by atomic rename, with a warning naming the dead holder. |
+| Dead same-host owner | Block acquisition; after checking descendants, recover its exact claim explicitly under the transition mutex. |
+| Partial/malformed/ownerless/foreign-host lock | Fail closed for manual recovery. |
 | Primary repo has no commits on `main` | Hard error naming the cause. Never a silent no-op. |
 | `warm-worktree.sh` missing during bootstrap | Hard error. `--skip-warm` is the explicit opt-out. |
 | `github/main` does not resolve | Hard failure naming the explicit fetch needed; gates never silently disable. |

@@ -46,9 +46,9 @@
 #                                   (must equal cache-warmer.sh/warm-worktree.sh:
 #                                   one path, one mutex)
 #   MIPSTARRE_CI_BUILD_LOCK_WAIT_S  default 14400 (4h) wait for the build lock
-#   MIPSTARRE_FULL_BUILD_LOCK_STALE_S default 10800 (3h) — applies ONLY to a
-#                                   lock whose owner stamp is unreadable; a
-#                                   lock with a live owner pid is never broken
+#   MIPSTARRE_FULL_BUILD_LOCK_STALE_S retained for compatibility; ownerless or
+#                                   malformed locks require operator recovery
+#                                   regardless of age
 #   MIPSTARRE_CI_REQUIRE_WARMER=1   fail the build step if warm-worktree.sh is
 #                                   missing instead of doing a cold build
 #   MIPSTARRE_CI_ALLOW_COLD_FETCH=1 let the build step materialise .lake/packages
@@ -122,147 +122,83 @@ worktree_is_clean() {
   [ -z "$_status" ]
 }
 
-# Locks are advisory mkdir-based lease directories, matching the hot-main
-# writer lease convention in local/protocols/build-cache.md.
+# Every long-lived workflow lease uses runtime_lock.py's complete owner record
+# and persistent sibling transition mutex.
 HELD_LOCKS=""
-LOCK_COUNTER=0
+LOCK_LAST_STATE=""
+LOCK_LAST_PID=""
+LOCK_LAST_DETAIL=""
+ACQUIRED_LOCK_IDENTITY=""
+ACQUIRED_LOCK_PID=""
 ACQUIRED_LOCK_TOKEN=""
+ACQUIRED_LOCK_DIGEST=""
 
-lock_age_s() {
-  # $1 = lock dir. Use the directory timestamp until the owner stamp is
-  # atomically installed, so a process between mkdir and publication is never
-  # mistaken for an ancient partial lock.
-  local _stamp="$1/owner"
-  [ -f "$_stamp" ] || _stamp="$1"
-  local _mtime _age
-  _mtime="$(stat -c %Y "$_stamp" 2>/dev/null ||
-    stat -f %m "$_stamp" 2>/dev/null || echo 0)"
-  case "$_mtime" in
-    ''|*[!0-9]*) _mtime=0 ;;
-  esac
-  _age=$(( $(epoch_now) - _mtime ))
-  [ "$_age" -ge 0 ] || _age=0
-  printf '%s\n' "$_age"
-}
-
-lock_inode() {
-  local _identity
-  _identity="$(stat -c '%d:%i' "$1" 2>/dev/null ||
-    stat -f '%d:%i' "$1" 2>/dev/null || true)"
-  case "$_identity" in
-    *:*) printf '%s\n' "$_identity" ;;
-    *) return 1 ;;
-  esac
-}
-
-break_stale_lock() {
-  local _dir="$1" _expected_inode="$2" _doomed _moved_inode
-  [ -n "$_expected_inode" ] || return 1
-  LOCK_COUNTER=$((LOCK_COUNTER + 1))
-  _doomed="${_dir}.stale.$$.$(epoch_now).$LOCK_COUNTER"
-  if mv "$_dir" "$_doomed" 2>/dev/null; then
-    _moved_inode="$(lock_inode "$_doomed" 2>/dev/null || true)"
-    if [ "$_moved_inode" = "$_expected_inode" ]; then
-      rm -rf "$_doomed"
-      return 0
-    fi
-    if [ ! -e "$_dir" ]; then
-      mv "$_doomed" "$_dir" 2>/dev/null ||
-        warn "could not restore replacement lock moved to $_doomed"
-    else
-      warn "replacement lock preserved at $_doomed"
-    fi
-  fi
-  return 1
+parse_lock_result() {
+  IFS='|' read -r LOCK_LAST_STATE _lock_identity LOCK_LAST_PID \
+      _lock_token _lock_digest LOCK_LAST_DETAIL <<EOF
+$1
+EOF
 }
 
 release_owned_lock() {
-  local _dir="$1" _token="$2" _doomed _owner _observed
-  _owner="$(cat "$_dir/pid" 2>/dev/null || true)"
-  _observed="$(cat "$_dir/token" 2>/dev/null || true)"
-  [ "$_owner" = "$$" ] && [ "$_observed" = "$_token" ] || return 0
-  LOCK_COUNTER=$((LOCK_COUNTER + 1))
-  _doomed="${_dir}.release.$$.$(epoch_now).$LOCK_COUNTER"
-  mv "$_dir" "$_doomed" 2>/dev/null || return 0
-  _owner="$(cat "$_doomed/pid" 2>/dev/null || true)"
-  _observed="$(cat "$_doomed/token" 2>/dev/null || true)"
-  if [ "$_owner" = "$$" ] && [ "$_observed" = "$_token" ]; then
-    rm -rf "$_doomed"
-  elif [ ! -e "$_dir" ]; then
-    mv "$_doomed" "$_dir" 2>/dev/null ||
-      warn "could not restore replacement lock moved to $_doomed"
-  else
-    warn "replacement lock preserved at $_doomed"
-  fi
-}
-
-lock_owner_alive() {
-  local _stamp="$1/owner"
-  [ -f "$_stamp" ] || return 1
-  local _pid
-  _pid="$(head -n 1 "$_stamp" 2>/dev/null || true)"
-  case "$_pid" in
-    ''|*[!0-9]*) return 1 ;;
-  esac
-  kill -0 "$_pid" 2>/dev/null
+  local _dir="$1" _identity="$2" _pid="$3" _token="$4" _digest="$5"
+  python3 "$SCRIPT_DIR/runtime_lock.py" release-owned \
+    "$_dir" "$_identity" "$_pid" "$_token" "$_digest" \
+    >/dev/null 2>&1 || true
 }
 
 # acquire_lock <dir> <wait_seconds> <stale_seconds> <tag>
-# Returns 0 on success, 1 on timeout.  A lock whose owner process is ALIVE is
-# NEVER broken, regardless of age: the parent workflow exempts main-branch
-# (cache-seeding) runs from cancellation, and the local analog is that a
-# running full build is always allowed to finish (the initial cold build took
-# ~7 h; see results/telemetry/builds.jsonl).  The stale threshold applies only
-# when the owner stamp is unreadable, so an interrupted mkdir cannot wedge the
-# machine forever.
+# The stale setting is retained as an interface compatibility argument.
+# Acquisition never breaks a complete record; every existing record blocks.
 acquire_lock() {
   local _dir="$1" _wait="$2" _stale="$3" _tag="$4"
-  local _waited=0 _observed_inode
+  local _waited=0 _result _rc=0 _identity _pid _token _digest
+  : "$_stale"
   mkdir -p "$(dirname "$_dir")"
-  while ! mkdir "$_dir" 2>/dev/null; do
-    _observed_inode="$(lock_inode "$_dir" 2>/dev/null || true)"
-    if lock_owner_alive "$_dir"; then
-      : # live owner: wait below, never break
-    elif [ -f "$_dir/owner" ] || [ -f "$_dir/info" ]; then
-      warn "breaking stale lock $_dir (owner process is dead)"
-      break_stale_lock "$_dir" "$_observed_inode" || true
-      continue
-    elif [ "$(lock_age_s "$_dir")" -gt "$_stale" ]; then
-      warn "breaking stale lock $_dir (no owner stamp, older than ${_stale}s)"
-      break_stale_lock "$_dir" "$_observed_inode" || true
-      continue
+  _token="$(python3 "$SCRIPT_DIR/runtime_lock.py" new-token)" || return 2
+  while :; do
+    _rc=0
+    _result="$(python3 "$SCRIPT_DIR/runtime_lock.py" acquire \
+      "$_dir" "$$" "$_token" "$_tag")" || _rc=$?
+    parse_lock_result "$_result"
+    _identity="$_lock_identity"
+    _pid="$LOCK_LAST_PID"
+    _digest="$_lock_digest"
+    if [ "$LOCK_LAST_STATE" = acquired ]; then
+      ACQUIRED_LOCK_IDENTITY="$_identity"
+      ACQUIRED_LOCK_PID="$_pid"
+      ACQUIRED_LOCK_TOKEN="$_token"
+      ACQUIRED_LOCK_DIGEST="$_digest"
+      [ -z "$LOCK_LAST_DETAIL" ] || warn "$LOCK_LAST_DETAIL at $_dir"
+      HELD_LOCKS="${HELD_LOCKS}${HELD_LOCKS:+
+}${_dir}	${_identity}	${_pid}	${_token}	${_digest}"
+      return 0
+    fi
+    if [ "$LOCK_LAST_STATE" = unsafe ] || [ "$_rc" -eq 2 ]; then
+      warn "unsafe runtime lock $_dir: \
+${LOCK_LAST_DETAIL:-helper failure}; manual recovery required"
+      return 2
     fi
     if [ "$_waited" -ge "$_wait" ]; then
       return 1
     fi
     if [ "$_waited" -eq 0 ]; then
-      info "waiting for lock $_dir (held by pid $(head -n 1 "$_dir/owner" 2>/dev/null || echo '?'))"
+      info "waiting for lock $_dir (held by pid ${LOCK_LAST_PID:-unknown})"
     fi
     sleep 5
     _waited=$(( _waited + 5 ))
   done
-  LOCK_COUNTER=$((LOCK_COUNTER + 1))
-  ACQUIRED_LOCK_TOKEN="ci-$$-$(epoch_now)-$LOCK_COUNTER-${RANDOM:-0}"
-  printf '%s\n' "$$" >"$_dir/pid.tmp.$$"
-  printf '%s\n' "$ACQUIRED_LOCK_TOKEN" >"$_dir/token.tmp.$$"
-  printf '%s\n%s\n%s\n' "$$" "$(iso_now)" "$_tag" >"$_dir/owner.tmp.$$"
-  mv "$_dir/pid.tmp.$$" "$_dir/pid"
-  mv "$_dir/token.tmp.$$" "$_dir/token"
-  mv "$_dir/owner.tmp.$$" "$_dir/owner"
-  HELD_LOCKS="${HELD_LOCKS}${HELD_LOCKS:+
-}${_dir}	${ACQUIRED_LOCK_TOKEN}"
-  return 0
 }
 
 release_lock() {
-  local _dir="$1" _kept="" _held _token
-  while IFS="$(printf '\t')" read -r _held _token; do
+  local _dir="$1" _kept="" _held _identity _pid _token _digest
+  while IFS="$(printf '\t')" read -r _held _identity _pid _token _digest; do
     [ -n "$_held" ] || continue
     if [ "$_held" = "$_dir" ]; then
-      release_owned_lock "$_held" "$_token"
+      release_owned_lock "$_held" "$_identity" "$_pid" "$_token" "$_digest"
     else
       _kept="${_kept}${_kept:+
-}${_held}	${_token}"
+}${_held}	${_identity}	${_pid}	${_token}	${_digest}"
     fi
   done <<EOF
 $HELD_LOCKS
@@ -272,10 +208,10 @@ EOF
 
 RUN_TMP=""
 cleanup() {
-  local _lock _token
-  while IFS="$(printf '\t')" read -r _lock _token; do
+  local _lock _identity _pid _token _digest
+  while IFS="$(printf '\t')" read -r _lock _identity _pid _token _digest; do
     [ -n "$_lock" ] || continue
-    release_owned_lock "$_lock" "$_token"
+    release_owned_lock "$_lock" "$_identity" "$_pid" "$_token" "$_digest"
   done <<EOF
 $HELD_LOCKS
 EOF
@@ -694,13 +630,15 @@ while IFS= read -r _file; do
   if match_globs "$_file" 'scripts/comparator/*'; then A_comparator=1; fi
   # 'workflow' is the local translation of "the CI definition itself changed":
   # the frozen reference workflow, this driver, or its protocol.
-  if match_globs "$_file" '.github/workflows/pr-ci.yml' '.githooks/*' \
+  if match_globs "$_file" '.github/*' '.githooks/*' \
+      'results/telemetry/registry-archive/*' \
       'local/bin/github_api.py' 'local/bin/issue_new.py' 'local/bin/issue_close.py' \
       'local/bin/pr_open.py' 'local/bin/ci.sh' 'local/bin/review.sh' \
       'local/bin/autofix.sh' 'local/bin/pr_merge.py' 'local/bin/agent.sh' \
       'local/bin/housekeeping.sh' 'local/bin/github-sync.sh' \
       'local/bin/export_issues.py' 'local/bin/worktree-setup.sh' \
-      'local/bin/cache-warmer.sh' 'local/protocols/*' 'local/personas/*'; then
+      'local/bin/cache-warmer.sh' 'local/bin/runtime_lock.py' \
+      'local/bin/warm-worktree.sh' 'local/protocols/*' 'local/personas/*'; then
     A_workflow=1
   fi
 done < "$CHANGED_FILES"
@@ -793,8 +731,16 @@ fi
 # .lake/build and a half-held build lock behind (gotcha 5).
 PR_LOCK="$CACHE_ROOT/locks/ci-$PR_ID.lock"
 if ! acquire_lock "$PR_LOCK" 0 "$BUILD_LOCK_STALE_S" "ci.sh pr=$PR_ID sha=$HEAD_SHA"; then
-  die "another ci.sh run for PR $PR_ID is in progress (lock $PR_LOCK, pid $(head -n 1 "$PR_LOCK/owner" 2>/dev/null || echo '?')); wait for it or break the lock by hand"
+  if [ "$LOCK_LAST_STATE" = unsafe ]; then
+    die "the CI lock $PR_LOCK has an incomplete owner record; recover that exact path manually"
+  fi
+  die "another ci.sh run for PR $PR_ID is in progress \
+(lock $PR_LOCK, pid ${LOCK_LAST_PID:-unknown}); wait or recover it by hand"
 fi
+PR_LOCK_IDENTITY="$ACQUIRED_LOCK_IDENTITY"
+PR_LOCK_PID="$ACQUIRED_LOCK_PID"
+PR_LOCK_TOKEN="$ACQUIRED_LOCK_TOKEN"
+PR_LOCK_DIGEST="$ACQUIRED_LOCK_DIGEST"
 
 mkdir -p "$LOG_DIR" "$RUN_DIR"
 
@@ -804,22 +750,28 @@ mkdir -p "$LOG_DIR" "$RUN_DIR"
 # can replace any already-published pending or success status.
 PUBLICATION_GUARD="$RUN_TMP/publication-guard.json"
 python3 - "$PUBLICATION_GUARD" "$PR_ID" "$BRANCH" "$BASE" "$HEAD_SHA" \
-    "$BASE_SHA" "$WORKTREE" <<'PY'
+    "$BASE_SHA" "$WORKTREE" "$PR_LOCK" "$PR_LOCK_IDENTITY" \
+    "$PR_LOCK_PID" "$PR_LOCK_TOKEN" "$PR_LOCK_DIGEST" <<'PY'
 import json
 import sys
 
-destination, number, branch, base, head_sha, base_sha, worktree = sys.argv[1:]
+(destination, number, branch, base, head_sha, base_sha, worktree,
+ lock_path, identity, pid, token, owner_digest) = sys.argv[1:]
 payload = {
-    "schema": 1,
+    "schema": 2,
     "pr": int(number),
     "branch": branch,
     "base": base,
     "head_sha": head_sha,
     "base_sha": base_sha,
     "worktree": worktree,
-    "pid": "",
-    "owner": "",
-    "locks": [],
+    "locks": [{
+        "path": lock_path,
+        "identity": identity,
+        "pid": int(pid),
+        "token": token,
+        "owner_digest": owner_digest,
+    }],
 }
 with open(destination, "w", encoding="utf-8") as stream:
     json.dump(payload, stream, sort_keys=True)

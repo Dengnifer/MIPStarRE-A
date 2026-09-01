@@ -64,8 +64,18 @@ BOT_PREFIX_RE='^\[(codex-auto-fix|codex-review-fix)\]'
 SESSION_TELEMETRY="$ROOT/results/telemetry/sessions.jsonl"
 
 HELD_LOCKS=""
-LEASE_OWNER="review-$$-$(date -u +%Y%m%dT%H%M%SZ)"
+ACQUIRED_LOCK_IDENTITY=""
+ACQUIRED_LOCK_PID=""
+ACQUIRED_LOCK_TOKEN=""
+ACQUIRED_LOCK_DIGEST=""
+LOCK_LAST_STATE=""
+LOCK_LAST_PID=""
+LOCK_LAST_DETAIL=""
 RUN_TMP=""
+ATTEMPT_ACTIVE=0
+ATTESTATION_PUBLISHED=0
+REVIEW_POST_MAY_HAVE_STARTED=0
+ABORT_PUBLICATION_ATTEMPTED=0
 
 log()  { printf '%s: %s\n' "$PROG" "$*" >&2; }
 warn() { printf '%s: warning: %s\n' "$PROG" "$*" >&2; }
@@ -73,13 +83,22 @@ die()  { printf '%s: error: %s\n' "$PROG" "$*" >&2; exit 1; }
 
 cleanup() {
   local rc=$?
-  local lock
-  for lock in $HELD_LOCKS; do
-    if [ "$(cat "$lock/pid" 2>/dev/null || true)" = "$$" ] \
-        && [ "$(cat "$lock/owner" 2>/dev/null || true)" = "$LEASE_OWNER" ]; then
-      rm -rf "$lock"
-    fi
-  done
+  local lock identity pid token digest
+  if [ "$ATTEMPT_ACTIVE" -eq 1 ] && [ "$ATTESTATION_PUBLISHED" -eq 0 ] &&
+      [ "$REVIEW_POST_MAY_HAVE_STARTED" -eq 0 ] &&
+      [ "$ABORT_PUBLICATION_ATTEMPTED" -eq 0 ]; then
+    ABORT_PUBLICATION_ATTEMPTED=1
+    publish_aborted_attempt ||
+      warn "could not publish the canonical aborted-attempt status"
+  fi
+  while IFS="$(printf '\t')" read -r lock identity pid token digest; do
+    [ -n "$lock" ] || continue
+    python3 "$SCRIPT_DIR/runtime_lock.py" release-owned \
+      "$lock" "$identity" "$pid" "$token" "$digest" \
+      >/dev/null 2>&1 || true
+  done <<EOF
+$HELD_LOCKS
+EOF
   HELD_LOCKS=""
   if [ -n "$RUN_TMP" ] && [ -d "$RUN_TMP" ]; then
     rm -rf "$RUN_TMP"
@@ -130,44 +149,60 @@ PY
 }
 
 # acquire_lock <lockdir> <wait-seconds> <label>
-# Per-PR review lock and branch fix reservation. The mkdir is the atomic lease;
-# pid/owner make release and boundary checks ownership-safe. Autofix recognizes
-# the shared fix lock's pid/cancel layout and can request supersession.
+# Per-PR review lock and branch fix reservation. runtime_lock.py serializes
+# acquisition, explicit recovery, cancellation checks, and owned release.
 acquire_lock() {
-  local dir="$1" wait_s="$2" label="$3" waited=0 holder=""
+  local dir="$1" wait_s="$2" label="$3" waited=0 token result rc=0
+  local state identity holder observed_token digest detail
   mkdir -p "$(dirname "$dir")"
-  while ! mkdir "$dir" 2>/dev/null; do
-    holder="$(cat "$dir/pid" 2>/dev/null || true)"
-    if [ -n "$holder" ] && ! kill -0 "$holder" 2>/dev/null; then
-      warn "removing stale lock $dir (holder pid $holder is gone)"
-      rm -rf "$dir"
-      continue
+  token="$(python3 "$SCRIPT_DIR/runtime_lock.py" new-token)" || \
+    die "cannot allocate a unique runtime-lock token"
+  while :; do
+    rc=0
+    result="$(python3 "$SCRIPT_DIR/runtime_lock.py" acquire \
+      "$dir" "$$" "$token" "$label")" || rc=$?
+    IFS='|' read -r state identity holder observed_token digest detail <<EOF
+$result
+EOF
+    LOCK_LAST_STATE="$state"
+    LOCK_LAST_PID="$holder"
+    LOCK_LAST_DETAIL="$detail"
+    if [ "$state" = acquired ]; then
+      ACQUIRED_LOCK_IDENTITY="$identity"
+      ACQUIRED_LOCK_PID="$holder"
+      ACQUIRED_LOCK_TOKEN="$observed_token"
+      ACQUIRED_LOCK_DIGEST="$digest"
+      HELD_LOCKS="${HELD_LOCKS}${HELD_LOCKS:+
+}${dir}	${identity}	${holder}	${observed_token}	${digest}"
+      [ -z "$detail" ] || warn "$detail at $dir"
+      return 0
+    fi
+    if [ "$state" = unsafe ] || [ "$rc" -eq 2 ]; then
+      die "unsafe runtime lock $dir: ${detail:-helper failure}; recover that exact path manually"
     fi
     if [ "$waited" -ge "$wait_s" ]; then
-      die "timed out after ${wait_s}s waiting for the review lock $dir (holder pid ${holder:-unknown})"
+      die "timed out after ${wait_s}s waiting for the review lock $dir \
+(holder pid ${holder:-unknown})"
     fi
     [ "$waited" = 0 ] && log "another review holds $dir (pid ${holder:-unknown}); queuing"
     sleep 5
     waited=$((waited + 5))
   done
-  printf '%s\n' "$$" >"$dir/pid"
-  printf '%s\n' "$LEASE_OWNER" >"$dir/owner"
-  printf '%s\n' "$label" >"$dir/label"
-  HELD_LOCKS="$dir $HELD_LOCKS"
 }
 
 lease_is_owned() {
-  local dir="$1"
-  [ -d "$dir" ] \
-    && [ "$(cat "$dir/pid" 2>/dev/null || true)" = "$$" ] \
-    && [ "$(cat "$dir/owner" 2>/dev/null || true)" = "$LEASE_OWNER" ] \
-    && [ ! -f "$dir/cancel" ]
+  local dir="$1" identity="$2" pid="$3" token="$4" digest="$5"
+  python3 "$SCRIPT_DIR/runtime_lock.py" validate-owned \
+    "$dir" "$identity" "$pid" "$token" "$digest" --reject-cancel \
+    >/dev/null 2>&1
 }
 
 assert_review_leases() {
-  lease_is_owned "$LOCK_DIR" || \
+  lease_is_owned "$LOCK_DIR" "$LOCK_DIR_IDENTITY" "$LOCK_DIR_PID" \
+      "$LOCK_DIR_TOKEN" "$LOCK_DIR_DIGEST" || \
     die "review lock ownership was lost or superseded ($LOCK_DIR)"
-  lease_is_owned "$FIX_LOCK" || \
+  lease_is_owned "$FIX_LOCK" "$FIX_LOCK_IDENTITY" "$FIX_LOCK_PID" \
+      "$FIX_LOCK_TOKEN" "$FIX_LOCK_DIGEST" || \
     die "branch fix reservation ownership was lost or superseded ($FIX_LOCK)"
 }
 
@@ -352,8 +387,16 @@ lint_branch_name "$BRANCH"
 LOCK_DIR="$CACHE/locks/review-$PR_NUM.lock"
 FIX_LOCK="$CACHE/locks/fix-$(printf '%s' "$BRANCH" | tr '/' '-').lock"
 acquire_lock "$LOCK_DIR" "$LOCK_WAIT" "review pr=$PR_NUM sha=$HEAD_SHA"
+LOCK_DIR_IDENTITY="$ACQUIRED_LOCK_IDENTITY"
+LOCK_DIR_PID="$ACQUIRED_LOCK_PID"
+LOCK_DIR_TOKEN="$ACQUIRED_LOCK_TOKEN"
+LOCK_DIR_DIGEST="$ACQUIRED_LOCK_DIGEST"
 acquire_lock "$FIX_LOCK" "$LOCK_WAIT" \
   "review-reservation pr=$PR_NUM branch=$BRANCH sha=$HEAD_SHA"
+FIX_LOCK_IDENTITY="$ACQUIRED_LOCK_IDENTITY"
+FIX_LOCK_PID="$ACQUIRED_LOCK_PID"
+FIX_LOCK_TOKEN="$ACQUIRED_LOCK_TOKEN"
+FIX_LOCK_DIGEST="$ACQUIRED_LOCK_DIGEST"
 assert_review_leases
 
 # A queued review binds the same refs and comparison SHAs it read before the
@@ -453,7 +496,11 @@ PY
 # its authoritative idempotency lookup and immediately before each POST.
 PUBLICATION_GUARD="$RUN_TMP/publication-guard.json"
 python3 - "$PUBLICATION_GUARD" "$PR_NUM" "$BRANCH" "$BASE" "$HEAD_SHA" \
-    "$BASE_SHA" "$WORKTREE" "$$" "$LEASE_OWNER" "$LOCK_DIR" "$FIX_LOCK" <<'PY'
+    "$BASE_SHA" "$WORKTREE" \
+    "$LOCK_DIR" "$LOCK_DIR_IDENTITY" "$LOCK_DIR_PID" "$LOCK_DIR_TOKEN" \
+    "$LOCK_DIR_DIGEST" \
+    "$FIX_LOCK" "$FIX_LOCK_IDENTITY" "$FIX_LOCK_PID" "$FIX_LOCK_TOKEN" \
+    "$FIX_LOCK_DIGEST" <<'PY'
 import json
 import sys
 
@@ -465,22 +512,41 @@ import sys
     head_sha,
     base_sha,
     worktree,
-    pid,
-    owner,
     review_lock,
+    review_identity,
+    review_pid,
+    review_token,
+    review_digest,
     fix_lock,
+    fix_identity,
+    fix_pid,
+    fix_token,
+    fix_digest,
 ) = sys.argv[1:]
 payload = {
-    "schema": 1,
+    "schema": 2,
     "pr": int(number),
     "branch": branch,
     "base": base,
     "head_sha": head_sha,
     "base_sha": base_sha,
     "worktree": worktree,
-    "pid": pid,
-    "owner": owner,
-    "locks": [review_lock, fix_lock],
+    "locks": [
+        {
+            "path": review_lock,
+            "identity": review_identity,
+            "pid": int(review_pid),
+            "token": review_token,
+            "owner_digest": review_digest,
+        },
+        {
+            "path": fix_lock,
+            "identity": fix_identity,
+            "pid": int(fix_pid),
+            "token": fix_token,
+            "owner_digest": fix_digest,
+        },
+    ],
 }
 with open(destination, "w", encoding="utf-8") as stream:
     json.dump(payload, stream, sort_keys=True)
@@ -505,9 +571,17 @@ python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" --no-probe \
 # failed. Adopt only the exact attested run, and finalize only a missing or
 # canonically matching pending status. No reviewer is redispatched in this path.
 PUBLICATION_STATE_JSON="$RUN_TMP/review-publication-state.json"
-python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" --no-probe \
-  review-state "$PR_NUM" "$HEAD_SHA" "$BASE_SHA" >"$PUBLICATION_STATE_JSON" ||
-  die "existing exact-head review publication is invalid or belongs to another pending run"
+if [ "$NEW_ROUND" -eq 1 ]; then
+  python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" --no-probe \
+    review-state "$PR_NUM" "$HEAD_SHA" "$BASE_SHA" \
+    --allow-new-round-recovery >"$PUBLICATION_STATE_JSON" ||
+    die "existing review publication cannot start an explicit new round"
+else
+  python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" --no-probe \
+    review-state "$PR_NUM" "$HEAD_SHA" "$BASE_SHA" \
+    >"$PUBLICATION_STATE_JSON" ||
+    die "existing exact-head review publication is invalid or incomplete"
+fi
 IFS="$(printf '\t')" read -r PUBLICATION_STATE EXISTING_SUMMARY EXISTING_RUN \
     EXISTING_DIGEST EXISTING_FINDINGS EXISTING_EVENT < <(
   python3 - "$PUBLICATION_STATE_JSON" <<'PY'
@@ -550,6 +624,11 @@ case "$PUBLICATION_STATE" in
     log "recovered review run $EXISTING_RUN without a duplicate review POST"
     [ "$EXISTING_SUMMARY" = success ] && exit 0
     exit 1
+    ;;
+  aborted)
+    [ "$NEW_ROUND" -eq 1 ] ||
+      die "aborted review-attempt recovery requires --new-round"
+    log "starting a new round after an explicitly acknowledged aborted attempt"
     ;;
   absent) ;;
   *) die "review publication classifier returned invalid state '$PUBLICATION_STATE'" ;;
@@ -934,14 +1013,45 @@ if [ "$DRY_RUN" -eq 1 ]; then
   exit 0
 fi
 
+review_attempt_description() {
+  python3 -B - "$SCRIPT_DIR" "$BASE_SHA" "$RUN_ID" "$1" <<'PY'
+import sys
+
+sys.path.insert(0, sys.argv[1])
+from github_api import review_attempt_description
+
+print(review_attempt_description(sys.argv[2], sys.argv[3], sys.argv[4]))
+PY
+}
+
+publish_aborted_attempt() {
+  local _description
+  _description="$(review_attempt_description aborted)" || return 1
+  python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" --no-probe \
+    post-status "$HEAD_SHA" local-review/summary error \
+    "$_description" >/dev/null
+}
+
+abort_attempt() {
+  local _message="$1" _exit="${2:-2}"
+  ABORT_PUBLICATION_ATTEMPTED=1
+  publish_aborted_attempt ||
+    warn "could not publish the canonical aborted-attempt status"
+  printf '%s: error: %s\n' "$PROG" "$_message" >&2
+  exit "$_exit"
+}
+
+PENDING_DESCRIPTION="$(review_attempt_description pending)" ||
+  die "could not construct the canonical pending review status"
+ATTEMPT_ACTIVE=1
 python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" --no-probe \
   post-status "$HEAD_SHA" local-review/summary pending \
-  "local review run=$RUN_ID is pending" \
+  "$PENDING_DESCRIPTION" \
   --guard-file "$PUBLICATION_GUARD" >/dev/null ||
   die "could not publish pending local-review/summary on $HEAD_SHA"
 
 review_boundary "$RUN_TMP/pre-dispatch-pull.json" ||
-  die "comparison or worktree changed immediately before reviewer dispatch"
+  abort_attempt "comparison or worktree changed immediately before reviewer dispatch"
 
 # The two review lanes are independent per head: dispatch them CONCURRENTLY
 # (EVOLUTION.md 2026-08-31, "Review lanes run in parallel"). Parsing stays
@@ -977,10 +1087,8 @@ CODE_RC="$(cat "$CODE_RC_FILE" 2>/dev/null || echo 1)"
 if [ "$CODE_RC" -ne 0 ]; then
   [ -n "$PROSE_LANE_PID" ] && kill "$PROSE_LANE_PID" 2>/dev/null || true
   [ -n "$PROSE_LANE_PID" ] && wait "$PROSE_LANE_PID" 2>/dev/null || true
-  python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" --no-probe \
-    post-status "$HEAD_SHA" local-review/summary error \
-    "local review run=$RUN_ID code reviewer exited $CODE_RC" >/dev/null || true
-  die "the code reviewer exited $CODE_RC; output cannot override a failed reviewer session"
+  abort_attempt \
+    "the code reviewer exited $CODE_RC; output cannot override a failed reviewer session"
 fi
 
 CODE_LANE_JSON="$RUN_DIR/code-lane.json"
@@ -989,10 +1097,7 @@ if ! python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" --no-probe \
     "$PR_NUM" "$WORKTREE" "$CODE_RC" >"$CODE_LANE_JSON"; then
   [ -n "$PROSE_LANE_PID" ] && kill "$PROSE_LANE_PID" 2>/dev/null || true
   [ -n "$PROSE_LANE_PID" ] && wait "$PROSE_LANE_PID" 2>/dev/null || true
-  python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" --no-probe \
-    post-status "$HEAD_SHA" local-review/summary error \
-    "local review run=$RUN_ID has invalid code session telemetry" >/dev/null || true
-  die "the code reviewer lacks clean, matching completion telemetry"
+  abort_attempt "the code reviewer lacks clean, matching completion telemetry"
 fi
 CODE_SESSION_NAME="$(python3 - "$CODE_LANE_JSON" <<'PY'
 import json
@@ -1006,12 +1111,9 @@ if ! CODE_RESULT="$(write_review code "$CODE_OUT" "$REVIEWS_DIR/$HEAD_SHA-code.m
       "$CODE_SESSION_NAME" \
       "$REVIEW_MODEL")"; then
   [ -n "$PROSE_LANE_PID" ] && kill "$PROSE_LANE_PID" 2>/dev/null || true
-  python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" --no-probe \
-    post-status "$HEAD_SHA" local-review/summary error \
-    "code review produced no usable verdict" >/dev/null || true
-  printf '%s: %s\n' "$PROG" \
-    "the code review produced no usable verdict; review_state=blocked (raw output kept at $CODE_OUT)" >&2
-  exit 4
+  abort_attempt \
+    "the code review produced no usable verdict; review_state=blocked \
+(raw output kept at $CODE_OUT)" 4
 fi
 CODE_VERDICT="$(printf '%s\n' "$CODE_RESULT" | sed -n 's/^verdict=//p')"
 CODE_UNRESOLVED="$(printf '%s\n' "$CODE_RESULT" | sed -n 's/^unresolved=//p')"
@@ -1025,19 +1127,14 @@ if [ "$TOUCHES_BLUEPRINT" -eq 1 ]; then
   wait "$PROSE_LANE_PID" 2>/dev/null || true
   PROSE_RC="$(cat "$PROSE_RC_FILE" 2>/dev/null || echo 1)"
   if [ "$PROSE_RC" -ne 0 ]; then
-    python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" --no-probe \
-      post-status "$HEAD_SHA" local-review/summary error \
-      "local review run=$RUN_ID prose reviewer exited $PROSE_RC" >/dev/null || true
-    die "the prose reviewer exited $PROSE_RC; output cannot override a failed reviewer session"
+    abort_attempt \
+      "the prose reviewer exited $PROSE_RC; output cannot override a failed reviewer session"
   fi
   PROSE_LANE_JSON="$RUN_DIR/prose-lane.json"
   if ! python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" --no-probe \
       review-session "$PROSE_OUT.dispatch.log" "$SESSION_TELEMETRY" prose \
       "$PR_NUM" "$WORKTREE" "$PROSE_RC" >"$PROSE_LANE_JSON"; then
-    python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" --no-probe \
-      post-status "$HEAD_SHA" local-review/summary error \
-      "local review run=$RUN_ID has invalid prose session telemetry" >/dev/null || true
-    die "the prose reviewer lacks clean, matching completion telemetry"
+    abort_attempt "the prose reviewer lacks clean, matching completion telemetry"
   fi
   PROSE_SESSION_NAME="$(python3 - "$PROSE_LANE_JSON" <<'PY'
 import json
@@ -1049,10 +1146,7 @@ PY
   if ! PROSE_RESULT="$(write_review prose "$PROSE_OUT" \
       "$REVIEWS_DIR/$HEAD_SHA-prose.md" "$PROSE_SESSION_NAME" \
       "$PROSE_MODEL")"; then
-    python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" --no-probe \
-      post-status "$HEAD_SHA" local-review/summary error \
-      "local review run=$RUN_ID prose verdict is unusable" >/dev/null || true
-    die "the prose review returned no usable verdict"
+    abort_attempt "the prose review returned no usable verdict"
   fi
   PROSE_VERDICT="$(printf '%s\n' "$PROSE_RESULT" | sed -n 's/^verdict=//p')"
   PROSE_UNRESOLVED="$(printf '%s\n' "$PROSE_RESULT" | sed -n 's/^unresolved=//p')"
@@ -1081,7 +1175,7 @@ case "$WORST" in
 esac
 
 case "$CODE_UNRESOLVED:$PROSE_UNRESOLVED" in
-  *[!0-9:]*) die "reviewer ledger counts are not nonnegative integers" ;;
+  *[!0-9:]*) abort_attempt "reviewer ledger counts are not nonnegative integers" ;;
 esac
 UNRESOLVED_TOTAL=$((CODE_UNRESOLVED + PROSE_UNRESOLVED))
 
@@ -1155,16 +1249,15 @@ fallback=$REVIEW_FALLBACK digest=$REVIEW_DIGEST -->"
 printf '%s\n' "$REVIEW_MARKER" >>"$REVIEW_BODY"
 
 if ! review_boundary "$RUN_TMP/pre-review-publication-pull.json"; then
-  python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" --no-probe \
-    post-status "$HEAD_SHA" local-review/summary error \
-    "local review run=$RUN_ID failed evidence-integrity checks" >/dev/null || true
-  die "comparison or worktree changed during review; refusing publication"
+  abort_attempt "comparison or worktree changed during review; refusing publication"
 fi
 
+REVIEW_POST_MAY_HAVE_STARTED=1
 python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" --no-probe \
   review-once "$PR_NUM" "$HEAD_SHA" "$REVIEW_BODY" "$REVIEW_EVENT" \
   "$REVIEW_MARKER" --guard-file "$PUBLICATION_GUARD" >/dev/null ||
   die "could not publish the exact-head marker-bound review ledger"
+ATTESTATION_PUBLISHED=1
 review_boundary "$RUN_TMP/pre-status-publication-pull.json" ||
   die "comparison or worktree changed after review publication; refusing summary status"
 python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" --no-probe \

@@ -52,18 +52,74 @@ unset _common
 CACHE="${MIPSTARRE_CACHE_ROOT:-$HOME/.cache/mipstarre-dev}"
 TRUSTED_REF="${MIPSTARRE_TRUSTED_REF:-refs/remotes/github/main}"
 DISPATCH="$ROOT/local/bin/dispatch.sh"
+RUNTIME_LOCK="$ROOT/local/bin/runtime_lock.py"
 AGENT_MODEL="${MIPSTARRE_AGENT_MODEL:-}"
 PERSONA_PATH=".github/prompts/claude-code-system-prompt.md"
 RUN_TMP="$(mktemp -d "${TMPDIR:-/tmp}/mipstarre-agent.XXXXXX")"
-trap 'rm -rf "$RUN_TMP"' EXIT INT TERM
+FIX_LOCK_HELD=""
+FIX_LOCK_IDENTITY=""
+FIX_LOCK_PID=""
+FIX_LOCK_TOKEN=""
+FIX_LOCK_DIGEST=""
 
 log()  { printf '%s: %s\n' "$PROG" "$*" >&2; }
 warn() { printf '%s: warning: %s\n' "$PROG" "$*" >&2; }
 die()  { printf '%s: error: %s\n' "$PROG" "$*" >&2; exit 1; }
 
+release_fix_lock() {
+  local result rc=0
+  [ -n "$FIX_LOCK_HELD" ] || return 0
+  result="$(python3 "$RUNTIME_LOCK" release-owned \
+    "$FIX_LOCK_HELD" "$FIX_LOCK_IDENTITY" "$FIX_LOCK_PID" \
+    "$FIX_LOCK_TOKEN" "$FIX_LOCK_DIGEST")" || rc=$?
+  if [ "$rc" -ne 0 ]; then
+    warn "could not release the exact branch lease $FIX_LOCK_HELD: $result"
+  fi
+  FIX_LOCK_HELD=""
+}
+
+cleanup() {
+  local rc=$?
+  release_fix_lock
+  rm -rf "$RUN_TMP"
+  return "$rc"
+}
+
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+
 # ---------------------------------------------------------------- utilities
 
 now_utc() { date -u +%Y-%m-%dT%H:%M:%SZ; }
+
+acquire_fix_lock() {
+  local dir="$1" label="$2" token result rc=0
+  local state identity holder observed_token digest detail
+  mkdir -p "$(dirname "$dir")"
+  token="$(python3 "$RUNTIME_LOCK" new-token)" || \
+    die "cannot allocate a unique runtime-lock token"
+  result="$(python3 "$RUNTIME_LOCK" acquire \
+    "$dir" "$$" "$token" "$label")" || rc=$?
+  IFS='|' read -r state identity holder observed_token digest detail <<EOF
+$result
+EOF
+  if [ "$state" = acquired ]; then
+    FIX_LOCK_HELD="$dir"
+    FIX_LOCK_IDENTITY="$identity"
+    FIX_LOCK_PID="$holder"
+    FIX_LOCK_TOKEN="$observed_token"
+    FIX_LOCK_DIGEST="$digest"
+    return 0
+  fi
+  if [ "$state" = busy ]; then
+    printf '%s: refused: branch %s is reserved by pid %s (%s).\n' \
+      "$PROG" "$BRANCH" "${holder:-unknown}" "${detail:-complete owner record}" >&2
+    printf '  Wait for that writer or recover the exact complete lock explicitly.\n' >&2
+    exit 3
+  fi
+  die "unsafe branch lock $dir: ${detail:-helper failure}; recover that exact path manually"
+}
 
 # sanitize_to <src> <dest> <max-lines> — the issue or PR body is written by
 # humans and agents; it is quoted to the session as data (DESIGN.md invariant 6).
@@ -282,18 +338,8 @@ fi
 git -C "$ROOT" rev-parse --verify --quiet "$BRANCH^{commit}" >/dev/null ||
   die "branch '$BRANCH' does not resolve in this repository"
 
-# ------------------------------------------------- do not fight the fix loop
+# ---------------------------------------------------------- branch lease path
 FIX_LOCK="$CACHE/locks/fix-$(printf '%s' "$BRANCH" | tr '/' '-').lock"
-if [ -d "$FIX_LOCK" ]; then
-  FIX_PID="$(cat "$FIX_LOCK/pid" 2>/dev/null || true)"
-  if [ -n "$FIX_PID" ] && kill -0 "$FIX_PID" 2>/dev/null; then
-    printf '%s: refused: autofix.sh (pid %s) is writing to %s right now.\n' \
-      "$PROG" "$FIX_PID" "$BRANCH" >&2
-    printf '  Two writers on one branch is the parallel-push collision the parent\n' >&2
-    printf '  workflow serialized away (auto-fix.yml:253-256). Wait for it, or stop it.\n' >&2
-    exit 3
-  fi
-fi
 
 WORKTREE="$(resolve_worktree "$BRANCH")"
 [ -d "$WORKTREE" ] || die "worktree resolution failed for branch $BRANCH"
@@ -376,6 +422,10 @@ if [ "$DRY_RUN" -eq 1 ]; then
 fi
 
 # ------------------------------------------------------------------ dispatch
+if [ "$SANDBOX" = workspace-write ]; then
+  acquire_fix_lock "$FIX_LOCK" \
+    "agent.sh target=$KIND#$NUMBER branch=$BRANCH"
+fi
 PRE_HEAD="$(git -C "$WORKTREE" rev-parse HEAD)"
 RC=0
 if [ -x "$DISPATCH" ]; then

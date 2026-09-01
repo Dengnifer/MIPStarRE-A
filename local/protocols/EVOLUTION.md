@@ -376,3 +376,125 @@ through the supported CLI without weakening CI, identity, comparison, bot, or
 lock guards; poisoned summaries and stale partial locks have bounded recovery;
 replacement locks, merge-only topology, and equal-time chronology remain
 fail-closed.
+
+## 2026-09-01 - Final transitions are serialized before rename
+
+**Trigger:** the issue 0007 incident in `results/telemetry/events.md`, "Final
+serialization audit found lock-transition and review-attempt races."
+
+**Change:** `ci.md`, `review.md`, and `issues-prs.md` now require one persistent
+per-lock `flock` transition mutex for CI stale breaking and merge cleanup.
+Canonical directory identity and complete dead-owner or releasing-owner
+evidence are revalidated under that mutex before rename; partial locks always
+require explicit operator recovery. Provisional review statuses bind a
+fingerprint of the full base SHA, run, attempt state, exact head/context digest,
+and trusted creator. Only explicit `--new-round` may supersede a canonical
+unattested pending or aborted attempt. Present classic linear-history data must
+be a well-formed object reporting `enabled=false`.
+
+**Expected effect:** two breakers cannot both transition one stale lease, old
+cleanup cannot move a replacement directory, and failed review rounds remain
+retryable without making ordinary reruns, wrong-base attempts, or arbitrary
+trusted conflicts recoverable. Zero-approval clean `COMMENT` attestation plus
+trusted exact-head local-review summary remains the review gate.
+
+## 2026-09-01 - Shared runtime locks use one complete claim protocol
+
+**Trigger:** the issue 0007 incident in `results/telemetry/events.md`,
+"Lock-unification audit found incompatible transition participants."
+
+**Change:** `ci.md`, `review.md`, `autofix.md`, `issues-prs.md`,
+`build-cache.md`, and `local/README.md` now specify one helper-owned record for
+CI, review, fix, merge, full-build, warmer-writer, and cache-telemetry leases.
+The record binds directory identity, PID, random UUID token, structured owner
+metadata, and its digest. Acquisition, complete-dead-owner recovery, exact
+release, and claim-bound cancellation revalidate under the persistent sibling
+mutex. Malformed, ownerless, partial, and foreign-host records require manual
+recovery. The zero-approval clean `COMMENT` plus exact-summary review gate is
+unchanged.
+
+**Expected effect:** no participant can rename, delete, or cancel a replacement
+directory from a pre-mutex observation; review and auto-fix retain queueing,
+supersession, signal cleanup, and cap-time handoff; and all full-build callers
+enforce one machine-wide exclusion contract.
+
+## 2026-09-01 - Runtime and publication ambiguity fail closed
+
+**Trigger:** the issue 0007 incident in `results/telemetry/events.md`, "Final
+audit found descendant, publication, and post-merge ambiguity."
+
+**Change:** runtime-lock acquisition now refuses every complete existing claim;
+dead-parent recovery is explicit because descendants may survive. Dispatcher
+and workspace-write agent sessions use exact helper-owned leases, while
+autofix cancellation is restricted under the transition mutex to prior
+`autofix ` owners. Signal wrappers preserve 130/143 and exact cleanup.
+Publication guards run after status, comment, and review writes or adoption;
+transient reconciliation reads retry without a second mutation, and a review
+whose POST may have begun is never overwritten with an ambiguous abort. Merge
+requires `draft` exactly false; after verified remote topology, local refresh
+and cleanup warn and defer rather than reversing the reported result. Workflow
+triggers cover both lock and warmer implementations, and protected-tree tests
+are pinned to archival commit `c8f1999`.
+
+**Expected effect:** surviving descendants retain exclusion, human and
+automatic writers cannot cancel across owner classes, ambiguous accepted
+reviews remain idempotently recoverable, and a proven GitHub merge cannot be
+misreported because later local telemetry or cleanup is dirty. The
+zero-approval clean `COMMENT` review gate remains unchanged.
+
+## 2026-09-01 - Close-out audit preserves liveness and protected history
+
+**Trigger:** the issue 0007 incidents in `results/telemetry/events.md`, "Late
+first-phase cancellation could strand auto-fix work," "Protected workflow
+changes could bypass regression tests," "PR label replacement retried an
+ambiguous write," "Archival session telemetry invalidated valid review
+evidence," and "Contributor guidance still described inactive GitHub Actions."
+
+**Change:** the final pre-dispatch auto-fix cancellation check is now the
+phase-start linearization point: a later canonical exact-claim cancellation may
+finish the active phase's one wrapper commit and leased push, while malformed
+cancellation or lost ownership fails closed. Workflow classifiers and hooks
+cover `.github/` and the immutable registry archive, including deletions and
+rename sources. PR label replacement reads first, performs one retry-free
+`PUT`, and reconciles by authoritative read-back. Reviewer evidence accepts one
+original `done` row plus field-preserving `archived` projections and rejects
+identity changes or cross-session thread reuse. Contributor guidance now names
+the local GitHub-native tools rather than inactive Actions.
+
+**Expected effect:** authorized supersession cannot strand a dirty auto-fix
+tree; protected history cannot evade tests by deletion or rename; ambiguous
+label writes cannot clobber concurrent updates; archival telemetry remains
+valid evidence without enabling replay; and operators see the actual live
+workflow. The trusted exact-head clean `COMMENT` plus
+`local-review/summary=success` remains the zero-approval review gate.
+
+## 2026-09-01 - Resumed dispatch respects the Codex CLI boundary
+
+**Trigger:** the issue 0007 incident in `results/telemetry/events.md`, "Resumed
+dispatch placed parent options after the subcommand."
+
+**Change:** `dispatch.sh` now places the working directory and sandbox options
+on `codex exec` before the optional `resume` subcommand, while JSON capture,
+last-message output, model, and effort options remain valid for either mode.
+The workflow suite checks both fresh and resumed dry-run argv shapes.
+
+**Expected effect:** a resumed session starts in the requested worktree and
+sandbox instead of failing before event capture, so continuity and telemetry
+remain available through the only sanctioned dispatcher.
+
+## 2026-09-01 - Session allocation remains single-instance
+
+**Trigger:** the issue 0007 incident in `results/telemetry/events.md`,
+"Bootstrap dispatch reused a session name across worktrees."
+
+**Change:** the operator guide and session protocol again require invoking
+workflow tools through the primary checkout. The recovery rule preserves both
+original bundles in a dated collision archive, retains the primary allocation,
+and assigns the next free sequence to a byte-identical copy of the colliding
+feature bundle. The session, build, and stage telemetry schemas and append-only
+pipeline are unchanged.
+
+**Expected effect:** all dispatches scan one registry and capture directory
+under the shared allocator lock, while any bootstrap collision remains
+reconstructible without overloading a stable session name or rewriting source
+evidence.

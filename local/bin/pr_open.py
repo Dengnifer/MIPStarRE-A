@@ -252,13 +252,7 @@ def run(args: argparse.Namespace) -> int:
     pull, adopted = _create_pull(client, branch, base, title, full_body)
     number = int(pull["number"])
     if labels:
-        client.api(
-            f"/repos/{client.repo}/issues/{number}/labels",
-            method="PUT",
-            data={"labels": labels},
-            retry=True,
-        )
-        authoritative = client.get_issue(number)
+        authoritative = client.replace_labels_once(number, labels)
         adopted_labels = {
             str(row.get("name") or "")
             for row in authoritative.get("labels", [])

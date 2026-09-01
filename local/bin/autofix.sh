@@ -64,7 +64,10 @@ BOT_NAME="${MIPSTARRE_BOT_NAME:-codex[bot]}"
 BOT_EMAIL="${MIPSTARRE_BOT_EMAIL:-codex-bot@localhost}"
 
 LOCK_HELD=""
-LEASE_OWNER="autofix-$$-$(date -u +%Y%m%dT%H%M%SZ)"
+LOCK_IDENTITY=""
+LOCK_PID=""
+LOCK_TOKEN=""
+LOCK_DIGEST=""
 RUN_TMP=""
 
 log()  { printf '%s: %s\n' "$PROG" "$*" >&2; }
@@ -87,12 +90,16 @@ trap 'exit 143' TERM
 # review.sh exited 0 against the held lock and the final bot-fix commit went
 # unreviewed).
 release_fix_lock() {
-  if [ -n "$LOCK_HELD" ] && [ -d "$LOCK_HELD" ] \
-      && [ "$(cat "$LOCK_HELD/pid" 2>/dev/null || true)" = "$$" ] \
-      && [ "$(cat "$LOCK_HELD/owner" 2>/dev/null || true)" = "$LEASE_OWNER" ]; then
-    rm -rf "$LOCK_HELD"
+  if [ -n "$LOCK_HELD" ] && [ -n "$LOCK_IDENTITY" ]; then
+    python3 "$SCRIPT_DIR/runtime_lock.py" release-owned \
+      "$LOCK_HELD" "$LOCK_IDENTITY" "$LOCK_PID" "$LOCK_TOKEN" \
+      "$LOCK_DIGEST" >/dev/null 2>&1 || true
   fi
   LOCK_HELD=""
+  LOCK_IDENTITY=""
+  LOCK_PID=""
+  LOCK_TOKEN=""
+  LOCK_DIGEST=""
 }
 
 # ---------------------------------------------------------------- utilities
@@ -140,50 +147,108 @@ PY
 # auto-fix.yml:259-261).  Reviews use a per-PR lock without cancellation; the
 # split is deliberate (auto-fix.yml:29-32).
 acquire_fix_lock() {
-  local dir="$1" wait_s="$2" label="$3" waited=0 holder=""
+  local dir="$1" wait_s="$2" label="$3" waited=0 holder="" token
+  local result rc=0 state identity observed_token digest detail
+  local cancel_target="" observed_target cancel_result cancel_rc cancel_state
   mkdir -p "$(dirname "$dir")"
-  while ! mkdir "$dir" 2>/dev/null; do
-    holder="$(cat "$dir/pid" 2>/dev/null || true)"
-    if [ -n "$holder" ] && ! kill -0 "$holder" 2>/dev/null; then
-      warn "removing stale fix lock $dir (holder pid $holder is gone)"
-      rm -rf "$dir"
-      continue
+  token="$(python3 "$SCRIPT_DIR/runtime_lock.py" new-token)" || \
+    die "cannot allocate a unique runtime-lock token"
+  while :; do
+    rc=0
+    result="$(python3 "$SCRIPT_DIR/runtime_lock.py" acquire \
+      "$dir" "$$" "$token" "$label")" || rc=$?
+    IFS='|' read -r state identity holder observed_token digest detail <<EOF
+$result
+EOF
+    if [ "$state" = acquired ]; then
+      LOCK_HELD="$dir"
+      LOCK_IDENTITY="$identity"
+      LOCK_PID="$holder"
+      LOCK_TOKEN="$observed_token"
+      LOCK_DIGEST="$digest"
+      [ -z "$detail" ] || warn "$detail at $dir"
+      return 0
     fi
-    if [ "$waited" = 0 ]; then
-      log "a fix is already running for this branch (pid ${holder:-unknown}); requesting supersession"
-      printf 'superseded-by %s at %s\n' "$$" "$(now_utc)" >"$dir/cancel" 2>/dev/null || true
+    if [ "$state" = unsafe ] || [ "$rc" -eq 2 ]; then
+      die "unsafe fix lock $dir: ${detail:-helper failure}; recover that exact path manually"
+    fi
+    observed_target="$identity|$holder|$observed_token|$digest"
+    if [ "$state" = busy ] && [ "$cancel_target" != "$observed_target" ]; then
+      log "a fix is already running for this branch \
+(pid ${holder:-unknown}); requesting supersession"
+      cancel_rc=0
+      cancel_result="$(python3 "$SCRIPT_DIR/runtime_lock.py" request-cancel \
+        "$dir" "$identity" "$holder" "$observed_token" "$digest" \
+        "autofix.sh pid=$$ at $(now_utc)" --owner-prefix "autofix ")" || cancel_rc=$?
+      IFS='|' read -r cancel_state _ _ _ _ _ <<EOF
+$cancel_result
+EOF
+      if [ "$cancel_state" = unsafe ] || [ "$cancel_rc" -eq 2 ]; then
+        die "could not safely request supersession of $dir; manual recovery required"
+      fi
+      if [ "$cancel_state" = cancel-requested ]; then
+        cancel_target="$observed_target"
+      elif [ "$cancel_state" = not-cancellable ]; then
+        cancel_target="$observed_target"
+        log "the branch lock belongs to a non-autofix writer; waiting without cancellation"
+      fi
     fi
     if [ "$waited" -ge "$wait_s" ]; then
-      die "timed out after ${wait_s}s waiting for the fix lock $dir (holder pid ${holder:-unknown}); it did not stop at a phase boundary"
+      die "timed out after ${wait_s}s waiting for the fix lock $dir \
+(holder pid ${holder:-unknown}); it did not stop at a phase boundary"
     fi
     sleep 5
     waited=$((waited + 5))
   done
-  printf '%s\n' "$$" >"$dir/pid"
-  printf '%s\n' "$LEASE_OWNER" >"$dir/owner"
-  printf '%s\n' "$label" >"$dir/label"
-  LOCK_HELD="$dir"
 }
 
 # superseded — checked between phases: a newer invocation wants this one gone.
+# Only an exact claim-bound cancellation is supersession. Ownership loss or an
+# unsafe cancellation record is a hard failure, not permission to hand off.
 superseded() {
-  [ -n "$LOCK_HELD" ] && [ -f "$LOCK_HELD/cancel" ]
+  local result rc=0 state identity pid token digest detail
+  [ -n "$LOCK_HELD" ] || return 1
+  result="$(python3 "$SCRIPT_DIR/runtime_lock.py" validate-owned \
+    "$LOCK_HELD" "$LOCK_IDENTITY" "$LOCK_PID" "$LOCK_TOKEN" \
+    "$LOCK_DIGEST" --reject-cancel)" || rc=$?
+  IFS='|' read -r state identity pid token digest detail <<EOF
+$result
+EOF
+  case "$state:$rc" in
+    owned:0) return 1 ;;
+    cancelled:1) return 0 ;;
+    unsafe:*|*:2)
+      die "unsafe fix-lock state at $LOCK_HELD: ${detail:-helper failure}"
+      ;;
+    *)
+      die "fix-lock ownership was lost at $LOCK_HELD \
+(${state:-unreadable}: ${detail:-helper failure})"
+      ;;
+  esac
 }
 
 fix_lease_is_owned() {
   [ -n "$LOCK_HELD" ] \
-    && [ -d "$LOCK_HELD" ] \
-    && [ "$(cat "$LOCK_HELD/pid" 2>/dev/null || true)" = "$$" ] \
-    && [ "$(cat "$LOCK_HELD/owner" 2>/dev/null || true)" = "$LEASE_OWNER" ]
+    && python3 "$SCRIPT_DIR/runtime_lock.py" validate-owned \
+      "$LOCK_HELD" "$LOCK_IDENTITY" "$LOCK_PID" "$LOCK_TOKEN" \
+      "$LOCK_DIGEST" >/dev/null 2>&1
 }
 
 assert_fix_ownership() {
-  fix_lease_is_owned ||
-    die "fix-lock ownership was lost ($LOCK_HELD)"
+  [ -n "$LOCK_HELD" ] || die "fix-lock ownership was lost (no held path)"
+  # `superseded` accepts only a canonical cancellation bound to our exact
+  # claim; it exits on malformed cancellation or ownership loss.
+  if superseded; then
+    return 0
+  fi
+  return 0
 }
 
 assert_fix_lease() {
-  fix_lease_is_owned && [ ! -f "$LOCK_HELD/cancel" ] ||
+  fix_lease_is_owned \
+    && python3 "$SCRIPT_DIR/runtime_lock.py" validate-owned \
+      "$LOCK_HELD" "$LOCK_IDENTITY" "$LOCK_PID" "$LOCK_TOKEN" \
+      "$LOCK_DIGEST" --reject-cancel >/dev/null 2>&1 ||
     die "fix-lock ownership was lost or superseded ($LOCK_HELD)"
 }
 
@@ -398,7 +463,8 @@ if [ "$AUTO_FIX" != "true" ]; then
 fi
 
 # Evidence selection and all feature-tree reads happen only after this atomic
-# branch reservation. A review uses the same pid/owner/label/cancel layout.
+# branch reservation. A review uses the same complete claim and cancellation
+# contract.
 LOCK_DIR="$CACHE/locks/fix-$(printf '%s' "$BRANCH" | tr '/' '-').lock"
 acquire_fix_lock "$LOCK_DIR" "$LOCK_WAIT" \
   "autofix pr=$PR_NUM branch=$BRANCH mode=$MODE"
@@ -906,6 +972,10 @@ run_phase() {
       "$phase_allow_cancel" ||
     die "head/base comparison changed immediately before the $kind dispatch"
   supersession_stops_phase "$kind" && return 10
+  # This final cancellation check is the phase-start linearization point. A
+  # later valid cancel may stop future phases, but this authorized phase must
+  # finish at most one wrapper commit and its original-head leased push.
+  phase_allow_cancel=1
   log "running the $kind fix for PR $PR_NUM (iteration $iteration of $FIX_CAP)"
   rm -f "$out" || {
     warn "cannot prepare the $kind dispatch output path"

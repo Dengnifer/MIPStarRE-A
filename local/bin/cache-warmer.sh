@@ -10,7 +10,7 @@
 #   --targets "<a b>"    Extra `lake build` targets after the default build.
 #   --lock-timeout <s>   Max seconds to wait for the machine-wide full-build lock
 #                        (default 43200; 0 = wait forever).
-#   --lease-ttl <s>      Writer-lease staleness TTL in seconds (default 43200).
+#   --lease-ttl <s>      Retained for compatibility; staleness is not age-based.
 #   --keep <n>           Snapshots to retain after GC (default 2, minimum 1).
 #   --gc-only            Run snapshot GC and exit.
 #   --status             Print the published snapshot state and exit.
@@ -62,6 +62,18 @@ MODE="warm"
 
 LEASE_HELD=0
 FULL_BUILD_LOCK_HELD=0
+ACQUIRED_LOCK_IDENTITY=""
+ACQUIRED_LOCK_PID=""
+ACQUIRED_LOCK_TOKEN=""
+ACQUIRED_LOCK_DIGEST=""
+LEASE_IDENTITY=""
+LEASE_PID=""
+LEASE_TOKEN=""
+LEASE_DIGEST=""
+FULL_BUILD_LOCK_IDENTITY=""
+FULL_BUILD_LOCK_PID=""
+FULL_BUILD_LOCK_TOKEN=""
+FULL_BUILD_LOCK_DIGEST=""
 STAGE_DIR=""
 
 # ---------------------------------------------------------------------- helpers
@@ -80,7 +92,7 @@ Usage: local/bin/cache-warmer.sh [options]
   --targets "<a b>"    Extra `lake build` targets after the default build.
   --lock-timeout <s>   Max seconds to wait for the machine-wide full-build lock
                        (default 43200; 0 = wait forever).
-  --lease-ttl <s>      Writer-lease staleness TTL in seconds (default 43200).
+  --lease-ttl <s>      Retained for compatibility; staleness is not age-based.
   --keep <n>           Snapshots to retain after GC (default 2, minimum 1).
   --gc-only            Run snapshot GC and exit.
   --status             Print the published snapshot state and exit.
@@ -145,107 +157,37 @@ ensure_lean_on_path() {
 }
 
 # --------------------------------------------------------------- lock primitives
-#
-# mkdir(2) is the atomic primitive.  A stale lock is broken by *renaming* the lock
-# directory to a unique name first, so that when two warmers both judge a lock
-# stale exactly one wins the rename and re-acquires.
+# The writer lease and machine-wide build lease use the same helper contract as
+# CI and worktree consumers. Ownerless or partial canonical directories stop the
+# caller for explicit operator recovery.
 
-lock_info_field() { # <lockdir> <key>
-  local dir="$1" key="$2" line
-  [ -f "$dir/info" ] || { printf ''; return 0; }
-  while IFS= read -r line; do
-    case "$line" in
-      "$key="*) printf '%s' "${line#*=}"; return 0 ;;
-    esac
-  done < "$dir/info"
-  printf ''
-}
-
-# Portable directory mtime, used as a last-resort acquisition time for a lock
-# written by another script in a different metadata layout.
-lock_dir_mtime() { # <lockdir>
-  stat -f %m "$1" 2>/dev/null || stat -c %Y "$1" 2>/dev/null || printf ''
-}
-
-# local/bin/ci.sh records the holder as `owner` (pid / ISO time / tag, one per
-# line) rather than `info`.  Read both layouts, so that neither script mistakes a
-# live lock held by the other for an unreadable — and therefore breakable — one.
-lock_pid() { # <lockdir>
-  local dir="$1" pid
-  pid="$(lock_info_field "$dir" pid)"
-  if [ -z "$pid" ] && [ -f "$dir/owner" ]; then
-    pid="$(head -n 1 "$dir/owner" 2>/dev/null || true)"
-  fi
-  printf '%s' "$pid"
-}
-
-lock_is_stale() { # <lockdir> <ttl-seconds>
-  local dir="$1" ttl="$2" pid host started age
-  pid="$(lock_pid "$dir")"
-  host="$(lock_info_field "$dir" host)"
-
-  # Same host: the holder's liveness is authoritative, which is what lets the TTL
-  # be generous.  A full Mathlib-scale build here took 25052 s
-  # (results/telemetry/builds.jsonl, 2026-08-30), so an age-only rule with a
-  # short TTL would break a live warmer's lease mid-build.
-  # An absent host field means the lock came from a script that does not record
-  # one; on a single-machine setup that is this host, so pid liveness stays
-  # authoritative and a live holder is never broken.
-  if [ -n "$pid" ] && { [ -z "$host" ] || [ "$host" = "$(hostname)" ]; }; then
-    case "$pid" in
-      ''|*[!0-9]*) ;;
-      *)
-        if kill -0 "$pid" 2>/dev/null; then
-          return 1
-        fi
-        return 0
-        ;;
-    esac
-  fi
-
-  started="$(lock_info_field "$dir" started_epoch)"
-  case "$started" in
-    ''|*[!0-9]*) started="$(lock_dir_mtime "$dir")" ;;
-  esac
-
-  case "$started" in
-    ''|*[!0-9]*) return 0 ;;
-  esac
-  age=$(( $(epoch_now) - started ))
-  [ "$age" -gt "$ttl" ]
-}
-
-break_lock() { # <lockdir>
-  local dir="$1" doomed
-  doomed="$1.stale.$$.$(epoch_now)"
-  if mv "$dir" "$doomed" 2>/dev/null; then
-    warn "broke stale lock $dir (pid=$(lock_pid "$doomed") held since $(lock_info_field "$doomed" started)$(lock_info_field "$doomed" purpose))"
-    rm -rf "$doomed"
-  fi
-}
-
-write_lock_info() { # <lockdir> <purpose>
-  {
-    printf 'pid=%s\n' "$$"
-    printf 'host=%s\n' "$(hostname)"
-    printf 'started=%s\n' "$(iso_now)"
-    printf 'started_epoch=%s\n' "$(epoch_now)"
-    printf 'purpose=%s\n' "$2"
-  } > "$1/info"
-  # Also publish the holder in the layout local/bin/ci.sh reads.
-  printf '%s\n%s\n%s\n' "$$" "$(iso_now)" "$2" > "$1/owner"
-}
-
-acquire_lock() { # <lockdir> <ttl> <timeout-seconds; 0 = wait forever> <purpose>
+acquire_lock() { # <lockdir> <ttl> <timeout-seconds; 0 = forever> <purpose>
   local dir="$1" ttl="$2" timeout="$3" purpose="$4" waited=0 announced=0
+  local token result rc=0 state identity holder observed_token digest detail
+  : "$ttl"
   mkdir -p "$(dirname "$dir")"
-  while ! mkdir "$dir" 2>/dev/null; do
-    if lock_is_stale "$dir" "$ttl"; then
-      break_lock "$dir"
-      continue
+  token="$(python3 "$SCRIPT_DIR/runtime_lock.py" new-token)" || return 2
+  while :; do
+    rc=0
+    result="$(python3 "$SCRIPT_DIR/runtime_lock.py" acquire \
+      "$dir" "$$" "$token" "cache-warmer.sh $purpose")" || rc=$?
+    IFS='|' read -r state identity holder observed_token digest detail <<EOF
+$result
+EOF
+    if [ "$state" = acquired ]; then
+      ACQUIRED_LOCK_IDENTITY="$identity"
+      ACQUIRED_LOCK_PID="$holder"
+      ACQUIRED_LOCK_TOKEN="$observed_token"
+      ACQUIRED_LOCK_DIGEST="$digest"
+      [ -z "$detail" ] || warn "$detail at $dir"
+      return 0
+    fi
+    if [ "$state" = unsafe ] || [ "$rc" -eq 2 ]; then
+      warn "unsafe runtime lock $dir: ${detail:-helper failure}; manual recovery required"
+      return 2
     fi
     if [ "$announced" -eq 0 ]; then
-      log "waiting for the $purpose lock $dir (held by pid=$(lock_pid "$dir"))"
+      log "waiting for the $purpose lock $dir (held by pid=${holder:-unknown})"
       announced=1
     fi
     if [ "$timeout" -ne 0 ] && [ "$waited" -ge "$timeout" ]; then
@@ -254,8 +196,11 @@ acquire_lock() { # <lockdir> <ttl> <timeout-seconds; 0 = wait forever> <purpose>
     sleep 10
     waited=$((waited + 10))
   done
-  write_lock_info "$dir" "$purpose"
-  return 0
+}
+
+release_lock() { # <lockdir> <identity> <pid> <token> <owner-digest>
+  python3 "$SCRIPT_DIR/runtime_lock.py" release-owned "$1" "$2" "$3" "$4" "$5" \
+    >/dev/null 2>&1 || true
 }
 
 cleanup() {
@@ -264,16 +209,20 @@ cleanup() {
     rm -rf "$STAGE_DIR"
   fi
   if [ "$FULL_BUILD_LOCK_HELD" -eq 1 ]; then
-    rm -rf "$FULL_BUILD_LOCK"
+    release_lock "$FULL_BUILD_LOCK" "$FULL_BUILD_LOCK_IDENTITY" \
+      "$FULL_BUILD_LOCK_PID" "$FULL_BUILD_LOCK_TOKEN" "$FULL_BUILD_LOCK_DIGEST"
     FULL_BUILD_LOCK_HELD=0
   fi
   if [ "$LEASE_HELD" -eq 1 ]; then
-    rm -rf "$LEASE_DIR"
+    release_lock "$LEASE_DIR" "$LEASE_IDENTITY" "$LEASE_PID" \
+      "$LEASE_TOKEN" "$LEASE_DIGEST"
     LEASE_HELD=0
   fi
   exit "$rc"
 }
-trap cleanup EXIT INT TERM
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
 
 # ------------------------------------------------------------------- telemetry
 #
@@ -300,14 +249,30 @@ resolve_primary_repo() {
 }
 
 append_build_telemetry() { # <kind> <outcome> <seconds> <trigger> <sha> <note>
-  local dir file waited=0
+  local dir file waited=0 held=0 token result rc=0
+  local state identity holder observed_token digest detail
   dir="${MIPSTARRE_TELEMETRY_DIR:-$(resolve_primary_repo)/results/telemetry}"
   file="$dir/builds.jsonl"
   if ! mkdir -p "$dir" 2>/dev/null; then
     warn "cannot create the telemetry directory $dir; build record dropped"
     return 0
   fi
-  while ! mkdir "$TELEMETRY_LOCK" 2>/dev/null; do
+  token="$(python3 "$SCRIPT_DIR/runtime_lock.py" new-token 2>/dev/null || true)"
+  while [ -n "$token" ]; do
+    rc=0
+    result="$(python3 "$SCRIPT_DIR/runtime_lock.py" acquire \
+      "$TELEMETRY_LOCK" "$$" "$token" "cache-warmer.sh telemetry")" || rc=$?
+    IFS='|' read -r state identity holder observed_token digest detail <<EOF
+$result
+EOF
+    if [ "$state" = acquired ]; then
+      held=1
+      break
+    fi
+    if [ "$state" = unsafe ] || [ "$rc" -eq 2 ]; then
+      warn "telemetry lock is unsafe; appending without serialization and requiring manual recovery"
+      break
+    fi
     if [ "$waited" -ge 5 ]; then
       warn "telemetry lock busy; appending without serialization"
       break
@@ -346,7 +311,10 @@ PY
   then
     warn "failed to append build telemetry to $file"
   fi
-  rmdir "$TELEMETRY_LOCK" 2>/dev/null || true
+  if [ "$held" -eq 1 ]; then
+    release_lock "$TELEMETRY_LOCK" "$identity" "$holder" \
+      "$observed_token" "$digest"
+  fi
 }
 
 # ---------------------------------------------------------------- snapshot store
@@ -638,6 +606,10 @@ main() {
   # proceed while the warmer sits idle between commits.
   acquire_lock "$LEASE_DIR" "$LEASE_TTL" 0 "warmer-writer-lease" \
     || die "could not acquire the writer lease at $LEASE_DIR"
+  LEASE_IDENTITY="$ACQUIRED_LOCK_IDENTITY"
+  LEASE_PID="$ACQUIRED_LOCK_PID"
+  LEASE_TOKEN="$ACQUIRED_LOCK_TOKEN"
+  LEASE_DIGEST="$ACQUIRED_LOCK_DIGEST"
   LEASE_HELD=1
 
   if [ "$MODE" = "gc" ]; then
@@ -671,9 +643,15 @@ main() {
   # One full `lake build` machine-wide (DESIGN.md #7).  The warmer WAITS instead of
   # aborting, and is never killed for a newer commit: pr-ci.yml:50 — "Do not cancel
   # main-branch runs: they seed the build cache."
-  if ! acquire_lock "$FULL_BUILD_LOCK" "$LOCK_TIMEOUT" "$LOCK_TIMEOUT" "full-lake-build"; then
-    die "timed out after ${LOCK_TIMEOUT}s waiting for the machine-wide full-build lock $FULL_BUILD_LOCK"
+  if ! acquire_lock \
+      "$FULL_BUILD_LOCK" "$LOCK_TIMEOUT" "$LOCK_TIMEOUT" "full-lake-build"; then
+    die "could not acquire the machine-wide full-build lock $FULL_BUILD_LOCK \
+within ${LOCK_TIMEOUT}s"
   fi
+  FULL_BUILD_LOCK_IDENTITY="$ACQUIRED_LOCK_IDENTITY"
+  FULL_BUILD_LOCK_PID="$ACQUIRED_LOCK_PID"
+  FULL_BUILD_LOCK_TOKEN="$ACQUIRED_LOCK_TOKEN"
+  FULL_BUILD_LOCK_DIGEST="$ACQUIRED_LOCK_DIGEST"
   FULL_BUILD_LOCK_HELD=1
 
   logfile="$LOG_DIR/warm-$(stamp_id)-${sha:0:12}.log"
@@ -717,7 +695,8 @@ main() {
 
   elapsed=$(( $(epoch_now) - started ))
 
-  rm -rf "$FULL_BUILD_LOCK"
+  release_lock "$FULL_BUILD_LOCK" "$FULL_BUILD_LOCK_IDENTITY" \
+    "$FULL_BUILD_LOCK_PID" "$FULL_BUILD_LOCK_TOKEN" "$FULL_BUILD_LOCK_DIGEST"
   FULL_BUILD_LOCK_HELD=0
 
   if [ ! -d "$HOT_REPO/.lake/build" ]; then

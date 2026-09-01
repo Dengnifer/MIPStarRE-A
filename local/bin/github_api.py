@@ -25,6 +25,10 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Iterable, Sequence, TypeVar
 
+# Lifecycle scripts execute from worktrees whose cleanliness is itself a gate.
+sys.dont_write_bytecode = True
+from runtime_lock import LockClaim, LockIdentity, validate_owned_lock
+
 
 API_VERSION = "2022-11-28"
 ACCEPT = "application/vnd.github+json"
@@ -70,6 +74,10 @@ _CANONICAL_FINDING_LINE_RE = re.compile(
 _SESSION_NAME_RE = re.compile(r"^reviewer-[A-Za-z0-9._-]+$")
 _THREAD_ID_RE = re.compile(r"^[A-Za-z0-9._:-]{8,200}$")
 _RUN_ID_RE = re.compile(r"^[A-Za-z0-9._:-]{1,28}$")
+_REVIEW_ATTEMPT_RE = re.compile(
+    r"^local review base=([0-9a-f]{32}) run=([A-Za-z0-9._:-]{1,28}) "
+    r"state=(pending|aborted) \[mip:([0-9a-f]{16})\]$"
+)
 _ACTOR_RE = re.compile(
     r"^(?=.{1,39}$)[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?$"
 )
@@ -368,11 +376,56 @@ def review_summary_state(attestation: ReviewAttestation) -> str:
     return "failure"
 
 
-def review_pending_description(run_id: str) -> str:
-    """Return the canonical pending description for one review run."""
+def review_attempt_description(
+    base_sha: str, run_id: str, attempt_state: str
+) -> str:
+    """Bind one provisional review attempt to its full comparison base."""
+    base_sha = normalize_sha(base_sha, kind="pull-request base SHA")
     if not _RUN_ID_RE.fullmatch(run_id):
         raise GitHubError("review run id is invalid")
-    return f"local review run={run_id} is pending"
+    if attempt_state not in {"pending", "aborted"}:
+        raise GitHubError("review attempt state is invalid")
+    fingerprint = stable_digest({"base_sha": base_sha}, length=32)
+    return f"local review base={fingerprint} run={run_id} state={attempt_state}"
+
+
+def review_pending_description(base_sha: str, run_id: str) -> str:
+    """Return the canonical pending description for one review run."""
+    return review_attempt_description(base_sha, run_id, "pending")
+
+
+def review_aborted_description(base_sha: str, run_id: str) -> str:
+    """Return the canonical diagnostic description for an aborted attempt."""
+    return review_attempt_description(base_sha, run_id, "aborted")
+
+
+def parse_review_attempt_status(
+    status: dict[str, Any], sha: str
+) -> dict[str, str] | None:
+    """Parse a canonical pending or aborted review-attempt status."""
+    description = str(status.get("description") or "")
+    match = _REVIEW_ATTEMPT_RE.fullmatch(description)
+    if match is None:
+        return None
+    base_fingerprint, run_id, attempt_state, _digest = match.groups()
+    status_state = str(status.get("state") or "").casefold()
+    expected_state = "pending" if attempt_state == "pending" else "error"
+    if status_state != expected_state:
+        return None
+    canonical = (
+        f"local review base={base_fingerprint} run={run_id} "
+        f"state={attempt_state}"
+    )
+    if description != render_status_description(
+        sha, REVIEW_CONTEXT, status_state, canonical
+    ):
+        return None
+    return {
+        "base_fingerprint": base_fingerprint,
+        "run_id": run_id,
+        "attempt_state": attempt_state,
+        "status_state": status_state,
+    }
 
 
 def ci_pending_description(run_id: str) -> str:
@@ -470,6 +523,46 @@ def _read_session_records(path: Path) -> list[dict[str, Any]]:
     return records
 
 
+def _session_lineage(
+    name: str, records: Sequence[dict[str, Any]]
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Return one completion and its append-only status lineage."""
+    matching = [row for row in records if str(row.get("name") or "") == name]
+    completions = [row for row in matching if "status_ts" not in row]
+    if len(completions) != 1:
+        raise GitHubError(
+            f"reviewer session {name!r} must have exactly one completion record"
+        )
+    completion = completions[0]
+    if matching[0] is not completion:
+        raise GitHubError(
+            f"reviewer session {name!r} has archival status before its completion"
+        )
+    if str(completion.get("status") or "") != "done":
+        raise GitHubError(f"reviewer session {name!r} did not complete successfully")
+
+    mutable = {"status", "status_ts", "note"}
+    identity = {key: value for key, value in completion.items() if key not in mutable}
+    for row in matching:
+        if {key: value for key, value in row.items() if key not in mutable} != identity:
+            raise GitHubError(
+                f"reviewer session {name!r} has a status row with changed identity"
+            )
+        if "status_ts" in row:
+            _parse_timestamp(row.get("status_ts"), field=f"{name} status")
+            if str(row.get("status") or "") != "archived":
+                raise GitHubError(
+                    f"reviewer session {name!r} has a non-archival status projection"
+                )
+
+    latest = matching[-1]
+    if str(latest.get("status") or "") not in {"done", "archived"}:
+        raise GitHubError(
+            f"reviewer session {name!r} latest status is not done or archived"
+        )
+    return completion, latest
+
+
 def _validate_session_record(
     lane: ReviewLaneEvidence,
     *,
@@ -477,12 +570,7 @@ def _validate_session_record(
     number: int,
     worktree: str,
 ) -> None:
-    matching = [row for row in records if str(row.get("name") or "") == lane.name]
-    if len(matching) != 1:
-        raise GitHubError(
-            f"reviewer session {lane.name!r} must have exactly one completion record"
-        )
-    row = matching[0]
+    row, _latest = _session_lineage(lane.name, records)
     expected_worktree = str(Path(worktree).resolve())
     actual_worktree = str(Path(str(row.get("worktree") or "")).resolve())
     checks = {
@@ -502,9 +590,12 @@ def _validate_session_record(
             f"reviewer session {lane.name!r} has mismatched completion telemetry: "
             + ", ".join(failed)
         )
-    if sum(
-        str(other.get("thread_id") or "") == lane.thread_id for other in records
-    ) != 1:
+    thread_names = {
+        str(other.get("name") or "")
+        for other in records
+        if str(other.get("thread_id") or "") == lane.thread_id
+    }
+    if thread_names != {lane.name}:
         raise GitHubError(
             f"reviewer thread {lane.thread_id!r} does not identify one fresh session"
         )
@@ -550,12 +641,7 @@ def validate_reviewer_session(
         raise GitHubError(f"reviewer lane {lane} has an invalid or empty thread_id")
 
     records = _read_session_records(telemetry_path)
-    matching = [row for row in records if str(row.get("name") or "") == name]
-    if len(matching) != 1:
-        raise GitHubError(
-            f"reviewer session {name!r} must have exactly one completion record"
-        )
-    row = matching[0]
+    row, _latest = _session_lineage(name, records)
     resolved_worktree = str(worktree.resolve())
     evidence = ReviewLaneEvidence(
         lane=lane,
@@ -1102,8 +1188,6 @@ class GitHub:
             "head_sha",
             "base_sha",
             "worktree",
-            "pid",
-            "owner",
             "locks",
         }
         if not isinstance(payload, dict) or set(payload) != expected_keys:
@@ -1114,32 +1198,49 @@ class GitHub:
         head_sha = normalize_sha(payload.get("head_sha"), kind="guard head SHA")
         base_sha = normalize_sha(payload.get("base_sha"), kind="guard base SHA")
         worktree = Path(str(payload.get("worktree") or "")).resolve()
-        pid = str(payload.get("pid") or "")
-        owner = str(payload.get("owner") or "")
         raw_locks = payload.get("locks")
         if (
-            payload.get("schema") != 1
+            payload.get("schema") != 2
             or not branch
             or not base
             or not worktree.is_dir()
             or not isinstance(raw_locks, list)
-            or len(raw_locks) not in {0, 2}
+            or len(raw_locks) not in {0, 1, 2}
         ):
             raise GitHubError("publication guard contains invalid values")
-        locks = tuple(Path(str(item)).resolve() for item in raw_locks)
-        if locks and (not pid.isdigit() or not owner or len(set(locks)) != 2):
-            raise GitHubError("publication guard contains invalid lease values")
+        locks: list[tuple[Path, LockClaim]] = []
+        for item in raw_locks:
+            if not isinstance(item, dict) or set(item) != {
+                "path",
+                "identity",
+                "pid",
+                "token",
+                "owner_digest",
+            }:
+                raise GitHubError("publication guard has a noncanonical lock claim")
+            try:
+                lock_path = Path(str(item["path"])).resolve()
+                claim = LockClaim(
+                    identity=LockIdentity.parse(str(item["identity"])),
+                    pid=int(item["pid"]),
+                    token=str(item["token"]),
+                    owner_digest=str(item["owner_digest"]),
+                )
+            except (TypeError, ValueError) as exc:
+                raise GitHubError(
+                    "publication guard contains an invalid lock claim"
+                ) from exc
+            locks.append((lock_path, claim))
+        if len({lock for lock, _claim in locks}) != len(locks):
+            raise GitHubError("publication guard repeats a runtime-lock path")
 
         def assert_leases() -> None:
-            for lock in locks:
-                try:
-                    lock_pid = (lock / "pid").read_text(encoding="utf-8").strip()
-                    lock_owner = (lock / "owner").read_text(encoding="utf-8").strip()
-                except OSError as exc:
-                    raise GitHubError(f"publication lease is unreadable: {lock}") from exc
-                if lock_pid != pid or lock_owner != owner or (lock / "cancel").exists():
+            for lock, claim in locks:
+                result = validate_owned_lock(lock, claim, reject_cancel=True)
+                if result.state != "owned":
                     raise GitHubError(
-                        f"publication lease was lost or cancelled: {lock}"
+                        "publication lease was lost, malformed, or cancelled: "
+                        f"{lock} ({result.state}: {result.detail})"
                     )
 
         def git_output(*arguments: str) -> str:
@@ -1204,6 +1305,53 @@ class GitHub:
                 f"{self.repo}: {', '.join(missing)}. Repository labels are authoritative."
             )
         return labels
+
+    def replace_labels_once(
+        self, number: int, requested: Iterable[str]
+    ) -> dict[str, Any]:
+        """Replace issue/PR labels with one mutation and read-back reconciliation."""
+        number = normalize_number(number, kind="issue or PR number")
+        labels = list(dict.fromkeys(name.strip() for name in requested if name.strip()))
+        expected = set(labels)
+
+        def names(value: Any, *, kind: str) -> set[str]:
+            if not isinstance(value, list) or not all(
+                isinstance(item, dict)
+                and isinstance(item.get("name"), str)
+                and item.get("name")
+                for item in value
+            ):
+                raise GitHubError(f"{kind} returned malformed label data")
+            return {str(item["name"]) for item in value}
+
+        def lookup() -> dict[str, Any] | None:
+            issue = self.get_issue(number)
+            return issue if names(issue.get("labels"), kind="issue read-back") == expected else None
+
+        def mutate() -> dict[str, Any]:
+            payload = self.api(
+                f"/repos/{self.repo}/issues/{number}/labels",
+                method="PUT",
+                data={"labels": labels},
+                retry=False,
+            )
+            try:
+                returned = names(payload, kind="label replacement")
+            except GitHubError as exc:
+                raise GitHubError(str(exc), transient=True) from exc
+            if returned != expected:
+                raise GitHubError(
+                    "label replacement response differs from the requested set",
+                    transient=True,
+                )
+            authoritative = lookup()
+            if authoritative is None:
+                raise GitHubError(
+                    "GitHub reported success but did not retain the requested labels exactly"
+                )
+            return authoritative
+
+        return self._idempotent_mutation(lookup=lookup, mutate=mutate)
 
     def remove_label(self, number: int, label: str) -> None:
         encoded = urllib.parse.quote(label, safe="")
@@ -1504,6 +1652,10 @@ class GitHub:
             or str(summary.get("description") or "") != expected
         ):
             raise GitHubError("CI summary failed authoritative final read-back")
+        if before_mutation is not None:
+            before_mutation()
+        if before_write is not None:
+            before_write()
         return current
 
     def ci_manifest(
@@ -1633,27 +1785,84 @@ class GitHub:
         return selected
 
     def review_publication_state(
-        self, number: int, sha: str, base_sha: str
+        self,
+        number: int,
+        sha: str,
+        base_sha: str,
+        *,
+        allow_new_round_recovery: bool = False,
     ) -> dict[str, Any]:
         """Classify exact-attestation summary evidence for rerun recovery."""
         sha = normalize_sha(sha)
         base_sha = normalize_sha(base_sha, kind="pull-request base SHA")
+        attestations = self._review_attestations(number)
         matches = [
             item
-            for item in self._review_attestations(number)
+            for item in attestations
             if item.head_sha == sha and item.base_sha == base_sha
         ]
+        status = self.latest_statuses(sha).get(REVIEW_CONTEXT.casefold())
+        status_is_trusted = status is None or self.is_trusted_actor_row(
+            status, field="creator", kind=f"{REVIEW_CONTEXT} status"
+        )
+        attempt = (
+            parse_review_attempt_status(status, sha)
+            if status is not None and status_is_trusted
+            else None
+        )
+        expected_base_fingerprint = stable_digest(
+            {"base_sha": base_sha}, length=32
+        )
+
+        def aborted_attempt() -> dict[str, Any] | None:
+            if attempt is None:
+                return None
+            if attempt["base_fingerprint"] != expected_base_fingerprint:
+                raise GitHubError(
+                    "latest review attempt status belongs to a different base"
+                )
+            if any(item.run_id == attempt["run_id"] for item in attestations):
+                return None
+            if not allow_new_round_recovery:
+                raise GitHubError(
+                    "latest review attempt has no attestation; retry requires "
+                    "explicit --new-round"
+                )
+            return {"state": "aborted", "attempt": attempt}
+
         if not matches:
-            return {"state": "absent"}
+            if status is None:
+                return {"state": "absent"}
+            recovered = aborted_attempt()
+            if recovered is not None:
+                return recovered
+            if status_is_trusted:
+                for prior in attestations:
+                    if prior.head_sha != sha:
+                        continue
+                    prior_state = review_summary_state(prior)
+                    prior_description = render_status_description(
+                        sha,
+                        REVIEW_CONTEXT,
+                        prior_state,
+                        review_status_description(prior),
+                    )
+                    if (
+                        str(status.get("state") or "").casefold() == prior_state
+                        and str(status.get("description") or "")
+                        == prior_description
+                    ):
+                        self._validate_attestation_sessions(prior)
+                        return {"state": "absent"}
+            raise GitHubError(
+                "latest review summary has no exact-comparison attestation"
+            )
+
         selected_row = self._latest(
             [attestation.row for attestation in matches], "submitted_at"
         )
         attestation = next(item for item in matches if item.row is selected_row)
         self._validate_attestation_sessions(attestation)
-        status = self.latest_statuses(sha).get(REVIEW_CONTEXT.casefold())
-        status_is_trusted = status is None or self.is_trusted_actor_row(
-            status, field="creator", kind=f"{REVIEW_CONTEXT} status"
-        )
         final_state = review_summary_state(attestation)
         expected_final = render_status_description(
             sha,
@@ -1674,7 +1883,7 @@ class GitHub:
             sha,
             REVIEW_CONTEXT,
             "pending",
-            review_pending_description(attestation.run_id),
+            review_pending_description(base_sha, attestation.run_id),
         )
         if status is None or not status_is_trusted or (
             str(status.get("state") or "").casefold() == "pending"
@@ -1685,6 +1894,9 @@ class GitHub:
                 "summary_state": final_state,
                 "attestation": attestation.as_dict(),
             }
+        recovered = aborted_attempt()
+        if recovered is not None:
+            return recovered
         raise GitHubError(
             "latest review summary belongs to a different run or does not "
             "match the exact review attestation"
@@ -1702,6 +1914,12 @@ class GitHub:
         before_write: Callable[[], None] | None = None,
     ) -> ReviewEvidence:
         """Revalidate one exact attestation and idempotently finalize its status."""
+        def revalidate_publication_guards() -> None:
+            if before_mutation is not None:
+                before_mutation()
+            if before_write is not None:
+                before_write()
+
         if not _RUN_ID_RE.fullmatch(run_id):
             raise GitHubError("review finalization run id is invalid")
         if re.fullmatch(r"[0-9a-f]{64}", digest) is None:
@@ -1715,7 +1933,9 @@ class GitHub:
                 "review finalization identity does not match the latest exact attestation"
             )
         if publication.get("state") == "complete":
-            return self._complete_review_evidence(attestation)
+            evidence = self._complete_review_evidence(attestation)
+            revalidate_publication_guards()
+            return evidence
         if publication.get("state") != "recoverable":
             raise GitHubError("review publication is not finalizable")
         state = review_summary_state(attestation)
@@ -1726,7 +1946,7 @@ class GitHub:
             current = self.review_publication_state(number, sha, base_sha)
             current_attestation = current.get("attestation") or {}
             if (
-                current.get("state") != "recoverable"
+                current.get("state") not in {"recoverable", "complete"}
                 or current_attestation.get("run_id") != run_id
                 or current_attestation.get("digest") != digest
             ):
@@ -1745,7 +1965,9 @@ class GitHub:
             review_status_description(attestation),
             before_mutation=assert_finalizable,
         )
-        return self.review_evidence(number, sha, base_sha)
+        evidence = self.review_evidence(number, sha, base_sha)
+        revalidate_publication_guards()
+        return evidence
 
     def latest_review_evidence(self, number: int) -> ReviewEvidence | None:
         selected = self.latest_review_attestation(number)
@@ -1820,7 +2042,11 @@ class GitHub:
                 raise GitHubError("commit status creation returned a non-object response")
             return payload
 
-        row = self._idempotent_mutation(lookup=lookup, mutate=mutate)
+        row = self._idempotent_mutation(
+            lookup=lookup,
+            mutate=mutate,
+            after_result=before_mutation,
+        )
         if not matches(row):
             raise GitHubError(
                 "commit status response does not match its exact SHA, context, "
@@ -1833,27 +2059,40 @@ class GitHub:
         *,
         lookup: Callable[[], T | None],
         mutate: Callable[[], T],
+        after_result: Callable[[], None] | None = None,
     ) -> T:
+        def accept(value: T) -> T:
+            if after_result is not None:
+                after_result()
+            return value
+
         found = lookup()
         if found is not None:
-            return found
+            return accept(found)
         try:
-            return mutate()
+            return accept(mutate())
         except GitHubError as exc:
             if not exc.transient:
                 raise
+            latest_error = exc
             for attempt in range(self.retries + 1):
-                found = lookup()
+                try:
+                    found = lookup()
+                except GitHubError as lookup_error:
+                    if not lookup_error.transient:
+                        raise
+                    latest_error = lookup_error
+                    found = None
                 if found is not None:
-                    return found
+                    return accept(found)
                 if attempt < self.retries:
                     time.sleep(self.retry_delay * (2**attempt))
             raise GitHubError(
                 "mutation outcome is ambiguous after authoritative read-back; "
                 "refusing to issue a second mutation",
-                status=exc.status,
+                status=latest_error.status,
                 transient=True,
-                stdout=exc.stdout,
+                stdout=latest_error.stdout,
             ) from exc
 
     def comment_once(
@@ -1897,7 +2136,11 @@ class GitHub:
                 raise GitHubError("comment creation returned a non-object response")
             return payload
 
-        row = self._idempotent_mutation(lookup=lookup, mutate=mutate)
+        row = self._idempotent_mutation(
+            lookup=lookup,
+            mutate=mutate,
+            after_result=before_mutation,
+        )
         self.require_trusted_actor_row(row, field="user", kind="issue comment")
         if str(row.get("body") or "") != body:
             raise GitHubError("comment publication returned a different authoritative body")
@@ -2010,7 +2253,17 @@ class GitHub:
                 raise GitHubError("review creation returned a non-object response")
             return payload
 
-        row = self._idempotent_mutation(lookup=lookup, mutate=mutate)
+        def after_publication() -> None:
+            if before_mutation is not None:
+                before_mutation()
+            if before_write is not None:
+                before_write()
+
+        row = self._idempotent_mutation(
+            lookup=lookup,
+            mutate=mutate,
+            after_result=after_publication,
+        )
         self.require_trusted_actor_row(
             row, field="user", kind="review COMMENT row"
         )
@@ -2242,6 +2495,7 @@ def build_parser() -> argparse.ArgumentParser:
     review_state.add_argument("number")
     review_state.add_argument("sha")
     review_state.add_argument("base_sha")
+    review_state.add_argument("--allow-new-round-recovery", action="store_true")
 
     review_finalize = sub.add_parser("review-finalize")
     review_finalize.add_argument("number")
@@ -2395,7 +2649,10 @@ def cli(argv: Sequence[str] | None = None) -> int:
         print(json.dumps(payload, ensure_ascii=False))
     elif args.command == "review-state":
         state = client.review_publication_state(
-            normalize_number(args.number), args.sha, args.base_sha
+            normalize_number(args.number),
+            args.sha,
+            args.base_sha,
+            allow_new_round_recovery=args.allow_new_round_recovery,
         )
         print(json.dumps(state, ensure_ascii=False))
     elif args.command == "review-finalize":

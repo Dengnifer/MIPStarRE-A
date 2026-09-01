@@ -8,10 +8,8 @@ import hashlib
 import json
 import os
 import re
-import shutil
 import subprocess
 import sys
-import uuid
 from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import datetime
@@ -34,6 +32,14 @@ from github_api import (  # noqa: E402
     normalize_sha,
     pull_identity,
     render_status_description,
+)
+from runtime_lock import (  # noqa: E402
+    LockClaim,
+    LockIdentity,
+    acquire_lock,
+    new_token,
+    release_owned_lock,
+    validate_owned_lock,
 )
 
 
@@ -90,20 +96,34 @@ class AdjudicationEvidence:
 @dataclass(frozen=True)
 class HeldLock:
     path: Path
-    pid: int
-    token: str
+    claim: LockClaim
+
+    @property
+    def pid(self) -> int:
+        return self.claim.pid
+
+    @property
+    def token(self) -> str:
+        return self.claim.token
+
+    @property
+    def identity(self) -> LockIdentity:
+        return self.claim.identity
 
     def require_owned(self, *, reject_cancel: bool = False) -> None:
-        try:
-            recorded = int((self.path / "pid").read_text(encoding="utf-8").strip())
-            token = (self.path / "token").read_text(encoding="utf-8").strip()
-        except (OSError, ValueError) as exc:
-            raise GateFailure(f"reserved lock {self.path} lost its owner record") from exc
-        if not self.path.is_dir() or recorded != self.pid or token != self.token:
-            raise GateFailure(f"reserved lock {self.path} is no longer owned by this merge")
-        if reject_cancel and (self.path / "cancel").exists():
+        result = validate_owned_lock(
+            self.path,
+            self.claim,
+            reject_cancel=reject_cancel,
+        )
+        if result.state == "cancelled":
             raise GateFailure(
                 f"an auto-fix attempted to supersede the reserved merge lock {self.path}"
+            )
+        if result.state != "owned":
+            raise GateFailure(
+                f"reserved lock {self.path} is no longer owned by this merge "
+                f"({result.state}: {result.detail})"
             )
 
 
@@ -238,14 +258,16 @@ def require_server_policy(client: GitHub, base: str) -> None:
     if repository.get("allow_merge_commit") is not True:
         raise GateFailure("repository settings must allow merge commits")
 
-    linear_history = protection.get("required_linear_history")
-    if linear_history is not None and (
-        not isinstance(linear_history, dict)
-        or linear_history.get("enabled") is not False
-    ):
-        raise GateFailure(
-            "classic branch protection must not require linear history"
-        )
+    if "required_linear_history" in protection:
+        linear_history = protection["required_linear_history"]
+        if (
+            not isinstance(linear_history, dict)
+            or linear_history.get("enabled") is not False
+        ):
+            raise GateFailure(
+                "classic required_linear_history must explicitly report "
+                "enabled=false when that API field is present"
+            )
 
     status_rule = protection.get("required_status_checks")
     if not isinstance(status_rule, dict) or status_rule.get("strict") is not True:
@@ -346,8 +368,8 @@ def require_server_policy(client: GitHub, base: str) -> None:
 def require_open_mergeable(pull: dict[str, Any], number: int) -> PullIdentity:
     if str(pull.get("state") or "").casefold() != "open":
         raise GateFailure(f"PR #{number} is not open")
-    if bool(pull.get("draft")):
-        raise GateFailure(f"PR #{number} is a draft")
+    if pull.get("draft") is not False:
+        raise GateFailure(f"PR #{number} draft state is not exactly false")
     if pull.get("mergeable") is not True:
         state = pull.get("mergeable_state") or "unknown"
         raise GateFailure(f"PR #{number} is not proven mergeable (state={state})")
@@ -754,62 +776,27 @@ def require_no_live_fix(cache: Path, branch: str) -> None:
 @contextmanager
 def reserve_runtime_lock(path: Path, label: str) -> Iterator[HeldLock]:
     """Atomically reserve one runtime lock and release only our lease."""
-    path.parent.mkdir(parents=True, exist_ok=True)
-    try:
-        path.mkdir()
-    except FileExistsError as exc:
-        try:
-            holder = int((path / "pid").read_text(encoding="utf-8").strip())
-            if holder <= 0:
-                holder = None
-        except (OSError, ValueError):
-            holder = None
-        state = f"live pid {holder}" if holder is not None else "unproven owner"
-        if holder is not None:
-            try:
-                os.kill(holder, 0)
-            except ProcessLookupError:
-                state = f"stale pid {holder}"
-            except PermissionError:
-                pass
+    result = acquire_lock(path, os.getpid(), new_token(), f"pr_merge.py {label}")
+    if result.state != "acquired" or result.record is None:
         recovery = ""
-        if holder is None or state.startswith("stale pid"):
+        if result.state == "unsafe":
             recovery = (
                 "; after verifying no CI, review, auto-fix, or merge process "
                 f"owns it, remove {path} explicitly and retry"
             )
         raise GateFailure(
-            f"cannot reserve runtime lock {path} ({state}){recovery}"
-        ) from exc
-    held = HeldLock(path=path, pid=os.getpid(), token=uuid.uuid4().hex)
-    try:
-        (path / "pid").write_text(f"{held.pid}\n", encoding="utf-8")
-        (path / "token").write_text(f"{held.token}\n", encoding="utf-8")
-        (path / "owner").write_text(
-            f"{held.pid}\nmerge-reservation\n{label}\n", encoding="utf-8"
+            f"cannot reserve runtime lock {path} "
+            f"({result.state}: {result.detail}){recovery}"
         )
-        (path / "label").write_text(label + "\n", encoding="utf-8")
+    held = HeldLock(path=path, claim=result.record.claim)
+    try:
         held.require_owned()
         yield held
     finally:
-        tombstone = path.with_name(f"{path.name}.release.{held.token}")
         try:
-            path.rename(tombstone)
-        except OSError:
+            release_owned_lock(held.path, held.claim)
+        except (OSError, RuntimeError):
             pass
-        else:
-            try:
-                owner = int(
-                    (tombstone / "pid").read_text(encoding="utf-8").strip()
-                )
-                token = (tombstone / "token").read_text(encoding="utf-8").strip()
-            except (OSError, ValueError):
-                owner = None
-                token = None
-            if owner == held.pid and token == held.token:
-                shutil.rmtree(tombstone)
-            elif not path.exists():
-                tombstone.rename(path)
 
 
 def require_merge_capability(client: GitHub) -> None:
@@ -1179,8 +1166,20 @@ def run(args: argparse.Namespace) -> int:
                     client, number, expected, command
                 )
                 feature_worktree = final.worktree
-    fast_forward_base(root, expected.base)
-    cleanup_feature(root, expected.branch, feature_worktree, merge_sha)
+    try:
+        fast_forward_base(root, expected.base)
+    except Exception as exc:
+        sys.stderr.write(
+            f"pr_merge.py: warning: GitHub PR #{number} merged at {merge_sha}, "
+            f"but local base refresh is deferred: {exc}\n"
+        )
+    try:
+        cleanup_feature(root, expected.branch, feature_worktree, merge_sha)
+    except Exception as exc:
+        sys.stderr.write(
+            f"pr_merge.py: warning: GitHub PR #{number} merged at {merge_sha}, "
+            f"but local feature cleanup is deferred: {exc}\n"
+        )
     print(f"merged GitHub PR #{number} at {merge_sha}")
     return 0
 

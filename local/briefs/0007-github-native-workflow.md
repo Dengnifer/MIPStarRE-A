@@ -124,10 +124,10 @@ statuses, and run the existing trusted-prompt code/prose review lanes.
   path/line references and unresolved findings.
 - Re-read local and remote head SHAs after reviewers finish. A moved head makes
   the result stale and forbids publication.
-- Submit one review bound to `commit_id`, with a stable marker so retry does
-  not duplicate an identical review. Use `REQUEST_CHANGES` for unresolved
-  findings when GitHub accepts it and `COMMENT` for a clean verdict. Never
-  require the PR author's impossible self-approval.
+- Submit one `COMMENT` review bound to `commit_id`, with a stable marker so
+  retry does not duplicate an identical review. Clean and adverse verdicts
+  both use `COMMENT`; the local wrapper never publishes `APPROVE` or
+  `REQUEST_CHANGES` events.
 - Publish a separate exact-head `local-review/summary` commit status:
   `success` for an acceptable local verdict and `failure` for unresolved
   findings. This status plus the marker-bound ledger, not a GitHub
@@ -150,8 +150,10 @@ files from `autofix.sh` and `pr_merge.py`.
   successful on that head; review state is acceptable on that same commit;
   no live fix lock; fix iteration count is within cap; and a final head recheck.
 - Normal review requires a successful exact-head `local-review/summary` status
-  and the matching marker-bound ledger with no unresolved finding. A later
-  exact-head `CHANGES_REQUESTED` review still blocks.
+  and the matching trusted `COMMENT` ledger with no unresolved finding. An
+  adverse local `COMMENT` has a failing summary and does not satisfy the gate;
+  a later external exact-head `CHANGES_REQUESTED` review remains a conservative
+  block.
 - With `--adjudicated`, require a current-head PR comment beginning
   `ADJUDICATION`, containing the findings disposition and stable head marker,
   plus the repository's adjudication label. Missing or stale evidence blocks.
@@ -203,8 +205,8 @@ fake `gh`; no test may contact the real repository. Cover:
    local fallback artifacts.
 4. Per-step pending/final statuses, all canonical contexts, skipped steps,
    partial-run refusal, manifest comments, and local/remote head races.
-5. Exact-commit COMMENT/REQUEST_CHANGES reviews, ledger bodies, the
-   `local-review/summary` status, idempotency, and moved-head refusal.
+5. Exact-commit `COMMENT` reviews for clean and adverse findings, ledger bodies,
+   the `local-review/summary` status, idempotency, and moved-head refusal.
 6. Gate refusal for missing/failing/stale statuses, stale or adverse reviews,
    live fix locks, iteration-cap excess, and incomplete/stale adjudication.
 7. An exact-head guarded `gh pr merge` invocation with no direct `main` push.
@@ -215,3 +217,34 @@ fake `gh`; no test may contact the real repository. Cover:
 
 Run focused Python/shell tests, syntax checks, `git diff --check`, and the
 workflow CI lane. Do not run a full Lean build unless change gating requires it.
+
+## Final audit repair (2026-09-01)
+
+The final audit adds these acceptance conditions without weakening the
+zero-approval `COMMENT` review contract:
+
+- Runtime-lock acquisition never reclaims any complete record. A dead recorded
+  parent may have surviving descendants, so recovery is always explicit;
+  malformed, partial, ownerless, and foreign-host records remain fail-closed.
+- Workspace-write `agent.sh` holds the shared branch fix lease through
+  dispatch. Read-only sessions do not need it, and autofix may request
+  cancellation only from a prior owner whose recorded class is `autofix `.
+- Housekeeping, cache warming, and worktree warming exit 130 on `INT` and 143 on
+  `TERM`, cleaning only private staging and exact owned claims.
+- Status, comment, and review publication guards run after write responses and
+  authoritative adoption as well as before POST. Reconciliation retries
+  transient lookup failures without another mutation. Once a review POST may
+  have started, an ambiguous result remains pending for idempotent adoption and
+  is never overwritten by `aborted`.
+- Merge preflight accepts only `draft is False`. After a topology-verified
+  remote merge, local base refresh and feature cleanup are best-effort,
+  warning and deferring on local dirt or failure; remote nonconformance remains
+  fatal.
+- Workflow change gating includes `runtime_lock.py`, `warm-worktree.sh`,
+  `.github/`, and `results/telemetry/registry-archive/`. Classifiers include
+  deletions and both sides of renames. Archive and frozen `.github/`
+  immutability are compared with archival commit `c8f1999` and reject tracked
+  dirt or untracked additions.
+- Resumed sessions place worktree and sandbox options before the `resume`
+  subcommand, matching the installed Codex CLI. Fresh and resumed dry-run argv
+  shapes are covered by the workflow regression suite.

@@ -209,11 +209,10 @@ Use the **Tracking Issue** template (`.github/ISSUE_TEMPLATE/tracking-issue.yml`
 Label with `tracking`; add `chapter-tracking` for the long-lived chapter
 overview trackers. A tracking issue should begin by naming the mathematical
 objective and citing the paper or blueprint labels that the child issues cover.
-The `issue-automation` workflow will automatically:
-
-- Rely on GitHub's native sub-issue progress instead of editing body checkboxes.
-- Post progress comments on linked issues when PRs merge.
-- Suggest or create `follow-up` issues for genuine deferred work called out by merged PRs.
+GitHub displays native progress for attached sub-issues. Create and attach
+children with `local/bin/issue_new.py --parent <number>` or the GitHub sidebar.
+Progress comments and follow-up issues are explicit operator or orchestrator
+actions; no active GitHub Actions workflow creates them automatically.
 
 The repository does not currently use a live `all-resolved` label, so do not
 add one manually.
@@ -541,23 +540,31 @@ this project specifically:
 
 ## 7. CI & Automation
 
-The following workflows run automatically:
+The checked-in `.github/workflows/` files are frozen historical precedent; no
+active project workflow depends on GitHub Actions. GitHub remains the issue,
+PR, comment, review, status, and merge authority, while trusted local commands
+produce and verify the workflow evidence:
 
-| Workflow | Trigger | What it does |
-|----------|---------|-------------|
-| **Lean CI** (`pr-ci.yml` (`build` job)) | Push to `main`, PRs touching `.lean`/`lakefile.toml`/`lean-toolchain` | Runs `lake build` with Mathlib cache |
-| **PR Review** (`pr-review.yml`, `code-review` jobs) | After a successful PR CI run | Automated review for proof integrity, Mathlib style, type safety, performance, modularity, mathematical exposition, and documentation |
-| **Issue Automation** (`issue-automation.yml`) | Issue opened/labeled/closed/reopened; PR opened/merged | Classifies new issues, posts Mathlib scouting reports, keeps tracking issues current via a deterministic script (progress comments, sub-issue counts, and a ready-to-close notice when every sub-issue is resolved), and scans merged PRs for genuine deferred mathematical obligations, filing `follow-up` issues |
-| **Blueprint Lint** (`pr-ci.yml` (`blueprint-render` job)) | PRs touching blueprint files | Builds `leanblueprint pdf` / `web` to catch broken labels, undefined macros, and plasTeX errors, then runs the blueprint ↔ Lean sync checks. The LaTeX convention scan and the `scripts/tests` helper unit tests both run locally in the pre-commit hook. |
-| **Blueprint Sync & Prose Review** (`pr-review.yml`, `prose-review` job) | After a successful PR CI run | Reviews blueprint synchronization, source-faithfulness, and mathematical prose for formalization changes. |
-| **README Freshness Audit** (`housekeeping.yml`, `readme-freshness` job) | Weekly + manual dispatch | Report-only audit for README local paths, LDT submodule count, and hard-coded Lean/Mathlib versions |
-| **PR Mathematical Description** (`pr-cleanup.yml`) | PR opened from `claude/*` or `codex/*` branches | Normalizes title to `type(scope): desc`, rewrites the PR body as a self-contained mathematical note, preserves source citations from the linked issue, copies labels, adds `Addresses #N`, and comments on the issue |
-| **Mathlib Scout** (`issue-automation.yml`, `scout` job) | Formalization issue opened/labeled | Scouts Mathlib for relevant lemmas and posts a scouting report |
+- `local/bin/ci.sh <pr>` runs the change-gated checks and publishes one
+  `local-ci/<step>` status per step, a manifest comment, and the exact-head
+  `local-ci/summary`.
+- `local/bin/review.sh <pr>` dispatches independent reviewers and publishes a
+  trusted exact-head `COMMENT` ledger plus `local-review/summary`. It never
+  relies on author approval.
+- `local/bin/autofix.sh <pr>` performs the opt-in, capped repair loop.
+- `local/bin/pr_merge.py <pr>` reads GitHub evidence, enforces every merge
+  guard, and issues the match-head merge.
+- `local/bin/github-sync.sh` records read-only recovery snapshots, while
+  `local/bin/housekeeping.sh` runs scheduled local maintenance.
+- Installed pre-commit and pre-push hooks run fast statement, proof-debt,
+  changed-file Lean, blueprint-sync, and workflow-regression checks as
+  applicable.
 
 ### What CI checks before merge
 
-- `lake build MIPStarRE` must succeed (no type errors, no broken imports).
-- No new `sorry` without explicit justification.
-- Blueprint labels must resolve (no broken `\ref` or `\label`).
-- Claude Code Review should not flag critical issues (proof correctness,
-  type safety).
+- Every change-gated CI step must have a trusted successful status on the exact
+  PR head, and the manifest digest must match `local-ci/summary`.
+- Lean changes must build and pass statement-integrity and proof-debt checks.
+- Blueprint changes must render and keep declaration links synchronized.
+- The trusted exact-head review ledger must be clean and agree with the
+  successful `local-review/summary`; GitHub approval is not required.

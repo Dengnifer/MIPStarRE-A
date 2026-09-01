@@ -49,9 +49,11 @@ CI checks cleanliness after binding the initial comparison and again at every
 final-publication boundary. Immediately before final statuses and the manifest,
 it rereads the local and GitHub head and base SHAs and the complete worktree
 status. The shared client repeats this full guard inside each final-status and
-manifest mutation, after its idempotency lookup and immediately before the
-POST. Movement, an unreadable comparison, or any dirt makes the run stale and
-returns nonzero. It publishes no marker-bound manifest; after detecting a
+manifest mutation, after its idempotency lookup, immediately before the POST,
+and after the write response or authoritative adoption. The final manifest and
+summary readbacks are guarded again before their evidence is returned.
+Movement, an unreadable comparison, or any dirt makes the run stale and returns
+nonzero. It publishes no marker-bound manifest; after detecting a
 mid-publication change it invalidates that run's contexts with `error`, so the
 latest statuses cannot form a successful set. A dirty run therefore cannot
 leave gate-satisfying evidence, while a clean, stable failure or error run keeps
@@ -81,8 +83,9 @@ success. A later trusted publication may explicitly supersede it.
 Status creation is digest-idempotent. Each invocation issues at most one
 mutation. If the POST result is ambiguous, the client polls statuses on the
 exact SHA and adopts only the matching casefolded context, state, and
-description digest. It fails ambiguous if read-back does not establish the
-mutation and never sends a second POST.
+description digest. Transient reconciliation lookup failures are retried
+without issuing a second mutation. It fails ambiguous if read-back does not
+establish the mutation and never sends a second POST.
 
 Logs and manifests are runtime state under `~/.cache/mipstarre-dev/`. Build
 events remain append-only in `results/telemetry/builds.jsonl`. No committed
@@ -90,20 +93,37 @@ issue or PR shadow record is created.
 
 ## Build lock
 
-The per-PR `ci-<number>.lock` is also reserved by the merge gate. Its atomic
-directory lease carries a PID and unique ownership token. Until those stamps
-are published, the directory's own age controls partial-lock recovery, so a
-nascent merge reservation cannot be mistaken for an ancient lock. Stale
-cleanup and normal release rename the directory first and delete it only after
-verifying the renamed directory identity and, for release, its owner token; a
-replacement lock is never removed by an old holder. A truly old unstamped
-partial lock remains recoverable, while a fresh partial or live lock preserves
-exclusion.
+The per-PR `ci-<number>.lock` is also reserved by the merge gate. Every owner
+uses `local/bin/runtime_lock.py` to record a PID, random UUID token, directory
+device/inode identity, and structured owner metadata. The metadata repeats the
+PID, token, and identity and records the owner label, host, and creation time.
+The helper binds a claim to the digest of that complete record.
 
-Single-file Lean checks do not take the machine-wide lock. A full `lake build`
-uses the advisory lock and a worktree-local copy-on-write cache clone described
-by `build-cache.md`. Never run `lake update`, and never write back to the hot
-main cache.
+Creation, explicit recovery, release, and validation are serialized by `flock`
+on the canonical path's persistent sibling transition file. Acquisition never
+breaks a complete record, including a dead same-host parent whose descendants
+may survive. An explicit recovery or release revalidates the exact identity,
+PID, token, and owner digest under that mutex before renaming, then deletes only
+the verified private tombstone while still holding the mutex.
+
+Ownerless, malformed, partial, and foreign-host lock directories are never
+removed automatically, regardless of age. They fail closed with the exact path
+and require the operator recovery described in `local/README.md`. This prevents
+two recovery attempts or an old cleanup handler from moving a replacement
+directory.
+
+Single-file Lean checks do not take the machine-wide lock. Full builds by CI,
+the cache warmer, worktree warming, and the housekeeping linter sweep all use
+the same helper and `$CACHE_ROOT/.full-build-lock`, with a worktree-local
+copy-on-write cache clone as described by `build-cache.md`. Never run
+`lake update`, and never write back to the hot main cache.
+
+Changes to `local/bin/runtime_lock.py`, `local/bin/warm-worktree.sh`, `.github/`,
+or `results/telemetry/registry-archive/` are workflow changes. CI change gating
+and both installed git hooks must run the GitHub-native regression suite for
+these paths. Their changed-file inventories include deletions and expose rename
+sources as well as destinations, so removing or moving a protected path cannot
+bypass the suite.
 
 The merge and review gates require the success-level evidence described above,
 bound to the current full head and base SHAs. Classic branch protection also

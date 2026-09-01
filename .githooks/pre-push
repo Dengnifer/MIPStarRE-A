@@ -45,7 +45,7 @@ do
     BASE_SHA="$REMOTE_SHA"
   fi
 
-  git diff --name-only --diff-filter=ACMR "$BASE_SHA" "$LOCAL_SHA" -- >> "$CHANGED_FILE_LIST"
+  git diff --name-only --no-renames "$BASE_SHA" "$LOCAL_SHA" -- >> "$CHANGED_FILE_LIST"
 done
 
 sort -u "$CHANGED_FILE_LIST" -o "$CHANGED_FILE_LIST"
@@ -68,7 +68,7 @@ if [ -s "$CHANGED_LEAN_FILE_LIST" ]; then
     done < "$CHANGED_LEAN_FILE_LIST"
 fi
 
-if grep -Eq '^(local/bin/(github_api\.py|issue_new\.py|issue_close\.py|pr_open\.py|ci\.sh|review\.sh|autofix\.sh|pr_merge\.py|agent\.sh|housekeeping\.sh|github-sync\.sh|export_issues\.py|worktree-setup\.sh|cache-warmer\.sh)|local/protocols/|local/personas/|scripts/(blueprint_lean_sync\.py|tests/test_github_workflow\.py)|\.githooks/)' "$CHANGED_FILE_LIST"; then
+if grep -Eq '^(local/bin/(github_api\.py|issue_new\.py|issue_close\.py|pr_open\.py|ci\.sh|review\.sh|autofix\.sh|pr_merge\.py|agent\.sh|housekeeping\.sh|github-sync\.sh|export_issues\.py|worktree-setup\.sh|cache-warmer\.sh|runtime_lock\.py|warm-worktree\.sh)|local/protocols/|local/personas/|scripts/(blueprint_lean_sync\.py|tests/test_github_workflow\.py)|\.githooks/|\.github/|results/telemetry/registry-archive/)' "$CHANGED_FILE_LIST"; then
   echo "MIPStarRE pre-push: checking GitHub-native workflow regression suite."
   run_outside_git_env python3 -m unittest scripts.tests.test_github_workflow
 fi

@@ -8,6 +8,11 @@ CACHE_ROOT="${MIPSTARRE_CACHE_ROOT:-$HOME/.cache/mipstarre-dev}"
 REPORT_DIR="$REPO_ROOT/results/reports"
 LOG_DIR="$CACHE_ROOT/logs"
 LOCK_DIR="$CACHE_ROOT/locks"
+BUILD_LOCK_PATH=""
+BUILD_LOCK_IDENTITY=""
+BUILD_LOCK_PID=""
+BUILD_LOCK_TOKEN=""
+BUILD_LOCK_DIGEST=""
 
 usage() {
   cat <<'EOF'
@@ -185,6 +190,23 @@ internal_lean_build() {
   { lake exe cache get; lake build -q --log-level=info; } 2>&1 | tee "$log_file" || true
 }
 
+release_build_lock() {
+  if [ -n "$BUILD_LOCK_PATH" ]; then
+    python3 "$SCRIPT_DIR/runtime_lock.py" release-owned \
+      "$BUILD_LOCK_PATH" "$BUILD_LOCK_IDENTITY" "$BUILD_LOCK_PID" \
+      "$BUILD_LOCK_TOKEN" "$BUILD_LOCK_DIGEST" >/dev/null 2>&1 || true
+    BUILD_LOCK_PATH=""
+  fi
+}
+
+cleanup() {
+  release_build_lock
+}
+
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+
 job_linter_sweep() {
   local reporter="$REPO_ROOT/scripts/lean_linter_warning_report.py"
   require_file "$reporter" "linter warning reporter is required"
@@ -192,16 +214,26 @@ job_linter_sweep() {
   mkdir -p "$REPORT_DIR" "$LOG_DIR"
   local log_file="$LOG_DIR/lean-build-$(timestamp).log"
   local build_lock="${MIPSTARRE_FULL_BUILD_LOCK:-$CACHE_ROOT/.full-build-lock}"
-  if ! mkdir "$build_lock" 2>/dev/null; then
-    die "full-build lock is held: $build_lock"
-  fi
-  printf '%s\n%s\n%s\n' "$$" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-    "housekeeping linter-sweep" >"$build_lock/owner"
-  trap "rm -rf '$build_lock'" RETURN
+  local token result state identity holder observed_token digest detail rc=0
+  token="$(python3 "$SCRIPT_DIR/runtime_lock.py" new-token)" || \
+    die "could not allocate a full-build lock token"
+  result="$(python3 "$SCRIPT_DIR/runtime_lock.py" acquire "$build_lock" \
+    "$$" "$token" "housekeeping.sh linter-sweep")" || rc=$?
+  IFS='|' read -r state identity holder observed_token digest detail <<EOF
+$result
+EOF
+  [ "$rc" -eq 0 ] && [ "$state" = acquired ] || \
+    die "full-build lock is unavailable: $build_lock (${state:-error}: ${detail:-unknown})"
+  BUILD_LOCK_PATH="$build_lock"
+  BUILD_LOCK_IDENTITY="$identity"
+  BUILD_LOCK_PID="$holder"
+  BUILD_LOCK_TOKEN="$observed_token"
+  BUILD_LOCK_DIGEST="$digest"
   internal_lean_build "$log_file"
   python3 "$reporter" --log "$log_file" \
     --json "$REPORT_DIR/lean-linter-warnings.json" \
     --text "$REPORT_DIR/lean-linter-warnings.txt"
+  release_build_lock
 }
 
 job_readme_freshness() {
