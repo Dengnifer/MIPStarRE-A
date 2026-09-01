@@ -372,3 +372,13 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   normal hook, and bypass the whitespace hook only for this telemetry commit.
   Lesson: preservation of generated evidence takes precedence over formatting
   a representation whose byte identity is itself part of the archive.
+- **Pre-push declaration check fell back to a dropped package clone.** Symptom:
+  the first SSH push passed all 117 workflow tests and statement audits, then
+  `lake exe checkdecls` found no feature-worktree Mathlib checkout and its HTTPS
+  clone ended with a TLS receive error. Diagnosis: tier-one build artifacts had
+  been warmed, but the per-worktree package tier was absent even though the
+  primary checkout held a complete tree under the identical dependency key.
+  Fix: seed `.lake/packages` copy-on-write from that matching primary tree and
+  rerun `lake exe checkdecls blueprint/lean_decls`, which resolved all 597
+  declarations. Lesson: before a network fallback, a prepared worktree should
+  confirm both cache tiers against a same-key primary checkout.
