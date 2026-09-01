@@ -20,6 +20,21 @@ model-agnostic and binds you identically.
   run sub-stages autonomously). Never push to GitHub anything the gate has
   not passed.
 
+## Parallelism (owner guidance, 2026-08-31; restored from HANDOFF)
+
+Run independent issues in parallel worktrees — one branch + one
+`.worktrees/<branch>` per work item, always through
+`local/bin/worktree-setup.sh` (warm `.lake` from the hot main cache,
+vendored-package resets, hooks) before any Lean work; NEVER a raw codex
+worktree with a cold `.lake`. Sub-sessions still start only via
+`dispatch.sh` (locks, telemetry, sanitization, trusted personas). Full
+builds are ~10 min on this host and only they serialize (the machine-wide
+`.full-build-lock`); per-file `lake env lean` iteration parallelizes
+freely across worktrees, so scale prover lanes past the old 4–6 target if
+codex quota and review throughput allow. Batch PRs per module to keep the
+review side from becoming the bottleneck. Evidence binds to exact SHAs on
+GitHub, so parallel lanes cannot trample each other's records.
+
 ## The operating loop (per issue)
 
 1. `issue_new.py` creates the GitHub issue (fill the body — the reviewer
