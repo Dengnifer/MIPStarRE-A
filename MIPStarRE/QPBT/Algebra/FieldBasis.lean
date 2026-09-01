@@ -86,7 +86,7 @@ The construction of the basis and its natural coding is deferred to the
 algebra stage; keeping it as a named theorem makes the proof obligation visible
 without adding a model hypothesis to the source-facing test statements.
 -/
-theorem exists_fixedFieldModel (q : ℕ) (hq : IsAdmissibleSize q) :
+theorem exists_fixed_field_model (q : ℕ) (hq : IsAdmissibleSize q) :
     Nonempty (FixedFieldModel q) := by
   sorry
 
@@ -98,7 +98,7 @@ representations.  Blueprint `ch11_qpbt_algebra.tex:298-315`; paper origin
 -/
 noncomputable def fixedFieldModel (q : ℕ) (hq : IsAdmissibleSize q) :
     FixedFieldModel q :=
-  Classical.choice (exists_fixedFieldModel q hq)
+  Classical.choice (exists_fixed_field_model q hq)
 
 instance {q : ℕ} (F : FixedFieldModel q) : Field F.K := F.toFieldModel.instField
 instance {q : ℕ} (F : FixedFieldModel q) : Fintype F.K := F.toFieldModel.instFintype
