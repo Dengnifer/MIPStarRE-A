@@ -145,3 +145,27 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   `#0007` instead of treating `auth status` as authoritative. Lesson:
   authenticate by exercising the required API surface; a legacy client's
   credential-format diagnostic can be a false negative.
+
+## 2026-09-01 — issue-0007 infrastructure overbuild
+
+- **Symptom**: the GitHub-native workflow port (issue 0007, a bounded ~6-script
+  adaptation) ran ~17 h / 21 commits producing +14.6k/−7.5k lines: bespoke
+  2,761-line `github_api.py`, 643-line `runtime_lock.py`, 5,649-line
+  `test_github_workflow.py` executed by BOTH the pre-commit and pre-push hooks
+  (≈10 min per commit), an actor-verification regime, a branch-protection
+  evaluator, and repeated self-hardening sub-sessions
+  (`final-gate-repair`, `final-recovery`, `evidence-integrity`,
+  `merge-integrity`, `lock-unification`, `final-serialization`).  Zero Lean
+  progress during the episode; PR #5's 17 findings untouched.
+- **Diagnosis**: unbounded scaffolding recursion — each hardening pass
+  generated new failure modes to harden against, with no cost ceiling and no
+  product-work forcing function.  The brief itself was sound; execution
+  exceeded it because nothing in the protocol bounded infrastructure effort.
+- **Fix**: owner paused the session; branch preserved verbatim as
+  `telemetry/issue-0007-overbuilt` (research data); port rebuilt lean from
+  the archive commit c8f1999 (thin `gh_common.py` layer, REST exact-SHA merge,
+  no hook changes, bounded test file).
+- **Lesson**: scaffolding needs an explicit budget and a math-first forcing
+  function — see the scope-control amendment in `local/protocols/EVOLUTION.md`
+  and `local/personas/main.md`.  Test suites are load too: hooks that grow
+  with the test corpus throttle the entire pipeline.

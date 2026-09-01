@@ -102,7 +102,7 @@ You were dispatched by `local/bin/dispatch.sh` and dispatch nothing further.
     writes `\criticize{comment}{severity}{confidence}` into the TeX rather than
     into a markdown findings file — add `\usepackage{xcolor}` and the
     `\criticize` definition to the preamble first. The local review lane writes
-    markdown under `prs/<id>/reviews/`, so do this only when the issue asks.
+    markdown into the review ledger (published to the PR by review.sh), so do this only when the issue asks.
 
 ## Output contract
 

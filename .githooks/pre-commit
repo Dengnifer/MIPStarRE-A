@@ -23,6 +23,20 @@ if [ -z "$STAGED_FILES" ]; then
   exit 0
 fi
 
+# Scope-control guard (EVOLUTION.md 2026-09-01, the issue-0007 overbuild):
+# workflow scaffolding is budgeted at <=400 changed lines per commit.  This is
+# mechanical enforcement — repeated verbal correction of scaffolding bloat did
+# not stick, so the budget lives in the hook.  The override env var is granted
+# by the OWNER per commit, never self-granted by an agent session.
+INFRA_CHANGED="$(git diff --cached --numstat -- local/ .githooks/ scripts/tests/test_github_workflow.py \
+  | awk '{added=$1; deleted=$2; if (added != "-") total+=added+deleted} END {print total+0}')"
+if [ "${INFRA_CHANGED:-0}" -gt 400 ] && [ "${MIPSTARRE_INFRA_OVERRIDE:-}" != "1" ]; then
+  echo "MIPStarRE pre-commit: staged workflow-layer change is ${INFRA_CHANGED} lines (budget: 400)."
+  echo "Scope control (local/personas/main.md): split the change, or ask the owner"
+  echo "to authorize this commit with MIPSTARRE_INFRA_OVERRIDE=1."
+  exit 1
+fi
+
 echo "MIPStarRE pre-commit: checking staged whitespace."
 # Paper mirrors under references/ are byte-faithful captures of external
 # arXiv sources (see references/*/README.md); their inherited trailing

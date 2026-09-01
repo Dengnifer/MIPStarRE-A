@@ -5,12 +5,13 @@
 # Usage:
 #   local/bin/autofix.sh <pr-id> --mode {ci|blueprint|review|auto} [--dry-run]
 #
-#   <pr-id>     PR registry id: "7", "0007", or "0007-qpbt-basis-shift".
-#   --mode ci         fix Lean build errors, if the CI manifest says build failed
+#   <pr-id>     GitHub PR number, e.g. "7" (GitHub is the source of truth for
+#               PR metadata now; there is no local PR record).
+#   --mode ci         fix Lean build errors, if local-ci/build failed on the head
 #          blueprint  fix blueprint compilation, if that CI step failed
-#          review     fix unresolved review findings (needs auto_fix: true)
-#          auto       dispatch from the CI manifest and run every applicable fix
-#                     strictly in the order ci -> blueprint -> review
+#          review     fix unresolved review findings (needs the auto-fix label)
+#          auto       dispatch from the head's CI statuses and run every
+#                     applicable fix strictly in the order ci -> blueprint -> review
 #   --dry-run   Resolve the dispatch and build the prompts, then stop.
 #
 # Local replacement for .github/workflows/auto-fix.yml (setup + auto-fix-ci +
@@ -33,14 +34,16 @@
 #   MIPSTARRE_FIX_LOCK_WAIT   seconds to wait for a superseded fix to stop
 #                             (default 900)
 #   MIPSTARRE_LOG_TAIL_LINES  log lines handed to the fixer (default 400)
+#   MIPSTARRE_AUTO_FIX_LABEL  PR label that opts a PR into review-fix
+#                             (default "auto-fix-codex")
 #
 set -euo pipefail
 
 PROG="autofix.sh"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-# The registry (issues/, prs/, results/telemetry/) is single-instance and
-# lives in the PRIMARY checkout. When this script is invoked from a linked
-# worktree copy, re-point the root at the primary (same resolution as
+# Worktrees, the fix lock and results/telemetry/ are single-instance and live
+# in the PRIMARY checkout. When this script is invoked from a linked worktree
+# copy, re-point the root at the primary (same resolution as
 # cache-warmer.sh resolve_primary_repo; EVOLUTION.md 2026-08-30).
 _common="$(git -C "$ROOT" rev-parse --path-format=absolute --git-common-dir 2>/dev/null || true)"
 case "$_common" in
@@ -51,6 +54,8 @@ unset _common
 CACHE="${MIPSTARRE_CACHE_ROOT:-$HOME/.cache/mipstarre-dev}"
 TRUSTED_REF="${MIPSTARRE_TRUSTED_REF:-main}"
 DISPATCH="$ROOT/local/bin/dispatch.sh"
+GH_COMMON="$ROOT/local/bin/gh_common.py"
+AUTO_FIX_LABEL="${MIPSTARRE_AUTO_FIX_LABEL:-auto-fix-codex}"
 FIX_MODEL="${MIPSTARRE_FIX_MODEL:-}"
 FIX_CAP="${MIPSTARRE_FIX_CAP:-5}"
 LOCK_WAIT="${MIPSTARRE_FIX_LOCK_WAIT:-900}"
@@ -94,58 +99,19 @@ release_fix_lock() {
 
 now_utc() { date -u +%Y-%m-%dT%H:%M:%SZ; }
 
-fm_get() {
-  python3 - "$1" "$2" <<'PY'
-import sys
-path, key = sys.argv[1], sys.argv[2]
-try:
-    lines = open(path, encoding="utf-8").read().split("\n")
-except OSError:
-    sys.exit(1)
-if not lines or lines[0].strip() != "---":
-    sys.exit(1)
-for line in lines[1:]:
-    if line.strip() == "---":
-        break
-    if not line.startswith(key + ":"):
-        continue
-    value = line[len(key) + 1:].strip()
-    if len(value) >= 2 and value[0] == value[-1] and value[0] in "'\"":
-        value = value[1:-1]
-    print(value)
-    break
-PY
+# gh_common <subcommand> ... — the one way this script talks to GitHub
+# (gh_common.py:1-25).  It exits 2 with a diagnostic on stderr, so every caller
+# either dies or warns explicitly: there is no local fallback record to fall
+# back to, and dispatching a fixer from guessed metadata is worse than not
+# dispatching one.
+gh_common() {
+  python3 "$GH_COMMON" "$@"
 }
 
-fm_set() {
-  python3 - "$1" "$2" "$3" <<'PY'
-import os, sys, tempfile
-path, key, value = sys.argv[1], sys.argv[2], sys.argv[3]
-text = open(path, encoding="utf-8").read()
-lines = text.split("\n")
-if not lines or lines[0].strip() != "---":
-    sys.stderr.write("no YAML frontmatter in %s\n" % path)
-    sys.exit(1)
-end = None
-for i, line in enumerate(lines[1:], start=1):
-    if line.strip() == "---":
-        end = i
-        break
-if end is None:
-    sys.stderr.write("unterminated YAML frontmatter in %s\n" % path)
-    sys.exit(1)
-new = "%s: %s" % (key, value)
-for i in range(1, end):
-    if lines[i].startswith(key + ":"):
-        lines[i] = new
-        break
-else:
-    lines.insert(end, new)
-fd, tmp = tempfile.mkstemp(dir=os.path.dirname(os.path.abspath(path)))
-with os.fdopen(fd, "w", encoding="utf-8") as fh:
-    fh.write("\n".join(lines))
-os.replace(tmp, path)
-PY
+# pr_head_sha — the head SHA GitHub currently records for PR $1.
+pr_head_sha() {
+  gh_common pr-view "$1" | python3 -c \
+    'import json, sys; print((json.load(sys.stdin).get("head") or {}).get("sha") or "")'
 }
 
 # sanitize_to <src> <dest> <max-lines> — DESIGN.md invariant 6.  Build logs and
@@ -378,164 +344,141 @@ if [ "${LOCAL_AUTO_FIX_ENABLED:-}" = "false" ]; then
 fi
 
 # ------------------------------------------------------------- resolve the PR
-
-[ -d "$ROOT/prs" ] ||
-  die "PR registry $ROOT/prs not found; open the PR record first (local/bin/pr_open.py, local/protocols/issues-prs.md)"
-
-PR_DIR=""
-if [ -d "$ROOT/prs/$PR_ARG" ]; then
-  PR_DIR="$ROOT/prs/$PR_ARG"
-else
-  case "$PR_ARG" in
-    *[!0-9]*) die "PR id '$PR_ARG' is neither a registry directory name nor a number" ;;
-  esac
-  PR_PAD="$(printf '%04d' "$((10#$PR_ARG))")"
-  for cand in "$ROOT/prs/$PR_PAD"-*; do
-    [ -d "$cand" ] || continue
-    [ -z "$PR_DIR" ] || die "PR id $PR_PAD is ambiguous: $PR_DIR and $cand"
-    PR_DIR="$cand"
-  done
-fi
-[ -n "$PR_DIR" ] || die "no PR record for '$PR_ARG' under $ROOT/prs"
-
-PR_MD="$PR_DIR/pr.md"
-[ -f "$PR_MD" ] || die "$PR_MD is missing; the PR record is incomplete"
-
-PR_NUM="$(fm_get "$PR_MD" id || true)"
-BRANCH="$(fm_get "$PR_MD" branch || true)"
-BASE="$(fm_get "$PR_MD" base || true)"
-HEAD_SHA="$(fm_get "$PR_MD" head_sha || true)"
-PR_STATE="$(fm_get "$PR_MD" state || true)"
-AUTO_FIX="$(fm_get "$PR_MD" auto_fix || true)"
-FIX_ITERATIONS="$(fm_get "$PR_MD" fix_iterations || true)"
-
-[ -n "$PR_NUM" ]   || die "pr.md has no 'id'"
-[ -n "$BRANCH" ]   || die "pr.md has no 'branch'"
-[ -n "$HEAD_SHA" ] || die "pr.md has no 'head_sha'; run local/bin/ci.sh $PR_ARG first"
-BASE="${BASE:-main}"
-case "$FIX_ITERATIONS" in
-  ""|*[!0-9]*) FIX_ITERATIONS=0 ;;
+# One read of the GitHub PR is the whole metadata source: branch, base, head
+# SHA, state and labels (local/protocols/issues-prs.md).  A failed read is
+# fatal — fixing the wrong branch is unrecoverable, and there is deliberately
+# no cached copy to fall back on.
+case "$PR_ARG" in
+  ""|*[!0-9]*) die "PR id '$PR_ARG' is not a GitHub PR number" ;;
 esac
+PR_NUM="$((10#$PR_ARG))"
+# Runtime state, never a record: the API responses are cached here only so the
+# heredoc parsers below can read them from a path (DESIGN.md:37-38).
+PR_CACHE="$CACHE/autofix/$PR_NUM"
+mkdir -p "$PR_CACHE"
+
+gh_common pr-view "$PR_NUM" >"$PR_CACHE/pr.json" ||
+  die "cannot read PR #$PR_NUM from GitHub; refusing to dispatch a fixer blind"
+PR_ENV="$(python3 - "$PR_CACHE/pr.json" <<'PY'
+import json, shlex, sys
+pr = json.load(open(sys.argv[1], encoding="utf-8")) or {}
+head, base = pr.get("head") or {}, pr.get("base") or {}
+labels = "\n".join(str((row or {}).get("name") or "") for row in pr.get("labels") or [])
+state = "merged" if pr.get("merged") else str(pr.get("state") or "")
+for key, value in (("BRANCH", head.get("ref") or ""),
+                   ("HEAD_SHA", head.get("sha") or ""),
+                   ("BASE", base.get("ref") or "main"),
+                   ("PR_STATE", state),
+                   ("PR_URL", pr.get("html_url") or ""),
+                   ("PR_LABELS", labels)):
+    print("%s=%s" % (key, shlex.quote(str(value))))
+PY
+)" || die "PR #$PR_NUM came back in an unreadable shape; refusing to dispatch a fixer blind"
+eval "$PR_ENV"
+
+[ -n "$BRANCH" ]   || die "PR #$PR_NUM reports no head branch"
+[ -n "$HEAD_SHA" ] || die "PR #$PR_NUM reports no head SHA"
+BASE="${BASE:-main}"
 lint_branch_name "$BRANCH"
 
 if [ "$BRANCH" = "$TRUSTED_REF" ]; then
   die "refusing to auto-fix '$BRANCH': it is the trusted prompt ref"
 fi
-if [ -n "$PR_STATE" ] && [ "$PR_STATE" != "open" ]; then
+if [ "$PR_STATE" != "open" ]; then
   log "PR $PR_NUM is '$PR_STATE', not open; nothing to fix"
   exit 0
 fi
 
 git -C "$ROOT" rev-parse --verify --quiet "$HEAD_SHA^{commit}" >/dev/null ||
-  die "head_sha $HEAD_SHA does not resolve in this repository"
+  die "head SHA $HEAD_SHA does not resolve here; fetch the branch first (git -C $ROOT fetch github $BRANCH)"
+
+# ------------------------------------------------------------- iteration count
+# The branch's own history is the counter: one commit per fix, subject-prefixed.
+# Nothing local has to be trusted or kept in sync, and the cap survives a fresh
+# clone — the same commits are what pr-review.yml:78 matches on.
+# Count over the LOCAL branch tip, not the GitHub head: fix commits that were
+# made but not yet pushed (a crashed run, a failed push) are ancestors of the
+# local tip only, and the cap must see them or it can never fire.
+LOCAL_TIP="$(git -C "$ROOT" rev-parse --verify --quiet "refs/heads/$BRANCH" || printf '%s' "$HEAD_SHA")"
+MERGE_BASE="$(git -C "$ROOT" merge-base "$BASE" "$LOCAL_TIP" 2>/dev/null || true)"
+FIX_ITERATIONS=0
+if [ -n "$MERGE_BASE" ]; then
+  FIX_ITERATIONS="$(git -C "$ROOT" log --format=%s "$MERGE_BASE..$LOCAL_TIP" |
+    awk -v a="$PREFIX_AUTO" -v r="$PREFIX_REVIEW" \
+      'index($0, a) == 1 || index($0, r) == 1 { n++ } END { print n + 0 }')"
+else
+  warn "no merge base between '$BASE' and $LOCAL_TIP; counting zero prior fixes. Fetch '$BASE' if the cap must hold."
+fi
 
 # ------------------------------------------------------------ setup dispatch
 # auto-fix.yml:101-114 — only the Lean build and the blueprint render are
 # auto-fixable.  The blueprint-sync job and every audit guard are deliberately
-# excluded, and so is an "error" outcome: ci.sh reports that when a step could
+# excluded, and so is an "error" state: ci.sh reports that when a step could
 # not run at all (missing tool, build lock timeout), which no fixer can repair.
-CI_MANIFEST="$PR_DIR/ci/$HEAD_SHA.json"
-CI_FIX=0
-BLUEPRINT_FIX=0
-EXCLUDED=""
-INFRA=""
-CI_LOG=""
-BLUEPRINT_LOG=""
-
-if [ -f "$CI_MANIFEST" ]; then
-  MANIFEST_ENV="$(python3 - "$CI_MANIFEST" "$PR_DIR" "$ROOT" <<'PY'
+#
+# The evidence is the set of local-ci/<step> commit statuses bound to this exact
+# head SHA (local/protocols/ci.md).  Statuses are per-SHA, so a green on the
+# previous head can never be mistaken for evidence about this one; an absent
+# context simply means "no CI ran", which dispatches nothing.
+gh_common latest-statuses "$HEAD_SHA" >"$PR_CACHE/statuses-$HEAD_SHA.json" ||
+  die "cannot read the CI statuses on $HEAD_SHA from GitHub; refusing to guess what failed"
+STATUS_ENV="$(python3 - "$PR_CACHE/statuses-$HEAD_SHA.json" "$CACHE" "$PR_NUM" \
+  "$HEAD_SHA" <<'PY'
 import json, os, shlex, sys
 
-manifest, pr_dir, root = sys.argv[1], sys.argv[2], sys.argv[3]
-try:
-    data = json.load(open(manifest, encoding="utf-8"))
-except Exception as exc:
-    print("MANIFEST_ERROR=%s" % shlex.quote(str(exc)))
-    raise SystemExit(0)
-if not isinstance(data, dict):
-    print("MANIFEST_ERROR=%s" % shlex.quote("manifest is not a JSON object"))
-    raise SystemExit(0)
+src, cache, pr_num, sha = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
+statuses = json.load(open(src, encoding="utf-8")) or {}
+
+PREFIX = "local-ci/"
+FIXABLE_FAIL = {"failure"}
+INFRA_FAIL = {"error"}
 
 
-def norm(entries):
-    """ci.sh writes [{'step','outcome','log_path',...}]; tolerate the obvious
-    variants so a manifest-schema bump degrades to 'nothing to fix', never to a
-    wrong dispatch."""
-    out = []
-    if isinstance(entries, dict):
-        for name, value in entries.items():
-            if isinstance(value, dict):
-                out.append((str(name),
-                            str(value.get("outcome") or value.get("status") or "").lower(),
-                            value.get("log_path") or value.get("log") or ""))
-            else:
-                out.append((str(name), str(value).lower(), ""))
-    elif isinstance(entries, list):
-        for item in entries:
-            if not isinstance(item, dict):
-                continue
-            name = str(item.get("step") or item.get("id") or item.get("name") or "")
-            out.append((name,
-                        str(item.get("outcome") or item.get("status") or
-                            item.get("conclusion") or "").lower(),
-                        item.get("log_path") or item.get("log") or ""))
-    return out
-
-
-steps = norm(data.get("steps") or data.get("jobs") or {})
-if not steps:
-    print("MANIFEST_ERROR=%s" % shlex.quote("the manifest lists no steps"))
-    raise SystemExit(0)
-
-FIXABLE_FAIL = {"failure", "failed"}
-INFRA_FAIL = {"error", "timed_out", "cancelled", "canceled"}
-
-
-def resolve(path):
-    if not path:
-        return ""
-    for base in (pr_dir, root):
-        cand = path if os.path.isabs(path) else os.path.join(base, path)
-        if os.path.isfile(cand):
-            return os.path.abspath(cand)
-    return ""
+def log_path(step):
+    """ci.sh:29 — step logs are runtime state at
+    $CACHE_ROOT/ci-logs/<pr>/<sha>/<step>.log, never a record.  An absent log
+    degrades the fix (the agent diagnoses from the worktree); it never blocks."""
+    cand = os.path.join(cache, "ci-logs", pr_num, sha, step + ".log")
+    return os.path.abspath(cand) if os.path.isfile(cand) else ""
 
 
 ci_fix = blueprint_fix = False
 ci_log = blueprint_log = ""
-excluded, infra = [], []
-for name, outcome, logpath in steps:
-    key = name.strip().lower()
-    if outcome in INFRA_FAIL:
-        infra.append(name)
+excluded, infra, seen = [], [], 0
+for context in sorted(statuses):
+    if not context.startswith(PREFIX):
         continue
-    if outcome not in FIXABLE_FAIL:
+    step = context[len(PREFIX):].strip().lower()
+    if step == "summary":          # the roll-up, not a step: never dispatchable
         continue
-    if key == "build":
+    seen += 1
+    state = str((statuses.get(context) or {}).get("state") or "").lower()
+    if state in INFRA_FAIL:
+        infra.append(step)
+    elif state not in FIXABLE_FAIL:
+        continue
+    elif step == "build":
         ci_fix = True
-        ci_log = ci_log or resolve(logpath)
-    elif "blueprint" in key and "sync" not in key:
+        ci_log = ci_log or log_path(step)
+    elif "blueprint" in step and "sync" not in step:
         blueprint_fix = True
-        blueprint_log = blueprint_log or resolve(logpath)
+        blueprint_log = blueprint_log or log_path(step)
     else:
-        excluded.append(name)
+        excluded.append(step)
 
 print("CI_FIX=%d" % int(ci_fix))
 print("BLUEPRINT_FIX=%d" % int(blueprint_fix))
+print("CI_STEPS=%d" % seen)
 print("CI_LOG=%s" % shlex.quote(ci_log))
 print("BLUEPRINT_LOG=%s" % shlex.quote(blueprint_log))
 print("EXCLUDED=%s" % shlex.quote(", ".join(excluded)))
 print("INFRA=%s" % shlex.quote(", ".join(infra)))
 PY
-)"
-  case "$MANIFEST_ENV" in
-    MANIFEST_ERROR=*)
-      die "CI manifest $CI_MANIFEST is unusable: ${MANIFEST_ENV#MANIFEST_ERROR=}"
-      ;;
-  esac
-  eval "$MANIFEST_ENV"
-else
-  warn "no CI manifest at $CI_MANIFEST; run local/bin/ci.sh $PR_NUM first. Only review-fix can be dispatched without one."
+)" || die "the CI statuses on $HEAD_SHA came back in an unreadable shape"
+eval "$STATUS_ENV"
+
+if [ "$CI_STEPS" -eq 0 ]; then
+  warn "no local-ci/* statuses on $HEAD_SHA; run local/bin/ci.sh $PR_NUM first. Only review-fix can be dispatched without CI evidence."
 fi
 
 if [ -n "$EXCLUDED" ]; then
@@ -547,20 +490,36 @@ if [ -n "$INFRA" ]; then
   log "  these are infrastructure failures, not code failures; no fixer is dispatched for them"
 fi
 
-# Review-fix precondition: unresolved findings plus the per-PR opt-in flag (the
-# auto-fix-claude label analogue, auto-fix.yml:116-126).
-REVIEWS_DIR="$PR_DIR/reviews"
-UNRESOLVED=0
-if [ -d "$REVIEWS_DIR" ]; then
-  UNRESOLVED="$( { grep -h '^- \[ \] F' "$REVIEWS_DIR"/*.md 2>/dev/null || true; } |
-    wc -l | tr -d ' ')"
-fi
+# Review-fix precondition: unresolved findings in the verdict for THIS head SHA,
+# plus the per-PR opt-in label (the auto-fix-claude label analogue,
+# auto-fix.yml:116-126).  The verdict is the one COMMENT review carrying the
+# per-head marker (local/protocols/review.md); a finding is unresolved when its
+# ledger line is still an unchecked box.  A verdict written against an older
+# head is not evidence about this one and is never read.
+RUN_DIR="$PR_CACHE/$HEAD_SHA"
+mkdir -p "$RUN_DIR"
+VERDICT="$RUN_DIR/review-verdict.md"
+gh_common pr-reviews "$PR_NUM" >"$RUN_DIR/reviews.json" ||
+  die "cannot read the review verdicts for PR #$PR_NUM from GitHub"
+python3 - "$RUN_DIR/reviews.json" "<!-- mipstarre-review pr=$PR_NUM head=$HEAD_SHA -->" \
+  "$VERDICT" <<'PY'
+import json, sys
+src, marker, dest = sys.argv[1], sys.argv[2], sys.argv[3]
+body = ""
+for row in json.load(open(src, encoding="utf-8")) or []:
+    # Last wins: a re-review of the same head supersedes its predecessor.
+    if marker in (row.get("body") or ""):
+        body = row.get("body") or ""
+open(dest, "w", encoding="utf-8").write(body)
+PY
+UNRESOLVED="$(grep -c -E '^[[:space:]]*[-*][[:space:]]+\[ \]' "$VERDICT" || true)"
+
 REVIEW_FIX=0
-if [ "$UNRESOLVED" -gt 0 ]; then
-  if [ "$AUTO_FIX" = "true" ]; then
+if [ "${UNRESOLVED:-0}" -gt 0 ]; then
+  if printf '%s\n' "$PR_LABELS" | grep -Fxq "$AUTO_FIX_LABEL"; then
     REVIEW_FIX=1
   else
-    log "$UNRESOLVED unresolved review findings, but pr.md has auto_fix='$AUTO_FIX'; review-fix is opt-in (set auto_fix: true in $PR_MD to enable it)"
+    log "$UNRESOLVED unresolved review findings on $HEAD_SHA, but PR #$PR_NUM does not carry the '$AUTO_FIX_LABEL' label; review-fix is opt-in (add the label on GitHub to enable it)"
   fi
 fi
 
@@ -581,42 +540,40 @@ fi
 LOCK_DIR="$CACHE/locks/fix-$(printf '%s' "$BRANCH" | tr '/' '-').lock"
 acquire_fix_lock "$LOCK_DIR" "$LOCK_WAIT" "autofix pr=$PR_NUM branch=$BRANCH mode=$MODE"
 
-CUR_HEAD_SHA="$(fm_get "$PR_MD" head_sha || true)"
+CUR_HEAD_SHA="$(pr_head_sha "$PR_NUM")" ||
+  die "cannot re-read PR #$PR_NUM after acquiring the fix lock"
 if [ "$CUR_HEAD_SHA" != "$HEAD_SHA" ]; then
-  log "the head SHA moved from $HEAD_SHA to $CUR_HEAD_SHA while queuing; exiting so the newer run dispatches from the newer manifest"
+  log "the head SHA moved from $HEAD_SHA to $CUR_HEAD_SHA while queuing; exiting so the newer run dispatches from the newer CI statuses"
   exit 0
 fi
 
 WORKTREE="$(resolve_worktree "$BRANCH")"
 [ -d "$WORKTREE" ] || die "worktree resolution failed for branch $BRANCH"
 
-RUN_DIR="$CACHE/autofix/$PR_NUM/$HEAD_SHA"
-mkdir -p "$RUN_DIR"
-
 # ------------------------------------------------------------- iteration cap
 # The bot-fix-guard analogue: ONE counter combined across ci, blueprint and
-# review fixes.  At the cap the loop stops, the opt-in flag is cleared, a human
-# note is appended, and the final bot-fix result gets its single forced review
+# review fixes.  At the cap the loop stops, a human-attention note goes on the
+# PR, and the final bot-fix result gets its single forced review
 # (pr-review.yml:69-72 — "we only want to review human-authored pushes and the
 # final bot-fix result, detected by iteration cap").
 cap_reached() {
-  local marker="<!-- autofix:cap-reached -->"
+  local marker="<!-- autofix:cap-reached pr=$PR_NUM -->" note="$RUN_DIR/cap-note.md"
   log "combined fix-iteration cap reached ($FIX_ITERATIONS/$FIX_CAP) for PR $PR_NUM"
-  fm_set "$PR_MD" auto_fix false
-  if grep -qF "$marker" "$PR_MD"; then
-    log "the human-attention note is already in $PR_MD; not appending it again"
-  else
-    {
-      printf '\n%s\n' "$marker"
-      printf '\n## Human attention required\n\n'
-      printf 'The combined auto-fix iteration cap (%s) was reached at %s.\n\n' "$FIX_CAP" "$(now_utc)"
-      printf '`auto_fix` has been cleared: no further automated fix runs on this\n'
-      printf 'branch until a human resets it.  Read the fix commits, the CI\n'
-      printf 'manifests under `ci/`, and the findings ledger under `reviews/`\n'
-      printf 'before re-enabling.  Repeated cap hits are protocol evidence —\n'
-      printf 'record them in `results/telemetry/events.md`.\n'
-    } >>"$PR_MD"
-  fi
+  {
+    printf '## Human attention required\n\n'
+    printf 'The combined auto-fix iteration cap (%s) was reached at %s on head `%s`.\n\n' \
+      "$FIX_CAP" "$(now_utc)" "$HEAD_SHA"
+    printf 'No further automated fix runs on this branch.  The counter is the\n'
+    printf 'branch history itself — the `%s` / `%s` commits in\n' "$PREFIX_AUTO" "$PREFIX_REVIEW"
+    printf '`%s..HEAD` — so the cap stays reached until a human takes over.\n\n' "$BASE"
+    printf 'Read the fix commits, the `local-ci/*` statuses on that SHA, and the\n'
+    printf 'review verdict for it before re-enabling.  Repeated cap hits are\n'
+    printf 'protocol evidence — record them in `results/telemetry/events.md`.\n'
+  } >"$note"
+  # Idempotent by marker (gh_common.py:203-209): the note is updated in place,
+  # never re-posted.  A failed post does not weaken the cap — the commits do.
+  gh_common ensure-pr-comment "$PR_NUM" "$marker" --body-file "$note" >/dev/null ||
+    warn "could not post the cap-reached note to PR #$PR_NUM; the cap itself still holds"
   # One forced review of the final bot-fix result: without it the last fix
   # commit would be the only commit on the branch nobody ever reviewed.
   # Release the fix lock FIRST — review.sh refuses to review a branch whose
@@ -654,18 +611,20 @@ EOF
 
 # Local execution contract (authoritative where it conflicts with the above)
 
-This fix runs on a local git repository.  There is no GitHub here.
+This fix runs in a local worktree of a repository whose records live on GitHub.
 
-- Do NOT run \`gh\`, \`git push\`, or any mcp__github__* tool; they do not exist.
-  Wherever the task prompt tells you to post a PR comment or resolve a review
-  thread, put that text in your final message instead: it is kept with the fix
-  and read by the operator.
+- Do NOT run \`gh\`, \`git push\`, or any mcp__github__* tool.  Every PR comment,
+  review verdict and commit status is posted by the lifecycle scripts through
+  local/bin/gh_common.py, bound to a head SHA that does not exist yet while you
+  work.  Wherever the task prompt tells you to post a PR comment or resolve a
+  review thread, put that text in your final message instead: it is kept with
+  the fix and read by the operator.
 - Do NOT commit.  Leave your changes in the working tree of $WORKTREE.
   autofix.sh makes one commit whose subject starts with "$prefix";
   that exact prefix is what stops the reviewer from re-reviewing bot commits,
   so the commit has to be made by the script.
 - Do NOT amend, rebase, reset or otherwise rewrite history, and do not touch
-  prs/, issues/ or results/telemetry/.
+  results/telemetry/ — it is maintained by the lifecycle scripts.
 - Validate with \`lake build\` (or a single-file \`lake env lean\` check) as the
   task prompt requires.  At most one full \`lake build\` machine-wide.
 - If the fix cannot be made without changing a paper-labelled statement, STOP,
@@ -673,8 +632,7 @@ This fix runs on a local git repository.  There is no GitHub here.
   worse than none: this loop is capped, and the next iteration is not free.
 
 Local fix context:
-  PR id             $PR_NUM
-  PR record         $PR_DIR/pr.md
+  PR                #$PR_NUM ($PR_URL)
   Branch            $BRANCH
   Base              $BASE
   Head SHA          $HEAD_SHA
@@ -796,12 +754,18 @@ run_phase() {
 
   HEAD_SHA="$(git -C "$WORKTREE" rev-parse HEAD)"
   FIX_ITERATIONS=$((FIX_ITERATIONS + 1))
-  fm_set "$PR_MD" head_sha "$HEAD_SHA"
-  fm_set "$PR_MD" fix_iterations "$FIX_ITERATIONS"
-  # The new head has no CI result and no review yet; a stale green must never
-  # survive a fix commit.
-  fm_set "$PR_MD" ci_status pending
-  fm_set "$PR_MD" review_state pending
+  # GitHub tracks the head SHA on its own once the branch is pushed, and the
+  # iteration count is now the commit history above.  What remains is to say
+  # out loud that the NEW SHA has no evidence yet: statuses are per-SHA, so the
+  # old head's green cannot leak onto this commit either way — the pending pair
+  # is a courtesy for whoever reads the PR, which is why an unpushed SHA
+  # (GitHub 422s an unknown commit) only warns.
+  gh_common post-status "$HEAD_SHA" local-ci/summary pending \
+    --desc "$kind fix $iteration/$FIX_CAP: awaiting local CI" >/dev/null ||
+    warn "could not post local-ci/summary=pending on $HEAD_SHA (unpushed commit?); CI will post it when it runs"
+  gh_common post-status "$HEAD_SHA" local-review/summary pending \
+    --desc "$kind fix $iteration/$FIX_CAP: awaiting review" >/dev/null ||
+    warn "could not post local-review/summary=pending on $HEAD_SHA (unpushed commit?); review will post it when it runs"
   log "the $kind fix is committed as $HEAD_SHA (fix_iterations=$FIX_ITERATIONS)"
   return 0
 }
@@ -864,24 +828,11 @@ if [ "$WANT_REVIEW" -eq 1 ] && [ "$PHASE_FAILED" -eq 0 ]; then
   RAW="$RUN_DIR/review-findings.raw.md"
   CTX="$RUN_DIR/review-findings.txt"
   {
-    printf 'Unresolved findings ("- [ ]") from the local findings ledger.\n'
-    printf 'Resolved ("- [x]") and outdated ("- [-]") findings are omitted:\n'
-    printf 'they are not yours to reopen.\n\n'
-    for f in "$REVIEWS_DIR"/*.md; do
-      [ -f "$f" ] || continue
-      if grep -q '^- \[ \] F' "$f"; then
-        printf '### %s\n' "${f##*/}"
-        grep '^- \[ \] F' "$f" || true
-        printf '\n'
-      fi
-    done
-    printf '\n--- reviewer prose for the reviewed head SHA ---\n\n'
-    for f in "$REVIEWS_DIR/$CUR_HEAD_SHA-code.md" "$REVIEWS_DIR/$CUR_HEAD_SHA-prose.md"; do
-      [ -f "$f" ] || continue
-      printf '### %s\n' "${f##*/}"
-      cat "$f"
-      printf '\n'
-    done
+    printf 'The review verdict posted for head %s, verbatim.\n' "$HEAD_SHA"
+    printf 'Your work is the unresolved findings — the "- [ ]" lines.  Resolved\n'
+    printf '("- [x]") and outdated ("- [-]") findings are not yours to reopen,\n'
+    printf 'and the VERDICT line is the reviewer.s, not an instruction to you.\n\n'
+    cat "$VERDICT"
   } >"$RAW"
   sanitize_to "$RAW" "$CTX" 1200
   rc=0
@@ -897,12 +848,27 @@ fi
 
 # ------------------------------------------------------------------ post-fix
 if [ "$FIXED_ANY" -eq 1 ]; then
-  if [ -x "$ROOT/local/bin/ci.sh" ]; then
+  # Evidence binds to pushed SHAs: ci.sh refuses a full run when the worktree
+  # head is not the PR head on GitHub, so the fix commits must be pushed BEFORE
+  # the CI chain — an unpushed fix would leave the new head permanently without
+  # statuses (and the old head's stale failures standing).
+  PUSHED=0
+  for attempt in 1 2 3; do
+    if git -C "$ROOT" push github "refs/heads/$BRANCH:refs/heads/$BRANCH"; then
+      PUSHED=1
+      break
+    fi
+    warn "push attempt $attempt of 3 for $BRANCH failed; retrying in 10s"
+    sleep 10
+  done
+  if [ "$PUSHED" -ne 1 ]; then
+    warn "could not push $BRANCH: the new head carries no statuses and cannot merge. Push by hand (local/bin/github-sync.sh $BRANCH), then run ci.sh $PR_NUM."
+  elif [ -x "$ROOT/local/bin/ci.sh" ]; then
     log "re-running local CI on the new head $HEAD_SHA"
     "$ROOT/local/bin/ci.sh" "$PR_NUM" ||
       warn "local/bin/ci.sh reported a failure for $HEAD_SHA; run autofix again if that failure is auto-fixable"
   else
-    warn "local/bin/ci.sh not found: PR $PR_NUM keeps ci_status=pending on $HEAD_SHA and will NOT be reviewed until CI runs (local/protocols/ci.md)"
+    warn "local/bin/ci.sh not found: PR $PR_NUM keeps no CI statuses on $HEAD_SHA and will NOT be reviewed until CI runs (local/protocols/ci.md)"
   fi
   log "done: fix_iterations=$FIX_ITERATIONS of $FIX_CAP"
 fi

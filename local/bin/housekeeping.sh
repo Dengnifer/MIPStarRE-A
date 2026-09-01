@@ -7,7 +7,7 @@
 # scheduler here and that is deliberate: DESIGN.md:53 makes the dispatcher
 # on-demand, so the operator decides when a job runs and sees its output.
 #
-#   standup           structured daily digest -> issues/standup/YYYY-MM-DD.md
+#   standup           structured daily digest -> results/reports/standup/YYYY-MM-DD.md
 #   stale-audit       report-only stale-citation audit of open issues
 #   linter-sweep      report-only Lean linter-warning capture (FULL BUILD)
 #   readme-freshness  report-only README freshness audit
@@ -44,7 +44,7 @@ usage() {
   cat <<'USAGE'
 Usage: local/bin/housekeeping.sh {standup|stale-audit|linter-sweep|readme-freshness|all}
 
-  standup           structured daily digest -> issues/standup/YYYY-MM-DD.md
+  standup           structured daily digest -> results/reports/standup/YYYY-MM-DD.md
                     (72h lookback on Mondays, 24h otherwise; no model call)
   stale-audit       report-only stale-citation audit over open issues
   linter-sweep      report-only Lean linter-warning capture; FULL `lake build`,
@@ -113,8 +113,14 @@ timestamp() {
 #
 # Ports housekeeping.yml:31-215.  Upstream, six GitHub search/REST calls built
 # an activity feed which a model then wrote up.  Here the feed is derived from
-# `git log` plus the issues/ and prs/ registries, and the write-up is a
-# structured digest with no model in the loop; the LLM hook is marked below.
+# `git log` plus GitHub's own issues, pulls, reviews and per-SHA statuses (read
+# through local/bin/gh_common.py, the single GitHub layer), and the write-up is
+# a structured digest with no model in the loop; the LLM hook is marked below.
+#
+# The digest is a REPORT, not a record: it lands in results/reports/standup/ and
+# nothing reads it back.  It is deliberately no longer an issue — the old
+# synthetic `standup-<date>` issue existed only to give the file a home in the
+# local registry, and re-creating it on GitHub would spam the tracker daily.
 #
 # Two upstream rules are preserved exactly:
 #   * the lookback window is 72 hours on Mondays and 24 hours otherwise, so the
@@ -124,8 +130,8 @@ timestamp() {
 #     digest reports on its own previous output and the report grows every day.
 
 job_standup() {
-  note "standup: deriving the activity feed from git log and the local registries"
-  mkdir -p "${REPO_ROOT}/issues/standup"
+  note "standup: deriving the activity feed from git log and the GitHub records"
+  mkdir -p "${REPORT_DIR}/standup"
   python3 - "${REPO_ROOT}" <<'PY'
 import subprocess
 import sys
@@ -135,9 +141,10 @@ from pathlib import Path
 repo_root = Path(sys.argv[1])
 sys.path.insert(0, str(repo_root / "local" / "bin"))
 try:
-    import track
+    from gh_common import api, latest_statuses
+    from wf_util import LayerError, TITLE_LIMIT, atomic_write, sanitize
 except ModuleNotFoundError as exc:
-    sys.stderr.write(f"standup: cannot import local/bin/track.py ({exc})\n")
+    sys.stderr.write(f"standup: cannot import the GitHub layer ({exc})\n")
     raise SystemExit(2)
 
 now = datetime.now(timezone.utc)
@@ -173,16 +180,27 @@ def in_window(value):
     return stamp is not None and stamp >= since
 
 
-def commit_time(sha):
+def labels_of(row):
+    return [str((lab or {}).get("name") or "") for lab in row.get("labels") or []]
+
+
+def title_of(row):
+    return sanitize(str(row.get("title") or ""), TITLE_LIMIT)
+
+
+def summary_state(sha, context):
+    """The latest <context> commit status on *sha*, or 'none'.
+
+    Statuses are per-SHA, so this is evidence about the head the digest names
+    and about nothing else (local/protocols/ci.md).  A read failure degrades
+    one line of the report, never the whole run.
+    """
     if not sha:
-        return None
-    iso = git("show", "-s", "--format=%cI", str(sha))
-    if not iso:
-        return None
+        return "none"
     try:
-        return datetime.fromisoformat(iso).astimezone(timezone.utc)
-    except ValueError:
-        return None
+        return str((latest_statuses(sha).get(context) or {}).get("state") or "none")
+    except LayerError:
+        return "unknown"
 
 
 # --- commits on the base branch -------------------------------------------
@@ -195,38 +213,48 @@ for line in raw_log.splitlines():
         commits.append(dict(zip(("sha", "author", "date", "subject"), parts)))
 
 # --- issues ----------------------------------------------------------------
+# GitHub's `since` filters on updated_at, which is exactly the window this
+# digest reports on; `state=all` keeps the closures.  Pull requests come back
+# from the issues endpoint too and are dropped here — they have their own
+# section below.  Fail closed: no feed is better than half a feed.
+try:
+    raw_issues = api(f"issues?state=all&since={since_iso}", paginate=True)
+    pulls = api("pulls?state=all&sort=updated&direction=desc&per_page=100")
+except LayerError as exc:
+    sys.stderr.write(f"standup: GitHub read failed ({exc}); no digest was written\n")
+    raise SystemExit(2)
+
 # `standup` issues never enter the feed: automation must not report on itself.
-issues = [i for i in track.iter_issues(repo_root) if "standup" not in i.labels]
-opened = [i for i in issues if in_window(i.meta.get("created"))]
-closed = [
-    i for i in issues
-    if i.state == "closed" and in_window(i.meta.get("updated"))
-]
-tracking = [i for i in issues if i.state == "open" and "tracking" in i.labels]
+issues = [i for i in raw_issues or []
+          if "pull_request" not in i and "standup" not in labels_of(i)]
+opened = [i for i in issues if in_window(i.get("created_at"))]
+closed = [i for i in issues
+          if i.get("state") == "closed" and in_window(i.get("closed_at") or i.get("updated_at"))]
+tracking = [i for i in issues
+            if i.get("state") == "open" and "tracking" in labels_of(i)]
 
 # --- pull requests ---------------------------------------------------------
 merged, active, reviews = [], [], []
-for pr in track.iter_prs(repo_root):
-    # Review verdicts are collected for every PR, merged ones included: a
-    # verdict written inside the window is activity even if the PR landed.
-    review_dir = pr.path.parent / "reviews"
-    if review_dir.is_dir():
-        for verdict in sorted(review_dir.glob("*.*")):
-            if verdict.name.startswith("."):
-                continue
-            stamp = datetime.fromtimestamp(verdict.stat().st_mtime, tz=timezone.utc)
-            if stamp >= since:
-                reviews.append((pr, verdict, stamp))
-
-    state = pr.meta.get("state")
-    if state == "merged":
-        when = commit_time(pr.meta.get("merged_commit")) or parse_stamp(pr.meta.get("created"))
-        if when is not None and when >= since:
-            merged.append((pr, when))
-    elif state == "open":
-        head_when = commit_time(pr.meta.get("head_sha")) or parse_stamp(pr.meta.get("created"))
-        if head_when is not None and head_when >= since:
-            active.append((pr, head_when))
+for pr in pulls or []:
+    number = int(pr.get("number") or 0)
+    touched = in_window(pr.get("updated_at"))
+    if in_window(pr.get("merged_at")):
+        merged.append((pr, parse_stamp(pr.get("merged_at"))))
+    elif pr.get("state") == "open" and touched:
+        active.append(pr)
+    if not touched:
+        continue
+    # Review verdicts are collected for every PR touched in the window, merged
+    # ones included: a verdict posted inside the window is activity even if the
+    # PR landed afterwards.
+    try:
+        rows = api(f"pulls/{number}/reviews", paginate=True)
+    except LayerError:
+        rows = []
+    for row in rows:
+        stamp = parse_stamp((row.get("submitted_at") or "").replace("+00:00", "Z"))
+        if stamp is not None and stamp >= since:
+            reviews.append((number, str(row.get("state") or "?"), stamp))
 
 
 def bullets(rows):
@@ -245,28 +273,29 @@ lines.append("")
 lines.append("## Merged pull requests")
 lines.append("")
 lines.append(bullets([
-    f"- PR #{pr.id} (*{track.sanitize(pr.title, track.TITLE_LIMIT)}*) "
-    f"— merged {when.strftime('%Y-%m-%dT%H:%M:%SZ')}, issue #{pr.issue or '?'}"
-    for pr, when in sorted(merged, key=lambda row: row[1])
+    f"- PR #{pr.get('number')} (*{title_of(pr)}*) "
+    f"— merged {when.strftime('%Y-%m-%dT%H:%M:%SZ')}, "
+    f"`{(pr.get('head') or {}).get('ref')}` into `{(pr.get('base') or {}).get('ref')}`"
+    for pr, when in sorted(merged, key=lambda row: row[1] or since)
 ]))
 lines.append("")
 
 lines.append("## Active pull requests")
 lines.append("")
 lines.append(bullets([
-    f"- PR #{pr.id} (*{track.sanitize(pr.title, track.TITLE_LIMIT)}*) "
-    f"— branch `{pr.branch}`, ci_status {pr.meta.get('ci_status')!r}, "
-    f"review_state {pr.meta.get('review_state')!r}, "
-    f"fix_iterations {pr.meta.get('fix_iterations')}"
-    for pr, _ in sorted(active, key=lambda row: row[0].id)
+    f"- PR #{pr.get('number')} (*{title_of(pr)}*) "
+    f"— branch `{(pr.get('head') or {}).get('ref')}`, "
+    f"local-ci/summary {summary_state((pr.get('head') or {}).get('sha'), 'local-ci/summary')!r}, "
+    f"local-review/summary {summary_state((pr.get('head') or {}).get('sha'), 'local-review/summary')!r}"
+    for pr in sorted(active, key=lambda row: int(row.get("number") or 0))
 ]))
 lines.append("")
 
 lines.append("## Issues opened")
 lines.append("")
 lines.append(bullets([
-    f"- #{i.id} (*{track.sanitize(i.title, track.TITLE_LIMIT)}*) "
-    f"— labels {', '.join(i.labels) or 'none'}"
+    f"- #{i.get('number')} (*{title_of(i)}*) "
+    f"— labels {', '.join(labels_of(i)) or 'none'}"
     for i in opened
 ]))
 lines.append("")
@@ -274,8 +303,8 @@ lines.append("")
 lines.append("## Issues closed")
 lines.append("")
 lines.append(bullets([
-    f"- #{i.id} (*{track.sanitize(i.title, track.TITLE_LIMIT)}*) "
-    f"— {i.state_reason or 'no reason recorded'}"
+    f"- #{i.get('number')} (*{title_of(i)}*) "
+    f"— {i.get('state_reason') or 'no reason recorded'}"
     for i in closed
 ]))
 lines.append("")
@@ -283,7 +312,7 @@ lines.append("")
 lines.append("## Commits on " + base)
 lines.append("")
 lines.append(bullets([
-    f"- `{c['sha']}` {track.sanitize(c['subject'], 120)} — {c['author']}, {c['date']}"
+    f"- `{c['sha']}` {sanitize(c['subject'], 120)} — {c['author']}, {c['date']}"
     for c in commits
 ]))
 lines.append("")
@@ -291,8 +320,8 @@ lines.append("")
 lines.append("## Review activity")
 lines.append("")
 lines.append(bullets([
-    f"- PR #{pr.id}: verdict `{verdict.name}` written {stamp.strftime('%Y-%m-%dT%H:%M:%SZ')}"
-    for pr, verdict, stamp in sorted(reviews, key=lambda row: row[2])
+    f"- PR #{number}: review `{state}` submitted {stamp.strftime('%Y-%m-%dT%H:%M:%SZ')}"
+    for number, state, stamp in sorted(reviews, key=lambda row: row[2])
 ]))
 lines.append("")
 
@@ -300,12 +329,18 @@ lines.append("## Tracking parents")
 lines.append("")
 rows = []
 for parent in tracking:
-    resolved, total = track.child_counts(repo_root, parent)
+    number = int(parent.get("number") or 0)
+    try:
+        children = api(f"issues/{number}/sub_issues", paginate=True)
+    except LayerError:
+        continue
+    total = len(children)
     if total == 0:
         continue
+    resolved = sum(1 for c in children if c.get("state") == "closed")
     flag = " — ready to close" if resolved == total else ""
     rows.append(
-        f"- #{parent.id} (*{track.sanitize(parent.title, track.TITLE_LIMIT)}*) "
+        f"- #{number} (*{title_of(parent)}*) "
         f"[{resolved}/{total} sub-issues closed]{flag}"
     )
 lines.append(bullets(rows))
@@ -329,30 +364,8 @@ lines.append(
 )
 lines.append("")
 
-path = repo_root / "issues" / "standup" / f"{today}.md"
-created = track.utcnow()
-if path.is_file():
-    try:
-        existing, _ = track.split_frontmatter(path.read_text(encoding="utf-8"))
-        created = str(existing.get("created") or created)
-    except track.LayerError:
-        pass
-
-meta = {
-    "id": f"standup-{today}",
-    "title": f"Daily standup — {today}",
-    "state": "open",
-    "state_reason": None,
-    "parent": None,
-    "children": [],
-    "labels": ["standup"],
-    "pinned": False,
-    "created": created,
-    "updated": track.utcnow(),
-    "agent_session": None,
-}
-rendered = track.dump_frontmatter(meta, track.ISSUE_FIELDS) + "\n" + "\n".join(lines)
-track.atomic_write(path, rendered)
+path = repo_root / "results" / "reports" / "standup" / f"{today}.md"
+atomic_write(path, "\n".join(lines))
 print(f"wrote {path.relative_to(repo_root)} "
       f"({len(merged)} merged PR(s), {len(opened)} issue(s) opened, "
       f"{len(closed)} closed, {len(commits)} commit(s))")
@@ -364,26 +377,48 @@ PY
 # ---------------------------------------------------------------------------
 #
 # Ports housekeeping.yml:216-309.  The export step is the only GitHub-dependent
-# part and is replaced by local/bin/export_issues.py; scripts/audit_stale_issues.py
-# runs unchanged.  docs/stale_issue_audit.md:157-159 asks for a clean checkout of
-# current main, so the working tree is checked and a dirty tree is reported —
-# a flagged citation is only meaningful against committed code.
+# part; it is back on GitHub, read through gh_common.py's snapshot, and
+# scripts/audit_stale_issues.py runs unchanged.  docs/stale_issue_audit.md:157-159
+# asks for a clean checkout of current main, so the working tree is checked and a
+# dirty tree is reported — a flagged citation is only meaningful against
+# committed code.
 
 job_stale_audit() {
   local audit="${REPO_ROOT}/scripts/audit_stale_issues.py"
-  local exporter="${SCRIPT_DIR}/export_issues.py"
   require_file "${audit}" "the stale-issue audit ports unchanged from the parent repo"
-  require_file "${exporter}" "the local replacement for 'gh issue list --json'"
 
   mkdir -p "${REPORT_DIR}" "${CACHE_ROOT}"
+  local snapshot_dir="${CACHE_ROOT}/github-snapshot"
   local issues_json="${CACHE_ROOT}/open-issues.json"
 
   if command -v git >/dev/null 2>&1 && [ -n "$(git -C "${REPO_ROOT}" status --porcelain 2>/dev/null || true)" ]; then
     printf 'note: the working tree is dirty; citations are audited against the files on disk, not against committed main (docs/stale_issue_audit.md:157-159).\n' >&2
   fi
 
-  note "stale-audit: exporting open issues"
-  python3 "${exporter}" --repo-root "${REPO_ROOT}" --state open --output "${issues_json}"
+  note "stale-audit: reading open issues from GitHub"
+  python3 "${SCRIPT_DIR}/gh_common.py" snapshot --out-dir "${snapshot_dir}"
+  # The audit expects the `gh issue list --json number,title,body,url` shape
+  # (audit_stale_issues.py:338-345); the REST snapshot is the same rows with
+  # `url` holding the API address, so only that one field is remapped.  Bodies
+  # stay verbatim: the audit greps them for citations, and sanitising here
+  # would hide a citation rather than protect anything (nothing is prompted
+  # with this file).
+  python3 - "${snapshot_dir}/open-issues.json" "${issues_json}" <<'PY'
+import json
+import sys
+
+src, dest = sys.argv[1], sys.argv[2]
+rows = json.load(open(src, encoding="utf-8")) or []
+out = [{"number": row.get("number"),
+        "title": row.get("title") or "",
+        "body": row.get("body") or "",
+        "url": row.get("html_url") or row.get("url") or "",
+        "labels": [(lab or {}).get("name") or "" for lab in row.get("labels") or []]}
+       for row in rows if "pull_request" not in row]
+with open(dest, "w", encoding="utf-8") as handle:
+    json.dump(out, handle, indent=1)
+print(f"stale-audit: {len(out)} open issue(s) exported to {dest}")
+PY
 
   note "stale-audit: running the report-only audit"
   python3 "${audit}" --issues "${issues_json}" --repo-root "${REPO_ROOT}" \

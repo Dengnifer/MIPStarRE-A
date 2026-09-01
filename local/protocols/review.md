@@ -23,11 +23,11 @@ drew two full reviews per push — and the auto-fix loop then rewrote the very
 code under review.  Chaining the review to CI completion spends review effort
 only on code that at least compiles.
 
-Locally the chain is: `ci.sh` writes `prs/<id>/ci/<head_sha>.json` and sets
-`ci_status` in `pr.md`; `review.sh` refuses to do anything until that manifest
-says `success` for the **current** `head_sha`.  There is no event bus, so the
-chain is an ordering discipline rather than a trigger, and the discipline is
-enforced by the gate below rather than by trust.
+Locally the chain is: `ci.sh` publishes the `local-ci/*` statuses on the head
+SHA; `review.sh` refuses to do anything until the `local-ci/summary` roll-up is
+`success` for the **current** head.  There is no event bus, so the chain is an
+ordering discipline rather than a trigger, and the discipline is enforced by the
+gate below rather than by trust.
 
 Marking a draft ready is not a trigger there and is not one here.  A review
 follows a CI run, and only a CI run.
@@ -35,7 +35,8 @@ follows a CI run, and only a CI run.
 ## 2. The gate
 
 The gate is a ladder.  Each rung either passes, skips (exit 0, no verdict), or
-**blocks** (exit 3, `review_state: blocked`).  The distinction between skip and
+**blocks** (exit 3, publishing nothing at all — the *absence* of a green
+`local-review/summary` is the block).  The distinction between skip and
 block is the whole point of the rung: `pr-review.yml:59-61` fails the job with
 "PR CI concluded X; PR Review must not report success without a review", a
 fail-instead-of-skip semantics that exists because a skipped review once read
@@ -44,17 +45,15 @@ as a green one.
 | # | Rung | Outcome when it fires |
 |---|---|---|
 | 1 | `LOCAL_REVIEW_ENABLED` is the literal string `false` | skip, exit 0 |
-| 2 | no PR record, no `pr.md`, no `head_sha` | error, exit 1 |
+| 2 | no open GitHub PR for the number, or no head SHA | error, exit 1 |
 | 3 | branch name contains `] ~ ^ : ? *`, space or backslash | error, exit 1 |
 | 4 | branch under review equals `MIPSTARRE_TRUSTED_REF` | error, exit 1 |
-| 5 | no `ci/<head_sha>.json`, or it is unreadable | **block**, exit 3 |
-| 6 | manifest is `partial: true` (an `--only` / `--skip-build` run) | **block**, exit 3 |
-| 7 | manifest `head_sha` ≠ `pr.md` `head_sha` | **block**, exit 3 |
-| 8 | manifest `conclusion` ≠ `success`, or `pr.md ci_status` ≠ `success` | **block**, exit 3 |
-| 9 | head commit subject matches `^\[(claude\|codex)-(auto\|review)-fix\]` | skip, exit 0, unless `--force-review` |
-| 10 | a fix lock is held for this branch | skip, exit 0 |
-| 11 | `head_sha` moved while this run queued for the review lock | skip, exit 0 |
-| 12 | the diff against the merge base is empty | skip, exit 0 |
+| 5 | `local-ci/summary` is missing on the head SHA, or is not `success` | **block**, exit 3 |
+| 6 | the local branch tip ≠ the remote PR head | error, exit 1 |
+| 7 | head commit subject matches `^\[(claude\|codex)-(auto\|review)-fix\]` | skip, exit 0, unless `--force-review` |
+| 8 | a fix lock is held for this branch | skip, exit 0 |
+| 9 | the head moved while this run queued for the review lock | skip, exit 0 |
+| 10 | the diff against the merge base is empty | skip, exit 0 |
 
 Rung 1 is `vars.CLAUDE_REVIEW_ENABLED` (`pr-review.yml:44-48`).  **Only the
 literal string `false` disables it**; unset, empty, `"0"`, `"no"` and `"False"`
@@ -62,10 +61,13 @@ all leave the reviewer enabled.  This is DESIGN.md invariant 4, and it is not a
 stylistic preference: a port that treats unset as false silently stops
 reviewing and reports nothing.
 
-Rung 9 is the ping-pong guard, and §5 explains it.
+Rung 7 is the ping-pong guard, and §5 explains it.
 
-Rung 6 exists locally and had no GitHub analogue: `ci.sh` can be told to run a
-subset of steps, and a subset cannot green-light a review.
+Rung 5 reads exactly one status, the `local-ci/summary` roll-up `ci.sh` posts
+last; it never iterates the per-step contexts.  Per-step completeness is the
+merge gate's job (`pr_merge.py` gate 3 blocks on any missing `local-ci/<step>`),
+and it costs this gate nothing: a partial `--only` / `--skip-build` run posts
+nothing to GitHub at all, so a subset can never green-light a review either.
 
 ## 3. Trusted prompts
 
@@ -141,14 +143,15 @@ calls `review.sh <id> --force-review` once when the cap is reached — after
 **releasing its own fix lock** (`release_fix_lock` in `autofix.sh`), because
 `review.sh` refuses to run while the branch's fix lock has a live holder and
 that holder would otherwise be the very process asking for the review.
-`--force-review` is the only way past rung 9.  Do not use it to "just get a
+`--force-review` is the only way past rung 7.  Do not use it to "just get a
 review" of a bot commit; that reopens the cascade one commit at a time.
 
 ## 6. What the reviewer must return
 
-There is no GitHub review-state field to fall back on, so the verdict is a
-trailer in the agent's last message (`codex exec -o <file>`), and the contract
-demands three things in order:
+A single account cannot approve its own pull request, so GitHub's review-state
+field carries no authority here (`issues-prs.md` §2): the verdict is a trailer
+in the agent's last message (`codex exec -o <file>`), and the contract demands
+three things in order:
 
 1. a `## Findings` section, one line per finding, in exactly this shape:
 
@@ -162,9 +165,9 @@ demands three things in order:
 
        VERDICT: APPROVED | COMMENTED | CHANGES_REQUESTED
 
-A missing or malformed trailer is **not** an approval: `review.sh` exits 4 and
-sets `review_state: blocked`, keeping the raw output under
-`~/.cache/mipstarre-dev/review/<pr>/<sha>/`.  Nothing in the findings section
+A missing or malformed trailer is **not** an approval: `review.sh` exits 4,
+posts a `failure` `local-review/summary`, and keeps the raw output under
+`~/.cache/mipstarre-dev/reviews/pr<N>/<sha>/`.  Nothing in the findings section
 is discarded either — a line that does not parse is kept verbatim as a
 `changes`-severity finding labelled `unparsed finding:`, and a non-approving
 verdict with an empty ledger gets one synthesised finding so the merge gate
@@ -192,14 +195,14 @@ missing, while `pr-review.yml:202-224` *skips* the prose review in the same
 situation.  Locally, a code reviewer that dies without output blocks the PR; a
 prose reviewer that dies leaves a warning and the code verdict stands.
 
-`review_state` in `pr.md` takes the **worst** of the two verdicts, written
-verbatim: `APPROVED`, `COMMENTED` or `CHANGES_REQUESTED`.  The two states in
-which there is no verdict are lowercase words rather than verdicts —
-`blocked` (the gate refused, or the reviewer produced nothing parseable) and
-`pending` (this SHA has not been reviewed; `autofix.sh` sets it after every fix
-commit).  `local/bin/pr_merge.py` compares against exactly these strings:
-it merges on `APPROVED`, or on `COMMENTED` with an empty ledger, and refuses on
-everything else.
+The published verdict takes the **worst** of the two lanes, written verbatim on
+the `VERDICT:` line of one exact-head `COMMENT` review (marker
+`<!-- mipstarre-review pr=N head=SHA -->`): `APPROVED`, `COMMENTED` or
+`CHANGES_REQUESTED`.  Adverse verdicts post as `COMMENT` too; adverseness lives
+in the paired `local-review/summary` status, `success` only for `APPROVED` or a
+`COMMENTED` verdict with an empty ledger and `failure` otherwise.  A head with
+no review at all simply has no such status, which the merge gate reads as
+"not reviewed" rather than as a pass.
 
 ## 8. Concurrency
 
@@ -216,12 +219,12 @@ saves a write to a branch that has already moved.
 
 Locks are directories under `~/.cache/mipstarre-dev/locks/` holding the
 holder's pid — `flock(1)` does not exist on macOS.  A lock whose holder is gone
-is reclaimed.  After acquiring the review lock, `review.sh` re-reads
-`head_sha`: a fix commit that landed while this run queued invalidates the
-review, and the run exits without a verdict rather than describing a commit
-that is no longer head.  The same check runs again after the agent returns; if
-the head moved during the review, the per-SHA review file is still written (it
-is a true statement about that SHA) but `pr.md` is left alone.
+is reclaimed.  After acquiring the review lock, `review.sh` re-reads the local
+tip and the remote PR head: a fix commit that landed while this run queued
+invalidates the review, and the run exits without a verdict rather than
+describing a commit that is no longer head.  The same check runs again after
+the agent returns; a head that moved during the review makes the result stale
+and forbids publication, leaving the raw output in the runtime cache.
 
 `review.sh` also refuses to start while a fix lock is held for the branch.
 The two tools share one worktree here, where GitHub gave each job a fresh
@@ -238,7 +241,7 @@ GraphQL `reviewThreads` `isResolved` / `isOutdated` pair was the only reliable
 status signal; the REST `line` field lied.
 
 Locally there is **one** surface.  Every finding lives on one line of the
-`## Findings` section of `prs/<id>/reviews/<sha>-{code,prose}.md`, between
+`## Findings` section of the exact-head `COMMENT` review body, between
 `<!-- findings:begin -->` and `<!-- findings:end -->`:
 
     - [ ] F1 (blocker) `MIPStarRE/Basic.lean:120` — adds a non-paper hypothesis
@@ -250,29 +253,26 @@ Locally there is **one** surface.  Every finding lives on one line of the
 | `[-]` | outdated — the cited lines were rewritten since the reviewed SHA | no |
 
 `[ ]` → `[x]` is a human judgement, or a claim by the fixer that a human is
-expected to check; it is never automatic.  `[ ]` → `[-]` **is** automatic and
-is the local `isOutdated`: on each run, `review.sh` re-reads every older review
-file in the PR and, for each unresolved finding citing `path:line`, asks
-`git diff -U0 <reviewed-sha>..<new-sha> -- <path>` whether a hunk rewrites that
-line.  A pure insertion elsewhere in the file does **not** outdate a finding —
-outdating is biased towards keeping findings alive, because a wrongly outdated
-finding is one that silently stops blocking.  `[x]` is never touched.
+expected to check; it is never automatic.  There is no automatic `[ ]` → `[-]`
+pass: exactly one review is published per head SHA and the merge gate reads only
+that one, so a finding written against an older SHA can no longer block and has
+nothing to be outdated *out of*.  `[-]` stays available as a hand-written
+disposition; a reviewer re-derives its findings from the new diff on every head.
 
-**Merge gate.**  A PR with any `[ ]` finding across `prs/<id>/reviews/*.md` is
-not mergeable.  The contract for `pr_merge.py` and for humans is exactly:
-
-    grep -h '^- \[ \] F' prs/<id>/reviews/*.md
-
-Empty output means the ledger is clean.  The verdict files for a given head SHA
-are `<sha>-code.md` and `<sha>-prose.md`, so a gate that wants "the verdicts for
-this SHA" must glob `<sha>-*.md`.  Anything else must be resolved,
-outdated, or explicitly overridden by the user — and per
+**Merge gate.**  A PR whose current-head review carries any `[ ]` finding is
+not mergeable.  The contract for `pr_merge.py` and for humans is exactly the
+unchecked-finding regex of `issues-prs.md` §2, `^\s*[-*]\s*\[ \]`, applied to
+the marker-bound review body for the head SHA; no match means the ledger is
+clean, and the paired `local-review/summary` status must agree.  Anything else
+must be resolved, outdated, or explicitly overridden by the user — and per
 `docs/pr_review_management.md`, "never merge without user consent" is the
 standing rule that override is *not* the automation's to exercise.
 
-Findings survive across SHAs on purpose.  A finding raised at SHA *A* still
-blocks at SHA *B* unless it was resolved or outdated; this is the local form of
-"unresolved and not outdated is a merge blocker".
+Findings do **not** survive across SHAs.  Gate 4 matches the marker
+`<!-- mipstarre-review pr=N head=SHA -->` on that exact commit id, so a ledger
+written at SHA *A* is invisible at SHA *B* — and a head carrying no review at
+all is "not reviewed", never clean.  A finding that still applies is one the
+next review re-derives from the new diff.
 
 A second review of the **same** SHA replaces that SHA's ledger, including any
 `[x]` a human had set.  `review.sh` copies the previous file into the run
@@ -319,8 +319,8 @@ session used one anyway.
 
 The auto-create-PR step of `claude.yml` becomes a printed instruction rather
 than an action: when a session on an issue branch produces commits, `agent.sh`
-tells the operator to open the PR record with `local/bin/pr_open.py`, which
-owns the id sequence and the branch-name lint (`local/protocols/issues-prs.md`).
+tells the operator to open the PR with `local/bin/pr_open.py`, which pushes the
+branch and owns the branch-name lint (`local/protocols/issues-prs.md`).
 
 ## 11. Operating it
 
@@ -330,15 +330,17 @@ owns the id sequence and the branch-name lint (`local/protocols/issues-prs.md`).
 
 Exit codes: `0` reviewed or intentionally skipped · `1` usage/environment ·
 `3` gate blocked (CI not green for this head) · `4` no parseable verdict.
-Codes 3 and 4 both leave `review_state: blocked`.
+Code 3 publishes nothing at all — the missing green `local-review/summary` is
+the block.  Only code 4 publishes a `failure` `local-review/summary`, and
+neither publishes a review.
 
 Artefacts:
 
 | Path | Committed | Contents |
 |---|---|---|
-| `prs/<id>/reviews/<sha>-code.md` | yes | code-review verdict, ledger, prose |
-| `prs/<id>/reviews/<sha>-prose.md` | yes | blueprint prose verdict (when run) |
-| `~/.cache/mipstarre-dev/review/<pr>/<sha>/` | no | diff, prompts, raw agent output |
+| the exact-head `COMMENT` review on the PR | on GitHub | combined verdict, ledger, prose |
+| `local-review/summary` on the head SHA | on GitHub | the gate-readable verdict |
+| `~/.cache/mipstarre-dev/reviews/pr<N>/<sha>/` | no | diff, prompts, raw agent output |
 | `~/.cache/mipstarre-dev/locks/review-<pr>.lock` | no | the review lock |
 
 Every codex invocation goes through `local/bin/dispatch.sh` when it exists, so
@@ -351,9 +353,10 @@ is a degradation, not an alternative.  `dispatch.sh` enforces
 `LOCAL_REVIEW_ENABLED` for reviewer-role sessions independently; the two checks
 agreeing is intentional redundancy.
 
-Missing pieces degrade with a message, never silently: no CI manifest blocks,
-no `worktree-setup.sh` warns about a cold build cache, no codex CLI is a hard
-error.
+Missing pieces degrade with a message, never silently: missing CI statuses
+block, no `worktree-setup.sh` warns about a cold build cache, no codex CLI is a
+hard error.  A GitHub failure is fatal — a verdict that cannot be published is
+not a verdict.
 
 ## 12. Deliberately not ported
 
@@ -361,8 +364,8 @@ error.
   One reviewer session; the cascade
   `CLAUDE_CODE_REVIEW_PROVIDERS > CLAUDE_CODE_PROVIDER > anthropic` becomes
   `MIPSTARRE_REVIEW_MODEL > MIPSTARRE_CODEX_MODEL > the dispatcher's default`.
-* **Fork check** (`head_repository.full_name != repo` → skip).  There are no
-  forks in a local registry.
+* **Fork check** (`head_repository.full_name != repo` → skip).  Every PR here
+  comes from a branch of this single repository.
 * **Thread resolution via `mcp__github__resolve_review_thread`.**  Replaced by
   the ledger checkbox; the reviewer is told not to attempt it.
 * **`allowed-tools` presets and `allowed-tools.json`.**  codex sandbox modes
@@ -379,15 +382,15 @@ A PR receives at most **four** full review rounds. From the fifth round on,
 the operator may close the loop by adjudication instead of iteration:
 
 1. every remaining finding is either fixed, or converted to a tracked issue;
-   the operator writes an **adjudication record**
-   `reviews/<final_head>-adjudication.md` — frontmatter `verdict: ADJUDICATED`
-   plus the last review round's findings ledger with every box ticked and a
-   one-line disposition each (`fixed in <commit>` / `deferred to issue #NNNN:
-   <reason>` / `moot: <reason>`);
-2. `pr.md` records `review_state: ADJUDICATED`;
+   the operator posts an **ADJUDICATION comment** on the PR — a body starting
+   with `ADJUDICATION`, carrying `head=<final_head>`, and listing the last
+   round's findings with every box ticked and a one-line disposition each
+   (`fixed in <commit>` / `deferred to issue #NNNN: <reason>` /
+   `moot: <reason>`);
+2. the comment is the record; nothing local is written;
 3. the merge commit names the adjudication and the issues created;
-4. `pr_merge.py --adjudicated` accepts this state in place of APPROVED
-   (the adjudication record is the current-head verdict file the gate reads).
+4. `pr_merge.py --adjudicated` accepts it in place of a clean verdict, and
+   only for the current head — a stale `head=` is a refusal.
 
 Nothing is dropped silently: an adjudicated finding lives on as an issue.
 This mirrors the parent's combined bot-fix iteration cap with a single

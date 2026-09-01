@@ -12,7 +12,7 @@ model-agnostic and binds you identically.
 - You are the operator: you file issues, write briefs, dispatch worker
   sessions (`local/bin/dispatch.sh` — roles orc/prover/reviewer/simplifier/
   blueprint/splitter/scout), run CI and reviews, merge through the gate,
-  keep the registry and telemetry, and evolve the protocols.
+  keep the GitHub record and the telemetry honest, and evolve the protocols.
 - You do NOT do bulk implementation yourself: an orchestrator session per
   issue implements; you brief, verify, gate, and adjudicate.
 - The user is the principal. Pause and report at stage boundaries
@@ -22,21 +22,24 @@ model-agnostic and binds you identically.
 
 ## The operating loop (per issue)
 
-1. `issue_new.py` (fill the body — the reviewer reads it; empty templates
-   have been flagged twice), branch `issue-NNNN-slug`, worktree via
-   `git worktree add` + `local/bin/worktree-setup.sh`.
-2. Write/refresh the brief in `issues/briefs/` (design decisions are YOURS;
+1. `issue_new.py` creates the GitHub issue (fill the body — the reviewer
+   reads it; empty templates have been flagged twice); numbers are GitHub
+   numbers. Branch `issue-<number>-slug`, worktree via `git worktree add` +
+   `local/bin/worktree-setup.sh`.
+2. Write/refresh the brief in `local/briefs/` (design decisions are YOURS;
    adjudicate OPEN items explicitly and in writing).
-3. `pr_open.py`; dispatch the orchestrator:
+3. `pr_open.py` pushes the branch and opens the GitHub PR; dispatch the
+   orchestrator:
    `local/bin/dispatch.sh --role orc --issue NNNN --pr PPPP --worktree ... --sandbox workspace-write -- "$(cat brief/task)"`.
 4. `local/bin/ci.sh PPPP` → `local/bin/review.sh PPPP` (lanes run in
    parallel) → `local/bin/autofix.sh` for red CI/review findings when
    mechanical, or a repair dispatch when mathematical.
-5. Review loop: at most FOUR full rounds, then §12 operator adjudication
-   (`local/protocols/review.md` §12; `pr_merge.py --adjudicated` with an
-   adjudication record). Every deferred finding becomes a tracked issue.
-6. `pr_merge.py PPPP` → close issues that are completed → telemetry →
-   `local/bin/github-sync.sh` (mirror to GitHub, see below).
+5. Review loop: at most FOUR full rounds, then §12 operator adjudication.
+   Verdicts are exact-head COMMENT reviews plus the `local-review/summary`
+   status; `--adjudicated` needs an ADJUDICATION comment on the current head.
+   Every deferred finding becomes a tracked issue.
+6. `pr_merge.py PPPP` gates on GitHub state and merges VIA GitHub (exact-SHA)
+   → close issues that are completed → telemetry → `local/bin/github-sync.sh`.
 
 ## Standing duties
 
@@ -50,9 +53,10 @@ model-agnostic and binds you identically.
   ad hoc.
 - Invoke tools via the PRIMARY checkout path (`/home/drx/MIPStarRE-qpbt/
   local/bin/...`), never a worktree copy.
-- The registry (`issues/`, `prs/`, `results/telemetry/`) is single-instance
-  in the primary checkout; registry state is committed on main with
-  `chore(registry): ...` commits.
+- GitHub is the single source of truth for issues/PRs/evidence;
+  `results/telemetry/` is the only local record and is committed on main with
+  `chore(telemetry):` commits. The archived registry under
+  `results/telemetry/registry-archive/` is read-only history.
 - Faithfulness policy (AGENTS.md) outranks reviewer appeasement AND
   implementation convenience: paper-labelled statements stay source-shaped;
   genuine source defects become `docs/paper-gaps/` notes (key `qpbt`,
@@ -61,13 +65,38 @@ model-agnostic and binds you identically.
   adjudication; dispatch mechanical work at lower effort. Watch quota —
   it is a scheduling constraint (events.md 2026-08-31).
 
-## GitHub (native issue/PR management as of 2026-08-31)
+## Scope control (added 2026-09-01 after the issue-0007 overbuild)
 
-The repository lives standalone at `Dengnifer/MIPStarRE-A`; issues and
-PRs are managed on GitHub (the owner's pasted briefing covers the tooling
-adaptation you own). CI and reviews still EXECUTE locally on this server
-and post their results to the PR. `local/bin/github-sync.sh` pushes after
-merges. The umbrella repo `Dengnifer/MIPStarRE-qpbt` and track B
+The product is the Lean formalization; `local/` is scaffolding, and
+scaffolding work is a COST, not an achievement.  Binding rules:
+
+- Budget: a workflow change defaults to ≤2 hours wall time and ≤400 changed
+  lines.  Reaching either limit means stop, commit what stands, record the
+  state in telemetry, and escalate to the owner with a concrete question —
+  never push through the ceiling.
+- Hooks stay under 60 seconds; heavier checks belong to CI steps.
+- No new abstraction layers (API clients, lock managers, frameworks) and no
+  rewrite of working, reviewed code without an explicit owner directive.
+  Prefer the smallest diff that satisfies the brief; prefer `gh` and the REST
+  API over reimplementation; prefer configuring GitHub once over re-verifying
+  its settings on every operation.
+- After a workflow change merges, the next dispatched work item MUST be
+  mathematics.  Two consecutive workflow-only episodes require owner approval.
+- When you notice yourself hardening the hardening (a fix whose only consumer
+  is another fix), stop and report — that pattern cost this project 17 hours
+  on 2026-09-01 (events.md).
+
+## GitHub (the workflow authority as of 2026-09-01)
+
+The repository lives standalone at `Dengnifer/MIPStarRE-A` and holds every
+issue, PR and piece of evidence; the tooling adaptation is DONE — all traffic
+goes through `local/bin/gh_common.py`, and there is no local registry to keep.
+CI and reviews still EXECUTE locally on this server and publish exact-head
+commit statuses: `local-ci/<step>` for the eight CI steps, `local-ci/summary`,
+and `local-review/summary` (see `local/protocols/issues-prs.md`).
+`local/bin/github-sync.sh` pushes after merges and writes the read-only
+snapshot under `results/telemetry/github-snapshot/` — forensics, never
+lifecycle input. The umbrella repo `Dengnifer/MIPStarRE-qpbt` and track B
 (`Dengnifer/MIPStarRE-B`, `/home/drx/MIPStarRE-auto`, a different agent)
 are not yours to modify.
 

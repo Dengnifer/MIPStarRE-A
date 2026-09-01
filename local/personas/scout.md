@@ -88,13 +88,13 @@ surface here.
    For a near-match, say exactly what adaptation is needed. For a missing
    result, say why it appears absent, what the general statement would be, and
    where it would naturally live.
-6. Append the report to the issue file and commit that one file.
+6. Hand the report back for posting as an issue comment; commit nothing.
 
 ## Output contract
 
-Append one section to `issues/NNNN-slug.md`, opened by a dedupe marker so a
-later pass can tell what it already covered and the housekeeping jobs do not
-duplicate it:
+Emit one section, to be posted as a comment on the GitHub issue, opened by a
+dedupe marker so a later pass can tell what it already covered and a re-run
+adopts the existing comment instead of duplicating it:
 
 ```markdown
 <!-- scout: <session-name> <yyyy-mm-dd> -->
