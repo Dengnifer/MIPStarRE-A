@@ -11,6 +11,7 @@ import MIPStarRE.QPBT.Test.MagicSquare
 import MIPStarRE.QPBT.Test.PauliBasisTest
 import MIPStarRE.QPBT.Test.Soundness
 
+-- Mathlib 4.31 header checks require this for this aggregate module.
 set_option linter.style.header false
 
 /-!

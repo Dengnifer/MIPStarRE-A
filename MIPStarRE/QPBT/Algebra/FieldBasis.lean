@@ -79,8 +79,8 @@ selector itself is the resulting noncomputable choice.
 /-- An admissible binary field size admits the fixed self-dual normal model used
 by the Pauli basis test.  This is the existence assertion implicit in
 `def:dual-self-dual-normal-basis` and `def:binary-representation`, blueprint
-`blueprint/src/chapter/ch11_qpbt_algebra.tex:277-315`, paper origin
-`references/qpbt-paper/04_preliminaries.tex:653-680`.
+`blueprint/src/chapter/ch11_qpbt_algebra.tex:234-246,298-315`, paper origin
+`references/qpbt-paper/04_preliminaries.tex:653-680,702-725`.
 
 The construction of the basis and its natural coding is deferred to the
 algebra stage; keeping it as a named theorem makes the proof obligation visible
@@ -157,12 +157,12 @@ noncomputable def fixedBinTrace {q : ℕ} (F : FixedFieldModel q) : F.K → ZMod
 The matrix-trace presentation of `fixedBinTrace`, a statement-level bridge to
 Equation `eq:def-trace`.  It is the trace assertion in `def:subfield-trace`,
 blueprint `blueprint/src/chapter/ch11_qpbt_algebra.tex:217-232`, paper origin
-`references/qpbt-paper/04_preliminaries.tex:481-502`.  It remains a proof
-obligation in stage 4.1.
+`references/qpbt-paper/04_preliminaries.tex:481-502`.  Mathlib's
+`Algebra.trace_eq_matrix_trace` supplies the basis-independent equality.
 -/
 theorem fixedBinTrace_eq_matrixTrace {q ι : ℕ} (F : FixedFieldModel q)
     (b : Module.Basis (Fin ι) (ZMod 2) F.K) (a : F.K) :
     fixedBinTrace F a = (multiplicationTable b a).trace := by
-  sorry
+  exact Algebra.trace_eq_matrix_trace b a
 
 end MIPStarRE.QPBT

@@ -576,13 +576,9 @@ noncomputable def pauliWinPredicate (P : AdmissibleParams) :
               msWinPredicate (.var j) (.constraint i) (.bit γ) (.triple β))
           else true
       | .point W, .ms (.var j), .value u, .bit β =>
-          if (W = .X ∧ j = ⟨0, by decide⟩) ∨ (W = .Z ∧ j = ⟨4, by decide⟩) then
-            decide (pauliPointVariableCondition P W xB j u β)
-          else true
+          decide (pauliPointVariableCondition P W xB j u β)
       | .ms (.var j), .point W, .bit β, .value u =>
-          if (W = .X ∧ j = ⟨0, by decide⟩) ∨ (W = .Z ∧ j = ⟨4, by decide⟩) then
-            decide (pauliPointVariableCondition P W xA j u β)
-          else true
+          decide (pauliPointVariableCondition P W xA j u β)
         | _, _, _, _ => true
     else false
 
