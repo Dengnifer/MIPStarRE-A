@@ -255,3 +255,120 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   continued from local evidence. Lesson: an allocator refusal before identity
   creation is still protocol friction even though it cannot append normal
   session telemetry.
+- **Final serialization audit found lock-transition and review-attempt races.**
+  Symptom: CI validated a stale directory only after moving it, merge cleanup
+  moved the canonical path before proving ownership, and failed extra review
+  rounds left trusted statuses that were either unrecoverable or too weakly
+  bound. The classic linear-history response also accepted a present `null`
+  field. Diagnosis: rename participants did not share a stable mutex, while
+  provisional review evidence omitted the comparison base and explicit recovery
+  intent. Fix: serialize canonical lock renames on a persistent sibling
+  `flock`, revalidate identity and complete ownership before rename, require
+  manual recovery for every partial lock, bind review attempts to base/run/state,
+  permit abandoned-attempt recovery only through `--new-round`, and require a
+  present classic linear-history object to say `enabled=false`. Lesson:
+  recovery metadata needs the same immutable comparison identity as final
+  evidence, and ownership must be proven before the namespace mutation.
+- **Lock-unification audit found incompatible transition participants.**
+  Symptom: review cleanup could stale-break and release merge-reserved review
+  and fix locks with unchecked recursive deletion; auto-fix could write a
+  cancellation into a replacement fix lease; and the cache warmer, worktree
+  warmer, and housekeeping sweep used incompatible records and unchecked
+  release on the shared full-build path. Diagnosis: the first transition-mutex
+  repair covered CI and merge but left other owners outside the claim protocol,
+  so one safe participant could not make a shared lock safe. Fix: centralize
+  creation, inspection, stale recovery, exact-owner validation, claim-bound
+  cancellation, and release in `local/bin/runtime_lock.py`; migrate every
+  review/fix/full-build owner plus the warmer writer and telemetry leases; and
+  add deterministic replacement, partial-record, and cross-tool tests. Lesson:
+  a shared lock is only as strong as its least disciplined participant, and its
+  directory identity and complete owner record must be rechecked under one
+  persistent mutex before any namespace or cancellation mutation.
+- **Final audit found descendant, publication, and post-merge ambiguity.**
+  Symptom: acquisition reclaimed complete locks after the recorded PID died;
+  human write dispatch did not own the branch lease; autofix could cancel a
+  non-autofix owner; signal wrappers lost conventional exit codes; publication
+  guards ended before authoritative readback; and local cleanup failure could
+  report a topology-verified GitHub merge as failed. Diagnosis: parent-PID
+  liveness was mistaken for process-tree liveness, owner class was not part of
+  cancellation authorization, and mutation success was conflated with later
+  local maintenance. Fix: require explicit complete-record recovery, share the
+  branch lease with workspace-write agents, check autofix ownership under the
+  transition mutex, use exact signal cleanup, revalidate after publication and
+  retry reconciliation reads, preserve ambiguous accepted reviews as pending,
+  require `draft` exactly false, and defer failed local post-merge maintenance.
+  Lesson: irreversible remote success, local cleanup, and parent-process
+  liveness are independent facts and must not overwrite one another.
+- **Unquoted audit pattern temporarily relocated workflow paths.** Symptom: a
+  malformed audit command briefly moved `local/bin`, `local/protocols`, and
+  `scripts/tests/test_github_workflow.py` under `.githooks/`. Diagnosis: the
+  shell interpreted unquoted regex alternation as pipelines and the final
+  `mv` segment treated repository paths as sources. Fix: verify the exact
+  destinations were absent, move the three paths back verbatim, and confirm
+  that status, diff statistics, and protected-path guards were unchanged.
+  Lesson: pass search patterns as quoted arguments or structured argv; never
+  compose shell metacharacters into audit commands.
+- **Late first-phase cancellation could strand auto-fix work.** Symptom: a
+  canonical cancellation received during the first dispatched phase stopped
+  the wrapper before committing its successful edit, leaving a dirty feature
+  tree. Diagnosis: post-dispatch handling did not treat the final pre-dispatch
+  check as the phase-start linearization point. Fix: permit only a canonical
+  exact-claim cancellation after that point to finish one wrapper commit and
+  leased push; malformed records or lost ownership fail closed. Lesson: a
+  cancellation boundary must preserve both supersession and worktree liveness.
+- **Protected workflow changes could bypass regression tests.** Symptom:
+  `.github/` and registry-archive changes did not trigger the workflow suite,
+  while hook inventories omitted deletions and rename sources. Diagnosis: the
+  classifier covered only executable workflow files and used a restrictive
+  diff filter. Fix: include both protected trees and inventory changes with
+  no-renames semantics. Lesson: an immutability guard must trigger on removal
+  and both sides of a move, not only additions and modifications.
+- **PR label replacement retried an ambiguous write.** Symptom: a transient
+  response after an accepted label `PUT` could repeat an exact-set replacement
+  and overwrite a concurrent label update. Diagnosis: the generic retry path
+  treated replacement as safely repeatable. Fix: read first, issue one
+  retry-free `PUT`, and reconcile only through authoritative read-back. Lesson:
+  idempotent payload shape does not make concurrent replacement replay-safe.
+- **Archival session telemetry invalidated valid review evidence.** Symptom:
+  appending an `archived` projection made a previously valid reviewer session
+  look duplicated. Diagnosis: validation counted raw rows instead of the
+  append-only session lineage. Fix: require one original `done` row followed
+  only by field-preserving archival projections, while rejecting changed
+  identities and cross-session thread reuse. Lesson: append-only status history
+  must preserve, rather than erase, the original attestation.
+- **Contributor guidance still described inactive GitHub Actions.** Symptom:
+  the operator guide promised automatic issue, CI, and review workflows even
+  though `.github/workflows/` is frozen precedent. Diagnosis: the workflow
+  migration did not update its public operations summary. Fix: document the
+  GitHub-native local commands and explicit tracking actions. Lesson: operator
+  documentation is part of the authority boundary and must identify the live
+  mechanism.
+- **Resumed dispatch placed parent options after the subcommand.** Symptom:
+  the final read-only scout failed before starting because Codex rejected `-C`
+  after `codex exec resume`; the failed attempt was retained in session
+  telemetry. Diagnosis: one shared argv builder appended the `resume`
+  subcommand before worktree and sandbox options that belong to `codex exec`.
+  Fix: place `-C` and `--sandbox` before optional `resume`, retain child-shared
+  output options after it, and test fresh and resumed dry-run shapes. Lesson:
+  command-line subcommand boundaries are an integration contract and require a
+  regression against the installed parser's option ownership.
+- **Bootstrap dispatch reused a session name across worktrees.** Symptom: the
+  primary checkout recorded a failed `scout-0007-final-closure-audit` sequence
+  `01`, then the repaired feature-copy dispatcher independently assigned `01`
+  to the successful resume. Diagnosis: the shared allocator lock serialized
+  two scans of different worktree-local registries and capture directories.
+  Fix: preserve both original bundles under the dated session-collision
+  archive, retain the primary failure as `01`, record the byte-identical
+  successful bundle as `02`, and restore the primary-tool invocation rule in
+  the operator and session protocols. Lesson: serialization cannot prevent a
+  duplicate identity when participants consult different authoritative sets.
+- **Verbatim session capture conflicts with the whitespace hook.** Symptom:
+  the imported `scout-0007-post-repair-audit` final message contains three
+  Markdown hard-break lines with trailing spaces, so `git diff --check` rejects
+  the otherwise telemetry-only checkpoint. Diagnosis: session captures are
+  immutable research evidence, while the source whitespace gate assumes every
+  newly tracked text file may be normalized. Fix: keep the captured bytes
+  identical to the primary checkout, verify all source changes through the
+  normal hook, and bypass the whitespace hook only for this telemetry commit.
+  Lesson: preservation of generated evidence takes precedence over formatting
+  a representation whose byte identity is itself part of the archive.
