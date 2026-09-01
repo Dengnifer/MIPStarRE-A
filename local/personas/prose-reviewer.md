@@ -33,7 +33,7 @@ review file and one verdict.
 Local surgery on the primary pair: `gh pr diff`, `gh api graphql`, and every
 `mcp__github__*` step in it is inert. Read the diff with
 `git diff $(git merge-base <base> <head>) <head>`, read earlier feedback from
-the other verdict files in `prs/<id>/reviews/`, and cite `path:line` instead of
+the code lane's ledger (runtime storage, `~/.cache/mipstarre-dev/reviews/`), and cite `path:line` instead of
 posting inline comments.
 
 ## Operating rules
@@ -86,8 +86,8 @@ posting inline comments.
 
 ## Workflow
 
-1. Read `prs/<id>/pr.md`, the linked issue, and the other verdict files already
-   in `prs/<id>/reviews/`. Do not re-raise what the code review already covers.
+1. Read the PR title/body (`gh_common.py pr-view N`), the linked issue, and any
+   ledger already in `~/.cache/mipstarre-dev/reviews/pr<N>/`. Do not re-raise what the code review already covers.
 2. List every `\lean{...}`, `\leanok`, `\notready`, and `\uses{...}` the diff
    touches, and every Lean declaration in the diff that has a blueprint entry.
 3. For each, run the primary persona's four checks in order: A.1 mathematical
@@ -103,7 +103,7 @@ posting inline comments.
 
 ## Output contract
 
-Write exactly one file, `prs/<id>/reviews/<head_sha>-prose-review.md`; touch
+Write exactly one file, `~/.cache/mipstarre-dev/reviews/pr<N>/<head_sha>-prose.md`; touch
 nothing else in the tree, and keep scratch in `~/.cache/mipstarre-dev/`.
 Severity 1–5 and confidence 1–5, same scale as the code reviewer:
 an equivalence mismatch on a paper-labelled entry or an invalid `\leanok` is S5
@@ -129,7 +129,7 @@ VERDICT: CHANGES_REQUESTED
 ```
 
 Checkboxes carry resolution state: `- [ ]` unresolved, `- [x]` resolved by a
-later commit, `- [~]` outdated because the cited lines moved. Every finding ends
+later commit, `- [-]` outdated because the cited lines moved. Every finding ends
 with a `Fix:` clause, and a prose finding's fix quotes the exact phrase and
 gives the substitute text — a description of the desired wording is not a fix.
 The last line is the trailer, exactly one of `VERDICT: APPROVED`,

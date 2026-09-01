@@ -233,3 +233,92 @@ management, at the cost of link-dependence for record operations — an
 accepted trade recorded as a workflow-evolution datum: localization and
 re-hybridization are both responses to the environment, which is the
 paper's thesis in miniature.
+
+## 2026-09-01 — GitHub becomes the workflow authority (lean port)
+
+**Trigger:** owner decision 2026-08-31 (follow-on to the re-hybridization
+entry); executed 2026-09-01 after the scope reset recorded below.
+
+**Change:** The local issue tree and PR registry are retired.  GitHub
+(`Dengnifer/MIPStarRE-A`) is the single source of truth for issues (native
+sub-issues replace `parent`/`children` frontmatter), PRs, CI evidence
+(per-step commit statuses `local-ci/<step>` plus `local-ci/summary` and
+`local-review/summary` on the exact head SHA), review verdicts (COMMENT
+reviews bound to a commit id — a single-account repo cannot self-APPROVE, so
+adverseness travels in the failing `local-review/summary` status), and merges
+(REST merge guarded by the exact-SHA `sha` parameter, verified by merge-commit
+topology).  All GitHub traffic goes through `local/bin/gh_common.py`; shared
+non-registry helpers moved to `local/bin/wf_util.py`.  `track.py`,
+`validate_tree.py`, `export_issues.py`, and `local/labels.yml` are deleted —
+GitHub provides what they reimplemented.  The registries were archived
+verbatim first (`results/telemetry/registry-archive/`, commit c8f1999) and
+stay read-only research data; `github-sync.sh` now also writes a read-only
+JSON snapshot of open issues/PRs under `results/telemetry/github-snapshot/`
+for offline forensics — never lifecycle input.
+
+**Expected effect:** CI and reviews still execute locally on this machine;
+GitHub stores the evidence.
+
+## 2026-09-01 — Scope control for workflow changes (incident amendment)
+
+**Trigger:** events.md 2026-09-01, the issue-0007 overbuild.  The first
+implementation of the entry above grew, in ~17 hours and 21 commits, into a
++14.6k-line unreviewed rewrite of the whole layer — a 2,761-line bespoke
+GitHub API client, a 643-line lock manager, a 5,649-line test suite wired
+into the commit and push hooks (≈10 minutes per commit), an actor-verification
+regime and a branch-protection evaluator nobody asked for — while the actual
+product (the Lean formalization; PR #5's 17 findings) sat untouched.  The
+owner paused the session, archived the branch as research data
+(`telemetry/issue-0007-overbuilt`), and rebuilt the port lean.
+
+**Change:** amendment (now also in `local/personas/main.md`):
+
+1. The product is the Lean formalization.  `local/` is scaffolding; scaffolding
+   work is a cost center, budgeted by default at ≤2 hours wall time and ≤400
+   changed lines per episode.  Hitting the budget means stop, commit what
+   stands, record the state, and escalate to the owner — not push through.
+2. Git hooks must finish in under 60 seconds on a typical commit; heavier
+   verification belongs to CI steps.
+3. No new abstraction layers (API clients, lock managers, frameworks) and no
+   rewrites of working, reviewed code without an explicit owner directive;
+   prefer the smallest diff that satisfies the brief, and prefer `gh` + the
+   REST API over reimplementation.
+4. After any workflow change merges, the next dispatched work item MUST be a
+   mathematics item.  Two consecutive workflow-only episodes require owner
+   approval.
+
+**Expected effect:** scaffolding episodes stay bounded and auditable, and the
+work item after a merged workflow change is mathematics.
+
+## 2026-09-02 — PR 7 review hardening (rounds 1-3)
+
+**Trigger:** the three adversarial review rounds on the GitHub-native port PR
+(#7).  Each round's findings ledger sits in the PR's published review; the
+supporting record is `results/telemetry/` and the read-only
+`registry-archive/` precedent for what evidence must be able to prove.
+
+**Change:** every bypass the reviewer found is now closed mechanically.
+
+1. A publishing CI or review run refuses a dirty worktree, and `ci.sh`
+   re-checks both the local tip and the remote head immediately before
+   publication — a status is a claim about one commit, and dirty bytes are not
+   that commit.
+2. `--base`, `--only`, and `--skip-build` runs are partial: they publish
+   nothing at all.  `--base` joins the list because an overridden base empties
+   the diff and marks every gate skipped-success.
+3. The roll-up summary is invalidated (set `pending`) before a rerun, so a
+   crashed run can never leave the previous `success` standing.
+4. Green review evidence requires BOTH a clean `VERDICT` and a
+   zero-unresolved findings ledger; a clean verdict over unresolved findings is
+   inconsistent reviewer output, not a pass.
+5. The merge gate adds gate 2b (fresh base): the head must contain the current
+   base tip, and a failed base fetch fails the gate.
+6. The fix-iteration cap fails closed on an unresolvable merge base rather
+   than counting zero fixes.
+7. The scope guard counts deletions and runs before the early exit, so a
+   large-deletion or no-op-looking change cannot slip past the budget.
+8. Review ledgers stay in runtime storage; the published GitHub review is the
+   durable record.
+
+**Expected effect:** evidence can only ever certify committed, pushed, current
+bytes, and each bypass is closed by the tooling rather than by convention.

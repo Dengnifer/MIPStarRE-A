@@ -7,10 +7,13 @@ track here is the **quantum Pauli basis test (QPBT)** from MIP\*=RE
 (arXiv:2001.04383, primary) and NEEXP in MIP\* (arXiv:1904.05870, secondary).
 
 Every GitHub-hosted operation of the parent workflow is replaced by a local
-equivalent. The `.github/` tree is kept **frozen as reference** — it documents
-the mechanisms being localized and is never executed here. The operative layer
-is this `local/` tree plus the (already-local) `scripts/` audits and
-`.githooks/` gates, which port unchanged.
+equivalent that *executes* here. Since 2026-09-01 the issue, PR, evidence and
+merge **records** live on GitHub again (`Dengnifer/MIPStarRE-A`,
+`protocols/issues-prs.md`); what runs is still local. The `.github/` tree is
+kept **frozen as reference** — it documents the mechanisms being localized and
+is never executed here. The operative layer is this `local/` tree plus the
+(already-local) `scripts/` audits and `.githooks/` gates, which port
+unchanged.
 
 ## Layout
 
@@ -24,14 +27,13 @@ local/
 │   ├── ci.md          # local PR CI gate
 │   ├── review.md      # reviewer dispatch and gating
 │   ├── autofix.md     # auto-fix loop, iteration caps
-│   ├── issues-prs.md  # issue tree and PR registry
+│   ├── issues-prs.md  # GitHub-backed issue and PR lifecycle
 │   ├── sessions.md    # agent session naming, dispatch, archiving
 │   └── EVOLUTION.md   # dated protocol-amendment ledger (research data)
 ├── personas/          # system prompts for locally dispatched agents
 └── bin/               # executables (the workflow engine)
-issues/                # dynamic issue tree (committed)
-prs/                   # PR registry (committed)
-results/telemetry/     # sessions/stages/builds logs (committed)
+local/briefs/          # per-issue design briefs (committed)
+results/telemetry/     # sessions/stages/builds logs, GitHub snapshot (committed)
 ```
 
 Runtime state that must never be committed lives in `~/.cache/mipstarre-dev/`
@@ -44,11 +46,11 @@ Runtime state that must never be committed lives in `~/.cache/mipstarre-dev/`
 | PR CI (`pr-ci.yml`) on push/PR events | `local/bin/ci.sh <pr-id>` run by the PR lifecycle scripts |
 | Main-build actions cache (main-only save, PR restore) | Hot main cache: single-writer warmer + read-only snapshots + APFS copy-on-write clones per worktree (`build-cache.md`) |
 | `lake exe cache get` (Mathlib cloud cache) | Unchanged — already local |
-| Model-backed PR review chained on CI success | `local/bin/review.sh <pr-id>`: codex CLI with the same `.github/prompts/` review personas, invoked only from a green `ci.sh`; verdict files under `prs/<id>/reviews/` |
+| Model-backed PR review chained on CI success | `local/bin/review.sh <pr-number>`: codex CLI with the same `.github/prompts/` review personas, invoked only from green exact-head CI statuses; one COMMENT review plus `local-review/summary` |
 | Auto-fix workflows (CI-fix, blueprint-fix, review-fix) | `local/bin/autofix.sh <pr-id> --mode {ci,blueprint,review,auto}` with the same commit-prefix guards and a combined iteration cap |
 | `@claude`/`@codex` mention responders | `local/bin/agent.sh <id> "instruction"` — human-invoked codex session on the branch worktree |
-| GitHub issues + sub-issues + labels | `issues/` markdown tree with YAML frontmatter (`issues-prs.md`); `labels.yml` taxonomy |
-| GitHub PRs | `prs/` registry, branch-per-issue, merge gate in `pr_merge.py` |
+| GitHub issues + sub-issues + labels | unchanged — GitHub is the record again (`issues-prs.md`); `issue_new.py` / `issue_close.py` drive it through `gh_common.py` |
+| GitHub PRs | GitHub PRs, branch-per-issue, merge gate in `pr_merge.py` (REST merge with the exact-SHA guard) |
 | Issue automation (classify/scout/track/followups) | `local/bin/` Python ports; LLM steps optional behind `MIPSTARRE_LLM_ENABLED` |
 | Housekeeping crons (standup, stale audit, linter sweep, README freshness) | `local/bin/housekeeping.sh <job>` on demand |
 | Badges + Pages site (blueprint/docs/badges components) | `local/bin/site.sh` → component store + assembled site in `~/.cache/mipstarre-dev/site/` |
@@ -63,8 +65,10 @@ documented failure modes. Sources are cited in `local/protocols/*.md`.
 1. **Single cache writer.** Only the warmer writes the hot main cache; agent
    worktrees consume copy-on-write clones and never write back. (GitHub's
    per-PR cache saves evicted the main entry: pr-ci.yml:138-142.)
-2. **Review only after green CI, on the same head SHA.** A failed CI yields
-   `review_state: blocked`, never a silent skip. Draft/bot commits with prefix
+2. **Review only after green CI, on the same head SHA.** The gate reads the
+   exact-head `local-ci/*` statuses; a failed or absent CI summary blocks the
+   review, which then publishes nothing at all — the *absence* of a green
+   `local-review/summary` is the block, never a silent skip. Bot commits with prefix
    `[codex-auto-fix]`/`[codex-review-fix]` are not re-reviewed except the final
    fix at the iteration cap, which gets one forced review.
 3. **Serialized fixes.** ci-fix → blueprint-fix → review-fix strictly in order,
@@ -94,17 +98,14 @@ documented failure modes. Sources are cited in `local/protocols/*.md`.
 
 ## Naming and identity conventions
 
-- **Issues**: `issues/NNNN-slug.md`, 4-digit zero-padded id from `issues/.seq`.
-  Frontmatter: `id, title, state (open|closed), state_reason
-  (completed|not-planned|null), parent, children, labels, pinned, created,
-  updated, agent_session`. Labels validated against `local/labels.yml`.
-- **PRs**: `prs/NNNN-slug/` directory with `pr.md` (frontmatter: `id, branch,
-  issue, base, state (open|merged|closed), head_sha, ci_status, review_state,
-  fix_iterations, auto_fix, labels, created, merged_commit`; body =
-  Motivation/Description/Testing per CONTRIBUTING.md), `ci/` (per-SHA result
-  manifests), `reviews/` (per-SHA verdict files).
-- **Branches**: `issue-<id>-<slug>` (orchestrator/human), `codex/issue-<id>-<slug>`
-  (agent-created). The `issue-(\d+)` regex stays load-bearing for tracking.
+- **Issues and PRs**: GitHub's, identified by their numbers; sub-issues carry
+  the parent/child structure and repository labels are the taxonomy
+  (`issues-prs.md`). PR bodies keep the Motivation/Description/Testing shape of
+  CONTRIBUTING.md; evidence is exact-head commit statuses, the manifest comment
+  and the COMMENT review.
+- **Branches**: `issue-<number>-<slug>` (orchestrator/human),
+  `codex/issue-<number>-<slug>` (agent-created); the number is the GitHub
+  issue's.
 - **Fix commits**: subjects prefixed `[codex-auto-fix]` / `[codex-review-fix]`
   exactly (the review-gate regex depends on them).
 - **Agent sessions**: `<role>-<issue|scope>-<yyyymmdd>-<seq>` with roles
