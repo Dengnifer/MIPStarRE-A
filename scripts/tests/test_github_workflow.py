@@ -1698,10 +1698,26 @@ class CIPublicationTests(FakeGhCase):
         self.assertTrue(
             any(
                 call["args"][:3] == ["api", "--method", "GET"]
-                and call["args"][3].startswith(f"repos/o/r/commits/{head_sha}/statuses")
+                and call["args"][3].startswith(
+                    f"repos/o/r/commits/{head_sha}/statuses"
+                )
                 for call in between
             )
         )
+
+    def test_ci_preserves_nascent_merge_lock_and_recovers_old_partial(self) -> None:
+        repository, _base_sha, _head_sha = self.prepare_ci(name="ci-lock-race")
+        lock = self.root / "cache" / "locks" / "ci-1.lock"
+        lock.mkdir(parents=True)
+
+        nascent = self.run_ci(repository)
+        self.assertNotEqual(nascent.returncode, 0)
+        self.assertTrue(lock.is_dir())
+
+        os.utime(lock, (1, 1))
+        recovered = self.run_ci(repository)
+        self.assertEqual(recovered.returncode, 0, recovered.stderr + recovered.stdout)
+        self.assertFalse(lock.exists())
 
     def test_partial_run_publishes_nothing_and_remote_race_has_no_success(self) -> None:
         repository, base_sha, head_sha = self.prepare_ci()
@@ -1856,6 +1872,7 @@ class ReviewPublicationTests(FakeGhCase):
         output: str | None = None,
         trusted_ref: str | None = None,
         extra_env: dict[str, str] | None = None,
+        options: tuple[str, ...] = (),
     ) -> subprocess.CompletedProcess[str]:
         environment = os.environ.copy()
         environment.update(
@@ -1871,7 +1888,7 @@ class ReviewPublicationTests(FakeGhCase):
             environment["MIPSTARRE_TRUSTED_REF"] = trusted_ref
         environment.update(extra_env or {})
         return subprocess.run(
-            ["bash", str(repository / "local/bin/review.sh"), "1"],
+            ["bash", str(repository / "local/bin/review.sh"), "1", *options],
             cwd=repository,
             env=environment,
             text=True,
@@ -2094,11 +2111,87 @@ class ReviewPublicationTests(FakeGhCase):
         )
         self.assertEqual(state["state"], "recoverable")
 
-        second = self.run_review(repository)
+        second = self.run_review(repository, options=("--new-round",))
         self.assertEqual(second.returncode, 0, second.stderr + second.stdout)
         self.assertEqual(self.dispatch_count(repository), 1)
         self.assertEqual(len(self.review_posts()), 1)
         self.client(repository).review_evidence(1, head_sha, base_sha)
+
+    def test_review_new_round_cli_produces_four_exact_comparison_rounds(self) -> None:
+        repository, base_sha, head_sha, _pull = self.prepare_review_shell(
+            name="review-four-rounds"
+        )
+        first = self.run_review(repository)
+        self.assertEqual(first.returncode, 0, first.stderr + first.stdout)
+
+        ordinary = self.run_review(repository)
+        self.assertEqual(ordinary.returncode, 0, ordinary.stderr + ordinary.stdout)
+        self.assertEqual(self.dispatch_count(repository), 1)
+
+        for _ in range(3):
+            result = self.run_review(repository, options=("--new-round",))
+            self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+
+        self.assertEqual(self.dispatch_count(repository), 4)
+        attestations = self.client(repository).review_attestations(1)
+        self.assertEqual(len(attestations), 4)
+        self.assertTrue(
+            all(
+                item.head_sha == head_sha and item.base_sha == base_sha
+                for item in attestations
+            )
+        )
+        self.assertEqual(len({item.run_id for item in attestations}), 4)
+        self.assertEqual(len(self.review_posts()), 4)
+
+    def test_review_recovers_untrusted_summary_but_rejects_trusted_conflict(self) -> None:
+        for index, creator in enumerate(({"login": "Mallory"}, None), start=1):
+            with self.subTest(creator=creator):
+                repository, base_sha, head_sha, _pull = self.prepare_review_shell(
+                    name=f"review-untrusted-summary-{index}"
+                )
+                first = self.run_review(repository)
+                self.assertEqual(first.returncode, 0, first.stderr + first.stdout)
+                before_dispatch = self.dispatch_count(repository)
+                state = self.state()
+                poisoned = {
+                    "id": 999,
+                    "sha": head_sha,
+                    "context": github_api.REVIEW_CONTEXT,
+                    "state": "failure",
+                    "description": "untrusted summary poison",
+                    "created_at": "2098-01-01T00:00:11Z",
+                }
+                if creator is not None:
+                    poisoned["creator"] = creator
+                state["statuses"][head_sha].append(poisoned)
+                self.write_state(**state)
+
+                recovered = self.run_review(repository)
+                self.assertEqual(
+                    recovered.returncode, 0, recovered.stderr + recovered.stdout
+                )
+                self.assertEqual(self.dispatch_count(repository), before_dispatch)
+                evidence = self.client(repository).review_evidence(
+                    1, head_sha, base_sha
+                )
+                self.assertEqual(evidence.status["creator"]["login"], "o")
+
+        repository, _base_sha, head_sha, _pull = self.prepare_review_shell(
+            name="review-trusted-summary-conflict"
+        )
+        first = self.run_review(repository)
+        self.assertEqual(first.returncode, 0, first.stderr + first.stdout)
+        self.client(repository).post_status(
+            head_sha,
+            github_api.REVIEW_CONTEXT,
+            "pending",
+            github_api.review_pending_description("trusted-conflict"),
+        )
+        before_dispatch = self.dispatch_count(repository)
+        conflict = self.run_review(repository, options=("--new-round",))
+        self.assertNotEqual(conflict.returncode, 0)
+        self.assertEqual(self.dispatch_count(repository), before_dispatch)
 
     def test_review_does_not_recover_unrelated_pending_run(self) -> None:
         repository, base_sha, head_sha, _pull = self.prepare_review_shell()
@@ -2138,6 +2231,7 @@ class ReviewPublicationTests(FakeGhCase):
                 github_api.review_pending_description("race-run"),
             ),
             "created_at": "2099-01-01T00:00:00Z",
+            "creator": {"login": "o"},
         }
         self.write_state(
             status_read_count=0,
@@ -3488,6 +3582,9 @@ class MergeGateTests(FakeGhCase):
         protection = classic_protection()
         protection["allow_deletions"]["enabled"] = True
         invalid.append(("deletion", protection))
+        protection = classic_protection()
+        protection["required_linear_history"] = {"enabled": True}
+        invalid.append(("linear-history", protection))
 
         for name, candidate in invalid:
             with self.subTest(name=name):
@@ -3544,6 +3641,9 @@ class MergeGateTests(FakeGhCase):
 
         candidates = {
             "merge-queue": [{"type": "merge_queue", "parameters": {}}],
+            "linear-history": [
+                {"type": "required_linear_history", "parameters": {}}
+            ],
             "nonstrict-status": [
                 {
                     **status_rule,
@@ -3680,6 +3780,18 @@ class MergeGateTests(FakeGhCase):
                 self.client(), pull, 1, sha, base_sha, require_status=False
             )
 
+        equal_source = {
+            **comment,
+            "id": 9999,
+            "created_at": "2026-01-01T00:03:04Z",
+            "updated_at": "2026-01-01T00:03:04Z",
+        }
+        self.write_state(comments={"1": [equal_source]})
+        with self.assertRaisesRegex(pr_merge.GateFailure, "strictly later"):
+            pr_merge.require_adjudication(
+                self.client(), pull, 1, sha, base_sha, require_status=False
+            )
+
     def test_adjudication_rejects_edited_duplicate_short_and_inexact_records(self) -> None:
         sha, base_sha = "4" * 40, "5" * 40
         pull = pull_row(1, sha, base_sha=base_sha)
@@ -3792,6 +3904,17 @@ class MergeGateTests(FakeGhCase):
                 with pr_merge.reserve_runtime_lock(lock, "test contender"):
                     self.fail("a live lock must exclude a contender")
         self.assertFalse(lock.exists())
+
+        with pr_merge.reserve_runtime_lock(lock, "test replacement") as held:
+            (lock / "token").write_text("replacement-owner\n", encoding="utf-8")
+            with self.assertRaisesRegex(pr_merge.GateFailure, "no longer owned"):
+                held.require_owned()
+        self.assertTrue(lock.is_dir())
+        self.assertEqual(
+            (lock / "token").read_text(encoding="utf-8"),
+            "replacement-owner\n",
+        )
+        shutil.rmtree(lock)
 
 
 class GuardedMergeTests(FakeGhCase):

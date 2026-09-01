@@ -1651,10 +1651,9 @@ class GitHub:
         attestation = next(item for item in matches if item.row is selected_row)
         self._validate_attestation_sessions(attestation)
         status = self.latest_statuses(sha).get(REVIEW_CONTEXT.casefold())
-        if status is not None:
-            self.require_trusted_actor_row(
-                status, field="creator", kind=f"{REVIEW_CONTEXT} status"
-            )
+        status_is_trusted = status is None or self.is_trusted_actor_row(
+            status, field="creator", kind=f"{REVIEW_CONTEXT} status"
+        )
         final_state = review_summary_state(attestation)
         expected_final = render_status_description(
             sha,
@@ -1662,7 +1661,7 @@ class GitHub:
             final_state,
             review_status_description(attestation),
         )
-        if status is not None and (
+        if status_is_trusted and status is not None and (
             str(status.get("state") or "").casefold() == final_state
             and str(status.get("description") or "") == expected_final
         ):
@@ -1677,7 +1676,7 @@ class GitHub:
             "pending",
             review_pending_description(attestation.run_id),
         )
-        if status is None or (
+        if status is None or not status_is_trusted or (
             str(status.get("state") or "").casefold() == "pending"
             and str(status.get("description") or "") == expected_pending
         ):

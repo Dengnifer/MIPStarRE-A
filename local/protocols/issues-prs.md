@@ -109,10 +109,13 @@ Runtime logs live beneath `~/.cache/mipstarre-dev/`.
 Review holds the per-PR review lock and the ownership-stamped branch fix lock
 from before reading the feature tree through publication. It may recover a
 valid exact-head and exact-base attestation whose matching summary is missing
-or canonically pending by posting only the final status. It cannot recover an
-unrelated pending run, a conflicting status, or a stale-base attestation, and
-one review run id, reviewer session name, or thread cannot be replayed across
-distinct attestations for the same PR.
+or canonically pending, or whose globally latest summary is untrusted or lacks
+a creator, by posting only the trusted final status. It cannot recover an
+unrelated pending run, a conflicting trusted status, or a stale-base
+attestation. Ordinary reruns adopt complete evidence; `--new-round` explicitly
+dispatches another fully guarded attestation for the same exact comparison.
+One review run id, reviewer session name, or thread cannot be replayed across a
+distinct attestation for the same PR.
 
 `local/bin/pr_merge.py <pr-number>` accepts only an open, non-draft, mergeable
 PR whose local branch and GitHub head are the same full 40- or 64-hex SHA and
@@ -135,10 +138,12 @@ force pushes and deletions must be disabled. The classic `checks` rows must
 bind both summaries to PAT publication with `app_id` null or `-1`. Every
 effective branch rule is also read, and each required status row must likewise
 have `integration_id` null or `-1`. The repository setting must allow merge
-commits. Active merge queues, nonstrict or missing summary rules, approval
-requirements, unavailable merge commits, malformed or non-PAT producers,
-inactive referenced rulesets, or nonempty ruleset bypass actors block the
-merge.
+commits. Classic `required_linear_history.enabled` and every effective
+`required_linear_history` rule are incompatible with that merge-only policy.
+Active merge queues, linear-history requirements, nonstrict or missing summary
+rules, approval requirements, unavailable merge commits, malformed or non-PAT
+producers, inactive referenced rulesets, or nonempty ruleset bypass actors
+block the merge.
 
 GitHub approval and `reviewDecision` are not gates. A clean independent
 exact-head `COMMENT` review is sufficient with the other evidence above.
@@ -155,6 +160,11 @@ reason and evidence, while `tracked` records name an open, non-PR issue in the
 same repository. After a full revalidation under all three locks, the gate
 publishes the exact adjudication as `local-review/summary=success` and rereads
 it before merge.
+
+Because review ids and issue-comment ids come from different namespaces, their
+relative values carry no chronology. The source-review/adjudication comparison
+uses timestamps only and requires strict inequality; equal timestamps fail
+closed regardless of either row's id.
 
 The only merge mutation is one guarded
 `gh pr merge --merge --match-head-commit <sha>` call, without `--admin` or

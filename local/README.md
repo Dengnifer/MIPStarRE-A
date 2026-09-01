@@ -23,7 +23,8 @@ GitHub issue -> branch/worktree -> agent sessions -> exact-head CI -> review
    the digest-bound `local-ci/summary` gate.
 6. Run `local/bin/review.sh <pr-number>`. A clean commit-bound `COMMENT` review
    plus `local-review/summary=success` is sufficient; GitHub approval is not a
-   gate.
+   gate. Ordinary reruns adopt complete evidence; use `--new-round` to request
+   another guarded attestation for the unchanged exact head and base.
 7. Optionally run `local/bin/autofix.sh <pr-number> --mode auto` when the PR has
    the opt-in label.
 8. Merge with `local/bin/pr_merge.py <pr-number>`, which invokes only guarded

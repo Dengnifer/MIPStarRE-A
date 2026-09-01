@@ -125,18 +125,75 @@ worktree_is_clean() {
 # Locks are advisory mkdir-based lease directories, matching the hot-main
 # writer lease convention in local/protocols/build-cache.md.
 HELD_LOCKS=""
+LOCK_COUNTER=0
+ACQUIRED_LOCK_TOKEN=""
 
 lock_age_s() {
-  # $1 = lock dir.  Prints the age in seconds of its owner stamp, or a huge
-  # number when the stamp is unreadable (treat as stale).
+  # $1 = lock dir. Use the directory timestamp until the owner stamp is
+  # atomically installed, so a process between mkdir and publication is never
+  # mistaken for an ancient partial lock.
   local _stamp="$1/owner"
-  if [ ! -f "$_stamp" ]; then
-    printf '%s\n' 999999999
-    return 0
+  [ -f "$_stamp" ] || _stamp="$1"
+  local _mtime _age
+  _mtime="$(stat -c %Y "$_stamp" 2>/dev/null ||
+    stat -f %m "$_stamp" 2>/dev/null || echo 0)"
+  case "$_mtime" in
+    ''|*[!0-9]*) _mtime=0 ;;
+  esac
+  _age=$(( $(epoch_now) - _mtime ))
+  [ "$_age" -ge 0 ] || _age=0
+  printf '%s\n' "$_age"
+}
+
+lock_inode() {
+  local _identity
+  _identity="$(stat -c '%d:%i' "$1" 2>/dev/null ||
+    stat -f '%d:%i' "$1" 2>/dev/null || true)"
+  case "$_identity" in
+    *:*) printf '%s\n' "$_identity" ;;
+    *) return 1 ;;
+  esac
+}
+
+break_stale_lock() {
+  local _dir="$1" _expected_inode="$2" _doomed _moved_inode
+  [ -n "$_expected_inode" ] || return 1
+  LOCK_COUNTER=$((LOCK_COUNTER + 1))
+  _doomed="${_dir}.stale.$$.$(epoch_now).$LOCK_COUNTER"
+  if mv "$_dir" "$_doomed" 2>/dev/null; then
+    _moved_inode="$(lock_inode "$_doomed" 2>/dev/null || true)"
+    if [ "$_moved_inode" = "$_expected_inode" ]; then
+      rm -rf "$_doomed"
+      return 0
+    fi
+    if [ ! -e "$_dir" ]; then
+      mv "$_doomed" "$_dir" 2>/dev/null ||
+        warn "could not restore replacement lock moved to $_doomed"
+    else
+      warn "replacement lock preserved at $_doomed"
+    fi
   fi
-  local _mtime
-  _mtime="$(stat -f %m "$_stamp" 2>/dev/null || stat -c %Y "$_stamp" 2>/dev/null || echo 0)"
-  printf '%s\n' "$(( $(epoch_now) - _mtime ))"
+  return 1
+}
+
+release_owned_lock() {
+  local _dir="$1" _token="$2" _doomed _owner _observed
+  _owner="$(cat "$_dir/pid" 2>/dev/null || true)"
+  _observed="$(cat "$_dir/token" 2>/dev/null || true)"
+  [ "$_owner" = "$$" ] && [ "$_observed" = "$_token" ] || return 0
+  LOCK_COUNTER=$((LOCK_COUNTER + 1))
+  _doomed="${_dir}.release.$$.$(epoch_now).$LOCK_COUNTER"
+  mv "$_dir" "$_doomed" 2>/dev/null || return 0
+  _owner="$(cat "$_doomed/pid" 2>/dev/null || true)"
+  _observed="$(cat "$_doomed/token" 2>/dev/null || true)"
+  if [ "$_owner" = "$$" ] && [ "$_observed" = "$_token" ]; then
+    rm -rf "$_doomed"
+  elif [ ! -e "$_dir" ]; then
+    mv "$_doomed" "$_dir" 2>/dev/null ||
+      warn "could not restore replacement lock moved to $_doomed"
+  else
+    warn "replacement lock preserved at $_doomed"
+  fi
 }
 
 lock_owner_alive() {
@@ -160,18 +217,19 @@ lock_owner_alive() {
 # machine forever.
 acquire_lock() {
   local _dir="$1" _wait="$2" _stale="$3" _tag="$4"
-  local _waited=0
+  local _waited=0 _observed_inode
   mkdir -p "$(dirname "$_dir")"
   while ! mkdir "$_dir" 2>/dev/null; do
+    _observed_inode="$(lock_inode "$_dir" 2>/dev/null || true)"
     if lock_owner_alive "$_dir"; then
       : # live owner: wait below, never break
     elif [ -f "$_dir/owner" ] || [ -f "$_dir/info" ]; then
       warn "breaking stale lock $_dir (owner process is dead)"
-      rm -rf "$_dir"
+      break_stale_lock "$_dir" "$_observed_inode" || true
       continue
     elif [ "$(lock_age_s "$_dir")" -gt "$_stale" ]; then
       warn "breaking stale lock $_dir (no owner stamp, older than ${_stale}s)"
-      rm -rf "$_dir"
+      break_stale_lock "$_dir" "$_observed_inode" || true
       continue
     fi
     if [ "$_waited" -ge "$_wait" ]; then
@@ -183,29 +241,44 @@ acquire_lock() {
     sleep 5
     _waited=$(( _waited + 5 ))
   done
-  printf '%s\n%s\n%s\n' "$$" "$(iso_now)" "$_tag" > "$_dir/owner"
-  HELD_LOCKS="$HELD_LOCKS $_dir"
+  LOCK_COUNTER=$((LOCK_COUNTER + 1))
+  ACQUIRED_LOCK_TOKEN="ci-$$-$(epoch_now)-$LOCK_COUNTER-${RANDOM:-0}"
+  printf '%s\n' "$$" >"$_dir/pid.tmp.$$"
+  printf '%s\n' "$ACQUIRED_LOCK_TOKEN" >"$_dir/token.tmp.$$"
+  printf '%s\n%s\n%s\n' "$$" "$(iso_now)" "$_tag" >"$_dir/owner.tmp.$$"
+  mv "$_dir/pid.tmp.$$" "$_dir/pid"
+  mv "$_dir/token.tmp.$$" "$_dir/token"
+  mv "$_dir/owner.tmp.$$" "$_dir/owner"
+  HELD_LOCKS="${HELD_LOCKS}${HELD_LOCKS:+
+}${_dir}	${ACQUIRED_LOCK_TOKEN}"
   return 0
 }
 
 release_lock() {
-  local _dir="$1" _kept="" _held
-  for _held in $HELD_LOCKS; do
+  local _dir="$1" _kept="" _held _token
+  while IFS="$(printf '\t')" read -r _held _token; do
+    [ -n "$_held" ] || continue
     if [ "$_held" = "$_dir" ]; then
-      rm -rf "$_held"
+      release_owned_lock "$_held" "$_token"
     else
-      _kept="$_kept $_held"
+      _kept="${_kept}${_kept:+
+}${_held}	${_token}"
     fi
-  done
+  done <<EOF
+$HELD_LOCKS
+EOF
   HELD_LOCKS="$_kept"
 }
 
 RUN_TMP=""
 cleanup() {
-  local _lock
-  for _lock in $HELD_LOCKS; do
-    rm -rf "$_lock" 2>/dev/null || true
-  done
+  local _lock _token
+  while IFS="$(printf '\t')" read -r _lock _token; do
+    [ -n "$_lock" ] || continue
+    release_owned_lock "$_lock" "$_token"
+  done <<EOF
+$HELD_LOCKS
+EOF
   if [ -n "$RUN_TMP" ] && [ -d "$RUN_TMP" ]; then
     rm -rf "$RUN_TMP"
   fi

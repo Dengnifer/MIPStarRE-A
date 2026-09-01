@@ -3,12 +3,17 @@
 # review.sh — model-backed review of a GitHub PR, chained after exact-head CI.
 #
 # Usage:
-#   local/bin/review.sh <github-pr-number> [--force-review] [--dry-run]
+#   local/bin/review.sh <github-pr-number> [--force-review] [--new-round]
+#                       [--dry-run]
 #
 #   <github-pr-number> Positive GitHub pull-request number.
 #   --force-review   Review even when the head commit is a bot fix commit.
 #                    Used by autofix.sh for the single forced review at the
 #                    iteration cap (local/protocols/autofix.md).
+#   --new-round      Dispatch another review round for the same exact head and
+#                    base after a complete attestation. Ordinary reruns adopt
+#                    complete evidence; incomplete publication is always
+#                    recovered without redispatch.
 #   --dry-run        Resolve the worktree, diff and prompts, print where they
 #                    landed, and stop before dispatching an agent.
 #
@@ -273,12 +278,14 @@ run_agent() {
 # ------------------------------------------------------------------ arguments
 
 FORCE_REVIEW=0
+NEW_ROUND=0
 DRY_RUN=0
 PR_ARG=""
 
 while [ $# -gt 0 ]; do
   case "$1" in
     --force-review) FORCE_REVIEW=1 ;;
+    --new-round)    NEW_ROUND=1 ;;
     --dry-run)      DRY_RUN=1 ;;
     -h|--help)      sed -n '2,41p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     -*)             die "unknown option: $1" ;;
@@ -289,7 +296,8 @@ while [ $# -gt 0 ]; do
   esac
   shift
 done
-[ -n "$PR_ARG" ] || die "usage: $PROG <pr-id> [--force-review] [--dry-run]"
+[ -n "$PR_ARG" ] || \
+  die "usage: $PROG <pr-id> [--force-review] [--new-round] [--dry-run]"
 
 command -v python3 >/dev/null 2>&1 || die "python3 is required"
 command -v git >/dev/null 2>&1 || die "git is required"
@@ -524,9 +532,12 @@ case "$PUBLICATION_STATE" in
     python3 "$SCRIPT_DIR/github_api.py" --repo-root "$ROOT" --no-probe \
       review-evidence "$PR_NUM" "$HEAD_SHA" "$BASE_SHA" >/dev/null ||
       die "completed review evidence failed exact status validation"
-    log "adopted complete review run $EXISTING_RUN without redispatch"
-    [ "$EXISTING_SUMMARY" = success ] && exit 0
-    exit 1
+    if [ "$NEW_ROUND" -eq 0 ]; then
+      log "adopted complete review run $EXISTING_RUN without redispatch"
+      [ "$EXISTING_SUMMARY" = success ] && exit 0
+      exit 1
+    fi
+    log "complete review run $EXISTING_RUN exists; --new-round requested"
     ;;
   recoverable)
     review_boundary "$RUN_TMP/recovery-pull.json" ||

@@ -11,6 +11,7 @@ import re
 import shutil
 import subprocess
 import sys
+import uuid
 from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import datetime
@@ -90,13 +91,15 @@ class AdjudicationEvidence:
 class HeldLock:
     path: Path
     pid: int
+    token: str
 
     def require_owned(self, *, reject_cancel: bool = False) -> None:
         try:
             recorded = int((self.path / "pid").read_text(encoding="utf-8").strip())
+            token = (self.path / "token").read_text(encoding="utf-8").strip()
         except (OSError, ValueError) as exc:
             raise GateFailure(f"reserved lock {self.path} lost its owner record") from exc
-        if not self.path.is_dir() or recorded != self.pid:
+        if not self.path.is_dir() or recorded != self.pid or token != self.token:
             raise GateFailure(f"reserved lock {self.path} is no longer owned by this merge")
         if reject_cancel and (self.path / "cancel").exists():
             raise GateFailure(
@@ -235,6 +238,15 @@ def require_server_policy(client: GitHub, base: str) -> None:
     if repository.get("allow_merge_commit") is not True:
         raise GateFailure("repository settings must allow merge commits")
 
+    linear_history = protection.get("required_linear_history")
+    if linear_history is not None and (
+        not isinstance(linear_history, dict)
+        or linear_history.get("enabled") is not False
+    ):
+        raise GateFailure(
+            "classic branch protection must not require linear history"
+        )
+
     status_rule = protection.get("required_status_checks")
     if not isinstance(status_rule, dict) or status_rule.get("strict") is not True:
         raise GateFailure("classic branch protection must use strict required checks")
@@ -268,6 +280,10 @@ def require_server_policy(client: GitHub, base: str) -> None:
         parameters = rule.get("parameters")
         if rule_type == "merge_queue":
             raise GateFailure("an active merge queue is incompatible with one-shot merge")
+        if rule_type == "required_linear_history":
+            raise GateFailure(
+                "effective required-linear-history rules forbid merge commits"
+            )
         if rule_type == "required_status_checks":
             if not isinstance(parameters, dict):
                 raise GateFailure("effective required-status rule is malformed")
@@ -370,6 +386,11 @@ def row_order(row: dict[str, Any]) -> tuple[datetime, int]:
     if timestamp.utcoffset() is None:
         raise GateFailure("review ordering evidence has a timezone-free timestamp")
     return timestamp, identifier
+
+
+def row_timestamp(row: dict[str, Any]) -> datetime:
+    """Return the timestamp used for ordering rows from different namespaces."""
+    return row_order(row)[0]
 
 
 def require_review(
@@ -595,7 +616,7 @@ def require_adjudication(
             state == "CHANGES_REQUESTED" or authoritative_comment
         ):
             raise GateFailure("a later exact-head review supersedes the adjudication source")
-    if row_order(comment) <= source_order:
+    if row_timestamp(comment) <= row_timestamp(source.row):
         raise GateFailure("the adjudication comment must be strictly later than its source review")
 
     raw_rounds = payload.get("rounds")
@@ -760,9 +781,10 @@ def reserve_runtime_lock(path: Path, label: str) -> Iterator[HeldLock]:
         raise GateFailure(
             f"cannot reserve runtime lock {path} ({state}){recovery}"
         ) from exc
-    held = HeldLock(path=path, pid=os.getpid())
+    held = HeldLock(path=path, pid=os.getpid(), token=uuid.uuid4().hex)
     try:
         (path / "pid").write_text(f"{held.pid}\n", encoding="utf-8")
+        (path / "token").write_text(f"{held.token}\n", encoding="utf-8")
         (path / "owner").write_text(
             f"{held.pid}\nmerge-reservation\n{label}\n", encoding="utf-8"
         )
@@ -770,12 +792,24 @@ def reserve_runtime_lock(path: Path, label: str) -> Iterator[HeldLock]:
         held.require_owned()
         yield held
     finally:
+        tombstone = path.with_name(f"{path.name}.release.{held.token}")
         try:
-            owner = int((path / "pid").read_text(encoding="utf-8").strip())
-        except (OSError, ValueError):
-            owner = None
-        if owner == held.pid:
-            shutil.rmtree(path)
+            path.rename(tombstone)
+        except OSError:
+            pass
+        else:
+            try:
+                owner = int(
+                    (tombstone / "pid").read_text(encoding="utf-8").strip()
+                )
+                token = (tombstone / "token").read_text(encoding="utf-8").strip()
+            except (OSError, ValueError):
+                owner = None
+                token = None
+            if owner == held.pid and token == held.token:
+                shutil.rmtree(tombstone)
+            elif not path.exists():
+                tombstone.rename(path)
 
 
 def require_merge_capability(client: GitHub) -> None:

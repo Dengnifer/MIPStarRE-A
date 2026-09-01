@@ -90,6 +90,16 @@ issue or PR shadow record is created.
 
 ## Build lock
 
+The per-PR `ci-<number>.lock` is also reserved by the merge gate. Its atomic
+directory lease carries a PID and unique ownership token. Until those stamps
+are published, the directory's own age controls partial-lock recovery, so a
+nascent merge reservation cannot be mistaken for an ancient lock. Stale
+cleanup and normal release rename the directory first and delete it only after
+verifying the renamed directory identity and, for release, its owner token; a
+replacement lock is never removed by an old holder. A truly old unstamped
+partial lock remains recoverable, while a fresh partial or live lock preserves
+exclusion.
+
 Single-file Lean checks do not take the machine-wide lock. A full `lake build`
 uses the advisory lock and a worktree-local copy-on-write cache clone described
 by `build-cache.md`. Never run `lake update`, and never write back to the hot

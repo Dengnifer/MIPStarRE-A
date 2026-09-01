@@ -354,3 +354,25 @@ live locks remain exclusive.
 producer-app substitution, disabled merge commits, and squash/rebase or foreign
 merge results cannot satisfy the local gate, without adding an approval or
 `reviewDecision` requirement.
+
+## 2026-09-01 - Final recovery preserves zero-approval guards
+
+**Trigger:** the issue 0007 incident in `results/telemetry/events.md`, "Final
+workflow recovery audit exposed five remaining guard gaps."
+
+**Change:** `review.md`, `ci.md`, and `issues-prs.md` now specify an explicit
+`review.sh --new-round` path after complete exact-comparison evidence while
+keeping ordinary reruns idempotent and incomplete publication recovery
+dispatch-free. A globally latest untrusted or creator-missing review summary is
+recoverable by a newer trusted digest-bound final status; a trusted mismatch
+still fails closed. Shared per-PR CI leases use directory age during owner
+initialization, unique ownership tokens, and rename-before-delete cleanup.
+Merge policy rejects classic and effective linear-history requirements, and
+adjudication orders review rows against issue comments by strict timestamp
+without an id tie-break.
+
+**Expected effect:** operators can produce four independently attested rounds
+through the supported CLI without weakening CI, identity, comparison, bot, or
+lock guards; poisoned summaries and stale partial locks have bounded recovery;
+replacement locks, merge-only topology, and equal-time chronology remain
+fail-closed.

@@ -8,6 +8,14 @@ set for the current full head and base SHAs. The manifest conclusion must be
 matching statuses plus the digest-bound `local-ci/summary` must be `success`.
 A readable failure or error manifest does not authorize review.
 
+An ordinary rerun adopts a complete exact-head and exact-base attestation.
+`--new-round` explicitly requests another adjudication round for that same
+comparison. It changes only complete-attestation idempotency: incomplete
+publication is still finalized without redispatch, and all comparison,
+session, CI, bot-commit, and lock guards remain in force. Repeating the guarded
+mode after an initial review can therefore produce the four distinct rounds
+required for operator adjudication.
+
 ## Tree and prompt integrity
 
 After reading the GitHub PR identity, review takes the per-PR review lock and
@@ -106,8 +114,11 @@ actor, and its latest summary must have the same actor in `creator.login`.
 Every invocation verifies that the authenticated `gh` user is that actor.
 Untrusted or missing-author marker copies are not attestations and cannot
 collide with a trusted publication. Summary selection remains global per
-context, so a newer untrusted status blocks rather than exposing an older
-trusted result.
+context, so a newer untrusted status blocks the gate rather than exposing an
+older trusted result. For an otherwise valid latest attestation, the producer
+may classify that untrusted or creator-missing summary as recoverable and post
+the exact digest-bound trusted final status. A conflicting status from the
+trusted actor remains fail-closed.
 
 A valid review attestation is deliberately distinct from complete merge
 evidence. Structural parsing, the exact commit and base, the body digest,
@@ -116,16 +127,17 @@ session uniqueness can all be validated before a final summary status exists.
 Prior-ledger and review-fix consumers may read that valid attestation. Merge
 evidence additionally requires the exact matching final summary status.
 
-If a review POST succeeded but its summary status is missing or remains the
-canonical `pending` status for that same attested run, a rerun adopts the
-existing exact-head, exact-base attestation without redispatch or a duplicate
-review POST. After another full boundary check it idempotently posts the
-matching final status and verifies complete evidence. The guarded finalizer
-reclassifies the latest summary inside the mutation path, repeats the full
-authoritative comparison after that read, and then performs the fast local
-lease/tree check before the POST; normal publication uses the same path. A
-pending status for a different run, a conflicting final status, or an
-attestation for a stale base is not recoverable as the current run.
+If a review POST succeeded but its summary status is missing, remains the
+canonical `pending` status for that same attested run, or has been superseded
+by an untrusted or creator-missing row, a rerun adopts the existing exact-head,
+exact-base attestation without redispatch or a duplicate review POST. After
+another full boundary check it idempotently posts the matching trusted final
+status and verifies complete evidence. The guarded finalizer reclassifies the
+latest summary inside the mutation path, repeats the full authoritative
+comparison after that read, and then performs the fast local lease/tree check
+before the POST; normal publication uses the same path. A pending status for a
+different run, any conflicting trusted status, or an attestation for a stale
+base is not recoverable as the current run.
 
 GitHub approval and `reviewDecision` are never required. The normal gate is a
 successful exact-head summary status plus a strictly parsed clean `COMMENT`

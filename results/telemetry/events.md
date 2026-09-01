@@ -233,3 +233,25 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   Lesson: immutable payloads, publisher identity, server configuration, and
   resulting Git topology are separate facts and all must be proven without
   weakening the zero-approval `COMMENT` review design.
+- **Final workflow recovery audit exposed five remaining guard gaps.** Symptom:
+  complete review evidence made four supported same-comparison adjudication
+  rounds impossible; an untrusted latest review summary could not be
+  superseded; CI could delete a merge reservation between `mkdir` and owner
+  publication or during stale cleanup; linear-history rules contradicted the
+  merge-only policy; and equal-time review/comment rows inherited unrelated id
+  ordering. Diagnosis: idempotency, global status precedence, shared lock
+  ownership, server policy, and cross-namespace chronology each lacked one
+  explicit recovery or refusal case. Fix: add guarded `--new-round`, permit
+  trusted digest-bound recovery over untrusted summaries while rejecting
+  trusted conflicts, use age-aware token leases with rename-before-delete,
+  reject classic and effective linear history, and compare cross-namespace
+  timestamps strictly. Lesson: recovery controls must preserve every original
+  guard, while identities from separate GitHub namespaces cannot serve as a
+  chronological tie-breaker.
+- **Read-only recovery scout dispatch was blocked before allocation.** The
+  attempted `scout-0007-final-recovery-audit` session found an ownership-
+  ambiguous `session-seq.lock` and exited 5 without a session name, telemetry
+  record, analysis, or repository mutation. The primary dispatched session
+  continued from local evidence. Lesson: an allocator refusal before identity
+  creation is still protocol friction even though it cannot append normal
+  session telemetry.
