@@ -551,7 +551,22 @@ if len(tail) == 3 and tail[0] == "commits" and tail[2] == "statuses":
                 )
         state["cancel_lock_on_status_read"] = {}
     state["status_read_count"] = read_count + 1
-    emit(page(state.setdefault("statuses", {}).get(sha, []), parsed.query))
+    response_rows = state.setdefault("statuses", {}).get(sha, [])
+    hidden_reads = int(state.get("hide_status_reads", 0))
+    if hidden_reads > 0:
+        state["hide_status_reads"] = hidden_reads - 1
+        response_rows = []
+    if "status_read_sha_override" in state:
+        response_rows = [
+            {**row, "sha": state["status_read_sha_override"]}
+            for row in response_rows
+        ]
+    elif state.get("status_responses_omit_sha"):
+        response_rows = [
+            {key: value for key, value in row.items() if key != "sha"}
+            for row in response_rows
+        ]
+    emit(page(response_rows, parsed.query))
 
 if len(tail) == 2 and tail[0] == "statuses" and method == "POST":
     sha = tail[1]
@@ -591,11 +606,22 @@ if len(tail) == 2 and tail[0] == "statuses" and method == "POST":
         "creator": dict(state.get("user", {"login": "o"})),
     }
     rows.append(row)
+    response_row = row
+    if "status_post_sha_override" in state:
+        response_row = {**row, "sha": state["status_post_sha_override"]}
+    elif state.get("status_responses_omit_sha"):
+        response_row = {key: value for key, value in row.items() if key != "sha"}
+    readback_failures = int(state.pop("status_readback_failures_once", 0))
+    if readback_failures > 0:
+        state.setdefault("failures", {})[f"GET commits/{sha}/statuses"] = {
+            "remaining": readback_failures,
+            "message": "HTTP 503 injected status readback outage",
+        }
     if state.pop("ambiguous_status_once", False):
         fail("HTTP 503 Service Unavailable")
     if state.pop("corrupt_status_response", False):
-        emit({**row, "context": "different/context"})
-    emit(row)
+        emit({**response_row, "context": "different/context"})
+    emit(response_row)
 
 fail("HTTP 404 unsupported fake endpoint " + key)
 '''
@@ -2155,6 +2181,115 @@ class SharedGitHubLayerTests(FakeGhCase):
                 github_api.normalize_sha(value)
         self.assertEqual(github_api.normalize_sha("A" * 64), "a" * 64)
 
+    def test_status_endpoint_binds_real_github_rows_without_sha(self) -> None:
+        sha = "d" * 40
+        self.write_state(status_responses_omit_sha=True)
+        row = self.client().post_status(
+            sha, "local-ci/build", "success", "passed"
+        )
+        self.assertEqual(row["sha"], sha)
+        self.assertEqual(
+            self.client().latest_statuses(sha)["local-ci/build"]["sha"], sha
+        )
+        posts = [
+            call for call in self.state()["calls"]
+            if call["args"][:3] == ["api", "--method", "POST"]
+            and call["args"][3].endswith(f"statuses/{sha}")
+        ]
+        self.assertEqual(len(posts), 1)
+
+    def test_status_readback_retries_without_reposting(self) -> None:
+        delayed_sha = "7" * 40
+        self.write_state(hide_status_reads=2)
+        delayed = self.client().post_status(
+            delayed_sha, "local-ci/build", "success", "delayed"
+        )
+        self.assertEqual(delayed["sha"], delayed_sha)
+
+        transient_sha = "8" * 40
+        self.write_state(status_readback_failures_once=3)
+        transient = self.client().post_status(
+            transient_sha, "local-ci/build", "success", "transient"
+        )
+        self.assertEqual(transient["sha"], transient_sha)
+
+        calls = self.state()["calls"]
+        for sha in (delayed_sha, transient_sha):
+            posts = [
+                call for call in calls
+                if call["args"][:3] == ["api", "--method", "POST"]
+                and call["args"][3].endswith(f"statuses/{sha}")
+            ]
+            self.assertEqual(len(posts), 1)
+
+    def test_status_readback_absence_fails_closed_without_reposting(self) -> None:
+        sha = "9" * 40
+        self.write_state(hide_status_reads=99)
+        client = self.client()
+        with self.assertRaisesRegex(
+            github_api.GitHubError, "not visible after authoritative read-back"
+        ):
+            client.post_status(sha, "local-ci/build", "success", "hidden")
+        calls = self.state()["calls"]
+        posts = [
+            call for call in calls
+            if call["args"][:3] == ["api", "--method", "POST"]
+            and call["args"][3].endswith(f"statuses/{sha}")
+        ]
+        self.assertEqual(len(posts), 1)
+
+        self.write_state(hide_status_reads=0)
+        client.post_status(sha, "local-ci/build", "success", "hidden")
+        posts = [
+            call for call in self.state()["calls"]
+            if call["args"][:3] == ["api", "--method", "POST"]
+            and call["args"][3].endswith(f"statuses/{sha}")
+        ]
+        self.assertEqual(len(posts), 1)
+
+    def test_explicit_status_sha_values_never_inherit_endpoint_identity(self) -> None:
+        context = "local-ci/build"
+        for index, value in enumerate((None, "", "deadbeef", "f" * 40), start=1):
+            sha = str(index) * 40
+            self.write_state(
+                calls=[],
+                statuses={},
+                status_post_sha_override=value,
+            )
+            with self.assertRaisesRegex(
+                github_api.GitHubError, "does not match its exact SHA"
+            ):
+                self.client().post_status(sha, context, "success", "invalid")
+            posts = [
+                call for call in self.state()["calls"]
+                if call["args"][:3] == ["api", "--method", "POST"]
+            ]
+            self.assertEqual(len(posts), 1)
+
+            stored = self.state()["statuses"][sha][0]
+            self.write_state(
+                statuses={sha: [{**stored, "sha": value}]},
+                status_post_sha_override=value,
+            )
+            self.assertNotIn(context, self.client().latest_statuses(sha))
+
+        sha = "5" * 40
+        self.write_state(
+            calls=[],
+            statuses={},
+            status_post_sha_override=sha,
+            status_read_sha_override="e" * 40,
+        )
+        with self.assertRaisesRegex(
+            github_api.GitHubError, "not visible after authoritative read-back"
+        ):
+            self.client().post_status(sha, context, "success", "conflicting read")
+        posts = [
+            call for call in self.state()["calls"]
+            if call["args"][:3] == ["api", "--method", "POST"]
+        ]
+        self.assertEqual(len(posts), 1)
+
     def test_ambiguous_absent_mutations_never_issue_a_second_write(self) -> None:
         sha = "6" * 40
         self.write_state(
@@ -2260,7 +2395,7 @@ class SharedGitHubLayerTests(FakeGhCase):
             "passed",
             before_mutation=status_guard,
         )
-        self.assertEqual(status_observations, [0, 1, 1])
+        self.assertEqual(status_observations, [0, 1, 1, 1])
 
         marker = github_api.stable_marker("guarded-comment", id="one")
         body = "guarded body\n\n" + marker

@@ -382,3 +382,13 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   rerun `lake exe checkdecls blueprint/lean_decls`, which resolved all 597
   declarations. Lesson: before a network fallback, a prepared worktree should
   confirm both cache tiers against a same-key primary checkout.
+- **Real GitHub status objects omitted the commit SHA.** Symptom: PR #7 CI
+  published its initial `local-ci/summary` row, then rejected the successful
+  response and stopped before running any step. Diagnosis: the fake GitHub
+  fixture supplied a `sha` field that GitHub's commit-status response and
+  exact-commit listing omit; the client therefore rejected both the write
+  response and authoritative read-back. Fix: bind a missing SHA only from the
+  exact endpoint request, retain and reject any explicit conflict, and require
+  authoritative status adoption after a successful write. Lesson: fixtures
+  must cover the provider's literal response shape, including fields omitted
+  because the request URL already supplies their identity.

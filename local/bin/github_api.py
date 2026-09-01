@@ -1419,7 +1419,17 @@ class GitHub:
 
     def statuses(self, sha: str) -> list[dict[str, Any]]:
         sha = normalize_sha(sha)
-        return self.paginate(f"/repos/{self.repo}/commits/{sha}/statuses")
+        rows = self.paginate(f"/repos/{self.repo}/commits/{sha}/statuses")
+        bound: list[dict[str, Any]] = []
+        for raw in rows:
+            row = dict(raw)
+            if "sha" not in row:
+                # GitHub omits `sha` from real status objects. The exact-commit
+                # endpoint supplies the binding; an explicit conflicting value
+                # remains intact so latest_statuses rejects it below.
+                row["sha"] = sha
+            bound.append(row)
+        return bound
 
     def latest_statuses(self, sha: str) -> dict[str, dict[str, Any]]:
         sha = normalize_sha(sha)
@@ -2008,6 +2018,12 @@ class GitHub:
             sha, context, state, description
         )
 
+        def bind_endpoint_sha(row: dict[str, Any]) -> dict[str, Any]:
+            bound = dict(row)
+            if "sha" not in bound:
+                bound["sha"] = sha
+            return bound
+
         def matches(row: dict[str, Any]) -> bool:
             row_sha = str(row.get("sha") or "")
             return (
@@ -2025,7 +2041,10 @@ class GitHub:
             row = self.latest_statuses(sha).get(context.casefold())
             return row if row is not None and matches(row) else None
 
+        wrote = False
+
         def mutate() -> dict[str, Any]:
+            nonlocal wrote
             if before_mutation is not None:
                 before_mutation()
             payload = self.api(
@@ -2040,7 +2059,14 @@ class GitHub:
             )
             if not isinstance(payload, dict):
                 raise GitHubError("commit status creation returned a non-object response")
-            return payload
+            row = bind_endpoint_sha(payload)
+            if not matches(row):
+                raise GitHubError(
+                    "commit status response does not match its exact SHA, context, "
+                    "state, and digest"
+                )
+            wrote = True
+            return row
 
         row = self._idempotent_mutation(
             lookup=lookup,
@@ -2051,6 +2077,29 @@ class GitHub:
             raise GitHubError(
                 "commit status response does not match its exact SHA, context, "
                 "state, and digest"
+            )
+        if wrote:
+            latest_error: GitHubError | None = None
+            for attempt in range(self.retries + 1):
+                try:
+                    adopted = lookup()
+                except GitHubError as exc:
+                    if not exc.transient:
+                        raise
+                    latest_error = exc
+                    adopted = None
+                if adopted is not None:
+                    if before_mutation is not None:
+                        before_mutation()
+                    return adopted
+                if attempt < self.retries:
+                    time.sleep(self.retry_delay * (2**attempt))
+            raise GitHubError(
+                "commit status publication is not visible after authoritative "
+                "read-back; refusing another mutation",
+                status=latest_error.status if latest_error is not None else None,
+                transient=True,
+                stdout=latest_error.stdout if latest_error is not None else "",
             )
         return row
 
