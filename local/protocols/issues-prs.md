@@ -15,12 +15,23 @@ All lifecycle commands use `local/bin/github_api.py`. It resolves `gh` from
 from `MIPSTARRE_GITHUB_REPO` or the `github` remote; and verifies access with a
 harmless API request. Mutations fail closed when GitHub cannot be reached.
 
+`MIPSTARRE_GITHUB_ACTOR` selects the sole trusted evidence publisher. It is a
+validated GitHub user login and defaults to the discovered repository owner,
+which is `Dengnifer` for this repository. Every command, including internal
+`--no-probe` invocations, verifies `gh api /user` against that value before it
+reads gate evidence or mutates workflow state. CI manifests, review comments,
+and adjudications require that actor in `user.login`; CI and review statuses
+require it in `creator.login`.
+
 The shared client supplies versioned REST headers, complete pagination,
 sanitized diagnostics, and bounded retries for connection failures, timeouts,
 HTTP 429, rate-limit responses, and HTTP 5xx. Permanent failures are not
 retried blindly. Ambiguous mutations use stable hidden markers followed by an
 authoritative read-back. A marker may be adopted only when its event, exact
-commit, and complete body match.
+commit, complete body, and GitHub author match. Untrusted marker copies are
+ignored. Commit statuses retain GitHub's global latest-row precedence: the
+latest context is selected before its creator is checked, so a later untrusted
+row blocks instead of falling back to an older trusted success.
 
 An idempotent mutating command issues at most one POST or PATCH per invocation.
 Every local review, clean or adverse, is a `COMMENT`; unresolved findings are
@@ -119,32 +130,53 @@ The evaluator reads classic protection for the PR's actual base. Required
 checks must be strict and exactly `local-ci/summary` and
 `local-review/summary`; administrators must be enforced; a pull-request review
 rule must be present with zero required approvals, no code-owner or last-push
-approval, and empty user/team/app bypass allowances; force pushes and deletions
-must be disabled. Every effective branch rule is also read. Active merge queues,
-nonstrict or missing summary rules, approval requirements, unavailable merge
-commits, inactive referenced rulesets, or nonempty ruleset bypass actors block
-the merge.
+approval, and absent, null, or exactly empty user/team/app bypass allowances;
+force pushes and deletions must be disabled. The classic `checks` rows must
+bind both summaries to PAT publication with `app_id` null or `-1`. Every
+effective branch rule is also read, and each required status row must likewise
+have `integration_id` null or `-1`. The repository setting must allow merge
+commits. Active merge queues, nonstrict or missing summary rules, approval
+requirements, unavailable merge commits, malformed or non-PAT producers,
+inactive referenced rulesets, or nonempty ruleset bypass actors block the
+merge.
 
 GitHub approval and `reviewDecision` are not gates. A clean independent
 exact-head `COMMENT` review is sufficient with the other evidence above.
 
 Adjudicated merges require the current `adjudicated` label and exactly one
-unedited PR comment beginning `ADJUDICATION`. Its canonical JSON and final
-digest marker bind the PR, head, base, and latest source review id, run, and
-digest. It cites at least four ordered, distinct, session-valid review rounds
-for that same head and base. Its dispositions exactly cover every unresolved
-source finding: `fixed` records need nonempty reason and evidence, while
-`tracked` records name an open, non-PR issue in the same repository. After a
-full revalidation under all three locks, the gate publishes the exact
-adjudication as `local-review/summary=success` and rereads it before merge.
+structurally valid, unedited comment by the trusted actor for the exact
+comparison. Unrelated `ADJUDICATION` prefix prose and untrusted copies are
+ignored. The selected row must order strictly after its source review. Its
+canonical JSON and final digest marker bind the PR, head, base, and latest
+source review id, run, and digest. It cites at least four ordered, distinct,
+session-valid review rounds for that same head and base. Its dispositions
+exactly cover every unresolved source finding: `fixed` records need nonempty
+reason and evidence, while `tracked` records name an open, non-PR issue in the
+same repository. After a full revalidation under all three locks, the gate
+publishes the exact adjudication as `local-review/summary=success` and rereads
+it before merge.
 
 The only merge mutation is one guarded
 `gh pr merge --merge --match-head-commit <sha>` call, without `--admin` or
 `--auto`. GitHub's strict required checks and base-freshness rule remain the
 server-side last gate. A transient result triggers authoritative PR read-back,
-never a second merge call; only the exact PR/head/base reported merged and
-closed is accepted. After success, the trusted local base may be fetched and
-fast-forwarded; feature cleanup then follows the worktree safeguards.
+never a second merge call. Read-back retains the frozen head SHA, head ref, and
+base ref, but does not require GitHub's post-merge `base.sha` to remain frozen:
+GitHub may advance it to the new base tip. Instead, the reported
+`merge_commit_sha` must resolve through the Git Data API to exactly two parents,
+the frozen base then the frozen head. An already-merged response with different
+identity or topology is classified external/nonconforming, not successful
+local execution, and receives no cleanup. After success, the trusted local base
+may be fetched and fast-forwarded; feature cleanup then follows the worktree
+safeguards.
+
+Merge reservations use PID-stamped runtime directories and never weaken live
+lock exclusion. A directory without a readable live PID may be a stale partial
+lock or a process between `mkdir` and PID publication, so the merge gate does
+not delete it automatically. The operator must verify that no CI, review,
+auto-fix, or merge process owns the exact path from the error, remove an empty
+partial with `rmdir <absolute-lock-path>` or move a nonempty stale directory
+aside for inspection, and rerun the gate.
 
 ## Snapshots and reporting
 

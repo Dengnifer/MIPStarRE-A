@@ -214,3 +214,22 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   leases, reconciling a transient result by read-back only. Lesson: the last
   merge checkpoint must make producer evidence, operator adjudication, local
   serialization, and GitHub's server gate one auditable contract.
+- Final gate audit found publication identity and merge topology were not
+  authoritative. Symptom: copied CI/review/adjudication markers and statuses
+  from another GitHub account could satisfy content checks; adjudication prefix
+  comments could poison selection or precede their source; null classic bypass
+  allowances and PAT producer identifiers were not modeled faithfully; and a
+  merged PR was accepted without proving a two-parent merge commit. Repository
+  merge-method settings and partial merge-lock recovery were also unspecified.
+  Diagnosis: exact-run digests proved what was published but not who published
+  it, while post-mutation PR metadata was treated as a topology proof and as if
+  `base.sha` could not advance. Fix: configure one owner-default trusted actor,
+  verify `gh api /user`, bind every gate row to its GitHub author/creator while
+  preserving global latest-status precedence, select one later trusted
+  adjudication, validate null/empty bypasses and PAT producer ids, preflight
+  merge commits, and verify frozen base/head parents through the Git Data API.
+  Partial no-PID locks remain fail-closed with explicit operator recovery
+  because they cannot be distinguished safely from a live initializer.
+  Lesson: immutable payloads, publisher identity, server configuration, and
+  resulting Git topology are separate facts and all must be proven without
+  weakening the zero-approval `COMMENT` review design.

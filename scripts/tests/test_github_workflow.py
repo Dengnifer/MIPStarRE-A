@@ -215,9 +215,24 @@ if args[:2] == ["pr", "merge"]:
            for name in expected_contexts):
         fail("HTTP 409 required summary status is not successful")
     require_runtime_locks("required_merge_locks", "merge_locks_observed")
+    merge_sha = state.get("merge_sha", "b" * 40)
+    parents = state.get("merge_commit_parents")
+    if parents is None:
+        parents = [base_sha, current_head]
+    state.setdefault("git_commits", {}).setdefault(
+        merge_sha,
+        {
+            "sha": merge_sha,
+            "parents": [{"sha": str(parent)} for parent in parents],
+        },
+    )
     row["merged"] = True
     row["state"] = "closed"
-    row["merge_commit_sha"] = state.get("merge_sha", "b" * 40)
+    row["merge_commit_sha"] = merge_sha
+    if state.get("post_merge_base_sha"):
+        row.setdefault("base", {})["sha"] = str(state["post_merge_base_sha"])
+    if state.get("post_merge_head_ref"):
+        row.setdefault("head", {})["ref"] = str(state["post_merge_head_ref"])
     if state.pop("ambiguous_merge_success_once", False):
         fail("HTTP 503 Service Unavailable after merge")
     emit({"merged": True})
@@ -229,6 +244,8 @@ method = option("--method", "GET").upper()
 endpoint = args[3] if len(args) > 3 else ""
 parsed = urllib.parse.urlsplit(endpoint)
 path = parsed.path.strip("/")
+if path == "user" and method == "GET":
+    emit(state.get("user", {"login": "o"}))
 parts = path.split("/")
 if parts[:3] != ["repos", "o", "r"]:
     fail("HTTP 404 Not Found")
@@ -248,7 +265,17 @@ if tail == ["slow"]:
     emit({})
 
 if not tail and method == "GET":
-    emit(state.get("repo", {"id": 1, "full_name": "o/r"}))
+    emit(
+        state.get(
+            "repo", {"id": 1, "full_name": "o/r", "allow_merge_commit": True}
+        )
+    )
+
+if len(tail) == 3 and tail[:2] == ["git", "commits"] and method == "GET":
+    commit = state.setdefault("git_commits", {}).get(tail[2])
+    if commit is None:
+        fail("HTTP 404 Git commit not found")
+    emit(commit)
 
 if len(tail) >= 3 and tail[0] == "branches" and tail[-1] == "protection":
     branch = urllib.parse.unquote("/".join(tail[1:-1]))
@@ -367,6 +394,7 @@ if len(tail) == 3 and tail[0] == "issues" and tail[2] == "comments":
             "body": str((payload or {}).get("body", "")),
             "created_at": f"2026-01-01T00:00:{len(comments):02d}Z",
             "updated_at": f"2026-01-01T00:00:{len(comments):02d}Z",
+            "user": dict(state.get("user", {"login": "o"})),
         }
         comments.append(row)
         if state.pop("corrupt_comment_response", False):
@@ -460,6 +488,7 @@ if len(tail) == 3 and tail[0] == "pulls" and tail[2] == "reviews":
             "commit_id": str((payload or {}).get("commit_id", "")),
             "state": "COMMENTED",
             "submitted_at": f"2026-01-01T00:00:{len(reviews):02d}Z",
+            "user": dict(state.get("user", {"login": "o"})),
         }
         reviews.append(row)
         if state.pop("ambiguous_review_once", False):
@@ -520,6 +549,7 @@ if len(tail) == 2 and tail[0] == "statuses" and method == "POST":
         "state": str((payload or {}).get("state", "")),
         "description": str((payload or {}).get("description", "")),
         "created_at": f"2098-01-01T00:00:{len(rows):02d}Z",
+        "creator": dict(state.get("user", {"login": "o"})),
     }
     rows.append(row)
     if state.pop("ambiguous_status_once", False):
@@ -815,7 +845,8 @@ class FakeGhCase(unittest.TestCase):
 
     def write_state(self, **updates: object) -> None:
         state = {
-            "repo": {"id": 1, "full_name": "o/r"},
+            "repo": {"id": 1, "full_name": "o/r", "allow_merge_commit": True},
+            "user": {"login": "o"},
             "labels": [],
             "issues": {},
             "pulls": {},
@@ -823,6 +854,7 @@ class FakeGhCase(unittest.TestCase):
             "reviews": {},
             "statuses": {},
             "commits": {},
+            "git_commits": {},
             "sub_issues": {},
             "branch_protections": {"main": classic_protection()},
             "branch_rules": {"main": []},
@@ -929,6 +961,7 @@ class FakeGhCase(unittest.TestCase):
                         head_sha, context, state, description
                     ),
                     "created_at": created_at,
+                    "creator": {"login": "o"},
                 }
             )
         conclusion = "success"
@@ -951,7 +984,12 @@ class FakeGhCase(unittest.TestCase):
             f"run={run_id} -->"
         )
         body = "```json\n" + json.dumps(manifest) + "\n```\n\n" + marker + "\n"
-        comment = {"id": comment_id, "body": body, "created_at": created_at}
+        comment = {
+            "id": comment_id,
+            "body": body,
+            "created_at": created_at,
+            "user": {"login": "o"},
+        }
         digest = github_api.ci_manifest_digest(manifest)
         summary_state = conclusion
         verdict = {
@@ -975,6 +1013,7 @@ class FakeGhCase(unittest.TestCase):
                     summary_description,
                 ),
                 "created_at": created_at,
+                "creator": {"login": "o"},
             }
         )
         return comment, statuses
@@ -1056,6 +1095,7 @@ class FakeGhCase(unittest.TestCase):
             "commit_id": head_sha,
             "state": "COMMENTED",
             "submitted_at": submitted_at,
+            "user": {"login": "o"},
         }
         status_state = "success" if findings == 0 else "failure"
         verdict = "clean" if findings == 0 else f"findings={findings}"
@@ -1072,6 +1112,7 @@ class FakeGhCase(unittest.TestCase):
                 description,
             ),
             "created_at": submitted_at,
+            "creator": {"login": "o"},
         }
         session = {
             "name": session_name,
@@ -1170,6 +1211,7 @@ class FakeGhCase(unittest.TestCase):
             "body": prefix + marker + "\n",
             "created_at": "2026-01-01T00:10:00Z",
             "updated_at": "2026-01-01T00:10:00Z",
+            "user": {"login": "o"},
         }
         return reviews, statuses, sessions, comment, payload
 
@@ -1340,7 +1382,7 @@ class SharedGitHubLayerTests(FakeGhCase):
         before = len(self.state()["calls"])
         with self.assertRaises(github_api.GitHubError):
             client.probe_authentication()
-        self.assertEqual(len(self.state()["calls"]) - before, 1)
+        self.assertEqual(len(self.state()["calls"]) - before, 2)
 
     def test_cli_and_repository_discovery_precedence(self) -> None:
         self.assertEqual(github_api.discover_gh(), self.gh_path.resolve())
@@ -1366,6 +1408,34 @@ class SharedGitHubLayerTests(FakeGhCase):
             self.assertEqual(
                 github_api.discover_repository(repository), "example/project"
             )
+
+    def test_trusted_actor_defaults_to_owner_and_rejects_auth_mismatch(self) -> None:
+        client = self.client()
+        self.assertEqual(client.trusted_actor, "o")
+        self.assertEqual(client.verify_authenticated_actor()["login"], "o")
+
+        self.write_state(user={"login": "Mallory"}, statuses={})
+        mismatched = self.client()
+        with self.assertRaisesRegex(github_api.GitHubError, "does not match"):
+            mismatched.probe_authentication()
+        with self.assertRaisesRegex(github_api.GitHubError, "does not match"):
+            mismatched.post_status("a" * 40, "local-ci/build", "success", "ok")
+        with self.assertRaisesRegex(github_api.GitHubError, "does not match"):
+            mismatched.ci_evidence(1, "a" * 40, "b" * 40)
+        self.assertEqual(self.state()["statuses"], {})
+
+        self.write_state(user={"login": "Dengnifer"})
+        with mock.patch.dict(
+            os.environ, {"MIPSTARRE_GITHUB_ACTOR": "Dengnifer"}
+        ):
+            configured = self.client()
+            self.assertEqual(configured.trusted_actor, "Dengnifer")
+            configured.probe_authentication()
+        with mock.patch.dict(
+            os.environ, {"MIPSTARRE_GITHUB_ACTOR": "invalid_actor"}
+        ):
+            with self.assertRaisesRegex(github_api.GitHubError, "valid GitHub"):
+                self.client()
 
     def test_timeout_bytes_and_sanitized_retained_stdout(self) -> None:
         os.environ["MIPSTARRE_GH_TIMEOUT"] = "0.05"
@@ -2484,6 +2554,7 @@ class ReviewPublicationTests(FakeGhCase):
                         "body": "different\n" + marker,
                         "commit_id": sha,
                         "state": "COMMENTED",
+                        "user": {"login": "o"},
                     }
                 ]
             }
@@ -3259,8 +3330,103 @@ class MergeGateTests(FakeGhCase):
         with self.assertRaisesRegex(pr_merge.GateFailure, "not a clean COMMENT"):
             pr_merge.require_review(self.client(), 1, sha, base_sha)
 
+    def test_evidence_is_bound_to_trusted_comment_review_and_status_actors(self) -> None:
+        sha, base_sha = "7" * 40, "8" * 40
+        state = self.green_state(sha, base_sha)
+        trusted_comment = state["comments"]["1"][0]
+        trusted_review = state["reviews"]["1"][0]
+        statuses = state["statuses"][sha]
+
+        copied_comment = {
+            **trusted_comment,
+            "id": 900,
+            "created_at": "2099-01-01T00:00:00Z",
+            "user": {"login": "Mallory"},
+        }
+        copied_review = {
+            **trusted_review,
+            "id": 901,
+            "submitted_at": "2099-01-01T00:00:01Z",
+            "user": {"login": "Mallory"},
+        }
+        self.write_state(
+            comments={"1": [trusted_comment, copied_comment]},
+            reviews={"1": [trusted_review, copied_review]},
+            statuses={sha: statuses},
+        )
+        pr_merge.require_ci(self.client(), 1, sha, base_sha)
+        pr_merge.require_review(self.client(), 1, sha, base_sha)
+
+        for field, row, collection, requirement in (
+            ("user", trusted_comment, "comments", pr_merge.require_ci),
+            ("user", trusted_review, "reviews", pr_merge.require_review),
+        ):
+            for identity in ({"login": "Mallory"}, None):
+                with self.subTest(collection=collection, identity=identity):
+                    candidate = copy.deepcopy(row)
+                    if identity is None:
+                        candidate.pop(field, None)
+                    else:
+                        candidate[field] = identity
+                    self.write_state(
+                        comments={
+                            "1": [candidate]
+                            if collection == "comments"
+                            else [trusted_comment]
+                        },
+                        reviews={"1": [candidate] if collection == "reviews" else [trusted_review]},
+                        statuses={sha: statuses},
+                    )
+                    with self.assertRaises(pr_merge.GateFailure):
+                        requirement(self.client(), 1, sha, base_sha)
+
+        for context in (
+            "local-ci/build",
+            github_api.CI_SUMMARY_CONTEXT,
+            github_api.REVIEW_CONTEXT,
+        ):
+            trusted = next(
+                item for item in statuses if item["context"].casefold() == context.casefold()
+            )
+            for creator in ({"login": "Mallory"}, None):
+                with self.subTest(context=context, creator=creator):
+                    poisoned = {**trusted, "id": 999, "created_at": "2099-01-01T00:00:02Z"}
+                    if creator is None:
+                        poisoned.pop("creator", None)
+                    else:
+                        poisoned["creator"] = creator
+                    self.write_state(
+                        comments={"1": [trusted_comment]},
+                        reviews={"1": [trusted_review]},
+                        statuses={sha: [*statuses, poisoned]},
+                    )
+                    requirement = (
+                        pr_merge.require_review
+                        if context == github_api.REVIEW_CONTEXT
+                        else pr_merge.require_ci
+                    )
+                    with self.assertRaises(pr_merge.GateFailure):
+                        requirement(self.client(), 1, sha, base_sha)
+
     def test_server_policy_requires_exact_zero_approval_classic_protection(self) -> None:
         client = self.client()
+        pr_merge.require_server_policy(client, "main")
+
+        for allowance in ("absent", None):
+            with self.subTest(valid_bypass=allowance):
+                protection = classic_protection()
+                reviews = protection["required_pull_request_reviews"]
+                if allowance == "absent":
+                    reviews.pop("bypass_pull_request_allowances")
+                else:
+                    reviews["bypass_pull_request_allowances"] = None
+                self.write_state(branch_protections={"main": protection})
+                pr_merge.require_server_policy(client, "main")
+
+        protection = classic_protection()
+        for check in protection["required_status_checks"]["checks"]:
+            check["app_id"] = -1
+        self.write_state(branch_protections={"main": protection})
         pr_merge.require_server_policy(client, "main")
 
         invalid: list[tuple[str, dict]] = []
@@ -3295,7 +3461,27 @@ class MergeGateTests(FakeGhCase):
         protection["required_pull_request_reviews"][
             "bypass_pull_request_allowances"
         ]["users"] = [{"login": "owner"}]
-        invalid.append(("bypass", protection))
+        invalid.append(("bypass-user", protection))
+        for actor_kind in ("teams", "apps"):
+            protection = classic_protection()
+            protection["required_pull_request_reviews"][
+                "bypass_pull_request_allowances"
+            ][actor_kind] = [{"slug": "bypass"}]
+            invalid.append((f"bypass-{actor_kind}", protection))
+        for malformed in ([], {"users": [], "teams": []}):
+            protection = classic_protection()
+            protection["required_pull_request_reviews"][
+                "bypass_pull_request_allowances"
+            ] = malformed
+            invalid.append(("bypass-malformed", protection))
+        for producer in (1, "-1", "missing"):
+            protection = classic_protection()
+            check = protection["required_status_checks"]["checks"][0]
+            if producer == "missing":
+                check.pop("app_id")
+            else:
+                check["app_id"] = producer
+            invalid.append((f"classic-producer-{producer}", protection))
         protection = classic_protection()
         protection["allow_force_pushes"]["enabled"] = True
         invalid.append(("force-push", protection))
@@ -3321,8 +3507,14 @@ class MergeGateTests(FakeGhCase):
             "parameters": {
                 "strict_required_status_checks_policy": True,
                 "required_status_checks": [
-                    {"context": github_api.CI_SUMMARY_CONTEXT},
-                    {"context": github_api.REVIEW_CONTEXT},
+                    {
+                        "context": github_api.CI_SUMMARY_CONTEXT,
+                        "integration_id": None,
+                    },
+                    {
+                        "context": github_api.REVIEW_CONTEXT,
+                        "integration_id": None,
+                    },
                 ],
             },
         }
@@ -3342,6 +3534,12 @@ class MergeGateTests(FakeGhCase):
             branch_rules={"main": [status_rule, review_rule]},
             rulesets={"7": active},
         )
+        pr_merge.require_server_policy(client, "main")
+
+        pat_status_rule = copy.deepcopy(status_rule)
+        for check in pat_status_rule["parameters"]["required_status_checks"]:
+            check["integration_id"] = -1
+        self.write_state(branch_rules={"main": [pat_status_rule, review_rule]})
         pr_merge.require_server_policy(client, "main")
 
         candidates = {
@@ -3365,6 +3563,14 @@ class MergeGateTests(FakeGhCase):
                 }
             ],
         }
+        for producer in (7, "-1", "missing"):
+            candidate = copy.deepcopy(status_rule)
+            check = candidate["parameters"]["required_status_checks"][0]
+            if producer == "missing":
+                check.pop("integration_id")
+            else:
+                check["integration_id"] = producer
+            candidates[f"effective-producer-{producer}"] = [candidate]
         for name, rules in candidates.items():
             with self.subTest(name=name):
                 self.write_state(
@@ -3418,6 +3624,61 @@ class MergeGateTests(FakeGhCase):
         pr_merge.require_adjudication(
             self.client(), pull, 1, sha, base_sha, require_status=False
         )
+
+    def test_adjudication_ignores_prefix_poison_and_requires_trusted_later_row(self) -> None:
+        sha, base_sha = "a" * 40, "b" * 40
+        pull = pull_row(1, sha, base_sha=base_sha)
+        pull["labels"] = [{"name": github_api.ADJUDICATION_LABEL}]
+        reviews, _statuses, sessions, comment, _payload = self.adjudication_bundle(
+            self.root, sha, base_sha, first_review_id=30
+        )
+        self.append_sessions(self.root, sessions)
+        prefix_poison = {
+            "id": 600,
+            "body": "ADJUDICATION\nthis is unrelated prose",
+            "created_at": "2099-01-01T00:00:00Z",
+            "updated_at": "2099-01-01T00:00:00Z",
+            "user": {"login": "o"},
+        }
+        untrusted_copy = {
+            **comment,
+            "id": 601,
+            "user": {"login": "Mallory"},
+        }
+        self.write_state(
+            pulls={"1": pull},
+            reviews={"1": reviews},
+            comments={"1": [prefix_poison, untrusted_copy, comment]},
+        )
+        pr_merge.require_adjudication(
+            self.client(), pull, 1, sha, base_sha, require_status=False
+        )
+
+        for author in ({"login": "Mallory"}, None):
+            with self.subTest(author=author):
+                wrong_author = copy.deepcopy(comment)
+                if author is None:
+                    wrong_author.pop("user")
+                else:
+                    wrong_author["user"] = author
+                self.write_state(comments={"1": [wrong_author]})
+                with self.assertRaisesRegex(
+                    pr_merge.GateFailure, "structurally valid"
+                ):
+                    pr_merge.require_adjudication(
+                        self.client(), pull, 1, sha, base_sha, require_status=False
+                    )
+
+        pre_source = {
+            **comment,
+            "created_at": "2026-01-01T00:03:03Z",
+            "updated_at": "2026-01-01T00:03:03Z",
+        }
+        self.write_state(comments={"1": [pre_source]})
+        with self.assertRaisesRegex(pr_merge.GateFailure, "strictly later"):
+            pr_merge.require_adjudication(
+                self.client(), pull, 1, sha, base_sha, require_status=False
+            )
 
     def test_adjudication_rejects_edited_duplicate_short_and_inexact_records(self) -> None:
         sha, base_sha = "4" * 40, "5" * 40
@@ -3513,6 +3774,24 @@ class MergeGateTests(FakeGhCase):
             pr_merge.require_adjudication(
                 self.client(), pull, 1, sha, pull["base"]["sha"], require_status=False
             )
+
+    def test_partial_runtime_lock_fails_closed_with_explicit_recovery(self) -> None:
+        lock = self.root / "cache" / "locks" / "review-1.lock"
+        lock.mkdir(parents=True)
+        with self.assertRaisesRegex(
+            pr_merge.GateFailure, "remove .* explicitly and retry"
+        ):
+            with pr_merge.reserve_runtime_lock(lock, "test partial"):
+                self.fail("a partial lock must never be adopted")
+        self.assertTrue(lock.is_dir())
+
+        lock.rmdir()
+        with pr_merge.reserve_runtime_lock(lock, "test live") as held:
+            held.require_owned()
+            with self.assertRaisesRegex(pr_merge.GateFailure, "live pid"):
+                with pr_merge.reserve_runtime_lock(lock, "test contender"):
+                    self.fail("a live lock must exclude a contender")
+        self.assertFalse(lock.exists())
 
 
 class GuardedMergeTests(FakeGhCase):
@@ -3612,6 +3891,26 @@ class GuardedMergeTests(FakeGhCase):
         ]
         self.assertEqual(merge_calls, [])
 
+    def test_repository_merge_method_preflight_blocks_the_mutation(self) -> None:
+        _repository, _base_sha, _head_sha, args = self.prepare_valid_merge(
+            name="merge-method-disabled"
+        )
+        self.write_state(
+            repo={"id": 1, "full_name": "o/r", "allow_merge_commit": False}
+        )
+        with mock.patch.dict(
+            os.environ, {"MIPSTARRE_CACHE_ROOT": str(self.root / "cache")}
+        ), mock.patch.object(pr_merge, "fast_forward_base"), mock.patch.object(
+            pr_merge, "cleanup_feature"
+        ):
+            with self.assertRaisesRegex(pr_merge.GateFailure, "allow merge commits"):
+                pr_merge.run(args)
+        merge_calls = [
+            call for call in self.state()["calls"]
+            if call["args"][:2] == ["pr", "merge"] and "--help" not in call["args"]
+        ]
+        self.assertEqual(merge_calls, [])
+
     def test_final_same_head_adverse_review_race_blocks_merge(self) -> None:
         _repository, _base_sha, _head_sha, args = self.prepare_valid_merge()
         self.write_state(inject_adverse_review_at=2, review_read_count=0)
@@ -3685,6 +3984,68 @@ class GuardedMergeTests(FakeGhCase):
             self.assertEqual(pr_merge.run(args), 0)
         self.assertEqual(self.state()["merge_call_count"], 1)
         self.assertTrue(self.state()["pulls"]["1"]["merged"])
+
+    def test_merge_readback_accepts_advanced_base_and_verifies_parent_order(self) -> None:
+        _repository, base_sha, head_sha, args = self.prepare_valid_merge(
+            name="merge-readback-base-advanced"
+        )
+        self.write_state(post_merge_base_sha="3" * 40)
+        with mock.patch.dict(
+            os.environ, {"MIPSTARRE_CACHE_ROOT": str(self.root / "cache")}
+        ), mock.patch.object(pr_merge, "fast_forward_base"), mock.patch.object(
+            pr_merge, "cleanup_feature"
+        ):
+            self.assertEqual(pr_merge.run(args), 0)
+        commit = self.state()["git_commits"]["2" * 40]
+        self.assertEqual(
+            [parent["sha"] for parent in commit["parents"]],
+            [base_sha, head_sha],
+        )
+        self.assertEqual(self.state()["pulls"]["1"]["base"]["sha"], "3" * 40)
+
+    def test_nonconforming_merge_commit_is_external_and_never_retried(self) -> None:
+        for name, parents in (
+            ("one-parent", ["0" * 40]),
+            ("reversed", ["1" * 40, "0" * 40]),
+            ("wrong-first", ["9" * 40, "1" * 40]),
+        ):
+            with self.subTest(name=name):
+                _repository, base_sha, head_sha, args = self.prepare_valid_merge(
+                    name=f"merge-nonconforming-{name}"
+                )
+                resolved = [
+                    base_sha if parent == "0" * 40 else
+                    head_sha if parent == "1" * 40 else parent
+                    for parent in parents
+                ]
+                self.write_state(merge_commit_parents=resolved)
+                with mock.patch.dict(
+                    os.environ,
+                    {"MIPSTARRE_CACHE_ROOT": str(self.root / "cache")},
+                ), mock.patch.object(
+                    pr_merge, "fast_forward_base"
+                ), mock.patch.object(pr_merge, "cleanup_feature"):
+                    with self.assertRaisesRegex(
+                        pr_merge.NonconformingMerge, "external/nonconforming"
+                    ):
+                        pr_merge.run(args)
+                self.assertEqual(self.state()["merge_call_count"], 1)
+
+    def test_post_merge_ref_drift_is_external_and_never_retried(self) -> None:
+        _repository, _base_sha, _head_sha, args = self.prepare_valid_merge(
+            name="merge-nonconforming-ref"
+        )
+        self.write_state(post_merge_head_ref="foreign-feature")
+        with mock.patch.dict(
+            os.environ, {"MIPSTARRE_CACHE_ROOT": str(self.root / "cache")}
+        ), mock.patch.object(pr_merge, "fast_forward_base"), mock.patch.object(
+            pr_merge, "cleanup_feature"
+        ):
+            with self.assertRaisesRegex(
+                pr_merge.NonconformingMerge, "head/ref/base-ref"
+            ):
+                pr_merge.run(args)
+        self.assertEqual(self.state()["merge_call_count"], 1)
 
     def test_ambiguous_unmerged_outcome_is_not_retried(self) -> None:
         _repository, _base_sha, _head_sha, args = self.prepare_valid_merge(

@@ -22,6 +22,11 @@ Review-fix authorization uses the attestation parser's canonical unresolved
 count, never checkbox-like text elsewhere in the review body. The count and
 body come from one parsed attestation snapshot.
 
+The manifest comment, review `COMMENT`, and their status rows must be published
+by the configured trusted GitHub actor. Copied markers from another account are
+not auto-fix authorization, and a newer untrusted status blocks selection under
+GitHub's global latest-context semantics.
+
 Each fix session is dispatched through `local/bin/dispatch.sh` using a trusted
 persona and a fenced, sanitized evidence block. The session cannot publish or
 merge. A successful repair is committed with the exact prefix

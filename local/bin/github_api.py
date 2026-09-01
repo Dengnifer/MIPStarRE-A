@@ -70,6 +70,9 @@ _CANONICAL_FINDING_LINE_RE = re.compile(
 _SESSION_NAME_RE = re.compile(r"^reviewer-[A-Za-z0-9._-]+$")
 _THREAD_ID_RE = re.compile(r"^[A-Za-z0-9._:-]{8,200}$")
 _RUN_ID_RE = re.compile(r"^[A-Za-z0-9._:-]{1,28}$")
+_ACTOR_RE = re.compile(
+    r"^(?=.{1,39}$)[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?$"
+)
 
 _REPO_RE = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 _HTTP_RE = re.compile(r"(?:HTTP|status(?: code)?)\D*(\d{3})", re.IGNORECASE)
@@ -311,6 +314,16 @@ def normalize_sha(value: str, *, kind: str = "commit SHA") -> str:
     if not _SHA_RE.fullmatch(text):
         raise GitHubError(f"{kind} must be an exact 40- or 64-hex SHA, got {text!r}")
     return text.lower()
+
+
+def normalize_actor(value: Any, *, kind: str = "GitHub actor") -> str:
+    """Validate one GitHub user login used as an evidence principal."""
+    if not isinstance(value, str) or value != value.strip():
+        raise GitHubError(f"{kind} is not a valid GitHub user login: {value!r}")
+    text = value
+    if not _ACTOR_RE.fullmatch(text):
+        raise GitHubError(f"{kind} is not a valid GitHub user login: {text!r}")
+    return text
 
 
 def render_status_description(
@@ -836,6 +849,11 @@ class GitHub:
         self.gh = gh or discover_gh()
         self.repo = repo or discover_repository(self.repo_root)
         self.owner, self.name = self.repo.split("/", 1)
+        configured_actor = os.environ.get("MIPSTARRE_GITHUB_ACTOR")
+        self.trusted_actor = normalize_actor(
+            self.owner if configured_actor is None else configured_actor,
+            kind="configured trusted GitHub actor",
+        )
         self.retries = max(0, int(os.environ.get("MIPSTARRE_GH_RETRIES", "3")))
         self.retry_delay = max(
             0.0, float(os.environ.get("MIPSTARRE_GH_RETRY_DELAY", "1"))
@@ -949,8 +967,52 @@ class GitHub:
                 return collected
         raise GitHubError(f"pagination exceeded 100 pages for {endpoint}")
 
+    @staticmethod
+    def _row_actor(row: dict[str, Any], *, field: str, kind: str) -> str:
+        identity = row.get(field)
+        if not isinstance(identity, dict):
+            raise GitHubError(f"{kind} has no authoritative {field} identity")
+        return normalize_actor(identity.get("login"), kind=f"{kind} {field} login")
+
+    def is_trusted_actor_row(
+        self, row: dict[str, Any], *, field: str, kind: str
+    ) -> bool:
+        """Return whether a publication row names the configured principal."""
+        try:
+            actor = self._row_actor(row, field=field, kind=kind)
+        except GitHubError:
+            return False
+        return actor.casefold() == self.trusted_actor.casefold()
+
+    def require_trusted_actor_row(
+        self, row: dict[str, Any], *, field: str, kind: str
+    ) -> None:
+        """Reject evidence whose authoritative creator is absent or untrusted."""
+        actor = self._row_actor(row, field=field, kind=kind)
+        if actor.casefold() != self.trusted_actor.casefold():
+            raise GitHubError(
+                f"{kind} was published by {actor!r}, not configured trusted "
+                f"actor {self.trusted_actor!r}"
+            )
+
+    def verify_authenticated_actor(self) -> dict[str, Any]:
+        """Bind the active ``gh`` credential to the configured principal."""
+        payload = self.api("/user")
+        if not isinstance(payload, dict):
+            raise GitHubError("authenticated-user probe returned a non-object response")
+        login = normalize_actor(
+            payload.get("login"), kind="authenticated GitHub user login"
+        )
+        if login.casefold() != self.trusted_actor.casefold():
+            raise GitHubError(
+                f"authenticated gh user {login!r} does not match configured trusted "
+                f"actor {self.trusted_actor!r}"
+            )
+        return payload
+
     def probe_authentication(self) -> dict[str, Any]:
         try:
+            self.verify_authenticated_actor()
             payload = self.api(f"/repos/{self.repo}")
         except GitHubError as exc:
             raise GitHubError(
@@ -962,6 +1024,13 @@ class GitHub:
             ) from exc
         if not isinstance(payload, dict):
             raise GitHubError("authentication probe returned a non-object response")
+        return payload
+
+    def repository_metadata(self) -> dict[str, Any]:
+        """Read current repository settings used by the merge preflight."""
+        payload = self.api(f"/repos/{self.repo}")
+        if not isinstance(payload, dict):
+            raise GitHubError("repository settings response is not a JSON object")
         return payload
 
     def get_issue(self, number: int) -> dict[str, Any]:
@@ -1007,6 +1076,14 @@ class GitHub:
         payload = self.api(f"/repos/{self.repo}/rulesets/{identifier}")
         if not isinstance(payload, dict):
             raise GitHubError(f"ruleset {identifier} response is not a JSON object")
+        return payload
+
+    def git_commit(self, sha: str) -> dict[str, Any]:
+        """Read one exact Git commit object for merge-parent verification."""
+        sha = normalize_sha(sha, kind="Git commit SHA")
+        payload = self.api(f"/repos/{self.repo}/git/commits/{sha}")
+        if not isinstance(payload, dict):
+            raise GitHubError(f"Git commit {sha} response is not a JSON object")
         return payload
 
     def publication_guard(
@@ -1239,6 +1316,7 @@ class GitHub:
         self, number: int, sha: str, base_sha: str | None = None
     ) -> CIManifestEvidence:
         """Parse a complete manifest and bind every status to its exact run."""
+        self.verify_authenticated_actor()
         number = normalize_number(number, kind="PR number")
         sha = normalize_sha(sha)
         expected_base = normalize_sha(base_sha, kind="pull-request base SHA") if base_sha else None
@@ -1247,6 +1325,10 @@ class GitHub:
             body = str(row.get("body") or "")
             markers = _CI_MARKER_RE.findall(body)
             if not any(int(pr) == number and head.lower() == sha for pr, head, _ in markers):
+                continue
+            if not self.is_trusted_actor_row(
+                row, field="user", kind="CI manifest comment"
+            ):
                 continue
             matches.append(row)
         row = self._latest(matches, "created_at")
@@ -1305,6 +1387,9 @@ class GitHub:
             state, description = ci_status_description(marker_run, step)
             context = f"local-ci/{step_name}"
             status = statuses.get(context.casefold()) or {}
+            self.require_trusted_actor_row(
+                status, field="creator", kind=f"{context} status"
+            )
             expected_description = render_status_description(
                 sha, context, state, description
             )
@@ -1346,6 +1431,9 @@ class GitHub:
             )
         statuses = self.latest_statuses(evidence.head_sha)
         summary = statuses.get(CI_SUMMARY_CONTEXT.casefold()) or {}
+        self.require_trusted_actor_row(
+            summary, field="creator", kind=f"{CI_SUMMARY_CONTEXT} status"
+        )
         expected_description = render_status_description(
             evidence.head_sha,
             CI_SUMMARY_CONTEXT,
@@ -1400,6 +1488,9 @@ class GitHub:
         )
         current = self.ci_evidence(number, sha, base_sha)
         summary = self.latest_statuses(sha).get(CI_SUMMARY_CONTEXT.casefold()) or {}
+        self.require_trusted_actor_row(
+            summary, field="creator", kind=f"{CI_SUMMARY_CONTEXT} status"
+        )
         expected = render_status_description(
             sha,
             CI_SUMMARY_CONTEXT,
@@ -1423,10 +1514,15 @@ class GitHub:
         return evidence.row, evidence.manifest
 
     def _review_attestations(self, number: int) -> list[ReviewAttestation]:
+        self.verify_authenticated_actor()
         attestations: list[ReviewAttestation] = []
         for row in self.reviews(number):
             body = str(row.get("body") or "")
             if "mipstarre:review-attestation" not in body:
+                continue
+            if not self.is_trusted_actor_row(
+                row, field="user", kind="review COMMENT row"
+            ):
                 continue
             attestations.append(_review_attestation_from_row(row, number))
         session_owners: dict[str, tuple[str, str, str, str]] = {}
@@ -1481,6 +1577,9 @@ class GitHub:
         self._validate_attestation_sessions(attestation)
         statuses = self.latest_statuses(attestation.head_sha)
         status = statuses.get(REVIEW_CONTEXT.casefold()) or {}
+        self.require_trusted_actor_row(
+            status, field="creator", kind=f"{REVIEW_CONTEXT} status"
+        )
         state = review_summary_state(attestation)
         expected_description = render_status_description(
             attestation.head_sha,
@@ -1552,6 +1651,10 @@ class GitHub:
         attestation = next(item for item in matches if item.row is selected_row)
         self._validate_attestation_sessions(attestation)
         status = self.latest_statuses(sha).get(REVIEW_CONTEXT.casefold())
+        if status is not None:
+            self.require_trusted_actor_row(
+                status, field="creator", kind=f"{REVIEW_CONTEXT} status"
+            )
         final_state = review_summary_state(attestation)
         expected_final = render_status_description(
             sha,
@@ -1673,6 +1776,7 @@ class GitHub:
         *,
         before_mutation: Callable[[], None] | None = None,
     ) -> dict[str, Any]:
+        self.verify_authenticated_actor()
         sha = normalize_sha(sha)
         context = context.strip()
         if not context or any(ord(ch) < 32 for ch in context):
@@ -1691,13 +1795,14 @@ class GitHub:
                 and str(row.get("context") or "").casefold() == context.casefold()
                 and str(row.get("state") or "").casefold() == state
                 and str(row.get("description") or "") == rendered_description
+                and self.is_trusted_actor_row(
+                    row, field="creator", kind="commit status"
+                )
             )
 
         def lookup() -> dict[str, Any] | None:
-            for row in self.statuses(sha):
-                if matches(row):
-                    return row
-            return None
+            row = self.latest_statuses(sha).get(context.casefold())
+            return row if row is not None and matches(row) else None
 
         def mutate() -> dict[str, Any]:
             if before_mutation is not None:
@@ -1760,12 +1865,17 @@ class GitHub:
         *,
         before_mutation: Callable[[], None] | None = None,
     ) -> dict[str, Any]:
+        self.verify_authenticated_actor()
         _validated_marker(marker, body)
 
         def lookup() -> dict[str, Any] | None:
             for row in self.comments(number):
                 adopted_body = str(row.get("body") or "")
                 if marker not in adopted_body:
+                    continue
+                if not self.is_trusted_actor_row(
+                    row, field="user", kind="issue comment"
+                ):
                     continue
                 if adopted_body != body:
                     raise GitHubError(
@@ -1789,6 +1899,7 @@ class GitHub:
             return payload
 
         row = self._idempotent_mutation(lookup=lookup, mutate=mutate)
+        self.require_trusted_actor_row(row, field="user", kind="issue comment")
         if str(row.get("body") or "") != body:
             raise GitHubError("comment publication returned a different authoritative body")
         return row
@@ -1804,6 +1915,7 @@ class GitHub:
         before_mutation: Callable[[], None] | None = None,
         before_write: Callable[[], None] | None = None,
     ) -> tuple[dict[str, Any], str]:
+        self.verify_authenticated_actor()
         number = normalize_number(number, kind="PR number")
         commit_id = normalize_sha(commit_id, kind="review commit SHA")
         _validated_marker(marker, body)
@@ -1862,6 +1974,10 @@ class GitHub:
                 adopted_body = str(row.get("body") or "")
                 if marker not in adopted_body:
                     continue
+                if not self.is_trusted_actor_row(
+                    row, field="user", kind="review COMMENT row"
+                ):
+                    continue
                 if str(row.get("commit_id") or "").lower() != commit_id:
                     raise GitHubError(
                         "review marker collision: authoritative review is bound to "
@@ -1896,6 +2012,9 @@ class GitHub:
             return payload
 
         row = self._idempotent_mutation(lookup=lookup, mutate=mutate)
+        self.require_trusted_actor_row(
+            row, field="user", kind="review COMMENT row"
+        )
         if str(row.get("commit_id") or "").lower() != commit_id:
             raise GitHubError("review publication returned a different commit binding")
         if str(row.get("body") or "") != body:
@@ -2161,10 +2280,15 @@ def build_parser() -> argparse.ArgumentParser:
 def cli(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     client = GitHub(repo_root=args.repo_root)
-    if not args.no_probe:
+    if args.no_probe:
+        client.verify_authenticated_actor()
+    else:
         client.probe_authentication()
     if args.command == "probe":
-        print(f"authenticated repository: {client.repo}")
+        print(
+            f"authenticated actor: {client.trusted_actor}; "
+            f"repository: {client.repo}"
+        )
     elif args.command == "repo":
         print(client.repo)
     elif args.command == "pull":

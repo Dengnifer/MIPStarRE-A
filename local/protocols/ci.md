@@ -68,6 +68,16 @@ summary. A publication failure invalidates the step and summary contexts with
 `error`; a prior success can never survive as the latest summary for the failed
 run.
 
+The manifest comment and every step/summary status are authoritative only when
+GitHub reports the configured trusted actor as, respectively, `user.login` and
+`creator.login`. The actor defaults to the repository owner and is configured
+with `MIPSTARRE_GITHUB_ACTOR`; `gh api /user` must match before every producer
+or consumer invocation. An untrusted copied manifest marker is ignored. Status
+rows differ because GitHub resolves required contexts by global latest-row
+semantics: the client selects the latest row first, then checks its creator, so
+a newer untrusted row fails closed rather than revealing an older trusted
+success. A later trusted publication may explicitly supersede it.
+
 Status creation is digest-idempotent. Each invocation issues at most one
 mutation. If the POST result is ambiguous, the client polls statuses on the
 exact SHA and adopts only the matching casefolded context, state, and

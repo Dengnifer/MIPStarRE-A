@@ -28,7 +28,8 @@ GitHub issue -> branch/worktree -> agent sessions -> exact-head CI -> review
    the opt-in label.
 8. Merge with `local/bin/pr_merge.py <pr-number>`, which invokes only guarded
    `gh pr merge --merge --match-head-commit` after all evidence and strict
-   protection on the actual base are current.
+   protection on the actual base are current. Read-back accepts only a real
+   merge commit with frozen base/head parents in that order.
 
 `local/bin/github-sync.sh` creates an atomic audit snapshot under
 `results/telemetry/github-snapshot/`. Lifecycle commands never read snapshots
@@ -43,6 +44,13 @@ as authority. `local/bin/housekeeping.sh standup` writes reports under
 - One session never reviews its own work.
 - Invoke lifecycle tools from the prepared worktree. The shared GitHub client
   discovers `gh` and the `github` remote and fails closed when unavailable.
+- `MIPSTARRE_GITHUB_ACTOR` is the sole evidence publisher and defaults to the
+  repository owner (`Dengnifer` here). The authenticated `gh` user must match;
+  changing marker text or posting from another account grants no authority.
+- A partial merge lock with no proven PID is never deleted automatically. After
+  verifying that no CI, review, auto-fix, or merge process owns the exact path
+  printed by the error, use `rmdir <absolute-lock-path>` when it is empty, or
+  move a nonempty stale directory aside for inspection, then retry.
 - The retired registry under `results/telemetry/registry-archive/` is immutable
   research data, never workflow input.
 - Record protocol friction in `results/telemetry/events.md`, then amend

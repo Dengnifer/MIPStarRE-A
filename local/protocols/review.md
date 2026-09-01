@@ -101,6 +101,14 @@ Publication is idempotent only when the full attestation, digest, body, commit,
 event/state, and status agree. Transient and ambiguous review writes use
 authoritative read-back and never issue a second review mutation.
 
+The review `COMMENT` row must have `user.login` equal to the configured trusted
+actor, and its latest summary must have the same actor in `creator.login`.
+Every invocation verifies that the authenticated `gh` user is that actor.
+Untrusted or missing-author marker copies are not attestations and cannot
+collide with a trusted publication. Summary selection remains global per
+context, so a newer untrusted status blocks rather than exposing an older
+trusted result.
+
 A valid review attestation is deliberately distinct from complete merge
 evidence. Structural parsing, the exact commit and base, the body digest,
 canonical ledger, event semantics, session telemetry, and cross-attestation

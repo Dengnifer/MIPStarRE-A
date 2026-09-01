@@ -326,3 +326,31 @@ have exhaustive fixed-with-evidence or tracked-to-open-issue dispositions.
 bases, weak protection, bypass actors, mixed adjudication rounds, incomplete
 dispositions, concurrent producers, and ambiguous duplicate merges fail
 closed against GitHub's sole authoritative state.
+
+## 2026-09-01 - Gate evidence has one principal and proven merge topology
+
+**Trigger:** the issue 0007 incident in `results/telemetry/events.md`, "Final
+gate audit found publication identity and merge topology were not
+authoritative."
+
+**Change:** `ci.md`, `review.md`, `autofix.md`, and `issues-prs.md` now bind CI
+comments, review `COMMENT` rows, adjudications, and CI/review statuses to one
+validated `MIPSTARRE_GITHUB_ACTOR`, defaulting to the repository owner. Every
+workflow invocation verifies the authenticated `gh` user. Comment copies from
+other actors are ignored, while status selection remains globally latest and
+therefore fails on a newer untrusted row. Adjudication selects exactly one
+unedited trusted exact-comparison record strictly after its source review.
+
+The merge gate accepts absent or null classic bypass allowances as empty but
+rejects malformed or nonempty actor lists; classic `app_id` and effective
+`integration_id` producers must be null or `-1`. Repository settings must
+enable merge commits. One-shot read-back permits GitHub to advance the reported
+base SHA, but proves the result is a two-parent commit ordered frozen base then
+head; any other already-merged result is external/nonconforming. Ownership-
+ambiguous partial locks remain fail-closed with documented manual recovery and
+live locks remain exclusive.
+
+**Expected effect:** copied markers, status impersonation, prefix poisoning,
+producer-app substitution, disabled merge commits, and squash/rebase or foreign
+merge results cannot satisfy the local gate, without adding an approval or
+`reviewDecision` requirement.

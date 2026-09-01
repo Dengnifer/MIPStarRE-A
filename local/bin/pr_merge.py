@@ -50,6 +50,10 @@ class GateFailure(RuntimeError):
     """A merge-gate refusal with an operator-facing explanation."""
 
 
+class NonconformingMerge(GateFailure):
+    """An already-merged result that cannot be attributed to this local gate."""
+
+
 @dataclass(frozen=True)
 class GateExpectation:
     """The immutable PR comparison accepted for this merge invocation."""
@@ -168,23 +172,32 @@ def _contexts_from_classic(value: dict[str, Any]) -> set[str]:
         ):
             raise GateFailure("classic required status contexts are malformed")
         context_sets.append({item.casefold() for item in raw_contexts})
-    if raw_checks is not None:
-        if not isinstance(raw_checks, list) or not all(
-            isinstance(item, dict)
-            and isinstance(item.get("context"), str)
-            and item.get("context")
-            for item in raw_checks
-        ):
-            raise GateFailure("classic required status checks are malformed")
-        context_sets.append(
-            {str(item["context"]).casefold() for item in raw_checks}
+    if not isinstance(raw_checks, list) or not all(
+        isinstance(item, dict)
+        and isinstance(item.get("context"), str)
+        and item.get("context")
+        and "app_id" in item
+        and (
+            item.get("app_id") is None
+            or (type(item.get("app_id")) is int and item.get("app_id") == -1)
         )
+        for item in raw_checks
+    ):
+        raise GateFailure(
+            "classic required status checks must name PAT producers "
+            "with app_id null or -1"
+        )
+    context_sets.append(
+        {str(item["context"]).casefold() for item in raw_checks}
+    )
     if not context_sets or any(value != context_sets[0] for value in context_sets[1:]):
         raise GateFailure("classic required status context representations disagree")
     return context_sets[0]
 
 
 def _empty_actor_allowances(value: Any) -> bool:
+    if value is None:
+        return True
     return (
         isinstance(value, dict)
         and set(value) == {"users", "teams", "apps"}
@@ -210,12 +223,17 @@ def _require_zero_approval_rule(value: dict[str, Any], *, source: str) -> None:
 def require_server_policy(client: GitHub, base: str) -> None:
     """Validate classic protection and every active effective ruleset."""
     try:
+        client.verify_authenticated_actor()
+        repository = client.repository_metadata()
         protection = client.branch_protection(base)
         rules = client.branch_rules(base)
     except GitHubError as exc:
         raise GateFailure(
             f"cannot validate server policy for actual base {base!r}: {exc}"
         ) from exc
+
+    if repository.get("allow_merge_commit") is not True:
+        raise GateFailure("repository settings must allow merge commits")
 
     status_rule = protection.get("required_status_checks")
     if not isinstance(status_rule, dict) or status_rule.get("strict") is not True:
@@ -258,9 +276,20 @@ def require_server_policy(client: GitHub, base: str) -> None:
                 isinstance(item, dict)
                 and isinstance(item.get("context"), str)
                 and item.get("context")
+                and "integration_id" in item
+                and (
+                    item.get("integration_id") is None
+                    or (
+                        type(item.get("integration_id")) is int
+                        and item.get("integration_id") == -1
+                    )
+                )
                 for item in raw_checks
             ):
-                raise GateFailure("effective required-status contexts are malformed")
+                raise GateFailure(
+                    "effective required-status checks must name PAT producers "
+                    "with integration_id null or -1"
+                )
             contexts = {str(item["context"]).casefold() for item in raw_checks}
             if (
                 parameters.get("strict_required_status_checks_policy") is not True
@@ -388,6 +417,40 @@ def _required_nonempty_text(value: Any, *, field: str) -> str:
     return value
 
 
+def _adjudication_comment_has_shape(
+    client: GitHub,
+    row: dict[str, Any],
+    *,
+    number: int,
+    sha: str,
+    base_sha: str,
+) -> bool:
+    """Recognize an unedited trusted comment for the exact comparison."""
+    if not client.is_trusted_actor_row(
+        row, field="user", kind="adjudication comment"
+    ):
+        return False
+    created = str(row.get("created_at") or "")
+    if not created or str(row.get("updated_at") or "") != created:
+        return False
+    body = str(row.get("body") or "")
+    matches = list(ADJUDICATION_MARKER_RE.finditer(body))
+    if len(matches) != 1 or body.count("<!-- mipstarre:adjudication ") != 1:
+        return False
+    marker_match = matches[0]
+    marker = marker_match.group(0)
+    if body[marker_match.start() :] not in {marker, marker + "\n"}:
+        return False
+    prefix = body[: marker_match.start()]
+    if re.fullmatch(r"ADJUDICATION\n\n```json\n.*\n```\n\n", prefix, re.DOTALL) is None:
+        return False
+    return (
+        int(marker_match.group(1)) == number
+        and marker_match.group(2).lower() == sha
+        and marker_match.group(3).lower() == base_sha
+    )
+
+
 def require_adjudication(
     client: GitHub,
     pull: dict[str, Any],
@@ -397,6 +460,10 @@ def require_adjudication(
     *,
     require_status: bool,
 ) -> AdjudicationEvidence:
+    try:
+        client.verify_authenticated_actor()
+    except GitHubError as exc:
+        raise GateFailure(f"cannot verify trusted adjudication actor: {exc}") from exc
     labels = {
         str(item.get("name") if isinstance(item, dict) else item)
         for item in (pull.get("labels") or [])
@@ -406,11 +473,22 @@ def require_adjudication(
     adjudications = [
         row
         for row in client.comments(number)
-        if str(row.get("body") or "").startswith("ADJUDICATION\n")
+        if _adjudication_comment_has_shape(
+            client, row, number=number, sha=sha, base_sha=base_sha
+        )
     ]
     if len(adjudications) != 1:
-        raise GateFailure("the PR must contain exactly one ADJUDICATION comment")
+        raise GateFailure(
+            "the PR must contain exactly one structurally valid, unedited "
+            "trusted ADJUDICATION comment for this comparison"
+        )
     comment = adjudications[0]
+    try:
+        client.require_trusted_actor_row(
+            comment, field="user", kind="adjudication comment"
+        )
+    except GitHubError as exc:  # Defensive: selection above owns this invariant.
+        raise GateFailure(str(exc)) from exc
     created = str(comment.get("created_at") or "")
     updated = str(comment.get("updated_at") or "")
     if not created or created != updated:
@@ -509,8 +587,16 @@ def require_adjudication(
     for review in client.reviews(number):
         if str(review.get("commit_id") or "").lower() != sha:
             continue
-        if row_order(review) > source_order:
+        state = str(review.get("state") or "").upper()
+        authoritative_comment = client.is_trusted_actor_row(
+            review, field="user", kind="review row"
+        )
+        if row_order(review) > source_order and (
+            state == "CHANGES_REQUESTED" or authoritative_comment
+        ):
             raise GateFailure("a later exact-head review supersedes the adjudication source")
+    if row_order(comment) <= source_order:
+        raise GateFailure("the adjudication comment must be strictly later than its source review")
 
     raw_rounds = payload.get("rounds")
     if not isinstance(raw_rounds, list) or len(raw_rounds) < 4:
@@ -607,6 +693,12 @@ def require_adjudication(
     )
     if require_status:
         status = client.latest_statuses(sha).get(REVIEW_CONTEXT.casefold()) or {}
+        try:
+            client.require_trusted_actor_row(
+                status, field="creator", kind=f"{REVIEW_CONTEXT} status"
+            )
+        except GitHubError as exc:
+            raise GateFailure(str(exc)) from exc
         expected = render_status_description(
             sha,
             REVIEW_CONTEXT,
@@ -640,22 +732,34 @@ def require_no_live_fix(cache: Path, branch: str) -> None:
 
 @contextmanager
 def reserve_runtime_lock(path: Path, label: str) -> Iterator[HeldLock]:
-    """Atomically reserve one known runtime lock and release only our lease."""
+    """Atomically reserve one runtime lock and release only our lease."""
     path.parent.mkdir(parents=True, exist_ok=True)
     try:
         path.mkdir()
     except FileExistsError as exc:
         try:
             holder = int((path / "pid").read_text(encoding="utf-8").strip())
+            if holder <= 0:
+                holder = None
         except (OSError, ValueError):
             holder = None
         state = f"live pid {holder}" if holder is not None else "unproven owner"
         if holder is not None:
             try:
                 os.kill(holder, 0)
-            except OSError:
+            except ProcessLookupError:
                 state = f"stale pid {holder}"
-        raise GateFailure(f"cannot reserve runtime lock {path} ({state})") from exc
+            except PermissionError:
+                pass
+        recovery = ""
+        if holder is None or state.startswith("stale pid"):
+            recovery = (
+                "; after verifying no CI, review, auto-fix, or merge process "
+                f"owns it, remove {path} explicitly and retry"
+            )
+        raise GateFailure(
+            f"cannot reserve runtime lock {path} ({state}){recovery}"
+        ) from exc
     held = HeldLock(path=path, pid=os.getpid())
     try:
         (path / "pid").write_text(f"{held.pid}\n", encoding="utf-8")
@@ -718,6 +822,7 @@ def evaluate_gate(
     require_adjudication_status: bool = True,
 ) -> GateSnapshot:
     """Evaluate the complete fail-closed gate from authoritative state."""
+    client.verify_authenticated_actor()
     review_lock.require_owned()
     ci_lock.require_owned()
     fix_lock.require_owned(reject_cancel=True)
@@ -800,6 +905,7 @@ def merge_once(
 ) -> tuple[dict[str, Any], str]:
     """Issue one merge mutation and reconcile its result by read-back only."""
     mutation_error: GitHubError | None = None
+    client.verify_authenticated_actor()
     try:
         client.run(command, retry=False)
     except GitHubError as exc:
@@ -816,12 +922,49 @@ def merge_once(
             raise mutation_error
         raise GateFailure("gh returned success but GitHub does not report the PR merged")
     if str(merged.get("state") or "").casefold() != "closed":
-        raise GateFailure("GitHub reports merged=true but the PR is not closed")
-    merged_identity = pull_identity(merged)
-    _require_expected(merged_identity, expected)
-    merge_sha = normalize_sha(
-        str(merged.get("merge_commit_sha") or ""), kind="merge commit SHA"
-    )
+        raise NonconformingMerge(
+            "external/nonconforming result: merged=true but the PR is not closed"
+        )
+    try:
+        merged_identity = pull_identity(merged)
+        merge_sha = normalize_sha(
+            str(merged.get("merge_commit_sha") or ""), kind="merge commit SHA"
+        )
+    except GitHubError as exc:
+        raise NonconformingMerge(
+            f"external/nonconforming merged identity: {exc}"
+        ) from exc
+    if (
+        merged_identity.branch != expected.branch
+        or merged_identity.base != expected.base
+        or merged_identity.head_sha != expected.head_sha
+    ):
+        raise NonconformingMerge(
+            "external/nonconforming result changed the frozen head/ref/base-ref identity"
+        )
+    try:
+        commit = client.git_commit(merge_sha)
+        commit_sha = normalize_sha(
+            str(commit.get("sha") or ""), kind="reported merge Git commit SHA"
+        )
+        raw_parents = commit.get("parents")
+        if not isinstance(raw_parents, list) or len(raw_parents) != 2:
+            raise GitHubError("reported merge commit does not have exactly two parents")
+        parents = [
+            normalize_sha(
+                str(parent.get("sha") or ""), kind="reported merge parent SHA"
+            )
+            for parent in raw_parents
+            if isinstance(parent, dict)
+        ]
+        if commit_sha != merge_sha or parents != [expected.base_sha, expected.head_sha]:
+            raise GitHubError(
+                "reported merge commit parents are not frozen base then frozen head"
+            )
+    except (GitHubError, AttributeError) as exc:
+        raise NonconformingMerge(
+            f"external/nonconforming merge commit: {exc}"
+        ) from exc
     return merged, merge_sha
 
 

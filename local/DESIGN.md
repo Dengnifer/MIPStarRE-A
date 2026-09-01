@@ -39,11 +39,21 @@ headers, full pagination, bounded retry classification, sanitized diagnostics,
 exact 40- or 64-hex SHAs, and marker/read-back reconciliation for ambiguous
 mutations. There is no offline mutation mode.
 
+The configured evidence principal is `MIPSTARRE_GITHUB_ACTOR`, a validated
+GitHub user login that defaults to the discovered repository owner. It is
+`Dengnifer` for `Dengnifer/MIPStarRE-A`. Every workflow command verifies that
+`gh api /user` reports this actor. Gate evidence additionally requires this
+actor as the `user.login` on CI comments, review `COMMENT` rows, and
+adjudications, and as the `creator.login` on CI/review statuses. Marker text is
+not an identity credential. Status precedence is global per context: a newer
+untrusted status blocks the gate until a newer trusted publication supersedes
+it.
+
 ## Core invariants
 
 1. Only the cache warmer writes the hot main cache. Worktrees consume clones.
-2. CI and review evidence is bound to one exact PR head and is reread before
-   publication or merge.
+2. CI and review evidence is bound to one exact PR head, base, run, digest, and
+   trusted GitHub actor, and is reread before publication or merge.
 3. A clean exact-head `COMMENT` review is sufficient with a clean ledger and
    successful review summary; GitHub approval is not required.
 4. Auto-fixes are serialized `ci` then `blueprint` then `review`, protected by
@@ -64,6 +74,9 @@ mutations. There is no offline mutation mode.
 13. Merge holds the CI, review, and fix leases through its one exact-head
     mutation and validates strict classic protection plus every effective rule
     on the PR's actual base.
+14. A successful local merge read-back proves a two-parent Git commit whose
+    parents are exactly the frozen base then head; GitHub may advance the PR's
+    reported post-merge base SHA without invalidating that topology proof.
 
 ## Identity and telemetry
 
