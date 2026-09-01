@@ -48,8 +48,18 @@ structure FixedFieldModel (q : ℕ) extends MIPStarRE.LDT.FieldModel q where
   basisCard : q = 2 ^ basisDim
   /-- The chosen basis of `K` over `ZMod 2`. -/
   basis : Module.Basis (Fin basisDim) (ZMod 2) K
-  /-- The finite code used to serialize basis coordinates as `Fin q`. -/
-  binaryCode : (Fin basisDim → ZMod 2) ≃ Fin q
+  /--
+  The inherited coding of `K` is the natural binary encoding of the stored
+  basis coordinates.  This field records the source's `downsize` convention
+  rather than allowing an unrelated permutation of `Fin q`.  It is the
+  coordinate clause of `def:binary-representation` in
+  `blueprint/src/chapter/ch11_qpbt_algebra.tex:298-315`, with paper origin
+  `references/qpbt-paper/04_preliminaries.tex:669-680`.
+  -/
+  representation_natural :
+    ∀ v : Fin basisDim → ZMod 2,
+      (toFieldModel.equiv (basis.equivFun.symm v)).val =
+        ∑ i : Fin basisDim, if v i = 1 then 2 ^ i.1 else 0
   /-- Self-duality of the chosen basis with respect to the field trace. -/
   selfDual : ∀ i j, Algebra.trace (ZMod 2) K (basis i * basis j) =
     if i = j then 1 else 0
@@ -66,7 +76,7 @@ Blueprint: `blueprint/src/chapter/ch11_qpbt_algebra.tex:298-315`; paper origin:
 `references/qpbt-paper/04_preliminaries.tex:653-680`.
 -/
 noncomputable def binaryEquiv {q : ℕ} (F : FixedFieldModel q) : F.K ≃ Fin q :=
-  F.basis.equivFun.toEquiv.trans F.binaryCode
+  F.toFieldModel.equiv
 
 /-- The fixed binary representation obtained from the chosen basis coordinates. -/
 noncomputable def binaryRepresentation {q : ℕ} (F : FixedFieldModel q) : F.K ≃ Fin q :=
