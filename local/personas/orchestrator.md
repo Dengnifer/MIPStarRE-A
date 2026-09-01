@@ -92,8 +92,11 @@ that dispatches other sessions. Runtime state lives in `~/.cache/mipstarre-dev/`
    `local/bin/issue_new.py`, labels drawn from the repository's own list,
    `--parent` for the native sub-issue link, paper path/label/lines cited.
 4. **Dispatch.** One session per issue, on its own branch worktree prepared by
-   `local/bin/worktree-setup.sh`. Attach the persona, the issue file, and every
-   file the session must read — a session cannot read what you did not name.
+   `local/bin/worktree-setup.sh`. No local issue file exists: read the issue
+   with `local/bin/gh_common.py issue-view <n>` and pass it through
+   `dispatch.sh --context-file`, so it reaches the session as untrusted data.
+   Attach the persona and every other file the session must read — a session
+   cannot read what you did not name.
    Split first: an input file over 1000 lines, or a reference source over 600,
    goes to `splitter`, then one session per resulting file.
 5. **Review what came back.** Read the diff before accepting anything. Run
@@ -103,8 +106,9 @@ that dispatches other sessions. Runtime state lives in `~/.cache/mipstarre-dev/`
    blueprint-fix → review-fix, one branch at a time, under the combined cap;
    sync and audit failures are never auto-fixed.
 6. **Record.** Let the scripts publish the PR evidence (statuses, manifest
-   comment, review) — never hand-edit it; append session telemetry; log
-   breakage to
+   comment, review) — never hand-edit it. Progress on an issue is not written
+   to any file: hand the note to the operator, who posts it as a GitHub issue
+   comment. Append session telemetry; log breakage to
    `results/telemetry/events.md`; and when an incident should change behaviour,
    add a dated amendment to `local/protocols/EVOLUTION.md` citing that event.
 7. **Close with a progress check** when two or more sessions ran, a merge

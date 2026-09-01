@@ -57,9 +57,9 @@ ROOT="$SELF_ROOT"
 # Worktrees are administered from the PRIMARY checkout: when this script runs
 # from a linked worktree copy, re-point the git root at the primary (same
 # resolution as cache-warmer.sh resolve_primary_repo; EVOLUTION.md 2026-08-30).
-# Only git operations follow the re-point — gh_common.py and the telemetry copy
-# stay in THIS checkout, which is also what wf_util.default_repo_root resolves
-# to (wf_util.py:46-48).
+# Git operations AND the telemetry ledger copy follow the re-point (telemetry
+# is single-instance in the primary, like builds.jsonl); gh_common.py ships
+# beside this script and needs no re-point.
 _common="$(git -C "$ROOT" rev-parse --path-format=absolute --git-common-dir 2>/dev/null || true)"
 case "$_common" in
   */.git) ROOT="$(dirname "$_common")" ;;
@@ -519,7 +519,10 @@ PROSE_MD="$REVIEWS_DIR/$HEAD_SHA-prose.md"
 COMBINED_MD="$REVIEWS_DIR/$HEAD_SHA-combined.md"
 # Research copy of the published ledger (results/telemetry is data, never
 # lifecycle input; local/protocols/review.md).
-TELEMETRY_DIR="$SELF_ROOT/results/telemetry/reviews"
+# Single-instance telemetry lives in the PRIMARY checkout (like builds.jsonl):
+# writing it into the reviewed worktree would dirty the very tree the next
+# CI/review run must certify (PR 7 round 2, F13).
+TELEMETRY_DIR="$ROOT/results/telemetry/reviews"
 
 # The cross-SHA "outdate stale findings" pass is gone with the local registry:
 # exactly one review is published per head SHA and the merge gate reads only
@@ -1033,8 +1036,11 @@ ghc post-review "$PR_NUM" "$HEAD_SHA" "$REVIEW_MARKER" --body-file "$COMBINED_MD
 # — CHANGES_REQUESTED, an unparseable verdict, or a COMMENTED verdict that still
 # carries unresolved findings — is a failing status.  Single-account repos
 # cannot self-APPROVE, so this status is the whole adverseness signal.
-if [ "$REVIEW_STATE" = "APPROVED" ] ||
-   { [ "$REVIEW_STATE" = "COMMENTED" ] && [ "${UNRESOLVED_TOTAL:-1}" = "0" ]; }; then
+# An APPROVED trailer above a ledger with unresolved findings is inconsistent
+# reviewer output; green requires BOTH a clean verdict and a clean ledger
+# (PR 7 round 2, F4).
+if { [ "$REVIEW_STATE" = "APPROVED" ] || [ "$REVIEW_STATE" = "COMMENTED" ]; } &&
+   [ "${UNRESOLVED_TOTAL:-1}" = "0" ]; then
   SUMMARY_STATE=success
 else
   SUMMARY_STATE=failure

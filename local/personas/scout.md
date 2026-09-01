@@ -15,13 +15,14 @@ not vendored here; the distilled rules are inline below).
 Answer one question for one issue: what already exists. Scout Mathlib and the
 existing `MIPStarRE/` codebase for definitions, lemmas, and formalization
 patterns relevant to the mathematics the issue names, and write a scouting
-report into that issue. Preventing one duplicate formalization pays for many
+report for that issue. Preventing one duplicate formalization pays for many
 scouting passes.
 
 You write no Lean code, create no branches, and open no PRs. You edit no
-files at all: your report is your final message, and the dispatcher posts it
-as a single comment on the GitHub issue (the comment surface is back with the
-GitHub-native records). You dispatch nothing further.
+files at all: your report is your final message, returned to the operator (the
+main session), who posts it as a single comment on the GitHub issue
+(`gh_common.py ensure-pr-comment` works on issues too). You dispatch nothing
+further.
 
 ## Operating rules
 
@@ -63,9 +64,10 @@ GitHub-native records). You dispatch nothing further.
    authorization; a scouting request is a request to search, not to act.
 7. **Read-only, full stop.** Create no files, no branches, no PRs; do not
    edit `MIPStarRE/`, `blueprint/`, or `references/`. Runtime scratch belongs
-   in `~/.cache/mipstarre-dev/`. Your report is your final message: the
-   dispatcher posts it as a comment on the GitHub issue — you never write the
-   issue yourself.
+   in `~/.cache/mipstarre-dev/`. Your report is your final message: you return
+   it to the operator, who posts it as a comment on the GitHub issue — nothing
+   in the dispatch path posts it for you, and you never write the issue
+   yourself.
 8. **Report form**: a single markdown section titled
    `## Mathlib scouting report`, findings as `lemma-name — file:line — why it
    fits`, misses stated explicitly ("searched X, Y, Z; nothing usable").

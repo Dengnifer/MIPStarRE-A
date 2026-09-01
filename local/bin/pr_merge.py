@@ -173,7 +173,9 @@ def check_review(number: int, head_sha: str, reviews: list[dict], statuses: dict
     verdict = found.group(1) if found else ""
     unchecked = len(UNCHECKED_FINDING_RE.findall(body))
     summary_state = (statuses.get(REVIEW_CONTEXT) or {}).get("state")
-    clean = verdict == "APPROVED" or (verdict == "COMMENTED" and unchecked == 0)
+    # Green needs BOTH a clean verdict and a clean ledger: an APPROVED trailer
+    # over unresolved findings is inconsistent reviewer output (round 2, F4).
+    clean = verdict in ("APPROVED", "COMMENTED") and unchecked == 0
     if clean and summary_state == "success":
         passed(f"gate 4 verdict {verdict} on {head_sha[:12]}, {REVIEW_CONTEXT} success")
         return

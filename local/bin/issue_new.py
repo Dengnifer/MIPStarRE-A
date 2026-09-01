@@ -35,6 +35,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import sys
 from pathlib import Path
 
@@ -89,11 +90,13 @@ def create(args: argparse.Namespace) -> int:
         )
         return 0
 
-    # Every create is adoption-safe: without an explicit --key the slug is the
-    # key, so a retried create after an ambiguous failure adopts, never duplicates.
+    # Every create is adoption-safe: without an explicit --key the slug plus a
+    # short digest of the FULL title is the key, so a retried create adopts —
+    # and two distinct titles sharing a truncated slug cannot alias (round 2, F12).
+    auto_key = f"{slugify(title)}-{hashlib.sha256(title.encode()).hexdigest()[:8]}"
     number = gh_common.issue_create(
         title, body, labels=labels, parent=args.parent,
-        key=args.key or slugify(title)
+        key=args.key or auto_key
     )
     # Bare number on stdout: shell callers capture it with $(...).
     sys.stdout.write(f"{number}\n")

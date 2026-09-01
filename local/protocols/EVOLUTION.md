@@ -236,10 +236,10 @@ paper's thesis in miniature.
 
 ## 2026-09-01 — GitHub becomes the workflow authority (lean port)
 
-Trigger: owner decision 2026-08-31 (follow-on to the re-hybridization entry);
-executed 2026-09-01 after the scope reset recorded below.
+**Trigger:** owner decision 2026-08-31 (follow-on to the re-hybridization
+entry); executed 2026-09-01 after the scope reset recorded below.
 
-The local issue tree and PR registry are retired.  GitHub
+**Change:** The local issue tree and PR registry are retired.  GitHub
 (`Dengnifer/MIPStarRE-A`) is the single source of truth for issues (native
 sub-issues replace `parent`/`children` frontmatter), PRs, CI evidence
 (per-step commit statuses `local-ci/<step>` plus `local-ci/summary` and
@@ -254,12 +254,14 @@ GitHub provides what they reimplemented.  The registries were archived
 verbatim first (`results/telemetry/registry-archive/`, commit c8f1999) and
 stay read-only research data; `github-sync.sh` now also writes a read-only
 JSON snapshot of open issues/PRs under `results/telemetry/github-snapshot/`
-for offline forensics — never lifecycle input.  CI and reviews still execute
-locally on this machine; GitHub stores the evidence.
+for offline forensics — never lifecycle input.
+
+**Expected effect:** CI and reviews still execute locally on this machine;
+GitHub stores the evidence.
 
 ## 2026-09-01 — Scope control for workflow changes (incident amendment)
 
-Trigger: events.md 2026-09-01, the issue-0007 overbuild.  The first
+**Trigger:** events.md 2026-09-01, the issue-0007 overbuild.  The first
 implementation of the entry above grew, in ~17 hours and 21 commits, into a
 +14.6k-line unreviewed rewrite of the whole layer — a 2,761-line bespoke
 GitHub API client, a 643-line lock manager, a 5,649-line test suite wired
@@ -269,7 +271,7 @@ product (the Lean formalization; PR #5's 17 findings) sat untouched.  The
 owner paused the session, archived the branch as research data
 (`telemetry/issue-0007-overbuilt`), and rebuilt the port lean.
 
-Amendment (now also in `local/personas/main.md`):
+**Change:** amendment (now also in `local/personas/main.md`):
 
 1. The product is the Lean formalization.  `local/` is scaffolding; scaffolding
    work is a cost center, budgeted by default at ≤2 hours wall time and ≤400
@@ -284,3 +286,6 @@ Amendment (now also in `local/personas/main.md`):
 4. After any workflow change merges, the next dispatched work item MUST be a
    mathematics item.  Two consecutive workflow-only episodes require owner
    approval.
+
+**Expected effect:** scaffolding episodes stay bounded and auditable, and the
+work item after a merged workflow change is mathematics.

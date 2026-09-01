@@ -380,6 +380,11 @@ def issue_close(number: int, reason: str = "completed",
                 comment: str | None = None) -> None:
     if reason not in ("completed", "not-planned"):
         raise LayerError(f"invalid close reason {reason!r}")
+    # /issues/{n} also answers for pull requests; closing a PR through the
+    # issues endpoint would bypass the merge gate's whole evidence model.
+    if "pull_request" in issue_view(number):
+        raise LayerError(f"#{number} is a pull request — merge it through pr_merge.py "
+                         "or close it from the PR surface, never via issue_close")
     if comment:
         ensure_pr_comment(number, f"<!-- mipstarre-close-note-{number} -->", comment)
     api(f"issues/{number}", method="PATCH",

@@ -526,7 +526,15 @@ esac
 
 BASE="$GH_BASE"
 [ -n "$BASE" ] || BASE="main"
-[ -z "$BASE_OVERRIDE" ] || BASE="$BASE_OVERRIDE"
+if [ -n "$BASE_OVERRIDE" ]; then
+  # A base override is a debugging aid: with the base pointed anywhere else —
+  # the PR head itself, say — the diff shrinks or empties, every step skips,
+  # and a "fully green" status set would certify nothing (PR 7 round 2, F1).
+  # Overridden-base runs are therefore always PARTIAL: nothing is published.
+  BASE="$BASE_OVERRIDE"
+  PARTIAL=1
+  info "--base override: this run is partial and publishes no statuses"
+fi
 
 # Worktree: prefer git's own registry, fall back to the .worktrees/ convention.
 WORKTREE=""
@@ -1214,14 +1222,26 @@ else
     warn "the per-step statuses on $SHORT_SHA stand, but no local-ci/summary is posted: re-run ci.sh $PR_ID on the new head"
     exit 1
   fi
+  # A step may legally rewrite tracked files (blueprint_lean_sync
+  # --update-lean-decls, say); certified bytes must still be the commit's
+  # (PR 7 round 2, F2).  Same rule as the pre-run check: dirty = no summary.
+  _end_dirty="$(git -C "$WORKTREE" status --porcelain)"
+  if [ -n "$_end_dirty" ]; then
+    warn "the worktree became dirty during this run; no local-ci/summary is posted:"
+    warn "$_end_dirty"
+    warn "commit the step-generated changes (a new head) and re-run ci.sh $PR_ID"
+    exit 1
+  fi
 
+  # Manifest first, summary last: the summary status is the merge gate's
+  # trigger, so everything it points at must already exist (PR 7 round 2, F3).
+  publish_manifest_comment
   if [ "$CONCLUSION" = success ]; then
     post_status "$HEAD_SHA" local-ci/summary success "all gating steps passed (${RUN_SECONDS}s)"
   else
     post_status "$HEAD_SHA" local-ci/summary failure "conclusion=$CONCLUSION (${RUN_SECONDS}s); see the manifest comment"
   fi
-  publish_manifest_comment
-  info "published local-ci/summary=$CONCLUSION and the manifest comment on PR #$PR_ID"
+  info "published the manifest comment and local-ci/summary=$CONCLUSION on PR #$PR_ID"
 fi
 
 [ "$CONCLUSION" = success ] || exit 1

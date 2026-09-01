@@ -1,5 +1,13 @@
 # Brief: GitHub-native records with a durable local fallback
 
+> **SUPERSEDED.** This brief specified the original write-through design. The
+> owner reset the overbuilt first implementation of it (see
+> `results/telemetry/events.md`, 2026-09-01, and the archived branch
+> `telemetry/issue-0007-overbuilt`), and the shipped port is the lean
+> GitHub-only layer described in `local/protocols/issues-prs.md`. Where this
+> brief and the shipped code disagree, the shipped code and protocol win. The
+> body below is unchanged: it is historical input, kept as research data.
+
 Issue: `#0007`
 Target branch: `issue-0007-github-native-workflow`
 Expected PR title: `feat(local): add GitHub write-through records`
