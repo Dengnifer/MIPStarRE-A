@@ -12,7 +12,7 @@ and packages the resulting low-degree code as honest polynomial representatives.
 The source-facing nodes are `def:polynomials-degree`,
 `def:low-degree-encoding`, and `def:indicator-vector` in
 `blueprint/src/chapter/ch11_qpbt_algebra.tex:321-417`; the paper origin is
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:917-925`.
+`references/qpbt-paper/04_preliminaries.tex:832-897`.
 The polynomial class `def:polyfunc` is reused from
 `MIPStarRE.LDT.Preliminaries.polyFunc` (the LDT formalization).
 -/
@@ -26,7 +26,7 @@ namespace MIPStarRE.QPBT
 /-- The Boolean cube indexing the `2^m` qudits of the test.  This is the index
 type in `def:low-degree-encoding`, blueprint
 `blueprint/src/chapter/ch11_qpbt_algebra.tex:381-401`, paper origin
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:917-925`.
+`references/qpbt-paper/04_preliminaries.tex:832-897`.
 -/
 abbrev Cube (m : ℕ) := Fin m → Bool
 
@@ -34,7 +34,7 @@ abbrev Cube (m : ℕ) := Fin m → Bool
 The representative polynomial which is `1` at `y` on the Boolean cube and
 zero at the other cube points.  This is the indicator polynomial in
 `def:low-degree-encoding` (blueprint lines 381-401; paper
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:917-925`).
+`references/qpbt-paper/04_preliminaries.tex:832-897`).
 -/
 noncomputable def indicatorPoly {K : Type*} [CommRing K] {m : ℕ} (y : Cube m) :
     MvPolynomial (Fin m) K :=
@@ -45,7 +45,7 @@ The multilinear low-degree encoding of a coefficient string.  Polynomial
 representatives are used, as fixed by issue #0004, rather than quotienting by
 functional equality.  Blueprint: `def:low-degree-encoding`,
 `blueprint/src/chapter/ch11_qpbt_algebra.tex:381-401`; paper origin:
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:917-925`.
+`references/qpbt-paper/04_preliminaries.tex:832-897`.
 -/
 noncomputable def lowDegreeEncoding {K : Type*} [CommRing K] {m : ℕ}
     (a : Cube m → K) : MvPolynomial (Fin m) K :=
@@ -55,7 +55,7 @@ noncomputable def lowDegreeEncoding {K : Type*} [CommRing K] {m : ℕ}
 `def:low-degree-encoding`; it is Lean-only notation. -/
 /-- Evaluation shorthand for the low-degree encoding.  Blueprint
 `blueprint/src/chapter/ch11_qpbt_algebra.tex:381-401`, paper origin
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:917-925`.
+`references/qpbt-paper/04_preliminaries.tex:832-897`.
 -/
 noncomputable def lowDegreeEnc {K : Type*} [CommRing K] {m : ℕ}
     (a : Cube m → K) (x : Fin m → K) : K :=
@@ -64,7 +64,7 @@ noncomputable def lowDegreeEnc {K : Type*} [CommRing K] {m : ℕ}
 /--
 The indicator vector `ind_m(x)` of `def:indicator-vector`.
 Blueprint: `blueprint/src/chapter/ch11_qpbt_algebra.tex:403-417`; paper origin:
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:917-925`.
+`references/qpbt-paper/04_preliminaries.tex:832-897`.
 -/
 noncomputable def indicatorVec {K : Type*} [CommRing K] {m : ℕ}
     (x : Fin m → K) : Cube m → K :=
@@ -74,7 +74,7 @@ noncomputable def indicatorVec {K : Type*} [CommRing K] {m : ℕ}
 The defining dot-product identity for the encoding, corresponding to
 Equation `eq:low-degree-encoding-definition` and `lem:indicator-vector` in the
 blueprint `blueprint/src/chapter/ch11_qpbt_algebra.tex:403-417`, paper origin
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:917-925`.
+`references/qpbt-paper/04_preliminaries.tex:832-897`.
 It is a proof obligation in stage 4.1.
 -/
 theorem lowDegreeEnc_eq_dotProduct {K : Type*} [CommRing K] {m : ℕ}
@@ -84,7 +84,7 @@ theorem lowDegreeEnc_eq_dotProduct {K : Type*} [CommRing K] {m : ℕ}
 
 /-- Re-export of the LDT polynomial representative class (`def:polyfunc`).
 Blueprint `blueprint/src/chapter/ch11_qpbt_algebra.tex:321-329`; paper origin
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:917-925`.
+`references/ldt-paper/preliminaries.tex:89-119`.
 -/
 noncomputable abbrev polyFunc (m d : ℕ) (K : Type*) [CommSemiring K] :
     Submodule K (MvPolynomial (Fin m) K) :=

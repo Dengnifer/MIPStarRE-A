@@ -123,7 +123,7 @@ def condLinearConcat {ιU ιV : Type*} [Fintype ιU] [DecidableEq ιU]
     (x : ιU ⊕ ιV → K) : ιU ⊕ ιV → K :=
   let u : ιU → K := fun i => x (.inl i)
   let v : ιV → K := fun j => x (.inr j)
-  Sum.elim (L u) (R u v)
+  Sum.elim (L u) (R (L u) v)
 
 /--
 Concatenating an outer and an indexed inner CL map adds their levels.  This is
@@ -148,16 +148,18 @@ The graph distribution samples an ordered endpoint pair whose unordered edge
 `s(a,b)` lies in `E`, including self-loops.  It is the inlined graph sampler of
 `def:graph-distribution` in `blueprint/src/chapter/ch12_qpbt_games.tex:553-563`;
 paper origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:984-1009`.
+The underlying graph-distribution definition is
+`references/qpbt-paper/07_types.tex:65-82`.
 -/
 noncomputable def graphDistribution {T : Type*} [Fintype T] [DecidableEq T]
-    (E : Finset (Sym2 T)) : Distribution (T × T) :=
+    (E : Finset (Sym2 T)) (_hE : E.Nonempty) : Distribution (T × T) :=
   Distribution.uniformOnFinset
     (Finset.univ.filter fun ab : T × T => Sym2.mk ab.1 ab.2 ∈ E)
 
 /-- The graph sampler has unit mass whenever its edge set is nonempty. -/
 theorem graphDistribution_isProbability {T : Type*} [Fintype T] [DecidableEq T]
     (E : Finset (Sym2 T)) (hE : E.Nonempty) :
-    (graphDistribution E).IsProbability := by
+    (graphDistribution E hE).IsProbability := by
   sorry
 
 end MIPStarRE.QPBT

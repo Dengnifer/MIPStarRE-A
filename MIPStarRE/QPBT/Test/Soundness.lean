@@ -54,7 +54,7 @@ noncomputable def conjIsometry {ι ι' : Type*}
 /-- Reindex a finite Euclidean-space vector along an equivalence.  This is the
 coordinate form of the tensor-register shuffle used in the paper's ideal
 state (`def:EPR`, blueprint `blueprint/src/chapter/ch11_qpbt_algebra.tex:513-523`),
-paper origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:908-915`.
+paper origin `references/qpbt-paper/04_preliminaries.tex:946-955`.
 -/
 noncomputable def reindexState {ι ι' : Type*} [Fintype ι] [DecidableEq ι]
     [Fintype ι'] [DecidableEq ι'] (e : ι ≃ ι')
@@ -89,7 +89,7 @@ noncomputable def isometryTensor
 /-- The ideal auxiliary state `aux ⊗ EPR_q^{⊗M}` in the shuffled register
 ordering.  The EPR factor is the concrete `eprState` from
 `def:EPR` (`blueprint/src/chapter/ch11_qpbt_algebra.tex:513-523`; paper
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:908-915`).
+`references/qpbt-paper/04_preliminaries.tex:946-955`).
 -/
 noncomputable def idealState (P : AdmissibleParams)
     {ιA' ιB' : Type*} [Fintype ιA'] [DecidableEq ιA']
@@ -105,7 +105,7 @@ noncomputable def idealState (P : AdmissibleParams)
 
 /-- The Pauli question carrying no additional coefficient data, as in
 `def:pauli-win-predicate`, blueprint `ch13_qpbt_test.tex:331-367`, paper origin
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:958-1039`.
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1006-1008`.
 -/
 def pauliQuestion (P : AdmissibleParams) (W : PauliKind) : PauliQuestion P :=
   (.pauli W, 0)
@@ -198,27 +198,27 @@ attribute [instance] PauliSoundnessWitness.ιAFintype PauliSoundnessWitness.ιBF
 /-- The A-side operator-distance quantity appearing in the soundness
 conclusion.  It is the finite-sum realization of `def:povm-distance` from
 `blueprint/src/chapter/ch12_qpbt_games.tex:201-220`, paper origin
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:95-103`.
+`references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:258-271`.
 -/
 noncomputable def pauliOperatorDistanceA
     (P : AdmissibleParams) (S : Strategy (pauliBasisTest P))
     (w : PauliSoundnessWitness P S) (W : PauliKind) : ℝ :=
   ∑ u : PauliRegister P,
-    ‖(liftedAEffect S w.φA
+      ‖applyOperatorToState (liftedAEffect S w.φA
         ((S.A (pauliQuestion P W)).effect (.pauliOutcome u)) -
-      pauliProjOnA'' P W u).mulVec (idealState P w.aux)‖ ^ 2
+      pauliProjOnA'' P W u) (idealState P w.aux)‖ ^ 2
 
 /-- The symmetric B-side operator-distance quantity from `def:povm-distance`,
 blueprint `ch12_qpbt_games.tex:201-220`, paper origin
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:95-103`.
+`references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:258-271`.
 -/
 noncomputable def pauliOperatorDistanceB
     (P : AdmissibleParams) (S : Strategy (pauliBasisTest P))
     (w : PauliSoundnessWitness P S) (W : PauliKind) : ℝ :=
   ∑ u : PauliRegister P,
-    ‖(liftedBEffect S w.φB
+      ‖applyOperatorToState (liftedBEffect S w.φB
         ((S.B (pauliQuestion P W)).effect (.pauliOutcome u)) -
-      pauliProjOnB'' P W u).mulVec (idealState P w.aux)‖ ^ 2
+      pauliProjOnB'' P W u) (idealState P w.aux)‖ ^ 2
 
 /-- `thm:pauli`: every sufficiently successful Pauli basis test strategy admits
 local isometries and an auxiliary unit state for which the state and both
@@ -234,7 +234,7 @@ functional; the squared operator distances use the quantitative convention of
 -/
 theorem pauli_soundness :
     ∃ a b : ℝ, 1 ≤ a ∧ 0 < b ∧ b < 1 ∧
-      ∀ (P : AdmissibleParams) (ε : ℝ), 0 < ε →
+      ∀ (P : AdmissibleParams) (ε : ℝ), 0 ≤ ε →
         ∀ S : Strategy (pauliBasisTest P), 1 - ε ≤ S.value →
           ∃ w : PauliSoundnessWitness P S,
             ‖isometryTensor w.φA w.φB S.ψ - idealState P w.aux‖ ≤

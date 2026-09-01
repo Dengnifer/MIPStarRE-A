@@ -12,7 +12,7 @@ estimates to later proof stages.
 
 These are `def:state-distance` and `def:povm-distance` in
 `blueprint/src/chapter/ch12_qpbt_games.tex:171-220`; the paper origin is
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:95-103`.
+`references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:219-271`.
 -/
 
 open scoped BigOperators
@@ -25,21 +25,17 @@ open MIPStarRE.Quantum
 /--
 Squared Euclidean distance between pure states.  Blueprint `def:state-distance`
 (`blueprint/src/chapter/ch12_qpbt_games.tex:171-179`), paper origin
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:95-103`.
+`references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:219-271`.
 -/
 noncomputable def stateDistSq {ι : Type*} [Fintype ι]
     [DecidableEq ι]
     (ψ φ : EuclideanSpace ℂ ι) : ℝ :=
   ‖ψ - φ‖ ^ 2
 
-private noncomputable def applyOperatorToState {ι : Type*} [Fintype ι]
-    (M : Op ι) (ψ : EuclideanSpace ℂ ι) : EuclideanSpace ℂ ι :=
-  (EuclideanSpace.equiv ι ℂ).symm (M.mulVec ((EuclideanSpace.equiv ι ℂ) ψ))
-
 /--
 Average squared state-dependent distance between two operator families.  This
 is `def:povm-distance` in `blueprint/src/chapter/ch12_qpbt_games.tex:203-210`,
-with paper origin `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:95-103`.
+with paper origin `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:219-271`.
 -/
 noncomputable def opFamilyDistSq {X α ι : Type*}
     [Fintype α] [Fintype ι] [DecidableEq ι]

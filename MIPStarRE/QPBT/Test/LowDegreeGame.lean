@@ -17,7 +17,7 @@ invariants are recorded as proof-level obligations for later stages.
 The source-facing nodes are `def:ld-game`, `def:ld-question-distribution`, and
 `def:ld-win-predicate` in
 `blueprint/src/chapter/ch13_qpbt_test.tex:17-105`; their paper origin is
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:958-1010`.
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
 -/
 
 open scoped BigOperators
@@ -29,7 +29,7 @@ open MIPStarRE.LDT
 /-- Parameters for the low-degree game, including the fixed field model used by
 the ambient coefficient space.  This is the Lean carrier for `def:ld-game` in
 `blueprint/src/chapter/ch13_qpbt_test.tex:17-105`, with paper origin
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:958-1010`.
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
 -/
 structure LdParams where
   q : ℕ
@@ -45,13 +45,13 @@ structure LdParams where
 
 /-- The scalar carrier selected by an `LdParams` record; this is the fixed
 field carrier in `def:ld-game`, blueprint `ch13_qpbt_test.tex:17-31`, paper
-origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:958-961`.
+origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
 -/
 abbrev ScalarQ (P : LdParams) := P.model.K
 
 /-- The three low-degree question types of `def:ld-game`, blueprint
 `blueprint/src/chapter/ch13_qpbt_test.tex:17-31`, paper origin
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:958-961`.
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
 -/
 inductive LdType where
   | point
@@ -61,36 +61,30 @@ inductive LdType where
 
 /-- The register index used by the low-degree game (`def:ld-game`, blueprint
 `ch13_qpbt_test.tex:17-31`; paper origin
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:958-961`).
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`).
 -/
 abbrev LdIndex (P : LdParams) := (Fin P.m ⊕ Unit) ⊕ Fin P.m
 
 /-- The full ambient low-degree coefficient space (`def:ld-game`, blueprint
 `ch13_qpbt_test.tex:17-31`; paper origin
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:958-961`).
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`).
 -/
 abbrev LdSpace (P : LdParams) := LdIndex P → ScalarQ P
 
 /-- The point coordinates of an ambient low-degree vector in
-`def:ld-question-distribution`, blueprint
-`blueprint/src/chapter/ch13_qpbt_test.tex:38-49`, paper origin
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:979-1009`.
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
 -/
 def LdSpace.point (z : LdSpace P) : Fin P.m → ScalarQ P :=
   fun i => z (.inl (.inl i))
 
 /-- The shared scalar coordinate of an ambient low-degree vector in
-`def:ld-question-distribution`, blueprint
-`blueprint/src/chapter/ch13_qpbt_test.tex:38-49`, paper origin
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:979-1009`.
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
 -/
 def LdSpace.seed (z : LdSpace P) : ScalarQ P :=
   z (.inl (.inr ()) )
 
 /-- The direction coordinates of an ambient low-degree vector in
-`def:ld-question-distribution`, blueprint
-`blueprint/src/chapter/ch13_qpbt_test.tex:38-49`, paper origin
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:979-1009`.
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
 -/
 def LdSpace.direction (z : LdSpace P) : Fin P.m → ScalarQ P :=
   fun i => z (.inr i)
@@ -98,7 +92,7 @@ def LdSpace.direction (z : LdSpace P) : Fin P.m → ScalarQ P :=
 /-- The integer-coordinate map `χ` from the fixed field representation.  This
 is `eq:chi-func` in `def:ld-question-distribution`, blueprint
 `blueprint/src/chapter/ch13_qpbt_test.tex:38-49`, paper origin
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:979-1009`.
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
 -/
 noncomputable def chiIndex (P : LdParams) (s : ScalarQ P) : Fin P.m := by
   letI : NeZero P.m := ⟨by
@@ -110,7 +104,7 @@ noncomputable def chiIndex (P : LdParams) (s : ScalarQ P) : Fin P.m := by
  skeleton's proof-irrelevant zero-dimension branch.  This is the projection
  clause of `def:ld-question-distribution`, blueprint
  `blueprint/src/chapter/ch13_qpbt_test.tex:38-49`, paper origin
- `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:979-1009`.
+ `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
 -/
 def prefixProjection (i : Fin P.m) (v : Fin P.m → ScalarQ P) :
     Fin P.m → ScalarQ P :=
@@ -119,7 +113,7 @@ def prefixProjection (i : Fin P.m) (v : Fin P.m → ScalarQ P) :
 /-- The point CL map, retaining the point block and clearing the auxiliary
 blocks.  It is the map `L_point` of `def:ld-question-distribution`, blueprint
 `blueprint/src/chapter/ch13_qpbt_test.tex:38-49`, paper origin
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:979-1009`.
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
 -/
 def ldPointCL (P : LdParams) (z : LdSpace P) : LdSpace P :=
   fun i => match i with
@@ -130,7 +124,7 @@ def ldPointCL (P : LdParams) (z : LdSpace P) : LdSpace P :=
 /-- The affine-line CL map.  The direction block is put through the canonical
 line representative map from `def:line-representative`, while the point block
 is retained (blueprint `blueprint/src/chapter/ch13_qpbt_test.tex:38-49`; paper
-origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:979-1009`).
+origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`).
 -/
 noncomputable def ldALineCL (P : LdParams) (z : LdSpace P) : LdSpace P :=
   let i := chiIndex P (z.seed)
@@ -144,7 +138,7 @@ noncomputable def ldALineCL (P : LdParams) (z : LdSpace P) : LdSpace P :=
 for the direction block.  This is the `L_DLine` clause of
 `def:ld-question-distribution` (blueprint
 `blueprint/src/chapter/ch13_qpbt_test.tex:38-49`; paper origin
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:979-1009`).
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`).
 -/
 noncomputable def ldDLineCL (P : LdParams) (z : LdSpace P) : LdSpace P :=
   let i := chiIndex P (z.seed)
@@ -158,7 +152,7 @@ noncomputable def ldDLineCL (P : LdParams) (z : LdSpace P) : LdSpace P :=
 /-- Dispatch the three low-degree CL maps by question type.  This is the typed
 construction in `def:ld-question-distribution`, blueprint
 `blueprint/src/chapter/ch13_qpbt_test.tex:38-49`, paper origin
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:979-1009`.
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
 -/
 noncomputable def ldCL (P : LdParams) : LdType → LdSpace P → LdSpace P
   | .point => ldPointCL P
@@ -168,7 +162,7 @@ noncomputable def ldCL (P : LdParams) : LdType → LdSpace P → LdSpace P
 /-- The conditional-linearity level of the affine-line map.  This is a named
 Lean proof obligation for the prose assertion in `def:ld-question-distribution`,
 blueprint `blueprint/src/chapter/ch13_qpbt_test.tex:38-49`, paper
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:979-1009`.
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
 -/
 theorem isCondLinear_ldALineCL (P : LdParams) :
     IsCondLinearOn (ScalarQ P) Finset.univ 2 (ldALineCL P) := by
@@ -177,7 +171,7 @@ theorem isCondLinear_ldALineCL (P : LdParams) :
 /-- The conditional-linearity level of the diagonal-line map.  This is the
 level-3 assertion in `def:ld-question-distribution`, blueprint
 `blueprint/src/chapter/ch13_qpbt_test.tex:38-49`, paper origin
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:979-1009`.
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
 -/
 theorem isCondLinear_ldDLineCL (P : LdParams) :
     IsCondLinearOn (ScalarQ P) Finset.univ 3 (ldDLineCL P) := by
@@ -185,25 +179,15 @@ theorem isCondLinear_ldDLineCL (P : LdParams) :
 
 /-- The question alphabet for the low-degree game (`def:ld-game`, blueprint
 `ch13_qpbt_test.tex:17-31`; paper origin
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:958-961`).
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`).
 -/
 abbrev LdQuestion (P : LdParams) := LdType × LdSpace P
-
-/-- The finite edge set for the low-degree question graph.  Self-loops are
-included so that every type has a valid endpoint pair; this is the graph in
-`def:ld-question-distribution`, blueprint
-`blueprint/src/chapter/ch13_qpbt_test.tex:38-49`, paper origin
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:979-1009`.
--/
-def ldEdges : Finset (Sym2 LdType) :=
-  (Finset.univ.image (fun t : LdType => Sym2.mk t t)) ∪
-    ({Sym2.mk .point .aline, Sym2.mk .point .dline} : Finset (Sym2 LdType))
 
 /-- The support of the typed CL question distribution, obtained by pushing a
 uniform seed through the type-indexed maps.  This is the construction in
 `def:ld-question-distribution`, blueprint
 `blueprint/src/chapter/ch13_qpbt_test.tex:38-49`, paper origin
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:979-1009`.
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
 -/
 noncomputable def ldQuestionSupport (P : LdParams) :
     Finset (LdQuestion P × LdQuestion P) :=
@@ -212,7 +196,7 @@ noncomputable def ldQuestionSupport (P : LdParams) :
 
 /-- The typed CL question distribution.  This is the inlined construction in
 `def:ld-question-distribution`, blueprint `ch13_qpbt_test.tex:38-49`; paper
-origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:979-1009`.
+origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
 -/
 noncomputable def ldQuestionDistribution (P : LdParams) :
     Distribution (LdQuestion P × LdQuestion P) :=
@@ -225,7 +209,7 @@ noncomputable def ldQuestionDistribution (P : LdParams) :
 answers are representatives with exactly the coefficient lengths printed in
 the paper, as required by `def:ld-win-predicate` (blueprint
 `blueprint/src/chapter/ch13_qpbt_test.tex:56-105`; paper
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1012-1039`).
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`).
 -/
 inductive LdAnswer (P : LdParams) where
   | pointVals (a : Fin P.k → ScalarQ P)
@@ -236,7 +220,7 @@ inductive LdAnswer (P : LdParams) where
 /-- A finite sum code used only to provide the answer alphabet's `Fintype`
 instance; the public constructors are those of `def:ld-win-predicate`,
 blueprint `ch13_qpbt_test.tex:56-105`, paper origin
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1012-1039`.
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
 -/
 abbrev LdAnswerCode (P : LdParams) :=
   (Fin P.k → ScalarQ P) ⊕
@@ -246,7 +230,7 @@ abbrev LdAnswerCode (P : LdParams) :=
 /-- The constructor-preserving code equivalence for `LdAnswer` (Lean-only
 finite-carrier infrastructure for `def:ld-win-predicate`, blueprint
 `blueprint/src/chapter/ch13_qpbt_test.tex:56-105`, paper origin
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1012-1039`).
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`).
 -/
 noncomputable def ldAnswerEquiv (P : LdParams) :
     LdAnswer P ≃ LdAnswerCode P where
@@ -277,7 +261,7 @@ noncomputable instance (P : LdParams) : Fintype (LdAnswer P) :=
 /-- Evaluation of a coefficient tuple at a field element.  This is the
 representative convention used by the line answers in `def:ld-win-predicate`,
 blueprint `blueprint/src/chapter/ch13_qpbt_test.tex:56-105`, paper origin
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1012-1039`.
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
 -/
 def evalCoefficient {K : Type*} [Semiring K] {n : ℕ}
     (c : Fin n → K) (t : K) : K :=
@@ -286,7 +270,7 @@ def evalCoefficient {K : Type*} [Semiring K] {n : ℕ}
 /-- Check that an answer has the constructor prescribed by its question type;
 Lean encoding of the rejection clause in `def:ld-win-predicate`, blueprint
 `ch13_qpbt_test.tex:56-105`, paper origin
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1012-1039`.
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
 -/
 def validLdAnswer (t : LdType) (a : LdAnswer P) : Bool :=
   match t, a with
@@ -297,7 +281,7 @@ def validLdAnswer (t : LdType) (a : LdAnswer P) : Bool :=
 
 /-- The axis-parallel line/point relation in `def:ld-win-predicate`, blueprint
 `ch13_qpbt_test.tex:56-105`, paper origin
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1012-1039`.
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
 -/
 def alinePointCondition (P : LdParams) (line point : LdSpace P)
     (f : Fin P.k → Fin (P.d + 1) → ScalarQ P)
@@ -310,7 +294,7 @@ def alinePointCondition (P : LdParams) (line point : LdSpace P)
 
 /-- The diagonal line/point relation in `def:ld-win-predicate`, blueprint
 `ch13_qpbt_test.tex:56-105`, paper origin
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1012-1039`.
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
 -/
 def dlinePointCondition (P : LdParams) (line point : LdSpace P)
     (f : Fin P.k → Fin (P.m * P.d + 1) → ScalarQ P)
@@ -322,7 +306,7 @@ def dlinePointCondition (P : LdParams) (line point : LdSpace P)
 /-- The low-degree consistency predicate, rejecting answers of the wrong
 constructor shape.  This is `def:ld-win-predicate` in
 `blueprint/src/chapter/ch13_qpbt_test.tex:56-105`, paper origin
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1012-1039`.
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
 -/
 noncomputable def ldWinPredicate (P : LdParams) :
     LdQuestion P → LdQuestion P → LdAnswer P → LdAnswer P → Bool :=
@@ -346,7 +330,7 @@ noncomputable def ldWinPredicate (P : LdParams) :
 
 /-- The low-degree game packaged as a `Game`.  This is `def:ld-game` in
 `blueprint/src/chapter/ch13_qpbt_test.tex:17-105`, paper origin
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:958-1039`.
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
 -/
 noncomputable def ldGame (P : LdParams) : Game where
   QuestionA := LdQuestion P

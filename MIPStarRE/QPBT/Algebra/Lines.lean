@@ -12,7 +12,7 @@ provides the canonical projection used for line representatives.
 
 The source-facing nodes are `def:line`, `prop:line-equiv`, and
 `def:line-representative` in `blueprint/src/chapter/ch11_qpbt_algebra.tex:433-492`.
-The paper origin is `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:979-1002`.
+The paper origin is `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:102-174`.
 -/
 
 namespace MIPStarRE.QPBT
@@ -25,7 +25,7 @@ variable {K : Type*} [Field K]
 The affine line through `u` in direction `v`, including the singleton case
 `v = 0`.  Blueprint `def:line`, `blueprint/src/chapter/ch11_qpbt_algebra.tex:439-453`;
 paper origin
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:979-1002`.
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:106-124`.
 -/
 def linePoints {m : ℕ} [Fintype (Fin m)] [DecidableEq (Fin m)]
     (u v : Fin m → K) : Set (Fin m → K) :=
@@ -33,7 +33,7 @@ def linePoints {m : ℕ} [Fintype (Fin m)] [DecidableEq (Fin m)]
 
 /-- The elementary coordinate direction used in the axis-parallel predicate of
 `def:line`; blueprint `ch11_qpbt_algebra.tex:439-453`, paper origin
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:979-1002`.
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:106-124`.
 -/
 def coordinateDirection {m : ℕ} [DecidableEq (Fin m)]
     (i : Fin m) : Fin m → K :=
@@ -42,7 +42,7 @@ def coordinateDirection {m : ℕ} [DecidableEq (Fin m)]
 /--
 `IsAxisParallel v` means that `v` is a standard coordinate direction.  This is
 the axis-parallel clause of `def:line` (blueprint lines 445-450; paper
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:979-1002`).
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:106-124`).
 -/
 def IsAxisParallel {m : ℕ} [DecidableEq (Fin m)] (v : Fin m → K) : Prop :=
   ∃ i : Fin m, v = coordinateDirection i
@@ -50,7 +50,7 @@ def IsAxisParallel {m : ℕ} [DecidableEq (Fin m)] (v : Fin m → K) : Prop :=
 /--
 The diagonal-direction predicate from `def:line`; a prefix of coordinates may
 vanish.  Blueprint `blueprint/src/chapter/ch11_qpbt_algebra.tex:439-453`; paper origin
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:979-1002`.
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:106-124`.
 -/
 def IsDiagonal {m : ℕ} (v : Fin m → K) : Prop :=
   ∃ i : Fin m, ∀ j : Fin m, j.1 < i.1 → v j = 0
@@ -58,7 +58,7 @@ def IsDiagonal {m : ℕ} (v : Fin m → K) : Prop :=
 /--
 Changing the base point to another point on a line leaves the line unchanged.
 This is `prop:line-equiv` in `blueprint/src/chapter/ch11_qpbt_algebra.tex:455-466`,
-with paper origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:979-1002`.
+with paper origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:128-132`.
 -/
 theorem linePoints_eq_of_mem {m : ℕ} [Fintype (Fin m)] [DecidableEq (Fin m)]
     (u v u' : Fin m → K) (h : u' ∈ linePoints u v) :
@@ -70,7 +70,7 @@ The canonical linear representative map of a line direction.  It projects onto
 the coordinate complement of the span of `v`; for `v = 0` the span is bottom,
 so the resulting map is the identity.  Blueprint `def:line-representative`,
 `blueprint/src/chapter/ch11_qpbt_algebra.tex:472-492`; paper origin
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:979-1002`.
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:143-174`.
 -/
 noncomputable def lineRepMap {m : ℕ} [Fintype (Fin m)] [DecidableEq (Fin m)]
     (v : Fin m → K) : (Fin m → K) →ₗ[K] (Fin m → K) :=
@@ -80,7 +80,7 @@ noncomputable def lineRepMap {m : ℕ} [Fintype (Fin m)] [DecidableEq (Fin m)]
 canonical representative in `def:line-representative`. -/
 /-- The canonical representative point `lineRepMap v u`.  Blueprint
 `blueprint/src/chapter/ch11_qpbt_algebra.tex:472-492`, paper origin
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:979-1002`.
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:166-174`.
 -/
 noncomputable def lineRep {m : ℕ} [Fintype (Fin m)] [DecidableEq (Fin m)]
     (u v : Fin m → K) : Fin m → K :=

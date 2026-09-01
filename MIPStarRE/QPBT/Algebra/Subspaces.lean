@@ -14,8 +14,7 @@ construction theorem.
 The statement-level definitions are `def:register-subspace`,
 `def:dot-product-orthogonal`, `def:canonical-complement`, and
 `def:cl-canonical` in `blueprint/src/chapter/ch11_qpbt_algebra.tex`;
-the paper origin is `references/qpbt-paper/05_conditionally_linear_functions.tex:35-57`
-and `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1073-1090`.
+the paper origin is `references/qpbt-paper/04_preliminaries.tex:231-384`.
 -/
 
 open scoped BigOperators
@@ -28,7 +27,7 @@ variable {K ι : Type*} [Field K] [Fintype ι] [DecidableEq ι]
 `registerSubmodule K S` is the span of the standard coordinate vectors indexed
 by `S`.  It is the Lean encoding of `def:register-subspace` from
 `blueprint/src/chapter/ch11_qpbt_algebra.tex:24-29`, whose paper origin is
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1076-1083`.
+`references/qpbt-paper/04_preliminaries.tex:231-239`.
 -/
 def registerSubmodule (K : Type*) [Field K] (S : Finset ι) : Submodule K (ι → K) :=
   Submodule.span K {v | ∃ i, i ∈ S ∧ v = Pi.single i 1}
@@ -37,7 +36,7 @@ def registerSubmodule (K : Type*) [Field K] (S : Finset ι) : Submodule K (ι �
 `dotOrthogonal W` consists of vectors whose coordinate dot product with every
 member of `W` vanishes.  This is `def:dot-product-orthogonal` in
 `blueprint/src/chapter/ch11_qpbt_algebra.tex:31-42`, with paper origin
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1076-1083`.
+`references/qpbt-paper/04_preliminaries.tex:241-255`.
 -/
 def dotOrthogonal (W : Submodule K (ι → K)) : Submodule K (ι → K) where
   carrier := {u | ∀ v, v ∈ W → dotProduct u v = 0}
@@ -61,6 +60,10 @@ def dotOrthogonal (W : Submodule K (ι → K)) : Submodule K (ι → K) where
         simp [dotProduct, smul_eq_mul, mul_assoc, Finset.mul_sum]
       _ = 0 := by rw [hu v hv, mul_zero]
 
+/-- Restrict a coordinate vector to the first `k` coordinates.  Lean-only rank
+infrastructure for `def:canonical-complement`, blueprint
+`ch11_qpbt_algebra.tex:84-110`, paper `references/qpbt-paper/04_preliminaries.tex:231-384`.
+-/
 private def prefixMap (k n : ℕ) (hk : k ≤ n) :
     (Fin n → K) →ₗ[K] (Fin k → K) :=
   { toFun := fun x i => x ⟨i.1, lt_of_lt_of_le i.2 hk⟩
@@ -71,6 +74,7 @@ private def prefixMap (k n : ℕ) (hk : k ≤ n) :
       intro c x
       rfl }
 
+/-- The rank of a prefix restriction used by the pivot characterization. -/
 private noncomputable def prefixRank {n : ℕ} (W : Submodule K (Fin n → K))
     (k : ℕ) (hk : k ≤ n) : ℕ :=
   Module.finrank K (W.map (prefixMap k n hk))
@@ -80,7 +84,7 @@ The non-pivot coordinate set of `W`, defined by the rank-increase
 characterization of pivots.  This is the basis-free encoding approved for
 `def:canonical-complement` in `blueprint/src/chapter/ch11_qpbt_algebra.tex:84-110`;
 the paper's Gaussian-elimination presentation is
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1073-1090`.
+`references/qpbt-paper/04_preliminaries.tex:303-320`.
 -/
 noncomputable def canonicalComplement {n : ℕ}
     (W : Submodule K (Fin n → K)) : Finset (Fin n) :=
@@ -92,7 +96,7 @@ noncomputable def canonicalComplement {n : ℕ}
 The canonical coordinate complement spans a complement of `W`.  This is the
 proposition `lem:canonical-complement` in
 `blueprint/src/chapter/ch11_qpbt_algebra.tex:112-120`, with paper origin
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1073-1090`.
+`references/qpbt-paper/04_preliminaries.tex:342-373`.
 The proof is intentionally deferred in the stage-4.1 skeleton.
 -/
 theorem isCompl_registerSubmodule_canonicalComplement {n : ℕ}
@@ -103,7 +107,7 @@ theorem isCompl_registerSubmodule_canonicalComplement {n : ℕ}
 /--
 The projector onto the canonical coordinate complement along `W`.  This is
 `def:cl-canonical` in `blueprint/src/chapter/ch11_qpbt_algebra.tex:133-145`,
-originating at `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1073-1090`.
+originating at `references/qpbt-paper/04_preliminaries.tex:375-384`.
 -/
 noncomputable def canonicalProjOfKernel {n : ℕ}
     (W : Submodule K (Fin n → K)) : (Fin n → K) →ₗ[K] (Fin n → K) := by
