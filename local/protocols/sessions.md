@@ -163,7 +163,7 @@ Archiving a session means three things, in this order:
 # 1. the record: append a superseding status line
 python3 local/bin/telemetry.py session-status \
   --name prover-0042-20260830-01 --status archived \
-  --note "merged as <sha>; residual sorry tracked in issues/0043-*.md"
+  --note "merged as <sha>; residual sorry tracked in GitHub issue #43"
 
 # 2. the worktree: remove it once nothing depends on it
 git worktree remove .worktrees/issue-0042-pauli-basis

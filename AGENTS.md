@@ -13,9 +13,11 @@ the **low individual degree test (LDT)** paper (arXiv:2009.12982); the active
 track is the **quantum Pauli basis test (QPBT)** from *MIP\*=RE*
 (arXiv:2001.04383, primary) and *NEEXP in MIP\** (arXiv:1904.05870, secondary).
 
-This repository has **no GitHub remote operations**: CI, review, issues, and
-PRs all run locally. Read `local/README.md` and `local/DESIGN.md` before doing
-workflow actions; the `## Local Operations` section below summarizes the rules.
+CI, review, and auto-fix **execute locally**; issues, PRs, their evidence and
+merges live on GitHub (`Dengnifer/MIPStarRE-A`), reached only through
+`local/bin/gh_common.py`. Read `local/README.md` and `local/DESIGN.md` before
+doing workflow actions; the `## Local Operations` section below summarizes the
+rules.
 
 Key locations:
 
@@ -31,7 +33,7 @@ Key locations:
   (`\lean{}`, `\leanok`)
 - `MIPStarRE/` — Lean codebase matching the blueprint
 - `audits/` — dated audit reports, scouting notes, and repair plans
-- `local/`, `issues/`, `prs/`, `results/telemetry/` — the local workflow layer
+- `local/`, `results/telemetry/` — the local workflow layer
 
 A legacy 2111 tensor track exists under `blueprint/legacy/` — do not modify it.
 
@@ -525,10 +527,10 @@ the lean-conventions `PROOF_INTEGRITY` reference and `docs/project_conventions.m
 
 ## PR and Commit Conventions
 
-PRs are local records under `prs/NNNN-slug/` (created by
-`local/bin/pr_open.py`, merged by `local/bin/pr_merge.py`); `#N` in PR bodies
-and commit messages refers to the local issue `issues/NNNN-*.md`. Titles,
-bodies, and commit rules below are unchanged from the parent project.
+PRs are GitHub pull requests (opened by `local/bin/pr_open.py`, merged by
+`local/bin/pr_merge.py`); `#N` in PR bodies and commit messages is the GitHub
+issue number. Titles, bodies, and commit rules below are unchanged from the
+parent project.
 
 ### PR title format
 
@@ -657,7 +659,7 @@ Use this file together with:
 | `docs/ci-automation.md` | GitHub-era CI/CD reference (inactive; see `local/`) |
 | `docs/pr_review_management.md` | GitHub-era review-bot reference (lessons still apply; mechanism replaced by `local/protocols/review.md`) |
 | `local/DESIGN.md` | Local operations architecture and invariants |
-| `local/protocols/` | Normative local protocols (meta, build cache, CI, review, auto-fix, issues/PRs, sessions) |
+| `local/protocols/` | Normative protocols (meta, build cache, CI, review, auto-fix, issues/PRs, sessions) |
 | `local/personas/` | System prompts for locally dispatched agent roles |
 | `audits/` | Chapter-by-chapter scouting reports |
 | Pinned memories (external agent tooling) | Agent session memory maintained by the agent runtime; not a directory in the repository checkout. Pinned memories contain accumulated project lessons |
@@ -672,10 +674,12 @@ agent must know:
   installs git hooks and resets dirty vendored packages). Never run
   `lake update`; never write to the cache; at most one full `lake build`
   runs machine-wide (the scripts take the lock for you).
-- **Lifecycle.** issue (`issues/`) → branch `issue-NNNN-slug` + worktree →
+- **Lifecycle.** GitHub issue → branch `issue-<number>-slug` + worktree →
   agent sessions → `local/bin/ci.sh` → `local/bin/review.sh` → optional
-  `local/bin/autofix.sh` → `local/bin/pr_merge.py`. Details:
-  `local/README.md`.
+  `local/bin/autofix.sh` → `local/bin/pr_merge.py`. CI and review evidence are
+  exact-head commit statuses (`local-ci/*`, `local-review/summary`); merges go
+  through GitHub with an exact-SHA guard. Details: `local/README.md`,
+  `local/protocols/issues-prs.md`.
 - **Sessions.** Dispatch, resume, and archive agent sessions only via
   `local/bin/dispatch.sh` (roles: orc, prover, reviewer, simplifier,
   blueprint, splitter, scout) so token/time telemetry stays complete.

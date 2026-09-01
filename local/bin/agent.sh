@@ -6,8 +6,9 @@
 #   local/bin/agent.sh <pr-id|issue-id> "instruction" [--role ROLE]
 #                      [--read-only] [--dry-run]
 #
-#   <pr-id|issue-id>  A PR registry id ("7", "0007", "0007-slug") if a PR record
-#                     exists, otherwise an issue id ("42", "0042", "0042-slug").
+#   <pr-id|issue-id>  A GitHub number: the pull request if one carries it,
+#                     otherwise the issue ("7", "42").  GitHub numbers both out
+#                     of one sequence, so one argument covers both.
 #   "instruction"     What you want done, in one argument.  This is the whole
 #                     authorization: there is no @-mention trigger and no
 #                     author_association gate locally — you are the gate.
@@ -42,8 +43,8 @@ set -euo pipefail
 
 PROG="agent.sh"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-# The registry (issues/, prs/, results/telemetry/) is single-instance and
-# lives in the PRIMARY checkout. When this script is invoked from a linked
+# Worktrees, the locks and results/telemetry/ are single-instance and live in
+# the PRIMARY checkout. When this script is invoked from a linked
 # worktree copy, re-point the root at the primary (same resolution as
 # cache-warmer.sh resolve_primary_repo; EVOLUTION.md 2026-08-30).
 _common="$(git -C "$ROOT" rev-parse --path-format=absolute --git-common-dir 2>/dev/null || true)"
@@ -66,27 +67,11 @@ die()  { printf '%s: error: %s\n' "$PROG" "$*" >&2; exit 1; }
 
 now_utc() { date -u +%Y-%m-%dT%H:%M:%SZ; }
 
-fm_get() {
-  python3 - "$1" "$2" <<'PY'
-import sys
-path, key = sys.argv[1], sys.argv[2]
-try:
-    lines = open(path, encoding="utf-8").read().split("\n")
-except OSError:
-    sys.exit(1)
-if not lines or lines[0].strip() != "---":
-    sys.exit(1)
-for line in lines[1:]:
-    if line.strip() == "---":
-        break
-    if not line.startswith(key + ":"):
-        continue
-    value = line[len(key) + 1:].strip()
-    if len(value) >= 2 and value[0] == value[-1] and value[0] in "'\"":
-        value = value[1:-1]
-    print(value)
-    break
-PY
+# gh_common <subcommand> ... — the one way this script talks to GitHub
+# (gh_common.py:1-25).  It exits 2 with a diagnostic on stderr; there is no
+# local copy of an issue or PR to fall back on, by design.
+gh_common() {
+  python3 "$ROOT/local/bin/gh_common.py" "$@"
 }
 
 # sanitize_to <src> <dest> <max-lines> — the issue or PR body is written by
@@ -233,65 +218,65 @@ fi
 
 # ---------------------------------------------------------- resolve the target
 
-KIND=""
-TARGET_DIR=""
-TARGET_FILE=""
-BRANCH=""
-PAD=""
+# GitHub numbers issues and pull requests out of one sequence, so the target is
+# whichever of the two owns the number: ask the PR endpoint first and fall back
+# to the issue endpoint (local/protocols/issues-prs.md).  The record is fetched
+# once into runtime cache and enters the prompt as untrusted data, exactly as
+# the registry file used to.
 case "$TARGET" in
-  *[!0-9]*) PAD="" ;;
-  *)        PAD="$(printf '%04d' "$((10#$TARGET))")" ;;
+  ""|*[!0-9]*) die "target '$TARGET' is not a GitHub issue or PR number" ;;
 esac
-
-if [ -d "$ROOT/prs/$TARGET" ]; then
-  KIND=pr
-  TARGET_DIR="$ROOT/prs/$TARGET"
-elif [ -n "$PAD" ] && [ -d "$ROOT/prs" ]; then
-  for cand in "$ROOT/prs/$PAD"-*; do
-    [ -d "$cand" ] || continue
-    [ -z "$TARGET_DIR" ] || die "PR id $PAD is ambiguous: $TARGET_DIR and $cand"
-    KIND=pr
-    TARGET_DIR="$cand"
-  done
+NUM="$((10#$TARGET))"
+RECORD_DIR="$CACHE/agent/record-$NUM"
+mkdir -p "$RECORD_DIR"
+BRANCH=""
+KIND=pr
+if ! gh_common pr-view "$NUM" >"$RECORD_DIR/record.json" 2>"$RECORD_DIR/pr-view.err"; then
+  # Fall back to the issue endpoint ONLY on a proven "it is not a PR" (404).
+  # A transport/auth/5xx failure must die instead: /issues/N also answers for
+  # pull requests, so a blind fallback could classify a PR as an issue and
+  # hand a write-enabled agent the wrong branch (PR 7 review, F8).
+  grep -qi "404\|not found" "$RECORD_DIR/pr-view.err" ||
+    die "could not read PR #$NUM from GitHub (not a 404): $(tail -1 "$RECORD_DIR/pr-view.err" 2>/dev/null || true)"
+  KIND=issue
+  gh_common issue-view "$NUM" >"$RECORD_DIR/record.json" ||
+    die "GitHub has neither a PR nor an issue numbered $NUM (PR read: $(tail -1 "$RECORD_DIR/pr-view.err" 2>/dev/null || true))"
+  python3 -c "import json,sys; sys.exit(1 if \"pull_request\" in json.load(open(sys.argv[1])) else 0)" "$RECORD_DIR/record.json" ||
+    die "GitHub says #$NUM is a pull request, but its PR endpoint failed; refusing to classify it as an issue"
 fi
 
-if [ -z "$KIND" ]; then
-  if [ -f "$ROOT/issues/$TARGET.md" ]; then
-    KIND=issue
-    TARGET_FILE="$ROOT/issues/$TARGET.md"
-  elif [ -n "$PAD" ] && [ -d "$ROOT/issues" ]; then
-    for cand in "$ROOT/issues/$PAD"-*.md; do
-      [ -f "$cand" ] || continue
-      [ -z "$TARGET_FILE" ] || die "issue id $PAD is ambiguous: $TARGET_FILE and $cand"
-      KIND=issue
-      TARGET_FILE="$cand"
-    done
-  fi
-fi
+CONTEXT_SRC="$RECORD_DIR/record.md"
+REC_ENV="$(python3 - "$RECORD_DIR/record.json" "$KIND" "$CONTEXT_SRC" <<'PY'
+import json, shlex, sys
 
-[ -n "$KIND" ] ||
-  die "no PR record under $ROOT/prs and no issue under $ROOT/issues matches '$TARGET'"
+rec = json.load(open(sys.argv[1], encoding="utf-8")) or {}
+kind, dest = sys.argv[2], sys.argv[3]
+head, base = rec.get("head") or {}, rec.get("base") or {}
+labels = ", ".join(str((lab or {}).get("name") or "") for lab in rec.get("labels") or [])
+state = "merged" if rec.get("merged") else str(rec.get("state") or "")
+# The body is copied verbatim; sanitize_to below is what makes it safe to quote
+# (DESIGN.md invariant 6), and sanitising twice would only hide content.
+with open(dest, "w", encoding="utf-8") as handle:
+    handle.write("%s #%s: %s\nstate: %s\nlabels: %s\nurl: %s\n\n%s\n" % (
+        kind, rec.get("number"), rec.get("title") or "", state,
+        labels or "none", rec.get("html_url") or "", rec.get("body") or ""))
+for key, value in (("BRANCH", head.get("ref") or ""),
+                   ("BASE", base.get("ref") or "main"),
+                   ("HEAD_SHA", head.get("sha") or ""),
+                   ("STATE", state),
+                   ("REC_URL", rec.get("html_url") or "")):
+    print("%s=%s" % (key, shlex.quote(str(value))))
+PY
+)" || die "$KIND #$NUM came back from GitHub in an unreadable shape"
+eval "$REC_ENV"
 
-SCOPE=""
-CONTEXT_SRC=""
 if [ "$KIND" = pr ]; then
-  TARGET_FILE="$TARGET_DIR/pr.md"
-  [ -f "$TARGET_FILE" ] || die "$TARGET_FILE is missing; the PR record is incomplete"
-  PR_ID="$(fm_get "$TARGET_FILE" id || true)"
-  BRANCH="$(fm_get "$TARGET_FILE" branch || true)"
-  BASE="$(fm_get "$TARGET_FILE" base || true)"
-  HEAD_SHA="$(fm_get "$TARGET_FILE" head_sha || true)"
-  STATE="$(fm_get "$TARGET_FILE" state || true)"
-  [ -n "$PR_ID" ] || die "pr.md has no 'id'"
-  [ -n "$BRANCH" ] || die "pr.md has no 'branch'"
+  PR_ID="$NUM"
   SCOPE="pr$PR_ID"
-  CONTEXT_SRC="$TARGET_FILE"
+  [ -n "$BRANCH" ] || die "PR #$PR_ID reports no head branch"
 else
-  ISSUE_ID="$(fm_get "$TARGET_FILE" id || true)"
-  [ -n "$ISSUE_ID" ] || die "$TARGET_FILE has no 'id' in its frontmatter"
-  STATE="$(fm_get "$TARGET_FILE" state || true)"
+  ISSUE_ID="$NUM"
   SCOPE="$ISSUE_ID"
-  CONTEXT_SRC="$TARGET_FILE"
   # An issue has no branch of its own until somebody makes one.  Prefer an
   # existing issue-<id>-* / codex/issue-<id>-* branch; otherwise work on the
   # trusted ref's checkout and let the human create the branch.
@@ -353,17 +338,20 @@ EOF
 
 # Local execution contract
 
-You are a human-directed working session on a local git repository.  There is
-no GitHub here, and no CI is watching you.
+You are a human-directed working session in a local worktree.  The repository's
+records live on GitHub, but no CI is watching you here.
 
-- Do NOT run \`gh\`, \`git push\`, or any mcp__github__* tool; they do not exist.
+- Do NOT run \`gh\`, \`git push\`, or any mcp__github__* tool.  Issues, PR
+  comments, review verdicts and commit statuses are written only by the
+  lifecycle scripts, through local/bin/gh_common.py; say what you would have
+  posted in your final message and the operator decides.
 - You MAY commit on $BRANCH when the work warrants it.  Do NOT use the
   \`[codex-auto-fix]\` or \`[codex-review-fix]\` subject prefixes: they mark
   machine fixes, and the reviewer skips commits that carry them.  A commit you
   make is a human-directed commit and must be reviewable.
 - Do NOT rewrite published history (no amend, rebase or reset of commits that
-  are already on the branch), and do not touch prs/, issues/ or
-  results/telemetry/ — those records are maintained by the lifecycle scripts.
+  are already on the branch), and do not touch results/telemetry/ — it is
+  maintained by the lifecycle scripts.
 - Validate with \`lake build\` (or a single-file \`lake env lean\` check) when
   you change Lean.  At most one full \`lake build\` machine-wide.
 - Say plainly in your final message what you changed, what you did not, and
@@ -372,7 +360,7 @@ no GitHub here, and no CI is watching you.
 
 Session context:
   Target            $KIND $SCOPE
-  Record            $CONTEXT_SRC
+  Record            $KIND #$NUM ($REC_URL)
   Branch            $BRANCH
   Worktree          $WORKTREE
   Invoked           $(now_utc)
@@ -456,16 +444,16 @@ if [ "$POST_HEAD" != "$PRE_HEAD" ]; then
   fi
   if [ "$KIND" = pr ]; then
     log "next: run local/bin/ci.sh $PR_ID, then local/bin/review.sh $PR_ID"
-    log "  (pr.md head_sha is left for ci.sh to update — it owns that field)"
+    log "  (GitHub's PR head only moves when the branch is pushed; ci.sh binds its evidence to that SHA)"
   else
-    # claude.yml's auto-create-issue-pr analogue.  Creating the PR record is
-    # pr_open.py's job, not this script's: it owns the id sequence and the
-    # branch-name lint.
-    log "next: open a PR record for this branch, e.g."
+    # claude.yml's auto-create-issue-pr analogue.  Opening the pull request is
+    # pr_open.py's job, not this script's: it owns the branch-name lint and the
+    # issue link.
+    log "next: open a pull request for this branch, e.g."
     log "  python3 local/bin/pr_open.py --issue $SCOPE --branch $BRANCH --title \"...\""
-    log "  then run local/bin/ci.sh on the new PR id."
+    log "  then run local/bin/ci.sh on the new PR number."
     if [ ! -f "$ROOT/local/bin/pr_open.py" ]; then
-      warn "local/bin/pr_open.py is not present; create prs/<id>-<slug>/pr.md by hand per local/protocols/issues-prs.md before CI or review can see this branch."
+      warn "local/bin/pr_open.py is not present; open the pull request on GitHub by hand (local/protocols/issues-prs.md) before CI or review can see this branch."
     fi
   fi
 else

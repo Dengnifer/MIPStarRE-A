@@ -113,3 +113,63 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 - **`elan show` errors on this machine.** `~/.elan/toolchains/stable` is a
   stale non-symlink directory (Jan 2025); pinned-toolchain resolution is
   unaffected. Left untouched; scripts must not depend on `elan show`.
+- **Fable 5 usage limit hit (2026-08-31).** All four 4.2 brief-drafter agents failed at dispatch with the account limit message; the main session continued. Mitigation: subagent fleets fall back to Opus (the standing model policy makes this the default for non-frontier reasoning anyway); codex sessions unaffected. Lesson for the paper: multi-model quotas are a real scheduling constraint — parallelism plans need a per-model budget column.
+- **Invalid UTF-8 argv broke every review dispatch of PR #0003.** Symptom: codex exited 2 in ~1 s with "invalid UTF-8 was detected in one or more arguments"; the pre-model retry failed identically. Diagnosis: `dispatch.sh` truncates untrusted attachments with `head -c`, which cuts at a byte boundary; the QPBT Lean diff is dense with mathematical Unicode, and the cut split a multibyte character — stage-3 TeX diffs were ASCII-heavy, so the latent defect never fired. Fix: UTF-8-safe truncation (decode with errors=ignore after the byte cap). Lesson: byte-capped truncation of UTF-8 text must always be followed by a decode-boundary repair; and a failing dispatch should be reproduced with the REAL payload, not a toy probe (the toy probe passed and misdirected the first diagnosis to transience).
+- **GitHub CLI discovery and API authentication were separate prerequisites.**
+  Symptom: `gh` was not on the main session's `PATH`, Ubuntu reported no
+  installed package, and a system install attempt could not obtain `sudo`;
+  inspection then found an existing binary at `~/.local/bin/gh`. Diagnosis:
+  the handoff's required user-local path was absent from this shell, while
+  `gh auth status` independently reported no authenticated GitHub host; the
+  repository deploy key authenticates Git transport, not GitHub API calls.
+  Fix: use the explicit user-local binary for preflight and leave API writes
+  pending until the owner completes `gh auth login` with the scoped PAT.
+  Lesson: migration preflight must check user-local binary discovery, API
+  authentication, and SSH Git access separately before attempting installation.
+- **The main-session sandbox initially denied the workflow lock root.**
+  Symptom: the first `issue_new.py` invocation failed before allocation with
+  `EROFS` for `~/.cache/mipstarre-dev/locks/issues-seq.lock`. Diagnosis: the
+  workspace sandbox admitted repository writes but not the shared runtime
+  cache required by the lifecycle's concurrency protocol. Fix: rerun the same
+  sanctioned command with explicit access to the cache root; issue `#0007`
+  was then allocated once. Lesson: authorize the runtime lock root for main
+  lifecycle commands and never bypass the locks merely because the repository
+  itself is writable.
+- **Old `gh auth status` falsely rejected a valid fine-grained PAT.**
+  Symptom: after `gh 2.4.0` accepted the token, `gh auth status` reported that
+  it was no longer valid, prompting an attempted client upgrade over a link
+  transferring only about 10 KiB/s. Diagnosis: this client predates
+  fine-grained PATs; a direct read-only `gh api user --jq .login` call
+  authenticated successfully as `Dengnifer`. Fix: stopped the unnecessary
+  release download and adopted a functional API capability probe for issue
+  `#0007` instead of treating `auth status` as authoritative. Lesson:
+  authenticate by exercising the required API surface; a legacy client's
+  credential-format diagnostic can be a false negative.
+
+## 2026-09-01 — issue-0007 infrastructure overbuild
+
+- **Symptom**: the GitHub-native workflow port (issue 0007, a bounded ~6-script
+  adaptation) ran ~17 h / 21 commits producing +14.6k/−7.5k lines: bespoke
+  2,761-line `github_api.py`, 643-line `runtime_lock.py`, 5,649-line
+  `test_github_workflow.py` executed by BOTH the pre-commit and pre-push hooks
+  (≈10 min per commit), an actor-verification regime, a branch-protection
+  evaluator, and repeated self-hardening sub-sessions
+  (`final-gate-repair`, `final-recovery`, `evidence-integrity`,
+  `merge-integrity`, `lock-unification`, `final-serialization`).  Zero Lean
+  progress during the episode; PR #5's 17 findings untouched.
+- **Diagnosis**: unbounded scaffolding recursion — each hardening pass
+  generated new failure modes to harden against, with no cost ceiling and no
+  product-work forcing function.  The brief itself was sound; execution
+  exceeded it because nothing in the protocol bounded infrastructure effort.
+- **Fix**: owner paused the session; branch preserved verbatim as
+  `telemetry/issue-0007-overbuilt` (research data); port rebuilt lean from
+  the archive commit c8f1999 (thin `gh_common.py` layer, REST exact-SHA merge,
+  no hook changes, bounded test file).
+- **Lesson**: scaffolding needs an explicit budget and a math-first forcing
+  function — see the scope-control amendment in `local/protocols/EVOLUTION.md`
+  and `local/personas/main.md`.  Test suites are load too: hooks that grow
+  with the test corpus throttle the entire pipeline.
+## 2026-08-31
+
+- Write-through adapter superseded during implementation. Symptom: the first issue-0007 orchestrator had begun adding a durable local GitHub-operation journal when the owner rejected retaining any local issue/PR fallback. Diagnosis: the earlier step-0 brief preserved registry machinery that no longer matched the owner's desired GitHub-only authority. Fix: stopped the session before commit, reverted its partial edit, verified and moved all 60 issue/PR files byte-identically into results/telemetry/registry-archive in the isolated c8f1999 commit, and re-scoped issue 0007 to read live GitHub gate evidence. Lesson: when eliminating an operational registry, archive research evidence before rewriting consumers, and treat an explicit owner authority decision as a protocol amendment rather than extending the superseded design.
+- Codex resume dispatch rejected the worktree option. Symptom: dispatch.sh allocated orc-0007-20260831-02, but codex exec resume exited 2 with 'unexpected argument -C' before producing an event. Diagnosis: the dispatcher assembles fresh and resumed codex invocations in the same option order even though this CLI requires global worktree options before the resume subcommand. Fix: retained the zero-usage failed session record and started orc-0007-20260831-03 as a fresh sanctioned session with the committed brief. Lesson: dispatch.sh needs an explicit resume-mode argv test; telemetry-complete failure handling does not imply the resume command itself is compatible.

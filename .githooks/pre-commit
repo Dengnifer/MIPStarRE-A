@@ -18,6 +18,24 @@ run_without_git_local_env() (
   "$@"
 )
 
+# Scope-control guard (EVOLUTION.md 2026-09-01, the issue-0007 overbuild):
+# workflow scaffolding is budgeted at <=400 changed lines per commit.  This is
+# mechanical enforcement — repeated verbal correction of scaffolding bloat did
+# not stick, so the budget lives in the hook.  The override env var is granted
+# by the OWNER per commit, never self-granted by an agent session.  Runs
+# before the ACMR early-exit so deletion-only commits are counted too
+# (numstat includes deletions; PR 7 round 3, F8).
+INFRA_CHANGED="$(git diff --cached --numstat -- local/ .githooks/ scripts/tests/test_github_workflow.py \
+  | awk '{added=$1; deleted=$2; if (added != "-") total+=added+deleted} END {print total+0}')"
+if [ "${INFRA_CHANGED:-0}" -gt 400 ] && [ "${MIPSTARRE_INFRA_OVERRIDE:-}" != "1" ]; then
+  echo "MIPStarRE pre-commit: staged workflow-layer change is ${INFRA_CHANGED} lines (budget: 400)."
+  echo "Scope control (local/personas/main.md): the budget is PER EPISODE, not per"
+  echo "commit — serial oversized commits are the same violation and show in the"
+  echo "telemetry. Shrink the change, or ask the OWNER to authorize this commit"
+  echo "with MIPSTARRE_INFRA_OVERRIDE=1 (self-granting it is a protocol breach)."
+  exit 1
+fi
+
 STAGED_FILES="$(git diff --cached --name-only --diff-filter=ACMR)"
 if [ -z "$STAGED_FILES" ]; then
   exit 0

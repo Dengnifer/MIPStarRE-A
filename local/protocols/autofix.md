@@ -31,16 +31,16 @@ Locally there are no events.  A fix run is started by one of:
 | Parent trigger | Local caller |
 |---|---|
 | PR CI failed | the operator (or the PR lifecycle) after `ci.sh` returns non-zero |
-| PR Review completed + `auto-fix-claude` label | the operator after `review.sh` leaves unresolved findings |
-| label `auto-fix-claude` added (retroactive probe) | `autofix.sh <id> --mode auto`, which re-reads the manifest and the ledger |
+| PR Review completed + `auto-fix-codex` label | the operator after `review.sh` leaves unresolved findings |
+| label `auto-fix-codex` added (retroactive probe) | `autofix.sh <id> --mode auto`, which re-reads the head's statuses and the review ledger |
 
 The retroactive probe is the interesting one.  On GitHub it queried the
 *latest completed* PR CI run for the exact head SHA (`per_page: 1`,
 `event: 'pull_request'`) so that a successful re-run superseded an earlier
 failure (`auto-fix.yml:139-142`).  Locally that is structural rather than
-queried: `prs/<id>/ci/<head_sha>.json` is overwritten by each complete `ci.sh`
-run, so the manifest *is* the latest result for that SHA, and there is no
-older failure left to find.  The associated booby-trap — `workflow_run` matches
+queried: `latest-statuses <head_sha>` returns the newest status per context, so
+a re-run's `success` supersedes an earlier `failure` by construction and there
+is no older failure left to find.  The associated booby-trap — `workflow_run` matches
 a workflow by **name** while the REST API queries by **filename**, so a rename
 must be applied in both places (`auto-fix.yml:136-139`) — has no local
 counterpart at all, since there is only the file.
@@ -63,7 +63,7 @@ in the same way that `dispatch.sh` — not `autofix.sh` — enforces
 
 ## 3. Dispatch: what may be fixed
 
-The decision comes from the CI manifest `prs/<id>/ci/<head_sha>.json` written
+The decision comes from the exact-head CI statuses and manifest comment written
 by `ci.sh` (`local/protocols/ci.md`), whose steps carry the same names as the
 `pr-ci.yml` jobs they replace.  This mirrors `auto-fix.yml:101-114`, which
 listed the failed jobs of the CI run and dispatched on their names.
@@ -75,7 +75,7 @@ listed the failed jobs of the CI run and dispatched on their names.
 | `blueprint-sync` | `failure` | **never auto-fixed** |
 | `paper-gaps`, `file-length`, `proof-debt`, `proof-evasion`, `statement-origin` | `failure` | **never auto-fixed** |
 | any step | `error` | **never auto-fixed** (see below) |
-| — | unresolved findings in `reviews/*.md` **and** `auto_fix: true` | **review-fix** — `auto-fix-review-prompt.md` pair |
+| — | unresolved findings in the exact-head review ledger **and** the auto-fix label | **review-fix** — `auto-fix-review-prompt.md` pair |
 
 The exclusion is the load-bearing part.  `auto-fix.yml:102-105` says it
 outright: *only the Lean build and the TeX render are auto-fixable — the sync
@@ -96,8 +96,8 @@ timeout on the machine-wide full-build lock).  GitHub had one bucket.  An
 fixes a missing `elan` or a busy build lock, and each attempt would burn an
 iteration from the cap.
 
-Review-fix additionally requires the per-PR opt-in `auto_fix: true` in
-`pr.md` — the local form of the `auto-fix-claude` label
+Review-fix additionally requires the per-PR opt-in, now the repository's
+auto-fix label on the PR itself — the mechanism the parent used
 (`auto-fix.yml:116-126`).  CI and blueprint fixes do not require it, matching
 the parent, where a CI failure dispatched a fix without any label.
 
@@ -133,7 +133,7 @@ in-progress auto-fix.  One global lock would recreate that class of bug.
 **Recursion.**  `autofix.sh` exports `MIPSTARRE_AUTOFIX_ACTIVE=1` and refuses
 to start when it is already set.  Without it, `autofix → ci.sh → review.sh →
 autofix` would deadlock on the branch lock and, worse, would let a nested run
-observe a fresh `fix_iterations` and slip the cap.  The same variable, with
+count fix commits that a parallel run is still making, and slip the cap.  The same variable, with
 `MIPSTARRE_AUTOMATION=1`, is what makes `agent.sh` refuse to run from inside
 the loop — the local form of `claude.yml:24-30`'s "skip when sender is a bot".
 
@@ -143,19 +143,28 @@ operator's half-finished edit must not end up inside a bot commit.
 
 ## 5. The iteration cap
 
-`pr.md` carries `fix_iterations`.  It counts **fix commits across all three
-kinds**, not per kind — the parent surfaced it to the prompt as
+The count is derived from the branch's own history, not from a stored field:
+commits in `merge-base..`*local branch tip* whose subject begins exactly
+`[codex-auto-fix]` or `[codex-review-fix]` (`issues-prs.md` §1).  The **local**
+tip, not the GitHub head: a fix commit that was made but not yet pushed (a
+crashed run, a failed push) is an ancestor of the local tip only, and the cap
+must see it or it can never fire.  It counts **fix commits across
+all three kinds**, not per kind — the parent surfaced it to the prompt as
 "Review-fix iteration N (combined bot-fix cap: M)" (`auto-fix.yml:391-395`),
 computed by the `bot-fix-guard` action (`auto-fix.yml:313-315`).  The default
 cap is 5 (`MIPSTARRE_FIX_CAP`).
 
-Before every phase, if `fix_iterations >= cap`, the run performs the **cap
+Deriving it from the commit subjects rather than a counter also removes the
+drift the old field could develop: the history is the counter.
+
+Before every phase, if the count is at the cap, the run performs the **cap
 ritual** and stops:
 
-1. set `auto_fix: false` in `pr.md` — no further automated fix touches this
-   branch until a human resets it;
-2. append a `Human attention required` note to the `pr.md` body, marked with
-   `<!-- autofix:cap-reached -->` so a repeated run does not append it twice;
+1. remove the auto-fix label on GitHub — no further automated fix touches this
+   branch until a human restores it;
+2. post a `Human attention required` PR comment, marked with
+   `<!-- autofix:cap-reached -->` so a repeated run adopts it instead of
+   posting twice;
 3. run `review.sh <id> --force-review` **once**, so the final bot-fix result is
    reviewed;
 4. exit 0.
@@ -201,10 +210,11 @@ pre-commit gates (`scripts/install_git_hooks.sh`), and a bot commit is exactly
 the kind of commit they exist to inspect.  A hook rejection leaves the changes
 staged in the worktree and fails the phase.
 
-After a successful commit, `pr.md` is updated: `head_sha` to the new commit,
-`fix_iterations` incremented, and `ci_status` / `review_state` reset to
-`pending`.  The reset matters — a green `ci_status` inherited from the previous
-head would let `review.sh` review a commit CI never saw.
+After a successful commit the branch has a new head, and that is the whole
+bookkeeping: the fix count is recomputed from the commit subjects, and the new
+SHA carries no statuses at all until `ci.sh` runs.  Evidence being per-SHA is
+what makes this safe — no green status can be inherited across a fix commit,
+so `review.sh` can never review a commit CI never saw.
 
 ## 7. Prompts and untrusted data
 
@@ -220,9 +230,10 @@ read with `git show "$MIPSTARRE_TRUSTED_REF:.github/prompts/…"`, never from th
 branch being fixed (DESIGN.md invariant 5).  This matters more for the fixer
 than for the reviewer: the fixer runs `workspace-write`.
 
-`autofix.sh` appends a local execution contract stating that GitHub tools do
-not exist, that the agent must not commit or rewrite history, that
-`prs/`, `issues/` and `results/telemetry/` are off limits, that at most one
+`autofix.sh` appends a local execution contract stating that the agent must not
+call `gh`, push, or touch the PR on GitHub (publication belongs to the wrapper),
+that it must not commit or rewrite history, that `results/telemetry/` is off
+limits, that at most one
 full `lake build` may run machine-wide (DESIGN.md invariant 7), and that a fix
 which requires changing a paper-labelled statement must **stop** and report the
 obstacle instead — the escalation path the fix prompts already describe, and
@@ -250,15 +261,24 @@ allots.
 
 ## 8. After the fix
 
-`autofix.sh` re-runs `local/bin/ci.sh <pr-id>` on the new head.  The chain then
-resumes where `review.md` describes it: CI writes a manifest for the new SHA,
-and the review gate skips the bot commit — so the fixed branch is reviewed
-again only when a human pushes, or once at the cap.  That is the parent's
-intended shape, not an accident of the port.
+`autofix.sh` **pushes** the branch — up to three attempts, ten seconds apart —
+and only then re-runs `local/bin/ci.sh <pr-id>` on the new head.  The order is
+forced by the evidence model: statuses bind to *pushed* SHAs, and `ci.sh`
+refuses a full run whose worktree head is not the PR's GitHub head, so an
+unpushed fix would leave the new head permanently without statuses and the old
+head's stale failures standing.  When all three attempts fail, CI is skipped and
+the run says so: the new head carries no statuses, the merge gate keeps
+refusing, and a human pushes by hand (`local/bin/github-sync.sh`) before running
+`ci.sh`.  Failing closed is the point.
 
-If `ci.sh` is absent, the run says so and leaves `ci_status: pending`; the PR
-is then structurally unreviewable (`review.md` §2, rung 5) until CI runs, which
-is the correct failure: no silent no-op, no stale green.
+Once CI has run, the chain resumes where `review.md` describes it: CI publishes
+statuses for the new SHA, and the review gate skips the bot commit — so the
+fixed branch is reviewed again only when a human pushes, or once at the cap.
+That is the parent's intended shape, not an accident of the port.
+
+If `ci.sh` is absent, the run says so and the new head keeps no CI statuses at
+all; the PR is then structurally unreviewable (`review.md` §2, rung 5) until CI
+runs, which is the correct failure: no silent no-op, no stale green.
 
 ## 9. Operating it
 
@@ -275,7 +295,7 @@ Artefacts:
 | Path | Committed | Contents |
 |---|---|---|
 | the fix commits on the branch | yes | the fix itself |
-| `prs/<id>/pr.md` | yes | `head_sha`, `fix_iterations`, `auto_fix`, `ci_status`, `review_state`, cap note |
+| the PR on GitHub | on GitHub | auto-fix label state and the cap-reached comment |
 | `~/.cache/mipstarre-dev/autofix/<pr>/<sha>/` | no | prompts, sanitized logs, raw agent output, commit messages |
 | `~/.cache/mipstarre-dev/locks/fix-<branch>.lock` | no | the fix lock and its `cancel` sentinel |
 
@@ -286,8 +306,8 @@ direct `codex exec` and warns that the session will be missing from the
 registry.
 
 **When the loop is stuck.**  Two failed iterations on the same error mean the
-fixer does not have what it needs, and a third will not help.  Clear
-`auto_fix`, read the agent's last message under the cache directory, and use
+fixer does not have what it needs, and a third will not help.  Remove the
+auto-fix label, read the agent's last message under the cache directory, and use
 `local/bin/agent.sh <pr-id> "…"` — a human-directed session, with the
 obstacle named — instead of another automated round.  The cap will eventually
 force this; doing it earlier is cheaper.
@@ -300,12 +320,13 @@ force this; doing it earlier is cheaper.
 * **The reusable workflow `_ci-auto-fix-shared.yml` and the composite actions**
   (`attach-pr-branch`, `bot-fix-guard`, `fetch-review-comments`).  Their jobs
   are, respectively: the worktree resolution shared with `ci.sh`, the
-  `fix_iterations` counter in `pr.md`, and the findings ledger.
+  fix-iteration count from the commit subjects, and the findings ledger.
 * **GraphQL `reviewThreads` probing** for unresolved and not-outdated threads.
   The ledger is single-surface and carries both states directly
   (`review.md` §9).
-* **`BOT_PAT` pushes and the `claude[bot]` GitHub identity.**  Local commits
-  with a configured author; no push.
+* **`BOT_PAT` and the `claude[bot]` GitHub identity.**  Local commits with a
+  configured author, pushed (§8) over the operator's own git credentials: no
+  bot token, no bot account.
 * **The provider cascade and `allowed_tools` presets.**  codex sandbox modes
   and `MIPSTARRE_FIX_MODEL`.
 * **The linter-warning sweep** (`lean-linter-warning-autofix.yml`), which shares

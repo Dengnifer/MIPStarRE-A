@@ -5,11 +5,12 @@ Normative protocol for `local/bin/ci.sh`, the local replacement for
 Read `meta.md` first; `build-cache.md` owns the hot-main cache this protocol
 consumes but never writes.
 
-`ci.sh <pr-id>` is the **only** thing allowed to set `ci_status` in a PR
-record. Everything downstream — `review.sh` (invariant 2: review only after
-green CI on the same head SHA), `autofix.sh` (invariant 3: sync/audit failures
-are never auto-fixed), and the merge gate in `pr_merge.py` — reads the manifest
-this script writes and nothing else.
+`ci.sh <pr-number>` is the **only** thing allowed to publish the `local-ci/*`
+commit statuses. Everything downstream — `review.sh` (invariant 2: review only
+after green CI on the same head SHA), `autofix.sh` (invariant 3: sync/audit
+failures are never auto-fixed), and the merge gate in `pr_merge.py` — reads
+those exact-head statuses and the manifest comment this script publishes
+(`local/protocols/issues-prs.md` §2), and nothing else.
 
 ## 1. What it is
 
@@ -23,21 +24,23 @@ local/bin/ci.sh <pr-id> [--worktree PATH] [--base REF] [--only STEP]
                         [--force-all] [--skip-build] [--dry-run]
 ```
 
-`<pr-id>` is `7`, `0007`, or `0007-slug`; the script resolves it to a single
-directory under `prs/`, reads `branch` and `base` from `pr.md` frontmatter,
-finds the branch's worktree (via `git worktree list`, falling back to
-`.worktrees/<branch with / → ->`), and runs everything **inside that
-worktree**. Nothing is run in the primary checkout.
+`<pr-id>` is the GitHub PR number; the script reads `branch`, `base` and the
+head SHA from GitHub (`gh_common.py pr-view`), finds the branch's worktree (via
+`git worktree list`, falling back to `.worktrees/<branch with / → ->`), and
+runs everything **inside that worktree**. Nothing is run in the primary
+checkout, and the worktree's branch tip must equal the remote head before the
+run starts.
 
 Exit status: `0` all gating steps passed or were legitimately skipped; `1` at
 least one gating step failed or could not run; `2` the run could not start
-(unknown PR id, missing worktree, unresolvable base).
+(unknown PR number, missing worktree, unresolvable base, GitHub unreachable —
+a GitHub error never degrades to a local record).
 
 ### Preconditions that are hard errors, never silent skips
 
 | Precondition | Why it is fatal |
 |---|---|
-| `prs/<id>/pr.md` exists with a `branch` key | there is no branch to test |
+| GitHub returns an open PR with a head branch | there is no branch to test |
 | a worktree for that branch exists | CI must not test the primary checkout |
 | `origin/<base>` or `<base>` resolves | invariant 8 — the diff-based audits and the change gating self-disable without a base, which is exactly the "checks silently stopped running" failure the parent repo patched twice |
 | a merge base exists | the change set is undefined without one |
@@ -46,8 +49,8 @@ least one gating step failed or could not run; `2` the run could not start
 There is deliberately **no `LOCAL_CI_ENABLED` kill switch**. `LOCAL_REVIEW_ENABLED`
 and `LOCAL_AUTO_FIX_ENABLED` exist because a disabled reviewer or fixer merely
 stops work from happening; a disabled CI would hand the merge gate a green
-light it never earned. If CI must not run, do not run it — the record keeps its
-previous `ci_status`.
+light it never earned. If CI must not run, do not run it — the head SHA simply
+keeps whatever statuses it already carries.
 
 ## 2. Job table
 
@@ -104,7 +107,7 @@ minimatch's `**`.
 | `paper_gaps` | `docs/paper-gaps/*`, `texra-blueprint.toml`, `MIPStarRE/*.lean`, `blueprint/src/*`, `docs/*.md` | `:99-107` |
 | `scripts` | `scripts/*` | `:108-109` |
 | `comparator` | `scripts/comparator/*` | `:110-111` |
-| `workflow` | `.github/workflows/pr-ci.yml`, `local/bin/ci.sh`, `local/protocols/ci.md` | `:112-113`, extended |
+| `workflow` | `.github/workflows/pr-ci.yml`, `local/bin/*`, `local/protocols/*`, `.githooks/*` | `:112-113`, extended |
 
 > **Lockstep warning.** These globs must move together with the trees the audit
 > scripts actually scan. The parent repo patched the `paper_gaps` filter twice
@@ -115,18 +118,27 @@ minimatch's `**`.
 > commit, per `meta.md` §5.
 
 The `workflow` area is the one deliberate extension. On GitHub it meant "the
-workflow file changed, so re-run everything"; locally the CI definition lives
-in three files — the frozen reference, this driver, and this protocol — and any
-of them changing forces a full run.
+workflow file changed, so re-run everything"; locally the workflow layer is a
+whole tree — the frozen reference `pr-ci.yml`, every driver and helper under
+`local/bin/`, every protocol under `local/protocols/`, and the hooks in
+`.githooks/` — and a change to any of them forces a full run, every step
+included. The globs are that broad on purpose: a `gh_common.py`-only change has
+to run the `scripts/tests` unit suite that covers it — carried by
+`blueprint-sync` — and under the old three-file glob such a change matched no
+area and ran nothing at all (PR 7 review, F13).
 
 ## 4. Manifest schema
 
-Written atomically (same-directory tempfile + `os.replace`) to
+Built in runtime storage (same-directory tempfile + `os.replace`) and then
+posted as the manifest PR comment (§5):
 
 ```
-prs/<pr-dir>/ci/<head_sha>.json          complete run  (committed)
-prs/<pr-dir>/ci/<head_sha>.partial.json  --only / --skip-build run
+~/.cache/mipstarre-dev/ci-manifests/pr<pr>-<head_sha>.json          complete run
+~/.cache/mipstarre-dev/ci-manifests/pr<pr>-<head_sha>.partial.json  partial run
 ```
+
+A run is **partial** when it was given `--only`, `--skip-build`, or `--base`;
+`--dry-run` writes nothing at all.
 
 Step logs live outside the repository, under
 `~/.cache/mipstarre-dev/ci-logs/<pr-id>/<head_sha>/<step>.log`.
@@ -136,10 +148,9 @@ Step logs live outside the repository, under
   "schema": 1,
   "generator": "local/bin/ci.sh",
   "replaces": ".github/workflows/pr-ci.yml",
-  "pr": "0007",                  // 4-digit id
-  "pr_dir": "0007-qpbt-basis",   // directory under prs/
+  "pr": 7,                       // GitHub PR number
   "branch": "issue-7-qpbt-basis",
-  "base": "main",                // from pr.md frontmatter
+  "base": "main",                // from the GitHub PR
   "base_ref": "origin/main",     // what actually resolved
   "merge_base": "<sha>",
   "head_sha": "<sha>",           // the SHA every step ran against
@@ -177,26 +188,32 @@ Outcome vocabulary — the distinction is what routes the auto-fix loop:
 `conclusion` is `failure` if any step failed, else `error` if any step errored,
 else `success`. The run's exit status is `0` iff `conclusion == "success"`.
 
-## 5. PR record updates
+## 5. Publication
 
-`ci.sh` rewrites two frontmatter keys of `prs/<pr-dir>/pr.md` atomically:
+Evidence goes to GitHub, bound to the exact SHA the steps ran against
+(`issues-prs.md` §2). For every complete run:
 
-```
-head_sha:  <the SHA CI actually tested>
-ci_status: pending → running → success | failure | error
-```
+* one `local-ci/<step>` status per gate step — `pending` posted before the
+  step, then `success | failure | error`; a gated-out step is a `success`
+  whose description says it was skipped, so the gate never has to distinguish
+  "absent" from "not applicable";
+* `local-ci/summary` carrying the run's `conclusion`;
+* the manifest JSON as the PR comment marked
+  `<!-- mipstarre-ci-manifest pr=N -->`, created or updated in place.
 
-`running` is written **before the first step**. A crashed, killed, or
-power-cut run therefore leaves `running`, never a stale `success`: the review
-gate's "green CI on the same head SHA" check (invariant 2) fails closed.
+`pending` before the first step is the old `ci_status: running`: a crashed,
+killed or power-cut run leaves `pending`, never a stale `success`, so the
+review gate's "green CI on the same head SHA" check (invariant 2) fails closed.
+Immediately before the final publication `ci.sh` re-reads both the local branch
+tip and the remote PR head; if either moved, it publishes no success and exits
+nonzero, because a status is a claim about one commit.
 
-`head_sha` and `ci_status` are written together, because a status without the
-SHA it belongs to is unusable to the gate.
-
-A **partial** run (`--only`, `--skip-build`) does not touch `pr.md` at all and
-writes `<sha>.partial.json`. Partial runs are a debugging aid; they must not be
-able to produce a merge-gate verdict, and they must not clobber a complete
-manifest for the same SHA.
+A **partial** run (`--only`, `--skip-build`, or `--base`) publishes nothing at
+all — no statuses, no manifest comment — and keeps its manifest in runtime
+storage only. `--base` belongs on that list because an overridden base (the PR
+head, say) can empty the diff and mark every gate skipped-success. Partial runs
+are a debugging aid; they must not be able to produce a merge-gate verdict, and
+they must not clobber a complete manifest for the same SHA.
 
 ## 6. Concurrency and locks
 
@@ -209,7 +226,7 @@ owner pid is dead or its stamp is older than `MIPSTARRE_FULL_BUILD_LOCK_STALE_S`
 | Lock | Scope | On contention |
 |---|---|---|
 | `locks/ci-<pr-id>.lock` | one `ci.sh` per PR | **refuse immediately** (exit 2) |
-| `hot-main/.full-build-lock` | one full `lake build` machine-wide (invariant 7) | wait up to `MIPSTARRE_CI_BUILD_LOCK_WAIT_S` (default 4 h), then record `build` as `error` and continue with the Python steps |
+| `$CACHE_ROOT/.full-build-lock` | one full `lake build` machine-wide (invariant 7) | wait up to `MIPSTARRE_CI_BUILD_LOCK_WAIT_S` (default 4 h), then record `build` as `error` and continue with the Python steps |
 
 Only the `build` step takes the full-build lock. The audits are pure Python and
 take nothing; single-file `lake env lean` checks are read-only over oleans and
@@ -322,12 +339,12 @@ consumer's explicit, visible responsibility.
 | `workflow` filter = the YAML file | also `local/bin/ci.sh`, `local/protocols/ci.md` | the CI definition is now three files |
 | `--github-annotations` on the duplicate-helper audit | dropped | annotation-only flag |
 | `push`-to-main and docs-only `pull_request` triggers | none | the docs-only paths existed solely to emit the completion event that started PR Review (`pr-ci.yml:31-33`); locally the lifecycle script calls `review.sh` directly |
-| implicit "PR event" job conditions | every run is a PR run | `ci.sh` is only ever invoked on a PR record |
+| implicit "PR event" job conditions | every run is a PR run | `ci.sh` is only ever invoked on a GitHub PR number |
 
 ## 12. Amendments
 
-Changing a gating glob, a step's command set, the manifest schema, the
-`ci_status` vocabulary, or a lock's name or semantics is a protocol amendment:
+Changing a gating glob, a step's command set, the manifest schema, the status
+contexts or their vocabulary, or a lock's name or semantics is an amendment:
 record the trigger in `results/telemetry/events.md`, edit this file and
 `ci.sh` together, append to `EVOLUTION.md`, and grep `local/` for every other
 enforcement point (`meta.md` §5). The manifest schema in particular is a
