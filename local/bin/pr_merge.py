@@ -286,6 +286,19 @@ def run_gate(repo_root: Path, number: int, *, adjudicated: bool) -> dict:
                           f"ref={branch!r} base={base!r}; all three are required.")
     passed(f"gate 1 open, not a draft: {branch} @ {head_sha[:12]} -> {base}")
     ensure_mergeable_worktree(repo_root, branch, base, head_sha)
+    # Gate 2b — the head must CONTAIN the current base tip: CI and review bind
+    # to the head alone, so a branch behind the base would merge a base/head
+    # combination nothing ever tested (round 3, F2).  Fetch first so "current"
+    # means GitHub's tip, not a stale local remote-tracking ref.
+    if not git_ok(repo_root, "fetch", "github", base):
+        raise GateFailure(f"gate 2b (fresh base): 'git fetch github {base}' failed; cannot "
+                          "verify the branch is up to date with the base.")
+    if not git_ok(repo_root, "merge-base", "--is-ancestor", f"github/{base}", head_sha):
+        base_tip = git(repo_root, "rev-parse", "--short", f"github/{base}", check=False)
+        raise GateFailure(f"gate 2b (fresh base): {base} is at {base_tip} and the PR head "
+                          f"{head_sha[:12]} does not contain it. Merge or rebase the base "
+                          "into the branch, re-run CI and review on the new head, then merge.")
+    passed(f"gate 2b head contains the current {base} tip")
     statuses = gh_common.latest_statuses(head_sha)  # one read; gates 3 and 4 share it
     reviews = gh_common.pr_reviews(number)
     check_ci(statuses, head_sha)

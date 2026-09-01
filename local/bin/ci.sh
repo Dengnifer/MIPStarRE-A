@@ -532,7 +532,6 @@ if [ -n "$BASE_OVERRIDE" ]; then
   # and a "fully green" status set would certify nothing (PR 7 round 2, F1).
   # Overridden-base runs are therefore always PARTIAL: nothing is published.
   BASE="$BASE_OVERRIDE"
-  PARTIAL=1
   info "--base override: this run is partial and publishes no statuses"
 fi
 
@@ -681,7 +680,10 @@ LOG_DIR="$CACHE_ROOT/ci-logs/$PR_ID/$HEAD_SHA"
 # writes a clearly-named side manifest and posts nothing at all, so a debugging
 # --only run can never leave the review gate a green status it did not earn.
 PARTIAL=0
-if [ -n "$ONLY_STEPS" ] || [ "$SKIP_BUILD" = 1 ]; then
+if [ -n "$ONLY_STEPS" ] || [ "$SKIP_BUILD" = 1 ] || [ -n "$BASE_OVERRIDE" ]; then
+  # --base is in this list because an overridden base (the PR head, say) can
+  # empty the diff and mark every gate skipped-success (round 2 F1; round 3 F1
+  # caught this line resetting the earlier fix).
   PARTIAL=1
 fi
 # The manifest is runtime evidence, not a record: GitHub carries the verdict

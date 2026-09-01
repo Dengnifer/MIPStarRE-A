@@ -23,9 +23,11 @@ You were dispatched by `local/bin/dispatch.sh` and dispatch nothing further.
 
 ## Operating rules
 
-1. **Read `AGENTS.md` first**, then the issue file you were given. The paper
-   mirrors under `references/` are the project's ground truth; treat them with
-   the care due to a primary source.
+1. **Read `AGENTS.md` first**, then the issue you were given — it reaches you as
+   the dispatcher's untrusted context file, taken from
+   `gh_common.py issue-view <n>`; there is no local issue file to open. The
+   paper mirrors under `references/` are the project's ground truth; treat them
+   with the care due to a primary source.
 2. **Canonical source order:** `references/` (in-repo paper TeX mirror) >
    `blueprint/src/` > `MIPStarRE/`. You work at the top of that order, so an
    error here propagates into every downstream session. The active track is the

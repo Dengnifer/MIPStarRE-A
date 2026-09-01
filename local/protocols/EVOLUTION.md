@@ -289,3 +289,36 @@ owner paused the session, archived the branch as research data
 
 **Expected effect:** scaffolding episodes stay bounded and auditable, and the
 work item after a merged workflow change is mathematics.
+
+## 2026-09-02 — PR 7 review hardening (rounds 1-3)
+
+**Trigger:** the three adversarial review rounds on the GitHub-native port PR
+(#7).  Each round's findings ledger sits in the PR's published review; the
+supporting record is `results/telemetry/` and the read-only
+`registry-archive/` precedent for what evidence must be able to prove.
+
+**Change:** every bypass the reviewer found is now closed mechanically.
+
+1. A publishing CI or review run refuses a dirty worktree, and `ci.sh`
+   re-checks both the local tip and the remote head immediately before
+   publication — a status is a claim about one commit, and dirty bytes are not
+   that commit.
+2. `--base`, `--only`, and `--skip-build` runs are partial: they publish
+   nothing at all.  `--base` joins the list because an overridden base empties
+   the diff and marks every gate skipped-success.
+3. The roll-up summary is invalidated (set `pending`) before a rerun, so a
+   crashed run can never leave the previous `success` standing.
+4. Green review evidence requires BOTH a clean `VERDICT` and a
+   zero-unresolved findings ledger; a clean verdict over unresolved findings is
+   inconsistent reviewer output, not a pass.
+5. The merge gate adds gate 2b (fresh base): the head must contain the current
+   base tip, and a failed base fetch fails the gate.
+6. The fix-iteration cap fails closed on an unresolvable merge base rather
+   than counting zero fixes.
+7. The scope guard counts deletions and runs before the early exit, so a
+   large-deletion or no-op-looking change cannot slip past the budget.
+8. Review ledgers stay in runtime storage; the published GitHub review is the
+   durable record.
+
+**Expected effect:** evidence can only ever certify committed, pushed, current
+bytes, and each bypass is closed by the tooling rather than by convention.

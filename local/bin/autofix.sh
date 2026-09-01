@@ -407,7 +407,9 @@ if [ -n "$MERGE_BASE" ]; then
     awk -v a="$PREFIX_AUTO" -v r="$PREFIX_REVIEW" \
       'index($0, a) == 1 || index($0, r) == 1 { n++ } END { print n + 0 }')"
 else
-  warn "no merge base between '$BASE' and $LOCAL_TIP; counting zero prior fixes. Fetch '$BASE' if the cap must hold."
+  # Fail closed: with no merge base the cap cannot be counted, and "assume
+  # zero" would let a stuck environment mint unlimited fix commits (round 3 F3).
+  die "no merge base between '$BASE' and $LOCAL_TIP; fetch '$BASE' (git fetch github $BASE) before running autofix — the iteration cap cannot be counted without it"
 fi
 
 # ------------------------------------------------------------ setup dispatch

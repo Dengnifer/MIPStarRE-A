@@ -107,7 +107,7 @@ minimatch's `**`.
 | `paper_gaps` | `docs/paper-gaps/*`, `texra-blueprint.toml`, `MIPStarRE/*.lean`, `blueprint/src/*`, `docs/*.md` | `:99-107` |
 | `scripts` | `scripts/*` | `:108-109` |
 | `comparator` | `scripts/comparator/*` | `:110-111` |
-| `workflow` | `.github/workflows/pr-ci.yml`, `local/bin/ci.sh`, `local/protocols/ci.md` | `:112-113`, extended |
+| `workflow` | `.github/workflows/pr-ci.yml`, `local/bin/*`, `local/protocols/*`, `.githooks/*` | `:112-113`, extended |
 
 > **Lockstep warning.** These globs must move together with the trees the audit
 > scripts actually scan. The parent repo patched the `paper_gaps` filter twice
@@ -118,9 +118,14 @@ minimatch's `**`.
 > commit, per `meta.md` §5.
 
 The `workflow` area is the one deliberate extension. On GitHub it meant "the
-workflow file changed, so re-run everything"; locally the CI definition lives
-in three files — the frozen reference, this driver, and this protocol — and any
-of them changing forces a full run.
+workflow file changed, so re-run everything"; locally the workflow layer is a
+whole tree — the frozen reference `pr-ci.yml`, every driver and helper under
+`local/bin/`, every protocol under `local/protocols/`, and the hooks in
+`.githooks/` — and a change to any of them forces a full run, every step
+included. The globs are that broad on purpose: a `gh_common.py`-only change has
+to run the `scripts/tests` unit suite that covers it — carried by
+`blueprint-sync` — and under the old three-file glob such a change matched no
+area and ran nothing at all (PR 7 review, F13).
 
 ## 4. Manifest schema
 
@@ -128,9 +133,12 @@ Built in runtime storage (same-directory tempfile + `os.replace`) and then
 posted as the manifest PR comment (§5):
 
 ```
-~/.cache/mipstarre-dev/ci/<pr>/<head_sha>.json          complete run
-~/.cache/mipstarre-dev/ci/<pr>/<head_sha>.partial.json  --only / --skip-build
+~/.cache/mipstarre-dev/ci-manifests/pr<pr>-<head_sha>.json          complete run
+~/.cache/mipstarre-dev/ci-manifests/pr<pr>-<head_sha>.partial.json  partial run
 ```
+
+A run is **partial** when it was given `--only`, `--skip-build`, or `--base`;
+`--dry-run` writes nothing at all.
 
 Step logs live outside the repository, under
 `~/.cache/mipstarre-dev/ci-logs/<pr-id>/<head_sha>/<step>.log`.
@@ -200,10 +208,12 @@ Immediately before the final publication `ci.sh` re-reads both the local branch
 tip and the remote PR head; if either moved, it publishes no success and exits
 nonzero, because a status is a claim about one commit.
 
-A **partial** run (`--only`, `--skip-build`) publishes no gate-satisfying status
-set and keeps its manifest in runtime storage only. Partial runs are a debugging
-aid; they must not be able to produce a merge-gate verdict, and they must not
-clobber a complete manifest for the same SHA.
+A **partial** run (`--only`, `--skip-build`, or `--base`) publishes nothing at
+all — no statuses, no manifest comment — and keeps its manifest in runtime
+storage only. `--base` belongs on that list because an overridden base (the PR
+head, say) can empty the diff and mark every gate skipped-success. Partial runs
+are a debugging aid; they must not be able to produce a merge-gate verdict, and
+they must not clobber a complete manifest for the same SHA.
 
 ## 6. Concurrency and locks
 

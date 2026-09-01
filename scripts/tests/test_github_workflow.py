@@ -357,6 +357,10 @@ class MergeGateTests(LayerTestCase):
         _git(self.repo, "commit", "-q", "--no-verify", "-am", "port the workflow layer")
         self.head = _git(self.repo, "rev-parse", "HEAD")
         _git(self.repo, "checkout", "-q", "main")
+        # Gate 2b fetches github/<base> and requires the head to contain its
+        # tip; a self-remote satisfies both without any network.
+        _git(self.repo, "remote", "add", "github", str(self.repo))
+        _git(self.repo, "fetch", "-q", "github", "main")
 
     def _arm(self, *, missing: tuple[str, ...] = (), review_state: str = "success") -> None:
         """Route the PR, its statuses and its one marker review for a gate run."""

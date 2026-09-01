@@ -519,10 +519,11 @@ PROSE_MD="$REVIEWS_DIR/$HEAD_SHA-prose.md"
 COMBINED_MD="$REVIEWS_DIR/$HEAD_SHA-combined.md"
 # Research copy of the published ledger (results/telemetry is data, never
 # lifecycle input; local/protocols/review.md).
-# Single-instance telemetry lives in the PRIMARY checkout (like builds.jsonl):
-# writing it into the reviewed worktree would dirty the very tree the next
-# CI/review run must certify (PR 7 round 2, F13).
-TELEMETRY_DIR="$ROOT/results/telemetry/reviews"
+# The PUBLISHED REVIEW on GitHub is the durable record (snapshots archive it);
+# a tracked copy would dirty whichever checkout received it — the reviewed
+# worktree (round 2 F13) or the primary the merge gate requires clean (round 3
+# F4) — so the local copy lives in runtime storage only.
+TELEMETRY_DIR="$CACHE/reviews/pr$PR_NUM/ledgers"
 
 # The cross-SHA "outdate stale findings" pass is gone with the local registry:
 # exactly one review is published per head SHA and the merge gate reads only
