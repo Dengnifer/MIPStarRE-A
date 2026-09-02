@@ -24,3 +24,5 @@
 {"ts": "2026-09-02T07:44:25+0800", "kind": "ci-build", "trigger": "ci.sh pr=5", "seconds": 59, "outcome": "success", "sha": "99ccb0c1165c99870ce4505df4ed1c62ec1eb4c1", "note": "branch issue-0006-qpbt-minimal-skeleton"}
 {"ts": "2026-09-02T08:41:16+0800", "kind": "ci-build", "trigger": "ci.sh pr=5", "seconds": 51, "outcome": "success", "sha": "b5da371de32dbaf487d140e389be1d8d317709a4", "note": "branch issue-0006-qpbt-minimal-skeleton"}
 {"ts": "2026-09-02T11:46:05+0800", "kind": "cache-get", "trigger": "warm-worktree warm path snapshot=snap-20260831T131851Z-02777b586cf2", "outcome": "failed", "seconds": 2558, "note": "worktree=/home/drx/MIPStarRE-qpbt/.worktrees/issue-20-retire-merge-fix-cap; lake exe cache get failed"}
+{"ts": "2026-09-02T12:14:43+0800", "kind": "ci-build", "trigger": "ci.sh pr=21", "seconds": 1195, "outcome": "failure", "sha": "7f5c58ba9a658d208f3419b1bf982045f2eff897", "note": "branch issue-20-retire-merge-fix-cap"}
+{"ts": "2026-09-02T12:20:47+0800", "kind": "ci-build", "trigger": "ci.sh pr=21", "seconds": 31, "outcome": "success", "sha": "7f5c58ba9a658d208f3419b1bf982045f2eff897", "note": "branch issue-20-retire-merge-fix-cap"}
