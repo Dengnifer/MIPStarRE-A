@@ -554,7 +554,7 @@ WORKTREE="$(resolve_worktree "$BRANCH")"
 
 # ------------------------------------------------------------- iteration cap
 # The bot-fix-guard analogue: ONE counter combined across ci, blueprint and
-# review fixes.  At the cap the loop stops, a human-attention note goes on the
+# review fixes.  At the cap the loop stops, a cap-reached note goes on the
 # PR, and the final bot-fix result gets its single forced review
 # (pr-review.yml:69-72 — "we only want to review human-authored pushes and the
 # final bot-fix result, detected by iteration cap").
@@ -562,12 +562,12 @@ cap_reached() {
   local marker="<!-- autofix:cap-reached pr=$PR_NUM -->" note="$RUN_DIR/cap-note.md"
   log "combined fix-iteration cap reached ($FIX_ITERATIONS/$FIX_CAP) for PR $PR_NUM"
   {
-    printf '## Human attention required\n\n'
+    printf '## Auto-fix cap reached — operator review required\n\n'
     printf 'The combined auto-fix iteration cap (%s) was reached at %s on head `%s`.\n\n' \
       "$FIX_CAP" "$(now_utc)" "$HEAD_SHA"
     printf 'No further automated fix runs on this branch.  The counter is the\n'
     printf 'branch history itself — the `%s` / `%s` commits in\n' "$PREFIX_AUTO" "$PREFIX_REVIEW"
-    printf '`%s..HEAD` — so the cap stays reached until a human takes over.\n\n' "$BASE"
+    printf '`%s..HEAD` — so the cap stays reached until the operator reviews the fix commits.\n\n' "$BASE"
     printf 'Read the fix commits, the `local-ci/*` statuses on that SHA, and the\n'
     printf 'review verdict for it before re-enabling.  Repeated cap hits are\n'
     printf 'protocol evidence — record them in `results/telemetry/events.md`.\n'
@@ -595,15 +595,15 @@ cap_reached() {
     sleep 10
   done
   if [ "$CAP_PUSHED" -ne 1 ]; then
-    warn "could not push $BRANCH at the cap: the final fix commit is local-only and UNREVIEWED. Push by hand (local/bin/github-sync.sh $BRANCH), run ci.sh $PR_NUM, then review.sh $PR_NUM --force-review."
+    warn "could not push $BRANCH at the cap: the final fix commit is local-only and UNREVIEWED. Push yourself (local/bin/github-sync.sh $BRANCH), run ci.sh $PR_NUM, then review.sh $PR_NUM --force-review."
   elif [ -x "$ROOT/local/bin/ci.sh" ] && [ -x "$ROOT/local/bin/review.sh" ]; then
     log "running CI, then the terminal forced review of the final bot-fix result"
     "$ROOT/local/bin/ci.sh" "$PR_NUM" ||
       warn "ci.sh reported a failure for the final fix commit; the review below still runs"
     "$ROOT/local/bin/review.sh" "$PR_NUM" --force-review ||
-      warn "the terminal forced review exited nonzero; PR $PR_NUM needs a human reviewer"
+      warn "the terminal forced review exited nonzero; PR $PR_NUM needs the operator to re-run review.sh"
   else
-    warn "local/bin/review.sh not found: the final bot-fix commit on $BRANCH is UNREVIEWED. Review it by hand."
+    warn "local/bin/review.sh not found: the final bot-fix commit on $BRANCH is UNREVIEWED. Run review.sh yourself."
   fi
   exit 0
 }

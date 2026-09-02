@@ -322,3 +322,52 @@ supporting record is `results/telemetry/` and the read-only
 
 **Expected effect:** evidence can only ever certify committed, pushed, current
 bytes, and each bypass is closed by the tooling rather than by convention.
+
+## 2026-09-02 — Merge-time fix cap retired; owner-gated controls enumerated
+
+**Trigger:** the PR #5 stall recorded in `results/telemetry/events.md`
+(2026-09-02, "PR #5 review-fix cap"): six hand-authored review-fix commits,
+every CI context green and an APPROVED review with zero unresolved findings on
+the exact head, yet `pr_merge.py` gate 6 refused because the branch carried six
+`[codex-review-fix]` commits against a cap of five.  The operator escalated to
+the owner: the gate text named "human attention" as the remedy and the standing
+briefing forbade weakening a gate.  An owner-side audit (six read-only lanes,
+three adversarial refuters) found no safety property behind the refusal.  The
+episode is owner-directed — the owner approval `main.md` requires for a second
+consecutive workflow episode — and the incident record is the events.md entry
+of 2026-09-02 ("PR #5 review-fix cap"), committed on main (f94fe3c) before
+this amendment and contained in the PR head.
+
+**Change:**
+
+1. `pr_merge.py` gate 6 no longer enforces a fix-commit cap.  The count is
+   retired because it carries no evidence about the head: gates 3/4 already
+   bind CI and the review — which covers the whole `merge-base..head` diff —
+   to the exact SHA, so a converged PR is proven converged however many fix
+   commits it took.  The count was also subject-prefix-based, not
+   provenance-based (PR #5's six were hand-authored).  Bounding the automated
+   loop is `autofix.sh`'s job; its pre-lock count race (issue #9) and its
+   terminal-review gaps (issue #13) are loop defects, tracked there.  The lock
+   probe stays, the merge-base computation gate 7 reuses stays (with a gate-7
+   message), and the count is printed for the record.  `review.md` §12
+   operator adjudication remains the convergence backstop.
+2. `autofix.sh`'s cap note and `autofix.md` §5 address the operator, not "a
+   human", and the doc matches the code (the label is not removed).
+3. `.githooks/pre-commit` runs the scope-control budget before the
+   `MIPSTARRE_SKIP_HOOKS` exit, so a blanket hook skip cannot launder the
+   owner-only override.
+4. `issues-prs.md` §3/§5, `review.md` (merge gate), `meta.md` §1 and
+   `personas/main.md` name exactly one owner-gated control,
+   `MIPSTARRE_INFRA_OVERRIDE`; every other parameter and remedy is the
+   operator's with a recorded reason; an owner-blocked item becomes a
+   `needs-owner` issue and the session continues with the queue.
+5. Worker personas commit repairs under plain `fix(...)` subjects; the
+   `[codex-*-fix]` prefixes are reserved for `autofix.sh` (they made
+   `review.sh` skip PR #5's heads and forced four `--force-review` runs).
+6. A regression test pins that six fix-prefixed commits with full evidence
+   pass `--check-only`.
+
+**Expected effect:** the merge gate never demands owner action while all
+evidence is green on the exact head; the owner-gated set is exactly the
+anti-bloat budget; a question for the owner parks one item instead of idling
+the session.

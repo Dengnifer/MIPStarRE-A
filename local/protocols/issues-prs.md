@@ -34,8 +34,10 @@ out to `gh`. `issue_new.py`, `issue_close.py`, `pr_open.py`, `ci.sh`,
   names inherit those characters and "`]` breaks part of the PR automation
   stack" (docs/CONTRIBUTING.md:122-124). A `:` in a *title* is fine
   (`Tracking: …`), but not in a branch.
-* Fix commits keep the exact subject prefixes `[codex-auto-fix]` and
-  `[codex-review-fix]`; the iteration counter and the review skip key on them.
+* `autofix.sh`'s automated fix commits keep the exact subject prefixes
+  `[codex-auto-fix]` and `[codex-review-fix]`; its iteration counter and the
+  review skip key on them.  Operator and worker repairs use plain
+  `fix(review): …` / `fix(ci): …` subjects so the reviewer sees them.
 * `Closes #N` / `Fixes #N` auto-closes the issue on merge, `Addresses #N` does
   not (docs/CONTRIBUTING.md:61-62) — and the numbers being GitHub's, that
   footer is now literally what GitHub itself reads.
@@ -92,9 +94,9 @@ that refuse by default:
    `COMMENTED` with zero unchecked findings, **and** `local-review/summary` is
    `success` there;
 5. no `CHANGES_REQUESTED` review stands on that head, from anyone;
-6. no live fix lock for the branch (`locks/fix-<branch>.lock`, running holder),
-   and the fix-iteration count — `merge-base..head` commits whose subject starts
-   with a §1 fix prefix — is within `MIPSTARRE_FIX_CAP`;
+6. no live fix lock for the branch (`locks/fix-<branch>.lock`, running holder);
+   the count of `merge-base..head` commits whose subject starts with a §1 fix
+   prefix is printed for the record and is not a gate;
 7. every issue the PR body closes — all nine of GitHub's closing keywords, not
    just `Closes` — has no open sub-issue left.
 
@@ -126,9 +128,11 @@ keeps its path-traversal rejection for externally sourced citations.
 
 `MIPSTARRE_GH` is the path to `gh` (else `PATH`, else the documented user-local
 location); `MIPSTARRE_GITHUB_REPO` overrides the `owner/name` otherwise read
-from the `github` remote; `MIPSTARRE_FIX_CAP` is the combined fix-iteration cap,
-default 5 — the old table's `MIPSTARRE_FIX_ITERATION_CAP` row was wrong, the
-code reads `MIPSTARRE_FIX_CAP`. `MIPSTARRE_LLM_ENABLED` and
+from the `github` remote; `MIPSTARRE_FIX_CAP` (default 5) bounds `autofix.sh`'s
+own loop only — the merge gate does not read it — and is operator-tunable with
+the reason recorded in `results/telemetry/events.md`, unlike
+`MIPSTARRE_INFRA_OVERRIDE` (the pre-commit budget), the one owner-gated control
+in the layer. `MIPSTARRE_LLM_ENABLED` and
 `LOCAL_REVIEW_ENABLED` keep kill-switch semantics (DESIGN.md:73-75).
 
 `github-sync.sh` pushes explicit refs and writes an atomic, paginated read-only

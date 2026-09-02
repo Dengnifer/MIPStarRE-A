@@ -410,6 +410,20 @@ class MergeGateTests(LayerTestCase):
             self.assertIn("gate 5 no CHANGES_REQUESTED review", result.stdout)
             self.assertEqual([c for c in self.gh.calls() if c["method"] == "PUT"], [],
                              "--check-only must stop before the merge")
+        with self.subTest("fix-prefixed commits are reported, never a gate"):
+            os.environ["MIPSTARRE_FIX_CAP"] = "5"  # the retired knob must be inert
+            self.addCleanup(os.environ.pop, "MIPSTARRE_FIX_CAP", None)
+            _git(self.repo, "checkout", "-q", self.BRANCH)
+            for number in range(6):
+                _git(self.repo, "commit", "-q", "--no-verify", "--allow-empty",
+                     "-m", f"[codex-review-fix] repair {number}")
+            self.head = _git(self.repo, "rev-parse", "HEAD")
+            _git(self.repo, "checkout", "-q", "main")
+            self.gh.reset()
+            self._arm()
+            result = self._check_only()
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn("6 fix-prefixed commit(s)", result.stdout)
 
 
 # --------------------------------------------------------------------------

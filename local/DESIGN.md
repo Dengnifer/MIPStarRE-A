@@ -106,8 +106,9 @@ documented failure modes. Sources are cited in `local/protocols/*.md`.
 - **Branches**: `issue-<number>-<slug>` (orchestrator/human),
   `codex/issue-<number>-<slug>` (agent-created); the number is the GitHub
   issue's.
-- **Fix commits**: subjects prefixed `[codex-auto-fix]` / `[codex-review-fix]`
-  exactly (the review-gate regex depends on them).
+- **Fix commits**: `autofix.sh`'s subjects are prefixed `[codex-auto-fix]` /
+  `[codex-review-fix]` exactly (the review-gate skip regex depends on them);
+  operator and worker repairs use plain `fix(...)` subjects and are reviewed.
 - **Agent sessions**: `<role>-<issue|scope>-<yyyymmdd>-<seq>` with roles
   `orc, prover, reviewer, simplifier, blueprint, splitter, scout`. Dispatched
   only via `local/bin/dispatch.sh`, which records the codex `thread_id`,
