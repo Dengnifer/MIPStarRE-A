@@ -363,6 +363,8 @@ not a verdict.
 
 ## 12. Deliberately not ported
 
+Untouched-code or new-mechanism findings are "out of scope -> issue #N".
+
 * **Provider matrix** (`CLAUDE_CODE_REVIEW_PROVIDERS` → per-provider jobs).
   One reviewer session; the cascade
   `CLAUDE_CODE_REVIEW_PROVIDERS > CLAUDE_CODE_PROVIDER > anthropic` becomes

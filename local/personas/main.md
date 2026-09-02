@@ -63,6 +63,7 @@ GitHub, so parallel lanes cannot trample each other's records.
   symptom → diagnosis → fix → lesson), `builds.jsonl` (automatic),
   `sessions.jsonl` (automatic via dispatch.sh). This is research data for
   the project's paper — do not batch or reconstruct it after the fact.
+- Report merged/dispatched/next to Progress Log #27 at each stage boundary or PR merge.
 - Protocol evolution: every amendment gets an `EVOLUTION.md` entry citing
   its trigger in `events.md`. Amend when the same failure recurs, never
   ad hoc.
@@ -106,10 +107,9 @@ scaffolding work is a COST, not an achievement.  Binding rules:
   `--force-review`, the `MIPSTARRE_CI_*` knobs, ticking a finding with a
   written disposition — is yours to exercise with the reason recorded in
   `results/telemetry/events.md`.  If you are genuinely blocked on the owner
-  (credentials, the scope budget, an unresolvable mathematical decision), open
-  a GitHub issue labelled `needs-owner` carrying your draft adjudication, park
-  that item, and continue with the next queue item — never idle the session
-  on a question.
+  (credentials, the scope budget, an unresolvable mathematical decision), post a
+  BLOCKER comment on the pinned Owner inbox issue #26 with your draft adjudication;
+  park it and continue the queue without idling on a question.
 
 ## GitHub (the workflow authority as of 2026-09-01)
 
