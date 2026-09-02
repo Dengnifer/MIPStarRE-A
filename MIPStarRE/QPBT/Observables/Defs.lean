@@ -8,9 +8,9 @@ import MIPStarRE.QPBT.Test.PauliBasisTest
 This file fixes a projective, possibly heterogeneous strategy for the Pauli
 basis test and extracts the typed measurement families used in the analysis.
 Malformed answers are folded into a fixed valid answer, so the extracted
-families remain complete measurements. Their original wrong-form mass is kept
-separately and bounded by named proof obligations. `Option` is used only for
-the completed line-evaluation classes.
+families remain complete measurements. The winning hypothesis bounds their
+original wrong-form mass by the rejection probability. `Option` is used only
+for the completed line-evaluation classes.
 
 ## References
 
@@ -54,8 +54,8 @@ namespace ProjectiveSetting
 
 variable {P : AdmissibleParams} {ε : ℝ}
 
-/-- The local Hilbert-space index type on a specified player side. This is the
-dependent carrier behind the side-qualified operators at paper
+/-- The local Hilbert-space index type on a specified player side. It indexes
+the side-qualified operators at paper
 `14_analysis_of_the_pauli_basis_test.tex:174-190`. -/
 def LocalSpace (S : ProjectiveSetting P ε) : PlayerSide → Type
   | .alice => S.toStrategy.ιA
@@ -72,7 +72,7 @@ instance localSpaceDecidableEq (S : ProjectiveSetting P ε) (side : PlayerSide) 
 /-- Select the strategy measurement before outcome postprocessing on one
 player side. This is the heterogeneous interpretation of the shared symbol `M` at
 paper `14_analysis_of_the_pauli_basis_test.tex:160-184`. -/
-def rawMeasurement (S : ProjectiveSetting P ε) (side : PlayerSide)
+def strategyMeasurement (S : ProjectiveSetting P ε) (side : PlayerSide)
     (question : PauliQuestion P) :
     Measurement (PauliAnswer P) (S.LocalSpace side) := by
   cases side with
@@ -287,7 +287,7 @@ corresponding strategy measurement postprocessed by `pointAnswerOrZero`; paper
 noncomputable def pointMeas (S : ProjectiveSetting P ε) (side : PlayerSide)
     (W : PauliKind) (u : Fin P.m → PauliScalar P) :
     Measurement (PauliScalar P) (S.LocalSpace side) :=
-  (S.rawMeasurement side (pointQuestion P W u)).postprocess pointAnswerOrZero
+  (S.strategyMeasurement side (pointQuestion P W u)).postprocess pointAnswerOrZero
 
 /-- The complete typed line measurement on one player side, uniformly indexed
 by degree-`m*d` coefficient lists. Paper
@@ -296,7 +296,7 @@ by degree-`m*d` coefficient lists. Paper
 noncomputable def lineMeas (S : ProjectiveSetting P ε) (side : PlayerSide)
     (W : PauliKind) (line : LineDesc P.toLdParams) :
     Measurement (DegPoly P.toLdParams (P.m * P.d)) (S.LocalSpace side) :=
-  (S.rawMeasurement side (lineQuestion P W line)).postprocess
+  (S.strategyMeasurement side (lineQuestion P W line)).postprocess
     (lineAnswerOrZero P line)
 
 /-- The completed evaluation classes of a typed line measurement. This is the
@@ -316,7 +316,7 @@ noncomputable def lineEvalMeas (S : ProjectiveSetting P ε) (side : PlayerSide)
 noncomputable def pairMeas (S : ProjectiveSetting P ε) (side : PlayerSide)
     (uX uZ : Fin P.m → PauliScalar P) (rX rZ : PauliScalar P) :
     Measurement (ZMod 2 × ZMod 2) (S.LocalSpace side) :=
-  (S.rawMeasurement side (pairQuestion P uX uZ rX rZ)).postprocess pairAnswerOrZero
+  (S.strategyMeasurement side (pairQuestion P uX uZ rX rZ)).postprocess pairAnswerOrZero
 
 /-- The complete typed Pair/W measurement on one player side. Paper
 `14_analysis_of_the_pauli_basis_test.tex:210-263`; blueprint
@@ -324,7 +324,7 @@ noncomputable def pairMeas (S : ProjectiveSetting P ε) (side : PlayerSide)
 noncomputable def pairWMeas (S : ProjectiveSetting P ε) (side : PlayerSide)
     (W : PauliKind) (uX uZ : Fin P.m → PauliScalar P)
     (rX rZ : PauliScalar P) : Measurement (ZMod 2) (S.LocalSpace side) :=
-  (S.rawMeasurement side (pairWQuestion P W uX uZ rX rZ)).postprocess
+  (S.strategyMeasurement side (pairWQuestion P W uX uZ rX rZ)).postprocess
     pairWAnswerOrZero
 
 /-- The complete typed Pauli/W measurement on one player side. Paper
@@ -332,7 +332,7 @@ noncomputable def pairWMeas (S : ProjectiveSetting P ε) (side : PlayerSide)
 `lem:qld-win-implications`. -/
 noncomputable def pauliMeas (S : ProjectiveSetting P ε) (side : PlayerSide)
     (W : PauliKind) : Measurement (PauliRegister P) (S.LocalSpace side) :=
-  (S.rawMeasurement side (pauliQuestion P W)).postprocess pauliAnswerOrZero
+  (S.strategyMeasurement side (pauliQuestion P W)).postprocess pauliAnswerOrZero
 
 /-- The complete typed Magic Square measurement on one player side. Its answer
 alphabet is exactly `MsAnswer`; these families therefore define a Magic Square
@@ -341,7 +341,7 @@ blueprint `lem:qld-win-implications`. -/
 noncomputable def msMeas (S : ProjectiveSetting P ε) (side : PlayerSide)
     (t : MsType) (uX uZ : Fin P.m → PauliScalar P)
     (rX rZ : PauliScalar P) : Measurement MsAnswer (S.LocalSpace side) :=
-  (S.rawMeasurement side (msQuestion P t uX uZ rX rZ)).postprocess
+  (S.strategyMeasurement side (msQuestion P t uX uZ rX rZ)).postprocess
     (msAnswerOrZero t)
 
 /-- The sum of effects corresponding to answers that are invalid for a given
@@ -360,7 +360,7 @@ bounds this quantity. Paper
 `08_classical_and_quantum_low_degree_tests.tex:1126-1225`, used at paper
 `14_analysis_of_the_pauli_basis_test.tex:197-266`; blueprint
 `lem:qld-win-implications`. -/
-noncomputable def junkMass (S : ProjectiveSetting P ε) (side : PlayerSide) : ℝ :=
+noncomputable def wrongFormMass (S : ProjectiveSetting P ε) (side : PlayerSide) : ℝ :=
   avgOver (pauliQuestionDistribution P) fun questions =>
     match side with
     | .alice =>
@@ -377,19 +377,17 @@ noncomputable def junkMass (S : ProjectiveSetting P ε) (side : PlayerSide) : �
             S.toStrategy.ψ)).re
 
 /-- The Alice-side wrong-form mass is at most the strategy's rejection
-probability. This is the named obligation justifying the fixed-outcome folds;
-paper `08_classical_and_quantum_low_degree_tests.tex:1126-1225`, used at
+probability. Paper `08_classical_and_quantum_low_degree_tests.tex:1126-1225`, used at
 `14_analysis_of_the_pauli_basis_test.tex:197-266`. -/
-theorem junkMass_alice_le_error (S : ProjectiveSetting P ε) :
-    S.junkMass .alice ≤ ε := by
+theorem wrongFormMass_alice_le_error (S : ProjectiveSetting P ε) :
+    S.wrongFormMass .alice ≤ ε := by
   sorry
 
 /-- The Bob-side wrong-form mass is at most the strategy's rejection
-probability. This is the named obligation justifying the fixed-outcome folds;
-paper `08_classical_and_quantum_low_degree_tests.tex:1126-1225`, used at
+probability. Paper `08_classical_and_quantum_low_degree_tests.tex:1126-1225`, used at
 `14_analysis_of_the_pauli_basis_test.tex:197-266`. -/
-theorem junkMass_bob_le_error (S : ProjectiveSetting P ε) :
-    S.junkMass .bob ≤ ε := by
+theorem wrongFormMass_bob_le_error (S : ProjectiveSetting P ε) :
+    S.wrongFormMass .bob ≤ ε := by
   sorry
 
 /-- The side-indexed strategy observable

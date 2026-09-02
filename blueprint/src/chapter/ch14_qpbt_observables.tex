@@ -521,6 +521,10 @@ $\{M^{(\mathrm{Point},W),u}_a\}_{a \in \F_q}$ for all $u \in \F_q^m$.
 	$\ell$ denotes the description of either an axis-parallel line, given by
 	a pair $\ell = (u_0, s)$, or a diagonal line, given by a triple
 	$\ell = (u_0, s, v)$ (Definition~\ref{def:line-representative}). For
+	the formalization, $M^{(\mathrm{Point},W),u}_a$ denotes the complete
+	field-valued measurement obtained by assigning every answer of the wrong
+	form to $a=0$. The winning condition bounds the reassigned mass by the
+	strategy's rejection probability. For
 	every $u \in \F_q^m$, $r \in \F_q$, and $W \in \{X, Z\}$, define
 	\begin{equation}\label{eq:qld-strat-obs}
 		W^r(u) \,=\, \sum_{a \in \F_q} (-1)^{\tr(ar)} \, M^{(\mathrm{Point},W),u}_a\,.
@@ -1053,6 +1057,11 @@ exactly these variants.
 	\lean{MIPStarRE.QPBT.exists_deltaAnticom}
 	\leanok
 	\uses{def:expanded-point-measurement, def:expanded-point-trace-projection, def:expanded-state, def:approx-question-indexed-operators, def:povm-distance, def:symmetric-equivalents}
+	Here $\poly(\eps)$ uses the corrected one-parameter convention: there
+	exist $A \geq 1$ and $r>0$ such that
+	$0 \leq \delta(x) \leq A x^r$ for every $x \geq 0$. Separating the
+	prefactor and exponent is necessary to include the square-root bound;
+	see \path{docs/paper-gaps/qpbt_polynomial-error-square-root.tex}.
 	There exists a function $\delta_{\mathrm{Anticom}}(\eps) = \poly(\eps)$
 	such that the following holds, with respect to the state
 	$\ket{\hat{\psi}}$ of Definition~\ref{def:expanded-state}.
@@ -1170,6 +1179,11 @@ exactly these variants.
 	\lean{MIPStarRE.QPBT.expLine_point_cons', MIPStarRE.QPBT.exists_deltaLine}
 	\leanok
 	\uses{def:expanded-point-measurement, def:expanded-line-measurement, def:expanded-state, def:line-point-dist, def:approx-question-indexed-operators, def:povm-distance, def:ideg-deg-polynomials, def:symmetric-equivalents}
+	Here $\poly(\eps)$ uses the corrected one-parameter convention: there
+	exist $A \geq 1$ and $r>0$ such that
+	$0 \leq \delta(x) \leq A x^r$ for every $x \geq 0$. Separating the
+	prefactor and exponent is necessary to include the square-root bound;
+	see \path{docs/paper-gaps/qpbt_polynomial-error-square-root.tex}.
 	There exists a function $\delta_{\mathrm{Line}}(\eps) = \poly(\eps)$
 	such that the following holds, with respect to the state
 	$\ket{\hat{\psi}}$ of Definition~\ref{def:expanded-state}. For all
@@ -1209,9 +1223,11 @@ exactly these variants.
 			\,\approx_{\delta_{\mathrm{Line}}}\,
 			(\hat{M}^{(\mathrm{Point},W),u}_a)_{\mathsf{B}\mathsf{A}''}\,,
 		\]
-		where
-		$\hat{M}^{(\mathrm{Line},W),\ell}_{[\mathrm{eval}_u(\cdot)=a]} = \sum_{f \in \deg_{md}(\ell) \colon f(u)=a} \hat{M}^{(\mathrm{Line},W),\ell}_f$
-		and the answer summation is over $a \in \F_q$.
+		where, for $a \in \F_q$,
+		$\hat{M}^{(\mathrm{Line},W),\ell}_{[\mathrm{eval}_u(\cdot)=a]} = \sum_{f \in \deg_{md}(\ell) \colon f(u)=a} \hat{M}^{(\mathrm{Line},W),\ell}_f$.
+		For $a=\bot$ it is the sum over the polynomials without an evaluation
+		at $u$, and the answer summation is over
+		$a \in \F_q \cup \{\bot\}$.
 	\end{enumerate}
 	Furthermore, all symmetric equivalents of these approximations also
 	hold. The proof exhibits the measurements of

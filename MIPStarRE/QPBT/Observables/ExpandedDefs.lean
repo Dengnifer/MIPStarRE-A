@@ -63,8 +63,8 @@ inductive Placement where
   | AB''
   deriving DecidableEq, Repr, Inhabited, Fintype
 
-/-- The strategy-player side supplying the local factor of a placement. This
-is Lean-only dependent typing for the four register placements at paper
+/-- The strategy-player side supplying the local Hilbert space in each of the
+four register placements at paper
 `14_analysis_of_the_pauli_basis_test.tex:420-450`. -/
 def Placement.side : Placement → PlayerSide
   | .AA' => .alice

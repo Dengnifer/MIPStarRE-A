@@ -202,9 +202,9 @@ theorem win_cons :
       0 ≤ ε →
       consistencyDefect (pauliQuestionMarginal P)
         (fun question a => heteroKron
-          ((S.rawMeasurement .alice question).effect a) 1)
+          ((S.strategyMeasurement .alice question).effect a) 1)
         (fun question a => heteroKron 1
-          ((S.rawMeasurement .bob question).effect a))
+          ((S.strategyMeasurement .bob question).effect a))
         S.toStrategy.ψ ≤ C * ε := by
   sorry
 
@@ -314,15 +314,15 @@ theorem win_cons_approx :
       0 ≤ ε →
       opFamilyDistSq (pauliQuestionMarginal P)
         (fun question a => heteroKron
-          ((S.rawMeasurement .alice question).effect a) 1)
+          ((S.strategyMeasurement .alice question).effect a) 1)
         (fun question a => heteroKron 1
-          ((S.rawMeasurement .bob question).effect a))
+          ((S.strategyMeasurement .bob question).effect a))
         S.toStrategy.ψ ≤ C * ε ∧
       opFamilyDistSq (pauliQuestionMarginal P)
         (fun question a => heteroKron
-          ((S.rawMeasurement .bob question).effect a) 1)
+          ((S.strategyMeasurement .bob question).effect a) 1)
         (fun question a => heteroKron 1
-          ((S.rawMeasurement .alice question).effect a))
+          ((S.strategyMeasurement .alice question).effect a))
         S.swappedState ≤ C * ε := by
   sorry
 
