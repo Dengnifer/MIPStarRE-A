@@ -1,5 +1,4 @@
 import MIPStarRE.QPBT.Algebra.PauliTheorems
-import MIPStarRE.QPBT.Algebra.SelfDualBasisTheorems
 import MIPStarRE.QPBT.Test.Soundness
 
 /-!
@@ -25,32 +24,6 @@ namespace MIPStarRE.QPBT
 open MIPStarRE.LDT MIPStarRE.Quantum
 
 noncomputable section
-
-/-- The tensor product of binary Pauli projectors, obtained by specializing
-`pauliProj` to `ZMod 2`. -/
-noncomputable abbrev qubitPauliProj {ι : Type*} [Fintype ι] [DecidableEq ι]
-    (W : PauliKind) (b : ι → ZMod 2) : Op (ι → ZMod 2) :=
-  pauliProj W b
-
-/-- `lem:pauli-binary`: the fixed binary coordinates induce an isometry that
-maps EPR states and generalized Pauli projectors to their qubit forms.
-Blueprint `ch11_qpbt_algebra.tex:675-708`, paper
-`04_preliminaries.tex:1163-1208`.
-
-**Local fix:** The source's final factor index is printed as
-`j ∈ {1, ..., q}`; the basis expansion at paper lines 1191--1194 shows that
-the intended range has `basisDim = log₂ q` entries. -/
-theorem exists_qubitIsometry (q : ℕ) (F : FixedFieldModel q) (L : ℕ) :
-    ∃ φ : EuclideanSpace ℂ (Fin L → F.K) ≃ₗᵢ[ℂ]
-        EuclideanSpace ℂ (Fin L × Fin F.basisDim → ZMod 2),
-      isometryTensor φ.toLinearIsometry φ.toLinearIsometry
-          (eprState (Fin L → F.K)) =
-          eprState (Fin L × Fin F.basisDim → ZMod 2) ∧
-        ∀ (W : PauliKind) (u : Fin L → F.K),
-          pauliProj W u =
-            conjIsometry φ.symm.toLinearIsometry
-              (qubitPauliProj W (kappaVec F u)) := by
-  sorry
 
 /-- The bit register obtained by expanding every Pauli-register field element
 in the basis stored by `P.model`. -/

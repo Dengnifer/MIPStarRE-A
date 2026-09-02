@@ -45,7 +45,7 @@ inductive LineKind where
   deriving DecidableEq, Fintype
 
 /-- The tagged canonical carrier of `def:line-point-dist`, blueprint
-`ch13_qpbt_test.tex:180-186`, paper
+`ch13_qpbt_test.tex:81-90`, paper
 `08_classical_and_quantum_low_degree_tests.tex:174-186`.
 
 An axis description stores its canonical base and seed. A diagonal description

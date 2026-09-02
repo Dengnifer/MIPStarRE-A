@@ -34,7 +34,7 @@ instance (L : LdParams) : Nonempty (Fin L.m) :=
   ⟨⟨0, lt_of_lt_of_le Nat.zero_lt_one L.hm⟩⟩
 
 /-- `lem:alnf`: the point and axis-index marginals of the axis line-point
-distribution are uniform. Blueprint `ch13_qpbt_test.tex:108-124`, paper
+distribution are uniform. Blueprint `ch13_qpbt_test.tex:63-70`, paper
 `08_classical_and_quantum_low_degree_tests.tex:123-137`. -/
 theorem aLinePointDist_point_marginal_uniform (L : LdParams) :
     (aLinePointDist L).map Prod.snd =
@@ -44,14 +44,14 @@ theorem aLinePointDist_point_marginal_uniform (L : LdParams) :
   sorry
 
 /-- The incidence conclusion of `lem:alnf`, blueprint
-`ch13_qpbt_test.tex:108-124`, paper
+`ch13_qpbt_test.tex:63-70`, paper
 `08_classical_and_quantum_low_degree_tests.tex:123-137`. -/
 theorem aLinePointDist_mem_line (L : LdParams) :
     ∀ sample ∈ (aLinePointDist L).support, sample.2 ∈ sample.1.pointSet := by
   sorry
 
 /-- `lem:dlnf`: the point and prefix-index marginals of the diagonal
-line-point distribution are uniform. Blueprint `ch13_qpbt_test.tex:126-142`,
+line-point distribution are uniform. Blueprint `ch13_qpbt_test.tex:72-79`,
 paper `08_classical_and_quantum_low_degree_tests.tex:139-151`. -/
 theorem dLinePointDist_point_marginal_uniform (L : LdParams) :
     (dLinePointDist L).map Prod.snd =
@@ -61,14 +61,14 @@ theorem dLinePointDist_point_marginal_uniform (L : LdParams) :
   sorry
 
 /-- The incidence conclusion of `lem:dlnf`, blueprint
-`ch13_qpbt_test.tex:126-142`, paper
+`ch13_qpbt_test.tex:72-79`, paper
 `08_classical_and_quantum_low_degree_tests.tex:139-151`. -/
 theorem dLinePointDist_mem_line (L : LdParams) :
     ∀ sample ∈ (dLinePointDist L).support, sample.2 ∈ sample.1.pointSet := by
   sorry
 
 /-- The diagonal direction in every sampled description has the prefix-zero
-property of `lem:dlnf`, blueprint `ch13_qpbt_test.tex:126-142`, paper
+property of `lem:dlnf`, blueprint `ch13_qpbt_test.tex:72-79`, paper
 `08_classical_and_quantum_low_degree_tests.tex:139-151`. -/
 theorem dLinePointDist_prefix_zero (L : LdParams) :
     ∀ sample ∈ (dLinePointDist L).support,
@@ -78,7 +78,7 @@ theorem dLinePointDist_prefix_zero (L : LdParams) :
 
 /-- The actual bounded `polyFunc` subtype is finite over a finite coefficient
 semiring. This is the generic finite carrier required by `def:ld-meas`,
-blueprint `ch13_qpbt_test.tex:213-226`, paper
+blueprint `ch13_qpbt_test.tex:113-120`, paper
 `08_classical_and_quantum_low_degree_tests.tex:344-354`. -/
 noncomputable instance polyFuncFintype (m : ℕ) (K : Type*)
     [CommSemiring K] [Fintype K] (d : ℕ) : Fintype ↥(polyFunc m K d) := by
@@ -97,7 +97,7 @@ noncomputable abbrev PolyMeas (m : ℕ) (K : Type*) [CommSemiring K]
 
 /-- The source-general dependent family in `def:ld-meas`: component `i` may
 have its own coefficient field, number of variables, and degree bound.
-Blueprint `ch13_qpbt_test.tex:213-226`, paper
+Blueprint `ch13_qpbt_test.tex:113-120`, paper
 `08_classical_and_quantum_low_degree_tests.tex:344-354`. -/
 noncomputable abbrev PolyMeasFamily (k : ℕ) (K : Fin k → Type*)
     [∀ i, CommSemiring (K i)] [∀ i, Fintype (K i)]
