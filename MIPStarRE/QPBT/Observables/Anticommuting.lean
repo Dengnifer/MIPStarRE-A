@@ -93,6 +93,9 @@ final display of `fact:omega-anticomm-prob`, blueprint
 theorem anticommProb_ge_of_one_le_md (P : AdmissibleParams) :
     (1 - (P.q : ℝ)⁻¹ ^ P.m) * (1 - (P.q : ℝ)⁻¹) *
         (1 - ((P.m * P.d : ℕ) : ℝ) / P.q) / 2 ≤ anticommProb P ∧
+      (1 - 3 * ((P.m * P.d : ℕ) : ℝ) / P.q) / 2 ≤
+        (1 - (P.q : ℝ)⁻¹ ^ P.m) * (1 - (P.q : ℝ)⁻¹) *
+          (1 - ((P.m * P.d : ℕ) : ℝ) / P.q) / 2 ∧
       (1 - 3 * ((P.m * P.d : ℕ) : ℝ) / P.q) / 2 ≤ anticommProb P ∧
       (1 - 3 * ((P.m * P.d : ℕ) : ℝ) / P.q) / 2 ≤ commProb P := by
   sorry
