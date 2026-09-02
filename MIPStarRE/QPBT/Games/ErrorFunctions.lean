@@ -21,17 +21,13 @@ def IsPolyErr (f : ℝ → ℝ) : Prop :=
   ∃ C r : ℝ, 1 ≤ C ∧ 0 < r ∧ ∀ x, 0 ≤ x →
     0 ≤ f x ∧ f x ≤ C * Real.rpow x r
 
-/-- The two-parameter polynomial-smallness convention used by `lem:pasting`
-and QPBT chapter 15; blueprint `ch12_qpbt_games.tex:402-427`, paper
-`references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:504-525`. -/
-def IsPolyErr2 (f : ℝ → ℝ → ℝ) : Prop :=
-  ∃ C r s : ℝ, 1 ≤ C ∧ 0 < r ∧ 0 < s ∧ ∀ x y, 0 ≤ x → 0 ≤ y →
-    0 ≤ f x y ∧
-      f x y ≤ C * (Real.rpow x r + Real.rpow y s)
-
-/-- Unicode compatibility alias for the two-parameter polynomial-smallness
-predicate used by `lem:pasting`, blueprint `ch12_qpbt_games.tex:402-427`, paper
-`references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:504-525`. -/
-abbrev IsPolyErr₂ := IsPolyErr2
+/-- The two-parameter polynomial bound used by `lem:pasting`: on positive
+arguments, one universal positive constant is both the prefactor and exponent.
+This is the convention of `04_preliminaries.tex:26-29`, applied at
+`06_nonlocal_games_and_mipstar.tex:518-524`; blueprint
+`ch12_qpbt_games.tex:438-463`. -/
+def IsPolyErr₂ (f : ℝ → ℝ → ℝ) : Prop :=
+  ∃ C : ℝ, 0 < C ∧ ∀ x y, 0 < x → 0 < y →
+    0 ≤ f x y ∧ f x y ≤ C * Real.rpow (x * y) C
 
 end MIPStarRE.QPBT
