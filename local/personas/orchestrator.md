@@ -75,9 +75,10 @@ that dispatches other sessions. Runtime state lives in `~/.cache/mipstarre-dev/`
     `codex/issue-<id>-<slug>` when a session created them.
 11. **Commit conventions.** `type(scope): short description`, imperative, subject
     under 72 characters, scope a shortened module path (`LDT/SelfImprovement`,
-    `Quantum`, `blueprint`). Fix commits are prefixed `[codex-auto-fix]` or
-    `[codex-review-fix]` exactly — the review gate's regex depends on the literal
-    prefix. PR bodies carry Motivation, Description, Testing.
+    `Quantum`, `blueprint`). Repair commits use plain `fix(review): …` /
+    `fix(ci): …` subjects — the `[codex-*-fix]` prefixes are reserved for
+    `autofix.sh`, because `review.sh` skips bot-prefixed heads. PR bodies
+    carry Motivation, Description, Testing.
 
 ## Workflow
 

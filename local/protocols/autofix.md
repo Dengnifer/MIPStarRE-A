@@ -160,10 +160,11 @@ drift the old field could develop: the history is the counter.
 Before every phase, if the count is at the cap, the run performs the **cap
 ritual** and stops:
 
-1. remove the auto-fix label on GitHub — no further automated fix touches this
-   branch until a human restores it;
-2. post a `Human attention required` PR comment, marked with
-   `<!-- autofix:cap-reached -->` so a repeated run adopts it instead of
+1. leave the label in place — the branch history is the counter, so any rerun
+   re-enters this ritual at once and no further automated fix touches the
+   branch;
+2. post an `Auto-fix cap reached — operator review required` PR comment, marked
+   with `<!-- autofix:cap-reached -->` so a repeated run adopts it instead of
    posting twice;
 3. run `review.sh <id> --force-review` **once**, so the final bot-fix result is
    reviewed;
@@ -175,7 +176,7 @@ merged — is the only commit on the branch nobody ever reviewed.
 `pr-review.yml:69-72` names this case explicitly: *we only want to review
 human-authored pushes and the final bot-fix result (detected by iteration
 cap)*.  If `review.sh` cannot produce a verdict (a red CI at the cap, say), the
-run says so loudly and leaves the PR for a human; it never claims the branch
+run says so loudly and leaves the PR to the operator; it never claims the branch
 was reviewed.
 
 A PR that reaches the cap is evidence, not just an incident.  Record it in

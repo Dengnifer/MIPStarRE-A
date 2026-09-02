@@ -264,9 +264,9 @@ not mergeable.  The contract for `pr_merge.py` and for humans is exactly the
 unchecked-finding regex of `issues-prs.md` §2, `^\s*[-*]\s*\[ \]`, applied to
 the marker-bound review body for the head SHA; no match means the ledger is
 clean, and the paired `local-review/summary` status must agree.  Anything else
-must be resolved, outdated, or explicitly overridden by the user — and per
-`docs/pr_review_management.md`, "never merge without user consent" is the
-standing rule that override is *not* the automation's to exercise.
+must be resolved, outdated, or adjudicated by the operator under §12 (Round cap
+and operator adjudication) — the operator is the adjudicating party; the owner
+is consulted only for the escalations named in the standing briefing.
 
 Findings do **not** survive across SHAs.  Gate 4 matches the marker
 `<!-- mipstarre-review pr=N head=SHA -->` on that exact commit id, so a ledger

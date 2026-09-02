@@ -8,7 +8,10 @@ change, and the telemetry duties that make the project usable as research data.
 1. **Protocols are normative until amended.** An agent that finds a protocol
    wrong, ambiguous, or costly does not silently deviate: it follows the
    protocol (or stops), records the friction in
-   `results/telemetry/events.md`, and proposes an amendment.
+   `results/telemetry/events.md`, and proposes an amendment — a dispatched
+   worker proposes it to the operator; the operator amends directly under the
+   procedure below, an `events.md` incident being a sufficient trigger.  Owner
+   sign-off is needed only for the escalations named in the standing briefing.
 2. **Amendments are evidence-driven.** Every change to a file under
    `local/protocols/` or to `AGENTS.md` must append an entry to
    `local/protocols/EVOLUTION.md` citing its trigger: an `events.md` incident,

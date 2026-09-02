@@ -22,8 +22,10 @@ Every piece of evidence lives on GitHub, bound to the head SHA (issues-prs.md; t
    findings), and ``local-review/summary`` is ``success`` (DESIGN.md:66-69) — one
    account cannot self-APPROVE, so an adverse verdict travels in that status;
 5. no ``CHANGES_REQUESTED`` review sits on that SHA, from anyone;
-6. the fix loop is quiescent: no live autofix.sh lock, and the ``[codex-auto-fix]``
-   / ``[codex-review-fix]`` commits since the merge base are within the cap;
+6. the fix loop is quiescent: no live autofix.sh lock.  The ``[codex-auto-fix]`` /
+   ``[codex-review-fix]`` commit count since the merge base is printed for the
+   record only — the iteration cap is autofix.sh's loop-termination bound and
+   carries no merge authority (issues-prs.md 3; EVOLUTION.md 2026-09-02);
 7. every issue this PR closes has no open sub-issue left.
 
 ``--adjudicated`` waives gate 4's adverse verdict — nothing else — when an
@@ -50,8 +52,6 @@ import gh_common  # noqa: E402
 from wf_util import (TITLE_LIMIT, LayerError, cache_root, default_repo_root,  # noqa: E402
                      file_lock, lock_dir, sanitize, utcnow)
 
-DEFAULT_FIX_CAP = 5
-
 #: ci.sh:70 ``STEP_NAMES`` verbatim, plus the roll-up ci.sh posts last.
 CI_STEPS = ("build", "blueprint-render", "paper-gaps", "blueprint-sync",
             "file-length", "proof-debt", "proof-evasion", "statement-origin")
@@ -64,7 +64,7 @@ UNCHECKED_FINDING_RE = re.compile(r"^\s*[-*]\s*\[ \]", re.MULTILINE)
 VERDICT_RE = re.compile(r"^VERDICT:\s*([A-Z_]+)", re.MULTILINE)
 
 #: autofix.sh:62-63 ``PREFIX_AUTO``/``PREFIX_REVIEW`` — the ping-pong guard's subject
-#: prefixes, and the only commits that count against the fix cap.
+#: prefixes; gate 6 reports how many such commits the PR carries.
 FIX_COMMIT_PREFIXES = ("[codex-auto-fix]", "[codex-review-fix]")
 
 #: GitHub's nine auto-closing keywords, exactly (close/closes/closed, fix/fixes/fixed,
@@ -204,8 +204,9 @@ def check_review(number: int, head_sha: str, reviews: list[dict], statuses: dict
 
 
 def check_fix_gates(repo_root: Path, branch: str, base: str, head_sha: str) -> str:
-    """Gate 6 — refuse while the serialized fix loop is mid-flight or over its cap.
-    Returns the merge base (gate 7 scans the same commit range)."""
+    """Gate 6 — refuse while the serialized fix loop is mid-flight.
+    Returns the merge base (gate 7 scans the same commit range); the fix-prefixed
+    commit count is reported, never enforced (EVOLUTION.md 2026-09-02)."""
     # autofix.sh holds a mkdir-based lease keyed on the BRANCH (autofix.sh:580,
     # locks/fix-<branch with / -> ->.lock, holder pid in <lock>/pid).  Probe the same lock
     # the same way; a dead holder's lock does not block the merge.
@@ -226,20 +227,16 @@ def check_fix_gates(repo_root: Path, branch: str, base: str, head_sha: str) -> s
             base_ref = candidate
             break
     if base_ref is None:
-        raise GateFailure(f"gate 6 (fix cap): no local ref resolves for base {base!r}, so the "
-                          f"fix iterations cannot be counted. Run: git fetch github {base}")
+        raise GateFailure(f"gate 7 (dependencies): no local ref resolves for base {base!r}, so "
+                          f"the merge-base commit range cannot be scanned. Run: git fetch "
+                          f"github {base}")
     merge_base = git(repo_root, "merge-base", base_ref, head_sha)
     # `git rev-list --format` prints a "commit <sha>" header before each formatted line.
     lines = git(repo_root, "rev-list", "--format=%s", f"{merge_base}..{head_sha}").splitlines()
     iterations = sum(1 for line in lines if not line.startswith("commit ")
                      and line.startswith(FIX_COMMIT_PREFIXES))
-    cap = int(os.environ.get("MIPSTARRE_FIX_CAP", DEFAULT_FIX_CAP))
-    if iterations > cap:
-        raise GateFailure(f"gate 6 (fix cap): {iterations} fix commit(s) on {branch} since "
-                          f"{merge_base[:12]}, required at most {cap}. The cap is combined across "
-                          "ci/blueprint/review fixes (DESIGN.md:70-72); a PR past it needs human "
-                          "attention, not another merge attempt.")
-    passed(f"gate 6 fix loop idle, {iterations}/{cap} fix commits")
+    passed(f"gate 6 fix loop idle; {iterations} fix-prefixed commit(s) since "
+           f"{merge_base[:12]} (autofix.sh bounds its own loop)")
     return merge_base
 
 
