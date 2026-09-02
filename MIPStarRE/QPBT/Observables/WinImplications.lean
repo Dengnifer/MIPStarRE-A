@@ -41,16 +41,27 @@ noncomputable instance pauliQuestionPairDecidableEq (P : AdmissibleParams) :
     DecidableEq (PauliQuestion P × PauliQuestion P) :=
   Classical.decEq _
 
+/-- A finite code for canonical line descriptions that omits only their
+proposition-valued invariants. This is Lean-only support for the line-point
+average in `lem:qld-win-implications`, blueprint
+`ch14_qpbt_observables.tex:523-548`. -/
 private abbrev LineDescCode (P : AdmissibleParams) :=
   ((Fin P.m → PauliScalar P) × PauliScalar P) ⊕
     ((Fin P.m → PauliScalar P) × PauliScalar P ×
       (Fin P.m → PauliScalar P))
 
+/-- Encode a canonical line by its tag and finite data fields. This is a
+Lean-only helper for `lineDescFintype`, used at blueprint
+`ch14_qpbt_observables.tex:523-548`. -/
 private def lineDescCode (P : AdmissibleParams) :
     LineDesc P.toLdParams → LineDescCode P
   | .axis base seed _ => .inl (base, seed)
   | .diagonal base seed direction _ _ => .inr (base, seed, direction)
 
+/-- The finite line code is injective because the omitted invariant fields are
+proof-irrelevant. This is Lean-only support for the line-point average in
+`lem:qld-win-implications`, blueprint
+`ch14_qpbt_observables.tex:523-548`. -/
 private theorem lineDescCode_injective (P : AdmissibleParams) :
     Function.Injective (lineDescCode P) := by
   intro x y h

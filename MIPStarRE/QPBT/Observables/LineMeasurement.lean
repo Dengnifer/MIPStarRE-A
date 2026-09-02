@@ -198,6 +198,10 @@ function. This Lean-only package preserves the full existential content of
 `14_analysis_of_the_pauli_basis_test.tex:559-679`, blueprint
 `ch14_qpbt_observables.tex:1082-1210`. -/
 def ExpandedLineConclusions (δ : ℝ → ℝ) : Prop :=
+  (∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε)
+      (side : PlayerSide) (W : PauliKind) (line : LineDesc P.toLdParams),
+      MIPStarRE.QPBT.Measurement.IsProjective
+        (S.lineMeasExp side W line)) ∧
   (∃ C : ℝ, 1 ≤ C ∧
     ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε)
       (p₁ p₂ : Placement), p₁.IsOpposite p₂ → ∀ W : PauliKind,
@@ -289,7 +293,8 @@ expanded-line witnesses and square-root error. This is
 theorem exists_deltaLine :
     ∃ δ : ℝ → ℝ, IsPolyErr δ ∧ ExpandedLineConclusions δ := by
   refine ⟨deltaLine, deltaLine_isPolyErr, ?_⟩
-  exact ⟨expLine_self_cons, expLine_point_cons, expLine_point_cons'⟩
+  exact ⟨fun P ε S side W line => S.lineMeasExp_isProjective side W line,
+    expLine_self_cons, expLine_point_cons, expLine_point_cons'⟩
 
 end
 
