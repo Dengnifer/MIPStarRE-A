@@ -143,14 +143,6 @@ noncomputable def pairComponentMeas (S : ProjectiveSetting P ε)
     | .X => bits.1
     | .Z => bits.2
 
-/-- Extract a bit from a typed Magic Square answer, folding the impossible
-triple constructor to zero. This Lean-only postprocessing is used only for
-variable questions in item 7 of `lem:qld-win-implications`, blueprint
-`ch14_qpbt_observables.tex:626-660`. -/
-def msBitOrZero : MsAnswer → ZMod 2
-  | .bit b => b
-  | .triple _ => 0
-
 /-- The bit measurement for a Magic Square variable question. This is
 `M^(Variable_j,omega)_a` in item 7 of `lem:qld-win-implications`, paper
 `14_analysis_of_the_pauli_basis_test.tex:250-263`, blueprint

@@ -36,6 +36,10 @@ preliminary definitions and lemmas used throughout the analysis.
 
 \begin{definition}[Individual and total degree polynomial classes]
 	\label{def:ideg-deg-polynomials}
+	\lean{MIPStarRE.LDT.Preliminaries.polyFunc}
+	\lean{MIPStarRE.QPBT.DegPoly, MIPStarRE.QPBT.evalCoefficient}
+	\lean{MIPStarRE.QPBT.DegPoly.padTo, MIPStarRE.QPBT.EvaluatesTo, MIPStarRE.QPBT.evalOpt}
+	\leanok
 	\uses{def:line, def:line-representative, def:polyfunc}
 	Given integers $d, m \geq 0$ and a prime power $q$, denote by
 	$\mathrm{ideg}_{d,m}(\F_q)$ the set of polynomials in $m$ variables over
@@ -126,6 +130,9 @@ field trace $\tr = \tr_{q \to 2} \colon \F_q \to \F_2$
 
 \begin{definition}[Commuting and anticommuting tuples]
 	\label{def:anticommuting-tuple}
+	\lean{MIPStarRE.QPBT.PauliTuple}
+	\lean{MIPStarRE.QPBT.IsAnticommuting, MIPStarRE.QPBT.IsCommuting}
+	\leanok
 	% The quantity gamma is introduced in the source at eq:gamma-value, inside
 	% the completeness analysis of the Pauli basis test; the definition below
 	% is self-contained and does not depend on that occurrence.
@@ -150,6 +157,11 @@ this is the source of the terminology.
 
 \begin{lemma}[Probability of anticommuting tuples]
 	\label{fact:omega-anticomm-prob}
+	\lean{MIPStarRE.QPBT.anticommProb, MIPStarRE.QPBT.anticommProb_eq}
+	\lean{MIPStarRE.QPBT.commProb, MIPStarRE.QPBT.commProb_ge_half}
+	\lean{MIPStarRE.QPBT.anticommProb_ge_of_m_le_q}
+	\lean{MIPStarRE.QPBT.anticommProb_ge_of_one_le_md}
+	\leanok
 	% The source states this result in a `fact' environment; it is stated here
 	% as a lemma, and the paper label is kept verbatim.
 	% The exact value of the anticommuting probability and the constant lower
@@ -268,6 +280,8 @@ this is the source of the terminology.
 
 \begin{definition}[Closeness of question-indexed operators]
 	\label{def:approx-question-indexed-operators}
+	\lean{MIPStarRE.QPBT.opDistSq}
+	\leanok
 	\uses{def:povm-distance}
 	Let $\{A^x\}$ and $\{B^x\}$ be families of operators (not necessarily
 	POVM elements) indexed by questions $x \in \mathcal{X}$ but not by
@@ -288,6 +302,8 @@ weighted sums of those operators.
 
 \begin{lemma}
 	\label{lem:avg-closeness}
+	\lean{MIPStarRE.QPBT.avg_closeness}
+	\leanok
 	\uses{def:approx-question-indexed-operators}
 	Let $\{A^x\}$ and $\{B^x\}$ be operators indexed by a finite set
 	$\mathcal{X}$, let $\mu$ be a probability distribution over
@@ -320,6 +336,8 @@ weighted sums of those operators.
 
 \begin{lemma}
 	\label{lem:povm-to-obs}
+	\lean{MIPStarRE.QPBT.povm_to_obs}
+	\leanok
 	\uses{def:approx-question-indexed-operators, def:povm-distance}
 	Let $\mathcal{A}$ be a finite set, let $\{A^x_a\}_{a \in \mathcal{A}}$
 	and $\{B^x_a\}_{a \in \mathcal{A}}$ be POVMs, and let
@@ -359,6 +377,8 @@ measurements.
 
 \begin{lemma}[Orthonormalization lemma]
 	\label{lem:ortho}
+	\lean{MIPStarRE.QPBT.exists_projective_close_of_consistent}
+	\leanok
 	\uses{def:consistency, def:povm-distance}
 	Let $0 \leq \delta \leq 1$. There exists a function
 	$\eta_{\mathrm{ortho}}(\delta) = O\big(\delta^{1/4}\big)$ such that the
@@ -414,6 +434,8 @@ generality.
 
 \begin{lemma}[Reduction to a projective strategy]
 	\label{lem:projective-strategy-setup}
+	\lean{MIPStarRE.QPBT.exists_projective_padded_strategy}
+	\leanok
 	\uses{def:admissible, def:pauli-question-distribution, def:pauli-win-predicate, def:tensor-product-strategy, def:tensor-product-value, def:projective-strategy-general}
 	Let $(q,m,d)$ be an admissible parameter tuple
 	(Definition~\ref{def:admissible}) and let
@@ -479,6 +501,17 @@ $\{M^{(\mathrm{Point},W),u}_a\}_{a \in \F_q}$ for all $u \in \F_q^m$.
 
 \begin{definition}[Strategy observables]
 	\label{def:strategy-observables}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.pointMeas}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.lineMeas}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.pairMeas}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.pairWMeas}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.pauliMeas}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.msMeas}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.pointObs}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.pointObs_sq_eq_one}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.pointObs_isHermitian}
+	\leanok
 	\uses{lem:projective-strategy-setup, def:pauli-win-predicate, def:subfield-trace, def:line, def:line-representative}
 	For ``line'' questions we write $\mathrm{Line}$ for either of the
 	types $\mathrm{ALine}$ and $\mathrm{DLine}$: a statement about the
@@ -504,6 +537,14 @@ extracts from the strategy.
 
 \begin{lemma}[Winning implications]
 	\label{lem:qld-win-implications}
+	\lean{MIPStarRE.QPBT.win_cons, MIPStarRE.QPBT.win_cons_approx}
+	\lean{MIPStarRE.QPBT.win_low_degree, MIPStarRE.QPBT.win_low_degree_approx}
+	\lean{MIPStarRE.QPBT.win_pauli_basis_cons, MIPStarRE.QPBT.win_pauli_basis_cons_approx}
+	\lean{MIPStarRE.QPBT.win_comm, MIPStarRE.QPBT.win_comm_approx}
+	\lean{MIPStarRE.QPBT.win_comm_cons, MIPStarRE.QPBT.win_comm_cons_approx}
+	\lean{MIPStarRE.QPBT.win_magic_square}
+	\lean{MIPStarRE.QPBT.win_ms_cons, MIPStarRE.QPBT.win_ms_cons_approx}
+	\leanok
 	\uses{lem:projective-strategy-setup, def:anticommuting-tuple, def:pauli-question-distribution, def:pauli-win-predicate, def:line-point-dist, def:consistency, def:povm-distance, def:ms-game, def:tensor-product-value, def:low-degree-encoding, def:ideg-deg-polynomials}
 	Assume that $\mathcal{S}$ succeeds in $\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$
 	with probability at least $1 - \eps$, for some $\eps \geq 0$. Then the
@@ -630,6 +671,10 @@ extracts from the strategy.
 
 \begin{lemma}[Winning implications for observables]
 	\label{lem:qld-win-implications-obs}
+	\lean{MIPStarRE.QPBT.pointObs_self_consistent}
+	\lean{MIPStarRE.QPBT.pointObs_twisted_commutation}
+	\lean{MIPStarRE.QPBT.pointObs_twisted_commutation_interchanged}
+	\leanok
 	% The source labels this lemma `len:qld-win-implications-obs'; the prefix
 	% `len' is a typo for `lem'. The label above is the corrected form.
 	\uses{def:strategy-observables, def:approx-question-indexed-operators, def:anticommuting-tuple, lem:projective-strategy-setup}
@@ -759,6 +804,8 @@ every tuple $\omega$.
 
 \begin{definition}[Expanded state]
 	\label{def:expanded-state}
+	\lean{MIPStarRE.QPBT.SixReg, MIPStarRE.QPBT.ProjectiveSetting.psiHat}
+	\leanok
 	\uses{lem:projective-strategy-setup, def:EPR}
 	Recall that $M = 2^m$. Introduce registers $\mathsf{A}', \mathsf{A}'',
 	\mathsf{B}', \mathsf{B}''$, each with Hilbert space isomorphic to
@@ -782,6 +829,8 @@ every tuple $\omega$.
 
 \begin{definition}[Expanded observables]
 	\label{def:expanded-observables}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.expObs}
+	\leanok
 	\uses{def:strategy-observables, def:expanded-state, lem:twisted-commutation}
 	For all $W \in \{X,Z\}$, $r \in \F_q$, and $u \in \F_q^m$, define the
 	observable
@@ -807,6 +856,12 @@ every tuple $\omega$.
 
 \begin{definition}[Expanded point measurements]
 	\label{def:expanded-point-measurement}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.expPointOp}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.tauPointProj}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.pointMeasExp}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.expPointOp_eq_convolution}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.pointMeasExp_isProjective}
+	\leanok
 	\uses{def:expanded-observables, lem:pauli-observable-expansion, def:low-degree-encoding, def:subfield-trace}
 	For $W \in \{X,Z\}$, $u \in \F_q^m$ and $a \in \F_q$, define
 	\[
@@ -837,6 +892,9 @@ every tuple $\omega$.
 
 \begin{definition}[Trace-coarse-grained point projections]
 	\label{def:expanded-point-trace-projection}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.expPointTrace}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.expPointTrace_eq_half_add}
+	\leanok
 	\uses{def:expanded-point-measurement, def:expanded-observables, def:subfield-trace}
 	For fixed $u \in \F_q^m$, $r \in \F_q$ and $b \in \F_2$, define the
 	projection
@@ -853,6 +911,8 @@ every tuple $\omega$.
 
 \begin{definition}[Symmetric equivalents]
 	\label{def:symmetric-equivalents}
+	\lean{MIPStarRE.QPBT.Placement, MIPStarRE.QPBT.ProjectiveSetting.place}
+	\leanok
 	\uses{def:expanded-state}
 	For the remainder of this chapter, as well as in
 	Chapters~\ref{chap:qpbt-combining} and~\ref{chap:qpbt-extraction}, the
@@ -986,6 +1046,10 @@ exactly these variants.
 
 \begin{lemma}[Consistency and approximate commutation of the expanded point measurements]
 	\label{lem:qld-comm-cons}
+	\lean{MIPStarRE.QPBT.deltaAnticom, MIPStarRE.QPBT.deltaAnticom_isPolyErr}
+	\lean{MIPStarRE.QPBT.expPoint_self_cons, MIPStarRE.QPBT.expPointTrace_comm}
+	\lean{MIPStarRE.QPBT.exists_deltaAnticom}
+	\leanok
 	\uses{def:expanded-point-measurement, def:expanded-point-trace-projection, def:expanded-state, def:approx-question-indexed-operators, def:povm-distance, def:symmetric-equivalents}
 	There exists a function $\delta_{\mathrm{Anticom}}(\eps) = \poly(\eps)$
 	such that the following holds, with respect to the state
@@ -1046,6 +1110,13 @@ exactly these variants.
 
 \begin{definition}[Expanded line measurements]
 	\label{def:expanded-line-measurement}
+	\lean{MIPStarRE.QPBT.polynomialOnLine, MIPStarRE.QPBT.restrictToLine}
+	\lean{MIPStarRE.QPBT.polynomialOnLine_lowDegreeEncoding_natDegree_le}
+	\lean{MIPStarRE.QPBT.tauLineProj, MIPStarRE.QPBT.ProjectiveSetting.expLineOp}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.lineMeasExp}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.lineMeasExp_isProjective}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.expLineOp_zero_of_not_deg_d}
+	\leanok
 	% In the source this measurement is defined inside the proof of the lemma
 	% labelled lem:qld-comm-line-cons (lines 552-556); it is recorded as a
 	% standalone definition because Chapter chap:qpbt-combining uses the
@@ -1092,6 +1163,10 @@ exactly these variants.
 
 \begin{lemma}[Consistency of the expanded line measurements]
 	\label{lem:qld-comm-line-cons}
+	\lean{MIPStarRE.QPBT.deltaLine, MIPStarRE.QPBT.deltaLine_isPolyErr}
+	\lean{MIPStarRE.QPBT.expLine_self_cons, MIPStarRE.QPBT.expLine_point_cons}
+	\lean{MIPStarRE.QPBT.expLine_point_cons', MIPStarRE.QPBT.exists_deltaLine}
+	\leanok
 	\uses{def:expanded-point-measurement, def:expanded-line-measurement, def:expanded-state, def:line-point-dist, def:approx-question-indexed-operators, def:povm-distance, def:ideg-deg-polynomials, def:symmetric-equivalents}
 	There exists a function $\delta_{\mathrm{Line}}(\eps) = \poly(\eps)$
 	such that the following holds, with respect to the state

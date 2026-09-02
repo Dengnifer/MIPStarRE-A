@@ -21,7 +21,7 @@ corresponding to `def:strategy-observables` in
 and answer forms come from `def:pauli-question-distribution` and
 `def:pauli-win-predicate`, paper
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1225`
-and blueprint `blueprint/src/chapter/ch13_qpbt_test.tex:285-367`.
+and blueprint `blueprint/src/chapter/ch13_qpbt_test.tex:310-392`.
 -/
 
 open scoped BigOperators Matrix ComplexOrder
@@ -82,7 +82,7 @@ def rawMeasurement (S : ProjectiveSetting P ε) (side : PlayerSide)
 /-- Embed a point into the full Pauli question space in basis `W`. This is the
 point-question content from `def:pauli-question-distribution`, paper
 `08_classical_and_quantum_low_degree_tests.tex:997-1008`, blueprint
-`ch13_qpbt_test.tex:285-329`. -/
+`ch13_qpbt_test.tex:310-354`. -/
 def contentOfPoint (P : AdmissibleParams) (W : PauliKind)
     (u : Fin P.m → PauliScalar P) : PauliSpace P :=
   embedLd P W fun i =>
@@ -95,7 +95,7 @@ def contentOfPoint (P : AdmissibleParams) (W : PauliKind)
 Axis lines clear the direction block, whereas diagonal lines retain their
 canonical projected direction. Paper
 `08_classical_and_quantum_low_degree_tests.tex:997-1008`; blueprint
-`ch13_qpbt_test.tex:285-329` and `rem:deg-line-representatives`. -/
+`ch13_qpbt_test.tex:310-354` and `rem:deg-line-representatives`. -/
 def contentOfLine (P : AdmissibleParams) (W : PauliKind)
     (line : LineDesc P.toLdParams) : PauliSpace P :=
   embedLd P W fun i =>
@@ -111,7 +111,7 @@ def contentOfLine (P : AdmissibleParams) (W : PauliKind)
 Square questions. This is the type-4 content of
 `def:pauli-question-distribution`, paper
 `08_classical_and_quantum_low_degree_tests.tex:1030-1120`, blueprint
-`ch13_qpbt_test.tex:285-329`. -/
+`ch13_qpbt_test.tex:310-354`. -/
 def contentOfTuple (P : AdmissibleParams)
     (uX uZ : Fin P.m → PauliScalar P) (rX rZ : PauliScalar P) : PauliSpace P :=
   fun i =>
@@ -125,7 +125,7 @@ def contentOfTuple (P : AdmissibleParams)
 
 /-- The typed point question in basis `W`, from the strategy notation at paper
 `14_analysis_of_the_pauli_basis_test.tex:174-190` and
-`def:pauli-question-distribution`, blueprint `ch13_qpbt_test.tex:285-329`. -/
+`def:pauli-question-distribution`, blueprint `ch13_qpbt_test.tex:310-354`. -/
 def pointQuestion (P : AdmissibleParams) (W : PauliKind)
     (u : Fin P.m → PauliScalar P) : PauliQuestion P :=
   (.point W, contentOfPoint P W u)
@@ -163,7 +163,7 @@ def msQuestion (P : AdmissibleParams) (t : MsType)
 /-- A typed question occurs in the Pauli-test distribution when it appears on
 at least one side of a supported question pair. This Lean-only predicate makes
 the support guarantees for the question embeddings precise; blueprint
-`def:pauli-question-distribution`, `ch13_qpbt_test.tex:285-329`, paper
+`def:pauli-question-distribution`, `ch13_qpbt_test.tex:310-354`, paper
 `08_classical_and_quantum_low_degree_tests.tex:964-1120`. -/
 def QuestionAppearsInSupport (P : AdmissibleParams) (question : PauliQuestion P) : Prop :=
   ∃ other : PauliQuestion P,
@@ -172,7 +172,7 @@ def QuestionAppearsInSupport (P : AdmissibleParams) (question : PauliQuestion P)
 
 /-- Point embeddings occur in the typed Pauli question support. This is the
 support well-formedness companion to `def:pauli-question-distribution`,
-blueprint `ch13_qpbt_test.tex:285-329`, paper
+blueprint `ch13_qpbt_test.tex:310-354`, paper
 `08_classical_and_quantum_low_degree_tests.tex:997-1008`. -/
 theorem pointQuestion_appears_in_support (P : AdmissibleParams) (W : PauliKind)
     (u : Fin P.m → PauliScalar P) :
@@ -181,7 +181,7 @@ theorem pointQuestion_appears_in_support (P : AdmissibleParams) (W : PauliKind)
 
 /-- Canonical axis and diagonal line embeddings occur in the typed Pauli
 question support. This is the line companion to
-`def:pauli-question-distribution`, blueprint `ch13_qpbt_test.tex:285-329`,
+`def:pauli-question-distribution`, blueprint `ch13_qpbt_test.tex:310-354`,
 paper `08_classical_and_quantum_low_degree_tests.tex:997-1008`. -/
 theorem lineQuestion_appears_in_support (P : AdmissibleParams) (W : PauliKind)
     (line : LineDesc P.toLdParams) :
@@ -190,7 +190,7 @@ theorem lineQuestion_appears_in_support (P : AdmissibleParams) (W : PauliKind)
 
 /-- Pair embeddings occur in the typed Pauli question support. This is the
 Pair companion to `def:pauli-question-distribution`, blueprint
-`ch13_qpbt_test.tex:285-329`, paper
+`ch13_qpbt_test.tex:310-354`, paper
 `08_classical_and_quantum_low_degree_tests.tex:1030-1057`. -/
 theorem pairQuestion_appears_in_support (P : AdmissibleParams)
     (uX uZ : Fin P.m → PauliScalar P) (rX rZ : PauliScalar P) :
@@ -199,7 +199,7 @@ theorem pairQuestion_appears_in_support (P : AdmissibleParams)
 
 /-- Pair/W embeddings occur in the typed Pauli question support. This is the
 Pair/W companion to `def:pauli-question-distribution`, blueprint
-`ch13_qpbt_test.tex:285-329`, paper
+`ch13_qpbt_test.tex:310-354`, paper
 `08_classical_and_quantum_low_degree_tests.tex:1030-1057`. -/
 theorem pairWQuestion_appears_in_support (P : AdmissibleParams) (W : PauliKind)
     (uX uZ : Fin P.m → PauliScalar P) (rX rZ : PauliScalar P) :
@@ -208,7 +208,7 @@ theorem pairWQuestion_appears_in_support (P : AdmissibleParams) (W : PauliKind)
 
 /-- Magic Square embeddings occur in the typed Pauli question support. This is
 the Magic Square companion to `def:pauli-question-distribution`, blueprint
-`ch13_qpbt_test.tex:285-329`, paper
+`ch13_qpbt_test.tex:310-354`, paper
 `08_classical_and_quantum_low_degree_tests.tex:1059-1120`. -/
 theorem msQuestion_appears_in_support (P : AdmissibleParams) (t : MsType)
     (uX uZ : Fin P.m → PauliScalar P) (rX rZ : PauliScalar P) :
@@ -217,7 +217,7 @@ theorem msQuestion_appears_in_support (P : AdmissibleParams) (t : MsType)
 
 /-- Pauli/W embeddings occur in the typed Pauli question support. This is the
 zero-content companion to `def:pauli-question-distribution`, blueprint
-`ch13_qpbt_test.tex:285-329`, paper
+`ch13_qpbt_test.tex:310-354`, paper
 `08_classical_and_quantum_low_degree_tests.tex:1006-1008`. -/
 theorem pauliQuestion_appears_in_support (P : AdmissibleParams) (W : PauliKind) :
     QuestionAppearsInSupport P (MIPStarRE.QPBT.pauliQuestion P W) := by
@@ -262,13 +262,6 @@ Pair/W family used in items 4 and 7 of `lem:qld-win-implications`, paper
 `14_analysis_of_the_pauli_basis_test.tex:210-263`. -/
 def pairWAnswerOrZero {P : AdmissibleParams} : PauliAnswer P → ZMod 2
   | .bit bit => bit
-  | _ => 0
-
-/-- Fold every non-Pauli/W answer into the zero Pauli label. This is the typed
-Pauli family of item 3 of `lem:qld-win-implications`, paper
-`14_analysis_of_the_pauli_basis_test.tex:205-209`. -/
-def pauliAnswerOrZero {P : AdmissibleParams} : PauliAnswer P → PauliRegister P
-  | .pauliOutcome h => h
   | _ => 0
 
 /-- Fold wrong-form Pauli-test answers into a fixed valid Magic Square answer

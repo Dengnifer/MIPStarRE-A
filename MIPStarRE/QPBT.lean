@@ -25,6 +25,13 @@ import MIPStarRE.QPBT.Games.Sandwich
 import MIPStarRE.QPBT.Games.CondLinearTheorems
 import MIPStarRE.QPBT.Games.TypedCondLinear
 import MIPStarRE.QPBT.Observables.LineDefs
+import MIPStarRE.QPBT.Observables.Anticommuting
+import MIPStarRE.QPBT.Observables.Setup
+import MIPStarRE.QPBT.Observables.Defs
+import MIPStarRE.QPBT.Observables.ExpandedDefs
+import MIPStarRE.QPBT.Observables.PointConsistency
+import MIPStarRE.QPBT.Observables.LineMeasurement
+import MIPStarRE.QPBT.Observables.WinImplications
 import MIPStarRE.QPBT.Test.LowDegreeGameTheorems
 import MIPStarRE.QPBT.Test.MagicSquareTheorems
 import MIPStarRE.QPBT.Test.Completeness
