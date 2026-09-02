@@ -1,5 +1,6 @@
 import MIPStarRE.QPBT.Games.Consistency
 import MIPStarRE.QPBT.Games.StrategyClasses
+import MIPStarRE.QPBT.Games.TypedCondLinear
 import MIPStarRE.QPBT.Observables.LineDefs
 
 /-!
@@ -74,6 +75,17 @@ theorem dLinePointDist_prefix_zero (L : LdParams) :
     ∀ sample ∈ (dLinePointDist L).support,
       ∀ j : Fin L.m, j.val < (chiIndex L sample.1.seed).val →
         sample.1.direction j = 0 := by
+  sorry
+
+/-- The inlined low-degree question sampler is the typed conditionally linear
+distribution on the complete type graph. This reconciles the stage-4.1
+definition with `def:typed-cl-distributions`; blueprint
+`ch12_qpbt_games.tex:568-577`, paper
+`references/qpbt-paper/07_types.tex:84-94`. -/
+theorem ldQuestionDistribution_eq_typedCL (L : LdParams) :
+    ldQuestionDistribution L =
+      typedCLDistribution (Finset.univ : Finset (Sym2 LdType)) (by simp)
+        (ldCL L) (ldCL L) := by
   sorry
 
 /-- The actual bounded `polyFunc` subtype is finite over a finite coefficient

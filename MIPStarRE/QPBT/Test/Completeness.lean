@@ -1,4 +1,5 @@
 import MIPStarRE.QPBT.Games.StrategyClasses
+import MIPStarRE.QPBT.Games.TypedCondLinear
 import MIPStarRE.QPBT.Test.LowDegreeGameTheorems
 import MIPStarRE.QPBT.Test.MagicSquareTheorems
 import MIPStarRE.QPBT.Test.PauliBasisTest
@@ -19,6 +20,17 @@ The source node is `lem:pauli-completeness` in
 namespace MIPStarRE.QPBT
 
 noncomputable section
+
+/-- The inlined Pauli question sampler is the typed conditionally linear
+distribution on the Pauli type graph. This reconciles the stage-4.1 definition
+with `def:typed-cl-distributions`; blueprint `ch12_qpbt_games.tex:568-577`,
+paper `references/qpbt-paper/07_types.tex:84-94`. -/
+theorem pauliQuestionDistribution_eq_typedCL (P : AdmissibleParams) :
+    pauliQuestionDistribution P =
+      typedCLDistribution pauliEdges (by
+        refine ⟨Sym2.mk (.point .X) (.point .X), ?_⟩
+        simp [pauliEdges]) (pauliCL P) (pauliCL P) := by
+  sorry
 
 /-- Symmetry of the Pauli question distribution, used to package the landed
 game as the symmetric game appearing in `lem:pauli-completeness`. -/
