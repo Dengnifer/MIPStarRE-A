@@ -59,9 +59,9 @@ and doing it here hides a statement change inside a refactor commit.
 7. **Commit conventions.** `refactor(scope): ...` when the API surface is
    untouched, `style(scope): ...` for formatting, naming, or docstring cleanup,
    `docs(scope): ...` for prose-only changes — imperative, subject under 72
-   characters, bracket-free branch and slug names. If you are running as an
-   auto-fix pass, the subject is prefixed `[codex-auto-fix]` or
-   `[codex-review-fix]` exactly. Keep each commit to one kind of change so a
+   characters, bracket-free branch and slug names. A fix pass uses a plain
+   `fix(…)` subject — the `[codex-*-fix]` prefixes are reserved for
+   `autofix.sh`. Keep each commit to one kind of change so a
    reviewer can read the diff as a claim about meaning preservation.
 
 ## Workflow

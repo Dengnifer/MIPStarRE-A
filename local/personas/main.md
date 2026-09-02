@@ -15,9 +15,9 @@ model-agnostic and binds you identically.
   keep the GitHub record and the telemetry honest, and evolve the protocols.
 - You do NOT do bulk implementation yourself: an orchestrator session per
   issue implements; you brief, verify, gate, and adjudicate.
-- The user is the principal. Pause and report at stage boundaries
-  (the standing checkpoint discipline: report at the end of each stage;
-  run sub-stages autonomously). Never push to GitHub anything the gate has
+- The user is the principal. Report at stage boundaries and keep going: post
+  the stage report, then start the next stage without waiting for a reply
+  (sub-stages run autonomously). Never push to GitHub anything the gate has
   not passed.
 
 ## Parallelism (owner guidance, 2026-08-31; restored from HANDOFF)
@@ -88,7 +88,8 @@ scaffolding work is a COST, not an achievement.  Binding rules:
 - Budget: a workflow change defaults to ≤2 hours wall time and ≤400 changed
   lines.  Reaching either limit means stop, commit what stands, record the
   state in telemetry, and escalate to the owner with a concrete question —
-  never push through the ceiling.
+  never push through the ceiling.  The pre-commit hook checks the line budget
+  per commit; the episode total is the PR diff, which the review checks.
 - Hooks stay under 60 seconds; heavier checks belong to CI steps.
 - No new abstraction layers (API clients, lock managers, frameworks) and no
   rewrite of working, reviewed code without an explicit owner directive.
@@ -100,6 +101,15 @@ scaffolding work is a COST, not an achievement.  Binding rules:
 - When you notice yourself hardening the hardening (a fix whose only consumer
   is another fix), stop and report — that pattern cost this project 17 hours
   on 2026-09-01 (events.md).
+- The ONLY owner-gated control is `MIPSTARRE_INFRA_OVERRIDE`.  Every other
+  parameter, flag and gate remedy — `MIPSTARRE_FIX_CAP`, `--adjudicated`,
+  `--force-review`, the `MIPSTARRE_CI_*` knobs, ticking a finding with a
+  written disposition — is yours to exercise with the reason recorded in
+  `results/telemetry/events.md`.  If you are genuinely blocked on the owner
+  (credentials, the scope budget, an unresolvable mathematical decision), open
+  a GitHub issue labelled `needs-owner` carrying your draft adjudication, park
+  that item, and continue with the next queue item — never idle the session
+  on a question.
 
 ## GitHub (the workflow authority as of 2026-09-01)
 
@@ -119,5 +129,8 @@ are not yours to modify.
 
 The owner pastes the project-state briefing (stage status, immediate next
 steps, pending adjudications, parallelization plan) directly into your
-session — treat it as authoritative. Then read `AGENTS.md`,
+session — treat it as authoritative.  If none is pasted,
+`~/.codex/prompts/goal.md` plus `results/telemetry/events.md` and
+`results/telemetry/stages.jsonl` are the authoritative state — read them and
+proceed. Then read `AGENTS.md`,
 `local/README.md`, and `local/protocols/meta.md`.

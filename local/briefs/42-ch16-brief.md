@@ -329,3 +329,74 @@ on.** ch16 is terminal in the wave: it consumes ch14 and ch15 and is consumed by
   `lem:qld-unitary`'s unitary conjugation to the isometry conjugation (the range-projection
   argument added by the blueprint at ch16:296–321) has no ch16 declaration and should be
   budgeted as a stage-5 lemma. Flagging so it is not lost between briefs.
+
+## Operator adjudication — 2026-09-02
+
+This section is binding for stage 4.2 and supersedes incompatible sketches above. It
+uses the landed stage-4.1 API and the primary source at
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1415-1877`.
+
+### RECONCILE decisions
+
+- **RECONCILE-1 — consume the heterogeneous ch14 setting.** Define `Block`, `SixReg`,
+  and every placement with explicit parentheses over the strategy's distinct `ιA` and
+  `ιB`. Extract raw measurements from the existing `A` and `B` families. There is no
+  shared local space, measurement family, or symmetry field.
+- **RECONCILE-2 — bind to ch15's polynomial subtype.** Use `Poly P` and `PolyPair P`,
+  evaluate representatives with `MvPolynomial.eval`, and make encoding membership
+  explicit through `IsEncoding`. Do not introduce a second polynomial carrier.
+- **RECONCILE-3 — use landed Pauli and field data.** Reuse `tauObservable` and
+  `phaseSign`. The binary basis dimension is `P.model.basisDim`; never recover it from
+  `P.hq.choose`, and never add a second basis witness.
+- **RECONCILE-4 — use the actual distribution API.** Use `uniformDistribution` for
+  finite uniform laws, including the one-point `Unit` law. There is no
+  `Distribution.dirac` in the landed API. Import shared product or mixture combinators
+  from their single owner rather than duplicating them in extraction files.
+
+### OPEN decisions
+
+- **OPEN-1 — patch direct blueprint dependencies only.** In
+  `lem:qld-construct-the-paulis`, replace `def:povm-distance` by
+  `def:approx-question-indexed-operators`. Add `def:expanded-point-measurement` to the
+  helper whose statement displays that measurement. Do not add transitive `kappa`
+  dependencies: the fixed binary representation is internal to the canonical model.
+- **OPEN-2 — residual owns the three deferred ch11 nodes.** The residual wave binds
+  `def:decoding-map`, `def:dual-self-dual-normal-basis`, and
+  `def:binary-representation` using definitions and lemmas over the landed
+  `FixedFieldModel`; ch16 only imports them. Do not add `SelfDualNormalBasis`
+  infrastructure: the canonical model already owns the selected basis and binary
+  representation. Generic basis predicates may be Lean-only bridges, but they are not
+  new public carriers and no source theorem gains an extra basis argument.
+- **OPEN-3 — keep the unbundled bracket with a definitional bridge.** Define
+  `bracketOp` for a finite operator family. Its equality with the corresponding
+  `Measurement.postprocess` effect is an `rfl`/`simp` lemma, not a new `sorry`.
+- **OPEN-4 — reuse residual's operator distance.** Use the real `opDistSq` and its bridge
+  to `opFamilyDistSq` at outcome type `Unit`; extraction does not define an alias with a
+  competing statement.
+- **OPEN-5 — drop the explicit basis parameter.** Every `tildeObs`, conjugation lemma,
+  and extraction witness uses the basis stored in `P.model`. This is the paper's fixed
+  once-and-for-all choice and avoids strengthening all ch16 statements.
+- **OPEN-6 — keep only the restricted decoding identity.** The dot-product evaluation
+  theorem requires `IsEncoding g`. General outcomes must be handled by the
+  non-encoding-mass estimate; no stage-4.2 theorem may assume the unrestricted identity.
+- **OPEN-7 — retain the corrected cross-basis phase theorem.** State
+  `tildeObs_twisted_commutation` with its actual phase and mark the docstring
+  `**Local fix:**`. Add a dedicated `docs/paper-gaps/` note for the false source phase
+  before marking this node closed.
+- **OPEN-8 — keep `thm:pauli` proof work in stage 4.3.** The stage-4.2 extraction
+  witness must expose the concrete swap unitaries, transformed state, and comparison
+  conclusions needed downstream. It must not store a residual, bridge hypothesis, or
+  assumed transfer premise. Stage 4.3 proves a named range-projection/isometry transfer
+  lemma from those derived data and conclusions. Before closure, add paper-gap notes
+  for the quoted linearity theorem, restricted decoding identity, cross-basis phase,
+  and extraction triangle/transfer defects, in addition to the two already tracked
+  QPBT gaps.
+
+### Cross-wave contract
+
+Ch16 consumes the unguarded ch15 `GlobalPairWitness`, the heterogeneous ch14 setting,
+and the canonical basis in `P.model`. It introduces no alternative field model, basis,
+polynomial outcome type, or symmetry assumption. All four player-side conclusions are
+represented explicitly so the final `pauli_soundness` route remains source-faithful.
+`ExtractionWitness` contains only concrete derived data and proved comparison
+conclusions; transfer obligations remain proposition-valued Stage 4.3 theorems.

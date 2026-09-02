@@ -316,3 +316,91 @@ Blueprint sync after the skeleton type-checks: `\lean{…}` + `\leanok` on the 1
   `PosSemidef` and `trace = 1`, keeping 4.1 (e)4's rule that the density-matrix
   `LDT.QuantumState` layer stays out of the QPBT games layer. Switch to `QuantumState`
   if the orchestrator prefers; the only consumer is a future proof of node 2.
+
+## Operator adjudication — 2026-09-02
+
+This section is binding for stage 4.2 and supersedes incompatible sketches above. It
+uses the landed stage-4.1 API and the primary source at
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:680-1414`.
+
+### RECONCILE decisions
+
+- **RECONCILE-1 — use the heterogeneous ch14 setting.** The shared interface is
+  `ProjectiveSetting P ε`, wrapping an arbitrary bipartite strategy with distinct
+  spaces and measurements. Ch15 witness structures use side-specific measurement and
+  placement maps; no symmetry hypothesis is added.
+- **RECONCILE-2 — retain the original distribution on valid `LdParams`.** Use
+  `linePointDist (L : LdParams)` without a model binder and obtain its scalar field
+  through `L.model`. Since `LdParams` itself contains `L.m ∣ L.q`, it cannot represent
+  the extended dimension `2 * P.m + 2` in general. OPEN-7 therefore introduces a
+  separately named directly indexed carrier rather than overloading this declaration.
+- **RECONCILE-3 — bind to the landed names.** Use `LdSpace.point`, `LdSpace.seed`,
+  `LdSpace.direction`, `PauliScalar P`, and the tagged canonical `LineDesc` adjudicated
+  in ch14. Remove every stale `[FieldModel ...]` parameter.
+- **RECONCILE-4 — retain the polynomial subtype.** Define
+  `noncomputable abbrev Poly P :=
+  ↥MIPStarRE.LDT.Preliminaries.polyFunc P.m (PauliScalar P) P.d` and
+  `noncomputable abbrev PolyPair P := Poly P × Poly P`. Consume the generic
+  bounded-`polyFunc` `Fintype` instance owned by the residual wave and the existing
+  derived `DecidableEq`; do not create competing instances. Ch16 consumes these exact
+  names and carriers.
+
+### OPEN decisions
+
+- **OPEN-1 — residual owns the original `def:line-point-dist`.** Ch15 imports its unique
+  seed/`chiIndex`-based `LineDesc` and adds the restricted distributions used at the
+  original dimension. The distinct direct-index carrier required at dimension
+  `2 * P.m + 2` is owned by ch15 under the names fixed in OPEN-7; it is not a duplicate
+  implementation of the source game distribution.
+- **OPEN-2 — adopt the witness convention and one error-function module.** Existential
+  mathematical objects are bundled in witness structures with explicit error fields.
+  Define `IsPolyErr` and `IsPolyErr₂` once in `Games/ErrorFunctions.lean`; ch14,
+  residual ch12, and ch15 import that leaf. Source-facing existence theorems produce the
+  witnesses; the structures themselves do not hide proof obligations.
+- **OPEN-3 — keep `Poly P` and consume finite instances faithfully.** Residual issue
+  #16 derives `Fintype` for the bounded `polyFunc` subtype with
+  `Module.finite_of_finite` and `Fintype.ofFinite`, following the existing LDT
+  finite-answer construction. The existing subtype `DecidableEq` resolves from the
+  canonical scalar model. Ch15 reuses that infrastructure for `Poly P`; it does not
+  replace public polynomial outcomes by a raw box index. This supersedes the
+  coefficient-equivalence proposal above.
+- **OPEN-4 — retain both results under different names and roles.** The source-facing
+  `lem:qld-4-13` statement keeps the paper's `poly(m²ε, md/q)` error and remains a
+  tracked obligation. A separately named established Lean-only theorem states the
+  `m · poly(ε, md/q)` bound and is the only one used downstream. Both cite
+  `docs/paper-gaps/qpbt_combined-lines-error-term.tex`; the established result must not
+  be advertised as the source theorem.
+- **OPEN-5 — residual owns state-dependent consistency.** Import that definition. The
+  normalized-trace LDT inconsistency is not a substitute.
+- **OPEN-6 — accept a total `combineLinePoly` with a specification theorem.** Define it
+  from explicit affine reparameterizations and coefficients. Prove its advertised
+  equation only under the compatibility data supplied by `SubLineWitness`; do not use a
+  fallback polynomial for incompatible lines.
+- **OPEN-7 — reject source-facing divisibility guards.** Do not add
+  `(2 * P.m + 2) ∣ P.q` to `lem:qld-sublines` or `lem:qld-4-13`: for the admissible
+  regime it would make the results vacuous. Add `DirectLineDesc`, whose axis constructor
+  stores the coordinate index rather than a field seed, together with
+  `directLinePointDist`, `directLdGame`, and a directly indexed low-degree soundness
+  obligation. Use that layer in the extended-dimension fields of `SubLineWitness` and
+  `ExtendedLinesWitness`; the original-dimension fields continue to use `LineDesc` and
+  `linePointDist`. A guarded `_of_dvd` bridge may relate the two layers when divisibility
+  is available. Keep `lem:qld-4-7` unguarded and cite
+  `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex` until its proof route is closed.
+- **OPEN-8 — patch only direct statement dependencies.** Add
+  `def:ideg-deg-polynomials` to `lem:qld-xz-lines`, `def:combine-map`, and
+  `lem:qld-4-13`. Add it to `lem:qld-4-7` only if the final public statement exposes
+  the polynomial carrier directly. Do not add `def:admissible-size` merely because the
+  chapter preamble mentions it.
+- **OPEN-9 — keep the raw density operator.** State `thm:linearity` with `ρ : Op ι`,
+  positive-semidefinite and trace-one hypotheses. Introducing the unrelated LDT
+  `QuantumState` layer would not improve the source match.
+
+### Cross-wave contract
+
+All ch15 witnesses are parameterized by the heterogeneous ch14 setting, the canonical
+models `P.model` and `L.model`, and `Poly P`. Ch15 consumes residual's generic
+bounded-`polyFunc` finite instances. The original game uses residual's unique
+seed-bearing `LineDesc` and `linePointDist`; extended-dimension arguments use ch15's
+separate `DirectLineDesc` and `directLinePointDist`. The source route contains no
+divisibility or symmetry assumption. Conditional `_of_dvd` bridges and the established
+qld-4-13 bound are Lean-only and are never linked as source theorem implementations.
