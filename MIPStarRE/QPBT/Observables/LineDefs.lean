@@ -29,8 +29,9 @@ open MIPStarRE.LDT.Preliminaries
 
 noncomputable section
 
-/-- Applying the canonical line-representative projection twice has the same
-effect as applying it once. -/
+/-- A formalization-only identity used to construct canonical line
+descriptions: applying the canonical line-representative projection twice has
+the same effect as applying it once. -/
 theorem lineRepMap_apply_self {K : Type*} [Field K] {m : ℕ}
     (v u : Fin m → K) :
     lineRepMap v (lineRepMap v u) = lineRepMap v u := by

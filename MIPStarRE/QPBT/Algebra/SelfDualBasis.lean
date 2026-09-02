@@ -30,10 +30,11 @@ def IsSelfDual {F K ι : Type*} [CommRing F] [CommRing K] [DecidableEq ι]
   IsDualBasisPair b b
 
 /-- Normality in `def:dual-self-dual-normal-basis`, blueprint
-`ch11_qpbt_algebra.tex:241-257`, paper `04_preliminaries.tex:498-502`. -/
-def IsNormal {F K : Type*} [CommSemiring F] [Field K] [Algebra F K]
-    {k : ℕ} (b : Module.Basis (Fin k) F K) (q : ℕ) : Prop :=
-  ∃ α : K, ∀ j, b j = α ^ (q ^ j.1)
+`ch11_qpbt_algebra.tex:241-257`, paper `04_preliminaries.tex:498-502`. The
+Frobenius exponent uses the cardinality of the base field. -/
+def IsNormal {F K : Type*} [CommSemiring F] [Fintype F] [Field K] [Algebra F K]
+    {k : ℕ} (b : Module.Basis (Fin k) F K) : Prop :=
+  ∃ α : K, ∀ j, b j = α ^ (Fintype.card F ^ j.1)
 
 end Basis
 
@@ -44,7 +45,7 @@ theorem exists_selfDualNormalBasis {K : Type*} [Field K] [Fintype K]
     [Algebra (ZMod 2) K] (k : ℕ) (hk : Odd k)
     (hcard : Fintype.card K = 2 ^ k) :
     ∃ b : Module.Basis (Fin k) (ZMod 2) K,
-      Basis.IsSelfDual b ∧ Basis.IsNormal b 2 := by
+      Basis.IsSelfDual b ∧ Basis.IsNormal b := by
   sorry
 
 /-- Coordinates in the fixed model's chosen binary basis;
@@ -61,6 +62,17 @@ theorem binaryCoordinates_mul {q : ℕ} (F : FixedFieldModel q) (a b : F.K) :
       ∑ i : Fin F.basisDim, F.binaryCoordinates a i •
         (F.binaryCoordinates (F.basis i * b)) := by
   sorry
+
+/-- Multiplication by a basis element is multiplication-table action in binary
+coordinates; this is the second equality of `eq:eq-mult`, blueprint
+`ch11_qpbt_algebra.tex:327-330`, paper `04_preliminaries.tex:684-700`. -/
+theorem binaryCoordinates_basis_mul {q : ℕ} (F : FixedFieldModel q)
+    (i : Fin F.basisDim) (b : F.K) :
+    F.binaryCoordinates (F.basis i * b) =
+      multiplicationTable F.basis (F.basis i) *ᵥ F.binaryCoordinates b := by
+  simpa only [FixedFieldModel.binaryCoordinates, kappa, multiplicationTable,
+    Module.Basis.equivFun_apply] using
+    (Algebra.leftMulMatrix_mulVec_repr F.basis (F.basis i) b).symm
 
 /-- Matrix coordinate expansion for an arbitrary basis. This is the `chi_q`
 construction of `def:subfields-kappa`, blueprint `ch11_qpbt_algebra.tex:207-214`,

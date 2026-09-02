@@ -4,7 +4,7 @@ import MIPStarRE.QPBT.Games.TypedCondLinear
 import MIPStarRE.QPBT.Observables.LineDefs
 
 /-!
-# Low-degree game interfaces
+# Low-degree polynomial measurements and soundness
 
 This file defines the finite polynomial-measurement index and states the
 low-degree soundness theorem used by the QPBT combining argument. Polynomial
@@ -12,7 +12,7 @@ outcomes are bounded multivariate polynomials.
 
 ## References
 
-The source-facing declarations are `def:ld-meas` and `lem:ld-soundness` in
+The principal definition and theorem are `def:ld-meas` and `lem:ld-soundness` in
 `blueprint/src/chapter/ch13_qpbt_test.tex:63-160`. Their paper origin is
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:243-287,392-480`.
 The dimension-divisibility hypothesis is documented in

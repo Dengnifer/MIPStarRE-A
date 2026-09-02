@@ -34,7 +34,7 @@ theorem trace_mul_eq_dotProduct_basisCoord {F K ι : Type*} [Field F] [Field K]
 theorem trace_basis_eq_one_of_selfDual_normal {K : Type*} [Field K] [Fintype K]
     [Algebra (ZMod 2) K] {k : ℕ} (hk : Odd k)
     (b : Module.Basis (Fin k) (ZMod 2) K)
-    (hself : Basis.IsSelfDual b) (hnormal : Basis.IsNormal b 2) (i : Fin k) :
+    (hself : Basis.IsSelfDual b) (hnormal : Basis.IsNormal b) (i : Fin k) :
     Algebra.trace (ZMod 2) K (b i) = 1 := by
   sorry
 
@@ -43,7 +43,7 @@ theorem trace_basis_eq_one_of_selfDual_normal {K : Type*} [Field K] [Fintype K]
 theorem basisCoord_one_of_selfDual_normal {K : Type*} [Field K] [Fintype K]
     [Algebra (ZMod 2) K] {k : ℕ} (hk : Odd k)
     (b : Module.Basis (Fin k) (ZMod 2) K)
-    (hself : Basis.IsSelfDual b) (hnormal : Basis.IsNormal b 2) :
+    (hself : Basis.IsSelfDual b) (hnormal : Basis.IsNormal b) :
     b.equivFun 1 = fun _ => 1 := by
   sorry
 

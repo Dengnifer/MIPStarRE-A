@@ -59,6 +59,8 @@ The classical low individual degree game is a two-player game based on the low i
 \end{definition}
 
 The next two lemmas show that the CL functions $L_{\mathsf{Point}}$, $L_{\mathsf{ALine}}$, $L_{\mathsf{DLine}}$ give rise to the axis-parallel and diagonal line-versus-point distributions.
+Their formal coordinate labels are $r\in\{0,\ldots,m-1\}$, with label $r$
+representing the paper's coordinate $r+1$.
 
 \begin{lemma}\label{lem:alnf}
 	\lean{MIPStarRE.QPBT.aLinePointDist_point_marginal_uniform, MIPStarRE.QPBT.aLinePointDist_mem_line}
@@ -126,6 +128,8 @@ The soundness properties of the low individual degree game are expressed in term
 	\leanok
 	\uses{def:polyfunc, def:polymeasurements, def:polynomials-degree}
 	Let $\polymeas{m}{q}{d}$ denote the set of POVM measurements indexed by $\polyfunc{m}{q}{d}$, the polynomial representatives of individual degree at most $d$ in each variable; this is the notion of Definition~\ref{def:polymeasurements}, and the argument order $(m,q,d)$ follows that definition (the paper orders the arguments as $(m,d,q)$). By Definition~\ref{def:polynomials-degree}, evaluation identifies these representatives with the corresponding polynomial functions $g\colon \F_q^m \to \F_q$, bijectively whenever $d \le q-1$; at the canonical parameters (Definition~\ref{def:introparams}, where $d = 1 \le q-1$) the identification is bijective; the general statements of this chapter quantify over all admissible tuples and are read through the representative convention. More generally, for an integer $k$ and tuples $m = (m_1,\ldots,m_k)$, $q = (q_1,\ldots,q_k)$, $d = (d_1,\ldots,d_k)$, let $\mathrm{PolyMeas}(m,q,d,k)$ denote the set of measurements $G = \{G_{g_1,\ldots,g_k}\}$ such that for each $i \in \{1,\ldots,k\}$, the outcome index $g_i$ is a polynomial $g_i\colon \F_{q_i}^{m_i} \to \F_{q_i}$ of individual degree at most $d_i$.
+	The formal tuple components are labelled by $r\in\{0,\ldots,k-1\}$, with
+	label $r$ representing the paper's component $r+1$.
 \end{definition}
 
 Quantum soundness of a version of the classical low-degree test for polynomials of low \emph{total} degree was claimed by Natarajan and Vidick, building on an analysis of a three-prover version of the test by Vidick; there is a known gap in the soundness analysis of that test, and it is not used here. Instead, the construction relies on the low \emph{individual} degree test, whose quantum soundness is proved in~\cite{Ji2020LowIndividualDegree} and generalized in~\cite{Ji2021Quantum}. The statement below is the form most directly useful in what follows.
@@ -218,6 +222,8 @@ We recall the Magic Square game of Mermin and Peres. It is a simple self-test fo
 \end{definition}
 
 The following theorem records the self-testing (rigidity) properties of the Magic Square game. It is used in the soundness analysis of the Pauli basis test to enforce anticommutation relations between certain pairs of observables.
+In the formal indexing, the paper's variables $1$ and $5$ have labels $0$ and
+$4$, respectively.
 
 \begin{theorem}[Rigidity of the Magic Square game]\label{thm:ms-rigidity}
 	\lean{MIPStarRE.QPBT.exists_ms_rigidity}

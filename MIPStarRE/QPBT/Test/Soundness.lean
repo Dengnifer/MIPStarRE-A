@@ -156,7 +156,7 @@ noncomputable def pauliOperatorDistanceA
     (w : PauliSoundnessWitness P S) (W : PauliKind) : ℝ :=
   ∑ u : PauliRegister P,
       ‖applyOperatorToState (liftedAEffect S w.φA
-        ((S.A (pauliQuestion P W)).effect (.pauliOutcome u)) -
+        (((S.A (pauliQuestion P W)).postprocess pauliAnswerOrZero).effect u) -
       pauliProjOnA'' P W u) (idealState P w.aux)‖ ^ 2
 
 /-- The symmetric B-side operator-distance quantity from `def:povm-distance`,
@@ -168,7 +168,7 @@ noncomputable def pauliOperatorDistanceB
     (w : PauliSoundnessWitness P S) (W : PauliKind) : ℝ :=
   ∑ u : PauliRegister P,
       ‖applyOperatorToState (liftedBEffect S w.φB
-        ((S.B (pauliQuestion P W)).effect (.pauliOutcome u)) -
+        (((S.B (pauliQuestion P W)).postprocess pauliAnswerOrZero).effect u) -
       pauliProjOnB'' P W u) (idealState P w.aux)‖ ^ 2
 
 /-- `thm:pauli`: every sufficiently successful Pauli basis test strategy admits

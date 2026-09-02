@@ -116,7 +116,7 @@ noncomputable def qubitOperatorDistanceA
   ∑ u : PauliRegister P,
     ‖applyOperatorToState
       (liftedQubitAEffect S w.φA
-          ((S.A (pauliQuestion P W)).effect (.pauliOutcome u)) -
+          (((S.A (pauliQuestion P W)).postprocess pauliAnswerOrZero).effect u) -
         qubitProjOnA'' P W u)
       (idealQubitState P w.aux)‖ ^ 2
 
@@ -127,7 +127,7 @@ noncomputable def qubitOperatorDistanceB
   ∑ u : PauliRegister P,
     ‖applyOperatorToState
       (liftedQubitBEffect S w.φB
-          ((S.B (pauliQuestion P W)).effect (.pauliOutcome u)) -
+          (((S.B (pauliQuestion P W)).postprocess pauliAnswerOrZero).effect u) -
         qubitProjOnB'' P W u)
       (idealQubitState P w.aux)‖ ^ 2
 
@@ -135,7 +135,7 @@ noncomputable def qubitOperatorDistanceB
 coordinates. Blueprint `ch13_qpbt_test.tex:430-454`, paper
 `08_classical_and_quantum_low_degree_tests.tex:1450-1491`.
 
-The theorem retains the source-compatible nonnegative error boundary and uses
+The theorem assumes a nonnegative error parameter, as in the source, and uses
 only `P.model` and its stored basis dimension. -/
 theorem pauli_soundness_qubit :
     ∃ a b : ℝ, 1 ≤ a ∧ 0 < b ∧ b < 1 ∧

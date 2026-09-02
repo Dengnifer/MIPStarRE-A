@@ -102,7 +102,8 @@ noncomputable def msOperatorDistanceA (S : Strategy msGame)
     (w : MsRigidityWitness S) (j : Fin 9) (W : PauliKind) : ℝ :=
   opFamilyDistSq (uniformDistribution Unit)
     (fun _ b => heteroKron
-      (conjIsometry w.φA ((S.A (.var j)).effect (.bit b))) 1)
+      (conjIsometry w.φA
+        (((S.A (.var j)).postprocess msBitOrZero).effect b)) 1)
     (fun _ b => heteroKron
       (heteroKron (idealMagicBitProj W b) (1 : Op w.ιA'')) 1)
     (idealMsState w.aux)
@@ -112,7 +113,8 @@ noncomputable def msOperatorDistanceB (S : Strategy msGame)
     (w : MsRigidityWitness S) (j : Fin 9) (W : PauliKind) : ℝ :=
   opFamilyDistSq (uniformDistribution Unit)
     (fun _ b => heteroKron 1
-      (conjIsometry w.φB ((S.B (.var j)).effect (.bit b))))
+      (conjIsometry w.φB
+        (((S.B (.var j)).postprocess msBitOrZero).effect b)))
     (fun _ b => heteroKron 1
       (heteroKron (idealMagicBitProj W b) (1 : Op w.ιB'')))
     (idealMsState w.aux)
@@ -122,11 +124,9 @@ noncomputable def msOperatorDistanceB (S : Strategy msGame)
 noncomputable def msAnticommutatorDistanceA (S : Strategy msGame)
     (w : MsRigidityWitness S) : ℝ :=
   let X := heteroKron
-    (conjIsometry w.φA
-      ((S.A (.var 0)).effect (.bit 0) - (S.A (.var 0)).effect (.bit 1))) 1
+    (conjIsometry w.φA (obsOf ((S.A (.var 0)).postprocess msBitOrZero))) 1
   let Z := heteroKron
-    (conjIsometry w.φA
-      ((S.A (.var 4)).effect (.bit 0) - (S.A (.var 4)).effect (.bit 1))) 1
+    (conjIsometry w.φA (obsOf ((S.A (.var 4)).postprocess msBitOrZero))) 1
   opDistSq (uniformDistribution Unit) (fun _ => X * Z)
     (fun _ => -(Z * X)) (idealMsState w.aux)
 
@@ -135,11 +135,9 @@ noncomputable def msAnticommutatorDistanceA (S : Strategy msGame)
 noncomputable def msAnticommutatorDistanceB (S : Strategy msGame)
     (w : MsRigidityWitness S) : ℝ :=
   let X := heteroKron 1
-    (conjIsometry w.φB
-      ((S.B (.var 0)).effect (.bit 0) - (S.B (.var 0)).effect (.bit 1)))
+    (conjIsometry w.φB (obsOf ((S.B (.var 0)).postprocess msBitOrZero)))
   let Z := heteroKron 1
-    (conjIsometry w.φB
-      ((S.B (.var 4)).effect (.bit 0) - (S.B (.var 4)).effect (.bit 1)))
+    (conjIsometry w.φB (obsOf ((S.B (.var 4)).postprocess msBitOrZero)))
   opDistSq (uniformDistribution Unit) (fun _ => X * Z)
     (fun _ => -(Z * X)) (idealMsState w.aux)
 
@@ -147,10 +145,9 @@ noncomputable def msAnticommutatorDistanceB (S : Strategy msGame)
 Blueprint `ch13_qpbt_test.tex:222-244`, paper
 `08_classical_and_quantum_low_degree_tests.tex:612-652`.
 
-**Local fix:** The state estimate is stated in Euclidean norm at scale
-`sqrt ε`, and the ideal observables use the local basis change described at
-paper lines 650--652. One universal constant applies to every strategy and
-error parameter. This formal boundary is recorded in issue #16. -/
+The paper states the Euclidean estimate at scale `sqrt ε` at lines 624--626
+and explains the norm conversion and local basis change at lines 650--652. One
+universal constant applies to every strategy and nonnegative error parameter. -/
 theorem exists_ms_rigidity :
     ∃ C : ℝ, 1 ≤ C ∧ ∀ (ε : ℝ), 0 ≤ ε →
       ∀ S : Strategy msGame, 1 - ε ≤ S.value →

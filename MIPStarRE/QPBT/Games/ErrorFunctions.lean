@@ -16,10 +16,14 @@ chapter 6.
 namespace MIPStarRE.QPBT
 
 /-- A nonnegative one-parameter error function bounded by a positive real power.
-The prefactor and exponent are quantified separately: paper chapter 14 explicitly
-obtains `sqrt ε` at `14_analysis_of_the_pauli_basis_test.tex:503-505,657-679`,
-which would be excluded if the two constants were identified as in the shorthand
-at `04_preliminaries.tex:26-29`. -/
+
+**Local fix:** The prefactor and exponent are quantified separately. Paper
+chapter 14 explicitly obtains `sqrt ε` at
+`14_analysis_of_the_pauli_basis_test.tex:508-520,649-676`, which the coupled
+constant in the shorthand at `04_preliminaries.tex:26-29` cannot bound on all
+positive inputs. The correction is documented in
+`docs/paper-gaps/qpbt_polynomial-error-square-root.tex` and tracked by issue
+#16. -/
 def IsPolyErr (f : ℝ → ℝ) : Prop :=
   ∃ C r : ℝ, 1 ≤ C ∧ 0 < r ∧ ∀ x, 0 ≤ x →
     0 ≤ f x ∧ f x ≤ C * Real.rpow x r

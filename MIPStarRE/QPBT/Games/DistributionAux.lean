@@ -118,6 +118,19 @@ theorem Distribution.restrict_isProbability {α : Type*} [DecidableEq α]
     (μ : Distribution α) (p : α → Prop) [DecidablePred p]
     (hpos : 0 < ∑ a ∈ μ.support.filter p, μ.weight a) :
     (Distribution.restrict μ p hpos).IsProbability := by
-  sorry
+  simp only [Distribution.IsProbability, Distribution.totalWeight,
+    Distribution.restrict]
+  calc
+    (∑ a ∈ μ.support.filter p,
+        if p a then μ.weight a / ∑ b ∈ μ.support.filter p, μ.weight b else 0) =
+        ∑ a ∈ μ.support.filter p,
+          μ.weight a / ∑ b ∈ μ.support.filter p, μ.weight b := by
+      apply Finset.sum_congr rfl
+      intro a ha
+      rw [if_pos (Finset.mem_filter.mp ha).2]
+    _ = (∑ a ∈ μ.support.filter p, μ.weight a) /
+        ∑ b ∈ μ.support.filter p, μ.weight b := by
+      rw [Finset.sum_div]
+    _ = 1 := div_self hpos.ne'
 
 end MIPStarRE.QPBT
