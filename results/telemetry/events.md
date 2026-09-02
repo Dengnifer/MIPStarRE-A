@@ -225,3 +225,9 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   operator terminated the orphaned wrapper, retaining the transcript as
   failure evidence.  Since no exact-head review was published, it cannot be
   adjudicated; rerun `review.sh 5` after stale-lock reclamation.
+- **Repeated failure:** two subsequent exact-head retries on `ce94902` also
+  stopped with dead lock owners and no terminal ledger.  The merge gate cannot
+  use operator adjudication for an absent review marker, so no review evidence
+  was manufactured.  The operator has parked further retries pending the
+  bounded reviewer-lane repair, after which the branch will take a fresh base
+  and repeat CI and review.
