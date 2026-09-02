@@ -26,3 +26,4 @@
 {"ts": "2026-09-02T11:46:05+0800", "kind": "cache-get", "trigger": "warm-worktree warm path snapshot=snap-20260831T131851Z-02777b586cf2", "outcome": "failed", "seconds": 2558, "note": "worktree=/home/drx/MIPStarRE-qpbt/.worktrees/issue-20-retire-merge-fix-cap; lake exe cache get failed"}
 {"ts": "2026-09-02T12:14:43+0800", "kind": "ci-build", "trigger": "ci.sh pr=21", "seconds": 1195, "outcome": "failure", "sha": "7f5c58ba9a658d208f3419b1bf982045f2eff897", "note": "branch issue-20-retire-merge-fix-cap"}
 {"ts": "2026-09-02T12:20:47+0800", "kind": "ci-build", "trigger": "ci.sh pr=21", "seconds": 31, "outcome": "success", "sha": "7f5c58ba9a658d208f3419b1bf982045f2eff897", "note": "branch issue-20-retire-merge-fix-cap"}
+{"ts": "2026-09-02T15:05:34+0800", "kind": "ci-build", "trigger": "ci.sh pr=21", "seconds": 33, "outcome": "success", "sha": "4a0d5ec6743619005457615a86809245ecd01482", "note": "branch issue-20-retire-merge-fix-cap"}
