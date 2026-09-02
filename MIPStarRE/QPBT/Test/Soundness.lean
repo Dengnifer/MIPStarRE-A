@@ -1,4 +1,5 @@
 import MIPStarRE.QPBT.Test.PauliBasisTest
+import MIPStarRE.QPBT.State
 
 /-!
 # Pauli basis test soundness
@@ -35,54 +36,6 @@ noncomputable def deltaQld (a b ε : ℝ) (m d q : ℕ) : ℝ :=
   a * Real.rpow ((m * d : ℕ) : ℝ) a *
     (Real.rpow ε b + Real.rpow (q : ℝ) (-b) +
       Real.rpow 2 (-(b * ((m * d : ℕ) : ℝ))))
-
-/-- Matrix conjugation by a finite-dimensional linear isometry.  This is a
-Lean-only helper for the operator conclusion of `thm:pauli`; it uses the
-matrix representation of the isometry and its conjugate transpose.  Blueprint
-`blueprint/src/chapter/ch13_qpbt_test.tex:386-403`, paper origin
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1426-1447`.
--/
-noncomputable def conjIsometry {ι ι' : Type*}
-    [Fintype ι] [DecidableEq ι] [Fintype ι'] [DecidableEq ι']
-    (φ : EuclideanSpace ℂ ι →ₗᵢ[ℂ] EuclideanSpace ℂ ι')
-    (M : Op ι) : Op ι' :=
-  let U : Matrix ι' ι ℂ := Matrix.toEuclideanLin.symm φ.toLinearMap
-  U * M * Uᴴ
-
-/-- Reindex a finite Euclidean-space vector along an equivalence.  This is the
-coordinate form of the tensor-register shuffle used in the paper's ideal
-state (`def:EPR`, blueprint `blueprint/src/chapter/ch11_qpbt_algebra.tex:513-523`),
-paper origin `references/qpbt-paper/04_preliminaries.tex:946-955`.
--/
-noncomputable def reindexState {ι ι' : Type*} [Fintype ι] [DecidableEq ι]
-    [Fintype ι'] [DecidableEq ι'] (e : ι ≃ ι')
-    (ψ : EuclideanSpace ℂ ι) : EuclideanSpace ℂ ι' :=
-  (EuclideanSpace.equiv ι' ℂ).symm
-    (fun j => (EuclideanSpace.equiv ι ℂ ψ) (e.symm j))
-
-/-- Coordinate tensoring of two local maps on a bipartite state.  The formula
-is a genuine finite sum over the input coordinates; preservation of the norm
-is part of the later soundness proof for `thm:pauli`, blueprint
-`blueprint/src/chapter/ch13_qpbt_test.tex:386-403`, paper origin
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1426-1447`.
--/
-noncomputable def isometryTensor
-    {ιA ιB ιA' ιB' R : Type*}
-    [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
-    [Fintype ιA'] [DecidableEq ιA'] [Fintype ιB'] [DecidableEq ιB']
-    [Fintype R] [DecidableEq R]
-    (φA : EuclideanSpace ℂ ιA →ₗᵢ[ℂ] EuclideanSpace ℂ (ιA' × R))
-    (φB : EuclideanSpace ℂ ιB →ₗᵢ[ℂ] EuclideanSpace ℂ (ιB' × R))
-    (ψ : EuclideanSpace ℂ (ιA × ιB)) :
-    EuclideanSpace ℂ ((ιA' × R) × (ιB' × R)) :=
-  (EuclideanSpace.equiv ((ιA' × R) × (ιB' × R)) ℂ).symm
-    (fun p =>
-      ∑ i : ιA, ∑ j : ιB,
-        ((EuclideanSpace.equiv (ιA' × R) ℂ)
-            (φA ((EuclideanSpace.equiv ιA ℂ).symm (Pi.single i 1))) p.1) *
-          ((EuclideanSpace.equiv (ιB' × R) ℂ)
-            (φB ((EuclideanSpace.equiv ιB ℂ).symm (Pi.single j 1))) p.2) *
-          ((EuclideanSpace.equiv (ιA × ιB) ℂ) ψ (i, j)) )
 
 /-- The ideal auxiliary state `aux ⊗ EPR_q^{⊗M}` in the shuffled register
 ordering.  The EPR factor is the concrete `eprState` from

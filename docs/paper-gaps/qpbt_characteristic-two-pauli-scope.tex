@@ -1,0 +1,39 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{xurl}
+\usepackage[hidelinks]{hyperref}
+\input{command}
+\begin{document}
+\section{At a glance}
+This is a medium implementation obligation.  Mathlib supplies finite-field
+characters and finite sums; the remaining work is project-local matrix algebra.
+The difficulty is medium, with an estimated weight of one algebra leaf and
+roughly 100--200 lines of eventual proof.  The Mathlib/project split is
+therefore mainly character orthogonality from Mathlib and matrix identities in
+the project; the key inputs are `ffChar`, finite-field trace, and the Pauli
+shift/phase definitions.
+\textbf{Key mathematical inputs.}  The key Mathlib or mathematical inputs are finite-field trace nondegeneracy,
+additive-character orthogonality, and the explicit shift and phase formulas.
+\section{Key theorem forms}
+For prime characteristic the source forms are
+\[\tau^X(a)\tau^Z(b)=\omega^{-\operatorname{tr}(a\cdot b)}
+\tau^Z(b)\tau^X(a),\qquad
+\mathbb E_{u\in V}\omega^{\operatorname{tr}(u\cdot v)}=0.\]
+\section{Source and formal scope}
+The Pauli preliminaries state twisted commutation and Fourier cancellation for
+an arbitrary prime field characteristic, using the additive character
+$\omega^{\operatorname{tr}(\cdot)}$.  The landed QPBT operator definitions use
+the binary character with phase $-1$, because the test fixes field sizes
+$q=2^k$.  This unit therefore states the source-facing algebra with the
+general character `ffChar` and keeps binary matrix corollaries under separate
+names for downstream QPBT consumers.
+\section{Conclusion}
+The split is a representation boundary, not an additional hypothesis on the
+source lemmas.  General-prime proofs remain obligations until the binary
+operator layer is generalized; the binary specializations are not linked to
+the unrestricted blueprint labels.  See \ghissue{16} for the construction plan.
+The source is the Pauli preliminaries of \cite{Ji2020MIPStar} (04\_preliminaries.tex,
+lines 1123--1140).
+\bibliographystyle{alpha}
+\bibliography{references}
+\end{document}
