@@ -132,7 +132,7 @@ that ch15 can instantiate it at dimension `2m+2` (answers ch15 RECONCILE-2).
 | def:anticommuting-tuple | `PauliTuple`, `IsAnticommuting`, `IsCommuting` | Anticommuting | R+N | `abbrev PauliTuple (q m) [FieldModel q] := (Fin m → K) × (Fin m → K) × K × K`; `def IsAnticommuting (ω : PauliTuple q m) : Prop := gammaValue ω.1 ω.2.1 ω.2.2.1 ω.2.2.2 ≠ 0` (γ REUSES 4.1's `gammaValue`, eq:gamma-value); `IsCommuting` its negation; both `DecidablePred` |
 | fact:omega-anticomm-prob | `anticommProb`, `anticommProb_eq`, `commProb_ge_half`, `anticommProb_ge_of_m_le_q`, `anticommProb_ge_of_one_le_md` | Anticommuting | N | `noncomputable def anticommProb (q m : ℕ) [FieldModel q] : ℝ := ((univ.filter (IsAnticommuting (q := q) (m := m))).card : ℝ) / Fintype.card (PauliTuple q m)`; `anticommProb_eq : anticommProb q m = (1 - (q:ℝ)⁻¹) ^ (m+1) / 2` (`sorry`); the three bound lemmas `sorry`, the last with hypotheses `1 ≤ m`, `1 ≤ d` (`**Local fix:**` docstring, rem:omega-anticomm-prob-correction). Companion distributions `anticommTupleDist`, `commTupleDist` := `Distribution.uniformOnFinset` on the two filtered sets, `IsProbability` (`sorry`) |
 | def:projective-strategy-general (ch12) | `Strategy.IsProjective` | Setup | N | `def Strategy.IsProjective (S : Strategy G) : Prop := (∀ x, (S.A x).IsProjective) ∧ (∀ y, (S.B y).IsProjective)` (REUSE 4.1's `Measurement.IsProjective`) |
-| lem:projective-strategy-setup | `exists_projective_padded_strategy` | Setup | N | `theorem exists_projective_padded_strategy (G : Game) (S : Strategy G) : ∃ (nA nB : ℕ) (T : Strategy G) (eA : T.ιA ≃ S.ιA × (Fin nA → Bool)) (eB : T.ιB ≃ S.ιB × (Fin nB → Bool)), T.IsProjective ∧ reindexState (Equiv.prodShuffle …) T.ψ = isometryTensor (padWithZeros eA) (padWithZeros eB) S.ψ ∧ T.value = S.value` (`sorry`; proof route = `naimarkTensorProductCorrelation` + residual-projector completion, per the blueprint proof). Lean-only `padWithZeros` helper |
+| lem:projective-strategy-setup | `exists_projective_padded_strategy` | Setup | N | `theorem exists_projective_padded_strategy (G : Game) (S : Strategy G) : ∃ (nA nB : ℕ) (T : Strategy G) (eA : T.ιA ≃ S.ιA × (Fin nA → Bool)) (eB : T.ιB ≃ S.ιB × (Fin nB → Bool)), T.IsProjective ∧ reindexState (prodShuffle …) T.ψ = isometryTensor (padWithZeros eA) (padWithZeros eB) S.ψ ∧ T.value = S.value` (`sorry`; proof route = `naimarkTensorProductCorrelation` + residual-projector completion, per the blueprint proof). Lean-only `padWithZeros` helper; `prodShuffle` is imported from residual `State.lean` |
 | — (standing convention, 14:160–172) | `ProjectiveSetting`, `.toStrategy`, `.IsSymmetric` | Defs | N **INTERFACE** | `structure ProjectiveSetting (P : AdmissibleParams) [FieldModel P.q] (ε : ℝ) where ι : Type; [Fintype ι] [DecidableEq ι]; ψ : EuclideanSpace ℂ (ι × ι); ψ_norm : ‖ψ‖ = 1; M : PauliQuestion P → Quantum.Measurement (PauliAnswer P) ι; M_proj : ∀ x, (M x).IsProjective; win : 1 - ε ≤ toStrategyAux.value`. Shared `M` for both players is forced by the statements of node 10 (same symbol on both sides) and is the compact symmetric notation of ch12; `noncomputable def toStrategy : Strategy (pauliBasisTest P)` (`ιA = ιB = ι`, `A = B = M`); `def IsSymmetric (S) : Prop := reindexState (Equiv.prodComm _ _) S.ψ = S.ψ` (`def:symmetric-game`, hypothesis of node 17 only) |
 | — (question embeddings, 14:174–184) | `ProjectiveSetting.pointQuestion`, `.lineQuestion`, `.pauliQuestion`, `.pairQuestion`, `.pairWQuestion`, `.msQuestion` and the `Option`-completed families `.pointMeas`, `.lineMeas`, `.pairMeas`, `.msMeas`, `.pauliMeas` | Defs | N **INTERFACE** | `def pointQuestion (W : PauliKind) (u : Fin P.m → K) : PauliQuestion P := (PauliType.point W, contentOfPoint W u)` and analogues (contents are full `PauliSpace P` vectors with the named blocks filled, 0 elsewhere — 4.1 (e)9); `noncomputable def pointMeas (S) (W) (u) : Quantum.Measurement (Option K) S.ι := (S.M (S.pointQuestion W u)).postprocess pointAnswerOpt` where `pointAnswerOpt : PauliAnswer P → Option K` sends `.value a ↦ some a`, every other constructor ↦ `none`. **Every answer alphabet in this chapter is `Option`-completed this way**: it is exactly the "answers not of the prescribed form are rejected" convention, and it makes the `⊥` classes of def:ideg-deg-polynomials and of item 2 of node 10 uniform. `lineMeas W ℓ : Quantum.Measurement (Option (DegPoly P.q (P.m*P.d))) S.ι` uses `DegPoly.padTo` on axis-parallel lines |
 | def:strategy-observables | `ProjectiveSetting.pointObs`, `pointObs_sq_eq_one` | Defs | N | `noncomputable def pointObs (S) (W : PauliKind) (r : K) (u : Fin P.m → K) : Op S.ι := ∑ a : K, negOnePow (binTrace (a * r)) • (S.pointMeas W u).effect (some a)` (eq:qld-strat-obs); companion `pointObs_sq_eq_one : S.pointObs W r u * S.pointObs W r u = 1` and `pointObs_isHermitian` (`sorry` — the prose "is an observable with eigenvalues ±1", per 4.1 (e)7) |
@@ -151,8 +151,8 @@ that ch15 can instantiate it at dimension `2m+2` (answers ch15 RECONCILE-2).
 Lean-only helpers (docstring-marked "formalization-only auxiliary" per AGENTS.md):
 `IsPolyErr (f : ℝ → ℝ) : Prop := ∃ a b, 1 ≤ a ∧ 0 < b ∧ ∀ ε, 0 ≤ ε → f ε ≤ a * ε ^ b` and
 `IsPolyErr₂` (Games/Consistency — adopted from the ch15 brief so both waves share one
-predicate); `negOnePow (b : ZMod 2) : ℂ`; `vecTensor`, `reindexState`, `reindexOp`,
-`sixRegShuffle`, `padWithZeros`; `contentOfPoint`/`contentOfLine`/… block fillers;
+predicate); `reindexOp`, `sixRegShuffle`, `padWithZeros`;
+`contentOfPoint`/`contentOfLine`/… block fillers;
 `pointAnswerOpt`/`lineAnswerOpt`/`pairAnswerOpt`/`msAnswerOpt`; `msValueAt`;
 `restrictToLine`; `π_{i-1}` truncation if 4.1 does not already export it.
 
@@ -333,3 +333,89 @@ predicate); `negOnePow (b : ZMod 2) : ℂ`; `vecTensor`, `reindexState`, `reinde
   explicit argument to the two conditional bounds. Confirm, or key the whole file to
   `AdmissibleParams` (which would cost ch15 the dimension-generic reuse of nothing —
   the node is not on ch15's path).
+
+## Operator adjudication — 2026-09-02
+
+This section is binding for stage 4.2 and supersedes incompatible signature sketches
+above. The decisions follow the landed stage-4.1 API and the primary source in
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex`.
+
+### RECONCILE decisions
+
+- **RECONCILE-1 — accepted with landed names.** Reuse `tauObservable` and
+  `tauObservable_eq_sum_pauliProj`. Reuse the existing `phaseSign`; do not introduce
+  `negOnePow` or a second sign convention.
+- **RECONCILE-2 — accepted after removing the obsolete model parameter.** All listed
+  `PauliAnswer` constructors and payloads have landed. Define
+  `DegPoly (K : Type*) (c : ℕ) := Fin (c + 1) → K` and instantiate it with
+  `PauliScalar P`. Reuse `evalCoefficient`. No declaration in this wave may retain a
+  free `[FieldModel q]` binder.
+- **RECONCILE-3 — use the landed block API and repair line descriptions.** Use the
+  exported block accessors. Move `pauliQuestion` from `Test/Soundness.lean` to
+  `Test/PauliBasisTest.lean` before ch14 imports it, avoiding an import cycle. Define
+  `LineDesc` as a nonredundant tagged axis/diagonal presentation with a canonical base,
+  seed, and direction data. The unrestricted four-field sketch above is insufficient:
+  paper lines 997–1008 require the representative base to be canonical.
+- **RECONCILE-4 — replace every guessed model API by the canonical model.** Use
+  `P.model` and `L.model`; use `PauliScalar P` for QPBT scalars and `ScalarQ L` for the
+  dimension-generic LDT layer. Key `PauliTuple`, `gammaValue`, and anticommutation data
+  to `P`. Import `reindexState`, generalized `isometryTensor`, `vecTensor`, and
+  `prodShuffle` from residual's neutral `QPBT/State.lean`; ch14 does not redefine them.
+  State distances with `applyOperatorToState`, not `.mulVec`.
+  `avg_closeness` must take `hμ : μ.IsProbability`, as required at paper lines 100–113.
+- **RECONCILE-5 — rejected.** Paper lines 160–172 fix an arbitrary heterogeneous
+  bipartite strategy; the shared-space/shared-measurement notation is only shorthand.
+  Use a setting whose data are an existing `Strategy (pauliBasisTest P)`, a
+  `Strategy.IsProjective` proof, and the win bound. Preserve `ιA`, `ιB`, `A`, `B`, and
+  side-specific placements and measurement families throughout.
+
+### OPEN decisions
+
+- **OPEN-1 — residual owns all four lower-chapter declarations.** The residual wave owns
+  `Strategy.IsProjective`, `def:line-point-dist`, state-dependent consistency, and
+  `def:symmetric-game`. It also owns `opDistSq` and its `Unit` bridge because residual
+  distance and rigidity statements already consume that API. Ch14 imports the first
+  three declarations and `opDistSq`, and does not assume symmetry. This follows the
+  source-layer DAG and lets the residual PR land before ch14. Construct each line-point
+  component from one common uniform seed and the fixed pair of CL maps, not by
+  projecting the already typed full game distribution.
+- **OPEN-2 — patch the blueprint metadata.** Add `def:polyfunc` to node 19's direct
+  uses, replace node 13's statement dependency on `lem:twisted-commutation` by
+  `def:generalized-pauli`, and add `def:game` to node 10. Keep the commutation lemma only
+  where the proof of node 18 actually uses it.
+- **OPEN-3 — drop the source-facing transfer lemma.** Paper lines 434–460 contain only
+  a prose instruction to repeat the argument with the parties interchanged. Do not
+  skeletonize blueprint node 17 as a source theorem. Keep the four placements and state
+  all four variants explicitly. A symmetry transfer result may exist only as a
+  Lean-only conditional helper and must not feed the source-labelled route.
+- **OPEN-4 — reject `Option` as the strategy measurement alphabet.** Fold wrong-form
+  answers into a fixed valid outcome to obtain complete typed point, line, pair, Pauli,
+  and Magic Square measurements; prove a separate bound on the folded junk mass.
+  Reserve `Option` for line-evaluation equivalence classes. Otherwise the proposed
+  observable squares to `1 - P_none`, so `pointObs_sq_eq_one` is false.
+- **OPEN-5 — accept the membership guard.** `EvaluatesTo` includes `u ∈ ℓ` and the
+  evaluation equation. Off-line inputs map to `none`; sampled line-point pairs are
+  on-line, so this is a faithful total extension.
+- **OPEN-6 — use one quantitative theorem and derive the existential wrapper.** Define
+  `deltaAnticom ε := Real.sqrt ε` and `deltaLine ε := Real.sqrt ε`, prove each satisfies
+  `IsPolyErr`, and derive the source existential form from the concrete theorem. Hidden
+  constants are quantified before `P`, `ε`, and the strategy. `IsPolyErr` includes
+  nonnegativity and uses `Real.rpow`; do not create two independent proof holes.
+- **OPEN-7 — package a real Magic Square strategy.** Define `msStrategyAt S ω` by typed
+  postprocessing with wrong-form mass folded into fixed valid answers, and define
+  `msValueAt S ω := (msStrategyAt S ω).value`. The scalar-only sketch cannot be passed
+  to the rigidity theorem used immediately after paper lines 213–217.
+- **OPEN-8 — key the tuple distribution to `AdmissibleParams`.** Define `PauliTuple P`,
+  `anticommProb P`, and its distributions using the canonical model. Discharge the
+  corrected lower bounds from `P.one_le_m` and `P.hd`; the exact probability theorem
+  may record that its value is independent of `P.d`.
+
+### Cross-wave contract
+
+`ProjectiveSetting P ε` is heterogeneous and wraps the landed strategy. `LineDesc` is
+the tagged canonical presentation above. All QPBT field data come from `P.model`, all
+dimension-generic LDT field data come from `L.model`, and no wave introduces a competing
+model or basis parameter. The residual wave owns the lower-chapter strategy,
+consistency, line-distribution, and operator-distance declarations, together with the
+neutral state helpers `reindexState`, `isometryTensor`, `vecTensor`, and `prodShuffle`;
+ch14 extends them. These decisions bind ch15 and ch16.
