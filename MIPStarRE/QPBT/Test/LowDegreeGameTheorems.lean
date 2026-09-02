@@ -28,16 +28,91 @@ open MIPStarRE.Quantum
 
 noncomputable section
 
-/-- The bounded multivariate polynomial outcome used by the low-degree
-soundness theorem. -/
-abbrev PolyIndex (L : LdParams) := ↥(polyFunc L.m (ScalarQ L) L.d)
+/-- The positive dimension in `LdParams` supplies the finite coordinate type
+used by the uniform axis and prefix-index marginals. -/
+instance (L : LdParams) : Nonempty (Fin L.m) :=
+  ⟨⟨0, lt_of_lt_of_le Nat.zero_lt_one L.hm⟩⟩
+
+/-- `lem:alnf`: the point and axis-index marginals of the axis line-point
+distribution are uniform. Blueprint `ch13_qpbt_test.tex:108-124`, paper
+`08_classical_and_quantum_low_degree_tests.tex:123-137`. -/
+theorem aLinePointDist_point_marginal_uniform (L : LdParams) :
+    (aLinePointDist L).map Prod.snd =
+        uniformDistribution (Fin L.m → ScalarQ L) ∧
+      (aLinePointDist L).map (fun sample => chiIndex L sample.1.seed) =
+        uniformDistribution (Fin L.m) := by
+  sorry
+
+/-- The incidence conclusion of `lem:alnf`, blueprint
+`ch13_qpbt_test.tex:108-124`, paper
+`08_classical_and_quantum_low_degree_tests.tex:123-137`. -/
+theorem aLinePointDist_mem_line (L : LdParams) :
+    ∀ sample ∈ (aLinePointDist L).support, sample.2 ∈ sample.1.pointSet := by
+  sorry
+
+/-- `lem:dlnf`: the point and prefix-index marginals of the diagonal
+line-point distribution are uniform. Blueprint `ch13_qpbt_test.tex:126-142`,
+paper `08_classical_and_quantum_low_degree_tests.tex:139-151`. -/
+theorem dLinePointDist_point_marginal_uniform (L : LdParams) :
+    (dLinePointDist L).map Prod.snd =
+        uniformDistribution (Fin L.m → ScalarQ L) ∧
+      (dLinePointDist L).map (fun sample => chiIndex L sample.1.seed) =
+        uniformDistribution (Fin L.m) := by
+  sorry
+
+/-- The incidence conclusion of `lem:dlnf`, blueprint
+`ch13_qpbt_test.tex:126-142`, paper
+`08_classical_and_quantum_low_degree_tests.tex:139-151`. -/
+theorem dLinePointDist_mem_line (L : LdParams) :
+    ∀ sample ∈ (dLinePointDist L).support, sample.2 ∈ sample.1.pointSet := by
+  sorry
+
+/-- The diagonal direction in every sampled description has the prefix-zero
+property of `lem:dlnf`, blueprint `ch13_qpbt_test.tex:126-142`, paper
+`08_classical_and_quantum_low_degree_tests.tex:139-151`. -/
+theorem dLinePointDist_prefix_zero (L : LdParams) :
+    ∀ sample ∈ (dLinePointDist L).support,
+      ∀ j : Fin L.m, j.val < (chiIndex L sample.1.seed).val →
+        sample.1.direction j = 0 := by
+  sorry
+
+/-- The actual bounded `polyFunc` subtype is finite over a finite coefficient
+semiring. This is the generic finite carrier required by `def:ld-meas`,
+blueprint `ch13_qpbt_test.tex:213-226`, paper
+`08_classical_and_quantum_low_degree_tests.tex:344-354`. -/
+noncomputable instance polyFuncFintype (m : ℕ) (K : Type*)
+    [CommSemiring K] [Fintype K] (d : ℕ) : Fintype ↥(polyFunc m K d) := by
+  letI : Finite ↥(polyFunc m K d) := Module.finite_of_finite K
+  exact Fintype.ofFinite _
+
+/-- A bounded multivariate polynomial outcome over an arbitrary finite
+coefficient semiring. -/
+noncomputable abbrev PolyIndex (m : ℕ) (K : Type*) [CommSemiring K]
+    [Fintype K] (d : ℕ) := ↥(polyFunc m K d)
+
+/-- A POVM indexed by one bounded multivariate polynomial. -/
+noncomputable abbrev PolyMeas (m : ℕ) (K : Type*) [CommSemiring K]
+    [Fintype K] [DecidableEq K] (d : ℕ) (ι : Type*)
+    [Fintype ι] [DecidableEq ι] := Measurement (PolyIndex m K d) ι
+
+/-- The source-general dependent family in `def:ld-meas`: component `i` may
+have its own coefficient field, number of variables, and degree bound.
+Blueprint `ch13_qpbt_test.tex:213-226`, paper
+`08_classical_and_quantum_low_degree_tests.tex:344-354`. -/
+noncomputable abbrev PolyMeasFamily (k : ℕ) (K : Fin k → Type*)
+    [∀ i, CommSemiring (K i)] [∀ i, Fintype (K i)]
+    [∀ i, DecidableEq (K i)] (m d : Fin k → ℕ) (ι : Type*)
+    [Fintype ι] [DecidableEq ι] :=
+  Measurement ((i : Fin k) → PolyIndex (m i) (K i) (d i)) ι
 
 /-- A simultaneous tuple of `L.k` bounded polynomial representatives. -/
-abbrev PolyTuple (L : LdParams) := Fin L.k → PolyIndex L
+noncomputable abbrev PolyTuple (L : LdParams) :=
+  Fin L.k → PolyIndex L.m (ScalarQ L) L.d
 
-/-- A complete POVM indexed by simultaneous bounded polynomial outcomes. -/
-abbrev PolyMeasTuple (L : LdParams) (ι : Type*)
-    [Fintype ι] [DecidableEq ι] := Measurement (PolyTuple L) ι
+/-- The constant-family specialization used by `lem:ld-soundness`. -/
+noncomputable abbrev PolyMeasTuple (L : LdParams) (ι : Type*)
+    [Fintype ι] [DecidableEq ι] :=
+  PolyMeasFamily L.k (fun _ => ScalarQ L) (fun _ => L.m) (fun _ => L.d) ι
 
 /-- Evaluate every component of a polynomial tuple at a point. -/
 def evalPolyTupleAt {L : LdParams} (u : Fin L.m → ScalarQ L)

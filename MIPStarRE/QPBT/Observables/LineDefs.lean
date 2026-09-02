@@ -1,7 +1,6 @@
 import MIPStarRE.QPBT.Games.DistributionAux
 import MIPStarRE.QPBT.Test.LowDegreeGame
 import MIPStarRE.LDT.Preliminaries.Polynomials
-import Mathlib.Data.Finsupp.Fintype
 
 /-!
 # Lines, bounded line polynomials, and line-point distributions
@@ -11,8 +10,8 @@ polynomials shared by the observable and combining chapters.  It also realizes
 the line-point distribution directly from the conditionally linear sampler.
 
 The bounded multivariate polynomial index remains the actual Mathlib
-`polyFunc` subtype.  Its finite instance is derived by injecting it into the
-finite table of coefficients with coordinatewise-bounded exponents.
+`polyFunc` subtype; its finite instance is supplied beside the measurement
+aliases in `Test.LowDegreeGameTheorems`.
 
 ## References
 
@@ -31,31 +30,79 @@ open MIPStarRE.LDT.Preliminaries
 
 noncomputable section
 
+/-- Applying the canonical line-representative projection twice has the same
+effect as applying it once. This is the fixed-point fact used by the tagged
+carrier below. -/
+theorem lineRepMap_apply_self {K : Type*} [Field K] {m : ℕ}
+    (v u : Fin m → K) :
+    lineRepMap v (lineRepMap v u) = lineRepMap v u := by
+  simp [lineRepMap, canonicalProjOfKernel, LinearMap.comp_apply]
+
 /-- The two presentations of lines used by the low-degree question sampler. -/
 inductive LineKind where
   | axis
   | diagonal
   deriving DecidableEq, Fintype
 
-/-- A line description retains the source seed as well as the canonical base
-point and raw direction data.  Retaining `seed` is essential for the restricted
-line distributions in the combining argument. -/
-structure LineDesc (L : LdParams) where
-  kind : LineKind
-  base : Fin L.m → ScalarQ L
-  seed : ScalarQ L
-  rawDirection : Fin L.m → ScalarQ L
+/-- The tagged canonical carrier of `def:line-point-dist`, blueprint
+`ch13_qpbt_test.tex:180-186`, paper
+`08_classical_and_quantum_low_degree_tests.tex:174-186`.
+
+An axis description stores its canonical base and seed. A diagonal description
+stores only the projected direction, together with its prefix-zero invariant.
+Both constructors carry the assertion that their base is fixed by the
+appropriate `lineRepMap`. -/
+inductive LineDesc (L : LdParams) where
+  | axis (base : Fin L.m → ScalarQ L) (seed : ScalarQ L)
+      (baseFixed : lineRepMap (coordinateDirection (chiIndex L seed)) base = base)
+  | diagonal (base : Fin L.m → ScalarQ L) (seed : ScalarQ L)
+      (direction : Fin L.m → ScalarQ L)
+      (baseFixed : lineRepMap direction base = base)
+      (prefixZero : ∀ j : Fin L.m, j.val < (chiIndex L seed).val → direction j = 0)
   deriving DecidableEq
 
-/-- The geometric direction represented by a seed-bearing line description. -/
+/-- The tag of a canonical line description. -/
+def LineDesc.kind {L : LdParams} : LineDesc L → LineKind
+  | .axis _ _ _ => .axis
+  | .diagonal _ _ _ _ _ => .diagonal
+
+/-- The seed retained by a canonical line description. -/
+def LineDesc.seed {L : LdParams} : LineDesc L → ScalarQ L
+  | .axis _ seed _ => seed
+  | .diagonal _ seed _ _ _ => seed
+
+/-- The canonical base stored by a line description. -/
+def LineDesc.base {L : LdParams} : LineDesc L → Fin L.m → ScalarQ L
+  | .axis base _ _ => base
+  | .diagonal base _ _ _ _ => base
+
+/-- The geometric direction represented by a canonical line description.
+Diagonal constructors already store the projected data, so this accessor does
+not apply a second projection. -/
 def LineDesc.direction {L : LdParams} (line : LineDesc L) :
     Fin L.m → ScalarQ L :=
-  match line.kind with
-  | .axis => coordinateDirection (chiIndex L line.seed)
-  | .diagonal => prefixProjection (chiIndex L line.seed) line.rawDirection
+  match line with
+  | .axis _ seed _ => coordinateDirection (chiIndex L seed)
+  | .diagonal _ _ direction _ _ => direction
+
+/-- The canonical base is fixed by the representative map of the line's
+geometric direction. -/
+theorem LineDesc.base_fixed {L : LdParams} (line : LineDesc L) :
+    lineRepMap line.direction line.base = line.base := by
+  cases line with
+  | axis base seed baseFixed => exact baseFixed
+  | diagonal base seed direction baseFixed prefixZero => exact baseFixed
+
+/-- Every diagonal description carries the source prefix-zero invariant. -/
+theorem LineDesc.diagonal_prefix_zero {L : LdParams} (line : LineDesc L)
+    (hline : line.kind = .diagonal) :
+    ∀ j : Fin L.m, j.val < (chiIndex L line.seed).val → line.direction j = 0 := by
+  cases line with
+  | axis base seed baseFixed => simp [LineDesc.kind] at hline
+  | diagonal base seed direction baseFixed prefixZero => exact prefixZero
 
 /-- The point set represented by a seed-bearing line description. -/
-def LineDesc.pointSet {L : LdParams} (line : LineDesc L) :
+noncomputable def LineDesc.pointSet {L : LdParams} (line : LineDesc L) :
     Set (Fin L.m → ScalarQ L) :=
   linePoints line.base line.direction
 
@@ -93,18 +140,20 @@ noncomputable def evalOpt {L : LdParams} {c : ℕ} (line : LineDesc L)
   else none
 
 /-- Convert an axis-line CL output to its seed-bearing presentation. -/
-def aLineDescOf (L : LdParams) (line : LdSpace L) : LineDesc L where
-  kind := .axis
-  base := line.point
-  seed := line.seed
-  rawDirection := 0
+def aLineDescOf (L : LdParams) (line : LdSpace L) : LineDesc L :=
+  let direction := coordinateDirection (chiIndex L line.seed)
+  let base := lineRepMap direction line.point
+  LineDesc.axis base line.seed (lineRepMap_apply_self direction line.point)
 
 /-- Convert a diagonal-line CL output to its seed-bearing presentation. -/
-def dLineDescOf (L : LdParams) (line : LdSpace L) : LineDesc L where
-  kind := .diagonal
-  base := line.point
-  seed := line.seed
-  rawDirection := line.direction
+def dLineDescOf (L : LdParams) (line : LdSpace L) : LineDesc L :=
+  let direction := prefixProjection (chiIndex L line.seed) line.direction
+  let base := lineRepMap direction line.point
+  LineDesc.diagonal base line.seed direction
+    (lineRepMap_apply_self direction line.point) (by
+      intro j hj
+      change prefixProjection (chiIndex L line.seed) line.direction j = 0
+      rw [prefixProjection, if_pos hj])
 
 /-- The affine-line/point component of the low-degree line-point sampler. -/
 noncomputable def aLinePointDist (L : LdParams) :
@@ -122,8 +171,8 @@ noncomputable def dLinePointDist (L : LdParams) :
 parameter record is explicit, so the same definition works at every dimension. -/
 noncomputable def linePointDist (L : LdParams) :
     Distribution (LineDesc L × (Fin L.m → ScalarQ L)) :=
-  Distribution.mixture (uniformDistribution Bool) fun chooseAxis =>
-    if chooseAxis then aLinePointDist L else dLinePointDist L
+  Distribution.mix (1 / 2) (by norm_num) (by norm_num)
+    (aLinePointDist L) (dLinePointDist L)
 
 /-- The affine line-point component has total probability one. -/
 theorem aLinePointDist_isProbability (L : LdParams) :
@@ -138,56 +187,9 @@ theorem dLinePointDist_isProbability (L : LdParams) :
 /-- The line-point mixture has total probability one. -/
 theorem linePointDist_isProbability (L : LdParams) :
     (linePointDist L).IsProbability := by
-  sorry
-
-/-- Convert a bounded exponent table to the finitely supported exponent vector
-used by `MvPolynomial.coeff`. -/
-def boundedExponent {m d : ℕ} (e : Fin m → Fin (d + 1)) : Fin m →₀ ℕ :=
-  Finsupp.equivFunOnFinite.symm fun i => (e i).val
-
-/-- The finite coefficient table of a low-individual-degree polynomial. -/
-def polyFuncCoeffTable {m d : ℕ} {K : Type*} [CommSemiring K]
-    (p : ↥(polyFunc m K d)) : (Fin m → Fin (d + 1)) → K :=
-  fun e => MvPolynomial.coeff (boundedExponent e) p.1
-
-/-- Bounded coefficient tables separate low-individual-degree polynomial
-representatives.  This is a formalization-only finiteness lemma. -/
-theorem polyFuncCoeffTable_injective {m d : ℕ} {K : Type*}
-    [CommSemiring K] : Function.Injective
-      (polyFuncCoeffTable : ↥(polyFunc m K d) → (Fin m → Fin (d + 1)) → K) := by
-  intro p q hpq
-  apply Subtype.ext
-  apply MvPolynomial.ext
-  intro exponent
-  by_cases hbounded : ∀ i : Fin m, exponent i ≤ d
-  · let e : Fin m → Fin (d + 1) := fun i => ⟨exponent i, Nat.lt_succ_iff.mpr (hbounded i)⟩
-    have hexponent : boundedExponent e = exponent := by
-      ext i
-      simp [boundedExponent, e]
-    have hcoeff := congrFun hpq e
-    simpa [polyFuncCoeffTable, hexponent] using hcoeff
-  · simp only [not_forall, not_le] at hbounded
-    obtain ⟨i, hi⟩ := hbounded
-    have hpzero : MvPolynomial.coeff exponent p.1 = 0 := by
-      by_contra hpne
-      have hmem : exponent ∈ p.1.support := MvPolynomial.mem_support_iff.mpr hpne
-      have hle := (MvPolynomial.mem_restrictDegree
-        (σ := Fin m) (R := K) p.1 d).mp p.2 exponent hmem i
-      omega
-    have hqzero : MvPolynomial.coeff exponent q.1 = 0 := by
-      by_contra hqne
-      have hmem : exponent ∈ q.1.support := MvPolynomial.mem_support_iff.mpr hqne
-      have hle := (MvPolynomial.mem_restrictDegree
-        (σ := Fin m) (R := K) q.1 d).mp q.2 exponent hmem i
-      omega
-    rw [hpzero, hqzero]
-
-/-- The actual bounded `polyFunc` subtype is finite over a finite coefficient
-semiring. -/
-noncomputable instance polyFuncFintype (m d : ℕ) (K : Type*)
-    [CommSemiring K] [Fintype K] [DecidableEq K] :
-    Fintype ↥(polyFunc m K d) :=
-  Fintype.ofInjective polyFuncCoeffTable polyFuncCoeffTable_injective
+  exact Distribution.mix_isProbability _ _ _
+    (aLinePointDist_isProbability L) (dLinePointDist_isProbability L)
+    (by norm_num) (by norm_num)
 
 end
 
