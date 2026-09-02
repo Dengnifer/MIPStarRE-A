@@ -61,6 +61,8 @@ The classical low individual degree game is a two-player game based on the low i
 The next two lemmas show that the CL functions $L_{\mathsf{Point}}$, $L_{\mathsf{ALine}}$, $L_{\mathsf{DLine}}$ give rise to the axis-parallel and diagonal line-versus-point distributions.
 
 \begin{lemma}\label{lem:alnf}
+	\lean{MIPStarRE.QPBT.aLinePointDist_point_marginal_uniform, MIPStarRE.QPBT.aLinePointDist_mem_line}
+	\leanok
 	\uses{def:ld-question-distribution, def:line}
 	Consider the pair $(\ell, u)$ sampled in the following way: first, sample the tuple $\bigl((u_0,s,0),(u,0,0)\bigr)$ from the CL distribution $\mu_{L_{\mathsf{ALine}}, L_{\mathsf{Point}}}$, and let $\ell = \ell(u_0, e_i)$ where $i = \chi(s)$. Then $u$ is a uniformly random point in $\F_q^m$, and $\ell$ is a line that goes through $u$ and is parallel to a uniformly random axis $i \in \{1,2,\ldots,m\}$.
 \end{lemma}
@@ -70,6 +72,8 @@ The next two lemmas show that the CL functions $L_{\mathsf{Point}}$, $L_{\mathsf
 \end{proof}
 
 \begin{lemma}\label{lem:dlnf}
+	\lean{MIPStarRE.QPBT.dLinePointDist_point_marginal_uniform, MIPStarRE.QPBT.dLinePointDist_mem_line, MIPStarRE.QPBT.dLinePointDist_prefix_zero}
+	\leanok
 	\uses{def:ld-question-distribution, def:line}
 	Consider the pair $(\ell, u)$ sampled in the following way: first, sample the tuple $\bigl((u_0,s,v),(u,0,0)\bigr)$ from the CL distribution $\mu_{L_{\mathsf{DLine}}, L_{\mathsf{Point}}}$, and let $\ell = \ell(u_0, v)$ where $i = \chi(s)$. Then $u$ is a uniformly random point in $\F_q^m$, and $\ell$ is a random diagonal line that goes through $u$ and shares its first $i-1$ coordinates with $u$, for uniformly random $i \in \{1,2,\ldots,m\}$.
 \end{lemma}
@@ -79,6 +83,8 @@ The next two lemmas show that the CL functions $L_{\mathsf{Point}}$, $L_{\mathsf
 \end{proof}
 
 \begin{definition}[Line-point distributions]\label{def:line-point-dist}
+	\lean{MIPStarRE.QPBT.LineKind, MIPStarRE.QPBT.LineDesc, MIPStarRE.QPBT.aLinePointDist, MIPStarRE.QPBT.dLinePointDist, MIPStarRE.QPBT.linePointDist}
+	\leanok
 	\uses{def:ld-question-distribution, lem:alnf, lem:dlnf}
 	The \emph{axis line-point distribution} $D_{\mathsf{ALine}}$ is the distribution $\mu_{L_{\mathsf{ALine}}, L_{\mathsf{Point}}}$ over pairs $(\ell = (u_0,e_i),\, u)$, where we omit the $0$ components for simplicity. The \emph{diagonal line-point distribution} $D_{\mathsf{DLine}}$ is the distribution $\mu_{L_{\mathsf{DLine}}, L_{\mathsf{Point}}}$ over pairs $(\ell = (u_0,s,v),\, u)$. The \emph{line-point distribution} $D_{\mathsf{Line}}$ is the equal mixture of the two: with probability $\tfrac12$ output a sample from $D_{\mathsf{ALine}}$, and with probability $\tfrac12$ output a sample from $D_{\mathsf{DLine}}$.
 \end{definition}
@@ -111,6 +117,8 @@ The next two lemmas show that the CL functions $L_{\mathsf{Point}}$, $L_{\mathsf
 The soundness properties of the low individual degree game are expressed in terms of the following class of measurements.
 
 \begin{definition}[Low-degree polynomial measurements]\label{def:ld-meas}
+	\lean{MIPStarRE.QPBT.PolyIndex, MIPStarRE.QPBT.PolyMeas, MIPStarRE.QPBT.PolyMeasFamily, MIPStarRE.QPBT.PolyMeasTuple}
+	\leanok
 	\uses{def:polyfunc, def:polymeasurements, def:polynomials-degree}
 	Let $\polymeas{m}{q}{d}$ denote the set of POVM measurements indexed by $\polyfunc{m}{q}{d}$, the polynomial representatives of individual degree at most $d$ in each variable; this is the notion of Definition~\ref{def:polymeasurements}, and the argument order $(m,q,d)$ follows that definition (the paper orders the arguments as $(m,d,q)$). By Definition~\ref{def:polynomials-degree}, evaluation identifies these representatives with the corresponding polynomial functions $g\colon \F_q^m \to \F_q$, bijectively whenever $d \le q-1$; at the canonical parameters (Definition~\ref{def:introparams}, where $d = 1 \le q-1$) the identification is bijective; the general statements of this chapter quantify over all admissible tuples and are read through the representative convention. More generally, for an integer $k$ and tuples $m = (m_1,\ldots,m_k)$, $q = (q_1,\ldots,q_k)$, $d = (d_1,\ldots,d_k)$, let $\mathrm{PolyMeas}(m,q,d,k)$ denote the set of measurements $G = \{G_{g_1,\ldots,g_k}\}$ such that for each $i \in \{1,\ldots,k\}$, the outcome index $g_i$ is a polynomial $g_i\colon \F_{q_i}^{m_i} \to \F_{q_i}$ of individual degree at most $d_i$.
 \end{definition}
@@ -120,6 +128,8 @@ Quantum soundness of a version of the classical low-degree test for polynomials 
 % The paper states this result in a theorem environment with the label lem:ld-soundness.
 % We keep both the environment and the label verbatim for cross-reference fidelity.
 \begin{theorem}[Quantum soundness of the simultaneous classical low individual degree test]\label{lem:ld-soundness}
+	\lean{MIPStarRE.QPBT.deltaLd, MIPStarRE.QPBT.exists_ld_soundness}
+	\leanok
 	\uses{def:ld-game, def:ld-question-distribution, def:ld-win-predicate, def:ld-meas, def:projective-strategy-general, def:tensor-product-value, def:consistency, def:bracket}
 	There exists a function
 	\[
@@ -205,6 +215,8 @@ We recall the Magic Square game of Mermin and Peres. It is a simple self-test fo
 The following theorem records the self-testing (rigidity) properties of the Magic Square game. It is used in the soundness analysis of the Pauli basis test to enforce anticommutation relations between certain pairs of observables.
 
 \begin{theorem}[Rigidity of the Magic Square game]\label{thm:ms-rigidity}
+	\lean{MIPStarRE.QPBT.exists_ms_rigidity}
+	\leanok
 	\uses{def:ms-game, def:tensor-product-value, def:EPR, def:povm-distance}
 	Let $\mathcal S = (\ket{\psi}, A, B)$ be a strategy that succeeds in the Magic Square game $\mathfrak{G}^{\mathrm{MS}}$ with probability $1-\eps$, where $\ket{\psi} \in \hilb_{\mathrm A} \ot \hilb_{\mathrm B}$. Then there exist local isometries $\phi_{\mathrm A}\colon \hilb_{\mathrm A} \to \hilb_{\mathrm A'} \ot \hilb_{\mathrm A''}$ and $\phi_{\mathrm B}\colon \hilb_{\mathrm B} \to \hilb_{\mathrm B'} \ot \hilb_{\mathrm B''}$, where $\hilb_{\mathrm A'}, \hilb_{\mathrm B'} \cong (\C^2)^{\ot 2}$ and $\hilb_{\mathrm A''}, \hilb_{\mathrm B''}$ are finite dimensional, and a state $\ket{\mathrm{aux}} \in \hilb_{\mathrm A''} \ot \hilb_{\mathrm B''}$, such that:
 	\begin{enumerate}
@@ -232,6 +244,8 @@ The following theorem records the self-testing (rigidity) properties of the Magi
 The converse construction shows that any pair of anticommuting binary observables yields a perfect strategy for the Magic Square game.
 
 \begin{theorem}\label{thm:ms-from-ac}
+	\lean{MIPStarRE.QPBT.obsOf, MIPStarRE.QPBT.exists_ms_perfect_strategy_of_anticommuting}
+	\leanok
 	\uses{def:ms-game, def:consistent-measurement, def:spcc, def:EPR, def:tensor-product-value}
 	Let $A = \{A_b\}_{b \in \F_2}$ and $B = \{B_b\}_{b \in \F_2}$ be two-outcome projective measurements acting on $(\C^q)^{\ot n}$ that are consistent on $\ket{\mathrm{EPR}_q}^{\ot n}$ (Definition~\ref{def:consistent-measurement}), and let $\mathcal O_A = A_0 - A_1$ and $\mathcal O_B = B_0 - B_1$ be the corresponding $\pm 1$-valued observables. Suppose that $\mathcal O_A \mathcal O_B = - \mathcal O_B \mathcal O_A$. Then there exists a symmetric strategy $\mathcal S = (\psi, M)$ for the Magic Square game with the following properties:
 	\begin{enumerate}
@@ -369,6 +383,8 @@ The Pauli basis test is the quantum low individual degree test of Natarajan and 
 Note the one-sided gating on $\gamma$: the commutation check and the $\mathsf{Pair}$ consistency check accept automatically when $\gamma \neq 0$, while the Magic Square check and the $\mathsf{Variable}$ consistency check accept automatically when $\gamma = 0$.
 
 \begin{lemma}[Completeness of the Pauli basis test]\label{lem:pauli-completeness}
+	\lean{MIPStarRE.QPBT.pauliBasisTestSymm, MIPStarRE.QPBT.exists_spcc_value_one}
+	\leanok
 	\uses{def:pauli-question-distribution, def:pauli-win-predicate, def:admissible, def:spcc, def:tensor-product-value}
 	For every admissible tuple $\mathsf{qldparams} = (q,m,d)$ (Definition~\ref{def:admissible}), the Pauli basis test $\mathfrak{G}^{\mathrm{Pauli}}_{\mathsf{qldparams}}$ has a value-$1$ SPCC strategy.
 \end{lemma}
@@ -407,7 +423,9 @@ The proof of Theorem~\ref{thm:pauli} is the adaptation, to low individual degree
 The strategies appearing in Lemma~\ref{lem:pauli-completeness} and in the conclusion of Theorem~\ref{thm:pauli} are phrased in terms of qudit Pauli measurements and maximally entangled states of $q$-dimensional qudits. For the intended application it is more convenient to work with qubits: since the field sizes $q$ used here are powers of $2$, the conclusions can be restated in terms of qubit EPR pairs and qubit Pauli measurements.
 
 \begin{corollary}[Qubit form of the soundness of the Pauli basis test]\label{cor:pauli-binary}
-	\uses{def:pauli-question-distribution, def:pauli-win-predicate, def:admissible, def:tensor-product-value, def:EPR, def:povm-distance}
+	\lean{MIPStarRE.QPBT.pauli_soundness_qubit}
+	\leanok
+	\uses{def:pauli-question-distribution, def:pauli-win-predicate, def:admissible, def:tensor-product-value, def:EPR, def:povm-distance, def:binary-representation}
 	There exists a function
 	\[
 		\delta_{\mathrm{qld}}(\eps, m, d, q) = a\,(md)^a \bigl( \eps^b + q^{-b} + 2^{-bmd} \bigr)
@@ -446,6 +464,8 @@ The strategies appearing in Lemma~\ref{lem:pauli-completeness} and in the conclu
 We specify a canonical setting of the parameter tuple $\mathsf{qldparams}$ as a function of an integer $R$, and bound the resulting soundness function. All logarithms are base $2$.
 
 \begin{definition}[Canonical parameters of the Pauli basis test]\label{def:introparams}
+	\lean{MIPStarRE.QPBT.introParamsC, MIPStarRE.QPBT.introParamsTuple, MIPStarRE.QPBT.AdmissibleParams.ofTuple, MIPStarRE.QPBT.introParams}
+	\leanok
 	\uses{thm:pauli}
 	Let $a, b$ be the universal constants of Theorem~\ref{thm:pauli}, and let $c$ be the smallest \emph{even} integer that is at least $(b+a)/b$. For every integer $R \ge 4$, define the tuple $\mathsf{introparams}(R) = (q, m, d)$ by
 	\begin{itemize}
@@ -457,6 +477,8 @@ We specify a canonical setting of the parameter tuple $\mathsf{qldparams}$ as a 
 \end{definition}
 
 \begin{lemma}[Soundness bound for the canonical parameters]\label{lem:delta-bound}
+	\lean{MIPStarRE.QPBT.introParamsTuple_isAdmissible, MIPStarRE.QPBT.le_two_pow_introParams_m, MIPStarRE.QPBT.exists_deltaQld_introParams_bound}
+	\leanok
 	\uses{def:introparams, def:admissible, thm:pauli}
 	For all integers $R \ge 4$, the parameter tuple $\mathsf{introparams}(R) = (q,m,d)$ is admissible (Definition~\ref{def:admissible}) and satisfies $2^m \ge R$. Furthermore, there exist universal constants $a' \ge 1$ and $0 < b' \le 1$ such that the function $\delta_{\mathrm{qld}}(\eps, m, d, q)$ of Theorem~\ref{thm:pauli} is at most
 	\[

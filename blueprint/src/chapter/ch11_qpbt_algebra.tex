@@ -47,6 +47,8 @@ as is $\mathrm{span}\{(1,1)\}$ over $\F_2$. The following dimension identity
 nevertheless holds over every field.
 
 \begin{lemma}\label{lem:perp_perp}
+	\lean{MIPStarRE.QPBT.finrank_add_finrank_dotOrthogonal, MIPStarRE.QPBT.dotOrthogonal_dotOrthogonal}
+	\leanok
 	\uses{def:dot-product-orthogonal}
 	Let $S$ be a subspace of $V$. Then $\dim(S) + \dim(S^\perp) = \dim(V)$, and
 	\[
@@ -145,6 +147,8 @@ one may nevertheless single out a \emph{canonical} complement.
 \end{definition}
 
 \begin{definition}[The map $L^\perp$]\label{def:Lperp}
+	\lean{MIPStarRE.QPBT.canonicalProjPerp}
+	\leanok
 	\uses{def:cl-canonical, def:dot-product-orthogonal}
 	Let $L \in \mathrm{End}(V)$ be a linear map and let $F$ be a basis for
 	$\ker(L)^\perp$. Define $L^\perp : V \to V$ as the canonical linear map with
@@ -154,6 +158,8 @@ one may nevertheless single out a \emph{canonical} complement.
 \end{definition}
 
 \begin{lemma}\label{lem:L_perp_perp}
+	\lean{MIPStarRE.QPBT.ker_canonicalProjPerp}
+	\leanok
 	\uses{def:Lperp}
 	Let $L \in \mathrm{End}(V)$ be a linear map, $F$ a basis for
 	$\ker(L)^\perp$, and $L^\perp$ as in Definition~\ref{def:Lperp}. Then
@@ -232,6 +238,8 @@ test.
 \end{definition}
 
 \begin{definition}[Dual, self-dual, and normal bases]\label{def:dual-self-dual-normal-basis}
+	\lean{MIPStarRE.QPBT.IsDualBasisPair, MIPStarRE.QPBT.Basis.IsSelfDual, MIPStarRE.QPBT.Basis.IsNormal, MIPStarRE.QPBT.exists_selfDualNormalBasis}
+	\leanok
 	\uses{def:subfield-trace}
 	A \emph{dual basis} $\{e_1', \dots, e_k'\}$ of a basis
 	$\{e_1, \dots, e_k\}$ of $\F_{q^k}$ over $\F_q$ is a basis such that
@@ -246,6 +254,8 @@ test.
 \end{definition}
 
 \begin{lemma}[Coordinate maps of self-dual bases]\label{lem:downsize_field}
+	\lean{MIPStarRE.QPBT.basisCoord_apply_eq_trace, MIPStarRE.QPBT.trace_mul_eq_dotProduct_basisCoord, MIPStarRE.QPBT.chi_mulVec_basisCoord}
+	\leanok
 	\uses{def:subfields-kappa, def:subfield-trace,
 		def:dual-self-dual-normal-basis, def:dot-product-orthogonal}
 	Let $q$ be a prime power, $k \ge 1$ an integer, and $\{e_i\}$ a self-dual
@@ -275,6 +285,8 @@ test.
 \end{proof}
 
 \begin{lemma}\label{lem:one}
+	\lean{MIPStarRE.QPBT.trace_basis_eq_one_of_selfDual_normal, MIPStarRE.QPBT.basisCoord_one_of_selfDual_normal}
+	\leanok
 	\uses{def:subfields-kappa, def:subfield-trace, def:dual-self-dual-normal-basis}
 	Let $k$ be an odd integer and $\{e_i\}_{i=1}^k$ a self-dual normal basis of
 	$\F_{2^k}$ over $\F_2$. Then $\tr(e_i) = 1$ for all $i$, and the
@@ -296,6 +308,8 @@ test.
 \end{proof}
 
 \begin{definition}[Binary representation of field elements]\label{def:binary-representation}
+	\lean{MIPStarRE.QPBT.FixedFieldModel.binaryCoordinates, MIPStarRE.QPBT.multiplicationTable, MIPStarRE.QPBT.chi, MIPStarRE.QPBT.binaryCoordinates_mul}
+	\leanok
 	\uses{def:subfields-kappa, def:admissible-size,
 		def:dual-self-dual-normal-basis}
 	Let $q = 2^k$ be an admissible field size. For each odd $k$ we fix, once and
@@ -349,6 +363,8 @@ test.
 \end{definition}
 
 \begin{lemma}[Schwartz--Zippel lemma~\cite{Sch80,Zip79}]\label{lem:schwartz-zippel}
+	\lean{MIPStarRE.LDT.Preliminaries.schwartzZippel_totalDegree}
+	\leanok
 	% Restatement of lem:schwartz-zippel-total-degree under the source's label.
 	\uses{def:polynomials-degree}
 	Let $f, g : \F_q^m \to \F_q$ be two unequal polynomials of total degree at
@@ -421,6 +437,8 @@ encodings of distinct strings agree on at most an $m/q$ fraction of points of
 $\F_q^m$ by Lemma~\ref{lem:schwartz-zippel}.
 
 \begin{definition}[Decoding maps]\label{def:decoding-map}
+	\lean{MIPStarRE.QPBT.decodeAt, MIPStarRE.QPBT.decodeBool, MIPStarRE.QPBT.decodeAt_lowDegreeEnc}
+	\leanok
 	\uses{def:low-degree-encoding}
 	For $H \subseteq \F_q$, the \emph{decoding map} $\mathrm{Dec}_H$ takes as
 	input a polynomial $g : \F_q^m \to \F_q$ and returns the vector
@@ -571,6 +589,8 @@ representation is obtained as follows.
 \end{definition}
 
 \begin{lemma}[Product and twisted commutation relations]\label{lem:twisted-commutation}
+	\lean{MIPStarRE.QPBT.primeTauObservable_mul, MIPStarRE.QPBT.primeTauObservable_pow, MIPStarRE.QPBT.primeTauObservable_pow_char, MIPStarRE.QPBT.primeTauObservable_X_mul_Z}
+	\leanok
 	\uses{def:generalized-pauli, def:subfield-trace, def:dot-product-orthogonal}
 	Let $q = p^k$, let $n \ge 1$ be an integer, and let $W \in \{X, Z\}$.
 	\begin{enumerate}
@@ -614,6 +634,8 @@ representation is obtained as follows.
 \end{proof}
 
 \begin{lemma}[Fourier cancellation over a subspace]\label{lem:cancellation}
+	\lean{MIPStarRE.QPBT.ffChar_dotProduct_submodule_expect_eq_zero}
+	\leanok
 	\uses{def:dot-product-orthogonal, def:subfield-trace}
 	Let $V$ be a subspace of $\F_q^k$ and let $\omega = e^{2\pi i/p}$, where
 	$p$ is the characteristic of $\F_q$ and $\tr = \tr_{q \to p}$. For all
@@ -673,7 +695,9 @@ observables and maximally entangled states over \emph{qubits}
 (Chapter~\ref{chap:qpbt-test}).
 
 \begin{lemma}[Qudit-to-qubit isomorphism]\label{lem:pauli-binary}
-	\uses{def:admissible-size, def:binary-representation,
+	\lean{MIPStarRE.QPBT.qubitPauliProj, MIPStarRE.QPBT.exists_qubitIsometry}
+	\leanok
+	\uses{def:admissible-size, def:subfields-kappa, def:binary-representation,
 		def:generalized-pauli, def:EPR}
 	% The source quantifies over all integers L; the tensor powers require
 	% L >= 1, so that domain condition is made explicit here.
