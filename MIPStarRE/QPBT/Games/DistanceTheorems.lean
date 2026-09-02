@@ -114,19 +114,19 @@ theorem opDistSq_sum_sub_mul_le_of_projective {X α ι : Type*}
 /-- Explicit squared-distance triangle inequality. This is `fact:triangle`,
 blueprint `ch12_qpbt_games.tex:290-297`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:383-387`. -/
-theorem opFamilyDistSq_triangle {X α ι : Type*}
+theorem opFamilyDistSq_le_of_le_of_le {X α ι : Type*}
     [Fintype α] [Fintype ι] [DecidableEq ι]
     (μ : Distribution X) (A B C : X → α → Op ι)
     (ψ : EuclideanSpace ℂ ι) (δ ε : ℝ)
     (hAB : opFamilyDistSq μ A B ψ ≤ δ)
     (hBC : opFamilyDistSq μ B C ψ ≤ ε) :
-    opFamilyDistSq μ A C ψ ≤ 2 * (δ + ε) := by
+    opFamilyDistSq μ A C ψ ≤ 2 * δ + 2 * ε := by
   sorry
 
 /-- Triangle inequality for consistency, with the square-root loss of
 `fact:triangle-for-simeq`; blueprint `ch12_qpbt_games.tex:299-309`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:389-395`. -/
-theorem consistencyDefect_triangle {X α ι : Type*}
+theorem consistencyDefect_trans_le {X α ι : Type*}
     [Fintype X] [DecidableEq X] [Fintype α] [DecidableEq α]
     [Fintype ι] [DecidableEq ι]
     (μ : Distribution X) (A B C D : X → Measurement α ι)
@@ -192,7 +192,7 @@ close values. The asymptotic constant is universal for the game. This is
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:531-540`. -/
 theorem abs_value_sub_le_of_areClose :
     ∃ C₀ : ℝ, 1 ≤ C₀ ∧ ∀ (G : Game) (S S' : Strategy G) (δ : ℝ)
-      (hclose : AreCloseStrategies G S S' δ),
+      (_hδ0 : 0 ≤ δ) (_hδ1 : δ ≤ 1) (hclose : AreCloseStrategies G S S' δ),
       reindexState (Equiv.prodCongr (Equiv.cast hclose.hA).symm
         (Equiv.cast hclose.hB).symm) S'.ψ = S.ψ →
       (S.IsProjective ∨ S'.IsProjective) →
