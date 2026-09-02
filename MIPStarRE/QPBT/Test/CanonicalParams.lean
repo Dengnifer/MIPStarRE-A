@@ -70,6 +70,10 @@ has polylogarithmic dependence on `R`. Blueprint
 `ch13_qpbt_test.tex:484-492`, paper
 `08_classical_and_quantum_low_degree_tests.tex:1520-1562`.
 
+The explicit nonnegativity premise records the failure-probability domain
+inherited from `thm:pauli`; fractional powers of a negative real do not express
+the source's error parameter.
+
 **Local fix:** The third error term is bounded directly using the lower bound
 on `m`, rather than the source's false intermediate comparison between the
 field exponent and `m`. This discrepancy is documented in issue #16 and
@@ -79,7 +83,7 @@ theorem exists_deltaQld_introParams_bound (a b : ℝ) (ha : 1 ≤ a)
     (hb : 0 < b) (hb' : b < 1) :
     ∃ a' b' : ℝ, 1 ≤ a' ∧ 0 < b' ∧ b' ≤ 1 ∧
       ∀ (R : ℕ) (hR : 4 ≤ R) (ε : ℝ),
-        deltaQld a b ε (introParams a b R hR).m
+        0 ≤ ε → deltaQld a b ε (introParams a b R hR).m
             (introParams a b R hR).d (introParams a b R hR).q ≤
           a' * (Real.rpow (Real.logb 2 R) a' * Real.rpow ε b' +
             Real.rpow (Real.logb 2 R) (-b')) := by

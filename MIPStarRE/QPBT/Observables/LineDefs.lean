@@ -50,8 +50,8 @@ inductive LineKind where
 An axis description stores its canonical base and seed. A diagonal description
 stores only the projected direction, together with its prefix-zero invariant.
 Both cases carry the assertion that their base is fixed by the
-appropriate `lineRepMap`. A value `j : Fin L.m` represents the paper's
-one-based coordinate `j + 1`. -/
+appropriate `lineRepMap`. Coordinates are numbered from zero; coordinate `j`
+corresponds to the paper's coordinate `j + 1`. -/
 inductive LineDesc (L : LdParams) where
   | axis (base : Fin L.m → ScalarQ L) (seed : ScalarQ L)
       (baseFixed : lineRepMap (coordinateDirection (chiIndex L seed)) base = base)
@@ -110,11 +110,6 @@ noncomputable def LineDesc.pointSet {L : LdParams} (line : LineDesc L) :
 most `c` over the scalar field of `L`. -/
 abbrev DegPoly (L : LdParams) (c : ℕ) := Fin (c + 1) → ScalarQ L
 
-/-- Evaluate a bounded coefficient-list polynomial. -/
-def degPolyEval {L : LdParams} {c : ℕ}
-    (f : DegPoly L c) (t : ScalarQ L) : ScalarQ L :=
-  ∑ i : Fin (c + 1), f i * t ^ i.val
-
 /-- Extend a coefficient list by zero from degree bound `c` to `c'`. -/
 def DegPoly.padTo {L : LdParams} {c c' : ℕ} (_h : c ≤ c')
     (f : DegPoly L c) : DegPoly L c' :=
@@ -127,7 +122,7 @@ the zero-direction presentation without choosing a sentinel parameter. -/
 def EvaluatesTo {L : LdParams} {c : ℕ} (line : LineDesc L)
     (f : DegPoly L c) (u : Fin L.m → ScalarQ L) (a : ScalarQ L) : Prop :=
   (∃ t : ScalarQ L, u = line.base + t • line.direction) ∧
-    ∀ t : ScalarQ L, u = line.base + t • line.direction → degPolyEval f t = a
+    ∀ t : ScalarQ L, u = line.base + t • line.direction → evalCoefficient f t = a
 
 /-- Partially evaluate a line polynomial at a point. The value is undefined
 when the point does not determine an evaluation. This formalization-only

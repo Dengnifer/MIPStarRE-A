@@ -35,8 +35,8 @@
 
 \section{Key theorem forms}
 
-Let $a\geq 1$ and $0<b<1$ be the universal constants in the soundness
-function
+Let $a\geq 1$ and $0<b<1$ be the universal constants, and let $\eps\geq0$ be a
+failure-probability parameter.  The soundness function is
 \[
   \delta_{\mathrm{qld}}(\eps,m,d,q)
     = a(md)^a\bigl(\eps^b+q^{-b}+2^{-bmd}\bigr).
@@ -86,9 +86,11 @@ constant yields the required estimate.
 
 \section{Comparison with the blueprint and formalization}
 
-The blueprint retains the source statement and uses the direct estimate above.
-The formal theorem has the same hypotheses and conclusion; its docstring marks
-the corrected intermediate argument and cites this note.%
+The blueprint makes explicit the nonnegative failure-probability domain
+implicit in Theorem~\ref{thm:pauli} and otherwise retains the source statement.
+The formal theorem records the same faithful boundary hypothesis and
+conclusion; its docstring marks the corrected intermediate argument and cites
+this note.%
 \footnote{The formal statement is
 \leanid{exists\_deltaQld\_introParams\_bound} in
 \doclink{MIPStarRE/QPBT/Test/CanonicalParams.lean}.}
@@ -96,9 +98,9 @@ the corrected intermediate argument and cites this note.%
 \section{Conclusion}
 
 The source's comparison $k\leq m$ is false for some permitted constants and
-values of $R$.  It is not needed: the canonical lower bound on $m$ controls the
-third soundness term directly and proves the same final estimate after enlarging
-the universal constant.
+values of $R$.  It is not needed: for nonnegative failure parameters, the
+canonical lower bound on $m$ controls the third soundness term directly and
+proves the same final estimate after enlarging the universal constant.
 
 \bibliographystyle{alpha}
 \bibliography{references}
