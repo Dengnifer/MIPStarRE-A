@@ -183,13 +183,6 @@ test (`lem:ld-soundness`, blueprint lines 125--178; paper origin
 The `Option` completion makes malformed point answers explicit on both sides
 of the first two relations.  It adds no hypothesis and agrees with the game's
 rejection convention.
-
-**Unfaithful:** This imported proof remains open because the asserted game
-correspondence and the provider's auxiliary-parameter bound have not been
-derived.  They are documented in
-`docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`.  Elimination: prove the
-typed-game reduction and repair the parameter choice, then instantiate the
-low-individual-degree soundness provider.
 -/
 theorem exists_ld_soundness :
     ∃ a b : ℝ, 1 ≤ a ∧ 0 < b ∧ b ≤ 1 ∧
