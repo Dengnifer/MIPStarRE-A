@@ -90,7 +90,8 @@ These hooks also reject explicit `axiom` and `constant` declarations in the LDT
 tree; use a tracked `sorry` for an unfinished source-faithful proof instead of
 turning the missing proof into a new ambient assumption.
 For larger PRs, `MIPSTARRE_HOOK_FULL=1 git push` also runs the full local gate.
-Use `MIPSTARRE_SKIP_HOOKS=1` only for a one-off local-tooling bypass, and still
+Use `MIPSTARRE_SKIP_HOOKS=1` only for a one-off local-tooling bypass (the
+workflow-layer line budget of `.githooks/pre-commit` still runs), and still
 report the corresponding validation in the PR body.
 
 ### Labels
@@ -338,6 +339,7 @@ label set.
 | Label              | Description                                           |
 |--------------------|-------------------------------------------------------|
 | `tracking`         | Umbrella issue using GitHub sub-issues                 |
+| `needs-owner`      | Blocked on an owner decision; the operator parked the item and continues with the queue |
 | `chapter-tracking` | Long-lived chapter progress tracker                   |
 | `follow-up`        | A mathematical obligation split out of a PR            |
 | `campaign-5`       | Historical label for the session-5 campaign issues    |

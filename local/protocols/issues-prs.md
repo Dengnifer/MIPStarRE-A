@@ -34,8 +34,10 @@ out to `gh`. `issue_new.py`, `issue_close.py`, `pr_open.py`, `ci.sh`,
   names inherit those characters and "`]` breaks part of the PR automation
   stack" (docs/CONTRIBUTING.md:122-124). A `:` in a *title* is fine
   (`Tracking: …`), but not in a branch.
-* Fix commits keep the exact subject prefixes `[codex-auto-fix]` and
-  `[codex-review-fix]`; the iteration counter and the review skip key on them.
+* `autofix.sh`'s automated fix commits keep the exact subject prefixes
+  `[codex-auto-fix]` and `[codex-review-fix]`; its iteration counter and the
+  review skip key on them.  Operator and worker repairs use plain
+  `fix(review): …` / `fix(ci): …` subjects so the reviewer sees them.
 * `Closes #N` / `Fixes #N` auto-closes the issue on merge, `Addresses #N` does
   not (docs/CONTRIBUTING.md:61-62) — and the numbers being GitHub's, that
   footer is now literally what GitHub itself reads.

@@ -686,8 +686,11 @@ agent must know:
 - **Telemetry duty.** Incidents go to `results/telemetry/events.md`;
   protocol changes follow `local/protocols/meta.md` and are ledgered in
   `local/protocols/EVOLUTION.md`.
-- **Fix commits** are prefixed `[codex-auto-fix]` / `[codex-review-fix]`
-  exactly; issue titles, slugs, and branch names stay bracket-free.
+- **Fix commits**: `autofix.sh`'s automated commits are prefixed
+  `[codex-auto-fix]` / `[codex-review-fix]` exactly (the review skip keys on
+  them); operator and worker repairs use plain `fix(review): …` /
+  `fix(ci): …` subjects so they are reviewed. Issue titles, slugs, and branch
+  names stay bracket-free.
 
 ## Practical Defaults for Agents
 

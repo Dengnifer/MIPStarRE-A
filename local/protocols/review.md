@@ -266,7 +266,10 @@ the marker-bound review body for the head SHA; no match means the ledger is
 clean, and the paired `local-review/summary` status must agree.  Anything else
 must be resolved, outdated, or adjudicated by the operator under §12 (Round cap
 and operator adjudication) — the operator is the adjudicating party; the owner
-is consulted only for the escalations named in the standing briefing.
+is consulted only for the escalations named in the standing briefing.  Owner
+decision 2026-09-02 (EVOLUTION.md): this supersedes the GitHub-era "never merge
+without consulting the user" rule of `docs/pr_review_management.md` for this
+repository; the substantive review criteria are unchanged.
 
 Findings do **not** survive across SHAs.  Gate 4 matches the marker
 `<!-- mipstarre-review pr=N head=SHA -->` on that exact commit id, so a ledger

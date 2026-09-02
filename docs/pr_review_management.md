@@ -8,6 +8,12 @@ pinned: true
 
 ## Critical Rules
 
+> **Local supersession (owner decision, 2026-09-02).** Rule 1 and the
+> corresponding merge-consent process steps are superseded in this
+> repository: merge authority is `local/bin/pr_merge.py`, and the adjudicating
+> party is the operator (`local/protocols/review.md` §12;
+> `local/protocols/EVOLUTION.md` 2026-09-02). The remaining lessons still apply.
+
 1. **Never merge a PR without consulting the user.** Merging is the user's decision.
 2. **Every review comment must be addressed before merge.** If Bugbot, Claude, Copilot, or Codex flagged something, it must be fixed or explicitly justified — not just acknowledged.
 3. **Don't rush through PR triage.** Reading "0 sorry, CI pass" is not enough. Must read every inline comment and PR-level comment in full.

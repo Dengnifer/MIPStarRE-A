@@ -88,7 +88,8 @@ scaffolding work is a COST, not an achievement.  Binding rules:
 - Budget: a workflow change defaults to ≤2 hours wall time and ≤400 changed
   lines.  Reaching either limit means stop, commit what stands, record the
   state in telemetry, and escalate to the owner with a concrete question —
-  never push through the ceiling.
+  never push through the ceiling.  The pre-commit hook checks the line budget
+  per commit; the episode total is the PR diff, which the review checks.
 - Hooks stay under 60 seconds; heavier checks belong to CI steps.
 - No new abstraction layers (API clients, lock managers, frameworks) and no
   rewrite of working, reviewed code without an explicit owner directive.
@@ -130,6 +131,6 @@ The owner pastes the project-state briefing (stage status, immediate next
 steps, pending adjudications, parallelization plan) directly into your
 session — treat it as authoritative.  If none is pasted,
 `~/.codex/prompts/goal.md` plus `results/telemetry/events.md` and
-`stages.jsonl` are the authoritative state — read them and proceed. Then read
-`AGENTS.md`,
+`results/telemetry/stages.jsonl` are the authoritative state — read them and
+proceed. Then read `AGENTS.md`,
 `local/README.md`, and `local/protocols/meta.md`.

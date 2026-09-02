@@ -332,17 +332,25 @@ the exact head, yet `pr_merge.py` gate 6 refused because the branch carried six
 `[codex-review-fix]` commits against a cap of five.  The operator escalated to
 the owner: the gate text named "human attention" as the remedy and the standing
 briefing forbade weakening a gate.  An owner-side audit (six read-only lanes,
-three adversarial refuters) found no safety property behind the refusal.
+three adversarial refuters) found no safety property behind the refusal.  The
+episode is owner-directed — the owner approval `main.md` requires for a second
+consecutive workflow episode — and the incident record is the events.md entry
+of 2026-09-02 ("PR #5 review-fix cap"), committed on main (f94fe3c) before
+this amendment and contained in the PR head.
 
 **Change:**
 
-1. `pr_merge.py` gate 6 no longer enforces a fix-commit cap.  The count was
-   subject-prefix-based, not provenance-based, and both `autofix.sh` and the
-   gate read the same `MIPSTARRE_FIX_CAP`, so it was never an independent
-   bound; gates 3/4 already bind CI and the review to the exact head.  The lock
+1. `pr_merge.py` gate 6 no longer enforces a fix-commit cap.  The count is
+   retired because it carries no evidence about the head: gates 3/4 already
+   bind CI and the review — which covers the whole `merge-base..head` diff —
+   to the exact SHA, so a converged PR is proven converged however many fix
+   commits it took.  The count was also subject-prefix-based, not
+   provenance-based (PR #5's six were hand-authored).  Bounding the automated
+   loop is `autofix.sh`'s job; its pre-lock count race (issue #9) and its
+   terminal-review gaps (issue #13) are loop defects, tracked there.  The lock
    probe stays, the merge-base computation gate 7 reuses stays (with a gate-7
-   message), and the count is printed for the record.  `review.md` §12 operator
-   adjudication remains the convergence backstop.
+   message), and the count is printed for the record.  `review.md` §12
+   operator adjudication remains the convergence backstop.
 2. `autofix.sh`'s cap note and `autofix.md` §5 address the operator, not "a
    human", and the doc matches the code (the label is not removed).
 3. `.githooks/pre-commit` runs the scope-control budget before the
