@@ -173,3 +173,17 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 
 - Write-through adapter superseded during implementation. Symptom: the first issue-0007 orchestrator had begun adding a durable local GitHub-operation journal when the owner rejected retaining any local issue/PR fallback. Diagnosis: the earlier step-0 brief preserved registry machinery that no longer matched the owner's desired GitHub-only authority. Fix: stopped the session before commit, reverted its partial edit, verified and moved all 60 issue/PR files byte-identically into results/telemetry/registry-archive in the isolated c8f1999 commit, and re-scoped issue 0007 to read live GitHub gate evidence. Lesson: when eliminating an operational registry, archive research evidence before rewriting consumers, and treat an explicit owner authority decision as a protocol amendment rather than extending the superseded design.
 - Codex resume dispatch rejected the worktree option. Symptom: dispatch.sh allocated orc-0007-20260831-02, but codex exec resume exited 2 with 'unexpected argument -C' before producing an event. Diagnosis: the dispatcher assembles fresh and resumed codex invocations in the same option order even though this CLI requires global worktree options before the resume subcommand. Fix: retained the zero-usage failed session record and started orc-0007-20260831-03 as a fresh sanctioned session with the committed brief. Lesson: dispatch.sh needs an explicit resume-mode argv test; telemetry-complete failure handling does not imply the resume command itself is compatible.
+
+## 2026-09-02 — PR #5 review-fix cap
+
+- **PR #5 reached six review-fix commits against the five-commit merge cap.**
+  The repair began from the 17 archived round-1 findings, then exact-head reviews
+  exposed a fixed-field-model quantification defect, four predicate/API/doc issues,
+  and four import/duplicate-API issues.  Each finding was source-adjudicated and
+  repaired; exact head `b5da371` has green local CI and an `APPROVED` review with
+  zero unresolved findings.  Nevertheless, `pr_merge.py` gate 6 correctly blocks
+  because the branch contains six `[codex-review-fix]` commits since the merge base.
+  No cap override or history rewrite was attempted.  Owner disposition is required
+  before merge; the branch, exact-head evidence, and reviewer session telemetry are
+  preserved.
+- **Owner disposition (2026-09-02):** the merge-time cap is retired by amendment (issue #20 / PR #21, EVOLUTION.md 2026-09-02); PR #5 merges after a fresh-base merge of main — no cap override.
