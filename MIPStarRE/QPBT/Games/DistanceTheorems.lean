@@ -49,14 +49,16 @@ theorem consistencyDefect_le_opFamilyDistSq_of_projective {X α ι : Type*}
       opFamilyDistSq μ (fun x a => (A x).effect a) (fun x a => (B x).effect a) ψ := by
   sorry
 
-/-- Projectivity on one side gives the square-root consistency estimate in the
-third item of `fact:agreement`; blueprint `ch12_qpbt_games.tex:227-238`, paper
+/-- Projectivity on one side gives the square-root consistency estimate for a
+unit state under a probability distribution. This is the third item of
+`fact:agreement`; blueprint `ch12_qpbt_games.tex:227-238`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:295-311`. -/
 theorem consistencyDefect_le_sqrt_of_projective_left {X α ι : Type*}
     [Fintype X] [DecidableEq X] [Fintype α] [DecidableEq α]
     [Fintype ι] [DecidableEq ι]
     (μ : Distribution X) (A B : X → Measurement α ι)
     (ψ : EuclideanSpace ℂ ι)
+    (hμ : μ.IsProbability) (hψ : ‖ψ‖ = 1)
     (hA : ∀ x, MIPStarRE.QPBT.Measurement.IsProjective (A x)) :
     consistencyDefect μ (fun x a => (A x).effect a) (fun x a => (B x).effect a) ψ ≤
       Real.sqrt (2 * opFamilyDistSq μ (fun x a => (A x).effect a)
@@ -81,19 +83,21 @@ theorem opFamilyDistSq_mul_left_le {X Y α β γ ι : Type*}
         C p.2 abc.1.1 abc.2 * B p.1 (abc.1.1, abc.1.2)) ψ ≤ δ := by
   sorry
 
-/-- Function-indexed left multiplication preserves a state-dependent bound.
-This is `fact:add-a-proj2`, blueprint `ch12_qpbt_games.tex:254-268`, paper
+/-- Left multiplication by operators indexed by an arbitrary finite family of
+functions preserves a state-dependent bound. This is `fact:add-a-proj2`,
+blueprint `ch12_qpbt_games.tex:254-268`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:347-361`. -/
-theorem opFamilyDistSq_mul_funIndexed_le {X α ι : Type*}
-    [Fintype X] [DecidableEq X] [Fintype α]
+theorem opFamilyDistSq_mul_funIndexed_le {X α Γ ι : Type*}
+    [Fintype α] [Fintype Γ]
     [Fintype ι] [DecidableEq ι]
     (μ : Distribution X) (A B : X → Measurement α ι)
-    (S : X → (X → α) → Op ι) (ψ : EuclideanSpace ℂ ι) (δ : ℝ)
-    (hS : ∀ x, (1 - ∑ g : X → α, (S x g)ᴴ * S x g).PosSemidef)
+    (eval : Γ → X → α) (S : X → Γ → Op ι)
+    (ψ : EuclideanSpace ℂ ι) (δ : ℝ)
+    (hS : ∀ x, (1 - ∑ g : Γ, (S x g)ᴴ * S x g).PosSemidef)
     (h : opFamilyDistSq μ (fun x a => (A x).effect a)
       (fun x a => (B x).effect a) ψ ≤ δ) :
-    opFamilyDistSq μ (fun x g => S x g * (A x).effect (g x))
-      (fun x g => S x g * (B x).effect (g x)) ψ ≤ δ := by
+    opFamilyDistSq μ (fun x g => S x g * (A x).effect (eval g x))
+      (fun x g => S x g * (B x).effect (eval g x)) ψ ≤ δ := by
   sorry
 
 /-- A projective sub-sum absorbs an approximating operator family. This is
@@ -123,14 +127,16 @@ theorem opFamilyDistSq_le_of_le_of_le {X α ι : Type*}
     opFamilyDistSq μ A C ψ ≤ 2 * δ + 2 * ε := by
   sorry
 
-/-- Triangle inequality for consistency, with the square-root loss of
-`fact:triangle-for-simeq`; blueprint `ch12_qpbt_games.tex:299-309`, paper
+/-- Triangle inequality for consistency on a unit state under a probability
+distribution, with the square-root loss of `fact:triangle-for-simeq`; blueprint
+`ch12_qpbt_games.tex:299-309`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:389-395`. -/
 theorem consistencyDefect_trans_le {X α ι : Type*}
     [Fintype X] [DecidableEq X] [Fintype α] [DecidableEq α]
     [Fintype ι] [DecidableEq ι]
     (μ : Distribution X) (A B C D : X → Measurement α ι)
     (ψ : EuclideanSpace ℂ ι) (ε δ γ : ℝ)
+    (hμ : μ.IsProbability) (hψ : ‖ψ‖ = 1)
     (hAB : consistencyDefect μ (fun x a => (A x).effect a)
       (fun x a => (B x).effect a) ψ ≤ ε)
     (hCB : consistencyDefect μ (fun x a => (C x).effect a)
@@ -141,30 +147,36 @@ theorem consistencyDefect_trans_le {X α ι : Type*}
       (fun x a => (D x).effect a) ψ ≤ ε + 2 * Real.sqrt (δ + γ) := by
   sorry
 
-/-- Coarse-graining cannot increase inconsistency. This is
-`fact:data-processing`, blueprint `ch12_qpbt_games.tex:311-320`, paper
+/-- Coarse-graining measurements on opposite tensor factors cannot increase
+inconsistency. This is `fact:data-processing`, blueprint
+`ch12_qpbt_games.tex:311-320`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:397-401`. -/
-theorem consistencyDefect_postprocess_le {X α β ι : Type*}
+theorem consistencyDefect_postprocess_le {X α β ιA ιB : Type*}
     [Fintype X] [DecidableEq X] [Fintype α] [DecidableEq α]
-    [Fintype β] [DecidableEq β] [Fintype ι] [DecidableEq ι]
-    (μ : Distribution X) (A B : X → Measurement α ι)
-    (ψ : EuclideanSpace ℂ ι) (f : α → β) :
-    consistencyDefect μ (fun x b => ((A x).postprocess f).effect b)
-      (fun x b => ((B x).postprocess f).effect b) ψ ≤
-      consistencyDefect μ (fun x a => (A x).effect a)
-        (fun x a => (B x).effect a) ψ := by
+    [Fintype β] [DecidableEq β]
+    [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
+    (μ : Distribution X) (A : X → Measurement α ιA)
+    (B : X → Measurement α ιB) (ψ : EuclideanSpace ℂ (ιA × ιB))
+    (f : α → β) :
+    consistencyDefect μ
+        (fun x b => heteroKron (((A x).postprocess f).effect b) 1)
+        (fun x b => heteroKron 1 (((B x).postprocess f).effect b)) ψ ≤
+      consistencyDefect μ (fun x a => heteroKron ((A x).effect a) 1)
+        (fun x a => heteroKron 1 ((B x).effect a)) ψ := by
   sorry
 
 /-- Joint closeness to a projective refinement implies approximate
-commutation. The universal constant is quantified before the operator data, as
-required by `lem:commutation-analysis`; blueprint
+commutation. The universal constant is quantified before the carrier types and
+operator data, as required by `lem:commutation-analysis`; blueprint
 `ch12_qpbt_games.tex:324-355`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:410-461`. -/
-theorem opDistSq_commutator_le {X α β γ ιA ιB : Type*}
-    [Fintype α] [DecidableEq α]
-    [Fintype β] [DecidableEq β] [Fintype γ] [DecidableEq γ]
-    [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB] :
-    ∃ C₀ : ℝ, 1 ≤ C₀ ∧ ∀ (μ : Distribution X)
+theorem opDistSq_commutator_le :
+    ∃ C₀ : ℝ, 1 ≤ C₀ ∧
+      ∀ {X α β γ ιA ιB : Type*}
+      [Fintype α] [DecidableEq α]
+      [Fintype β] [DecidableEq β] [Fintype γ] [DecidableEq γ]
+      [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
+      (μ : Distribution X)
       (A : X → Measurement (α × β) ιA)
       (B : X → Measurement ((α × β) × γ) ιB)
       (D : X → Measurement (α × γ) ιA)
