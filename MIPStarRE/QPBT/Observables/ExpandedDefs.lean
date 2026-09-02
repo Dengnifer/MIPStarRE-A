@@ -32,6 +32,13 @@ abbrev SixReg (P : AdmissibleParams) (ιA ιB : Type*) :=
   (ιA × (PauliRegister P × PauliRegister P)) ×
     (ιB × (PauliRegister P × PauliRegister P))
 
+/-- Classical coordinate equality for the finite six-register carrier. This is
+Lean-only support for the matrix distance functionals used after
+`def:expanded-state`, blueprint `ch14_qpbt_observables.tex:760-781`. -/
+noncomputable instance sixRegDecidableEq (P : AdmissibleParams)
+    (ιA ιB : Type*) : DecidableEq (SixReg P ιA ιB) :=
+  Classical.decEq _
+
 /-- Reassociate the raw tensor of the strategy state and two EPR states into
 register order `AA'A''BB'B''`. This is Lean-only bookkeeping for
 `eq:def-psihat`, paper `14_analysis_of_the_pauli_basis_test.tex:367-372`. -/
