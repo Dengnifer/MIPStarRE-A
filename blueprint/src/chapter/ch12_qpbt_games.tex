@@ -396,9 +396,9 @@ The state-dependent distance is the right tool for reasoning about the closeness
 % fact:low-degree-sandwich) instead samples the evaluation point from a specified
 % question distribution.
 \begin{lemma}[Sandwiched simultaneous measurement; modified from Fact 4.34 in \cite{Natarajan2018NEEXP}]\label{lem:ld-sandwich}
-	\lean{MIPStarRE.QPBT.sandwichProduct,
-		MIPStarRE.QPBT.sandwichProduct_isMeasurement,
-		MIPStarRE.QPBT.consistencyDefect_sandwich_le}
+	\lean{MIPStarRE.QPBT.sandwichProduct}
+	\lean{MIPStarRE.QPBT.sandwichProduct_isMeasurement}
+	\lean{MIPStarRE.QPBT.consistencyDefect_sandwich_le}
 	\leanok
 	\uses{def:consistency, def:bracket, def:povm-conventions}
 	Let $k \ge 0$ be an integer and let $\eps > 0$. Let $\mathcal X$ be a finite set and $\mu$ a distribution over $\mathcal X$, and let $\mathcal Y$ be a finite nonempty set; all statements below that sample $y \in \mathcal Y$ refer to the uniform distribution on $\mathcal Y$. For each $1 \le i \le k$ let $\mathcal R_i$ be a finite set, let $\mathcal G_i$ be a finite set of functions $g_i \colon \mathcal Y \to \mathcal R_i$, and for each $x \in \mathcal X$ let $\{G^{i,\,x}_g\}_{g \in \mathcal G_i}$ be a projective measurement. Suppose that for all $i \in \{1,\dots,k\}$ the set $\mathcal G_i$ satisfies the following property: for any two $g_i \ne g_i' \in \mathcal G_i$, the probability that $g_i(y) = g_i'(y)$ over a uniformly random $y \in \mathcal Y$ is at most $\eps$.
@@ -440,9 +440,9 @@ The state-dependent distance is the right tool for reasoning about the closeness
 % 05_quantum_preliminaries.tex:1000-1008, label fact:low-degree-sandwich-on-steroids)
 % conditions on a fixed question tuple with the same restriction left implicit.
 \begin{lemma}[Pasting two consistent measurements; Fact 4.35 in \cite{Natarajan2018NEEXP}]\label{lem:pasting}
-	\lean{MIPStarRE.QPBT.pastedMeasurement,
-		MIPStarRE.QPBT.pastedMeasurement_isMeasurement,
-		MIPStarRE.QPBT.exists_pasting_error}
+	\lean{MIPStarRE.QPBT.pastedMeasurement}
+	\lean{MIPStarRE.QPBT.pastedMeasurement_isMeasurement}
+	\lean{MIPStarRE.QPBT.exists_pasting_error}
 	\leanok
 	\uses{def:consistency, def:bracket, def:povm-conventions}
 	Let $\mathcal D$ be a distribution on $(x, y_1, y_2) \in \mathcal X \times \mathcal Y_1 \times \mathcal Y_2$. For $i \in \{1,2\}$ let $\mathcal G_i$ be a collection of functions $g_i \colon \mathcal Y_i \to \mathcal R_i$ and let $\{(G_i)^x_g\}_{g \in \mathcal G_i}$ be families of measurements such that $\{(G_2)^x_g\}_g$ is projective for every $x$. Suppose further that for every pair $(x, y_1)$ of positive probability under the marginal of $\mathcal D$ on $\mathcal X \times \mathcal Y_1$ (the only pairs for which the conditional distribution of $y_2$ under $\mathcal D$ is defined; pairs of marginal probability zero are subject to no requirement) it holds that for $g_2 \ne g_2' \in \mathcal G_2$ the probability, on average over $y_2$ chosen from $\mathcal D$ conditioned on $(x, y_1)$, that $g_2(y_2) = g_2'(y_2)$ is at most $\eta$. Let $\{A^{x,y_1,y_2}_{a_1,\,a_2}\}$ be a family of projective measurements with outcomes $(a_1, a_2) \in \mathcal R_1 \times \mathcal R_2$ such that for $i \in \{1,2\}$,

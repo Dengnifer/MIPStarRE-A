@@ -83,12 +83,12 @@ The next two lemmas show that the CL functions $L_{\mathsf{Point}}$, $L_{\mathsf
 \end{proof}
 
 \begin{definition}[Line-point distributions]\label{def:line-point-dist}
-	\lean{MIPStarRE.QPBT.LineKind, MIPStarRE.QPBT.LineDesc,
-		MIPStarRE.QPBT.aLinePointDist, MIPStarRE.QPBT.dLinePointDist,
-		MIPStarRE.QPBT.linePointDist,
-		MIPStarRE.QPBT.aLinePointDist_isProbability,
-		MIPStarRE.QPBT.dLinePointDist_isProbability,
-		MIPStarRE.QPBT.linePointDist_isProbability}
+	\lean{MIPStarRE.QPBT.LineKind, MIPStarRE.QPBT.LineDesc}
+	\lean{MIPStarRE.QPBT.aLinePointDist, MIPStarRE.QPBT.dLinePointDist}
+	\lean{MIPStarRE.QPBT.linePointDist}
+	\lean{MIPStarRE.QPBT.aLinePointDist_isProbability}
+	\lean{MIPStarRE.QPBT.dLinePointDist_isProbability}
+	\lean{MIPStarRE.QPBT.linePointDist_isProbability}
 	\leanok
 	\uses{def:ld-question-distribution, lem:alnf, lem:dlnf}
 	The \emph{axis line-point distribution} $D_{\mathsf{ALine}}$ is the distribution $\mu_{L_{\mathsf{ALine}}, L_{\mathsf{Point}}}$ over pairs $(\ell = (u_0,e_i),\, u)$, where we omit the $0$ components for simplicity. The \emph{diagonal line-point distribution} $D_{\mathsf{DLine}}$ is the distribution $\mu_{L_{\mathsf{DLine}}, L_{\mathsf{Point}}}$ over pairs $(\ell = (u_0,s,v),\, u)$. The \emph{line-point distribution} $D_{\mathsf{Line}}$ is the equal mixture of the two: with probability $\tfrac12$ output a sample from $D_{\mathsf{ALine}}$, and with probability $\tfrac12$ output a sample from $D_{\mathsf{DLine}}$.

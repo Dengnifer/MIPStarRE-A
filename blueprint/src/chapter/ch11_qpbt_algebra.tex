@@ -551,8 +551,8 @@ representation is obtained as follows.
 \label{sec:generalized-pauli}
 
 \begin{definition}[Generalized Pauli observables]\label{def:generalized-pauli}
-	\lean{MIPStarRE.QPBT.primeTauShift, MIPStarRE.QPBT.primeTauPhase,
-		MIPStarRE.QPBT.primeTauObservable}
+	\lean{MIPStarRE.QPBT.primeTauShift, MIPStarRE.QPBT.primeTauPhase}
+	\lean{MIPStarRE.QPBT.primeTauObservable}
 	\uses{def:subfield-trace, def:lin-reg}
 	Let $p$ be a prime and $\omega = e^{2\pi i/p}$. The \emph{generalized Pauli
 	observables over $\F_p$} are the unitaries on $\C^{\F_p}$ given by
@@ -597,12 +597,12 @@ representation is obtained as follows.
 \end{definition}
 
 \begin{lemma}[Product and twisted commutation relations]\label{lem:twisted-commutation}
-	\lean{MIPStarRE.QPBT.primeTauObservable_mul,
-		MIPStarRE.QPBT.primeTauObservable_pow,
-		MIPStarRE.QPBT.primeTauObservable_pow_char,
-		MIPStarRE.QPBT.primeTauObservable_isUnitary,
-		MIPStarRE.QPBT.primeTauObservable_eigenvalue_pow_char,
-		MIPStarRE.QPBT.primeTauObservable_X_mul_Z}
+	\lean{MIPStarRE.QPBT.primeTauObservable_mul}
+	\lean{MIPStarRE.QPBT.primeTauObservable_pow}
+	\lean{MIPStarRE.QPBT.primeTauObservable_pow_char}
+	\lean{MIPStarRE.QPBT.primeTauObservable_isUnitary}
+	\lean{MIPStarRE.QPBT.primeTauObservable_eigenvalue_pow_char}
+	\lean{MIPStarRE.QPBT.primeTauObservable_X_mul_Z}
 	\leanok
 	\uses{def:generalized-pauli, def:subfield-trace, def:dot-product-orthogonal}
 	Let $q = p^k$, let $n \ge 1$ be an integer, and let $W \in \{X, Z\}$.
@@ -776,6 +776,6 @@ observables and maximally entangled states over \emph{qubits}
 	$j \in \{1, \dots, q\}$; the intended range, used above, is
 	$j \in \{1, \dots, k\}$, as the $i$-th qudit is mapped to $k$ qubits. The
 	source also quantifies over arbitrary integers $L$; the statement above
-	takes $L \ge 1$, the domain on which the tensor powers $(\C^q)^{\ot L}$
-	are defined.
+	takes $L$ to be a natural number, including zero, and uses the usual
+	empty-product convention for the tensor powers when $L=0$.
 \end{remark}

@@ -62,17 +62,19 @@ theorem binaryCoordinates_mul {q : ℕ} (F : FixedFieldModel q) (a b : F.K) :
         (F.binaryCoordinates (F.basis i * b)) := by
   sorry
 
-/-- Matrix coordinate expansion for an arbitrary basis. This is the
-`chi_q` construction used in item 3 of `lem:downsize_field`, blueprint
-`ch11_qpbt_algebra.tex:259-277`, paper `04_preliminaries.tex:509-550`. -/
+/-- Matrix coordinate expansion for an arbitrary basis. This is the `chi_q`
+construction of `def:subfields-kappa`, blueprint `ch11_qpbt_algebra.tex:207-214`,
+paper `04_preliminaries.tex:462-475`; it is used in item 3 of
+`lem:downsize_field`, blueprint lines 259-277, paper lines 509-550. -/
 noncomputable def chiOfBasis {F K ρ κ σ : Type*} [Field F] [Field K]
     [Algebra F K] [Fintype κ] (b : Module.Basis κ F K) (M : Matrix ρ σ K) :
     Matrix (ρ × κ) (σ × κ) F :=
   fun p r => b.equivFun (M p.1 r.1 * b r.2) p.2
 
 /-- Coordinates of a vector, block-indexed by its vector and basis indices.
-This is the vector `kappa_q(v)` in item 3 of `lem:downsize_field`, blueprint
-`ch11_qpbt_algebra.tex:259-277`, paper `04_preliminaries.tex:509-550`. -/
+This is the vector `kappa_q(v)` of `def:subfields-kappa`, blueprint
+`ch11_qpbt_algebra.tex:207-214`, paper `04_preliminaries.tex:462-475`; it is used
+in item 3 of `lem:downsize_field`, blueprint lines 259-277, paper lines 509-550. -/
 noncomputable def basisCoordVec {F K ι κ : Type*} [Field F] [Field K]
     [Algebra F K] [Fintype κ] (b : Module.Basis κ F K) (v : ι → K) : ι × κ → F :=
   fun p => b.equivFun (v p.1) p.2
