@@ -1,4 +1,3 @@
-import Mathlib
 import MIPStarRE.QPBT.Algebra.FieldBasis
 import MIPStarRE.QPBT.Algebra.Lines
 import MIPStarRE.QPBT.Games.CondLinear
@@ -193,17 +192,6 @@ theorem isCondLinear_ldDLineCL (P : LdParams) :
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`).
 -/
 abbrev LdQuestion (P : LdParams) := LdType × LdSpace P
-
-/-- The support of the typed CL question distribution, obtained by pushing a
-uniform seed through the type-indexed maps.  This is the construction in
-`def:ld-question-distribution`, blueprint
-`blueprint/src/chapter/ch13_qpbt_test.tex:38-49`, paper origin
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
--/
-noncomputable def ldQuestionSupport (P : LdParams) :
-    Finset (LdQuestion P × LdQuestion P) :=
-  (Finset.univ : Finset ((LdType × LdType) × LdSpace P)).image (fun s =>
-    ((s.1.1, ldCL P s.1.1 s.2), (s.1.2, ldCL P s.1.2 s.2)))
 
 /-- The typed CL question distribution.  This is the inlined construction in
 `def:ld-question-distribution`, blueprint `ch13_qpbt_test.tex:38-49`; paper

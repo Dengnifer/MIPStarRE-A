@@ -1,4 +1,3 @@
-import Mathlib
 import MIPStarRE.QPBT.Games.Defs
 
 /-!

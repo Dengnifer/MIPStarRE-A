@@ -1,5 +1,3 @@
-import Mathlib
-import MIPStarRE.QPBT.Algebra.FieldBasis
 import MIPStarRE.QPBT.Algebra.LowDegreeCode
 import MIPStarRE.QPBT.Algebra.Pauli
 import MIPStarRE.QPBT.Test.LowDegreeGame
@@ -313,20 +311,6 @@ object `pauliEdges` above (same blueprint and paper references).
 theorem pauliEdge_nonempty : Nonempty PauliEdge := by
   refine ⟨⟨(.point .X, .point .X), ?_⟩⟩
   simp [pauliEdges]
-
-/-- The finite support obtained by sampling an edge and a common ambient seed,
-then applying the endpoint CL maps.  This is the inlined typed-CL construction
-of `def:pauli-question-distribution` (blueprint lines 285-329; paper
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1120`).
--/
-noncomputable def pauliQuestionSupport (P : AdmissibleParams) :
-    Finset (PauliQuestion P × PauliQuestion P) :=
-  by
-    classical
-    exact
-      (Finset.univ.filter fun s : (PauliType × PauliType) × PauliSpace P =>
-          Sym2.mk s.1.1 s.1.2 ∈ pauliEdges).image (fun s =>
-        ((s.1.1, pauliCL P s.1.1 s.2), (s.1.2, pauliCL P s.1.2 s.2)))
 
 /-- The Pauli question distribution from `def:pauli-question-distribution`,
 blueprint `ch13_qpbt_test.tex:285-329`, paper origin

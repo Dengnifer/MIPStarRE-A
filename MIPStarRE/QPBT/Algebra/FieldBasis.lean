@@ -1,4 +1,3 @@
-import Mathlib
 import MIPStarRE.LDT.Basic.ParametersBase
 
 /-!
@@ -105,16 +104,9 @@ instance {q : ℕ} (F : FixedFieldModel q) : Fintype F.K := F.toFieldModel.instF
 instance {q : ℕ} (F : FixedFieldModel q) : DecidableEq F.K := F.toFieldModel.instDecidableEq
 instance {q : ℕ} (F : FixedFieldModel q) : Algebra (ZMod 2) F.K := F.algebra
 
-/-- The fixed binary representation of field elements (`def:binary-representation`).
-Blueprint: `blueprint/src/chapter/ch11_qpbt_algebra.tex:298-315`; paper origin:
-`references/qpbt-paper/04_preliminaries.tex:653-680`.
--/
-noncomputable def binaryEquiv {q : ℕ} (F : FixedFieldModel q) : F.K ≃ Fin q :=
-  F.toFieldModel.equiv
-
 /-- The fixed binary representation obtained from the chosen basis coordinates. -/
 noncomputable def binaryRepresentation {q : ℕ} (F : FixedFieldModel q) : F.K ≃ Fin q :=
-  binaryEquiv F
+  F.toFieldModel.equiv
 
 /--
 The coordinate map associated with a finite basis.  This is the `κ` of

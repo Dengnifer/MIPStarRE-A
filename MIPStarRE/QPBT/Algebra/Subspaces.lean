@@ -1,4 +1,6 @@
-import Mathlib
+import Mathlib.Data.Matrix.Mul
+import Mathlib.LinearAlgebra.Dimension.Finrank
+import Mathlib.LinearAlgebra.Projection
 
 /-!
 # Subspaces for the Pauli basis test

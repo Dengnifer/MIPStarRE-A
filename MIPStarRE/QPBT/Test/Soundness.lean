@@ -1,7 +1,3 @@
-import Mathlib
-import MIPStarRE.QPBT.Algebra.Pauli
-import MIPStarRE.QPBT.Games.Defs
-import MIPStarRE.QPBT.Games.Distance
 import MIPStarRE.QPBT.Test.PauliBasisTest
 
 /-!

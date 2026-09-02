@@ -1,6 +1,4 @@
-import Mathlib
 import MIPStarRE.Quantum.Measurement
-import MIPStarRE.QPBT.Algebra.Pauli
 import MIPStarRE.LDT.Basic.Distribution
 
 /-!

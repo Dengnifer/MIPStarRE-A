@@ -1,4 +1,3 @@
-import Mathlib.Algebra.MvPolynomial.CommRing
 import MIPStarRE.LDT.Preliminaries.Polynomials
 
 /-!
@@ -81,13 +80,5 @@ theorem lowDegreeEnc_eq_dotProduct {K : Type*} [CommRing K] {m : ℕ}
     (a : Cube m → K) (x : Fin m → K) :
     lowDegreeEnc a x = dotProduct a (indicatorVec x) := by
   sorry
-
-/-- Re-export of the LDT polynomial representative class (`def:polyfunc`).
-Blueprint `blueprint/src/chapter/ch11_qpbt_algebra.tex:321-329`; paper origin
-`references/ldt-paper/preliminaries.tex:89-119`.
--/
-noncomputable abbrev polyFunc (m d : ℕ) (K : Type*) [CommSemiring K] :
-    Submodule K (MvPolynomial (Fin m) K) :=
-  MIPStarRE.LDT.Preliminaries.polyFunc m K d
 
 end MIPStarRE.QPBT
