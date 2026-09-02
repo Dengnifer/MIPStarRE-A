@@ -206,3 +206,28 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 - **Lesson:** review.md §12's fifth-round threshold assumes convergence; for a
   workflow-layer PR the owner may adjudicate once a round re-raises
   dispositioned items.  To be written into §12 by #25.
+
+## 2026-09-02 — PR #5 fresh-base review repair
+
+- **Symptom:** the exact-head review of fresh-base commit `46e32d6` completed
+  in its durable dispatch transcript while the parent `review.sh` process
+  became orphaned before publishing its result.  The review identified two
+  source-documentation defects: the root re-export header omitted QPBT and
+  misidentified the LDT paper, and `lowDegreeEnc_eq_dotProduct` cited
+  `lem:indicator-vector` instead of the existing `def:indicator-vector`.
+- **Disposition:** both findings are within the PR's documentation surface and
+  have direct source corrections.  Repair them under the plain commit subject
+  `fix(review): correct QPBT source documentation`; rerun exact-head CI and
+  review rather than adjudicating the failed publication path.  The review's
+  mathematical audit found no statement drift.
+- **Recovery:** the replacement review for repair head `a361b42` again left a
+  stale review lock and no verdict after its dispatch transcript stopped.  The
+  operator terminated the orphaned wrapper, retaining the transcript as
+  failure evidence.  Since no exact-head review was published, it cannot be
+  adjudicated; rerun `review.sh 5` after stale-lock reclamation.
+- **Repeated failure:** two subsequent exact-head retries on `ce94902` also
+  stopped with dead lock owners and no terminal ledger.  The merge gate cannot
+  use operator adjudication for an absent review marker, so no review evidence
+  was manufactured.  The operator has parked further retries pending the
+  bounded reviewer-lane repair, after which the branch will take a fresh base
+  and repeat CI and review.
