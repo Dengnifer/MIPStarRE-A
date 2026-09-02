@@ -1,33 +1,31 @@
-import Mathlib.Analysis.SpecialFunctions.Pow.Real
+import MIPStarRE.LDT.Basic.ParametersBase
 
-/-!
-# Polynomial error functions
+/-! # Polynomial error predicates
 
-This file records the asymptotic error predicates shared by the observable and
-combining chapters.  They make the universal constants and positive exponents
-explicit while leaving their values unspecified.
-
-## References
-
-These are Lean-only auxiliaries for the `poly` notation used in
-`blueprint/src/chapter/ch14_qpbt_observables.tex` and
-`blueprint/src/chapter/ch15_qpbt_combining.tex`.
+Shared quantitative predicates for the polynomial-error bounds in QPBT
+chapters 12, 14, and 15.
 -/
 
 namespace MIPStarRE.QPBT
 
-/-- A one-variable error function bounded by a positive power with a universal
-constant.  This is a formalization-only auxiliary for the paper's `poly(ε)`
-notation. -/
+/-- The one-parameter polynomial-smallness convention used by `lem:pasting`
+and QPBT chapters 14--15; blueprint `ch12_qpbt_games.tex:380-410`, paper
+`06_nonlocal_games_and_mipstar.tex:409-445`. -/
 def IsPolyErr (f : ℝ → ℝ) : Prop :=
-  ∃ C b : ℝ, 1 ≤ C ∧ 0 < b ∧
-    ∀ ε : ℝ, 0 ≤ ε → f ε ≤ C * Real.rpow ε b
+  ∃ C r : ℝ, 0 < C ∧ 0 < r ∧ ∀ x, 0 ≤ x → x ≤ 1 →
+    0 ≤ f x ∧ f x ≤ C * Real.rpow x r
 
-/-- A two-variable error function bounded by positive powers of both inputs.
-This is a formalization-only auxiliary for the paper's `poly(ε, η)` notation. -/
+/-- The two-parameter polynomial-smallness convention used by `lem:pasting`
+and QPBT chapter 15; blueprint `ch12_qpbt_games.tex:380-410`, paper
+`06_nonlocal_games_and_mipstar.tex:409-445`. -/
 def IsPolyErr2 (f : ℝ → ℝ → ℝ) : Prop :=
-  ∃ C b c : ℝ, 1 ≤ C ∧ 0 < b ∧ 0 < c ∧
-    ∀ ε η : ℝ, 0 ≤ ε → 0 ≤ η →
-      f ε η ≤ C * (Real.rpow ε b + Real.rpow η c)
+  ∃ C r s : ℝ, 0 < C ∧ 0 < r ∧ 0 < s ∧ ∀ x y, 0 ≤ x → x ≤ 1 →
+    0 ≤ y → y ≤ 1 → 0 ≤ f x y ∧
+      f x y ≤ C * (Real.rpow x r + Real.rpow y s)
+
+/-- Unicode compatibility alias for the two-parameter polynomial-smallness
+predicate used by `lem:pasting`, blueprint `ch12_qpbt_games.tex:380-410`, paper
+`06_nonlocal_games_and_mipstar.tex:409-445`. -/
+abbrev IsPolyErr₂ := IsPolyErr2
 
 end MIPStarRE.QPBT

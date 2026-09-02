@@ -15,7 +15,9 @@ namespace MIPStarRE.QPBT
 
 open MIPStarRE.Quantum
 
-/-- Conjugate a finite operator by a linear isometry. -/
+/-- Conjugation by the local isometries in `thm:ms-rigidity` and
+`lem:pauli-binary`; blueprint `ch13_qpbt_test.tex:386-403` and
+`ch11_qpbt_algebra.tex:675-708`, paper `08_classical_and_quantum_low_degree_tests.tex:1426-1447`. -/
 noncomputable def conjIsometry {ι ι' : Type*}
     [Fintype ι] [DecidableEq ι] [Fintype ι'] [DecidableEq ι']
     (φ : EuclideanSpace ℂ ι →ₗᵢ[ℂ] EuclideanSpace ℂ ι')
@@ -23,42 +25,52 @@ noncomputable def conjIsometry {ι ι' : Type*}
   let U : Matrix ι' ι ℂ := Matrix.toEuclideanLin.symm φ.toLinearMap
   U * M * Uᴴ
 
-/-- Reindex a finite Euclidean-space vector along an equivalence. -/
+/-- Coordinate transport used by `def:strategy-distance`, blueprint
+`ch12_qpbt_games.tex:212-219`, paper `06_nonlocal_games_and_mipstar.tex:273-285`. -/
 noncomputable def reindexState {ι ι' : Type*} [Fintype ι] [DecidableEq ι]
     [Fintype ι'] [DecidableEq ι'] (e : ι ≃ ι')
     (ψ : EuclideanSpace ℂ ι) : EuclideanSpace ℂ ι' :=
   (EuclideanSpace.equiv ι' ℂ).symm
     (fun j => (EuclideanSpace.equiv ι ℂ ψ) (e.symm j))
 
-/-- Apply two local isometries to a bipartite state, with arbitrary finite
-codomain index types. -/
+/-- Apply the two independent local isometries of `thm:ms-rigidity`; blueprint
+`ch13_qpbt_test.tex:386-403`, paper
+`08_classical_and_quantum_low_degree_tests.tex:1426-1447`. -/
 noncomputable def isometryTensor
-    {ιA ιB κA κB R : Type*}
+    {ιA ιB κA κB : Type*}
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
     [Fintype κA] [DecidableEq κA] [Fintype κB] [DecidableEq κB]
-    [Fintype R] [DecidableEq R]
-    (φA : EuclideanSpace ℂ ιA →ₗᵢ[ℂ] EuclideanSpace ℂ (κA × R))
-    (φB : EuclideanSpace ℂ ιB →ₗᵢ[ℂ] EuclideanSpace ℂ (κB × R))
+    (φA : EuclideanSpace ℂ ιA →ₗᵢ[ℂ] EuclideanSpace ℂ κA)
+    (φB : EuclideanSpace ℂ ιB →ₗᵢ[ℂ] EuclideanSpace ℂ κB)
     (ψ : EuclideanSpace ℂ (ιA × ιB)) :
-    EuclideanSpace ℂ ((κA × R) × (κB × R)) :=
-  (EuclideanSpace.equiv ((κA × R) × (κB × R)) ℂ).symm
+    EuclideanSpace ℂ (κA × κB) :=
+  (EuclideanSpace.equiv (κA × κB) ℂ).symm
     (fun p =>
       ∑ i : ιA, ∑ j : ιB,
-        ((EuclideanSpace.equiv (κA × R) ℂ)
+        ((EuclideanSpace.equiv κA ℂ)
             (φA ((EuclideanSpace.equiv ιA ℂ).symm (Pi.single i 1))) p.1) *
-          ((EuclideanSpace.equiv (κB × R) ℂ)
+          ((EuclideanSpace.equiv κB ℂ)
             (φB ((EuclideanSpace.equiv ιB ℂ).symm (Pi.single j 1))) p.2) *
           ((EuclideanSpace.equiv (ιA × ιB) ℂ) ψ (i, j)))
 
-/-- Tensor two real coordinate vectors, indexed by a product. -/
-def vecTensor {ι κ : Type*} (u : ι → ℝ) (v : κ → ℝ) : ι × κ → ℝ :=
-  fun p => u p.1 * v p.2
+/-- Coordinate tensor used in the ideal state of `thm:ms-rigidity`; blueprint
+`ch13_qpbt_test.tex:386-403`, paper
+`08_classical_and_quantum_low_degree_tests.tex:1426-1447`. -/
+noncomputable def vecTensor {ι κ : Type*}
+    [Fintype ι] [DecidableEq ι] [Fintype κ] [DecidableEq κ]
+    (u : EuclideanSpace ℂ ι) (v : EuclideanSpace ℂ κ) :
+    EuclideanSpace ℂ (ι × κ) :=
+  (EuclideanSpace.equiv (ι × κ) ℂ).symm
+    (fun p => (EuclideanSpace.equiv ι ℂ u) p.1 * (EuclideanSpace.equiv κ ℂ v) p.2)
 
-/-- Reindex a finite matrix along equivalences of its row and column types. -/
+/-- Operator transport used by `def:strategy-distance`, blueprint
+`ch12_qpbt_games.tex:212-219`, paper `06_nonlocal_games_and_mipstar.tex:273-285`. -/
 def reindexOp {ι ι' : Type*} (e : ι ≃ ι') (M : Op ι') : Op ι :=
   (Matrix.reindex e.symm e.symm) M
 
-/-- The four-factor product shuffle used to compare bipartite tensor orderings. -/
+/-- Four-factor tensor shuffle used by `thm:ms-rigidity`; blueprint
+`ch13_qpbt_test.tex:386-403`, paper
+`08_classical_and_quantum_low_degree_tests.tex:1426-1447`. -/
 def prodShuffle {α β γ δ : Type*} :
     (α × β) × (γ × δ) ≃ (α × γ) × (β × δ) where
   toFun p := ((p.1.1, p.2.1), (p.1.2, p.2.2))

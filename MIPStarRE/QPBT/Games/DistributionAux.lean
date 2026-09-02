@@ -1,98 +1,124 @@
 import MIPStarRE.LDT.Basic.Distribution
 
-/-!
-# Finite distribution combinators
+/-! # Finite distribution combinators
 
-This file supplies weighted mixtures, independent products, and normalized
-restrictions for the explicit-support `Distribution` used throughout QPBT.
-
-## References
-
-These are formalization-only auxiliaries for the mixtures and independent
-line samples in `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:882-1019`.
+Lean-only infrastructure for `def:line-point-dist` and the distribution
+constructions in QPBT chapters 13--15; blueprint
+`ch13_qpbt_test.tex:180-245`, paper
+`08_classical_and_quantum_low_degree_tests.tex:544-626`.
 -/
 
 open scoped BigOperators
 
-namespace MIPStarRE.LDT.Distribution
+namespace MIPStarRE.QPBT
 
-/-- Mix a finite family of distributions using another distribution as the
-law of the family index. -/
-noncomputable def mixture {κ α : Type*} [DecidableEq α]
-    (weights : Distribution κ) (component : κ → Distribution α) : Distribution α where
-  support := weights.support.biUnion fun i => (component i).support
-  weight := fun a =>
-    ∑ i ∈ weights.support, weights.weight i * (component i).weight a
-  nonnegative := fun a => Finset.sum_nonneg fun i _ =>
-    mul_nonneg (weights.nonnegative i) ((component i).nonnegative a)
-  outsideSupport := fun a ha => by
-    apply Finset.sum_eq_zero
-    intro i hi
-    have hai : a ∉ (component i).support := by
-      intro hai
-      exact ha (Finset.mem_biUnion.mpr ⟨i, hi, hai⟩)
-    rw [(component i).outsideSupport a hai, mul_zero]
+open MIPStarRE.LDT
 
-/-- The mixture of probability distributions is a probability distribution.
-This named formalization-only obligation provides the mass calculation used by
-the line-point sampler. -/
-theorem mixture_isProbability {κ α : Type*} [DecidableEq α]
-    (weights : Distribution κ) (component : κ → Distribution α)
-    (hw : weights.IsProbability)
-    (hc : ∀ i ∈ weights.support, (component i).IsProbability) :
-    (mixture weights component).IsProbability := by
-  sorry
-
-/-- The independent product of two finite-support distributions. -/
-def prod {α β : Type*} [DecidableEq α] [DecidableEq β]
+/-- Product of finite distributions. Lean-only infrastructure for
+`def:line-point-dist`, blueprint `ch13_qpbt_test.tex:180-245`, paper
+`08_classical_and_quantum_low_degree_tests.tex:544-626`. -/
+noncomputable def Distribution.prod {α β : Type*} [DecidableEq α] [DecidableEq β]
     (μ : Distribution α) (ν : Distribution β) : Distribution (α × β) where
-  support := μ.support ×ˢ ν.support
-  weight := fun ab => μ.weight ab.1 * ν.weight ab.2
-  nonnegative := fun ab => mul_nonneg (μ.nonnegative ab.1) (ν.nonnegative ab.2)
-  outsideSupport := fun ab hab => by
-    by_cases ha : ab.1 ∈ μ.support
-    · have hb : ab.2 ∉ ν.support := by
-        intro hb
-        exact hab (Finset.mem_product.mpr ⟨ha, hb⟩)
-      rw [ν.outsideSupport ab.2 hb, mul_zero]
-    · rw [μ.outsideSupport ab.1 ha, zero_mul]
+  support := μ.support.product ν.support
+  weight p := μ.weight p.1 * ν.weight p.2
+  nonnegative p := mul_nonneg (μ.nonnegative p.1) (ν.nonnegative p.2)
+  outsideSupport p hp := by
+    by_cases hμ : p.1 ∈ μ.support
+    · have hν : p.2 ∉ ν.support := by
+        intro h
+        exact hp (Finset.mem_product.mpr ⟨hμ, h⟩)
+      simp [ν.outsideSupport p.2 hν]
+    · simp [μ.outsideSupport p.1 hμ]
 
-/-- Independent products preserve total probability mass. -/
-theorem prod_isProbability {α β : Type*} [DecidableEq α] [DecidableEq β]
-    (μ : Distribution α) (ν : Distribution β)
+/-- Products preserve probability. Lean-only companion used by the product
+distributions in QPBT chapters 13--15; blueprint `ch13_qpbt_test.tex:180-245`,
+paper `08_classical_and_quantum_low_degree_tests.tex:544-626`. -/
+theorem Distribution.prod_isProbability {α β : Type*}
+    [DecidableEq α] [DecidableEq β] (μ : Distribution α) (ν : Distribution β)
     (hμ : μ.IsProbability) (hν : ν.IsProbability) :
-    (prod μ ν).IsProbability := by
+    (Distribution.prod μ ν).IsProbability := by
   sorry
 
-/-- The mass of an event inside a finite-support distribution. -/
-def restrictedWeight {α : Type*} [DecidableEq α]
-    (μ : Distribution α) (p : α → Prop) [DecidablePred p] : ℝ :=
-  ∑ a ∈ μ.support.filter p, μ.weight a
+/-- Convex mixture with a coefficient in `[0,1]`. Lean-only infrastructure for
+the equal mixture in `def:line-point-dist`, blueprint
+`ch13_qpbt_test.tex:180-245`, paper
+`08_classical_and_quantum_low_degree_tests.tex:544-626`. -/
+noncomputable def Distribution.mix {α : Type*} [DecidableEq α]
+    (t : ℝ) (ht0 : 0 ≤ t) (ht1 : t ≤ 1)
+    (μ ν : Distribution α) : Distribution α where
+  support := μ.support ∪ ν.support
+  weight a := t * μ.weight a + (1 - t) * ν.weight a
+  nonnegative a := by
+    exact add_nonneg
+      (mul_nonneg ht0 (μ.nonnegative a))
+      (mul_nonneg (sub_nonneg.mpr ht1) (ν.nonnegative a))
+  outsideSupport a ha := by
+    have hμ : a ∉ μ.support := fun h => ha (Finset.mem_union_left _ h)
+    have hν : a ∉ ν.support := fun h => ha (Finset.mem_union_right _ h)
+    simp [μ.outsideSupport a hμ, ν.outsideSupport a hν]
 
-/-- Normalize a distribution on an event of positive mass.  The positive-mass
-hypothesis is part of the domain, so the definition has no zero-mass fallback. -/
-noncomputable def restrict {α : Type*} [DecidableEq α]
+/-- Convex mixtures preserve probability. Lean-only companion for
+`def:line-point-dist`, blueprint `ch13_qpbt_test.tex:180-245`, paper
+`08_classical_and_quantum_low_degree_tests.tex:544-626`. -/
+theorem Distribution.mix_isProbability {α : Type*} [DecidableEq α]
+    (t : ℝ) (μ ν : Distribution α) (hμ : μ.IsProbability)
+    (hν : ν.IsProbability) (ht0 : 0 ≤ t) (ht1 : t ≤ 1) :
+    (Distribution.mix t ht0 ht1 μ ν).IsProbability := by
+  sorry
+
+/-- A dependent finite bind. Lean-only infrastructure for typed question
+distributions, blueprint `ch12_qpbt_games.tex:430-470`, paper
+`05_conditionally_linear_functions.tex:236-286`. -/
+noncomputable def Distribution.bind {α β : Type*} [DecidableEq β]
+    (μ : Distribution α) (ν : α → Distribution β) : Distribution β where
+  support := μ.support.biUnion (fun a => (ν a).support)
+  weight b := ∑ a ∈ μ.support, μ.weight a * (ν a).weight b
+  nonnegative b := Finset.sum_nonneg fun a _ => mul_nonneg (μ.nonnegative a) ((ν a).nonnegative b)
+  outsideSupport b hb := by
+    apply Finset.sum_eq_zero
+    intro a ha
+    have hnot : b ∉ (ν a).support := by
+      intro h
+      exact hb (Finset.mem_biUnion.mpr ⟨a, ha, h⟩)
+    simp [ν a |>.outsideSupport b hnot]
+
+/-- Binding probability distributions preserves probability. Lean-only
+companion for typed question distributions, blueprint
+`ch12_qpbt_games.tex:430-470`, paper
+`05_conditionally_linear_functions.tex:236-286`. -/
+theorem Distribution.bind_isProbability {α β : Type*} [DecidableEq β]
+    (μ : Distribution α) (ν : α → Distribution β) (hμ : μ.IsProbability)
+    (hν : ∀ a ∈ μ.support, (ν a).IsProbability) :
+    (Distribution.bind μ ν).IsProbability := by
+  sorry
+
+/-- Normalize a distribution after restricting its support to a decidable
+predicate. Lean-only infrastructure for `def:ith-restricted-line`, blueprint
+`ch15_qpbt_combining.tex:1038-1048`, paper
+`14_analysis_of_the_pauli_basis_test.tex:1038-1048`. -/
+noncomputable def Distribution.restrict {α : Type*} [DecidableEq α]
     (μ : Distribution α) (p : α → Prop) [DecidablePred p]
-    (hpos : 0 < restrictedWeight μ p) : Distribution α where
+    (hpos : 0 < ∑ a ∈ μ.support.filter p, μ.weight a) : Distribution α where
   support := μ.support.filter p
-  weight := fun a => if p a then μ.weight a / restrictedWeight μ p else 0
-  nonnegative := fun a => by
-    split_ifs
-    · exact div_nonneg (μ.nonnegative a) hpos.le
+  weight a := if p a then μ.weight a / ∑ b ∈ μ.support.filter p, μ.weight b else 0
+  nonnegative a := by
+    split
+    · exact div_nonneg (μ.nonnegative a) (le_of_lt hpos)
     · exact le_rfl
-  outsideSupport := fun a ha => by
-    by_cases hpa : p a
-    · have hsa : a ∉ μ.support := by
-        intro hsa
-        exact ha (Finset.mem_filter.mpr ⟨hsa, hpa⟩)
-      rw [if_pos hpa, μ.outsideSupport a hsa, zero_div]
-    · rw [if_neg hpa]
+  outsideSupport a ha := by
+    by_cases hp : p a
+    · have hμ : a ∉ μ.support := fun h => ha (Finset.mem_filter.mpr ⟨h, hp⟩)
+      simp [hp, μ.outsideSupport a hμ]
+    · simp [hp]
 
-/-- A normalized restriction has total probability mass one. -/
-theorem restrict_isProbability {α : Type*} [DecidableEq α]
+/-- A normalized positive-mass restriction is probabilistic. Lean-only
+companion for `def:ith-restricted-line`, blueprint
+`ch15_qpbt_combining.tex:1038-1048`, paper
+`14_analysis_of_the_pauli_basis_test.tex:1038-1048`. -/
+theorem Distribution.restrict_isProbability {α : Type*} [DecidableEq α]
     (μ : Distribution α) (p : α → Prop) [DecidablePred p]
-    (hpos : 0 < restrictedWeight μ p) :
-    (restrict μ p hpos).IsProbability := by
+    (hpos : 0 < ∑ a ∈ μ.support.filter p, μ.weight a) :
+    (Distribution.restrict μ p hpos).IsProbability := by
   sorry
 
-end MIPStarRE.LDT.Distribution
+end MIPStarRE.QPBT
