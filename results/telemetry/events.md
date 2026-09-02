@@ -220,3 +220,8 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   `fix(review): correct QPBT source documentation`; rerun exact-head CI and
   review rather than adjudicating the failed publication path.  The review's
   mathematical audit found no statement drift.
+- **Recovery:** the replacement review for repair head `a361b42` again left a
+  stale review lock and no verdict after its dispatch transcript stopped.  The
+  operator terminated the orphaned wrapper, retaining the transcript as
+  failure evidence.  Since no exact-head review was published, it cannot be
+  adjudicated; rerun `review.sh 5` after stale-lock reclamation.
