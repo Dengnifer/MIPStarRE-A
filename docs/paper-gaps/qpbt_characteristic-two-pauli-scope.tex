@@ -3,7 +3,13 @@
 \usepackage{xurl}
 \usepackage[hidelinks]{hyperref}
 \input{command}
+
+\title{Prime-Characteristic and Binary Pauli Observables}
+\author{}
+\date{2026-09-02}
+
 \begin{document}
+\maketitle
 \section{At a glance}
 \begin{itemize}
   \item \textbf{Difficulty.} Medium.  The source-facing statements must retain
@@ -16,7 +22,9 @@
   characteristic-two specialization are project-local.
   \item \textbf{Key mathematical inputs.} Unitarity of shift and phase
   matrices, the $p$-th-power identity, and additive-character orthogonality.
-  The scope correction is tracked in \ghissue{16}.
+  The scope correction is tracked in
+  \href{https://github.com/Dengnifer/MIPStarRE-A/issues/16}{GitHub issue \#16}
+  and descends from \localissue{0002}.
 \end{itemize}
 
 \section{Key theorem forms}
@@ -42,9 +50,10 @@ $V\leq K^n$ and $v\notin V^\perp$, Fourier cancellation takes the form
 \section{Source and formal scope}
 The source defines the shift and phase matrices and states their product,
 $p$-th-power, unitarity, spectral, and twisted-commutation properties in
-\cite[lines 1056--1095]{Ji2020MIPStar}.  It then uses the same character for
-Fourier cancellation over a subspace at lines 1123--1140.  These assertions
-depend on the characteristic $p$; they are not intrinsically binary.
+\cite[lines 1056--1095]{Ji2020MIPStar}. It uses the same character for Fourier
+cancellation over a subspace at lines 1124--1132 and extends the twisted
+relation to several qudits at lines 1141--1150. These assertions depend on the
+characteristic $p$; they are not intrinsically binary.
 
 The formal definitions \path{primeTauShift}, \path{primeTauPhase}, and
 \path{primeTauObservable} use the canonical character \path{ffChar} in
@@ -62,6 +71,21 @@ gives $\tau^W(a)^p=I$.  Applying this equality to a nonzero eigenvector gives
 $(\lambda^p-1)v=0$, hence $\lambda^p=1$.  Finally, when
 $v\notin V^\perp$, the map $u\mapsto\chi(u\cdot v)$ is a nontrivial character
 of the finite additive group $V$, so its average vanishes.
+
+\section{Blueprint and formalization}
+The source-general definitions and results are linked from
+\path{blueprint/src/chapter/ch11_qpbt_algebra.tex}, lines~553--633 and
+649--660. Their Lean declarations are \leanid{primeTauShift},
+\leanid{primeTauPhase}, \leanid{primeTauObservable}, and the accompanying
+product, power, unitarity, spectral, commutation, and cancellation theorems.
+They quantify an arbitrary prime characteristic and use the corresponding
+additive character.
+
+The separately named binary declarations are used by the later QPBT chapters.
+They specialize the same formulas to characteristic two and are not linked as
+implementations of the unrestricted source nodes. Thus the blueprint, the
+general Lean interface, and the paper agree; the binary layer is a consumer
+specialization rather than a restriction of the source statement.
 
 \section{Conclusion}
 There is no mathematical restriction in the source-facing formal statements:

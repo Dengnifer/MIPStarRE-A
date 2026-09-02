@@ -11,11 +11,11 @@ perfect strategy from two anticommuting consistent binary measurements.
 ## References
 
 The source statements are `thm:ms-rigidity` and `thm:ms-from-ac` in
-`blueprint/src/chapter/ch13_qpbt_test.tex:207-263`, from
+`blueprint/src/chapter/ch13_qpbt_test.tex:222-261`, from
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-722`.
 
-Magic Square variables are one-based in the paper. Thus Lean's `.var 0` and
-`.var 4` denote the paper's first and fifth variables, respectively.
+The variable indices below are zero-based: indices 0 and 4 represent the
+paper's first and fifth variables, respectively.
 -/
 
 open scoped BigOperators Matrix
@@ -27,14 +27,14 @@ open MIPStarRE.LDT MIPStarRE.Quantum
 noncomputable section
 
 /-- Symmetry of the Magic Square question distribution from `def:ms-game`;
-blueprint `ch13_qpbt_test.tex:188-203`, paper
+blueprint `ch13_qpbt_test.tex:203-218`, paper
 `08_classical_and_quantum_low_degree_tests.tex:512-610`. -/
 theorem msQuestionDistribution_symm (x y : MsType) :
     msGame.μ.weight (x, y) = msGame.μ.weight (y, x) := by
   sorry
 
 /-- Symmetry of the Magic Square decision predicate from `def:ms-game`;
-blueprint `ch13_qpbt_test.tex:188-203`, paper
+blueprint `ch13_qpbt_test.tex:203-218`, paper
 `08_classical_and_quantum_low_degree_tests.tex:512-610`. -/
 theorem msWinPredicate_symm (x y : MsType) (a b : MsAnswer) :
     msWinPredicate x y a b = msWinPredicate y x b a := by
@@ -56,7 +56,7 @@ theorem msGameSymm_toGame : msGameSymm.toGame = msGame := by
   rfl
 
 /-- The observable associated with a binary measurement; formalization-only notation
-used in `thm:ms-from-ac`, blueprint `ch13_qpbt_test.tex:234-263`, paper
+used in `thm:ms-from-ac`, blueprint `ch13_qpbt_test.tex:251-261`, paper
 `08_classical_and_quantum_low_degree_tests.tex:658-722`. -/
 def obsOf {ι : Type*} [Fintype ι] [DecidableEq ι]
     (M : Measurement (ZMod 2) ι) : Op ι :=
@@ -144,13 +144,13 @@ noncomputable def msAnticommutatorDistanceB (S : Strategy msGame)
     (fun _ => -(Z * X)) (idealMsState w.aux)
 
 /-- `thm:ms-rigidity`, imported from Coladangelo--Stark, Theorem 6.9.
-Blueprint `ch13_qpbt_test.tex:207-231`, paper
+Blueprint `ch13_qpbt_test.tex:222-244`, paper
 `08_classical_and_quantum_low_degree_tests.tex:612-652`.
 
 **Local fix:** The state estimate is stated in Euclidean norm at scale
 `sqrt ε`, and the ideal observables use the local basis change described at
-paper lines 650--652. The universal constant is quantified before the strategy
-and error parameter. This formal boundary is recorded in issue #16. -/
+paper lines 650--652. One universal constant applies to every strategy and
+error parameter. This formal boundary is recorded in issue #16. -/
 theorem exists_ms_rigidity :
     ∃ C : ℝ, 1 ≤ C ∧ ∀ (ε : ℝ), 0 ≤ ε →
       ∀ S : Strategy msGame, 1 - ε ≤ S.value →
@@ -172,12 +172,12 @@ noncomputable def msPerfectState (ι : Type*) [Fintype ι] [DecidableEq ι]
 
 /-- `thm:ms-from-ac`: any anticommuting pair of projective binary
 measurements, consistent on an EPR state, extends to a value-one SPCC Magic
-Square strategy. Blueprint `ch13_qpbt_test.tex:234-263`, paper
+Square strategy. Blueprint `ch13_qpbt_test.tex:251-261`, paper
 `08_classical_and_quantum_low_degree_tests.tex:654-722`.
 
 The local index type is arbitrary, finite, and nonempty; no field model or QPBT
-parameter is assumed. The equality `hι` records the explicitly constructed
-local tensor factor. -/
+parameter is assumed. The equality `hι` identifies the target local Hilbert
+space with the constructed tensor factor. -/
 theorem exists_ms_perfect_strategy_of_anticommuting
     {ι : Type} [Fintype ι] [DecidableEq ι] [Nonempty ι]
     (A B : Measurement (ZMod 2) ι)

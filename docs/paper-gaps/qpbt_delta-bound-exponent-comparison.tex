@@ -28,7 +28,9 @@
   \item \textbf{Key mathematical inputs.} The function
   $(\log R)^{a+b}R^{-b}$ is bounded for $R\geq 4$, and the canonical lower and
   upper bounds on $m$ transfer this estimate to the third soundness term.
-  Tracked in \ghissue{16}.
+  Tracked in
+  \href{https://github.com/Dengnifer/MIPStarRE-A/issues/16}{GitHub issue \#16};
+  the parent blueprint task is \localissue{0002}.
 \end{itemize}
 
 \section{Key theorem forms}
@@ -39,8 +41,11 @@ function
   \delta_{\mathrm{qld}}(\eps,m,d,q)
     = a(md)^a\bigl(\eps^b+q^{-b}+2^{-bmd}\bigr).
 \]
-For the canonical parameters, $d=1$, $q=2^k$, and
-$m\geq (c/2)\log R\geq\log R$.  The required estimate for the third summand is
+For $R\geq4$, let $c$ be the least even integer at least $(a+b)/b$, set
+$k=c\lceil\log_2\log_2 R\rceil+1$ and $q=2^k$, and let $j$ be determined by
+$2^j\leq c\lceil\log_2 R\rceil+1<2^{j+1}$. The remaining canonical parameters
+are $m=2^j$ and $d=1$. In particular,
+$m\geq (c/2)\log_2 R\geq\log_2 R$. The required estimate for the third summand is
 \[
   a m^a 2^{-bm} \leq C'(\log R)^{-b},
 \]
@@ -50,14 +55,15 @@ polylogarithmic bound for $\delta_{\mathrm{qld}}$.
 
 \section{The source comparison}
 
-The proof of the canonical-parameter bound in \cite{Ji2020MIPStar} replaces
-$2^{-bmd}$ by $q^{-b}$ using the assertion $k\leq m$.%
+The canonical parameters are defined in \cite[lines~1503--1514]{Ji2020MIPStar},
+and the bound and its proof occupy lines~1520--1562. At line~1543 the proof
+replaces $2^{-bmd}$ by $q^{-b}$ using the assertion $k\leq m$.%
 \footnote{Tracked in
 \href{https://github.com/Dengnifer/MIPStarRE-A/issues/16}{GitHub issue \#16}.
 The canonical parameter definition is at
 \path{references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex},
-lines~1503--1520; the bound and its proof are at lines~1521--1547, with the
-disputed comparison at lines~1535--1536.}
+lines~1503--1514; the bound and its proof are at lines~1520--1562, with the
+disputed comparison at line~1543.}
 That comparison does not follow from the stated parameter choice.  For example,
 the allowed values $a=1$ and $b=1/2$ give $c=4$, and $R=5$ gives $k=9$ but
 $m=8$.  Thus the displayed justification is false even though the lemma's

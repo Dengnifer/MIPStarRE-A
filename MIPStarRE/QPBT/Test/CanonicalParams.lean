@@ -10,8 +10,8 @@ the target register size and states its quantitative soundness estimate.
 
 The definitions and estimate correspond to `def:introparams` and
 `lem:delta-bound` in
-`blueprint/src/chapter/ch13_qpbt_test.tex:448-481`, from
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1503-1547`.
+`blueprint/src/chapter/ch13_qpbt_test.tex:471-492`, from
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1503-1562`.
 -/
 
 namespace MIPStarRE.QPBT
@@ -45,15 +45,15 @@ def introParamsTuple (c R : ℕ) : ℕ × ℕ × ℕ :=
 
 /-- The canonical tuple is admissible. This is the numerical
 admissibility part of `lem:delta-bound`, blueprint
-`ch13_qpbt_test.tex:459-478`, paper
-`08_classical_and_quantum_low_degree_tests.tex:1521-1547`. -/
+`ch13_qpbt_test.tex:484-492`, paper
+`08_classical_and_quantum_low_degree_tests.tex:1520-1562`. -/
 theorem introParamsTuple_isAdmissible (a b : ℝ) (R : ℕ) (hR : 4 ≤ R) :
     IsAdmissibleTuple (introParamsTuple (introParamsC a b) R) := by
   sorry
 
 /-- The canonical admissible parameter structure of `def:introparams`,
-blueprint `ch13_qpbt_test.tex:448-457`, paper
-`08_classical_and_quantum_low_degree_tests.tex:1503-1520`. -/
+blueprint `ch13_qpbt_test.tex:471-482`, paper
+`08_classical_and_quantum_low_degree_tests.tex:1503-1514`. -/
 noncomputable def introParams (a b : ℝ) (R : ℕ) (hR : 4 ≤ R) :
     AdmissibleParams :=
   AdmissibleParams.ofTuple _ (introParamsTuple_isAdmissible a b R hR)
@@ -67,8 +67,8 @@ theorem le_two_pow_introParams_m (a b : ℝ) (ha : 1 ≤ a) (hb : 0 < b)
 
 /-- `lem:delta-bound`: the Pauli soundness error at the canonical parameters
 has polylogarithmic dependence on `R`. Blueprint
-`ch13_qpbt_test.tex:459-478`, paper
-`08_classical_and_quantum_low_degree_tests.tex:1521-1547`.
+`ch13_qpbt_test.tex:484-492`, paper
+`08_classical_and_quantum_low_degree_tests.tex:1520-1562`.
 
 **Local fix:** The third error term is bounded directly using the lower bound
 on `m`, rather than the source's false intermediate comparison between the

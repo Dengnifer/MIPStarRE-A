@@ -6,19 +6,18 @@ import MIPStarRE.LDT.Preliminaries.Polynomials
 # Lines, bounded line polynomials, and line-point distributions
 
 This file provides the seed-bearing line descriptions and coefficient-list
-polynomials shared by the observable and combining chapters.  It also realizes
+polynomials shared by the observable and combining chapters. It also realizes
 the line-point distribution directly from the conditionally linear sampler.
-
-The bounded multivariate polynomial index remains the actual Mathlib
-`polyFunc` subtype; its finite instance is supplied beside the measurement
-aliases in `Test.LowDegreeGameTheorems`.
+Over a finite coefficient field, bounded individual-degree multivariate
+polynomials form a finite outcome set for the associated measurements.
 
 ## References
 
 The line and bounded-polynomial definitions are `def:ideg-deg-polynomials` in
-`blueprint/src/chapter/ch14_qpbt_observables.tex:51-62`.  The line-point sampler
-is `def:line-point-dist` in `blueprint/src/chapter/ch13_qpbt_test.tex`, used in
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:882-1019`.
+`blueprint/src/chapter/ch14_qpbt_observables.tex:37-86`, with source origin
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:51-58`. The
+line-point sampler is `def:line-point-dist` in blueprint chapter 13, from
+`08_classical_and_quantum_low_degree_tests.tex:274-287`.
 -/
 
 open scoped BigOperators
@@ -44,12 +43,12 @@ inductive LineKind where
   deriving DecidableEq, Fintype
 
 /-- A seed-bearing line description for `def:line-point-dist`, blueprint
-`ch13_qpbt_test.tex:81-90`, paper
+`ch13_qpbt_test.tex:85-95`, paper
 `08_classical_and_quantum_low_degree_tests.tex:143-174,243-287`.
 
 An axis description stores its canonical base and seed. A diagonal description
 stores only the projected direction, together with its prefix-zero invariant.
-Both constructors carry the assertion that their base is fixed by the
+Both cases carry the assertion that their base is fixed by the
 appropriate `lineRepMap`. A value `j : Fin L.m` represents the paper's
 one-based coordinate `j + 1`. -/
 inductive LineDesc (L : LdParams) where
@@ -77,7 +76,7 @@ def LineDesc.base {L : LdParams} : LineDesc L → Fin L.m → ScalarQ L
   | .diagonal base _ _ _ _ => base
 
 /-- The geometric direction represented by a canonical line description.
-Diagonal constructors already store the projected data, so this accessor does
+Diagonal descriptions already store the projected data, so this map does
 not apply a second projection. -/
 def LineDesc.direction {L : LdParams} (line : LineDesc L) :
     Fin L.m → ScalarQ L :=
@@ -129,9 +128,10 @@ def EvaluatesTo {L : LdParams} {c : ℕ} (line : LineDesc L)
   (∃ t : ScalarQ L, u = line.base + t • line.direction) ∧
     ∀ t : ScalarQ L, u = line.base + t • line.direction → degPolyEval f t = a
 
-/-- Evaluate a line polynomial at a point, returning `none` precisely when the
-point does not determine an evaluation.  The `Option` completion is the
-paper's bottom outcome for malformed or nonincident answers. -/
+/-- Partially evaluate a line polynomial at a point. The value is undefined
+when the point does not determine an evaluation. This formalization-only
+completion is used in blueprint chapter 14; the displayed family at paper
+`14_analysis_of_the_pauli_basis_test.tex:197-206` has no bottom outcome. -/
 noncomputable def evalOpt {L : LdParams} {c : ℕ} (line : LineDesc L)
     (u : Fin L.m → ScalarQ L) (f : DegPoly L c) : Option (ScalarQ L) := by
   classical

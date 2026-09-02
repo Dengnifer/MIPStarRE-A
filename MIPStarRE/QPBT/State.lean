@@ -3,10 +3,9 @@ import MIPStarRE.Quantum.FiniteMatrix.Basic
 /-!
 # Finite-dimensional state transformations
 
-This file defines the tensor and reindexing operations used to transport states
-and operators in the Pauli basis test
-(`blueprint/src/chapter/ch13_qpbt_test.tex:386-403`; paper
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1426-1447`).
+This file defines the tensor and reindexing operations used for strategy
+distance, Magic Square rigidity, and the qudit-to-qubit isomorphism. See
+blueprint chapters 11--13 and the declaration-level references below.
 -/
 
 open scoped Matrix
@@ -16,8 +15,10 @@ namespace MIPStarRE.QPBT
 open MIPStarRE.Quantum
 
 /-- Conjugation by the local isometries in `thm:ms-rigidity` and
-`lem:pauli-binary`; blueprint `ch13_qpbt_test.tex:386-403` and
-`ch11_qpbt_algebra.tex:675-708`, paper `08_classical_and_quantum_low_degree_tests.tex:1426-1447`. -/
+`lem:pauli-binary`; blueprint `ch13_qpbt_test.tex:222-244` and
+`ch11_qpbt_algebra.tex:710-741`, paper
+`08_classical_and_quantum_low_degree_tests.tex:620-652` and
+`04_preliminaries.tex:1163-1208`. -/
 noncomputable def conjIsometry {ι ι' : Type*}
     [Fintype ι] [DecidableEq ι] [Fintype ι'] [DecidableEq ι']
     (φ : EuclideanSpace ℂ ι →ₗᵢ[ℂ] EuclideanSpace ℂ ι')
@@ -26,7 +27,7 @@ noncomputable def conjIsometry {ι ι' : Type*}
   U * M * Uᴴ
 
 /-- Coordinate transport used by `def:strategy-distance`, blueprint
-`ch12_qpbt_games.tex:212-219`, paper `06_nonlocal_games_and_mipstar.tex:273-285`. -/
+`ch12_qpbt_games.tex:228-237`, paper `06_nonlocal_games_and_mipstar.tex:273-285`. -/
 noncomputable def reindexState {ι ι' : Type*} [Fintype ι] [DecidableEq ι]
     [Fintype ι'] [DecidableEq ι'] (e : ι ≃ ι')
     (ψ : EuclideanSpace ℂ ι) : EuclideanSpace ℂ ι' :=
@@ -34,8 +35,8 @@ noncomputable def reindexState {ι ι' : Type*} [Fintype ι] [DecidableEq ι]
     (fun j => (EuclideanSpace.equiv ι ℂ ψ) (e.symm j))
 
 /-- Apply the two independent local isometries of `thm:ms-rigidity`; blueprint
-`ch13_qpbt_test.tex:386-403`, paper
-`08_classical_and_quantum_low_degree_tests.tex:1426-1447`. -/
+`ch13_qpbt_test.tex:222-244`, paper
+`08_classical_and_quantum_low_degree_tests.tex:620-652`. -/
 noncomputable def isometryTensor
     {ιA ιB κA κB : Type*}
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
@@ -54,8 +55,8 @@ noncomputable def isometryTensor
           ((EuclideanSpace.equiv (ιA × ιB) ℂ) ψ (i, j)))
 
 /-- Coordinate tensor used in the ideal state of `thm:ms-rigidity`; blueprint
-`ch13_qpbt_test.tex:386-403`, paper
-`08_classical_and_quantum_low_degree_tests.tex:1426-1447`. -/
+`ch13_qpbt_test.tex:222-244`, paper
+`08_classical_and_quantum_low_degree_tests.tex:620-652`. -/
 noncomputable def vecTensor {ι κ : Type*}
     [Fintype ι] [DecidableEq ι] [Fintype κ] [DecidableEq κ]
     (u : EuclideanSpace ℂ ι) (v : EuclideanSpace ℂ κ) :
@@ -64,13 +65,13 @@ noncomputable def vecTensor {ι κ : Type*}
     (fun p => (EuclideanSpace.equiv ι ℂ u) p.1 * (EuclideanSpace.equiv κ ℂ v) p.2)
 
 /-- Operator transport used by `def:strategy-distance`, blueprint
-`ch12_qpbt_games.tex:212-219`, paper `06_nonlocal_games_and_mipstar.tex:273-285`. -/
+`ch12_qpbt_games.tex:228-237`, paper `06_nonlocal_games_and_mipstar.tex:273-285`. -/
 def reindexOp {ι ι' : Type*} (e : ι ≃ ι') (M : Op ι') : Op ι :=
   (Matrix.reindex e.symm e.symm) M
 
 /-- Four-factor tensor shuffle used by `thm:ms-rigidity`; blueprint
-`ch13_qpbt_test.tex:386-403`, paper
-`08_classical_and_quantum_low_degree_tests.tex:1426-1447`. -/
+`ch13_qpbt_test.tex:222-244`, paper
+`08_classical_and_quantum_low_degree_tests.tex:620-652`. -/
 def prodShuffle {α β γ δ : Type*} :
     (α × β) × (γ × δ) ≃ (α × γ) × (β × δ) where
   toFun p := ((p.1.1, p.2.1), (p.1.2, p.2.2))

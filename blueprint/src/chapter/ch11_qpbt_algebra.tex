@@ -186,6 +186,7 @@ the finite fields with $p$ and $q$ elements; $p$ is the characteristic of
 $\F_q$, and $\F_p$ is its prime subfield.
 
 \begin{definition}[Coordinate map and multiplication tables]\label{def:subfields-kappa}
+	\lean{MIPStarRE.QPBT.chiOfBasis, MIPStarRE.QPBT.basisCoordVec}
 	% The source lets k range over all integers; the extension field exists
 	% only for k >= 1, so that domain condition is made explicit here.
 	Let $q$ be a prime power and $k \ge 1$ an integer, so that $\F_q$ is a
@@ -251,6 +252,8 @@ test.
 	exist for every field extension, but for $q = 2$ and odd $k$ a self-dual
 	normal basis of $\F_{2^k}$ over $\F_2$ always exists; \cite{Ji2020MIPStar}
 	exhibits one through an explicit construction.
+	In the formalization, a basis index in $\operatorname{Fin}(k)$ has value
+	$j-1$ when it represents the paper's index $j\in\{1,\ldots,k\}$.
 \end{definition}
 
 \begin{lemma}[Coordinate maps of self-dual bases]\label{lem:downsize_field}
@@ -326,6 +329,8 @@ test.
 		= \sum_{i=1}^k a_i \bigl(K_{e_i}\, \kappa(b)\bigr)\;,
 	\end{equation}
 	where $\kappa(a) = (a_i)_{i=1}^k$.
+	The formal sums use indices in $\operatorname{Fin}(k)$, with value $i-1$
+	corresponding to the paper's index $i\in\{1,\ldots,k\}$.
 \end{definition}
 
 \section{Polynomials and the low-degree code}
@@ -374,6 +379,7 @@ test.
 	\]
 \end{lemma}
 \begin{proof}
+	\leanok
 	\uses{lem:schwartz-zippel-total-degree}
 	This is Lemma~\ref{lem:schwartz-zippel-total-degree}, stated and proved in
 	Chapter~\ref{chap:preliminaries}; it is restated here under the label used
@@ -545,6 +551,8 @@ representation is obtained as follows.
 \label{sec:generalized-pauli}
 
 \begin{definition}[Generalized Pauli observables]\label{def:generalized-pauli}
+	\lean{MIPStarRE.QPBT.primeTauShift, MIPStarRE.QPBT.primeTauPhase,
+		MIPStarRE.QPBT.primeTauObservable}
 	\uses{def:subfield-trace, def:lin-reg}
 	Let $p$ be a prime and $\omega = e^{2\pi i/p}$. The \emph{generalized Pauli
 	observables over $\F_p$} are the unitaries on $\C^{\F_p}$ given by
@@ -704,9 +712,7 @@ observables and maximally entangled states over \emph{qubits}
 	\leanok
 	\uses{def:admissible-size, def:subfields-kappa, def:binary-representation,
 		def:generalized-pauli, def:EPR}
-	% The source quantifies over all integers L; the tensor powers require
-	% L >= 1, so that domain condition is made explicit here.
-	For all admissible field sizes $q = 2^k$ and integers $L \ge 1$, there
+	For all admissible field sizes $q = 2^k$ and integers $L \ge 0$, there
 	exists an isomorphism $\phi : (\C^q)^{\ot L} \to (\C^2)^{\ot Lk}$ such that
 	\begin{equation}\label{eq:epr-q-to-epr-2}
 		\phi \ot \phi\, \ket{\mathrm{EPR}_q}^{\ot L}
@@ -730,6 +736,8 @@ observables and maximally entangled states over \emph{qubits}
 	$\sigma^W_{u_{ij}}$ denotes the projector
 	$\frac{1}{2}\bigl(\Id + (-1)^{u_{ij}} \sigma^W(1)\bigr)$ acting on the
 	$s$-th qubit, where $s = (i-1)k + j$.
+	The formal product indices are zero-based: values $(i-1,j-1)$ correspond to
+	the paper's pair $(i,j)$.
 \end{lemma}
 \begin{proof}
 	\uses{lem:pauli-observable-expansion, lem:downsize_field,

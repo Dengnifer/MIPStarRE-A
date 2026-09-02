@@ -7,10 +7,10 @@ import MIPStarRE.LDT.Preliminaries.FiniteFields
 /-! # Pauli product, commutation, and cancellation identities
 
 The principal results are `lem:twisted-commutation` and `lem:cancellation` in
-`blueprint/src/chapter/ch11_qpbt_algebra.tex:543-663`, from
-`references/qpbt-paper/04_preliminaries.tex:1056-1095,1124-1132`. The general-prime
-statements use the canonical character `ffChar`; binary declarations below are
-separately named QPBT specializations.
+`blueprint/src/chapter/ch11_qpbt_algebra.tex:553-660`, from
+`references/qpbt-paper/04_preliminaries.tex:1056-1095,1124-1151`. The
+general-prime statements use the canonical character `ffChar`; binary
+declarations below are separately named QPBT specializations.
 -/
 
 open scoped BigOperators Matrix
@@ -20,20 +20,20 @@ namespace MIPStarRE.QPBT
 open MIPStarRE.LDT MIPStarRE.LDT.Preliminaries MIPStarRE.Quantum
 
 /-- The shift observable in `lem:twisted-commutation`, blueprint
-`ch11_qpbt_algebra.tex:547-589`, paper `04_preliminaries.tex:1056-1089`. -/
+`ch11_qpbt_algebra.tex:553-597`, paper `04_preliminaries.tex:1056-1089`. -/
 noncomputable def primeTauShift {p : ℕ} {K : Type*} [Field K] [Fintype K]
     [DecidableEq K] [Fact p.Prime] [Algebra (ZMod p) K]
     (a : K) : Op K := fun i j => if i = j + a then 1 else 0
 
 /-- The phase observable in `lem:twisted-commutation`, blueprint
-`ch11_qpbt_algebra.tex:547-589`, paper `04_preliminaries.tex:1056-1089`. -/
+`ch11_qpbt_algebra.tex:553-597`, paper `04_preliminaries.tex:1056-1089`. -/
 noncomputable def primeTauPhase {p : ℕ} {K : Type*} [Field K] [Fintype K]
     [DecidableEq K] [Fact p.Prime] [Algebra (ZMod p) K]
     (b : K) : Op K := fun i j =>
   if i = j then ffChar (p := p) (F := K) (b * j) else 0
 
 /-- The multi-qudit observable in `lem:twisted-commutation`, with `false`
-denoting phase; blueprint `ch11_qpbt_algebra.tex:547-589`, paper
+denoting phase; blueprint `ch11_qpbt_algebra.tex:553-597`, paper
 `04_preliminaries.tex:1073-1095,1141-1151`. -/
 noncomputable def primeTauObservable {p : ℕ} {K ι : Type*} [Field K] [Fintype K]
     [DecidableEq K] [Fact p.Prime] [Algebra (ZMod p) K]
@@ -42,7 +42,7 @@ noncomputable def primeTauObservable {p : ℕ} {K ι : Type*} [Field K] [Fintype
     else primeTauPhase (p := p) (a i) (x i) (y i)
 
 /-- The product identity `eq:pauli-product-power`, blueprint
-`ch11_qpbt_algebra.tex:603-610`, paper `04_preliminaries.tex:1082-1089`. -/
+`ch11_qpbt_algebra.tex:599-633`, paper `04_preliminaries.tex:1082-1089`. -/
 theorem primeTauObservable_mul {p : ℕ} {K ι : Type*} [Field K] [Fintype K]
     [DecidableEq K] [Fact p.Prime] [Algebra (ZMod p) K] [Fintype ι]
     [DecidableEq ι] (W : Bool) (a a' : ι → K) :
@@ -51,7 +51,7 @@ theorem primeTauObservable_mul {p : ℕ} {K ι : Type*} [Field K] [Fintype K]
   sorry
 
 /-- The prime-field exponent identity in `eq:pauli-product-power`, blueprint
-`ch11_qpbt_algebra.tex:603-610`, paper `04_preliminaries.tex:1082-1089`. -/
+`ch11_qpbt_algebra.tex:599-633`, paper `04_preliminaries.tex:1082-1089`. -/
 theorem primeTauObservable_pow {p : ℕ} {K ι : Type*} [Field K] [Fintype K]
     [DecidableEq K] [Fact p.Prime] [Algebra (ZMod p) K] [Fintype ι]
     [DecidableEq ι] (W : Bool) (a : ι → K) (b : ZMod p) :
@@ -60,7 +60,7 @@ theorem primeTauObservable_pow {p : ℕ} {K ι : Type*} [Field K] [Fintype K]
   sorry
 
 /-- The characteristic-`p` consequence of `primeTauObservable_pow`, blueprint
-`ch11_qpbt_algebra.tex:608-610`, paper `04_preliminaries.tex:1088-1089`. -/
+`ch11_qpbt_algebra.tex:599-633`, paper `04_preliminaries.tex:1088-1089`. -/
 theorem primeTauObservable_pow_char {p : ℕ} {K ι : Type*} [Field K] [Fintype K]
     [DecidableEq K] [Fact p.Prime] [Algebra (ZMod p) K] [Fintype ι]
     [DecidableEq ι] (W : Bool) (a : ι → K) :
@@ -68,7 +68,7 @@ theorem primeTauObservable_pow_char {p : ℕ} {K ι : Type*} [Field K] [Fintype 
   sorry
 
 /-- Generalized Pauli observables are unitary by their explicit shift and phase
-matrices; blueprint `ch11_qpbt_algebra.tex:608-610`, paper
+matrices; blueprint `ch11_qpbt_algebra.tex:599-633`, paper
 `04_preliminaries.tex:1056-1089`. -/
 theorem primeTauObservable_isUnitary {p : ℕ} {K ι : Type*} [Field K] [Fintype K]
     [DecidableEq K] [Fact p.Prime] [Algebra (ZMod p) K] [Fintype ι]
@@ -78,7 +78,7 @@ theorem primeTauObservable_isUnitary {p : ℕ} {K ι : Type*} [Field K] [Fintype
 
 /-- Every eigenvalue of a generalized Pauli observable is a `p`-th root of
 unity. This is the spectral consequence of `eq:pauli-product-power`, blueprint
-`ch11_qpbt_algebra.tex:608-610`, paper `04_preliminaries.tex:1082-1089`. -/
+`ch11_qpbt_algebra.tex:599-633`, paper `04_preliminaries.tex:1082-1089`. -/
 theorem primeTauObservable_eigenvalue_pow_char {p : ℕ} {K ι : Type*}
     [Field K] [Fintype K] [DecidableEq K] [Fact p.Prime]
     [Algebra (ZMod p) K] [Fintype ι] [DecidableEq ι]
@@ -89,7 +89,7 @@ theorem primeTauObservable_eigenvalue_pow_char {p : ℕ} {K ι : Type*}
   sorry
 
 /-- The source multi-qudit twisted relation `eq:twisted-fq`, blueprint
-`ch11_qpbt_algebra.tex:611-623`, paper `04_preliminaries.tex:1090-1095,1141-1151`. -/
+`ch11_qpbt_algebra.tex:599-633`, paper `04_preliminaries.tex:1090-1095,1141-1151`. -/
 theorem primeTauObservable_X_mul_Z {p : ℕ} {K ι : Type*} [Field K] [Fintype K]
     [DecidableEq K] [Fact p.Prime] [Algebra (ZMod p) K] [Fintype ι]
     [DecidableEq ι] [Nonempty ι] (a b : ι → K) :
@@ -99,7 +99,7 @@ theorem primeTauObservable_X_mul_Z {p : ℕ} {K ι : Type*} [Field K] [Fintype K
   sorry
 
 /-- Binary specialization of `eq:pauli-product-power`, blueprint
-`ch11_qpbt_algebra.tex:603-610`, paper `04_preliminaries.tex:1082-1089`.
+`ch11_qpbt_algebra.tex:599-633`, paper `04_preliminaries.tex:1082-1089`.
 
 **Scope restriction:** This characteristic-two specialization is separated
 from the general-prime identity as documented in
@@ -111,7 +111,7 @@ theorem tauObservable_mul {K ι : Type*} [Field K] [Fintype K] [DecidableEq K]
   sorry
 
 /-- Binary characteristic-two specialization of `eq:pauli-product-power`,
-blueprint `ch11_qpbt_algebra.tex:608-610`, paper `04_preliminaries.tex:1088-1089`.
+blueprint `ch11_qpbt_algebra.tex:599-633`, paper `04_preliminaries.tex:1088-1089`.
 
 **Scope restriction:** This characteristic-two specialization is separated
 from the general-prime identity as documented in
@@ -122,7 +122,7 @@ theorem tauObservable_sq {K ι : Type*} [Field K] [Fintype K] [DecidableEq K]
   sorry
 
 /-- Binary specialization of `eq:twisted-fq`, blueprint
-`ch11_qpbt_algebra.tex:611-623`, paper `04_preliminaries.tex:1090-1095`.
+`ch11_qpbt_algebra.tex:599-633`, paper `04_preliminaries.tex:1090-1095`.
 
 **Scope restriction:** This characteristic-two specialization is separated
 from the general-prime identity as documented in
@@ -135,7 +135,7 @@ theorem tauObservable_X_mul_Z {K ι : Type*} [Field K] [Fintype K] [DecidableEq 
   sorry
 
 /-- Uniform complex expectation over a finite submodule, as used by
-`lem:cancellation`; blueprint `ch11_qpbt_algebra.tex:641-652`, paper
+`lem:cancellation`; blueprint `ch11_qpbt_algebra.tex:649-660`, paper
 `04_preliminaries.tex:1124-1132`. -/
 noncomputable def submoduleExpect {K ι : Type*} [Field K] [Fintype K]
     [DecidableEq K] [Fintype ι] [DecidableEq ι]
@@ -144,7 +144,7 @@ noncomputable def submoduleExpect {K ι : Type*} [Field K] [Fintype K]
   exact 𝔼 u : V, f u
 
 /-- Fourier cancellation `lem:cancellation` over an arbitrary field submodule;
-blueprint `ch11_qpbt_algebra.tex:641-652`, paper
+blueprint `ch11_qpbt_algebra.tex:649-660`, paper
 `04_preliminaries.tex:1124-1132`. -/
 theorem ffChar_dotProduct_submodule_expect_eq_zero {p : ℕ} {K ι : Type*}
     [Field K] [Fintype K] [DecidableEq K] [Fact p.Prime] [Algebra (ZMod p) K]
@@ -155,7 +155,7 @@ theorem ffChar_dotProduct_submodule_expect_eq_zero {p : ℕ} {K ι : Type*}
   sorry
 
 /-- Binary specialization of `lem:cancellation`, blueprint
-`ch11_qpbt_algebra.tex:641-652`, paper `04_preliminaries.tex:1124-1132`.
+`ch11_qpbt_algebra.tex:649-660`, paper `04_preliminaries.tex:1124-1132`.
 
 **Scope restriction:** This characteristic-two specialization is separated
 from the general-prime identity as documented in
@@ -170,7 +170,7 @@ theorem avg_neg_one_pow_binTrace_eq_zero {K : Type*} [Field K] [Fintype K]
 
 /-- The tensor product of binary Pauli projectors, obtained by specializing
 `pauliProj` to `ZMod 2`. This is the binary target in `lem:pauli-binary`,
-blueprint `ch11_qpbt_algebra.tex:702-733`, paper
+blueprint `ch11_qpbt_algebra.tex:710-741`, paper
 `references/qpbt-paper/04_preliminaries.tex:1163-1208`. -/
 noncomputable abbrev qubitPauliProj {ι : Type*} [Fintype ι] [DecidableEq ι]
     (W : PauliKind) (b : ι → ZMod 2) : Op (ι → ZMod 2) :=
@@ -178,7 +178,7 @@ noncomputable abbrev qubitPauliProj {ι : Type*} [Fintype ι] [DecidableEq ι]
 
 /-- `lem:pauli-binary`: the fixed binary coordinates induce an isometry that
 maps EPR states and generalized Pauli projectors to their qubit forms.
-Blueprint `ch11_qpbt_algebra.tex:702-733`, paper
+Blueprint `ch11_qpbt_algebra.tex:710-741`, paper
 `references/qpbt-paper/04_preliminaries.tex:1163-1208`.
 
 **Local fix:** The source's final factor index is printed as

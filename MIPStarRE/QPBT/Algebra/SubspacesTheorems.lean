@@ -3,7 +3,7 @@ import MIPStarRE.QPBT.Algebra.Subspaces
 /-! # Orthogonal-complement algebra
 
 Source labels `lem:perp_perp`, `def:Lperp`, and `lem:L_perp_perp`; blueprint
-`blueprint/src/chapter/ch11_qpbt_algebra.tex:49-64,147-169`; paper
+`blueprint/src/chapter/ch11_qpbt_algebra.tex:49-64,149-175`; paper
 `references/qpbt-paper/04_preliminaries.tex:263-281,386-415`.
 -/
 
@@ -23,7 +23,7 @@ theorem dotOrthogonal_dotOrthogonal (W : Submodule K (ι → K)) :
     dotOrthogonal (dotOrthogonal W) = W := by
   sorry
 
-/-- The map of `def:Lperp`, blueprint `ch11_qpbt_algebra.tex:147-154`, paper
+/-- The map of `def:Lperp`, blueprint `ch11_qpbt_algebra.tex:149-158`, paper
 `04_preliminaries.tex:386-392`. The source chooses a basis of `ker(L)^perp`;
 `canonicalProjOfKernel` depends only on its span, so the basis argument is
 elided in this encoding. -/
@@ -33,7 +33,7 @@ noncomputable def canonicalProjPerp {n : ℕ} [Fintype (Fin n)] [DecidableEq (Fi
   canonicalProjOfKernel (dotOrthogonal (LinearMap.ker L))
 
 /-- The kernel identity `lem:L_perp_perp`, blueprint
-`ch11_qpbt_algebra.tex:156-169`, paper `04_preliminaries.tex:394-415`. -/
+`ch11_qpbt_algebra.tex:160-175`, paper `04_preliminaries.tex:394-415`. -/
 theorem ker_canonicalProjPerp {n : ℕ} [Fintype (Fin n)] [DecidableEq (Fin n)]
     (L : (Fin n → K) →ₗ[K] (Fin n → K)) :
     LinearMap.ker (canonicalProjPerp L) = dotOrthogonal (LinearMap.ker L) := by

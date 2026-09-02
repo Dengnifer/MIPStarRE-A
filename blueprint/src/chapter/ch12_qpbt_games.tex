@@ -402,6 +402,8 @@ The state-dependent distance is the right tool for reasoning about the closeness
 	\leanok
 	\uses{def:consistency, def:bracket, def:povm-conventions}
 	Let $k \ge 0$ be an integer and let $\eps > 0$. Let $\mathcal X$ be a finite set and $\mu$ a distribution over $\mathcal X$, and let $\mathcal Y$ be a finite nonempty set; all statements below that sample $y \in \mathcal Y$ refer to the uniform distribution on $\mathcal Y$. For each $1 \le i \le k$ let $\mathcal R_i$ be a finite set, let $\mathcal G_i$ be a finite set of functions $g_i \colon \mathcal Y \to \mathcal R_i$, and for each $x \in \mathcal X$ let $\{G^{i,\,x}_g\}_{g \in \mathcal G_i}$ be a projective measurement. Suppose that for all $i \in \{1,\dots,k\}$ the set $\mathcal G_i$ satisfies the following property: for any two $g_i \ne g_i' \in \mathcal G_i$, the probability that $g_i(y) = g_i'(y)$ over a uniformly random $y \in \mathcal Y$ is at most $\eps$.
+	The formal family is indexed by $\operatorname{Fin}(k)$: index value $i-1$
+	corresponds to the paper's $i\in\{1,\ldots,k\}$.
 
 	Let $\bigl\{ A^x_{g_1,\,g_2,\,\dots,\,g_k} \bigr\}$ be a projective measurement with outcomes $(g_1,\dots,g_k) \in \mathcal G_1 \times \cdots \times \mathcal G_k$. Here $\operatorname{eval}_y$ denotes the evaluation map $g \mapsto g(y)$, so that $A^x_{[\operatorname{eval}_y(\cdot)_i = a_i]}$ post-processes the outcome tuple by evaluating its $i$-th component at $y$; since the outcome sets $\mathcal G_1 \times \cdots \times \mathcal G_k$ and $\mathcal G_i$ and the targets $\mathcal R_i$ are finite, these are post-processings in the sense of Definition~\ref{def:bracket}. For each $1 \le i \le k$, suppose that on average over $x \sim \mu$ and $y \in \mathcal Y$ sampled uniformly at random,
 	\begin{equation}\label{eq:ld-sandwich-1}
@@ -533,6 +535,8 @@ Note that both players' questions are generated from the \emph{same} uniformly r
 		\item $L = L_{\le \ell}$.
 	\end{enumerate}
 	As in condition 3, we sometimes use $V_k$ and $L_k$ to denote $V_{k,\,u}$ and $L_{k,\,u}$ respectively, leaving the prefix $u$ implicit.
+	The formal decomposition uses $\operatorname{Fin}(\ell)$, whose value $k-1$
+	corresponds to the paper's level $k\in\{1,\ldots,\ell\}$.
 \end{lemma}
 \begin{proof}
 	\uses{def:cl-func}
