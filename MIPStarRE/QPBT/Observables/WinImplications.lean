@@ -5,7 +5,7 @@ import MIPStarRE.QPBT.Observables.Defs
 /-!
 # Winning implications for strategy observables
 
-This module packages the seven consequences of success in the Pauli basis test
+This module states the seven consequences of success in the Pauli basis test
 and their operator-distance companions. It also constructs the actual Magic
 Square strategy associated with a Pauli tuple and records the two observable
 consequences used by the expanded-state argument.
@@ -25,6 +25,23 @@ namespace MIPStarRE.QPBT
 open MIPStarRE.LDT MIPStarRE.Quantum
 
 noncomputable section
+
+/-- The single-question marginal used by the consistency check. Both players
+receive this same question; paper
+`14_analysis_of_the_pauli_basis_test.tex:197-202`, blueprint
+`ch14_qpbt_observables.tex:555-559`. -/
+noncomputable def pauliQuestionMarginal (P : AdmissibleParams) :
+    Distribution (PauliQuestion P) :=
+  (pauliQuestionDistribution P).map Prod.fst
+
+/-- Reindex a heterogeneous strategy state after interchanging its two tensor
+factors. This is the state used by the factor-interchanged conclusions at
+paper `14_analysis_of_the_pauli_basis_test.tex:227-228`. -/
+noncomputable def ProjectiveSetting.swappedState
+    {P : AdmissibleParams} {ε : ℝ} (S : ProjectiveSetting P ε) :
+    EuclideanSpace ℂ (S.toStrategy.ιB × S.toStrategy.ιA) :=
+  reindexState (Equiv.prodComm S.toStrategy.ιA S.toStrategy.ιB)
+    S.toStrategy.ψ
 
 /-- Finite-carrier support for applying the chapter-12 defect functional to
 the Pauli question-pair distribution. The question space is finite by the
@@ -175,19 +192,19 @@ noncomputable def msValueAt (S : ProjectiveSetting P ε) (ω : PauliTuple P) : �
 
 end ProjectiveSetting
 
-/-- The consistency subtest bounds the off-diagonal defect of the two raw
-strategy families. This is item 1 of `lem:qld-win-implications`, paper
+/-- The consistency subtest bounds the off-diagonal defect of the two strategy
+measurement families. This is item 1 of `lem:qld-win-implications`, paper
 `14_analysis_of_the_pauli_basis_test.tex:197-199`, blueprint
 `ch14_qpbt_observables.tex:515-522`. -/
 theorem win_cons :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
       0 ≤ ε →
-      consistencyDefect (pauliQuestionDistribution P)
-        (fun questions a => heteroKron
-          ((S.rawMeasurement .alice questions.1).effect a) 1)
-        (fun questions a => heteroKron 1
-          ((S.rawMeasurement .bob questions.2).effect a))
+      consistencyDefect (pauliQuestionMarginal P)
+        (fun question a => heteroKron
+          ((S.rawMeasurement .alice question).effect a) 1)
+        (fun question a => heteroKron 1
+          ((S.rawMeasurement .bob question).effect a))
         S.toStrategy.ψ ≤ C * ε := by
   sorry
 
@@ -295,18 +312,18 @@ theorem win_cons_approx :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
       0 ≤ ε →
-      opFamilyDistSq (pauliQuestionDistribution P)
-        (fun questions a => heteroKron
-          ((S.rawMeasurement .alice questions.1).effect a) 1)
-        (fun questions a => heteroKron 1
-          ((S.rawMeasurement .bob questions.2).effect a))
+      opFamilyDistSq (pauliQuestionMarginal P)
+        (fun question a => heteroKron
+          ((S.rawMeasurement .alice question).effect a) 1)
+        (fun question a => heteroKron 1
+          ((S.rawMeasurement .bob question).effect a))
         S.toStrategy.ψ ≤ C * ε ∧
-      opFamilyDistSq (pauliQuestionDistribution P)
-        (fun questions a => heteroKron 1
-          ((S.rawMeasurement .bob questions.2).effect a))
-        (fun questions a => heteroKron
-          ((S.rawMeasurement .alice questions.1).effect a) 1)
-        S.toStrategy.ψ ≤ C * ε := by
+      opFamilyDistSq (pauliQuestionMarginal P)
+        (fun question a => heteroKron
+          ((S.rawMeasurement .bob question).effect a) 1)
+        (fun question a => heteroKron 1
+          ((S.rawMeasurement .alice question).effect a))
+        S.swappedState ≤ C * ε := by
   sorry
 
 /-- Operator-distance and factor-interchanged companions to the low-degree
@@ -324,11 +341,11 @@ theorem win_low_degree_approx :
           ((S.pointMeasOption .bob W sample.2).effect a))
         S.toStrategy.ψ ≤ C * ε ∧
       opFamilyDistSq (linePointDist P.toLdParams)
-        (fun sample a => heteroKron 1
-          ((S.pointMeasOption .bob W sample.2).effect a))
         (fun sample a => heteroKron
-          ((S.lineEvalMeas .alice W sample.1 sample.2).effect a) 1)
-        S.toStrategy.ψ ≤ C * ε := by
+          ((S.lineEvalMeas .bob W sample.1 sample.2).effect a) 1)
+        (fun sample a => heteroKron 1
+          ((S.pointMeasOption .alice W sample.2).effect a))
+        S.swappedState ≤ C * ε := by
   sorry
 
 /-- Operator-distance and factor-interchanged companions to Pauli-basis
@@ -344,9 +361,9 @@ theorem win_pauli_basis_cons_approx :
         (fun u a => heteroKron 1 ((S.pauliEvalMeas .bob W u).effect a))
         S.toStrategy.ψ ≤ C * ε ∧
       opFamilyDistSq (uniformDistribution (Fin P.m → PauliScalar P))
-        (fun u a => heteroKron 1 ((S.pauliEvalMeas .bob W u).effect a))
-        (fun u a => heteroKron ((S.pointMeas .alice W u).effect a) 1)
-        S.toStrategy.ψ ≤ C * ε := by
+        (fun u a => heteroKron ((S.pointMeas .bob W u).effect a) 1)
+        (fun u a => heteroKron 1 ((S.pauliEvalMeas .alice W u).effect a))
+        S.swappedState ≤ C * ε := by
   sorry
 
 /-- Operator-distance and factor-interchanged companions to the commuting
@@ -363,10 +380,10 @@ theorem win_comm_approx :
         (fun ω a => heteroKron 1 ((S.pairComponentMeas .bob W ω).effect a))
         S.toStrategy.ψ ≤ C * ε ∧
       opFamilyDistSq (commTupleDist P)
-        (fun ω a => heteroKron 1 ((S.pairComponentMeas .bob W ω).effect a))
         (fun ω a => heteroKron
-          ((S.pairWMeas .alice W ω.1 ω.2.1 ω.2.2.1 ω.2.2.2).effect a) 1)
-        S.toStrategy.ψ ≤ C * ε := by
+          ((S.pairWMeas .bob W ω.1 ω.2.1 ω.2.2.1 ω.2.2.2).effect a) 1)
+        (fun ω a => heteroKron 1 ((S.pairComponentMeas .alice W ω).effect a))
+        S.swappedState ≤ C * ε := by
   sorry
 
 /-- Operator-distance and factor-interchanged companions to commuting point
@@ -386,13 +403,13 @@ theorem win_comm_cons_approx :
           ((S.pairWMeas .bob W ω.1 ω.2.1 ω.2.2.1 ω.2.2.2).effect a))
         S.toStrategy.ψ ≤ C * ε ∧
       opFamilyDistSq (commTupleDist P)
-        (fun ω a => heteroKron 1
-          ((S.pairWMeas .bob W ω.1 ω.2.1 ω.2.2.1 ω.2.2.2).effect a))
         (fun ω a => heteroKron
-          ((S.pointTraceMeas .alice W
+          ((S.pointTraceMeas .bob W
             (match W with | .X => ω.1 | .Z => ω.2.1)
             (match W with | .X => ω.2.2.1 | .Z => ω.2.2.2)).effect a) 1)
-        S.toStrategy.ψ ≤ C * ε := by
+        (fun ω a => heteroKron 1
+          ((S.pairWMeas .alice W ω.1 ω.2.1 ω.2.2.1 ω.2.2.2).effect a))
+        S.swappedState ≤ C * ε := by
   sorry
 
 /-- Operator-distance and factor-interchanged companions to Magic Square
@@ -413,13 +430,13 @@ theorem win_ms_cons_approx :
           ((S.msVarBitMeas .bob (match W with | .X => 0 | .Z => 4) ω).effect a))
         S.toStrategy.ψ ≤ C * ε ∧
       opFamilyDistSq (anticommTupleDist P)
-        (fun ω a => heteroKron 1
-          ((S.msVarBitMeas .bob (match W with | .X => 0 | .Z => 4) ω).effect a))
         (fun ω a => heteroKron
-          ((S.pointTraceMeas .alice W
+          ((S.pointTraceMeas .bob W
             (match W with | .X => ω.1 | .Z => ω.2.1)
             (match W with | .X => ω.2.2.1 | .Z => ω.2.2.2)).effect a) 1)
-        S.toStrategy.ψ ≤ C * ε := by
+        (fun ω a => heteroKron 1
+          ((S.msVarBitMeas .alice (match W with | .X => 0 | .Z => 4) ω).effect a))
+        S.swappedState ≤ C * ε := by
   sorry
 
 /-- Observable self-consistency on both tensor-factor orientations. This is

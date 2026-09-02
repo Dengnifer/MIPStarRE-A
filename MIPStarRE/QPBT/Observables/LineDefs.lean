@@ -106,6 +106,13 @@ noncomputable def LineDesc.pointSet {L : LdParams} (line : LineDesc L) :
     Set (Fin L.m → ScalarQ L) :=
   linePoints line.base line.direction
 
+/-- Multivariate polynomials in `m` variables whose total degree is at most
+`d`. This is the class `deg_d` in `def:ideg-deg-polynomials`, blueprint
+`ch14_qpbt_observables.tex:37-48`, paper
+`14_analysis_of_the_pauli_basis_test.tex:51-52`. -/
+abbrev TotalDegreePoly (m : ℕ) (K : Type*) [CommSemiring K] (d : ℕ) :=
+  {p : MvPolynomial (Fin m) K // p.totalDegree ≤ d}
+
 /-- Coefficient-list representation of a univariate polynomial of degree at
 most `c` over the scalar field of `L`. -/
 abbrev DegPoly (L : LdParams) (c : ℕ) := Fin (c + 1) → ScalarQ L

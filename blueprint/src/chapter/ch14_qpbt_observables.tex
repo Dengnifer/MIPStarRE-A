@@ -37,6 +37,7 @@ preliminary definitions and lemmas used throughout the analysis.
 \begin{definition}[Individual and total degree polynomial classes]
 	\label{def:ideg-deg-polynomials}
 	\lean{MIPStarRE.LDT.Preliminaries.polyFunc}
+	\lean{MIPStarRE.QPBT.TotalDegreePoly}
 	\lean{MIPStarRE.QPBT.DegPoly, MIPStarRE.QPBT.evalCoefficient}
 	\lean{MIPStarRE.QPBT.DegPoly.padTo, MIPStarRE.QPBT.EvaluatesTo, MIPStarRE.QPBT.evalOpt}
 	\leanok
@@ -911,7 +912,8 @@ every tuple $\omega$.
 
 \begin{definition}[Symmetric equivalents]
 	\label{def:symmetric-equivalents}
-	\lean{MIPStarRE.QPBT.Placement, MIPStarRE.QPBT.ProjectiveSetting.place}
+	\lean{MIPStarRE.QPBT.Placement, MIPStarRE.QPBT.Placement.IsOpposite}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.place}
 	\leanok
 	\uses{def:expanded-state}
 	For the remainder of this chapter, as well as in

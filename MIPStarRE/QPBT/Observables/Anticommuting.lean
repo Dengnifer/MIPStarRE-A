@@ -3,7 +3,7 @@ import MIPStarRE.QPBT.Test.PauliBasisTest
 /-!
 # Commuting and anticommuting Pauli tuples
 
-This module packages the tuple phase used in the Pauli basis test and the
+This module defines the tuple phase used in the Pauli basis test and the
 conditional uniform distributions used by its observable analysis.
 
 ## References
@@ -21,7 +21,7 @@ open MIPStarRE.LDT
 noncomputable section
 
 /-- A tuple `(u_X,u_Z,r_X,r_Z)` over the fixed field model of an admissible
-Pauli-test parameter package. This is the carrier of
+Pauli-test parameter tuple. This is the tuple space of
 `def:anticommuting-tuple`, blueprint `ch14_qpbt_observables.tex:128-148`, paper
 `14_analysis_of_the_pauli_basis_test.tex:64-68`. -/
 abbrev PauliTuple (P : AdmissibleParams) :=

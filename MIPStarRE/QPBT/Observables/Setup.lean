@@ -22,8 +22,8 @@ namespace MIPStarRE.QPBT
 noncomputable section
 
 /-- Embed a finite Euclidean space into an equivalently indexed space by
-placing its coordinates in the all-zero ancilla sector. This is Lean-only
-infrastructure for the padding in `lem:projective-strategy-setup`, blueprint
+placing its coordinates in the all-zero ancilla sector. This is the
+zero-padding isometry in `lem:projective-strategy-setup`, blueprint
 `ch14_qpbt_observables.tex:412-475`, paper
 `14_analysis_of_the_pauli_basis_test.tex:155-172`. -/
 noncomputable def padWithZeros {ι κ : Type*}

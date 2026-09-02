@@ -25,22 +25,22 @@ open MIPStarRE.LDT MIPStarRE.Quantum
 noncomputable section
 
 /-- The six registers `AA'A''BB'B''`, retaining distinct Alice and Bob local
-spaces. This is the carrier of `def:expanded-state`, paper
+spaces. This is the register index type of `def:expanded-state`, paper
 `14_analysis_of_the_pauli_basis_test.tex:367-372`, blueprint
 `ch14_qpbt_observables.tex:760-781`. -/
 abbrev SixReg (P : AdmissibleParams) (ιA ιB : Type*) :=
   (ιA × (PauliRegister P × PauliRegister P)) ×
     (ιB × (PauliRegister P × PauliRegister P))
 
-/-- Classical coordinate equality for the finite six-register carrier. This is
-Lean-only support for the matrix distance functionals used after
+/-- Classical coordinate equality for the finite six-register index type,
+used by the matrix distance functionals after
 `def:expanded-state`, blueprint `ch14_qpbt_observables.tex:760-781`. -/
 noncomputable instance sixRegDecidableEq (P : AdmissibleParams)
     (ιA ιB : Type*) : DecidableEq (SixReg P ιA ιB) :=
   Classical.decEq _
 
-/-- Reassociate the raw tensor of the strategy state and two EPR states into
-register order `AA'A''BB'B''`. This is Lean-only bookkeeping for
+/-- Reassociate the tensor product of the strategy state and two EPR states
+directly into register order `AA'A''BB'B''` for
 `eq:def-psihat`, paper `14_analysis_of_the_pauli_basis_test.tex:367-372`. -/
 def sixRegShuffle (P : AdmissibleParams) (ιA ιB : Type*) :
     (((ιA × ιB) × (PauliRegister P × PauliRegister P)) ×
@@ -77,7 +77,7 @@ namespace ProjectiveSetting
 variable {P : AdmissibleParams} {ε : ℝ}
 
 /-- A strategy-local register paired with one generalized-Pauli register. This
-is the operator carrier in `def:expanded-observables`, paper
+is the operator space in `def:expanded-observables`, paper
 `14_analysis_of_the_pauli_basis_test.tex:374-382`. -/
 abbrev ExpandedLocalSpace (S : ProjectiveSetting P ε) (side : PlayerSide) :=
   S.LocalSpace side × PauliRegister P
@@ -177,7 +177,7 @@ theorem expPointOp_sum_eq_one (S : ProjectiveSetting P ε) (side : PlayerSide)
   sorry
 
 /-- The complete expanded point measurement on the chosen player and Pauli
-register. This packages the effects of `def:expanded-point-measurement`, paper
+register. Its effects are those of `def:expanded-point-measurement`, paper
 `14_analysis_of_the_pauli_basis_test.tex:384-418`, blueprint
 `ch14_qpbt_observables.tex:809-844`. -/
 noncomputable def pointMeasExp (S : ProjectiveSetting P ε) (side : PlayerSide)

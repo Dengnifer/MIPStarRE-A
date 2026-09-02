@@ -297,8 +297,7 @@ abbrev PauliQuestion (P : AdmissibleParams) := PauliType × PauliSpace P
 /-- The Pauli question carrying no additional coefficient data, as in
 `def:pauli-win-predicate`, blueprint `ch13_qpbt_test.tex:356-392`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1006-1008`.
-This constructor lives with the question type so the chapter-14 observable
-layer can use it without importing the chapter-13 soundness theorem. -/
+Its ambient coefficient vector is zero. -/
 def pauliQuestion (P : AdmissibleParams) (W : PauliKind) : PauliQuestion P :=
   (.pauli W, 0)
 

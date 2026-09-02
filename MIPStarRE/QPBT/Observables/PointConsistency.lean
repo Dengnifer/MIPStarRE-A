@@ -23,9 +23,10 @@ open MIPStarRE.LDT MIPStarRE.Quantum
 noncomputable section
 
 /-- The four directed cross-party placement pairs asserted by the source's
-“symmetric equivalents” clause. This explicit relation replaces the unready
-symmetry-transfer node; paper `14_analysis_of_the_pauli_basis_test.tex:420-450`,
-blueprint `ch14_qpbt_observables.tex:876-922`. -/
+“symmetric equivalents” clause. The relation lists the two orientations of
+each of the `AA'`--`BA''` and `BB'`--`AB''` pairs; paper
+`14_analysis_of_the_pauli_basis_test.tex:420-450`, blueprint
+`ch14_qpbt_observables.tex:876-922`. -/
 def Placement.IsOpposite : Placement → Placement → Prop
   | .AA', .BA'' => True
   | .BA'', .AA' => True
@@ -54,8 +55,8 @@ theorem deltaAnticom_isPolyErr : IsPolyErr deltaAnticom := by
 
 /-- All expanded-point conclusions at an abstract error function. The first
 conjunct lists the four directed cross-party placements; the second lists all
-four same-placement commutation conclusions. This is a Lean-only package for
-the existential wording of `lem:qld-comm-cons`, blueprint
+four same-placement commutation conclusions. This proposition collects the
+expanded-point conclusions of `lem:qld-comm-cons`, blueprint
 `ch14_qpbt_observables.tex:932-1032`, paper
 `14_analysis_of_the_pauli_basis_test.tex:452-505`. -/
 def ExpandedPointConclusions (δ : ℝ → ℝ) : Prop :=

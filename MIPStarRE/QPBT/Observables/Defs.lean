@@ -41,7 +41,7 @@ inductive PlayerSide where
   deriving DecidableEq, Repr, Inhabited, Fintype
 
 /-- A projective strategy satisfying the winning premise used throughout
-Section `sec:commutation`. The wrapper retains the distinct player spaces and
+Section `sec:commutation`. The structure retains the distinct player spaces and
 measurement families of `Strategy`. Paper
 `14_analysis_of_the_pauli_basis_test.tex:160-172`; blueprint
 `ch14_qpbt_observables.tex:385-475`. -/
@@ -69,8 +69,8 @@ instance localSpaceDecidableEq (S : ProjectiveSetting P ε) (side : PlayerSide) 
     DecidableEq (S.LocalSpace side) := by
   cases side <;> simp only [LocalSpace] <;> infer_instance
 
-/-- Select the raw strategy measurement on one player side. This is the
-formalization-only heterogeneous interpretation of the shared symbol `M` at
+/-- Select the strategy measurement before outcome postprocessing on one
+player side. This is the heterogeneous interpretation of the shared symbol `M` at
 paper `14_analysis_of_the_pauli_basis_test.tex:160-184`. -/
 def rawMeasurement (S : ProjectiveSetting P ε) (side : PlayerSide)
     (question : PauliQuestion P) :
@@ -280,8 +280,8 @@ def msAnswerOrZero {P : AdmissibleParams} (t : MsType) : PauliAnswer P → MsAns
       | .bit bit => .bit bit
       | _ => .bit 0
 
-/-- The complete typed point measurement on one player side. It is the raw
-strategy measurement postprocessed by `pointAnswerOrZero`; paper
+/-- The complete typed point measurement on one player side. It is the
+corresponding strategy measurement postprocessed by `pointAnswerOrZero`; paper
 `14_analysis_of_the_pauli_basis_test.tex:174-190`, blueprint
 `def:strategy-observables`. -/
 noncomputable def pointMeas (S : ProjectiveSetting P ε) (side : PlayerSide)
@@ -335,8 +335,8 @@ noncomputable def pauliMeas (S : ProjectiveSetting P ε) (side : PlayerSide)
   (S.rawMeasurement side (pauliQuestion P W)).postprocess pauliAnswerOrZero
 
 /-- The complete typed Magic Square measurement on one player side. Its answer
-alphabet is exactly `MsAnswer`, so these families can be packaged as a real
-Magic Square strategy. Paper `14_analysis_of_the_pauli_basis_test.tex:213-258`;
+alphabet is exactly `MsAnswer`; these families therefore define a Magic Square
+strategy. Paper `14_analysis_of_the_pauli_basis_test.tex:213-258`;
 blueprint `lem:qld-win-implications`. -/
 noncomputable def msMeas (S : ProjectiveSetting P ε) (side : PlayerSide)
     (t : MsType) (uX uZ : Fin P.m → PauliScalar P)
@@ -344,7 +344,7 @@ noncomputable def msMeas (S : ProjectiveSetting P ε) (side : PlayerSide)
   (S.rawMeasurement side (msQuestion P t uX uZ rX rZ)).postprocess
     (msAnswerOrZero t)
 
-/-- The raw effect carried by answers whose constructor is invalid for a
+/-- The sum of effects corresponding to answers that are invalid for a given
 question type. This mass is kept separate from the fixed valid outcome into
 which typed postprocessing folds it. Paper
 `08_classical_and_quantum_low_degree_tests.tex:1126-1225`, blueprint
