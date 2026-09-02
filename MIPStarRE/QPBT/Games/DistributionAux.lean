@@ -1,9 +1,9 @@
 import MIPStarRE.LDT.Basic.Distribution
 
-/-! # Finite distribution combinators
+/-! # Operations on finite distributions
 
-Lean-only infrastructure for `def:line-point-dist` and the distribution
-constructions in QPBT chapters 13--15; blueprint
+Products, convex mixtures, dependent binds, and normalized restrictions used by
+the QPBT distributions; blueprint
 `ch13_qpbt_test.tex:180-245`, paper
 `08_classical_and_quantum_low_degree_tests.tex:544-626`.
 -/
@@ -14,7 +14,7 @@ namespace MIPStarRE.QPBT
 
 open MIPStarRE.LDT
 
-/-- Product of finite distributions. Lean-only infrastructure for
+/-- The product of two finite distributions, as used in
 `def:line-point-dist`, blueprint `ch13_qpbt_test.tex:180-245`, paper
 `08_classical_and_quantum_low_degree_tests.tex:544-626`. -/
 noncomputable def Distribution.prod {α β : Type*} [DecidableEq α] [DecidableEq β]
@@ -30,8 +30,8 @@ noncomputable def Distribution.prod {α β : Type*} [DecidableEq α] [DecidableE
       simp [ν.outsideSupport p.2 hν]
     · simp [μ.outsideSupport p.1 hμ]
 
-/-- Products preserve probability. Lean-only companion used by the product
-distributions in QPBT chapters 13--15; blueprint `ch13_qpbt_test.tex:180-245`,
+/-- The product of two probability distributions is a probability distribution;
+blueprint `ch13_qpbt_test.tex:180-245`,
 paper `08_classical_and_quantum_low_degree_tests.tex:544-626`. -/
 theorem Distribution.prod_isProbability {α β : Type*}
     [DecidableEq α] [DecidableEq β] (μ : Distribution α) (ν : Distribution β)
@@ -39,7 +39,7 @@ theorem Distribution.prod_isProbability {α β : Type*}
     (Distribution.prod μ ν).IsProbability := by
   sorry
 
-/-- Convex mixture with a coefficient in `[0,1]`. Lean-only infrastructure for
+/-- The convex mixture with a coefficient in `[0,1]`, as used for
 the equal mixture in `def:line-point-dist`, blueprint
 `ch13_qpbt_test.tex:180-245`, paper
 `08_classical_and_quantum_low_degree_tests.tex:544-626`. -/
@@ -57,7 +57,7 @@ noncomputable def Distribution.mix {α : Type*} [DecidableEq α]
     have hν : a ∉ ν.support := fun h => ha (Finset.mem_union_right _ h)
     simp [μ.outsideSupport a hμ, ν.outsideSupport a hν]
 
-/-- Convex mixtures preserve probability. Lean-only companion for
+/-- A convex mixture of probability distributions is a probability distribution;
 `def:line-point-dist`, blueprint `ch13_qpbt_test.tex:180-245`, paper
 `08_classical_and_quantum_low_degree_tests.tex:544-626`. -/
 theorem Distribution.mix_isProbability {α : Type*} [DecidableEq α]
@@ -66,7 +66,7 @@ theorem Distribution.mix_isProbability {α : Type*} [DecidableEq α]
     (Distribution.mix t ht0 ht1 μ ν).IsProbability := by
   sorry
 
-/-- A dependent finite bind. Lean-only infrastructure for typed question
+/-- The dependent bind of finite distributions used for typed question
 distributions, blueprint `ch12_qpbt_games.tex:430-470`, paper
 `05_conditionally_linear_functions.tex:236-286`. -/
 noncomputable def Distribution.bind {α β : Type*} [DecidableEq β]
@@ -82,8 +82,8 @@ noncomputable def Distribution.bind {α β : Type*} [DecidableEq β]
       exact hb (Finset.mem_biUnion.mpr ⟨a, ha, h⟩)
     simp [ν a |>.outsideSupport b hnot]
 
-/-- Binding probability distributions preserves probability. Lean-only
-companion for typed question distributions, blueprint
+/-- A dependent bind of probability distributions is a probability distribution;
+blueprint
 `ch12_qpbt_games.tex:430-470`, paper
 `05_conditionally_linear_functions.tex:236-286`. -/
 theorem Distribution.bind_isProbability {α β : Type*} [DecidableEq β]
@@ -92,8 +92,8 @@ theorem Distribution.bind_isProbability {α β : Type*} [DecidableEq β]
     (Distribution.bind μ ν).IsProbability := by
   sorry
 
-/-- Normalize a distribution after restricting its support to a decidable
-predicate. Lean-only infrastructure for `def:ith-restricted-line`, blueprint
+/-- Restrict a distribution to a decidable positive-mass event and normalize it,
+as in `def:ith-restricted-line`; blueprint
 `ch15_qpbt_combining.tex:1038-1048`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1038-1048`. -/
 noncomputable def Distribution.restrict {α : Type*} [DecidableEq α]
@@ -111,8 +111,8 @@ noncomputable def Distribution.restrict {α : Type*} [DecidableEq α]
       simp [hp, μ.outsideSupport a hμ]
     · simp [hp]
 
-/-- A normalized positive-mass restriction is probabilistic. Lean-only
-companion for `def:ith-restricted-line`, blueprint
+/-- Restriction to a positive-mass event preserves total probability;
+`def:ith-restricted-line`, blueprint
 `ch15_qpbt_combining.tex:1038-1048`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1038-1048`. -/
 theorem Distribution.restrict_isProbability {α : Type*} [DecidableEq α]

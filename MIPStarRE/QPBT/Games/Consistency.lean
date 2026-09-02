@@ -44,7 +44,7 @@ noncomputable def opDistSq {X ι : Type*}
     (μ : Distribution X) (M N : X → Op ι) (ψ : EuclideanSpace ℂ ι) : ℝ :=
   opFamilyDistSq μ (fun x (_ : Unit) => M x) (fun x (_ : Unit) => N x) ψ
 
-/-- Lean-only unfolding lemma for the unit-alphabet specialization of
+/-- The unit-alphabet operator distance equals its one-outcome family form from
 `def:povm-distance`, blueprint `ch12_qpbt_games.tex:203-210`, paper
 `06_nonlocal_games_and_mipstar.tex:258-271`. -/
 theorem opDistSq_eq_opFamilyDistSq {X ι : Type*}

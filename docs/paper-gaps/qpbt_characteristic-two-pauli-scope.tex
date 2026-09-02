@@ -5,35 +5,71 @@
 \input{command}
 \begin{document}
 \section{At a glance}
-This is a medium implementation obligation.  Mathlib supplies finite-field
-characters and finite sums; the remaining work is project-local matrix algebra.
-The difficulty is medium, with an estimated weight of one algebra leaf and
-roughly 100--200 lines of eventual proof.  The Mathlib/project split is
-therefore mainly character orthogonality from Mathlib and matrix identities in
-the project; the key inputs are `ffChar`, finite-field trace, and the Pauli
-shift/phase definitions.
-\textbf{Key mathematical inputs.}  The key Mathlib or mathematical inputs are finite-field trace nondegeneracy,
-additive-character orthogonality, and the explicit shift and phase formulas.
+\begin{itemize}
+  \item \textbf{Difficulty.} Medium.  The source-facing statements must retain
+  arbitrary prime characteristic while the later Pauli basis test uses a
+  separately named characteristic-two specialization.
+  \item \textbf{Estimated weight.} The remaining proofs should occupy one
+  algebra file of roughly 100--200 lines.
+  \item \textbf{Mathlib/project split.} Mathlib supplies finite matrix algebra
+  and finite-field facts; the generalized Pauli definitions and their
+  characteristic-two specialization are project-local.
+  \item \textbf{Key mathematical inputs.} Unitarity of shift and phase
+  matrices, the $p$-th-power identity, and additive-character orthogonality.
+  The scope correction is tracked in \ghissue{16}.
+\end{itemize}
+
 \section{Key theorem forms}
-For prime characteristic the source forms are
-\[\tau^X(a)\tau^Z(b)=\omega^{-\operatorname{tr}(a\cdot b)}
-\tau^Z(b)\tau^X(a),\qquad
-\mathbb E_{u\in V}\omega^{\operatorname{tr}(u\cdot v)}=0.\]
+Let $K$ be a finite extension of $\mathbb F_p$, let
+$\chi(x)=\exp(2\pi i\operatorname{Tr}_{K/\mathbb F_p}(x)/p)$, and let
+$a,a',b\in K^n$.  The relevant identities are
+\[
+ \tau^W(a)\tau^W(a')=\tau^W(a+a'),\qquad
+ \tau^W(a)^p=I,
+\]
+and
+\[
+ \tau^X(a)\tau^Z(b)=\chi(-a\mathbin{\cdot}b)
+ \tau^Z(b)\tau^X(a).
+\]
+The explicit shift and phase matrices are unitary. The second identity implies
+that every eigenvalue $\lambda$ of $\tau^W(a)$ satisfies $\lambda^p=1$. If
+$V\leq K^n$ and $v\notin V^\perp$, Fourier cancellation takes the form
+\[
+ \mathbb E_{u\in V}\chi(u\mathbin{\cdot}v)=0.
+\]
+
 \section{Source and formal scope}
-The Pauli preliminaries state twisted commutation and Fourier cancellation for
-an arbitrary prime field characteristic, using the additive character
-$\omega^{\operatorname{tr}(\cdot)}$.  The landed QPBT operator definitions use
-the binary character with phase $-1$, because the test fixes field sizes
-$q=2^k$.  This unit therefore states the source-facing algebra with the
-general character `ffChar` and keeps binary matrix corollaries under separate
-names for downstream QPBT consumers.
+The source defines the shift and phase matrices and states their product,
+$p$-th-power, unitarity, spectral, and twisted-commutation properties in
+\cite[lines 1056--1095]{Ji2020MIPStar}.  It then uses the same character for
+Fourier cancellation over a subspace at lines 1123--1140.  These assertions
+depend on the characteristic $p$; they are not intrinsically binary.
+
+The formal definitions \path{primeTauShift}, \path{primeTauPhase}, and
+\path{primeTauObservable} use the canonical character \path{ffChar} in
+characteristic $p$.  Their theorem statements cover the identities above for
+arbitrary $p$.  The declarations whose names begin with
+\path{tauObservable} or use \path{phaseSign} instead specialize to
+$p=2$, where $\chi(x)=(-1)^{\operatorname{Tr}(x)}$.  This specialization is
+appropriate only for the subsequent test, whose admissible sizes satisfy
+$q=2^k$; it is not substituted for the general statements.
+
+The proofs can be obtained directly from the displayed matrices.  A shift is a
+permutation matrix, a phase matrix has diagonal entries of modulus one, and a
+tensor product of such matrices is unitary.  Iterating the product identity
+gives $\tau^W(a)^p=I$.  Applying this equality to a nonzero eigenvector gives
+$(\lambda^p-1)v=0$, hence $\lambda^p=1$.  Finally, when
+$v\notin V^\perp$, the map $u\mapsto\chi(u\cdot v)$ is a nontrivial character
+of the finite additive group $V$, so its average vanishes.
+
 \section{Conclusion}
-The split is a representation boundary, not an additional hypothesis on the
-source lemmas.  General-prime proofs remain obligations until the binary
-operator layer is generalized; the binary specializations are not linked to
-the unrestricted blueprint labels.  See \ghissue{16} for the construction plan.
-The source is the Pauli preliminaries of \cite{Ji2020MIPStar} (04\_preliminaries.tex,
-lines 1123--1140).
+There is no mathematical restriction in the source-facing formal statements:
+they retain arbitrary prime characteristic and the corresponding canonical
+character.  The characteristic-two declarations are separate corollaries for
+the QPBT parameter regime.  The remaining work is to prove the general
+identities from the explicit matrices and character orthogonality; it does not
+require changing the binary operator definitions.
 \bibliographystyle{alpha}
 \bibliography{references}
 \end{document}

@@ -80,7 +80,7 @@ theorem binTrace_mul_eq_dotProduct {q : ℕ} (F : FixedFieldModel q)
     binTrace F.K (x * y) = dotProduct (F.binaryCoordinates x) (F.binaryCoordinates y) := by
   sorry
 
-/-- Fixed-model coordinate-vector packaging for item 3 of
+/-- Fixed-model coordinate vector for item 3 of
 `lem:downsize_field`, blueprint `ch11_qpbt_algebra.tex:260-274`, paper
 `04_preliminaries.tex:509-550`. -/
 noncomputable def kappaVec {q : ℕ} {ι : Type*} (F : FixedFieldModel q)
@@ -103,7 +103,7 @@ theorem fixedFieldModel_chi_mulVec_basisCoord {q s t : ℕ} (F : FixedFieldModel
     chi F M *ᵥ kappaVec F v = kappaVec F (M *ᵥ v) := by
   sorry
 
-/-- Compatibility spelling for the canonical item 3 specialization;
+/-- The identity `chi_mulVec_kappa` expressing compatibility of `chi` and `kappa`;
 `lem:downsize_field`, blueprint `ch11_qpbt_algebra.tex:260-274`, paper
 `04_preliminaries.tex:509-550`. -/
 theorem chi_mulVec_kappa {q s t : ℕ} (F : FixedFieldModel q)

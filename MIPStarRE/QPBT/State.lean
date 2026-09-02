@@ -1,11 +1,11 @@
 import MIPStarRE.Quantum.FiniteMatrix.Basic
 
 /-!
-# Neutral finite-dimensional state constructions
+# Finite-dimensional state transformations
 
-This leaf contains tensor and reindexing operations shared by the QPBT game and
-test layers.  The definitions support the state transports used in the Pauli
-basis test (`blueprint/src/chapter/ch13_qpbt_test.tex:386-403`; paper
+This file defines the tensor and reindexing operations used to transport states
+and operators in the Pauli basis test
+(`blueprint/src/chapter/ch13_qpbt_test.tex:386-403`; paper
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1426-1447`).
 -/
 

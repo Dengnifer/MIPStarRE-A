@@ -10,9 +10,12 @@ perfect strategy from two anticommuting consistent binary measurements.
 
 ## References
 
-The source nodes are `thm:ms-rigidity` and `thm:ms-from-ac` in
+The source statements are `thm:ms-rigidity` and `thm:ms-from-ac` in
 `blueprint/src/chapter/ch13_qpbt_test.tex:207-263`, from
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-722`.
+
+Magic Square variables are one-based in the paper. Thus Lean's `.var 0` and
+`.var 4` denote the paper's first and fifth variables, respectively.
 -/
 
 open scoped BigOperators Matrix
@@ -23,22 +26,21 @@ open MIPStarRE.LDT MIPStarRE.Quantum
 
 noncomputable section
 
-/-- Symmetry of the Magic Square question distribution. This proposition is
-the distributional field required to package `def:ms-game` as a symmetric
-game; blueprint `ch13_qpbt_test.tex:188-203`, paper
+/-- Symmetry of the Magic Square question distribution from `def:ms-game`;
+blueprint `ch13_qpbt_test.tex:188-203`, paper
 `08_classical_and_quantum_low_degree_tests.tex:512-610`. -/
 theorem msQuestionDistribution_symm (x y : MsType) :
     msGame.μ.weight (x, y) = msGame.μ.weight (y, x) := by
   sorry
 
-/-- Symmetry of the Magic Square decision predicate. This is the second
-packaging fact for `def:ms-game`, blueprint `ch13_qpbt_test.tex:188-203`, paper
+/-- Symmetry of the Magic Square decision predicate from `def:ms-game`;
+blueprint `ch13_qpbt_test.tex:188-203`, paper
 `08_classical_and_quantum_low_degree_tests.tex:512-610`. -/
 theorem msWinPredicate_symm (x y : MsType) (a b : MsAnswer) :
     msWinPredicate x y a b = msWinPredicate y x b a := by
   sorry
 
-/-- The symmetric-game presentation of the landed Magic Square game. -/
+/-- The symmetric-game presentation of the Magic Square game. -/
 noncomputable def msGameSymm : SymmetricGame where
   Question := MsType
   Answer := MsAnswer
@@ -48,12 +50,12 @@ noncomputable def msGameSymm : SymmetricGame where
   decide := msWinPredicate
   decide_symm := msWinPredicate_symm
 
-/-- The symmetric presentation has the landed Magic Square game as its
+/-- The symmetric presentation has the Magic Square game as its
 underlying game. -/
 theorem msGameSymm_toGame : msGameSymm.toGame = msGame := by
   rfl
 
-/-- The observable associated with a binary measurement; Lean-only notation
+/-- The observable associated with a binary measurement; formalization-only notation
 used in `thm:ms-from-ac`, blueprint `ch13_qpbt_test.tex:234-263`, paper
 `08_classical_and_quantum_low_degree_tests.tex:658-722`. -/
 def obsOf {ι : Type*} [Fintype ι] [DecidableEq ι]
@@ -75,8 +77,8 @@ noncomputable def idealMsState {ιA'' ιB'' : Type*}
       (((Fin 2 → ZMod 2) × ιA'') × ((Fin 2 → ZMod 2) × ιB'')) :=
   reindexState prodShuffle (vecTensor (eprState (Fin 2 → ZMod 2)) aux)
 
-/-- Existential data in the conclusion of `thm:ms-rigidity`; this is a
-Lean-only package of the theorem's isometries and auxiliary unit state. -/
+/-- The isometries and auxiliary unit state in the conclusion of
+`thm:ms-rigidity`. -/
 structure MsRigidityWitness (S : Strategy msGame) where
   ιA'' : Type
   ιB'' : Type
@@ -148,7 +150,7 @@ Blueprint `ch13_qpbt_test.tex:207-231`, paper
 **Local fix:** The state estimate is stated in Euclidean norm at scale
 `sqrt ε`, and the ideal observables use the local basis change described at
 paper lines 650--652. The universal constant is quantified before the strategy
-and error parameter. -/
+and error parameter. This formal boundary is recorded in issue #16. -/
 theorem exists_ms_rigidity :
     ∃ C : ℝ, 1 ≤ C ∧ ∀ (ε : ℝ), 0 ≤ ε →
       ∀ S : Strategy msGame, 1 - ε ≤ S.value →
@@ -173,7 +175,7 @@ measurements, consistent on an EPR state, extends to a value-one SPCC Magic
 Square strategy. Blueprint `ch13_qpbt_test.tex:234-263`, paper
 `08_classical_and_quantum_low_degree_tests.tex:654-722`.
 
-The local carrier is arbitrary, finite, and nonempty; no field model or QPBT
+The local index type is arbitrary, finite, and nonempty; no field model or QPBT
 parameter is assumed. The equality `hι` records the explicitly constructed
 local tensor factor. -/
 theorem exists_ms_perfect_strategy_of_anticommuting

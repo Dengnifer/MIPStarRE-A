@@ -13,14 +13,14 @@ namespace MIPStarRE.QPBT
 
 open MIPStarRE.LDT MIPStarRE.LDT.Preliminaries
 
-/-- Lean-only embedding of Boolean coordinates into a field, supporting
+/-- The formalization-only embedding of Boolean coordinates into a field used by
 `def:decoding-map`; blueprint `ch11_qpbt_algebra.tex:423-431`, paper
 `04_preliminaries.tex:917-924`. -/
 def boolToScalar {K : Type*} [Field K] : Bool → K
   | false => 0
   | true => 1
 
-/-- Lean-only coordinatewise Boolean-cube embedding supporting
+/-- The coordinatewise Boolean-cube embedding used by
 `def:decoding-map`; blueprint `ch11_qpbt_algebra.tex:423-431`, paper
 `04_preliminaries.tex:917-924`. -/
 def cubeEmbed {K : Type*} [Field K] {m : ℕ} : Cube m → (Fin m → K) :=

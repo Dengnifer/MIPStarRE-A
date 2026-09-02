@@ -37,10 +37,8 @@ set_option linter.style.header false
 /-!
 # Quantum Pauli basis test
 
-This aggregate module re-exports the stage-4.2 statement skeleton for the
-quantum Pauli basis test.  The source-facing declarations follow the algebra,
-game, test, and soundness chapters of the blueprint and retain proof-level
-obligations for later stages.
+This aggregate module provides the QPBT algebraic, game-theoretic, and test
+declarations.
 
 ## References
 

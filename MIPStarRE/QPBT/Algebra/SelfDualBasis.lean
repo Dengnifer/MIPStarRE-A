@@ -6,7 +6,7 @@ import Mathlib.LinearAlgebra.Trace
 
 Source `def:dual-self-dual-normal-basis` and `def:binary-representation`;
 blueprint `blueprint/src/chapter/ch11_qpbt_algebra.tex:234-246,298-315`; paper
-`references/qpbt-paper/04_preliminaries.tex:653-680,702-725`.
+`references/qpbt-paper/04_preliminaries.tex:494-502,669-700`.
 -/
 
 namespace MIPStarRE.QPBT
@@ -16,7 +16,7 @@ open scoped BigOperators Matrix
 open MIPStarRE.LDT
 
 /-- A dual pair of bases for `def:dual-self-dual-normal-basis`, blueprint
-`ch11_qpbt_algebra.tex:234-246`, paper `04_preliminaries.tex:505-533`. -/
+`ch11_qpbt_algebra.tex:234-246`, paper `04_preliminaries.tex:494-496`. -/
 def IsDualBasisPair {F K ι : Type*} [CommRing F] [CommRing K] [DecidableEq ι]
     [Algebra F K] (b b' : Module.Basis ι F K) : Prop :=
   ∀ i j, Algebra.trace F K (b i * b' j) = if i = j then 1 else 0
@@ -24,13 +24,13 @@ def IsDualBasisPair {F K ι : Type*} [CommRing F] [CommRing K] [DecidableEq ι]
 namespace Basis
 
 /-- Self-duality in `def:dual-self-dual-normal-basis`, blueprint
-`ch11_qpbt_algebra.tex:234-246`, paper `04_preliminaries.tex:505-533`. -/
+`ch11_qpbt_algebra.tex:234-246`, paper `04_preliminaries.tex:494-497`. -/
 def IsSelfDual {F K ι : Type*} [CommRing F] [CommRing K] [DecidableEq ι]
     [Algebra F K] (b : Module.Basis ι F K) : Prop :=
   IsDualBasisPair b b
 
 /-- Normality in `def:dual-self-dual-normal-basis`, blueprint
-`ch11_qpbt_algebra.tex:234-246`, paper `04_preliminaries.tex:702-725`. -/
+`ch11_qpbt_algebra.tex:234-246`, paper `04_preliminaries.tex:498-502`. -/
 def IsNormal {F K : Type*} [CommSemiring F] [Field K] [Algebra F K]
     {k : ℕ} (b : Module.Basis (Fin k) F K) (q : ℕ) : Prop :=
   ∃ α : K, ∀ j, b j = α ^ (q ^ j.1)

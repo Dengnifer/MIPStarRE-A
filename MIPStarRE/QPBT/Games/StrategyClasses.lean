@@ -23,8 +23,8 @@ def Strategy.IsProjective {G : Game} (S : Strategy G) : Prop :=
 
 /-- Symmetric games from `def:symmetric-game`, blueprint
 `ch12_qpbt_games.tex:98-107`, paper `06_nonlocal_games_and_mipstar.tex:74-92`.
-The source equalities of question and answer alphabets are encoded by single
-shared carriers, matching its compact notation. -/
+The question and answer alphabets are each represented by a single shared type,
+matching the source notation. -/
 structure SymmetricGame where
   Question : Type
   Answer : Type
@@ -41,7 +41,8 @@ structure SymmetricGame where
 attribute [instance] SymmetricGame.questionFintype SymmetricGame.answerFintype
   SymmetricGame.questionDecidableEq SymmetricGame.answerDecidableEq
 
-/-- Lean-only coercion supporting `def:symmetric-game`, blueprint
+/-- Regard a symmetric game as a game with equal question and answer types;
+`def:symmetric-game`, blueprint
 `ch12_qpbt_games.tex:98-107`, paper `06_nonlocal_games_and_mipstar.tex:74-92`. -/
 def SymmetricGame.toGame (G : SymmetricGame) : Game where
   QuestionA := G.Question
@@ -54,8 +55,8 @@ def SymmetricGame.toGame (G : SymmetricGame) : Game where
 
 /-- Symmetric strategies from `def:symmetric-game`, blueprint
 `ch12_qpbt_games.tex:98-107`, paper `06_nonlocal_games_and_mipstar.tex:74-92`.
-The source equalities of local spaces and measurements are encoded by one
-shared local carrier and one measurement family. -/
+The two local spaces and measurement families are identified, as in the source
+definition. -/
 structure SymmetricStrategy (G : SymmetricGame) where
   ι : Type
   [ιFintype : Fintype ι]
@@ -67,7 +68,8 @@ structure SymmetricStrategy (G : SymmetricGame) where
 
 attribute [instance] SymmetricStrategy.ιFintype SymmetricStrategy.ιDecidableEq
 
-/-- Lean-only coercion supporting `def:symmetric-game`, blueprint
+/-- Regard a symmetric strategy as a strategy using the same local space and
+measurement family for both players; `def:symmetric-game`, blueprint
 `ch12_qpbt_games.tex:98-107`, paper `06_nonlocal_games_and_mipstar.tex:74-92`. -/
 def SymmetricStrategy.toStrategy {G : SymmetricGame} (S : SymmetricStrategy G) :
     Strategy G.toGame where
@@ -151,7 +153,8 @@ theorem exists_symmetric_projective_strategy (G : SymmetricGame) (ε : ℝ)
       1 - ε ≤ S.toStrategy.value := by
   sorry
 
-/-- Lean-only given-strategy form associated with `lem:symmetric-strat`, blueprint
+/-- Formalization-only form of `lem:symmetric-strat` starting from a specified
+near-optimal strategy; blueprint
 `ch12_qpbt_games.tex:112-132`, paper `06_nonlocal_games_and_mipstar.tex:94-130`.
 The source attainment distinction is tracked in
 `docs/paper-gaps/qpbt_symmetrization-attainment.tex`. -/

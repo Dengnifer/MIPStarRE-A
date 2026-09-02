@@ -589,7 +589,12 @@ representation is obtained as follows.
 \end{definition}
 
 \begin{lemma}[Product and twisted commutation relations]\label{lem:twisted-commutation}
-	\lean{MIPStarRE.QPBT.primeTauObservable_mul, MIPStarRE.QPBT.primeTauObservable_pow, MIPStarRE.QPBT.primeTauObservable_pow_char, MIPStarRE.QPBT.primeTauObservable_X_mul_Z}
+	\lean{MIPStarRE.QPBT.primeTauObservable_mul,
+		MIPStarRE.QPBT.primeTauObservable_pow,
+		MIPStarRE.QPBT.primeTauObservable_pow_char,
+		MIPStarRE.QPBT.primeTauObservable_isUnitary,
+		MIPStarRE.QPBT.primeTauObservable_eigenvalue_pow_char,
+		MIPStarRE.QPBT.primeTauObservable_X_mul_Z}
 	\leanok
 	\uses{def:generalized-pauli, def:subfield-trace, def:dot-product-orthogonal}
 	Let $q = p^k$, let $n \ge 1$ be an integer, and let $W \in \{X, Z\}$.
@@ -600,9 +605,9 @@ representation is obtained as follows.
 			      \qquad \text{and} \qquad
 			      \bigl(\tau^W(a)\bigr)^b = \tau^W(ab)\;;
 		      \end{equation}
-		      in particular $\bigl(\tau^W(a)\bigr)^p = \Id$, so each
-		      $\tau^W(a)$ is a unitary with eigenvalues that are $p$-th roots
-		      of unity.
+		      in particular $\bigl(\tau^W(a)\bigr)^p = \Id$. By the explicit
+		      definitions each $\tau^W(a)$ is unitary, and its eigenvalues are
+		      $p$-th roots of unity.
 		\item For all $a, b \in \F_q^n$,
 		      % Paper equation label kept on the display it names.
 		      \begin{equation}\label{eq:twisted-fq}

@@ -45,8 +45,9 @@ noncomputable def idealQubitState (P : AdmissibleParams)
         (EuclideanSpace.equiv (QubitRegister P × QubitRegister P) ℂ
           (eprState (QubitRegister P)) (p.1.2, p.2.2)))
 
-/-- Existential data in `cor:pauli-binary`; this Lean-only package introduces
-no hypothesis beyond the paper theorem. -/
+/-- The local isometries, auxiliary spaces, and unit auxiliary state in
+`cor:pauli-binary`; this structure introduces no hypothesis beyond the paper
+theorem. -/
 structure QubitSoundnessWitness (P : AdmissibleParams)
     (S : Strategy (pauliBasisTest P)) where
   ιA' : Type

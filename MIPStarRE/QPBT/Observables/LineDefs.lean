@@ -15,7 +15,7 @@ aliases in `Test.LowDegreeGameTheorems`.
 
 ## References
 
-The line and bounded-polynomial interface is `def:ideg-deg-polynomials` in
+The line and bounded-polynomial definitions are `def:ideg-deg-polynomials` in
 `blueprint/src/chapter/ch14_qpbt_observables.tex:51-62`.  The line-point sampler
 is `def:line-point-dist` in `blueprint/src/chapter/ch13_qpbt_test.tex`, used in
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:882-1019`.
@@ -31,8 +31,7 @@ open MIPStarRE.LDT.Preliminaries
 noncomputable section
 
 /-- Applying the canonical line-representative projection twice has the same
-effect as applying it once. This is the fixed-point fact used by the tagged
-carrier below. -/
+effect as applying it once. -/
 theorem lineRepMap_apply_self {K : Type*} [Field K] {m : ℕ}
     (v u : Fin m → K) :
     lineRepMap v (lineRepMap v u) = lineRepMap v u := by
@@ -44,14 +43,15 @@ inductive LineKind where
   | diagonal
   deriving DecidableEq, Fintype
 
-/-- The tagged canonical carrier of `def:line-point-dist`, blueprint
+/-- A seed-bearing line description for `def:line-point-dist`, blueprint
 `ch13_qpbt_test.tex:81-90`, paper
-`08_classical_and_quantum_low_degree_tests.tex:174-186`.
+`08_classical_and_quantum_low_degree_tests.tex:143-174,243-287`.
 
 An axis description stores its canonical base and seed. A diagonal description
 stores only the projected direction, together with its prefix-zero invariant.
 Both constructors carry the assertion that their base is fixed by the
-appropriate `lineRepMap`. -/
+appropriate `lineRepMap`. A value `j : Fin L.m` represents the paper's
+one-based coordinate `j + 1`. -/
 inductive LineDesc (L : LdParams) where
   | axis (base : Fin L.m → ScalarQ L) (seed : ScalarQ L)
       (baseFixed : lineRepMap (coordinateDirection (chiIndex L seed)) base = base)
@@ -139,13 +139,15 @@ noncomputable def evalOpt {L : LdParams} {c : ℕ} (line : LineDesc L)
     some (Classical.choose h)
   else none
 
-/-- Convert an axis-line CL output to its seed-bearing presentation. -/
+/-- Convert an axis-line CL output to its seed-bearing presentation; paper
+`08_classical_and_quantum_low_degree_tests.tex:243-257,276-287`. -/
 def aLineDescOf (L : LdParams) (line : LdSpace L) : LineDesc L :=
   let direction := coordinateDirection (chiIndex L line.seed)
   let base := lineRepMap direction line.point
   LineDesc.axis base line.seed (lineRepMap_apply_self direction line.point)
 
-/-- Convert a diagonal-line CL output to its seed-bearing presentation. -/
+/-- Convert a diagonal-line CL output to its seed-bearing presentation; paper
+`08_classical_and_quantum_low_degree_tests.tex:261-287`. -/
 def dLineDescOf (L : LdParams) (line : LdSpace L) : LineDesc L :=
   let direction := prefixProjection (chiIndex L line.seed) line.direction
   let base := lineRepMap direction line.point
@@ -155,20 +157,23 @@ def dLineDescOf (L : LdParams) (line : LdSpace L) : LineDesc L :=
       change prefixProjection (chiIndex L line.seed) line.direction j = 0
       rw [prefixProjection, if_pos hj])
 
-/-- The affine-line/point component of the low-degree line-point sampler. -/
+/-- The axis-line/point component of the low-degree line-point sampler; paper
+`08_classical_and_quantum_low_degree_tests.tex:243-257,274-287`. -/
 noncomputable def aLinePointDist (L : LdParams) :
     Distribution (LineDesc L × (Fin L.m → ScalarQ L)) :=
   (clDistribution (ldALineCL L) (ldPointCL L)).map fun sample =>
     (aLineDescOf L sample.1, LdSpace.point sample.2)
 
-/-- The diagonal-line/point component of the low-degree line-point sampler. -/
+/-- The diagonal-line/point component of the low-degree line-point sampler; paper
+`08_classical_and_quantum_low_degree_tests.tex:261-287`. -/
 noncomputable def dLinePointDist (L : LdParams) :
     Distribution (LineDesc L × (Fin L.m → ScalarQ L)) :=
   (clDistribution (ldDLineCL L) (ldPointCL L)).map fun sample =>
     (dLineDescOf L sample.1, LdSpace.point sample.2)
 
-/-- The equal mixture of affine and diagonal line-point samples.  The
-parameter record is explicit, so the same definition works at every dimension. -/
+/-- The equal mixture of axis and diagonal line-point samples from
+`def:line-point-dist`; paper
+`08_classical_and_quantum_low_degree_tests.tex:274-287`. -/
 noncomputable def linePointDist (L : LdParams) :
     Distribution (LineDesc L × (Fin L.m → ScalarQ L)) :=
   Distribution.mix (1 / 2) (by norm_num) (by norm_num)
