@@ -290,6 +290,11 @@ owner paused the session, archived the branch as research data
 **Expected effect:** scaffolding episodes stay bounded and auditable, and the
 work item after a merged workflow change is mathematics.
 
+## 2026-09-02 — Issue #25 bounded reviewer lane
+
+**Trigger:** Issue #25 and the PR #28 bootstrap review recorded in `results/telemetry/events.md`.
+**Change:** Bound reviewer scope, context, model, effort, memory, and timeout.
+**Expected effect:** Reviews stay focused while owner inbox #26 and progress log #27 remain current.
 ## 2026-09-02 — PR 7 review hardening (rounds 1-3)
 
 **Trigger:** the three adversarial review rounds on the GitHub-native port PR

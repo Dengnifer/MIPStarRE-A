@@ -34,7 +34,8 @@
 #   4. composes the prompt: persona (from the trusted ref) + session context
 #      + sanitized untrusted attachments + the task;
 #   5. runs `codex exec --json -C <worktree> --sandbox <mode> </dev/null`,
-#      teeing the event stream to results/telemetry/sessions/<name>.jsonl;
+#      teeing live events to the cache and publishing the final capture to
+#      results/telemetry/sessions/<name>.jsonl;
 #   6. appends the registry line via local/bin/telemetry.py and prints
 #      name, thread_id and the last-message path.
 #
@@ -44,7 +45,7 @@
 # Environment: MIPSTARRE_CACHE_ROOT (runtime state root, default
 #   ~/.cache/mipstarre-dev), MIPSTARRE_PERSONA_REF, MIPSTARRE_CODEX_MODEL,
 #   MIPSTARRE_SESSION (dispatching session name), MIPSTARRE_DISPATCH_LOCK_WAIT,
-#   MIPSTARRE_MAX_CONTEXT_BYTES, LOCAL_REVIEW_ENABLED.
+#   MIPSTARRE_MAX_CONTEXT_BYTES (default 100000), LOCAL_REVIEW_ENABLED.
 
 set -euo pipefail
 
@@ -57,8 +58,9 @@ READ_ONLY_ROLES="reviewer scout"
 # (results/telemetry/events.md, 2026-08-30 "Workflow critic stalled on
 # oversized prompt"); fail loudly rather than hang a paid session.
 PROMPT_WARN_BYTES=65536
-PROMPT_MAX_BYTES=262144
-MAX_CONTEXT_BYTES="${MIPSTARRE_MAX_CONTEXT_BYTES:-20000}"
+PROMPT_MAX_BYTES=120000
+MAX_CONTEXT_BYTES="${MIPSTARRE_MAX_CONTEXT_BYTES:-100000}"
+ATTACHMENT_BYTES=0
 
 die() {
   local code="$1"
@@ -239,11 +241,12 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "$SCRIPT_DIR/../.." && pwd)"
 TELEMETRY_DIR="$REPO_ROOT/results/telemetry"
 REGISTRY="$TELEMETRY_DIR/sessions.jsonl"
-CAPTURE_DIR="$TELEMETRY_DIR/sessions"
 TELEMETRY_PY="$SCRIPT_DIR/telemetry.py"
 HOOK_SCRIPT="$REPO_ROOT/scripts/install_git_hooks.sh"
 
 CACHE_ROOT="${MIPSTARRE_CACHE_ROOT:-$HOME/.cache/mipstarre-dev}"
+CAPTURE_DIR="$CACHE_ROOT/sessions"
+PUBLISHED_CAPTURE_DIR="$TELEMETRY_DIR/sessions"
 LOCK_DIR="$CACHE_ROOT/locks"
 
 [ -f "$REPO_ROOT/AGENTS.md" ] || die 4 "no AGENTS.md at $REPO_ROOT — dispatch.sh must live in <repo>/local/bin/"
@@ -263,7 +266,7 @@ WORKTREE_ABS="$(cd -- "$WORKTREE" && pwd)"
 git -C "$WORKTREE_ABS" rev-parse --is-inside-work-tree >/dev/null 2>&1 \
   || die 4 "worktree '$WORKTREE_ABS' is not a git work tree; codex exec needs one"
 
-mkdir -p "$CAPTURE_DIR" "$LOCK_DIR"
+mkdir -p "$CAPTURE_DIR" "$PUBLISHED_CAPTURE_DIR" "$LOCK_DIR"
 
 # ---------------------------------------------------------------------------
 # Sandbox default by role (reviewer/scout read-only, others workspace-write)
@@ -337,6 +340,7 @@ LAST_SEQ="$(
   {
     if [ -f "$REGISTRY" ]; then cat "$REGISTRY"; fi
     ls "$CAPTURE_DIR" 2>/dev/null || true
+    ls "$PUBLISHED_CAPTURE_DIR" 2>/dev/null || true
   } \
     | grep -oE "$NAME_PREFIX-[0-9]+" \
     | sed -e "s/^$NAME_PREFIX-//" \
@@ -483,7 +487,7 @@ sanitize_untrusted() {
     | sed -e 's/^\([[:space:]]*\)```/\1 ```/' \
           -e 's/^\([[:space:]]*\)~~~/\1 ~~~/' \
           -e 's/UNTRUSTED-DATA/UNTRUSTED_DATA/g' \
-    | head -c "$MAX_CONTEXT_BYTES" \
+    | head -c "$((MAX_CONTEXT_BYTES > ATTACHMENT_BYTES ? MAX_CONTEXT_BYTES - ATTACHMENT_BYTES : 0))" \
     | python3 -c 'import sys; sys.stdout.write(sys.stdin.buffer.read().decode("utf-8", "ignore"))' \
     || true
 }
@@ -544,9 +548,10 @@ sanitize_untrusted() {
       sanitize_untrusted "$context_file"
       printf '\n'
       printf '%s\n' "<<<END-UNTRUSTED-DATA>>>"
-      if [ "$original_bytes" -gt "$MAX_CONTEXT_BYTES" ]; then
-        printf '%s\n' "(truncated from $original_bytes bytes to $MAX_CONTEXT_BYTES; full file: $context_file)"
+      if [ "$((ATTACHMENT_BYTES + original_bytes))" -gt "$MAX_CONTEXT_BYTES" ]; then
+        printf '%s\n' "(truncated by the aggregate $MAX_CONTEXT_BYTES-byte attachment cap; full file: $context_file)"
       fi
+      ATTACHMENT_BYTES=$((ATTACHMENT_BYTES + original_bytes))
       printf '%s\n' ""
     done
   fi
@@ -628,19 +633,28 @@ note "dispatching $NAME (role=$ROLE sandbox=$SANDBOX worktree=$WORKTREE_ABS)"
 # would silently splice the caller's stdin into the session.
 CODEX_STARTED=1
 set +e
-codex "${CODEX_ARGS[@]}" </dev/null | tee "$CAPTURE"
+if [ -n "${MIPSTARRE_SESSION_TIMEOUT:-}" ]; then
+  timeout --signal=TERM --kill-after=30s "$MIPSTARRE_SESSION_TIMEOUT" \
+    codex "${CODEX_ARGS[@]}" </dev/null | tee "$CAPTURE"
+else
+  codex "${CODEX_ARGS[@]}" </dev/null | tee "$CAPTURE"
+fi
 CODEX_EXIT="${PIPESTATUS[0]}"
 set -e
 
 END_TS="$(date +%Y-%m-%dT%H:%M:%S%z)"
 release_locks
+cp "$CAPTURE" "$PUBLISHED_CAPTURE_DIR/$NAME.jsonl" 2>/dev/null ||
+  note "warning: could not copy final capture into $PUBLISHED_CAPTURE_DIR"
+cp "$LAST_MESSAGE" "$PUBLISHED_CAPTURE_DIR/$NAME.last.md" 2>/dev/null ||
+  note "warning: could not copy final message into $PUBLISHED_CAPTURE_DIR"
 
 # ---------------------------------------------------------------------------
 # Telemetry
 # ---------------------------------------------------------------------------
 
 SUMMARY_SH="$RUN_TMPDIR/summary.sh"
-TELEM_ARGS=(--repo-root "$REPO_ROOT" session-summarize "$CAPTURE"
+TELEM_ARGS=(--repo-root "$REPO_ROOT" session-summarize "$PUBLISHED_CAPTURE_DIR/$NAME.jsonl"
   --name "$NAME" --role "$ROLE" --issue "$ISSUE"
   --start "$START_TS" --end "$END_TS" --exit-code "$CODEX_EXIT"
   --dispatcher "$DISPATCHER" --worktree "$WORKTREE_ABS"

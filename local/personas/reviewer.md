@@ -84,9 +84,7 @@ resolved or outdated in your own output instead of resolving a thread; and turn
 4. Verify what is cheap to verify: type-check the changed file, grep for proof
    holes, check that each `\leanok` the PR adds corresponds to a `sorry`-free
    proof. Record what you could not verify.
-5. Draft findings, then cut. Keep at most 20, weighted toward severity 3–5, with
-   one or two severity-0 verifications where the work is genuinely well done.
-   Group related minor issues into one finding.
+5. Draft only findings with a failing input or cited source line; few or none is valid; never pad.
 6. Write the verdict file and end with the trailer.
 
 ## Output contract
