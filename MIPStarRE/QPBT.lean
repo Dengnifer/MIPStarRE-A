@@ -10,6 +10,26 @@ import MIPStarRE.QPBT.Test.LowDegreeGame
 import MIPStarRE.QPBT.Test.MagicSquare
 import MIPStarRE.QPBT.Test.PauliBasisTest
 import MIPStarRE.QPBT.Test.Soundness
+import MIPStarRE.QPBT.State
+import MIPStarRE.QPBT.Algebra.SubspacesTheorems
+import MIPStarRE.QPBT.Algebra.SelfDualBasis
+import MIPStarRE.QPBT.Algebra.SelfDualBasisTheorems
+import MIPStarRE.QPBT.Algebra.LowDegreeCodeTheorems
+import MIPStarRE.QPBT.Algebra.PauliTheorems
+import MIPStarRE.QPBT.Games.DistributionAux
+import MIPStarRE.QPBT.Games.ErrorFunctions
+import MIPStarRE.QPBT.Games.Consistency
+import MIPStarRE.QPBT.Games.StrategyClasses
+import MIPStarRE.QPBT.Games.DistanceTheorems
+import MIPStarRE.QPBT.Games.Sandwich
+import MIPStarRE.QPBT.Games.CondLinearTheorems
+import MIPStarRE.QPBT.Games.TypedCondLinear
+import MIPStarRE.QPBT.Observables.LineDefs
+import MIPStarRE.QPBT.Test.LowDegreeGameTheorems
+import MIPStarRE.QPBT.Test.MagicSquareTheorems
+import MIPStarRE.QPBT.Test.Completeness
+import MIPStarRE.QPBT.Test.QubitForm
+import MIPStarRE.QPBT.Test.CanonicalParams
 
 -- Mathlib 4.31 header checks require this for this aggregate module.
 set_option linter.style.header false
@@ -17,10 +37,8 @@ set_option linter.style.header false
 /-!
 # Quantum Pauli basis test
 
-This aggregate module re-exports the stage-4.1 statement skeleton for the
-quantum Pauli basis test.  The source-facing declarations follow the algebra,
-game, test, and soundness chapters of the blueprint and retain proof-level
-obligations for later stages.
+This aggregate module provides the QPBT algebraic, game-theoretic, and test
+declarations.
 
 ## References
 

@@ -47,6 +47,8 @@ as is $\mathrm{span}\{(1,1)\}$ over $\F_2$. The following dimension identity
 nevertheless holds over every field.
 
 \begin{lemma}\label{lem:perp_perp}
+	\lean{MIPStarRE.QPBT.finrank_add_finrank_dotOrthogonal, MIPStarRE.QPBT.dotOrthogonal_dotOrthogonal}
+	\leanok
 	\uses{def:dot-product-orthogonal}
 	Let $S$ be a subspace of $V$. Then $\dim(S) + \dim(S^\perp) = \dim(V)$, and
 	\[
@@ -145,6 +147,8 @@ one may nevertheless single out a \emph{canonical} complement.
 \end{definition}
 
 \begin{definition}[The map $L^\perp$]\label{def:Lperp}
+	\lean{MIPStarRE.QPBT.canonicalProjPerp}
+	\leanok
 	\uses{def:cl-canonical, def:dot-product-orthogonal}
 	Let $L \in \mathrm{End}(V)$ be a linear map and let $F$ be a basis for
 	$\ker(L)^\perp$. Define $L^\perp : V \to V$ as the canonical linear map with
@@ -154,6 +158,8 @@ one may nevertheless single out a \emph{canonical} complement.
 \end{definition}
 
 \begin{lemma}\label{lem:L_perp_perp}
+	\lean{MIPStarRE.QPBT.ker_canonicalProjPerp}
+	\leanok
 	\uses{def:Lperp}
 	Let $L \in \mathrm{End}(V)$ be a linear map, $F$ a basis for
 	$\ker(L)^\perp$, and $L^\perp$ as in Definition~\ref{def:Lperp}. Then
@@ -180,6 +186,7 @@ the finite fields with $p$ and $q$ elements; $p$ is the characteristic of
 $\F_q$, and $\F_p$ is its prime subfield.
 
 \begin{definition}[Coordinate map and multiplication tables]\label{def:subfields-kappa}
+	\lean{MIPStarRE.QPBT.chiOfBasis, MIPStarRE.QPBT.basisCoordVec}
 	% The source lets k range over all integers; the extension field exists
 	% only for k >= 1, so that domain condition is made explicit here.
 	Let $q$ be a prime power and $k \ge 1$ an integer, so that $\F_q$ is a
@@ -232,6 +239,8 @@ test.
 \end{definition}
 
 \begin{definition}[Dual, self-dual, and normal bases]\label{def:dual-self-dual-normal-basis}
+	\lean{MIPStarRE.QPBT.IsDualBasisPair, MIPStarRE.QPBT.Basis.IsSelfDual, MIPStarRE.QPBT.Basis.IsNormal, MIPStarRE.QPBT.exists_selfDualNormalBasis}
+	\leanok
 	\uses{def:subfield-trace}
 	A \emph{dual basis} $\{e_1', \dots, e_k'\}$ of a basis
 	$\{e_1, \dots, e_k\}$ of $\F_{q^k}$ over $\F_q$ is a basis such that
@@ -243,9 +252,13 @@ test.
 	exist for every field extension, but for $q = 2$ and odd $k$ a self-dual
 	normal basis of $\F_{2^k}$ over $\F_2$ always exists; \cite{Ji2020MIPStar}
 	exhibits one through an explicit construction.
+	The basis coordinates are indexed by $0,\ldots,k-1$; coordinate $r$
+	corresponds to the paper's coordinate $r+1$.
 \end{definition}
 
 \begin{lemma}[Coordinate maps of self-dual bases]\label{lem:downsize_field}
+	\lean{MIPStarRE.QPBT.basisCoord_apply_eq_trace, MIPStarRE.QPBT.trace_mul_eq_dotProduct_basisCoord, MIPStarRE.QPBT.chi_mulVec_basisCoord}
+	\leanok
 	\uses{def:subfields-kappa, def:subfield-trace,
 		def:dual-self-dual-normal-basis, def:dot-product-orthogonal}
 	Let $q$ be a prime power, $k \ge 1$ an integer, and $\{e_i\}$ a self-dual
@@ -275,6 +288,8 @@ test.
 \end{proof}
 
 \begin{lemma}\label{lem:one}
+	\lean{MIPStarRE.QPBT.trace_basis_eq_one_of_selfDual_normal, MIPStarRE.QPBT.basisCoord_one_of_selfDual_normal}
+	\leanok
 	\uses{def:subfields-kappa, def:subfield-trace, def:dual-self-dual-normal-basis}
 	Let $k$ be an odd integer and $\{e_i\}_{i=1}^k$ a self-dual normal basis of
 	$\F_{2^k}$ over $\F_2$. Then $\tr(e_i) = 1$ for all $i$, and the
@@ -296,6 +311,9 @@ test.
 \end{proof}
 
 \begin{definition}[Binary representation of field elements]\label{def:binary-representation}
+	\lean{MIPStarRE.QPBT.FixedFieldModel.binaryCoordinates, MIPStarRE.QPBT.multiplicationTable, MIPStarRE.QPBT.chi, MIPStarRE.QPBT.binaryCoordinates_mul}
+	\lean{MIPStarRE.QPBT.binaryCoordinates_basis_mul}
+	\leanok
 	\uses{def:subfields-kappa, def:admissible-size,
 		def:dual-self-dual-normal-basis}
 	Let $q = 2^k$ be an admissible field size. For each odd $k$ we fix, once and
@@ -312,6 +330,8 @@ test.
 		= \sum_{i=1}^k a_i \bigl(K_{e_i}\, \kappa(b)\bigr)\;,
 	\end{equation}
 	where $\kappa(a) = (a_i)_{i=1}^k$.
+	The sums use coordinates $0,\ldots,k-1$; coordinate $r$ corresponds to the
+	paper's coordinate $r+1$.
 \end{definition}
 
 \section{Polynomials and the low-degree code}
@@ -349,6 +369,8 @@ test.
 \end{definition}
 
 \begin{lemma}[Schwartz--Zippel lemma~\cite{Sch80,Zip79}]\label{lem:schwartz-zippel}
+	\lean{MIPStarRE.LDT.Preliminaries.schwartzZippel_totalDegree}
+	\leanok
 	% Restatement of lem:schwartz-zippel-total-degree under the source's label.
 	\uses{def:polynomials-degree}
 	Let $f, g : \F_q^m \to \F_q$ be two unequal polynomials of total degree at
@@ -358,6 +380,7 @@ test.
 	\]
 \end{lemma}
 \begin{proof}
+	\leanok
 	\uses{lem:schwartz-zippel-total-degree}
 	This is Lemma~\ref{lem:schwartz-zippel-total-degree}, stated and proved in
 	Chapter~\ref{chap:preliminaries}; it is restated here under the label used
@@ -421,6 +444,8 @@ encodings of distinct strings agree on at most an $m/q$ fraction of points of
 $\F_q^m$ by Lemma~\ref{lem:schwartz-zippel}.
 
 \begin{definition}[Decoding maps]\label{def:decoding-map}
+	\lean{MIPStarRE.QPBT.decodeAt, MIPStarRE.QPBT.decodeBool, MIPStarRE.QPBT.decodeAt_lowDegreeEnc}
+	\leanok
 	\uses{def:low-degree-encoding}
 	For $H \subseteq \F_q$, the \emph{decoding map} $\mathrm{Dec}_H$ takes as
 	input a polynomial $g : \F_q^m \to \F_q$ and returns the vector
@@ -527,6 +552,8 @@ representation is obtained as follows.
 \label{sec:generalized-pauli}
 
 \begin{definition}[Generalized Pauli observables]\label{def:generalized-pauli}
+	\lean{MIPStarRE.QPBT.primeTauShift, MIPStarRE.QPBT.primeTauPhase}
+	\lean{MIPStarRE.QPBT.primeTauObservable}
 	\uses{def:subfield-trace, def:lin-reg}
 	Let $p$ be a prime and $\omega = e^{2\pi i/p}$. The \emph{generalized Pauli
 	observables over $\F_p$} are the unitaries on $\C^{\F_p}$ given by
@@ -571,6 +598,13 @@ representation is obtained as follows.
 \end{definition}
 
 \begin{lemma}[Product and twisted commutation relations]\label{lem:twisted-commutation}
+	\lean{MIPStarRE.QPBT.primeTauObservable_mul}
+	\lean{MIPStarRE.QPBT.primeTauObservable_pow}
+	\lean{MIPStarRE.QPBT.primeTauObservable_pow_char}
+	\lean{MIPStarRE.QPBT.primeTauObservable_isUnitary}
+	\lean{MIPStarRE.QPBT.primeTauObservable_eigenvalue_pow_char}
+	\lean{MIPStarRE.QPBT.primeTauObservable_X_mul_Z}
+	\leanok
 	\uses{def:generalized-pauli, def:subfield-trace, def:dot-product-orthogonal}
 	Let $q = p^k$, let $n \ge 1$ be an integer, and let $W \in \{X, Z\}$.
 	\begin{enumerate}
@@ -580,9 +614,9 @@ representation is obtained as follows.
 			      \qquad \text{and} \qquad
 			      \bigl(\tau^W(a)\bigr)^b = \tau^W(ab)\;;
 		      \end{equation}
-		      in particular $\bigl(\tau^W(a)\bigr)^p = \Id$, so each
-		      $\tau^W(a)$ is a unitary with eigenvalues that are $p$-th roots
-		      of unity.
+		      in particular $\bigl(\tau^W(a)\bigr)^p = \Id$. By the explicit
+		      definitions each $\tau^W(a)$ is unitary, and its eigenvalues are
+		      $p$-th roots of unity.
 		\item For all $a, b \in \F_q^n$,
 		      % Paper equation label kept on the display it names.
 		      \begin{equation}\label{eq:twisted-fq}
@@ -614,6 +648,8 @@ representation is obtained as follows.
 \end{proof}
 
 \begin{lemma}[Fourier cancellation over a subspace]\label{lem:cancellation}
+	\lean{MIPStarRE.QPBT.ffChar_dotProduct_submodule_expect_eq_zero}
+	\leanok
 	\uses{def:dot-product-orthogonal, def:subfield-trace}
 	Let $V$ be a subspace of $\F_q^k$ and let $\omega = e^{2\pi i/p}$, where
 	$p$ is the characteristic of $\F_q$ and $\tr = \tr_{q \to p}$. For all
@@ -673,11 +709,11 @@ observables and maximally entangled states over \emph{qubits}
 (Chapter~\ref{chap:qpbt-test}).
 
 \begin{lemma}[Qudit-to-qubit isomorphism]\label{lem:pauli-binary}
-	\uses{def:admissible-size, def:binary-representation,
+	\lean{MIPStarRE.QPBT.qubitPauliProj, MIPStarRE.QPBT.exists_qubitIsometry}
+	\leanok
+	\uses{def:admissible-size, def:subfields-kappa, def:binary-representation,
 		def:generalized-pauli, def:EPR}
-	% The source quantifies over all integers L; the tensor powers require
-	% L >= 1, so that domain condition is made explicit here.
-	For all admissible field sizes $q = 2^k$ and integers $L \ge 1$, there
+	For all admissible field sizes $q = 2^k$ and integers $L \ge 0$, there
 	exists an isomorphism $\phi : (\C^q)^{\ot L} \to (\C^2)^{\ot Lk}$ such that
 	\begin{equation}\label{eq:epr-q-to-epr-2}
 		\phi \ot \phi\, \ket{\mathrm{EPR}_q}^{\ot L}
@@ -701,6 +737,8 @@ observables and maximally entangled states over \emph{qubits}
 	$\sigma^W_{u_{ij}}$ denotes the projector
 	$\frac{1}{2}\bigl(\Id + (-1)^{u_{ij}} \sigma^W(1)\bigr)$ acting on the
 	$s$-th qubit, where $s = (i-1)k + j$.
+	We index the product coordinates from zero: values $(i-1,j-1)$ correspond to
+	the paper's pair $(i,j)$.
 \end{lemma}
 \begin{proof}
 	\uses{lem:pauli-observable-expansion, lem:downsize_field,
@@ -739,6 +777,6 @@ observables and maximally entangled states over \emph{qubits}
 	$j \in \{1, \dots, q\}$; the intended range, used above, is
 	$j \in \{1, \dots, k\}$, as the $i$-th qudit is mapped to $k$ qubits. The
 	source also quantifies over arbitrary integers $L$; the statement above
-	takes $L \ge 1$, the domain on which the tensor powers $(\C^q)^{\ot L}$
-	are defined.
+	takes $L$ to be a natural number, including zero, and uses the usual
+	empty-product convention for the tensor powers when $L=0$.
 \end{remark}

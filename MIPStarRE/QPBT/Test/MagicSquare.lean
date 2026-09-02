@@ -70,6 +70,13 @@ inductive MsAnswer where
   | bit (γ : ZMod 2)
   deriving DecidableEq
 
+/-- A formalization-only total relabeling from the global Magic Square answer
+alphabet to a bit. It folds wrong-form answers into zero so that a variable
+question yields a complete binary measurement. -/
+def msBitOrZero : MsAnswer → ZMod 2
+  | .bit b => b
+  | .triple _ => 0
+
 /-- A finite code for the two Magic Square answer constructors.  This is
 Lean-only carrier infrastructure for `def:ms-game`, blueprint
 `ch13_qpbt_test.tex:188-203`, paper origin

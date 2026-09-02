@@ -1,0 +1,99 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{xurl}
+\usepackage[hidelinks]{hyperref}
+\input{command}
+
+\title{Prime-Characteristic and Binary Pauli Observables}
+\author{}
+\date{2026-09-02}
+
+\begin{document}
+\maketitle
+\section{At a glance}
+\begin{itemize}
+  \item \textbf{Difficulty.} Medium.  The source-facing statements must retain
+  arbitrary prime characteristic while the later Pauli basis test uses a
+  separately named characteristic-two specialization.
+  \item \textbf{Estimated weight.} The remaining proofs should occupy one
+  algebra file of roughly 100--200 lines.
+  \item \textbf{Mathlib/project split.} Mathlib supplies finite matrix algebra
+  and finite-field facts; the generalized Pauli definitions and their
+  characteristic-two specialization are project-local.
+  \item \textbf{Key mathematical inputs.} Unitarity of shift and phase
+  matrices, the $p$-th-power identity, and additive-character orthogonality.
+  The scope correction is tracked in
+  \href{https://github.com/Dengnifer/MIPStarRE-A/issues/16}{GitHub issue \#16}
+  and descends from \localissue{0002}.
+\end{itemize}
+
+\section{Key theorem forms}
+Let $K$ be a finite extension of $\mathbb F_p$, let
+$\chi(x)=\exp(2\pi i\operatorname{Tr}_{K/\mathbb F_p}(x)/p)$, and let
+$a,a',b\in K^n$.  The relevant identities are
+\[
+ \tau^W(a)\tau^W(a')=\tau^W(a+a'),\qquad
+ \tau^W(a)^p=I,
+\]
+and
+\[
+ \tau^X(a)\tau^Z(b)=\chi(-a\mathbin{\cdot}b)
+ \tau^Z(b)\tau^X(a).
+\]
+The explicit shift and phase matrices are unitary. The second identity implies
+that every eigenvalue $\lambda$ of $\tau^W(a)$ satisfies $\lambda^p=1$. If
+$V\leq K^n$ and $v\notin V^\perp$, Fourier cancellation takes the form
+\[
+ \mathbb E_{u\in V}\chi(u\mathbin{\cdot}v)=0.
+\]
+
+\section{Source and formal scope}
+The source defines the shift and phase matrices and states their product,
+$p$-th-power, unitarity, spectral, and twisted-commutation properties in
+\cite[lines 1056--1095]{Ji2020MIPStar}. It uses the same character for Fourier
+cancellation over a subspace at lines 1124--1132 and extends the twisted
+relation to several qudits at lines 1141--1150. These assertions depend on the
+characteristic $p$; they are not intrinsically binary.
+
+The formal definitions \path{primeTauShift}, \path{primeTauPhase}, and
+\path{primeTauObservable} use the canonical character \path{ffChar} in
+characteristic $p$.  Their theorem statements cover the identities above for
+arbitrary $p$.  The declarations whose names begin with
+\path{tauObservable} or use \path{phaseSign} instead specialize to
+$p=2$, where $\chi(x)=(-1)^{\operatorname{Tr}(x)}$.  This specialization is
+appropriate only for the subsequent test, whose admissible sizes satisfy
+$q=2^k$; it is not substituted for the general statements.
+
+The proofs can be obtained directly from the displayed matrices.  A shift is a
+permutation matrix, a phase matrix has diagonal entries of modulus one, and a
+tensor product of such matrices is unitary.  Iterating the product identity
+gives $\tau^W(a)^p=I$.  Applying this equality to a nonzero eigenvector gives
+$(\lambda^p-1)v=0$, hence $\lambda^p=1$.  Finally, when
+$v\notin V^\perp$, the map $u\mapsto\chi(u\cdot v)$ is a nontrivial character
+of the finite additive group $V$, so its average vanishes.
+
+\section{Blueprint and formalization}
+The source-general definitions and results are linked from
+\path{blueprint/src/chapter/ch11_qpbt_algebra.tex}, lines~553--633 and
+649--660. Their Lean declarations are \leanid{primeTauShift},
+\leanid{primeTauPhase}, \leanid{primeTauObservable}, and the accompanying
+product, power, unitarity, spectral, commutation, and cancellation theorems.
+They quantify an arbitrary prime characteristic and use the corresponding
+additive character.
+
+The separately named binary declarations are used by the later QPBT chapters.
+They specialize the same formulas to characteristic two and are not linked as
+implementations of the unrestricted source nodes. Thus the blueprint, the
+general Lean interface, and the paper agree; the binary layer is a consumer
+specialization rather than a restriction of the source statement.
+
+\section{Conclusion}
+There is no mathematical restriction in the source-facing formal statements:
+they retain arbitrary prime characteristic and the corresponding canonical
+character.  The characteristic-two declarations are separate corollaries for
+the QPBT parameter regime.  The remaining work is to prove the general
+identities from the explicit matrices and character orthogonality; it does not
+require changing the binary operator definitions.
+\bibliographystyle{alpha}
+\bibliography{references}
+\end{document}

@@ -342,6 +342,13 @@ inductive PauliAnswer (P : AdmissibleParams) where
   | pauliOutcome (a : PauliRegister P)
   deriving DecidableEq
 
+/-- A formalization-only total relabeling from the global Pauli-test answer
+alphabet to a Pauli register. It folds wrong-form answers into zero so that a
+Pauli question yields a complete `PauliRegister`-indexed measurement. -/
+def pauliAnswerOrZero {P : AdmissibleParams} : PauliAnswer P → PauliRegister P
+  | .pauliOutcome u => u
+  | _ => 0
+
 /-- A finite sum code used only to construct the `Fintype` instance for the
 answer alphabet in `def:pauli-win-predicate`, blueprint
 `ch13_qpbt_test.tex:331-367`, paper origin

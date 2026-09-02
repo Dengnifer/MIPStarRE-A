@@ -1,0 +1,108 @@
+\documentclass[11pt]{article}
+
+\usepackage{amsmath,amssymb}
+\usepackage{xurl}
+\usepackage[hidelinks]{hyperref}
+\setlength{\emergencystretch}{2em}
+
+\input{command}
+
+\title{The Exponent Comparison in the Canonical Pauli Basis Test Bound}
+\author{}
+\date{2026-09-02}
+
+\begin{document}
+\maketitle
+
+\section{At a glance}
+
+\begin{itemize}
+  \item \textbf{Difficulty.} Low.  One intermediate inequality in the source
+  does not follow from the canonical parameter definition, but the claimed
+  soundness bound follows by estimating the same term directly.
+  \item \textbf{Estimated weight.} The remaining formal argument is an
+  elementary real-analytic estimate of roughly 30--60 lines.
+  \item \textbf{Mathlib/project split.} Mathlib supplies inequalities for real
+  powers, exponentials, and logarithms; the project-specific step unfolds the
+  canonical parameters and soundness function.
+  \item \textbf{Key mathematical inputs.} The function
+  $(\log R)^{a+b}R^{-b}$ is bounded for $R\geq 4$, and the canonical lower and
+  upper bounds on $m$ transfer this estimate to the third soundness term.
+  Tracked in
+  \href{https://github.com/Dengnifer/MIPStarRE-A/issues/16}{GitHub issue \#16};
+  the parent blueprint task is \localissue{0002}.
+\end{itemize}
+
+\section{Key theorem forms}
+
+Let $a\geq 1$ and $0<b<1$ be the universal constants, and let $\eps\geq0$ be a
+failure-probability parameter.  The soundness function is
+\[
+  \delta_{\mathrm{qld}}(\eps,m,d,q)
+    = a(md)^a\bigl(\eps^b+q^{-b}+2^{-bmd}\bigr).
+\]
+For $R\geq4$, let $c$ be the least even integer at least $(a+b)/b$, set
+$k=c\lceil\log_2\log_2 R\rceil+1$ and $q=2^k$, and let $j$ be determined by
+$2^j\leq c\lceil\log_2 R\rceil+1<2^{j+1}$. The remaining canonical parameters
+are $m=2^j$ and $d=1$. In particular,
+$m\geq (c/2)\log_2 R\geq\log_2 R$. The required estimate for the third summand is
+\[
+  a m^a 2^{-bm} \leq C'(\log R)^{-b},
+\]
+for a constant $C'$ depending only on $a$ and $b$.  This estimate, together
+with the source bounds for the first two summands, gives the asserted
+polylogarithmic bound for $\delta_{\mathrm{qld}}$.
+
+\section{The source comparison}
+
+The canonical parameters are defined in \cite[lines~1503--1514]{Ji2020MIPStar},
+and the bound and its proof occupy lines~1520--1562. At line~1543 the proof
+replaces $2^{-bmd}$ by $q^{-b}$ using the assertion $k\leq m$.%
+\footnote{Tracked in
+\href{https://github.com/Dengnifer/MIPStarRE-A/issues/16}{GitHub issue \#16}.
+The canonical parameter definition is at
+\path{references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex},
+lines~1503--1514; the bound and its proof are at lines~1520--1562, with the
+disputed comparison at line~1543.}
+That comparison does not follow from the stated parameter choice.  For example,
+the allowed values $a=1$ and $b=1/2$ give $c=4$, and $R=5$ gives $k=9$ but
+$m=8$.  Thus the displayed justification is false even though the lemma's
+conclusion remains valid.
+
+The third term can instead be bounded independently of $q$.  Since $d=1$ and
+$m\geq (c/2)\log R\geq\log R$,
+\[
+  2^{-bm}\leq R^{-b}.
+\]
+The accompanying upper bound $m\leq 2c\log R$ therefore gives
+\[
+  a m^a2^{-bm}
+    \leq a(2c)^a(\log R)^aR^{-b}
+    = a(2c)^a\bigl((\log R)^{a+b}R^{-b}\bigr)(\log R)^{-b}.
+\]
+The parenthesized factor is bounded on $R\geq4$: it is continuous and tends
+to zero as $R$ tends to infinity.  Absorbing its supremum into the universal
+constant yields the required estimate.
+
+\section{Comparison with the blueprint and formalization}
+
+The blueprint makes explicit the nonnegative failure-probability domain
+implicit in Theorem~\ref{thm:pauli} and otherwise retains the source statement.
+The formal theorem records the same faithful boundary hypothesis and
+conclusion; its docstring marks the corrected intermediate argument and cites
+this note.%
+\footnote{The formal statement is
+\leanid{exists\_deltaQld\_introParams\_bound} in
+\doclink{MIPStarRE/QPBT/Test/CanonicalParams.lean}.}
+
+\section{Conclusion}
+
+The source's comparison $k\leq m$ is false for some permitted constants and
+values of $R$.  It is not needed: for nonnegative failure parameters, the
+canonical lower bound on $m$ controls the third soundness term directly and
+proves the same final estimate after enlarging the universal constant.
+
+\bibliographystyle{alpha}
+\bibliography{references}
+
+\end{document}

@@ -87,6 +87,8 @@ Unless specified otherwise, all strategies considered in what follows are tensor
 % by the low individual degree test track (Chapter 2), where it names the strategy format
 % specific to that test, so a distinct label is used here; see the following remark.
 \begin{definition}[Projective strategies]\label{def:projective-strategy-general}
+	\lean{MIPStarRE.QPBT.Strategy.IsProjective}
+	\leanok
 	\uses{def:tensor-product-strategy, def:povm-conventions}
 	A strategy $\mathcal S = (\ket{\psi}, A, B)$ is \emph{projective} if all the measurements $\{A^x_a\}_a$ and $\{B^y_b\}_b$ are projective.
 \end{definition}
@@ -96,6 +98,8 @@ Unless specified otherwise, all strategies considered in what follows are tensor
 \end{remark}
 
 \begin{definition}[Symmetric games and symmetric strategies]\label{def:symmetric-game}
+	\lean{MIPStarRE.QPBT.SymmetricGame, MIPStarRE.QPBT.SymmetricGame.toGame, MIPStarRE.QPBT.SymmetricStrategy, MIPStarRE.QPBT.SymmetricStrategy.toStrategy}
+	\leanok
 	% Paper label: rem:symmetric-games (a definition environment carrying a rem: label in the
 	% source); relabeled here to match the environment kind.
 	\uses{def:game, def:tensor-product-strategy}
@@ -110,6 +114,8 @@ We often specify symmetric games $\mathfrak G$ and symmetric strategies $\mathca
 % its original form. The proof below records the approximate form the source argument
 % establishes and leaves the final attainment step unproved; see rem:symmetric-strat-limit.
 \begin{lemma}[Symmetrization of strategies for symmetric games]\label{lem:symmetric-strat}
+	\lean{MIPStarRE.QPBT.exists_symmetric_projective_strategy}
+	\leanok
 	\uses{def:symmetric-game, def:tensor-product-value, def:projective-strategy-general}
 	Let $\mathfrak G = (\mathcal X, \mathcal A, \mu, D)$ be a symmetric game such that $\operatorname{val}^*(\mathfrak G) = 1-\eps$ for some $\eps \ge 0$. Then there exists a symmetric and projective strategy $\mathcal S = (\ket{\psi}, M)$ such that $\operatorname{val}^*(\mathfrak G, \mathcal S) \ge 1-\eps$.
 \end{lemma}
@@ -133,6 +139,8 @@ We often specify symmetric games $\mathfrak G$ and symmetric strategies $\mathca
 \end{remark}
 
 \begin{definition}[Commuting strategies]\label{def:comm-strategy}
+	\lean{MIPStarRE.QPBT.IsCommutingOn, MIPStarRE.QPBT.Strategy.IsCommuting}
+	\leanok
 	\uses{def:game, def:tensor-product-strategy}
 	Let $\mathfrak G = (\mathcal X, \mathcal Y, \mathcal A, \mathcal B, \mu, D)$ be a game, and let $\mathcal S = (\ket{\psi}, A, B)$ be a strategy for $\mathfrak G$ such that $\mathcal H_A = \mathcal H_B$. We say that $\mathcal S$ is a \emph{commuting strategy for $\mathfrak G$} if for all question pairs $(x,y)$ in the support of $\mu$ (i.e.\ all $(x,y)$ with $\mu(x,y) > 0$) we have
 	\[
@@ -142,6 +150,8 @@ We often specify symmetric games $\mathfrak G$ and symmetric strategies $\mathca
 \end{definition}
 
 \begin{definition}[Consistent measurements]\label{def:consistent-measurement}
+	\lean{MIPStarRE.QPBT.Measurement.IsConsistentOn}
+	\leanok
 	\uses{def:povm-conventions}
 	Let $\mathcal A$ be a finite set, let $\ket{\psi} \in \mathcal H \ot \mathcal H$ be a state, and let $\{M_a\}_{a \in \mathcal A}$ be a projective measurement on $\mathcal H$. We say that \emph{$\{M_a\}_{a \in \mathcal A}$ is consistent on $\ket{\psi}$} if and only if
 	\[
@@ -157,6 +167,8 @@ The terminology arises from the fact that when the measurement $\{M_a\}$ is perf
 where the first equality is by the definition of consistency, the second uses that $\{M_a\}$ is projective, and the last uses $\sum_a M_a = \Id$.
 
 \begin{definition}[Consistent strategies]\label{def:consistent-strategy}
+	\lean{MIPStarRE.QPBT.IsConsistentStrategyOn, MIPStarRE.QPBT.SymmetricStrategy.IsConsistent}
+	\leanok
 	\uses{def:consistent-measurement, def:projective-strategy-general}
 	Let $\mathcal S = (\ket{\psi}, A, B)$ be a projective strategy with state $\ket{\psi} \in \mathcal H \ot \mathcal H$, for some Hilbert space $\mathcal H$, defined on question alphabets $\mathcal X$ and $\mathcal Y$ and answer alphabets $\mathcal A$ and $\mathcal B$, respectively. We say that $\mathcal S$ is \emph{consistent} if for all $x \in \mathcal X$ the measurement $\{A^x_a\}_{a \in \mathcal A}$ is consistent on $\ket{\psi}$, and for all $y \in \mathcal Y$ the measurement $\{B^y_b\}_{b \in \mathcal B}$ is consistent on $\ket{\psi}$.
 \end{definition}
@@ -164,6 +176,8 @@ where the first equality is by the definition of consistency, the second uses th
 We almost always restrict attention to symmetric strategies; in this case consistency implies that whenever both players are sent the same question, they provide the same answer.
 
 \begin{definition}[PCC and SPCC strategies]\label{def:spcc}
+	\lean{MIPStarRE.QPBT.Strategy.IsPCC, MIPStarRE.QPBT.SymmetricStrategy.IsSPCC}
+	\leanok
 	\uses{def:projective-strategy-general, def:consistent-strategy, def:comm-strategy, def:symmetric-game}
 	We say that a strategy $\mathcal S$ for a game $\mathfrak G$ is \emph{PCC} if it is projective, consistent, and commuting for $\mathfrak G$. Additionally, we say that a PCC strategy $\mathcal S$ is \emph{SPCC} if it is furthermore symmetric.
 \end{definition}
@@ -179,6 +193,8 @@ We almost always restrict attention to symmetric strategies; in this case consis
 \end{definition}
 
 \begin{definition}[Consistency between POVMs]\label{def:consistency}
+	\lean{MIPStarRE.QPBT.consistencyDefect, MIPStarRE.QPBT.IsConsistentWithin}
+	\leanok
 	\uses{def:povm-conventions, def:state-distance}
 	Let $\mathcal X$ be a finite set and $\mu$ a distribution on $\mathcal X$. Let $\ket{\psi} \in \mathcal H_A \ot \mathcal H_B$ be a quantum state, and for all $x \in \mathcal X$ let $\{A^x_a\}$ and $\{B^x_a\}$ be POVMs. We write
 	\[
@@ -210,6 +226,8 @@ A measurement that is consistent on $\ket{\psi}$ in the sense of Definition~\ref
 \end{definition}
 
 \begin{definition}[Distance between strategies]\label{def:strategy-distance}
+	\lean{MIPStarRE.QPBT.AreCloseStrategies}
+	\leanok
 	\uses{def:tensor-product-strategy, def:state-distance, def:povm-distance}
 	Let $\mathfrak G = (\mathcal X, \mathcal Y, \mathcal A, \mathcal B, \mu, D)$ be a nonlocal game and let $\mathcal S = (\psi, A, B)$ and $\mathcal S' = (\psi', A', B')$ be strategies for $\mathfrak G$. For $\delta \in [0,1]$ we say that \emph{$\mathcal S$ is $\delta$-close to $\mathcal S'$} if the following conditions hold.
 	\begin{enumerate}
@@ -225,6 +243,8 @@ A measurement that is consistent on $\ket{\psi}$ in the sense of Definition~\ref
 We record several useful facts about the consistency measure and the state-dependent distance. For the statements imported without proof, readers are referred to Sections~4.4 and~4.5 of \cite{Natarajan2018NEEXP}.
 
 \begin{lemma}[Consistency versus closeness; Facts 4.13 and 4.14 in \cite{Natarajan2018NEEXP}]\label{fact:agreement}
+	\lean{MIPStarRE.QPBT.opFamilyDistSq_le_two_mul_consistencyDefect, MIPStarRE.QPBT.consistencyDefect_le_opFamilyDistSq_of_projective, MIPStarRE.QPBT.consistencyDefect_le_sqrt_of_projective_left}
+	\leanok
 	\uses{def:consistency, def:povm-distance}
 	For POVMs $\{A^x_a\}$ and $\{B^x_a\}$, the following hold.
 	\begin{enumerate}
@@ -238,6 +258,8 @@ We record several useful facts about the consistency measure and the state-depen
 \end{proof}
 
 \begin{lemma}[Fact 4.20 in \cite{Natarajan2018NEEXP}]\label{fact:add-a-proj}
+	\lean{MIPStarRE.QPBT.opFamilyDistSq_mul_left_le}
+	\leanok
 	\uses{def:povm-distance}
 	Let $\mathcal A, \mathcal B, \mathcal C$ be finite sets, and let $\mu$ be a distribution over question pairs $(x,y)$. Let $\{A^x_{a,\,b}\}$ and $\{B^x_{a,\,b}\}$ be operators whose outcomes range over the product set $\mathcal A \times \mathcal B$. Suppose a set of operators $\{C^y_{a,\,c}\}$, whose outcomes range over the product set $\mathcal A \times \mathcal C$, satisfies the condition $\sum_c (C^y_{a,\,c})^\dagger C^y_{a,\,c} \le \Id$ for all $a$ and all $y$. If $A^x_{a,\,b} \approx_\delta B^x_{a,\,b}$ on average over $x$ sampled from the corresponding marginal of the distribution $\mu$, then $C^y_{a,\,c} A^x_{a,\,b} \approx_\delta C^y_{a,\,c} B^x_{a,\,b}$ on average over $(x,y)$ sampled from $\mu$.
 \end{lemma}
@@ -252,6 +274,8 @@ We record several useful facts about the consistency measure and the state-depen
 \end{proof}
 
 \begin{lemma}[Multiplying by function-indexed operators]\label{fact:add-a-proj2}
+	\lean{MIPStarRE.QPBT.opFamilyDistSq_mul_funIndexed_le}
+	\leanok
 	\uses{def:povm-distance}
 	Let $\mathcal X, \mathcal A$ be finite sets, and let $\mathcal G$ be a set of functions $g \colon \mathcal X \to \mathcal A$. Let $\{A^x_a\}$ and $\{B^x_a\}$ be POVMs indexed by $\mathcal X$ with outcomes in $\mathcal A$. Let $\{S^x_g\}_{x \in \mathcal X,\, g \in \mathcal G}$ be a set of operators such that for all $x \in \mathcal X$, $\sum_g (S^x_g)^\dagger S^x_g \le \Id$. If $A^x_a \approx_\delta B^x_a$ on average over $x$, then $S^x_g A^x_{g(x)} \approx_\delta S^x_g B^x_{g(x)}$.
 \end{lemma}
@@ -268,6 +292,8 @@ We record several useful facts about the consistency measure and the state-depen
 \end{proof}
 
 \begin{lemma}[Absorbing an approximating family into a projective sum]\label{lem:cool-closeness-fact}
+	\lean{MIPStarRE.QPBT.opDistSq_sum_sub_mul_le_of_projective}
+	\leanok
 	\uses{def:povm-distance, def:povm-conventions}
 	Let $\mathcal X$ and $\mathcal A$ be finite sets and $\mu$ a distribution on $\mathcal X$. Let $\{A^x_a\}_{a \in \mathcal A}$ be a projective measurement and let $\{B^x_a\}_{a \in \mathcal A}$ be a set of matrices. If $A^x_a \approx_\delta B^x_a$, then for all subsets $S \subseteq \mathcal A$ we have
 	\[
@@ -288,6 +314,8 @@ We record several useful facts about the consistency measure and the state-depen
 \end{proof}
 
 \begin{lemma}[Triangle inequality; Fact 4.28 in \cite{Natarajan2018NEEXP}]\label{fact:triangle}
+	\lean{MIPStarRE.QPBT.opFamilyDistSq_le_of_le_of_le}
+	\leanok
 	\uses{def:povm-distance}
 	If $A^x_a \approx_\delta B^x_a$ and $B^x_a \approx_{\eps} C^x_a$, then $A^x_a \approx_{\delta+\eps} C^x_a$.
 \end{lemma}
@@ -297,6 +325,8 @@ We record several useful facts about the consistency measure and the state-depen
 \end{proof}
 
 \begin{lemma}[Triangle inequality for ``$\simeq$''; Proposition 4.29 in \cite{Ji2020LowIndividualDegree}]\label{fact:triangle-for-simeq}
+	\lean{MIPStarRE.QPBT.consistencyDefect_trans_le}
+	\leanok
 	\uses{def:consistency}
 	If $A^x_a \ot \Id_B \simeq_{\eps} \Id_A \ot B^x_a$, and $C^x_a \ot \Id_B \simeq_\delta \Id_A \ot B^x_a$, and $C^x_a \ot \Id_B \simeq_\gamma \Id_A \ot D^x_a$, then
 	\[
@@ -309,6 +339,8 @@ We record several useful facts about the consistency measure and the state-depen
 \end{proof}
 
 \begin{lemma}[Data processing; Fact 4.26 in \cite{Natarajan2018NEEXP}]\label{fact:data-processing}
+	\lean{MIPStarRE.QPBT.consistencyDefect_postprocess_le}
+	\leanok
 	\uses{def:consistency, def:bracket}
 	Suppose $A^x_a \ot \Id_B \simeq_\delta \Id_A \ot B^x_a$. Then for any function $f$ on the outcome set,
 	\[
@@ -322,6 +354,8 @@ We record several useful facts about the consistency measure and the state-depen
 The state-dependent distance is the right tool for reasoning about the closeness of measurement operators in a strategy. The following lemma converts joint consistency with a single projective measurement into an approximate commutation relation.
 
 \begin{lemma}[Approximate commutation from joint consistency]\label{lem:commutation-analysis}
+	\lean{MIPStarRE.QPBT.opDistSq_commutator_le}
+	\leanok
 	\uses{def:povm-distance, def:povm-conventions}
 	Let $\{A^x_{a,\,b}\}$, $\{B^x_{a,\,b,\,c}\}$, $\{C^x_{a,\,c}\}$ be POVMs. Suppose $\{B^x_{a,\,b,\,c}\}$ is projective, and
 	\begin{align*}
@@ -362,8 +396,14 @@ The state-dependent distance is the right tool for reasoning about the closeness
 % fact:low-degree-sandwich) instead samples the evaluation point from a specified
 % question distribution.
 \begin{lemma}[Sandwiched simultaneous measurement; modified from Fact 4.34 in \cite{Natarajan2018NEEXP}]\label{lem:ld-sandwich}
+	\lean{MIPStarRE.QPBT.sandwichProduct}
+	\lean{MIPStarRE.QPBT.sandwichProduct_isMeasurement}
+	\lean{MIPStarRE.QPBT.consistencyDefect_sandwich_le}
+	\leanok
 	\uses{def:consistency, def:bracket, def:povm-conventions}
 	Let $k \ge 0$ be an integer and let $\eps > 0$. Let $\mathcal X$ be a finite set and $\mu$ a distribution over $\mathcal X$, and let $\mathcal Y$ be a finite nonempty set; all statements below that sample $y \in \mathcal Y$ refer to the uniform distribution on $\mathcal Y$. For each $1 \le i \le k$ let $\mathcal R_i$ be a finite set, let $\mathcal G_i$ be a finite set of functions $g_i \colon \mathcal Y \to \mathcal R_i$, and for each $x \in \mathcal X$ let $\{G^{i,\,x}_g\}_{g \in \mathcal G_i}$ be a projective measurement. Suppose that for all $i \in \{1,\dots,k\}$ the set $\mathcal G_i$ satisfies the following property: for any two $g_i \ne g_i' \in \mathcal G_i$, the probability that $g_i(y) = g_i'(y)$ over a uniformly random $y \in \mathcal Y$ is at most $\eps$.
+	Index the factors by $0,\ldots,k-1$; factor $r$ corresponds to the paper's
+	factor $r+1$.
 
 	Let $\bigl\{ A^x_{g_1,\,g_2,\,\dots,\,g_k} \bigr\}$ be a projective measurement with outcomes $(g_1,\dots,g_k) \in \mathcal G_1 \times \cdots \times \mathcal G_k$. Here $\operatorname{eval}_y$ denotes the evaluation map $g \mapsto g(y)$, so that $A^x_{[\operatorname{eval}_y(\cdot)_i = a_i]}$ post-processes the outcome tuple by evaluating its $i$-th component at $y$; since the outcome sets $\mathcal G_1 \times \cdots \times \mathcal G_k$ and $\mathcal G_i$ and the targets $\mathcal R_i$ are finite, these are post-processings in the sense of Definition~\ref{def:bracket}. For each $1 \le i \le k$, suppose that on average over $x \sim \mu$ and $y \in \mathcal Y$ sampled uniformly at random,
 	\begin{equation}\label{eq:ld-sandwich-1}
@@ -400,6 +440,10 @@ The state-dependent distance is the right tool for reasoning about the closeness
 % 05_quantum_preliminaries.tex:1000-1008, label fact:low-degree-sandwich-on-steroids)
 % conditions on a fixed question tuple with the same restriction left implicit.
 \begin{lemma}[Pasting two consistent measurements; Fact 4.35 in \cite{Natarajan2018NEEXP}]\label{lem:pasting}
+	\lean{MIPStarRE.QPBT.pastedMeasurement}
+	\lean{MIPStarRE.QPBT.pastedMeasurement_isMeasurement}
+	\lean{MIPStarRE.QPBT.exists_pasting_error}
+	\leanok
 	\uses{def:consistency, def:bracket, def:povm-conventions}
 	Let $\mathcal D$ be a distribution on $(x, y_1, y_2) \in \mathcal X \times \mathcal Y_1 \times \mathcal Y_2$. For $i \in \{1,2\}$ let $\mathcal G_i$ be a collection of functions $g_i \colon \mathcal Y_i \to \mathcal R_i$ and let $\{(G_i)^x_g\}_{g \in \mathcal G_i}$ be families of measurements such that $\{(G_2)^x_g\}_g$ is projective for every $x$. Suppose further that for every pair $(x, y_1)$ of positive probability under the marginal of $\mathcal D$ on $\mathcal X \times \mathcal Y_1$ (the only pairs for which the conditional distribution of $y_2$ under $\mathcal D$ is defined; pairs of marginal probability zero are subject to no requirement) it holds that for $g_2 \ne g_2' \in \mathcal G_2$ the probability, on average over $y_2$ chosen from $\mathcal D$ conditioned on $(x, y_1)$, that $g_2(y_2) = g_2'(y_2)$ is at most $\eta$. Let $\{A^{x,y_1,y_2}_{a_1,\,a_2}\}$ be a family of projective measurements with outcomes $(a_1, a_2) \in \mathcal R_1 \times \mathcal R_2$ such that for $i \in \{1,2\}$,
 	\begin{equation}\label{eq:pasting-1}
@@ -428,6 +472,8 @@ The state-dependent distance is the right tool for reasoning about the closeness
 \end{proof}
 
 \begin{lemma}[Close strategies have close values; Fact 4.32 in \cite{Natarajan2018NEEXP}]\label{lem:close-strategies-have-close-values}
+	\lean{MIPStarRE.QPBT.abs_value_sub_le_of_areClose}
+	\leanok
 	\uses{def:strategy-distance, def:tensor-product-value, def:projective-strategy-general}
 	Let $\mathfrak G$ be a nonlocal game, and let $\mathcal S$, $\mathcal S'$ be two strategies that are $\delta$-close in the sense of Definition~\ref{def:strategy-distance}, for some $\delta \in [0,1]$, and that use the same state $\ket{\psi}$. If either $\mathcal S$ or $\mathcal S'$ is projective, then
 	\[
@@ -472,6 +518,8 @@ We abbreviate ``conditionally linear'' as \emph{CL}. Operationally, an $\ell$-le
 Note that both players' questions are generated from the \emph{same} uniformly random seed $x$; this shared-seed structure is what the introspection technique exploits. The following lemma elucidates the structural properties of $\ell$-level CL functions. Recall that $x^{L_{<k}}$ and $x^{L_k}$ denote $L_{<k}(x)$ and $L_{k,\,u}(x^{V_{k,\,u}})$ where $u = L_{<k}(x)$.
 
 \begin{lemma}[Structure of conditionally linear functions]\label{lem:cl-kth}
+	\lean{MIPStarRE.QPBT.CLData, MIPStarRE.QPBT.isCondLinear_iff_nonempty_clData}
+	\leanok
 	\uses{def:cl-func, def:register-subspace}
 	Let $\ell \ge 1$ and $V = \F^n$ for some integer $n \ge 0$. A function $L \colon V \to V$ is an $\ell$-level CL function if and only if the following collection of functions and subspaces exists:
 	\begin{enumerate}
@@ -487,6 +535,8 @@ Note that both players' questions are generated from the \emph{same} uniformly r
 		\item $L = L_{\le \ell}$.
 	\end{enumerate}
 	As in condition 3, we sometimes use $V_k$ and $L_k$ to denote $V_{k,\,u}$ and $L_{k,\,u}$ respectively, leaving the prefix $u$ implicit.
+	Index the decomposition levels by $0,\ldots,\ell-1$; level $r$ corresponds
+	to the paper's level $r+1$.
 \end{lemma}
 \begin{proof}
 	\uses{def:cl-func}
@@ -513,12 +563,16 @@ The marginal functions, factor spaces, and linear maps of a given CL function $L
 % have an index) and begins its induction at level 1; the level-zero base case is supplied
 % here, since def:cl-func admits 0-level functions and all ell_j may be 0.
 \begin{lemma}[Direct sums of conditionally linear functions]\label{lem:cl-func-prod}
+	\lean{MIPStarRE.QPBT.IsCondLinear.directSum}
+	\leanok
 	\uses{def:cl-func, def:register-subspace}
 	Let $m \ge 1$ be an integer and let $V^{(1)}, V^{(2)}, \dots, V^{(m)}$ be register subspaces of $V$ such that $V = \bigoplus_{j=1}^m V^{(j)}$. Suppose that, for each $j \in \{1, 2, \dots, m\}$, $L^{(j)}$ is an $\ell_j$-level conditionally linear function on $V^{(j)}$. Then the direct sum $L = \bigoplus_{j=1}^m L^{(j)}$, defined by
 	\[
 		L(x) = \sum_{j=1}^m L^{(j)}(x^{(j)})
 	\]
 	for all $x = \sum_{j=1}^m x^{(j)} \in \bigoplus_{j=1}^m V^{(j)}$, is an $\ell$-level CL function on $V$ for $\ell = \max_j \{\ell_j\}$; the maximum exists since $m \ge 1$.
+	With zero-based indices, the summand labelled $r\in\{0,\ldots,m-1\}$
+	corresponds to the paper's summand $j=r+1$.
 \end{lemma}
 \begin{proof}
 	\uses{def:cl-func}
@@ -526,6 +580,8 @@ The marginal functions, factor spaces, and linear maps of a given CL function $L
 \end{proof}
 
 \begin{lemma}[Direct sums give product distributions]\label{lem:cl-dist-prod}
+	\lean{MIPStarRE.QPBT.clDistribution_directSum_eq_prod}
+	\leanok
 	\uses{def:cl-dist, lem:cl-func-prod}
 	For each $i \in \{1, \dots, m\}$ let $L^{(i)}, R^{(i)} \colon V^{(i)} \to V^{(i)}$ be $\ell_i$-level conditionally linear functions, and let $L, R \colon V \to V$ be the direct sums $L = \bigoplus_i L^{(i)}$ and $R = \bigoplus_i R^{(i)}$, as defined in Lemma~\ref{lem:cl-func-prod}. Then the conditionally linear distribution $\mu_{L,R}$ is the product distribution $\prod_{i=1}^m \mu_{L^{(i)},\,R^{(i)}}$ over $V \times V$.
 \end{lemma}
@@ -543,6 +599,8 @@ The marginal functions, factor spaces, and linear maps of a given CL function $L
 The question distribution of the Pauli basis test is \emph{typed}: each question is a pair consisting of a type, drawn together with the other player's type from the edges of a fixed \emph{type graph}, and a question content, drawn from a CL distribution determined by the pair of types.
 
 \begin{definition}[Typed conditionally linear functions]\label{def:typed-cl-functions}
+	\lean{MIPStarRE.QPBT.IsTypedCondLinearFamily}
+	\leanok
 	\uses{def:cl-func}
 	Let $\mathcal T$ be a finite set (the \emph{type set}) and let $V$ be $\F^n$ for some integer $n \ge 0$. A \emph{$\mathcal T$-typed family of $\ell$-level conditionally linear functions} (implicitly, \emph{on $V$}) is a collection $\{L_t\}_{t \in \mathcal T}$ such that, for each $t \in \mathcal T$, $L_t$ is an $\ell$-level conditionally linear function on $V$.
 \end{definition}
@@ -566,6 +624,8 @@ The question distribution of the Pauli basis test is \emph{typed}: each question
 % needed for the graph distribution mu_G to be defined; the source
 % (references/qpbt-paper/07_types.tex:84-93) leaves it implicit here as well.
 \begin{definition}[Typed conditionally linear distributions]\label{def:typed-cl-distributions}
+	\lean{MIPStarRE.QPBT.typedCLDistribution, MIPStarRE.QPBT.ldQuestionDistribution_eq_typedCL, MIPStarRE.QPBT.pauliQuestionDistribution_eq_typedCL}
+	\leanok
 	\uses{def:typed-cl-functions, def:graph-distribution, def:cl-dist}
 	Let $\mathcal T$ be a type set and let $L = \{L_u\}_{u \in \mathcal T}$ and $R = \{R_v\}_{v \in \mathcal T}$ be $\mathcal T$-typed families of conditionally linear functions on $V$. Let $G = (\mathcal T, E)$ be a graph with vertex set $\mathcal T$ and nonempty edge set $E$, so that the graph distribution $\mu_G$ of Definition~\ref{def:graph-distribution} is defined. The \emph{$(\mathcal T, G)$-typed conditionally linear distribution $\mu^G_{L,\,R}$ corresponding to $(L, R)$} is the distribution over pairs $\bigl( (u, x), (v, y) \bigr)$, where the type pair $(u,v)$ is drawn from the graph distribution $\mu_G$ and the content pair $(x,y)$ is drawn from $\mu_{L_u,\,R_v}$.
 \end{definition}

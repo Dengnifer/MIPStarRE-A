@@ -1,0 +1,88 @@
+\documentclass[11pt]{article}
+
+\usepackage{amsmath,amssymb}
+\usepackage{xurl}
+\usepackage[hidelinks]{hyperref}
+\setlength{\emergencystretch}{2em}
+
+\input{command}
+
+\title{Polynomial Error Notation and Square-Root Bounds}
+\author{}
+\date{2026-09-03}
+
+\begin{document}
+\maketitle
+
+\section{At a glance}
+
+\begin{itemize}
+  \item \textbf{Difficulty.} Low.  The paper's global polynomial shorthand
+  couples two constants in a way that excludes a square-root function used
+  explicitly later in the same paper.
+  \item \textbf{Estimated weight.} The formal correction is one predicate with
+  separate prefactor and exponent witnesses; no theorem statement changes.
+  \item \textbf{Mathlib/project split.} The obstruction is elementary real
+  analysis.  Mathlib's real-power API will discharge concrete downstream
+  witnesses, while the corrected convention is project-local.
+  \item \textbf{Key Mathlib inputs.} The downstream witnesses use the
+  \path{Real.rpow} API.  The obstruction here is the elementary fact that no
+  constant $C>0$ can bound $\sqrt{x}$ by $C x^C$ for every $x>0$.
+\end{itemize}
+
+\section{Key theorem forms}
+
+The paper's shorthand asks for one universal constant $C>0$ such that
+\[
+  f(x) \leq Cx^C \qquad (x>0).
+\]
+The formal one-parameter convention instead asks for constants $A\geq1$ and
+$r>0$ such that
+\[
+  0\leq f(x)\leq Ax^r \qquad (x\geq0).
+\]
+This form includes $f(x)=\sqrt{x}$ by taking $A=1$ and $r=1/2$.
+
+\section{The source convention}
+
+The asymptotic conventions of \cite[lines~23--29]{Ji2020MIPStar} define
+$f(x)=\operatorname{poly}(x)$ using the same constant as prefactor and
+exponent.  Later, the Pauli basis analysis explicitly obtains
+$\delta_{\mathrm{acom}}(\eps)=\sqrt{\eps}$ and
+$\delta_{\mathrm{Line}}(\eps)=\sqrt{\eps}$ at lines~508--520 and 649--676 of
+the chapter-14 source mirror.\footnote{The corresponding files are
+\path{references/qpbt-paper/04_preliminaries.tex} and
+\path{references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex}.  The
+formal correction is tracked in
+\href{https://github.com/Dengnifer/MIPStarRE-A/issues/16}{GitHub issue \#16}
+and descends from \localissue{0002}.}
+
+The coupled-constant inequality cannot hold for $f(x)=\sqrt{x}$.  At $x=1$ it
+would imply $C\geq1$.  For such a constant,
+\[
+  \frac{\sqrt{x}}{Cx^C}=C^{-1}x^{1/2-C}
+\]
+is unbounded as $x$ decreases to zero, contradicting the proposed inequality
+on all positive inputs.
+
+\section{Comparison with the blueprint and formalization}
+
+The blueprint records only the paper's local assertions that the relevant
+errors are polynomial in $\eps$; those assertions include the displayed
+square-root choices.  The formal helper therefore separates the prefactor and
+exponent.\footnote{The helper is \leanid{IsPolyErr} in
+\doclink{MIPStarRE/QPBT/Games/ErrorFunctions.lean}.}  This changes no
+source-labelled theorem and preserves the intended meaning that the error
+decays as a positive power of its argument.
+
+\section{Conclusion}
+
+The single-constant shorthand is incompatible with the paper's own
+square-root error functions.  Using independent positive exponent and
+prefactor witnesses is a local correction to that shorthand, not an
+unfaithful theorem dependency.
+
+\bibliographystyle{alpha}
+\bibliography{references}
+
+\end{document}
