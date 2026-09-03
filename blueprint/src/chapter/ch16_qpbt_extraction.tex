@@ -33,6 +33,7 @@ For a $g$ that is not an encoding the two sides of this identity are the evaluat
 The measurement $\{\hat{S}_{g_X,g_Z}\}$ reads out an $X$-polynomial and a $Z$-polynomial simultaneously. We now separate the two readings again, this time as commuting actions on distinct registers: the polynomial outcome is measured on registers $\mathrm{A}\mathrm{A}'$ (resp.\ $\mathrm{B}\mathrm{B}'$), while a genuine Pauli measurement acts on the EPR register $\mathrm{A}''$ (resp.\ $\mathrm{B}''$).
 
 \begin{definition}[Single-basis marginals of the polynomial-pair measurement]\label{def:s-w-marginals}
+	\lean{MIPStarRE.QPBT.GlobalPairWitness.marginalPoly}
 	\uses{lem:qld-4-7}
 	Let $\{\hat{S}_{g_X,g_Z}\}$ be the projective measurement of Lemma~\ref{lem:qld-4-7}. For every $g \in \mathrm{ideg}_{d,m}(\F_q)$ define
 	\[
@@ -44,6 +45,7 @@ The measurement $\{\hat{S}_{g_X,g_Z}\}$ reads out an $X$-polynomial and a $Z$-po
 \end{definition}
 
 \begin{definition}[Pauli dot-product projectors]\label{def:tau-dot-product-projector}
+	\lean{MIPStarRE.QPBT.tauDotProj}
 	\uses{def:generalized-pauli}
 	For $W \in \{X,Z\}$ and $h \in \F_q^{M}$ let $\tau^W_h$ denote the projector corresponding to measuring $(\C^q)^{\ot M}$ in the $W$ basis and obtaining the outcome $h$ (Definition~\ref{def:generalized-pauli}). For all $W \in \{X,Z\}$, $\tilde{u} \in \F_q^{M}$, and $a \in \F_q$, define the projector
 	\begin{equation}\label{eq:def-tauwu}
@@ -53,6 +55,7 @@ The measurement $\{\hat{S}_{g_X,g_Z}\}$ reads out an $X$-polynomial and a $Z$-po
 \end{definition}
 
 \begin{definition}[Pulled-apart Pauli basis measurements]\label{def:tilde-m-measurement}
+	\lean{MIPStarRE.QPBT.tildeM}
 	\uses{def:s-w-marginals, def:tau-dot-product-projector, def:decoding-map}
 	For all $W \in \{X,Z\}$ and $\tilde{u} \in \F_q^{M}$ define the measurement $\{\tilde{M}^{W,\tilde{u}}_a\}_{a \in \F_q}$ by
 	\begin{equation}\label{eq:tilde_M}
@@ -62,6 +65,7 @@ The measurement $\{\hat{S}_{g_X,g_Z}\}$ reads out an $X$-polynomial and a $Z$-po
 \end{definition}
 
 \begin{definition}[Pulled-apart Pauli observables]\label{def:tilde-w-observables}
+	\lean{MIPStarRE.QPBT.tildeObs}
 	\uses{def:tilde-m-measurement, def:dual-self-dual-normal-basis, def:binary-representation, def:subfield-trace}
 	Let $\{e_j\}_{j \in \{1,\ldots,t\}}$ be the self-dual normal basis for $\F_q$ over $\F_2$ (Definition~\ref{def:dual-self-dual-normal-basis}) that is fixed once and for all in Definition~\ref{def:binary-representation}, and let $\tr = \tr_{q \to 2} \colon \F_q \to \F_2$ be the subfield trace. For all $W \in \{X,Z\}$, $\tilde{u} \in \F_q^M$, and $j \in \{1,\ldots,t\}$ define the operator
 	\begin{equation}\label{eq:def-tildewj}
@@ -73,6 +77,11 @@ The measurement $\{\hat{S}_{g_X,g_Z}\}$ reads out an $X$-polynomial and a $Z$-po
 % In the source the following properties are stated inline with the
 % definition of the observables; they are recorded here as a lemma.
 \begin{lemma}[Product form and Pauli relations of the pulled-apart observables]\label{lem:tildew-product-form}
+	\lean{MIPStarRE.QPBT.tildeObs_eq_heteroKron}
+	\lean{MIPStarRE.QPBT.tildeObs_isHermitian}
+	\lean{MIPStarRE.QPBT.tildeObs_mul_self}
+	\lean{MIPStarRE.QPBT.tildeObs_twisted_commutation}
+	\notready
 	\uses{def:tilde-w-observables, def:s-w-marginals, def:generalized-pauli, def:decoding-map, lem:qld-4-7}
 	Let $\tau^W(\cdot)$ denote the generalized Pauli $W$ observable (Definition~\ref{def:generalized-pauli}). For all $W \in \{X,Z\}$, $\tilde{u} \in \F_q^M$, and $j \in \{1,\ldots,t\}$,
 	\begin{equation}\label{eq:tildewj-product-form}
@@ -103,6 +112,10 @@ The measurement $\{\hat{S}_{g_X,g_Z}\}$ reads out an $X$-polynomial and a $Z$-po
 The next lemma shows that the pulled-apart measurements are consistent with the original points measurements of the strategy, and self-consistent. In its statement, and for the remainder of the chapter, $\delta_S$ denotes the function of Lemma~\ref{lem:qld-4-7}, enlarged by an adjustment of the universal constants $a$ and $b$ so as to also dominate additional error terms of order $\sqrt{\eps}$, $\eps$, and $md/q$ that the source absorbs into $\delta_S$ along the way; such an adjustment is possible since, after shrinking $b$ to at most $1/2$, the term $\eps^b$ dominates $\sqrt{\eps}$ and $\eps$ for $\eps \leq 1$, while $(md)^a q^{-b}$ dominates $md/q$.
 
 \begin{lemma}[Consistency and self-consistency of the pulled-apart measurements]\label{lem:qld-construct-the-paulis}
+	\lean{MIPStarRE.QPBT.tildeM_consistent_pointMeas}
+	\lean{MIPStarRE.QPBT.tildeM_consistent_pointMeas'}
+	\lean{MIPStarRE.QPBT.tildeObs_selfConsistent}
+	\notready
 	\uses{def:tilde-m-measurement, def:tilde-w-observables,
 		lem:projective-strategy-setup, def:expanded-state, def:consistency,
 		def:approx-question-indexed-operators, lem:qld-4-7,
@@ -141,7 +154,9 @@ The next lemma shows that the pulled-apart measurements are consistent with the 
 	\]
 	Expanding $K^u_a$ over pairs $(h, h'')$ of Pauli outcomes, a term of the left-hand side with outcomes $(g, h, h'')$ is constrained by $g(u) = g_h(u) + g_{h''}(u) = g_{h + h''}(u)$, by the linearity of the encoding \eqref{eq:low-degree-encoding-definition}. If $g$ is not an encoding then $g \neq g_{h+h''}$, and both are polynomials of total degree at most $md$, so the constraint holds for at most an $md/q$ fraction of $u$ (Lemma~\ref{lem:schwartz-zippel-total-degree}). Since all terms are nonnegative and, for each $g$, the operators of the $(h,h'')$-sum add up to the identity, it follows that
 	\begin{equation}\label{eq:qld-nonencoding-mass}
-		\sum_{g \,\text{not an encoding}} \bra{\hat\psi} (\hat{S}^W_g)_{\mathrm{B}\mathrm{B}'} \ket{\hat\psi} \,\leq\, O(\delta_S) + \frac{md}{q} \,\leq\, O(\delta_S)\;,
+	\lean{nonencodingMarginalMass_le}
+	\notready
+	\sum_{g \,\text{not an encoding}} \bra{\hat\psi} (\hat{S}^W_g)_{\mathrm{B}\mathrm{B}'} \ket{\hat\psi} \,\leq\, O(\delta_S) + \frac{md}{q} \,\leq\, O(\delta_S)\;,
 	\end{equation}
 	and symmetrically with the registers $\mathrm{A}\mathrm{A}'$ in place of $\mathrm{B}\mathrm{B}'$. (If $d = 0$, every element of $\mathrm{ideg}_{d,m}(\F_q)$ is constant, hence an encoding, and the left-hand side vanishes.)
 
@@ -174,6 +189,9 @@ The next lemma shows that the pulled-apart measurements are consistent with the 
 Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two estimates, which were used in the proof of Lemma~\ref{lem:qld-construct-the-paulis}.
 
 \begin{lemma}[The marginals absorb the point measurements]\label{lem:qld-constructing-the-paulis-helper}
+	\lean{MIPStarRE.QPBT.sum_marginalPoly_pointMeas_approx_id}
+	\lean{MIPStarRE.QPBT.marginalPoly_sub_pointMeas_approx_zero}
+	\notready
 	\uses{def:s-w-marginals, def:expanded-point-measurement, def:expanded-state, def:povm-distance, lem:qld-4-7, def:symmetric-equivalents}
 	For $W \in \{X,Z\}$, on average over uniformly random $u \in \F_q^m$,
 	\begin{equation}\label{eq:qld-sg-cons}
@@ -206,6 +224,7 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 \section{The swap unitaries and the extraction of the Pauli group}
 
 \begin{definition}[The swap unitaries]\label{def:v-swap-unitary}
+	\lean{MIPStarRE.QPBT.swapUnitary}
 	\uses{lem:qld-4-7, def:generalized-pauli, def:decoding-map}
 	Define the linear map
 	\[
@@ -217,6 +236,11 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 % In the source the following properties are established inline with the
 % definition of the swap unitaries; they are recorded here as a lemma.
 \begin{lemma}[Unitarity and conjugation action of the swap unitaries]\label{lem:v-swap-conjugation}
+	\lean{MIPStarRE.QPBT.swapUnitary_mul_conjTranspose}
+	\lean{MIPStarRE.QPBT.conjTranspose_mul_swapUnitary}
+	\lean{MIPStarRE.QPBT.swapUnitary_conj_tildeObs}
+	\lean{MIPStarRE.QPBT.swapUnitary_conj_tildeM}
+	\notready
 	\uses{def:v-swap-unitary, def:tilde-w-observables, def:tilde-m-measurement, def:generalized-pauli, def:indicator-vector, def:bracket}
 	The maps $V_{\mathrm{A}}$ and $V_{\mathrm{B}}$ of Definition~\ref{def:v-swap-unitary} are unitaries acting on registers $\mathrm{A}\mathrm{A}'\mathrm{A}''$ and $\mathrm{B}\mathrm{B}'\mathrm{B}''$ respectively, and their conjugation action is exact, as follows. For all $W \in \{X,Z\}$, $j \in \{1,\ldots,t\}$, and $\tilde{u} \in \F_q^M$,
 	\begin{equation}\label{eq:v-swap-obs-conjugation}
@@ -246,6 +270,9 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 \end{proof}
 
 \begin{lemma}[Extraction of the EPR state and the Pauli observables]\label{lem:qld-unitary}
+	\lean{MIPStarRE.QPBT.ExtractionWitness}
+	\lean{MIPStarRE.QPBT.exists_extractionWitness}
+	\notready
 	\uses{lem:qld-4-7, def:v-swap-unitary, def:expanded-state, lem:projective-strategy-setup, def:generalized-pauli, def:EPR, def:povm-distance}
 	There exists a function $\delta_{\mathrm{qld}}(\eps,m,d,q) = O(\delta_S^{1/4} + md/q)$, where $\delta_S$ is the function of Lemma~\ref{lem:qld-4-7}, and there exist unitaries $V_{\mathrm{A}}$ acting on registers $\mathrm{A}\mathrm{A}'\mathrm{A}''$ and $V_{\mathrm{B}}$ acting on registers $\mathrm{B}\mathrm{B}'\mathrm{B}''$, such that the following hold.
 	\begin{enumerate}

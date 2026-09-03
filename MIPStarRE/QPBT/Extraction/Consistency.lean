@@ -102,7 +102,7 @@ noncomputable def nonencodingMarginalMass {P : AdmissibleParams}
     {epsilon deltaS : ℝ} {S : ProjectiveSetting P epsilon}
     (w : GlobalPairWitness S deltaS) (side : PlayerSide) (W : PauliKind) : ℝ := by
   classical
-  exact ∑ g ∈ Finset.univ.filter (fun g : Poly P => ¬ IsEncoding g.1),
+  exact ∑ g ∈ Finset.univ.filter (fun g : Poly P => ¬ IsEncoding g),
     (inner ℂ S.psiHat
       (applyOperatorToState
         (S.placeSide side

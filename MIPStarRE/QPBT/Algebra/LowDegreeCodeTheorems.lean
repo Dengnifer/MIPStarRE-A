@@ -4,7 +4,9 @@ import MIPStarRE.QPBT.Algebra.LowDegreeCode
 
 This file supplies `def:decoding-map` and the Boolean cube embedding from
 `blueprint/src/chapter/ch11_qpbt_algebra.tex:445-455`, paper
-`references/qpbt-paper/04_preliminaries.tex:917-924`.
+`references/qpbt-paper/04_preliminaries.tex:917-924`.  The raw polynomial
+specialization is named `decodeFqRep`; the Chapter 16 `Poly` API is kept in
+`Algebra/Decoding`.
 -/
 
 open scoped BigOperators
@@ -38,7 +40,8 @@ noncomputable abbrev decodeBool {K : Type*} [Field K] [DecidableEq K] {m : ℕ}
     (g : (Fin m → K) → K) : Cube m → K :=
   decodeAt ({0, 1} : Finset K) g
 
-/-- The full-field specialization of `decodeAt` used by the Pauli extraction.
+/-- The full-field specialization of `decodeAt` used by the generic algebra
+layer.  The Chapter 16 `Poly`-facing name is defined in `Algebra/Decoding.lean`.
 Every value is retained because the filter is `H = Finset.univ`, so this is the
 cube-indexed evaluation of a polynomial representative.  The restricted
 decoder identity remains separate and is only available for encoding
@@ -49,7 +52,7 @@ This is the `H = \F_q` reading of `def:decoding-map`, blueprint
 `blueprint/src/chapter/ch16_qpbt_extraction.tex:11-20`; paper origin
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1419-1420` and
 the correction recorded in `docs/paper-gaps/qpbt_decoding-identity.tex`. -/
-noncomputable def decodeFq {K : Type*} [Field K] [Fintype K] [DecidableEq K] {m : ℕ}
+noncomputable def decodeFqRep {K : Type*} [Field K] [Fintype K] [DecidableEq K] {m : ℕ}
     (g : MvPolynomial (Fin m) K) : Cube m → K :=
   decodeAt (Finset.univ : Finset K) (fun x => MvPolynomial.eval x g)
 
@@ -60,9 +63,9 @@ the Chapter 16 decoding argument; it does not identify arbitrary polynomial
 functions with their representatives.
 
 See `docs/paper-gaps/qpbt_decoding-identity.tex:87-116`. -/
-def IsEncoding {K : Type*} [Field K] [Fintype K] [DecidableEq K] {m : ℕ}
+def IsEncodingRep {K : Type*} [Field K] [Fintype K] [DecidableEq K] {m : ℕ}
     (g : MvPolynomial (Fin m) K) : Prop :=
-  lowDegreeEncoding (decodeFq g) = g
+  lowDegreeEncoding (decodeFqRep g) = g
 
 /-- The restricted decoding identity in `def:decoding-map`, blueprint
 `ch11_qpbt_algebra.tex:445-455`, paper `04_preliminaries.tex:917-924`. -/

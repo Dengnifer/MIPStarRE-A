@@ -1,4 +1,4 @@
-import MIPStarRE.QPBT.Algebra.LowDegreeCodeTheorems
+import MIPStarRE.QPBT.Algebra.Decoding
 import MIPStarRE.QPBT.Combining.Witnesses
 import MIPStarRE.QPBT.Extraction.Defs
 
@@ -54,6 +54,19 @@ noncomputable def marginalPoly {P : AdmissibleParams} {epsilon delta : ℝ}
     Measurement (Poly P) (S.ExpandedLocalSpace side) :=
   (w.Smeas side).postprocess W.selectPoly
 
+/-- The single-basis marginal remains a projective measurement. This is the
+projectivity assertion implicit in `def:s-w-marginals`, blueprint
+`ch16_qpbt_extraction.tex:35-44`, paper
+`14_analysis_of_the_pauli_basis_test.tex:1421-1423`.
+
+**Proof obligation:** issue #19 tracks the preservation of projectivity under
+the finite postprocessing map `PauliKind.selectPoly`. -/
+theorem marginalPoly_isProjective {P : AdmissibleParams} {epsilon delta : ℝ}
+    {S : ProjectiveSetting P epsilon} (w : GlobalPairWitness S delta)
+    (side : PlayerSide) (W : PauliKind) :
+    Measurement.IsProjective (w.marginalPoly side W) := by
+  sorry
+
 end GlobalPairWitness
 
 /-- The pulled-apart projective-measurement effect from Equation `eq:tilde_M`.
@@ -67,7 +80,33 @@ noncomputable def tildeM {P : AdmissibleParams} {epsilon delta : ℝ}
     (a : PauliScalar P) : Op (ExtractionBlock P (S.LocalSpace side)) :=
   ∑ g : Poly P,
     heteroKron ((w.marginalPoly side W).effect g)
-      (tauDotProj W u (dotProduct (decodeFq g.1) u - a))
+      (tauDotProj W u (dotProduct (decodeFq g) u - a))
+
+/-- Each pulled-apart effect is a projector, as asserted in
+`def:tilde-m-measurement`, blueprint `ch16_qpbt_extraction.tex:55-62`, paper
+`14_analysis_of_the_pauli_basis_test.tex:1425-1435`.
+
+**Proof obligation:** issue #19 tracks the orthogonal-sum calculation using
+`marginalPoly_isProjective` and `tauDotProj_isProj`. -/
+theorem tildeM_isProj {P : AdmissibleParams} {epsilon delta : ℝ}
+    {S : ProjectiveSetting P epsilon} (w : GlobalPairWitness S delta)
+    (side : PlayerSide) (W : PauliKind) (u : PauliRegister P)
+    (a : PauliScalar P) :
+    IsProj (tildeM w side W u a) := by
+  sorry
+
+/-- The pulled-apart effects are complete for each fixed basis and Pauli
+register vector. This is the completeness assertion in
+`def:tilde-m-measurement`, blueprint `ch16_qpbt_extraction.tex:55-62`, paper
+`14_analysis_of_the_pauli_basis_test.tex:1425-1435`.
+
+**Proof obligation:** issue #19 tracks summing the orthogonal dot-product
+projectors and the polynomial marginal effects. -/
+theorem sum_tildeM_eq_one {P : AdmissibleParams} {epsilon delta : ℝ}
+    {S : ProjectiveSetting P epsilon} (w : GlobalPairWitness S delta)
+    (side : PlayerSide) (W : PauliKind) (u : PauliRegister P) :
+    ∑ a : PauliScalar P, tildeM w side W u a = 1 := by
+  sorry
 
 /-- The binary observable obtained from the trace coarse-graining of `tildeM`.
 This is Equation `eq:def-tildewj` in `def:tilde-w-observables`, blueprint
@@ -97,7 +136,7 @@ theorem tildeObs_eq_heteroKron {P : AdmissibleParams} {epsilon delta : ℝ}
       heteroKron
         (∑ pair : PolyPair P,
           phaseSign (fixedBinTrace P.model
-            (P.model.basis j * dotProduct (decodeFq (W.selectPoly pair).1) u)) •
+            (P.model.basis j * dotProduct (decodeFq (W.selectPoly pair)) u)) •
             (w.Smeas side).effect pair)
         (tauObservable W (P.model.basis j • u)) := by
   sorry
@@ -160,8 +199,8 @@ noncomputable def swapUnitary {P : AdmissibleParams} {epsilon delta : ℝ}
     (side : PlayerSide) : Op (ExtractionBlock P (S.LocalSpace side)) :=
   ∑ pair : PolyPair P,
     heteroKron ((w.Smeas side).effect pair)
-      (tauObservable .X (decodeFq pair.2.1) *
-        tauObservable .Z (decodeFq pair.1.1))
+      (tauObservable .X (decodeFq pair.2) *
+        tauObservable .Z (decodeFq pair.1))
 
 /-- The swap map is a right unitary. This is the first exact unitarity
 calculation of `lem:v-swap-conjugation`, blueprint
