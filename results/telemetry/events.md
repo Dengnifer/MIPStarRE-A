@@ -232,6 +232,31 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   bounded reviewer-lane repair, after which the branch will take a fresh base
   and repeat CI and review.
 
+## 2026-09-03 — Issue #18 helper worktree tier-2 recovery
+
+- **Symptom:** `worktree-setup.sh /tmp/mipstarre-18-core --no-build` restored
+  the complete `22afbcbb` tier-1 snapshot, but `lake exe cache get` timed out
+  while cloning Mathlib from GitHub, leaving an incomplete tier-2 tree.
+- **Recovery:** the orchestrator copied the already-pinned `.lake/packages`
+  tree from the issue worktree into the helper worktree as a private copy,
+  then `worktree-setup.sh --check` reported both tiers present and
+  `lake env lean MIPStarRE/QPBT/Test/Soundness.lean` succeeded.
+- **Lesson:** the setup path correctly reports a degraded warm bootstrap, but
+  a network-independent private tier-2 clone remains a manual recovery step
+  when GitHub is unreachable. No hot-cache or manifest state was modified.
+
+## 2026-09-03 - PR #40 review triage
+
+- **Disposition:** the four source-labelled blueprint entries whose Lean
+  carriers or hypotheses are explicitly documented as divergent now carry
+  `\\notready` rather than statement-match `\\leanok`; their declaration links
+  remain for traceability. The wording findings were changed to mathematical
+  descriptions of the directly indexed construction.
+- **Scope decision:** the remaining skeleton propositions stay as tracked open
+  proof obligations, as required by issue #18's accepted contract. The Apply
+  module now states that these links do not claim proof closure. Completing
+  those proofs is a later mathematics stage, not a change to this skeleton PR.
+
 ## 2026-09-03 — PR #42 exact-head gate recovery
 
 - **Symptom:** the first `local/bin/ci.sh 42` run posted pending statuses at
@@ -239,5 +264,12 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   The lock owner was PR #41, whose comparator check was stalled in a Mathlib
   HTTPS clone.  The PR #42 gate was stopped without running review.
 - **Recovery:** after confirming owner pid `1229580` was dead, its stale lock
-  was reclaimed by the retry path.  The exact-head full CI gate is being
-  retried before review; no merge or scoped code repair was made.
+  was reclaimed by the retry path.  Full CI passed at repair head `c0bc746`,
+  but the run resolved a stale local `origin/main` alias at `22afbcbb` rather
+  than current GitHub main `9d2b9198`.  The branch was therefore merged with
+  current main and the exact-head gate restarted; the earlier green statuses
+  are not being used as merge evidence.
+- **Review dispatch:** the first bounded review invocation was denied by the
+  execution sandbox because it could send repository context to the configured
+  external reviewer.  No indirect retry or review evidence was manufactured;
+  the main controller retained the authorized review boundary.
