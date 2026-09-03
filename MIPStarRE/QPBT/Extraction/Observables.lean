@@ -15,8 +15,7 @@ canonical field model.
 The product form and observable relations formalize `lem:tildew-product-form`
 in `blueprint/src/chapter/ch16_qpbt_extraction.tex:75-88`, from
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1415-1456`.
-The consistency conclusions formalize `lem:qld-construct-the-paulis`, blueprint
-lines 105-128 and paper lines 1458-1608. The swap identities formalize
+The swap identities formalize
 `lem:v-swap-conjugation`, blueprint lines 208-243 and paper lines 1687-1713.
 -/
 
@@ -157,69 +156,6 @@ theorem tildeObs_twisted_commutation {P : AdmissibleParams}
       phaseSign (fixedBinTrace P.model
         (P.model.basis j * P.model.basis j' * dotProduct u v)) •
         (tildeObs w side .Z v j' * tildeObs w side .X u j) := by
-  sorry
-
-/-! ## Consistency with the point measurements -/
-
-/-- Alice's original point measurement is consistent with Bob's pulled-apart
-measurement. This is the first display of Item 1 in
-`lem:qld-construct-the-paulis`, blueprint
-`ch16_qpbt_extraction.tex:105-122`, paper
-`14_analysis_of_the_pauli_basis_test.tex:1463-1492`.
-
-**Proof obligation:** issue #19 tracks the non-encoding-mass argument required
-by the restricted decoding identity. Discharge: split the global outcomes into
-encodings and non-encodings and apply the Schwartz-Zippel estimate described in
-`docs/paper-gaps/qpbt_decoding-identity.tex`. -/
-theorem tildeM_consistent_pointMeas {P : AdmissibleParams}
-    {epsilon delta : ℝ} {S : ProjectiveSetting P epsilon}
-    (w : GlobalPairWitness S delta) (W : PauliKind) :
-    consistencyDefect
-      (uniformDistribution (Fin P.m -> PauliScalar P))
-      (fun u a => S.placeSide .alice
-        (S.onPlayer .alice ((S.pointMeas .alice W u).effect a)))
-      (fun u a => S.placeSide .bob
-        (tildeM w .bob W (indicatorVec u) a))
-      S.psiHat <= delta := by
-  sorry
-
-/-- Bob's original point measurement is consistent with Alice's pulled-apart
-measurement. This is the player-interchanged display of Item 1 in
-`lem:qld-construct-the-paulis`, blueprint
-`ch16_qpbt_extraction.tex:105-122`, paper
-`14_analysis_of_the_pauli_basis_test.tex:1463-1492`.
-
-**Proof obligation:** issue #19 tracks the symmetric non-encoding-mass
-argument. Discharge: repeat `tildeM_consistent_pointMeas` with the player
-placements exchanged. -/
-theorem tildeM_consistent_pointMeas' {P : AdmissibleParams}
-    {epsilon delta : ℝ} {S : ProjectiveSetting P epsilon}
-    (w : GlobalPairWitness S delta) (W : PauliKind) :
-    consistencyDefect
-      (uniformDistribution (Fin P.m -> PauliScalar P))
-      (fun u a => S.placeSide .alice
-        (tildeM w .alice W (indicatorVec u) a))
-      (fun u a => S.placeSide .bob
-        (S.onPlayer .bob ((S.pointMeas .bob W u).effect a)))
-      S.psiHat <= delta := by
-  sorry
-
-/-- The two player-side copies of each pulled-apart observable are close on the
-expanded state. This is Item 2 of `lem:qld-construct-the-paulis`, blueprint
-`ch16_qpbt_extraction.tex:123-128`, paper
-`14_analysis_of_the_pauli_basis_test.tex:1476-1606`.
-
-**Proof obligation:** issue #19 tracks the pulling-consistency calculation.
-Discharge: prove the corresponding measurement-family estimate and apply the
-agreement and measurement-to-observable lemmas after trace postprocessing. -/
-theorem tildeObs_selfConsistent {P : AdmissibleParams}
-    {epsilon delta : ℝ} {S : ProjectiveSetting P epsilon}
-    (w : GlobalPairWitness S delta) (W : PauliKind)
-    (j : Fin P.model.basisDim) :
-    opDistSq (uniformDistribution (PauliRegister P))
-      (fun u => S.placeSide .alice (tildeObs w .alice W u j))
-      (fun u => S.placeSide .bob (tildeObs w .bob W u j))
-      S.psiHat <= delta := by
   sorry
 
 /-! ## Swap conjugation -/
