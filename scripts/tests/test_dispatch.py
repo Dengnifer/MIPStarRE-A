@@ -13,17 +13,24 @@ import unittest
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DISPATCH = REPO_ROOT / "local" / "bin" / "dispatch.sh"
+PRE_COMMIT = REPO_ROOT / ".githooks" / "pre-commit"
 THREAD_ID = "019e93a5-e370-7aa1-ba77-6373dbdd6a61"
 
 
 class DispatchCommandTests(unittest.TestCase):
     def dispatch_command(self, *extra: str) -> list[str]:
         with tempfile.TemporaryDirectory() as cache_root:
+            fake_bin = Path(cache_root) / "bin"
+            fake_bin.mkdir()
+            fake_codex = fake_bin / "codex"
+            fake_codex.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+            fake_codex.chmod(0o755)
             env = os.environ.copy()
             env.update(
                 {
                     "MIPSTARRE_CACHE_ROOT": cache_root,
                     "MIPSTARRE_CODEX_MODEL": "test-model",
+                    "PATH": f"{fake_bin}{os.pathsep}{env.get('PATH', '')}",
                 }
             )
             result = subprocess.run(
@@ -80,6 +87,12 @@ class DispatchCommandTests(unittest.TestCase):
 
         self.assert_common_exec_options(argv)
         self.assertEqual(argv[13:], ["resume", "--", THREAD_ID, "<prompt>"])
+
+    def test_pre_commit_budget_counts_dispatch_tests(self) -> None:
+        self.assertIn(
+            "scripts/tests/test_dispatch.py",
+            PRE_COMMIT.read_text(encoding="utf-8"),
+        )
 
 
 if __name__ == "__main__":

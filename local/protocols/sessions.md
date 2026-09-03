@@ -197,8 +197,8 @@ local/bin/dispatch.sh --role prover --issue 0042 \
 
 `dispatch.sh` places the worktree, sandbox, JSON, final-message, model, and
 configuration options before the optional `resume` subcommand. They are
-`codex exec` options in the installed CLI grammar and are rejected when placed
-after `resume`.
+`codex exec` options in the installed CLI grammar; some, notably the worktree
+and sandbox options, are rejected when placed after `resume`.
 
 Semantics:
 
