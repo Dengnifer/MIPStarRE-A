@@ -211,4 +211,59 @@ theorem abs_value_sub_le_of_areClose :
       |S.value - S'.value| ≤ C₀ * Real.rpow δ (1 / 2 : ℝ) := by
   sorry
 
+/-- Averaging contractions preserves state-dependent operator closeness.
+This is `lem:avg-closeness`, blueprint
+`blueprint/src/chapter/ch14_qpbt_observables.tex:299-319`, paper
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:100-113`.
+The probability hypothesis is explicit because the proof uses Jensen's
+inequality for the average. -/
+theorem avg_closeness {X ι : Type*}
+    [Fintype X] [DecidableEq X] [Fintype ι] [DecidableEq ι]
+    (μ : Distribution X) (hμ : μ.IsProbability) (A B : X → Op ι)
+    (α : X → ℂ) (hα : ∀ x, ‖α x‖ ≤ 1) (ψ : EuclideanSpace ℂ ι) :
+    ‖applyOperatorToState
+        (averageOperatorOverDistribution μ fun x =>
+          α x • (A x - B x)) ψ‖ ^ 2 ≤
+      opDistSq μ A B ψ := by
+  sorry
+
+/-- Passing from answer-indexed effects to unit-modulus weighted observables
+costs at most the answer-alphabet cardinality. This is `lem:povm-to-obs`,
+blueprint `blueprint/src/chapter/ch14_qpbt_observables.tex:321-354`, paper
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:115-129`. -/
+theorem povm_to_obs {X α ι : Type*}
+    [Fintype X] [DecidableEq X] [Fintype α]
+    [Fintype ι] [DecidableEq ι]
+    (μ : Distribution X) (A B : X → α → Op ι)
+    (c : α → ℂ) (hc : ∀ a, ‖c a‖ = 1) (ψ : EuclideanSpace ℂ ι) :
+    opDistSq μ (fun x => ∑ a, c a • A x a) (fun x => ∑ a, c a • B x a) ψ ≤
+      Fintype.card α * opFamilyDistSq μ A B ψ := by
+  sorry
+
+/-- Orthonormalization of a consistent pair of POVMs. The resulting
+Alice-side measurement is projective and remains close to the original one on
+the unit bipartite state. This imported result is `lem:ortho`, blueprint
+`blueprint/src/chapter/ch14_qpbt_observables.tex:356-383`, paper
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:131-153`;
+the source cites KV11 and the self-contained proof [ML20]. -/
+theorem exists_projective_close_of_consistent :
+    ∃ η : ℝ → ℝ,
+      (∃ C : ℝ, 1 ≤ C ∧ ∀ δ : ℝ, 0 ≤ δ →
+        η δ ≤ C * Real.rpow δ (1 / 4 : ℝ)) ∧
+      ∀ (ιA ιB α : Type) [Fintype ιA] [DecidableEq ιA]
+        [Fintype ιB] [DecidableEq ιB] [Fintype α] [DecidableEq α]
+        (ψ : EuclideanSpace ℂ (ιA × ιB)) (hψ : ‖ψ‖ = 1)
+        (Q : Measurement α ιA)
+        (R : Measurement α ιB) (δ : ℝ),
+        0 ≤ δ ∧ δ ≤ 1 →
+        consistencyDefect (uniformDistribution Unit)
+          (fun _ a => heteroKron (Q.effect a) 1)
+          (fun _ a => heteroKron 1 (R.effect a)) ψ ≤ δ →
+        ∃ Pm : Measurement α ιA,
+          MIPStarRE.QPBT.Measurement.IsProjective Pm ∧
+          opFamilyDistSq (uniformDistribution Unit)
+            (fun _ a => heteroKron (Pm.effect a) 1)
+            (fun _ a => heteroKron (Q.effect a) 1) ψ ≤ η δ := by
+  sorry
+
 end MIPStarRE.QPBT

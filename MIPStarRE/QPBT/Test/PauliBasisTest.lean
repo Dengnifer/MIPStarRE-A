@@ -294,6 +294,13 @@ origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-
 -/
 abbrev PauliQuestion (P : AdmissibleParams) := PauliType × PauliSpace P
 
+/-- The Pauli question carrying no additional coefficient data, as in
+`def:pauli-win-predicate`, blueprint `ch13_qpbt_test.tex:356-392`, paper origin
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1006-1008`.
+Its ambient coefficient vector is zero. -/
+def pauliQuestion (P : AdmissibleParams) (W : PauliKind) : PauliQuestion P :=
+  (.pauli W, 0)
+
 /-- The ordered-edge subtype used by the Pauli question sampler.  This is
 the finite carrier underlying `graphDistribution pauliEdges`; it is Lean-only
 infrastructure for `def:pauli-question-distribution`, blueprint

@@ -54,13 +54,6 @@ noncomputable def idealState (P : AdmissibleParams)
         ((EuclideanSpace.equiv (PauliRegister P × PauliRegister P) ℂ)
           (eprState (PauliRegister P)) (p.1.2, p.2.2)))
 
-/-- The Pauli question carrying no additional coefficient data, as in
-`def:pauli-win-predicate`, blueprint `ch13_qpbt_test.tex:350-386`, paper origin
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1006-1008`.
--/
-def pauliQuestion (P : AdmissibleParams) (W : PauliKind) : PauliQuestion P :=
-  (.pauli W, 0)
-
 /-- The A-side ideal Pauli projector, with identities on the auxiliary and
 B-side registers.  This is a concrete matrix form of the operator comparison
 in `thm:pauli` (`blueprint/src/chapter/ch13_qpbt_test.tex:407-424`; paper
