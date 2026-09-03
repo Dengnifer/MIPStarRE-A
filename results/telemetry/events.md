@@ -231,3 +231,13 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   was manufactured.  The operator has parked further retries pending the
   bounded reviewer-lane repair, after which the branch will take a fresh base
   and repeat CI and review.
+
+## 2026-09-03 — PR #42 exact-head gate recovery
+
+- **Symptom:** the first `local/bin/ci.sh 42` run posted pending statuses at
+  exact head `c7ab72e`, then waited behind the machine-wide full-build lock.
+  The lock owner was PR #41, whose comparator check was stalled in a Mathlib
+  HTTPS clone.  The PR #42 gate was stopped without running review.
+- **Recovery:** after confirming owner pid `1229580` was dead, its stale lock
+  was reclaimed by the retry path.  The exact-head full CI gate is being
+  retried before review; no merge or scoped code repair was made.
