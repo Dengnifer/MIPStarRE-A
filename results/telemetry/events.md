@@ -273,3 +273,7 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   execution sandbox because it could send repository context to the configured
   external reviewer.  No indirect retry or review evidence was manufactured;
   the main controller retained the authorized review boundary.
+- **Pre-push cache miss:** the first fresh-base push was stopped by the normal
+  hook because this worktree's tier-1 cache predated the Chapter 15 modules now
+  imported by `MIPStarRE/QPBT.lean`.  No hook was bypassed; the merged target is
+  built locally before the push is retried.
