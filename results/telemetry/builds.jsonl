@@ -31,3 +31,5 @@
 {"ts": "2026-09-04T00:58:03+0800", "kind": "ci-build", "trigger": "ci.sh pr=44", "seconds": 60, "outcome": "success", "sha": "4f6147c0231c5a0062c04ae572a8ff085ebae43f", "note": "branch issue-0035-ch12-locators"}
 {"ts": "2026-09-04T01:36:44+0800", "kind": "ci-build", "trigger": "ci.sh pr=46", "seconds": 69, "outcome": "success", "sha": "5156e1746011983ef8a43ccaf444e14ac76afff3", "note": "branch issue-0019-qpbt-extraction-skeleton"}
 {"ts": "2026-09-04T05:45:07+0800", "kind": "ci-build", "trigger": "ci.sh pr=51", "seconds": 91, "outcome": "success", "sha": "15e9db7a0e8757cadcb89d7ab51f38c05d483ab9", "note": "branch issue-50-shared-package-store"}
+{"ts": "2026-09-04T06:19:45+0800", "kind": "ci-build", "trigger": "ci.sh pr=46", "seconds": 74, "outcome": "success", "sha": "3f18c52ee79e60e395573f984f3ca737bcfbd780", "note": "branch issue-0019-qpbt-extraction-skeleton"}
+{"ts": "2026-09-04T06:24:11+0800", "kind": "ci-build", "trigger": "ci.sh pr=41", "seconds": 58, "outcome": "success", "sha": "6602875b583869642ed4c175b96cb2e871757ee4", "note": "branch issue-0015-main-session-launcher"}

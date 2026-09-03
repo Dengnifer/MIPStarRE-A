@@ -804,3 +804,130 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   updated in place by using the required `ADJUDICATION ... head=<sha>` header
   itself as the idempotency marker, preserving one record and satisfying the
   gate without changing the PR head.
+- **Post-#51 worktree setup incident:** the operator invoked
+  `worktree-setup.sh` from the two stale PR branches for #41 and #46. Those
+  branch-local scripts predated the shared-store change and began private
+  `lake exe cache get` operations, contrary to the owner migration rule. Both
+  processes were interrupted immediately; each had created only a 124 KiB
+  partial `.lake/packages` directory, and no fetch process remained. The two
+  exact partial directories were removed after type and size verification;
+  setup is rerun through merged main's script so the worktrees link the shared
+  read-only store. The already completed 1.8 GiB tier-1 build copies are kept
+  for their upcoming CI runs.
+- **Gate-audit presentation note:** the exact-head audit worker emitted one
+  stray malformed #46 heading (`515ennials`) before immediately correcting it
+  to the verified head `5156e1746011`. The underlying API data and gate verdict
+  were unchanged.
+- **Partial-package cleanup command note:** after verifying both accidental
+  partial trees were exact 124 KiB directories, the operator attempted a
+  narrowly targeted `rm -rf`; the execution policy rejected it before launch.
+  The directories were instead moved intact to named `/tmp` quarantine paths,
+  making the worktree repair recoverable.
+- **PR #41 pre-push cache incident:** after the fresh-base merge, the pre-push
+  hook rebuilt changed-main modules but its inherited tier-1 graph still lacked
+  36 already-merged Chapter 15 declarations, so `checkdecls` rejected the push.
+  This is the same stale snapshot condition observed on PR #51, not a launcher
+  change failure. The unchanged retry uses the documented one-off
+  `MIPSTARRE_SKIP_HOOKS=1`; the mandatory exact-head `ci.sh 41` full build and
+  all audits run immediately after the push, avoiding a duplicate full build.
+- **Housekeeping-audit command notes:** a read-only disk audit first ran an
+  overbroad `/tmp` size scan and cache inventory, producing permission noise
+  and truncated output; it replaced both with project-filtered aggregates.
+  Two probes also assumed `.lake` existed in an old merged PR #7 clone, one
+  stale-ref ancestry check misclassified PR #51, and one sequential remote
+  branch lookup timed out. Exact GitHub state and bounded path probes produced
+  the final conservative cleanup list; no data was changed.
+- **PR #46 preflight orchestration note:** the write worker's first parallel
+  preflight wrapper contained invalid JavaScript (`Unexpected token ':'`), so
+  it failed before launching any shell command. The corrected wrapper then
+  verified the clean worktree and shared-store symlink; no state was changed by
+  the failed attempt.
+- **PR #46 terminal-review decision:** two substantive reviews already covered
+  earlier heads, but the mandatory fresh-base merge created head `3f18c52`
+  after all known in-diff repairs. `pr_merge.py` cannot accept adjudication
+  without a marker-bound review on that exact SHA, so one terminal exact-head
+  review is run solely to satisfy the invariant. It will be adjudicated without
+  another repair or review loop, consistent with the owner's two-round rule.
+- **PR #46 reviewer parallelism note:** the terminal review's code/prose
+  sessions repeatedly attempted to spawn child reviewers after the shared
+  agent-thread ceiling was already full. The runtime rejected each spawn
+  before creation; the two primary reviewer lanes remained live and no
+  repository state changed. PR #41's review was held until this contention
+  cleared instead of adding another reviewer process.
+- **Merged-worktree cleanup under read-only Git metadata:** after archiving six
+  completed sessions, `git worktree remove` deleted the clean worktree
+  directories for merged PRs #44, #39, and #51, reclaiming their generated
+  build trees. Each command then exited 255 because this session cannot delete
+  the corresponding records under the original checkout's read-only `.git`.
+  The records now appear as `prunable`; no live checkout or source work was
+  lost, and the divergent old #51 branch remains preserved for the owner to
+  prune explicitly later.
+- **Housekeeping-policy scout note:** a secondary read-only scout's first broad
+  search was truncated, and a `comm | head` diagnostic emitted an expected
+  broken-pipe warning when `head` closed early. Narrow reads established the
+  archive-before-removal rule and confirmed that permanent session telemetry
+  must never be deleted; no state changed.
+- **PR #46 review fan-out incident:** the first terminal exact-head review
+  launched its intended code and prose lanes, but those reviewers repeatedly
+  attempted nested child-agent fan-out until the shared user concurrency limit
+  was saturated. Both primary lanes then spent about twenty minutes cycling on
+  HTTP 429 reconnects without producing a review. The unpublished attempt was
+  interrupted, and the cache-local review launcher now injects
+  `features.multi_agent=false`; the retry retains the independent top-level
+  code/prose lanes while preventing nested reviewer fan-out. This runtime-only
+  correction is recorded here rather than expanded into a workflow PR.
+- **Fan-out workaround patch note:** the first patch attempted to update the
+  cache-local launcher and telemetry together but omitted the second file's
+  `Update File` header. `apply_patch` rejected the whole patch before changing
+  either file; the corrected atomic patch applied both edits.
+- **Interrupted-review recovery note:** interrupting the stalled PR #46 parent
+  left `review-46.lock` with the short-lived namespace pid 2 and two complete
+  raw JSONL captures but no registry summaries. After confirming both log
+  mtimes had stopped and the parent command had exited, the lock was moved
+  intact to `review-46.lock.stale-20260904T0648`. The raw sessions are retained
+  for telemetry backfill before the next commit; none is treated as a
+  published review round.
+- **Reviewer fan-out retry correction:** `features.multi_agent=false` alone did
+  not remove collaboration calls under the active developer policy. The PR
+  #46 retry and the concurrently started PR #41 review again encountered the
+  shared thread ceiling and were interrupted before either published a review.
+  Their stopped locks were preserved as `.stale-20260904T0658`, and all three
+  raw captures remain available for backfill. Inspection of the active Codex
+  config identified the supported bound
+  `agents.max_concurrent_threads_per_session`; the runtime reviewer launcher
+  now sets it to one and prepends an explicit no-subagent instruction while
+  retaining the intended top-level code/prose parallelism.
+- **Reviewer-config lookup note:** an official OpenAI documentation search for
+  the thread-limit key was itself rejected with HTTP 429 while the runaway
+  reviewer fan-out still occupied the account concurrency limit. The local
+  Codex config then supplied the exact supported key; no external or repository
+  state changed in the failed lookup.
+- **Interrupted-review telemetry backfill:** the five valid raw JSONL captures
+  from the two unpublished PR #46 attempts and the unpublished PR #41 attempt
+  were copied from the runtime cache into permanent session telemetry,
+  validated with `jq`, and summarized as failed exit-130 registry entries.
+  They contain no `turn.completed` event, so zero accounted tokens is the
+  faithful parser result even though partial model/tool events remain archived.
+- **Review prompt truncation noise:** both blueprint-bearing PR #46 attempts
+  printed `sed: couldn't flush stdout: Broken pipe` while the bounded prompt
+  builder stopped reading an oversized stream. The generated sanitized prompt
+  files remained below the hard byte cap, and the later interruption was due
+  to concurrency saturation, not this benign pipe closure.
+
+## 2026-09-03 — Operator takeover: owner's Claude session replaces the codex main session
+
+- **Trigger:** owner decision (2026-09-03, after the eight-hour stall and the
+  reviewer-churn episode): the owner's Claude Fable 5.1 session, working from
+  the owner's machine over ssh, takes the operator role for about one to two
+  days. Dispatched worker sessions (orc/prover/reviewer/…) remain codex
+  sessions on ghz via `dispatch.sh` (model gpt-5.6-sol until "astra" is
+  available in codex's configuration, then astra; an hourly codex poller
+  `owner-tools/astra-poll.sh` reports the switch to #26).
+- **Handover:** the codex main session posted its exact in-flight state to
+  #27 ("Handover to owner session") and exited at 2026-09-03T23:21:32Z. The owner session
+  picks up every lane from that report. The same protocols, gates and telemetry
+  duties bind the owner session; owner-side records continue in
+  `owner-log.md`.
+- **Hand-back:** to be recorded here and in `stages.jsonl` when the owner
+  says so; the codex main session then resumes from `~/.codex/prompts/goal.md`
+  plus the #27 log.
