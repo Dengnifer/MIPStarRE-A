@@ -440,7 +440,13 @@ class MergeGateTests(LayerTestCase):
         with mock.patch.object(pr_merge.gh_common, "api",
                                side_effect=lambda path, **_: [comment] if path.endswith("comments")
                                else {"number": 23, "state": "open"}):
-            pr_merge.check_review(7, self.head, reviews, statuses, adjudicated=True)
+            deferred = pr_merge.check_review(7, self.head, reviews, statuses, adjudicated=True)
+        self.assertEqual(deferred, {23})
+
+        merge_base = _git(self.repo, "merge-base", "main", self.head)
+        with self.assertRaisesRegex(LayerError, "also closes deferred"):
+            pr_merge.check_dependencies(self.repo, 7, "Closes #23", merge_base, self.head,
+                                        deferred)
 
         for bad_body in (comment["body"].replace("head=", "head ="),
                          "ADJUDICATION\nhead=" + self.head):

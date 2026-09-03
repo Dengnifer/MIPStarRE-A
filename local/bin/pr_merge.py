@@ -163,7 +163,7 @@ def check_ci(statuses: dict, head_sha: str) -> None:
 
 
 def check_review(number: int, head_sha: str, reviews: list[dict], statuses: dict,
-                 *, adjudicated: bool) -> None:
+                 *, adjudicated: bool) -> set[int]:
     """Gate 4 — one verdict review on this commit id, clean or adjudicated."""
     marker = f"<!-- mipstarre-review pr={number} head={head_sha} -->"
     matching = [r for r in reviews
@@ -184,7 +184,7 @@ def check_review(number: int, head_sha: str, reviews: list[dict], statuses: dict
     clean = verdict in ("APPROVED", "COMMENTED") and unchecked == 0
     if clean and summary_state == "success":
         passed(f"gate 4 verdict {verdict} on {head_sha[:12]}, {REVIEW_CONTEXT} success")
-        return
+        return set()
     observed = (f"VERDICT {verdict or 'absent'} with {unchecked} unchecked finding(s), "
                 f"{REVIEW_CONTEXT} {summary_state or 'MISSING'}")
     if not adjudicated:
@@ -230,6 +230,7 @@ def check_review(number: int, head_sha: str, reviews: list[dict], statuses: dict
     sys.stderr.write(f"warning: merging PR #{number} on operator adjudication ({where}); the "
                      f"review evidence is adverse — {observed}\n")
     passed(f"gate 4 adjudicated at {head_sha[:12]} ({where})")
+    return {int(issue_number) for _, issue_number in dispositions if issue_number}
 
 
 def check_fix_gates(repo_root: Path, branch: str, base: str, head_sha: str) -> str:
@@ -270,7 +271,8 @@ def check_fix_gates(repo_root: Path, branch: str, base: str, head_sha: str) -> s
 
 
 def check_dependencies(repo_root: Path, number: int, body: str,
-                       merge_base: str, head_sha: str) -> None:
+                       merge_base: str, head_sha: str,
+                       deferred_issues: set[int]) -> None:
     """Gate 7 — nothing this PR closes may still have open children.
 
     GitHub honors closing keywords in the PR body AND in commit messages that
@@ -282,6 +284,9 @@ def check_dependencies(repo_root: Path, number: int, body: str,
                         check=False))
     closes = list(dict.fromkeys(n for text in surfaces
                                 for n in CLOSES_RE.findall(text)))
+    if conflicts := deferred_issues.intersection(int(ident) for ident in closes):
+        raise GateFailure(f"gate 7 (dependencies): PR #{number} also closes deferred issue(s) "
+                          f"{sorted(conflicts)}, which must remain open.")
     for ident in closes:
         children = gh_common.open_sub_issues(int(ident))
         if children:
@@ -328,7 +333,7 @@ def run_gate(repo_root: Path, number: int, *, adjudicated: bool) -> dict:
     statuses = gh_common.latest_statuses(head_sha)  # one read; gates 3 and 4 share it
     reviews = gh_common.pr_reviews(number)
     check_ci(statuses, head_sha)
-    check_review(number, head_sha, reviews, statuses, adjudicated=adjudicated)
+    deferred_issues = check_review(number, head_sha, reviews, statuses, adjudicated=adjudicated)
     # Gate 5 — a CHANGES_REQUESTED review on this head is final, and never adjudicable.
     blockers = [r for r in reviews if r.get("state") == "CHANGES_REQUESTED"
                 and r.get("commit_id") == head_sha]
@@ -340,7 +345,8 @@ def run_gate(repo_root: Path, number: int, *, adjudicated: bool) -> dict:
                           "never overrides this: dismiss it on GitHub, or fix and re-review.")
     passed("gate 5 no CHANGES_REQUESTED review on this head")
     merge_base = check_fix_gates(repo_root, branch, base, head_sha)
-    check_dependencies(repo_root, number, str(pr.get("body") or ""), merge_base, head_sha)
+    check_dependencies(repo_root, number, str(pr.get("body") or ""), merge_base, head_sha,
+                       deferred_issues)
     return {"pr": pr, "head_sha": head_sha, "branch": branch, "base": base}
 
 
