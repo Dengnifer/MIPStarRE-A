@@ -97,9 +97,13 @@ ErrorFunctions} ← Combining/Defs`; `{Combining/Defs, Games/Consistency, ch14 i
 expanded-state interface. Add every file to `MIPStarRE/QPBT.lean`.
 
 **One append to a 4.1 file** (no rename): `deltaQld_mono` in `Test/Soundness.lean` —
-`a ≤ a' → b' ≤ b → 0 < b' → deltaQld a b ε m d q ≤ deltaQld a' b' ε m d q` (`sorry`).
-ch16 needs exactly this ("enlarged by an adjustment of the universal constants",
-ch16 preamble); it belongs beside `deltaQld`, not in ch15's own files.
+for `P : AdmissibleParams`, assume `1 ≤ a`, `a ≤ a'`, `b' ≤ b`, `0 < b'`,
+`0 ≤ ε`, and `ε ≤ 1`, and conclude
+`deltaQld a b ε P.m P.d P.q ≤ deltaQld a' b' ε P.m P.d P.q` (`sorry`). Ch16
+needs this source-domain form ("enlarged by an adjustment of the universal constants",
+ch16 preamble); it belongs beside `deltaQld`, not in ch15's own files. The corrected
+domain is recorded in `results/telemetry/events.md` under
+"2026-09-03 - Issue #18 false unrestricted error monotonicity".
 
 ### Two skeleton patterns (proposed as wave-wide; OPEN-2)
 

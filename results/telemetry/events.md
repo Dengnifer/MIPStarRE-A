@@ -231,3 +231,16 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   was manufactured.  The operator has parked further retries pending the
   bounded reviewer-lane repair, after which the branch will take a fresh base
   and repeat CI and review.
+
+## 2026-09-03 — Issue #18 helper worktree tier-2 recovery
+
+- **Symptom:** `worktree-setup.sh /tmp/mipstarre-18-core --no-build` restored
+  the complete `22afbcbb` tier-1 snapshot, but `lake exe cache get` timed out
+  while cloning Mathlib from GitHub, leaving an incomplete tier-2 tree.
+- **Recovery:** the orchestrator copied the already-pinned `.lake/packages`
+  tree from the issue worktree into the helper worktree as a private copy,
+  then `worktree-setup.sh --check` reported both tiers present and
+  `lake env lean MIPStarRE/QPBT/Test/Soundness.lean` succeeded.
+- **Lesson:** the setup path correctly reports a degraded warm bootstrap, but
+  a network-independent private tier-2 clone remains a manual recovery step
+  when GitHub is unreachable. No hot-cache or manifest state was modified.
