@@ -34,6 +34,7 @@ The measurement $\{\hat{S}_{g_X,g_Z}\}$ reads out an $X$-polynomial and a $Z$-po
 
 \begin{definition}[Single-basis marginals of the polynomial-pair measurement]\label{def:s-w-marginals}
 	\lean{MIPStarRE.QPBT.GlobalPairWitness.marginalPoly}
+	\leanok
 	\uses{lem:qld-4-7}
 	Let $\{\hat{S}_{g_X,g_Z}\}$ be the projective measurement of Lemma~\ref{lem:qld-4-7}. For every $g \in \mathrm{ideg}_{d,m}(\F_q)$ define
 	\[
@@ -46,6 +47,7 @@ The measurement $\{\hat{S}_{g_X,g_Z}\}$ reads out an $X$-polynomial and a $Z$-po
 
 \begin{definition}[Pauli dot-product projectors]\label{def:tau-dot-product-projector}
 	\lean{MIPStarRE.QPBT.tauDotProj}
+	\leanok
 	\uses{def:generalized-pauli}
 	For $W \in \{X,Z\}$ and $h \in \F_q^{M}$ let $\tau^W_h$ denote the projector corresponding to measuring $(\C^q)^{\ot M}$ in the $W$ basis and obtaining the outcome $h$ (Definition~\ref{def:generalized-pauli}). For all $W \in \{X,Z\}$, $\tilde{u} \in \F_q^{M}$, and $a \in \F_q$, define the projector
 	\begin{equation}\label{eq:def-tauwu}
@@ -56,6 +58,7 @@ The measurement $\{\hat{S}_{g_X,g_Z}\}$ reads out an $X$-polynomial and a $Z$-po
 
 \begin{definition}[Pulled-apart Pauli basis measurements]\label{def:tilde-m-measurement}
 	\lean{MIPStarRE.QPBT.tildeM}
+	\leanok
 	\uses{def:s-w-marginals, def:tau-dot-product-projector, def:decoding-map}
 	For all $W \in \{X,Z\}$ and $\tilde{u} \in \F_q^{M}$ define the measurement $\{\tilde{M}^{W,\tilde{u}}_a\}_{a \in \F_q}$ by
 	\begin{equation}\label{eq:tilde_M}
@@ -66,6 +69,7 @@ The measurement $\{\hat{S}_{g_X,g_Z}\}$ reads out an $X$-polynomial and a $Z$-po
 
 \begin{definition}[Pulled-apart Pauli observables]\label{def:tilde-w-observables}
 	\lean{MIPStarRE.QPBT.tildeObs}
+	\leanok
 	\uses{def:tilde-m-measurement, def:dual-self-dual-normal-basis, def:binary-representation, def:subfield-trace}
 	Let $\{e_j\}_{j \in \{1,\ldots,t\}}$ be the self-dual normal basis for $\F_q$ over $\F_2$ (Definition~\ref{def:dual-self-dual-normal-basis}) that is fixed once and for all in Definition~\ref{def:binary-representation}, and let $\tr = \tr_{q \to 2} \colon \F_q \to \F_2$ be the subfield trace. For all $W \in \{X,Z\}$, $\tilde{u} \in \F_q^M$, and $j \in \{1,\ldots,t\}$ define the operator
 	\begin{equation}\label{eq:def-tildewj}
@@ -81,7 +85,7 @@ The measurement $\{\hat{S}_{g_X,g_Z}\}$ reads out an $X$-polynomial and a $Z$-po
 	\lean{MIPStarRE.QPBT.tildeObs_isHermitian}
 	\lean{MIPStarRE.QPBT.tildeObs_mul_self}
 	\lean{MIPStarRE.QPBT.tildeObs_twisted_commutation}
-	\notready
+	\leanok
 	\uses{def:tilde-w-observables, def:s-w-marginals, def:generalized-pauli, def:decoding-map, lem:qld-4-7}
 	Let $\tau^W(\cdot)$ denote the generalized Pauli $W$ observable (Definition~\ref{def:generalized-pauli}). For all $W \in \{X,Z\}$, $\tilde{u} \in \F_q^M$, and $j \in \{1,\ldots,t\}$,
 	\begin{equation}\label{eq:tildewj-product-form}
@@ -115,7 +119,7 @@ The next lemma shows that the pulled-apart measurements are consistent with the 
 	\lean{MIPStarRE.QPBT.tildeM_consistent_pointMeas}
 	\lean{MIPStarRE.QPBT.tildeM_consistent_pointMeas'}
 	\lean{MIPStarRE.QPBT.tildeObs_selfConsistent}
-	\notready
+	\leanok
 	\uses{def:tilde-m-measurement, def:tilde-w-observables,
 		lem:projective-strategy-setup, def:expanded-state, def:consistency,
 		def:approx-question-indexed-operators, lem:qld-4-7,
@@ -191,7 +195,7 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 \begin{lemma}[The marginals absorb the point measurements]\label{lem:qld-constructing-the-paulis-helper}
 	\lean{MIPStarRE.QPBT.sum_marginalPoly_pointMeas_approx_id}
 	\lean{MIPStarRE.QPBT.marginalPoly_sub_pointMeas_approx_zero}
-	\notready
+	\leanok
 	\uses{def:s-w-marginals, def:expanded-point-measurement, def:expanded-state, def:povm-distance, lem:qld-4-7, def:symmetric-equivalents}
 	For $W \in \{X,Z\}$, on average over uniformly random $u \in \F_q^m$,
 	\begin{equation}\label{eq:qld-sg-cons}
@@ -225,6 +229,7 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 
 \begin{definition}[The swap unitaries]\label{def:v-swap-unitary}
 	\lean{MIPStarRE.QPBT.swapUnitary}
+	\leanok
 	\uses{lem:qld-4-7, def:generalized-pauli, def:decoding-map}
 	Define the linear map
 	\[
@@ -240,7 +245,7 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 	\lean{MIPStarRE.QPBT.conjTranspose_mul_swapUnitary}
 	\lean{MIPStarRE.QPBT.swapUnitary_conj_tildeObs}
 	\lean{MIPStarRE.QPBT.swapUnitary_conj_tildeM}
-	\notready
+	\leanok
 	\uses{def:v-swap-unitary, def:tilde-w-observables, def:tilde-m-measurement, def:generalized-pauli, def:indicator-vector, def:bracket}
 	The maps $V_{\mathrm{A}}$ and $V_{\mathrm{B}}$ of Definition~\ref{def:v-swap-unitary} are unitaries acting on registers $\mathrm{A}\mathrm{A}'\mathrm{A}''$ and $\mathrm{B}\mathrm{B}'\mathrm{B}''$ respectively, and their conjugation action is exact, as follows. For all $W \in \{X,Z\}$, $j \in \{1,\ldots,t\}$, and $\tilde{u} \in \F_q^M$,
 	\begin{equation}\label{eq:v-swap-obs-conjugation}
@@ -272,7 +277,7 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 \begin{lemma}[Extraction of the EPR state and the Pauli observables]\label{lem:qld-unitary}
 	\lean{MIPStarRE.QPBT.ExtractionWitness}
 	\lean{MIPStarRE.QPBT.exists_extractionWitness}
-	\notready
+	\leanok
 	\uses{lem:qld-4-7, def:v-swap-unitary, def:expanded-state, lem:projective-strategy-setup, def:generalized-pauli, def:EPR, def:povm-distance}
 	There exists a function $\delta_{\mathrm{qld}}(\eps,m,d,q) = O(\delta_S^{1/4} + md/q)$, where $\delta_S$ is the function of Lemma~\ref{lem:qld-4-7}, and there exist unitaries $V_{\mathrm{A}}$ acting on registers $\mathrm{A}\mathrm{A}'\mathrm{A}''$ and $V_{\mathrm{B}}$ acting on registers $\mathrm{B}\mathrm{B}'\mathrm{B}''$, such that the following hold.
 	\begin{enumerate}

@@ -41,6 +41,12 @@ side-indexed global measurements, and use only the basis fixed by `P.model`.
 structure ExtractionWitness {P : AdmissibleParams} {epsilon deltaS : ℝ}
     (S : ProjectiveSetting P epsilon) (w : GlobalPairWitness S deltaS)
     (delta : ℝ) where
+  /-- Each swap map is a right unitary. -/
+  swap_right_unitary : ∀ side : PlayerSide,
+    swapUnitary w side * (swapUnitary w side)ᴴ = 1
+  /-- Each swap map is a left unitary. -/
+  swap_left_unitary : ∀ side : PlayerSide,
+    (swapUnitary w side)ᴴ * swapUnitary w side = 1
   /-- The auxiliary state on registers `AA'BB'`. -/
   aux : EuclideanSpace ℂ
     (ExtractionAuxRegisters P S.toStrategy.ιA S.toStrategy.ιB)
