@@ -23,13 +23,16 @@ export PATH="$HOME/.elan/bin:$HOME/.local/bin:$PATH"
 command -v codex >/dev/null 2>&1 || {
   printf 'main-session.sh: codex CLI not found on PATH\n' >&2; exit 1; }
 
-readonly CACHE_ROOT=/home/drx/.cache/mipstarre-dev
+# The MAIN session is the trusted orchestrator: it commits, merges and pushes
+# in the primary checkout, which codex's workspace-write sandbox forbids (.git
+# stays read-only there; review of PR #41, F1).  Worker sessions get their own
+# sandboxes from dispatch.sh.  approval_policy=never: the automatic approval
+# review timed out and dropped merges on 2026-09-03 (events.md).
+readonly CACHE_ROOT="${MIPSTARRE_CACHE_ROOT:-$HOME/.cache/mipstarre-dev}"
 readonly -a CODEX_ARGS=(
   -C "$ROOT"
-  -s workspace-write
+  --sandbox danger-full-access
   -c 'approval_policy="never"'
-  -c 'sandbox_workspace_write.network_access=true'
-  -c "sandbox_workspace_write.writable_roots=[\"$CACHE_ROOT\",\"$ROOT\"]"
 )
 
 if [ "${1:-}" = "--resume" ]; then
