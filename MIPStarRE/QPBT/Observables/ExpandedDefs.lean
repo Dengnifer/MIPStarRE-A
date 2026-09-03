@@ -32,8 +32,8 @@ abbrev SixReg (P : AdmissibleParams) (ιA ιB : Type*) :=
   (ιA × (PauliRegister P × PauliRegister P)) ×
     (ιB × (PauliRegister P × PauliRegister P))
 
-/-- Equality of six-register indices is decidable because the index set is
-finite. This is the index set of `def:expanded-state`; blueprint
+/-- Equality of six-register indices is supplied by classical decidability for
+the register type. This is the index set of `def:expanded-state`; blueprint
 `ch14_qpbt_observables.tex:760-781`. -/
 noncomputable instance sixRegDecidableEq (P : AdmissibleParams)
     (ιA ιB : Type*) : DecidableEq (SixReg P ιA ιB) :=
