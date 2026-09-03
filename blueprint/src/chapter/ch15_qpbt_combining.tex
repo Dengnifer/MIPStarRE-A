@@ -97,6 +97,9 @@ assembled by Fourier averaging.
 % cited theorem, and none is reproduced here. See rem:linearity-import.
 \begin{theorem}[Quantum linearity test~\cite{Natarajan2017Linearity}]
 	\label{thm:linearity}
+	\lean{MIPStarRE.QPBT.IsBinaryObservable, MIPStarRE.QPBT.stateDepDistSq}
+	\lean{MIPStarRE.QPBT.exists_exactly_linear_observables}
+	\leanok
 	\uses{def:povm-conventions}
 	Let $t$ be a positive integer and $\delta \ge 0$. Let $\rho$ be a
 	density operator on a Hilbert space $\hilb$ and let
@@ -190,6 +193,9 @@ assembled by Fourier averaging.
 
 \begin{lemma}[Combined point measurements]
 	\label{lem:qld-4-10}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness}
+	\lean{MIPStarRE.QPBT.exists_combinedPointsWitness}
+	\leanok
 	\uses{def:expanded-state, def:expanded-point-measurement,
 		def:povm-distance, def:symmetric-equivalents}
 	There exists a function $\delta_Q(\eps) = \poly(\eps)$ such that the
@@ -344,8 +350,12 @@ assembled by Fourier averaging.
 
 \begin{lemma}[Combined line measurements]
 	\label{lem:qld-xz-lines}
+	\lean{MIPStarRE.QPBT.CombinedLinesWitness}
+	\lean{MIPStarRE.QPBT.exists_combinedLinesWitness}
+	\leanok
 	\uses{lem:qld-4-10, def:line, def:line-point-dist, def:consistency,
-		def:bracket, def:expanded-state, def:symmetric-equivalents}
+		def:bracket, def:expanded-state, def:symmetric-equivalents,
+		def:ideg-deg-polynomials}
 	There exists a function $\delta_P(\eps,m,d,q) = \poly(\eps, md/q)$ such
 	that the following holds. For
 	$\hilb \in \{\hilb_{\mathsf{A}}, \hilb_{\mathsf{B}}\}$ and every pair of
@@ -444,7 +454,13 @@ analyzed, together with candidate repairs, in
 
 \begin{definition}[The combining map]
 	\label{def:combine-map}
-	\uses{def:polyfunc, def:line}
+	\lean{MIPStarRE.QPBT.combinePoly, MIPStarRE.QPBT.combinePoly_eval}
+	\lean{MIPStarRE.QPBT.combinePoly_mem_polyFunc}
+	\lean{MIPStarRE.QPBT.combineLinePoly}
+	\lean{MIPStarRE.QPBT.combineLinePolynomial_natDegree_le}
+	\lean{MIPStarRE.QPBT.IsCombineLineCompatible, MIPStarRE.QPBT.combineLinePoly_spec}
+	\leanok
+	\uses{def:polyfunc, def:line, def:ideg-deg-polynomials}
 	For $f, g \in \mathrm{ideg}_{d,m}(\F_q)$, the polynomial
 	$\mathrm{combine}_{f,g} \in \mathrm{ideg}_{d,2m+2}(\F_q)$ is defined by
 	\[
@@ -476,6 +492,9 @@ analyzed, together with candidate repairs, in
 
 \begin{lemma}[Combined point measurement on the extended coordinates]
 	\label{lem:qld-4-12}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.extendedQ}
+	\lean{MIPStarRE.QPBT.extendedQ_spec}
+	\leanok
 	\uses{lem:qld-4-10, def:expanded-state, def:expanded-point-measurement,
 		def:povm-distance, def:symmetric-equivalents}
 	For all $x, z \in \F_q^m$, $\alpha, \beta \in \F_q$, and
@@ -530,8 +549,11 @@ analyzed, together with candidate repairs, in
 
 \begin{lemma}[Combined line measurement on the extended coordinates]
 	\label{lem:qld-4-13}
+	\lean{MIPStarRE.QPBT.ExtendedLinesWitness}
+	\lean{MIPStarRE.QPBT.exists_extendedLinesWitness}
+	\leanok
 	\uses{lem:qld-4-12, def:line, def:line-point-dist, def:consistency,
-		def:bracket, def:expanded-state}
+		def:bracket, def:expanded-state, def:ideg-deg-polynomials}
 	% Statement as in the source (references/qpbt-paper/
 	% 14_analysis_of_the_pauli_basis_test.tex, lem:qld-4-13), including the
 	% error form poly(m^2 eps, md/q); neither of the source's two proof
@@ -577,6 +599,10 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 
 \begin{definition}[Restricted line distributions]
 	\label{def:ith-restricted-line}
+	\lean{MIPStarRE.QPBT.restrictedALineDist, MIPStarRE.QPBT.restrictedDLineDist}
+	\lean{MIPStarRE.QPBT.restrictedALineDist_isProbability}
+	\lean{MIPStarRE.QPBT.restrictedDLineDist_isProbability}
+	\leanok
 	\uses{def:line-point-dist, def:ld-question-distribution}
 	For any $i \in \{1, \dots, m\}$, the \emph{$i$-th restricted
 	axis-parallel line distribution} $D_{\mathrm{ALine},i}$ is the
@@ -593,6 +619,10 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 
 \begin{lemma}[Restricted line distributions and error inflation]
 	\label{lem:restricted-line-mixture-bounds}
+	\lean{MIPStarRE.QPBT.linePointDist_eq_mixture_restricted}
+	\lean{MIPStarRE.QPBT.avg_restricted_le, MIPStarRE.QPBT.avg_restricted_prod_le}
+	\lean{MIPStarRE.QPBT.restricted_lines_consistency_bound}
+	\leanok
 	% Source: unlabelled prose in the paper --- the discussion following
 	% def:ith-restricted-line at lines 1049-1061 of
 	% references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex.
@@ -646,6 +676,8 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 
 \begin{lemma}[The sub-line distribution]
 	\label{lem:qld-sublines}
+	\lean{MIPStarRE.QPBT.SubLineWitness, MIPStarRE.QPBT.exists_subLineWitness}
+	\leanok
 	\uses{def:line, def:line-point-dist, def:ith-restricted-line}
 	% Statement as in the source (references/qpbt-paper/
 	% 14_analysis_of_the_pauli_basis_test.tex, lem:qld-sublines). The
@@ -859,6 +891,8 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 
 \begin{lemma}[Replacing the combined point measurement by the ordered product]
 	\label{lem:claim-17-1}
+	\lean{MIPStarRE.QPBT.subline_replace_by_ordered_product}
+	\leanok
 	% claim:17-1 in the paper; the original label is recorded here as a
 	% comment for cross-reference fidelity.
 	\uses{lem:qld-sublines, lem:qld-xz-lines, lem:qld-4-10,
@@ -906,6 +940,8 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 
 \begin{lemma}[Removing the $X$-point factor]
 	\label{lem:claim-17-2}
+	\lean{MIPStarRE.QPBT.subline_remove_X_factor}
+	\leanok
 	% claim:17-2 in the paper; the original label is recorded here as a
 	% comment for cross-reference fidelity. The source right-hand side
 	% carries a typographical superscript "Z" in place of the point "z";
@@ -973,6 +1009,8 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 
 \begin{lemma}[The remaining $Z$-point term is close to one]
 	\label{lem:claim-17-3}
+	\lean{MIPStarRE.QPBT.subline_Z_term_near_one}
+	\leanok
 	% claim:17-3 in the paper; the original label is recorded here as a
 	% comment for cross-reference fidelity.
 	\uses{lem:qld-sublines, lem:qld-xz-lines, lem:qld-4-10,
@@ -1132,8 +1170,12 @@ projective measurement whose outcomes are pairs of global polynomials.
 
 \begin{lemma}[The global polynomial-pair measurement]
 	\label{lem:qld-4-7}
+	\lean{MIPStarRE.QPBT.Poly, MIPStarRE.QPBT.PolyPair, MIPStarRE.QPBT.evalAt}
+	\lean{MIPStarRE.QPBT.GlobalPairWitness}
+	\lean{MIPStarRE.QPBT.exists_globalPairWitness}
+	\leanok
 	\uses{def:polyfunc, def:expanded-state, def:expanded-point-measurement,
-		def:consistency, def:bracket}
+		def:consistency, def:bracket, def:ideg-deg-polynomials}
 	% Statement as in the source (references/qpbt-paper/
 	% 14_analysis_of_the_pauli_basis_test.tex, lem:qld-4-7). The proof
 	% instantiates the classical low individual degree game, and Theorem
