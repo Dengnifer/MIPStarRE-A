@@ -34,6 +34,7 @@ The measurement $\{\hat{S}_{g_X,g_Z}\}$ reads out an $X$-polynomial and a $Z$-po
 
 \begin{definition}[Single-basis marginals of the polynomial-pair measurement]\label{def:s-w-marginals}
 	\lean{MIPStarRE.QPBT.GlobalPairWitness.marginalPoly}
+	\lean{MIPStarRE.QPBT.GlobalPairWitness.marginalPoly_isProjective}
 	\leanok
 	\uses{lem:qld-4-7}
 	Let $\{\hat{S}_{g_X,g_Z}\}$ be the projective measurement of Lemma~\ref{lem:qld-4-7}. For every $g \in \mathrm{ideg}_{d,m}(\F_q)$ define
@@ -167,8 +168,6 @@ The source continues to call this enlarged error $\delta_S$, absorbing the new t
 	\]
 	Expanding $K^u_a$ over pairs $(h, h'')$ of Pauli outcomes, a term of the left-hand side with outcomes $(g, h, h'')$ is constrained by $g(u) = g_h(u) + g_{h''}(u) = g_{h + h''}(u)$, by the linearity of the encoding \eqref{eq:low-degree-encoding-definition}. If $g$ is not an encoding then $g \neq g_{h+h''}$, and both are polynomials of total degree at most $md$, so the constraint holds for at most an $md/q$ fraction of $u$ (Lemma~\ref{lem:schwartz-zippel-total-degree}). Since all terms are nonnegative and, for each $g$, the operators of the $(h,h'')$-sum add up to the identity, it follows that
 	\begin{equation}\label{eq:qld-nonencoding-mass}
-	\lean{nonencodingMarginalMass_le}
-	\notready
 	\sum_{g \,\text{not an encoding}} \bra{\hat\psi} (\hat{S}^W_g)_{\mathrm{B}\mathrm{B}'} \ket{\hat\psi} \,\leq\, O(\delta_G + \eps) + \frac{md}{q} \,\leq\, \delta_P\;,
 	\end{equation}
 	and symmetrically with the registers $\mathrm{A}\mathrm{A}'$ in place of $\mathrm{B}\mathrm{B}'$. (If $d = 0$, every element of $\mathrm{ideg}_{d,m}(\F_q)$ is constant, hence an encoding, and the left-hand side vanishes.)
@@ -194,6 +193,16 @@ The source continues to call this enlarged error $\delta_S$, absorbing the new t
 	\]
 	is symmetric under exchanging $(g,h)$ with $(g',h')$: since $\mathrm{Dec}$ is linear with $\mathrm{Dec}(g_{h}) = h$ for all $h \in \F_q^M$ (Remark~\ref{rem:qld-decoding-identity}), the constraint $g' - g_{h'} = g - g_h$ implies $\mathrm{Dec}(g) - h = \mathrm{Dec}(g') - h'$, so the two constraint sets coincide. The same derivation therefore bounds the distance of the displayed expression to $(\tilde{M}^{W,\tilde{u}}_a)_{\mathrm{B}\mathrm{B}'\mathrm{B}''}$, and \eqref{eq:qld-pulling-cons} follows at the common scale $\delta_P$. Finally, since $\{\tilde{M}^{W,\tilde{u}}_a\}$ is projective, Item~2 of Lemma~\ref{fact:agreement}, data processing along the map $a \mapsto \tr(e_j a)$ (Lemma~\ref{fact:data-processing}), and Item~1 of Lemma~\ref{fact:agreement} yield $(\tilde{M}^{W,\tilde{u}}_{[\tr(e_j \cdot) = b]})_{\mathrm{A}\mathrm{A}'\mathrm{A}''} \approx_{\delta_P} (\tilde{M}^{W,\tilde{u}}_{[\tr(e_j \cdot) = b]})_{\mathrm{B}\mathrm{B}'\mathrm{B}''}$ with answer summation over $b \in \F_2$, and Lemma~\ref{lem:povm-to-obs} converts this into the claimed self-consistency of the observables $\tilde{W}^j(\tilde{u})$.
 \end{proof}
+
+\begin{lemma}[Non-encoding support estimate]
+\label{lem:qld-nonencoding-mass-bound}
+	\lean{MIPStarRE.QPBT.nonencodingMarginalMass_le}
+	\notready
+	For either player and either Pauli basis, the non-encoding marginal mass in
+	Equation~\eqref{eq:qld-nonencoding-mass} is at most the common construction
+	error~$\delta_P$. This bound must be derived from point consistency and
+	Schwartz--Zippel; it is not an additional extraction hypothesis.
+\end{lemma}
 
 % Following the source, the next lemma is stated after
 % lem:qld-construct-the-paulis, whose proof invokes it; its own proof

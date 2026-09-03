@@ -13,10 +13,10 @@ placements. The generalized Pauli projectors use the field and basis fixed by
 ## References
 
 The extraction witness formalizes `lem:qld-unitary` in
-`blueprint/src/chapter/ch16_qpbt_extraction.tex:248-270`, from
+`blueprint/src/chapter/ch16_qpbt_extraction.tex:295-314`, from
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1666-1860`.
 The error-form comparison records `rem:pauli-robustness-form`, blueprint lines
-330-334 and paper lines 1855-1858 and 1868-1876.
+380-385 and paper lines 1855-1858 and 1868-1876.
 -/
 
 open scoped BigOperators Matrix
@@ -33,7 +33,7 @@ Pauli projectors. The answer sum in `pauli_close` is over
 `PauliRegister P`; the uniform distribution on `Unit` records that there is no
 average over questions.
 
-Blueprint `ch16_qpbt_extraction.tex:248-264`; paper
+Blueprint `ch16_qpbt_extraction.tex:295-314`; paper
 `14_analysis_of_the_pauli_basis_test.tex:1666-1685,1827-1859`. The swap maps
 are `swapUnitary w .alice` and `swapUnitary w .bob`, defined from the
 side-indexed global measurements, and use only the basis fixed by `P.model`.
@@ -72,7 +72,7 @@ structure ExtractionWitness {P : AdmissibleParams} {epsilon deltaS : ℝ}
 explicit extraction scale applied to `deltaConstructPaulis`.
 
 This is the source-facing existence statement from blueprint
-`ch16_qpbt_extraction.tex:248-264` and paper
+`ch16_qpbt_extraction.tex:295-314` and paper
 `14_analysis_of_the_pauli_basis_test.tex:1666-1860`. It introduces no transfer
 premise or additional basis parameter.
 
@@ -105,7 +105,7 @@ family after decreasing the exponent and enlarging the universal constant.
 
 This is the named quantitative obligation behind
 `rem:pauli-robustness-form`, blueprint
-`ch16_qpbt_extraction.tex:330-334`, and the concluding comparison at paper
+`ch16_qpbt_extraction.tex:380-385`, and the concluding comparison at paper
 `14_analysis_of_the_pauli_basis_test.tex:1855-1858,1868-1876`.
 
 **Proof obligation:** issue #47 tracks this real-power estimate. Discharge:
