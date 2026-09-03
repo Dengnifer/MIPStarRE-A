@@ -376,3 +376,32 @@ this amendment and contained in the PR head.
 evidence is green on the exact head; the owner-gated set is exactly the
 anti-bloat budget; a question for the owner parks one item instead of idling
 the session.
+
+## 2026-09-03 — Tier 2 becomes a shared read-only package store
+
+**Trigger:** owner audit of disk use on ghz (2026-09-03): the project directory
+had grown to 87 GB on a 97 %-full disk, 58 GB of it eight identical 7.3 GB
+copies of `.lake/packages` (all 21 checkouts share one `lake-manifest.json`
+and `lean-toolchain`); ext4 without reflink, so copy-on-write is unavailable.
+
+**Change:**
+
+1. `warm-worktree.sh`: tier 2 is linked from `$CACHE_ROOT/packages/<key>`
+   (`key = sha256(lake-manifest.json ‖ lean-toolchain)[:16]`); the first
+   warmer for a key still runs `lake exe cache get`, then publishes the tree
+   (move, `chmod -R a-w`, symlink); later warmers only link. A pre-existing
+   per-worktree copy is left in place with a warning.
+2. `build-cache.md` tier-2 section and invariant 10 rewritten: the
+   "never symlinked" rule is replaced by the read-only store, with the reason
+   the old objection no longer applies (writes fail loudly instead of
+   spreading). `ci.sh` already treated a symlinked `.lake/packages` as a
+   read-only dependency tree.
+3. Live migration performed by the owner: the primary checkout's tree was
+   moved into the store and every identical worktree copy swapped for a
+   symlink (same filesystem `mv` + `ln -s`, safe under running `lake`
+   processes), reclaiming ~51 GB.
+
+**Expected effect:** packages cost 7.3 GB once per manifest rather than per
+worktree; new worktrees are ready in seconds without touching the network
+(which was flaking from ghz on 2026-09-02); a Mathlib bump is a new store key,
+never a mutation of a shared tree.

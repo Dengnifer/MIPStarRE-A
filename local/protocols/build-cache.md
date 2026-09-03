@@ -55,15 +55,22 @@ copy.
 
 **Tier 2 — `.lake/packages`** — Mathlib and its transitive dependencies. The
 parent never put these in the GitHub cache; they come from Mathlib's own cloud
-cache via `lake exe cache get` inside `lean-action`. Locally the same holds:
-**every worktree runs its own `lake exe cache get`.**
+cache via `lake exe cache get` inside `lean-action`. Locally they live **once
+per manifest** in a shared, read-only store:
+`$CACHE_ROOT/packages/<key>`, `key = sha256(lake-manifest.json ‖ lean-toolchain)[:16]`,
+and every worktree's `.lake/packages` is a symlink to it.
 
-> **Tier 2 is never symlinked into a worktree.** A shared `.lake/packages` looks
-> attractive (it saves the download), but it is read-only only by convention, and
-> a single consumer running `lake update` mutates the tree for every other
-> worktree simultaneously. The download is cheap; a corrupted shared dependency
-> tree during a multi-agent session is not. `warm-worktree.sh` therefore fetches
-> per worktree, and `worktree-setup.sh` refuses to run `lake update` at all.
+> **Why a shared store is safe here (2026-09-03).** The old objection — a
+> shared tree is read-only only by convention, so one `lake update` mutates it
+> for everyone — is answered mechanically: the store is `chmod -R a-w`, so any
+> write (an automated `lake update`, a dependency rebuild after a manifest
+> drift) fails loudly in the one worktree that attempted it. Identity is by
+> key, so a Mathlib bump simply creates a new store entry; worktrees on the old
+> manifest keep linking the old one. The first worktree to need a key fetches
+> with `lake exe cache get` into a real directory, then *publishes* it (move,
+> `chmod a-w`, link); later worktrees only link. Cost: 7.3 GB once per key
+> instead of per worktree (8 copies = 58 GB on 2026-09-03, on a 97 % full disk).
+> `worktree-setup.sh` still refuses to run `lake update`.
 
 Consequence for `lake update`: it is not part of any automated path here. It
 rewrites `lake-manifest.json`, which moves the cache key (§3) out from under
@@ -524,7 +531,8 @@ A change to any of these scripts must preserve all of the following:
 7. Failed builds still publish, flagged `partial`.
 8. GC never removes the snapshot `current` names.
 9. At most one full `lake build` machine-wide; `lake env lean` takes no lock.
-10. `.lake/packages` is per-worktree and never symlinked; no automated `lake update`.
+10. `.lake/packages` is a symlink to the read-only store `$CACHE_ROOT/packages/<key>`;
+    the store is `chmod a-w`; no automated `lake update`.
 11. The ProofWidgets fresh-state workaround runs before any `lake exe cache get`.
 12. Every `lake` / vendored-`git` invocation goes through `run_outside_git_env`.
 13. `STAMP` is parsed by whitelist and validated; never `eval`ed or `source`d.
