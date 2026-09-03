@@ -37,6 +37,16 @@ noncomputable def deltaQld (a b ε : ℝ) (m d q : ℕ) : ℝ :=
     (Real.rpow ε b + Real.rpow (q : ℝ) (-b) +
       Real.rpow 2 (-(b * ((m * d : ℕ) : ℝ))))
 
+/-- Monotonicity obligation for adjusting the universal constants in
+`deltaQld`.  This Lean-only helper supports the enlargement of `a` and
+shrinkage of `b` described in the Chapter 16 preamble
+(`blueprint/src/chapter/ch16_qpbt_extraction.tex:101-104`); it is not an
+additional hypothesis of `thm:pauli` or `lem:qld-4-7`. -/
+theorem deltaQld_mono {a a' b b' ε : ℝ} {m d q : ℕ}
+    (ha : a ≤ a') (hb : b' ≤ b) (hb' : 0 < b') :
+    deltaQld a b ε m d q ≤ deltaQld a' b' ε m d q := by
+  sorry
+
 /-- The ideal auxiliary state `aux ⊗ EPR_q^{⊗M}` in the shuffled register
 ordering.  The EPR factor is the concrete `eprState` from
 `def:EPR` (`blueprint/src/chapter/ch11_qpbt_algebra.tex:537-547`; paper
