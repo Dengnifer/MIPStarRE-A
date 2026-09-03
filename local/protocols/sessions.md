@@ -195,6 +195,11 @@ local/bin/dispatch.sh --role prover --issue 0042 \
   -- "The build now fails at line 88; fix that and re-run the ladder."
 ```
 
+`dispatch.sh` places the worktree, sandbox, JSON, final-message, model, and
+configuration options before the optional `resume` subcommand. They are
+`codex exec` options in the installed CLI grammar and are rejected when placed
+after `resume`.
+
 Semantics:
 
 - A resume is a **new session**: new name, new sequence number, new capture

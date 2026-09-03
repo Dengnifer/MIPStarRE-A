@@ -376,3 +376,24 @@ this amendment and contained in the PR head.
 evidence is green on the exact head; the owner-gated set is exactly the
 anti-bloat budget; a question for the owner parks one item instead of idling
 the session.
+
+## 2026-09-03 — Dispatch resume option ordering
+
+**Trigger:** `results/telemetry/events.md` 2026-09-03, "Dispatch resume
+argument-order failure" (issue #38): sanctioned session
+`orc-18-20260903-01` failed before agent start because `codex exec resume`
+rejected the worktree option after the subcommand.
+
+**Change:** `local/bin/dispatch.sh` now places all `codex exec` options before
+the optional `resume` subcommand. `local/protocols/sessions.md` records that
+CLI-ordering invariant, and `scripts/tests/test_dispatch.py` checks fresh and
+resumed argv assembly deterministically.
+
+**Expected effect:** fresh and resumed dispatches retain the same worktree,
+sandbox, JSON capture, final-message, model, and configuration behavior, while
+both conform to the installed Codex CLI grammar.
+
+**Outcome:** read-only smoke sessions `scout-38-resume-smoke-20260903-01` and
+`scout-38-resume-smoke-20260903-02` started in the issue #38 worktree, shared
+thread `01a064b5-fb0a-77b0-830e-e106a44b1a8f`, and each completed with JSON,
+a final message, and a successful telemetry record.
