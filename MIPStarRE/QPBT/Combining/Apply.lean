@@ -1,0 +1,92 @@
+import MIPStarRE.QPBT.Combining.Points
+import MIPStarRE.QPBT.Test.Soundness
+
+/-!
+# Applying the classical low-degree test
+
+This module states the two application obligations at the end of the Pauli-basis
+combining argument.  The combined-line measurement is recorded both with the error
+form asserted by the source and with the weaker estimate established by its first
+proof route.  The final witness packages the projective measurement of a pair of
+global bounded individual-degree polynomials.
+
+## References
+
+The combined-line declarations formalize `lem:qld-4-13` in
+`blueprint/src/chapter/ch15_qpbt_combining.tex`, with paper source
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1020-1034`.
+The global-pair declaration formalizes `lem:qld-4-7` in the same blueprint, with
+paper source
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1267-1274`.
+-/
+
+namespace MIPStarRE.QPBT
+
+noncomputable section
+
+/-- Construction of the extended-line measurements with the source error
+`poly(m^2 * epsilon, md / q)`.  This is the source-facing statement of
+`lem:qld-4-13`, paper lines 1020--1034.
+
+The printed proof does not establish this error form: its first route gives
+`m * poly(epsilon, md / q)`, while its second route gives a different bound and
+uses a joint-law decomposition absent from the subline lemma.  The discrepancy is
+documented in `docs/paper-gaps/qpbt_combined-lines-error-term.tex` and
+`rem:qld-4-13-source-defects` in the blueprint.  The directly indexed line carrier
+used by `ExtendedLinesWitness` represents the required extended-dimensional
+line-point law without the invalid divisibility guard; it is analysis-only and does
+not identify the source's seed-bearing verifier game with the directly indexed game.
+-/
+theorem exists_extendedLinesWitness :
+    ∃ deltaCombine : ℝ → ℝ → ℝ, IsPolyErr₂ deltaCombine ∧
+      ∀ (P : AdmissibleParams) (ε δQ : ℝ) (S : ProjectiveSetting P ε)
+        (points : CombinedPointsWitness S δQ),
+        Nonempty (ExtendedLinesWitness S points
+          (deltaCombine ((P.m : ℝ) ^ 2 * ε)
+            ((P.m * P.d : ℕ) / (P.q : ℝ)))) := by
+  sorry
+
+/-- Construction of the extended-line measurements with the estimate actually
+delivered by the first proof route, `C * m * poly(epsilon, md / q)`.
+
+This is a Lean-only established form of the argument, not the source-labelled
+`lem:qld-4-13`; it must not be advertised as that theorem.  The source discrepancy
+is analyzed in `docs/paper-gaps/qpbt_combined-lines-error-term.tex`.  As in the
+source-facing declaration, the extended questions use the analysis-only direct line
+carrier.  Relating its game to the source's seed-bearing game requires the transport
+and soundness obligations in
+`docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`.
+-/
+theorem exists_extendedLinesWitness_established :
+    ∃ C : ℝ, 0 < C ∧
+      ∃ deltaCombine : ℝ → ℝ → ℝ, IsPolyErr₂ deltaCombine ∧
+        ∀ (P : AdmissibleParams) (ε δQ : ℝ) (S : ProjectiveSetting P ε)
+          (points : CombinedPointsWitness S δQ),
+          Nonempty (ExtendedLinesWitness S points
+            (C * (P.m : ℝ) *
+              deltaCombine ε ((P.m * P.d : ℕ) / (P.q : ℝ)))) := by
+  sorry
+
+/-- Construction of the projective global polynomial-pair measurements from
+`lem:qld-4-7`, paper lines 1267--1274.  The statement has the source's universal
+constants and contains no divisibility hypothesis or residual construction input.
+
+The proof must apply low-degree soundness at dimension `2 * m + 2`.  The current
+direct carrier makes that application well-typed without assuming
+`2 * m + 2 ∣ q`, but it does not itself prove the game-correspondence and
+auxiliary-parameter estimates required by the soundness import; those obligations
+are exposed by `exists_direct_ld_soundness` and documented in
+`docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`.  Absorption of the established
+combined-lines prefactor into the final universal constants is to use
+`deltaQld_mono` on its stated source parameter domain.
+-/
+theorem exists_globalPairWitness :
+    ∃ a b : ℝ, 1 < a ∧ 0 < b ∧ b < 1 ∧
+      ∀ (P : AdmissibleParams) (ε : ℝ), 0 < ε →
+        ∀ S : ProjectiveSetting P ε,
+          Nonempty (GlobalPairWitness S (deltaQld a b ε P.m P.d P.q)) := by
+  sorry
+
+end
+
+end MIPStarRE.QPBT
