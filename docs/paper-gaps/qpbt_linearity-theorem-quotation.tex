@@ -37,29 +37,36 @@
 
 \section{Key theorem forms}
 
-Let $u\mapsto O^u$ be observables indexed by $\mathbb F_2^t$, acting on one
-factor of a bipartite state $\rho$.  The cited theorem assumes the averaged
+Let $H$ be a finite-dimensional Hilbert space, let $\rho$ be an arbitrary
+density operator on $H$, and let $u\mapsto O^u$ be binary observables on $H$,
+indexed by $\mathbb F_2^t$.  The cited theorem assumes the averaged
 correlation estimate
 \[
   \mathop{\mathbb E}_{u,v}
-  \operatorname{Tr}_{\rho}\!\left(O^u O^v O^{u+v}\right) \geq 1-\delta.
+  \operatorname{Tr}\!\left(O^u O^v O^{u+v}\rho\right) \geq 1-\delta.
 \]
-It produces an extension $\rho'$ and observables $L^u$ satisfying
+It produces an auxiliary space $H'$, a unit vector $\mathrm{anc}\in H'$, and
+binary observables $L^u$ on $H\otimes H'$ satisfying, with
+$\rho'=\rho\otimes|\mathrm{anc}\rangle\langle\mathrm{anc}|$,
 \[
   L^uL^v=L^{u+v}
-  \quad\text{for every }u,v,
-  \qquad
+  \quad\text{for every }u,v.
+\]
+Moreover,
+\[
   \mathop{\mathbb E}_{u}
-  \lVert L^u-O^u\rVert_{\rho'}^2\leq\delta.
+  \operatorname{Tr}\!\left((L^u-O^u\otimes I_{H'})^\dagger
+    (L^u-O^u\otimes I_{H'})\,\rho'\right)\leq\delta.
 \]
 In particular, $L^0=I$: exact linearity gives $(L^0)^2=L^0$, while an
 observable is invertible.
 
 The chapter needs a parameterized version.  For each pair $(x,z)$ it applies
-the theorem to $(r,s)\mapsto O^{x,z,r,s}$.  The available hypothesis and the
-required conclusion are both averaged over $(x,z)$.  Thus one must first
-separate good and bad fibers, or formulate and prove the corresponding finite
-averaged theorem directly.
+the theorem to $(r,s)\mapsto O^{x,z,r,s}$.  Since the provider theorem accepts
+the actual nonnegative defect on each fiber, no assumption that a fiber defect
+is at most one, and no good--bad fiber split, is needed.  One must still
+formulate the finite common-extension step that makes the auxiliary space
+uniform over $(x,z)$.
 
 \section{Comparison with the quoted statement}
 
@@ -68,34 +75,33 @@ Lines~711--725 of
 linearity theorem.  The displayed hypothesis correctly averages over both
 group variables.  The displayed conclusion, however, says that the corrected
 observable is close for every $u$, whereas Theorem~10 of the cited work gives
-closeness only on average over $u$ \cite{Natarajan2017Linearity}.  The extra
-assumption $\delta\leq1$ is harmless, and the assertion at the identity follows
-from exact linearity as above.
+closeness only on average over $u$ \cite{Natarajan2017Linearity}.  The quotation
+also inserts $\delta\leq1$, which is absent from the provider theorem and would
+unnecessarily obstruct applying it with a fiber's actual defect.  The assertion
+at the identity follows from exact linearity as above.
 
 Lines~825--832 construct the family $O^{x,z,r,s}$ and establish approximate
 linearity only after averaging over $x,z,r,r',s,s'$.  They then apply the
 single-family theorem separately for every $(x,z)$ and state that sufficiently
-many zero ancillas avoid a further extension.  This leaves two steps implicit:
-the global average does not provide the same error bound on every fiber, and
-the theorem may return different extension spaces for different fibers.
+many zero ancillas avoid a further extension.  The remaining implicit step is
+to make the theorem's possibly fiber-dependent auxiliary spaces uniform.
 
-The finite setting admits a standard repair.  Apply the theorem on fibers with
-their actual defects, use Markov's inequality if a uniform good-fiber bound is
-needed, and choose one finite auxiliary space large enough for every returned
-space.  For each fiber, embed its auxiliary space so that its returned unit
-vector maps to one fixed vector, and extend the conjugated observables by the
-identity on the orthogonal complement.  The embeddings may depend on the fiber
-because the observables do.  Averaging then yields the conclusion used later in
-the chapter.  This is an open reduction, not a counterexample to the quoted
-theorem or to the source's eventual combined-measurement conclusion.
+The finite setting admits a standard repair.  Apply the theorem on each fiber
+with its actual defect, choose one finite auxiliary space large enough for all
+returned spaces, and embed each returned space so that its unit vector maps to
+one fixed vector.  Extend the conjugated observables by the identity on the
+orthogonal complement.  The embeddings may depend on the fiber because the
+observables do.  Averaging then yields the conclusion used later in the
+chapter.  This is an open reduction, not a counterexample to the quoted theorem
+or to the source's eventual combined-measurement conclusion.
 
 \section{Blueprint and formalization status}
 
 The blueprint records the averaged theorem form and the common-ancilla
 obligation in
-\path{blueprint/src/chapter/ch15_qpbt_global-pair.tex}, lines~90--189 and
-275--319.  No source-labelled Lean theorem should assert pointwise closeness or
-a common auxiliary space until that finite-family reduction has been proved.
+\path{blueprint/src/chapter/ch15_qpbt_combining.tex}, lines~82--180.  No
+source-labelled Lean theorem should assert pointwise closeness or a common
+auxiliary space until that finite-family reduction has been proved.
 The chapter-16 extraction statements may consume the resulting global-pair
 witness once the reduction is discharged; they must not assume a new
 fiberwise linearity hypothesis.

@@ -20,8 +20,8 @@
 
 \begin{itemize}
   \item \textbf{Difficulty.} Medium.  The source applies a decoder--encoder
-  identity to every bounded individual-degree polynomial, although it holds
-  only for polynomials in the image of the low-degree encoding.
+  identity to every bounded individual-degree polynomial, although the identity
+  is guaranteed for encoded polynomials and can fail outside the encoding image.
   \item \textbf{Estimated weight.} One restricted algebraic identity and one
   probabilistic estimate showing that the constructed measurement assigns
   little state-dependent mass to outcomes outside the encoding image.
@@ -49,7 +49,8 @@ Then
   \operatorname{Dec}(g_h)\mathbin{\cdot}\operatorname{ind}_m(u)=g_h(u).
 \]
 More generally, the second identity holds for a polynomial outcome $g$ under
-the explicit hypothesis that $g$ belongs to the image of the encoding.
+the explicit hypothesis that $g$ belongs to the image of the encoding; no
+converse is asserted.
 
 For an arbitrary bounded individual-degree polynomial $g$, the Boolean values
 determine its multilinear interpolant, not necessarily $g$ itself.  The
