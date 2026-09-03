@@ -61,7 +61,13 @@ REVIEW_CONTEXT = "local-review/summary"
 #: Findings are task-list items; an unticked box is an open finding.  Kept compatible
 #: with review.sh's tally and autofix.sh's ledger read.
 UNCHECKED_FINDING_RE = re.compile(r"^\s*[-*]\s*\[ \]", re.MULTILINE)
+UNCHECKED_ID_RE = re.compile(r"^\s*[-*]\s*\[ \]\s*(F\d+)\b", re.MULTILINE)
 VERDICT_RE = re.compile(r"^VERDICT:\s*([A-Z_]+)", re.MULTILINE)
+HEAD_FIELD_RE = re.compile(r"^head=([0-9a-f]{40})$", re.MULTILINE)
+DISPOSITION_RE = re.compile(
+    r"^\s*[-*]\s*\[[xX]\]\s*(F\d+)\b.*?\s+[—–]\s+"
+    r"(?:fixed in [0-9a-f]{7,40}|moot:\s*\S.*|deferred to issue #(\d+):\s*\S.*)$",
+    re.MULTILINE)
 
 #: autofix.sh:62-63 ``PREFIX_AUTO``/``PREFIX_REVIEW`` — the ping-pong guard's subject
 #: prefixes; gate 6 reports how many such commits the PR carries.
@@ -187,17 +193,40 @@ def check_review(number: int, head_sha: str, reviews: list[dict], statuses: dict
                           f"{observed}. Address the findings (or tick them off with a reason and "
                           "a tracked issue) and re-run review.sh, or merge --adjudicated.")
     # review.md section 12: past the round cap the operator may adjudicate what is left.
-    # Binding the comment to the SHA stops an adjudication of round four covering five.
-    where = None
+    round_marker = re.compile(rf"mipstarre-review pr={number} head=([0-9a-f]{{40}})")
+    reviewed_heads = {m.group(1) for row in reviews
+                      if (m := round_marker.search(row.get("body") or ""))}
+    if len(reviewed_heads) < 4:
+        raise GateFailure("gate 4 (review): adjudication is available only from review round "
+                          f"5; found {len(reviewed_heads)} completed round(s).")
+    finding_ids = UNCHECKED_ID_RE.findall(body)
+    if len(finding_ids) != unchecked or len(set(finding_ids)) != unchecked:
+        raise GateFailure("gate 4 (review): every unresolved finding must have one unique F<n> "
+                          "identifier before it can be adjudicated.")
+    accepted = None
     for row in gh_common.api(f"issues/{number}/comments", paginate=True):
         text = (row.get("body") or "").lstrip()
-        if text.startswith("ADJUDICATION") and f"head={head_sha}" in text:
-            where = str(row.get("html_url") or row.get("id"))
+        heads = HEAD_FIELD_RE.findall(text)
+        dispositions = DISPOSITION_RE.findall(text)
+        disposition_ids = [match[0] for match in dispositions]
+        if (text.startswith("ADJUDICATION") and heads == [head_sha]
+                and sorted(disposition_ids) == sorted(finding_ids)
+                and len(set(disposition_ids)) == len(disposition_ids)):
+            accepted = (row, dispositions)
             break
-    if where is None:
+    if accepted is None:
         raise GateFailure(f"gate 4 (review): --adjudicated given but no ADJUDICATION comment "
-                          f"names head={head_sha} on PR #{number}; observed {observed}. Post one "
-                          f"first: a comment starting with ADJUDICATION, containing that head.")
+                          f"on PR #{number} has exactly head={head_sha} and one checked, valid "
+                          f"disposition for each of {unchecked} unresolved finding(s).")
+    row, dispositions = accepted
+    for _, issue_number in dispositions:
+        if not issue_number:
+            continue
+        issue = gh_common.api(f"issues/{issue_number}")
+        if issue.get("pull_request") or issue.get("state") != "open":
+            raise GateFailure(f"gate 4 (review): deferred issue #{issue_number} does not exist "
+                              "as an open tracked issue.")
+    where = str(row.get("html_url") or row.get("id"))
     sys.stderr.write(f"warning: merging PR #{number} on operator adjudication ({where}); the "
                      f"review evidence is adverse — {observed}\n")
     passed(f"gate 4 adjudicated at {head_sha[:12]} ({where})")
