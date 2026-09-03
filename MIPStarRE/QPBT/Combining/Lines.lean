@@ -27,21 +27,43 @@ noncomputable section
 
 /-! ## Combined line measurements -/
 
-/-- The joint X/Z line measurements of `lem:qld-xz-lines`.
+/-- Conditional joint X/Z line measurements for `lem:qld-xz-lines`.
 
 **Source statement:** `lem:qld-xz-lines` in
 `blueprint/src/chapter/ch15_qpbt_combining.tex:345-443`, from
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:882-894`.
 The error depends polynomially on `ε` and `md/q`, and the witness retains all
-directed opposite-placement comparisons.  The proof is tracked by issue #18.
+directed opposite-placement comparisons.  This is the formalization-only form
+with an already constructed point witness; the source-facing theorem below
+packages that witness existentially.  The proof is tracked by issue #18.
 Discharge: formalize the sandwich measurement and the pasting argument in the
 cited proof. -/
-theorem exists_combinedLinesWitness :
+theorem exists_combinedLinesWitness_ofPointsWitness :
     ∃ deltaP : ℝ -> ℝ -> ℝ, IsPolyErr₂ deltaP ∧
       ∀ (P : AdmissibleParams) (ε δQ : ℝ) (S : ProjectiveSetting P ε)
         (points : CombinedPointsWitness S δQ),
         Nonempty (CombinedLinesWitness S points
           (deltaP ε (((P.m * P.d : ℕ) : ℝ) / (P.q : ℝ)))) := by
+  sorry
+
+/-! The source-facing declaration below packages the point witness produced by
+`lem:qld-4-10` existentially.  The `_ofPointsWitness` companion above is the
+conditional form used by downstream calculations. -/
+
+/-- The source-facing joint X/Z line measurement construction of
+`lem:qld-xz-lines`, paper lines 882--894.
+
+Unlike the formalization-only `_ofPointsWitness` companion, this declaration
+does not assume a `CombinedPointsWitness` as an external bridge input.  It
+quantifies the point error function and witness construction together with the
+line construction, as the preceding source lemma supplies those points. -/
+theorem exists_combinedLinesWitness :
+    ∃ deltaQ : ℝ -> ℝ, IsPolyErr deltaQ ∧
+      ∃ deltaP : ℝ -> ℝ -> ℝ, IsPolyErr₂ deltaP ∧
+        ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
+          ∃ points : CombinedPointsWitness S (deltaQ ε),
+            Nonempty (CombinedLinesWitness S points
+              (deltaP ε (((P.m * P.d : ℕ) : ℝ) / (P.q : ℝ)))) := by
   sorry
 
 /-! ## Restricted line distributions -/

@@ -26,7 +26,7 @@ namespace MIPStarRE.QPBT
 
 noncomputable section
 
-/-- Construction of the extended-line measurements with the source error
+/-- Conditional construction of the extended-line measurements with the source error
 `poly(m^2 * epsilon, md / q)`.  This is the source-facing statement of
 `lem:qld-4-13`, paper lines 1020--1034.
 
@@ -39,14 +39,34 @@ used by `ExtendedLinesWitness` represents the required extended-dimensional
 line-point law without the invalid divisibility guard; it is a directly indexed
 line-space construction and does
 not identify the source's seed-bearing verifier game with the directly indexed game.
+This declaration takes an already constructed point witness; the
+source-facing declaration below packages that witness existentially.
 -/
-theorem exists_extendedLinesWitness :
+theorem exists_extendedLinesWitness_ofPointsWitness :
     ∃ deltaCombine : ℝ → ℝ → ℝ, IsPolyErr₂ deltaCombine ∧
       ∀ (P : AdmissibleParams) (ε δQ : ℝ) (S : ProjectiveSetting P ε)
         (points : CombinedPointsWitness S δQ),
         Nonempty (ExtendedLinesWitness S points
           (deltaCombine ((P.m : ℝ) ^ 2 * ε)
             ((P.m * P.d : ℕ) / (P.q : ℝ)))) := by
+  sorry
+
+/-! The source-facing declaration packages the point witness from
+`lem:qld-4-10` rather than taking it as an unproved external hypothesis. -/
+
+/-- The source-facing extended-line construction of `lem:qld-4-13`, paper
+lines 1020--1034.
+
+The `_ofPointsWitness` companion is the conditional, Lean-only form retained
+for calculations that already have a point witness. -/
+theorem exists_extendedLinesWitness :
+    ∃ deltaQ : ℝ → ℝ, IsPolyErr deltaQ ∧
+      ∃ deltaCombine : ℝ → ℝ → ℝ, IsPolyErr₂ deltaCombine ∧
+        ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
+          ∃ points : CombinedPointsWitness S (deltaQ ε),
+            Nonempty (ExtendedLinesWitness S points
+              (deltaCombine ((P.m : ℝ) ^ 2 * ε)
+                ((P.m * P.d : ℕ) / (P.q : ℝ)))) := by
   sorry
 
 /-- Construction of the extended-line measurements with the estimate actually
@@ -56,11 +76,13 @@ This is an established auxiliary form of the argument, not the source-labelled
 `lem:qld-4-13`; it must not be advertised as that theorem.  The source discrepancy
 is analyzed in `docs/paper-gaps/qpbt_combined-lines-error-term.tex`.  As in the
 source-facing declaration, the extended questions use the directly indexed line-space
-construction.  Relating its game to the source's seed-bearing game requires the transport
+construction.  This conditional declaration takes an already constructed point witness;
+the source-facing package below supplies it existentially.  Relating its game to the source's
+seed-bearing game requires the transport
 and soundness obligations in
 `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`.
 -/
-theorem exists_extendedLinesWitness_established :
+theorem exists_extendedLinesWitness_established_ofPointsWitness :
     ∃ C : ℝ, 0 < C ∧
       ∃ deltaCombine : ℝ → ℝ → ℝ, IsPolyErr₂ deltaCombine ∧
         ∀ (P : AdmissibleParams) (ε δQ : ℝ) (S : ProjectiveSetting P ε)
@@ -68,6 +90,20 @@ theorem exists_extendedLinesWitness_established :
           Nonempty (ExtendedLinesWitness S points
             (C * (P.m : ℝ) *
               deltaCombine ε ((P.m * P.d : ℕ) / (P.q : ℝ)))) := by
+  sorry
+
+/-- Source-facing package for the established auxiliary estimate.  This is
+the same Lean-only bound as `exists_extendedLinesWitness_established_ofPointsWitness`,
+with the point witness existentially supplied rather than assumed. -/
+theorem exists_extendedLinesWitness_established :
+    ∃ deltaQ : ℝ → ℝ, IsPolyErr deltaQ ∧
+      ∃ C : ℝ, 0 < C ∧
+        ∃ deltaCombine : ℝ → ℝ → ℝ, IsPolyErr₂ deltaCombine ∧
+          ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
+            ∃ points : CombinedPointsWitness S (deltaQ ε),
+              Nonempty (ExtendedLinesWitness S points
+                (C * (P.m : ℝ) *
+                  deltaCombine ε ((P.m * P.d : ℕ) / (P.q : ℝ)))) := by
   sorry
 
 /-- Construction of the projective global polynomial-pair measurements from
