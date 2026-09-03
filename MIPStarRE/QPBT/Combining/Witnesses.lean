@@ -7,7 +7,7 @@ import MIPStarRE.QPBT.Observables.WinImplications
 /-!
 # Witnesses for combining the Pauli bases
 
-This module packages the five measurement and distribution witnesses used in
+This module defines the five measurement and distribution witnesses used in
 the combining argument.  Every measurement is indexed by the player side, so
 Alice's and Bob's local spaces remain distinct.  The extended-dimensional
 line objects use the directly indexed low-degree interface and therefore do

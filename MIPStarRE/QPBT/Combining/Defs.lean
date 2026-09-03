@@ -95,12 +95,16 @@ theorem combinePoly_eval {K : Type*} [CommSemiring K] {m : ℕ}
       u (betaVar m) * MvPolynomial.eval (u ∘ embZ m) g
   simp [combinePoly, MvPolynomial.eval_rename]
 
-/-- The combining polynomial has individual degree at most `d` when `d ≥ 1`.
-The lower bound is the source's implicit requirement needed for the new
-`alpha` and `beta` factors.  This is the well-definedness obligation in
+/-- The combining polynomial has individual degree at most `d` when
+`hd : 1 ≤ d`.  This is the faithful boundary condition for the two affine
+coordinate factors `alpha` and `beta`: each contributes degree one, while the
+corresponding polynomial factors have degree at most `d - 1` in those
+coordinates.  The statement is the well-definedness assertion in
 `def:combine-map`, blueprint
-`blueprint/src/chapter/ch15_qpbt_combining.tex:445-480`, paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:970-983`. -/
+`blueprint/src/chapter/ch15_qpbt_combining.tex:445-480`, with source context
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:970-983` and the
+boundary-hypothesis discussion in `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`.
+-/
 theorem combinePoly_mem_polyFunc {K : Type*} [CommSemiring K] {m d : ℕ}
     (hd : 1 ≤ d) {f g : MvPolynomial (Fin m) K}
     (hf : f ∈ polyFunc m K d) (hg : g ∈ polyFunc m K d) :
