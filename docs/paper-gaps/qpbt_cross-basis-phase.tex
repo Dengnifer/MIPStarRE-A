@@ -1,0 +1,109 @@
+\documentclass[11pt]{article}
+
+\usepackage{amsmath,amssymb}
+\usepackage{xurl}
+\usepackage[hidelinks]{hyperref}
+\setlength{\emergencystretch}{2em}
+
+\input{command}
+\renewcommand{\ghissue}[1]{%
+  \href{https://github.com/Dengnifer/MIPStarRE-A/issues/#1}{GitHub issue \##1}}
+
+\title{The Cross-Basis Phase in the Extracted Pauli Observables}
+\author{}
+\date{2026-09-03}
+
+\begin{document}
+\maketitle
+
+\section{At a glance}
+
+\begin{itemize}
+  \item \textbf{Difficulty.} Low.  The source drops a nontrivial phase when the
+  two binary-basis indices are distinct.
+  \item \textbf{Estimated weight.} One exact multiplication calculation for
+  generalized Pauli observables; no robustness estimate changes.
+  \item \textbf{Mathlib/project split.} Finite-sum bilinearity and the field
+  trace are standard algebra.  The extracted-observable product form and the
+  project's phase convention are project-local.
+  \item \textbf{Key mathematical inputs.} The generalized Pauli commutation
+  relation and nondegeneracy of the trace pairing.  The local correction is
+  tracked in \ghissue{19}.
+\end{itemize}
+
+\section{Key theorem forms}
+
+Let $e_1,\ldots,e_t$ be the fixed self-dual basis of $\mathbb F_q$ over
+$\mathbb F_2$.  With the phase convention of the source, generalized Pauli
+observables satisfy
+\[
+  \tau^X(a)\tau^Z(b)
+  =(-1)^{\operatorname{tr}(a\mathbin{\cdot}b)}
+   \tau^Z(b)\tau^X(a).
+\]
+Substituting $a=e_j\widetilde u$ and $b=e_{j'}\widetilde v$ gives the exact
+relation
+\[
+  \widetilde X^j(\widetilde u)\widetilde Z^{j'}(\widetilde v)
+  =(-1)^{\operatorname{tr}
+      (e_je_{j'}(\widetilde u\mathbin{\cdot}\widetilde v))}
+   \widetilde Z^{j'}(\widetilde v)\widetilde X^j(\widetilde u).
+\]
+This formula applies uniformly, whether or not $j=j'$.
+
+\section{The false dichotomy in the source}
+
+Lines~1438--1450 of
+\path{references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex}
+identify each extracted observable with a tensor product containing
+$\tau^W(e_j\widetilde u)$.  Lines~1451--1456 then claim that the extracted
+$X$- and $Z$-observables commute whenever $j\neq j'$
+\cite[lines~1438--1456]{Ji2020MIPStar}.  Self-duality gives only
+\[
+  \operatorname{tr}(e_je_{j'})=0 \qquad (j\neq j').
+\]
+It does not imply
+\[
+  \operatorname{tr}(e_je_{j'}s)=0
+  \qquad\text{for every }s\in\mathbb F_q.
+\]
+
+Indeed, for distinct $j,j'$, the element $c=e_je_{j'}$ is nonzero.  The trace
+pairing is nondegenerate, so there is an $s\in\mathbb F_q$ for which
+$\operatorname{tr}(cs)=1$.  Taking vectors whose first coordinates are $1$
+and $s$, with all remaining coordinates zero, gives
+$\widetilde u\mathbin{\cdot}\widetilde v=s$.  The two extracted observables
+then anticommute.  This is a counterexample to the printed cross-basis
+commutation assertion.
+
+When $\widetilde u\mathbin{\cdot}\widetilde v$ lies in the prime field, the
+printed distinction is recovered from self-duality.  The chapter quantifies
+over arbitrary vectors, however, so that special case does not repair its
+statement.
+
+\section{Blueprint and formalization status}
+
+The discussion following the product-form calculation in
+\path{blueprint/src/chapter/ch16_qpbt_extraction.tex}, lines~69--95, records
+the full phase and notes that the false dichotomy is not used later in the
+extraction argument.  A formal theorem may therefore retain the mathematically
+correct uniform phase relation with a \textbf{Local fix} marker.  It must not
+assert exact commutation merely from $j\neq j'$.
+
+This correction changes neither the definition of the extracted observables
+nor the source-faithful consistency and extraction conclusions.  It repairs an
+auxiliary algebraic assertion that is independent of the robustness estimates.
+
+\section{Conclusion}
+
+The source's cross-basis commutation claim is false for general
+$\widetilde u$ and $\widetilde v$.  The correct relation retains the phase
+$(-1)^{\operatorname{tr}(e_je_{j'}(\widetilde u\cdot\widetilde v))}$.
+Because the later argument does not invoke the false dichotomy, this is a
+local correction rather than an additional hypothesis on the extraction
+theorem.
+
+\bibliographystyle{alpha}
+\bibliography{references}
+
+\end{document}

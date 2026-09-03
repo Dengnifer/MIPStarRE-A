@@ -103,7 +103,10 @@ The measurement $\{\hat{S}_{g_X,g_Z}\}$ reads out an $X$-polynomial and a $Z$-po
 The next lemma shows that the pulled-apart measurements are consistent with the original points measurements of the strategy, and self-consistent. In its statement, and for the remainder of the chapter, $\delta_S$ denotes the function of Lemma~\ref{lem:qld-4-7}, enlarged by an adjustment of the universal constants $a$ and $b$ so as to also dominate additional error terms of order $\sqrt{\eps}$, $\eps$, and $md/q$ that the source absorbs into $\delta_S$ along the way; such an adjustment is possible since, after shrinking $b$ to at most $1/2$, the term $\eps^b$ dominates $\sqrt{\eps}$ and $\eps$ for $\eps \leq 1$, while $(md)^a q^{-b}$ dominates $md/q$.
 
 \begin{lemma}[Consistency and self-consistency of the pulled-apart measurements]\label{lem:qld-construct-the-paulis}
-	\uses{def:tilde-m-measurement, def:tilde-w-observables, lem:projective-strategy-setup, def:expanded-state, def:consistency, def:povm-distance, lem:qld-4-7, def:indicator-vector}
+	\uses{def:tilde-m-measurement, def:tilde-w-observables,
+		lem:projective-strategy-setup, def:expanded-state, def:consistency,
+		def:approx-question-indexed-operators, lem:qld-4-7,
+		def:indicator-vector}
 	The measurements $\{\tilde{M}^{W,\tilde{u}}_a\}_{a \in \F_q}$ and observables $\tilde{W}^j(\tilde{u})$ satisfy the following properties.
 	% The paper's statement also quantifies item 1 over j, but j does not occur
 	% in item 1; the vacuous quantifier is dropped here.
