@@ -37,6 +37,14 @@ import MIPStarRE.QPBT.Test.MagicSquareTheorems
 import MIPStarRE.QPBT.Test.Completeness
 import MIPStarRE.QPBT.Test.QubitForm
 import MIPStarRE.QPBT.Test.CanonicalParams
+import MIPStarRE.QPBT.Combining.Defs
+import MIPStarRE.QPBT.Combining.DirectLowDegree
+import MIPStarRE.QPBT.Combining.Linearity
+import MIPStarRE.QPBT.Combining.Witnesses
+import MIPStarRE.QPBT.Combining.Points
+import MIPStarRE.QPBT.Combining.Lines
+import MIPStarRE.QPBT.Combining.Claims
+import MIPStarRE.QPBT.Combining.Apply
 
 -- Mathlib 4.31 header checks require this for this aggregate module.
 set_option linter.style.header false
