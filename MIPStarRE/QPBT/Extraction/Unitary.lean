@@ -4,8 +4,8 @@ import MIPStarRE.QPBT.Test.Soundness
 /-!
 # Extraction by the swap unitaries
 
-This module states the conclusion of the Pauli extraction argument. The local
-maps are the concrete swap operators constructed from the global polynomial
+The concrete swap operators below yield the Pauli extraction conclusion. The
+local maps are constructed from the global polynomial
 measurements, and all operators retain the heterogeneous Alice and Bob
 placements. The generalized Pauli projectors use the field and basis fixed by
 `P.model`.
@@ -68,8 +68,8 @@ structure ExtractionWitness {P : AdmissibleParams} {epsilon deltaS : ℝ}
         S.placeExtractedRegister side (pauliProj W h))
       (S.idealExpState aux) ≤ delta
 
-/-- `lem:qld-unitary`: the concrete swap maps admit extraction data at scale
-`C * (deltaS^(1/4) + md/q)` for one universal constant `C`.
+/-- `lem:qld-unitary`: the concrete swap maps admit extraction data at the
+explicit extraction scale applied to `deltaConstructPaulis`.
 
 This is the source-facing existence statement from blueprint
 `ch16_qpbt_extraction.tex:248-264` and paper
@@ -80,39 +80,46 @@ premise or additional basis parameter.
 repair the two numerical defects at paper lines 1743-1783 without changing the
 conclusion; see `docs/paper-gaps/qpbt_extraction-transfer.tex`.
 
-**Proof obligation:** issue #19 tracks the EPR projection argument and the
+**Proof obligation:** issue #47 tracks the EPR projection argument and the
 Schwartz-Zippel comparison at paper lines 1715-1858. Discharge: construct
 `aux` from the EPR projection of the swapped state, use the corrected
 small-error case split, and combine the point-measurement consistency with the
 exact swap conjugation identities. -/
 theorem exists_extractionWitness :
     ∃ C : ℝ, 1 ≤ C ∧
-      ∀ (P : AdmissibleParams) (epsilon deltaS : ℝ)
-        (S : ProjectiveSetting P epsilon) (w : GlobalPairWitness S deltaS),
-        Nonempty
-          (ExtractionWitness S w
-            (deltaExtract C deltaS P.m P.d P.q)) := by
+      ∀ (P : AdmissibleParams) (epsilon deltaG : ℝ),
+        0 ≤ epsilon → epsilon ≤ 1 → 0 ≤ deltaG →
+          ∀ (S : ProjectiveSetting P epsilon)
+            (w : GlobalPairWitness S deltaG),
+            Nonempty
+              (ExtractionWitness S w
+                (deltaExtract C
+                  (deltaConstructPaulis C epsilon deltaG P.m P.d P.q)
+                  P.m P.d P.q)) := by
   sorry
 
-/-- The extraction error preserves the error family of `thm:pauli`: when
-`deltaS` has the form `deltaQld a b epsilon m d q`, it is bounded by another
-member of that family after decreasing the exponent and enlarging the
-universal constant.
+/-- The composed construction and extraction errors preserve the error family
+of `thm:pauli`: when `deltaG` has the form
+`deltaQld a b epsilon m d q`, the result is bounded by another member of that
+family after decreasing the exponent and enlarging the universal constant.
 
 This is the named quantitative obligation behind
 `rem:pauli-robustness-form`, blueprint
 `ch16_qpbt_extraction.tex:330-334`, and the concluding comparison at paper
 `14_analysis_of_the_pauli_basis_test.tex:1855-1858,1868-1876`.
 
-**Proof obligation:** issue #19 tracks this real-power estimate. Discharge:
-take an exponent no larger than `b / 4`, bound the fourth root of the three
-summands in `deltaQld`, absorb `md/q` using admissibility, and enlarge the
-prefactor and polynomial exponent. -/
+**Proof obligation:** issue #47 tracks this real-power estimate. Discharge:
+take an exponent no larger than `b / 4` and `1 / 8`, bound the fourth root of
+the terms in `deltaConstructPaulis`, absorb `md/q` using admissibility, and
+enlarge the prefactor and polynomial exponent. -/
 theorem deltaExtract_le_deltaQld (C a b : ℝ) (hC : 1 ≤ C) (ha : 1 < a)
     (hb : 0 < b) (hb1 : b < 1) :
     ∃ a' b' : ℝ, 1 ≤ a' ∧ 0 < b' ∧ b' < 1 ∧
       ∀ (P : AdmissibleParams) (epsilon : ℝ), 0 ≤ epsilon →
-        deltaExtract C (deltaQld a b epsilon P.m P.d P.q)
+        epsilon ≤ 1 →
+        deltaExtract C
+            (deltaConstructPaulis C epsilon
+              (deltaQld a b epsilon P.m P.d P.q) P.m P.d P.q)
             P.m P.d P.q ≤
           deltaQld a' b' epsilon P.m P.d P.q := by
   sorry

@@ -73,7 +73,7 @@ extra hypothesis of the decoding identity.  See
 `blueprint/src/chapter/ch11_qpbt_algebra.tex:381-401` and paper
 `references/qpbt-paper/04_preliminaries.tex:832-897`.
 
-**Proof obligation:** issue #19 tracks the individual-degree calculation. -/
+**Proof obligation:** issue #47 tracks the individual-degree calculation. -/
 theorem lowDegreeEncoding_mem_poly {P : AdmissibleParams}
     (h : PauliRegister P) :
     lowDegreeEncoding h ∈
@@ -108,7 +108,7 @@ This is the linearity used in the source's regrouping calculation at paper
 assert evaluation equality for non-encoding representatives.  See
 `docs/paper-gaps/qpbt_decoding-identity.tex:87-123`.
 
-**Proof obligation:** issue #19 tracks the regrouping calculation. -/
+**Proof obligation:** issue #47 tracks the regrouping calculation. -/
 theorem decodeFq_add {P : AdmissibleParams} (g h : Poly P) :
     decodeFq (g + h) = decodeFq g + decodeFq h := by
   sorry
@@ -119,13 +119,12 @@ This companion has the same source and proof-gap status as `decodeFq_add` and
 does not strengthen the restricted decoder identity.  See
 `docs/paper-gaps/qpbt_decoding-identity.tex:87-123`.
 
-**Proof obligation:** issue #19 tracks scalar linearity. -/
+**Proof obligation:** issue #47 tracks scalar linearity. -/
 theorem decodeFq_smul {P : AdmissibleParams} (c : PauliScalar P) (g : Poly P) :
     decodeFq (c • g) = c • decodeFq g := by
   sorry
 
-/-- Recover a word from the polynomial representative represented by
-`encodingPoly`.
+/-- The full-field decoder is a left inverse to `encodingPoly`.
 
 This is the source identity `\operatorname{Dec}(g_h)=h` from
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1805-1822`.
@@ -133,7 +132,7 @@ The degree proof is separated into `lowDegreeEncoding_mem_poly`; no additional
 encoding or interpolation hypothesis is introduced.  See
 `docs/paper-gaps/qpbt_decoding-identity.tex:87-123`.
 
-**Proof obligation:** issue #19 tracks the decoder/encoding calculation. -/
+**Proof obligation:** issue #47 tracks the decoder/encoding calculation. -/
 theorem decodeFq_lowDegreeEncoding {P : AdmissibleParams}
     (h : PauliRegister P) :
     decodeFq (encodingPoly h) = h := by
@@ -148,7 +147,7 @@ the source step at
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1483-1492`;
 see `docs/paper-gaps/qpbt_decoding-identity.tex:87-123`.
 
-**Proof obligation:** issue #19 tracks the restricted evaluation calculation. -/
+**Proof obligation:** issue #47 tracks the restricted evaluation calculation. -/
 theorem decodeFq_dotProduct_indicatorVec {P : AdmissibleParams}
     {g : Poly P} (hg : IsEncoding g) (x : Fin P.m → PauliScalar P) :
     dotProduct (decodeFq g) (indicatorVec x) = evalPoly g x := by

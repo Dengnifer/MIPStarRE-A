@@ -59,7 +59,7 @@ projectivity assertion implicit in `def:s-w-marginals`, blueprint
 `ch16_qpbt_extraction.tex:35-44`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1421-1423`.
 
-**Proof obligation:** issue #19 tracks the preservation of projectivity under
+**Proof obligation:** issue #47 tracks the preservation of projectivity under
 the finite postprocessing map `PauliKind.selectPoly`. -/
 theorem marginalPoly_isProjective {P : AdmissibleParams} {epsilon delta : ℝ}
     {S : ProjectiveSetting P epsilon} (w : GlobalPairWitness S delta)
@@ -86,7 +86,7 @@ noncomputable def tildeM {P : AdmissibleParams} {epsilon delta : ℝ}
 `def:tilde-m-measurement`, blueprint `ch16_qpbt_extraction.tex:55-62`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1425-1435`.
 
-**Proof obligation:** issue #19 tracks the orthogonal-sum calculation using
+**Proof obligation:** issue #47 tracks the orthogonal-sum calculation using
 `marginalPoly_isProjective` and `tauDotProj_isProj`. -/
 theorem tildeM_isProj {P : AdmissibleParams} {epsilon delta : ℝ}
     {S : ProjectiveSetting P epsilon} (w : GlobalPairWitness S delta)
@@ -100,7 +100,7 @@ register vector. This is the completeness assertion in
 `def:tilde-m-measurement`, blueprint `ch16_qpbt_extraction.tex:55-62`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1425-1435`.
 
-**Proof obligation:** issue #19 tracks summing the orthogonal dot-product
+**Proof obligation:** issue #47 tracks summing the orthogonal dot-product
 projectors and the polynomial marginal effects. -/
 theorem sum_tildeM_eq_one {P : AdmissibleParams} {epsilon delta : ℝ}
     {S : ProjectiveSetting P epsilon} (w : GlobalPairWitness S delta)
@@ -125,7 +125,7 @@ noncomputable def tildeObs {P : AdmissibleParams} {epsilon delta : ℝ}
 `ch16_qpbt_extraction.tex:75-88`; paper
 `14_analysis_of_the_pauli_basis_test.tex:1442-1450`.
 
-**Proof obligation:** issue #19 tracks the finite Fourier regrouping needed to
+**Proof obligation:** issue #47 tracks the finite Fourier regrouping needed to
 derive this equality from `tauObservable_eq_sum_pauliProj`. Discharge: expand
 the two finite sums and reindex the Pauli outcomes by their dot product. -/
 theorem tildeObs_eq_heteroKron {P : AdmissibleParams} {epsilon delta : ℝ}
@@ -145,7 +145,7 @@ theorem tildeObs_eq_heteroKron {P : AdmissibleParams} {epsilon delta : ℝ}
 `lem:tildew-product-form`, blueprint `ch16_qpbt_extraction.tex:75-88`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1450`.
 
-**Proof obligation:** issue #19 tracks this consequence of the product form.
+**Proof obligation:** issue #47 tracks this consequence of the product form.
 Discharge: use projectivity of `w.Smeas side` and Hermiticity of the generalized
 Pauli observable. -/
 theorem tildeObs_isHermitian {P : AdmissibleParams} {epsilon delta : ℝ}
@@ -159,7 +159,7 @@ theorem tildeObs_isHermitian {P : AdmissibleParams} {epsilon delta : ℝ}
 `lem:tildew-product-form`, blueprint `ch16_qpbt_extraction.tex:75-88`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1450`.
 
-**Proof obligation:** issue #19 tracks this consequence of the product form.
+**Proof obligation:** issue #47 tracks this consequence of the product form.
 Discharge: eliminate cross terms using the orthogonality of `w.Smeas side` and
 use that `tauObservable` is self-inverse. -/
 theorem tildeObs_mul_self {P : AdmissibleParams} {epsilon delta : ℝ}
@@ -176,7 +176,7 @@ This is Equation `eq:tildew-twisted-commutation` in blueprint
 
 **Local fix:** the paper drops this phase when `j != j'`, which is false for
 general register vectors; see `docs/paper-gaps/qpbt_cross-basis-phase.tex`.
-Issue #19 tracks the proof. Discharge: combine both product forms with
+Issue #47 tracks the proof. Discharge: combine both product forms with
 `tauObservable_X_mul_Z`. -/
 theorem tildeObs_twisted_commutation {P : AdmissibleParams}
     {epsilon delta : ℝ} {S : ProjectiveSetting P epsilon}
@@ -207,7 +207,7 @@ calculation of `lem:v-swap-conjugation`, blueprint
 `ch16_qpbt_extraction.tex:219-226`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1687-1699`.
 
-**Proof obligation:** issue #19 tracks the finite projector calculation.
+**Proof obligation:** issue #47 tracks the finite projector calculation.
 Discharge: use projectivity and completeness of `w.Smeas side` together with
 self-inverseness of both generalized Pauli observables. -/
 theorem swapUnitary_mul_conjTranspose {P : AdmissibleParams}
@@ -221,7 +221,7 @@ calculation implicit in `lem:v-swap-conjugation`, blueprint
 `ch16_qpbt_extraction.tex:219-226`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1687-1699`.
 
-**Proof obligation:** issue #19 tracks the reverse projector calculation.
+**Proof obligation:** issue #47 tracks the reverse projector calculation.
 Discharge: use the same orthogonality and Pauli involution identities as in
 `swapUnitary_mul_conjTranspose`. -/
 theorem conjTranspose_mul_swapUnitary {P : AdmissibleParams}
@@ -235,7 +235,7 @@ Equation `eq:v-swap-obs-conjugation` in `lem:v-swap-conjugation`, blueprint
 `ch16_qpbt_extraction.tex:219-226`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1701-1713`.
 
-**Proof obligation:** issue #19 tracks the diagonal projector reduction.
+**Proof obligation:** issue #47 tracks the diagonal projector reduction.
 Discharge: substitute `tildeObs_eq_heteroKron`, eliminate off-diagonal outcomes,
 and cancel the phase using `tauObservable_X_mul_Z`. -/
 theorem swapUnitary_conj_tildeObs {P : AdmissibleParams}
@@ -252,7 +252,7 @@ Equation `eq:qld-unitary-6` in `lem:v-swap-conjugation`, blueprint
 `ch16_qpbt_extraction.tex:227-233`; its calculation occurs at paper
 `14_analysis_of_the_pauli_basis_test.tex:1805-1822`.
 
-**Proof obligation:** issue #19 tracks the exact relabeling calculation.
+**Proof obligation:** issue #47 tracks the exact relabeling calculation.
 Discharge: expand `tildeM`, conjugate each Pauli projector, and translate the
 dot-product constraint with `lowDegreeEnc_eq_dotProduct`; no unrestricted
 decoder interpolation identity is used. -/

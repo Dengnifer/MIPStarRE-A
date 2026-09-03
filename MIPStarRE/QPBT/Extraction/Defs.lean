@@ -54,7 +54,7 @@ abbrev ExtractionAuxRegisters (P : AdmissibleParams) (ιA ιB : Type*) :=
   (ιA × PauliRegister P) × (ιB × PauliRegister P)
 
 /-- Reassociate the landed six-register order with the two extraction blocks.
-This is a Lean-only equivalence for the register order in paper
+This equivalence identifies the register order in paper
 `14_analysis_of_the_pauli_basis_test.tex:1429-1435,1687-1713`. -/
 def sixRegExtractionEquiv (P : AdmissibleParams) (ιA ιB : Type*) :
     SixReg P ιA ιB ≃ ExtractionRegisters P ιA ιB where
@@ -175,15 +175,15 @@ end ProjectiveSetting
 /-! ## Coarse-grained Pauli projectors -/
 
 /-- Coarse-grain a finite operator family along a map of outcomes. This is the
-unbundled Lean counterpart of `Measurement.postprocess` used by
+operator-valued sum corresponding to `Measurement.postprocess`, used by
 `def:tau-dot-product-projector`, blueprint
 `ch16_qpbt_extraction.tex:46-53`. -/
 noncomputable def bracketOp {α β ι : Type*} [Fintype α] [DecidableEq β]
     (N : α → Op ι) (f : α → β) (b : β) : Op ι :=
   ∑ a ∈ Finset.univ.filter (fun a => f a = b), N a
 
-/-- The effect of a postprocessed measurement is its unbundled coarse-grained
-operator. This definitional bridge is Lean-only support for `def:bracket` and
+/-- The effect of a postprocessed measurement is the corresponding
+coarse-grained operator sum. This equality is used by `def:bracket` and
 `def:tau-dot-product-projector`, blueprint
 `ch12_qpbt_games.tex:8-26` and `ch16_qpbt_extraction.tex:46-53`. -/
 theorem postprocess_effect_eq_bracketOp {α β ι : Type*}
@@ -206,8 +206,8 @@ noncomputable def tauDotProj {P : AdmissibleParams} (W : PauliKind)
 `ch16_qpbt_extraction.tex:46-53`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1426-1429`.
 
-This is a named Stage 4.2 proof obligation for the orthogonal rank-one Pauli
-projectors. -/
+**Proof obligation:** issue #47 tracks the orthogonal rank-one Pauli projector
+calculation. -/
 theorem tauDotProj_isProj {P : AdmissibleParams} (W : PauliKind)
     (u : PauliRegister P) (a : PauliScalar P) :
     IsProj (tauDotProj W u a) := by
@@ -218,7 +218,7 @@ This is the completeness assertion of `def:tau-dot-product-projector`,
 blueprint `ch16_qpbt_extraction.tex:46-53`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1426-1429`.
 
-This is a named Stage 4.2 proof obligation for the complete generalized-Pauli
+**Proof obligation:** issue #47 tracks completeness of the generalized-Pauli
 projector family. -/
 theorem sum_tauDotProj_eq_one {P : AdmissibleParams} (W : PauliKind)
     (u : PauliRegister P) :
@@ -234,6 +234,21 @@ for the exact conjugation equations in `lem:v-swap-conjugation`, blueprint
 noncomputable def conjBy {ι : Type*} [Fintype ι]
     (V N : Op ι) : Op ι :=
   V * N * Vᴴ
+
+/-- The common error scale for constructing the pulled-apart measurements from
+a global polynomial-pair witness. Here `deltaG` is the raw consistency error of
+the global witness. The remaining terms record the point-measurement transfer
+and the Schwartz--Zippel loss; when `0 ≤ epsilon ≤ 1`, `sqrt epsilon` also
+dominates terms of order `epsilon`.
+
+This makes explicit the enlargement of the error called `deltaS` in
+`lem:qld-construct-the-paulis`, blueprint
+`ch16_qpbt_extraction.tex:114-186`, paper
+`14_analysis_of_the_pauli_basis_test.tex:1458-1605`. -/
+noncomputable def deltaConstructPaulis (C epsilon deltaG : ℝ)
+    (m d q : ℕ) : ℝ :=
+  C * (deltaG + Real.sqrt epsilon +
+    ((m * d : ℕ) : ℝ) / (q : ℝ))
 
 /-- The explicit extraction scale
 `C * (deltaS^(1/4) + md/q)` from `lem:qld-unitary`, blueprint
