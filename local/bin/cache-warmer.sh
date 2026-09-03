@@ -688,7 +688,9 @@ main() {
   # .lake/packages; `lake update` would move lake-manifest.json out from under the
   # keyhash and mutate the vendored package trees (two-tier split, see
   # local/protocols/build-cache.md).
-  if ! ( cd "$HOT_REPO" && run_outside_git_env lake exe cache get ) >> "$logfile" 2>&1; then
+  if [ -L "$HOT_REPO/.lake/packages" ]; then
+    log ".lake/packages is the shared read-only store; skipping lake exe cache get"
+  elif ! ( cd "$HOT_REPO" && run_outside_git_env lake exe cache get ) >> "$logfile" 2>&1; then
     warn "lake exe cache get failed; continuing to build from source (see $logfile)"
   fi
 

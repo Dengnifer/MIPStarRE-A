@@ -578,9 +578,6 @@ PROMPT_TEXT="$(cat "$PROMPT_FILE")"
 # ---------------------------------------------------------------------------
 
 CODEX_ARGS=(exec)
-if [ -n "$RESUME_ID" ]; then
-  CODEX_ARGS[${#CODEX_ARGS[@]}]="resume"
-fi
 CODEX_ARGS[${#CODEX_ARGS[@]}]="--json"
 CODEX_ARGS[${#CODEX_ARGS[@]}]="-C"
 CODEX_ARGS[${#CODEX_ARGS[@]}]="$WORKTREE_ABS"
@@ -595,6 +592,9 @@ fi
 if [ -n "$EFFORT" ]; then
   CODEX_ARGS[${#CODEX_ARGS[@]}]="-c"
   CODEX_ARGS[${#CODEX_ARGS[@]}]="model_reasoning_effort=\"$EFFORT\""
+fi
+if [ -n "$RESUME_ID" ]; then
+  CODEX_ARGS[${#CODEX_ARGS[@]}]="resume"
 fi
 CODEX_ARGS[${#CODEX_ARGS[@]}]="--"
 if [ -n "$RESUME_ID" ]; then

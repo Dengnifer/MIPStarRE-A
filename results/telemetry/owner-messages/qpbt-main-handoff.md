@@ -1,0 +1,15 @@
+OWNER MESSAGE — 2026-09-02, fresh main session after PR #21.
+
+0. First read ~/.codex/prompts/goal.md in full: it is my standing briefing (amended today) and is authoritative. Then local/personas/main.md, AGENTS.md, local/README.md, local/protocols/issues-prs.md, local/protocols/review.md, and the last entry of local/protocols/EVOLUTION.md (2026-09-02).
+
+1. What changed. The merge-time fix cap is retired (issue #20 / PR #21, merged). The ONLY owner-gated control is MIPSTARRE_INFRA_OVERRIDE (the pre-commit line budget); every other parameter, flag and gate remedy — MIPSTARRE_FIX_CAP, --adjudicated, --force-review, the MIPSTARRE_CI_* knobs, ticking a finding with a written disposition — is yours with the reason recorded in results/telemetry/events.md. When you are genuinely blocked on me (credentials, the scope budget, an unresolvable mathematical decision), open a GitHub issue labelled `needs-owner` carrying your draft adjudication, park that item, and continue with the next queue item. Never idle the session on a question. Repair commits use plain `fix(review): …` / `fix(ci): …` subjects; the `[codex-*-fix]` prefixes are reserved for autofix.sh.
+
+2. State. Your predecessor committed the four adjudicated 42-* briefs and the issue #16-#19 task packets (f94fe3c on main; nothing dispatched). main has been synced to GitHub after PR #21. The primary checkout is clean.
+
+3. Start the Lean work NOW, in parallel with PR #5's merge. Dispatch issue #16 and the rest of the stage 4.2 wave per the committed task packets — separate issues and worktrees for residual, ch14, ch15, ch16, based on PR #5's approved head b5da371 (rebase onto main once #5 merges); serialize only the shared MIPStarRE/QPBT.lean re-export edit and the final merges; every PR gated by exact-head CI and review. Do not wait for PR #5 to merge before dispatching.
+
+4. PR #5, concurrently. Head b5da371 was green and APPROVED, but main moved: in .worktrees/issue-0006-qpbt-minimal-skeleton merge github/main into issue-0006-qpbt-minimal-skeleton (fresh-base, gate 2b), push the branch, `local/bin/ci.sh 5`, `local/bin/review.sh 5`, `local/bin/pr_merge.py 5`, then `local/bin/github-sync.sh`. If the review raises findings, fix them or adjudicate under review.md §12 yourself — no owner action.
+
+5. Reviewer discipline (owner directive). The reviewer over-produces: findings about code the PR does not touch, or that propose new mechanisms, are dispositioned "out of scope → issue" without action; scope control applies to its suggestions as much as to your own ideas. Issue #25 (bound the reviewer lane: scope, whole diff, pinned effort, persona by content, no finding quota, memory, safety-net timeout) is an owner-approved workflow lane — run it in a separate worktree in parallel with the Lean waves, ≤150 lines, and merge it through the gate; it does not block mathematics and mathematics does not wait for it. Issue #22 (vocabulary sweep) stays for later.
+
+Work continuously through the queue. End each report with what merged, what is dispatched, and what is next.

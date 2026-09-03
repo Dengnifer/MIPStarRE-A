@@ -463,21 +463,66 @@ clone_build_tier() { # <snapshot-dir> <snapshot-name> <keyhash> <snapshot-status
   log "tier 1 in place at $build"
 }
 
+# Tier 2 lives once per (lake-manifest.json, lean-toolchain) in a READ-ONLY
+# store under $CACHE_ROOT/packages/<key>; every worktree symlinks .lake/packages
+# to it (build-cache.md, EVOLUTION.md 2026-09-03).  The store is chmod a-w, so a
+# stray `lake update` or dependency rebuild fails loudly instead of mutating the
+# tree for every consumer — the objection that justified per-worktree copies.
+packages_store_dir() { # <tree>
+  printf '%s/packages/%s' "$CACHE_ROOT" \
+    "$(cat "$1/lake-manifest.json" "$1/lean-toolchain" | sha256sum | cut -c1-16)"
+}
+
+link_packages_store() { # returns 0 when .lake/packages is (now) a link to the store
+  local store link="$WORKTREE/.lake/packages"
+  store="$(packages_store_dir "$WORKTREE")"
+  if [ -L "$link" ]; then
+    [ "$(readlink "$link")" = "$store" ] && return 0
+    warn "$link pointed at $(readlink "$link"), not at $store (manifest changed); relinking"
+    rm -f "$link"
+  fi
+  [ -d "$store" ] || return 1
+  if dir_is_populated "$link"; then
+    warn "$link is a per-worktree copy while the store $store exists; migrate it with mv+ln to reclaim the space"
+    return 0
+  fi
+  mkdir -p "$WORKTREE/.lake"; rmdir "$link" 2>/dev/null || true
+  ln -s "$store" "$link"
+  log "tier 2 linked to the shared read-only store $store"
+  return 0
+}
+
+publish_packages_store() { # move a freshly fetched per-worktree tree into the store
+  local store src="$WORKTREE/.lake/packages"
+  store="$(packages_store_dir "$WORKTREE")"
+  mkdir -p "$(dirname "$store")"
+  if [ -d "$store" ]; then   # a concurrent warmer published first; ours is identical
+    rm -rf "$src"
+  else
+    mv -T "$src" "$store.incoming.$$" && chmod -R a-w "$store.incoming.$$" \
+      && mv -T "$store.incoming.$$" "$store" || { warn "could not publish $store; keeping the per-worktree copy"; return 1; }
+  fi
+  ln -s "$store" "$src"
+  log "tier 2 published to $store and linked"
+}
+
 fetch_packages_tier() { # <trigger>
   local trigger="$1" started elapsed
   if [ "$SKIP_PACKAGES" -eq 1 ]; then
     log "skipping tier 2 (.lake/packages) on request"
     return 0
   fi
+  if link_packages_store; then
+    return 0
+  fi
   proofwidgets_fresh_state_workaround "$WORKTREE"
   started="$(epoch_now)"
-  log "fetching tier 2 (.lake/packages) with lake exe cache get"
-  # Per-worktree, never a symlink into the warmer's tree: a shared packages
-  # directory is mutated for every consumer by any `lake update`.
+  log "fetching tier 2 (.lake/packages) with lake exe cache get (no store for this manifest yet)"
   if ( cd "$WORKTREE" && run_outside_git_env lake exe cache get ); then
     elapsed=$(( $(epoch_now) - started ))
     append_build_telemetry "cache-get" "success" "$elapsed" "$trigger" "" \
       "worktree=$WORKTREE"
+    publish_packages_store || true
     return 0
   fi
   elapsed=$(( $(epoch_now) - started ))
