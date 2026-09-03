@@ -8,7 +8,9 @@ This module states the two application obligations at the end of the Pauli-basis
 combining argument.  The combined-line measurement is recorded both with the error
 form asserted by the source and with the weaker estimate established by its first
 proof route.  The final witness packages the projective measurement of a pair of
-global bounded individual-degree polynomials.
+global bounded individual-degree polynomials.  The proposition-valued declarations
+below are intentionally open proof obligations in this skeleton; their statement
+links do not claim proof closure.
 
 ## References
 
@@ -34,7 +36,8 @@ uses a joint-law decomposition absent from the subline lemma.  The discrepancy i
 documented in `docs/paper-gaps/qpbt_combined-lines-error-term.tex` and
 `rem:qld-4-13-source-defects` in the blueprint.  The directly indexed line carrier
 used by `ExtendedLinesWitness` represents the required extended-dimensional
-line-point law without the invalid divisibility guard; it is analysis-only and does
+line-point law without the invalid divisibility guard; it is a directly indexed
+line-space construction and does
 not identify the source's seed-bearing verifier game with the directly indexed game.
 -/
 theorem exists_extendedLinesWitness :
@@ -49,11 +52,11 @@ theorem exists_extendedLinesWitness :
 /-- Construction of the extended-line measurements with the estimate actually
 delivered by the first proof route, `C * m * poly(epsilon, md / q)`.
 
-This is a Lean-only established form of the argument, not the source-labelled
+This is an established auxiliary form of the argument, not the source-labelled
 `lem:qld-4-13`; it must not be advertised as that theorem.  The source discrepancy
 is analyzed in `docs/paper-gaps/qpbt_combined-lines-error-term.tex`.  As in the
-source-facing declaration, the extended questions use the analysis-only direct line
-carrier.  Relating its game to the source's seed-bearing game requires the transport
+source-facing declaration, the extended questions use the directly indexed line-space
+construction.  Relating its game to the source's seed-bearing game requires the transport
 and soundness obligations in
 `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`.
 -/

@@ -244,3 +244,15 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 - **Lesson:** the setup path correctly reports a degraded warm bootstrap, but
   a network-independent private tier-2 clone remains a manual recovery step
   when GitHub is unreachable. No hot-cache or manifest state was modified.
+
+## 2026-09-03 - PR #40 review triage
+
+- **Disposition:** the four source-labelled blueprint entries whose Lean
+  carriers or hypotheses are explicitly documented as divergent now carry
+  `\\notready` rather than statement-match `\\leanok`; their declaration links
+  remain for traceability. The wording findings were changed to mathematical
+  descriptions of the directly indexed construction.
+- **Scope decision:** the remaining skeleton propositions stay as tracked open
+  proof obligations, as required by issue #18's accepted contract. The Apply
+  module now states that these links do not claim proof closure. Completing
+  those proofs is a later mathematics stage, not a change to this skeleton PR.

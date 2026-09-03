@@ -8,7 +8,7 @@ The low-degree game used by the Pauli-basis combining argument is needed in
 dimension `2 * m + 2`.  The existing conditionally linear game represents a
 coordinate index by an equally sized fiber in the scalar field and therefore
 requires the dimension to divide the field size.  This file gives the separate
-analysis-only variant which samples that index directly.
+directly indexed variant which samples that index directly.
 
 The geometric line carrier records the sampled coordinate, and line evaluation
 uses an `Option` outcome rather than assigning a value when a point does not
@@ -37,7 +37,7 @@ open MIPStarRE.Quantum
 noncomputable section
 
 /-- Parameters for the directly indexed low-degree game.  Unlike `LdParams`,
-this analysis-only carrier has no divisibility field: its coordinate index is
+this directly indexed line-space construction has no divisibility field: its coordinate index is
 sampled from `Fin m` rather than encoded by fibers of `chiIndex`.
 
 This is the direct-index repair described in
@@ -71,7 +71,7 @@ instance (D : DirectLdParams) : Nonempty (Fin D.m) := ⟨D.firstIndex⟩
 field, degree, and simultaneity parameters are inherited from `P`, while its
 dimension is `2 * P.m + 2`; no divisibility assertion is introduced.
 
-This is Lean-only infrastructure for the repair of
+This is formalization infrastructure for the repair of
 `rem:qld-4-7-divisibility`, blueprint
 `blueprint/src/chapter/ch15_qpbt_combining.tex:1257-1293`, paper context
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1020-1116`.
@@ -216,7 +216,7 @@ theorem directLinePointDist_isProbability (D : DirectLdParams) :
     (by norm_num) (by norm_num)
 
 /-- The point and stored-index marginals of the direct axis-line law are
-uniform.  This is a Lean-only direct-index analogue of `lem:alnf`, required by
+uniform.  This is a direct-index analogue of `lem:alnf`, required by
 the repair described in `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`;
 the source distribution is at
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:243-257`.
@@ -229,7 +229,7 @@ theorem directALinePointDist_point_index_marginal_uniform (D : DirectLdParams) :
   sorry
 
 /-- Every sampled direct axis line contains its paired point.  This is the
-Lean-only direct-index incidence obligation corresponding to `lem:alnf` and
+Direct-index incidence obligation corresponding to `lem:alnf` and
 the repair in `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`. -/
 theorem directALinePointDist_mem_line (D : DirectLdParams) :
     ∀ sample ∈ (directALinePointDist D).support,
@@ -248,7 +248,7 @@ theorem directDLinePointDist_point_index_marginal_uniform (D : DirectLdParams) :
   sorry
 
 /-- Every sampled direct diagonal line contains its paired point.  This is the
-Lean-only direct-index incidence obligation corresponding to `lem:dlnf`. -/
+Direct-index incidence obligation corresponding to `lem:dlnf`. -/
 theorem directDLinePointDist_mem_line (D : DirectLdParams) :
     ∀ sample ∈ (directDLinePointDist D).support,
       sample.2 ∈ sample.1.pointSet := by
@@ -460,7 +460,7 @@ This is the repaired import form proposed in
 combining argument at paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1267-1288`.
 
-This is a Lean-only proof obligation, not the source-labelled
+This is a formalization auxiliary assertion, not the source-labelled
 `lem:ld-soundness`.  Its proof must establish the game-correspondence and
 auxiliary-parameter bounds catalogued in the cited gap note; neither is hidden
 as a hypothesis here. -/
