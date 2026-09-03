@@ -240,17 +240,22 @@ def _marked_body(marker: str, body: str) -> str:
 
 
 def post_review(number: int, commit_id: str, marker: str, body: str) -> str:
-    """Post one COMMENT review bound to *commit_id*; marker-idempotent.
+    """Create or update one COMMENT review bound to *commit_id*.
 
     Single-account repos cannot self-APPROVE, so every local verdict is a
     COMMENT review; adverseness travels in the ``local-review/summary`` status,
-    not in a review state.  Returns ``"exists"`` or the new review id.
+    not in a review state.  The marker is the idempotency key: a matching
+    review on the same commit is updated in place.  Returns the review id.
     """
+    full = _marked_body(marker, body)
     for row in api(f"pulls/{number}/reviews", paginate=True):
         if row.get("commit_id") == commit_id and marker in (row.get("body") or ""):
-            return "exists"
+            review_id = str(row["id"])
+            api(f"pulls/{number}/reviews/{review_id}", method="PUT",
+                payload={"body": full}, mutation=True, idempotent=True)
+            return review_id
     payload = {"commit_id": commit_id, "event": "COMMENT",
-               "body": _marked_body(marker, body)}
+               "body": full}
     try:
         created = api(f"pulls/{number}/reviews", method="POST",
                       payload=payload, mutation=True)

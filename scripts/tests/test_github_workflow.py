@@ -232,12 +232,15 @@ class GitHubLayerTests(LayerTestCase):
             self.assertEqual(gh_common.ensure_pr_comment(7, marker, "body"), 33)
             self.assertEqual(len(self.gh.payloads("POST", r"^issues/7/comments")), 1)
 
-    def test_post_review_is_marker_idempotent_and_posts_a_comment_review(self) -> None:
+    def test_post_review_updates_by_marker_or_posts_a_comment_review(self) -> None:
         marker = f"<!-- mipstarre-review pr=7 head={HEAD} -->"
-        with self.subTest("same commit id and marker -> skip"):
+        with self.subTest("same commit id and marker -> update in place"):
             self.gh.route(r"^pulls/7/reviews",
                           [{"id": 5, "commit_id": HEAD, "body": marker + "\nVERDICT: APPROVED"}])
-            self.assertEqual(gh_common.post_review(7, HEAD, marker, "again"), "exists")
+            self.gh.route(r"^pulls/7/reviews/5$", {"id": 5}, method="PUT")
+            self.assertEqual(gh_common.post_review(7, HEAD, marker, "again"), "5")
+            updated = self.gh.payloads("PUT", r"^pulls/7/reviews/5$")
+            self.assertEqual(updated, [{"body": marker + "\nagain"}])
             self.assertEqual(self.gh.payloads("POST", r"^pulls/7/reviews"), [])
         with self.subTest("absent -> one COMMENT review bound to the commit"):
             self.gh.reset()
