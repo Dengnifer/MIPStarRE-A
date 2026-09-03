@@ -22,7 +22,8 @@ run_without_git_local_env() (
 # (numstat includes deletions; PR 7 round 3, F8), and before the
 # MIPSTARRE_SKIP_HOOKS exit so a blanket hook skip cannot launder the
 # owner-only budget override.
-INFRA_CHANGED="$(git diff --cached --numstat -- local/ .githooks/ scripts/tests/test_github_workflow.py \
+INFRA_CHANGED="$(git diff --cached --numstat -- local/ .githooks/ \
+  scripts/tests/test_dispatch.py scripts/tests/test_github_workflow.py \
   | awk '{added=$1; deleted=$2; if (added != "-") total+=added+deleted} END {print total+0}')"
 if [ "${INFRA_CHANGED:-0}" -gt 400 ] && [ "${MIPSTARRE_INFRA_OVERRIDE:-}" != "1" ]; then
   echo "MIPStarRE pre-commit: staged workflow-layer change is ${INFRA_CHANGED} lines (budget: 400)."
