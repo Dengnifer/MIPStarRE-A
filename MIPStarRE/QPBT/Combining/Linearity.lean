@@ -5,8 +5,8 @@ import MIPStarRE.QPBT.Games.Defs
 # The quantum linearity theorem
 
 This file states the external quantum-linearity result used to combine the
-binary observables produced in the point analysis.  The statement uses a raw
-positive trace-one operator, and its conclusion adjoins a finite ancillary
+binary observables produced in the point analysis.  The statement uses a
+positive semidefinite trace-one operator, and its conclusion adjoins a finite ancillary
 space on which the exactly linear observables act.
 
 ## References

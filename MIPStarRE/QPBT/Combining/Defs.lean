@@ -96,10 +96,12 @@ theorem combinePoly_eval {K : Type*} [CommSemiring K] {m : ℕ}
   simp [combinePoly, MvPolynomial.eval_rename]
 
 /-- The combining polynomial has individual degree at most `d` when
-`hd : 1 ≤ d`.  This is the faithful boundary condition for the two affine
-coordinate factors `alpha` and `beta`: each contributes degree one, while the
-corresponding polynomial factors have degree at most `d - 1` in those
-coordinates.  The statement is the well-definedness assertion in
+`hd : 1 ≤ d`.  The coordinate blocks are disjoint: `f` depends only on the
+`x` variables and `g` only on the `z` variables, so multiplication by `alpha`
+or `beta` preserves the degree bound on those old coordinates and gives degree
+one only in the corresponding fresh coordinate.  Thus `hd` supplies exactly
+the needed bound on the two fresh coordinates; no `d + 1` bound is introduced.
+The statement is the well-definedness assertion in
 `def:combine-map`, blueprint
 `blueprint/src/chapter/ch15_qpbt_combining.tex:445-480`, with source context
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:970-983` and the

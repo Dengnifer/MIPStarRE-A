@@ -7,7 +7,7 @@ import MIPStarRE.QPBT.Test.Soundness
 This module states the two application obligations at the end of the Pauli-basis
 combining argument.  The combined-line measurement is recorded both with the error
 form asserted by the source and with the weaker estimate established by its first
-proof route.  The final witness packages the projective measurement of a pair of
+proof route.  The final witness consists of a projective measurement of a pair of
 global bounded individual-degree polynomials.  The proposition-valued declarations
 below are intentionally open proof obligations in this skeleton; their statement
 links do not claim proof closure.
