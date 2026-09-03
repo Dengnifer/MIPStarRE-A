@@ -477,8 +477,9 @@ link_packages_store() { # returns 0 when .lake/packages is (now) a link to the s
   local store link="$WORKTREE/.lake/packages"
   store="$(packages_store_dir "$WORKTREE")"
   if [ -L "$link" ]; then
-    [ "$(readlink "$link")" = "$store" ] || warn "$link points at $(readlink "$link"), not at $store (manifest changed?)"
-    return 0
+    [ "$(readlink "$link")" = "$store" ] && return 0
+    warn "$link pointed at $(readlink "$link"), not at $store (manifest changed); relinking"
+    rm -f "$link"
   fi
   [ -d "$store" ] || return 1
   if dir_is_populated "$link"; then
@@ -498,8 +499,8 @@ publish_packages_store() { # move a freshly fetched per-worktree tree into the s
   if [ -d "$store" ]; then   # a concurrent warmer published first; ours is identical
     rm -rf "$src"
   else
-    mv "$src" "$store.incoming.$$" && chmod -R a-w "$store.incoming.$$" \
-      && mv "$store.incoming.$$" "$store" || { warn "could not publish $store; keeping the per-worktree copy"; return 1; }
+    mv -T "$src" "$store.incoming.$$" && chmod -R a-w "$store.incoming.$$" \
+      && mv -T "$store.incoming.$$" "$store" || { warn "could not publish $store; keeping the per-worktree copy"; return 1; }
   fi
   ln -s "$store" "$src"
   log "tier 2 published to $store and linked"
