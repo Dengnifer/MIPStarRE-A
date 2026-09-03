@@ -42,15 +42,6 @@ def selectPoly {P : AdmissibleParams} (W : PauliKind) : PolyPair P -> Poly P
 
 end PauliKind
 
-/-- Decode a bounded polynomial by evaluating it on every Boolean-cube point.
-This is the `H = F_q` decoder used at paper
-`14_analysis_of_the_pauli_basis_test.tex:1419-1420`; see
-`docs/paper-gaps/qpbt_decoding-identity.tex`. No unrestricted interpolation
-identity is asserted for this definition. -/
-noncomputable def decodeFq {P : AdmissibleParams} (g : Poly P) :
-    PauliRegister P :=
-  fun y => MvPolynomial.eval (cubeEmbed y) g.1
-
 namespace GlobalPairWitness
 
 /-- The single-basis marginal of the global polynomial-pair measurement.
@@ -76,7 +67,7 @@ noncomputable def tildeM {P : AdmissibleParams} {epsilon delta : ℝ}
     (a : PauliScalar P) : Op (ExtractionBlock P (S.LocalSpace side)) :=
   ∑ g : Poly P,
     heteroKron ((w.marginalPoly side W).effect g)
-      (tauDotProj W u (dotProduct (decodeFq g) u - a))
+      (tauDotProj W u (dotProduct (decodeFq g.1) u - a))
 
 /-- The binary observable obtained from the trace coarse-graining of `tildeM`.
 This is Equation `eq:def-tildewj` in `def:tilde-w-observables`, blueprint
@@ -106,7 +97,7 @@ theorem tildeObs_eq_heteroKron {P : AdmissibleParams} {epsilon delta : ℝ}
       heteroKron
         (∑ pair : PolyPair P,
           phaseSign (fixedBinTrace P.model
-            (P.model.basis j * dotProduct (decodeFq (W.selectPoly pair)) u)) •
+            (P.model.basis j * dotProduct (decodeFq (W.selectPoly pair).1) u)) •
             (w.Smeas side).effect pair)
         (tauObservable W (P.model.basis j • u)) := by
   sorry
@@ -169,8 +160,8 @@ noncomputable def swapUnitary {P : AdmissibleParams} {epsilon delta : ℝ}
     (side : PlayerSide) : Op (ExtractionBlock P (S.LocalSpace side)) :=
   ∑ pair : PolyPair P,
     heteroKron ((w.Smeas side).effect pair)
-      (tauObservable .X (decodeFq pair.2) *
-        tauObservable .Z (decodeFq pair.1))
+      (tauObservable .X (decodeFq pair.2.1) *
+        tauObservable .Z (decodeFq pair.1.1))
 
 /-- The swap map is a right unitary. This is the first exact unitarity
 calculation of `lem:v-swap-conjugation`, blueprint

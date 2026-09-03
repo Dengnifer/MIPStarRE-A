@@ -86,6 +86,52 @@ theorem marginalPoly_sub_pointMeas_approx_zero {P : AdmissibleParams}
       (fun _ _ => 0) S.psiHat ≤ δS := by
   sorry
 
+/-! ## Non-encoding support -/
+
+/-- The state-dependent mass assigned by a side's polynomial marginal to
+outcomes outside the low-degree encoding image.  The finite support filter is
+written explicitly so the restricted decoder identity is never applied to an
+arbitrary polynomial representative.
+
+This is the left-hand side of `eq:qld-nonencoding-mass` in
+`blueprint/src/chapter/ch16_qpbt_extraction.tex:155-159`, from
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1458-1602`.
+The bound remains a proposition-valued proof obligation, as required by
+`docs/paper-gaps/qpbt_decoding-identity.tex:87-123`. -/
+noncomputable def nonencodingMarginalMass {P : AdmissibleParams}
+    {epsilon deltaS : ℝ} {S : ProjectiveSetting P epsilon}
+    (w : GlobalPairWitness S deltaS) (side : PlayerSide) (W : PauliKind) : ℝ := by
+  classical
+  exact ∑ g ∈ Finset.univ.filter (fun g : Poly P => ¬ IsEncoding g.1),
+    (inner ℂ S.psiHat
+      (applyOperatorToState
+        (S.placeSide side
+          (heteroKron ((w.marginalPoly side W).effect g)
+            (1 : Op (PauliRegister P))))
+        S.psiHat)).re
+
+/-- The non-encoding support estimate required by the Chapter 16 extraction
+argument.  For either player side and either Pauli basis, the marginal mass on
+polynomial representatives outside the encoding image is bounded by a
+universal multiple of the consistency error plus the Schwartz--Zippel term
+`md/q`.
+
+This is the named obligation for `eq:qld-nonencoding-mass`, blueprint
+`blueprint/src/chapter/ch16_qpbt_extraction.tex:155-159`, paper
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1458-1602`.
+The estimate is intentionally not folded into a decoder identity; its proof
+must use the point-consistency hypotheses and Schwartz--Zippel. See
+`docs/paper-gaps/qpbt_decoding-identity.tex:87-123`. -/
+theorem nonencodingMarginalMass_le :
+    ∃ C : ℝ, 1 ≤ C ∧
+      ∀ (P : AdmissibleParams) (epsilon deltaS : ℝ), 0 ≤ deltaS →
+        (S : ProjectiveSetting P epsilon) →
+        (w : GlobalPairWitness S deltaS) →
+        ∀ (side : PlayerSide) (W : PauliKind),
+          nonencodingMarginalMass w side W ≤
+            C * deltaS + ((P.m * P.d : ℕ) : ℝ) / (P.q : ℝ) := by
+  sorry
+
 /-! ## Consistency of the pulled-apart measurements -/
 
 /-- Alice's original point measurement is consistent with Bob's pulled-apart

@@ -38,6 +38,32 @@ noncomputable abbrev decodeBool {K : Type*} [Field K] [DecidableEq K] {m : ℕ}
     (g : (Fin m → K) → K) : Cube m → K :=
   decodeAt ({0, 1} : Finset K) g
 
+/-- The full-field specialization of `decodeAt` used by the Pauli extraction.
+Every value is retained because the filter is `H = Finset.univ`, so this is the
+cube-indexed evaluation of a polynomial representative.  The restricted
+decoder identity remains separate and is only available for encoding
+representatives; no unrestricted interpolation identity is asserted here.
+
+This is the `H = \F_q` reading of `def:decoding-map`, blueprint
+`blueprint/src/chapter/ch11_qpbt_algebra.tex:445-455`, used by Chapter 16 at
+`blueprint/src/chapter/ch16_qpbt_extraction.tex:11-20`; paper origin
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1419-1420` and
+the correction recorded in `docs/paper-gaps/qpbt_decoding-identity.tex`. -/
+noncomputable def decodeFq {K : Type*} [Field K] [Fintype K] [DecidableEq K] {m : ℕ}
+    (g : MvPolynomial (Fin m) K) : Cube m → K :=
+  decodeAt (Finset.univ : Finset K) (fun x => MvPolynomial.eval x g)
+
+/-- A polynomial representative lies in the low-degree encoding image when it
+is exactly the multilinear representative reconstructed from its full-field
+decoder.  This predicate is used to state the support restriction required by
+the Chapter 16 decoding argument; it does not identify arbitrary polynomial
+functions with their representatives.
+
+See `docs/paper-gaps/qpbt_decoding-identity.tex:87-116`. -/
+def IsEncoding {K : Type*} [Field K] [Fintype K] [DecidableEq K] {m : ℕ}
+    (g : MvPolynomial (Fin m) K) : Prop :=
+  lowDegreeEncoding (decodeFq g) = g
+
 /-- The restricted decoding identity in `def:decoding-map`, blueprint
 `ch11_qpbt_algebra.tex:445-455`, paper `04_preliminaries.tex:917-924`. -/
 theorem decodeAt_lowDegreeEnc {K : Type*} [Field K] [DecidableEq K] {m : ℕ}
