@@ -6,6 +6,8 @@
 set -u
 S=qpbt
 if tmux capture-pane -p -t "$S" | grep -q "gpt-5.6-sol"; then
+  # interrupt a running turn first (Esc), then quit at the prompt
+  tmux capture-pane -p -t "$S" | grep -q "esc to interrupt" && { tmux send-keys -t "$S" Escape; sleep 4; }
   tmux send-keys -t "$S" "/quit" Enter; sleep 2; tmux send-keys -t "$S" Enter
   for _ in $(seq 1 30); do tmux capture-pane -p -t "$S" | grep -q "gpt-5.6-sol" || break; sleep 2; done
   tmux capture-pane -p -t "$S" | grep -q "gpt-5.6-sol" && { echo "codex did not exit"; exit 1; }

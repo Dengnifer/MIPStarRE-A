@@ -291,3 +291,24 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 - **Delegated search error:** the read-only issue #18 triage used one invalid
   `rg` escape while inspecting proof debt. The agent reran the search with a
   valid expression; no file or build state changed.
+
+## 2026-09-04 — PR #44 review attached a stale-base diff
+
+- **Symptom:** after PR #39 merged, the primary `main` retained an unpublished
+  telemetry commit. PR #44's first fresh-head CI and review therefore computed
+  their changed-file set from the older common ancestor and included PR #39's
+  ten files alongside PR #44's two locator files. CI passed the conservative
+  superset, but the reviewer began testing out-of-scope workflow code.
+- **Recovery:** the operator interrupted the review before publication and
+  terminated its remaining read-only child. Updating only `origin/main` did
+  not help: `review.sh` computes its merge base from the local branch named
+  `main`. A second attempt was stopped immediately when its attachment proved
+  unchanged. The unpublished telemetry commits are to be reconciled onto the
+  current GitHub main before the same-head review is run again.
+- **Mistaken diagnosis:** the operator initially attributed the repeated
+  attachment to a cached `diff.patch`; inspection of `review.sh` showed that
+  the file is regenerated unconditionally and that local `main` was the real
+  stale input. One diagnostic also passed multiple revisions to
+  `git rev-parse --short`, which accepts one revision in this form; the command
+  was rerun separately. Neither mistake changed tracked source or GitHub review
+  evidence.
