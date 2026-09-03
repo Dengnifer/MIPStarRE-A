@@ -435,18 +435,21 @@ class MergeGateTests(LayerTestCase):
                             "body": f"<!-- mipstarre-review pr=7 head={sha} -->"})
         statuses = {pr_merge.REVIEW_CONTEXT: {"state": "failure"}}
         comment = {"id": 9, "body": ("ADJUDICATION\nhead=" + self.head
-                                      + "\n- [x] F1 — deferred to issue #23: follow-up")}
+                                      + "\n- [x] F1 — deferred to issue #24: follow-up")}
 
         with mock.patch.object(pr_merge.gh_common, "api",
                                side_effect=lambda path, **_: [comment] if path.endswith("comments")
-                               else {"number": 23, "state": "open"}):
+                               else {"number": 24, "state": "open"}):
             deferred = pr_merge.check_review(7, self.head, reviews, statuses, adjudicated=True)
-        self.assertEqual(deferred, {23})
+        self.assertEqual(deferred, {24})
 
         merge_base = _git(self.repo, "merge-base", "main", self.head)
-        with self.assertRaisesRegex(LayerError, "also closes deferred"):
+        with mock.patch.object(pr_merge.gh_common, "open_sub_issues", return_value=[]):
             pr_merge.check_dependencies(self.repo, 7, "Closes #23", merge_base, self.head,
                                         deferred)
+        with self.assertRaisesRegex(LayerError, "also closes deferred"):
+            pr_merge.check_dependencies(self.repo, 7, "Closes #23", merge_base, self.head,
+                                        {23})
 
         for bad_body in (comment["body"].replace("head=", "head ="),
                          "ADJUDICATION\nhead=" + self.head):
@@ -457,7 +460,7 @@ class MergeGateTests(LayerTestCase):
                     pr_merge.check_review(7, self.head, reviews, statuses, adjudicated=True)
 
         with mock.patch.object(pr_merge.gh_common, "api",
-                               side_effect=([comment], {"number": 23, "state": "closed"})):
+                               side_effect=([comment], {"number": 24, "state": "closed"})):
             with self.assertRaisesRegex(LayerError, "open tracked issue"):
                 pr_merge.check_review(7, self.head, reviews, statuses, adjudicated=True)
 
