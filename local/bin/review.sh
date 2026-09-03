@@ -431,6 +431,52 @@ case "$CI_SUMMARY" in
   *)  gate_block "local-ci/summary is '$CI_SUMMARY' for $HEAD_SHA; review is blocked until CI is green on this head SHA" ;;
 esac
 
+# ------------------------------------------------------------- round-cap gate
+# events.md 2026-09-03 (the eight-hour stall): a PR that touches only the
+# workflow layer gets at most TWO review rounds; from the third the operator
+# adjudicates at the current head (review.md section 12) instead of feeding the
+# reviewer again.  Mathematics PRs keep the four-round cap.  --force-review
+# overrides (the autofix terminal review).
+ROUNDS="$(ghc pr-reviews "$PR_NUM" 2>/dev/null | python3 -c '
+import json, sys
+try:
+    rows = json.load(sys.stdin)
+except Exception:
+    rows = []
+print(sum(1 for r in rows if "mipstarre-review pr=" in (r.get("body") or "")))
+' 2>/dev/null || echo 0)"
+CHANGED_FILES="$(git -C "$ROOT" diff --name-only "$BASE...$HEAD_SHA" 2>/dev/null || true)"
+WORKFLOW_ONLY=0
+if [ -n "$CHANGED_FILES" ] && ! printf '%s\n' "$CHANGED_FILES" | grep -qvE '^(local/|\.githooks/|scripts/tests/|docs/|results/telemetry/|README\.md$)'; then
+  WORKFLOW_ONLY=1
+fi
+if [ "$WORKFLOW_ONLY" -eq 1 ] && [ "${ROUNDS:-0}" -ge 2 ] && [ "$FORCE_REVIEW" -eq 0 ]; then
+  gate_block "PR #$PR_NUM touches only the workflow layer and already has $ROUNDS review rounds; adjudicate at $HEAD_SHA under review.md section 12 (ADJUDICATION comment, then pr_merge.py $PR_NUM --adjudicated) instead of a third round (--force-review overrides)"
+fi
+
+# ------------------------------------------------------------- round-cap gate
+# events.md 2026-09-03 (the eight-hour stall): a PR that touches only the
+# workflow layer gets at most TWO review rounds; from the third the operator
+# adjudicates at the current head (review.md section 12) instead of feeding the
+# reviewer again.  Mathematics PRs keep the four-round cap.  --force-review
+# overrides (the autofix terminal review).
+ROUNDS="$(ghc pr-reviews "$PR_NUM" 2>/dev/null | python3 -c '
+import json, sys
+try:
+    rows = json.load(sys.stdin)
+except Exception:
+    rows = []
+print(sum(1 for r in rows if "mipstarre-review pr=" in (r.get("body") or "")))
+' 2>/dev/null || echo 0)"
+CHANGED_FILES="$(git -C "$ROOT" diff --name-only "$BASE...$HEAD_SHA" 2>/dev/null || true)"
+WORKFLOW_ONLY=0
+if [ -n "$CHANGED_FILES" ] && ! printf '%s\n' "$CHANGED_FILES" | grep -qvE '^(local/|\.githooks/|scripts/tests/|docs/|results/telemetry/|README\.md$)'; then
+  WORKFLOW_ONLY=1
+fi
+if [ "$WORKFLOW_ONLY" -eq 1 ] && [ "${ROUNDS:-0}" -ge 2 ] && [ "$FORCE_REVIEW" -eq 0 ]; then
+  gate_block "PR #$PR_NUM touches only the workflow layer and already has $ROUNDS review rounds; adjudicate at $HEAD_SHA under review.md section 12 (ADJUDICATION comment, then pr_merge.py $PR_NUM --adjudicated) instead of a third round (--force-review overrides)"
+fi
+
 # ------------------------------------------------------------ bot-commit gate
 # pr-review.yml:69-79 — skip auto-fix bot commits so the review -> fix -> review
 # cascade cannot start.  The exact prefixes are load-bearing (DESIGN.md

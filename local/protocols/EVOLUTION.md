@@ -437,3 +437,21 @@ and `lean-toolchain`); ext4 without reflink, so copy-on-write is unavailable.
 worktree; new worktrees are ready in seconds without touching the network
 (which was flaking from ghz on 2026-09-02); a Mathlib bump is a new store key,
 never a mutation of a shared tree.
+
+## 2026-09-03 — Two-round cap for workflow-only PRs; queue discipline
+
+**Trigger:** `results/telemetry/events.md` 2026-09-03, "Eight-hour stall on
+main": the operator fed a 107-line workflow PR to the reviewer three times
+(5 → 10 → 11 findings), grew it to 400 lines to satisfy them, and left two
+green PRs unmerged for hours.
+
+**Change:** (1) `review.sh` counts the marker reviews on the PR and, when the
+diff touches only the workflow layer, refuses a third round with the section-12
+adjudication instruction (`--force-review` still allows the autofix terminal
+review); (2) `personas/main.md` gains the queue-discipline bullet (merge green
+PRs first at every iteration; two rounds then adjudicate; never grow a PR to
+satisfy findings; mechanism requests are out of scope); (3) `review.md`
+section 12 records the two-round threshold for workflow-only PRs.
+
+**Expected effect:** scaffolding PRs converge in two rounds or are decided;
+green work merges at every iteration; the reviewer cannot drive scope growth.
