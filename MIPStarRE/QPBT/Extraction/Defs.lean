@@ -243,7 +243,7 @@ dominates terms of order `epsilon`.
 
 This makes explicit the enlargement of the error called `deltaS` in
 `lem:qld-construct-the-paulis`, blueprint
-`ch16_qpbt_extraction.tex:114-186`, paper
+`ch16_qpbt_extraction.tex:120-196`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1458-1605`. -/
 noncomputable def deltaConstructPaulis (C epsilon deltaG : ℝ)
     (m d q : ℕ) : ℝ :=
