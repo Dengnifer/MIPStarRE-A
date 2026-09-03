@@ -1,0 +1,3 @@
+OWNER MESSAGE — addendum to the inbox rule (binding). Re-read the body of issue #26; it changed.
+1. Post to #26 ONLY when the item cannot move at all without me AND no rule lets you decide; reviewer findings, workflow ergonomics, tooling, and ordering questions are never owner blockers. If in doubt, decide yourself, record the reason in events.md, and continue.
+2. Write BLOCKER comments for a human who has not looked at the project for days: question first, options with your recommendation, why only I can decide, what you do meanwhile — at most 10 plain lines above the fold; SHAs, paths, and long reasoning go inside a <details> block. Same plainness for #27 progress reports: a reader should catch up in one minute.
