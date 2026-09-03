@@ -43,41 +43,40 @@ noncomputable def ProjectiveSetting.swappedState
   reindexState (Equiv.prodComm S.toStrategy.ιA S.toStrategy.ιB)
     S.toStrategy.ψ
 
-/-- Finite-carrier support for applying the chapter-12 defect functional to
-the Pauli question-pair distribution. The question space is finite by the
-fixed finite field model; paper `14_analysis_of_the_pauli_basis_test.tex:197-199`,
+/-- The space of Pauli question pairs is finite because the underlying field
+model is finite. Paper `14_analysis_of_the_pauli_basis_test.tex:197-199`;
 blueprint `ch14_qpbt_observables.tex:515-522`. -/
 noncomputable instance pauliQuestionPairFintype (P : AdmissibleParams) :
     Fintype (PauliQuestion P × PauliQuestion P) :=
   Fintype.ofFinite _
 
-/-- Classical equality for the finite Pauli question-pair carrier. This is
-Lean-only support for `consistencyDefect` in item 1 of
-`lem:qld-win-implications`, blueprint `ch14_qpbt_observables.tex:515-522`. -/
+/-- Equality of Pauli question pairs is decidable. This is used in the
+consistency defect from item 1 of `lem:qld-win-implications`; blueprint
+`ch14_qpbt_observables.tex:515-522`. -/
 noncomputable instance pauliQuestionPairDecidableEq (P : AdmissibleParams) :
     DecidableEq (PauliQuestion P × PauliQuestion P) :=
   Classical.decEq _
 
-/-- A finite code for canonical line descriptions that omits only their
-proposition-valued invariants. This is Lean-only support for the line-point
-average in `lem:qld-win-implications`, blueprint
+/-- The coordinate space records the base and seed of an axis line, or the
+base, seed, and direction of a diagonal line. It is finite and indexes the
+line-point average in `lem:qld-win-implications`; blueprint
 `ch14_qpbt_observables.tex:523-548`. -/
 private abbrev LineDescCode (P : AdmissibleParams) :=
   ((Fin P.m → PauliScalar P) × PauliScalar P) ⊕
     ((Fin P.m → PauliScalar P) × PauliScalar P ×
       (Fin P.m → PauliScalar P))
 
-/-- Encode a canonical line by its tag and finite data fields. This is a
-Lean-only helper for `lineDescFintype`, used at blueprint
+/-- Map a canonical line to its kind and coordinate data: base and seed for an
+axis line, and base, seed, and direction for a diagonal line. Blueprint
 `ch14_qpbt_observables.tex:523-548`. -/
 private def lineDescCode (P : AdmissibleParams) :
     LineDesc P.toLdParams → LineDescCode P
   | .axis base seed _ => .inl (base, seed)
   | .diagonal base seed direction _ _ => .inr (base, seed, direction)
 
-/-- The finite line code is injective because the omitted invariant fields are
-proof-irrelevant. This is Lean-only support for the line-point average in
-`lem:qld-win-implications`, blueprint
+/-- The coordinate-data map on canonical lines is injective: lines of the same
+kind with equal base, seed, and direction data are equal. This supports the
+line-point average in `lem:qld-win-implications`; blueprint
 `ch14_qpbt_observables.tex:523-548`. -/
 private theorem lineDescCode_injective (P : AdmissibleParams) :
     Function.Injective (lineDescCode P) := by
@@ -98,16 +97,16 @@ private theorem lineDescCode_injective (P : AdmissibleParams) :
           rcases h with ⟨rfl, rfl, rfl⟩
           rfl
 
-/-- Finite enumeration of the proof-bearing canonical line descriptions,
-obtained by an injective code that forgets only proposition-valued invariants.
-This is Lean-only support for the line-point average in item 2 of
-`lem:qld-win-implications`, blueprint `ch14_qpbt_observables.tex:523-548`. -/
+/-- The set of canonical axis and diagonal lines is finite. This finiteness is
+used in the line-point average from item 2 of `lem:qld-win-implications`;
+blueprint `ch14_qpbt_observables.tex:523-548`. -/
 noncomputable instance lineDescFintype (P : AdmissibleParams) :
     Fintype (LineDesc P.toLdParams) :=
   Fintype.ofInjective (lineDescCode P) (lineDescCode_injective P)
 
-/-- Finite-carrier support for the canonical line-point distribution in the
-low-degree winning implication. Paper
+/-- The set of pairs consisting of a canonical line and a point is finite.
+These pairs index the line-point distribution in the low-degree winning
+implication. Paper
 `14_analysis_of_the_pauli_basis_test.tex:200-204`, blueprint
 `ch14_qpbt_observables.tex:523-548`. -/
 noncomputable instance linePointFintype (P : AdmissibleParams) :
