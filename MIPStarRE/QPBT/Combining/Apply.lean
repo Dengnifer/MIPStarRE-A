@@ -74,8 +74,8 @@ theorem exists_extendedLinesWitness_established :
 `lem:qld-4-7`, paper lines 1267--1274.  The statement has the source's universal
 constants and contains no divisibility hypothesis or residual construction input.
 
-The proof must apply low-degree soundness at dimension `2 * m + 2`.  The current
-direct carrier makes that application well-typed without assuming
+The argument uses low-degree soundness at dimension `2 * m + 2`.  The current
+direct carrier realizes the required dimension without assuming
 `2 * m + 2 ∣ q`, but it does not itself prove the game-correspondence and
 auxiliary-parameter estimates required by the soundness import; those obligations
 are exposed by `exists_direct_ld_soundness` and documented in

@@ -71,10 +71,10 @@ instance (D : DirectLdParams) : Nonempty (Fin D.m) := ⟨D.firstIndex⟩
 field, degree, and simultaneity parameters are inherited from `P`, while its
 dimension is `2 * P.m + 2`; no divisibility assertion is introduced.
 
-This is formalization infrastructure for the repair of
-`rem:qld-4-7-divisibility`, blueprint
-`blueprint/src/chapter/ch15_qpbt_combining.tex:1257-1293`, paper context
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1020-1116`.
+The construction has dimension `2 * P.m + 2` without requiring
+`2 * P.m + 2 ∣ P.q`; it supplies the directly indexed line and coordinate
+spaces used in the dimension-extension argument of
+`blueprint/src/chapter/ch15_qpbt_combining.tex:1257-1293`.
 -/
 def AdmissibleParams.extendedDirectLd (P : AdmissibleParams) : DirectLdParams where
   q := P.q
@@ -335,8 +335,8 @@ abbrev DirectLdAnswerCode (D : DirectLdParams) :=
     ((Fin D.k → Fin (D.d + 1) → DirectScalarQ D) ⊕
       (Fin D.k → Fin (D.m * D.d + 1) → DirectScalarQ D))
 
-/-- Constructor-preserving equivalence used only for finite-answer
-infrastructure. -/
+/-- Constructor-preserving equivalence between the inductive answer type and
+its finite code. -/
 noncomputable def directLdAnswerEquiv (D : DirectLdParams) :
     DirectLdAnswer D ≃ DirectLdAnswerCode D where
   toFun
