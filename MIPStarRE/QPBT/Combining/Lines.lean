@@ -35,7 +35,7 @@ noncomputable section
 The error depends polynomially on `ε` and `md/q`, and the witness retains all
 directed opposite-placement comparisons.  This is the formalization-only form
 with an already constructed point witness; the source-facing theorem below
-packages that witness existentially.  The proof is tracked by issue #18.
+supplies that witness existentially.  The proof is tracked by issue #18.
 Discharge: formalize the sandwich measurement and the pasting argument in the
 cited proof. -/
 theorem exists_combinedLinesWitness_ofPointsWitness :
@@ -46,7 +46,7 @@ theorem exists_combinedLinesWitness_ofPointsWitness :
           (deltaP ε (((P.m * P.d : ℕ) : ℝ) / (P.q : ℝ)))) := by
   sorry
 
-/-! The source-facing declaration below packages the point witness produced by
+/-! The source-facing declaration below supplies the point witness produced by
 `lem:qld-4-10` existentially.  The `_ofPointsWitness` companion above is the
 conditional form used by downstream calculations. -/
 

@@ -40,7 +40,7 @@ line-point law without the invalid divisibility guard; it is a directly indexed
 line-space construction and does
 not identify the source's seed-bearing verifier game with the directly indexed game.
 This declaration takes an already constructed point witness; the
-source-facing declaration below packages that witness existentially.
+source-facing declaration below supplies that witness existentially.
 -/
 theorem exists_extendedLinesWitness_ofPointsWitness :
     ∃ deltaCombine : ℝ → ℝ → ℝ, IsPolyErr₂ deltaCombine ∧
@@ -51,7 +51,7 @@ theorem exists_extendedLinesWitness_ofPointsWitness :
             ((P.m * P.d : ℕ) / (P.q : ℝ)))) := by
   sorry
 
-/-! The source-facing declaration packages the point witness from
+/-! The source-facing declaration supplies the point witness from
 `lem:qld-4-10` rather than taking it as an unproved external hypothesis. -/
 
 /-- The source-facing extended-line construction of `lem:qld-4-13`, paper
@@ -77,7 +77,7 @@ This is an established auxiliary form of the argument, not the source-labelled
 is analyzed in `docs/paper-gaps/qpbt_combined-lines-error-term.tex`.  As in the
 source-facing declaration, the extended questions use the directly indexed line-space
 construction.  This conditional declaration takes an already constructed point witness;
-the source-facing package below supplies it existentially.  Relating its game to the source's
+the source-facing construction below supplies it existentially.  Relating its game to the source's
 seed-bearing game requires the transport
 and soundness obligations in
 `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`.
@@ -92,7 +92,7 @@ theorem exists_extendedLinesWitness_established_ofPointsWitness :
               deltaCombine ε ((P.m * P.d : ℕ) / (P.q : ℝ)))) := by
   sorry
 
-/-- Source-facing package for the established auxiliary estimate.  This is
+/-- Source-facing construction for the established auxiliary estimate.  This is
 the same Lean-only bound as `exists_extendedLinesWitness_established_ofPointsWitness`,
 with the point witness existentially supplied rather than assumed. -/
 theorem exists_extendedLinesWitness_established :
