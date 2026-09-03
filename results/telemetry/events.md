@@ -256,3 +256,38 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   proof obligations, as required by issue #18's accepted contract. The Apply
   module now states that these links do not claim proof closure. Completing
   those proofs is a later mathematics stage, not a change to this skeleton PR.
+
+## 2026-09-03 — Disk at 97 %: eight copies of `.lake/packages`
+
+- **Symptom:** ghz root filesystem at 97 % (185 GB free of 5 TB); the project
+  directory measured 87 GB, of which eight worktrees each held an identical
+  7.3 GB copy of `.lake/packages` (58 GB) plus 2.1 GB of `.lake/build`.
+- **Diagnosis:** tier 2 was fetched per worktree by design ("never
+  symlinked"); ghz is ext4 without reflink, so every warm was a full copy; all
+  21 checkouts shared one `lake-manifest.json` and `lean-toolchain`.
+- **Fix:** shared read-only store `~/.cache/mipstarre-dev/packages/<key>`
+  (`key = sha256(lake-manifest.json ‖ lean-toolchain)[:16]`, `chmod -R a-w`);
+  every checkout's `.lake/packages` replaced by a symlink via same-filesystem
+  `mv` + `ln -s` (safe under the two running builds); verified with
+  `lake build MIPStarRE.LDT.Test.AxiomAudit` (8,984 jobs) in a migrated
+  worktree and in the primary. Project 87 GB → 28 GB; disk 185 → 237 GB free.
+  Code and protocol change: issue #50 / PR #51.
+- **Lesson:** a shared dependency tree is safe when writes fail loudly
+  (read-only bit) and identity is by manifest key; the "never symlink" rule
+  was protecting against mutation, which the read-only bit does better.
+
+## 2026-09-04 — PR #39 merge-window diagnostics
+
+- **Stale saved path:** the first parallel status probe used an obsolete name
+  for the issue #35 worktree, so the probe failed before returning its other
+  read-only results. Recovery: resolve live paths from `git worktree list`
+  before launching grouped probes. No repository state changed.
+- **Pre-push false positive:** PR #39's first fresh-base push compared its new
+  head with the stale remote PR head and therefore treated already-merged QPBT
+  files as PR changes. The hook then failed on a missing cached QPBT object in
+  this workflow-only worktree; the remote ref did not move. The retry used the
+  documented `MIPSTARRE_SKIP_HOOKS=1` local-tooling bypass, followed immediately
+  by full exact-head CI and review; both succeeded at `b7c5cfd`.
+- **Delegated search error:** the read-only issue #18 triage used one invalid
+  `rg` escape while inspecting proof debt. The agent reran the search with a
+  valid expression; no file or build state changed.
