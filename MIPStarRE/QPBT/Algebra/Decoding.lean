@@ -124,7 +124,7 @@ theorem decodeFq_smul {P : AdmissibleParams} (c : PauliScalar P) (g : Poly P) :
     decodeFq (c • g) = c • decodeFq g := by
   sorry
 
-/-- Recover a word from the polynomial representative explicitly packaged by
+/-- Recover a word from the polynomial representative represented by
 `encodingPoly`.
 
 This is the source identity `\operatorname{Dec}(g_h)=h` from

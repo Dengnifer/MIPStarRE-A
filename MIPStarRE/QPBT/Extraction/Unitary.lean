@@ -4,7 +4,7 @@ import MIPStarRE.QPBT.Test.Soundness
 /-!
 # Extraction by the swap unitaries
 
-This module packages the output of the Pauli extraction argument. The local
+This module states the conclusion of the Pauli extraction argument. The local
 maps are the concrete swap operators constructed from the global polynomial
 measurements, and all operators retain the heterogeneous Alice and Bob
 placements. The generalized Pauli projectors use the field and basis fixed by

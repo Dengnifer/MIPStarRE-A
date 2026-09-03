@@ -33,7 +33,7 @@ noncomputable section
 /-! ## Heterogeneous extraction registers -/
 
 /-- One player's registers after adjoining the two generalized-Pauli
-registers: `AA'A''` or `BB'B''`. This is Lean-only register bookkeeping for
+registers: `AA'A''` or `BB'B''`. This identifies the register order and spaces for
 paper `14_analysis_of_the_pauli_basis_test.tex:1429-1435,1687-1713` and
 blueprint `ch16_qpbt_extraction.tex:55-62,203-230`. -/
 abbrev ExtractionBlock (P : AdmissibleParams) (ι : Type*) :=
