@@ -160,9 +160,9 @@ def msQuestion (P : AdmissibleParams) (t : MsType)
     (uX uZ : Fin P.m → PauliScalar P) (rX rZ : PauliScalar P) : PauliQuestion P :=
   (.ms t, contentOfTuple P uX uZ rX rZ)
 
-/-- A typed question occurs in the Pauli-test distribution when it appears on
-at least one side of a supported question pair. This Lean-only predicate makes
-the support guarantees for the question embeddings precise; blueprint
+/-- A typed question occurs in the Pauli-test distribution when it is the first
+or second component of a question pair in the support. This is the support
+condition satisfied by the typed question embeddings; blueprint
 `def:pauli-question-distribution`, `ch13_qpbt_test.tex:310-354`, paper
 `08_classical_and_quantum_low_degree_tests.tex:964-1120`. -/
 def QuestionAppearsInSupport (P : AdmissibleParams) (question : PauliQuestion P) : Prop :=

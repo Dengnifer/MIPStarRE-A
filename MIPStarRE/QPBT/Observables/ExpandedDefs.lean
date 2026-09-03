@@ -32,9 +32,9 @@ abbrev SixReg (P : AdmissibleParams) (ιA ιB : Type*) :=
   (ιA × (PauliRegister P × PauliRegister P)) ×
     (ιB × (PauliRegister P × PauliRegister P))
 
-/-- Classical coordinate equality for the finite six-register index type,
-used by the matrix distance functionals after
-`def:expanded-state`, blueprint `ch14_qpbt_observables.tex:760-781`. -/
+/-- Equality of six-register indices is decidable because the index set is
+finite. This is the index set of `def:expanded-state`; blueprint
+`ch14_qpbt_observables.tex:760-781`. -/
 noncomputable instance sixRegDecidableEq (P : AdmissibleParams)
     (ιA ιB : Type*) : DecidableEq (SixReg P ιA ιB) :=
   Classical.decEq _
