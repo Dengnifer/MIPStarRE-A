@@ -95,3 +95,15 @@ Repository: `Dengnifer/MIPStarRE-A`. Operator: the codex (gpt-5.6-sol) session
 | Standing briefing | `~/.codex/prompts/goal.md` | (operator-owned) |
 | Directives to the operator | tmux pastes | `owner-messages/` |
 | Audit data | — | `owner-audits/` |
+
+## 2026-09-03 — Owner session takes the operator role (2026-09-03T23:21:32Z)
+
+- **Why:** after the stall and reviewer-churn episode the owner asked the
+  Claude session to run the operator loop itself for one to two days, with
+  codex worker sessions on ghz unchanged.
+- **How:** codex main session posted its handover state to #27 and quit;
+  telemetry `stages.jsonl` event=takeover; astra availability polled hourly
+  by `owner-tools/astra-poll.sh` (cron :37); the stall watchdog keeps running
+  and now nudges the owner session through #26 rather than a tmux pane.
+- **Hand-back:** on the owner's word; recorded as event=handback with the
+  state at that moment.
