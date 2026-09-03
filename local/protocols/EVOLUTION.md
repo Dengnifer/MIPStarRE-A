@@ -376,3 +376,35 @@ this amendment and contained in the PR head.
 evidence is green on the exact head; the owner-gated set is exactly the
 anti-bloat budget; a question for the owner parks one item instead of idling
 the session.
+
+## 2026-09-03 — Dispatch resume option ordering
+
+**Trigger:** `results/telemetry/events.md` 2026-08-31, "Codex resume dispatch
+rejected the worktree option" (tracked by issue #38): sanctioned session
+`orc-0007-20260831-02` failed before agent start because `codex exec resume`
+rejected the worktree option after the subcommand.
+
+**Change:** `local/bin/dispatch.sh` now places all `codex exec` options before
+the optional `resume` subcommand. `local/protocols/sessions.md` records that
+CLI-ordering invariant, and `scripts/tests/test_dispatch.py` checks fresh and
+resumed argv assembly deterministically.
+
+The issue #38 review found that the new regression file was omitted from the
+workflow line-budget path set and that its preflight depended on an installed
+Codex CLI. A repository-wide search found `.githooks/pre-commit` to be the only
+`INFRA_CHANGED` enforcement point. It now counts the dispatch test, while the
+test places a temporary fake `codex` first on `PATH`.
+
+**Expected effect:** fresh and resumed dispatches retain the same worktree,
+sandbox, JSON capture, final-message, model, and configuration behavior, while
+both conform to the installed Codex CLI grammar.
+
+**Outcome:** read-only smoke sessions `scout-38-resume-smoke-20260903-01` and
+`scout-38-resume-smoke-20260903-02` started in the issue #38 worktree, shared
+thread `01a064b5-fb0a-77b0-830e-e106a44b1a8f`, and each completed with JSON,
+a final message, and a successful telemetry record.
+
+The review repair kept total issue-branch workflow churn at 145 changed lines,
+below the 400-line limit, without `MIPSTARRE_INFRA_OVERRIDE`; the focused tests,
+full Python suite, and pre-commit gate exercise the corrected budget and
+hermetic test path.
