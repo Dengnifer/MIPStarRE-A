@@ -23,8 +23,17 @@ export PATH="$HOME/.elan/bin:$HOME/.local/bin:$PATH"
 command -v codex >/dev/null 2>&1 || {
   printf 'main-session.sh: codex CLI not found on PATH\n' >&2; exit 1; }
 
+readonly CACHE_ROOT=/home/drx/.cache/mipstarre-dev
+readonly -a CODEX_ARGS=(
+  -C "$ROOT"
+  -s workspace-write
+  -c 'approval_policy="never"'
+  -c 'sandbox_workspace_write.network_access=true'
+  -c "sandbox_workspace_write.writable_roots=[\"$CACHE_ROOT\",\"$ROOT\"]"
+)
+
 if [ "${1:-}" = "--resume" ]; then
-  exec codex -C "$ROOT" resume --last
+  exec codex "${CODEX_ARGS[@]}" resume --last
 fi
 
 PROMPT="You are the MAIN SESSION of this project. Read, in order:
@@ -34,4 +43,4 @@ authoritative for state and next steps. Your working directory is the
 repository root: $ROOT — all workflow tools are invoked as
 local/bin/<tool> from there."
 
-exec codex -C "$ROOT" "$PROMPT"
+exec codex "${CODEX_ARGS[@]}" "$PROMPT"
