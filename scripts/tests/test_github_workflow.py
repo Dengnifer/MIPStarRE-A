@@ -429,7 +429,7 @@ class MergeGateTests(LayerTestCase):
         marker = f"<!-- mipstarre-review pr=7 head={self.head} -->"
         current = marker + "\nVERDICT: COMMENTED\n- [ ] F1 (changes) `x:1` — fix\n"
         reviews = [{"commit_id": self.head, "body": current}]
-        for digit in "123":
+        for digit in "1234":
             sha = digit * 40
             reviews.append({"commit_id": sha,
                             "body": f"<!-- mipstarre-review pr=7 head={sha} -->"})
@@ -462,7 +462,7 @@ class MergeGateTests(LayerTestCase):
                 pr_merge.check_review(7, self.head, reviews, statuses, adjudicated=True)
 
         with self.assertRaisesRegex(LayerError, "round 5"):
-            pr_merge.check_review(7, self.head, reviews[:3], statuses, adjudicated=True)
+            pr_merge.check_review(7, self.head, reviews[:-1], statuses, adjudicated=True)
 
 
 # --------------------------------------------------------------------------

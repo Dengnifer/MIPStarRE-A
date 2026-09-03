@@ -196,9 +196,9 @@ def check_review(number: int, head_sha: str, reviews: list[dict], statuses: dict
     round_marker = re.compile(rf"mipstarre-review pr={number} head=([0-9a-f]{{40}})")
     reviewed_heads = {m.group(1) for row in reviews
                       if (m := round_marker.search(row.get("body") or ""))}
-    if len(reviewed_heads) < 4:
+    if len(reviewed_heads - {head_sha}) < 4:
         raise GateFailure("gate 4 (review): adjudication is available only from review round "
-                          f"5; found {len(reviewed_heads)} completed round(s).")
+                          "5; fewer than four prior rounds were found.")
     finding_ids = UNCHECKED_ID_RE.findall(body)
     if len(finding_ids) != unchecked or len(set(finding_ids)) != unchecked:
         raise GateFailure("gate 4 (review): every unresolved finding must have one unique F<n> "
