@@ -1,0 +1,8 @@
+OWNER MESSAGE — escalation and reporting channel (binding from now).
+
+1. Two pinned GitHub issues now exist; read both bodies first (`gh issue view 26`, `gh issue view 27`).
+   - #26 "Owner inbox": the ONLY place to ask me for a decision. When you are genuinely blocked on the owner (credentials, the scope budget MIPSTARRE_INFRA_OVERRIDE, an unresolvable mathematical decision), post ONE comment there in the BLOCKER format given in the issue body (id B1, B2, …; context, exact question, your draft decision, what you do meanwhile), park that item, and continue the queue. Do not open separate needs-owner issues any more. I answer with a comment starting with `DECISION <id>:`. At the start of every loop iteration and at every stage boundary, read #26's comments, act on any DECISION for an open id, post `RESOLVED <id>: …`, and edit your BLOCKER comment's marker to status=resolved.
+   - #27 "Progress log": append one comment at every stage boundary and whenever a PR merges, in the format given in its body (Merged / Dispatched / Next / Blocked). This replaces reporting into the terminal only; I read GitHub, not tmux.
+2. Post your first #27 report now: PR #21 merged (2bb76f7), the worktrees you have dispatched (#16–#19, #25), PR #5's state, and what is next.
+3. Fold the wording into the #25 reviewer-lane PR (no separate workflow episode): in local/personas/main.md replace the "open a GitHub issue labelled needs-owner" clause with "post a BLOCKER comment on the pinned Owner inbox issue #26" and add the #27 stage-report duty to the reporting bullet; make the same two edits in ~/.codex/prompts/goal.md now (it is your briefing; edit it directly, two lines).
+4. Everything else in the earlier handoff stands. Continue.
