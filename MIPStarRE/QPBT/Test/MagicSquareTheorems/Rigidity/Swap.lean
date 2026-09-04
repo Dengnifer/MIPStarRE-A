@@ -200,10 +200,11 @@ theorem binarySwap_intertwines_Z {ι : Type} [Fintype ι] [DecidableEq ι]
   rw [apply_binaryTauPhase_left]
   rcases zmod_two_eq_zero_or_one b with rfl | rfl
   · simp only [binarySwapIsometry_apply, ZMod.val_zero, pow_zero, one_mul]
-    rw [← applyOperatorToState_mul, reflectionEffect_zero_mul_reflection Z hZ]
+    rw [← MIPStarRE.QPBT.DistanceCalculus.applyOperatorToState_mul,
+      reflectionEffect_zero_mul_reflection Z hZ]
     norm_num [bitSign]
   · simp only [binarySwapIsometry_apply, ZMod.val_one, pow_one]
-    rw [← applyOperatorToState_mul, mul_assoc,
+    rw [← MIPStarRE.QPBT.DistanceCalculus.applyOperatorToState_mul, mul_assoc,
       reflectionEffect_one_mul_reflection Z hZ]
     norm_num [bitSign, ZMod.val_one, applyOperatorToState]
 
@@ -270,7 +271,7 @@ theorem norm_binarySwap_intertwines_X_sub_le {ι : Type} [Fintype ι]
     change
       (applyOperatorToState (reflectionEffect Z 0) (applyOperatorToState X ψ) -
         applyOperatorToState (X * reflectionEffect Z 1) ψ) i = _
-    rw [← applyOperatorToState_mul, ← apply_sub,
+    rw [← MIPStarRE.QPBT.DistanceCalculus.applyOperatorToState_mul, ← apply_sub,
       reflectionEffect_zero_mul_X_sub_X_mul_one]
     rw [applyOperatorToState_smul]
     rfl
@@ -289,9 +290,10 @@ theorem norm_binarySwap_intertwines_X_sub_le {ι : Type} [Fintype ι]
       (applyOperatorToState (X * reflectionEffect Z 1)
           (applyOperatorToState X ψ) -
         applyOperatorToState (reflectionEffect Z 0) ψ) i = _
-    rw [← applyOperatorToState_mul, ← apply_sub,
+    rw [← MIPStarRE.QPBT.DistanceCalculus.applyOperatorToState_mul, ← apply_sub,
       X_mul_reflectionEffect_one_mul_X_sub_zero X Z hX]
-    rw [applyOperatorToState_smul, applyOperatorToState_mul]
+    rw [applyOperatorToState_smul,
+      MIPStarRE.QPBT.DistanceCalculus.applyOperatorToState_mul]
     rfl
   apply (sq_le_sq₀ (norm_nonneg _) (norm_nonneg _)).1
   rw [EuclideanSpace.norm_sq_eq]
