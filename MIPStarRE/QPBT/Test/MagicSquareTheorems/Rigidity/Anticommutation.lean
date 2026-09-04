@@ -592,6 +592,123 @@ theorem msLogicalZA_comm_msLogicalZB (S : Strategy msGame) :
     msLogicalZA S * msLogicalZB S = msLogicalZB S * msLogicalZA S :=
   msVarObsA_comm_msVarObsB S 4 4
 
+/-! ## Unit scalars -/
+
+/-- Multiplying both operators by a scalar of modulus one leaves the
+state-dependent distance unchanged. -/
+theorem CloseOn.smul {ι : Type} [Fintype ι] [DecidableEq ι]
+    {ψ : EuclideanSpace ℂ ι} {δ : ℝ} {c : ℂ} (hc : ‖c‖ = 1) {M N : Op ι}
+    (h : CloseOn ψ δ M N) : CloseOn ψ δ (c • M) (c • N) := by
+  show ‖applyOperatorToState (c • M - c • N) ψ‖ ≤ δ
+  rw [← smul_sub, applyOperatorToState_smul, norm_smul, hc, one_mul]
+  exact h
+
+/-- The sign of a binary value has modulus one as a complex number. -/
+theorem norm_bitSign_ofReal (c : ZMod 2) : ‖((bitSign c : ℝ) : ℂ)‖ = 1 := by
+  rw [Complex.norm_real, Real.norm_eq_abs]
+  rcases bit_sign_eq_one_or_neg_one c with h | h <;> rw [h] <;> norm_num
+
+/-- The square of the sign of a binary value is one. -/
+theorem bitSign_ofReal_mul_self (c : ZMod 2) :
+    ((bitSign c : ℝ) : ℂ) * ((bitSign c : ℝ) : ℂ) = 1 := by
+  rw [← Complex.ofReal_mul]
+  rcases bit_sign_eq_one_or_neg_one c with h | h <;> rw [h] <;> norm_num
+
+/-- Formalization-only: a sign multiple of an isometric operator is
+isometric. -/
+private theorem isometry_bitSign_smul {ι : Type} [Fintype ι] [DecidableEq ι]
+    {c : ZMod 2} {U : Op ι} (hU : Uᴴ * U = 1) :
+    (((bitSign c : ℝ) : ℂ) • U)ᴴ * (((bitSign c : ℝ) : ℂ) • U) = 1 := by
+  have hstar : (((bitSign c : ℝ) : ℂ) • U)ᴴ = ((bitSign c : ℝ) : ℂ) • Uᴴ := by
+    rw [← Matrix.star_eq_conjTranspose, star_smul, Matrix.star_eq_conjTranspose]
+    congr 1
+    simp
+  rw [hstar, Matrix.smul_mul, Matrix.mul_smul, smul_smul, hU,
+    bitSign_ofReal_mul_self, one_smul]
+
+/-! ## Building blocks of the solution-group computation -/
+
+/-- One of Bob's three cell reflections of a constraint question is close, on
+the dilated state, to the signed product of the other two. -/
+theorem msCellObsB_single_close (S : Strategy msGame) (ε : ℝ) (hwin : 1 - ε ≤ S.value)
+    (i : Fin 6) (k₀ k₁ k₂ : Fin 3)
+    (hsum : ∀ a, constraintBitOrZero k₀ a + constraintBitOrZero k₁ a +
+      constraintBitOrZero k₂ a = constraintBitSum a) :
+    CloseOn (msDilatedStrategy S).ψ (12 * Real.sqrt ε) (msCellObsB S i k₁)
+      (((bitSign (msParity i) : ℝ) : ℂ) •
+        (msCellObsB S i k₀ * msCellObsB S i k₂)) := by
+  have hprod := msCellObsB_prod_close_of S ε hwin i k₀ k₁ k₂ hsum
+  have hX2 : msCellObsB S i k₀ * msCellObsB S i k₀ = 1 :=
+    (isReflection_msCellObsB S i k₀).mul_self_eq_one
+  have hZ2 : msCellObsB S i k₂ * msCellObsB S i k₂ = 1 :=
+    (isReflection_msCellObsB S i k₂).mul_self_eq_one
+  have hZY : msCellObsB S i k₂ * msCellObsB S i k₁ =
+      msCellObsB S i k₁ * msCellObsB S i k₂ := msCellObsB_comm S i k₂ k₁
+  have hZX : msCellObsB S i k₂ * msCellObsB S i k₀ =
+      msCellObsB S i k₀ * msCellObsB S i k₂ := msCellObsB_comm S i k₂ k₀
+  have hU : (msCellObsB S i k₂ * msCellObsB S i k₀)ᴴ *
+      (msCellObsB S i k₂ * msCellObsB S i k₀) = 1 :=
+    (IsReflection.mul (isReflection_msCellObsB S i k₂) (isReflection_msCellObsB S i k₀)
+      hZX).isometry
+  have e1 : (msCellObsB S i k₂ * msCellObsB S i k₀) *
+      (msCellObsB S i k₀ * msCellObsB S i k₁ * msCellObsB S i k₂) = msCellObsB S i k₁ := by
+    calc (msCellObsB S i k₂ * msCellObsB S i k₀) *
+          (msCellObsB S i k₀ * msCellObsB S i k₁ * msCellObsB S i k₂)
+        = msCellObsB S i k₂ *
+            ((msCellObsB S i k₀ * msCellObsB S i k₀) * msCellObsB S i k₁) *
+            msCellObsB S i k₂ := by noncomm_ring
+      _ = msCellObsB S i k₂ * msCellObsB S i k₁ * msCellObsB S i k₂ := by
+          rw [hX2, one_mul]
+      _ = msCellObsB S i k₁ * msCellObsB S i k₂ * msCellObsB S i k₂ := by rw [hZY]
+      _ = msCellObsB S i k₁ := by rw [mul_assoc, hZ2, mul_one]
+  have e2 : (msCellObsB S i k₂ * msCellObsB S i k₀) *
+      (((bitSign (msParity i) : ℝ) : ℂ) • (1 : Op _)) =
+      ((bitSign (msParity i) : ℝ) : ℂ) • (msCellObsB S i k₀ * msCellObsB S i k₂) := by
+    rw [Matrix.mul_smul, mul_one, hZX]
+  have h := CloseOn.isometry_mul hU hprod
+  rw [e1, e2] at h
+  exact h.symm
+
+/-- A product of two of Bob's cell reflections is close, on the dilated state,
+to the product of Alice's variable reflections at the same two cells, taken in
+the reverse order. -/
+theorem msCellObsB_mul_close (S : Strategy msGame) (ε : ℝ) (hwin : 1 - ε ≤ S.value)
+    (I J : Fin 6) (k l : Fin 3) :
+    CloseOn (msDilatedStrategy S).ψ (12 * Real.sqrt ε + 12 * Real.sqrt ε)
+      (msCellObsB S I k * msCellObsB S J l)
+      (msVarObsA S (msConstraintVars J l) * msVarObsA S (msConstraintVars I k)) := by
+  have p1 : CloseOn (msDilatedStrategy S).ψ (12 * Real.sqrt ε) (msCellObsB S J l)
+      (msVarObsA S (msConstraintVars J l)) :=
+    (msVarObsA_close_msCellObsB S ε hwin J l).symm
+  have p2 : CloseOn (msDilatedStrategy S).ψ (12 * Real.sqrt ε) (msCellObsB S I k)
+      (msVarObsA S (msConstraintVars I k)) :=
+    (msVarObsA_close_msCellObsB S ε hwin I k).symm
+  have h1 : CloseOn (msDilatedStrategy S).ψ (12 * Real.sqrt ε)
+      (msCellObsB S I k * msCellObsB S J l)
+      (msCellObsB S I k * msVarObsA S (msConstraintVars J l)) :=
+    CloseOn.isometry_mul (isReflection_msCellObsB S I k).isometry p1
+  have hswap : msCellObsB S I k * msVarObsA S (msConstraintVars J l) =
+      msVarObsA S (msConstraintVars J l) * msCellObsB S I k :=
+    (msVarObsA_comm_msCellObsB S (msConstraintVars J l) I k).symm
+  rw [hswap] at h1
+  exact h1.trans (CloseOn.isometry_mul (isReflection_msVarObsA S _).isometry p2)
+
+/-- Two of Bob's cell reflections attached to a common cell by two different
+constraint questions are close on the dilated state. -/
+theorem msCellObsB_close_of_same_cell (S : Strategy msGame) (ε : ℝ)
+    (hwin : 1 - ε ≤ S.value) (I J : Fin 6) (k l : Fin 3)
+    (hcell : msConstraintVars I k = msConstraintVars J l) :
+    CloseOn (msDilatedStrategy S).ψ (12 * Real.sqrt ε + 12 * Real.sqrt ε)
+      (msCellObsB S I k) (msCellObsB S J l) := by
+  have p1 : CloseOn (msDilatedStrategy S).ψ (12 * Real.sqrt ε) (msCellObsB S I k)
+      (msVarObsA S (msConstraintVars I k)) :=
+    (msVarObsA_close_msCellObsB S ε hwin I k).symm
+  have p2 : CloseOn (msDilatedStrategy S).ψ (12 * Real.sqrt ε)
+      (msVarObsA S (msConstraintVars J l)) (msCellObsB S J l) :=
+    msVarObsA_close_msCellObsB S ε hwin J l
+  rw [hcell] at p1
+  exact p1.trans p2
+
 end
 
 end MIPStarRE.QPBT.MagicSquareRigidity
