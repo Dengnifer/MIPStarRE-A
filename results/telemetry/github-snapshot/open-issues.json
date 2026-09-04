@@ -324,7 +324,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/166",
   "issue_dependencies_summary": {
-   "blocked_by": 2,
+   "blocked_by": 1,
    "total_blocked_by": 2,
    "blocking": 0,
    "total_blocking": 0
@@ -1162,8 +1162,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 16,
-   "completed": 9,
-   "percent_completed": 56
+   "completed": 10,
+   "percent_completed": 62
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
   "issue_dependencies_summary": {
@@ -1720,7 +1720,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/166",
   "issue_dependencies_summary": {
-   "blocked_by": 2,
+   "blocked_by": 1,
    "total_blocked_by": 4,
    "blocking": 0,
    "total_blocking": 0
@@ -1805,7 +1805,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/166",
   "issue_dependencies_summary": {
-   "blocked_by": 2,
+   "blocked_by": 1,
    "total_blocked_by": 4,
    "blocking": 2,
    "total_blocking": 2
@@ -1825,91 +1825,6 @@
    "eyes": 0
   },
   "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/134/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/132",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/132/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/132/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/132/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/132",
-  "id": 5345266174,
-  "node_id": "I_kwDOUJyJf88AAAABPppJ_g",
-  "number": 132,
-  "title": "feat(QPBT/Combining): prove low-degree consistency conversion",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-04T07:02:20Z",
-  "updated_at": "2026-09-04T12:05:36Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/166",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 0,
-   "blocking": 3,
-   "total_blocking": 3
-  },
-  "body": "<!-- mipstarre-issue-key: stage43-ld-consistency-conversion -->\n### Target declarations\n\n- `MIPStarRE/QPBT/Combining/DirectLowDegree/Transport/Consistency.lean:new` -\n  `directPolyEquivPolynomial`, an equivalence between\n  `PolyIndex D.m (DirectScalarQ D) D.d` and\n  `MIPStarRE.LDT.Polynomial D.toLDTParameters`, with evaluation compatibility.\n- Same file - conversions from `ProjMeas (Polynomial ...)` to QPBT\n  `Measurement (PolyIndex ...)`, and between their evaluation postprocessings;\n  include tuple/marginal versions for `DirectPolyMeasTuple` and `PolyMeasTuple`.\n- Same file - `consRel_iff_consistencyDefect` for a pure bipartite state and\n  complete projective families, matching LDT submeasurements with QPBT\n  `heteroKron` effects without loss in the error parameter.\n- Same file - the three specialized conversion lemmas for the two point/global\n  conclusions and the global/global conclusion of `LDT.Test.mainFormal`.\n- Same file - correlated-ancilla compression of a polynomial POVM and proof\n  that all three `consistencyDefect` bounds descend to the original carriers\n  for the seed-bearing game.\n\n### Paper and blueprint references\n\n- QPBT polynomial measurements and consistency conclusions:\n  `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:393-458`.\n- Blueprint:\n  `blueprint/src/chapter/ch13_qpbt_test.tex:124-164`.\n- Mature LDT conclusion:\n  `references/ldt-paper/test_definition.tex:180-202` and\n  `MIPStarRE/LDT/Test/MainTheorem/MainFormal.lean:300-327`.\n- Polynomial definitions:\n  `MIPStarRE/LDT/Basic/LowDegreePolynomial.lean:17-51` and QPBT\n  `PolyIndex`, `PolyMeas`, and `PolyMeasTuple` declarations linked from\n  `blueprint/src/chapter/ch13_qpbt_test.tex:126-133`.\n- QPBT defect:\n  `MIPStarRE/QPBT/Games/Consistency.lean:18-38`.\n- The paper-gap note applying to this packet is\n  `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`.\n\nThe conversions must expose definitional or proved equality of field models,\npolynomial evaluation, finite uniform distributions, density/Born expressions,\nand outcome postprocessing. They may not replace a mismatch by an inequality\nwith an unexplained constant.\n\n### Dependencies\n\n- #130 must merge first for `toLDTParameters`, both strategy adapters, and the\n  correlated residue ancilla.\n- This packet may be developed alongside #131 but both are prerequisites of\n  the final soundness assembly.\n- Reuse existing consistency bridges and measurement postprocessing APIs before\n  adding project-local lemmas.\n\n### Acceptance\n\n- Every LDT polynomial outcome and evaluation is transported bijectively to\n  the corresponding QPBT representative, with coordinate order unchanged.\n- Each of the three `mainFormal` conclusions becomes the corresponding QPBT\n  `consistencyDefect` statement with exactly the same numerical bound.\n- Compression from the correlated seed ancilla yields valid POVMs on the\n  original local carriers and preserves the required three bounds.\n- Direct Lean checks, full build, declaration checking, paper-gap checks,\n  exact-head CI, and independent review pass with no `sorry`, axiom, bypass,\n  or conversion hypothesis.\n\n### Scope notes\n\nOwn only the new consistency/conversion file and necessary imports. Do not\nchoose the `mainFormal` auxiliary parameter, prove scalar estimates, combine\ndifferent tuple coordinates, invoke the tensor-code theorem, or edit either\npublic soundness declaration. Main locators are from `c1c0af4`.\n\n---\nStage 4.3 proof packet under #47.\n\nPrerequisites are recorded as GitHub issue dependencies (blocked_by); the bullets above are commentary.\n",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/132/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/132/timeline",
   "performed_via_github_app": null,
   "state_reason": null,
   "pinned_comment": null
