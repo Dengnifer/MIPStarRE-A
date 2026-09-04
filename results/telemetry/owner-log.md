@@ -175,3 +175,15 @@ Owner command at 12:53Z (Claude 5-hour limit at 95%): hand back in 10 minutes, t
 at 14:50Z and then dispatch Opus and codex subagents at about 1:1. The merge daemon, stack-watch,
 the 112 watcher and all detached lanes keep running across the hand-back; codex main is told not
 to merge by hand. Handoff: results/telemetry/owner-messages/handoff-to-codex-main-*.md.
+
+## 2026-09-04 — Owner session takes the operator role (2026-09-04T14:57:57Z)
+
+- **Why:** after the stall and reviewer-churn episode the owner asked the
+  Claude session to run the operator loop itself for one to two days, with
+  codex worker sessions on ghz unchanged.
+- **How:** codex main session posted its handover state to #27 and quit;
+  telemetry `stages.jsonl` event=takeover; astra availability polled hourly
+  by `owner-tools/astra-poll.sh` (cron :37); the stall watchdog keeps running
+  and now nudges the owner session through #26 rather than a tmux pane.
+- **Hand-back:** on the owner's word; recorded as event=handback with the
+  state at that moment.
