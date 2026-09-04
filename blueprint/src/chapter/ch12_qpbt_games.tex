@@ -498,7 +498,7 @@ The state-dependent distance is the right tool for reasoning about the closeness
 \end{proof}
 
 \begin{remark}[Index pairing in the sandwich]\label{rem:ld-sandwich-indexing}
-	As printed in the source, the sandwich in Lemma~\ref{lem:ld-sandwich} pairs the $i$-th measurement with the outcome $g_{k+1-i}$: the outermost factor $G^{k,\,x}$ carries the outcome $g_1$ and the innermost factor $G^{1,\,x}$ carries $g_k$. Since the measurement $\{G^{i,\,x}_g\}$ is indexed by $g \in \mathcal G_i$, the operator $G^{k,\,x}_{g_1}$ is undefined whenever $\mathcal G_1 \ne \mathcal G_k$, so the printed pairing is a typographical slip. The statement above instead uses the pairing $G^{k,\,x}_{g_k} \cdots G^{1,\,x}_{g_1} \cdots G^{k,\,x}_{g_k}$ of Fact 4.34 in \cite{Natarajan2018NEEXP}, from which the lemma is imported. The source also leaves the case $k = 0$ implicit; with the empty-product convention recorded in the statement, both sides of \eqref{eq:ld-sandwich-2} are then the identity on the single empty-tuple outcome and the conclusion holds with error zero.
+	As printed in the source, the sandwich in Lemma~\ref{lem:ld-sandwich} pairs the $i$-th measurement with the outcome $g_{k+1-i}$: the outermost factor $G^{k,\,x}$ carries the outcome $g_1$ and the innermost factor $G^{1,\,x}$ carries $g_k$. Since the measurement $\{G^{i,\,x}_g\}$ is indexed by $g \in \mathcal G_i$, the operator $G^{k,\,x}_{g_1}$ is undefined whenever $\mathcal G_1 \ne \mathcal G_k$, so the printed pairing is a typographical slip. The statement above instead uses the pairing $G^{k,\,x}_{g_k} \cdots G^{1,\,x}_{g_1} \cdots G^{k,\,x}_{g_k}$ of Fact 4.34 in \cite{Natarajan2018NEEXP}, from which the lemma is imported. The source also leaves the case $k = 0$ implicit; with the empty-product convention recorded in the statement, both sides of \eqref{eq:ld-sandwich-2} are then the identity on the single empty-tuple outcome and the conclusion holds with error zero.  The correction is documented in \cite{gap:qpbt_ld-sandwich-indexing}.
 \end{remark}
 
 \begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
@@ -1356,7 +1356,7 @@ The question distribution of the Pauli basis test is \emph{typed}: each question
 	\lean{MIPStarRE.QPBT.IsTypedCondLinearFamily}
 	\leanok
 	\uses{def:cl-func}
-	Let $\mathcal T$ be a finite set (the \emph{type set}) and let $V$ be $\F^n$ for some integer $n \ge 0$. A \emph{$\mathcal T$-typed family of $\ell$-level conditionally linear functions} (implicitly, \emph{on $V$}) is a collection $\{L_t\}_{t \in \mathcal T}$ such that, for each $t \in \mathcal T$, $L_t$ is an $\ell$-level conditionally linear function on $V$.
+	Let $\mathcal T$ be a set (the \emph{type set}) and let $V$ be $\F^n$ for some integer $n \ge 0$. A \emph{$\mathcal T$-typed family of $\ell$-level conditionally linear functions} (implicitly, \emph{on $V$}) is a collection $\{L_t\}_{t \in \mathcal T}$ such that, for each $t \in \mathcal T$, $L_t$ is an $\ell$-level conditionally linear function on $V$. Finiteness of $\mathcal T$ plays no part in this definition, which is therefore stated, as in the linked declaration, for an arbitrary type set; it is required from Definition~\ref{def:graph-distribution} onwards, where $\mathcal T$ indexes a distribution. The source states the definition for a finite type set, and every type set occurring below is finite.
 \end{definition}
 
 % Nonemptiness of the edge set is stated explicitly here: with E empty, m = k = 0 and the
@@ -1391,9 +1391,14 @@ The question distribution of the Pauli basis test is \emph{typed}: each question
 % The nonempty-edge hypothesis on G is inherited from def:graph-distribution, where it is
 % needed for the graph distribution mu_G to be defined; the source
 % (references/qpbt-paper/07_types.tex:84-93) leaves it implicit here as well.
+% The Lean declaration typedCLDistribution is stated for arbitrary T-indexed families of maps
+% on V: it carries neither a level nor the IsTypedCondLinearFamily hypotheses that this
+% definition imposes on L and R, so it is a strict generalization of the definition below and
+% the node is left unmarked, exactly as for def:cl-dist. The identifications of the two
+% concrete samplers with this construction are stated separately as lem:ld-question-typed-cl
+% and lem:pauli-question-typed-cl in Chapter chap:qpbt-test.
 \begin{definition}[Typed conditionally linear distributions]\label{def:typed-cl-distributions}
-	\lean{MIPStarRE.QPBT.typedCLDistribution, MIPStarRE.QPBT.ldQuestionDistribution_eq_typedCL, MIPStarRE.QPBT.pauliQuestionDistribution_eq_typedCL}
-	\leanok
+	\lean{MIPStarRE.QPBT.typedCLDistribution}
 	\uses{def:typed-cl-functions, def:graph-distribution, def:cl-dist}
 	Let $\mathcal T$ be a type set and let $L = \{L_u\}_{u \in \mathcal T}$ and $R = \{R_v\}_{v \in \mathcal T}$ be $\mathcal T$-typed families of conditionally linear functions on $V$. Let $G = (\mathcal T, E)$ be a graph with vertex set $\mathcal T$ and nonempty edge set $E$, so that the graph distribution $\mu_G$ of Definition~\ref{def:graph-distribution} is defined. The \emph{$(\mathcal T, G)$-typed conditionally linear distribution $\mu^G_{L,\,R}$ corresponding to $(L, R)$} is the distribution over pairs $\bigl( (u, x), (v, y) \bigr)$, where the type pair $(u,v)$ is drawn from the graph distribution $\mu_G$ and the content pair $(x,y)$ is drawn from $\mu_{L_u,\,R_v}$.
 \end{definition}

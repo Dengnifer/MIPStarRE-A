@@ -256,13 +256,32 @@ assembled by Fourier averaging.
 	exact linearity, under the quantifier ``for all $u, u' \in \F_2^t$'',
 	a strengthening of the theorem proved in
 	\cite{Natarajan2017Linearity}; and it appends the identity
-	$\mathcal{L}^u = \Id$ for $u = 0$. None of the three is reproduced
-	here: the restriction is dropped, the pointwise closeness is not
-	used, and the appended identity is instead derived from the
+	$\mathcal{L}^u = \Id$ for $u = 0$. None of the three is
+	reproduced here: the restriction is dropped, the pointwise closeness
+	is not used, and the appended identity is instead derived from the
 	conclusion, since exact linearity at $u = u' = 0$ gives
 	$(\mathcal{L}^0)^2 = \mathcal{L}^0$, and an idempotent unitary equals
-	the identity. The import carries two conversion obligations,
-	discharged in the proof of Lemma~\ref{lem:qld-4-10}: the theorem is
+	the identity. The factor of two of
+	Remark~\ref{rem:linearity-distance-normalization} is not one of these
+	differences. It is a defect of the cited statement itself: the mean
+	squared operator bound printed in
+	\cite[Theorem~10]{Natarajan2017Linearity} is $\delta$, whereas the
+	calculation behind \cite[equation~(3)]{Natarajan2017Linearity} bounds
+	the mean squared distance between the associated binary projective
+	measurements, which is half the squared operator distance; the
+	provider-side correction to $2\delta$ is carried by
+	Theorem~\ref{thm:linearity}. The quotation neither reproduces nor
+	asserts the erroneous constant, since it states its conclusion as
+	$\mathcal{L}^u \approx_\delta \mathcal{O}^u$, which by
+	Definition~\ref{def:povm-distance} bounds the associated expectation
+	only by $O(\delta)$ and so absorbs a constant factor. These three
+	discrepancies, together with the common-extension obligation recorded
+	below, are analyzed in
+	\cite{gap:qpbt_linearity-theorem-quotation}, and the provider-side
+	normalization defect in
+	\cite{gap:qpbt_linearity-distance-normalization}. The import carries two
+	conversion obligations, discharged in the proof of
+	Lemma~\ref{lem:qld-4-10}: the theorem is
 	instantiated with $\rho$ the reduced density operator of
 	$\ket{\hat\psi}$ on the registers carrying the observables, so that
 	traces against $\rho$ are expectation values in $\ket{\hat\psi}$; and
@@ -756,7 +775,7 @@ assembled by Fourier averaging.
 	$\bot$ is folded into the outcome $u = 0$, so that the resulting family
 	$\{C^u\}_{u \in \F_2^t}$ is still a family of orthogonal projectors summing
 	to $\Id_{\hilb \ot \hilb'}$ and still compresses to $B^u$ along
-	$\ket{\mathrm{anc}}$, the latter because $\sum_u B^u = \Id_\hilb$. Set
+	$\ket{\mathrm{anc}}$, the latter because $\sum_u B^u = \Id_{\hilb}$. Set
 	$\mathcal{L}^a = \sum_u \chi_u(a) \, C^u$; orthogonality of the $C^u$ and
 	multiplicativity of the characters give
 	$\mathcal{L}^a \mathcal{L}^b = \mathcal{L}^{a+b}$ and
@@ -1752,6 +1771,48 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\cite{gap:qpbt_combined-lines-error-term}.
 \end{remark}
 
+\begin{lemma}[Formalization support for Lemma~\ref{lem:qld-4-13}]
+	\label{lem:qld-4-13-established}
+	\lean{MIPStarRE.QPBT.exists_extendedLinesWitness_established}
+	\uses{lem:qld-4-12, def:line, def:line-point-dist, def:consistency,
+		def:bracket, def:expanded-state, def:ideg-deg-polynomials}
+	This formalization-only auxiliary is not a named statement of the paper.
+	It is the conclusion of Lemma~\ref{lem:qld-4-13} with the error form that
+	the proof of that lemma establishes: the statement is that of
+	Lemma~\ref{lem:qld-4-13} with $\delta_{\mathrm{combine}}$ replaced by
+	$C \cdot m \cdot \poly(\eps, md/q)$ for a universal constant $C > 0$.
+	The printed error form $\poly(m^2\eps, md/q)$ is not claimed here; see
+	Remark~\ref{rem:qld-4-13-source-defects}.
+	The error form is the only change this node makes to
+	Lemma~\ref{lem:qld-4-13}, and no formalization mark is placed on the
+	statement: the linked declaration differs from it in three further
+	respects, which the blueprint does not adopt. Its extended questions are
+	drawn from the directly indexed line space of
+	\cite{gap:qpbt_ld-dimension-divisibility} rather than from the lines of
+	$\F_q^{2m+2}$ used above; its average is taken over the corresponding
+	directly indexed line-point law rather than over the line-point
+	distribution of Definition~\ref{def:line-point-dist} instantiated at
+	dimension $2m+2$, whose definition is blocked by the divisibility
+	obstruction of Remark~\ref{rem:qld-4-7-divisibility}; and both sides of
+	its two consistency displays are compared on the completed answer
+	alphabet $\F_q \cup \{\bot\}$, whose extra outcome collects the line
+	polynomials that admit no evaluation at the sampled point, rather than
+	under the answer summation over $a \in \F_q$ used above. Relating the two
+	formulations is the transport obligation of
+	\cite{gap:qpbt_ld-dimension-divisibility}.
+\end{lemma}
+\begin{proof}
+	\uses{lem:qld-xz-lines, lem:qld-sublines, def:combine-map,
+		lem:qld-4-12, lem:claim-17-1, lem:claim-17-2, lem:claim-17-3}
+	This is what the proof of Lemma~\ref{lem:qld-4-13} above establishes: the
+	chaining of the three claims bounds
+	\eqref{eq:qld-combined-lines-consistency} by
+	$O(m(\eps^{1/4} + \delta_P^{1/4} + \delta_Q^{1/4} +
+	\delta_{\mathrm{Line}}^{1/2}))$, a function of the form
+	$m \cdot \poly(\eps, md/q)$, and the remaining steps of that proof are
+	unchanged.
+\end{proof}
+
 The measurements of Lemma~\ref{lem:qld-4-12} and Lemma~\ref{lem:qld-4-13}
 constitute a strategy for the classical low individual degree game in $2m+2$
 variables. Applying the quantum soundness of that game yields a single
@@ -1800,19 +1861,27 @@ projective measurement whose outcomes are pairs of global polynomials.
 	if $W = Z$.
 \end{lemma}
 \begin{proof}
-	\uses{lem:qld-4-13, lem:qld-4-12, thm:naimark, lem:ld-soundness,
-		def:ld-game, fact:agreement, fact:add-a-proj2,
+	\uses{lem:qld-4-13-established, lem:qld-4-12, thm:naimark,
+		lem:ld-soundness, def:ld-game, fact:agreement, fact:add-a-proj2,
 		fact:data-processing, lem:schwartz-zippel-total-degree,
 		def:combine-map}
-	By Lemmas~\ref{lem:qld-4-12} and~\ref{lem:qld-4-13}, the expanded state
-	$\ket{\hat\psi}$ together with the lines measurements
+	By Lemmas~\ref{lem:qld-4-12} and~\ref{lem:qld-4-13-established}, the
+	expanded state $\ket{\hat\psi}$ together with the lines measurements
 	$\{\hat{Q}^{\ell}_{f}\}$ and the points measurements
 	$\{\hat{Q}^{x,z,\alpha,\beta}_{a}\}$ constitutes a strategy for the
 	classical low individual degree game (Definition~\ref{def:ld-game}) with
 	parameters $(q, 2m+2, d, 1)$ succeeding with probability
 	$1 - \delta_{\mathrm{combine}}$; the axis-parallel clause of
-	Lemma~\ref{lem:qld-4-13} supplies the degree-$d$ answer format that the
-	game requires on axis-parallel lines.
+	Lemma~\ref{lem:qld-4-13-established} supplies the degree-$d$ answer
+	format that the game requires on axis-parallel lines. Here
+	$\delta_{\mathrm{combine}}$ is the error established by the proof of
+	Lemma~\ref{lem:qld-4-13}, namely the bound
+	$C \cdot m \cdot \poly(\eps, md/q)$ of
+	Lemma~\ref{lem:qld-4-13-established}, and not the form
+	$\poly(m^2\eps, md/q)$ printed in the statement of
+	Lemma~\ref{lem:qld-4-13}, which remains unproved
+	(Remark~\ref{rem:qld-4-13-source-defects}); the error function
+	$\delta_S$ of the statement absorbs the prefactor $m$ into $(md)^a$.
 	(For $(q, 2m+2, d, 1)$ to be a parameter tuple of
 	Definition~\ref{def:ld-game} the dimension $2m+2$ must divide $q$;
 	admissibility of $(q,m,d)$ supplies only that $m$ divides $q$, and for
