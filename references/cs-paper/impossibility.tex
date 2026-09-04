@@ -1,0 +1,15 @@
+One can generalize the magic square and magic pentagram games by taking the constraints and the answers in the game to be mod $d$ (instead of simply mod $2$). A previous version of this paper falsely claimed that these generalizations are pseudotelepathy games, and that moreover our self-testing theorem \ref{thm:robust-self-testing} applies to them. It is instead the case that for any $d \neq 2$, both the magic square and magic pentagram games are not pseudotelepathy games. The following theorem establishes this.
+
+\begin{thm}
+    Let $\G$ be the solution group of the magic square game or the magic pentagram game over $\Z_d$. Then $\G$ satisfies $J^2 = 1$. In particular, if $d$ is odd, then $J = 1$ and $\G$ is abelian. 
+\end{thm}
+
+\begin{proof}
+    One can show that for any pair $\set{x,z}$ of generators which do not share a constraint,
+    we have $[x,z] = J$. (See Lemmas \ref{prop:four-edges} and \ref{prop:six-edges}.)
+    Applying the same observation with the role of $x$ and $z$ swapped shows that $[z,x] = J.$ For general group commutators we have that $[x,z] = [z,x]\1$. In particular $J = J\1$ or equivalently, $J^2 = 1 = J^d$. If $d$ is odd, then $J^{d+1} = (J^2)^{\frac{d+1}{2}} = 1 = J^d$. This implies $J=1$. Since the commutator subgroup of $\G$ is equal to the trivial subgroup $\braket{J}$ (see Lemmas \ref{lemma:commutator-subgroup-square} and \ref{lemma:commutator-subgroup-pentagram}), $\G$ is abelian.
+\end{proof}
+
+Note that a solution group with $J=1$ has no operator solution, even in the commuting operator model of entanglement. Separately, an abelian group has an operator solution iff it has a classical solution.
+
+In a manuscript to appear shortly after this one, Joel Wallman \cite{wallman2019} shows that there is no pseudotelepathy LCS game whose ideal operators are tensor products of Paulis mod $d$ for $d\neq 2$. 
