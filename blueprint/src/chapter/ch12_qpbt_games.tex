@@ -241,22 +241,49 @@ A measurement that is consistent on $\ket{\psi}$ in the sense of Definition~\ref
 
 We record several useful facts about the consistency measure and the state-dependent distance. For the statements imported without proof, readers are referred to Sections~4.4 and~4.5 of \cite{Natarajan2018NEEXP}.
 
-\begin{lemma}[Consistency versus closeness; Facts 4.13 and 4.14 in \cite{Natarajan2018NEEXP}]\label{fact:agreement}
-	\lean{MIPStarRE.QPBT.opFamilyDistSq_le_two_mul_consistencyDefect, MIPStarRE.QPBT.consistencyDefect_le_opFamilyDistSq_of_projective, MIPStarRE.QPBT.consistencyDefect_le_sqrt_of_projective_left}
+\begin{lemma}[Consistency versus closeness; Fact 4.13 in \cite{Natarajan2018NEEXP}]\label{fact:agreement}
+	\lean{MIPStarRE.QPBT.opFamilyDistSq_le_two_mul_consistencyDefect, MIPStarRE.QPBT.consistencyDefect_le_opFamilyDistSq_of_projective}
+	\leanok
 	\uses{def:consistency, def:povm-distance}
 	For POVMs $\{A^x_a\}$ and $\{B^x_a\}$, the following hold.
 	\begin{enumerate}
 		\item If $A^x_a \ot \Id_B \simeq_\delta \Id_A \ot B^x_a$, then $A^x_a \ot \Id_B \approx_\delta \Id_A \ot B^x_a$.
 		\item If $A^x_a \ot \Id_B \approx_\delta \Id_A \ot B^x_a$ \emph{and} $\{A^x_a\}$ and $\{B^x_a\}$ are projective measurements, then $A^x_a \ot \Id_B \simeq_\delta \Id_A \ot B^x_a$.
-		\item If $A^x_a \ot \Id_B \approx_\delta \Id_A \ot B^x_a$ and either $\{A^x_a\}$ or $\{B^x_a\}$ is a projective measurement, then $A^x_a \ot \Id_B \simeq_{\delta^{1/2}} \Id_A \ot B^x_a$.
 	\end{enumerate}
 \end{lemma}
 \begin{proof}
+	\leanok
 	\uses{lem:distance-consistency-term,
 		lem:distance-point-distance-le-defect,
-		lem:distance-projective-point-distance, lem:distance-nonnegative,
-		lem:distance-projective-left-square-root}
-	Stated in the source without proof; these are Facts 4.13 and 4.14 of \cite{Natarajan2018NEEXP}. For the first item, expand each term $\lVert (A^x_a \ot \Id - \Id \ot B^x_a)\ket{\psi} \rVert^2$ and use $ (A^x_a)^2 \le A^x_a$, $(B^x_a)^2 \le B^x_a$ together with completeness of the two POVMs: summing over $a$ and averaging over $x$ bounds the total by at most twice the off-diagonal mass, which is $O(\delta)$ by hypothesis. When both families are projective the two operator inequalities hold with equality, so the expansion equals exactly twice the off-diagonal mass; reading this identity in the other direction gives the second item. For the third item, write the off-diagonal mass $\sum_{a \ne b} \bra{\psi} A^x_a \ot B^x_b \ket{\psi}$ as an inner product involving $(A^x_a \ot \Id - \Id \ot B^x_a)\ket{\psi}$, using projectivity of one of the two families, and apply the Cauchy--Schwarz inequality; this route costs a square root in the error.
+		lem:distance-projective-point-distance, lem:distance-nonnegative}
+	Stated in the source without proof; this is Fact 4.13 of \cite{Natarajan2018NEEXP}. For the first item, expand each term $\lVert (A^x_a \ot \Id - \Id \ot B^x_a)\ket{\psi} \rVert^2$ and use $ (A^x_a)^2 \le A^x_a$, $(B^x_a)^2 \le B^x_a$ together with completeness of the two POVMs: summing over $a$ and averaging over $x$ bounds the total by at most twice the off-diagonal mass, which is $O(\delta)$ by hypothesis. When both families are projective the two operator inequalities hold with equality, so the expansion equals exactly twice the off-diagonal mass; reading this identity in the other direction gives the second item.
+\end{proof}
+
+\begin{lemma}[Consistency from closeness with one projective family; Fact 4.14 in \cite{Natarajan2018NEEXP}]\label{fact:agreement-one-sided}
+	% Status: the statement is final; no Lean declaration exists yet for the full disjunctive form, so this node carries no formalization marker.
+	\uses{def:consistency, def:povm-distance}
+	Let $\{A^x_a\}$ and $\{B^x_a\}$ be POVMs. If $A^x_a \ot \Id_B \approx_\delta \Id_A \ot B^x_a$ and either $\{A^x_a\}$ or $\{B^x_a\}$ is a projective measurement, then $A^x_a \ot \Id_B \simeq_{\delta^{1/2}} \Id_A \ot B^x_a$.
+\end{lemma}
+\begin{proof}
+	\uses{lem:distance-projective-left-square-root}
+	Stated in the source without proof; it is Fact 4.14 of \cite{Natarajan2018NEEXP}. Write the off-diagonal mass $\sum_{a \ne b} \bra{\psi} A^x_a \ot B^x_b \ket{\psi}$ as an inner product involving $(A^x_a \ot \Id - \Id \ot B^x_a)\ket{\psi}$, using projectivity of one of the two families, and apply the Cauchy--Schwarz inequality; this route costs a square root in the error. Only the branch in which $\{A^x_a\}$ is the projective family is available, as Lemma~\ref{lem:agreement-projective-left}; the branch in which only $\{B^x_a\}$ is projective is still open.
+\end{proof}
+
+\begin{lemma}[Left-projective branch of Lemma~\ref{fact:agreement-one-sided}]\label{lem:agreement-projective-left}
+	\lean{MIPStarRE.QPBT.consistencyDefect_le_sqrt_of_projective_left}
+	\leanok
+	\uses{def:consistency, def:povm-distance}
+	This entry states only the branch of Lemma~\ref{fact:agreement-one-sided} in which the left family is the projective one; it is not the full disjunctive statement of the source. Let $\mu$ be a probability distribution on $\mathcal X$, let $\ket{\psi}$ be a unit vector, and let $\{A^x_a\}$ be a projective measurement for every $x$. Then
+	\[
+		\E_x \sum_{a \ne b} \bra{\psi} A^x_a \ot B^x_b \ket{\psi}
+		\leq \sqrt{2\, \E_x \sum_a \bigl\lVert (A^x_a \ot \Id - \Id \ot B^x_a)\ket{\psi} \bigr\rVert^2}\,;
+	\]
+	in particular, if $A^x_a \ot \Id_B \approx_\delta \Id_A \ot B^x_a$, then $A^x_a \ot \Id_B \simeq_{(2\delta)^{1/2}} \Id_A \ot B^x_a$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:distance-projective-left-square-root, lem:distance-averaged-square-root}
+	Apply the pointwise estimate of Lemma~\ref{lem:distance-projective-left-square-root} at each question $x$, then average over $x$ with Lemma~\ref{lem:distance-averaged-square-root}.
 \end{proof}
 
 \begin{lemma}[Fact 4.20 in \cite{Natarajan2018NEEXP}]\label{fact:add-a-proj}
@@ -425,7 +452,6 @@ The state-dependent distance is the right tool for reasoning about the closeness
 % question distribution.
 \begin{lemma}[Sandwiched simultaneous measurement; modified from Fact 4.34 in \cite{Natarajan2018NEEXP}]\label{lem:ld-sandwich}
 	\lean{MIPStarRE.QPBT.sandwichProduct}
-	\lean{MIPStarRE.QPBT.sandwichProduct_isMeasurement}
 	\lean{MIPStarRE.QPBT.consistencyDefect_sandwich_le}
 	\leanok
 	\uses{def:consistency, def:bracket, def:povm-conventions}
@@ -459,6 +485,26 @@ The state-dependent distance is the right tool for reasoning about the closeness
 	As printed in the source, the sandwich in Lemma~\ref{lem:ld-sandwich} pairs the $i$-th measurement with the outcome $g_{k+1-i}$: the outermost factor $G^{k,\,x}$ carries the outcome $g_1$ and the innermost factor $G^{1,\,x}$ carries $g_k$. Since the measurement $\{G^{i,\,x}_g\}$ is indexed by $g \in \mathcal G_i$, the operator $G^{k,\,x}_{g_1}$ is undefined whenever $\mathcal G_1 \ne \mathcal G_k$, so the printed pairing is a typographical slip. The statement above instead uses the pairing $G^{k,\,x}_{g_k} \cdots G^{1,\,x}_{g_1} \cdots G^{k,\,x}_{g_k}$ of Fact 4.34 in \cite{Natarajan2018NEEXP}, from which the lemma is imported. The source also leaves the case $k = 0$ implicit; with the empty-product convention recorded in the statement, both sides of \eqref{eq:ld-sandwich-2} are then the identity on the single empty-tuple outcome and the conclusion holds with error zero.
 \end{remark}
 
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:ld-sandwich-measurement}
+	\lean{MIPStarRE.QPBT.sandwichProduct_isMeasurement}
+	\leanok
+	\uses{def:povm-conventions}
+	This formalization-only auxiliary is not a named statement of the paper; it
+	isolates the assertion, left implicit in Lemma~\ref{lem:ld-sandwich}, that
+	the sandwiched family is a POVM. If $\{G^{i,\,x}_g\}_{g \in \mathcal G_i}$
+	is a projective measurement for every $i$ and every $x$, then every
+	operator $C^x_{g_1,\,\dots,\,g_k}$ is positive and
+	$\sum_{g_1,\,\dots,\,g_k} C^x_{g_1,\,\dots,\,g_k} = \Id$.
+\end{lemma}
+\begin{proof}
+	\leanok \uses{lem:distance-measurement-effect-hermitian}
+	Induct on $k$. Positivity is preserved by conjugation, and summing the
+	inner indices gives $\Id$ by the inductive hypothesis, after which the
+	remaining outer pair collapses by idempotence to
+	$\sum_{g_k} G^{k,\,x}_{g_k} = \Id$.
+\end{proof}
+
 % The source (references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:504-505) quantifies
 % the pairwise-agreement hypothesis over every pair (x, y_1), including pairs carrying
 % probability zero under D, on which no conditional distribution of y_2 is defined; the
@@ -469,7 +515,6 @@ The state-dependent distance is the right tool for reasoning about the closeness
 % conditions on a fixed question tuple with the same restriction left implicit.
 \begin{lemma}[Pasting two consistent measurements; Fact 4.35 in \cite{Natarajan2018NEEXP}]\label{lem:pasting}
 	\lean{MIPStarRE.QPBT.pastedMeasurement}
-	\lean{MIPStarRE.QPBT.pastedMeasurement_isMeasurement}
 	\lean{MIPStarRE.QPBT.exists_pasting_error}
 	\leanok
 	\uses{def:consistency, def:bracket, def:povm-conventions}
@@ -499,6 +544,27 @@ The state-dependent distance is the right tool for reasoning about the closeness
 	Stated in the source without proof, as an import of Fact 4.35 of \cite{Natarajan2018NEEXP}. The measurement $J^x$ sandwiches the family $(G_1)^x$ between two copies of the projective family $(G_2)^x$. The consistency hypotheses \eqref{eq:pasting-1} and the self-consistency \eqref{eq:pasting-2} allow the joint measurement $A^{x,y_1,y_2}$ to be compared with the sandwiched product one factor at a time, and the $\eta$-bound on the pairwise agreement of distinct functions in $\mathcal G_2$ controls the error terms arising when two different outcomes $g_2 \ne g_2'$ agree at the sampled point $y_2$.
 \end{proof}
 
+\begin{lemma}[Formalization support for Lemma~\ref{lem:pasting}]
+	\label{lem:pasting-measurement}
+	\lean{MIPStarRE.QPBT.pastedMeasurement_isMeasurement}
+	\leanok
+	\uses{def:povm-conventions}
+	This formalization-only auxiliary is not a named statement of the paper; it
+	isolates the assertion, left implicit in~\eqref{eq:pasting-2a}, that the
+	pasted family is a POVM. If $\{(G_1)^x_{g_1}\}_{g_1}$ is a measurement and
+	$\{(G_2)^x_{g_2}\}_{g_2}$ is a projective measurement, then every operator
+	$J^x_{g_1,\,g_2}$ is positive and
+	$\sum_{g_1,\,g_2} J^x_{g_1,\,g_2} = \Id$.
+\end{lemma}
+\begin{proof}
+	\leanok \uses{lem:distance-measurement-effect-hermitian}
+	Positivity holds because $J^x_{g_1,\,g_2}$ is the conjugation of the
+	positive operator $(G_1)^x_{g_1}$ by the self-adjoint operator
+	$(G_2)^x_{g_2}$. Summing over $g_1$ first leaves
+	$\sum_{g_2} (G_2)^x_{g_2} (G_2)^x_{g_2}$, which equals
+	$\sum_{g_2} (G_2)^x_{g_2} = \Id$ by idempotence and completeness.
+\end{proof}
+
 \begin{lemma}[Close strategies have close values; Fact 4.32 in \cite{Natarajan2018NEEXP}]\label{lem:close-strategies-have-close-values}
 	\lean{MIPStarRE.QPBT.abs_value_sub_le_of_areClose}
 	\leanok
@@ -514,7 +580,7 @@ The state-dependent distance is the right tool for reasoning about the closeness
 
 \paragraph{Formalization support for the distance calculus.}
 The following subordinate results isolate the finite-dimensional estimates and
-tensor identities used in the Lean proofs above. They are not named statements
+tensor identities used in the preceding proofs. They are not named statements
 of the paper.
 
 \begin{lemma}[Formalization support for Fact~\ref{fact:add-a-proj}]
@@ -744,13 +810,13 @@ of the paper.
 	It is an average of sums of nonnegative squared norms.
 \end{proof}
 
-\begin{lemma}[Formalization support for Fact~\ref{fact:agreement}, item 3]
+\begin{lemma}[Formalization support for Lemma~\ref{fact:agreement-one-sided}]
 	\label{lem:distance-projective-left-square-root}
 	\lean{MIPStarRE.QPBT.DistanceCalculus.abs_point_defect_le_sqrt_distance_of_projective_left}
 	\leanok
 	\uses{def:distance-state-quadratic-form}
 	This formalization-only auxiliary is not a named statement of the paper; it
-	isolates the pointwise Cauchy--Schwarz estimate for item 3. If $A$ is
+	isolates the pointwise Cauchy--Schwarz estimate for that lemma. If $A$ is
 	projective and $\|\psi\|=1$, then
 	\[
 		\left|\sum_{a\ne b}q_\psi(A_aB_b)\right|
@@ -762,6 +828,25 @@ of the paper.
 	\uses{lem:distance-point-defect}
 	Write the defect as a sum of inner products, apply finite
 	Cauchy--Schwarz, and use projective orthogonality and completeness.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:agreement-projective-left} and Lemma~\ref{lem:avg-closeness}]
+	\label{lem:distance-averaged-square-root}
+	\lean{MIPStarRE.LDT.Preliminaries.avgOver_abs_le_sqrt_of_pointwise}
+	\leanok
+	This formalization-only auxiliary is not a named statement of the paper; it
+	is the weighted Cauchy--Schwarz step that turns a pointwise square-root
+	bound into the same bound for the weighted averages. Let $\mu$ be a
+	distribution on $\mathcal X$ of total mass at most $1$, and let
+	$f,g\colon\mathcal X\to\R$ satisfy $g(x)\geq0$ and
+	$|f(x)|\leq\sqrt{g(x)}$ for every $x$. Then
+	$\bigl|\E_x f(x)\bigr|\leq\sqrt{\E_x g(x)}$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Apply the weighted Cauchy--Schwarz inequality to the families with entries
+	$\sqrt{\mu(x)}$ and $\sqrt{\mu(x)}\sqrt{g(x)}$, and use that the total mass
+	is at most $1$.
 \end{proof}
 
 \begin{lemma}[Formalization support for Proposition~\ref{fact:triangle-for-simeq}]
@@ -857,6 +942,31 @@ of the paper.
 \end{proof}
 
 \begin{lemma}[Formalization support for Fact~\ref{fact:data-processing}]
+	\label{lem:distance-matched-mass-postprocess}
+	\lean{MIPStarRE.LDT.Preliminaries.qMatchMass_leftRight_postprocess_ge}
+	\leanok
+	\uses{def:post-processing}
+	This formalization-only auxiliary is not a named statement of the paper; it
+	records that the matched mass of a left-placed and a right-placed
+	sub-measurement does not decrease under post-processing. For
+	sub-measurements $A$ on the first factor and $B$ on the second, a map
+	$f\colon\mathcal A\to\mathcal B$, and any state $\rho$ of the bipartite
+	system,
+	\[
+		\sum_b\bigl\langle A_{[f=b]}\ot B_{[f=b]}\bigr\rangle_\rho
+		\geq\sum_a\bigl\langle A_a\ot B_a\bigr\rangle_\rho,
+	\]
+	where $\langle X\rangle_\rho$ is the expectation of $X$ in the state
+	$\rho$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Grouping the outcomes into the fibers of $f$ adds exactly the cross terms
+	$\langle A_a\ot B_{a'}\rangle_\rho$ with $f(a)=f(a')$ and $a\ne a'$, and
+	each of these is nonnegative.
+\end{proof}
+
+\begin{lemma}[Formalization support for Fact~\ref{fact:data-processing}]
 	\label{lem:distance-postprocess-overlap}
 	\lean{MIPStarRE.QPBT.DistanceCalculus.diagonal_postprocess_stateQForm_ge}
 	\leanok
@@ -871,8 +981,13 @@ of the paper.
 \end{lemma}
 \begin{proof}
 	\leanok
-	Expand the postprocessed effects; all additional same-fiber cross terms are
-	nonnegative.
+	\uses{lem:distance-matched-mass-postprocess}
+	Read $q_\psi$ as the expectation in the rank-one state determined by
+	$\ket\psi$; the two sides then become the matched masses of the
+	post-processed and of the original left- and right-placed measurements, so
+	the claim is Lemma~\ref{lem:distance-matched-mass-postprocess}. Concretely,
+	expanding the postprocessed effects adds only same-fiber cross terms, and
+	these are nonnegative.
 \end{proof}
 
 \begin{lemma}[Formalization support for Lemma~\ref{lem:commutation-analysis}]
