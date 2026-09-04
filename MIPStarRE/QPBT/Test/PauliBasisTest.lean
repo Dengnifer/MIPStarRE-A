@@ -482,7 +482,7 @@ private def pauliSharedProjectionLinear (P : AdmissibleParams) :
 
 /-- Formalization-only auxiliary: the inclusion of the low-degree register index
 into the ambient Pauli register index selected by a basis. -/
-def pauliLdIndex (P : AdmissibleParams) (W : PauliKind) :
+private def pauliLdIndex (P : AdmissibleParams) (W : PauliKind) :
     LdIndex P.toLdParams → PauliIndex P
   | .inl (.inl j) =>
       match W with
