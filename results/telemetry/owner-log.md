@@ -127,3 +127,10 @@ Repository: `Dengnifer/MIPStarRE-A`. Operator: the codex (gpt-5.6-sol) session
 - **External load:** another user's 40-process experiment used 123 of 128
   cores (load 1690, ssh drops); `rzhou`'s dead 223 GB CP-SAT log fills `/tmp`;
   reported in #26 and to the owner. Nothing of ours.
+
+### 2026-09-04 03:30Z — owner session: adjudication contract live, no-fan-out shim, lane bookkeeping
+
+- PR #43 (issue #23) merged `22d3eef` by adjudication at 62fa37e (F1/F2 owner rules, F3 moot, F4 out of scope); PR #95 merged `c240b6b`. pr_merge now enforces the ADJUDICATION format (head line + one ticked disposition per finding).
+- Reviewer deaths traced to codex multi-agent fan-out (agent thread limit) on top of the account concurrency cap; shim `~/.cache/mipstarre-dev/owner-bin/codex` (archived in owner-tools/owner-bin-codex) disables it for dispatched sessions; lane-v8.sh and rerun_review-v3.sh use it; six reviews re-queued serially.
+- Incident: two repair lanes (49, 75) were launched with an empty LANE_BRANCH because `gh pr view` ran outside the repo; killed within a minute, their stray worktrees/branches (issue-49-distance-theorems, issue-68-magic-square-split) removed, relaunched on the PR branches. Lesson: cd into the repo before any gh call in a launch command.
+- Duplicate lane processes: lanes 65/66 from 02:19Z resumed prover threads while older lanes for the same issues had already produced PR 90/96; the older lanes finished (review done) and the resumed provers keep closing sorries on the same branches — left running; their push will supersede the reviewed heads. Lane 73 (merged as PR 95) killed.
