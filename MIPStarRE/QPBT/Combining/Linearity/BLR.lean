@@ -6,12 +6,12 @@ import MIPStarRE.QPBT.Combining.Linearity.BooleanFourier
 
 This file carries out the Fourier-analytic part of the proof of the quantum
 linearity theorem of Natarajan and Vidick.  Given binary observables `O^u`
-indexed by the Boolean cube `(ZMod 2)^t` and a positive semidefinite trace-one
+indexed by the Boolean cube `𝔽_2^t` and a positive semidefinite trace-one
 operator `ρ`, it expresses the state-dependent multiplicative defect of the
 family through the two-query correlation of the linearity test, identifies the
 sum of the cubic Fourier coefficients with that correlation, and records the
-overlap certificate for the Fourier-square POVM `B^u = (hat O^u)^2` that the
-Naimark dilation consumes.  Pairwise commutation of the observables is never
+overlap certificate for the Fourier-square POVM `B^u = (hat O^u)^2` used in the
+Naimark-dilation argument.  Pairwise commutation of the observables is never
 assumed, and every complex trace is handled through its real part.
 
 ## Main results
@@ -38,8 +38,8 @@ invokes it at lines 787--832.  The blueprint statement is `thm:linearity` in
 `blueprint/src/chapter/ch15_qpbt_combining.tex:81-147`.  The normalization of
 the error constant is analyzed in
 `docs/paper-gaps/qpbt_linearity-distance-normalization.tex`: the exact defect
-bound is `2 * δ` for the raw distance `stateDepDistSq`, equivalently `δ` for
-the normalized binary-observable distance.
+bound is `2 * δ` for the squared state-dependent operator distance
+`stateDepDistSq`, equivalently `δ` for the squared binary-observable distance.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder
@@ -54,7 +54,7 @@ noncomputable section
 /-! ## The two-query correlation and the multiplicative defect -/
 
 /-- The two-query correlation of the linearity test: the average, over a
-uniformly random pair `(u, u')` in `(ZMod 2)^t`, of the real part of
+uniformly random pair `(u, u')` in `𝔽_2^t`, of the real part of
 `Tr(O^u O^{u'} O^{u+u'} ρ)`.  This is the left-hand side of display (7) in
 Natarajan--Vidick, `references/nv-paper/fullpaper.tex:1078-1080`, and the
 quantity bounded below in the hypothesis of
@@ -71,7 +71,8 @@ namely `d_ρ(O^u O^v, O^{u+v})^2` for the state-dependent distance of
 `references/nv-paper/fullpaper.tex:873-875`.  Its average over uniformly random
 `u, v` is the approximate-linearity error of the family in the sense of the QPBT
 quotation `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:713-718`,
-measured with the raw distance `stateDepDistSq`. -/
+measured with the squared state-dependent operator distance
+`stateDepDistSq`. -/
 def multiplicativeDefect {t : ℕ} {ι : Type} [Fintype ι] [DecidableEq ι]
     (O : (Fin t → ZMod 2) → Op ι) (ρ : Op ι) (u v : Fin t → ZMod 2) : ℝ :=
   stateDepDistSq (O u * O v) (O (u + v)) ρ
@@ -141,7 +142,7 @@ exchanging the two coordinates leaves the average unchanged.  This is the
 relation between the approximate-linearity hypothesis of the QPBT quotation
 (`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:713-718`) and
 display (7) of Natarajan--Vidick (`references/nv-paper/fullpaper.tex:1078-1080`),
-in the raw normalization of
+in the operator-distance normalization of
 `docs/paper-gaps/qpbt_linearity-distance-normalization.tex`. -/
 theorem avg_multiplicativeDefect_eq_two_sub_two_mul_correlation {t : ℕ}
     {ι : Type} [Fintype ι] [DecidableEq ι]
@@ -176,7 +177,7 @@ from `O^{u+v}` is at most `2 * δ`.  This is the passage from display (7) of
 Natarajan--Vidick (`references/nv-paper/fullpaper.tex:1078-1080`) to the
 approximate-linearity relation of the QPBT quotation
 (`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:713-718`); the
-constant `2` is the raw-distance normalization recorded in
+constant `2` is the operator-distance normalization recorded in
 `docs/paper-gaps/qpbt_linearity-distance-normalization.tex`. -/
 theorem avg_multiplicativeDefect_le_two_mul_error {t : ℕ}
     {ι : Type} [Fintype ι] [DecidableEq ι]
@@ -325,7 +326,7 @@ theorem operatorFourier_mul_self_posSemidef {t : ℕ}
     Matrix.posSemidef_conjTranspose_mul_self (operatorFourier O u)
 
 /-- The Fourier-square POVM `{B^u = (hat O^u)^2}` of a family of binary
-observables, with outcomes in `(ZMod 2)^t`.  Positivity is
+observables, with outcomes in `𝔽_2^t`.  Positivity is
 `operatorFourier_mul_self_posSemidef` and completeness is the Parseval
 identity `sum_operatorFourier_sq_eq_one`.  This is the POVM to which Naimark's
 theorem is applied at `references/nv-paper/fullpaper.tex:1097-1100`. -/
@@ -407,7 +408,7 @@ theorem avg_overlap_fourierSquare_eq_sum_cube {t : ℕ}
 hypothesis of `exists_exactly_linear_observables`, the average state-dependent
 overlap between `O^a` and the character sum `∑_u (-1)^{u·a} B^u` is at least
 `1 - δ`.  This is the conclusion of the computation at
-`references/nv-paper/fullpaper.tex:1104-1112` in the form consumed after the
+`references/nv-paper/fullpaper.tex:1104-1112` in the form used after the
 Naimark dilation: the same overlap, evaluated in `ρ ⊗ |anc⟩⟨anc|` against the
 exactly linear observables, is what bounds the average distance in display (8).
 No commutation among the observables is used. -/
