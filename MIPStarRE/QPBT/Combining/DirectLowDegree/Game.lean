@@ -18,7 +18,7 @@ open scoped BigOperators
 
 namespace MIPStarRE.QPBT
 
-open MIPStarRE.LDT hiding Measurement
+open MIPStarRE.LDT
 open MIPStarRE.LDT.Preliminaries
 open MIPStarRE.Quantum
 
@@ -205,7 +205,7 @@ noncomputable abbrev DirectPolyTuple (D : DirectLdParams) :=
 /-- A polynomial-tuple POVM for the directly indexed game. -/
 noncomputable abbrev DirectPolyMeasTuple (D : DirectLdParams) (ι : Type*)
     [Fintype ι] [DecidableEq ι] :=
-  Measurement (DirectPolyTuple D) ι
+  MIPStarRE.Quantum.Measurement (DirectPolyTuple D) ι
 
 /-- Evaluate every component of a direct polynomial tuple at a point. -/
 def evalDirectPolyTupleAt {D : DirectLdParams}
