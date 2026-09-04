@@ -1,0 +1,249 @@
+\ProvidesPackage{JalexMath}
+\NeedsTeXFormat{LaTeX2e} % I don't know whether this line is necessary or not
+\usepackage{amsmath, amssymb, amsthm, amstext, enumerate}
+\usepackage{array, fancyhdr, multicol, mathdots, hyperref, stmaryrd}
+\usepackage[pdftex]{graphicx}
+\PassOptionsToPackage{hyphens}{url}\usepackage{hyperref}
+\usepackage{braket}
+\usepackage{sidecap}
+\usepackage[all]{xy}
+% \usepackage[backend=bibtex, style=alphabetic]{biblatex}
+
+%% Heading stuff
+
+\makeatletter%
+\@ifclassloaded{article}%
+  {
+		\pagestyle{fancy}
+
+		\setcounter{section}{0}
+
+		\newcommand{\makecoverpage}{
+			\pagenumbering{gobble}
+			\maketitle
+			\pagebreak
+			\pagenumbering{arabic}
+		}
+
+		\def\problemname#1{\renewcommand{\prob}[1]{\section*{#1##1}}}
+
+		\author{Jalex Stark}
+		\lhead{Jalex Stark}
+		\rhead{\today}
+
+		\newtheorem{thm}{Theorem}[section]
+		\newtheorem{fact}[thm]{Fact}
+		\newtheorem{theorem}[thm]{Theorem}
+		\newtheorem{axiom}[thm]{Axiom}
+		\newtheorem{lemma}[thm]{Lemma}
+		\newtheorem{claim}[thm]{Claim}
+		\newtheorem{conjecture}[thm]{Conjecture}
+		\newtheorem{question}[thm]{Question}
+		\newtheorem{prop}[thm]{Proposition}
+		\newtheorem{cor}[thm]{Corollary}
+		\theoremstyle{definition}
+		\newtheorem{problem}{Problem}[section]
+		\newtheorem{algorithm}[thm]{Algorithm}
+		\newtheorem{exercise}[problem]{Exercise}
+		\newtheorem{definition}[thm]{Definition}
+		\theoremstyle{remark}
+		\newtheorem{remark}[thm]{Remark}
+		\newtheorem{example}[thm]{Example}
+  }%
+  {
+  % if documentclass is not article, do nothing here.
+  }%
+\makeatother%
+	
+
+%%	Problem set organization
+	\newcommand{\prob}[1]{\section*{Problem #1.}}
+	\newcommand{\sub}[1]{\subsection*{(#1)}}
+	\newcommand{\subsub}[1]{\subsubsection*{(#1)}}
+
+%% Umans header
+\newcommand{\problemset}[5]{
+	\setlength{\oddsidemargin}{0.25 in}
+	\setlength{\evensidemargin}{-0.25 in}
+	\setlength{\topmargin}{-0.6 in}
+	\setlength{\textwidth}{6.5 in}
+	\setlength{\textheight}{8.5 in}
+	\setlength{\headsep}{0.75 in}
+	\setlength{\parindent}{0 in}
+	\setlength{\parskip}{0.1 in}
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {#1
+                        \hfill #2} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill #3  \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {#4 \hfill #5} }
+      \vspace{2mm}}
+   }
+   \end{center}
+   \vspace*{4mm}
+}
+
+%% Form writing
+	\newcommand{\blank}[1]{\line(1,0){#1}}
+
+%%	Symbol renaming
+	\DeclareSymbolFont{bbold}{U}{bbold}{m}{n}
+	\DeclareSymbolFontAlphabet{\mathbbold}{bbold}
+	\newcommand{\ind}{\mathbbold{1}}
+	\newcommand{\minus}{\setminus}
+	\newcommand{\halts}{\!\!\downarrow}
+	\newcommand{\restrict}{\mathord{\upharpoonright}}
+	\newcommand{\e}{\varepsilon}
+	\newcommand{\s}{\sigma}
+	\renewcommand{\d}{\delta}
+	\renewcommand{\(}{\left(}
+	\renewcommand{\)}{\right)}
+	\renewcommand{\qed}{\hfill$\square$}
+	\newcommand{\normin}{\trianglelefteq}
+	\renewcommand{\th}{\textsuperscript{th}}
+	\renewcommand{\1}{^{-1}}
+	\renewcommand{\;}{\,\middle\vert\,}
+	\newcommand{\into}{\hookrightarrow} % For injections
+	\newcommand{\onto}{\to}	%	For surjections
+	\newcommand{\from}{\leftarrow}
+	\newcommand{\xto}{\xrightarrow}
+	\newcommand{\xfrom}{\xleftarrow}
+	\newcommand{\G}{\Gamma}
+	\renewcommand{\a}{\alpha}
+	\renewcommand{\k}{\kappa}
+	\newcommand{\g}{\gamma}
+	\renewcommand{\l}{\lambda}
+	\newcommand{\w}{\omega}
+	\newcommand{\B}{\beta}
+	\newcommand{\z}{\zeta}
+	\renewcommand{\t}{\theta}
+	\newcommand{\concat}{^\smallfrown}
+	\renewcommand{\iff}{\Leftrightarrow}
+	\renewcommand{\implies}{\Rightarrow}
+	\newcommand{\seq}{\subseteq}
+	\newcommand{\suq}{\supseteq}
+	\newcommand{\del}{\nabla}
+	\newcommand{\0}{\emptyset}
+	\newcommand{\proves}{\vdash}
+	\newcommand{\nin}{\not\in}
+	\newcommand{\tensor}{\otimes}
+
+%	\newcommand{\transv}{\mathrel{\text{\tpitchfork}}}
+%		\makeatletter
+%		\newcommand{\tpitchfork}{%
+%		  \vbox{
+%		    \baselineskip\z@skip
+%		    \lineskip-.52ex
+%		    \lineskiplimit\maxdimen
+%		    \m@th
+%		    \ialign{##\crcr\hidewidth\smash{$-$}\hidewidth\crcr$\pitchfork$\crcr}
+%		  }%
+%		}
+%		\makeatother
+
+%% Functions
+	\newcommand{\udown}[1]{\rotatebox[origin=c]{180}{#1}}
+	\newcommand{\numberthis}{\addtocounter{equation}{1}{\tag}{\theequation}}
+	\newcommand{\coltwo}[2]{\left( \begin{array}{c}#1\\#2\end{array} \right)}
+	\newcommand{\colthree}[3]{\left( \begin{array}{c}#1\\#2\\#3\end{array} \right)}
+	\newcommand{\colfour}[4]{\left( \begin{array}{c}#1\\#2\\#3\\#4\end{array} \right)}
+	\newcommand{\comment}[1]{}
+	\newcommand{\fseq}[2]{\left(#1_1,#1_2,\ldots,#1_{#2}\right)}
+	\newcommand{\Prob}[2]{\Pr_{#1}\left[#2\right]}
+	\renewcommand{\set}[1]{\left\{#1\right\}}
+%	\newcommand{\bra}[1]{\left\langle #1 \right|}
+%	\newcommand{\ket}[1]{\left| #1 \right\rangle}
+%	\newcommand{\braket}[2]{\left\langle #1 \middle| #2 \right\rangle}
+	\newcommand{\ketbra}[2]{\ket{#1}\!\bra{#2}}
+	\newcommand{\proj}[1]{\ket{#1}\!\bra{#1}}
+	\newcommand{\sandwich}[2]{
+	\Braket{#1 | #2 | #1}
+	}
+	\newcommand{\pair}[2]{\set{#1,#2}}
+
+	\newcommand{\m}{\mathcal}
+	\renewcommand{\sf}{\mathsf}
+	\renewcommand{\sc}{\textsc}
+	\renewcommand{\r}{\mathrm}
+	\renewcommand{\b}{\mathbb}
+	\renewcommand{\k}{\mathfrak}
+
+	\newcommand{\matwo}[4]{\left( \begin{array}{cc}#1& #2 \\ #3 &#4 \end{array} \right)}
+	\newcommand{\mathree}[9]{\left( \begin{array}{ccc}#1& #2&#3\\#4&#5&#6\\#7&#8&#9\end{array} \right)}
+	\renewcommand{\matrix}[2]{\left( \begin{array}{#1}#2 \end{array} \right)}
+	\renewcommand{\bar}[1]{\overline{#1}}
+	\newcommand{\norm}[1]{\left\Vert#1\right\Vert}
+	\newcommand{\abs}[1]{\left\vert#1\right\vert}
+
+
+% Higher order options
+
+	\newcommand{\bb}[1]{\expandafter\newcommand\expandafter{\csname #1\endcsname}{\mathbb {#1}}} % turns \foo into %%{\mathbb}{foo}
+	\bb Q
+	\bb N
+	\bb Z
+	\bb R
+	\bb F
+	\bb C
+	\DeclareMathOperator*\Expectation{\b E}
+	\newcommand{\E}[1]{\Expectation\limits_{#1}}
+%%
+	\newcommand{\complexity}[1]{\expandafter\newcommand\expandafter{\csname #1\endcsname}{\mathsf {#1}}} 
+	% force math?
+	\complexity{QMA}
+	\complexity{BQP}
+	\complexity{NP}
+	\complexity{PSPACE}
+	\complexity{FO}
+%%
+%%
+%%	\newcommand{\mm}[1]{\expandafter\newcommand{\expandafter}{\csname #1\endcsname}{\m {#1}}} % turns \foo into %%{\mathcal}{foo}
+%%	\mm M
+%%	\mm U
+%%	\mm F
+	\newcommand{\op}[1]{\expandafter\DeclareMathOperator\expandafter{\csname #1\endcsname}{#1}} 
+			% turns \foo into \text%%{foo}
+	\op{diam}
+	\op{End}
+	\op{lcm}
+	\op{Frac}
+	\op{spec}
+	\op{Hom}
+	\op{co}
+	\op{coker}
+	\op{im}
+	\op{rank}
+	\op{Tr}
+	\op{tr}
+	\op{ran}
+	\op{dom}
+	\op{sgn}
+	\op{poly}
+	\op{Span}
+	\op{id}
+	\op{supp}
+
+
+%%	
+	\newcommand{\iInt}{\iint\limits}
+	\newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
+	\newcommand{\ceil}[1]{\left\lceil #1 \right\rceil}
+	\newcommand{\grad}{\nabla}
+
+	\newcommand{\dee}[2]{\frac{\r d #1}{\r d #2}}
+	\newcommand{\de}[1]{\dee\null #1}
+	\newcommand{\deetwo}[2]{\frac{\r d^2 #1}{\r d #2^2}}
+	\newcommand{\deemix}[3]{\frac{\r d^2 #1}{\r d #2\r d#3}}
+
+% tikz
+	\newcommand{\midarrow}{\tikz \draw[-triangle 90] (0,0) -- +(.1,0);}
+	\newcommand{\midarrowback}{\rotatebox{180}{\midarrow}}
+	
