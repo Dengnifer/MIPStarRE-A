@@ -502,10 +502,11 @@ started on #102 (stacked on #101)" — while #47 itself had grown to 50 flat
 sub-issues (19 closed) and two open packets (#146, #156) had no parent at all.
 
 **Change:** (1) five chapter trackers (#163 games, #164 test, #165 observables,
-#166 combining, #167 extraction) are now the open sub-issues of #47, and the 35
-packets #63, #77, #97-#135, #146 and #156 are re-parented under exactly one of
-them (#77 keeps its rigidity chain #101-#105); the #47 body is an index over
-the trackers, and the closed foundation packets stay its direct children.
+#166 combining, #167 extraction) are now open sub-issues of #47. The 35 direct
+tracker children migrated then were #63, #77, #97-#99, #106-#121, #123-#125,
+#127-#135, #146 and #156; #77 retained its five nested rigidity packets #101-#105.
+Closed foundation packets such as #100, #122 and #126 remained direct children
+of #47, whose body became an index over its trackers.
 (2) Every open packet's prose prerequisites are transcribed into `blocked_by`
 issue dependencies (69 edges) and the bullets are demoted to commentary by a
 line in the body itself. (3) `local/bin/ready_packets.py` walks that tree and
@@ -516,5 +517,4 @@ launch list; `local/README.md` documents the command.
 
 **Expected effect:** the operator launches from a computed list instead of
 re-reading a comment; a merged packet unblocks its dependents with no edit
-anywhere; an unparented packet shows as a gap in the tree instead of being
-lost in a flat list of fifty.
+anywhere; the rooted traversal reports the tracker hierarchy and its leaves.
