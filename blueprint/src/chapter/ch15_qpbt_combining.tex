@@ -1777,11 +1777,11 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\uses{lem:qld-4-12, def:line, def:line-point-dist, def:consistency,
 		def:bracket, def:expanded-state, def:ideg-deg-polynomials}
 	This formalization-only auxiliary is not a named statement of the paper.
-	It is the conclusion of Lemma~\ref{lem:qld-4-13} with the error form that
-	the proof of that lemma establishes: the statement is that of
-	Lemma~\ref{lem:qld-4-13} with $\delta_{\mathrm{combine}}$ replaced by
-	$C \cdot m \cdot \poly(\eps, md/q)$ for a universal constant $C > 0$.
-	The printed error form $\poly(m^2\eps, md/q)$ is not claimed here; see
+	It records a directly indexed auxiliary with the numerical error estimate
+	$C \cdot m \cdot \poly(\eps, md/q)$ obtained from the first route in the
+	printed proof, for a universal constant $C > 0$. It does not claim either
+	the printed error form $\poly(m^2\eps, md/q)$ or a source-shaped replacement
+	for Lemma~\ref{lem:qld-4-13}; see
 	Remark~\ref{rem:qld-4-13-source-defects}.
 	The intended comparison with Lemma~\ref{lem:qld-4-13} changes only the
 	error form. The available auxiliary construction also differs from that
@@ -1797,20 +1797,26 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	alphabet $\F_q \cup \{\bot\}$, whose extra outcome collects the line
 	polynomials that admit no evaluation at the sampled point, rather than
 	under the answer summation over $a \in \F_q$ used above. Thus the auxiliary
-	construction does not establish this formulation until the two forms are
-	related by the transport obligation of
-	\cite{gap:qpbt_ld-dimension-divisibility}.
+	construction does not establish this formulation until the question carrier
+	and law are related by the transport obligation of
+	\cite{gap:qpbt_ld-dimension-divisibility} and the completed answer comparison
+	is related to the source sum by
+	\cite{gap:qpbt_combined-lines-error-term}.
 \end{lemma}
 \begin{proof}
 	\uses{lem:qld-xz-lines, lem:qld-sublines, def:combine-map,
 		lem:qld-4-12, lem:claim-17-1, lem:claim-17-2, lem:claim-17-3}
-	This is what the proof of Lemma~\ref{lem:qld-4-13} above establishes: the
-	chaining of the three claims bounds
+	Chaining the three claims gives the numerical estimate
 	\eqref{eq:qld-combined-lines-consistency} by
 	$O(m(\eps^{1/4} + \delta_P^{1/4} + \delta_Q^{1/4} +
 	\delta_{\mathrm{Line}}^{1/2}))$, a function of the form
-	$m \cdot \poly(\eps, md/q)$, and the remaining steps of that proof are
-	unchanged.
+	$m \cdot \poly(\eps, md/q)$. This calculation is the only established part
+	of the comparison. Applying it to the source statement remains conditional
+	on transporting the question space and distribution and on converting the
+	completed answer comparison, including zero-direction singleton lines, to
+	the source sum over $a \in \F_q$; these obligations are recorded in
+	\cite{gap:qpbt_ld-dimension-divisibility} and
+	\cite{gap:qpbt_combined-lines-error-term}.
 \end{proof}
 
 The measurements of Lemma~\ref{lem:qld-4-12} and Lemma~\ref{lem:qld-4-13}

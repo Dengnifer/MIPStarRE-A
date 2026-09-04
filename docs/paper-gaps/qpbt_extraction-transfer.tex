@@ -129,8 +129,8 @@ The structure \path{ExtractionWitness} in
 \path{MIPStarRE/QPBT/Extraction/Unitary.lean} contains only the two-sided
 unitarity equations for the concrete swap maps, a normalized auxiliary state,
 the transformed-state estimate, and the two-player Pauli-projector comparison.
-The theorem \path{exists_extractionWitness} concludes the existence of this
-data at the explicit extraction scale, but it takes the
+The theorem \path{exists_extractionWitness_ofGlobalPairWitness} concludes the
+existence of this data at the explicit extraction scale, but it takes the
 \path{GlobalPairWitness} of Lemma~\path{lem:qld-4-7} as an explicit hypothesis
 rather than obtaining it from \path{exists_globalPairWitness}.  That bundle
 carries the projective global polynomial-pair measurements and both
@@ -142,25 +142,27 @@ debt rather than a faithful boundary condition, and the declaration is a
 conditional helper: it does not certify the source lemma, and the blueprint
 node Lemma~\path{lem:qld-unitary} accordingly neither links it nor carries any
 statement-level formalization mark.  The declaration is recorded instead on the
-separate formalization-support node
-Lemma~\path{lem:qld-unitary-given-global-pair}, whose statement assumes the
-global polynomial-pair measurement explicitly and whose statement-level mark
-therefore certifies only that conditional form.  Apart from that hypothesis the
+separate formalization-support note
+Remark~\path{rem:qld-unitary-given-global-pair}, whose statement assumes the
+global polynomial-pair measurement explicitly.  It carries no formal theorem
+or lemma link and therefore cannot be mistaken for the source result.  Apart
+from that hypothesis the
 conclusion matches the Stage~4.2 extraction lemma, including the corrected
 numerical estimates; the later passage to the isometries in the soundness
 theorem is not formalized, and no declaration yet states that passage.
 
-Discharging the debt requires a source-facing declaration that obtains the
-witness from \path{exists_globalPairWitness} and carries its own tracked
-\path{sorry}, together with the corresponding correction of the docstring of
-\path{exists_extractionWitness}, which still describes that theorem as
-source-facing and as introducing no additional premise.
+The misleading source-facing description has been removed.  The suffix
+\path{ofGlobalPairWitness} now quarantines the extra premise in the helper's
+name, and its docstring explicitly identifies the result as conditional and
+marks its dependence on the witness as unfaithful.  Discharging the debt still
+requires composing \path{exists_globalPairWitness} with this helper to obtain
+the source lemma; no declaration currently carries out that composition.
 
 Issue~\#19 owns this concrete Stage~4.2 interface and discrepancy record.
-\ghissue{47} owns the Stage~4.3 proof of
-\path{exists_extractionWitness} and the separate range-projection theorem
-needed by \path{pauli_soundness}; that theorem must be derived from the
-concrete data rather than stored in the witness.
+\ghissue{123} owns the source-facing composition through
+\path{exists_globalPairWitness}.  \ghissue{47} tracks the separate
+range-projection transfer needed by \path{pauli_soundness}; that theorem must
+be derived from the concrete data rather than stored in the witness.
 
 \section{Conclusion}
 

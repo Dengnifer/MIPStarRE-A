@@ -79,7 +79,8 @@ obtained by applying `deltaExtract` to `deltaConstructPaulis`. Given a
 derived inside `lem:qld-unitary` rather than assumed by the paper statement.
 The discrepancy is documented in
 `docs/paper-gaps/qpbt_extraction-transfer.tex`. Elimination: obtain `w` from
-`exists_globalPairWitness` before applying this conditional extraction result.
+`exists_globalPairWitness` before applying this conditional extraction result; issue
+#123 tracks that composition.
 
 **Local fix:** the positive-contraction estimate and normalization case split
 repair the two numerical defects at paper lines 1743-1783 without changing the
@@ -90,7 +91,7 @@ Schwartz-Zippel comparison at paper lines 1715-1858. Discharge: construct
 `aux` from the EPR projection of the swapped state, use the corrected
 small-error case split, and combine the point-measurement consistency with the
 exact swap conjugation identities. -/
-theorem exists_extractionWitness :
+theorem exists_extractionWitness_ofGlobalPairWitness :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (epsilon deltaG : ℝ),
         0 ≤ epsilon → epsilon ≤ 1 → 0 ≤ deltaG →
