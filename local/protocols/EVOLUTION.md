@@ -537,9 +537,7 @@ test growth remains subject to the owner-gated 400-line episode budget.
 ## 2026-09-05 — Branch-private Lake products may use a separate volume
 
 **Trigger:** `results/telemetry/events.md` 2026-09-05, issue #190 and PR #198.
-
 **Change:** `MIPSTARRE_LAKE_ROOT` places `.lake` at `<root>/<branch>`. One helper
-guards canonical checkout, `hot-main`, escape, and shared-target overlaps;
-dispatch grants only that target to writable sessions.
-
+guards canonical checkout, `hot-main`, escape, branch-alias, and detached-owner
+overlaps; dispatch grants only that target to writable sessions.
 **Expected effect:** native relocation without cache corruption or leaked build data.

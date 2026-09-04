@@ -47,12 +47,10 @@ build tree.
 different sharing rules. Conflating them is the primary way to reintroduce the
 parent's failure.
 
-An absolute `MIPSTARRE_LAKE_ROOT` relocates each private `.lake` to
-`<root>/<branch>`. The shared setup/cleanup helper rejects `/`, checkout and
-`hot-main` overlap, escaped targets, and targets shared by another worktree,
-using canonical paths. Existing data is never moved implicitly. Keep the variable
-exported: dispatch grants only the resolved target to a `workspace-write` session
-with `--add-dir`, and post-merge cleanup uses it after removing the worktree.
+An absolute `MIPSTARRE_LAKE_ROOT` relocates `.lake` to `<root>/<branch>`. The
+shared helper uses canonical paths to reject `/`, checkout or `hot-main` overlap,
+escape, or ownership by another branch or detached worktree. Existing data is
+not moved. Keep it exported for dispatch `--add-dir` and post-merge cleanup.
 
 **Tier 1 — `.lake/build`** — this project's own compiled artifacts (`.olean`,
 `.ilean`, `.c`, `.trace` for `MIPStarRE` modules). This is *exactly* what the
@@ -117,9 +115,8 @@ Two properties matter, and they are not symmetric:
 
 ## 4. On-disk layout
 
-Shared `packages/` and `hot-main/` state lives under `MIPSTARRE_CACHE_ROOT`
-(default `~/.cache/mipstarre-dev/`). Branch-private products may instead use
-`MIPSTARRE_LAKE_ROOT` as in §2. Neither tree is ever committed.
+Shared packages and `hot-main` use `MIPSTARRE_CACHE_ROOT`; branch products may
+use `MIPSTARRE_LAKE_ROOT` as in §2. Neither runtime tree is committed.
 
 ```
 ~/.cache/mipstarre-dev/

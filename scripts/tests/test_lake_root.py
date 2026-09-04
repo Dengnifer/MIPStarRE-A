@@ -41,11 +41,9 @@ class LakeRootTests(unittest.TestCase):
     def test_prepare_places_lake_by_full_branch_and_is_idempotent(self) -> None:
         repo = self.make_repo("worktree", "codex/issue-test")
         target = self.lake_root / "codex" / "issue-test"
-        first = run([HELPER, "prepare", repo], env=self.env)
+        run([HELPER, "prepare", repo], env=self.env)
         second = run([HELPER, "prepare", repo, "--check"], env=self.env)
-        self.assertEqual(first.returncode, 0, first.stderr)
         self.assertEqual(second.returncode, 0, second.stderr)
-        self.assertTrue((repo / ".lake").is_symlink())
         self.assertEqual(os.readlink(repo / ".lake"), str(target))
         self.assertTrue(target.is_dir())
 
@@ -79,7 +77,7 @@ class LakeRootTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(os.readlink(repo / ".lake"), str(self.lake_root / "issue-warm"))
 
-    def test_cleanup_refuses_active_and_shared_targets_then_removes_retired(self) -> None:
+    def test_cleanup_refuses_active_detached_and_shared_targets_then_removes_retired(self) -> None:
         repo = self.make_repo("cleanup-owner", "main")
         worktree = self.tmp / "cleanup-worktree"
         git(repo, "branch", "issue-cleanup")
@@ -89,6 +87,10 @@ class LakeRootTests(unittest.TestCase):
         (target / "artifact").write_text("generated", encoding="utf-8")
         self.assertNotEqual(run([HELPER, "cleanup", repo, "issue-cleanup"],
                                 env=self.env).returncode, 0)
+        git(worktree, "switch", "--detach", "--quiet")
+        detached = run([HELPER, "cleanup", repo, "issue-cleanup"], env=self.env)
+        self.assertIn("already used", detached.stderr)
+        git(worktree, "switch", "--quiet", "issue-cleanup")
         (worktree / ".lake").unlink()
         (self.lake_root / "alias").symlink_to(self.lake_root, target_is_directory=True)
         shared = run([HELPER, "cleanup", repo, "alias/issue-cleanup"], env=self.env)

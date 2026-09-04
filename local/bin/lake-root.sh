@@ -34,8 +34,7 @@ validated_target() { # <canonical-root> <target>
   local root="$1" target="$2" resolved
   resolved="$(realpath -m -- "$target")" || die "cannot resolve Lake target: $target"
   case "$resolved" in "$root"/*) ;; *) die "Lake target escapes root: $resolved" ;; esac
-  reject_hot_main "$resolved"
-  printf '%s' "$resolved"
+  reject_hot_main "$resolved"; printf '%s' "$resolved"
 }
 validate_repo_paths() { # <repository> <root> <target> <current-tree> <branch>
   local repo="$1" root="$2" target="$3" current="$4" branch="$5" listing line tree other
@@ -45,7 +44,11 @@ validate_repo_paths() { # <repository> <root> <target> <current-tree> <branch>
     case "$line" in
       "worktree "*)
         tree="$(realpath -m -- "${line#worktree }")"
-        paths_overlap "$root" "$tree" && die "Lake root overlaps registered worktree: $tree" ;;
+        paths_overlap "$root" "$tree" && die "Lake root overlaps registered worktree: $tree"
+        if [ "$tree" != "$current" ] && [ -L "$tree/.lake" ]; then
+          other="$(realpath -m -- "$tree/.lake")"
+          [ "$other" != "$target" ] || die "target already used by $tree"
+        fi ;;
       "branch refs/heads/"*)
         other="${line#branch refs/heads/}"
         if [ "$other" = "$branch" ]; then
