@@ -2356,3 +2356,26 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 - **Hand-back:** to be recorded here and in `stages.jsonl` when the owner
   says so; the codex main session then resumes from `~/.codex/prompts/goal.md`
   plus the #27 log.
+
+## 2026-09-04 15:12Z - Packet prerequisite write and budget gaps
+
+- **Symptom:** PR #171 made GitHub `blocked_by` edges authoritative and added
+  `scripts/tests/test_ready_packets.py`, but the documented local lifecycle had
+  no supported edge-write command and the owner-gated 400-line budget did not
+  count that test module.
+- **Diagnosis:** deferred review findings F1 and F2, recorded as issue #177,
+  identified two missing enforcement paths around the bounded PR #171 work.
+- **Fix:** add an adoption-safe `gh_common.py add-blocked-by` command with fake
+  API coverage, and include the readiness test in the hook budget with an
+  executable over-budget regression.
+- **Lesson:** an authoritative GitHub relation needs both read and write paths,
+  and every workflow test added outside `local/` must be named by the scope
+  budget when the budget uses an explicit path set.
+
+## 2026-09-04 — Operator hand-back: codex main session resumes from the owner session
+
+- **Trigger:** owner decision (2026-09-04T21:14:46Z): the owner's Claude 5-hour window is nearly used; the
+  owner session retires; no takeover scheduled. Mode 2 ran since 2026-09-03 23:11Z with the merge daemon,
+  stacked lanes and the Opus/codex prover pools; Mode 1 resumes from /tmp/qpbt-main-handoff.md
+  (archived under results/telemetry/owner-messages/).
+- **State at hand-back:** main at 5b94709; open PRs: 203,202,198,197,195,193,192,191,189,188,185,179,178,175,169,160,155,153,152.
