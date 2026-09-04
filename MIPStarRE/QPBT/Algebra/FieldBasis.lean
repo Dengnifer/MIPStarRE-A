@@ -350,8 +350,6 @@ private theorem exists_self_dual_normal_basis_gal (hodd : Odd (Nat.card G)) :
   · intro σ
     rw [hc, normal_basis_repr_symm_mul_single]
     simp only [one_smul]
-    apply congrArg σ
-    change φ (U : A) = φ (U : A)
     rfl
 
 end NormalTraceDual

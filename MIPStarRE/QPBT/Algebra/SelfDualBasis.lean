@@ -1,22 +1,20 @@
 import MIPStarRE.QPBT.Algebra.FieldBasis
-import Mathlib.FieldTheory.Finite.GaloisField
-import Mathlib.LinearAlgebra.Trace
 
 /-! # Binary coordinates for the fixed self-dual normal basis
 
-Source `def:dual-self-dual-normal-basis` and `def:binary-representation`;
-blueprint `blueprint/src/chapter/ch11_qpbt_algebra.tex:241-257,313-334`; paper
-`references/qpbt-paper/04_preliminaries.tex:494-502,669-700`.
-
 The basis definitions and existence theorem live in the upstream
 `FieldBasis` module; this file develops their coordinate consequences.
+
+## References
+
+- `def:dual-self-dual-normal-basis` and `def:binary-representation` in
+  `blueprint/src/chapter/ch11_qpbt_algebra.tex:241-257,313-334`.
+- `references/qpbt-paper/04_preliminaries.tex:494-502,669-700`.
 -/
 
 namespace MIPStarRE.QPBT
 
 open scoped BigOperators Matrix
-
-open MIPStarRE.LDT
 
 /-- Coordinates in the fixed model's chosen binary basis;
 `def:binary-representation`, blueprint `ch11_qpbt_algebra.tex:313-334`, paper
@@ -26,7 +24,8 @@ noncomputable abbrev FixedFieldModel.binaryCoordinates {q : ℕ}
   kappa F.basis
 
 /-- Equation `eq:eq-mult`, blueprint `ch11_qpbt_algebra.tex:313-334`, paper
-`04_preliminaries.tex:684-700`. -/
+`04_preliminaries.tex:684-700`. The proof is deferred to issue #70; see the
+self-dual normal-basis setup in paper `04_preliminaries.tex:494-502`. -/
 theorem binaryCoordinates_mul {q : ℕ} (F : FixedFieldModel q) (a b : F.K) :
     F.binaryCoordinates (a * b) =
       ∑ i : Fin F.basisDim, F.binaryCoordinates a i •
