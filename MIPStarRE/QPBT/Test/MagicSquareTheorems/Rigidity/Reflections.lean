@@ -17,9 +17,13 @@ of the source are the binary observables of the rest of the development, so this
 file uses `MIPStarRE.QPBT.IsBinaryObservable` and its algebra, defined in
 `MIPStarRE/QPBT/Combining/Linearity/Defs.lean`, rather than a second predicate of
 its own.  Two operators are compared through the norm of the difference of their
-actions on a fixed state, which is the relation written `M ≈ N` in the source;
-this comparison is symmetric, satisfies the triangle inequality, and is unchanged
-by multiplication on the left by an isometric operator.  Finally, a real spectral combination of
+actions on a fixed state, the relation `NormCloseOn` below.  That relation is the
+unsquared Euclidean distance between `M ψ` and `N ψ`; it is *not* the
+state-dependent distance `≈_δ` of the source, which bounds the squared quantity
+`⟨ψ|(M - N)ᴴ (M - N)|ψ⟩` and is formalized in this development by `opDistSq`.
+The comparison is symmetric, satisfies the triangle inequality, and is unchanged
+by multiplication on the left by an isometric operator; `NormCloseOn.opDistSq_le`
+converts it into the source's relation.  Finally, a real spectral combination of
 the joint effects of the two players has state-dependent norm controlled by the
 Born mass of the answer pairs carrying a nonzero coefficient; this is the step
 that turns each rejection mass of the value-to-parity layer into an operator
@@ -120,24 +124,17 @@ theorem norm_applyOperatorToState_isometry_mul {U : Op ι} (hU : Uᴴ * U = 1)
 
 end StateNorm
 
-/-! ## Reflections -/
+/-! ## Reflections
 
-/-- The *reflections* of `thm:ms-rigidity`, blueprint
-`ch13_qpbt_test.tex:224-253`, are the self-adjoint involutions attached to
+The *reflections* of `thm:ms-rigidity`, blueprint
+`ch13_qpbt_test.tex:228-250`, are the self-adjoint involutions attached to
 two-outcome projective measurements, which are exactly the binary observables
 `MIPStarRE.QPBT.IsBinaryObservable` of
 `MIPStarRE/QPBT/Combining/Linearity/Defs.lean`.  The Magic Square rigidity
 argument therefore uses that predicate and its algebra directly:
 `IsBinaryObservable.one`, `IsBinaryObservable.mul`,
 `IsBinaryObservable.isometry`, `isBinaryObservable_heteroKron_one` and
-`isBinaryObservable_one_heteroKron`.
-
-This abbreviation carries the source's word for the predicate and exists only so
-that the stacked swap-isometry branch of issue #104, written before the two
-predicates were merged, still elaborates; delete it once that branch has
-landed. -/
-abbrev IsReflection {ι : Type} [Fintype ι] [DecidableEq ι] (X : Op ι) : Prop :=
-  IsBinaryObservable X
+`isBinaryObservable_one_heteroKron`. -/
 
 /-- Operators placed on the two tensor factors commute. -/
 theorem heteroKron_comm {ιA ιB : Type} [Fintype ιA] [DecidableEq ιA]
@@ -146,44 +143,54 @@ theorem heteroKron_comm {ιA ιB : Type} [Fintype ιA] [DecidableEq ιA]
       heteroKron (1 : Op ιA) Y * heteroKron X (1 : Op ιB) := by
   rw [heteroKron_mul, heteroKron_mul, mul_one, one_mul, one_mul, mul_one]
 
-/-! ## State-dependent closeness -/
+/-! ## Closeness in the state-dependent norm -/
 
 /-- Two operators are *close within `δ` on `ψ`* when the state-dependent norm of
-their difference is at most `δ`.  This is the relation written `M ≈_δ N` in
-`thm:ms-rigidity`, blueprint `ch13_qpbt_test.tex:224-253`, paper
-`08_classical_and_quantum_low_degree_tests.tex:612-652`. -/
-def CloseOn {ι : Type} [Fintype ι] [DecidableEq ι]
+their difference is at most `δ`, that is, when the Euclidean distance between
+`M ψ` and `N ψ` is at most `δ`.
+
+This is **not** the relation `M ≈_δ N` of `thm:ms-rigidity`, blueprint
+`ch13_qpbt_test.tex:249`, paper
+`08_classical_and_quantum_low_degree_tests.tex:644-646`: there the relation
+bounds the *squared* quantity `⟨ψ|(M - N)ᴴ (M - N)|ψ⟩` by `O(δ)`, and it is
+formalized in this development by `opDistSq` (`def:povm-distance`, blueprint
+`ch12_qpbt_games.tex:219-226`).  The unsquared relation defined here is the one
+under which the triangle inequality is additive, which is what the
+solution-group computation of `Rigidity/Anticommutation.lean` iterates;
+`NormCloseOn.opDistSq_le` converts a bound at scale `δ` here into the bound `δ ^ 2`
+for `opDistSq`. -/
+def NormCloseOn {ι : Type} [Fintype ι] [DecidableEq ι]
     (ψ : EuclideanSpace ℂ ι) (δ : ℝ) (M N : Op ι) : Prop :=
   ‖applyOperatorToState (M - N) ψ‖ ≤ δ
 
-namespace CloseOn
+namespace NormCloseOn
 
 variable {ι : Type} [Fintype ι] [DecidableEq ι]
 variable {ψ : EuclideanSpace ℂ ι} {δ η : ℝ} {M N P U : Op ι}
 
 /-- Equal operators are close at every nonnegative scale. -/
-theorem of_eq (h : M = N) (hδ : 0 ≤ δ) : CloseOn ψ δ M N := by
+theorem of_eq (h : M = N) (hδ : 0 ≤ δ) : NormCloseOn ψ δ M N := by
   have hzero : applyOperatorToState (M - N) ψ = 0 := by
     rw [h, sub_self, applyOperatorToState_zero_op]
-  rw [CloseOn, hzero, norm_zero]
+  rw [NormCloseOn, hzero, norm_zero]
   exact hδ
 
 /-- Closeness is symmetric. -/
-theorem symm (h : CloseOn ψ δ M N) : CloseOn ψ δ N M := by
+theorem symm (h : NormCloseOn ψ δ M N) : NormCloseOn ψ δ N M := by
   have happ : applyOperatorToState (N - M) ψ = -applyOperatorToState (M - N) ψ := by
     rw [show N - M = -(M - N) by abel]
     unfold applyOperatorToState
     simp only [map_neg, LinearMap.neg_apply]
-  rw [CloseOn, happ, norm_neg]
+  rw [NormCloseOn, happ, norm_neg]
   exact h
 
 /-- Enlarging the scale preserves closeness. -/
-theorem mono (h : CloseOn ψ δ M N) (hδ : δ ≤ η) : CloseOn ψ η M N :=
+theorem mono (h : NormCloseOn ψ δ M N) (hδ : δ ≤ η) : NormCloseOn ψ η M N :=
   le_trans h hδ
 
 /-- Closeness composes by the triangle inequality. -/
-theorem trans (h₁ : CloseOn ψ δ M N) (h₂ : CloseOn ψ η N P) :
-    CloseOn ψ (δ + η) M P := by
+theorem trans (h₁ : NormCloseOn ψ δ M N) (h₂ : NormCloseOn ψ η N P) :
+    NormCloseOn ψ (δ + η) M P := by
   have hsplit : M - P = (M - N) + (N - P) := by abel
   calc ‖applyOperatorToState (M - P) ψ‖
       = ‖applyOperatorToState (M - N) ψ + applyOperatorToState (N - P) ψ‖ := by
@@ -193,13 +200,67 @@ theorem trans (h₁ : CloseOn ψ δ M N) (h₂ : CloseOn ψ η N P) :
     _ ≤ δ + η := add_le_add h₁ h₂
 
 /-- Multiplying on the left by an isometric operator preserves closeness. -/
-theorem isometry_mul (hU : Uᴴ * U = 1) (h : CloseOn ψ δ M N) :
-    CloseOn ψ δ (U * M) (U * N) := by
+theorem isometry_mul (hU : Uᴴ * U = 1) (h : NormCloseOn ψ δ M N) :
+    NormCloseOn ψ δ (U * M) (U * N) := by
   have hsub : U * M - U * N = U * (M - N) := by noncomm_ring
-  rw [CloseOn, hsub, norm_applyOperatorToState_isometry_mul hU]
+  rw [NormCloseOn, hsub, norm_applyOperatorToState_isometry_mul hU]
   exact h
 
-end CloseOn
+/-- Negating both operators leaves the state-dependent norm of the difference
+unchanged. -/
+theorem neg (h : NormCloseOn ψ δ M N) : NormCloseOn ψ δ (-M) (-N) := by
+  change ‖applyOperatorToState (-M - -N) ψ‖ ≤ δ
+  rw [show -M - -N = -(M - N) by abel]
+  have happ : applyOperatorToState (-(M - N)) ψ =
+      -applyOperatorToState (M - N) ψ := by
+    unfold applyOperatorToState
+    simp only [map_neg, LinearMap.neg_apply]
+  rw [happ, norm_neg]
+  exact h
+
+/-- Multiplying both operators by a scalar of modulus one leaves the
+state-dependent norm of the difference unchanged. -/
+theorem smul {c : ℂ} (hc : ‖c‖ = 1) (h : NormCloseOn ψ δ M N) :
+    NormCloseOn ψ δ (c • M) (c • N) := by
+  change ‖applyOperatorToState (c • M - c • N) ψ‖ ≤ δ
+  rw [← smul_sub, applyOperatorToState_smul, norm_smul, hc, one_mul]
+  exact h
+
+/-- Replacing the left factor of a product costs the distance between the two
+factors plus twice the cost of replacing the right factor by an operator
+commuting with both.  This is the mechanism by which a state-dependent relation
+is used in the middle of a word: the tail is first moved to the other player,
+where it commutes with everything acting on the first player. -/
+theorem mul_left_subst {X X' K K' : Op ι}
+    (hXX' : NormCloseOn ψ δ X X') (hKK' : NormCloseOn ψ η K K')
+    (hX : Xᴴ * X = 1) (hX' : X'ᴴ * X' = 1) (hK' : K'ᴴ * K' = 1)
+    (hcX : X * K' = K' * X) (hcX' : X' * K' = K' * X') :
+    NormCloseOn ψ (η + δ + η) (X * K) (X' * K) := by
+  have h1 : NormCloseOn ψ η (X * K) (X * K') := NormCloseOn.isometry_mul hX hKK'
+  have h2 : NormCloseOn ψ δ (X * K') (X' * K') := by
+    change ‖applyOperatorToState (X * K' - X' * K') ψ‖ ≤ δ
+    rw [show X * K' - X' * K' = K' * X - K' * X' by rw [hcX, hcX']]
+    exact NormCloseOn.isometry_mul hK' hXX'
+  have h3 : NormCloseOn ψ η (X' * K') (X' * K) := NormCloseOn.isometry_mul hX' hKK'.symm
+  exact (h1.trans h2).trans h3
+
+/-- Conversion to the state-dependent distance of the source: `M ≈_δ N` of
+`thm:ms-rigidity` (blueprint `ch13_qpbt_test.tex:249`, paper
+`08_classical_and_quantum_low_degree_tests.tex:644-646`) bounds
+`⟨ψ|(M - N)ᴴ (M - N)|ψ⟩`, which is `opDistSq` on the one-point distribution
+(`def:povm-distance`, blueprint `ch12_qpbt_games.tex:219-226`).  A bound at
+scale `δ` for the unsquared relation is a bound at scale `δ ^ 2` for it. -/
+theorem opDistSq_le (h : NormCloseOn ψ δ M N) :
+    opDistSq (uniformDistribution Unit) (fun _ => M) (fun _ => N) ψ ≤ δ ^ 2 := by
+  have hnorm : ‖applyOperatorToState (M - N) ψ‖ ≤ δ := h
+  have heq : opDistSq (uniformDistribution Unit) (fun _ => M) (fun _ => N) ψ =
+      ‖applyOperatorToState (M - N) ψ‖ ^ 2 := by
+    rw [opDistSq_eq_opFamilyDistSq, opFamilyDistSq_uniform_unit]
+    simp
+  rw [heq]
+  nlinarith [norm_nonneg (applyOperatorToState (M - N) ψ)]
+
+end NormCloseOn
 
 /-! ## Sign observables of a projective measurement -/
 
@@ -324,23 +385,6 @@ theorem heteroKron_smul_right {ιA ιB : Type} (c : ℂ) (M : Op ιA) (N : Op ι
   unfold heteroKron
   exact Matrix.kronecker_smul c M N
 
-/-- Formalization-only: the tensor placement of two orthogonal projections is an
-orthogonal projection. -/
-private theorem isProj_heteroKron {ιA ιB : Type} [Fintype ιA] [DecidableEq ιA]
-    [Fintype ιB] [DecidableEq ιB] {A : Op ιA} {B : Op ιB}
-    (hA : IsProj A) (hB : IsProj B) : IsProj (heteroKron A B) := by
-  have hAi : A * A = A := hA.isIdempotentElem
-  have hBi : B * B = B := hB.isIdempotentElem
-  have hAs : Aᴴ = A := by
-    rw [← Matrix.star_eq_conjTranspose]; exact hA.isSelfAdjoint
-  have hBs : Bᴴ = B := by
-    rw [← Matrix.star_eq_conjTranspose]; exact hB.isSelfAdjoint
-  constructor
-  · change heteroKron A B * heteroKron A B = heteroKron A B
-    rw [heteroKron_mul, hAi, hBi]
-  · change star (heteroKron A B) = heteroKron A B
-    rw [Matrix.star_eq_conjTranspose, heteroKron_conjTranspose, hAs, hBs]
-
 /-- Formalization-only: a real spectral combination of the effects of a
 projective measurement is self-adjoint. -/
 private theorem sum_real_smul_effect_conjTranspose {α d : Type} [Fintype α]
@@ -419,7 +463,7 @@ theorem norm_apply_joint_defect_sq_le (T : Strategy G) (x : G.QuestionA)
   classical
   set J := jointMeasurement T x y with hJ
   have hJproj : MIPStarRE.QPBT.Measurement.IsProjective J := fun ab =>
-    isProj_heteroKron (hA ab.1) (hB ab.2)
+    MakingMeasurementsProjective.isProj_kronecker (hA ab.1) (hB ab.2)
   have hcollapse : (∑ a : G.AnswerA, ∑ b : G.AnswerB, ((coef a b : ℝ) : ℂ) •
       heteroKron ((T.A x).effect a) ((T.B y).effect b)) =
       ∑ ab : G.AnswerA × G.AnswerB, ((coef ab.1 ab.2 : ℝ) : ℂ) • J.effect ab := by

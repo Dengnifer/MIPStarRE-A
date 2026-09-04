@@ -1,6 +1,28 @@
+---
+title: Magic Square rigidity orientation obstruction
+date: 2026-09-04
+purpose: >
+  Records the two-copy obstruction to applying the cited one-way Magic Square
+  self-test to the symmetric game formalized for the QPBT track.
+status: held
+track: paper2001qpbt
+kind: statement-integrity-audit
+origin: "issue #104"
+issue: "#104"
+pr: "#169"
+---
+
 # Magic Square Rigidity Orientation Obstruction
 
 Date: 2026-09-04.
+
+## Status and review use
+
+**Held.** A statement correction awaits owner decision B5 on #26; no paper-gap
+note or change to `exists_ms_rigidity` is adopted by this audit.  Reviewers
+should use the argument below to reject an untracked cross-player agreement
+hypothesis or a claimed joint extraction from the current symmetric game, while
+leaving the source-facing theorem unchanged until that decision is recorded.
 
 ## At a glance
 
@@ -69,10 +91,10 @@ The unused tensor factor may be measured trivially.
 The support fact is visible directly in the definitions.  `msEdges` contains
 only the 18 constraint-variable incidence edges, while `graphDistribution`
 is uniform on all ordered endpoint pairs whose unordered pair is an edge.
-The blueprint says the same at `ch13_qpbt_test.tex:219`: the verifier sends the
-two endpoints to a uniformly random assignment of the players and there are no
-self-loops.  Although `msWinPredicate` has clauses for identical constraint or
-variable questions, those clauses have zero probability in `msGame`.
+Blueprint `def:ms-game` says the same: the verifier sends the two endpoints to a
+uniformly random assignment of the players and there are no self-loops.
+Although `msWinPredicate` has clauses for identical constraint or variable
+questions, those clauses have zero probability in `msGame`.
 
 ## Contradiction with zero-error extraction
 

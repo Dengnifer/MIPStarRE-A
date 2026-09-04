@@ -45,6 +45,28 @@ character in their statement types. -/
 noncomputable def phaseSign (t : ZMod 2) : ℂ :=
   if t = 0 then 1 else -1
 
+/-- Formalization-only expansion of a sum over the binary field into its two
+terms. -/
+theorem sum_zmod_two {M : Type*} [AddCommMonoid M] (f : ZMod 2 → M) :
+    ∑ b, f b = f 0 + f 1 := by
+  calc
+    ∑ b, f b = ∑ i : Fin 2, f (ZMod.finEquiv 2 i) := by
+      exact Fintype.sum_equiv (ZMod.finEquiv 2).symm f
+        (fun i : Fin 2 => f (ZMod.finEquiv 2 i)) (fun _ => rfl)
+    _ = f (ZMod.finEquiv 2 0) + f (ZMod.finEquiv 2 1) := Fin.sum_univ_two _
+    _ = f 0 + f 1 := by rfl
+
+/-- Formalization-only case split for the binary field: every element is zero
+or one. -/
+theorem zmod_two_eq_zero_or_one (b : ZMod 2) : b = 0 ∨ b = 1 := by
+  by_cases hb : b = 0
+  · exact Or.inl hb
+  · right
+    have hval_ne : b.val ≠ 0 := (ZMod.val_ne_zero b).mpr hb
+    have hval_lt : b.val < 2 := ZMod.val_lt b
+    have hval : b.val = 1 := by omega
+    exact (ZMod.val_eq_one (by omega) b).mp hval
+
 /-- In characteristic two, the standard additive character is the sign
 character used by the binary Pauli definitions. -/
 theorem phaseSign_eq_ffChar (t : ZMod 2) :
@@ -222,6 +244,80 @@ the second operator of `def:generalized-pauli` (blueprint lines 529-571; paper
 -/
 noncomputable def tauPhase (b : K) : Op K :=
   fun i j => if i = j then phaseSign (binTrace K (b * j)) else 0
+
+/-- The binary shift Pauli operator is Hermitian.  This is a
+formalization-only specialization of the generalized Pauli definition. -/
+theorem binaryTauShift_conjTranspose :
+    (tauShift (K := ZMod 2) 1)ᴴ = tauShift (K := ZMod 2) 1 := by
+  ext i j
+  have hiff : j = i + 1 ↔ i = j + 1 := by
+    rw [CharTwo.eq_add_iff_add_eq, eq_comm]
+  simp [tauShift, Matrix.conjTranspose_apply, hiff]
+
+/-- The binary phase Pauli operator is Hermitian.  This is a
+formalization-only specialization of the generalized Pauli definition. -/
+theorem binaryTauPhase_conjTranspose :
+    (tauPhase (K := ZMod 2) 1)ᴴ = tauPhase (K := ZMod 2) 1 := by
+  ext i j
+  rcases zmod_two_eq_zero_or_one i with rfl | rfl <;>
+    rcases zmod_two_eq_zero_or_one j with rfl | rfl <;>
+      norm_num [tauPhase, phaseSign, Matrix.conjTranspose_apply,
+        Algebra.trace_self_apply]
+
+/-- The binary shift Pauli operator is symmetric.  This formalization-only
+identity supports transport across an EPR state. -/
+theorem binaryTauShift_transpose :
+    (tauShift (K := ZMod 2) 1)ᵀ = tauShift (K := ZMod 2) 1 := by
+  ext i j
+  have hiff : j = i + 1 ↔ i = j + 1 := by
+    rw [CharTwo.eq_add_iff_add_eq, eq_comm]
+  simp [tauShift, Matrix.transpose_apply, hiff]
+
+/-- The binary phase Pauli operator is symmetric.  This formalization-only
+identity supports transport across an EPR state. -/
+theorem binaryTauPhase_transpose :
+    (tauPhase (K := ZMod 2) 1)ᵀ = tauPhase (K := ZMod 2) 1 := by
+  ext i j
+  rcases zmod_two_eq_zero_or_one i with rfl | rfl <;>
+    rcases zmod_two_eq_zero_or_one j with rfl | rfl <;>
+      norm_num [tauPhase, phaseSign, Matrix.transpose_apply,
+        Algebra.trace_self_apply]
+
+/-- The binary shift Pauli operator squares to the identity.  This is a
+formalization-only specialization of the generalized Pauli definition. -/
+theorem binaryTauShift_sq :
+    tauShift (K := ZMod 2) 1 * tauShift (K := ZMod 2) 1 = 1 := by
+  ext i j
+  simp only [Matrix.mul_apply]
+  rw [sum_zmod_two]
+  rcases zmod_two_eq_zero_or_one i with rfl | rfl <;>
+    rcases zmod_two_eq_zero_or_one j with rfl | rfl <;>
+      simp +decide [tauShift]
+
+/-- The binary phase Pauli operator squares to the identity.  This is a
+formalization-only specialization of the generalized Pauli definition. -/
+theorem binaryTauPhase_sq :
+    tauPhase (K := ZMod 2) 1 * tauPhase (K := ZMod 2) 1 = 1 := by
+  ext i j
+  simp only [Matrix.mul_apply]
+  rw [sum_zmod_two]
+  rcases zmod_two_eq_zero_or_one i with rfl | rfl <;>
+    rcases zmod_two_eq_zero_or_one j with rfl | rfl <;>
+      norm_num [tauPhase, phaseSign, Matrix.one_apply, Algebra.trace_self_apply]
+
+/-- The binary shift and phase Pauli operators anticommute.  This is a
+formalization-only specialization of their generalized definitions. -/
+theorem binaryTauShift_mul_tauPhase :
+    tauShift (K := ZMod 2) 1 * tauPhase (K := ZMod 2) 1 =
+      -(tauPhase (K := ZMod 2) 1 * tauShift (K := ZMod 2) 1) := by
+  ext i j
+  change
+    (∑ k, tauShift (K := ZMod 2) 1 i k * tauPhase (K := ZMod 2) 1 k j) =
+      -(∑ k, tauPhase (K := ZMod 2) 1 i k * tauShift (K := ZMod 2) 1 k j)
+  rw [sum_zmod_two, sum_zmod_two]
+  rcases zmod_two_eq_zero_or_one i with rfl | rfl <;>
+    rcases zmod_two_eq_zero_or_one j with rfl | rfl <;>
+      simp +decide [tauShift, tauPhase, phaseSign]
 
 /-- The single-qudit eigenvector coordinate used in the tensor-product basis;
 see `references/qpbt-paper/04_preliminaries.tex:1126-1161`. -/
