@@ -1,0 +1,133 @@
+\documentclass[11pt]{article}
+
+\usepackage{amsmath,amssymb}
+\usepackage{xurl}
+\usepackage[hidelinks]{hyperref}
+\setlength{\emergencystretch}{2em}
+
+\input{command}
+
+\newcommand{\ind}{\operatorname{ind}}
+\renewcommand{\ghissue}[1]{%
+  \href{https://github.com/Dengnifer/MIPStarRE-A/issues/#1}{GitHub issue \##1}}
+
+\title{Corrections to the Pauli-Test Winning Implications}
+\author{}
+\date{2026-09-04}
+
+\begin{document}
+\maketitle
+
+\section{At a glance}
+
+\begin{itemize}
+  \item \textbf{Difficulty.} Low to medium.  The subtest implications are
+  direct after conditioning, but the printed proof uses an invalid parameter
+  reduction and two displayed formulas contain wrong indices.
+  \item \textbf{Estimated weight.} The formal work is the family of exact and
+  approximate winning implications, roughly 300--500 lines after the sampling
+  probability results are available.
+  \item \textbf{Mathlib/project split.} About 20\% finite-probability
+  bookkeeping and 80\% project-local game predicates, post-processing, and
+  state-dependent distance transfer.
+  \item \textbf{Key mathematical inputs.} Constant lower bounds for the
+  commuting and anticommuting events, data processing, and the one-way Magic
+  Square rigidity theorem.  The proof packets are \ghissue{112} and
+  \ghissue{113}.
+\end{itemize}
+
+\section{Key theorem forms}
+
+For an admissible tuple $(q,m,d)$ and a strategy that wins the Pauli basis test
+with probability at least $1-\eps$, each subtest has conditional failure
+$O(\eps)$.  In particular, the Magic Square average is conditioned on
+\[
+  \gamma(\omega)
+  =\tr\big((r_X\ind_m(u_X))\cdot(r_Z\ind_m(u_Z))\big)\ne0,
+\]
+and the low-degree line-evaluation family is completed on zero-direction lines
+by an additional outcome.  The observable consequence is
+\[
+  X^{r_X}(u_X)Z^{r_Z}(u_Z)
+  \approx_{\sqrt\eps}
+  (-1)^{\gamma(\omega)}Z^{r_Z}(u_Z)X^{r_X}(u_X)
+\]
+on average over all tuples.  These statements hold for every admissible
+parameter tuple; no assumption $6md\leq q$ is needed.
+
+\section{The source assertions and discrepancies}
+
+The source states the measurement implications at lines~197--265 and the
+observable implications at lines~267--362 of the Pauli analysis
+\cite[lines~197--362]{Ji2020MIPStar}.%
+\footnote{See
+\path{references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex}.}
+Four corrections are required.
+
+First, the displayed conditioning event for the Magic Square average omits
+$\ind_m$ and writes the scalar expression
+$\tr((r_Xu_X)\cdot(r_Zu_Z))$, even though $u_X,u_Z\in\F_q^m$ and the phase
+used by the game is defined through vectors in $\F_q^{2^m}$.
+
+Second, the proof assumes $6md\leq q$ and disposes of the complementary range
+by appealing to the final Pauli soundness theorem, whose proof uses the lemma
+under discussion.  That appeal cannot prove the lemma as an unrestricted
+standalone result.  The corrected exact probability calculation gives
+universal lower bounds for both conditioning events whenever the parameters
+are admissible, and removes this circular reduction.%
+\footnote{The probability correction is documented separately in
+\path{docs/paper-gaps/qpbt_anticommuting-probability.tex}.}
+
+Third, the source treats evaluation classes of a line measurement as a POVM
+indexed by $\F_q$.  A zero-direction line admits nonconstant polynomial
+representatives with no well-defined value on its singleton image, so these
+classes form only a sub-measurement.  Adding an outcome $\bot$ for the missing
+mass makes the consistency relation well typed; the point family is completed
+by a zero effect at the same outcome.
+
+Finally, the observable proof writes
+$Z^{r_X}(u_X)X^{r_Z}(u_Z)$ where the intended reversed product is
+$Z^{r_Z}(u_Z)X^{r_X}(u_X)$.  The source label prefix
+\path{len:qld-win-implications-obs} is likewise a typographical error for
+\path{lem:qld-win-implications-obs}.
+
+\section{The corrected argument}
+
+Every question type and every relevant subtest has a universal positive
+sampling weight.  For admissible parameters, $1\leq m\leq q$, and the exact
+calculation of the anticommuting probability gives probability at least
+$2^{-4}$ for the anticommuting event and at least $1/2$ for its complement.
+Conditioning therefore enlarges rejection probabilities only by a universal
+factor.  The measurement implications follow directly from their rejection
+events, including the completed zero-direction outcome.  Data processing and
+the agreement identities yield the observable relations; the corrected Magic
+Square phase and reversed product then give the displayed signed commutation
+law.
+
+\section{Blueprint and formalization status}
+
+The blueprint uses the full phase $\gamma$, completes the line-evaluation
+families, proves the conditioning step with the universal probability bounds,
+and corrects the reversed product and label.  Its proof and correction remark
+cite this note.  The linked formal declarations use the same conditional
+distributions and completed line outcomes, so their statements agree with the
+corrected blueprint.  Their proofs remain open in the current tree.%
+\footnote{The relevant declarations are \leanid{win\_cons},
+\leanid{win\_low\_degree}, \leanid{win\_pauli\_basis\_cons},
+\leanid{win\_comm}, \leanid{win\_comm\_cons},
+\leanid{win\_magic\_square}, \leanid{win\_ms\_cons}, and their
+\path{\_approx} companions in
+\doclink{MIPStarRE/QPBT/Observables/WinImplications.lean}.}
+
+\section{Conclusion}
+
+The winning implications remain valid for all admissible parameters, but the
+printed proof does not establish that scope and several formulas need local
+correction.  Exact conditioning probabilities, the explicit missing outcome,
+and the corrected phase and operator indices give the form used by the Pauli
+basis analysis.
+
+\bibliographystyle{alpha}
+\bibliography{references}
+
+\end{document}
