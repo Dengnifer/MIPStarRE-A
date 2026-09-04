@@ -3,6 +3,8 @@ import MIPStarRE.QPBT.Test.MagicSquareTheorems.Basic
 import MIPStarRE.QPBT.Test.MagicSquareTheorems.PerfectStrategy
 import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.Relations
 import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.Dilation
+import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.Transfer
+import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.AnticommutatorB
 
 /-!
 # Magic Square rigidity
