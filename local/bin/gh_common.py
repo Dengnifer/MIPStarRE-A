@@ -248,12 +248,16 @@ def post_review(number: int, commit_id: str, marker: str, body: str) -> str:
     review on the same commit is updated in place.  Returns the review id.
     """
     full = _marked_body(marker, body)
-    for row in api(f"pulls/{number}/reviews", paginate=True):
-        if row.get("commit_id") == commit_id and marker in (row.get("body") or ""):
-            review_id = str(row["id"])
-            api(f"pulls/{number}/reviews/{review_id}", method="PUT",
-                payload={"body": full}, mutation=True, idempotent=True)
-            return review_id
+    # If a retry ever left two marker reviews on one head, the NEWEST is the
+    # operative one for every reader (pr_merge.py check_review, autofix.sh,
+    # review.sh); update that row, never an older duplicate (PR 42, F1).
+    matching = [row for row in api(f"pulls/{number}/reviews", paginate=True)
+                if row.get("commit_id") == commit_id and marker in (row.get("body") or "")]
+    if matching:
+        review_id = str(matching[-1]["id"])
+        api(f"pulls/{number}/reviews/{review_id}", method="PUT",
+            payload={"body": full}, mutation=True, idempotent=True)
+        return review_id
     payload = {"commit_id": commit_id, "event": "COMMENT",
                "body": full}
     try:

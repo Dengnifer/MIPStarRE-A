@@ -242,6 +242,15 @@ class GitHubLayerTests(LayerTestCase):
             updated = self.gh.payloads("PUT", r"^pulls/7/reviews/5$")
             self.assertEqual(updated, [{"body": marker + "\nagain"}])
             self.assertEqual(self.gh.payloads("POST", r"^pulls/7/reviews"), [])
+        with self.subTest("two same-head marker reviews -> the newest is updated"):
+            self.gh.reset()
+            self.gh.route(r"^pulls/7/reviews",
+                          [{"id": 5, "commit_id": HEAD, "body": marker + "\nVERDICT: APPROVED"},
+                           {"id": 9, "commit_id": HEAD, "body": marker + "\nVERDICT: COMMENTED"}])
+            self.gh.route(r"^pulls/7/reviews/9$", {"id": 9}, method="PUT")
+            self.assertEqual(gh_common.post_review(7, HEAD, marker, "again"), "9")
+            self.assertEqual(self.gh.payloads("PUT", r"^pulls/7/reviews/9$"), [{"body": marker + "\nagain"}])
+            self.assertEqual(self.gh.payloads("PUT", r"^pulls/7/reviews/5$"), [])
         with self.subTest("absent -> one COMMENT review bound to the commit"):
             self.gh.reset()
             # A review of an earlier head must not satisfy the marker check.
