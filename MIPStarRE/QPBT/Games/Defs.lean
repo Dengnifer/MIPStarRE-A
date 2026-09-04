@@ -135,6 +135,22 @@ theorem heteroKron_one_one {ιA ιB : Type*} [DecidableEq ιA] [DecidableEq ιB]
   unfold heteroKron Matrix.kronecker
   exact Matrix.one_kronecker_one
 
+/-- Formalization-only auxiliary lemma for `def:tensor-product-strategy`
+(blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:61-69`): tensor placement
+respects negation in the left factor. -/
+theorem heteroKron_neg_left {ιA ιB : Type*} (A : Op ιA) (C : Op ιB) :
+    heteroKron (-A) C = -heteroKron A C := by
+  ext p q
+  simp [heteroKron, Matrix.kronecker]
+
+/-- Formalization-only auxiliary lemma for `def:tensor-product-strategy`
+(blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:61-69`): tensor placement
+respects negation in the right factor. -/
+theorem heteroKron_neg_right {ιA ιB : Type*} (A : Op ιA) (C : Op ιB) :
+    heteroKron A (-C) = -heteroKron A C := by
+  ext p q
+  simp [heteroKron, Matrix.kronecker]
+
 /- The Euclidean linear map is the shared action used by the value and distance
 functionals.  Keeping it at the Euclidean-space level avoids accidentally
 using the function-space supremum norm of `Matrix.mulVec`. -/

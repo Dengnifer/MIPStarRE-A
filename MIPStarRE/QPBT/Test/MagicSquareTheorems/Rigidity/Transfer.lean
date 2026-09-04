@@ -590,12 +590,6 @@ theorem applyOperatorToState_neg_op {ι : Type*} [Fintype ι] [DecidableEq ι]
     applyOperatorToState (-M) v = -applyOperatorToState M v := by
   simp [applyOperatorToState]
 
-/-- Tensor placement respects negation in the left factor. -/
-theorem heteroKron_neg_left {ιA ιB : Type*} (A : Op ιA) (C : Op ιB) :
-    heteroKron (-A) C = -heteroKron A C := by
-  ext p q
-  simp [heteroKron, Matrix.kronecker]
-
 /-- The one-outcome distance under the one-point uniform distribution. -/
 theorem opDistSq_uniform_unit {ι : Type*} [Fintype ι] [DecidableEq ι]
     (M N : Unit → Op ι) (ψ : EuclideanSpace ℂ ι) :

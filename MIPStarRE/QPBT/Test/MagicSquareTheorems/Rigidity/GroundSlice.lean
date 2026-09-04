@@ -24,6 +24,11 @@ the calculus needed to compare the dilated projective strategy of
   replaces the `≈_δ`-preservation which Naimark dilation lacks in general
   (`references/ldt-paper/orthonormalization.tex:82-101`, blueprint
   `ch04_projective.tex:255-270`).
+
+## References
+
+`thm:ms-rigidity`, blueprint `blueprint/src/chapter/ch13_qpbt_test.tex:224-253`,
+paper `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652`.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder

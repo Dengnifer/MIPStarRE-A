@@ -340,18 +340,6 @@ private theorem heteroKron_neg_neg
   ext i j
   simp [heteroKron]
 
-private theorem heteroKron_neg_left
-    {V W : Type*} (A : Op V) (B : Op W) :
-    heteroKron (-A) B = -heteroKron A B := by
-  ext i j
-  simp [heteroKron]
-
-private theorem heteroKron_neg_right
-    {V W : Type*} (A : Op V) (B : Op W) :
-    heteroKron A (-B) = -heteroKron A B := by
-  ext i j
-  simp [heteroKron]
-
 private theorem anti_mul_sq
     {V : Type*} [Fintype V] [DecidableEq V]
     (A B : Op V) (hA : A * A = 1) (hB : B * B = 1)

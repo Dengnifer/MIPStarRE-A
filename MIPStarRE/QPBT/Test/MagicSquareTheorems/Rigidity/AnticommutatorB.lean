@@ -7,9 +7,12 @@ The right-placed counterpart of the Alice-side anticommutator transfer in
 `Rigidity/Transfer.lean`: Bob's dilated observables leak out of the ground
 slice by at most the forward cell-consistency defects, and the product of the
 compressed observables is compared with the product of the dilated ones on the
-dilated state through Alice's partner observable.  Blueprint
-`blueprint/src/chapter/ch13_qpbt_test.tex:224-253`, paper
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652`.
+dilated state through Alice's partner observable.
+
+## References
+
+`thm:ms-rigidity`, blueprint `blueprint/src/chapter/ch13_qpbt_test.tex:224-253`,
+paper `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652`.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder
@@ -20,12 +23,6 @@ open MIPStarRE.LDT hiding Measurement
 open MIPStarRE.Quantum MIPStarRE.QPBT.DistanceCalculus
 
 noncomputable section
-
-/-- Tensor placement respects negation in the right factor. -/
-theorem heteroKron_neg_right {ιA ιB : Type*} (A : Op ιA) (C : Op ιB) :
-    heteroKron A (-C) = -heteroKron A C := by
-  ext p q
-  simp [heteroKron, Matrix.kronecker]
 
 /-- The norm of a difference acting on a state is symmetric. -/
 theorem norm_applyOperatorToState_sub_comm {ι : Type*} [Fintype ι] [DecidableEq ι]
