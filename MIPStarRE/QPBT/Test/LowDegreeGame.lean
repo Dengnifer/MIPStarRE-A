@@ -45,6 +45,11 @@ structure LdParams where
   hq : IsAdmissibleSize q
   hdvd : m ∣ q
 
+/-- The positive dimension in `LdParams` supplies the finite coordinate type
+used by the uniform axis and prefix-index marginals. -/
+instance (L : LdParams) : Nonempty (Fin L.m) :=
+  ⟨⟨0, lt_of_lt_of_le Nat.zero_lt_one L.hm⟩⟩
+
 /-- The fixed model accessor for an `LdParams` record.  It is a compatibility
 view of the global `fixedFieldModel` selector, not an independently quantified
 parameter.  Blueprint `ch13_qpbt_test.tex:17-31`; paper origin
