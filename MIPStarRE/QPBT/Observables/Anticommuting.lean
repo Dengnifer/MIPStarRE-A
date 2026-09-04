@@ -404,9 +404,11 @@ theorem anticommProb_eq (P : AdmissibleParams) :
   field_simp
   ring
 
-/-- The commuting probability is the complement of the anticommuting
-probability. Blueprint `ch14_qpbt_observables.tex:151-178`. -/
-private theorem commProb_eq_one_sub (P : AdmissibleParams) :
+/-- A tuple is commuting with the probability complementary to the
+anticommuting one. This is the complementarity clause of
+`fact:omega-anticomm-prob`, blueprint `ch14_qpbt_observables.tex:151-178`,
+paper `14_analysis_of_the_pauli_basis_test.tex:70-77`. -/
+theorem commProb_eq_one_sub_anticommProb (P : AdmissibleParams) :
     commProb P = 1 - anticommProb P := by
   have hpos : (0 : ℝ) < (Fintype.card (PauliTuple P) : ℝ) := by
     exact_mod_cast card_pauliTuple_pos P
@@ -437,7 +439,7 @@ complementary bound in `fact:omega-anticomm-prob`, blueprint
 theorem commProb_ge_half (P : AdmissibleParams) : 1 / 2 ≤ commProb P := by
   obtain ⟨h0, h1⟩ := base_mem_unit_interval P
   have hle : (1 - (P.q : ℝ)⁻¹) ^ (P.m + 1) ≤ 1 := pow_le_one₀ h0 h1
-  rw [commProb_eq_one_sub, anticommProb_eq]
+  rw [commProb_eq_one_sub_anticommProb, anticommProb_eq]
   linarith
 
 /-- When `m ≤ q`, the anticommuting event has the uniform constant lower
@@ -633,7 +635,7 @@ theorem commTupleDist_isProbability (P : AdmissibleParams) :
     (commTupleDist P).IsProbability := by
   refine Distribution.uniformOnFinset_isProbability _ ⟨0, ?_⟩
   refine Finset.mem_filter.mpr ⟨Finset.mem_univ _, ?_⟩
-  show gammaValue P 0 0 0 0 = 0
+  change gammaValue P 0 0 0 0 = 0
   rw [gammaValue_eq_trace_prod]
   simp [fixedBinTrace, binTrace]
 
