@@ -1,0 +1,10 @@
+{"type":"thread.started","thread_id":"01a061af-6a84-7cd1-95d9-60fa60c3072c"}
+{"type":"item.completed","item":{"id":"item_0","type":"error","message":"Model metadata for `gpt-5` not found. Defaulting to fallback metadata; this can degrade performance and cause issues."}}
+{"type":"turn.started"}
+{"type":"error","message":"Reconnecting... 1/5 (unexpected status 404 Not Found: Model \"gpt-5\" is not supported by any configured account in this group, url: https://api.finite-dimensional.space/responses, request id: 30754393-24ad-406c-bf96-b86929705f36)"}
+{"type":"error","message":"Reconnecting... 2/5 (unexpected status 404 Not Found: Model \"gpt-5\" is not supported by any configured account in this group, url: https://api.finite-dimensional.space/responses, request id: 4ee68d1a-0fc3-4a8c-8172-385b13028f33)"}
+{"type":"error","message":"Reconnecting... 3/5 (unexpected status 404 Not Found: Model \"gpt-5\" is not supported by any configured account in this group, url: https://api.finite-dimensional.space/responses, request id: 58137700-ec67-461f-a701-54775b11363e)"}
+{"type":"error","message":"Reconnecting... 4/5 (unexpected status 404 Not Found: Model \"gpt-5\" is not supported by any configured account in this group, url: https://api.finite-dimensional.space/responses, request id: 30fa729a-3666-4568-a352-83054fb18ed6)"}
+{"type":"error","message":"Reconnecting... 5/5 (unexpected status 404 Not Found: Model \"gpt-5\" is not supported by any configured account in this group, url: https://api.finite-dimensional.space/responses, request id: b4065e98-9c7b-4f55-9c23-f3b1a5d35530)"}
+{"type":"error","message":"unexpected status 404 Not Found: Model \"gpt-5\" is not supported by any configured account in this group, url: https://api.finite-dimensional.space/responses, request id: f4765e81-bc0b-431f-a61f-78f802e0ab43"}
+{"type":"turn.failed","error":{"message":"unexpected status 404 Not Found: Model \"gpt-5\" is not supported by any configured account in this group, url: https://api.finite-dimensional.space/responses, request id: f4765e81-bc0b-431f-a61f-78f802e0ab43"}}
