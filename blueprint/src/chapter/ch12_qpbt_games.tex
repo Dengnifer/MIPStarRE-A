@@ -115,7 +115,6 @@ We often specify symmetric games $\mathfrak G$ and symmetric strategies $\mathca
 % establishes and leaves the final attainment step unproved; see rem:symmetric-strat-limit.
 \begin{lemma}[Symmetrization of strategies for symmetric games]\label{lem:symmetric-strat}
 	\lean{MIPStarRE.QPBT.exists_symmetric_projective_strategy}
-	\leanok
 	\uses{def:symmetric-game, def:tensor-product-value, def:projective-strategy-general}
 	Let $\mathfrak G = (\mathcal X, \mathcal A, \mu, D)$ be a symmetric game such that $\operatorname{val}^*(\mathfrak G) = 1-\eps$ for some $\eps \ge 0$. Then there exists a symmetric and projective strategy $\mathcal S = (\ket{\psi}, M)$ such that $\operatorname{val}^*(\mathfrak G, \mathcal S) \ge 1-\eps$.
 \end{lemma}
