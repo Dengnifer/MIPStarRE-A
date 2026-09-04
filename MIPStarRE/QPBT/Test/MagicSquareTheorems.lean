@@ -16,7 +16,7 @@ retaining the imported rigidity theorem and its supporting definitions.
 ## References
 
 The source statement is `thm:ms-rigidity` in
-`blueprint/src/chapter/ch13_qpbt_test.tex:228-250`, from
+`blueprint/src/chapter/ch13_qpbt_test.tex:228-259`, from
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652`.
 
 The variable indices below are zero-based: indices 0 and 4 represent the
@@ -111,12 +111,29 @@ noncomputable def msAnticommutatorDistanceB (S : Strategy msGame)
     (fun _ => -(Z * X)) (idealMsState w.aux)
 
 /-- `thm:ms-rigidity`, imported from Coladangelo--Stark, Theorem 6.9.
-Blueprint `ch13_qpbt_test.tex:228-250`, paper
+Blueprint `ch13_qpbt_test.tex:228-259`, paper
 `08_classical_and_quantum_low_degree_tests.tex:612-652`.
 
 The paper states the Euclidean estimate at scale `sqrt ε` at lines 624--626
 and explains the norm conversion and local basis change at lines 650--652. One
-universal constant applies to every strategy and nonnegative error parameter. -/
+universal constant applies to every strategy and nonnegative error parameter.
+
+**Known false as stated.** This is the paper's statement, and it has a
+counterexample. Its conclusion forces the two players' variable-0 and
+variable-4 measurements to agree on the shared state, while `msGame` samples
+only constraint-variable pairs and never sends the same question to both
+players. A perfect strategy that answers the two orientations of each sampled
+edge on two independent copies of two EPR pairs violates the conclusion at
+`ε = 0`, and so does its player-role symmetrization, which is a symmetric
+strategy of value 1; restricting to `SymmetricStrategy msGameSymm` therefore
+does not repair the statement, and the hypothesis that removes the obstruction
+is consistency of the strategy on its state. The counterexamples and the
+candidate correction are in
+`docs/paper-gaps/qpbt_ms-rigidity-symmetric-strategies.tex`, and the blueprint
+records them in `ch13_qpbt_test.tex:251-259`; the refutation is issue #105 and
+the statement-level decision is item B4 on issue #26, tracked by issue #172.
+The `sorry` below cannot be discharged while the statement stands, and no
+result should be derived from this theorem. -/
 theorem exists_ms_rigidity :
     ∃ C : ℝ, 1 ≤ C ∧ ∀ (ε : ℝ), 0 ≤ ε →
       ∀ S : Strategy msGame, 1 - ε ≤ S.value →
