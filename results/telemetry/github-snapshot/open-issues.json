@@ -1203,127 +1203,6 @@
   "pinned_comment": null
  },
  {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/66",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/66/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/66/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/66/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/66",
-  "id": 5341060134,
-  "node_id": "I_kwDOUJyJf88AAAABPlocJg",
-  "number": 66,
-  "title": "feat(QPBT/Algebra): prove self-dual coordinate identities",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement"
-   },
-   {
-    "id": 12025012183,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8f1w",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/qpbt-analysis",
-    "name": "qpbt-analysis",
-    "color": "ededed",
-    "default": false,
-    "description": "Soundness/rigidity analysis of the Pauli basis test \u2014 self-testing bounds and error terms"
-   },
-   {
-    "id": 12025012384,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8goA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/proof",
-    "name": "proof",
-    "color": "ededed",
-    "default": false,
-    "description": "Issue is primarily about proving an existing result"
-   },
-   {
-    "id": 12025012779,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8iKw",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/sorry-elimination",
-    "name": "sorry-elimination",
-    "color": "ededed",
-    "default": false,
-    "description": "Explicitly aimed at discharging remaining `sorry` sites"
-   },
-   {
-    "id": 12025013584,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8lUA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/paper-2001.04383",
-    "name": "paper-2001.04383",
-    "color": "ededed",
-    "default": false,
-    "description": "MIP*=RE (arXiv:2001.04383) \u2014 the primary paper of this track"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 1,
-  "created_at": "2026-09-03T20:16:57Z",
-  "updated_at": "2026-09-03T20:52:50Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 0,
-   "blocking": 0,
-   "total_blocking": 0
-  },
-  "body": "<!-- mipstarre-issue-key: stage43-self-dual-coordinate-identities -->\n### Motivation\n\nStage 4.3 needs the exact finite-field coordinate identities used throughout the\nPauli/Fourier algebra and later extraction argument. The statements are already\nsource-aligned; this packet proves the eleven remaining obligations in\n`MIPStarRE/QPBT/Algebra/SelfDualBasisTheorems.lean` without changing their\ninterfaces.\n\n### Target declarations\n\n1. `basisCoord_apply_eq_trace`\n2. `trace_mul_eq_dotProduct_basisCoord`\n3. `trace_basis_eq_one_of_selfDual_normal`\n4. `basisCoord_one_of_selfDual_normal`\n5. `fixedFieldModel_trace_basis_eq_one`\n6. `fixedFieldModel_basisCoord_one`\n7. `basisCoord_apply_eq_fixedBinTrace`\n8. `kappa_apply_eq_binTrace`\n9. `binTrace_mul_eq_dotProduct`\n10. `chi_mulVec_basisCoord`\n11. `fixedFieldModel_chi_mulVec_basisCoord`\n\nKeep the already-proved wrapper `chi_mulVec_kappa` unchanged and verify that it\nbecomes axiom-clean through `fixedFieldModel_chi_mulVec_basisCoord`.\n\n### Sources\n\n- Coordinate/trace identities and matrix compatibility:\n  `references/qpbt-paper/04_preliminaries.tex:504-550`, lemma\n  `lem:downsize_field`.\n- Trace-one and all-ones-coordinate identities:\n  `references/qpbt-paper/04_preliminaries.tex:730-767`, lemma `lem:one`.\n- Basis, coordinate-map, and multiplication-table definitions:\n  `references/qpbt-paper/04_preliminaries.tex:433-502,669-700`.\n- Blueprint: `blueprint/src/chapter/ch11_qpbt_algebra.tex:241-311`.\n\n### Dependencies and proof order\n\nThis packet depends only on the existing `FieldBasis` and `SelfDualBasis` API.\nIt does not depend on the proofs in #65 and may run in parallel with them.\n\nFirst prove `basisCoord_apply_eq_trace` from self-duality and Mathlib's trace\nmatrix identity. Derive `trace_mul_eq_dotProduct_basisCoord` by expanding one\nfactor in the basis and using trace linearity.\n\nNext prove that trace is invariant under the binary Frobenius automorphism.\nNormality then makes the traces of all basis elements equal. Show the common\nvalue is nonzero using self-duality and basis-coordinate injectivity, conclude\nthat it is one in `ZMod 2`, and derive the fixed-model wrappers.\n\nIndependently, prove `chi_mulVec_basisCoord` by extensionality on the\n`(row, basis-coordinate)` index, splitting the product-indexed matrix sum, and\nusing basis reconstruction for each vector entry. Then obtain the fixed-model\nspecialization definitionally.\n\nFinish the `fixedBinTrace`, `binTrace`, and `kappa` spellings from the generic\ncoordinate and trace identities. A minimal finite-field Frobenius/trace import\nis permitted if not already available transitively.\n\n### Statement integrity\n\nPreserve every public signature, constant, index order, and quantifier order.\nDo not add finite-dimensionality, separability, cardinality, nonemptiness, or\nnormality hypotheses; derive required finite/free instances locally.\n\nItems 1 and 2 require self-duality. `chi_mulVec_basisCoord` deliberately does\nnot; do not add it there. Retain `hk : Odd k` on the two `lem:one` results.\nFor `chi_mulVec_basisCoord`, preserve block ordering `(matrix row, basis\ncoordinate)` and `(matrix column, basis coordinate)`.\n\nDo not use unresolved existence or `binaryCoordinates_mul` proofs as shortcuts.\nAll eleven targets and `chi_mulVec_kappa` must have no transitive `sorryAx`.\n\n### Ownership and non-goals\n\n- Own only `MIPStarRE/QPBT/Algebra/SelfDualBasisTheorems.lean`.\n- Keep support lemmas private or file-local.\n- Do not edit `SelfDualBasis.lean`, `FieldBasis.lean`, Pauli algebra, field-model\n  construction, blueprint files, or downstream observables.\n- Do not prove `exists_selfDualNormalBasis`, `exists_fixed_field_model`, or\n  `binaryCoordinates_mul`.\n\n### Acceptance\n\n- All eleven targets contain no `sorry`, `admit`, axiom, or prohibited bypass.\n- The owned file has no remaining proof holes.\n- `#print axioms` for every target and `chi_mulVec_kappa` reports no `sorryAx`.\n- The statement-integrity audit classifies the generic source results and the\n  definition-preserving fixed-model specializations explicitly.\n- The owned file passes direct Lean checking.\n- Blueprint status/axiom audits, declaration checking/rendering, the full build,\n  diff check, exact-head CI, and independent review pass.\n\n---\nStage 4.3 proof packet under #47.\n",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/66/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/66/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/65",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/65/labels{/name}",
@@ -2273,8 +2152,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 19,
-   "completed": 4,
-   "percent_completed": 21
+   "completed": 5,
+   "percent_completed": 26
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/1",
   "issue_dependencies_summary": {
