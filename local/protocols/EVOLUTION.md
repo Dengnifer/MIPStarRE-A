@@ -491,3 +491,30 @@ Regression tests exercise both kinds of merge; ordinary commits are unchanged.
 **Expected effect:** fresh-base merges do not need the owner override solely for
 inherited main content; the budget keeps binding the PR's own changes, and the
 review reads the PR diff.
+
+## 2026-09-04 — Packet tree under #47; prerequisites become issue dependencies
+
+**Trigger:** owner decision on #159 (2026-09-04, after studying
+LionSR/MIPStarRE#449), and `results/telemetry/owner-log.md` 2026-09-04 07:25Z
+and 08:35Z, where lane order was carried by hand against tables kept in
+comments on #47 — "#125 (operator BLR, stacked on #124)", "Opus prover pilot
+started on #102 (stacked on #101)" — while #47 itself had grown to 50 flat
+sub-issues (19 closed) and two open packets (#146, #156) had no parent at all.
+
+**Change:** (1) five chapter trackers (#163 games, #164 test, #165 observables,
+#166 combining, #167 extraction) are now the open sub-issues of #47, and the 35
+packets #63, #77, #97-#135, #146 and #156 are re-parented under exactly one of
+them (#77 keeps its rigidity chain #101-#105); the #47 body is an index over
+the trackers, and the closed foundation packets stay its direct children.
+(2) Every open packet's prose prerequisites are transcribed into `blocked_by`
+issue dependencies (69 edges) and the bullets are demoted to commentary by a
+line in the body itself. (3) `local/bin/ready_packets.py` walks that tree and
+prints the open leaves whose blockers are all closed (`--all`, `--json`,
+`--root`), covered by `scripts/tests/test_ready_packets.py` against a fake API.
+(4) `issues-prs.md` §1 makes the edges normative and names the script as the
+launch list; `local/README.md` documents the command.
+
+**Expected effect:** the operator launches from a computed list instead of
+re-reading a comment; a merged packet unblocks its dependents with no edit
+anywhere; an unparented packet shows as a gap in the tree instead of being
+lost in a flat list of fifty.
