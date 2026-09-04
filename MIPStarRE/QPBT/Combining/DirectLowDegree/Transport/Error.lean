@@ -1,4 +1,4 @@
-import MIPStarRE.QPBT.Combining.DirectLowDegree.Soundness
+import MIPStarRE.QPBT.Combining.DirectLowDegree.Game
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Correspondence
 import MIPStarRE.QPBT.Games.DistanceTheorems.Support
 import MIPStarRE.LDT.Test.MainTheorem.ScalarBounds.EnvelopeBounds
