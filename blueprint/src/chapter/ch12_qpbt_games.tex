@@ -244,7 +244,6 @@ We record several useful facts about the consistency measure and the state-depen
 
 \begin{lemma}[Consistency versus closeness; Facts 4.13 and 4.14 in \cite{Natarajan2018NEEXP}]\label{fact:agreement}
 	\lean{MIPStarRE.QPBT.opFamilyDistSq_le_two_mul_consistencyDefect, MIPStarRE.QPBT.consistencyDefect_le_opFamilyDistSq_of_projective, MIPStarRE.QPBT.consistencyDefect_le_sqrt_of_projective_left}
-	\leanok
 	\uses{def:consistency, def:povm-distance}
 	For POVMs $\{A^x_a\}$ and $\{B^x_a\}$, the following hold.
 	\begin{enumerate}
@@ -254,6 +253,10 @@ We record several useful facts about the consistency measure and the state-depen
 	\end{enumerate}
 \end{lemma}
 \begin{proof}
+	\uses{lem:distance-consistency-term,
+		lem:distance-point-distance-le-defect,
+		lem:distance-projective-point-distance, lem:distance-nonnegative,
+		lem:distance-projective-left-square-root}
 	Stated in the source without proof; these are Facts 4.13 and 4.14 of \cite{Natarajan2018NEEXP}. For the first item, expand each term $\lVert (A^x_a \ot \Id - \Id \ot B^x_a)\ket{\psi} \rVert^2$ and use $ (A^x_a)^2 \le A^x_a$, $(B^x_a)^2 \le B^x_a$ together with completeness of the two POVMs: summing over $a$ and averaging over $x$ bounds the total by at most twice the off-diagonal mass, which is $O(\delta)$ by hypothesis. When both families are projective the two operator inequalities hold with equality, so the expansion equals exactly twice the off-diagonal mass; reading this identity in the other direction gives the second item. For the third item, write the off-diagonal mass $\sum_{a \ne b} \bra{\psi} A^x_a \ot B^x_b \ket{\psi}$ as an inner product involving $(A^x_a \ot \Id - \Id \ot B^x_a)\ket{\psi}$, using projectivity of one of the two families, and apply the Cauchy--Schwarz inequality; this route costs a square root in the error.
 \end{proof}
 
@@ -264,6 +267,8 @@ We record several useful facts about the consistency measure and the state-depen
 	Let $\mathcal A, \mathcal B, \mathcal C$ be finite sets, and let $\mu$ be a distribution over question pairs $(x,y)$. Let $\{A^x_{a,\,b}\}$ and $\{B^x_{a,\,b}\}$ be operators whose outcomes range over the product set $\mathcal A \times \mathcal B$. Suppose a set of operators $\{C^y_{a,\,c}\}$, whose outcomes range over the product set $\mathcal A \times \mathcal C$, satisfies the condition $\sum_c (C^y_{a,\,c})^\dagger C^y_{a,\,c} \le \Id$ for all $a$ and all $y$. If $A^x_{a,\,b} \approx_\delta B^x_{a,\,b}$ on average over $x$ sampled from the corresponding marginal of the distribution $\mu$, then $C^y_{a,\,c} A^x_{a,\,b} \approx_\delta C^y_{a,\,c} B^x_{a,\,b}$ on average over $(x,y)$ sampled from $\mu$.
 \end{lemma}
 \begin{proof}
+	\leanok
+	\uses{lem:distance-sum-contraction}
 	Fix questions $x, y$ and answers $a \in \mathcal A$, $b \in \mathcal B$. Then
 	\begin{align*}
 		\sum_c \bigl\lVert (C^y_{a,\,c} A^x_{a,\,b} - C^y_{a,\,c} B^x_{a,\,b})\, \ket{\psi} \bigr\rVert^2
@@ -280,6 +285,8 @@ We record several useful facts about the consistency measure and the state-depen
 	Let $\mathcal X, \mathcal A$ be finite sets, and let $\mathcal G$ be a set of functions $g \colon \mathcal X \to \mathcal A$. Let $\{A^x_a\}$ and $\{B^x_a\}$ be POVMs indexed by $\mathcal X$ with outcomes in $\mathcal A$. Let $\{S^x_g\}_{x \in \mathcal X,\, g \in \mathcal G}$ be a set of operators such that for all $x \in \mathcal X$, $\sum_g (S^x_g)^\dagger S^x_g \le \Id$. If $A^x_a \approx_\delta B^x_a$ on average over $x$, then $S^x_g A^x_{g(x)} \approx_\delta S^x_g B^x_{g(x)}$.
 \end{lemma}
 \begin{proof}
+	\leanok
+	\uses{lem:distance-function-indexed-contraction}
 	Expand the left-hand side and group the sum over $g$ according to the value $a = g(x)$:
 	\[
 		\E_x \sum_g \bigl\lVert S^x_g (A^x_{g(x)} - B^x_{g(x)})\, \ket{\psi} \bigr\rVert^2
@@ -301,6 +308,9 @@ We record several useful facts about the consistency measure and the state-depen
 	\]
 \end{lemma}
 \begin{proof}
+	\leanok
+	\uses{lem:distance-projective-orthogonality,
+		lem:distance-projective-sum}
 	By projectivity, $\sum_{a \in S} (A^x_a - A^x_a B^x_a) = \sum_{a \in S} A^x_a (A^x_a - B^x_a)$. Expanding the squared norm of the corresponding vector, the cross terms for distinct $a \ne a' \in S$ vanish because $A^x_a A^x_{a'} = 0$, so
 	\begin{align*}
 		\E_x \Bigl\lVert \sum_{a \in S} \bigl(A^x_a - A^x_a B^x_a\bigr) \ket{\psi} \Bigr\rVert^2
@@ -320,6 +330,7 @@ We record several useful facts about the consistency measure and the state-depen
 	If $A^x_a \approx_\delta B^x_a$ and $B^x_a \approx_{\eps} C^x_a$, then $A^x_a \approx_{\delta+\eps} C^x_a$.
 \end{lemma}
 \begin{proof}
+	\leanok
 	\uses{def:povm-distance}
 	Stated in the source without proof; it is Fact 4.28 of \cite{Natarajan2018NEEXP}. For every $x$ and $a$, $\lVert (A^x_a - C^x_a)\ket{\psi} \rVert^2 \le 2\lVert (A^x_a - B^x_a)\ket{\psi} \rVert^2 + 2\lVert (B^x_a - C^x_a)\ket{\psi} \rVert^2$. Averaging over $x$ and summing over $a$ gives the claim; the factor $2$ is absorbed by the $O(\cdot)$ in Definition~\ref{def:povm-distance}.
 \end{proof}
@@ -334,7 +345,9 @@ We record several useful facts about the consistency measure and the state-depen
 	\]
 \end{lemma}
 \begin{proof}
-	\uses{fact:agreement}
+	\leanok
+	\uses{fact:agreement, fact:triangle, lem:distance-overlap-gap,
+		lem:distance-defect-overlap, lem:distance-symmetry}
 	Stated in the source without proof; it is Proposition 4.29 of \cite{Ji2020LowIndividualDegree}. The two hypotheses involving $C$ convert, via Lemma~\ref{fact:agreement}, into state-dependent closeness of $C^x_a \ot \Id_B$ to both $\Id_A \ot B^x_a$ and $\Id_A \ot D^x_a$, hence of $\Id_A \ot B^x_a$ to $\Id_A \ot D^x_a$ at cost $O(\delta+\gamma)$. The first consistency then transfers from $B$ to $D$ by expanding the off-diagonal mass and applying the Cauchy--Schwarz inequality, which turns the squared-distance bound into the term $2\sqrt{\delta+\gamma}$.
 \end{proof}
 
@@ -348,6 +361,13 @@ We record several useful facts about the consistency measure and the state-depen
 	\]
 \end{lemma}
 \begin{proof}
+	\leanok
+	\uses{def:distance-state-quadratic-form,
+		lem:distance-consistency-term, lem:distance-point-defect,
+		def:distance-left-placed-measurement,
+		def:distance-right-placed-measurement,
+		lem:distance-placed-product-qform,
+		lem:distance-postprocess-overlap}
 	Stated in the source without proof; it is Fact 4.26 of \cite{Natarajan2018NEEXP}. Every off-diagonal pair $(b, b')$ with $b \ne b'$ of the post-processed families pulls back to pairs $(a, a')$ with $f(a) = b \ne b' = f(a')$, and in particular $a \ne a'$. Coarse-graining therefore only merges terms of the off-diagonal sum, so the post-processed off-diagonal mass is at most the original one.
 \end{proof}
 
@@ -368,7 +388,16 @@ The state-dependent distance is the right tool for reasoning about the closeness
 	\]
 \end{lemma}
 \begin{proof}
-	\uses{fact:add-a-proj, fact:triangle}
+	\leanok
+	\uses{fact:add-a-proj, fact:triangle,
+		lem:distance-left-fiber-contraction,
+		lem:distance-right-fiber-contraction,
+		lem:distance-joint-marginal-product,
+		lem:distance-joint-marginal-product-rev,
+		lem:distance-opposite-placements-commute, lem:distance-reindex,
+		lem:distance-congr, lem:distance-congr-sub,
+		def:distance-swap-last, lem:distance-swap-last-inverse,
+		lem:distance-symmetry}
 	Applying Lemma~\ref{fact:add-a-proj} to $C^x_{a,\,c} \ot \Id_B \approx_\delta \Id_A \ot B^x_{a,\,c}$ with the multiplier family $\{A^x_{a,\,b} \ot \Id_B\}$, we have
 	\begin{equation}\label{eq:commutation-analysis-1}
 		A^x_{a,\,b}\, C^x_{a,\,c} \ot \Id_B \approx_\delta A^x_{a,\,b} \ot B^x_{a,\,c}\,.
@@ -484,6 +513,531 @@ The state-dependent distance is the right tool for reasoning about the closeness
 	Stated in the source without proof; it is Fact 4.32 of \cite{Natarajan2018NEEXP}. Write the value difference as an average over $(x,y) \sim \mu$ of sums of terms of the form $\bra{\psi} (A^x_a - (A')^x_a) \ot B^y_b \ket{\psi}$ and $\bra{\psi} (A')^x_a \ot (B^y_b - (B')^y_b) \ket{\psi}$, replacing one player's measurements at a time. The Cauchy--Schwarz inequality bounds each group by the square root of the corresponding averaged squared state-dependent distance, and projectivity of one of the two strategies keeps the accompanying operator sums bounded, giving the total bound $O(\delta^{1/2})$.
 \end{proof}
 
+\paragraph{Formalization support for the distance calculus.}
+The following subordinate results isolate the finite-dimensional estimates and
+tensor identities used in the Lean proofs above. They are not named statements
+of the paper.
+
+\begin{lemma}[Formalization support for Fact~\ref{fact:add-a-proj}]
+	\label{lem:distance-quadratic-form-mono}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.quadratic_form_mono}
+	\leanok
+	This formalization-only auxiliary is not a named statement of the paper; it
+	isolates the order step in Fact~\ref{fact:add-a-proj}. If $S \leq T$, then
+	$\operatorname{Re}\langle v,Sv\rangle \leq
+	\operatorname{Re}\langle v,Tv\rangle$ for every vector $v$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Apply positivity of $T-S$ to $v$ and expand $T=S+(T-S)$.
+\end{proof}
+
+\begin{lemma}[Formalization support for Fact~\ref{fact:add-a-proj}]
+	\label{lem:distance-sum-contraction}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.sum_norm_mul_apply_le}
+	\leanok
+	This formalization-only auxiliary is not a named statement of the paper; it
+	isolates the contraction estimate in Fact~\ref{fact:add-a-proj}. If
+	$\sum_c C_c^\dagger C_c\leq\Id$, then
+	\[
+		\sum_c\|C_cD\ket\psi\|^2\leq\|D\ket\psi\|^2.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:distance-quadratic-form-mono}
+	Write the sum as the quadratic form of
+	$D^\dagger(\sum_c C_c^\dagger C_c)D$ and use
+	Lemma~\ref{lem:distance-quadratic-form-mono}.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{fact:add-a-proj2}]
+	\label{lem:distance-function-indexed-contraction}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.sum_norm_mul_funIndexed_apply_le}
+	\leanok
+	This formalization-only auxiliary is not a named statement of the paper; it
+	isolates the fiber estimate in Lemma~\ref{fact:add-a-proj2}. If
+	$e\colon\mathcal G\to\mathcal A$ and
+	$\sum_g S_g^\dagger S_g\leq\Id$, then
+	\[
+		\sum_g\|S_gD_{e(g)}\ket\psi\|^2
+		\leq\sum_a\|D_a\ket\psi\|^2.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	Partition the sum into the fibers of $e$ and apply the finite-subset
+	contraction estimate to each fiber.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:cool-closeness-fact}]
+	\label{lem:distance-projective-orthogonality}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.projective_effect_mul_effect_eq_zero}
+	\leanok
+	\uses{def:povm-conventions}
+	This formalization-only auxiliary is not a named statement of the paper; it
+	isolates the orthogonality step in Lemma~\ref{lem:cool-closeness-fact}.
+	Distinct effects $P_a,P_b$ of a projective measurement satisfy $P_aP_b=0$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Use orthogonality of the ranges of distinct projectors in a projective
+	measurement.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:cool-closeness-fact}]
+	\label{lem:distance-projective-sum}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.norm_finset_sum_projector_mul_sq_le}
+	\leanok
+	This formalization-only auxiliary is not a named statement of the paper; it
+	isolates the finite projective-sum estimate in
+	Lemma~\ref{lem:cool-closeness-fact}. For mutually orthogonal projectors
+	$P_a$ and any finite set $S$,
+	\[
+		\Big\|\sum_{a\in S}P_aD_a\ket\psi\Big\|^2
+		\leq\sum_a\|D_a\ket\psi\|^2.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:distance-quadratic-form-mono}
+	Expand the Gram operator, cancel the cross terms, and use $P_a\leq\Id$
+	together with Lemma~\ref{lem:distance-quadratic-form-mono}.
+\end{proof}
+
+\begin{definition}[Formalization support for Fact~\ref{fact:agreement}]
+	\label{def:distance-state-quadratic-form}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.stateQForm}
+	\leanok
+	This formalization-only definition is not named in the paper; it abbreviates
+	the scalar appearing throughout Fact~\ref{fact:agreement}. For a vector
+	$\ket\psi$ and operator $T$, set
+	\[
+		q_\psi(T)=\operatorname{Re}\langle\psi,T\psi\rangle.
+	\]
+\end{definition}
+
+\begin{lemma}[Formalization support for Fact~\ref{fact:agreement}]
+	\label{lem:distance-state-quadratic-form-add}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.stateQForm_add}
+	\leanok
+	\uses{def:distance-state-quadratic-form}
+	This formalization-only auxiliary is not a named statement of the paper; it
+	records the additivity used in Fact~\ref{fact:agreement}:
+	$q_\psi(S+T)=q_\psi(S)+q_\psi(T)$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	This follows from linearity in the second argument of the inner product.
+\end{proof}
+
+\begin{lemma}[Formalization support for Fact~\ref{fact:agreement}]
+	\label{lem:distance-measurement-effect-le-one}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.measurement_effect_le_one}
+	\leanok
+	\uses{def:povm-conventions}
+	This formalization-only auxiliary is not a named statement of the paper; it
+	isolates the operator bound used in Fact~\ref{fact:agreement}. Every effect
+	$M_a$ of a complete measurement satisfies $M_a\leq\Id$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Compare $M_a$ with the sum of all positive effects and use completeness.
+\end{proof}
+
+\begin{lemma}[Formalization support for Fact~\ref{fact:agreement}]
+	\label{lem:distance-measurement-effect-hermitian}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.measurement_effect_hermitian}
+	\leanok
+	\uses{def:povm-conventions}
+	This formalization-only auxiliary is not a named statement of the paper; it
+	records the self-adjointness used in Fact~\ref{fact:agreement}. Every
+	positive measurement effect satisfies $M_a^\dagger=M_a$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Positive semidefinite operators are Hermitian.
+\end{proof}
+
+\begin{lemma}[Formalization support for Fact~\ref{fact:agreement}]
+	\label{lem:distance-point-defect}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.point_defect_eq}
+	\leanok
+	\uses{def:distance-state-quadratic-form, def:povm-conventions}
+	This formalization-only auxiliary is not a named statement of the paper; it
+	isolates the pointwise overlap identity in Fact~\ref{fact:agreement}. For
+	complete measurements $A,B$,
+	\[
+		\sum_{a\ne b}q_\psi(A_aB_b)
+		=\|\psi\|^2-\sum_a q_\psi(A_aB_a).
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	Sum first over $b$, use $\sum_b B_b=\Id$, and then use
+	$\sum_a A_a=\Id$.
+\end{proof}
+
+\begin{lemma}[Formalization support for Fact~\ref{fact:agreement}]
+	\label{lem:distance-consistency-term}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.consistency_term_eq_stateQForm}
+	\leanok
+	\uses{def:consistency, def:distance-state-quadratic-form}
+	This formalization-only auxiliary is not a named statement of the paper; it
+	identifies each matrix-vector term in the consistency defect with
+	$q_\psi(T)$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	The two expressions are the same matrix action and inner product.
+\end{proof}
+
+\begin{lemma}[Formalization support for Fact~\ref{fact:agreement}, item 1]
+	\label{lem:distance-point-distance-le-defect}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.point_distance_le_two_defect}
+	\leanok
+	\uses{def:distance-state-quadratic-form}
+	This formalization-only auxiliary is not a named statement of the paper; it
+	isolates its pointwise calculation. For complete measurements $A,B$,
+	\[
+		\sum_a\|(A_a-B_a)\ket\psi\|^2
+		\leq 2\sum_{a\ne b}q_\psi(A_aB_b).
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:distance-quadratic-form-mono,
+		lem:distance-measurement-effect-le-one, lem:distance-point-defect}
+	Expand each squared norm, use $A_a^2\leq A_a$ and $B_a^2\leq B_a$,
+	then apply Lemma~\ref{lem:distance-point-defect}.
+\end{proof}
+
+\begin{lemma}[Formalization support for Fact~\ref{fact:agreement}, item 2]
+	\label{lem:distance-projective-point-distance}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.point_distance_eq_two_defect_of_projective}
+	\leanok
+	\uses{def:distance-state-quadratic-form}
+	This formalization-only auxiliary is not a named statement of the paper; it
+	isolates its pointwise projective calculation. If $A$ and $B$ are
+	projective measurements, then
+	\[
+		\sum_a\|(A_a-B_a)\ket\psi\|^2
+		=2\sum_{a\ne b}q_\psi(A_aB_b).
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:distance-point-defect}
+	The preceding expansion is an equality because $A_a^2=A_a$ and
+	$B_a^2=B_a$.
+\end{proof}
+
+\begin{lemma}[Formalization support for Fact~\ref{fact:agreement}, item 2]
+	\label{lem:distance-nonnegative}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.opFamilyDistSq_nonneg}
+	\leanok
+	\uses{def:povm-distance}
+	This formalization-only auxiliary is not a named statement of the paper; it
+	records that state-dependent squared distance is nonnegative.
+\end{lemma}
+\begin{proof}
+	\leanok
+	It is an average of sums of nonnegative squared norms.
+\end{proof}
+
+\begin{lemma}[Formalization support for Fact~\ref{fact:agreement}, item 3]
+	\label{lem:distance-projective-left-square-root}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.abs_point_defect_le_sqrt_distance_of_projective_left}
+	\leanok
+	\uses{def:distance-state-quadratic-form}
+	This formalization-only auxiliary is not a named statement of the paper; it
+	isolates the pointwise Cauchy--Schwarz estimate for item 3. If $A$ is
+	projective and $\|\psi\|=1$, then
+	\[
+		\left|\sum_{a\ne b}q_\psi(A_aB_b)\right|
+		\leq\sqrt{\sum_a\|(A_a-B_a)\ket\psi\|^2}.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:distance-point-defect}
+	Write the defect as a sum of inner products, apply finite
+	Cauchy--Schwarz, and use projective orthogonality and completeness.
+\end{proof}
+
+\begin{lemma}[Formalization support for Proposition~\ref{fact:triangle-for-simeq}]
+	\label{lem:distance-overlap-gap}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.overlap_gap_le_of_opFamilyDistSq}
+	\leanok
+	\uses{def:distance-state-quadratic-form, def:povm-distance}
+	This formalization-only auxiliary is not a named statement of the paper; it
+	isolates the overlap estimate in Proposition~\ref{fact:triangle-for-simeq}.
+	For a probability distribution $\mu$, unit vector $\psi$, and measurement
+	families $A,B,D$, a bound $d_\psi(B,D)^2\leq\zeta$ implies
+	\[
+		\left|\E_x\sum_a q_\psi(A^x_aB^x_a)
+		-\E_x\sum_a q_\psi(A^x_aD^x_a)\right|\leq\sqrt\zeta.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{prop:easy-approx-from-approx-delta}
+	Apply the weighted Cauchy--Schwarz estimate for approximate measurements
+	to the pure state determined by $\psi$.
+\end{proof}
+
+\begin{lemma}[Formalization support for Proposition~\ref{fact:triangle-for-simeq}]
+	\label{lem:distance-defect-overlap}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.consistencyDefect_eq_one_sub_overlap}
+	\leanok
+	\uses{def:consistency, def:distance-state-quadratic-form}
+	This formalization-only auxiliary is not a named statement of the paper; it
+	isolates the overlap form of consistency in
+	Proposition~\ref{fact:triangle-for-simeq}. For a probability distribution
+	$\mu$ and unit vector $\psi$,
+	\[
+		\operatorname{defect}_\mu(A,B)
+		=1-\E_x\sum_aq_\psi(A^x_aB^x_a).
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:distance-consistency-term, lem:distance-point-defect}
+	Average Lemma~\ref{lem:distance-point-defect} and use the unit-vector and
+	probability normalizations.
+\end{proof}
+
+\begin{lemma}[Formalization support for Proposition~\ref{fact:triangle-for-simeq}]
+	\label{lem:distance-symmetry}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.opFamilyDistSq_symm}
+	\leanok
+	\uses{def:povm-distance}
+	This formalization-only auxiliary is not a named statement of the paper; it
+	records the symmetry $d_\psi(A,B)^2=d_\psi(B,A)^2$ used in
+	Proposition~\ref{fact:triangle-for-simeq}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Use $\|u-v\|=\|v-u\|$ pointwise and then average.
+\end{proof}
+
+\begin{definition}[Formalization support for Fact~\ref{fact:data-processing}]
+	\label{def:distance-left-placed-measurement}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.leftPlacedMeasurement}
+	\leanok
+	\uses{def:povm-conventions}
+	This formalization-only definition is not named in the paper; it realizes the
+	left tensor placement used in Fact~\ref{fact:data-processing}. For a complete
+	measurement $M$, its left placement has effects $M_a\ot\Id$.
+\end{definition}
+
+\begin{definition}[Formalization support for Fact~\ref{fact:data-processing}]
+	\label{def:distance-right-placed-measurement}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.rightPlacedMeasurement}
+	\leanok
+	\uses{def:povm-conventions}
+	This formalization-only definition is not named in the paper; it realizes the
+	right tensor placement used in Fact~\ref{fact:data-processing}. For a
+	complete measurement $M$, its right placement has effects $\Id\ot M_a$.
+\end{definition}
+
+\begin{lemma}[Formalization support for Fact~\ref{fact:data-processing}]
+	\label{lem:distance-placed-product-qform}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.placed_product_stateQForm_eq}
+	\leanok
+	\uses{def:distance-state-quadratic-form}
+	This formalization-only auxiliary is not a named statement of the paper; it
+	identifies the tensor product in Fact~\ref{fact:data-processing}:
+	\[
+		q_\psi\big((A\ot\Id)(\Id\ot B)\big)=q_\psi(A\ot B).
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	Use $(A\ot\Id)(\Id\ot B)=A\ot B$.
+\end{proof}
+
+\begin{lemma}[Formalization support for Fact~\ref{fact:data-processing}]
+	\label{lem:distance-postprocess-overlap}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.diagonal_postprocess_stateQForm_ge}
+	\leanok
+	\uses{def:bracket, def:distance-state-quadratic-form}
+	This formalization-only auxiliary is not a named statement of the paper; it
+	isolates the diagonal-overlap form of data processing. For complete
+	measurements $A,B$ and a map $f\colon\mathcal A\to\mathcal B$,
+	\[
+		\sum_b q_\psi(A_{[f=b]}\ot B_{[f=b]})
+		\geq\sum_a q_\psi(A_a\ot B_a).
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	Expand the postprocessed effects; all additional same-fiber cross terms are
+	nonnegative.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:commutation-analysis}]
+	\label{lem:distance-left-fiber-contraction}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.left_fiber_contraction}
+	\leanok
+	\uses{def:povm-conventions}
+	This formalization-only auxiliary is not a named statement of the paper; it
+	isolates a multiplier bound in Lemma~\ref{lem:commutation-analysis}. For a
+	measurement $M$ with outcomes $(a,b)$ and each fixed $a$,
+	\[
+		\sum_b(M_{a,b}\ot\Id)^\dagger(M_{a,b}\ot\Id)\leq\Id.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:distance-measurement-effect-le-one}
+	Use $M_{a,b}^2\leq M_{a,b}$, completeness, and monotonicity of left tensor
+	placement.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:commutation-analysis}]
+	\label{lem:distance-right-fiber-contraction}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.right_fiber_contraction}
+	\leanok
+	\uses{def:povm-conventions}
+	This formalization-only auxiliary is not a named statement of the paper; it
+	isolates a multiplier bound in Lemma~\ref{lem:commutation-analysis}. For a
+	measurement $M$ with outcomes $(a,b)$ and each fixed $a$,
+	\[
+		\sum_b(\Id\ot M_{a,b})^\dagger(\Id\ot M_{a,b})\leq\Id.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:distance-measurement-effect-le-one}
+	Use $M_{a,b}^2\leq M_{a,b}$, completeness, and monotonicity of right tensor
+	placement.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:commutation-analysis}]
+	\label{lem:distance-joint-marginal-product}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.joint_marginal_product}
+	\leanok
+	\uses{def:povm-conventions}
+	This formalization-only auxiliary is not a named statement of the paper; it
+	isolates the projective-marginal identity in
+	Lemma~\ref{lem:commutation-analysis}. If $M_{a,b,c}$ is projective, then
+	\[
+		M_{a,b}M_{a,c}=M_{a,b,c}.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:distance-projective-orthogonality}
+	Expand both marginals and cancel every product of distinct projective
+	effects.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:commutation-analysis}]
+	\label{lem:distance-joint-marginal-product-rev}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.joint_marginal_product_rev}
+	\leanok
+	\uses{def:povm-conventions}
+	This formalization-only auxiliary is not a named statement of the paper; it
+	records the reverse-order identity used in
+	Lemma~\ref{lem:commutation-analysis}. For a projective joint measurement,
+	$M_{a,c}M_{a,b}=M_{a,b,c}$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:distance-joint-marginal-product,
+		lem:distance-measurement-effect-hermitian}
+	Take adjoints in Lemma~\ref{lem:distance-joint-marginal-product} and use
+	self-adjointness of measurement effects.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:commutation-analysis}]
+	\label{lem:distance-opposite-placements-commute}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.left_right_commute}
+	\leanok
+	This formalization-only auxiliary is not a named statement of the paper; it
+	records the tensor commutation used in
+	Lemma~\ref{lem:commutation-analysis}:
+	$(A\ot\Id)(\Id\ot B)=(\Id\ot B)(A\ot\Id)$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Both products are $A\ot B$.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:commutation-analysis}]
+	\label{lem:distance-reindex}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.opFamilyDistSq_reindex}
+	\leanok
+	\uses{def:povm-distance}
+	This formalization-only auxiliary is not a named statement of the paper; it
+	isolates reindexing in Lemma~\ref{lem:commutation-analysis}. State-dependent
+	distance is unchanged when both finite operator families are reindexed along
+	an equivalence of their outcome sets.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Reindex the finite sum defining the distance.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:commutation-analysis}]
+	\label{lem:distance-congr}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.opFamilyDistSq_congr}
+	\leanok
+	\uses{def:povm-distance}
+	This formalization-only auxiliary is not a named statement of the paper; it
+	records extensionality used in Lemma~\ref{lem:commutation-analysis}.
+	Pointwise equal pairs of operator families have equal state-dependent
+	distance.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Substitute the pointwise equalities in the defining finite sums.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:commutation-analysis}]
+	\label{lem:distance-congr-sub}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.opFamilyDistSq_congr_sub}
+	\leanok
+	\uses{def:povm-distance}
+	This formalization-only auxiliary is not a named statement of the paper; it
+	records the difference form of extensionality used in
+	Lemma~\ref{lem:commutation-analysis}. If $A^x_a-B^x_a=A'^x_a-B'^x_a$
+	pointwise, then $d_\psi(A,B)^2=d_\psi(A',B')^2$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Substitute the pointwise equality of differences in the defining finite
+	sums.
+\end{proof}
+
+\begin{definition}[Formalization support for Lemma~\ref{lem:commutation-analysis}]
+	\label{def:distance-swap-last}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.swapLast}
+	\leanok
+	This formalization-only definition is not named in the paper; it makes the
+	reindexing in Lemma~\ref{lem:commutation-analysis} explicit. It is the
+	equivalence
+	\[
+		((a,c),b)\longmapsto((a,b),c)
+	\]
+	between the two associations of the three outcome coordinates.
+\end{definition}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:commutation-analysis}]
+	\label{lem:distance-swap-last-inverse}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.swapLast_symm_apply}
+	\leanok
+	\uses{def:distance-swap-last}
+	This formalization-only auxiliary is not a named statement of the paper; it
+	records that the inverse coordinate exchange used in
+	Lemma~\ref{lem:commutation-analysis} sends $((a,b),c)$ to $((a,c),b)$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	The coordinate exchange is an involution.
+\end{proof}
+
 \section{Conditionally linear functions and distributions}
 % Paper subsection label sec:cl kept for cross-reference fidelity.
 \label{sec:cl}
@@ -540,7 +1094,7 @@ Note that both players' questions are generated from the \emph{same} uniformly r
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{def:cl-func}
+	\uses{def:cl-func, lem:cl-restriction-idem}
 	For the ``if'' direction, conditions 1 and 4 immediately exhibit $L$ as an $\ell$-level CL function. For the ``only if'' direction one constructs the marginals, factor spaces, and linear maps by induction on $\ell$. In the base case $\ell = 1$ take $L_{\le 1} = L$, $V_1 = V$, and $L_1 = L$. For the inductive step, write $L(x) = x^{L_1} + L_{>1,\,x^{L_1}}(x^{V_{>1}})$ as in Definition~\ref{def:cl-func} and apply the inductive hypothesis to each $(\ell-1)$-level function $L_{>1,\,v}$, obtaining its marginals, factor spaces, and linear maps over $V_{>1}$. Define $L_{\le 1} = L_1$ with first factor space $V_1$, and for $k \ge 2$ define $L_{\le k}(x) = x^{L_1} + L'_{x^{L_1},\,<k}(x^{V_{>1}})$, with the $k$-th factor space and linear map of $L$ with prefix $u$ given by those of $L_{>1,\,v}$ at index $k-1$ with prefix $w$, where $v = u^{V_1}$ and $w = u^{V_{>1}}$. Conditions 1--4 are then verified directly from the inductive hypothesis: the direct-sum decomposition of $V_{>1}$ extends to $V$ by adjoining $V_1$, and the sum formula for $L_{\le k}$ follows by unfolding the inductive marginals.
 \end{proof}
 
@@ -580,7 +1134,7 @@ The marginal functions, factor spaces, and linear maps of a given CL function $L
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{def:cl-func}
+	\uses{def:cl-func, lem:cl-func-prod-same-level}
 	Since an $\ell$-level CL function is also $k$-level conditionally linear for all $k \ge \ell$, it suffices to prove the claim when $\ell_j = \ell$ for all $j$. Proceed by induction on $\ell$. For $\ell = 0$ every $L^{(j)}$ is the zero function on $V^{(j)}$, so $L$ is the zero function on $V$, which is the unique $0$-level CL function on $V$ (Definition~\ref{def:cl-func}). For the inductive step with $\ell \ge 1$, decompose each $L^{(j)}$ into its first-level linear part $L^{(j)}_1$ on $V^{(j)}_1$ and its family of $(\ell-1)$-level remainders $L^{(j)}_{>1,\,v_j}$ on $V^{(j)}_{>1}$. The direct sums of the first-level parts define a linear map on $V_1 = \bigoplus_j V^{(j)}_1$, and, for each prefix value $v = \sum_j v_j$, the direct sums of the remainders are $(\ell-1)$-level conditionally linear on $V_{>1} = \bigoplus_j V^{(j)}_{>1}$ by the induction hypothesis. This exhibits $L$ in the form required by Definition~\ref{def:cl-func}.
 \end{proof}
 
@@ -592,7 +1146,69 @@ The marginal functions, factor spaces, and linear maps of a given CL function $L
 \end{lemma}
 \begin{proof}
 	\leanok
+	\uses{lem:cl-supported-vanishing, lem:cl-supported-restriction, lem:cl-restriction-sum}
 	A uniformly random $x \in V$ has independent components $x^{(i)}$, each uniformly distributed in $V^{(i)}$. Hence the pair $(L(x), R(x)) = \bigl( (L^{(i)}(x^{(i)}))_{i=1}^m,\, (R^{(i)}(x^{(i)}))_{i=1}^m \bigr)$ is distributed exactly as the product of the distributions $\mu_{L^{(i)},\,R^{(i)}}$ for $i = 1, 2, \dots, m$.
+\end{proof}
+
+% Formalization-support nodes.  The five statements below are not results of the source
+% article; each isolates one register-bookkeeping step of the Lean proofs of the lemmas
+% above, and is recorded here so that those proofs remain traceable.
+\begin{lemma}[Formalization support for restriction to a subregister]\label{lem:cl-restriction-idem}
+	\lean{MIPStarRE.QPBT.coordinateRestriction_coordinateRestriction}
+	\leanok
+	\uses{def:register-subspace}
+	This is not a named statement of the source article; it isolates a step used in the Lean proofs of Lemma~\ref{lem:cl-kth} and Lemma~\ref{lem:cl-func-prod}. Let $S$ and $S'$ be register subspaces of $V$ with $S \subseteq S'$. Then $(x^{S'})^S = x^S$ for every $x \in V$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	The two sides agree coordinatewise: a coordinate of $S$ is retained by both restrictions, since $S \subseteq S'$, and a coordinate outside $S$ is set to zero by both.
+\end{proof}
+
+\begin{lemma}[Formalization support for restricting a sum to one register]\label{lem:cl-restriction-sum}
+	\lean{MIPStarRE.QPBT.coordinateRestriction_sum_eq}
+	\leanok
+	\uses{def:register-subspace}
+	This is not a named statement of the source article; it isolates a step used in the Lean proofs of Lemma~\ref{lem:cl-func-prod} and Lemma~\ref{lem:cl-dist-prod}. Let $V^{(1)}, \dots, V^{(m)}$ be pairwise disjoint register subspaces of $V$ and, for each $j$, let $f_j \in V$ vanish outside $V^{(j)}$. Then $\bigl( \sum_{i=1}^m f_i \bigr)^{V^{(j)}} = f_j$ for every $j$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	On a coordinate of $V^{(j)}$ every summand $f_i$ with $i \neq j$ vanishes, by disjointness, so the sum agrees there with $f_j$; outside $V^{(j)}$ both sides vanish.
+\end{proof}
+
+\begin{lemma}[Formalization support for the values of a supported CL function]\label{lem:cl-supported-vanishing}
+	\lean{MIPStarRE.QPBT.CondLinearTerm.eval_eq_zero_of_not_mem}
+	\leanok
+	\uses{def:cl-func, def:register-subspace}
+	This is not a named statement of the source article; it isolates a step used in the Lean proof of Lemma~\ref{lem:cl-dist-prod}. Let $S$ be a register subspace of $V$ and let $L$ be a CL function on $V$ all of whose factor spaces are contained in $S$. Then $L(x) \in S$ for every $x \in V$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:cl-func}
+	Induction on the level of $L$. The $0$-level function is the zero function. At level $\ell \ge 1$ we have $L(x) = x^{L_1} + L_{>1,\,x^{L_1}}(x^{V_{>1}})$, where the first summand lies in $V_1 \subseteq S$ and the second lies in $S$ by the induction hypothesis, the factor spaces of $L_{>1,\,x^{L_1}}$ being contained in $S$ as well.
+\end{proof}
+
+\begin{lemma}[Formalization support for the arguments of a supported CL function]\label{lem:cl-supported-restriction}
+	\lean{MIPStarRE.QPBT.CondLinearTerm.eval_coordinateRestriction}
+	\leanok
+	\uses{def:cl-func, def:register-subspace}
+	This is not a named statement of the source article; it isolates a step used in the Lean proofs of Lemma~\ref{lem:cl-func-prod} and Lemma~\ref{lem:cl-dist-prod}. Let $S$ be a register subspace of $V$ and let $L$ be a CL function on $V$ all of whose factor spaces are contained in $S$. Then $L(x^S) = L(x)$ for every $x \in V$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:cl-func}
+	Induction on the level of $L$: the value of $L$ depends on $x$ only through the projections of $x$ onto the factor spaces of $L$, and $x^S$ and $x$ have the same projection onto every register subspace contained in $S$.
+\end{proof}
+
+\begin{lemma}[Formalization support for equal-level direct sums]\label{lem:cl-func-prod-same-level}
+	\lean{MIPStarRE.QPBT.IsCondLinearOn.directSum_sameLevel}
+	\leanok
+	\uses{def:cl-func, def:register-subspace}
+	This is not a named statement of the source article; it is the equal-level case of Lemma~\ref{lem:cl-func-prod}, isolated because the Lean proof of that lemma first raises every level $\ell_j$ to $\ell = \max_j \ell_j$. Let $V^{(1)}, \dots, V^{(m)}$ be pairwise disjoint register subspaces of $V$ and, for each $j$, let $L^{(j)}$ be an $\ell$-level CL function on $V^{(j)}$. Then the function $x \mapsto \sum_{j=1}^m L^{(j)}(x^{V^{(j)}})$ is an $\ell$-level CL function on $\bigoplus_{j=1}^m V^{(j)}$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:cl-func, lem:cl-restriction-idem, lem:cl-restriction-sum, lem:cl-supported-restriction}
+	Induction on $\ell$, as in the proof of Lemma~\ref{lem:cl-func-prod}: at level $0$ every summand is the zero function, and at level $\ell \ge 1$ the first-level linear maps combine to a linear map on $\bigoplus_j V^{(j)}_1$ while, for each prefix value, the remainders combine to an $(\ell-1)$-level CL function by the induction hypothesis. Identifying the restriction of the common input to each register $V^{(j)}$ with the input of the $j$-th summand uses Lemma~\ref{lem:cl-restriction-idem}, Lemma~\ref{lem:cl-restriction-sum}, and Lemma~\ref{lem:cl-supported-restriction}.
 \end{proof}
 
 \section{Typed conditionally linear distributions}
@@ -615,7 +1231,7 @@ The question distribution of the Pauli basis test is \emph{typed}: each question
 % normalization 1/(2m-k) below is undefined. The source
 % (references/qpbt-paper/07_types.tex:65-82) leaves this boundary hypothesis implicit.
 \begin{definition}[Graph distribution]\label{def:graph-distribution}
-	\lean{MIPStarRE.QPBT.graphDistribution, MIPStarRE.QPBT.graphDistribution_isProbability}
+	\lean{MIPStarRE.QPBT.graphDistribution}
 	\leanok
 	Let $G = (U, E)$ be an undirected graph with vertex set $U$ and nonempty edge set $E$. Edges in $E$ are written as multisets $\{u, v\}$ of two vertices; the case $u = v$ represents a self-loop. Suppose there are $m \ge 1$ edges, $k$ of which are self-loops. Then the \emph{graph distribution $\mu_G$ of $G$} is the distribution over $U \times U$ such that for every $(u,v) \in U \times U$,
 	\[
@@ -627,6 +1243,18 @@ The question distribution of the Pauli basis test is \emph{typed}: each question
 	\]
 	This is identical to the uniform distribution over ordered pairs $(u,v) \in U \times U$ such that $\{u,v\} \in E$: each edge that is not a self-loop contributes two ordered pairs, and each self-loop contributes one, whence the normalization $2m-k$.
 \end{definition}
+
+\begin{lemma}[Total mass of the graph distribution]\label{lem:graph-distribution-mass}
+	\lean{MIPStarRE.QPBT.graphDistribution_isProbability}
+	\leanok
+	\uses{def:graph-distribution}
+	Let $G = (U, E)$ be an undirected graph with nonempty edge set $E$. Then the graph distribution $\mu_G$ of Definition~\ref{def:graph-distribution} has total mass one, that is, $\sum_{(u,v) \in U \times U} \mu_G(u,v) = 1$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:graph-distribution}
+	The distribution $\mu_G$ is uniform on the set of ordered pairs $(u,v) \in U \times U$ with $\{u,v\} \in E$, and that set is nonempty because $E$ is: an edge $\{u,v\} \in E$ yields the ordered pair $(u,v)$. A uniform distribution on a nonempty finite set has total mass one.
+\end{proof}
 
 % The nonempty-edge hypothesis on G is inherited from def:graph-distribution, where it is
 % needed for the graph distribution mu_G to be defined; the source
