@@ -7,18 +7,28 @@ import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.Anticommutation
 import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.Transfer
 import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.AnticommutatorB
 import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.Swap
+import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.Consistency
 
 /-!
 # Magic Square rigidity
 
 This stable public facade re-exports the elementary symmetry facts, the
 value-to-parity relation layer, and the perfect strategy construction while
-retaining the imported rigidity theorem and its supporting definitions.
+retaining the rigidity theorem and its supporting definitions.
+
+The rigidity theorem is stated in the corrected form adopted on issue #172: the
+source quantifies over all strategies, which is false for the role-symmetric
+game (`docs/paper-gaps/qpbt_ms-rigidity-symmetric-strategies.tex`), and the
+corrected statement assumes that the two players' `Variable_1` and `Variable_5`
+measurements are consistent between the players up to a defect `δ`
+(`msVariableConsistencyDefect`, in `Rigidity/Consistency.lean`).  Symmetric
+consistent strategies satisfy the hypothesis with `δ = 0`
+(`exists_ms_rigidity_of_symmetric_consistent`).
 
 ## References
 
 The source statement is `thm:ms-rigidity` in
-`blueprint/src/chapter/ch13_qpbt_test.tex:228-259`, from
+`blueprint/src/chapter/ch13_qpbt_test.tex`, from
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652`.
 
 The variable indices below are zero-based: indices 0 and 4 represent the
@@ -112,43 +122,89 @@ noncomputable def msAnticommutatorDistanceB (S : Strategy msGame)
   opDistSq (uniformDistribution Unit) (fun _ => X * Z)
     (fun _ => -(Z * X)) (idealMsState w.aux)
 
-/-- `thm:ms-rigidity`, imported from Coladangelo--Stark, Theorem 6.9.
-Blueprint `ch13_qpbt_test.tex:228-259`, paper
-`08_classical_and_quantum_low_degree_tests.tex:612-652`.
+/-- `thm:ms-rigidity` in the corrected form adopted on issue #172 (owner
+decision B5 on issue #26), imported from Coladangelo--Stark, Theorem 6.9.
+Blueprint `ch13_qpbt_test.tex`, paper
+`08_classical_and_quantum_low_degree_tests.tex:612-652`; the correction is
+recorded in `docs/paper-gaps/qpbt_ms-rigidity-symmetric-strategies.tex`.
+
+**The correction.** The source quantifies over all strategies of value
+`1 - ε`.  That statement is false: its conclusion forces the two players'
+variable-0 and variable-4 measurements to agree on the shared state, while
+`msGame` samples only constraint-variable pairs and never sends the same
+question to both players, and a perfect strategy answering the two orientations
+of each edge on independent copies of two EPR pairs, or its symmetric role-flag
+version, violates the conclusion at `ε = 0`.  The corrected statement assumes,
+in addition to the value, that the two players' bit measurements at the cells
+`0` and `4` agree on the state up to a consistency defect `δ`
+(`msVariableConsistencyDefect`); the conclusion is the source's display with
+`sqrt ε` replaced by `sqrt ε + sqrt δ`, so that `δ = 0` is the source's display
+verbatim.  Symmetric strategies that are consistent on their state, the class
+named in the owner decision, satisfy the hypothesis with `δ = 0`
+(`exists_ms_rigidity_of_symmetric_consistent`); symmetry itself is not needed
+and not assumed.  Both counterexamples have defect `1` and are excluded.
 
 The paper states the Euclidean estimate at scale `sqrt ε` at lines 624--626
 and explains the norm conversion and local basis change at lines 650--652. One
-universal constant applies to every strategy and nonnegative error parameter.
+universal constant applies to every strategy and every pair of nonnegative
+error parameters.
 
-**Known false as stated.** This is the paper's statement, and it has a
-counterexample. Its conclusion forces the two players' variable-0 and
-variable-4 measurements to agree on the shared state, while `msGame` samples
-only constraint-variable pairs and never sends the same question to both
-players. A perfect strategy that answers the two orientations of each sampled
-edge on two independent copies of two EPR pairs violates the conclusion at
-`ε = 0`, and so does its player-role symmetrization, which is a symmetric
-strategy of value 1; restricting to `SymmetricStrategy msGameSymm` therefore
-does not repair the statement, and the hypothesis that removes the obstruction
-is consistency of the strategy on its state. The counterexamples and the
-candidate correction are in
-`docs/paper-gaps/qpbt_ms-rigidity-symmetric-strategies.tex`, and the blueprint
-records them in `ch13_qpbt_test.tex:251-259`; the refutation is issue #105 and
-the statement-level decision is item B4 on issue #26, tracked by issue #172.
-The `sorry` below cannot be discharged while the statement stands, and no
-result should be derived from this theorem. -/
+**Proof obligation.** The `sorry` is the assembly of issue #105: the one-way
+Coladangelo--Stark self-test for the orientation in which Alice holds the
+constraint, or equivalently the swap-isometry extraction from
+`Rigidity/Swap.lean` fed by the approximate anticommutation of
+`Rigidity/Anticommutation.lean` and by the cross-player agreement
+`MagicSquareRigidity.msVarObsA_close_msVarObsB` derived from the consistency
+hypothesis in `Rigidity/Consistency.lean`, followed by the transfer theorems of
+`Rigidity/Transfer.lean` and `Rigidity/AnticommutatorB.lean`. -/
 theorem exists_ms_rigidity :
-    ∃ C : ℝ, 1 ≤ C ∧ ∀ (ε : ℝ), 0 ≤ ε →
+    ∃ C : ℝ, 1 ≤ C ∧ ∀ (ε δ : ℝ), 0 ≤ ε → 0 ≤ δ →
       ∀ S : Strategy msGame, 1 - ε ≤ S.value →
+        msVariableConsistencyDefect S 0 ≤ δ →
+        msVariableConsistencyDefect S 4 ≤ δ →
         ∃ w : MsRigidityWitness S,
           ‖isometryTensor w.φA w.φB S.ψ - idealMsState w.aux‖ ≤
-              C * Real.sqrt ε ∧
-          msOperatorDistanceA S w 0 .X ≤ C * Real.sqrt ε ∧
-          msOperatorDistanceA S w 4 .Z ≤ C * Real.sqrt ε ∧
-          msOperatorDistanceB S w 0 .X ≤ C * Real.sqrt ε ∧
-          msOperatorDistanceB S w 4 .Z ≤ C * Real.sqrt ε ∧
-          msAnticommutatorDistanceA S w ≤ C * Real.sqrt ε ∧
-          msAnticommutatorDistanceB S w ≤ C * Real.sqrt ε := by
+              C * (Real.sqrt ε + Real.sqrt δ) ∧
+          msOperatorDistanceA S w 0 .X ≤ C * (Real.sqrt ε + Real.sqrt δ) ∧
+          msOperatorDistanceA S w 4 .Z ≤ C * (Real.sqrt ε + Real.sqrt δ) ∧
+          msOperatorDistanceB S w 0 .X ≤ C * (Real.sqrt ε + Real.sqrt δ) ∧
+          msOperatorDistanceB S w 4 .Z ≤ C * (Real.sqrt ε + Real.sqrt δ) ∧
+          msAnticommutatorDistanceA S w ≤ C * (Real.sqrt ε + Real.sqrt δ) ∧
+          msAnticommutatorDistanceB S w ≤ C * (Real.sqrt ε + Real.sqrt δ) := by
   sorry
+
+/-- `thm:ms-rigidity` on the class fixed by owner decision B5 on issue #26:
+symmetric strategies of the Magic Square game that are consistent on their
+state (`def:consistent-strategy`, paper
+`06_nonlocal_games_and_mipstar.tex:162-174`).  Their variable measurements have
+zero consistency defect, so this is the case `δ = 0` of `exists_ms_rigidity`,
+and its conclusion is the source's display verbatim.  The witness and the
+distances are those of the underlying `Strategy msGame`, which the symmetric
+presentation `msGameSymm` yields definitionally (`msGameSymm_toGame`).
+Blueprint `ch13_qpbt_test.tex`, paper
+`08_classical_and_quantum_low_degree_tests.tex:612-652`; the proof is that of
+`exists_ms_rigidity`, whose obligation is issue #105. -/
+theorem exists_ms_rigidity_of_symmetric_consistent :
+    ∃ C : ℝ, 1 ≤ C ∧ ∀ (ε : ℝ), 0 ≤ ε →
+      ∀ S : SymmetricStrategy msGameSymm, S.IsConsistent →
+        1 - ε ≤ S.toStrategy.value →
+        ∃ w : MsRigidityWitness S.toStrategy,
+          ‖isometryTensor w.φA w.φB S.toStrategy.ψ - idealMsState w.aux‖ ≤
+              C * Real.sqrt ε ∧
+          msOperatorDistanceA S.toStrategy w 0 .X ≤ C * Real.sqrt ε ∧
+          msOperatorDistanceA S.toStrategy w 4 .Z ≤ C * Real.sqrt ε ∧
+          msOperatorDistanceB S.toStrategy w 0 .X ≤ C * Real.sqrt ε ∧
+          msOperatorDistanceB S.toStrategy w 4 .Z ≤ C * Real.sqrt ε ∧
+          msAnticommutatorDistanceA S.toStrategy w ≤ C * Real.sqrt ε ∧
+          msAnticommutatorDistanceB S.toStrategy w ≤ C * Real.sqrt ε := by
+  obtain ⟨C, hC, h⟩ := exists_ms_rigidity
+  refine ⟨C, hC, fun ε hε S hS hwin => ?_⟩
+  have h0 := msVariableConsistencyDefect_eq_zero_of_isConsistent S hS 0
+  have h4 := msVariableConsistencyDefect_eq_zero_of_isConsistent S hS 4
+  obtain ⟨w, h1, h2, h3, h4', h5, h6, h7⟩ :=
+    h ε 0 hε le_rfl S.toStrategy hwin h0.le h4.le
+  rw [Real.sqrt_zero, add_zero] at h1 h2 h3 h4' h5 h6 h7
+  exact ⟨w, h1, h2, h3, h4', h5, h6, h7⟩
 
 end
 
