@@ -143,6 +143,10 @@ private theorem parityTriple_injective (i : Fin 6) :
   · exact congrFun h 0
   · exact congrFun h 1
 
+/-- Formalization-only auxiliary lemma for
+`exists_ms_perfect_strategy_of_anticommuting` (`thm:ms-from-ac`, blueprint
+`ch13_qpbt_test.tex:257-267`): the triple encoding two freely chosen bits sums
+to the parity `msParity i` prescribed by the constraint. -/
 theorem parityTriple_sum (i : Fin 6) (ab : ZMod 2 × ZMod 2) :
     ∑ k : Fin 3, parityTriple i ab k = msParity i := by
   rw [Fin.sum_univ_three]
@@ -180,6 +184,10 @@ private theorem msCellMeasurement_effect
       reflectionEffect (msCellObservable OA OB j) b :=
   rfl
 
+/-- Formalization-only auxiliary lemma for
+`exists_ms_perfect_strategy_of_anticommuting` (`thm:ms-from-ac`, blueprint
+`ch13_qpbt_test.tex:257-267`): each of the nine cell measurements of the Magic
+Square strategy is projective. -/
 theorem msCellMeasurement_projective
     {V : Type*} [Fintype V] [DecidableEq V]
     (OA OB : Op V) (hOA : OAᴴ = OA) (hOB : OBᴴ = OB)
@@ -198,6 +206,10 @@ private theorem reflectionEffect_transpose
   rcases zmod_two_eq_zero_or_one b with rfl | rfl <;>
     simp [reflectionEffect, Matrix.transpose_add, Matrix.transpose_sub, hO]
 
+/-- Formalization-only auxiliary lemma for
+`exists_ms_perfect_strategy_of_anticommuting` (`thm:ms-from-ac`, blueprint
+`ch13_qpbt_test.tex:257-267`): every effect of a cell measurement is symmetric
+whenever `OA` and `OB` are symmetric. -/
 theorem msCellMeasurement_transpose
     {V : Type*} [Fintype V] [DecidableEq V]
     (OA OB : Op V) (hOA : OAᴴ = OA) (hOB : OBᴴ = OB)
@@ -236,6 +248,11 @@ noncomputable def msStrategyMeasurement
       (msConstraintJoint P hP hcomm i).postprocess
         (fun ab => .triple (parityTriple i ab))
 
+/-- Formalization-only auxiliary lemma for
+`exists_ms_perfect_strategy_of_anticommuting` (`thm:ms-from-ac`, blueprint
+`ch13_qpbt_test.tex:257-267`): on a variable question the global measurement
+family reproduces the corresponding cell measurement: its effect at the answer
+`bit b` is the effect of `P j` at `b`. -/
 theorem msStrategyMeasurement_var_bit
     {V : Type*} [Fintype V] [DecidableEq V]
     (P : Fin 9 → Measurement (ZMod 2) V)
@@ -249,6 +266,11 @@ theorem msStrategyMeasurement_var_bit
   exact postprocess_effect_of_injective (P j) MsAnswer.bit
     bit_embedding_injective b
 
+/-- Formalization-only auxiliary lemma for
+`exists_ms_perfect_strategy_of_anticommuting` (`thm:ms-from-ac`, blueprint
+`ch13_qpbt_test.tex:257-267`): on a variable question the global measurement
+family assigns the zero effect to every answer outside the range of
+`MsAnswer.bit`. -/
 theorem msStrategyMeasurement_var_zero
     {V : Type*} [Fintype V] [DecidableEq V]
     (P : Fin 9 → Measurement (ZMod 2) V)
@@ -261,6 +283,11 @@ theorem msStrategyMeasurement_var_zero
     (msStrategyMeasurement P hP hcomm (.var j)).effect a = 0 := by
   exact postprocess_effect_eq_zero_of_notMem (P j) MsAnswer.bit ha
 
+/-- Formalization-only auxiliary lemma for
+`exists_ms_perfect_strategy_of_anticommuting` (`thm:ms-from-ac`, blueprint
+`ch13_qpbt_test.tex:257-267`): on a constraint question the effect at the answer
+triple encoding the bits `ab` equals the effect at `ab` of the joint measurement
+of the first two cells of that constraint. -/
 theorem msStrategyMeasurement_constraint_triple
     {V : Type*} [Fintype V] [DecidableEq V]
     (P : Fin 9 → Measurement (ZMod 2) V)
@@ -276,6 +303,11 @@ theorem msStrategyMeasurement_constraint_triple
     (fun cd => MsAnswer.triple (parityTriple i cd))
     (triple_embedding_injective i) ab
 
+/-- Formalization-only auxiliary lemma for
+`exists_ms_perfect_strategy_of_anticommuting` (`thm:ms-from-ac`, blueprint
+`ch13_qpbt_test.tex:257-267`): on a constraint question the global measurement
+family assigns the zero effect to every answer that is not a parity triple of
+the constraint. -/
 theorem msStrategyMeasurement_constraint_zero
     {V : Type*} [Fintype V] [DecidableEq V]
     (P : Fin 9 → Measurement (ZMod 2) V)
@@ -289,6 +321,10 @@ theorem msStrategyMeasurement_constraint_zero
   exact postprocess_effect_eq_zero_of_notMem (msConstraintJoint P hP hcomm i)
     (fun ab => MsAnswer.triple (parityTriple i ab)) ha
 
+/-- Formalization-only auxiliary lemma for
+`exists_ms_perfect_strategy_of_anticommuting` (`thm:ms-from-ac`, blueprint
+`ch13_qpbt_test.tex:257-267`): the global Magic Square measurement family is
+projective at every question. -/
 theorem msStrategyMeasurement_projective
     {V : Type*} [Fintype V] [DecidableEq V]
     (P : Fin 9 → Measurement (ZMod 2) V)
@@ -309,6 +345,10 @@ theorem msStrategyMeasurement_projective
           (hcomm i 0 1)
       · exact triple_embedding_injective i
 
+/-- Formalization-only auxiliary lemma for
+`exists_ms_perfect_strategy_of_anticommuting` (`thm:ms-from-ac`, blueprint
+`ch13_qpbt_test.tex:257-267`): post-processing a measurement along a relabelling
+of outcomes preserves symmetry of its effects. -/
 theorem postprocess_effect_transpose
     {α β V : Type*} [Fintype α] [Fintype β]
     [DecidableEq α] [DecidableEq β] [Fintype V] [DecidableEq V]
@@ -323,6 +363,11 @@ theorem postprocess_effect_transpose
   intro a _
   exact congrFun (congrFun (hM a) r) c
 
+/-- Formalization-only auxiliary lemma for
+`exists_ms_perfect_strategy_of_anticommuting` (`thm:ms-from-ac`, blueprint
+`ch13_qpbt_test.tex:257-267`): the effects of the joint measurement of the first
+two cells of a constraint are symmetric whenever the underlying cell effects
+are. -/
 theorem msConstraintJoint_effect_transpose
     {V : Type*} [Fintype V] [DecidableEq V]
     (P : Fin 9 → Measurement (ZMod 2) V)
@@ -354,6 +399,12 @@ private theorem msConstraintObservable_product_parity
   have hprod := msConstraintObservable_product OA OB hOA hOB hac i
   fin_cases i <;> simpa [msParity] using hprod
 
+/-- Formalization-only auxiliary lemma for
+`exists_ms_perfect_strategy_of_anticommuting` (`thm:ms-from-ac`, blueprint
+`ch13_qpbt_test.tex:257-267`): multiplying a constraint effect at `ab` by the
+effect of an incident cell measurement at `b` returns the constraint effect when
+`b` is the bit that the parity triple assigns to that cell, and `0` otherwise;
+this is the consistency of the constraint answer with its variable answers. -/
 theorem msCellConstraintJoint_mul
     {V : Type*} [Fintype V] [DecidableEq V]
     (OA OB : Op V) (hOA : OAᴴ = OA) (hOB : OBᴴ = OB)
