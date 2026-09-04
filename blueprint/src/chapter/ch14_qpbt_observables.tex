@@ -433,13 +433,18 @@ measurements.
 	$\hilb_{\mathsf{A}} \ot \hilb_{\mathsf{B}}$ with $\hilb_{\mathsf{A}}$ and
 	$\hilb_{\mathsf{B}}$ finite dimensional, let $\{Q_a\}$ and $\{R_a\}$ be POVMs
 	on $\hilb_{\mathsf{A}}$ and $\hilb_{\mathsf{B}}$ respectively, and let
-	$\delta \geq 0$ satisfy
+	$\delta \geq 0$ satisfy the exact consistency-defect bound
 	\[
-		Q_a \ot \Id_{\mathsf{B}} \,\simeq_\delta\, \Id_{\mathsf{A}} \ot R_a\,.
+	\operatorname{consistencyDefect}\!\left(
+		\operatorname{uniformDistribution}(\mathrm{Unit}),
+		(u,a) \mapsto Q_a \ot \Id_{\mathsf{B}},
+		(u,a) \mapsto \Id_{\mathsf{A}} \ot R_a,
+		\ket{\psi}\right) \leq \delta\,.
 	\]
 	Then there is a projective measurement $\{P_a\}$ on $\hilb_{\mathsf{A}}$ with
 	\[
-		d_\psi\bigl(P_a \ot \Id_{\mathsf{B}},\, Q_a \ot \Id_{\mathsf{B}}\bigr)^2
+		\sum_{a}
+		\left\|\left((P_a-Q_a) \ot \Id_{\mathsf{B}}\right)\ket{\psi}\right\|^2
 		\leq 220\,\delta^{1/4}\,.
 	\]
 \end{lemma}
@@ -447,12 +452,13 @@ measurements.
 	\leanok
 	\uses{lem:projective-low-rank-sum, lem:Q-completeness, lem:P-Q-approx,
 		def:projective-P}
-	Work with Alice's reduced state $\varphi$, for which the consistency
-	hypothesis gives $\sum_a \bra{\varphi} Q_a - Q_a^2 \ket{\varphi} \leq 2\delta$.
+	Work with Alice's reduced state $\rho_A$, for which the consistency
+	hypothesis gives
+	$\sum_a \operatorname{Tr}\!\left(\rho_A(Q_a-Q_a^2)\right) \leq 2\delta$.
 	When $\delta^{1/4} \leq 1/24$, rank reduction
 	(Lemma~\ref{lem:projective-low-rank-sum}) replaces $\{Q_a\}$ by a family of
 	projectors, Lemma~\ref{lem:Q-completeness} shows that this family is almost
-	complete on $\varphi$, and the operator $P$ of
+	complete on $\rho_A$, and the operator $P$ of
 	Definition~\ref{def:projective-P} is projective and close to it by
 	Lemma~\ref{lem:P-Q-approx}. Completing $P$ at one fixed outcome and summing the
 	two estimates gives the bound $220\,\delta^{1/4}$, the completion contributing
