@@ -546,6 +546,13 @@ it.  `issues-prs.md` makes this the repository-owned publication contract.
 **Expected effect:** long Lean gates no longer turn a successful hook into exit
 141, while gate failures still publish no ref and exact-head CI remains intact.
 
+## 2026-09-05 — Branch-private Lake products may use a separate volume
+
+**Trigger:** `results/telemetry/events.md` 2026-09-05, issue #190 and PR #198.
+**Change:** `MIPSTARRE_LAKE_ROOT` uses `<root>/<branch>` for one-component branches;
+the helper rejects protected overlap and duplicate ownership, and dispatch grants its target.
+**Expected effect:** native relocation without cache corruption or leaked build data.
+
 ## 2026-09-05 — Bind checked publication to the preflight tuple
 
 **Trigger:** `results/telemetry/events.md` 2026-09-05, "Checked push did not

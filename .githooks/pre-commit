@@ -39,7 +39,7 @@ else
 fi
 INFRA_CHANGED="$(git diff --cached --numstat $BUDGET_BASE -- local/ .githooks/ \
   scripts/tests/test_dispatch.py scripts/tests/test_github_workflow.py \
-  scripts/tests/test_pre_push_hook.py scripts/tests/test_ready_packets.py \
+  scripts/tests/test_lake_root.py scripts/tests/test_ready_packets.py \
   | awk '{added=$1; deleted=$2; if (added != "-") total+=added+deleted} END {print total+0}')"
 if [ "${INFRA_CHANGED:-0}" -gt 400 ] && [ "${MIPSTARRE_INFRA_OVERRIDE:-}" != "1" ]; then
   echo "MIPStarRE pre-commit: staged workflow-layer change is ${INFRA_CHANGED} lines (budget: 400)."
