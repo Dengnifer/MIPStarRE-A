@@ -21,18 +21,18 @@ namespace MIPStarRE.QPBT
 
 noncomputable section
 
-/-- The Pauli question sampler equals the distribution that the construction of
-`def:typed-cl-distributions` (`ch12_qpbt_games.tex:1414-1418`) produces from the
-family `pauliCL` on the Pauli type graph. This is the distribution-identity
-component supporting `lem:pauli-question-typed-cl`, blueprint
-`ch13_qpbt_test.tex:440-448`; it does not assert that `pauliCL` is a typed family
-of conditionally linear maps. Paper `references/qpbt-paper/07_types.tex:84-93`.
+/-- The Pauli question sampler equals the distribution produced by
+`def:typed-cl-distributions` (`ch12_qpbt_games.tex:1414-1418`) from the family
+`pauliCL` on the Pauli type graph. This is the distribution identity in
+`lem:pauli-question-typed-equality-obligation`, blueprint
+`ch13_qpbt_test.tex:450-458`, while the common-level family assertion is stated
+separately there. Paper
+`references/qpbt-paper/07_types.tex:84-93`.
 
-**Unfaithful:** The equality asserted in
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1115-1120`
-is not yet proved and is tracked by issue #180. Elimination: identify the
-uniform `PauliEdge` sampler with `graphDistribution` and unfold the common-seed
-push-forward in `typedCLDistribution`.
+**Unfaithful:** This equality is an unproved assertion from
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1115-1120`.
+Issue #180 tracks its derivation: both sides are the push-forward of the uniform
+law on ordered Pauli edges together with a common uniform seed.
 -/
 theorem pauliQuestionDistribution_eq_typedCL (P : AdmissibleParams) :
     pauliQuestionDistribution P =
@@ -44,15 +44,13 @@ theorem pauliQuestionDistribution_eq_typedCL (P : AdmissibleParams) :
 /-- `lem:pauli-question-typed-cl`: the Pauli maps form a common-level typed
 conditionally linear family, and their typed distribution is exactly the
 question distribution of the Pauli basis test. Blueprint
-`ch13_qpbt_test.tex:450-458`, paper
+`ch13_qpbt_test.tex:460-468`, paper
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-966,1084-1120`.
 
-**Unfaithful:** This proof currently relies on the open declarations
-`isTypedCondLinearFamily_pauliCL` and
-`pauliQuestionDistribution_eq_typedCL`, which are not yet proved from
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1084-1120`.
-This is tracked by issue #180. Elimination: complete those component family and
-distribution-equality proofs.
+**Unfaithful:** This assertion depends on the unproved assertions
+`isTypedCondLinearFamily_pauliCL` and `pauliQuestionDistribution_eq_typedCL`.
+Issue #180 tracks their mathematical derivations: establish the common level of
+the Pauli maps and identify the two common-seed distributions.
 -/
 theorem pauliQuestionDistribution_isTypedCL (P : AdmissibleParams) :
     IsTypedCondLinearFamily (PauliScalar P) PauliType 3 (pauliCL P) ∧

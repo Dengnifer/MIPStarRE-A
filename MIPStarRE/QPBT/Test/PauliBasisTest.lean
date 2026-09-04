@@ -255,7 +255,7 @@ noncomputable def pauliCL (P : AdmissibleParams) (t : PauliType) :
 /-- Level assertions for the typed Pauli CL maps. These are the component
 obligations in `def:pauli-question-distribution` and together imply the
 typed-family assertion required by `lem:pauli-question-typed-cl` (blueprint
-`blueprint/src/chapter/ch13_qpbt_test.tex:384-428`; paper
+`blueprint/src/chapter/ch13_qpbt_test.tex:430-438`; paper
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1084-1113`).
 
 **Unfaithful:** These assertions are not yet derived from
@@ -271,7 +271,7 @@ theorem isCondLinear_pauliCL (P : AdmissibleParams) (t : PauliType) :
 /-- The Pauli question maps form a typed family of three-level conditionally
 linear functions, after raising each component from the level specified by
 `pauliCLLevel`. This is the family condition in
-`lem:pauli-question-typed-cl`, blueprint `ch13_qpbt_test.tex:430-438`, paper
+`lem:pauli-question-typed-cl`, blueprint `ch13_qpbt_test.tex:440-448`, paper
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1084-1120`.
 
 **Unfaithful:** This proof currently relies on `isCondLinear_pauliCL`, whose
