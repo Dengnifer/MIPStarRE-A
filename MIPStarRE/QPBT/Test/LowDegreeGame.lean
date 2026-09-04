@@ -271,6 +271,8 @@ private def ldDirectionCLLinear (P : LdParams) (i : Fin P.m) :
       · simp only [prefixProjection, if_neg h]
         rfl
 
+/-- Formalization-only auxiliary lemma: the shared-scalar map vanishes
+outside the scalar register. -/
 private theorem ldSeedLinear_supported (P : LdParams) :
     ∀ (x : LdSpace P) (i : LdIndex P), i ∉ ldSeedRegister P →
       ldSeedLinear P x i = 0 := by
@@ -281,6 +283,8 @@ private theorem ldSeedLinear_supported (P : LdParams) :
     exact absurd (Finset.mem_singleton_self _) hi
   · rfl
 
+/-- Formalization-only auxiliary lemma: the canonical-representative map
+vanishes outside the point register. -/
 private theorem ldPointCLLinear_supported (P : LdParams) (v : Fin P.m → ScalarQ P) :
     ∀ (x : LdSpace P) (i : LdIndex P), i ∉ ldPointRegister P →
       ldPointCLLinear P v x i = 0 := by
@@ -290,6 +294,8 @@ private theorem ldPointCLLinear_supported (P : LdParams) (v : Fin P.m → Scalar
   · rfl
   · rfl
 
+/-- Formalization-only auxiliary lemma: the prefix-zeroing map vanishes
+outside the direction register. -/
 private theorem ldDirectionCLLinear_supported (P : LdParams) (i : Fin P.m) :
     ∀ (x : LdSpace P) (k : LdIndex P), k ∉ ldDirectionRegister P →
       ldDirectionCLLinear P i x k = 0 := by
@@ -299,18 +305,24 @@ private theorem ldDirectionCLLinear_supported (P : LdParams) (i : Fin P.m) :
   · rfl
   · exact absurd (Finset.mem_image_of_mem _ (Finset.mem_univ j)) hk
 
+/-- Formalization-only auxiliary lemma: the point register is disjoint from
+the scalar register. -/
 private theorem ldPointRegister_subset_sdiff_seed (P : LdParams) :
     ldPointRegister P ⊆ Finset.univ \ ldSeedRegister P := by
   intro i hi
   obtain ⟨j, -, rfl⟩ := Finset.mem_image.mp hi
   simp [ldSeedRegister]
 
+/-- Formalization-only auxiliary lemma: the direction register is disjoint
+from the scalar register. -/
 private theorem ldDirectionRegister_subset_sdiff_seed (P : LdParams) :
     ldDirectionRegister P ⊆ Finset.univ \ ldSeedRegister P := by
   intro i hi
   obtain ⟨j, -, rfl⟩ := Finset.mem_image.mp hi
   simp [ldSeedRegister]
 
+/-- Formalization-only auxiliary lemma: the point register is disjoint from
+both the scalar and the direction registers. -/
 private theorem ldPointRegister_subset_sdiff_seed_direction (P : LdParams) :
     ldPointRegister P ⊆
       (Finset.univ \ ldSeedRegister P) \ ldDirectionRegister P := by
@@ -318,6 +330,8 @@ private theorem ldPointRegister_subset_sdiff_seed_direction (P : LdParams) :
   obtain ⟨j, -, rfl⟩ := Finset.mem_image.mp hi
   simp [ldSeedRegister, ldDirectionRegister]
 
+/-- Formalization-only auxiliary lemma: restricting to the scalar register
+leaves the shared scalar coordinate unchanged. -/
 private theorem coordinateRestriction_seed (P : LdParams) (x : LdSpace P) :
     coordinateRestriction (ldSeedRegister P) x (Sum.inl (Sum.inr ())) =
       x (Sum.inl (Sum.inr ())) := by
@@ -325,6 +339,8 @@ private theorem coordinateRestriction_seed (P : LdParams) (x : LdSpace P) :
     Finset.mem_singleton_self _
   simp [coordinateRestriction, hmem]
 
+/-- Formalization-only auxiliary lemma: restricting to the point register
+leaves the point block unchanged. -/
 private theorem coordinateRestriction_point (P : LdParams) (x : LdSpace P) :
     LdSpace.point (coordinateRestriction (ldPointRegister P) x) = LdSpace.point x := by
   funext j
@@ -332,6 +348,8 @@ private theorem coordinateRestriction_point (P : LdParams) (x : LdSpace P) :
     Finset.mem_image_of_mem _ (Finset.mem_univ j)
   simp [LdSpace.point, coordinateRestriction, hmem]
 
+/-- Formalization-only auxiliary lemma: restricting to the direction register
+leaves the direction block unchanged. -/
 private theorem coordinateRestriction_direction (P : LdParams) (x : LdSpace P) :
     LdSpace.direction (coordinateRestriction (ldDirectionRegister P) x) =
       LdSpace.direction x := by
