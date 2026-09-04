@@ -145,6 +145,8 @@ noncomputable def naimarkEmbedding (ι α : Type) [Fintype ι] [DecidableEq ι]
     intro x y
     simp [PiLp.inner_apply, Fintype.sum_prod_type, naimarkEmbeddingMap]
 
+/-- The coordinates of the ground embedding: the amplitude is carried to the
+auxiliary basis vector `|⊥⟩` and vanishes on the other auxiliary vectors. -/
 @[simp]
 theorem naimarkEmbedding_apply {ι α : Type} [Fintype ι] [DecidableEq ι]
     [Fintype α] [DecidableEq α] (x : EuclideanSpace ℂ ι) (p : ι × Option α) :
@@ -157,6 +159,7 @@ def naimarkCompression {ι α : Type} [Fintype ι] [DecidableEq ι]
     [Fintype α] [DecidableEq α] (M : Op (ι × Option α)) : Op ι :=
   M.submatrix (fun i => (i, none)) (fun j => (j, none))
 
+/-- The entries of the ground-slice compression. -/
 @[simp]
 theorem naimarkCompression_apply {ι α : Type} [Fintype ι] [DecidableEq ι]
     [Fintype α] [DecidableEq α] (M : Op (ι × Option α)) (i j : ι) :
@@ -197,6 +200,7 @@ def naimarkInflation {ι α : Type} [Fintype ι] [DecidableEq ι]
     [Fintype α] [DecidableEq α] (M : Op ι) : Op (ι × Option α) :=
   Matrix.of fun p q => if p.2 = none ∧ q.2 = none then M p.1 q.1 else 0
 
+/-- The entries of the inflation of an operator to the enlarged space. -/
 @[simp]
 theorem naimarkInflation_apply {ι α : Type} [Fintype ι] [DecidableEq ι]
     [Fintype α] [DecidableEq α] (M : Op ι) (p q : ι × Option α) :
@@ -323,6 +327,7 @@ noncomputable def naimarkDilatedMeasurement {α d : Type} [Fintype α] [Decidabl
   MIPStarRE.Quantum.Measurement.ofSumEqOne (naimarkDilatedEffect M a₀)
     (naimarkDilatedEffect_pos M a₀) (naimarkDilatedEffect_sum M a₀)
 
+/-- The effects of the dilated measurement are the dilated effects. -/
 @[simp]
 theorem naimarkDilatedMeasurement_effect {α d : Type} [Fintype α] [DecidableEq α]
     [Fintype d] [DecidableEq d] (M : MIPStarRE.Quantum.Measurement α d) (a₀ a : α) :
@@ -370,6 +375,9 @@ noncomputable def naimarkDilatedState (α : Type) [Fintype α] [DecidableEq α]
     EuclideanSpace ℂ ((ιA × Option α) × (ιB × Option α)) :=
   isometryTensor (naimarkEmbedding ιA α) (naimarkEmbedding ιB α) ψ
 
+/-- The coordinates of the dilated state: the original amplitudes sit on the
+ground slice, where both auxiliary registers carry the adjoined basis vector,
+and all remaining coordinates vanish. -/
 theorem naimarkDilatedState_apply (α : Type) [Fintype α] [DecidableEq α]
     {ιA ιB : Type} [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
     (ψ : EuclideanSpace ℂ (ιA × ιB)) (p : (ιA × Option α) × (ιB × Option α)) :
@@ -453,15 +461,21 @@ noncomputable def msDilatedStrategy (S : Strategy msGame) : Strategy msGame wher
   A x := naimarkDilatedMeasurement (α := MsAnswer) (S.A x) (MsAnswer.bit 0)
   B y := naimarkDilatedMeasurement (α := MsAnswer) (S.B y) (MsAnswer.bit 0)
 
+/-- The state of the dilated strategy is the image of the original state under
+the two ground embeddings. -/
 @[simp]
 theorem msDilatedStrategy_psi (S : Strategy msGame) :
     (msDilatedStrategy S).ψ = naimarkDilatedState MsAnswer S.ψ := rfl
 
+/-- Alice's dilated question measurements are the Naimark dilations of her
+original ones. -/
 @[simp]
 theorem msDilatedStrategy_A_effect (S : Strategy msGame) (x : MsType) (a : MsAnswer) :
     ((msDilatedStrategy S).A x).effect a =
       naimarkDilatedEffect (α := MsAnswer) (S.A x) (MsAnswer.bit 0) a := rfl
 
+/-- Bob's dilated question measurements are the Naimark dilations of his
+original ones. -/
 @[simp]
 theorem msDilatedStrategy_B_effect (S : Strategy msGame) (y : MsType) (b : MsAnswer) :
     ((msDilatedStrategy S).B y).effect b =
