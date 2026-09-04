@@ -1,5 +1,6 @@
 import MIPStarRE.QPBT.Games.Consistency
 import MIPStarRE.LDT.Basic.DistributionAvg
+import MIPStarRE.LDT.MakingMeasurementsProjective.Defs
 import MIPStarRE.LDT.Preliminaries.CauchySchwarz
 import MIPStarRE.Quantum.FiniteHilbert
 
@@ -21,6 +22,7 @@ open scoped BigOperators Matrix MatrixOrder ComplexOrder
 namespace MIPStarRE.QPBT.DistanceCalculus
 
 open MIPStarRE.LDT MIPStarRE.Quantum
+open MIPStarRE.LDT.MakingMeasurementsProjective
 
 /-- The squared norm of `M ψ` is the quadratic form of `Mᴴ M`. -/
 private theorem norm_applyOperatorToState_sq_eq {ι : Type*}
@@ -151,22 +153,6 @@ theorem sum_norm_mul_funIndexed_apply_le {α Γ ι : Type*}
         (fun g _ _ => star_mul_self_nonneg (S g))
     _ ≤ 1 := hS
 
-/-- View a projective QPBT measurement as an LDT projective measurement. -/
-private def toLDTProjMeas {α ι : Type*} [Fintype α]
-    [Fintype ι] [DecidableEq ι]
-    (M : MIPStarRE.Quantum.Measurement α ι)
-    (hM : MIPStarRE.QPBT.Measurement.IsProjective M) :
-    MIPStarRE.LDT.ProjMeas α ι where
-  toMeasurement := {
-    toSubMeas := {
-      outcome := M.effect
-      total := 1
-      outcome_pos := M.pos
-      sum_eq_total := M.sum_eq_one
-      total_le_one := le_rfl }
-    total_eq_one := rfl }
-  proj := fun a => (hM a).isIdempotentElem.eq
-
 /-- Distinct effects of a projective complete measurement are orthogonal. -/
 theorem projective_effect_mul_effect_eq_zero {α ι : Type*}
     [Fintype α] [Fintype ι] [DecidableEq ι]
@@ -174,7 +160,22 @@ theorem projective_effect_mul_effect_eq_zero {α ι : Type*}
     (hM : MIPStarRE.QPBT.Measurement.IsProjective M)
     {a b : α} (hab : a ≠ b) :
     M.effect a * M.effect b = 0 := by
-  simpa [toLDTProjMeas] using (toLDTProjMeas M hM).outcome_orthogonal a b hab
+  classical
+  cases isEmpty_or_nonempty ι with
+  | inl hι =>
+      letI := hι
+      exact Subsingleton.elim _ _
+  | inr hι =>
+      letI := hι
+      let H : FiniteHilbertSpace :=
+        { carrier := ι
+          instFintype := inferInstance
+          instDecidableEq := inferInstance
+          instNonempty := inferInstance }
+      let P : ProjMeas α ι :=
+        { toMeasurement := MatrixMeasurement.toMeasurement (H := H) M
+          proj := fun a => (hM a).isIdempotentElem.eq }
+      simpa [P, H] using P.outcome_orthogonal a b hab
 
 /-- Gram expansion for a finite sum with mutually orthogonal left projectors. -/
 private theorem gram_finset_sum_projector_mul {α ι : Type*}
@@ -577,39 +578,6 @@ theorem abs_point_defect_le_sqrt_distance_of_projective_left {α ι : Type*}
       rw [Real.sqrt_sq (norm_nonneg ψ), hψ]
       simp [v]
 
-/-- Weighted Cauchy--Schwarz transports pointwise square-root bounds to an average. -/
-theorem avgOver_abs_le_sqrt_of_pointwise {X : Type*}
-    (μ : Distribution X) (f g : X → ℝ)
-    (hf : ∀ x, |f x| ≤ Real.sqrt (g x))
-    (hg : ∀ x, 0 ≤ g x) (hμ : μ.IsProbability) :
-    |avgOver μ f| ≤ Real.sqrt (avgOver μ g) := by
-  unfold avgOver
-  calc
-    |∑ x ∈ μ.support, μ.weight x * f x| ≤
-        ∑ x ∈ μ.support, |μ.weight x * f x| :=
-      Finset.abs_sum_le_sum_abs _ _
-    _ = ∑ x ∈ μ.support, μ.weight x * |f x| := by
-      apply Finset.sum_congr rfl
-      intro x _
-      rw [abs_mul, abs_of_nonneg (μ.nonnegative x)]
-    _ ≤ ∑ x ∈ μ.support, μ.weight x * Real.sqrt (g x) := by
-      apply Finset.sum_le_sum
-      intro x _
-      exact mul_le_mul_of_nonneg_left (hf x) (μ.nonnegative x)
-    _ = ∑ x ∈ μ.support,
-          Real.sqrt (μ.weight x) * Real.sqrt (μ.weight x * g x) := by
-      apply Finset.sum_congr rfl
-      intro x _
-      rw [Real.sqrt_mul (μ.nonnegative x)]
-      rw [← mul_assoc, Real.mul_self_sqrt (μ.nonnegative x)]
-    _ ≤ Real.sqrt (∑ x ∈ μ.support, μ.weight x) *
-          Real.sqrt (∑ x ∈ μ.support, μ.weight x * g x) := by
-      exact Real.sum_sqrt_mul_sqrt_le μ.support μ.nonnegative
-        (fun x => mul_nonneg (μ.nonnegative x) (hg x))
-    _ = Real.sqrt (∑ x ∈ μ.support, μ.weight x * g x) := by
-      rw [hμ.weight_sum_eq_one]
-      simp
-
 /-- Regard a unit Euclidean vector as an LDT pure state. -/
 private noncomputable def pureStateOfUnitVector {ι : Type*}
     [Fintype ι] [DecidableEq ι] [Nonempty ι]
@@ -621,16 +589,6 @@ private noncomputable def pureStateOfUnitVector {ι : Type*}
       _ = inner ℂ ψ ψ := (EuclideanSpace.inner_eq_star_dotProduct ψ ψ).symm
       _ = (‖ψ‖ ^ 2 : ℂ) := inner_self_eq_norm_sq_to_K ψ
       _ = 1 := by rw [hψ]; norm_num
-
-/-- View a complete QPBT measurement as an LDT submeasurement. -/
-private def qpbtMeasurementToSubMeas {α ι : Type*}
-    [Fintype α] [Fintype ι] [DecidableEq ι]
-    (M : MIPStarRE.Quantum.Measurement α ι) : SubMeas α ι where
-  outcome := M.effect
-  total := 1
-  outcome_pos := M.pos
-  sum_eq_total := M.sum_eq_one
-  total_le_one := le_rfl
 
 /-- For a unit vector, `stateQForm` agrees with the LDT pure-state expectation. -/
 private theorem stateQForm_eq_ev {ι : Type*}
@@ -667,9 +625,17 @@ theorem overlap_gap_le_of_opFamilyDistSq {X α ι : Type*}
         Real.sqrt ζ := by
   classical
   let ψp : PureState ι := pureStateOfUnitVector ψ hψ
-  let As : X → SubMeas α ι := fun x => qpbtMeasurementToSubMeas (A x)
-  let Bs : X → SubMeas α ι := fun x => qpbtMeasurementToSubMeas (B x)
-  let Ds : X → SubMeas α ι := fun x => qpbtMeasurementToSubMeas (D x)
+  let H : FiniteHilbertSpace :=
+    { carrier := ι
+      instFintype := inferInstance
+      instDecidableEq := inferInstance
+      instNonempty := inferInstance }
+  let As : X → SubMeas α ι := fun x =>
+    (MatrixMeasurement.toMeasurement (H := H) (A x)).toSubMeas
+  let Bs : X → SubMeas α ι := fun x =>
+    (MatrixMeasurement.toMeasurement (H := H) (B x)).toSubMeas
+  let Ds : X → SubMeas α ι := fun x =>
+    (MatrixMeasurement.toMeasurement (H := H) (D x)).toSubMeas
   have hmass : ∑ x ∈ μ.support, μ.weight x ≤ 1 := by
     rw [hμ.weight_sum_eq_one]
   have hsdd : SDDRel (ψp : QuantumState ι) μ Bs Ds ζ := by
@@ -686,7 +652,7 @@ theorem overlap_gap_le_of_opFamilyDistSq {X α ι : Type*}
         intro x
         apply Finset.sum_congr rfl
         intro a _
-        simpa [ψp, Bs, Ds, qpbtMeasurementToSubMeas] using
+        simpa [ψp, Bs, Ds, H] using
           ev_adjoint_mul_self_eq_norm_sq ψ hψ ((B x).effect a - (D x).effect a)
       _ ≤ ζ := hBD
   have hgap := MIPStarRE.LDT.Preliminaries.easyApproxFromApproxDelta
@@ -728,7 +694,8 @@ theorem overlap_gap_le_of_opFamilyDistSq {X α ι : Type*}
     intro a _
     exact stateQForm_eq_ev ψ hψ _]
   rw [hBA, hDA]
-  simpa only [ψp, As, Bs, Ds, qpbtMeasurementToSubMeas] using hgap
+  simpa only [ψp, As, Bs, Ds, H,
+    MatrixMeasurement.toMeasurement_outcome] using hgap
 
 /-- On a unit state and probability distribution, defect is one minus overlap. -/
 theorem consistencyDefect_eq_one_sub_overlap {X α ι : Type*}

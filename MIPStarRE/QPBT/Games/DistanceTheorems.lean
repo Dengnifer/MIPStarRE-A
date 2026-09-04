@@ -122,7 +122,8 @@ theorem consistencyDefect_le_sqrt_of_projective_left {X α ι : Type*}
   have hg (x : X) : 0 ≤ g x :=
     Finset.sum_nonneg fun a _ => sq_nonneg _
   have havg : |avgOver μ f| ≤ Real.sqrt (avgOver μ g) :=
-    avgOver_abs_le_sqrt_of_pointwise μ f g hf hg hμ
+    MIPStarRE.LDT.Preliminaries.avgOver_abs_le_sqrt_of_pointwise μ f g hf hg (by
+      rw [hμ.weight_sum_eq_one])
   have hdefect : consistencyDefect μ (fun x a => (A x).effect a)
       (fun x a => (B x).effect a) ψ = avgOver μ f := by
     unfold consistencyDefect

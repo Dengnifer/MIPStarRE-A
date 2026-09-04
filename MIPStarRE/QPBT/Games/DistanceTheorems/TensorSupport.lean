@@ -1,5 +1,7 @@
 import MIPStarRE.QPBT.Games.DistanceTheorems.Support
 import MIPStarRE.LDT.Basic.TensorPlacement
+import MIPStarRE.LDT.MakingMeasurementsProjective.Defs
+import MIPStarRE.LDT.Preliminaries.ComparisonCore
 
 /-!
 # Tensor support for the state-dependent distance calculus
@@ -18,16 +20,7 @@ open scoped BigOperators Matrix MatrixOrder ComplexOrder
 namespace MIPStarRE.QPBT.DistanceCalculus
 
 open MIPStarRE.LDT MIPStarRE.Quantum
-
-/-- The state quadratic form commutes with a finite-set sum. -/
-private theorem stateQForm_finset_sum {κ ι : Type*}
-    [Fintype ι] [DecidableEq ι]
-    (ψ : EuclideanSpace ℂ ι) (s : Finset κ) (M : κ → Op ι) :
-    stateQForm ψ (∑ k ∈ s, M k) = ∑ k ∈ s, stateQForm ψ (M k) := by
-  classical
-  induction s using Finset.induction_on with
-  | empty => simp [stateQForm, applyOperatorToState]
-  | @insert k s hk ih => simp [hk, stateQForm_add, ih]
+open MIPStarRE.LDT.MakingMeasurementsProjective
 
 /-- Lift a QPBT measurement to the left tensor factor. -/
 noncomputable def leftPlacedMeasurement {α ιA ιB : Type*}
@@ -67,40 +60,35 @@ theorem placed_product_stateQForm_eq {ιA ιB : Type*}
   congr 1
   exact leftTensor_mul_rightTensor_eq_opTensor A B
 
-/-- The quadratic form of a tensor product of positive operators is nonnegative. -/
-private theorem stateQForm_opTensor_nonneg {ιA ιB : Type*}
-    [Fintype ιA] [DecidableEq ιA]
-    [Fintype ιB] [DecidableEq ιB]
-    (ψ : EuclideanSpace ℂ (ιA × ιB)) (A : Op ιA) (B : Op ιB)
-    (hA : 0 ≤ A) (hB : 0 ≤ B) :
-    0 ≤ stateQForm ψ (heteroKron A B) := by
-  have hmono := quadratic_form_mono
-    (show (0 : Op (ιA × ιB)) ≤ heteroKron A B by
-      exact MIPStarRE.Quantum.kronecker_nonneg hA hB) ψ
-  simpa [stateQForm, applyOperatorToState] using hmono
+/-- The (possibly unnormalized) rank-one state associated to a Euclidean vector. -/
+private noncomputable def vectorQuantumState {ι : Type*}
+    [Fintype ι] [DecidableEq ι]
+    (ψ : EuclideanSpace ℂ ι) : QuantumState ι where
+  density := pureDensity ψ.ofLp
+  density_psd := by
+    refine Matrix.nonneg_iff_posSemidef.mpr ?_
+    exact (Matrix.posSemidef_vecMulVec_self_star ψ.ofLp).smul
+      (by positivity : 0 ≤ (Fintype.card ι : ℂ))
 
-/-- Expand the overlap of two postprocessed effects over their fibers. -/
-private theorem post_pair_stateQForm_expand {α β ιA ιB : Type*}
-    [Fintype α] [DecidableEq α] [Fintype β] [DecidableEq β]
-    [Fintype ιA] [DecidableEq ιA]
-    [Fintype ιB] [DecidableEq ιB]
-    (ψ : EuclideanSpace ℂ (ιA × ιB))
-    (A : MIPStarRE.Quantum.Measurement α ιA)
-    (B : MIPStarRE.Quantum.Measurement α ιB) (f : α → β) (b c : β) :
-    stateQForm ψ
-        (heteroKron ((A.postprocess f).effect b) ((B.postprocess f).effect c)) =
-      ∑ a ∈ Finset.univ.filter (fun a => f a = b),
-        ∑ a' ∈ Finset.univ.filter (fun a' => f a' = c),
-          stateQForm ψ (heteroKron (A.effect a) (B.effect a')) := by
-  change stateQForm ψ
-      (opTensor
-        (∑ a ∈ Finset.univ.filter (fun a => f a = b), A.effect a)
-        (∑ a' ∈ Finset.univ.filter (fun a' => f a' = c), B.effect a')) = _
-  rw [opTensor_sum_left_finset, stateQForm_finset_sum]
-  apply Finset.sum_congr rfl
-  intro a _
-  rw [opTensor_sum_right_finset, stateQForm_finset_sum]
-  rfl
+/-- Evaluation in the rank-one vector state is the corresponding quadratic form. -/
+private theorem vectorQuantumState_ev_eq_stateQForm {ι : Type*}
+    [Fintype ι] [DecidableEq ι] [Nonempty ι]
+    (ψ : EuclideanSpace ℂ ι) (T : Op ι) :
+    ev (vectorQuantumState ψ) T = stateQForm ψ T := by
+  have hcard : (Fintype.card ι : ℂ) ≠ 0 :=
+    Nat.cast_ne_zero.mpr Fintype.card_ne_zero
+  change (MIPStarRE.Quantum.normalizedTrace (pureDensity ψ.ofLp * T)).re =
+    stateQForm ψ T
+  rw [MIPStarRE.Quantum.normalizedTrace_mul_comm]
+  unfold pureDensity MIPStarRE.Quantum.normalizedTrace
+  rw [Matrix.mul_smul, Matrix.mul_vecMulVec, Matrix.trace_smul, Matrix.trace_vecMulVec]
+  change (((Fintype.card ι : ℂ) *
+      ((T *ᵥ ψ.ofLp) ⬝ᵥ star ψ.ofLp)) /
+      (Fintype.card ι : ℂ)).re = stateQForm ψ T
+  rw [mul_div_cancel_left₀ _ hcard]
+  unfold stateQForm applyOperatorToState
+  rw [EuclideanSpace.inner_eq_star_dotProduct]
+  simp [Matrix.toEuclideanLin, Matrix.toLpLin_apply]
 
 /-- Postprocessing can only increase diagonal tensor overlap. -/
 theorem diagonal_postprocess_stateQForm_ge {α β ιA ιB : Type*}
@@ -113,38 +101,58 @@ theorem diagonal_postprocess_stateQForm_ge {α β ιA ιB : Type*}
     (∑ b : β, stateQForm ψ
         (heteroKron ((A.postprocess f).effect b) ((B.postprocess f).effect b))) ≥
       ∑ a : α, stateQForm ψ (heteroKron (A.effect a) (B.effect a)) := by
-  let fiber : β → Finset α := fun b =>
-    Finset.univ.filter fun a => f a = b
-  let diagTerm : α → ℝ := fun a =>
-    stateQForm ψ (heteroKron (A.effect a) (B.effect a))
-  let pairTerm : α → α → ℝ := fun a a' =>
-    stateQForm ψ (heteroKron (A.effect a) (B.effect a'))
-  let fiberDiag : β → ℝ := fun b => (fiber b).sum diagTerm
-  let fiberPair : β → ℝ := fun b =>
-    (fiber b).sum fun a => (fiber b).sum fun a' => pairTerm a a'
-  have hdiag_le (b : β) : fiberDiag b ≤ fiberPair b := by
-    dsimp [fiberDiag, fiberPair]
-    refine Finset.sum_le_sum ?_
-    intro a ha
-    exact Finset.single_le_sum
-      (fun a' _ => stateQForm_opTensor_nonneg ψ
-        (A.effect a) (B.effect a') (A.pos a) (B.pos a')) ha
-  calc
-    ∑ a : α, stateQForm ψ (heteroKron (A.effect a) (B.effect a)) =
-        ∑ b : β, fiberDiag b := by
-      dsimp [fiberDiag, diagTerm, fiber]
-      symm
-      exact Finset.sum_fiberwise Finset.univ f
-        (fun a => stateQForm ψ (heteroKron (A.effect a) (B.effect a)))
-    _ ≤ ∑ b : β, fiberPair b :=
-      Finset.sum_le_sum fun b _ => hdiag_le b
-    _ = ∑ b : β, stateQForm ψ
-        (heteroKron ((A.postprocess f).effect b)
-          ((B.postprocess f).effect b)) := by
-      apply Finset.sum_congr rfl
-      intro b _
-      dsimp [fiberPair, pairTerm, fiber]
-      exact (post_pair_stateQForm_expand ψ A B f b b).symm
+  classical
+  cases isEmpty_or_nonempty (ιA × ιB) with
+  | inl hι =>
+      letI := hι
+      have hψ : ψ = 0 := Subsingleton.elim _ _
+      subst ψ
+      simp [stateQForm, applyOperatorToState]
+  | inr hι =>
+      letI := hι
+      letI : Nonempty ιA := ⟨(Classical.choice hι).1⟩
+      letI : Nonempty ιB := ⟨(Classical.choice hι).2⟩
+      let HA : FiniteHilbertSpace :=
+        { carrier := ιA
+          instFintype := inferInstance
+          instDecidableEq := inferInstance
+          instNonempty := inferInstance }
+      let HB : FiniteHilbertSpace :=
+        { carrier := ιB
+          instFintype := inferInstance
+          instDecidableEq := inferInstance
+          instNonempty := inferInstance }
+      let As : SubMeas α ιA :=
+        (MatrixMeasurement.toMeasurement (H := HA) A).toSubMeas
+      let Bs : SubMeas α ιB :=
+        (MatrixMeasurement.toMeasurement (H := HB) B).toSubMeas
+      have hAoutcome (a : α) : As.outcome a = A.effect a := by
+        simp [As, HA]
+      have hBoutcome (a : α) : Bs.outcome a = B.effect a := by
+        simp [Bs, HB]
+      have hApost (b : β) :
+          (MIPStarRE.LDT.postprocess As f).outcome b =
+            (A.postprocess f).effect b := by
+        rw [SubMeas.postprocess_outcome,
+          MIPStarRE.Quantum.Measurement.postprocess_effect]
+        apply Finset.sum_congr rfl
+        intro a _
+        exact hAoutcome a
+      have hBpost (b : β) :
+          (MIPStarRE.LDT.postprocess Bs f).outcome b =
+            (B.postprocess f).effect b := by
+        rw [SubMeas.postprocess_outcome,
+          MIPStarRE.Quantum.Measurement.postprocess_effect]
+        apply Finset.sum_congr rfl
+        intro a _
+        exact hBoutcome a
+      have h := MIPStarRE.LDT.Preliminaries.qMatchMass_leftRight_postprocess_ge
+        (vectorQuantumState ψ) As Bs f
+      unfold qMatchMass at h
+      simp only [leftPlacedSubMeas_outcome, rightPlacedSubMeas_outcome] at h
+      simpa only [hAoutcome, hBoutcome, hApost, hBpost,
+        leftTensor_mul_rightTensor_eq_opTensor,
+        vectorQuantumState_ev_eq_stateQForm, MIPStarRE.QPBT.heteroKron] using h
 
 /-- Squared effects in one measurement fiber sum to at most the identity. -/
 private theorem measurement_fiber_sum_adjoint_mul_le_one {α β ι : Type*}
