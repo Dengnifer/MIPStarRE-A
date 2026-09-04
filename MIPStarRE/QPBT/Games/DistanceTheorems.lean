@@ -716,10 +716,11 @@ theorem avg_closeness {X ι : Type*}
     _ = ∑ x ∈ μ.support, μ.weight x * ‖v x‖ ^ 2 :=
       Real.sq_sqrt hrhs_nonneg
 
-/-- Passing from answer-indexed effects to unit-modulus weighted observables
-costs at most the answer-alphabet cardinality. This is `lem:povm-to-obs`,
-blueprint `blueprint/src/chapter/ch14_qpbt_observables.tex:321-354`, paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:115-129`. -/
+/-- Formalization-only auxiliary for `lem:povm-to-obs`: passing from arbitrary
+answer-indexed operator families to unit-modulus weighted sums costs at most the
+answer-alphabet cardinality. Paper
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:115-129` states
+the specialization to POVMs. -/
 theorem povm_to_obs {X α ι : Type*}
     [Fintype X] [DecidableEq X] [Fintype α]
     [Fintype ι] [DecidableEq ι]
@@ -772,6 +773,23 @@ theorem povm_to_obs {X α ι : Type*}
     _ = (Fintype.card α : ℝ) * avgOver μ (fun x =>
         ∑ a, ‖applyOperatorToState (A x a - B x a) ψ‖ ^ 2) :=
       avgOver_const_mul _ _ _
+
+/-- Passing from answer-indexed POVM effects to unit-modulus weighted
+observables costs at most the answer-alphabet cardinality. This is
+`lem:povm-to-obs`, blueprint
+`blueprint/src/chapter/ch14_qpbt_observables.tex:361-398`, paper
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:115-129`. -/
+theorem povm_to_obs_of_measurements {X α ι : Type*}
+    [Fintype X] [DecidableEq X] [Fintype α]
+    [Fintype ι] [DecidableEq ι]
+    (μ : Distribution X) (A B : X → Measurement α ι)
+    (c : α → ℂ) (hc : ∀ a, ‖c a‖ = 1) (ψ : EuclideanSpace ℂ ι) :
+    opDistSq μ (fun x => ∑ a, c a • (A x).effect a)
+        (fun x => ∑ a, c a • (B x).effect a) ψ ≤
+      Fintype.card α * opFamilyDistSq μ
+        (fun x a => (A x).effect a) (fun x a => (B x).effect a) ψ := by
+  exact povm_to_obs μ (fun x a => (A x).effect a)
+    (fun x a => (B x).effect a) c hc ψ
 
 /-- Orthonormalization of a consistent pair of POVMs. The resulting
 Alice-side measurement is projective and remains close to the original one on

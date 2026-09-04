@@ -5,7 +5,7 @@ import MIPStarRE.LDT.Preliminaries.CauchySchwarz
 import MIPStarRE.Quantum.FiniteHilbert
 
 /-!
-# Algebraic support for the state-dependent distance calculus
+# Finite-dimensional operator estimates for state-dependent distance
 
 This module contains finite-dimensional operator and finite-sum identities used
 by the paper-facing distance theorems. It introduces no new mathematical
@@ -37,7 +37,8 @@ private theorem norm_applyOperatorToState_sq_eq {ι : Type*}
     (inner ℂ ψ ((Matrix.toEuclideanLin M).adjoint (Matrix.toEuclideanLin M ψ))).re
   rw [LinearMap.adjoint_inner_right]
 
-/-- Operator order is monotone under evaluation in a fixed vector. -/
+/-- Formalization-only auxiliary lemma for Fact 4.20: evaluation in a fixed
+vector preserves operator order. -/
 theorem quadratic_form_mono {ι : Type*}
     [Fintype ι] [DecidableEq ι]
     {S T : Op ι} (hST : S ≤ T) (v : EuclideanSpace ℂ ι) :
@@ -92,7 +93,8 @@ private theorem finset_sum_norm_mul_apply_le {γ ι : Type*}
       simpa [applyOperatorToState] using
         (norm_applyOperatorToState_sq_eq (1 : Op ι) (applyOperatorToState D v)).symm
 
-/-- A square-summable family of left multipliers contracts total squared norm. -/
+/-- Formalization-only auxiliary lemma for Fact 4.20: a square-summable family
+of left multipliers contracts total squared norm. -/
 theorem sum_norm_mul_apply_le {γ ι : Type*}
     [Fintype γ] [Fintype ι] [DecidableEq ι]
     (C : γ → Op ι) (D : Op ι) (v : EuclideanSpace ℂ ι)
@@ -101,7 +103,9 @@ theorem sum_norm_mul_apply_le {γ ι : Type*}
       ‖applyOperatorToState D v‖ ^ 2 := by
   simpa using finset_sum_norm_mul_apply_le Finset.univ C D v (by simpa using hC)
 
-/-- Fiber-indexed left multiplication contracts the associated squared-norm sum. -/
+/-- Formalization-only auxiliary lemma for the function-indexed multiplication
+estimate at paper lines 347--361: fiber-indexed left multiplication contracts
+the associated squared-norm sum. -/
 theorem sum_norm_mul_funIndexed_apply_le {α Γ ι : Type*}
     [Fintype α] [Fintype Γ] [Fintype ι] [DecidableEq ι]
     (eval : Γ → α) (S : Γ → Op ι) (D : α → Op ι)
@@ -134,7 +138,8 @@ theorem sum_norm_mul_funIndexed_apply_le {α Γ ι : Type*}
         (fun g _ _ => star_mul_self_nonneg (S g))
     _ ≤ 1 := hS
 
-/-- Distinct effects of a projective complete measurement are orthogonal. -/
+/-- Formalization-only auxiliary lemma for the projective-sum estimate at paper
+lines 364--380: distinct effects of a projective measurement are orthogonal. -/
 theorem projective_effect_mul_effect_eq_zero {α ι : Type*}
     [Fintype α] [Fintype ι] [DecidableEq ι]
     (M : MIPStarRE.Quantum.Measurement α ι)
@@ -192,7 +197,9 @@ private theorem gram_finset_sum_projector_mul {α ι : Type*}
           _ = 0 := by rw [horth (Ne.symm hba)]; simp
       · exact fun h => (h ha).elim
 
-/-- An orthogonal projective left sum is bounded by the full input norm sum. -/
+/-- Formalization-only auxiliary lemma for the projective-sum estimate at paper
+lines 364--380: an orthogonal projective left sum is bounded by the full input
+norm sum. -/
 theorem norm_finset_sum_projector_mul_sq_le {α ι : Type*}
     [Fintype α] [Fintype ι] [DecidableEq ι]
     (P D : α → Op ι) (hproj : ∀ a, IsProj (P a))
@@ -229,12 +236,14 @@ theorem norm_finset_sum_projector_mul_sq_le {α ι : Type*}
       intro a _
       exact (norm_applyOperatorToState_sq_eq (D a) ψ).symm
 
-/-- The real quadratic form of an operator evaluated in a state vector. -/
+/-- Formalization-only definition for the agreement facts (Facts 4.13 and 4.14):
+the real quadratic form of an operator evaluated in a state vector. -/
 noncomputable def stateQForm {ι : Type*} [Fintype ι] [DecidableEq ι]
     (ψ : EuclideanSpace ℂ ι) (M : Op ι) : ℝ :=
   (inner ℂ ψ (applyOperatorToState M ψ)).re
 
-/-- The state quadratic form is additive in its operator. -/
+/-- Formalization-only auxiliary lemma for the agreement facts (Facts 4.13 and
+4.14): the state quadratic form is additive in its operator. -/
 theorem stateQForm_add {ι : Type*} [Fintype ι] [DecidableEq ι]
     (ψ : EuclideanSpace ℂ ι) (M N : Op ι) :
     stateQForm ψ (M + N) = stateQForm ψ M + stateQForm ψ N := by
@@ -246,7 +255,7 @@ private theorem stateQForm_sub {ι : Type*} [Fintype ι] [DecidableEq ι]
     stateQForm ψ (M - N) = stateQForm ψ M - stateQForm ψ N := by
   simp [stateQForm, applyOperatorToState]
 
-/-- The state quadratic form commutes with a finite type sum. -/
+/-- The state quadratic form commutes with a finite sum. -/
 private theorem stateQForm_sum {α ι : Type*} [Fintype α]
     [Fintype ι] [DecidableEq ι]
     (ψ : EuclideanSpace ℂ ι) (M : α → Op ι) :
@@ -262,7 +271,8 @@ private theorem stateQForm_one {ι : Type*} [Fintype ι] [DecidableEq ι]
   rw [stateQForm, hone]
   simpa using (inner_self_eq_norm_sq (𝕜 := ℂ) ψ)
 
-/-- Every effect of a complete measurement is bounded by the identity. -/
+/-- Formalization-only auxiliary lemma for the agreement facts (Facts 4.13 and
+4.14): every effect of a complete measurement is bounded by the identity. -/
 theorem measurement_effect_le_one {α ι : Type*} [Fintype α]
     [Fintype ι] [DecidableEq ι]
     (M : MIPStarRE.Quantum.Measurement α ι) (a : α) :
@@ -272,7 +282,8 @@ theorem measurement_effect_le_one {α ι : Type*} [Fintype α]
       Finset.single_le_sum (fun b _ => M.pos b) (Finset.mem_univ a)
     _ = 1 := M.sum_eq_one
 
-/-- Every positive measurement effect is Hermitian. -/
+/-- Formalization-only auxiliary lemma for the agreement facts (Facts 4.13 and
+4.14): every positive measurement effect is Hermitian. -/
 theorem measurement_effect_hermitian {α ι : Type*} [Fintype α]
     [Fintype ι] [DecidableEq ι]
     (M : MIPStarRE.Quantum.Measurement α ι) (a : α) :
@@ -344,7 +355,8 @@ private theorem stateQForm_effect_sum {α ι : Type*} [Fintype α]
     (∑ a : α, stateQForm ψ (A.effect a)) = ‖ψ‖ ^ 2 := by
   rw [← stateQForm_sum, A.sum_eq_one, stateQForm_one]
 
-/-- Pointwise inconsistency is total mass minus diagonal overlap. -/
+/-- Formalization-only auxiliary lemma for the agreement facts (Facts 4.13 and
+4.14): pointwise inconsistency is total mass minus diagonal overlap. -/
 theorem point_defect_eq {α ι : Type*} [Fintype α] [DecidableEq α]
     [Fintype ι] [DecidableEq ι]
     (A B : MIPStarRE.Quantum.Measurement α ι)
@@ -369,7 +381,9 @@ theorem point_defect_eq {α ι : Type*} [Fintype α] [DecidableEq α]
       rw [Finset.sum_sub_distrib]
     _ = _ := by rw [stateQForm_effect_sum]
 
-/-- The matrix-vector expression in `consistencyDefect` is `stateQForm`. -/
+/-- Formalization-only auxiliary lemma for the agreement facts (Facts 4.13 and
+4.14): the matrix-vector term in `consistencyDefect` is the state quadratic
+form. -/
 theorem consistency_term_eq_stateQForm {ι : Type*}
     [Fintype ι] [DecidableEq ι]
     (ψ : EuclideanSpace ℂ ι) (M : Op ι) :
@@ -377,7 +391,9 @@ theorem consistency_term_eq_stateQForm {ι : Type*}
       stateQForm ψ M := by
   rfl
 
-/-- Pointwise measurement distance is at most twice the inconsistency defect. -/
+/-- Formalization-only auxiliary lemma for the agreement facts (Facts 4.13 and
+4.14), item 1: pointwise measurement distance is at most twice the
+inconsistency defect. -/
 theorem point_distance_le_two_defect {α ι : Type*}
     [Fintype α] [DecidableEq α] [Fintype ι] [DecidableEq ι]
     (A B : MIPStarRE.Quantum.Measurement α ι)
@@ -409,7 +425,9 @@ theorem point_distance_le_two_defect {α ι : Type*}
       ring
     _ = _ := by rw [point_defect_eq A B ψ]
 
-/-- Projective measurements make distance exactly twice the pointwise defect. -/
+/-- Formalization-only auxiliary lemma for the agreement facts (Facts 4.13 and
+4.14), item 2: projective measurements make distance exactly twice the
+pointwise defect. -/
 theorem point_distance_eq_two_defect_of_projective {α ι : Type*}
     [Fintype α] [DecidableEq α] [Fintype ι] [DecidableEq ι]
     (A B : MIPStarRE.Quantum.Measurement α ι)
@@ -441,7 +459,9 @@ theorem point_distance_eq_two_defect_of_projective {α ι : Type*}
       ring
     _ = _ := by rw [point_defect_eq A B ψ]
 
-/-- State-dependent squared distance between operator families is nonnegative. -/
+/-- Formalization-only auxiliary lemma for the agreement facts (Facts 4.13 and
+4.14), item 2: state-dependent squared distance between operator families is
+nonnegative. -/
 theorem opFamilyDistSq_nonneg {X α ι : Type*}
     [Fintype α] [Fintype ι] [DecidableEq ι]
     (μ : Distribution X) (M N : X → α → Op ι)
@@ -525,7 +545,9 @@ private theorem sum_norm_effect_apply_sq_of_projective {α ι : Type*}
       rw [(hA a).isIdempotentElem.eq]
     _ = ‖ψ‖ ^ 2 := stateQForm_effect_sum A ψ
 
-/-- Pointwise projective-left defect obeys the Cauchy--Schwarz square-root bound. -/
+/-- Formalization-only auxiliary lemma for the agreement facts (Facts 4.13 and
+4.14), item 3: pointwise projective-left defect obeys the Cauchy--Schwarz
+square-root bound. -/
 theorem abs_point_defect_le_sqrt_distance_of_projective_left {α ι : Type*}
     [Fintype α] [DecidableEq α] [Fintype ι] [DecidableEq ι]
     (A B : MIPStarRE.Quantum.Measurement α ι)
@@ -591,7 +613,8 @@ private theorem ev_adjoint_mul_self_eq_norm_sq {ι : Type*}
   rw [← stateQForm_eq_ev]
   exact (norm_applyOperatorToState_sq_eq T ψ).symm
 
-/-- Operator-family distance controls the change in diagonal overlap. -/
+/-- Formalization-only auxiliary lemma for Proposition 4.29: operator-family
+distance controls the change in diagonal overlap. -/
 theorem overlap_gap_le_of_opFamilyDistSq {X α ι : Type*}
     [Fintype α]
     [Fintype ι] [DecidableEq ι] [Nonempty ι]
@@ -678,7 +701,8 @@ theorem overlap_gap_le_of_opFamilyDistSq {X α ι : Type*}
   simpa only [ψp, As, Bs, Ds, H,
     MatrixMeasurement.toMeasurement_outcome] using hgap
 
-/-- On a unit state and probability distribution, defect is one minus overlap. -/
+/-- Formalization-only auxiliary lemma for Proposition 4.29: on a unit state and
+probability distribution, defect is one minus diagonal overlap. -/
 theorem consistencyDefect_eq_one_sub_overlap {X α ι : Type*}
     [Fintype X] [DecidableEq X] [Fintype α] [DecidableEq α]
     [Fintype ι] [DecidableEq ι]
@@ -705,7 +729,8 @@ theorem consistencyDefect_eq_one_sub_overlap {X α ι : Type*}
       rw [avgOver_const_of_isProbability μ hμ, hψ]
       norm_num
 
-/-- State-dependent operator-family distance is symmetric. -/
+/-- Formalization-only auxiliary lemma for Proposition 4.29: state-dependent
+operator-family distance is symmetric. -/
 theorem opFamilyDistSq_symm {X α ι : Type*}
     [Fintype α] [Fintype ι] [DecidableEq ι]
     (μ : Distribution X) (A B : X → α → Op ι)

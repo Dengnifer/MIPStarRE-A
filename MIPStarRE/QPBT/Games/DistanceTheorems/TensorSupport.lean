@@ -4,7 +4,7 @@ import MIPStarRE.LDT.MakingMeasurementsProjective.Defs
 import MIPStarRE.LDT.Preliminaries.ComparisonCore
 
 /-!
-# Tensor support for the state-dependent distance calculus
+# Tensor-placement and marginal identities
 
 This module collects tensor-placement, marginal, and finite-fiber identities
 used in data processing and the commutator estimate.
@@ -22,7 +22,8 @@ namespace MIPStarRE.QPBT.DistanceCalculus
 open MIPStarRE.LDT MIPStarRE.Quantum
 open MIPStarRE.LDT.MakingMeasurementsProjective
 
-/-- Lift a QPBT measurement to the left tensor factor. -/
+/-- Formalization-only definition used in the proof of Fact 4.26: place a
+complete measurement on the left tensor factor. -/
 noncomputable def leftPlacedMeasurement {α ιA ιB : Type*}
     [Fintype α] [Fintype ιA] [DecidableEq ιA]
     [Fintype ιB] [DecidableEq ιB]
@@ -36,7 +37,8 @@ noncomputable def leftPlacedMeasurement {α ιA ιB : Type*}
       change ∑ a : α, leftTensor (ι₂ := ιB) (M.effect a) = 1
       rw [leftTensor_finset_sum, M.sum_eq_one, leftTensor_one])
 
-/-- Lift a QPBT measurement to the right tensor factor. -/
+/-- Formalization-only definition used in the proof of Fact 4.26: place a
+complete measurement on the right tensor factor. -/
 noncomputable def rightPlacedMeasurement {α ιA ιB : Type*}
     [Fintype α] [Fintype ιA] [DecidableEq ιA]
     [Fintype ιB] [DecidableEq ιB]
@@ -50,7 +52,8 @@ noncomputable def rightPlacedMeasurement {α ιA ιB : Type*}
       change ∑ a : α, rightTensor (ι₁ := ιA) (M.effect a) = 1
       rw [rightTensor_finset_sum, M.sum_eq_one, rightTensor_one])
 
-/-- Products of left and right placements evaluate as a Kronecker product. -/
+/-- Formalization-only auxiliary lemma for Fact 4.26: products of left and right
+placements evaluate as a Kronecker product. -/
 theorem placed_product_stateQForm_eq {ιA ιB : Type*}
     [Fintype ιA] [DecidableEq ιA]
     [Fintype ιB] [DecidableEq ιB]
@@ -90,7 +93,8 @@ private theorem vectorQuantumState_ev_eq_stateQForm {ι : Type*}
   rw [EuclideanSpace.inner_eq_star_dotProduct]
   simp [Matrix.toEuclideanLin, Matrix.toLpLin_apply]
 
-/-- Postprocessing can only increase diagonal tensor overlap. -/
+/-- Formalization-only auxiliary lemma for Fact 4.26: postprocessing can only
+increase diagonal tensor overlap. -/
 theorem diagonal_postprocess_stateQForm_ge {α β ιA ιB : Type*}
     [Fintype α] [DecidableEq α] [Fintype β] [DecidableEq β]
     [Fintype ιA] [DecidableEq ιA]
@@ -175,7 +179,8 @@ private theorem measurement_fiber_sum_adjoint_mul_le_one {α β ι : Type*}
     _ = ∑ z : α × β, M.effect z := (Fintype.sum_prod_type _).symm
     _ = 1 := M.sum_eq_one
 
-/-- A left-placed measurement fiber is square-summable. -/
+/-- Formalization-only auxiliary lemma for approximate commutation at paper
+lines 410--461: a left-placed measurement fiber is square-summable. -/
 theorem left_fiber_contraction {α β ιA ιB : Type*}
     [Fintype α] [Fintype β]
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
@@ -199,7 +204,8 @@ theorem left_fiber_contraction {α β ιA ιB : Type*}
       leftTensor_mono (measurement_fiber_sum_adjoint_mul_le_one M a)
     _ = 1 := leftTensor_one
 
-/-- A right-placed measurement fiber is square-summable. -/
+/-- Formalization-only auxiliary lemma for approximate commutation at paper
+lines 410--461: a right-placed measurement fiber is square-summable. -/
 theorem right_fiber_contraction {α β ιA ιB : Type*}
     [Fintype α] [Fintype β]
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
@@ -248,7 +254,8 @@ private theorem postprocess_effect_mul_effect {ζ α ι : Type*}
         exact projective_effect_mul_effect_eq_zero M hM hyz
     _ = if f z = b then M.effect z else 0 := by simp
 
-/-- Compatible marginals of a projective joint measurement multiply to the joint effect. -/
+/-- Formalization-only auxiliary lemma for approximate commutation at paper
+lines 410--461: compatible projective marginals multiply to the joint effect. -/
 theorem joint_marginal_product {α β γ ι : Type*}
     [Fintype α] [DecidableEq α] [Fintype β] [DecidableEq β]
     [Fintype γ] [DecidableEq γ] [Fintype ι] [DecidableEq ι]
@@ -281,7 +288,9 @@ theorem joint_marginal_product {α β γ ι : Type*}
         exact Prod.ext hzfirst (congrArg (fun p : α × γ => p.2) hzfiber)
       · simp
 
-/-- Compatible projective marginals multiply to the joint effect in reverse order. -/
+/-- Formalization-only auxiliary lemma for approximate commutation at paper
+lines 410--461: compatible projective marginals multiply to the joint effect in
+reverse order. -/
 theorem joint_marginal_product_rev {α β γ ι : Type*}
     [Fintype α] [DecidableEq α] [Fintype β] [DecidableEq β]
     [Fintype γ] [DecidableEq γ] [Fintype ι] [DecidableEq ι]
@@ -300,7 +309,8 @@ theorem joint_marginal_product_rev {α β γ ι : Type*}
   rw [Matrix.conjTranspose_mul, hacHerm, habHerm, hjointHerm] at h
   exact h
 
-/-- Operators placed on opposite tensor factors commute. -/
+/-- Formalization-only auxiliary lemma for approximate commutation at paper
+lines 410--461: operators placed on opposite tensor factors commute. -/
 theorem left_right_commute {ιA ιB : Type*}
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
     (A : Op ιA) (B : Op ιB) :
@@ -309,7 +319,9 @@ theorem left_right_commute {ιA ιB : Type*}
   rw [leftTensor_mul_rightTensor_eq_opTensor,
     rightTensor_mul_leftTensor_eq_opTensor]
 
-/-- Reindexing an operator family along an equivalence preserves its distance. -/
+/-- Formalization-only auxiliary lemma for approximate commutation at paper
+lines 410--461: reindexing an operator family along an equivalence preserves its
+distance. -/
 theorem opFamilyDistSq_reindex {X α β ι : Type*}
     [Fintype α] [Fintype β] [Fintype ι] [DecidableEq ι]
     (μ : Distribution X) (e : α ≃ β) (A B : X → α → Op ι)
@@ -326,7 +338,9 @@ theorem opFamilyDistSq_reindex {X α β ι : Type*}
     (fun b => ‖applyOperatorToState (A x (e.symm b) - B x (e.symm b)) ψ‖ ^ 2)
     (by intro a; simp)
 
-/-- Pointwise equal operator families have equal state-dependent distance. -/
+/-- Formalization-only auxiliary lemma for approximate commutation at paper
+lines 410--461: pointwise equal operator families have equal state-dependent
+distance. -/
 theorem opFamilyDistSq_congr {X α ι : Type*}
     [Fintype α] [Fintype ι] [DecidableEq ι]
     (μ : Distribution X) (A B A' B' : X → α → Op ι)
@@ -341,7 +355,9 @@ theorem opFamilyDistSq_congr {X α ι : Type*}
   intro a _
   rw [hA x a, hB x a]
 
-/-- Pointwise equal operator differences have equal state-dependent distance. -/
+/-- Formalization-only auxiliary lemma for approximate commutation at paper
+lines 410--461: pointwise equal operator differences have equal state-dependent
+distance. -/
 theorem opFamilyDistSq_congr_sub {X α ι : Type*}
     [Fintype α] [Fintype ι] [DecidableEq ι]
     (μ : Distribution X) (A B A' B' : X → α → Op ι)
@@ -356,14 +372,16 @@ theorem opFamilyDistSq_congr_sub {X α ι : Type*}
   intro a _
   rw [h x a]
 
-/-- Exchange the final two coordinates of a nested product. -/
+/-- Formalization-only definition used in approximate commutation at paper
+lines 410--461: exchange the final two coordinates of a nested product. -/
 def swapLast (α β γ : Type*) : ((α × γ) × β) ≃ ((α × β) × γ) where
   toFun p := ((p.1.1, p.2), p.1.2)
   invFun p := ((p.1.1, p.2), p.1.2)
   left_inv := by rintro ⟨⟨a, c⟩, b⟩; rfl
   right_inv := by rintro ⟨⟨a, b⟩, c⟩; rfl
 
-/-- The inverse of `swapLast` has the same coordinate formula. -/
+/-- Formalization-only auxiliary lemma for approximate commutation at paper
+lines 410--461: the inverse of `swapLast` has the same coordinate formula. -/
 @[simp] theorem swapLast_symm_apply {α β γ : Type*}
     (p : (α × β) × γ) :
     (swapLast α β γ).symm p = ((p.1.1, p.2), p.1.2) :=

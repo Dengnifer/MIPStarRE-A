@@ -324,6 +324,7 @@ weighted sums of those operators.
 	hypothesis.
 \end{lemma}
 \begin{proof}
+	\leanok
 	Expand
 	\[
 		\Big\| \E_x \alpha_x (A^x - B^x) \ket{\psi} \Big\|^2
@@ -335,9 +336,31 @@ weighted sums of those operators.
 	implicit constant.
 \end{proof}
 
+\begin{lemma}[Formalization support for Lemma~\ref{lem:povm-to-obs}]
+	\label{lem:povm-to-obs-operator-families}
+	\lean{MIPStarRE.QPBT.povm_to_obs}
+	\leanok
+	\uses{def:approx-question-indexed-operators, def:povm-distance}
+	This formalization-only auxiliary is not a named statement of the paper; it
+	isolates the finite-sum estimate used in Lemma~\ref{lem:povm-to-obs}. Let
+	$\{A^x_a\}$ and $\{B^x_a\}$ be arbitrary operator families and let
+	$|\alpha_a|=1$. Then
+	\[
+		\E_x \Big\|\sum_a \alpha_a(A^x_a-B^x_a)\ket\psi\Big\|^2
+		\leq |\mathcal A|\,\E_x\sum_a
+		\big\|(A^x_a-B^x_a)\ket\psi\big\|^2.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	Apply the triangle inequality to the sum over $a$, square, and use the
+	finite Cauchy--Schwarz inequality. Averaging preserves the resulting
+	pointwise inequality.
+\end{proof}
+
 \begin{lemma}
 	\label{lem:povm-to-obs}
-	\lean{MIPStarRE.QPBT.povm_to_obs}
+	\lean{MIPStarRE.QPBT.povm_to_obs_of_measurements}
 	\leanok
 	\uses{def:approx-question-indexed-operators, def:povm-distance}
 	Let $\mathcal{A}$ be a finite set, let $\{A^x_a\}_{a \in \mathcal{A}}$
@@ -354,7 +377,9 @@ weighted sums of those operators.
 	Definition~\ref{def:approx-question-indexed-operators}.
 \end{lemma}
 \begin{proof}
-	\uses{def:povm-distance, def:approx-question-indexed-operators}
+	\leanok
+	\uses{def:povm-distance, def:approx-question-indexed-operators,
+		lem:povm-to-obs-operator-families}
 	% The source ends this display with the exact bound |A| * delta; under the
 	% O(.) reading of def:povm-distance the hypothesis only supplies O(delta),
 	% and the constant is retained inside the O(.).
