@@ -65,8 +65,9 @@ noncomputable abbrev decodeBool {K : Type*} [Field K] [DecidableEq K] {m : ℕ}
     (g : (Fin m → K) → K) : Cube m → K :=
   decodeAt ({0, 1} : Finset K) g
 
-/-- The full-field specialization of `decodeAt` used by the generic algebra
-layer.  The Chapter 16 `Poly`-facing name is defined in `Algebra/Decoding.lean`.
+/-- The full-field specialization of `decodeAt` for arbitrary polynomial
+representatives.  Its restriction to bounded representatives is defined in
+`Algebra/Decoding.lean`.
 Every value is retained because the filter is `H = Finset.univ`, so this is the
 cube-indexed evaluation of a polynomial representative.  The restricted
 decoder identity remains separate and is only available for encoding

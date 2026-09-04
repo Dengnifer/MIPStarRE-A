@@ -20,7 +20,7 @@ for universal constants $a > 1$, $0 < b < 1$. This is the error denoted $\delta_
 For a $g$ that is not an encoding the two sides of this identity are the evaluations of the distinct polynomial representatives $g_{\mathrm{Dec}(g)}$ and $g$; when $d \leq q-1$ they consequently disagree at some $u$, but when $d \geq q$ the two representatives may induce the same function on $\F_q^m$, so pointwise validity of the identity does not characterize the encodings; see Remark~\ref{rem:qld-decoding-identity}.
 
 \begin{definition}[Full-field decoding on bounded polynomials]\label{def:qld-full-field-decoder}
-	\lean{MIPStarRE.QPBT.evalPoly, MIPStarRE.QPBT.decodeOn, MIPStarRE.QPBT.decodeOnUniv, MIPStarRE.QPBT.decodeFq}
+	\lean{MIPStarRE.QPBT.evalPoly, MIPStarRE.QPBT.decodeOnUniv, MIPStarRE.QPBT.decodeFq}
 	\lean{MIPStarRE.QPBT.encodingPoly, MIPStarRE.QPBT.IsEncoding}
 	\leanok
 	\uses{def:decoding-map, def:low-degree-encoding}
@@ -126,7 +126,7 @@ The measurement $\{\hat{S}_{g_X,g_Z}\}$ reads out an $X$-polynomial and a $Z$-po
 	\lean{MIPStarRE.QPBT.tildeObs}
 	\leanok
 	\uses{def:tilde-m-measurement, def:dual-self-dual-normal-basis, def:binary-representation, def:subfield-trace}
-	Let $\{e_j\}_{j \in \{0,\ldots,t-1\}}$ be the self-dual normal basis for $\F_q$ over $\F_2$ (Definition~\ref{def:dual-self-dual-normal-basis}) that is fixed once and for all in Definition~\ref{def:binary-representation}, and let $\tr = \tr_{q \to 2} \colon \F_q \to \F_2$ be the subfield trace. The zero-based indexing agrees with the formal index type $\operatorname{Fin}(t)$. For all $W \in \{X,Z\}$, $\tilde{u} \in \F_q^M$, and $j \in \{0,\ldots,t-1\}$ define the operator
+	Let $\{e_j\}_{j \in \{0,\ldots,t-1\}}$ be the self-dual normal basis for $\F_q$ over $\F_2$ (Definition~\ref{def:dual-self-dual-normal-basis}) that is fixed once and for all in Definition~\ref{def:binary-representation}, and let $\tr = \tr_{q \to 2} \colon \F_q \to \F_2$ be the subfield trace. For all $W \in \{X,Z\}$, $\tilde{u} \in \F_q^M$, and $j \in \{0,\ldots,t-1\}$ define the operator
 	\begin{equation}\label{eq:def-tildewj}
 		\tilde{W}^j(\tilde{u}) = \sum_{a \in \F_q} (-1)^{\tr(e_j a)} \, \tilde{M}_a^{W,\tilde{u}}\;,
 	\end{equation}
@@ -147,7 +147,7 @@ The measurement $\{\hat{S}_{g_X,g_Z}\}$ reads out an $X$-polynomial and a $Z$-po
 		\tilde{W}^j(\tilde{u})
 		= \Big( \sum_{g_X,g_Z} (-1)^{\tr(e_j (\mathrm{Dec}(g_W) \cdot \tilde{u}))} \, \hat{S}_{g_X,g_Z} \Big) \ot \tau^W(e_j \tilde{u})\;,
 	\end{equation}
-	where $g_W$ denotes $g_X$ if $W = X$ and $g_Z$ if $W = Z$. In particular each $\tilde{W}^j(\tilde{u})$ is Hermitian and squares to the identity. Moreover, the pulled-apart observables satisfy exactly the twisted commutation relations of the generalized Pauli observables $\tau^X(e_j \tilde{u})$ and $\tau^Z(e_{j'} \tilde{v})$: for all $j,j' \in \{1,\ldots,t\}$ and $\tilde{u},\tilde{v} \in \F_q^M$,
+	where $g_W$ denotes $g_X$ if $W = X$ and $g_Z$ if $W = Z$. In particular each $\tilde{W}^j(\tilde{u})$ is Hermitian and squares to the identity. Moreover, the pulled-apart observables satisfy exactly the twisted commutation relations of the generalized Pauli observables $\tau^X(e_j \tilde{u})$ and $\tau^Z(e_{j'} \tilde{v})$: for all $j,j' \in \{0,\ldots,t-1\}$ and $\tilde{u},\tilde{v} \in \F_q^M$,
 	\begin{equation}\label{eq:tildew-twisted-commutation}
 		\tilde{X}^j(\tilde{u})\, \tilde{Z}^{j'}(\tilde{v})
 		= (-1)^{\tr((e_j \tilde{u}) \cdot (e_{j'} \tilde{v}))}\, \tilde{Z}^{j'}(\tilde{v})\, \tilde{X}^j(\tilde{u})\;,
@@ -172,7 +172,7 @@ The next lemma shows that the pulled-apart measurements are consistent with the 
 \[
 	B = \delta_G + \sqrt{\eps} + \frac{md}{q}.
 \]
-Each displayed construction estimate below has its own universal constant $C_E \geq 1$, quantified independently, and its own scale $\delta_P^E=C_EB$. This is the quantifier order of the linked formal declarations. The source uses one enlarged error $\delta_S$ for all of these estimates. The two presentations agree: after the finitely many estimates have been established, take $C_* = \max_E C_E$ and $\delta_P=C_*B$. Since $B\geq0$, every bound remains valid at this common scale. In the proof paragraphs, $\delta_P$ denotes this common enlargement. It has the same asymptotic form as $\delta_G$: after shrinking $b$ to at most $1/2$, the term $\eps^b$ dominates $\sqrt{\eps}$ for $0 \leq \eps \leq 1$, while $(md)^a q^{-b}$ dominates $md/q$.
+Each displayed construction estimate below has its own universal constant $C_E \geq 1$, quantified independently, and its own scale $\delta_P^E=C_EB$. The source uses one enlarged error $\delta_S$ for all of these estimates. The two presentations agree: after the finitely many estimates have been established, take $C_* = \max_E C_E$ and $\delta_P=C_*B$. Since $B\geq0$, every bound remains valid at this common scale. In the proof paragraphs, $\delta_P$ denotes this common enlargement. It has the same asymptotic form as $\delta_G$: after shrinking $b$ to at most $1/2$, the term $\eps^b$ dominates $\sqrt{\eps}$ for $0 \leq \eps \leq 1$, while $(md)^a q^{-b}$ dominates $md/q$.
 
 \begin{lemma}[Consistency and self-consistency of the pulled-apart measurements]\label{lem:qld-construct-the-paulis}
 	\lean{MIPStarRE.QPBT.tildeM_consistent_pointMeas}

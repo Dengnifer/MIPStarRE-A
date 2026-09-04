@@ -1,5 +1,5 @@
 import MIPStarRE.QPBT.Extraction.Consistency
-import MIPStarRE.QPBT.Test.Soundness
+import MIPStarRE.QPBT.Test.SoundnessDefs
 
 /-!
 # Extraction by the swap unitaries

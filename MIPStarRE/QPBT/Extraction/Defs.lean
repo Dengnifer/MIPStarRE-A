@@ -84,8 +84,7 @@ namespace ProjectiveSetting
 variable {P : AdmissibleParams} {ε : ℝ}
 
 /-- Place an operator on one complete extraction block, with the identity on
-the other player's block. This is the heterogeneous Lean realization of the
-side-qualified operators in paper
+the other player's block, as in the side-qualified operators of paper
 `14_analysis_of_the_pauli_basis_test.tex:1429-1435,1687-1713`. -/
 noncomputable def placeSide (S : ProjectiveSetting P ε) (side : PlayerSide)
     (O : Op (ExtractionBlock P (S.LocalSpace side))) :

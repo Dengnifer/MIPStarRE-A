@@ -38,7 +38,7 @@ noncomputable def evalPoly {P : AdmissibleParams} (g : Poly P)
 /-- Decode a bounded polynomial while retaining only values in `H`.
 
 This is the `H`-parameterized form of `def:decoding-map`; `decodeAt` remains
-the generic function-level implementation.  The Boolean cube is embedded in
+the decoding map for arbitrary functions.  The Boolean cube is embedded in
 `PauliScalar P` by `cubeEmbed`. -/
 noncomputable def decodeOn {P : AdmissibleParams}
     (H : Finset (PauliScalar P)) (g : Poly P) : PauliRegister P :=
