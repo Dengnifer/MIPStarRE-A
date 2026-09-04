@@ -30,6 +30,9 @@ import gh_common  # noqa: E402
 from wf_util import (BODY_LIMIT, FORBIDDEN_REF_CHARS, TITLE_LIMIT,  # noqa: E402
                      LayerError, check_bracket_free, default_repo_root, sanitize)
 
+
+CHECKED_PUSH = Path(__file__).resolve().with_name("checked-push.sh")
+
 #: DESIGN.md:106-107 — ``issue-<id>-<slug>``, optionally ``codex/``-prefixed.
 BRANCH_RE = re.compile(r"^(?:(codex|claude)/)?issue-(\d+)-([a-z0-9][a-z0-9-]*)$")
 
@@ -50,6 +53,18 @@ def git(repo_root: Path, *args: str, check: bool = True) -> str:
         raise LayerError(f"git {' '.join(args[:3])} failed: "
                          f"{(proc.stderr or proc.stdout).strip()[:500]}")
     return ""
+
+
+def checked_push(repo_root: Path, remote: str, refspec: str) -> None:
+    """Run the hook before opening the receive transport, then publish one ref."""
+    proc = subprocess.run(
+        [str(CHECKED_PUSH), "--repo-root", str(repo_root), remote, refspec],
+        capture_output=True,
+        text=True,
+    )
+    if proc.returncode != 0:
+        detail = "\n".join(part.strip() for part in (proc.stdout, proc.stderr) if part.strip())
+        raise LayerError(f"checked push failed ({proc.returncode}): {detail[-2000:]}")
 
 
 def lint_branch(repo_root: Path, branch: str) -> None:
@@ -118,8 +133,8 @@ def open_pr(args: argparse.Namespace) -> int:
                          f"ahead of {args.base}) and open {title!r} {labels}\n")
         return 0
 
-    git(repo_root, "push", "github",
-        f"refs/heads/{args.branch}:refs/heads/{args.branch}")
+    checked_push(repo_root, "github",
+                 f"refs/heads/{args.branch}:refs/heads/{args.branch}")
 
     existing = gh_common.pr_for_branch(args.branch)
     if existing is not None:

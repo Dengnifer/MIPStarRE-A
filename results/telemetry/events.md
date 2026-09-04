@@ -2371,3 +2371,17 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 - **Lesson:** an authoritative GitHub relation needs both read and write paths,
   and every workflow test added outside `local/` must be named by the scope
   budget when the budget uses an explicit path set.
+
+## 2026-09-05 - Pre-push gate outlived the GitHub transport
+
+- **Symptom:** five lane publications exited 141 after the pre-push hook printed
+  its final `ok`; GitHub received none of the refs (owner-log 2026-09-04 11:25Z,
+  issue #157).
+- **Diagnosis:** Git starts `receive-pack` before invoking `pre-push`.  The long
+  Lean and blueprint gate left that transport idle until it closed, so the hook
+  succeeded but the parent `git push` later received SIGPIPE.
+- **Fix:** `checked-push.sh` now runs the exact hook ref tuple before opening
+  `receive-pack`; all repository publication paths use it and skip only the
+  duplicate native hook call.
+- **Lesson:** expensive validation must precede transport startup; an `ok` line
+  is gate evidence, not evidence that a ref reached the remote.

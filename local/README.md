@@ -52,6 +52,9 @@ unblocks its dependents with no edit anywhere.
   blockers are unchanged from the parent project.
 - Never run `lake update`. Never write to the hot cache. Full `lake build`
   goes through the machine-wide lock (`warm-worktree.sh`/`ci.sh` handle it).
+- Publish branches through `checked-push.sh` (used internally by `pr_open.py`,
+  `github-sync.sh`, and `autofix.sh`) so the gate finishes before push transport
+  starts.
 - One session never reviews its own diff.
 - Sessions are dispatched, resumed, and archived only via `dispatch.sh`.
 - Invoke workflow tools through the primary checkout's path

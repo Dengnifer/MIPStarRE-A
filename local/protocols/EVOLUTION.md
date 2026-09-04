@@ -533,3 +533,15 @@ hook-level regression that stages 401 lines at that path.
 **Expected effect:** operators can create the prerequisite record without an
 ad hoc GitHub mutation or a duplicate edge after retry, and future readiness
 test growth remains subject to the owner-gated 400-line episode budget.
+
+## 2026-09-05 — Complete pre-push checks before transport startup
+
+**Trigger:** `results/telemetry/events.md` 2026-09-05, "Pre-push gate outlived
+the GitHub transport" (issue #157).
+
+**Change:** `checked-push.sh` preflights one explicit branch ref before starting
+`receive-pack`; `pr_open.py`, `github-sync.sh`, and both autofix push paths use
+it.  `issues-prs.md` makes this the repository-owned publication contract.
+
+**Expected effect:** long Lean gates no longer turn a successful hook into exit
+141, while gate failures still publish no ref and exact-head CI remains intact.

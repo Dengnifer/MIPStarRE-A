@@ -42,6 +42,13 @@ Nothing else shells out to `gh`. `issue_new.py`, `issue_close.py`, `pr_open.py`,
 `ci.sh`, `review.sh`, `autofix.sh`, `pr_merge.py`, `github-sync.sh` take GitHub
 numbers; `track.py`, `validate_tree.py` and `export_issues.py` are deleted.
 
+Every repository-owned branch publication runs through `checked-push.sh` with
+one explicit `refs/heads/...:refs/heads/...` mapping.  The helper reads the
+remote tip with a short `ls-remote`, runs `.githooks/pre-push` against that exact
+ref tuple before starting `receive-pack`, and then opens the push with only the
+completed hook invocation skipped.  Thus a long gate cannot leave the push
+transport idle, and a failed gate never starts it.
+
 * Branches: `issue-<github-number>-<slug>`, or `codex/issue-<number>-<slug>`
   from an agent; `pr_open.py` rejects what `git check-ref-format` would.
 * Titles, slugs and branch names are **bracket-free**: bot-generated branch

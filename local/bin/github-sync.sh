@@ -39,7 +39,8 @@ for ref in "${REFS[@]}"; do
   }
   pushed=0
   for i in 1 2 3 4 5; do
-    if git push github "refs/heads/$ref:refs/heads/$ref"; then
+    if "$LOCAL_BIN/checked-push.sh" --repo-root "$ROOT" github \
+        "refs/heads/$ref:refs/heads/$ref"; then
       echo "$PROG: pushed $ref ($(git rev-parse --short "$ref"))"
       pushed=1
       break

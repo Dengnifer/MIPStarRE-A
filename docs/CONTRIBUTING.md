@@ -86,10 +86,15 @@ including agent prompts and actions under `.github/`.  The pre-push hook
 checks changed Lean files with `lake env lean`, repeats the fast
 statement-integrity audits for relevant policy or prompt surfaces, and checks
 blueprint declaration synchronization when Lean or blueprint surfaces changed.
+Repository tools publish through `local/bin/checked-push.sh`, which runs that
+gate before opening the long-lived push transport; `pr_open.py`,
+`github-sync.sh`, and `autofix.sh` use it automatically.  For a direct branch
+publication, pass one full branch mapping to the helper instead of invoking
+`git push` directly.
 These hooks also reject explicit `axiom` and `constant` declarations in the LDT
 tree; use a tracked `sorry` for an unfinished source-faithful proof instead of
 turning the missing proof into a new ambient assumption.
-For larger PRs, `MIPSTARRE_HOOK_FULL=1 git push` also runs the full local gate.
+For larger PRs, set `MIPSTARRE_HOOK_FULL=1` when invoking the checked-push helper.
 Use `MIPSTARRE_SKIP_HOOKS=1` only for a one-off local-tooling bypass (the
 workflow-layer line budget of `.githooks/pre-commit` still runs), and still
 report the corresponding validation in the PR body.

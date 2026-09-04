@@ -446,6 +446,13 @@ lake build <changed Lean modules>
 lake exe checkdecls blueprint/lean_decls
 ```
 
+Repository-owned publication invokes this hook through
+`local/bin/checked-push.sh`.  The helper obtains the remote tip with
+`git ls-remote`, closes that short query, supplies the resulting four-field ref
+record to the hook, and starts `git receive-pack` only after the gate succeeds.
+The real push skips the duplicate native hook invocation, not the gate itself.
+This ordering prevents a long Lean check from aging out an idle SSH push.
+
 Commands that may invoke Lake, Lean, blueprint tooling, or Python audits are run
 in a subshell with Git's local hook environment variables cleared.  This avoids
 leaking the outer pre-push `GIT_DIR` or related variables into Lake package
@@ -652,11 +659,12 @@ workflow update through the default branch.
    PR.
 3. Commit normally.  The pre-commit hook runs the fast statement-integrity
    audits only when staged paths touch relevant files.
-4. Push normally.  The pre-push hook checks changed Lean files, repeats the fast
-   statement-integrity audits for relevant policy or prompt surfaces, and checks
-   blueprint declaration synchronization.
-5. Use `MIPSTARRE_HOOK_FULL=1 git push` before a larger Lean or blueprint PR
-   when local resources allow the full gate.
+4. Publish through `local/bin/checked-push.sh`, directly or through
+   `pr_open.py`, `github-sync.sh`, or `autofix.sh`.  The pre-push hook checks
+   changed Lean files, statement-integrity surfaces, and blueprint sync before
+   the push transport starts.
+5. Set `MIPSTARRE_HOOK_FULL=1` on the checked-push command before a larger Lean
+   or blueprint PR when local resources allow the full gate.
 
 ### For any PR (automatic)
 
