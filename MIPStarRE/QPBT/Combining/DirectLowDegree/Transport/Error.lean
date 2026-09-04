@@ -17,9 +17,9 @@ simultaneous-measurement estimate into the error function `deltaLd` of
 ## Main definitions
 
 * `directLdAuxParameter D = 2560000 m³ d` is the sampling parameter handed to
-  `MIPStarRE.LDT.Test.mainFormal`.  It is the smallest multiple of the
-  exponential scale `2560000 m²` of `mainFormalError` whose quotient is `m d`,
-  so that the exponential term of the mature error is exactly `exp (-m d)`.
+  `MIPStarRE.LDT.Test.mainFormal`.  It is the multiple of the exponential scale
+  `2560000 m²` of `mainFormalError` with quotient `m d`, so that the
+  exponential term of the mature error is exactly `exp (-m d)`.
 
 ## Main results
 
@@ -118,7 +118,10 @@ private theorem directLd_one_le_q (D : DirectLdParams) : (1 : ℝ) ≤ (D.q : �
 
 /-- With the auxiliary sampling parameter the exponential scale of
 `mainFormalError` collapses: the argument of its exponential term is exactly
-`m d`. -/
+`m d`.
+
+Formalization-only scalar identity for the error function displayed in
+`MIPStarRE/LDT/Test/MainTheorem/ScalarBounds/Definitions.lean:28-36`. -/
 theorem directLdAuxParameter_exp_arg (D : DirectLdParams) :
     (directLdAuxParameter D : ℝ) / (2560000 * ((D.m : ℝ) ^ (2 : ℕ))) =
       (D.m : ℝ) * (D.d : ℝ) := by
@@ -132,7 +135,12 @@ theorem directLdAuxParameter_exp_arg (D : DirectLdParams) :
   ring
 
 /-- The test term of `mainFormalError` at the incoming error `3 ε`, bounded by
-the constant `3` times `ε^(1/40000)`. -/
+the constant `3` times `ε^(1/40000)`.
+
+Formalization-only scalar bound on the first term of the error function
+displayed in `MIPStarRE/LDT/Test/MainTheorem/ScalarBounds/Definitions.lean:28-36`,
+used for the error of `lem:ld-soundness`, blueprint
+`ch13_qpbt_test.tex:139-167`. -/
 theorem directLd_test_term_le {ε : ℝ} (hε : 0 ≤ ε) :
     Real.rpow (3 * ε) (1 / 40000) ≤ 3 * Real.rpow ε (1 / 40000) := by
   simp only [Real.rpow_eq_pow]
@@ -144,7 +152,12 @@ theorem directLd_test_term_le {ε : ℝ} (hε : 0 ≤ ε) :
   exact mul_le_mul_of_nonneg_right h3 (Real.rpow_nonneg hε _)
 
 /-- The field term of `mainFormalError`, bounded by the polynomial `d` times
-`q^(-1/40000)`. -/
+`q^(-1/40000)`.
+
+Formalization-only scalar bound on the second term of the error function
+displayed in `MIPStarRE/LDT/Test/MainTheorem/ScalarBounds/Definitions.lean:28-36`,
+used for the error of `lem:ld-soundness`, blueprint
+`ch13_qpbt_test.tex:139-167`. -/
 theorem directLd_field_term_le (D : DirectLdParams) :
     Real.rpow ((D.d : ℝ) / (D.q : ℝ)) (1 / 40000) ≤
       (D.d : ℝ) * Real.rpow (D.q : ℝ) (-(1 / 40000)) := by
@@ -161,7 +174,12 @@ theorem directLd_field_term_le (D : DirectLdParams) :
 
 /-- The exponential term of `mainFormalError` at the auxiliary sampling
 parameter is `exp (-m d)`, hence at most `2^(-b m d)` for every exponent
-`0 ≤ b ≤ 1`. -/
+`0 ≤ b ≤ 1`.
+
+Formalization-only scalar bound on the third term of the error function
+displayed in `MIPStarRE/LDT/Test/MainTheorem/ScalarBounds/Definitions.lean:28-36`;
+the exponential of `deltaLd` is the base-two decay of `lem:ld-soundness`,
+blueprint `ch13_qpbt_test.tex:139-167`. -/
 theorem directLd_exponential_term_le (D : DirectLdParams) {b : ℝ}
     (hb0 : 0 ≤ b) (hb1 : b ≤ 1) :
     Real.exp (-((directLdAuxParameter D : ℝ) / (2560000 * ((D.m : ℝ) ^ (2 : ℕ))))) ≤
@@ -501,7 +519,11 @@ In the two regimes `1 ≤ ε` and `q ≤ d` the error function `deltaLd` is at
 least one, so the consistency conclusions of `lem:ld-soundness` hold for any
 witnesses; the low-degree test carries no information there. -/
 
-/-- In the regime `1 ≤ ε` the error function `deltaLd` is at least one. -/
+/-- In the regime `1 ≤ ε` the error function `deltaLd` is at least one.
+
+Formalization-only scalar bound closing the trivial regime of
+`lem:ld-soundness`, blueprint `ch13_qpbt_test.tex:139-167`, paper
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:413-458`. -/
 theorem one_le_deltaLd_of_one_le_error {a b ε : ℝ} (ha : 1 ≤ a) (hb : 0 ≤ b)
     (hε : 1 ≤ ε) {q m d k : ℕ} (hm : 1 ≤ m) (hd : 1 ≤ d) (hk : 1 ≤ k) :
     1 ≤ deltaLd a b ε q m d k := by
@@ -530,7 +552,12 @@ theorem one_le_deltaLd_of_one_le_error {a b ε : ℝ} (ha : 1 ≤ a) (hb : 0 ≤
       mul_le_mul hax hsum (by norm_num) (by linarith)
 
 /-- In the degenerate regime `q ≤ d`, where the degree bound is at least the
-field size, the error function `deltaLd` is at least one. -/
+field size, the error function `deltaLd` is at least one.
+
+Formalization-only scalar bound closing the regime in which the low individual
+degree test carries no information; the error of `lem:ld-soundness` is
+blueprint `ch13_qpbt_test.tex:139-167`, paper
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:413-458`. -/
 theorem one_le_deltaLd_of_fieldSize_le_degree {a b ε : ℝ} (ha : 1 ≤ a) (hb1 : b ≤ 1)
     (hε : 0 ≤ ε) {q m d k : ℕ} (hq : 1 ≤ q) (hqd : q ≤ d) (hm : 1 ≤ m) (hk : 1 ≤ k) :
     1 ≤ deltaLd a b ε q m d k := by
