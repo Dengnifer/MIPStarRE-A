@@ -405,10 +405,14 @@ terminal review (pr-review.yml:69-72). See EVOLUTION.md for the trigger.
 
 The merge gate's fresh-base rule (issues-prs.md, gate 2b) moves a PR's head
 every time `main` advances, but a merge of `main` into the branch does not
-change the PR's own patch.  `review.sh` therefore compares `git patch-id` of
-`base...head` with that of every earlier reviewed head of the same PR; on a
-match it republishes that head's verdict and ledger as the exact-head review of
-the new head, marked "Carried forward from <sha>", and posts the matching
+change the PR's own patch.  `review.sh` therefore compares a whitespace-
+sensitive hash of the patch (the diff without its `index`/hunk-header lines,
+so hunk positions may move but no byte of content may) with that of every
+earlier reviewed head of the same PR whose review is bound to that head and
+published by the lane's account; on a match it republishes that head's verdict
+and ledger as the exact-head review of the new head, marked "Carried forward
+from <sha>" (marker `<!-- mipstarre-review-carried from=<sha> -->`; a carried
+review is not a review round and is never itself a carry source), and posts the matching
 `local-review/summary` — without dispatching the reviewer.  Adverse verdicts
 are carried too, so an adjudication at the new head remains possible.  Any
 change to the patch (a repair, a conflict resolution) yields a different

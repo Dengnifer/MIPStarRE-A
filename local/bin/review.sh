@@ -431,72 +431,6 @@ case "$CI_SUMMARY" in
   *)  gate_block "local-ci/summary is '$CI_SUMMARY' for $HEAD_SHA; review is blocked until CI is green on this head SHA" ;;
 esac
 
-# ------------------------------------------------------ carry-forward fast path
-# Evidence follows the DIFF (review.md section 13, EVOLUTION.md 2026-09-04).
-# After a fresh-base merge of main the head SHA changes but the PR's own patch
-# usually does not; re-dispatching the reviewer for a byte-identical patch cost
-# a 15-25 minute round per merge on every other open PR.  When a prior marker
-# review exists for a head whose patch-id equals this head's, its verdict and
-# ledger are republished for this head (clean or adverse alike, so adjudication
-# stays possible) and the reviewer is not dispatched.  --force-review disables.
-carry_forward() {
-  local this_pid old old_base old_pid body
-  this_pid="$(git -C "$ROOT" diff "$BASE...$HEAD_SHA" | git patch-id --stable | cut -d' ' -f1)"
-  [ -n "$this_pid" ] || return 1
-  ghc pr-reviews "$PR_NUM" > "$RUN_ROOT/reviews.json" 2>/dev/null || return 1
-  for old in $(python3 - "$RUN_ROOT/reviews.json" <<'PY'
-import json, re, sys
-rows = json.load(open(sys.argv[1]))
-seen = []
-for r in sorted(rows, key=lambda r: r.get("submitted_at") or "", reverse=True):
-    m = re.search(r"<!-- mipstarre-review pr=\d+ head=([0-9a-f]{40}) -->", r.get("body") or "")
-    if m and m.group(1) not in seen:
-        seen.append(m.group(1)); print(m.group(1))
-PY
-  ); do
-    [ "$old" = "$HEAD_SHA" ] && continue
-    git -C "$ROOT" cat-file -e "$old^{commit}" 2>/dev/null || continue
-    old_base="$(git -C "$ROOT" merge-base "$BASE" "$old" 2>/dev/null)" || continue
-    old_pid="$(git -C "$ROOT" diff "$old_base" "$old" | git patch-id --stable | cut -d' ' -f1)"
-    [ "$old_pid" = "$this_pid" ] || continue
-    body="$RUN_ROOT/$HEAD_SHA-carried.md"
-    python3 - "$RUN_ROOT/reviews.json" "$old" "$HEAD_SHA" "$PR_NUM" > "$body" <<'PY' || continue
-import json, sys
-rows, old, new, pr = json.load(open(sys.argv[1])), sys.argv[2], sys.argv[3], sys.argv[4]
-for r in rows:
-    b = r.get("body") or ""
-    if f"head={old}" in b:
-        note = (f"<!-- mipstarre-review pr={pr} head={new} -->\n"
-                f"_Carried forward from {old[:12]}: the PR patch is byte-identical (git patch-id), "
-                f"so that head's verdict and ledger apply to {new[:12]} without a new reviewer round "
-                f"(review.md section 13)._\n")
-        print(note + b.replace(f"<!-- mipstarre-review pr={pr} head={old} -->", "", 1).lstrip("\n"), end="")
-        break
-else:
-    sys.exit(1)
-PY
-    printf '%s\n' "$old" > "$RUN_ROOT/$HEAD_SHA-carried-from"
-    return 0
-  done
-  return 1
-}
-if [ "$FORCE_REVIEW" -eq 0 ] && carry_forward; then
-  CARRIED_FROM="$(cat "$RUN_ROOT/$HEAD_SHA-carried-from")"
-  CARRIED_MD="$RUN_ROOT/$HEAD_SHA-carried.md"
-  log "carrying the review of ${CARRIED_FROM:0:12} forward to $HEAD_SHA (identical patch-id); reviewer not dispatched"
-  ghc post-review "$PR_NUM" "$HEAD_SHA" "<!-- mipstarre-review pr=$PR_NUM head=$HEAD_SHA -->" --body-file "$CARRIED_MD" ||
-    die "could not publish the carried review for PR $PR_NUM @ $HEAD_SHA"
-  CF_STATE="$(grep -o '^VERDICT: [A-Z_]*' "$CARRIED_MD" | head -1 | cut -d' ' -f2)"
-  CF_UNRESOLVED="$(grep -c '^- \[ \]' "$CARRIED_MD" || true)"
-  if { [ "$CF_STATE" = "APPROVED" ] || [ "$CF_STATE" = "COMMENTED" ]; } && [ "${CF_UNRESOLVED:-1}" = "0" ]; then
-    post_summary success "$CF_STATE carried forward from ${CARRIED_FROM:0:12}, 0 unresolved"
-  else
-    post_summary failure "${CF_STATE:-none} carried forward from ${CARRIED_FROM:0:12}, ${CF_UNRESOLVED:-?} unresolved"
-  fi
-  log "PR $PR_NUM local-review/summary carried forward (verdict=${CF_STATE:-none}, ${CF_UNRESOLVED:-?} unresolved)"
-  exit 0
-fi
-
 # ------------------------------------------------------------ bot-commit gate
 # pr-review.yml:69-79 — skip auto-fix bot commits so the review -> fix -> review
 # cascade cannot start.  The exact prefixes are load-bearing (DESIGN.md
@@ -613,6 +547,98 @@ REVIEW_DIRTY="$(git -C "$WORKTREE" status --porcelain)"
   die "worktree $WORKTREE is dirty; commit or stash before reviewing PR #$PR_NUM:
 $REVIEW_DIRTY"
 [ -d "$WORKTREE" ] || die "worktree resolution failed for branch $BRANCH"
+
+# ------------------------------------------------------ carry-forward fast path
+# Evidence follows the DIFF (review.md section 13, EVOLUTION.md 2026-09-04).
+# After a fresh-base merge of main the head SHA changes but the PR's own patch
+# usually does not; re-dispatching the reviewer for an identical patch cost
+# a 15-25 minute round per merge on every other open PR.  When a prior marker
+# review exists for a head whose patch hash equals this head's, its verdict and
+# ledger are republished for this head (clean or adverse alike, so adjudication
+# stays possible) and the reviewer is not dispatched.  --force-review disables.
+# patch_hash <base> <head> — sha256 of the diff with the position-dependent
+# lines (index, hunk headers) removed: whitespace-SENSITIVE (Lean is
+# indentation-sensitive; `git patch-id` would ignore it) but independent of
+# where the hunks land after a merge of the base.
+patch_hash() {
+  git -C "$ROOT" diff --no-color "$1" "$2" | grep -v '^index \|^@@ ' | sha256sum | cut -d' ' -f1
+}
+carry_forward() {
+  local this_pid old old_base old_pid body
+  this_pid="$(patch_hash "$(git -C "$ROOT" merge-base "$BASE" "$HEAD_SHA")" "$HEAD_SHA")"
+  [ -n "$this_pid" ] || return 1
+  ghc pr-reviews "$PR_NUM" > "$RUN_ROOT/reviews.json" 2>/dev/null || return 1
+  local me; me="$(gh api user --jq .login 2>/dev/null || true)"; [ -n "$me" ] || return 1
+  for old in $(python3 - "$RUN_ROOT/reviews.json" "$me" <<'PY'
+import json, re, sys
+rows = json.load(open(sys.argv[1]))
+seen = []
+me = sys.argv[2]
+for r in sorted(rows, key=lambda r: r.get("submitted_at") or "", reverse=True):
+    body = r.get("body") or ""
+    m = re.search(r"<!-- mipstarre-review pr=\d+ head=([0-9a-f]{40}) -->", body)
+    if not m or m.group(1) in seen:
+        continue
+    if r.get("commit_id") != m.group(1):            # marker must match the review's own commit binding
+        continue
+    if ((r.get("user") or {}).get("login") or "") != me:   # only this account publishes lane reviews
+        continue
+    if "<!-- mipstarre-review-carried" in body:      # never chain a carried review; use its source
+        continue
+    seen.append(m.group(1)); print(m.group(1))
+PY
+  ); do
+    [ "$old" = "$HEAD_SHA" ] && continue
+    git -C "$ROOT" cat-file -e "$old^{commit}" 2>/dev/null || continue
+    old_base="$(git -C "$ROOT" merge-base "$BASE" "$old" 2>/dev/null)" || continue
+    old_pid="$(patch_hash "$old_base" "$old")"
+    [ "$old_pid" = "$this_pid" ] || continue
+    body="$RUN_ROOT/$HEAD_SHA-carried.md"
+    python3 - "$RUN_ROOT/reviews.json" "$old" "$HEAD_SHA" "$PR_NUM" > "$body" <<'PY' || continue
+import json, sys
+rows, old, new, pr = json.load(open(sys.argv[1])), sys.argv[2], sys.argv[3], sys.argv[4]
+for r in rows:
+    b = r.get("body") or ""
+    if f"head={old}" in b:
+        note = (f"<!-- mipstarre-review pr={pr} head={new} -->\n"
+                f"<!-- mipstarre-review-carried from={old} -->\n"
+                f"_Carried forward from {old[:12]}: the PR patch is byte-identical (git patch-id), "
+                f"so that head's verdict and ledger apply to {new[:12]} without a new reviewer round "
+                f"(review.md section 13)._\n")
+        print(note + b.replace(f"<!-- mipstarre-review pr={pr} head={old} -->", "", 1).lstrip("\n"), end="")
+        break
+else:
+    sys.exit(1)
+PY
+    printf '%s\n' "$old" > "$RUN_ROOT/$HEAD_SHA-carried-from"
+    return 0
+  done
+  return 1
+}
+if [ "$FORCE_REVIEW" -eq 0 ] && carry_forward; then
+  CARRIED_FROM="$(cat "$RUN_ROOT/$HEAD_SHA-carried-from")"
+  CARRIED_MD="$RUN_ROOT/$HEAD_SHA-carried.md"
+  if [ "$DRY_RUN" -eq 1 ]; then
+    log "dry-run: would carry the review of ${CARRIED_FROM:0:12} forward to $HEAD_SHA (body at $CARRIED_MD)"
+    exit 0
+  fi
+  if MOVED="$(head_moved)"; then
+    log "head moved off $HEAD_SHA before the carried review could be published ($MOVED); publishing nothing"
+    exit 0
+  fi
+  log "carrying the review of ${CARRIED_FROM:0:12} forward to $HEAD_SHA (identical patch hash); reviewer not dispatched"
+  ghc post-review "$PR_NUM" "$HEAD_SHA" "<!-- mipstarre-review pr=$PR_NUM head=$HEAD_SHA -->" --body-file "$CARRIED_MD" ||
+    die "could not publish the carried review for PR $PR_NUM @ $HEAD_SHA"
+  CF_STATE="$(grep -o '^VERDICT: [A-Z_]*' "$CARRIED_MD" | head -1 | cut -d' ' -f2)"
+  CF_UNRESOLVED="$(grep -c '^- \[ \]' "$CARRIED_MD" || true)"
+  if { [ "$CF_STATE" = "APPROVED" ] || [ "$CF_STATE" = "COMMENTED" ]; } && [ "${CF_UNRESOLVED:-1}" = "0" ]; then
+    post_summary success "$CF_STATE carried forward from ${CARRIED_FROM:0:12}, 0 unresolved"
+  else
+    post_summary failure "${CF_STATE:-none} carried forward from ${CARRIED_FROM:0:12}, ${CF_UNRESOLVED:-?} unresolved"
+  fi
+  log "PR $PR_NUM local-review/summary carried forward (verdict=${CF_STATE:-none}, ${CF_UNRESOLVED:-?} unresolved)"
+  exit 0
+fi
 
 # Lane ledgers and the combined body that is published as the review.
 REVIEWS_DIR="$RUN_ROOT"
