@@ -6,9 +6,9 @@ import MIPStarRE.QPBT.Combining.Linearity
 
 This file develops the finite Fourier identities used in the proof of the
 quantum linearity theorem.  The Boolean characters are the additive characters
-of `(ZMod 2)^t`; their orthogonality gives Fourier inversion and matrix-valued
+of `𝔽_2^t`; their orthogonality gives Fourier inversion and matrix-valued
 Parseval for operator families.  The final section records the normalization
-relating raw state-dependent observable distance to the distance between the
+relating the state-dependent operator distance to the distance between the
 associated binary projective measurements.
 
 ## References
@@ -31,7 +31,7 @@ noncomputable section
 
 /-! ## Boolean characters -/
 
-/-- The character `a |-> (-1)^(a dot u)` on the Boolean cube `(ZMod 2)^t`.
+/-- The character `a |-> (-1)^(a dot u)` on the Boolean cube `𝔽_2^t`.
 
 This is the scalar character used in the Fourier transform at
 `references/nv-paper/fullpaper.tex:1095-1098`. -/
@@ -39,13 +39,17 @@ noncomputable def booleanCharacter {t : ℕ}
     (u a : Fin t → ZMod 2) : ℂ :=
   MIPStarRE.LDT.Preliminaries.ffVecChar (p := 2) (F := ZMod 2) u a
 
-/-- A Boolean character is multiplicative in its argument. -/
+/-- Formalization-only auxiliary lemma for the Fourier transform at
+`references/nv-paper/fullpaper.tex:1095-1098`: a Boolean character is
+multiplicative in its argument. -/
 theorem booleanCharacter_add_right {t : ℕ} (u a b : Fin t → ZMod 2) :
     booleanCharacter u (a + b) = booleanCharacter u a * booleanCharacter u b := by
   exact AddChar.map_add_eq_mul
     (MIPStarRE.LDT.Preliminaries.ffVecChar (p := 2) (F := ZMod 2) u) a b
 
-/-- The Boolean pairing defining the characters is symmetric. -/
+/-- Formalization-only auxiliary lemma for the Fourier transform at
+`references/nv-paper/fullpaper.tex:1095-1098`: the Boolean pairing defining
+the characters is symmetric. -/
 theorem booleanCharacter_comm {t : ℕ} (u a : Fin t → ZMod 2) :
     booleanCharacter u a = booleanCharacter a u := by
   simp only [booleanCharacter, MIPStarRE.LDT.Preliminaries.ffVecChar_apply]
@@ -57,25 +61,35 @@ theorem booleanCharacter_comm {t : ℕ} (u a : Fin t → ZMod 2) :
     exact mul_comm _ _
   rw [hdot]
 
-/-- A Boolean character is multiplicative in its frequency. -/
+/-- Formalization-only auxiliary lemma for the Fourier transform at
+`references/nv-paper/fullpaper.tex:1095-1098`: a Boolean character is
+multiplicative in its frequency. -/
 theorem booleanCharacter_add_left {t : ℕ} (u v a : Fin t → ZMod 2) :
     booleanCharacter (u + v) a = booleanCharacter u a * booleanCharacter v a := by
   rw [booleanCharacter_comm, booleanCharacter_add_right]
   rw [booleanCharacter_comm a u, booleanCharacter_comm a v]
 
+/-- Formalization-only auxiliary lemma for the Fourier transform at
+`references/nv-paper/fullpaper.tex:1095-1098`: a Boolean character takes
+the value one at the zero argument. -/
 @[simp]
 theorem booleanCharacter_zero_right {t : ℕ} (u : Fin t → ZMod 2) :
     booleanCharacter u 0 = 1 := by
   change MIPStarRE.LDT.Preliminaries.ffVecChar (p := 2) (F := ZMod 2) u 0 = 1
   exact AddChar.map_zero_eq_one _
 
+/-- Formalization-only auxiliary lemma for the Fourier transform at
+`references/nv-paper/fullpaper.tex:1095-1098`: a Boolean character takes
+the value one at the zero frequency. -/
 @[simp]
 theorem booleanCharacter_zero_left {t : ℕ} (a : Fin t → ZMod 2) :
     booleanCharacter 0 a = 1 := by
   rw [booleanCharacter_comm]
   exact booleanCharacter_zero_right a
 
-/-- Every Boolean character takes values whose square is one. -/
+/-- Formalization-only auxiliary lemma for the Fourier transform at
+`references/nv-paper/fullpaper.tex:1095-1098`: every Boolean character
+takes values whose square is one. -/
 theorem booleanCharacter_mul_self {t : ℕ} (u a : Fin t → ZMod 2) :
     booleanCharacter u a * booleanCharacter u a = 1 := by
   rw [← booleanCharacter_add_right]
@@ -84,14 +98,18 @@ theorem booleanCharacter_mul_self {t : ℕ} (u a : Fin t → ZMod 2) :
     exact CharTwo.add_self_eq_zero (a i)
   rw [haa, booleanCharacter_zero_right]
 
-/-- Boolean characters are real, hence fixed by complex conjugation. -/
+/-- Formalization-only auxiliary lemma for the Fourier transform at
+`references/nv-paper/fullpaper.tex:1095-1098`: Boolean characters are real,
+hence fixed by complex conjugation. -/
 theorem star_booleanCharacter {t : ℕ} (u a : Fin t → ZMod 2) :
     star (booleanCharacter u a) = booleanCharacter u a := by
   rcases mul_self_eq_one_iff.mp (booleanCharacter_mul_self u a) with h | h
   · simp [h]
   · simp [h]
 
-/-- The unnormalized character sum vanishes away from frequency zero. -/
+/-- Formalization-only auxiliary lemma for the Fourier transform at
+`references/nv-paper/fullpaper.tex:1095-1098`: the unnormalized character
+sum vanishes away from frequency zero. -/
 theorem sum_booleanCharacter {t : ℕ} (u : Fin t → ZMod 2) :
     ∑ a : Fin t → ZMod 2, booleanCharacter u a =
       if u = 0 then (Fintype.card (Fin t → ZMod 2) : ℂ) else 0 := by
@@ -107,14 +125,17 @@ theorem sum_booleanCharacter {t : ℕ} (u : Fin t → ZMod 2) :
         (p := 2) (F := ZMod 2) u)]
   split_ifs <;> simp
 
-/-- Summing a character over frequencies gives the delta function at zero. -/
+/-- Formalization-only auxiliary lemma for the Fourier transform at
+`references/nv-paper/fullpaper.tex:1095-1098`: summing a character over
+frequencies gives the delta function at zero. -/
 theorem sum_booleanCharacter_swap {t : ℕ} (a : Fin t → ZMod 2) :
     ∑ u : Fin t → ZMod 2, booleanCharacter u a =
       if a = 0 then (Fintype.card (Fin t → ZMod 2) : ℂ) else 0 := by
   simpa only [booleanCharacter_comm] using sum_booleanCharacter a
 
-/-- Orthogonality of two Boolean characters, in the form used by Fourier
-inversion and Parseval. -/
+/-- Formalization-only auxiliary lemma for the Fourier transform at
+`references/nv-paper/fullpaper.tex:1095-1098`: orthogonality of two Boolean
+characters, in the form used by Fourier inversion and Parseval. -/
 theorem sum_booleanCharacter_mul {t : ℕ} (a b : Fin t → ZMod 2) :
     ∑ u : Fin t → ZMod 2, booleanCharacter u a * booleanCharacter u b =
       if a = b then (Fintype.card (Fin t → ZMod 2) : ℂ) else 0 := by
@@ -144,7 +165,9 @@ noncomputable def operatorFourier {t : ℕ} {ι : Type*}
   ((Fintype.card (Fin t → ZMod 2) : ℂ)⁻¹) •
     ∑ a : Fin t → ZMod 2, booleanCharacter u a • O a
 
-/-- Fourier coefficients of a Hermitian operator family are Hermitian. -/
+/-- Formalization-only auxiliary lemma for the Fourier argument at
+`references/nv-paper/fullpaper.tex:1095-1100`: Fourier coefficients of a
+Hermitian operator family are Hermitian. -/
 theorem operatorFourier_isHermitian {t : ℕ} {ι : Type*}
     [Fintype ι] [DecidableEq ι]
     (O : (Fin t → ZMod 2) → Op ι) (hO : ∀ a, (O a).IsHermitian)
@@ -158,7 +181,9 @@ theorem operatorFourier_isHermitian {t : ℕ} {ι : Type*}
   intro a _
   rw [star_booleanCharacter, (hO a).eq]
 
-/-- Fourier inversion for operator-valued functions on the Boolean cube. -/
+/-- Formalization-only auxiliary lemma for the Fourier argument at
+`references/nv-paper/fullpaper.tex:1095-1100`: Fourier inversion for
+operator-valued functions on the Boolean cube. -/
 theorem operatorFourier_inversion {t : ℕ} {ι : Type*}
     [Fintype ι] [DecidableEq ι]
     (O : (Fin t → ZMod 2) → Op ι) (a : Fin t → ZMod 2) :
@@ -200,8 +225,10 @@ theorem operatorFourier_inversion {t : ℕ} {ι : Type*}
     _ = O a := by
       simp [hN]
 
-/-- Matrix-valued Parseval identity for the Boolean Fourier transform.  The
-order of the two operator families is preserved. -/
+/-- Formalization-only auxiliary lemma for the Fourier argument at
+`references/nv-paper/fullpaper.tex:1095-1100`: the matrix-valued Parseval
+identity for the Boolean Fourier transform.  The order of the two operator
+families is preserved. -/
 theorem sum_operatorFourier_mul_operatorFourier {t : ℕ} {ι : Type*}
     [Fintype ι] [DecidableEq ι]
     (A B : (Fin t → ZMod 2) → Op ι) :
@@ -246,7 +273,9 @@ theorem sum_operatorFourier_mul_operatorFourier {t : ℕ} {ι : Type*}
           ∑ a : Fin t → ZMod 2, A a * B a := by
       rfl
 
-/-- Parseval specialized to the square of a single operator family. -/
+/-- Formalization-only auxiliary lemma for the Fourier argument at
+`references/nv-paper/fullpaper.tex:1095-1100`: Parseval specialized to the
+square of a single operator family. -/
 theorem sum_operatorFourier_sq {t : ℕ} {ι : Type*}
     [Fintype ι] [DecidableEq ι]
     (O : (Fin t → ZMod 2) → Op ι) :
@@ -290,8 +319,15 @@ noncomputable def binaryObservableDistSq {ι : Type} [Fintype ι]
     stateDepDistSq (binaryObservableEffect outcome S)
       (binaryObservableEffect outcome T) ρ
 
-/-- The normalized binary-observable distance is half the raw operator
-distance. -/
+/-- The binary-measurement distance is half the state-dependent operator
+distance.
+
+**Local fix:** Source equation (3) at
+`references/nv-paper/fullpaper.tex:903-911` ends by identifying the
+binary-measurement distance with the state-dependent operator distance of the
+two observables; the correct relation carries the factor `1 / 2` proved here.
+Documented in
+`docs/paper-gaps/qpbt_linearity-distance-normalization.tex`. -/
 theorem binaryObservableDistSq_eq_stateDepDistSq_div_two
     {ι : Type} [Fintype ι] [DecidableEq ι] (S T ρ : Op ι) :
     binaryObservableDistSq S T ρ = stateDepDistSq S T ρ / 2 := by
@@ -322,8 +358,8 @@ theorem binaryObservableDistSq_eq_stateDepDistSq_div_two
   norm_num [Complex.mul_re]
   ring
 
-/-- Raw squared distance between binary observables in terms of their
-state-dependent correlation. -/
+/-- The state-dependent squared distance between binary observables in terms
+of their correlation. -/
 theorem stateDepDistSq_eq_two_sub_two_mul_correlation
     {ι : Type} [Fintype ι] [DecidableEq ι]
     (S T ρ : Op ι) (hS : IsBinaryObservable S)
@@ -363,8 +399,8 @@ theorem stateDepDistSq_eq_two_sub_two_mul_correlation
   rw [hcross]
   ring
 
-/-- The normalized binary-observable distance is one minus the real
-state-dependent correlation. -/
+/-- The binary-measurement distance is one minus the real state-dependent
+correlation. -/
 theorem binaryObservableDistSq_eq_one_sub_correlation
     {ι : Type} [Fintype ι] [DecidableEq ι]
     (S T ρ : Op ι) (hS : IsBinaryObservable S)
