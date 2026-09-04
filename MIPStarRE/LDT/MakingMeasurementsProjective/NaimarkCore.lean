@@ -55,7 +55,10 @@ lemma optionBasisProj_sum_eq_one {α : Type*} [Fintype α] [DecidableEq α] :
             have hab : a ≠ b := fun h => hij (congrArg some h)
             simp [Matrix.sum_apply, Matrix.single_apply, hab]
 
-/-- Kronecker products of projectors are projective. -/
+/-- Kronecker products of projectors are projective. This supplies the
+formalization-only fact `lem:sandwich-tensor-projector` used in
+`lem:ld-sandwich`; detailed source argument
+`references/neexp-paper/05_quantum_preliminaries.tex:930-946`. -/
 lemma isProj_kronecker {d₁ d₂ : Type*}
     [Fintype d₁] [Fintype d₂]
     {A : MIPStarRE.Quantum.Op d₁} {B : MIPStarRE.Quantum.Op d₂}
