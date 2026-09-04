@@ -1,6 +1,8 @@
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Soundness
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Strategy
 import MIPStarRE.QPBT.Combining.DirectLowDegree.GameValue
+import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.PassConversion
+import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.SeedFiberValue
 
 /-!
 # The directly indexed low-degree game
@@ -20,10 +22,16 @@ The `Transport` modules relate the direct game to the seed-indexed game and to
 the mature low individual degree test interface: `Transport.Correspondence`
 identifies coordinates, answers, and the question law of the two QPBT
 presentations; `Transport.SeedFiber` dilates a seed-indexed strategy to a
-direct strategy by a correlated residue register; `Transport.Questions` reads
-mature lines as canonical direct questions and rebases direct answers; and
+direct strategy by a correlated residue register, and `Transport.SeedFiberValue`
+shows that the dilation preserves the value exactly; `Transport.Questions`
+reads mature lines as canonical direct questions and rebases direct answers;
 `Transport.Strategy` reads one coordinate of a projective direct strategy as a
-mature `ProjStrat`, with exact Born-weight formulas for both adapters.
+mature `ProjStrat`, with exact Born-weight formulas for both adapters; and
+`Transport.BranchComparison`, `Transport.DiagonalRecursion`, and
+`Transport.PassConversion` convert a value bound of the direct game into the
+pass hypothesis of the mature low individual degree theorem for every
+coordinate strategy.  `GameValue` supplies the rejection calculus relating the
+direct value to the mature branch weights.
 
 ## References
 

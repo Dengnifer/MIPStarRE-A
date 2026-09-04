@@ -4,9 +4,10 @@ import MIPStarRE.QPBT.Games.CondLinear
 # Coordinate direct sums of conditionally linear representations
 
 Equal-level representations of conditionally linear functions over pairwise
-disjoint registers have a coordinatewise direct sum.  Its support and
-evaluation properties follow from coordinate restriction, and it yields the
-corresponding product law for shared-seed distributions.
+disjoint registers have a coordinatewise direct sum.  Coordinate-restriction
+identities give its support and evaluation properties, and the resulting
+construction yields the corresponding product law for shared-seed
+distributions.
 
 ## References
 
