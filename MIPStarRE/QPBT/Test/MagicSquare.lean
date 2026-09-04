@@ -12,7 +12,7 @@ carrier is needed here.
 ## References
 
 This file formalizes `def:ms-game` in
-`blueprint/src/chapter/ch13_qpbt_test.tex:188-203`, from
+`blueprint/src/chapter/ch13_qpbt_test.tex:207-222`, from
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:512-610`.
 -/
 
@@ -21,7 +21,7 @@ namespace MIPStarRE.QPBT
 open MIPStarRE.LDT
 
 /-- A Magic Square question is either a row/column constraint or a cell
-variable.  This is `def:ms-game`, blueprint lines 188-203, paper origin
+variable.  This is `def:ms-game`, blueprint lines 207-222, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:512-610`.
 -/
 inductive MsType where
@@ -30,7 +30,7 @@ inductive MsType where
   deriving DecidableEq, Repr, Inhabited, Fintype
 
 /-- The cell incident to a constraint and one of its three positions in
-`def:ms-game`, blueprint `ch13_qpbt_test.tex:188-203`, paper origin
+`def:ms-game`, blueprint `ch13_qpbt_test.tex:207-222`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:512-610`.
 -/
 def msConstraintVars (i : Fin 6) (j : Fin 3) : Fin 9 :=
@@ -38,14 +38,14 @@ def msConstraintVars (i : Fin 6) (j : Fin 3) : Fin 9 :=
     by_cases h : i.val < 3 <;> simp [h] <;> omega⟩
 
 /-- The exceptional Magic Square parity, equal to one only on the final
-constraint.  Blueprint `blueprint/src/chapter/ch13_qpbt_test.tex:188-203`; paper
+constraint.  Blueprint `blueprint/src/chapter/ch13_qpbt_test.tex:207-222`; paper
 origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:512-610`.
 -/
 def msParity (i : Fin 6) : ZMod 2 :=
   if i.val = 5 then 1 else 0
 
 /-- The 18 constraint-variable incidence edges of the Magic Square graph in
-`def:ms-game`, blueprint `ch13_qpbt_test.tex:188-203`, paper origin
+`def:ms-game`, blueprint `ch13_qpbt_test.tex:207-222`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:512-610`.
 -/
 def msEdges : Finset (Sym2 MsType) :=
@@ -54,7 +54,7 @@ def msEdges : Finset (Sym2 MsType) :=
 
 /-- The Magic Square incidence graph has an edge, as required by the
 nonempty-support API of `graphDistribution`.  This is the finite carrier fact
-used to instantiate `def:ms-game`, blueprint `ch13_qpbt_test.tex:188-203`,
+used to instantiate `def:ms-game`, blueprint `ch13_qpbt_test.tex:207-222`,
 paper origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:512-610`.
 -/
 theorem msEdges_nonempty : msEdges.Nonempty := by
@@ -62,7 +62,7 @@ theorem msEdges_nonempty : msEdges.Nonempty := by
   exact Finset.mem_image.mpr ⟨(0, 0), Finset.mem_univ _, rfl⟩
 
 /-- A Magic Square answer is a parity triple or a single cell bit, as prescribed
-by `def:ms-game`, blueprint `blueprint/src/chapter/ch13_qpbt_test.tex:188-203`,
+by `def:ms-game`, blueprint `blueprint/src/chapter/ch13_qpbt_test.tex:207-222`,
 paper origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:512-610`.
 -/
 inductive MsAnswer where
@@ -79,14 +79,14 @@ def msBitOrZero : MsAnswer → ZMod 2
 
 /-- A finite code for the two Magic Square answer constructors.  This is
 Lean-only carrier infrastructure for `def:ms-game`, blueprint
-`ch13_qpbt_test.tex:188-203`, paper origin
+`ch13_qpbt_test.tex:207-222`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:512-610`.
 -/
 abbrev MsAnswerCode := (Fin 3 → ZMod 2) ⊕ ZMod 2
 
 /-- The constructor-preserving code equivalence for `MsAnswer`; Lean-only
 finite-carrier infrastructure for `def:ms-game`, blueprint
-`ch13_qpbt_test.tex:188-203`, paper origin
+`ch13_qpbt_test.tex:207-222`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:512-610`.
 -/
 noncomputable def msAnswerEquiv : MsAnswer ≃ MsAnswerCode where
@@ -107,7 +107,7 @@ noncomputable instance : Fintype MsAnswer :=
 instance : Inhabited MsAnswer := ⟨.bit 0⟩
 
 /-- The Magic Square consistency predicate.  Constructor mismatches are
-rejected, as required by `def:ms-game` (blueprint lines 188-203; paper
+rejected, as required by `def:ms-game` (blueprint lines 207-222; paper
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:512-610`).
 -/
 def msWinPredicate :
@@ -127,7 +127,7 @@ def msWinPredicate :
   | _, _, _, _ => false
 
 /-- The Magic Square game as a finite `Game`.  This is `def:ms-game` in
-`blueprint/src/chapter/ch13_qpbt_test.tex:188-203`, paper origin
+`blueprint/src/chapter/ch13_qpbt_test.tex:207-222`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:512-610`.
 -/
 noncomputable def msGame : Game where
@@ -136,7 +136,10 @@ noncomputable def msGame : Game where
   AnswerA := MsAnswer
   AnswerB := MsAnswer
   μ := graphDistribution msEdges msEdges_nonempty
-  μ_prob := by sorry
+  μ_prob := by
+    apply Distribution.uniformOnFinset_isProbability
+    refine ⟨(.constraint 0, .var (msConstraintVars 0 0)), ?_⟩
+    simp [msEdges]
   decide := msWinPredicate
 
 end MIPStarRE.QPBT
