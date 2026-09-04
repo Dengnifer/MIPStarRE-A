@@ -1,3 +1,4 @@
+import MIPStarRE.QPBT.Algebra.Pauli
 import MIPStarRE.QPBT.Test.MagicSquareTheorems.Basic
 
 /-!
@@ -9,7 +10,7 @@ construction from two anticommuting consistent binary measurements.
 ## References
 
 The source statement is `thm:ms-from-ac` in
-`blueprint/src/chapter/ch13_qpbt_test.tex:251-261`, from
+`blueprint/src/chapter/ch13_qpbt_test.tex:257-267`, from
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:654-722`.
 -/
 
@@ -28,7 +29,7 @@ noncomputable def msPerfectState (ι : Type*) [Fintype ι] [DecidableEq ι]
 
 /-- `thm:ms-from-ac`: any anticommuting pair of projective binary
 measurements, consistent on an EPR state, extends to a value-one SPCC Magic
-Square strategy. Blueprint `ch13_qpbt_test.tex:251-261`, paper
+Square strategy. Blueprint `ch13_qpbt_test.tex:257-267`, paper
 `08_classical_and_quantum_low_degree_tests.tex:654-722`.
 
 The local index type is arbitrary, finite, and nonempty; no field model or QPBT

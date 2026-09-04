@@ -1,4 +1,3 @@
-import MIPStarRE.QPBT.Algebra.Pauli
 import MIPStarRE.QPBT.Games.StrategyClasses
 import MIPStarRE.QPBT.Test.MagicSquare
 
@@ -12,7 +11,7 @@ observable associated with a binary measurement.
 ## References
 
 The game is `def:ms-game` in
-`blueprint/src/chapter/ch13_qpbt_test.tex:188-218`, from
+`blueprint/src/chapter/ch13_qpbt_test.tex:207-222`, from
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:512-610`.
 -/
 
@@ -25,7 +24,7 @@ open MIPStarRE.LDT MIPStarRE.Quantum
 noncomputable section
 
 /-- Symmetry of the Magic Square question distribution from `def:ms-game`;
-blueprint `ch13_qpbt_test.tex:203-218`, paper
+blueprint `ch13_qpbt_test.tex:207-222`, paper
 `08_classical_and_quantum_low_degree_tests.tex:512-610`. -/
 theorem msQuestionDistribution_symm (x y : MsType) :
     msGame.μ.weight (x, y) = msGame.μ.weight (y, x) := by
@@ -33,7 +32,7 @@ theorem msQuestionDistribution_symm (x y : MsType) :
   simp [msGame, graphDistribution, Sym2.eq_swap]
 
 /-- Symmetry of the Magic Square decision predicate from `def:ms-game`;
-blueprint `ch13_qpbt_test.tex:203-218`, paper
+blueprint `ch13_qpbt_test.tex:207-222`, paper
 `08_classical_and_quantum_low_degree_tests.tex:512-610`. -/
 theorem msWinPredicate_symm (x y : MsType) (a b : MsAnswer) :
     msWinPredicate x y a b = msWinPredicate y x b a := by
@@ -56,7 +55,7 @@ theorem msGameSymm_toGame : msGameSymm.toGame = msGame := by
   rfl
 
 /-- The observable associated with a binary measurement; formalization-only notation
-used in `thm:ms-from-ac`, blueprint `ch13_qpbt_test.tex:251-261`, paper
+used in `thm:ms-from-ac`, blueprint `ch13_qpbt_test.tex:257-267`, paper
 `08_classical_and_quantum_low_degree_tests.tex:658-722`. -/
 def obsOf {ι : Type*} [Fintype ι] [DecidableEq ι]
     (M : Measurement (ZMod 2) ι) : Op ι :=

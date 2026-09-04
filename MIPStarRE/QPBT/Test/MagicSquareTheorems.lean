@@ -1,3 +1,4 @@
+import MIPStarRE.QPBT.Algebra.Pauli
 import MIPStarRE.QPBT.Test.MagicSquareTheorems.Basic
 import MIPStarRE.QPBT.Test.MagicSquareTheorems.PerfectStrategy
 
@@ -11,7 +12,7 @@ supporting definitions.
 ## References
 
 The source statement is `thm:ms-rigidity` in
-`blueprint/src/chapter/ch13_qpbt_test.tex:222-244`, from
+`blueprint/src/chapter/ch13_qpbt_test.tex:228-250`, from
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652`.
 
 The variable indices below are zero-based: indices 0 and 4 represent the
@@ -106,7 +107,7 @@ noncomputable def msAnticommutatorDistanceB (S : Strategy msGame)
     (fun _ => -(Z * X)) (idealMsState w.aux)
 
 /-- `thm:ms-rigidity`, imported from Coladangelo--Stark, Theorem 6.9.
-Blueprint `ch13_qpbt_test.tex:222-244`, paper
+Blueprint `ch13_qpbt_test.tex:228-250`, paper
 `08_classical_and_quantum_low_degree_tests.tex:612-652`.
 
 The paper states the Euclidean estimate at scale `sqrt ε` at lines 624--626
