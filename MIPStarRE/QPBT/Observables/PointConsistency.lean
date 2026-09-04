@@ -1,6 +1,6 @@
 import MIPStarRE.QPBT.Games.ErrorFunctions
 import MIPStarRE.QPBT.Observables.Anticommuting
-import MIPStarRE.QPBT.Observables.ExpandedDefs
+import MIPStarRE.QPBT.Observables.ExpandedCommutation
 
 /-!
 # Expanded point consistency and commutation
@@ -116,8 +116,8 @@ theorem expPointTrace_comm :
           (fun ω (bits : ZMod 2 × ZMod 2) => S.place p
             ((S.expPointTrace p.side .Z ω.2.1 ω.2.2.2).effect bits.2 *
               (S.expPointTrace p.side .X ω.1 ω.2.2.1).effect bits.1))
-          S.psiHat ≤ C * deltaAnticom ε := by
-  sorry
+          S.psiHat ≤ C * deltaAnticom ε :=
+  ProjectiveSetting.expPointTrace_comm_proof
 
 /-- The source's existential polynomial-error formulation, derived from the
 concrete square-root bounds rather than postulated independently. This is
