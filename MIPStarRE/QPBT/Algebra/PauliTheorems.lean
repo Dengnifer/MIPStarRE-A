@@ -335,32 +335,13 @@ theorem primeTauObservable_X_mul_Z {p : ℕ} {K ι : Type*} [Field K] [Fintype K
     smul_eq_mul, Finset.prod_mul_distrib]
   rw [← hchar]
 
-/-- In characteristic two, the standard additive character is the sign
-character used by the binary Pauli definitions. -/
-private theorem phaseSign_eq_stdAddChar (t : ZMod 2) :
-    phaseSign t = ZMod.stdAddChar t := by
-  by_cases ht : t = 0
-  · subst t
-    simp [phaseSign]
-  · rw [phaseSign, if_neg ht]
-    have ht_ne_one : ZMod.stdAddChar t ≠ 1 := by
-      intro h
-      apply ht
-      apply ZMod.injective_stdAddChar
-      simpa using h
-    have htwo : 2 • t = 0 := by
-      simpa only [two_nsmul] using CharTwo.add_self_eq_zero t
-    have hsq : (ZMod.stdAddChar t) ^ 2 = 1 := by
-      rw [← AddChar.map_nsmul_eq_pow, htwo, AddChar.map_zero_eq_one]
-    exact ((sq_eq_one_iff.mp hsq).resolve_left ht_ne_one).symm
-
 /-- The canonical finite-field character at `p = 2` is `phaseSign` composed
 with the binary trace. -/
 private theorem ffChar_two_eq_phaseSign {K : Type*} [Field K]
     [Algebra (ZMod 2) K] (x : K) :
     ffChar (p := 2) (F := K) x = phaseSign (binTrace K x) := by
   rw [ffChar_apply]
-  exact (phaseSign_eq_stdAddChar (binTrace K x)).symm
+  exact (phaseSign_eq_ffChar (binTrace K x)).symm
 
 /-- The binary Pauli observable is the characteristic-two specialization of
 the prime-characteristic observable. -/
@@ -381,7 +362,7 @@ private theorem tauObservable_eq_primeTauObservable {K ι : Type*} [Field K]
       intro i hi
       by_cases hxy : x i = y i
       · rw [if_pos hxy, if_pos hxy, ffChar_apply]
-        exact phaseSign_eq_stdAddChar _
+        exact phaseSign_eq_ffChar _
       · rw [if_neg hxy, if_neg hxy]
 
 /-- With no coordinates, every binary Pauli observable is the identity. -/
@@ -618,21 +599,6 @@ private theorem binTrace_dotProduct_eq_quditQubitLabelEquiv
     Algebra.trace_self_apply, Fintype.sum_prod_type, quditQubitLabelEquiv,
     Equiv.trans_apply, Equiv.curry_symm_apply, kappaVec, basisCoordVec]
   rfl
-
-/-- The binary sign character sends sums to products. -/
-private theorem phaseSign_sum {ι : Type*} [Fintype ι] (f : ι → ZMod 2) :
-    phaseSign (∑ i, f i) = ∏ i, phaseSign (f i) := by
-  simpa only [phaseSign_eq_stdAddChar] using
-    (addChar_sum (ZMod.stdAddChar (N := 2)) f)
-
-/-- The product of the coordinate phases is the phase of the trace pairing. -/
-private theorem prod_phaseSign_binTrace_dotProduct
-    {K ι : Type*} [CommRing K] [Algebra (ZMod 2) K] [Fintype ι]
-    (a u : ι → K) :
-    (∏ i, phaseSign (binTrace K (a i * u i))) =
-      phaseSign (binTrace K (dotProduct a u)) := by
-  rw [← phaseSign_sum]
-  simp [dotProduct]
 
 /-- The coordinate label equivalence preserves addition. -/
 private theorem quditQubitLabelEquiv_add {q : ℕ}
