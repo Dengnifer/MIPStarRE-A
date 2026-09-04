@@ -42,14 +42,6 @@ noncomputable section
 
 /-! ## Contractions and their action on states -/
 
-/-- Applying a product of operators is successive application. -/
-theorem applyOperatorToState_mul {ι : Type*} [Fintype ι] [DecidableEq ι]
-    (M N : Op ι) (v : EuclideanSpace ℂ ι) :
-    applyOperatorToState (M * N) v =
-      applyOperatorToState M (applyOperatorToState N v) := by
-  unfold applyOperatorToState
-  simp [Matrix.toEuclideanLin, Matrix.toLpLin_mul_same]
-
 /-- The identity acts trivially. -/
 theorem applyOperatorToState_one {ι : Type*} [Fintype ι] [DecidableEq ι]
     (v : EuclideanSpace ℂ ι) :

@@ -57,7 +57,7 @@ theorem quadratic_form_mono {ι : Type*}
   exact le_add_of_nonneg_right hdiff
 
 /-- Applying a product of operators agrees with successive application. -/
-private theorem applyOperatorToState_mul {ι : Type*}
+theorem applyOperatorToState_mul {ι : Type*}
     [Fintype ι] [DecidableEq ι]
     (M N : Op ι) (v : EuclideanSpace ℂ ι) :
     applyOperatorToState (M * N) v =
