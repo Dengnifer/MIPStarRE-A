@@ -1,5 +1,90 @@
 [
  {
+  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/183",
+  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
+  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/183/labels{/name}",
+  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/183/comments",
+  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/183/events",
+  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/183",
+  "id": 5349439078,
+  "node_id": "I_kwDOUJyJf88AAAABPtn2Zg",
+  "number": 183,
+  "title": "refactor(QPBT/Test): clean Magic Square dilation proof support",
+  "user": {
+   "login": "Dengnifer",
+   "id": 89234078,
+   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
+   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/Dengnifer",
+   "html_url": "https://github.com/Dengnifer",
+   "followers_url": "https://api.github.com/users/Dengnifer/followers",
+   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
+   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
+   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
+   "repos_url": "https://api.github.com/users/Dengnifer/repos",
+   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
+   "type": "User",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "labels": [
+   {
+    "id": 12025014642,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8pcg",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/follow-up",
+    "name": "follow-up",
+    "color": "ededed",
+    "default": false,
+    "description": "A mathematical obligation split out of a merged PR"
+   }
+  ],
+  "state": "open",
+  "locked": false,
+  "assignees": [],
+  "milestone": null,
+  "comments": 0,
+  "created_at": "2026-09-04T14:40:31Z",
+  "updated_at": "2026-09-04T14:40:31Z",
+  "closed_at": null,
+  "assignee": null,
+  "author_association": "OWNER",
+  "active_lock_reason": null,
+  "sub_issues_summary": {
+   "total": 0,
+   "completed": 0,
+   "percent_completed": 0
+  },
+  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/77",
+  "issue_dependencies_summary": {
+   "blocked_by": 0,
+   "total_blocked_by": 0,
+   "blocking": 0,
+   "total_blocking": 0
+  },
+  "body": "<!-- mipstarre-issue-key: pr149-terminal-dilation-cleanup -->\n## Context\n\nPR #149 supplies the Magic Square projective-dilation and ground-slice\ntransfer layer for issue #102. Its third exact-head review approves the\nmathematics and source alignment and leaves three bounded code-hygiene\nfindings. They are tracked here so the completed proof packet does not grow.\n\n## Scope\n\n- Remove the unused `[DecidableEq alpha]` assumptions from the two\n  family-projection theorem signatures in `Dilation.lean`, introducing local\n  classical instances inside proofs if required.\n- Replace the three linter-reported goal-changing `show` tactics in\n  `Dilation.lean` with `change` or direct goal statements.\n- Promote or reuse the existing `applyOperatorToState_mul` helper from\n  `Games/DistanceTheorems/Support.lean` so `GroundSlice.lean` does not carry an\n  exact duplicate proof.\n\n## Acceptance\n\n- The affected public theorem signatures have no unused typeclass assumptions.\n- The three `style.show` warnings are eliminated at their source.\n- Both call sites use one appropriately shared multiplication helper.\n- Changed-file Lean checks, the duplicate-helper audit, and local CI pass.\n\nProvenance: PR #149 at\n`da0d0061c7a1a583fe43927632b2d97b45614065`, terminal findings F1-F3.\n\n---\nAddresses #102",
+  "closed_by": null,
+  "reactions": {
+   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/183/reactions",
+   "total_count": 0,
+   "+1": 0,
+   "-1": 0,
+   "laugh": 0,
+   "hooray": 0,
+   "confused": 0,
+   "heart": 0,
+   "rocket": 0,
+   "eyes": 0
+  },
+  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/183/timeline",
+  "performed_via_github_app": null,
+  "state_reason": null,
+  "pinned_comment": null
+ },
+ {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/182",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/182/labels{/name}",
@@ -3909,9 +3994,9 @@
   "author_association": "OWNER",
   "active_lock_reason": null,
   "sub_issues_summary": {
-   "total": 5,
+   "total": 6,
    "completed": 1,
-   "percent_completed": 20
+   "percent_completed": 16
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/164",
   "issue_dependencies_summary": {
@@ -4769,9 +4854,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 104,
+  "comments": 107,
   "created_at": "2026-09-02T08:30:04Z",
-  "updated_at": "2026-09-04T14:09:30Z",
+  "updated_at": "2026-09-04T14:56:45Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",

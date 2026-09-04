@@ -187,3 +187,8 @@ to merge by hand. Handoff: results/telemetry/owner-messages/handoff-to-codex-mai
   and now nudges the owner session through #26 rather than a tmux pane.
 - **Hand-back:** on the owner's word; recorded as event=handback with the
   state at that moment.
+
+### 2026-09-04 14:56Z - Takeover after the Claude window reset (planned at 12:53Z)
+
+- 14:52Z: the scheduled takeover fired; codex main posted its exact in-flight state to #27 (comments 5542210401 and 5542293871) and exited at 14:56Z; takeover-telemetry.sh recorded event=takeover (its boilerplate text describes the 2026-09-03 takeover; this entry is the accurate one). Mode 1 window 13:03Z-14:56Z merged PRs 151, 154, 171, 158 (adjudicated at the round cap, findings deferred to #176, #177, #180-#182), adjudicated PR 149 (deferred to #183), opened PRs 175, 178, 179, 184, 185 and closed #124, #125, #127, #128.
+- 14:59Z: owner: track B is discarded; track A uses the full codex concurrency of 10 (watchdog/max-codex = 10). Mode 2 resumes with Opus and codex subagents at about 1:1.
