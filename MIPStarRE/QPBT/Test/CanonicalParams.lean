@@ -1,4 +1,4 @@
-import MIPStarRE.QPBT.Test.Soundness
+import MIPStarRE.QPBT.Test.SoundnessDefs
 
 /-!
 # Canonical Pauli basis test parameters
