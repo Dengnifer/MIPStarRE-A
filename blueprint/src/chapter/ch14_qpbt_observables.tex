@@ -189,7 +189,8 @@ this is the source of the terminology.
 		\,\geq\, \Big(1 - \frac{3md}{q}\Big) \cdot \frac{1}{2}\,,
 	\]
 	and the probability that $\omega$ is commuting is also at least
-	$\big(1 - \frac{3md}{q}\big) \cdot \frac{1}{2}$.
+	$\big(1 - \frac{3md}{q}\big) \cdot \frac{1}{2}$.  These corrections are
+	documented in \cite{gap:qpbt_anticommuting-probability}.
 \end{lemma}
 \begin{proof}
 	\leanok
@@ -278,7 +279,8 @@ this is the source of the terminology.
 	$\mathrm{ind}_m(u_X) \cdot \mathrm{ind}_m(u_Z)$, in place of the
 	source's argument via the Schwartz--Zippel lemma; the exact value also
 	supplies the unconditional constant lower bounds used in the proof of
-	Lemma~\ref{lem:qld-win-implications}.
+	Lemma~\ref{lem:qld-win-implications}.  The full comparison is in
+	\cite{gap:qpbt_anticommuting-probability}.
 \end{remark}
 
 \begin{definition}[Closeness of question-indexed operators]
@@ -698,7 +700,9 @@ extracts from the strategy.
 	$M^{\mathrm{Pair},\omega}_{[\beta_W=a]}$ denotes its coarse-graining
 	onto the $W$-component. Furthermore, all of the approximations above
 	also hold with $\approx_\eps$ in place of $\simeq_\eps$, and with the
-	tensor factors interchanged.
+	tensor factors interchanged.  The corrected conditioning event,
+	zero-direction completion, and unrestricted parameter proof are documented
+	in \cite{gap:qpbt_win-implications-corrections}.
 \end{lemma}
 \begin{proof}
 	\leanok
@@ -741,7 +745,8 @@ extracts from the strategy.
 	Item~\ref{enu:qld-ms} follows in the same way, because the Magic Square
 	check is executed with constant probability over the choice of a pair
 	of questions and the anticommuting event has probability at least
-	$2^{-4}$. Finally, that all approximations
+	$2^{-4}$.  This replacement for the source's circular parameter reduction
+	is documented in \cite{gap:qpbt_win-implications-corrections}. Finally, that all approximations
 	also hold with $\approx_\eps$ in place of $\simeq_\eps$ is immediate
 	from Lemma~\ref{fact:agreement}.
 	The forms with the tensor factors interchanged are the same subtests
@@ -876,7 +881,8 @@ extracts from the strategy.
 	an explicit $\bot$ outcome; the same implicit completeness assumption
 	occurs in the source proof of the statement corresponding to
 	Lemma~\ref{lem:qld-comm-line-cons}, whose proof below invokes the
-	completed families instead.
+	completed families instead.  These corrections are collected in
+	\cite{gap:qpbt_win-implications-corrections}.
 \end{remark}
 
 \section{Expanding the Hilbert space and defining commuting observables}
@@ -1143,7 +1149,7 @@ exactly these variants.
 	exist $A \geq 1$ and $r>0$ such that
 	$0 \leq \delta(x) \leq A x^r$ for every $x \geq 0$. Separating the
 	prefactor and exponent is necessary to include the square-root bound;
-	see \path{docs/paper-gaps/qpbt_polynomial-error-square-root.tex}.
+	see \cite{gap:qpbt_polynomial-error-square-root}.
 	There exists a function $\delta_{\mathrm{Anticom}}(\eps) = \poly(\eps)$
 	such that the following holds, with respect to the state
 	$\ket{\hat{\psi}}$ of Definition~\ref{def:expanded-state}.
@@ -1265,7 +1271,7 @@ exactly these variants.
 	exist $A \geq 1$ and $r>0$ such that
 	$0 \leq \delta(x) \leq A x^r$ for every $x \geq 0$. Separating the
 	prefactor and exponent is necessary to include the square-root bound;
-	see \path{docs/paper-gaps/qpbt_polynomial-error-square-root.tex}.
+	see \cite{gap:qpbt_polynomial-error-square-root}.
 	There exists a function $\delta_{\mathrm{Line}}(\eps) = \poly(\eps)$
 	such that the following holds, with respect to the state
 	$\ket{\hat{\psi}}$ of Definition~\ref{def:expanded-state}. For all

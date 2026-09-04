@@ -130,12 +130,31 @@ The structure \path{ExtractionWitness} in
 unitarity equations for the concrete swap maps, a normalized auxiliary state,
 the transformed-state estimate, and the two-player Pauli-projector comparison.
 The theorem \path{exists_extractionWitness} concludes the existence of this
-data at the explicit extraction scale from the projective strategy and its
-\path{GlobalPairWitness}; it assumes no range-projection transfer, bridge, or
-residual package.  Thus these declarations match the Stage~4.2 extraction
-lemma, including the corrected numerical estimates, but do not formalize the
-later passage to the isometries in the soundness theorem.  No declaration yet
-states that passage.
+data at the explicit extraction scale, but it takes the
+\path{GlobalPairWitness} of Lemma~\path{lem:qld-4-7} as an explicit hypothesis
+rather than obtaining it from \path{exists_globalPairWitness}.  That bundle
+carries the projective global polynomial-pair measurements and both
+point-consistency estimates, and the blueprint proof of
+Lemma~\path{lem:qld-unitary} obtains it from Lemma~\path{lem:qld-4-7}; deleting
+the hypothesis would leave that construction unproved.  By the criterion of
+\path{docs/paper-gaps/proof-gap-protocol.tex} the hypothesis is therefore proof
+debt rather than a faithful boundary condition, and the declaration is a
+conditional helper: it does not certify the source lemma, and the blueprint
+node Lemma~\path{lem:qld-unitary} accordingly neither links it nor carries any
+statement-level formalization mark.  The declaration is recorded instead on the
+separate formalization-support node
+Lemma~\path{lem:qld-unitary-given-global-pair}, whose statement assumes the
+global polynomial-pair measurement explicitly and whose statement-level mark
+therefore certifies only that conditional form.  Apart from that hypothesis the
+conclusion matches the Stage~4.2 extraction lemma, including the corrected
+numerical estimates; the later passage to the isometries in the soundness
+theorem is not formalized, and no declaration yet states that passage.
+
+Discharging the debt requires a source-facing declaration that obtains the
+witness from \path{exists_globalPairWitness} and carries its own tracked
+\path{sorry}, together with the corresponding correction of the docstring of
+\path{exists_extractionWitness}, which still describes that theorem as
+source-facing and as introducing no additional premise.
 
 Issue~\#19 owns this concrete Stage~4.2 interface and discrepancy record.
 \ghissue{47} owns the Stage~4.3 proof of
@@ -150,7 +169,10 @@ last passage from unitaries to isometries omits a genuine range-projection
 argument.  Neither defect is a counterexample to Pauli soundness.  The former
 is corrected by positive-contraction inequalities and a small-error split;
 the latter remains a named downstream proof obligation whose hypotheses are
-already supplied by the extraction lemma.
+already supplied by the extraction lemma.  Independently of both defects, the
+present extraction declaration is conditional on the global polynomial-pair
+measurement, and that conditionality must be removed before it may be
+advertised as the source lemma.
 
 \bibliographystyle{alpha}
 \bibliography{references}
