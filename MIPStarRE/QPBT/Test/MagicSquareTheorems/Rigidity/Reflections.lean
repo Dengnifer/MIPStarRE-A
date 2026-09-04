@@ -1,4 +1,4 @@
-import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.Dilation
+import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.GroundSlice
 
 /-!
 # Reflections and the state-dependent metric on operators
@@ -41,36 +41,11 @@ noncomputable section
 
 section Kron
 
-/-- Formalization-only: the tensor placement is multiplicative. -/
-theorem heteroKron_mul {ιA ιB : Type} [Fintype ιA] [Fintype ιB]
-    (M M' : Op ιA) (N N' : Op ιB) :
-    heteroKron M N * heteroKron M' N' = heteroKron (M * M') (N * N') := by
-  unfold heteroKron
-  exact (Matrix.mul_kronecker_mul M M' N N').symm
-
-/-- Formalization-only: the tensor placement of two identities is the identity. -/
-theorem heteroKron_one_one {ιA ιB : Type} [DecidableEq ιA] [DecidableEq ιB] :
-    heteroKron (1 : Op ιA) (1 : Op ιB) = 1 := by
-  unfold heteroKron
-  exact Matrix.one_kronecker_one
-
 /-- Formalization-only: the tensor placement commutes with adjoints. -/
 theorem heteroKron_conjTranspose {ιA ιB : Type} (M : Op ιA) (N : Op ιB) :
     (heteroKron M N)ᴴ = heteroKron Mᴴ Nᴴ := by
   unfold heteroKron
   exact Matrix.conjTranspose_kronecker M N
-
-/-- Formalization-only: the tensor placement is additive in the first factor. -/
-theorem heteroKron_sub_left {ιA ιB : Type} (M M' : Op ιA) (N : Op ιB) :
-    heteroKron M N - heteroKron M' N = heteroKron (M - M') N := by
-  ext p q
-  simp [heteroKron, Matrix.kronecker, sub_mul]
-
-/-- Formalization-only: the tensor placement is additive in the second factor. -/
-theorem heteroKron_sub_right {ιA ιB : Type} (M : Op ιA) (N N' : Op ιB) :
-    heteroKron M N - heteroKron M N' = heteroKron M (N - N') := by
-  ext p q
-  simp [heteroKron, Matrix.kronecker, mul_sub]
 
 /-- Formalization-only: scalars pass through the first factor. -/
 theorem heteroKron_smul_left {ιA ιB : Type} (c : ℂ) (M : Op ιA) (N : Op ιB) :
@@ -100,44 +75,18 @@ section StateNorm
 
 variable {ι : Type} [Fintype ι] [DecidableEq ι]
 
-/-- Formalization-only: the action of an operator on a state is additive. -/
-theorem applyOperatorToState_sub (M N : Op ι) (ψ : EuclideanSpace ℂ ι) :
-    applyOperatorToState (M - N) ψ =
-      applyOperatorToState M ψ - applyOperatorToState N ψ := by
-  unfold applyOperatorToState
-  simp only [map_sub, LinearMap.sub_apply]
-
-/-- Formalization-only: the action of an operator on a state is additive. -/
-theorem applyOperatorToState_add (M N : Op ι) (ψ : EuclideanSpace ℂ ι) :
-    applyOperatorToState (M + N) ψ =
-      applyOperatorToState M ψ + applyOperatorToState N ψ := by
-  unfold applyOperatorToState
-  simp only [map_add, LinearMap.add_apply]
-
 /-- Formalization-only: the action of an operator on a state is homogeneous. -/
 theorem applyOperatorToState_smul (c : ℂ) (M : Op ι) (ψ : EuclideanSpace ℂ ι) :
     applyOperatorToState (c • M) ψ = c • applyOperatorToState M ψ := by
   unfold applyOperatorToState
   simp only [map_smul, LinearMap.smul_apply]
 
-/-- Formalization-only: the identity operator fixes every state. -/
-theorem applyOperatorToState_one (ψ : EuclideanSpace ℂ ι) :
-    applyOperatorToState (1 : Op ι) ψ = ψ := by
-  unfold applyOperatorToState
-  rw [Matrix.toLpLin_apply, Matrix.one_mulVec]
-
-/-- Formalization-only: the zero operator annihilates every state. -/
-theorem applyOperatorToState_zero (ψ : EuclideanSpace ℂ ι) :
+/-- Formalization-only: the zero operator annihilates every state; the
+companion `applyOperatorToState_zero` annihilates the zero state instead. -/
+theorem applyOperatorToState_zero_op (ψ : EuclideanSpace ℂ ι) :
     applyOperatorToState (0 : Op ι) ψ = 0 := by
   unfold applyOperatorToState
   simp only [map_zero, LinearMap.zero_apply]
-
-/-- Formalization-only: acting by a product is acting twice. -/
-theorem applyOperatorToState_mul (M N : Op ι) (ψ : EuclideanSpace ℂ ι) :
-    applyOperatorToState (M * N) ψ =
-      applyOperatorToState M (applyOperatorToState N ψ) := by
-  unfold applyOperatorToState
-  simp [Matrix.toEuclideanLin, Matrix.toLpLin_mul_same]
 
 /-- Formalization-only: acting by a finite sum of operators is the sum of the
 actions. -/
@@ -146,18 +95,6 @@ theorem applyOperatorToState_sum {γ : Type} [Fintype γ]
     applyOperatorToState (∑ c, M c) ψ = ∑ c, applyOperatorToState (M c) ψ := by
   unfold applyOperatorToState
   simp only [map_sum, LinearMap.sum_apply]
-
-/-- Formalization-only: the squared state-dependent norm of an operator is the
-quadratic form of the operator composed with its adjoint. -/
-theorem norm_applyOperatorToState_sq (M : Op ι) (ψ : EuclideanSpace ℂ ι) :
-    ‖applyOperatorToState M ψ‖ ^ 2 =
-      (inner ℂ ψ (applyOperatorToState (Mᴴ * M) ψ)).re := by
-  rw [@norm_sq_eq_re_inner ℂ]
-  unfold applyOperatorToState
-  rw [Matrix.toEuclideanLin_conjTranspose_mul_self]
-  change (inner ℂ (Matrix.toEuclideanLin M ψ) (Matrix.toEuclideanLin M ψ)).re =
-    (inner ℂ ψ ((Matrix.toEuclideanLin M).adjoint (Matrix.toEuclideanLin M ψ))).re
-  rw [LinearMap.adjoint_inner_right]
 
 /-- An isometric operator preserves the norm of every state. -/
 theorem norm_applyOperatorToState_of_isometry {U : Op ι} (hU : Uᴴ * U = 1)
@@ -255,15 +192,16 @@ variable {ψ : EuclideanSpace ℂ ι} {δ η : ℝ} {M N P U : Op ι}
 /-- Equal operators are close at every nonnegative scale. -/
 theorem of_eq (h : M = N) (hδ : 0 ≤ δ) : CloseOn ψ δ M N := by
   have hzero : applyOperatorToState (M - N) ψ = 0 := by
-    rw [h, sub_self, applyOperatorToState_zero]
+    rw [h, sub_self, applyOperatorToState_zero_op]
   rw [CloseOn, hzero, norm_zero]
   exact hδ
 
 /-- Closeness is symmetric. -/
 theorem symm (h : CloseOn ψ δ M N) : CloseOn ψ δ N M := by
   have happ : applyOperatorToState (N - M) ψ = -applyOperatorToState (M - N) ψ := by
-    rw [show N - M = (0 : Op ι) - (M - N) by abel, applyOperatorToState_sub,
-      applyOperatorToState_zero, zero_sub]
+    rw [show N - M = -(M - N) by abel]
+    unfold applyOperatorToState
+    simp only [map_neg, LinearMap.neg_apply]
   rw [CloseOn, happ, norm_neg]
   exact h
 
@@ -277,7 +215,7 @@ theorem trans (h₁ : CloseOn ψ δ M N) (h₂ : CloseOn ψ η N P) :
   have hsplit : M - P = (M - N) + (N - P) := by abel
   calc ‖applyOperatorToState (M - P) ψ‖
       = ‖applyOperatorToState (M - N) ψ + applyOperatorToState (N - P) ψ‖ := by
-        rw [hsplit, applyOperatorToState_add]
+        rw [hsplit, applyOperatorToState_add_op]
     _ ≤ ‖applyOperatorToState (M - N) ψ‖ + ‖applyOperatorToState (N - P) ψ‖ :=
         norm_add_le _ _
     _ ≤ δ + η := add_le_add h₁ h₂
