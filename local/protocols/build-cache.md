@@ -47,16 +47,12 @@ build tree.
 different sharing rules. Conflating them is the primary way to reintroduce the
 parent's failure.
 
-The whole per-worktree `.lake` may live on another volume. When the absolute
-`MIPSTARRE_LAKE_ROOT` is set, `worktree-setup.sh` and `warm-worktree.sh` make
-`.lake` an absolute symlink to `$MIPSTARRE_LAKE_ROOT/<branch>`. This changes
-placement, not ownership: each branch still has one private writable build tree.
-Populated directories and conflicting symlinks are never moved or replaced
-implicitly; they require an operator-managed migration.
-The root and target are resolved before use: `/`, repository ancestors, paths
-outside the root, and paths below `MIPSTARRE_CACHE_ROOT/hot-main` are refused.
-Keep the variable exported for dispatch; `workspace-write` sessions receive only
-the resolved branch target through Codex's `--add-dir` option.
+An absolute `MIPSTARRE_LAKE_ROOT` relocates each private `.lake` to
+`<root>/<branch>`. The shared setup/cleanup helper rejects `/`, checkout and
+`hot-main` overlap, escaped targets, and targets shared by another worktree,
+using canonical paths. Existing data is never moved implicitly. Keep the variable
+exported: dispatch grants only the resolved target to a `workspace-write` session
+with `--add-dir`, and post-merge cleanup uses it after removing the worktree.
 
 **Tier 1 — `.lake/build`** — this project's own compiled artifacts (`.olean`,
 `.ilean`, `.c`, `.trace` for `MIPStarRE` modules). This is *exactly* what the
@@ -121,10 +117,9 @@ Two properties matter, and they are not symmetric:
 
 ## 4. On-disk layout
 
-Shared runtime state lives under `MIPSTARRE_CACHE_ROOT`, default
-`~/.cache/mipstarre-dev/`; in particular, this is the root of `packages/` and
-`hot-main/`. Branch-private Lake products may instead live under
-`MIPSTARRE_LAKE_ROOT` as described in §2. Neither tree is ever committed.
+Shared `packages/` and `hot-main/` state lives under `MIPSTARRE_CACHE_ROOT`
+(default `~/.cache/mipstarre-dev/`). Branch-private products may instead use
+`MIPSTARRE_LAKE_ROOT` as in §2. Neither tree is ever committed.
 
 ```
 ~/.cache/mipstarre-dev/
@@ -551,4 +546,3 @@ A change to any of these scripts must preserve all of the following:
 13. `STAMP` is parsed by whitelist and validated; never `eval`ed or `source`d.
 14. Telemetry is best-effort, serialized, sanitized, and lands in the primary checkout.
 15. Every degradation is a loud warning or a hard error. Never a silent no-op.
-16. External `.lake` cleanup runs only after its worktree is removed.

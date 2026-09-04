@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 #
 # Usage: local/bin/housekeeping.sh {standup|stale-audit|linter-sweep|readme-freshness|all}
-#        local/bin/housekeeping.sh lake-cleanup <branch>
 #
 # On-demand replacement for .github/workflows/housekeeping.yml, whose four jobs
 # were bound to four cron entries (housekeeping.yml:14-18).  There is no
@@ -13,7 +12,6 @@
 #   linter-sweep      report-only Lean linter-warning capture (FULL BUILD)
 #   readme-freshness  report-only README freshness audit
 #   all               standup + stale-audit + readme-freshness
-#   lake-cleanup BR   remove BR's external .lake after its worktree is removed
 #
 # `all` deliberately EXCLUDES linter-sweep.  That job is a complete `lake build`
 # — the upstream workflow gave it a 120-minute timeout (housekeeping.yml:321) —
@@ -31,7 +29,6 @@
 #
 # Environment:
 #   MIPSTARRE_CACHE_ROOT   override ~/.cache/mipstarre-dev
-#   MIPSTARRE_LAKE_ROOT    absolute root holding branch-private .lake trees
 #   MIPSTARRE_LLM_ENABLED  "false" disables every model call (none are wired yet)
 
 set -euo pipefail
@@ -55,7 +52,6 @@ Usage: local/bin/housekeeping.sh {standup|stale-audit|linter-sweep|readme-freshn
                     taken under the machine-wide build lock. Never part of `all`.
   readme-freshness  report-only README freshness audit
   all               standup + stale-audit + readme-freshness
-  lake-cleanup BR   remove $MIPSTARRE_LAKE_ROOT/BR after its worktree is gone
 
 Reports are written to results/reports/. Build logs and intermediate JSON go to
 ${MIPSTARRE_CACHE_ROOT:-~/.cache/mipstarre-dev}/ and are never committed.
@@ -615,8 +611,7 @@ main() {
       [ "$#" -eq 2 ] || die "lake-cleanup needs exactly one branch name"
       [ -x "${SCRIPT_DIR}/lake-root.sh" ] \
         || die "missing executable ${SCRIPT_DIR}/lake-root.sh"
-      "${SCRIPT_DIR}/lake-root.sh" cleanup "${REPO_ROOT}" "$2"
-      exit 0
+      "${SCRIPT_DIR}/lake-root.sh" cleanup "${REPO_ROOT}" "$2"; exit 0
       ;;
   esac
 

@@ -536,14 +536,10 @@ test growth remains subject to the owner-gated 400-line episode budget.
 
 ## 2026-09-05 — Branch-private Lake products may use a separate volume
 
-**Trigger:** `results/telemetry/events.md` 2026-09-05, "Owner-side `.lake`
-relocation shim" and "External Lake-root review guards" (issue #190, PR #198).
+**Trigger:** `results/telemetry/events.md` 2026-09-05, issue #190 and PR #198.
 
-**Change:** `MIPSTARRE_LAKE_ROOT` places each worktree's `.lake` at
-`<root>/<branch>` through a shared helper used by setup and warming. Canonical
-containment guards exclude `/`, repository ancestors, escapes, and `hot-main`;
-dispatch grants the resolved target only to `workspace-write` sessions.
-Post-worktree housekeeping removes the branch's external products.
+**Change:** `MIPSTARRE_LAKE_ROOT` places `.lake` at `<root>/<branch>`. One helper
+guards canonical checkout, `hot-main`, escape, and shared-target overlaps;
+dispatch grants only that target to writable sessions.
 
-**Expected effect:** branch builds use the selected volume without owner shims,
-cache ownership remains intact, and retired worktrees do not leak build data.
+**Expected effect:** native relocation without cache corruption or leaked build data.

@@ -9,6 +9,7 @@ import shlex
 import subprocess
 import tempfile
 import unittest
+from unittest import mock
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -18,10 +19,7 @@ THREAD_ID = "019e93a5-e370-7aa1-ba77-6373dbdd6a61"
 
 
 class DispatchCommandTests(unittest.TestCase):
-    def dispatch_command(
-        self, *extra: str, worktree: Path = REPO_ROOT, sandbox: str = "read-only",
-        lake_root: Path | None = None,
-    ) -> list[str]:
+    def dispatch_command(self, *extra: str) -> list[str]:
         with tempfile.TemporaryDirectory() as cache_root:
             fake_bin = Path(cache_root) / "bin"
             fake_bin.mkdir()
@@ -36,19 +34,17 @@ class DispatchCommandTests(unittest.TestCase):
                     "PATH": f"{fake_bin}{os.pathsep}{env.get('PATH', '')}",
                 }
             )
-            if lake_root is not None:
-                env["MIPSTARRE_LAKE_ROOT"] = str(lake_root)
             result = subprocess.run(
                 [
                     str(DISPATCH),
                     "--role",
-                    "scout" if sandbox == "read-only" else "prover",
+                    "scout",
                     "--issue",
                     "dispatch-argv",
                     "--worktree",
-                    str(worktree),
+                    str(REPO_ROOT),
                     "--sandbox",
-                    sandbox,
+                    "read-only",
                     "--no-persona",
                     "--skip-hook-check",
                     "--effort",
@@ -102,9 +98,10 @@ class DispatchCommandTests(unittest.TestCase):
             target = lake_root / "main"
             target.mkdir(parents=True)
             (worktree / ".lake").symlink_to(target, target_is_directory=True)
-            argv = self.dispatch_command(
-                worktree=worktree, sandbox="workspace-write", lake_root=lake_root,
-            )
+            with mock.patch.dict(os.environ, {"MIPSTARRE_LAKE_ROOT": str(lake_root)}):
+                argv = self.dispatch_command(
+                    "--role", "prover", "--worktree", str(worktree),
+                    "--sandbox", "workspace-write")
         index = argv.index("--add-dir")
         self.assertEqual(argv[index + 1], str(target.resolve()))
         self.assertLess(index, argv.index("-o"))

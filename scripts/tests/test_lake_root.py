@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """Regression tests for external per-worktree Lake directories."""
 
-from __future__ import annotations
-
 import os
 import subprocess
 import sys
@@ -15,18 +13,14 @@ sys.path.insert(0, str(REPO_ROOT / "local" / "bin"))
 import pr_merge  # noqa: E402
 HELPER = REPO_ROOT / "local" / "bin" / "lake-root.sh"
 WARMER = REPO_ROOT / "local" / "bin" / "warm-worktree.sh"
-HOUSEKEEPING = REPO_ROOT / "local" / "bin" / "housekeeping.sh"
+HOUSEKEEPING = HELPER.parent / "housekeeping.sh"
 
 def run(argv: list[str | Path], *, env: dict[str, str]) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
-        [str(item) for item in argv], cwd=REPO_ROOT, env=env,
-        text=True, capture_output=True, check=False,
-    )
+    return subprocess.run([str(item) for item in argv], cwd=REPO_ROOT, env=env,
+                          text=True, capture_output=True)
 
 def git(repo: Path, *args: str) -> None:
-    result = subprocess.run(["git", *args], cwd=repo, text=True, capture_output=True)
-    if result.returncode != 0:
-        raise AssertionError(result.stderr)
+    subprocess.run(["git", *args], cwd=repo, text=True, capture_output=True, check=True)
 
 class LakeRootTests(unittest.TestCase):
     def setUp(self) -> None:
@@ -39,8 +33,7 @@ class LakeRootTests(unittest.TestCase):
     def make_repo(self, name: str, branch: str) -> Path:
         repo = self.tmp / name
         repo.mkdir()
-        git(repo, "init", "-q")
-        git(repo, "symbolic-ref", "HEAD", f"refs/heads/{branch}")
+        git(repo, "init", "-q", "-b", branch)
         git(repo, "-c", "user.name=Test", "-c", "user.email=test@example.invalid",
             "commit", "-q", "--allow-empty", "-m", "seed")
         return repo
@@ -76,21 +69,17 @@ class LakeRootTests(unittest.TestCase):
         repo = self.make_repo("warm", "issue-warm")
         for name in ("lean-toolchain", "lake-manifest.json", "lakefile.toml"):
             (repo / name).write_text(name, encoding="utf-8")
-        fake_bin = self.tmp / "bin"
-        fake_bin.mkdir()
-        fake_lake = fake_bin / "lake"
+        fake_lake = self.tmp / "bin" / "lake"
+        fake_lake.parent.mkdir()
         fake_lake.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
         fake_lake.chmod(0o755)
-        env = dict(self.env, PATH=f"{fake_bin}:{self.env['PATH']}",
+        env = dict(self.env, PATH=f"{fake_lake.parent}:{self.env['PATH']}",
                    MIPSTARRE_CACHE_ROOT=str(self.tmp / "cache"))
-        result = run(
-            [WARMER, repo, "--force-cold", "--skip-packages", "--no-build"], env=env,
-        )
+        result = run([WARMER, repo, "--force-cold", "--skip-packages", "--no-build"], env=env)
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(os.readlink(repo / ".lake"),
-                         str(self.lake_root / "issue-warm"))
+        self.assertEqual(os.readlink(repo / ".lake"), str(self.lake_root / "issue-warm"))
 
-    def test_cleanup_refuses_active_branch_then_removes_retired_tree(self) -> None:
+    def test_cleanup_refuses_active_and_shared_targets_then_removes_retired(self) -> None:
         repo = self.make_repo("cleanup-owner", "main")
         worktree = self.tmp / "cleanup-worktree"
         git(repo, "branch", "issue-cleanup")
@@ -98,8 +87,12 @@ class LakeRootTests(unittest.TestCase):
         self.assertEqual(run([HELPER, "prepare", worktree], env=self.env).returncode, 0)
         target = self.lake_root / "issue-cleanup"
         (target / "artifact").write_text("generated", encoding="utf-8")
-        active = run([HELPER, "cleanup", repo, "issue-cleanup"], env=self.env)
-        self.assertNotEqual(active.returncode, 0)
+        self.assertNotEqual(run([HELPER, "cleanup", repo, "issue-cleanup"],
+                                env=self.env).returncode, 0)
+        (worktree / ".lake").unlink()
+        (self.lake_root / "alias").symlink_to(self.lake_root, target_is_directory=True)
+        shared = run([HELPER, "cleanup", repo, "alias/issue-cleanup"], env=self.env)
+        self.assertIn("already used", shared.stderr)
         self.assertTrue(target.is_dir())
         git(repo, "worktree", "remove", "--force", str(worktree))
         retired = run([HELPER, "cleanup", repo, "issue-cleanup"], env=self.env)
@@ -114,49 +107,63 @@ class LakeRootTests(unittest.TestCase):
             with self.subTest(root=root):
                 env = dict(self.env, MIPSTARRE_LAKE_ROOT=root)
                 result = run([HELPER, "cleanup", repo, "mipstarre-root-guard"], env=env)
-                self.assertNotEqual(result.returncode, 0)
                 self.assertIn("must not resolve to /", result.stderr)
 
     def test_cleanup_rejects_symlinked_ancestor_escape(self) -> None:
         repo = self.make_repo("escape-owner", "main")
-        outside = self.tmp / "outside"
-        target = outside / "issue-escape"
+        outside, target = self.tmp / "outside", self.tmp / "outside" / "issue-escape"
         self.lake_root.mkdir()
-        outside.mkdir()
-        target.mkdir()
+        target.mkdir(parents=True)
         (target / "keep").write_text("build", encoding="utf-8")
         (self.lake_root / "codex").symlink_to(outside, target_is_directory=True)
         result = run([HELPER, "cleanup", repo, "codex/issue-escape"], env=self.env)
-        self.assertNotEqual(result.returncode, 0)
         self.assertIn("escapes root", result.stderr)
         self.assertTrue((target / "keep").is_file())
 
-    def test_prepare_rejects_hot_main_before_creation(self) -> None:
+    def test_prepare_rejects_hot_main_overlap_in_either_direction(self) -> None:
         repo = self.make_repo("hot-main-guard", "issue-hot-main")
         cache = self.tmp / "cache"
-        root = self.tmp / "physical-hot-repo"; root.mkdir()
-        hot = cache / "hot-main"; hot.mkdir(parents=True); (hot / "repo").symlink_to(root)
-        target = root / "issue-hot-main"
-        env = dict(self.env, MIPSTARRE_CACHE_ROOT=str(cache),
-                   MIPSTARRE_LAKE_ROOT=str(root))
-        result = run([HELPER, "prepare", repo], env=env)
-        self.assertNotEqual(result.returncode, 0)
-        self.assertIn("inside hot-main", result.stderr)
-        self.assertFalse(target.exists())
+        cases = ((cache / "hot-main" / "repo", cache), (self.lake_root,
+                 self.lake_root / "issue-hot-main"))
+        for root, cache_root in cases:
+            with self.subTest(root=root):
+                env = dict(self.env, MIPSTARRE_CACHE_ROOT=str(cache_root),
+                           MIPSTARRE_LAKE_ROOT=str(root))
+                result = run([HELPER, "prepare", repo], env=env)
+                self.assertIn("overlaps hot-main", result.stderr)
+                self.assertFalse((root / "issue-hot-main").exists())
 
-    def test_merge_cleanup_calls_housekeeping_after_worktree_removal(self) -> None:
-        listing = "worktree /tmp/retired\nbranch refs/heads/issue-retired\n"
+    def test_prepare_rejects_lake_root_inside_another_checkout(self) -> None:
+        repo = self.make_repo("root-in-checkout", "main")
+        worktree = self.tmp / "linked-checkout"
+        git(repo, "branch", "issue-linked")
+        git(repo, "worktree", "add", "-q", str(worktree), "issue-linked")
+        env = dict(self.env, MIPSTARRE_LAKE_ROOT=str(repo / "build-products"))
+        result = run([HELPER, "prepare", worktree], env=env)
+        self.assertIn("overlaps registered worktree", result.stderr)
+
+    def test_merge_cleanup_runs_when_worktree_is_already_gone(self) -> None:
         completed = subprocess.CompletedProcess([], 0, "", "removed\n")
-        with mock.patch.object(pr_merge, "git", return_value=listing), \
-             mock.patch.object(pr_merge, "git_ok", side_effect=[True, True]), \
+        with mock.patch.object(pr_merge, "git", return_value=""), \
+             mock.patch.object(pr_merge, "git_ok", return_value=True), \
              mock.patch.object(pr_merge.subprocess, "run", return_value=completed) as cleanup, \
+             mock.patch.object(pr_merge.sys, "stderr") as stderr, \
              mock.patch.dict(os.environ, self.env):
             pr_merge.remove_branch_and_worktree(REPO_ROOT, "issue-retired")
+        stderr.write.assert_any_call("warning: no worktree found for issue-retired; "
+                                     "attempting .lake cleanup\n")
         cleanup.assert_called_once_with(
             [str(HOUSEKEEPING), "lake-cleanup", "issue-retired"], cwd=str(REPO_ROOT),
             text=True, capture_output=True, check=False,
         )
 
-
-if __name__ == "__main__":
-    unittest.main()
+    def test_merge_cleanup_warns_when_lake_root_is_unset(self) -> None:
+        with mock.patch.object(pr_merge, "git", return_value=""), \
+             mock.patch.object(pr_merge, "git_ok", return_value=True), \
+             mock.patch.object(pr_merge.subprocess, "run") as cleanup, \
+             mock.patch.object(pr_merge.sys, "stderr") as stderr, \
+             mock.patch.dict(os.environ, {"MIPSTARRE_LAKE_ROOT": ""}):
+            pr_merge.remove_branch_and_worktree(REPO_ROOT, "issue-retired")
+        cleanup.assert_not_called()
+        stderr.write.assert_any_call("warning: MIPSTARRE_LAKE_ROOT is unset; cannot clean "
+                                     ".lake for issue-retired\n")

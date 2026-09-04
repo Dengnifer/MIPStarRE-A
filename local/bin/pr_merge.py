@@ -421,6 +421,7 @@ def spawn_cache_warmer(repo_root: Path) -> None:
 
 def remove_branch_and_worktree(repo_root: Path, branch: str) -> None:
     """Drop the branch worktree, then the branch itself, under the old safeguards."""
+    lake_root = os.environ.get("MIPSTARRE_LAKE_ROOT")
     listing = git(repo_root, "worktree", "list", "--porcelain", check=False)
     target: str | None = None
     current_path: str | None = None
@@ -429,25 +430,29 @@ def remove_branch_and_worktree(repo_root: Path, branch: str) -> None:
             current_path = line[len("worktree "):]
         elif line.startswith("branch ") and line[len("branch "):] == f"refs/heads/{branch}":
             target = current_path
-    if target:
-        if git_ok(repo_root, "worktree", "remove", target):
-            sys.stdout.write(f"removed worktree {target}\n")
-            lake_root = os.environ.get("MIPSTARRE_LAKE_ROOT")
-            cleanup = repo_root / "local" / "bin" / "housekeeping.sh"
-            if lake_root and cleanup.is_file():
-                result = subprocess.run(
-                    [str(cleanup), "lake-cleanup", branch], cwd=str(repo_root),
-                    text=True, capture_output=True, check=False)
-                if result.returncode == 0:
-                    sys.stdout.write(result.stdout + result.stderr)
-                else:
-                    sys.stderr.write(f"warning: .lake cleanup failed for {branch}: "
-                                     f"{result.stderr.strip()}\n")
-            elif lake_root:
-                sys.stderr.write(f"warning: .lake cleanup tool is missing: {cleanup}\n")
+    if not target:
+        sys.stderr.write(f"warning: no worktree found for {branch}; attempting .lake cleanup\n")
+    elif git_ok(repo_root, "worktree", "remove", target):
+        sys.stdout.write(f"removed worktree {target}\n")
+    else:
+        sys.stderr.write(f"warning: could not remove worktree {target} (uncommitted files?); "
+                         f"by hand: git worktree remove --force {target}\n")
+
+    cleanup = repo_root / "local" / "bin" / "housekeeping.sh"
+    if not lake_root:
+        sys.stderr.write(f"warning: MIPSTARRE_LAKE_ROOT is unset; cannot clean .lake for "
+                         f"{branch}\n")
+    elif not cleanup.is_file():
+        sys.stderr.write(f"warning: .lake cleanup tool is missing: {cleanup}\n")
+    else:
+        result = subprocess.run(
+            [str(cleanup), "lake-cleanup", branch], cwd=str(repo_root),
+            text=True, capture_output=True, check=False)
+        if result.returncode == 0:
+            sys.stdout.write(result.stdout + result.stderr)
         else:
-            sys.stderr.write(f"warning: could not remove worktree {target} (uncommitted "
-                             f"files?); by hand: git worktree remove --force {target}\n")
+            sys.stderr.write(f"warning: .lake cleanup failed for {branch}: "
+                             f"{result.stderr.strip()}\n")
     # `git branch -d` is the safeguard: it refuses unless the branch is merged into HEAD,
     # which it only is once the fast-forward above succeeded.
     if git_ok(repo_root, "branch", "-d", branch):

@@ -9,12 +9,16 @@ run_outside_git_env() (
   fi
   "$@"
 )
+paths_overlap() {
+  case "$1/" in "$2/"*) return 0 ;; esac
+  case "$2/" in "$1/"*) return 0 ;; *) return 1 ;; esac
+}
 reject_hot_main() { # <canonical-path>
   local base="${MIPSTARRE_CACHE_ROOT:-$HOME/.cache/mipstarre-dev}/hot-main" protected
   for protected in "$base" "$base/repo" "$base/snapshots" "$base/current"; do
     protected="$(realpath -m -- "$protected")" || die "cannot resolve hot-main"
     [ "$protected" != "/" ] || die "a protected hot-main path resolves to /"
-    case "$1" in "$protected"|"$protected"/*) die "Lake target is inside hot-main: $1" ;; esac
+    paths_overlap "$1" "$protected" && die "Lake target overlaps hot-main: $1"
   done
 }
 canonical_lake_root() { # <create: 0|1>
@@ -22,9 +26,8 @@ canonical_lake_root() { # <create: 0|1>
   [ -n "$root" ] || return 1
   case "$root" in /*) ;; *) die "MIPSTARRE_LAKE_ROOT must be absolute: $root" ;; esac
   root="$(realpath -m -- "$root")" || die "cannot resolve MIPSTARRE_LAKE_ROOT"
-  [ "$root" != "/" ] || die "MIPSTARRE_LAKE_ROOT must not resolve to /"; reject_hot_main "$root"
-  [ "$create" -eq 1 ] || [ -d "$root" ] \
-    || die "MIPSTARRE_LAKE_ROOT does not exist: $root"
+  [ "$root" != "/" ] || die "MIPSTARRE_LAKE_ROOT must not resolve to /"
+  [ "$create" -eq 1 ] || [ -d "$root" ] || die "MIPSTARRE_LAKE_ROOT does not exist: $root"
   printf '%s' "$root"
 }
 validated_target() { # <canonical-root> <target>
@@ -34,12 +37,33 @@ validated_target() { # <canonical-root> <target>
   reject_hot_main "$resolved"
   printf '%s' "$resolved"
 }
+validate_repo_paths() { # <repository> <root> <target> <current-tree> <branch>
+  local repo="$1" root="$2" target="$3" current="$4" branch="$5" listing line tree other
+  listing="$(run_outside_git_env git -C "$repo" worktree list --porcelain)" \
+    || die "cannot read worktrees under $repo"
+  while IFS= read -r line; do
+    case "$line" in
+      "worktree "*)
+        tree="$(realpath -m -- "${line#worktree }")"
+        paths_overlap "$root" "$tree" && die "Lake root overlaps registered worktree: $tree" ;;
+      "branch refs/heads/"*)
+        other="${line#branch refs/heads/}"
+        if [ "$other" = "$branch" ]; then
+          [ -n "$current" ] && [ "$tree" = "$current" ] \
+            || die "branch $branch still has a worktree"
+        else
+          other="$(realpath -m -- "$root/$other")" || die "cannot resolve target for $tree"
+          [ "$other" != "$target" ] || die "target already used by $tree"
+        fi ;;
+    esac
+  done <<< "$listing"
+}
 worktree_branch() { # <worktree>
   local branch
   branch="$(run_outside_git_env git -C "$1" symbolic-ref --quiet --short HEAD 2>/dev/null)" \
-    || die "$1 is detached; MIPSTARRE_LAKE_ROOT requires a branch-owned worktree"
+    || die "$1 is detached; a Lake root requires a branch"
   run_outside_git_env git check-ref-format --branch "$branch" >/dev/null 2>&1 \
-    || die "invalid worktree branch: $branch"
+    || die "invalid branch: $branch"
   printf '%s' "$branch"
 }
 prepare_lake() { # <worktree> <check-only: 0|1>
@@ -48,66 +72,48 @@ prepare_lake() { # <worktree> <check-only: 0|1>
   [ -d "$tree" ] || die "worktree does not exist: $tree"
   tree="$(cd "$tree" && pwd -P)"
   root="$(canonical_lake_root "$((1 - check))")"
-  case "$root/" in "$tree/"*) die "the Lake root must be outside the worktree" ;; esac
-  case "$tree/" in "$root/"*) die "the worktree must be outside the Lake root" ;; esac
   branch="$(worktree_branch "$tree")"; target="$root/$branch"
+  resolved="$(validated_target "$root" "$target")"
+  validate_repo_paths "$tree" "$root" "$resolved" "$tree" "$branch"
   link="$tree/.lake"
   if [ -L "$link" ]; then
-    actual="$(readlink "$link")"
-    [ "$actual" = "$target" ] \
+    actual="$(readlink "$link")"; [ "$actual" = "$target" ] \
       || die "$link points to $actual, expected $target; refusing to orphan build data"
   elif [ "$check" -eq 1 ]; then die "$link is not a symlink to $target"
   elif [ -e "$link" ]; then
     [ -d "$link" ] || die "$link exists and is not a directory"
     [ -z "$(find "$link" -mindepth 1 -maxdepth 1 -print -quit)" ] \
-      || die "$link is populated; migrate it before enabling MIPSTARRE_LAKE_ROOT"
+      || die "$link is populated; migrate it before enabling the Lake root"
   fi
   [ ! -L "$target" ] || die "external Lake target must not be a symlink: $target"
   if [ "$check" -eq 1 ]; then
-    validated_target "$root" "$target" >/dev/null
     [ -d "$target" ] || die "$link is dangling; expected directory $target"
   else
-    [ ! -e "$target" ] || [ -d "$target" ] \
-      || die "external Lake target is not a directory: $target"
-    resolved="$(validated_target "$root" "$target")"
+    [ ! -e "$target" ] || [ -d "$target" ] || die "Lake target is not a directory: $target"
     mkdir -p "$target"
     [ "$(validated_target "$root" "$target")" = "$resolved" ] \
-      || die "Lake target changed while it was prepared: $target"
+      || die "Lake target changed while preparing: $target"
     if [ ! -L "$link" ]; then [ ! -d "$link" ] || rmdir "$link"; ln -s "$target" "$link"; fi
   fi
   log "$link -> $target"
 }
 cleanup_lake() { # <repository> <branch>
-  local repo="$1" branch="$2" root target resolved line listing tree
+  local repo="$1" branch="$2" root target resolved
   [ -d "$repo" ] || die "repository does not exist: $repo"
   repo="$(cd "$repo" && pwd -P)"
   root="$(canonical_lake_root 0)" || die "MIPSTARRE_LAKE_ROOT must be set for cleanup"
-  case "$root/" in "$repo/"*) die "the Lake root must be outside the repository" ;; esac
-  case "$repo/" in "$root/"*) die "the repository must be outside the Lake root" ;; esac
   run_outside_git_env git check-ref-format --branch "$branch" >/dev/null 2>&1 \
-    || die "invalid branch name: $branch"
-  target="$root/$branch"; validated_target "$root" "$target" >/dev/null
-  listing="$(run_outside_git_env git -C "$repo" worktree list --porcelain)" \
-    || die "cannot read the worktree registry under $repo"
-  while IFS= read -r line; do
-    case "$line" in
-      "branch refs/heads/$branch") die "branch $branch still has a worktree" ;;
-      "worktree "*)
-        tree="${line#worktree }"
-        [ ! -L "$tree/.lake" ] || [ "$(readlink "$tree/.lake")" != "$target" ] \
-          || die "$tree still points to $target"
-        ;;
-    esac
-  done <<< "$listing"
+    || die "invalid branch: $branch"
+  target="$root/$branch"; resolved="$(validated_target "$root" "$target")"
   [ ! -L "$target" ] || die "refusing to remove symlink target $target"
   if [ ! -e "$target" ]; then log "no external Lake directory for $branch"; return 0; fi
   [ -d "$target" ] || die "external Lake target is not a directory: $target"
   resolved="$(validated_target "$root" "$target")"
+  validate_repo_paths "$repo" "$root" "$resolved" "" "$branch"
   rm -rf -- "$resolved"
   log "removed external Lake directory $target"
 }
-usage() { printf '%s\n' 'Usage: lake-root.sh prepare <worktree> [--check]' \
-  '       lake-root.sh cleanup <repository> <branch>'; }
+usage() { printf '%s\n' 'Usage: lake-root.sh prepare <tree> [--check] | cleanup <repo> <branch>'; }
 case "${1:-}" in
   prepare)
     [ "$#" -eq 2 ] || [ "$#" -eq 3 ] || { usage >&2; exit 2; }

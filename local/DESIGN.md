@@ -38,8 +38,6 @@ results/telemetry/     # sessions/stages/builds logs, GitHub snapshot (committed
 
 Runtime state that must never be committed lives in `~/.cache/mipstarre-dev/`
 (hot cache, snapshots, locks, served site) and `.worktrees/` (gitignored).
-When configured, `MIPSTARRE_LAKE_ROOT` holds the branch-private `.lake` targets
-on a separate volume (`protocols/build-cache.md`).
 
 ## GitHub → local mapping
 
