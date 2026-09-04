@@ -1,0 +1,90 @@
+\documentclass[11pt]{article}
+
+\usepackage{amsmath,amssymb}
+\usepackage{xurl}
+\usepackage[hidelinks]{hyperref}
+\setlength{\emergencystretch}{2em}
+
+\input{command}
+
+\newcommand{\Id}{\mathrm{Id}}
+\renewcommand{\ghissue}[1]{%
+  \href{https://github.com/Dengnifer/MIPStarRE-A/issues/#1}{GitHub issue \##1}}
+
+\title{The Binary Factor Index in the Qudit-to-Qubit Isomorphism}
+\author{}
+\date{2026-09-04}
+
+\begin{document}
+\maketitle
+
+\section{At a glance}
+
+\begin{itemize}
+  \item \textbf{Difficulty.} Low.  The printed upper index is incompatible
+  with both the binary coordinate array and the target tensor power.
+  \item \textbf{Estimated weight.} One statement correction and no additional
+  proof beyond the existing coordinatewise isomorphism.
+  \item \textbf{Mathlib/project split.} The correction is entirely
+  project-local notation; the proof uses finite tensor products and the fixed
+  self-dual basis.
+  \item \textbf{Key mathematical inputs.} A field of size $q=2^k$ has $k$
+  binary coordinates, and one $q$-dimensional qudit is identified with $k$
+  qubits.  This audit is tracked in \ghissue{173}.
+\end{itemize}
+
+\section{Key theorem forms}
+
+For $q=2^k$ and $u\in\F_q^L$, write
+$u_i=\sum_{j=1}^k u_{ij}e_j$ in the fixed self-dual basis.  The intended
+conjugation identity is
+\[
+  \tau_u^W
+  =\phi^\dagger
+    \left(\bigotimes_{i=1}^L\bigotimes_{j=1}^k
+      \sigma^W_{u_{ij}}\right)\phi,
+\]
+where $\phi:(\C^q)^{\ot L}\to(\C^2)^{\ot Lk}$.  The inner tensor index must
+range from $1$ through $k$, not from $1$ through $q$.
+
+\section{The source assertion and discrepancy}
+
+Lemma \path{lem:pauli-binary} of \cite[Section~4.6]{Ji2020MIPStar} first gives
+the correct tensor product with $j\in\{1,\ldots,k\}$, and defines each
+$u_{ij}$ using the $k$ basis elements $e_1,\ldots,e_k$.  Its final sentence,
+however, describes the $(i,j)$-th qubit factor with
+$j\in\{1,\ldots,q\}$.%
+\footnote{See \path{references/qpbt-paper/04_preliminaries.tex},
+lines~1172--1198.}
+For $k>1$ this asks for coordinates $u_{ij}$ that were not defined and for
+$Lq$ factors in a target containing only $Lk$ qubits.  The proof immediately
+returns to the $k$ binary coordinates.  The occurrence of $q$ is therefore a
+typographical error in the mathematical statement.
+
+\section{The correction}
+
+Replace the final range by $j\in\{1,\ldots,k\}$.  Then the factor numbered
+$s=(i-1)k+j$ lies between $1$ and $Lk$, and every binary coordinate of every
+qudit appears exactly once.  This agrees with the displayed tensor product and
+with the proof by tensoring the one-qudit coordinate isomorphism.
+
+\section{Blueprint and formalization status}
+
+The blueprint statement of \path{lem:pauli-binary} uses the corrected range
+$1\leq j\leq k$, and its proof and source-correction remark cite this note.
+The formal theorem indexes the inner factors by the binary-basis dimension and
+therefore matches the corrected statement.  Its proof is complete in the
+current tree.%
+\footnote{The linked declaration is \leanid{exists\_qubitIsometry} in
+\doclink{MIPStarRE/QPBT/Algebra/PauliTheorems.lean}.}
+
+\section{Conclusion}
+
+The upper bound $q$ in the source's final index range is a typographical error.
+The correct bound is $k=\log_2 q$, as required by the binary coordinate map,
+the target dimension, and the proof.
+
+\bibliographystyle{alpha}
+\bibliography{references}
+
+\end{document}

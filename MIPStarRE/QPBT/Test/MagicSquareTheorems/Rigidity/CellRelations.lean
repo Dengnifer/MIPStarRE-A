@@ -187,15 +187,28 @@ private theorem bob_event_weight_mono (T : Strategy msGame) (y : MsType)
 /-! ## The Magic Square reflections of the dilated strategy -/
 
 /-- Alice's cell reflection at one position of a constraint question of the
-dilated strategy, placed on the composite space.  These are the operators
-$\tilde A$ of `thm:ms-rigidity`, blueprint `ch13_qpbt_test.tex:224-253`. -/
+dilated strategy, placed on its composite space.  This is a pre-isometry
+observable of `msDilatedStrategy S`; the state-dependent relations below
+evaluate it on `(msDilatedStrategy S).ψ`.  It is not the paper's post-isometry
+operator $\tilde A$.  The post-isometry operators on the ideal state in
+`thm:ms-rigidity` arise later by conjugating with the local isometries and using
+the transfer theorems of issue #104.  Formalization-only operator-relation
+support for blueprint `ch13_qpbt_test.tex:224-253` and paper
+`08_classical_and_quantum_low_degree_tests.tex:612-652`. -/
 noncomputable def msCellObsA (S : Strategy msGame) (i : Fin 6) (k : Fin 3) :
     Op ((msDilatedStrategy S).ιA × (msDilatedStrategy S).ιB) :=
   heteroKron (signObs ((msDilatedStrategy S).A (MsType.constraint i))
     (constraintBitOrZero k)) 1
 
 /-- Bob's cell reflection at one position of a constraint question of the
-dilated strategy, placed on the composite space. -/
+dilated strategy, placed on its composite space.  This is a pre-isometry
+observable of `msDilatedStrategy S`; the state-dependent relations below
+evaluate it on `(msDilatedStrategy S).ψ`.  It is not the paper's post-isometry
+operator $\tilde B$.  The post-isometry operators on the ideal state in
+`thm:ms-rigidity` arise later by conjugating with the local isometries and using
+the transfer theorems of issue #104.  Formalization-only operator-relation
+support for blueprint `ch13_qpbt_test.tex:224-253` and paper
+`08_classical_and_quantum_low_degree_tests.tex:612-652`. -/
 noncomputable def msCellObsB (S : Strategy msGame) (i : Fin 6) (k : Fin 3) :
     Op ((msDilatedStrategy S).ιA × (msDilatedStrategy S).ιB) :=
   heteroKron 1 (signObs ((msDilatedStrategy S).B (MsType.constraint i))
