@@ -97,7 +97,7 @@ theorem Distribution.mix_isProbability {α : Type*} [DecidableEq α]
   ring
 
 /-- The dependent bind of finite distributions used for typed question
-distributions, blueprint `ch12_qpbt_games.tex:1383-1387`, paper
+distributions, blueprint `ch12_qpbt_games.tex:1400-1404`, paper
 `07_types.tex:84-94`. -/
 noncomputable def Distribution.bind {α β : Type*} [DecidableEq β]
     (μ : Distribution α) (ν : α → Distribution β) : Distribution β where
@@ -114,7 +114,7 @@ noncomputable def Distribution.bind {α β : Type*} [DecidableEq β]
 
 /-- A dependent bind of probability distributions is a probability distribution;
 blueprint
-`ch12_qpbt_games.tex:1383-1387`, paper `07_types.tex:84-94`. -/
+`ch12_qpbt_games.tex:1400-1404`, paper `07_types.tex:84-94`. -/
 theorem Distribution.bind_isProbability {α β : Type*} [DecidableEq β]
     (μ : Distribution α) (ν : α → Distribution β) (hμ : μ.IsProbability)
     (hν : ∀ a ∈ μ.support, (ν a).IsProbability) :

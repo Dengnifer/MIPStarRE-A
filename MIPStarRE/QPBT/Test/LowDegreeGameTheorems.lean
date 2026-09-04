@@ -23,7 +23,7 @@ open scoped BigOperators
 
 namespace MIPStarRE.QPBT
 
-open MIPStarRE.LDT hiding Measurement
+open MIPStarRE.LDT
 open MIPStarRE.LDT.Preliminaries
 open MIPStarRE.Quantum
 
@@ -322,7 +322,7 @@ theorem dLinePointDist_prefix_zero (L : LdParams) :
 /-- The low-degree question sampler is the typed conditionally linear
 distribution on the complete type graph. This is `lem:ld-question-typed-cl`,
 blueprint `ch13_qpbt_test.tex:85-95`, which identifies the sampler with
-`def:typed-cl-distributions` (`ch12_qpbt_games.tex:1383-1387`); paper
+`def:typed-cl-distributions` (`ch12_qpbt_games.tex:1400-1404`); paper
 `references/qpbt-paper/07_types.tex:84-94`. -/
 theorem ldQuestionDistribution_eq_typedCL (L : LdParams) :
     ldQuestionDistribution L =
@@ -379,7 +379,8 @@ noncomputable abbrev PolyIndex (m : ℕ) (K : Type*) [CommSemiring K]
 /-- A POVM indexed by one bounded multivariate polynomial. -/
 noncomputable abbrev PolyMeas (m : ℕ) (K : Type*) [CommSemiring K]
     [Fintype K] [DecidableEq K] (d : ℕ) (ι : Type*)
-    [Fintype ι] [DecidableEq ι] := Measurement (PolyIndex m K d) ι
+    [Fintype ι] [DecidableEq ι] :=
+  MIPStarRE.Quantum.Measurement (PolyIndex m K d) ι
 
 /-- The dependent family in `def:ld-meas`: component `i` may
 have its own coefficient field, number of variables, and degree bound.
@@ -389,7 +390,7 @@ noncomputable abbrev PolyMeasFamily (k : ℕ) (K : Fin k → Type*)
     [∀ i, CommSemiring (K i)] [∀ i, Fintype (K i)]
     [∀ i, DecidableEq (K i)] (m d : Fin k → ℕ) (ι : Type*)
     [Fintype ι] [DecidableEq ι] :=
-  Measurement ((i : Fin k) → PolyIndex (m i) (K i) (d i)) ι
+  MIPStarRE.Quantum.Measurement ((i : Fin k) → PolyIndex (m i) (K i) (d i)) ι
 
 /-- A simultaneous tuple of `L.k` bounded polynomial representatives. -/
 noncomputable abbrev PolyTuple (L : LdParams) :=
