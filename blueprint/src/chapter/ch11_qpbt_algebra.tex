@@ -519,6 +519,36 @@ representation is obtained as follows.
 	that $u_0 = u$; the source leaves this case implicit.)
 \end{definition}
 
+\begin{lemma}[Formalization support for the canonical representative]\label{lem:line-rep-kernel}
+	\lean{MIPStarRE.QPBT.sub_lineRepMap_mem_span}
+	\leanok
+	\uses{def:line-representative, def:cl-canonical}
+	This is not a named statement of the source article; it isolates the defining property of $L^{\mathrm{Ln}}_v$ that the line samplers of Chapter~\ref{chap:qpbt-test} invoke. For all $u, v \in \F_q^m$,
+	\[
+		u - L^{\mathrm{Ln}}_v(u) \in \mathrm{span}_{\F_q}\{v\}\;.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:cl-canonical, def:complementary}
+	The map $L^{\mathrm{Ln}}_v$ is the projection onto the canonical complement of $\mathrm{span}_{\F_q}\{v\}$ along $\mathrm{span}_{\F_q}\{v\}$, so $u - L^{\mathrm{Ln}}_v(u)$ is the value at $u$ of the complementary projection, which takes its values in $\mathrm{span}_{\F_q}\{v\}$.
+\end{proof}
+
+\begin{lemma}[Formalization support for line incidence]\label{lem:line-rep-incidence}
+	\lean{MIPStarRE.QPBT.mem_linePoints_lineRepMap}
+	\leanok
+	\uses{def:line-representative, def:line, lem:line-rep-kernel}
+	This is not a named statement of the source article; it is the incidence half of Definition~\ref{def:line-representative}, in the form used by the line-versus-point samplers of Chapter~\ref{chap:qpbt-test}. For all $u, v \in \F_q^m$,
+	\[
+		u \in \ell\bigl(L^{\mathrm{Ln}}_v(u),\, v\bigr)\;.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:line-rep-kernel, def:line}
+	By Lemma~\ref{lem:line-rep-kernel} there is $t \in \F_q$ with $u - L^{\mathrm{Ln}}_v(u) = t\,v$, so $u = L^{\mathrm{Ln}}_v(u) + t\,v$, which lies in $\ell\bigl(L^{\mathrm{Ln}}_v(u), v\bigr)$ by Equation~\eqref{eq:line-set}.
+\end{proof}
+
 \section{Quantum registers and EPR states}
 % Paper label sec:lin-reg kept for cross-reference fidelity.
 \label{sec:lin-reg}
