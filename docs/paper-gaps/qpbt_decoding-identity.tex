@@ -99,10 +99,15 @@ encoded polynomial, so Schwartz--Zippel bounds the probability that their
 evaluations coincide.  This estimate is the open reduction; it must be proved
 from the paper hypotheses rather than inserted as an extraction hypothesis.
 
-The conjugation calculation at lines~1805--1822 does not require the false
-unrestricted identity.  Its decoder term cancels against the outcome shift,
-and only linearity of $h\mapsto g_h$ and the genuine identity
-$\operatorname{Dec}(g_h)=h$ are needed
+The printed reindexing at lines~1805--1822 replaces
+$g_{\operatorname{Dec}(g_W)}$ by $g_W$, which is the invalid reverse identity
+for an arbitrary polynomial outcome.  In the corrected calculation, the
+constraint is
+$g_h(u)=\operatorname{Dec}(g_W)\mathbin{\cdot}\operatorname{ind}_m(u)-a$.
+After setting $h'=h+\operatorname{Dec}(g_W)$, the defining evaluation formula
+$g_k(u)=k\mathbin{\cdot}\operatorname{ind}_m(u)$ and characteristic two turn
+that constraint into $g_{h'}(u)=a$.  Thus this step uses neither decoder
+linearity nor the identity $\operatorname{Dec}(g_h)=h$
 \cite[lines~1805--1822]{Ji2020MIPStar}.
 
 \section{Blueprint and formalization status}

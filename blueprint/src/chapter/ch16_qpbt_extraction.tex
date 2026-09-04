@@ -104,7 +104,7 @@ The measurement $\{\hat{S}_{g_X,g_Z}\}$ reads out an $X$-polynomial and a $Z$-po
 \begin{definition}[Pulled-apart Pauli basis measurements]\label{def:tilde-m-measurement}
 	\lean{MIPStarRE.QPBT.tildeM}
 	\leanok
-	\uses{def:s-w-marginals, def:tau-dot-product-projector, def:decoding-map}
+	\uses{def:s-w-marginals, def:tau-dot-product-projector, def:qld-full-field-decoder}
 	For all $W \in \{X,Z\}$ and $\tilde{u} \in \F_q^{M}$ define the measurement $\{\tilde{M}^{W,\tilde{u}}_a\}_{a \in \F_q}$ by
 	\begin{equation}\label{eq:tilde_M}
 		\tilde{M}^{W,\tilde{u}}_a = \sum_{g} \hat{S}^W_g \ot \tau_{(\mathrm{Dec}(g) \cdot \tilde{u}) - a}^W(\tilde{u})\;,
@@ -246,6 +246,7 @@ Each displayed construction estimate below has its own universal constant $C_E \
 
 \begin{lemma}[Non-encoding support estimate]
 \label{lem:qld-nonencoding-mass-bound}
+	\lean{MIPStarRE.QPBT.nonencodingMarginalMass}
 	\lean{MIPStarRE.QPBT.nonencodingMarginalMass_le}
 	\uses{def:s-w-marginals, def:qld-full-field-decoder, def:expanded-state,
 		lem:qld-4-7}
