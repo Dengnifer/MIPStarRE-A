@@ -384,13 +384,13 @@ abbrev opTensor {ι₁ ι₂ : Type*} [Fintype ι₁] [DecidableEq ι₁] [Finty
     MIPStarRE.Quantum.Op (ι₁ × ι₂) :=
   Matrix.kronecker A B
 
--- source: MIPStarRE/LDT/Basic/Distribution.lean:218-220  (MIPStarRE.LDT.avgOver)
+-- source: MIPStarRE/LDT/Basic/Distribution.lean:228-230  (MIPStarRE.LDT.avgOver)
 /-- Average a scalar function against the stored finite support of a distribution. -/
 def avgOver {α : Type*} (𝒟 : Distribution α) (f : α → Error) : Error :=
   ∑ a ∈ 𝒟.support, 𝒟.weight a * f a
 namespace Distribution
 
--- source: MIPStarRE/LDT/Basic/Distribution.lean:404-417  (MIPStarRE.LDT.Distribution.uniformOnFinset)
+-- source: MIPStarRE/LDT/Basic/Distribution.lean:414-427  (MIPStarRE.LDT.Distribution.uniformOnFinset)
 /-- The uniform distribution on a specified finite support.
 
 The stored support is `s`, and the weight of a point is the elementary finite
@@ -407,7 +407,7 @@ noncomputable def uniformOnFinset {α : Type*} (s : Finset α) : Distribution α
       simp [ha] }
 end Distribution
 
--- source: MIPStarRE/LDT/Basic/Distribution.lean:479-482  (MIPStarRE.LDT.uniformDistribution)
+-- source: MIPStarRE/LDT/Basic/Distribution.lean:489-492  (MIPStarRE.LDT.uniformDistribution)
 /-- The uniform distribution on a nonempty finite type. -/
 noncomputable def uniformDistribution (α : Type*)
     [Fintype α] [DecidableEq α] [Nonempty α] : Distribution α :=

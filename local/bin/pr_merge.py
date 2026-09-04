@@ -61,7 +61,14 @@ REVIEW_CONTEXT = "local-review/summary"
 #: Findings are task-list items; an unticked box is an open finding.  Kept compatible
 #: with review.sh's tally and autofix.sh's ledger read.
 UNCHECKED_FINDING_RE = re.compile(r"^\s*[-*]\s*\[ \]", re.MULTILINE)
+UNCHECKED_ID_RE = re.compile(r"^\s*[-*]\s*\[ \]\s*(F\d+)\b", re.MULTILINE)
 VERDICT_RE = re.compile(r"^VERDICT:\s*([A-Z_]+)", re.MULTILINE)
+HEAD_FIELD_RE = re.compile(r"^head=([0-9a-f]{40})$", re.MULTILINE)
+DISPOSITION_RE = re.compile(
+    r"^\s*[-*]\s*\[[xX]\]\s*(F\d+)\b.*?\s+[—–]\s+"
+    r"(?:fixed in [0-9a-f]{7,40}|moot:\s*\S.*|out of scope:\s*\S.*|"
+    r"deferred to issue #(\d+):\s*\S.*)$",
+    re.MULTILINE)
 
 #: autofix.sh:62-63 ``PREFIX_AUTO``/``PREFIX_REVIEW`` — the ping-pong guard's subject
 #: prefixes; gate 6 reports how many such commits the PR carries.
@@ -156,8 +163,8 @@ def check_ci(statuses: dict, head_sha: str) -> None:
     passed(f"gate 3 all {len(CI_CONTEXTS)} local-ci contexts success")
 
 
-def check_review(number: int, head_sha: str, reviews: list[dict], statuses: dict,
-                 *, adjudicated: bool) -> None:
+def check_review(repo_root: Path, number: int, head_sha: str, reviews: list[dict],
+                 statuses: dict, *, adjudicated: bool) -> set[int]:
     """Gate 4 — one verdict review on this commit id, clean or adjudicated."""
     marker = f"<!-- mipstarre-review pr={number} head={head_sha} -->"
     matching = [r for r in reviews
@@ -178,7 +185,7 @@ def check_review(number: int, head_sha: str, reviews: list[dict], statuses: dict
     clean = verdict in ("APPROVED", "COMMENTED") and unchecked == 0
     if clean and summary_state == "success":
         passed(f"gate 4 verdict {verdict} on {head_sha[:12]}, {REVIEW_CONTEXT} success")
-        return
+        return set()
     observed = (f"VERDICT {verdict or 'absent'} with {unchecked} unchecked finding(s), "
                 f"{REVIEW_CONTEXT} {summary_state or 'MISSING'}")
     if not adjudicated:
@@ -187,20 +194,57 @@ def check_review(number: int, head_sha: str, reviews: list[dict], statuses: dict
                           f"{observed}. Address the findings (or tick them off with a reason and "
                           "a tracked issue) and re-run review.sh, or merge --adjudicated.")
     # review.md section 12: past the round cap the operator may adjudicate what is left.
-    # Binding the comment to the SHA stops an adjudication of round four covering five.
-    where = None
+    # A round is a marker review bound to the head it names and not itself a
+    # carried copy (review.md section 13): carried bodies and unbound markers
+    # never count towards adjudication eligibility.
+    round_marker = re.compile(rf"mipstarre-review pr={number} head=([0-9a-f]{{40}})")
+    reviewed_heads = {m.group(1) for row in reviews
+                      if (m := round_marker.search(row.get("body") or ""))
+                      and row.get("commit_id") == m.group(1)
+                      and "mipstarre-review-carried" not in (row.get("body") or "")}
+    if not reviewed_heads - {head_sha}:
+        raise GateFailure("gate 4 (review): adjudication is available after two review rounds; "
+                          "no prior reviewed head was found.")
+    finding_ids = UNCHECKED_ID_RE.findall(body)
+    if len(finding_ids) != unchecked or len(set(finding_ids)) != unchecked:
+        raise GateFailure("gate 4 (review): every unresolved finding must have one unique F<n> "
+                          "identifier before it can be adjudicated.")
+    accepted = None
     for row in gh_common.api(f"issues/{number}/comments", paginate=True):
         text = (row.get("body") or "").lstrip()
-        if text.startswith("ADJUDICATION") and f"head={head_sha}" in text:
-            where = str(row.get("html_url") or row.get("id"))
+        heads = HEAD_FIELD_RE.findall(text)
+        dispositions = DISPOSITION_RE.findall(text)
+        disposition_ids = [match[0] for match in dispositions]
+        if (text.startswith("ADJUDICATION") and heads == [head_sha]
+                and sorted(disposition_ids) == sorted(finding_ids)
+                and len(set(disposition_ids)) == len(disposition_ids)):
+            accepted = (row, dispositions)
             break
-    if where is None:
+    if accepted is None:
         raise GateFailure(f"gate 4 (review): --adjudicated given but no ADJUDICATION comment "
-                          f"names head={head_sha} on PR #{number}; observed {observed}. Post one "
-                          f"first: a comment starting with ADJUDICATION, containing that head.")
+                          f"on PR #{number} has exactly head={head_sha} and one checked, valid "
+                          f"disposition for each of {unchecked} unresolved finding(s).")
+    row, dispositions = accepted
+    # `fixed in <sha>` must name a commit that is part of this PR's history.
+    for fixed_sha in re.findall(r"fixed in ([0-9a-f]{7,40})", row.get("body") or ""):
+        reachable = subprocess.run(
+            ["git", "-C", str(repo_root), "merge-base", "--is-ancestor", fixed_sha, head_sha],
+            capture_output=True).returncode == 0
+        if not reachable:
+            raise GateFailure(f"gate 4 (review): disposition 'fixed in {fixed_sha}' does not name a commit "
+                              f"reachable from the PR head {head_sha[:12]}")
+    for _, issue_number in dispositions:
+        if not issue_number:
+            continue
+        issue = gh_common.api(f"issues/{issue_number}")
+        if issue.get("pull_request") or issue.get("state") != "open":
+            raise GateFailure(f"gate 4 (review): deferred issue #{issue_number} does not exist "
+                              "as an open tracked issue.")
+    where = str(row.get("html_url") or row.get("id"))
     sys.stderr.write(f"warning: merging PR #{number} on operator adjudication ({where}); the "
                      f"review evidence is adverse — {observed}\n")
     passed(f"gate 4 adjudicated at {head_sha[:12]} ({where})")
+    return {int(issue_number) for _, issue_number in dispositions if issue_number}
 
 
 def check_fix_gates(repo_root: Path, branch: str, base: str, head_sha: str) -> str:
@@ -241,7 +285,8 @@ def check_fix_gates(repo_root: Path, branch: str, base: str, head_sha: str) -> s
 
 
 def check_dependencies(repo_root: Path, number: int, body: str,
-                       merge_base: str, head_sha: str) -> None:
+                       merge_base: str, head_sha: str,
+                       deferred_issues: set[int]) -> None:
     """Gate 7 — nothing this PR closes may still have open children.
 
     GitHub honors closing keywords in the PR body AND in commit messages that
@@ -253,6 +298,9 @@ def check_dependencies(repo_root: Path, number: int, body: str,
                         check=False))
     closes = list(dict.fromkeys(n for text in surfaces
                                 for n in CLOSES_RE.findall(text)))
+    if conflicts := deferred_issues.intersection(int(ident) for ident in closes):
+        raise GateFailure(f"gate 7 (dependencies): PR #{number} also closes deferred issue(s) "
+                          f"{sorted(conflicts)}, which must remain open.")
     for ident in closes:
         children = gh_common.open_sub_issues(int(ident))
         if children:
@@ -299,7 +347,7 @@ def run_gate(repo_root: Path, number: int, *, adjudicated: bool) -> dict:
     statuses = gh_common.latest_statuses(head_sha)  # one read; gates 3 and 4 share it
     reviews = gh_common.pr_reviews(number)
     check_ci(statuses, head_sha)
-    check_review(number, head_sha, reviews, statuses, adjudicated=adjudicated)
+    deferred_issues = check_review(repo_root, number, head_sha, reviews, statuses, adjudicated=adjudicated)
     # Gate 5 — a CHANGES_REQUESTED review on this head is final, and never adjudicable.
     blockers = [r for r in reviews if r.get("state") == "CHANGES_REQUESTED"
                 and r.get("commit_id") == head_sha]
@@ -311,7 +359,8 @@ def run_gate(repo_root: Path, number: int, *, adjudicated: bool) -> dict:
                           "never overrides this: dismiss it on GitHub, or fix and re-review.")
     passed("gate 5 no CHANGES_REQUESTED review on this head")
     merge_base = check_fix_gates(repo_root, branch, base, head_sha)
-    check_dependencies(repo_root, number, str(pr.get("body") or ""), merge_base, head_sha)
+    check_dependencies(repo_root, number, str(pr.get("body") or ""), merge_base, head_sha,
+                       deferred_issues)
     return {"pr": pr, "head_sha": head_sha, "branch": branch, "base": base}
 
 
