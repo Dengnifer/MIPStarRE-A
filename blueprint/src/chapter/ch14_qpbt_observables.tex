@@ -701,6 +701,7 @@ extracts from the strategy.
 	tensor factors interchanged.
 \end{lemma}
 \begin{proof}
+	\leanok
 	\uses{fact:omega-anticomm-prob, fact:agreement, def:admissible, def:pauli-question-distribution, def:pauli-win-predicate, def:ld-win-predicate, def:ideg-deg-polynomials, def:consistency}
 	The question types are sampled according to the type graph of the Pauli
 	basis test (Definition~\ref{def:pauli-question-distribution}), which has
@@ -743,6 +744,13 @@ extracts from the strategy.
 	$2^{-4}$. Finally, that all approximations
 	also hold with $\approx_\eps$ in place of $\simeq_\eps$ is immediate
 	from Lemma~\ref{fact:agreement}.
+	The forms with the tensor factors interchanged are the same subtests
+	read on the reversed ordered question pair. That pair is again sampled
+	by the type graph, whose edges are unordered
+	(Definition~\ref{def:pauli-question-distribution}), and the win
+	predicate (Definition~\ref{def:pauli-win-predicate}) lists every clause
+	together with its mirror image, so exchanging the two questions and the
+	two answers leaves it unchanged.
 \end{proof}
 
 \begin{lemma}[Winning implications for observables]
