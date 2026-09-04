@@ -22,7 +22,8 @@ open scoped BigOperators Matrix MatrixOrder ComplexOrder
 
 namespace MIPStarRE.QPBT
 
-open MIPStarRE.LDT MIPStarRE.Quantum
+open MIPStarRE.LDT hiding Measurement
+open MIPStarRE.Quantum
 
 noncomputable section
 
@@ -323,16 +324,6 @@ private theorem qubitX_mul_qubitZ : qubitX * qubitZ = -(qubitZ * qubitX) := by
     rcases zmod_two_eq_zero_or_one j with rfl | rfl <;>
       norm_num [qubitX, qubitZ]
 
-/-- Formalization-only auxiliary lemma for
-`exists_ms_perfect_strategy_of_anticommuting` (`thm:ms-from-ac`, blueprint
-`ch13_qpbt_test.tex:257-267`): the tensor product of operators on two factors is
-multiplicative: `(A ⊗ C) * (B ⊗ D) = (A * B) ⊗ (C * D)`. -/
-theorem heteroKron_mul
-    {V W : Type*} [Fintype V] [Fintype W]
-    (A B : Op V) (C D : Op W) :
-    heteroKron A C * heteroKron B D = heteroKron (A * B) (C * D) := by
-  exact (Matrix.mul_kronecker_mul A B C D).symm
-
 private theorem heteroKron_conjTranspose
     {V W : Type*} (A : Op V) (B : Op W) :
     (heteroKron A B)ᴴ = heteroKron Aᴴ Bᴴ := by
@@ -349,27 +340,6 @@ private theorem heteroKron_neg_neg
     heteroKron (-A) (-B) = heteroKron A B := by
   ext i j
   simp [heteroKron]
-
-private theorem heteroKron_neg_left
-    {V W : Type*} (A : Op V) (B : Op W) :
-    heteroKron (-A) B = -heteroKron A B := by
-  ext i j
-  simp [heteroKron]
-
-private theorem heteroKron_neg_right
-    {V W : Type*} (A : Op V) (B : Op W) :
-    heteroKron A (-B) = -heteroKron A B := by
-  ext i j
-  simp [heteroKron]
-
-/-- Formalization-only auxiliary lemma for
-`exists_ms_perfect_strategy_of_anticommuting` (`thm:ms-from-ac`, blueprint
-`ch13_qpbt_test.tex:257-267`): the tensor product of the two identity operators
-is the identity operator on the product space. -/
-theorem heteroKron_one_one
-    {V W : Type*} [DecidableEq V] [DecidableEq W] :
-    heteroKron (1 : Op V) (1 : Op W) = 1 := by
-  exact Matrix.one_kronecker_one
 
 private theorem anti_mul_sq
     {V : Type*} [Fintype V] [DecidableEq V]

@@ -14,7 +14,9 @@ issue  →  branch + worktree  →  agent session(s)  →  local CI  →  review
 
 1. **File an issue**: `local/bin/issue_new.py --title "..." --body-file b.md --label ...` opens
    a GitHub issue and prints its number; `--parent N` attaches it as a native
-   sub-issue. The brief for it goes in `local/briefs/`.
+   sub-issue. Record each prerequisite, including one already closed, with
+   `local/bin/gh_common.py add-blocked-by ISSUE PREREQUISITE`; the command is
+   safe to repeat. The brief for the issue goes in `local/briefs/`.
 2. **Open a PR**: create branch `issue-<number>-slug`, worktree under
    `.worktrees/`, run `local/bin/worktree-setup.sh` there, then
    `local/bin/pr_open.py --branch issue-<number>-slug --title "..." --body-file pr.md --issue N` (the body follows the PR template in `local/protocols/issues-prs.md`),

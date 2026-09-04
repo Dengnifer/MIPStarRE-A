@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """The one GitHub layer for ``local/bin`` — a thin, fail-closed wrapper over ``gh``.
 
-GitHub is the single source of truth for issues, PRs, CI evidence (commit
-statuses on the exact head SHA), review verdicts (COMMENT reviews bound to a
-commit id), and merges (REST merge guarded by an exact-SHA match).  This module
-is the only place workflow scripts talk to GitHub, as a Python import or via
-its CLI (``gh_common.py <subcommand> ...``) from shell.
+GitHub is the single source of truth for issues and their prerequisite edges,
+PRs, CI evidence (commit statuses on the exact head SHA), review verdicts
+(COMMENT reviews bound to a commit id), and merges (REST merge guarded by an
+exact-SHA match).  This module is the only place workflow scripts talk to
+GitHub, as a Python import or via its CLI
+(``gh_common.py <subcommand> ...``) from shell.
 
 Design rules (local/protocols/issues-prs.md):
 
@@ -319,6 +320,30 @@ def issue_view(number: int) -> dict:
     return api(f"issues/{number}")
 
 
+def _has_blocker(number: int, blocker: int) -> bool:
+    rows = api(f"issues/{number}/dependencies/blocked_by", paginate=True)
+    return any(int(row.get("number", -1)) == blocker for row in rows or [])
+
+
+def add_blocked_by(number: int, blocker: int) -> None:
+    """Ensure issue *number* is blocked by *blocker*.
+
+    The prerequisite edge is read before writing so a repeated command adopts
+    it without another mutation.  A failed POST is ambiguous, so the edge is
+    read again and adopted if GitHub committed it before reporting failure.
+    """
+    if _has_blocker(number, blocker):
+        return
+    blocker_id = int(issue_view(blocker)["id"])
+    try:
+        api(f"issues/{number}/dependencies/blocked_by", method="POST",
+            payload={"issue_id": blocker_id}, mutation=True)
+    except LayerError as exc:
+        if _has_blocker(number, blocker):
+            return
+        raise exc
+
+
 def issue_create(title: str, body: str, labels: tuple[str, ...] = (),
                  parent: int | None = None, key: str | None = None) -> int:
     """Create an issue; validate labels; optionally link as a sub-issue.
@@ -452,6 +477,8 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("merge-pr")
     p.add_argument("number", type=int); p.add_argument("sha")
     p = sub.add_parser("issue-view"); p.add_argument("number", type=int)
+    p = sub.add_parser("add-blocked-by")
+    p.add_argument("issue", type=int); p.add_argument("blocker", type=int)
     p = sub.add_parser("issue-create")
     p.add_argument("--title", required=True)
     p.add_argument("--body-file", required=True)
@@ -490,6 +517,8 @@ def main(argv: list[str] | None = None) -> int:
             _emit(merge_pr(args.number, args.sha))
         elif args.cmd == "issue-view":
             _emit(issue_view(args.number))
+        elif args.cmd == "add-blocked-by":
+            add_blocked_by(args.issue, args.blocker)
         elif args.cmd == "issue-create":
             _emit(issue_create(args.title,
                                Path(args.body_file).read_text(encoding="utf-8"),
