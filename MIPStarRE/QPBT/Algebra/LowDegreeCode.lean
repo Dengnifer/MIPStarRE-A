@@ -74,11 +74,10 @@ The defining dot-product identity for the encoding, corresponding to
 Equation `eq:low-degree-encoding-definition` and `def:indicator-vector` in the
 blueprint `blueprint/src/chapter/ch11_qpbt_algebra.tex:403-417`, paper origin
 `references/qpbt-paper/04_preliminaries.tex:832-897`.
-It is a proof obligation in stage 4.1.
 -/
 theorem lowDegreeEnc_eq_dotProduct {K : Type*} [CommRing K] {m : ℕ}
     (a : Cube m → K) (x : Fin m → K) :
     lowDegreeEnc a x = dotProduct a (indicatorVec x) := by
-  sorry
+  simp [lowDegreeEnc, lowDegreeEncoding, indicatorVec, dotProduct]
 
 end MIPStarRE.QPBT
