@@ -90,7 +90,8 @@ that refuse by default:
 3. all eight `local-ci/<step>` contexts plus `local-ci/summary` are `success` on
    that exact SHA; a **missing** context blocks, because GitHub's combined state
    reads `success` for a commit carrying no statuses at all;
-4. that SHA's marker-bound `COMMENT` review carries `VERDICT: APPROVED`, or
+4. that SHA's marker-bound `COMMENT` review (or one carried forward per
+   review.md §13) carries `VERDICT: APPROVED`, or
    `COMMENTED` with zero unchecked findings, **and** `local-review/summary` is
    `success` there;
 5. no `CHANGES_REQUESTED` review stands on that head, from anyone;
