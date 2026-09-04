@@ -1,0 +1,152 @@
+\documentclass[11pt]{article}
+
+\usepackage{amsmath,amssymb}
+\usepackage{xurl}
+\usepackage[hidelinks]{hyperref}
+\setlength{\emergencystretch}{2em}
+
+\input{command}
+\renewcommand{\ghissue}[1]{%
+  \href{https://github.com/Dengnifer/MIPStarRE-A/issues/#1}{GitHub issue \##1}}
+
+\title{The Decoding Identity in the Pauli Extraction Argument}
+\author{}
+\date{2026-09-03}
+
+\begin{document}
+\maketitle
+
+\section{At a glance}
+
+\begin{itemize}
+  \item \textbf{Difficulty.} Medium.  The source applies a decoder--encoder
+  identity to every bounded individual-degree polynomial, although the identity
+  is guaranteed for encoded polynomials and can fail outside the encoding image.
+  \item \textbf{Estimated weight.} One restricted algebraic identity and one
+  probabilistic estimate showing that the constructed measurement assigns
+  little state-dependent mass to outcomes outside the encoding image.
+  \item \textbf{Mathlib/project split.} Evaluation of the multilinear
+  interpolant is elementary polynomial algebra.  The non-encoding-mass bound
+  uses project-specific consistency estimates and Schwartz--Zippel.
+  \item \textbf{Key mathematical inputs.} Multilinear interpolation on the
+  Boolean cube, injectivity of the low-degree encoding, measurement
+  consistency, and Schwartz--Zippel.  The correction is tracked in
+  \ghissue{19}.
+\end{itemize}
+
+\section{Key theorem forms}
+
+For a word $h\colon\{0,1\}^m\to\mathbb F_q$, let $g_h$ be its multilinear
+extension.  Define the chapter's decoder by
+\[
+  \operatorname{Dec}(g)(y)=g(y),
+  \qquad y\in\{0,1\}^m.
+\]
+Then
+\[
+  \operatorname{Dec}(g_h)=h
+  \quad\text{and}\quad
+  \operatorname{Dec}(g_h)\mathbin{\cdot}\operatorname{ind}_m(u)=g_h(u).
+\]
+More generally, the second identity holds for a polynomial outcome $g$ under
+the explicit hypothesis that $g$ belongs to the image of the encoding; no
+converse is asserted.
+
+For an arbitrary bounded individual-degree polynomial $g$, the Boolean values
+determine its multilinear interpolant, not necessarily $g$ itself.  The
+unrestricted identity
+\[
+  \operatorname{Dec}(g)\mathbin{\cdot}\operatorname{ind}_m(u)=g(u)
+\]
+is therefore false.
+
+\section{Counterexample and source comparison}
+
+The low-degree encoding is defined at lines~873--897 of
+\path{references/qpbt-paper/04_preliminaries.tex}.  The general decoder at
+lines~917--924 retains evaluations lying in a chosen subset $H$; the extraction
+chapter instead specifies at lines~1419--1420 of
+\path{references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex} that the
+decoder returns all evaluations on the Boolean cube.  This is the specialization
+$H=\mathbb F_q$, rather than the Boolean-valued shorthand used earlier
+\cite[lines~873--924 and 1419--1420]{Ji2020MIPStar}.
+
+Take $m=1$, $d\geq2$, and a field of characteristic two with more than two
+elements.  For $g(x)=x^2$, the Boolean evaluations are $g(0)=0$ and $g(1)=1$.
+Consequently the decoder is the word whose multilinear extension is $x$.
+For any $u\notin\{0,1\}$ with $u^2\neq u$,
+\[
+  \operatorname{Dec}(g)\mathbin{\cdot}\operatorname{ind}_1(u)=u
+  \neq u^2=g(u).
+\]
+Thus the equality asserted for every $g$ at lines~1483--1492 of the chapter-14
+source mirror is false \cite[lines~1483--1492]{Ji2020MIPStar}.  If degrees at
+least $q$ are allowed, equality as a function would not by itself prove encoding
+membership either, since $x^q$ and $x$ induce the same function on $\mathbb F_q$.
+
+\section{Required repair}
+
+The extraction proof must split the marginal measurement into encoding and
+non-encoding outcomes.  On encoding outcomes, the restricted identity above
+justifies the substitution.  On the complement, the proof must bound
+\[
+  \sum_{g\ \mathrm{not\ an\ encoding}}
+  \langle\widehat\psi,\widehat S_g^W\widehat\psi\rangle.
+\]
+The blueprint derives an $O(\delta_S)+md/q$ bound from point consistency and
+the combined point measurement.  A non-encoding polynomial differs from every
+encoded polynomial, so Schwartz--Zippel bounds the probability that their
+evaluations coincide.  This estimate is the open reduction; it must be proved
+from the paper hypotheses rather than inserted as an extraction hypothesis.
+
+The printed reindexing at lines~1805--1822 replaces
+$g_{\operatorname{Dec}(g_W)}$ by $g_W$, which is the invalid reverse identity
+for an arbitrary polynomial outcome.  In the corrected calculation, the
+constraint is
+$g_h(u)=\operatorname{Dec}(g_W)\mathbin{\cdot}\operatorname{ind}_m(u)-a$.
+After setting $h'=h+\operatorname{Dec}(g_W)$, the defining evaluation formula
+$g_k(u)=k\mathbin{\cdot}\operatorname{ind}_m(u)$ and characteristic two turn
+that constraint into $g_{h'}(u)=a$.  Thus this step uses neither decoder
+linearity nor the identity $\operatorname{Dec}(g_h)=h$
+\cite[lines~1805--1822]{Ji2020MIPStar}.
+
+\section{Blueprint and formalization status}
+
+Definition~\path{def:qld-full-field-decoder} and
+Lemmas~\path{lem:qld-decoder-linearity} and
+\path{lem:qld-decoder-evaluation} in
+\path{blueprint/src/chapter/ch16_qpbt_extraction.tex} state the full-field
+decoder, its linearity and inverse, and the evaluation identity restricted to
+encoding outcomes.  Lemma~\path{lem:qld-nonencoding-mass-bound}
+separately records the estimate on the remaining outcomes.
+
+The declarations \path{decodeFq_add}, \path{decodeFq_smul}, and
+\path{decodeFq_lowDegreeEncoding} in
+\path{MIPStarRE/QPBT/Algebra/Decoding.lean} match the three algebraic assertions.
+In the same file, \path{IsEncoding} is the equality
+$g_{\operatorname{Dec}(g)}=g$ of polynomial representatives, and
+\path{decodeFq_dotProduct_indicatorVec} requires an explicit hypothesis
+of that predicate.  It therefore matches the corrected evaluation lemma and
+does not assert the false unrestricted identity.  Finally,
+\path{nonencodingMarginalMass_le} in
+\path{MIPStarRE/QPBT/Extraction/Consistency.lean} concludes the complementary
+mass bound from the projective strategy and global polynomial-pair witness; it
+does not add the bound as a witness field or theorem hypothesis.
+
+These proposition-valued declarations are present with open proofs.  Issue~\#19
+owns their Stage~4.2 statements and this discrepancy record; \ghissue{47} owns
+the Stage~4.3 decoder calculations and non-encoding support estimate.  No
+unrestricted theorem, residual assumption, or additional witness field is
+source-faithful.
+
+\section{Conclusion}
+
+The decoding identity is false for a general polynomial outcome.  Restricting
+it to the encoding image is a necessary local correction.  Recovering the
+source's measurement-consistency conclusion then requires the separate
+non-encoding-mass estimate, which remains an open proof obligation.
+
+\bibliographystyle{alpha}
+\bibliography{references}
+
+\end{document}

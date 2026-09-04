@@ -1,0 +1,158 @@
+\documentclass[11pt]{article}
+
+\usepackage{amsmath,amssymb}
+\usepackage{xurl}
+\usepackage[hidelinks]{hyperref}
+\setlength{\emergencystretch}{2em}
+
+\input{command}
+\renewcommand{\ghissue}[1]{%
+  \href{https://github.com/Dengnifer/MIPStarRE-A/issues/#1}{GitHub issue \##1}}
+
+\title{Triangle Estimates and Isometry Transfer in Pauli Extraction}
+\author{}
+\date{2026-09-03}
+
+\begin{document}
+\maketitle
+
+\section{At a glance}
+
+\begin{itemize}
+  \item \textbf{Difficulty.} Medium.  The extraction proof contains two
+  incorrect numerical steps and later suppresses the range projection when
+  passing from unitary conjugation to isometry conjugation.
+  \item \textbf{Estimated weight.} A corrected positive-contraction estimate,
+  a small-error case split for normalization, and one range-projection transfer
+  lemma for a projective measurement family.
+  \item \textbf{Mathlib/project split.} Positivity, contraction inequalities,
+  isometry range projections, and norm estimates belong to finite-dimensional
+  Hilbert-space algebra.  The state-dependent family distance and register
+  placements are project-local.
+  \item \textbf{Key mathematical inputs.} The inequality
+  $H^2\geq2H-I$ for a positive contraction, the triangle inequality, and
+  $Q=\phi\phi^\dagger$ for an isometry.  The repair is tracked in
+  \ghissue{19}.
+\end{itemize}
+
+\section{Key theorem forms}
+
+Let $H_X$ and $H_Z$ be the positive contractions of the extraction proof, and
+let $\vartheta$ be a unit vector such that
+\[
+  \langle\vartheta,H_W\vartheta\rangle\geq1-\delta/2
+  \qquad (W\in\{X,Z\}).
+\]
+Since $(I-H_W)^2\geq0$,
+\[
+  H_W^2\geq2H_W-I,
+  \qquad
+  \langle\vartheta,H_W^2\vartheta\rangle\geq1-\delta.
+\]
+Also $\lVert(I-H_W)\vartheta\rVert^2\leq\delta$, whence
+\[
+  \lVert H_X\vartheta-H_Z\vartheta\rVert^2\leq4\delta.
+\]
+Together with $H_XH_Z$ equal to the EPR projection, these estimates give the
+required overlap bound, with constants absorbed into the stated
+$O(\sqrt\delta)$ error.
+
+For the final transfer, let $\phi\colon\mathcal H\to\mathcal K$ be an isometry
+and set $Q=\phi\phi^\dagger$.  If $N_h$ is the unitary-conjugated extension of
+a measurement operator $M_h$, then the exact identity is
+\[
+  \phi M_h\phi^\dagger=N_hQ=QN_h,
+\]
+not merely $N_h$.  Thus comparison of $N_h$ with an ideal projector must be
+combined with control of $(I-Q)\Delta$ on the ideal comparison state
+$\Delta$.
+
+\section{Numerical defects in the source proof}
+
+Lines~1715--1742 of
+\path{references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex}
+construct $H_X,H_Z$ and identify $H_XH_Z$ with the EPR projection.  The norm
+estimate at lines~1743--1750 gives
+$\lVert(I-H_W)\vartheta\rVert\leq\sqrt\delta$.  At lines~1753--1757 the
+source substitutes $\delta$ inside the reverse triangle inequality
+\cite[lines~1715--1783]{Ji2020MIPStar}.  That replacement is not valid for
+small $\delta$.  The desired lower bound on
+$\langle H_W^2\rangle$ follows directly from $H_W^2\geq2H_W-I$, as above.
+
+The triangle inequality yields
+\[
+  \lVert H_X\vartheta-H_Z\vartheta\rVert\leq2\sqrt\delta,
+\]
+so its square is at most $4\delta$.  Line~1761 instead bounds that square by
+$2\sqrt\delta$ without a stated restriction.  This inequality follows when
+$\delta\leq1/4$; for larger error the theorem is made trivial by enlarging the
+universal constant.  The same small-error split ensures that the projected
+vector defined at lines~1769--1773 is nonzero before it is normalized.  These
+are local numerical repairs and do not weaken the extraction conclusion.
+
+\section{The range-projection obligation}
+
+Lines~1827--1858 prove state-dependent closeness for the concrete operators
+obtained by conjugating the original measurement with the swap unitaries.
+Lines~1864--1875 then define isometries by adjoining EPR pairs and applying
+those unitaries, and immediately state the corresponding closeness for
+$\phi M_h\phi^\dagger$.  The omitted range projection makes this implication
+non-definitional \cite[lines~1827--1875]{Ji2020MIPStar}.
+
+Let $\Psi$ be the original state and suppose $\phi\Psi$ is close to the ideal
+state $\Delta$.  Since $Q\phi\Psi=\phi\Psi$ and $Q$ is a contraction, the
+triangle inequality bounds $(I-Q)\Delta$ by the state-extraction error.  Using
+$\phi M_h\phi^\dagger=N_hQ$, split
+\[
+  (N_hQ-T_h)\Delta
+  =(N_h-T_h)\Delta-N_h(I-Q)\Delta,
+\]
+where $T_h$ is the ideal Pauli projector.  Summing squared norms over $h$
+uses projectivity and orthogonality to keep the second term under control.
+The same argument is required for each player and each Pauli basis.
+
+This transfer is an open proof obligation for the next extraction stage.  It
+must be a theorem derived from the concrete swap unitaries, transformed-state
+estimate, and operator comparisons.  It must not be stored as a bridge field,
+residual assumption, or hypothesis of the source-labelled soundness theorem.
+
+\section{Blueprint and formalization status}
+
+The proof of Lemma~\path{lem:qld-unitary} and the soundness proof in
+\path{blueprint/src/chapter/ch16_qpbt_extraction.tex} use the corrected
+positive-contraction estimate, make the small-error case distinction explicit,
+and isolate the range-projection calculation.  The chapter therefore preserves
+the source's state and observable conclusions while exposing the omitted
+argument.
+
+The structure \path{ExtractionWitness} in
+\path{MIPStarRE/QPBT/Extraction/Unitary.lean} contains only the two-sided
+unitarity equations for the concrete swap maps, a normalized auxiliary state,
+the transformed-state estimate, and the two-player Pauli-projector comparison.
+The theorem \path{exists_extractionWitness} concludes the existence of this
+data at the explicit extraction scale from the projective strategy and its
+\path{GlobalPairWitness}; it assumes no range-projection transfer, bridge, or
+residual package.  Thus these declarations match the Stage~4.2 extraction
+lemma, including the corrected numerical estimates, but do not formalize the
+later passage to the isometries in the soundness theorem.  No declaration yet
+states that passage.
+
+Issue~\#19 owns this concrete Stage~4.2 interface and discrepancy record.
+\ghissue{47} owns the Stage~4.3 proof of
+\path{exists_extractionWitness} and the separate range-projection theorem
+needed by \path{pauli_soundness}; that theorem must be derived from the
+concrete data rather than stored in the witness.
+
+\section{Conclusion}
+
+The printed triangle calculation has repairable numerical errors, and the
+last passage from unitaries to isometries omits a genuine range-projection
+argument.  Neither defect is a counterexample to Pauli soundness.  The former
+is corrected by positive-contraction inequalities and a small-error split;
+the latter remains a named downstream proof obligation whose hypotheses are
+already supplied by the extraction lemma.
+
+\bibliographystyle{alpha}
+\bibliography{references}
+
+\end{document}
