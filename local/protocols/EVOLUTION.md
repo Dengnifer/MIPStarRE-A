@@ -437,3 +437,57 @@ and `lean-toolchain`); ext4 without reflink, so copy-on-write is unavailable.
 worktree; new worktrees are ready in seconds without touching the network
 (which was flaking from ghz on 2026-09-02); a Mathlib bump is a new store key,
 never a mutation of a shared tree.
+
+## 2026-09-03 — Two-round cap for workflow-only PRs; queue discipline
+
+**Trigger:** `results/telemetry/events.md` 2026-09-03, "Eight-hour stall on
+main": the operator fed a 107-line workflow PR to the reviewer three times
+(5 → 10 → 11 findings), grew it to 400 lines to satisfy them, and left two
+green PRs unmerged for hours.
+
+**Change:** (1) the two-round threshold for workflow-only PRs is operator
+discipline enforced by the owner's watchdog (a `review.sh` refusal was tried in
+PR #79 and withdrawn: a corrected head needs an exact-head review before it can
+be adjudicated); (2) `personas/main.md` gains the queue-discipline bullet (merge green
+PRs first at every iteration; two rounds then adjudicate; never grow a PR to
+satisfy findings; mechanism requests are out of scope); (3) `review.md`
+section 12 records the two-round threshold for workflow-only PRs.
+
+**Expected effect:** scaffolding PRs converge in two rounds or are decided;
+green work merges at every iteration; the reviewer cannot drive scope growth.
+## 2026-09-04 — Review evidence follows the diff (carry-forward across a fresh-base)
+
+**Trigger:** owner operation of the loop with eight parallel lanes
+(2026-09-03/04): each merge advanced `main`, gate 2b then required every other
+green PR to merge `main` and re-run CI **and** a 15–25-minute reviewer round
+for a byte-identical patch (PR #78 refused at 6f224bf minutes after its review
+had passed); with N open PRs every merge cost N reviewer rounds.
+
+**Change:** `review.sh` gains a carry-forward fast path (section 13): equal
+`git patch-id` of `base...head` against an earlier reviewed head republishes
+that head's verdict and ledger for the new head and posts the summary status;
+adverse verdicts carry too; `--force-review` disables it.  `issues-prs.md`
+gate 4 notes that a carried review counts.
+
+**Expected effect:** a fresh-base costs one CI run (about two minutes) and no
+reviewer time; the reviewer pool serves new patches only; merge throughput
+scales with the number of lanes instead of collapsing under them.
+
+
+## 2026-09-04 — Pre-commit budget exempts inherited main changes
+
+**Trigger:** `results/telemetry/events.md` 2026-09-04 (owner override for a
+merge commit): a fresh-base merge of `main` into a 130-line workflow PR staged
+520 inherited workflow-layer lines and the budget guard refused the merge
+commit; completing it would have required the owner override for content that
+was already reviewed on `main`.
+
+**Change:** `.githooks/pre-commit` measures a merge commit against `MERGE_HEAD`
+only when that commit is contained in `refs/remotes/github/main`.  The PR's own
+cumulative workflow-layer diff and merge-time edits remain budgeted, inherited
+main content counts zero, and side-branch merges remain measured against `HEAD`.
+Regression tests exercise both kinds of merge; ordinary commits are unchanged.
+
+**Expected effect:** fresh-base merges do not need the owner override solely for
+inherited main content; the budget keeps binding the PR's own changes, and the
+review reads the PR diff.

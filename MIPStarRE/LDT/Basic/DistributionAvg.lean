@@ -268,22 +268,14 @@ theorem totalVariationDistance_eq_sum_max_sub {α : Type*} [DecidableEq α]
   let u : Finset α := μ.support ∪ ν.support
   have hμ_union :
       ∑ a ∈ u, μ.weight a = 1 := by
-    have hsubset : μ.support ⊆ u := by
-      intro a ha
-      exact Finset.mem_union_left ν.support ha
-    have hsum :
-        ∑ a ∈ μ.support, μ.weight a = ∑ a ∈ u, μ.weight a :=
-      Finset.sum_subset hsubset (fun a _ ha => μ.outsideSupport a ha)
-    exact hsum ▸ hμ.weight_sum_eq_one
+    apply hμ.weight_sum_eq_one_of_subset
+    intro a ha
+    exact Finset.mem_union_left ν.support ha
   have hν_union :
       ∑ a ∈ u, ν.weight a = 1 := by
-    have hsubset : ν.support ⊆ u := by
-      intro a ha
-      exact Finset.mem_union_right μ.support ha
-    have hsum :
-        ∑ a ∈ ν.support, ν.weight a = ∑ a ∈ u, ν.weight a :=
-      Finset.sum_subset hsubset (fun a _ ha => ν.outsideSupport a ha)
-    exact hsum ▸ hν.weight_sum_eq_one
+    apply hν.weight_sum_eq_one_of_subset
+    intro a ha
+    exact Finset.mem_union_right μ.support ha
   have hdiff_sum :
       ∑ a ∈ u, (ν.weight a - μ.weight a) = 0 := by
     rw [Finset.sum_sub_distrib, hν_union, hμ_union, sub_self]

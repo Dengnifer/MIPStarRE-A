@@ -270,6 +270,12 @@ is consulted only for the escalations named in the standing briefing.  Owner
 decision 2026-09-02 (EVOLUTION.md): this supersedes the GitHub-era "never merge
 without consulting the user" rule of `docs/pr_review_management.md` for this
 repository; the substantive review criteria are unchanged.
+A PR that touches only the workflow layer (`local/`, `.githooks/`,
+`scripts/tests/`, `docs/`, telemetry) is adjudicated after its SECOND round
+because reviewer rounds on scaffolding did not converge (events.md
+2026-09-03); a further review is still permitted when the head changed (an
+adjudication needs an exact-head review), but it is churn the owner's
+watchdog reports.  Mathematics PRs keep the four-round cap above.
 
 Findings do **not** survive across SHAs.  Gate 4 matches the marker
 `<!-- mipstarre-review pr=N head=SHA -->` on that exact commit id, so a ledger
@@ -400,3 +406,20 @@ the operator may close the loop by adjudication instead of iteration:
 Nothing is dropped silently: an adjudicated finding lives on as an issue.
 This mirrors the parent's combined bot-fix iteration cap with a single
 terminal review (pr-review.yml:69-72). See EVOLUTION.md for the trigger.
+
+## 13. Evidence follows the diff: carry-forward across a fresh-base (2026-09-04)
+
+The merge gate's fresh-base rule (issues-prs.md, gate 2b) moves a PR's head
+every time `main` advances, but a merge of `main` into the branch does not
+change the PR's own patch.  `review.sh` therefore compares a whitespace-
+sensitive hash of the patch (the diff without its `index`/hunk-header lines,
+so hunk positions may move but no byte of content may) with that of every
+earlier reviewed head of the same PR whose review is bound to that head and
+published by the lane's account; on a match it republishes that head's verdict
+and ledger as the exact-head review of the new head, marked "Carried forward
+from <sha>" (marker `<!-- mipstarre-review-carried from=<sha> -->`; a carried
+review is not a review round and is never itself a carry source), and posts the matching
+`local-review/summary` — without dispatching the reviewer.  Adverse verdicts
+are carried too, so an adjudication at the new head remains possible.  Any
+change to the patch (a repair, a conflict resolution) yields a different
+patch-id and a real review.  `--force-review` bypasses the fast path.

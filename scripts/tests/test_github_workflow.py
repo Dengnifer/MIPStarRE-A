@@ -232,13 +232,25 @@ class GitHubLayerTests(LayerTestCase):
             self.assertEqual(gh_common.ensure_pr_comment(7, marker, "body"), 33)
             self.assertEqual(len(self.gh.payloads("POST", r"^issues/7/comments")), 1)
 
-    def test_post_review_is_marker_idempotent_and_posts_a_comment_review(self) -> None:
+    def test_post_review_updates_by_marker_or_posts_a_comment_review(self) -> None:
         marker = f"<!-- mipstarre-review pr=7 head={HEAD} -->"
-        with self.subTest("same commit id and marker -> skip"):
+        with self.subTest("same commit id and marker -> update in place"):
             self.gh.route(r"^pulls/7/reviews",
                           [{"id": 5, "commit_id": HEAD, "body": marker + "\nVERDICT: APPROVED"}])
-            self.assertEqual(gh_common.post_review(7, HEAD, marker, "again"), "exists")
+            self.gh.route(r"^pulls/7/reviews/5$", {"id": 5}, method="PUT")
+            self.assertEqual(gh_common.post_review(7, HEAD, marker, "again"), "5")
+            updated = self.gh.payloads("PUT", r"^pulls/7/reviews/5$")
+            self.assertEqual(updated, [{"body": marker + "\nagain"}])
             self.assertEqual(self.gh.payloads("POST", r"^pulls/7/reviews"), [])
+        with self.subTest("two same-head marker reviews -> the newest is updated"):
+            self.gh.reset()
+            self.gh.route(r"^pulls/7/reviews",
+                          [{"id": 5, "commit_id": HEAD, "body": marker + "\nVERDICT: APPROVED"},
+                           {"id": 9, "commit_id": HEAD, "body": marker + "\nVERDICT: COMMENTED"}])
+            self.gh.route(r"^pulls/7/reviews/9$", {"id": 9}, method="PUT")
+            self.assertEqual(gh_common.post_review(7, HEAD, marker, "again"), "9")
+            self.assertEqual(self.gh.payloads("PUT", r"^pulls/7/reviews/9$"), [{"body": marker + "\nagain"}])
+            self.assertEqual(self.gh.payloads("PUT", r"^pulls/7/reviews/5$"), [])
         with self.subTest("absent -> one COMMENT review bound to the commit"):
             self.gh.reset()
             # A review of an earlier head must not satisfy the marker check.
@@ -424,6 +436,54 @@ class MergeGateTests(LayerTestCase):
             result = self._check_only()
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertIn("6 fix-prefixed commit(s)", result.stdout)
+
+    def test_adjudication_validates_round_head_dispositions_and_issues(self) -> None:
+        marker = f"<!-- mipstarre-review pr=7 head={self.head} -->"
+        current = marker + "\nVERDICT: COMMENTED\n- [ ] F1 (changes) `x:1` — fix\n"
+        reviews = [{"commit_id": self.head, "body": current}]
+        for digit in "1":
+            sha = digit * 40
+            reviews.append({"commit_id": sha,
+                            "body": f"<!-- mipstarre-review pr=7 head={sha} -->"})
+        statuses = {pr_merge.REVIEW_CONTEXT: {"state": "failure"}}
+        comment = {"id": 9, "body": ("ADJUDICATION\nhead=" + self.head
+                                      + "\n- [x] F1 — deferred to issue #24: follow-up")}
+
+        with mock.patch.object(pr_merge.gh_common, "api",
+                               side_effect=lambda path, **_: [comment] if path.endswith("comments")
+                               else {"number": 24, "state": "open"}):
+            deferred = pr_merge.check_review(self.repo, 7, self.head, reviews, statuses, adjudicated=True)
+        self.assertEqual(deferred, {24})
+
+        out_of_scope = {"id": 10, "body": ("ADJUDICATION\nhead=" + self.head
+                                             + "\n- [x] F1 — out of scope: new mechanism")}
+        with mock.patch.object(pr_merge.gh_common, "api", return_value=[out_of_scope]):
+            deferred = pr_merge.check_review(self.repo, 7, self.head, reviews, statuses, adjudicated=True)
+        self.assertEqual(deferred, set())
+
+        merge_base = _git(self.repo, "merge-base", "main", self.head)
+        with mock.patch.object(pr_merge.gh_common, "open_sub_issues", return_value=[]):
+            pr_merge.check_dependencies(self.repo, 7, "Closes #23", merge_base, self.head,
+                                        deferred)
+        with self.assertRaisesRegex(LayerError, "also closes deferred"):
+            pr_merge.check_dependencies(self.repo, 7, "Closes #23", merge_base, self.head,
+                                        {23})
+
+        for bad_body in (comment["body"].replace("head=", "head ="),
+                         "ADJUDICATION\nhead=" + self.head):
+            with self.subTest(bad_body=bad_body), \
+                    mock.patch.object(pr_merge.gh_common, "api",
+                                      return_value=[dict(comment, body=bad_body)]):
+                with self.assertRaisesRegex(LayerError, "exactly head="):
+                    pr_merge.check_review(self.repo, 7, self.head, reviews, statuses, adjudicated=True)
+
+        with mock.patch.object(pr_merge.gh_common, "api",
+                               side_effect=([comment], {"number": 24, "state": "closed"})):
+            with self.assertRaisesRegex(LayerError, "open tracked issue"):
+                pr_merge.check_review(self.repo, 7, self.head, reviews, statuses, adjudicated=True)
+
+        with self.assertRaisesRegex(LayerError, "two review rounds"):
+            pr_merge.check_review(self.repo, 7, self.head, reviews[:-1], statuses, adjudicated=True)
 
 
 # --------------------------------------------------------------------------

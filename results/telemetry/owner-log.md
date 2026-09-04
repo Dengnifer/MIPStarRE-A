@@ -1,17 +1,13 @@
 # Owner log — interventions by the owner's session (Claude Fable 5.1)
-
 Chronological record of what the owner-side session did to the project, why,
 and where the evidence is. Complements `events.md` (incidents, written by
 whoever hits them), `EVOLUTION.md` (protocol amendments) and `owner-audits/`
 (the audit data). Owner-side scripts are archived under `owner-tools/`; the
 directives sent to the operator session under `owner-messages/`. The live
 copies run outside the repository on purpose (`~/bin`, `/tmp`, cron).
-
 Repository: `Dengnifer/MIPStarRE-A`. Operator: the codex (gpt-5.6-sol) session
 "qpbt-main" in tmux `qpbt` on ghz. Times UTC.
-
 ## 2026-09-01 — Overbuild contained; lean GitHub-native workflow rebuilt
-
 - **Found:** the operator had spent 17 h / 21 commits / +14.6k lines on
   workflow scaffolding (bespoke API client, lock manager, 5.6k-line test suite
   in the hooks) with zero Lean progress; verbal corrections had not stuck.
@@ -25,9 +21,7 @@ Repository: `Dengnifer/MIPStarRE-A`. Operator: the codex (gpt-5.6-sol) session
   section; standing briefing `~/.codex/prompts/goal.md` (pasted at launch —
   codex's built-in `/goal` shadows custom prompts).
 - **Launched** the first gpt-5.6-sol operator session.
-
 ## 2026-09-02 — Fix-cap stall; operator behaviour bounded; channels to the owner
-
 - **Found:** PR #5 (QPBT skeleton) green but blocked by merge gate 6 (six
   `[codex-review-fix]` commits > cap 5); the operator escalated to the owner
   because gate text said "human attention" and the briefing forbade weakening
@@ -49,9 +43,7 @@ Repository: `Dengnifer/MIPStarRE-A`. Operator: the codex (gpt-5.6-sol) session
 - **Also:** clean retirement pattern for background waits (detached
   `setsid nohup` scripts + marker files + one wake-up) to save owner-session
   quota.
-
 ## 2026-09-03 — Disk migration; eight-hour stall; watchdog
-
 - **Found (disk):** root filesystem 97 % full; the project was 87 GB, 58 GB of
   it eight identical 7.3 GB copies of `.lake/packages` (ext4, no reflink).
 - **Did:** shared read-only package store `~/.cache/mipstarre-dev/packages/<key>`
@@ -84,9 +76,7 @@ Repository: `Dengnifer/MIPStarRE-A`. Operator: the codex (gpt-5.6-sol) session
 - **Lessons recorded** in `events.md` (2026-09-03 entries): "merge what is
   green" is the first step of every loop; a stall guard must live outside the
   thing it guards; a shared dependency tree is safe when writes fail loudly.
-
 ## Owner-side artifacts (live locations on ghz)
-
 | Artifact | Live location | Archived copy |
 |---|---|---|
 | Watchdog | `~/bin/qpbt-watchdog.sh`, crontab `17 * * * *` | `owner-tools/qpbt-watchdog.sh` |
@@ -95,9 +85,7 @@ Repository: `Dengnifer/MIPStarRE-A`. Operator: the codex (gpt-5.6-sol) session
 | Standing briefing | `~/.codex/prompts/goal.md` | (operator-owned) |
 | Directives to the operator | tmux pastes | `owner-messages/` |
 | Audit data | — | `owner-audits/` |
-
 ## 2026-09-03 — Owner session takes the operator role (2026-09-03T23:21:32Z)
-
 - **Why:** after the stall and reviewer-churn episode the owner asked the
   Claude session to run the operator loop itself for one to two days, with
   codex worker sessions on ghz unchanged.
@@ -107,3 +95,48 @@ Repository: `Dengnifer/MIPStarRE-A`. Operator: the codex (gpt-5.6-sol) session
   and now nudges the owner session through #26 rather than a tmux pane.
 - **Hand-back:** on the owner's word; recorded as event=handback with the
   state at that moment.
+## 2026-09-04 — Owner session as operator: first hours
+- **Handover:** the codex main session posted its exact state to #27 and was
+  closed (23:11Z); takeover recorded (`ff5d719`); the primary's `main` had been
+  left behind a `/tmp` clone the codex session used to dodge its sandbox — the
+  clone's uncommitted telemetry was folded in and the clone removed.
+- **Lanes:** eight stage-4.3 packets dispatched at once as codex provers
+  (`owner-tools/lane.sh`: worktree → warm → dispatch → PR → CI → review);
+  the codex API answered HTTP 429 above ~6 concurrent sessions and four lanes
+  died; the runner now caps live sessions at five and resumes a lane's own
+  thread. Lesson: never overwrite a running bash script in place (three lanes
+  crashed at the next line read) — versioned filenames from now on.
+- **Merged:** #41 (`ede882f`, launcher with full access), #81 (`8788ee7`→#62
+  encoding/decoding proofs), #78 (`ebd5c47`→#48 soundness-interface split).
+- **Throughput fix in flight:** gate 2b (fresh base) turned every merge into a
+  reviewer round on every other open PR for an unchanged patch; PR #85 carries
+  a review forward across a fresh-base when the patch hash is unchanged
+  (review.md §13). PR #79 keeps the two-round rule as operator discipline.
+- **External load:** another user's 40-process experiment used 123 of 128
+  cores (load 1690, ssh drops); `rzhou`'s dead 223 GB CP-SAT log fills `/tmp`;
+  reported in #26 and to the owner. Nothing of ours.
+### 2026-09-04 03:30Z — owner session: adjudication contract live, no-fan-out shim, lane bookkeeping
+- PR #43 (issue #23) merged `22d3eef` by adjudication at 62fa37e (F1/F2 owner rules, F3 moot, F4 out of scope); PR #95 merged `c240b6b`. pr_merge now enforces the ADJUDICATION format (head line + one ticked disposition per finding).
+- Reviewer deaths traced to codex multi-agent fan-out (agent thread limit) on top of the account concurrency cap; shim `~/.cache/mipstarre-dev/owner-bin/codex` (archived in owner-tools/owner-bin-codex) disables it for dispatched sessions; lane-v8.sh and rerun_review-v3.sh use it; six reviews re-queued serially.
+- Incident: two repair lanes (49, 75) were launched with an empty LANE_BRANCH because `gh pr view` ran outside the repo; killed within a minute, their stray worktrees/branches (issue-49-distance-theorems, issue-68-magic-square-split) removed, relaunched on the PR branches. Lesson: cd into the repo before any gh call in a launch command.
+- Duplicate lane processes: lanes 65/66 from 02:19Z resumed prover threads while older lanes for the same issues had already produced PR 90/96; the older lanes finished (review done) and the resumed provers keep closing sorries on the same branches — left running; their push will supersede the reviewed heads. Lane 73 (merged as PR 95) killed.
+### 2026-09-04 06:40Z — owner decision: everything must be proved
+- Owner (chat): "everything must be proved" — the completion criterion admits no external statements or bridge assumptions; the Natarajan-Vidick linearity theorem (exists_exactly_linear_observables, blueprint thm:linearity) and the low-degree soundness transport (exists_direct_ld_soundness / exists_ld_soundness) become packet chains. Splitter sessions file them (owner-messages/split-task-20260904.md, split-longpoles-task-20260904.md).
+- Owner: codex account concurrency is 10 sessions shared with track B; split 7 (A) / 3 (B). lane-v9 gates at 7 with serialized launches; track B received the budget prompt.
+
+### 2026-09-04 07:25Z — owner session: merge daemon, capacity 7, incidents
+
+- Merge daemon (owner-tools/merge-daemon.sh) replaces the hand-run chains: refresh + exact-head CI + carried review + merge, one PR at a time, unattended; PRs 92/42/79 by adjudication templates.
+- Incident: the daemon hook-sync step (meant to give PRs 42/79 the merge-budget exemption from main) overwrote PR 92 own hook with main old hook; the reviewer caught it (F1 at 32ee82d). Restored from 6de2dce (622f7c0); daemon v2 syncs only when main already carries the MERGE_HEAD logic and the branch does not.
+- Incident: a direct owner push to main (references mirror 535b4a8) invalidated PR 92 fresh-base refresh and, with CI writing builds.jsonl into the primary during the gate, left 14 stuck telemetry stashes; recovered by union (26c8553). Rule: no pushes to main outside the daemon; merge-v2.sh auto-resolves stash conflicts and retries a dirtied gate.
+- Capacity: lane-v9 gates at 7 (account limit 10 shared with track B, 7/3 split), launches serialized by flock; 7 live sessions reached at 07:10Z. Splitters filed #97-#131 (chapters 12-16, rigidity split, linearity chain, LD transport).
+
+### 2026-09-04 08:15Z — owner decision: Claude (Fable 5.1) prover pool, ratio codex:fable ≈ 3.5:1
+
+- Owner: "Use fable. number of codex : fable provers should be roughly 3.5 : 1". Level 2 of the parallelism proposal is active: Fable 5.1 subagents run on the owner machine and work over ssh in their own warmed worktrees (owner-tools/claude-lane-prep.sh, claude-lane-finish.sh); the lane tail (merge main, build, push, PR, exact-head CI, codex review, merge daemon) is unchanged, so every Claude PR is reviewed by codex.
+- Telemetry: these sessions bypass dispatch.sh and are recorded in results/telemetry/owner-sessions.jsonl (start/end/wall/status/commits). First prover: #125 (operator BLR, stacked on #124), started 08:15Z; second planned on #102 after #101 lands. Assignment policy: Fable on the hard/analytic packets (rigidity, linearity, LD transport, chapters 14-15), codex on routine algebra.
+
+### 2026-09-04 08:35Z — incident: operator pkill killed four codex provers
+
+- At 08:26:30Z an operator command `pkill -f "lake build" -u drx` (meant to stop a refresh build) matched the codex prover command lines, whose prompts mention lake build, and terminated the provers of #97, #76, #98 and #130 mid-session (all four dispatch logs end at 16:26:30 local with no turn.completed). #97/#76 had uncommitted edits and their lanes failed; relaunched with thread resume on the same worktrees at 08:30Z. #98/#130 had commits and their lanes proceeded; their PRs are to be checked for completeness. Rule (second occurrence): on ghz kill only PIDs from an anchored pgrep; never pkill -f with a bare substring.
+- Merge daemon v3 (parallel refresh) replaced v2 at 08:26Z; the v2 refresh of PR 79 had spent 40 min on a full review. Opus prover pilot started on #102 (stacked on #101) at 08:28Z; Fable prover on #125 since 08:15Z.

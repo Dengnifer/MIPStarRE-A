@@ -29,11 +29,6 @@ open MIPStarRE.Quantum
 
 noncomputable section
 
-/-- The positive dimension in `LdParams` supplies the finite coordinate type
-used by the uniform axis and prefix-index marginals. -/
-instance (L : LdParams) : Nonempty (Fin L.m) :=
-  ⟨⟨0, lt_of_lt_of_le Nat.zero_lt_one L.hm⟩⟩
-
 /-- `lem:alnf`: the point and axis-index marginals of the axis line-point
 distribution are uniform. Blueprint `ch13_qpbt_test.tex:63-68`, paper
 `08_classical_and_quantum_low_degree_tests.tex:243-257`. -/
