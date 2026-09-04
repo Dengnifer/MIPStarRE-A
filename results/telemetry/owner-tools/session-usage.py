@@ -11,7 +11,7 @@ Claude subagents (owner session, Agent tool): results/telemetry/owner-sessions.j
 Usage: python3 results/telemetry/owner-tools/session-usage.py [--md]  (from the repo root)
 """
 import json, sys, collections, re, datetime, pathlib
-root = pathlib.Path(__file__).resolve().parents[2]
+root = pathlib.Path(__file__).resolve().parents[3]
 def load(p):
     out = []
     for line in (root / p).read_text().splitlines():
