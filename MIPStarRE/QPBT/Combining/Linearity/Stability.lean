@@ -68,14 +68,14 @@ noncomputable section
 /-! ## The extended weight -/
 
 /-- Formalization-only auxiliary lemma for the extended state
-`ρ' = ρ ⊗ |anc⟩⟨anc|` of `references/nv-paper/fullpaper.tex:1084-1085`: the
+`ρ' = ρ ⊗ |anc⟩⟨anc|` of `references/nv-paper/fullpaper.tex:1081-1082`: the
 rank-one density of any vector is positive semidefinite. -/
 theorem ancProj_posSemidef {ι : Type} [Fintype ι] (v : EuclideanSpace ℂ ι) :
     (ancProj v).PosSemidef :=
   Matrix.posSemidef_vecMulVec_self_star _
 
 /-- Formalization-only auxiliary lemma for the extended state
-`ρ' = ρ ⊗ |anc⟩⟨anc|` of `references/nv-paper/fullpaper.tex:1084-1085`: the
+`ρ' = ρ ⊗ |anc⟩⟨anc|` of `references/nv-paper/fullpaper.tex:1081-1082`: the
 trace of the rank-one density of a vector is the square of its norm. -/
 theorem trace_ancProj {ι : Type} [Fintype ι] (v : EuclideanSpace ℂ ι) :
     Matrix.trace (ancProj v) = (‖v‖ : ℂ) ^ 2 := by
@@ -86,7 +86,7 @@ theorem trace_ancProj {ι : Type} [Fintype ι] (v : EuclideanSpace ℂ ι) :
 /-- The extended weight `ρ ⊗ |anc⟩⟨anc|` of a positive semidefinite operator
 `ρ` and an ancillary vector is positive semidefinite.  Together with
 `trace_heteroKron_ancProj` this is the assertion that `ρ'` is a density
-operator on the extended space at `references/nv-paper/fullpaper.tex:1084-1085`. -/
+operator on the extended space at `references/nv-paper/fullpaper.tex:1081-1082`. -/
 theorem heteroKron_ancProj_posSemidef {ι ι' : Type} [Fintype ι] [Fintype ι']
     {ρ : Op ι} (hρ : ρ.PosSemidef) (anc : EuclideanSpace ℂ ι') :
     (heteroKron ρ (ancProj anc)).PosSemidef :=
@@ -95,7 +95,7 @@ theorem heteroKron_ancProj_posSemidef {ι ι' : Type} [Fintype ι] [Fintype ι']
 /-- The extended weight `ρ ⊗ |anc⟩⟨anc|` of a trace-one operator `ρ` and a unit
 vector `anc` has trace one.  Together with `heteroKron_ancProj_posSemidef` this
 is the assertion that `ρ'` is a density operator on the extended space at
-`references/nv-paper/fullpaper.tex:1084-1085`. -/
+`references/nv-paper/fullpaper.tex:1081-1082`. -/
 theorem trace_heteroKron_ancProj {ι ι' : Type} [Fintype ι] [Fintype ι']
     (ρ : Op ι) (htrace : ρ.trace = 1)
     (anc : EuclideanSpace ℂ ι') (hanc : ‖anc‖ = 1) :
@@ -108,7 +108,7 @@ theorem trace_heteroKron_ancProj {ι ι' : Type} [Fintype ι] [Fintype ι']
 /-- The ampliation `O ⊗ 1` of a binary observable by the identity of an
 ancillary space is a binary observable.  This is the sense in which the
 original observables `A(a)` act on the extended space in display (8) of
-`references/nv-paper/fullpaper.tex:1086-1088`. -/
+`references/nv-paper/fullpaper.tex:1083-1086`. -/
 theorem isBinaryObservable_heteroKron_one {ι ι' : Type} [Fintype ι] [DecidableEq ι]
     [Fintype ι'] [DecidableEq ι'] {O : Op ι} (hO : IsBinaryObservable O) :
     IsBinaryObservable (heteroKron O (1 : Op ι')) := by
