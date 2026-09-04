@@ -628,6 +628,9 @@ representation is obtained as follows.
 		\ket{e_W} = \ket{(e_1)_W} \ot \dots \ot \ket{(e_n)_W}
 	\]
 	for $e \in \F_q^n$, with associated rank-one projectors $\tau^W_e$.
+	The distinction between the general prime-characteristic definitions and
+	the characteristic-two specializations used by the Pauli basis test is
+	documented in \cite{gap:qpbt_characteristic-two-pauli-scope}.
 \end{definition}
 
 \begin{lemma}[Product and twisted commutation relations]\label{lem:twisted-commutation}
@@ -718,6 +721,8 @@ representation is obtained as follows.
 		\omega^{\tr(\ba \cdot (b' - b))}\, \tau^W_{b'}
 		= \tau^W_b\;.
 	\end{equation}
+	The source scope and the binary specialization of these identities are
+	recorded in \cite{gap:qpbt_characteristic-two-pauli-scope}.
 \end{lemma}
 \begin{proof}
 	\uses{def:generalized-pauli, lem:cancellation}
@@ -771,37 +776,47 @@ observables and maximally entangled states over \emph{qubits}
 	$\frac{1}{2}\bigl(\Id + (-1)^{u_{ij}} \sigma^W(1)\bigr)$ acting on the
 	$s$-th qubit, where $s = (i-1)k + j$.
 	We index the product coordinates from zero: values $(i-1,j-1)$ correspond to
-	the paper's pair $(i,j)$.
+	the paper's pair $(i,j)$.  The corrected upper bound $j\leq k$ is
+	documented in \cite{gap:qpbt_pauli-binary-factor-index}.
 \end{lemma}
 \begin{proof}
-	\uses{lem:pauli-observable-expansion, lem:downsize_field,
-		lem:twisted-commutation}
-	Define the isometry $\theta : \C^q \to (\C^2)^{\ot k}$ by
-	$\theta\ket{a} = \ket{a_1} \ot \dots \ot \ket{a_k}$, where
-	$\kappa(a) = (a_1, \dots, a_k)$ is the binary representation with respect
-	to the fixed basis; since $\kappa$ is a bijection, $\theta$ is a unitary
-	and $\theta \ot \theta\, \ket{\mathrm{EPR}_{2^k}} =
-	\ket{\mathrm{EPR}_2}^{\ot k}$. For $a \in \F_q$ with
-	$\kappa(a) = (a_1, \dots, a_k)$, the inversion formula of
-	Lemma~\ref{lem:pauli-observable-expansion} gives
-	$\tau^W_a = \E_{b \in \F_q} (-1)^{\tr(ab)}\, \tau^W(b)$; writing
-	$b = \sum_j b_j e_j$, self-duality of the basis gives
-	$b_j = \tr(b e_j)$ (item 1 of Lemma~\ref{lem:downsize_field}) and hence
-	$\tr(ab) = \sum_j a_j b_j$. The product relation of
-	Lemma~\ref{lem:twisted-commutation} factors
-	$\tau^W(b) = \prod_j \tau^W(b_j e_j)$, so the expectation factors over
-	independent $b_1, \dots, b_k \in \F_2$. A computation on basis states shows
-	that for all $c \in \F_2$, $\tau^W(c e_j) = \theta^\dagger\,
-	\sigma^{W,j}(c)\, \theta$, where $\sigma^{W,j}(c)$ is the identity for
-	$c = 0$ and the Pauli $W$ observable acting on the $j$-th qubit of
-	$(\C^2)^{\ot k}$ for $c = 1$. Averaging,
-	$\E_{b_j \in \F_2} (-1)^{a_j b_j} \sigma^W(b_j) =
-	\frac{1}{2}\bigl(\Id + (-1)^{a_j}\sigma^W(1)\bigr) = \sigma^W_{a_j}$,
-	whence $\tau^W_a = \theta^\dagger \bigl(\bigotimes_j
-	\sigma^W_{a_j}\bigr) \theta$. Taking $\phi = \theta^{\ot L}$ and tensoring
-	the last identity over the $L$ qudits, using
-	$\tau^W_u = \bigotimes_{i=1}^L \tau^W_{u_i}$, yields both displayed
-	identities.
+	\leanok
+	\uses{def:binary-representation, def:subfields-kappa, lem:downsize_field,
+		def:generalized-pauli, def:EPR, lem:pauli-observable-expansion}
+	The formalized proof is a relabelling argument rather than a factorwise
+	construction. Let
+	$e : \F_q^L \to \F_2^{L \times k}$ be the bijection that expands each
+	coordinate in the fixed self-dual normal basis
+	(Definition~\ref{def:binary-representation}), so that $e(u)$ is exactly the
+	array $(u_{ij})_{i,j}$ of the statement, and let $\phi$ be the unitary that
+	permutes the two computational bases along $e$, that is,
+	$\phi \ket{u} = \ket{e(u)}$. Identity \eqref{eq:epr-q-to-epr-2} holds for
+	any such relabelling: a bijection of orthonormal bases carries the maximally
+	entangled state of the source space to that of the target space. For
+	\eqref{eq:pauli-q-to-pauli-2}, conjugation by $\phi^\dagger$ is exactly
+	the reindexing of a matrix along $e$, so it suffices to compare matrix
+	entries. Both generalized Pauli observables are computed entrywise from
+	Definition~\ref{def:generalized-pauli}: $\tau^W(a)$ is, for $W = X$, the
+	permutation matrix of the translation $y \mapsto y + a$, and, for $W = Z$,
+	the diagonal matrix with entries $(-1)^{\tr(a \cdot y)}$. The relabelling
+	$e$ is additive, and item 2 of Lemma~\ref{lem:downsize_field} gives
+	$\tr(a \cdot y) = e(a) \cdot e(y)$ by self-duality of the basis; the two
+	entry formulas are therefore carried by the reindexing to the corresponding
+	formulas over $\F_2$, so that $\tau^W(a)$ becomes $\tau^W(e(a))$ for both
+	$W$. Finally, the projectors are recovered from the observables by the
+	inversion identity \eqref{eq:pauli-inversion-0} in its characteristic-two
+	form $\tau^W_u = \E_{\ba} (-1)^{\tr(\ba \cdot u)}\, \tau^W(\ba)$, used
+	over $\F_q^L$ on the left-hand side and over $\F_2^{L \times k}$ on the
+	right; averaging the entrywise comparison
+	over $\ba$ carries $\tau^W_u$ to the qubit projector at the label
+	$e(u) = \kappa(u)$, which is \eqref{eq:pauli-q-to-pauli-2}. Only this
+	characteristic-two specialization of
+	Lemma~\ref{lem:pauli-observable-expansion} is formalized; its
+	general-prime expansion and inversion have no Lean declaration, as
+	recorded in \cite{gap:qpbt_characteristic-two-pauli-scope}. The formalized
+	argument uses neither the qudit-by-qudit isometry $\theta$ of the source
+	proof nor the product and twisted-commutation relations of
+	Lemma~\ref{lem:twisted-commutation}.
 \end{proof}
 
 \begin{remark}\label{rem:pauli-binary-source}
@@ -811,5 +826,6 @@ observables and maximally entangled states over \emph{qubits}
 	$j \in \{1, \dots, k\}$, as the $i$-th qudit is mapped to $k$ qubits. The
 	source also quantifies over arbitrary integers $L$; the statement above
 	takes $L$ to be a natural number, including zero, and uses the usual
-	empty-product convention for the tensor powers when $L=0$.
+	empty-product convention for the tensor powers when $L=0$.  The index
+	correction is documented in \cite{gap:qpbt_pauli-binary-factor-index}.
 \end{remark}
