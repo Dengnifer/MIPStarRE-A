@@ -79,10 +79,6 @@ private theorem phaseSign_sum {ι : Type*} [Fintype ι] (f : ι → ZMod 2) :
   | @insert i s hi ih =>
       rw [Finset.sum_insert hi, Finset.prod_insert hi, phaseSign_add, ih]
 
-private theorem forall_apply_eq_iff {α β : Type*} (f g : α → β) :
-    (∀ i, f i = g i) ↔ f = g :=
-  ⟨funext, fun h i => congrFun h i⟩
-
 omit [Fintype K] [DecidableEq K] in
 private theorem prod_phaseSign_binTrace_dotProduct {ι : Type*} [Fintype ι]
     (u v : ι → K) :
@@ -365,7 +361,8 @@ theorem tauObservable_eq_sum_pauliProj {ι : Type*} [Fintype ι] [DecidableEq ι
       simp_rw [pauliProj_X_apply]
       rw [Fintype.prod_boole]
       have hsupport : (∀ i, x i = y i + a i) ↔ x = y + a := by
-        simpa only [Pi.add_apply] using forall_apply_eq_iff x (y + a)
+        simpa only [Pi.add_apply] using
+          (funext_iff (f := x) (g := y + a)).symm
       simp only [hsupport]
       have hsum :
           (∑ e : ι → K,
@@ -408,8 +405,8 @@ theorem tauObservable_eq_sum_pauliProj {ι : Type*} [Fintype ι] [DecidableEq ι
       by_cases hxy : x = y
       · subst y
         rw [prod_phaseSign_binTrace_dotProduct]
-        simp [forall_apply_eq_iff]
-      · simp [forall_apply_eq_iff, hxy]
+        simp [← funext_iff]
+      · simp [← funext_iff, hxy]
 
 /-- The inverse Fourier expansion of a Pauli projector
 (`lem:pauli-observable-expansion`), blueprint
