@@ -1067,7 +1067,7 @@ analyzed, together with candidate repairs, in
 	\lean{MIPStarRE.QPBT.combineLinePoly}
 	\lean{MIPStarRE.QPBT.combineLinePolynomial_natDegree_le}
 	\lean{MIPStarRE.QPBT.IsCombineLineCompatible, MIPStarRE.QPBT.combineLinePoly_spec}
-	\notready
+	\leanok
 	\uses{def:polyfunc, def:line, def:ideg-deg-polynomials}
 	For $f, g \in \mathrm{ideg}_{d,m}(\F_q)$, the polynomial
 	$\mathrm{combine}_{f,g} \in \mathrm{ideg}_{d,2m+2}(\F_q)$ is defined by
@@ -1102,7 +1102,7 @@ analyzed, together with candidate repairs, in
 	\label{lem:qld-4-12}
 	\lean{MIPStarRE.QPBT.CombinedPointsWitness.extendedQ}
 	\lean{MIPStarRE.QPBT.extendedQ_spec}
-	\notready
+	\leanok
 	\uses{lem:qld-4-10, def:expanded-state, def:expanded-point-measurement,
 		def:povm-distance, def:symmetric-equivalents}
 	For all $x, z \in \F_q^m$, $\alpha, \beta \in \F_q$, and
@@ -1142,6 +1142,7 @@ analyzed, together with candidate repairs, in
 	Furthermore, all symmetric equivalents of these approximations also hold.
 \end{lemma}
 \begin{proof}
+	\leanok
 	\uses{lem:qld-4-10, fact:data-processing}
 	Define
 	$\hat{Q}^{x,z,\alpha,\beta}_{c}
@@ -1210,7 +1211,7 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 	\lean{MIPStarRE.QPBT.restrictedALineDist, MIPStarRE.QPBT.restrictedDLineDist}
 	\lean{MIPStarRE.QPBT.restrictedALineDist_isProbability}
 	\lean{MIPStarRE.QPBT.restrictedDLineDist_isProbability}
-	\notready
+	\leanok
 	\uses{def:line-point-dist, def:ld-question-distribution}
 	For any $i \in \{1, \dots, m\}$, the \emph{$i$-th restricted
 	axis-parallel line distribution} $D_{\mathrm{ALine},i}$ is the
