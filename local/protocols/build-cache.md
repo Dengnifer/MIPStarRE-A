@@ -53,6 +53,10 @@ The whole per-worktree `.lake` may live on another volume. When the absolute
 placement, not ownership: each branch still has one private writable build tree.
 Populated directories and conflicting symlinks are never moved or replaced
 implicitly; they require an operator-managed migration.
+The root and target are resolved before use: `/`, repository ancestors, paths
+outside the root, and paths below `MIPSTARRE_CACHE_ROOT/hot-main` are refused.
+Keep the variable exported for dispatch; `workspace-write` sessions receive only
+the resolved branch target through Codex's `--add-dir` option.
 
 **Tier 1 — `.lake/build`** — this project's own compiled artifacts (`.olean`,
 `.ilean`, `.c`, `.trace` for `MIPStarRE` modules). This is *exactly* what the
@@ -272,9 +276,6 @@ operate on any path inside `hot-main/repo` or `hot-main/snapshots`.
 
 Decision procedure:
 
-Before this procedure, a configured `MIPSTARRE_LAKE_ROOT` is prepared (or only
-verified under `--status`) so neither cache tier touches the old location.
-
 1. Compute the worktree's own keyhash (§3).
 2. Resolve `current` **once**; require `build/` and `STAMP` to exist.
 3. Read and validate the `STAMP`. A malformed stamp is treated as *no snapshot*.
@@ -364,9 +365,6 @@ compatibility hazards follow, and both are handled here:
 
 Replaces `.codex/setup.sh` (the Codex cloud environment hook) per `DESIGN.md`'s
 GitHub→local mapping. Order of operations:
-
-Before these steps, a configured `$MIPSTARRE_LAKE_ROOT/<branch>` is prepared;
-`--check` only verifies the symlink and its target.
 
 1. **Assert `elan`** — never install it by piping a URL into a shell. This is a
    developer machine, not a disposable runner. Missing `elan` is a hard, actionable
@@ -470,12 +468,7 @@ local/bin/cache-warmer.sh --ref main
 local/bin/cache-warmer.sh --status
 
 # Bootstrap a brand-new agent worktree end to end.
-MIPSTARRE_LAKE_ROOT=/fast/lake local/bin/worktree-setup.sh \
-  /path/to/.worktrees/issue-0042-qpbt-basis
-
-# Delete its external build products after removing the worktree.
-MIPSTARRE_LAKE_ROOT=/fast/lake local/bin/housekeeping.sh \
-  lake-cleanup issue-0042-qpbt-basis
+local/bin/worktree-setup.sh /path/to/.worktrees/issue-0042-qpbt-basis
 
 # Verify an existing worktree without touching it.
 local/bin/worktree-setup.sh /path/to/worktree --check
@@ -509,7 +502,6 @@ each worktree serialized behind one lock.
 | Stale lock (dead pid, or age > TTL) | Broken by atomic rename, with a warning naming the dead holder. |
 | Primary repo has no commits on `main` | Hard error naming the cause. Never a silent no-op. |
 | `warm-worktree.sh` missing during bootstrap | Hard error. `--skip-warm` is the explicit opt-out. |
-| Existing `.lake` conflicts with `MIPSTARRE_LAKE_ROOT` | Hard error; never migrate or orphan build data implicitly. |
 | `origin/main` does not resolve | Warning, non-zero exit from `--check`, because hooks self-disable silently. |
 | `python3` absent | Warmer: hard error (needed for the atomic publish). Consumer: warning, telemetry skipped. |
 
@@ -554,9 +546,9 @@ A change to any of these scripts must preserve all of the following:
 9. At most one full `lake build` machine-wide; `lake env lean` takes no lock.
 10. `.lake/packages` is a symlink to the read-only store `$CACHE_ROOT/packages/<key>`;
     the store is `chmod a-w`; no automated `lake update`.
-11. An external `.lake` is branch-private; cleanup runs only after worktree removal.
-12. The ProofWidgets fresh-state workaround runs before any `lake exe cache get`.
-13. Every `lake` / vendored-`git` invocation goes through `run_outside_git_env`.
-14. `STAMP` is parsed by whitelist and validated; never `eval`ed or `source`d.
-15. Telemetry is best-effort, serialized, sanitized, and lands in the primary checkout.
-16. Every degradation is a loud warning or a hard error. Never a silent no-op.
+11. The ProofWidgets fresh-state workaround runs before any `lake exe cache get`.
+12. Every `lake` / vendored-`git` invocation goes through `run_outside_git_env`.
+13. `STAMP` is parsed by whitelist and validated; never `eval`ed or `source`d.
+14. Telemetry is best-effort, serialized, sanitized, and lands in the primary checkout.
+15. Every degradation is a loud warning or a hard error. Never a silent no-op.
+16. External `.lake` cleanup runs only after its worktree is removed.

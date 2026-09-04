@@ -10,6 +10,12 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   setup and warming, plus guarded post-worktree cleanup. Lesson: storage
   placement and lifecycle cleanup belong in the workflow boundary that creates
   and retires the worktree.
+- **External Lake-root review guards.** PR #198 round-1 review found that root
+  aliases, symlinked branch ancestors, `hot-main` targets, and the Codex sandbox
+  were outside the initial safety model. The repair canonicalizes before create
+  and delete, preserves both containment boundaries, and grants only the checked
+  branch target to writable sessions. Lesson: external placement needs filesystem
+  and execution-sandbox containment to be designed as one boundary.
 ## 2026-08-30
 - **Stale seed clone.** Symptom: files copied from the sibling `../MIPStarRE`
   checkout were dated Jul 5 while upstream main was Aug 25. Diagnosis: the

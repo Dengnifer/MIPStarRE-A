@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 #
-# Usage: local/bin/housekeeping.sh
-#          {standup|stale-audit|linter-sweep|readme-freshness|all}
+# Usage: local/bin/housekeeping.sh {standup|stale-audit|linter-sweep|readme-freshness|all}
 #        local/bin/housekeeping.sh lake-cleanup <branch>
 #
 # On-demand replacement for .github/workflows/housekeeping.yml, whose four jobs
@@ -21,11 +20,11 @@
 # and it must never sit on a fast path someone runs casually.  Ask for it by
 # name.
 #
-# The audit jobs are report-only, and that contract is load-bearing:
+# Three of the four jobs are report-only, and that contract is load-bearing:
 # docs/stale_issue_audit.md:143-144 states "Do **not** let the script close
 # issues automatically", and DESIGN.md:88-90 generalizes it to the sweep and the
-# freshness audit. Nothing here closes, edits or labels an issue. `standup`
-# writes its digest; `lake-cleanup` is a separately requested destructive job.
+# freshness audit.  Nothing in this script closes, edits or labels an issue.
+# `standup` is the sole writer, and it writes only its own digest file.
 #
 # Reports land in results/reports/.  Build logs and intermediate JSON go to
 # ~/.cache/mipstarre-dev/ and are never committed (DESIGN.md:37-38).
@@ -61,9 +60,9 @@ Usage: local/bin/housekeeping.sh {standup|stale-audit|linter-sweep|readme-freshn
 Reports are written to results/reports/. Build logs and intermediate JSON go to
 ${MIPSTARRE_CACHE_ROOT:-~/.cache/mipstarre-dev}/ and are never committed.
 
-The audits are report-only by contract (docs/stale_issue_audit.md:143-144,
-DESIGN.md:88-90). `lake-cleanup` deletes only external build products and is
-never included in `all`.
+Only `standup` writes anything into the repository, and only its own digest.
+The three audits are report-only by contract (docs/stale_issue_audit.md:143-144,
+DESIGN.md:88-90): they never close, edit, or label an issue.
 USAGE
 }
 

@@ -18,9 +18,6 @@
 #   --status            Report what this worktree would do, change nothing.
 #   -h | --help         Show this text.
 #
-# Environment:
-#   MIPSTARRE_LAKE_ROOT  optional absolute root for branch-private .lake trees
-#
 # Local replacement for the *restore* half of the GitHub Actions build cache in
 # .github/workflows/pr-ci.yml:143-149 (restore-keys prefix-match on
 # hashFiles('lean-toolchain','lake-manifest.json','lakefile.toml')).  The cache
@@ -89,8 +86,8 @@ Usage: local/bin/warm-worktree.sh [<worktree>] [options]
   --status            Report the planned action and exit without changing anything.
   -h | --help         Show this text.
 
-Environment: MIPSTARRE_CACHE_ROOT, MIPSTARRE_LAKE_ROOT,
-MIPSTARRE_FULL_BUILD_LOCK_TIMEOUT, MIPSTARRE_TELEMETRY_DIR.
+Environment: MIPSTARRE_CACHE_ROOT, MIPSTARRE_FULL_BUILD_LOCK_TIMEOUT,
+MIPSTARRE_TELEMETRY_DIR.
 EOF
 }
 
@@ -602,11 +599,8 @@ main() {
   esac
 
   [ -x "$LAKE_ROOT_HELPER" ] || die "Lake-root helper is missing: $LAKE_ROOT_HELPER"
-  if [ "$STATUS_ONLY" -eq 1 ]; then
-    "$LAKE_ROOT_HELPER" prepare "$WORKTREE" --check
-  else
-    "$LAKE_ROOT_HELPER" prepare "$WORKTREE"
-  fi
+  if [ "$STATUS_ONLY" -eq 1 ]; then "$LAKE_ROOT_HELPER" prepare "$WORKTREE" --check
+  else "$LAKE_ROOT_HELPER" prepare "$WORKTREE"; fi
   WARM_MARKER="$WORKTREE/.lake/.mipstarre-warm-stamp"
 
   local keyhash snap="" name="" snap_keyhash="" snap_status="" snap_sha=""

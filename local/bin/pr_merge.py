@@ -437,18 +437,14 @@ def remove_branch_and_worktree(repo_root: Path, branch: str) -> None:
             if lake_root and cleanup.is_file():
                 result = subprocess.run(
                     [str(cleanup), "lake-cleanup", branch], cwd=str(repo_root),
-                    text=True, capture_output=True, check=False,
-                )
+                    text=True, capture_output=True, check=False)
                 if result.returncode == 0:
-                    sys.stdout.write(result.stdout)
-                    sys.stdout.write(result.stderr)
+                    sys.stdout.write(result.stdout + result.stderr)
                 else:
-                    sys.stderr.write(
-                        f"warning: external .lake cleanup failed for {branch}: "
-                        f"{result.stderr.strip()}\n"
-                    )
+                    sys.stderr.write(f"warning: .lake cleanup failed for {branch}: "
+                                     f"{result.stderr.strip()}\n")
             elif lake_root:
-                sys.stderr.write(f"warning: external .lake cleanup tool is missing: {cleanup}\n")
+                sys.stderr.write(f"warning: .lake cleanup tool is missing: {cleanup}\n")
         else:
             sys.stderr.write(f"warning: could not remove worktree {target} (uncommitted "
                              f"files?); by hand: git worktree remove --force {target}\n")

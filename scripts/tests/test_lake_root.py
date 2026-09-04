@@ -10,15 +10,12 @@ import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
-
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "local" / "bin"))
 import pr_merge  # noqa: E402
-
 HELPER = REPO_ROOT / "local" / "bin" / "lake-root.sh"
 WARMER = REPO_ROOT / "local" / "bin" / "warm-worktree.sh"
 HOUSEKEEPING = REPO_ROOT / "local" / "bin" / "housekeeping.sh"
-
 
 def run(argv: list[str | Path], *, env: dict[str, str]) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
@@ -26,14 +23,10 @@ def run(argv: list[str | Path], *, env: dict[str, str]) -> subprocess.CompletedP
         text=True, capture_output=True, check=False,
     )
 
-
 def git(repo: Path, *args: str) -> None:
-    result = subprocess.run(
-        ["git", *args], cwd=repo, text=True, capture_output=True, check=False,
-    )
+    result = subprocess.run(["git", *args], cwd=repo, text=True, capture_output=True)
     if result.returncode != 0:
         raise AssertionError(result.stderr)
-
 
 class LakeRootTests(unittest.TestCase):
     def setUp(self) -> None:
@@ -113,14 +106,52 @@ class LakeRootTests(unittest.TestCase):
         self.assertEqual(retired.returncode, 0, retired.stderr)
         self.assertFalse(target.exists())
 
+    def test_cleanup_rejects_roots_resolving_to_filesystem_root(self) -> None:
+        repo = self.make_repo("root-guard", "main")
+        alias = self.tmp / "root-alias"
+        alias.symlink_to("/", target_is_directory=True)
+        for root in ("/tmp/..", str(alias)):
+            with self.subTest(root=root):
+                env = dict(self.env, MIPSTARRE_LAKE_ROOT=root)
+                result = run([HELPER, "cleanup", repo, "mipstarre-root-guard"], env=env)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("must not resolve to /", result.stderr)
+
+    def test_cleanup_rejects_symlinked_ancestor_escape(self) -> None:
+        repo = self.make_repo("escape-owner", "main")
+        outside = self.tmp / "outside"
+        target = outside / "issue-escape"
+        self.lake_root.mkdir()
+        outside.mkdir()
+        target.mkdir()
+        (target / "keep").write_text("build", encoding="utf-8")
+        (self.lake_root / "codex").symlink_to(outside, target_is_directory=True)
+        result = run([HELPER, "cleanup", repo, "codex/issue-escape"], env=self.env)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("escapes root", result.stderr)
+        self.assertTrue((target / "keep").is_file())
+
+    def test_prepare_rejects_hot_main_before_creation(self) -> None:
+        repo = self.make_repo("hot-main-guard", "issue-hot-main")
+        cache = self.tmp / "cache"
+        root = self.tmp / "physical-hot-repo"; root.mkdir()
+        hot = cache / "hot-main"; hot.mkdir(parents=True); (hot / "repo").symlink_to(root)
+        target = root / "issue-hot-main"
+        env = dict(self.env, MIPSTARRE_CACHE_ROOT=str(cache),
+                   MIPSTARRE_LAKE_ROOT=str(root))
+        result = run([HELPER, "prepare", repo], env=env)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("inside hot-main", result.stderr)
+        self.assertFalse(target.exists())
+
     def test_merge_cleanup_calls_housekeeping_after_worktree_removal(self) -> None:
         listing = "worktree /tmp/retired\nbranch refs/heads/issue-retired\n"
         completed = subprocess.CompletedProcess([], 0, "", "removed\n")
         with mock.patch.object(pr_merge, "git", return_value=listing), \
-                mock.patch.object(pr_merge, "git_ok", side_effect=[True, True]), \
-                mock.patch.object(pr_merge.subprocess, "run", return_value=completed) as cleanup:
-            with mock.patch.dict(os.environ, self.env):
-                pr_merge.remove_branch_and_worktree(REPO_ROOT, "issue-retired")
+             mock.patch.object(pr_merge, "git_ok", side_effect=[True, True]), \
+             mock.patch.object(pr_merge.subprocess, "run", return_value=completed) as cleanup, \
+             mock.patch.dict(os.environ, self.env):
+            pr_merge.remove_branch_and_worktree(REPO_ROOT, "issue-retired")
         cleanup.assert_called_once_with(
             [str(HOUSEKEEPING), "lake-cleanup", "issue-retired"], cwd=str(REPO_ROOT),
             text=True, capture_output=True, check=False,
