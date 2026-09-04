@@ -151,7 +151,8 @@ assembled by Fourier averaging.
 \begin{proof}
 	\leanok
 	\uses{lem:binary-measurement-distance, lem:boolean-fourier-transform,
-		lem:naimark-helper}
+		lem:boolean-representation-stability, lem:naimark-helper,
+		lem:naimark-rounding}
 	This is Theorem~10 of Natarajan and Vidick~\cite{Natarajan2017Linearity},
 	whose Fourier--Naimark argument is followed; \cite{Ji2020MIPStar} invokes
 	the result without proof. Write $\chi_v(u) = (-1)^{v \cdot u}$ and
@@ -563,6 +564,123 @@ assembled by Fourier averaging.
 	substitutes the correlation hypothesis into the overlap identity.
 \end{proof}
 
+\begin{lemma}[Formalization support for the Naimark rounding of the
+	Fourier-square measurement]
+	\label{lem:naimark-rounding}
+	\lean{MIPStarRE.QPBT.naimarkAncilla}
+	\lean{MIPStarRE.QPBT.norm_naimarkAncilla}
+	\lean{MIPStarRE.QPBT.ancProj_naimarkAncilla}
+	\lean{MIPStarRE.QPBT.fourierNaimarkData}
+	\lean{MIPStarRE.QPBT.fourierNaimarkData_source}
+	\lean{MIPStarRE.QPBT.roundedFourierPVM}
+	\lean{MIPStarRE.QPBT.roundedFourierPVM_isProj}
+	\lean{MIPStarRE.QPBT.roundedFourierPVM_sum_eq_one}
+	\lean{MIPStarRE.QPBT.roundedFourierPVM_mul_eq_zero_of_ne}
+	\lean{MIPStarRE.QPBT.roundedFourierMeasurement}
+	\lean{MIPStarRE.QPBT.roundedFourierMeasurement_effect}
+	\lean{MIPStarRE.QPBT.roundedFourierMeasurement_isProjective}
+	\lean{MIPStarRE.QPBT.trace_heteroKron_mul_roundedFourierPVM}
+	\lean{MIPStarRE.QPBT.roundedObservable}
+	\lean{MIPStarRE.QPBT.roundedObservable_mul}
+	\lean{MIPStarRE.QPBT.roundedObservable_zero}
+	\lean{MIPStarRE.QPBT.roundedObservable_isHermitian}
+	\lean{MIPStarRE.QPBT.roundedObservable_isBinaryObservable}
+	\lean{MIPStarRE.QPBT.trace_heteroKron_mul_roundedObservable}
+	\leanok
+	\uses{def:povm-conventions, lem:fourier-square-measurement,
+		lem:naimark-helper}
+	This is not a named statement of \cite{Natarajan2017Linearity}; it isolates
+	the dilation step of the proof given there for
+	Theorem~\ref{thm:linearity}, namely the passage from the Fourier-square
+	measurement to the exactly linear observables
+	(\texttt{references/nv-paper/fullpaper.tex:1099--1110}). Let
+	$\{O(a)\}_{a \in \F_2^t}$ be binary observables on a finite-dimensional
+	Hilbert space $\hilb$, with characters $\chi_u$ and Fourier coefficients
+	$\widehat{O}^u$ as in Lemma~\ref{lem:boolean-fourier-transform}, and let
+	$\{B^u = (\widehat{O}^u)^2\}_{u \in \F_2^t}$ be the Fourier-square
+	measurement of Lemma~\ref{lem:fourier-square-measurement}. Write
+	$\hilb' = \C^{\F_2^t \sqcup \{\bot\}}$ for the auxiliary space of
+	Lemma~\ref{lem:naimark-helper} and
+	$\ket{\mathrm{anc}} = \ket{\bot} \in \hilb'$ for its initial vector, so
+	that $\|\ket{\mathrm{anc}}\| = 1$ and
+	$\ket{\mathrm{anc}}\bra{\mathrm{anc}}$ is the auxiliary projector of that
+	lemma. Applying Lemma~\ref{lem:naimark-helper} to $\{B^u\}$ yields
+	projections $\{\hat{P}_a\}_{a \in \F_2^t \sqcup \{\bot\}}$ on
+	$\hilb \ot \hilb'$ with $\sum_a \hat{P}_a \le \Id$ --- a projective
+	submeasurement, not a measurement --- and such that, for every operator
+	$X$ on $\hilb$ and every $u \in \F_2^t$,
+	\[
+		\Tr\big((X \ot \ket{\mathrm{anc}}\bra{\mathrm{anc}}) \, \hat{P}_u\big)
+		= \Tr\big(X \, B^u\big) .
+	\]
+	Define the rounded family $\{C^u\}_{u \in \F_2^t}$ by enlarging the zero
+	outcome to the complement of the nonzero ones,
+	\[
+		C^u =
+		\begin{cases}
+			\Id - \sum_{v \ne 0} \hat{P}_v & \text{if } u = 0, \\
+			\hat{P}_u & \text{otherwise,}
+		\end{cases}
+	\]
+	and set $\mathcal{L}^a = \sum_u \chi_u(a) \, C^u$ for $a \in \F_2^t$. Then
+	every $C^u$ is an orthogonal projection, $\sum_u C^u = \Id$, and
+	$C^u C^v = 0$ for $u \ne v$; hence $\{C^u\}$ is a projective measurement
+	with outcomes in $\F_2^t$ on $\hilb \ot \hilb'$, whose compression along
+	$\ket{\mathrm{anc}}$ is $\{B^u\}$: for every operator $X$ on $\hilb$ and
+	every $u \in \F_2^t$,
+	\[
+		\Tr\big((X \ot \ket{\mathrm{anc}}\bra{\mathrm{anc}}) \, C^u\big)
+		= \Tr\big(X \, B^u\big) .
+	\]
+	Moreover $\mathcal{L}^0 = \Id$, each $\mathcal{L}^a$ is a binary
+	observable, the linearity
+	\[
+		\mathcal{L}^a \, \mathcal{L}^b = \mathcal{L}^{a+b}
+	\]
+	holds exactly for all $a, b \in \F_2^t$, and for every operator $X$ on
+	$\hilb$ and every $a \in \F_2^t$,
+	\[
+		\Tr\big((X \ot \ket{\mathrm{anc}}\bra{\mathrm{anc}}) \,
+		\mathcal{L}^a\big)
+		= \Tr\Big(X \sum_u \chi_u(a) \, B^u\Big) .
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:boolean-characters, lem:boolean-fourier-transform,
+		lem:naimark-helper}
+	Projections summing to at most the identity are mutually orthogonal, so
+	$\hat{P}_a \hat{P}_b = 0$ for $a \ne b$. Consequently
+	$Q = \sum_{v \ne 0} \hat{P}_v$ absorbs each of its summands on either
+	side, $Q \hat{P}_v = \hat{P}_v Q = \hat{P}_v$ for $v \ne 0$, whence $Q$ is
+	itself a projection and $C^0 = \Id - Q$ is a projection orthogonal to
+	every $\hat{P}_v$ with $v \ne 0$. Splitting off the zero outcome in
+	$\sum_u C^u$ leaves $(\Id - Q) + Q = \Id$.
+
+	For $u \ne 0$ the compression identity is the expectation-preservation
+	identity supplied with the dilation of Lemma~\ref{lem:naimark-helper},
+	rewritten with unnormalized traces; the normalizing factors of the two
+	spaces cancel, the enlarged space having dimension
+	$(\lvert \F_2^t \rvert + 1)$ times that of $\hilb$. For $u = 0$,
+	linearity of the trace reduces the claim to
+	$\Tr(X \ot \ket{\mathrm{anc}}\bra{\mathrm{anc}}) = \Tr(X)$ together with
+	the identity $B^0 = \Id - \sum_{v \ne 0} B^v$, which is the completeness
+	$\sum_u B^u = \Id$ of Lemma~\ref{lem:boolean-fourier-transform}.
+
+	Expanding $\mathcal{L}^a \mathcal{L}^b$ and using that $C^u C^v$ vanishes
+	for $u \ne v$ and equals $C^u$ for $u = v$ leaves the diagonal terms
+	$\sum_u \chi_u(a) \chi_u(b) \, C^u$, and
+	$\chi_u(a) \chi_u(b) = \chi_u(a+b)$ by
+	Lemma~\ref{lem:boolean-characters}. Taking $a = 0$ in the definition of
+	$\mathcal{L}^a$ and using $\chi_u(0) = 1$ gives
+	$\mathcal{L}^0 = \sum_u C^u = \Id$. Hermiticity of $\mathcal{L}^a$ follows
+	from the realness of the characters and the self-adjointness of the
+	$C^u$, and $(\mathcal{L}^a)^2 = \mathcal{L}^{a+a} = \mathcal{L}^0 = \Id$
+	because $a + a = 0$ in characteristic two, so each $\mathcal{L}^a$ is a
+	binary observable. The last identity is the compression identity for the
+	$C^u$ summed against the characters.
+\end{proof}
+
 \begin{lemma}[Formalization support for Boolean representation stability]
 	\label{lem:boolean-representation-stability}
 	\lean{MIPStarRE.QPBT.ancProj_posSemidef}
@@ -576,7 +694,7 @@ assembled by Fourier averaging.
 	\lean{MIPStarRE.QPBT.exists_exact_boolean_representation}
 	\leanok
 	\uses{def:povm-conventions, lem:fourier-square-measurement,
-		lem:naimark-helper}
+		lem:naimark-helper, lem:naimark-rounding}
 	This is not a named statement of \cite{Natarajan2017Linearity}; it records
 	the conclusion that the Fourier--Naimark argument given there for
 	Theorem~\ref{thm:linearity}
@@ -628,7 +746,7 @@ assembled by Fourier averaging.
 	\leanok
 	\uses{lem:binary-measurement-distance, lem:blr-defect-identity,
 		lem:boolean-fourier-transform, lem:fourier-square-measurement,
-		lem:naimark-helper}
+		lem:naimark-helper, lem:naimark-rounding}
 	Let $\hilb'$ have orthonormal basis indexed by $\F_2^t$ together with one
 	extra element $\bot$, and take $\ket{\mathrm{anc}} = \ket{\bot}$, the
 	initial state of the auxiliary register in the one-measurement Naimark
