@@ -74,7 +74,7 @@ def binarySwapMap {ι : Type} [Fintype ι] [DecidableEq ι]
 /-- The controlled-swap map preserves norms whenever both controlling
 operators are reflections.  No anticommutation assumption is needed. -/
 theorem binarySwapMap_norm {ι : Type} [Fintype ι] [DecidableEq ι]
-    (X Z : Op ι) (hX : IsReflection X) (hZ : IsReflection Z)
+    (X Z : Op ι) (hX : IsBinaryObservable X) (hZ : IsBinaryObservable Z)
     (ψ : EuclideanSpace ℂ ι) :
     ‖binarySwapMap X Z ψ‖ = ‖ψ‖ := by
   apply (sq_eq_sq₀ (norm_nonneg _) (norm_nonneg _)).mp
@@ -113,7 +113,7 @@ theorem binarySwapMap_norm {ι : Type} [Fintype ι] [DecidableEq ι]
 
 /-- The local controlled-swap map bundled as a linear isometric embedding. -/
 noncomputable def binarySwapIsometry {ι : Type} [Fintype ι] [DecidableEq ι]
-    (X Z : Op ι) (hX : IsReflection X) (hZ : IsReflection Z) :
+    (X Z : Op ι) (hX : IsBinaryObservable X) (hZ : IsBinaryObservable Z) :
     EuclideanSpace ℂ ι →ₗᵢ[ℂ] EuclideanSpace ℂ (ZMod 2 × ι) where
   toLinearMap := binarySwapMap X Z
   norm_map' := binarySwapMap_norm X Z hX hZ
@@ -121,7 +121,7 @@ noncomputable def binarySwapIsometry {ι : Type} [Fintype ι] [DecidableEq ι]
 /-- Coordinate formula for the binary swap isometry. -/
 @[simp]
 theorem binarySwapIsometry_apply {ι : Type} [Fintype ι] [DecidableEq ι]
-    (X Z : Op ι) (hX : IsReflection X) (hZ : IsReflection Z)
+    (X Z : Op ι) (hX : IsBinaryObservable X) (hZ : IsBinaryObservable Z)
     (ψ : EuclideanSpace ℂ ι) (b : ZMod 2) (i : ι) :
     binarySwapIsometry X Z hX hZ ψ (b, i) =
       applyOperatorToState (X ^ b.val * reflectionEffect Z b) ψ i := rfl
@@ -137,7 +137,7 @@ def swapPauliZ : Op (ZMod 2) :=
   fun b c => if b = c then if b = 0 then 1 else -1 else 0
 
 /-- The extracted binary `X` matrix is a reflection. -/
-theorem isReflection_swapPauliX : IsReflection swapPauliX := by
+theorem isReflection_swapPauliX : IsBinaryObservable swapPauliX := by
   constructor
   · ext b c
     rcases zmod_two_eq_zero_or_one b with rfl | rfl <;>
@@ -151,7 +151,7 @@ theorem isReflection_swapPauliX : IsReflection swapPauliX := by
         norm_num [swapPauliX, Matrix.one_apply]
 
 /-- The extracted binary `Z` matrix is a reflection. -/
-theorem isReflection_swapPauliZ : IsReflection swapPauliZ := by
+theorem isReflection_swapPauliZ : IsBinaryObservable swapPauliZ := by
   constructor
   · ext b c
     rcases zmod_two_eq_zero_or_one b with rfl | rfl <;>
@@ -202,7 +202,7 @@ theorem apply_swapPauliX_left {ι : Type} [Fintype ι] [DecidableEq ι]
 
 private theorem reflectionEffect_zero_mul_reflection
     {ι : Type} [Fintype ι] [DecidableEq ι]
-    (Z : Op ι) (hZ : IsReflection Z) :
+    (Z : Op ι) (hZ : IsBinaryObservable Z) :
     reflectionEffect Z 0 * Z = reflectionEffect Z 0 := by
   simp only [reflectionEffect, if_pos, Matrix.smul_mul]
   rw [add_mul, one_mul, hZ.mul_self_eq_one]
@@ -210,7 +210,7 @@ private theorem reflectionEffect_zero_mul_reflection
 
 private theorem reflectionEffect_one_mul_reflection
     {ι : Type} [Fintype ι] [DecidableEq ι]
-    (Z : Op ι) (hZ : IsReflection Z) :
+    (Z : Op ι) (hZ : IsBinaryObservable Z) :
     reflectionEffect Z 1 * Z = -reflectionEffect Z 1 := by
   simp only [reflectionEffect, if_neg one_ne_zero, Matrix.smul_mul]
   rw [sub_mul, one_mul, hZ.mul_self_eq_one]
@@ -219,7 +219,7 @@ private theorem reflectionEffect_one_mul_reflection
 /-- The controlled-swap isometry transports its controlling reflection exactly
 to Pauli `Z` on the extracted binary register. -/
 theorem binarySwap_intertwines_Z {ι : Type} [Fintype ι] [DecidableEq ι]
-    (X Z : Op ι) (hX : IsReflection X) (hZ : IsReflection Z)
+    (X Z : Op ι) (hX : IsBinaryObservable X) (hZ : IsBinaryObservable Z)
     (ψ : EuclideanSpace ℂ ι) :
     binarySwapIsometry X Z hX hZ (applyOperatorToState Z ψ) =
       applyOperatorToState (heteroKron swapPauliZ (1 : Op ι))
@@ -252,7 +252,7 @@ private theorem reflectionEffect_zero_mul_X_sub_X_mul_one
 
 private theorem X_mul_reflectionEffect_one_mul_X_sub_zero
     {ι : Type} [Fintype ι] [DecidableEq ι]
-    (X Z : Op ι) (hX : IsReflection X) :
+    (X Z : Op ι) (hX : IsBinaryObservable X) :
     X * reflectionEffect Z 1 * X - reflectionEffect Z 0 =
       -(2 : ℂ)⁻¹ • (X * (X * Z - -(Z * X))) := by
   simp only [reflectionEffect, if_pos, if_neg one_ne_zero]
@@ -273,7 +273,7 @@ private theorem X_mul_reflectionEffect_one_mul_X_sub_zero
 Pauli `X` is bounded by the anticommutator defect of `X` and `Z` on the input
 vector. -/
 theorem norm_binarySwap_intertwines_X_sub_le {ι : Type} [Fintype ι]
-    [DecidableEq ι] (X Z : Op ι) (hX : IsReflection X) (hZ : IsReflection Z)
+    [DecidableEq ι] (X Z : Op ι) (hX : IsBinaryObservable X) (hZ : IsBinaryObservable Z)
     (ψ : EuclideanSpace ℂ ι) :
     ‖binarySwapIsometry X Z hX hZ (applyOperatorToState X ψ) -
         applyOperatorToState (heteroKron swapPauliX (1 : Op ι))
@@ -350,12 +350,12 @@ noncomputable def msLocalVarObsB (S : Strategy msGame) (j : Fin 9) :
 
 /-- Alice's dilated local variable observable is a reflection. -/
 theorem isReflection_msLocalVarObsA (S : Strategy msGame) (j : Fin 9) :
-    IsReflection (msLocalVarObsA S j) :=
+    IsBinaryObservable (msLocalVarObsA S j) :=
   isBinaryObservable_signObs _ (msDilatedStrategy_isProjective_A S _) _
 
 /-- Bob's dilated local variable observable is a reflection. -/
 theorem isReflection_msLocalVarObsB (S : Strategy msGame) (j : Fin 9) :
-    IsReflection (msLocalVarObsB S j) :=
+    IsBinaryObservable (msLocalVarObsB S j) :=
   isBinaryObservable_signObs _ (msDilatedStrategy_isProjective_B S _) _
 
 /-- Alice's exact binary controlled-swap embedding for the distinguished
