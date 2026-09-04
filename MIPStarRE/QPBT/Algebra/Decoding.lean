@@ -11,9 +11,8 @@ specialization to polynomial representatives live in
 
 ## References
 
-The decoder is `def:decoding-map`, blueprint
-`blueprint/src/chapter/ch11_qpbt_algebra.tex:446-457`, with the extraction use
-at `blueprint/src/chapter/ch16_qpbt_extraction.tex:11-20` and paper
+The decoder is blueprint `def:decoding-map`, with its extraction use in
+blueprint `sec:separating` and paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1419-1450`.
 The restricted decoder identity and its encoding hypothesis are documented in
 `docs/paper-gaps/qpbt_decoding-identity.tex:87-123`.
@@ -70,8 +69,8 @@ Each indicator factor has degree zero away from its own variable and degree at
 most one in that variable, so the multilinear encoding has individual degree at
 most one, and hence at most `P.d` using `P.hd`.  This is the degree
 side-condition implicit in the source's `g_h` construction, not an extra
-hypothesis of the decoding identity.  See `def:low-degree-encoding`, blueprint
-`blueprint/src/chapter/ch11_qpbt_algebra.tex:404-424`, and paper
+hypothesis of the decoding identity.  See blueprint
+`def:low-degree-encoding`, and paper
 `references/qpbt-paper/04_preliminaries.tex:832-897`. -/
 theorem lowDegreeEncoding_mem_poly {P : AdmissibleParams}
     (h : PauliRegister P) :
@@ -126,11 +125,11 @@ def IsEncoding {P : AdmissibleParams} (g : Poly P) : Prop :=
 
 /-- Linearity of the full-field decoder on bounded representatives.
 
-This is the additive linearity of `lem:qld-decoder-linearity`, blueprint
-`ch16_qpbt_extraction.tex:30-40`, used in the symmetry step of the source
+This is the additive linearity of blueprint
+`lem:qld-decoder-linearity`, used in the symmetry step of the source
 argument at
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1546-1550`
-and blueprint `ch16_qpbt_extraction.tex:239-244`.  It does not assert
+and blueprint `lem:qld-decoder-linearity`.  It does not assert
 evaluation equality for non-encoding representatives.  See
 `docs/paper-gaps/qpbt_decoding-identity.tex:87-123`. -/
 theorem decodeFq_add {P : AdmissibleParams} (g h : Poly P) :
@@ -151,7 +150,7 @@ theorem decodeFq_smul {P : AdmissibleParams} (c : PauliScalar P) (g : Poly P) :
 /-- The full-field decoder is a left inverse to `encodingPoly`.
 
 This is the identity `\operatorname{Dec}(g_h)=h` of
-`lem:qld-decoder-linearity`, blueprint `ch16_qpbt_extraction.tex:30-40`, for
+blueprint `lem:qld-decoder-linearity`, for
 the full-field decoder specified at
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1419-1420`.
 The degree proof is separated into `lowDegreeEncoding_mem_poly`; no additional

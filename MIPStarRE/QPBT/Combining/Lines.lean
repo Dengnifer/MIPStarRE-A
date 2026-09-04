@@ -12,9 +12,8 @@ source-facing statements requires a divisibility hypothesis at dimension
 
 ## References
 
-The declarations formalize `lem:qld-xz-lines`,
-`lem:restricted-line-mixture-bounds`, and `lem:qld-sublines` in
-`blueprint/src/chapter/ch15_qpbt_combining.tex:345-846`.  Their paper sources
+The declarations formalize blueprint `lem:qld-xz-lines`,
+`lem:restricted-line-mixture-bounds`, and `lem:qld-sublines`.  Their paper sources
 are `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:882-894`
 and `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1038-1069`.
 -/
@@ -29,8 +28,8 @@ noncomputable section
 
 /-- Conditional joint X/Z line measurements for `lem:qld-xz-lines`.
 
-**Source statement:** `lem:qld-xz-lines` in
-`blueprint/src/chapter/ch15_qpbt_combining.tex:345-443`, from
+**Source statement:** blueprint
+`lem:qld-xz-lines`, from
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:882-894`.
 The error depends polynomially on `ε` and `md/q`, and the witness retains all
 directed opposite-placement comparisons.  This is the formalization-only form
@@ -71,8 +70,8 @@ theorem exists_combinedLinesWitness :
 /-- The axis and diagonal line-point laws are uniform mixtures of their
 coordinate-index restrictions.
 
-**Source statement:** `lem:restricted-line-mixture-bounds` in
-`blueprint/src/chapter/ch15_qpbt_combining.tex:595-646`, formalizing the
+**Source statement:** blueprint
+`lem:restricted-line-mixture-bounds`, formalizing the
 unlabelled observation at
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1049-1051`.
 `Distribution.bind` is the finite uniform-mixture operation.  The proof is
@@ -90,8 +89,8 @@ theorem linePointDist_eq_mixture_restricted (L : LdParams) :
 /-- Restricting a nonnegative average from the line-point distribution to one
 fixed line kind and coordinate inflates its bound by at most `2m`.
 
-**Source statement:** item 1 of `lem:restricted-line-mixture-bounds` in
-`blueprint/src/chapter/ch15_qpbt_combining.tex:595-646`, from the unlabelled
+**Source statement:** item 1 of blueprint
+`lem:restricted-line-mixture-bounds`, from the unlabelled
 estimate at
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1052-1056`.
 The proof is tracked by issue #18.  Discharge: use
@@ -109,8 +108,8 @@ theorem avg_restricted_le {P : AdmissibleParams}
 /-- Restricting both variables of a nonnegative average over two independent
 line-point samples inflates its bound by at most `4m^2`.
 
-**Source statement:** item 2 of `lem:restricted-line-mixture-bounds` in
-`blueprint/src/chapter/ch15_qpbt_combining.tex:595-646`, from the unlabelled
+**Source statement:** item 2 of blueprint
+`lem:restricted-line-mixture-bounds`, from the unlabelled
 estimate at
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1056-1058`.
 The proof is tracked by issue #18.  Discharge: apply the one-variable mixture
@@ -133,8 +132,8 @@ theorem avg_restricted_prod_le {P : AdmissibleParams}
 point measurement on every product of restricted line distributions.
 
 **Source statement:** item 3 and Equation `eq:qld-xz-lines-restricted` of
-`lem:restricted-line-mixture-bounds` in
-`blueprint/src/chapter/ch15_qpbt_combining.tex:595-646`, from
+blueprint
+`lem:restricted-line-mixture-bounds`, from
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1058-1061`.
 Here `consistencyDefect` is the finite POVM form of the displayed expectation
 against `Id - Q` after both measurements are postprocessed by evaluation.
@@ -169,8 +168,8 @@ theorem restricted_lines_consistency_bound :
 point marginals and axis-line closure.
 
 **Source statement:** `lem:qld-sublines` and
-`rem:qld-sublines-property-three` in
-`blueprint/src/chapter/ch15_qpbt_combining.tex:647-846`, from
+blueprint
+`rem:qld-sublines-property-three`, from
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1063-1069` and
 its proof at lines 1071--1116.  The witness uses the directly indexed extended
 line law described in `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`, so

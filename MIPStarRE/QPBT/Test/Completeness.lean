@@ -12,8 +12,8 @@ value-one SPCC completeness theorem.
 
 ## References
 
-The source statement is `lem:pauli-completeness` in
-`blueprint/src/chapter/ch13_qpbt_test.tex:390-395`, from
+The source statement is blueprint
+`lem:pauli-completeness`, from
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1229-1421`.
 -/
 
@@ -22,8 +22,8 @@ namespace MIPStarRE.QPBT
 noncomputable section
 
 /-- The Pauli question sampler equals the typed conditionally linear distribution
-on the Pauli type graph from `def:typed-cl-distributions`; blueprint
-`ch12_qpbt_games.tex:1377-1382`,
+on the Pauli type graph from blueprint
+`def:typed-cl-distributions`,
 paper `references/qpbt-paper/07_types.tex:84-94`. -/
 theorem pauliQuestionDistribution_eq_typedCL (P : AdmissibleParams) :
     pauliQuestionDistribution P =
@@ -65,7 +65,7 @@ theorem pauliBasisTestSymm_toGame (P : AdmissibleParams) :
   rfl
 
 /-- `lem:pauli-completeness`: every admissible Pauli basis test has a
-value-one SPCC strategy. Blueprint `ch13_qpbt_test.tex:390-395`, paper
+value-one SPCC strategy. Blueprint `lem:pauli-completeness`, paper
 `08_classical_and_quantum_low_degree_tests.tex:1229-1421`. -/
 theorem exists_spcc_value_one (P : AdmissibleParams) :
     ∃ S : SymmetricStrategy (pauliBasisTestSymm P),

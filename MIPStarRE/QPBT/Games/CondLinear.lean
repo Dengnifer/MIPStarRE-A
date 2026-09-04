@@ -10,11 +10,8 @@ needed by later formalization stages.
 
 ## References
 
-The source-facing nodes are `def:cl-func`
-(`blueprint/src/chapter/ch12_qpbt_games.tex:1168-1178`), `def:cl-dist`
-(`ch12_qpbt_games.tex:1182-1185`), `lem:cl-concat`
-(`ch12_qpbt_games.tex:1218-1232`), and `def:graph-distribution`
-(`ch12_qpbt_games.tex:1348-1360`).
+The source-facing nodes are blueprint `def:cl-func`, `def:cl-dist`,
+`lem:cl-concat`, and `def:graph-distribution`.
 The paper origins are
 `references/qpbt-paper/05_conditionally_linear_functions.tex:35-57,282-314`,
 `references/qpbt-paper/07_types.tex:65-82`,
@@ -36,7 +33,7 @@ rejected by Lean's strict-positivity checker.  We therefore expose the same
 public predicate through a positive syntax tree (`CondLinearTerm`), together
 with its support invariant and evaluation function.  This is a representation
 deviation forced by Lean, not an additional mathematical hypothesis.  It encodes
-`def:cl-func`, blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:1168-1178`,
+blueprint `def:cl-func`,
 paper origin `references/qpbt-paper/05_conditionally_linear_functions.tex:35-57`.
 -/
 inductive CondLinearTerm (K : Type*) [Field K] {ι : Type*} [Fintype ι]
@@ -50,16 +47,16 @@ inductive CondLinearTerm (K : Type*) [Field K] {ι : Type*} [Fintype ι]
       CondLinearTerm K (ι := ι) (ell + 1)
 
 /-- Restrict a coordinate vector to a register, zeroing the complementary
-coordinates.  This is Lean-only support for the projections in `def:cl-func`,
-blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:1168-1178`, paper origin
+coordinates.  This is Lean-only support for the projections in blueprint
+`def:cl-func`, paper origin
 `references/qpbt-paper/05_conditionally_linear_functions.tex:35-57`.
 -/
 def coordinateRestriction (S : Finset ι) (x : ι → K) : ι → K :=
   fun i => if i ∈ S then x i else 0
 
 /-- Evaluation of a representation of a conditionally linear function.
-Lean-only support for `def:cl-func`, blueprint
-`ch12_qpbt_games.tex:1168-1178`, paper origin
+Lean-only support for blueprint
+`def:cl-func`, paper origin
 `references/qpbt-paper/05_conditionally_linear_functions.tex:35-57`.
 -/
 def CondLinearTerm.eval {ι : Type*} [Fintype ι] [DecidableEq ι]
@@ -72,8 +69,8 @@ def CondLinearTerm.eval {ι : Type*} [Fintype ι] [DecidableEq ι]
         L₁ x₁ + CondLinearTerm.eval (rest (L₁ x₁)) x
 
 /-- The support invariant for a representation of a conditionally linear
-function.  This is a Lean-only companion to `def:cl-func`, blueprint
-`blueprint/src/chapter/ch12_qpbt_games.tex:1168-1178`, paper origin
+function.  This is a Lean-only companion to blueprint
+`def:cl-func`, paper origin
 `references/qpbt-paper/05_conditionally_linear_functions.tex:35-57`.
 -/
 def CondLinearTerm.supportedOn {ι : Type*} [Fintype ι] [DecidableEq ι]
@@ -84,8 +81,8 @@ def CondLinearTerm.supportedOn {ι : Type*} [Fintype ι] [DecidableEq ι]
       S₁ ⊆ S ∧ ∀ y, CondLinearTerm.supportedOn (rest y) (S \ S₁)
 
 /-- The public conditionally-linear predicate.  Its positive syntax-tree
-encoding is the Lean representation of `def:cl-func`, blueprint
-`blueprint/src/chapter/ch12_qpbt_games.tex:1168-1178`, paper origin
+encoding is the Lean representation of blueprint
+`def:cl-func`, paper origin
 `references/qpbt-paper/05_conditionally_linear_functions.tex:35-57`.
 -/
 def IsCondLinearOn (K : Type*) [Field K] {ι : Type*} [Fintype ι]
@@ -96,7 +93,7 @@ def IsCondLinearOn (K : Type*) [Field K] {ι : Type*} [Fintype ι]
 
 /--
 `IsCondLinear` abbreviates the full-coordinate predicate.  Blueprint
-`def:cl-func`, `blueprint/src/chapter/ch12_qpbt_games.tex:1168-1178`; paper
+`def:cl-func`; paper
 `references/qpbt-paper/05_conditionally_linear_functions.tex:35-57`.
 -/
 def IsCondLinear (ell : ℕ) (L : (ι → K) → (ι → K)) : Prop :=
@@ -650,8 +647,8 @@ theorem IsCondLinearOn.directSum_sameLevel {K ι J : Type*} [Field K]
 
 /--
 The distribution obtained by applying two conditionally linear maps to a common
-uniform seed.  This is `def:cl-dist` in
-`blueprint/src/chapter/ch12_qpbt_games.tex:1182-1185`, paper origin
+uniform seed.  This is blueprint
+`def:cl-dist`, paper origin
 `references/qpbt-paper/05_conditionally_linear_functions.tex:132-138`.
 -/
 noncomputable def clDistribution [Fintype K] [DecidableEq K]
@@ -662,8 +659,8 @@ noncomputable def clDistribution [Fintype K] [DecidableEq K]
 /-- The direct-sum map used to encode the paper's CL concatenation.  The left
 coordinates carry `L`, while the right coordinates carry the family member
 `R u v` selected by the left input `u`.  This is Lean-only coordinate
-infrastructure for `lem:cl-concat`, blueprint
-`blueprint/src/chapter/ch12_qpbt_games.tex:1218-1232`, paper origin
+infrastructure for blueprint
+`lem:cl-concat`, paper origin
 `references/qpbt-paper/05_conditionally_linear_functions.tex:282-314`.
 -/
 def condLinearConcat {ιU ιV : Type*} [Fintype ιU] [DecidableEq ιU]
@@ -676,7 +673,7 @@ def condLinearConcat {ιU ιV : Type*} [Fintype ιU] [DecidableEq ιU]
 
 /--
 Concatenating an outer and an indexed inner CL map adds their levels.  This is
-`lem:cl-concat` in `blueprint/src/chapter/ch12_qpbt_games.tex:1218-1232`, with
+blueprint `lem:cl-concat`, with
 paper origin `references/qpbt-paper/05_conditionally_linear_functions.tex:282-292`.
 The map `condLinearConcat` realizes this concatenation on the direct sum.
 -/
@@ -725,8 +722,8 @@ theorem IsCondLinearOn.concat {ιU ιV : Type*} [Fintype ιU] [DecidableEq ιU]
 
 /--
 The graph distribution is uniform on ordered pairs `(a, b)` whose unordered
-pair belongs to `E`, including self-loops.  This is `def:graph-distribution`
-in `blueprint/src/chapter/ch12_qpbt_games.tex:1348-1360`;
+pair belongs to `E`, including self-loops.  This is blueprint
+`def:graph-distribution`;
 paper origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:984-1009`.
 The underlying graph-distribution definition is
 `references/qpbt-paper/07_types.tex:65-82`.
@@ -738,8 +735,8 @@ noncomputable def graphDistribution {T : Type*} [Fintype T] [DecidableEq T]
 
 /-- The graph distribution has total mass one whenever its edge set is
 nonempty.  This is not a named statement of the source article; it is
-`lem:graph-distribution-mass` in
-`blueprint/src/chapter/ch12_qpbt_games.tex:1362-1372`. -/
+blueprint
+`lem:graph-distribution-mass`. -/
 theorem graphDistribution_isProbability {T : Type*} [Fintype T] [DecidableEq T]
     (E : Finset (Sym2 T)) (hE : E.Nonempty) :
     (graphDistribution E hE).IsProbability := by

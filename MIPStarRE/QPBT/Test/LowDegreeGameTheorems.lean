@@ -12,8 +12,8 @@ outcomes are bounded multivariate polynomials.
 
 ## References
 
-The principal definition and theorem are `def:ld-meas` and `lem:ld-soundness` in
-`blueprint/src/chapter/ch13_qpbt_test.tex:63-160`. Their paper origin is
+The principal definition and theorem are blueprint `def:ld-meas` and
+`lem:ld-soundness`. Their paper origin is
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:243-287,392-480`.
 The dimension-divisibility hypothesis is documented in
 `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`.
@@ -30,7 +30,7 @@ open MIPStarRE.Quantum
 noncomputable section
 
 /-- `lem:alnf`: the point and axis-index marginals of the axis line-point
-distribution are uniform. Blueprint `ch13_qpbt_test.tex:63-68`, paper
+distribution are uniform. Blueprint `lem:alnf`, paper
 `08_classical_and_quantum_low_degree_tests.tex:243-257`. -/
 theorem aLinePointDist_point_marginal_uniform (L : LdParams) :
     (aLinePointDist L).map Prod.snd =
@@ -39,15 +39,15 @@ theorem aLinePointDist_point_marginal_uniform (L : LdParams) :
         uniformDistribution (Fin L.m) := by
   sorry
 
-/-- The incidence conclusion of `lem:alnf`, blueprint
-`ch13_qpbt_test.tex:63-68`, paper
+/-- The incidence conclusion of blueprint
+`lem:alnf`, paper
 `08_classical_and_quantum_low_degree_tests.tex:243-257`. -/
 theorem aLinePointDist_mem_line (L : LdParams) :
     ∀ sample ∈ (aLinePointDist L).support, sample.2 ∈ sample.1.pointSet := by
   sorry
 
 /-- `lem:dlnf`: the point and prefix-index marginals of the diagonal
-line-point distribution are uniform. Blueprint `ch13_qpbt_test.tex:74-79`,
+line-point distribution are uniform. Blueprint `lem:dlnf`,
 paper `08_classical_and_quantum_low_degree_tests.tex:261-272`. -/
 theorem dLinePointDist_point_marginal_uniform (L : LdParams) :
     (dLinePointDist L).map Prod.snd =
@@ -56,15 +56,15 @@ theorem dLinePointDist_point_marginal_uniform (L : LdParams) :
         uniformDistribution (Fin L.m) := by
   sorry
 
-/-- The incidence conclusion of `lem:dlnf`, blueprint
-`ch13_qpbt_test.tex:74-79`, paper
+/-- The incidence conclusion of blueprint
+`lem:dlnf`, paper
 `08_classical_and_quantum_low_degree_tests.tex:261-272`. -/
 theorem dLinePointDist_mem_line (L : LdParams) :
     ∀ sample ∈ (dLinePointDist L).support, sample.2 ∈ sample.1.pointSet := by
   sorry
 
 /-- The diagonal direction in every sampled description has the prefix-zero
-property of `lem:dlnf`, blueprint `ch13_qpbt_test.tex:74-79`, paper
+property of blueprint `lem:dlnf`, paper
 `08_classical_and_quantum_low_degree_tests.tex:261-272`. -/
 theorem dLinePointDist_prefix_zero (L : LdParams) :
     ∀ sample ∈ (dLinePointDist L).support,
@@ -74,8 +74,8 @@ theorem dLinePointDist_prefix_zero (L : LdParams) :
 
 /-- The low-degree question sampler is the typed conditionally linear
 distribution on the complete type graph. This identifies the sampler with
-`def:typed-cl-distributions`; blueprint
-`ch12_qpbt_games.tex:1377-1382`, paper
+blueprint
+`def:typed-cl-distributions`, paper
 `references/qpbt-paper/07_types.tex:84-94`. -/
 theorem ldQuestionDistribution_eq_typedCL (L : LdParams) :
     ldQuestionDistribution L =
@@ -84,8 +84,8 @@ theorem ldQuestionDistribution_eq_typedCL (L : LdParams) :
   sorry
 
 /-- Bounded multivariate polynomials form a finite set over a finite coefficient
-semiring. This is the finite outcome set required by `def:ld-meas`,
-blueprint `ch13_qpbt_test.tex:124-129`, paper
+semiring. This is the finite outcome set required by blueprint
+`def:ld-meas`, paper
 `08_classical_and_quantum_low_degree_tests.tex:394-408`. -/
 noncomputable instance polyFuncFintype (m : ℕ) (K : Type*)
     [CommSemiring K] [Fintype K] (d : ℕ) : Fintype ↥(polyFunc m K d) := by
@@ -104,7 +104,7 @@ noncomputable abbrev PolyMeas (m : ℕ) (K : Type*) [CommSemiring K]
 
 /-- The dependent family in `def:ld-meas`: component `i` may
 have its own coefficient field, number of variables, and degree bound.
-Blueprint `ch13_qpbt_test.tex:124-129`, paper
+Blueprint `def:ld-meas`, paper
 `08_classical_and_quantum_low_degree_tests.tex:394-408`. -/
 noncomputable abbrev PolyMeasFamily (k : ℕ) (K : Fin k → Type*)
     [∀ i, CommSemiring (K i)] [∀ i, Fintype (K i)]
@@ -154,7 +154,7 @@ noncomputable def deltaLd (a b ε : ℝ) (q m d k : ℕ) : ℝ :=
       Real.rpow 2 (-(b * ((m * d : ℕ) : ℝ))))
 
 /-- Quantum soundness of the simultaneous classical low individual degree
-test (`lem:ld-soundness`, blueprint lines 135--160; paper theorem and proof
+test (blueprint `lem:ld-soundness`; paper theorem and proof
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:413-458`).
 
 The first two consistency bounds compare the point-answer postprocessing of the

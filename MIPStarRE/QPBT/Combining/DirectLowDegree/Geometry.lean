@@ -63,8 +63,7 @@ dimension is `2 * P.m + 2`; no divisibility assertion is introduced.
 
 The construction has dimension `2 * P.m + 2` without requiring
 `2 * P.m + 2 ∣ P.q`; it supplies the directly indexed line and coordinate
-spaces used in the dimension-extension argument of
-`blueprint/src/chapter/ch15_qpbt_combining.tex:1257-1293`.
+spaces used in blueprint `lem:qld-sublines`.
 -/
 def AdmissibleParams.extendedDirectLd (P : AdmissibleParams) : DirectLdParams where
   q := P.q
@@ -230,7 +229,7 @@ theorem directLinePointDist_isProbability (D : DirectLdParams) :
 
 /-- A point differs from its canonical line representative by a scalar
 multiple of the line direction.  This is the canonical incidence lemma of
-`def:line-representative`, `blueprint/src/chapter/ch11_qpbt_algebra.tex:497-517`
+blueprint `def:line-representative`
 (the decomposition establishing incidence is at lines 507-509), shared by
 the line-point laws and the strategy transport. -/
 theorem mem_linePoints_lineRepMap {K : Type*} [Field K] {m : ℕ}

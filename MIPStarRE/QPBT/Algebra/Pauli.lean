@@ -12,9 +12,8 @@ finite-field Fourier orthogonality in characteristic two.
 
 ## References
 
-The source-facing nodes are `def:lin-reg`, `def:EPR`, `def:generalized-pauli`,
-and `lem:pauli-observable-expansion` in
-`blueprint/src/chapter/ch11_qpbt_algebra.tex:494-652`.  The paper origin is
+The source-facing nodes are blueprint `def:lin-reg`, `def:EPR`,
+`def:generalized-pauli`, and `lem:pauli-observable-expansion`.  The paper origin is
 `references/qpbt-paper/04_preliminaries.tex:908-1161`.
 -/
 
@@ -28,8 +27,8 @@ open MIPStarRE.LDT.Preliminaries
 variable {K : Type*} [Field K] [Fintype K] [DecidableEq K]
   [Algebra (ZMod 2) K]
 
-/-- The two generalized Pauli bases used by the test in `def:generalized-pauli`,
-blueprint `ch11_qpbt_algebra.tex:529-571`, paper origin
+/-- The two generalized Pauli bases used by the test in blueprint
+`def:generalized-pauli`, paper origin
 `references/qpbt-paper/04_preliminaries.tex:1052-1096`.
 -/
 inductive PauliKind where
@@ -208,8 +207,7 @@ private theorem sum_phaseSign_dotProduct {ι : Type*} [Fintype ι]
   by_cases hv : v = 0 <;> simp [hv]
 
 /--
-The shift operator `τ^X(a)`.  Blueprint `def:generalized-pauli`,
-`blueprint/src/chapter/ch11_qpbt_algebra.tex:529-571`; paper origin
+The shift operator `τ^X(a)`.  Blueprint `def:generalized-pauli`; paper origin
 `references/qpbt-paper/04_preliminaries.tex:1052-1096`.
 -/
 noncomputable def tauShift (a : K) : Op K :=
@@ -217,8 +215,8 @@ noncomputable def tauShift (a : K) : Op K :=
 
 /--
 The phase operator `τ^Z(b)`, with the fixed binary trace in the phase.  It is
-the second operator of `def:generalized-pauli` (blueprint lines 529-571; paper
-`references/qpbt-paper/04_preliminaries.tex:1052-1096`).
+the second operator of blueprint `def:generalized-pauli`; paper
+`references/qpbt-paper/04_preliminaries.tex:1052-1096`.
 -/
 noncomputable def tauPhase (b : K) : Op K :=
   fun i j => if i = j then phaseSign (binTrace K (b * j)) else 0
@@ -234,8 +232,8 @@ private noncomputable def singlePauliVec (W : PauliKind) (e x : K) : ℂ :=
 /--
 The normalized single/multi-qudit eigenvector for a Pauli basis label.  For an
 index type `ι`, the input `e : ι → K` labels the tensor-product basis vector.
-This is the vector form of `def:generalized-pauli`, blueprint
-`blueprint/src/chapter/ch11_qpbt_algebra.tex:550-570`, paper origin
+This is the vector form of blueprint
+`def:generalized-pauli`, paper origin
 `references/qpbt-paper/04_preliminaries.tex:1101-1122`.
 -/
 noncomputable def pauliVec {ι : Type*} [Fintype ι] [DecidableEq ι]
@@ -244,8 +242,8 @@ noncomputable def pauliVec {ι : Type*} [Fintype ι] [DecidableEq ι]
 
 /--
 The rank-one projector onto `pauliVec W e`.  This is the projective measurement
-element `τ^W_e` in `def:generalized-pauli` (blueprint lines 562-570; paper
-`references/qpbt-paper/04_preliminaries.tex:1101-1122`).
+element `τ^W_e` in blueprint `def:generalized-pauli`; paper
+`references/qpbt-paper/04_preliminaries.tex:1101-1122`.
 -/
 noncomputable def pauliProj {ι : Type*} [Fintype ι] [DecidableEq ι]
     (W : PauliKind) (e : ι → K) : Op (ι → K) :=
@@ -282,7 +280,7 @@ private theorem pauliProj_X_apply {ι : Type*} [Fintype ι] [DecidableEq ι]
       rw [pauliNormalizer_mul_self, phaseSign_binTrace_dotProduct_add]
 
 /-- A compact operator-valued form of a generalized Pauli observable from
-`def:generalized-pauli`, blueprint `ch11_qpbt_algebra.tex:529-571`, paper origin
+blueprint `def:generalized-pauli`, paper origin
 `references/qpbt-paper/04_preliminaries.tex:1052-1096`.
 -/
 noncomputable def tauObservable {ι : Type*} [Fintype ι] [DecidableEq ι]
@@ -294,8 +292,7 @@ noncomputable def tauObservable {ι : Type*} [Fintype ι] [DecidableEq ι]
       | .Z => tauPhase (a i) (x i) (y i)
 
 /--
-The EPR vector on a finite label space.  Blueprint `def:EPR`,
-`blueprint/src/chapter/ch11_qpbt_algebra.tex:513-523`; paper origin
+The EPR vector on a finite label space.  Blueprint `def:EPR`; paper origin
 `references/qpbt-paper/04_preliminaries.tex:946-955`.
 -/
 noncomputable def eprState (V : Type*) [Fintype V] [DecidableEq V] [Nonempty V] :
@@ -339,7 +336,7 @@ theorem eprState_norm (V : Type*) [Fintype V] [DecidableEq V] [Nonempty V] :
 Fourier expansion of a generalized Pauli observable in the Pauli projectors.
 This theorem is the characteristic-two (binary) specialization of the forward
 identity `eq:pauli-obs-proj` in `lem:pauli-observable-expansion`,
-`blueprint/src/chapter/ch11_qpbt_algebra.tex:674-680`; paper origin
+with blueprint source `lem:pauli-observable-expansion`; paper origin
 `references/qpbt-paper/04_preliminaries.tex:1151-1161`.
 
 **Scope restriction:** This characteristic-two specialization is separated
@@ -416,7 +413,7 @@ theorem tauObservable_eq_sum_pauliProj {ι : Type*} [Fintype ι] [DecidableEq ι
 /-- The inverse Fourier expansion of a Pauli projector.  This theorem is the
 characteristic-two (binary) specialization of the inverse identity
 `eq:pauli-inversion-0` in `lem:pauli-observable-expansion`,
-`blueprint/src/chapter/ch11_qpbt_algebra.tex:674-688`; paper origin
+with blueprint source `lem:pauli-observable-expansion`; paper origin
 `references/qpbt-paper/04_preliminaries.tex:1151-1161`.
 
 **Scope restriction:** This characteristic-two specialization is separated

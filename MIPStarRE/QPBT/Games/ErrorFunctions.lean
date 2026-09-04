@@ -32,7 +32,7 @@ def IsPolyErr (f : ℝ → ℝ) : Prop :=
 arguments, one universal positive constant is both the prefactor and exponent.
 This is the convention of `04_preliminaries.tex:26-29`, applied at
 `06_nonlocal_games_and_mipstar.tex:518-524`; blueprint
-`ch12_qpbt_games.tex:517-546`. -/
+`lem:pasting`. -/
 def IsPolyErr₂ (f : ℝ → ℝ → ℝ) : Prop :=
   ∃ C : ℝ, 0 < C ∧ ∀ x y, 0 < x → 0 < y →
     0 ≤ f x y ∧ f x y ≤ C * Real.rpow (x * y) C

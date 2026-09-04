@@ -15,8 +15,8 @@ namespace MIPStarRE.QPBT
 open MIPStarRE.LDT
 
 /-- The product of two finite distributions, a formalization-only auxiliary
-used by the sandwich construction; blueprint `ch12_qpbt_games.tex:454-480`,
-paper `06_nonlocal_games_and_mipstar.tex:465-501`. -/
+used by blueprint `lem:ld-sandwich`; paper
+`06_nonlocal_games_and_mipstar.tex:465-501`. -/
 noncomputable def Distribution.prod {α β : Type*} [DecidableEq α] [DecidableEq β]
     (μ : Distribution α) (ν : Distribution β) : Distribution (α × β) where
   support := μ.support.product ν.support
@@ -31,7 +31,7 @@ noncomputable def Distribution.prod {α β : Type*} [DecidableEq α] [DecidableE
     · simp [μ.outsideSupport p.1 hμ]
 
 /-- The product of two probability distributions is a probability
-distribution; blueprint `ch12_qpbt_games.tex:454-480`, paper
+distribution used by blueprint `lem:ld-sandwich`; paper
 `06_nonlocal_games_and_mipstar.tex:465-501`. -/
 theorem Distribution.prod_isProbability {α β : Type*}
     [DecidableEq α] [DecidableEq β] (μ : Distribution α) (ν : Distribution β)
@@ -55,8 +55,8 @@ theorem Distribution.prod_isProbability {α β : Type*}
     _ = 1 := hμ.weight_sum_eq_one
 
 /-- The convex mixture with a coefficient in `[0,1]`, as used for
-the equal mixture in `def:line-point-dist`, blueprint
-`ch13_qpbt_test.tex:85-95`, paper
+the equal mixture in blueprint
+`def:line-point-dist`, paper
 `08_classical_and_quantum_low_degree_tests.tex:274-287`. -/
 noncomputable def Distribution.mix {α : Type*} [DecidableEq α]
     (t : ℝ) (ht0 : 0 ≤ t) (ht1 : t ≤ 1)
@@ -73,7 +73,7 @@ noncomputable def Distribution.mix {α : Type*} [DecidableEq α]
     simp [μ.outsideSupport a hμ, ν.outsideSupport a hν]
 
 /-- A convex mixture of probability distributions is a probability distribution;
-`def:line-point-dist`, blueprint `ch13_qpbt_test.tex:85-95`, paper
+blueprint `def:line-point-dist`, paper
 `08_classical_and_quantum_low_degree_tests.tex:274-287`. -/
 theorem Distribution.mix_isProbability {α : Type*} [DecidableEq α]
     (t : ℝ) (μ ν : Distribution α) (hμ : μ.IsProbability)
@@ -96,7 +96,7 @@ theorem Distribution.mix_isProbability {α : Type*} [DecidableEq α]
   ring
 
 /-- The dependent bind of finite distributions used for typed question
-distributions, blueprint `ch12_qpbt_games.tex:1377-1382`, paper
+distributions in blueprint `def:typed-cl-distributions`; paper
 `07_types.tex:84-94`. -/
 noncomputable def Distribution.bind {α β : Type*} [DecidableEq β]
     (μ : Distribution α) (ν : α → Distribution β) : Distribution β where
@@ -112,8 +112,7 @@ noncomputable def Distribution.bind {α β : Type*} [DecidableEq β]
     simp [ν a |>.outsideSupport b hnot]
 
 /-- A dependent bind of probability distributions is a probability distribution;
-blueprint
-`ch12_qpbt_games.tex:1377-1382`, paper `07_types.tex:84-94`. -/
+it supports blueprint `def:typed-cl-distributions`, paper `07_types.tex:84-94`. -/
 theorem Distribution.bind_isProbability {α β : Type*} [DecidableEq β]
     (μ : Distribution α) (ν : α → Distribution β) (hμ : μ.IsProbability)
     (hν : ∀ a ∈ μ.support, (ν a).IsProbability) :
@@ -146,8 +145,8 @@ theorem Distribution.bind_isProbability {α β : Type*} [DecidableEq β]
     _ = 1 := hμ.weight_sum_eq_one
 
 /-- Restrict a distribution to a decidable positive-mass event and normalize it,
-as in `def:ith-restricted-line`; blueprint
-`ch15_qpbt_combining.tex:578-592`, paper
+as in blueprint
+`def:ith-restricted-line`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1038-1048`. -/
 noncomputable def Distribution.restrict {α : Type*} [DecidableEq α]
     (μ : Distribution α) (p : α → Prop) [DecidablePred p]
@@ -165,8 +164,8 @@ noncomputable def Distribution.restrict {α : Type*} [DecidableEq α]
     · simp [hp]
 
 /-- Restriction to a positive-mass event preserves total probability;
-`def:ith-restricted-line`, blueprint
-`ch15_qpbt_combining.tex:578-592`, paper
+blueprint
+`def:ith-restricted-line`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1038-1048`. -/
 theorem Distribution.restrict_isProbability {α : Type*} [DecidableEq α]
     (μ : Distribution α) (p : α → Prop) [DecidablePred p]

@@ -11,6 +11,9 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 PR_CI = REPO_ROOT / ".github" / "workflows" / "pr-ci.yml"
 PR_REVIEW = REPO_ROOT / ".github" / "workflows" / "pr-review.yml"
+CODE_REVIEW_PROMPT = REPO_ROOT / ".github" / "prompts" / "claude-code-review-prompt.md"
+PROSE_REVIEW_PROMPT = REPO_ROOT / ".github" / "prompts" / "blueprint-prose-review-prompt.md"
+LOCAL_REVIEW = REPO_ROOT / "local" / "bin" / "review.sh"
 
 
 def _job_block(text: str, job: str) -> str:
@@ -25,6 +28,9 @@ class PRReviewWorkflowTests(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.pr_ci = PR_CI.read_text(encoding="utf-8")
         cls.pr_review = PR_REVIEW.read_text(encoding="utf-8")
+        cls.code_prompt = CODE_REVIEW_PROMPT.read_text(encoding="utf-8")
+        cls.prose_prompt = PROSE_REVIEW_PROMPT.read_text(encoding="utf-8")
+        cls.local_review = LOCAL_REVIEW.read_text(encoding="utf-8")
 
     def test_review_trigger_surface_includes_agents_file(self) -> None:
         self.assertIn("- 'AGENTS.md'", self.pr_ci)
@@ -47,6 +53,18 @@ class PRReviewWorkflowTests(unittest.TestCase):
         self.assertIn('echo "skip=true" >> "$GITHUB_OUTPUT"', prose_review)
         self.assertIn("Skipping prose review", prose_review)
         self.assertIn("if: steps.provider-token.outputs.skip != 'true'", prose_review)
+
+    def test_reviewers_derive_blueprint_spans_from_labels(self) -> None:
+        for prompt in (self.code_prompt, self.prose_prompt):
+            self.assertIn("scripts/blueprint_citations.py", prompt)
+            self.assertIn("do not flag line drift", prompt)
+        self.assertIn('BLUEPRINT_CITATION_PATH="scripts/blueprint_citations.py"',
+                      self.local_review)
+        self.assertIn('--files-from "$RUN_DIR/files.txt" --format markdown',
+                      self.local_review)
+        self.assertIn('name="blueprint-citations.md"', self.local_review)
+        self.assertIn('case "$CITATION_RC" in', self.local_review)
+        self.assertIn("refusing review without citation evidence", self.local_review)
 
 
 if __name__ == "__main__":

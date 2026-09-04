@@ -34,8 +34,8 @@ its proof, `references/nv-paper/fullpaper.tex:1074-1113`; the state-dependent
 distance is defined at lines 866--900 of the same file.  The QPBT paper quotes
 the theorem at
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:711-725` and
-invokes it at lines 787--832.  The blueprint statement is `thm:linearity` in
-`blueprint/src/chapter/ch15_qpbt_combining.tex:81-147`.  The normalization of
+invokes it at lines 787--832.  The blueprint statement is blueprint
+`thm:linearity`.  The normalization of
 the error constant is analyzed in
 `docs/paper-gaps/qpbt_linearity-distance-normalization.tex`: the exact defect
 bound is `2 * δ` for the squared state-dependent operator distance

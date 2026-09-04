@@ -10,9 +10,9 @@ expanded point observables and measurements.
 
 ## References
 
-The constructions formalize `def:expanded-state`, `def:expanded-observables`,
-`def:expanded-point-measurement`, and `def:expanded-point-trace-projection` in
-`blueprint/src/chapter/ch14_qpbt_observables.tex:760-874`. Their paper source is
+The constructions formalize blueprint `def:expanded-state`,
+`def:expanded-observables`, `def:expanded-point-measurement`, and
+`def:expanded-point-trace-projection`. Their paper source is
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:367-418`.
 -/
 
@@ -28,14 +28,14 @@ noncomputable section
 /-- The six registers `AA'A''BB'B''`, retaining distinct Alice and Bob local
 spaces. This is the register index type of `def:expanded-state`, paper
 `14_analysis_of_the_pauli_basis_test.tex:367-372`, blueprint
-`ch14_qpbt_observables.tex:760-781`. -/
+`def:expanded-state`. -/
 abbrev SixReg (P : AdmissibleParams) (ιA ιB : Type*) :=
   (ιA × (PauliRegister P × PauliRegister P)) ×
     (ιB × (PauliRegister P × PauliRegister P))
 
 /-- Equality of six-register indices is supplied by classical decidability for
-the register type. This is the index set of `def:expanded-state`; blueprint
-`ch14_qpbt_observables.tex:760-781`. -/
+the register type. This is the index set of blueprint
+`def:expanded-state`. -/
 noncomputable instance sixRegDecidableEq (P : AdmissibleParams)
     (ιA ιB : Type*) : DecidableEq (SixReg P ιA ιB) :=
   Classical.decEq _
@@ -56,7 +56,7 @@ def sixRegShuffle (P : AdmissibleParams) (ιA ιB : Type*) :
 /-- The four placements `AA'`, `BA''`, `BB'`, and `AB''` used explicitly in
 the chapter-14 consistency statements. Paper
 `14_analysis_of_the_pauli_basis_test.tex:420-450`; blueprint
-`ch14_qpbt_observables.tex:876-922`. -/
+`def:symmetric-equivalents`. -/
 inductive Placement where
   | AA'
   | BA''
@@ -86,7 +86,7 @@ abbrev ExpandedLocalSpace (S : ProjectiveSetting P ε) (side : PlayerSide) :=
 /-- The strategy state tensored with EPR states on `A'A''` and `B'B''`, in the
 six-register order. This is `eq:def-psihat`, paper
 `14_analysis_of_the_pauli_basis_test.tex:367-372`, blueprint
-`ch14_qpbt_observables.tex:760-781`. -/
+`eq:def-psihat`. -/
 noncomputable def psiHat (S : ProjectiveSetting P ε) :
     EuclideanSpace ℂ (SixReg P S.toStrategy.ιA S.toStrategy.ιB) := by
   classical
@@ -100,7 +100,7 @@ noncomputable def psiHat (S : ProjectiveSetting P ε) :
 identity on all remaining registers. The input local space is determined by
 the placement, so no equality between the player spaces is assumed. Paper
 `14_analysis_of_the_pauli_basis_test.tex:420-450`; blueprint
-`ch14_qpbt_observables.tex:876-922`. -/
+`def:symmetric-equivalents`. -/
 noncomputable def place (S : ProjectiveSetting P ε) (p : Placement)
     (O : Op (S.ExpandedLocalSpace p.side)) :
     Op (SixReg P S.toStrategy.ιA S.toStrategy.ιB) :=
@@ -134,7 +134,7 @@ noncomputable def place (S : ProjectiveSetting P ε) (p : Placement)
 /-- The expanded observable
 `W^r(u) tensor tau^W(r * ind_m(u))` on a selected player side. This is
 Equation `eq:lc-23`, paper `14_analysis_of_the_pauli_basis_test.tex:374-382`,
-blueprint `ch14_qpbt_observables.tex:783-807`. -/
+blueprint `eq:lc-23`. -/
 noncomputable def expObs (S : ProjectiveSetting P ε) (side : PlayerSide)
     (W : PauliKind) (r : PauliScalar P) (u : Fin P.m → PauliScalar P) :
     Op (S.ExpandedLocalSpace side) :=
@@ -144,7 +144,7 @@ noncomputable def expObs (S : ProjectiveSetting P ε) (side : PlayerSide)
 /-- The Fourier average defining the expanded point effect. This is the first
 display of `def:expanded-point-measurement`, paper
 `14_analysis_of_the_pauli_basis_test.tex:384-418`, blueprint
-`ch14_qpbt_observables.tex:809-844`. -/
+`def:expanded-point-measurement`. -/
 noncomputable def expPointOp (S : ProjectiveSetting P ε) (side : PlayerSide)
     (W : PauliKind) (u : Fin P.m → PauliScalar P) (a : PauliScalar P) :
     Op (S.ExpandedLocalSpace side) :=
@@ -154,7 +154,7 @@ noncomputable def expPointOp (S : ProjectiveSetting P ε) (side : PlayerSide)
 /-- The Pauli-register projector onto labels whose low-degree encoding has
 value `a` at `u`. This is Equation `eq:qld-point-obs-def`, paper
 `14_analysis_of_the_pauli_basis_test.tex:389-394`, blueprint
-`ch14_qpbt_observables.tex:809-844`. -/
+`eq:qld-point-obs-def`. -/
 noncomputable def tauPointProj (W : PauliKind)
     (u : Fin P.m → PauliScalar P) (a : PauliScalar P) : Op (PauliRegister P) :=
   ∑ h ∈ Finset.univ.filter (fun h : PauliRegister P =>
@@ -180,7 +180,7 @@ theorem expPointOp_sum_eq_one (S : ProjectiveSetting P ε) (side : PlayerSide)
 /-- The complete expanded point measurement on the chosen player and Pauli
 register. Its effects are those of `def:expanded-point-measurement`, paper
 `14_analysis_of_the_pauli_basis_test.tex:384-418`, blueprint
-`ch14_qpbt_observables.tex:809-844`. -/
+`def:expanded-point-measurement`. -/
 noncomputable def pointMeasExp (S : ProjectiveSetting P ε) (side : PlayerSide)
     (W : PauliKind) (u : Fin P.m → PauliScalar P) :
     Measurement (PauliScalar P) (S.ExpandedLocalSpace side) :=
@@ -211,7 +211,7 @@ theorem pointMeasExp_isProjective (S : ProjectiveSetting P ε)
 
 /-- Trace-coarse-graining of the expanded point measurement. This is Equation
 `eq:qld-def-mptur`, paper `14_analysis_of_the_pauli_basis_test.tex:411-418`,
-blueprint `ch14_qpbt_observables.tex:846-874`. -/
+blueprint `eq:qld-def-mptur`. -/
 noncomputable def expPointTrace (S : ProjectiveSetting P ε)
     (side : PlayerSide) (W : PauliKind) (u : Fin P.m → PauliScalar P)
     (r : PauliScalar P) : Measurement (ZMod 2) (S.ExpandedLocalSpace side) :=
@@ -220,7 +220,7 @@ noncomputable def expPointTrace (S : ProjectiveSetting P ε)
 /-- Fourier inversion writes a trace-coarse-grained point effect as one half
 of the identity plus its signed expanded observable. This is Equation
 `eq:lc-22`, paper `14_analysis_of_the_pauli_basis_test.tex:411-418`, blueprint
-`ch14_qpbt_observables.tex:846-874`. -/
+`eq:lc-22`. -/
 theorem expPointTrace_eq_half_add (S : ProjectiveSetting P ε)
     (side : PlayerSide) (W : PauliKind) (u : Fin P.m → PauliScalar P)
     (r : PauliScalar P) (b : ZMod 2) :

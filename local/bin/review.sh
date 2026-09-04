@@ -84,6 +84,7 @@ DIFF_MAX_LINES="${MIPSTARRE_DIFF_MAX_LINES:-4000}"
 REVIEW_TIMEOUT="${MIPSTARRE_REVIEW_TIMEOUT:-10800}"
 REVIEW_EFFORT="${MIPSTARRE_REVIEW_EFFORT:-ultra}"
 BOT_PREFIX_RE='^\[(claude|codex)-(auto|review)-fix\]'
+BLUEPRINT_CITATION_PATH="scripts/blueprint_citations.py"
 
 LOCK_HELD=""
 
@@ -272,6 +273,10 @@ run_agent() {
     if [ -n "$ctx" ]; then
       args[${#args[@]}]="--context-file"
       args[${#args[@]}]="$ctx"
+    fi
+    if [ -s "$BLUEPRINT_CITATION_MAP" ]; then
+      args[${#args[@]}]="--context-file"
+      args[${#args[@]}]="$BLUEPRINT_CITATION_MAP"
     fi
     if [ -s "$RUN_DIR/prior-ledger.md" ]; then
       args[${#args[@]}]="--context-file"
@@ -548,6 +553,32 @@ REVIEW_DIRTY="$(git -C "$WORKTREE" status --porcelain)"
 $REVIEW_DIRTY"
 [ -d "$WORKTREE" ] || die "worktree resolution failed for branch $BRANCH"
 
+# Stored blueprint citations are labels; their numeric source spans are derived
+# for the reviewer from the current worktree.  The helper executable is read
+# from the trusted primary checkout, while the branch files it parses remain
+# untrusted review data (review.md section 4).
+BLUEPRINT_CITATION_MAP="$RUN_DIR/blueprint-citations.md"
+TRUSTED_HELPER_DIR="$RUN_DIR/trusted-blueprint-citations"
+mkdir -p "$TRUSTED_HELPER_DIR"
+fetch_trusted "$BLUEPRINT_CITATION_PATH" \
+  "$TRUSTED_HELPER_DIR/blueprint_citations.py"
+fetch_trusted "scripts/tex_utils.py" "$TRUSTED_HELPER_DIR/tex_utils.py"
+CITATION_RC=0
+PYTHONPATH="$TRUSTED_HELPER_DIR" python3 \
+  "$TRUSTED_HELPER_DIR/blueprint_citations.py" --root "$WORKTREE" resolve \
+  --files-from "$RUN_DIR/files.txt" --format markdown \
+  >"$BLUEPRINT_CITATION_MAP" || CITATION_RC=$?
+case "$CITATION_RC" in
+  0) ;;
+  1)
+    warn "one or more blueprint labels did not resolve uniquely; the generated map records them"
+    ;;
+  *)
+    die "blueprint citation resolver failed with status $CITATION_RC;" \
+      "refusing review without citation evidence"
+    ;;
+esac
+
 # ------------------------------------------------------ carry-forward fast path
 # Evidence follows the DIFF (review.md section 13, EVOLUTION.md 2026-09-04).
 # After a fresh-base merge of main the head SHA changes but the PR's own patch
@@ -700,6 +731,11 @@ this head SHA.
   blueprint/src/chapter/, AGENTS.md, docs/project_conventions.md and
   docs/CONTRIBUTING.md §5 (the review checklist you are applying, unchanged by
   the move to GitHub-native records).
+- Lean docstrings store durable blueprint labels, not numeric blueprint line
+  ranges.  The attached blueprint-citations map derives each cited label's
+  current span.  Do not flag line drift or the absence of a stored numeric
+  range when the label resolves to the intended node.  Unknown, duplicate, or
+  mathematically incorrect labels remain review findings.
 
 PR context:
   PR number        $PR_NUM
@@ -771,6 +807,11 @@ build_standalone() {
     printf '<<<UNTRUSTED-DATA name="diff.patch">>>\n'
     cat "$ctx"
     printf '<<<END-UNTRUSTED-DATA>>>\n\n'
+    if [ -s "$BLUEPRINT_CITATION_MAP" ]; then
+      printf '<<<UNTRUSTED-DATA name="blueprint-citations.md">>>\n'
+      cat "$BLUEPRINT_CITATION_MAP"
+      printf '<<<END-UNTRUSTED-DATA>>>\n\n'
+    fi
     cat "$task"
   } >"$dest"
 }
@@ -1050,6 +1091,7 @@ if [ "$DRY_RUN" -eq 1 ]; then
   log "  diff:         $RUN_DIR/diff.patch"
   log "  code task:    $RUN_DIR/code-task.md"
   log "  code fallback:$RUN_DIR/code-standalone.md"
+  log "  citations:   $BLUEPRINT_CITATION_MAP"
   if [ "$TOUCHES_BLUEPRINT" -eq 1 ]; then
     log "  prose task:   $RUN_DIR/prose-task.md"
   else

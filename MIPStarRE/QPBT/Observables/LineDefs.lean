@@ -13,8 +13,8 @@ polynomials form a finite outcome set for the associated measurements.
 
 ## References
 
-The line and bounded-polynomial definitions are `def:ideg-deg-polynomials` in
-`blueprint/src/chapter/ch14_qpbt_observables.tex:37-86`, with source origin
+The line and bounded-polynomial definitions are blueprint
+`def:ideg-deg-polynomials`, with source origin
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:51-58`. The
 line-point sampler is `def:line-point-dist` in blueprint chapter 13, from
 `08_classical_and_quantum_low_degree_tests.tex:274-287`.
@@ -43,8 +43,8 @@ inductive LineKind where
   | diagonal
   deriving DecidableEq, Fintype
 
-/-- A seed-bearing line description for `def:line-point-dist`, blueprint
-`ch13_qpbt_test.tex:85-95`, paper
+/-- A seed-bearing line description for blueprint
+`def:line-point-dist`, paper
 `08_classical_and_quantum_low_degree_tests.tex:143-174,243-287`.
 
 An axis description stores its canonical base and seed. A diagonal description
@@ -107,8 +107,8 @@ noncomputable def LineDesc.pointSet {L : LdParams} (line : LineDesc L) :
   linePoints line.base line.direction
 
 /-- Multivariate polynomials in `m` variables whose total degree is at most
-`d`. This is the class `deg_d` in `def:ideg-deg-polynomials`, blueprint
-`ch14_qpbt_observables.tex:37-48`, paper
+`d`. This is the class `deg_d` in blueprint
+`def:ideg-deg-polynomials`, paper
 `14_analysis_of_the_pauli_basis_test.tex:51-52`. -/
 abbrev TotalDegreePoly (m : ℕ) (K : Type*) [CommSemiring K] (d : ℕ) :=
   {p : MvPolynomial (Fin m) K // p.totalDegree ≤ d}

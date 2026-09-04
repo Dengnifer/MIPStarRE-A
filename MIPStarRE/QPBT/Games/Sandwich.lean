@@ -9,8 +9,7 @@ by the QPBT analysis.
 
 ## References
 
-The source results are `lem:ld-sandwich` and `lem:pasting` in
-`blueprint/src/chapter/ch12_qpbt_games.tex:454-546`, with paper origin
+The source results are blueprint `lem:ld-sandwich` and `lem:pasting`, with paper origin
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:465-525`.
 -/
 
@@ -42,7 +41,7 @@ private noncomputable def sandwichProductCore {ι : Type*}
 the outcome families differ. This definition uses the pairing corrected in
 `rem:ld-sandwich-indexing` and
 `docs/paper-gaps/qpbt_ld-sandwich-indexing.tex`; blueprint statement
-`ch12_qpbt_games.tex:454-480` and remark `ch12_qpbt_games.tex:485-487`, paper
+`lem:ld-sandwich` and remark `rem:ld-sandwich-indexing`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:465-501`. Tracked in
 issue #16. The empty product is `1`. -/
 noncomputable def sandwichProduct {k : ℕ} {X ι : Type*}
@@ -52,8 +51,8 @@ noncomputable def sandwichProduct {k : ℕ} {X ι : Type*}
   sandwichProductCore k Γ (fun i a => G i x a) g
 
 /-- The two-family sandwiched product
-`(G₂)_{g₂} (G₁)_{g₁} (G₂)_{g₂}` from `eq:pasting-2a`; blueprint
-`ch12_qpbt_games.tex:517-546`, paper
+`(G₂)_{g₂} (G₁)_{g₁} (G₂)_{g₂}` from blueprint
+`eq:pasting-2a`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:504-525`. -/
 def pastedMeasurement {ι : Type*} [Fintype ι] [DecidableEq ι]
     {G₁ G₂ : Type*} (M₁ : G₁ → Op ι) (M₂ : G₂ → Op ι)
@@ -61,8 +60,8 @@ def pastedMeasurement {ι : Type*} [Fintype ι] [DecidableEq ι]
   M₂ g₂ * M₁ g₁ * M₂ g₂
 
 /-- Evaluating a tuple of codewords at a common point. This is a
-formalization-only auxiliary for `lem:ld-sandwich`, blueprint
-`ch12_qpbt_games.tex:454-480`, paper
+formalization-only auxiliary for blueprint
+`lem:ld-sandwich`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:465-495`. -/
 def evalFunctionTuple {k : ℕ} {Y : Type*} {R Γ : Fin k → Type*}
     (eval : (i : Fin k) → Γ i → Y → R i) (y : Y)
@@ -71,7 +70,7 @@ def evalFunctionTuple {k : ℕ} {Y : Type*} {R Γ : Fin k → Type*}
 
 /-- The palindromic effects form a POVM when each constituent measurement is
 projective. This is `lem:ld-sandwich-measurement`, the measurement assertion
-implicit in `lem:ld-sandwich`; blueprint `ch12_qpbt_games.tex:489-507`, paper
+implicit in `lem:ld-sandwich`; blueprint `lem:ld-sandwich-measurement`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:484-494`. -/
 theorem sandwichProduct_isMeasurement {k : ℕ} {X ι : Type*}
     [Fintype ι] [DecidableEq ι] {Γ : Fin k → Type*}
@@ -187,7 +186,7 @@ theorem sandwichProduct_isMeasurement {k : ℕ} {X ι : Type*}
 /-- The sandwiched simultaneous-measurement estimate of `lem:ld-sandwich`.
 One universal asymptotic constant applies independently of the distribution,
 measurements, state, and error parameters. Blueprint
-`ch12_qpbt_games.tex:454-480`, paper
+`lem:ld-sandwich`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:465-501`. -/
 theorem consistencyDefect_sandwich_le :
     ∃ C₀ : ℝ, 1 ≤ C₀ ∧
@@ -223,7 +222,7 @@ theorem consistencyDefect_sandwich_le :
 
 /-- The positive-mass conditional collision bound used by `lem:pasting`.
 This is a formalization-only spelling of the conditional probability in
-`blueprint/src/chapter/ch12_qpbt_games.tex:517-546`, with paper origin
+`lem:pasting`, with paper origin
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:504-525`. -/
 def HasConditionalCollisionBound {X Y₁ Y₂ R₂ Γ₂ : Type*}
     [Fintype X] [DecidableEq X] [Fintype Y₁] [DecidableEq Y₁]
@@ -239,7 +238,7 @@ def HasConditionalCollisionBound {X Y₁ Y₂ R₂ Γ₂ : Type*}
 
 /-- The effects obtained by sandwiching one measurement with a projective
 measurement form a POVM. This is `lem:pasting-measurement`, the measurement
-assertion for `eq:pasting-2a`; blueprint `ch12_qpbt_games.tex:548-567`, paper
+assertion for `eq:pasting-2a`; blueprint `lem:pasting-measurement`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:514-524`. -/
 theorem pastedMeasurement_isMeasurement {Γ₁ Γ₂ ι : Type*}
     [Fintype Γ₁] [Fintype Γ₂] [Fintype ι] [DecidableEq ι]
@@ -277,7 +276,7 @@ theorem pastedMeasurement_isMeasurement {Γ₁ Γ₂ ι : Type*}
 
 /-- Pasting two consistent measurements yields a product-form polynomial
 error. All operator families in the conclusion are the postprocessed source
-families. This is `lem:pasting`, blueprint `ch12_qpbt_games.tex:517-546`, paper
+families. This is blueprint `lem:pasting`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:504-525`. -/
 theorem exists_pasting_error :
     ∃ δp : ℝ → ℝ → ℝ, IsPolyErr₂ δp ∧

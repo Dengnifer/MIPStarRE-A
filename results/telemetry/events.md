@@ -2371,3 +2371,16 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 - **Lesson:** an authoritative GitHub relation needs both read and write paths,
   and every workflow test added outside `local/` must be named by the scope
   budget when the budget uses an explicit path set.
+
+## 2026-09-05 - Blueprint numeric locator churn
+
+- **Symptom:** issue #174 records nine stale blueprint spans in PR #152's first
+  review and same-day conflicts in four active lanes; earlier PR #29 had the
+  same downstream-locator failure after a two-line chapter insertion.
+- **Diagnosis:** mutable blueprint line numbers were stored as source metadata
+  in Lean docstrings, so unrelated chapter edits invalidated citations and
+  changed otherwise independent Lean files.
+- **Fix:** issue #174 adopts blueprint labels as the stored citation and makes
+  current file and line spans deterministic reviewer output.
+- **Lesson:** stable identifiers belong in maintained source; positional
+  context should be derived at the point of review.

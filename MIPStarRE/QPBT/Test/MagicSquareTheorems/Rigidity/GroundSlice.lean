@@ -5,7 +5,7 @@ import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.Dilation
 # Contractions, isometries and the ground slice of the dilation
 
 Support for the transfer step of `thm:ms-rigidity` (blueprint
-`blueprint/src/chapter/ch13_qpbt_test.tex:224-253`, paper
+`thm:ms-rigidity`, paper
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652`):
 the calculus needed to compare the dilated projective strategy of
 `Rigidity/Dilation.lean` with the original strategy on states.
@@ -23,11 +23,11 @@ the calculus needed to compare the dilated projective strategy of
   because `(1 - Π) ⊗ 1` annihilates `(1 ⊗ Q) ψ'`.  This is the estimate that
   replaces the `≈_δ`-preservation which Naimark dilation lacks in general
   (`references/ldt-paper/orthonormalization.tex:82-101`, blueprint
-  `ch04_projective.tex:255-270`).
+  `ex:easy-but-long`).
 
 ## References
 
-`thm:ms-rigidity`, blueprint `blueprint/src/chapter/ch13_qpbt_test.tex:224-253`,
+blueprint `thm:ms-rigidity`,
 paper `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652`.
 -/
 
@@ -432,7 +432,7 @@ theorem applyOperatorToState_rightTensor_conjIsometry {ιA ιB κA κB : Type}
 
 /-- The orthogonal projection of an enlarged local space onto its ground slice,
 namely the inflation of the identity.  Formalization-only support for the
-transfer step of `thm:ms-rigidity`, blueprint `ch13_qpbt_test.tex:224-253`. -/
+transfer step of blueprint `thm:ms-rigidity`. -/
 def groundProjection (ι α : Type) [Fintype ι] [DecidableEq ι]
     [Fintype α] [DecidableEq α] : Op (ι × Option α) :=
   naimarkInflation (α := α) (1 : Op ι)

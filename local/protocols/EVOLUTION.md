@@ -533,3 +533,20 @@ hook-level regression that stages 401 lines at that path.
 **Expected effect:** operators can create the prerequisite record without an
 ad hoc GitHub mutation or a duplicate edge after retry, and future readiness
 test growth remains subject to the owner-gated 400-line episode budget.
+
+## 2026-09-05 — Blueprint citations use labels; reviewers derive spans
+
+**Trigger:** `results/telemetry/events.md` 2026-09-05 "Blueprint numeric
+locator churn", consolidating issue #174, PR #152's nine stale-span findings,
+four same-day merge conflicts, and the earlier PR #29 locator regression.
+
+**Change:** `AGENTS.md` makes blueprint labels the stored Lean-docstring
+citation form. `scripts/blueprint_citations.py` resolves active labels to
+current statement/proof spans and conservatively rewrites legacy locators.
+`review.sh` loads that helper from the committed trusted ref, attaches its
+derived map as untrusted review data, and the review prompts and protocol no
+longer treat numeric drift as a finding when the intended label resolves.
+
+**Expected effect:** blueprint insertions no longer force edits or review
+findings in unrelated Lean files, while reviewers retain exact current source
+locations and still detect missing, duplicate, or incorrect anchors.

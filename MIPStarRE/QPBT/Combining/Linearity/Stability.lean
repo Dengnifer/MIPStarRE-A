@@ -48,8 +48,8 @@ converts the overlap certificate into the distance bound, is at lines
 1104--1112, and the state-dependent distance is defined at lines 866--900.
 The QPBT paper quotes the theorem at
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:711-725`.  The
-blueprint statement is `thm:linearity` in
-`blueprint/src/chapter/ch15_qpbt_combining.tex:98-147`, and the
+blueprint statement is blueprint
+`thm:linearity`, and the
 correlation-form statement is `exists_exactly_linear_observables` in
 `MIPStarRE/QPBT/Combining/Linearity.lean`.  The declarations of this file are
 collected in the blueprint as `lem:boolean-representation-stability`.  The
@@ -255,8 +255,8 @@ the hypothesis.
 **Local fix:** This is the mathematical content of Theorem 10 of
 Natarajan--Vidick, `references/nv-paper/fullpaper.tex:1074-1088`, quoted at
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:711-725` and
-stated as `thm:linearity` in
-`blueprint/src/chapter/ch15_qpbt_combining.tex:98-147`, but not that displayed
+stated as blueprint
+`thm:linearity`, but not that displayed
 statement: the hypothesis here is the average multiplicative defect rather
 than the two-query correlation.  By
 `avg_multiplicativeDefect_le_two_mul_error`, a correlation at least `1 - δ`

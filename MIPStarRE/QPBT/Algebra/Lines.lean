@@ -9,8 +9,8 @@ provides the canonical projection used for line representatives.
 
 ## References
 
-The source-facing nodes are `def:line`, `prop:line-equiv`, and
-`def:line-representative` in `blueprint/src/chapter/ch11_qpbt_algebra.tex:433-492`.
+The source-facing nodes are blueprint `def:line`, `prop:line-equiv`, and
+`def:line-representative`.
 The paper origin is `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:102-174`.
 -/
 
@@ -22,7 +22,7 @@ variable {K : Type*} [Field K]
 
 /--
 The affine line through `u` in direction `v`, including the singleton case
-`v = 0`.  Blueprint `def:line`, `blueprint/src/chapter/ch11_qpbt_algebra.tex:439-453`;
+`v = 0`.  Blueprint `def:line`;
 paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:106-124`.
 -/
@@ -31,7 +31,7 @@ def linePoints {m : ℕ}
   {x | ∃ t : K, x = u + t • v}
 
 /-- The elementary coordinate direction used in the axis-parallel predicate of
-`def:line`; blueprint `ch11_qpbt_algebra.tex:439-453`, paper origin
+blueprint `def:line`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:106-124`.
 -/
 def coordinateDirection {m : ℕ}
@@ -40,15 +40,15 @@ def coordinateDirection {m : ℕ}
 
 /--
 `IsAxisParallel v` means that `v` is a standard coordinate direction.  This is
-the axis-parallel clause of `def:line` (blueprint lines 445-450; paper
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:106-124`).
+the axis-parallel clause of blueprint `def:line`; paper
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:106-124`.
 -/
 def IsAxisParallel {m : ℕ} (v : Fin m → K) : Prop :=
   ∃ i : Fin m, v = coordinateDirection i
 
 /--
 The diagonal-direction predicate from `def:line`; a prefix of coordinates may
-vanish.  Blueprint `blueprint/src/chapter/ch11_qpbt_algebra.tex:439-453`; paper origin
+vanish.  Blueprint `def:line`; paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:106-124`.
 -/
 def IsDiagonal {m : ℕ} (v : Fin m → K) : Prop :=
@@ -56,7 +56,7 @@ def IsDiagonal {m : ℕ} (v : Fin m → K) : Prop :=
 
 /--
 Changing the base point to another point on a line leaves the line unchanged.
-This is `prop:line-equiv` in `blueprint/src/chapter/ch11_qpbt_algebra.tex:455-466`,
+This is blueprint `prop:line-equiv`,
 with paper origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:128-132`.
 -/
 theorem linePoints_eq_of_mem {m : ℕ}
@@ -67,8 +67,7 @@ theorem linePoints_eq_of_mem {m : ℕ}
 /--
 The canonical linear representative map of a line direction.  It projects onto
 the coordinate complement of the span of `v`; for `v = 0` the span is bottom,
-so the resulting map is the identity.  Blueprint `def:line-representative`,
-`blueprint/src/chapter/ch11_qpbt_algebra.tex:472-492`; paper origin
+so the resulting map is the identity.  Blueprint `def:line-representative`; paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:143-174`.
 -/
 noncomputable def lineRepMap {m : ℕ}
@@ -78,7 +77,7 @@ noncomputable def lineRepMap {m : ℕ}
 /- The point-valued companion to `lineRepMap`; Lean-only notation for the
 canonical representative in `def:line-representative`. -/
 /-- The canonical representative point `lineRepMap v u`.  Blueprint
-`blueprint/src/chapter/ch11_qpbt_algebra.tex:472-492`, paper origin
+`def:line-representative`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:166-174`.
 -/
 noncomputable def lineRep {m : ℕ}

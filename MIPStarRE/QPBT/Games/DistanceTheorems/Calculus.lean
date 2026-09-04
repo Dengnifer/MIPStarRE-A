@@ -14,8 +14,8 @@ constants that the paper absorbs into asymptotic notation.
 
 ## References
 
-The source results are `fact:agreement` through `lem:commutation-analysis` in
-`blueprint/src/chapter/ch12_qpbt_games.tex:244-416`, with paper origin
+The source results run from blueprint `fact:agreement` through
+`lem:commutation-analysis`, with paper origin
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:295-461`.
 -/
 
@@ -27,7 +27,7 @@ open MIPStarRE.LDT hiding Measurement
 open MIPStarRE.Quantum DistanceCalculus
 
 /-- Consistency bounds state-dependent distance, with the explicit factor
-hidden in `fact:agreement`; blueprint `ch12_qpbt_games.tex:245-254`, paper
+hidden in blueprint `fact:agreement`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:295-311`. -/
 theorem opFamilyDistSq_le_two_mul_consistencyDefect {X α ι : Type*}
     [Fintype X] [DecidableEq X] [Fintype α] [DecidableEq α]
@@ -58,7 +58,7 @@ theorem opFamilyDistSq_le_two_mul_consistencyDefect {X α ι : Type*}
       ring
 
 /-- For projective POVMs, state-dependent distance bounds consistency. This is
-the second item of `fact:agreement`, blueprint `ch12_qpbt_games.tex:245-254`,
+the second item of blueprint `fact:agreement`,
 paper `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:295-311`. -/
 theorem consistencyDefect_le_opFamilyDistSq_of_projective {X α ι : Type*}
     [Fintype X] [DecidableEq X] [Fintype α] [DecidableEq α]
@@ -101,7 +101,7 @@ theorem consistencyDefect_le_opFamilyDistSq_of_projective {X α ι : Type*}
 /-- Projectivity of the left family gives the square-root consistency estimate
 for a unit state under a probability distribution. This is
 `lem:agreement-projective-left`, the left-projective branch of
-`fact:agreement-one-sided`; blueprint `ch12_qpbt_games.tex:273-288`, paper
+`fact:agreement-one-sided`; blueprint `lem:agreement-projective-left`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:306-309`.
 
 **Scope restriction:** The cited item also permits the right family to be
@@ -149,8 +149,8 @@ theorem consistencyDefect_le_sqrt_of_projective_left {X α ι : Type*}
       linarith
 
 /-- Left multiplication by a square-summable operator family does not increase
-state-dependent distance. This is `fact:add-a-proj`, blueprint
-`ch12_qpbt_games.tex:290-295`, paper
+state-dependent distance. This is blueprint
+`fact:add-a-proj`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:313-344`. -/
 theorem opFamilyDistSq_mul_left_le {X Y α β γ ι : Type*}
     [DecidableEq X] [Fintype α] [Fintype β] [Fintype γ]
@@ -191,8 +191,8 @@ theorem opFamilyDistSq_mul_left_le {X Y α β γ ι : Type*}
     _ ≤ δ := h
 
 /-- Left multiplication by operators indexed by an arbitrary finite family of
-functions preserves a state-dependent bound. This is `fact:add-a-proj2`,
-blueprint `ch12_qpbt_games.tex:308-313`, paper
+functions preserves a state-dependent bound. This is blueprint
+`fact:add-a-proj2`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:347-361`. -/
 theorem opFamilyDistSq_mul_funIndexed_le {X α Γ ι : Type*}
     [Fintype α] [Fintype Γ]
@@ -221,7 +221,7 @@ theorem opFamilyDistSq_mul_funIndexed_le {X α Γ ι : Type*}
     _ ≤ δ := h
 
 /-- A projective sub-sum absorbs an approximating operator family. This is
-`lem:cool-closeness-fact`, blueprint `ch12_qpbt_games.tex:328-336`, paper
+blueprint `lem:cool-closeness-fact`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:364-380`. -/
 theorem opDistSq_sum_sub_mul_le_of_projective {X α ι : Type*}
     [Fintype X] [DecidableEq X] [Fintype α]
@@ -257,8 +257,8 @@ theorem opDistSq_sum_sub_mul_le_of_projective {X α ι : Type*}
   exact norm_finset_sum_projector_mul_sq_le
     (fun a => (A x).effect a) D (hA x) horth s ψ
 
-/-- Explicit squared-distance triangle inequality. This is `fact:triangle`,
-blueprint `ch12_qpbt_games.tex:353-358`, paper
+/-- Explicit squared-distance triangle inequality. This is blueprint
+`fact:triangle`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:383-387`. -/
 theorem opFamilyDistSq_le_of_le_of_le {X α ι : Type*}
     [Fintype α] [Fintype ι] [DecidableEq ι]
@@ -305,8 +305,8 @@ theorem opFamilyDistSq_le_of_le_of_le {X α ι : Type*}
       (mul_le_mul_of_nonneg_left hBC (by positivity))
 
 /-- Triangle inequality for consistency on a unit state under a probability
-distribution, with the square-root loss of `fact:triangle-for-simeq`; blueprint
-`ch12_qpbt_games.tex:365-373`, paper
+distribution, with the square-root loss of blueprint
+`fact:triangle-for-simeq`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:389-395`. -/
 theorem consistencyDefect_trans_le {X α ι : Type*}
     [Fintype X] [DecidableEq X] [Fintype α] [DecidableEq α]
@@ -376,8 +376,8 @@ theorem consistencyDefect_trans_le {X α ι : Type*}
   linarith
 
 /-- Coarse-graining measurements on opposite tensor factors cannot increase
-inconsistency. This is `fact:data-processing`, blueprint
-`ch12_qpbt_games.tex:381-389`, paper
+inconsistency. This is blueprint
+`fact:data-processing`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:397-401`. -/
 theorem consistencyDefect_postprocess_le {X α β ιA ιB : Type*}
     [Fintype X] [DecidableEq X] [Fintype α] [DecidableEq α]
@@ -445,7 +445,7 @@ private theorem opFamilyDistSq_mul_left_same_question_le {X α β γ ι : Type*}
 /-- Joint closeness to a projective refinement implies approximate
 commutation. The bound has one universal constant, independent of the finite
 alphabets, Hilbert space, distributions, operators, state, and error; blueprint
-`ch12_qpbt_games.tex:403-416`, paper
+`lem:commutation-analysis`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:410-461`. -/
 theorem opDistSq_commutator_le :
     ∃ C₀ : ℝ, 1 ≤ C₀ ∧
