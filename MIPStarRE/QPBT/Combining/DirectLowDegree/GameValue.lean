@@ -6,13 +6,16 @@ import MIPStarRE.LDT.Basic.DistributionAvg
 
 This module compares the rejection probability of the directly indexed game
 with the branch weights used by the mature low-individual-degree test.
+All declarations below are formalization-only support derived from the game
+value; none is a paper-labelled result.
 
 ## References
 
-The low-degree verifier and its three question types are defined in
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:274-392`.
-The mature low-individual-degree test weights are given in
-`references/ldt-paper/test_definition.tex:130-151`.
+The uniform distribution on the three ordered question types is specified in
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:178-186`,
+and its verifier is specified in the same file at lines 320-392.  The mature
+low-individual-degree test's three equal outer weights and its uniform role
+choices are specified in `references/ldt-paper/test_definition.tex:10-67`.
 -/
 
 open scoped BigOperators MatrixOrder Matrix ComplexOrder
@@ -24,59 +27,6 @@ open MIPStarRE.Quantum
 
 noncomputable section
 
-/-- The Born weight of an answer pair at a fixed pair of direct questions. -/
-private noncomputable def directLdAnswerPairBornWeight
-    (D : DirectLdParams) (S : Strategy (directLdGame D))
-    (x : (directLdGame D).QuestionA) (y : (directLdGame D).QuestionB)
-    (a : (directLdGame D).AnswerA) (b : (directLdGame D).AnswerB) : ℝ :=
-  let M : Op (S.ιA × S.ιB) :=
-    heteroKron ((S.A x).effect a) ((S.B y).effect b)
-  (inner ℂ S.ψ (applyOperatorToState M S.ψ)).re
-
-private theorem directLdAnswerPairBornWeight_nonneg
-    (D : DirectLdParams) (S : Strategy (directLdGame D))
-    (x : (directLdGame D).QuestionA) (y : (directLdGame D).QuestionB)
-    (a : (directLdGame D).AnswerA) (b : (directLdGame D).AnswerB) :
-    0 ≤ directLdAnswerPairBornWeight D S x y a b := by
-  unfold directLdAnswerPairBornWeight applyOperatorToState heteroKron
-  exact
-    (Matrix.isPositive_toEuclideanLin_iff.mpr
-      (Matrix.nonneg_iff_posSemidef.mp
-        (kronecker_nonneg ((S.A x).pos a) ((S.B y).pos b)))).re_inner_nonneg_right S.ψ
-
-private theorem directLdAnswerPairBornWeight_sum_eq_one
-    (D : DirectLdParams) (S : Strategy (directLdGame D))
-    (x : (directLdGame D).QuestionA) (y : (directLdGame D).QuestionB) :
-    ∑ a : (directLdGame D).AnswerA, ∑ b : (directLdGame D).AnswerB,
-      directLdAnswerPairBornWeight D S x y a b = 1 := by
-  have hsum :
-      (∑ a : (directLdGame D).AnswerA, ∑ b : (directLdGame D).AnswerB,
-        heteroKron ((S.A x).effect a) ((S.B y).effect b)) =
-          (1 : Op (S.ιA × S.ιB)) := by
-    ext i j
-    simp only [Matrix.sum_apply, heteroKron, Matrix.kronecker,
-      Matrix.kroneckerMap_apply]
-    simp_rw [← Finset.mul_sum, ← Finset.sum_mul]
-    rw [show (∑ a : (directLdGame D).AnswerA, (S.A x).effect a i.1 j.1) =
-        (1 : Op S.ιA) i.1 j.1 by
-      simpa only [Matrix.sum_apply] using congrFun (congrFun (S.A x).sum_eq_one i.1) j.1]
-    rw [show (∑ b : (directLdGame D).AnswerB, (S.B y).effect b i.2 j.2) =
-        (1 : Op S.ιB) i.2 j.2 by
-      simpa only [Matrix.sum_apply] using congrFun (congrFun (S.B y).sum_eq_one i.2) j.2]
-    exact congrFun (congrFun
-      (Matrix.one_kronecker_one (m := S.ιA) (n := S.ιB) (α := ℂ)) i) j
-  calc
-    ∑ a : (directLdGame D).AnswerA, ∑ b : (directLdGame D).AnswerB,
-        directLdAnswerPairBornWeight D S x y a b =
-        (inner ℂ S.ψ
-          (applyOperatorToState
-            (∑ a : (directLdGame D).AnswerA, ∑ b : (directLdGame D).AnswerB,
-              heteroKron ((S.A x).effect a) ((S.B y).effect b)) S.ψ)).re := by
-          simp [directLdAnswerPairBornWeight, applyOperatorToState]
-    _ = (inner ℂ S.ψ (applyOperatorToState 1 S.ψ)).re := by rw [hsum]
-    _ = 1 := by
-      simp [applyOperatorToState, S.ψ_norm]
-
 private theorem directLdAccepted_add_rejected_eq_one
     (D : DirectLdParams) (S : Strategy (directLdGame D))
     (types : LdType × LdType) (sample : DirectLdSpace D) :
@@ -84,7 +34,7 @@ private theorem directLdAccepted_add_rejected_eq_one
         if directLdWinPredicate D
             (types.1, directLdMap D types.1 sample)
             (types.2, directLdMap D types.2 sample) a b then
-          directLdAnswerPairBornWeight D S
+          outcomeWeight S
             (types.1, directLdMap D types.1 sample)
             (types.2, directLdMap D types.2 sample) a b
         else 0) +
@@ -93,12 +43,12 @@ private theorem directLdAccepted_add_rejected_eq_one
             (types.1, directLdMap D types.1 sample)
             (types.2, directLdMap D types.2 sample) a b then
           0
-        else directLdAnswerPairBornWeight D S
+        else outcomeWeight S
           (types.1, directLdMap D types.1 sample)
           (types.2, directLdMap D types.2 sample) a b) = 1 := by
   calc
     _ = ∑ a : (directLdGame D).AnswerA, ∑ b : (directLdGame D).AnswerB,
-        directLdAnswerPairBornWeight D S
+        outcomeWeight S
           (types.1, directLdMap D types.1 sample)
           (types.2, directLdMap D types.2 sample) a b := by
       rw [← Finset.sum_add_distrib]
@@ -112,7 +62,7 @@ private theorem directLdAccepted_add_rejected_eq_one
           (types.2, directLdMap D types.2 sample) a b
       · simp [h]
       · simp [h]
-    _ = 1 := directLdAnswerPairBornWeight_sum_eq_one D S
+    _ = 1 := outcomeWeight_sum_eq_one S
       (types.1, directLdMap D types.1 sample)
       (types.2, directLdMap D types.2 sample)
 
@@ -127,7 +77,7 @@ noncomputable def directLdBranchRejectionProbability
           (types.1, directLdMap D types.1 sample)
           (types.2, directLdMap D types.2 sample) a b then
         0
-      else directLdAnswerPairBornWeight D S
+      else outcomeWeight S
         (types.1, directLdMap D types.1 sample)
         (types.2, directLdMap D types.2 sample) a b
 
@@ -180,7 +130,7 @@ theorem directLdBranchRejectionProbability_nonneg
       (types.1, directLdMap D types.1 sample)
       (types.2, directLdMap D types.2 sample) a b
   · simp [h]
-  · simpa [h] using directLdAnswerPairBornWeight_nonneg D S
+  · simpa [h] using outcomeWeight_nonneg S
       (types.1, directLdMap D types.1 sample)
       (types.2, directLdMap D types.2 sample) a b
 
@@ -194,7 +144,7 @@ theorem directLdRejectionProbability_eq_one_sub_value
         if directLdWinPredicate D
             (types.1, directLdMap D types.1 sample)
             (types.2, directLdMap D types.2 sample) a b then
-          directLdAnswerPairBornWeight D S
+          outcomeWeight S
             (types.1, directLdMap D types.1 sample)
             (types.2, directLdMap D types.2 sample) a b
         else 0
