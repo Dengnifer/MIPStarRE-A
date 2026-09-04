@@ -101,13 +101,15 @@ def IsEncoding {P : AdmissibleParams} (g : Poly P) : Prop :=
 
 /-- Linearity of the full-field decoder on bounded representatives.
 
-This is the linearity used in the source's regrouping calculation at paper
-`14_analysis_of_the_pauli_basis_test.tex:1442-1450` and blueprint
-`ch16_qpbt_extraction.tex:11-20`.  It is a proof obligation; it does not
-assert evaluation equality for non-encoding representatives.  See
+This is the additive linearity of `lem:qld-decoder-linearity`, blueprint
+`ch16_qpbt_extraction.tex:30-40`, used in the symmetry step of the source
+argument at
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1546-1550`
+and blueprint `ch16_qpbt_extraction.tex:239-244`.  It is a proof obligation;
+it does not assert evaluation equality for non-encoding representatives.  See
 `docs/paper-gaps/qpbt_decoding-identity.tex:87-123`.
 
-**Proof obligation:** issue #47 tracks the regrouping calculation. -/
+**Proof obligation:** issue #47 tracks the decoder linearity calculation. -/
 theorem decodeFq_add {P : AdmissibleParams} (g h : Poly P) :
     decodeFq (g + h) = decodeFq g + decodeFq h := by
   sorry
