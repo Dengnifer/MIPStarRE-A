@@ -1,4 +1,5 @@
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Soundness
+import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Strategy
 
 /-!
 # The directly indexed low-degree game
@@ -13,6 +14,15 @@ The geometric line carrier records the sampled coordinate, and line evaluation
 uses an `Option` outcome rather than assigning a value when a point does not
 determine one.  The game retains the point, axis-line, and diagonal-line answer
 formats and the nine ordered type branches of the original low-degree game.
+
+The `Transport` modules relate the direct game to the seed-indexed game and to
+the mature low individual degree test interface: `Transport.Correspondence`
+identifies coordinates, answers, and the question law of the two QPBT
+presentations; `Transport.SeedFiber` dilates a seed-indexed strategy to a
+direct strategy by a correlated residue register; `Transport.Questions` reads
+mature lines as canonical direct questions and rebases direct answers; and
+`Transport.Strategy` reads one coordinate of a projective direct strategy as a
+mature `ProjStrat`, with exact Born-weight formulas for both adapters.
 
 ## References
 
