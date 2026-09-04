@@ -1,0 +1,138 @@
+\documentclass{article}
+\usepackage{JalexMath}
+\usepackage{authblk}
+\usepackage[toc,page]{appendix}
+\usepackage{rotating}
+\usepackage{caption}
+\usepackage[margin=1in]{geometry}
+\usepackage[showonlyrefs]{mathtools}
+% \input{header/tikz_header}
+
+\bibliographystyle{alpha}
+
+\pagestyle{headings}
+
+\mathtoolsset{showonlyrefs=true} % turns off equation number for un-referenced equations
+
+\newcommand{\nocontentsline}[3]{}
+\newcommand{\tocless}[2]{\bgroup\let\addcontentsline=\nocontentsline#1{#2}\egroup}
+
+
+\newcommand\jnote[1]{
+\begin{footnotesize}
+	\color{green}{(Jalex: #1)}
+\end{footnotesize}
+}
+\newcommand\anote[1]{
+\begin{footnotesize}
+	\color{blue}{(Andrea: #1)}
+\end{footnotesize}
+}
+
+
+\newcommand{\dagg}{^\dagger}
+\newcommand{\eps}{\e}
+\newcommand{\eprp}{\ket{\r{EPR}_d}}
+\newcommand{\epr}{{\r{EPR}_d}}
+\newcommand{\hatA}[2]{\hat A_{#1}^{(#2)}}
+\newcommand{\eprrho}{{\r{EPR}_\s}}
+\newcommand{\pauli}{\m P_d^{\otimes n}}
+\newcommand{\paulin}[1]{\m P_d^{\otimes #1}}
+\newcommand{\drho}[3]{\mathop{D}\limits_{#1}\left(#2\middle\| #3\right)}
+
+\newcommand\todo[1]{{\color{red}{(TODO: #1)}}}
+
+\complexity{LCS}
+\DeclareMathOperator*\can{\sf{can}}
+
+
+\begin{document}
+\title{Robust self-testing for linear constraint system games}
+
+\author{Andrea Coladangelo}
+\author{Jalex Stark}
+\date{}
+\affil{
+% Department of 
+Computing and Mathematical Sciences, Caltech\\ 
+{\{acoladan,jalex\}@caltech.edu}
+}
+% \affil[ ]{{ }}
+\maketitle
+
+\abstract{
+	We study linear constraint system (LCS) games over the ring of arithmetic modulo $d$. 
+    We give a new proof that certain LCS games (the Mermin--Peres Magic Square and Magic Pentagram over binary alphabets, together with parallel repetitions of these) have unique winning strategies, where the uniqueness is robust to small perturbations.
+	In order to prove our result, we extend the representation-theoretic framework of Cleve, Liu, and Slofstra \cite{cleve2016perfect} to apply to linear constraint games over $\Z_d$ for $d\geq 2$. We package our main argument into machinery which applies to any nonabelian finite group with a ``solution group'' presentation. We equip the $n$-qubit Pauli group for $n\geq 2$ with such a presentation; our machinery produces the Magic Square and Pentagram games from the presentation and provides robust self-testing bounds.
+	The question of whether there exist LCS games self-testing maximally entangled states of local dimension not a power of 2 is left open. A previous version of this paper falsely claimed to show self-testing results for a certain generalization of the Magic Square and Pentagram mod $d\neq 2$. We show instead that such a result is impossible.
+}
+
+\pagenumbering{gobble}
+\pagebreak
+\pagenumbering{arabic}
+
+\tocless\section{Introduction}
+	\input{introduction.tex}
+
+
+\section*{Acknowledgements}
+
+An early version of Theorem \ref{thm:informal-magic-square} used a more complicated linear constraint game. We thank William Slofstra for pointing out that the same analysis goes through for the Magic Square.
+
+The arxiv version 1 of this paper falsely claimed that in a certain $3\times 3$ square of operators, every pair of operators sharing a row or column commute. We thank Richard Cleve, Nadish De Silva and Joel Wallman for pointing out that one pair of them did not. 
+We thank Richard Cleve and Joel Wallman for sharing with the authors a proof that the magic square game mod $d$ for $d\neq 2$ is not a pseudotelepathy game. More details about this impossibility are provided in section \ref{sec:impossibility}.
+
+We thank 
+William Ballinger,
+William Hoza,
+Jenish Mehta,
+Chinmay Nirkhe,
+William Slofstra,
+Thomas Vidick,
+Matthew Weidner,
+and
+Felix Weilacher
+for helpful discussions.
+We thank Martino Lupini for pointing us to reference \cite{de2017operator} and Scott Aaronson for pointing us to reference \cite{cleve2004consequences}.
+
+We thank
+Arjun Bose,
+Chinmay Nirkhe, 
+and 
+Thomas Vidick
+for helpful comments on preliminary drafts of the paper.
+
+We thank Thomas Vidick for various forms of guidance throughout the project. A.C. was supported by AFOSR YIP award number FA9550-16-1-0495.
+J.S. was supported by NSF CAREER Grant CCF-1553477 and the Mellon Mays Undergraduate Fellowship. 
+Part of this work was completed while J.S. was visiting UT Austin. 
+
+\tableofcontents
+
+
+\section{Preliminaries}\label{sec:preliminaries}
+	\input{preliminaries.tex}
+
+\section{Linear constraint system games over $\Z_d$}\label{sec:linear-constraint-games}
+	\input{linear-constraint-games.tex}
+
+\section{General self-testing}\label{sec:self-testing}
+	\input{self-testing.tex}
+
+\section{On the failure of Magic Square and Pentagram for $d\neq 2$}\label{sec:impossibility}
+	\input{impossibility.tex}
+	
+\section{Self-testing of specific games}\label{sec:specific-games}
+	\input{specific-games.tex}
+	
+
+
+\section{Concluding remarks}
+\input{conclusion.tex}
+
+% \printbibliography
+
+\bibliography{ms}
+
+\input{appendix.tex}
+
+\end{document}

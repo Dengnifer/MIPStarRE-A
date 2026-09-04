@@ -1,0 +1,22 @@
+We have presented a general robust self-testing theorem for a certain class of linear constraint system games, using the group-theoretic approach of Cleve, Liu and Slofstra. We specialized this theorem to the cases of the Magic Square and Magic Pentagram games mod $2$, obtaining robust self-testing theorems for respectively two and three pairs of maximally entangled qubits and the associated ideal measurements. Furthermore, we applied our theorem to a certain $n$-fold product of these games to obtain a robust self-testing theorem for a tensor product of $n$ maximally entangled qubits and the associated $n$-qubit Pauli measurements. The following are some remaining open questions.
+
+\begin{question}
+	For which $d$ is there a non-local game self-testing the maximally entangled state of local dimension $d$?
+\end{question}
+In \cite{coladangelo2018generalization}, one of us gave a family of Bell inequalities whose maximal violation self-tests the maximally entangled game of local dimension $d$ for any $d > 2$. However, this translates into non-local games which are not pseudotelepathy (i.e. they do not have a perfect strategy). 
+If one considers just pseudotelepathy games, it is known that there are no non-local games which can be won perfectly with dimension $2$ but not with dimension $1$ (i.e.\ with a classical strategy) \cite{brassard2004minimum}; this answers the above question in the negative for $d=2$. For $d=3$, there is a pseudotelepathy game based on Kochen-Specker sets for which there is no classical perfect strategy and there is a perfect quantum strategy using the maximally entangled state of qutrits. \cite{cleve2004consequences} To the best of the authors' knowledge, the question of rigidity is open for this game.
+
+Restricting our attention to just to LCS games, we can reduce the above question to the following:
+\begin{question}
+	For any $d$, is there a solution group $\G$ presented over $\Z_d$ such that every irreducible representation of $\G$ is either $1$-dimensional or $d$-dimensional, sending $J$ to a nontrivial $d\th$ root of unity? 
+\end{question}
+$\m P_d^{\otimes 1}$ has this property, but it can be shown that it is not a solution group. 
+Classifying the groups with the above property seems like a nontrivial question in group theory.
+
+The following question represents, in the authors' opinion, the main barrier to understanding the full power of general LCS games.
+\begin{question}
+	Which groups are solution groups? In particular, are there any nonabelian finite solution groups other than the groups of qubit paulis?
+\end{question}
+William Slofstra gave a partial answer to this question by proving \emph{embedding theorems.} First, he proved \cite{slofstra2016tsirelson} that all finitely presented groups embed into some solution group over $\Z_2$. Next, he proved \cite{slofstra2017set} that a somewhat broad class of groups, including all finite symmetric groups, embed into binary solution groups such that the embedding preserves the finite-dimensional approximate representation structure. These embeddings fail to preserve finiteness of the group, however.
+
+
