@@ -44,6 +44,7 @@ import MIPStarRE.QPBT.Combining.Linearity
 import MIPStarRE.QPBT.Combining.Linearity.BooleanFourier
 import MIPStarRE.QPBT.Combining.Linearity.BLR
 import MIPStarRE.QPBT.Combining.Linearity.NaimarkRounding
+import MIPStarRE.QPBT.Combining.Linearity.Stability
 import MIPStarRE.QPBT.Combining.Witnesses
 import MIPStarRE.QPBT.Combining.Points
 import MIPStarRE.QPBT.Combining.Lines
