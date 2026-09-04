@@ -308,8 +308,9 @@ noncomputable def binaryObservableEffect {ι : Type} [Fintype ι]
     [DecidableEq ι] (outcome : Bool) (O : Op ι) : Op ι :=
   if outcome then ((2 : ℂ)⁻¹) • (1 - O) else ((2 : ℂ)⁻¹) • (1 + O)
 
-/-- The squared distance between the binary projective measurements associated
-with two observables, summed over their two effects.  This is the measurement
+/-- The squared binary-measurement distance of two operators, summed over the two
+effects `(1 ± O)/2`; when both operators are binary observables this is the
+squared distance between the associated binary projective measurements.  This is the measurement
 distance calculated in `references/nv-paper/fullpaper.tex:900-912`; its relation
 to `stateDepDistSq` is recorded in
 `docs/paper-gaps/qpbt_linearity-distance-normalization.tex`. -/
