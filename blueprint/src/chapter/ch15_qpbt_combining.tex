@@ -114,7 +114,7 @@ assembled by Fourier averaging.
 	$u \in \F_2^t$ acting on $\hilb$, such that on average over $u, u'$
 	chosen uniformly at random from $\F_2^t$,
 	\[
-		\E_{u,u'} \Tr\big(\mathcal{O}^u \, \mathcal{O}^{u'} \,
+		\E_{u,u'} \Re \Tr\big(\mathcal{O}^u \, \mathcal{O}^{u'} \,
 		\mathcal{O}^{u+u'} \, \rho\big) \ge 1 - \delta\,.
 	\]
 	Then there exist a Hilbert space $\hilb'$, a pure state
@@ -150,9 +150,8 @@ assembled by Fourier averaging.
 \end{theorem}
 \begin{proof}
 	\leanok
-	\uses{lem:binary-measurement-distance, lem:boolean-fourier-transform,
-		lem:boolean-representation-stability, lem:naimark-helper,
-		lem:naimark-rounding}
+	\uses{lem:binary-measurement-distance, lem:blr-defect-identity,
+		lem:boolean-representation-stability}
 	This is Theorem~10 of Natarajan and Vidick~\cite{Natarajan2017Linearity},
 	whose Fourier--Naimark argument is followed; \cite{Ji2020MIPStar} invokes
 	the result without proof. Write $\chi_v(u) = (-1)^{v \cdot u}$ and
@@ -550,7 +549,8 @@ assembled by Fourier averaging.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{lem:boolean-characters, lem:boolean-fourier-transform}
+	\uses{lem:blr-defect-identity, lem:boolean-characters,
+		lem:boolean-fourier-transform}
 	Expanding one Fourier coefficient at a time through the inversion formula
 	of Lemma~\ref{lem:boolean-fourier-transform} and collapsing the inner
 	character sum with Lemma~\ref{lem:boolean-characters} gives the cubic
@@ -587,8 +587,8 @@ assembled by Fourier averaging.
 	\lean{MIPStarRE.QPBT.roundedObservable_isBinaryObservable}
 	\lean{MIPStarRE.QPBT.trace_heteroKron_mul_roundedObservable}
 	\leanok
-	\uses{def:povm-conventions, lem:fourier-square-measurement,
-		lem:naimark-helper}
+	\uses{def:povm-conventions, lem:boolean-fourier-transform,
+		lem:fourier-square-measurement, lem:naimark-helper}
 	This is not a named statement of \cite{Natarajan2017Linearity}; it isolates
 	the dilation step of the proof given there for
 	Theorem~\ref{thm:linearity}, namely the passage from the Fourier-square
@@ -648,7 +648,7 @@ assembled by Fourier averaging.
 \begin{proof}
 	\leanok
 	\uses{lem:boolean-characters, lem:boolean-fourier-transform,
-		lem:naimark-helper}
+		lem:fourier-square-measurement, lem:naimark-helper}
 	Projections summing to at most the identity are mutually orthogonal, so
 	$\hat{P}_a \hat{P}_b = 0$ for $a \ne b$. Consequently
 	$Q = \sum_{v \ne 0} \hat{P}_v$ absorbs each of its summands on either
@@ -693,7 +693,8 @@ assembled by Fourier averaging.
 	\lean{MIPStarRE.QPBT.avg_stateDepDistSq_roundedObservable_eq_avg_multiplicativeDefect}
 	\lean{MIPStarRE.QPBT.exists_exact_boolean_representation}
 	\leanok
-	\uses{def:povm-conventions, lem:fourier-square-measurement,
+	\uses{def:povm-conventions, lem:binary-measurement-distance,
+		lem:blr-defect-identity, lem:fourier-square-measurement,
 		lem:naimark-helper, lem:naimark-rounding}
 	This is not a named statement of \cite{Natarajan2017Linearity}; it records
 	the conclusion that the Fourier--Naimark argument given there for
@@ -745,8 +746,7 @@ assembled by Fourier averaging.
 \begin{proof}
 	\leanok
 	\uses{lem:binary-measurement-distance, lem:blr-defect-identity,
-		lem:boolean-fourier-transform, lem:fourier-square-measurement,
-		lem:naimark-helper, lem:naimark-rounding}
+		lem:fourier-square-measurement, lem:naimark-rounding}
 	Let $\hilb'$ have orthonormal basis indexed by $\F_2^t$ together with one
 	extra element $\bot$, and take $\ket{\mathrm{anc}} = \ket{\bot}$, the
 	initial state of the auxiliary register in the one-measurement Naimark

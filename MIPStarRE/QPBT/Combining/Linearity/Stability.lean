@@ -132,8 +132,8 @@ Hermitian factors, after which the ampliated observable is absorbed into the
 weight and the rounded observable is compressed along the ancillary vector.
 This is the passage from `Tr_{ρ'}(A(a) 𝒜(a))` to
 `Tr_ρ(A(a) ∑_u (-1)^{u·a} (hat A^u)^2)` at
-`references/nv-paper/fullpaper.tex:1105-1110`, with the operator order of the
-Lean distance preserved. -/
+`references/nv-paper/fullpaper.tex:1105-1110`, with the operator order in the
+state-dependent distance preserved. -/
 theorem re_trace_roundedObservable_mul_heteroKron {t : ℕ} {ι : Type}
     [Fintype ι] [DecidableEq ι]
     (O : (Fin t → ZMod 2) → Op ι) (hO : ∀ a, IsBinaryObservable (O a))
