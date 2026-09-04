@@ -2482,3 +2482,18 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 - **Lesson:** operator adjudications should be validated against
   `DISPOSITION_RE` before entering the merge queue; semantically equivalent
   prose is not protocol-equivalent evidence.
+
+## 2026-09-05 05:48+08:00 - PR 179 stops at the mathematics review cap
+
+- **Symptom:** the post-conflict exact-head review accepted the low-degree
+  transport mathematics but repeated five cleanup obligations as twelve code
+  and prose findings.
+- **Diagnosis:** PR #179 has exceeded the four-round mathematics cap; the EPR
+  and consistency citations are owned by #174, while the direct-parameter
+  domain, dependency prose, redundant instance, and temporary aliases are
+  owned by the post-#134 transport sweep #199.
+- **Fix:** post one valid disposition for every exact-head finding, retain the
+  proof PR unchanged, and release its old conflict marker to the merge daemon.
+- **Lesson:** parallel reviewer lanes may duplicate one obligation under
+  separate finding IDs; adjudication must preserve every ID while tracking the
+  underlying work only once.
