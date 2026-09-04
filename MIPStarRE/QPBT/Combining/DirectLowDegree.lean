@@ -1,4 +1,5 @@
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Soundness
+import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Consistency
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Strategy
 import MIPStarRE.QPBT.Combining.DirectLowDegree.GameValue
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.PassConversion
@@ -37,6 +38,8 @@ scalar half of the transport: the auxiliary sampling parameter with which
 the mature theorem is applied, bounds on the three terms of its error
 function, and the absorption of the resulting simultaneous-measurement
 estimate into the error function of `lem:ld-soundness`.
+`Transport.Consistency` identifies polynomial outcomes and transports the
+three mature consistency conclusions to the direct game.
 
 ## References
 

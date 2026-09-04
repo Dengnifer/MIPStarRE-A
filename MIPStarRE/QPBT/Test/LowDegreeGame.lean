@@ -342,7 +342,8 @@ noncomputable def ldGame (P : LdParams) : Game where
   AnswerA := LdAnswer P
   AnswerB := LdAnswer P
   μ := ldQuestionDistribution P
-  μ_prob := by sorry
+  μ_prob := (uniformDistribution_isProbability
+    ((LdType × LdType) × LdSpace P)).map _
   decide := ldWinPredicate P
 
 end
