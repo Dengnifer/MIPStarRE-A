@@ -1,5 +1,6 @@
 import MIPStarRE.QPBT.Test.MagicSquareTheorems.PerfectStrategy.Observables
 import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.Anticommutation
+import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.Transfer
 
 /-!
 # Swap-isometry extraction for Magic Square rigidity
@@ -97,12 +98,12 @@ theorem binarySwapMap_norm {ι : Type} [Fintype ι] [DecidableEq ι]
     norm_applyOperatorToState_isometry_mul hX.isometry]
   have hplus : applyOperatorToState (reflectionEffect Z 0) ψ =
       (2 : ℂ)⁻¹ • (ψ + applyOperatorToState Z ψ) := by
-    simp [reflectionEffect, applyOperatorToState_smul, applyOperatorToState_add,
-      applyOperatorToState_one]
+    simp [reflectionEffect, applyOperatorToState_smul,
+      applyOperatorToState_add_op, applyOperatorToState_one]
   have hminus : applyOperatorToState (reflectionEffect Z 1) ψ =
       (2 : ℂ)⁻¹ • (ψ - applyOperatorToState Z ψ) := by
-    simp [reflectionEffect, applyOperatorToState_smul, applyOperatorToState_sub,
-      applyOperatorToState_one]
+    simp [reflectionEffect, applyOperatorToState_smul,
+      applyOperatorToState_sub_op, applyOperatorToState_one]
   rw [hplus, hminus, norm_smul, norm_smul]
   rw [show ‖(2 : ℂ)⁻¹‖ = (2 : ℝ)⁻¹ by norm_num]
   have hZnorm := norm_applyOperatorToState_of_isometry hZ.isometry ψ
@@ -199,13 +200,6 @@ theorem apply_swapPauliX_left {ι : Type} [Fintype ι] [DecidableEq ι]
   all_goals norm_num [swapPauliX, Matrix.one_apply]
   all_goals rw [show (2 : ZMod 2) = 0 by decide]
 
-private theorem applyOperatorToState_neg
-    {ι : Type} [Fintype ι] [DecidableEq ι]
-    (M : Op ι) (ψ : EuclideanSpace ℂ ι) :
-    applyOperatorToState (-M) ψ = -applyOperatorToState M ψ := by
-  unfold applyOperatorToState
-  simp
-
 private theorem reflectionEffect_zero_mul_reflection
     {ι : Type} [Fintype ι] [DecidableEq ι]
     (Z : Op ι) (hZ : IsReflection Z) :
@@ -240,7 +234,7 @@ theorem binarySwap_intertwines_Z {ι : Type} [Fintype ι] [DecidableEq ι]
   · simp only [binarySwapIsometry_apply, ZMod.val_one, pow_one]
     rw [← applyOperatorToState_mul, mul_assoc,
       reflectionEffect_one_mul_reflection Z hZ]
-    norm_num [bitSign, ZMod.val_one, applyOperatorToState_neg]
+    norm_num [bitSign, ZMod.val_one, applyOperatorToState_neg_op]
 
 private theorem reflectionEffect_zero_mul_X_sub_X_mul_one
     {ι : Type} [Fintype ι] [DecidableEq ι] (X Z : Op ι) :
@@ -298,7 +292,7 @@ theorem norm_binarySwap_intertwines_X_sub_le {ι : Type} [Fintype ι]
     change
       (applyOperatorToState (reflectionEffect Z 0) (applyOperatorToState X ψ) -
         applyOperatorToState (X * reflectionEffect Z 1) ψ) i = _
-    rw [← applyOperatorToState_mul, ← applyOperatorToState_sub,
+    rw [← applyOperatorToState_mul, ← applyOperatorToState_sub_op,
       reflectionEffect_zero_mul_X_sub_X_mul_one]
     rw [applyOperatorToState_smul]
     rfl
@@ -316,7 +310,7 @@ theorem norm_binarySwap_intertwines_X_sub_le {ι : Type} [Fintype ι]
       (applyOperatorToState (X * reflectionEffect Z 1)
           (applyOperatorToState X ψ) -
         applyOperatorToState (reflectionEffect Z 0) ψ) i = _
-    rw [← applyOperatorToState_mul, ← applyOperatorToState_sub,
+    rw [← applyOperatorToState_mul, ← applyOperatorToState_sub_op,
       X_mul_reflectionEffect_one_mul_X_sub_zero X Z hX]
     rw [applyOperatorToState_smul, applyOperatorToState_mul]
     rfl
