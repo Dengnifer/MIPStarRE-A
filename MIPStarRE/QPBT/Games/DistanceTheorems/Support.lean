@@ -242,6 +242,34 @@ noncomputable def stateQForm {ι : Type*} [Fintype ι] [DecidableEq ι]
     (ψ : EuclideanSpace ℂ ι) (M : Op ι) : ℝ :=
   (inner ℂ ψ (applyOperatorToState M ψ)).re
 
+/-- Tensor placement is additive over finite sums in the left factor. -/
+theorem heteroKron_finset_sum_left {β ιA ιB : Type*} (s : Finset β)
+    (A : β → Op ιA) (C : Op ιB) :
+    heteroKron (∑ b ∈ s, A b) C = ∑ b ∈ s, heteroKron (A b) C := by
+  ext p q
+  simp [heteroKron, Matrix.kronecker, Matrix.sum_apply, Finset.sum_mul]
+
+/-- Tensor placement is additive over finite sums in the right factor. -/
+theorem heteroKron_finset_sum_right {β ιA ιB : Type*} (s : Finset β)
+    (A : Op ιA) (C : β → Op ιB) :
+    heteroKron A (∑ b ∈ s, C b) = ∑ b ∈ s, heteroKron A (C b) := by
+  ext p q
+  simp [heteroKron, Matrix.kronecker, Matrix.sum_apply, Finset.mul_sum]
+
+/-- The quadratic form is additive over finite sums of operators. -/
+theorem stateQForm_finset_sum {β ι : Type*} [Fintype ι] [DecidableEq ι]
+    (ψ : EuclideanSpace ℂ ι) (s : Finset β) (M : β → Op ι) :
+    stateQForm ψ (∑ b ∈ s, M b) = ∑ b ∈ s, stateQForm ψ (M b) := by
+  simp [stateQForm, applyOperatorToState]
+
+/-- A positive semidefinite operator has nonnegative state quadratic form. -/
+theorem stateQForm_nonneg {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (ψ : EuclideanSpace ℂ ι) {M : Op ι} (hM : 0 ≤ M) :
+    0 ≤ stateQForm ψ M := by
+  calc
+    0 = stateQForm ψ 0 := by simp [stateQForm, applyOperatorToState]
+    _ ≤ stateQForm ψ M := quadratic_form_mono hM ψ
+
 /-- Formalization-only auxiliary lemma for the agreement facts (Facts 4.13 and
 4.14): the state quadratic form is additive in its operator. -/
 theorem stateQForm_add {ι : Type*} [Fintype ι] [DecidableEq ι]
