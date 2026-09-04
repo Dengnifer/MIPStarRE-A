@@ -20,8 +20,10 @@
 
 \begin{itemize}
   \item \textbf{Difficulty.} Medium.  The source quotes a fiberwise consequence
-  of a state-dependent quantum linearity theorem, but suppresses two averages
-  and a compatibility argument for the auxiliary spaces.
+  of a state-dependent quantum linearity theorem, but suppresses two averages,
+  loses a factor of two when converting measurement distance to operator
+  distance, and leaves implicit a compatibility argument for the auxiliary
+  spaces.
   \item \textbf{Estimated weight.} One faithful theorem for a single family,
   followed by a finite common-extension construction that makes the auxiliary space
   uniform over the outer parameters.
@@ -56,8 +58,12 @@ Moreover,
 \[
   \mathop{\mathbb E}_{u}
   \operatorname{Tr}\!\left((L^u-O^u\otimes I_{H'})^\dagger
-    (L^u-O^u\otimes I_{H'})\,\rho'\right)\leq\delta.
+    (L^u-O^u\otimes I_{H'})\,\rho'\right)\leq2\delta.
 \]
+Equivalently, the mean squared distance between the associated binary
+projective measurements is at most $\delta$.  The normalization identity and
+a counterexample to the stronger operator bound are given in
+\path{docs/paper-gaps/qpbt_linearity-distance-normalization.tex}.
 In particular, $L^0=I$: exact linearity gives $(L^0)^2=L^0$, while an
 observable is invertible.
 
@@ -75,10 +81,14 @@ Lines~711--725 of
 linearity theorem.  The displayed hypothesis correctly averages over both
 group variables.  The displayed conclusion, however, says that the corrected
 observable is close for every $u$, whereas Theorem~10 of the cited work gives
-closeness only on average over $u$ \cite{Natarajan2017Linearity}.  The quotation
-also inserts $\delta\leq1$, which is absent from the provider theorem and would
-unnecessarily obstruct applying it with a fiber's actual defect.  The assertion
-at the identity follows from exact linearity as above.
+closeness only on average over $u$ \cite{Natarajan2017Linearity}.  Moreover,
+the provider's equation~(3) proves the bound $\delta$ for binary-measurement
+distance; under the operator-distance convention displayed above this is the
+bound $2\delta$.  Identifying it with the same bound $\delta$ loses a factor of
+two.  The quotation also inserts $\delta\leq1$, which is absent from the
+provider theorem and would unnecessarily obstruct applying it with a fiber's
+actual defect.  The assertion at the identity follows from exact linearity as
+above.
 
 Lines~825--832 construct the family $O^{x,z,r,s}$ and establish approximate
 linearity only after averaging over $x,z,r,r',s,s'$.  They then apply the
@@ -101,19 +111,21 @@ Theorem~\path{thm:linearity} and
 Remark~\path{rem:linearity-import} in
 \path{blueprint/src/chapter/ch15_qpbt_combining.tex} record respectively the
 averaged provider theorem and the common-ancilla obligation for its fiberwise
-use.  The relevant material is at lines~98--147 and 149--191 of that chapter.
+use.
 
 The declaration \path{exists_exactly_linear_observables} in
 \path{MIPStarRE/QPBT/Combining/Linearity.lean} assumes a nonnegative defect, a
 positive semidefinite trace-one operator, binary observables, and the averaged
 three-observable correlation.  It returns one finite ancillary space and
 normalized ancillary vector for that family, exactly linear binary observables
-on the extension, and only the averaged squared-distance bound with the same
-defect.  It neither assumes $\delta\leq1$ nor asserts pointwise closeness.  Its
-statement therefore matches the provider-faithful blueprint theorem rather
-than the strengthened quotation in the QPBT paper.  Its proof remains open,
-and no Lean declaration yet supplies the finite common-extension construction
-for the family indexed by $(x,z)$.
+on the extension, and only the averaged squared operator-distance bound with
+the same defect.  It neither assumes $\delta\leq1$ nor asserts pointwise
+closeness, but its operator bound is too strong by a factor of two.  It
+therefore does not match the corrected blueprint theorem and is not marked as
+such.  Its proof remains open, and no Lean declaration yet supplies the finite
+common-extension construction for the family indexed by $(x,z)$.  The
+statement repair is tracked in \ghissue{129}; the normalization analysis and
+its formal adapter are tracked in \ghissue{124}.
 
 Issue~\#19 introduced this discrepancy record for the extraction skeleton;
 \ghissue{47} owns the Stage~4.3 proof work consumed downstream.  The chapter-16
@@ -122,11 +134,11 @@ do not assume a new fiberwise linearity hypothesis or a common ancillary space.
 
 \section{Conclusion}
 
-The primary discrepancy is a quantifier mismatch in the quotation: the cited
-linearity theorem gives average, not pointwise, closeness.  Its use for the
-family indexed by $(x,z)$ also requires an explicit finite common-extension
-argument.  Both are open formal reductions compatible with the intended
-source conclusion.
+The quotation strengthens average closeness to pointwise closeness and loses a
+factor of two in translating binary-measurement distance to operator distance.
+Its use for the family indexed by $(x,z)$ also requires an explicit finite
+common-extension argument.  The blueprint now records the corrected averaged
+bound; the Lean theorem and common-extension construction remain open.
 
 \bibliographystyle{alpha}
 \bibliography{references}

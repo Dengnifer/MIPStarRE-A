@@ -1,0 +1,113 @@
+\documentclass[11pt]{article}
+
+\usepackage{amsmath,amssymb}
+\usepackage{xurl}
+\usepackage[hidelinks]{hyperref}
+\setlength{\emergencystretch}{2em}
+
+\input{command}
+
+\newcommand{\ind}{\operatorname{ind}}
+\renewcommand{\ghissue}[1]{%
+  \href{https://github.com/Dengnifer/MIPStarRE-A/issues/#1}{GitHub issue \##1}}
+
+\title{The Probability of Anticommuting Pauli Tuples}
+\author{}
+\date{2026-09-04}
+
+\begin{document}
+\maketitle
+
+\section{At a glance}
+
+\begin{itemize}
+  \item \textbf{Difficulty.} Low.  A product expansion computes the
+  probability exactly and exposes two false claims in the printed proof.
+  \item \textbf{Estimated weight.} The formal correction consists of one
+  finite-field counting theorem and elementary real inequalities, roughly
+  100--180 lines.
+  \item \textbf{Mathlib/project split.} About 40\% finite counting and real
+  inequalities, and 60\% project-local finite-field coordinates and sampling.
+  \item \textbf{Key Mathlib inputs.} Uniform finite distributions, field-trace
+  fibers, Bernoulli's inequality, and the fixed self-dual basis.  The formal
+  proof is tracked in \ghissue{110}.
+\end{itemize}
+
+\section{Key theorem forms}
+
+Let $q=2^k$, let $u_X,u_Z$ be uniform in $\F_q^m$, and let $r_X,r_Z$ be
+uniform in $\F_q$.  Put
+\[
+  \gamma=\tr\big((r_X\ind_m(u_X))\cdot(r_Z\ind_m(u_Z))\big).
+\]
+Then
+\[
+  \Pr[\gamma\ne0]=\frac12(1-q^{-1})^{m+1},
+  \qquad
+  \Pr[\gamma=0]\geq\frac12.
+\]
+In particular, $m\leq q$ gives the uniform lower bound
+$\Pr[\gamma\ne0]\geq2^{-4}$.  If $m,d\geq1$, the two lower bounds printed in
+the source also hold:
+\[
+  \Pr[\gamma\ne0]
+  \geq \frac12(1-q^{-m})(1-q^{-1})(1-md/q)
+  \geq \frac12(1-3md/q),
+\]
+and $\Pr[\gamma=0]\geq\frac12(1-3md/q)$.
+
+\section{The source assertion and discrepancy}
+
+Fact \path{fact:omega-anticomm-prob} of the Pauli analysis
+\cite[lines~64--93]{Ji2020MIPStar} states the last two bounds without the
+positivity assumptions on $m$ and $d$.  Its proof starts by
+asserting that $\ind_m(u_X)=0$ if and only if $u_X=0$, and that $u_X=0$ forces
+$\gamma=0$.%
+\footnote{See
+\path{references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex},
+lines~64--93.}
+Both assertions are false.  The coordinates of $\ind_m(u)$ sum to one, so the
+indicator vector never vanishes.  For $(q,m,d)=(2,1,0)$ and
+$(u_X,u_Z,r_X,r_Z)=(0,0,1,1)$, the phase is nonzero.  In the same parameter
+case the exact anticommuting probability is $1/8$, below the printed lower
+bound $1/2$.  Thus the missing hypothesis $d\geq1$ is mathematically necessary
+for that displayed bound.
+
+\section{The corrected calculation}
+
+In characteristic two, expansion over the Boolean cube gives
+\[
+  \ind_m(u_X)\cdot\ind_m(u_Z)
+  =\prod_{i=1}^m(1+u_{X,i}+u_{Z,i}).
+\]
+For fixed $u_X$, the factors are independent and uniform as $u_Z$ varies, so
+they are all nonzero with probability $(1-q^{-1})^m$.  Independently,
+$r_X\ne0$ with probability $1-q^{-1}$.  Conditioned on these events, the
+argument of the trace is uniform as $r_Z$ varies, and a nonzero linear trace
+to $\F_2$ takes the value one with probability $1/2$.  This proves the exact
+formula.  Bernoulli's inequality gives the stated source bounds when
+$m,d\geq1$; the admissible Pauli-test parameters satisfy these conditions.
+
+\section{Blueprint and formalization status}
+
+The blueprint states the exact probability, restores $m,d\geq1$ on the
+source bounds, and uses the unconditional constant lower bound when
+conditioning the winning implications.  Its proof and correction remark cite
+this note.  The corresponding formal declarations have the same corrected
+statements, but their proofs remain open in the current tree.%
+\footnote{The declarations are \leanid{anticommProb\_eq},
+\leanid{commProb\_ge\_half}, \leanid{anticommProb\_ge\_of\_m\_le\_q}, and
+\leanid{anticommProb\_ge\_of\_one\_le\_md} in
+\doclink{MIPStarRE/QPBT/Observables/Anticommuting.lean}.}
+
+\section{Conclusion}
+
+The source proof is incorrect, and its displayed bound fails when $d=0$.
+The exact probability is $\frac12(1-q^{-1})^{m+1}$.  It yields universal
+conditioning probabilities for all admissible parameters and recovers the
+printed lower bounds after making the implicit positivity assumptions explicit.
+
+\bibliographystyle{alpha}
+\bibliography{references}
+
+\end{document}

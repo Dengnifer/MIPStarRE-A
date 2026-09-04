@@ -11,6 +11,8 @@
 \newcommand{\val}{\operatorname{val}}
 \newcommand{\game}{\mathfrak{G}}
 \newcommand{\strategy}{\mathcal{S}}
+\renewcommand{\ghissue}[1]{%
+  \href{https://github.com/Dengnifer/MIPStarRE-A/issues/#1}{GitHub issue \##1}}
 
 \title{Attainment in the Symmetrization Lemma}
 \author{}
@@ -38,7 +40,8 @@
   \item \textbf{Key mathematical inputs:} the completed projective form of
   Naimark dilation, \cite[Theorem~5.1]{Ji2020LowIndividualDegree}, and the
   definitions of symmetric games and tensor product values in the source
-  \cite[Section~5]{Ji2020MIPStar}.  Tracked in \localissue{0002}.
+  \cite[Section~5]{Ji2020MIPStar}.  The blueprint correction is audited in
+  \ghissue{173}.
 \end{itemize}
 
 \section{Key theorem forms}
@@ -93,8 +96,8 @@ same measurements.
 The symmetrization lemma of \cite[Section~5]{Ji2020MIPStar} asserts:%
 \footnote{The statement is at
 \path{references/qpbt-paper/06_nonlocal_games_and_mipstar.tex}, lines~94--99,
-and its proof at lines~101--132.  The blueprint statement restored to this form
-is \path{lem:symmetric-strat} in
+and its proof at lines~101--132.  The printed source statement is recorded next
+to the corrected \path{lem:symmetric-strat} in
 \path{blueprint/src/chapter/ch12_qpbt_games.tex}.}
 if $\game$ is a symmetric game with $\val^*(\game) = 1-\eps$ for some
 $\eps \ge 0$, then
@@ -175,42 +178,34 @@ not used.
 In this project, the soundness statements of the Pauli basis test track
 quantify over strategies assumed to succeed with probability at least
 $1-\eps$, so any symmetrization step starts from a given strategy and consumes
-the given-strategy form.  The blueprint currently records the lemma as part of
-the games vocabulary and has no downstream dependency on it; the two source
-uses above belong to transformations outside the scope of the present
-development.  Consequently, no consumer of the lemma --- in the source or here
---- requires the attainment form.
+the given-strategy form.  The blueprint records that form as part of the games
+vocabulary and has no downstream dependency on it; the two source uses above
+belong to transformations outside the scope of the present development.
+Consequently, no consumer of the lemma --- in the source or here --- requires
+the attainment form.
 
 \section{Comparison with the blueprint}
 
-The blueprint \cite{MIPStarREBlueprint} states the lemma in the source shape.
-Its proof records the value-preserving construction and the approximate form
-that the construction yields, and explicitly marks the remaining attainment
-step as unproved, citing this note; an accompanying remark summarizes the
-obstruction.  An earlier revision of the blueprint had instead weakened the
-source-labelled conclusion to the approximate form; following the project's
-proof-gap protocol, the source-labelled statement is restored and the missing
-step is tracked in the proof rather than absorbed into the statement. The
-source-shaped declaration \leanid{exists\_symmetric\_projective\_strategy} is
-now linked to the lemma; its proof remains the tracked attainment obligation.
+The blueprint \cite{MIPStarREBlueprint} now states the given-strategy form and
+cites this note at the correction.  Its proof is exactly the value-preserving
+block construction above; an accompanying remark records the stronger printed
+attainment form and explains why it does not follow.  The linked declaration
+\leanid{exists\_symmetric\_projective\_strategy\_of\_strategy} has the same
+hypothesis, exact value equality, and projective symmetric conclusion.  Its
+proof remains open.  The separate source-shaped declaration
+\leanid{exists\_symmetric\_projective\_strategy} remains an unproved record of
+the unsupported attainment claim and is not advertised by the corrected node.
 
 \section{Conclusion}
 
 The verdict is a proof-level gap in the cited lemma: the symmetrization
 argument proves the given-strategy and approximate forms, while the printed
 conclusion additionally asserts that the supremum defining $\val^*(\game)$ is
-attained, which does not follow.  The gap is harmless for the results built on
-the lemma, since both uses in the source, and all planned uses in this
-project, proceed from a given strategy of value at least $1-\eps$ or from a
-strict lower bound on the value, for which the value-preserving construction
-suffices.  For stage~4 (formalization) the recommendation is: formalize the
-given-strategy symmetrization lemma as the workhorse statement; keep the
-source-labelled lemma in source shape with the attainment step an explicit,
-tracked proof obligation; and do not strengthen the source-labelled statement's
-hypotheses or weaken its conclusion silently.  If a later investigation
-settles the counterexample question for symmetric games, the statement should
-then be reclassified from an unproved step to a documented statement
-correction.
+attained.  The blueprint uses the valid given-strategy form and displays the
+source discrepancy explicitly.  This correction is harmless downstream,
+because every source use proceeds either from a given strategy or from a
+strict lower bound on the value.  The source-shaped attainment declaration
+remains separate and unproved rather than serving as the blueprint theorem.
 
 \bibliographystyle{alpha}
 \bibliography{references}

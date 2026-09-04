@@ -10,6 +10,8 @@
 % Local notation for this note.
 \DeclareMathOperator{\poly}{poly}
 \newcommand{\Id}{\mathrm{Id}}
+\renewcommand{\ghissue}[1]{%
+  \href{https://github.com/Dengnifer/MIPStarRE-A/issues/#1}{GitHub issue \##1}}
 
 \title{The Error Term of the Combined-Lines Consistency Lemma}
 \author{}
@@ -29,8 +31,8 @@
   $m \cdot \poly(\eps, md/q)$, the other would give
   $m^2 \cdot \poly(\eps, md/q)$ and rests in addition on a distributional
   decomposition that the stated sub-line lemma does not supply.  The
-  substance is deciding which error form the statement should carry and
-  confirming that the sole consumer tolerates it.
+  correction is to state the first route's established error form and confirm
+  that the sole consumer tolerates it.
   \item \textbf{Key Mathlib inputs:} the
   Cauchy--Schwarz inequality for state-dependent operator distances
   (project-local, blueprint Chapter 12), mixture decompositions of
@@ -52,7 +54,8 @@
   the sub-line distribution of the Pauli basis analysis in
   \cite{Ji2020MIPStar}, and the error function of the classical soundness
   theorem imported from \cite{Ji2020LowIndividualDegree}, into which the
-  corrected error form must be absorbed.  Tracked in \localissue{0002}.
+  corrected error form must be absorbed.  The blueprint correction is tracked
+  in \ghissue{173}.
 \end{itemize}
 
 \section{Key theorem forms}
@@ -221,26 +224,21 @@ steps applied to already square-rooted quantities, and its
 $md/q$-dependence enters as $m\,\delta_P^{1/4}$, which the claimed form
 cannot absorb.
 
-\section{Candidate repairs}
+\section{Correction and alternative repairs}
 
 The following are candidate directions, with their open obligations; none
 of the routes below is claimed as established.
 
-\paragraph{Correcting the error form (recommended direction).}
-Adopt $\delta_{\mathrm{combine}} = m \cdot \poly(\eps, md/q)$ ---
-concretely, the first-route bound --- as the operative error form.  Open
-obligations: (i)~verify that every consumer tolerates the prefactor; in
-the source and in the blueprint the only consumer is the polynomial-pair
-lemma, whose imported error
+\paragraph{Corrected error form (adopted).}
+The blueprint adopts
+$\delta_{\mathrm{combine}} = m \cdot \poly(\eps, md/q)$ --- concretely,
+the first-route bound --- as the operative error form.  The only consumer is
+the polynomial-pair lemma, whose imported error
 $a(md)^a(\delta_{\mathrm{combine}}^b + q^{-b} + 2^{-bmd})$ absorbs
-$m^{O(1)}$ prefactors by enlarging $a$ and shrinking $b$, and this
-absorption must be carried out with explicit constants when the lemma is
-formalized; (ii)~record the correction against the source-labelled
-statement in accordance with the proof-gap protocol, rather than
-silently substituting the corrected form --- the blueprint currently
-retains the source statement and carries the corrected bound in the
-proof; (iii)~confirm the three chained claims at the required level of
-detail, including the corrected deficit reading of the second claim.
+$m^{O(1)}$ prefactors by enlarging $a$ and shrinking $b$.  The blueprint proof
+records this absorption and the corrected deficit reading of the second claim.
+The remaining obligation is formal: prove the three chained estimates and the
+consumer bound with explicit constants.
 
 \paragraph{Repairing the second route.}
 Strengthen Property~2 of the sub-line lemma to the joint product law: in
@@ -273,11 +271,9 @@ the first direction stands.
 
 \section{Comparison with the blueprint}
 
-The blueprint \cite{MIPStarREBlueprint} keeps the combined-lines lemma in
-its source shape, error form $\poly(m^2\eps, md/q)$ included, and marks
-in the proof that this form remains unproved: the proof derives the
-first route only, records the established bound
-$m \cdot \poly(\eps, md/q)$, and uses that bound in the sequel.  The
+The blueprint \cite{MIPStarREBlueprint} corrects the combined-lines lemma to
+the established error form $m \cdot \poly(\eps, md/q)$.  Its proof derives the
+first route and uses that bound in the sequel.  The
 three claims are stated as separate lemmas with the corrected deficit
 assertion for the second; the sub-line lemma states Property~2 at the
 level of the two marginal laws and expressly disclaims the joint
@@ -289,8 +285,16 @@ chapter remark summarizes the discrepancy and cites this note.%
 \path{lem:qld-sublines}, \path{lem:claim-17-1}--\path{lem:claim-17-3},
 \path{lem:qld-4-7}, and the remark
 \path{rem:qld-4-13-source-defects}, all in
-\path{blueprint/src/chapter/ch15_qpbt_combining.tex}.  No Lean
-declaration is currently linked to any of them.}
+\path{blueprint/src/chapter/ch15_qpbt_combining.tex}.  The corrected lemma
+links to \path{ExtendedLinesWitness} and
+\path{exists_extendedLinesWitness_established}.}
+
+The latter Lean theorem has the explicit form
+$C m\,\poly(\eps,md/q)$ for a universal $C>0$, which agrees with the
+blueprint convention that constants are absorbed into $\poly$.  Its proof
+remains open.  The older declaration \path{exists_extendedLinesWitness}
+retains the unsupported printed form $\poly(m^2\eps,md/q)$ and is no longer
+linked to the corrected blueprint node.
 
 \section{Conclusion}
 
@@ -305,12 +309,11 @@ in the lemma statement, $\poly(m^2\eps, md/q)$, follows from neither.
 The first route is sound after a harmless deficit correction in its
 second claim and establishes $m \cdot \poly(\eps, md/q)$.  The
 discrepancy is harmless downstream, since the sole consumer absorbs
-polynomial-in-$m$ prefactors into its constants.  The recommended
-resolution is to treat the corrected error form as operative while the
-source-labelled statement retains its printed form with the missing step
-explicitly tracked; strengthening the sub-line lemma to license the
-second route is optional, and no route to the claimed form is currently
-known.  We do not assert that the claimed form is false.
+polynomial-in-$m$ prefactors into its constants.  The blueprint therefore
+uses the corrected first-route form and cites this note; strengthening the
+sub-line lemma to license the second route is optional, and no route to the
+printed form is currently known.  We do not assert that the printed form is
+false.
 
 \bibliographystyle{alpha}
 \bibliography{references}

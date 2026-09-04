@@ -594,7 +594,10 @@ representation is obtained as follows.
 		\tau^W(a) = \tau^W(a_1) \ot \dots \ot \tau^W(a_n)\;, \qquad
 		\ket{e_W} = \ket{(e_1)_W} \ot \dots \ot \ket{(e_n)_W}
 	\]
-	for $e \in \F_q^n$, with associated rank-one projectors $\tau^W_e$.
+		for $e \in \F_q^n$, with associated rank-one projectors $\tau^W_e$.
+		The distinction between the general prime-characteristic definitions and
+		the characteristic-two specializations used by the Pauli basis test is
+		documented in \cite{gap:qpbt_characteristic-two-pauli-scope}.
 \end{definition}
 
 \begin{lemma}[Product and twisted commutation relations]\label{lem:twisted-commutation}
@@ -679,12 +682,14 @@ representation is obtained as follows.
 		\tau^W(a) = \sum_{b \in \F_q^n} \omega^{\tr(a \cdot b)}\, \tau^W_b\;,
 	\end{equation}
 	and conversely
-	\begin{equation}\label{eq:pauli-inversion-0}
+		\begin{equation}\label{eq:pauli-inversion-0}
 		\E_{\ba \sim \F_q^n}\, \omega^{-\tr(\ba \cdot b)}\, \tau^W(\ba)
 		= \sum_{b' \in \F_q^n} \E_{\ba \sim \F_q^n}\,
 		\omega^{\tr(\ba \cdot (b' - b))}\, \tau^W_{b'}
-		= \tau^W_b\;.
-	\end{equation}
+			= \tau^W_b\;.
+		\end{equation}
+		The source scope and the binary specialization of these identities are
+		recorded in \cite{gap:qpbt_characteristic-two-pauli-scope}.
 \end{lemma}
 \begin{proof}
 	\uses{def:generalized-pauli, lem:cancellation}
@@ -737,8 +742,9 @@ observables and maximally entangled states over \emph{qubits}
 	$\sigma^W_{u_{ij}}$ denotes the projector
 	$\frac{1}{2}\bigl(\Id + (-1)^{u_{ij}} \sigma^W(1)\bigr)$ acting on the
 	$s$-th qubit, where $s = (i-1)k + j$.
-	We index the product coordinates from zero: values $(i-1,j-1)$ correspond to
-	the paper's pair $(i,j)$.
+		We index the product coordinates from zero: values $(i-1,j-1)$ correspond to
+		the paper's pair $(i,j)$.  The corrected upper bound $j\leq k$ is
+		documented in \cite{gap:qpbt_pauli-binary-factor-index}.
 \end{lemma}
 \begin{proof}
 	\uses{lem:pauli-observable-expansion, lem:downsize_field,
@@ -774,9 +780,10 @@ observables and maximally entangled states over \emph{qubits}
 \begin{remark}\label{rem:pauli-binary-source}
 	In the source statement of Lemma~\ref{lem:pauli-binary} in
 	\cite{Ji2020MIPStar}, the index range of the qubit factor is printed as
-	$j \in \{1, \dots, q\}$; the intended range, used above, is
-	$j \in \{1, \dots, k\}$, as the $i$-th qudit is mapped to $k$ qubits. The
-	source also quantifies over arbitrary integers $L$; the statement above
-	takes $L$ to be a natural number, including zero, and uses the usual
-	empty-product convention for the tensor powers when $L=0$.
+		$j \in \{1, \dots, q\}$; the intended range, used above, is
+		$j \in \{1, \dots, k\}$, as the $i$-th qudit is mapped to $k$ qubits. The
+		source also quantifies over arbitrary integers $L$; the statement above
+		takes $L$ to be a natural number, including zero, and uses the usual
+		empty-product convention for the tensor powers when $L=0$.  The index
+		correction is documented in \cite{gap:qpbt_pauli-binary-factor-index}.
 \end{remark}

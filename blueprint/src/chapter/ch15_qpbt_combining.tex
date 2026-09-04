@@ -82,8 +82,9 @@ assembled by Fourier averaging.
 % (arXiv:1610.03574): hypothesis as in its display (7), conclusion as in its
 % display (8). The provider imposes no upper bound on delta, asserts the
 % exact linearity for all pairs (u, u'), and guarantees the closeness of L^u
-% to O^u on average over uniformly random u only, in mean squared
-% state-dependent distance with the error delta preserved; it is stated for
+% to O^u on average over uniformly random u only. Its binary-measurement
+% distance bound delta becomes the operator-distance bound 2 delta under
+% the convention used below; it is stated for
 % an arbitrary density operator rho on a single Hilbert space, with the
 % index group written {0,1}^n under bitwise XOR (here F_2^t, additively) and
 % Obs(H) denoting the Hermitian unitaries, i.e. the binary observables of
@@ -94,7 +95,8 @@ assembled by Fourier averaging.
 % inserts the restriction 0 <= delta <= 1, places the closeness conclusion,
 % together with the exact linearity, under the quantifier "for all u, u' in
 % F_2^t", and appends "L^u = Id when u = 0"; none of these is part of the
-% cited theorem, and none is reproduced here. See rem:linearity-import.
+% cited theorem, and none is reproduced here. See rem:linearity-import and
+% the normalization analysis in gap:qpbt_linearity-distance-normalization.
 \begin{theorem}[Quantum linearity test~\cite{Natarajan2017Linearity}]
 	\label{thm:linearity}
 	\lean{MIPStarRE.QPBT.IsBinaryObservable, MIPStarRE.QPBT.stateDepDistSq}
@@ -122,7 +124,7 @@ assembled by Fourier averaging.
 	holds for all $u, u' \in \F_2^t$, and
 	\[
 		\E_{u} \, d_{\rho'}\big(\mathcal{L}^u,\ \mathcal{O}^u \ot
-		\Id_{\hilb'}\big)^2 \le \delta\,,
+		\Id_{\hilb'}\big)^2 \le 2\delta\,,
 	\]
 	where the expectation is over $u$ chosen uniformly at random from
 	$\F_2^t$ and
@@ -143,16 +145,19 @@ assembled by Fourier averaging.
 	register into padding of the strategy state, and the identity
 	$\mathcal{L}^0 = \Id$ --- are enumerated in
 	Remark~\ref{rem:linearity-import} and addressed in the proof of
-	Lemma~\ref{lem:qld-4-10}.
+	Lemma~\ref{lem:qld-4-10}. The factor two in the distance conclusion is
+	the normalization correction documented in
+	\cite{gap:qpbt_linearity-distance-normalization}.
 \end{proof}
 
 \begin{remark}[Obligations of the linearity-theorem import]
 	\label{rem:linearity-import}
 	Theorem~\ref{thm:linearity} is stated in the form proved in
 	\cite{Natarajan2017Linearity}. Three features are load-bearing for the
-	proof of Lemma~\ref{lem:qld-4-10}: the error is preserved without
-	polynomial loss ($\delta$ in the hypothesis becomes $\delta$ in the
-	conclusion); the linearity of the $\{\mathcal{L}^u\}$ is exact and
+	proof of Lemma~\ref{lem:qld-4-10}: the error suffers only the explicit
+	constant-factor loss ($\delta$ in the correlation hypothesis becomes
+	$2\delta$ in squared operator distance); the linearity of the
+	$\{\mathcal{L}^u\}$ is exact and
 	holds for all pairs $(u,u')$, not merely on average; and the
 	hypothesis carries no upper bound on $\delta$, so the theorem may be
 	applied separately for each pair $(x,z)$ with hypothesis error the
@@ -173,7 +178,10 @@ assembled by Fourier averaging.
 	used, and the appended identity is instead derived from the
 	conclusion, since exact linearity at $u = u' = 0$ gives
 	$(\mathcal{L}^0)^2 = \mathcal{L}^0$, and an idempotent unitary equals
-	the identity. The import carries two conversion obligations,
+	the identity. These quotation discrepancies and the fiberwise
+	common-extension obligation are documented in
+	\cite{gap:qpbt_linearity-theorem-quotation}. The import carries two
+	conversion obligations,
 	discharged in the proof of Lemma~\ref{lem:qld-4-10}: the theorem is
 	instantiated with $\rho$ the reduced density operator of
 	$\ket{\hat\psi}$ on the registers carrying the observables, so that
@@ -182,8 +190,11 @@ assembled by Fourier averaging.
 	converted to and from the relation $\approx_\delta$ of
 	Definition~\ref{def:povm-distance} by expanding the square, using
 	unitarity of the observables, and relabelling the averaged index
-	pair, at the cost of the constant factors absorbed by that
-	definition. One obligation remains open and is flagged where it
+	pair. In particular, the binary-measurement distance of the cited theorem
+	is one half of the squared operator distance used here, which accounts
+	for the factor two and cannot be omitted; see
+	\cite{gap:qpbt_linearity-distance-normalization}. One obligation remains
+	open and is flagged where it
 	arises: the ancilla register $\hilb'$ and its state
 	$\ket{\mathrm{anc}}$ produced by the theorem, which may depend on the
 	pair $(x,z)$, must be absorbed --- uniformly in $(x,z)$ --- into
@@ -302,7 +313,7 @@ assembled by Fourier averaging.
 	$\{\mathcal{L}^{x,z,r,s}\}$, exactly linear in $(r,s)$ for all pairs,
 	acting on an extension by an ancilla register in a pure state, with
 	$\E_{r,s}\, d\big(\mathcal{L}^{x,z,r,s},\ \mathcal{O}^{x,z,r,s} \ot
-	\Id\big)^2 \le \tfrac{1}{2}\delta_{x,z}$
+		\Id\big)^2 \le \delta_{x,z}$
 	in the state-dependent distance of the extended state; taking the
 	expectation over $(x,z)$ shows that the two families are
 	$\delta$-close, in the sense of Definition~\ref{def:povm-distance},
@@ -550,21 +561,22 @@ analyzed, together with candidate repairs, in
 \begin{lemma}[Combined line measurement on the extended coordinates]
 	\label{lem:qld-4-13}
 	\lean{MIPStarRE.QPBT.ExtendedLinesWitness}
-	\lean{MIPStarRE.QPBT.exists_extendedLinesWitness}
+	\lean{MIPStarRE.QPBT.exists_extendedLinesWitness_established}
 	\notready
 	\uses{lem:qld-4-12, def:line, def:line-point-dist, def:consistency,
 		def:bracket, def:expanded-state, def:ideg-deg-polynomials}
-	% Statement as in the source (references/qpbt-paper/
-	% 14_analysis_of_the_pauli_basis_test.tex, lem:qld-4-13), including the
-	% error form poly(m^2 eps, md/q); neither of the source's two proof
-	% routes delivers that form, and the route retained below establishes
-	% m * poly(eps, md/q), which is the form the sequel uses. See
+	% Correction of the source statement (references/qpbt-paper/
+	% 14_analysis_of_the_pauli_basis_test.tex, lem:qld-4-13): neither of its
+	% two proof routes establishes poly(m^2 eps, md/q). The route retained
+	% below establishes m * poly(eps, md/q), which is the form the sequel
+	% uses. See
 	% rem:qld-4-13-source-defects and the analysis in
 	% docs/paper-gaps/qpbt_combined-lines-error-term.tex. The line-point
 	% distribution over F_q^{2m+2} presupposes that 2m+2 divides q; see
 	% rem:qld-4-7-divisibility.
 	There exists a function
-	$\delta_{\mathrm{combine}}(\eps,m,d,q) = \poly(m^2\eps, md/q)$
+	$\delta_{\mathrm{combine}}(\eps,m,d,q)
+	= m \cdot \poly(\eps, md/q)$
 	such that the following holds. For
 	every line $\ell$ in $\F_q^{2m+2}$ and
 	$\hilb \in \{\hilb_{\mathsf{A}}, \hilb_{\mathsf{B}}\}$ there exists a
@@ -1111,13 +1123,11 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	since
 	$\delta_P = \poly(\eps, md/q)$, $\delta_Q = \poly(\eps)$, and
 	$\delta_{\mathrm{Line}} = \poly(\eps)$, the right-hand side is a
-	function of the form $m \cdot \poly(\eps, md/q)$. This established
-	bound is not of the stated form $\poly(m^2\eps, md/q)$, and no
-	function of that form dominates it, so the error function claimed in
-	the statement remains unproved along this route; the source's second
-	route rests on a joint-law decomposition not provided by Property~2 of
-	Lemma~\ref{lem:qld-sublines}, and the established bound is the one
-	used in the sequel (Remark~\ref{rem:qld-4-13-source-defects}; the two
+	function of the stated form $m \cdot \poly(\eps, md/q)$. The source's
+	printed form $\poly(m^2\eps, md/q)$ does not follow from this bound, and
+	its second route rests on a joint-law decomposition not provided by
+	Property~2 of Lemma~\ref{lem:qld-sublines}. The corrected bound is the
+	one used in the sequel (Remark~\ref{rem:qld-4-13-source-defects}; the two
 	routes are analyzed in \cite{gap:qpbt_combined-lines-error-term}). Now
 	if the pair $(f_X, f_Z)$ evaluates to $(a, b)$ at $(x, z)$, then
 	$\mathrm{combine}_{f_X,f_Z}$ evaluates to $\alpha a + \beta b$ at
@@ -1128,18 +1138,20 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	construction of $\hat{Q}^{x,z,\alpha,\beta}$ in
 	Lemma~\ref{lem:qld-4-12} as the corresponding coarse-graining of
 	$\hat{Q}^{x,z}$ together yield the first relation of
-	\eqref{eq:qld-4-13}, with the established error
-	$m \cdot \poly(\eps, md/q)$ in place of the stated
-	$\delta_{\mathrm{combine}}$. The second relation follows from the
+	\eqref{eq:qld-4-13}, with the stated error
+	$\delta_{\mathrm{combine}} = m \cdot \poly(\eps, md/q)$. The second
+	relation follows from the
 	analogous argument with the registers swapped.
 \end{proof}
 
 \begin{remark}[The error term in the source proof of
 	Lemma~\ref{lem:qld-4-13}]
 	\label{rem:qld-4-13-source-defects}
-	The statement of Lemma~\ref{lem:qld-4-13} retains the source error
-	form $\delta_{\mathrm{combine}} = \poly(m^2\eps, md/q)$, which
-	remains unproved. The source proof in \cite{Ji2020MIPStar} asserts
+	The source states the error as
+	$\delta_{\mathrm{combine}} = \poly(m^2\eps, md/q)$, which its proof
+	does not establish. Lemma~\ref{lem:qld-4-13} instead records the
+	corrected form $m \cdot \poly(\eps, md/q)$. The source proof in
+	\cite{Ji2020MIPStar} asserts
 	two different bounds for the quantity
 	\eqref{eq:qld-combined-lines-consistency}: the bound
 	$O(m(\eps^{1/4} + \delta_P^{1/4} + \delta_Q^{1/4} +
@@ -1153,8 +1165,8 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	Property~2 of Lemma~\ref{lem:qld-sublines} does not provide, and
 	neither bound is dominated by a function of $m^2\eps$ and $md/q$
 	alone that vanishes as its arguments vanish. The proof above
-	therefore follows the first route only and establishes the bound
-	$m \cdot \poly(\eps, md/q)$, which is the form consumed by
+	therefore follows the first route only and establishes the corrected
+	bound $m \cdot \poly(\eps, md/q)$, which is the form consumed by
 	Lemma~\ref{lem:qld-4-7}, whose error function absorbs the prefactor
 	$m$ into $(md)^a$. The full analysis --- the two routes, the scalings
 	showing that the claimed form follows from neither, the corrected
