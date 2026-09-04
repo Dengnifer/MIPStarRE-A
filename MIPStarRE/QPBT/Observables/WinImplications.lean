@@ -1,4 +1,4 @@
-import MIPStarRE.QPBT.Observables.WinImplications.Approx
+import MIPStarRE.QPBT.Observables.WinImplications.PointObs
 
 /-!
 # Winning implications for strategy observables
@@ -281,8 +281,8 @@ theorem pointObs_self_consistent :
       opDistSq (uniformDistribution (Fin P.m → PauliScalar P))
         (fun u => heteroKron 1 (S.pointObs .bob W r u))
         (fun u => heteroKron (S.pointObs .alice W r u) 1)
-        S.toStrategy.ψ ≤ C * ε := by
-  sorry
+        S.toStrategy.ψ ≤ C * ε :=
+  WinImplications.pointObs_self_consistent_proof
 
 /-- The strategy observables satisfy the phase-signed commutation relation on
 Alice's factor. This is Equation `eq:pts-obs-commutation`, paper
