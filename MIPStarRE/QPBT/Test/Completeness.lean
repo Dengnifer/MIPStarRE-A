@@ -1,5 +1,6 @@
 import MIPStarRE.QPBT.Games.StrategyClasses
 import MIPStarRE.QPBT.Games.TypedCondLinear
+import MIPStarRE.QPBT.Test.Completeness.HonestStrategy
 import MIPStarRE.QPBT.Test.LowDegreeGameTheorems
 import MIPStarRE.QPBT.Test.MagicSquareTheorems
 import MIPStarRE.QPBT.Test.PauliBasisTest
@@ -8,7 +9,8 @@ import MIPStarRE.QPBT.Test.PauliBasisTest
 # Completeness of the Pauli basis test
 
 This file presents the Pauli basis test as a symmetric game and states its
-value-one SPCC completeness theorem.
+value-one SPCC completeness theorem.  The honest measurements entering that
+theorem are constructed in `MIPStarRE.QPBT.Test.Completeness.HonestStrategy`.
 
 ## References
 

@@ -118,13 +118,13 @@ theorem tauObservable_transpose (W : PauliKind) (a : ι → K) :
   cases W with
   | X =>
       refine Finset.prod_congr rfl fun i _ => ?_
-      show (if y i = x i + a i then (1 : ℂ) else 0) = if x i = y i + a i then 1 else 0
+      change (if y i = x i + a i then (1 : ℂ) else 0) = if x i = y i + a i then 1 else 0
       by_cases h : x i = y i + a i
       · rw [if_pos h, if_pos ((hswap _ _ _).mp h)]
       · rw [if_neg h, if_neg (fun hc => h ((hswap _ _ _).mp hc))]
   | Z =>
       refine Finset.prod_congr rfl fun i _ => ?_
-      show (if y i = x i then phaseSign (binTrace K (a i * x i)) else 0) =
+      change (if y i = x i then phaseSign (binTrace K (a i * x i)) else 0) =
         if x i = y i then phaseSign (binTrace K (a i * y i)) else 0
       by_cases h : x i = y i
       · rw [h]
@@ -241,7 +241,7 @@ theorem tauObservable_mul_pauliProj (W : PauliKind) (a f : ι → K) :
             phaseSign (binTrace K (dotProduct (a + c) f)) • tauObservable W c := by
         congr 1
         refine Fintype.sum_equiv (Equiv.addLeft a) _ _ fun b => ?_
-        show phaseSign (binTrace K (dotProduct b f)) • tauObservable W (a + b) =
+        change phaseSign (binTrace K (dotProduct b f)) • tauObservable W (a + b) =
           phaseSign (binTrace K (dotProduct (a + (a + b)) f)) • tauObservable W (a + b)
         rw [hchar2 b]
     _ = phaseSign (binTrace K (dotProduct a f)) • pauliProj W f := by
@@ -517,7 +517,7 @@ theorem pauliPointMeasurement_postprocess_trace_effect (P : AdmissibleParams)
     constructor
     · intro hh
       refine ⟨?_, hh⟩
-      show fixedBinTrace P.model (lowDegreeEnc h u * r) = b
+      change fixedBinTrace P.model (lowDegreeEnc h u * r) = b
       rw [hh]
       exact (Finset.mem_filter.mp ha).2
     · exact fun hh => hh.2
@@ -691,7 +691,7 @@ theorem pauliPairMeasurement_isConsistentOn (P : AdmissibleParams) (z : PauliSpa
       (eprState (PauliRegister P)) := by
   intro β
   refine epr_action_eq_of_transpose _ ?_
-  show (pauliPairEffect P z β)ᵀ = pauliPairEffect P z β
+  change (pauliPairEffect P z β)ᵀ = pauliPairEffect P z β
   rw [pauliPairEffect, Matrix.transpose_mul, pauliTraceMeasurement_effect_transpose,
     pauliTraceMeasurement_effect_transpose]
   exact (pauliTraceMeasurement_effect_commute P z hgamma β.1 β.2).eq.symm
