@@ -6,7 +6,7 @@
 #   local/bin/main-session.sh --resume   resume the most recent codex session
 #
 # The main session is the orchestrating operator of this project (persona:
-# local/personas/main.md; state: HANDOFF.md). It always works in the repo
+# local/personas/main.md; state: the owner's /goal briefing). It always works in the repo
 # root — NOT the caller's cwd, NOT $HOME — and runs interactively so the
 # user can steer it. Worker sessions are still started only via dispatch.sh.
 set -euo pipefail
@@ -22,18 +22,28 @@ export PATH="$HOME/.elan/bin:$HOME/.local/bin:$PATH"
 
 command -v codex >/dev/null 2>&1 || {
   printf 'main-session.sh: codex CLI not found on PATH\n' >&2; exit 1; }
-[ -f "$ROOT/HANDOFF.md" ] || {
-  printf 'main-session.sh: %s/HANDOFF.md missing — refusing to start an unbriefed main session\n' "$ROOT" >&2; exit 1; }
+
+# The MAIN session is the trusted orchestrator: it commits, merges and pushes
+# in the primary checkout, which codex's workspace-write sandbox forbids (.git
+# stays read-only there; review of PR #41, F1).  Worker sessions get their own
+# sandboxes from dispatch.sh.  approval_policy=never: the automatic approval
+# review timed out and dropped merges on 2026-09-03 (events.md).
+readonly CACHE_ROOT="${MIPSTARRE_CACHE_ROOT:-$HOME/.cache/mipstarre-dev}"
+readonly -a CODEX_ARGS=(
+  -C "$ROOT"
+  --sandbox danger-full-access
+  -c 'approval_policy="never"'
+)
 
 if [ "${1:-}" = "--resume" ]; then
-  exec codex -C "$ROOT" resume --last
+  exec codex "${CODEX_ARGS[@]}" resume --last
 fi
 
 PROMPT="You are the MAIN SESSION of this project. Read, in order:
 local/personas/main.md (your persona), local/README.md, AGENTS.md. The
-owner will paste the project-state briefing into this session; treat it
-as authoritative for state and next steps. Your working directory is the
+owner will invoke /goal to provide the project-state briefing; treat it as
+authoritative for state and next steps. Your working directory is the
 repository root: $ROOT — all workflow tools are invoked as
 local/bin/<tool> from there."
 
-exec codex -C "$ROOT" "$PROMPT"
+exec codex "${CODEX_ARGS[@]}" "$PROMPT"
