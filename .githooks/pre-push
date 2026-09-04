@@ -4,11 +4,9 @@ set -eu
 if [ "${MIPSTARRE_SKIP_HOOKS:-}" = "1" ]; then
   # checked-push sets an expected tuple when only the expensive gate is skipped.
   if [ -n "${MIPSTARRE_EXPECTED_PUSH_TUPLE:-}" ]; then
-    if IFS= read -r ACTUAL_PUSH_TUPLE; then
-      :
-    else
-      echo "MIPStarRE pre-push: missing advertised ref tuple." >&2
-      exit 1
+    if ! IFS= read -r ACTUAL_PUSH_TUPLE; then
+      echo "MIPStarRE pre-push: checked ref is already current."
+      exit 0
     fi
     if IFS= read -r EXTRA_PUSH_TUPLE; then
       echo "MIPStarRE pre-push: expected exactly one advertised ref tuple." >&2

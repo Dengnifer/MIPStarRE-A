@@ -565,3 +565,17 @@ preflight tuple.  Local or remote ref movement fails closed.  A caller's plain
 
 **Expected effect:** the ref update that passed the long gate is exactly the one
 offered to the remote, while operators retain the explicit recovery path.
+
+## 2026-09-05 — Make checked publication independent of hook selection
+
+**Trigger:** `results/telemetry/events.md` 2026-09-05, "Checked publication
+relied on ambient native-hook selection" (round-3 review of PR #197).
+
+**Change:** `checked-push.sh` now binds the captured remote tip with an atomic
+lease and preserves fast-forward-only publication.  Native confirmation accepts
+an already-current ref, its test module is budgeted, and installation guidance
+routes full checks through the helper.
+
+**Expected effect:** stale, absent, or redirected native hooks cannot weaken the
+validated tuple, while idempotent publication and full-mode guidance remain
+usable.

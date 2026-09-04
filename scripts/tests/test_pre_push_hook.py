@@ -55,12 +55,15 @@ set -eu
 if [ "${MIPSTARRE_SKIP_HOOKS:-}" = "1" ]; then
   [ -e "$RECEIVE_MARKER" ] || exit 91
   if [ -n "${MIPSTARRE_EXPECTED_PUSH_TUPLE:-}" ]; then
-    IFS= read -r actual_tuple || exit 93
-    if IFS= read -r extra_tuple; then
-      exit 94
+    if IFS= read -r actual_tuple; then
+      if IFS= read -r extra_tuple; then
+        exit 94
+      fi
+      printf 'transport-advertised|%s\\n' "$actual_tuple" >> "$HOOK_LOG"
+      [ "$actual_tuple" = "$MIPSTARRE_EXPECTED_PUSH_TUPLE" ] || exit 95
+    else
+      printf 'transport-noop\\n' >> "$HOOK_LOG"
     fi
-    printf 'transport-advertised|%s\\n' "$actual_tuple" >> "$HOOK_LOG"
-    [ "$actual_tuple" = "$MIPSTARRE_EXPECTED_PUSH_TUPLE" ] || exit 95
   else
     printf 'transport-bypass\\n' >> "$HOOK_LOG"
   fi
@@ -204,6 +207,21 @@ exec git-receive-pack "$@"
                 ],
             )
 
+            receive_marker.unlink()
+            hook_log.write_text("", encoding="utf-8")
+
+            no_op = self.run_checked_push(repo, hook_log, receive_marker)
+
+            self.assertEqual(no_op.returncode, 0, no_op.stdout + no_op.stderr)
+            self.assertEqual(
+                hook_log.read_text(encoding="utf-8").splitlines(),
+                [
+                    "preflight|refs/heads/main|"
+                    f"{second_head}|refs/heads/main|{second_head}",
+                    "transport-noop",
+                ],
+            )
+
     def test_checked_push_rejects_local_ref_movement_during_gate(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
             repo, remote, hook_log, receive_marker = self.new_push_repo(
@@ -235,46 +253,51 @@ exec git-receive-pack "$@"
             self.assertNotEqual(remote_ref.returncode, 0)
 
     def test_checked_push_rejects_remote_ref_movement_during_gate(self) -> None:
-        with tempfile.TemporaryDirectory() as temporary_directory:
-            repo, remote, hook_log, receive_marker = self.new_push_repo(
-                Path(temporary_directory)
-            )
-            initial = self.run_checked_push(repo, hook_log, receive_marker)
-            self.assertEqual(initial.returncode, 0, initial.stdout + initial.stderr)
-            first_head = self.git(repo, "rev-parse", "HEAD").stdout.strip()
+        for native_hook in ("missing", "stale"):
+            with self.subTest(native_hook=native_hook), tempfile.TemporaryDirectory() as temp:
+                repo, remote, hook_log, receive_marker = self.new_push_repo(Path(temp))
+                initial = self.run_checked_push(repo, hook_log, receive_marker)
+                self.assertEqual(initial.returncode, 0, initial.stdout + initial.stderr)
+                first_head = self.git(repo, "rev-parse", "HEAD").stdout.strip()
 
-            receive_marker.unlink()
-            hook_log.write_text("", encoding="utf-8")
-            (repo / "payload").write_text("middle\n", encoding="utf-8")
-            self.git(repo, "commit", "--quiet", "-am", "middle")
-            middle_head = self.git(repo, "rev-parse", "HEAD").stdout.strip()
-            self.git(remote, "fetch", "--quiet", str(repo), middle_head)
-            (repo / "payload").write_text("target\n", encoding="utf-8")
-            self.git(repo, "commit", "--quiet", "-am", "target")
-            target_head = self.git(repo, "rev-parse", "HEAD").stdout.strip()
+                receive_marker.unlink()
+                hook_log.write_text("", encoding="utf-8")
+                (repo / "payload").write_text("middle\n", encoding="utf-8")
+                self.git(repo, "commit", "--quiet", "-am", "middle")
+                middle_head = self.git(repo, "rev-parse", "HEAD").stdout.strip()
+                self.git(remote, "fetch", "--quiet", str(repo), middle_head)
+                (repo / "payload").write_text("target\n", encoding="utf-8")
+                self.git(repo, "commit", "--quiet", "-am", "target")
+                target_head = self.git(repo, "rev-parse", "HEAD").stdout.strip()
 
-            result = self.run_checked_push(
-                repo,
-                hook_log,
-                receive_marker,
-                move_remote_to=middle_head,
-                push_remote=remote,
-            )
+                hooks_path = repo / f".{native_hook}-hooks"
+                if native_hook == "stale":
+                    hooks_path.mkdir()
+                    stale_hook = hooks_path / "pre-push"
+                    stale_hook.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+                    stale_hook.chmod(0o755)
+                self.git(repo, "config", "core.hooksPath", hooks_path.name)
 
-            self.assertNotEqual(result.returncode, 0)
-            self.assertEqual(
-                self.git(remote, "rev-parse", "refs/heads/main").stdout.strip(),
-                middle_head,
-            )
-            self.assertEqual(
-                hook_log.read_text(encoding="utf-8").splitlines(),
-                [
-                    "preflight|refs/heads/main|"
-                    f"{target_head}|refs/heads/main|{first_head}",
-                    "transport-advertised|"
-                    f"{target_head} {target_head} refs/heads/main {middle_head}",
-                ],
-            )
+                result = self.run_checked_push(
+                    repo,
+                    hook_log,
+                    receive_marker,
+                    move_remote_to=middle_head,
+                    push_remote=remote,
+                )
+
+                self.assertNotEqual(result.returncode, 0)
+                self.assertEqual(
+                    self.git(remote, "rev-parse", "refs/heads/main").stdout.strip(),
+                    middle_head,
+                )
+                self.assertEqual(
+                    hook_log.read_text(encoding="utf-8").splitlines(),
+                    [
+                        "preflight|refs/heads/main|"
+                        f"{target_head}|refs/heads/main|{first_head}",
+                    ],
+                )
 
     def test_checked_push_preserves_emergency_bypass(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -325,10 +348,21 @@ exec git-receive-pack "$@"
             capture_output=True,
             text=True,
         )
+        no_op = subprocess.run(
+            [str(PRE_PUSH), "test", "unused"],
+            cwd=REPO_ROOT,
+            env=env,
+            input="",
+            check=False,
+            capture_output=True,
+            text=True,
+        )
 
         self.assertEqual(accepted.returncode, 0, accepted.stdout + accepted.stderr)
         self.assertNotEqual(rejected.returncode, 0)
         self.assertIn("changed after preflight", rejected.stderr)
+        self.assertEqual(no_op.returncode, 0, no_op.stdout + no_op.stderr)
+        self.assertIn("already current", no_op.stdout)
 
     def test_checked_push_gate_failure_never_starts_receive_transport(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -362,6 +396,7 @@ exec git-receive-pack "$@"
                 "pr_open.py": "local/bin/pr_open.py",
                 "github-sync.sh": "local/bin/github-sync.sh",
                 "autofix.sh": "local/bin/autofix.sh",
+                "install_git_hooks.sh": "scripts/install_git_hooks.sh",
             }.items()
         }
         for name, source in sources.items():
@@ -370,6 +405,10 @@ exec git-receive-pack "$@"
         self.assertNotIn('git(repo_root, "push", "github"', sources["pr_open.py"])
         self.assertNotIn('git push github "refs/heads/$ref', sources["github-sync.sh"])
         self.assertNotIn('git -C "$ROOT" push github', sources["autofix.sh"])
+        self.assertIn(
+            "MIPSTARRE_HOOK_FULL=1 when invoking local/bin/checked-push.sh",
+            sources["install_git_hooks.sh"],
+        )
 
 
 if __name__ == "__main__":

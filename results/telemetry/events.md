@@ -2553,3 +2553,17 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 - **Lesson:** temporary validation cleanup must preserve the managed `.lake`
   link. A worker that replaces it should restore and verify the link before
   reporting a clean handoff.
+
+## 2026-09-05 06:49+08:00 - Checked publication relied on ambient native-hook selection
+
+- **Symptom:** round-3 review of PR #197 found that an unchanged retry failed,
+  while a stale or unselected native hook could silently remove the remote-tip
+  check after preflight.  The workflow budget also omitted the new regression
+  module, and hook installation still recommended a plain full-mode push.
+- **Diagnosis:** exact tuple binding was split between `checked-push.sh` and
+  ambient `core.hooksPath`, so the helper did not own the complete invariant.
+- **Fix:** enforce the captured remote SHA with an atomic push lease, accept the
+  native hook's zero-update case, budget the regression module, and route the
+  full-mode instruction through `checked-push.sh`.
+- **Lesson:** publication safety belongs in the helper that captures the tuple;
+  native hooks can confirm that tuple but cannot be its sole enforcement point.

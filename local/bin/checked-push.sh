@@ -85,6 +85,10 @@ done <<< "$REMOTE_ROWS"
 [ -n "$REMOTE_SHA" ] || REMOTE_SHA="$ZERO_SHA"
 [[ "$LOCAL_SHA" =~ ^[0-9a-f]{40}$ ]] || die "unexpected local object id $LOCAL_SHA"
 [[ "$REMOTE_SHA" =~ ^[0-9a-f]{40}$ ]] || die "unexpected remote object id $REMOTE_SHA"
+if [ "$REMOTE_SHA" != "$ZERO_SHA" ] &&
+    ! git -C "$REPO_ROOT" merge-base --is-ancestor "$REMOTE_SHA" "$LOCAL_SHA"; then
+  die "$LOCAL_SHA would not fast-forward $REMOTE_REF from $REMOTE_SHA"
+fi
 
 HOOK="$REPO_ROOT/.githooks/pre-push"
 [ -x "$HOOK" ] || die "$HOOK is missing or not executable; run scripts/install_git_hooks.sh"
@@ -102,7 +106,12 @@ CURRENT_LOCAL_SHA="$(git -C "$REPO_ROOT" rev-parse --verify "$LOCAL_REF^{commit}
   die "local branch $LOCAL_REF changed during preflight"
 
 printf '%s: gate passed before opening the push transport.\n' "$PROG" >&2
-# Freeze the source object; the native hook confirms the freshly advertised remote tip.
+# Freeze the source object and atomically require the preflight remote tip.  The
+# native hook is only a short defense-in-depth confirmation; the lease keeps the
+# tuple binding intact when that hook is stale or not selected.
+LEASE_SHA="$REMOTE_SHA"
+[ "$LEASE_SHA" != "$ZERO_SHA" ] || LEASE_SHA=""
 MIPSTARRE_SKIP_HOOKS=1 \
   MIPSTARRE_EXPECTED_PUSH_TUPLE="$LOCAL_SHA $LOCAL_SHA $REMOTE_REF $REMOTE_SHA" \
-  git -C "$REPO_ROOT" push "$REMOTE" "$LOCAL_SHA:$REMOTE_REF"
+  git -C "$REPO_ROOT" push --force-with-lease="$REMOTE_REF:$LEASE_SHA" \
+    "$REMOTE" "$LOCAL_SHA:$REMOTE_REF"
