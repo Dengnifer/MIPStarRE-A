@@ -21,7 +21,7 @@ open scoped BigOperators Matrix MatrixOrder ComplexOrder
 open MIPStarRE.LDT MIPStarRE.Quantum
 
 /-- Projectivity from `def:projective-strategy-general`, blueprint
-`ch12_qpbt_games.tex:90-101`, paper `06_nonlocal_games_and_mipstar.tex:68-72`. -/
+`ch12_qpbt_games.tex:89-94`, paper `06_nonlocal_games_and_mipstar.tex:68-72`. -/
 def Strategy.IsProjective {G : Game} (S : Strategy G) : Prop :=
   (∀ x, MIPStarRE.QPBT.Measurement.IsProjective (S.A x)) ∧
     ∀ y, MIPStarRE.QPBT.Measurement.IsProjective (S.B y)
