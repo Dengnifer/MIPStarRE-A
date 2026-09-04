@@ -1,4 +1,5 @@
-import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.BranchComparison
+import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Strategy
+import MIPStarRE.QPBT.Combining.DirectLowDegree.GameValue
 
 /-!
 # Value of the seed-fiber dilation

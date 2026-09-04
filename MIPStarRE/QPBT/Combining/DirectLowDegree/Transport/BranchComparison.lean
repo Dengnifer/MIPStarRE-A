@@ -399,14 +399,6 @@ theorem directPointAnswerReadout_eq_diagonal_zeroCoord_of_win (D : DirectLdParam
       simp [directLdWinPredicate, directDiagonalQuestionOf, directPointQuestionOf,
         directLdPointQuestionOf, validDirectLdAnswer] at hwin
 
-/-- A uniform average over a finite type is the normalized sum.
-Formalization-only support for the branch bookkeeping. -/
-theorem avgOver_uniform_eq_inv_card_mul_sum {α : Type*}
-    [Fintype α] [DecidableEq α] [Nonempty α] (f : α → ℝ) :
-    avgOver (uniformDistribution α) f = (Fintype.card α : ℝ)⁻¹ * ∑ a, f a := by
-  unfold avgOver uniformDistribution Distribution.uniformOnFinset
-  simp only [Finset.mem_univ, if_true, Finset.card_univ, one_div, Finset.mul_sum]
-
 /-! ## Direct samples as products -/
 
 /-- A direct sample as its point-index pair together with its direction.
@@ -416,16 +408,6 @@ def directLdSpaceSplitEquiv (D : DirectLdParams) :
       ((Fin D.m → DirectScalarQ D) × Fin D.m) × (Fin D.m → DirectScalarQ D) where
   toFun s := ((s.point, s.index), s.direction)
   invFun x := ⟨x.1.1, x.1.2, x.2⟩
-  left_inv s := by cases s; rfl
-  right_inv x := rfl
-
-/-- A direct sample as its index together with its point-direction pair.
-Formalization-only reindexing of the direct sample space. -/
-def directLdSpaceIndexSplitEquiv (D : DirectLdParams) :
-    DirectLdSpace D ≃
-      Fin D.m × ((Fin D.m → DirectScalarQ D) × (Fin D.m → DirectScalarQ D)) where
-  toFun s := (s.index, s.point, s.direction)
-  invFun x := ⟨x.2.1, x.1, x.2.2⟩
   left_inv s := by cases s; rfl
   right_inv x := rfl
 
