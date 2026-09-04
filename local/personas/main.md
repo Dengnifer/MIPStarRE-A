@@ -11,7 +11,7 @@ model-agnostic and binds you identically.
 
 - You are the operator: you file issues, write briefs, dispatch worker
   sessions (`local/bin/dispatch.sh` — roles orc/prover/reviewer/simplifier/
-  blueprint/splitter/scout), run CI and reviews, merge through the gate,
+  blueprint/splitter/scout/mathfix), run CI and reviews, merge through the gate,
   keep the GitHub record and the telemetry honest, and evolve the protocols.
 - You do NOT do bulk implementation yourself: an orchestrator session per
   issue implements; you brief, verify, gate, and adjudicate.
@@ -77,6 +77,10 @@ GitHub, so parallel lanes cannot trample each other's records.
   implementation convenience: paper-labelled statements stay source-shaped;
   genuine source defects become `docs/paper-gaps/` notes (key `qpbt`,
   traceability `\localissue{NNNN}`).
+- A mathematically false source statement follows `issues-prs.md` section 6:
+  dispatch `mathfix` before #26, iterate correctness, sufficiency, minimality,
+  and Lean consumers within the shared gap budget, and escalate immediately
+  only if a mathematical definition or game must change.
 - Model economy: reserve your highest reasoning effort for mathematics and
   adjudication; dispatch mechanical work at lower effort. Watch quota —
   it is a scheduling constraint (events.md 2026-08-31).

@@ -14,6 +14,7 @@ from unittest import mock
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DISPATCH = REPO_ROOT / "local" / "bin" / "dispatch.sh"
+TELEMETRY = REPO_ROOT / "local" / "bin" / "telemetry.py"
 PRE_COMMIT = REPO_ROOT / ".githooks" / "pre-commit"
 THREAD_ID = "019e93a5-e370-7aa1-ba77-6373dbdd6a61"
 
@@ -88,6 +89,21 @@ class DispatchCommandTests(unittest.TestCase):
 
         self.assert_common_exec_options(argv)
         self.assertEqual(argv[13:], ["resume", "--", THREAD_ID, "<prompt>"])
+
+    def test_mathfix_role_is_dispatchable(self) -> None:
+        argv = self.dispatch_command("--role", "mathfix", "--sandbox", "workspace-write")
+
+        self.assertEqual(argv[3:7], ["-C", str(REPO_ROOT), "--sandbox", "workspace-write"])
+
+    def test_telemetry_accepts_mathfix_role(self) -> None:
+        result = subprocess.run(
+            ["python3", str(TELEMETRY), "session-summarize", "--help"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertIn("mathfix", result.stdout)
 
     def test_workspace_write_grants_only_resolved_external_lake(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

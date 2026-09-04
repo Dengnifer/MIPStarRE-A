@@ -43,9 +43,10 @@ the `dispatcher` field. The session prompt states this rule verbatim.
 
 ## 2. Roles and sandboxes
 
-Seven roles, fixed (`DESIGN.md`, "Naming and identity conventions"):
+Eight roles, fixed (`DESIGN.md`, "Naming and identity conventions"):
 
-`orc`, `prover`, `reviewer`, `simplifier`, `blueprint`, `splitter`, `scout`.
+`orc`, `prover`, `reviewer`, `simplifier`, `blueprint`, `splitter`, `scout`,
+`mathfix`.
 
 Sandbox defaults follow from what the role is allowed to change:
 
@@ -63,6 +64,9 @@ The persona for a role lives at `local/personas/<role>.md`, with one naming
 exception: the role code `orc` maps to `local/personas/orchestrator.md`.
 Until such a file is committed, `dispatch.sh` warns and falls back to a
 one-line built-in frame — enough to run, not enough for load-bearing work.
+The `mathfix` role is the source-statement repair lane governed by
+`issues-prs.md` section 6. Its per-gap attempt and elapsed-time budget is
+cumulative across sessions; the operator supplies that state in each dispatch.
 
 ## 3. Naming
 

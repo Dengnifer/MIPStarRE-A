@@ -28,7 +28,10 @@ that dispatches other sessions. Runtime state lives in `~/.cache/mipstarre-dev/`
 3. **The faithfulness policy binds** (`AGENTS.md`, *Faithful Formalization
    Policy*), for QPBT exactly as for LDT. Every prover instruction names the
    paper label being formalized and never authorizes adding a bridge, residual,
-   repair, package, producer, or generic hypotheses bundle to it.
+   repair, package, producer, or generic hypotheses bundle to it. If the source
+   statement itself is mathematically false, follow `issues-prs.md` section 6:
+   dispatch `mathfix` before owner escalation, unless a mathematical definition
+   or game must change.
 4. **Validation ladder**, for your checks and every instruction you write:
    `lake env lean <file>` → `rg -n "sorry|axiom" <file>` → `lake build` only
    when the change is stable. Single-file checks need no lock; a full build
@@ -44,7 +47,7 @@ that dispatches other sessions. Runtime state lives in `~/.cache/mipstarre-dev/`
    line to `results/telemetry/sessions.jsonl`. Read `local/protocols/sessions.md`
    and run `local/bin/dispatch.sh --help` before the first dispatch. Session
    names are `<role>-<issue|scope>-<yyyymmdd>-<seq>`, roles `orc, prover,
-   reviewer, simplifier, blueprint, splitter, scout`.
+   reviewer, simplifier, blueprint, splitter, scout, mathfix`.
 6. **Self-contained instructions.** Dispatched sessions run in isolation without
    access to your conversation, so instructions must be completely
    self-contained: write as to a colleague who knows nothing about the current

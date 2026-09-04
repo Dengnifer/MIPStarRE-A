@@ -540,3 +540,21 @@ test growth remains subject to the owner-gated 400-line episode budget.
 **Change:** `MIPSTARRE_LAKE_ROOT` uses `<root>/<branch>` for one-component branches;
 the helper rejects protected overlap and duplicate ownership, and dispatch grants its target.
 **Expected effect:** native relocation without cache corruption or leaked build data.
+
+## 2026-09-05 — Mathematical repair precedes owner escalation
+
+**Trigger:** `results/telemetry/owner-log.md` entries at 2026-09-04 22:35Z and
+23:05Z, and `results/telemetry/events.md` entry "Owner rule: mathematical gaps
+are resolved by math-fix sessions before reaching the owner"; issue #208 records
+the owner's confirmed defaults.
+
+**Change:** `issues-prs.md` section 6 now makes a bounded `mathfix` pass the
+default response to a false source statement and defines correctness,
+sufficiency, minimality, Lean convergence, adoption records, and escalation.
+`dispatch.sh` and the fixed-role documentation admit the new persona;
+`docs/paper-gaps/policy.tex` points mathematical notes to the operational rule;
+and `local/README.md` identifies the design-decisions register.
+
+**Expected effect:** the fleet resolves theorem-statement defects against their
+complete dependency graph, while #26 receives only definition/game decisions or
+an evidence-backed nonconvergence packet after the shared budget is exhausted.

@@ -2,7 +2,7 @@
 # dispatch.sh — the only sanctioned way to start a codex agent session.
 #
 # Usage:
-#   local/bin/dispatch.sh --role <orc|prover|reviewer|simplifier|blueprint|splitter|scout>
+#   local/bin/dispatch.sh --role <orc|prover|reviewer|simplifier|blueprint|splitter|scout|mathfix>
 #                         --issue <id|scope>
 #                         [--worktree DIR]        working root (default: repo root)
 #                         [--sandbox MODE]        read-only|workspace-write|danger-full-access
@@ -52,7 +52,7 @@ set -euo pipefail
 
 PROG="${0##*/}"
 
-ROLES="orc prover reviewer simplifier blueprint splitter scout"
+ROLES="orc prover reviewer simplifier blueprint splitter scout mathfix"
 READ_ONLY_ROLES="reviewer scout"
 
 # Prompt-size guards. The study fleet lost a session to an oversized prompt
@@ -402,6 +402,9 @@ builtin_frame() {
     blueprint) printf '%s\n' "You are a blueprint writer: you keep blueprint/src in sync with the Lean development and with the source paper, in mathematical prose." ;;
     splitter) printf '%s\n' "You are a splitter: you divide oversized files and oversized tasks into coherent units without changing content." ;;
     scout) printf '%s\n' "You are a scout: you search Mathlib and the repository, report what exists, and change nothing." ;;
+    mathfix) printf '%s\n' \
+      "You are a mathematical-gap specialist: derive the closest correct and sufficient repair," \
+      "verify every downstream use, and confirm it in Lean before adoption." ;;
   esac
 }
 

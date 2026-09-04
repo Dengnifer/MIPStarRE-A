@@ -682,7 +682,7 @@ agent must know:
   `local/protocols/issues-prs.md`.
 - **Sessions.** Dispatch, resume, and archive agent sessions only via
   `local/bin/dispatch.sh` (roles: orc, prover, reviewer, simplifier,
-  blueprint, splitter, scout) so token/time telemetry stays complete.
+  blueprint, splitter, scout, mathfix) so token/time telemetry stays complete.
 - **Telemetry duty.** Incidents go to `results/telemetry/events.md`;
   protocol changes follow `local/protocols/meta.md` and are ledgered in
   `local/protocols/EVOLUTION.md`.

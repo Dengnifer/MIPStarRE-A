@@ -111,8 +111,8 @@ documented failure modes. Sources are cited in `local/protocols/*.md`.
   `[codex-review-fix]` exactly (the review-gate skip regex depends on them);
   operator and worker repairs use plain `fix(...)` subjects and are reviewed.
 - **Agent sessions**: `<role>-<issue|scope>-<yyyymmdd>-<seq>` with roles
-  `orc, prover, reviewer, simplifier, blueprint, splitter, scout`. Dispatched
-  only via `local/bin/dispatch.sh`, which records the codex `thread_id`,
+  `orc, prover, reviewer, simplifier, blueprint, splitter, scout, mathfix`.
+  Dispatched only via `local/bin/dispatch.sh`, which records the codex `thread_id`,
   captures the `--json` event stream to
   `results/telemetry/sessions/<name>.jsonl`, and appends a summary line to
   `results/telemetry/sessions.jsonl`. Archiving a session = final status line
@@ -138,9 +138,10 @@ All appends are one-line JSON; schemas documented in `protocols/meta.md`.
 ## Model policy
 
 - codex CLI (`gpt-5.6-sol`, ultra effort) drives orchestrator/prover/reviewer/
-  simplifier sessions (`codex exec`, `codex exec review`).
-- Claude-side subagents: easy/mechanical tasks run on Opus-tier; Fable-tier is
-  reserved for hard reasoning (proof strategy, protocol synthesis, adversarial
-  verification).
+  simplifier sessions (`codex exec`, `codex exec review`); `dispatch.sh` also
+  admits the `mathfix` role for astra when that model is available.
+- Claude-side subagents: easy/mechanical tasks run on Opus-tier; Fable 5.1 is
+  the current `mathfix` model and otherwise remains reserved for hard reasoning
+  (proof strategy, protocol synthesis, adversarial verification).
 - Reviewer and prover roles must be **different sessions** — a session never
   reviews its own diff.
