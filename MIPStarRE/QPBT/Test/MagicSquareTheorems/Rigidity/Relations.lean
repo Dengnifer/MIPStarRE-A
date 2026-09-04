@@ -126,7 +126,7 @@ noncomputable def totalRejectionMass (S : Strategy msGame) : ℝ :=
 theorem acceptance_mass_add_rejection_mass (S : Strategy msGame) (x y : MsType) :
     acceptanceMass S x y + rejectionMass S x y = 1 := by
   rw [← show (∑ a : MsAnswer, ∑ b : MsAnswer, outcomeWeight S x y a b) = 1 by
-    exact outcome_weight_sum_eq_one S x y]
+    exact outcomeWeight_sum_eq_one S x y]
   unfold acceptanceMass rejectionMass outcomeEventWeight
   rw [← Finset.sum_add_distrib]
   apply Finset.sum_congr rfl
