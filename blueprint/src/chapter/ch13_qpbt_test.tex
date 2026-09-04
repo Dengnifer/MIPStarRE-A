@@ -69,6 +69,7 @@ representing the paper's coordinate $r+1$.
 	Consider the pair $(\ell, u)$ sampled in the following way: first, sample the tuple $\bigl((u_0,s,0),(u,0,0)\bigr)$ from the CL distribution $\mu_{L_{\mathsf{ALine}}, L_{\mathsf{Point}}}$, and let $\ell = \ell(u_0, e_i)$ where $i = \chi(s)$. Then $u$ is a uniformly random point in $\F_q^m$, and $\ell$ is a line that goes through $u$ and is parallel to a uniformly random axis $i \in \{1,2,\ldots,m\}$.
 \end{lemma}
 \begin{proof}
+	\leanok
 	\uses{def:line-representative}
 	Since $s$ is uniformly random in $\F_q$ and $m$ divides $q$, the index $i = \chi(s)$ is uniformly random in $\{1,2,\ldots,m\}$, so $(u_0,s)$ specifies a uniformly random axis-parallel line $\ell(u_0,e_i)$. Since $u_0 = L^{\mathrm{Ln}}_{e_i}(u)$ is the canonical representative of the line through $u$ in direction $e_i$, we have $u \in \ell(u_0,e_i)$.
 \end{proof}
@@ -80,6 +81,7 @@ representing the paper's coordinate $r+1$.
 	Consider the pair $(\ell, u)$ sampled in the following way: first, sample the tuple $\bigl((u_0,s,v),(u,0,0)\bigr)$ from the CL distribution $\mu_{L_{\mathsf{DLine}}, L_{\mathsf{Point}}}$, and let $\ell = \ell(u_0, v)$ where $i = \chi(s)$. Then $u$ is a uniformly random point in $\F_q^m$, and $\ell$ is a random diagonal line that goes through $u$ and shares its first $i-1$ coordinates with $u$, for uniformly random $i \in \{1,2,\ldots,m\}$.
 \end{lemma}
 \begin{proof}
+	\leanok
 	\uses{lem:alnf}
 	The proof is identical to that of Lemma~\ref{lem:alnf}: uniformity of $s$ makes $i = \chi(s)$ uniform, the direction component of the sampled tuple is $\pi_{i-1}(v)$ for uniform $v$ (so its first $i-1$ coordinates vanish), and $u_0 = L^{\mathrm{Ln}}_{\pi_{i-1}(v)}(u)$ places $u$ on the line $\ell(u_0,\pi_{i-1}(v))$.
 \end{proof}

@@ -478,11 +478,14 @@ we record here the definition of lines and their canonical representatives.
 \end{definition}
 
 \begin{proposition}\label{prop:line-equiv}
+	\lean{MIPStarRE.QPBT.linePoints_eq_of_mem}
+	\leanok
 	\uses{def:line}
 	Let $u, v \in \F_q^m$. Then for all $u' \in \ell(u,v)$, we have
 	$\ell(u,v) = \ell(u',v)$.
 \end{proposition}
 \begin{proof}
+	\leanok
 	\uses{def:line}
 	Fix $u' \in \ell(u,v)$, so $u' = u + tv$ for some $t \in \F_q$. Any
 	$a \in \ell(u,v)$ has the form $a = u + sv = u' + (s - t)v$, so
