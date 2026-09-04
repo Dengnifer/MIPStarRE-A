@@ -60,8 +60,8 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/165",
   "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 0,
+   "blocked_by": 2,
+   "total_blocked_by": 2,
    "blocking": 0,
    "total_blocking": 0
   },
@@ -310,9 +310,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 0,
+  "comments": 1,
   "created_at": "2026-09-04T17:40:44Z",
-  "updated_at": "2026-09-04T17:40:44Z",
+  "updated_at": "2026-09-04T21:50:15Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
@@ -322,9 +322,10 @@
    "completed": 0,
    "percent_completed": 0
   },
+  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/166",
   "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 0,
+   "blocked_by": 2,
+   "total_blocked_by": 2,
    "blocking": 0,
    "total_blocking": 0
   },
@@ -428,90 +429,6 @@
    "eyes": 0
   },
   "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/196/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/190",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/190/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/190/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/190/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/190",
-  "id": 5350230367,
-  "node_id": "I_kwDOUJyJf88AAAABPuYJXw",
-  "number": 190,
-  "title": "workflow: native support for build products on a separate volume (MIPSTARRE_LAKE_ROOT), replacing the owner-side .lake symlink shim",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025011061,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8bdQ",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/infrastructure",
-    "name": "infrastructure",
-    "color": "ededed",
-    "default": false,
-    "description": "Foundational definitions, shared APIs, or supporting layers"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-04T15:56:12Z",
-  "updated_at": "2026-09-04T15:56:12Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 0,
-   "blocking": 0,
-   "total_blocking": 0
-  },
-  "body": "Since 2026-09-04 the operator keeps every worktree's .lake (and the shared package store and hot-main under ~/.cache/mipstarre-dev) on the NVMe ZFS pool /data/users/drx/mipstarre-cache via symlinks created by owner-side helpers (/tmp/lane-v15.sh, /tmp/claude-lane-prep.sh, /tmp/lake-to-data.sh; archived under results/telemetry/owner-tools/). Reason: the root volume (RAID5 of SATA SSDs, 87 percent full) is 9x slower for fsync writes than /data and the per-worktree build dirs (2.2 GB each) were the growing consumer. Proposal: (1) an env var MIPSTARRE_LAKE_ROOT read by local/bin/worktree-setup.sh and warm-worktree.sh that places .lake for a new worktree at $MIPSTARRE_LAKE_ROOT/<branch> and symlinks it; (2) MIPSTARRE_CACHE_ROOT documented as the place for the package store and hot-main (already honoured); (3) housekeeping.sh removes the /data tree when a worktree is removed; (4) a note in local/protocols/build-cache.md. Operator-decidable; run as an orc packet.",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/190/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/190/timeline",
   "performed_via_github_app": null,
   "state_reason": null,
   "pinned_comment": null
@@ -1244,9 +1161,9 @@
   "author_association": "OWNER",
   "active_lock_reason": null,
   "sub_issues_summary": {
-   "total": 15,
+   "total": 16,
    "completed": 9,
-   "percent_completed": 60
+   "percent_completed": 56
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
   "issue_dependencies_summary": {
@@ -1890,8 +1807,8 @@
   "issue_dependencies_summary": {
    "blocked_by": 2,
    "total_blocked_by": 4,
-   "blocking": 1,
-   "total_blocking": 1
+   "blocking": 2,
+   "total_blocking": 2
   },
   "body": "<!-- mipstarre-issue-key: stage43-ld-simultaneous-measurements -->\n### Target declarations\n\n- `MIPStarRE/QPBT/Combining/DirectLowDegree/Transport/Simultaneous.lean:new` -\n  a point-reference sandwich lemma: coordinate polynomial PVMs individually\n  consistent with the coordinate marginals of one joint point PVM yield a\n  tuple-polynomial POVM whose evaluated tuple is consistent with that joint\n  point PVM, with an explicit `C * k * sqrt(\u03b4 + m*d/q)` bound.\n- Same file - a two-sided sandwich lemma: coordinate PVMs on Alice and Bob that\n  are pairwise consistent across the state yield sandwiched tuple POVMs that\n  are globally consistent, with the same one-square-root error shape.\n- Same file - reuse `polynomialAgreement_avg_le_mdq` under #132's polynomial\n  equivalence to discharge the distinct-polynomial collision hypothesis.\n- Same file - `directCoordinateMainFormal`: invoke\n  `MIPStarRE.LDT.Test.mainFormal` for every `r : Fin D.k` with the strategy and\n  pass proof from #130/#131 and `directLdAuxParameter` from #133.\n- Same file - `exists_directSimultaneousPolynomialMeasurements`, constructing\n  `GA : DirectPolyMeasTuple D S.\u03b9A` and\n  `GB : DirectPolyMeasTuple D S.\u03b9B` whose two point-consistency defects and\n  global-consistency defect are bounded by the explicit transport envelope\n  absorbed in #133.\n\n### Paper and blueprint references\n\n- Simultaneous low-degree conclusion:\n  `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:413-458`\n  and `blueprint/src/chapter/ch13_qpbt_test.tex:139-164`.\n- Sandwiched simultaneous measurement:\n  `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:465-501` and\n  `MIPStarRE/QPBT/Games/Sandwich.lean:58-107`.\n- Mature scalar conclusion:\n  `references/ldt-paper/test_definition.tex:180-202` and\n  `MIPStarRE/LDT/Test/MainTheorem/MainFormal.lean:300-327`.\n- Reusable Schwartz--Zippel bound:\n  `MIPStarRE/LDT/Preliminaries/PolynomialAgreement.lean:90-163`.\n- The paper-gap note applying to this packet is\n  `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`; this is the product\n  argument that discharges its open simultaneity warning.\n\nIndependent applications of `mainFormal` do not make the resulting coordinate\nPVMs commute. Define the tuple effects by the existing palindromic\n`sandwichProduct`; prove measurement validity and transfer factors across the\nbipartite state one at a time. The global/global bound must be proved directly\nfrom the coordinate global consistencies, rather than by a second square-root\ntriangle through point measurements. This keeps the envelope within the\n`b = 1/80000` scale allowed by #133.\n\n### Dependencies\n\n- #130 and #131 supply coordinate strategies and `PassesLowIndividualDegreeTest`.\n- #132 supplies polynomial, measurement, and `ConsRel` conversions.\n- #133 supplies the auxiliary parameter and scalar envelope.\n- #49 must merge for the core distance calculus; #99 must merge for\n  `sandwichProduct_isMeasurement` and its insertion estimates.\n- The packet handles arbitrary positive `D.k`; it does not restrict the public\n  theorem to the route's special value `k = 1`.\n\n### Acceptance\n\n- `mainFormal` is applied separately to all coordinates with no extra\n  hypotheses, and finite choice produces the two coordinate families.\n- `GA` and `GB` are valid POVMs for arbitrary `D.k`; no commutativity of the\n  coordinate PVMs is assumed.\n- All three required defects have a proved explicit bound that #133 turns into\n  `deltaLd a b \u03b5 D.q D.m D.d D.k`.\n- Direct Lean checks, full build, paper-gap checks, exact-head CI, and\n  independent review pass with no `sorry`, axiom, bypass, bridge, or external\n  theorem import.\n\n### Scope notes\n\nOwn only the new simultaneity file and necessary imports. Generalize sandwich\nmachinery only in this file unless a minimal reusable theorem clearly belongs\nbeside #99 after its owner merges. Do not change `mainFormal`, `deltaLd`, either\npublic soundness signature, or the paper mirror. Main locators are from\n`c1c0af4`.\n\n---\nStage 4.3 proof packet under #47.\n\nPrerequisites are recorded as GitHub issue dependencies (blocked_by); the bullets above are commentary.\n",
   "closed_by": null,
@@ -1975,8 +1892,8 @@
   "issue_dependencies_summary": {
    "blocked_by": 0,
    "total_blocked_by": 0,
-   "blocking": 2,
-   "total_blocking": 2
+   "blocking": 3,
+   "total_blocking": 3
   },
   "body": "<!-- mipstarre-issue-key: stage43-ld-consistency-conversion -->\n### Target declarations\n\n- `MIPStarRE/QPBT/Combining/DirectLowDegree/Transport/Consistency.lean:new` -\n  `directPolyEquivPolynomial`, an equivalence between\n  `PolyIndex D.m (DirectScalarQ D) D.d` and\n  `MIPStarRE.LDT.Polynomial D.toLDTParameters`, with evaluation compatibility.\n- Same file - conversions from `ProjMeas (Polynomial ...)` to QPBT\n  `Measurement (PolyIndex ...)`, and between their evaluation postprocessings;\n  include tuple/marginal versions for `DirectPolyMeasTuple` and `PolyMeasTuple`.\n- Same file - `consRel_iff_consistencyDefect` for a pure bipartite state and\n  complete projective families, matching LDT submeasurements with QPBT\n  `heteroKron` effects without loss in the error parameter.\n- Same file - the three specialized conversion lemmas for the two point/global\n  conclusions and the global/global conclusion of `LDT.Test.mainFormal`.\n- Same file - correlated-ancilla compression of a polynomial POVM and proof\n  that all three `consistencyDefect` bounds descend to the original carriers\n  for the seed-bearing game.\n\n### Paper and blueprint references\n\n- QPBT polynomial measurements and consistency conclusions:\n  `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:393-458`.\n- Blueprint:\n  `blueprint/src/chapter/ch13_qpbt_test.tex:124-164`.\n- Mature LDT conclusion:\n  `references/ldt-paper/test_definition.tex:180-202` and\n  `MIPStarRE/LDT/Test/MainTheorem/MainFormal.lean:300-327`.\n- Polynomial definitions:\n  `MIPStarRE/LDT/Basic/LowDegreePolynomial.lean:17-51` and QPBT\n  `PolyIndex`, `PolyMeas`, and `PolyMeasTuple` declarations linked from\n  `blueprint/src/chapter/ch13_qpbt_test.tex:126-133`.\n- QPBT defect:\n  `MIPStarRE/QPBT/Games/Consistency.lean:18-38`.\n- The paper-gap note applying to this packet is\n  `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`.\n\nThe conversions must expose definitional or proved equality of field models,\npolynomial evaluation, finite uniform distributions, density/Born expressions,\nand outcome postprocessing. They may not replace a mismatch by an inequality\nwith an unexplained constant.\n\n### Dependencies\n\n- #130 must merge first for `toLDTParameters`, both strategy adapters, and the\n  correlated residue ancilla.\n- This packet may be developed alongside #131 but both are prerequisites of\n  the final soundness assembly.\n- Reuse existing consistency bridges and measurement postprocessing APIs before\n  adding project-local lemmas.\n\n### Acceptance\n\n- Every LDT polynomial outcome and evaluation is transported bijectively to\n  the corresponding QPBT representative, with coordinate order unchanged.\n- Each of the three `mainFormal` conclusions becomes the corresponding QPBT\n  `consistencyDefect` statement with exactly the same numerical bound.\n- Compression from the correlated seed ancilla yields valid POVMs on the\n  original local carriers and preserves the required three bounds.\n- Direct Lean checks, full build, declaration checking, paper-gap checks,\n  exact-head CI, and independent review pass with no `sorry`, axiom, bypass,\n  or conversion hypothesis.\n\n### Scope notes\n\nOwn only the new consistency/conversion file and necessary imports. Do not\nchoose the `mainFormal` auxiliary parameter, prove scalar estimates, combine\ndifferent tuple coordinates, invoke the tensor-code theorem, or edit either\npublic soundness declaration. Main locators are from `c1c0af4`.\n\n---\nStage 4.3 proof packet under #47.\n\nPrerequisites are recorded as GitHub issue dependencies (blocked_by); the bullets above are commentary.\n",
   "closed_by": null,
@@ -2653,10 +2570,10 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/165",
   "issue_dependencies_summary": {
-   "blocked_by": 3,
+   "blocked_by": 2,
    "total_blocked_by": 5,
-   "blocking": 3,
-   "total_blocking": 3
+   "blocking": 4,
+   "total_blocking": 4
   },
   "body": "<!-- mipstarre-issue-key: stage43-unfiled-observables-derived-points -->\n### Target declarations\n\n- `MIPStarRE/QPBT/Observables/WinImplications.lean:457` \u2014 `pointObs_self_consistent`\n- `MIPStarRE/QPBT/Observables/WinImplications.lean:476` \u2014 `pointObs_twisted_commutation`\n- `MIPStarRE/QPBT/Observables/WinImplications.lean:495` \u2014 `pointObs_twisted_commutation_interchanged`\n- `MIPStarRE/QPBT/Observables/PointConsistency.lean:101` \u2014 `expPoint_self_cons`\n- `MIPStarRE/QPBT/Observables/PointConsistency.lean:120` \u2014 `expPointTrace_comm`\n\n### Paper and blueprint references\n\n- Observable consequences:\n  `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:268-354`;\n  `blueprint/src/chapter/ch14_qpbt_observables.tex:681-759`.\n- Expanded point consistency:\n  `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:420-505`;\n  `blueprint/src/chapter/ch14_qpbt_observables.tex:921-1057`.\n\n### Dependencies\n\n- #113 and #114 must merge first.\n- #77 and its child chain #101-#105 must close for the Magic Square rigidity\n  input used in twisted anticommutation.\n- #49 and #64/#68 must be axiom-clean.\n- This is the final serialized owner of `WinImplications.lean`.\n\n### Acceptance\n\n- All five target declarations are proved with unchanged signatures and bounds.\n- `lake env lean` is green for both target files and direct consumers.\n- Completed source nodes receive proof-level `\\leanok`.\n- No new `sorry`, `admit`, axiom, prohibited bypass, unfaithful rigidity\n  dependency, symmetry shortcut, or omitted placement is introduced.\n- Full build, declaration checking, blueprint rendering, exact-head CI, and\n  independent review pass.\n\n### Scope notes\n\nOwn only the last three holes in `WinImplications.lean` after #113, all\ntwo holes in `PointConsistency.lean`, and matching proof status. Preserve all\nfour directed opposite placements and both twisted-commutation orientations.\nMain locators are from `c1c0af4`.\n\n---\nStage 4.3 proof packet under #47.\n\nPrerequisites are recorded as GitHub issue dependencies (blocked_by); the bullets above are commentary.\n",
   "closed_by": null,
@@ -2825,8 +2742,8 @@
   "issue_dependencies_summary": {
    "blocked_by": 1,
    "total_blocked_by": 2,
-   "blocking": 1,
-   "total_blocking": 1
+   "blocking": 2,
+   "total_blocking": 2
   },
   "body": "<!-- mipstarre-issue-key: stage43-unfiled-observables-win-approx -->\n### Target declarations\n\nIn `MIPStarRE/QPBT/Observables/WinImplications.lean` prove:\n\n- line 326 \u2014 `win_cons_approx`\n- line 348 \u2014 `win_low_degree_approx`\n- line 366 \u2014 `win_pauli_basis_cons_approx`\n- line 386 \u2014 `win_comm_approx`\n- line 412 \u2014 `win_comm_cons_approx`\n- line 439 \u2014 `win_ms_cons_approx`\n\n### Paper and blueprint references\n\n- Approximate measurement consequences of the seven checks:\n  `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:192-267`.\n- `blueprint/src/chapter/ch14_qpbt_observables.tex:505-680`,\n  `lem:qld-win-implications`.\n\n### Dependencies\n\n- #112 must merge first because both packets own `WinImplications.lean`.\n- #49 must merge for consistency/distance conversion, transitivity, and data processing.\n- #98 supplies value stability where the proof route uses the padded strategy.\n\n### Acceptance\n\n- All six target declarations are proved with unchanged signatures and explicit bounds.\n- `lake env lean MIPStarRE/QPBT/Observables/WinImplications.lean` is green.\n- Proof-level `\\leanok` is added only when the complete grouped source claim\n  is axiom-clean.\n- No new `sorry`, `admit`, axiom, prohibited bypass, bridge, or hidden\n  probability/projectivity hypothesis is introduced.\n- Full build, declaration checking, blueprint rendering, exact-head CI, and\n  independent review pass.\n\n### Scope notes\n\nThis is the second serialized owner of `WinImplications.lean`; own only the\nsix approximate companions at lines 310-439. Preserve the source distributions,\ndirections of consistency, and stated error scales. The final owner must depend\non this issue. Main locators are from `c1c0af4`.\n\n---\nStage 4.3 proof packet under #47.\n\nPrerequisites are recorded as GitHub issue dependencies (blocked_by); the bullets above are commentary.\n",
   "closed_by": null,
@@ -3418,7 +3335,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/77",
   "issue_dependencies_summary": {
-   "blocked_by": 2,
+   "blocked_by": 1,
    "total_blocked_by": 2,
    "blocking": 0,
    "total_blocking": 0
@@ -3438,91 +3355,6 @@
    "eyes": 0
   },
   "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/105/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/104",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/104/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/104/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/104/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/104",
-  "id": 5345093007,
-  "node_id": "I_kwDOUJyJf88AAAABPpeljw",
-  "number": 104,
-  "title": "feat(QPBT/Test): prove Magic Square swap-isometry extraction",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-04T06:40:35Z",
-  "updated_at": "2026-09-04T12:02:05Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/77",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 1,
-   "blocking": 2,
-   "total_blocking": 2
-  },
-  "body": "<!-- mipstarre-issue-key: stage43-ms-rigidity-swap-extraction -->\n### Target declarations\n\nCreate the private extraction layer in\n`MIPStarRE/QPBT/Test/MagicSquareTheorems/Rigidity/Swap.lean:1`, supporting\n`MagicSquareTheorems.lean:116-128`. Prove named declarations for:\n\n1. Alice's and Bob's local swap isometries;\n2. construction and normalization of the auxiliary vector;\n3. extraction of the two ideal EPR pairs;\n4. transport of the four distinguished binary effects to\n   `idealMagicBitProj`;\n5. the trace/density estimate and its explicit conversion to Euclidean vector distance.\n\nThis packet owns zero pre-existing `sorry` sites.\n\n### Paper and blueprint references\n\n- `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652`,\n  especially the trace-norm and local-basis-change discussion at lines 650-652.\n- `blueprint/src/chapter/ch13_qpbt_test.tex:224-253`\n- `references/qpbt-paper/04_preliminaries.tex:1097-1262` for the concrete\n  binary Pauli/EPR identifications.\n\n### Dependencies\n\n- #103 must merge first.\n- #64 and #68 must merge for EPR normalization, projector expansions, and Pauli laws.\n\n### Acceptance\n\n- Both local isometries, the normalized auxiliary state, state extraction, four\n  effect bounds, basis change, and trace-to-Euclidean loss are proved explicitly.\n- `lake env lean` is green for the new module and direct consumers.\n- No blueprint `\\leanok` is added before final rigidity closure.\n- No new `sorry`, `admit`, axiom, prohibited bypass, or implicit\n  trace-to-vector `simpa` is introduced.\n- Full build, exact-head CI, and independent review pass.\n\n### Scope notes\n\nDo not choose the final universal constant or handle the large-error branch.\nKeep both players and all four zero-based variable/effect targets; preserve the\nlocal basis-change orientation used by `idealMagicBitProj`.\n\n---\nStage 4.3 rigidity sub-packet under #77.\n\nPrerequisites are recorded as GitHub issue dependencies (blocked_by); the bullets above are commentary.\n",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/104/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/104/timeline",
   "performed_via_github_app": null,
   "state_reason": null,
   "pinned_comment": null
@@ -3694,8 +3526,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 6,
-   "completed": 3,
-   "percent_completed": 50
+   "completed": 4,
+   "percent_completed": 66
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/164",
   "issue_dependencies_summary": {
@@ -4553,9 +4385,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 109,
+  "comments": 112,
   "created_at": "2026-09-02T08:30:04Z",
-  "updated_at": "2026-09-04T18:09:45Z",
+  "updated_at": "2026-09-04T21:44:39Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
