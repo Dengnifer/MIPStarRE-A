@@ -333,9 +333,10 @@ theorem eprState_norm (V : Type*) [Fintype V] [DecidableEq V] [Nonempty V] :
 
 /--
 Fourier expansion of a generalized Pauli observable in the Pauli projectors.
-This is `lem:pauli-observable-expansion`, equations `eq:pauli-obs-proj` and
-`eq:pauli-inversion-0`, in `blueprint/src/chapter/ch11_qpbt_algebra.tex:638-652`;
-paper origin `references/qpbt-paper/04_preliminaries.tex:1141-1161`.
+This theorem is the characteristic-two (binary) specialization of the forward
+identity `eq:pauli-obs-proj` in `lem:pauli-observable-expansion`,
+`blueprint/src/chapter/ch11_qpbt_algebra.tex:674-680`; paper origin
+`references/qpbt-paper/04_preliminaries.tex:1151-1161`.
 
 **Scope restriction:** This characteristic-two specialization is separated
 from the general-prime identity as documented in
@@ -408,10 +409,11 @@ theorem tauObservable_eq_sum_pauliProj {ι : Type*} [Fintype ι] [DecidableEq ι
         simp [← funext_iff]
       · simp [← funext_iff, hxy]
 
-/-- The inverse Fourier expansion of a Pauli projector
-(`lem:pauli-observable-expansion`), blueprint
-`ch11_qpbt_algebra.tex:638-652`, paper origin
-`references/qpbt-paper/04_preliminaries.tex:1141-1161`.
+/-- The inverse Fourier expansion of a Pauli projector.  This theorem is the
+characteristic-two (binary) specialization of the inverse identity
+`eq:pauli-inversion-0` in `lem:pauli-observable-expansion`,
+`blueprint/src/chapter/ch11_qpbt_algebra.tex:674-688`; paper origin
+`references/qpbt-paper/04_preliminaries.tex:1151-1161`.
 
 **Scope restriction:** This characteristic-two specialization is separated
 from the general-prime identity as documented in
