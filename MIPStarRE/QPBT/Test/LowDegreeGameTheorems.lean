@@ -75,7 +75,7 @@ theorem dLinePointDist_prefix_zero (L : LdParams) :
 /-- The low-degree question sampler is the typed conditionally linear
 distribution on the complete type graph. This identifies the sampler with
 `def:typed-cl-distributions`; blueprint
-`ch12_qpbt_games.tex:624-629`, paper
+`ch12_qpbt_games.tex:1295-1300`, paper
 `references/qpbt-paper/07_types.tex:84-94`. -/
 theorem ldQuestionDistribution_eq_typedCL (L : LdParams) :
     ldQuestionDistribution L =

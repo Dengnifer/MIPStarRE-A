@@ -23,7 +23,7 @@ noncomputable section
 
 /-- The Pauli question sampler equals the typed conditionally linear distribution
 on the Pauli type graph from `def:typed-cl-distributions`; blueprint
-`ch12_qpbt_games.tex:624-629`,
+`ch12_qpbt_games.tex:1295-1300`,
 paper `references/qpbt-paper/07_types.tex:84-94`. -/
 theorem pauliQuestionDistribution_eq_typedCL (P : AdmissibleParams) :
     pauliQuestionDistribution P =
