@@ -48,7 +48,11 @@ the admissibility convention `def:admissible`, blueprint
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:958-961`.
 -/
 theorem AdmissibleParams.one_le_m (P : AdmissibleParams) : 1 ≤ P.m := by
-  sorry
+  obtain ⟨k, -, hk⟩ := P.hq
+  have hq : 0 < P.q := by
+    rw [hk]
+    positivity
+  exact Nat.pos_of_dvd_of_pos P.hdvd hq
 
 /-- The fixed model accessor for an admissible parameter package.  It is a
 compatibility view of the global `fixedFieldModel` selector, not an independently
@@ -251,6 +255,294 @@ noncomputable def pauliCL (P : AdmissibleParams) (t : PauliType) :
   | .pair => pauliSharedProjection
   | .ms _ => pauliSharedProjection
 
+/-- Formalization-only auxiliary: a linear map of the ambient coefficient space
+is conditionally linear with a single level on the full register. -/
+private theorem isCondLinearOn_one_of_linear {K ι : Type*} [Field K]
+    [Fintype ι] [DecidableEq ι] (L : (ι → K) →ₗ[K] (ι → K)) :
+    IsCondLinearOn K Finset.univ 1 (fun x => L x) := by
+  refine ⟨.succ Finset.univ L (fun _ i hi => absurd (Finset.mem_univ i) hi)
+      (fun _ => .zero), ⟨Finset.subset_univ _, fun _ => trivial⟩, ?_⟩
+  funext x
+  have hx : coordinateRestriction (Finset.univ : Finset ι) x = x := by
+    funext i
+    simp [coordinateRestriction]
+  show L (coordinateRestriction Finset.univ x) + 0 = L x
+  rw [hx, add_zero]
+
+/-- Formalization-only auxiliary: extend a coefficient vector along an injective
+reindexing of registers, setting every coordinate outside the image to zero. -/
+private def clExtend {K κ ι : Type*} [Zero K] (f : κ → ι) (u : κ → K) : ι → K :=
+  Function.extend f u 0
+
+/-- Formalization-only auxiliary: the extension recovers the original
+coordinates along an injective reindexing. -/
+private theorem clExtend_apply {K κ ι : Type*} [Zero K] {f : κ → ι}
+    (hf : Function.Injective f) (u : κ → K) (k : κ) :
+    clExtend f u (f k) = u k :=
+  hf.extend_apply u 0 k
+
+/-- Formalization-only auxiliary: the extension vanishes at any coordinate
+outside the image of the reindexing. -/
+private theorem clExtend_eq_zero_of_not_mem {K κ ι : Type*} [Zero K]
+    (f : κ → ι) (u : κ → K) (i : ι) (h : ∀ k, f k ≠ i) :
+    clExtend f u i = 0 :=
+  Function.extend_apply' u (0 : ι → K) i
+    (fun hex => h hex.choose hex.choose_spec)
+
+/-- Formalization-only auxiliary: restriction along an injective reindexing
+inverts the extension. -/
+private theorem clExtend_comp {K κ ι : Type*} [Zero K] {f : κ → ι}
+    (hf : Function.Injective f) (u : κ → K) :
+    (fun k => clExtend f u (f k)) = u :=
+  funext fun k => clExtend_apply hf u k
+
+/-- Formalization-only auxiliary: the extension of the zero vector vanishes. -/
+private theorem clExtend_zero {K κ ι : Type*} [Zero K] {f : κ → ι}
+    (hf : Function.Injective f) : clExtend f (0 : κ → K) = 0 := by
+  funext i
+  by_cases h : ∃ k, f k = i
+  · obtain ⟨k, rfl⟩ := h
+    simp [clExtend_apply hf]
+  · simp [clExtend, Function.extend_apply' _ _ _ h]
+
+/-- Formalization-only auxiliary: the extension is additive. -/
+private theorem clExtend_add {K κ ι : Type*} [AddZeroClass K] {f : κ → ι}
+    (hf : Function.Injective f) (u v : κ → K) :
+    clExtend f (u + v) = clExtend f u + clExtend f v := by
+  funext i
+  by_cases h : ∃ k, f k = i
+  · obtain ⟨k, rfl⟩ := h
+    simp [clExtend_apply hf]
+  · simp [clExtend, Function.extend_apply' _ _ _ h]
+
+/-- Formalization-only auxiliary: the extension commutes with scalars. -/
+private theorem clExtend_smul {K κ ι : Type*} [Semiring K] {f : κ → ι}
+    (hf : Function.Injective f) (c : K) (u : κ → K) :
+    clExtend f (c • u) = c • clExtend f u := by
+  funext i
+  by_cases h : ∃ k, f k = i
+  · obtain ⟨k, rfl⟩ := h
+    simp [clExtend_apply hf]
+  · simp [clExtend, Function.extend_apply' _ _ _ h]
+
+/-- Formalization-only auxiliary: transport a linear map of coefficient vectors
+along an injective reindexing of registers. -/
+private def clReindexLinear {K κ ι : Type*} [Field K] {f : κ → ι}
+    (hf : Function.Injective f) (L : (κ → K) →ₗ[K] (κ → K)) :
+    (ι → K) →ₗ[K] (ι → K) where
+  toFun x := clExtend f (L (fun k => x (f k)))
+  map_add' x y := by
+    show clExtend f (L (fun k => (x + y) (f k))) =
+      clExtend f (L (fun k => x (f k))) + clExtend f (L (fun k => y (f k)))
+    have h : (fun k => (x + y) (f k)) =
+        (fun k => x (f k)) + (fun k => y (f k)) := rfl
+    rw [h, map_add, clExtend_add hf]
+  map_smul' c x := by
+    show clExtend f (L (fun k => (c • x) (f k))) =
+      c • clExtend f (L (fun k => x (f k)))
+    have h : (fun k => (c • x) (f k)) = c • (fun k => x (f k)) := rfl
+    rw [h, map_smul, clExtend_smul hf]
+
+/-- Formalization-only auxiliary: transport a conditionally linear syntax tree
+along an injective reindexing of registers. -/
+private def clReindexTerm {K κ ι : Type*} [Field K] [Fintype κ] [DecidableEq κ]
+    [Fintype ι] [DecidableEq ι] {f : κ → ι} (hf : Function.Injective f) :
+    {ell : ℕ} → CondLinearTerm K (ι := κ) ell → CondLinearTerm K (ι := ι) ell
+  | _, .zero => .zero
+  | _, .succ S₁ L₁ h rest =>
+      .succ (S₁.image f) (clReindexLinear hf L₁)
+        (by
+          intro x i hi
+          by_cases hex : ∃ k, f k = i
+          · obtain ⟨k, rfl⟩ := hex
+            have hk : k ∉ S₁ := fun hk => hi (Finset.mem_image_of_mem f hk)
+            show clExtend f (L₁ (fun j => x (f j))) (f k) = 0
+            rw [clExtend_apply hf]
+            exact h _ k hk
+          · show clExtend f (L₁ (fun j => x (f j))) i = 0
+            simp [clExtend, Function.extend_apply' _ _ _ hex])
+        (fun y => clReindexTerm hf (rest (fun k => y (f k))))
+
+/-- Formalization-only auxiliary: the transported syntax tree is supported on
+any register containing the image of the original support. -/
+private theorem clReindexTerm_supportedOn {K κ ι : Type*} [Field K]
+    [Fintype κ] [DecidableEq κ] [Fintype ι] [DecidableEq ι] {f : κ → ι}
+    (hf : Function.Injective f) :
+    ∀ {ell : ℕ} (t : CondLinearTerm K (ι := κ) ell) (S : Finset κ)
+      (T : Finset ι), t.supportedOn S → S.image f ⊆ T →
+      (clReindexTerm hf t).supportedOn T := by
+  intro ell t
+  induction t with
+  | zero => intro S T _ _; trivial
+  | succ S₁ L₁ hL rest ih =>
+      intro S T hsupp hST
+      obtain ⟨h1, h2⟩ := hsupp
+      refine ⟨fun i hi => hST (Finset.image_subset_image h1 hi), fun y => ?_⟩
+      refine ih (fun k => y (f k)) (S \ S₁) (T \ S₁.image f) (h2 _) ?_
+      intro i hi
+      obtain ⟨k, hk, rfl⟩ := Finset.mem_image.mp hi
+      obtain ⟨hkS, hkS₁⟩ := Finset.mem_sdiff.mp hk
+      refine Finset.mem_sdiff.mpr ⟨hST (Finset.mem_image_of_mem f hkS), ?_⟩
+      intro hmem
+      obtain ⟨k', hk', hk'eq⟩ := Finset.mem_image.mp hmem
+      exact hkS₁ (hf hk'eq ▸ hk')
+
+/-- Formalization-only auxiliary: evaluation commutes with the transport of a
+conditionally linear syntax tree along an injective reindexing. -/
+private theorem clReindexTerm_eval {K κ ι : Type*} [Field K]
+    [Fintype κ] [DecidableEq κ] [Fintype ι] [DecidableEq ι] {f : κ → ι}
+    (hf : Function.Injective f) :
+    ∀ {ell : ℕ} (t : CondLinearTerm K (ι := κ) ell) (x : ι → K),
+      CondLinearTerm.eval (clReindexTerm hf t) x =
+        clExtend f (CondLinearTerm.eval t (fun k => x (f k))) := by
+  intro ell t
+  induction t with
+  | zero => intro x; exact (clExtend_zero hf).symm
+  | succ S₁ L₁ hL rest ih =>
+      intro x
+      have hres : (fun k => coordinateRestriction (S₁.image f) x (f k)) =
+          coordinateRestriction S₁ (fun k => x (f k)) := by
+        funext k
+        by_cases hk : k ∈ S₁
+        · have hmem : f k ∈ S₁.image f := Finset.mem_image_of_mem f hk
+          simp [coordinateRestriction, hk, hmem]
+        · have hni : f k ∉ S₁.image f := by
+            intro hmem
+            obtain ⟨k', hk', hk'eq⟩ := Finset.mem_image.mp hmem
+            exact hk (hf hk'eq ▸ hk')
+          simp [coordinateRestriction, hk, hni]
+      have hhead : clReindexLinear hf L₁ (coordinateRestriction (S₁.image f) x) =
+          clExtend f (L₁ (coordinateRestriction S₁ (fun k => x (f k)))) := by
+        show clExtend f (L₁ (fun k => coordinateRestriction (S₁.image f) x (f k))) = _
+        rw [hres]
+      have hcomp : (fun k => clReindexLinear hf L₁
+            (coordinateRestriction (S₁.image f) x) (f k)) =
+          L₁ (coordinateRestriction S₁ (fun k => x (f k))) := by
+        rw [hhead]
+        exact clExtend_comp hf _
+      show clReindexLinear hf L₁ (coordinateRestriction (S₁.image f) x) +
+          CondLinearTerm.eval (clReindexTerm hf (rest
+            (fun k => clReindexLinear hf L₁
+              (coordinateRestriction (S₁.image f) x) (f k)))) x =
+        clExtend f (L₁ (coordinateRestriction S₁ (fun k => x (f k))) +
+          CondLinearTerm.eval
+            (rest (L₁ (coordinateRestriction S₁ (fun k => x (f k)))))
+            (fun k => x (f k)))
+      rw [hcomp, ih _ x, hhead, ← clExtend_add hf]
+
+/-- Formalization-only auxiliary: conditional linearity is preserved by an
+injective reindexing of registers, the coordinates outside the image of the
+reindexing being set to zero. -/
+private theorem isCondLinearOn_reindex {K κ ι : Type*} [Field K]
+    [Fintype κ] [DecidableEq κ] [Fintype ι] [DecidableEq ι] {f : κ → ι}
+    (hf : Function.Injective f) {ell : ℕ} {L : (κ → K) → (κ → K)}
+    (h : IsCondLinearOn K Finset.univ ell L) :
+    IsCondLinearOn K Finset.univ ell
+      (fun x => clExtend f (L (fun k => x (f k)))) := by
+  obtain ⟨t, hsupp, hval⟩ := h
+  refine ⟨clReindexTerm hf t,
+    clReindexTerm_supportedOn hf t Finset.univ Finset.univ hsupp
+      (Finset.subset_univ _), ?_⟩
+  funext x
+  rw [clReindexTerm_eval hf t x, hval]
+
+/-- Formalization-only auxiliary: the point projection of the ambient low-degree
+coefficient space, presented as a linear map. -/
+private def ldPointProjection (P : LdParams) :
+    LdSpace P →ₗ[ScalarQ P] LdSpace P where
+  toFun z := ldPointCL P z
+  map_add' x y := by
+    funext i
+    rcases i with (j | u) | j <;> simp [ldPointCL]
+  map_smul' c x := by
+    funext i
+    rcases i with (j | u) | j <;> simp [ldPointCL]
+
+/-- Formalization-only auxiliary: the point map of the low-degree question
+distribution is conditionally linear of level one, as asserted for `L_Point` in
+`def:ld-question-distribution`, blueprint
+`blueprint/src/chapter/ch13_qpbt_test.tex:38-49`, paper origin
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
+It is recorded here because only the Pauli reindexing uses it. -/
+private theorem isCondLinear_ldPointCL (P : LdParams) :
+    IsCondLinearOn (ScalarQ P) Finset.univ 1 (ldPointCL P) :=
+  isCondLinearOn_one_of_linear (ldPointProjection P)
+
+/-- Formalization-only auxiliary: the type-4 projection of the ambient Pauli
+coefficient space, presented as a linear map. -/
+private def pauliSharedProjectionLinear (P : AdmissibleParams) :
+    PauliSpace P →ₗ[PauliScalar P] PauliSpace P where
+  toFun z := pauliSharedProjection z
+  map_add' x y := by
+    funext i
+    rcases i with ((((j | j) | u) | j) | u) | u <;> simp [pauliSharedProjection]
+  map_smul' c x := by
+    funext i
+    rcases i with ((((j | j) | u) | j) | u) | u <;> simp [pauliSharedProjection]
+
+/-- Formalization-only auxiliary: the inclusion of the low-degree register index
+into the ambient Pauli register index selected by a basis. -/
+def pauliLdIndex (P : AdmissibleParams) (W : PauliKind) :
+    LdIndex P.toLdParams → PauliIndex P
+  | .inl (.inl j) =>
+      match W with
+      | .X => .inl (.inl (.inl (.inl (.inl j))))
+      | .Z => .inl (.inl (.inl (.inl (.inr j))))
+  | .inl (.inr _) => .inl (.inl (.inl (.inr ())))
+  | .inr j => .inl (.inl (.inr j))
+
+/-- Formalization-only auxiliary: distinct low-degree registers are sent to
+distinct ambient Pauli registers. -/
+private theorem pauliLdIndex_injective (P : AdmissibleParams) (W : PauliKind) :
+    Function.Injective (pauliLdIndex P W) := by
+  intro a b hab
+  cases W <;> rcases a with (j | u) | j <;> rcases b with (j' | u') | j' <;>
+    simp_all [pauliLdIndex]
+
+/-- Formalization-only auxiliary: reading the low-degree register out of an
+ambient Pauli vector is restriction along `pauliLdIndex`. -/
+private theorem pauliToLd_eq (P : AdmissibleParams) (W : PauliKind)
+    (z : PauliSpace P) :
+    pauliToLd P W z = fun k => z (pauliLdIndex P W k) := by
+  funext k
+  rcases k with (j | u) | j <;> cases W <;> rfl
+
+/-- Formalization-only auxiliary: writing a low-degree vector into the ambient
+Pauli registers is extension along `pauliLdIndex`. -/
+private theorem embedLd_eq (P : AdmissibleParams) (W : PauliKind)
+    (w : LdSpace P.toLdParams) :
+    embedLd P W w = clExtend (pauliLdIndex P W) w := by
+  have hf := pauliLdIndex_injective P W
+  funext i
+  rcases i with ((((j | j) | u) | j) | u) | u
+  · cases W
+    · exact (clExtend_apply hf w (Sum.inl (Sum.inl j))).symm
+    · exact (clExtend_eq_zero_of_not_mem _ w _ (by
+        rintro ((j' | u') | j') <;> simp [pauliLdIndex])).symm
+  · cases W
+    · exact (clExtend_eq_zero_of_not_mem _ w _ (by
+        rintro ((j' | u') | j') <;> simp [pauliLdIndex])).symm
+    · exact (clExtend_apply hf w (Sum.inl (Sum.inl j))).symm
+  · exact (clExtend_apply hf w (Sum.inl (Sum.inr ()))).symm
+  · exact (clExtend_apply hf w (Sum.inr j)).symm
+  · exact (clExtend_eq_zero_of_not_mem _ w _ (by
+      intro k
+      cases W <;> rcases k with (j' | u') | j' <;> simp [pauliLdIndex])).symm
+  · exact (clExtend_eq_zero_of_not_mem _ w _ (by
+      intro k
+      cases W <;> rcases k with (j' | u') | j' <;> simp [pauliLdIndex])).symm
+
+/-- Formalization-only auxiliary: the typed Pauli point, axis-line, and
+diagonal-line maps are the corresponding low-degree maps reindexed along
+`pauliLdIndex`. -/
+private theorem pauliCL_reindex (P : AdmissibleParams) (W : PauliKind)
+    (L : LdSpace P.toLdParams → LdSpace P.toLdParams) :
+    (fun z : PauliSpace P => embedLd P W (L (pauliToLd P W z))) =
+      fun z => clExtend (pauliLdIndex P W)
+        (L (fun k => z (pauliLdIndex P W k))) := by
+  funext z
+  rw [embedLd_eq, pauliToLd_eq]
+
 /-- Level assertions for the typed Pauli CL maps.  These are Lean-only
 proof obligations corresponding to the prose following `def:pauli-question-distribution`
 (`blueprint/src/chapter/ch13_qpbt_test.tex:285-329`; paper
@@ -258,7 +550,35 @@ proof obligations corresponding to the prose following `def:pauli-question-distr
 -/
 theorem isCondLinear_pauliCL (P : AdmissibleParams) (t : PauliType) :
     IsCondLinearOn (PauliScalar P) Finset.univ (pauliCLLevel t) (pauliCL P t) := by
-  sorry
+  have hshared : IsCondLinearOn (PauliScalar P) Finset.univ 1
+      (pauliSharedProjection (P := P)) :=
+    isCondLinearOn_one_of_linear (pauliSharedProjectionLinear P)
+  cases t with
+  | point W =>
+      show IsCondLinearOn (PauliScalar P) Finset.univ 1
+        (fun z : PauliSpace P =>
+          embedLd P W (ldPointCL P.toLdParams (pauliToLd P W z)))
+      rw [pauliCL_reindex P W (ldPointCL P.toLdParams)]
+      exact isCondLinearOn_reindex (pauliLdIndex_injective P W)
+        (isCondLinear_ldPointCL P.toLdParams)
+  | aline W =>
+      show IsCondLinearOn (PauliScalar P) Finset.univ 2
+        (fun z : PauliSpace P =>
+          embedLd P W (ldALineCL P.toLdParams (pauliToLd P W z)))
+      rw [pauliCL_reindex P W (ldALineCL P.toLdParams)]
+      exact isCondLinearOn_reindex (pauliLdIndex_injective P W)
+        (isCondLinear_ldALineCL P.toLdParams)
+  | dline W =>
+      show IsCondLinearOn (PauliScalar P) Finset.univ 3
+        (fun z : PauliSpace P =>
+          embedLd P W (ldDLineCL P.toLdParams (pauliToLd P W z)))
+      rw [pauliCL_reindex P W (ldDLineCL P.toLdParams)]
+      exact isCondLinearOn_reindex (pauliLdIndex_injective P W)
+        (isCondLinear_ldDLineCL P.toLdParams)
+  | pauli W => exact ⟨.zero, trivial, rfl⟩
+  | pairW W => exact hshared
+  | pair => exact hshared
+  | ms s => exact hshared
 
 /-- A finite edge set for the typed Pauli question graph.  The self-loops and
 the displayed type-incidence families are the graph used by the sampler in
@@ -591,7 +911,11 @@ noncomputable def pauliBasisTest (P : AdmissibleParams) : Game where
   AnswerA := PauliAnswer P
   AnswerB := PauliAnswer P
   μ := pauliQuestionDistribution P
-  μ_prob := by sorry
+  μ_prob := by
+    classical
+    letI : Nonempty PauliEdge := pauliEdge_nonempty
+    exact Distribution.IsProbability.map
+      (uniformDistribution_isProbability (PauliEdge × PauliSpace P)) _
   decide := pauliWinPredicate P
 
 end
