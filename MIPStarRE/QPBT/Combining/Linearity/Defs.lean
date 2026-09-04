@@ -15,7 +15,10 @@ operator BLR, Naimark rounding, and representation stability modules under
 
 ## Main definitions
 
-* `IsBinaryObservable`: a Hermitian operator whose square is the identity.
+* `IsBinaryObservable`: a Hermitian operator whose square is the identity,
+  together with its algebra: the identity is a binary observable, so is the
+  product of two commuting ones, every binary observable is an isometry, and it
+  remains one after ampliation by the identity of another tensor factor.
 * `ancProj`: the rank-one density operator `|v⟩⟨v|` of a vector `v`.
 * `stateDepDistSq`: the squared state-dependent distance
   `d_ρ(S, T)^2 = Re Tr((S - T)^† (S - T) ρ)`.
@@ -46,6 +49,69 @@ This is the finite-matrix realization of `Obs(H)` in `thm:linearity`, blueprint
 def IsBinaryObservable {ι : Type} [Fintype ι] [DecidableEq ι]
     (O : Op ι) : Prop :=
   O.IsHermitian ∧ O * O = 1
+
+namespace IsBinaryObservable
+
+variable {ι : Type} [Fintype ι] [DecidableEq ι] {X Y : Op ι}
+
+/-- A binary observable is self-adjoint. -/
+theorem conjTranspose_eq (hX : IsBinaryObservable X) : Xᴴ = X := hX.1
+
+/-- A binary observable squares to the identity. -/
+theorem mul_self_eq_one (hX : IsBinaryObservable X) : X * X = 1 := hX.2
+
+/-- A binary observable is isometric: being self-adjoint and an involution, its
+adjoint is its own inverse. -/
+theorem isometry (hX : IsBinaryObservable X) : Xᴴ * X = 1 := by
+  rw [hX.conjTranspose_eq, hX.mul_self_eq_one]
+
+/-- The identity is a binary observable. -/
+theorem one : IsBinaryObservable (1 : Op ι) :=
+  ⟨Matrix.isHermitian_one, one_mul 1⟩
+
+/-- The product of two commuting binary observables is a binary observable. -/
+theorem mul (hX : IsBinaryObservable X) (hY : IsBinaryObservable Y)
+    (hcomm : X * Y = Y * X) : IsBinaryObservable (X * Y) := by
+  refine ⟨?_, ?_⟩
+  · rw [Matrix.IsHermitian, Matrix.conjTranspose_mul, hX.conjTranspose_eq,
+      hY.conjTranspose_eq, ← hcomm]
+  · calc X * Y * (X * Y) = X * (Y * X) * Y := by noncomm_ring
+      _ = X * (X * Y) * Y := by rw [hcomm]
+      _ = X * X * (Y * Y) := by noncomm_ring
+      _ = 1 := by rw [hX.mul_self_eq_one, hY.mul_self_eq_one, one_mul]
+
+end IsBinaryObservable
+
+/-- The ampliation `O ⊗ 1` of a binary observable by the identity of a second
+tensor factor is a binary observable.  This is the sense in which the original
+observables `A(a)` act on the extended space in display (8) of
+`references/nv-paper/fullpaper.tex:1083-1086`; it is also the way a Magic Square
+observable of one player acts on the joint space of `thm:ms-rigidity`. -/
+theorem isBinaryObservable_heteroKron_one {ι ι' : Type} [Fintype ι] [DecidableEq ι]
+    [Fintype ι'] [DecidableEq ι'] {O : Op ι} (hO : IsBinaryObservable O) :
+    IsBinaryObservable (heteroKron O (1 : Op ι')) := by
+  unfold heteroKron
+  simp only [Matrix.kronecker]
+  refine ⟨?_, ?_⟩
+  · rw [Matrix.IsHermitian, Matrix.conjTranspose_kronecker, hO.conjTranspose_eq,
+      Matrix.conjTranspose_one]
+  · rw [← Matrix.mul_kronecker_mul, hO.mul_self_eq_one, Matrix.one_mul,
+      Matrix.one_kronecker_one]
+
+/-- The ampliation `1 ⊗ O` of a binary observable by the identity of the first
+tensor factor is a binary observable; this is the mirror of
+`isBinaryObservable_heteroKron_one` for the second player's factor in
+`thm:ms-rigidity`, blueprint `blueprint/src/chapter/ch13_qpbt_test.tex:224-253`. -/
+theorem isBinaryObservable_one_heteroKron {ι ι' : Type} [Fintype ι] [DecidableEq ι]
+    [Fintype ι'] [DecidableEq ι'] {O : Op ι'} (hO : IsBinaryObservable O) :
+    IsBinaryObservable (heteroKron (1 : Op ι) O) := by
+  unfold heteroKron
+  simp only [Matrix.kronecker]
+  refine ⟨?_, ?_⟩
+  · rw [Matrix.IsHermitian, Matrix.conjTranspose_kronecker, hO.conjTranspose_eq,
+      Matrix.conjTranspose_one]
+  · rw [← Matrix.mul_kronecker_mul, hO.mul_self_eq_one, Matrix.one_mul,
+      Matrix.one_kronecker_one]
 
 /-- The rank-one density operator associated with an ancillary vector.  This
 is the state `|anc⟩⟨anc|` of the extension `ρ' = ρ ⊗ |anc⟩⟨anc|` in

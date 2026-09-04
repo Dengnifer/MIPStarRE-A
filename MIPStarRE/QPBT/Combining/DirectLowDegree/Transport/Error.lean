@@ -1,6 +1,6 @@
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Game
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Correspondence
-import MIPStarRE.QPBT.Games.DistanceTheorems.Support
+import MIPStarRE.QPBT.Games.DistanceTheorems.TensorSupport
 import MIPStarRE.LDT.Test.MainTheorem.ScalarBounds.EnvelopeBounds
 
 /-!
@@ -607,57 +607,9 @@ tensor factors of a unit bipartite state.  Since the joint Born weights are
 nonnegative and sum to one, that mass is at most one; combined with the two
 lower bounds on `deltaLd` above this closes the regimes `1 ≤ ε` and `q ≤ d`.
 
-The three lemmas of this section are formalization-only.  They are generic
-statements about `consistencyDefect` rather than about the low-degree game,
-and would naturally live in `MIPStarRE/QPBT/Games/DistanceTheorems.lean`. -/
-
-private theorem sum_heteroKron_one_right {α ιA ιB : Type*} [Fintype α]
-    [Fintype ιA] [DecidableEq ιA] [DecidableEq ιB]
-    (M : Quantum.Measurement α ιA) :
-    (∑ a : α, heteroKron (M.effect a) (1 : Op ιB)) = 1 := by
-  ext i j
-  simp only [Matrix.sum_apply, heteroKron, Matrix.kronecker,
-    Matrix.kroneckerMap_apply]
-  rw [← Finset.sum_mul]
-  rw [show (∑ a : α, M.effect a i.1 j.1) = (1 : Op ιA) i.1 j.1 by
-    simpa only [Matrix.sum_apply] using congrFun (congrFun M.sum_eq_one i.1) j.1]
-  exact congrFun (congrFun
-    (Matrix.one_kronecker_one (m := ιA) (n := ιB) (α := ℂ)) i) j
-
-private theorem sum_heteroKron_one_left {α ιA ιB : Type*} [Fintype α]
-    [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
-    (N : Quantum.Measurement α ιB) :
-    (∑ a : α, heteroKron (1 : Op ιA) (N.effect a)) = 1 := by
-  ext i j
-  simp only [Matrix.sum_apply, heteroKron, Matrix.kronecker,
-    Matrix.kroneckerMap_apply]
-  rw [← Finset.mul_sum]
-  rw [show (∑ a : α, N.effect a i.2 j.2) = (1 : Op ιB) i.2 j.2 by
-    simpa only [Matrix.sum_apply] using congrFun (congrFun N.sum_eq_one i.2) j.2]
-  exact congrFun (congrFun
-    (Matrix.one_kronecker_one (m := ιA) (n := ιB) (α := ℂ)) i) j
-
-/-- Alice's measurement seen on the bipartite space, by tensoring with the
-identity on Bob's space.  Formalization-only. -/
-private noncomputable def leftKronMeasurement {α ιA ιB : Type*} [Fintype α]
-    [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
-    (M : Quantum.Measurement α ιA) : Quantum.Measurement α (ιA × ιB) where
-  effect a := heteroKron (M.effect a) 1
-  pos a := kronecker_nonneg (M.pos a)
-    (Matrix.nonneg_iff_posSemidef.mpr Matrix.PosSemidef.one)
-  sum_le_one := le_of_eq (sum_heteroKron_one_right M)
-  sum_eq_one := sum_heteroKron_one_right M
-
-/-- Bob's measurement seen on the bipartite space, by tensoring with the
-identity on Alice's space.  Formalization-only. -/
-private noncomputable def rightKronMeasurement {α ιA ιB : Type*} [Fintype α]
-    [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
-    (N : Quantum.Measurement α ιB) : Quantum.Measurement α (ιA × ιB) where
-  effect a := heteroKron 1 (N.effect a)
-  pos a := kronecker_nonneg
-    (Matrix.nonneg_iff_posSemidef.mpr Matrix.PosSemidef.one) (N.pos a)
-  sum_le_one := le_of_eq (sum_heteroKron_one_left N)
-  sum_eq_one := sum_heteroKron_one_left N
+The theorem below is formalization-only.  It is a generic statement about
+`consistencyDefect` rather than about the low-degree game, and would naturally
+live in `MIPStarRE/QPBT/Games/DistanceTheorems.lean`. -/
 
 /-- Coarse bound on the consistency defect of a bipartite pair of measurement
 families on a unit state: the off-diagonal Born mass is at most one.
@@ -681,7 +633,8 @@ theorem consistencyDefect_heteroKron_le_one {X α ιA ιB : Type*}
         DistanceCalculus.stateQForm ψ
           (heteroKron ((A x).effect a) 1 * heteroKron 1 ((B x).effect a))) :=
     DistanceCalculus.consistencyDefect_eq_one_sub_overlap μ
-      (fun x => leftKronMeasurement (A x)) (fun x => rightKronMeasurement (B x))
+      (fun x => DistanceCalculus.leftPlacedMeasurement (A x))
+      (fun x => DistanceCalculus.rightPlacedMeasurement (B x))
       ψ hμ hψ
   have hnn : 0 ≤ avgOver μ (fun x => ∑ a : α,
       DistanceCalculus.stateQForm ψ
