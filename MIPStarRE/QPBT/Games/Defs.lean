@@ -120,13 +120,57 @@ noncomputable def applyOperatorToState {ι : Type*} [Fintype ι] [DecidableEq ι
 
 /-- The Born weight of an answer pair for a strategy.  Lean-only support for
 `def:tensor-product-value`, blueprint `ch12_qpbt_games.tex:71-82`, paper
-`references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:219-271`. -/
-private noncomputable def outcomeWeight {G : Game} (S : Strategy G)
+`references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:40-48`. -/
+noncomputable def outcomeWeight {G : Game} (S : Strategy G)
     (x : G.QuestionA) (y : G.QuestionB) (a : G.AnswerA) (b : G.AnswerB) : ℝ :=
   let M : MIPStarRE.Quantum.Op (S.ιA × S.ιB) :=
     heteroKron ((S.A x).effect a) ((S.B y).effect b)
   let acted := applyOperatorToState M S.ψ
   (inner ℂ S.ψ acted).re
+
+/-- Every answer-pair Born weight is nonnegative.  This is formalization-only
+support for the probability expression in `def:tensor-product-value`. -/
+theorem outcomeWeight_nonneg {G : Game} (S : Strategy G)
+    (x : G.QuestionA) (y : G.QuestionB) (a : G.AnswerA) (b : G.AnswerB) :
+    0 ≤ outcomeWeight S x y a b := by
+  unfold outcomeWeight applyOperatorToState heteroKron
+  exact
+    (Matrix.isPositive_toEuclideanLin_iff.mpr
+      (Matrix.nonneg_iff_posSemidef.mp
+        (kronecker_nonneg ((S.A x).pos a) ((S.B y).pos b)))).re_inner_nonneg_right S.ψ
+
+/-- The Born weights of all answer pairs at fixed questions sum to one.  This
+is formalization-only support for the POVM normalization implicit in
+`def:tensor-product-value`. -/
+theorem outcomeWeight_sum_eq_one {G : Game} (S : Strategy G)
+    (x : G.QuestionA) (y : G.QuestionB) :
+    ∑ a : G.AnswerA, ∑ b : G.AnswerB, outcomeWeight S x y a b = 1 := by
+  have hsum :
+      (∑ a : G.AnswerA, ∑ b : G.AnswerB,
+        heteroKron ((S.A x).effect a) ((S.B y).effect b)) =
+          (1 : Op (S.ιA × S.ιB)) := by
+    ext i j
+    simp only [Matrix.sum_apply, heteroKron, Matrix.kronecker,
+      Matrix.kroneckerMap_apply]
+    simp_rw [← Finset.mul_sum, ← Finset.sum_mul]
+    rw [show (∑ a : G.AnswerA, (S.A x).effect a i.1 j.1) =
+        (1 : Op S.ιA) i.1 j.1 by
+      simpa only [Matrix.sum_apply] using congrFun (congrFun (S.A x).sum_eq_one i.1) j.1]
+    rw [show (∑ b : G.AnswerB, (S.B y).effect b i.2 j.2) =
+        (1 : Op S.ιB) i.2 j.2 by
+      simpa only [Matrix.sum_apply] using congrFun (congrFun (S.B y).sum_eq_one i.2) j.2]
+    exact congrFun (congrFun
+      (Matrix.one_kronecker_one (m := S.ιA) (n := S.ιB) (α := ℂ)) i) j
+  calc
+    ∑ a : G.AnswerA, ∑ b : G.AnswerB, outcomeWeight S x y a b =
+        (inner ℂ S.ψ
+          (applyOperatorToState
+            (∑ a : G.AnswerA, ∑ b : G.AnswerB,
+              heteroKron ((S.A x).effect a) ((S.B y).effect b)) S.ψ)).re := by
+          simp [outcomeWeight, applyOperatorToState]
+    _ = (inner ℂ S.ψ (applyOperatorToState 1 S.ψ)).re := by rw [hsum]
+    _ = 1 := by
+      simp [applyOperatorToState, S.ψ_norm]
 
 /--
 The tensor-product value, expressed as the distribution average of the Born
