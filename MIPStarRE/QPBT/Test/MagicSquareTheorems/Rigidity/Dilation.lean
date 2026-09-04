@@ -823,12 +823,17 @@ theorem norm_applyOperatorToState_heteroKron_naimarkInflation
       ‖applyOperatorToState (heteroKron M N) ψ‖ := by
   rw [applyOperatorToState_heteroKron_naimarkInflation, naimarkDilatedState_norm]
 
-/-- Transfer of state-dependent effect bounds.  Every average squared distance
-between two families of inflated operators, measured on the dilated state, is
-the corresponding distance between the original families measured on the
-original state; a bound obtained for the dilated strategy is therefore a bound
-for the strategy one started from.  Blueprint `ch13_qpbt_test.tex:224-253`,
-paper `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652`. -/
+/-- Every average squared distance between two families of *inflated*
+operators, measured on the dilated state, is the corresponding distance between
+the original families measured on the original state.  This identity concerns
+inflations only: the dilated projectors of `msDilatedStrategy` are not
+inflations, and their difference from the inflated original effects on the
+dilated state is the leakage out of the ground slice, which is controlled in
+`Rigidity/Transfer.lean` (`ms_effect_transfer_A`, `ms_effect_transfer_B`,
+`ms_anticommutator_transfer_A`, `ms_anticommutator_transfer_B`) by the
+cell-consistency masses of the value-to-parity layer.  Blueprint
+`ch13_qpbt_test.tex:224-253`, paper
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652`. -/
 theorem opFamilyDistSq_naimarkInflation (α : Type) [Fintype α] [DecidableEq α]
     {X γ ιA ιB : Type} [Fintype γ] [Fintype ιA] [DecidableEq ιA]
     [Fintype ιB] [DecidableEq ιB]
