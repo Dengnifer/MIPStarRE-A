@@ -114,29 +114,44 @@ theorem prod_phaseSign_binTrace_dotProduct {ι : Type*} [Fintype ι]
   congr 2
   simp [dotProduct]
 
-omit [DecidableEq K] [Algebra (ZMod 2) K] in
-private theorem inv_sqrt_card_mul_self :
-    (Real.sqrt (Fintype.card K : ℝ) : ℂ)⁻¹ *
-        (Real.sqrt (Fintype.card K : ℝ) : ℂ)⁻¹ =
-      (Fintype.card K : ℂ)⁻¹ := by
-  have hcard : 0 < (Fintype.card K : ℝ) := by positivity
-  calc
-    (Real.sqrt (Fintype.card K : ℝ) : ℂ)⁻¹ *
-          (Real.sqrt (Fintype.card K : ℝ) : ℂ)⁻¹ =
-        ((Real.sqrt (Fintype.card K : ℝ) : ℂ) ^ 2)⁻¹ := by
-      rw [pow_two, mul_inv_rev]
-    _ = ((Fintype.card K : ℝ) : ℂ)⁻¹ := by
-      rw [← Complex.ofReal_pow, Real.sq_sqrt hcard.le]
-    _ = (Fintype.card K : ℂ)⁻¹ := by norm_num
+/-- The complex amplitude `(√n)⁻¹` normalizing a uniform superposition over `n`
+basis vectors squares to `n⁻¹`.
 
-omit [DecidableEq K] [Algebra (ZMod 2) K] in
+This formalization-only normalization identity supports the Pauli normalizer
+of `def:EPR`, blueprint `ch11_qpbt_algebra.tex:494-528`, paper origin
+`references/qpbt-paper/04_preliminaries.tex:908-950`, and the seed-fiber and
+correlated-ancilla amplitudes of the direct low-degree transport. -/
+theorem inv_sqrt_natCast_mul_self (n : ℕ) :
+    (Real.sqrt (n : ℝ) : ℂ)⁻¹ * (Real.sqrt (n : ℝ) : ℂ)⁻¹ =
+      (n : ℂ)⁻¹ := by
+  calc
+    (Real.sqrt (n : ℝ) : ℂ)⁻¹ * (Real.sqrt (n : ℝ) : ℂ)⁻¹ =
+        ((Real.sqrt (n : ℝ) : ℂ) ^ 2)⁻¹ := by
+      rw [pow_two, mul_inv_rev]
+    _ = ((n : ℝ) : ℂ)⁻¹ := by
+      rw [← Complex.ofReal_pow, Real.sq_sqrt (Nat.cast_nonneg n)]
+    _ = (n : ℂ)⁻¹ := by norm_num
+
+/-- Conjugated form of `inv_sqrt_natCast_mul_self`: the normalizing amplitude
+`(√n)⁻¹` is real, so pairing it with its conjugate again gives `n⁻¹`.  This
+formalization-only auxiliary is the form in which the identity occurs in Born
+amplitudes, where the bra side carries the conjugate. -/
+theorem inv_sqrt_natCast_mul_conj (n : ℕ) :
+    (Real.sqrt (n : ℝ) : ℂ)⁻¹ *
+        (starRingEnd ℂ) (Real.sqrt (n : ℝ) : ℂ)⁻¹ =
+      (n : ℂ)⁻¹ := by
+  rw [show (starRingEnd ℂ) (Real.sqrt (n : ℝ) : ℂ)⁻¹ =
+      (Real.sqrt (n : ℝ) : ℂ)⁻¹ by simp]
+  exact inv_sqrt_natCast_mul_self n
+
+omit [Field K] [DecidableEq K] [Algebra (ZMod 2) K] in
 private theorem pauliNormalizer_mul_self {ι : Type*} [Fintype ι]
     [DecidableEq ι] :
     (∏ _i : ι, (Real.sqrt (Fintype.card K : ℝ) : ℂ)⁻¹) *
         (∏ _i : ι, (Real.sqrt (Fintype.card K : ℝ) : ℂ)⁻¹) =
       (Fintype.card (ι → K) : ℂ)⁻¹ := by
   simp only [Finset.prod_const, Finset.card_univ]
-  rw [← mul_pow, inv_sqrt_card_mul_self, inv_pow, Fintype.card_fun]
+  rw [← mul_pow, inv_sqrt_natCast_mul_self, inv_pow, Fintype.card_fun]
   norm_cast
 
 omit [Fintype K] [DecidableEq K] in
