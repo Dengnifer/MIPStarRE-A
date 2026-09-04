@@ -166,6 +166,19 @@ class PreCommitBudgetTests(unittest.TestCase):
         self.assertIn("non-main merge", result.stdout)
         self.assertIn("staged workflow-layer change is 401 lines", result.stdout)
 
+    def test_ready_packets_test_growth_is_budgeted(self) -> None:
+        repo, _ = self.new_repo()
+        path = "scripts/tests/test_ready_packets.py"
+        target = repo / path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text("line\n" * 401, encoding="utf-8")
+        self.git(repo, "add", path)
+
+        result = self.run_hook(repo)
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("staged workflow-layer change is 401 lines", result.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

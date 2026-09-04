@@ -150,40 +150,25 @@ Repository: `Dengnifer/MIPStarRE-A`. Operator: the codex (gpt-5.6-sol) session
 - Owner: hand Fable provers over to Opus and codex; no prover uses Fable from now on; Opus and codex subagents roughly 1:1; codex concurrency should saturate the track-A limit of 7. The three Fable sessions in flight (#131, #109 provers; #149 pull-back repair) run to completion; successors alternate Opus/codex. Codex cap fixed at 7 via watchdog/max-codex (lane-v11.sh, rerun_review-v6.sh read it).
 - 11:10Z: owner asked the in-flight Fable sessions to hand over rather than run to completion. #109 (2 of 4 targets) and the #149 pull-back repair had already finished; the #131 prover was told to commit a compiling state, write watchdog/lanes/131.handover.md (proved/open goals, plan, useful lemmas, dead ends, conventions, estimate) and stop; an Opus prover resumes from the note.
 - 11:12Z: owner: for all other subagent roles, use Opus wherever it is capable (Fable only as fallback).
-
 ### 2026-09-04 11:25Z - pre-push hook exit 141 after ok
-
 - Five lane tails (63, 98, 102, 106, 108) failed at push although the pre-push gate printed ok; by hand git push exits 141 (SIGPIPE) with no GitHub rejection. Filed 157. Workaround: pushed those five branches with --no-verify after confirming the ok line in each push log, then relaunched their lane tails (CI and review still run on the pushed heads). Also: PR #147 (#130) merged; #131 proved all targets (Fable, handed over per owner request); #133 and #156 to Opus provers.
 - 11:38Z: lane-v12 works around the pre-push hook (#157): the fallback path runs .githooks/pre-push by hand, requires its ok line, then pushes with MIPSTARRE_SKIP_HOOKS=1; merge daemon v5 uses it for refresh lanes.
-
 ### 2026-09-04 11:55Z - packet tree and issue dependencies (#159)
-
 - Owner asked whether to learn from LionSR/MIPStarRE issue trees (#449). Opus study (archived in the session record): upstream uses native sub-issues for containment and roll-up only; readiness stays prose. Decision: adopt the chapter/chain parent layer under #47 AND GitHub issue dependencies (blocked_by, live on this plan, unused) so ready packets are computed, not hand-read. Filed #159; an Opus orc is doing the GitHub restructuring and local/bin/ready_packets.py (workflow-layer PR).
 - 12:05Z: owner request: every 8 h post (1) percent implemented and (2) days to go, concisely. Pinned issue #168 (two-line posts) + results/telemetry/estimates.jsonl; cron 0 */8 * * * ~/bin/estimate.sh (owner-tools/estimate.sh). First post: 33%, 2.0 days (count-based); operator judgement 3-5 days.
-
 ### 2026-09-04 12:40Z - Magic Square rigidity statement refuted; Claude pause
-
 - 12:14Z: owner: no new Claude subagents until about 14:15Z (5-hour Claude limit at 88%); running Opus agents may finish; codex only meanwhile. Operator continues with lane tails, codex repairs (PR 150: 11 findings; PR 154: 1 finding) and stacked codex packets #114 and #112 on the #111 branch.
 - 12:36Z: Opus prover for #105 refused to assemble `exists_ms_rigidity`: a role-symmetrized two-copy perfect strategy violates the conclusions at eps = 0 (report on #105). Paper check: the theorem is applied in section 14 only to symmetric strategies and only for the anticommutation conclusion. Filed on #26 with the operator recommendation (restrict to symmetric strategies; route #115 to #103's anticommutation theorem). #105 parked; #102-#104 PRs continue.
 - 12:24Z: lane 112 was launched while its worktree still held a conflicted merge of the #110 branch; the lane was killed, but its codex worker had already started. The merge was aborted under it and a watcher runs the lane tail when the worker exits. Lesson: create and verify a stacked worktree before launching its lane.
 - 12:26Z: #133 (Opus, all targets proved, explicit constants a = 2.5e9*C0, b = 1/80000) opened PR 170 stacked on PR 161.
 - 12:58Z: owner: learn from the proof-gap protocol (docs/paper-gaps/proof-gap-protocol.tex, inherited from LionSR/MIPStarRE and identical to upstream); every source-paper gap (wrong mathematics) must be recorded as a paper-gap note and fixed in the blueprint. Applied at once to the Magic Square rigidity gap as packet #172 (codex lane, review on) and filed the register/audit of all QPBT gap notes as #173 (to run when a slot frees; Opus after 14:15Z).
-
 ## 2026-09-04 — Hand-back to the codex main session (2026-09-04T13:03:08Z), planned takeover 14:50Z
-
 Owner command at 12:53Z (Claude 5-hour limit at 95%): hand back in 10 minutes, take over again
 at 14:50Z and then dispatch Opus and codex subagents at about 1:1. The merge daemon, stack-watch,
 the 112 watcher and all detached lanes keep running across the hand-back; codex main is told not
 to merge by hand. Handoff: results/telemetry/owner-messages/handoff-to-codex-main-*.md.
-
 ## 2026-09-04 — Owner session takes the operator role (2026-09-04T14:57:57Z)
-
-- **Why:** after the stall and reviewer-churn episode the owner asked the
-  Claude session to run the operator loop itself for one to two days, with
-  codex worker sessions on ghz unchanged.
-- **How:** codex main session posted its handover state to #27 and quit;
-  telemetry `stages.jsonl` event=takeover; astra availability polled hourly
-  by `owner-tools/astra-poll.sh` (cron :37); the stall watchdog keeps running
-  and now nudges the owner session through #26 rather than a tmux pane.
-- **Hand-back:** on the owner's word; recorded as event=handback with the
-  state at that moment.
+### 2026-09-04 14:56Z - Takeover after the Claude window reset (planned at 12:53Z)
+- 14:52Z: the scheduled takeover fired; codex main posted its exact in-flight state to #27 (comments 5542210401 and 5542293871) and exited at 14:56Z; takeover-telemetry.sh recorded event=takeover (its boilerplate text describes the 2026-09-03 takeover; this entry is the accurate one). Mode 1 window 13:03Z-14:56Z merged PRs 151, 154, 171, 158 (adjudicated at the round cap, findings deferred to #176, #177, #180-#182), adjudicated PR 149 (deferred to #183), opened PRs 175, 178, 179, 184, 185 and closed #124, #125, #127, #128.
+- 14:59Z: owner: track B is discarded; track A uses the full codex concurrency of 10 (watchdog/max-codex = 10). Mode 2 resumes with Opus and codex subagents at about 1:1.
+- 15:26Z: owner decision B4 (#26): option A — thm:ms-rigidity / exists_ms_rigidity restricted to symmetric strategies, recorded as a paper-gap note and fixed in the blueprint (#172, Opus); routing yes — #115 onward consume the #103 anticommutation theorem, #105/#77 edges removed from #115. #26 was reformatted at the owner's request (open-decisions table in the body, B-ids, outdated comments hidden).
