@@ -27,7 +27,7 @@ noncomputable section
 
 /-! ## Equality of the two consistency formulations -/
 
--- The following exported identities identify pure-state expectation with the
+-- The following identities identify pure-state expectation with the
 -- Euclidean quadratic form used in the consistency calculations below.  They
 -- send a pure state to its Euclidean coordinate vector and identify the
 -- quadratic form of that vector with evaluation in the associated density
@@ -130,8 +130,7 @@ private theorem quantumState_ext
           subst sigma
           rfl
 
-/-- The pure state carried by a game strategy, expressed in the LDT
-state interface. -/
+/-- The pure state carried by a game strategy, regarded as an LDT pure state. -/
 noncomputable def gameStrategyPureState {G : Game} (S : Strategy G) :
     letI : Nonempty (S.ιA × S.ιB) :=
       (strategyQuantumState_isNormalized S).nonempty

@@ -77,29 +77,6 @@ theorem directPointPolynomial_consistencyDefect_eq
         (ldtPointAPlaced D S hS r)
         (ldtPolynomialEvaluationRight D G) S.ψ
 
-/-- Express the LDT point/global `ConsRel` conclusion as a vector-state
-QPBT defect bound. -/
-theorem ldtPointPolynomial_consistencyDefect_le
-    (D : DirectLdParams) (S : Strategy (directLdGame D))
-    (hS : S.IsProjective) (r : Fin D.k) :
-    letI := D.toLDTFieldModel
-    ∀ (G : ProjMeas (MIPStarRE.LDT.Polynomial D.toLDTParameters) S.ιB)
-      (delta : ℝ),
-      ConsRel (strategyQuantumState S)
-          (uniformDistribution (Point D.toLDTParameters))
-          (fun u => (ldtCoordinatePointMeasurementA D S hS r u).toSubMeas)
-          (fun u => (ldtPolynomialEvaluationMeasurement D G u).toSubMeas) delta →
-        consistencyDefect (uniformDistribution (Point D.toLDTParameters))
-          (ldtPointAPlaced D S hS r)
-          (ldtPolynomialEvaluationRight D G) S.ψ ≤ delta := by
-  letI := D.toLDTFieldModel
-  intro G delta h
-  exact strategyConsRel_consistencyDefect_le S
-    (uniformDistribution (Point D.toLDTParameters))
-    (uniformDistribution_isProbability (Point D.toLDTParameters))
-    (ldtCoordinatePointMeasurementA D S hS r)
-    (ldtPolynomialEvaluationMeasurement D G) delta h
-
 /-- Convert the point-on-Alice/global-on-Bob conclusion of `LDT.Test.mainFormal`
 for one simultaneous coordinate to the direct QPBT defect, with the identical
 numerical bound. -/
@@ -123,19 +100,18 @@ theorem directPointPolynomial_consistencyDefect_le
           S.ψ ≤ delta := by
   letI := D.toLDTFieldModel
   intro G delta h
-  have hldt :
-      consistencyDefect (uniformDistribution (Point D.toLDTParameters))
-        (ldtPointAPlaced D S hS r)
-        (ldtPolynomialEvaluationRight D G) S.ψ ≤ delta := by
-    apply ldtPointPolynomial_consistencyDefect_le D S hS r G delta
-    change ConsRel (directCoordinateProjStrat D S hS r).state
-      (uniformDistribution (Point D.toLDTParameters))
-      (IdxProjMeas.toIdxSubMeas
-        (directCoordinateProjStrat D S hS r).pointMeasurementA)
-      (polynomialEvaluationFamily D.toLDTParameters G.toSubMeas) delta
-    exact h
   rw [directPointPolynomial_consistencyDefect_eq D S hS r G]
-  exact hldt
+  apply strategyConsRel_consistencyDefect_le S
+    (uniformDistribution (Point D.toLDTParameters))
+    (uniformDistribution_isProbability (Point D.toLDTParameters))
+    (ldtCoordinatePointMeasurementA D S hS r)
+    (ldtPolynomialEvaluationMeasurement D G) delta
+  change ConsRel (directCoordinateProjStrat D S hS r).state
+    (uniformDistribution (Point D.toLDTParameters))
+    (IdxProjMeas.toIdxSubMeas
+      (directCoordinateProjStrat D S hS r).pointMeasurementA)
+    (polynomialEvaluationFamily D.toLDTParameters G.toSubMeas) delta
+  exact h
 
 /-- The direct single-coordinate global/point defect is exactly the LDT
 defect after the polynomial, point, and scalar equivalences. -/
@@ -307,11 +283,29 @@ theorem directPolynomialPolynomial_consistencyDefect_le
   rw [directPolynomialPolynomial_consistencyDefect_eq D S GA GB, heq]
   exact hldt
 
-/-- Former name of `ldtPointPolynomial_consistencyDefect_le`, kept for the
-stacked branch of issue #134. -/
-@[deprecated (since := "2026-09-05")]
-alias maturePointPolynomial_consistencyDefect_le :=
-  ldtPointPolynomial_consistencyDefect_le
+/-- Deprecated specialization of `strategyConsRel_consistencyDefect_le` for
+Alice's LDT point family and Bob's polynomial-evaluation family. -/
+@[deprecated strategyConsRel_consistencyDefect_le (since := "2026-09-05")]
+theorem maturePointPolynomial_consistencyDefect_le
+    (D : DirectLdParams) (S : Strategy (directLdGame D))
+    (hS : S.IsProjective) (r : Fin D.k) :
+    letI := D.toLDTFieldModel
+    ∀ (G : ProjMeas (MIPStarRE.LDT.Polynomial D.toLDTParameters) S.ιB)
+      (delta : ℝ),
+      ConsRel (strategyQuantumState S)
+          (uniformDistribution (Point D.toLDTParameters))
+          (fun u => (ldtCoordinatePointMeasurementA D S hS r u).toSubMeas)
+          (fun u => (ldtPolynomialEvaluationMeasurement D G u).toSubMeas) delta →
+        consistencyDefect (uniformDistribution (Point D.toLDTParameters))
+          (ldtPointAPlaced D S hS r)
+          (ldtPolynomialEvaluationRight D G) S.ψ ≤ delta := by
+  letI := D.toLDTFieldModel
+  intro G delta h
+  exact strategyConsRel_consistencyDefect_le S
+    (uniformDistribution (Point D.toLDTParameters))
+    (uniformDistribution_isProbability (Point D.toLDTParameters))
+    (ldtCoordinatePointMeasurementA D S hS r)
+    (ldtPolynomialEvaluationMeasurement D G) delta h
 
 end
 
