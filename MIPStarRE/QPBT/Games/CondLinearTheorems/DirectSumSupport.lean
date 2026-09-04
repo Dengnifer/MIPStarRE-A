@@ -14,11 +14,11 @@ finite coordinate direct sums, which are proved in
 ## References
 
 The source result is `lem:cl-func-prod` in
-`blueprint/src/chapter/ch12_qpbt_games.tex:1255-1266`, approached through the
+`blueprint/src/chapter/ch12_qpbt_games.tex:1267-1278`, approached through the
 formalization support nodes `lem:cl-supported-vanishing`,
 `lem:cl-restriction-idem`, `lem:cl-restriction-sum`,
 `lem:cl-supported-restriction`, and `lem:cl-func-prod-same-level` at
-`ch12_qpbt_games.tex:1288-1344`.  The paper origin is
+`ch12_qpbt_games.tex:1300-1356`.  The paper origin is
 `references/qpbt-paper/05_conditionally_linear_functions.tex:150-379`.
 -/
 
