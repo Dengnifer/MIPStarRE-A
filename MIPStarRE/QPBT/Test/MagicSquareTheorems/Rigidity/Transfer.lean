@@ -78,7 +78,7 @@ theorem sum_stateQForm_reverse_eq (S : Strategy msGame) (i : Fin 6) (k : Fin 3) 
     · rw [heteroKron_finset_sum_right, stateQForm_finset_sum, Finset.sum_filter]
       rfl
     · simp
-  have htotal := outcome_weight_sum_eq_one S (.var (msConstraintVars i k)) (.constraint i)
+  have htotal := outcomeWeight_sum_eq_one S (.var (msConstraintVars i k)) (.constraint i)
   unfold reverseCellMismatchMass outcomeEventWeight
   simp_rw [hterm]
   rw [Finset.sum_comm, eq_sub_iff_add_eq, ← htotal, ← Finset.sum_add_distrib]
@@ -117,7 +117,7 @@ theorem sum_stateQForm_forward_eq (S : Strategy msGame) (i : Fin 6) (k : Fin 3) 
     · rw [heteroKron_finset_sum_right, stateQForm_finset_sum, Finset.sum_filter]
       rfl
     · simp
-  have htotal := outcome_weight_sum_eq_one S (.constraint i) (.var (msConstraintVars i k))
+  have htotal := outcomeWeight_sum_eq_one S (.constraint i) (.var (msConstraintVars i k))
   unfold forwardCellMismatchMass outcomeEventWeight
   simp_rw [hterm]
   rw [Finset.sum_comm, eq_sub_iff_add_eq, ← htotal, ← Finset.sum_add_distrib]
