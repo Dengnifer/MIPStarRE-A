@@ -319,10 +319,13 @@ theorem dLinePointDist_prefix_zero (L : LdParams) :
   obtain ⟨s, -, rfl⟩ := Finset.mem_image.mp hsample
   exact LineDesc.diagonal_prefix_zero (dLineDescOf L s.1) rfl
 
-/-- The low-degree question sampler is the typed conditionally linear
-distribution on the complete type graph. This is `lem:ld-question-typed-cl`,
-blueprint `ch13_qpbt_test.tex:85-95`, which identifies the sampler with
-`def:typed-cl-distributions` (`ch12_qpbt_games.tex:1400-1404`); paper
+/-- The low-degree question sampler equals the distribution that the
+construction of `def:typed-cl-distributions` (`ch12_qpbt_games.tex:1400-1404`)
+produces from the family `ldCL` on the complete type graph. This is the
+distribution identity of `lem:ld-question-typed-cl`, blueprint
+`ch13_qpbt_test.tex:85-95`; the assertion that `ldCL` is a typed family of
+conditionally linear maps of one common level is not proved here, and that
+open obligation is tracked by issue #180. Paper
 `references/qpbt-paper/07_types.tex:84-94`. -/
 theorem ldQuestionDistribution_eq_typedCL (L : LdParams) :
     ldQuestionDistribution L =

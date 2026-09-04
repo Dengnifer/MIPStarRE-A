@@ -24,8 +24,8 @@ namespace MIPStarRE.QPBT
 
 open MIPStarRE.LDT
 
-/-- Add one empty first stage to a representation of a conditionally linear
-function. -/
+/-- Raise a representation of a conditionally linear function by one level,
+whose linear contribution is zero. -/
 private def CondLinearTerm.raiseLevel {K ι : Type*} [Field K]
     [Fintype ι] [DecidableEq ι] {ell : ℕ}
     (t : CondLinearTerm K (ι := ι) ell) : CondLinearTerm K (ι := ι) (ell + 1) :=
@@ -46,7 +46,7 @@ private theorem CondLinearTerm.raiseLevel_supportedOn {K ι : Type*} [Field K]
   exact ⟨Finset.empty_subset S, fun _ => by simpa using ht⟩
 
 /-- Raise a representation of a conditionally linear function by a specified
-number of empty stages. -/
+number of levels, each with zero linear contribution. -/
 private def CondLinearTerm.raiseBy {K ι : Type*} [Field K]
     [Fintype ι] [DecidableEq ι] :
     (d : ℕ) → {ell : ℕ} → CondLinearTerm K (ι := ι) ell →
@@ -103,8 +103,8 @@ private theorem IsCondLinearOn.apply_coordinateRestriction {K ι : Type*} [Field
   rw [← congrFun ht_eval, CondLinearTerm.eval_coordinateRestriction ht,
     congrFun ht_eval]
 
-/-- Prepend one supported linear stage to a family of residual
-conditionally-linear maps. -/
+/-- Prepend a first-level linear contribution, supported on one register, to a
+family of residual conditionally linear maps indexed by its value. -/
 private theorem IsCondLinearOn.cons {K ι : Type*} [Field K]
     [Fintype ι] [DecidableEq ι] {S S₁ : Finset ι} {ell : ℕ}
     (L₁ : (ι → K) →ₗ[K] (ι → K))
