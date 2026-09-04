@@ -13,14 +13,16 @@ degree test to a projective measurement `{C^u}` on the enlarged space
 again `{B^u}`.  The signed character sums `L^a = ∑_u (-1)^{u·a} C^u` are then
 binary observables satisfying the exact linearity `L^a L^b = L^{a+b}`.
 
-The one-measurement Naimark construction produces projectors indexed by
-`Option (F_2^t)`: one for each Fourier outcome and one for the residual outcome
-`none`.  Discarding the residual projector would destroy the resolution of the
-identity on the enlarged space, and with it the multiplicativity of the signed
-sums.  It is therefore folded into the zero Fourier outcome: the projector
-attached to `u = 0` is the complement of the sum of the projectors attached to
-the nonzero outcomes.  Since the Fourier-square effects themselves sum to the
-identity, the folded projector still compresses to `B^0`.
+The one-measurement Naimark construction produces a projective submeasurement
+indexed by `Option (F_2^t)`: one projector for each Fourier outcome and one for
+the residual outcome `none`.  Its projectors sum only to at most the identity,
+so the Fourier-indexed ones alone need not resolve the identity on the enlarged
+space, and the signed character sums of a family that does not resolve the
+identity are not multiplicative.  The zero Fourier outcome is therefore enlarged
+to the complement of the sum of the projectors attached to the nonzero outcomes;
+that complement is again a projector orthogonal to the others, and it absorbs
+the residual outcome.  Since the Fourier-square effects themselves sum to the
+identity, the enlarged zero projector still compresses to `B^0`.
 
 ## Main definitions and results
 
@@ -28,12 +30,15 @@ identity, the folded projector still compresses to `B^0`.
   canonical ancillary unit vector and its rank-one density.
 * `roundedFourierPVM` with `roundedFourierPVM_isProj`,
   `roundedFourierPVM_sum_eq_one`, `roundedFourierPVM_mul_eq_zero_of_ne`, and
-  `trace_heteroKron_mul_roundedFourierPVM`: the dilated projective measurement
+  `trace_heteroKron_mul_roundedFourierPVM`: the dilated family of projectors
   and its compression to the Fourier-square POVM.
+* `roundedFourierMeasurement` with `roundedFourierMeasurement_effect` and
+  `roundedFourierMeasurement_isProjective`: that family bundled as a projective
+  measurement with outcomes in `F_2^t`.
 * `roundedObservable` with `roundedObservable_mul` and
   `roundedObservable_isBinaryObservable`: the exactly linear binary observables.
 * `trace_heteroKron_mul_roundedObservable`: the compression of the rounded
-  observables, in the form consumed by the averaged distance bound.
+  observables, in the form used to prove the averaged distance bound.
 
 ## References
 
@@ -87,9 +92,12 @@ theorem ancProj_naimarkAncilla (t : ℕ) :
 `{B^u}`, supplied by `oneMeasNaimark`: a family of projectors on
 `ι × Option (F_2^t)`, indexed by `Option (F_2^t)`, summing to at most the
 identity and reproducing every expectation value of `{B^u}` in the lifted
-state.  This is the projective measurement produced by Naimark's theorem at
-`references/nv-paper/fullpaper.tex:1099-1100`, before the residual outcome is
-folded into the zero outcome. -/
+state.  The signature supplies only `∑ a, P̂_a ≤ 1`, so this is the projective
+submeasurement supplied by the one-measurement Naimark dilation of
+`references/nv-paper/fullpaper.tex:1099-1100`; completeness holds only once the
+zero Fourier outcome has been enlarged to the complement of the nonzero ones,
+and is recorded for the resulting projective measurement
+`roundedFourierMeasurement`. -/
 def fourierNaimarkData {t : ℕ} {ι : Type} [Fintype ι] [DecidableEq ι]
     (O : (Fin t → ZMod 2) → Op ι) (hO : ∀ a, IsBinaryObservable (O a)) :
     OneMeasNaimarkData (Fin t → ZMod 2) ι :=
@@ -130,15 +138,17 @@ private theorem trace_kronecker_auxProjector_mul_liftedEffect {α d : Type*}
     rw [mul_comm (Fintype.card d : ℂ), mul_div_mul_left _ _ hα, div_left_inj' hd0] at h
     exact h.symm
 
-/-! ## Folding the residual outcome into the zero Fourier outcome -/
+/-! ## Absorbing the residual outcome into the zero Fourier outcome -/
 
-/-- The rounded Fourier projective measurement `{C^u}` on `ι × Option (F_2^t)`,
-obtained from the Naimark dilation of the Fourier-square POVM by folding the
-residual outcome `none` into the zero Fourier outcome.  For `u ≠ 0` the
+/-- The rounded Fourier projectors `{C^u}` on `ι × Option (F_2^t)`, obtained
+from the Naimark dilation of the Fourier-square POVM by enlarging the zero
+Fourier outcome until it absorbs the residual outcome `none`.  For `u ≠ 0` the
 projector is the dilated projector of the outcome `u`; for `u = 0` it is the
 complement of the sum of the dilated projectors of the nonzero outcomes, so
-that the family resolves the identity on the enlarged space.  This is the
-projective measurement `{C^u}` of `references/nv-paper/fullpaper.tex:1099-1100`. -/
+that the family resolves the identity on the enlarged space.  Bundled as a POVM
+with outcomes in `F_2^t` this family is `roundedFourierMeasurement`, the
+projective measurement `{C^u}` of
+`references/nv-paper/fullpaper.tex:1099-1100`. -/
 def roundedFourierPVM {t : ℕ} {ι : Type} [Fintype ι] [DecidableEq ι]
     (O : (Fin t → ZMod 2) → Op ι) (hO : ∀ a, IsBinaryObservable (O a))
     (u : Fin t → ZMod 2) : Op (ι × Option (Fin t → ZMod 2)) :=
@@ -235,6 +245,39 @@ theorem roundedFourierPVM_mul_eq_zero_of_ne {t : ℕ} {ι : Type} [Fintype ι] [
       liftedEffect_mul_sum_erase O hO hu, sub_self]
   · rw [if_neg hu, if_neg hv]
     exact liftedEffect_mul_liftedEffect_of_ne _ (fun h => huv (Option.some_inj.mp h))
+
+/-- The rounded Fourier projective measurement `{C^u}`: the family
+`roundedFourierPVM` bundled as a POVM with outcomes in `F_2^t` acting on the
+enlarged space `ι × Option (F_2^t)`.  Positivity of each effect follows from
+`roundedFourierPVM_isProj` and completeness is `roundedFourierPVM_sum_eq_one`;
+the measurement is projective by `roundedFourierMeasurement_isProjective`, and
+distinct effects are orthogonal by `roundedFourierPVM_mul_eq_zero_of_ne`.  This
+is the projective measurement `{C^u}` produced by Naimark's theorem at
+`references/nv-paper/fullpaper.tex:1099-1100`. -/
+def roundedFourierMeasurement {t : ℕ} {ι : Type} [Fintype ι] [DecidableEq ι]
+    (O : (Fin t → ZMod 2) → Op ι) (hO : ∀ a, IsBinaryObservable (O a)) :
+    MIPStarRE.Quantum.Measurement (Fin t → ZMod 2) (ι × Option (Fin t → ZMod 2)) :=
+  MIPStarRE.Quantum.Measurement.ofSumEqOne
+    (roundedFourierPVM O hO)
+    (fun u => (roundedFourierPVM_isProj O hO u).nonneg)
+    (roundedFourierPVM_sum_eq_one O hO)
+
+/-- The effects of the rounded Fourier measurement are the rounded Fourier
+projectors. -/
+@[simp]
+theorem roundedFourierMeasurement_effect {t : ℕ} {ι : Type} [Fintype ι] [DecidableEq ι]
+    (O : (Fin t → ZMod 2) → Op ι) (hO : ∀ a, IsBinaryObservable (O a))
+    (u : Fin t → ZMod 2) :
+    (roundedFourierMeasurement O hO).effect u = roundedFourierPVM O hO u :=
+  rfl
+
+/-- The rounded Fourier measurement is projective: every one of its effects is
+an orthogonal projection.  This is the projectivity of `{C^u}` invoked at
+`references/nv-paper/fullpaper.tex:1103-1104`. -/
+theorem roundedFourierMeasurement_isProjective {t : ℕ} {ι : Type} [Fintype ι] [DecidableEq ι]
+    (O : (Fin t → ZMod 2) → Op ι) (hO : ∀ a, IsBinaryObservable (O a)) :
+    MIPStarRE.QPBT.Measurement.IsProjective (roundedFourierMeasurement O hO) :=
+  fun u => roundedFourierPVM_isProj O hO u
 
 /-- The compression identity of the rounded Fourier projective measurement: for
 every operator `X` on the original space,
