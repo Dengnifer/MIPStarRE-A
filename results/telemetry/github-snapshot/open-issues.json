@@ -1445,127 +1445,6 @@
   "pinned_comment": null
  },
  {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/61",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/61/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/61/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/61/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/61",
-  "id": 5340895301,
-  "node_id": "I_kwDOUJyJf88AAAABPleYRQ",
-  "number": 61,
-  "title": "feat(QPBT/Games): prove finite-distribution normalization",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement"
-   },
-   {
-    "id": 12025012183,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8f1w",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/qpbt-analysis",
-    "name": "qpbt-analysis",
-    "color": "ededed",
-    "default": false,
-    "description": "Soundness/rigidity analysis of the Pauli basis test \u2014 self-testing bounds and error terms"
-   },
-   {
-    "id": 12025012384,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8goA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/proof",
-    "name": "proof",
-    "color": "ededed",
-    "default": false,
-    "description": "Issue is primarily about proving an existing result"
-   },
-   {
-    "id": 12025012779,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8iKw",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/sorry-elimination",
-    "name": "sorry-elimination",
-    "color": "ededed",
-    "default": false,
-    "description": "Explicitly aimed at discharging remaining `sorry` sites"
-   },
-   {
-    "id": 12025013584,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8lUA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/paper-2001.04383",
-    "name": "paper-2001.04383",
-    "color": "ededed",
-    "default": false,
-    "description": "MIP*=RE (arXiv:2001.04383) \u2014 the primary paper of this track"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 1,
-  "created_at": "2026-09-03T19:58:51Z",
-  "updated_at": "2026-09-03T20:47:47Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 0,
-   "blocking": 0,
-   "total_blocking": 0
-  },
-  "body": "<!-- mipstarre-issue-key: qpbt-stage43-finite-distribution-normalization -->\n### Motivation\n\nThe QPBT construction uses product sampling, convex mixtures, and dependent\nsampling, but their normalization lemmas remain unfinished. These elementary\nfacts support sandwich distributions, the line-point sampler, and typed\nconditionally linear question distributions.\n\nThe operations are Lean infrastructure for sampling patterns used by the paper;\nthey are not separate paper-labelled theorems.\n\n### Target declarations\n\nProve these existing declarations in\n`MIPStarRE/QPBT/Games/DistributionAux.lean` without changing their public\nsignatures:\n\n1. `Distribution.prod_isProbability`\n2. `Distribution.mix_isProbability`\n3. `Distribution.bind_isProbability`\n\n### Sources\n\n- Independent product sampling in the sandwich construction:\n  `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:465-501` and\n  `blueprint/src/chapter/ch12_qpbt_games.tex:398-425`.\n- The equal mixture defining the line-point distribution:\n  `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:274-287`\n  and `blueprint/src/chapter/ch13_qpbt_test.tex:85-95`.\n- Conditional sampling in typed conditionally linear distributions:\n  `references/qpbt-paper/07_types.tex:84-94` and\n  `blueprint/src/chapter/ch12_qpbt_games.tex:624-629`.\n\n### Proof plan\n\n- Expand `Distribution.IsProbability`, `Distribution.totalWeight`, and the\n  corresponding operation.\n- For `prod`, rewrite the sum over the product support as iterated sums, factor\n  the inner sum, and apply both normalization hypotheses.\n- For `mix`, distribute the sum over the union support, use\n  `Distribution.outsideSupport` to replace each union sum by its original\n  support sum, then apply the normalization hypotheses and simplify the convex\n  coefficients.\n- For `bind`, commute the finite sums over the union support and the outer\n  support. For each supported outer value, use `outsideSupport` to reduce the\n  union sum to the corresponding inner support, then apply `h\u03bd` and finally\n  `h\u03bc`.\n\nPrefer existing Mathlib finite-sum lemmas and the\n`Distribution.IsProbability.weight_sum_eq_one` API.\n\n### Scope and non-goals\n\n- Own only `MIPStarRE/QPBT/Games/DistributionAux.lean`.\n- Do not change `Distribution.prod`, `Distribution.mix`, `Distribution.bind`,\n  their supports or weights, or any public theorem signature.\n- Do not touch `Distribution.restrict_isProbability`, line geometry, downstream\n  QPBT proofs, re-export files, or blueprint proof status.\n- Do not add bridge assumptions, conditional helpers, axioms, or new proof\n  holes. Keep any genuinely useful support lemma private.\n- This packet depends only on the merged `MIPStarRE.LDT.Basic.Distribution` API.\n  It is independent of PRs #46, #48, and #49 and may run in parallel with them.\n\n### Acceptance\n\n- All three targets contain complete kernel-checked proofs with unchanged\n  signatures.\n- `MIPStarRE/QPBT/Games/DistributionAux.lean` contains no `sorry`, `admit`,\n  axiom, or prohibited bypass.\n- `#print axioms` for all three targets contains no `sorryAx`.\n- The target file and its direct consumers type-check; `lake build` and\n  `git diff --check` pass.\n- The PR passes exact-head local CI and independent review.\n\n---\nStage 4.3 proof packet under #47.\n",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/61/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/61/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/60",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/60/labels{/name}",
@@ -2031,8 +1910,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 19,
-   "completed": 6,
-   "percent_completed": 31
+   "completed": 7,
+   "percent_completed": 36
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/1",
   "issue_dependencies_summary": {
@@ -2675,9 +2554,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 11,
+  "comments": 12,
   "created_at": "2026-09-02T08:29:59Z",
-  "updated_at": "2026-09-03T23:37:44Z",
+  "updated_at": "2026-09-04T05:17:49Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
