@@ -306,7 +306,7 @@ assembled by Fourier averaging.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{prop:fourier-fact-vector, lem:boolean-characters}
+	\uses{lem:boolean-characters}
 	Orthogonality of the characters of $\F_2^t$ gives the inversion formula;
 	the Parseval identity follows by substituting it into the product and
 	exchanging the two sums; the last identity uses $O(a)^2 = \Id$.
@@ -326,8 +326,8 @@ assembled by Fourier averaging.
 	Remark~\ref{rem:linearity-distance-normalization}. For operators $S$, $T$
 	and $\rho$ on $\hilb$, write
 	$d_\rho(S,T)^2 = \Re \Tr\big((S-T)^\dagger (S-T) \, \rho\big)$ and
-	$P_S^\pm = (\Id \pm S)/2$ for the effects of the associated binary
-	projective measurements, and set
+	$P_S^\pm = (\Id \pm S)/2$ for the affine operators that are effects of a
+	binary projective measurement when $S$ is a binary observable, and set
 	$d^{\mathrm{bin}}_\rho(S,T)^2
 	= \sum_{s \in \{+,-\}} d_\rho(P_S^s, P_T^s)^2$. Then, with no hypothesis
 	on $S$, $T$ or $\rho$,
