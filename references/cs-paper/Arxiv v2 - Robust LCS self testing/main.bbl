@@ -1,0 +1,129 @@
+\begin{thebibliography}{CHTW04}
+
+\bibitem[Ara04]{aravind2004quantum}
+PK~Aravind.
+\newblock Quantum mysteries revisited again.
+\newblock {\em American Journal of Physics}, 72(10):1303--1307, 2004.
+
+\bibitem[Ark12]{arkhipov2012extending}
+Alex Arkhipov.
+\newblock Extending and characterizing quantum magic games.
+\newblock {\em arXiv preprint arXiv:1209.3819}, 2012.
+
+\bibitem[BMT04]{brassard2004minimum}
+Gilles Brassard, Andre~A Methot, and Alain Tapp.
+\newblock Minimum entangled state dimension required for pseudo-telepathy.
+\newblock {\em arXiv preprint quant-ph/0412136}, 2004.
+
+\bibitem[CHTW04]{cleve2004consequences}
+Richard Cleve, Peter Hoyer, Benjamin Toner, and John Watrous.
+\newblock Consequences and limits of nonlocal strategies.
+\newblock In {\em Computational Complexity, 2004. Proceedings. 19th IEEE Annual
+  Conference on}, pages 236--249. IEEE, 2004.
+
+\bibitem[CLS16]{cleve2016perfect}
+Richard Cleve, Li~Liu, and William Slofstra.
+\newblock Perfect commuting-operator strategies for linear system games.
+\newblock {\em arXiv preprint arXiv:1606.02278}, 2016.
+
+\bibitem[CM14]{cleve2014characterization}
+Richard Cleve and Rajat Mittal.
+\newblock Characterization of binary constraint system games.
+\newblock In {\em International Colloquium on Automata, Languages, and
+  Programming}, pages 320--331. Springer, 2014.
+
+\bibitem[CN16]{CN16}
+Matthew Coudron and Anand Natarajan.
+\newblock The parallel-repeated magic square game is rigid.
+\newblock {\em arXiv preprint arXiv:1609.06306}, 2016.
+
+\bibitem[Col17]{coladan17}
+Andrea Coladangelo.
+\newblock Parallel self-testing of (tilted) epr pairs via copies of (tilted)
+  chsh and the magic square game.
+\newblock {\em Quantum Information and Computation 17}, pages 831--865, 2017.
+
+\bibitem[Col18]{coladangelo2018generalization}
+Andrea Coladangelo.
+\newblock Generalization of the clauser-horne-shimony-holt inequality
+  self-testing maximally entangled states of any local dimension.
+\newblock {\em Physical Review A}, 98(5):052115, 2018.
+
+\bibitem[DCOT17]{de2017operator}
+Marcus De~Chiffre, Narutaka Ozawa, and Andreas Thom.
+\newblock Operator algebraic approach to inverse and stability theorems for
+  amenable groups.
+\newblock {\em arXiv preprint arXiv:1706.04544}, 2017.
+
+\bibitem[DF04]{dummit2004abstract}
+David~Steven Dummit and Richard~M Foote.
+\newblock {\em Abstract algebra}, volume~3.
+\newblock Wiley Hoboken, 2004.
+
+\bibitem[GH15]{gowers2015inverse}
+WT~Gowers and O~Hatami.
+\newblock Inverse and stability theorems for approximate representations of
+  finite groups.
+\newblock {\em arXiv preprint arXiv:1510.04085}, 2015.
+
+\bibitem[Gow17]{gowers2017generalizations}
+W~Gowers.
+\newblock Generalizations of fourier analysis, and how to apply them.
+\newblock {\em Bulletin of the American Mathematical Society}, 54(1):1--44,
+  2017.
+
+\bibitem[GP10]{guillemin2010differential}
+Victor Guillemin and Alan Pollack.
+\newblock {\em Differential topology}, volume 370.
+\newblock American Mathematical Soc., 2010.
+
+\bibitem[Ji13]{ji2013binary}
+Zhengfeng Ji.
+\newblock Binary constraint system games and locally commutative reductions.
+\newblock {\em arXiv preprint arXiv:1310.3794}, 2013.
+
+\bibitem[KM17]{kalev2017rigidity}
+Amir Kalev and Carl~A Miller.
+\newblock Rigidity of the magic pentagram game.
+\newblock {\em arXiv preprint arXiv:1705.06649}, 2017.
+
+\bibitem[Mer90]{mermin1990simple}
+N~David Mermin.
+\newblock Simple unified form for the major no-hidden-variables theorems.
+\newblock {\em Physical Review Letters}, 65(27):3373, 1990.
+
+\bibitem[NC02]{nielsen2002quantum}
+Michael~A Nielsen and Isaac Chuang.
+\newblock Quantum computation and quantum information, 2002.
+
+\bibitem[Per90]{peres1990incompatible}
+Asher Peres.
+\newblock Incompatible results of quantum measurements.
+\newblock {\em Physics Letters A}, 151(3-4):107--108, 1990.
+
+\bibitem[QW19]{wallman2019}
+Hammam Qassim and Joel~J Wallman.
+\newblock Manuscript in preparation.
+\newblock 2019.
+
+\bibitem[Slo16]{slofstra2016tsirelson}
+William Slofstra.
+\newblock Tsirelson's problem and an embedding theorem for groups arising from
+  non-local games.
+\newblock {\em arXiv preprint arXiv:1606.03140}, 2016.
+
+\bibitem[Slo17]{slofstra2017set}
+William Slofstra.
+\newblock The set of quantum correlations is not closed.
+\newblock {\em arXiv preprint arXiv:1703.08618}, 2017.
+
+\bibitem[Vid17]{vidick2017approx}
+Thomas Vidick.
+\newblock Private communication, 2017.
+
+\bibitem[WBMS16]{wu2016device}
+Xingyao Wu, Jean-Daniel Bancal, Matthew McKague, and Valerio Scarani.
+\newblock Device-independent parallel self-testing of two singlets.
+\newblock {\em Physical Review A}, 93(6):062121, 2016.
+
+\end{thebibliography}

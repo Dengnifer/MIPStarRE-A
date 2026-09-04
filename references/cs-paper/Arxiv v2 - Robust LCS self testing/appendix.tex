@@ -1,0 +1,259 @@
+\begin{appendices}
+
+\section{Some Inequalities}
+We record here inequalities which we need and whose proofs are not particularly enlightening. We'll use $\Re z:= \frac{z + \bar z}2$ denote the real part of $z\in \C$.
+\begin{lemma}
+\label{lemma:convex-inequality-easy}
+	Let $d\geq 2$ be an integer and $\a = \sum_i \a_i \w_d^i$, where $\a_i$ are nonnegative reals with $\sum_i \a_i = 1$. Suppose $\a_0 \geq 1-\e$. Then $1 - \Re\a \leq \abs{1-\a} \leq 2\e$.
+\end{lemma}
+\begin{proof}
+	Make repeated applications of the inequality $\abs{a+b} \leq \abs a + \abs b$. 
+	\begin{align}
+		\abs{\a - 1}
+		& \leq (1-\a_0) + \sum_i\abs{\a_i\w_d^i}
+		\\& = 2(1-\a_0) 
+		\\&\leq 2\e.
+	\end{align}
+\end{proof}
+Now we prove a converse which is slightly more technical.
+% right now, need to improve to 4
+\begin{lemma}
+\label{lemma:convex-inequality-hard}
+	Let $d\geq 2$ be an integer and $\a = \sum_i \a_i \w_d^i$, where $\a_i$ are nonnegative reals with $\sum_i \a_i = 1$. 
+	Suppose $1- \Re\a \leq \e$. Then $1-\a_0 \leq \frac12d^2\e$.
+
+\end{lemma}
+The quadratic dependence on $d$ is optimal. Take for example $\a = \a_0 + (1-\a_0) \frac{\w_d+\w_d\1}2$. 
+\begin{proof}
+Recalling that $\Re\w_d = \cos\frac{2\pi}d$, we establish the following inequality for all integers $d\geq 2$.
+\begin{equation}
+	1 - \cos \frac{2\pi}p \geq \frac{2}{d^2}.
+\end{equation}
+It suffices to use the fourth order Taylor series for cosine and the inequality $\pi^2 - \frac{\pi^4}{3d^2} \geq 1$, true for $d\geq 1.92$.
+\begin{equation}
+	1 - \cos \frac{2\pi}d \geq \frac{2^2\pi^2}{2!d^2} - \frac{2^4\pi^4}{4!d^4} 
+	\geq \frac{2}{d^2}\left[\pi^2 - \frac{\pi^4}{3d^2}\right]
+	\geq \frac{2}{d^2}.
+\end{equation}
+
+\noindent
+From this we conclude that $\frac{1}{1 - \Re\w_d} \leq \frac12d^2$.
+ We'll also use that the primitive $d\th$ root of unity has maximal real part among the $d\th$ roots of unity, i.e.\ $\Re \w_d^i \leq\Re \w_d$ for all $i\neq 0$. (We write in two columns to save space. Read the left column first.)
+	\begin{align}
+		1-\e& \leq \Re \a
+		& \a_0(1-\Re\w_d) &\geq 1 - \Re\w_d - \e
+		\\	& \leq \a_0 + \sum_{i\neq 0} \a_i \Re (\w_d^i)
+		& \a_0 &\geq 1 - \frac{\e}{1 - \Re\w_d}
+		\\	& \leq \a_0 + (1-\a_0)(\Re \w_d)
+		& \a_0 &\geq 1 - \frac{1}{1 - \Re\w_d} \e
+		\\	& \leq \a_0(1- \Re\w_d) + \Re \w_d
+		& \a_0 &\geq 1 - \frac12d^2 \e.
+	\end{align}
+\end{proof}
+
+\begin{lemma}\label{lemma:entanglement-monogamy}
+	Let $\m H_A, \m H_B, \m H_C$ Hilbert spaces. Let $\rho_{ABC}$ be a state on $\m H_A\otimes \m H_B\otimes \m H_C$. Let $\rho_{AB} = \Tr_C \rho_{ABC}$. Let $\ket\psi_{AB}$ be a pure state on $\m H_A\otimes \m H_B$. Suppose that 
+	\begin{equation}
+	\label{eq:assumption-entanglement-monogamy}
+		\drho{\rho_{AB}}{\proj \psi_{AB}}{I_{AB}}^2 \leq \e. 
+	\end{equation}
+	Then there is some state $\rho_{\text{aux}}$ on $\m H_C$ such that 
+	\begin{equation}
+		\norm{\rho_{ABC} - \proj\psi_{AB}\otimes \rho_{\text{aux}}}_1 \leq 6\e.
+	\end{equation}
+\end{lemma}
+\begin{proof}
+
+	Let $\ket\phi_{ABCC'}$ be a purification of $\rho_{ABC}$, i.e.\ suppose that $\Tr_{C'} \proj\phi = \rho_{ABC}$. We examine a Schmidt decomposition of $\ket\phi$, cutting along subystems $AB/CC'$. Let
+	\begin{equation}
+		\ket{\phi}_{ABCC'} = \sum_i \sqrt{\l_i} \ket{i_{AB}}\otimes\ket{i_{CC'}}.
+	\end{equation}
+	where $\l_i >0$ for all $i$.
+	Tracing out $C'$, we have
+	\begin{equation}
+		\rho_{ABC} = \sum_i \l_i \proj{i_{AB}}\otimes\Tr_{C'}\proj{i_{CC'}}.
+	\end{equation}
+	Now let $\rho^{(i)}_{\text{aux}} = \Tr_C\proj{i_{CC'}}$. One can compute the distance between $\rho_{ABC}$ and $\proj{i_{AB}}\otimes\rho^{(i)}_{\text{aux}}$ as
+	\begin{equation}
+	\label{eq:entanglement-monogamy-1}
+		\frac12\norm{\rho_{ABC} - \proj{i_{AB}}\otimes\rho^{(i)}_{\text{aux}}}_1 = 1- \l_i.
+	\end{equation}
+	By the same computation,
+	\begin{equation}
+	\label{eq:entanglement-monogamy-2}
+		\frac 12\norm{\rho_{AB} - \proj{i_{AB}}}_1 
+		= 1- \l_i.
+	\end{equation}
+	\noindent
+	The $\l_i$ are the eigenvalues of $\rho_{AB}$; let $\l_1$ be the greatest. Then we have
+	\begin{align}
+		\l_1 
+		&\geq \braket{\psi|_{AB}\rho_{AB}|\psi}_{AB} 
+		\\&= 1 - \drho\rho{\proj\psi}{I}^2. 
+		\\ &\geq 1-\epsilon
+	\end{align}
+where we applied assumption \eqref{eq:assumption-entanglement-monogamy} to get the last line. We use the following inequality, valid for arbitrary $\rho$ and $\ket\psi$,
+	\begin{align*}
+		\frac12 \norm{\rho - \proj \psi}_1 
+		& = \frac12 + \Tr\rho^2 - \sandwich\psi\rho
+		\\& \leq 1 - \sandwich\psi\rho,
+	\end{align*}
+	to conclude that 
+	\begin{equation}
+	\label{eq:entanglement-monogamy-3}
+		\frac12\norm{\rho_{AB} - \proj\psi_{AB}}_1 \leq \e.
+	\end{equation}
+	Finally, we apply several triangle inequalities, to obtain the following. (To clarify any confusion, here $\proj {1_{AB}}$ is $\proj {i_{AB}}$ when $i = 1$):
+	\begin{align}
+		\frac12 \norm{\rho_{AB} - \proj\psi_{AB}}_1
+		&\leq \e
+		& \text{Equation \eqref{eq:entanglement-monogamy-3}}
+		\\
+		\frac12\norm{\proj {1_{AB}} - \proj\psi_{AB}}_1
+		&\leq 2\e
+		& \text{Triangle inequality with Equation \eqref{eq:entanglement-monogamy-2}}
+		\\
+		\frac12 \norm{\proj {1_{AB}}\otimes \rho^{(1)}_{\text{aux}} - \proj\psi_{AB}\otimes \rho^{(1)}_{\text{aux}}}_1
+		&\leq 2\e
+		& \text{Tensoring }\rho^{(1)}_{\text{aux}}
+		\\
+		\frac12 \norm{\rho_{ABC} - \proj\psi_{AB}\otimes \rho^{(1)}_{\text{aux}}}_1
+		&\leq 3\e
+		& \text{Triangle inequality with Equation \eqref{eq:entanglement-monogamy-1}}.
+	\end{align}
+	%In the third step, we used that for any $A,B,\rho$, 
+	%\begin{equation}
+		%\norm{A\otimes \rho - B\otimes \rho}_1 \leq \norm{A-B}.
+%	\end{equation}
+This concludes the proof.
+\end{proof}
+
+% \begin{lemma}
+% 	Let $H(\rho) = -\Tr\rho\log\rho$ be the von Neumman entropy of $\rho$. Let $\rho$ be a state with at most $D$ nonzero eigenvalues. Let $\ket\psi$ be a pure state. Suppose $\drho\rho{\proj\psi}{I} \leq \eta \leq \frac12$. Then $H(\rho) \leq \eta(2 + \log D - \log\eta).$
+% \end{lemma}
+% \begin{proof}
+% 	Let $\l_i$ be the eigenvalues of $\rho$ and $\l_1$ be the largest. Then 
+% 	\begin{equation}
+% 		\l_1 \geq \sandwich\psi\rho = 1 - \drho\rho{\proj\psi}{I}^2 \geq 1- \eta.
+% 	\end{equation}
+% 	We invoke the fact that $H(\rho)= \sum_i -\l_i\log\l_i$ is decreasing in $\l_1$ and is maximized when all eigenvalues other than $\l_1$ are equal. Then we have
+% 	\begin{align}
+% 		H(\rho) 
+% 		&\leq -(1-\eta)\log(1-\eta) + \sum_{i>1}-\l_i\log\l_i
+% 		\\&\leq -(1-\eta)\log(1-\eta) -(D-1)\frac{\eta}{D-1}\log\frac{\eta}{D-1}
+% 		\\&\leq 2\eta(1-\eta) -\eta(\log\eta - \log(D-1))
+% 		\\&\leq \eta(2 + \log D - \log\eta).
+% 	\end{align}
+% 	We used the approximation $-(1-\eta)\log(1-\eta) \leq 2\eta$, valid for $\eta \leq \frac12$. 
+% \end{proof}
+
+\section{Tighter bounds via more parameters}
+In Section \ref{sec:self-testing}, we introduced one complexity parameter for LCS games and gave a robustness bound in terms of that parameter. Here, we give a tighter robustness bound at the expense of cumbersome bookeeping of parameters. We give new statements of the lemmas from \S \ref{subsection:robust-self-testing}. The proofs are essentially the same, and are omitted. We give the subscript $0$ to parameters which are typically constant.
+
+\begin{theorem}
+\label{thm:robust-self-testing-appendix}
+	Let $G$ be a linear constraint game over $\Z_d$ with vertex set $V$, edge set $E$, and constraints given by  $H:V\times E \to \Z_d$ and $l: V\to \Z_d$. Let $\G$ be the solution group of $G$. Suppose that:
+	\begin{enumerate}[(i)]
+		\item 
+		\label{assumption:bounded-degree-appendix}
+		 each equation has at most $l_0$ variables with multiplicity, i.e.\ $\forall v:\sum_e\abs{H(v,e)} \leq l_0$,
+		\item 
+		
+		\label{assumption:small-pictures-w-appendix}
+		there is a canonical form $\can$ such that every equation of the form  $\can(e)e\1 = 1$ for $e\in E$ is witnessed by a $\G$-picture in which each generator and relation appears at most $m_0$ times,
+		\item 
+		\label{assumption:small-pictures-appendix}
+		 every equation of the form $\can(g)\can(gh)\1\can(h) = 1$ $g,h\in \G$ is witnessed by a $\G$-picture 
+		 proving in which 
+		 each generator and 
+		 each relation is used at most $m$ times,
+		\item \label{assumption:group-test-appendix}
+		 $\G$ group-tests $\tau: \G \to U(\C^{d^n}) $ in the sense of Definition \ref{definition:group-test}.
+		 \item \label{assumption:pauli-in-image-appendix}The image of $\tau$ contains an isomorphic copy of the Pauli group $\m P_d^{\otimes n}$.
+	\end{enumerate}	
+Then $G$ self-tests the strategy $\tilde A_e^{(v)} = \tau(e), \tilde B_e = \bar{\tau(e)}, \ket\psi = \ket{\r{EPR}_{d^n}}$
+	with perfect completeness and $O\left((m_0l_0dm\abs E \abs V)^2 \e\right)$-robustness.
+\end{theorem}
+
+
+\begin{proof}
+	The proof is the same as the proof of Theorem \ref{thm:robust-self-testing}, but with different parameters.
+	Using Lemmas \ref{lemma:Bs-are-approximate-conjugate-operator-solution-appendix} and \ref{lemma:canonical-form-implies-stability-appendix}, we can get $\eta_1 = 2^4l\abs E \abs V \sqrt \e, \eta_2 = 2^{10}m_0l_0m\abs E \abs V \sqrt \e$. The rest of the argument goes through unmodified.
+\end{proof}
+
+\begin{lemma}[c.f.\ Lemma \ref{lemma:Bs-are-approximate-conjugate-operator-solution}]
+\label{lemma:Bs-are-approximate-conjugate-operator-solution-appendix}
+	$\set{B_e}$ is an ``approximate conjugate operator solution'' in the following sense:
+	\begin{align}
+	\label{eq:Bs-approximately-satisfy-constraints-appendix-appendix}
+		\sum_v \drho{\rho}{
+		\prod_{e\in r_v} I_A\otimes B_e}{\w_d^{-l(v)}I} 
+		&\leq 4l_0\abs E \abs V\sqrt\e.
+		\\
+	\label{eq:Bs-approximately-commute-appendix-appendix}
+		\sum_{\substack{e,e'\\e\sim e'}} \drho{\rho}{I_A\otimes [B_e,B_{e'}]}{I}
+		&\leq 4l_0 \abs E\abs V\sqrt\e
+		.\
+	\end{align}
+	Furthermore, $\set{A_e^{(v_e)}}$ is an ``approximate operator solution'' in the same sense with a slightly worse parameter, i.e.\ 
+	\begin{align}
+	\label{eq:As-approximately-satisfy-constraints-appendix-appendix}
+		\sum_v\drho{\rho}{\prod_{e\in r_v}A_e^{(v_e)}\otimes I_B}{\w_d^{l(v)}}
+		&\leq 8l_0\abs E\abs V\sqrt{\e},
+		\\
+	\label{eq:As-approximately-commute-appendix-appendix}
+		\sum_{\substack{e,e'\\e\sim e'}} \drho{\rho}{\left[A_e^{(v_e)},A_{e'}^{(v_{e'})}\right]\otimes I_B}{I}
+		&\leq 8l_0 \abs E\abs V\sqrt\e
+		.
+	\end{align}
+	Finally, these ``solutions'' are consistent in the sense that
+	\begin{equation}
+	\label{eq:As-and-Bs-approximately-consistent-appendix-appendix}
+		\sum_e \drho{\rho}{A_e^{(v_e)}\otimes B_e}{I}
+		 \leq 2 \abs E \abs V\sqrt\e.
+	\end{equation}
+\end{lemma}
+
+\begin{lemma}[c.f.\ Lemma \ref{lemma:canonical-form-implies-stability}]
+\label{lemma:canonical-form-implies-stability-appendix}
+	
+	Suppose that $\set{A_e^{(v_e)}}$ and $\set{B_e}$ $\eta$-satisfy the relations from $R$ in the sense that
+	\begin{align}
+	\label{lemma:canonical-form-implies-stability-1-appendix}
+		\sum_{r\in R} \drho{\rho}{\prod_{e\in r}{A_e^{(v_e)}\otimes I}}I \leq \eta, 
+		&&\text{ and }
+		&&
+		\sum_{r\in R} \drho{\rho}{I\otimes \prod_{e\in r}{B_e}}I \leq \eta.
+	\end{align}
+	 Furthermore, suppose that $\set{A_e^{(v_e)}}$ and $\set{B_e}$ are $\eta$-consistent in the sense that
+	 \begin{equation}
+	 \label{lemma:canonical-form-implies-stability-2-appendix}
+	 	\sum_e\drho\rho{A_e^{(v_e)}\otimes B_e}I \leq \eta.
+	 \end{equation}
+	 Then 
+ \begin{itemize}
+	\item $f_A$ and $f_B$ are consistent, i.e.\ for all $x\in \G$,
+	\begin{equation}
+	\label{eq:canonical-form-implies-consistency-appendix-appendix}
+		\drho\rho{f_A(x)\otimes f_B(x)}I \leq m\eta.
+	\end{equation}
+ 	\item $f$ is close to Alice and Bob's strategy pointwise, i.e.\ for all $e\in E$,
+	  \begin{align}
+	  \label{eq:canonical-form-implies-stability-conclusion-1-appendix-appendix}
+	  	\drho{\rho}{f_A(e)\otimes I_B}{ A_e^{(v_e)}\otimes I_B } &\leq 5m_0\eta
+	  	\\
+	  	\drho{\rho}{I_A \otimes f_B(e)}{ I_A \otimes B_e} &\leq 5m_0\eta. 
+	  \end{align}
+	  \item $f$ is ``approximately a homomorphism'', i.e.\ for all $x,y\in \G$, 
+	\begin{align}
+	\label{eq:canonical-form-implies-stability-appendix-appendix}
+		\drho\rho{f_A(x)f_A(yx)\1f_A(y)\otimes I_B}I &\leq 17mm_0\eta,
+		\\
+		\drho\rho{I_A\otimes f_B(x)f_B(yx)\1f_B(y)}I &\leq 17mm_0\eta.
+	\end{align}
+ \end{itemize}
+
+\end{lemma}
+
+
+\end{appendices}
