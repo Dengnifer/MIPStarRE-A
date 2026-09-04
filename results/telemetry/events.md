@@ -2567,3 +2567,38 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   full-mode instruction through `checked-push.sh`.
 - **Lesson:** publication safety belongs in the helper that captures the tuple;
   native hooks can confirm that tuple but cannot be its sole enforcement point.
+
+## 2026-09-04 — Operator takeover: owner's Claude session replaces the codex main session
+
+- **Trigger:** owner decision (2026-09-03, after the eight-hour stall and the
+  reviewer-churn episode): the owner's Claude Fable 5.1 session, working from
+  the owner's machine over ssh, takes the operator role for about one to two
+  days. Dispatched worker sessions (orc/prover/reviewer/…) remain codex
+  sessions on ghz via `dispatch.sh` (model gpt-5.6-sol until "astra" is
+  available in codex's configuration, then astra; an hourly codex poller
+  `owner-tools/astra-poll.sh` reports the switch to #26).
+- **Handover:** the codex main session posted its exact in-flight state to
+  #27 ("Handover to owner session") and exited at 2026-09-04T22:30:18Z. The owner session
+  picks up every lane from that report. The same protocols, gates and telemetry
+  duties bind the owner session; owner-side records continue in
+  `owner-log.md`.
+- **Hand-back:** to be recorded here and in `stages.jsonl` when the owner
+  says so; the codex main session then resumes from `~/.codex/prompts/goal.md`
+  plus the #27 log.
+
+## 2026-09-04 — Owner rule: mathematical gaps are resolved by math-fix sessions before reaching the owner
+
+- **Trigger:** the owner, after decision B5 on #26 (Magic Square rigidity), ruled that gaps of this
+  kind should not be brought to the owner inbox first (22:35Z): the operator dispatches a Fable 5.1
+  (later astra) session to find a corrected statement that is both correct and sufficient, iterating a
+  few times between the mathematics and the Lean implementation; only a gap that truly does not
+  converge goes to #26.
+- **Defaults proposed by the operator and confirmed by the owner (23:05Z):** sufficiency means every
+  use in the paper and the blueprint graph; minimality (closest to the source, no definition or game
+  change); convergence = the corrected statement type-checks, downstream consumers compile, and the
+  gap note carries the counterexample and a proof sketch; budget at most 10 math-fix sessions or
+  about 1.5 working days per gap; immediate escalation only for definition or game changes; inform
+  the owner by one line on #27 instead of asking; log in events.md and the new
+  `results/telemetry/design-decisions.md` register.
+- **First application:** #172 (rigidity statement) re-routed from a codex lane to a Fable math-fix
+  session at 22:38Z.
