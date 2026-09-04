@@ -12,7 +12,7 @@ uniformly random tuple the two point observables commute up to the sign
 
 The declarations formalize the first assertion of
 `lem:qld-win-implications-obs` in
-`blueprint/src/chapter/ch14_qpbt_observables.tex:683-733`, whose paper source
+`blueprint/src/chapter/ch14_qpbt_observables.tex:761-794`, whose paper source
 is `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:309-362`.
 -/
 
@@ -34,7 +34,7 @@ local instance pauliEdgeNonemptyTwisted : Nonempty PauliEdge :=
 
 /-- An isometry preserves the state-dependent norm. Formalization-only support
 for `def:strategy-observables`, blueprint
-`ch14_qpbt_observables.tex:480-503`. -/
+`ch14_qpbt_observables.tex:573-610`. -/
 theorem norm_applyOperatorToState_of_isometry {ι : Type} [Fintype ι]
     [DecidableEq ι] {U : Op ι} (hU : Uᴴ * U = 1) (ψ : EuclideanSpace ℂ ι) :
     ‖applyOperatorToState U ψ‖ = ‖ψ‖ := by
@@ -42,7 +42,7 @@ theorem norm_applyOperatorToState_of_isometry {ι : Type} [Fintype ι]
     MagicSquareRigidity.norm_applyOperatorToState_isometry_mul hU 1 ψ
   rwa [mul_one, applyOperatorToState_one] at h
 
-/-- The product of two reflections is an isometry. Formalization-only support
+/-- The product of two isometries is an isometry. Formalization-only support
 for `eq:pts-obs-commutation`, paper
 `14_analysis_of_the_pauli_basis_test.tex:309-354`. -/
 theorem mul_conjTranspose_mul_self {ι : Type*} [Fintype ι] [DecidableEq ι]
@@ -59,7 +59,7 @@ distance is bounded by two for every tuple. This is the unconditional bound
 used when the error parameter exceeds one; the statement is generic in the two
 tensor factors and the state. Paper
 `14_analysis_of_the_pauli_basis_test.tex:309-362`, blueprint
-`ch14_qpbt_observables.tex:683-733`. -/
+`ch14_qpbt_observables.tex:761-794`. -/
 theorem norm_twistedCommutator_sq_le_four {P : AdmissibleParams}
     {ιL ιR : Type} [Fintype ιL] [DecidableEq ιL] [Fintype ιR] [DecidableEq ιR]
     (OX OZ : PauliTuple P → Op ιL) (χ : EuclideanSpace ℂ (ιL × ιR))
@@ -123,7 +123,7 @@ theorem avgOver_gated_le {X : Type*} [Fintype X] [DecidableEq X] [Nonempty X]
 
 /-- The commuting event is nonempty. Paper
 `14_analysis_of_the_pauli_basis_test.tex:70-77`, blueprint
-`ch14_qpbt_observables.tex:151-178`. -/
+`ch14_qpbt_observables.tex:159-194`. -/
 theorem commuting_filter_nonempty (P : AdmissibleParams) :
     (Finset.univ.filter (@IsCommuting P)).Nonempty := by
   refine ⟨0, Finset.mem_filter.mpr ⟨Finset.mem_univ _, ?_⟩⟩
@@ -131,7 +131,7 @@ theorem commuting_filter_nonempty (P : AdmissibleParams) :
 
 /-- The anticommuting event is nonempty. Paper
 `14_analysis_of_the_pauli_basis_test.tex:70-77`, blueprint
-`ch14_qpbt_observables.tex:151-178`. -/
+`ch14_qpbt_observables.tex:159-194`. -/
 theorem anticommuting_filter_nonempty (P : AdmissibleParams) :
     (Finset.univ.filter (@IsAnticommuting P)).Nonempty := by
   by_contra h
@@ -181,7 +181,7 @@ commutation relation. This is Equation `eq:pts-obs-commutation`, stated
 generically in the two tensor factors and the state so that both orientations
 of `lem:qld-win-implications-obs` use it. Paper
 `14_analysis_of_the_pauli_basis_test.tex:309-354`, blueprint
-`ch14_qpbt_observables.tex:683-733`. -/
+`ch14_qpbt_observables.tex:761-794`. -/
 theorem twisted_commutation_of_halves {P : AdmissibleParams} {ιL ιR : Type}
     [Fintype ιL] [DecidableEq ιL] [Fintype ιR] [DecidableEq ιR]
     (OX OZ : PauliTuple P → Op ιL) (χ : EuclideanSpace ℂ (ιL × ιR))
@@ -275,9 +275,16 @@ theorem twisted_commutation_of_halves {P : AdmissibleParams} {ιL ιR : Type}
 
 /-- The point observables of Alice approximately commute on commuting tuples.
 This instantiates the generic commuting half at the standard placement of
-`lem:qld-win-implications-obs`. Paper
+`lem:qld-win-implications-obs`.
+
+The error is `C * (ε + √ε)` rather than `C * ε` because Equation `eq:lc-11` is
+closed by the transitivity estimate for the consistency relation `≃`, which is
+not additive. The detour through the Pair/W families passes through a squared
+state-dependent distance and a Cauchy--Schwarz step, so its two `O(ε)` defects
+contribute `O(√ε)`, while the defect of the step used directly contributes
+`O(ε)`. Paper
 `14_analysis_of_the_pauli_basis_test.tex:311-341`, blueprint
-`ch14_qpbt_observables.tex:683-733`. -/
+`ch14_qpbt_observables.tex:761-794`. -/
 theorem exists_pointObs_commutator_comm_le_alice :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε), 0 ≤ ε →
@@ -331,7 +338,7 @@ theorem exists_pointObs_commutator_comm_le_alice :
 /-- The strategy observables satisfy the phase-signed commutation relation on
 Alice's factor. This is Equation `eq:pts-obs-commutation`, paper
 `14_analysis_of_the_pauli_basis_test.tex:309-354`, blueprint
-`ch14_qpbt_observables.tex:683-733`. -/
+`ch14_qpbt_observables.tex:761-794`. -/
 theorem pointObs_twisted_commutation_proof :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),

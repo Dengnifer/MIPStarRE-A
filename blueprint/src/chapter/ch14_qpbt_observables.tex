@@ -1132,8 +1132,9 @@ every tuple $\omega$.
 
 Several lemmas below conclude by asserting that all symmetric equivalents
 of the stated approximations also hold, in each case by
-Lemma~\ref{lem:symmetric-equivalents-transfer}; later chapters invoke
-exactly these variants.
+Lemma~\ref{lem:symmetric-equivalents-transfer} unless the individual register
+pairs are established separately, as in Lemma~\ref{lem:qld-comm-cons}; later
+chapters invoke exactly these variants.
 
 \begin{lemma}[Consistency and approximate commutation of the expanded point measurements]
 	\label{lem:qld-comm-cons}
@@ -1176,7 +1177,7 @@ exactly these variants.
 	hold, and the proof yields $\delta_{\mathrm{Anticom}}(\eps) = \sqrt{\eps}$.
 \end{lemma}
 \begin{proof}
-	\uses{lem:qld-win-implications, lem:qld-win-implications-obs, fact:data-processing, lem:twisted-commutation, def:expanded-point-measurement, def:expanded-point-trace-projection, def:expanded-observables, lem:symmetric-equivalents-transfer}
+	\leanok \uses{lem:qld-win-implications, lem:qld-win-implications-obs, fact:data-processing, lem:twisted-commutation, def:expanded-point-measurement, def:expanded-point-trace-projection, def:expanded-observables, def:symmetric-equivalents}
 	For item~1: the original point measurements
 	$\{M^{(\mathrm{Point},W),u}_a\}$ are $\eps$-self-consistent between
 	registers $\mathsf{A}$ and $\mathsf{B}$ in $\ket{\hat{\psi}}$
@@ -1200,8 +1201,12 @@ exactly these variants.
 	$\hat{X}^{r_X}(u_X)\hat{Z}^{r_Z}(u_Z) \approx_{\sqrt{\eps}} \hat{Z}^{r_Z}(u_Z)\hat{X}^{r_X}(u_X)$
 	on average over uniformly random $\omega$, giving the approximate
 	commutation with $\delta_{\mathrm{Anticom}} = \sqrt{\eps}$. The
-	symmetric equivalents follow from
-	Lemma~\ref{lem:symmetric-equivalents-transfer}.
+	symmetric equivalents are obtained without the transfer of
+	Lemma~\ref{lem:symmetric-equivalents-transfer}: both displays are proved
+	separately on each of the four register pairs
+	$\mathsf{A}\mathsf{A}'$, $\mathsf{B}\mathsf{A}''$, $\mathsf{B}\mathsf{B}'$ and
+	$\mathsf{A}\mathsf{B}''$ of Definition~\ref{def:symmetric-equivalents}, so no
+	symmetry hypothesis on the strategy is used.
 \end{proof}
 
 \begin{definition}[Expanded line measurements]

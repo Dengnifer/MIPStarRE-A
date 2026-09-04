@@ -17,8 +17,8 @@ each of the four placements is treated explicitly.
 ## References
 
 The declarations support `def:symmetric-equivalents` and `lem:qld-comm-cons`
-in `blueprint/src/chapter/ch14_qpbt_observables.tex:876-922` and
-`blueprint/src/chapter/ch14_qpbt_observables.tex:932-1032`.  Their paper source
+in `blueprint/src/chapter/ch14_qpbt_observables.tex:1002-1031` and
+`blueprint/src/chapter/ch14_qpbt_observables.tex:1139-1178`.  Their paper source
 is `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:420-505`.
 -/
 
@@ -38,7 +38,13 @@ noncomputable section
 
 /-! ## Coordinate tensors -/
 
-/-- Reindexing a finite Euclidean vector preserves its norm. -/
+/-- Reindexing a finite Euclidean vector preserves its norm.
+Formalization-only support for `def:expanded-state`, blueprint
+`ch14_qpbt_observables.tex:895-918`. The same statement is proved as
+`reindexState_norm_eq` at
+`MIPStarRE/QPBT/Combining/DirectLowDegree/Transport/SeedFiber.lean:144`, which
+is not in the import closure of this file; moving that lemma down beside
+`reindexState` and deleting this copy is issue #204. -/
 theorem norm_reindexState {ι κ : Type*} [Fintype ι] [DecidableEq ι]
     [Fintype κ] [DecidableEq κ] (e : ι ≃ κ) (u : EuclideanSpace ℂ ι) :
     ‖reindexState e u‖ = ‖u‖ := by
@@ -49,7 +55,11 @@ theorem norm_reindexState {ι κ : Type*} [Fintype ι] [DecidableEq ι]
 
 /-- The coordinate tensor of two vectors has the product norm.
 Formalization-only support for `def:expanded-state`, blueprint
-`ch14_qpbt_observables.tex:760-781`. -/
+`ch14_qpbt_observables.tex:895-918`. The same statement is proved as
+`vecTensor_norm_eq` at
+`MIPStarRE/QPBT/Combining/DirectLowDegree/Transport/SeedFiber.lean:156`, which
+is not in the import closure of this file; moving that lemma down beside
+`vecTensor` and deleting this copy is issue #204. -/
 theorem norm_vecTensor {ι κ : Type*} [Fintype ι] [DecidableEq ι] [Fintype κ]
     [DecidableEq κ] (u : EuclideanSpace ℂ ι) (v : EuclideanSpace ℂ κ) :
     ‖vecTensor u v‖ = ‖u‖ * ‖v‖ := by
@@ -66,7 +76,7 @@ theorem norm_vecTensor {ι κ : Type*} [Fintype ι] [DecidableEq ι] [Fintype κ
 
 /-- A Kronecker product of operators acts factorwise on a coordinate tensor.
 Formalization-only support for `def:expanded-state`, blueprint
-`ch14_qpbt_observables.tex:760-781`. -/
+`ch14_qpbt_observables.tex:895-918`. -/
 theorem applyOperatorToState_heteroKron_vecTensor {ι κ : Type*}
     [Fintype ι] [DecidableEq ι] [Fintype κ] [DecidableEq κ]
     (A : Op ι) (B : Op κ) (u : EuclideanSpace ℂ ι) (v : EuclideanSpace ℂ κ) :
@@ -228,7 +238,7 @@ variable {P : AdmissibleParams} {ε : ℝ}
 /-- Place a strategy-local operator on the player side that supplies the local
 space of a register placement. Paper
 `14_analysis_of_the_pauli_basis_test.tex:420-450`, blueprint
-`ch14_qpbt_observables.tex:876-922`. -/
+`ch14_qpbt_observables.tex:1002-1031`. -/
 noncomputable def placeStrategySide (S : ProjectiveSetting P ε) :
     (side : PlayerSide) → Op (S.LocalSpace side) →
       Op (S.toStrategy.ιA × S.toStrategy.ιB)
@@ -237,7 +247,7 @@ noncomputable def placeStrategySide (S : ProjectiveSetting P ε) :
 
 /-- The placement of a difference is the difference of the placements. Paper
 `14_analysis_of_the_pauli_basis_test.tex:420-450`, blueprint
-`ch14_qpbt_observables.tex:876-922`. -/
+`ch14_qpbt_observables.tex:1002-1031`. -/
 theorem place_sub (S : ProjectiveSetting P ε) (p : Placement)
     (O₁ O₂ : Op (S.ExpandedLocalSpace p.side)) :
     S.place p (O₁ - O₂) = S.place p O₁ - S.place p O₂ := by
@@ -249,7 +259,7 @@ theorem place_sub (S : ProjectiveSetting P ε) (p : Placement)
 /-- The expanded state is the shuffle of the coordinate tensor of the strategy
 state with the two EPR ancillas. This is `eq:def-psihat`, paper
 `14_analysis_of_the_pauli_basis_test.tex:367-372`, blueprint
-`ch14_qpbt_observables.tex:760-781`. -/
+`ch14_qpbt_observables.tex:895-918`. -/
 theorem psiHat_eq_reindexState (S : ProjectiveSetting P ε) :
     S.psiHat = reindexState (sixRegShuffle P S.toStrategy.ιA S.toStrategy.ιB)
       (vecTensor (vecTensor S.toStrategy.ψ (eprState (PauliRegister P)))
@@ -513,7 +523,7 @@ theorem stateQForm_place_AB''_mul_BB' (S : ProjectiveSetting P ε)
 
 /-- Placing a factorized operator on the register pair `AA'`. Paper
 `14_analysis_of_the_pauli_basis_test.tex:420-450`, blueprint
-`ch14_qpbt_observables.tex:876-922`. -/
+`ch14_qpbt_observables.tex:1002-1031`. -/
 theorem norm_place_AA'_heteroKron_psiHat (S : ProjectiveSetting P ε)
     (T : Op S.toStrategy.ιA) (V : Op (PauliRegister P)) (hV : Vᴴ * V = 1) :
     ‖applyOperatorToState (S.place .AA' (heteroKron T V)) S.psiHat‖ =
@@ -533,7 +543,7 @@ theorem norm_place_AA'_heteroKron_psiHat (S : ProjectiveSetting P ε)
 
 /-- Placing a factorized operator on the register pair `BA''`. Paper
 `14_analysis_of_the_pauli_basis_test.tex:420-450`, blueprint
-`ch14_qpbt_observables.tex:876-922`. -/
+`ch14_qpbt_observables.tex:1002-1031`. -/
 theorem norm_place_BA''_heteroKron_psiHat (S : ProjectiveSetting P ε)
     (T : Op S.toStrategy.ιB) (V : Op (PauliRegister P)) (hV : Vᴴ * V = 1) :
     ‖applyOperatorToState (S.place .BA'' (heteroKron T V)) S.psiHat‖ =
@@ -553,7 +563,7 @@ theorem norm_place_BA''_heteroKron_psiHat (S : ProjectiveSetting P ε)
 
 /-- Placing a factorized operator on the register pair `BB'`. Paper
 `14_analysis_of_the_pauli_basis_test.tex:420-450`, blueprint
-`ch14_qpbt_observables.tex:876-922`. -/
+`ch14_qpbt_observables.tex:1002-1031`. -/
 theorem norm_place_BB'_heteroKron_psiHat (S : ProjectiveSetting P ε)
     (T : Op S.toStrategy.ιB) (V : Op (PauliRegister P)) (hV : Vᴴ * V = 1) :
     ‖applyOperatorToState (S.place .BB' (heteroKron T V)) S.psiHat‖ =
@@ -573,7 +583,7 @@ theorem norm_place_BB'_heteroKron_psiHat (S : ProjectiveSetting P ε)
 
 /-- Placing a factorized operator on the register pair `AB''`. Paper
 `14_analysis_of_the_pauli_basis_test.tex:420-450`, blueprint
-`ch14_qpbt_observables.tex:876-922`. -/
+`ch14_qpbt_observables.tex:1002-1031`. -/
 theorem norm_place_AB''_heteroKron_psiHat (S : ProjectiveSetting P ε)
     (T : Op S.toStrategy.ιA) (V : Op (PauliRegister P)) (hV : Vᴴ * V = 1) :
     ‖applyOperatorToState (S.place .AB'' (heteroKron T V)) S.psiHat‖ =
@@ -596,7 +606,7 @@ expanded state, the state-dependent norm of its strategy factor on the original
 state, provided its Pauli factor is an isometry. This is the placement
 bookkeeping behind `lem:qld-comm-cons`, paper
 `14_analysis_of_the_pauli_basis_test.tex:420-505`, blueprint
-`ch14_qpbt_observables.tex:876-922`. -/
+`ch14_qpbt_observables.tex:1002-1031`. -/
 theorem norm_place_heteroKron_psiHat (S : ProjectiveSetting P ε)
     (p : Placement) (T : Op (S.LocalSpace p.side)) (V : Op (PauliRegister P))
     (hV : Vᴴ * V = 1) :

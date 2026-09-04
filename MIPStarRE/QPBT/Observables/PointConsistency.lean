@@ -1,5 +1,4 @@
 import MIPStarRE.QPBT.Games.ErrorFunctions
-import MIPStarRE.QPBT.Observables.Anticommuting
 import MIPStarRE.QPBT.Observables.ExpandedCommutation
 
 /-!
@@ -12,7 +11,7 @@ principle is assumed: the four placements occur explicitly in the statements.
 ## References
 
 The declarations formalize `lem:qld-comm-cons` in
-`blueprint/src/chapter/ch14_qpbt_observables.tex:932-1032`, whose paper source
+`blueprint/src/chapter/ch14_qpbt_observables.tex:1139-1178`, whose paper source
 is `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:452-505`.
 -/
 
@@ -141,7 +140,10 @@ theorem leftPlacedMeasurement_postprocess_effect
       (∑ a ∈ Finset.univ.filter (fun a => f a = b), M.effect a)
   exact leftTensor_finset_sum _ _
 
--- The four-level product indices below exceed the default instance-search size.
+-- The statements below are indexed by the fourfold iterated product of
+-- `eq:def-psihat`; instance search for its `Fintype` and `DecidableEq`
+-- structure needs a larger budget than the default, which the
+-- `synthInstance.maxSize` settings below supply declaration by declaration.
 namespace ProjectiveSetting
 
 /-! ## Fine-product consistency on the two bipartitions -/
@@ -421,7 +423,7 @@ set_option synthInstance.maxSize 400 in
 This is the explicit data-processing estimate for item 1 of
 `lem:qld-comm-cons`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:468-489`,
-blueprint `ch14_qpbt_observables.tex:1148-1182`. -/
+blueprint `ch14_qpbt_observables.tex:1155-1163`. -/
 theorem expPointDist_aaBa_le {P : AdmissibleParams} {ε : ℝ}
     (S : ProjectiveSetting P ε) (W : PauliKind) :
     opFamilyDistSq (uniformDistribution (Fin P.m → PauliScalar P))
@@ -535,7 +537,7 @@ set_option synthInstance.maxSize 400 in
 /-- Expanded point consistency for the directed `AB''`--`BB'` placement pair.
 This is the second bipartition of item 1 and does not assume strategy symmetry;
 paper `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:468-489`,
-blueprint `ch14_qpbt_observables.tex:1148-1182`. -/
+blueprint `ch14_qpbt_observables.tex:1155-1163`. -/
 theorem expPointDist_abBb_le {P : AdmissibleParams} {ε : ℝ}
     (S : ProjectiveSetting P ε) (W : PauliKind) :
     opFamilyDistSq (uniformDistribution (Fin P.m → PauliScalar P))
@@ -651,7 +653,7 @@ end ProjectiveSetting
 “symmetric equivalents” clause. The relation lists the two orientations of
 each of the `AA'`--`BA''` and `BB'`--`AB''` pairs; paper
 `14_analysis_of_the_pauli_basis_test.tex:420-450`, blueprint
-`ch14_qpbt_observables.tex:876-922`. -/
+`ch14_qpbt_observables.tex:1002-1031`. -/
 def Placement.IsOpposite : Placement → Placement → Prop
   | .AA', .BA'' => True
   | .BA'', .AA' => True
@@ -662,13 +664,13 @@ def Placement.IsOpposite : Placement → Placement → Prop
 /-- The square-root error obtained by the expanded-observable commutation
 argument in `lem:qld-comm-cons`, paper
 `14_analysis_of_the_pauli_basis_test.tex:475-505`, blueprint
-`ch14_qpbt_observables.tex:932-1032`. -/
+`ch14_qpbt_observables.tex:1139-1178`. -/
 noncomputable def deltaAnticom (ε : ℝ) : ℝ :=
   Real.sqrt ε
 
 /-- The concrete square-root error is polynomially small in the sense used by
 chapters 14 and 15. This discharges the error-function part of
-`lem:qld-comm-cons`, blueprint `ch14_qpbt_observables.tex:932-1032`, from the
+`lem:qld-comm-cons`, blueprint `ch14_qpbt_observables.tex:1139-1178`, from the
 explicit value proved at paper `14_analysis_of_the_pauli_basis_test.tex:503-505`. -/
 theorem deltaAnticom_isPolyErr : IsPolyErr deltaAnticom := by
   refine ⟨1, (2 : ℝ)⁻¹, le_rfl, by positivity, ?_⟩
@@ -682,7 +684,7 @@ theorem deltaAnticom_isPolyErr : IsPolyErr deltaAnticom := by
 conjunct lists the four directed cross-party placements; the second lists all
 four same-placement commutation conclusions. This proposition collects the
 expanded-point conclusions of `lem:qld-comm-cons`, blueprint
-`ch14_qpbt_observables.tex:932-1032`, paper
+`ch14_qpbt_observables.tex:1139-1178`, paper
 `14_analysis_of_the_pauli_basis_test.tex:452-505`. -/
 def ExpandedPointConclusions (δ : ℝ → ℝ) : Prop :=
   (∃ C : ℝ, 1 ≤ C ∧
@@ -711,7 +713,7 @@ def ExpandedPointConclusions (δ : ℝ → ℝ) : Prop :=
 directed opposite-placement pairs. The universal constant precedes all test
 parameters and strategies. This is item 1 of `lem:qld-comm-cons`, paper
 `14_analysis_of_the_pauli_basis_test.tex:455-465`, blueprint
-`ch14_qpbt_observables.tex:942-959`. -/
+`ch14_qpbt_observables.tex:1155-1163`. -/
 theorem expPoint_self_cons :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε)
@@ -744,7 +746,7 @@ theorem expPoint_self_cons :
 each of `AA'`, `BA''`, `BB'`, and `AB''`. The universal constant precedes all
 test parameters and strategies. This is item 2 of `lem:qld-comm-cons`, paper
 `14_analysis_of_the_pauli_basis_test.tex:466-505`, blueprint
-`ch14_qpbt_observables.tex:960-1032`. -/
+`ch14_qpbt_observables.tex:1164-1175`. -/
 theorem expPointTrace_comm :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε)
@@ -762,7 +764,7 @@ theorem expPointTrace_comm :
 /-- The source's existential polynomial-error formulation, derived from the
 concrete square-root bounds rather than postulated independently. This is
 `lem:qld-comm-cons`, paper `14_analysis_of_the_pauli_basis_test.tex:452-505`,
-blueprint `ch14_qpbt_observables.tex:932-1032`. -/
+blueprint `ch14_qpbt_observables.tex:1139-1178`. -/
 theorem exists_deltaAnticom :
     ∃ δ : ℝ → ℝ, IsPolyErr δ ∧ ExpandedPointConclusions δ := by
   refine ⟨deltaAnticom, deltaAnticom_isPolyErr, ?_⟩

@@ -10,7 +10,7 @@ This module converts the trace-coarse-grained point consistency of item 1 of
 ## References
 
 The declarations support `lem:qld-win-implications-obs` in
-`blueprint/src/chapter/ch14_qpbt_observables.tex:663-682`, whose paper source
+`blueprint/src/chapter/ch14_qpbt_observables.tex:761-794`, whose paper source
 is `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:294-308`.
 -/
 
@@ -32,7 +32,7 @@ local instance pauliEdgeNonemptyPointObs : Nonempty PauliEdge :=
 
 /-- The left tensor placement commutes with weighted finite sums. This is
 formalization-only support for `lem:povm-to-obs`, blueprint
-`ch14_qpbt_observables.tex:361-378`. -/
+`ch14_qpbt_observables.tex:365-382`. -/
 theorem heteroKron_left_sum_smul {α ιA ιB : Type*} [Fintype α]
     (c : α → ℂ) (A : α → Op ιA) (B : Op ιB) :
     heteroKron (∑ a, c a • A a) B = ∑ a, c a • heteroKron (A a) B := by
@@ -43,7 +43,7 @@ theorem heteroKron_left_sum_smul {α ιA ιB : Type*} [Fintype α]
 
 /-- The right tensor placement commutes with weighted finite sums. This is
 formalization-only support for `lem:povm-to-obs`, blueprint
-`ch14_qpbt_observables.tex:361-378`. -/
+`ch14_qpbt_observables.tex:365-382`. -/
 theorem heteroKron_right_sum_smul {α ιA ιB : Type*} [Fintype α]
     (c : α → ℂ) (A : Op ιA) (B : α → Op ιB) :
     heteroKron A (∑ a, c a • B a) = ∑ a, c a • heteroKron A (B a) := by
@@ -62,7 +62,7 @@ theorem norm_phaseSign (t : ZMod 2) : ‖phaseSign t‖ = 1 := by
 /-- The strategy point observable of `def:strategy-observables` is the
 binary observable of the trace-coarse-grained point measurement. Paper
 `14_analysis_of_the_pauli_basis_test.tex:174-190,294-308`, blueprint
-`ch14_qpbt_observables.tex:480-503`. -/
+`ch14_qpbt_observables.tex:573-610`. -/
 theorem pointObs_eq_traceMeas_obs {P : AdmissibleParams} {ε : ℝ}
     (S : ProjectiveSetting P ε) (side : PlayerSide) (W : PauliKind)
     (r : PauliScalar P) (u : Fin P.m → PauliScalar P) :
@@ -89,7 +89,7 @@ theorem pointObs_eq_traceMeas_obs {P : AdmissibleParams} {ε : ℝ}
 /-- The point self-loop mismatch of trace labels is contained in rejection.
 This is item 1 of `lem:qld-win-implications` read on the point questions,
 paper `14_analysis_of_the_pauli_basis_test.tex:197-199`, blueprint
-`ch14_qpbt_observables.tex:515-522`. -/
+`ch14_qpbt_observables.tex:633-637`. -/
 theorem pointTraceMismatch_le_rejection {P : AdmissibleParams} {ε : ℝ}
     (S : ProjectiveSetting P ε) (W : PauliKind) (r : PauliScalar P)
     (z : PauliSpace P) :
@@ -109,7 +109,7 @@ theorem pointTraceMismatch_le_rejection {P : AdmissibleParams} {ε : ℝ}
 /-- Trace-coarse-grained point self-consistency is the point self-loop label
 mismatch probability. Paper
 `14_analysis_of_the_pauli_basis_test.tex:294-308`, blueprint
-`ch14_qpbt_observables.tex:663-682`. -/
+`ch14_qpbt_observables.tex:778-782`. -/
 theorem pointTraceConsistency_eq_mismatch {P : AdmissibleParams} {ε : ℝ}
     (S : ProjectiveSetting P ε) (W : PauliKind) (r : PauliScalar P) :
     consistencyDefect (uniformDistribution (Fin P.m → PauliScalar P))
@@ -167,7 +167,7 @@ theorem pointTraceConsistency_eq_mismatch {P : AdmissibleParams} {ε : ℝ}
 /-- The trace-coarse-grained point measurements are self-consistent on average
 over the point. This is item 1 of `lem:qld-win-implications` specialized to the
 point questions, paper `14_analysis_of_the_pauli_basis_test.tex:294-300`,
-blueprint `ch14_qpbt_observables.tex:663-682`. -/
+blueprint `ch14_qpbt_observables.tex:778-782`. -/
 theorem pointTrace_self_consistency_le {P : AdmissibleParams} {ε : ℝ}
     (S : ProjectiveSetting P ε) (W : PauliKind) (r : PauliScalar P) :
     consistencyDefect (uniformDistribution (Fin P.m → PauliScalar P))
@@ -224,7 +224,7 @@ theorem pointTrace_self_consistency_le {P : AdmissibleParams} {ε : ℝ}
 /-- Observable self-consistency on both tensor-factor orientations. This is
 Equation `eq:pts-obs-consistency` in `lem:qld-win-implications-obs`, paper
 `14_analysis_of_the_pauli_basis_test.tex:294-308`, blueprint
-`ch14_qpbt_observables.tex:663-682`. -/
+`ch14_qpbt_observables.tex:778-782`. -/
 theorem pointObs_self_consistent_proof :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
