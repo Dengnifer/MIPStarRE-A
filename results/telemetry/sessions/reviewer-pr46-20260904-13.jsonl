@@ -1,0 +1,6 @@
+{"type":"thread.started","thread_id":"01a06a32-396f-77a1-bb6c-7c8528fbbdc7"}
+{"type":"turn.started"}
+{"type":"error","message":"Reconnecting... 1/5 (rate limit exceeded: Concurrency limit exceeded for user, please retry later)"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’m reviewing the exact head against the QPBT paper, changed blueprint entries, proof-integrity rules, and the prior-round ledger. I’ll split the mathematical and API checks across the new modules, then consolidate only findings that are specific and merge-blocking under this review contract."}}
+{"type":"error","message":"exceeded retry limit, last status: 429 Too Many Requests, request id: 4a8b9842-4d08-4184-9181-428d1980f32e"}
+{"type":"turn.failed","error":{"message":"exceeded retry limit, last status: 429 Too Many Requests, request id: 4a8b9842-4d08-4184-9181-428d1980f32e"}}

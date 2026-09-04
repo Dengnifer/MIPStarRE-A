@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# owner-bin/codex — PATH shim for dispatched worker/reviewer sessions: keeps
+# codex's own sandbox but disables multi-agent fan-out, which hit the account's
+# "agent thread limit" and killed big reviews (PR 46/87, 2026-09-04). Adds
+#   -c features.multi_agent=false -c agents.max_concurrent_threads_per_session=1
+# before the task and prefixes the task with a no-collaboration instruction.
+set -euo pipefail
+args=(); injected=0; saw_sep=0
+while [ "$#" -gt 0 ]; do
+  if [ "$1" = "--" ] && [ "$injected" -eq 0 ]; then
+    args+=(-c 'features.multi_agent=false' -c 'agents.max_concurrent_threads_per_session=1' --)
+    injected=1; saw_sep=1; shift
+  else
+    args+=("$1"); shift
+  fi
+done
+if [ "$saw_sep" -eq 1 ] && [ "${#args[@]}" -gt 0 ]; then
+  last=$(( ${#args[@]} - 1 ))
+  args[$last]="Complete this task in the current session. Do not use collaboration tools or spawn subagents.
+
+${args[$last]}"
+fi
+exec /home/drx/.local/bin/codex "${args[@]}"
