@@ -16,13 +16,12 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   and delete, preserves both containment boundaries, and grants only the checked
   branch target to writable sessions. Lesson: external placement needs filesystem
   and execution-sandbox containment to be designed as one boundary.
-- **Canonical Lake target ownership.** PR #198 reviews found reverse `hot-main`
-  containment, roots inside another checkout, branch aliases, detached worktrees,
-  and skipped retry cleanup were unsafe or silent. Setup and cleanup now share
-  repository-overlap checks and inspect registered worktrees' canonical targets;
-  merge cleanup runs after a missing branch worktree and warns when its root is
-  unavailable. Lesson: destructive cleanup must validate canonical ownership at
-  deletion time, and every unavailable ownership input must be operator-visible.
+- **Canonical Lake target ownership.** PR #198 reviews found shared-cache and
+  checkout overlap, nested or aliased branch targets, detached owners, and silent
+  retry cleanup. Setup and cleanup now accept one-component branches, protect
+  packages, `hot-main`, and every checkout, and compare canonical ownership;
+  retries warn when the root is unavailable. Lesson: destructive cleanup needs
+  collision-free names and operator-visible ownership inputs at deletion time.
 ## 2026-08-30
 - **Stale seed clone.** Symptom: files copied from the sibling `../MIPStarRE`
   checkout were dated Jul 5 while upstream main was Aug 25. Diagnosis: the

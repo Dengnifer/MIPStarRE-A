@@ -55,6 +55,7 @@ Usage: local/bin/housekeeping.sh {standup|stale-audit|linter-sweep|readme-freshn
 
 Reports are written to results/reports/. Build logs and intermediate JSON go to
 ${MIPSTARRE_CACHE_ROOT:-~/.cache/mipstarre-dev}/ and are never committed.
+External Lake cleanup uses MIPSTARRE_LAKE_ROOT when configured.
 
 Only `standup` writes anything into the repository, and only its own digest.
 The three audits are report-only by contract (docs/stale_issue_audit.md:143-144,

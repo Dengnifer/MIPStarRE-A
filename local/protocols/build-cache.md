@@ -47,10 +47,11 @@ build tree.
 different sharing rules. Conflating them is the primary way to reintroduce the
 parent's failure.
 
-An absolute `MIPSTARRE_LAKE_ROOT` relocates `.lake` to `<root>/<branch>`. The
-shared helper uses canonical paths to reject `/`, checkout or `hot-main` overlap,
-escape, or ownership by another branch or detached worktree. Existing data is
-not moved. Keep it exported for dispatch `--add-dir` and post-merge cleanup.
+An absolute `MIPSTARRE_LAKE_ROOT` relocates `.lake` to `<root>/<branch>` for a
+one-component branch name. The helper rejects `/`, symlink targets, escape, and
+canonical overlap with packages, `hot-main`, the repository, or any worktree,
+plus canonical-equal ownership by another worktree. Export it before setup or
+warming and through dispatch and cleanup; only its target gets `--add-dir`.
 
 **Tier 1 — `.lake/build`** — this project's own compiled artifacts (`.olean`,
 `.ilean`, `.c`, `.trace` for `MIPStarRE` modules). This is *exactly* what the

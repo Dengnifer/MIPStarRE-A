@@ -88,6 +88,7 @@ Usage: local/bin/warm-worktree.sh [<worktree>] [options]
 
 Environment: MIPSTARRE_CACHE_ROOT, MIPSTARRE_FULL_BUILD_LOCK_TIMEOUT,
 MIPSTARRE_TELEMETRY_DIR.
+MIPSTARRE_LAKE_ROOT optionally relocates this worktree's `.lake` directory.
 EOF
 }
 

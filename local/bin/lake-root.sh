@@ -4,21 +4,20 @@ set -euo pipefail
 log() { printf '[lake-root] %s\n' "$*" >&2; }
 die() { printf '[lake-root] ERROR: %s\n' "$*" >&2; exit 1; }
 run_outside_git_env() (
-  if command -v git >/dev/null 2>&1; then
-    for name in $(git rev-parse --local-env-vars); do unset "$name" || true; done
-  fi
+  for name in $(git rev-parse --local-env-vars); do unset "$name" || true; done
   "$@"
 )
 paths_overlap() {
   case "$1/" in "$2/"*) return 0 ;; esac
   case "$2/" in "$1/"*) return 0 ;; *) return 1 ;; esac
 }
-reject_hot_main() { # <canonical-path>
-  local base="${MIPSTARRE_CACHE_ROOT:-$HOME/.cache/mipstarre-dev}/hot-main" protected
-  for protected in "$base" "$base/repo" "$base/snapshots" "$base/current"; do
-    protected="$(realpath -m -- "$protected")" || die "cannot resolve hot-main"
-    [ "$protected" != "/" ] || die "a protected hot-main path resolves to /"
-    paths_overlap "$1" "$protected" && die "Lake target overlaps hot-main: $1"
+reject_shared_cache() { # <canonical-target>
+  local base="${MIPSTARRE_CACHE_ROOT:-$HOME/.cache/mipstarre-dev}" protected
+  for protected in "$base/packages" "$base/hot-main" "$base/hot-main/repo" \
+      "$base/hot-main/snapshots" "$base/hot-main/current"; do
+    protected="$(realpath -m -- "$protected")" || die "cannot resolve shared cache"
+    [ "$protected" != "/" ] || die "a protected shared-cache path resolves to /"
+    paths_overlap "$1" "$protected" && die "Lake target overlaps shared cache: $protected"
   done
 }
 canonical_lake_root() { # <create: 0|1>
@@ -30,34 +29,34 @@ canonical_lake_root() { # <create: 0|1>
   [ "$create" -eq 1 ] || [ -d "$root" ] || die "MIPSTARRE_LAKE_ROOT does not exist: $root"
   printf '%s' "$root"
 }
+validate_branch() { # <branch>
+  case "$1" in ""|"."|".."|*/*|*..*) die "branch must be one path component: $1" ;; esac
+  run_outside_git_env git check-ref-format --branch "$1" >/dev/null 2>&1 || die "invalid branch: $1"
+}
 validated_target() { # <canonical-root> <target>
   local root="$1" target="$2" resolved
+  [ ! -L "$target" ] || die "external Lake target must not be a symlink: $target"
   resolved="$(realpath -m -- "$target")" || die "cannot resolve Lake target: $target"
   case "$resolved" in "$root"/*) ;; *) die "Lake target escapes root: $resolved" ;; esac
-  reject_hot_main "$resolved"; printf '%s' "$resolved"
+  [ "$resolved" = "$target" ] || die "Lake target is not canonical: $target"
+  reject_shared_cache "$resolved"; printf '%s' "$resolved"
 }
-validate_repo_paths() { # <repository> <root> <target> <current-tree> <branch>
-  local repo="$1" root="$2" target="$3" current="$4" branch="$5" listing line tree other
+validate_repo_paths() { # <repository> <target> <current-tree> <branch>
+  local repo="$1" target="$2" current="$3" branch="$4" listing line tree other
   listing="$(run_outside_git_env git -C "$repo" worktree list --porcelain)" \
     || die "cannot read worktrees under $repo"
   while IFS= read -r line; do
     case "$line" in
       "worktree "*)
         tree="$(realpath -m -- "${line#worktree }")"
-        paths_overlap "$root" "$tree" && die "Lake root overlaps registered worktree: $tree"
+        paths_overlap "$target" "$tree" && die "Lake target overlaps registered worktree: $tree"
         if [ "$tree" != "$current" ] && [ -L "$tree/.lake" ]; then
           other="$(realpath -m -- "$tree/.lake")"
           [ "$other" != "$target" ] || die "target already used by $tree"
         fi ;;
-      "branch refs/heads/"*)
-        other="${line#branch refs/heads/}"
-        if [ "$other" = "$branch" ]; then
-          [ -n "$current" ] && [ "$tree" = "$current" ] \
-            || die "branch $branch still has a worktree"
-        else
-          other="$(realpath -m -- "$root/$other")" || die "cannot resolve target for $tree"
-          [ "$other" != "$target" ] || die "target already used by $tree"
-        fi ;;
+      "branch refs/heads/$branch")
+        [ -n "$current" ] && [ "$tree" = "$current" ] \
+          || die "branch $branch still has a worktree" ;;
     esac
   done <<< "$listing"
 }
@@ -65,8 +64,7 @@ worktree_branch() { # <worktree>
   local branch
   branch="$(run_outside_git_env git -C "$1" symbolic-ref --quiet --short HEAD 2>/dev/null)" \
     || die "$1 is detached; a Lake root requires a branch"
-  run_outside_git_env git check-ref-format --branch "$branch" >/dev/null 2>&1 \
-    || die "invalid branch: $branch"
+  validate_branch "$branch"
   printf '%s' "$branch"
 }
 prepare_lake() { # <worktree> <check-only: 0|1>
@@ -77,7 +75,7 @@ prepare_lake() { # <worktree> <check-only: 0|1>
   root="$(canonical_lake_root "$((1 - check))")"
   branch="$(worktree_branch "$tree")"; target="$root/$branch"
   resolved="$(validated_target "$root" "$target")"
-  validate_repo_paths "$tree" "$root" "$resolved" "$tree" "$branch"
+  validate_repo_paths "$tree" "$resolved" "$tree" "$branch"
   link="$tree/.lake"
   if [ -L "$link" ]; then
     actual="$(readlink "$link")"; [ "$actual" = "$target" ] \
@@ -88,7 +86,6 @@ prepare_lake() { # <worktree> <check-only: 0|1>
     [ -z "$(find "$link" -mindepth 1 -maxdepth 1 -print -quit)" ] \
       || die "$link is populated; migrate it before enabling the Lake root"
   fi
-  [ ! -L "$target" ] || die "external Lake target must not be a symlink: $target"
   if [ "$check" -eq 1 ]; then
     [ -d "$target" ] || die "$link is dangling; expected directory $target"
   else
@@ -105,14 +102,12 @@ cleanup_lake() { # <repository> <branch>
   [ -d "$repo" ] || die "repository does not exist: $repo"
   repo="$(cd "$repo" && pwd -P)"
   root="$(canonical_lake_root 0)" || die "MIPSTARRE_LAKE_ROOT must be set for cleanup"
-  run_outside_git_env git check-ref-format --branch "$branch" >/dev/null 2>&1 \
-    || die "invalid branch: $branch"
+  validate_branch "$branch"
   target="$root/$branch"; resolved="$(validated_target "$root" "$target")"
-  [ ! -L "$target" ] || die "refusing to remove symlink target $target"
+  validate_repo_paths "$repo" "$resolved" "" "$branch"
   if [ ! -e "$target" ]; then log "no external Lake directory for $branch"; return 0; fi
   [ -d "$target" ] || die "external Lake target is not a directory: $target"
-  resolved="$(validated_target "$root" "$target")"
-  validate_repo_paths "$repo" "$root" "$resolved" "" "$branch"
+  [ "$(validated_target "$root" "$target")" = "$resolved" ] || die "Lake target changed"
   rm -rf -- "$resolved"
   log "removed external Lake directory $target"
 }
