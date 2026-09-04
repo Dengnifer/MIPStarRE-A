@@ -1,5 +1,90 @@
 [
  {
+  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/183",
+  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
+  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/183/labels{/name}",
+  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/183/comments",
+  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/183/events",
+  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/183",
+  "id": 5349439078,
+  "node_id": "I_kwDOUJyJf88AAAABPtn2Zg",
+  "number": 183,
+  "title": "refactor(QPBT/Test): clean Magic Square dilation proof support",
+  "user": {
+   "login": "Dengnifer",
+   "id": 89234078,
+   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
+   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/Dengnifer",
+   "html_url": "https://github.com/Dengnifer",
+   "followers_url": "https://api.github.com/users/Dengnifer/followers",
+   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
+   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
+   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
+   "repos_url": "https://api.github.com/users/Dengnifer/repos",
+   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
+   "type": "User",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "labels": [
+   {
+    "id": 12025014642,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8pcg",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/follow-up",
+    "name": "follow-up",
+    "color": "ededed",
+    "default": false,
+    "description": "A mathematical obligation split out of a merged PR"
+   }
+  ],
+  "state": "open",
+  "locked": false,
+  "assignees": [],
+  "milestone": null,
+  "comments": 0,
+  "created_at": "2026-09-04T14:40:31Z",
+  "updated_at": "2026-09-04T14:40:31Z",
+  "closed_at": null,
+  "assignee": null,
+  "author_association": "OWNER",
+  "active_lock_reason": null,
+  "sub_issues_summary": {
+   "total": 0,
+   "completed": 0,
+   "percent_completed": 0
+  },
+  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/77",
+  "issue_dependencies_summary": {
+   "blocked_by": 0,
+   "total_blocked_by": 0,
+   "blocking": 0,
+   "total_blocking": 0
+  },
+  "body": "<!-- mipstarre-issue-key: pr149-terminal-dilation-cleanup -->\n## Context\n\nPR #149 supplies the Magic Square projective-dilation and ground-slice\ntransfer layer for issue #102. Its third exact-head review approves the\nmathematics and source alignment and leaves three bounded code-hygiene\nfindings. They are tracked here so the completed proof packet does not grow.\n\n## Scope\n\n- Remove the unused `[DecidableEq alpha]` assumptions from the two\n  family-projection theorem signatures in `Dilation.lean`, introducing local\n  classical instances inside proofs if required.\n- Replace the three linter-reported goal-changing `show` tactics in\n  `Dilation.lean` with `change` or direct goal statements.\n- Promote or reuse the existing `applyOperatorToState_mul` helper from\n  `Games/DistanceTheorems/Support.lean` so `GroundSlice.lean` does not carry an\n  exact duplicate proof.\n\n## Acceptance\n\n- The affected public theorem signatures have no unused typeclass assumptions.\n- The three `style.show` warnings are eliminated at their source.\n- Both call sites use one appropriately shared multiplication helper.\n- Changed-file Lean checks, the duplicate-helper audit, and local CI pass.\n\nProvenance: PR #149 at\n`da0d0061c7a1a583fe43927632b2d97b45614065`, terminal findings F1-F3.\n\n---\nAddresses #102",
+  "closed_by": null,
+  "reactions": {
+   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/183/reactions",
+   "total_count": 0,
+   "+1": 0,
+   "-1": 0,
+   "laugh": 0,
+   "hooray": 0,
+   "confused": 0,
+   "heart": 0,
+   "rocket": 0,
+   "eyes": 0
+  },
+  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/183/timeline",
+  "performed_via_github_app": null,
+  "state_reason": null,
+  "pinned_comment": null
+ },
+ {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/182",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/182/labels{/name}",
@@ -2614,7 +2699,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/165",
   "issue_dependencies_summary": {
-   "blocked_by": 7,
+   "blocked_by": 6,
    "total_blocked_by": 7,
    "blocking": 3,
    "total_blocking": 3
@@ -3634,7 +3719,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/77",
   "issue_dependencies_summary": {
-   "blocked_by": 1,
+   "blocked_by": 0,
    "total_blocked_by": 1,
    "blocking": 2,
    "total_blocking": 2
@@ -3654,91 +3739,6 @@
    "eyes": 0
   },
   "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/103/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/102",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/102/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/102/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/102/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/102",
-  "id": 5345088251,
-  "node_id": "I_kwDOUJyJf88AAAABPpeS-w",
-  "number": 102,
-  "title": "feat(QPBT/Test): prove Magic Square projective dilation",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-04T06:40:03Z",
-  "updated_at": "2026-09-04T12:01:54Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/77",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 0,
-   "blocking": 2,
-   "total_blocking": 2
-  },
-  "body": "<!-- mipstarre-issue-key: stage43-ms-rigidity-projective-dilation -->\n### Target declarations\n\nCreate the private dilation layer in\n`MIPStarRE/QPBT/Test/MagicSquareTheorems/Rigidity/Dilation.lean:1`, supporting\n`MagicSquareTheorems.lean:116-128`. Prove named declarations for:\n\n1. a simultaneous finite-dimensional Naimark dilation of all Magic Square POVMs;\n2. projectivity of every dilated question measurement;\n3. preservation of game value and the relations proved in #101;\n4. composition of the dilation embeddings with later local isometries;\n5. transfer of state-dependent effect bounds back to the original strategy.\n\nThis packet owns zero pre-existing `sorry` sites.\n\n### Paper and blueprint references\n\n- `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652`\n- `blueprint/src/chapter/ch13_qpbt_test.tex:224-253`\n- Reuse `MIPStarRE/LDT/MakingMeasurementsProjective/NaimarkFull.lean` rather\n  than postulating a projective-strategy reduction.\n\n### Dependencies\n\n- #101 must merge first.\n- #49 must merge for the clean state-dependent distance and transfer calculus.\n\n### Acceptance\n\n- The dilation is constructed from arbitrary POVMs and all intertwining,\n  normalization, value-preservation, and pullback statements are proved.\n- `lake env lean` is green for the new module and its direct consumers.\n- No blueprint `\\leanok` is added before the final rigidity theorem closes.\n- No new `sorry`, `admit`, axiom, prohibited bypass, dimension restriction,\n  or theorem-level projectivity hypothesis is introduced.\n- Full build, exact-head CI, and independent review pass.\n\n### Scope notes\n\nOwn only the rigidity-private dilation module. Do not expose projectivity in\n`exists_ms_rigidity`, change the theorem signature, or begin the operator\nself-test. Any needed reuse from the LDT Naimark development must be proved\ncompatible with the pure-vector heterogeneous strategy representation.\n\n---\nStage 4.3 rigidity sub-packet under #77.\n\nPrerequisites are recorded as GitHub issue dependencies (blocked_by); the bullets above are commentary.\n",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/102/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/102/timeline",
   "performed_via_github_app": null,
   "state_reason": null,
   "pinned_comment": null
@@ -3909,9 +3909,9 @@
   "author_association": "OWNER",
   "active_lock_reason": null,
   "sub_issues_summary": {
-   "total": 5,
-   "completed": 1,
-   "percent_completed": 20
+   "total": 6,
+   "completed": 2,
+   "percent_completed": 33
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/164",
   "issue_dependencies_summary": {
@@ -4769,9 +4769,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 104,
+  "comments": 108,
   "created_at": "2026-09-02T08:30:04Z",
-  "updated_at": "2026-09-04T14:09:30Z",
+  "updated_at": "2026-09-04T15:04:50Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
@@ -4853,9 +4853,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 16,
+  "comments": 17,
   "created_at": "2026-09-02T08:29:59Z",
-  "updated_at": "2026-09-04T12:47:56Z",
+  "updated_at": "2026-09-04T15:21:25Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
@@ -4871,7 +4871,7 @@
    "blocking": 0,
    "total_blocking": 0
   },
-  "body": "This issue is the single place where the operator session (qpbt-main) asks the owner for a decision. It stays open and pinned; nothing else uses the `needs-owner` label. The owner is a human who checks GitHub occasionally and wants to catch up in one minute; every comment here also reaches the owner by email.\n\n## When to post here \u2014 the test\n\nPost ONLY if all three hold:\n1. the item cannot move at all without the owner (credentials; the scope budget `MIPSTARRE_INFRA_OVERRIDE`; a mathematical design choice that changes what is being proved or what the paper claims);\n2. no protocol, persona rule, or standing briefing lets you decide it yourself \u2014 if one does, decide, record the reason in `results/telemetry/events.md`, and continue;\n3. you have already parked the item and have other queue work to do meanwhile.\n\nIf in doubt, decide it yourself and record it. A wrong self-decision is recoverable; an idle project is not. Reviewer findings, workflow ergonomics, tooling choices, and \"which order\" questions are never owner blockers.\n\n## Format \u2014 plain and short (hard cap: 10 lines above the fold)\n\nWrite for a human who has not seen the project in days. No jargon, no SHAs, no file paths above the fold, no protocol section numbers. Question first.\n\n```\n### BLOCKER <id> \u2014 <plain title, \u2264 8 words>\n<!-- owner-inbox id=<id> status=open -->\n**What I need from you:** one question, with the options (A/B/\u2026) and which one I recommend and why, in \u2264 3 sentences.\n**Why only you can decide:** one sentence.\n**What happens meanwhile:** one sentence (what I am working on instead; nothing is waiting idle).\n<details><summary>Details, if you want them</summary>\nIssue/PR numbers, heads, file paths, the full reasoning, alternatives considered.\n</details>\n```\n\n`<id>` is `B` + a running number (B1, B2, \u2026). One blocker per comment. Do not repeat a blocker; do not add commentary.\n\n**Owner \u2014 to answer:** reply with a comment starting with `DECISION <id>:` in plain words (e.g. `DECISION B3: agree`, or `DECISION B3: option B, and also \u2026`).\n\n**Operator \u2014 closing the loop:** at the start of every loop iteration and at every stage boundary, read this issue's comments (`gh api repos/Dengnifer/MIPStarRE-A/issues/26/comments --paginate`), find `DECISION <id>` comments for ids still `status=open`, act, then post `RESOLVED <id>: <one line>` and edit the original BLOCKER comment's marker to `status=resolved`. A blocker with no decision stays parked; never re-ask.\n\n**Everything else** (progress, stage reports, what merged / what is dispatched / what is next) goes to the pinned \"Progress log\" issue #27, not here.\n",
+  "body": "## Open now (answer in a comment)\n\n| id | question | reply with |\n|---|---|---|\n| **B4** | Which corrected statement of the Magic Square rigidity theorem do we prove (A recommended), and may later packets use the #103 anticommutation statement instead (yes recommended)? See the **BLOCKER B4** comment. | `DECISION B4: A, routing yes` (or your choice) |\n\nOlder comments that were superseded or were automatic alerts are hidden as outdated so the thread stays short.\n\n---\n\nThis issue is the single place where the operator session (qpbt-main) asks the owner for a decision. It stays open and pinned; nothing else uses the `needs-owner` label. The owner is a human who checks GitHub occasionally and wants to catch up in one minute; every comment here also reaches the owner by email.\n\n## When to post here \u2014 the test\n\nPost ONLY if all three hold:\n1. the item cannot move at all without the owner (credentials; the scope budget `MIPSTARRE_INFRA_OVERRIDE`; a mathematical design choice that changes what is being proved or what the paper claims);\n2. no protocol, persona rule, or standing briefing lets you decide it yourself \u2014 if one does, decide, record the reason in `results/telemetry/events.md`, and continue;\n3. you have already parked the item and have other queue work to do meanwhile.\n\nIf in doubt, decide it yourself and record it. A wrong self-decision is recoverable; an idle project is not. Reviewer findings, workflow ergonomics, tooling choices, and \"which order\" questions are never owner blockers.\n\n## Format \u2014 plain and short (hard cap: 10 lines above the fold)\n\nWrite for a human who has not seen the project in days. No jargon, no SHAs, no file paths above the fold, no protocol section numbers. Question first.\n\n```\n### BLOCKER <id> \u2014 <plain title, \u2264 8 words>\n<!-- owner-inbox id=<id> status=open -->\n**What I need from you:** one question, with the options (A/B/\u2026) and which one I recommend and why, in \u2264 3 sentences.\n**Why only you can decide:** one sentence.\n**What happens meanwhile:** one sentence (what I am working on instead; nothing is waiting idle).\n<details><summary>Details, if you want them</summary>\nIssue/PR numbers, heads, file paths, the full reasoning, alternatives considered.\n</details>\n```\n\n`<id>` is `B` + a running number (B1, B2, \u2026). One blocker per comment. Do not repeat a blocker; do not add commentary.\n\n**Owner \u2014 to answer:** reply with a comment starting with `DECISION <id>:` in plain words (e.g. `DECISION B3: agree`, or `DECISION B3: option B, and also \u2026`).\n\n**Operator \u2014 closing the loop:** at the start of every loop iteration and at every stage boundary, read this issue's comments (`gh api repos/Dengnifer/MIPStarRE-A/issues/26/comments --paginate`), find `DECISION <id>` comments for ids still `status=open`, act, then post `RESOLVED <id>: <one line>` and edit the original BLOCKER comment's marker to `status=resolved`. A blocker with no decision stays parked; never re-ask.\n\n**Everything else** (progress, stage reports, what merged / what is dispatched / what is next) goes to the pinned \"Progress log\" issue #27, not here.\n\n",
   "closed_by": null,
   "reactions": {
    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/26/reactions",

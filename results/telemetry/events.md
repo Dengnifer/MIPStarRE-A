@@ -2356,3 +2356,18 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 - **Hand-back:** to be recorded here and in `stages.jsonl` when the owner
   says so; the codex main session then resumes from `~/.codex/prompts/goal.md`
   plus the #27 log.
+
+## 2026-09-04 15:12Z - Packet prerequisite write and budget gaps
+
+- **Symptom:** PR #171 made GitHub `blocked_by` edges authoritative and added
+  `scripts/tests/test_ready_packets.py`, but the documented local lifecycle had
+  no supported edge-write command and the owner-gated 400-line budget did not
+  count that test module.
+- **Diagnosis:** deferred review findings F1 and F2, recorded as issue #177,
+  identified two missing enforcement paths around the bounded PR #171 work.
+- **Fix:** add an adoption-safe `gh_common.py add-blocked-by` command with fake
+  API coverage, and include the readiness test in the hook budget with an
+  executable over-budget regression.
+- **Lesson:** an authoritative GitHub relation needs both read and write paths,
+  and every workflow test added outside `local/` must be named by the scope
+  budget when the budget uses an explicit path set.
