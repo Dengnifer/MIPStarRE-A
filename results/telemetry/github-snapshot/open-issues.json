@@ -310,9 +310,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 0,
+  "comments": 1,
   "created_at": "2026-09-04T17:40:44Z",
-  "updated_at": "2026-09-04T17:40:44Z",
+  "updated_at": "2026-09-04T21:50:15Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
@@ -2570,7 +2570,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/165",
   "issue_dependencies_summary": {
-   "blocked_by": 3,
+   "blocked_by": 2,
    "total_blocked_by": 5,
    "blocking": 4,
    "total_blocking": 4
@@ -3335,7 +3335,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/77",
   "issue_dependencies_summary": {
-   "blocked_by": 2,
+   "blocked_by": 1,
    "total_blocked_by": 2,
    "blocking": 0,
    "total_blocking": 0
@@ -3355,91 +3355,6 @@
    "eyes": 0
   },
   "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/105/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/104",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/104/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/104/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/104/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/104",
-  "id": 5345093007,
-  "node_id": "I_kwDOUJyJf88AAAABPpeljw",
-  "number": 104,
-  "title": "feat(QPBT/Test): prove Magic Square swap-isometry extraction",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-04T06:40:35Z",
-  "updated_at": "2026-09-04T12:02:05Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/77",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 1,
-   "blocking": 2,
-   "total_blocking": 2
-  },
-  "body": "<!-- mipstarre-issue-key: stage43-ms-rigidity-swap-extraction -->\n### Target declarations\n\nCreate the private extraction layer in\n`MIPStarRE/QPBT/Test/MagicSquareTheorems/Rigidity/Swap.lean:1`, supporting\n`MagicSquareTheorems.lean:116-128`. Prove named declarations for:\n\n1. Alice's and Bob's local swap isometries;\n2. construction and normalization of the auxiliary vector;\n3. extraction of the two ideal EPR pairs;\n4. transport of the four distinguished binary effects to\n   `idealMagicBitProj`;\n5. the trace/density estimate and its explicit conversion to Euclidean vector distance.\n\nThis packet owns zero pre-existing `sorry` sites.\n\n### Paper and blueprint references\n\n- `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652`,\n  especially the trace-norm and local-basis-change discussion at lines 650-652.\n- `blueprint/src/chapter/ch13_qpbt_test.tex:224-253`\n- `references/qpbt-paper/04_preliminaries.tex:1097-1262` for the concrete\n  binary Pauli/EPR identifications.\n\n### Dependencies\n\n- #103 must merge first.\n- #64 and #68 must merge for EPR normalization, projector expansions, and Pauli laws.\n\n### Acceptance\n\n- Both local isometries, the normalized auxiliary state, state extraction, four\n  effect bounds, basis change, and trace-to-Euclidean loss are proved explicitly.\n- `lake env lean` is green for the new module and direct consumers.\n- No blueprint `\\leanok` is added before final rigidity closure.\n- No new `sorry`, `admit`, axiom, prohibited bypass, or implicit\n  trace-to-vector `simpa` is introduced.\n- Full build, exact-head CI, and independent review pass.\n\n### Scope notes\n\nDo not choose the final universal constant or handle the large-error branch.\nKeep both players and all four zero-based variable/effect targets; preserve the\nlocal basis-change orientation used by `idealMagicBitProj`.\n\n---\nStage 4.3 rigidity sub-packet under #77.\n\nPrerequisites are recorded as GitHub issue dependencies (blocked_by); the bullets above are commentary.\n",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/104/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/104/timeline",
   "performed_via_github_app": null,
   "state_reason": null,
   "pinned_comment": null
@@ -3611,8 +3526,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 6,
-   "completed": 3,
-   "percent_completed": 50
+   "completed": 4,
+   "percent_completed": 66
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/164",
   "issue_dependencies_summary": {
@@ -4470,9 +4385,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 111,
+  "comments": 112,
   "created_at": "2026-09-02T08:30:04Z",
-  "updated_at": "2026-09-04T21:15:58Z",
+  "updated_at": "2026-09-04T21:44:39Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",

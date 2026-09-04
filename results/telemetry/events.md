@@ -2497,3 +2497,31 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 - **Lesson:** parallel reviewer lanes may duplicate one obligation under
   separate finding IDs; adjudication must preserve every ID while tracking the
   underlying work only once.
+
+## 2026-09-05 05:53+08:00 - Owner-gated packet 105 removed from auto-release
+
+- **Symptom:** merging prerequisite PR #169 made stack entry #105 eligible for
+  the next automatic release even though owner blocker B5 still holds its
+  Magic Square rigidity statement.
+- **Diagnosis:** the stack watcher has no owner-decision hold mechanism; an
+  entry becomes runnable solely when its recorded base reaches `main`.
+- **Fix:** remove only #105 from the runtime stack registry, preserving its
+  branch for explicit re-queue after the owner chooses A′, B, or C.
+- **Lesson:** owner-gated packets must not remain in an automatic dependency
+  release registry once their technical prerequisite becomes merge-complete.
+
+## 2026-09-05 06:06+08:00 - Worker cleanup removed a managed Lake link
+
+- **Symptom:** packet #180's fresh-base publication build attempted to clone
+  Mathlib and failed with a transient TLS error, despite the worktree having a
+  prepared build-products directory under `/data`.
+- **Diagnosis:** the resumed worker's temporary-validation cleanup removed the
+  worktree's managed `.lake` symlink and left an empty `.lake/packages`
+  directory. The lane therefore treated the directory as local Lake state and
+  allowed Lake to fetch dependencies from the network.
+- **Fix:** remove the two empty directories, restore the exact worktree link to
+  `/data/users/drx/mipstarre-cache/lake/issue-180-typed-conditionally-linear-question-laws`,
+  and restart the v14 publication tail with dispatch skipped.
+- **Lesson:** temporary validation cleanup must preserve the managed `.lake`
+  link. A worker that replaces it should restore and verify the link before
+  reporting a clean handoff.
