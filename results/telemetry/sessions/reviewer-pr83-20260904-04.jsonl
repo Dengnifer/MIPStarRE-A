@@ -1,0 +1,7 @@
+{"type":"thread.started","thread_id":"01a06a4d-108c-7ae1-881e-8efe4041f086"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’m reviewing only blueprint/Lean equivalence, status tags, and mathematical prose. I’ll first load the authoritative language and review rules, then compare every affected paper-facing theorem against the blueprint and cited paper passages; the attached prior ledger will be triaged only where it intersects this review lane."}}
+{"type":"error","message":"Reconnecting... 1/5 (rate limit exceeded: Concurrency limit exceeded for user, please retry later)"}
+{"type":"error","message":"Reconnecting... 2/5 (rate limit exceeded: Concurrency limit exceeded for user, please retry later)"}
+{"type":"error","message":"exceeded retry limit, last status: 429 Too Many Requests, request id: 34c58fc4-1904-4a33-ad4f-6cb7ebfcbaa6"}
+{"type":"turn.failed","error":{"message":"exceeded retry limit, last status: 429 Too Many Requests, request id: 34c58fc4-1904-4a33-ad4f-6cb7ebfcbaa6"}}
