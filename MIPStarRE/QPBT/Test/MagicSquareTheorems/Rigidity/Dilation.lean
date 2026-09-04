@@ -496,9 +496,9 @@ theorem msDilatedStrategy_isProjective_B (S : Strategy msGame) (y : MsType) :
 /-! ## Preservation of the value-to-parity layer -/
 
 /-- The dilation preserves every conditioned Born mass. -/
-theorem msDilatedStrategy_outcomeMass (S : Strategy msGame) (x y : MsType)
+theorem ms_dilated_strategy_outcome_weight (S : Strategy msGame) (x y : MsType)
     (a b : MsAnswer) :
-    outcomeMass (msDilatedStrategy S) x y a b = outcomeMass S x y a b := by
+    outcomeWeight (msDilatedStrategy S) x y a b = outcomeWeight S x y a b := by
   show (inner ℂ (naimarkDilatedState MsAnswer S.ψ)
       (applyOperatorToState
         (heteroKron (naimarkDilatedEffect (α := MsAnswer) (S.A x) (MsAnswer.bit 0) a)
@@ -510,111 +510,111 @@ theorem msDilatedStrategy_outcomeMass (S : Strategy msGame) (x y : MsType)
     naimarkCompression_naimarkDilatedEffect]
 
 /-- The dilation preserves Alice's marginal Born masses. -/
-theorem msDilatedStrategy_aliceOutcomeMass (S : Strategy msGame) (x : MsType)
+theorem ms_dilated_strategy_alice_outcome_weight (S : Strategy msGame) (x : MsType)
     (a : MsAnswer) :
-    aliceOutcomeMass (msDilatedStrategy S) x a = aliceOutcomeMass S x a := by
-  rw [← sum_outcomeMass_right (msDilatedStrategy S) x x a,
-    ← sum_outcomeMass_right S x x a]
-  exact Finset.sum_congr rfl fun b _ => msDilatedStrategy_outcomeMass S x x a b
+    aliceOutcomeWeight (msDilatedStrategy S) x a = aliceOutcomeWeight S x a := by
+  rw [← sum_outcome_weight_right (msDilatedStrategy S) x x a,
+    ← sum_outcome_weight_right S x x a]
+  exact Finset.sum_congr rfl fun b _ => ms_dilated_strategy_outcome_weight S x x a b
 
 /-- The dilation preserves Bob's marginal Born masses. -/
-theorem msDilatedStrategy_bobOutcomeMass (S : Strategy msGame) (y : MsType)
+theorem ms_dilated_strategy_bob_outcome_weight (S : Strategy msGame) (y : MsType)
     (b : MsAnswer) :
-    bobOutcomeMass (msDilatedStrategy S) y b = bobOutcomeMass S y b := by
-  rw [← sum_outcomeMass_left (msDilatedStrategy S) y y b,
-    ← sum_outcomeMass_left S y y b]
-  exact Finset.sum_congr rfl fun a _ => msDilatedStrategy_outcomeMass S y y a b
+    bobOutcomeWeight (msDilatedStrategy S) y b = bobOutcomeWeight S y b := by
+  rw [← sum_outcome_weight_left (msDilatedStrategy S) y y b,
+    ← sum_outcome_weight_left S y y b]
+  exact Finset.sum_congr rfl fun a _ => ms_dilated_strategy_outcome_weight S y y a b
 
 /-- The dilation preserves the mass of every answer event. -/
-theorem msDilatedStrategy_eventMass (S : Strategy msGame) (x y : MsType)
+theorem ms_dilated_strategy_outcome_event_weight (S : Strategy msGame) (x y : MsType)
     (E : MsAnswer → MsAnswer → Prop) [DecidableRel E] :
-    eventMass (msDilatedStrategy S) x y E = eventMass S x y E := by
-  unfold eventMass
+    outcomeEventWeight (msDilatedStrategy S) x y E = outcomeEventWeight S x y E := by
+  unfold outcomeEventWeight
   exact Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ => by
-    by_cases h : E a b <;> simp [h, msDilatedStrategy_outcomeMass]
+    by_cases h : E a b <;> simp [h, ms_dilated_strategy_outcome_weight]
 
 /-- The dilation preserves the mass of every event depending only on Alice's
 answer. -/
-theorem msDilatedStrategy_aliceEventMass (S : Strategy msGame) (x : MsType)
+theorem ms_dilated_strategy_alice_event_weight (S : Strategy msGame) (x : MsType)
     (E : MsAnswer → Prop) [DecidablePred E] :
-    aliceEventMass (msDilatedStrategy S) x E = aliceEventMass S x E := by
-  unfold aliceEventMass
+    aliceEventWeight (msDilatedStrategy S) x E = aliceEventWeight S x E := by
+  unfold aliceEventWeight
   exact Finset.sum_congr rfl fun a _ => by
-    by_cases h : E a <;> simp [h, msDilatedStrategy_aliceOutcomeMass]
+    by_cases h : E a <;> simp [h, ms_dilated_strategy_alice_outcome_weight]
 
 /-- The dilation preserves the mass of every event depending only on Bob's
 answer. -/
-theorem msDilatedStrategy_bobEventMass (S : Strategy msGame) (y : MsType)
+theorem ms_dilated_strategy_bob_event_weight (S : Strategy msGame) (y : MsType)
     (E : MsAnswer → Prop) [DecidablePred E] :
-    bobEventMass (msDilatedStrategy S) y E = bobEventMass S y E := by
-  unfold bobEventMass
+    bobEventWeight (msDilatedStrategy S) y E = bobEventWeight S y E := by
+  unfold bobEventWeight
   exact Finset.sum_congr rfl fun b _ => by
-    by_cases h : E b <;> simp [h, msDilatedStrategy_bobOutcomeMass]
+    by_cases h : E b <;> simp [h, ms_dilated_strategy_bob_outcome_weight]
 
 /-- The dilation preserves the conditioned rejection mass. -/
-theorem msDilatedStrategy_rejectionMass (S : Strategy msGame) (x y : MsType) :
+theorem ms_dilated_strategy_rejection_mass (S : Strategy msGame) (x y : MsType) :
     rejectionMass (msDilatedStrategy S) x y = rejectionMass S x y :=
-  msDilatedStrategy_eventMass S x y _
+  ms_dilated_strategy_outcome_event_weight S x y _
 
 /-- The dilation preserves the value of the Magic Square game, so a strategy of
 value at least `1 - ε` dilates to a projective strategy of the same value. -/
-theorem msDilatedStrategy_value (S : Strategy msGame) :
+theorem ms_dilated_strategy_value (S : Strategy msGame) :
     (msDilatedStrategy S).value = S.value := by
-  rw [strategy_value_eq_acceptanceMass, strategy_value_eq_acceptanceMass]
+  rw [strategy_value_eq_acceptance_mass, strategy_value_eq_acceptance_mass]
   congr 1
   funext xy
-  exact msDilatedStrategy_eventMass S xy.1 xy.2 _
+  exact ms_dilated_strategy_outcome_event_weight S xy.1 xy.2 _
 
 /-- The dilation preserves the total rejection mass, hence the whole
 value-to-parity layer applies verbatim to the dilated strategy. -/
-theorem msDilatedStrategy_totalRejectionMass (S : Strategy msGame) :
+theorem ms_dilated_strategy_total_rejection_mass (S : Strategy msGame) :
     totalRejectionMass (msDilatedStrategy S) = totalRejectionMass S := by
   unfold totalRejectionMass
   congr 1
   funext xy
-  exact msDilatedStrategy_rejectionMass S xy.1 xy.2
+  exact ms_dilated_strategy_rejection_mass S xy.1 xy.2
 
 /-- The dilation preserves Alice's malformed variable-answer mass. -/
-theorem msDilatedStrategy_aliceVariableWrongFormMass (S : Strategy msGame) (j : Fin 9) :
+theorem ms_dilated_strategy_alice_variable_wrong_form_mass (S : Strategy msGame) (j : Fin 9) :
     aliceVariableWrongFormMass (msDilatedStrategy S) j = aliceVariableWrongFormMass S j :=
-  msDilatedStrategy_aliceEventMass S _ _
+  ms_dilated_strategy_alice_event_weight S _ _
 
 /-- The dilation preserves Bob's malformed variable-answer mass. -/
-theorem msDilatedStrategy_bobVariableWrongFormMass (S : Strategy msGame) (j : Fin 9) :
+theorem ms_dilated_strategy_bob_variable_wrong_form_mass (S : Strategy msGame) (j : Fin 9) :
     bobVariableWrongFormMass (msDilatedStrategy S) j = bobVariableWrongFormMass S j :=
-  msDilatedStrategy_bobEventMass S _ _
+  ms_dilated_strategy_bob_event_weight S _ _
 
 /-- The dilation preserves Alice's malformed constraint-answer mass. -/
-theorem msDilatedStrategy_aliceConstraintWrongFormMass (S : Strategy msGame) (i : Fin 6) :
+theorem ms_dilated_strategy_alice_constraint_wrong_form_mass (S : Strategy msGame) (i : Fin 6) :
     aliceConstraintWrongFormMass (msDilatedStrategy S) i = aliceConstraintWrongFormMass S i :=
-  msDilatedStrategy_aliceEventMass S _ _
+  ms_dilated_strategy_alice_event_weight S _ _
 
 /-- The dilation preserves Bob's malformed constraint-answer mass. -/
-theorem msDilatedStrategy_bobConstraintWrongFormMass (S : Strategy msGame) (i : Fin 6) :
+theorem ms_dilated_strategy_bob_constraint_wrong_form_mass (S : Strategy msGame) (i : Fin 6) :
     bobConstraintWrongFormMass (msDilatedStrategy S) i = bobConstraintWrongFormMass S i :=
-  msDilatedStrategy_bobEventMass S _ _
+  ms_dilated_strategy_bob_event_weight S _ _
 
 /-- The dilation preserves the forward cell-consistency defect. -/
-theorem msDilatedStrategy_forwardCellMismatchMass (S : Strategy msGame)
+theorem ms_dilated_strategy_forward_cell_mismatch_mass (S : Strategy msGame)
     (i : Fin 6) (k : Fin 3) :
     forwardCellMismatchMass (msDilatedStrategy S) i k = forwardCellMismatchMass S i k :=
-  msDilatedStrategy_eventMass S _ _ _
+  ms_dilated_strategy_outcome_event_weight S _ _ _
 
 /-- The dilation preserves the reverse cell-consistency defect. -/
-theorem msDilatedStrategy_reverseCellMismatchMass (S : Strategy msGame)
+theorem ms_dilated_strategy_reverse_cell_mismatch_mass (S : Strategy msGame)
     (i : Fin 6) (k : Fin 3) :
     reverseCellMismatchMass (msDilatedStrategy S) i k = reverseCellMismatchMass S i k :=
-  msDilatedStrategy_eventMass S _ _ _
+  ms_dilated_strategy_outcome_event_weight S _ _ _
 
 /-- The dilation preserves Alice's row or column parity-failure mass. -/
-theorem msDilatedStrategy_aliceParityFailureMass (S : Strategy msGame) (i : Fin 6) :
+theorem ms_dilated_strategy_alice_parity_failure_mass (S : Strategy msGame) (i : Fin 6) :
     aliceParityFailureMass (msDilatedStrategy S) i = aliceParityFailureMass S i :=
-  msDilatedStrategy_aliceEventMass S _ _
+  ms_dilated_strategy_alice_event_weight S _ _
 
 /-- The dilation preserves Bob's row or column parity-failure mass. -/
-theorem msDilatedStrategy_bobParityFailureMass (S : Strategy msGame) (i : Fin 6) :
+theorem ms_dilated_strategy_bob_parity_failure_mass (S : Strategy msGame) (i : Fin 6) :
     bobParityFailureMass (msDilatedStrategy S) i = bobParityFailureMass S i :=
-  msDilatedStrategy_bobEventMass S _ _
+  ms_dilated_strategy_bob_event_weight S _ _
 
 /-! ## Composition of the dilation with later local isometries -/
 

@@ -2,6 +2,7 @@ import MIPStarRE.QPBT.Algebra.Pauli
 import MIPStarRE.QPBT.Test.MagicSquareTheorems.Basic
 import MIPStarRE.QPBT.Test.MagicSquareTheorems.PerfectStrategy
 import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.Relations
+import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.Dilation
 
 /-!
 # Magic Square rigidity
