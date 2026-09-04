@@ -270,14 +270,14 @@ theorem pauliQuestionDistribution_symm (P : AdmissibleParams)
     simp only [Finset.mem_filter, Finset.mem_univ, true_and]
     constructor
     · intro hq
-      show Prod.swap (((q.1.val.1, pauliCL P q.1.val.1 q.2),
+      change Prod.swap (((q.1.val.1, pauliCL P q.1.val.1 q.2),
         (q.1.val.2, pauliCL P q.1.val.2 q.2))) = c.swap
       rw [hq]
     · intro hq
       have hq' : Prod.swap (((q.1.val.1, pauliCL P q.1.val.1 q.2),
         (q.1.val.2, pauliCL P q.1.val.2 q.2))) = c.swap := hq
       simpa using congrArg Prod.swap hq'
-  show ((uniformDistribution (PauliEdge × PauliSpace P)).map
+  change ((uniformDistribution (PauliEdge × PauliSpace P)).map
       (fun q => ((q.1.val.1, pauliCL P q.1.val.1 q.2),
         (q.1.val.2, pauliCL P q.1.val.2 q.2)))).weight (x, y) =
     ((uniformDistribution (PauliEdge × PauliSpace P)).map
