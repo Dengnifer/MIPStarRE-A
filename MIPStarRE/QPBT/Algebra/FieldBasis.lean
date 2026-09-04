@@ -59,6 +59,7 @@ section GroupAlgebra
 
 variable {G : Type*} [CommGroup G]
 
+/-- The squaring automorphism of a commutative group whose `Nat.card` is odd. -/
 private noncomputable def squareMulEquiv (hodd : Odd (Nat.card G)) : G ≃* G :=
   MulEquiv.ofBijective (powMonoidHom 2) hodd.coprime_two_right.pow_left_bijective
 
@@ -85,20 +86,6 @@ private theorem monoid_algebra_sq_bijective (hodd : Odd (Nat.card G)) :
 
 end GroupAlgebra
 
-section TraceAction
-
-variable {R K : Type*} [Field R] [Field K] [Algebra R K]
-  [FiniteDimensional R K] [IsGalois R K]
-
-private theorem trace_alg_equiv_apply (σ : Gal(K/R)) (x : K) :
-    Algebra.trace R K (σ x) = Algebra.trace R K x := by
-  apply (algebraMap R K).injective
-  rw [trace_eq_sum_automorphisms, trace_eq_sum_automorphisms]
-  exact Fintype.sum_bijective (fun τ : Gal(K/R) => τ * σ)
-    (Group.mulRight_bijective σ) (fun τ => τ (σ x)) (fun τ => τ x) (fun τ => by rfl)
-
-end TraceAction
-
 section NormalTraceDual
 
 variable {K : Type*} [Field K] [Fintype K] [Algebra (ZMod 2) K]
@@ -122,7 +109,7 @@ private theorem normal_basis_trace_dual_apply (σ : G) :
           Algebra.trace (ZMod 2) K
             (τ⁻¹ (τ (b.traceDual 1) * b υ)) := by
               symm
-              exact trace_alg_equiv_apply τ⁻¹ _
+              exact Algebra.trace_eq_of_algEquiv τ⁻¹ _
       _ = Algebra.trace (ZMod 2) K (b.traceDual 1 * b (τ⁻¹ * υ)) := by
         congr 2
         rw [map_mul]
@@ -243,7 +230,7 @@ private theorem normal_basis_transition_inv :
         Algebra.trace (ZMod 2) K
           (σ (b.traceDual 1 * b.traceDual σ⁻¹)) := by
             symm
-            exact trace_alg_equiv_apply σ _
+            exact Algebra.trace_eq_of_algEquiv σ _
     _ = Algebra.trace (ZMod 2) K (b.traceDual σ * b.traceDual 1) := by
       congr 2
       rw [map_mul, ← normal_basis_trace_dual_apply σ,
@@ -291,6 +278,12 @@ private theorem trace_group_algebra_pairing
           · have hne : σ⁻¹ * τ ≠ 1 := by simpa [inv_mul_eq_one]
             simp [h, hne]
 
+/-- A finite binary extension whose Galois group has odd cardinality admits a
+self-dual normal basis indexed by that group. Starting from Mathlib's normal
+basis, the construction multiplies by the inversion-invariant square root of
+the transition element to the trace-dual basis in the group algebra. This is
+the construction underlying `exists_selfDualNormalBasis`, paper
+`04_preliminaries.tex:702-725`. -/
 private theorem exists_self_dual_normal_basis_gal (hodd : Odd (Nat.card G)) :
     ∃ c : Module.Basis G (ZMod 2) K,
       (∀ σ τ, Algebra.trace (ZMod 2) K (c σ * c τ) =
