@@ -13,16 +13,19 @@ individual degree theorem and the palindromic measurement used to combine its
 coordinate polynomial measurements. It also transports the Schwartz--Zippel
 collision estimate to the direct polynomial representation.
 
-The remaining quantitative comparison between the combined measurement and
-the joint point measurement requires the insertion estimate of
-`lem:ld-sandwich`. The corresponding public declaration
-`consistencyDefect_sandwich_le` is currently not proved, so this module does
-not use it as an assumption.
+The theorem `consistencyDefect_sandwich_le` proves the quantitative estimate
+when the reference PVM already has tuple-polynomial outcomes. The simultaneous
+direct-game reduction instead starts from a point-indexed PVM with tuple-value
+outcomes. Relating its effects to the evaluated palindromic product requires
+the unstructured point-reference estimate of Fact 4.35 in the secondary source;
+the corresponding QPBT interface `exists_pasting_error` remains open (issue
+#201), so this module does not use it as an assumption.
 
 ## References
 
 * `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:413-458`
 * `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:465-501`
+* `references/neexp-paper/05_quantum_preliminaries.tex`, Fact 4.35
 * `references/ldt-paper/test_definition.tex:180-202`
 * `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`
 -/
