@@ -22,7 +22,6 @@ open DistanceCalculus
 namespace SandwichInternal
 
 set_option maxHeartbeats 400000 in
--- The three-stage family comparison requires a larger elaboration budget.
 /-- Replacing the two outer copies and the inner marginal in a joint
 projective effect costs two outer distances and one inner distance. -/
 private theorem sqrt_opFamilyDistSq_joint_sandwich_le

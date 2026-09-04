@@ -2,9 +2,10 @@ import MIPStarRE.QPBT.Games.Sandwich.Quantitative
 
 /-! # Sandwiched measurements and pasting
 
-This facade re-exports the ordered palindromic products used to combine
-measurements and records the two quantitative consistency statements imported
-by the QPBT analysis.
+This module collects the ordered palindromic products used to combine
+measurements and the two quantitative consistency statements imported by the
+QPBT analysis: the sandwiched simultaneous-measurement estimate and the
+two-measurement pasting estimate.
 
 ## References
 

@@ -117,7 +117,6 @@ theorem consistencyDefect_placed_eq_avg_point
     rw [consistency_term_eq_stateQForm, placed_product_stateQForm_eq]
 
 set_option maxHeartbeats 600000 in
--- Normalizing the nested finite sums requires a larger elaboration budget.
 /-- Averaged diagonal overlap after evaluation exceeds the original diagonal
 overlap by at most the collision probability. -/
 theorem avg_diagonal_postprocess_stateQForm_le
@@ -242,7 +241,6 @@ theorem avg_diagonal_postprocess_stateQForm_le
       simpa using mul_le_mul_of_nonneg_left hoffdiag_le_one hε
 
 set_option maxHeartbeats 600000 in
--- Rewriting the averaged complementary overlaps needs the same budget.
 /-- Taking complements converts the diagonal-overlap estimate into a
 pointwise consistency-defect estimate. -/
 theorem point_codeword_defect_le_avg_evaluated_add
@@ -299,7 +297,6 @@ theorem point_codeword_defect_le_avg_evaluated_add
   linarith
 
 set_option maxHeartbeats 600000 in
--- Expanding the two nested distribution averages needs the same budget.
 /-- If distinct codewords collide under a random evaluation with probability
 at most `ε`, their full-outcome consistency defect is at most the evaluated
 defect plus `ε`. -/
@@ -367,7 +364,6 @@ theorem consistencyDefect_codewords_le_evaluated_add
     _ = _ := by rw [avgOver_const_of_isProbability μ hμ]
 
 set_option maxHeartbeats 600000 in
--- Normalizing both postprocessed defect sums needs the same budget.
 /-- Averaging the fixed-map data-processing inequality over an independent
 random relabeling preserves its bound. -/
 theorem consistencyDefect_prod_postprocess_le

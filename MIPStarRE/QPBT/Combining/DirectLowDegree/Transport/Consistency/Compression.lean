@@ -36,7 +36,7 @@ the original point question. -/
   rfl
 
 /-- The direct point-answer readout agrees with the seed-indexed readout under
-the constructor-preserving answer equivalence. -/
+the canonical answer equivalence. -/
 @[simp] theorem ldPointValuesOrZero_ldDirectAnswerEquiv_symm
     (L : LdParams) (a : DirectLdAnswer L.toDirectLdParams) :
     ldPointValuesOrZero L ((ldDirectAnswerEquiv L).symm a) =
@@ -64,7 +64,7 @@ private theorem seedFiberPointMeasurement
   funext a
   cases a <;> rfl
 
-/-- The point POVM of the correlated direct adapter is the block-diagonal
+/-- The point POVM of the seed-fiber lift of the strategy is the block-diagonal
 amplification of Alice's original seed-indexed point POVM. -/
 theorem ldStrategyToDirect_pointMeasurementA
     (L : LdParams) (S : Strategy (ldGame L))
@@ -81,7 +81,7 @@ theorem ldStrategyToDirect_pointMeasurementA
       (directLdPointValuesOrZero L.toDirectLdParams) = _
   exact seedFiberPointMeasurement L S.A u
 
-/-- The point POVM of the correlated direct adapter is the block-diagonal
+/-- The point POVM of the seed-fiber lift of the strategy is the block-diagonal
 amplification of Bob's original seed-indexed point POVM. -/
 theorem ldStrategyToDirect_pointMeasurementB
     (L : LdParams) (S : Strategy (ldGame L))
@@ -330,7 +330,7 @@ theorem consistencyDefect_seedFiber_compress_right
   · simp only [if_neg hab]
     exact seedFiberLiftedState_compress_right S L (A x a) (B x b)
 
-/-- The point-on-Alice/global-on-Bob defect of the correlated direct adapter is
+/-- The point-on-Alice/global-on-Bob defect of the seed-fiber lift of the strategy is
 exactly the defect of the compressed polynomial tuple on the original
 seed-indexed strategy. -/
 theorem ldStrategyToDirect_pointPolynomial_compression
@@ -368,7 +368,7 @@ theorem ldStrategyToDirect_pointPolynomial_compression
       (GB.postprocess (evalDirectPolyTupleAt u)).effect outcome) using 1
   apply consistencyDefect_congr <;> intros <;> rfl
 
-/-- The global-on-Alice/point-on-Bob defect of the correlated direct adapter is
+/-- The global-on-Alice/point-on-Bob defect of the seed-fiber lift of the strategy is
 exactly the defect of the compressed polynomial tuple on the original
 seed-indexed strategy. -/
 theorem ldStrategyToDirect_polynomialPoint_compression
