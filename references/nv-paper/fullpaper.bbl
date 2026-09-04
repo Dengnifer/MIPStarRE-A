@@ -1,0 +1,179 @@
+\begin{thebibliography}{CHTW04}
+
+\bibitem[AAV13]{AharonovAV13qpcp}
+Dorit Aharonov, Itai Arad, and Thomas Vidick.
+\newblock The quantum {PCP} conjecture.
+\newblock Technical report, arXiv:1309.7495, 2013.
+\newblock Appeared as guest column in ACM SIGACT News archive Volume 44 Issue
+  2, June 2013, Pages 47--79.
+
+\bibitem[BLR93]{BLR93}
+Manuel Blum, Michael Luby, and Ronitt Rubinfeld.
+\newblock Self-testing/correcting with applications to numerical problems.
+\newblock {\em Journal of Computer and System Sciences}, 47:549--595, 1993.
+
+\bibitem[CHSH69]{CHSH69}
+John~F. Clauser, Michael~A. Horne, Abner Shimony, and Richard~A. Holt.
+\newblock Proposed experiment to test local hidden-variable theories.
+\newblock {\em Phys. Rev. Lett.}, 23:880--884, Oct 1969.
+
+\bibitem[CHTW04]{CHTW04}
+Richard Cleve, Peter H{\o}yer, Ben Toner, and John Watrous.
+\newblock Consequences and limits of nonlocal strategies, 2004.
+\newblock arXiv:quant-ph/0404076.
+
+\bibitem[CM14]{CM13}
+Toby Cubitt and Ashley Montanaro.
+\newblock Complexity classification of local hamiltonian problems.
+\newblock In {\em Foundations of Computer Science (FOCS), 2014 IEEE 55th Annual
+  Symposium on}, pages 120--129. IEEE, 2014.
+
+\bibitem[CN16]{CN16}
+Matthew Coudron and Anand Natarajan.
+\newblock The parallel-repeated {Magic} {Square} game is rigid.
+\newblock Technical report, arXiv:1609.06306, 2016.
+
+\bibitem[Col16]{Coladangelo16}
+Andrea~W. Coladangelo.
+\newblock Parallel self-testing of (tilted) {EPR} pairs via copies of (tilted)
+  {CHSH}.
+\newblock Technical report, arXiv:1609.03687, 2016.
+
+\bibitem[CS96]{CalderbankShor96}
+A.~R. Calderbank and Peter~W. Shor.
+\newblock Good quantum error-correcting codes exist.
+\newblock {\em Phys. Rev. A}, 54:1098--1105, 1996.
+\newblock arXiv:quant-ph/9512032.
+
+\bibitem[Din07]{Dinur07pcp}
+Irit Dinur.
+\newblock The {PCP} theorem by gap amplification.
+\newblock {\em J. ACM}, 54(3), June 2007.
+
+\bibitem[FH15]{FitzsimonsH15}
+Joseph Fitzsimons and Michal Hajdu{\v{s}}ek.
+\newblock Post hoc verificatin of quantum computing.
+\newblock Technical report, arXiv:1512.04375, 2015.
+
+\bibitem[FV15]{FV14}
+Joseph Fitzsimons and Thomas Vidick.
+\newblock A multiprover interactive proof system for the local {H}amiltonian
+  problem.
+\newblock In {\em Proceedings of the 2015 Conference on Innovations in
+  Theoretical Computer Science}, pages 103--112. ACM, 2015.
+
+\bibitem[Got97]{Gottesman97}
+Daniel Gottesman.
+\newblock Stabilizer codes and quantum error correction, 1997.
+\newblock arXiv:quant-ph/9705052.
+
+\bibitem[IKM09]{IKM09}
+Tsuyoshi Ito, Hirotada Kobayashi, and Keiji Matsumoto.
+\newblock Oracularization and two-prover one-round interactive proofs against
+  nonlocal strategies.
+\newblock In {\em Proceedings: Twenty-Fourth Annual IEEE Conference on
+  Computational Complexity (CCC 2009)}, pages 217--228, July 2009.
+
+\bibitem[IV12]{IV12}
+Tsuyoshi Ito and Thomas Vidick.
+\newblock A multi-prover interactive proof for {NEXP} sound against entangled
+  provers.
+\newblock {\em Proc. 53rd FOCS}, pages 243--252, 2012.
+
+\bibitem[Ji16a]{ji2015classical}
+Zhengfeng Ji.
+\newblock Classical verification of quantum proofs.
+\newblock In {\em Proceedings of the 48th Annual ACM SIGACT Symposium on Theory
+  of Computing}, pages 885--898. ACM, 2016.
+
+\bibitem[Ji16b]{ji16nexp}
+Zhengfeng Ji.
+\newblock Compression of quantum multi-prover interactive proofs.
+\newblock Technical report, arXiv:1610.03133, 2016.
+
+\bibitem[KM03]{KM03}
+Hirotada Kobayashi and Keiji Matsumoto.
+\newblock Quantum multi-prover interactive proof systems with limited prior
+  entanglement.
+\newblock {\em JCSS}, 66:429--450, 2003.
+\newblock arXiv:cs/0102013.
+
+\bibitem[McK14]{mckague2014self}
+Matthew McKague.
+\newblock Self-testing graph states.
+\newblock In {\em Theory of Quantum Computation, Communication, and
+  Cryptography}, pages 104--120. Springer, 2014.
+
+\bibitem[McK15]{McKague15}
+Matthew McKague.
+\newblock Self-testing in parallel, 2015.
+\newblock arXiv:1511.04194.
+
+\bibitem[MdW13]{montanaro2013survey}
+Ashley Montanaro and Ronald de~Wolf.
+\newblock A survey of quantum property testing.
+\newblock {\em arXiv preprint arXiv:1310.2035}, 2013.
+
+\bibitem[Mer90]{mermin1990simple}
+N~David Mermin.
+\newblock Simple unified form for the major no-hidden-variables theorems.
+\newblock {\em Physical Review Letters}, 65(27):3373, 1990.
+
+\bibitem[MS14]{MS14}
+Carl~A. Miller and Yaoyun Shi.
+\newblock Robust protocols for securely expanding randomness and distributing
+  keys using untrusted quantum devices.
+\newblock In {\em Proceedings of the 46th Annual ACM Symposium on Theory of
+  Computing}, STOC '14, pages 417--426, New York, NY, USA, 2014. ACM.
+
+\bibitem[MYS12]{McKagueYS12rigidity}
+M~McKague, T~H Yang, and V~Scarani.
+\newblock Robust self-testing of the singlet.
+\newblock {\em Journal of Physics A: Mathematical and Theoretical},
+  45(45):455304, 2012.
+
+\bibitem[NC01]{NieChu01}
+Michael~A. Nielsen and Isaac~L. Chuang.
+\newblock {\em Quantum Computation and Quantum Information}.
+\newblock Cambridge University Press, 2001.
+
+\bibitem[OV16]{OV16}
+Dimiter Ostrev and Thomas Vidick.
+\newblock Entanglement of approximate quantum strategies in xor games.
+\newblock Technical report, arXiv:1609.01652, 2016.
+
+\bibitem[Per90]{peres1990incompatible}
+Asher Peres.
+\newblock Incompatible results of quantum measurements.
+\newblock {\em Physics Letters A}, 151(3-4):107--108, 1990.
+
+\bibitem[RUV13]{ReichardtUV13nature}
+Ben Reichardt, Falk Unger, and Umesh Vazirani.
+\newblock A classical leash for a quantum system: Command of quantum systems
+  via rigidity of {CHSH} games.
+\newblock {\em Nature}, 496(7446):456--460, 2013.
+
+\bibitem[Ste96]{Steane96}
+Andrew Steane.
+\newblock Multiple-particle interference and quantum error correction.
+\newblock In {\em Proceedings of the Royal Society of London A: Mathematical,
+  Physical and Engineering Sciences}, volume 452, pages 2551--2577. The Royal
+  Society, 1996.
+\newblock arXiv:quant-ph/9601029.
+
+\bibitem[Vid13]{Vidick13xor}
+Thomas Vidick.
+\newblock Three-player entangled {XOR} games are {NP}-hard to approximate.
+\newblock In {\em Proc. 54th FOCS}, 2013.
+
+\bibitem[VV14]{VV14}
+Umesh Vazirani and Thomas Vidick.
+\newblock Fully device-independent quantum key distribution.
+\newblock {\em Phys. Rev. Lett.}, 113:140501, Sep 2014.
+
+\bibitem[WBMS16]{wu2016device}
+Xingyao Wu, Jean-Daniel Bancal, Matthew McKague, and Valerio Scarani.
+\newblock Device-independent parallel self-testing of two singlets.
+\newblock {\em Physical Review A}, 93(6):062121, 2016.
+
+\end{thebibliography}
