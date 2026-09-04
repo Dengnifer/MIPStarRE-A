@@ -59,7 +59,7 @@ theorem quadratic_form_mono {ι : Type*}
 /-- Formalization-only auxiliary lemma: applying a product of operators agrees
 with successive application. It supports the ground-slice transfer of the Magic
 Square rigidity bounds in `thm:ms-rigidity`; see blueprint
-`blueprint/src/chapter/ch13_qpbt_test.tex:224-253` and paper
+`blueprint/src/chapter/ch13_qpbt_test.tex:268-290` and paper
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652`. -/
 theorem applyOperatorToState_mul {ι : Type*}
     [Fintype ι] [DecidableEq ι]
