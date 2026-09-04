@@ -185,12 +185,18 @@ noncomputable def linePointDist (L : LdParams) :
 /-- The affine line-point component has total probability one. -/
 theorem aLinePointDist_isProbability (L : LdParams) :
     (aLinePointDist L).IsProbability := by
-  sorry
+  change (aLinePointDist L).totalWeight = 1
+  rw [aLinePointDist, Distribution.map_totalWeight, clDistribution,
+    Distribution.map_totalWeight]
+  exact uniformDistribution_isProbability _
 
 /-- The diagonal line-point component has total probability one. -/
 theorem dLinePointDist_isProbability (L : LdParams) :
     (dLinePointDist L).IsProbability := by
-  sorry
+  change (dLinePointDist L).totalWeight = 1
+  rw [dLinePointDist, Distribution.map_totalWeight, clDistribution,
+    Distribution.map_totalWeight]
+  exact uniformDistribution_isProbability _
 
 /-- The line-point mixture has total probability one. -/
 theorem linePointDist_isProbability (L : LdParams) :
