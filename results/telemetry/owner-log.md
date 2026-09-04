@@ -123,20 +123,55 @@ Repository: `Dengnifer/MIPStarRE-A`. Operator: the codex (gpt-5.6-sol) session
 ### 2026-09-04 06:40Z — owner decision: everything must be proved
 - Owner (chat): "everything must be proved" — the completion criterion admits no external statements or bridge assumptions; the Natarajan-Vidick linearity theorem (exists_exactly_linear_observables, blueprint thm:linearity) and the low-degree soundness transport (exists_direct_ld_soundness / exists_ld_soundness) become packet chains. Splitter sessions file them (owner-messages/split-task-20260904.md, split-longpoles-task-20260904.md).
 - Owner: codex account concurrency is 10 sessions shared with track B; split 7 (A) / 3 (B). lane-v9 gates at 7 with serialized launches; track B received the budget prompt.
-
 ### 2026-09-04 07:25Z — owner session: merge daemon, capacity 7, incidents
-
 - Merge daemon (owner-tools/merge-daemon.sh) replaces the hand-run chains: refresh + exact-head CI + carried review + merge, one PR at a time, unattended; PRs 92/42/79 by adjudication templates.
 - Incident: the daemon hook-sync step (meant to give PRs 42/79 the merge-budget exemption from main) overwrote PR 92 own hook with main old hook; the reviewer caught it (F1 at 32ee82d). Restored from 6de2dce (622f7c0); daemon v2 syncs only when main already carries the MERGE_HEAD logic and the branch does not.
 - Incident: a direct owner push to main (references mirror 535b4a8) invalidated PR 92 fresh-base refresh and, with CI writing builds.jsonl into the primary during the gate, left 14 stuck telemetry stashes; recovered by union (26c8553). Rule: no pushes to main outside the daemon; merge-v2.sh auto-resolves stash conflicts and retries a dirtied gate.
 - Capacity: lane-v9 gates at 7 (account limit 10 shared with track B, 7/3 split), launches serialized by flock; 7 live sessions reached at 07:10Z. Splitters filed #97-#131 (chapters 12-16, rigidity split, linearity chain, LD transport).
-
 ### 2026-09-04 08:15Z — owner decision: Claude (Fable 5.1) prover pool, ratio codex:fable ≈ 3.5:1
-
 - Owner: "Use fable. number of codex : fable provers should be roughly 3.5 : 1". Level 2 of the parallelism proposal is active: Fable 5.1 subagents run on the owner machine and work over ssh in their own warmed worktrees (owner-tools/claude-lane-prep.sh, claude-lane-finish.sh); the lane tail (merge main, build, push, PR, exact-head CI, codex review, merge daemon) is unchanged, so every Claude PR is reviewed by codex.
 - Telemetry: these sessions bypass dispatch.sh and are recorded in results/telemetry/owner-sessions.jsonl (start/end/wall/status/commits). First prover: #125 (operator BLR, stacked on #124), started 08:15Z; second planned on #102 after #101 lands. Assignment policy: Fable on the hard/analytic packets (rigidity, linearity, LD transport, chapters 14-15), codex on routine algebra.
-
 ### 2026-09-04 08:35Z — incident: operator pkill killed four codex provers
-
 - At 08:26:30Z an operator command `pkill -f "lake build" -u drx` (meant to stop a refresh build) matched the codex prover command lines, whose prompts mention lake build, and terminated the provers of #97, #76, #98 and #130 mid-session (all four dispatch logs end at 16:26:30 local with no turn.completed). #97/#76 had uncommitted edits and their lanes failed; relaunched with thread resume on the same worktrees at 08:30Z. #98/#130 had commits and their lanes proceeded; their PRs are to be checked for completeness. Rule (second occurrence): on ghz kill only PIDs from an anchored pgrep; never pkill -f with a bare substring.
 - Merge daemon v3 (parallel refresh) replaced v2 at 08:26Z; the v2 refresh of PR 79 had spent 40 min on a full review. Opus prover pilot started on #102 (stacked on #101) at 08:28Z; Fable prover on #125 since 08:15Z.
+### 2026-09-04 10:00Z — milestone: linearity theorem proved; Opus provers capable
+- The quantum linearity theorem is proved by Fable 5.1 provers on the stacked chain #124-#129 (bound realigned to 2δ, local fix recorded); pending codex review of five stacked PRs.
+- Opus capability (owner request): repair role passes (11 repairs, all findings fixed minimally, PR #139 re-approved); reviewer role passes (shadow ledger on PR #137 at least as substantive as codex); prover role: #106 all targets, #102 partial (item 5 needed a Fable repair). Pool ratio today about codex 7 : opus 5 : fable 3; owner target 5:5:1 once reviews confirm.
+- Merge daemon v3 (parallel refresh) merged #83, #92, #79, #93, #100, #122 since 08:27Z.
+### 2026-09-04 10:12Z — PR 46 adjudicated after seven rounds
+- PR #46 (chapter-16 extraction skeleton, statements only): code lane approved since round 5; the prose lane produced new wording findings on unchanged text in rounds 5-7. Adjudicated at the refreshed head (template owner-tools; findings deferred to the packets that own the files: #63 for Decoding.lean, #123 for Extraction/Consistency.lean). Merge daemon v4 reads the adjudication list from watchdog/daemon/adj-list.
+- Merged by the daemon since 09:30Z: #100, #122, #126, #139; approved and queued: #138, #145 (both Opus repairs).
+### 2026-09-04 10:55Z — linearity chain consolidated into PR #151; pool ratio
+- The five stacked linearity PRs (#136, #143, #144, #148 and #151 for #129) were each drawing review rounds on the same documentation (normalization remark, Fourier nodes) at every level, and every fix had to be propagated upward (three conflict resolutions). Closed #136/#143/#144/#148 (branches kept); the #129 branch, which contains all commits and fixes, is the single merge vehicle (PR #151, in CI). The pending #127 repair (bundled rounded measurement, blueprint entry) is merged upward before PR #151 final review.
+- Pool at 10:50Z: codex 2 (both reviewers; no codex prover had a ready packet), opus 5 (3 provers #103/#108/#110, 2 repairs), fable 3 (2 provers #109/#131, 1 repair). Launched three codex prover lanes on stacked packets (#111 on #107+#98, #132 on #130) and the citation sweep (#146) to move toward the owner target 5:5:1.
+### 2026-09-04 11:00Z - PR 142 adjudicated after four rounds
+- PR #142 (issue #97, conditional-linearity structure): code lane approved in rounds 2-4; the prose lane in round 4 asked for definition-level leanok that its own round-3 review had correctly required to be withheld for a documented representation deviation. Adjudicated at the refreshed head via the daemon (template in owner-tools). Also stopped a codex review still running on the closed PR #136.
+### 2026-09-04 11:05Z - owner directive: no Fable provers; opus:codex 1:1; codex at 7
+- Owner: hand Fable provers over to Opus and codex; no prover uses Fable from now on; Opus and codex subagents roughly 1:1; codex concurrency should saturate the track-A limit of 7. The three Fable sessions in flight (#131, #109 provers; #149 pull-back repair) run to completion; successors alternate Opus/codex. Codex cap fixed at 7 via watchdog/max-codex (lane-v11.sh, rerun_review-v6.sh read it).
+- 11:10Z: owner asked the in-flight Fable sessions to hand over rather than run to completion. #109 (2 of 4 targets) and the #149 pull-back repair had already finished; the #131 prover was told to commit a compiling state, write watchdog/lanes/131.handover.md (proved/open goals, plan, useful lemmas, dead ends, conventions, estimate) and stop; an Opus prover resumes from the note.
+- 11:12Z: owner: for all other subagent roles, use Opus wherever it is capable (Fable only as fallback).
+
+### 2026-09-04 11:25Z - pre-push hook exit 141 after ok
+
+- Five lane tails (63, 98, 102, 106, 108) failed at push although the pre-push gate printed ok; by hand git push exits 141 (SIGPIPE) with no GitHub rejection. Filed 157. Workaround: pushed those five branches with --no-verify after confirming the ok line in each push log, then relaunched their lane tails (CI and review still run on the pushed heads). Also: PR #147 (#130) merged; #131 proved all targets (Fable, handed over per owner request); #133 and #156 to Opus provers.
+- 11:38Z: lane-v12 works around the pre-push hook (#157): the fallback path runs .githooks/pre-push by hand, requires its ok line, then pushes with MIPSTARRE_SKIP_HOOKS=1; merge daemon v5 uses it for refresh lanes.
+
+### 2026-09-04 11:55Z - packet tree and issue dependencies (#159)
+
+- Owner asked whether to learn from LionSR/MIPStarRE issue trees (#449). Opus study (archived in the session record): upstream uses native sub-issues for containment and roll-up only; readiness stays prose. Decision: adopt the chapter/chain parent layer under #47 AND GitHub issue dependencies (blocked_by, live on this plan, unused) so ready packets are computed, not hand-read. Filed #159; an Opus orc is doing the GitHub restructuring and local/bin/ready_packets.py (workflow-layer PR).
+- 12:05Z: owner request: every 8 h post (1) percent implemented and (2) days to go, concisely. Pinned issue #168 (two-line posts) + results/telemetry/estimates.jsonl; cron 0 */8 * * * ~/bin/estimate.sh (owner-tools/estimate.sh). First post: 33%, 2.0 days (count-based); operator judgement 3-5 days.
+
+### 2026-09-04 12:40Z - Magic Square rigidity statement refuted; Claude pause
+
+- 12:14Z: owner: no new Claude subagents until about 14:15Z (5-hour Claude limit at 88%); running Opus agents may finish; codex only meanwhile. Operator continues with lane tails, codex repairs (PR 150: 11 findings; PR 154: 1 finding) and stacked codex packets #114 and #112 on the #111 branch.
+- 12:36Z: Opus prover for #105 refused to assemble `exists_ms_rigidity`: a role-symmetrized two-copy perfect strategy violates the conclusions at eps = 0 (report on #105). Paper check: the theorem is applied in section 14 only to symmetric strategies and only for the anticommutation conclusion. Filed on #26 with the operator recommendation (restrict to symmetric strategies; route #115 to #103's anticommutation theorem). #105 parked; #102-#104 PRs continue.
+- 12:24Z: lane 112 was launched while its worktree still held a conflicted merge of the #110 branch; the lane was killed, but its codex worker had already started. The merge was aborted under it and a watcher runs the lane tail when the worker exits. Lesson: create and verify a stacked worktree before launching its lane.
+- 12:26Z: #133 (Opus, all targets proved, explicit constants a = 2.5e9*C0, b = 1/80000) opened PR 170 stacked on PR 161.
+- 12:58Z: owner: learn from the proof-gap protocol (docs/paper-gaps/proof-gap-protocol.tex, inherited from LionSR/MIPStarRE and identical to upstream); every source-paper gap (wrong mathematics) must be recorded as a paper-gap note and fixed in the blueprint. Applied at once to the Magic Square rigidity gap as packet #172 (codex lane, review on) and filed the register/audit of all QPBT gap notes as #173 (to run when a slot frees; Opus after 14:15Z).
+
+## 2026-09-04 — Hand-back to the codex main session (2026-09-04T13:03:08Z), planned takeover 14:50Z
+
+Owner command at 12:53Z (Claude 5-hour limit at 95%): hand back in 10 minutes, take over again
+at 14:50Z and then dispatch Opus and codex subagents at about 1:1. The merge daemon, stack-watch,
+the 112 watcher and all detached lanes keep running across the hand-back; codex main is told not
+to merge by hand. Handoff: results/telemetry/owner-messages/handoff-to-codex-main-*.md.
