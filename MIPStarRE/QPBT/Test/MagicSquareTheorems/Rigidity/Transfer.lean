@@ -567,6 +567,419 @@ theorem ms_state_transfer {κA κB : Type} [Fintype κA] [DecidableEq κA]
   rw [isometryTensor_comp_naimarkEmbedding]
   rfl
 
+/-! ## Transfer of the anticommutator estimates -/
+
+/-- Inflation respects differences. -/
+theorem naimarkInflation_sub {ι α : Type} [Fintype ι] [DecidableEq ι]
+    [Fintype α] [DecidableEq α] (M N : Op ι) :
+    naimarkInflation (α := α) (M - N) =
+      naimarkInflation (α := α) M - naimarkInflation (α := α) N := by
+  ext p q
+  by_cases h : p.2 = none ∧ q.2 = none <;> simp [h]
+
+/-- The action on states respects differences of operators. -/
+theorem applyOperatorToState_sub_op {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (M N : Op ι) (v : EuclideanSpace ℂ ι) :
+    applyOperatorToState (M - N) v =
+      applyOperatorToState M v - applyOperatorToState N v := by
+  simp [applyOperatorToState]
+
+/-- The action on states respects negation of operators. -/
+theorem applyOperatorToState_neg_op {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (M : Op ι) (v : EuclideanSpace ℂ ι) :
+    applyOperatorToState (-M) v = -applyOperatorToState M v := by
+  simp [applyOperatorToState]
+
+/-- Tensor placement respects negation in the left factor. -/
+theorem heteroKron_neg_left {ιA ιB : Type*} (A : Op ιA) (C : Op ιB) :
+    heteroKron (-A) C = -heteroKron A C := by
+  ext p q
+  simp [heteroKron, Matrix.kronecker]
+
+/-- The one-outcome distance under the one-point uniform distribution. -/
+theorem opDistSq_uniform_unit {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (M N : Unit → Op ι) (ψ : EuclideanSpace ℂ ι) :
+    opDistSq (uniformDistribution Unit) M N ψ =
+      ‖applyOperatorToState (M () - N ()) ψ‖ ^ 2 := by
+  rw [opDistSq_eq_opFamilyDistSq, opFamilyDistSq_uniform_unit]
+  simp
+
+/-- Alice's dilated observable of a variable question, typed on the enlarged
+local space.  Formalization-only abbreviation. -/
+abbrev dilatedObsA (S : Strategy msGame) (x : MsType) : Op (S.ιA × Option MsAnswer) :=
+  obsOf (((msDilatedStrategy S).A x).postprocess msBitOrZero)
+
+/-- Bob's dilated observable of a totalized bit, typed on the enlarged local
+space.  Formalization-only abbreviation. -/
+abbrev dilatedObsB (S : Strategy msGame) (y : MsType) (f : MsAnswer → ZMod 2) :
+    Op (S.ιB × Option MsAnswer) :=
+  obsOf (((msDilatedStrategy S).B y).postprocess f)
+
+/-- The inflation of Alice's original observable is the ground compression of
+her dilated observable. -/
+theorem naimarkInflation_obs_A (S : Strategy msGame) (x : MsType) :
+    naimarkInflation (α := MsAnswer) (obsOf ((S.A x).postprocess msBitOrZero)) =
+      groundProjection S.ιA MsAnswer * dilatedObsA S x * groundProjection S.ιA MsAnswer := by
+  change naimarkInflation (α := MsAnswer) (((S.A x).postprocess msBitOrZero).effect 0 -
+    ((S.A x).postprocess msBitOrZero).effect 1) =
+    groundProjection S.ιA MsAnswer *
+      (dilatedEffectA S x msBitOrZero 0 - dilatedEffectA S x msBitOrZero 1) *
+      groundProjection S.ιA MsAnswer
+  rw [naimarkInflation_sub, naimarkInflation_postprocess_A, naimarkInflation_postprocess_A,
+    Matrix.mul_sub, Matrix.sub_mul]
+
+/-- Alice's dilated observables are contractions. -/
+theorem conjTranspose_mul_le_one_dilatedObsA (S : Strategy msGame) (x : MsType) :
+    (dilatedObsA S x)ᴴ * dilatedObsA S x ≤ 1 :=
+  conjTranspose_mul_le_one_of_obsOf _
+
+/-- Bob's dilated observables are contractions. -/
+theorem conjTranspose_mul_le_one_dilatedObsB (S : Strategy msGame) (y : MsType)
+    (f : MsAnswer → ZMod 2) :
+    (dilatedObsB S y f)ᴴ * dilatedObsB S y f ≤ 1 :=
+  conjTranspose_mul_le_one_of_obsOf _
+
+/-- The leakage of Alice's dilated observable out of the ground slice is bounded
+by the two intertwining defects of its effects. -/
+theorem norm_leak_obs_le_A (S : Strategy msGame) (i : Fin 6) (k : Fin 3) :
+    ‖applyOperatorToState (heteroKron ((1 - groundProjection S.ιA MsAnswer) *
+        dilatedObsA S (.var (msConstraintVars i k))) 1) (naimarkDilatedState MsAnswer S.ψ)‖ ≤
+      ‖applyOperatorToState
+        (heteroKron (dilatedEffectA S (.var (msConstraintVars i k)) msBitOrZero 0) 1 -
+          heteroKron 1 (dilatedEffectB S (.constraint i) (constraintBitOrZero k) 0))
+        (naimarkDilatedState MsAnswer S.ψ)‖ +
+      ‖applyOperatorToState
+        (heteroKron (dilatedEffectA S (.var (msConstraintVars i k)) msBitOrZero 1) 1 -
+          heteroKron 1 (dilatedEffectB S (.constraint i) (constraintBitOrZero k) 1))
+        (naimarkDilatedState MsAnswer S.ψ)‖ := by
+  change ‖applyOperatorToState (heteroKron ((1 - groundProjection S.ιA MsAnswer) *
+    (dilatedEffectA S (.var (msConstraintVars i k)) msBitOrZero 0 -
+      dilatedEffectA S (.var (msConstraintVars i k)) msBitOrZero 1)) 1)
+    (naimarkDilatedState MsAnswer S.ψ)‖ ≤ _
+  rw [Matrix.mul_sub, heteroKron_sub_left, applyOperatorToState_sub_op]
+  refine le_trans (norm_sub_le _ _) (add_le_add ?_ ?_)
+  · exact norm_leftTensor_one_sub_groundProjection_mul_le MsAnswer S.ψ _ _
+  · exact norm_leftTensor_one_sub_groundProjection_mul_le MsAnswer S.ψ _ _
+
+/-- The intertwining defect of Alice's dilated observable against Bob's is
+bounded by the two intertwining defects of the effects. -/
+theorem norm_intertwine_obs_le_A (S : Strategy msGame) (i : Fin 6) (k : Fin 3) :
+    ‖applyOperatorToState (heteroKron (dilatedObsA S (.var (msConstraintVars i k))) 1 -
+        heteroKron 1 (dilatedObsB S (.constraint i) (constraintBitOrZero k)))
+        (naimarkDilatedState MsAnswer S.ψ)‖ ≤
+      ‖applyOperatorToState
+        (heteroKron (dilatedEffectA S (.var (msConstraintVars i k)) msBitOrZero 0) 1 -
+          heteroKron 1 (dilatedEffectB S (.constraint i) (constraintBitOrZero k) 0))
+        (naimarkDilatedState MsAnswer S.ψ)‖ +
+      ‖applyOperatorToState
+        (heteroKron (dilatedEffectA S (.var (msConstraintVars i k)) msBitOrZero 1) 1 -
+          heteroKron 1 (dilatedEffectB S (.constraint i) (constraintBitOrZero k) 1))
+        (naimarkDilatedState MsAnswer S.ψ)‖ := by
+  have hsplit : heteroKron (dilatedObsA S (.var (msConstraintVars i k))) (1 : Op _) -
+      heteroKron 1 (dilatedObsB S (.constraint i) (constraintBitOrZero k)) =
+      (heteroKron (dilatedEffectA S (.var (msConstraintVars i k)) msBitOrZero 0) 1 -
+        heteroKron 1 (dilatedEffectB S (.constraint i) (constraintBitOrZero k) 0)) -
+      (heteroKron (dilatedEffectA S (.var (msConstraintVars i k)) msBitOrZero 1) 1 -
+        heteroKron 1 (dilatedEffectB S (.constraint i) (constraintBitOrZero k) 1)) := by
+    change heteroKron (dilatedEffectA S (.var (msConstraintVars i k)) msBitOrZero 0 -
+      dilatedEffectA S (.var (msConstraintVars i k)) msBitOrZero 1) (1 : Op _) -
+      heteroKron 1 (dilatedEffectB S (.constraint i) (constraintBitOrZero k) 0 -
+        dilatedEffectB S (.constraint i) (constraintBitOrZero k) 1) = _
+    rw [heteroKron_sub_left, heteroKron_sub_right]
+    abel
+  rw [hsplit, applyOperatorToState_sub_op]
+  exact norm_sub_le _ _
+
+/-- The defect of the compressed product `Π A Π · Π B Π` against `A B` on the
+dilated state is controlled by the leakage of `A` and `B` and the intertwining
+defect of `B` against any right-placed contraction `Y`.  Since `Π ψ' = ψ'`,
+`(Π A Π Π B Π - A B) ψ' = -(Π A (1 - Π) B) ψ' - ((1 - Π) A B) ψ'`; the first
+term is bounded by the leakage of `B`, and in the second `B ψ'` is replaced by
+`Y ψ'`, which commutes past `(1 - Π) A`. -/
+theorem norm_leftTensor_compressed_product_sub_le (α : Type) [Fintype α]
+    [DecidableEq α] {ιA ιB : Type} [Fintype ιA] [DecidableEq ιA] [Fintype ιB]
+    [DecidableEq ιB] (ψ : EuclideanSpace ℂ (ιA × ιB))
+    (A B : Op (ιA × Option α)) (Y : Op (ιB × Option α))
+    (hA : Aᴴ * A ≤ 1) (hY : Yᴴ * Y ≤ 1) :
+    ‖applyOperatorToState (heteroKron (groundProjection ιA α * A * groundProjection ιA α *
+        (groundProjection ιA α * B * groundProjection ιA α) - A * B) 1)
+        (naimarkDilatedState α ψ)‖ ≤
+      ‖applyOperatorToState (heteroKron ((1 - groundProjection ιA α) * B) 1)
+        (naimarkDilatedState α ψ)‖ +
+      ‖applyOperatorToState (heteroKron ((1 - groundProjection ιA α) * A) 1)
+        (naimarkDilatedState α ψ)‖ +
+      ‖applyOperatorToState (heteroKron B 1 - heteroKron 1 Y) (naimarkDilatedState α ψ)‖ := by
+  have hGG : groundProjection ιA α * groundProjection ιA α = groundProjection ιA α :=
+    (isProj_groundProjection ιA α).isIdempotentElem.eq
+  have hGc : (groundProjection ιA α)ᴴ * groundProjection ιA α ≤ 1 :=
+    conjTranspose_mul_le_one_of_isProj (isProj_groundProjection ιA α)
+  have h1Gc : (1 - groundProjection ιA α)ᴴ * (1 - groundProjection ιA α) ≤ 1 :=
+    conjTranspose_mul_le_one_of_isProj (isProj_groundProjection ιA α).one_sub
+  have hstep1 : applyOperatorToState (heteroKron (groundProjection ιA α * A *
+      groundProjection ιA α * (groundProjection ιA α * B * groundProjection ιA α)) 1)
+      (naimarkDilatedState α ψ) =
+      applyOperatorToState (heteroKron (groundProjection ιA α * A * groundProjection ιA α * B) 1)
+        (naimarkDilatedState α ψ) := by
+    have hassoc : groundProjection ιA α * A * groundProjection ιA α *
+        (groundProjection ιA α * B * groundProjection ιA α) =
+        groundProjection ιA α * A * groundProjection ιA α * B * groundProjection ιA α := by
+      simp only [Matrix.mul_assoc]
+      rw [← Matrix.mul_assoc (groundProjection ιA α) (groundProjection ιA α) (B * _), hGG]
+    rw [hassoc, show heteroKron (groundProjection ιA α * A * groundProjection ιA α * B *
+        groundProjection ιA α) (1 : Op (ιB × Option α)) =
+        heteroKron (groundProjection ιA α * A * groundProjection ιA α * B) 1 *
+          heteroKron (groundProjection ιA α) 1 by rw [heteroKron_mul, Matrix.mul_one],
+      applyOperatorToState_mul, applyOperatorToState_leftTensor_groundProjection]
+  have hdec : groundProjection ιA α * A * groundProjection ιA α * B - A * B =
+      -(groundProjection ιA α * A * ((1 - groundProjection ιA α) * B)) -
+        ((1 - groundProjection ιA α) * A) * B := by
+    noncomm_ring
+  have hfirst : ‖applyOperatorToState (heteroKron (groundProjection ιA α * A *
+      ((1 - groundProjection ιA α) * B)) 1) (naimarkDilatedState α ψ)‖ ≤
+      ‖applyOperatorToState (heteroKron ((1 - groundProjection ιA α) * B) 1)
+        (naimarkDilatedState α ψ)‖ := by
+    rw [show heteroKron (groundProjection ιA α * A * ((1 - groundProjection ιA α) * B))
+        (1 : Op (ιB × Option α)) =
+        heteroKron (groundProjection ιA α * A) 1 * heteroKron ((1 - groundProjection ιA α) * B) 1
+        by rw [heteroKron_mul, Matrix.mul_one], applyOperatorToState_mul]
+    exact norm_applyOperatorToState_le
+      (conjTranspose_mul_le_one_leftTensor (conjTranspose_mul_le_one_mul hGc hA)) _
+  have hsecond : ‖applyOperatorToState (heteroKron (((1 - groundProjection ιA α) * A) * B) 1)
+      (naimarkDilatedState α ψ)‖ ≤
+      ‖applyOperatorToState (heteroKron B 1 - heteroKron 1 Y) (naimarkDilatedState α ψ)‖ +
+      ‖applyOperatorToState (heteroKron ((1 - groundProjection ιA α) * A) 1)
+        (naimarkDilatedState α ψ)‖ := by
+    have hL : (heteroKron ((1 - groundProjection ιA α) * A) (1 : Op (ιB × Option α)))ᴴ *
+        heteroKron ((1 - groundProjection ιA α) * A) 1 ≤ 1 :=
+      conjTranspose_mul_le_one_leftTensor (conjTranspose_mul_le_one_mul h1Gc hA)
+    have hYc : (heteroKron (1 : Op (ιA × Option α)) Y)ᴴ * heteroKron 1 Y ≤ 1 :=
+      conjTranspose_mul_le_one_rightTensor hY
+    have hcomm : heteroKron ((1 - groundProjection ιA α) * A) (1 : Op (ιB × Option α)) *
+        heteroKron 1 Y = heteroKron 1 Y * heteroKron ((1 - groundProjection ιA α) * A) 1 := by
+      rw [heteroKron_mul, heteroKron_mul, Matrix.one_mul, Matrix.mul_one, Matrix.one_mul,
+        Matrix.mul_one]
+    rw [show heteroKron (((1 - groundProjection ιA α) * A) * B) (1 : Op (ιB × Option α)) =
+        heteroKron ((1 - groundProjection ιA α) * A) 1 * heteroKron B 1
+        by rw [heteroKron_mul, Matrix.mul_one], applyOperatorToState_mul]
+    have hdecB : applyOperatorToState (heteroKron B 1) (naimarkDilatedState α ψ) =
+        applyOperatorToState (heteroKron B 1 - heteroKron 1 Y) (naimarkDilatedState α ψ) +
+          applyOperatorToState (heteroKron 1 Y) (naimarkDilatedState α ψ) := by
+      rw [applyOperatorToState_sub_op, sub_add_cancel]
+    rw [hdecB, applyOperatorToState_add, ← applyOperatorToState_mul _ (heteroKron 1 Y), hcomm,
+      applyOperatorToState_mul]
+    refine le_trans (norm_add_le _ _) (add_le_add ?_ ?_)
+    · exact norm_applyOperatorToState_le hL _
+    · exact norm_applyOperatorToState_le hYc _
+  calc ‖applyOperatorToState (heteroKron (groundProjection ιA α * A * groundProjection ιA α *
+          (groundProjection ιA α * B * groundProjection ιA α) - A * B) 1)
+          (naimarkDilatedState α ψ)‖ =
+        ‖applyOperatorToState (heteroKron (groundProjection ιA α * A * groundProjection ιA α *
+          B - A * B) 1) (naimarkDilatedState α ψ)‖ := by
+        rw [heteroKron_sub_left, heteroKron_sub_left, applyOperatorToState_sub_op,
+          applyOperatorToState_sub_op, hstep1]
+    _ = ‖-applyOperatorToState (heteroKron (groundProjection ιA α * A *
+          ((1 - groundProjection ιA α) * B)) 1) (naimarkDilatedState α ψ) -
+          applyOperatorToState (heteroKron (((1 - groundProjection ιA α) * A) * B) 1)
+            (naimarkDilatedState α ψ)‖ := by
+        rw [hdec, heteroKron_sub_left, heteroKron_neg_left, applyOperatorToState_sub_op,
+          applyOperatorToState_neg_op]
+    _ ≤ ‖applyOperatorToState (heteroKron (groundProjection ιA α * A *
+          ((1 - groundProjection ιA α) * B)) 1) (naimarkDilatedState α ψ)‖ +
+          ‖applyOperatorToState (heteroKron (((1 - groundProjection ιA α) * A) * B) 1)
+            (naimarkDilatedState α ψ)‖ := by
+        refine le_trans (norm_sub_le _ _) ?_
+        rw [norm_neg]
+    _ ≤ _ := by linarith [hfirst, hsecond]
+
+/-- Transfer of a product of two conjugated observables on Alice's side: the
+product of the conjugated original observables differs from the product of
+the conjugated dilated ones, on the target state, by the compressed-product
+defect on the dilated state plus twice the state closeness. -/
+theorem norm_product_transfer_le_A {κA κB : Type} [Fintype κA] [DecidableEq κA]
+    [Fintype κB] [DecidableEq κB] (S : Strategy msGame)
+    (φA : EuclideanSpace ℂ (S.ιA × Option MsAnswer) →ₗᵢ[ℂ] EuclideanSpace ℂ κA)
+    (φB : EuclideanSpace ℂ (S.ιB × Option MsAnswer) →ₗᵢ[ℂ] EuclideanSpace ℂ κB)
+    (ξ : EuclideanSpace ℂ (κA × κB)) (A B : Op (S.ιA × Option MsAnswer))
+    (hA : Aᴴ * A ≤ 1) (hB : Bᴴ * B ≤ 1) :
+    ‖applyOperatorToState
+        (heteroKron (conjIsometry φA (groundProjection S.ιA MsAnswer * A *
+            groundProjection S.ιA MsAnswer)) 1 *
+          heteroKron (conjIsometry φA (groundProjection S.ιA MsAnswer * B *
+            groundProjection S.ιA MsAnswer)) 1 -
+          heteroKron (conjIsometry φA A) 1 * heteroKron (conjIsometry φA B) 1) ξ‖ ≤
+      ‖applyOperatorToState (heteroKron (groundProjection S.ιA MsAnswer * A *
+          groundProjection S.ιA MsAnswer * (groundProjection S.ιA MsAnswer * B *
+            groundProjection S.ιA MsAnswer) - A * B) 1) (naimarkDilatedState MsAnswer S.ψ)‖ +
+      2 * ‖isometryTensor φA φB (naimarkDilatedState MsAnswer S.ψ) - ξ‖ := by
+  have hGc : (groundProjection S.ιA MsAnswer)ᴴ * groundProjection S.ιA MsAnswer ≤ 1 :=
+    conjTranspose_mul_le_one_of_isProj (isProj_groundProjection S.ιA MsAnswer)
+  have hGA := conjTranspose_mul_le_one_mul (conjTranspose_mul_le_one_mul hGc hA) hGc
+  have hGB := conjTranspose_mul_le_one_mul (conjTranspose_mul_le_one_mul hGc hB) hGc
+  have hprod : heteroKron (conjIsometry φA (groundProjection S.ιA MsAnswer * A *
+      groundProjection S.ιA MsAnswer)) (1 : Op κB) *
+      heteroKron (conjIsometry φA (groundProjection S.ιA MsAnswer * B *
+        groundProjection S.ιA MsAnswer)) 1 -
+      heteroKron (conjIsometry φA A) 1 * heteroKron (conjIsometry φA B) 1 =
+      heteroKron (conjIsometry φA (groundProjection S.ιA MsAnswer * A *
+        groundProjection S.ιA MsAnswer * (groundProjection S.ιA MsAnswer * B *
+          groundProjection S.ιA MsAnswer) - A * B)) 1 := by
+    rw [heteroKron_mul, heteroKron_mul, Matrix.mul_one, conjIsometry_mul, conjIsometry_mul,
+      conjIsometry_sub, heteroKron_sub_left]
+  rw [hprod]
+  have hT : (heteroKron (conjIsometry φA (groundProjection S.ιA MsAnswer * A *
+      groundProjection S.ιA MsAnswer * (groundProjection S.ιA MsAnswer * B *
+        groundProjection S.ιA MsAnswer) - A * B)) (1 : Op κB)) =
+      heteroKron (conjIsometry φA (groundProjection S.ιA MsAnswer * A *
+        groundProjection S.ιA MsAnswer * (groundProjection S.ιA MsAnswer * B *
+          groundProjection S.ιA MsAnswer))) 1 - heteroKron (conjIsometry φA (A * B)) 1 := by
+    rw [conjIsometry_sub, heteroKron_sub_left]
+  have h1 : (heteroKron (conjIsometry φA (groundProjection S.ιA MsAnswer * A *
+      groundProjection S.ιA MsAnswer * (groundProjection S.ιA MsAnswer * B *
+        groundProjection S.ιA MsAnswer))) (1 : Op κB))ᴴ *
+      heteroKron (conjIsometry φA (groundProjection S.ιA MsAnswer * A *
+        groundProjection S.ιA MsAnswer * (groundProjection S.ιA MsAnswer * B *
+          groundProjection S.ιA MsAnswer))) 1 ≤ 1 :=
+    conjTranspose_mul_le_one_leftTensor (conjTranspose_mul_le_one_conjIsometry φA
+      (conjTranspose_mul_le_one_mul hGA hGB))
+  have h2 : (heteroKron (conjIsometry φA (A * B)) (1 : Op κB))ᴴ *
+      heteroKron (conjIsometry φA (A * B)) 1 ≤ 1 :=
+    conjTranspose_mul_le_one_leftTensor (conjTranspose_mul_le_one_conjIsometry φA
+      (conjTranspose_mul_le_one_mul hA hB))
+  have hswap : applyOperatorToState (heteroKron (conjIsometry φA
+      (groundProjection S.ιA MsAnswer * A * groundProjection S.ιA MsAnswer *
+        (groundProjection S.ιA MsAnswer * B * groundProjection S.ιA MsAnswer) - A * B)) 1) ξ =
+      applyOperatorToState (heteroKron (conjIsometry φA
+        (groundProjection S.ιA MsAnswer * A * groundProjection S.ιA MsAnswer *
+          (groundProjection S.ιA MsAnswer * B * groundProjection S.ιA MsAnswer) - A * B)) 1)
+        (isometryTensor φA φB (naimarkDilatedState MsAnswer S.ψ)) -
+      applyOperatorToState (heteroKron (conjIsometry φA
+        (groundProjection S.ιA MsAnswer * A * groundProjection S.ιA MsAnswer *
+          (groundProjection S.ιA MsAnswer * B * groundProjection S.ιA MsAnswer) - A * B)) 1)
+        (isometryTensor φA φB (naimarkDilatedState MsAnswer S.ψ) - ξ) := by
+    rw [applyOperatorToState_sub, sub_sub_cancel]
+  rw [hswap]
+  refine le_trans (norm_sub_le _ _) (add_le_add ?_ ?_)
+  · rw [applyOperatorToState_leftTensor_conjIsometry, norm_isometryTensor]
+  · rw [hT]
+    exact norm_applyOperatorToState_sub_le h1 h2 _
+
+/-- The square of a two-term leakage sum is controlled by the cell-mismatch
+mass. -/
+theorem sq_add_le_of_sum_sq_le (ℓ : ZMod 2 → ℝ) (m ε : ℝ)
+    (hL : ∑ b, ℓ b ^ 2 ≤ 2 * m) (hm : m ≤ 36 * ε) :
+    (ℓ 0 + ℓ 1) ^ 2 ≤ 144 * ε := by
+  have h2 : ∑ b : Fin 2, ℓ b ^ 2 ≤ 2 * m := hL
+  rw [Fin.sum_univ_two] at h2
+  have h3 : ℓ 0 ^ 2 + ℓ 1 ^ 2 ≤ 2 * m := h2
+  nlinarith [sq_nonneg (ℓ 0 - ℓ 1)]
+
+/-- The final arithmetic of the anticommutator transfer. -/
+theorem anticommutator_arith {o a x z η ε : ℝ} (ho : 0 ≤ o)
+    (h : o ≤ a + (x + 2 * z + 2 * η) + (z + 2 * x + 2 * η))
+    (hx : x ^ 2 ≤ 144 * ε) (hz : z ^ 2 ≤ 144 * ε) :
+    o ^ 2 ≤ 3 * a ^ 2 + 15552 * ε + 48 * η ^ 2 := by
+  have h1 : o ^ 2 ≤ (a + 3 * (x + z) + 4 * η) ^ 2 :=
+    pow_le_pow_left₀ ho (by linarith) 2
+  have h2 : (a + 3 * (x + z) + 4 * η) ^ 2 ≤
+      3 * a ^ 2 + 3 * (3 * (x + z)) ^ 2 + 3 * (4 * η) ^ 2 := by
+    nlinarith [sq_nonneg (a - 3 * (x + z)), sq_nonneg (3 * (x + z) - 4 * η),
+      sq_nonneg (a - 4 * η)]
+  have h3 : (x + z) ^ 2 ≤ 2 * x ^ 2 + 2 * z ^ 2 := by nlinarith [sq_nonneg (x - z)]
+  nlinarith [h1, h2, h3, hx, hz]
+
+/-- Transfer of Alice's anticommutator estimate of `thm:ms-rigidity` from the
+dilated strategy to the original one.  The left-hand side is
+`msAnticommutatorDistanceA S w` for the witness whose isometry is the composite
+of the dilation embedding and `φ_A`, and the distance on the right is
+`msAnticommutatorDistanceA (msDilatedStrategy S) w'`.  The transfer costs the
+leakage of both dilated observables out of the ground slice, controlled by the
+cell-consistency masses, and the state closeness.  Blueprint
+`ch13_qpbt_test.tex:224-253`, paper
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652`. -/
+theorem ms_anticommutator_transfer_A {κA κB : Type} [Fintype κA] [DecidableEq κA]
+    [Fintype κB] [DecidableEq κB] (S : Strategy msGame)
+    (φA : EuclideanSpace ℂ (S.ιA × Option MsAnswer) →ₗᵢ[ℂ] EuclideanSpace ℂ κA)
+    (φB : EuclideanSpace ℂ (S.ιB × Option MsAnswer) →ₗᵢ[ℂ] EuclideanSpace ℂ κB)
+    (ξ : EuclideanSpace ℂ (κA × κB)) (ε η : ℝ)
+    (hwin : 1 - ε ≤ S.value)
+    (hξ : ‖isometryTensor φA φB (msDilatedStrategy S).ψ - ξ‖ ≤ η) :
+    opDistSq (uniformDistribution Unit)
+        (fun _ => heteroKron (conjIsometry (φA.comp (naimarkEmbedding S.ιA MsAnswer))
+            (obsOf ((S.A (.var 0)).postprocess msBitOrZero))) 1 *
+          heteroKron (conjIsometry (φA.comp (naimarkEmbedding S.ιA MsAnswer))
+            (obsOf ((S.A (.var 4)).postprocess msBitOrZero))) 1)
+        (fun _ => -(heteroKron (conjIsometry (φA.comp (naimarkEmbedding S.ιA MsAnswer))
+            (obsOf ((S.A (.var 4)).postprocess msBitOrZero))) 1 *
+          heteroKron (conjIsometry (φA.comp (naimarkEmbedding S.ιA MsAnswer))
+            (obsOf ((S.A (.var 0)).postprocess msBitOrZero))) 1)) ξ ≤
+      3 * opDistSq (uniformDistribution Unit)
+        (fun _ => heteroKron (conjIsometry φA
+            (obsOf (((msDilatedStrategy S).A (.var 0)).postprocess msBitOrZero))) 1 *
+          heteroKron (conjIsometry φA
+            (obsOf (((msDilatedStrategy S).A (.var 4)).postprocess msBitOrZero))) 1)
+        (fun _ => -(heteroKron (conjIsometry φA
+            (obsOf (((msDilatedStrategy S).A (.var 4)).postprocess msBitOrZero))) 1 *
+          heteroKron (conjIsometry φA
+            (obsOf (((msDilatedStrategy S).A (.var 0)).postprocess msBitOrZero))) 1)) ξ +
+      15552 * ε + 48 * η ^ 2 := by
+  obtain ⟨i0, k0, h0⟩ := every_variable_is_incident 0
+  obtain ⟨i4, k4, h4⟩ := every_variable_is_incident 4
+  have hξ' : ‖isometryTensor φA φB (naimarkDilatedState MsAnswer S.ψ) - ξ‖ ≤ η := hξ
+  rw [opDistSq_uniform_unit, opDistSq_uniform_unit, conjIsometry_comp_naimarkEmbedding,
+    conjIsometry_comp_naimarkEmbedding, naimarkInflation_obs_A, naimarkInflation_obs_A]
+  change ‖applyOperatorToState (heteroKron (conjIsometry φA (groundProjection S.ιA MsAnswer *
+      dilatedObsA S (.var 0) * groundProjection S.ιA MsAnswer)) 1 *
+      heteroKron (conjIsometry φA (groundProjection S.ιA MsAnswer *
+        dilatedObsA S (.var 4) * groundProjection S.ιA MsAnswer)) 1 -
+      -(heteroKron (conjIsometry φA (groundProjection S.ιA MsAnswer *
+        dilatedObsA S (.var 4) * groundProjection S.ιA MsAnswer)) 1 *
+      heteroKron (conjIsometry φA (groundProjection S.ιA MsAnswer *
+        dilatedObsA S (.var 0) * groundProjection S.ιA MsAnswer)) 1)) ξ‖ ^ 2 ≤
+    3 * ‖applyOperatorToState (heteroKron (conjIsometry φA (dilatedObsA S (.var 0))) 1 *
+      heteroKron (conjIsometry φA (dilatedObsA S (.var 4))) 1 -
+      -(heteroKron (conjIsometry φA (dilatedObsA S (.var 4))) 1 *
+      heteroKron (conjIsometry φA (dilatedObsA S (.var 0))) 1)) ξ‖ ^ 2 +
+    15552 * ε + 48 * η ^ 2
+  have hXc := conjTranspose_mul_le_one_dilatedObsA S (.var 0)
+  have hZc := conjTranspose_mul_le_one_dilatedObsA S (.var 4)
+  have hYXc := conjTranspose_mul_le_one_dilatedObsB S (.constraint i0) (constraintBitOrZero k0)
+  have hYZc := conjTranspose_mul_le_one_dilatedObsB S (.constraint i4) (constraintBitOrZero k4)
+  -- leakage and intertwining of the two observables
+  have hleakX := norm_leak_obs_le_A S i0 k0
+  have hintX := norm_intertwine_obs_le_A S i0 k0
+  have hleakZ := norm_leak_obs_le_A S i4 k4
+  have hintZ := norm_intertwine_obs_le_A S i4 k4
+  have hsqX := sq_add_le_of_sum_sq_le _ _ ε (sum_norm_sq_intertwining_le_reverse S i0 k0)
+    (reverse_cell_mismatch_mass_le S ε hwin i0 k0)
+  have hsqZ := sq_add_le_of_sum_sq_le _ _ ε (sum_norm_sq_intertwining_le_reverse S i4 k4)
+    (reverse_cell_mismatch_mass_le S ε hwin i4 k4)
+  rw [h0] at hleakX hintX hsqX
+  rw [h4] at hleakZ hintZ hsqZ
+  -- product transfers
+  have hXZ := norm_product_transfer_le_A S φA φB ξ (dilatedObsA S (.var 0))
+    (dilatedObsA S (.var 4)) hXc hZc
+  have hZX := norm_product_transfer_le_A S φA φB ξ (dilatedObsA S (.var 4))
+    (dilatedObsA S (.var 0)) hZc hXc
+  have hdXZ := norm_leftTensor_compressed_product_sub_le MsAnswer S.ψ (dilatedObsA S (.var 0))
+    (dilatedObsA S (.var 4)) (dilatedObsB S (.constraint i4) (constraintBitOrZero k4)) hXc hYZc
+  have hdZX := norm_leftTensor_compressed_product_sub_le MsAnswer S.ψ (dilatedObsA S (.var 4))
+    (dilatedObsA S (.var 0)) (dilatedObsB S (.constraint i0) (constraintBitOrZero k0)) hZc hYXc
+  -- the anticommutator on the target state
+  have hsplit : ∀ (Xo Zo Xd Zd : Op (κA × κB)),
+      applyOperatorToState (Xo * Zo - -(Zo * Xo)) ξ =
+        applyOperatorToState (Xd * Zd - -(Zd * Xd)) ξ +
+          applyOperatorToState (Xo * Zo - Xd * Zd) ξ +
+          applyOperatorToState (Zo * Xo - Zd * Xd) ξ := by
+    intro Xo Zo Xd Zd
+    rw [← applyOperatorToState_add_op, ← applyOperatorToState_add_op]
+    congr 1
+    abel
+  rw [hsplit _ _ (heteroKron (conjIsometry φA (dilatedObsA S (.var 0))) 1)
+    (heteroKron (conjIsometry φA (dilatedObsA S (.var 4))) 1)]
+  refine anticommutator_arith (norm_nonneg _) ?_ hsqX hsqZ
+  refine le_trans (norm_add_le _ _) (le_trans (add_le_add_left (norm_add_le _ _) _) ?_)
+  linarith [hXZ, hZX, hdXZ, hdZX, hleakX, hintX, hleakZ, hintZ, hξ']
+
 end
 
 end MIPStarRE.QPBT.MagicSquareRigidity
