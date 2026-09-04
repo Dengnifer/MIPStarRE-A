@@ -32,7 +32,7 @@ while true; do
     log "PR $PR ($BR @ ${H:0:7}) merge candidate ($MODE)"
     if ! git merge-base --is-ancestor github/main "$H"; then
       W=.worktrees/$BR
-      if [ "$MODE" = adj ] && [ -d "$W" ] && ! git -C "$W" diff --quiet github/main -- .githooks/pre-commit; then
+      if [ "$MODE" = adj ] && [ -d "$W" ] && git show github/main:.githooks/pre-commit | grep -q MERGE_HEAD && ! git -C "$W" show HEAD:.githooks/pre-commit | grep -q MERGE_HEAD; then
         git -C "$W" checkout github/main -- .githooks/pre-commit && git -C "$W" commit -qm "chore(hooks): take the merge-budget exemption from main"
       fi
       rm -f "$L/$N.done" "$L/$N.needs-attention"
