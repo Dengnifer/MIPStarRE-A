@@ -281,6 +281,89 @@ private theorem pauliProj_X_apply {ι : Type*} [Fintype ι] [DecidableEq ι]
     _ = _ := by
       rw [pauliNormalizer_mul_self, phaseSign_binTrace_dotProduct_add]
 
+/-- Generalized Pauli eigenspace projectors are symmetric matrices in
+characteristic two. For the `X` basis this uses `x + y = y + x` in the
+character formula; for the `Z` basis the projector is diagonal. This is the
+EPR-transport property used in `lem:qld-comm-cons`, paper
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:455-465`. -/
+theorem pauliProj_transpose {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (W : PauliKind) (e : ι → K) :
+    (pauliProj W e)ᵀ = pauliProj W e := by
+  ext x y
+  rw [Matrix.transpose_apply]
+  cases W with
+  | X =>
+      rw [pauliProj_X_apply, pauliProj_X_apply, add_comm]
+  | Z =>
+      have hreal (z : ι → K) : star (pauliVec .Z e z) = pauliVec .Z e z := by
+        simp [pauliVec, singlePauliVec]
+      change pauliVec .Z e y * star (pauliVec .Z e x) =
+        pauliVec .Z e x * star (pauliVec .Z e y)
+      rw [hreal x, hreal y, mul_comm]
+
+/-- Generalized Pauli eigenspace projectors are mutually orthogonal. This is
+the orthogonal-projector calculation used for the ancillary point measurement
+in `lem:qld-comm-cons`, paper
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:455-465`. -/
+theorem pauliProj_mul_pauliProj {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (W : PauliKind) (e f : ι → K) :
+    pauliProj W e * pauliProj W f =
+      if e = f then pauliProj W e else 0 := by
+  classical
+  ext x z
+  cases W with
+  | X =>
+      rw [Matrix.mul_apply]
+      simp_rw [pauliProj_X_apply]
+      have hsum :
+          (∑ y : ι → K,
+              ((Fintype.card (ι → K) : ℂ)⁻¹ *
+                  phaseSign (binTrace K (dotProduct e (x + y)))) *
+                ((Fintype.card (ι → K) : ℂ)⁻¹ *
+                  phaseSign (binTrace K (dotProduct f (y + z))))) =
+            (Fintype.card (ι → K) : ℂ)⁻¹ *
+                (Fintype.card (ι → K) : ℂ)⁻¹ *
+              phaseSign (binTrace K (dotProduct e x)) *
+              phaseSign (binTrace K (dotProduct f z)) *
+              ∑ y : ι → K,
+                phaseSign (binTrace K (dotProduct y (e + f))) := by
+        rw [Finset.mul_sum]
+        apply Finset.sum_congr rfl
+        intro y _
+        rw [← phaseSign_binTrace_dotProduct_add e x y,
+          ← phaseSign_binTrace_dotProduct_add f y z,
+          ← phaseSign_binTrace_dotProduct_add y e f,
+          dotProduct_comm e y, dotProduct_comm f y]
+        ring
+      rw [hsum, sum_phaseSign_dotProduct]
+      letI : CharP K 2 :=
+        (Algebra.charP_iff (ZMod 2) K 2).mp (ZMod.charP 2)
+      by_cases hef : e = f
+      · subst f
+        have hzero : e + e = 0 := by
+          funext i
+          exact CharTwo.add_self_eq_zero (e i)
+        rw [if_pos rfl, if_pos hzero]
+        rw [pauliProj_X_apply]
+        have hcard : (Fintype.card (ι → K) : ℂ) ≠ 0 := by positivity
+        field_simp
+        rw [← phaseSign_binTrace_dotProduct_add e x z]
+      · have hadd : e + f ≠ 0 := by
+          intro h
+          apply hef
+          funext i
+          exact CharTwo.add_eq_zero.mp (congrFun h i)
+        simp [hef, hadd]
+  | Z =>
+      have hz (g y : ι → K) :
+          pauliVec .Z g y = if y = g then 1 else 0 := by
+        simp [pauliVec, singlePauliVec, Fintype.prod_ite_zero, ← funext_iff]
+      by_cases hef : e = f
+      · subst f
+        simp [pauliProj, Matrix.mul_apply, Matrix.vecMulVec_apply, hz]
+      · have hfe : f ≠ e := Ne.symm hef
+        simp [pauliProj, Matrix.mul_apply, Matrix.vecMulVec_apply, hz, hef, hfe]
+
 /-- A compact operator-valued form of a generalized Pauli observable from
 `def:generalized-pauli`, blueprint `ch11_qpbt_algebra.tex:529-571`, paper origin
 `references/qpbt-paper/04_preliminaries.tex:1052-1096`.
