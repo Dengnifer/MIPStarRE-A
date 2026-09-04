@@ -1,52 +1,20 @@
 import MIPStarRE.QPBT.Algebra.FieldBasis
-import Mathlib.FieldTheory.Finite.GaloisField
-import Mathlib.LinearAlgebra.Trace
 
-/-! # Dual, self-dual, and normal bases
+/-! # Binary coordinates for the fixed self-dual normal basis
 
-Source `def:dual-self-dual-normal-basis` and `def:binary-representation`;
-blueprint `blueprint/src/chapter/ch11_qpbt_algebra.tex:241-257,313-334`; paper
-`references/qpbt-paper/04_preliminaries.tex:494-502,669-700`.
+The basis definitions and existence theorem live in the upstream
+`FieldBasis` module; this file develops their coordinate consequences.
+
+## References
+
+- `def:dual-self-dual-normal-basis` and `def:binary-representation` in
+  `blueprint/src/chapter/ch11_qpbt_algebra.tex:241-257,313-334`.
+- `references/qpbt-paper/04_preliminaries.tex:494-502,669-700`.
 -/
 
 namespace MIPStarRE.QPBT
 
 open scoped BigOperators Matrix
-
-open MIPStarRE.LDT
-
-/-- A dual pair of bases for `def:dual-self-dual-normal-basis`, blueprint
-`ch11_qpbt_algebra.tex:241-257`, paper `04_preliminaries.tex:494-496`. -/
-def IsDualBasisPair {F K ι : Type*} [CommRing F] [CommRing K] [DecidableEq ι]
-    [Algebra F K] (b b' : Module.Basis ι F K) : Prop :=
-  ∀ i j, Algebra.trace F K (b i * b' j) = if i = j then 1 else 0
-
-namespace Basis
-
-/-- Self-duality in `def:dual-self-dual-normal-basis`, blueprint
-`ch11_qpbt_algebra.tex:241-257`, paper `04_preliminaries.tex:494-497`. -/
-def IsSelfDual {F K ι : Type*} [CommRing F] [CommRing K] [DecidableEq ι]
-    [Algebra F K] (b : Module.Basis ι F K) : Prop :=
-  IsDualBasisPair b b
-
-/-- Normality in `def:dual-self-dual-normal-basis`, blueprint
-`ch11_qpbt_algebra.tex:241-257`, paper `04_preliminaries.tex:498-502`. The
-Frobenius exponent uses the cardinality of the base field. -/
-def IsNormal {F K : Type*} [CommSemiring F] [Fintype F] [Field K] [Algebra F K]
-    {k : ℕ} (b : Module.Basis (Fin k) F K) : Prop :=
-  ∃ α : K, ∀ j, b j = α ^ (Fintype.card F ^ j.1)
-
-end Basis
-
-/-- Existence over the binary extension of cardinality `2^k` for odd `k`;
-`def:dual-self-dual-normal-basis`, blueprint `ch11_qpbt_algebra.tex:241-257`,
-paper `04_preliminaries.tex:702-725`. -/
-theorem exists_selfDualNormalBasis {K : Type*} [Field K] [Fintype K]
-    [Algebra (ZMod 2) K] (k : ℕ) (hk : Odd k)
-    (hcard : Fintype.card K = 2 ^ k) :
-    ∃ b : Module.Basis (Fin k) (ZMod 2) K,
-      Basis.IsSelfDual b ∧ Basis.IsNormal b := by
-  sorry
 
 /-- Coordinates in the fixed model's chosen binary basis;
 `def:binary-representation`, blueprint `ch11_qpbt_algebra.tex:313-334`, paper
@@ -56,7 +24,8 @@ noncomputable abbrev FixedFieldModel.binaryCoordinates {q : ℕ}
   kappa F.basis
 
 /-- Equation `eq:eq-mult`, blueprint `ch11_qpbt_algebra.tex:313-334`, paper
-`04_preliminaries.tex:684-700`. -/
+`04_preliminaries.tex:684-700`. The proof is deferred to issue #70; see the
+self-dual normal-basis setup in paper `04_preliminaries.tex:494-502`. -/
 theorem binaryCoordinates_mul {q : ℕ} (F : FixedFieldModel q) (a b : F.K) :
     F.binaryCoordinates (a * b) =
       ∑ i : Fin F.basisDim, F.binaryCoordinates a i •

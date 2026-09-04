@@ -9,6 +9,7 @@ import MIPStarRE.QPBT.Games.CondLinear
 import MIPStarRE.QPBT.Test.LowDegreeGame
 import MIPStarRE.QPBT.Test.MagicSquare
 import MIPStarRE.QPBT.Test.PauliBasisTest
+import MIPStarRE.QPBT.Test.SoundnessDefs
 import MIPStarRE.QPBT.Test.Soundness
 import MIPStarRE.QPBT.State
 import MIPStarRE.QPBT.Algebra.SubspacesTheorems

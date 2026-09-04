@@ -95,3 +95,42 @@ Repository: `Dengnifer/MIPStarRE-A`. Operator: the codex (gpt-5.6-sol) session
 | Standing briefing | `~/.codex/prompts/goal.md` | (operator-owned) |
 | Directives to the operator | tmux pastes | `owner-messages/` |
 | Audit data | — | `owner-audits/` |
+
+## 2026-09-03 — Owner session takes the operator role (2026-09-03T23:21:32Z)
+
+- **Why:** after the stall and reviewer-churn episode the owner asked the
+  Claude session to run the operator loop itself for one to two days, with
+  codex worker sessions on ghz unchanged.
+- **How:** codex main session posted its handover state to #27 and quit;
+  telemetry `stages.jsonl` event=takeover; astra availability polled hourly
+  by `owner-tools/astra-poll.sh` (cron :37); the stall watchdog keeps running
+  and now nudges the owner session through #26 rather than a tmux pane.
+- **Hand-back:** on the owner's word; recorded as event=handback with the
+  state at that moment.
+## 2026-09-04 — Owner session as operator: first hours
+- **Handover:** the codex main session posted its exact state to #27 and was
+  closed (23:11Z); takeover recorded (`ff5d719`); the primary's `main` had been
+  left behind a `/tmp` clone the codex session used to dodge its sandbox — the
+  clone's uncommitted telemetry was folded in and the clone removed.
+- **Lanes:** eight stage-4.3 packets dispatched at once as codex provers
+  (`owner-tools/lane.sh`: worktree → warm → dispatch → PR → CI → review);
+  the codex API answered HTTP 429 above ~6 concurrent sessions and four lanes
+  died; the runner now caps live sessions at five and resumes a lane's own
+  thread. Lesson: never overwrite a running bash script in place (three lanes
+  crashed at the next line read) — versioned filenames from now on.
+- **Merged:** #41 (`ede882f`, launcher with full access), #81 (`8788ee7`→#62
+  encoding/decoding proofs), #78 (`ebd5c47`→#48 soundness-interface split).
+- **Throughput fix in flight:** gate 2b (fresh base) turned every merge into a
+  reviewer round on every other open PR for an unchanged patch; PR #85 carries
+  a review forward across a fresh-base when the patch hash is unchanged
+  (review.md §13). PR #79 keeps the two-round rule as operator discipline.
+- **External load:** another user's 40-process experiment used 123 of 128
+  cores (load 1690, ssh drops); `rzhou`'s dead 223 GB CP-SAT log fills `/tmp`;
+  reported in #26 and to the owner. Nothing of ours.
+
+### 2026-09-04 03:30Z — owner session: adjudication contract live, no-fan-out shim, lane bookkeeping
+
+- PR #43 (issue #23) merged `22d3eef` by adjudication at 62fa37e (F1/F2 owner rules, F3 moot, F4 out of scope); PR #95 merged `c240b6b`. pr_merge now enforces the ADJUDICATION format (head line + one ticked disposition per finding).
+- Reviewer deaths traced to codex multi-agent fan-out (agent thread limit) on top of the account concurrency cap; shim `~/.cache/mipstarre-dev/owner-bin/codex` (archived in owner-tools/owner-bin-codex) disables it for dispatched sessions; lane-v8.sh and rerun_review-v3.sh use it; six reviews re-queued serially.
+- Incident: two repair lanes (49, 75) were launched with an empty LANE_BRANCH because `gh pr view` ran outside the repo; killed within a minute, their stray worktrees/branches (issue-49-distance-theorems, issue-68-magic-square-split) removed, relaunched on the PR branches. Lesson: cd into the repo before any gh call in a launch command.
+- Duplicate lane processes: lanes 65/66 from 02:19Z resumed prover threads while older lanes for the same issues had already produced PR 90/96; the older lanes finished (review done) and the resumed provers keep closing sorries on the same branches — left running; their push will supersede the reviewed heads. Lane 73 (merged as PR 95) killed.

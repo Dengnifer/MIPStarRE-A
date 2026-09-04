@@ -123,6 +123,17 @@ theorem weight_sum_eq_one {α : Type*}
     ∑ a ∈ 𝒟.support, 𝒟.weight a = 1 := by
   simpa [Distribution.IsProbability, Distribution.totalWeight] using h𝒟
 
+/-- A probability distribution has total weight one over any finite superset
+of its explicit support. -/
+theorem weight_sum_eq_one_of_subset {α : Type*}
+    {𝒟 : Distribution α} (h𝒟 : 𝒟.IsProbability) {s : Finset α}
+    (hsubset : 𝒟.support ⊆ s) :
+    ∑ a ∈ s, 𝒟.weight a = 1 := by
+  have hsum :
+      ∑ a ∈ 𝒟.support, 𝒟.weight a = ∑ a ∈ s, 𝒟.weight a :=
+    Finset.sum_subset hsubset (fun a _ ha => 𝒟.outsideSupport a ha)
+  exact hsum ▸ h𝒟.weight_sum_eq_one
+
 /-- On a finite ambient type, a probabilistic `Distribution` has total weight `1` even
 when its weights are summed over the whole ambient type.
 
@@ -132,8 +143,7 @@ than over a stored support finset. -/
 theorem weight_sum_univ_eq_one {α : Type*} [Fintype α]
     {𝒟 : Distribution α} (h𝒟 : 𝒟.IsProbability) :
     (∑ a : α, 𝒟.weight a) = 1 := by
-  rw [Distribution.sum_univ_eq_sum_support 𝒟 𝒟.weight 𝒟.outsideSupport]
-  exact h𝒟.weight_sum_eq_one
+  simpa using h𝒟.weight_sum_eq_one_of_subset (Finset.subset_univ 𝒟.support)
 
 /-- A probability distribution has total weight at most `1`. -/
 theorem weight_sum_le_one {α : Type*}
