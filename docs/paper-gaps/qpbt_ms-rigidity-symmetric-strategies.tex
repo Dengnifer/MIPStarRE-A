@@ -1,0 +1,420 @@
+\documentclass[11pt]{article}
+
+\usepackage{amsmath,amssymb}
+\usepackage{xurl}
+\usepackage[hidelinks]{hyperref}
+\setlength{\emergencystretch}{2em}
+
+\input{command}
+
+% Local notation matching the source paper (its style file is not shared here).
+\newcommand{\val}{\operatorname{val}}
+\newcommand{\game}{\mathfrak{G}}
+\newcommand{\strategy}{\mathcal{S}}
+\newcommand{\MS}{\mathrm{MS}}
+\newcommand{\EPR}{\mathrm{EPR}}
+\newcommand{\aux}{\mathrm{aux}}
+\newcommand{\Id}{\mathrm{I}}
+\newcommand{\mH}{\mathcal{H}}
+\newcommand{\Constraint}{\mathsf{Constraint}}
+\newcommand{\Variable}{\mathsf{Variable}}
+
+\title{The Strategy Class in the Rigidity of the Magic Square Game}
+\author{}
+\date{2026-09-04}
+
+\begin{document}
+\maketitle
+
+\section{At a glance}
+
+\begin{itemize}
+  \item \textbf{Difficulty: easy to diagnose, medium to repair.}  The printed
+  theorem is false: a perfect strategy for the Magic Square game may answer the
+  two orientations of a constraint--variable question pair on two independent
+  maximally entangled copies, and then the two players' variable observables
+  are uncorrelated where the conclusion forces them to agree.  Restricting to
+  symmetric strategies, the source's standing convention, does \emph{not}
+  remove the counterexample; the property the conclusion actually needs is
+  consistency of the strategy on its state.
+  \item \textbf{Estimated weight:} the statement repair itself is a hypothesis
+  and a docstring, on the order of \textbf{20--40 lines}.  Proving the repaired
+  theorem is a separate and much larger task: about \textbf{3--6 interfaces}
+  (restriction of a symmetric strategy to the one-way orientation, the import
+  of the cited self-test, and the consistency transport of the conclusion from
+  one player to the other) and several hundred to a few thousand lines,
+  depending on how much of the imported self-test is proved rather than
+  assumed.
+  \item \textbf{Mathlib/project split:} approximately \textbf{10\% Mathlib} and
+  \textbf{90\% project-local}.  Mathlib supplies finite-dimensional inner
+  product spaces, tensor products, and isometries; games, strategies, values,
+  consistency, and the Magic Square operator solution are project-local.
+  \item \textbf{Key Mathlib inputs:} finite-dimensional complex inner product
+  spaces and their isometries, Kronecker products of matrices, and elementary
+  trace identities for maximally entangled states.  The main inputs are the
+  cited robust self-test of \cite{Coladangelo2017Robust} and the game and
+  strategy vocabulary of \cite[Section~5]{Ji2020MIPStar}.  Tracked in
+  \ghissue{172}; the refutation is \ghissue{105}.
+\end{itemize}
+
+\section{Key theorem forms}
+
+Throughout, $\game^{\MS}$ is the Magic Square game in the role-symmetric
+presentation of the source, $\strategy$ a tensor product strategy for it,
+$\eps \ge 0$ an error parameter, and $\approx_\delta$ the state-dependent
+approximation recalled in the next section.  Four statements must be kept
+apart.
+\begin{enumerate}
+  \item \textbf{Source theorem form.}  For every strategy
+  $\strategy = (\ket{\psi}, A, B)$ with
+  $\val^*(\game^{\MS}, \strategy) = 1-\eps$ there are local isometries
+  $\phi_{\mathrm A}, \phi_{\mathrm B}$ and an auxiliary state $\ket{\aux}$ such
+  that $\phi_{\mathrm A} \ot \phi_{\mathrm B} \ket{\psi}$ is $O(\sqrt\eps)$-close
+  to $\ket{\EPR_2}^{\ot 2} \ot \ket{\aux}$ and \emph{both} players'
+  $\Variable_1$ and $\Variable_5$ measurements are $\sqrt\eps$-close to the
+  ideal $\sigma^X$ and $\sigma^Z$ measurements on the extracted qubits.
+  \item \textbf{Cited theorem form.}  The robust self-test of
+  \cite[Theorem~6.9]{Coladangelo2017Robust} for a linear constraint system
+  game, in which one player always receives a constraint and the other always
+  receives a variable.  Its conclusion compares the \emph{constraint} player's
+  observables with an ideal representation and the \emph{variable} player's
+  observables with its conjugate.  It says nothing about the constraint
+  player's variable observables, which that game never asks for.
+  \item \textbf{Refuted intermediate form.}  The source theorem form with
+  $\strategy$ assumed symmetric, $\strategy = (\ket{\psi}, M)$.  Section~%
+  \ref{sec:symmetric} exhibits a symmetric strategy of value $1$ violating the
+  conclusion, so this form is false as well.
+  \item \textbf{Candidate corrected form.}  The source theorem form for a
+  symmetric strategy $\strategy = (\ket{\psi}, M)$ that is moreover
+  \emph{consistent}: every measurement $M^x$ satisfies
+  $(M^x_a \ot \Id)\ket{\psi} = (\Id \ot M^x_a)\ket{\psi}$ for all $a$.  This is
+  the class the source's own application produces, and Section~\ref{sec:repair}
+  explains why consistency is exactly the missing input.  The form is a
+  candidate: this note establishes that consistency removes the obstruction at
+  $\eps = 0$ and sketches the intended derivation, but does not prove the
+  robust statement.
+\end{enumerate}
+The formal declaration carrying the source theorem form is
+\leanid{MIPStarRE.QPBT.exists\_ms\_rigidity}, with the witness and distance
+definitions \leanid{MIPStarRE.QPBT.MsRigidityWitness},
+\leanid{MIPStarRE.QPBT.msOperatorDistanceA},
+\leanid{MIPStarRE.QPBT.msOperatorDistanceB}, and
+\leanid{MIPStarRE.QPBT.msAnticommutatorDistanceA} in
+\doclink{MIPStarRE/QPBT/Test/MagicSquareTheorems.lean}.
+
+\section{The source assertion}
+
+The Magic Square game $\game^{\MS}$ of \cite[Section~7]{Ji2020MIPStar} has nine
+variables $x_1,\ldots,x_9$ over $\F_2$ in a $3\times 3$ grid and six parity
+constraints, one per row and column.  Its verifier samples a uniformly random
+edge $\Constraint_i \,\text{---}\, \Variable_j$ of the bipartite incidence
+graph and sends one endpoint to a uniformly random player and the other
+endpoint to the other player.  The constraint player answers with an
+assignment to the three variables of its constraint, the variable player with
+one bit, and the players win when the assignment satisfies the constraint and
+the two reported values of $x_j$ agree.  Two features are used below: the game
+is \emph{role-symmetric}, so each player is asked constraint questions and
+variable questions, and its question distribution is supported on
+constraint--variable pairs, so the same question is never sent to both
+players.
+
+A strategy $\strategy = (\ket{\psi}, A, B)$ consists of a unit vector
+$\ket{\psi} \in \mH_{\mathrm A} \ot \mH_{\mathrm B}$ and POVMs $\{A^x_a\}$,
+$\{B^y_b\}$; $\val^*(\game^{\MS},\strategy)$ is the acceptance probability.
+The strategy is \emph{symmetric} when $\mH_{\mathrm A} = \mH_{\mathrm B}$,
+$\ket{\psi}$ is invariant under exchanging the two factors, and $A = B$; the
+source writes such a strategy $\strategy = (\ket{\psi}, M)$ and states that it
+almost always restricts attention to this class.%
+\footnote{Definitions and the convention:
+\path{references/qpbt-paper/06_nonlocal_games_and_mipstar.tex}, lines~74--92
+and~174.  In this repository: \path{def:symmetric-game} in
+\path{blueprint/src/chapter/ch12_qpbt_games.tex}, formalized as
+\leanid{MIPStarRE.QPBT.SymmetricStrategy}.}
+For operators $M, N$ and a state $\ket{\varphi}$ we write
+$M \approx_\delta N$ for
+$\bra{\varphi}(M-N)^\dagger(M-N)\ket{\varphi} \le O(\delta)$, and for POVM
+families $\{M_a\}, \{N_a\}$ for
+$\sum_a \bra{\varphi}(M_a-N_a)^\dagger(M_a-N_a)\ket{\varphi} \le O(\delta)$;
+the state is named wherever the relation is used.
+
+The rigidity theorem asserts:%
+\footnote{Statement and proof at
+\path{references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex},
+lines~620--652; the blueprint statement is \path{thm:ms-rigidity} in
+\path{blueprint/src/chapter/ch13_qpbt_test.tex}.  Tracked in \ghissue{172};
+the refutation is recorded on \ghissue{105}, and the decision to record and
+repair the statement is item~B4 on \ghissue{26}.}
+if $\strategy = (\ket{\psi},A,B)$ succeeds in $\game^{\MS}$ with probability
+$1-\eps$, then there are local isometries
+$\phi_{\mathrm A} \colon \mH_{\mathrm A} \to \mH_{\mathrm A'} \ot
+\mH_{\mathrm A''}$ and
+$\phi_{\mathrm B} \colon \mH_{\mathrm B} \to \mH_{\mathrm B'} \ot
+\mH_{\mathrm B''}$ with
+$\mH_{\mathrm A'}, \mH_{\mathrm B'} \cong (\C^2)^{\ot 2}$, and a state
+$\ket{\aux} \in \mH_{\mathrm A''} \ot \mH_{\mathrm B''}$, such that
+\begin{equation}
+  \bigl\| \phi_{\mathrm A} \ot \phi_{\mathrm B}\ket{\psi}
+    - \ket{\EPR_2}^{\ot 2} \ot \ket{\aux} \bigr\| \le O(\sqrt\eps)
+  \tag{\path{thm:ms-rigidity}, 1}
+\end{equation}
+and, writing $\tilde A^x_a = \phi_{\mathrm A} A^x_a \phi_{\mathrm A}^\dagger$
+and $\tilde B^y_b = \phi_{\mathrm B} B^y_b \phi_{\mathrm B}^\dagger$,
+\begin{equation}
+  \tilde A^{\Variable_1}_b \ot \Id \approx_{\sqrt\eps}
+    (\sigma^X_b)_{\mathrm A'} \ot \Id,
+  \qquad
+  \Id \ot \tilde B^{\Variable_1}_b \approx_{\sqrt\eps}
+    \Id \ot (\sigma^X_b)_{\mathrm B'},
+  \tag{\path{thm:ms-rigidity}, 2}
+\end{equation}
+with respect to $\ket{\Theta} = \ket{\EPR_2}^{\ot 2}_{\mathrm{A'B'}} \ot
+\ket{\aux}_{\mathrm{A''B''}}$, together with the two companion relations for
+$\Variable_5$ and $\sigma^Z$ and the anticommutation consequence for the
+associated observables.
+
+\section{What the conclusion forces}
+\label{sec:forces}
+
+Write $O_A = \tilde A^{\Variable_1}_0 - \tilde A^{\Variable_1}_1$ and
+$O_B = \tilde B^{\Variable_1}_0 - \tilde B^{\Variable_1}_1$ for the transported
+$\pm 1$ observables, and $\mathcal O_A, \mathcal O_B$ for the untransported
+ones.  Take $\eps = 0$, so that all the estimates above are exact.  Then
+$\phi_{\mathrm A} \ot \phi_{\mathrm B}\ket{\psi} = \ket{\Theta}$, and since
+$\phi^\dagger \phi = \Id$ for an isometry, $\tilde M \phi = \phi M$ for each
+transported operator, whence
+\begin{equation}
+  \bra{\psi}\,\mathcal O_A \ot \mathcal O_B\,\ket{\psi}
+  = \bra{\Theta}\, O_A \ot O_B \,\ket{\Theta}
+  = \bra{\Theta}\, \sigma^X_{\mathrm A'} \ot \sigma^X_{\mathrm B'}
+    \,\ket{\Theta}
+  = 1 .
+  \label{eq:forced-correlation}
+\end{equation}
+The middle equality uses the exact form of the two relations in
+(\path{thm:ms-rigidity},~2) and the self-adjointness of the observables; the
+last one is the identity
+$\bra{\EPR_2}\, M \ot N \,\ket{\EPR_2} = \tr(M N^{\mathsf T})/2$ applied to
+$M = N = \sigma^X$ on the first extracted qubit pair.  For $\pm 1$ observables,
+$\bra{\psi} \mathcal O_A \ot \mathcal O_B \ket{\psi} = 1$ is equivalent to
+$(\mathcal O_A \ot \Id)\ket{\psi} = (\Id \ot \mathcal O_B)\ket{\psi}$, that is,
+to the two players' $\Variable_1$ measurements agreeing on $\ket{\psi}$.  The
+conclusion of the theorem therefore contains a cross-player agreement
+assertion about a question pair that the game never samples.
+
+\section{A perfect strategy violating the conclusion}
+\label{sec:counterexample}
+
+Fix the canonical Mermin--Peres operator solution on
+$\mathcal K = \C^2 \ot \C^2$: the nine $\pm 1$ observables
+\[
+  \begin{array}{ccc}
+    \sigma^X \ot \Id & \Id \ot \sigma^X & \sigma^X \ot \sigma^X \\
+    \Id \ot \sigma^Z & \sigma^Z \ot \Id & \sigma^Z \ot \sigma^Z \\
+    \sigma^X \ot \sigma^Z & \sigma^Z \ot \sigma^X & \sigma^Y \ot \sigma^Y
+  \end{array}
+\]
+placed in the grid, whose rows and first two columns multiply to $\Id$ and
+whose third column multiplies to $-\Id$.  All nine are real and symmetric.  Let
+$\ket{\Omega} \in \mathcal K \ot \mathcal K$ be the maximally entangled state,
+which is $\ket{\EPR_2}^{\ot 2}$ after reordering the qubits, and let $M$ be the
+measurement family that answers $\Constraint_i$ by jointly measuring the three
+commuting observables of row or column $i$ and answers $\Variable_j$ by the
+two-outcome measurement $\{(\Id \pm O_j)/2\}$.  Then $(\ket{\Omega}, M)$ is a
+symmetric, projective, consistent strategy of value $1$.
+
+Now give each player a copy of $\mathcal K \ot \mathcal K$ and split the two
+roles across the two copies: on a constraint question the first player measures
+copy~$1$ and the second measures copy~$2$, and on a variable question the first
+player measures copy~$2$ and the second measures copy~$1$.  With the state
+$\ket{\Omega}_{\mathrm A_1 \mathrm B_1} \ot
+\ket{\Omega}_{\mathrm A_2 \mathrm B_2}$, every sampled question pair consists of
+one constraint and one variable, so the two measurements actually performed are
+the canonical perfect pair acting on a single maximally entangled copy: on
+copy~$1$ when the first player holds the constraint, and on copy~$2$ when the
+second player does.  The value is therefore $1$.  The two players' $\Variable_1$
+observables, however, act on $\mathrm A_2$ and $\mathrm B_1$, whose joint
+reduced state is a product of maximally mixed states, so
+\begin{equation}
+  \bra{\psi}\,\mathcal O_A \ot \mathcal O_B\,\ket{\psi}
+  = \frac{\tr(\sigma^X \ot \Id)}{4} \cdot \frac{\tr(\sigma^X \ot \Id)}{4}
+  = 0 ,
+  \label{eq:zero-correlation}
+\end{equation}
+contradicting \eqref{eq:forced-correlation}.  The same computation with
+$\sigma^Z$ refutes the $\Variable_5$ relations.  The source statement is thus
+false at $\eps = 0$, and no choice of isometries or auxiliary state can repair
+it, since \eqref{eq:forced-correlation} used only that $\phi_{\mathrm A}$ and
+$\phi_{\mathrm B}$ are isometries.
+
+\section{Symmetry does not repair the statement}
+\label{sec:symmetric}
+
+The strategy just described is not symmetric: the two players use different
+measurement families.  It is natural to hope that the source's standing
+restriction to symmetric strategies excludes it.  It does not.
+
+Give each player a flag qubit and two copies of $\mathcal K$, so that the local
+space is $\C^2 \ot \mathcal K \ot \mathcal K$, and take the state
+\[
+  \ket{\psi} = \frac{1}{\sqrt2}
+    \bigl( \ket{0}_{f_{\mathrm A}}\ket{1}_{f_{\mathrm B}}
+         + \ket{1}_{f_{\mathrm A}}\ket{0}_{f_{\mathrm B}} \bigr)
+    \ot \ket{\Omega}_{\mathrm A_1 \mathrm B_1}
+    \ot \ket{\Omega}_{\mathrm A_2 \mathrm B_2} .
+\]
+Both players use the single family
+\begin{align*}
+  M^{\Constraint_i}_a
+    &= \ket{0}\!\bra{0}_f \ot (M^{\Constraint_i}_a)_1 \ot \Id_2
+     + \ket{1}\!\bra{1}_f \ot \Id_1 \ot (M^{\Constraint_i}_a)_2 , \\
+  M^{\Variable_j}_b
+    &= \ket{0}\!\bra{0}_f \ot \Id_1 \ot (M^{\Variable_j}_b)_2
+     + \ket{1}\!\bra{1}_f \ot (M^{\Variable_j}_b)_1 \ot \Id_2 :
+\end{align*}
+a player whose flag reads $0$ answers constraints from copy~$1$ and variables
+from copy~$2$, and a player whose flag reads $1$ does the opposite.  Since
+$\ket{\Omega}$ is invariant under exchanging its two factors, $\ket{\psi}$ is
+invariant under exchanging the two players' registers, and the two players use
+identical measurements; the strategy is symmetric in the sense of the source.
+
+The flags are perfectly anticorrelated, so on each branch exactly one player
+plays the role assigned to flag~$0$.  On the branch $f_{\mathrm A} = 0$, if the
+first player receives the constraint it measures copy~$1$ while the second
+player, whose flag reads $1$, answers its variable question from copy~$1$ as
+well; if the roles are exchanged, both act on copy~$2$.  In every case the pair
+of measurements performed is the canonical perfect pair on one maximally
+entangled copy, and the branch $f_{\mathrm A} = 1$ is its mirror image.  The
+value is again $1$.  The correlation of the two players' $\Variable_1$
+observables is, branch by branch, the product of two traces of $\sigma^X \ot
+\Id$ against maximally mixed states, hence $0$ as in
+\eqref{eq:zero-correlation}, and the cross terms between the two flag branches
+vanish because the observables are flag-diagonal.  So
+\eqref{eq:forced-correlation} fails for a symmetric strategy of value $1$,
+and the same computation refutes the $\Variable_5$ relations.%
+\footnote{This strategy is the player-role symmetrization of the previous one,
+so the symmetrization construction of \path{lem:symmetric-strat}
+(\path{references/qpbt-paper/06_nonlocal_games_and_mipstar.tex}, lines~94--130)
+does not repair the statement either: it is value-preserving and moves the two
+role-dependent families into two blocks of one family, which is exactly what
+the flag register does above.  The value, the swap invariance, and the two
+vanishing correlations have also been verified numerically for the explicit
+$32$-dimensional local spaces described here.}
+
+\section{What the cited self-test provides}
+
+The source imports the theorem from \cite[Theorem~6.9]{Coladangelo2017Robust},
+whose notion of robust self-testing is stated for a linear constraint system
+game in the ordinary one-way presentation: one player receives a vertex $v$,
+that is a constraint, and answers with observables $A^{(v)}_e$ for the
+variables $e$ occurring in it, while the other receives a variable $e$ and
+answers with an observable $B_e$.%
+\footnote{\path{references/cs-paper/self-testing.tex}, lines~669--689 for the
+definition and lines~706--724 for the theorem; the Magic Square instance is at
+\path{references/cs-paper/specific-games.tex}, lines~111--135.}
+The conclusion compares $\phi_{\mathrm A} A^{(v)}_e \phi_{\mathrm A}^\dagger$
+with an ideal representation $\tau(e)$ and
+$\phi_{\mathrm B} B_e \phi_{\mathrm B}^\dagger$ with its conjugate.  In that
+game the first player never receives a bare variable question, so the theorem
+constrains one player's constraint observables and the other player's variable
+observables, and nothing else.
+
+The source relabels this conclusion for the role-symmetric game, in which each
+player has both kinds of question, and asserts it for both players' variable
+observables.  The step from the cited conclusion to the printed one is exactly
+the cross-player agreement isolated in Section~\ref{sec:forces}, and the
+strategies of Sections~\ref{sec:counterexample} and~\ref{sec:symmetric} show
+that neither the value hypothesis nor symmetry supplies it.
+
+\section{The correction}
+\label{sec:repair}
+
+Recall that a measurement $\{M_a\}$ is \emph{consistent} on a state
+$\ket{\psi} \in \mH \ot \mH$ when
+$(M_a \ot \Id)\ket{\psi} = (\Id \ot M_a)\ket{\psi}$ for every outcome $a$, and
+that a strategy is consistent when all of its measurements are.%
+\footnote{\path{references/qpbt-paper/06_nonlocal_games_and_mipstar.tex},
+lines~144--174; \path{def:consistent-measurement} and
+\path{def:consistent-strategy} in
+\path{blueprint/src/chapter/ch12_qpbt_games.tex}, formalized as
+\leanid{MIPStarRE.QPBT.Measurement.IsConsistentOn} and
+\leanid{MIPStarRE.QPBT.IsConsistentStrategyOn}.}
+For a symmetric strategy and a two-outcome measurement with observable
+$\mathcal O = M_0 - M_1$, consistency gives
+\[
+  \bra{\psi}\, \mathcal O \ot \mathcal O \,\ket{\psi}
+  = \bra{\psi}\, (\mathcal O \ot \Id)(\mathcal O \ot \Id) \,\ket{\psi}
+  = \bra{\psi}\, \mathcal O^2 \ot \Id \,\ket{\psi} = 1 ,
+\]
+which is precisely the assertion \eqref{eq:forced-correlation} that the
+conclusion forces.  The strategy of Section~\ref{sec:symmetric} is not
+consistent: for it,
+$\bigl\| (M^{\Variable_1}_0 \ot \Id)\ket{\psi}
+  - (\Id \ot M^{\Variable_1}_0)\ket{\psi} \bigr\| = 1/\sqrt2$.
+Consistency is thus the missing hypothesis, and it is not an artefact of the
+$\eps = 0$ analysis: it is the property that ties the untested same-question
+pair to the tested constraint--variable pairs.
+
+The intended derivation of the corrected theorem is the following, and this
+note does not carry it out.  Let $\strategy = (\ket{\psi}, M)$ be symmetric and
+consistent with $\val^*(\game^{\MS}, \strategy) \ge 1-\eps$.  Conditioning on
+the orientation in which the first player receives the constraint gives a
+strategy for the one-way linear constraint system game of value at least
+$1-2\eps$, to which \cite[Theorem~6.9]{Coladangelo2017Robust} applies; it
+yields isometries constraining the first player's constraint observables and
+the second player's variable observables.  Consistency then transports the
+second constraint to the first player's variable observables, across the
+approximately maximally entangled state supplied by the first conclusion.
+Tracking the loss through this transport is the content of the repaired
+theorem.
+
+This is also the class of strategies that the source's own application uses.
+The analysis of the Pauli basis test fixes a symmetric strategy
+$\strategy = (\ket{\psi}, M)$ and, immediately before invoking the rigidity
+theorem, derives cross-player consistency relations for the $\Variable_1$ and
+$\Variable_5$ measurements from the consistency subtests of the Pauli basis
+test itself.%
+\footnote{\path{references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex},
+lines~160--162 for the symmetric strategy and lines~326--342 for the
+consistency relations and the invocation, which uses only the anticommutation
+consequence for one player.}
+The restriction therefore costs the source nothing at the point of use.
+
+\section{Comparison with the blueprint and formalization}
+
+The blueprint \cite{MIPStarREBlueprint} states \path{thm:ms-rigidity} in the
+source shape, and the Lean declaration
+\leanid{MIPStarRE.QPBT.exists\_ms\_rigidity} carries the same statement for an
+arbitrary strategy of the Magic Square game, with its proof an explicit
+\verb|sorry|.  Following the proof-gap protocol, the source-labelled statement
+is left in source shape and the obstruction is recorded at the statement: the
+blueprint's proof paragraph and the declaration's docstring cite this note and
+say that the printed conclusion is false, that symmetry alone does not repair
+it, and that the candidate repair is the consistency hypothesis above.  The
+statement-level \verb|\leanok| records that the Lean statement matches the
+blueprint statement; no proof-level \verb|\leanok| is claimed, and none can be,
+since the statement as it stands has a counterexample.  Choosing between the
+candidate corrected form and the alternative of restating the theorem for the
+one-way game is a statement-level decision about a source theorem and is
+recorded on \ghissue{26}; the implementation packet is \ghissue{172}.
+
+\section{Conclusion}
+
+The verdict is a theorem-level gap: the rigidity theorem for the Magic Square
+game is false as printed.  Its conclusion forces the two players' $\Variable_1$
+and $\Variable_5$ measurements to agree on the shared state, while the
+role-symmetric game never sends the same question to both players, and a
+perfect strategy that answers the two orientations on two independent
+maximally entangled copies violates the conclusion at $\eps = 0$.  Restricting
+to symmetric strategies does not repair the statement: the player-role
+symmetrization of that strategy is symmetric, has value $1$, and violates the
+conclusion in the same way.  The hypothesis that does remove the obstruction is
+consistency of the strategy on its state, which is what the source's only
+application supplies and what the cited one-way self-test needs in order to
+speak about both players' variable observables.  Until the statement is
+changed, \leanid{MIPStarRE.QPBT.exists\_ms\_rigidity} is a false statement with
+a tracked \verb|sorry| and must not be proved or consumed.
+
+\bibliographystyle{alpha}
+\bibliography{references}
+
+\end{document}
