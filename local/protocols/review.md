@@ -400,3 +400,16 @@ the operator may close the loop by adjudication instead of iteration:
 Nothing is dropped silently: an adjudicated finding lives on as an issue.
 This mirrors the parent's combined bot-fix iteration cap with a single
 terminal review (pr-review.yml:69-72). See EVOLUTION.md for the trigger.
+
+## 13. Evidence follows the diff: carry-forward across a fresh-base (2026-09-04)
+
+The merge gate's fresh-base rule (issues-prs.md, gate 2b) moves a PR's head
+every time `main` advances, but a merge of `main` into the branch does not
+change the PR's own patch.  `review.sh` therefore compares `git patch-id` of
+`base...head` with that of every earlier reviewed head of the same PR; on a
+match it republishes that head's verdict and ledger as the exact-head review of
+the new head, marked "Carried forward from <sha>", and posts the matching
+`local-review/summary` — without dispatching the reviewer.  Adverse verdicts
+are carried too, so an adjudication at the new head remains possible.  Any
+change to the patch (a repair, a conflict resolution) yields a different
+patch-id and a real review.  `--force-review` bypasses the fast path.
