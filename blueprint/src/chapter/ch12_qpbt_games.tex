@@ -536,7 +536,6 @@ of the paper.
 	\label{lem:distance-sum-contraction}
 	\lean{MIPStarRE.QPBT.DistanceCalculus.sum_norm_mul_apply_le}
 	\leanok
-	\uses{lem:distance-quadratic-form-mono}
 	This formalization-only auxiliary is not a named statement of the paper; it
 	isolates the contraction estimate in Fact~\ref{fact:add-a-proj}. If
 	$\sum_c C_c^\dagger C_c\leq\Id$, then
@@ -546,6 +545,7 @@ of the paper.
 \end{lemma}
 \begin{proof}
 	\leanok
+	\uses{lem:distance-quadratic-form-mono}
 	Write the sum as the quadratic form of
 	$D^\dagger(\sum_c C_c^\dagger C_c)D$ and use
 	Lemma~\ref{lem:distance-quadratic-form-mono}.
@@ -555,7 +555,6 @@ of the paper.
 	\label{lem:distance-function-indexed-contraction}
 	\lean{MIPStarRE.QPBT.DistanceCalculus.sum_norm_mul_funIndexed_apply_le}
 	\leanok
-	\uses{lem:distance-sum-contraction}
 	This formalization-only auxiliary is not a named statement of the paper; it
 	isolates the fiber estimate in Lemma~\ref{fact:add-a-proj2}. If
 	$e\colon\mathcal G\to\mathcal A$ and
@@ -567,8 +566,8 @@ of the paper.
 \end{lemma}
 \begin{proof}
 	\leanok
-	Partition the sum into the fibers of $e$ and apply
-	Lemma~\ref{lem:distance-sum-contraction} to each fiber.
+	Partition the sum into the fibers of $e$ and apply the finite-subset
+	contraction estimate to each fiber.
 \end{proof}
 
 \begin{lemma}[Formalization support for Lemma~\ref{lem:cool-closeness-fact}]
@@ -590,8 +589,6 @@ of the paper.
 	\label{lem:distance-projective-sum}
 	\lean{MIPStarRE.QPBT.DistanceCalculus.norm_finset_sum_projector_mul_sq_le}
 	\leanok
-	\uses{lem:distance-quadratic-form-mono,
-		lem:distance-projective-orthogonality}
 	This formalization-only auxiliary is not a named statement of the paper; it
 	isolates the finite projective-sum estimate in
 	Lemma~\ref{lem:cool-closeness-fact}. For mutually orthogonal projectors
@@ -603,6 +600,7 @@ of the paper.
 \end{lemma}
 \begin{proof}
 	\leanok
+	\uses{lem:distance-quadratic-form-mono}
 	Expand the Gram operator, cancel the cross terms, and use $P_a\leq\Id$
 	together with Lemma~\ref{lem:distance-quadratic-form-mono}.
 \end{proof}
@@ -698,8 +696,7 @@ of the paper.
 	\label{lem:distance-point-distance-le-defect}
 	\lean{MIPStarRE.QPBT.DistanceCalculus.point_distance_le_two_defect}
 	\leanok
-	\uses{def:distance-state-quadratic-form,
-		lem:distance-measurement-effect-le-one, lem:distance-point-defect}
+	\uses{def:distance-state-quadratic-form}
 	This formalization-only auxiliary is not a named statement of the paper; it
 	isolates its pointwise calculation. For complete measurements $A,B$,
 	\[
@@ -709,6 +706,8 @@ of the paper.
 \end{lemma}
 \begin{proof}
 	\leanok
+	\uses{lem:distance-quadratic-form-mono,
+		lem:distance-measurement-effect-le-one, lem:distance-point-defect}
 	Expand each squared norm, use $A_a^2\leq A_a$ and $B_a^2\leq B_a$,
 	then apply Lemma~\ref{lem:distance-point-defect}.
 \end{proof}
@@ -717,8 +716,7 @@ of the paper.
 	\label{lem:distance-projective-point-distance}
 	\lean{MIPStarRE.QPBT.DistanceCalculus.point_distance_eq_two_defect_of_projective}
 	\leanok
-	\uses{def:distance-state-quadratic-form,
-		lem:distance-point-defect}
+	\uses{def:distance-state-quadratic-form}
 	This formalization-only auxiliary is not a named statement of the paper; it
 	isolates its pointwise projective calculation. If $A$ and $B$ are
 	projective measurements, then
@@ -729,6 +727,7 @@ of the paper.
 \end{lemma}
 \begin{proof}
 	\leanok
+	\uses{lem:distance-point-defect}
 	The preceding expansion is an equality because $A_a^2=A_a$ and
 	$B_a^2=B_a$.
 \end{proof}
@@ -750,8 +749,7 @@ of the paper.
 	\label{lem:distance-projective-left-square-root}
 	\lean{MIPStarRE.QPBT.DistanceCalculus.abs_point_defect_le_sqrt_distance_of_projective_left}
 	\leanok
-	\uses{def:distance-state-quadratic-form,
-		lem:distance-point-defect}
+	\uses{def:distance-state-quadratic-form}
 	This formalization-only auxiliary is not a named statement of the paper; it
 	isolates the pointwise Cauchy--Schwarz estimate for item 3. If $A$ is
 	projective and $\|\psi\|=1$, then
@@ -762,6 +760,7 @@ of the paper.
 \end{lemma}
 \begin{proof}
 	\leanok
+	\uses{lem:distance-point-defect}
 	Write the defect as a sum of inner products, apply finite
 	Cauchy--Schwarz, and use projective orthogonality and completeness.
 \end{proof}
@@ -782,6 +781,7 @@ of the paper.
 \end{lemma}
 \begin{proof}
 	\leanok
+	\uses{prop:easy-approx-from-approx-delta}
 	Apply the weighted Cauchy--Schwarz estimate for approximate measurements
 	to the pure state determined by $\psi$.
 \end{proof}
@@ -790,8 +790,7 @@ of the paper.
 	\label{lem:distance-defect-overlap}
 	\lean{MIPStarRE.QPBT.DistanceCalculus.consistencyDefect_eq_one_sub_overlap}
 	\leanok
-	\uses{def:consistency, def:distance-state-quadratic-form,
-		lem:distance-consistency-term, lem:distance-point-defect}
+	\uses{def:consistency, def:distance-state-quadratic-form}
 	This formalization-only auxiliary is not a named statement of the paper; it
 	isolates the overlap form of consistency in
 	Proposition~\ref{fact:triangle-for-simeq}. For a probability distribution
@@ -803,6 +802,7 @@ of the paper.
 \end{lemma}
 \begin{proof}
 	\leanok
+	\uses{lem:distance-consistency-term, lem:distance-point-defect}
 	Average Lemma~\ref{lem:distance-point-defect} and use the unit-vector and
 	probability normalizations.
 \end{proof}
@@ -845,9 +845,7 @@ of the paper.
 	\label{lem:distance-placed-product-qform}
 	\lean{MIPStarRE.QPBT.DistanceCalculus.placed_product_stateQForm_eq}
 	\leanok
-	\uses{def:distance-state-quadratic-form,
-		def:distance-left-placed-measurement,
-		def:distance-right-placed-measurement}
+	\uses{def:distance-state-quadratic-form}
 	This formalization-only auxiliary is not a named statement of the paper; it
 	identifies the tensor product in Fact~\ref{fact:data-processing}:
 	\[
@@ -882,8 +880,7 @@ of the paper.
 	\label{lem:distance-left-fiber-contraction}
 	\lean{MIPStarRE.QPBT.DistanceCalculus.left_fiber_contraction}
 	\leanok
-	\uses{def:povm-conventions,
-		lem:distance-measurement-effect-le-one}
+	\uses{def:povm-conventions}
 	This formalization-only auxiliary is not a named statement of the paper; it
 	isolates a multiplier bound in Lemma~\ref{lem:commutation-analysis}. For a
 	measurement $M$ with outcomes $(a,b)$ and each fixed $a$,
@@ -893,6 +890,7 @@ of the paper.
 \end{lemma}
 \begin{proof}
 	\leanok
+	\uses{lem:distance-measurement-effect-le-one}
 	Use $M_{a,b}^2\leq M_{a,b}$, completeness, and monotonicity of left tensor
 	placement.
 \end{proof}
@@ -901,8 +899,7 @@ of the paper.
 	\label{lem:distance-right-fiber-contraction}
 	\lean{MIPStarRE.QPBT.DistanceCalculus.right_fiber_contraction}
 	\leanok
-	\uses{def:povm-conventions,
-		lem:distance-measurement-effect-le-one}
+	\uses{def:povm-conventions}
 	This formalization-only auxiliary is not a named statement of the paper; it
 	isolates a multiplier bound in Lemma~\ref{lem:commutation-analysis}. For a
 	measurement $M$ with outcomes $(a,b)$ and each fixed $a$,
@@ -912,6 +909,7 @@ of the paper.
 \end{lemma}
 \begin{proof}
 	\leanok
+	\uses{lem:distance-measurement-effect-le-one}
 	Use $M_{a,b}^2\leq M_{a,b}$, completeness, and monotonicity of right tensor
 	placement.
 \end{proof}
@@ -920,8 +918,7 @@ of the paper.
 	\label{lem:distance-joint-marginal-product}
 	\lean{MIPStarRE.QPBT.DistanceCalculus.joint_marginal_product}
 	\leanok
-	\uses{def:povm-conventions,
-		lem:distance-projective-orthogonality}
+	\uses{def:povm-conventions}
 	This formalization-only auxiliary is not a named statement of the paper; it
 	isolates the projective-marginal identity in
 	Lemma~\ref{lem:commutation-analysis}. If $M_{a,b,c}$ is projective, then
@@ -931,6 +928,7 @@ of the paper.
 \end{lemma}
 \begin{proof}
 	\leanok
+	\uses{lem:distance-projective-orthogonality}
 	Expand both marginals and cancel every product of distinct projective
 	effects.
 \end{proof}
@@ -939,8 +937,7 @@ of the paper.
 	\label{lem:distance-joint-marginal-product-rev}
 	\lean{MIPStarRE.QPBT.DistanceCalculus.joint_marginal_product_rev}
 	\leanok
-	\uses{lem:distance-joint-marginal-product,
-		lem:distance-measurement-effect-hermitian}
+	\uses{def:povm-conventions}
 	This formalization-only auxiliary is not a named statement of the paper; it
 	records the reverse-order identity used in
 	Lemma~\ref{lem:commutation-analysis}. For a projective joint measurement,
@@ -948,6 +945,8 @@ of the paper.
 \end{lemma}
 \begin{proof}
 	\leanok
+	\uses{lem:distance-joint-marginal-product,
+		lem:distance-measurement-effect-hermitian}
 	Take adjoints in Lemma~\ref{lem:distance-joint-marginal-product} and use
 	self-adjointness of measurement effects.
 \end{proof}

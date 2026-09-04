@@ -378,23 +378,9 @@ weighted sums of those operators.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{def:povm-distance, def:approx-question-indexed-operators,
-		lem:povm-to-obs-operator-families}
-	% The source ends this display with the exact bound |A| * delta; under the
-	% O(.) reading of def:povm-distance the hypothesis only supplies O(delta),
-	% and the constant is retained inside the O(.).
-	Expand
-	\[
-		\E_x \Big\| \sum_a \alpha_a (A^x_a - B^x_a) \ket{\psi} \Big\|^2
-		\,\leq\, \E_x \Big( \sum_a \big\| (A^x_a - B^x_a) \ket{\psi} \big\| \Big)^2
-		\,\leq\, |\mathcal{A}| \cdot \E_x \sum_a \big\| (A^x_a - B^x_a) \ket{\psi} \big\|^2
-		\,\leq\, O\big( |\mathcal{A}| \cdot \delta \big)\,,
-	\]
-	using the triangle inequality followed by the Cauchy--Schwarz
-	inequality; the last step is the hypothesis
-	$A^x_a \approx_\delta B^x_a$, whose bound carries a hidden universal
-	constant (Definition~\ref{def:povm-distance}), and the conclusion
-	holds with the same implicit constant.
+	\uses{lem:povm-to-obs-operator-families}
+	Apply Lemma~\ref{lem:povm-to-obs-operator-families} to the two families of
+	POVM effects.
 \end{proof}
 
 The following lemma shows that POVMs that are approximately projective, in
