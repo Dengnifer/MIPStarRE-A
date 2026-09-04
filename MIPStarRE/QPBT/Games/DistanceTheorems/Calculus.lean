@@ -633,4 +633,196 @@ theorem opDistSq_commutator_le :
       exact (leftTensor_sub _ _).symm
     _ ≤ 16 * δ := hraw
 
+/-- Joint closeness to a projective refinement on the left tensor factor
+implies approximate commutation of the corresponding right-factor POVMs.
+This is the tensor-factor dual of `opDistSq_commutator_le`, with the same
+explicit constant. -/
+theorem opDistSq_commutator_right_le :
+    ∃ C₀ : ℝ, 1 ≤ C₀ ∧
+      ∀ {X α β γ ιA ιB : Type*}
+      [Fintype α] [DecidableEq α]
+      [Fintype β] [DecidableEq β] [Fintype γ] [DecidableEq γ]
+      [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
+      (μ : Distribution X)
+      (A : X → Measurement (α × β) ιB)
+      (B : X → Measurement ((α × β) × γ) ιA)
+      (D : X → Measurement (α × γ) ιB)
+      (ψ : EuclideanSpace ℂ (ιA × ιB)) (δ : ℝ),
+      (∀ x, MIPStarRE.QPBT.Measurement.IsProjective (B x)) →
+      opFamilyDistSq μ
+        (fun x ab => heteroKron (((B x).postprocess
+          (fun abc => abc.1)).effect ab) 1)
+        (fun x ab => heteroKron 1 ((A x).effect ab)) ψ ≤ δ →
+      opFamilyDistSq μ
+        (fun x ac => heteroKron (((B x).postprocess
+          (fun abc => (abc.1.1, abc.2))).effect ac) 1)
+        (fun x ac => heteroKron 1 ((D x).effect ac)) ψ ≤ δ →
+      opFamilyDistSq μ
+        (fun x (abc : (α × β) × γ) => heteroKron 1
+          (((A x).effect (abc.1.1, abc.1.2)) * ((D x).effect (abc.1.1, abc.2)) -
+            ((D x).effect (abc.1.1, abc.2)) * ((A x).effect (abc.1.1, abc.1.2))))
+        (fun _ _ => 0) ψ ≤ C₀ * δ := by
+  refine ⟨16, by norm_num, ?_⟩
+  intro X α β γ ιA ιB _ _ _ _ _ _ _ _ _ _ μ A B D ψ δ hB hBA hBD
+  let AR : X → (α × β) → Op (ιA × ιB) :=
+    fun x ab => rightTensor (ι₁ := ιA) ((A x).effect ab)
+  let DR : X → (α × γ) → Op (ιA × ιB) :=
+    fun x ac => rightTensor (ι₁ := ιA) ((D x).effect ac)
+  let BAB : X → (α × β) → Op (ιA × ιB) :=
+    fun x ab => leftTensor (ι₂ := ιB)
+      (((B x).postprocess (fun abc => abc.1)).effect ab)
+  let BAC : X → (α × γ) → Op (ιA × ιB) :=
+    fun x ac => leftTensor (ι₂ := ιB)
+      (((B x).postprocess (fun abc => (abc.1.1, abc.2))).effect ac)
+  let BJ : X → ((α × β) × γ) → Op (ιA × ιB) :=
+    fun x abc => leftTensor (ι₂ := ιB) ((B x).effect abc)
+  let FAD : X → ((α × β) × γ) → Op (ιA × ιB) :=
+    fun x abc => AR x abc.1 * DR x (abc.1.1, abc.2)
+  let FDA : X → ((α × β) × γ) → Op (ιA × ιB) :=
+    fun x abc => DR x (abc.1.1, abc.2) * AR x abc.1
+  let FMidAD : X → ((α × β) × γ) → Op (ιA × ιB) :=
+    fun x abc => AR x abc.1 * BAC x (abc.1.1, abc.2)
+  let FMidDA : X → ((α × β) × γ) → Op (ιA × ιB) :=
+    fun x abc => DR x (abc.1.1, abc.2) * BAB x abc.1
+  have hAR_BAB : opFamilyDistSq μ AR BAB ψ ≤ δ := by
+    rw [opFamilyDistSq_symm]
+    simpa [AR, BAB, heteroKron, leftTensor, rightTensor] using hBA
+  have hDR_BAC : opFamilyDistSq μ DR BAC ψ ≤ δ := by
+    rw [opFamilyDistSq_symm]
+    simpa [DR, BAC, heteroKron, leftTensor, rightTensor] using hBD
+  have hAR : ∀ x a,
+      (1 - ∑ b : β, (AR x (a, b))ᴴ * AR x (a, b)).PosSemidef := by
+    intro x a
+    exact right_fiber_contraction (A x) a
+  have hDR : ∀ x a,
+      (1 - ∑ c : γ, (DR x (a, c))ᴴ * DR x (a, c)).PosSemidef := by
+    intro x a
+    exact right_fiber_contraction (D x) a
+  have hBAB : ∀ x a,
+      (1 - ∑ b : β, (BAB x (a, b))ᴴ * BAB x (a, b)).PosSemidef := by
+    intro x a
+    exact left_fiber_contraction
+      ((B x).postprocess (fun abc => abc.1)) a
+  have hBAC : ∀ x a,
+      (1 - ∑ c : γ, (BAC x (a, c))ᴴ * BAC x (a, c)).PosSemidef := by
+    intro x a
+    exact left_fiber_contraction
+      ((B x).postprocess (fun abc => (abc.1.1, abc.2))) a
+  have hAD_mid_raw := opFamilyDistSq_mul_left_same_question_le μ DR BAC
+    (fun x a b => AR x (a, b)) ψ δ hAR hDR_BAC
+  have hAD_mid : opFamilyDistSq μ FAD FMidAD ψ ≤ δ := by
+    rw [opFamilyDistSq_reindex μ (swapLast α β γ)] at hAD_mid_raw
+    simpa [swapLast, FAD, FMidAD] using hAD_mid_raw
+  have hmid_AD_joint_raw := opFamilyDistSq_mul_left_same_question_le μ AR BAB
+    (fun x a c => BAC x (a, c)) ψ δ hBAC hAR_BAB
+  have hmid_AD_joint : opFamilyDistSq μ FMidAD BJ ψ ≤ δ := by
+    have hcross (x : X) (abc : (α × β) × γ) :
+        BAC x (abc.1.1, abc.2) * AR x abc.1 =
+          AR x abc.1 * BAC x (abc.1.1, abc.2) :=
+      left_right_commute _ _
+    have hcollapse (x : X) (abc : (α × β) × γ) :
+        BAC x (abc.1.1, abc.2) * BAB x abc.1 = BJ x abc := by
+      change leftTensor (ι₂ := ιB)
+            (((B x).postprocess (fun z => (z.1.1, z.2))).effect
+              (abc.1.1, abc.2)) *
+          leftTensor (ι₂ := ιB)
+            (((B x).postprocess (fun z => z.1)).effect abc.1) =
+        leftTensor (ι₂ := ιB) ((B x).effect abc)
+      rw [leftTensor_mul_leftTensor]
+      exact congrArg (leftTensor (ι₂ := ιB))
+        (joint_marginal_product_rev (B x) (hB x)
+          abc.1.1 abc.1.2 abc.2)
+    simpa only [FMidAD, hcross, hcollapse] using hmid_AD_joint_raw
+  have hAD_joint : opFamilyDistSq μ FAD BJ ψ ≤ 4 * δ := by
+    have h := opFamilyDistSq_le_of_le_of_le μ FAD FMidAD BJ ψ δ δ
+      hAD_mid hmid_AD_joint
+    linarith
+  have hDA_mid_raw := opFamilyDistSq_mul_left_same_question_le μ AR BAB
+    (fun x a c => DR x (a, c)) ψ δ hDR hAR_BAB
+  have hDA_mid : opFamilyDistSq μ FDA FMidDA ψ ≤ δ := by
+    simpa [FDA, FMidDA] using hDA_mid_raw
+  have hmid_DA_joint_raw :
+      opFamilyDistSq μ
+        (fun x (acb : (α × γ) × β) => BAB x (acb.1.1, acb.2) * DR x acb.1)
+        (fun x (acb : (α × γ) × β) => BAB x (acb.1.1, acb.2) * BAC x acb.1)
+        ψ ≤ δ :=
+    opFamilyDistSq_mul_left_same_question_le μ DR BAC
+      (fun x a b => BAB x (a, b)) ψ δ hBAB hDR_BAC
+  have hmid_DA_joint : opFamilyDistSq μ FMidDA BJ ψ ≤ δ := by
+    have hcross (x : X) (abc : (α × β) × γ) :
+        BAB x abc.1 * DR x (abc.1.1, abc.2) =
+          DR x (abc.1.1, abc.2) * BAB x abc.1 :=
+      left_right_commute _ _
+    have hcollapse (x : X) (abc : (α × β) × γ) :
+        BAB x abc.1 * BAC x (abc.1.1, abc.2) = BJ x abc := by
+      change leftTensor (ι₂ := ιB)
+            (((B x).postprocess (fun z => z.1)).effect abc.1) *
+          leftTensor (ι₂ := ιB)
+            (((B x).postprocess (fun z => (z.1.1, z.2))).effect
+              (abc.1.1, abc.2)) =
+        leftTensor (ι₂ := ιB) ((B x).effect abc)
+      rw [leftTensor_mul_leftTensor]
+      exact congrArg (leftTensor (ι₂ := ιB))
+        (joint_marginal_product (B x) (hB x)
+          abc.1.1 abc.1.2 abc.2)
+    have hreindexed : opFamilyDistSq μ
+        (fun x (abc : (α × β) × γ) =>
+          BAB x abc.1 * DR x (abc.1.1, abc.2))
+        (fun x (abc : (α × β) × γ) =>
+          BAB x abc.1 * BAC x (abc.1.1, abc.2)) ψ ≤ δ := by
+      calc
+        opFamilyDistSq μ
+            (fun x (abc : (α × β) × γ) =>
+              BAB x abc.1 * DR x (abc.1.1, abc.2))
+            (fun x (abc : (α × β) × γ) =>
+              BAB x abc.1 * BAC x (abc.1.1, abc.2)) ψ =
+          opFamilyDistSq μ
+            (fun x (acb : (α × γ) × β) =>
+              BAB x (acb.1.1, acb.2) * DR x acb.1)
+            (fun x (acb : (α × γ) × β) =>
+              BAB x (acb.1.1, acb.2) * BAC x acb.1) ψ := by
+            simpa only [swapLast_symm_apply] using
+              (opFamilyDistSq_reindex μ (swapLast α β γ)
+                (fun x (acb : (α × γ) × β) =>
+                  BAB x (acb.1.1, acb.2) * DR x acb.1)
+                (fun x (acb : (α × γ) × β) =>
+                  BAB x (acb.1.1, acb.2) * BAC x acb.1) ψ).symm
+        _ ≤ δ := hmid_DA_joint_raw
+    calc
+      opFamilyDistSq μ FMidDA BJ ψ = opFamilyDistSq μ
+          (fun x (abc : (α × β) × γ) =>
+            BAB x abc.1 * DR x (abc.1.1, abc.2))
+          (fun x (abc : (α × β) × γ) =>
+            BAB x abc.1 * BAC x (abc.1.1, abc.2)) ψ := by
+        exact (opFamilyDistSq_congr μ _ _ FMidDA BJ ψ hcross hcollapse).symm
+      _ ≤ δ := hreindexed
+  have hDA_joint : opFamilyDistSq μ FDA BJ ψ ≤ 4 * δ := by
+    have h := opFamilyDistSq_le_of_le_of_le μ FDA FMidDA BJ ψ δ δ
+      hDA_mid hmid_DA_joint
+    linarith
+  have hjoint_DA : opFamilyDistSq μ BJ FDA ψ ≤ 4 * δ := by
+    rw [← opFamilyDistSq_symm]
+    exact hDA_joint
+  have hcomm := opFamilyDistSq_le_of_le_of_le μ FAD BJ FDA ψ
+    (4 * δ) (4 * δ) hAD_joint hjoint_DA
+  have hraw : opFamilyDistSq μ FAD FDA ψ ≤ 16 * δ := by linarith
+  calc
+    opFamilyDistSq μ
+        (fun x (abc : (α × β) × γ) => heteroKron 1
+          ((A x).effect abc.1 * (D x).effect (abc.1.1, abc.2) -
+            (D x).effect (abc.1.1, abc.2) * (A x).effect abc.1))
+        (fun _ _ => 0) ψ = opFamilyDistSq μ FAD FDA ψ := by
+      apply opFamilyDistSq_congr_sub
+      intro x abc
+      change heteroKron 1
+          ((A x).effect abc.1 * (D x).effect (abc.1.1, abc.2) -
+            (D x).effect (abc.1.1, abc.2) * (A x).effect abc.1) - 0 =
+        rightTensor (ι₁ := ιA) ((A x).effect abc.1) *
+            rightTensor (ι₁ := ιA) ((D x).effect (abc.1.1, abc.2)) -
+          rightTensor (ι₁ := ιA) ((D x).effect (abc.1.1, abc.2)) *
+            rightTensor (ι₁ := ιA) ((A x).effect abc.1)
+      rw [rightTensor_mul_rightTensor, rightTensor_mul_rightTensor, sub_zero]
+      exact (rightTensor_sub _ _).symm
+    _ ≤ 16 * δ := hraw
+
 end MIPStarRE.QPBT

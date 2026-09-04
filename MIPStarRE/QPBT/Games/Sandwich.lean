@@ -110,20 +110,21 @@ theorem pastedMeasurement_isMeasurement {Γ₁ Γ₂ ι : Type*}
         rw [G₁.sum_eq_one, mul_one, (hG₂ g₂).isIdempotentElem.eq]
       _ = 1 := G₂.sum_eq_one
 
-/-- Pasting two consistent measurements yields a product-form polynomial
-error. All operator families in the conclusion are the postprocessed source
+/-- Pasting two consistent measurements yields an additive polynomial error.
+All operator families in the conclusion are the postprocessed source
 families. This is `lem:pasting`, blueprint `ch12_qpbt_games.tex:517-546`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:504-525`.
 
-**Unfaithful:** This source-shaped declaration remains admitted because the
-current product-form predicate `IsPolyErr₂` makes the cited assertion false.
-For every fixed `0 < δ < 1`, a two-dimensional correlated strategy can have
-pasting defect `δ` for every `η > 0`, whereas `IsPolyErr₂ δp` forces
-`δp η δ` to tend to zero with `η`. This is documented in
-`docs/paper-gaps/qpbt_pasting-product-error.tex` and tracked by issue #196.
-Elimination requires a documented correction of the multivariate polynomial
-convention, or a source-level restriction coupling the two error parameters,
-before formalizing the quantitative estimate of Fact 4.35. -/
+**Unfaithful:** The additive correction to `IsPolyErr₂` removes the scalar
+obstruction documented in `docs/paper-gaps/qpbt_pasting-product-error.tex`, but
+the available proof still uses the symmetric-strategy convention stated at
+`references/neexp-paper/05_quantum_preliminaries.tex:176-180`. In particular,
+the argument at lines 1158-1175 moves a fine `G₂` effect between tensor
+factors. This declaration quantifies an arbitrary bipartite vector and assumes
+only the forward marginal comparisons, so that move is not derivable from its
+hypotheses. This remaining boundary is tracked by issue #201. Elimination:
+prove a one-sided replacement for the register-move step, or expose the
+source's permutation-invariance boundary in a paper-aligned statement. -/
 theorem exists_pasting_error :
     ∃ δp : ℝ → ℝ → ℝ, IsPolyErr₂ δp ∧
       ∀ {X Y₁ Y₂ R₁ R₂ Γ₁ Γ₂ ι : Type*}
