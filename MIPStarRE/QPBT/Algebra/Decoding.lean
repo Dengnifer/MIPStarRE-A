@@ -12,7 +12,7 @@ specialization to polynomial representatives live in
 ## References
 
 The decoder is `def:decoding-map`, blueprint
-`blueprint/src/chapter/ch11_qpbt_algebra.tex:445-455`, with the extraction use
+`blueprint/src/chapter/ch11_qpbt_algebra.tex:446-457`, with the extraction use
 at `blueprint/src/chapter/ch16_qpbt_extraction.tex:11-20` and paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1419-1450`.
 The restricted decoder identity and its encoding hypothesis are documented in
@@ -70,8 +70,8 @@ Each indicator factor has degree zero away from its own variable and degree at
 most one in that variable, so the multilinear encoding has individual degree at
 most one, and hence at most `P.d` using `P.hd`.  This is the degree
 side-condition implicit in the source's `g_h` construction, not an extra
-hypothesis of the decoding identity.  See
-`blueprint/src/chapter/ch11_qpbt_algebra.tex:381-401` and paper
+hypothesis of the decoding identity.  See `def:low-degree-encoding`, blueprint
+`blueprint/src/chapter/ch11_qpbt_algebra.tex:404-424`, and paper
 `references/qpbt-paper/04_preliminaries.tex:832-897`. -/
 theorem lowDegreeEncoding_mem_poly {P : AdmissibleParams}
     (h : PauliRegister P) :
