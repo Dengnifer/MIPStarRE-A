@@ -8,13 +8,14 @@ import MIPStarRE.QPBT.Games.Defs
 
 This file introduces the finite question and answer alphabets used by the
 low-degree component of the Pauli basis test.  The maps are explicit maps on
-the ambient coefficient space; their conditional-linearity and distribution
-invariants are recorded as proof-level obligations for later stages.
+the ambient coefficient space, and their conditional-linearity levels are
+established below; the line-point distributions they induce are analysed in
+`MIPStarRE/QPBT/Test/LowDegreeGameTheorems.lean`.
 
 ## References
 
-The source-facing nodes are blueprint `def:ld-game`, `def:ld-question-distribution`,
-and `def:ld-win-predicate`; their paper origin is
+The source-facing nodes are blueprint `def:ld-game`,
+`def:ld-question-distribution`, and `def:ld-win-predicate`; their paper origin is
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
 -/
 
@@ -173,23 +174,323 @@ noncomputable def ldCL (P : LdParams) : LdType → LdSpace P → LdSpace P
   | .aline => ldALineCL P
   | .dline => ldDLineCL P
 
-/-- The conditional-linearity level of the affine-line map.  This is a named
-Lean proof obligation for the prose assertion in blueprint
+/-- Formalization-only auxiliary: the register carrying the shared scalar
+coordinate of the ambient low-degree space.  It is the first register in the
+concatenation exhibiting the conditional-linearity levels asserted in
+blueprint
+`def:ld-question-distribution`, paper origin
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`. -/
+private def ldSeedRegister (P : LdParams) : Finset (LdIndex P) :=
+  {Sum.inl (Sum.inr ())}
+
+/-- Formalization-only auxiliary: the register carrying the point coordinates
+of the ambient low-degree space; see `ldSeedRegister`. -/
+private def ldPointRegister (P : LdParams) : Finset (LdIndex P) :=
+  Finset.univ.image fun j : Fin P.m => (Sum.inl (Sum.inl j) : LdIndex P)
+
+/-- Formalization-only auxiliary: the register carrying the direction
+coordinates of the ambient low-degree space; see `ldSeedRegister`. -/
+private def ldDirectionRegister (P : LdParams) : Finset (LdIndex P) :=
+  Finset.univ.image fun j : Fin P.m => (Sum.inr j : LdIndex P)
+
+/-- Formalization-only auxiliary: the linear map retaining the shared scalar
+coordinate and clearing every other coordinate. -/
+private def ldSeedLinear (P : LdParams) :
+    LdSpace P →ₗ[ScalarQ P] LdSpace P where
+  toFun x := fun i =>
+    match i with
+    | .inl (.inl _) => 0
+    | .inl (.inr _) => x (Sum.inl (Sum.inr ()))
+    | .inr _ => 0
+  map_add' x y := by
+    funext i
+    rcases i with (j | u) | j <;> simp
+  map_smul' c x := by
+    funext i
+    rcases i with (j | u) | j <;> simp
+
+/-- Formalization-only auxiliary: the linear map sending the point block to its
+canonical line representative in the fixed direction `v` and clearing every
+other coordinate. -/
+private noncomputable def ldPointCLLinear (P : LdParams) (v : Fin P.m → ScalarQ P) :
+    LdSpace P →ₗ[ScalarQ P] LdSpace P where
+  toFun x := fun i =>
+    match i with
+    | .inl (.inl j) => lineRepMap v (LdSpace.point x) j
+    | .inl (.inr _) => 0
+    | .inr _ => 0
+  map_add' x y := by
+    funext i
+    rcases i with (j | u) | j
+    · change lineRepMap v (LdSpace.point (x + y)) j = _
+      have hpoint : LdSpace.point (x + y) = LdSpace.point x + LdSpace.point y := rfl
+      rw [hpoint, map_add]
+      rfl
+    · simp
+    · simp
+  map_smul' c x := by
+    funext i
+    rcases i with (j | u) | j
+    · change lineRepMap v (LdSpace.point (c • x)) j = _
+      have hpoint : LdSpace.point (c • x) = c • LdSpace.point x := rfl
+      rw [hpoint, map_smul]
+      rfl
+    · simp
+    · simp
+
+/-- Formalization-only auxiliary: the linear map zeroing the first `i`
+coordinates of the direction block and clearing every other coordinate. -/
+private def ldDirectionCLLinear (P : LdParams) (i : Fin P.m) :
+    LdSpace P →ₗ[ScalarQ P] LdSpace P where
+  toFun x := fun k =>
+    match k with
+    | .inl (.inl _) => 0
+    | .inl (.inr _) => 0
+    | .inr j => prefixProjection i (LdSpace.direction x) j
+  map_add' x y := by
+    funext k
+    rcases k with (j | u) | j
+    · simp
+    · simp
+    · change prefixProjection i (LdSpace.direction (x + y)) j =
+        prefixProjection i (LdSpace.direction x) j +
+          prefixProjection i (LdSpace.direction y) j
+      by_cases h : j.val < i.val
+      · simp only [prefixProjection, if_pos h, add_zero]
+      · simp only [prefixProjection, if_neg h]
+        rfl
+  map_smul' c x := by
+    funext k
+    rcases k with (j | u) | j
+    · simp
+    · simp
+    · change prefixProjection i (LdSpace.direction (c • x)) j =
+        c • prefixProjection i (LdSpace.direction x) j
+      by_cases h : j.val < i.val
+      · simp only [prefixProjection, if_pos h, smul_zero]
+      · simp only [prefixProjection, if_neg h]
+        rfl
+
+/-- Formalization-only auxiliary lemma: the shared-scalar map vanishes
+outside the scalar register. -/
+private theorem ldSeedLinear_supported (P : LdParams) :
+    ∀ (x : LdSpace P) (i : LdIndex P), i ∉ ldSeedRegister P →
+      ldSeedLinear P x i = 0 := by
+  intro x i hi
+  rcases i with (j | u) | j
+  · rfl
+  · cases u
+    exact absurd (Finset.mem_singleton_self _) hi
+  · rfl
+
+/-- Formalization-only auxiliary lemma: the canonical-representative map
+vanishes outside the point register. -/
+private theorem ldPointCLLinear_supported (P : LdParams) (v : Fin P.m → ScalarQ P) :
+    ∀ (x : LdSpace P) (i : LdIndex P), i ∉ ldPointRegister P →
+      ldPointCLLinear P v x i = 0 := by
+  intro x i hi
+  rcases i with (j | u) | j
+  · exact absurd (Finset.mem_image_of_mem _ (Finset.mem_univ j)) hi
+  · rfl
+  · rfl
+
+/-- Formalization-only auxiliary lemma: the prefix-zeroing map vanishes
+outside the direction register. -/
+private theorem ldDirectionCLLinear_supported (P : LdParams) (i : Fin P.m) :
+    ∀ (x : LdSpace P) (k : LdIndex P), k ∉ ldDirectionRegister P →
+      ldDirectionCLLinear P i x k = 0 := by
+  intro x k hk
+  rcases k with (j | u) | j
+  · rfl
+  · rfl
+  · exact absurd (Finset.mem_image_of_mem _ (Finset.mem_univ j)) hk
+
+/-- Formalization-only auxiliary lemma: the point register is disjoint from
+the scalar register. -/
+private theorem ldPointRegister_subset_sdiff_seed (P : LdParams) :
+    ldPointRegister P ⊆ Finset.univ \ ldSeedRegister P := by
+  intro i hi
+  obtain ⟨j, -, rfl⟩ := Finset.mem_image.mp hi
+  simp [ldSeedRegister]
+
+/-- Formalization-only auxiliary lemma: the direction register is disjoint
+from the scalar register. -/
+private theorem ldDirectionRegister_subset_sdiff_seed (P : LdParams) :
+    ldDirectionRegister P ⊆ Finset.univ \ ldSeedRegister P := by
+  intro i hi
+  obtain ⟨j, -, rfl⟩ := Finset.mem_image.mp hi
+  simp [ldSeedRegister]
+
+/-- Formalization-only auxiliary lemma: the point register is disjoint from
+both the scalar and the direction registers. -/
+private theorem ldPointRegister_subset_sdiff_seed_direction (P : LdParams) :
+    ldPointRegister P ⊆
+      (Finset.univ \ ldSeedRegister P) \ ldDirectionRegister P := by
+  intro i hi
+  obtain ⟨j, -, rfl⟩ := Finset.mem_image.mp hi
+  simp [ldSeedRegister, ldDirectionRegister]
+
+/-- Formalization-only auxiliary lemma: restricting to the scalar register
+leaves the shared scalar coordinate unchanged. -/
+private theorem coordinateRestriction_seed (P : LdParams) (x : LdSpace P) :
+    coordinateRestriction (ldSeedRegister P) x (Sum.inl (Sum.inr ())) =
+      x (Sum.inl (Sum.inr ())) := by
+  have hmem : (Sum.inl (Sum.inr ()) : LdIndex P) ∈ ldSeedRegister P :=
+    Finset.mem_singleton_self _
+  simp [coordinateRestriction, hmem]
+
+/-- Formalization-only auxiliary lemma: restricting to the point register
+leaves the point block unchanged. -/
+private theorem coordinateRestriction_point (P : LdParams) (x : LdSpace P) :
+    LdSpace.point (coordinateRestriction (ldPointRegister P) x) = LdSpace.point x := by
+  funext j
+  have hmem : (Sum.inl (Sum.inl j) : LdIndex P) ∈ ldPointRegister P :=
+    Finset.mem_image_of_mem _ (Finset.mem_univ j)
+  simp [LdSpace.point, coordinateRestriction, hmem]
+
+/-- Formalization-only auxiliary lemma: restricting to the direction register
+leaves the direction block unchanged. -/
+private theorem coordinateRestriction_direction (P : LdParams) (x : LdSpace P) :
+    LdSpace.direction (coordinateRestriction (ldDirectionRegister P) x) =
+      LdSpace.direction x := by
+  funext j
+  have hmem : (Sum.inr j : LdIndex P) ∈ ldDirectionRegister P :=
+    Finset.mem_image_of_mem _ (Finset.mem_univ j)
+  simp [LdSpace.direction, coordinateRestriction, hmem]
+
+/-- Formalization-only auxiliary: a two-level representation of the
+affine-line map as a conditionally linear function. -/
+private noncomputable def ldALineTerm (P : LdParams) :
+    CondLinearTerm (ScalarQ P) (ι := LdIndex P) 2 :=
+  .succ (ldSeedRegister P) (ldSeedLinear P) (ldSeedLinear_supported P)
+    fun y =>
+      .succ (ldPointRegister P)
+        (ldPointCLLinear P (coordinateDirection (chiIndex P (LdSpace.seed y))))
+        (ldPointCLLinear_supported P _)
+        fun _ => .zero
+
+/-- Formalization-only auxiliary: a three-level representation of the
+diagonal-line map as a conditionally linear function. -/
+private noncomputable def ldDLineTerm (P : LdParams) :
+    CondLinearTerm (ScalarQ P) (ι := LdIndex P) 3 :=
+  .succ (ldSeedRegister P) (ldSeedLinear P) (ldSeedLinear_supported P)
+    fun y =>
+      .succ (ldDirectionRegister P)
+        (ldDirectionCLLinear P (chiIndex P (LdSpace.seed y)))
+        (ldDirectionCLLinear_supported P _)
+        fun w =>
+          .succ (ldPointRegister P)
+            (ldPointCLLinear P (LdSpace.direction w))
+            (ldPointCLLinear_supported P _)
+            fun _ => .zero
+
+/-- The conditional-linearity level of the affine-line map.  This is
+`lem:ld-aline-level`, the level-2 assertion in blueprint
 `def:ld-question-distribution`, paper
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
 -/
 theorem isCondLinear_ldALineCL (P : LdParams) :
     IsCondLinearOn (ScalarQ P) Finset.univ 2 (ldALineCL P) := by
-  sorry
+  refine ⟨ldALineTerm P, ⟨Finset.subset_univ _, fun _ =>
+    ⟨ldPointRegister_subset_sdiff_seed P, fun _ => trivial⟩⟩, ?_⟩
+  funext x
+  have hseed :
+      LdSpace.seed (ldSeedLinear P (coordinateRestriction (ldSeedRegister P) x)) =
+        LdSpace.seed x := coordinateRestriction_seed P x
+  have hpoint : LdSpace.point (coordinateRestriction (ldPointRegister P) x) =
+      LdSpace.point x := coordinateRestriction_point P x
+  have hval :
+      CondLinearTerm.eval (ldALineTerm P) x =
+        ldSeedLinear P (coordinateRestriction (ldSeedRegister P) x) +
+          (ldPointCLLinear P (coordinateDirection (chiIndex P (LdSpace.seed x)))
+            (coordinateRestriction (ldPointRegister P) x) + 0) := by
+    change ldSeedLinear P (coordinateRestriction (ldSeedRegister P) x) +
+        (ldPointCLLinear P
+            (coordinateDirection (chiIndex P
+              (LdSpace.seed (ldSeedLinear P (coordinateRestriction (ldSeedRegister P) x)))))
+            (coordinateRestriction (ldPointRegister P) x) + 0) = _
+    rw [hseed]
+  rw [hval]
+  funext i
+  rcases i with (j | u) | j
+  · change (0 : ScalarQ P) +
+        (lineRepMap (coordinateDirection (chiIndex P (LdSpace.seed x)))
+          (LdSpace.point (coordinateRestriction (ldPointRegister P) x)) j + 0) =
+      lineRepMap (coordinateDirection (chiIndex P (LdSpace.seed x)))
+        (LdSpace.point x) j
+    rw [hpoint, zero_add, add_zero]
+  · change coordinateRestriction (ldSeedRegister P) x (Sum.inl (Sum.inr ())) +
+        ((0 : ScalarQ P) + 0) = x (Sum.inl (Sum.inr ()))
+    rw [coordinateRestriction_seed, add_zero, add_zero]
+  · change (0 : ScalarQ P) + ((0 : ScalarQ P) + 0) = 0
+    rw [add_zero, add_zero]
 
-/-- The conditional-linearity level of the diagonal-line map.  This is the
-level-3 assertion in blueprint
+/-- The conditional-linearity level of the diagonal-line map.  This is
+`lem:ld-dline-level`, the level-3 assertion in blueprint
 `def:ld-question-distribution`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
 -/
 theorem isCondLinear_ldDLineCL (P : LdParams) :
     IsCondLinearOn (ScalarQ P) Finset.univ 3 (ldDLineCL P) := by
-  sorry
+  refine ⟨ldDLineTerm P, ⟨Finset.subset_univ _, fun _ =>
+    ⟨ldDirectionRegister_subset_sdiff_seed P, fun _ =>
+      ⟨ldPointRegister_subset_sdiff_seed_direction P, fun _ => trivial⟩⟩⟩, ?_⟩
+  funext x
+  have hseed :
+      LdSpace.seed (ldSeedLinear P (coordinateRestriction (ldSeedRegister P) x)) =
+        LdSpace.seed x := coordinateRestriction_seed P x
+  have hpoint : LdSpace.point (coordinateRestriction (ldPointRegister P) x) =
+      LdSpace.point x := coordinateRestriction_point P x
+  have hdir :
+      LdSpace.direction
+          (ldDirectionCLLinear P (chiIndex P (LdSpace.seed x))
+            (coordinateRestriction (ldDirectionRegister P) x)) =
+        prefixProjection (chiIndex P (LdSpace.seed x)) (LdSpace.direction x) := by
+    funext j
+    change prefixProjection (chiIndex P (LdSpace.seed x))
+        (LdSpace.direction (coordinateRestriction (ldDirectionRegister P) x)) j = _
+    rw [coordinateRestriction_direction]
+  have hval :
+      CondLinearTerm.eval (ldDLineTerm P) x =
+        ldSeedLinear P (coordinateRestriction (ldSeedRegister P) x) +
+          (ldDirectionCLLinear P (chiIndex P (LdSpace.seed x))
+              (coordinateRestriction (ldDirectionRegister P) x) +
+            (ldPointCLLinear P
+                (prefixProjection (chiIndex P (LdSpace.seed x)) (LdSpace.direction x))
+                (coordinateRestriction (ldPointRegister P) x) + 0)) := by
+    change ldSeedLinear P (coordinateRestriction (ldSeedRegister P) x) +
+        (ldDirectionCLLinear P
+            (chiIndex P
+              (LdSpace.seed (ldSeedLinear P (coordinateRestriction (ldSeedRegister P) x))))
+            (coordinateRestriction (ldDirectionRegister P) x) +
+          (ldPointCLLinear P
+              (LdSpace.direction
+                (ldDirectionCLLinear P
+                  (chiIndex P
+                    (LdSpace.seed
+                      (ldSeedLinear P (coordinateRestriction (ldSeedRegister P) x))))
+                  (coordinateRestriction (ldDirectionRegister P) x)))
+              (coordinateRestriction (ldPointRegister P) x) + 0)) = _
+    rw [hseed, hdir]
+  rw [hval]
+  funext i
+  rcases i with (j | u) | j
+  · change (0 : ScalarQ P) + ((0 : ScalarQ P) +
+        (lineRepMap
+          (prefixProjection (chiIndex P (LdSpace.seed x)) (LdSpace.direction x))
+          (LdSpace.point (coordinateRestriction (ldPointRegister P) x)) j + 0)) =
+      lineRepMap (prefixProjection (chiIndex P (LdSpace.seed x)) (LdSpace.direction x))
+        (LdSpace.point x) j
+    rw [hpoint, zero_add, zero_add, add_zero]
+  · change coordinateRestriction (ldSeedRegister P) x (Sum.inl (Sum.inr ())) +
+        ((0 : ScalarQ P) + ((0 : ScalarQ P) + 0)) = x (Sum.inl (Sum.inr ()))
+    rw [coordinateRestriction_seed, add_zero, add_zero, add_zero]
+  · change (0 : ScalarQ P) +
+        (prefixProjection (chiIndex P (LdSpace.seed x))
+            (LdSpace.direction (coordinateRestriction (ldDirectionRegister P) x)) j +
+          ((0 : ScalarQ P) + 0)) =
+      prefixProjection (chiIndex P (LdSpace.seed x)) (LdSpace.direction x) j
+    rw [coordinateRestriction_direction, zero_add, add_zero, add_zero]
 
 /-- The question alphabet for the low-degree game (blueprint
 `def:ld-game`; paper origin
@@ -341,7 +642,9 @@ noncomputable def ldGame (P : LdParams) : Game where
   AnswerA := LdAnswer P
   AnswerB := LdAnswer P
   μ := ldQuestionDistribution P
-  μ_prob := by sorry
+  μ_prob := by
+    exact Distribution.IsProbability.map
+      (uniformDistribution_isProbability ((LdType × LdType) × LdSpace P)) _
   decide := ldWinPredicate P
 
 end

@@ -254,6 +254,8 @@ noncomputable def pauliCL (P : AdmissibleParams) (t : PauliType) :
 proof obligations corresponding to the prose following `def:pauli-question-distribution`
 (`def:pauli-question-distribution`; paper
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1120`).
+Together they are the typed-family assertion required by the source statement
+`lem:pauli-question-typed-cl`; the proof below is open, tracked by issue #180.
 -/
 theorem isCondLinear_pauliCL (P : AdmissibleParams) (t : PauliType) :
     IsCondLinearOn (PauliScalar P) Finset.univ (pauliCLLevel t) (pauliCL P t) := by

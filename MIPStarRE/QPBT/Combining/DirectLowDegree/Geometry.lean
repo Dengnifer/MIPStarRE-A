@@ -63,7 +63,7 @@ dimension is `2 * P.m + 2`; no divisibility assertion is introduced.
 
 The construction has dimension `2 * P.m + 2` without requiring
 `2 * P.m + 2 ∣ P.q`; it supplies the directly indexed line and coordinate
-spaces used in blueprint `lem:qld-sublines`.
+spaces used in the dimension-extension argument of blueprint `lem:qld-sublines`.
 -/
 def AdmissibleParams.extendedDirectLd (P : AdmissibleParams) : DirectLdParams where
   q := P.q
@@ -99,7 +99,7 @@ private def directLdSpacePointEquiv (D : DirectLdParams) :
 
 /-- Decompose a direct sample into its stored index and the remaining
 independent coordinates. -/
-private def directLdSpaceIndexEquiv (D : DirectLdParams) :
+def directLdSpaceIndexEquiv (D : DirectLdParams) :
     DirectLdSpace D ≃
       Fin D.m ×
         ((Fin D.m → DirectScalarQ D) ×
@@ -108,6 +108,12 @@ private def directLdSpaceIndexEquiv (D : DirectLdParams) :
   invFun sample := ⟨sample.2.1, sample.1, sample.2.2⟩
   left_inv sample := by cases sample; rfl
   right_inv sample := by cases sample; rfl
+
+/-- Compatibility name for the index-first direct-sample decomposition. -/
+abbrev directLdSpaceIndexSplitEquiv (D : DirectLdParams) :
+    DirectLdSpace D ≃
+      Fin D.m × ((Fin D.m → DirectScalarQ D) × (Fin D.m → DirectScalarQ D)) :=
+  directLdSpaceIndexEquiv D
 
 /-- Zero the coordinates preceding the directly sampled prefix index. -/
 def directPrefixProjection {D : DirectLdParams} (i : Fin D.m)
@@ -226,25 +232,6 @@ theorem directLinePointDist_isProbability (D : DirectLdParams) :
   exact Distribution.mix_isProbability _ _ _
     (directALinePointDist_isProbability D) (directDLinePointDist_isProbability D)
     (by norm_num) (by norm_num)
-
-/-- A point differs from its canonical line representative by a scalar
-multiple of the line direction.  This is the canonical incidence lemma of
-blueprint `def:line-representative`
-(the decomposition establishing incidence is at lines 507-509), shared by
-the line-point laws and the strategy transport. -/
-theorem mem_linePoints_lineRepMap {K : Type*} [Field K] {m : ℕ}
-    (v u : Fin m → K) : u ∈ linePoints (lineRepMap v u) v := by
-  let W : Submodule K (Fin m → K) := Submodule.span K ({v} : Set (Fin m → K))
-  let T : Submodule K (Fin m → K) :=
-    registerSubmodule K (canonicalComplement W)
-  have hdiff : u - lineRepMap v u ∈ W := by
-    simpa [lineRepMap, canonicalProjOfKernel, W, T, LinearMap.comp_apply] using
-      (Submodule.sub_projection_mem
-        (isCompl_registerSubmodule_canonicalComplement W).symm u)
-  rcases Submodule.mem_span_singleton.mp hdiff with ⟨t, ht⟩
-  refine ⟨t, ?_⟩
-  rw [ht]
-  abel
 
 /-- The point and stored-index marginals of the direct axis-line law are
 uniform.  This is a direct-index analogue of `lem:alnf`, required by
