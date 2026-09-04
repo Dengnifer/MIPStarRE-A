@@ -18,6 +18,9 @@
 #   --status            Report what this worktree would do, change nothing.
 #   -h | --help         Show this text.
 #
+# Environment:
+#   MIPSTARRE_LAKE_ROOT  optional absolute root for branch-private .lake trees
+#
 # Local replacement for the *restore* half of the GitHub Actions build cache in
 # .github/workflows/pr-ci.yml:143-149 (restore-keys prefix-match on
 # hashFiles('lean-toolchain','lake-manifest.json','lakefile.toml')).  The cache
@@ -38,6 +41,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LAKE_ROOT_HELPER="$SCRIPT_DIR/lake-root.sh"
 
 # ---------------------------------------------------------------- configuration
 
@@ -85,8 +89,8 @@ Usage: local/bin/warm-worktree.sh [<worktree>] [options]
   --status            Report the planned action and exit without changing anything.
   -h | --help         Show this text.
 
-Environment: MIPSTARRE_CACHE_ROOT, MIPSTARRE_FULL_BUILD_LOCK_TIMEOUT,
-MIPSTARRE_TELEMETRY_DIR.
+Environment: MIPSTARRE_CACHE_ROOT, MIPSTARRE_LAKE_ROOT,
+MIPSTARRE_FULL_BUILD_LOCK_TIMEOUT, MIPSTARRE_TELEMETRY_DIR.
 EOF
 }
 
@@ -589,7 +593,6 @@ main() {
   fi
   [ -d "$WORKTREE" ] || die "worktree $WORKTREE does not exist"
   WORKTREE="$(cd "$WORKTREE" && pwd)"
-  WARM_MARKER="$WORKTREE/.lake/.mipstarre-warm-stamp"
 
   # Single-writer invariant (DESIGN.md #1): a consumer must never be pointed at
   # the warmer's own trees, or its incremental build writes into the cache.
@@ -597,6 +600,14 @@ main() {
     "$SNAPSHOTS"/*|"$HOT_REPO"/*|"$HOT_REPO"/)
       die "refusing to warm $WORKTREE: it is inside the warmer's own tree. Only local/bin/cache-warmer.sh may write there." ;;
   esac
+
+  [ -x "$LAKE_ROOT_HELPER" ] || die "Lake-root helper is missing: $LAKE_ROOT_HELPER"
+  if [ "$STATUS_ONLY" -eq 1 ]; then
+    "$LAKE_ROOT_HELPER" prepare "$WORKTREE" --check
+  else
+    "$LAKE_ROOT_HELPER" prepare "$WORKTREE"
+  fi
+  WARM_MARKER="$WORKTREE/.lake/.mipstarre-warm-stamp"
 
   local keyhash snap="" name="" snap_keyhash="" snap_status="" snap_sha=""
   keyhash="$(compute_keyhash "$WORKTREE")"

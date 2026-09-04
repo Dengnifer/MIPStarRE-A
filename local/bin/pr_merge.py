@@ -432,6 +432,23 @@ def remove_branch_and_worktree(repo_root: Path, branch: str) -> None:
     if target:
         if git_ok(repo_root, "worktree", "remove", target):
             sys.stdout.write(f"removed worktree {target}\n")
+            lake_root = os.environ.get("MIPSTARRE_LAKE_ROOT")
+            cleanup = repo_root / "local" / "bin" / "housekeeping.sh"
+            if lake_root and cleanup.is_file():
+                result = subprocess.run(
+                    [str(cleanup), "lake-cleanup", branch], cwd=str(repo_root),
+                    text=True, capture_output=True, check=False,
+                )
+                if result.returncode == 0:
+                    sys.stdout.write(result.stdout)
+                    sys.stdout.write(result.stderr)
+                else:
+                    sys.stderr.write(
+                        f"warning: external .lake cleanup failed for {branch}: "
+                        f"{result.stderr.strip()}\n"
+                    )
+            elif lake_root:
+                sys.stderr.write(f"warning: external .lake cleanup tool is missing: {cleanup}\n")
         else:
             sys.stderr.write(f"warning: could not remove worktree {target} (uncommitted "
                              f"files?); by hand: git worktree remove --force {target}\n")

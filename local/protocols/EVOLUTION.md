@@ -533,3 +533,20 @@ hook-level regression that stages 401 lines at that path.
 **Expected effect:** operators can create the prerequisite record without an
 ad hoc GitHub mutation or a duplicate edge after retry, and future readiness
 test growth remains subject to the owner-gated 400-line episode budget.
+
+## 2026-09-05 — Branch-private Lake products may use a separate volume
+
+**Trigger:** `results/telemetry/events.md` 2026-09-05, "Owner-side `.lake`
+relocation shim" (issue #190).
+
+**Change:** `MIPSTARRE_LAKE_ROOT` places each worktree's `.lake` at
+`<root>/<branch>` through a shared, refusal-safe helper used by setup and direct
+warming. `housekeeping.sh lake-cleanup <branch>` removes the external products
+only after no registered worktree uses them, and `pr_merge.py` invokes that job
+after successful worktree removal. `DESIGN.md` and `build-cache.md` separate
+this private placement root from `MIPSTARRE_CACHE_ROOT`, which owns `packages/`
+and `hot-main/`.
+
+**Expected effect:** branch builds use the selected fast volume without
+owner-side launcher shims, conflicting build data is preserved for explicit
+migration, and merged worktrees no longer leak their external build directory.

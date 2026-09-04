@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 #
-# Usage: local/bin/housekeeping.sh {standup|stale-audit|linter-sweep|readme-freshness|all}
+# Usage: local/bin/housekeeping.sh
+#          {standup|stale-audit|linter-sweep|readme-freshness|all}
+#        local/bin/housekeeping.sh lake-cleanup <branch>
 #
 # On-demand replacement for .github/workflows/housekeeping.yml, whose four jobs
 # were bound to four cron entries (housekeeping.yml:14-18).  There is no
@@ -12,23 +14,25 @@
 #   linter-sweep      report-only Lean linter-warning capture (FULL BUILD)
 #   readme-freshness  report-only README freshness audit
 #   all               standup + stale-audit + readme-freshness
+#   lake-cleanup BR   remove BR's external .lake after its worktree is removed
 #
 # `all` deliberately EXCLUDES linter-sweep.  That job is a complete `lake build`
 # — the upstream workflow gave it a 120-minute timeout (housekeeping.yml:321) —
 # and it must never sit on a fast path someone runs casually.  Ask for it by
 # name.
 #
-# Three of the four jobs are report-only, and that contract is load-bearing:
+# The audit jobs are report-only, and that contract is load-bearing:
 # docs/stale_issue_audit.md:143-144 states "Do **not** let the script close
 # issues automatically", and DESIGN.md:88-90 generalizes it to the sweep and the
-# freshness audit.  Nothing in this script closes, edits or labels an issue.
-# `standup` is the sole writer, and it writes only its own digest file.
+# freshness audit. Nothing here closes, edits or labels an issue. `standup`
+# writes its digest; `lake-cleanup` is a separately requested destructive job.
 #
 # Reports land in results/reports/.  Build logs and intermediate JSON go to
 # ~/.cache/mipstarre-dev/ and are never committed (DESIGN.md:37-38).
 #
 # Environment:
 #   MIPSTARRE_CACHE_ROOT   override ~/.cache/mipstarre-dev
+#   MIPSTARRE_LAKE_ROOT    absolute root holding branch-private .lake trees
 #   MIPSTARRE_LLM_ENABLED  "false" disables every model call (none are wired yet)
 
 set -euo pipefail
@@ -43,6 +47,7 @@ LOCK_DIR="${CACHE_ROOT}/locks"
 usage() {
   cat <<'USAGE'
 Usage: local/bin/housekeeping.sh {standup|stale-audit|linter-sweep|readme-freshness|all}
+       local/bin/housekeeping.sh lake-cleanup <branch>
 
   standup           structured daily digest -> results/reports/standup/YYYY-MM-DD.md
                     (72h lookback on Mondays, 24h otherwise; no model call)
@@ -51,13 +56,14 @@ Usage: local/bin/housekeeping.sh {standup|stale-audit|linter-sweep|readme-freshn
                     taken under the machine-wide build lock. Never part of `all`.
   readme-freshness  report-only README freshness audit
   all               standup + stale-audit + readme-freshness
+  lake-cleanup BR   remove $MIPSTARRE_LAKE_ROOT/BR after its worktree is gone
 
 Reports are written to results/reports/. Build logs and intermediate JSON go to
 ${MIPSTARRE_CACHE_ROOT:-~/.cache/mipstarre-dev}/ and are never committed.
 
-Only `standup` writes anything into the repository, and only its own digest.
-The three audits are report-only by contract (docs/stale_issue_audit.md:143-144,
-DESIGN.md:88-90): they never close, edit, or label an issue.
+The audits are report-only by contract (docs/stale_issue_audit.md:143-144,
+DESIGN.md:88-90). `lake-cleanup` deletes only external build products and is
+never included in `all`.
 USAGE
 }
 
@@ -604,6 +610,13 @@ main() {
     --internal-lean-build)
       [ "$#" -eq 2 ] || die "--internal-lean-build needs a log path"
       internal_lean_build "$2"
+      exit 0
+      ;;
+    lake-cleanup)
+      [ "$#" -eq 2 ] || die "lake-cleanup needs exactly one branch name"
+      [ -x "${SCRIPT_DIR}/lake-root.sh" ] \
+        || die "missing executable ${SCRIPT_DIR}/lake-root.sh"
+      "${SCRIPT_DIR}/lake-root.sh" cleanup "${REPO_ROOT}" "$2"
       exit 0
       ;;
   esac

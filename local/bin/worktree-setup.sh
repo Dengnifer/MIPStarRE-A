@@ -16,6 +16,9 @@
 #                    not edit your shell configuration unless you ask.
 #   -h | --help      Show this text.
 #
+# Environment:
+#   MIPSTARRE_LAKE_ROOT  optional absolute root for branch-private .lake trees
+#
 # Local replacement for .codex/setup.sh (the Codex cloud environment hook), per
 # local/DESIGN.md's GitHub->local mapping row "Codex cloud env setup
 # (.codex/setup.sh) -> local/bin/worktree-setup.sh".
@@ -39,6 +42,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LAKE_ROOT_HELPER="$SCRIPT_DIR/lake-root.sh"
 
 WORKTREE=""
 CHECK_ONLY=0
@@ -62,6 +66,8 @@ Usage: local/bin/worktree-setup.sh [<worktree>] [options]
   --skip-warm      Do not call warm-worktree.sh at all.
   --persist-path   Append the elan PATH line to $MIPSTARRE_SHELL_RC (~/.zshrc).
   -h | --help      Show this text.
+
+Environment: MIPSTARRE_LAKE_ROOT optionally places .lake at <root>/<branch>.
 EOF
 }
 
@@ -267,6 +273,15 @@ main() {
     log "checking $WORKTREE (report-only; nothing will be modified)"
   else
     log "bootstrapping $WORKTREE"
+  fi
+
+  # 0. Place .lake before any bootstrap step reads or writes it.
+  [ -x "$LAKE_ROOT_HELPER" ] || die "Lake-root helper is missing: $LAKE_ROOT_HELPER"
+  if [ "$CHECK_ONLY" -eq 1 ]; then
+    "$LAKE_ROOT_HELPER" prepare "$WORKTREE" --check || status=1
+  else
+    "$LAKE_ROOT_HELPER" prepare "$WORKTREE" \
+      || die "could not prepare the external .lake directory"
   fi
 
   # 1. elan and the pinned toolchain.
