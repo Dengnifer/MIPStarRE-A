@@ -22,17 +22,21 @@ run_without_git_local_env() (
 # (numstat includes deletions; PR 7 round 3, F8), and before the
 # MIPSTARRE_SKIP_HOOKS exit so a blanket hook skip cannot launder the
 # owner-only budget override.
-# A merge commit stages the base branch's already-reviewed content; the budget
-# applies to a PR's own diff (which the review reads), not to what a fresh-base
-# merge inherits (2026-09-04: a 130-line PR's merge of main counted 520 lines).
+# A merge commit stages the merged branch's already-reviewed content; the
+# budget applies to the PR's own diff (which the review reads).  So a merge
+# commit is measured against MERGE_HEAD: what the merged tree adds relative to
+# the branch being merged in — i.e. this PR's cumulative workflow-layer change,
+# plus any merge-time edit — while inherited content counts zero (2026-09-04: a
+# 130-line PR's merge of main counted 520 lines under the plain measure).
 if [ -f "$(git rev-parse --git-path MERGE_HEAD)" ]; then
-  echo "MIPStarRE pre-commit: merge commit; the workflow-layer budget is not applied to inherited changes."
-  INFRA_CHANGED=0
+  BUDGET_BASE="$(git rev-parse MERGE_HEAD)"
+  echo "MIPStarRE pre-commit: merge commit; workflow-layer budget measured against MERGE_HEAD ${BUDGET_BASE%??????????????????????????????????}."
 else
-INFRA_CHANGED="$(git diff --cached --numstat -- local/ .githooks/ \
+  BUDGET_BASE=""
+fi
+INFRA_CHANGED="$(git diff --cached --numstat $BUDGET_BASE -- local/ .githooks/ \
   scripts/tests/test_dispatch.py scripts/tests/test_github_workflow.py \
   | awk '{added=$1; deleted=$2; if (added != "-") total+=added+deleted} END {print total+0}')"
-fi
 if [ "${INFRA_CHANGED:-0}" -gt 400 ] && [ "${MIPSTARRE_INFRA_OVERRIDE:-}" != "1" ]; then
   echo "MIPStarRE pre-commit: staged workflow-layer change is ${INFRA_CHANGED} lines (budget: 400)."
   echo "Scope control (local/personas/main.md): the budget is PER EPISODE, not per"

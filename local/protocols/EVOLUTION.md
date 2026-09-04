@@ -465,8 +465,10 @@ merge commit): a fresh-base merge of `main` into a 130-line workflow PR staged
 commit; the operator had to use the owner override for content that was
 already reviewed on `main`.
 
-**Change:** `.githooks/pre-commit` skips the line budget when `MERGE_HEAD`
-exists (a merge commit) and says so; ordinary commits are unchanged.
+**Change:** `.githooks/pre-commit` measures a merge commit against
+`MERGE_HEAD` (the PR's own cumulative workflow-layer diff, merge-time edits
+included; inherited content counts zero) and says so; ordinary commits are
+unchanged.
 
 **Expected effect:** fresh-base merges never need the owner override; the
 budget keeps binding the PR's own commits, and the review reads the PR diff.
