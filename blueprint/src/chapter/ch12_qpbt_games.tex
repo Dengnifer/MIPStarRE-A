@@ -1151,8 +1151,8 @@ The marginal functions, factor spaces, and linear maps of a given CL function $L
 \end{proof}
 
 % Formalization-support nodes.  The five statements below are not results of the source
-% article; each isolates one register-bookkeeping step of the Lean proofs of the lemmas
-% above, and is recorded here so that those proofs remain traceable.
+% article; each isolates one identity about restricting to, or summing over, registers
+% used in the Lean proofs of the lemmas above, so that those proofs remain traceable.
 \begin{lemma}[Formalization support for restriction to a subregister]\label{lem:cl-restriction-idem}
 	\lean{MIPStarRE.QPBT.coordinateRestriction_coordinateRestriction}
 	\leanok
@@ -1244,11 +1244,11 @@ The question distribution of the Pauli basis test is \emph{typed}: each question
 	This is identical to the uniform distribution over ordered pairs $(u,v) \in U \times U$ such that $\{u,v\} \in E$: each edge that is not a self-loop contributes two ordered pairs, and each self-loop contributes one, whence the normalization $2m-k$.
 \end{definition}
 
-\begin{lemma}[Total mass of the graph distribution]\label{lem:graph-distribution-mass}
+\begin{lemma}[Formalization support for normalization of the graph distribution]\label{lem:graph-distribution-mass}
 	\lean{MIPStarRE.QPBT.graphDistribution_isProbability}
 	\leanok
 	\uses{def:graph-distribution}
-	Let $G = (U, E)$ be an undirected graph with nonempty edge set $E$. Then the graph distribution $\mu_G$ of Definition~\ref{def:graph-distribution} has total mass one, that is, $\sum_{(u,v) \in U \times U} \mu_G(u,v) = 1$.
+	This is not a named statement of the source article; it records the normalization of the graph distribution of Definition~\ref{def:graph-distribution}, which the source leaves implicit. Let $G = (U, E)$ be an undirected graph with nonempty edge set $E$. Then the graph distribution $\mu_G$ has total mass one, that is, $\sum_{(u,v) \in U \times U} \mu_G(u,v) = 1$.
 \end{lemma}
 \begin{proof}
 	\leanok

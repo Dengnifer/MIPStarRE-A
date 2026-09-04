@@ -10,10 +10,14 @@ needed by later formalization stages.
 
 ## References
 
-The source-facing nodes are `def:cl-func`, `def:cl-dist`, `lem:cl-concat`, and
-`def:graph-distribution` in `blueprint/src/chapter/ch12_qpbt_games.tex:496-629`.
+The source-facing nodes are `def:cl-func`
+(`blueprint/src/chapter/ch12_qpbt_games.tex:1053-1063`), `def:cl-dist`
+(`ch12_qpbt_games.tex:1067-1070`), `lem:cl-concat`
+(`ch12_qpbt_games.tex:1103-1117`), and `def:graph-distribution`
+(`ch12_qpbt_games.tex:1233-1245`).
 The paper origins are
-`references/qpbt-paper/05_conditionally_linear_functions.tex:35-57,282-314`
+`references/qpbt-paper/05_conditionally_linear_functions.tex:35-57,282-314`,
+`references/qpbt-paper/07_types.tex:65-82`,
 and `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1010`.
 -/
 
@@ -32,7 +36,7 @@ rejected by Lean's strict-positivity checker.  We therefore expose the same
 public predicate through a positive syntax tree (`CondLinearTerm`), together
 with its support invariant and evaluation function.  This is a representation
 deviation forced by Lean, not an additional mathematical hypothesis.  It encodes
-`def:cl-func`, blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:441-463`,
+`def:cl-func`, blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:1053-1063`,
 paper origin `references/qpbt-paper/05_conditionally_linear_functions.tex:35-57`.
 -/
 inductive CondLinearTerm (K : Type*) [Field K] {ι : Type*} [Fintype ι]
@@ -47,7 +51,7 @@ inductive CondLinearTerm (K : Type*) [Field K] {ι : Type*} [Fintype ι]
 
 /-- Restrict a coordinate vector to a register, zeroing the complementary
 coordinates.  This is Lean-only support for the projections in `def:cl-func`,
-blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:441-463`, paper origin
+blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:1053-1063`, paper origin
 `references/qpbt-paper/05_conditionally_linear_functions.tex:35-57`.
 -/
 def coordinateRestriction (S : Finset ι) (x : ι → K) : ι → K :=
@@ -55,7 +59,7 @@ def coordinateRestriction (S : Finset ι) (x : ι → K) : ι → K :=
 
 /-- Evaluation of a representation of a conditionally linear function.
 Lean-only support for `def:cl-func`, blueprint
-`ch12_qpbt_games.tex:453-463`, paper origin
+`ch12_qpbt_games.tex:1053-1063`, paper origin
 `references/qpbt-paper/05_conditionally_linear_functions.tex:35-57`.
 -/
 def CondLinearTerm.eval {ι : Type*} [Fintype ι] [DecidableEq ι]
@@ -69,7 +73,7 @@ def CondLinearTerm.eval {ι : Type*} [Fintype ι] [DecidableEq ι]
 
 /-- The support invariant for a representation of a conditionally linear
 function.  This is a Lean-only companion to `def:cl-func`, blueprint
-`blueprint/src/chapter/ch12_qpbt_games.tex:453-463`, paper origin
+`blueprint/src/chapter/ch12_qpbt_games.tex:1053-1063`, paper origin
 `references/qpbt-paper/05_conditionally_linear_functions.tex:35-57`.
 -/
 def CondLinearTerm.supportedOn {ι : Type*} [Fintype ι] [DecidableEq ι]
@@ -81,7 +85,7 @@ def CondLinearTerm.supportedOn {ι : Type*} [Fintype ι] [DecidableEq ι]
 
 /-- The public conditionally-linear predicate.  Its positive syntax-tree
 encoding is the Lean representation of `def:cl-func`, blueprint
-`blueprint/src/chapter/ch12_qpbt_games.tex:453-463`, paper origin
+`blueprint/src/chapter/ch12_qpbt_games.tex:1053-1063`, paper origin
 `references/qpbt-paper/05_conditionally_linear_functions.tex:35-57`.
 -/
 def IsCondLinearOn (K : Type*) [Field K] {ι : Type*} [Fintype ι]
@@ -92,7 +96,7 @@ def IsCondLinearOn (K : Type*) [Field K] {ι : Type*} [Fintype ι]
 
 /--
 `IsCondLinear` abbreviates the full-coordinate predicate.  Blueprint
-`def:cl-func`, `blueprint/src/chapter/ch12_qpbt_games.tex:453-463`; paper
+`def:cl-func`, `blueprint/src/chapter/ch12_qpbt_games.tex:1053-1063`; paper
 `references/qpbt-paper/05_conditionally_linear_functions.tex:35-57`.
 -/
 def IsCondLinear (ell : ℕ) (L : (ι → K) → (ι → K)) : Prop :=
@@ -221,8 +225,9 @@ private theorem CondLinearTerm.liftRight_supportedOn {K ιU ιV : Type*}
       rw [← hsets]
       exact ih (fun i => y (.inr i)) (hrest (fun i => y (.inr i)))
 
-/-- Append a family of right-coordinate terms after a left-coordinate term,
-while recording the prefix accumulated by the preceding left levels. -/
+/-- Concatenate a family of conditionally linear representations on the right
+register with a conditionally linear representation on the left register, while
+recording the prefix accumulated by the preceding left levels. -/
 private def CondLinearTerm.concat {K ιU ιV : Type*} [Field K]
     [Fintype ιU] [DecidableEq ιU] [Fintype ιV] [DecidableEq ιV]
     {ell : ℕ} (rTerm : (ιU → K) → CondLinearTerm K (ι := ιV) ell)
@@ -372,19 +377,19 @@ theorem coordinateRestriction_sum_eq {K ι J : Type*} [Field K]
   · rw [coordinateRestriction]
     simp [ha, hf j a ha]
 
-/-- The first register of a positive-level conditionally-linear term. -/
+/-- The first register of a positive-level conditionally-linear representation. -/
 private def CondLinearTerm.headSupport {K ι : Type*} [Field K]
     [Fintype ι] [DecidableEq ι] {ell : ℕ} :
     CondLinearTerm K (ι := ι) (ell + 1) → Finset ι
   | .succ S₁ _ _ _ => S₁
 
-/-- The first linear map of a positive-level conditionally-linear term. -/
+/-- The first linear map of a positive-level conditionally-linear representation. -/
 private def CondLinearTerm.headLinear {K ι : Type*} [Field K]
     [Fintype ι] [DecidableEq ι] {ell : ℕ} :
     CondLinearTerm K (ι := ι) (ell + 1) → ((ι → K) →ₗ[K] (ι → K))
   | .succ _ L₁ _ _ => L₁
 
-/-- The residual family of a positive-level conditionally-linear term. -/
+/-- The residual family of a positive-level conditionally-linear representation. -/
 private def CondLinearTerm.tail {K ι : Type*} [Field K]
     [Fintype ι] [DecidableEq ι] {ell : ℕ} :
     CondLinearTerm K (ι := ι) (ell + 1) →
@@ -424,7 +429,7 @@ private theorem CondLinearTerm.eval_succ_eq {K ι : Type*} [Field K]
   rfl
 
 /-- The sum of the first linear pieces of a finite family of positive-level
-conditionally-linear terms. -/
+conditionally-linear representations. -/
 private def condLinearHeadSum {K ι J : Type*} [Field K]
     [Fintype ι] [DecidableEq ι] [Fintype J] [DecidableEq J] {ell : ℕ}
     (t : J → CondLinearTerm K (ι := ι) (ell + 1)) :
@@ -646,7 +651,7 @@ theorem IsCondLinearOn.directSum_sameLevel {K ι J : Type*} [Field K]
 /--
 The distribution obtained by applying two conditionally linear maps to a common
 uniform seed.  This is `def:cl-dist` in
-`blueprint/src/chapter/ch12_qpbt_games.tex:467-470`, paper origin
+`blueprint/src/chapter/ch12_qpbt_games.tex:1067-1070`, paper origin
 `references/qpbt-paper/05_conditionally_linear_functions.tex:132-138`.
 -/
 noncomputable def clDistribution [Fintype K] [DecidableEq K]
@@ -658,7 +663,7 @@ noncomputable def clDistribution [Fintype K] [DecidableEq K]
 coordinates carry `L`, while the right coordinates carry the family member
 `R u v` selected by the left input `u`.  This is Lean-only coordinate
 infrastructure for `lem:cl-concat`, blueprint
-`blueprint/src/chapter/ch12_qpbt_games.tex:498-505`, paper origin
+`blueprint/src/chapter/ch12_qpbt_games.tex:1103-1117`, paper origin
 `references/qpbt-paper/05_conditionally_linear_functions.tex:315-364`.
 -/
 def condLinearConcat {ιU ιV : Type*} [Fintype ιU] [DecidableEq ιU]
@@ -671,7 +676,7 @@ def condLinearConcat {ιU ιV : Type*} [Fintype ιU] [DecidableEq ιU]
 
 /--
 Concatenating an outer and an indexed inner CL map adds their levels.  This is
-`lem:cl-concat` in `blueprint/src/chapter/ch12_qpbt_games.tex:548-559`, with
+`lem:cl-concat` in `blueprint/src/chapter/ch12_qpbt_games.tex:1103-1117`, with
 paper origin `references/qpbt-paper/05_conditionally_linear_functions.tex:282-314`.
 The map `condLinearConcat` realizes this concatenation on the direct sum.
 -/
@@ -721,7 +726,7 @@ theorem IsCondLinearOn.concat {ιU ιV : Type*} [Fintype ιU] [DecidableEq ιU]
 /--
 The graph distribution is uniform on ordered pairs `(a, b)` whose unordered
 pair belongs to `E`, including self-loops.  This is `def:graph-distribution`
-in `blueprint/src/chapter/ch12_qpbt_games.tex:679-691`;
+in `blueprint/src/chapter/ch12_qpbt_games.tex:1233-1245`;
 paper origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:984-1009`.
 The underlying graph-distribution definition is
 `references/qpbt-paper/07_types.tex:65-82`.
@@ -732,8 +737,9 @@ noncomputable def graphDistribution {T : Type*} [Fintype T] [DecidableEq T]
     (Finset.univ.filter fun ab : T × T => Sym2.mk ab.1 ab.2 ∈ E)
 
 /-- The graph distribution has total mass one whenever its edge set is
-nonempty.  This is `lem:graph-distribution-mass` in
-`blueprint/src/chapter/ch12_qpbt_games.tex:693-698`. -/
+nonempty.  This is not a named statement of the source article; it is
+`lem:graph-distribution-mass` in
+`blueprint/src/chapter/ch12_qpbt_games.tex:1247-1257`. -/
 theorem graphDistribution_isProbability {T : Type*} [Fintype T] [DecidableEq T]
     (E : Finset (Sym2 T)) (hE : E.Nonempty) :
     (graphDistribution E hE).IsProbability := by
