@@ -1,4 +1,5 @@
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Geometry
+import MIPStarRE.QPBT.Test.LowDegreeGameTheorems
 
 /-!
 # The directly indexed low-degree game

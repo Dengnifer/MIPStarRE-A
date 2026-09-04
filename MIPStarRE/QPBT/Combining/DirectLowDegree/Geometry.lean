@@ -1,4 +1,4 @@
-import MIPStarRE.QPBT.Test.LowDegreeGameTheorems
+import MIPStarRE.QPBT.Observables.LineDefs
 import MIPStarRE.QPBT.Test.PauliBasisTest
 
 /-!
