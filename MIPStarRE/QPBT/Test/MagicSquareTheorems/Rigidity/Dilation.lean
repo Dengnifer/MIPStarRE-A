@@ -750,6 +750,33 @@ theorem conjIsometry_naimarkEmbedding {ι α : Type} [Fintype ι] [DecidableEq �
   · by_cases hq : q.2 = none <;> simp [hp, hq, eq_comm]
   · simp [hp]
 
+/-- Conjugating an operator by the ground embedding followed by a later local
+isometry is conjugating its inflation by that isometry.  This is the form in
+which the conclusions of a self-testing argument applied to the dilated strategy
+are read back on the original strategy. -/
+theorem conjIsometry_comp_naimarkEmbedding {ι α κ : Type} [Fintype ι] [DecidableEq ι]
+    [Fintype α] [DecidableEq α] [Fintype κ] [DecidableEq κ]
+    (φ : EuclideanSpace ℂ (ι × Option α) →ₗᵢ[ℂ] EuclideanSpace ℂ κ) (M : Op ι) :
+    conjIsometry (φ.comp (naimarkEmbedding ι α)) M =
+      conjIsometry φ (naimarkInflation (α := α) M) := by
+  rw [conjIsometry_comp, conjIsometry_naimarkEmbedding]
+
+/-- Compressing one of Alice's dilated Magic Square effects to the ground slice
+returns her original effect. -/
+theorem naimarkCompression_msDilatedStrategy_A_effect (S : Strategy msGame)
+    (x : MsType) (a : MsAnswer) :
+    naimarkCompression (α := MsAnswer) (((msDilatedStrategy S).A x).effect a) =
+      (S.A x).effect a :=
+  naimarkCompression_naimarkDilatedEffect (α := MsAnswer) (S.A x) (MsAnswer.bit 0) a
+
+/-- Compressing one of Bob's dilated Magic Square effects to the ground slice
+returns his original effect. -/
+theorem naimarkCompression_msDilatedStrategy_B_effect (S : Strategy msGame)
+    (y : MsType) (b : MsAnswer) :
+    naimarkCompression (α := MsAnswer) (((msDilatedStrategy S).B y).effect b) =
+      (S.B y).effect b :=
+  naimarkCompression_naimarkDilatedEffect (α := MsAnswer) (S.B y) (MsAnswer.bit 0) b
+
 /-- The action of an operator on the dilated state only sees its ground-slice
 columns. -/
 theorem applyOperatorToState_naimarkDilatedState (α : Type) [Fintype α] [DecidableEq α]
