@@ -554,6 +554,7 @@ We specify a canonical setting of the parameter tuple $\mathsf{qldparams}$ as a 
 	\]
 \end{lemma}
 \begin{proof}
+	\leanok
 	\uses{def:introparams, def:admissible, def:admissible-size, thm:pauli}
 	Since $c$ is even, the exponent $k = c \lceil \log\log R \rceil + 1$ is odd, so $q = 2^k$ is an admissible field size; $m$ divides $q$ because $2^j \le c \lceil \log R \rceil + 1 \le 2 \log^c R \le 2^k$, so $j \le k$ and both are powers of $2$; and $d = 1 \ge 1$. Hence the tuple is admissible. Since $m = 2^j \ge (c/2) \log R$, we get $2^m \ge R^{c/2} \ge R$, using $c \ge 2$.
 
