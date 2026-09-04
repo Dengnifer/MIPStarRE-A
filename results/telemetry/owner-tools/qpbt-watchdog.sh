@@ -33,7 +33,8 @@ done < <(gh pr list --repo "$SLUG" --state open --json number,headRefOid,updated
 
 pane=$(tmux capture-pane -p -t "$SESSION" 2>/dev/null | tail -3)
 pane_state=running
-if [ -z "$pane" ]; then pane_state=missing
+if [ -f "$STATE/owner-operator" ]; then pane_state=running   # the owner session is the operator; no codex pane expected
+elif [ -z "$pane" ]; then pane_state=missing
 elif ! printf '%s' "$pane" | grep -q "gpt-5.6-sol"; then pane_state=no-codex
 elif printf '%s' "$pane" | grep -qi "Goal paused\|Goal stalled\|Goal marked blocked"; then pane_state=paused
 fi

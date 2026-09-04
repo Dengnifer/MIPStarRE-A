@@ -455,3 +455,20 @@ section 12 records the two-round threshold for workflow-only PRs.
 
 **Expected effect:** scaffolding PRs converge in two rounds or are decided;
 green work merges at every iteration; the reviewer cannot drive scope growth.
+## 2026-09-04 — Review evidence follows the diff (carry-forward across a fresh-base)
+
+**Trigger:** owner operation of the loop with eight parallel lanes
+(2026-09-03/04): each merge advanced `main`, gate 2b then required every other
+green PR to merge `main` and re-run CI **and** a 15–25-minute reviewer round
+for a byte-identical patch (PR #78 refused at 6f224bf minutes after its review
+had passed); with N open PRs every merge cost N reviewer rounds.
+
+**Change:** `review.sh` gains a carry-forward fast path (section 13): equal
+`git patch-id` of `base...head` against an earlier reviewed head republishes
+that head's verdict and ledger for the new head and posts the summary status;
+adverse verdicts carry too; `--force-review` disables it.  `issues-prs.md`
+gate 4 notes that a carried review counts.
+
+**Expected effect:** a fresh-base costs one CI run (about two minutes) and no
+reviewer time; the reviewer pool serves new patches only; merge throughput
+scales with the number of lanes instead of collapsing under them.

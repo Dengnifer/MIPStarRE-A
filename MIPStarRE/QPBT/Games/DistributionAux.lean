@@ -37,7 +37,22 @@ theorem Distribution.prod_isProbability {α β : Type*}
     [DecidableEq α] [DecidableEq β] (μ : Distribution α) (ν : Distribution β)
     (hμ : μ.IsProbability) (hν : ν.IsProbability) :
     (Distribution.prod μ ν).IsProbability := by
-  sorry
+  simp only [Distribution.IsProbability, Distribution.totalWeight,
+    Distribution.prod]
+  calc
+    (∑ p ∈ μ.support.product ν.support, μ.weight p.1 * ν.weight p.2) =
+        ∑ a ∈ μ.support, ∑ b ∈ ν.support, μ.weight a * ν.weight b := by
+      exact Finset.sum_product' μ.support ν.support
+        (fun a b => μ.weight a * ν.weight b)
+    _ =
+        ∑ a ∈ μ.support, μ.weight a * ∑ b ∈ ν.support, ν.weight b := by
+      apply Finset.sum_congr rfl
+      intro a _
+      exact (Finset.mul_sum ν.support (fun b => ν.weight b) (μ.weight a)).symm
+    _ = ∑ a ∈ μ.support, μ.weight a := by
+      rw [hν.weight_sum_eq_one]
+      simp
+    _ = 1 := hμ.weight_sum_eq_one
 
 /-- The convex mixture with a coefficient in `[0,1]`, as used for
 the equal mixture in `def:line-point-dist`, blueprint
@@ -64,7 +79,21 @@ theorem Distribution.mix_isProbability {α : Type*} [DecidableEq α]
     (t : ℝ) (μ ν : Distribution α) (hμ : μ.IsProbability)
     (hν : ν.IsProbability) (ht0 : 0 ≤ t) (ht1 : t ≤ 1) :
     (Distribution.mix t ht0 ht1 μ ν).IsProbability := by
-  sorry
+  have hμ_union :
+      ∑ a ∈ μ.support ∪ ν.support, μ.weight a = 1 := by
+    apply hμ.weight_sum_eq_one_of_subset
+    intro a ha
+    exact Finset.mem_union_left ν.support ha
+  have hν_union :
+      ∑ a ∈ μ.support ∪ ν.support, ν.weight a = 1 := by
+    apply hν.weight_sum_eq_one_of_subset
+    intro a ha
+    exact Finset.mem_union_right μ.support ha
+  simp only [Distribution.IsProbability, Distribution.totalWeight,
+    Distribution.mix]
+  rw [Finset.sum_add_distrib, ← Finset.mul_sum, ← Finset.mul_sum,
+    hμ_union, hν_union]
+  ring
 
 /-- The dependent bind of finite distributions used for typed question
 distributions, blueprint `ch12_qpbt_games.tex:624-629`, paper
@@ -89,7 +118,32 @@ theorem Distribution.bind_isProbability {α β : Type*} [DecidableEq β]
     (μ : Distribution α) (ν : α → Distribution β) (hμ : μ.IsProbability)
     (hν : ∀ a ∈ μ.support, (ν a).IsProbability) :
     (Distribution.bind μ ν).IsProbability := by
-  sorry
+  classical
+  have hν_union (a : α) (ha : a ∈ μ.support) :
+      ∑ b ∈ μ.support.biUnion (fun a => (ν a).support), (ν a).weight b = 1 := by
+    apply (hν a ha).weight_sum_eq_one_of_subset
+    intro b hb
+    exact Finset.mem_biUnion.mpr ⟨a, ha, hb⟩
+  simp only [Distribution.IsProbability, Distribution.totalWeight,
+    Distribution.bind]
+  rw [Finset.sum_comm]
+  calc
+    (∑ a ∈ μ.support,
+        ∑ b ∈ μ.support.biUnion (fun a => (ν a).support),
+          μ.weight a * (ν a).weight b) =
+        ∑ a ∈ μ.support,
+          μ.weight a *
+            ∑ b ∈ μ.support.biUnion (fun a => (ν a).support),
+              (ν a).weight b := by
+      apply Finset.sum_congr rfl
+      intro a _
+      exact (Finset.mul_sum _ (fun b => (ν a).weight b) (μ.weight a)).symm
+    _ = ∑ a ∈ μ.support, μ.weight a := by
+      apply Finset.sum_congr rfl
+      intro a ha
+      rw [hν_union a ha]
+      simp
+    _ = 1 := hμ.weight_sum_eq_one
 
 /-- Restrict a distribution to a decidable positive-mass event and normalize it,
 as in `def:ith-restricted-line`; blueprint

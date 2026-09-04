@@ -1,0 +1,14 @@
+{"type":"thread.started","thread_id":"01a06a2c-b674-7783-b7d5-82e530d71e14"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’m starting with the repository’s review rules and the authoritative patch, then I’ll independently check the Fourier argument, the EPR normalization proof, source fidelity, and dependency/style concerns. I’ll keep the review read-only and return all would-be inline comments in the required ledger."}}
+{"type":"error","message":"Reconnecting... 1/5 (rate limit exceeded: Concurrency limit exceeded for user, please retry later)"}
+{"type":"error","message":"Reconnecting... 1/5 (rate limit exceeded: Concurrency limit exceeded for user, please retry later)"}
+{"type":"error","message":"Reconnecting... 2/5 (rate limit exceeded: Concurrency limit exceeded for account, please retry later)"}
+{"type":"error","message":"Reconnecting... 1/5 (rate limit exceeded: Concurrency limit exceeded for user, please retry later)"}
+{"type":"error","message":"Reconnecting... 1/5 (rate limit exceeded: Concurrency limit exceeded for user, please retry later)"}
+{"type":"error","message":"Reconnecting... 2/5 (rate limit exceeded: Concurrency limit exceeded for user, please retry later)"}
+{"type":"error","message":"Reconnecting... 3/5 (rate limit exceeded: Concurrency limit exceeded for user, please retry later)"}
+{"type":"error","message":"Reconnecting... 4/5 (rate limit exceeded: Concurrency limit exceeded for user, please retry later)"}
+{"type":"error","message":"Reconnecting... 5/5 (rate limit exceeded: Concurrency limit exceeded for user, please retry later)"}
+{"type":"error","message":"rate limit exceeded: Concurrency limit exceeded for user, please retry later"}
+{"type":"turn.failed","error":{"message":"rate limit exceeded: Concurrency limit exceeded for user, please retry later"}}
