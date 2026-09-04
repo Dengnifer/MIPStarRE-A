@@ -2385,3 +2385,17 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   duplicate native hook call.
 - **Lesson:** expensive validation must precede transport startup; an `ok` line
   is gate evidence, not evidence that a ref reached the remote.
+
+## 2026-09-05 - Checked push did not bind publication to preflight
+
+- **Symptom:** round-1 review of PR #197 found that `checked-push.sh` validated
+  captured object IDs but then pushed a mutable branch ref, and it discarded the
+  documented `MIPSTARRE_SKIP_HOOKS=1` emergency bypass.
+- **Diagnosis:** moving the expensive hook before transport startup separated
+  validation from Git's final advertised ref tuple without preserving an exact
+  binding between them.
+- **Fix:** publish the captured commit, use the native hook only to compare the
+  advertised tuple with the preflight tuple, reject ref movement, and preserve
+  a caller-requested emergency bypass.
+- **Lesson:** validation evidence must bind the immutable object IDs that the
+  transport advertises; suppressing duplicate work must not suppress that check.

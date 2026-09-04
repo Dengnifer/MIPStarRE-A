@@ -545,3 +545,16 @@ it.  `issues-prs.md` makes this the repository-owned publication contract.
 
 **Expected effect:** long Lean gates no longer turn a successful hook into exit
 141, while gate failures still publish no ref and exact-head CI remains intact.
+
+## 2026-09-05 — Bind checked publication to the preflight tuple
+
+**Trigger:** `results/telemetry/events.md` 2026-09-05, "Checked push did not
+bind publication to preflight" (round-1 review of PR #197).
+
+**Change:** `checked-push.sh` publishes the captured commit object and asks the
+native pre-push hook to compare Git's single advertised tuple with the captured
+preflight tuple.  Local or remote ref movement fails closed.  A caller's plain
+`MIPSTARRE_SKIP_HOOKS=1` continues to request the documented emergency bypass.
+
+**Expected effect:** the ref update that passed the long gate is exactly the one
+offered to the remote, while operators retain the explicit recovery path.

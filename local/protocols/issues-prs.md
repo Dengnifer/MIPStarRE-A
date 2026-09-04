@@ -45,9 +45,11 @@ numbers; `track.py`, `validate_tree.py` and `export_issues.py` are deleted.
 Every repository-owned branch publication runs through `checked-push.sh` with
 one explicit `refs/heads/...:refs/heads/...` mapping.  The helper reads the
 remote tip with a short `ls-remote`, runs `.githooks/pre-push` against that exact
-ref tuple before starting `receive-pack`, and then opens the push with only the
-completed hook invocation skipped.  Thus a long gate cannot leave the push
-transport idle, and a failed gate never starts it.
+ref tuple before starting `receive-pack`, and then pushes the captured commit.
+The native hook performs only a short comparison between Git's advertised tuple
+and the preflight tuple, so a moved local or remote ref fails closed without
+repeating the gate.  A caller's explicit `MIPSTARRE_SKIP_HOOKS=1` remains the
+documented emergency bypass.
 
 * Branches: `issue-<github-number>-<slug>`, or `codex/issue-<number>-<slug>`
   from an agent; `pr_open.py` rejects what `git check-ref-format` would.

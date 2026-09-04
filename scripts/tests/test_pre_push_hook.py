@@ -54,13 +54,25 @@ class PrePushHookTests(unittest.TestCase):
 set -eu
 if [ "${MIPSTARRE_SKIP_HOOKS:-}" = "1" ]; then
   [ -e "$RECEIVE_MARKER" ] || exit 91
-  printf 'transport-skip\\n' >> "$HOOK_LOG"
+  if [ -n "${MIPSTARRE_EXPECTED_PUSH_TUPLE:-}" ]; then
+    IFS= read -r actual_tuple || exit 93
+    if IFS= read -r extra_tuple; then
+      exit 94
+    fi
+    printf 'transport-advertised|%s\\n' "$actual_tuple" >> "$HOOK_LOG"
+    [ "$actual_tuple" = "$MIPSTARRE_EXPECTED_PUSH_TUPLE" ] || exit 95
+  else
+    printf 'transport-bypass\\n' >> "$HOOK_LOG"
+  fi
   exit 0
 fi
 [ ! -e "$RECEIVE_MARKER" ] || exit 92
 read local_ref local_sha remote_ref remote_sha
 printf 'preflight|%s|%s|%s|%s\\n' \
   "$local_ref" "$local_sha" "$remote_ref" "$remote_sha" >> "$HOOK_LOG"
+[ -z "${MOVE_LOCAL_REF_TO:-}" ] || git update-ref "$local_ref" "$MOVE_LOCAL_REF_TO"
+[ -z "${MOVE_REMOTE_TO:-}" ] || \
+  git --git-dir="$PUSH_REMOTE" update-ref "$remote_ref" "$MOVE_REMOTE_TO"
 [ "${FAIL_GATE:-}" != "1" ] || exit 23
 """,
             encoding="utf-8",
@@ -87,15 +99,28 @@ exec git-receive-pack "$@"
         receive_marker: Path,
         *,
         fail_gate: bool = False,
+        bypass: bool = False,
+        move_local_ref_to: str | None = None,
+        move_remote_to: str | None = None,
+        push_remote: Path | None = None,
     ) -> subprocess.CompletedProcess[str]:
         env = dict(
             os.environ,
             HOOK_LOG=str(hook_log),
             RECEIVE_MARKER=str(receive_marker),
-            MIPSTARRE_SKIP_HOOKS="1",
         )
+        env.pop("MIPSTARRE_SKIP_HOOKS", None)
+        env.pop("MIPSTARRE_EXPECTED_PUSH_TUPLE", None)
         if fail_gate:
             env["FAIL_GATE"] = "1"
+        if bypass:
+            env["MIPSTARRE_SKIP_HOOKS"] = "1"
+        if move_local_ref_to is not None:
+            env["MOVE_LOCAL_REF_TO"] = move_local_ref_to
+        if move_remote_to is not None:
+            env["MOVE_REMOTE_TO"] = move_remote_to
+        if push_remote is not None:
+            env["PUSH_REMOTE"] = str(push_remote)
         return subprocess.run(
             [
                 str(CHECKED_PUSH),
@@ -151,7 +176,8 @@ exec git-receive-pack "$@"
                 [
                     "preflight|refs/heads/main|"
                     f"{first_head}|refs/heads/main|{'0' * 40}",
-                    "transport-skip",
+                    "transport-advertised|"
+                    f"{first_head} {first_head} refs/heads/main {'0' * 40}",
                 ],
             )
             self.assertEqual(
@@ -173,9 +199,136 @@ exec git-receive-pack "$@"
                 [
                     "preflight|refs/heads/main|"
                     f"{second_head}|refs/heads/main|{first_head}",
-                    "transport-skip",
+                    "transport-advertised|"
+                    f"{second_head} {second_head} refs/heads/main {first_head}",
                 ],
             )
+
+    def test_checked_push_rejects_local_ref_movement_during_gate(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            repo, remote, hook_log, receive_marker = self.new_push_repo(
+                Path(temporary_directory)
+            )
+            validated_head = self.git(repo, "rev-parse", "HEAD").stdout.strip()
+            (repo / "payload").write_text("moved\n", encoding="utf-8")
+            self.git(repo, "commit", "--quiet", "-am", "moved")
+            moved_head = self.git(repo, "rev-parse", "HEAD").stdout.strip()
+            self.git(repo, "update-ref", "refs/heads/main", validated_head, moved_head)
+
+            result = self.run_checked_push(
+                repo,
+                hook_log,
+                receive_marker,
+                move_local_ref_to=moved_head,
+            )
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("changed during preflight", result.stderr)
+            self.assertFalse(receive_marker.exists())
+            remote_ref = subprocess.run(
+                ["git", "rev-parse", "--verify", "refs/heads/main"],
+                cwd=remote,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertNotEqual(remote_ref.returncode, 0)
+
+    def test_checked_push_rejects_remote_ref_movement_during_gate(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            repo, remote, hook_log, receive_marker = self.new_push_repo(
+                Path(temporary_directory)
+            )
+            initial = self.run_checked_push(repo, hook_log, receive_marker)
+            self.assertEqual(initial.returncode, 0, initial.stdout + initial.stderr)
+            first_head = self.git(repo, "rev-parse", "HEAD").stdout.strip()
+
+            receive_marker.unlink()
+            hook_log.write_text("", encoding="utf-8")
+            (repo / "payload").write_text("middle\n", encoding="utf-8")
+            self.git(repo, "commit", "--quiet", "-am", "middle")
+            middle_head = self.git(repo, "rev-parse", "HEAD").stdout.strip()
+            self.git(remote, "fetch", "--quiet", str(repo), middle_head)
+            (repo / "payload").write_text("target\n", encoding="utf-8")
+            self.git(repo, "commit", "--quiet", "-am", "target")
+            target_head = self.git(repo, "rev-parse", "HEAD").stdout.strip()
+
+            result = self.run_checked_push(
+                repo,
+                hook_log,
+                receive_marker,
+                move_remote_to=middle_head,
+                push_remote=remote,
+            )
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertEqual(
+                self.git(remote, "rev-parse", "refs/heads/main").stdout.strip(),
+                middle_head,
+            )
+            self.assertEqual(
+                hook_log.read_text(encoding="utf-8").splitlines(),
+                [
+                    "preflight|refs/heads/main|"
+                    f"{target_head}|refs/heads/main|{first_head}",
+                    "transport-advertised|"
+                    f"{target_head} {target_head} refs/heads/main {middle_head}",
+                ],
+            )
+
+    def test_checked_push_preserves_emergency_bypass(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            repo, remote, hook_log, receive_marker = self.new_push_repo(
+                Path(temporary_directory)
+            )
+            head = self.git(repo, "rev-parse", "HEAD").stdout.strip()
+
+            result = self.run_checked_push(
+                repo,
+                hook_log,
+                receive_marker,
+                bypass=True,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertEqual(
+                hook_log.read_text(encoding="utf-8").splitlines(),
+                ["transport-bypass"],
+            )
+            self.assertEqual(
+                self.git(remote, "rev-parse", "refs/heads/main").stdout.strip(),
+                head,
+            )
+
+    def test_pre_push_confirmation_requires_the_exact_tuple(self) -> None:
+        expected = f"{'1' * 40} {'1' * 40} refs/heads/main {'0' * 40}"
+        env = dict(
+            os.environ,
+            MIPSTARRE_SKIP_HOOKS="1",
+            MIPSTARRE_EXPECTED_PUSH_TUPLE=expected,
+        )
+        accepted = subprocess.run(
+            [str(PRE_PUSH), "test", "unused"],
+            cwd=REPO_ROOT,
+            env=env,
+            input=f"{expected}\n",
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        rejected = subprocess.run(
+            [str(PRE_PUSH), "test", "unused"],
+            cwd=REPO_ROOT,
+            env=env,
+            input=f"{expected[:-1]}2\n",
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertEqual(accepted.returncode, 0, accepted.stdout + accepted.stderr)
+        self.assertNotEqual(rejected.returncode, 0)
+        self.assertIn("changed after preflight", rejected.stderr)
 
     def test_checked_push_gate_failure_never_starts_receive_transport(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:

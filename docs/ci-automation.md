@@ -450,8 +450,10 @@ Repository-owned publication invokes this hook through
 `local/bin/checked-push.sh`.  The helper obtains the remote tip with
 `git ls-remote`, closes that short query, supplies the resulting four-field ref
 record to the hook, and starts `git receive-pack` only after the gate succeeds.
-The real push skips the duplicate native hook invocation, not the gate itself.
-This ordering prevents a long Lean check from aging out an idle SSH push.
+The real push names the captured commit, and its native hook performs a short
+comparison of Git's advertised ref tuple with the preflight tuple.  Ref movement
+therefore fails closed without repeating the gate.  This ordering prevents a
+long Lean check from aging out an idle SSH push.
 
 Commands that may invoke Lake, Lean, blueprint tooling, or Python audits are run
 in a subshell with Git's local hook environment variables cleared.  This avoids

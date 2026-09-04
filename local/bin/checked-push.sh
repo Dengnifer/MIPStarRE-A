@@ -62,6 +62,11 @@ git -C "$REPO_ROOT" check-ref-format "$LOCAL_REF" >/dev/null ||
 git -C "$REPO_ROOT" check-ref-format "$REMOTE_REF" >/dev/null ||
   die "invalid remote ref $REMOTE_REF"
 
+if [ "${MIPSTARRE_SKIP_HOOKS:-}" = "1" ]; then
+  unset MIPSTARRE_EXPECTED_PUSH_TUPLE
+  exec git -C "$REPO_ROOT" push "$REMOTE" "$REFSPEC"
+fi
+
 LOCAL_SHA="$(git -C "$REPO_ROOT" rev-parse --verify "$LOCAL_REF^{commit}")" ||
   die "cannot resolve local branch $LOCAL_REF"
 REMOTE_URL="$(git -C "$REPO_ROOT" remote get-url --push "$REMOTE")" ||
@@ -86,10 +91,18 @@ HOOK="$REPO_ROOT/.githooks/pre-push"
 
 (
   unset MIPSTARRE_SKIP_HOOKS
+  unset MIPSTARRE_EXPECTED_PUSH_TUPLE
   cd "$REPO_ROOT"
   "$HOOK" "$REMOTE" "$REMOTE_URL"
 ) <<< "$LOCAL_REF $LOCAL_SHA $REMOTE_REF $REMOTE_SHA"
 
+CURRENT_LOCAL_SHA="$(git -C "$REPO_ROOT" rev-parse --verify "$LOCAL_REF^{commit}")" ||
+  die "cannot re-resolve local branch $LOCAL_REF after preflight"
+[ "$CURRENT_LOCAL_SHA" = "$LOCAL_SHA" ] ||
+  die "local branch $LOCAL_REF changed during preflight"
+
 printf '%s: gate passed before opening the push transport.\n' "$PROG" >&2
+# Freeze the source object; the native hook confirms the freshly advertised remote tip.
 MIPSTARRE_SKIP_HOOKS=1 \
-  git -C "$REPO_ROOT" push "$REMOTE" "$REFSPEC"
+  MIPSTARRE_EXPECTED_PUSH_TUPLE="$LOCAL_SHA $LOCAL_SHA $REMOTE_REF $REMOTE_SHA" \
+  git -C "$REPO_ROOT" push "$REMOTE" "$LOCAL_SHA:$REMOTE_REF"
