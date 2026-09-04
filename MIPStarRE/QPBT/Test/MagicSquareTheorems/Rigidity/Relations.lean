@@ -459,30 +459,30 @@ def constraintParityProduct : MsAnswer → ℝ
   | .bit _ => 0
 
 /-- Failure of the required sign product for one row or column constraint. -/
-def constraintParityFailure (i : Fin 6) (a : MsAnswer) : Prop :=
+def ConstraintParityFailure (i : Fin 6) (a : MsAnswer) : Prop :=
   constraintParityProduct a ≠ bitSign (msParity i)
 
 /-- Equality of the real parity signs is classically decidable on the finite
 Magic Square answer alphabet. -/
-noncomputable instance (i : Fin 6) : DecidablePred (constraintParityFailure i) :=
-  fun a => Classical.propDecidable (constraintParityFailure i a)
+noncomputable instance (i : Fin 6) : DecidablePred (ConstraintParityFailure i) :=
+  fun a => Classical.propDecidable (ConstraintParityFailure i a)
 
 /-- Every wrong-form constraint answer is included in the parity-failure event. -/
 theorem wrong_constraint_answer_implies_parity_failure (i : Fin 6) (a : MsAnswer)
-    (ha : wrongConstraintAnswer a = true) : constraintParityFailure i a := by
+    (ha : wrongConstraintAnswer a = true) : ConstraintParityFailure i a := by
   cases a with
   | triple β => simp [wrongConstraintAnswer] at ha
   | bit γ =>
-      unfold constraintParityFailure constraintParityProduct
+      unfold ConstraintParityFailure constraintParityProduct
       exact (bit_sign_ne_zero (msParity i)).symm
 
 /-- Alice's local failure mass for the row or column sign product. -/
 noncomputable def aliceParityFailureMass (S : Strategy msGame) (i : Fin 6) : ℝ :=
-  aliceEventWeight S (.constraint i) (constraintParityFailure i)
+  aliceEventWeight S (.constraint i) (ConstraintParityFailure i)
 
 /-- Bob's local failure mass for the row or column sign product. -/
 noncomputable def bobParityFailureMass (S : Strategy msGame) (i : Fin 6) : ℝ :=
-  bobEventWeight S (.constraint i) (constraintParityFailure i)
+  bobEventWeight S (.constraint i) (ConstraintParityFailure i)
 
 /-- Alice's malformed constraint mass is part of her parity-failure mass. -/
 theorem alice_constraint_wrong_form_mass_le_parity_failure_mass (S : Strategy msGame)
@@ -503,7 +503,7 @@ theorem bob_constraint_wrong_form_mass_le_parity_failure_mass (S : Strategy msGa
     wrong_constraint_answer_implies_parity_failure i b hb
 
 private theorem forward_parity_failure_rejects (i : Fin 6) (k : Fin 3)
-    (a b : MsAnswer) (hparity : constraintParityFailure i a) :
+    (a b : MsAnswer) (hparity : ConstraintParityFailure i a) :
     msWinPredicate (.constraint i) (.var (msConstraintVars i k)) a b = false := by
   cases a with
   | bit δ => rfl
@@ -521,7 +521,7 @@ private theorem forward_parity_failure_rejects (i : Fin 6) (k : Fin 3)
             _ = bitSign (msParity i) := by rw [haccept.1]
 
 private theorem reverse_parity_failure_rejects (i : Fin 6) (k : Fin 3)
-    (a b : MsAnswer) (hparity : constraintParityFailure i b) :
+    (a b : MsAnswer) (hparity : ConstraintParityFailure i b) :
     msWinPredicate (.var (msConstraintVars i k)) (.constraint i) a b = false := by
   cases a with
   | triple α => rfl
@@ -546,7 +546,7 @@ theorem alice_parity_failure_mass_le (S : Strategy msGame) (ε : ℝ)
   rw [← outcome_event_weight_left_eq S (.constraint i) (.var (msConstraintVars i 0))]
   calc
     outcomeEventWeight S (.constraint i) (.var (msConstraintVars i 0))
-        (fun a _ => constraintParityFailure i a) ≤
+        (fun a _ => ConstraintParityFailure i a) ≤
         rejectionMass S (.constraint i) (.var (msConstraintVars i 0)) :=
       outcome_event_weight_le_rejection_mass S _ _ _ (forward_parity_failure_rejects i 0)
     _ ≤ 36 * ε :=
@@ -560,7 +560,7 @@ theorem bob_parity_failure_mass_le (S : Strategy msGame) (ε : ℝ)
   rw [← outcome_event_weight_right_eq S (.var (msConstraintVars i 0)) (.constraint i)]
   calc
     outcomeEventWeight S (.var (msConstraintVars i 0)) (.constraint i)
-        (fun _ b => constraintParityFailure i b) ≤
+        (fun _ b => ConstraintParityFailure i b) ≤
         rejectionMass S (.var (msConstraintVars i 0)) (.constraint i) :=
       outcome_event_weight_le_rejection_mass S _ _ _ (reverse_parity_failure_rejects i 0)
     _ ≤ 36 * ε :=
