@@ -125,8 +125,10 @@ theorem decodeFq_smul {P : AdmissibleParams} (c : PauliScalar P) (g : Poly P) :
 
 /-- The full-field decoder is a left inverse to `encodingPoly`.
 
-This is the source identity `\operatorname{Dec}(g_h)=h` from
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1805-1822`.
+This is the identity `\operatorname{Dec}(g_h)=h` of
+`lem:qld-decoder-linearity`, blueprint `ch16_qpbt_extraction.tex:30-40`, for
+the full-field decoder specified at
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1419-1420`.
 The degree proof is separated into `lowDegreeEncoding_mem_poly`; no additional
 encoding or interpolation hypothesis is introduced.  See
 `docs/paper-gaps/qpbt_decoding-identity.tex:87-123`.

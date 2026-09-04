@@ -141,7 +141,7 @@ The measurement $\{\hat{S}_{g_X,g_Z}\}$ reads out an $X$-polynomial and a $Z$-po
 	\lean{MIPStarRE.QPBT.tildeObs_mul_self}
 	\lean{MIPStarRE.QPBT.tildeObs_twisted_commutation}
 	\leanok
-	\uses{def:tilde-w-observables, def:s-w-marginals, def:generalized-pauli, def:decoding-map, lem:qld-4-7}
+	\uses{def:tilde-w-observables, def:s-w-marginals, def:generalized-pauli, def:qld-full-field-decoder, lem:qld-4-7}
 	Let $\tau^W(\cdot)$ denote the generalized Pauli $W$ observable (Definition~\ref{def:generalized-pauli}). For all $W \in \{X,Z\}$, $\tilde{u} \in \F_q^M$, and $j \in \{0,\ldots,t-1\}$,
 	\begin{equation}\label{eq:tildewj-product-form}
 		\tilde{W}^j(\tilde{u})
@@ -301,7 +301,7 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 \begin{definition}[The swap unitaries]\label{def:v-swap-unitary}
 	\lean{MIPStarRE.QPBT.swapUnitary}
 	\leanok
-	\uses{lem:qld-4-7, def:generalized-pauli, def:decoding-map}
+	\uses{lem:qld-4-7, def:generalized-pauli, def:qld-full-field-decoder}
 	Define the linear map
 	\[
 		V_{\mathrm{A}} = \sum_{g_X,g_Z} (\hat{S}_{g_X,g_Z})_{\mathrm{A}\mathrm{A}'} \ot \bigl(\tau^X(\mathrm{Dec}(g_Z)) \, \tau^Z(\mathrm{Dec}(g_X))\bigr)_{\mathrm{A}''}\;,
