@@ -531,7 +531,7 @@ theorem norm_apply_joint_defect_sq_le (T : Strategy G) (x : G.QuestionA)
           (inner ℂ T.ψ (applyOperatorToState (J.effect ab) T.ψ)).re ≤
         (if E ab.1 ab.2 then 4 * outcomeWeight T x y ab.1 ab.2 else 0) := by
     intro ab
-    have hw : 0 ≤ outcomeWeight T x y ab.1 ab.2 := outcome_weight_nonneg T x y ab.1 ab.2
+    have hw : 0 ≤ outcomeWeight T x y ab.1 ab.2 := outcomeWeight_nonneg T x y ab.1 ab.2
     rw [re_inner_jointMeasurement_effect]
     by_cases hE : E ab.1 ab.2
     · rw [if_pos hE]
