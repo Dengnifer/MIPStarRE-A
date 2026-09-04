@@ -1,5 +1,5 @@
 import MIPStarRE.LDT.Preliminaries.FiniteFields
-import MIPStarRE.QPBT.Combining.Linearity
+import MIPStarRE.QPBT.Combining.Linearity.Defs
 
 /-!
 # Boolean Fourier analysis for the quantum linearity theorem

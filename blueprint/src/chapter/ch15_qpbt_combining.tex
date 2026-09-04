@@ -80,16 +80,22 @@ assembled by Fourier averaging.
 
 % Statement as in Theorem 10 of the cited source \cite{Natarajan2017Linearity}
 % (arXiv:1610.03574): hypothesis as in its display (7), conclusion as in its
-% display (8). The provider imposes no upper bound on delta, asserts the
-% exact linearity for all pairs (u, u'), and guarantees the closeness of L^u
-% to O^u on average over uniformly random u only, in mean squared
-% state-dependent distance with the error delta preserved; it is stated for
-% an arbitrary density operator rho on a single Hilbert space, with the
-% index group written {0,1}^n under bitwise XOR (here F_2^t, additively) and
-% Obs(H) denoting the Hermitian unitaries, i.e. the binary observables of
-% def:povm-conventions. In the closeness conclusion an operator on H is
-% compared with an operator on the extension via its ampliation S ot Id. The
-% mirror's quotation
+% display (8) with the normalization of the distance bound corrected, see
+% rem:linearity-distance-normalization. The provider imposes no upper bound
+% on delta, asserts the exact linearity for all pairs (u, u'), and guarantees
+% the closeness of L^u to O^u on average over uniformly random u only, in mean
+% squared state-dependent distance; it is stated for an arbitrary density
+% operator rho on a single Hilbert space, with the index group written {0,1}^n
+% under bitwise XOR (here F_2^t, additively) and Obs(H) denoting the Hermitian
+% unitaries, i.e. the binary observables of def:povm-conventions. In the
+% closeness conclusion an operator on H is compared with an operator on the
+% extension via its ampliation S ot Id. The provider prints the closeness
+% bound as delta for the squared operator distance; what its argument
+% establishes is delta for the squared binary-measurement distance, i.e.
+% 2 delta for the squared operator distance, and the printed operator bound is
+% false (docs/paper-gaps/qpbt_linearity-distance-normalization.tex). The
+% statement below carries the corrected operator bound together with the
+% equivalent measurement form. The mirror's quotation
 % (references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:713-725)
 % inserts the restriction 0 <= delta <= 1, places the closeness conclusion,
 % together with the exact linearity, under the quantifier "for all u, u' in
@@ -99,8 +105,9 @@ assembled by Fourier averaging.
 	\label{thm:linearity}
 	\lean{MIPStarRE.QPBT.IsBinaryObservable, MIPStarRE.QPBT.stateDepDistSq}
 	\lean{MIPStarRE.QPBT.exists_exactly_linear_observables}
-	\notready
-	\uses{def:povm-conventions}
+	\lean{MIPStarRE.QPBT.exists_exactly_linear_observables_binaryObservableDistSq}
+	\leanok
+	\uses{def:povm-conventions, lem:binary-measurement-distance}
 	Let $t$ be a positive integer and $\delta \ge 0$. Let $\rho$ be a
 	density operator on a Hilbert space $\hilb$ and let
 	$\{\mathcal{O}^u\}$ be a set of binary observables indexed by
@@ -122,42 +129,123 @@ assembled by Fourier averaging.
 	holds for all $u, u' \in \F_2^t$, and
 	\[
 		\E_{u} \, d_{\rho'}\big(\mathcal{L}^u,\ \mathcal{O}^u \ot
-		\Id_{\hilb'}\big)^2 \le \delta\,,
+		\Id_{\hilb'}\big)^2 \le 2\delta\,,
 	\]
 	where the expectation is over $u$ chosen uniformly at random from
 	$\F_2^t$ and
 	$d_{\sigma}(S,T)
 	= \big(\Tr\big((S-T)^\dagger (S-T)\, \sigma\big)\big)^{1/2}$
 	denotes the state-dependent distance with respect to a density
-	operator $\sigma$.
+	operator $\sigma$. Equivalently, in the distance $d^{\mathrm{bin}}_\sigma$
+	between the binary projective measurements associated with the
+	observables (Lemma~\ref{lem:binary-measurement-distance}),
+	\[
+		\E_{u} \, d^{\mathrm{bin}}_{\rho'}\big(\mathcal{L}^u,\
+		\mathcal{O}^u \ot \Id_{\hilb'}\big)^2 \le \delta\,.
+	\]
+	The cited source prints the first bound with $\delta$ in place of
+	$2\delta$; that normalization is false, and the bounds stated here are
+	the ones its argument establishes
+	(Remark~\ref{rem:linearity-distance-normalization}).
 \end{theorem}
 \begin{proof}
-	This is Theorem~10 of Natarajan and
-	Vidick~\cite{Natarajan2017Linearity}, imported as an external result;
-	no proof is given in \cite{Ji2020MIPStar}, which invokes the result
-	directly. The verification obligations attached to the import at its
-	point of use --- the correspondence between the correlation hypothesis
-	above and the relation $\approx_\delta$ of
-	Definition~\ref{def:povm-distance}, the instantiation of $\rho$ as a
-	reduced state of $\ket{\hat\psi}$, the absorption of the ancilla
-	register into padding of the strategy state, and the identity
-	$\mathcal{L}^0 = \Id$ --- are enumerated in
+	\leanok
+	\uses{lem:binary-measurement-distance, lem:boolean-fourier-transform,
+		lem:naimark-helper}
+	This is Theorem~10 of Natarajan and Vidick~\cite{Natarajan2017Linearity},
+	whose Fourier--Naimark argument is followed; \cite{Ji2020MIPStar} invokes
+	the result without proof. Write $\chi_v(u) = (-1)^{v \cdot u}$ and
+	$\widehat{\mathcal{O}}^v = \E_u \, \chi_v(u) \, \mathcal{O}^u$ as in
+	Lemma~\ref{lem:boolean-fourier-transform}.
+
+	\emph{From the correlation to the multiplicative defect.} For
+	$u, u' \in \F_2^t$, expanding
+	$(\mathcal{O}^u \mathcal{O}^{u'} - \mathcal{O}^{u+u'})^\dagger
+	(\mathcal{O}^u \mathcal{O}^{u'} - \mathcal{O}^{u+u'})$ with
+	$(\mathcal{O}^w)^2 = \Id$ and $\Tr \rho = 1$, as in the proof of
+	Lemma~\ref{lem:binary-measurement-distance}, gives
+	\[
+		d_\rho\big(\mathcal{O}^u \mathcal{O}^{u'}, \mathcal{O}^{u+u'}\big)^2
+		= 2 - 2 \Re \Tr\big(\mathcal{O}^{u'} \mathcal{O}^u
+		\mathcal{O}^{u'+u} \rho\big)\,,
+	\]
+	the two cross terms being adjoint to each other. Exchanging the two
+	coordinates of the uniform pair $(u,u')$, the hypothesis yields
+	$\E_{u,u'} d_\rho(\mathcal{O}^u \mathcal{O}^{u'},
+	\mathcal{O}^{u+u'})^2 \le 2\delta$. No commutation among the
+	observables is used.
+
+	\emph{The Fourier-square measurement and its Naimark rounding.} By
+	Lemma~\ref{lem:boolean-fourier-transform} the operators
+	$B^v = (\widehat{\mathcal{O}}^v)^2$ are positive semidefinite and sum to
+	$\Id$, so they form a POVM indexed by $\F_2^t$.
+	Lemma~\ref{lem:naimark-helper}, applied with an ancillary space $\hilb'$
+	of dimension $2^t + 1$ and with $\ket{\mathrm{anc}}$ the basis vector of
+	its extra direction, produces orthogonal projectors on $\hilb \ot \hilb'$
+	compressing along $\ket{\mathrm{anc}}$ to the $B^v$; the residual
+	projector of the construction is folded into the outcome $v = 0$, which
+	gives a projective measurement $\{C^v\}$ resolving the identity on
+	$\hilb \ot \hilb'$ whose compression is still $\{B^v\}$, because the
+	$B^v$ themselves sum to $\Id$. Set
+	$\mathcal{L}^u = \sum_v \chi_v(u) \, C^v$. Each $\mathcal{L}^u$ is
+	Hermitian, and the orthogonality of the $C^v$ together with
+	$\chi_v(u) \chi_v(u') = \chi_v(u+u')$ gives
+	$\mathcal{L}^u \mathcal{L}^{u'} = \mathcal{L}^{u+u'}$ for all $u, u'$;
+	in particular $(\mathcal{L}^u)^2 = \mathcal{L}^0 = \sum_v C^v = \Id$,
+	so the $\mathcal{L}^u$ are binary observables.
+
+	\emph{The distance/defect identity.} Since $\mathcal{L}^u$ and
+	$\mathcal{O}^u \ot \Id$ are binary observables and $\rho'$ is a density
+	operator, Lemma~\ref{lem:binary-measurement-distance} gives
+	$d_{\rho'}(\mathcal{L}^u, \mathcal{O}^u \ot \Id)^2
+	= 2 - 2 \Re \Tr(\mathcal{L}^u (\mathcal{O}^u \ot \Id) \rho')$.
+	Compressing along $\ket{\mathrm{anc}}$,
+	$\Re \Tr(\mathcal{L}^u (\mathcal{O}^u \ot \Id) \rho')
+	= \Re \Tr(\mathcal{O}^u \sum_v \chi_v(u) B^v \rho)$; averaging over $u$
+	turns $\E_u \chi_v(u) \mathcal{O}^u$ into $\widehat{\mathcal{O}}^v$, and
+	expanding the three Fourier coefficients and summing the characters
+	(Lemma~\ref{lem:boolean-fourier-transform}) gives
+	\[
+		\E_u \Re \Tr\big(\mathcal{L}^u (\mathcal{O}^u \ot \Id) \rho'\big)
+		= \sum_v \Re \Tr\big((\widehat{\mathcal{O}}^v)^3 \rho\big)
+		= \E_{u,u'} \Re \Tr\big(\mathcal{O}^u \mathcal{O}^{u'}
+		\mathcal{O}^{u+u'} \rho\big)\,.
+	\]
+	Hence
+	$\E_u d_{\rho'}(\mathcal{L}^u, \mathcal{O}^u \ot \Id)^2
+	= 2 - 2 \E_{u,u'} \Re \Tr(\mathcal{O}^u \mathcal{O}^{u'}
+	\mathcal{O}^{u+u'} \rho)
+	= \E_{u,u'} d_\rho(\mathcal{O}^u \mathcal{O}^{u'},
+	\mathcal{O}^{u+u'})^2 \le 2\delta$ by the first step. The measurement
+	form follows by halving, through the normalization identity of
+	Lemma~\ref{lem:binary-measurement-distance}.
+
+	The obligations attached to the theorem at its point of use --- the
+	correspondence between the correlation hypothesis above and the relation
+	$\approx_\delta$ of Definition~\ref{def:povm-distance}, the
+	instantiation of $\rho$ as a reduced state of $\ket{\hat\psi}$, the
+	absorption of the ancilla register into padding of the strategy state,
+	and the identity $\mathcal{L}^0 = \Id$ --- are enumerated in
 	Remark~\ref{rem:linearity-import} and addressed in the proof of
 	Lemma~\ref{lem:qld-4-10}.
 \end{proof}
 
 \begin{remark}[Obligations of the linearity-theorem import]
 	\label{rem:linearity-import}
-	Theorem~\ref{thm:linearity} is stated in the form proved in
-	\cite{Natarajan2017Linearity}. Three features are load-bearing for the
-	proof of Lemma~\ref{lem:qld-4-10}: the error is preserved without
-	polynomial loss ($\delta$ in the hypothesis becomes $\delta$ in the
-	conclusion); the linearity of the $\{\mathcal{L}^u\}$ is exact and
-	holds for all pairs $(u,u')$, not merely on average; and the
-	hypothesis carries no upper bound on $\delta$, so the theorem may be
-	applied separately for each pair $(x,z)$ with hypothesis error the
-	conditional linearity defect given $(x,z)$, a quantity for which no a
-	priori bound is available. The closeness of $\mathcal{L}^u$ to
+	Theorem~\ref{thm:linearity} is stated in the form established by the
+	argument of \cite{Natarajan2017Linearity}, with the normalization of its
+	distance bound corrected as described in
+	Remark~\ref{rem:linearity-distance-normalization}. Three features are
+	load-bearing for the proof of Lemma~\ref{lem:qld-4-10}: the error is
+	preserved without polynomial loss ($\delta$ in the hypothesis becomes
+	$2\delta$ in the conclusion for the squared operator distance, and
+	$\delta$ for the squared measurement distance, a constant factor absorbed
+	by the relation $\approx_\delta$); the linearity of the
+	$\{\mathcal{L}^u\}$ is exact and holds for all pairs $(u,u')$, not merely
+	on average; and the hypothesis carries no upper bound on $\delta$, so the
+	theorem may be applied separately for each pair $(x,z)$ with hypothesis
+	error the conditional linearity defect given $(x,z)$, a quantity for
+	which no a priori bound is available. The closeness of $\mathcal{L}^u$ to
 	$\mathcal{O}^u$ is guaranteed on average over a uniformly random $u$
 	only; this averaged form suffices because the $\mathcal{L}^u$ enter
 	the proof of Lemma~\ref{lem:qld-4-10} only through averages over $u$.
@@ -193,20 +281,23 @@ assembled by Fourier averaging.
 
 \begin{remark}[Normalization of the distance in the linearity conclusion]
 	\label{rem:linearity-distance-normalization}
-	The conclusion of Theorem~\ref{thm:linearity} bounds the state-dependent
-	operator distance $d_{\rho'}$ by $\delta$, as quoted in
-	\cite{Ji2020MIPStar}. The calculation behind that bound in
-	\cite[Section~3.1]{Natarajan2017Linearity} computes the distance between
-	the binary projective measurements associated with the observables, which
-	is half the squared operator distance, and then identifies the two
-	quantities; the identification loses that factor. What the Fourier
-	argument proves is the bound $\delta$ for the squared measurement
-	distance, equivalently $2\delta$ for the squared operator distance, and
-	the operator bound $\delta$ stated above is refuted by a four-point
-	counterexample \cite{gap:qpbt_linearity-distance-normalization}. The
-	normalization identities are recorded in
-	Lemma~\ref{lem:binary-measurement-distance}; realigning the statement of
-	Theorem~\ref{thm:linearity} is a separate task.
+	As printed in \cite{Natarajan2017Linearity} and quoted in
+	\cite{Ji2020MIPStar}, the conclusion of the quantum linearity theorem
+	bounds the squared state-dependent operator distance $d_{\rho'}^2$ by
+	$\delta$. The calculation behind that bound in
+	\cite[Section~3.1]{Natarajan2017Linearity} computes the squared distance
+	between the binary projective measurements associated with the
+	observables, which is half the squared operator distance, and then
+	identifies the two quantities; the identification loses that factor.
+	What the Fourier argument proves is the bound $\delta$ for the squared
+	measurement distance, equivalently $2\delta$ for the squared operator
+	distance, and the printed operator bound $\delta$ is refuted by a
+	four-point counterexample
+	\cite{gap:qpbt_linearity-distance-normalization}. The normalization
+	identities are recorded in Lemma~\ref{lem:binary-measurement-distance},
+	and Theorem~\ref{thm:linearity} is stated with the corrected bounds:
+	$2\delta$ for the squared operator distance and $\delta$ for the squared
+	measurement distance.
 \end{remark}
 
 \begin{lemma}[Formalization support for the Boolean Fourier transform]

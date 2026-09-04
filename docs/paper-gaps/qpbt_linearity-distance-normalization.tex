@@ -20,7 +20,7 @@
 
 \begin{document}
 \maketitle
-\gapnote{false-source}{open}
+\gapnote{false-source}{resolved}
 
 \section{At a glance}
 
@@ -30,8 +30,8 @@
   extension allowed by the theorem.
   \item \textbf{Estimated weight.} The formal adapter consists of one binary
   effect definition and two distance identities, requiring roughly 70--100
-  lines of matrix algebra.  Correcting the source-facing theorem is a separate
-  statement-realignment task.
+  lines of matrix algebra.  The source-facing theorem is stated with the
+  corrected bound.
   \item \textbf{Mathlib/project split.} About 60\% is direct finite-matrix and
   finite-sum algebra; the remaining 40\% is the project-local Boolean Fourier
   and state-dependent distance interface.
@@ -174,27 +174,27 @@ Pauli-basis analysis and defers its proof to Natarajan and Vidick.%
 \path{references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex},
 lines~711--725.}
 The active blueprint expands the conclusion's distance as the raw distance
-$\draw$ while retaining the bound $\delta$.  The formal theorem
-\leanid{exists\_exactly\_linear\_observables}, whose conclusion bounds the
-average over $u$ of \leanid{stateDepDistSq} by $\delta$, makes the same
-choice.  Thus both carry the false normalization exhibited by the
-counterexample.%
+$\draw$ and states the bound $2\delta$, together with the equivalent bound
+$\delta$ for $\dbin$.  The formal theorem
+\leanid{exists\_exactly\_linear\_observables} bounds the average over $u$
+of \leanid{stateDepDistSq} by $2\delta$, and its companion
+\leanid{exists\_exactly\_linear\_observables\_binaryObservableDistSq}
+bounds the average of \leanid{binaryObservableDistSq} by $\delta$; the
+printed raw bound $\delta$ is not reproduced.%
 \footnote{See
-\path{blueprint/src/chapter/ch15_qpbt_combining.tex}, lines~124--132, and
-\leanid{exists\_exactly\_linear\_observables} together with
-\leanid{stateDepDistSq} in
+\path{blueprint/src/chapter/ch15_qpbt_combining.tex}, lines~104--150, and
+the two declarations in
 \doclink{MIPStarRE/QPBT/Combining/Linearity.lean}.}
 
 The Boolean Fourier foundation keeps the raw definition unchanged and adds the
 separately named normalized measurement distance together with
-equations~\eqref{eq:normalization}--\eqref{eq:binary-correlation}.  It does not
-advertise the current source-labelled theorem as proved.  The statement repair
-should change the conclusion either to normalized distance at most $\delta$ or
-to raw distance at most $2\delta$, and synchronize the blueprint at the same
-time.%
+equations~\eqref{eq:normalization}--\eqref{eq:binary-correlation}.  The
+statement repair changed the raw conclusion to $2\delta$, added the normalized
+form with bound $\delta$, and synchronized the blueprint; the realigned theorem
+is proved by the Fourier--Naimark argument, with the distance/defect relation
+established as an equality.%
 \footnote{The normalization investigation is tracked in
-\ghissue{124}; the source-facing statement repair is assigned to
-\ghissue{129}.}
+\ghissue{124}; the source-facing statement repair is \ghissue{129}.}
 
 \section{Conclusion}
 
@@ -202,8 +202,9 @@ The provider's binary-measurement calculation is correct through the factor
 $1/2$ in equation~(3), but its final identification with raw observable
 distance is incorrect.  The theorem proved by the Fourier--Naimark argument has
 normalized binary-measurement error at most $\delta$, equivalently raw
-operator error at most $2\delta$.  The four-point example rules out the current
+operator error at most $2\delta$.  The four-point example rules out the printed
 raw-error bound $\delta$ even when arbitrary ancillary extensions are allowed.
+The blueprint theorem and the formal declarations carry the corrected bounds.
 
 \bibliographystyle{alpha}
 \bibliography{references}
