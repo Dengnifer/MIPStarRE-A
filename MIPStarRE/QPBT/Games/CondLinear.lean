@@ -125,7 +125,7 @@ def condLinearConcat {ιU ιV : Type*} [Fintype ιU] [DecidableEq ιU]
 /--
 Concatenating an outer and an indexed inner CL map adds their levels.  This is
 `lem:cl-concat` in `blueprint/src/chapter/ch12_qpbt_games.tex:1217-1224`, with
-paper origin `references/qpbt-paper/05_conditionally_linear_functions.tex:282-314`.
+paper origin `references/qpbt-paper/05_conditionally_linear_functions.tex:282-292`.
 The direct-sum coordinate bookkeeping is represented by `condLinearConcat`; the
 level proof remains deferred in this skeleton.
 -/
