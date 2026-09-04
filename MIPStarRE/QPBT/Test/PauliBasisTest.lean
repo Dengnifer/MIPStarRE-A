@@ -274,8 +274,9 @@ private theorem isCondLinearOn_one_of_linear {K ι : Type*} [Field K]
 
 /-- Formalization-only auxiliary: extend a coefficient vector along an injective
 reindexing of registers, setting every coordinate outside the image to zero.
-Together with the lemmas that follow it, this supports the transport of
-conditional linearity between the register spaces of `def:cl-func`,
+The extension is used to reindex a conditionally linear map along `f`, with zero
+coordinates outside its image. This supports the transport of conditional
+linearity between the register spaces of `def:cl-func`,
 blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:1185-1195`,
 paper origin `references/qpbt-paper/05_conditionally_linear_functions.tex:35-57`. -/
 private def clExtend {K κ ι : Type*} [Zero K] (f : κ → ι) (u : κ → K) : ι → K :=
@@ -476,7 +477,7 @@ distribution is conditionally linear of level one, as asserted for `L_Point` in
 `def:ld-question-distribution`, blueprint
 `blueprint/src/chapter/ch13_qpbt_test.tex:34-59`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
-It is recorded here because only the Pauli reindexing uses it. -/
+Under `pauliLdIndex`, this level-one description yields the Pauli point map. -/
 private theorem isCondLinear_ldPointCL (P : LdParams) :
     IsCondLinearOn (ScalarQ P) Finset.univ 1 (ldPointCL P) :=
   isCondLinearOn_one_of_linear (ldPointProjection P)

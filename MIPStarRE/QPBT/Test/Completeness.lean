@@ -24,7 +24,7 @@ noncomputable section
 /-- The Pauli question sampler equals the distribution that the construction of
 `def:typed-cl-distributions` (`ch12_qpbt_games.tex:1400-1404`) produces from the
 family `pauliCL` on the Pauli type graph. This is the distribution identity of
-`lem:pauli-question-typed-cl`, blueprint `ch13_qpbt_test.tex:394-402`; it does
+`lem:pauli-question-typed-cl`, blueprint `ch13_qpbt_test.tex:400-408`; it does
 not assert that `pauliCL` is a typed family of conditionally linear maps. The
 proof below is open; that proof debt and the missing family assertion are both
 tracked by issue #180. Paper `references/qpbt-paper/07_types.tex:84-94`. -/

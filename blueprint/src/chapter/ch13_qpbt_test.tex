@@ -351,8 +351,7 @@ The Pauli basis test is the quantum low individual degree test of Natarajan and 
 	\lean{MIPStarRE.QPBT.PauliType, MIPStarRE.QPBT.pauliCLLevel, MIPStarRE.QPBT.pauliCL}
 	\lean{MIPStarRE.QPBT.isCondLinear_pauliCL, MIPStarRE.QPBT.pauliEdges}
 	\lean{MIPStarRE.QPBT.pauliQuestionDistribution}
-	\leanok
-	\uses{def:admissible, def:ld-question-distribution, def:ms-game, def:cl-func, def:cl-dist, def:graph-distribution}
+	\uses{def:admissible, def:ld-question-distribution, lem:ld-aline-level, lem:ld-dline-level, def:ms-game, def:cl-func, def:cl-dist, def:graph-distribution}
 	% Admissibility of the full tuple is required here, not only the divisibility m | q:
 	% the source parametrizes the Pauli basis test by the tuple qldparams introduced
 	% together with Definition def:admissible (references/qpbt-paper/
@@ -394,7 +393,8 @@ The Pauli basis test is the quantum low individual degree test of Natarajan and 
 	% endpoints uniformly would be a different distribution here: it gives each self-loop
 	% twice the relative mass of an oriented non-loop pair, and G^pauli has a self-loop
 	% at every vertex.
-	The question distribution of $\mathfrak{G}^{\mathrm{Pauli}}$ is the typed CL distribution on $\mathcal T^{\mathrm{pauli}} \times V^{\mathrm{pauli}} \times \mathcal T^{\mathrm{pauli}} \times V^{\mathrm{pauli}}$ obtained by sampling the type pair $(t_{\mathrm A}, t_{\mathrm B})$ from the graph distribution $\mu_{G^{\mathrm{pauli}}}$ of Definition~\ref{def:graph-distribution}, that is, uniformly at random among all ordered pairs of types whose underlying unordered pair $\{t_{\mathrm A}, t_{\mathrm B}\}$ is an edge of $G^{\mathrm{pauli}}$, self-loops included; sampling $z \in V^{\mathrm{pauli}}$ uniformly at random; and setting $x_w = L_{t_w}(z)$ for $w \in \{\mathrm A,\mathrm B\}$. Explicitly, if $z = (u_X,u_Z,s,v,r_X,r_Z)$, then a player whose type is $(\mathsf{Point},W)$ receives $u_W$; a player whose type is $(\mathsf{ALine},W)$ receives $(u_0, s)$ with $u_0 = L^{\mathrm{Ln}}_{e_i}(u_W)$ and $i = \chi(s)$; a player whose type is $(\mathsf{DLine},W)$ receives $(u_0, s, v')$ with $i = \chi(s)$, $v' = \pi_{i-1}(v)$, and $u_0 = L^{\mathrm{Ln}}_{v'}(u_W)$; a player whose type lies in $\mathcal T^{\mathrm{ms}} \cup \{\mathsf{Pair}, (\mathsf{Pair},X), (\mathsf{Pair},Z)\}$ receives $(u_X, u_Z, r_X, r_Z)$; and a player whose type is $(\mathsf{Pauli},W)$ receives $0$.
+	The question distribution of $\mathfrak{G}^{\mathrm{Pauli}}$ is obtained by sampling the type pair $(t_{\mathrm A}, t_{\mathrm B})$ from the graph distribution $\mu_{G^{\mathrm{pauli}}}$ of Definition~\ref{def:graph-distribution}, that is, uniformly at random among all ordered pairs of types whose underlying unordered pair $\{t_{\mathrm A}, t_{\mathrm B}\}$ is an edge of $G^{\mathrm{pauli}}$, self-loops included; sampling $z \in V^{\mathrm{pauli}}$ uniformly at random; and setting $x_w = L_{t_w}(z)$ for $w \in \{\mathrm A,\mathrm B\}$. Explicitly, if $z = (u_X,u_Z,s,v,r_X,r_Z)$, then a player whose type is $(\mathsf{Point},W)$ receives $u_W$; a player whose type is $(\mathsf{ALine},W)$ receives $(u_0, s)$ with $u_0 = L^{\mathrm{Ln}}_{e_i}(u_W)$ and $i = \chi(s)$; a player whose type is $(\mathsf{DLine},W)$ receives $(u_0, s, v')$ with $i = \chi(s)$, $v' = \pi_{i-1}(v)$, and $u_0 = L^{\mathrm{Ln}}_{v'}(u_W)$; a player whose type lies in $\mathcal T^{\mathrm{ms}} \cup \{\mathsf{Pair}, (\mathsf{Pair},X), (\mathsf{Pair},Z)\}$ receives $(u_X, u_Z, r_X, r_Z)$; and a player whose type is $(\mathsf{Pauli},W)$ receives $0$.
+	The displayed level of each individual map $L_t$ is proved. These assertions do not yet provide one common level for the family, and the identification of this sampler with the general typed CL construction remains open; both assertions are stated separately in Lemma~\ref{lem:pauli-question-typed-cl}.
 \end{definition}
 
 \begin{lemma}[The Pauli question distribution is a typed CL distribution]\label{lem:pauli-question-typed-cl}
@@ -411,7 +411,7 @@ The Pauli basis test is the quantum low individual degree test of Natarajan and 
 	\lean{MIPStarRE.QPBT.PauliAnswer, MIPStarRE.QPBT.validPauliAnswer}
 	\lean{MIPStarRE.QPBT.pauliWinPredicate, MIPStarRE.QPBT.pauliBasisTest}
 	\leanok
-	\uses{def:pauli-question-distribution, def:ld-win-predicate, def:ms-game, def:indicator-vector, def:admissible}
+	\uses{def:pauli-question-distribution, def:ld-win-predicate, def:ms-game, def:indicator-vector, def:admissible, def:game, def:low-degree-encoding, def:subfield-trace}
 	Fix an admissible tuple $\mathsf{qldparams} = (q,m,d)$ (Definition~\ref{def:admissible}) and let $M = 2^m$. Answers in the game $\mathfrak{G}^{\mathrm{Pauli}}_{\mathsf{qldparams}}$ take the following forms, depending on the question type; answers not of the prescribed form are rejected.
 	% The paper's format table writes the line contents loosely as (u_W, s) and (u_W, s, v);
 	% by the sampling procedure the actual contents are the canonical pairs (u_0, s) and
