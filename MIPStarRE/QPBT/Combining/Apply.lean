@@ -1,5 +1,5 @@
 import MIPStarRE.QPBT.Combining.Points
-import MIPStarRE.QPBT.Test.Soundness
+import MIPStarRE.QPBT.Test.SoundnessDefs
 
 /-!
 # Applying the classical low-degree test
