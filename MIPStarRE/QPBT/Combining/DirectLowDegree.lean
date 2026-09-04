@@ -3,6 +3,7 @@ import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Strategy
 import MIPStarRE.QPBT.Combining.DirectLowDegree.GameValue
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.PassConversion
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.SeedFiberValue
+import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Error
 
 /-!
 # The directly indexed low-degree game
@@ -31,7 +32,11 @@ mature `ProjStrat`, with exact Born-weight formulas for both adapters; and
 `Transport.PassConversion` convert a value bound of the direct game into the
 pass hypothesis of the mature low individual degree theorem for every
 coordinate strategy.  `GameValue` supplies the rejection calculus relating the
-direct value to the mature branch weights.
+direct value to the mature branch weights.  `Transport.Error` carries the
+scalar half of the transport: the auxiliary sampling parameter with which
+the mature theorem is applied, bounds on the three terms of its error
+function, and the absorption of the resulting simultaneous-measurement
+estimate into the error function of `lem:ld-soundness`.
 
 ## References
 
