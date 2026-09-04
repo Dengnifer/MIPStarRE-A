@@ -1,5 +1,89 @@
 [
  {
+  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/89",
+  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
+  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/89/labels{/name}",
+  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/89/comments",
+  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/89/events",
+  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/89",
+  "id": 5343164784,
+  "node_id": "I_kwDOUJyJf88AAAABPno5cA",
+  "number": 89,
+  "title": "carry-forward hygiene: copy the validated source row, exclude carried reviews from round counts, lane account via gh_common, EVOLUTION wording",
+  "user": {
+   "login": "Dengnifer",
+   "id": 89234078,
+   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
+   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/Dengnifer",
+   "html_url": "https://github.com/Dengnifer",
+   "followers_url": "https://api.github.com/users/Dengnifer/followers",
+   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
+   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
+   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
+   "repos_url": "https://api.github.com/users/Dengnifer/repos",
+   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
+   "type": "User",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "labels": [
+   {
+    "id": 12025011061,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8bdQ",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/infrastructure",
+    "name": "infrastructure",
+    "color": "ededed",
+    "default": false,
+    "description": "Foundational definitions, shared APIs, or supporting layers"
+   }
+  ],
+  "state": "open",
+  "locked": false,
+  "assignees": [],
+  "milestone": null,
+  "comments": 0,
+  "created_at": "2026-09-04T01:32:29Z",
+  "updated_at": "2026-09-04T01:32:29Z",
+  "closed_at": null,
+  "assignee": null,
+  "author_association": "OWNER",
+  "active_lock_reason": null,
+  "sub_issues_summary": {
+   "total": 0,
+   "completed": 0,
+   "percent_completed": 0
+  },
+  "issue_dependencies_summary": {
+   "blocked_by": 0,
+   "total_blocked_by": 0,
+   "blocking": 0,
+   "total_blocking": 0
+  },
+  "body": "<!-- mipstarre-issue-key: carry-forward-hygiene-copy-the-validated-source-row-eaab5d6c -->\nFrom PR #85 round-2 findings F2, F3, F5, F6 (adjudicated 2026-09-04). (1) review.sh carry_forward: copy the body of the exact validated row (commit-bound, lane account, not itself carried) instead of the first body mentioning the SHA; (2) exclude bodies carrying mipstarre-review-carried from every round count and from prior-ledger preservation; (3) resolve the lane account through gh_common instead of a direct gh api user call; (4) EVOLUTION.md 2026-09-04 entry says patch-id where the implementation uses a normalized SHA-256 hash. One commit, under 40 lines, after the next mathematics merge.",
+  "closed_by": null,
+  "reactions": {
+   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/89/reactions",
+   "total_count": 0,
+   "+1": 0,
+   "-1": 0,
+   "laugh": 0,
+   "hooray": 0,
+   "confused": 0,
+   "heart": 0,
+   "rocket": 0,
+   "eyes": 0
+  },
+  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/89/timeline",
+  "performed_via_github_app": null,
+  "state_reason": null,
+  "pinned_comment": null
+ },
+ {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/77",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/77/labels{/name}",
@@ -2274,109 +2358,6 @@
   "pinned_comment": null
  },
  {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/48",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/48/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/48/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/48/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/48",
-  "id": 5334502691,
-  "node_id": "I_kwDOUJyJf88AAAABPfYNIw",
-  "number": 48,
-  "title": "refactor(QPBT/Test): isolate the soundness interface",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025011402,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8cyg",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/refactor",
-    "name": "refactor",
-    "color": "ededed",
-    "default": false,
-    "description": "Structural change without intended behavior change"
-   },
-   {
-    "id": 12025012183,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8f1w",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/qpbt-analysis",
-    "name": "qpbt-analysis",
-    "color": "ededed",
-    "default": false,
-    "description": "Soundness/rigidity analysis of the Pauli basis test \u2014 self-testing bounds and error terms"
-   },
-   {
-    "id": 12025012620,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8hjA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/proof-infra",
-    "name": "proof-infra",
-    "color": "ededed",
-    "default": false,
-    "description": "Intermediate lemmas or definitions that mainly support proofs"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-03T08:57:06Z",
-  "updated_at": "2026-09-03T08:57:06Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 0,
-   "blocking": 0,
-   "total_blocking": 0
-  },
-  "body": "<!-- mipstarre-issue-key: qpbt-stage43-soundness-interface-split -->\n### Context\n\nStage 4.3 must prove `pauli_soundness` from the Chapter 16 extraction API. The\ncurrent module graph cannot express that dependency: `Extraction/Unitary.lean`\nimports `Test/Soundness.lean` for `deltaQld`, so importing extraction back into\nthe final soundness theorem would create a cycle.\n\nThe split is structural only. It must preserve every public declaration and the\nsource-facing statement of `pauli_soundness` verbatim.\n\n### Scope\n\n- Add `MIPStarRE/QPBT/Test/SoundnessDefs.lean` containing the current closed\n  soundness interface: `deltaQld`, `deltaQld_mono`, `idealState`, both ideal\n  projector placements, both lifted effects, `PauliSoundnessWitness`, its\n  instance attributes, and both operator-distance definitions.\n- Leave `pauli_soundness` in `Test/Soundness.lean`.\n- Point `Combining/Apply.lean`, `Extraction/Unitary.lean`, and\n  `Test/CanonicalParams.lean` at `SoundnessDefs` where they use only the lower\n  interface. Keep `Test/QubitForm.lean` importing full `Soundness`.\n- Once PR #46 is merged into the branch, let `Test/Soundness.lean` import the\n  extraction/final-proof dependencies without a cycle.\n- Update `MIPStarRE/QPBT.lean` once, after the module graph is stable. This issue\n  is the sole Stage 4.3 owner of that shared re-export edit.\n\n### Non-goals\n\n- Do not prove or restate `pauli_soundness`.\n- Do not add an extraction transfer theorem, witness field, bridge hypothesis,\n  or new proof hole.\n- Do not change blueprint proof status or mathematical definitions.\n- Do not edit the Chapter 16 quantitative contract owned by PR #46.\n\n### Acceptance\n\n- The moved declaration bodies, types, namespace, attributes, and documentation\n  are unchanged apart from import/source-location wording made necessary by the\n  move.\n- Importing either `MIPStarRE.QPBT.Test.Soundness` or `MIPStarRE.QPBT` exposes\n  every moved declaration under its existing fully qualified name.\n- The `sorry|axiom` inventory is unchanged.\n- Focused checks pass in dependency order for `SoundnessDefs`,\n  `Combining/Apply`, `Extraction/Unitary`, `Soundness`, `QubitForm`,\n  `CanonicalParams`, and `QPBT.lean`.\n- `lake build`, declaration checking, blueprint rendering, and\n  `git diff --check` pass.\n- The final PR is based on merged PR #46 and passes exact-head CI and independent\n  review.\n\n### Sources\n\n- `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1426-1447`\n- `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1862-1877`\n- `blueprint/src/chapter/ch13_qpbt_test.tex:407-424`\n\n---\nCloses this Stage 4.3 subtask under #47.",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/48/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/48/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47/labels{/name}",
@@ -2450,8 +2431,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 19,
-   "completed": 1,
-   "percent_completed": 5
+   "completed": 2,
+   "percent_completed": 10
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/1",
   "issue_dependencies_summary": {
@@ -3010,9 +2991,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 90,
+  "comments": 91,
   "created_at": "2026-09-02T08:30:04Z",
-  "updated_at": "2026-09-04T00:07:06Z",
+  "updated_at": "2026-09-04T01:06:49Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",

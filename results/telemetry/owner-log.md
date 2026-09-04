@@ -107,3 +107,23 @@ Repository: `Dengnifer/MIPStarRE-A`. Operator: the codex (gpt-5.6-sol) session
   and now nudges the owner session through #26 rather than a tmux pane.
 - **Hand-back:** on the owner's word; recorded as event=handback with the
   state at that moment.
+## 2026-09-04 — Owner session as operator: first hours
+- **Handover:** the codex main session posted its exact state to #27 and was
+  closed (23:11Z); takeover recorded (`ff5d719`); the primary's `main` had been
+  left behind a `/tmp` clone the codex session used to dodge its sandbox — the
+  clone's uncommitted telemetry was folded in and the clone removed.
+- **Lanes:** eight stage-4.3 packets dispatched at once as codex provers
+  (`owner-tools/lane.sh`: worktree → warm → dispatch → PR → CI → review);
+  the codex API answered HTTP 429 above ~6 concurrent sessions and four lanes
+  died; the runner now caps live sessions at five and resumes a lane's own
+  thread. Lesson: never overwrite a running bash script in place (three lanes
+  crashed at the next line read) — versioned filenames from now on.
+- **Merged:** #41 (`ede882f`, launcher with full access), #81 (`8788ee7`→#62
+  encoding/decoding proofs), #78 (`ebd5c47`→#48 soundness-interface split).
+- **Throughput fix in flight:** gate 2b (fresh base) turned every merge into a
+  reviewer round on every other open PR for an unchanged patch; PR #85 carries
+  a review forward across a fresh-base when the patch hash is unchanged
+  (review.md §13). PR #79 keeps the two-round rule as operator discipline.
+- **External load:** another user's 40-process experiment used 123 of 128
+  cores (load 1690, ssh drops); `rzhou`'s dead 223 GB CP-SAT log fills `/tmp`;
+  reported in #26 and to the owner. Nothing of ours.
