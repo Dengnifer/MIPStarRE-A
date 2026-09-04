@@ -51,12 +51,13 @@ open MIPStarRE.Quantum
 noncomputable section
 
 /-- The quantum linearity theorem of Natarajan--Vidick.  Let `t` be positive,
-`δ ≥ 0`, `ρ` a positive semidefinite trace-one operator on a finite carrier,
-and `O^u`, for `u ∈ F_2^t`, binary observables whose two-query correlation
-satisfies `E_{u,u'} Re Tr(O^u O^{u'} O^{u+u'} ρ) ≥ 1 - δ`.  Then there are a
-finite ancillary carrier, a unit vector `anc` in it, and binary observables
-`L^u` on the product carrier such that `L^u L^{u'} = L^{u+u'}` for all `u, u'`
-and `E_u d_{ρ'}(L^u, O^u ⊗ 1)^2 ≤ 2δ`, where `ρ' = ρ ⊗ |anc⟩⟨anc|`.
+`δ ≥ 0`, `ρ` a positive semidefinite trace-one operator on a finite-dimensional
+Hilbert space, and `O^u`, for `u ∈ F_2^t`, binary observables whose two-query
+correlation satisfies `E_{u,u'} Re Tr(O^u O^{u'} O^{u+u'} ρ) ≥ 1 - δ`.  Then
+there are a finite-dimensional ancillary Hilbert space, a unit vector `anc` in
+it, and binary observables `L^u` on the tensor-product Hilbert space such that
+`L^u L^{u'} = L^{u+u'}` for all `u, u'` and
+`E_u d_{ρ'}(L^u, O^u ⊗ 1)^2 ≤ 2δ`, where `ρ' = ρ ⊗ |anc⟩⟨anc|`.
 
 This is Theorem 10 of Natarajan--Vidick,
 `references/nv-paper/fullpaper.tex:1074-1088`, hypothesis as in its display

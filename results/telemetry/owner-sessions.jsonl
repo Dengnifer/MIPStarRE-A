@@ -90,3 +90,4 @@
 {"name":"claude-prover-113-20260904T1504Z","role":"prover","model":"claude-opus-5","issue":113,"worktree":"/home/drx/MIPStarRE-qpbt/.worktrees/issue-113-approximate-winning-implications","base":"issue-112-exact-winning-implications","start":"2026-09-04T15:04:49Z","status":"running"}
 {"name":"opus-repair-pr179-r3-20260904-01","role":"repair","model":"claude-opus-5","issue":132,"pr":179,"start":"2026-09-04T15:04Z","status":"running"}
 {"name":"opus-repair-pr184-r1-20260904-01","role":"repair","model":"claude-opus-5","issue":173,"pr":184,"start":"2026-09-04T15:06Z","status":"running"}
+{"name":"claude-prover-172-20260904T1524Z","role":"prover","model":"claude-opus-5","issue":172,"worktree":"/home/drx/MIPStarRE-qpbt/.worktrees/issue-172-ms-rigidity-gap","base":"github/main","start":"2026-09-04T15:24:39Z","status":"running"}
