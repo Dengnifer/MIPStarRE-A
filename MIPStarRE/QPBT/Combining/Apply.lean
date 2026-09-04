@@ -14,7 +14,8 @@ links do not claim proof closure.
 
 ## References
 
-The combined-line declarations formalize `lem:qld-4-13` in
+The combined-line declarations record directly indexed auxiliary forms of
+`lem:qld-4-13` in
 `blueprint/src/chapter/ch15_qpbt_combining.tex`, with paper source
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1020-1034`.
 The global-pair declaration formalizes `lem:qld-4-7` in the same blueprint, with
@@ -92,9 +93,15 @@ theorem exists_extendedLinesWitness_established_ofPointsWitness :
               deltaCombine ε ((P.m * P.d : ℕ) / (P.q : ℝ)))) := by
   sorry
 
-/-- Source-facing construction for the established auxiliary estimate.  This is
-the same Lean-only bound as `exists_extendedLinesWitness_established_ofPointsWitness`,
-with the point witness existentially supplied rather than assumed. -/
+/-- Directly indexed construction for the auxiliary estimate
+`C * m * poly(epsilon, md / q)`. This has the same Lean-only bound as
+`exists_extendedLinesWitness_established_ofPointsWitness`, with the point witness
+existentially supplied rather than assumed.
+
+Its extended questions, line-point law, and completed answer alphabet are the
+directly indexed forms described in
+`docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`. Consequently, transport to
+the source formulation of `lem:qld-4-13` remains an open obligation. -/
 theorem exists_extendedLinesWitness_established :
     ∃ deltaQ : ℝ → ℝ, IsPolyErr deltaQ ∧
       ∃ C : ℝ, 0 < C ∧

@@ -81,7 +81,7 @@ assembled by Fourier averaging.
 % Statement as in Theorem 10 of the cited source \cite{Natarajan2017Linearity}
 % (arXiv:1610.03574): hypothesis as in its display (7), conclusion as in its
 % display (8) with the normalization of the distance bound corrected, see
-% rem:linearity-distance-normalization. The provider imposes no upper bound
+% rem:linearity-distance-normalization. The cited theorem imposes no upper bound
 % on delta, asserts the exact linearity for all pairs (u, u'), and guarantees
 % the closeness of L^u to O^u on average over uniformly random u only, in mean
 % squared state-dependent distance; it is stated for an arbitrary density
@@ -89,7 +89,7 @@ assembled by Fourier averaging.
 % under bitwise XOR (here F_2^t, additively) and Obs(H) denoting the Hermitian
 % unitaries, i.e. the binary observables of def:povm-conventions. In the
 % closeness conclusion an operator on H is compared with an operator on the
-% extension via its ampliation S ot Id. The provider prints the closeness
+% extension via its ampliation S ot Id. The cited theorem prints the closeness
 % bound as delta for the squared operator distance; what its argument
 % establishes is delta for the squared binary-measurement distance, i.e.
 % 2 delta for the squared operator distance, and the printed operator bound is
@@ -269,7 +269,7 @@ assembled by Fourier averaging.
 	calculation behind \cite[equation~(3)]{Natarajan2017Linearity} bounds
 	the mean squared distance between the associated binary projective
 	measurements, which is half the squared operator distance; the
-	provider-side correction to $2\delta$ is carried by
+	corrected bound $2\delta$ is stated in
 	Theorem~\ref{thm:linearity}. The quotation neither reproduces nor
 	asserts the erroneous constant, since it states its conclusion as
 	$\mathcal{L}^u \approx_\delta \mathcal{O}^u$, which by
@@ -277,8 +277,8 @@ assembled by Fourier averaging.
 	only by $O(\delta)$ and so absorbs a constant factor. These three
 	discrepancies, together with the common-extension obligation recorded
 	below, are analyzed in
-	\cite{gap:qpbt_linearity-theorem-quotation}, and the provider-side
-	normalization defect in
+	\cite{gap:qpbt_linearity-theorem-quotation}, while the normalization defect
+	in \cite[Theorem~10]{Natarajan2017Linearity} is analyzed in
 	\cite{gap:qpbt_linearity-distance-normalization}. The import carries two
 	conversion obligations, discharged in the proof of
 	Lemma~\ref{lem:qld-4-10}: the theorem is
@@ -803,7 +803,7 @@ assembled by Fourier averaging.
 	\label{lem:qld-4-10}
 	\lean{MIPStarRE.QPBT.CombinedPointsWitness}
 	\lean{MIPStarRE.QPBT.exists_combinedPointsWitness}
-	\notready
+	\leanok
 	\uses{def:expanded-state, def:expanded-point-measurement,
 		def:povm-distance, def:symmetric-equivalents}
 	There exists a function $\delta_Q(\eps) = \poly(\eps)$ such that the
@@ -1783,10 +1783,9 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	$C \cdot m \cdot \poly(\eps, md/q)$ for a universal constant $C > 0$.
 	The printed error form $\poly(m^2\eps, md/q)$ is not claimed here; see
 	Remark~\ref{rem:qld-4-13-source-defects}.
-	The error form is the only change this node makes to
-	Lemma~\ref{lem:qld-4-13}, and no formalization mark is placed on the
-	statement: the linked declaration differs from it in three further
-	respects, which the blueprint does not adopt. Its extended questions are
+	The intended comparison with Lemma~\ref{lem:qld-4-13} changes only the
+	error form. The available auxiliary construction also differs from that
+	lemma in three respects. Its extended questions are
 	drawn from the directly indexed line space of
 	\cite{gap:qpbt_ld-dimension-divisibility} rather than from the lines of
 	$\F_q^{2m+2}$ used above; its average is taken over the corresponding
@@ -1797,8 +1796,9 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	its two consistency displays are compared on the completed answer
 	alphabet $\F_q \cup \{\bot\}$, whose extra outcome collects the line
 	polynomials that admit no evaluation at the sampled point, rather than
-	under the answer summation over $a \in \F_q$ used above. Relating the two
-	formulations is the transport obligation of
+	under the answer summation over $a \in \F_q$ used above. Thus the auxiliary
+	construction does not establish this formulation until the two forms are
+	related by the transport obligation of
 	\cite{gap:qpbt_ld-dimension-divisibility}.
 \end{lemma}
 \begin{proof}
