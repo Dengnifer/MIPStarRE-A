@@ -17,6 +17,14 @@ by the exceptional parity of the third column; this yields the approximate
 anticommutation of the two reflections at the cells labelled by the paper's
 first and fifth variables.
 
+The final squared-distance corollaries measure the anticommutation defects of
+the dilated strategy on its own state, in the `opDistSq` convention of
+`def:povm-distance`, at the scale `624 ^ 2 * sqrt ε`.  These are pre-isometry
+estimates.  The post-isometry estimates on the ideal EPR-pair-plus-auxiliary
+state in `thm:ms-rigidity` are obtained from them through
+`ms_anticommutator_transfer_A` and `ms_anticommutator_transfer_B` in the
+swap-isometry packet, issue #104.
+
 ## References
 
 The statement supported here is `thm:ms-rigidity` in
@@ -269,13 +277,14 @@ theorem msCellObsB_mul_close_of_same_cells (S : Strategy msGame) (ε : ℝ)
 
 /-- The two reflections that Alice attaches to the cells of the paper's first
 and fifth variables approximately anticommute on the dilated state, in the
-unsquared state-dependent norm and at the scale `624 * sqrt ε`.  The source
-states this conclusion for the squared distance: the last display of
+unsquared state-dependent norm and at the scale `624 * sqrt ε`.  For comparison,
+the source states the corresponding post-isometry relation for the squared
+distance: the last display of
 `thm:ms-rigidity`, blueprint `ch13_qpbt_test.tex:244-249`, paper
 `08_classical_and_quantum_low_degree_tests.tex:640-646`, reads
-`⟨ψ|(M - N)ᴴ (M - N)|ψ⟩ ≤ O(sqrt ε)`; that form is
-`msVarObsA_anticommute_opDistSq` below, obtained from this bound through
-`NormCloseOn.opDistSq_le`. -/
+`⟨ψ|(M - N)ᴴ (M - N)|ψ⟩ ≤ O(sqrt ε)`.  The squared-distance form on the
+dilated state is `msVarObsA_anticommute_dilated_opDistSq` below, obtained from
+this bound through `NormCloseOn.opDistSq_le`. -/
 theorem msVarObsA_anticommute (S : Strategy msGame) (ε : ℝ) (hwin : 1 - ε ≤ S.value) :
     NormCloseOn (msDilatedStrategy S).ψ (624 * Real.sqrt ε)
       (msVarObsA S 0 * msVarObsA S 4) (-(msVarObsA S 4 * msVarObsA S 0)) := by
@@ -333,15 +342,17 @@ theorem msVarObsA_anticommute (S : Strategy msGame) (ε : ℝ) (hwin : 1 - ε �
     linkB.neg).trans stepC.neg).trans linkC.neg).trans hend.neg
   exact normCloseOn_neg_swap (hchain.mono (by linarith))
 
-/-- Alice's half of the last conclusion of `thm:ms-rigidity` in the convention
-of the source.  The relation `M ≈_δ N` of blueprint `ch13_qpbt_test.tex:249`
-and paper `08_classical_and_quantum_low_degree_tests.tex:644-646` bounds
-`⟨ψ|(M - N)ᴴ (M - N)|ψ⟩`, formalized by `opDistSq` (`def:povm-distance`), and
-the anticommutation is printed at the scale `sqrt ε`.  For `ε ≤ 1` the norm
-bound of `msVarObsA_anticommute` gives that statement with the explicit constant
-`624 ^ 2`; the same estimate gives the bound `624 ^ 2 * ε`, which is stronger in
-this range. -/
-theorem msVarObsA_anticommute_opDistSq (S : Strategy msGame) (ε : ℝ)
+/-- The squared-distance form of Alice's anticommutation defect for the
+projective dilation, evaluated on `(msDilatedStrategy S).ψ`.  In the `opDistSq`
+convention of `def:povm-distance`, `msVarObsA_anticommute` gives the explicit
+bound `624 ^ 2 * sqrt ε` when `ε ≤ 1`; it also gives the stronger bound
+`624 ^ 2 * ε` in this range.
+
+This is a pre-isometry estimate on the dilated state, not the post-isometry
+ideal-state conclusion of `thm:ms-rigidity`.  That conclusion is obtained from
+this bound through `ms_anticommutator_transfer_A` in the swap-isometry packet,
+issue #104. -/
+theorem msVarObsA_anticommute_dilated_opDistSq (S : Strategy msGame) (ε : ℝ)
     (hwin : 1 - ε ≤ S.value) (hε : ε ≤ 1) :
     opDistSq (uniformDistribution Unit)
         (fun _ => msVarObsA S 0 * msVarObsA S 4)
@@ -351,6 +362,11 @@ theorem msVarObsA_anticommute_opDistSq (S : Strategy msGame) (ε : ℝ)
   have h1 : Real.sqrt ε ≤ 1 := Real.sqrt_le_one.mpr hε
   have h0 : (0 : ℝ) ≤ Real.sqrt ε := Real.sqrt_nonneg ε
   nlinarith [mul_nonneg h0 (sub_nonneg.mpr h1)]
+
+/-- Deprecated compatibility name for the squared anticommutation defect of
+Alice's projective dilation. -/
+@[deprecated msVarObsA_anticommute_dilated_opDistSq (since := "2026-09-05")]
+alias msVarObsA_anticommute_opDistSq := msVarObsA_anticommute_dilated_opDistSq
 
 /-! ## The computation on Alice's cell reflections -/
 
@@ -487,13 +503,14 @@ theorem msCellObsA_mul_close_of_same_cells (S : Strategy msGame) (ε : ℝ)
 
 /-- The two reflections that Bob attaches to the cells of the paper's first and
 fifth variables approximately anticommute on the dilated state, in the unsquared
-state-dependent norm and at the scale `624 * sqrt ε`.  The source states the
-second half of the last conclusion of `thm:ms-rigidity` for the squared
-distance: blueprint `ch13_qpbt_test.tex:244-249`, paper
+state-dependent norm and at the scale `624 * sqrt ε`.  For comparison, the
+source states the corresponding post-isometry relation in the second half of
+the last conclusion of `thm:ms-rigidity` for the squared distance: blueprint
+`ch13_qpbt_test.tex:244-249`, paper
 `08_classical_and_quantum_low_degree_tests.tex:640-646`, reads
-`⟨ψ|(M - N)ᴴ (M - N)|ψ⟩ ≤ O(sqrt ε)`; that form is
-`msVarObsB_anticommute_opDistSq` below, obtained from this bound through
-`NormCloseOn.opDistSq_le`. -/
+`⟨ψ|(M - N)ᴴ (M - N)|ψ⟩ ≤ O(sqrt ε)`.  The squared-distance form on the
+dilated state is `msVarObsB_anticommute_dilated_opDistSq` below, obtained from
+this bound through `NormCloseOn.opDistSq_le`. -/
 theorem msVarObsB_anticommute (S : Strategy msGame) (ε : ℝ) (hwin : 1 - ε ≤ S.value) :
     NormCloseOn (msDilatedStrategy S).ψ (624 * Real.sqrt ε)
       (msVarObsB S 0 * msVarObsB S 4) (-(msVarObsB S 4 * msVarObsB S 0)) := by
@@ -547,15 +564,17 @@ theorem msVarObsB_anticommute (S : Strategy msGame) (ε : ℝ) (hwin : 1 - ε �
     linkB.neg).trans stepC.neg).trans linkC.neg).trans hend.neg
   exact normCloseOn_neg_swap (hchain.mono (by linarith))
 
-/-- Bob's half of the last conclusion of `thm:ms-rigidity` in the convention of
-the source.  The relation `M ≈_δ N` of blueprint `ch13_qpbt_test.tex:249` and
-paper `08_classical_and_quantum_low_degree_tests.tex:644-646` bounds
-`⟨ψ|(M - N)ᴴ (M - N)|ψ⟩`, formalized by `opDistSq` (`def:povm-distance`), and
-the anticommutation is printed at the scale `sqrt ε`.  For `ε ≤ 1` the norm
-bound of `msVarObsB_anticommute` gives that statement with the explicit constant
-`624 ^ 2`; the same estimate gives the bound `624 ^ 2 * ε`, which is stronger in
-this range. -/
-theorem msVarObsB_anticommute_opDistSq (S : Strategy msGame) (ε : ℝ)
+/-- The squared-distance form of Bob's anticommutation defect for the projective
+dilation, evaluated on `(msDilatedStrategy S).ψ`.  In the `opDistSq` convention
+of `def:povm-distance`, `msVarObsB_anticommute` gives the explicit bound
+`624 ^ 2 * sqrt ε` when `ε ≤ 1`; it also gives the stronger bound
+`624 ^ 2 * ε` in this range.
+
+This is a pre-isometry estimate on the dilated state, not the post-isometry
+ideal-state conclusion of `thm:ms-rigidity`.  That conclusion is obtained from
+this bound through `ms_anticommutator_transfer_B` in the swap-isometry packet,
+issue #104. -/
+theorem msVarObsB_anticommute_dilated_opDistSq (S : Strategy msGame) (ε : ℝ)
     (hwin : 1 - ε ≤ S.value) (hε : ε ≤ 1) :
     opDistSq (uniformDistribution Unit)
         (fun _ => msVarObsB S 0 * msVarObsB S 4)
@@ -565,6 +584,11 @@ theorem msVarObsB_anticommute_opDistSq (S : Strategy msGame) (ε : ℝ)
   have h1 : Real.sqrt ε ≤ 1 := Real.sqrt_le_one.mpr hε
   have h0 : (0 : ℝ) ≤ Real.sqrt ε := Real.sqrt_nonneg ε
   nlinarith [mul_nonneg h0 (sub_nonneg.mpr h1)]
+
+/-- Deprecated compatibility name for the squared anticommutation defect of
+Bob's projective dilation. -/
+@[deprecated msVarObsB_anticommute_dilated_opDistSq (since := "2026-09-05")]
+alias msVarObsB_anticommute_opDistSq := msVarObsB_anticommute_dilated_opDistSq
 
 end
 
