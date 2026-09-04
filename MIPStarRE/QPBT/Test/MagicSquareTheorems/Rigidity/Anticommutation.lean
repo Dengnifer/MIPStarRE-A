@@ -363,11 +363,6 @@ theorem msVarObsA_anticommute_dilated_opDistSq (S : Strategy msGame) (ε : ℝ)
   have h0 : (0 : ℝ) ≤ Real.sqrt ε := Real.sqrt_nonneg ε
   nlinarith [mul_nonneg h0 (sub_nonneg.mpr h1)]
 
-/-- Deprecated compatibility name for the squared anticommutation defect of
-Alice's projective dilation. -/
-@[deprecated msVarObsA_anticommute_dilated_opDistSq (since := "2026-09-05")]
-alias msVarObsA_anticommute_opDistSq := msVarObsA_anticommute_dilated_opDistSq
-
 /-! ## The computation on Alice's cell reflections -/
 
 /-- One of Alice's three cell reflections of a constraint question is close, on
@@ -584,11 +579,6 @@ theorem msVarObsB_anticommute_dilated_opDistSq (S : Strategy msGame) (ε : ℝ)
   have h1 : Real.sqrt ε ≤ 1 := Real.sqrt_le_one.mpr hε
   have h0 : (0 : ℝ) ≤ Real.sqrt ε := Real.sqrt_nonneg ε
   nlinarith [mul_nonneg h0 (sub_nonneg.mpr h1)]
-
-/-- Deprecated compatibility name for the squared anticommutation defect of
-Bob's projective dilation. -/
-@[deprecated msVarObsB_anticommute_dilated_opDistSq (since := "2026-09-05")]
-alias msVarObsB_anticommute_opDistSq := msVarObsB_anticommute_dilated_opDistSq
 
 end
 
