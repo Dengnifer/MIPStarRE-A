@@ -560,6 +560,263 @@ theorem msDilatedStrategy_totalRejectionMass (S : Strategy msGame) :
   funext xy
   exact msDilatedStrategy_rejectionMass S xy.1 xy.2
 
+/-- The dilation preserves Alice's malformed variable-answer mass. -/
+theorem msDilatedStrategy_aliceVariableWrongFormMass (S : Strategy msGame) (j : Fin 9) :
+    aliceVariableWrongFormMass (msDilatedStrategy S) j = aliceVariableWrongFormMass S j :=
+  msDilatedStrategy_aliceEventMass S _ _
+
+/-- The dilation preserves Bob's malformed variable-answer mass. -/
+theorem msDilatedStrategy_bobVariableWrongFormMass (S : Strategy msGame) (j : Fin 9) :
+    bobVariableWrongFormMass (msDilatedStrategy S) j = bobVariableWrongFormMass S j :=
+  msDilatedStrategy_bobEventMass S _ _
+
+/-- The dilation preserves Alice's malformed constraint-answer mass. -/
+theorem msDilatedStrategy_aliceConstraintWrongFormMass (S : Strategy msGame) (i : Fin 6) :
+    aliceConstraintWrongFormMass (msDilatedStrategy S) i = aliceConstraintWrongFormMass S i :=
+  msDilatedStrategy_aliceEventMass S _ _
+
+/-- The dilation preserves Bob's malformed constraint-answer mass. -/
+theorem msDilatedStrategy_bobConstraintWrongFormMass (S : Strategy msGame) (i : Fin 6) :
+    bobConstraintWrongFormMass (msDilatedStrategy S) i = bobConstraintWrongFormMass S i :=
+  msDilatedStrategy_bobEventMass S _ _
+
+/-- The dilation preserves the forward cell-consistency defect. -/
+theorem msDilatedStrategy_forwardCellMismatchMass (S : Strategy msGame)
+    (i : Fin 6) (k : Fin 3) :
+    forwardCellMismatchMass (msDilatedStrategy S) i k = forwardCellMismatchMass S i k :=
+  msDilatedStrategy_eventMass S _ _ _
+
+/-- The dilation preserves the reverse cell-consistency defect. -/
+theorem msDilatedStrategy_reverseCellMismatchMass (S : Strategy msGame)
+    (i : Fin 6) (k : Fin 3) :
+    reverseCellMismatchMass (msDilatedStrategy S) i k = reverseCellMismatchMass S i k :=
+  msDilatedStrategy_eventMass S _ _ _
+
+/-- The dilation preserves Alice's row or column parity-failure mass. -/
+theorem msDilatedStrategy_aliceParityFailureMass (S : Strategy msGame) (i : Fin 6) :
+    aliceParityFailureMass (msDilatedStrategy S) i = aliceParityFailureMass S i :=
+  msDilatedStrategy_aliceEventMass S _ _
+
+/-- The dilation preserves Bob's row or column parity-failure mass. -/
+theorem msDilatedStrategy_bobParityFailureMass (S : Strategy msGame) (i : Fin 6) :
+    bobParityFailureMass (msDilatedStrategy S) i = bobParityFailureMass S i :=
+  msDilatedStrategy_bobEventMass S _ _
+
+/-! ## Composition of the dilation with later local isometries -/
+
+/-- The matrix of a linear isometry of Euclidean spaces in the computational
+bases.  Formalization-only support for `thm:ms-rigidity`, blueprint
+`ch13_qpbt_test.tex:224-253`. -/
+noncomputable def isometryMatrix {ι ι' : Type} [Fintype ι] [DecidableEq ι]
+    [Fintype ι'] [DecidableEq ι']
+    (φ : EuclideanSpace ℂ ι →ₗᵢ[ℂ] EuclideanSpace ℂ ι') : Matrix ι' ι ℂ :=
+  Matrix.toEuclideanLin.symm φ.toLinearMap
+
+/-- Conjugation by an isometry is conjugation by its matrix. -/
+theorem conjIsometry_eq {ι ι' : Type} [Fintype ι] [DecidableEq ι]
+    [Fintype ι'] [DecidableEq ι']
+    (φ : EuclideanSpace ℂ ι →ₗᵢ[ℂ] EuclideanSpace ℂ ι') (M : Op ι) :
+    conjIsometry φ M = isometryMatrix φ * M * (isometryMatrix φ)ᴴ := rfl
+
+/-- The matrix of an isometry acts on vectors as the isometry does. -/
+theorem isometryMatrix_mulVec {ι ι' : Type} [Fintype ι] [DecidableEq ι]
+    [Fintype ι'] [DecidableEq ι']
+    (φ : EuclideanSpace ℂ ι →ₗᵢ[ℂ] EuclideanSpace ℂ ι') (x : EuclideanSpace ℂ ι) :
+    isometryMatrix φ *ᵥ WithLp.ofLp x = WithLp.ofLp (φ x) := by
+  have h : Matrix.toEuclideanLin (isometryMatrix φ) = φ.toLinearMap :=
+    Matrix.toEuclideanLin.apply_symm_apply φ.toLinearMap
+  have h' : Matrix.toEuclideanLin (isometryMatrix φ) x = φ x := by rw [h]; rfl
+  simpa using congrArg WithLp.ofLp h'
+
+/-- The columns of the matrix of an isometry are the images of the basis
+vectors. -/
+theorem isometryMatrix_apply {ι ι' : Type} [Fintype ι] [DecidableEq ι]
+    [Fintype ι'] [DecidableEq ι']
+    (φ : EuclideanSpace ℂ ι →ₗᵢ[ℂ] EuclideanSpace ℂ ι') (k : ι') (i : ι) :
+    isometryMatrix φ k i =
+      φ ((EuclideanSpace.equiv ι ℂ).symm (Pi.single i 1)) k := by
+  have h := congrFun (isometryMatrix_mulVec φ
+    ((EuclideanSpace.equiv ι ℂ).symm (Pi.single i 1))) k
+  rw [← h]
+  simp [Matrix.mulVec, dotProduct, EuclideanSpace.equiv, eq_comm]
+
+/-- The matrix of a composite isometry is the product of the two matrices. -/
+theorem isometryMatrix_comp {ι κ ν : Type} [Fintype ι] [DecidableEq ι]
+    [Fintype κ] [DecidableEq κ] [Fintype ν] [DecidableEq ν]
+    (φ : EuclideanSpace ℂ κ →ₗᵢ[ℂ] EuclideanSpace ℂ ν)
+    (E : EuclideanSpace ℂ ι →ₗᵢ[ℂ] EuclideanSpace ℂ κ) :
+    isometryMatrix (φ.comp E) = isometryMatrix φ * isometryMatrix E := by
+  ext k i
+  have h := congrFun (isometryMatrix_mulVec φ
+    (E ((EuclideanSpace.equiv ι ℂ).symm (Pi.single i 1)))) k
+  rw [isometryMatrix_apply, Matrix.mul_apply]
+  simp only [isometryMatrix_apply E]
+  simpa [Matrix.mulVec, dotProduct] using h.symm
+
+/-- Conjugating by a composite isometry is conjugating twice.  This is how the
+ground embeddings of the dilation combine with the local isometries produced by
+the self-testing argument of `thm:ms-rigidity`, blueprint
+`ch13_qpbt_test.tex:224-253`. -/
+theorem conjIsometry_comp {ι κ ν : Type} [Fintype ι] [DecidableEq ι]
+    [Fintype κ] [DecidableEq κ] [Fintype ν] [DecidableEq ν]
+    (φ : EuclideanSpace ℂ κ →ₗᵢ[ℂ] EuclideanSpace ℂ ν)
+    (E : EuclideanSpace ℂ ι →ₗᵢ[ℂ] EuclideanSpace ℂ κ) (M : Op ι) :
+    conjIsometry (φ.comp E) M = conjIsometry φ (conjIsometry E M) := by
+  rw [conjIsometry_eq, conjIsometry_eq, conjIsometry_eq, isometryMatrix_comp]
+  simp [Matrix.conjTranspose_mul, Matrix.mul_assoc]
+
+/-- The two-sided isometry image of a bipartite state, written through the
+Kronecker product of the two isometry matrices. -/
+theorem isometryTensor_apply_eq {ιA ιB κA κB : Type}
+    [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
+    [Fintype κA] [DecidableEq κA] [Fintype κB] [DecidableEq κB]
+    (φA : EuclideanSpace ℂ ιA →ₗᵢ[ℂ] EuclideanSpace ℂ κA)
+    (φB : EuclideanSpace ℂ ιB →ₗᵢ[ℂ] EuclideanSpace ℂ κB)
+    (ψ : EuclideanSpace ℂ (ιA × ιB)) (p : κA × κB) :
+    isometryTensor φA φB ψ p =
+      ∑ q : ιA × ιB,
+        Matrix.kronecker (isometryMatrix φA) (isometryMatrix φB) p q * ψ q := by
+  simp [isometryTensor, Matrix.kronecker, Fintype.sum_prod_type, isometryMatrix_apply,
+    EuclideanSpace.equiv, mul_assoc]
+
+/-- Applying two local isometries after two others is the same as applying their
+composites.  Together with `conjIsometry_comp` this is the composition rule used
+to turn a rigidity witness for the dilated strategy into one for the original
+strategy. -/
+theorem isometryTensor_comp {ιA ιB κA κB νA νB : Type}
+    [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
+    [Fintype κA] [DecidableEq κA] [Fintype κB] [DecidableEq κB]
+    [Fintype νA] [DecidableEq νA] [Fintype νB] [DecidableEq νB]
+    (φA : EuclideanSpace ℂ κA →ₗᵢ[ℂ] EuclideanSpace ℂ νA)
+    (φB : EuclideanSpace ℂ κB →ₗᵢ[ℂ] EuclideanSpace ℂ νB)
+    (EA : EuclideanSpace ℂ ιA →ₗᵢ[ℂ] EuclideanSpace ℂ κA)
+    (EB : EuclideanSpace ℂ ιB →ₗᵢ[ℂ] EuclideanSpace ℂ κB)
+    (ψ : EuclideanSpace ℂ (ιA × ιB)) :
+    isometryTensor (φA.comp EA) (φB.comp EB) ψ =
+      isometryTensor φA φB (isometryTensor EA EB ψ) := by
+  ext p
+  rw [isometryTensor_apply_eq, isometryTensor_apply_eq]
+  simp only [isometryTensor_apply_eq, isometryMatrix_comp, Finset.mul_sum]
+  rw [Finset.sum_comm]
+  refine Finset.sum_congr rfl fun r _ => ?_
+  have hk : (isometryMatrix φA * isometryMatrix EA).kronecker
+        (isometryMatrix φB * isometryMatrix EB) =
+      (isometryMatrix φA).kronecker (isometryMatrix φB) *
+        (isometryMatrix EA).kronecker (isometryMatrix EB) :=
+    Matrix.mul_kronecker_mul _ _ _ _
+  rw [hk, Matrix.mul_apply, Finset.sum_mul]
+  exact Finset.sum_congr rfl fun x _ => by ring
+
+/-- The ground embeddings of the dilation composed with two later local
+isometries carry the original state exactly as those isometries carry the
+dilated state. -/
+theorem isometryTensor_comp_naimarkEmbedding (α : Type) [Fintype α] [DecidableEq α]
+    {ιA ιB κA κB : Type} [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
+    [Fintype κA] [DecidableEq κA] [Fintype κB] [DecidableEq κB]
+    (φA : EuclideanSpace ℂ (ιA × Option α) →ₗᵢ[ℂ] EuclideanSpace ℂ κA)
+    (φB : EuclideanSpace ℂ (ιB × Option α) →ₗᵢ[ℂ] EuclideanSpace ℂ κB)
+    (ψ : EuclideanSpace ℂ (ιA × ιB)) :
+    isometryTensor (φA.comp (naimarkEmbedding ιA α)) (φB.comp (naimarkEmbedding ιB α)) ψ =
+      isometryTensor φA φB (naimarkDilatedState α ψ) :=
+  isometryTensor_comp φA φB _ _ ψ
+
+/-! ## Transfer of state-dependent bounds -/
+
+/-- Conjugating an operator by the ground embedding inflates it: the result acts
+as the original operator on the ground slice and annihilates the orthogonal
+complement. -/
+theorem conjIsometry_naimarkEmbedding {ι α : Type} [Fintype ι] [DecidableEq ι]
+    [Fintype α] [DecidableEq α] (M : Op ι) :
+    conjIsometry (naimarkEmbedding ι α) M = naimarkInflation (α := α) M := by
+  ext p q
+  rw [conjIsometry_eq]
+  simp only [Matrix.mul_apply, Matrix.conjTranspose_apply, isometryMatrix_apply,
+    naimarkEmbedding_apply, naimarkInflation_apply, EuclideanSpace.equiv]
+  by_cases hp : p.2 = none
+  · by_cases hq : q.2 = none <;> simp [hp, hq, eq_comm]
+  · simp [hp]
+
+/-- The action of an operator on the dilated state only sees its ground-slice
+columns. -/
+theorem applyOperatorToState_naimarkDilatedState (α : Type) [Fintype α] [DecidableEq α]
+    {ιA ιB : Type} [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
+    (K : Op ((ιA × Option α) × (ιB × Option α)))
+    (ψ : EuclideanSpace ℂ (ιA × ιB)) (p : (ιA × Option α) × (ιB × Option α)) :
+    applyOperatorToState K (naimarkDilatedState α ψ) p =
+      ∑ k : ιA, ∑ l : ιB, K p ((k, none), (l, none)) * ψ (k, l) := by
+  classical
+  simp [applyOperatorToState, Matrix.mulVec, dotProduct, Fintype.sum_prod_type,
+    Fintype.sum_option, naimarkDilatedState_apply_mul]
+
+/-- Inflated operators act on the dilated state exactly as the original
+operators act on the original state.  This is the identity that transfers
+state-dependent effect bounds back to the undilated strategy. -/
+theorem applyOperatorToState_heteroKron_naimarkInflation
+    (α : Type) [Fintype α] [DecidableEq α]
+    {ιA ιB : Type} [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
+    (M : Op ιA) (N : Op ιB) (ψ : EuclideanSpace ℂ (ιA × ιB)) :
+    applyOperatorToState
+        (heteroKron (naimarkInflation (α := α) M) (naimarkInflation (α := α) N))
+        (naimarkDilatedState α ψ) =
+      naimarkDilatedState α (applyOperatorToState (heteroKron M N) ψ) := by
+  classical
+  ext p
+  rw [applyOperatorToState_naimarkDilatedState, naimarkDilatedState_apply]
+  obtain ⟨⟨i, oa⟩, ⟨j, ob⟩⟩ := p
+  by_cases hoa : oa = none
+  · by_cases hob : ob = none
+    · simp [hoa, hob, heteroKron, applyOperatorToState, Matrix.mulVec, dotProduct,
+        Fintype.sum_prod_type, mul_assoc]
+    · simp [hob, heteroKron]
+  · simp [hoa, heteroKron]
+
+/-- The state-dependent norm of an inflated operator on the dilated state equals
+the state-dependent norm of the original operator on the original state. -/
+theorem norm_applyOperatorToState_heteroKron_naimarkInflation
+    (α : Type) [Fintype α] [DecidableEq α]
+    {ιA ιB : Type} [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
+    (M : Op ιA) (N : Op ιB) (ψ : EuclideanSpace ℂ (ιA × ιB)) :
+    ‖applyOperatorToState
+        (heteroKron (naimarkInflation (α := α) M) (naimarkInflation (α := α) N))
+        (naimarkDilatedState α ψ)‖ =
+      ‖applyOperatorToState (heteroKron M N) ψ‖ := by
+  rw [applyOperatorToState_heteroKron_naimarkInflation, naimarkDilatedState_norm]
+
+/-- Transfer of state-dependent effect bounds.  Every average squared distance
+between two families of inflated operators, measured on the dilated state, is
+the corresponding distance between the original families measured on the
+original state; a bound obtained for the dilated strategy is therefore a bound
+for the strategy one started from.  Blueprint `ch13_qpbt_test.tex:224-253`,
+paper `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652`. -/
+theorem opFamilyDistSq_naimarkInflation (α : Type) [Fintype α] [DecidableEq α]
+    {X γ ιA ιB : Type} [Fintype γ] [Fintype ιA] [DecidableEq ιA]
+    [Fintype ιB] [DecidableEq ιB]
+    (μ : Distribution X) (M N : X → γ → Op ιA) (P : X → γ → Op ιB)
+    (ψ : EuclideanSpace ℂ (ιA × ιB)) :
+    opFamilyDistSq μ
+        (fun x c => heteroKron (naimarkInflation (α := α) (M x c))
+          (naimarkInflation (α := α) (P x c)))
+        (fun x c => heteroKron (naimarkInflation (α := α) (N x c))
+          (naimarkInflation (α := α) (P x c)))
+        (naimarkDilatedState α ψ) =
+      opFamilyDistSq μ (fun x c => heteroKron (M x c) (P x c))
+        (fun x c => heteroKron (N x c) (P x c)) ψ := by
+  unfold opFamilyDistSq
+  congr 1
+  funext x
+  refine Finset.sum_congr rfl fun c _ => ?_
+  have hkron : ∀ {ρA ρB : Type} [Fintype ρA] [DecidableEq ρA] [Fintype ρB] [DecidableEq ρB]
+      (X Y : Op ρA) (Z : Op ρB),
+      heteroKron X Z - heteroKron Y Z = heteroKron (X - Y) Z := by
+    intro ρA ρB _ _ _ _ X Y Z
+    ext p q
+    simp [heteroKron, Matrix.kronecker, sub_mul]
+  have hinfl : naimarkInflation (α := α) (M x c) - naimarkInflation (α := α) (N x c) =
+      naimarkInflation (α := α) (M x c - N x c) := by
+    ext p q
+    by_cases h : p.2 = none ∧ q.2 = none <;> simp [h]
+  rw [hkron, hkron, hinfl, norm_applyOperatorToState_heteroKron_naimarkInflation]
+
 end
 
 end MIPStarRE.QPBT.MagicSquareRigidity
