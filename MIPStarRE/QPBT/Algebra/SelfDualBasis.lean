@@ -24,13 +24,14 @@ noncomputable abbrev FixedFieldModel.binaryCoordinates {q : ℕ}
   kappa F.basis
 
 /-- Equation `eq:eq-mult`, blueprint `ch11_qpbt_algebra.tex:313-334`, paper
-`04_preliminaries.tex:684-700`. The proof is deferred to issue #70; see the
-self-dual normal-basis setup in paper `04_preliminaries.tex:494-502`. -/
+`04_preliminaries.tex:684-700`. -/
 theorem binaryCoordinates_mul {q : ℕ} (F : FixedFieldModel q) (a b : F.K) :
     F.binaryCoordinates (a * b) =
       ∑ i : Fin F.basisDim, F.binaryCoordinates a i •
         (F.binaryCoordinates (F.basis i * b)) := by
-  sorry
+  rw [← F.basis.sum_equivFun a, Finset.sum_mul]
+  simp only [Module.Basis.equivFun_apply, Algebra.smul_mul_assoc, map_sum,
+    map_smul, Module.Basis.sum_repr]
 
 /-- Multiplication by a basis element is multiplication-table action in binary
 coordinates; this is the second equality of `eq:eq-mult`, blueprint
