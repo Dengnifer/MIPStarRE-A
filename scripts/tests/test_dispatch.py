@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regression tests for local agent-session command assembly."""
+"""Regression tests for dispatch commands and pre-commit workflow behavior."""
 
 from __future__ import annotations
 
@@ -93,6 +93,78 @@ class DispatchCommandTests(unittest.TestCase):
             "scripts/tests/test_dispatch.py",
             PRE_COMMIT.read_text(encoding="utf-8"),
         )
+
+
+class PreCommitBudgetTests(unittest.TestCase):
+    def git(self, repo: Path, *args: str) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            ["git", *args],
+            cwd=repo,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+
+    def new_repo(self) -> tuple[Path, str]:
+        temporary_directory = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary_directory.cleanup)
+        repo = Path(temporary_directory.name)
+        self.git(repo, "init", "--initial-branch=feature")
+        self.git(repo, "config", "user.email", "hook-test@example.invalid")
+        self.git(repo, "config", "user.name", "Hook Test")
+        (repo / "README").write_text("root\n", encoding="utf-8")
+        self.git(repo, "add", "README")
+        self.git(repo, "commit", "-m", "root")
+        return repo, self.git(repo, "rev-parse", "HEAD").stdout.strip()
+
+    def commit_file(self, repo: Path, path: str, lines: int) -> None:
+        target = repo / path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text("line\n" * lines, encoding="utf-8")
+        self.git(repo, "add", path)
+        self.git(repo, "commit", "-m", f"add {path}")
+
+    def run_hook(self, repo: Path) -> subprocess.CompletedProcess[str]:
+        env = os.environ.copy()
+        env["MIPSTARRE_SKIP_HOOKS"] = "1"
+        env.pop("MIPSTARRE_INFRA_OVERRIDE", None)
+        return subprocess.run(
+            [str(PRE_COMMIT)],
+            cwd=repo,
+            env=env,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+
+    def test_main_merge_exempts_inherited_workflow_lines(self) -> None:
+        repo, root = self.new_repo()
+        self.commit_file(repo, "feature.txt", 1)
+        self.git(repo, "switch", "--create", "main", root)
+        self.commit_file(repo, "local/inherited.txt", 401)
+        self.git(repo, "update-ref", "refs/remotes/github/main", "HEAD")
+        self.git(repo, "switch", "feature")
+        self.git(repo, "merge", "--no-commit", "--no-ff", "main")
+
+        result = self.run_hook(repo)
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("main-history merge", result.stdout)
+
+    def test_non_main_merge_keeps_workflow_lines_budgeted(self) -> None:
+        repo, root = self.new_repo()
+        self.commit_file(repo, "feature.txt", 1)
+        self.git(repo, "update-ref", "refs/remotes/github/main", root)
+        self.git(repo, "switch", "--create", "side", root)
+        self.commit_file(repo, "local/side.txt", 401)
+        self.git(repo, "switch", "feature")
+        self.git(repo, "merge", "--no-commit", "--no-ff", "side")
+
+        result = self.run_hook(repo)
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("non-main merge", result.stdout)
+        self.assertIn("staged workflow-layer change is 401 lines", result.stdout)
 
 
 if __name__ == "__main__":
