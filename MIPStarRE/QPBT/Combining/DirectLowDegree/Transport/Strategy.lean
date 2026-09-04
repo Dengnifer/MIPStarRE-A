@@ -179,7 +179,7 @@ private theorem strategy_carrier_nonempty {G : Game} (S : Strategy G) :
   exact zero_ne_one hnorm
 
 /-- The pure LDT state represented by a game's unit strategy vector. -/
-private noncomputable def strategyPureState {G : Game} (S : Strategy G)
+noncomputable def strategyPureState {G : Game} (S : Strategy G)
     [Nonempty (S.ιA × S.ιB)] : PureState (S.ιA × S.ιB) where
   vector := S.ψ
   unit := by

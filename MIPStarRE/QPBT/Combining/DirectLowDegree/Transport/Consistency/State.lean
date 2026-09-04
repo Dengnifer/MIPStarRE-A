@@ -1,3 +1,4 @@
+import MIPStarRE.LDT.Test.StrategyRole.Algebra
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Consistency.Measurements
 
 /-!
@@ -173,12 +174,7 @@ noncomputable def gameStrategyPureState {G : Game} (S : Strategy G) :
     PureState (S.ιA × S.ιB) := by
   letI : Nonempty (S.ιA × S.ιB) :=
     (strategyQuantumState_isNormalized S).nonempty
-  exact
-    { vector := S.ψ
-      unit := by
-        rw [dotProduct_comm, ← EuclideanSpace.inner_eq_star_dotProduct,
-          inner_self_eq_norm_sq_to_K, S.ψ_norm]
-        norm_num }
+  exact strategyPureState S
 
 @[simp] theorem gameStrategyPureState_vector {G : Game} (S : Strategy G) :
     letI : Nonempty (S.ιA × S.ιB) :=
@@ -230,12 +226,11 @@ theorem strategyConsRel_consistencyDefect_le
       (fun x a => heteroKron 1 ((B x).outcome a)) S.ψ ≤ delta := by
   letI : Nonempty (S.ιA × S.ιB) :=
     (strategyQuantumState_isNormalized S).nonempty
-  let pure : PureState (S.ιA × S.ιB) := gameStrategyPureState S
+  let pure : PureState (S.ιA × S.ιB) := strategyPureState S
   have hpure :
       ConsRel (pure : QuantumState (S.ιA × S.ιB)) mu
         (fun x => (A x).toSubMeas) (fun x => (B x).toSubMeas) delta := by
-    rw [← strategyQuantumState_eq_gameStrategyPureState S]
-    exact h
+    simpa [pure, strategyQuantumState] using h
   have hconverted := (consRel_iff_consistencyDefect pure mu hmu A B delta).mp hpure
   have hv : pureStateEuclideanVector pure = S.ψ := by
     exact gameStrategyPureState_euclideanVector S

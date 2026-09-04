@@ -205,35 +205,11 @@ theorem maturePointPolynomial_consistencyDefect_le
           (maturePolynomialEvaluationRight D G) S.ψ ≤ delta := by
   letI := D.toLDTFieldModel
   intro G delta h
-  letI : Nonempty (S.ιA × S.ιB) :=
-    (strategyQuantumState_isNormalized S).nonempty
-  let pure : PureState (S.ιA × S.ιB) := gameStrategyPureState S
-  have hpure :
-      ConsRel (pure : QuantumState (S.ιA × S.ιB))
-        (uniformDistribution (Point D.toLDTParameters))
-        (fun u => (matureCoordinatePointMeasurementA D S hS r u).toSubMeas)
-        (fun u => (maturePolynomialEvaluationMeasurement D G u).toSubMeas) delta := by
-    rw [← strategyQuantumState_eq_gameStrategyPureState S]
-    exact h
-  have hconverted := (consRel_iff_consistencyDefect pure
+  exact strategyConsRel_consistencyDefect_le S
     (uniformDistribution (Point D.toLDTParameters))
     (uniformDistribution_isProbability (Point D.toLDTParameters))
     (matureCoordinatePointMeasurementA D S hS r)
-    (maturePolynomialEvaluationMeasurement D G) delta).mp hpure
-  have hv : pureStateEuclideanVector pure = S.ψ := by
-    exact gameStrategyPureState_euclideanVector S
-  rw [hv] at hconverted
-  have heq := consistencyDefect_congr
-    (uniformDistribution (Point D.toLDTParameters))
-    (maturePointAPlaced D S hS r)
-    (fun u a => heteroKron
-      ((matureCoordinatePointMeasurementA D S hS r u).outcome a) 1)
-    (maturePolynomialEvaluationRight D G)
-    (fun u a => heteroKron 1
-      ((maturePolynomialEvaluationMeasurement D G u).outcome a)) S.ψ
-    (by intro u a; rfl) (by intro u a; rfl)
-  rw [heq]
-  exact hconverted
+    (maturePolynomialEvaluationMeasurement D G) delta h
 
 /-- Convert the point-on-Alice/global-on-Bob conclusion of `LDT.Test.mainFormal`
 for one simultaneous coordinate to the direct QPBT defect, with the identical

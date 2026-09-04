@@ -98,13 +98,6 @@ theorem ldStrategyToDirect_pointMeasurementB
       (directLdPointValuesOrZero L.toDirectLdParams) = _
   exact seedFiberPointMeasurement L S.B u
 
-private theorem mul_fintype_sum
-    {alpha R : Type*} [Fintype alpha] [NonUnitalNonAssocSemiring R]
-    (a : R) (f : alpha → R) :
-    a * ∑ x, f x = ∑ x, a * f x := by
-  classical
-  simpa only using Finset.mul_sum Finset.univ f a
-
 private theorem correlated_ancilla_scale
     (block : Type*) [Fintype block] [Nonempty block] :
     (Real.sqrt (Fintype.card block : ℝ) : ℂ)⁻¹ *
@@ -160,7 +153,7 @@ private theorem correlatedState_compress_left
     simpa [hphi, Matrix.blockDiagonal_apply, Matrix.kroneckerMap_apply,
       apply_ite, map_zero, ite_mul, zero_mul, Finset.sum_ite_eq,
       Finset.mem_univ, if_true, map_mul, Matrix.submatrix,
-      Matrix.sum_apply, Matrix.of_apply, mul_fintype_sum, Finset.sum_mul,
+      Matrix.sum_apply, Matrix.of_apply, Finset.mul_sum, Finset.sum_mul,
       mul_assoc, mul_comm] using h
   apply Fintype.sum_congr
   intro i
@@ -220,7 +213,7 @@ private theorem correlatedState_compress_right
     simpa [hphi, Matrix.blockDiagonal_apply, Matrix.kroneckerMap_apply,
       apply_ite, map_zero, ite_mul, zero_mul, Finset.sum_ite_eq,
       Finset.mem_univ, if_true, map_mul, Matrix.submatrix,
-      Matrix.sum_apply, Matrix.of_apply, mul_fintype_sum, Finset.sum_mul,
+      Matrix.sum_apply, Matrix.of_apply, Finset.mul_sum, Finset.sum_mul,
       mul_assoc, mul_comm] using h
   apply Fintype.sum_congr
   intro i

@@ -1,4 +1,3 @@
-import MIPStarRE.LDT.Test.MainTheorem.MainFormal
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Strategy
 import MIPStarRE.QPBT.Games.DistanceTheorems.TensorSupport
 
