@@ -2299,3 +2299,42 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   stacked lanes and the Opus/codex prover pools; Mode 1 resumes from /tmp/qpbt-main-handoff.md
   (archived under results/telemetry/owner-messages/).
 - **State at hand-back:** main at 4eaf968; open PRs: 171,170,169,162,161,160,158,155,154,153,152,151,150,149.
+
+## 2026-09-04 13:22Z - Issue #132 file-length gate repair
+
+- **Symptom:** the first pre-push gate rejected
+  `MIPStarRE/QPBT/Combining/DirectLowDegree/Transport/Consistency.lean` at
+  1,782 lines.
+- **Diagnosis:** the proof work was complete, but the new module exceeded the
+  repository's 1,000-line source-file limit.
+- **Fix:** the existing prover session was resumed with a structure-only repair:
+  split the implementation into submodules, preserve the facade and public
+  declarations, and make no proof or theorem-statement changes. The repaired
+  branch opened PR #179 and entered exact-head CI.
+- **Lesson:** include the file-length check before the first publication attempt
+  when a proof packet substantially grows one module.
+
+## 2026-09-04 13:38Z - Merge-daemon detached restart
+
+- **Symptom:** after a deliberate exact-PID reload to pick up a changed
+  adjudication list, the first `nohup` restart exited with its launching shell.
+- **Diagnosis:** the process was not fully detached from the execution session.
+- **Fix:** the missing daemon was detected before another merge operation began
+  and restarted with `setsid`; PID and command line were verified. PR #151 had
+  already completed its daemon-owned merge before the reload.
+- **Lesson:** verify persistence after every daemon reload and use a detached
+  session, not `nohup` alone, in this execution environment.
+
+## 2026-09-04 13:39Z - Adjudication follow-up parent blocked closing gate
+
+- **Symptom:** follow-up issue #177 was initially created as a sub-issue of
+  #159, while PR #171 closes #159; gate 7 would therefore have refused the
+  adjudicated merge while #177 remained open.
+- **Diagnosis:** review follow-up provenance was confused with tracker
+  containment. A closing issue cannot parent open deferred work.
+- **Fix:** #177 retained `Addresses #159` in its body but was detached from
+  #159 before the daemon reached the merge gate; `open-sub-issues 159` then
+  returned an empty list.
+- **Lesson:** deferred-review issues should link by provenance, or live under a
+  non-closing tracker, rather than become children of the issue closed by the
+  adjudicated PR.
