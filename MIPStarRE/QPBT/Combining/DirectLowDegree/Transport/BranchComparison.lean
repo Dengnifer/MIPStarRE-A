@@ -85,7 +85,7 @@ overlap is the full Born mass, which is one. -/
 theorem qBipartiteConsDefect_le_directRejectedMass
     (D : DirectLdParams) (S : Strategy (directLdGame D))
     (hS : S.IsProjective)
-    {Outcome : Type*} [Fintype Outcome] [DecidableEq Outcome]
+    {Outcome : Type*} [Fintype Outcome]
     (x y : DirectLdQuestion D)
     (readA readB : DirectLdAnswer D → Outcome)
     (hwin : ∀ a b, directLdWinPredicate D x y a b = true → readA a = readB b) :

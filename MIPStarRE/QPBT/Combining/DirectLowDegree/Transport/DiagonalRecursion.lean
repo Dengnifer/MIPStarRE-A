@@ -193,7 +193,7 @@ private def restrictedDirectionEquiv (j : Fin D.m) :
     · simp only [dif_pos h, Fin.eta]
     · simp only [dif_neg h, Equiv.symm_apply_apply]
       refine congrArg v (Fin.ext ?_)
-      show D.m - 1 - (D.m - 1 - c.val) = c.val
+      change D.m - 1 - (D.m - 1 - c.val) = c.val
       have h1 := c.isLt
       have h2 := D.hm
       omega
@@ -206,7 +206,7 @@ private def restrictedDirectionEquiv (j : Fin D.m) :
       have hc : ¬ (D.m - 1 - c.val < (Fin.rev j).val) := by omega
       simp only [dif_neg hc, Equiv.apply_symm_apply]
       refine congrArg x.1 (Fin.ext ?_)
-      show D.m - 1 - (D.m - 1 - c.val) = c.val
+      change D.m - 1 - (D.m - 1 - c.val) = c.val
       omega
     · funext c
       simp only [dif_pos c.isLt, Fin.eta]
@@ -234,7 +234,7 @@ private theorem ldtPointToDirect_extend_restrictedDirectionEquiv (j : Fin D.m)
     simp only [ldtPointToDirect, directPointEquiv_symm_apply, extendRestrictedDirection,
       dif_pos hle, restrictedDirectionEquiv, Equiv.coe_fn_mk, Equiv.symm_apply_apply]
     refine congrArg v (Fin.ext ?_)
-    show D.m - 1 - (Fin.rev c).val = c.val
+    change D.m - 1 - (Fin.rev c).val = c.val
     have hm := D.hm
     omega
 
@@ -261,7 +261,7 @@ private theorem avgOver_restrictedDiagonalSample_eq (j : Fin D.m)
       (ldtPointToDirect D (extendRestrictedDirection j free)))]
   apply avgOver_congr
   intro v
-  show H (ldtPointToDirect D u)
+  change H (ldtPointToDirect D u)
       (ldtPointToDirect D (extendRestrictedDirection j (restrictedDirectionEquiv D j v).1)) =
     H ((directPointEquiv D).symm u) (directPrefixProjection (Fin.rev j) v)
   rw [ldtPointToDirect_extend_restrictedDirectionEquiv]

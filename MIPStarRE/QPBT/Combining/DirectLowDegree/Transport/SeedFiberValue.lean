@@ -69,7 +69,7 @@ theorem ldCL_ldSpaceOfDirectResidue_directLdMap (L : LdParams) (t : LdType)
       · simp only [ldCL, ldDLineCL, ldSpaceOfDirectResidue_point,
           ldSpaceOfDirectResidue_seed, ldSpaceOfDirectResidue_direction, directLdMap,
           chiIndex_seedOfIndexResidue]
-        show lineRepMap
+        change lineRepMap
             (directPrefixProjection sample.index
               (directPrefixProjection sample.index sample.direction))
             (lineRepMap (directPrefixProjection sample.index sample.direction)
@@ -80,7 +80,7 @@ theorem ldCL_ldSpaceOfDirectResidue_directLdMap (L : LdParams) (t : LdType)
       · rfl
       · simp only [ldCL, ldDLineCL, ldSpaceOfDirectResidue_seed,
           ldSpaceOfDirectResidue_direction, directLdMap, chiIndex_seedOfIndexResidue]
-        show directPrefixProjection sample.index
+        change directPrefixProjection sample.index
             (directPrefixProjection sample.index sample.direction) j =
           directPrefixProjection sample.index sample.direction j
         rw [directPrefixProjection_idem]
@@ -178,7 +178,7 @@ private theorem directAcceptedMass_ldStrategyToDirect (L : LdParams)
       by_cases hc : directLdWinPredicate L.toDirectLdParams
           (tA, directLdMap L.toDirectLdParams tA sample)
           (tB, directLdMap L.toDirectLdParams tB sample) a' b' = true
-      · simp only [hc, eq_self_iff_true, if_true]
+      · simp only [hc, if_true]
         rw [← Finset.mul_sum, ← strategyBornWeight_eq_outcomeWeight,
           ldStrategyToDirect_bornWeight]
         simp only [hseeded, strategyBornWeight_eq_outcomeWeight]
