@@ -433,6 +433,165 @@ theorem msVarObsA_close_msCellObsB (S : Strategy msGame) (ε : ℝ)
         ms_dilated_strategy_reverse_cell_mismatch_mass S i k
     _ ≤ 36 * ε := reverse_cell_mismatch_mass_le S ε hwin i k
 
+/-! ## Substitution inside a product -/
+
+/-- Replacing the left factor of a product costs the distance between the two
+factors plus twice the cost of replacing the right factor by an operator
+commuting with both.  This is the mechanism by which a state-dependent relation
+is used in the middle of a word: the tail is first moved to the other player,
+where it commutes with everything acting on the first player. -/
+theorem CloseOn.mul_left_subst {ι : Type} [Fintype ι] [DecidableEq ι]
+    {ψ : EuclideanSpace ℂ ι} {δ η : ℝ} {X X' K K' : Op ι}
+    (hXX' : CloseOn ψ δ X X') (hKK' : CloseOn ψ η K K')
+    (hX : Xᴴ * X = 1) (hX' : X'ᴴ * X' = 1) (hK' : K'ᴴ * K' = 1)
+    (hcX : X * K' = K' * X) (hcX' : X' * K' = K' * X') :
+    CloseOn ψ (η + δ + η) (X * K) (X' * K) := by
+  have h1 : CloseOn ψ η (X * K) (X * K') := CloseOn.isometry_mul hX hKK'
+  have h2 : CloseOn ψ δ (X * K') (X' * K') := by
+    show ‖applyOperatorToState (X * K' - X' * K') ψ‖ ≤ δ
+    rw [show X * K' - X' * K' = K' * X - K' * X' by rw [hcX, hcX']]
+    exact CloseOn.isometry_mul hK' hXX'
+  have h3 : CloseOn ψ η (X' * K') (X' * K) := CloseOn.isometry_mul hX' hKK'.symm
+  exact (h1.trans h2).trans h3
+
+/-! ## Permuted row and column products -/
+
+/-- The product of Alice's three cell reflections of a constraint question, in
+any order in which the three positions occur once each, is the reflection
+attached to the sum of the three reported bits. -/
+theorem msCellObsA_prod_of (S : Strategy msGame) (i : Fin 6) (k₀ k₁ k₂ : Fin 3)
+    (hsum : ∀ a, constraintBitOrZero k₀ a + constraintBitOrZero k₁ a +
+      constraintBitOrZero k₂ a = constraintBitSum a) :
+    msCellObsA S i k₀ * msCellObsA S i k₁ * msCellObsA S i k₂ =
+      heteroKron (signObs ((msDilatedStrategy S).A (MsType.constraint i))
+        constraintBitSum) 1 := by
+  have hkey : signObs ((msDilatedStrategy S).A (MsType.constraint i))
+        (constraintBitOrZero k₀) *
+      signObs ((msDilatedStrategy S).A (MsType.constraint i)) (constraintBitOrZero k₁) *
+      signObs ((msDilatedStrategy S).A (MsType.constraint i)) (constraintBitOrZero k₂) =
+      signObs ((msDilatedStrategy S).A (MsType.constraint i)) constraintBitSum := by
+    rw [signObs_mul _ (msDilatedStrategy_isProjective_A S _),
+      signObs_mul _ (msDilatedStrategy_isProjective_A S _)]
+    congr 1
+    funext a
+    exact hsum a
+  rw [msCellObsA, msCellObsA, msCellObsA, heteroKron_mul, heteroKron_mul]
+  simp only [mul_one]
+  rw [hkey]
+
+/-- The product of Bob's three cell reflections of a constraint question, in any
+order in which the three positions occur once each, is the reflection attached
+to the sum of the three reported bits. -/
+theorem msCellObsB_prod_of (S : Strategy msGame) (i : Fin 6) (k₀ k₁ k₂ : Fin 3)
+    (hsum : ∀ a, constraintBitOrZero k₀ a + constraintBitOrZero k₁ a +
+      constraintBitOrZero k₂ a = constraintBitSum a) :
+    msCellObsB S i k₀ * msCellObsB S i k₁ * msCellObsB S i k₂ =
+      heteroKron 1 (signObs ((msDilatedStrategy S).B (MsType.constraint i))
+        constraintBitSum) := by
+  have hkey : signObs ((msDilatedStrategy S).B (MsType.constraint i))
+        (constraintBitOrZero k₀) *
+      signObs ((msDilatedStrategy S).B (MsType.constraint i)) (constraintBitOrZero k₁) *
+      signObs ((msDilatedStrategy S).B (MsType.constraint i)) (constraintBitOrZero k₂) =
+      signObs ((msDilatedStrategy S).B (MsType.constraint i)) constraintBitSum := by
+    rw [signObs_mul _ (msDilatedStrategy_isProjective_B S _),
+      signObs_mul _ (msDilatedStrategy_isProjective_B S _)]
+    congr 1
+    funext a
+    exact hsum a
+  rw [msCellObsB, msCellObsB, msCellObsB, heteroKron_mul, heteroKron_mul]
+  simp only [mul_one]
+  rw [hkey]
+
+/-- Each permuted row or column product of Alice's cell reflections is close, on
+the dilated state, to the sign prescribed by the corresponding linear
+equation. -/
+theorem msCellObsA_prod_close_of (S : Strategy msGame) (ε : ℝ)
+    (hwin : 1 - ε ≤ S.value) (i : Fin 6) (k₀ k₁ k₂ : Fin 3)
+    (hsum : ∀ a, constraintBitOrZero k₀ a + constraintBitOrZero k₁ a +
+      constraintBitOrZero k₂ a = constraintBitSum a) :
+    CloseOn (msDilatedStrategy S).ψ (12 * Real.sqrt ε)
+      (msCellObsA S i k₀ * msCellObsA S i k₁ * msCellObsA S i k₂)
+      (((bitSign (msParity i) : ℝ) : ℂ) • 1) := by
+  rw [msCellObsA_prod_of S i k₀ k₁ k₂ hsum, ← msCellObsA_prod S i]
+  exact msCellObsA_prod_close S ε hwin i
+
+/-- Each permuted row or column product of Bob's cell reflections is close, on
+the dilated state, to the sign prescribed by the corresponding linear
+equation. -/
+theorem msCellObsB_prod_close_of (S : Strategy msGame) (ε : ℝ)
+    (hwin : 1 - ε ≤ S.value) (i : Fin 6) (k₀ k₁ k₂ : Fin 3)
+    (hsum : ∀ a, constraintBitOrZero k₀ a + constraintBitOrZero k₁ a +
+      constraintBitOrZero k₂ a = constraintBitSum a) :
+    CloseOn (msDilatedStrategy S).ψ (12 * Real.sqrt ε)
+      (((bitSign (msParity i) : ℝ) : ℂ) • 1)
+      (msCellObsB S i k₀ * msCellObsB S i k₁ * msCellObsB S i k₂) := by
+  rw [msCellObsB_prod_of S i k₀ k₁ k₂ hsum, ← msCellObsB_prod S i]
+  exact msCellObsB_prod_close S ε hwin i
+
+/-! ## The two logical Pauli pairs -/
+
+/-- Alice's logical `X` reflection, read at the cell of the paper's first
+variable.  In the ideal strategy of `thm:ms-rigidity` this is `σ^X` on the first
+qubit; blueprint `ch13_qpbt_test.tex:224-253`. -/
+noncomputable def msLogicalXA (S : Strategy msGame) :
+    Op ((msDilatedStrategy S).ιA × (msDilatedStrategy S).ιB) := msVarObsA S 0
+
+/-- Alice's logical `Z` reflection, read at the cell of the paper's fifth
+variable.  In the ideal strategy of `thm:ms-rigidity` this is `σ^Z` on the first
+qubit. -/
+noncomputable def msLogicalZA (S : Strategy msGame) :
+    Op ((msDilatedStrategy S).ιA × (msDilatedStrategy S).ιB) := msVarObsA S 4
+
+/-- Bob's logical `X` reflection, read at the cell of the paper's first
+variable. -/
+noncomputable def msLogicalXB (S : Strategy msGame) :
+    Op ((msDilatedStrategy S).ιA × (msDilatedStrategy S).ιB) := msVarObsB S 0
+
+/-- Bob's logical `Z` reflection, read at the cell of the paper's fifth
+variable. -/
+noncomputable def msLogicalZB (S : Strategy msGame) :
+    Op ((msDilatedStrategy S).ιA × (msDilatedStrategy S).ιB) := msVarObsB S 4
+
+/-- Alice's logical `X` operator is a reflection. -/
+theorem isReflection_msLogicalXA (S : Strategy msGame) :
+    IsReflection (msLogicalXA S) := isReflection_msVarObsA S 0
+
+/-- Alice's logical `Z` operator is a reflection. -/
+theorem isReflection_msLogicalZA (S : Strategy msGame) :
+    IsReflection (msLogicalZA S) := isReflection_msVarObsA S 4
+
+/-- Bob's logical `X` operator is a reflection. -/
+theorem isReflection_msLogicalXB (S : Strategy msGame) :
+    IsReflection (msLogicalXB S) := isReflection_msVarObsB S 0
+
+/-- Bob's logical `Z` operator is a reflection. -/
+theorem isReflection_msLogicalZB (S : Strategy msGame) :
+    IsReflection (msLogicalZB S) := isReflection_msVarObsB S 4
+
+/-- Alice's logical `X` operator commutes exactly with Bob's logical `X`
+operator. -/
+theorem msLogicalXA_comm_msLogicalXB (S : Strategy msGame) :
+    msLogicalXA S * msLogicalXB S = msLogicalXB S * msLogicalXA S :=
+  msVarObsA_comm_msVarObsB S 0 0
+
+/-- Alice's logical `X` operator commutes exactly with Bob's logical `Z`
+operator. -/
+theorem msLogicalXA_comm_msLogicalZB (S : Strategy msGame) :
+    msLogicalXA S * msLogicalZB S = msLogicalZB S * msLogicalXA S :=
+  msVarObsA_comm_msVarObsB S 0 4
+
+/-- Alice's logical `Z` operator commutes exactly with Bob's logical `X`
+operator. -/
+theorem msLogicalZA_comm_msLogicalXB (S : Strategy msGame) :
+    msLogicalZA S * msLogicalXB S = msLogicalXB S * msLogicalZA S :=
+  msVarObsA_comm_msVarObsB S 4 0
+
+/-- Alice's logical `Z` operator commutes exactly with Bob's logical `Z`
+operator. -/
+theorem msLogicalZA_comm_msLogicalZB (S : Strategy msGame) :
+    msLogicalZA S * msLogicalZB S = msLogicalZB S * msLogicalZA S :=
+  msVarObsA_comm_msVarObsB S 4 4
+
 end
 
 end MIPStarRE.QPBT.MagicSquareRigidity
