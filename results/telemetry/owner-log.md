@@ -202,3 +202,5 @@ to merge by hand. Handoff: results/telemetry/owner-messages/handoff-to-codex-mai
   and now nudges the owner session through #26 rather than a tmux pane.
 - **Hand-back:** on the owner's word; recorded as event=handback with the
   state at that moment.
+- 22:45Z: Mode 2 resumed on the owner order of 22:10Z (codex : Opus : Fable = 5:5:2); codex main posted its state and exited; takeover-telemetry.sh boilerplate describes the 2026-09-03 takeover, this entry is the accurate one. Dispatched: Fable #134, #116, #172 (math-fix); Opus #117, #199, pre-review PR 195; codex lanes 107, 157, 174, 180, 182, 183, 200 continue.
+- 23:05Z: owner confirmed the math-gap rule defaults with a larger budget (10 sessions / 1.5 working days) and asked that design choices be recorded in telemetry with a findable summary: results/telemetry/design-decisions.md created (register of all owner/operator design decisions so far) and the rule written into events.md and the #26 body.
