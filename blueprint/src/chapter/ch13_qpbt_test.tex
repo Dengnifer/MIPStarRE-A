@@ -3,7 +3,7 @@
 % Paper label sec:pauli-verifier kept for cross-reference fidelity; it resolves to this chapter.
 \label{sec:pauli-verifier}
 
-This chapter defines the two testing primitives underlying the question-reduction step: the \emph{classical low individual degree game}, in its simultaneous form, and the \emph{Pauli basis test}, a nonlocal game built from the classical game together with the Magic Square game. We state the quantum soundness of the classical game (Theorem~\ref{lem:ld-soundness}, imported, with the facts required by the identification, which remain to be proved, recorded in \cite{gap:qpbt_ld-dimension-divisibility}; see Remark~\ref{rem:ld-soundness-provider}), the rigidity of the Magic Square game for symmetric strategies (Theorem~\ref{thm:ms-rigidity}) and the one-sided consequence needed for arbitrary strategies (Lemma~\ref{lem:ms-one-sided-anticommutation}), with the correction documented in \cite{gap:qpbt_ms-rigidity-symmetric-strategies}, completeness of the Pauli basis test (Lemma~\ref{lem:pauli-completeness}), and the main soundness theorem for the Pauli basis test (Theorem~\ref{thm:pauli}), whose proof occupies Chapters~\ref{chap:qpbt-observables}--\ref{chap:qpbt-extraction} and is completed in Chapter~\ref{chap:qpbt-extraction} only modulo the proof obligation documented in \cite{gap:qpbt_ld-dimension-divisibility}. The chapter closes with the qubit form of the soundness statement (Corollary~\ref{cor:pauli-binary}) and the canonical parameter choice with its soundness bound (Definition~\ref{def:introparams}, Lemma~\ref{lem:delta-bound}).
+This chapter defines the two testing primitives underlying the question-reduction step: the \emph{classical low individual degree game}, in its simultaneous form, and the \emph{Pauli basis test}, a nonlocal game built from the classical game together with the Magic Square game. We state the quantum soundness of the classical game (Theorem~\ref{lem:ld-soundness}, imported, with the facts required by the identification, which remain to be proved, recorded in \cite{gap:qpbt_ld-dimension-divisibility}; see Remark~\ref{rem:ld-soundness-provider}), the rigidity of the Magic Square game (Theorem~\ref{thm:ms-rigidity}, imported), completeness of the Pauli basis test (Lemma~\ref{lem:pauli-completeness}), and the main soundness theorem for the Pauli basis test (Theorem~\ref{thm:pauli}), whose proof occupies Chapters~\ref{chap:qpbt-observables}--\ref{chap:qpbt-extraction} and is completed in Chapter~\ref{chap:qpbt-extraction} only modulo the proof obligation documented in \cite{gap:qpbt_ld-dimension-divisibility}. The chapter closes with the qubit form of the soundness statement (Corollary~\ref{cor:pauli-binary}) and the canonical parameter choice with its soundness bound (Definition~\ref{def:introparams}, Lemma~\ref{lem:delta-bound}).
 
 Throughout, the two players are denoted $\mathrm A$ and $\mathrm B$; for $w \in \{\mathrm A,\mathrm B\}$ we write $\overline w$ for the other player. Games, strategies, values, conditionally linear (CL) functions and distributions, typed distributions sampled from the edges of a graph, and the state-dependent approximation $\approx_\delta$ between families of measurement operators are as in Chapter~\ref{chap:qpbt-games}; the algebraic material on lines, canonical linear maps, the low-degree encoding, and generalized Pauli observables is from Chapter~\ref{chap:qpbt-algebra}.
 
@@ -221,31 +221,15 @@ We recall the Magic Square game of Mermin and Peres. It is a simple self-test fo
 	The $\mathsf{Constraint}$ player answers with three bits $(\beta_{v_1}, \beta_{v_2}, \beta_{v_3}) \in \F_2^3$, where $(v_1,v_2,v_3)$ are the indices of the three variables of $\mathsf{Constraint}_i$; the $\mathsf{Variable}$ player answers with a single bit $\gamma \in \F_2$. The players win if and only if the $\mathsf{Constraint}$ player's answer satisfies the equation associated with $\mathsf{Constraint}_i$ and $\gamma = \beta_j$.
 \end{definition}
 
-The following theorem records the full self-testing (rigidity) properties of
-the Magic Square game for symmetric strategies.  The subsequent lemma isolates
-the one-sided anticommutation consequence used in the soundness analysis of the
-Pauli basis test, where the strategy need not be symmetric.
+The following theorem records the self-testing (rigidity) properties of the Magic Square game. It is used in the soundness analysis of the Pauli basis test to enforce anticommutation relations between certain pairs of observables.
 With zero-based labels, the paper's variables $1$ and $5$ have labels $0$ and
 $4$, respectively.
 
 \begin{theorem}[Rigidity of the Magic Square game]\label{thm:ms-rigidity}
-		\lean{MIPStarRE.QPBT.exists_ms_rigidity}
-		% tracked in issue #172
-		\uses{def:ms-game, def:symmetric-game, def:EPR,
-			def:povm-distance}
-		View $\mathfrak{G}^{\mathrm{MS}}$ as a symmetric game, and let
-		$\mathcal S = (\ket{\psi}, M)$ be a symmetric strategy that succeeds in
-		it with probability at least $1-\eps$, where
-		$\ket{\psi} \in \hilb_{\mathrm A} \ot \hilb_{\mathrm B}$.  Write
-		$A=B=M$ for the two players' measurement families.  Then there exist local
-		isometries $\phi_{\mathrm A}\colon \hilb_{\mathrm A} \to
-		\hilb_{\mathrm A'} \ot \hilb_{\mathrm A''}$ and
-		$\phi_{\mathrm B}\colon \hilb_{\mathrm B} \to
-		\hilb_{\mathrm B'} \ot \hilb_{\mathrm B''}$, where
-		$\hilb_{\mathrm A'}, \hilb_{\mathrm B'} \cong (\C^2)^{\ot 2}$ and
-		$\hilb_{\mathrm A''}, \hilb_{\mathrm B''}$ are finite dimensional, and a
-		state $\ket{\mathrm{aux}} \in \hilb_{\mathrm A''} \ot
-		\hilb_{\mathrm B''}$, such that:
+	\lean{MIPStarRE.QPBT.exists_ms_rigidity}
+	\leanok
+	\uses{def:ms-game, def:tensor-product-value, def:EPR, def:povm-distance}
+	Let $\mathcal S = (\ket{\psi}, A, B)$ be a strategy that succeeds in the Magic Square game $\mathfrak{G}^{\mathrm{MS}}$ with probability $1-\eps$, where $\ket{\psi} \in \hilb_{\mathrm A} \ot \hilb_{\mathrm B}$. Then there exist local isometries $\phi_{\mathrm A}\colon \hilb_{\mathrm A} \to \hilb_{\mathrm A'} \ot \hilb_{\mathrm A''}$ and $\phi_{\mathrm B}\colon \hilb_{\mathrm B} \to \hilb_{\mathrm B'} \ot \hilb_{\mathrm B''}$, where $\hilb_{\mathrm A'}, \hilb_{\mathrm B'} \cong (\C^2)^{\ot 2}$ and $\hilb_{\mathrm A''}, \hilb_{\mathrm B''}$ are finite dimensional, and a state $\ket{\mathrm{aux}} \in \hilb_{\mathrm A''} \ot \hilb_{\mathrm B''}$, such that:
 	\begin{enumerate}
 		\item $\bigl\| \phi_{\mathrm A} \ot \phi_{\mathrm B} \ket{\psi} - \ket{\mathrm{EPR}_2}^{\ot 2} \ot \ket{\mathrm{aux}} \bigr\| \le O(\sqrt\eps)$;
 		\item letting $\tilde A^x_a = \phi_{\mathrm A} A^x_a \phi_{\mathrm A}^\dagger$ and $\tilde B^y_b = \phi_{\mathrm B} B^y_b \phi_{\mathrm B}^\dagger$,
@@ -262,57 +246,10 @@ $4$, respectively.
 		\tilde A^{\mathsf{Variable}_1} \tilde A^{\mathsf{Variable}_5} \ot I_{\mathrm{B'B''}} &\approx_{\sqrt\eps} -\, \tilde A^{\mathsf{Variable}_5} \tilde A^{\mathsf{Variable}_1} \ot I_{\mathrm{B'B''}}\;,\\
 		I_{\mathrm{A'A''}} \ot \tilde B^{\mathsf{Variable}_1} \tilde B^{\mathsf{Variable}_5} &\approx_{\sqrt\eps} -\, I_{\mathrm{A'A''}} \ot \tilde B^{\mathsf{Variable}_5} \tilde B^{\mathsf{Variable}_1}\;,
 	\end{align*}
-		where, for operators $M$, $N$ that are not POVM elements, the notation $M \approx_\delta N$ means $\bra{\psi} (M-N)^\dagger (M-N) \ket{\psi} \le O(\delta)$ with respect to the same state.  The symmetry restriction corrects the false arbitrary-strategy statement in the source; see \cite{gap:qpbt_ms-rigidity-symmetric-strategies}.
+	where, for operators $M$, $N$ that are not POVM elements, the notation $M \approx_\delta N$ means $\bra{\psi} (M-N)^\dagger (M-N) \ket{\psi} \le O(\delta)$ with respect to the same state.
 \end{theorem}
 \begin{proof}
-		Theorem~6.9 of~\cite{Coladangelo2017Robust} treats the one-way game in
-		which one fixed player receives the constraint.  For a symmetric strategy,
-		the two orientations in $\mathfrak{G}^{\mathrm{MS}}$ have equal success
-		probability, so its value is also the value of either one-way strategy and
-		the cited theorem applies.  Without symmetry this reduction is false, as
-		shown by the two-copy counterexample in
-		\cite{gap:qpbt_ms-rigidity-symmetric-strategies}.  The cited theorem
-		measures state closeness in trace norm at scale $O(\eps)$; converting to
-		Euclidean distance gives $O(\sqrt\eps)$.  Its ideal observables for
-		$\mathsf{Variable}_1$ and $\mathsf{Variable}_5$ are $I \ot \sigma^Z$ and
-		$\sigma^Z\sigma^X \ot \sigma^Z\sigma^X$; a local change of basis sends
-		them to $\sigma^X \ot I$ and $\sigma^Z \ot I$, respectively.
-\end{proof}
-
-\begin{lemma}[One-sided anticommutation in the Magic Square game]
-	\label{lem:ms-one-sided-anticommutation}
-	\uses{def:ms-game, def:povm-distance}
-	Let $\mathcal S=(\ket\psi,A,B)$ be a projective strategy that succeeds in
-	the role-symmetric Magic Square game with probability at least $1-\eps$,
-	where $\eps\geq0$.  For $j\in\{1,5\}$, let
-	$A^{\mathsf{Variable}_j}=A^{\mathsf{Variable}_j}_0-
-	A^{\mathsf{Variable}_j}_1$ and define
-	$B^{\mathsf{Variable}_j}$ analogously.  Then, with respect to
-	$\ket\psi$,
-	\begin{align*}
-		A^{\mathsf{Variable}_1}A^{\mathsf{Variable}_5}\ot\Id_{\mathrm B}
-		&\approx_{\sqrt\eps}
-		- A^{\mathsf{Variable}_5}A^{\mathsf{Variable}_1}\ot\Id_{\mathrm B},\\
-		\Id_{\mathrm A}\ot
-		B^{\mathsf{Variable}_1}B^{\mathsf{Variable}_5}
-		&\approx_{\sqrt\eps}
-		-\Id_{\mathrm A}\ot
-		B^{\mathsf{Variable}_5}B^{\mathsf{Variable}_1}.
-	\end{align*}
-\end{lemma}
-\begin{proof}
-	Split the value of the symmetric game according to which player receives
-	the constraint.  The average failure probability of the two orientations is
-	at most $\eps$, so each orientation fails with probability at most
-	$2\eps$.  Apply the one-way Magic Square self-test of
-	\cite[Theorem~6.9]{Coladangelo2017Robust} to each orientation separately.
-	In the first orientation it identifies the variable observables of the
-	second player with anticommuting Pauli observables; reversing the roles gives
-	the same conclusion for the first player.  Pulling these relations back
-	through the local isometries and absorbing the factor two into the universal
-	constant proves the two displayed estimates.  This consequence does not
-	require the full strategy to be symmetric; see
-	\cite{gap:qpbt_ms-rigidity-symmetric-strategies}.
+	This result is imported from Theorem~6.9 of~\cite{Coladangelo2017Robust}. There are two minor differences between their statement and the one given here. First, they state a robustness of $O(\eps)$, but measure the closeness of the actual and ideal states in trace norm; expressed as the Euclidean distance between $\phi_{\mathrm A} \ot \phi_{\mathrm B}\ket{\psi}$ and $\ket{\mathrm{EPR}_2}^{\ot 2} \ot \ket{\mathrm{aux}}$, this becomes $O(\sqrt\eps)$. Second, their ideal observables for the $\mathsf{Variable}_1$ and $\mathsf{Variable}_5$ questions are $I \ot \sigma^Z$ and $\sigma^Z\sigma^X \ot \sigma^Z\sigma^X$; under a local change of basis these are equivalent to $\sigma^X \ot I$ and $\sigma^Z \ot I$, respectively.
 \end{proof}
 
 The converse construction shows that any pair of anticommuting binary observables yields a perfect strategy for the Magic Square game.
@@ -492,7 +429,7 @@ We now state the main soundness property of the Pauli basis test; the statement 
 	\end{enumerate}
 \end{theorem}
 
-The proof of Theorem~\ref{thm:pauli} is the adaptation, to low individual degree, of the analysis of the quantum low-degree test of Natarajan and Vidick; it is developed in Chapters~\ref{chap:qpbt-observables} and~\ref{chap:qpbt-combining} and concluded in Chapter~\ref{chap:qpbt-extraction}, where the argument is complete only modulo the unresolved divisibility obligation documented in \cite{gap:qpbt_ld-dimension-divisibility}. It relies on the classical soundness theorem (Theorem~\ref{lem:ld-soundness}) and on the one-sided Magic Square anticommutation consequence (Lemma~\ref{lem:ms-one-sided-anticommutation}).
+The proof of Theorem~\ref{thm:pauli} is the adaptation, to low individual degree, of the analysis of the quantum low-degree test of Natarajan and Vidick; it is developed in Chapters~\ref{chap:qpbt-observables} and~\ref{chap:qpbt-combining} and concluded in Chapter~\ref{chap:qpbt-extraction}, where the argument is complete only modulo the unresolved divisibility obligation documented in \cite{gap:qpbt_ld-dimension-divisibility}. It relies on the classical soundness theorem (Theorem~\ref{lem:ld-soundness}) and on the rigidity of the Magic Square game (Theorem~\ref{thm:ms-rigidity}).
 
 The strategies appearing in Lemma~\ref{lem:pauli-completeness} and in the conclusion of Theorem~\ref{thm:pauli} are phrased in terms of qudit Pauli measurements and maximally entangled states of $q$-dimensional qudits. For the intended application it is more convenient to work with qubits: since the field sizes $q$ used here are powers of $2$, the conclusions can be restated in terms of qubit EPR pairs and qubit Pauli measurements.
 

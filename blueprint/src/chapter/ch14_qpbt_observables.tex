@@ -783,7 +783,7 @@ extracts from the strategy.
 	factors interchanged.
 \end{lemma}
 \begin{proof}
-	\uses{lem:qld-win-implications, lem:povm-to-obs, fact:data-processing, fact:agreement, lem:commutation-analysis, lem:ms-one-sided-anticommutation, fact:add-a-proj, def:strategy-observables}
+	\uses{lem:qld-win-implications, lem:povm-to-obs, fact:data-processing, fact:agreement, lem:commutation-analysis, thm:ms-rigidity, fact:add-a-proj, def:strategy-observables}
 	For~\eqref{eq:pts-obs-consistency}: item~\ref{enu:qld-cons} of
 	Lemma~\ref{lem:qld-win-implications} and the data processing inequality
 	(Lemma~\ref{fact:data-processing}), using that the type
@@ -812,9 +812,8 @@ extracts from the strategy.
 	Lemma~\ref{lem:povm-to-obs} relates $X^{r_X}(u_X)$ and $Z^{r_Z}(u_Z)$
 	to the Magic Square observables
 	$M^{\mathrm{Variable}_j,\omega} = M^{\mathrm{Variable}_j,\omega}_0 - M^{\mathrm{Variable}_j,\omega}_1$
-	for $j \in \{1,5\}$.  For each anticommuting $\omega$, the one-sided
-	Magic Square consequence (Lemma~\ref{lem:ms-one-sided-anticommutation})
-	applied with
+	for $j \in \{1,5\}$; for each anticommuting $\omega$, the Magic Square
+	rigidity theorem (Theorem~\ref{thm:ms-rigidity}) applied with
 	$\eps_\omega = 1 - \Lambda_\omega$ gives
 	$\Id \ot M^{\mathrm{Variable}_1,\omega} M^{\mathrm{Variable}_5,\omega} \approx_{\sqrt{\eps_\omega}} - \Id \ot M^{\mathrm{Variable}_5,\omega} M^{\mathrm{Variable}_1,\omega}$;
 	averaging over anticommuting $\omega$ with Jensen's inequality
