@@ -1,4 +1,5 @@
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Soundness
+import MIPStarRE.QPBT.Combining.DirectLowDegree.GameValue
 
 /-!
 # The directly indexed low-degree game

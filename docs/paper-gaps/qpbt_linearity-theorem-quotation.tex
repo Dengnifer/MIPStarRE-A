@@ -1,0 +1,134 @@
+\documentclass[11pt]{article}
+
+\usepackage{amsmath,amssymb}
+\usepackage{xurl}
+\usepackage[hidelinks]{hyperref}
+\setlength{\emergencystretch}{2em}
+
+\input{command}
+\renewcommand{\ghissue}[1]{%
+  \href{https://github.com/Dengnifer/MIPStarRE-A/issues/#1}{GitHub issue \##1}}
+
+\title{The Quoted Quantum Linearity Theorem in the Pauli Basis Analysis}
+\author{}
+\date{2026-09-03}
+
+\begin{document}
+\maketitle
+
+\section{At a glance}
+
+\begin{itemize}
+  \item \textbf{Difficulty.} Medium.  The source quotes a fiberwise consequence
+  of a state-dependent quantum linearity theorem, but suppresses two averages
+  and a compatibility argument for the auxiliary spaces.
+  \item \textbf{Estimated weight.} One faithful theorem for a single family,
+  followed by a finite common-extension construction that makes the auxiliary space
+  uniform over the outer parameters.
+  \item \textbf{Mathlib/project split.} Finite direct sums, extensions of
+  operators, and squared norms are standard linear algebra.  The imported
+  quantum linearity theorem and its state-dependent metric are project-level
+  inputs.
+  \item \textbf{Key mathematical inputs.} Theorem~10 of
+  \cite{Natarajan2017Linearity}, finite averaging, and extension by the identity
+  on orthogonal summands.  This reduction is tracked in
+  \ghissue{19}.
+\end{itemize}
+
+\section{Key theorem forms}
+
+Let $H$ be a finite-dimensional Hilbert space, let $\rho$ be an arbitrary
+density operator on $H$, and let $u\mapsto O^u$ be binary observables on $H$,
+indexed by $\mathbb F_2^t$.  The cited theorem assumes the averaged
+correlation estimate
+\[
+  \mathop{\mathbb E}_{u,v}
+  \operatorname{Tr}\!\left(O^u O^v O^{u+v}\rho\right) \geq 1-\delta.
+\]
+It produces an auxiliary space $H'$, a unit vector $\mathrm{anc}\in H'$, and
+binary observables $L^u$ on $H\otimes H'$ satisfying, with
+$\rho'=\rho\otimes|\mathrm{anc}\rangle\langle\mathrm{anc}|$,
+\[
+  L^uL^v=L^{u+v}
+  \quad\text{for every }u,v.
+\]
+Moreover,
+\[
+  \mathop{\mathbb E}_{u}
+  \operatorname{Tr}\!\left((L^u-O^u\otimes I_{H'})^\dagger
+    (L^u-O^u\otimes I_{H'})\,\rho'\right)\leq\delta.
+\]
+In particular, $L^0=I$: exact linearity gives $(L^0)^2=L^0$, while an
+observable is invertible.
+
+The chapter needs a parameterized version.  For each pair $(x,z)$ it applies
+the theorem to $(r,s)\mapsto O^{x,z,r,s}$.  Since the provider theorem accepts
+the actual nonnegative defect on each fiber, no assumption that a fiber defect
+is at most one, and no good--bad fiber split, is needed.  One must still
+formulate the finite common-extension step that makes the auxiliary space
+uniform over $(x,z)$.
+
+\section{Comparison with the quoted statement}
+
+Lines~711--725 of
+\path{references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex} quote the
+linearity theorem.  The displayed hypothesis correctly averages over both
+group variables.  The displayed conclusion, however, says that the corrected
+observable is close for every $u$, whereas Theorem~10 of the cited work gives
+closeness only on average over $u$ \cite{Natarajan2017Linearity}.  The quotation
+also inserts $\delta\leq1$, which is absent from the provider theorem and would
+unnecessarily obstruct applying it with a fiber's actual defect.  The assertion
+at the identity follows from exact linearity as above.
+
+Lines~825--832 construct the family $O^{x,z,r,s}$ and establish approximate
+linearity only after averaging over $x,z,r,r',s,s'$.  They then apply the
+single-family theorem separately for every $(x,z)$ and state that sufficiently
+many zero ancillas avoid a further extension.  The remaining implicit step is
+to make the theorem's possibly fiber-dependent auxiliary spaces uniform.
+
+The finite setting admits a standard repair.  Apply the theorem on each fiber
+with its actual defect, choose one finite auxiliary space large enough for all
+returned spaces, and embed each returned space so that its unit vector maps to
+one fixed vector.  Extend the conjugated observables by the identity on the
+orthogonal complement.  The embeddings may depend on the fiber because the
+observables do.  Averaging then yields the conclusion used later in the
+chapter.  This is an open reduction, not a counterexample to the quoted theorem
+or to the source's eventual combined-measurement conclusion.
+
+\section{Blueprint and formalization status}
+
+Theorem~\path{thm:linearity} and
+Remark~\path{rem:linearity-import} in
+\path{blueprint/src/chapter/ch15_qpbt_combining.tex} record respectively the
+averaged provider theorem and the common-ancilla obligation for its fiberwise
+use.  The relevant material is at lines~98--147 and 149--191 of that chapter.
+
+The declaration \path{exists_exactly_linear_observables} in
+\path{MIPStarRE/QPBT/Combining/Linearity.lean} assumes a nonnegative defect, a
+positive semidefinite trace-one operator, binary observables, and the averaged
+three-observable correlation.  It returns one finite ancillary space and
+normalized ancillary vector for that family, exactly linear binary observables
+on the extension, and only the averaged squared-distance bound with the same
+defect.  It neither assumes $\delta\leq1$ nor asserts pointwise closeness.  Its
+statement therefore matches the provider-faithful blueprint theorem rather
+than the strengthened quotation in the QPBT paper.  Its proof remains open,
+and no Lean declaration yet supplies the finite common-extension construction
+for the family indexed by $(x,z)$.
+
+Issue~\#19 introduced this discrepancy record for the extraction skeleton;
+\ghissue{47} owns the Stage~4.3 proof work consumed downstream.  The chapter-16
+extraction declarations consume the concrete \path{GlobalPairWitness}; they
+do not assume a new fiberwise linearity hypothesis or a common ancillary space.
+
+\section{Conclusion}
+
+The primary discrepancy is a quantifier mismatch in the quotation: the cited
+linearity theorem gives average, not pointwise, closeness.  Its use for the
+family indexed by $(x,z)$ also requires an explicit finite common-extension
+argument.  Both are open formal reductions compatible with the intended
+source conclusion.
+
+\bibliographystyle{alpha}
+\bibliography{references}
+
+\end{document}
