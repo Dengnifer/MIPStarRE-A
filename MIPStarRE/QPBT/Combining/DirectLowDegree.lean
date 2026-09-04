@@ -5,6 +5,7 @@ import MIPStarRE.QPBT.Combining.DirectLowDegree.GameValue
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.PassConversion
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.SeedFiberValue
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Error
+import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Simultaneous
 
 /-!
 # The directly indexed low-degree game
@@ -39,7 +40,13 @@ the mature theorem is applied, bounds on the three terms of its error
 function, and the absorption of the resulting simultaneous-measurement
 estimate into the error function of `lem:ld-soundness`.
 `Transport.Consistency` identifies polynomial outcomes and transports the
-three mature consistency conclusions to the direct game.
+three consistency conclusions of the low individual degree theorem to the
+direct game.  `Transport.Simultaneous` applies that theorem to every
+coordinate, combines coordinate polynomial measurements by the palindromic
+product of `lem:ld-sandwich`, and proves the polynomial-tuple conclusion of
+`lem:ld-soundness` for simultaneity parameter `1`; it also records why the
+coordinate conclusions do not determine simultaneous measurements for larger
+parameters.
 
 ## References
 
