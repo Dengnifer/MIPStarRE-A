@@ -114,16 +114,16 @@ be arbitrarily small, this failure is not confined to the large-error boundary.
 \section{Comparison with the blueprint and formalization}
 
 The blueprint reproduces the source theorem and its unrestricted nonnegative
-error parameters.  The formal predicate implements the product contract
-literally, and the paper-facing pasting declaration retains the same theorem
-form.%
+error parameters.  The formal predicate now states the corrected sum bound
+$A(\eta^r+\delta^s)$ on the closed nonnegative quadrant, and the paper-facing
+pasting declaration retains the same theorem form.%
 \footnote{The polynomial predicate is defined in
 \doclink{MIPStarRE/QPBT/Games/ErrorFunctions.lean}; the paper-facing theorem is
 \leanid{exists\_pasting\_error} in
 \doclink{MIPStarRE/QPBT/Games/Sandwich.lean}.}
-The declaration must remain without a proof-complete blueprint marker until the
-scalar contract is corrected or the source theorem is restricted.  The
-operator-valued pasting construction itself is not refuted by this example.
+The declaration must remain without a proof-complete blueprint marker until
+the quantitative estimate is formalized.  The operator-valued pasting
+construction itself is not refuted by this example.
 
 \section{Conclusion}
 

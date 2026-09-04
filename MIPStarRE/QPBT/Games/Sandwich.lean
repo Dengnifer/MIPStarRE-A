@@ -119,12 +119,13 @@ families. This is `lem:pasting`, blueprint `ch12_qpbt_games.tex:517-546`, paper
 obstruction documented in `docs/paper-gaps/qpbt_pasting-product-error.tex`, but
 the available proof still uses the symmetric-strategy convention stated at
 `references/neexp-paper/05_quantum_preliminaries.tex:176-180`. In particular,
-the argument at lines 1158-1175 moves a fine `G₂` effect between tensor
-factors. This declaration quantifies an arbitrary bipartite vector and assumes
-only the forward marginal comparisons, so that move is not derivable from its
-hypotheses. This remaining boundary is tracked by issue #201. Elimination:
-prove a one-sided replacement for the register-move step, or expose the
-source's permutation-invariance boundary in a paper-aligned statement. -/
+the argument at `05_quantum_preliminaries.tex:1158-1175` moves a `G₂` effect
+between the two tensor factors. This declaration quantifies an arbitrary
+bipartite vector and assumes only the forward marginal comparisons, so that
+move is not derivable from its hypotheses. This remaining boundary is tracked
+by issue #201. Elimination: prove a one-sided replacement for the register-move
+step, or expose the source's permutation-invariance boundary in a paper-aligned
+statement. -/
 theorem exists_pasting_error :
     ∃ δp : ℝ → ℝ → ℝ, IsPolyErr₂ δp ∧
       ∀ {X Y₁ Y₂ R₁ R₂ Γ₁ Γ₂ ι : Type*}
