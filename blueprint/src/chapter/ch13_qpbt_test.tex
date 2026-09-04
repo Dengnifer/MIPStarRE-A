@@ -332,6 +332,8 @@ The converse construction shows that any pair of anticommuting binary observable
 The Pauli basis test is the quantum low individual degree test of Natarajan and Vidick, in the slightly modified form introduced by Natarajan and Wright~\cite{Natarajan2018NEEXP}. Informally, the test certifies that the players share the state $\ket{\mathrm{EPR}_q}^{\ot M}$, where $M = 2^m$. On a question of type $(\mathsf{Pauli}, W)$ with $W \in \{X,Z\}$, a player is expected to measure the generalized Pauli basis POVM $\{\tau^W_h\}_{h \in \F_q^M}$ of Chapter~\ref{chap:qpbt-algebra} and report the outcome $h$. Most subtests probe limited information about $h$: given a point $u_W \in \F_q^m$, a player is expected to report the evaluation $g_h(u_W)$ of the low-degree encoding $g_h$ of $h$, and for a fixed basis $W$ these probes are checked against each other by the classical low individual degree game of Section~\ref{sec:ld-verifier}. Consistency \emph{between} the two bases is checked through two-outcome probes: given additionally $r_W \in \F_q$, a player reports $\tr(g_h(u_W)\, r_W) \in \F_2$. The two binary measurements obtained in this way for $W = X$ and $W = Z$ either commute or anticommute, according to the value $\gamma \in \F_2$ of Equation~\eqref{eq:gamma-value} below. When $\gamma = 0$ the verifier checks commutation directly by asking for both bits simultaneously; when $\gamma = 1$ the verifier checks anticommutation by playing the Magic Square game, using Theorem~\ref{thm:ms-from-ac}.
 
 \begin{definition}[Admissible parameters]\label{def:admissible}
+	\lean{MIPStarRE.QPBT.AdmissibleParams, MIPStarRE.QPBT.AdmissibleParams.one_le_m}
+	\leanok
 	\uses{def:admissible-size}
 	% The source introduces q, m, d in \N with \N the positive integers
 	% (references/qpbt-paper/04_preliminaries.tex:6 and
@@ -348,6 +350,10 @@ The Pauli basis test is the quantum low individual degree test of Natarajan and 
 \end{definition}
 
 \begin{definition}[Question distribution of the Pauli basis test]\label{def:pauli-question-distribution}
+	\lean{MIPStarRE.QPBT.PauliType, MIPStarRE.QPBT.pauliCLLevel, MIPStarRE.QPBT.pauliCL}
+	\lean{MIPStarRE.QPBT.isCondLinear_pauliCL, MIPStarRE.QPBT.pauliEdges}
+	\lean{MIPStarRE.QPBT.pauliQuestionDistribution}
+	\leanok
 	\uses{def:admissible, def:ld-question-distribution, def:ms-game, def:cl-func, def:cl-dist, def:graph-distribution}
 	% Admissibility of the full tuple is required here, not only the divisibility m | q:
 	% the source parametrizes the Pauli basis test by the tuple qldparams introduced
@@ -404,6 +410,9 @@ The Pauli basis test is the quantum low individual degree test of Natarajan and 
 \end{proof}
 
 \begin{definition}[Win predicate of the Pauli basis test]\label{def:pauli-win-predicate}
+	\lean{MIPStarRE.QPBT.PauliAnswer, MIPStarRE.QPBT.validPauliAnswer}
+	\lean{MIPStarRE.QPBT.pauliWinPredicate, MIPStarRE.QPBT.pauliBasisTest}
+	\leanok
 	\uses{def:pauli-question-distribution, def:ld-win-predicate, def:ms-game, def:indicator-vector, def:admissible}
 	Fix an admissible tuple $\mathsf{qldparams} = (q,m,d)$ (Definition~\ref{def:admissible}) and let $M = 2^m$. Answers in the game $\mathfrak{G}^{\mathrm{Pauli}}_{\mathsf{qldparams}}$ take the following forms, depending on the question type; answers not of the prescribed form are rejected.
 	% The paper's format table writes the line contents loosely as (u_W, s) and (u_W, s, v);

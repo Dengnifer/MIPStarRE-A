@@ -160,6 +160,7 @@ this is the source of the terminology.
 	\label{fact:omega-anticomm-prob}
 	\lean{MIPStarRE.QPBT.anticommProb, MIPStarRE.QPBT.anticommProb_eq}
 	\lean{MIPStarRE.QPBT.commProb, MIPStarRE.QPBT.commProb_ge_half}
+	\lean{MIPStarRE.QPBT.commProb_eq_one_sub_anticommProb}
 	\lean{MIPStarRE.QPBT.anticommProb_ge_of_m_le_q}
 	\lean{MIPStarRE.QPBT.anticommProb_ge_of_one_le_md}
 	\leanok
@@ -192,6 +193,7 @@ this is the source of the terminology.
 	documented in \cite{gap:qpbt_anticommuting-probability}.
 \end{lemma}
 \begin{proof}
+	\leanok
 	\uses{def:low-degree-encoding, def:indicator-vector, def:admissible-size, def:binary-representation, lem:downsize_field, lem:one}
 	By the definition of the indicator vector
 	(Definition~\ref{def:indicator-vector}), expanding the product over the
@@ -703,6 +705,7 @@ extracts from the strategy.
 	in \cite{gap:qpbt_win-implications-corrections}.
 \end{lemma}
 \begin{proof}
+	\leanok
 	\uses{fact:omega-anticomm-prob, fact:agreement, def:admissible, def:pauli-question-distribution, def:pauli-win-predicate, def:ld-win-predicate, def:ideg-deg-polynomials, def:consistency}
 	The question types are sampled according to the type graph of the Pauli
 	basis test (Definition~\ref{def:pauli-question-distribution}), which has
@@ -746,6 +749,13 @@ extracts from the strategy.
 	is documented in \cite{gap:qpbt_win-implications-corrections}. Finally, that all approximations
 	also hold with $\approx_\eps$ in place of $\simeq_\eps$ is immediate
 	from Lemma~\ref{fact:agreement}.
+	The forms with the tensor factors interchanged are the same subtests
+	read on the reversed ordered question pair. That pair is again sampled
+	by the type graph, whose edges are unordered
+	(Definition~\ref{def:pauli-question-distribution}), and the win
+	predicate (Definition~\ref{def:pauli-win-predicate}) lists every clause
+	together with its mirror image, so exchanging the two questions and the
+	two answers leaves it unchanged.
 \end{proof}
 
 \begin{lemma}[Winning implications for observables]
@@ -783,7 +793,7 @@ extracts from the strategy.
 	factors interchanged.
 \end{lemma}
 \begin{proof}
-	\uses{lem:qld-win-implications, lem:povm-to-obs, fact:data-processing, fact:agreement, lem:commutation-analysis, thm:ms-rigidity, fact:add-a-proj, def:strategy-observables}
+	\leanok \uses{lem:qld-win-implications, lem:povm-to-obs, fact:data-processing, fact:agreement, lem:commutation-analysis, thm:ms-rigidity, fact:add-a-proj, def:strategy-observables}
 	For~\eqref{eq:pts-obs-consistency}: item~\ref{enu:qld-cons} of
 	Lemma~\ref{lem:qld-win-implications} and the data processing inequality
 	(Lemma~\ref{fact:data-processing}), using that the type
@@ -1122,8 +1132,9 @@ every tuple $\omega$.
 
 Several lemmas below conclude by asserting that all symmetric equivalents
 of the stated approximations also hold, in each case by
-Lemma~\ref{lem:symmetric-equivalents-transfer}; later chapters invoke
-exactly these variants.
+Lemma~\ref{lem:symmetric-equivalents-transfer} unless the individual register
+pairs are established separately, as in Lemma~\ref{lem:qld-comm-cons}; later
+chapters invoke exactly these variants.
 
 \begin{lemma}[Consistency and approximate commutation of the expanded point measurements]
 	\label{lem:qld-comm-cons}
@@ -1166,7 +1177,7 @@ exactly these variants.
 	hold, and the proof yields $\delta_{\mathrm{Anticom}}(\eps) = \sqrt{\eps}$.
 \end{lemma}
 \begin{proof}
-	\uses{lem:qld-win-implications, lem:qld-win-implications-obs, fact:data-processing, lem:twisted-commutation, def:expanded-point-measurement, def:expanded-point-trace-projection, def:expanded-observables, lem:symmetric-equivalents-transfer}
+	\leanok \uses{lem:qld-win-implications, lem:qld-win-implications-obs, fact:data-processing, lem:twisted-commutation, def:expanded-point-measurement, def:expanded-point-trace-projection, def:expanded-observables, def:symmetric-equivalents}
 	For item~1: the original point measurements
 	$\{M^{(\mathrm{Point},W),u}_a\}$ are $\eps$-self-consistent between
 	registers $\mathsf{A}$ and $\mathsf{B}$ in $\ket{\hat{\psi}}$
@@ -1190,8 +1201,12 @@ exactly these variants.
 	$\hat{X}^{r_X}(u_X)\hat{Z}^{r_Z}(u_Z) \approx_{\sqrt{\eps}} \hat{Z}^{r_Z}(u_Z)\hat{X}^{r_X}(u_X)$
 	on average over uniformly random $\omega$, giving the approximate
 	commutation with $\delta_{\mathrm{Anticom}} = \sqrt{\eps}$. The
-	symmetric equivalents follow from
-	Lemma~\ref{lem:symmetric-equivalents-transfer}.
+	symmetric equivalents are obtained without the transfer of
+	Lemma~\ref{lem:symmetric-equivalents-transfer}: both displays are proved
+	separately on each of the four register pairs
+	$\mathsf{A}\mathsf{A}'$, $\mathsf{B}\mathsf{A}''$, $\mathsf{B}\mathsf{B}'$ and
+	$\mathsf{A}\mathsf{B}''$ of Definition~\ref{def:symmetric-equivalents}, so no
+	symmetry hypothesis on the strategy is used.
 \end{proof}
 
 \begin{definition}[Expanded line measurements]
