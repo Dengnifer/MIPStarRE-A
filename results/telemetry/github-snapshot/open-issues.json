@@ -4449,118 +4449,6 @@
   "pinned_comment": null
  },
  {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/49",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/49/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/49/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/49/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/49",
-  "id": 5334553411,
-  "node_id": "I_kwDOUJyJf88AAAABPfbTQw",
-  "number": 49,
-  "title": "feat(QPBT/Games): prove core distance calculus",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement"
-   },
-   {
-    "id": 12025012183,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8f1w",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/qpbt-analysis",
-    "name": "qpbt-analysis",
-    "color": "ededed",
-    "default": false,
-    "description": "Soundness/rigidity analysis of the Pauli basis test \u2014 self-testing bounds and error terms"
-   },
-   {
-    "id": 12025012384,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8goA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/proof",
-    "name": "proof",
-    "color": "ededed",
-    "default": false,
-    "description": "Issue is primarily about proving an existing result"
-   },
-   {
-    "id": 12025012779,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8iKw",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/sorry-elimination",
-    "name": "sorry-elimination",
-    "color": "ededed",
-    "default": false,
-    "description": "Explicitly aimed at discharging remaining `sorry` sites"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-03T09:02:01Z",
-  "updated_at": "2026-09-03T09:02:01Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 0,
-   "blocking": 0,
-   "total_blocking": 0
-  },
-  "body": "<!-- mipstarre-issue-key: stage43-qpbt-core-distance-calculus -->\n### Motivation\n\nStage 4.2 established the QPBT distance interfaces. Stage 4.3 now needs their\nelementary proofs throughout the Chapter 14 observable analysis, Chapter 15\ncombination argument, and Chapter 16 extraction argument.\n\nThis issue closes the reusable distance-calculus layer without taking on the\nimported projectivization theorem or strategy-value stability.\n\n### Target declarations\n\nProve these existing declarations in `Games/DistanceTheorems.lean` without\nchanging their public signatures:\n\n1. `opFamilyDistSq_le_two_mul_consistencyDefect`\n2. `consistencyDefect_le_opFamilyDistSq_of_projective`\n3. `consistencyDefect_le_sqrt_of_projective_left`\n4. `opFamilyDistSq_mul_left_le`\n5. `opFamilyDistSq_mul_funIndexed_le`\n6. `opDistSq_sum_sub_mul_le_of_projective`\n7. `opFamilyDistSq_le_of_le_of_le`\n8. `consistencyDefect_trans_le`\n9. `consistencyDefect_postprocess_le`\n10. `opDistSq_commutator_le`\n11. `avg_closeness`\n12. `povm_to_obs`\n\n### Sources and proof order\n\n- Agreement and multiplication:\n  `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:295-380`.\n- Squared and consistency triangle inequalities:\n  `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:383-395` and\n  `references/ldt-paper/preliminaries.tex:649-666`.\n- Data processing and commutation analysis:\n  `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:397-461`.\n- Averaging and POVM-to-observable conversion:\n  `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:95-131`.\n- Blueprint counterparts:\n  `blueprint/src/chapter/ch12_qpbt_games.tex:245-389` and\n  `blueprint/src/chapter/ch14_qpbt_observables.tex:282-373`.\n\nFirst prove the pointwise norm, PSD-order, finite-sum, and averaging facts. Then\nderive consistency transitivity using the proved LDT analogue\n`MIPStarRE.LDT.Preliminaries.simeqTriangleInequality`, and derive the commutator\nbound from multiplication stability and the squared triangle inequality.\n\n### Statement integrity\n\nPreserve every explicit constant and the current quantifier order. Do not add\nprobability, positivity, projectivity, bridge, residual, or generic assumptions.\n\nPaper `fact:agreement` item 3 allows either measurement family to be\nprojective, while the current Lean declaration exposes only the left-projective\nbranch. Issue #33 owns the additive source-facing wrapper decision. Prove the\nexisting branch here, but do not mark the grouped blueprint proof complete until\n#33 supplies a faithful interface or records the grouping correction.\n\n### Ownership and non-goals\n\n- Own `MIPStarRE/QPBT/Games/DistanceTheorems.lean`.\n- Own only proof-status edits for the corresponding nodes in Chapters 12 and 14.\n- Keep support lemmas private or file-local where practical.\n- Do not change `Distance`, `Consistency`, measurement, or strategy definitions.\n- Exclude `abs_value_sub_le_of_areClose` and\n  `exists_projective_close_of_consistent`; each receives a separate packet.\n- Do not prove downstream Chapter 14-16 theorems or optimize universal constants.\n- Do not add conditional helpers or proof-obligation packages.\n\n### Acceptance\n\n- All twelve targets contain no `sorry`, `admit`, axiom, or prohibited bypass.\n- `#print axioms` for each target contains no `sorryAx`.\n- The file proof-debt scan reports only the two excluded declarations.\n- Statement-integrity results are recorded for the source-linked nodes.\n- The single-file Lean check, blueprint axiom/status check, blueprint render,\n  declaration check, full build, exact-head CI, and independent review pass.\n\n---\nStage 4.3 proof packet under #47.",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/49/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/49/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47/labels{/name}",
@@ -4634,8 +4522,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 50,
-   "completed": 10,
-   "percent_completed": 20
+   "completed": 11,
+   "percent_completed": 22
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/1",
   "issue_dependencies_summary": {
@@ -6158,99 +6046,6 @@
    "eyes": 0
   },
   "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/9/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/8",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/8/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/8/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/8/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/8",
-  "id": 5312277938,
-  "node_id": "I_kwDOUJyJf88AAAABPKLtsg",
-  "number": 8,
-  "title": "gh_common: replace stale same-SHA review bodies instead of keeping them",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025011061,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8bdQ",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/infrastructure",
-    "name": "infrastructure",
-    "color": "ededed",
-    "default": false,
-    "description": "Foundational definitions, shared APIs, or supporting layers"
-   },
-   {
-    "id": 12025014642,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8pcg",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/follow-up",
-    "name": "follow-up",
-    "color": "ededed",
-    "default": false,
-    "description": "A mathematical obligation split out of a merged PR"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-01T13:14:14Z",
-  "updated_at": "2026-09-01T13:14:14Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 0,
-   "blocking": 0,
-   "total_blocking": 0
-  },
-  "body": "<!-- mipstarre-issue-key: gh-common-replace-stale-same-sha-review-bodies -->\nReviewers on the same head SHA can leave a stale review body when a rerun produces a different verdict: gh_common.post_review is marker-idempotent and never replaces an existing review, while post_summary posts the fresh status. The mismatch is fail-closed today (gate 4 needs BOTH the clean body and the green summary), but the stale body is confusing evidence. Port post_review to update (PUT) the existing review body when the marker matches instead of returning exists.\n\nFrom PR 7 review round 1, finding F4.",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/8/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/8/timeline",
   "performed_via_github_app": null,
   "state_reason": null,
   "pinned_comment": null

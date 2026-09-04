@@ -24,7 +24,8 @@ The witnesses formalize `lem:qld-4-10`, `lem:qld-xz-lines`,
 
 namespace MIPStarRE.QPBT
 
-open MIPStarRE.LDT MIPStarRE.LDT.Preliminaries MIPStarRE.Quantum
+open MIPStarRE.LDT hiding Measurement
+open MIPStarRE.LDT.Preliminaries MIPStarRE.Quantum
 
 noncomputable section
 
