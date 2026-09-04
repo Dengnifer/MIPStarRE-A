@@ -15,6 +15,7 @@ Throughout, the two players are denoted $\mathrm A$ and $\mathrm B$; for $w \in 
 The classical low individual degree game is a two-player game based on the low individual degree variant of the multilinearity test of Babai, Fortnow, and Lund. In the basic version, one player (the ``points player'') receives a uniformly random point $u \in \F_q^m$ and answers with a value $a \in \F_q$, while the other player (the ``lines player'') receives a random line through $u$ --- either axis-parallel or diagonal --- and answers with a univariate polynomial describing the restriction of a global function to that line. If the players share a polynomial $g\colon \F_q^m \to \F_q$ of individual degree at most $d$ and answer with $g(u)$ and with the restriction $g|_\ell$, they win with probability $1$; the soundness theorem below states that the converse approximately holds. In the simultaneous version, the players' answers are $k$-tuples, checked coordinatewise against a $k$-tuple of low individual degree polynomials.
 
 \begin{definition}[The classical low individual degree game: parameters and registers]\label{def:ld-game}
+	\lean{MIPStarRE.QPBT.ldGame}
 	\uses{def:game, def:admissible-size}
 	% The source fixes \N to be the set of positive integers
 	% (references/qpbt-paper/04_preliminaries.tex:6) and takes m, d, ldc in \N

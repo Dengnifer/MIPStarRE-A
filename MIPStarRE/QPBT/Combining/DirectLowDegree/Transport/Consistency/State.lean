@@ -26,52 +26,15 @@ noncomputable section
 
 /-! ## Equality of the two consistency formulations -/
 
-/-- View the coordinate function of an LDT pure state as a Euclidean vector. -/
-noncomputable def pureStateEuclideanVector
-    {iota : Type*} [Fintype iota] [DecidableEq iota] [Nonempty iota]
-    (psi : PureState iota) : EuclideanSpace ℂ iota :=
-  (EuclideanSpace.equiv iota ℂ).symm psi.vector
-
-@[simp] theorem pureStateEuclideanVector_apply
-    {iota : Type*} [Fintype iota] [DecidableEq iota] [Nonempty iota]
-    (psi : PureState iota) (i : iota) :
-    pureStateEuclideanVector psi i = psi.vector i :=
-  rfl
-
-/-- The Euclidean vector associated with an LDT pure state has norm one. -/
-theorem pureStateEuclideanVector_norm
-    {iota : Type*} [Fintype iota] [DecidableEq iota] [Nonempty iota]
-    (psi : PureState iota) : ‖pureStateEuclideanVector psi‖ = 1 := by
-  have hsquareComplex :
-      ((‖pureStateEuclideanVector psi‖ ^ 2 : ℝ) : ℂ) = 1 := by
-    calc
-      ((‖pureStateEuclideanVector psi‖ ^ 2 : ℝ) : ℂ) =
-          (‖pureStateEuclideanVector psi‖ : ℂ) ^ 2 := by norm_cast
-      _ = inner ℂ (pureStateEuclideanVector psi)
-          (pureStateEuclideanVector psi) :=
-        (inner_self_eq_norm_sq_to_K (pureStateEuclideanVector psi)).symm
-      _ = dotProduct psi.vector (star psi.vector) :=
-        EuclideanSpace.inner_eq_star_dotProduct _ _
-      _ = dotProduct (star psi.vector) psi.vector := dotProduct_comm _ _
-      _ = 1 := psi.unit
-  have hsquare : ‖pureStateEuclideanVector psi‖ ^ 2 = (1 : ℝ) := by
-    exact_mod_cast hsquareComplex
-  nlinarith [norm_nonneg (pureStateEuclideanVector psi)]
-
-/-- Evaluation in a pure LDT density state is the quadratic form of its
-Euclidean vector. -/
-theorem pureState_stateQForm_eq_ev
-    {iota : Type*} [Fintype iota] [DecidableEq iota] [Nonempty iota]
-    (psi : PureState iota) (T : Op iota) :
-    DistanceCalculus.stateQForm (pureStateEuclideanVector psi) T =
-      ev (psi : QuantumState iota) T := by
-  rw [PureState.ev_eq_re_inner]
-  unfold DistanceCalculus.stateQForm applyOperatorToState
-  change (inner ℂ (pureStateEuclideanVector psi)
-      (WithLp.toLp 2 (T *ᵥ psi.vector))).re =
-    (dotProduct (star psi.vector) (T *ᵥ psi.vector)).re
-  rw [EuclideanSpace.inner_eq_star_dotProduct, dotProduct_comm]
-  rfl
+-- The pure-state/Euclidean-vector bridge and the associated quadratic-form
+-- conversion are shared with the distance calculus, where they are stated for
+-- an arbitrary finite index type; see
+-- `MIPStarRE/QPBT/Games/DistanceTheorems/Support.lean`.  The aliases below keep
+-- the names under which the transport statements in this file, and their
+-- downstream consumers, refer to that shared API.
+export MIPStarRE.QPBT.DistanceCalculus (pureStateEuclideanVector
+  pureStateEuclideanVector_apply pureStateEuclideanVector_norm
+  pureState_stateQForm_eq_ev)
 
 /-- For complete projective families and a pure bipartite state, the mature
 LDT consistency relation is exactly the QPBT off-diagonal defect.  In

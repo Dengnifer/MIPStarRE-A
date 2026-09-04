@@ -98,20 +98,6 @@ theorem ldStrategyToDirect_pointMeasurementB
       (directLdPointValuesOrZero L.toDirectLdParams) = _
   exact seedFiberPointMeasurement L S.B u
 
-private theorem correlated_ancilla_scale
-    (block : Type*) [Fintype block] [Nonempty block] :
-    (Real.sqrt (Fintype.card block : ℝ) : ℂ)⁻¹ *
-        (starRingEnd ℂ)
-          (Real.sqrt (Fintype.card block : ℝ) : ℂ)⁻¹ =
-      (Fintype.card block : ℂ)⁻¹ := by
-  rw [show (starRingEnd ℂ)
-      (Real.sqrt (Fintype.card block : ℝ) : ℂ)⁻¹ =
-        (Real.sqrt (Fintype.card block : ℝ) : ℂ)⁻¹ by simp]
-  rw [← pow_two, inv_pow, ← Complex.ofReal_pow,
-    Real.sq_sqrt (Nat.cast_nonneg (Fintype.card block))]
-  norm_cast
-  exact Complex.ofReal_inv _
-
 private theorem correlatedState_compress_left
     {iotaA iotaB block : Type*}
     [Fintype iotaA] [DecidableEq iotaA]
@@ -169,7 +155,7 @@ private theorem correlatedState_compress_left
   apply Fintype.sum_congr
   intro r
   ring_nf
-  rw [correlated_ancilla_scale block]
+  rw [inv_sqrt_natCast_mul_conj (Fintype.card block)]
   ring
 
 private theorem correlatedState_compress_right
@@ -229,7 +215,7 @@ private theorem correlatedState_compress_right
   apply Fintype.sum_congr
   intro r
   ring_nf
-  rw [correlated_ancilla_scale block]
+  rw [inv_sqrt_natCast_mul_conj (Fintype.card block)]
   ring
 
 /-- Compressing Alice's ancillary register preserves every correlation against
