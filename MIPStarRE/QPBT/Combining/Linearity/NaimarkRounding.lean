@@ -33,7 +33,7 @@ identity, the folded projector still compresses to `B^0`.
 * `roundedObservable` with `roundedObservable_mul` and
   `roundedObservable_isBinaryObservable`: the exactly linear binary observables.
 * `trace_heteroKron_mul_roundedObservable`: the compression of the rounded
-  observables, in the form consumed by the averaged distance bound.
+  observables, whose identity yields the averaged distance bound.
 
 ## References
 

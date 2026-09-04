@@ -281,11 +281,18 @@ assembled by Fourier averaging.
 
 \begin{remark}[Normalization of the distance in the linearity conclusion]
 	\label{rem:linearity-distance-normalization}
-	As printed in \cite{Natarajan2017Linearity} and quoted in
-	\cite{Ji2020MIPStar}, the conclusion of the quantum linearity theorem
-	bounds the mean squared state-dependent operator distance
+	As printed in \cite{Natarajan2017Linearity}, the conclusion of the quantum
+	linearity theorem bounds the mean squared state-dependent operator distance
 	$\E_u \, d_{\rho'}(\mathcal{L}^u, \mathcal{O}^u \ot \Id_{\hilb'})^2$ by
-	$\delta$. The calculation behind that bound in
+	$\delta$. That exact constant is the one printed in
+	\cite[Theorem~10]{Natarajan2017Linearity}
+	(\texttt{references/nv-paper/fullpaper.tex:1079--1085}), once the distance
+	there is read as the state-dependent operator distance. The quotation in
+	\cite{Ji2020MIPStar} does not assert it: there the conclusion reads
+	$\mathcal{L}^u \approx_\delta \mathcal{O}^u$, and
+	Definition~\ref{def:povm-distance} bounds the associated expectation only
+	by $O(\delta)$, so that quotation absorbs a constant factor rather than
+	claiming an exact one. The calculation behind the printed bound in
 	\cite[Section~3.1]{Natarajan2017Linearity} computes the squared distance
 	between the binary projective measurements associated with the
 	observables, which is half the squared operator distance, and then
@@ -298,7 +305,11 @@ assembled by Fourier averaging.
 	identities are recorded in Lemma~\ref{lem:binary-measurement-distance},
 	and Theorem~\ref{thm:linearity} is stated and proved with the corrected
 	bounds: $2\delta$ for the mean squared state-dependent operator distance
-	and $\delta$ for the mean squared measurement distance.
+	and $\delta$ for the mean squared measurement distance. The same
+	conclusion, carrying the mean multiplicative defect as its hypothesis
+	parameter, is recorded as
+	Lemma~\ref{lem:boolean-representation-stability}, from which the theorem
+	is obtained by the substitution $\eta = 2\delta$.
 \end{remark}
 
 \begin{lemma}[Formalization support for the Boolean characters]
@@ -396,7 +407,7 @@ assembled by Fourier averaging.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{prop:fourier-fact-vector, lem:boolean-characters}
+	\uses{lem:boolean-characters}
 	Orthogonality of the characters of $\F_2^t$ gives the inversion formula;
 	the Parseval identity follows by substituting it into the product and
 	exchanging the two sums; the last identity uses $O(a)^2 = \Id$.
@@ -416,8 +427,8 @@ assembled by Fourier averaging.
 	Remark~\ref{rem:linearity-distance-normalization}. For operators $S$, $T$
 	and $\rho$ on $\hilb$, write
 	$d_\rho(S,T)^2 = \Re \Tr\big((S-T)^\dagger (S-T) \, \rho\big)$ and
-	$P_S^\pm = (\Id \pm S)/2$ for the effects of the associated binary
-	projective measurements, and set
+	$P_S^\pm = (\Id \pm S)/2$ for the affine operators that are effects of a
+	binary projective measurement when $S$ is a binary observable, and set
 	$d^{\mathrm{bin}}_\rho(S,T)^2
 	= \sum_{s \in \{+,-\}} d_\rho(P_S^s, P_T^s)^2$. Then, with no hypothesis
 	on $S$, $T$ or $\rho$,
@@ -550,6 +561,106 @@ assembled by Fourier averaging.
 	identity $\sum_u (\widehat{O}^u)^2 = \Id$ of
 	Lemma~\ref{lem:boolean-fourier-transform}. The final inequality
 	substitutes the correlation hypothesis into the overlap identity.
+\end{proof}
+
+\begin{lemma}[Formalization support for Boolean representation stability]
+	\label{lem:boolean-representation-stability}
+	\lean{MIPStarRE.QPBT.ancProj_posSemidef}
+	\lean{MIPStarRE.QPBT.trace_ancProj}
+	\lean{MIPStarRE.QPBT.heteroKron_ancProj_posSemidef}
+	\lean{MIPStarRE.QPBT.trace_heteroKron_ancProj}
+	\lean{MIPStarRE.QPBT.isBinaryObservable_heteroKron_one}
+	\lean{MIPStarRE.QPBT.re_trace_roundedObservable_mul_heteroKron}
+	\lean{MIPStarRE.QPBT.stateDepDistSq_roundedObservable}
+	\lean{MIPStarRE.QPBT.avg_stateDepDistSq_roundedObservable_eq_avg_multiplicativeDefect}
+	\lean{MIPStarRE.QPBT.exists_exact_boolean_representation}
+	\leanok
+	\uses{def:povm-conventions, lem:fourier-square-measurement,
+		lem:naimark-helper}
+	This is not a named statement of \cite{Natarajan2017Linearity}; it records
+	the conclusion that the Fourier--Naimark argument given there for
+	Theorem~\ref{thm:linearity}
+	(\texttt{references/nv-paper/fullpaper.tex:1096--1112}) establishes, with
+	the correlation hypothesis replaced by the mean multiplicative defect of
+	Lemma~\ref{lem:blr-defect-identity}. Let $t$ be a positive integer, let
+	$\eta \ge 0$, let $\rho$ be a density operator on $\hilb$, and let
+	$\{\mathcal{O}^u\}_{u \in \F_2^t}$ be binary observables on $\hilb$ with
+	\[
+		\E_{u,u'} \, d_\rho\big(\mathcal{O}^u \, \mathcal{O}^{u'},\
+		\mathcal{O}^{u+u'}\big)^2 \le \eta .
+	\]
+	Then there are a finite-dimensional space $\hilb'$, a unit vector
+	$\ket{\mathrm{anc}} \in \hilb'$ and binary observables
+	$\{\mathcal{L}^u\}_{u \in \F_2^t}$ on $\hilb \ot \hilb'$ such that
+	$\mathcal{L}^u \mathcal{L}^{u'} = \mathcal{L}^{u+u'}$ for all
+	$u, u' \in \F_2^t$ and, writing
+	$\rho' = \rho \ot \ket{\mathrm{anc}}\bra{\mathrm{anc}}$, which is again a
+	density operator,
+	\[
+		\E_u \, d_{\rho'}\big(\mathcal{L}^u,\ \mathcal{O}^u \ot
+		\Id_{\hilb'}\big)^2 \le \eta .
+	\]
+	The bound is the specialization of the identity
+	\[
+		\E_u \, d_{\rho'}\big(\mathcal{L}^u,\ \mathcal{O}^u \ot
+		\Id_{\hilb'}\big)^2
+		= \E_{u,u'} \, d_\rho\big(\mathcal{O}^u \, \mathcal{O}^{u'},\
+		\mathcal{O}^{u+u'}\big)^2 ,
+	\]
+	which holds for the family constructed below and whose two sides both
+	equal $2 - 2 \, C_\rho(\mathcal{O})$ for the two-query correlation
+	$C_\rho(\mathcal{O})$ of Lemma~\ref{lem:blr-defect-identity}.
+
+	This is the mathematical content of Theorem~\ref{thm:linearity}: the
+	ancillary space and state are produced explicitly, and by
+	Lemma~\ref{lem:blr-defect-identity} a correlation hypothesis
+	$C_\rho(\mathcal{O}) \ge 1 - \delta$ is exactly the hypothesis above with
+	$\eta = 2\delta$. The conclusion obtained from such a hypothesis is
+	therefore the bound $2\delta$, which is the bound displayed in
+	Theorem~\ref{thm:linearity}; the constant $2$ separating it from the bound
+	$\delta$ printed in the source is the normalization recorded in
+	Remark~\ref{rem:linearity-distance-normalization}. The present statement is
+	the defect-parameterized form of that theorem, and the substitution
+	$\eta = 2\delta$ is the whole of the proof of
+	Theorem~\ref{thm:linearity} from it.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:binary-measurement-distance, lem:blr-defect-identity,
+		lem:boolean-fourier-transform, lem:fourier-square-measurement,
+		lem:naimark-helper}
+	Let $\hilb'$ have orthonormal basis indexed by $\F_2^t$ together with one
+	extra element $\bot$, and take $\ket{\mathrm{anc}} = \ket{\bot}$, the
+	initial state of the auxiliary register in the one-measurement Naimark
+	construction of Lemma~\ref{lem:naimark-helper}. Apply that construction to
+	the Fourier-square POVM $\{B^u\}$ of
+	Lemma~\ref{lem:fourier-square-measurement}. It returns
+	projectors indexed by $\F_2^t \cup \{\bot\}$; the residual projector at
+	$\bot$ is folded into the outcome $u = 0$, so that the resulting family
+	$\{C^u\}_{u \in \F_2^t}$ is still a family of orthogonal projectors summing
+	to $\Id_{\hilb \ot \hilb'}$ and still compresses to $B^u$ along
+	$\ket{\mathrm{anc}}$, the latter because $\sum_u B^u = \Id_\hilb$. Set
+	$\mathcal{L}^a = \sum_u \chi_u(a) \, C^u$; orthogonality of the $C^u$ and
+	multiplicativity of the characters give
+	$\mathcal{L}^a \mathcal{L}^b = \mathcal{L}^{a+b}$ and
+	$(\mathcal{L}^a)^2 = \Id$, and each $\mathcal{L}^a$ is Hermitian because
+	the characters are real. Since $\rho'$ is a density operator and both
+	$\mathcal{L}^a$ and $\mathcal{O}^a \ot \Id_{\hilb'}$ are binary
+	observables, Lemma~\ref{lem:binary-measurement-distance} gives
+	\[
+		d_{\rho'}\big(\mathcal{L}^a, \mathcal{O}^a \ot \Id_{\hilb'}\big)^2
+		= 2 - 2 \, \Re \Tr\big(\mathcal{L}^a \,
+		(\mathcal{O}^a \ot \Id_{\hilb'}) \, \rho'\big) ,
+	\]
+	and taking the adjoint of the triple product, absorbing
+	$\mathcal{O}^a \ot \Id_{\hilb'}$ into the weight and compressing
+	$\mathcal{L}^a$ along $\ket{\mathrm{anc}}$ rewrites the trace as
+	$\Re \Tr\big(\mathcal{O}^a \, (\sum_u \chi_u(a) B^u) \, \rho\big)$.
+	Averaging over $a$ and applying the overlap and cubic identities of
+	Lemma~\ref{lem:fourier-square-measurement} turns the average into
+	$2 - 2 \, C_\rho(\mathcal{O})$, which is the mean multiplicative defect by
+	Lemma~\ref{lem:blr-defect-identity}. No commutation among the
+	$\mathcal{O}^u$ is used. The hypothesis then bounds the average by $\eta$.
 \end{proof}
 
 \begin{lemma}[Combined point measurements]

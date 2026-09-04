@@ -4,7 +4,7 @@ import MIPStarRE.QPBT.Combining.Linearity.NaimarkRounding
 # Boolean representation stability
 
 This file completes the proof of the quantum linearity theorem of Natarajan
-and Vidick in the specialized form used by the linearity route.  A family of
+and Vidick in its multiplicative-defect formulation.  A family of
 binary observables `O^u`, indexed by the Boolean cube `F_2^t` and weighted by a
 positive semidefinite trace-one operator `ρ`, whose products `O^u O^v` are on
 average close to `O^{u+v}` in the state-dependent distance, is on average close,
@@ -13,10 +13,11 @@ an exactly linear family of binary observables on an ancillary extension.
 
 The extension, the ancillary vector, and the exactly linear family are those
 of the Naimark rounding of the Fourier-square POVM.  The main computation is
-an identity, not an inequality: the average raw distance between the rounded
-family and the ampliated original family, weighted by `ρ ⊗ |anc⟩⟨anc|`, equals
-the average multiplicative defect of the original family weighted by `ρ`.  Both
-sides equal `2 - 2 * (two-query correlation)`.  The left side reduces to the
+an identity, not an inequality: the average squared state-dependent operator
+distance between the rounded family and the ampliated original family,
+weighted by `ρ ⊗ |anc⟩⟨anc|`, equals the average multiplicative defect of the
+original family weighted by `ρ`.  Both sides equal
+`2 - 2 * (two-query correlation)`.  The left side reduces to the
 correlation by compressing the rounded observables along the ancillary vector
 and applying the cubic Fourier identity; the right side is the operator BLR
 computation, including the reindexing of the uniform pair.  No commutation
@@ -48,11 +49,13 @@ converts the overlap certificate into the distance bound, is at lines
 The QPBT paper quotes the theorem at
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:711-725`.  The
 blueprint statement is `thm:linearity` in
-`blueprint/src/chapter/ch15_qpbt_combining.tex:98-147`, and the target public
-theorem is `exists_exactly_linear_observables` in
-`MIPStarRE/QPBT/Combining/Linearity.lean`.  The normalization convention, under
-which the incoming average multiplicative defect and the outgoing average raw
-distance carry the same constant, is recorded in
+`blueprint/src/chapter/ch15_qpbt_combining.tex:98-147`, and the
+correlation-form statement is `exists_exactly_linear_observables` in
+`MIPStarRE/QPBT/Combining/Linearity.lean`.  The declarations of this file are
+collected in the blueprint as `lem:boolean-representation-stability`.  The
+normalization convention, under which the incoming average multiplicative
+defect and the outgoing average squared state-dependent operator distance
+carry the same constant, is recorded in
 `docs/paper-gaps/qpbt_linearity-distance-normalization.tex`.
 -/
 
@@ -183,10 +186,11 @@ theorem re_trace_roundedObservable_mul_heteroKron {t : ℕ} {ι : Type}
 /-- The squared state-dependent distance between a rounded observable `L^u` and
 the ampliated original observable `O^u ⊗ 1`, weighted by the extended state
 `ρ ⊗ |anc⟩⟨anc|`, equals `2 - 2 Re Tr(O^u (∑_v (-1)^{v·u} B^v) ρ)`.  This
-combines the raw-correlation identity for binary observables with the
-compression of the rounded observable; it is the pointwise form of the closing
-computation at `references/nv-paper/fullpaper.tex:1104-1112`, in the raw
-normalization of `docs/paper-gaps/qpbt_linearity-distance-normalization.tex`. -/
+combines the operator-distance correlation identity for binary observables with
+the compression of the rounded observable; it is the pointwise form of the
+closing computation at `references/nv-paper/fullpaper.tex:1104-1112`, in the
+operator-distance normalization of
+`docs/paper-gaps/qpbt_linearity-distance-normalization.tex`. -/
 theorem stateDepDistSq_roundedObservable {t : ℕ} {ι : Type}
     [Fintype ι] [DecidableEq ι]
     (O : (Fin t → ZMod 2) → Op ι) (hO : ∀ a, IsBinaryObservable (O a))
@@ -242,14 +246,22 @@ The ancillary carrier is `Option (F_2^t)`, the vector is the canonical
 ancillary vector of the Naimark dilation, and the family is the rounded
 observables of the Fourier-square POVM; the bound is the distance/defect
 identity `avg_stateDepDistSq_roundedObservable_eq_avg_multiplicativeDefect`
-weakened by the hypothesis.  This is Theorem 10 of Natarajan--Vidick,
-`references/nv-paper/fullpaper.tex:1074-1088`, in the state-weighted
-`Z_2^t` form quoted at
+weakened by the hypothesis.
+
+**Local fix:** This is the mathematical content of Theorem 10 of
+Natarajan--Vidick, `references/nv-paper/fullpaper.tex:1074-1088`, quoted at
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:711-725` and
 stated as `thm:linearity` in
-`blueprint/src/chapter/ch15_qpbt_combining.tex:98-147`, with the incoming
-hypothesis expressed as the average multiplicative defect in the raw
-normalization of `docs/paper-gaps/qpbt_linearity-distance-normalization.tex`.
+`blueprint/src/chapter/ch15_qpbt_combining.tex:98-147`, but not that displayed
+statement: the hypothesis here is the average multiplicative defect rather
+than the two-query correlation.  By
+`avg_multiplicativeDefect_le_two_mul_error`, a correlation at least `1 - δ`
+gives the present hypothesis with `η = 2δ`, so the conclusion obtained from a
+correlation hypothesis is the bound `2δ` for the average squared
+state-dependent operator distance, whereas `thm:linearity` displays the bound
+`δ`.  That factor of two is the normalization refuted in
+`docs/paper-gaps/qpbt_linearity-distance-normalization.tex`; the blueprint
+entry for the present statement is `lem:boolean-representation-stability`.
 The positivity of `t` and the nonnegativity of `η` are part of the quoted
 statement and are not needed by the proof. -/
 theorem exists_exact_boolean_representation {ι : Type}

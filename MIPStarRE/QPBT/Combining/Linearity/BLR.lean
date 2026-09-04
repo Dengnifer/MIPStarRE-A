@@ -350,8 +350,11 @@ theorem fourierSquareMeasurement_effect {t : ℕ}
   rfl
 
 /-- The average state-dependent overlap between `O^a` and the character sum
-`∑_u (-1)^{u·a} B^u` of the Fourier-square POVM equals the sum of the cubic
-Fourier coefficients evaluated in `ρ`.  This is the computation of
+`∑_u (-1)^{u·a} B^u` of the Fourier-square operators `B^u = (hat O^u)^2` equals
+the sum of the cubic Fourier coefficients evaluated in `ρ`.  The family `O` is
+arbitrary here, so the `B^u` need not be positive or sum to the identity; they
+are the effects of a POVM only under the binary-observable hypothesis of
+`fourierSquareMeasurement`.  This is the computation of
 `E_a Re Tr_{ρ'}(A(a) 𝒜(a))` at `references/nv-paper/fullpaper.tex:1104-1110`,
 carried out before the Naimark dilation: the character sum is the compression
 of the exactly linear observable `𝒜(a) = ∑_u (-1)^{u·a} C^u` to the original
@@ -404,10 +407,12 @@ theorem avg_overlap_fourierSquare_eq_sum_cube {t : ℕ}
               (operatorFourier O u * operatorFourier O u)) * ρ)).re) := by
       rw [avgOver_uniform_eq_inv_card_mul_sum]
 
-/-- The overlap certificate for the Fourier-square POVM: under the correlation
-hypothesis of `exists_exactly_linear_observables`, the average state-dependent
-overlap between `O^a` and the character sum `∑_u (-1)^{u·a} B^u` is at least
-`1 - δ`.  This is the conclusion of the computation at
+/-- The overlap certificate for the Fourier-square operators `B^u = (hat O^u)^2`:
+under the correlation hypothesis of `exists_exactly_linear_observables`, the
+average state-dependent overlap between `O^a` and the character sum
+`∑_u (-1)^{u·a} B^u` is at least `1 - δ`.  The family `O` is arbitrary here, so
+the `B^u` are the effects of a POVM only under the binary-observable hypothesis
+of `fourierSquareMeasurement`.  This is the conclusion of the computation at
 `references/nv-paper/fullpaper.tex:1104-1112` in the form used after the
 Naimark dilation: the same overlap, evaluated in `ρ ⊗ |anc⟩⟨anc|` against the
 exactly linear observables, is what bounds the average distance in display (8).
