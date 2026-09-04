@@ -108,6 +108,33 @@ the finite-matrix realization of `def:tensor-product-strategy`, blueprint
 def heteroKron {ιA ιB : Type*} (A : Op ιA) (B : Op ιB) : Op (ιA × ιB) :=
   Matrix.kronecker A B
 
+/-! ### Algebra of the tensor placement
+
+The shared tensor-placement API.  These identities are used both by the perfect
+Magic Square strategy (`thm:ms-from-ac`, blueprint
+`blueprint/src/chapter/ch13_qpbt_test.tex:257-267`) and by the rigidity transfer
+step (`thm:ms-rigidity`, blueprint `ch13_qpbt_test.tex:224-253`), so they live
+with the definition rather than in either development. -/
+
+/-- Formalization-only auxiliary lemma for `def:tensor-product-strategy`
+(blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:61-69`, paper
+`references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:26-38`): the tensor
+placement is multiplicative, `(A ⊗ C) * (B ⊗ D) = (A * B) ⊗ (C * D)`. -/
+theorem heteroKron_mul {ιA ιB : Type*} [Fintype ιA] [Fintype ιB]
+    (A B : Op ιA) (C D : Op ιB) :
+    heteroKron A C * heteroKron B D = heteroKron (A * B) (C * D) := by
+  unfold heteroKron Matrix.kronecker
+  exact (Matrix.mul_kronecker_mul A B C D).symm
+
+/-- Formalization-only auxiliary lemma for `def:tensor-product-strategy`
+(blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:61-69`): the tensor
+placement of the two identity operators is the identity operator on the product
+space. -/
+theorem heteroKron_one_one {ιA ιB : Type*} [DecidableEq ιA] [DecidableEq ιB] :
+    heteroKron (1 : Op ιA) (1 : Op ιB) = 1 := by
+  unfold heteroKron Matrix.kronecker
+  exact Matrix.one_kronecker_one
+
 /- The Euclidean linear map is the shared action used by the value and distance
 functionals.  Keeping it at the Euclidean-space level avoids accidentally
 using the function-space supremum norm of `Matrix.mulVec`. -/
