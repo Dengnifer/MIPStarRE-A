@@ -1,4 +1,5 @@
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Soundness
+import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Consistency
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Strategy
 import MIPStarRE.QPBT.Combining.DirectLowDegree.GameValue
 
@@ -23,7 +24,9 @@ presentations; `Transport.SeedFiber` dilates a seed-indexed strategy to a
 direct strategy by a correlated residue register; `Transport.Questions` reads
 mature lines as canonical direct questions and rebases direct answers; and
 `Transport.Strategy` reads one coordinate of a projective direct strategy as a
-mature `ProjStrat`, with exact Born-weight formulas for both adapters.
+mature `ProjStrat`, with exact Born-weight formulas for both adapters; and
+`Transport.Consistency` identifies polynomial outcomes and transports the
+three mature consistency conclusions to the direct game.
 
 ## References
 
