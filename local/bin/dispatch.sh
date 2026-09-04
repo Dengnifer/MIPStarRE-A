@@ -45,7 +45,8 @@
 # Environment: MIPSTARRE_CACHE_ROOT (runtime state root, default
 #   ~/.cache/mipstarre-dev), MIPSTARRE_PERSONA_REF, MIPSTARRE_CODEX_MODEL,
 #   MIPSTARRE_SESSION (dispatching session name), MIPSTARRE_DISPATCH_LOCK_WAIT,
-#   MIPSTARRE_MAX_CONTEXT_BYTES (default 100000), LOCAL_REVIEW_ENABLED.
+#   MIPSTARRE_MAX_CONTEXT_BYTES (default 100000), MIPSTARRE_LAKE_ROOT,
+#   LOCAL_REVIEW_ENABLED.
 
 set -euo pipefail
 
@@ -297,6 +298,14 @@ case " $READ_ONLY_ROLES " in
     fi
     ;;
 esac
+
+LAKE_WRITE_DIR=""
+if [ "$SANDBOX" = "workspace-write" ] && [ -n "${MIPSTARRE_LAKE_ROOT:-}" ]; then
+  [ -x "$SCRIPT_DIR/lake-root.sh" ] || die 4 "missing $SCRIPT_DIR/lake-root.sh"
+  "$SCRIPT_DIR/lake-root.sh" prepare "$WORKTREE_ABS" --check
+  LAKE_WRITE_DIR="$(realpath -e -- "$WORKTREE_ABS/.lake")" \
+    || die 4 "cannot resolve the configured external .lake target"
+fi
 
 # ---------------------------------------------------------------------------
 # Scope sanitization — bracket-free naming (DESIGN.md invariant 9;
@@ -583,6 +592,10 @@ CODEX_ARGS[${#CODEX_ARGS[@]}]="-C"
 CODEX_ARGS[${#CODEX_ARGS[@]}]="$WORKTREE_ABS"
 CODEX_ARGS[${#CODEX_ARGS[@]}]="--sandbox"
 CODEX_ARGS[${#CODEX_ARGS[@]}]="$SANDBOX"
+if [ -n "$LAKE_WRITE_DIR" ]; then
+  CODEX_ARGS[${#CODEX_ARGS[@]}]="--add-dir"
+  CODEX_ARGS[${#CODEX_ARGS[@]}]="$LAKE_WRITE_DIR"
+fi
 CODEX_ARGS[${#CODEX_ARGS[@]}]="-o"
 CODEX_ARGS[${#CODEX_ARGS[@]}]="$LAST_MESSAGE"
 if [ -n "${MIPSTARRE_CODEX_MODEL:-}" ]; then

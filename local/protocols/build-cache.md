@@ -47,6 +47,12 @@ build tree.
 different sharing rules. Conflating them is the primary way to reintroduce the
 parent's failure.
 
+An absolute `MIPSTARRE_LAKE_ROOT` relocates `.lake` to `<root>/<branch>` for a
+one-component branch name. The helper rejects `/`, symlink targets, escape, and
+canonical overlap with packages, `hot-main`, the repository, or any worktree,
+plus canonical-equal ownership by another worktree. Export it before setup or
+warming and through dispatch and cleanup; only its target gets `--add-dir`.
+
 **Tier 1 — `.lake/build`** — this project's own compiled artifacts (`.olean`,
 `.ilean`, `.c`, `.trace` for `MIPStarRE` modules). This is *exactly* what the
 parent cached, and only from `main`. Locally it is produced by the warmer and
@@ -110,8 +116,8 @@ Two properties matter, and they are not symmetric:
 
 ## 4. On-disk layout
 
-All runtime state lives under `MIPSTARRE_CACHE_ROOT`, default
-`~/.cache/mipstarre-dev/`. Nothing in this tree is ever committed.
+Shared packages and `hot-main` use `MIPSTARRE_CACHE_ROOT`; branch products may
+use `MIPSTARRE_LAKE_ROOT` as in §2. Neither runtime tree is committed.
 
 ```
 ~/.cache/mipstarre-dev/
