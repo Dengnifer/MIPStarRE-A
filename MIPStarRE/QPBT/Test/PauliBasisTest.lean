@@ -256,7 +256,9 @@ noncomputable def pauliCL (P : AdmissibleParams) (t : PauliType) :
   | .ms _ => pauliSharedProjection
 
 /-- Formalization-only auxiliary: a linear map of the ambient coefficient space
-is conditionally linear with a single level on the full register. -/
+is conditionally linear with a single level on the full register.  This is the
+one-level case of `def:cl-func`, blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:453-463`,
+paper origin `references/qpbt-paper/05_conditionally_linear_functions.tex:35-57`. -/
 private theorem isCondLinearOn_one_of_linear {K ι : Type*} [Field K]
     [Fintype ι] [DecidableEq ι] (L : (ι → K) →ₗ[K] (ι → K)) :
     IsCondLinearOn K Finset.univ 1 (fun x => L x) := by
@@ -270,7 +272,11 @@ private theorem isCondLinearOn_one_of_linear {K ι : Type*} [Field K]
   rw [hx, add_zero]
 
 /-- Formalization-only auxiliary: extend a coefficient vector along an injective
-reindexing of registers, setting every coordinate outside the image to zero. -/
+reindexing of registers, setting every coordinate outside the image to zero.
+Together with the lemmas that follow it, this supports the transport of
+conditional linearity between the register spaces of `def:cl-func`,
+blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:453-463`,
+paper origin `references/qpbt-paper/05_conditionally_linear_functions.tex:35-57`. -/
 private def clExtend {K κ ι : Type*} [Zero K] (f : κ → ι) (u : κ → K) : ι → K :=
   Function.extend f u 0
 
@@ -326,7 +332,9 @@ private theorem clExtend_smul {K κ ι : Type*} [Semiring K] {f : κ → ι}
   · simp [clExtend, Function.extend_apply' _ _ _ h]
 
 /-- Formalization-only auxiliary: transport a linear map of coefficient vectors
-along an injective reindexing of registers. -/
+along an injective reindexing of registers; see `clExtend`.  Supports
+`def:cl-func`, blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:453-463`,
+paper origin `references/qpbt-paper/05_conditionally_linear_functions.tex:35-57`. -/
 private def clReindexLinear {K κ ι : Type*} [Field K] {f : κ → ι}
     (hf : Function.Injective f) (L : (κ → K) →ₗ[K] (κ → K)) :
     (ι → K) →ₗ[K] (ι → K) where
@@ -344,7 +352,9 @@ private def clReindexLinear {K κ ι : Type*} [Field K] {f : κ → ι}
     rw [h, map_smul, clExtend_smul hf]
 
 /-- Formalization-only auxiliary: transport a conditionally linear syntax tree
-along an injective reindexing of registers. -/
+along an injective reindexing of registers; see `clExtend`.  Supports
+`def:cl-func`, blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:453-463`,
+paper origin `references/qpbt-paper/05_conditionally_linear_functions.tex:35-57`. -/
 private def clReindexTerm {K κ ι : Type*} [Field K] [Fintype κ] [DecidableEq κ]
     [Fintype ι] [DecidableEq ι] {f : κ → ι} (hf : Function.Injective f) :
     {ell : ℕ} → CondLinearTerm K (ι := κ) ell → CondLinearTerm K (ι := ι) ell
@@ -447,7 +457,9 @@ private theorem isCondLinearOn_reindex {K κ ι : Type*} [Field K]
   rw [clReindexTerm_eval hf t x, hval]
 
 /-- Formalization-only auxiliary: the point projection of the ambient low-degree
-coefficient space, presented as a linear map. -/
+coefficient space, presented as a linear map.  It is the map `L_Point` of
+`def:ld-question-distribution`, blueprint `ch13_qpbt_test.tex:38-49`, paper
+origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`. -/
 private def ldPointProjection (P : LdParams) :
     LdSpace P →ₗ[ScalarQ P] LdSpace P where
   toFun z := ldPointCL P z
@@ -469,7 +481,9 @@ private theorem isCondLinear_ldPointCL (P : LdParams) :
   isCondLinearOn_one_of_linear (ldPointProjection P)
 
 /-- Formalization-only auxiliary: the type-4 projection of the ambient Pauli
-coefficient space, presented as a linear map. -/
+coefficient space, presented as a linear map; see `pauliSharedProjection` and
+`def:pauli-question-distribution`, blueprint `ch13_qpbt_test.tex:285-329`,
+paper origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1120`. -/
 private def pauliSharedProjectionLinear (P : AdmissibleParams) :
     PauliSpace P →ₗ[PauliScalar P] PauliSpace P where
   toFun z := pauliSharedProjection z
@@ -481,7 +495,10 @@ private def pauliSharedProjectionLinear (P : AdmissibleParams) :
     rcases i with ((((j | j) | u) | j) | u) | u <;> simp [pauliSharedProjection]
 
 /-- Formalization-only auxiliary: the inclusion of the low-degree register index
-into the ambient Pauli register index selected by a basis. -/
+into the ambient Pauli register index selected by a basis.  It realizes the
+natural embedding of the range of the low-degree maps described in
+`def:pauli-question-distribution`, blueprint `ch13_qpbt_test.tex:285-329`,
+paper origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1120`. -/
 private def pauliLdIndex (P : AdmissibleParams) (W : PauliKind) :
     LdIndex P.toLdParams → PauliIndex P
   | .inl (.inl j) =>
@@ -492,7 +509,7 @@ private def pauliLdIndex (P : AdmissibleParams) (W : PauliKind) :
   | .inr j => .inl (.inl (.inr j))
 
 /-- Formalization-only auxiliary: distinct low-degree registers are sent to
-distinct ambient Pauli registers. -/
+distinct ambient Pauli registers; see `pauliLdIndex`. -/
 private theorem pauliLdIndex_injective (P : AdmissibleParams) (W : PauliKind) :
     Function.Injective (pauliLdIndex P W) := by
   intro a b hab
@@ -500,7 +517,9 @@ private theorem pauliLdIndex_injective (P : AdmissibleParams) (W : PauliKind) :
     simp_all [pauliLdIndex]
 
 /-- Formalization-only auxiliary: reading the low-degree register out of an
-ambient Pauli vector is restriction along `pauliLdIndex`. -/
+ambient Pauli vector is restriction along `pauliLdIndex`; see
+`def:pauli-question-distribution`, blueprint `ch13_qpbt_test.tex:285-329`,
+paper origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1120`. -/
 private theorem pauliToLd_eq (P : AdmissibleParams) (W : PauliKind)
     (z : PauliSpace P) :
     pauliToLd P W z = fun k => z (pauliLdIndex P W k) := by
@@ -508,7 +527,9 @@ private theorem pauliToLd_eq (P : AdmissibleParams) (W : PauliKind)
   rcases k with (j | u) | j <;> cases W <;> rfl
 
 /-- Formalization-only auxiliary: writing a low-degree vector into the ambient
-Pauli registers is extension along `pauliLdIndex`. -/
+Pauli registers is extension along `pauliLdIndex`; see
+`def:pauli-question-distribution`, blueprint `ch13_qpbt_test.tex:285-329`,
+paper origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1120`. -/
 private theorem embedLd_eq (P : AdmissibleParams) (W : PauliKind)
     (w : LdSpace P.toLdParams) :
     embedLd P W w = clExtend (pauliLdIndex P W) w := by
@@ -534,7 +555,9 @@ private theorem embedLd_eq (P : AdmissibleParams) (W : PauliKind)
 
 /-- Formalization-only auxiliary: the typed Pauli point, axis-line, and
 diagonal-line maps are the corresponding low-degree maps reindexed along
-`pauliLdIndex`. -/
+`pauliLdIndex`.  This is items 1--3 of `def:pauli-question-distribution`,
+blueprint `ch13_qpbt_test.tex:285-329`,
+paper origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1120`. -/
 private theorem pauliCL_reindex (P : AdmissibleParams) (W : PauliKind)
     (L : LdSpace P.toLdParams → LdSpace P.toLdParams) :
     (fun z : PauliSpace P => embedLd P W (L (pauliToLd P W z))) =
