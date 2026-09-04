@@ -41,6 +41,11 @@ import MIPStarRE.QPBT.Test.CanonicalParams
 import MIPStarRE.QPBT.Combining.Defs
 import MIPStarRE.QPBT.Combining.DirectLowDegree
 import MIPStarRE.QPBT.Combining.Linearity
+import MIPStarRE.QPBT.Combining.Linearity.Defs
+import MIPStarRE.QPBT.Combining.Linearity.BooleanFourier
+import MIPStarRE.QPBT.Combining.Linearity.BLR
+import MIPStarRE.QPBT.Combining.Linearity.NaimarkRounding
+import MIPStarRE.QPBT.Combining.Linearity.Stability
 import MIPStarRE.QPBT.Combining.Witnesses
 import MIPStarRE.QPBT.Combining.Points
 import MIPStarRE.QPBT.Combining.Lines

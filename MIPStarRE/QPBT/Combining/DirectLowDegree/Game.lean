@@ -205,7 +205,7 @@ noncomputable abbrev DirectPolyTuple (D : DirectLdParams) :=
 /-- A polynomial-tuple POVM for the directly indexed game. -/
 noncomputable abbrev DirectPolyMeasTuple (D : DirectLdParams) (ι : Type*)
     [Fintype ι] [DecidableEq ι] :=
-  Measurement (DirectPolyTuple D) ι
+  MIPStarRE.Quantum.Measurement (DirectPolyTuple D) ι
 
 /-- Evaluate every component of a direct polynomial tuple at a point. -/
 def evalDirectPolyTupleAt {D : DirectLdParams}

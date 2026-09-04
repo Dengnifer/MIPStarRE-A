@@ -257,7 +257,8 @@ noncomputable def pauliCL (P : AdmissibleParams) (t : PauliType) :
 
 /-- Formalization-only auxiliary: a linear map of the ambient coefficient space
 is conditionally linear with a single level on the full register.  This is the
-one-level case of `def:cl-func`, blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:1168-1178`,
+one-level case of `def:cl-func`, blueprint
+`blueprint/src/chapter/ch12_qpbt_games.tex:1185-1195`,
 paper origin `references/qpbt-paper/05_conditionally_linear_functions.tex:35-57`. -/
 private theorem isCondLinearOn_one_of_linear {K ι : Type*} [Field K]
     [Fintype ι] [DecidableEq ι] (L : (ι → K) →ₗ[K] (ι → K)) :
@@ -275,7 +276,7 @@ private theorem isCondLinearOn_one_of_linear {K ι : Type*} [Field K]
 reindexing of registers, setting every coordinate outside the image to zero.
 Together with the lemmas that follow it, this supports the transport of
 conditional linearity between the register spaces of `def:cl-func`,
-blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:1168-1178`,
+blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:1185-1195`,
 paper origin `references/qpbt-paper/05_conditionally_linear_functions.tex:35-57`. -/
 private def clExtend {K κ ι : Type*} [Zero K] (f : κ → ι) (u : κ → K) : ι → K :=
   Function.extend f u 0
@@ -333,7 +334,7 @@ private theorem clExtend_smul {K κ ι : Type*} [Semiring K] {f : κ → ι}
 
 /-- Formalization-only auxiliary: transport a linear map of coefficient vectors
 along an injective reindexing of registers; see `clExtend`.  Supports
-`def:cl-func`, blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:1168-1178`,
+`def:cl-func`, blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:1185-1195`,
 paper origin `references/qpbt-paper/05_conditionally_linear_functions.tex:35-57`. -/
 private def clReindexLinear {K κ ι : Type*} [Field K] {f : κ → ι}
     (hf : Function.Injective f) (L : (κ → K) →ₗ[K] (κ → K)) :
@@ -353,7 +354,7 @@ private def clReindexLinear {K κ ι : Type*} [Field K] {f : κ → ι}
 
 /-- Formalization-only auxiliary: transport a conditionally linear syntax tree
 along an injective reindexing of registers; see `clExtend`.  Supports
-`def:cl-func`, blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:1168-1178`,
+`def:cl-func`, blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:1185-1195`,
 paper origin `references/qpbt-paper/05_conditionally_linear_functions.tex:35-57`. -/
 private def clReindexTerm {K κ ι : Type*} [Field K] [Fintype κ] [DecidableEq κ]
     [Fintype ι] [DecidableEq ι] {f : κ → ι} (hf : Function.Injective f) :
@@ -570,6 +571,8 @@ private theorem pauliCL_reindex (P : AdmissibleParams) (W : PauliKind)
 proof obligations corresponding to the prose following `def:pauli-question-distribution`
 (`blueprint/src/chapter/ch13_qpbt_test.tex:350-398`; paper
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1120`).
+They supply the per-type input to the common-level typed-family assertion in
+`lem:pauli-question-typed-cl`; promotion to one common level is tracked by issue #180.
 -/
 theorem isCondLinear_pauliCL (P : AdmissibleParams) (t : PauliType) :
     IsCondLinearOn (PauliScalar P) Finset.univ (pauliCLLevel t) (pauliCL P t) := by
@@ -605,7 +608,7 @@ theorem isCondLinear_pauliCL (P : AdmissibleParams) (t : PauliType) :
 
 /-- A finite edge set for the typed Pauli question graph.  The self-loops and
 the displayed type-incidence families are the graph used by the sampler in
-`def:pauli-question-distribution`, blueprint lines 285-329, paper origin
+`def:pauli-question-distribution`, blueprint `ch13_qpbt_test.tex:350-398`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1120`.
 -/
 def pauliEdges : Finset (Sym2 PauliType) :=
@@ -679,7 +682,8 @@ noncomputable def pauliQuestionDistribution (P : AdmissibleParams) :
             (s.1.1.2, pauliCL P s.1.1.2 s.2)))
 
 /-- The finite answer alphabet for the Pauli basis test.  Its constructors are
-the seven answer forms in `def:pauli-win-predicate`, blueprint lines 331-367,
+the seven answer forms in `def:pauli-win-predicate`, blueprint
+`ch13_qpbt_test.tex:410-449`,
 paper origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1126-1225`.
 -/
 inductive PauliAnswer (P : AdmissibleParams) where
