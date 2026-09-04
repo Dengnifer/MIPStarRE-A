@@ -51,19 +51,23 @@ open MIPStarRE.LDT
 
 noncomputable section
 
-private def diagBlock {ιA ιB : Type*}
+/-- The diagonal block of a bipartite operator at a fixed right index. -/
+def diagBlock {ιA ιB : Type*}
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
     (M : MIPStarRE.Quantum.Op (ιA × ιB)) (b : ιB) :
     MIPStarRE.Quantum.Op ιA :=
   M.submatrix (fun i => (i, b)) (fun j => (j, b))
 
-private def leftMarginalDensity {ιA ιB : Type*}
+/-- The normalized left marginal of a bipartite density, obtained by
+averaging its diagonal right blocks. -/
+def leftMarginalDensity {ιA ιB : Type*}
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB] [Nonempty ιB]
     (ρ : MIPStarRE.Quantum.Op (ιA × ιB)) : MIPStarRE.Quantum.Op ιA :=
   ((((Fintype.card ιB : Error) : Error)⁻¹ : Error) : ℂ) •
     ∑ b : ιB, diagBlock ρ b
 
-private lemma leftMarginalDensity_nonneg {ιA ιB : Type*}
+/-- Positivity passes from a bipartite density to its left marginal. -/
+lemma leftMarginalDensity_nonneg {ιA ιB : Type*}
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB] [Nonempty ιB]
     {ρ : MIPStarRE.Quantum.Op (ιA × ιB)} (hρ : 0 ≤ ρ) :
     0 ≤ leftMarginalDensity ρ := by
@@ -76,13 +80,17 @@ private lemma leftMarginalDensity_nonneg {ιA ιB : Type*}
     positivity
   simpa [leftMarginalDensity] using smul_nonneg hcoeff hsum
 
-private def leftMarginalState {ιA ιB : Type*}
+/-- The local state on the left factor defined by the left marginal
+density of a bipartite state. -/
+def leftMarginalState {ιA ιB : Type*}
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB] [Nonempty ιB]
     (ψ : QuantumState (ιA × ιB)) : QuantumState ιA where
   density := leftMarginalDensity ψ.density
   density_psd := leftMarginalDensity_nonneg ψ.density_psd
 
-private lemma leftTensor_eq_blockDiagonal_const {ιA ιB : Type*}
+/-- Left tensor placement is block diagonal with the same block at every
+right index. -/
+lemma leftTensor_eq_blockDiagonal_const {ιA ιB : Type*}
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
     (X : MIPStarRE.Quantum.Op ιA) :
     leftTensor (ι₂ := ιB) X = Matrix.blockDiagonal (fun _ : ιB => X) := by
@@ -94,7 +102,9 @@ private lemma leftTensor_eq_blockDiagonal_const {ιA ιB : Type*}
     simp [leftTensor, Matrix.blockDiagonal_apply]
   · simp [leftTensor, Matrix.blockDiagonal_apply, h]
 
-private lemma trace_blockDiagonal_const_mul_eq_sum_trace_diagBlock
+/-- The trace against a constant block-diagonal operator is the sum of the
+traces of the diagonal blocks. -/
+lemma trace_blockDiagonal_const_mul_eq_sum_trace_diagBlock
     {ιA ιB : Type*}
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
     (X : MIPStarRE.Quantum.Op ιA)
@@ -112,7 +122,9 @@ private lemma trace_blockDiagonal_const_mul_eq_sum_trace_diagBlock
     (e.sum_comp (fun y : ιB × (ιA × ιA) =>
       X y.2.1 y.2.2 * M (y.2.2, y.1) (y.2.1, y.1)))
 
-private lemma normalizedTrace_leftMarginalDensity_mul_eq
+/-- Evaluating a local operator against the left marginal agrees with
+evaluating its left tensor placement against the bipartite density. -/
+lemma normalizedTrace_leftMarginalDensity_mul_eq
     {ιA ιB : Type*}
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB] [Nonempty ιB]
     (ρ : MIPStarRE.Quantum.Op (ιA × ιB)) (X : MIPStarRE.Quantum.Op ιA) :
@@ -135,7 +147,8 @@ private lemma normalizedTrace_leftMarginalDensity_mul_eq
   simp [Fintype.card_prod]
   ring
 
-private lemma leftMarginalState_isNormalized {ιA ιB : Type*}
+/-- The left marginal of a normalized bipartite state is normalized. -/
+lemma leftMarginalState_isNormalized {ιA ιB : Type*}
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB] [Nonempty ιB]
     {ψ : QuantumState (ιA × ιB)} (hψ : ψ.IsNormalized) :
     (leftMarginalState ψ).IsNormalized := by
@@ -148,7 +161,9 @@ private lemma leftMarginalState_isNormalized {ιA ιB : Type*}
         (X := (1 : MIPStarRE.Quantum.Op ιA))
   simpa [leftMarginalState] using hnorm.trans hψ
 
-private lemma leftMarginal_ev_eq {ιA ιB : Type*}
+/-- Local evaluation in the left marginal equals bipartite evaluation of
+the left tensor placement. -/
+lemma leftMarginal_ev_eq {ιA ιB : Type*}
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB] [Nonempty ιB]
     (ψ : QuantumState (ιA × ιB)) (X : MIPStarRE.Quantum.Op ιA) :
     ev ψ (leftTensor (ι₂ := ιB) X) = ev (leftMarginalState ψ) X := by
@@ -306,7 +321,8 @@ private lemma one_le_orthonormalizationMainLemmaError_of_quarter_lt {ζ : Error}
   have hone : (1 : Error) ≤ (84 : Error) * (1 / (4 : Error)) := by norm_num
   exact hone.trans hscaled
 
-private lemma matrix_eq_zero_of_rank_eq_zero {m n : Type*}
+/-- A finite complex matrix of rank zero is the zero matrix. -/
+lemma matrix_eq_zero_of_rank_eq_zero {m n : Type*}
     [Finite m] [Fintype n] (A : Matrix m n ℂ) (hA : A.rank = 0) :
     A = 0 := by
   let _ : Fintype m := Fintype.ofFinite m

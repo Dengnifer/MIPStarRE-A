@@ -24,6 +24,11 @@ the calculus needed to compare the dilated projective strategy of
   replaces the `≈_δ`-preservation which Naimark dilation lacks in general
   (`references/ldt-paper/orthonormalization.tex:82-101`, blueprint
   `ch04_projective.tex:255-270`).
+
+## References
+
+`thm:ms-rigidity`, blueprint `blueprint/src/chapter/ch13_qpbt_test.tex:224-253`,
+paper `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652`.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder
@@ -209,20 +214,12 @@ theorem conjTranspose_mul_le_one_rightTensor {ιA ιB : Type*} [Fintype ιA] [De
   rw [rightTensor_conjTranspose, rightTensor_mul_rightTensor]
   exact rightTensor_le_one hB
 
-/-! ## Kronecker algebra of placed operators -/
+/-! ## Kronecker algebra of placed operators
 
-/-- Mixed-product rule for the rectangular tensor placement. -/
-theorem heteroKron_mul {ιA ιB : Type*} [Fintype ιA] [Fintype ιB]
-    (A B : Op ιA) (C D : Op ιB) :
-    heteroKron A C * heteroKron B D = heteroKron (A * B) (C * D) := by
-  unfold heteroKron Matrix.kronecker
-  exact (Matrix.mul_kronecker_mul A B C D).symm
-
-/-- The tensor placement of two identities is the identity. -/
-theorem heteroKron_one_one {ιA ιB : Type*} [DecidableEq ιA] [DecidableEq ιB] :
-    heteroKron (1 : Op ιA) (1 : Op ιB) = 1 := by
-  unfold heteroKron Matrix.kronecker
-  exact Matrix.one_kronecker_one
+The mixed-product rule `heteroKron_mul` and the identity `heteroKron_one_one`
+are the shared tensor-placement lemmas of `MIPStarRE/QPBT/Games/Defs.lean`; the
+identities below extend them with the additive facts used by the transfer
+step. -/
 
 /-- Tensor placement is additive in the left factor. -/
 theorem heteroKron_add_left {ιA ιB : Type*} (A B : Op ιA) (C : Op ιB) :

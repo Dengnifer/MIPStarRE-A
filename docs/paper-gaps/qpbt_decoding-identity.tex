@@ -133,11 +133,17 @@ does not assert the false unrestricted identity.  Finally,
 mass bound from the projective strategy and global polynomial-pair witness; it
 does not add the bound as a witness field or theorem hypothesis.
 
-These proposition-valued declarations are present with open proofs.  Issue~\#19
-owns their Stage~4.2 statements and this discrepancy record; \ghissue{47} owns
-the Stage~4.3 decoder calculations and non-encoding support estimate.  No
-unrestricted theorem, residual assumption, or additional witness field is
-source-faithful.
+The decoder calculations are proved.  \path{lowDegreeEncoding_mem_poly},
+\path{decodeFq_add}, \path{decodeFq_smul}, \path{decodeFq_lowDegreeEncoding},
+and \path{decodeFq_dotProduct_indicatorVec} carry complete proofs: the degree
+side-condition on $g_h$, the two linearity laws, the inversion
+$\operatorname{Dec}_{\mathbb F_q}(g_h)=h$, and the evaluation identity under the
+explicit \path{IsEncoding} hypothesis.  The complementary estimate
+\path{nonencodingMarginalMass_le} is the remaining open proof of this note.
+Issue~\#19 owns the Stage~4.2 statements and this discrepancy record;
+\ghissue{47} owns the Stage~4.3 decoder calculations, now discharged, and the
+non-encoding support estimate.  No unrestricted theorem, residual assumption, or
+additional witness field was introduced.
 
 \section{Conclusion}
 

@@ -229,25 +229,29 @@ theorem msVarObsB_eq_obsOf (S : Strategy msGame) (j : Fin 9) :
         (obsOf (((msDilatedStrategy S).B (MsType.var j)).postprocess msBitOrZero)) := by
   rw [msVarObsB, signObs_eq_obsOf_postprocess]
 
-/-- Alice's cell operators are reflections. -/
-theorem isReflection_msCellObsA (S : Strategy msGame) (i : Fin 6) (k : Fin 3) :
-    IsReflection (msCellObsA S i k) :=
-  (isReflection_signObs _ (msDilatedStrategy_isProjective_A S _) _).heteroKron_left
+/-- Alice's cell operators are binary observables. -/
+theorem isBinaryObservable_msCellObsA (S : Strategy msGame) (i : Fin 6) (k : Fin 3) :
+    IsBinaryObservable (msCellObsA S i k) :=
+  isBinaryObservable_heteroKron_one
+    (isBinaryObservable_signObs _ (msDilatedStrategy_isProjective_A S _) _)
 
-/-- Bob's cell operators are reflections. -/
-theorem isReflection_msCellObsB (S : Strategy msGame) (i : Fin 6) (k : Fin 3) :
-    IsReflection (msCellObsB S i k) :=
-  (isReflection_signObs _ (msDilatedStrategy_isProjective_B S _) _).heteroKron_right
+/-- Bob's cell operators are binary observables. -/
+theorem isBinaryObservable_msCellObsB (S : Strategy msGame) (i : Fin 6) (k : Fin 3) :
+    IsBinaryObservable (msCellObsB S i k) :=
+  isBinaryObservable_one_heteroKron
+    (isBinaryObservable_signObs _ (msDilatedStrategy_isProjective_B S _) _)
 
-/-- Alice's variable operators are reflections. -/
-theorem isReflection_msVarObsA (S : Strategy msGame) (j : Fin 9) :
-    IsReflection (msVarObsA S j) :=
-  (isReflection_signObs _ (msDilatedStrategy_isProjective_A S _) _).heteroKron_left
+/-- Alice's variable operators are binary observables. -/
+theorem isBinaryObservable_msVarObsA (S : Strategy msGame) (j : Fin 9) :
+    IsBinaryObservable (msVarObsA S j) :=
+  isBinaryObservable_heteroKron_one
+    (isBinaryObservable_signObs _ (msDilatedStrategy_isProjective_A S _) _)
 
-/-- Bob's variable operators are reflections. -/
-theorem isReflection_msVarObsB (S : Strategy msGame) (j : Fin 9) :
-    IsReflection (msVarObsB S j) :=
-  (isReflection_signObs _ (msDilatedStrategy_isProjective_B S _) _).heteroKron_right
+/-- Bob's variable operators are binary observables. -/
+theorem isBinaryObservable_msVarObsB (S : Strategy msGame) (j : Fin 9) :
+    IsBinaryObservable (msVarObsB S j) :=
+  isBinaryObservable_one_heteroKron
+    (isBinaryObservable_signObs _ (msDilatedStrategy_isProjective_B S _) _)
 
 /-- The three cell reflections of one constraint question commute exactly. -/
 theorem msCellObsA_comm (S : Strategy msGame) (i : Fin 6) (k l : Fin 3) :
@@ -551,21 +555,21 @@ variable. -/
 noncomputable def msLogicalZB (S : Strategy msGame) :
     Op ((msDilatedStrategy S).ιA × (msDilatedStrategy S).ιB) := msVarObsB S 4
 
-/-- Alice's logical `X` operator is a reflection. -/
-theorem isReflection_msLogicalXA (S : Strategy msGame) :
-    IsReflection (msLogicalXA S) := isReflection_msVarObsA S 0
+/-- Alice's logical `X` operator is a binary observable. -/
+theorem isBinaryObservable_msLogicalXA (S : Strategy msGame) :
+    IsBinaryObservable (msLogicalXA S) := isBinaryObservable_msVarObsA S 0
 
-/-- Alice's logical `Z` operator is a reflection. -/
-theorem isReflection_msLogicalZA (S : Strategy msGame) :
-    IsReflection (msLogicalZA S) := isReflection_msVarObsA S 4
+/-- Alice's logical `Z` operator is a binary observable. -/
+theorem isBinaryObservable_msLogicalZA (S : Strategy msGame) :
+    IsBinaryObservable (msLogicalZA S) := isBinaryObservable_msVarObsA S 4
 
-/-- Bob's logical `X` operator is a reflection. -/
-theorem isReflection_msLogicalXB (S : Strategy msGame) :
-    IsReflection (msLogicalXB S) := isReflection_msVarObsB S 0
+/-- Bob's logical `X` operator is a binary observable. -/
+theorem isBinaryObservable_msLogicalXB (S : Strategy msGame) :
+    IsBinaryObservable (msLogicalXB S) := isBinaryObservable_msVarObsB S 0
 
-/-- Bob's logical `Z` operator is a reflection. -/
-theorem isReflection_msLogicalZB (S : Strategy msGame) :
-    IsReflection (msLogicalZB S) := isReflection_msVarObsB S 4
+/-- Bob's logical `Z` operator is a binary observable. -/
+theorem isBinaryObservable_msLogicalZB (S : Strategy msGame) :
+    IsBinaryObservable (msLogicalZB S) := isBinaryObservable_msVarObsB S 4
 
 /-- Alice's logical `X` operator commutes exactly with Bob's logical `X`
 operator. -/
@@ -638,17 +642,17 @@ theorem msCellObsB_single_close (S : Strategy msGame) (ε : ℝ) (hwin : 1 - ε 
         (msCellObsB S i k₀ * msCellObsB S i k₂)) := by
   have hprod := msCellObsB_prod_close_of S ε hwin i k₀ k₁ k₂ hsum
   have hX2 : msCellObsB S i k₀ * msCellObsB S i k₀ = 1 :=
-    (isReflection_msCellObsB S i k₀).mul_self_eq_one
+    (isBinaryObservable_msCellObsB S i k₀).mul_self_eq_one
   have hZ2 : msCellObsB S i k₂ * msCellObsB S i k₂ = 1 :=
-    (isReflection_msCellObsB S i k₂).mul_self_eq_one
+    (isBinaryObservable_msCellObsB S i k₂).mul_self_eq_one
   have hZY : msCellObsB S i k₂ * msCellObsB S i k₁ =
       msCellObsB S i k₁ * msCellObsB S i k₂ := msCellObsB_comm S i k₂ k₁
   have hZX : msCellObsB S i k₂ * msCellObsB S i k₀ =
       msCellObsB S i k₀ * msCellObsB S i k₂ := msCellObsB_comm S i k₂ k₀
   have hU : (msCellObsB S i k₂ * msCellObsB S i k₀)ᴴ *
       (msCellObsB S i k₂ * msCellObsB S i k₀) = 1 :=
-    (IsReflection.mul (isReflection_msCellObsB S i k₂) (isReflection_msCellObsB S i k₀)
-      hZX).isometry
+    ((isBinaryObservable_msCellObsB S i k₂).mul
+      (isBinaryObservable_msCellObsB S i k₀) hZX).isometry
   have e1 : (msCellObsB S i k₂ * msCellObsB S i k₀) *
       (msCellObsB S i k₀ * msCellObsB S i k₁ * msCellObsB S i k₂) = msCellObsB S i k₁ := by
     calc (msCellObsB S i k₂ * msCellObsB S i k₀) *
@@ -685,12 +689,12 @@ theorem msCellObsB_mul_close (S : Strategy msGame) (ε : ℝ) (hwin : 1 - ε ≤
   have h1 : CloseOn (msDilatedStrategy S).ψ (12 * Real.sqrt ε)
       (msCellObsB S I k * msCellObsB S J l)
       (msCellObsB S I k * msVarObsA S (msConstraintVars J l)) :=
-    CloseOn.isometry_mul (isReflection_msCellObsB S I k).isometry p1
+    CloseOn.isometry_mul (isBinaryObservable_msCellObsB S I k).isometry p1
   have hswap : msCellObsB S I k * msVarObsA S (msConstraintVars J l) =
       msVarObsA S (msConstraintVars J l) * msCellObsB S I k :=
     (msVarObsA_comm_msCellObsB S (msConstraintVars J l) I k).symm
   rw [hswap] at h1
-  exact h1.trans (CloseOn.isometry_mul (isReflection_msVarObsA S _).isometry p2)
+  exact h1.trans (CloseOn.isometry_mul (isBinaryObservable_msVarObsA S _).isometry p2)
 
 /-- Two of Bob's cell reflections attached to a common cell by two different
 constraint questions are close on the dilated state. -/
