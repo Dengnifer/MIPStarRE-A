@@ -100,8 +100,15 @@ This is equation~(3) at lines~903--910 of the in-repository source mirror.%
 \path{references/nv-paper/fullpaper.tex}, lines~866--912.  The quantum
 linearity theorem and its Fourier--Naimark proof are at lines~1074--1112.}
 The next line identifies the final expression with the squared raw operator
-distance.  Under the operator-distance definition at lines~873--875, however,
-the latter is $\tr_\rho((S-T)^2)$ rather than one half of that quantity.  Thus
+distance.  The operator-distance definition at lines~873--875 is printed with
+$\rho$ occurring twice,
+\[
+  \draw_\rho(S,T)^2 = \tr_\rho\big((S-T)^\dagger(S-T)\rho\big),
+  \qquad \tr_\rho(X) := \tr(\rho X),
+\]
+and we read the duplication as typographical, keeping the single $\rho$ of the
+definition of $\draw$ above.  Under that reading the squared raw operator
+distance is $\tr_\rho((S-T)^2)$ rather than one half of that quantity.  Thus
 the calculation through line~910 is correct and the equality on line~911 loses
 a factor of two.
 
@@ -167,11 +174,14 @@ Pauli-basis analysis and defers its proof to Natarajan and Vidick.%
 \path{references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex},
 lines~711--725.}
 The active blueprint expands the conclusion's distance as the raw distance
-$\draw$ while retaining the bound $\delta$.  The current formal theorem makes
-the same choice.  Thus both carry the false normalization exhibited by the
+$\draw$ while retaining the bound $\delta$.  The formal theorem
+\leanid{exists\_exactly\_linear\_observables}, whose conclusion bounds the
+average over $u$ of \leanid{stateDepDistSq} by $\delta$, makes the same
+choice.  Thus both carry the false normalization exhibited by the
 counterexample.%
 \footnote{See
 \path{blueprint/src/chapter/ch15_qpbt_combining.tex}, lines~124--132, and
+\leanid{exists\_exactly\_linear\_observables} together with
 \leanid{stateDepDistSq} in
 \doclink{MIPStarRE/QPBT/Combining/Linearity.lean}.}
 
