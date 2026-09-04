@@ -222,7 +222,7 @@ private noncomputable def ldPointCLLinear (P : LdParams) (v : Fin P.m → Scalar
   map_add' x y := by
     funext i
     rcases i with (j | u) | j
-    · show lineRepMap v (LdSpace.point (x + y)) j = _
+    · change lineRepMap v (LdSpace.point (x + y)) j = _
       have hpoint : LdSpace.point (x + y) = LdSpace.point x + LdSpace.point y := rfl
       rw [hpoint, map_add]
       rfl
@@ -231,7 +231,7 @@ private noncomputable def ldPointCLLinear (P : LdParams) (v : Fin P.m → Scalar
   map_smul' c x := by
     funext i
     rcases i with (j | u) | j
-    · show lineRepMap v (LdSpace.point (c • x)) j = _
+    · change lineRepMap v (LdSpace.point (c • x)) j = _
       have hpoint : LdSpace.point (c • x) = c • LdSpace.point x := rfl
       rw [hpoint, map_smul]
       rfl
@@ -252,7 +252,7 @@ private def ldDirectionCLLinear (P : LdParams) (i : Fin P.m) :
     rcases k with (j | u) | j
     · simp
     · simp
-    · show prefixProjection i (LdSpace.direction (x + y)) j =
+    · change prefixProjection i (LdSpace.direction (x + y)) j =
         prefixProjection i (LdSpace.direction x) j +
           prefixProjection i (LdSpace.direction y) j
       by_cases h : j.val < i.val
@@ -264,7 +264,7 @@ private def ldDirectionCLLinear (P : LdParams) (i : Fin P.m) :
     rcases k with (j | u) | j
     · simp
     · simp
-    · show prefixProjection i (LdSpace.direction (c • x)) j =
+    · change prefixProjection i (LdSpace.direction (c • x)) j =
         c • prefixProjection i (LdSpace.direction x) j
       by_cases h : j.val < i.val
       · simp only [prefixProjection, if_pos h, smul_zero]
@@ -386,7 +386,7 @@ theorem isCondLinear_ldALineCL (P : LdParams) :
         ldSeedLinear P (coordinateRestriction (ldSeedRegister P) x) +
           (ldPointCLLinear P (coordinateDirection (chiIndex P (LdSpace.seed x)))
             (coordinateRestriction (ldPointRegister P) x) + 0) := by
-    show ldSeedLinear P (coordinateRestriction (ldSeedRegister P) x) +
+    change ldSeedLinear P (coordinateRestriction (ldSeedRegister P) x) +
         (ldPointCLLinear P
             (coordinateDirection (chiIndex P
               (LdSpace.seed (ldSeedLinear P (coordinateRestriction (ldSeedRegister P) x)))))
@@ -395,16 +395,16 @@ theorem isCondLinear_ldALineCL (P : LdParams) :
   rw [hval]
   funext i
   rcases i with (j | u) | j
-  · show (0 : ScalarQ P) +
+  · change (0 : ScalarQ P) +
         (lineRepMap (coordinateDirection (chiIndex P (LdSpace.seed x)))
           (LdSpace.point (coordinateRestriction (ldPointRegister P) x)) j + 0) =
       lineRepMap (coordinateDirection (chiIndex P (LdSpace.seed x)))
         (LdSpace.point x) j
     rw [hpoint, zero_add, add_zero]
-  · show coordinateRestriction (ldSeedRegister P) x (Sum.inl (Sum.inr ())) +
+  · change coordinateRestriction (ldSeedRegister P) x (Sum.inl (Sum.inr ())) +
         ((0 : ScalarQ P) + 0) = x (Sum.inl (Sum.inr ()))
     rw [coordinateRestriction_seed, add_zero, add_zero]
-  · show (0 : ScalarQ P) + ((0 : ScalarQ P) + 0) = 0
+  · change (0 : ScalarQ P) + ((0 : ScalarQ P) + 0) = 0
     rw [add_zero, add_zero]
 
 /-- The conditional-linearity level of the diagonal-line map.  This is the
@@ -429,7 +429,7 @@ theorem isCondLinear_ldDLineCL (P : LdParams) :
             (coordinateRestriction (ldDirectionRegister P) x)) =
         prefixProjection (chiIndex P (LdSpace.seed x)) (LdSpace.direction x) := by
     funext j
-    show prefixProjection (chiIndex P (LdSpace.seed x))
+    change prefixProjection (chiIndex P (LdSpace.seed x))
         (LdSpace.direction (coordinateRestriction (ldDirectionRegister P) x)) j = _
     rw [coordinateRestriction_direction]
   have hval :
@@ -440,7 +440,7 @@ theorem isCondLinear_ldDLineCL (P : LdParams) :
             (ldPointCLLinear P
                 (prefixProjection (chiIndex P (LdSpace.seed x)) (LdSpace.direction x))
                 (coordinateRestriction (ldPointRegister P) x) + 0)) := by
-    show ldSeedLinear P (coordinateRestriction (ldSeedRegister P) x) +
+    change ldSeedLinear P (coordinateRestriction (ldSeedRegister P) x) +
         (ldDirectionCLLinear P
             (chiIndex P
               (LdSpace.seed (ldSeedLinear P (coordinateRestriction (ldSeedRegister P) x))))
@@ -457,17 +457,17 @@ theorem isCondLinear_ldDLineCL (P : LdParams) :
   rw [hval]
   funext i
   rcases i with (j | u) | j
-  · show (0 : ScalarQ P) + ((0 : ScalarQ P) +
+  · change (0 : ScalarQ P) + ((0 : ScalarQ P) +
         (lineRepMap
           (prefixProjection (chiIndex P (LdSpace.seed x)) (LdSpace.direction x))
           (LdSpace.point (coordinateRestriction (ldPointRegister P) x)) j + 0)) =
       lineRepMap (prefixProjection (chiIndex P (LdSpace.seed x)) (LdSpace.direction x))
         (LdSpace.point x) j
     rw [hpoint, zero_add, zero_add, add_zero]
-  · show coordinateRestriction (ldSeedRegister P) x (Sum.inl (Sum.inr ())) +
+  · change coordinateRestriction (ldSeedRegister P) x (Sum.inl (Sum.inr ())) +
         ((0 : ScalarQ P) + ((0 : ScalarQ P) + 0)) = x (Sum.inl (Sum.inr ()))
     rw [coordinateRestriction_seed, add_zero, add_zero, add_zero]
-  · show (0 : ScalarQ P) +
+  · change (0 : ScalarQ P) +
         (prefixProjection (chiIndex P (LdSpace.seed x))
             (LdSpace.direction (coordinateRestriction (ldDirectionRegister P) x)) j +
           ((0 : ScalarQ P) + 0)) =

@@ -29,6 +29,372 @@ open MIPStarRE.Quantum
 
 noncomputable section
 
+/-!
+### Formalization-only auxiliary facts on finite distributions
+
+The statements of this section are not named in the paper.  They record the
+elementary behaviour of push-forwards of uniform distributions that the proofs
+of `lem:alnf`, `lem:dlnf`, and of the identification of the low-degree sampler
+with a typed conditionally linear distribution rely on.
+-/
+
+/-- Formalization-only auxiliary lemma: two finite distributions coincide as
+soon as their supports and their weight functions coincide. -/
+private theorem distribution_ext {α : Type*} {μ ν : Distribution α}
+    (hsupport : μ.support = ν.support) (hweight : μ.weight = ν.weight) : μ = ν := by
+  cases μ with
+  | mk s w hn ho =>
+    cases ν with
+    | mk s' w' hn' ho' =>
+      have hs : s = s' := hsupport
+      have hw : w = w' := hweight
+      subst hs
+      subst hw
+      rfl
+
+/-- Formalization-only auxiliary lemma: successive push-forwards compose. -/
+private theorem distribution_map_map {α β γ : Type*}
+    [DecidableEq β] [DecidableEq γ]
+    (μ : Distribution α) (e : α → β) (f : β → γ) :
+    (μ.map e).map f = μ.map fun a => f (e a) := by
+  refine distribution_ext ?_ ?_
+  · change (μ.support.image e).image f = μ.support.image fun a => f (e a)
+    rw [Finset.image_image]
+    rfl
+  · funext c
+    have hmaps : ∀ a ∈ μ.support.filter fun a => f (e a) = c,
+        e a ∈ (μ.support.image e).filter fun b => f b = c := by
+      intro a ha
+      obtain ⟨ha1, ha2⟩ := Finset.mem_filter.mp ha
+      exact Finset.mem_filter.mpr ⟨Finset.mem_image_of_mem _ ha1, ha2⟩
+    have hkey := Finset.sum_fiberwise_of_maps_to hmaps μ.weight
+    change (∑ b ∈ (μ.support.image e).filter fun b => f b = c,
+        ∑ a ∈ μ.support.filter fun a => e a = b, μ.weight a) =
+      ∑ a ∈ μ.support.filter fun a => f (e a) = c, μ.weight a
+    rw [← hkey]
+    refine Finset.sum_congr rfl fun b hb => ?_
+    obtain ⟨-, hb2⟩ := Finset.mem_filter.mp hb
+    congr 1
+    ext a
+    simp only [Finset.mem_filter]
+    constructor
+    · rintro ⟨ha1, rfl⟩
+      exact ⟨⟨ha1, hb2⟩, rfl⟩
+    · rintro ⟨⟨ha1, -⟩, hae⟩
+      exact ⟨ha1, hae⟩
+
+/-- Formalization-only auxiliary lemma: every point of a finite type carries
+the same uniform weight. -/
+private theorem uniformDistribution_weight_apply (α : Type*)
+    [Fintype α] [DecidableEq α] [Nonempty α] (a : α) :
+    (uniformDistribution α).weight a = 1 / (Fintype.card α : Error) := by
+  simp [uniformDistribution]
+
+/-- Formalization-only auxiliary lemma: a map whose fibers all have the same
+cardinality pushes the uniform distribution forward to the uniform
+distribution. -/
+private theorem map_uniformDistribution_of_card_fiber {α β : Type*}
+    [Fintype α] [DecidableEq α] [Nonempty α]
+    [Fintype β] [DecidableEq β] [Nonempty β]
+    (e : α → β) (c : ℕ)
+    (hc : ∀ b : β, ((Finset.univ : Finset α).filter fun a => e a = b).card = c) :
+    (uniformDistribution α).map e = uniformDistribution β := by
+  have hcpos : 0 < c := by
+    obtain ⟨a₀⟩ := (inferInstance : Nonempty α)
+    have hmem : a₀ ∈ (Finset.univ : Finset α).filter fun a => e a = e a₀ :=
+      Finset.mem_filter.mpr ⟨Finset.mem_univ _, rfl⟩
+    have hpos := Finset.card_pos.mpr ⟨a₀, hmem⟩
+    rwa [hc] at hpos
+  have hcard : Fintype.card α = Fintype.card β * c := by
+    have h := Finset.card_eq_sum_card_fiberwise
+      (f := e) (s := (Finset.univ : Finset α)) (t := (Finset.univ : Finset β))
+      (fun a _ => Finset.mem_univ _)
+    rw [Finset.card_univ] at h
+    rw [h, Finset.sum_congr rfl fun b _ => hc b]
+    simp [Finset.card_univ, mul_comm]
+  refine distribution_ext ?_ ?_
+  · change (Finset.univ : Finset α).image e = (Finset.univ : Finset β)
+    ext b
+    simp only [Finset.mem_image, Finset.mem_univ, iff_true, true_and]
+    have hne : ((Finset.univ : Finset α).filter fun a => e a = b).Nonempty := by
+      rw [← Finset.card_pos, hc]
+      exact hcpos
+    obtain ⟨a, ha⟩ := hne
+    exact ⟨a, (Finset.mem_filter.mp ha).2⟩
+  · funext b
+    have hbeta : (Fintype.card β : Error) ≠ 0 := by
+      exact_mod_cast Fintype.card_ne_zero (α := β)
+    have hc' : (c : Error) ≠ 0 := by exact_mod_cast hcpos.ne'
+    change (∑ a ∈ (Finset.univ : Finset α).filter fun a => e a = b,
+        (uniformDistribution α).weight a) = (uniformDistribution β).weight b
+    rw [Finset.sum_congr rfl fun a _ => uniformDistribution_weight_apply α a,
+      uniformDistribution_weight_apply, Finset.sum_const, hc, nsmul_eq_mul, hcard]
+    push_cast
+    field_simp
+
+/-- Formalization-only auxiliary lemma: relabelling along a bijection preserves
+uniformity. -/
+private theorem map_uniformDistribution_equiv {α β : Type*}
+    [Fintype α] [DecidableEq α] [Nonempty α]
+    [Fintype β] [DecidableEq β] [Nonempty β] (E : α ≃ β) :
+    (uniformDistribution α).map E = uniformDistribution β := by
+  refine map_uniformDistribution_of_card_fiber _ 1 fun b => ?_
+  have hfilter : ((Finset.univ : Finset α).filter fun a => E a = b) = {E.symm b} := by
+    ext a
+    simp [Equiv.apply_eq_iff_eq_symm_apply]
+  rw [hfilter]
+  simp
+
+/-- Formalization-only auxiliary lemma: the first marginal of the uniform
+distribution on a product is uniform. -/
+private theorem map_uniformDistribution_fst {α β : Type*}
+    [Fintype α] [DecidableEq α] [Nonempty α]
+    [Fintype β] [DecidableEq β] [Nonempty β] :
+    (uniformDistribution (α × β)).map Prod.fst = uniformDistribution α := by
+  refine map_uniformDistribution_of_card_fiber _ (Fintype.card β) fun a => ?_
+  have hfilter : ((Finset.univ : Finset (α × β)).filter fun p => p.1 = a)
+      = ({a} : Finset α) ×ˢ (Finset.univ : Finset β) := by
+    ext p
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_product,
+      Finset.mem_singleton, and_true]
+  rw [hfilter, Finset.card_product]
+  simp
+
+/-- Formalization-only auxiliary lemma: the second marginal of the uniform
+distribution on a product is uniform. -/
+private theorem map_uniformDistribution_snd {α β : Type*}
+    [Fintype α] [DecidableEq α] [Nonempty α]
+    [Fintype β] [DecidableEq β] [Nonempty β] :
+    (uniformDistribution (α × β)).map Prod.snd = uniformDistribution β := by
+  refine map_uniformDistribution_of_card_fiber _ (Fintype.card α) fun b => ?_
+  have hfilter : ((Finset.univ : Finset (α × β)).filter fun p => p.2 = b)
+      = (Finset.univ : Finset α) ×ˢ ({b} : Finset β) := by
+    ext p
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_product,
+      Finset.mem_singleton]
+  rw [hfilter, Finset.card_product]
+  simp
+
+/-- Formalization-only auxiliary lemma: binding a uniform type distribution to a
+family of uniformly seeded push-forwards is the push-forward of the uniform
+distribution on the product. -/
+private theorem bind_uniformDistribution_map {α β γ : Type*}
+    [Fintype α] [DecidableEq α] [Nonempty α]
+    [Fintype β] [DecidableEq β] [Nonempty β] [DecidableEq γ]
+    (g : α → β → γ) :
+    Distribution.bind (uniformDistribution α)
+        (fun a => (uniformDistribution β).map (g a)) =
+      (uniformDistribution (α × β)).map fun p => g p.1 p.2 := by
+  refine distribution_ext ?_ ?_
+  · change (Finset.univ : Finset α).biUnion
+        (fun a => (Finset.univ : Finset β).image (g a)) =
+      (Finset.univ : Finset (α × β)).image fun p => g p.1 p.2
+    ext c
+    simp [Prod.exists]
+  · funext c
+    have hcount :
+        ((Finset.univ : Finset (α × β)).filter fun p => g p.1 p.2 = c).card
+          = ∑ a : α, ((Finset.univ : Finset β).filter fun b => g a b = c).card := by
+      simp only [Finset.card_filter]
+      rw [Fintype.sum_prod_type]
+    have hinner : ∀ a : α,
+        ((uniformDistribution β).map (g a)).weight c
+          = (((Finset.univ : Finset β).filter fun b => g a b = c).card : Error) *
+              (1 / (Fintype.card β : Error)) := by
+      intro a
+      change (∑ b ∈ (Finset.univ : Finset β).filter fun b => g a b = c,
+          (uniformDistribution β).weight b) = _
+      rw [Finset.sum_congr rfl fun b _ => uniformDistribution_weight_apply β b,
+        Finset.sum_const, nsmul_eq_mul]
+    have key : ∀ a : α, (uniformDistribution α).weight a *
+        ((uniformDistribution β).map (g a)).weight c
+        = (((Finset.univ : Finset β).filter fun b => g a b = c).card : Error) *
+            (1 / ((Fintype.card α : Error) * (Fintype.card β : Error))) := by
+      intro a
+      rw [uniformDistribution_weight_apply, hinner a]
+      ring
+    change (∑ a ∈ (Finset.univ : Finset α), (uniformDistribution α).weight a *
+        ((uniformDistribution β).map (g a)).weight c) =
+      ∑ p ∈ (Finset.univ : Finset (α × β)).filter fun p => g p.1 p.2 = c,
+        (uniformDistribution (α × β)).weight p
+    rw [Finset.sum_congr rfl fun a _ => key a, ← Finset.sum_mul,
+      Finset.sum_congr rfl fun p _ => uniformDistribution_weight_apply (α × β) p,
+      Finset.sum_const, nsmul_eq_mul, hcount, Fintype.card_prod]
+    push_cast
+    ring
+
+/-!
+### Formalization-only auxiliary facts about the ambient low-degree space
+-/
+
+/-- Formalization-only auxiliary equivalence splitting an ambient low-degree
+vector into its point, seed, and direction blocks. -/
+private def ldSpaceSplit (L : LdParams) :
+    LdSpace L ≃ ((Fin L.m → ScalarQ L) × ScalarQ L) × (Fin L.m → ScalarQ L) where
+  toFun z := ((LdSpace.point z, LdSpace.seed z), LdSpace.direction z)
+  invFun p := fun i =>
+    match i with
+    | .inl (.inl j) => p.1.1 j
+    | .inl (.inr _) => p.1.2
+    | .inr j => p.2 j
+  left_inv z := by
+    funext i
+    rcases i with (j | u) | j
+    · rfl
+    · cases u
+      rfl
+    · rfl
+  right_inv p := by
+    obtain ⟨⟨a, b⟩, c⟩ := p
+    rfl
+
+/-- Formalization-only auxiliary lemma: the point block of a uniformly random
+ambient vector is uniform. -/
+private theorem map_uniformDistribution_point (L : LdParams) :
+    (uniformDistribution (LdSpace L)).map LdSpace.point =
+      uniformDistribution (Fin L.m → ScalarQ L) := by
+  have hsplit : (uniformDistribution (LdSpace L)).map (ldSpaceSplit L) =
+      uniformDistribution (((Fin L.m → ScalarQ L) × ScalarQ L) × (Fin L.m → ScalarQ L)) :=
+    map_uniformDistribution_equiv (ldSpaceSplit L)
+  calc
+    (uniformDistribution (LdSpace L)).map LdSpace.point
+        = (((uniformDistribution (LdSpace L)).map (ldSpaceSplit L)).map
+            Prod.fst).map Prod.fst := by
+          rw [distribution_map_map, distribution_map_map]
+          rfl
+    _ = ((uniformDistribution
+          (((Fin L.m → ScalarQ L) × ScalarQ L) × (Fin L.m → ScalarQ L))).map
+            Prod.fst).map Prod.fst := by rw [hsplit]
+    _ = (uniformDistribution ((Fin L.m → ScalarQ L) × ScalarQ L)).map Prod.fst := by
+          rw [map_uniformDistribution_fst]
+    _ = uniformDistribution (Fin L.m → ScalarQ L) := map_uniformDistribution_fst
+
+/-- Formalization-only auxiliary lemma: the shared scalar coordinate of a
+uniformly random ambient vector is uniform. -/
+private theorem map_uniformDistribution_seed (L : LdParams) :
+    (uniformDistribution (LdSpace L)).map LdSpace.seed =
+      uniformDistribution (ScalarQ L) := by
+  have hsplit : (uniformDistribution (LdSpace L)).map (ldSpaceSplit L) =
+      uniformDistribution (((Fin L.m → ScalarQ L) × ScalarQ L) × (Fin L.m → ScalarQ L)) :=
+    map_uniformDistribution_equiv (ldSpaceSplit L)
+  calc
+    (uniformDistribution (LdSpace L)).map LdSpace.seed
+        = (((uniformDistribution (LdSpace L)).map (ldSpaceSplit L)).map
+            Prod.fst).map Prod.snd := by
+          rw [distribution_map_map, distribution_map_map]
+          rfl
+    _ = ((uniformDistribution
+          (((Fin L.m → ScalarQ L) × ScalarQ L) × (Fin L.m → ScalarQ L))).map
+            Prod.fst).map Prod.snd := by rw [hsplit]
+    _ = (uniformDistribution ((Fin L.m → ScalarQ L) × ScalarQ L)).map Prod.snd := by
+          rw [map_uniformDistribution_fst]
+    _ = uniformDistribution (ScalarQ L) := map_uniformDistribution_snd
+
+/-- Formalization-only auxiliary lemma: an admissible field size is positive. -/
+private theorem ldParams_q_pos (L : LdParams) : 0 < L.q := by
+  obtain ⟨j, -, hj⟩ := L.hq
+  rw [hj]
+  exact Nat.pow_pos (by norm_num)
+
+/-- Formalization-only auxiliary lemma: the coordinate index of a scalar is
+read off from its binary representation. -/
+private theorem chiIndex_eq_iff (L : LdParams) (s : ScalarQ L) (i : Fin L.m) :
+    chiIndex L s = i ↔
+      ((binaryRepresentation L.model s).val / (L.q / L.m)) % L.m = i.val := by
+  rw [Fin.ext_iff]
+  simp [chiIndex]
+
+/-- Formalization-only auxiliary lemma: every fiber of the coordinate index has
+exactly `q / m` elements.  This is the balance property used in
+`def:ld-question-distribution`, blueprint `ch13_qpbt_test.tex:38-49`, paper
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`. -/
+private theorem card_chiIndex_fiber (L : LdParams) (i : Fin L.m) :
+    ((Finset.univ : Finset (ScalarQ L)).filter fun s => chiIndex L s = i).card
+      = L.q / L.m := by
+  have hq : 0 < L.q := ldParams_q_pos L
+  have hqk : L.m * (L.q / L.m) = L.q := Nat.mul_div_cancel' L.hdvd
+  have hkpos : 0 < L.q / L.m := by
+    rcases Nat.eq_zero_or_pos (L.q / L.m) with h | h
+    · rw [h, Nat.mul_zero] at hqk
+      omega
+    · exact h
+  have hstep1 :
+      ((Finset.univ : Finset (ScalarQ L)).filter fun s => chiIndex L s = i).card
+        = ((Finset.univ : Finset (Fin L.q)).filter
+            fun n => (n.val / (L.q / L.m)) % L.m = i.val).card := by
+    refine Finset.card_equiv (binaryRepresentation L.model) fun s => ?_
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and, chiIndex_eq_iff]
+  have hstep2 :
+      ((Finset.range L.q).filter fun t => (t / (L.q / L.m)) % L.m = i.val)
+        = ((Finset.univ : Finset (Fin L.q)).filter
+            fun n => (n.val / (L.q / L.m)) % L.m = i.val).image Fin.val := by
+    ext t
+    simp only [Finset.mem_filter, Finset.mem_range, Finset.mem_image,
+      Finset.mem_univ, true_and]
+    constructor
+    · rintro ⟨ht, hP⟩
+      exact ⟨⟨t, ht⟩, hP, rfl⟩
+    · rintro ⟨n, hP, rfl⟩
+      exact ⟨n.isLt, hP⟩
+  have hstep3 :
+      ((Finset.range L.q).filter fun t => (t / (L.q / L.m)) % L.m = i.val)
+        = Finset.Ico (i.val * (L.q / L.m)) (i.val * (L.q / L.m) + L.q / L.m) := by
+    ext t
+    simp only [Finset.mem_filter, Finset.mem_range, Finset.mem_Ico]
+    constructor
+    · rintro ⟨htq, hP⟩
+      have hlt : t / (L.q / L.m) < L.m := by
+        rw [Nat.div_lt_iff_lt_mul hkpos]
+        omega
+      have hdiv : t / (L.q / L.m) = i.val := by
+        rwa [Nat.mod_eq_of_lt hlt] at hP
+      have hle : t / (L.q / L.m) * (L.q / L.m) ≤ t := Nat.div_mul_le_self t _
+      have hupper : t < (i.val + 1) * (L.q / L.m) := by
+        rw [← Nat.div_lt_iff_lt_mul hkpos, hdiv]
+        omega
+      have hexp : (i.val + 1) * (L.q / L.m)
+          = i.val * (L.q / L.m) + L.q / L.m := by ring
+      rw [hdiv] at hle
+      omega
+    · rintro ⟨hlo, hhi⟩
+      have hexp : (i.val + 1) * (L.q / L.m)
+          = i.val * (L.q / L.m) + L.q / L.m := by ring
+      have hdiv : t / (L.q / L.m) = i.val := by
+        have h1 : i.val ≤ t / (L.q / L.m) := (Nat.le_div_iff_mul_le hkpos).mpr hlo
+        have h2 : t / (L.q / L.m) < i.val + 1 := by
+          rw [Nat.div_lt_iff_lt_mul hkpos]
+          omega
+        omega
+      refine ⟨?_, ?_⟩
+      · have hbound : (i.val + 1) * (L.q / L.m) ≤ L.m * (L.q / L.m) :=
+          Nat.mul_le_mul_right _ i.isLt
+        omega
+      · rw [hdiv, Nat.mod_eq_of_lt i.isLt]
+  rw [hstep1, ← Finset.card_image_of_injective
+      ((Finset.univ : Finset (Fin L.q)).filter
+        fun n => (n.val / (L.q / L.m)) % L.m = i.val) Fin.val_injective,
+    ← hstep2, hstep3, Nat.card_Ico]
+  omega
+
+/-- Formalization-only auxiliary lemma: the coordinate index of a uniformly
+random scalar is uniform.  This is the balance assertion made in
+`def:ld-question-distribution`, blueprint `ch13_qpbt_test.tex:38-49`, paper
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`. -/
+private theorem map_uniformDistribution_chiIndex (L : LdParams) :
+    (uniformDistribution (ScalarQ L)).map (chiIndex L) =
+      uniformDistribution (Fin L.m) :=
+  map_uniformDistribution_of_card_fiber _ (L.q / L.m) (card_chiIndex_fiber L)
+
+/-- Formalization-only auxiliary lemma: zeroing an initial segment of the
+coordinates is idempotent. -/
+private theorem prefixProjection_prefixProjection (L : LdParams) (i : Fin L.m)
+    (v : Fin L.m → ScalarQ L) :
+    prefixProjection i (prefixProjection i v) = prefixProjection i v := by
+  funext j
+  by_cases h : j.val < i.val
+  · simp only [prefixProjection, if_pos h]
+  · simp only [prefixProjection, if_neg h]
+
 /-- `lem:alnf`: the point and axis-index marginals of the axis line-point
 distribution are uniform. Blueprint `ch13_qpbt_test.tex:63-68`, paper
 `08_classical_and_quantum_low_degree_tests.tex:243-257`. -/
@@ -37,14 +403,46 @@ theorem aLinePointDist_point_marginal_uniform (L : LdParams) :
         uniformDistribution (Fin L.m → ScalarQ L) ∧
       (aLinePointDist L).map (fun sample => chiIndex L sample.1.seed) =
         uniformDistribution (Fin L.m) := by
-  sorry
+  constructor
+  · have hmap : (aLinePointDist L).map Prod.snd
+        = (uniformDistribution (LdSpace L)).map LdSpace.point := by
+      change ((((uniformDistribution (LdSpace L)).map
+          fun z => (ldALineCL L z, ldPointCL L z)).map
+          fun s => (aLineDescOf L s.1, LdSpace.point s.2)).map Prod.snd) = _
+      rw [distribution_map_map, distribution_map_map]
+      rfl
+    rw [hmap, map_uniformDistribution_point]
+  · have hmap : (aLinePointDist L).map (fun sample => chiIndex L sample.1.seed)
+        = ((uniformDistribution (LdSpace L)).map LdSpace.seed).map (chiIndex L) := by
+      change ((((uniformDistribution (LdSpace L)).map
+          fun z => (ldALineCL L z, ldPointCL L z)).map
+          fun s => (aLineDescOf L s.1, LdSpace.point s.2)).map
+          fun sample => chiIndex L sample.1.seed) = _
+      rw [distribution_map_map, distribution_map_map, distribution_map_map]
+      rfl
+    rw [hmap, map_uniformDistribution_seed, map_uniformDistribution_chiIndex]
 
 /-- The incidence conclusion of `lem:alnf`, blueprint
 `ch13_qpbt_test.tex:63-68`, paper
 `08_classical_and_quantum_low_degree_tests.tex:243-257`. -/
 theorem aLinePointDist_mem_line (L : LdParams) :
     ∀ sample ∈ (aLinePointDist L).support, sample.2 ∈ sample.1.pointSet := by
-  sorry
+  intro sample hsample
+  have hsupport : (aLinePointDist L).support =
+      ((Finset.univ : Finset (LdSpace L)).image
+        fun z => (ldALineCL L z, ldPointCL L z)).image
+        fun s => (aLineDescOf L s.1, LdSpace.point s.2) := rfl
+  rw [hsupport] at hsample
+  obtain ⟨s, hs, rfl⟩ := Finset.mem_image.mp hsample
+  obtain ⟨z, -, rfl⟩ := Finset.mem_image.mp hs
+  change LdSpace.point z ∈
+    linePoints
+      (lineRepMap (coordinateDirection (chiIndex L (LdSpace.seed z)))
+        (lineRepMap (coordinateDirection (chiIndex L (LdSpace.seed z)))
+          (LdSpace.point z)))
+      (coordinateDirection (chiIndex L (LdSpace.seed z)))
+  rw [lineRepMap_apply_self]
+  exact mem_linePoints_lineRepMap _ _
 
 /-- `lem:dlnf`: the point and prefix-index marginals of the diagonal
 line-point distribution are uniform. Blueprint `ch13_qpbt_test.tex:74-79`,
@@ -54,14 +452,50 @@ theorem dLinePointDist_point_marginal_uniform (L : LdParams) :
         uniformDistribution (Fin L.m → ScalarQ L) ∧
       (dLinePointDist L).map (fun sample => chiIndex L sample.1.seed) =
         uniformDistribution (Fin L.m) := by
-  sorry
+  constructor
+  · have hmap : (dLinePointDist L).map Prod.snd
+        = (uniformDistribution (LdSpace L)).map LdSpace.point := by
+      change ((((uniformDistribution (LdSpace L)).map
+          fun z => (ldDLineCL L z, ldPointCL L z)).map
+          fun s => (dLineDescOf L s.1, LdSpace.point s.2)).map Prod.snd) = _
+      rw [distribution_map_map, distribution_map_map]
+      rfl
+    rw [hmap, map_uniformDistribution_point]
+  · have hmap : (dLinePointDist L).map (fun sample => chiIndex L sample.1.seed)
+        = ((uniformDistribution (LdSpace L)).map LdSpace.seed).map (chiIndex L) := by
+      change ((((uniformDistribution (LdSpace L)).map
+          fun z => (ldDLineCL L z, ldPointCL L z)).map
+          fun s => (dLineDescOf L s.1, LdSpace.point s.2)).map
+          fun sample => chiIndex L sample.1.seed) = _
+      rw [distribution_map_map, distribution_map_map, distribution_map_map]
+      rfl
+    rw [hmap, map_uniformDistribution_seed, map_uniformDistribution_chiIndex]
 
 /-- The incidence conclusion of `lem:dlnf`, blueprint
 `ch13_qpbt_test.tex:74-79`, paper
 `08_classical_and_quantum_low_degree_tests.tex:261-272`. -/
 theorem dLinePointDist_mem_line (L : LdParams) :
     ∀ sample ∈ (dLinePointDist L).support, sample.2 ∈ sample.1.pointSet := by
-  sorry
+  intro sample hsample
+  have hsupport : (dLinePointDist L).support =
+      ((Finset.univ : Finset (LdSpace L)).image
+        fun z => (ldDLineCL L z, ldPointCL L z)).image
+        fun s => (dLineDescOf L s.1, LdSpace.point s.2) := rfl
+  rw [hsupport] at hsample
+  obtain ⟨s, hs, rfl⟩ := Finset.mem_image.mp hsample
+  obtain ⟨z, -, rfl⟩ := Finset.mem_image.mp hs
+  change LdSpace.point z ∈
+    linePoints
+      (lineRepMap
+        (prefixProjection (chiIndex L (LdSpace.seed z))
+          (prefixProjection (chiIndex L (LdSpace.seed z)) (LdSpace.direction z)))
+        (lineRepMap
+          (prefixProjection (chiIndex L (LdSpace.seed z)) (LdSpace.direction z))
+          (LdSpace.point z)))
+      (prefixProjection (chiIndex L (LdSpace.seed z))
+        (prefixProjection (chiIndex L (LdSpace.seed z)) (LdSpace.direction z)))
+  rw [prefixProjection_prefixProjection, lineRepMap_apply_self]
+  exact mem_linePoints_lineRepMap _ _
 
 /-- The diagonal direction in every sampled description has the prefix-zero
 property of `lem:dlnf`, blueprint `ch13_qpbt_test.tex:74-79`, paper
@@ -70,7 +504,14 @@ theorem dLinePointDist_prefix_zero (L : LdParams) :
     ∀ sample ∈ (dLinePointDist L).support,
       ∀ j : Fin L.m, j.val < (chiIndex L sample.1.seed).val →
         sample.1.direction j = 0 := by
-  sorry
+  intro sample hsample
+  have hsupport : (dLinePointDist L).support =
+      ((Finset.univ : Finset (LdSpace L)).image
+        fun z => (ldDLineCL L z, ldPointCL L z)).image
+        fun s => (dLineDescOf L s.1, LdSpace.point s.2) := rfl
+  rw [hsupport] at hsample
+  obtain ⟨s, -, rfl⟩ := Finset.mem_image.mp hsample
+  exact LineDesc.diagonal_prefix_zero (dLineDescOf L s.1) rfl
 
 /-- The low-degree question sampler is the typed conditionally linear
 distribution on the complete type graph. This identifies the sampler with
@@ -81,7 +522,39 @@ theorem ldQuestionDistribution_eq_typedCL (L : LdParams) :
     ldQuestionDistribution L =
       typedCLDistribution (Finset.univ : Finset (Sym2 LdType)) (by simp)
         (ldCL L) (ldCL L) := by
-  sorry
+  have hgraph : ∀ hE : (Finset.univ : Finset (Sym2 LdType)).Nonempty,
+      graphDistribution (Finset.univ : Finset (Sym2 LdType)) hE =
+        uniformDistribution (LdType × LdType) := by
+    intro hE
+    have hfilter : ((Finset.univ : Finset (LdType × LdType)).filter
+        fun ab => Sym2.mk ab.1 ab.2 ∈ (Finset.univ : Finset (Sym2 LdType)))
+        = (Finset.univ : Finset (LdType × LdType)) := by
+      simp
+    change Distribution.uniformOnFinset _ = _
+    rw [hfilter]
+    rfl
+  have hleft : ldQuestionDistribution L =
+      Distribution.bind (uniformDistribution (LdType × LdType))
+        (fun uv => (uniformDistribution (LdSpace L)).map
+          fun z => ((uv.1, ldCL L uv.1 z), (uv.2, ldCL L uv.2 z))) := by
+    rw [bind_uniformDistribution_map]
+    rfl
+  have hright : ∀ hE : (Finset.univ : Finset (Sym2 LdType)).Nonempty,
+      typedCLDistribution (Finset.univ : Finset (Sym2 LdType)) hE (ldCL L) (ldCL L) =
+        Distribution.bind (uniformDistribution (LdType × LdType))
+          (fun uv => (uniformDistribution (LdSpace L)).map
+            fun z => ((uv.1, ldCL L uv.1 z), (uv.2, ldCL L uv.2 z))) := by
+    intro hE
+    have hfamily : (fun uv : LdType × LdType =>
+        (clDistribution (ldCL L uv.1) (ldCL L uv.2)).map
+          fun xy => ((uv.1, xy.1), (uv.2, xy.2))) =
+      fun uv : LdType × LdType => (uniformDistribution (LdSpace L)).map
+        fun z => ((uv.1, ldCL L uv.1 z), (uv.2, ldCL L uv.2 z)) := by
+      funext uv
+      exact distribution_map_map _ _ _
+    change Distribution.bind (graphDistribution _ hE) _ = _
+    rw [hgraph hE, hfamily]
+  rw [hleft, hright]
 
 /-- Bounded multivariate polynomials form a finite set over a finite coefficient
 semiring. This is the finite outcome set required by `def:ld-meas`,
