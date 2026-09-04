@@ -322,6 +322,7 @@ theorem signObs_eq_obsOf_postprocess (M : MIPStarRE.Quantum.Measurement α d)
     Finset.sum_filter, ← Finset.sum_sub_distrib]
   exact Finset.sum_congr rfl fun a _ => key a
 
+omit [DecidableEq α] in
 /-- Formalization-only: the effects of a projective measurement are mutually
 orthogonal, so two spectral combinations of them multiply coefficientwise. -/
 private theorem sum_smul_effect_mul (M : MIPStarRE.Quantum.Measurement α d)
@@ -341,6 +342,7 @@ private theorem sum_smul_effect_mul (M : MIPStarRE.Quantum.Measurement α d)
   · intro ha
     exact absurd (Finset.mem_univ a) ha
 
+omit [DecidableEq α] in
 /-- Sign observables of one projective measurement multiply by adding their
 relabellings. -/
 theorem signObs_mul (M : MIPStarRE.Quantum.Measurement α d)
@@ -359,6 +361,7 @@ theorem signObs_const_zero (M : MIPStarRE.Quantum.Measurement α d) :
   simp only [hb, one_smul]
   exact M.sum_eq_one
 
+omit [DecidableEq α] in
 /-- A sign observable of a projective measurement is an involution. -/
 theorem signObs_mul_self (M : MIPStarRE.Quantum.Measurement α d)
     (hM : MIPStarRE.QPBT.Measurement.IsProjective M) (f : α → ZMod 2) :
@@ -381,12 +384,14 @@ theorem signObs_conjTranspose (M : MIPStarRE.Quantum.Measurement α d)
   · simp
   · exact (hM a).isSelfAdjoint
 
+omit [DecidableEq α] in
 /-- A sign observable of a projective measurement is a reflection. -/
 theorem isReflection_signObs (M : MIPStarRE.Quantum.Measurement α d)
     (hM : MIPStarRE.QPBT.Measurement.IsProjective M) (f : α → ZMod 2) :
     IsReflection (signObs M f) :=
   ⟨signObs_conjTranspose M hM f, signObs_mul_self M hM f⟩
 
+omit [DecidableEq α] in
 /-- Sign observables of one projective measurement commute. -/
 theorem signObs_comm (M : MIPStarRE.Quantum.Measurement α d)
     (hM : MIPStarRE.QPBT.Measurement.IsProjective M) (f g : α → ZMod 2) :
@@ -420,9 +425,9 @@ private theorem isProj_heteroKron {ιA ιB : Type} [Fintype ιA] [DecidableEq ι
   have hBs : Bᴴ = B := by
     rw [← Matrix.star_eq_conjTranspose]; exact hB.isSelfAdjoint
   constructor
-  · show heteroKron A B * heteroKron A B = heteroKron A B
+  · change heteroKron A B * heteroKron A B = heteroKron A B
     rw [heteroKron_mul, hAi, hBi]
-  · show star (heteroKron A B) = heteroKron A B
+  · change star (heteroKron A B) = heteroKron A B
     rw [Matrix.star_eq_conjTranspose, heteroKron_conjTranspose, hAs, hBs]
 
 /-- Formalization-only: a real spectral combination of the effects of a

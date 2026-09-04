@@ -56,7 +56,7 @@ private theorem AlicePlaced.comm {ιA ιB : Type} [Fintype ιA] [DecidableEq ιA
   exact heteroKron_comm M N
 
 /-- Formalization-only: products stay on Alice's tensor factor. -/
-private theorem AlicePlaced.mul {ιA ιB : Type} [Fintype ιA] [DecidableEq ιA]
+private theorem AlicePlaced.mul {ιA ιB : Type} [Fintype ιA]
     [Fintype ιB] [DecidableEq ιB] {Z W : Op (ιA × ιB)} (hZ : AlicePlaced Z)
     (hW : AlicePlaced W) : AlicePlaced (Z * W) := by
   obtain ⟨M, rfl⟩ := hZ
@@ -65,7 +65,7 @@ private theorem AlicePlaced.mul {ιA ιB : Type} [Fintype ιA] [DecidableEq ιA]
 
 /-- Formalization-only: products stay on Bob's tensor factor. -/
 private theorem BobPlaced.mul {ιA ιB : Type} [Fintype ιA] [DecidableEq ιA]
-    [Fintype ιB] [DecidableEq ιB] {Z W : Op (ιA × ιB)} (hZ : BobPlaced Z)
+    [Fintype ιB] {Z W : Op (ιA × ιB)} (hZ : BobPlaced Z)
     (hW : BobPlaced W) : BobPlaced (Z * W) := by
   obtain ⟨N, rfl⟩ := hZ
   obtain ⟨N', rfl⟩ := hW
