@@ -616,127 +616,6 @@
   "pinned_comment": null
  },
  {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/73",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/73/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/73/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/73/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/73",
-  "id": 5341726706,
-  "node_id": "I_kwDOUJyJf88AAAABPmRH8g",
-  "number": 73,
-  "title": "feat(QPBT/Algebra): prove orthogonal-complement identities",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement"
-   },
-   {
-    "id": 12025012183,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8f1w",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/qpbt-analysis",
-    "name": "qpbt-analysis",
-    "color": "ededed",
-    "default": false,
-    "description": "Soundness/rigidity analysis of the Pauli basis test \u2014 self-testing bounds and error terms"
-   },
-   {
-    "id": 12025012384,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8goA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/proof",
-    "name": "proof",
-    "color": "ededed",
-    "default": false,
-    "description": "Issue is primarily about proving an existing result"
-   },
-   {
-    "id": 12025012779,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8iKw",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/sorry-elimination",
-    "name": "sorry-elimination",
-    "color": "ededed",
-    "default": false,
-    "description": "Explicitly aimed at discharging remaining `sorry` sites"
-   },
-   {
-    "id": 12025013584,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8lUA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/paper-2001.04383",
-    "name": "paper-2001.04383",
-    "color": "ededed",
-    "default": false,
-    "description": "MIP*=RE (arXiv:2001.04383) \u2014 the primary paper of this track"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-03T21:37:46Z",
-  "updated_at": "2026-09-03T21:37:46Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 0,
-   "blocking": 0,
-   "total_blocking": 0
-  },
-  "body": "<!-- mipstarre-issue-key: qpbt-stage43-orthogonal-complement-identities -->\n### Parent and objective\n\nStage 4.3 proof packet under #47. Prove the two conclusions of `lem:perp_perp`\nand the kernel identity for the canonical perpendicular projector.\n\n### Source contract\n\nCanonical source: `references/qpbt-paper/04_preliminaries.tex:241-282`\n(`lem:perp_perp`) and `:386-418` (`def:Lperp`, `lem:L_perp_perp`). Blueprint:\n`blueprint/src/chapter/ch11_qpbt_algebra.tex:31-66,149-175`.\n\nThe dimension and double-orthogonal statements are exact faithful\nfinite-coordinate encodings, generalized harmlessly to any field and an empty\nindex type. The kernel statement faithfully elides the paper's inessential\nchoice of a basis of `ker L ^perp`; the blueprint explicitly records that basis\nindependence. No extra hypothesis or weakened conclusion is permitted.\n\n### Exact targets\n\nIn `MIPStarRE/QPBT/Algebra/SubspacesTheorems.lean`, replace only these three\nproof holes without changing their signatures:\n\n```lean\ntheorem finrank_add_finrank_dotOrthogonal (W : Submodule K (\u03b9 \u2192 K)) :\n    Module.finrank K W + Module.finrank K (dotOrthogonal W) =\n      Fintype.card \u03b9 := by\n  ...\n\ntheorem dotOrthogonal_dotOrthogonal (W : Submodule K (\u03b9 \u2192 K)) :\n    dotOrthogonal (dotOrthogonal W) = W := by\n  ...\n\ntheorem ker_canonicalProjPerp {n : \u2115} [Fintype (Fin n)]\n    [DecidableEq (Fin n)]\n    (L : (Fin n \u2192 K) \u2192\u2097[K] (Fin n \u2192 K)) :\n    LinearMap.ker (canonicalProjPerp L) =\n      dotOrthogonal (LinearMap.ker L) := by\n  ...\n```\n\n### Recommended proof route\n\nDefine a private coordinate bilinear form with `dotProductBilin K K`. Prove it\nreflexive using `dotProduct_comm`, nondegenerate by testing a vector against\n`Pi.single i 1`, and identify its Mathlib orthogonal with `dotOrthogonal` by\nextensionality.\n\nUse `LinearMap.BilinForm.finrank_add_finrank_orthogonal'`, nondegeneracy,\n`finrank_bot`, and `Module.finrank_pi` for the dimension formula. Use\n`LinearMap.BilinForm.orthogonal_orthogonal` with reflexivity and nondegeneracy\nfor the double-orthogonal identity. Minimal imports experimentally sufficient\ninclude `Mathlib.LinearAlgebra.BilinearForm.Orthogonal` and\n`Mathlib.LinearAlgebra.Matrix.BilinearForm`; scope helpers precisely to avoid\nunused-variable warnings.\n\nAfter #72 merges, unfold `canonicalProjPerp` and `canonicalProjOfKernel`; the\nkernel target reduces directly to `Submodule.ker_projection`, or the equivalent\n`ker_projectionOnto` chain, applied to\n`isCompl_registerSubmodule_canonicalComplement ... .symm`.\n\nThese proof skeletons were compiled in isolated `/tmp` files against the\ncurrent checkout without changing the repository.\n\n### Ownership and non-goals\n\nOwn only `MIPStarRE/QPBT/Algebra/SubspacesTheorems.lean`. Do not modify\n`Subspaces.lean`, definitions, blueprint links, exports, or unrelated algebra.\nDo not add positive-definiteness assumptions: finite-field dot products can be\nisotropic. Do not introduce basis choices, bridges, axioms, or new public\nmechanisms.\n\n### Dependencies and ordering\n\nDispatch in parallel with #72: the first two theorems are independent and can\nbe completed immediately. The third theorem and this packet's final axiom audit\nand merge depend on #72 because `canonicalProjOfKernel` currently embeds its\ncomplement proof. Rebase after #72 lands. The blueprint groups both\n`lem:perp_perp` declarations under one `\\leanok`, so both must be clean together.\n\n### Acceptance\n\n- All three exact signatures are proved without `sorry`, `admit`, axioms, or\n  proof-evasion mechanisms.\n- `lake env lean MIPStarRE/QPBT/Algebra/SubspacesTheorems.lean` succeeds and the\n  owned file has no proof holes.\n- `#print axioms` for all three theorems, `canonicalProjOfKernel`, and\n  `canonicalProjPerp` contains no `sorryAx` after rebasing on #72.\n- Existing blueprint links remain valid; no new link is added for the\n  unformalized RREF-equivalence claim.\n- Direct consumers type-check, followed by `lake build`.\n- The PR records statement-integrity verdicts `exact faithful finite-index\n  encoding`, `exact faithful`, and `faithful quotienting of an inessential\n  basis choice` for the three targets.\n- Exact-head local CI and independent review pass.\n\n---\nStage 4.3 proof packet under #47.\n",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/73/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/73/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/71",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/71/labels{/name}",
@@ -2394,8 +2273,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 19,
-   "completed": 3,
-   "percent_completed": 15
+   "completed": 4,
+   "percent_completed": 21
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/1",
   "issue_dependencies_summary": {
@@ -2954,9 +2833,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 92,
+  "comments": 94,
   "created_at": "2026-09-02T08:30:04Z",
-  "updated_at": "2026-09-04T01:35:07Z",
+  "updated_at": "2026-09-04T02:47:45Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
@@ -3155,90 +3034,6 @@
    "eyes": 0
   },
   "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/24/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/23",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/23/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/23/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/23/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/23",
-  "id": 5320499969,
-  "node_id": "I_kwDOUJyJf88AAAABPSBjAQ",
-  "number": 23,
-  "title": "pr_merge --adjudicated: validate the section 12 disposition contract",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025011061,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8bdQ",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/infrastructure",
-    "name": "infrastructure",
-    "color": "ededed",
-    "default": false,
-    "description": "Foundational definitions, shared APIs, or supporting layers"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-02T06:16:30Z",
-  "updated_at": "2026-09-02T06:16:30Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 0,
-   "blocking": 0,
-   "total_blocking": 0
-  },
-  "body": "<!-- mipstarre-issue-key: pr-merge-adjudicated-validate-the-section-12-disposition-b35d64ff -->\nFrom PR #21 round-1 finding F2. check_review only requires an issue comment whose body starts with ADJUDICATION and contains head=<sha> (pr_merge.py ~189-200). review.md section 12 requires every remaining finding to be fixed or converted to a tracked issue, ticked, and given a disposition line (fixed in <commit> / deferred to issue #N: reason / moot: reason), and adjudication only from the fifth round. Validate: the exact head= field, one disposition line per unresolved finding of the head review, tracked issue references that exist and are open, and the round count. Pre-existing behaviour, not introduced by PR #21; keep the change small (<60 lines) and add one test.",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/23/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/23/timeline",
   "performed_via_github_app": null,
   "state_reason": null,
   "pinned_comment": null
