@@ -159,7 +159,7 @@ theorem win_comm_interchanged_proof :
 
 /-- Operator-distance and factor-interchanged companions to the commuting
 Pair check. This is the trailing clause of `lem:qld-win-implications`, paper
-`14_analysis_of_the_pauli_basis_test.tex:264-266`, blueprint
+`14_analysis_of_the_pauli_basis_test.tex:227,263-264`, blueprint
 `ch14_qpbt_observables.tex:699-701`. -/
 theorem win_comm_approx_proof :
     ∃ C : ℝ, 1 ≤ C ∧
@@ -332,7 +332,7 @@ theorem win_comm_cons_interchanged_proof :
 
 /-- Operator-distance and factor-interchanged companions to commuting point
 consistency. This is the trailing clause of `lem:qld-win-implications`, paper
-`14_analysis_of_the_pauli_basis_test.tex:264-266`, blueprint
+`14_analysis_of_the_pauli_basis_test.tex:227,263-264`, blueprint
 `ch14_qpbt_observables.tex:699-701`. -/
 theorem win_comm_cons_approx_proof :
     ∃ C : ℝ, 1 ≤ C ∧
@@ -537,7 +537,7 @@ theorem win_ms_cons_interchanged_proof :
 /-- Operator-distance and factor-interchanged companions to Magic Square
 variable consistency. This is the trailing clause of
 `lem:qld-win-implications`, paper
-`14_analysis_of_the_pauli_basis_test.tex:264-266`, blueprint
+`14_analysis_of_the_pauli_basis_test.tex:227,263-264`, blueprint
 `ch14_qpbt_observables.tex:699-701`. -/
 theorem win_ms_cons_approx_proof :
     ∃ C : ℝ, 1 ≤ C ∧
