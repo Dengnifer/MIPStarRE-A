@@ -100,7 +100,7 @@ private def directLdSpacePointEquiv (D : DirectLdParams) :
 
 /-- Decompose a direct sample into its stored index and the remaining
 independent coordinates. -/
-private def directLdSpaceIndexEquiv (D : DirectLdParams) :
+def directLdSpaceIndexEquiv (D : DirectLdParams) :
     DirectLdSpace D ≃
       Fin D.m ×
         ((Fin D.m → DirectScalarQ D) ×
@@ -109,6 +109,12 @@ private def directLdSpaceIndexEquiv (D : DirectLdParams) :
   invFun sample := ⟨sample.2.1, sample.1, sample.2.2⟩
   left_inv sample := by cases sample; rfl
   right_inv sample := by cases sample; rfl
+
+/-- Compatibility name for the index-first direct-sample decomposition. -/
+abbrev directLdSpaceIndexSplitEquiv (D : DirectLdParams) :
+    DirectLdSpace D ≃
+      Fin D.m × ((Fin D.m → DirectScalarQ D) × (Fin D.m → DirectScalarQ D)) :=
+  directLdSpaceIndexEquiv D
 
 /-- Zero the coordinates preceding the directly sampled prefix index. -/
 def directPrefixProjection {D : DirectLdParams} (i : Fin D.m)
