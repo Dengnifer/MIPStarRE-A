@@ -293,15 +293,28 @@ chapter remark summarizes the discrepancy and cites this note.%
 \path{blueprint/src/chapter/ch15_qpbt_combining.tex}.}
 
 The source-labelled lemma links the carrier
-\path{ExtendedLinesWitness} and the source-shaped declaration
+\path{ExtendedLinesWitness} and the declaration
 \path{exists_extendedLinesWitness}, which retains the printed error form
 $\poly(m^2\eps,md/q)$ and whose proof is the tracked obligation.  The
 established error form is linked from the separate formalization-support node
 \path{lem:qld-4-13-established}, whose declaration
 \path{exists_extendedLinesWitness_established} has the explicit form
 $C m\,\poly(\eps,md/q)$ for a universal $C>0$; this agrees with the blueprint
-convention that constants are absorbed into $\poly$.  Its proof is open as
-well, so neither node carries a proof-completion mark.
+convention that constants are absorbed into $\poly$.  Both proofs are open.
+
+Neither declaration is source-shaped beyond its error form, and this note does
+not claim otherwise.  Both return the carrier \path{ExtendedLinesWitness},
+which replaces the source's lines in $\F_q^{2m+2}$ by the directly indexed
+extended line space of
+\path{docs/paper-gaps/qpbt_ld-dimension-divisibility.tex}, averages over the
+corresponding directly indexed line-point law instead of over the line-point
+distribution instantiated at dimension $2m+2$, and compares both sides of its
+two consistency displays on the completed answer alphabet
+$\F_q\cup\{\bot\}$, whose extra outcome collects the line polynomials that
+admit no evaluation at the sampled point, in place of the source's answer
+summation over $a\in\F_q$.  Neither blueprint node therefore carries a
+statement-level formalization mark, and relating the two formulations is the
+transport obligation of that note.
 
 \section{Conclusion}
 

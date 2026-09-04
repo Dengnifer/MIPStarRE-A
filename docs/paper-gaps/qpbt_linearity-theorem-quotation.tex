@@ -20,10 +20,12 @@
 
 \begin{itemize}
   \item \textbf{Difficulty.} Medium.  The source quotes a fiberwise consequence
-  of a state-dependent quantum linearity theorem, but suppresses two averages,
-  loses a factor of two when converting measurement distance to operator
-  distance, and leaves implicit a compatibility argument for the auxiliary
-  spaces.
+  of a state-dependent quantum linearity theorem, but suppresses an average,
+  inserts an unnecessary bound on the error, appends an identity at the origin,
+  and leaves implicit a compatibility argument for the auxiliary spaces.  The
+  factor of two lost between measurement distance and operator distance is not
+  one of these: it is a defect of the provider's own printed statement, treated
+  in a separate note.
   \item \textbf{Estimated weight.} The corrected single-family theorem and its
   two distance formulations are proved.  The remaining task is a finite
   common-extension construction that makes the auxiliary space uniform over
@@ -69,7 +71,7 @@ binary projective measurements associated with the two observables, then
   \mathop{\mathbb E}_{u}
   d^{\mathrm{bin}}_{\rho'}(L^u,O^u\otimes I_{H'})^2\leq\delta.
 \]
-The source prints $\delta$ for the first, operator-distance bound.  Its
+The provider prints $\delta$ for the first, operator-distance bound.  Its
 calculation instead proves the second, measurement-distance bound, which is
 one half of the squared operator distance.  The factor-of-two discrepancy and
 a counterexample to the printed operator bound are given in
@@ -96,14 +98,22 @@ Lines~711--725 of
 linearity theorem.  The displayed hypothesis correctly averages over both
 group variables.  The displayed conclusion, however, says that the corrected
 observable is close for every $u$, whereas Theorem~10 of the cited work gives
-closeness only on average over $u$ \cite{Natarajan2017Linearity}.  Moreover,
-the provider's equation~(3) proves the bound $\delta$ for binary-measurement
-distance; under the operator-distance convention displayed above this is the
-bound $2\delta$.  Identifying it with the same bound $\delta$ loses a factor of
-two.  The quotation also inserts $\delta\leq1$, which is absent from the
-provider theorem and would unnecessarily obstruct applying it with a fiber's
-actual defect.  The assertion at the identity follows from exact linearity as
-above.
+closeness only on average over $u$ \cite{Natarajan2017Linearity}.  The
+quotation also inserts $\delta\leq1$, which is absent from the provider theorem
+and would unnecessarily obstruct applying it with a fiber's actual defect, and
+it appends the assertion at the identity, which follows from exact linearity as
+above.  These three are the differences between the quotation and the cited
+statement.
+
+The factor of two is not one of them.  The provider's equation~(3) proves the
+bound $\delta$ for binary-measurement distance; under the operator-distance
+convention displayed above this is the bound $2\delta$, and it is the
+provider's own Theorem~10 that prints $\delta$ for the operator distance.  The
+quotation states its conclusion in the relation $\approx_\delta$, which asserts
+only an $O(\delta)$ bound and therefore absorbs the constant factor instead of
+reproducing the erroneous one.  The normalization defect and its counterexample
+are the provider's and are treated in
+\path{docs/paper-gaps/qpbt_linearity-distance-normalization.tex}.
 
 Lines~825--832 construct the family $O^{x,z,r,s}$ and establish approximate
 linearity only after averaging over $x,z,r,r',s,s'$.  They then apply the
@@ -154,9 +164,11 @@ do not assume a new fiberwise linearity hypothesis or a common ancillary space.
 \section{Conclusion}
 
 The quotation changes averaged closeness to pointwise closeness, inserts an
-unnecessary upper bound on $\delta$, and loses a factor of two in translating
-binary-measurement distance to operator distance.  Its assertion at the
-identity is derivable from exact linearity.  The single-family theorem is now
+unnecessary upper bound on $\delta$, and appends an assertion at the identity
+that is derivable from exact linearity.  It does not reproduce the provider's
+factor-of-two normalization defect, since it states its conclusion in a
+relation that absorbs constant factors; that defect is the provider's own and
+is treated separately.  The single-family theorem is now
 proved with mean squared operator error at most $2\delta$, equivalently mean
 squared binary-measurement error at most $\delta$.  Its use for the family
 indexed by $(x,z)$ still requires an explicit finite common-extension argument;

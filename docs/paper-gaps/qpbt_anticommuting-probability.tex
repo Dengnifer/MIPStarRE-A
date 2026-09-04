@@ -47,8 +47,8 @@ Then
   \Pr[\gamma=0]\geq\frac12.
 \]
 In particular, $m\leq q$ gives the uniform lower bound
-$\Pr[\gamma\ne0]\geq2^{-4}$.  If $m,d\geq1$, the two lower bounds printed in
-the source also hold:
+$\Pr[\gamma\ne0]\geq2^{-4}$.  On the source parameter domain, where
+$m,d\geq1$, the two lower bounds printed in the source also hold:
 \[
   \Pr[\gamma\ne0]
   \geq \frac12(1-q^{-m})(1-q^{-1})(1-md/q)
@@ -66,12 +66,30 @@ $\gamma=0$.%
 \footnote{See
 \path{references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex},
 lines~64--93.}
-Both assertions are false.  The coordinates of $\ind_m(u)$ sum to one, so the
-indicator vector never vanishes.  For $(q,m,d)=(2,1,0)$ and
-$(u_X,u_Z,r_X,r_Z)=(0,0,1,1)$, the phase is nonzero.  In the same parameter
-case the exact anticommuting probability is $1/8$, below the printed lower
-bound $1/2$.  Thus the missing hypothesis $d\geq1$ is mathematically necessary
-for that displayed bound.
+Both assertions are false, and both are refuted inside the source parameter
+domain.  The coordinates of $\ind_m(u)$ sum to one, so the indicator vector
+never vanishes.  And for $(q,m)=(2,1)$ and $(u_X,u_Z,r_X,r_Z)=(0,0,1,1)$ the
+phase is nonzero although $u_X=0$, so vanishing of $u_X$ does not force
+$\gamma=0$; the degree $d$ does not occur in $\gamma$, so this holds for every
+$d$, in particular for $d=1$.
+
+The displayed bounds themselves are nevertheless correct throughout that
+domain.  The source declares $\N$ to be the set of positive integers and takes
+the parameter tuple $(q,m,d)$ in $\N$,%
+\footnote{See \path{references/qpbt-paper/04_preliminaries.tex}, line~6, and
+\path{references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex},
+lines~903--904.  The blueprint records the same domain, and its admissibility
+predicate repeats $d\geq1$ explicitly.}
+so $m,d\geq1$ hold by hypothesis and the calculation of the next section
+derives both printed bounds from them.  No source hypothesis is therefore
+missing here: the printed proof is wrong, but its stated conclusion is not.
+The bounds do fail outside the source domain --- at $(q,m,d)=(2,1,0)$ the exact
+probability is $1/8$, below the printed $1/2$ --- which is why the formal
+statements, whose parameters range over the Lean natural numbers and so include
+zero, carry $m,d\geq1$ as an explicit hypothesis.  That hypothesis is a
+faithful encoding of the source domain in the sense of
+\path{docs/paper-gaps/proof-gap-protocol.tex}, not a missing source hypothesis
+and not proof debt.
 
 \section{The corrected calculation}
 
@@ -85,8 +103,12 @@ they are all nonzero with probability $(1-q^{-1})^m$.  Independently,
 $r_X\ne0$ with probability $1-q^{-1}$.  Conditioned on these events, the
 argument of the trace is uniform as $r_Z$ varies, and a nonzero linear trace
 to $\F_2$ takes the value one with probability $1/2$.  This proves the exact
-formula.  Bernoulli's inequality gives the stated source bounds when
-$m,d\geq1$; the admissible Pauli-test parameters satisfy these conditions.
+formula.  Bernoulli's inequality gives the stated source bounds whenever
+$m,d\geq1$, which both the source parameter domain and admissibility of the
+Pauli-test parameters supply.  The role of $d\geq1$ is exactly that it forces
+$md/q\geq m/q$, so that
+$(1-q^{-1})^m\geq1-m/q\geq(1-q^{-m})(1-md/q)$, which is the first printed
+bound; the second follows from it because $q^{-m}\leq q^{-1}\leq md/q$.
 
 \section{Blueprint and formalization status}
 
@@ -102,10 +124,14 @@ statements, but their proofs remain open in the current tree.%
 
 \section{Conclusion}
 
-The source proof is incorrect, and its displayed bound fails when $d=0$.
-The exact probability is $\frac12(1-q^{-1})^{m+1}$.  It yields universal
-conditioning probabilities for all admissible parameters and recovers the
-printed lower bounds after making the implicit positivity assumptions explicit.
+The source proof is incorrect: both of its opening assertions are refuted
+inside the source parameter domain.  Its displayed bounds are nevertheless true
+throughout that domain, where $m,d\geq1$ by the source's convention that $\N$
+is the set of positive integers, so no source hypothesis is missing.  The exact
+probability is $\frac12(1-q^{-1})^{m+1}$; it yields universal conditioning
+probabilities for all admissible parameters, and it recovers the printed lower
+bounds once the positivity built into the source domain is written out --- as
+the formal statements must do, since the Lean natural numbers include zero.
 
 \bibliographystyle{alpha}
 \bibliography{references}

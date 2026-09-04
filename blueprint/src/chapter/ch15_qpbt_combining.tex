@@ -250,26 +250,36 @@ assembled by Fourier averaging.
 	only; this averaged form suffices because the $\mathcal{L}^u$ enter
 	the proof of Lemma~\ref{lem:qld-4-10} only through averages over $u$.
 	The quotation of the theorem in \cite{Ji2020MIPStar} differs from the
-	cited statement in four respects: it inserts the restriction
+	cited statement in three respects: it inserts the restriction
 	$0 \le \delta \le 1$, which would block the fiberwise application
 	just described; it places the closeness conclusion, together with the
 	exact linearity, under the quantifier ``for all $u, u' \in \F_2^t$'',
 	a strengthening of the theorem proved in
-	\cite{Natarajan2017Linearity}; it appends the identity
-	$\mathcal{L}^u = \Id$ for $u = 0$; and it reports the bound $\delta$
-	of \cite[equation~(3)]{Natarajan2017Linearity}, which bounds the mean
-	squared distance between the associated binary projective
-	measurements, as a bound on the mean squared operator distance,
-	thereby losing the factor of two recorded in
-	Remark~\ref{rem:linearity-distance-normalization}. None of the four is
+	\cite{Natarajan2017Linearity}; and it appends the identity
+	$\mathcal{L}^u = \Id$ for $u = 0$. None of the three is
 	reproduced here: the restriction is dropped, the pointwise closeness
-	is not used, the appended identity is instead derived from the
+	is not used, and the appended identity is instead derived from the
 	conclusion, since exact linearity at $u = u' = 0$ gives
 	$(\mathcal{L}^0)^2 = \mathcal{L}^0$, and an idempotent unitary equals
-	the identity, and Theorem~\ref{thm:linearity} carries the corrected
-	operator bound $2\delta$. These four discrepancies, together with the
-	common-extension obligation recorded below, are analyzed in
-	\cite{gap:qpbt_linearity-theorem-quotation}. The import carries two
+	the identity. The factor of two of
+	Remark~\ref{rem:linearity-distance-normalization} is not one of these
+	differences. It is a defect of the cited statement itself: the mean
+	squared operator bound printed in
+	\cite[Theorem~10]{Natarajan2017Linearity} is $\delta$, whereas the
+	calculation behind \cite[equation~(3)]{Natarajan2017Linearity} bounds
+	the mean squared distance between the associated binary projective
+	measurements, which is half the squared operator distance; the
+	provider-side correction to $2\delta$ is carried by
+	Theorem~\ref{thm:linearity}. The quotation neither reproduces nor
+	asserts the erroneous constant, since it states its conclusion as
+	$\mathcal{L}^u \approx_\delta \mathcal{O}^u$, which by
+	Definition~\ref{def:povm-distance} bounds the associated expectation
+	only by $O(\delta)$ and so absorbs a constant factor. These three
+	discrepancies, together with the common-extension obligation recorded
+	below, are analyzed in
+	\cite{gap:qpbt_linearity-theorem-quotation}, and the provider-side
+	normalization defect in
+	\cite{gap:qpbt_linearity-distance-normalization}. The import carries two
 	conversion obligations, discharged in the proof of
 	Lemma~\ref{lem:qld-4-10}: the theorem is
 	instantiated with $\rho$ the reduced density operator of
@@ -1764,7 +1774,6 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 \begin{lemma}[Formalization support for Lemma~\ref{lem:qld-4-13}]
 	\label{lem:qld-4-13-established}
 	\lean{MIPStarRE.QPBT.exists_extendedLinesWitness_established}
-	\leanok
 	\uses{lem:qld-4-12, def:line, def:line-point-dist, def:consistency,
 		def:bracket, def:expanded-state, def:ideg-deg-polynomials}
 	This formalization-only auxiliary is not a named statement of the paper.
@@ -1774,6 +1783,23 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	$C \cdot m \cdot \poly(\eps, md/q)$ for a universal constant $C > 0$.
 	The printed error form $\poly(m^2\eps, md/q)$ is not claimed here; see
 	Remark~\ref{rem:qld-4-13-source-defects}.
+	The error form is the only change this node makes to
+	Lemma~\ref{lem:qld-4-13}, and no formalization mark is placed on the
+	statement: the linked declaration differs from it in three further
+	respects, which the blueprint does not adopt. Its extended questions are
+	drawn from the directly indexed line space of
+	\cite{gap:qpbt_ld-dimension-divisibility} rather than from the lines of
+	$\F_q^{2m+2}$ used above; its average is taken over the corresponding
+	directly indexed line-point law rather than over the line-point
+	distribution of Definition~\ref{def:line-point-dist} instantiated at
+	dimension $2m+2$, whose definition is blocked by the divisibility
+	obstruction of Remark~\ref{rem:qld-4-7-divisibility}; and both sides of
+	its two consistency displays are compared on the completed answer
+	alphabet $\F_q \cup \{\bot\}$, whose extra outcome collects the line
+	polynomials that admit no evaluation at the sampled point, rather than
+	under the answer summation over $a \in \F_q$ used above. Relating the two
+	formulations is the transport obligation of
+	\cite{gap:qpbt_ld-dimension-divisibility}.
 \end{lemma}
 \begin{proof}
 	\uses{lem:qld-xz-lines, lem:qld-sublines, def:combine-map,
