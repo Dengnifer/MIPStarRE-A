@@ -1,5 +1,6 @@
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Soundness
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Correspondence
+import MIPStarRE.QPBT.Games.DistanceTheorems.Support
 import MIPStarRE.LDT.Test.MainTheorem.ScalarBounds.EnvelopeBounds
 
 /-!
@@ -36,8 +37,10 @@ simultaneous-measurement estimate into the error function `deltaLd` of
   `deltaLd a b ε q m d k` in the regime `0 < ε ≤ 1`.
 * `one_le_deltaLd_of_one_le_error` and
   `one_le_deltaLd_of_fieldSize_le_degree` bound `deltaLd` below by one in the
-  two degenerate regimes `1 ≤ ε` and `q ≤ d`, where the conclusion of
-  `lem:ld-soundness` is vacuous.
+  two degenerate regimes `1 ≤ ε` and `q ≤ d`, and
+  `consistencyDefect_heteroKron_le_one` bounds every bipartite consistency
+  defect on a unit state above by one.  Together they close both degenerate
+  regimes, where the conclusion of `lem:ld-soundness` carries no information.
 
 The exponent `b = 1/80000` is half the exponent `1/40000` carried by
 `mainFormalError`; the halving is exactly what the square root of the
@@ -53,11 +56,11 @@ simultaneous-measurement estimate costs.
 * `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`
 -/
 
-open scoped BigOperators
+open scoped BigOperators MatrixOrder Matrix ComplexOrder
 
 namespace MIPStarRE.QPBT
 
-open MIPStarRE.LDT
+open MIPStarRE.LDT MIPStarRE.Quantum
 
 /-! ## The auxiliary sampling parameter -/
 
@@ -568,5 +571,112 @@ theorem one_le_deltaLd_of_fieldSize_le_degree {a b ε : ℝ} (ha : 1 ≤ a) (hb1
         (Real.rpow ε b + Real.rpow (q : ℝ) (-b) +
           Real.rpow 2 (-(b * ((m * d : ℕ) : ℝ)))) :=
       mul_le_mul hax hsum (by positivity) (by linarith)
+
+/-! ## A coarse universal bound on the consistency defect
+
+The consistency defect compared with `deltaLd` in `lem:ld-soundness` is the
+off-diagonal Born mass of a pair of measurement families acting on the two
+tensor factors of a unit bipartite state.  Since the joint Born weights are
+nonnegative and sum to one, that mass is at most one; combined with the two
+lower bounds on `deltaLd` above this closes the regimes `1 ≤ ε` and `q ≤ d`.
+
+The three lemmas of this section are formalization-only.  They are generic
+statements about `consistencyDefect` rather than about the low-degree game,
+and would naturally live in `MIPStarRE/QPBT/Games/DistanceTheorems.lean`. -/
+
+private theorem sum_heteroKron_one_right {α ιA ιB : Type*} [Fintype α]
+    [Fintype ιA] [DecidableEq ιA] [DecidableEq ιB]
+    (M : Quantum.Measurement α ιA) :
+    (∑ a : α, heteroKron (M.effect a) (1 : Op ιB)) = 1 := by
+  ext i j
+  simp only [Matrix.sum_apply, heteroKron, Matrix.kronecker,
+    Matrix.kroneckerMap_apply]
+  rw [← Finset.sum_mul]
+  rw [show (∑ a : α, M.effect a i.1 j.1) = (1 : Op ιA) i.1 j.1 by
+    simpa only [Matrix.sum_apply] using congrFun (congrFun M.sum_eq_one i.1) j.1]
+  exact congrFun (congrFun
+    (Matrix.one_kronecker_one (m := ιA) (n := ιB) (α := ℂ)) i) j
+
+private theorem sum_heteroKron_one_left {α ιA ιB : Type*} [Fintype α]
+    [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
+    (N : Quantum.Measurement α ιB) :
+    (∑ a : α, heteroKron (1 : Op ιA) (N.effect a)) = 1 := by
+  ext i j
+  simp only [Matrix.sum_apply, heteroKron, Matrix.kronecker,
+    Matrix.kroneckerMap_apply]
+  rw [← Finset.mul_sum]
+  rw [show (∑ a : α, N.effect a i.2 j.2) = (1 : Op ιB) i.2 j.2 by
+    simpa only [Matrix.sum_apply] using congrFun (congrFun N.sum_eq_one i.2) j.2]
+  exact congrFun (congrFun
+    (Matrix.one_kronecker_one (m := ιA) (n := ιB) (α := ℂ)) i) j
+
+/-- Alice's measurement seen on the bipartite space, by tensoring with the
+identity on Bob's space.  Formalization-only. -/
+private noncomputable def leftKronMeasurement {α ιA ιB : Type*} [Fintype α]
+    [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
+    (M : Quantum.Measurement α ιA) : Quantum.Measurement α (ιA × ιB) where
+  effect a := heteroKron (M.effect a) 1
+  pos a := kronecker_nonneg (M.pos a)
+    (Matrix.nonneg_iff_posSemidef.mpr Matrix.PosSemidef.one)
+  sum_le_one := le_of_eq (sum_heteroKron_one_right M)
+  sum_eq_one := sum_heteroKron_one_right M
+
+/-- Bob's measurement seen on the bipartite space, by tensoring with the
+identity on Alice's space.  Formalization-only. -/
+private noncomputable def rightKronMeasurement {α ιA ιB : Type*} [Fintype α]
+    [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
+    (N : Quantum.Measurement α ιB) : Quantum.Measurement α (ιA × ιB) where
+  effect a := heteroKron 1 (N.effect a)
+  pos a := kronecker_nonneg
+    (Matrix.nonneg_iff_posSemidef.mpr Matrix.PosSemidef.one) (N.pos a)
+  sum_le_one := le_of_eq (sum_heteroKron_one_left N)
+  sum_eq_one := sum_heteroKron_one_left N
+
+/-- Coarse bound on the consistency defect of a bipartite pair of measurement
+families on a unit state: the off-diagonal Born mass is at most one.
+
+This is the trivial estimate that closes the degenerate regimes of
+`lem:ld-soundness`, where `deltaLd` is at least one by
+`one_le_deltaLd_of_one_le_error` or by
+`one_le_deltaLd_of_fieldSize_le_degree`.  Formalization-only support for
+`blueprint/src/chapter/ch13_qpbt_test.tex:139-167`. -/
+theorem consistencyDefect_heteroKron_le_one {X α ιA ιB : Type*}
+    [Fintype X] [DecidableEq X] [Fintype α] [DecidableEq α]
+    [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
+    (μ : Distribution X) (hμ : μ.IsProbability)
+    (A : X → Quantum.Measurement α ιA) (B : X → Quantum.Measurement α ιB)
+    (ψ : EuclideanSpace ℂ (ιA × ιB)) (hψ : ‖ψ‖ = 1) :
+    consistencyDefect μ (fun x a => heteroKron ((A x).effect a) 1)
+        (fun x a => heteroKron 1 ((B x).effect a)) ψ ≤ 1 := by
+  have hEq : consistencyDefect μ (fun x a => heteroKron ((A x).effect a) 1)
+      (fun x a => heteroKron 1 ((B x).effect a)) ψ =
+      1 - avgOver μ (fun x => ∑ a : α,
+        DistanceCalculus.stateQForm ψ
+          (heteroKron ((A x).effect a) 1 * heteroKron 1 ((B x).effect a))) :=
+    DistanceCalculus.consistencyDefect_eq_one_sub_overlap μ
+      (fun x => leftKronMeasurement (A x)) (fun x => rightKronMeasurement (B x))
+      ψ hμ hψ
+  have hnn : 0 ≤ avgOver μ (fun x => ∑ a : α,
+      DistanceCalculus.stateQForm ψ
+        (heteroKron ((A x).effect a) 1 * heteroKron 1 ((B x).effect a))) := by
+    refine avgOver_nonneg μ _ (fun x => Finset.sum_nonneg (fun a _ => ?_))
+    have hprod : heteroKron ((A x).effect a) (1 : Op ιB) *
+        heteroKron (1 : Op ιA) ((B x).effect a) =
+        heteroKron ((A x).effect a) ((B x).effect a) := by
+      change Matrix.kroneckerMap (fun x1 x2 => x1 * x2) ((A x).effect a)
+            (1 : Op ιB) *
+          Matrix.kroneckerMap (fun x1 x2 => x1 * x2) (1 : Op ιA)
+            ((B x).effect a) =
+          Matrix.kroneckerMap (fun x1 x2 => x1 * x2) ((A x).effect a)
+            ((B x).effect a)
+      rw [← Matrix.mul_kronecker_mul, mul_one, one_mul]
+    rw [hprod]
+    unfold DistanceCalculus.stateQForm applyOperatorToState heteroKron
+    exact
+      (Matrix.isPositive_toEuclideanLin_iff.mpr
+        (Matrix.nonneg_iff_posSemidef.mp
+          (kronecker_nonneg ((A x).pos a) ((B x).pos a)))).re_inner_nonneg_right ψ
+  rw [hEq]
+  linarith
 
 end MIPStarRE.QPBT
