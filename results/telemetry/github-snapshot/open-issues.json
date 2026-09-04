@@ -1,5 +1,98 @@
 [
  {
+  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/177",
+  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
+  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/177/labels{/name}",
+  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/177/comments",
+  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/177/events",
+  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/177",
+  "id": 5348738187,
+  "node_id": "I_kwDOUJyJf88AAAABPs9Eiw",
+  "number": 177,
+  "title": "feat(local): add prerequisite writes and readiness test budgeting",
+  "user": {
+   "login": "Dengnifer",
+   "id": 89234078,
+   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
+   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/Dengnifer",
+   "html_url": "https://github.com/Dengnifer",
+   "followers_url": "https://api.github.com/users/Dengnifer/followers",
+   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
+   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
+   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
+   "repos_url": "https://api.github.com/users/Dengnifer/repos",
+   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
+   "type": "User",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "labels": [
+   {
+    "id": 12025011061,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8bdQ",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/infrastructure",
+    "name": "infrastructure",
+    "color": "ededed",
+    "default": false,
+    "description": "Foundational definitions, shared APIs, or supporting layers"
+   },
+   {
+    "id": 12025014642,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8pcg",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/follow-up",
+    "name": "follow-up",
+    "color": "ededed",
+    "default": false,
+    "description": "A mathematical obligation split out of a merged PR"
+   }
+  ],
+  "state": "open",
+  "locked": false,
+  "assignees": [],
+  "milestone": null,
+  "comments": 0,
+  "created_at": "2026-09-04T13:35:45Z",
+  "updated_at": "2026-09-04T13:35:45Z",
+  "closed_at": null,
+  "assignee": null,
+  "author_association": "OWNER",
+  "active_lock_reason": null,
+  "sub_issues_summary": {
+   "total": 0,
+   "completed": 0,
+   "percent_completed": 0
+  },
+  "issue_dependencies_summary": {
+   "blocked_by": 0,
+   "total_blocked_by": 0,
+   "blocking": 0,
+   "total_blocking": 0
+  },
+  "body": "<!-- mipstarre-issue-key: pr171-round2-workflow-followup -->\n## Context\n\nPR #171 implements the packet tree and read-only readiness command from #159.\nIts second exact-head review identified two additional workflow mechanisms that\nshould not enlarge that bounded infrastructure PR.\n\n## Scope\n\n- Add an adoption-safe `gh_common.py` API and documented lifecycle command for\n  writing GitHub issue prerequisite (`blocked_by`) edges.\n- Add fake-API coverage for successful creation, ambiguous-write adoption, and\n  duplicate-edge handling.\n- Include `local/tests/test_ready_packets.py` in the owner-gated infrastructure\n  line budget, with a regression test showing that future growth is enforced.\n\n## Acceptance\n\n- Operators can establish the prerequisite record through a supported local\n  command without an ad hoc GitHub mutation.\n- An ambiguous mutation is resolved by re-reading and adopting the edge.\n- The infrastructure budget covers the packet-readiness test module.\n\n## Provenance\n\nDeferred findings F1 and F2 from PR #171 at\n`c2f8eb4e3c1444c107fe16074afacc09164b2d99` under the owner review-churn rule.\n\n---\nAddresses #159",
+  "closed_by": null,
+  "reactions": {
+   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/177/reactions",
+   "total_count": 0,
+   "+1": 0,
+   "-1": 0,
+   "laugh": 0,
+   "hooray": 0,
+   "confused": 0,
+   "heart": 0,
+   "rocket": 0,
+   "eyes": 0
+  },
+  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/177/timeline",
+  "performed_via_github_app": null,
+  "state_reason": null,
+  "pinned_comment": null
+ },
+ {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/176",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/176/labels{/name}",
@@ -943,8 +1036,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 4,
-   "completed": 2,
-   "percent_completed": 50
+   "completed": 3,
+   "percent_completed": 75
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
   "issue_dependencies_summary": {
@@ -1201,91 +1294,6 @@
    "eyes": 0
   },
   "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/156/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/146",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/146/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/146/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/146/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/146",
-  "id": 5346386064,
-  "node_id": "I_kwDOUJyJf88AAAABPqtgkA",
-  "number": 146,
-  "title": "chore(blueprint): sweep stale chapter-12 line-range citations outside PR 138",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-04T09:19:39Z",
-  "updated_at": "2026-09-04T12:06:08Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/163",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 0,
-   "blocking": 0,
-   "total_blocking": 0
-  },
-  "body": "Found during the PR #138 repair (2026-09-04): chapter-12 insertions shifted line numbers; about fourteen Lean modules outside that PR still cite ch12_qpbt_games.tex ranges that are now off. Recompute every ch12 citation under MIPStarRE/QPBT against the current chapter after PR #138 merges; no other changes.\n\nPrerequisites are recorded as GitHub issue dependencies (blocked_by); the prose above is commentary.\n",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/146/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/146/timeline",
   "performed_via_github_app": null,
   "state_reason": null,
   "pinned_comment": null
@@ -4951,9 +4959,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 102,
+  "comments": 103,
   "created_at": "2026-09-02T08:30:04Z",
-  "updated_at": "2026-09-04T13:03:16Z",
+  "updated_at": "2026-09-04T13:37:48Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
