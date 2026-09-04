@@ -8,7 +8,7 @@ collision predicate used by the sandwich and pasting lemmas.
 
 ## References
 
-Blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:454-546`; paper
+Blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:469-1004`; paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:465-525`.
 -/
 
@@ -20,11 +20,14 @@ open MIPStarRE.LDT hiding Measurement
 open MIPStarRE.Quantum
 open DistanceCalculus
 
-namespace SandwichInternal
+namespace SandwichProduct
 
-/-- Recursive form of the palindromic operator product, extending a tuple by
-placing its final operator on both sides of the preceding product. -/
-noncomputable def sandwichProductCore {ι : Type*}
+/-- The ordered product of coordinate effects, defined recursively by placing
+the final coordinate effect on both sides of the preceding product. This is the
+palindromic product in `lem:ld-sandwich`; blueprint
+`blueprint/src/chapter/ch12_qpbt_games.tex`, paper
+`references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:465-501`. -/
+noncomputable def orderedCoordinateProduct {ι : Type*}
     [Fintype ι] [DecidableEq ι] :
     (k : ℕ) → (Γ : Fin k → Type*) →
       ((i : Fin k) → Γ i → Op ι) → ((i : Fin k) → Γ i) → Op ι
@@ -32,31 +35,40 @@ noncomputable def sandwichProductCore {ι : Type*}
   | 1, _, G, g => G 0 (g 0)
   | k + 2, Γ, G, g =>
       G (Fin.last (k + 1)) (g (Fin.last (k + 1))) *
-        sandwichProductCore (k + 1) (fun i => Γ i.castSucc)
+        orderedCoordinateProduct (k + 1) (fun i => Γ i.castSucc)
           (fun i a => G i.castSucc a) (fun i => g i.castSucc) *
         G (Fin.last (k + 1)) (g (Fin.last (k + 1)))
+
+end SandwichProduct
+
+namespace SandwichInternal
+
+@[deprecated SandwichProduct.orderedCoordinateProduct (since := "2026-09-05")]
+noncomputable abbrev sandwichProductCore :=
+  @SandwichProduct.orderedCoordinateProduct
 
 end SandwichInternal
 
 /-- The ordered product
 `G^k_{g_k} ... G^1_{g_1} ... G^k_{g_k}` of `lem:ld-sandwich`.
 
-**Local fix:** The source reverses the outcome indices, which is ill-typed when
-the outcome families differ. This definition uses the pairing corrected in
+**Local fix:** The source reverses the outcome indices, so the printed
+expression is undefined when the outcome families differ. This definition uses
+the pairing corrected in
 `rem:ld-sandwich-indexing` and
 `docs/paper-gaps/qpbt_ld-sandwich-indexing.tex`; blueprint statement
-`ch12_qpbt_games.tex:454-480` and remark `ch12_qpbt_games.tex:485-487`, paper
+`ch12_qpbt_games.tex:469-496` and remark `ch12_qpbt_games.tex:544-546`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:465-501`. Tracked in
 issue #16. The empty product is `1`. -/
 noncomputable def sandwichProduct {k : ℕ} {X ι : Type*}
     [Fintype ι] [DecidableEq ι] {Γ : Fin k → Type*}
     (G : (i : Fin k) → X → Γ i → Op ι) (x : X)
     (g : (i : Fin k) → Γ i) : Op ι :=
-  SandwichInternal.sandwichProductCore k Γ (fun i a => G i x a) g
+  SandwichProduct.orderedCoordinateProduct k Γ (fun i a => G i x a) g
 
 /-- The two-family sandwiched product
 `(G₂)_{g₂} (G₁)_{g₁} (G₂)_{g₂}` from `eq:pasting-2a`; blueprint
-`ch12_qpbt_games.tex:517-546`, paper
+`ch12_qpbt_games.tex:954-979`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:504-525`. -/
 def pastedMeasurement {ι : Type*} [Fintype ι] [DecidableEq ι]
     {G₁ G₂ : Type*} (M₁ : G₁ → Op ι) (M₂ : G₂ → Op ι)
@@ -65,7 +77,7 @@ def pastedMeasurement {ι : Type*} [Fintype ι] [DecidableEq ι]
 
 /-- Evaluating a tuple of codewords at a common point. This is a
 formalization-only auxiliary for `lem:ld-sandwich`, blueprint
-`ch12_qpbt_games.tex:454-480`, paper
+`ch12_qpbt_games.tex:469-496`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:465-495`. -/
 def evalFunctionTuple {k : ℕ} {Y : Type*} {R Γ : Fin k → Type*}
     (eval : (i : Fin k) → Γ i → Y → R i) (y : Y)
@@ -74,7 +86,7 @@ def evalFunctionTuple {k : ℕ} {Y : Type*} {R Γ : Fin k → Type*}
 
 /-- The positive-mass conditional collision bound used by `lem:pasting`.
 This is a formalization-only spelling of the conditional probability in
-`blueprint/src/chapter/ch12_qpbt_games.tex:517-546`, with paper origin
+`blueprint/src/chapter/ch12_qpbt_games.tex:954-979`, with paper origin
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:504-525`. -/
 def HasConditionalCollisionBound {X Y₁ Y₂ R₂ Γ₂ : Type*}
     [Fintype X] [DecidableEq X] [Fintype Y₁] [DecidableEq Y₁]
