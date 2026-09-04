@@ -271,9 +271,11 @@ decision 2026-09-02 (EVOLUTION.md): this supersedes the GitHub-era "never merge
 without consulting the user" rule of `docs/pr_review_management.md` for this
 repository; the substantive review criteria are unchanged.
 A PR that touches only the workflow layer (`local/`, `.githooks/`,
-`scripts/tests/`, `docs/`, telemetry) is adjudicated after its SECOND round —
-`review.sh` refuses a third — because reviewer rounds on scaffolding did not
-converge (events.md 2026-09-03); mathematics PRs keep the four-round cap.
+`scripts/tests/`, `docs/`, telemetry) is adjudicated after its SECOND round
+because reviewer rounds on scaffolding did not converge (events.md
+2026-09-03); a further review is still permitted when the head changed (an
+adjudication needs an exact-head review), but it is churn the owner's
+watchdog reports.  Mathematics PRs keep the four-round cap above.
 
 Findings do **not** survive across SHAs.  Gate 4 matches the marker
 `<!-- mipstarre-review pr=N head=SHA -->` on that exact commit id, so a ledger

@@ -445,10 +445,10 @@ main": the operator fed a 107-line workflow PR to the reviewer three times
 (5 → 10 → 11 findings), grew it to 400 lines to satisfy them, and left two
 green PRs unmerged for hours.
 
-**Change:** (1) `review.sh` counts the marker reviews on the PR and, when the
-diff touches only the workflow layer, refuses a third round with the section-12
-adjudication instruction (`--force-review` still allows the autofix terminal
-review); (2) `personas/main.md` gains the queue-discipline bullet (merge green
+**Change:** (1) the two-round threshold for workflow-only PRs is operator
+discipline enforced by the owner's watchdog (a `review.sh` refusal was tried in
+PR #79 and withdrawn: a corrected head needs an exact-head review before it can
+be adjudicated); (2) `personas/main.md` gains the queue-discipline bullet (merge green
 PRs first at every iteration; two rounds then adjudicate; never grow a PR to
 satisfy findings; mechanism requests are out of scope); (3) `review.md`
 section 12 records the two-round threshold for workflow-only PRs.

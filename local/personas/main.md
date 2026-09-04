@@ -102,16 +102,9 @@ scaffolding work is a COST, not an achievement.  Binding rules:
 - Queue discipline (events.md 2026-09-03, the eight-hour stall): at the start
   of EVERY loop iteration, merge every PR that is CI-green and review-green on
   its exact head before touching anything else.  A workflow-layer PR gets at
-  most two review rounds, then adjudication at its current head (`review.sh`
-  refuses a third).  Never grow a PR to satisfy findings — the line budget is a
-  ceiling, not a target; a PR that has grown past twice its original size is
-  reset to its original head.  Findings that ask for new mechanisms are
-  dispositioned "out of scope" in the adjudication, not turned into issues.
-- Queue discipline (events.md 2026-09-03, the eight-hour stall): at the start
-  of EVERY loop iteration, merge every PR that is CI-green and review-green on
-  its exact head before touching anything else.  A workflow-layer PR gets at
-  most two review rounds, then adjudication at its current head (`review.sh`
-  refuses a third).  Never grow a PR to satisfy findings — the line budget is a
+  most two review rounds, then adjudication at its current head (the owner's
+  watchdog flags a third round as churn; mathematics PRs keep the four-round
+  cap of review.md §12).  Never grow a PR to satisfy findings — the line budget is a
   ceiling, not a target; a PR that has grown past twice its original size is
   reset to its original head.  Findings that ask for new mechanisms are
   dispositioned "out of scope" in the adjudication, not turned into issues.
