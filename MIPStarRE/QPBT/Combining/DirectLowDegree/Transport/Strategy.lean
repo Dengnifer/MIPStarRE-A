@@ -202,7 +202,7 @@ theorem strategyQuantumState_isNormalized {G : Game} (S : Strategy G) :
     PureState.toQuantumState_isNormalized (strategyPureState S)
 
 /-- The complex Born amplitude of a vector and two local effects. -/
-noncomputable def vectorBornAmplitude
+private noncomputable def vectorBornAmplitude
     {iotaA iotaB : Type*}
     [Fintype iotaA] [DecidableEq iotaA]
     [Fintype iotaB] [DecidableEq iotaB]
@@ -211,19 +211,13 @@ noncomputable def vectorBornAmplitude
   inner ℂ psi (applyOperatorToState (heteroKron A B) psi)
 
 /-- The real Born quadratic form of a vector and two local effects. -/
-noncomputable def vectorBornWeight
+private noncomputable def vectorBornWeight
     {iotaA iotaB : Type*}
     [Fintype iotaA] [DecidableEq iotaA]
     [Fintype iotaB] [DecidableEq iotaB]
     (psi : EuclideanSpace ℂ (iotaA × iotaB))
     (A : Op iotaA) (B : Op iotaB) : ℝ :=
   (vectorBornAmplitude psi A B).re
-
-/-- Public outcome-level Born weight for a finite game strategy. -/
-noncomputable def strategyBornWeight {G : Game} (S : Strategy G)
-    (x : G.QuestionA) (y : G.QuestionB)
-    (a : G.AnswerA) (b : G.AnswerB) : ℝ :=
-  vectorBornWeight S.ψ ((S.A x).effect a) ((S.B y).effect b)
 
 private theorem vectorBornAmplitude_add_left
     {iotaA iotaB : Type*}
@@ -325,7 +319,7 @@ private theorem vectorBornWeight_finset_sum_right
 
 /-- Expectations in the density state associated with a strategy agree with
 the strategy's vector Born quadratic form. -/
-theorem strategyQuantumState_ev_eq_vectorBornWeight
+private theorem strategyQuantumState_ev_eq_vectorBornWeight
     {G : Game} (S : Strategy G) (A : Op S.ιA) (B : Op S.ιB) :
     ev (strategyQuantumState S) (opTensor A B) =
       vectorBornWeight S.ψ A B := by
@@ -360,7 +354,7 @@ theorem directPostprocessBornWeight
             (matrixMeasurementToLDTProjMeas (S.B y) (hS.2 y)) readB).outcome b)) =
       ∑ directA ∈ Finset.univ.filter (fun answer => readA answer = a),
         ∑ directB ∈ Finset.univ.filter (fun answer => readB answer = b),
-          strategyBornWeight S x y directA directB := by
+          outcomeWeight S x y directA directB := by
   rw [strategyQuantumState_ev_eq_vectorBornWeight]
   simp only [ProjMeas.postprocess, SubMeas.postprocess_outcome,
     matrixMeasurementToLDTProjMeas_outcome]
@@ -422,10 +416,10 @@ theorem ldStrategyToDirect_bornWeight
     (L : LdParams) (S : Strategy (ldGame L))
     (x y : DirectLdQuestion L.toDirectLdParams)
     (a b : DirectLdAnswer L.toDirectLdParams) :
-    strategyBornWeight (ldStrategyToDirect L S) x y a b =
+    outcomeWeight (ldStrategyToDirect L S) x y a b =
       (Fintype.card (Fin (L.q / L.m)) : ℝ)⁻¹ *
         ∑ residue,
-          strategyBornWeight S
+          outcomeWeight S
             (seededLdQuestion L x residue)
             (seededLdQuestion L y residue)
             ((ldDirectAnswerEquiv L).symm a)
@@ -482,7 +476,7 @@ theorem directCoordinateProjStrat_point_bornWeight
           directPointAnswerReadout D r answer = a),
         ∑ directB ∈ Finset.univ.filter (fun answer =>
             directPointAnswerReadout D r answer = b),
-          strategyBornWeight S (directPointQuestionOf D u)
+          outcomeWeight S (directPointQuestionOf D u)
             (directPointQuestionOf D v) directA directB := by
   letI := D.toLDTFieldModel
   change ev (strategyQuantumState S)
@@ -519,7 +513,7 @@ theorem directCoordinateProjStrat_axis_bornWeight
           directAxisAnswerReadout D r lineA answer = f),
         ∑ directB ∈ Finset.univ.filter (fun answer =>
             directAxisAnswerReadout D r lineB answer = g),
-          strategyBornWeight S (directAxisQuestionOf D lineA)
+          outcomeWeight S (directAxisQuestionOf D lineA)
             (directAxisQuestionOf D lineB) directA directB := by
   letI := D.toLDTFieldModel
   classical
@@ -560,7 +554,7 @@ theorem directCoordinateProjStrat_diagonal_bornWeight
           directDiagonalAnswerReadout D r lineA answer = f),
         ∑ directB ∈ Finset.univ.filter (fun answer =>
             directDiagonalAnswerReadout D r lineB answer = g),
-          strategyBornWeight S (directDiagonalQuestionOf D lineA)
+          outcomeWeight S (directDiagonalQuestionOf D lineA)
             (directDiagonalQuestionOf D lineB) directA directB := by
   letI := D.toLDTFieldModel
   classical
