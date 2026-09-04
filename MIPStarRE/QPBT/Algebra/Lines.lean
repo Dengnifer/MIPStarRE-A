@@ -62,7 +62,13 @@ with paper origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tes
 theorem linePoints_eq_of_mem {m : ℕ}
     (u v u' : Fin m → K) (h : u' ∈ linePoints u v) :
     linePoints u v = linePoints u' v := by
-  sorry
+  obtain ⟨t, rfl⟩ := h
+  ext x
+  constructor
+  · rintro ⟨s, rfl⟩
+    exact ⟨s - t, by module⟩
+  · rintro ⟨s, rfl⟩
+    exact ⟨t + s, by module⟩
 
 /--
 The canonical linear representative map of a line direction.  It projects onto
@@ -84,5 +90,42 @@ canonical representative in `def:line-representative`. -/
 noncomputable def lineRep {m : ℕ}
     (u v : Fin m → K) : Fin m → K :=
   lineRepMap v u
+
+/--
+Formalization-only auxiliary lemma for `def:line-representative`
+(blueprint `blueprint/src/chapter/ch11_qpbt_algebra.tex:472-492`, paper origin
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:143-174`).
+The canonical representative map is a projection whose kernel is the line
+`K v`, so a point and its canonical representative differ by a scalar multiple
+of the direction.
+-/
+theorem sub_lineRepMap_mem_span {m : ℕ} (v u : Fin m → K) :
+    u - lineRepMap v u ∈ Submodule.span K ({v} : Set (Fin m → K)) := by
+  have hc :
+      IsCompl
+        (registerSubmodule K
+          (canonicalComplement (Submodule.span K ({v} : Set (Fin m → K)))))
+        (Submodule.span K ({v} : Set (Fin m → K))) :=
+    (isCompl_registerSubmodule_canonicalComplement
+      (Submodule.span K ({v} : Set (Fin m → K)))).symm
+  have hrep : lineRepMap v u =
+      (registerSubmodule K
+        (canonicalComplement (Submodule.span K ({v} : Set (Fin m → K))))).projection
+        (Submodule.span K ({v} : Set (Fin m → K))) hc u := rfl
+  rw [hrep, ← Submodule.projection_eq_self_sub_projection hc u]
+  exact Submodule.projection_apply_mem hc.symm u
+
+/--
+Formalization-only auxiliary lemma for `def:line-representative`
+(blueprint `blueprint/src/chapter/ch11_qpbt_algebra.tex:472-492`, paper origin
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:166-174`).
+Every point lies on the line through its own canonical representative in the
+same direction; this is the incidence property used by the line-versus-point
+samplers.
+-/
+theorem mem_linePoints_lineRepMap {m : ℕ} (v u : Fin m → K) :
+    u ∈ linePoints (lineRepMap v u) v := by
+  obtain ⟨t, ht⟩ := Submodule.mem_span_singleton.mp (sub_lineRepMap_mem_span v u)
+  exact ⟨t, by rw [ht]; abel⟩
 
 end MIPStarRE.QPBT
