@@ -33,6 +33,14 @@ local instance pauliEdgeNonemptyInterchange : Nonempty PauliEdge := pauliEdge_no
 
 /-! ## Transport of the distance functional along the factor interchange -/
 
+/-- The identity operator acts trivially on a state. Formalization-only support
+for `def:strategy-observables`, blueprint
+`ch14_qpbt_observables.tex:480-503`. -/
+theorem applyOperatorToState_one {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (ψ : EuclideanSpace ℂ ι) : applyOperatorToState (1 : Op ι) ψ = ψ := by
+  ext i
+  simp [applyOperatorToState]
+
 /-- Reindexing an operator is computed entrywise, hence commutes with
 subtraction. Formalization-only support for the interchanged conclusions of
 `lem:qld-win-implications`, blueprint `ch14_qpbt_observables.tex:699-701`. -/

@@ -1,4 +1,4 @@
-import MIPStarRE.QPBT.Observables.WinImplications.TwistedCommutation
+import MIPStarRE.QPBT.Observables.WinImplications.InterchangedCommutation
 
 /-!
 # Winning implications for strategy observables
@@ -319,8 +319,8 @@ theorem pointObs_twisted_commutation_interchanged :
           heteroKron 1
             (S.pointObs .bob .Z ω.2.2.2 ω.2.1 *
               S.pointObs .bob .X ω.2.2.1 ω.1))
-        S.toStrategy.ψ ≤ C * Real.sqrt ε := by
-  sorry
+        S.toStrategy.ψ ≤ C * Real.sqrt ε :=
+  WinImplications.pointObs_twisted_commutation_interchanged_proof
 
 end
 
