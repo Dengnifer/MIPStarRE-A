@@ -384,6 +384,182 @@ theorem naimarkDilatedState_apply (α : Type) [Fintype α] [DecidableEq α]
     · simp [hob]
   · simp [hoa]
 
+/-- The quadratic form of an operator on a pure state, written out in the
+computational basis.  Formalization-only support for the dilation of
+`thm:ms-rigidity`, blueprint `ch13_qpbt_test.tex:224-253`. -/
+theorem inner_applyOperatorToState {ι : Type} [Fintype ι] [DecidableEq ι]
+    (K : Op ι) (u : EuclideanSpace ℂ ι) :
+    inner ℂ u (applyOperatorToState K u) =
+      ∑ p : ι, ∑ q : ι, (starRingEnd ℂ) (u p) * (K p q * u q) := by
+  simp [PiLp.inner_apply, RCLike.inner_apply, applyOperatorToState,
+    Matrix.mulVec, dotProduct, Finset.mul_sum, mul_comm]
+
+/-- On the ground slice the dilated state factors as the original amplitude
+times the two indicator amplitudes of the auxiliary registers. -/
+theorem naimarkDilatedState_apply_mul (α : Type) [Fintype α] [DecidableEq α]
+    {ιA ιB : Type} [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
+    (ψ : EuclideanSpace ℂ (ιA × ιB)) (i : ιA) (oa : Option α) (j : ιB) (ob : Option α) :
+    naimarkDilatedState α ψ ((i, oa), (j, ob)) =
+      (if oa = none then (1 : ℂ) else 0) *
+        ((if ob = none then (1 : ℂ) else 0) * ψ (i, j)) := by
+  rw [naimarkDilatedState_apply]
+  by_cases h1 : oa = none <;> by_cases h2 : ob = none <;> simp [h1, h2]
+
+/-- The quadratic form of a product operator on the dilated state agrees with the
+quadratic form of the two ground-slice compressions on the original state.  This
+is the identity that makes the dilation invisible to every observable quantity of
+the strategy. -/
+theorem inner_heteroKron_naimarkDilatedState (α : Type) [Fintype α] [DecidableEq α]
+    {ιA ιB : Type} [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
+    (ψ : EuclideanSpace ℂ (ιA × ιB))
+    (M : Op (ιA × Option α)) (N : Op (ιB × Option α)) :
+    inner ℂ (naimarkDilatedState α ψ)
+        (applyOperatorToState (heteroKron M N) (naimarkDilatedState α ψ)) =
+      inner ℂ ψ (applyOperatorToState
+        (heteroKron (naimarkCompression M) (naimarkCompression N)) ψ) := by
+  classical
+  rw [inner_applyOperatorToState, inner_applyOperatorToState]
+  simp [Fintype.sum_prod_type, Fintype.sum_option, naimarkDilatedState_apply_mul,
+    heteroKron, Matrix.kroneckerMap_apply, mul_comm, mul_assoc]
+
+/-- The ground embeddings are isometric, so the dilated state is again a unit
+vector when the original one is. -/
+theorem naimarkDilatedState_norm (α : Type) [Fintype α] [DecidableEq α]
+    {ιA ιB : Type} [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
+    (ψ : EuclideanSpace ℂ (ιA × ιB)) :
+    ‖naimarkDilatedState α ψ‖ = ‖ψ‖ := by
+  classical
+  rw [EuclideanSpace.norm_eq, EuclideanSpace.norm_eq]
+  congr 1
+  simp [Fintype.sum_prod_type, Fintype.sum_option, naimarkDilatedState_apply_mul]
+
+/-! ## The dilated Magic Square strategy -/
+
+/-- The projective dilation of an arbitrary Magic Square strategy.  Both local
+spaces acquire one auxiliary register indexed by `Option MsAnswer`, the state is
+carried to the ground slice, and each question measurement is replaced by its
+Naimark dilation, the deficiency being absorbed by the answer `bit 0`.  This is
+the projective strategy on which the self-testing argument of `thm:ms-rigidity`
+operates; blueprint `ch13_qpbt_test.tex:224-253`, paper
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652`. -/
+noncomputable def msDilatedStrategy (S : Strategy msGame) : Strategy msGame where
+  ιA := S.ιA × Option MsAnswer
+  ιB := S.ιB × Option MsAnswer
+  ψ := naimarkDilatedState MsAnswer S.ψ
+  ψ_norm := by
+    show ‖naimarkDilatedState MsAnswer S.ψ‖ = 1
+    rw [naimarkDilatedState_norm]
+    exact S.ψ_norm
+  A x := naimarkDilatedMeasurement (α := MsAnswer) (S.A x) (MsAnswer.bit 0)
+  B y := naimarkDilatedMeasurement (α := MsAnswer) (S.B y) (MsAnswer.bit 0)
+
+@[simp]
+theorem msDilatedStrategy_psi (S : Strategy msGame) :
+    (msDilatedStrategy S).ψ = naimarkDilatedState MsAnswer S.ψ := rfl
+
+@[simp]
+theorem msDilatedStrategy_A_effect (S : Strategy msGame) (x : MsType) (a : MsAnswer) :
+    ((msDilatedStrategy S).A x).effect a =
+      naimarkDilatedEffect (α := MsAnswer) (S.A x) (MsAnswer.bit 0) a := rfl
+
+@[simp]
+theorem msDilatedStrategy_B_effect (S : Strategy msGame) (y : MsType) (b : MsAnswer) :
+    ((msDilatedStrategy S).B y).effect b =
+      naimarkDilatedEffect (α := MsAnswer) (S.B y) (MsAnswer.bit 0) b := rfl
+
+/-- Every question measurement of the dilated strategy is projective, which is
+the hypothesis under which the Coladangelo--Stark self-test is stated. -/
+theorem msDilatedStrategy_isProjective_A (S : Strategy msGame) (x : MsType) :
+    MIPStarRE.QPBT.Measurement.IsProjective ((msDilatedStrategy S).A x) :=
+  naimarkDilatedMeasurement_isProjective (α := MsAnswer) (S.A x) (MsAnswer.bit 0)
+
+/-- Every question measurement of the dilated strategy is projective on Bob's
+side as well. -/
+theorem msDilatedStrategy_isProjective_B (S : Strategy msGame) (y : MsType) :
+    MIPStarRE.QPBT.Measurement.IsProjective ((msDilatedStrategy S).B y) :=
+  naimarkDilatedMeasurement_isProjective (α := MsAnswer) (S.B y) (MsAnswer.bit 0)
+
+/-! ## Preservation of the value-to-parity layer -/
+
+/-- The dilation preserves every conditioned Born mass. -/
+theorem msDilatedStrategy_outcomeMass (S : Strategy msGame) (x y : MsType)
+    (a b : MsAnswer) :
+    outcomeMass (msDilatedStrategy S) x y a b = outcomeMass S x y a b := by
+  show (inner ℂ (naimarkDilatedState MsAnswer S.ψ)
+      (applyOperatorToState
+        (heteroKron (naimarkDilatedEffect (α := MsAnswer) (S.A x) (MsAnswer.bit 0) a)
+          (naimarkDilatedEffect (α := MsAnswer) (S.B y) (MsAnswer.bit 0) b))
+        (naimarkDilatedState MsAnswer S.ψ))).re =
+    (inner ℂ S.ψ (applyOperatorToState
+      (heteroKron ((S.A x).effect a) ((S.B y).effect b)) S.ψ)).re
+  rw [inner_heteroKron_naimarkDilatedState, naimarkCompression_naimarkDilatedEffect,
+    naimarkCompression_naimarkDilatedEffect]
+
+/-- The dilation preserves Alice's marginal Born masses. -/
+theorem msDilatedStrategy_aliceOutcomeMass (S : Strategy msGame) (x : MsType)
+    (a : MsAnswer) :
+    aliceOutcomeMass (msDilatedStrategy S) x a = aliceOutcomeMass S x a := by
+  rw [← sum_outcomeMass_right (msDilatedStrategy S) x x a,
+    ← sum_outcomeMass_right S x x a]
+  exact Finset.sum_congr rfl fun b _ => msDilatedStrategy_outcomeMass S x x a b
+
+/-- The dilation preserves Bob's marginal Born masses. -/
+theorem msDilatedStrategy_bobOutcomeMass (S : Strategy msGame) (y : MsType)
+    (b : MsAnswer) :
+    bobOutcomeMass (msDilatedStrategy S) y b = bobOutcomeMass S y b := by
+  rw [← sum_outcomeMass_left (msDilatedStrategy S) y y b,
+    ← sum_outcomeMass_left S y y b]
+  exact Finset.sum_congr rfl fun a _ => msDilatedStrategy_outcomeMass S y y a b
+
+/-- The dilation preserves the mass of every answer event. -/
+theorem msDilatedStrategy_eventMass (S : Strategy msGame) (x y : MsType)
+    (E : MsAnswer → MsAnswer → Prop) [DecidableRel E] :
+    eventMass (msDilatedStrategy S) x y E = eventMass S x y E := by
+  unfold eventMass
+  exact Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ => by
+    by_cases h : E a b <;> simp [h, msDilatedStrategy_outcomeMass]
+
+/-- The dilation preserves the mass of every event depending only on Alice's
+answer. -/
+theorem msDilatedStrategy_aliceEventMass (S : Strategy msGame) (x : MsType)
+    (E : MsAnswer → Prop) [DecidablePred E] :
+    aliceEventMass (msDilatedStrategy S) x E = aliceEventMass S x E := by
+  unfold aliceEventMass
+  exact Finset.sum_congr rfl fun a _ => by
+    by_cases h : E a <;> simp [h, msDilatedStrategy_aliceOutcomeMass]
+
+/-- The dilation preserves the mass of every event depending only on Bob's
+answer. -/
+theorem msDilatedStrategy_bobEventMass (S : Strategy msGame) (y : MsType)
+    (E : MsAnswer → Prop) [DecidablePred E] :
+    bobEventMass (msDilatedStrategy S) y E = bobEventMass S y E := by
+  unfold bobEventMass
+  exact Finset.sum_congr rfl fun b _ => by
+    by_cases h : E b <;> simp [h, msDilatedStrategy_bobOutcomeMass]
+
+/-- The dilation preserves the conditioned rejection mass. -/
+theorem msDilatedStrategy_rejectionMass (S : Strategy msGame) (x y : MsType) :
+    rejectionMass (msDilatedStrategy S) x y = rejectionMass S x y :=
+  msDilatedStrategy_eventMass S x y _
+
+/-- The dilation preserves the value of the Magic Square game, so a strategy of
+value at least `1 - ε` dilates to a projective strategy of the same value. -/
+theorem msDilatedStrategy_value (S : Strategy msGame) :
+    (msDilatedStrategy S).value = S.value := by
+  rw [strategy_value_eq_acceptanceMass, strategy_value_eq_acceptanceMass]
+  congr 1
+  funext xy
+  exact msDilatedStrategy_eventMass S xy.1 xy.2 _
+
+/-- The dilation preserves the total rejection mass, hence the whole
+value-to-parity layer applies verbatim to the dilated strategy. -/
+theorem msDilatedStrategy_totalRejectionMass (S : Strategy msGame) :
+    totalRejectionMass (msDilatedStrategy S) = totalRejectionMass S := by
+  unfold totalRejectionMass
+  congr 1
+  funext xy
+  exact msDilatedStrategy_rejectionMass S xy.1 xy.2
+
 end
 
 end MIPStarRE.QPBT.MagicSquareRigidity
