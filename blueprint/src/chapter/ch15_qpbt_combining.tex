@@ -1871,23 +1871,28 @@ projective measurement whose outcomes are pairs of global polynomials.
 		lem:ld-soundness, def:ld-game, fact:agreement, fact:add-a-proj2,
 		fact:data-processing, lem:schwartz-zippel-total-degree,
 		def:combine-map}
-	By Lemmas~\ref{lem:qld-4-12} and~\ref{lem:qld-4-13-established}, the
-	expanded state $\ket{\hat\psi}$ together with the lines measurements
-	$\{\hat{Q}^{\ell}_{f}\}$ and the points measurements
-	$\{\hat{Q}^{x,z,\alpha,\beta}_{a}\}$ constitutes a strategy for the
-	classical low individual degree game (Definition~\ref{def:ld-game}) with
-	parameters $(q, 2m+2, d, 1)$ succeeding with probability
-	$1 - \delta_{\mathrm{combine}}$; the axis-parallel clause of
-	Lemma~\ref{lem:qld-4-13-established} supplies the degree-$d$ answer
-	format that the game requires on axis-parallel lines. Here
-	$\delta_{\mathrm{combine}}$ is the error established by the proof of
-	Lemma~\ref{lem:qld-4-13}, namely the bound
-	$C \cdot m \cdot \poly(\eps, md/q)$ of
-	Lemma~\ref{lem:qld-4-13-established}, and not the form
-	$\poly(m^2\eps, md/q)$ printed in the statement of
-	Lemma~\ref{lem:qld-4-13}, which remains unproved
-	(Remark~\ref{rem:qld-4-13-source-defects}); the error function
-	$\delta_S$ of the statement absorbs the prefactor $m$ into $(md)^a$.
+	Lemma~\ref{lem:qld-4-13-established} supplies measurements on the directly
+	indexed line carrier: an axis line records its base point and directly sampled
+	coordinate index, while a diagonal line also records a direction whose earlier
+	coordinates vanish. Its averages use the corresponding
+	directly indexed line-point law, and its consistency relations use the completed
+	answer alphabet $\F_q \cup \{\bot\}$. These data are not yet a strategy for the
+	classical low individual degree game of Definition~\ref{def:ld-game}, whose line
+	questions retain a field-valued seed. Such a strategy requires a transport from
+	the directly indexed carrier and law to the seed-indexed question distribution,
+	and a conversion from the completed-answer relations, including degenerate
+	zero-direction lines, to the game's field-valued answer checks. These open
+	transports are recorded in \cite{gap:qpbt_ld-dimension-divisibility} and
+	\cite{gap:qpbt_combined-lines-error-term}.
+	Conditional on these transports, Lemmas~\ref{lem:qld-4-12}
+	and~\ref{lem:qld-4-13-established} give a strategy with parameters
+	$(q,2m+2,d,1)$ and success probability $1-\delta_{\mathrm{combine}}$; the
+	axis-parallel clause supplies the required degree-$d$ answer format. The
+	numerical estimate available for $\delta_{\mathrm{combine}}$ is
+	$C \cdot m \cdot \poly(\eps,md/q)$, not the unproved form
+	$\poly(m^2\eps,md/q)$ printed in Lemma~\ref{lem:qld-4-13}
+	(Remark~\ref{rem:qld-4-13-source-defects}). The error function $\delta_S$
+	absorbs the prefactor $m$ into $(md)^a$.
 	(For $(q, 2m+2, d, 1)$ to be a parameter tuple of
 	Definition~\ref{def:ld-game} the dimension $2m+2$ must divide $q$;
 	admissibility of $(q,m,d)$ supplies only that $m$ divides $q$, and for

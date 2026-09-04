@@ -271,9 +271,9 @@ structure SubLineWitness (P : AdmissibleParams) where
 
 /-! ## Extended lines and global polynomial pairs -/
 
-/-- Extended-line POVMs and the two source consistency displays from
-`lem:qld-4-13`, paper lines 1020--1034.  The direct line carrier avoids the
-dimension-divisibility obstruction documented in
+/-- Extended-line POVMs and directly indexed, completed-answer forms of the two
+consistency relations in `lem:qld-4-13`, paper lines 1020--1034. The direct line
+carrier avoids the dimension-divisibility obstruction documented in
 `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`. -/
 structure ExtendedLinesWitness {P : AdmissibleParams} {ε δQ : ℝ}
     (S : ProjectiveSetting P ε) (points : CombinedPointsWitness S δQ)

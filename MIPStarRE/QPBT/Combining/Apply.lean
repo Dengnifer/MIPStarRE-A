@@ -8,9 +8,9 @@ This module states the two application obligations at the end of the Pauli-basis
 combining argument.  Directly indexed combined-line measurements are recorded both
 with the error form printed in the source and with the weaker estimate established by
 its first proof route.  The final witness consists of a projective measurement of a
-pair of global bounded individual-degree polynomials.  The proposition-valued
-declarations below are intentionally open proof obligations in this skeleton; their
-statement links do not claim proof closure.
+pair of global bounded individual-degree polynomials.  The existence assertions below
+record the measurements and quantitative estimates required by the combining argument;
+their derivations remain open.
 
 ## References
 
