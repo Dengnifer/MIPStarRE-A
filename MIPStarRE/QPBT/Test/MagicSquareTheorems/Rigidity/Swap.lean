@@ -351,12 +351,12 @@ noncomputable def msLocalVarObsB (S : Strategy msGame) (j : Fin 9) :
 /-- Alice's dilated local variable observable is a reflection. -/
 theorem isReflection_msLocalVarObsA (S : Strategy msGame) (j : Fin 9) :
     IsReflection (msLocalVarObsA S j) :=
-  isReflection_signObs _ (msDilatedStrategy_isProjective_A S _) _
+  isBinaryObservable_signObs _ (msDilatedStrategy_isProjective_A S _) _
 
 /-- Bob's dilated local variable observable is a reflection. -/
 theorem isReflection_msLocalVarObsB (S : Strategy msGame) (j : Fin 9) :
     IsReflection (msLocalVarObsB S j) :=
-  isReflection_signObs _ (msDilatedStrategy_isProjective_B S _) _
+  isBinaryObservable_signObs _ (msDilatedStrategy_isProjective_B S _) _
 
 /-- Alice's exact binary controlled-swap embedding for the distinguished
 variable-0 and variable-4 reflections. -/
