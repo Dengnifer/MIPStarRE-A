@@ -319,13 +319,14 @@ noncomputable def binaryObservableDistSq {ι : Type} [Fintype ι]
     stateDepDistSq (binaryObservableEffect outcome S)
       (binaryObservableEffect outcome T) ρ
 
-/-- The binary-measurement distance is half the state-dependent operator
-distance.
+/-- The squared binary-measurement distance is half the squared
+state-dependent operator distance.
 
 **Local fix:** Source equation (3) at
-`references/nv-paper/fullpaper.tex:903-911` ends by identifying the
-binary-measurement distance with the state-dependent operator distance of the
-two observables; the correct relation carries the factor `1 / 2` proved here.
+`references/nv-paper/fullpaper.tex:903-911` ends by identifying the squared
+binary-measurement distance with the squared state-dependent operator distance
+of the two observables; the correct relation carries the factor `1 / 2` proved
+here.
 Documented in
 `docs/paper-gaps/qpbt_linearity-distance-normalization.tex`. -/
 theorem binaryObservableDistSq_eq_stateDepDistSq_div_two
@@ -399,8 +400,8 @@ theorem stateDepDistSq_eq_two_sub_two_mul_correlation
   rw [hcross]
   ring
 
-/-- The binary-measurement distance is one minus the real state-dependent
-correlation. -/
+/-- The squared binary-measurement distance is one minus the real
+state-dependent correlation. -/
 theorem binaryObservableDistSq_eq_one_sub_correlation
     {ι : Type} [Fintype ι] [DecidableEq ι]
     (S T ρ : Op ι) (hS : IsBinaryObservable S)

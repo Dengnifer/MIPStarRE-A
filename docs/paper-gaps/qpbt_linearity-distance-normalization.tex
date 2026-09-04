@@ -7,7 +7,6 @@
 
 \input{command}
 
-\newcommand{\draw}{d^{\mathrm{raw}}}
 \newcommand{\dbin}{d^{\mathrm{bin}}}
 \newcommand{\Id}{\mathrm{Id}}
 \providecommand{\gapnote}[2]{\par\noindent\textbf{Verdict:} #1 (#2).\par}
@@ -43,10 +42,11 @@
 \section{Key theorem forms}
 
 Let $S$ and $T$ be binary observables and let $\rho$ be a positive
-semidefinite operator of trace one.  We distinguish the raw operator distance
-from the distance between their associated binary projective measurements:
+semidefinite operator of trace one.  We distinguish the state-dependent
+operator distance from the distance between their associated binary projective
+measurements:
 \begin{align*}
-  \draw_\rho(S,T)^2
+  d_\rho(S,T)^2
     &:= \Re\tr\big((S-T)^\dagger(S-T)\rho\big), \\
   \dbin_\rho(S,T)^2
     &:= \sum_{s\in\{+,-\}}
@@ -56,11 +56,11 @@ from the distance between their associated binary projective measurements:
 \end{align*}
 The normalization and correlation identities are
 \begin{align}
-  \dbin_\rho(S,T)^2 &= \frac12\draw_\rho(S,T)^2,
+  \dbin_\rho(S,T)^2 &= \frac12 d_\rho(S,T)^2,
     \tag{normalization}\label{eq:normalization}\\
-  \draw_\rho(S,T)^2
+  d_\rho(S,T)^2
     &= 2-2\Re\tr(ST\rho),
-    \tag{raw correlation}\label{eq:raw-correlation}\\
+    \tag{operator correlation}\label{eq:operator-correlation}\\
   \dbin_\rho(S,T)^2
     &= 1-\Re\tr(ST\rho).
     \tag{binary correlation}\label{eq:binary-correlation}
@@ -72,9 +72,10 @@ be written either as
 \]
 or, equivalently, as
 \[
-  \mathbb E_a\draw_{\rho'}(\mathcal A(a),A(a))^2\leq2\delta.
+  \mathbb E_a d_{\rho'}(\mathcal A(a),A(a))^2\leq2\delta.
 \]
-These are not equivalent to the same bound $\delta$ for the raw distance.%
+These are not equivalent to the same bound $\delta$ for the mean squared
+state-dependent operator distance.%
 \footnote{The formal declarations are \leanid{binaryObservableEffect},
 \leanid{binaryObservableDistSq},
 \leanid{binaryObservableDistSq\_eq\_stateDepDistSq\_div\_two},
@@ -99,18 +100,18 @@ This is equation~(3) at lines~903--910 of the in-repository source mirror.%
 \footnote{See
 \path{references/nv-paper/fullpaper.tex}, lines~866--912.  The quantum
 linearity theorem and its Fourier--Naimark proof are at lines~1074--1112.}
-The next line identifies the final expression with the squared raw operator
-distance.  The operator-distance definition at lines~873--875 is printed with
-$\rho$ occurring twice,
+The next line identifies the final expression with the squared state-dependent
+operator distance.  The operator-distance definition at lines~873--875 is
+printed with $\rho$ occurring twice,
 \[
-  \draw_\rho(S,T)^2 = \tr_\rho\big((S-T)^\dagger(S-T)\rho\big),
+  d_\rho(S,T)^2 = \tr_\rho\big((S-T)^\dagger(S-T)\rho\big),
   \qquad \tr_\rho(X) := \tr(\rho X),
 \]
 and we read the duplication as typographical, keeping the single $\rho$ of the
-definition of $\draw$ above.  Under that reading the squared raw operator
-distance is $\tr_\rho((S-T)^2)$ rather than one half of that quantity.  Thus
-the calculation through line~910 is correct and the equality on line~911 loses
-a factor of two.
+definition of $d$ above.  Under that reading the squared state-dependent
+operator distance is $\tr_\rho((S-T)^2)$ rather than one half of that
+quantity.  Thus the calculation through line~910 is correct and the equality
+on line~911 loses a factor of two.
 
 The Fourier--Naimark proof is consistent with the measurement normalization.
 It proves
@@ -121,14 +122,15 @@ It proves
 \]
 The hypothesis therefore makes the consistency deficit at most $\delta/2$.
 For binary projective measurements, the squared measurement distance is twice
-that deficit, giving the bound $\delta$ in the normalized convention and the
-bound $2\delta$ in the raw convention.
+that deficit, giving the bound $\delta$ for the squared binary-measurement
+distance and the bound $2\delta$ for the squared state-dependent operator
+distance.
 
 \section{A four-point counterexample}
 
-The raw bound with constant $\delta$ is false.  Let
-$G=(\mathbb Z/2\mathbb Z)^2$, choose $r\in G\setminus\{0\}$, take the
-one-dimensional state $\rho=1$, and define scalar binary observables by
+The bound $\delta$ for the mean squared state-dependent operator distance is
+false.  Let $G=(\mathbb Z/2\mathbb Z)^2$, choose $r\in G\setminus\{0\}$, take
+the one-dimensional state $\rho=1$, and define scalar binary observables by
 \[
   A(a)=\begin{cases}
     -1,&a=r,\\
@@ -151,7 +153,7 @@ $\{\frac12,\frac12,\frac12,-\frac12\}$, and hence
 The correlation hypothesis therefore holds with $\delta=3/4$.
 
 Every scalar exact Boolean representation is one of the characters $\chi_u$,
-and its average raw distance from $A$ is
+and its mean squared state-dependent operator distance from $A$ is
 \[
   \mathbb E_a |A(a)-\chi_u(a)|^2
     =2-2\widehat A(u)\geq1.
@@ -161,10 +163,10 @@ and the binary-observable relations make the operators $\mathcal A(a)$ a
 commuting family of Hermitian involutions.  Their simultaneous spectral
 subspaces carry characters of $G$.  Evaluation in any density operator is
 therefore a convex combination of the scalar character correlations above, so
-the average raw distance remains at least $1$.  It cannot be at most
-$\delta=3/4$.  By~\eqref{eq:normalization}, the corresponding normalized
-distance has lower bound $1/2$, which is compatible with the provider's
-conclusion.
+the mean squared state-dependent operator distance remains at least $1$.  It
+cannot be at most $\delta=3/4$.  By~\eqref{eq:normalization}, the corresponding
+mean squared binary-measurement distance has lower bound $1/2$, which is
+compatible with the provider's conclusion.
 
 \section{Comparison with the blueprint and formalization}
 
@@ -173,38 +175,42 @@ Pauli-basis analysis and defers its proof to Natarajan and Vidick.%
 \footnote{See
 \path{references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex},
 lines~711--725.}
-The active blueprint expands the conclusion's distance as the raw distance
-$\draw$ and states the bound $2\delta$, together with the equivalent bound
-$\delta$ for $\dbin$.  The formal theorem
+The active blueprint expands the conclusion's distance as the state-dependent
+operator distance $d$ and states the bound $2\delta$, together with the
+equivalent bound $\delta$ for $\dbin$.  The formal theorem
 \leanid{exists\_exactly\_linear\_observables} bounds the average over $u$
 of \leanid{stateDepDistSq} by $2\delta$, and its companion
 \leanid{exists\_exactly\_linear\_observables\_binaryObservableDistSq}
 bounds the average of \leanid{binaryObservableDistSq} by $\delta$; the
-printed raw bound $\delta$ is not reproduced.%
+printed bound $\delta$ for the mean squared state-dependent operator
+distance is not reproduced.%
 \footnote{See
 \path{blueprint/src/chapter/ch15_qpbt_combining.tex}, lines~104--150, and
 the two declarations in
 \doclink{MIPStarRE/QPBT/Combining/Linearity.lean}.}
 
-The Boolean Fourier foundation keeps the raw definition unchanged and adds the
-separately named normalized measurement distance together with
-equations~\eqref{eq:normalization}--\eqref{eq:binary-correlation}.  The
-statement repair changed the raw conclusion to $2\delta$, added the normalized
-form with bound $\delta$, and synchronized the blueprint; the realigned theorem
-is proved by the Fourier--Naimark argument, with the distance/defect relation
-established as an equality.%
+The Boolean Fourier foundation keeps the state-dependent operator distance
+unchanged and adds the separately named binary-measurement distance together
+with equations~\eqref{eq:normalization}--\eqref{eq:binary-correlation}.  The
+statement repair changed the conclusion to mean squared state-dependent
+operator distance at most $2\delta$, added the equivalent form with mean
+squared binary-measurement distance at most $\delta$, and synchronized the
+blueprint; the realigned theorem is proved by the Fourier--Naimark argument,
+with the distance/defect relation established as an equality.%
 \footnote{The normalization investigation is tracked in
 \ghissue{124}; the source-facing statement repair is \ghissue{129}.}
 
 \section{Conclusion}
 
 The provider's binary-measurement calculation is correct through the factor
-$1/2$ in equation~(3), but its final identification with raw observable
-distance is incorrect.  The theorem proved by the Fourier--Naimark argument has
-normalized binary-measurement error at most $\delta$, equivalently raw
-operator error at most $2\delta$.  The four-point example rules out the printed
-raw-error bound $\delta$ even when arbitrary ancillary extensions are allowed.
-The blueprint theorem and the formal declarations carry the corrected bounds.
+$1/2$ in equation~(3), but its final identification with the squared
+state-dependent operator distance is incorrect.  The theorem proved by the
+Fourier--Naimark argument has mean squared binary-measurement error at most
+$\delta$, equivalently mean squared state-dependent operator error at most
+$2\delta$.  The four-point example rules out the printed bound $\delta$ for
+the mean squared state-dependent operator distance even when arbitrary
+ancillary extensions are allowed.  The blueprint theorem and the formal
+declarations carry the corrected bounds.
 
 \bibliographystyle{alpha}
 \bibliography{references}

@@ -283,22 +283,91 @@ assembled by Fourier averaging.
 	\label{rem:linearity-distance-normalization}
 	As printed in \cite{Natarajan2017Linearity} and quoted in
 	\cite{Ji2020MIPStar}, the conclusion of the quantum linearity theorem
-	bounds the squared state-dependent operator distance $d_{\rho'}^2$ by
+	bounds the mean squared state-dependent operator distance
+	$\E_u \, d_{\rho'}(\mathcal{L}^u, \mathcal{O}^u \ot \Id_{\hilb'})^2$ by
 	$\delta$. The calculation behind that bound in
 	\cite[Section~3.1]{Natarajan2017Linearity} computes the squared distance
 	between the binary projective measurements associated with the
 	observables, which is half the squared operator distance, and then
-	identifies the two quantities; the identification loses that factor.
-	What the Fourier argument proves is the bound $\delta$ for the squared
-	measurement distance, equivalently $2\delta$ for the squared operator
+	identifies the two quantities; the identification loses that factor. What
+	the Fourier argument proves is the bound $\delta$ for the mean squared
+	measurement distance, equivalently $2\delta$ for the mean squared operator
 	distance, and the printed operator bound $\delta$ is refuted by a
 	four-point counterexample
 	\cite{gap:qpbt_linearity-distance-normalization}. The normalization
 	identities are recorded in Lemma~\ref{lem:binary-measurement-distance},
-	and Theorem~\ref{thm:linearity} is stated with the corrected bounds:
-	$2\delta$ for the squared operator distance and $\delta$ for the squared
-	measurement distance.
+	and Theorem~\ref{thm:linearity} is stated and proved with the corrected
+	bounds: $2\delta$ for the mean squared state-dependent operator distance
+	and $\delta$ for the mean squared measurement distance.
 \end{remark}
+
+\begin{lemma}[Formalization support for the Boolean characters]
+	\label{lem:boolean-characters}
+	\lean{MIPStarRE.QPBT.booleanCharacter_add_right}
+	\lean{MIPStarRE.QPBT.booleanCharacter_add_left}
+	\lean{MIPStarRE.QPBT.booleanCharacter_comm}
+	\lean{MIPStarRE.QPBT.booleanCharacter_zero_right}
+	\lean{MIPStarRE.QPBT.booleanCharacter_zero_left}
+	\lean{MIPStarRE.QPBT.booleanCharacter_mul_self}
+	\lean{MIPStarRE.QPBT.star_booleanCharacter}
+	\lean{MIPStarRE.QPBT.sum_booleanCharacter}
+	\lean{MIPStarRE.QPBT.sum_booleanCharacter_swap}
+	\lean{MIPStarRE.QPBT.sum_booleanCharacter_mul}
+	\leanok
+	This is not a named statement of \cite{Natarajan2017Linearity}; it collects
+	the character identities on which the Fourier transform of
+	Lemma~\ref{lem:boolean-fourier-transform} rests. Write
+	$\chi_u(a) = (-1)^{u \cdot a}$ for $u, a \in \F_2^t$. Then, for all
+	$u, v, a, b \in \F_2^t$,
+	\[
+		\chi_u(a + b) = \chi_u(a) \, \chi_u(b) ,
+		\quad
+		\chi_{u+v}(a) = \chi_u(a) \, \chi_v(a) ,
+		\quad
+		\chi_u(a) = \chi_a(u) ,
+	\]
+	\[
+		\chi_u(0) = \chi_0(a) = 1 ,
+		\quad
+		\chi_u(a)^2 = 1 ,
+		\quad
+		\overline{\chi_u(a)} = \chi_u(a) ,
+	\]
+	and the character sums are
+	\[
+		\sum_a \chi_u(a) =
+		\begin{cases}
+			2^t & \text{if } u = 0, \\
+			0 & \text{otherwise,}
+		\end{cases}
+		\qquad
+		\sum_u \chi_u(a) =
+		\begin{cases}
+			2^t & \text{if } a = 0, \\
+			0 & \text{otherwise,}
+		\end{cases}
+	\]
+	\[
+		\sum_u \chi_u(a) \, \chi_u(b) =
+		\begin{cases}
+			2^t & \text{if } a = b, \\
+			0 & \text{otherwise.}
+		\end{cases}
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{prop:fourier-fact-vector}
+	The multiplicativity, symmetry and normalization identities hold because
+	$\chi$ is the additive character pairing of $\F_2^t$, and
+	$\chi_u(a)^2 = \chi_u(a + a) = \chi_u(0) = 1$ because $a + a = 0$ in
+	characteristic two; realness follows from $\chi_u(a)^2 = 1$. The first
+	character sum is Lemma~\ref{prop:fourier-fact-vector} for $q = 2$, rescaled
+	from the average to the sum, and the second follows from it by the symmetry
+	$\chi_u(a) = \chi_a(u)$. The third follows from the second together with
+	$\chi_u(a) \, \chi_u(b) = \chi_u(a + b)$ and the equivalence of
+	$a + b = 0$ with $a = b$.
+\end{proof}
 
 \begin{lemma}[Formalization support for the Boolean Fourier transform]
 	\label{lem:boolean-fourier-transform}
@@ -306,8 +375,10 @@ assembled by Fourier averaging.
 	\lean{MIPStarRE.QPBT.operatorFourier_isHermitian}
 	\lean{MIPStarRE.QPBT.operatorFourier_inversion}
 	\lean{MIPStarRE.QPBT.sum_operatorFourier_mul_operatorFourier}
+	\lean{MIPStarRE.QPBT.sum_operatorFourier_sq}
 	\lean{MIPStarRE.QPBT.sum_operatorFourier_sq_eq_one}
 	\leanok
+	\uses{def:povm-conventions}
 	This is not a named statement of \cite{Natarajan2017Linearity}; it isolates
 	the finite Fourier identities used in the proof given there for
 	Theorem~\ref{thm:linearity}. Write $\chi_u(a) = (-1)^{u \cdot a}$ for
@@ -317,13 +388,15 @@ assembled by Fourier averaging.
 	\[
 		O(a) = \sum_u \chi_u(a) \, \widehat{O}^u ,
 		\qquad
-		\sum_u \widehat{A}^u \, \widehat{B}^u = \E_a \, A(a) B(a) .
+		\sum_u \widehat{A}^u \, \widehat{B}^u = \E_a \, A(a) B(a) ;
 	\]
-	If every $O(a)$ is a binary observable, then
+	taking $B = A$ gives $\sum_u (\widehat{O}^u)^2 = \E_a \, O(a)^2$ for a
+	single family $O$. If every $O(a)$ is a binary observable, then
 	$\sum_u (\widehat{O}^u)^2 = \Id$.
 \end{lemma}
 \begin{proof}
 	\leanok
+	\uses{prop:fourier-fact-vector, lem:boolean-characters}
 	Orthogonality of the characters of $\F_2^t$ gives the inversion formula;
 	the Parseval identity follows by substituting it into the product and
 	exchanging the two sums; the last identity uses $O(a)^2 = \Id$.
@@ -340,25 +413,143 @@ assembled by Fourier averaging.
 	\uses{def:povm-conventions}
 	This is not a named statement of \cite{Natarajan2017Linearity}; it records
 	the normalization discussed in
-	Remark~\ref{rem:linearity-distance-normalization}. Let $S$ and $T$ be
-	binary observables, let $\rho$ be a density operator, write
+	Remark~\ref{rem:linearity-distance-normalization}. For operators $S$, $T$
+	and $\rho$ on $\hilb$, write
+	$d_\rho(S,T)^2 = \Re \Tr\big((S-T)^\dagger (S-T) \, \rho\big)$ and
 	$P_S^\pm = (\Id \pm S)/2$ for the effects of the associated binary
 	projective measurements, and set
 	$d^{\mathrm{bin}}_\rho(S,T)^2
-	= \sum_{s \in \{+,-\}} d_\rho(P_S^s, P_T^s)^2$. Then
+	= \sum_{s \in \{+,-\}} d_\rho(P_S^s, P_T^s)^2$. Then, with no hypothesis
+	on $S$, $T$ or $\rho$,
 	\[
-		d^{\mathrm{bin}}_\rho(S,T)^2 = \tfrac{1}{2} \, d_\rho(S,T)^2 ,
-		\quad
+		d^{\mathrm{bin}}_\rho(S,T)^2 = \tfrac{1}{2} \, d_\rho(S,T)^2 .
+	\]
+	If moreover $S$ and $T$ are binary observables and $\rho$ is a density
+	operator, then
+	\[
 		d_\rho(S,T)^2 = 2 - 2 \Re \Tr(S T \rho) ,
-		\quad
+		\qquad
 		d^{\mathrm{bin}}_\rho(S,T)^2 = 1 - \Re \Tr(S T \rho) .
 	\]
 \end{lemma}
 \begin{proof}
 	\leanok
 	Expand $P_S^s - P_T^s = \pm (S - T)/2$ in each of the two outcomes and
-	sum. The remaining identities use $S^2 = T^2 = \Id$, $\Tr \rho = 1$, and
-	the Hermiticity of $S$, $T$ and $\rho$.
+	sum; this uses no hypothesis on $S$, $T$ or $\rho$. The two correlation
+	identities use $S^2 = T^2 = \Id$, $\Tr \rho = 1$, and the Hermiticity of
+	$S$, $T$ and $\rho$.
+\end{proof}
+
+\begin{lemma}[Formalization support for the operator-valued BLR defect]
+	\label{lem:blr-defect-identity}
+	\lean{MIPStarRE.QPBT.blrCorrelation}
+	\lean{MIPStarRE.QPBT.multiplicativeDefect}
+	\lean{MIPStarRE.QPBT.multiplicativeDefect_eq_two_sub_two_mul_correlation}
+	\lean{MIPStarRE.QPBT.avg_multiplicativeDefect_eq_two_sub_two_mul_correlation}
+	\lean{MIPStarRE.QPBT.avg_multiplicativeDefect_le_two_mul_error}
+	\leanok
+	\uses{def:povm-conventions}
+	This is not a named statement of \cite{Natarajan2017Linearity}; it records
+	the step of the proof given there for Theorem~\ref{thm:linearity} that
+	converts the correlation hypothesis into approximate linearity of the
+	family, namely display~(7) of that proof
+	(\texttt{references/nv-paper/fullpaper.tex:1078--1080}) together with the
+	expansion at \texttt{references/nv-paper/fullpaper.tex:900--912}. For a
+	family $\{O(a)\}_{a \in \F_2^t}$ of operators on $\hilb$ and an operator
+	$\rho$ on $\hilb$, with no hypothesis on either, set
+	\[
+		C_\rho(O) = \E_{u,u'} \, \Re \Tr\big(O(u) \, O(u') \,
+		O(u+u') \, \rho\big) ,
+		\qquad
+		D_\rho(u,v) = d_\rho\big(O(u) \, O(v), \, O(u+v)\big)^2 ,
+	\]
+	the two-query correlation of the linearity test and the multiplicative
+	defect at $(u,v)$, where
+	$d_\rho(S,T)^2 = \Re \Tr\big((S-T)^\dagger (S-T) \, \rho\big)$ as in
+	Lemma~\ref{lem:binary-measurement-distance} and every expectation is over
+	uniform arguments in $\F_2^t$. If every $O(a)$ is a binary observable and
+	$\rho$ is a density operator, then for all $u, v \in \F_2^t$
+	\[
+		D_\rho(u,v) = 2 - 2 \Re \Tr\big(O(v) \, O(u) \, O(v+u) \, \rho\big) ,
+	\]
+	hence
+	\[
+		\E_{u,v} \, D_\rho(u,v) = 2 - 2 \, C_\rho(O) ,
+	\]
+	and if in addition $C_\rho(O) \ge 1 - \delta$, then
+	$\E_{u,v} \, D_\rho(u,v) \le 2\delta$. The constant $2$ is the
+	normalization discussed in
+	Remark~\ref{rem:linearity-distance-normalization}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Expanding
+	$\big(O(u) O(v) - O(u+v)\big)^\dagger \big(O(u) O(v) - O(u+v)\big)$ and
+	using $O(a)^2 = \Id$ leaves
+	$2 \, \Id - O(v) O(u) O(u+v) - O(u+v) O(u) O(v)$; the two triple products
+	are adjoint to one another, so their traces against $\rho$ are complex
+	conjugates and have equal real parts, and $\Tr \rho = 1$ then gives the
+	pointwise identity. Averaging it and exchanging the two uniform
+	coordinates gives the identity for the mean defect, and the bound follows
+	from the correlation hypothesis.
+\end{proof}
+
+\begin{lemma}[Formalization support for the Fourier-square measurement]
+	\label{lem:fourier-square-measurement}
+	\lean{MIPStarRE.QPBT.sum_operatorFourier_cube}
+	\lean{MIPStarRE.QPBT.operatorFourier_cube_trace_eq_correlation}
+	\lean{MIPStarRE.QPBT.operatorFourier_mul_self_posSemidef}
+	\lean{MIPStarRE.QPBT.fourierSquareMeasurement}
+	\lean{MIPStarRE.QPBT.fourierSquareMeasurement_effect}
+	\lean{MIPStarRE.QPBT.avg_overlap_fourierSquare_eq_sum_cube}
+	\lean{MIPStarRE.QPBT.one_sub_error_le_avg_overlap_fourierSquare}
+	\leanok
+	\uses{def:povm-conventions, lem:boolean-fourier-transform,
+		lem:blr-defect-identity}
+	This is not a named statement of \cite{Natarajan2017Linearity}; it isolates
+	the measurement to which Naimark's theorem is applied in the proof given
+	there for Theorem~\ref{thm:linearity}
+	(\texttt{references/nv-paper/fullpaper.tex:1096--1112}). Let
+	$\{O(a)\}_{a \in \F_2^t}$ be a family of operators on $\hilb$, with Fourier
+	coefficients $\widehat{O}^u$ and characters $\chi_u$ as in
+	Lemma~\ref{lem:boolean-fourier-transform}, let $\rho$ be an operator on
+	$\hilb$, and write $B^u = (\widehat{O}^u)^2$. With no hypothesis on the
+	family or on $\rho$,
+	\[
+		\sum_u (\widehat{O}^u)^3 = \E_{a,b} \, O(a) \, O(b) \, O(a+b) ,
+		\qquad
+		\sum_u \Re \Tr\big((\widehat{O}^u)^3 \, \rho\big) = C_\rho(O) ,
+	\]
+	where $C_\rho(O)$ is the two-query correlation of
+	Lemma~\ref{lem:blr-defect-identity}, and
+	\[
+		\E_a \, \Re \Tr\Big(O(a) \,
+		\Big(\sum_u \chi_u(a) \, B^u\Big) \, \rho\Big)
+		= \sum_u \Re \Tr\big((\widehat{O}^u)^3 \, \rho\big) .
+	\]
+	If every $O(a)$ is Hermitian, then every $B^u$ is positive semidefinite;
+	if every $O(a)$ is a binary observable, then the $B^u$ are the effects of a
+	POVM with outcomes in $\F_2^t$, the Fourier-square measurement. Finally,
+	if $C_\rho(O) \ge 1 - \delta$, then
+	\[
+		1 - \delta \le \E_a \, \Re \Tr\Big(O(a) \,
+		\Big(\sum_u \chi_u(a) \, B^u\Big) \, \rho\Big) .
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:boolean-characters, lem:boolean-fourier-transform}
+	Expanding one Fourier coefficient at a time through the inversion formula
+	of Lemma~\ref{lem:boolean-fourier-transform} and collapsing the inner
+	character sum with Lemma~\ref{lem:boolean-characters} gives the cubic
+	identity; multiplying it by $\rho$, taking the trace and passing to real
+	parts gives the correlation identity, and the same expansion applied to
+	$\sum_u \widehat{O}^u \, B^u$ gives the overlap identity. Positivity of
+	$B^u$ holds because $\widehat{O}^u$ is Hermitian, so that
+	$B^u = (\widehat{O}^u)^\dagger \widehat{O}^u$, and completeness is the
+	identity $\sum_u (\widehat{O}^u)^2 = \Id$ of
+	Lemma~\ref{lem:boolean-fourier-transform}. The final inequality
+	substitutes the correlation hypothesis into the overlap identity.
 \end{proof}
 
 \begin{lemma}[Combined point measurements]
