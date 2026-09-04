@@ -136,7 +136,10 @@ noncomputable def msGame : Game where
   AnswerA := MsAnswer
   AnswerB := MsAnswer
   μ := graphDistribution msEdges msEdges_nonempty
-  μ_prob := by sorry
+  μ_prob := by
+    apply Distribution.uniformOnFinset_isProbability
+    refine ⟨(.constraint 0, .var (msConstraintVars 0 0)), ?_⟩
+    simp [msEdges]
   decide := msWinPredicate
 
 end MIPStarRE.QPBT
