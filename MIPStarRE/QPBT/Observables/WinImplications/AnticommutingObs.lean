@@ -236,14 +236,6 @@ theorem msVarObs_anticommutator_le (S : Strategy msGame) (ε : ℝ) (hε : 0 ≤
   refine le_trans htrans ?_
   linarith
 
-/-- The left tensor placement is additive in its left factor.
-Formalization-only support for `thm:ms-rigidity`, blueprint
-`ch13_qpbt_test.tex:224-253`. -/
-theorem heteroKron_add_left {ιA ιB : Type*} (M N : Op ιA) (B : Op ιB) :
-    heteroKron M B + heteroKron N B = heteroKron (M + N) B := by
-  ext i j
-  simp [heteroKron, Matrix.kronecker, add_mul]
-
 /-- An operator inflated on the first factor acts on the dilated state exactly
 as the original operator acts on the original state. Formalization-only support
 for `thm:ms-rigidity`, blueprint `ch13_qpbt_test.tex:224-253`. -/
@@ -348,7 +340,7 @@ theorem msVarObsA_anticommutator_le (S : Strategy msGame) (ε : ℝ) (hε : 0 �
               obsOf ((S.A (.var 0)).postprocess msBitOrZero)))
         (1 : Op (S.ιB × Option MsAnswer)) := by
     simp only [heteroKron_mul, one_mul, sub_neg_eq_add, naimarkInflation_mul,
-      heteroKron_add_left, naimarkInflation_add]
+      ← MagicSquareRigidity.heteroKron_add_left, naimarkInflation_add]
   rw [hL, norm_heteroKron_naimarkInflation_one] at htrans
   have hclose := MagicSquareRigidity.msVarObsA_anticommute S ε hwin
   rw [msVarObsA_eq, msVarObsA_eq] at hclose

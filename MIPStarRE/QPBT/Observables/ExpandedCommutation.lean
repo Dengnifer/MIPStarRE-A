@@ -30,24 +30,6 @@ noncomputable section
 
 /-! ## Algebraic preliminaries -/
 
-/-- The right tensor placement is additive in its right factor.
-Formalization-only support for `eq:lc-23`, blueprint
-`ch14_qpbt_observables.tex:783-807`. -/
-theorem heteroKron_sub_right {ιA ιB : Type*} (A : Op ιA) (M N : Op ιB) :
-    heteroKron A M - heteroKron A N = heteroKron A (M - N) := by
-  ext i j
-  simp [heteroKron, Matrix.kronecker, mul_sub]
-
-/-- The right tensor placement is homogeneous in its right factor.
-Formalization-only support for `eq:lc-23`, blueprint
-`ch14_qpbt_observables.tex:783-807`. -/
-theorem heteroKron_smul_right {ιA ιB : Type*} (c : ℂ) (A : Op ιA) (M : Op ιB) :
-    heteroKron A (c • M) = c • heteroKron A M := by
-  ext i j
-  simp only [heteroKron, Matrix.kronecker, Matrix.kroneckerMap_apply,
-    Matrix.smul_apply, smul_eq_mul]
-  ring
-
 /-- The binary phase is its own inverse. Paper
 `references/qpbt-paper/04_preliminaries.tex:1052-1081`. -/
 theorem phaseSign_mul_self (t : ZMod 2) : phaseSign t * phaseSign t = 1 := by
@@ -159,7 +141,8 @@ theorem expObs_commutator (S : ProjectiveSetting P ε) (side : PlayerSide)
     tauX P ω from rfl,
     show tauObservable .Z (fun h => ω.2.2.2 * indicatorVec ω.2.1 h) =
       tauZ P ω from rfl]
-  rw [tauZ_mul_tauX, heteroKron_smul_right, ← WinImplications.heteroKron_smul_left,
+  rw [tauZ_mul_tauX, MagicSquareRigidity.heteroKron_smul_right,
+    ← WinImplications.heteroKron_smul_left,
     WinImplications.heteroKron_sub_left, twistedCommutator]
 
 /-- The commutator of two trace-coarse-grained expanded point projections is a
@@ -218,7 +201,7 @@ theorem exists_twistedCommutator_avg_le :
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε)
         (side : PlayerSide), 0 ≤ ε →
       avgOver (uniformDistribution (PauliTuple P)) (fun ω =>
-        ‖applyOperatorToState (S.placeSide side (S.twistedCommutator side ω))
+        ‖applyOperatorToState (S.placeStrategySide side (S.twistedCommutator side ω))
           S.toStrategy.ψ‖ ^ 2) ≤ C * Real.sqrt ε := by
   obtain ⟨C₁, hC₁, h₁⟩ := pointObs_twisted_commutation
   obtain ⟨C₂, hC₂, h₂⟩ := pointObs_twisted_commutation_interchanged
@@ -231,7 +214,7 @@ theorem exists_twistedCommutator_avg_le :
       rw [WinImplications.opDistSq_eq_avgOver] at h
       refine le_trans (le_of_eq ?_) (le_trans h ?_)
       · refine avgOver_congr _ _ _ (fun ω => ?_)
-        have hop : S.placeSide .alice (S.twistedCommutator .alice ω) =
+        have hop : S.placeStrategySide .alice (S.twistedCommutator .alice ω) =
             heteroKron (S.pointObs .alice .X ω.2.2.1 ω.1 *
                 S.pointObs .alice .Z ω.2.2.2 ω.2.1)
                 (1 : Op S.toStrategy.ιB) -
@@ -257,7 +240,7 @@ theorem exists_twistedCommutator_avg_le :
       rw [WinImplications.opDistSq_eq_avgOver] at h
       refine le_trans (le_of_eq ?_) (le_trans h ?_)
       · refine avgOver_congr _ _ _ (fun ω => ?_)
-        have hop : S.placeSide .bob (S.twistedCommutator .bob ω) =
+        have hop : S.placeStrategySide .bob (S.twistedCommutator .bob ω) =
             heteroKron (1 : Op S.toStrategy.ιA)
                 (S.pointObs .bob .X ω.2.2.1 ω.1 *
                   S.pointObs .bob .Z ω.2.2.2 ω.2.1) -
@@ -272,8 +255,8 @@ theorem exists_twistedCommutator_avg_le :
                   (phaseSign (gammaValue P ω.1 ω.2.1 ω.2.2.1 ω.2.2.2) •
                     (S.pointObs .bob .Z ω.2.2.2 ω.2.1 *
                       S.pointObs .bob .X ω.2.2.1 ω.1)) :=
-            (heteroKron_sub_right _ _ _).symm
-          rw [← heteroKron_smul_right]
+            MagicSquareRigidity.heteroKron_sub_right _ _ _
+          rw [← MagicSquareRigidity.heteroKron_smul_right]
           exact h1
         rw [hop]
         rfl
@@ -312,7 +295,7 @@ theorem expPointTrace_comm_proof :
                 (S.expPointTrace p.side .X ω.1 ω.2.2.1).effect bits.1))
           S.psiHat‖ ^ 2 =
         (16 : ℝ)⁻¹ * ‖applyOperatorToState
-          (S.placeSide p.side (S.twistedCommutator p.side ω))
+          (S.placeStrategySide p.side (S.twistedCommutator p.side ω))
           S.toStrategy.ψ‖ ^ 2 := by
     intro ω bits
     rw [← place_sub, expPointTrace_commutator, place_smul,
@@ -337,7 +320,7 @@ theorem expPointTrace_comm_proof :
       S.psiHat =
       (4 : ℝ)⁻¹ * avgOver (uniformDistribution (PauliTuple P)) (fun ω =>
         ‖applyOperatorToState
-          (S.placeSide p.side (S.twistedCommutator p.side ω))
+          (S.placeStrategySide p.side (S.twistedCommutator p.side ω))
           S.toStrategy.ψ‖ ^ 2) := by
     rw [← avgOver_const_mul]
     unfold opFamilyDistSq
@@ -351,7 +334,7 @@ theorem expPointTrace_comm_proof :
   have hs : (0 : ℝ) ≤ Real.sqrt ε := Real.sqrt_nonneg ε
   have hnn : (0 : ℝ) ≤ avgOver (uniformDistribution (PauliTuple P)) (fun ω =>
       ‖applyOperatorToState
-        (S.placeSide p.side (S.twistedCommutator p.side ω))
+        (S.placeStrategySide p.side (S.twistedCommutator p.side ω))
         S.toStrategy.ψ‖ ^ 2) :=
     avgOver_nonneg _ _ (fun _ => by positivity)
   nlinarith

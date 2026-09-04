@@ -91,7 +91,7 @@ variable {P : AdmissibleParams} {ε : ℝ}
 space of a register placement. Paper
 `14_analysis_of_the_pauli_basis_test.tex:420-450`, blueprint
 `ch14_qpbt_observables.tex:876-922`. -/
-noncomputable def placeSide (S : ProjectiveSetting P ε) :
+noncomputable def placeStrategySide (S : ProjectiveSetting P ε) :
     (side : PlayerSide) → Op (S.LocalSpace side) →
       Op (S.toStrategy.ιA × S.toStrategy.ιB)
   | .alice, T => heteroKron T 1
@@ -257,7 +257,7 @@ theorem norm_place_heteroKron_psiHat (S : ProjectiveSetting P ε)
     (p : Placement) (T : Op (S.LocalSpace p.side)) (V : Op (PauliRegister P))
     (hV : Vᴴ * V = 1) :
     ‖applyOperatorToState (S.place p (heteroKron T V)) S.psiHat‖ =
-      ‖applyOperatorToState (S.placeSide p.side T) S.toStrategy.ψ‖ := by
+      ‖applyOperatorToState (S.placeStrategySide p.side T) S.toStrategy.ψ‖ := by
   cases p with
   | AA' => exact norm_place_AA'_heteroKron_psiHat S T V hV
   | BA'' => exact norm_place_BA''_heteroKron_psiHat S T V hV
