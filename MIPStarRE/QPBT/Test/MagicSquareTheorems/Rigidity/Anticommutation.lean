@@ -290,6 +290,113 @@ theorem isometry_mul (hU : Uᴴ * U = 1) (h : CloseOn ψ δ M N) :
 
 end CloseOn
 
+/-! ## Sign observables of a projective measurement -/
+
+section SignObs
+
+variable {α d : Type} [Fintype α] [DecidableEq α] [Fintype d] [DecidableEq d]
+
+/-- The `±1`-valued observable attached to a measurement together with a binary
+relabelling of its answers: an answer labelled `0` carries the eigenvalue `1`
+and an answer labelled `1` carries the eigenvalue `-1`.  For the Magic Square
+these are the cell observables of `thm:ms-rigidity`, blueprint
+`ch13_qpbt_test.tex:224-253`, paper
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652`. -/
+noncomputable def signObs (M : MIPStarRE.Quantum.Measurement α d) (f : α → ZMod 2) : Op d :=
+  ∑ a, (bitSign (f a) : ℂ) • M.effect a
+
+/-- The sign observable is the observable of the binary measurement obtained by
+relabelling the answers. -/
+theorem signObs_eq_obsOf_postprocess (M : MIPStarRE.Quantum.Measurement α d)
+    (f : α → ZMod 2) : signObs M f = obsOf (M.postprocess f) := by
+  classical
+  have hcases : ∀ x : ZMod 2, x = 0 ∨ x = 1 := by decide
+  have key : ∀ a : α, (bitSign (f a) : ℂ) • M.effect a =
+      (if f a = 0 then M.effect a else 0) - (if f a = 1 then M.effect a else 0) := by
+    intro a
+    rcases hcases (f a) with h | h <;> rw [h] <;>
+      norm_num [bitSign, ZMod.val_one, neg_one_smul]
+  rw [signObs, obsOf, MIPStarRE.Quantum.Measurement.postprocess_effect,
+    MIPStarRE.Quantum.Measurement.postprocess_effect, Finset.sum_filter,
+    Finset.sum_filter, ← Finset.sum_sub_distrib]
+  exact Finset.sum_congr rfl fun a _ => key a
+
+/-- Formalization-only: the effects of a projective measurement are mutually
+orthogonal, so two spectral combinations of them multiply coefficientwise. -/
+private theorem sum_smul_effect_mul (M : MIPStarRE.Quantum.Measurement α d)
+    (hM : MIPStarRE.QPBT.Measurement.IsProjective M) (c e : α → ℂ) :
+    (∑ a, c a • M.effect a) * (∑ a, e a • M.effect a) =
+      ∑ a, (c a * e a) • M.effect a := by
+  classical
+  have horth : ∀ a b : α, a ≠ b → M.effect a * M.effect b = 0 := fun a b hab =>
+    mul_eq_zero_of_isProj_family hM M.sum_le_one hab
+  rw [Finset.sum_mul]
+  refine Finset.sum_congr rfl fun a _ => ?_
+  have hidem : M.effect a * M.effect a = M.effect a := (hM a).isIdempotentElem
+  rw [Matrix.smul_mul, Matrix.mul_sum, Finset.smul_sum, Finset.sum_eq_single a]
+  · rw [Matrix.mul_smul, smul_smul, hidem]
+  · intro b _ hba
+    rw [Matrix.mul_smul, horth a b (Ne.symm hba), smul_zero, smul_zero]
+  · intro ha
+    exact absurd (Finset.mem_univ a) ha
+
+/-- Sign observables of one projective measurement multiply by adding their
+relabellings. -/
+theorem signObs_mul (M : MIPStarRE.Quantum.Measurement α d)
+    (hM : MIPStarRE.QPBT.Measurement.IsProjective M) (f g : α → ZMod 2) :
+    signObs M f * signObs M g = signObs M (fun a => f a + g a) := by
+  rw [signObs, signObs, sum_smul_effect_mul M hM, signObs]
+  refine Finset.sum_congr rfl fun a _ => ?_
+  rw [← Complex.ofReal_mul, ← bit_sign_add]
+
+omit [DecidableEq α] in
+/-- The sign observable of the zero relabelling is the identity. -/
+theorem signObs_const_zero (M : MIPStarRE.Quantum.Measurement α d) :
+    signObs M (fun _ => 0) = 1 := by
+  have hb : ((bitSign (0 : ZMod 2) : ℝ) : ℂ) = 1 := by norm_num [bitSign]
+  rw [signObs]
+  simp only [hb, one_smul]
+  exact M.sum_eq_one
+
+/-- A sign observable of a projective measurement is an involution. -/
+theorem signObs_mul_self (M : MIPStarRE.Quantum.Measurement α d)
+    (hM : MIPStarRE.QPBT.Measurement.IsProjective M) (f : α → ZMod 2) :
+    signObs M f * signObs M f = 1 := by
+  rw [signObs_mul M hM]
+  have hzero : (fun a => f a + f a) = fun _ : α => (0 : ZMod 2) := by
+    funext a
+    exact (by decide : ∀ x : ZMod 2, x + x = 0) (f a)
+  rw [hzero, signObs_const_zero]
+
+omit [DecidableEq α] in
+/-- A sign observable of a projective measurement is self-adjoint. -/
+theorem signObs_conjTranspose (M : MIPStarRE.Quantum.Measurement α d)
+    (hM : MIPStarRE.QPBT.Measurement.IsProjective M) (f : α → ZMod 2) :
+    (signObs M f)ᴴ = signObs M f := by
+  rw [← Matrix.star_eq_conjTranspose, signObs, star_sum]
+  refine Finset.sum_congr rfl fun a _ => ?_
+  rw [star_smul]
+  congr 1
+  · simp
+  · exact (hM a).isSelfAdjoint
+
+/-- A sign observable of a projective measurement is a reflection. -/
+theorem isReflection_signObs (M : MIPStarRE.Quantum.Measurement α d)
+    (hM : MIPStarRE.QPBT.Measurement.IsProjective M) (f : α → ZMod 2) :
+    IsReflection (signObs M f) :=
+  ⟨signObs_conjTranspose M hM f, signObs_mul_self M hM f⟩
+
+/-- Sign observables of one projective measurement commute. -/
+theorem signObs_comm (M : MIPStarRE.Quantum.Measurement α d)
+    (hM : MIPStarRE.QPBT.Measurement.IsProjective M) (f g : α → ZMod 2) :
+    signObs M f * signObs M g = signObs M g * signObs M f := by
+  rw [signObs_mul M hM, signObs_mul M hM]
+  congr 1
+  funext a
+  exact add_comm _ _
+
+end SignObs
+
 end
 
 end MIPStarRE.QPBT.MagicSquareRigidity
