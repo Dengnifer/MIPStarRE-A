@@ -435,11 +435,10 @@ measurements.
 	on $\hilb_{\mathsf{A}}$ and $\hilb_{\mathsf{B}}$ respectively, and let
 	$\delta \geq 0$ satisfy the exact consistency-defect bound
 	\[
-	\operatorname{consistencyDefect}\!\left(
-		\operatorname{uniformDistribution}(\mathrm{Unit}),
-		(u,a) \mapsto Q_a \ot \Id_{\mathsf{B}},
-		(u,a) \mapsto \Id_{\mathsf{A}} \ot R_a,
-		\ket{\psi}\right) \leq \delta\,.
+		\sum_{\substack{a,b \\ a \ne b}}
+		\bra{\psi}
+		Q_a \ot R_b \ket{\psi}
+		\leq \delta\,.
 	\]
 	Then there is a projective measurement $\{P_a\}$ on $\hilb_{\mathsf{A}}$ with
 	\[
@@ -450,19 +449,20 @@ measurements.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{lem:projective-low-rank-sum, lem:Q-completeness, lem:P-Q-approx,
-		def:projective-P}
+	\uses{lem:projective-low-rank-sum, lem:sqrt-Q-completeness, lem:P-Q-approx, def:projective-P,
+		prop:triangle-inequality-for-approx_delta, def:left-marginal-state, lem:matrix-rank-zero,
+		lem:left-marginal-state-evaluation, lem:left-marginal-state-normalization}
 	Work with Alice's reduced state $\rho_A$, for which the consistency
 	hypothesis gives
 	$\sum_a \operatorname{Tr}\!\left(\rho_A(Q_a-Q_a^2)\right) \leq 2\delta$.
 	When $\delta^{1/4} \leq 1/24$, rank reduction
 	(Lemma~\ref{lem:projective-low-rank-sum}) replaces $\{Q_a\}$ by a family of
-	projectors, Lemma~\ref{lem:Q-completeness} shows that this family is almost
-	complete on $\rho_A$, and the operator $P$ of
+	projectors, Lemma~\ref{lem:sqrt-Q-completeness} controls the square root of
+	their total operator on $\rho_A$, and the operator $P$ of
 	Definition~\ref{def:projective-P} is projective and close to it by
 	Lemma~\ref{lem:P-Q-approx}. Completing $P$ at one fixed outcome and summing the
 	two estimates gives the bound $220\,\delta^{1/4}$, the completion contributing
-	the residual mass controlled by Lemma~\ref{lem:Q-completeness}. When
+	the residual mass controlled by the same square-root completeness estimate. When
 	$\delta^{1/4} > 1/24$, the bound $220\,\delta^{1/4} > 9$ exceeds the universal
 	bound $4$ on the distance between any two sub-measurements on a normalized
 	state, so the completion of the zero sub-measurement already satisfies the

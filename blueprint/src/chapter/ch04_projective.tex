@@ -1458,3 +1458,71 @@
 		A_a \ot I \approx_{84\zeta^{1/4}} P_a \ot I.
 	\]
 \end{proof}
+
+\paragraph{Formalization support for marginal reduction and rank zero.}
+The following auxiliary results are not named statements of the paper. They
+isolate the marginal-state and finite-rank facts used by the formal proofs of
+Lemma~\ref{lem:locality-preserving-projectivization} and
+Lemma~\ref{lem:ortho-explicit-constant}.
+
+\begin{definition}[Formalization support for marginal reduction]
+	\label{def:left-marginal-state}
+	\lean{MIPStarRE.LDT.MakingMeasurementsProjective.leftMarginalState}
+	\leanok
+	Let $\rho$ be the density operator of a state on
+	$\hilb_{\mathsf A}\ot\hilb_{\mathsf B}$, where $\hilb_{\mathsf B}$ is nonzero
+	and both spaces are finite dimensional. Relative to an orthonormal basis $\{e_b\}$ of
+	$\hilb_{\mathsf B}$, define its normalized left marginal $\rho_{\mathsf A}$ by
+	\[
+		\bra{i}\rho_{\mathsf A}\ket{j}
+		= \frac{1}{\dim \hilb_{\mathsf B}}\sum_b
+		\bra{i,e_b}\rho\ket{j,e_b}.
+	\]
+	The dimension factor reflects the normalized-trace convention used for
+	finite matrix states in Lean.
+\end{definition}
+
+\begin{lemma}[Formalization support for marginal evaluation]
+	\label{lem:left-marginal-state-evaluation}
+	\lean{MIPStarRE.LDT.MakingMeasurementsProjective.leftMarginal_ev_eq}
+	\leanok
+	\uses{def:left-marginal-state}
+	For every operator $X$ on $\hilb_{\mathsf A}$,
+	\[
+		\operatorname{Tr}_{\mathrm{norm}}\!\bigl(\rho(X\ot\Id_{\mathsf B})\bigr)
+		= \operatorname{Tr}_{\mathrm{norm}}\!\bigl(\rho_{\mathsf A}X\bigr).
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	Expand both normalized traces in the chosen product basis and sum the
+	diagonal $\mathsf B$-blocks.
+\end{proof}
+
+\begin{lemma}[Formalization support for marginal normalization]
+	\label{lem:left-marginal-state-normalization}
+	\lean{MIPStarRE.LDT.MakingMeasurementsProjective.leftMarginalState_isNormalized}
+	\leanok
+	\uses{def:left-marginal-state, lem:left-marginal-state-evaluation}
+	If $\rho$ is normalized, then its normalized left marginal
+	$\rho_{\mathsf A}$ is normalized as well.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Take $X=\Id_{\mathsf A}$ in the marginal-evaluation identity and use the
+	normalization of $\rho$.
+\end{proof}
+
+\begin{lemma}[Formalization support for rank-zero matrices]
+	\label{lem:matrix-rank-zero}
+	\lean{MIPStarRE.LDT.MakingMeasurementsProjective.matrix_eq_zero_of_rank_eq_zero}
+	\leanok
+	If a complex matrix between finite coordinate spaces has rank zero, then it
+	is the zero matrix.
+\end{lemma}
+\begin{proof}
+	\leanok
+	The range of the associated linear map has dimension zero and is therefore
+	the zero subspace. Applying the map to each coordinate vector shows that every
+	matrix entry vanishes.
+\end{proof}

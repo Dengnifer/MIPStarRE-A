@@ -52,7 +52,7 @@ open MIPStarRE.LDT
 noncomputable section
 
 /-- The diagonal block of a bipartite operator at a fixed right index. -/
-def diagBlock {ιA ιB : Type*}
+private def diagBlock {ιA ιB : Type*}
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
     (M : MIPStarRE.Quantum.Op (ιA × ιB)) (b : ιB) :
     MIPStarRE.Quantum.Op ιA :=
@@ -60,14 +60,14 @@ def diagBlock {ιA ιB : Type*}
 
 /-- The normalized left marginal of a bipartite density, obtained by
 averaging its diagonal right blocks. -/
-def leftMarginalDensity {ιA ιB : Type*}
+private def leftMarginalDensity {ιA ιB : Type*}
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB] [Nonempty ιB]
     (ρ : MIPStarRE.Quantum.Op (ιA × ιB)) : MIPStarRE.Quantum.Op ιA :=
   ((((Fintype.card ιB : Error) : Error)⁻¹ : Error) : ℂ) •
     ∑ b : ιB, diagBlock ρ b
 
 /-- Positivity passes from a bipartite density to its left marginal. -/
-lemma leftMarginalDensity_nonneg {ιA ιB : Type*}
+private lemma leftMarginalDensity_nonneg {ιA ιB : Type*}
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB] [Nonempty ιB]
     {ρ : MIPStarRE.Quantum.Op (ιA × ιB)} (hρ : 0 ≤ ρ) :
     0 ≤ leftMarginalDensity ρ := by
@@ -80,8 +80,9 @@ lemma leftMarginalDensity_nonneg {ιA ιB : Type*}
     positivity
   simpa [leftMarginalDensity] using smul_nonneg hcoeff hsum
 
-/-- The local state on the left factor defined by the left marginal
-density of a bipartite state. -/
+/-- The local state on the left factor defined by the left marginal density
+of a bipartite state. This is the formalization-only definition recorded by
+`def:left-marginal-state` in `blueprint/src/chapter/ch04_projective.tex`. -/
 def leftMarginalState {ιA ιB : Type*}
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB] [Nonempty ιB]
     (ψ : QuantumState (ιA × ιB)) : QuantumState ιA where
@@ -90,7 +91,7 @@ def leftMarginalState {ιA ιB : Type*}
 
 /-- Left tensor placement is block diagonal with the same block at every
 right index. -/
-lemma leftTensor_eq_blockDiagonal_const {ιA ιB : Type*}
+private lemma leftTensor_eq_blockDiagonal_const {ιA ιB : Type*}
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
     (X : MIPStarRE.Quantum.Op ιA) :
     leftTensor (ι₂ := ιB) X = Matrix.blockDiagonal (fun _ : ιB => X) := by
@@ -104,7 +105,7 @@ lemma leftTensor_eq_blockDiagonal_const {ιA ιB : Type*}
 
 /-- The trace against a constant block-diagonal operator is the sum of the
 traces of the diagonal blocks. -/
-lemma trace_blockDiagonal_const_mul_eq_sum_trace_diagBlock
+private lemma trace_blockDiagonal_const_mul_eq_sum_trace_diagBlock
     {ιA ιB : Type*}
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
     (X : MIPStarRE.Quantum.Op ιA)
@@ -124,7 +125,7 @@ lemma trace_blockDiagonal_const_mul_eq_sum_trace_diagBlock
 
 /-- Evaluating a local operator against the left marginal agrees with
 evaluating its left tensor placement against the bipartite density. -/
-lemma normalizedTrace_leftMarginalDensity_mul_eq
+private lemma normalizedTrace_leftMarginalDensity_mul_eq
     {ιA ιB : Type*}
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB] [Nonempty ιB]
     (ρ : MIPStarRE.Quantum.Op (ιA × ιB)) (X : MIPStarRE.Quantum.Op ιA) :
@@ -147,7 +148,9 @@ lemma normalizedTrace_leftMarginalDensity_mul_eq
   simp [Fintype.card_prod]
   ring
 
-/-- The left marginal of a normalized bipartite state is normalized. -/
+/-- The left marginal of a normalized bipartite state is normalized. This is
+formalization support for `lem:locality-preserving-projectivization` and
+`lem:ortho-explicit-constant`, recorded by `lem:left-marginal-state-normalization`. -/
 lemma leftMarginalState_isNormalized {ιA ιB : Type*}
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB] [Nonempty ιB]
     {ψ : QuantumState (ιA × ιB)} (hψ : ψ.IsNormalized) :
@@ -161,8 +164,9 @@ lemma leftMarginalState_isNormalized {ιA ιB : Type*}
         (X := (1 : MIPStarRE.Quantum.Op ιA))
   simpa [leftMarginalState] using hnorm.trans hψ
 
-/-- Local evaluation in the left marginal equals bipartite evaluation of
-the left tensor placement. -/
+/-- Local evaluation in the left marginal equals bipartite evaluation of the
+left tensor placement. This is the formalization-only identity recorded by
+`lem:left-marginal-state-evaluation` in Chapter 4 of the blueprint. -/
 lemma leftMarginal_ev_eq {ιA ιB : Type*}
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB] [Nonempty ιB]
     (ψ : QuantumState (ιA × ιB)) (X : MIPStarRE.Quantum.Op ιA) :
@@ -321,7 +325,9 @@ private lemma one_le_orthonormalizationMainLemmaError_of_quarter_lt {ζ : Error}
   have hone : (1 : Error) ≤ (84 : Error) * (1 / (4 : Error)) := by norm_num
   exact hone.trans hscaled
 
-/-- A finite complex matrix of rank zero is the zero matrix. -/
+/-- A finite complex matrix of rank zero is the zero matrix. This
+formalization-only linear-algebra fact is recorded by `lem:matrix-rank-zero`
+in Chapter 4 of the blueprint. -/
 lemma matrix_eq_zero_of_rank_eq_zero {m n : Type*}
     [Finite m] [Fintype n] (A : Matrix m n ℂ) (hA : A.rank = 0) :
     A = 0 := by
