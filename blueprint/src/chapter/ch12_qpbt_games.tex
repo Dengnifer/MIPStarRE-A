@@ -539,6 +539,7 @@ Note that both players' questions are generated from the \emph{same} uniformly r
 	to the paper's level $r+1$.
 \end{lemma}
 \begin{proof}
+	\leanok
 	\uses{def:cl-func}
 	For the ``if'' direction, conditions 1 and 4 immediately exhibit $L$ as an $\ell$-level CL function. For the ``only if'' direction one constructs the marginals, factor spaces, and linear maps by induction on $\ell$. In the base case $\ell = 1$ take $L_{\le 1} = L$, $V_1 = V$, and $L_1 = L$. For the inductive step, write $L(x) = x^{L_1} + L_{>1,\,x^{L_1}}(x^{V_{>1}})$ as in Definition~\ref{def:cl-func} and apply the inductive hypothesis to each $(\ell-1)$-level function $L_{>1,\,v}$, obtaining its marginals, factor spaces, and linear maps over $V_{>1}$. Define $L_{\le 1} = L_1$ with first factor space $V_1$, and for $k \ge 2$ define $L_{\le k}(x) = x^{L_1} + L'_{x^{L_1},\,<k}(x^{V_{>1}})$, with the $k$-th factor space and linear map of $L$ with prefix $u$ given by those of $L_{>1,\,v}$ at index $k-1$ with prefix $w$, where $v = u^{V_1}$ and $w = u^{V_{>1}}$. Conditions 1--4 are then verified directly from the inductive hypothesis: the direct-sum decomposition of $V_{>1}$ extends to $V$ by adjoining $V_1$, and the sum formula for $L_{\le k}$ follows by unfolding the inductive marginals.
 \end{proof}
@@ -546,6 +547,8 @@ Note that both players' questions are generated from the \emph{same} uniformly r
 The marginal functions, factor spaces, and linear maps of a given CL function $L$ need not be unique. For example, the identity function on $V = \F^n$ is a $1$-level CL function, but it can also be viewed as a $k$-level CL function for any $k \in \{2, \dots, n\}$ with an arbitrary partition of $V$ into factor spaces.
 
 \begin{lemma}[Concatenation of conditionally linear functions]\label{lem:cl-concat}
+	\lean{MIPStarRE.QPBT.IsCondLinearOn.concat}
+	\leanok
 	\uses{def:cl-func}
 	Let $\ell, k \ge 0$ be integers and let $U = \F^n$, $V = \F^m$ be linear spaces. Suppose $L$ is a $k$-level CL function on $U$ and, for each $u \in L(U)$, $R_u$ is an $\ell$-level CL function on $V$. Then the \emph{concatenation} $T$ of $L$ and $\{R_u\}_u$, defined by
 	\[
@@ -554,6 +557,7 @@ The marginal functions, factor spaces, and linear maps of a given CL function $L
 	is a $(k+\ell)$-level conditionally linear function on $U \oplus V$.
 \end{lemma}
 \begin{proof}
+	\leanok
 	\uses{def:cl-func}
 	By induction on $k$. The case $k = 0$ follows directly from Definition~\ref{def:cl-func}, since then $L = 0$ and $T$ acts by the single $\ell$-level function $R_0$ on the register subspace $V$. For the inductive step, write $L(x^U) = x^{L_1} + L_{>1,\,x^{L_1}}(x^{U_{>1}})$ with complementary register subspaces $U_1$ and $U_{>1}$ of $U$. For each value $x^{L_1}$, the function $T_{>1,\,x^{L_1}}$ on $U_{>1} \oplus V$ sending $x^{U_{>1} \oplus V}$ to $L_{>1,\,x^{L_1}}(x^{U_{>1}}) + R_{x^{L_1} + x^{L_{>1}}}(x^V)$ is the concatenation of the $(k-1)$-level function $L_{>1,\,x^{L_1}}$ with a family drawn from $\{R_u\}$, hence is $(k+\ell-1)$-level by the induction hypothesis. The claim then follows from Definition~\ref{def:cl-func} applied with first subspace $U_1$ and first linear map $L_1$.
 \end{proof}
@@ -575,6 +579,7 @@ The marginal functions, factor spaces, and linear maps of a given CL function $L
 	corresponds to the paper's summand $j=r+1$.
 \end{lemma}
 \begin{proof}
+	\leanok
 	\uses{def:cl-func}
 	Since an $\ell$-level CL function is also $k$-level conditionally linear for all $k \ge \ell$, it suffices to prove the claim when $\ell_j = \ell$ for all $j$. Proceed by induction on $\ell$. For $\ell = 0$ every $L^{(j)}$ is the zero function on $V^{(j)}$, so $L$ is the zero function on $V$, which is the unique $0$-level CL function on $V$ (Definition~\ref{def:cl-func}). For the inductive step with $\ell \ge 1$, decompose each $L^{(j)}$ into its first-level linear part $L^{(j)}_1$ on $V^{(j)}_1$ and its family of $(\ell-1)$-level remainders $L^{(j)}_{>1,\,v_j}$ on $V^{(j)}_{>1}$. The direct sums of the first-level parts define a linear map on $V_1 = \bigoplus_j V^{(j)}_1$, and, for each prefix value $v = \sum_j v_j$, the direct sums of the remainders are $(\ell-1)$-level conditionally linear on $V_{>1} = \bigoplus_j V^{(j)}_{>1}$ by the induction hypothesis. This exhibits $L$ in the form required by Definition~\ref{def:cl-func}.
 \end{proof}
@@ -586,6 +591,7 @@ The marginal functions, factor spaces, and linear maps of a given CL function $L
 	For each $i \in \{1, \dots, m\}$ let $L^{(i)}, R^{(i)} \colon V^{(i)} \to V^{(i)}$ be $\ell_i$-level conditionally linear functions, and let $L, R \colon V \to V$ be the direct sums $L = \bigoplus_i L^{(i)}$ and $R = \bigoplus_i R^{(i)}$, as defined in Lemma~\ref{lem:cl-func-prod}. Then the conditionally linear distribution $\mu_{L,R}$ is the product distribution $\prod_{i=1}^m \mu_{L^{(i)},\,R^{(i)}}$ over $V \times V$.
 \end{lemma}
 \begin{proof}
+	\leanok
 	A uniformly random $x \in V$ has independent components $x^{(i)}$, each uniformly distributed in $V^{(i)}$. Hence the pair $(L(x), R(x)) = \bigl( (L^{(i)}(x^{(i)}))_{i=1}^m,\, (R^{(i)}(x^{(i)}))_{i=1}^m \bigr)$ is distributed exactly as the product of the distributions $\mu_{L^{(i)},\,R^{(i)}}$ for $i = 1, 2, \dots, m$.
 \end{proof}
 
@@ -609,6 +615,8 @@ The question distribution of the Pauli basis test is \emph{typed}: each question
 % normalization 1/(2m-k) below is undefined. The source
 % (references/qpbt-paper/07_types.tex:65-82) leaves this boundary hypothesis implicit.
 \begin{definition}[Graph distribution]\label{def:graph-distribution}
+	\lean{MIPStarRE.QPBT.graphDistribution, MIPStarRE.QPBT.graphDistribution_isProbability}
+	\leanok
 	Let $G = (U, E)$ be an undirected graph with vertex set $U$ and nonempty edge set $E$. Edges in $E$ are written as multisets $\{u, v\}$ of two vertices; the case $u = v$ represents a self-loop. Suppose there are $m \ge 1$ edges, $k$ of which are self-loops. Then the \emph{graph distribution $\mu_G$ of $G$} is the distribution over $U \times U$ such that for every $(u,v) \in U \times U$,
 	\[
 		\mu_G(u, v) =
