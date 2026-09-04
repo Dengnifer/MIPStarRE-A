@@ -1923,6 +1923,96 @@ projective measurement whose outcomes are pairs of global polynomials.
 	\cite{gap:qpbt_ld-dimension-divisibility}.
 \end{remark}
 
+% The two lemmas below are not statements of the source; they record which
+% consequences of Theorem~\ref{lem:ld-soundness} are available for the directly
+% indexed presentation of the classical game discussed in the preceding remark.
+\begin{lemma}[Formalization support for the consistency conclusions in directly indexed coordinates]
+	\label{lem:direct-ld-consistency-coordinates}
+	\lean{MIPStarRE.QPBT.directPointPolynomial_consistencyDefect_le}
+	\lean{MIPStarRE.QPBT.directPolynomialPoint_consistencyDefect_le}
+	\lean{MIPStarRE.QPBT.directPolynomialPolynomial_consistencyDefect_le}
+	\leanok
+	\uses{def:consistency, def:ld-game, lem:ld-soundness}
+	This is not a named statement of \cite{Ji2020MIPStar}. It records the
+	form in which the approximate-agreement conclusions of
+	Theorem~\ref{lem:ld-soundness} are available for the directly indexed
+	presentation of the classical low individual degree game, in which the
+	sampled coordinate is carried by the question itself rather than by a
+	residue class of $\F_q$; that presentation, and the divisibility
+	obstruction motivating it, are the subject of
+	Remark~\ref{rem:qld-4-7-divisibility}.
+
+	Let $\delta \ge 0$, let $(\psi, A, B)$ be a projective strategy for the
+	directly indexed game, and let $G^{\mathrm A}$ and $G^{\mathrm B}$ be
+	measurements on $\hilb_{\mathrm A}$ and $\hilb_{\mathrm B}$ whose
+	outcomes are single polynomials of individual degree at most $d$ in $m$
+	variables. Fix one coordinate $r \in \{1, \dots, k\}$ of the answer
+	tuple and write $A^{\mathsf{Point},\,u,\,r}$ and
+	$B^{\mathsf{Point},\,u,\,r}$ for the point measurements of the two
+	players read out at that coordinate. Then:
+	\begin{enumerate}
+		\item if, over a uniformly random point $u \in \F_q^m$,
+		      $A^{\mathsf{Point},\,u,\,r} \ot I_{\mathrm B}$ and
+		      $I_{\mathrm A} \ot G^{\mathrm B}_{[g(u) = a]}$ satisfy the
+		      relation $\simeq_{\delta}$ of
+		      Theorem~\ref{lem:ld-soundness} on the density operator of
+		      $\psi$, then the off-diagonal defect of
+		      Definition~\ref{def:consistency} of that same pair, written
+		      in the directly indexed question and answer types and
+		      evaluated on the vector $\psi$, is at most $\delta$;
+		\item the same statement with the two players exchanged, for
+		      $G^{\mathrm A}_{[g(u) = a]} \ot I_{\mathrm B}$ and
+		      $I_{\mathrm A} \ot B^{\mathsf{Point},\,u,\,r}$;
+		\item if $G^{\mathrm A} \ot I_{\mathrm B}$ and
+		      $I_{\mathrm A} \ot G^{\mathrm B}$ satisfy that relation,
+		      taken over the one-element question set, then the
+		      off-diagonal defect of the corresponding pair in the
+		      directly indexed answer type is at most $\delta$.
+	\end{enumerate}
+	The first two statements fix the coordinate $r$ and assume the relation
+	only for that coordinate, and all three take single polynomials rather
+	than tuples as the outcomes of $G^{\mathrm A}$ and $G^{\mathrm B}$.
+	None of them constructs the joint measurement of a whole $k$-tuple of
+	polynomials asserted by Theorem~\ref{lem:ld-soundness}; that
+	construction is not established here.
+\end{lemma}
+
+\begin{lemma}[Formalization support for the compression of a correlated residue register]
+	\label{lem:direct-ld-residue-compression}
+	\lean{MIPStarRE.QPBT.ldStrategyToDirect_pointPolynomial_compression}
+	\lean{MIPStarRE.QPBT.ldStrategyToDirect_polynomialPoint_compression}
+	\leanok
+	\uses{def:consistency, def:ld-game, def:ld-question-distribution}
+	This is not a named statement of \cite{Ji2020MIPStar}. It records the
+	two compression identities that are available between the classical low
+	individual degree game and its directly indexed presentation, and the
+	one that is not.
+
+	Let $(\psi, A, B)$ be a strategy for the classical game with parameters
+	$(q,m,d,k)$, and extend it to the directly indexed game by adjoining to
+	each player a register of dimension $q/m$, the common size of the
+	classes of the index function $\chi$ of
+	Definition~\ref{def:ld-question-distribution}; the two copies of that
+	register are perfectly correlated in the extended state. For a
+	measurement $G$ on the extended carrier
+	$\hilb \ot \C^{q/m}$ whose outcomes are $k$-tuples of polynomials,
+	write $\bar G$ for its compression: the normalized average of its
+	diagonal blocks over the residue register. Then, over a uniformly
+	random point $u \in \F_q^m$, the off-diagonal defect of
+	Definition~\ref{def:consistency} between the point measurement of the
+	first player and the evaluation of $G$ at $u$, taken on the extended
+	strategy, equals the off-diagonal defect between the point measurement
+	of the first player and the evaluation of $\bar G$ at $u$, taken on
+	$(\psi, A, B)$; and symmetrically with the two players exchanged.
+
+	No such identity is recorded when both measurements are polynomial
+	measurements on the extended carrier. The extended state pairs equal
+	residues, whereas compressing the two measurements separately averages
+	independently over two residues, and neither quantity bounds the other
+	in general; this open point is analyzed in
+	\cite{gap:qpbt_ld-dimension-divisibility}.
+\end{lemma}
+
 \begin{remark}[Constant regimes in the quotation of the classical soundness
 	theorem]
 	\label{rem:qld-4-7-constants}

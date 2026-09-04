@@ -95,11 +95,10 @@ theorem prod_phaseSign_binTrace_dotProduct {ι : Type*} [Fintype ι]
 /-- The complex amplitude `(√n)⁻¹` normalizing a uniform superposition over `n`
 basis vectors squares to `n⁻¹`.
 
-This is the shared normalization identity behind the Pauli normalizer of
-`def:EPR`, blueprint `ch11_qpbt_algebra.tex:494-528`, paper origin
-`references/qpbt-paper/04_preliminaries.tex:908-950`, and behind the
-seed-fiber and correlated-ancilla amplitudes of the direct low-degree
-transport. -/
+This formalization-only normalization identity supports the Pauli normalizer
+of `def:EPR`, blueprint `ch11_qpbt_algebra.tex:494-528`, paper origin
+`references/qpbt-paper/04_preliminaries.tex:908-950`, and the seed-fiber and
+correlated-ancilla amplitudes of the direct low-degree transport. -/
 theorem inv_sqrt_natCast_mul_self (n : ℕ) :
     (Real.sqrt (n : ℝ) : ℂ)⁻¹ * (Real.sqrt (n : ℝ) : ℂ)⁻¹ =
       (n : ℂ)⁻¹ := by
@@ -112,9 +111,9 @@ theorem inv_sqrt_natCast_mul_self (n : ℕ) :
     _ = (n : ℂ)⁻¹ := by norm_num
 
 /-- Conjugated form of `inv_sqrt_natCast_mul_self`: the normalizing amplitude
-`(√n)⁻¹` is real, so pairing it with its conjugate again gives `n⁻¹`.  This is
-the form in which the identity occurs in Born amplitudes, where the bra side
-carries the conjugate. -/
+`(√n)⁻¹` is real, so pairing it with its conjugate again gives `n⁻¹`.  This
+formalization-only auxiliary is the form in which the identity occurs in Born
+amplitudes, where the bra side carries the conjugate. -/
 theorem inv_sqrt_natCast_mul_conj (n : ℕ) :
     (Real.sqrt (n : ℝ) : ℂ)⁻¹ *
         (starRingEnd ℂ) (Real.sqrt (n : ℝ) : ℂ)⁻¹ =

@@ -18,15 +18,15 @@ determine one.  The game retains the point, axis-line, and diagonal-line answer
 formats and the nine ordered type branches of the original low-degree game.
 
 The `Transport` modules relate the direct game to the seed-indexed game and to
-the mature low individual degree test interface: `Transport.Correspondence`
+the low individual degree test interface: `Transport.Correspondence`
 identifies coordinates, answers, and the question law of the two QPBT
 presentations; `Transport.SeedFiber` dilates a seed-indexed strategy to a
 direct strategy by a correlated residue register; `Transport.Questions` reads
-mature lines as canonical direct questions and rebases direct answers; and
-`Transport.Strategy` reads one coordinate of a projective direct strategy as a
-mature `ProjStrat`, with exact Born-weight formulas for both adapters; and
-`Transport.Consistency` identifies polynomial outcomes and transports the
-three mature consistency conclusions to the direct game.
+LDT lines as canonical direct questions and rebases direct answers;
+`Transport.Strategy` reads one coordinate of a projective direct strategy as an
+LDT `ProjStrat`, with exact Born-weight formulas for both constructions; and
+`Transport.Consistency` reexpresses the three single-polynomial LDT consistency
+relations in direct coordinates, the first two at a fixed tuple coordinate.
 
 ## References
 

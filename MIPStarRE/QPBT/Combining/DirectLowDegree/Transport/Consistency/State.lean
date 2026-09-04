@@ -1,5 +1,6 @@
 import MIPStarRE.LDT.Test.StrategyRole.Algebra
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Consistency.Measurements
+import MIPStarRE.QPBT.Games.DistanceTheorems.TensorSupport
 
 /-!
 # State conversion and direct point readout
@@ -26,18 +27,18 @@ noncomputable section
 
 /-! ## Equality of the two consistency formulations -/
 
--- The pure-state/Euclidean-vector bridge and the associated quadratic-form
--- conversion are shared with the distance calculus, where they are stated for
--- an arbitrary finite index type; see
--- `MIPStarRE/QPBT/Games/DistanceTheorems/Support.lean`.  The aliases below keep
--- the names under which the transport statements in this file, and their
--- downstream consumers, refer to that shared API.
+-- The following exported identities identify pure-state expectation with the
+-- Euclidean quadratic form used in the consistency calculations below.  They
+-- send a pure state to its Euclidean coordinate vector and identify the
+-- quadratic form of that vector with evaluation in the associated density
+-- state; they are stated for an arbitrary finite index type in
+-- `MIPStarRE/QPBT/Games/DistanceTheorems/Support.lean`.
 export MIPStarRE.QPBT.DistanceCalculus (pureStateEuclideanVector
   pureStateEuclideanVector_apply pureStateEuclideanVector_norm
   pureState_stateQForm_eq_ev)
 
-/-- For complete projective families and a pure bipartite state, the mature
-LDT consistency relation is exactly the QPBT off-diagonal defect.  In
+/-- For complete projective families and a pure bipartite state, the LDT
+consistency relation is exactly the QPBT off-diagonal defect.  In
 particular, changing between the density and vector formulations incurs no
 loss in the error parameter. -/
 theorem consRel_iff_consistencyDefect
@@ -129,7 +130,7 @@ private theorem quantumState_ext
           subst sigma
           rfl
 
-/-- The pure state carried by a game strategy, expressed in the mature LDT
+/-- The pure state carried by a game strategy, expressed in the LDT
 state interface. -/
 noncomputable def gameStrategyPureState {G : Game} (S : Strategy G) :
     letI : Nonempty (S.ιA × S.ιB) :=
@@ -172,7 +173,7 @@ original game vector. -/
   apply (EuclideanSpace.equiv (S.ιA × S.ιB) ℂ).injective
   rfl
 
-/-- A mature consistency relation on the density state associated with a game
+/-- An LDT consistency relation on the density state associated with a game
 strategy gives the identical QPBT defect bound on the strategy vector. -/
 theorem strategyConsRel_consistencyDefect_le
     {G : Game} (S : Strategy G)
@@ -207,18 +208,13 @@ theorem strategyConsRel_consistencyDefect_le
   unfold directPointQuestionOf ldtPointToDirect
   rw [(directPointEquiv D).symm_apply_apply]
 
-/-- Mature points associated with direct parameters have a canonical zero
+/-- LDT points associated with direct parameters have a canonical zero
 witness. -/
-instance directMaturePointNonempty (D : DirectLdParams) :
+instance directLdtPointNonempty (D : DirectLdParams) :
     Nonempty (Point D.toLDTParameters) :=
   ⟨fun _ => ⟨0, D.toLDTParameters.hq⟩⟩
 
-/-- Direct points are nonempty because they are equivalent to mature points. -/
-noncomputable instance directPointNonempty (D : DirectLdParams) :
-    Nonempty (Fin D.m → DirectScalarQ D) :=
-  Nonempty.map (directPointEquiv D).symm (directMaturePointNonempty D)
-
-/-- The mature scalar readout is the direct coordinate readout followed by
+/-- The LDT scalar readout is the direct coordinate readout followed by
 the scalar coding equivalence. -/
 @[simp] theorem directPointAnswerReadout_eq
     (D : DirectLdParams) (r : Fin D.k) (answer : DirectLdAnswer D) :
@@ -228,7 +224,7 @@ the scalar coding equivalence. -/
   letI := D.toLDTFieldModel
   cases answer <;> rfl
 
-/-- At corresponding points and scalar outcomes, the mature point effect is
+/-- At corresponding points and scalar outcomes, the LDT point effect is
 the effect of the direct point measurement followed by coordinate projection. -/
 theorem directCoordinatePointMeasurement_effect_transport
     (D : DirectLdParams) (S : Strategy (directLdGame D))
@@ -254,7 +250,7 @@ theorem directCoordinatePointMeasurement_effect_transport
   simpa only [directPointAnswerReadout_eq] using
     (directScalarEquiv D).injective.eq_iff
 
-/-- Bob's point effects satisfy the same direct-to-mature readout identity. -/
+/-- Bob's point effects satisfy the same direct-to-LDT readout identity. -/
 theorem directCoordinatePointMeasurementB_effect_transport
     (D : DirectLdParams) (S : Strategy (directLdGame D))
     (hS : S.IsProjective) (r : Fin D.k)
@@ -297,7 +293,7 @@ noncomputable def directPointCoordinateMeasurementB
   (S.B (directLdPointQuestionOf D u)).postprocess
     (fun answer => directLdPointValuesOrZero D answer r)
 
-/-- Evaluate a transported mature polynomial measurement at a direct point. -/
+/-- Evaluate a transported LDT polynomial measurement at a direct point. -/
 noncomputable def directPolynomialEvaluationMeasurement
     (D : DirectLdParams) :
     letI := D.toLDTFieldModel
@@ -310,8 +306,8 @@ noncomputable def directPolynomialEvaluationMeasurement
   exact (directPolynomialMeasurement D G).postprocess
     (fun g => MvPolynomial.eval u g.1)
 
-/-- Alice's mature point family obtained from direct coordinate `r`. -/
-noncomputable def matureCoordinatePointMeasurementA
+/-- Alice's LDT point family obtained from direct coordinate `r`. -/
+noncomputable def ldtCoordinatePointMeasurementA
     (D : DirectLdParams) (S : Strategy (directLdGame D))
     (hS : S.IsProjective) (r : Fin D.k) :
     letI := D.toLDTFieldModel
@@ -319,8 +315,8 @@ noncomputable def matureCoordinatePointMeasurementA
   letI := D.toLDTFieldModel
   exact (directCoordinateProjStrat D S hS r).pointMeasurementA
 
-/-- Bob's mature point family obtained from direct coordinate `r`. -/
-noncomputable def matureCoordinatePointMeasurementB
+/-- Bob's LDT point family obtained from direct coordinate `r`. -/
+noncomputable def ldtCoordinatePointMeasurementB
     (D : DirectLdParams) (S : Strategy (directLdGame D))
     (hS : S.IsProjective) (r : Fin D.k) :
     letI := D.toLDTFieldModel
@@ -328,9 +324,9 @@ noncomputable def matureCoordinatePointMeasurementB
   letI := D.toLDTFieldModel
   exact (directCoordinateProjStrat D S hS r).pointMeasurementB
 
-/-- The mature projective evaluation family associated with a global
+/-- The LDT projective evaluation family associated with a global
 polynomial projective measurement. -/
-noncomputable def maturePolynomialEvaluationMeasurement
+noncomputable def ldtPolynomialEvaluationMeasurement
     (D : DirectLdParams) :
     letI := D.toLDTFieldModel
     {iota : Type*} → [Fintype iota] → [DecidableEq iota] →
@@ -340,28 +336,28 @@ noncomputable def maturePolynomialEvaluationMeasurement
   intro iota _ _ G u
   exact ProjMeas.postprocess G (fun g => g u)
 
-/-- Left placement of Alice's mature point family. -/
-noncomputable def maturePointAPlaced
+/-- Left placement of Alice's LDT point family. -/
+noncomputable def ldtPointAPlaced
     (D : DirectLdParams) (S : Strategy (directLdGame D))
     (hS : S.IsProjective) (r : Fin D.k) :
     letI := D.toLDTFieldModel
     Point D.toLDTParameters → Fq D.toLDTParameters → Op (S.ιA × S.ιB) := by
   letI := D.toLDTFieldModel
   intro u a
-  exact heteroKron ((matureCoordinatePointMeasurementA D S hS r u).outcome a) 1
+  exact heteroKron ((ldtCoordinatePointMeasurementA D S hS r u).outcome a) 1
 
-/-- Right placement of Bob's mature point family. -/
-noncomputable def maturePointBPlaced
+/-- Right placement of Bob's LDT point family. -/
+noncomputable def ldtPointBPlaced
     (D : DirectLdParams) (S : Strategy (directLdGame D))
     (hS : S.IsProjective) (r : Fin D.k) :
     letI := D.toLDTFieldModel
     Point D.toLDTParameters → Fq D.toLDTParameters → Op (S.ιA × S.ιB) := by
   letI := D.toLDTFieldModel
   intro u a
-  exact heteroKron 1 ((matureCoordinatePointMeasurementB D S hS r u).outcome a)
+  exact heteroKron 1 ((ldtCoordinatePointMeasurementB D S hS r u).outcome a)
 
-/-- Left placement of a mature polynomial evaluation family. -/
-noncomputable def maturePolynomialEvaluationLeft
+/-- Left placement of an LDT polynomial evaluation family. -/
+noncomputable def ldtPolynomialEvaluationLeft
     (D : DirectLdParams) {iotaA iotaB : Type*}
     [Fintype iotaA] [DecidableEq iotaA]
     [Fintype iotaB] [DecidableEq iotaB] :
@@ -370,10 +366,10 @@ noncomputable def maturePolynomialEvaluationLeft
       Point D.toLDTParameters → Fq D.toLDTParameters → Op (iotaA × iotaB) := by
   letI := D.toLDTFieldModel
   intro G u a
-  exact heteroKron ((maturePolynomialEvaluationMeasurement D G u).outcome a) 1
+  exact heteroKron ((ldtPolynomialEvaluationMeasurement D G u).outcome a) 1
 
-/-- Right placement of a mature polynomial evaluation family. -/
-noncomputable def maturePolynomialEvaluationRight
+/-- Right placement of an LDT polynomial evaluation family. -/
+noncomputable def ldtPolynomialEvaluationRight
     (D : DirectLdParams) {iotaA iotaB : Type*}
     [Fintype iotaA] [DecidableEq iotaA]
     [Fintype iotaB] [DecidableEq iotaB] :
@@ -382,10 +378,10 @@ noncomputable def maturePolynomialEvaluationRight
       Point D.toLDTParameters → Fq D.toLDTParameters → Op (iotaA × iotaB) := by
   letI := D.toLDTFieldModel
   intro G u a
-  exact heteroKron 1 ((maturePolynomialEvaluationMeasurement D G u).outcome a)
+  exact heteroKron 1 ((ldtPolynomialEvaluationMeasurement D G u).outcome a)
 
-/-- Left placement of a mature global polynomial measurement. -/
-noncomputable def maturePolynomialLeftPlaced
+/-- Left placement of an LDT global polynomial measurement. -/
+noncomputable def ldtPolynomialLeftPlaced
     (D : DirectLdParams) {iotaA iotaB : Type*}
     [Fintype iotaA] [DecidableEq iotaA]
     [Fintype iotaB] [DecidableEq iotaB] :
@@ -396,8 +392,8 @@ noncomputable def maturePolynomialLeftPlaced
   intro G g
   exact heteroKron (G.outcome g) 1
 
-/-- Right placement of a mature global polynomial measurement. -/
-noncomputable def maturePolynomialRightPlaced
+/-- Right placement of an LDT global polynomial measurement. -/
+noncomputable def ldtPolynomialRightPlaced
     (D : DirectLdParams) {iotaA iotaB : Type*}
     [Fintype iotaA] [DecidableEq iotaA]
     [Fintype iotaB] [DecidableEq iotaB] :
@@ -407,6 +403,63 @@ noncomputable def maturePolynomialRightPlaced
   letI := D.toLDTFieldModel
   intro G g
   exact heteroKron 1 (G.outcome g)
+
+/-! ## Deprecated names
+
+The names below were used before the constructions above were named after the
+low individual degree test they belong to.  They are retained only because the
+stacked branch `issue-134-simultaneous-polynomial-measurements` refers to them.
+-/
+
+/-- Former name of `ldtCoordinatePointMeasurementA`, kept for the stacked
+branch of issue #134. -/
+@[deprecated (since := "2026-09-05")]
+alias matureCoordinatePointMeasurementA := ldtCoordinatePointMeasurementA
+
+/-- Former name of `ldtCoordinatePointMeasurementB`, kept for the stacked
+branch of issue #134. -/
+@[deprecated (since := "2026-09-05")]
+alias matureCoordinatePointMeasurementB := ldtCoordinatePointMeasurementB
+
+/-- Former name of `ldtPolynomialEvaluationMeasurement`, kept for the stacked
+branch of issue #134. -/
+@[deprecated (since := "2026-09-05")]
+alias maturePolynomialEvaluationMeasurement := ldtPolynomialEvaluationMeasurement
+
+/-- Former name of `ldtPointAPlaced`, kept for the stacked branch of
+issue #134. -/
+@[deprecated (since := "2026-09-05")]
+alias maturePointAPlaced := ldtPointAPlaced
+
+/-- Former name of `ldtPointBPlaced`, kept for the stacked branch of
+issue #134. -/
+@[deprecated (since := "2026-09-05")]
+alias maturePointBPlaced := ldtPointBPlaced
+
+/-- Former name of `ldtPolynomialEvaluationLeft`, kept for the stacked branch
+of issue #134. -/
+@[deprecated (since := "2026-09-05")]
+alias maturePolynomialEvaluationLeft := ldtPolynomialEvaluationLeft
+
+/-- Former name of `ldtPolynomialEvaluationRight`, kept for the stacked branch
+of issue #134. -/
+@[deprecated (since := "2026-09-05")]
+alias maturePolynomialEvaluationRight := ldtPolynomialEvaluationRight
+
+/-- Former name of `ldtPolynomialLeftPlaced`, kept for the stacked branch of
+issue #134. -/
+@[deprecated (since := "2026-09-05")]
+alias maturePolynomialLeftPlaced := ldtPolynomialLeftPlaced
+
+/-- Former name of `ldtPolynomialRightPlaced`, kept for the stacked branch of
+issue #134. -/
+@[deprecated (since := "2026-09-05")]
+alias maturePolynomialRightPlaced := ldtPolynomialRightPlaced
+
+/-- Former name of `directLdtPointNonempty`, kept for the stacked branch of
+issue #134. -/
+@[deprecated (since := "2026-09-05")]
+alias directMaturePointNonempty := directLdtPointNonempty
 
 end
 

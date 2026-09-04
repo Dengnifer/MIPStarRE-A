@@ -595,11 +595,13 @@ private noncomputable def pureStateOfUnitVector {ι : Type*}
 
 /-- View the coordinate function of an LDT pure state as a Euclidean vector.
 
-This is the direction of the pure-state bridge opposite to
-`pureStateOfUnitVector`.  Both directions, and the quadratic-form identity
-`pureState_stateQForm_eq_ev` below, are kept together here so that the
-distance calculus and the low-degree consistency transport share one
-conversion API; the two formulations of consistency they relate are
+This construction sends a pure state to its Euclidean coordinate vector, and
+`pureStateOfUnitVector` above reads a unit Euclidean vector as a pure state.
+The theorem `pureState_stateQForm_eq_ev` below identifies the
+quadratic form of that vector with evaluation in the associated density state.
+Both constructions and that identity are stated here for an arbitrary finite
+index type, and are used both by the distance calculus and by the low-degree
+consistency transport; the two formulations of consistency they relate are
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:295-395` and
 `references/ldt-paper/preliminaries.tex:649-666`. -/
 noncomputable def pureStateEuclideanVector {ι : Type*}
@@ -634,8 +636,8 @@ theorem pureStateEuclideanVector_norm {ι : Type*}
   nlinarith [norm_nonneg (pureStateEuclideanVector ψ)]
 
 /-- Evaluation in a pure LDT density state is the quadratic form of its
-Euclidean vector.  This is the shared conversion between the density and the
-vector formulation of consistency; see
+Euclidean vector.  This identity relates the density formulation of consistency
+to the vector formulation; see
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:295-395`. -/
 theorem pureState_stateQForm_eq_ev {ι : Type*}
     [Fintype ι] [DecidableEq ι] [Nonempty ι]
