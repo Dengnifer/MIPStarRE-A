@@ -44,12 +44,14 @@ numbers; `track.py`, `validate_tree.py` and `export_issues.py` are deleted.
 
 Every repository-owned branch publication runs through `checked-push.sh` with
 one explicit `refs/heads/...:refs/heads/...` mapping.  The helper reads the
-remote tip with a short `ls-remote`, runs `.githooks/pre-push` against that exact
-ref tuple before starting `receive-pack`, and then pushes the captured commit
-under an exact remote-tip lease.  The native hook performs a short
-defense-in-depth comparison when selected, while the helper's lease makes a
-moved remote ref fail closed even when that hook is stale or absent.  A caller's
-explicit `MIPSTARRE_SKIP_HOOKS=1` remains the documented emergency bypass.
+remote tip with a short `ls-remote`, resolves the local ref's registered
+worktree, and refuses a checkout whose HEAD or working tree differs from the
+captured commit.  It runs that checkout's `.githooks/pre-push` against the exact
+ref tuple before starting `receive-pack`, then pushes the captured commit under
+an exact remote-tip lease.  The native hook performs a short defense-in-depth
+comparison when selected, while the helper's lease makes a moved remote ref fail
+closed even when that hook is stale or absent.  A caller's explicit
+`MIPSTARRE_SKIP_HOOKS=1` remains the documented emergency bypass.
 
 * Branches: `issue-<github-number>-<slug>`, or `codex/issue-<number>-<slug>`
   from an agent; `pr_open.py` rejects what `git check-ref-format` would.

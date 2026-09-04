@@ -2602,3 +2602,16 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   `results/telemetry/design-decisions.md` register.
 - **First application:** #172 (rigidity statement) re-routed from a codex lane to a Fable math-fix
   session at 22:38Z.
+
+## 2026-09-05 07:34+08:00 - Checked push validated a different checkout
+
+- **Symptom:** round-4 review of PR #197 found that callers could name a feature
+  ref while `checked-push.sh` ran the gate over files in another checkout.
+- **Diagnosis:** the helper captured the ref's object ID but kept `REPO_ROOT` as
+  the hook working directory; the hook used the ID only for its changed-file
+  list, while Lean and audit tools read the unrelated checkout's bytes.
+- **Fix:** resolve the registered worktree that owns the local ref, require its
+  HEAD and complete working-tree status to match the captured commit before and
+  after preflight, and run the hook from that worktree.
+- **Lesson:** an immutable push source does not bind validation unless every
+  filesystem-reading check runs over a checkout of that same object.

@@ -24,6 +24,19 @@ die() {
   exit 2
 }
 
+require_validation_checkout() {
+  local checkout_sha checkout_state
+  checkout_sha="$(git -C "$VALIDATION_ROOT" rev-parse --verify 'HEAD^{commit}')" ||
+    die "cannot resolve HEAD in $VALIDATION_ROOT"
+  [ "$checkout_sha" = "$LOCAL_SHA" ] ||
+    die "$VALIDATION_ROOT is at $checkout_sha, not $LOCAL_REF at $LOCAL_SHA"
+  checkout_state="$(
+    git -C "$VALIDATION_ROOT" status --porcelain=v1 --untracked-files=all
+  )" || die "cannot inspect working tree $VALIDATION_ROOT"
+  [ -z "$checkout_state" ] ||
+    die "working tree $VALIDATION_ROOT differs from $LOCAL_REF at $LOCAL_SHA"
+}
+
 REPO_ROOT="$SCRIPT_ROOT"
 if [ "${1:-}" = "--repo-root" ]; then
   [ "$#" -ge 2 ] || die "--repo-root requires a path"
@@ -69,6 +82,22 @@ fi
 
 LOCAL_SHA="$(git -C "$REPO_ROOT" rev-parse --verify "$LOCAL_REF^{commit}")" ||
   die "cannot resolve local branch $LOCAL_REF"
+WORKTREE_ROWS="$(git -C "$REPO_ROOT" worktree list --porcelain)" ||
+  die "cannot list registered worktrees"
+VALIDATION_ROOT=""
+candidate=""
+while IFS= read -r line; do
+  case "$line" in
+    "worktree "*) candidate="${line#worktree }" ;;
+    "branch $LOCAL_REF") VALIDATION_ROOT="$candidate"; break ;;
+  esac
+done <<< "$WORKTREE_ROWS"
+[ -n "$VALIDATION_ROOT" ] ||
+  die "$LOCAL_REF is not checked out in a registered worktree"
+VALIDATION_ROOT="$(git -C "$VALIDATION_ROOT" rev-parse --show-toplevel)" ||
+  die "cannot resolve worktree for $LOCAL_REF"
+require_validation_checkout
+
 REMOTE_URL="$(git -C "$REPO_ROOT" remote get-url --push "$REMOTE")" ||
   die "cannot resolve push URL for remote $REMOTE"
 REMOTE_ROWS="$(git -C "$REPO_ROOT" ls-remote --refs "$REMOTE_URL" "$REMOTE_REF")" ||
@@ -90,13 +119,13 @@ if [ "$REMOTE_SHA" != "$ZERO_SHA" ] &&
   die "$LOCAL_SHA would not fast-forward $REMOTE_REF from $REMOTE_SHA"
 fi
 
-HOOK="$REPO_ROOT/.githooks/pre-push"
+HOOK="$VALIDATION_ROOT/.githooks/pre-push"
 [ -x "$HOOK" ] || die "$HOOK is missing or not executable; run scripts/install_git_hooks.sh"
 
 (
   unset MIPSTARRE_SKIP_HOOKS
   unset MIPSTARRE_EXPECTED_PUSH_TUPLE
-  cd "$REPO_ROOT"
+  cd "$VALIDATION_ROOT"
   "$HOOK" "$REMOTE" "$REMOTE_URL"
 ) <<< "$LOCAL_REF $LOCAL_SHA $REMOTE_REF $REMOTE_SHA"
 
@@ -104,6 +133,7 @@ CURRENT_LOCAL_SHA="$(git -C "$REPO_ROOT" rev-parse --verify "$LOCAL_REF^{commit}
   die "cannot re-resolve local branch $LOCAL_REF after preflight"
 [ "$CURRENT_LOCAL_SHA" = "$LOCAL_SHA" ] ||
   die "local branch $LOCAL_REF changed during preflight"
+require_validation_checkout
 
 printf '%s: gate passed before opening the push transport.\n' "$PROG" >&2
 # Freeze the source object and atomically require the preflight remote tip.  The

@@ -73,6 +73,11 @@ fi
 read local_ref local_sha remote_ref remote_sha
 printf 'preflight|%s|%s|%s|%s\\n' \
   "$local_ref" "$local_sha" "$remote_ref" "$remote_sha" >> "$HOOK_LOG"
+if [ -n "${EXPECTED_PAYLOAD:-}" ]; then
+  actual_payload="$(cat payload)"
+  printf 'checked-payload|%s\\n' "$actual_payload" >> "$HOOK_LOG"
+  [ "$actual_payload" = "$EXPECTED_PAYLOAD" ] || exit 96
+fi
 [ -z "${MOVE_LOCAL_REF_TO:-}" ] || git update-ref "$local_ref" "$MOVE_LOCAL_REF_TO"
 [ -z "${MOVE_REMOTE_TO:-}" ] || \
   git --git-dir="$PUSH_REMOTE" update-ref "$remote_ref" "$MOVE_REMOTE_TO"
@@ -81,6 +86,8 @@ printf 'preflight|%s|%s|%s|%s\\n' \
             encoding="utf-8",
         )
         hook.chmod(0o755)
+        self.git(repo, "add", ".githooks/pre-push")
+        self.git(repo, "commit", "--quiet", "-m", "install pre-push hook")
 
         receive_pack = root / "receive-pack"
         receive_pack.write_text(
@@ -106,6 +113,9 @@ exec git-receive-pack "$@"
         move_local_ref_to: str | None = None,
         move_remote_to: str | None = None,
         push_remote: Path | None = None,
+        expected_payload: str | None = None,
+        local_branch: str = "main",
+        remote_branch: str | None = None,
     ) -> subprocess.CompletedProcess[str]:
         env = dict(
             os.environ,
@@ -124,13 +134,16 @@ exec git-receive-pack "$@"
             env["MOVE_REMOTE_TO"] = move_remote_to
         if push_remote is not None:
             env["PUSH_REMOTE"] = str(push_remote)
+        if expected_payload is not None:
+            env["EXPECTED_PAYLOAD"] = expected_payload
+        remote_branch = remote_branch or local_branch
         return subprocess.run(
             [
                 str(CHECKED_PUSH),
                 "--repo-root",
                 str(repo),
                 "test",
-                "refs/heads/main:refs/heads/main",
+                f"refs/heads/{local_branch}:refs/heads/{remote_branch}",
             ],
             cwd=repo,
             env=env,
@@ -222,6 +235,79 @@ exec git-receive-pack "$@"
                 ],
             )
 
+    def test_checked_push_validates_local_refs_registered_worktree(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            repo, remote, hook_log, receive_marker = self.new_push_repo(root)
+            self.git(repo, "branch", "publish")
+            publish_worktree = root / "publish"
+            self.git(repo, "worktree", "add", "--quiet", str(publish_worktree), "publish")
+
+            (publish_worktree / "payload").write_text("publish\n", encoding="utf-8")
+            self.git(publish_worktree, "commit", "--quiet", "-am", "publish bytes")
+            publish_head = self.git(publish_worktree, "rev-parse", "HEAD").stdout.strip()
+
+            (repo / "payload").write_text("main\n", encoding="utf-8")
+            self.git(repo, "commit", "--quiet", "-am", "main bytes")
+
+            result = self.run_checked_push(
+                repo,
+                hook_log,
+                receive_marker,
+                expected_payload="publish",
+                local_branch="publish",
+            )
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertEqual(
+                hook_log.read_text(encoding="utf-8").splitlines(),
+                [
+                    "preflight|refs/heads/publish|"
+                    f"{publish_head}|refs/heads/publish|{'0' * 40}",
+                    "checked-payload|publish",
+                    "transport-advertised|"
+                    f"{publish_head} {publish_head} refs/heads/publish {'0' * 40}",
+                ],
+            )
+            self.assertEqual(
+                self.git(remote, "rev-parse", "refs/heads/publish").stdout.strip(),
+                publish_head,
+            )
+
+    def test_checked_push_rejects_dirty_ref_worktree(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            repo, _, hook_log, receive_marker = self.new_push_repo(
+                Path(temporary_directory)
+            )
+            (repo / "payload").write_text("dirty\n", encoding="utf-8")
+
+            result = self.run_checked_push(repo, hook_log, receive_marker)
+
+            self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+            self.assertIn("working tree", result.stderr)
+            self.assertIn("differs from refs/heads/main", result.stderr)
+            self.assertFalse(receive_marker.exists())
+            self.assertFalse(hook_log.exists())
+
+    def test_checked_push_rejects_ref_without_worktree(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            repo, _, hook_log, receive_marker = self.new_push_repo(
+                Path(temporary_directory)
+            )
+            self.git(repo, "branch", "unowned")
+
+            result = self.run_checked_push(
+                repo,
+                hook_log,
+                receive_marker,
+                local_branch="unowned",
+            )
+
+            self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+            self.assertIn("not checked out in a registered worktree", result.stderr)
+            self.assertFalse(receive_marker.exists())
+            self.assertFalse(hook_log.exists())
+
     def test_checked_push_rejects_local_ref_movement_during_gate(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
             repo, remote, hook_log, receive_marker = self.new_push_repo(
@@ -232,6 +318,7 @@ exec git-receive-pack "$@"
             self.git(repo, "commit", "--quiet", "-am", "moved")
             moved_head = self.git(repo, "rev-parse", "HEAD").stdout.strip()
             self.git(repo, "update-ref", "refs/heads/main", validated_head, moved_head)
+            self.git(repo, "restore", "--source=HEAD", "--staged", "--worktree", ".")
 
             result = self.run_checked_push(
                 repo,
@@ -270,13 +357,13 @@ exec git-receive-pack "$@"
                 self.git(repo, "commit", "--quiet", "-am", "target")
                 target_head = self.git(repo, "rev-parse", "HEAD").stdout.strip()
 
-                hooks_path = repo / f".{native_hook}-hooks"
+                hooks_path = Path(temp) / f"{native_hook}-hooks"
                 if native_hook == "stale":
                     hooks_path.mkdir()
                     stale_hook = hooks_path / "pre-push"
                     stale_hook.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
                     stale_hook.chmod(0o755)
-                self.git(repo, "config", "core.hooksPath", hooks_path.name)
+                self.git(repo, "config", "core.hooksPath", str(hooks_path))
 
                 result = self.run_checked_push(
                     repo,

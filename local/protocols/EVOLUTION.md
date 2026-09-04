@@ -579,3 +579,17 @@ routes full checks through the helper.
 **Expected effect:** stale, absent, or redirected native hooks cannot weaken the
 validated tuple, while idempotent publication and full-mode guidance remain
 usable.
+
+## 2026-09-05 — Bind preflight files to the captured local commit
+
+**Trigger:** `results/telemetry/events.md` 2026-09-05, "Checked push validated a
+different checkout" (round-4 review of PR #197).
+
+**Change:** `checked-push.sh` resolves the registered worktree owning the local
+ref, requires its HEAD and status to match the captured commit before and after
+preflight, and runs the gate from that checkout.  A two-worktree regression
+binds the checked payload to the published ref.
+
+**Expected effect:** publication cannot approve bytes from main while pushing a
+feature commit, and dirty, detached, or unregistered ref checkouts fail before
+transport startup.

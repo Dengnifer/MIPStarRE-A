@@ -447,13 +447,15 @@ lake exe checkdecls blueprint/lean_decls
 ```
 
 Repository-owned publication invokes this hook through
-`local/bin/checked-push.sh`.  The helper obtains the remote tip with
-`git ls-remote`, closes that short query, supplies the resulting four-field ref
-record to the hook, and starts `git receive-pack` only after the gate succeeds.
-The real push names the captured commit, and its native hook performs a short
-comparison of Git's advertised ref tuple with the preflight tuple.  Ref movement
-therefore fails closed without repeating the gate.  This ordering prevents a
-long Lean check from aging out an idle SSH push.
+`local/bin/checked-push.sh`.  The helper resolves the local ref's registered,
+clean worktree at the captured commit, obtains the remote tip with
+`git ls-remote`, closes that short query, and supplies the resulting four-field
+ref record to the hook in that worktree.  It starts `git receive-pack` only after
+the gate succeeds.  The real push names the captured commit, uses an exact
+remote-tip lease, and asks its native hook for a short defense-in-depth tuple
+comparison.  Ref or checkout movement therefore fails closed without repeating
+the gate.  This ordering prevents a long Lean check from aging out an idle SSH
+push.
 
 Commands that may invoke Lake, Lean, blueprint tooling, or Python audits are run
 in a subshell with Git's local hook environment variables cleared.  This avoids
