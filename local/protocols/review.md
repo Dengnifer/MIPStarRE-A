@@ -126,6 +126,11 @@ ref, applies them to the reviewed worktree as untrusted data, and attaches
 `blueprint-citations.md`. That map derives each cited label's current file and
 statement/proof span. A uniquely resolved label suppresses locator-drift
 findings; an unknown, duplicate, or mathematically incorrect label does not.
+The branch-derived map is sanitized and truncated to
+`MIPSTARRE_CITATION_MAX_BYTES` (default 30000) with an explicit marker. It is
+attached before the diff, reserving its own share of the dispatcher's aggregate
+attachment budget; the direct-execution fallback receives this same bounded
+artifact rather than the raw resolver output.
 The rewrite subcommand exists for the one-time legacy migration, but review
 never rewrites the branch.
 
@@ -360,7 +365,8 @@ Artefacts:
 | the exact-head `COMMENT` review on the PR | on GitHub | combined verdict, ledger, prose |
 | `local-review/summary` on the head SHA | on GitHub | the gate-readable verdict |
 | `~/.cache/mipstarre-dev/reviews/pr<N>/<sha>/` | no | diff, prompts, raw agent output |
-| `~/.cache/mipstarre-dev/reviews/pr<N>/<sha>/blueprint-citations.md` | no | label-derived current blueprint spans |
+| `~/.cache/mipstarre-dev/reviews/pr<N>/<sha>/blueprint-citations.md` | no | bounded, sanitized label-derived blueprint spans |
+| `~/.cache/mipstarre-dev/reviews/pr<N>/<sha>/blueprint-citations.raw.md` | no | complete resolver output retained locally |
 | `~/.cache/mipstarre-dev/locks/review-<pr>.lock` | no | the review lock |
 
 Every codex invocation goes through `local/bin/dispatch.sh` when it exists, so

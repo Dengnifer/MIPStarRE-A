@@ -129,7 +129,7 @@ This is the additive linearity of blueprint
 `lem:qld-decoder-linearity`, used in the symmetry step of the source
 argument at
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1546-1550`
-and blueprint `lem:qld-decoder-linearity`.  It does not assert
+and blueprint `lem:qld-construct-the-paulis`.  It does not assert
 evaluation equality for non-encoding representatives.  See
 `docs/paper-gaps/qpbt_decoding-identity.tex:87-123`. -/
 theorem decodeFq_add {P : AdmissibleParams} (g h : Poly P) :

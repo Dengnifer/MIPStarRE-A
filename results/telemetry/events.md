@@ -2384,3 +2384,16 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   current file and line spans deterministic reviewer output.
 - **Lesson:** stable identifiers belong in maintained source; positional
   context should be derived at the point of review.
+
+## 2026-09-05 - Citation evidence starved by the review diff
+
+- **Symptom:** PR #202 round 1 found that a large diff could consume the
+  dispatcher's aggregate attachment allowance before the derived blueprint
+  citation map, while the no-dispatch fallback embedded the raw branch-derived
+  map.
+- **Diagnosis:** `review.sh` appended an independently unbounded map after the
+  diff and sanitized only the diff artifact.
+- **Fix:** cap and sanitize the map separately, attach it before the diff, and
+  use the same bounded artifact in the fallback prompt.
+- **Lesson:** required review evidence needs an explicit per-artifact budget;
+  aggregate truncation alone depends incorrectly on attachment order.

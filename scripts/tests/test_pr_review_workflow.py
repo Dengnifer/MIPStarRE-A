@@ -66,6 +66,32 @@ class PRReviewWorkflowTests(unittest.TestCase):
         self.assertIn('case "$CITATION_RC" in', self.local_review)
         self.assertIn("refusing review without citation evidence", self.local_review)
 
+    def test_blueprint_map_has_a_reserved_sanitized_attachment_budget(self) -> None:
+        self.assertIn(
+            'CITATION_MAX_BYTES="${MIPSTARRE_CITATION_MAX_BYTES:-30000}"',
+            self.local_review,
+        )
+        self.assertIn(
+            'sanitize_to "$BLUEPRINT_CITATION_MAP_RAW" "$BLUEPRINT_CITATION_MAP"',
+            self.local_review,
+        )
+        self.assertIn("truncated by review.sh attachment budget", self.local_review)
+        self.assertIn('"$CITATION_MAX_BYTES" -ge 128', self.local_review)
+        run_agent = self.local_review.split("run_agent() {", 1)[1].split(
+            "# ensure_review_body", 1
+        )[0]
+        self.assertLess(
+            run_agent.index('if [ -s "$BLUEPRINT_CITATION_MAP" ]'),
+            run_agent.index('if [ -n "$ctx" ]'),
+        )
+
+    def test_fallback_uses_only_the_bounded_sanitized_citation_map(self) -> None:
+        fallback = self.local_review.split("build_standalone() {", 1)[1].split(
+            "# preserve_prior", 1
+        )[0]
+        self.assertIn('cat "$BLUEPRINT_CITATION_MAP"', fallback)
+        self.assertNotIn("BLUEPRINT_CITATION_MAP_RAW", fallback)
+
 
 if __name__ == "__main__":
     unittest.main()

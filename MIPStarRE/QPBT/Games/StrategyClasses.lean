@@ -774,7 +774,8 @@ theorem exists_symmetric_projective_strategy (G : SymmetricGame) (ε : ℝ)
 
 /-- Value-preserving formalization-only form of `lem:symmetric-strat` starting
 from a specified near-optimal strategy; blueprint
-`lem:symmetric-strat`, paper `06_nonlocal_games_and_mipstar.tex:94-130`.
+`lem:symmetric-strat-given-strategy`, paper
+`06_nonlocal_games_and_mipstar.tex:94-130`.
 The source attainment distinction is tracked in
 `docs/paper-gaps/qpbt_symmetrization-attainment.tex`. -/
 theorem exists_symmetric_projective_strategy_of_strategy (G : SymmetricGame)

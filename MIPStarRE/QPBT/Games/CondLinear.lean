@@ -15,7 +15,8 @@ established in
 
 ## References
 
-The source-facing nodes are blueprint `def:cl-func`, blueprint `def:cl-dist`, blueprint `lem:cl-concat`, and blueprint `def:graph-distribution`.
+The source-facing nodes are blueprint `def:cl-func`, `def:cl-dist`,
+`lem:cl-concat`, and `def:graph-distribution`.
 The paper origins are
 `references/qpbt-paper/05_conditionally_linear_functions.tex:35-57,282-314`,
 `references/qpbt-paper/07_types.tex:65-82`,

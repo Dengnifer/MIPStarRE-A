@@ -550,3 +550,17 @@ longer treat numeric drift as a finding when the intended label resolves.
 **Expected effect:** blueprint insertions no longer force edits or review
 findings in unrelated Lean files, while reviewers retain exact current source
 locations and still detect missing, duplicate, or incorrect anchors.
+
+## 2026-09-05 — Blueprint citation evidence gets a reserved budget
+
+**Trigger:** `results/telemetry/events.md` 2026-09-05, "Citation evidence
+starved by the review diff", recording PR #202 round 1 findings F6 and F7.
+
+**Change:** `review.sh` sanitizes the branch-derived citation map into a
+separately capped artifact, attaches it before the diff, and uses only that
+artifact in the no-dispatch fallback. `review.md` section 4 makes the default
+30000-byte allowance and ordering part of the untrusted-data protocol.
+
+**Expected effect:** reviewers receive bounded label-resolution evidence even
+for large patches, and neither review path interpolates raw branch-derived map
+content.

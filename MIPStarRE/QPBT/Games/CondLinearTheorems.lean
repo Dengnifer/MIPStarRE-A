@@ -11,7 +11,8 @@ these results build on is in
 
 ## References
 
-The source results are blueprint `lem:cl-kth`, blueprint `lem:cl-func-prod`, and blueprint `lem:cl-dist-prod`, with paper origin
+The source results are blueprint `lem:cl-kth`, `lem:cl-func-prod`, and
+`lem:cl-dist-prod`, with paper origin
 `references/qpbt-paper/05_conditionally_linear_functions.tex:150-379`.
 -/
 

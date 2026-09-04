@@ -74,18 +74,22 @@ class BlueprintCitationTests(unittest.TestCase):
 
         self.assertEqual(len(index["lem:alpha"]), 2)
 
-    def test_scan_finds_known_tokens_and_unknown_canonical_citations(self) -> None:
+    def test_scan_finds_known_tokens_and_unknown_blueprint_labels(self) -> None:
         lean = self.root / "MIPStarRE" / "Example.lean"
         _write(
             lean,
-            "/-- See blueprint `lem:alpha` and blueprint `lem:missing`. -/\n",
+            "/-- See blueprint `lem:alpha`, `def:missing`, and bare "
+            "`rem:missing`; ignore Lean name `Example.value`. -/\n",
         )
         index = build_label_index(self.root)
 
         uses, unknown = find_citation_uses([lean], self.root, index)
 
         self.assertEqual([(use.label, use.line) for use in uses], [("lem:alpha", 1)])
-        self.assertEqual([(use.label, use.line) for use in unknown], [("lem:missing", 1)])
+        self.assertEqual(
+            [(use.label, use.line) for use in unknown],
+            [("def:missing", 1), ("rem:missing", 1)],
+        )
 
     def test_rewrite_uses_label_named_in_same_docstring(self) -> None:
         text = (
@@ -98,7 +102,7 @@ class BlueprintCitationTests(unittest.TestCase):
         self.assertEqual(unresolved, [])
         self.assertEqual(rewritten, "/-- Lean support for blueprint `lem:alpha`. -/\n")
 
-    def test_rewrite_prefers_an_explicit_label_to_a_conflicting_span(self) -> None:
+    def test_rewrite_prefers_an_exact_node_to_a_nearby_label(self) -> None:
         text = (
             "/-- Lean support for `lem:alpha`, blueprint "
             "`blueprint/src/chapter/ch12_example.tex:11-14`. -/\n"
@@ -107,7 +111,10 @@ class BlueprintCitationTests(unittest.TestCase):
         rewritten, unresolved = rewrite_text(text, build_label_index(self.root))
 
         self.assertEqual(unresolved, [])
-        self.assertEqual(rewritten, "/-- Lean support for blueprint `lem:alpha`. -/\n")
+        self.assertEqual(
+            rewritten,
+            "/-- Lean support for `lem:alpha`, blueprint `def:beta`. -/\n",
+        )
 
     def test_rewrite_can_use_an_exact_current_span(self) -> None:
         text = "/-- See `blueprint/src/chapter/ch12_example.tex:11-14`. -/\n"
@@ -158,6 +165,85 @@ class BlueprintCitationTests(unittest.TestCase):
             ["`blueprint/src/chapter/ch12_example.tex:4-6`"],
         )
 
+    def test_rewrite_does_not_guess_from_decoding_docstring_proximity(self) -> None:
+        index = {
+            "lem:qld-decoder-linearity": [LabelLocation(
+                "lem:qld-decoder-linearity", "blueprint/src/chapter/ch16_qpbt_analysis.tex",
+                30, 30, 46,
+            )],
+            "lem:qld-construct-the-paulis": [LabelLocation(
+                "lem:qld-construct-the-paulis", "blueprint/src/chapter/ch16_qpbt_analysis.tex",
+                193, 193, 261,
+            )],
+        }
+        text = (
+            "/-- This is blueprint `lem:qld-decoder-linearity`, used in the symmetry "
+            "step at blueprint `ch16_qpbt_analysis.tex:239-244`. -/\n"
+        )
+
+        rewritten, unresolved = rewrite_text(text, index)
+
+        self.assertIn("`ch16_qpbt_analysis.tex:239-244`", rewritten)
+        self.assertEqual(rewritten.count("`lem:qld-decoder-linearity`"), 1)
+        self.assertEqual(unresolved, ["`ch16_qpbt_analysis.tex:239-244`"])
+
+    def test_rewrite_uses_exact_given_strategy_support_node(self) -> None:
+        index = {
+            "lem:symmetric-strat": [LabelLocation(
+                "lem:symmetric-strat", "blueprint/src/chapter/ch12_qpbt_games.tex",
+                116, 116, 134,
+            )],
+            "lem:symmetric-strat-given-strategy": [LabelLocation(
+                "lem:symmetric-strat-given-strategy",
+                "blueprint/src/chapter/ch12_qpbt_games.tex", 140, 140, 154,
+            )],
+        }
+        text = (
+            "/-- Formalization-only form of `lem:symmetric-strat`; blueprint "
+            "`ch12_qpbt_games.tex:140-154`. -/\n"
+        )
+
+        rewritten, unresolved = rewrite_text(text, index)
+
+        self.assertEqual(unresolved, [])
+        self.assertEqual(
+            rewritten,
+            "/-- Formalization-only form of `lem:symmetric-strat`; blueprint\n"
+            "`lem:symmetric-strat-given-strategy`. -/\n",
+        )
+
+    def test_rewrite_wraps_long_blueprint_citation_lines_idempotently(self) -> None:
+        text = (
+            "/-- The source-facing nodes are blueprint `def:one`, blueprint `def:two`, "
+            "blueprint `lem:three`, and blueprint `def:a-very-long-fourth-label`. -/\n"
+        )
+
+        rewritten, unresolved = rewrite_text(text, {})
+        second, second_unresolved = rewrite_text(rewritten, {})
+
+        self.assertEqual(unresolved, [])
+        self.assertEqual(second_unresolved, [])
+        self.assertEqual(second, rewritten)
+        self.assertTrue(all(len(line) <= 100 for line in rewritten.splitlines()))
+
+    def test_resolve_scan_fails_for_bare_and_list_unknown_labels(self) -> None:
+        lean = self.root / "MIPStarRE" / "Example.lean"
+        _write(
+            lean,
+            "/-- Blueprint `lem:alpha`, `def:missing`; bare `rem:missing`. -/\n",
+        )
+        stdout = io.StringIO()
+
+        with contextlib.redirect_stdout(stdout):
+            result = main([
+                "--root", str(self.root), "resolve", "--path",
+                "MIPStarRE/Example.lean", "--format", "plain",
+            ])
+
+        self.assertEqual(result, 1)
+        self.assertIn("def:missing\tUNRESOLVED", stdout.getvalue())
+        self.assertIn("rem:missing\tUNRESOLVED", stdout.getvalue())
+
     def test_rewrite_refuses_proximity_with_multiple_labels(self) -> None:
         text = (
             "/-- Compare `lem:alpha` with `def:beta`. The first source is "
@@ -167,7 +253,12 @@ class BlueprintCitationTests(unittest.TestCase):
 
         rewritten, unresolved = rewrite_text(text, build_label_index(self.root))
 
-        self.assertEqual(rewritten, text)
+        self.assertEqual(
+            rewritten,
+            "/-- Compare `lem:alpha` with `def:beta`. The first source is\n"
+            "`blueprint/src/chapter/ch12_example.tex:80-90`; the second is\n"
+            "`blueprint/src/chapter/ch12_example.tex:91-100`. -/\n",
+        )
         self.assertEqual(
             unresolved,
             [

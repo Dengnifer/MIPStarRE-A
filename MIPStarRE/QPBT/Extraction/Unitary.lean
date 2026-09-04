@@ -12,8 +12,9 @@ placements. The generalized Pauli projectors use the field and basis fixed by
 
 ## References
 
-The extraction witness formalizes blueprint
-`lem:qld-unitary`, from
+`ExtractionWitness` packages the conclusion of blueprint `lem:qld-unitary`.
+Its current existence theorem is the conditional support result blueprint
+`lem:qld-unitary-given-global-pair`, from
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1666-1860`.
 The error-form comparison formalizes `lem:qld-extraction-error-form` and
 supports `rem:pauli-robustness-form` in the blueprint; its paper source is
@@ -69,23 +70,25 @@ structure ExtractionWitness {P : AdmissibleParams} {epsilon deltaS : ℝ}
         S.placeExtractedRegister side (pauliProj W h))
       (S.idealExpState aux) ≤ delta
 
-/-- `lem:qld-unitary`: the concrete swap maps admit extraction data at the
-explicit extraction scale applied to `deltaConstructPaulis`.
+/-- Conditional extraction from an explicitly supplied global-pair witness: the
+concrete swap maps admit extraction data at the explicit extraction scale
+applied to `deltaConstructPaulis`.
 
-This is the source-facing existence statement from blueprint
+This is the formalization-only support result blueprint
+`lem:qld-unitary-given-global-pair`. Unlike source-facing blueprint
 `lem:qld-unitary` and paper
-`14_analysis_of_the_pauli_basis_test.tex:1666-1860`. It introduces no transfer
-premise or additional basis parameter.
+`14_analysis_of_the_pauli_basis_test.tex:1666-1860`, it assumes a
+`GlobalPairWitness` rather than constructing one from the test hypotheses.
 
 **Local fix:** the positive-contraction estimate and normalization case split
 repair the two numerical defects at paper lines 1743-1783 without changing the
 conclusion; see `docs/paper-gaps/qpbt_extraction-transfer.tex`.
 
-**Proof obligation:** issue #47 tracks the EPR projection argument and the
-Schwartz-Zippel comparison at paper lines 1715-1858. Discharge: construct
-`aux` from the EPR projection of the swapped state, use the corrected
-small-error case split, and combine the point-measurement consistency with the
-exact swap conjugation identities. -/
+**Unfaithful:** The explicit `GlobalPairWitness` is proof debt not derived by
+this declaration from `lem:qld-unitary`. It is documented in
+`docs/paper-gaps/qpbt_extraction-transfer.tex` and issues #19 and #47.
+Elimination: obtain the witness from `exists_globalPairWitness`, then prove the
+source-facing extraction theorem from the paper hypotheses. -/
 theorem exists_extractionWitness :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (epsilon deltaG : ℝ),
