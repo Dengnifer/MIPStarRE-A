@@ -161,7 +161,7 @@ noncomputable def bobEventWeight {G : Game} (S : Strategy G)
 
 /-- Every answer-pair Born weight is nonnegative.  This is formalization-only
 support for the probability expression in `def:tensor-product-value`. -/
-theorem outcome_weight_nonneg {G : Game} (S : Strategy G)
+theorem outcomeWeight_nonneg {G : Game} (S : Strategy G)
     (x : G.QuestionA) (y : G.QuestionB) (a : G.AnswerA) (b : G.AnswerB) :
     0 ≤ outcomeWeight S x y a b := by
   unfold outcomeWeight applyOperatorToState heteroKron
@@ -173,7 +173,7 @@ theorem outcome_weight_nonneg {G : Game} (S : Strategy G)
 /-- The Born weights of all answer pairs at fixed questions sum to one.  This
 is formalization-only support for the POVM normalization implicit in
 `def:tensor-product-value`. -/
-theorem outcome_weight_sum_eq_one {G : Game} (S : Strategy G)
+theorem outcomeWeight_sum_eq_one {G : Game} (S : Strategy G)
     (x : G.QuestionA) (y : G.QuestionB) :
     ∑ a : G.AnswerA, ∑ b : G.AnswerB, outcomeWeight S x y a b = 1 := by
   have hsum :
@@ -263,7 +263,7 @@ theorem outcome_event_weight_nonneg {G : Game} (S : Strategy G)
   unfold outcomeEventWeight
   exact Finset.sum_nonneg fun a _ => Finset.sum_nonneg fun b _ => by
     split_ifs
-    · exact outcome_weight_nonneg S x y a b
+    · exact outcomeWeight_nonneg S x y a b
     · exact le_rfl
 
 /-- An answer event depending only on Alice has its Alice marginal weight. -/
@@ -306,7 +306,7 @@ theorem outcome_event_weight_mono {G : Game} (S : Strategy G)
   · simp [hE, hEF a b hE]
   · simp only [hE, ↓reduceIte]
     split_ifs
-    · exact outcome_weight_nonneg S x y a b
+    · exact outcomeWeight_nonneg S x y a b
     · exact le_rfl
 
 /--

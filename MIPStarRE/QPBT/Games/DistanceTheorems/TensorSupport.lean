@@ -12,7 +12,7 @@ used in data processing and the commutator estimate.
 ## References
 
 - `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:397-461`
-- `blueprint/src/chapter/ch12_qpbt_games.tex:340-388`
+- `blueprint/src/chapter/ch12_qpbt_games.tex:381-445`
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder
