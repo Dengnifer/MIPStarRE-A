@@ -64,34 +64,6 @@ private theorem applyOperatorToState_mul {ι : Type*}
   unfold applyOperatorToState
   simp [Matrix.toEuclideanLin, Matrix.toLpLin_mul_same]
 
-/-- A square-summable family of left multipliers contracts total squared norm. -/
-theorem sum_norm_mul_apply_le {γ ι : Type*}
-    [Fintype γ] [Fintype ι] [DecidableEq ι]
-    (C : γ → Op ι) (D : Op ι) (v : EuclideanSpace ℂ ι)
-    (hC : ∑ c : γ, (C c)ᴴ * C c ≤ 1) :
-    ∑ c : γ, ‖applyOperatorToState (C c * D) v‖ ^ 2 ≤
-      ‖applyOperatorToState D v‖ ^ 2 := by
-  calc
-    ∑ c : γ, ‖applyOperatorToState (C c * D) v‖ ^ 2 =
-        ∑ c : γ,
-          (inner ℂ (applyOperatorToState D v)
-            (applyOperatorToState ((C c)ᴴ * C c)
-              (applyOperatorToState D v))).re := by
-          apply Finset.sum_congr rfl
-          intro c _
-          rw [applyOperatorToState_mul]
-          exact norm_applyOperatorToState_sq_eq (C c) _
-    _ = (inner ℂ (applyOperatorToState D v)
-          (applyOperatorToState (∑ c : γ, (C c)ᴴ * C c)
-            (applyOperatorToState D v))).re := by
-          simp [applyOperatorToState]
-    _ ≤ (inner ℂ (applyOperatorToState D v)
-          (applyOperatorToState (1 : Op ι) (applyOperatorToState D v))).re :=
-      quadratic_form_mono hC _
-    _ = ‖applyOperatorToState D v‖ ^ 2 := by
-      simpa [applyOperatorToState] using
-        (norm_applyOperatorToState_sq_eq (1 : Op ι) (applyOperatorToState D v)).symm
-
 /-- Finite-subset form of contraction by square-summable left multipliers. -/
 private theorem finset_sum_norm_mul_apply_le {γ ι : Type*}
     [Fintype ι] [DecidableEq ι]
@@ -119,6 +91,15 @@ private theorem finset_sum_norm_mul_apply_le {γ ι : Type*}
     _ = ‖applyOperatorToState D v‖ ^ 2 := by
       simpa [applyOperatorToState] using
         (norm_applyOperatorToState_sq_eq (1 : Op ι) (applyOperatorToState D v)).symm
+
+/-- A square-summable family of left multipliers contracts total squared norm. -/
+theorem sum_norm_mul_apply_le {γ ι : Type*}
+    [Fintype γ] [Fintype ι] [DecidableEq ι]
+    (C : γ → Op ι) (D : Op ι) (v : EuclideanSpace ℂ ι)
+    (hC : ∑ c : γ, (C c)ᴴ * C c ≤ 1) :
+    ∑ c : γ, ‖applyOperatorToState (C c * D) v‖ ^ 2 ≤
+      ‖applyOperatorToState D v‖ ^ 2 := by
+  simpa using finset_sum_norm_mul_apply_le Finset.univ C D v (by simpa using hC)
 
 /-- Fiber-indexed left multiplication contracts the associated squared-norm sum. -/
 theorem sum_norm_mul_funIndexed_apply_le {α Γ ι : Type*}

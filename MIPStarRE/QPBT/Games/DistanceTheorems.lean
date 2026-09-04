@@ -96,10 +96,14 @@ theorem consistencyDefect_le_opFamilyDistSq_of_projective {X α ι : Type*}
     (fun x a => (A x).effect a) (fun x a => (B x).effect a) ψ
   nlinarith
 
-/-- Projectivity on one side gives the square-root consistency estimate for a
-unit state under a probability distribution. This is the third item of
-`fact:agreement`; blueprint `ch12_qpbt_games.tex:245-255`, paper
-`references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:295-311`. -/
+/-- Projectivity of the left family gives the square-root consistency estimate
+for a unit state under a probability distribution. This is the left-projective
+branch of the third item of `fact:agreement`; blueprint
+`ch12_qpbt_games.tex:245-255`, paper
+`references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:306-309`.
+
+**Scope restriction:** The cited item also permits the right family to be
+projective. The source-facing disjunction is tracked by issue #33. -/
 theorem consistencyDefect_le_sqrt_of_projective_left {X α ι : Type*}
     [Fintype X] [DecidableEq X] [Fintype α] [DecidableEq α]
     [Fintype ι] [DecidableEq ι]
@@ -685,31 +689,21 @@ theorem avg_closeness {X ι : Type*}
   have hrhs_nonneg :
       0 ≤ ∑ x ∈ μ.support, μ.weight x * ‖v x‖ ^ 2 :=
     Finset.sum_nonneg fun x _ => mul_nonneg (μ.nonnegative x) (sq_nonneg _)
-  have hcs :
-      ∑ x ∈ μ.support, μ.weight x * ‖v x‖ ≤
-        Real.sqrt (∑ x ∈ μ.support, μ.weight x) *
-          Real.sqrt (∑ x ∈ μ.support, μ.weight x * ‖v x‖ ^ 2) := by
-    convert Real.sum_sqrt_mul_sqrt_le
-      (s := μ.support)
-      (f := fun x => μ.weight x)
-      (g := fun x => μ.weight x * ‖v x‖ ^ 2)
-      (fun x => μ.nonnegative x)
-      (fun x => mul_nonneg (μ.nonnegative x) (sq_nonneg _)) using 1
-    apply Finset.sum_congr rfl
-    intro x _
-    rw [Real.sqrt_mul (μ.nonnegative x), Real.sqrt_sq_eq_abs, abs_norm]
-    rw [← mul_assoc, Real.mul_self_sqrt (μ.nonnegative x)]
+  have havg_norm :
+      |avgOver μ (fun x => ‖v x‖)| ≤
+        Real.sqrt (avgOver μ (fun x => ‖v x‖ ^ 2)) := by
+    exact MIPStarRE.LDT.Preliminaries.avgOver_abs_le_sqrt_of_pointwise μ
+      (fun x => ‖v x‖) (fun x => ‖v x‖ ^ 2)
+      (fun x => by rw [abs_norm, Real.sqrt_sq_eq_abs, abs_norm])
+      (fun x => sq_nonneg ‖v x‖) (by rw [hμ.weight_sum_eq_one])
   have hnorm_sqrt :
       ‖∑ x ∈ μ.support, μ.weight x • (α x • v x)‖ ≤
         Real.sqrt (∑ x ∈ μ.support, μ.weight x * ‖v x‖ ^ 2) := by
     calc
       ‖∑ x ∈ μ.support, μ.weight x • (α x • v x)‖ ≤
           ∑ x ∈ μ.support, μ.weight x * ‖v x‖ := hnorm
-      _ ≤ Real.sqrt (∑ x ∈ μ.support, μ.weight x) *
-          Real.sqrt (∑ x ∈ μ.support, μ.weight x * ‖v x‖ ^ 2) := hcs
-      _ = Real.sqrt (∑ x ∈ μ.support, μ.weight x * ‖v x‖ ^ 2) := by
-        rw [hμ.weight_sum_eq_one]
-        simp
+      _ ≤ |avgOver μ (fun x => ‖v x‖)| := le_abs_self _
+      _ ≤ Real.sqrt (avgOver μ (fun x => ‖v x‖ ^ 2)) := havg_norm
   rw [happly]
   unfold opDistSq opFamilyDistSq avgOver
   simp only [Fintype.sum_unique]
