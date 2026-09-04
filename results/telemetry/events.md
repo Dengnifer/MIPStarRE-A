@@ -2285,3 +2285,89 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 - **Fix:** no merge occurred and no changes were lost. Paused the merge path to
   identify and use the documented non-destructive telemetry/persona flush
   workflow, then will rerun the full preflight.
+
+## 2026-09-04 11:55Z - hand-tracked packet dependencies (owner session)
+
+- Symptom: for most of 2026-09-04 the operator launched lanes by reading the dependency tables on #47 and packet bodies by hand; several ready packets sat unlaunched for 30-90 min after their prerequisites merged (codex under 5 of 7 slots at 07:45Z and 10:50Z; see owner-log). Four packets (#122, #126, #146, #156) had no parent in the #47 tree.
+- Diagnosis (owner-audits/issue-tree-study-20260904.md): the upstream tree encodes containment and roll-up only; GitHub issue dependencies (blocked_by) are available on this repository and unused.
+- Change: #159 - chapter/chain parents under #47, blocked_by edges transcribed from the prose prerequisites, local/bin/ready_packets.py; protocol clause in issues-prs.md; EVOLUTION entry in the PR.
+
+## 2026-09-04 — Operator hand-back: codex main session resumes from the owner session
+
+- **Trigger:** owner decision (2026-09-04T13:03:08Z): the owner's Claude 5-hour window is nearly used; the
+  owner session returns at 14:50Z. Mode 2 ran since 2026-09-03 23:11Z with the merge daemon,
+  stacked lanes and the Opus/codex prover pools; Mode 1 resumes from /tmp/qpbt-main-handoff.md
+  (archived under results/telemetry/owner-messages/).
+- **State at hand-back:** main at 4eaf968; open PRs: 171,170,169,162,161,160,158,155,154,153,152,151,150,149.
+
+## 2026-09-04 13:22Z - Issue #132 file-length gate repair
+
+- **Symptom:** the first pre-push gate rejected
+  `MIPStarRE/QPBT/Combining/DirectLowDegree/Transport/Consistency.lean` at
+  1,782 lines.
+- **Diagnosis:** the proof work was complete, but the new module exceeded the
+  repository's 1,000-line source-file limit.
+- **Fix:** the existing prover session was resumed with a structure-only repair:
+  split the implementation into submodules, preserve the facade and public
+  declarations, and make no proof or theorem-statement changes. The repaired
+  branch opened PR #179 and entered exact-head CI.
+- **Lesson:** include the file-length check before the first publication attempt
+  when a proof packet substantially grows one module.
+
+## 2026-09-04 13:38Z - Merge-daemon detached restart
+
+- **Symptom:** after a deliberate exact-PID reload to pick up a changed
+  adjudication list, the first `nohup` restart exited with its launching shell.
+- **Diagnosis:** the process was not fully detached from the execution session.
+- **Fix:** the missing daemon was detected before another merge operation began
+  and restarted with `setsid`; PID and command line were verified. PR #151 had
+  already completed its daemon-owned merge before the reload.
+- **Lesson:** verify persistence after every daemon reload and use a detached
+  session, not `nohup` alone, in this execution environment.
+
+## 2026-09-04 13:39Z - Adjudication follow-up parent blocked closing gate
+
+- **Symptom:** follow-up issue #177 was initially created as a sub-issue of
+  #159, while PR #171 closes #159; gate 7 would therefore have refused the
+  adjudicated merge while #177 remained open.
+- **Diagnosis:** review follow-up provenance was confused with tracker
+  containment. A closing issue cannot parent open deferred work.
+- **Fix:** #177 retained `Addresses #159` in its body but was detached from
+  #159 before the daemon reached the merge gate; `open-sub-issues 159` then
+  returned an empty list.
+- **Lesson:** deferred-review issues should link by provenance, or live under a
+  non-closing tracker, rather than become children of the issue closed by the
+  adjudicated PR.
+
+## 2026-09-04 — Operator takeover: owner's Claude session replaces the codex main session
+
+- **Trigger:** owner decision (2026-09-03, after the eight-hour stall and the
+  reviewer-churn episode): the owner's Claude Fable 5.1 session, working from
+  the owner's machine over ssh, takes the operator role for about one to two
+  days. Dispatched worker sessions (orc/prover/reviewer/…) remain codex
+  sessions on ghz via `dispatch.sh` (model gpt-5.6-sol until "astra" is
+  available in codex's configuration, then astra; an hourly codex poller
+  `owner-tools/astra-poll.sh` reports the switch to #26).
+- **Handover:** the codex main session posted its exact in-flight state to
+  #27 ("Handover to owner session") and exited at 2026-09-04T14:57:57Z. The owner session
+  picks up every lane from that report. The same protocols, gates and telemetry
+  duties bind the owner session; owner-side records continue in
+  `owner-log.md`.
+- **Hand-back:** to be recorded here and in `stages.jsonl` when the owner
+  says so; the codex main session then resumes from `~/.codex/prompts/goal.md`
+  plus the #27 log.
+
+## 2026-09-04 15:12Z - Packet prerequisite write and budget gaps
+
+- **Symptom:** PR #171 made GitHub `blocked_by` edges authoritative and added
+  `scripts/tests/test_ready_packets.py`, but the documented local lifecycle had
+  no supported edge-write command and the owner-gated 400-line budget did not
+  count that test module.
+- **Diagnosis:** deferred review findings F1 and F2, recorded as issue #177,
+  identified two missing enforcement paths around the bounded PR #171 work.
+- **Fix:** add an adoption-safe `gh_common.py add-blocked-by` command with fake
+  API coverage, and include the readiness test in the hook budget with an
+  executable over-budget regression.
+- **Lesson:** an authoritative GitHub relation needs both read and write paths,
+  and every workflow test added outside `local/` must be named by the scope
+  budget when the budget uses an explicit path set.

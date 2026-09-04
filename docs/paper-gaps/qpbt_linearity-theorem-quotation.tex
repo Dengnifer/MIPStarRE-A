@@ -11,7 +11,7 @@
 
 \title{The Quoted Quantum Linearity Theorem in the Pauli Basis Analysis}
 \author{}
-\date{2026-09-03}
+\date{2026-09-04}
 
 \begin{document}
 \maketitle
@@ -22,17 +22,18 @@
   \item \textbf{Difficulty.} Medium.  The source quotes a fiberwise consequence
   of a state-dependent quantum linearity theorem, but suppresses two averages
   and a compatibility argument for the auxiliary spaces.
-  \item \textbf{Estimated weight.} One faithful theorem for a single family,
-  followed by a finite common-extension construction that makes the auxiliary space
-  uniform over the outer parameters.
+  \item \textbf{Estimated weight.} The corrected single-family theorem and its
+  two distance formulations are proved.  The remaining task is a finite
+  common-extension construction that makes the auxiliary space uniform over
+  the outer parameters.
   \item \textbf{Mathlib/project split.} Finite direct sums, extensions of
-  operators, and squared norms are standard linear algebra.  The imported
-  quantum linearity theorem and its state-dependent metric are project-level
-  inputs.
+  operators, and squared norms are standard linear algebra.  The proved
+  Fourier--Naimark stability theorem and the two state-dependent distance
+  conventions are project-level results.
   \item \textbf{Key mathematical inputs.} Theorem~10 of
-  \cite{Natarajan2017Linearity}, finite averaging, and extension by the identity
-  on orthogonal summands.  This reduction is tracked in
-  \ghissue{19}.
+  \cite{Natarajan2017Linearity}, the operator BLR identity, finite averaging,
+  and extension by the identity on orthogonal summands.  The remaining
+  common-extension reduction is tracked in \ghissue{19}.
 \end{itemize}
 
 \section{Key theorem forms}
@@ -43,10 +44,12 @@ indexed by $\mathbb F_2^t$.  The cited theorem assumes the averaged
 correlation estimate
 \[
   \mathop{\mathbb E}_{u,v}
-  \operatorname{Tr}\!\left(O^u O^v O^{u+v}\rho\right) \geq 1-\delta.
+  \operatorname{Re}\operatorname{Tr}\!\left(
+    O^u O^v O^{u+v}\rho\right) \geq 1-\delta.
 \]
-It produces an auxiliary space $H'$, a unit vector $\mathrm{anc}\in H'$, and
-binary observables $L^u$ on $H\otimes H'$ satisfying, with
+Its Fourier--Naimark argument produces an auxiliary space $H'$, a unit vector
+$\mathrm{anc}\in H'$, and binary observables $L^u$ on $H\otimes H'$ satisfying,
+with
 $\rho'=\rho\otimes|\mathrm{anc}\rangle\langle\mathrm{anc}|$,
 \[
   L^uL^v=L^{u+v}
@@ -56,17 +59,33 @@ Moreover,
 \[
   \mathop{\mathbb E}_{u}
   \operatorname{Tr}\!\left((L^u-O^u\otimes I_{H'})^\dagger
-    (L^u-O^u\otimes I_{H'})\,\rho'\right)\leq\delta.
+    (L^u-O^u\otimes I_{H'})\,\rho'\right)\leq2\delta.
 \]
+Equivalently, if $d^{\mathrm{bin}}_{\rho'}$ denotes the distance between the
+binary projective measurements associated with the two observables, then
+\[
+  \mathop{\mathbb E}_{u}
+  d^{\mathrm{bin}}_{\rho'}(L^u,O^u\otimes I_{H'})^2\leq\delta.
+\]
+The source prints $\delta$ for the first, operator-distance bound.  Its
+calculation instead proves the second, measurement-distance bound, which is
+one half of the squared operator distance.  The factor-of-two discrepancy and
+a counterexample to the printed operator bound are given in
+\path{docs/paper-gaps/qpbt_linearity-distance-normalization.tex}, tracked in
+\ghissue{124}.
 In particular, $L^0=I$: exact linearity gives $(L^0)^2=L^0$, while an
 observable is invertible.
 
 The chapter needs a parameterized version.  For each pair $(x,z)$ it applies
-the theorem to $(r,s)\mapsto O^{x,z,r,s}$.  Since the provider theorem accepts
-the actual nonnegative defect on each fiber, no assumption that a fiber defect
-is at most one, and no good--bad fiber split, is needed.  One must still
-formulate the finite common-extension step that makes the auxiliary space
-uniform over $(x,z)$.
+the theorem to $(r,s)\mapsto O^{x,z,r,s}$.  If $\delta_{x,z}$ is the mean
+squared multiplicative defect on that fiber, the corresponding correlation
+error is $\delta_{x,z}/2$.  The corrected theorem therefore gives mean squared
+operator distance at most $\delta_{x,z}$, equivalently mean squared binary-
+measurement distance at most $\delta_{x,z}/2$.  Since the theorem accepts the
+actual nonnegative error on each fiber, no assumption that a fiber error is at
+most one, and no good--bad fiber split, is needed.  One must still formulate
+the finite common-extension step that makes the auxiliary space uniform over
+$(x,z)$.
 
 \section{Comparison with the quoted statement}
 
@@ -78,7 +97,10 @@ observable is close for every $u$, whereas Theorem~10 of the cited work gives
 closeness only on average over $u$ \cite{Natarajan2017Linearity}.  The quotation
 also inserts $\delta\leq1$, which is absent from the provider theorem and would
 unnecessarily obstruct applying it with a fiber's actual defect.  The assertion
-at the identity follows from exact linearity as above.
+at the identity follows from exact linearity as above.  Finally, the provider
+prints the bound $\delta$ for squared operator distance, whereas its proof gives
+the bound $2\delta$, or equivalently $\delta$ for the associated binary-
+measurement distance.
 
 Lines~825--832 construct the family $O^{x,z,r,s}$ and establish approximate
 linearity only after averaging over $x,z,r,r',s,s'$.  They then apply the
@@ -100,20 +122,22 @@ or to the source's eventual combined-measurement conclusion.
 Theorem~\path{thm:linearity} and
 Remark~\path{rem:linearity-import} in
 \path{blueprint/src/chapter/ch15_qpbt_combining.tex} record respectively the
-averaged provider theorem and the common-ancilla obligation for its fiberwise
-use.  The relevant material is at lines~98--147 and 149--191 of that chapter.
+averaged provider theorem with the corrected distance normalization and the
+common-ancilla obligation for its fiberwise use.
 
 The declaration \path{exists_exactly_linear_observables} in
 \path{MIPStarRE/QPBT/Combining/Linearity.lean} assumes a nonnegative defect, a
 positive semidefinite trace-one operator, binary observables, and the averaged
 three-observable correlation.  It returns one finite ancillary space and
 normalized ancillary vector for that family, exactly linear binary observables
-on the extension, and only the averaged squared-distance bound with the same
-defect.  It neither assumes $\delta\leq1$ nor asserts pointwise closeness.  Its
-statement therefore matches the provider-faithful blueprint theorem rather
-than the strengthened quotation in the QPBT paper.  Its proof remains open,
-and no Lean declaration yet supplies the finite common-extension construction
-for the family indexed by $(x,z)$.
+on the extension, and the averaged squared operator-distance bound $2\delta$.
+The companion declaration
+\path{exists_exactly_linear_observables_binaryObservableDistSq} gives the
+equivalent squared binary-measurement bound $\delta$.  Both declarations are
+proved.  They neither assume $\delta\leq1$ nor assert pointwise closeness, and
+the first declaration records the correction to the provider's printed
+operator bound.  No Lean declaration yet supplies the finite common-extension
+construction for the family indexed by $(x,z)$.
 
 Issue~\#19 introduced this discrepancy record for the extraction skeleton;
 \ghissue{47} owns the Stage~4.3 proof work consumed downstream.  The chapter-16
@@ -122,11 +146,13 @@ do not assume a new fiberwise linearity hypothesis or a common ancillary space.
 
 \section{Conclusion}
 
-The primary discrepancy is a quantifier mismatch in the quotation: the cited
-linearity theorem gives average, not pointwise, closeness.  Its use for the
-family indexed by $(x,z)$ also requires an explicit finite common-extension
-argument.  Both are open formal reductions compatible with the intended
-source conclusion.
+The quotation has two independent discrepancies: it changes averaged closeness
+to pointwise closeness, and the provider's displayed operator-distance bound
+misses a factor of two.  The single-family theorem is now proved with mean
+squared operator error at most $2\delta$, equivalently mean squared binary-
+measurement error at most $\delta$, without an upper bound on $\delta$.
+Its use for the family indexed by $(x,z)$ still requires an explicit finite
+common-extension argument; that is the remaining open formal reduction.
 
 \bibliographystyle{alpha}
 \bibliography{references}

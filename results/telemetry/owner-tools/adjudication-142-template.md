@@ -1,0 +1,5 @@
+ADJUDICATION — PR 142 (issue #97, conditional-linearity structure), operator adjudication after round 4: the code lane approved in rounds 2-4; the prose lane's round-4 items reverse its own round-3 request.
+head=__HEAD__
+- [x] F1 — out of scope: the `\lean{}` links on `def:cl-func` were added in round 3 deliberately WITHOUT definition-level `\leanok`, because `IsCondLinearOn` is a documented representation deviation (positive syntax tree with finite supports, forced by the strict-positivity checker) and the blueprint style rule grants `\leanok` only for an exact match; marking it would misstate faithfulness.
+- [x] F2 — out of scope: `clDistribution` is defined for arbitrary families while the blueprint text assumes the conditional-linearity hypotheses; the round-3 repair linked it without `\leanok` for that reason (the same treatment `def:cl-dist` received before this PR), and adding `\leanok` would claim a match that does not hold.
+Evidence on this head: local-ci/summary success (all steps); marker review on this head with code lane APPROVED; four rounds; every conditional-linearity target of the packet proved with axioms audited.
