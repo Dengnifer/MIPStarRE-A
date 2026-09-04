@@ -1,6 +1,27 @@
 # Incident and observation log
 Dated bullets, one incident each: symptom → diagnosis → fix → lesson.
 This file is the raw feed for `local/protocols/EVOLUTION.md`.
+## 2026-09-05
+- **Owner-side `.lake` relocation shim.** Worktree build directories consumed the
+  87%-full root volume, whose fsync writes measured nine times slower than the
+  NVMe ZFS pool. Temporary owner launchers moved each `.lake` to `/data` before
+  bootstrap, but merge cleanup left the external directory behind. Issue #190
+  replaces that untracked ordering dependency with an opt-in Lake root shared by
+  setup and warming, plus guarded post-worktree cleanup. Lesson: storage
+  placement and lifecycle cleanup belong in the workflow boundary that creates
+  and retires the worktree.
+- **External Lake-root review guards.** PR #198 round-1 review found that root
+  aliases, symlinked branch ancestors, `hot-main` targets, and the Codex sandbox
+  were outside the initial safety model. The repair canonicalizes before create
+  and delete, preserves both containment boundaries, and grants only the checked
+  branch target to writable sessions. Lesson: external placement needs filesystem
+  and execution-sandbox containment to be designed as one boundary.
+- **Canonical Lake target ownership.** PR #198 reviews found shared-cache and
+  checkout overlap, nested or aliased branch targets, detached owners, and silent
+  retry cleanup. Setup and cleanup now accept one-component branches, protect
+  packages, `hot-main`, and every checkout, and compare canonical ownership;
+  retries warn when the root is unavailable. Lesson: destructive cleanup needs
+  collision-free names and operator-visible ownership inputs at deletion time.
 ## 2026-08-30
 - **Stale seed clone.** Symptom: files copied from the sibling `../MIPStarRE`
   checkout were dated Jul 5 while upstream main was Aug 25. Diagnosis: the
