@@ -1100,109 +1100,6 @@
   "pinned_comment": null
  },
  {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/67",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/67/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/67/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/67/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/67",
-  "id": 5341077898,
-  "node_id": "I_kwDOUJyJf88AAAABPlphig",
-  "number": 67,
-  "title": "refactor(QPBT): split direct low-degree proof surface",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025011402,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8cyg",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/refactor",
-    "name": "refactor",
-    "color": "ededed",
-    "default": false,
-    "description": "Structural change without intended behavior change"
-   },
-   {
-    "id": 12025012183,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8f1w",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/qpbt-analysis",
-    "name": "qpbt-analysis",
-    "color": "ededed",
-    "default": false,
-    "description": "Soundness/rigidity analysis of the Pauli basis test \u2014 self-testing bounds and error terms"
-   },
-   {
-    "id": 12025012620,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8hjA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/proof-infra",
-    "name": "proof-infra",
-    "color": "ededed",
-    "default": false,
-    "description": "Intermediate lemmas or definitions that mainly support proofs"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-03T20:19:05Z",
-  "updated_at": "2026-09-03T20:19:05Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 0,
-   "blocking": 0,
-   "total_blocking": 0
-  },
-  "body": "<!-- mipstarre-issue-key: stage43-direct-low-degree-proof-split -->\n### Motivation\n\n- Parent: #47.\n- `MIPStarRE/QPBT/Combining/DirectLowDegree.lean` currently combines the\n  direct-index geometry, game definition, and final soundness obligation in one\n  file.\n- Stage 4.3 needs independent geometry, game-calculus, native-LDT adapter,\n  bounds, and simultaneous-encoding packets. Keeping the current layout makes\n  those packets converge on one file or creates an import cycle when the public\n  theorem imports their helper results.\n- This issue is structural only. It must preserve the public API and all six\n  existing proof holes exactly.\n\n### Description\n\nSplit the existing file at its current declaration boundaries:\n\n1. Create `MIPStarRE/QPBT/Combining/DirectLowDegree/Geometry.lean`.\n\n   - Import `MIPStarRE.QPBT.Test.LowDegreeGameTheorems` and\n     `MIPStarRE.QPBT.Test.PauliBasisTest`.\n   - Move, without renaming, reordering, signature changes, or proof changes,\n     the declarations currently spanning `DirectLdParams` through\n     `directDLinePointDist_prefix_zero` (`DirectLowDegree.lean:39-266`).\n   - Retain the five existing `sorry` proofs unchanged.\n\n2. Create `MIPStarRE/QPBT/Combining/DirectLowDegree/Game.lean`.\n\n   - Import `MIPStarRE.QPBT.Combining.DirectLowDegree.Geometry`.\n   - Move verbatim the declarations from `DirectDegPoly` through\n     `evalDirectPolyTupleAt` (`DirectLowDegree.lean:268-455`).\n\n3. Create `MIPStarRE/QPBT/Combining/DirectLowDegree/Soundness.lean`.\n\n   - Import `MIPStarRE.QPBT.Combining.DirectLowDegree.Game`.\n   - Move `exists_direct_ld_soundness` and its docstring\n     (`DirectLowDegree.lean:457-497`) verbatim.\n   - Retain its existing `sorry` proof unchanged.\n\n4. Turn `MIPStarRE/QPBT/Combining/DirectLowDegree.lean` into the stable facade.\n\n   - Preserve its existing module docstring.\n   - Replace its implementation imports with\n     `MIPStarRE.QPBT.Combining.DirectLowDegree.Soundness`.\n   - Continue exposing every declaration under the same fully qualified name.\n\nEach new internal file must have the required module docstring and use the\nexisting `MIPStarRE.QPBT` namespace. Apart from those docstrings, imports, and\nnamespace wrappers, moved declaration text must remain unchanged.\n\n### Non-goals\n\n- Do not prove or alter any theorem, add helper declarations, or change the\n  proof-debt inventory.\n- Do not edit `MIPStarRE/QPBT.lean`, `Witnesses.lean`, `Apply.lean`, blueprint\n  files, or paper-gap notes.\n- Do not change any mathematical definition, theorem signature, constant, or\n  source claim.\n\nThis split establishes disjoint ownership for later geometry, game-value,\nnative-adapter, bounds, simultaneous-encoding, and final-assembly packets. Only\nthe final assembly packet will edit `Soundness.lean`.\n\n### Testing\n\n- Direct-check `Geometry.lean`, `Game.lean`, `Soundness.lean`, the facade, and\n  `Combining/Witnesses.lean` in dependency order.\n- Run `lake build` and `git diff --check`.\n- Confirm the four-file surface contains exactly six `sorry` sites: five in\n  `Geometry.lean` and one in `Soundness.lean`, with no `admit` or new axiom.\n- Confirm all existing declaration names and signatures are unchanged.\n- Confirm `MIPStarRE/QPBT.lean` is untouched.\n- Pass exact-head CI and independent review.\n\n---\nStage 4.3 structural packet under #47.\n",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/67/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/67/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/64",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/64/labels{/name}",
@@ -1910,8 +1807,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 19,
-   "completed": 7,
-   "percent_completed": 36
+   "completed": 8,
+   "percent_completed": 42
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/1",
   "issue_dependencies_summary": {
