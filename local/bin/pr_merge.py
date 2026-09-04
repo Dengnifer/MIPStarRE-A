@@ -163,8 +163,8 @@ def check_ci(statuses: dict, head_sha: str) -> None:
     passed(f"gate 3 all {len(CI_CONTEXTS)} local-ci contexts success")
 
 
-def check_review(number: int, head_sha: str, reviews: list[dict], statuses: dict,
-                 *, adjudicated: bool) -> set[int]:
+def check_review(repo_root: Path, number: int, head_sha: str, reviews: list[dict],
+                 statuses: dict, *, adjudicated: bool) -> set[int]:
     """Gate 4 — one verdict review on this commit id, clean or adjudicated."""
     marker = f"<!-- mipstarre-review pr={number} head={head_sha} -->"
     matching = [r for r in reviews
@@ -194,9 +194,14 @@ def check_review(number: int, head_sha: str, reviews: list[dict], statuses: dict
                           f"{observed}. Address the findings (or tick them off with a reason and "
                           "a tracked issue) and re-run review.sh, or merge --adjudicated.")
     # review.md section 12: past the round cap the operator may adjudicate what is left.
+    # A round is a marker review bound to the head it names and not itself a
+    # carried copy (review.md section 13): carried bodies and unbound markers
+    # never count towards adjudication eligibility.
     round_marker = re.compile(rf"mipstarre-review pr={number} head=([0-9a-f]{{40}})")
     reviewed_heads = {m.group(1) for row in reviews
-                      if (m := round_marker.search(row.get("body") or ""))}
+                      if (m := round_marker.search(row.get("body") or ""))
+                      and row.get("commit_id") == m.group(1)
+                      and "mipstarre-review-carried" not in (row.get("body") or "")}
     if not reviewed_heads - {head_sha}:
         raise GateFailure("gate 4 (review): adjudication is available after two review rounds; "
                           "no prior reviewed head was found.")
@@ -220,6 +225,14 @@ def check_review(number: int, head_sha: str, reviews: list[dict], statuses: dict
                           f"on PR #{number} has exactly head={head_sha} and one checked, valid "
                           f"disposition for each of {unchecked} unresolved finding(s).")
     row, dispositions = accepted
+    # `fixed in <sha>` must name a commit that is part of this PR's history.
+    for fixed_sha in re.findall(r"fixed in ([0-9a-f]{7,40})", row.get("body") or ""):
+        reachable = subprocess.run(
+            ["git", "-C", str(repo_root), "merge-base", "--is-ancestor", fixed_sha, head_sha],
+            capture_output=True).returncode == 0
+        if not reachable:
+            raise GateFailure(f"gate 4 (review): disposition 'fixed in {fixed_sha}' does not name a commit "
+                              f"reachable from the PR head {head_sha[:12]}")
     for _, issue_number in dispositions:
         if not issue_number:
             continue
@@ -334,7 +347,7 @@ def run_gate(repo_root: Path, number: int, *, adjudicated: bool) -> dict:
     statuses = gh_common.latest_statuses(head_sha)  # one read; gates 3 and 4 share it
     reviews = gh_common.pr_reviews(number)
     check_ci(statuses, head_sha)
-    deferred_issues = check_review(number, head_sha, reviews, statuses, adjudicated=adjudicated)
+    deferred_issues = check_review(repo_root, number, head_sha, reviews, statuses, adjudicated=adjudicated)
     # Gate 5 — a CHANGES_REQUESTED review on this head is final, and never adjudicable.
     blockers = [r for r in reviews if r.get("state") == "CHANGES_REQUESTED"
                 and r.get("commit_id") == head_sha]

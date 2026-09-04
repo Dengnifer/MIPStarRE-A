@@ -440,13 +440,13 @@ class MergeGateTests(LayerTestCase):
         with mock.patch.object(pr_merge.gh_common, "api",
                                side_effect=lambda path, **_: [comment] if path.endswith("comments")
                                else {"number": 24, "state": "open"}):
-            deferred = pr_merge.check_review(7, self.head, reviews, statuses, adjudicated=True)
+            deferred = pr_merge.check_review(self.repo, 7, self.head, reviews, statuses, adjudicated=True)
         self.assertEqual(deferred, {24})
 
         out_of_scope = {"id": 10, "body": ("ADJUDICATION\nhead=" + self.head
                                              + "\n- [x] F1 — out of scope: new mechanism")}
         with mock.patch.object(pr_merge.gh_common, "api", return_value=[out_of_scope]):
-            deferred = pr_merge.check_review(7, self.head, reviews, statuses, adjudicated=True)
+            deferred = pr_merge.check_review(self.repo, 7, self.head, reviews, statuses, adjudicated=True)
         self.assertEqual(deferred, set())
 
         merge_base = _git(self.repo, "merge-base", "main", self.head)
@@ -463,15 +463,15 @@ class MergeGateTests(LayerTestCase):
                     mock.patch.object(pr_merge.gh_common, "api",
                                       return_value=[dict(comment, body=bad_body)]):
                 with self.assertRaisesRegex(LayerError, "exactly head="):
-                    pr_merge.check_review(7, self.head, reviews, statuses, adjudicated=True)
+                    pr_merge.check_review(self.repo, 7, self.head, reviews, statuses, adjudicated=True)
 
         with mock.patch.object(pr_merge.gh_common, "api",
                                side_effect=([comment], {"number": 24, "state": "closed"})):
             with self.assertRaisesRegex(LayerError, "open tracked issue"):
-                pr_merge.check_review(7, self.head, reviews, statuses, adjudicated=True)
+                pr_merge.check_review(self.repo, 7, self.head, reviews, statuses, adjudicated=True)
 
         with self.assertRaisesRegex(LayerError, "two review rounds"):
-            pr_merge.check_review(7, self.head, reviews[:-1], statuses, adjudicated=True)
+            pr_merge.check_review(self.repo, 7, self.head, reviews[:-1], statuses, adjudicated=True)
 
 
 # --------------------------------------------------------------------------
