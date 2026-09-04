@@ -14,17 +14,6 @@ namespace MIPStarRE.QPBT
 
 open MIPStarRE.LDT
 
-/-- Enlarging the explicit support does not change the total weight of a
-probability distribution when the added weights vanish. -/
-private theorem weight_sum_eq_one_of_subset {α : Type*}
-    (μ : Distribution α) (hμ : μ.IsProbability) (s : Finset α)
-    (hsubset : μ.support ⊆ s) :
-    ∑ a ∈ s, μ.weight a = 1 := by
-  have hsum :
-      ∑ a ∈ μ.support, μ.weight a = ∑ a ∈ s, μ.weight a :=
-    Finset.sum_subset hsubset (fun a _ ha => μ.outsideSupport a ha)
-  exact hsum ▸ hμ.weight_sum_eq_one
-
 /-- The product of two finite distributions, a formalization-only auxiliary
 used by the sandwich construction; blueprint `ch12_qpbt_games.tex:398-425`,
 paper `06_nonlocal_games_and_mipstar.tex:465-501`. -/
@@ -92,12 +81,12 @@ theorem Distribution.mix_isProbability {α : Type*} [DecidableEq α]
     (Distribution.mix t ht0 ht1 μ ν).IsProbability := by
   have hμ_union :
       ∑ a ∈ μ.support ∪ ν.support, μ.weight a = 1 := by
-    apply weight_sum_eq_one_of_subset μ hμ
+    apply hμ.weight_sum_eq_one_of_subset
     intro a ha
     exact Finset.mem_union_left ν.support ha
   have hν_union :
       ∑ a ∈ μ.support ∪ ν.support, ν.weight a = 1 := by
-    apply weight_sum_eq_one_of_subset ν hν
+    apply hν.weight_sum_eq_one_of_subset
     intro a ha
     exact Finset.mem_union_right μ.support ha
   simp only [Distribution.IsProbability, Distribution.totalWeight,
@@ -132,7 +121,7 @@ theorem Distribution.bind_isProbability {α β : Type*} [DecidableEq β]
   classical
   have hν_union (a : α) (ha : a ∈ μ.support) :
       ∑ b ∈ μ.support.biUnion (fun a => (ν a).support), (ν a).weight b = 1 := by
-    apply weight_sum_eq_one_of_subset (ν a) (hν a ha)
+    apply (hν a ha).weight_sum_eq_one_of_subset
     intro b hb
     exact Finset.mem_biUnion.mpr ⟨a, ha, hb⟩
   simp only [Distribution.IsProbability, Distribution.totalWeight,
