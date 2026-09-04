@@ -7,15 +7,28 @@ import MIPStarRE.LDT.Test.StrategyRole.Algebra
 /-!
 # Projective rounding for consistent POVMs
 
-This module derives an explicit finite-dimensional projective rounding from the
-Q/X/XHat construction used in the LDT orthonormalization theorem. The argument
-keeps the original Alice space and completes the resulting projective
-submeasurement after proving that its missing state mass is small.
+This module proves the orthonormalization lemma `lem:ortho` with an explicit
+error constant: if a POVM `Q` on Alice's space and a POVM `R` on Bob's space are
+`δ`-consistent on a unit bipartite state `ψ`, then Alice has a projective
+measurement `P` on her original space with `P_a ⊗ 1` within `220 · δ^(1/4)` of
+`Q_a ⊗ 1` on `ψ`.
+
+The argument passes to Alice's reduced state and follows the construction of the
+LDT orthonormalization theorem. Rounding the almost-projective effects of `Q` and
+reducing their ranks gives a family of projectors `Q_a` whose ranges are almost
+orthogonal; assembling those ranges into one auxiliary space gives an operator
+`X`, whose positive-Gram polar factor `X̂` is a coisometry; and pulling the block
+projector of each outcome back along `X̂`, so that `P_a = X̂ᴴ T_a X̂`, gives a
+projective family close to `Q`. The family `P` lives on Alice's original space
+and is completed to a measurement at one fixed outcome once its missing state
+mass has been shown to be small.
 
 ## References
 
 - `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:131-153`
-- `blueprint/src/chapter/ch14_qpbt_observables.tex:356-383`
+- `blueprint/src/chapter/ch14_qpbt_observables.tex:390-423` (`lem:ortho`)
+- `blueprint/src/chapter/ch14_qpbt_observables.tex:425-464`
+  (`lem:ortho-explicit-constant`, the statement proved in this module)
 - `references/ldt-paper/orthonormalization.tex`
 -/
 
@@ -67,140 +80,13 @@ private theorem round_ev_adjoint_mul_self_eq_norm_sq {ι : Type*}
     (inner ℂ ψ ((Matrix.toEuclideanLin T).adjoint (Matrix.toEuclideanLin T ψ))).re
   rw [LinearMap.adjoint_inner_right]
 
-/-- Package a nonempty finite matrix index as an LDT finite Hilbert space. -/
+/-- Regard a nonempty finite coordinate set as an LDT finite Hilbert space. -/
 private def roundFiniteHilbertSpace (ι : Type*) [Fintype ι] [DecidableEq ι]
     [Nonempty ι] : FiniteHilbertSpace :=
   { carrier := ι
     instFintype := inferInstance
     instDecidableEq := inferInstance
     instNonempty := inferInstance }
-
-/-- The diagonal block of a bipartite operator at a fixed right index. -/
-private def roundDiagBlock {ιA ιB : Type*}
-    [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
-    (M : Op (ιA × ιB)) (b : ιB) : Op ιA :=
-  M.submatrix (fun i => (i, b)) (fun j => (j, b))
-
-/-- The normalized left marginal density obtained by summing diagonal right blocks. -/
-private def roundLeftMarginalDensity {ιA ιB : Type*}
-    [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB] [Nonempty ιB]
-    (ρ : Op (ιA × ιB)) : Op ιA :=
-  ((((Fintype.card ιB : Error) : Error)⁻¹ : Error) : ℂ) •
-    ∑ b : ιB, roundDiagBlock ρ b
-
-/-- Positivity passes from a bipartite density to its normalized left marginal. -/
-private lemma roundLeftMarginalDensity_nonneg {ιA ιB : Type*}
-    [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB] [Nonempty ιB]
-    {ρ : Op (ιA × ιB)} (hρ : 0 ≤ ρ) :
-    0 ≤ roundLeftMarginalDensity ρ := by
-  have hρpsd : ρ.PosSemidef := Matrix.nonneg_iff_posSemidef.mp hρ
-  have hsum : 0 ≤ ∑ b : ιB, roundDiagBlock ρ b := by
-    refine Finset.sum_nonneg fun b _ => ?_
-    refine Matrix.nonneg_iff_posSemidef.mpr ?_
-    simpa [roundDiagBlock] using hρpsd.submatrix (fun i => (i, b))
-  have hcoeff : 0 ≤ ((((Fintype.card ιB : Error) : Error)⁻¹ : Error) : ℂ) := by
-    positivity
-  simpa [roundLeftMarginalDensity] using smul_nonneg hcoeff hsum
-
-/-- The local quantum state defined by the normalized left marginal density. -/
-private def roundLeftMarginalState {ιA ιB : Type*}
-    [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB] [Nonempty ιB]
-    (ψ : QuantumState (ιA × ιB)) : QuantumState ιA where
-  density := roundLeftMarginalDensity ψ.density
-  density_psd := roundLeftMarginalDensity_nonneg ψ.density_psd
-
-/-- Left tensor placement is block diagonal with the same block at every right index. -/
-private lemma round_leftTensor_eq_blockDiagonal_const {ιA ιB : Type*}
-    [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
-    (X : Op ιA) :
-    leftTensor (ι₂ := ιB) X = Matrix.blockDiagonal (fun _ : ιB => X) := by
-  ext x y
-  rcases x with ⟨i, b⟩
-  rcases y with ⟨j, c⟩
-  by_cases h : b = c
-  · subst c
-    simp [leftTensor, Matrix.blockDiagonal_apply]
-  · simp [leftTensor, Matrix.blockDiagonal_apply, h]
-
-/-- The trace against a constant block-diagonal operator is the sum over diagonal blocks. -/
-private lemma round_trace_blockDiagonal_const_mul_eq_sum_trace_diagBlock
-    {ιA ιB : Type*}
-    [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
-    (X : Op ιA) (M : Op (ιA × ιB)) :
-    Matrix.trace (Matrix.blockDiagonal (fun _ : ιB => X) * M) =
-      ∑ b : ιB, Matrix.trace (X * roundDiagBlock M b) := by
-  classical
-  let e : ((ιA × ιB) × ιA) ≃ (ιB × (ιA × ιA)) :=
-    { toFun := fun x => (x.1.2, (x.1.1, x.2))
-      invFun := fun x => ((x.2.1, x.1), x.2.2)
-      left_inv := fun ⟨⟨_, _⟩, _⟩ => rfl
-      right_inv := fun ⟨_, ⟨_, _⟩⟩ => rfl }
-  simpa [roundDiagBlock, Matrix.trace, Matrix.mul_apply, Matrix.blockDiagonal_apply,
-    Fintype.sum_prod_type, Finset.sum_sigma', e] using
-    (e.sum_comp (fun y : ιB × (ιA × ιA) =>
-      X y.2.1 y.2.2 * M (y.2.2, y.1) (y.2.1, y.1)))
-
-/-- Evaluating a local operator in the left marginal agrees with left tensor placement. -/
-private lemma round_normalizedTrace_leftMarginalDensity_mul_eq
-    {ιA ιB : Type*}
-    [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB] [Nonempty ιB]
-    (ρ : Op (ιA × ιB)) (X : Op ιA) :
-    normalizedTrace (roundLeftMarginalDensity ρ * X) =
-      normalizedTrace (ρ * leftTensor (ι₂ := ιB) X) := by
-  have hcard : ((Fintype.card ιB : Error) : ℂ) ≠ 0 := by
-    exact_mod_cast Nat.cast_ne_zero.mpr Fintype.card_ne_zero
-  unfold normalizedTrace roundLeftMarginalDensity
-  rw [smul_mul_assoc, Matrix.trace_smul, Matrix.sum_mul, Matrix.trace_sum]
-  have hswap :
-      ∑ b : ιB, Matrix.trace (roundDiagBlock ρ b * X) =
-        ∑ b : ιB, Matrix.trace (X * roundDiagBlock ρ b) := by
-    refine Finset.sum_congr rfl ?_
-    intro b _
-    exact Matrix.trace_mul_comm _ _
-  rw [hswap, Matrix.trace_mul_comm, round_leftTensor_eq_blockDiagonal_const]
-  rw [round_trace_blockDiagonal_const_mul_eq_sum_trace_diagBlock]
-  simp [Fintype.card_prod]
-  ring
-
-/-- The left marginal of a normalized bipartite state is normalized. -/
-private lemma roundLeftMarginalState_isNormalized {ιA ιB : Type*}
-    [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB] [Nonempty ιB]
-    {ψ : QuantumState (ιA × ιB)} (hψ : ψ.IsNormalized) :
-    (roundLeftMarginalState ψ).IsNormalized := by
-  unfold QuantumState.IsNormalized
-  have hnorm : normalizedTrace (roundLeftMarginalDensity ψ.density) =
-      normalizedTrace ψ.density := by
-    simpa [leftTensor_one] using
-      round_normalizedTrace_leftMarginalDensity_mul_eq (ρ := ψ.density)
-        (X := (1 : Op ιA))
-  simpa [roundLeftMarginalState] using hnorm.trans hψ
-
-/-- Local evaluation in the left marginal equals bipartite evaluation after placement. -/
-private lemma roundLeftMarginal_ev_eq {ιA ιB : Type*}
-    [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB] [Nonempty ιB]
-    (ψ : QuantumState (ιA × ιB)) (X : Op ιA) :
-    ev ψ (leftTensor (ι₂ := ιB) X) = ev (roundLeftMarginalState ψ) X := by
-  unfold ev
-  rw [← Complex.ofReal_inj]
-  simp [round_normalizedTrace_leftMarginalDensity_mul_eq (ρ := ψ.density) (X := X),
-    roundLeftMarginalState]
-
-/-- A finite complex matrix of rank zero is the zero matrix. -/
-private lemma round_matrix_eq_zero_of_rank_eq_zero {m n : Type*}
-    [Finite m] [Fintype n] (A : Matrix m n ℂ) (hA : A.rank = 0) :
-    A = 0 := by
-  let _ : Fintype m := Fintype.ofFinite m
-  classical
-  have hrange : A.mulVecLin.range = ⊥ := by
-    rw [Matrix.rank] at hA
-    exact Submodule.finrank_eq_zero.mp hA
-  ext i j
-  have hv : A.mulVecLin (Pi.single j 1) ∈ A.mulVecLin.range := ⟨Pi.single j 1, rfl⟩
-  have hv0 : A.mulVecLin (Pi.single j 1) = 0 := by
-    simpa [hrange] using hv
-  have hentry := congrArg (fun w => w i) hv0
-  simpa [Matrix.mulVecLin_apply, Matrix.mulVec, dotProduct, Finset.sum_ite_eq,
-    Pi.single_apply] using hentry
 
 /-- A complete measurement on a nonzero finite space has a nonempty outcome type. -/
 private theorem round_measurement_outcome_nonempty {α ι : Type*}
@@ -324,8 +210,10 @@ private lemma round_consRel_of_consistencyDefect {ιA ιB α : Type*}
     rw [← hdefect]
     exact hcons
 
-/-- The Q/X/XHat repair and canonical completion give a projective measurement
-on Alice's original space with error at most `220 * δ^(1/4)`. -/
+/-- Rank reduction of the almost-projective effects, orthonormalization of the
+resulting ranges into the family `P_a = X̂ᴴ T_a X̂`, and completion at one fixed
+outcome give a projective measurement on Alice's original space within
+`220 * δ^(1/4)` of the given one. -/
 private lemma round_projective_ldt {ιA ιB α : Type*}
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
     [Fintype α] [DecidableEq α] [Nonempty ιA] [Nonempty ιB]
@@ -340,8 +228,8 @@ private lemma round_projective_ldt {ιA ιB α : Type*}
         (leftPlacedSubMeas (ιB := ιB) C.toSubMeas) ≤
           220 * zetaQuarterRoot δ := by
   classical
-  let φ : QuantumState ιA := roundLeftMarginalState Ψ
-  have hφ : φ.IsNormalized := roundLeftMarginalState_isNormalized hΨ
+  let φ : QuantumState ιA := leftMarginalState Ψ
+  have hφ : φ.IsNormalized := leftMarginalState_isNormalized hΨ
   let t : Error := zetaQuarterRoot δ
   have ht_nonneg : 0 ≤ t := zetaQuarterRoot_nonneg hδ
   by_cases ht_small : t ≤ 1 / (24 : Error)
@@ -372,7 +260,7 @@ private lemma round_projective_ldt {ιA ιB α : Type*}
       intro a
       simpa [φ, leftLiftedMeasurement, leftPlacedSubMeas, leftTensor_sub,
         leftTensor_mul_leftTensor] using
-        (roundLeftMarginal_ev_eq Ψ (A.outcome a - A.outcome a * A.outcome a))
+        (leftMarginal_ev_eq Ψ (A.outcome a - A.outcome a * A.outcome a))
     have hsource :
         ∑ a, ev φ (A.outcome a - A.outcome a * A.outcome a) ≤ 2 * δ := by
       simpa [hterm, consistencyToAlmostProjectiveError] using hsourceLifted
@@ -395,7 +283,7 @@ private lemma round_projective_ldt {ιA ιB α : Type*}
         exact hsigma this
       have hzero : ∀ a : α, qLayer.q.outcome a = 0 := by
         intro a
-        exact round_matrix_eq_zero_of_rank_eq_zero
+        exact matrix_eq_zero_of_rank_eq_zero
           (qLayer.q.outcome a) (hzero_rank a)
       have htotal_zero : QTotal qLayer = 0 := by
         calc
@@ -568,7 +456,7 @@ private lemma round_projective_ldt {ιA ιB α : Type*}
       intro a _
       simpa [φ, leftPlacedSubMeas, leftTensor_sub, leftTensor_conjTranspose,
         leftTensor_mul_leftTensor] using
-        roundLeftMarginal_ev_eq Ψ
+        leftMarginal_ev_eq Ψ
           ((A.outcome a - C.outcome a)ᴴ * (A.outcome a - C.outcome a))
     rw [hlift]
     exact hACq

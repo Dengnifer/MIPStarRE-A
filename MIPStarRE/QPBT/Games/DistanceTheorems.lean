@@ -809,7 +809,7 @@ theorem exists_projective_close_of_consistent :
         η δ ≤ C * Real.rpow δ (1 / 4 : ℝ)) ∧
       ∀ (ιA ιB α : Type) [Fintype ιA] [DecidableEq ιA]
         [Fintype ιB] [DecidableEq ιB] [Fintype α] [DecidableEq α]
-        (ψ : EuclideanSpace ℂ (ιA × ιB)) (hψ : ‖ψ‖ = 1)
+        (ψ : EuclideanSpace ℂ (ιA × ιB)) (_hψ : ‖ψ‖ = 1)
         (Q : Measurement α ιA)
         (R : Measurement α ιB) (δ : ℝ),
         0 ≤ δ ∧ δ ≤ 1 →
