@@ -81,9 +81,9 @@ private lemma leftMarginalDensity_nonneg {ιA ιB : Type*}
   simpa [leftMarginalDensity] using smul_nonneg hcoeff hsum
 
 /-- The local state on the left factor defined by the left marginal density
-of a bipartite state. This formalization-only definition supports
-`leftLiftedProjectivizationRepair` and
-`MIPStarRE.QPBT.projective_rounding_with_explicit_constant`. -/
+of a bipartite state. This formalization-only definition supports the
+locality-preserving projectivization lemma and the explicit-constant form of
+the orthonormalization lemma. -/
 def leftMarginalState {ιA ιB : Type*}
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB] [Nonempty ιB]
     (ψ : QuantumState (ιA × ιB)) : QuantumState ιA where
@@ -150,9 +150,9 @@ private lemma normalizedTrace_leftMarginalDensity_mul_eq
   ring
 
 /-- The complex normalized trace of a local operator is preserved by passage to
-the left marginal. This formalization-only identity supports
-`leftLiftedProjectivizationRepair` and
-`MIPStarRE.QPBT.projective_rounding_with_explicit_constant`. -/
+the left marginal. This formalization-only identity supports the marginal
+reduction in the locality-preserving projectivization lemma and the
+explicit-constant form of the orthonormalization lemma. -/
 lemma normalizedTrace_leftMarginalState_density_mul_eq
     {ιA ιB : Type*}
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB] [Nonempty ιB]
@@ -163,8 +163,9 @@ lemma normalizedTrace_leftMarginalState_density_mul_eq
     normalizedTrace_leftMarginalDensity_mul_eq (ρ := ψ.density) (X := X)
 
 /-- The left marginal of a normalized bipartite state is normalized. This
-formalization-only lemma supports `leftLiftedProjectivizationRepair` and
-`MIPStarRE.QPBT.projective_rounding_with_explicit_constant`. -/
+formalization-only lemma supports the marginal reduction in the
+locality-preserving projectivization lemma and the explicit-constant form of
+the orthonormalization lemma. -/
 lemma leftMarginalState_isNormalized {ιA ιB : Type*}
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB] [Nonempty ιB]
     {ψ : QuantumState (ιA × ιB)} (hψ : ψ.IsNormalized) :
@@ -179,9 +180,9 @@ lemma leftMarginalState_isNormalized {ιA ιB : Type*}
   exact hnorm.trans hψ
 
 /-- Local evaluation in the left marginal equals bipartite evaluation of the
-left tensor placement. This formalization-only identity supports
-`leftLiftedProjectivizationRepair` and
-`MIPStarRE.QPBT.projective_rounding_with_explicit_constant`. -/
+left tensor placement. This formalization-only identity supports the marginal
+reduction in the locality-preserving projectivization lemma and the
+explicit-constant form of the orthonormalization lemma. -/
 lemma leftMarginal_ev_eq {ιA ιB : Type*}
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB] [Nonempty ιB]
     (ψ : QuantumState (ιA × ιB)) (X : MIPStarRE.Quantum.Op ιA) :
@@ -339,9 +340,9 @@ private lemma one_le_orthonormalizationMainLemmaError_of_quarter_lt {ζ : Error}
   exact hone.trans hscaled
 
 /-- A finite complex matrix of rank zero is the zero matrix. This
-formalization-only linear-algebra lemma supports the zero-rank alternatives in
-`leftLiftedProjectivizationRepair` and
-`MIPStarRE.QPBT.projective_rounding_with_explicit_constant`. -/
+formalization-only linear-algebra lemma handles the zero-rank alternatives in
+the locality-preserving projectivization lemma and the explicit-constant form
+of the orthonormalization lemma. -/
 lemma matrix_eq_zero_of_rank_eq_zero {m n : Type*}
     [Finite m] [Fintype n] (A : Matrix m n ℂ) (hA : A.rank = 0) :
     A = 0 := by
