@@ -240,6 +240,27 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   proof obligations, as required by issue #18's accepted contract. The Apply
   module now states that these links do not claim proof closure. Completing
   those proofs is a later mathematics stage, not a change to this skeleton PR.
+
+## 2026-09-03 — PR #42 exact-head gate recovery
+
+- **Symptom:** the first `local/bin/ci.sh 42` run posted pending statuses at
+  exact head `c7ab72e`, then waited behind the machine-wide full-build lock.
+  The lock owner was PR #41, whose comparator check was stalled in a Mathlib
+  HTTPS clone.  The PR #42 gate was stopped without running review.
+- **Recovery:** after confirming owner pid `1229580` was dead, its stale lock
+  was reclaimed by the retry path.  Full CI passed at repair head `c0bc746`,
+  but the run resolved a stale local `origin/main` alias at `22afbcbb` rather
+  than current GitHub main `9d2b9198`.  The branch was therefore merged with
+  current main and the exact-head gate restarted; the earlier green statuses
+  are not being used as merge evidence.
+- **Review dispatch:** the first bounded review invocation was denied by the
+  execution sandbox because it could send repository context to the configured
+  external reviewer.  No indirect retry or review evidence was manufactured;
+  the main controller retained the authorized review boundary.
+- **Pre-push cache miss:** the first fresh-base push was stopped by the normal
+  hook because this worktree's tier-1 cache predated the Chapter 15 modules now
+  imported by `MIPStarRE/QPBT.lean`.  No hook was bypassed; the merged target is
+  built locally before the push is retried.
 ## 2026-09-03 — Disk at 97 %: eight copies of `.lake/packages`
 - **Symptom:** ghz root filesystem at 97 % (185 GB free of 5 TB); the project
   directory measured 87 GB, of which eight worktrees each held an identical

@@ -123,3 +123,10 @@ Repository: `Dengnifer/MIPStarRE-A`. Operator: the codex (gpt-5.6-sol) session
 ### 2026-09-04 06:40Z — owner decision: everything must be proved
 - Owner (chat): "everything must be proved" — the completion criterion admits no external statements or bridge assumptions; the Natarajan-Vidick linearity theorem (exists_exactly_linear_observables, blueprint thm:linearity) and the low-degree soundness transport (exists_direct_ld_soundness / exists_ld_soundness) become packet chains. Splitter sessions file them (owner-messages/split-task-20260904.md, split-longpoles-task-20260904.md).
 - Owner: codex account concurrency is 10 sessions shared with track B; split 7 (A) / 3 (B). lane-v9 gates at 7 with serialized launches; track B received the budget prompt.
+
+### 2026-09-04 07:25Z — owner session: merge daemon, capacity 7, incidents
+
+- Merge daemon (owner-tools/merge-daemon.sh) replaces the hand-run chains: refresh + exact-head CI + carried review + merge, one PR at a time, unattended; PRs 92/42/79 by adjudication templates.
+- Incident: the daemon hook-sync step (meant to give PRs 42/79 the merge-budget exemption from main) overwrote PR 92 own hook with main old hook; the reviewer caught it (F1 at 32ee82d). Restored from 6de2dce (622f7c0); daemon v2 syncs only when main already carries the MERGE_HEAD logic and the branch does not.
+- Incident: a direct owner push to main (references mirror 535b4a8) invalidated PR 92 fresh-base refresh and, with CI writing builds.jsonl into the primary during the gate, left 14 stuck telemetry stashes; recovered by union (26c8553). Rule: no pushes to main outside the daemon; merge-v2.sh auto-resolves stash conflicts and retries a dirtied gate.
+- Capacity: lane-v9 gates at 7 (account limit 10 shared with track B, 7/3 split), launches serialized by flock; 7 live sessions reached at 07:10Z. Splitters filed #97-#131 (chapters 12-16, rigidity split, linearity chain, LD transport).
