@@ -350,7 +350,7 @@ The Pauli basis test is the quantum low individual degree test of Natarajan and 
 \begin{definition}[Question distribution of the Pauli basis test]\label{def:pauli-question-distribution}
 	\lean{MIPStarRE.QPBT.PauliType, MIPStarRE.QPBT.pauliCLLevel, MIPStarRE.QPBT.pauliCL}
 	\lean{MIPStarRE.QPBT.isCondLinear_pauliCL, MIPStarRE.QPBT.pauliEdges}
-	\lean{MIPStarRE.QPBT.pauliQuestionDistribution, MIPStarRE.QPBT.pauliBasisTest}
+	\lean{MIPStarRE.QPBT.pauliQuestionDistribution}
 	\leanok
 	\uses{def:admissible, def:ld-question-distribution, def:ms-game, def:cl-func, def:cl-dist, def:graph-distribution}
 	% Admissibility of the full tuple is required here, not only the divisibility m | q:
@@ -408,6 +408,9 @@ The Pauli basis test is the quantum low individual degree test of Natarajan and 
 \end{proof}
 
 \begin{definition}[Win predicate of the Pauli basis test]\label{def:pauli-win-predicate}
+	\lean{MIPStarRE.QPBT.PauliAnswer, MIPStarRE.QPBT.validPauliAnswer}
+	\lean{MIPStarRE.QPBT.pauliWinPredicate, MIPStarRE.QPBT.pauliBasisTest}
+	\leanok
 	\uses{def:pauli-question-distribution, def:ld-win-predicate, def:ms-game, def:indicator-vector, def:admissible}
 	Fix an admissible tuple $\mathsf{qldparams} = (q,m,d)$ (Definition~\ref{def:admissible}) and let $M = 2^m$. Answers in the game $\mathfrak{G}^{\mathrm{Pauli}}_{\mathsf{qldparams}}$ take the following forms, depending on the question type; answers not of the prescribed form are rejected.
 	% The paper's format table writes the line contents loosely as (u_W, s) and (u_W, s, v);

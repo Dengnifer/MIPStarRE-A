@@ -21,8 +21,7 @@ The source-facing nodes are `def:cl-func`
 (`ch12_qpbt_games.tex:1235-1249`), and `def:graph-distribution`
 (`ch12_qpbt_games.tex:1365-1377`).
 The paper origins are
-`references/qpbt-paper/05_conditionally_linear_functions.tex:35-57,282-314`,
-`references/qpbt-paper/07_types.tex:65-82`,
+`references/qpbt-paper/05_conditionally_linear_functions.tex:35-57,282-314`
 and `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1010`.
 -/
 
@@ -230,9 +229,8 @@ private theorem CondLinearTerm.liftRight_supportedOn {K ιU ιV : Type*}
       rw [← hsets]
       exact ih (fun i => y (.inr i)) (hrest (fun i => y (.inr i)))
 
-/-- Concatenate a family of conditionally linear representations on the right
-register with a conditionally linear representation on the left register, while
-recording the prefix accumulated by the preceding left levels. -/
+/-- Append a family of right-coordinate terms after a left-coordinate term,
+while recording the prefix accumulated by the preceding left levels. -/
 private def CondLinearTerm.concat {K ιU ιV : Type*} [Field K]
     [Fintype ιU] [DecidableEq ιU] [Fintype ιV] [DecidableEq ιV]
     {ell : ℕ} (rTerm : (ιU → K) → CondLinearTerm K (ι := ιV) ell)
