@@ -457,18 +457,20 @@ reviewer time; the reviewer pool serves new patches only; merge throughput
 scales with the number of lanes instead of collapsing under them.
 
 
-## 2026-09-04 — Pre-commit budget exempts merge commits
+## 2026-09-04 — Pre-commit budget exempts inherited main changes
 
 **Trigger:** `results/telemetry/events.md` 2026-09-04 (owner override for a
 merge commit): a fresh-base merge of `main` into a 130-line workflow PR staged
 520 inherited workflow-layer lines and the budget guard refused the merge
-commit; the operator had to use the owner override for content that was
-already reviewed on `main`.
+commit; completing it would have required the owner override for content that
+was already reviewed on `main`.
 
-**Change:** `.githooks/pre-commit` measures a merge commit against
-`MERGE_HEAD` (the PR's own cumulative workflow-layer diff, merge-time edits
-included; inherited content counts zero) and says so; ordinary commits are
-unchanged.
+**Change:** `.githooks/pre-commit` measures a merge commit against `MERGE_HEAD`
+only when that commit is contained in `refs/remotes/github/main`.  The PR's own
+cumulative workflow-layer diff and merge-time edits remain budgeted, inherited
+main content counts zero, and side-branch merges remain measured against `HEAD`.
+Regression tests exercise both kinds of merge; ordinary commits are unchanged.
 
-**Expected effect:** fresh-base merges never need the owner override; the
-budget keeps binding the PR's own commits, and the review reads the PR diff.
+**Expected effect:** fresh-base merges do not need the owner override solely for
+inherited main content; the budget keeps binding the PR's own changes, and the
+review reads the PR diff.

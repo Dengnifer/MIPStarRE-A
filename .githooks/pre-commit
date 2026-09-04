@@ -22,17 +22,20 @@ run_without_git_local_env() (
 # (numstat includes deletions; PR 7 round 3, F8), and before the
 # MIPSTARRE_SKIP_HOOKS exit so a blanket hook skip cannot launder the
 # owner-only budget override.
-# A merge commit stages the merged branch's already-reviewed content; the
-# budget applies to the PR's own diff (which the review reads).  So a merge
-# commit is measured against MERGE_HEAD: what the merged tree adds relative to
-# the branch being merged in — i.e. this PR's cumulative workflow-layer change,
-# plus any merge-time edit — while inherited content counts zero (2026-09-04: a
-# 130-line PR's merge of main counted 520 lines under the plain measure).
-if [ -f "$(git rev-parse --git-path MERGE_HEAD)" ]; then
+# A main merge stages already-reviewed content.  Measure against MERGE_HEAD so
+# inherited main content counts zero while the PR's cumulative workflow diff
+# and merge-time edits still count.  A side-branch merge stays budgeted against
+# HEAD; only merge heads contained in github/main qualify for the exemption.
+MERGE_HEAD_PATH="$(git rev-parse --git-path MERGE_HEAD)"
+if [ -f "$MERGE_HEAD_PATH" ] &&
+    git merge-base --is-ancestor MERGE_HEAD refs/remotes/github/main 2>/dev/null; then
   BUDGET_BASE="$(git rev-parse MERGE_HEAD)"
-  echo "MIPStarRE pre-commit: merge commit; workflow-layer budget measured against MERGE_HEAD ${BUDGET_BASE%??????????????????????????????????}."
+  echo "MIPStarRE pre-commit: main-history merge; budget measured against MERGE_HEAD."
 else
   BUDGET_BASE=""
+  if [ -f "$MERGE_HEAD_PATH" ]; then
+    echo "MIPStarRE pre-commit: non-main merge; workflow-layer merge content is budgeted."
+  fi
 fi
 INFRA_CHANGED="$(git diff --cached --numstat $BUDGET_BASE -- local/ .githooks/ \
   scripts/tests/test_dispatch.py scripts/tests/test_github_workflow.py \
