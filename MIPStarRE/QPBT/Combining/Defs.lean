@@ -95,6 +95,72 @@ theorem combinePoly_eval {K : Type*} [CommSemiring K] {m : ℕ}
       u (betaVar m) * MvPolynomial.eval (u ∘ embZ m) g
   simp [combinePoly, MvPolynomial.eval_rename]
 
+/-- Formalization-only auxiliary for `def:combine-map`: a fresh variable times
+a renamed bounded polynomial keeps every individual degree at most `d`.  The
+renaming misses the fresh variable, so the degree-one contribution of the
+variable and the degree-`d` contribution of the renamed polynomial never meet
+on a common coordinate.  Blueprint
+`blueprint/src/chapter/ch15_qpbt_combining.tex:445-480`, paper
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:970-983`. -/
+private theorem X_mul_rename_mem_polyFunc {K : Type*} [CommSemiring K]
+    {m n d : ℕ} (hd : 1 ≤ d) {e : Fin m → Fin n} (he : Function.Injective e)
+    {a : Fin n} (ha : ∀ i, e i ≠ a) {p : MvPolynomial (Fin m) K}
+    (hp : p ∈ polyFunc m K d) :
+    MvPolynomial.X a * MvPolynomial.rename e p ∈ polyFunc n K d := by
+  classical
+  have hXdeg : ∀ j : Fin n,
+      (MvPolynomial.X a : MvPolynomial (Fin n) K).degreeOf j ≤
+        if j = a then 1 else 0 := by
+    intro j
+    rw [MvPolynomial.degreeOf_le_iff]
+    intro s hs
+    have hs1 : s ∈ ({Finsupp.single a 1} : Finset (Fin n →₀ ℕ)) := by
+      rw [MvPolynomial.X] at hs
+      exact MvPolynomial.support_monomial_subset hs
+    rw [Finset.mem_singleton] at hs1
+    subst hs1
+    by_cases h : j = a
+    · subst h; simp
+    · simp [Ne.symm h]
+  have hsupp : (MvPolynomial.rename e p).support =
+      p.support.image (Finsupp.mapDomain e) :=
+    MvPolynomial.support_rename_of_injective he
+  have hrenAll : ∀ j : Fin n, (MvPolynomial.rename e p).degreeOf j ≤ d := by
+    intro j
+    rw [MvPolynomial.degreeOf_le_iff]
+    intro s hs
+    rw [hsupp] at hs
+    obtain ⟨t, ht, rfl⟩ := Finset.mem_image.mp hs
+    by_cases h : ∃ i, e i = j
+    · obtain ⟨i, rfl⟩ := h
+      rw [Finsupp.mapDomain_apply he]
+      exact (MvPolynomial.mem_restrictDegree _ p d).mp hp t ht i
+    · have h0 : (Finsupp.mapDomain e t) j = 0 :=
+        Finsupp.mapDomain_notin_range t j (by rintro ⟨i, rfl⟩; exact h ⟨i, rfl⟩)
+      omega
+  have hrenA : (MvPolynomial.rename e p).degreeOf a ≤ 0 := by
+    rw [MvPolynomial.degreeOf_le_iff]
+    intro s hs
+    rw [hsupp] at hs
+    obtain ⟨t, ht, rfl⟩ := Finset.mem_image.mp hs
+    have h0 : (Finsupp.mapDomain e t) a = 0 :=
+      Finsupp.mapDomain_notin_range t a (by rintro ⟨i, rfl⟩; exact ha i rfl)
+    omega
+  refine (MvPolynomial.mem_restrictDegree _ _ _).mpr ?_
+  intro s hs j
+  refine MvPolynomial.degreeOf_le_iff.mp ?_ s hs
+  refine (MvPolynomial.degreeOf_mul_le j _ _).trans ?_
+  by_cases h : j = a
+  · have h1 : (MvPolynomial.X a : MvPolynomial (Fin n) K).degreeOf j ≤ 1 := by
+      simpa [h] using hXdeg j
+    have h2 : (MvPolynomial.rename e p).degreeOf j ≤ 0 := by
+      rw [h]; exact hrenA
+    omega
+  · have h0 : (MvPolynomial.X a : MvPolynomial (Fin n) K).degreeOf j ≤ 0 := by
+      simpa [h] using hXdeg j
+    have h2 := hrenAll j
+    omega
+
 /-- The combining polynomial has individual degree at most `d` when
 `hd : 1 ≤ d`.  The coordinate blocks are disjoint: `f` depends only on the
 `x` variables and `g` only on the `z` variables, so multiplication by `alpha`
@@ -111,7 +177,22 @@ theorem combinePoly_mem_polyFunc {K : Type*} [CommSemiring K] {m d : ℕ}
     (hd : 1 ≤ d) {f g : MvPolynomial (Fin m) K}
     (hf : f ∈ polyFunc m K d) (hg : g ∈ polyFunc m K d) :
     combinePoly f g ∈ polyFunc (2 * m + 2) K d := by
-  sorry
+  have hsymm : Function.Injective (finCombineEquiv m).symm :=
+    (finCombineEquiv m).symm.injective
+  have hX : Function.Injective (embX m) := by
+    intro i j hij
+    simpa using hsymm hij
+  have hZ : Function.Injective (embZ m) := by
+    intro i j hij
+    simpa using hsymm hij
+  have haX : ∀ i, embX m i ≠ alphaVar m := by
+    intro i hi
+    simpa using hsymm hi
+  have haZ : ∀ i, embZ m i ≠ betaVar m := by
+    intro i hi
+    simpa using hsymm hi
+  exact Submodule.add_mem _ (X_mul_rename_mem_polyFunc hd hX haX hf)
+    (X_mul_rename_mem_polyFunc hd hZ haZ hg)
 
 /-- Evaluate one member of a global polynomial pair at a point, selecting the
 component by Pauli basis.  This is formalization-only support for
@@ -155,6 +236,41 @@ noncomputable def combineLinePolynomial {K : Type*} [CommSemiring K] {c : ℕ}
       (linePolynomialOfCoefficients g).comp
         (Polynomial.C aZ + Polynomial.C bZ * Polynomial.X)
 
+/-- Formalization-only auxiliary: a bounded coefficient list of length `c + 1`
+represents a univariate polynomial of degree at most `c`.  This is the degree
+input of the bound accompanying Equation `eq:combine-lines` in
+`def:combine-map`, blueprint
+`blueprint/src/chapter/ch15_qpbt_combining.tex:459-479`, paper
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:984-989`. -/
+private theorem linePolynomialOfCoefficients_natDegree_le {K : Type*}
+    [Semiring K] {c : ℕ} (f : Fin (c + 1) → K) :
+    (linePolynomialOfCoefficients f).natDegree ≤ c := by
+  refine Polynomial.natDegree_sum_le_of_forall_le _ _ ?_
+  intro i _
+  refine Polynomial.natDegree_mul_le.trans ?_
+  rw [Polynomial.natDegree_C]
+  have h1 : (Polynomial.X ^ i.val : Polynomial K).natDegree ≤ i.val := by
+    refine Polynomial.natDegree_pow_le.trans ?_
+    have hX := Polynomial.natDegree_X_le (R := K)
+    calc i.val * (Polynomial.X : Polynomial K).natDegree ≤ i.val * 1 :=
+          Nat.mul_le_mul_left _ hX
+      _ = i.val := by ring
+  have h2 : i.val ≤ c := Nat.lt_succ_iff.mp i.isLt
+  omega
+
+/-- Formalization-only auxiliary: the affine reparameterization factors of
+Equation `eq:combine-lines` have degree at most one.  Blueprint
+`blueprint/src/chapter/ch15_qpbt_combining.tex:459-479`, paper
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:984-989`. -/
+private theorem affineFactor_natDegree_le {K : Type*} [CommSemiring K]
+    (u v : K) :
+    (Polynomial.C u + Polynomial.C v * Polynomial.X).natDegree ≤ 1 := by
+  refine (Polynomial.natDegree_add_le _ _).trans (max_le ?_ ?_)
+  · simp [Polynomial.natDegree_C]
+  · refine Polynomial.natDegree_mul_le.trans ?_
+    rw [Polynomial.natDegree_C]
+    simpa using Polynomial.natDegree_X_le (R := K)
+
 /-- The polynomial underlying `combineLinePoly` has degree at most `c + 1`.
 This is the degree assertion accompanying Equation `eq:combine-lines` in
 `def:combine-map`, blueprint
@@ -163,7 +279,25 @@ This is the degree assertion accompanying Equation `eq:combine-lines` in
 theorem combineLinePolynomial_natDegree_le {K : Type*} [CommSemiring K] {c : ℕ}
     (aX bX aZ bZ uα vα uβ vβ : K) (f g : Fin (c + 1) → K) :
     (combineLinePolynomial aX bX aZ bZ uα vα uβ vβ f g).natDegree ≤ c + 1 := by
-  sorry
+  have key : ∀ (a b u v : K) (h : Fin (c + 1) → K),
+      ((Polynomial.C u + Polynomial.C v * Polynomial.X) *
+        (linePolynomialOfCoefficients h).comp
+          (Polynomial.C a + Polynomial.C b * Polynomial.X)).natDegree ≤ c + 1 := by
+    intro a b u v h
+    refine Polynomial.natDegree_mul_le.trans ?_
+    have h1 := affineFactor_natDegree_le u v
+    have h2 : ((linePolynomialOfCoefficients h).comp
+        (Polynomial.C a + Polynomial.C b * Polynomial.X)).natDegree ≤ c := by
+      refine Polynomial.natDegree_comp_le.trans ?_
+      calc (linePolynomialOfCoefficients h).natDegree *
+            (Polynomial.C a + Polynomial.C b * Polynomial.X).natDegree
+          ≤ c * 1 :=
+            Nat.mul_le_mul (linePolynomialOfCoefficients_natDegree_le h)
+              (affineFactor_natDegree_le a b)
+        _ = c := by ring
+    omega
+  exact (Polynomial.natDegree_add_le _ _).trans
+    (max_le (key aX bX uα vα f) (key aZ bZ uβ vβ g))
 
 /-- Combine two degree-`c` line polynomials using explicit affine
 reparameterizations.  Coefficients through degree `c + 1` are extracted from
@@ -210,7 +344,22 @@ theorem combineLinePoly_spec {K : Type*} [Field K] {m c : ℕ}
           (combineLinePoly aX bX aZ bZ uα vα uβ vβ f g) t =
         (uα + t * vα) * evalCoefficient f (aX + bX * t) +
           (uβ + t * vβ) * evalCoefficient g (aZ + bZ * t) := by
-  sorry
+  intro t
+  obtain ⟨-, -, -, -, hlines⟩ := hcompat
+  refine ⟨(hlines t).1, (hlines t).2, ?_⟩
+  have hdeg := combineLinePolynomial_natDegree_le aX bX aZ bZ uα vα uβ vβ f g
+  have heval :
+      evalCoefficient (combineLinePoly aX bX aZ bZ uα vα uβ vβ f g) t =
+        (combineLinePolynomial aX bX aZ bZ uα vα uβ vβ f g).eval t := by
+    rw [Polynomial.eval_eq_sum_range' (n := c + 1 + 1) (by omega) t]
+    simp only [evalCoefficient, combineLinePoly]
+    exact Fin.sum_univ_eq_sum_range
+      (fun k => (combineLinePolynomial aX bX aZ bZ uα vα uβ vβ f g).coeff k * t ^ k)
+      (c + 1 + 1)
+  rw [heval, combineLinePolynomial]
+  simp only [Polynomial.eval_add, Polynomial.eval_mul, Polynomial.eval_C,
+    Polynomial.eval_X, Polynomial.eval_comp, linePolynomialOfCoefficients_eval]
+  ring
 
 /-- The seed event defining the `i`-th original-dimensional restricted line
 law.  It is applied before the `LineDesc` decoder, since a geometric line does
@@ -226,6 +375,38 @@ instance restrictedLineSeedEvent_decidablePred (L : LdParams) (i : Fin L.m) :
   unfold restrictedLineSeedEvent
   infer_instance
 
+/-- Formalization-only auxiliary for `def:ith-restricted-line`: whenever a line
+CL map keeps the shared scalar coordinate, the pre-decoding law it generates
+against the point map gives positive mass to every coordinate-index event.  The
+witness is the constant seed reconstructed from the index by
+`seedOfIndexResidue`.  Blueprint
+`blueprint/src/chapter/ch15_qpbt_combining.tex:578-592`, paper
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1038-1048`. -/
+private theorem clDistribution_seedEvent_pos (L : LdParams) (i : Fin L.m)
+    (CL : LdSpace L → LdSpace L)
+    (hseed : ∀ z : LdSpace L, (CL z).seed = z.seed) :
+    0 < ∑ sample ∈
+        (clDistribution CL (ldPointCL L)).support.filter
+          (restrictedLineSeedEvent L i),
+      (clDistribution CL (ldPointCL L)).weight sample := by
+  set s0 : ScalarQ L := seedOfIndexResidue L i ⟨0, L.seedFiberCard_pos⟩ with hs0
+  set z0 : LdSpace L := fun _ => s0 with hz0
+  refine Finset.sum_pos'
+    (fun a _ => (clDistribution CL (ldPointCL L)).nonnegative a)
+    ⟨(CL z0, ldPointCL L z0), Finset.mem_filter.mpr ⟨?_, ?_⟩, ?_⟩
+  · refine Finset.mem_image.mpr ⟨z0, ?_, rfl⟩
+    simp
+  · show chiIndex L (CL z0).seed = i
+    rw [hseed]
+    exact chiIndex_seedOfIndexResidue L i _
+  · refine Finset.sum_pos'
+      (fun a _ => (uniformDistribution (LdSpace L)).nonnegative a)
+      ⟨z0, Finset.mem_filter.mpr ⟨?_, rfl⟩, ?_⟩
+    · simp
+    · simp only [uniformDistribution, Distribution.uniformOnFinset_weight,
+        Finset.mem_univ, if_true]
+      positivity
+
 /-- The axis-line seed event has positive mass.  This named obligation makes
 normalization in `restrictedALinePreDist` explicit.  It belongs to
 `def:ith-restricted-line`, blueprint
@@ -235,8 +416,8 @@ theorem restrictedALineSeedEvent_positive (L : LdParams) (i : Fin L.m) :
     0 < ∑ sample ∈
         (clDistribution (ldALineCL L) (ldPointCL L)).support.filter
           (restrictedLineSeedEvent L i),
-      (clDistribution (ldALineCL L) (ldPointCL L)).weight sample := by
-  sorry
+      (clDistribution (ldALineCL L) (ldPointCL L)).weight sample :=
+  clDistribution_seedEvent_pos L i (ldALineCL L) fun _ => rfl
 
 /-- The diagonal-line seed event has positive mass.  This is the corresponding
 normalization obligation from `def:ith-restricted-line`, blueprint lines
@@ -245,8 +426,8 @@ theorem restrictedDLineSeedEvent_positive (L : LdParams) (i : Fin L.m) :
     0 < ∑ sample ∈
         (clDistribution (ldDLineCL L) (ldPointCL L)).support.filter
           (restrictedLineSeedEvent L i),
-      (clDistribution (ldDLineCL L) (ldPointCL L)).weight sample := by
-  sorry
+      (clDistribution (ldDLineCL L) (ldPointCL L)).weight sample :=
+  clDistribution_seedEvent_pos L i (ldDLineCL L) fun _ => rfl
 
 /-- The normalized pre-decoding axis law conditioned on coordinate `i`. -/
 noncomputable def restrictedALinePreDist (L : LdParams) (i : Fin L.m) :
