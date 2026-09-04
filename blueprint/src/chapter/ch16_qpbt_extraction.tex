@@ -29,6 +29,7 @@ For a $g$ that is not an encoding the two sides of this identity are the evaluat
 
 \begin{lemma}[Linearity and inversion of the full-field decoder]\label{lem:qld-decoder-linearity}
 	\lean{MIPStarRE.QPBT.decodeFq_add, MIPStarRE.QPBT.decodeFq_smul, MIPStarRE.QPBT.decodeFq_lowDegreeEncoding}
+	\leanok
 	\uses{def:qld-full-field-decoder}
 	For bounded polynomial representatives $g,g'$ and $c\in\F_q$, one has
 	\[
@@ -38,9 +39,15 @@ For a $g$ that is not an encoding the two sides of this identity are the evaluat
 	\]
 	and $\mathrm{Dec}_{\F_q}(g_h)=h$ for every $h\in\F_q^M$.
 \end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:qld-full-field-decoder, def:low-degree-encoding}
+	The decoder is given coordinatewise by evaluation of the representative at the points of the hypercube, and evaluation at a fixed point is $\F_q$-linear in the representative, which gives the two displayed identities. For the third, the multilinear encoding $g_h$ takes the value $h_y$ at each point $y$ of the hypercube, because the indicator polynomials of \eqref{eq:low-degree-encoding-definition} vanish at every other such point; hence the vector of its evaluations is $h$.
+\end{proof}
 
 \begin{lemma}[Evaluation identity for encoding outcomes]\label{lem:qld-decoder-evaluation}
 	\lean{MIPStarRE.QPBT.decodeFq_dotProduct_indicatorVec}
+	\leanok
 	\uses{def:qld-full-field-decoder, def:indicator-vector}
 	If $g$ is an encoding, then
 	\[
@@ -48,6 +55,11 @@ For a $g$ that is not an encoding the two sides of this identity are the evaluat
 	\]
 	for every $u\in\F_q^m$.
 \end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:qld-full-field-decoder, def:indicator-vector, def:low-degree-encoding}
+	By \eqref{eq:low-degree-encoding-definition} the left-hand side is the value at $u$ of the multilinear encoding $g_{\mathrm{Dec}_{\F_q}(g)}$. Since $g$ is an encoding, that representative equals $g$, so the value is $g(u)$.
+\end{proof}
 
 % Local correction of the source (lines 1419 and 1492 of
 % 14_analysis_of_the_pauli_basis_test.tex): the source invokes its boolean
@@ -353,7 +365,6 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 	\lean{MIPStarRE.QPBT.ExtractionWitness}
 	\lean{MIPStarRE.QPBT.exists_extractionWitness}
 	\lean{MIPStarRE.QPBT.deltaExtract}
-	\leanok
 	\uses{lem:qld-4-7, def:v-swap-unitary, def:expanded-state, lem:projective-strategy-setup, def:generalized-pauli, def:EPR, def:povm-distance}
 	There is a universal constant $C_{\mathrm{ext}}\geq1$. Set
 	\[
@@ -376,6 +387,7 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 		where the $\approx$ statements hold with respect to the state $\ket{\mathrm{aux}}_{\mathrm{A}\mathrm{A}'\mathrm{B}\mathrm{B}'} \ot \ket{\mathrm{EPR}_q}^{\ot M}_{\mathrm{A}''\mathrm{B}''}$, with the answer summation over $h \in \F_q^{M}$ and no average over questions.
 	\end{enumerate}
 	The unitaries may be taken to be $V_{\mathrm{A}}$ and $V_{\mathrm{B}}$ of Definition~\ref{def:v-swap-unitary}.
+	The existence declaration linked above assumes the global polynomial-pair measurement of Lemma~\ref{lem:qld-4-7} as data, instead of obtaining it from that lemma as the proof below does; it is therefore a conditional form of the statement above and does not certify it. The discrepancy and the declaration that must replace it are recorded in \cite{gap:qpbt_extraction-transfer}.
 \end{lemma}
 \begin{proof}
 	\uses{def:v-swap-unitary, lem:v-swap-conjugation, lem:tildew-product-form, lem:qld-construct-the-paulis, lem:qld-win-implications, fact:triangle-for-simeq, def:bracket, lem:cancellation, lem:schwartz-zippel-total-degree, lem:qld-4-7}

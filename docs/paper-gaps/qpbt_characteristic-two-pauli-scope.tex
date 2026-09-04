@@ -71,7 +71,12 @@ The formal definitions \path{primeTauShift}, \path{primeTauPhase}, and
 characteristic $p$.  Their theorem statements cover the product, power,
 unitarity, spectral, commutation, and cancellation identities for arbitrary
 $p$.  The source-general forward expansion and inversion do not yet have
-corresponding Lean declarations.  The declarations whose names begin with
+corresponding Lean declarations.  Neither do the common eigenbases
+$\{\ket{b_W}\}$ and the rank-one projectors $P^W_b$ of the same source
+definition: these are formalized only in the characteristic-two form, by
+\path{pauliVec} and \path{pauliProj}, whose phases are given by
+\path{phaseSign}.  The general definition is therefore covered in Lean by its
+shift, phase, and observable matrices alone.  The declarations whose names begin with
 \path{tauObservable} or use \path{phaseSign} instead specialize to $p=2$, where
 $\chi(x)=(-1)^{\operatorname{Tr}(x)}$.  This specialization is appropriate only
 for the subsequent test, whose admissible sizes satisfy $q=2^k$; it is not
@@ -114,13 +119,16 @@ agree; the binary layer is a consumer specialization rather than a restriction
 of the source statement.
 
 \section{Conclusion}
-There is no mathematical restriction in the source-facing formal statements:
-they retain arbitrary prime characteristic and the corresponding canonical
-character.  The characteristic-two declarations are separate corollaries for
-the QPBT parameter regime; the binary forward expansion and inversion are
-proved from the explicit matrices and character orthogonality.  The remaining
-work is to formalize and link the source-general expansion and inversion, and it
-does not require changing the binary operator definitions.
+There is no mathematical restriction in the source-facing formal statements
+that exist: the shift, phase, and observable matrices retain arbitrary prime
+characteristic and the corresponding canonical character.  The eigenvectors and
+rank-one projectors of the same definition, however, exist only in the
+characteristic-two form, so the general definition is not yet covered in full.
+The characteristic-two declarations are separate corollaries for the QPBT
+parameter regime; the binary forward expansion and inversion are proved from
+the explicit matrices and character orthogonality.  The remaining work is to
+formalize and link the source-general eigenvectors, projectors, expansion, and
+inversion, and it does not require changing the binary operator definitions.
 \bibliographystyle{alpha}
 \bibliography{references}
 \end{document}

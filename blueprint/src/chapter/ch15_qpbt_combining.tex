@@ -250,19 +250,28 @@ assembled by Fourier averaging.
 	only; this averaged form suffices because the $\mathcal{L}^u$ enter
 	the proof of Lemma~\ref{lem:qld-4-10} only through averages over $u$.
 	The quotation of the theorem in \cite{Ji2020MIPStar} differs from the
-	cited statement in three respects: it inserts the restriction
+	cited statement in four respects: it inserts the restriction
 	$0 \le \delta \le 1$, which would block the fiberwise application
 	just described; it places the closeness conclusion, together with the
 	exact linearity, under the quantifier ``for all $u, u' \in \F_2^t$'',
 	a strengthening of the theorem proved in
-	\cite{Natarajan2017Linearity}; and it appends the identity
-	$\mathcal{L}^u = \Id$ for $u = 0$. None of the three is reproduced
-	here: the restriction is dropped, the pointwise closeness is not
-	used, and the appended identity is instead derived from the
+	\cite{Natarajan2017Linearity}; it appends the identity
+	$\mathcal{L}^u = \Id$ for $u = 0$; and it reports the bound $\delta$
+	of \cite[equation~(3)]{Natarajan2017Linearity}, which bounds the mean
+	squared distance between the associated binary projective
+	measurements, as a bound on the mean squared operator distance,
+	thereby losing the factor of two recorded in
+	Remark~\ref{rem:linearity-distance-normalization}. None of the four is
+	reproduced here: the restriction is dropped, the pointwise closeness
+	is not used, the appended identity is instead derived from the
 	conclusion, since exact linearity at $u = u' = 0$ gives
 	$(\mathcal{L}^0)^2 = \mathcal{L}^0$, and an idempotent unitary equals
-	the identity. The import carries two conversion obligations,
-	discharged in the proof of Lemma~\ref{lem:qld-4-10}: the theorem is
+	the identity, and Theorem~\ref{thm:linearity} carries the corrected
+	operator bound $2\delta$. These four discrepancies, together with the
+	common-extension obligation recorded below, are analyzed in
+	\cite{gap:qpbt_linearity-theorem-quotation}. The import carries two
+	conversion obligations, discharged in the proof of
+	Lemma~\ref{lem:qld-4-10}: the theorem is
 	instantiated with $\rho$ the reduced density operator of
 	$\ket{\hat\psi}$ on the registers carrying the observables, so that
 	traces against $\rho$ are expectation values in $\ket{\hat\psi}$; and
@@ -1756,7 +1765,7 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 \begin{lemma}[Formalization support for Lemma~\ref{lem:qld-4-13}]
 	\label{lem:qld-4-13-established}
 	\lean{MIPStarRE.QPBT.exists_extendedLinesWitness_established}
-	\notready
+	\leanok
 	\uses{lem:qld-4-12, def:line, def:line-point-dist, def:consistency,
 		def:bracket, def:expanded-state, def:ideg-deg-polynomials}
 	This formalization-only auxiliary is not a named statement of the paper.
@@ -1827,19 +1836,27 @@ projective measurement whose outcomes are pairs of global polynomials.
 	if $W = Z$.
 \end{lemma}
 \begin{proof}
-	\uses{lem:qld-4-13, lem:qld-4-12, thm:naimark, lem:ld-soundness,
-		def:ld-game, fact:agreement, fact:add-a-proj2,
+	\uses{lem:qld-4-13-established, lem:qld-4-12, thm:naimark,
+		lem:ld-soundness, def:ld-game, fact:agreement, fact:add-a-proj2,
 		fact:data-processing, lem:schwartz-zippel-total-degree,
 		def:combine-map}
-	By Lemmas~\ref{lem:qld-4-12} and~\ref{lem:qld-4-13}, the expanded state
-	$\ket{\hat\psi}$ together with the lines measurements
+	By Lemmas~\ref{lem:qld-4-12} and~\ref{lem:qld-4-13-established}, the
+	expanded state $\ket{\hat\psi}$ together with the lines measurements
 	$\{\hat{Q}^{\ell}_{f}\}$ and the points measurements
 	$\{\hat{Q}^{x,z,\alpha,\beta}_{a}\}$ constitutes a strategy for the
 	classical low individual degree game (Definition~\ref{def:ld-game}) with
 	parameters $(q, 2m+2, d, 1)$ succeeding with probability
 	$1 - \delta_{\mathrm{combine}}$; the axis-parallel clause of
-	Lemma~\ref{lem:qld-4-13} supplies the degree-$d$ answer format that the
-	game requires on axis-parallel lines.
+	Lemma~\ref{lem:qld-4-13-established} supplies the degree-$d$ answer
+	format that the game requires on axis-parallel lines. Here
+	$\delta_{\mathrm{combine}}$ is the error established by the proof of
+	Lemma~\ref{lem:qld-4-13}, namely the bound
+	$C \cdot m \cdot \poly(\eps, md/q)$ of
+	Lemma~\ref{lem:qld-4-13-established}, and not the form
+	$\poly(m^2\eps, md/q)$ printed in the statement of
+	Lemma~\ref{lem:qld-4-13}, which remains unproved
+	(Remark~\ref{rem:qld-4-13-source-defects}); the error function
+	$\delta_S$ of the statement absorbs the prefactor $m$ into $(md)^a$.
 	(For $(q, 2m+2, d, 1)$ to be a parameter tuple of
 	Definition~\ref{def:ld-game} the dimension $2m+2$ must divide $q$;
 	admissibility of $(q,m,d)$ supplies only that $m$ divides $q$, and for
