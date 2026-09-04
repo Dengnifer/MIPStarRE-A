@@ -23,7 +23,8 @@ open scoped BigOperators Matrix
 
 namespace MIPStarRE.QPBT
 
-open MIPStarRE.LDT MIPStarRE.LDT.Preliminaries MIPStarRE.Quantum
+open MIPStarRE.LDT hiding Measurement
+open MIPStarRE.LDT.Preliminaries MIPStarRE.Quantum
 
 noncomputable section
 
