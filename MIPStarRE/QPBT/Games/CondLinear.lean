@@ -664,7 +664,7 @@ coordinates carry `L`, while the right coordinates carry the family member
 `R u v` selected by the left input `u`.  This is Lean-only coordinate
 infrastructure for `lem:cl-concat`, blueprint
 `blueprint/src/chapter/ch12_qpbt_games.tex:1103-1117`, paper origin
-`references/qpbt-paper/05_conditionally_linear_functions.tex:315-364`.
+`references/qpbt-paper/05_conditionally_linear_functions.tex:282-314`.
 -/
 def condLinearConcat {ιU ιV : Type*} [Fintype ιU] [DecidableEq ιU]
     [Fintype ιV] [DecidableEq ιV] (L : (ιU → K) → (ιU → K))
