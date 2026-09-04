@@ -118,14 +118,17 @@ The declaration \path{exists_exactly_linear_observables} in
 positive semidefinite trace-one operator, binary observables, and the averaged
 three-observable correlation.  It returns one finite ancillary space and
 normalized ancillary vector for that family, exactly linear binary observables
-on the extension, and only the averaged squared operator-distance bound with
-the same defect.  It neither assumes $\delta\leq1$ nor asserts pointwise
-closeness, but its operator bound is too strong by a factor of two.  It
-therefore does not match the corrected blueprint theorem and is not marked as
-such.  Its proof remains open, and no Lean declaration yet supplies the finite
-common-extension construction for the family indexed by $(x,z)$.  The
-statement repair is tracked in \ghissue{129}; the normalization analysis and
-its formal adapter are tracked in \ghissue{124}.
+on the extension, and only the averaged squared operator-distance bound.  It
+neither assumes $\delta\leq1$ nor asserts pointwise closeness, and it carries
+the corrected bound $2\delta$ rather than the printed $\delta$.  It therefore
+matches the corrected blueprint theorem, and its proof is complete; so is that
+of its measurement-distance companion
+\path{exists_exactly_linear_observables_binaryObservableDistSq}, which states
+the equivalent bound $\delta$.  Both are linked from
+Theorem~\path{thm:linearity}.  The normalization analysis was carried out in
+\ghissue{124} and the statement repair in \ghissue{129}; both are closed.
+What remains open is the finite common-extension construction for the family
+indexed by $(x,z)$, for which no Lean declaration yet exists.
 
 Issue~\#19 introduced this discrepancy record for the extraction skeleton;
 \ghissue{47} owns the Stage~4.3 proof work consumed downstream.  The chapter-16
@@ -137,8 +140,9 @@ do not assume a new fiberwise linearity hypothesis or a common ancillary space.
 The quotation strengthens average closeness to pointwise closeness and loses a
 factor of two in translating binary-measurement distance to operator distance.
 Its use for the family indexed by $(x,z)$ also requires an explicit finite
-common-extension argument.  The blueprint now records the corrected averaged
-bound; the Lean theorem and common-extension construction remain open.
+common-extension argument.  The blueprint records the corrected averaged
+bound and the Lean theorem proves it; only the common-extension construction
+remains open.
 
 \bibliographystyle{alpha}
 \bibliography{references}

@@ -226,19 +226,22 @@ cannot absorb.
 
 \section{Correction and alternative repairs}
 
-The following are candidate directions, with their open obligations; none
-of the routes below is claimed as established.
+The first direction below is the one the blueprint adopts; the remaining
+directions are alternatives, none of which is claimed as established.
 
-\paragraph{Corrected error form (adopted).}
-The blueprint adopts
+\paragraph{Corrected error form (adopted in the proof).}
+The operative error form is
 $\delta_{\mathrm{combine}} = m \cdot \poly(\eps, md/q)$ --- concretely,
-the first-route bound --- as the operative error form.  The only consumer is
-the polynomial-pair lemma, whose imported error
+the first-route bound.  Following the proof-gap protocol, the source-labelled
+statement keeps its printed form and the correction is carried by the proof,
+by the chapter remark, and by a separate formalization-support node, rather
+than being substituted silently into the source statement.  The only consumer
+is the polynomial-pair lemma, whose imported error
 $a(md)^a(\delta_{\mathrm{combine}}^b + q^{-b} + 2^{-bmd})$ absorbs
 $m^{O(1)}$ prefactors by enlarging $a$ and shrinking $b$.  The blueprint proof
 records this absorption and the corrected deficit reading of the second claim.
-The remaining obligation is formal: prove the three chained estimates and the
-consumer bound with explicit constants.
+Two obligations remain: carry out that absorption with explicit constants when
+the lemma is formalized, and prove the three chained estimates.
 
 \paragraph{Repairing the second route.}
 Strengthen Property~2 of the sub-line lemma to the joint product law: in
@@ -271,9 +274,11 @@ the first direction stands.
 
 \section{Comparison with the blueprint}
 
-The blueprint \cite{MIPStarREBlueprint} corrects the combined-lines lemma to
-the established error form $m \cdot \poly(\eps, md/q)$.  Its proof derives the
-first route and uses that bound in the sequel.  The
+The blueprint \cite{MIPStarREBlueprint} keeps the combined-lines lemma in
+its source shape, error form $\poly(m^2\eps, md/q)$ included, and marks in
+the proof that this form remains unproved: the proof derives the first route
+only, records the established bound $m \cdot \poly(\eps, md/q)$, and uses
+that bound in the sequel.  The
 three claims are stated as separate lemmas with the corrected deficit
 assertion for the second; the sub-line lemma states Property~2 at the
 level of the two marginal laws and expressly disclaims the joint
@@ -285,16 +290,18 @@ chapter remark summarizes the discrepancy and cites this note.%
 \path{lem:qld-sublines}, \path{lem:claim-17-1}--\path{lem:claim-17-3},
 \path{lem:qld-4-7}, and the remark
 \path{rem:qld-4-13-source-defects}, all in
-\path{blueprint/src/chapter/ch15_qpbt_combining.tex}.  The corrected lemma
-links to \path{ExtendedLinesWitness} and
-\path{exists_extendedLinesWitness_established}.}
+\path{blueprint/src/chapter/ch15_qpbt_combining.tex}.}
 
-The latter Lean theorem has the explicit form
-$C m\,\poly(\eps,md/q)$ for a universal $C>0$, which agrees with the
-blueprint convention that constants are absorbed into $\poly$.  Its proof
-remains open.  The older declaration \path{exists_extendedLinesWitness}
-retains the unsupported printed form $\poly(m^2\eps,md/q)$ and is no longer
-linked to the corrected blueprint node.
+The source-labelled lemma links the carrier
+\path{ExtendedLinesWitness} and the source-shaped declaration
+\path{exists_extendedLinesWitness}, which retains the printed error form
+$\poly(m^2\eps,md/q)$ and whose proof is the tracked obligation.  The
+established error form is linked from the separate formalization-support node
+\path{lem:qld-4-13-established}, whose declaration
+\path{exists_extendedLinesWitness_established} has the explicit form
+$C m\,\poly(\eps,md/q)$ for a universal $C>0$; this agrees with the blueprint
+convention that constants are absorbed into $\poly$.  Its proof is open as
+well, so neither node carries a proof-completion mark.
 
 \section{Conclusion}
 
@@ -310,10 +317,11 @@ The first route is sound after a harmless deficit correction in its
 second claim and establishes $m \cdot \poly(\eps, md/q)$.  The
 discrepancy is harmless downstream, since the sole consumer absorbs
 polynomial-in-$m$ prefactors into its constants.  The blueprint therefore
-uses the corrected first-route form and cites this note; strengthening the
-sub-line lemma to license the second route is optional, and no route to the
-printed form is currently known.  We do not assert that the printed form is
-false.
+retains the printed statement with the missing step explicitly tracked, uses
+the corrected first-route form in the proof and in the sequel, and cites this
+note; strengthening the sub-line lemma to license the second route is
+optional, and no route to the printed form is currently known.  We do not
+assert that the printed form is false.
 
 \bibliographystyle{alpha}
 \bibliography{references}

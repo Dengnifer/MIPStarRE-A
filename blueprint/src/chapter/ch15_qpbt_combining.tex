@@ -1753,6 +1753,32 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\cite{gap:qpbt_combined-lines-error-term}.
 \end{remark}
 
+\begin{lemma}[Formalization support for Lemma~\ref{lem:qld-4-13}]
+	\label{lem:qld-4-13-established}
+	\lean{MIPStarRE.QPBT.exists_extendedLinesWitness_established}
+	\notready
+	\uses{lem:qld-4-12, def:line, def:line-point-dist, def:consistency,
+		def:bracket, def:expanded-state, def:ideg-deg-polynomials}
+	This formalization-only auxiliary is not a named statement of the paper.
+	It is the conclusion of Lemma~\ref{lem:qld-4-13} with the error form that
+	the proof of that lemma establishes: the statement is that of
+	Lemma~\ref{lem:qld-4-13} with $\delta_{\mathrm{combine}}$ replaced by
+	$C \cdot m \cdot \poly(\eps, md/q)$ for a universal constant $C > 0$.
+	The printed error form $\poly(m^2\eps, md/q)$ is not claimed here; see
+	Remark~\ref{rem:qld-4-13-source-defects}.
+\end{lemma}
+\begin{proof}
+	\uses{lem:qld-xz-lines, lem:qld-sublines, def:combine-map,
+		lem:qld-4-12, lem:claim-17-1, lem:claim-17-2, lem:claim-17-3}
+	This is what the proof of Lemma~\ref{lem:qld-4-13} above establishes: the
+	chaining of the three claims bounds
+	\eqref{eq:qld-combined-lines-consistency} by
+	$O(m(\eps^{1/4} + \delta_P^{1/4} + \delta_Q^{1/4} +
+	\delta_{\mathrm{Line}}^{1/2}))$, a function of the form
+	$m \cdot \poly(\eps, md/q)$, and the remaining steps of that proof are
+	unchanged.
+\end{proof}
+
 The measurements of Lemma~\ref{lem:qld-4-12} and Lemma~\ref{lem:qld-4-13}
 constitute a strategy for the classical low individual degree game in $2m+2$
 variables. Applying the quantum soundness of that game yields a single

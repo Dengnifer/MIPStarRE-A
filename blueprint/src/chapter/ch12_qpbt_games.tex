@@ -110,60 +110,48 @@ Unless specified otherwise, all strategies considered in what follows are tensor
 
 We often specify symmetric games $\mathfrak G$ and symmetric strategies $\mathcal S$ using a compact notation: we write $\mathfrak G = (\mathcal X, \mathcal A, \mu, D)$ and $\mathcal S = (\ket{\psi}, M)$, where $M$ denotes the set of measurement operators shared by both players.
 
-% The source statement at 06_nonlocal_games_and_mipstar.tex:94-99 assumes only the
-% value of the game and therefore requires an unsupported attainment step.  The
-% statement below is the value-preserving given-strategy form actually proved by
-% the source construction; see gap:qpbt_symmetrization-attainment.
+% Source statement (references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:94-99) kept in
+% its original form. The proof below records the approximate form the source argument
+% establishes and leaves the final attainment step unproved; see rem:symmetric-strat-limit.
 \begin{lemma}[Symmetrization of strategies for symmetric games]\label{lem:symmetric-strat}
-		\lean{MIPStarRE.QPBT.exists_symmetric_projective_strategy_of_strategy}
-		\leanok
-		\uses{def:symmetric-game, def:tensor-product-value, def:projective-strategy-general}
-		Let $\mathfrak G = (\mathcal X, \mathcal A, \mu, D)$ be a symmetric game,
-		let $\eps \in \R$, and let $\mathcal S' = (\ket{\psi'}, A, B)$ be a
-		strategy such that
-		$\operatorname{val}^*(\mathfrak G, \mathcal S') \ge 1-\eps$.
-		Then there exists a symmetric and projective strategy
-		$\mathcal S = (\ket{\psi}, M)$ such that
-		\[
-			\operatorname{val}^*(\mathfrak G, \mathcal S)
-			= \operatorname{val}^*(\mathfrak G, \mathcal S') \ge 1-\eps.
-		\]
-		This is the corrected given-strategy form of the source lemma; the
-		attainment discrepancy is documented in
-		\cite{gap:qpbt_symmetrization-attainment}.
+	\lean{MIPStarRE.QPBT.exists_symmetric_projective_strategy}
+	\uses{def:symmetric-game, def:tensor-product-value, def:projective-strategy-general}
+	Let $\mathfrak G = (\mathcal X, \mathcal A, \mu, D)$ be a symmetric game such that $\operatorname{val}^*(\mathfrak G) = 1-\eps$ for some $\eps \ge 0$. Then there exists a symmetric and projective strategy $\mathcal S = (\ket{\psi}, M)$ such that $\operatorname{val}^*(\mathfrak G, \mathcal S) \ge 1-\eps$.
 \end{lemma}
 \begin{proof}
-		\uses{thm:naimark}
-		Using Naimark dilation (Theorem~\ref{thm:naimark}), each dilated
-		sub-measurement being completed to a projective measurement by assigning
-		to one fixed outcome the residual projector of its family, we may replace
-		$\mathcal S'$ by a projective strategy of exactly the same value.  Write
-		its state as $\ket{\psi'} \in \C^d_{A'} \ot \C^d_{B'}$.  Let
-		\[
-			\ket{\psi} = \frac{1}{\sqrt 2}\, \bigl( \ket{0}_{A}\ket{1}_{B}\ket{\psi'}_{A'B'} + \ket{1}_{A}\ket{0}_{B}\ket{\psi'_\tau}_{A'B'} \bigr) \in \bigl(\C^2_{A} \ot \C^d_{A'}\bigr) \ot \bigl(\C^2_{B} \ot \C^d_{B'}\bigr)\,,
+	\uses{thm:naimark}
+	The symmetrization argument establishes the following approximate form of the conclusion: for every $\eps' > \eps$ there exists a symmetric and projective strategy of value at least $1-\eps'$. Indeed, fix $\eps' > \eps$. Since $\operatorname{val}^*(\mathfrak G)$ is the supremum of the values of all strategies, there exists a strategy $\mathcal S' = (\ket{\psi'}, A, B)$ with $\operatorname{val}^*(\mathfrak G, \mathcal S') \ge 1-\eps'$. Using Naimark dilation (Theorem~\ref{thm:naimark}), each dilated sub-measurement being completed to a projective measurement by assigning to one fixed outcome the residual projector of its family --- which changes no correlation on the extended state, as described in Remark~\ref{rem:naimark-for-games} above --- we may assume without loss of generality that $\ket{\psi'} \in \C^d_{A'} \ot \C^d_{B'}$ for some integer $d$ and that every $A^x$ and $B^x$ is a projective measurement. Let
+	\[
+		\ket{\psi} = \frac{1}{\sqrt 2}\, \bigl( \ket{0}_{A}\ket{1}_{B}\ket{\psi'}_{A'B'} + \ket{1}_{A}\ket{0}_{B}\ket{\psi'_\tau}_{A'B'} \bigr) \in \bigl(\C^2_{A} \ot \C^d_{A'}\bigr) \ot \bigl(\C^2_{B} \ot \C^d_{B'}\bigr)\,,
 	\]
 	where $\ket{\psi'_\tau}$ is obtained from $\ket{\psi'}$ by permuting the two players' registers; then $\ket{\psi}$ is invariant under permutation of the register pairs $AA'$ and $BB'$. For each question $x \in \mathcal X$ define the projective measurement $M^x = \{M^x_a\}_{a \in \mathcal A}$ on $\C^2 \ot \C^d$ by
 	\[
 		M^x_a = \ket{0}\bra{0} \ot A^x_a + \ket{1}\bra{1} \ot B^x_a\,,
 	\]
-		and let each player measure $M$ on their pair of registers.  Because the
-		decision predicate treats both players symmetrically, the resulting
-		symmetric projective strategy has exactly the value of $\mathcal S'$.
-		This proves the statement without an attainment argument.
+	and let each player measure $M$ on their pair of registers. Because the decision predicate $D$ of the symmetric game treats the two players symmetrically, the resulting symmetric projective strategy $\mathcal S = (\ket{\psi}, M)$ satisfies $\operatorname{val}^*(\mathfrak G, \mathcal S) = \operatorname{val}^*(\mathfrak G, \mathcal S') \ge 1-\eps'$. Note that this construction preserves the value of the strategy it is applied to exactly.
+
+	The statement asserts more, namely a single symmetric projective strategy of value at least $1-\eps$ itself. Passing from the family of strategies constructed above to one attaining the bound $1-\eps$ is an attainment step which the argument does not supply: the supremum defining $\operatorname{val}^*(\mathfrak G)$ in Definition~\ref{def:tensor-product-value} ranges over strategies of unbounded dimension and need not be attained. This step remains unproved; the obstruction, and the forms of the lemma that the argument does prove, are documented in \cite{gap:qpbt_symmetrization-attainment}. See also Remark~\ref{rem:symmetric-strat-limit}.
 \end{proof}
 
 \begin{remark}[Attainment in the symmetrization lemma]\label{rem:symmetric-strat-limit}
-		The source states the stronger implication from
-		$\operatorname{val}^*(\mathfrak G)=1-\eps$ to a strategy attaining that
-		value.  Its proof first chooses strategies of value at least $1-\eps'$ for
-		every $\eps'>\eps$, and the dimensions may grow as $\eps'\downarrow\eps$;
-		it supplies no finite-dimensional limiting strategy.  The corrected
-		Lemma~\ref{lem:symmetric-strat} instead starts from the strategy that the
-		construction actually symmetrizes.  A strict lower bound on the game value
-		still supplies such a strategy, so every source use remains valid.  The
-		attainment gap and this correction are documented in
-		\cite{gap:qpbt_symmetrization-attainment}.
+	The proof of Lemma~\ref{lem:symmetric-strat} yields, for each $\eps' > \eps$, a symmetric projective strategy of value at least $1-\eps'$. The conclusion as stated, at $\eps' = \eps$, does not follow from this: the dilated dimension $d$ may grow as $\eps' \downarrow \eps$, and the supremum defining $\operatorname{val}^*(\mathfrak G)$ in Definition~\ref{def:tensor-product-value} need not be attained by any strategy. The symmetrization construction itself is value-preserving, so the conclusion does hold whenever the hypothesis supplies an actual strategy of value at least $1-\eps$ rather than only the value of the game; every use of the lemma in the source proceeds from such a strategy, or from a strict lower bound on the value, and therefore consumes only what the proof establishes. The gap and the available repairs are documented in \cite{gap:qpbt_symmetrization-attainment}.
 \end{remark}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:symmetric-strat}]
+	\label{lem:symmetric-strat-given-strategy}
+	\lean{MIPStarRE.QPBT.exists_symmetric_projective_strategy_of_strategy}
+	\leanok
+	\uses{def:symmetric-game, def:tensor-product-value, def:projective-strategy-general}
+	This formalization-only auxiliary is not a named statement of the paper; it is the value-preserving given-strategy form of Lemma~\ref{lem:symmetric-strat} isolated in Remark~\ref{rem:symmetric-strat-limit}, and it is what the symmetrization argument actually proves. Let $\mathfrak G = (\mathcal X, \mathcal A, \mu, D)$ be a symmetric game and let $\mathcal S'$ be a strategy for $\mathfrak G$ with $\operatorname{val}^*(\mathfrak G, \mathcal S') \ge 1-\eps$. Then there exists a symmetric and projective strategy $\mathcal S = (\ket{\psi}, M)$ with
+	\[
+		\operatorname{val}^*(\mathfrak G, \mathcal S) = \operatorname{val}^*(\mathfrak G, \mathcal S') \ge 1-\eps\,.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{thm:naimark}
+	Apply Naimark dilation (Theorem~\ref{thm:naimark}) to $\mathcal S'$, completing each dilated family at one fixed outcome as described in Remark~\ref{rem:naimark-for-games}, and then form the permutation-invariant state $\ket{\psi}$ and the block-diagonal measurements $M^x$ of the proof of Lemma~\ref{lem:symmetric-strat}. Both steps preserve the value of the strategy they are applied to, so $\mathcal S$ has exactly the value of $\mathcal S'$. No attainment step is involved, since the strategy $\mathcal S'$ is given rather than extracted from the supremum defining $\operatorname{val}^*(\mathfrak G)$.
+\end{proof}
 
 \begin{definition}[Commuting strategies]\label{def:comm-strategy}
 	\lean{MIPStarRE.QPBT.IsCommutingOn, MIPStarRE.QPBT.Strategy.IsCommuting}
@@ -510,7 +498,7 @@ The state-dependent distance is the right tool for reasoning about the closeness
 \end{proof}
 
 \begin{remark}[Index pairing in the sandwich]\label{rem:ld-sandwich-indexing}
-		As printed in the source, the sandwich in Lemma~\ref{lem:ld-sandwich} pairs the $i$-th measurement with the outcome $g_{k+1-i}$: the outermost factor $G^{k,\,x}$ carries the outcome $g_1$ and the innermost factor $G^{1,\,x}$ carries $g_k$. Since the measurement $\{G^{i,\,x}_g\}$ is indexed by $g \in \mathcal G_i$, the operator $G^{k,\,x}_{g_1}$ is undefined whenever $\mathcal G_1 \ne \mathcal G_k$, so the printed pairing is a typographical slip. The statement above instead uses the pairing $G^{k,\,x}_{g_k} \cdots G^{1,\,x}_{g_1} \cdots G^{k,\,x}_{g_k}$ of Fact 4.34 in \cite{Natarajan2018NEEXP}, from which the lemma is imported. The source also leaves the case $k = 0$ implicit; with the empty-product convention recorded in the statement, both sides of \eqref{eq:ld-sandwich-2} are then the identity on the single empty-tuple outcome and the conclusion holds with error zero.  The correction is documented in \cite{gap:qpbt_ld-sandwich-indexing}.
+	As printed in the source, the sandwich in Lemma~\ref{lem:ld-sandwich} pairs the $i$-th measurement with the outcome $g_{k+1-i}$: the outermost factor $G^{k,\,x}$ carries the outcome $g_1$ and the innermost factor $G^{1,\,x}$ carries $g_k$. Since the measurement $\{G^{i,\,x}_g\}$ is indexed by $g \in \mathcal G_i$, the operator $G^{k,\,x}_{g_1}$ is undefined whenever $\mathcal G_1 \ne \mathcal G_k$, so the printed pairing is a typographical slip. The statement above instead uses the pairing $G^{k,\,x}_{g_k} \cdots G^{1,\,x}_{g_1} \cdots G^{k,\,x}_{g_k}$ of Fact 4.34 in \cite{Natarajan2018NEEXP}, from which the lemma is imported. The source also leaves the case $k = 0$ implicit; with the empty-product convention recorded in the statement, both sides of \eqref{eq:ld-sandwich-2} are then the identity on the single empty-tuple outcome and the conclusion holds with error zero.  The correction is documented in \cite{gap:qpbt_ld-sandwich-indexing}.
 \end{remark}
 
 \begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
