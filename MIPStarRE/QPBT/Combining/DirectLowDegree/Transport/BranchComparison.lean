@@ -69,14 +69,6 @@ theorem directLdBranchRejectionProbability_eq_avgOver (D : DirectLdParams)
           (types.2, directLdMap D types.2 sample) :=
   rfl
 
-/-- The outcome-level Born weight of `Transport.Strategy` is the answer-pair
-Born weight of the game value.  Formalization-only bridge between the two
-presentations. -/
-theorem strategyBornWeight_eq_outcomeWeight {G : Game} (S : Strategy G)
-    (x : G.QuestionA) (y : G.QuestionB) (a : G.AnswerA) (b : G.AnswerB) :
-    strategyBornWeight S x y a b = outcomeWeight S x y a b :=
-  rfl
-
 /-- When every accepted direct answer pair reads out to equal mature answers,
 the bipartite consistency defect of the two readouts at a fixed question pair
 is at most the rejected direct Born mass there.  The matched mass of the
@@ -115,7 +107,7 @@ theorem qBipartiteConsDefect_le_directRejectedMass
           ∑ c : Outcome,
             ∑ a ∈ Finset.univ.filter (fun a => readA a = c),
               ∑ b ∈ Finset.univ.filter (fun b => readB b = c),
-                strategyBornWeight S x y a b := by
+                outcomeWeight S x y a b := by
         refine Finset.sum_congr rfl ?_
         intro c _
         exact directPostprocessBornWeight D S hS x y readA readB c c
@@ -124,7 +116,7 @@ theorem qBipartiteConsDefect_le_directRejectedMass
               ∑ b : DirectLdAnswer D,
                 if readB b = c then outcomeWeight S x y a b else 0
             else 0 := by
-        simp only [Finset.sum_filter, strategyBornWeight_eq_outcomeWeight]
+        simp only [Finset.sum_filter]
       _ = ∑ a : DirectLdAnswer D, ∑ c : Outcome,
             if readA a = c then
               ∑ b : DirectLdAnswer D,

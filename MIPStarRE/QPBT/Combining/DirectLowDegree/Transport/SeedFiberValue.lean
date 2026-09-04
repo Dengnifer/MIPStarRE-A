@@ -179,9 +179,8 @@ private theorem directAcceptedMass_ldStrategyToDirect (L : LdParams)
           (tA, directLdMap L.toDirectLdParams tA sample)
           (tB, directLdMap L.toDirectLdParams tB sample) a' b' = true
       · simp only [hc, if_true]
-        rw [← Finset.mul_sum, ← strategyBornWeight_eq_outcomeWeight,
-          ldStrategyToDirect_bornWeight]
-        simp only [hseeded, strategyBornWeight_eq_outcomeWeight]
+        rw [← Finset.mul_sum, ldStrategyToDirect_bornWeight]
+        simp only [hseeded]
       · simp [hc]
     _ = ∑ a' : DirectLdAnswer L.toDirectLdParams,
           ∑ residue : Fin (L.q / L.m),
