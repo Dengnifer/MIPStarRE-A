@@ -110,8 +110,9 @@ documented failure modes. Sources are cited in `local/protocols/*.md`.
 - **Fix commits**: `autofix.sh`'s subjects are prefixed `[codex-auto-fix]` /
   `[codex-review-fix]` exactly (the review-gate skip regex depends on them);
   operator and worker repairs use plain `fix(...)` subjects and are reviewed.
-- **Agent sessions**: `<role>-<issue|scope>-<yyyymmdd>-<seq>` with roles
-  `orc, prover, reviewer, simplifier, blueprint, splitter, scout, mathfix`.
+- **Codex sessions**: `<role>-<issue|scope>-<yyyymmdd>-<seq>` with roles
+  `orc, prover, reviewer, simplifier, blueprint, splitter, scout`, plus
+  `mathfix` for astra after its availability is reported on #26.
   Dispatched only via `local/bin/dispatch.sh`, which records the codex `thread_id`,
   captures the `--json` event stream to
   `results/telemetry/sessions/<name>.jsonl`, and appends a summary line to
@@ -139,9 +140,12 @@ All appends are one-line JSON; schemas documented in `protocols/meta.md`.
 
 - codex CLI (`gpt-5.6-sol`, ultra effort) drives orchestrator/prover/reviewer/
   simplifier sessions (`codex exec`, `codex exec review`); `dispatch.sh` also
-  admits the `mathfix` role for astra when that model is available.
-- Claude-side subagents: easy/mechanical tasks run on Opus-tier; Fable 5.1 is
-  the current `mathfix` model and otherwise remains reserved for hard reasoning
-  (proof strategy, protocol synthesis, adversarial verification).
+  admits the `mathfix` role for astra only after `owner-tools/astra-poll.sh`
+  reports availability on #26.
+- Claude-side subagents: easy/mechanical tasks run on Opus-tier. The current
+  `mathfix` lane is Claude Fable 5.1, launched by the owner session through its
+  Agent tool and recorded in `results/telemetry/owner-sessions.jsonl`; Fable
+  otherwise remains reserved for hard reasoning (proof strategy, protocol
+  synthesis, adversarial verification).
 - Reviewer and prover roles must be **different sessions** — a session never
   reviews its own diff.

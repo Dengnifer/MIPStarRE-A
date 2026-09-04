@@ -13,7 +13,7 @@
 #                     authorization: there is no @-mention trigger and no
 #                     author_association gate locally — you are the gate.
 #   --role ROLE       dispatch role (default: orc; prover, simplifier,
-#                     blueprint, splitter, scout and mathfix are the others).
+#                     blueprint, splitter and scout are the others).
 #   --read-only       Run the session in the read-only sandbox (investigate,
 #                     do not edit).
 #   --dry-run         Print what would be dispatched and stop.
@@ -190,17 +190,13 @@ done
 [ -n "$INSTRUCTION" ] || die "an instruction is required, quoted as a single argument"
 
 case "$ROLE" in
-  orc|prover|simplifier|blueprint|splitter|scout|mathfix|reviewer) ;;
-  *) die "unknown role '$ROLE'; dispatch.sh accepts orc, prover, reviewer,
-  simplifier, blueprint, splitter, scout, mathfix" ;;
+  orc|prover|simplifier|blueprint|splitter|scout|reviewer) ;;
+  *) die "unknown role '$ROLE'; dispatch.sh accepts orc, prover, reviewer, simplifier, blueprint, splitter, scout" ;;
 esac
 if [ "$ROLE" = reviewer ]; then
   # DESIGN.md model policy: a session never reviews its own diff, and reviewer
   # sessions are review.sh's business.
   die "role 'reviewer' belongs to local/bin/review.sh; agent.sh is for human-directed work sessions"
-fi
-if [ "$ROLE" = "mathfix" ]; then
-  PERSONA_PATH="local/personas/mathfix.md"
 fi
 
 command -v python3 >/dev/null 2>&1 || die "python3 is required"

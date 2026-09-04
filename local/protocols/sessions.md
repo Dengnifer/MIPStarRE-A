@@ -2,7 +2,7 @@
 
 Normative. Read `local/protocols/meta.md` first.
 
-A *session* is one `codex exec` run: a single model conversation with a
+A *Codex session* is one `codex exec` run: a single model conversation with a
 working root, a sandbox mode, a persona, a task, and a token bill. In the
 parent repository a session was a GitHub Actions job — its identity came from
 a bot token, its prompt from a trusted checkout of the default branch, and its
@@ -21,7 +21,7 @@ so this protocol reconstructs each one explicitly:
 
 ## 1. One entry point
 
-**Every session is started by `local/bin/dispatch.sh`.** Calling `codex` by
+**Every Codex session is started by `local/bin/dispatch.sh`.** Calling `codex` by
 hand — including from inside an agent session — is a protocol violation, not a
 shortcut: the thread id, the token counts and the wall time exist only in the
 event stream that `dispatch.sh` captures, and a session started any other way
@@ -65,8 +65,12 @@ exception: the role code `orc` maps to `local/personas/orchestrator.md`.
 Until such a file is committed, `dispatch.sh` warns and falls back to a
 one-line built-in frame — enough to run, not enough for load-bearing work.
 The `mathfix` role is the source-statement repair lane governed by
-`issues-prs.md` section 6. Its per-gap attempt and elapsed-time budget is
-cumulative across sessions; the operator supplies that state in each dispatch.
+`issues-prs.md` section 6. At present, the owner session launches that lane on
+Claude Fable 5.1 through its Agent tool and records it separately in
+`results/telemetry/owner-sessions.jsonl`; `dispatch.sh --role mathfix` is used
+only for astra after its availability is reported on #26. The per-gap attempt
+and elapsed-time budget is cumulative across both routes, and the operator
+supplies that state in each request or dispatch.
 
 ## 3. Naming
 

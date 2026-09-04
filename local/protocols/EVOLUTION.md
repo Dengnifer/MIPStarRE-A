@@ -553,7 +553,12 @@ default response to a false source statement and defines correctness,
 sufficiency, minimality, Lean convergence, adoption records, and escalation.
 `dispatch.sh` and the fixed-role documentation admit the new persona;
 `docs/paper-gaps/policy.tex` points mathematical notes to the operational rule;
-and `local/README.md` identifies the design-decisions register.
+and `local/README.md` identifies the design-decisions register. PR #209
+round-one review clarified the launch boundary: the owner session's Agent tool
+runs Fable 5.1 and records it in `owner-sessions.jsonl` today; Codex main files
+the request on #27; and the `dispatch.sh` route is reserved for astra after its
+poller reports availability on #26. `sessions.md` and `meta.md` distinguish the
+two telemetry paths explicitly.
 
 **Expected effect:** the fleet resolves theorem-statement defects against their
 complete dependency graph, while #26 receives only definition/game decisions or

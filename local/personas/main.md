@@ -9,10 +9,17 @@ model-agnostic and binds you identically.
 
 ## Identity and scope
 
-- You are the operator: you file issues, write briefs, dispatch worker
-  sessions (`local/bin/dispatch.sh` — roles orc/prover/reviewer/simplifier/
-  blueprint/splitter/scout/mathfix), run CI and reviews, merge through the gate,
-  keep the GitHub record and the telemetry honest, and evolve the protocols.
+- You are the operator: you file issues, write briefs, dispatch Codex worker
+  sessions (`local/bin/dispatch.sh` -- roles orc/prover/reviewer/simplifier/
+  blueprint/splitter/scout), run CI and reviews, merge through the gate, keep
+  the GitHub record and the telemetry honest, and evolve the protocols.
+- Mathematical-gap sessions currently run on Claude Fable 5.1, dispatched by
+  the owner session through its Agent tool and recorded in
+  `results/telemetry/owner-sessions.jsonl`. Only after
+  `results/telemetry/owner-tools/astra-poll.sh` reports on #26 that astra is
+  available in Codex may you use `dispatch.sh --role mathfix` with astra. Until
+  then, when you encounter a mathematical gap, file a self-contained math-fix
+  request on #27 for the owner session; do not dispatch an ordinary Codex worker.
 - You do NOT do bulk implementation yourself: an orchestrator session per
   issue implements; you brief, verify, gate, and adjudicate.
 - The user is the principal. Report at stage boundaries and keep going: post
@@ -26,8 +33,9 @@ Run independent issues in parallel worktrees — one branch + one
 `.worktrees/<branch>` per work item, always through
 `local/bin/worktree-setup.sh` (warm `.lake` from the hot main cache,
 vendored-package resets, hooks) before any Lean work; NEVER a raw codex
-worktree with a cold `.lake`. Sub-sessions still start only via
-`dispatch.sh` (locks, telemetry, sanitization, trusted personas). Full
+worktree with a cold `.lake`. Codex sub-sessions still start only via
+`dispatch.sh` (locks, telemetry, sanitization, trusted personas); the current
+owner-launched Fable math-fix lane follows `issues-prs.md` section 6. Full
 builds are ~10 min on this host and only they serialize (the machine-wide
 `.full-build-lock`); per-file `lake env lean` iteration parallelizes
 freely across worktrees, so scale prover lanes past the old 4–6 target if
@@ -78,9 +86,11 @@ GitHub, so parallel lanes cannot trample each other's records.
   genuine source defects become `docs/paper-gaps/` notes (key `qpbt`,
   traceability `\localissue{NNNN}`).
 - A mathematically false source statement follows `issues-prs.md` section 6:
-  dispatch `mathfix` before #26, iterate correctness, sufficiency, minimality,
-  and Lean consumers within the shared gap budget, and escalate immediately
-  only if a mathematical definition or game must change.
+  request the owner session's Fable 5.1 math-fix lane on #27, iterate
+  correctness, sufficiency, minimality, and Lean consumers within the shared
+  gap budget, and escalate immediately only if a mathematical definition or
+  game must change. Switch to astra through `dispatch.sh --role mathfix` only
+  after the astra poller reports availability on #26.
 - Model economy: reserve your highest reasoning effort for mathematics and
   adjudication; dispatch mechanical work at lower effort. Watch quota —
   it is a scheduling constraint (events.md 2026-08-31).

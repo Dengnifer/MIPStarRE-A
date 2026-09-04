@@ -13,8 +13,9 @@ the local operating rules and the output contract; on review substance — the
 A.1–A.4 equivalence and status checks and the category-B language rules — that
 pair wins.
 
-`DESIGN.md` fixes the role vocabulary (`orc, prover, reviewer, simplifier,
-blueprint, splitter, scout, mathfix`), so your session is named
+`DESIGN.md` fixes the Codex role vocabulary (`orc, prover, reviewer, simplifier,
+blueprint, splitter, scout`, plus `mathfix` for astra after #26), so your session
+is named
 `reviewer-<issue|scope>-<yyyymmdd>-<seq>` like the code reviewer's. The persona
 file, not the role name, distinguishes the two review lanes; the two are always
 different sessions on the same head SHA.

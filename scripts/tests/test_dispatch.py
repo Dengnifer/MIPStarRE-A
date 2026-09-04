@@ -20,7 +20,10 @@ THREAD_ID = "019e93a5-e370-7aa1-ba77-6373dbdd6a61"
 
 
 class DispatchCommandTests(unittest.TestCase):
-    def dispatch_command(self, *extra: str) -> list[str]:
+    def dispatch_command(
+        self, *extra: str, model: str = "test-model", effort: str = "high",
+        include_persona: bool = False,
+    ) -> list[str]:
         with tempfile.TemporaryDirectory() as cache_root:
             fake_bin = Path(cache_root) / "bin"
             fake_bin.mkdir()
@@ -31,7 +34,7 @@ class DispatchCommandTests(unittest.TestCase):
             env.update(
                 {
                     "MIPSTARRE_CACHE_ROOT": cache_root,
-                    "MIPSTARRE_CODEX_MODEL": "test-model",
+                    "MIPSTARRE_CODEX_MODEL": model,
                     "PATH": f"{fake_bin}{os.pathsep}{env.get('PATH', '')}",
                 }
             )
@@ -46,10 +49,10 @@ class DispatchCommandTests(unittest.TestCase):
                     str(REPO_ROOT),
                     "--sandbox",
                     "read-only",
-                    "--no-persona",
+                    *([] if include_persona else ["--no-persona"]),
                     "--skip-hook-check",
                     "--effort",
-                    "high",
+                    effort,
                     "--dry-run",
                     *extra,
                     "--",
@@ -61,6 +64,7 @@ class DispatchCommandTests(unittest.TestCase):
                 capture_output=True,
                 text=True,
             )
+        self.last_dispatch_stdout = result.stdout
         command_line = next(
             line.removeprefix("command: ")
             for line in result.stdout.splitlines()
@@ -90,10 +94,17 @@ class DispatchCommandTests(unittest.TestCase):
         self.assert_common_exec_options(argv)
         self.assertEqual(argv[13:], ["resume", "--", THREAD_ID, "<prompt>"])
 
-    def test_mathfix_role_is_dispatchable(self) -> None:
-        argv = self.dispatch_command("--role", "mathfix", "--sandbox", "workspace-write")
+    def test_future_astra_mathfix_selects_model_effort_and_persona(self) -> None:
+        argv = self.dispatch_command(
+            "--role", "mathfix", "--sandbox", "workspace-write", "--persona-ref", "HEAD",
+            model="astra", effort="ultra", include_persona=True,
+        )
 
         self.assertEqual(argv[3:7], ["-C", str(REPO_ROOT), "--sandbox", "workspace-write"])
+        self.assertEqual(argv[argv.index("-m") + 1], "astra")
+        self.assertIn("model_reasoning_effort=ultra", argv)
+        self.assertIn("persona: HEAD:local/personas/mathfix.md", self.last_dispatch_stdout)
+        self.assertIn("# Persona: mathematical-gap repair", self.last_dispatch_stdout)
 
     def test_telemetry_accepts_mathfix_role(self) -> None:
         result = subprocess.run(
