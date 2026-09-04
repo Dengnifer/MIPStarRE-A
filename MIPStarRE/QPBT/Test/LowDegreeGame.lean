@@ -6,11 +6,10 @@ import MIPStarRE.QPBT.Games.Defs
 /-!
 # The low-degree game
 
-This file introduces the finite question and answer alphabets used by the
-low-degree component of the Pauli basis test.  The maps are explicit maps on
-the ambient coefficient space, and their conditional-linearity levels are
-established below; the line-point distributions they induce are analysed in
-`MIPStarRE/QPBT/Test/LowDegreeGameTheorems.lean`.
+The low-degree component of the Pauli basis test has finite question and answer
+alphabets.  Its question maps act explicitly on the point, coordinate, and
+direction registers of the ambient coefficient space and have recursive
+conditionally linear representations of levels one, two, and three.
 
 ## References
 
@@ -18,6 +17,9 @@ The source-facing nodes are `def:ld-game`, `def:ld-question-distribution`, and
 `def:ld-win-predicate` in
 `blueprint/src/chapter/ch13_qpbt_test.tex:17-156`; their paper origin is
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
+The exact decomposition of a scalar seed into its coordinate index and its
+residue records the balance assertion for the map `chi` in the same source
+definition.
 -/
 
 open scoped BigOperators
@@ -116,6 +118,79 @@ noncomputable def chiIndex (P : LdParams) (s : ScalarQ P) : Fin P.m := by
     exact Nat.ne_of_gt (lt_of_lt_of_le Nat.zero_lt_one P.hm)⟩
   exact Fin.ofNat P.m ((binaryRepresentation P.model s).val / (P.q / P.m))
 
+/-! ### Equal fibers of the coordinate-index map -/
+
+/-- The common residue set in a fiber of `chiIndex` is nonempty.  This is part
+of the exact seed decomposition supporting the balance assertion in
+`def:ld-question-distribution`, blueprint `lem:chi-seed-fibers`, paper
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:215-221`.
+-/
+theorem LdParams.seedFiberCard_pos (L : LdParams) : 0 < L.q / L.m := by
+  exact Nat.div_pos (Nat.le_of_dvd (by
+    obtain ⟨n, hn, hq⟩ := L.hq
+    rw [hq]
+    exact Nat.pow_pos (by decide)) L.hdvd) L.hm
+
+/-- Divisibility identifies the scalar cardinality with the product of the
+coordinate-index cardinality and the common fiber cardinality.  This supports
+`lem:chi-seed-fibers` in blueprint chapter 13. -/
+theorem LdParams.seedFiberProduct_eq (L : LdParams) :
+    L.q = L.m * (L.q / L.m) :=
+  (Nat.mul_div_cancel' L.hdvd).symm
+
+/-- Casting between equal finite cardinalities preserves the underlying
+natural-number representative. -/
+@[simp] private theorem equivCastFin_val {m n : ℕ} (h : m = n) (i : Fin m) :
+    (Equiv.cast (congrArg Fin h) i).val = i.val := by
+  subst n
+  rfl
+
+/-- A scalar seed is uniquely a coordinate index and a residue in its
+`chiIndex` fiber.  This is the exact decomposition underlying
+`lem:chi-seed-fibers` in blueprint chapter 13. -/
+noncomputable def seedFiberEquiv (L : LdParams) :
+    ScalarQ L ≃ Fin L.m × Fin (L.q / L.m) :=
+  (binaryRepresentation L.model).trans <|
+    (Equiv.cast <| congrArg Fin L.seedFiberProduct_eq).trans
+      finProdFinEquiv.symm
+
+/-- The coordinate component of the exact seed decomposition is `chiIndex`. -/
+@[simp] theorem seedFiberEquiv_fst (L : LdParams) (s : ScalarQ L) :
+    (seedFiberEquiv L s).1 = chiIndex L s := by
+  letI : NeZero L.m := ⟨Nat.ne_of_gt (lt_of_lt_of_le Nat.zero_lt_one L.hm)⟩
+  have hquot : (binaryRepresentation L.model s).val / (L.q / L.m) < L.m := by
+    apply (Nat.div_lt_iff_lt_mul L.seedFiberCard_pos).mpr
+    rw [Nat.mul_div_cancel' L.hdvd]
+    exact (binaryRepresentation L.model s).isLt
+  simp only [seedFiberEquiv, Equiv.trans_apply]
+  apply Fin.ext
+  change
+    (Equiv.cast (congrArg Fin L.seedFiberProduct_eq)
+      (binaryRepresentation L.model s)).val / (L.q / L.m) =
+      (Fin.ofNat L.m ((binaryRepresentation L.model s).val / (L.q / L.m))).val
+  rw [equivCastFin_val]
+  · exact (Nat.mod_eq_of_lt hquot).symm
+  · exact L.seedFiberProduct_eq
+
+/-- Reconstruct the scalar seed belonging to a coordinate and its fiber
+residue. -/
+noncomputable def seedOfIndexResidue (L : LdParams)
+    (i : Fin L.m) (r : Fin (L.q / L.m)) : ScalarQ L :=
+  (seedFiberEquiv L).symm (i, r)
+
+/-- Decomposing a reconstructed seed recovers its coordinate and residue. -/
+@[simp] theorem seedFiberEquiv_seedOfIndexResidue (L : LdParams)
+    (i : Fin L.m) (r : Fin (L.q / L.m)) :
+    seedFiberEquiv L (seedOfIndexResidue L i r) = (i, r) :=
+  (seedFiberEquiv L).apply_symm_apply (i, r)
+
+/-- A reconstructed seed belongs to the prescribed `chiIndex` fiber. -/
+@[simp] theorem chiIndex_seedOfIndexResidue (L : LdParams)
+    (i : Fin L.m) (r : Fin (L.q / L.m)) :
+    chiIndex L (seedOfIndexResidue L i r) = i := by
+  rw [← seedFiberEquiv_fst]
+  simp
+
 /-- The projection used in the diagonal-line map zeroes coordinates before the
 chosen index and retains the suffix of the direction vector.  This is the
 prefix restriction in `def:ld-question-distribution`, blueprint
@@ -125,6 +200,18 @@ prefix restriction in `def:ld-question-distribution`, blueprint
 def prefixProjection {P : LdParams} (i : Fin P.m) (v : Fin P.m → ScalarQ P) :
     Fin P.m → ScalarQ P :=
   fun j => if j.val < i.val then 0 else v j
+
+/-- Zeroing the coordinates preceding a fixed index is idempotent.  This is a
+formalization-only consequence of the prefix restriction in
+`def:ld-question-distribution`, recorded as `lem:prefix-projection-idem` in
+blueprint chapter 13. -/
+theorem prefixProjection_idempotent {P : LdParams} (i : Fin P.m)
+    (v : Fin P.m → ScalarQ P) :
+    prefixProjection i (prefixProjection i v) = prefixProjection i v := by
+  funext j
+  by_cases h : j.val < i.val
+  · simp only [prefixProjection, if_pos h]
+  · simp only [prefixProjection, if_neg h]
 
 /-- The point CL map, retaining the point block and clearing the auxiliary
 blocks.  It is the map `L_point` of `def:ld-question-distribution`, blueprint
