@@ -302,7 +302,8 @@ theorem sum_operatorFourier_sq_eq_one {t : ℕ} {ι : Type}
 
 /-! ## Observable-distance normalization -/
 
-/-- The affine operator `(1 ± S)/2`, which is the effect of a binary projective measurement when `S` is a binary observable.
+/-- The affine operator `(1 ± S)/2`, which is the effect of a binary projective
+measurement when `S` is a binary observable.
 The two effects are `(1 + O) / 2` and `(1 - O) / 2`. -/
 noncomputable def binaryObservableEffect {ι : Type} [Fintype ι]
     [DecidableEq ι] (outcome : Bool) (O : Op ι) : Op ι :=
