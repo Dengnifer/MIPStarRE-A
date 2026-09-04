@@ -58,6 +58,42 @@ The classical low individual degree game is a two-player game based on the low i
 	The question distribution of $\mathfrak{G}^{\mathrm{ld}}$ is the typed CL distribution obtained as follows: sample a type pair $(t_{\mathrm A}, t_{\mathrm B})$ uniformly from $\mathcal T^{\mathrm{ld}} \times \mathcal T^{\mathrm{ld}}$, sample $z = (u,s,v)$ uniformly from $V$, and send each player $w \in \{\mathrm A,\mathrm B\}$ the question $(t_w, L_{t_w}(z))$.
 \end{definition}
 
+\begin{lemma}[Level of the axis-parallel line map]\label{lem:ld-aline-level}
+	\lean{MIPStarRE.QPBT.isCondLinear_ldALineCL}
+	\leanok
+	\uses{def:ld-question-distribution, def:cl-func}
+	Fix $\mathsf{ldparams} = (q,m,d,k)$ as in Definition~\ref{def:ld-game}. The map $L_{\mathsf{ALine}}$ of Equation~\eqref{eq:cl-alnf} is a $2$-level conditionally linear function on $V$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:cl-func, def:line-representative}
+	The two-level decomposition of $L_{\mathsf{ALine}}$ is exhibited directly: the first stage is the $1$-level CL function projecting $V_I \oplus V_V$ onto $V_I$, and the second stage, on the complementary register $V_X$, is the $1$-level CL function $L^{\mathrm{Ln}}_{e_i}$ with $i = \chi(s)$ read off the first stage. The two stages act on disjoint registers and sum to $L_{\mathsf{ALine}}$, which is therefore $1+1 = 2$-level conditionally linear.
+\end{proof}
+
+\begin{lemma}[Level of the diagonal line map]\label{lem:ld-dline-level}
+	\lean{MIPStarRE.QPBT.isCondLinear_ldDLineCL}
+	\leanok
+	\uses{def:ld-question-distribution, def:cl-func}
+	Fix $\mathsf{ldparams} = (q,m,d,k)$ as in Definition~\ref{def:ld-game}. The map $L_{\mathsf{DLine}}$ of Equation~\eqref{eq:cl-dlnf} is a $3$-level conditionally linear function on $V$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:cl-func, def:line-representative}
+	The three-level decomposition of $L_{\mathsf{DLine}}$ is exhibited directly: the first stage is the identity on $V_I$; the second, on $V_V$, is the $1$-level CL function $v \mapsto \pi_{i-1}(v)$ with $i = \chi(s)$ read off the first stage; and the third, on $V_X$, is the $1$-level CL function $L^{\mathrm{Ln}}_{v'}$ selected by the pair $(s,v')$ read off the first two. The three stages act on pairwise disjoint registers and sum to $L_{\mathsf{DLine}}$, which is therefore $1+1+1 = 3$-level conditionally linear.
+\end{proof}
+
+\begin{lemma}[The low-degree question distribution is a typed CL distribution]\label{lem:ld-question-typed-cl}
+	\lean{MIPStarRE.QPBT.ldQuestionDistribution_eq_typedCL}
+	\leanok
+	\uses{def:ld-question-distribution, def:typed-cl-distributions, def:graph-distribution, lem:ld-aline-level, lem:ld-dline-level}
+	Fix $\mathsf{ldparams} = (q,m,d,k)$ as in Definition~\ref{def:ld-game}, let $L = \{L_t\}_{t \in \mathcal T^{\mathrm{ld}}}$ be the family of Definition~\ref{def:ld-question-distribution}, and let $G^{\mathrm{ld}}$ be the graph on $\mathcal T^{\mathrm{ld}}$ all of whose unordered pairs, self-loops included, are edges. Then the question distribution of $\mathfrak{G}^{\mathrm{ld}}$ is the $(\mathcal T^{\mathrm{ld}}, G^{\mathrm{ld}})$-typed conditionally linear distribution $\mu^{G^{\mathrm{ld}}}_{L,\,L}$ of Definition~\ref{def:typed-cl-distributions}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:typed-cl-distributions, def:graph-distribution, def:cl-dist}
+	Every unordered pair of types is an edge of $G^{\mathrm{ld}}$, so the graph distribution $\mu_{G^{\mathrm{ld}}}$ of Definition~\ref{def:graph-distribution} is the uniform distribution on $\mathcal T^{\mathrm{ld}} \times \mathcal T^{\mathrm{ld}}$. For each ordered type pair $(t_{\mathrm A}, t_{\mathrm B})$ the CL distribution $\mu_{L_{t_{\mathrm A}},\, L_{t_{\mathrm B}}}$ is the push-forward of the uniform distribution on $V$ along $z \mapsto \bigl(L_{t_{\mathrm A}}(z), L_{t_{\mathrm B}}(z)\bigr)$. Binding the uniform type pair to these push-forwards and tagging each content with its type is exactly the two-stage sampling procedure of Definition~\ref{def:ld-question-distribution}.
+\end{proof}
+
 The next two lemmas show that the CL functions $L_{\mathsf{Point}}$, $L_{\mathsf{ALine}}$, $L_{\mathsf{DLine}}$ give rise to the axis-parallel and diagonal line-versus-point distributions.
 We label the coordinates by $r\in\{0,\ldots,m-1\}$, with label $r$
 representing the paper's coordinate $r+1$.
@@ -70,7 +106,7 @@ representing the paper's coordinate $r+1$.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{def:line-representative}
+	\uses{def:line-representative, lem:line-rep-incidence}
 	Since $s$ is uniformly random in $\F_q$ and $m$ divides $q$, the index $i = \chi(s)$ is uniformly random in $\{1,2,\ldots,m\}$, so $(u_0,s)$ specifies a uniformly random axis-parallel line $\ell(u_0,e_i)$. Since $u_0 = L^{\mathrm{Ln}}_{e_i}(u)$ is the canonical representative of the line through $u$ in direction $e_i$, we have $u \in \ell(u_0,e_i)$.
 \end{proof}
 
@@ -82,8 +118,8 @@ representing the paper's coordinate $r+1$.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{lem:alnf}
-	The proof is identical to that of Lemma~\ref{lem:alnf}: uniformity of $s$ makes $i = \chi(s)$ uniform, the direction component of the sampled tuple is $\pi_{i-1}(v)$ for uniform $v$ (so its first $i-1$ coordinates vanish), and $u_0 = L^{\mathrm{Ln}}_{\pi_{i-1}(v)}(u)$ places $u$ on the line $\ell(u_0,\pi_{i-1}(v))$.
+	\uses{def:line-representative, lem:line-rep-incidence}
+	The proof follows the same three steps as that of Lemma~\ref{lem:alnf}, without depending on it: uniformity of $s$ makes $i = \chi(s)$ uniform, the direction component of the sampled tuple is $\pi_{i-1}(v)$ for uniform $v$ (so its first $i-1$ coordinates vanish), and $u_0 = L^{\mathrm{Ln}}_{\pi_{i-1}(v)}(u)$ places $u$ on the line $\ell(u_0,\pi_{i-1}(v))$.
 \end{proof}
 
 \begin{definition}[Line-point distributions]\label{def:line-point-dist}
@@ -314,7 +350,7 @@ The Pauli basis test is the quantum low individual degree test of Natarajan and 
 \begin{definition}[Question distribution of the Pauli basis test]\label{def:pauli-question-distribution}
 	\lean{MIPStarRE.QPBT.PauliType, MIPStarRE.QPBT.pauliCLLevel, MIPStarRE.QPBT.pauliCL}
 	\lean{MIPStarRE.QPBT.isCondLinear_pauliCL, MIPStarRE.QPBT.pauliEdges}
-	\lean{MIPStarRE.QPBT.pauliQuestionDistribution, MIPStarRE.QPBT.pauliBasisTest}
+	\lean{MIPStarRE.QPBT.pauliQuestionDistribution}
 	\leanok
 	\uses{def:admissible, def:ld-question-distribution, def:ms-game, def:cl-func, def:cl-dist, def:graph-distribution}
 	% Admissibility of the full tuple is required here, not only the divisibility m | q:
@@ -361,7 +397,20 @@ The Pauli basis test is the quantum low individual degree test of Natarajan and 
 	The question distribution of $\mathfrak{G}^{\mathrm{Pauli}}$ is the typed CL distribution on $\mathcal T^{\mathrm{pauli}} \times V^{\mathrm{pauli}} \times \mathcal T^{\mathrm{pauli}} \times V^{\mathrm{pauli}}$ obtained by sampling the type pair $(t_{\mathrm A}, t_{\mathrm B})$ from the graph distribution $\mu_{G^{\mathrm{pauli}}}$ of Definition~\ref{def:graph-distribution}, that is, uniformly at random among all ordered pairs of types whose underlying unordered pair $\{t_{\mathrm A}, t_{\mathrm B}\}$ is an edge of $G^{\mathrm{pauli}}$, self-loops included; sampling $z \in V^{\mathrm{pauli}}$ uniformly at random; and setting $x_w = L_{t_w}(z)$ for $w \in \{\mathrm A,\mathrm B\}$. Explicitly, if $z = (u_X,u_Z,s,v,r_X,r_Z)$, then a player whose type is $(\mathsf{Point},W)$ receives $u_W$; a player whose type is $(\mathsf{ALine},W)$ receives $(u_0, s)$ with $u_0 = L^{\mathrm{Ln}}_{e_i}(u_W)$ and $i = \chi(s)$; a player whose type is $(\mathsf{DLine},W)$ receives $(u_0, s, v')$ with $i = \chi(s)$, $v' = \pi_{i-1}(v)$, and $u_0 = L^{\mathrm{Ln}}_{v'}(u_W)$; a player whose type lies in $\mathcal T^{\mathrm{ms}} \cup \{\mathsf{Pair}, (\mathsf{Pair},X), (\mathsf{Pair},Z)\}$ receives $(u_X, u_Z, r_X, r_Z)$; and a player whose type is $(\mathsf{Pauli},W)$ receives $0$.
 \end{definition}
 
+\begin{lemma}[The Pauli question distribution is a typed CL distribution]\label{lem:pauli-question-typed-cl}
+	\lean{MIPStarRE.QPBT.pauliQuestionDistribution_eq_typedCL}
+	\uses{def:pauli-question-distribution, def:typed-cl-distributions, def:graph-distribution}
+	Fix an admissible tuple $\mathsf{qldparams} = (q,m,d)$ (Definition~\ref{def:admissible}) and let $L = \{L_t\}_{t \in \mathcal T^{\mathrm{pauli}}}$ be the family of Definition~\ref{def:pauli-question-distribution}. Then the question distribution of $\mathfrak{G}^{\mathrm{Pauli}}_{\mathsf{qldparams}}$ is the $(\mathcal T^{\mathrm{pauli}}, G^{\mathrm{pauli}})$-typed conditionally linear distribution $\mu^{G^{\mathrm{pauli}}}_{L,\,L}$ of Definition~\ref{def:typed-cl-distributions}.
+\end{lemma}
+\begin{proof}
+	\uses{def:typed-cl-distributions, def:graph-distribution, def:cl-dist}
+	The type pair is drawn from $\mu_{G^{\mathrm{pauli}}}$ by definition, and for each ordered type pair the content pair is the image of a single uniform $z \in V^{\mathrm{pauli}}$ under the corresponding pair of CL functions, that is, a sample from $\mu_{L_{t_{\mathrm A}},\, L_{t_{\mathrm B}}}$.
+\end{proof}
+
 \begin{definition}[Win predicate of the Pauli basis test]\label{def:pauli-win-predicate}
+	\lean{MIPStarRE.QPBT.PauliAnswer, MIPStarRE.QPBT.validPauliAnswer}
+	\lean{MIPStarRE.QPBT.pauliWinPredicate, MIPStarRE.QPBT.pauliBasisTest}
+	\leanok
 	\uses{def:pauli-question-distribution, def:ld-win-predicate, def:ms-game, def:indicator-vector, def:admissible}
 	Fix an admissible tuple $\mathsf{qldparams} = (q,m,d)$ (Definition~\ref{def:admissible}) and let $M = 2^m$. Answers in the game $\mathfrak{G}^{\mathrm{Pauli}}_{\mathsf{qldparams}}$ take the following forms, depending on the question type; answers not of the prescribed form are rejected.
 	% The paper's format table writes the line contents loosely as (u_W, s) and (u_W, s, v);
