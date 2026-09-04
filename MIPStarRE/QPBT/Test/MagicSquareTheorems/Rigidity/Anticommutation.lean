@@ -397,6 +397,174 @@ theorem signObs_comm (M : MIPStarRE.Quantum.Measurement α d)
 
 end SignObs
 
+/-! ## Deviation of joint spectral combinations on the strategy state -/
+
+section JointDefect
+
+/-- Formalization-only: scalars pass through the second tensor factor. -/
+private theorem heteroKron_smul_right {ιA ιB : Type} (c : ℂ) (M : Op ιA) (N : Op ιB) :
+    heteroKron M (c • N) = c • heteroKron M N := by
+  unfold heteroKron
+  exact Matrix.kronecker_smul c M N
+
+/-- Formalization-only: the tensor placement of two orthogonal projections is an
+orthogonal projection. -/
+private theorem isProj_heteroKron {ιA ιB : Type} [Fintype ιA] [DecidableEq ιA]
+    [Fintype ιB] [DecidableEq ιB] {A : Op ιA} {B : Op ιB}
+    (hA : IsProj A) (hB : IsProj B) : IsProj (heteroKron A B) := by
+  have hAi : A * A = A := hA.isIdempotentElem
+  have hBi : B * B = B := hB.isIdempotentElem
+  have hAs : Aᴴ = A := by
+    rw [← Matrix.star_eq_conjTranspose]; exact hA.isSelfAdjoint
+  have hBs : Bᴴ = B := by
+    rw [← Matrix.star_eq_conjTranspose]; exact hB.isSelfAdjoint
+  constructor
+  · show heteroKron A B * heteroKron A B = heteroKron A B
+    rw [heteroKron_mul, hAi, hBi]
+  · show star (heteroKron A B) = heteroKron A B
+    rw [Matrix.star_eq_conjTranspose, heteroKron_conjTranspose, hAs, hBs]
+
+/-- Formalization-only: a real spectral combination of the effects of a
+projective measurement is self-adjoint. -/
+private theorem sum_real_smul_effect_conjTranspose {α d : Type} [Fintype α]
+    [Fintype d] [DecidableEq d] (M : MIPStarRE.Quantum.Measurement α d)
+    (hM : MIPStarRE.QPBT.Measurement.IsProjective M) (c : α → ℝ) :
+    (∑ a, ((c a : ℝ) : ℂ) • M.effect a)ᴴ = ∑ a, ((c a : ℝ) : ℂ) • M.effect a := by
+  rw [← Matrix.star_eq_conjTranspose, star_sum]
+  refine Finset.sum_congr rfl fun a _ => ?_
+  rw [star_smul]
+  congr 1
+  · simp
+  · exact (hM a).isSelfAdjoint
+
+/-- Formalization-only: the quadratic form of a real spectral combination on a
+state is the corresponding real combination of the individual quadratic
+forms. -/
+private theorem re_inner_apply_sum_real_smul {ι γ : Type} [Fintype ι] [DecidableEq ι]
+    [Fintype γ] (r : γ → ℝ) (K : γ → Op ι) (ψ : EuclideanSpace ℂ ι) :
+    (inner ℂ ψ (applyOperatorToState (∑ c, ((r c : ℝ) : ℂ) • K c) ψ)).re =
+      ∑ c, r c * (inner ℂ ψ (applyOperatorToState (K c) ψ)).re := by
+  rw [applyOperatorToState_sum, inner_sum, Complex.re_sum]
+  refine Finset.sum_congr rfl fun c _ => ?_
+  rw [applyOperatorToState_smul, inner_smul_right]
+  simp
+
+variable {G : Game}
+
+/-- Formalization-only: the joint effects of the two players form a projective
+measurement on the composite space when both local measurements are
+projective. -/
+private noncomputable def jointMeasurement (T : Strategy G) (x : G.QuestionA)
+    (y : G.QuestionB) :
+    MIPStarRE.Quantum.Measurement (G.AnswerA × G.AnswerB) (T.ιA × T.ιB) :=
+  MIPStarRE.Quantum.Measurement.ofSumEqOne
+    (fun ab => heteroKron ((T.A x).effect ab.1) ((T.B y).effect ab.2))
+    (fun ab => kronecker_nonneg ((T.A x).pos ab.1) ((T.B y).pos ab.2))
+    (by
+      rw [Fintype.sum_prod_type]
+      calc ∑ a : G.AnswerA, ∑ b : G.AnswerB,
+            heteroKron ((T.A x).effect a) ((T.B y).effect b)
+          = ∑ a : G.AnswerA, heteroKron ((T.A x).effect a)
+              (∑ b : G.AnswerB, (T.B y).effect b) := by
+            exact Finset.sum_congr rfl fun a _ => (heteroKron_sum_right _ _).symm
+        _ = heteroKron (∑ a : G.AnswerA, (T.A x).effect a) (1 : Op T.ιB) := by
+            rw [(T.B y).sum_eq_one, heteroKron_sum_left]
+        _ = 1 := by rw [(T.A x).sum_eq_one, heteroKron_one_one])
+
+/-- Formalization-only: the effects of the joint measurement. -/
+private theorem jointMeasurement_effect (T : Strategy G) (x : G.QuestionA)
+    (y : G.QuestionB) (ab : G.AnswerA × G.AnswerB) :
+    (jointMeasurement T x y).effect ab =
+      heteroKron ((T.A x).effect ab.1) ((T.B y).effect ab.2) := rfl
+
+/-- Formalization-only: the quadratic form of a joint effect is the Born weight
+of the corresponding answer pair. -/
+private theorem re_inner_jointMeasurement_effect (T : Strategy G) (x : G.QuestionA)
+    (y : G.QuestionB) (ab : G.AnswerA × G.AnswerB) :
+    (inner ℂ T.ψ (applyOperatorToState ((jointMeasurement T x y).effect ab) T.ψ)).re =
+      outcomeWeight T x y ab.1 ab.2 := rfl
+
+/-- A real spectral combination of the joint effects deviates from zero, in the
+state-dependent norm, by at most the mass of the answer pairs carrying a nonzero
+coefficient, scaled by the squared coefficient bound.  This is the estimate that
+converts each Magic Square rejection mass into an operator bound;
+`thm:ms-rigidity`, blueprint `ch13_qpbt_test.tex:224-253`. -/
+theorem norm_apply_joint_defect_sq_le (T : Strategy G) (x : G.QuestionA)
+    (y : G.QuestionB) (hA : MIPStarRE.QPBT.Measurement.IsProjective (T.A x))
+    (hB : MIPStarRE.QPBT.Measurement.IsProjective (T.B y))
+    (coef : G.AnswerA → G.AnswerB → ℝ) (E : G.AnswerA → G.AnswerB → Prop)
+    [DecidableRel E] (hbound : ∀ a b, coef a b ^ 2 ≤ 4)
+    (hsupp : ∀ a b, ¬ E a b → coef a b = 0) :
+    ‖applyOperatorToState
+        (∑ a : G.AnswerA, ∑ b : G.AnswerB, ((coef a b : ℝ) : ℂ) •
+          heteroKron ((T.A x).effect a) ((T.B y).effect b)) T.ψ‖ ^ 2 ≤
+      4 * outcomeEventWeight T x y E := by
+  classical
+  set J := jointMeasurement T x y with hJ
+  have hJproj : MIPStarRE.QPBT.Measurement.IsProjective J := fun ab =>
+    isProj_heteroKron (hA ab.1) (hB ab.2)
+  have hcollapse : (∑ a : G.AnswerA, ∑ b : G.AnswerB, ((coef a b : ℝ) : ℂ) •
+      heteroKron ((T.A x).effect a) ((T.B y).effect b)) =
+      ∑ ab : G.AnswerA × G.AnswerB, ((coef ab.1 ab.2 : ℝ) : ℂ) • J.effect ab := by
+    rw [Fintype.sum_prod_type]
+    rfl
+  have hsa : (∑ ab : G.AnswerA × G.AnswerB, ((coef ab.1 ab.2 : ℝ) : ℂ) • J.effect ab)ᴴ =
+      ∑ ab : G.AnswerA × G.AnswerB, ((coef ab.1 ab.2 : ℝ) : ℂ) • J.effect ab :=
+    sum_real_smul_effect_conjTranspose J hJproj (fun ab => coef ab.1 ab.2)
+  have hsq : ∀ ab : G.AnswerA × G.AnswerB,
+      ((coef ab.1 ab.2 : ℝ) : ℂ) * ((coef ab.1 ab.2 : ℝ) : ℂ) =
+        ((coef ab.1 ab.2 ^ 2 : ℝ) : ℂ) := by
+    intro ab
+    rw [← Complex.ofReal_mul, sq]
+  rw [hcollapse, norm_applyOperatorToState_sq, hsa,
+    sum_smul_effect_mul J hJproj]
+  simp only [hsq]
+  rw [re_inner_apply_sum_real_smul]
+  have hterm : ∀ ab : G.AnswerA × G.AnswerB,
+      coef ab.1 ab.2 ^ 2 *
+          (inner ℂ T.ψ (applyOperatorToState (J.effect ab) T.ψ)).re ≤
+        (if E ab.1 ab.2 then 4 * outcomeWeight T x y ab.1 ab.2 else 0) := by
+    intro ab
+    have hw : 0 ≤ outcomeWeight T x y ab.1 ab.2 := outcome_weight_nonneg T x y ab.1 ab.2
+    rw [re_inner_jointMeasurement_effect]
+    by_cases hE : E ab.1 ab.2
+    · rw [if_pos hE]
+      exact mul_le_mul_of_nonneg_right (hbound ab.1 ab.2) hw
+    · rw [if_neg hE, hsupp ab.1 ab.2 hE]
+      simp
+  calc ∑ ab : G.AnswerA × G.AnswerB, coef ab.1 ab.2 ^ 2 *
+        (inner ℂ T.ψ (applyOperatorToState (J.effect ab) T.ψ)).re
+      ≤ ∑ ab : G.AnswerA × G.AnswerB,
+          (if E ab.1 ab.2 then 4 * outcomeWeight T x y ab.1 ab.2 else 0) :=
+        Finset.sum_le_sum fun ab _ => hterm ab
+    _ = 4 * outcomeEventWeight T x y E := by
+        rw [Fintype.sum_prod_type, outcomeEventWeight, Finset.mul_sum]
+        refine Finset.sum_congr rfl fun a _ => ?_
+        rw [Finset.mul_sum]
+        refine Finset.sum_congr rfl fun b _ => ?_
+        by_cases hE : E a b <;> simp [hE]
+
+/-- Formalization-only: expansion of a product of two local spectral
+combinations into the joint effects. -/
+private theorem joint_expand (T : Strategy G) (x : G.QuestionA) (y : G.QuestionB)
+    (u : G.AnswerA → ℂ) (v : G.AnswerB → ℂ) :
+    heteroKron (∑ a, u a • (T.A x).effect a) (∑ b, v b • (T.B y).effect b) =
+      ∑ a, ∑ b, (u a * v b) • heteroKron ((T.A x).effect a) ((T.B y).effect b) := by
+  rw [heteroKron_sum_left]
+  refine Finset.sum_congr rfl fun a _ => ?_
+  rw [heteroKron_smul_left, heteroKron_sum_right, Finset.smul_sum]
+  refine Finset.sum_congr rfl fun b _ => ?_
+  rw [heteroKron_smul_right, smul_smul]
+
+/-- Formalization-only: the identity as a spectral combination of the effects of
+a measurement. -/
+private theorem smul_one_eq_sum_smul_effect {α d : Type} [Fintype α] [Fintype d]
+    [DecidableEq d] (M : MIPStarRE.Quantum.Measurement α d) (s : ℂ) :
+    s • (1 : Op d) = ∑ a, s • M.effect a := by
+  rw [← Finset.smul_sum, M.sum_eq_one]
+
+end JointDefect
+
 end
 
 end MIPStarRE.QPBT.MagicSquareRigidity
