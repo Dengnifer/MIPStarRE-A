@@ -6,7 +6,7 @@
 # Merging is left to the operator (gate decisions). Writes markers under
 # $STATE/lanes/<issue>.{done,needs-attention} and a log next to them.
 set -u
-export PATH="$HOME/.local/bin:$HOME/.elan/bin:$PATH"
+export PATH="$HOME/.cache/mipstarre-dev/owner-bin:$HOME/.local/bin:$HOME/.elan/bin:$PATH"
 export MIPSTARRE_CODEX_MODEL="${MIPSTARRE_CODEX_MODEL:-$(cat "$HOME/.cache/mipstarre-dev/watchdog/model.txt" 2>/dev/null || echo gpt-5.6-sol)}"
 export MIPSTARRE_SESSION="owner-operator"
 N="$1"; SLUG="$2"; ROLE="${3:-prover}"
@@ -46,7 +46,7 @@ TASK="$STATE/$N.task.md"
 BEFORE=$(git -C "$W" merge-base github/main HEAD)
 if [ "$SKIP_DISPATCH" != 1 ]; then
   # concurrency gate: the codex API rate-limits (HTTP 429) above ~5 sessions
-  MAX_CODEX="${MAX_CODEX:-5}"
+  MAX_CODEX="${MAX_CODEX:-3}"
   live() { pgrep -fa 'codex exec' | grep -o '\-C [^ ]*' | sort -u | wc -l; }
   for _ in $(seq 1 720); do [ "$(live)" -lt "$MAX_CODEX" ] && break; sleep 30; done
   RESUME=(); [ -s "$STATE/$N.thread" ] && RESUME=(--resume "$(cat "$STATE/$N.thread")")
@@ -83,11 +83,15 @@ PRB="$STATE/$N.pr.md"
   echo "## Description"; echo; git -C "$W" log --format="- %s" "$BEFORE..$AFTER"; echo
   echo "## Testing"; echo; echo "Worker checked every changed file with \`lake env lean\`; exact-head CI and review follow."; } > "$PRB"
 TITLE=$(gh issue view "$N" --json title --jq .title)
-PR=$(local/bin/pr_open.py --branch "$BR" --issue "$N" --title "$TITLE" --body-file "$PRB" --label formalization) || fail "pr_open failed"
+PR=$(local/bin/pr_open.py --branch "$BR" --issue "$N" --title "$TITLE" --body-file "$PRB" --label formalization) || {
+  log "pr_open failed; pushing directly and retrying (pre-push output in $STATE/$N.push.log)"
+  git -C "$W" push github "refs/heads/$BR:refs/heads/$BR" > "$STATE/$N.push.log" 2>&1 || fail "direct push failed (see $STATE/$N.push.log)"
+  PR=$(local/bin/pr_open.py --branch "$BR" --issue "$N" --title "$TITLE" --body-file "$PRB" --label formalization) || fail "pr_open failed after direct push"
+}
 echo "PR=$PR"
 for _ in $(seq 1 30); do [ "$(gh pr view "$PR" --json headRefOid --jq .headRefOid)" = "$AFTER" ] && break; sleep 10; done
 log "ci.sh $PR"; local/bin/ci.sh "$PR" >> "$STATE/$N.ci.log" 2>&1; echo "CI_EXIT=$?"
-MAXR="${MAX_CODEX:-5}"
+MAXR="${MAX_CODEX:-3}"
 for _ in $(seq 1 720); do [ "$(pgrep -fa 'codex exec' | grep -o '\-C [^ ]*' | sort -u | wc -l)" -lt "$MAXR" ] && break; sleep 30; done
 log "review.sh $PR"; local/bin/review.sh "$PR" >> "$STATE/$N.review.log" 2>&1; echo "REVIEW_EXIT=$?"
 gh api "repos/Dengnifer/MIPStarRE-A/commits/$AFTER/status" --jq '.statuses[] | select(.context|endswith("summary")) | .context+" "+.state+" "+(.description // "")'
