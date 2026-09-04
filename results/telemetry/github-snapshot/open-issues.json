@@ -1,5 +1,89 @@
 [
  {
+  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/91",
+  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
+  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/91/labels{/name}",
+  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/91/comments",
+  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/91/events",
+  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/91",
+  "id": 5343219483,
+  "node_id": "I_kwDOUJyJf88AAAABPnsPGw",
+  "number": 91,
+  "title": "pre-commit: the workflow-layer budget must exempt merge commits",
+  "user": {
+   "login": "Dengnifer",
+   "id": 89234078,
+   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
+   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/Dengnifer",
+   "html_url": "https://github.com/Dengnifer",
+   "followers_url": "https://api.github.com/users/Dengnifer/followers",
+   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
+   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
+   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
+   "repos_url": "https://api.github.com/users/Dengnifer/repos",
+   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
+   "type": "User",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "labels": [
+   {
+    "id": 12025011061,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8bdQ",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/infrastructure",
+    "name": "infrastructure",
+    "color": "ededed",
+    "default": false,
+    "description": "Foundational definitions, shared APIs, or supporting layers"
+   }
+  ],
+  "state": "open",
+  "locked": false,
+  "assignees": [],
+  "milestone": null,
+  "comments": 0,
+  "created_at": "2026-09-04T01:41:05Z",
+  "updated_at": "2026-09-04T01:41:05Z",
+  "closed_at": null,
+  "assignee": null,
+  "author_association": "OWNER",
+  "active_lock_reason": null,
+  "sub_issues_summary": {
+   "total": 0,
+   "completed": 0,
+   "percent_completed": 0
+  },
+  "issue_dependencies_summary": {
+   "blocked_by": 0,
+   "total_blocked_by": 0,
+   "blocking": 0,
+   "total_blocking": 0
+  },
+  "body": "<!-- mipstarre-issue-key: pre-commit-the-workflow-layer-budget-must-exempt-0be0a9d7 -->\nOwner-directed (2026-09-04). A fresh-base merge of main into a 130-line workflow PR staged 520 inherited, already-reviewed workflow-layer lines and the pre-commit budget guard refused the merge commit, so every fresh-base of a workflow PR would need the owner override. Change: the hook skips the line budget when MERGE_HEAD exists (a merge commit) and says so; ordinary commits are unchanged. EVOLUTION entry included. Under 20 lines.",
+  "closed_by": null,
+  "reactions": {
+   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/91/reactions",
+   "total_count": 0,
+   "+1": 0,
+   "-1": 0,
+   "laugh": 0,
+   "hooray": 0,
+   "confused": 0,
+   "heart": 0,
+   "rocket": 0,
+   "eyes": 0
+  },
+  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/91/timeline",
+  "performed_via_github_app": null,
+  "state_reason": null,
+  "pinned_comment": null
+ },
+ {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/89",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/89/labels{/name}",
@@ -648,127 +732,6 @@
    "eyes": 0
   },
   "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/73/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/72",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/72/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/72/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/72/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/72",
-  "id": 5341714569,
-  "node_id": "I_kwDOUJyJf88AAAABPmQYiQ",
-  "number": 72,
-  "title": "feat(QPBT/Algebra): prove the canonical coordinate complement",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement"
-   },
-   {
-    "id": 12025012183,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8f1w",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/qpbt-analysis",
-    "name": "qpbt-analysis",
-    "color": "ededed",
-    "default": false,
-    "description": "Soundness/rigidity analysis of the Pauli basis test \u2014 self-testing bounds and error terms"
-   },
-   {
-    "id": 12025012384,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8goA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/proof",
-    "name": "proof",
-    "color": "ededed",
-    "default": false,
-    "description": "Issue is primarily about proving an existing result"
-   },
-   {
-    "id": 12025012779,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8iKw",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/sorry-elimination",
-    "name": "sorry-elimination",
-    "color": "ededed",
-    "default": false,
-    "description": "Explicitly aimed at discharging remaining `sorry` sites"
-   },
-   {
-    "id": 12025013584,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8lUA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/paper-2001.04383",
-    "name": "paper-2001.04383",
-    "color": "ededed",
-    "default": false,
-    "description": "MIP*=RE (arXiv:2001.04383) \u2014 the primary paper of this track"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-03T21:36:22Z",
-  "updated_at": "2026-09-03T21:36:22Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 0,
-   "blocking": 0,
-   "total_blocking": 0
-  },
-  "body": "<!-- mipstarre-issue-key: qpbt-stage43-canonical-coordinate-complement -->\n### Parent and objective\n\nStage 4.3 proof packet under #47. Prove that the existing intrinsic\nnonpivot-coordinate set spans a complement of every coordinate subspace input.\n\n### Source contract\n\nCanonical source: `references/qpbt-paper/04_preliminaries.tex:303-373`, especially\n`def:canonical-complement` and `lem:canonical-complement`. Blueprint:\n`blueprint/src/chapter/ch11_qpbt_algebra.tex:86-133`.\n\nThe paper chooses nonpivot standard-basis vectors after reduced row echelon form\nand proves that their span has zero intersection with `S` and sums with `S` to\nthe ambient space. Lean's approved `canonicalComplement` encodes the same\nnonpivot set intrinsically by prefix-rank equality. The target is a faithful\ngeneralization from finite fields and `n >= 1` to any field and all `n`. It does\nnot itself prove equivalence with a particular RREF algorithm; do not add\n`\\lean` or `\\leanok` to the currently unlinked canonical-complement blueprint\nlemma in this packet.\n\n### Exact target\n\nIn `MIPStarRE/QPBT/Algebra/Subspaces.lean`, replace only the proof hole in:\n\n```lean\ntheorem isCompl_registerSubmodule_canonicalComplement {n : \u2115}\n    (W : Submodule K (Fin n \u2192 K)) :\n    IsCompl W (registerSubmodule K (canonicalComplement W)) := by\n  ...\n```\n\nPreserve the public signature and the definitions of `prefixMap`, `prefixRank`,\n`canonicalComplement`, and `canonicalProjOfKernel`. Update the stale docstring\nsentence saying the proof is deferred.\n\n### Recommended proof route\n\n1. Establish private coordinate-support facts identifying `registerSubmodule K S`\n   with the span of `Pi.single` vectors and characterize membership/support using\n   `Pi.spanSubset`, `Pi.mem_spanSubset_iff`, and `Pi.dim_spanSubset`.\n2. Rewrite `prefixRank` as the rank of `(prefixMap ...).domRestrict W`, using\n   `LinearMap.range_domRestrict` and rank-nullity.\n3. Prove the pivot criterion: equality of ranks at prefixes `j` and `j+1` iff\n   every `w \u2208 W` that vanishes below `j` also vanishes at `j`. In the strict-rank\n   case choose and normalize a vector of `W` with leading coordinate `j` equal\n   to `1`.\n4. Combine those pivot vectors with `Pi.single j 1` at nonpivot coordinates.\n   The resulting family is triangular with diagonal `1`; prove it linearly\n   independent and spanning using `Matrix.det_of_upperTriangular` and\n   `Matrix.linearIndependent_rows_of_det_ne_zero`, or an equivalent finite\n   induction.\n5. Partition pivot and nonpivot coordinates, identify the nonpivot span with\n   `registerSubmodule K (canonicalComplement W)`, and conclude `IsCompl`, for\n   example via `LinearIndependent.isCompl_span_image`. Cover `n = 0`.\n\nKeep helpers private unless independently reusable and naturally documented.\nPrefer existing Mathlib linear-algebra APIs over a new public RREF mechanism.\n\n### Ownership and non-goals\n\nOwn only `MIPStarRE/QPBT/Algebra/Subspaces.lean`. Do not edit\n`SubspacesTheorems.lean`, the blueprint, re-export files, or unrelated algebra\nmodules. Do not introduce an RREF implementation, bridge or obligation\nhypothesis, axiom, conditional theorem, or public statement change.\n\n### Dependencies and downstream\n\nThis packet has no mathematical dependency on the PR #46 diff. It removes the\ntransitive proof hole from `canonicalProjOfKernel` and unlocks the final proof\nand axiom audit of `ker_canonicalProjPerp` in the orthogonal-complement packet.\n\n### Acceptance\n\n- The exact theorem above is proved without `sorry`, `admit`, an axiom, or a\n  proof-evasion mechanism.\n- `lake env lean MIPStarRE/QPBT/Algebra/Subspaces.lean` succeeds and the owned\n  file has no proof holes.\n- Direct consumers of `canonicalProjOfKernel` type-check, followed by\n  `lake build`.\n- `#print axioms MIPStarRE.QPBT.isCompl_registerSubmodule_canonicalComplement`\n  and `#print axioms MIPStarRE.QPBT.canonicalProjOfKernel` contain no `sorryAx`.\n- The PR includes a statement-integrity audit with verdict `faithful\n  generalization under the approved basis-free prefix-rank encoding` and\n  explicitly leaves RREF equivalence out of scope.\n- Exact-head local CI and independent review pass.\n\n---\nStage 4.3 proof packet under #47.\n",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/72/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/72/timeline",
   "performed_via_github_app": null,
   "state_reason": null,
   "pinned_comment": null
@@ -2431,8 +2394,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 19,
-   "completed": 2,
-   "percent_completed": 10
+   "completed": 3,
+   "percent_completed": 15
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/1",
   "issue_dependencies_summary": {
@@ -2991,9 +2954,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 91,
+  "comments": 92,
   "created_at": "2026-09-02T08:30:04Z",
-  "updated_at": "2026-09-04T01:06:49Z",
+  "updated_at": "2026-09-04T01:35:07Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
