@@ -108,19 +108,6 @@ theorem trace_heteroKron_ancProj {ι ι' : Type} [Fintype ι] [Fintype ι']
   rw [Matrix.trace_kronecker, htrace, trace_ancProj, hanc]
   simp
 
-/-- The ampliation `O ⊗ 1` of a binary observable by the identity of an
-ancillary space is a binary observable.  This is the sense in which the
-original observables `A(a)` act on the extended space in display (8) of
-`references/nv-paper/fullpaper.tex:1083-1086`. -/
-theorem isBinaryObservable_heteroKron_one {ι ι' : Type} [Fintype ι] [DecidableEq ι]
-    [Fintype ι'] [DecidableEq ι'] {O : Op ι} (hO : IsBinaryObservable O) :
-    IsBinaryObservable (heteroKron O (1 : Op ι')) := by
-  unfold heteroKron
-  simp only [Matrix.kronecker]
-  refine ⟨?_, ?_⟩
-  · rw [Matrix.IsHermitian, Matrix.conjTranspose_kronecker, hO.1.eq, Matrix.conjTranspose_one]
-  · rw [← Matrix.mul_kronecker_mul, hO.2, Matrix.one_mul, Matrix.one_kronecker_one]
-
 /-! ## The distance/defect identity -/
 
 /-- The correlation between a rounded observable `L^u` and the ampliated

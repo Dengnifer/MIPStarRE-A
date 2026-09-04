@@ -142,9 +142,9 @@ blueprint `ch13_qpbt_test.tex:224-253`. -/
 private theorem closeOn_step {ιA ιB : Type} [Fintype ιA] [DecidableEq ιA]
     [Fintype ιB] [DecidableEq ιB] {ψ : EuclideanSpace ℂ (ιA × ιB)} {δ : ℝ}
     {X Y W P Q R Pa Ra : Op (ιA × ιB)} {sI sJ : ℂ}
-    (hXr : IsReflection X) (hYr : IsReflection Y) (hWr : IsReflection W)
-    (hPr : IsReflection P)
-    (hPar : IsReflection Pa) (hRar : IsReflection Ra)
+    (hXr : IsBinaryObservable X) (hYr : IsBinaryObservable Y) (hWr : IsBinaryObservable W)
+    (hPr : IsBinaryObservable P)
+    (hPar : IsBinaryObservable Pa) (hRar : IsBinaryObservable Ra)
     (hcY : Y * (Ra * Pa) = (Ra * Pa) * Y)
     (hcXW : (X * W) * (Ra * Pa) = (Ra * Pa) * (X * W))
     (hcP : P * Ra = Ra * P) (hcX : X * Ra = Ra * X)
@@ -232,10 +232,10 @@ theorem msCellObsB_step (S : Strategy msGame) (ε : ℝ) (hwin : 1 - ε ≤ S.va
       (msCellObsB S I k₁ * msCellObsB S J l₁)
       ((((bitSign (msParity I) : ℝ) : ℂ) * ((bitSign (msParity J) : ℝ) : ℂ)) •
         (msCellObsB S I k₂ * msCellObsB S J l₂)) :=
-  closeOn_step (isReflection_msCellObsB S I k₀) (isReflection_msCellObsB S I k₁)
-    (isReflection_msCellObsB S I k₂) (isReflection_msCellObsB S J l₀)
-    (isReflection_msVarObsA S (msConstraintVars J l₀))
-    (isReflection_msVarObsA S (msConstraintVars J l₂))
+  closeOn_step (isBinaryObservable_msCellObsB S I k₀) (isBinaryObservable_msCellObsB S I k₁)
+    (isBinaryObservable_msCellObsB S I k₂) (isBinaryObservable_msCellObsB S J l₀)
+    (isBinaryObservable_msVarObsA S (msConstraintVars J l₀))
+    (isBinaryObservable_msVarObsA S (msConstraintVars J l₂))
     (((alicePlaced_msVarObsA S (msConstraintVars J l₂)).mul
       (alicePlaced_msVarObsA S (msConstraintVars J l₀))).comm
       (bobPlaced_msCellObsB S I k₁)).symm
@@ -263,14 +263,14 @@ theorem msCellObsB_mul_close_of_same_cells (S : Strategy msGame) (ε : ℝ)
     CloseOn (msDilatedStrategy S).ψ (6 * (12 * Real.sqrt ε))
       (msCellObsB S I k * msCellObsB S J l)
       (msCellObsB S I' k' * msCellObsB S J' l') := by
-  have hright := CloseOn.isometry_mul (isReflection_msCellObsB S I k).isometry
+  have hright := CloseOn.isometry_mul (isBinaryObservable_msCellObsB S I k).isometry
     (msCellObsB_close_of_same_cell S ε hwin J J' l l' h2)
   have hleft := CloseOn.mul_left_subst
     (msCellObsB_close_of_same_cell S ε hwin I I' k k' h1)
     (msVarObsA_close_msCellObsB S ε hwin J' l').symm
-    (isReflection_msCellObsB S I k).isometry
-    (isReflection_msCellObsB S I' k').isometry
-    (isReflection_msVarObsA S (msConstraintVars J' l')).isometry
+    (isBinaryObservable_msCellObsB S I k).isometry
+    (isBinaryObservable_msCellObsB S I' k').isometry
+    (isBinaryObservable_msVarObsA S (msConstraintVars J' l')).isometry
     ((alicePlaced_msVarObsA S (msConstraintVars J' l')).comm
       (bobPlaced_msCellObsB S I k)).symm
     ((alicePlaced_msVarObsA S (msConstraintVars J' l')).comm
@@ -353,17 +353,17 @@ theorem msCellObsA_single_close (S : Strategy msGame) (ε : ℝ) (hwin : 1 - ε 
         (msCellObsA S i k₀ * msCellObsA S i k₂)) := by
   have hprod := msCellObsA_prod_close_of S ε hwin i k₀ k₁ k₂ hsum
   have hX2 : msCellObsA S i k₀ * msCellObsA S i k₀ = 1 :=
-    (isReflection_msCellObsA S i k₀).mul_self_eq_one
+    (isBinaryObservable_msCellObsA S i k₀).mul_self_eq_one
   have hZ2 : msCellObsA S i k₂ * msCellObsA S i k₂ = 1 :=
-    (isReflection_msCellObsA S i k₂).mul_self_eq_one
+    (isBinaryObservable_msCellObsA S i k₂).mul_self_eq_one
   have hZY : msCellObsA S i k₂ * msCellObsA S i k₁ =
       msCellObsA S i k₁ * msCellObsA S i k₂ := msCellObsA_comm S i k₂ k₁
   have hZX : msCellObsA S i k₂ * msCellObsA S i k₀ =
       msCellObsA S i k₀ * msCellObsA S i k₂ := msCellObsA_comm S i k₂ k₀
   have hU : (msCellObsA S i k₂ * msCellObsA S i k₀)ᴴ *
       (msCellObsA S i k₂ * msCellObsA S i k₀) = 1 :=
-    (IsReflection.mul (isReflection_msCellObsA S i k₂) (isReflection_msCellObsA S i k₀)
-      hZX).isometry
+    ((isBinaryObservable_msCellObsA S i k₂).mul
+      (isBinaryObservable_msCellObsA S i k₀) hZX).isometry
   have e1 : (msCellObsA S i k₂ * msCellObsA S i k₀) *
       (msCellObsA S i k₀ * msCellObsA S i k₁ * msCellObsA S i k₂) =
       msCellObsA S i k₁ := by
@@ -395,12 +395,12 @@ theorem msCellObsA_mul_close (S : Strategy msGame) (ε : ℝ) (hwin : 1 - ε ≤
   have h1 : CloseOn (msDilatedStrategy S).ψ (12 * Real.sqrt ε)
       (msCellObsA S I k * msCellObsA S J l)
       (msCellObsA S I k * msVarObsB S (msConstraintVars J l)) :=
-    CloseOn.isometry_mul (isReflection_msCellObsA S I k).isometry
+    CloseOn.isometry_mul (isBinaryObservable_msCellObsA S I k).isometry
       (msCellObsA_close_msVarObsB S ε hwin J l)
   rw [show msCellObsA S I k * msVarObsB S (msConstraintVars J l) =
       msVarObsB S (msConstraintVars J l) * msCellObsA S I k from
     msCellObsA_comm_msVarObsB S I k (msConstraintVars J l)] at h1
-  exact h1.trans (CloseOn.isometry_mul (isReflection_msVarObsB S _).isometry
+  exact h1.trans (CloseOn.isometry_mul (isBinaryObservable_msVarObsB S _).isometry
     (msCellObsA_close_msVarObsB S ε hwin I k))
 
 /-- Two of Alice's cell reflections attached to a common cell by two different
@@ -430,10 +430,10 @@ theorem msCellObsA_step (S : Strategy msGame) (ε : ℝ) (hwin : 1 - ε ≤ S.va
       (msCellObsA S I k₁ * msCellObsA S J l₁)
       ((((bitSign (msParity I) : ℝ) : ℂ) * ((bitSign (msParity J) : ℝ) : ℂ)) •
         (msCellObsA S I k₂ * msCellObsA S J l₂)) :=
-  closeOn_step (isReflection_msCellObsA S I k₀) (isReflection_msCellObsA S I k₁)
-    (isReflection_msCellObsA S I k₂) (isReflection_msCellObsA S J l₀)
-    (isReflection_msVarObsB S (msConstraintVars J l₀))
-    (isReflection_msVarObsB S (msConstraintVars J l₂))
+  closeOn_step (isBinaryObservable_msCellObsA S I k₀) (isBinaryObservable_msCellObsA S I k₁)
+    (isBinaryObservable_msCellObsA S I k₂) (isBinaryObservable_msCellObsA S J l₀)
+    (isBinaryObservable_msVarObsB S (msConstraintVars J l₀))
+    (isBinaryObservable_msVarObsB S (msConstraintVars J l₂))
     (((bobPlaced_msVarObsB S (msConstraintVars J l₂)).mul
       (bobPlaced_msVarObsB S (msConstraintVars J l₀))).comm
       (alicePlaced_msCellObsA S I k₁)).symm
@@ -461,14 +461,14 @@ theorem msCellObsA_mul_close_of_same_cells (S : Strategy msGame) (ε : ℝ)
     CloseOn (msDilatedStrategy S).ψ (6 * (12 * Real.sqrt ε))
       (msCellObsA S I k * msCellObsA S J l)
       (msCellObsA S I' k' * msCellObsA S J' l') := by
-  have hright := CloseOn.isometry_mul (isReflection_msCellObsA S I k).isometry
+  have hright := CloseOn.isometry_mul (isBinaryObservable_msCellObsA S I k).isometry
     (msCellObsA_close_of_same_cell S ε hwin J J' l l' h2)
   have hleft := CloseOn.mul_left_subst
     (msCellObsA_close_of_same_cell S ε hwin I I' k k' h1)
     (msCellObsA_close_msVarObsB S ε hwin J' l')
-    (isReflection_msCellObsA S I k).isometry
-    (isReflection_msCellObsA S I' k').isometry
-    (isReflection_msVarObsB S (msConstraintVars J' l')).isometry
+    (isBinaryObservable_msCellObsA S I k).isometry
+    (isBinaryObservable_msCellObsA S I' k').isometry
+    (isBinaryObservable_msVarObsB S (msConstraintVars J' l')).isometry
     (msCellObsA_comm_msVarObsB S I k (msConstraintVars J' l'))
     (msCellObsA_comm_msVarObsB S I' k' (msConstraintVars J' l'))
   exact (hright.trans hleft).mono (by linarith)

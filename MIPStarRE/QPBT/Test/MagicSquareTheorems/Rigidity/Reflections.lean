@@ -1,3 +1,4 @@
+import MIPStarRE.QPBT.Combining.Linearity.Defs
 import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.GroundSlice
 
 /-!
@@ -11,11 +12,14 @@ operator bounds.
 Postprocessing a projective measurement along a binary relabelling of its
 answers produces a *reflection*, that is, a self-adjoint involution; two
 reflections coming from one and the same measurement commute, and their product
-is the reflection attached to the sum of the two relabellings.  Two operators
-are compared through the norm of the difference of their actions on a fixed
-state, which is the relation written `M ≈ N` in the source; this comparison is
-symmetric, satisfies the triangle inequality, and is unchanged by multiplication
-on the left by an isometric operator.  Finally, a real spectral combination of
+is the reflection attached to the sum of the two relabellings.  The reflections
+of the source are the binary observables of the rest of the development, so this
+file uses `MIPStarRE.QPBT.IsBinaryObservable` and its algebra, defined in
+`MIPStarRE/QPBT/Combining/Linearity/Defs.lean`, rather than a second predicate of
+its own.  Two operators are compared through the norm of the difference of their
+actions on a fixed state, which is the relation written `M ≈ N` in the source;
+this comparison is symmetric, satisfies the triangle inequality, and is unchanged
+by multiplication on the left by an isometric operator.  Finally, a real spectral combination of
 the joint effects of the two players has state-dependent norm controlled by the
 Born mass of the answer pairs carrying a nonzero coefficient; this is the step
 that turns each rejection mass of the value-to-parity layer into an operator
@@ -118,54 +122,22 @@ end StateNorm
 
 /-! ## Reflections -/
 
-/-- A *reflection* is a self-adjoint involution.  These are the binary
-observables attached to two-outcome projective measurements; `thm:ms-rigidity`
-uses them for the Magic Square cells, blueprint `ch13_qpbt_test.tex:224-253`. -/
-structure IsReflection {ι : Type} [Fintype ι] [DecidableEq ι] (X : Op ι) : Prop where
-  /-- The operator is self-adjoint. -/
-  conjTranspose_eq : Xᴴ = X
-  /-- The operator squares to the identity. -/
-  mul_self_eq_one : X * X = 1
+/-- The *reflections* of `thm:ms-rigidity`, blueprint
+`ch13_qpbt_test.tex:224-253`, are the self-adjoint involutions attached to
+two-outcome projective measurements, which are exactly the binary observables
+`MIPStarRE.QPBT.IsBinaryObservable` of
+`MIPStarRE/QPBT/Combining/Linearity/Defs.lean`.  The Magic Square rigidity
+argument therefore uses that predicate and its algebra directly:
+`IsBinaryObservable.one`, `IsBinaryObservable.mul`,
+`IsBinaryObservable.isometry`, `isBinaryObservable_heteroKron_one` and
+`isBinaryObservable_one_heteroKron`.
 
-namespace IsReflection
-
-variable {ι : Type} [Fintype ι] [DecidableEq ι] {X Y : Op ι}
-
-/-- A reflection is isometric. -/
-theorem isometry (hX : IsReflection X) : Xᴴ * X = 1 := by
-  rw [hX.conjTranspose_eq, hX.mul_self_eq_one]
-
-/-- The identity is a reflection. -/
-theorem one : IsReflection (1 : Op ι) :=
-  ⟨Matrix.conjTranspose_one, one_mul 1⟩
-
-/-- The product of two commuting reflections is a reflection. -/
-theorem mul (hX : IsReflection X) (hY : IsReflection Y) (hcomm : X * Y = Y * X) :
-    IsReflection (X * Y) := by
-  refine ⟨?_, ?_⟩
-  · rw [Matrix.conjTranspose_mul, hX.conjTranspose_eq, hY.conjTranspose_eq, ← hcomm]
-  · calc X * Y * (X * Y) = X * (Y * X) * Y := by noncomm_ring
-      _ = X * (X * Y) * Y := by rw [hcomm]
-      _ = X * X * (Y * Y) := by noncomm_ring
-      _ = 1 := by rw [hX.mul_self_eq_one, hY.mul_self_eq_one, one_mul]
-
-end IsReflection
-
-/-- A reflection placed on Alice's tensor factor stays a reflection. -/
-theorem IsReflection.heteroKron_left {ιA ιB : Type} [Fintype ιA] [DecidableEq ιA]
-    [Fintype ιB] [DecidableEq ιB] {X : Op ιA} (hX : IsReflection X) :
-    IsReflection (heteroKron X (1 : Op ιB)) := by
-  refine ⟨?_, ?_⟩
-  · rw [heteroKron_conjTranspose, hX.conjTranspose_eq, Matrix.conjTranspose_one]
-  · rw [heteroKron_mul, hX.mul_self_eq_one, one_mul, heteroKron_one_one]
-
-/-- A reflection placed on Bob's tensor factor stays a reflection. -/
-theorem IsReflection.heteroKron_right {ιA ιB : Type} [Fintype ιA] [DecidableEq ιA]
-    [Fintype ιB] [DecidableEq ιB] {Y : Op ιB} (hY : IsReflection Y) :
-    IsReflection (heteroKron (1 : Op ιA) Y) := by
-  refine ⟨?_, ?_⟩
-  · rw [heteroKron_conjTranspose, hY.conjTranspose_eq, Matrix.conjTranspose_one]
-  · rw [heteroKron_mul, hY.mul_self_eq_one, one_mul, heteroKron_one_one]
+This abbreviation carries the source's word for the predicate and exists only so
+that the stacked swap-isometry branch of issue #104, written before the two
+predicates were merged, still elaborates; delete it once that branch has
+landed. -/
+abbrev IsReflection {ι : Type} [Fintype ι] [DecidableEq ι] (X : Op ι) : Prop :=
+  IsBinaryObservable X
 
 /-- Operators placed on the two tensor factors commute. -/
 theorem heteroKron_comm {ιA ιB : Type} [Fintype ιA] [DecidableEq ιA]
@@ -323,10 +295,11 @@ theorem signObs_conjTranspose (M : MIPStarRE.Quantum.Measurement α d)
   · exact (hM a).isSelfAdjoint
 
 omit [DecidableEq α] in
-/-- A sign observable of a projective measurement is a reflection. -/
-theorem isReflection_signObs (M : MIPStarRE.Quantum.Measurement α d)
+/-- A sign observable of a projective measurement is a binary observable, the
+reflection attached to the relabelling `f`. -/
+theorem isBinaryObservable_signObs (M : MIPStarRE.Quantum.Measurement α d)
     (hM : MIPStarRE.QPBT.Measurement.IsProjective M) (f : α → ZMod 2) :
-    IsReflection (signObs M f) :=
+    IsBinaryObservable (signObs M f) :=
   ⟨signObs_conjTranspose M hM f, signObs_mul_self M hM f⟩
 
 omit [DecidableEq α] in
