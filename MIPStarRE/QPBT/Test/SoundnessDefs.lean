@@ -48,7 +48,34 @@ theorem deltaQld_mono {P : AdmissibleParams} {a a' b b' ε : ℝ}
     (ha0 : 1 ≤ a) (ha : a ≤ a') (hb : b' ≤ b) (hb' : 0 < b')
     (hε0 : 0 ≤ ε) (hε1 : ε ≤ 1) :
     deltaQld a b ε P.m P.d P.q ≤ deltaQld a' b' ε P.m P.d P.q := by
-  sorry
+  have hmd : (1 : ℝ) ≤ ((P.m * P.d : ℕ) : ℝ) :=
+    Nat.one_le_cast.mpr (Nat.mul_pos P.one_le_m P.hd)
+  have hmd0 : (0 : ℝ) ≤ ((P.m * P.d : ℕ) : ℝ) := by linarith
+  have hq : (1 : ℝ) ≤ (P.q : ℝ) := by
+    obtain ⟨k, -, hk⟩ := P.hq
+    rw [hk]
+    exact_mod_cast Nat.one_le_pow _ _ (by norm_num)
+  unfold deltaQld
+  simp only [Real.rpow_eq_pow]
+  have h1 : ((P.m * P.d : ℕ) : ℝ) ^ a ≤ ((P.m * P.d : ℕ) : ℝ) ^ a' :=
+    Real.rpow_le_rpow_of_exponent_le hmd ha
+  have h2 : ε ^ b ≤ ε ^ b' := Real.rpow_le_rpow_of_exponent_ge' hε0 hε1 hb'.le hb
+  have h3 : (P.q : ℝ) ^ (-b) ≤ (P.q : ℝ) ^ (-b') :=
+    Real.rpow_le_rpow_of_exponent_le hq (neg_le_neg hb)
+  have h4 : (2 : ℝ) ^ (-(b * ((P.m * P.d : ℕ) : ℝ))) ≤
+      (2 : ℝ) ^ (-(b' * ((P.m * P.d : ℕ) : ℝ))) :=
+    Real.rpow_le_rpow_of_exponent_le (by norm_num)
+      (neg_le_neg (mul_le_mul_of_nonneg_right hb hmd0))
+  have hsum : 0 ≤ ε ^ b + (P.q : ℝ) ^ (-b) +
+      (2 : ℝ) ^ (-(b * ((P.m * P.d : ℕ) : ℝ))) := by
+    have := Real.rpow_nonneg hε0 b
+    have := Real.rpow_nonneg (Nat.cast_nonneg P.q) (-b)
+    have := Real.rpow_nonneg (by norm_num : (0 : ℝ) ≤ 2)
+      (-(b * ((P.m * P.d : ℕ) : ℝ)))
+    linarith
+  exact mul_le_mul (mul_le_mul ha h1 (Real.rpow_nonneg hmd0 a) (by linarith))
+    (add_le_add (add_le_add h2 h3) h4) hsum
+    (mul_nonneg (by linarith) (Real.rpow_nonneg hmd0 a'))
 
 /-- The ideal auxiliary state `aux ⊗ EPR_q^{⊗M}` in the shuffled register
 ordering.  The EPR factor is the concrete `eprState` from
