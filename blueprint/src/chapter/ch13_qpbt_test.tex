@@ -129,9 +129,9 @@ representing the paper's coordinate $r+1$.
 	\lean{MIPStarRE.QPBT.aLinePointDist_isProbability}
 	\lean{MIPStarRE.QPBT.dLinePointDist_isProbability}
 	\lean{MIPStarRE.QPBT.linePointDist_isProbability}
-	\leanok
+	% No completion mark: the linked laws retain seed and witness data absent from the source sample type.
 	\uses{def:ld-question-distribution, def:ld-line-description}
-	The \emph{axis line-point distribution} $D_{\mathsf{ALine}}$ is the distribution $\mu_{L_{\mathsf{ALine}}, L_{\mathsf{Point}}}$ over pairs $(\ell = (u_0,e_i),\, u)$, where we omit the $0$ components for simplicity. The \emph{diagonal line-point distribution} $D_{\mathsf{DLine}}$ is the distribution $\mu_{L_{\mathsf{DLine}}, L_{\mathsf{Point}}}$ over pairs $(\ell = (u_0,s,v),\, u)$. The \emph{line-point distribution} $D_{\mathsf{Line}}$ is the equal mixture of the two: with probability $\tfrac12$ output a sample from $D_{\mathsf{ALine}}$, and with probability $\tfrac12$ output a sample from $D_{\mathsf{DLine}}$.
+	The source \emph{axis line-point distribution} $D_{\mathsf{ALine}}$ is the law $\mu_{L_{\mathsf{ALine}}, L_{\mathsf{Point}}}$ on pairs $(\ell=(u_0,e_i),u)$, and the source \emph{diagonal line-point distribution} $D_{\mathsf{DLine}}$ is the corresponding law on pairs $(\ell=(u_0,s,v),u)$ from $\mu_{L_{\mathsf{DLine}}, L_{\mathsf{Point}}}$. Their equal mixture is $D_{\mathsf{Line}}$. The linked Lean declarations instead define refined laws on seed-bearing line descriptions. An axis description retains the seed $s$ selecting $i$, and both kinds of description include the equations certifying the canonical representative and diagonal prefix condition. Sending an axis description to $(u_0,e_{\chi(s)})$, sending a diagonal description to $(u_0,s,v)$, and forgetting the certificates pushes the refined laws forward to the respective source laws. Since the linked distributions and the source distributions have different sample types, this definition carries no completion mark.
 \end{definition}
 
 \begin{definition}[Win predicate of the classical low individual degree game]\label{def:ld-win-predicate}
@@ -576,8 +576,8 @@ low-degree question and line-point laws above.
 \end{lemma}
 \begin{proof}
 	\leanok
-	The support and weight fields determine a finite distribution; the remaining
-	fields are propositions.
+	The two laws have the same finite support and assign the same mass to every
+	point, so they coincide.
 \end{proof}
 
 \begin{lemma}[Composition of push-forwards]\label{lem:distribution-map-comp}
@@ -683,8 +683,8 @@ low-degree question and line-point laws above.
 	\label{lem:uniform-first-marginal-after-equivalence}
 	\lean{MIPStarRE.QPBT.uniformDistribution_map_fst_of_equiv}
 	\leanok
-	Let $E\colon A\simeq B\times C$, and suppose $f(a)$ is the first component of
-	$E(a)$ for every $a\in A$. Then
+	Let $A$, $B$, and $C$ be nonempty finite sets, let $E\colon A\simeq B\times C$,
+	and suppose $f(a)$ is the first component of $E(a)$ for every $a\in A$. Then
 	$f_\ast\operatorname{Unif}(A)=\operatorname{Unif}(B)$.
 \end{lemma}
 \begin{proof}
@@ -699,13 +699,14 @@ low-degree question and line-point laws above.
 	\lean{MIPStarRE.QPBT.seedFiberEquiv, MIPStarRE.QPBT.seedFiberEquiv_fst}
 	\lean{MIPStarRE.QPBT.seedOfIndexResidue, MIPStarRE.QPBT.seedFiberEquiv_seedOfIndexResidue, MIPStarRE.QPBT.chiIndex_seedOfIndexResidue}
 	\leanok
-	\uses{def:ld-game, def:binary-representation}
-	With the zero-based coordinate convention, every scalar seed has a unique
+	\uses{def:ld-game, def:ld-question-distribution, def:binary-representation}
+	Write $\chi_0(s)=\chi(s)-1$ for the zero-based index represented by Lean's
+	\texttt{chiIndex}. Every scalar seed has a unique
 	representation as a pair
 	\[
 		(i,r)\in\{0,\ldots,m-1\}\times\{0,\ldots,q/m-1\},
 	\]
-	and the first component is $\chi(s)$. Conversely, every such pair determines
+	and the first component is $\chi_0(s)$. Conversely, every such pair determines
 	a unique scalar seed. In particular, the residue set is nonempty and
 	$q=m(q/m)$.
 \end{lemma}
@@ -720,13 +721,14 @@ low-degree question and line-point laws above.
 	\lean{MIPStarRE.QPBT.uniformDistribution_map_chiIndex}
 	\leanok
 	\uses{def:ld-question-distribution}
-	For a uniformly random $s\in\F_q$, the coordinate index $\chi(s)$ is uniform
+	For a uniformly random $s\in\F_q$, the zero-based index
+	$\chi_0(s)=\chi(s)-1$ is uniform
 	on $\{0,\ldots,m-1\}$.
 \end{lemma}
 \begin{proof}
 	\leanok
 	\uses{lem:chi-seed-fibers, lem:uniform-first-marginal-after-equivalence}
-	Under the equivalence of Lemma~\ref{lem:chi-seed-fibers}, $\chi$ is the first
+	Under the equivalence of Lemma~\ref{lem:chi-seed-fibers}, $\chi_0$ is the first
 	projection. Apply Lemma~\ref{lem:uniform-first-marginal-after-equivalence}.
 \end{proof}
 

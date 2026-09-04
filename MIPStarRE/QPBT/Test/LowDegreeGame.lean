@@ -108,7 +108,8 @@ def LdSpace.seed {P : LdParams} (z : LdSpace P) : ScalarQ P :=
 def LdSpace.direction {P : LdParams} (z : LdSpace P) : Fin P.m → ScalarQ P :=
   fun i => z (.inr i)
 
-/-- The integer-coordinate map `χ` from the fixed field representation.  This
+/-- The zero-based coordinate index corresponding to the paper's map `χ`:
+`chiIndex P s` represents `χ(s) - 1` in the fixed field representation.  This
 is `eq:chi-func` in `def:ld-question-distribution`, blueprint
 `blueprint/src/chapter/ch13_qpbt_test.tex:34-59`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
@@ -203,8 +204,8 @@ def prefixProjection {P : LdParams} (i : Fin P.m) (v : Fin P.m → ScalarQ P) :
 
 /-- Zeroing the coordinates preceding a fixed index is idempotent.  This is a
 formalization-only consequence of the prefix restriction in
-`def:ld-question-distribution`, recorded as `lem:prefix-projection-idem` in
-blueprint chapter 13. -/
+`def:ld-question-distribution`, recorded as `lem:prefix-projection-idempotent`
+in blueprint chapter 13. -/
 theorem prefixProjection_idempotent {P : LdParams} (i : Fin P.m)
     (v : Fin P.m → ScalarQ P) :
     prefixProjection i (prefixProjection i v) = prefixProjection i v := by

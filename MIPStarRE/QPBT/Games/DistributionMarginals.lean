@@ -40,15 +40,16 @@ theorem distribution_eq_of_support_eq_of_toPMF_eq {alpha : Type*}
   exact Distribution.ext_of_support_of_weight hsupport hweight
 
 /-- Composition of two push-forwards of a probabilistic finite distribution
-is the push-forward by the composite map.  This probability-specialized form
-is retained for the directly indexed low-degree marginal theorems. -/
+is the push-forward by the composite map.  The probability hypothesis is
+retained for compatibility with sampling arguments that supply normalization;
+the underlying push-forward identity holds for every finite distribution. -/
 theorem distribution_map_map_of_isProbability
     {alpha beta gamma : Type*} [DecidableEq beta] [DecidableEq gamma]
-    (mu : Distribution alpha) (hmu : mu.IsProbability)
+    (mu : Distribution alpha) (_hmu : mu.IsProbability)
     (f : alpha → beta) (g : beta → gamma) :
     (mu.map f).map g = mu.map (g ∘ f) := by
   change (mu.map f).map g = mu.map fun a => g (f a)
-  exact (fun _ : mu.IsProbability => Distribution.map_map mu f g) hmu
+  exact Distribution.map_map mu f g
 
 /-- Projection onto the first factor of an explicit finite product
 equivalence sends the uniform distribution to the uniform first marginal.
