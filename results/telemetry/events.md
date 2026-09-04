@@ -2482,3 +2482,64 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 - **Lesson:** operator adjudications should be validated against
   `DISPOSITION_RE` before entering the merge queue; semantically equivalent
   prose is not protocol-equivalent evidence.
+
+## 2026-09-05 05:48+08:00 - PR 179 stops at the mathematics review cap
+
+- **Symptom:** the post-conflict exact-head review accepted the low-degree
+  transport mathematics but repeated five cleanup obligations as twelve code
+  and prose findings.
+- **Diagnosis:** PR #179 has exceeded the four-round mathematics cap; the EPR
+  and consistency citations are owned by #174, while the direct-parameter
+  domain, dependency prose, redundant instance, and temporary aliases are
+  owned by the post-#134 transport sweep #199.
+- **Fix:** post one valid disposition for every exact-head finding, retain the
+  proof PR unchanged, and release its old conflict marker to the merge daemon.
+- **Lesson:** parallel reviewer lanes may duplicate one obligation under
+  separate finding IDs; adjudication must preserve every ID while tracking the
+  underlying work only once.
+
+## 2026-09-05 05:53+08:00 - Owner-gated packet 105 removed from auto-release
+
+- **Symptom:** merging prerequisite PR #169 made stack entry #105 eligible for
+  the next automatic release even though owner blocker B5 still holds its
+  Magic Square rigidity statement.
+- **Diagnosis:** the stack watcher has no owner-decision hold mechanism; an
+  entry becomes runnable solely when its recorded base reaches `main`.
+- **Fix:** remove only #105 from the runtime stack registry, preserving its
+  branch for explicit re-queue after the owner chooses A′, B, or C.
+- **Lesson:** owner-gated packets must not remain in an automatic dependency
+  release registry once their technical prerequisite becomes merge-complete.
+
+## 2026-09-05 06:06+08:00 - Worker cleanup removed a managed Lake link
+
+- **Symptom:** packet #180's fresh-base publication build attempted to clone
+  Mathlib and failed with a transient TLS error, despite the worktree having a
+  prepared build-products directory under `/data`.
+- **Diagnosis:** the resumed worker's temporary-validation cleanup removed the
+  worktree's managed `.lake` symlink and left an empty `.lake/packages`
+  directory. The lane therefore treated the directory as local Lake state and
+  allowed Lake to fetch dependencies from the network.
+- **Fix:** remove the two empty directories, restore the exact worktree link to
+  `/data/users/drx/mipstarre-cache/lake/issue-180-typed-conditionally-linear-question-laws`,
+  and restart the v14 publication tail with dispatch skipped.
+- **Lesson:** temporary validation cleanup must preserve the managed `.lake`
+  link. A worker that replaces it should restore and verify the link before
+  reporting a clean handoff.
+
+## 2026-09-04 — Operator takeover: owner's Claude session replaces the codex main session
+
+- **Trigger:** owner decision (2026-09-03, after the eight-hour stall and the
+  reviewer-churn episode): the owner's Claude Fable 5.1 session, working from
+  the owner's machine over ssh, takes the operator role for about one to two
+  days. Dispatched worker sessions (orc/prover/reviewer/…) remain codex
+  sessions on ghz via `dispatch.sh` (model gpt-5.6-sol until "astra" is
+  available in codex's configuration, then astra; an hourly codex poller
+  `owner-tools/astra-poll.sh` reports the switch to #26).
+- **Handover:** the codex main session posted its exact in-flight state to
+  #27 ("Handover to owner session") and exited at 2026-09-04T22:30:18Z. The owner session
+  picks up every lane from that report. The same protocols, gates and telemetry
+  duties bind the owner session; owner-side records continue in
+  `owner-log.md`.
+- **Hand-back:** to be recorded here and in `stages.jsonl` when the owner
+  says so; the codex main session then resumes from `~/.codex/prompts/goal.md`
+  plus the #27 log.

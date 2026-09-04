@@ -179,7 +179,7 @@ private theorem strategy_carrier_nonempty {G : Game} (S : Strategy G) :
   exact zero_ne_one hnorm
 
 /-- The pure LDT state represented by a game's unit strategy vector. -/
-private noncomputable def strategyPureState {G : Game} (S : Strategy G)
+noncomputable def strategyPureState {G : Game} (S : Strategy G)
     [Nonempty (S.ιA × S.ιB)] : PureState (S.ιA × S.ιB) where
   vector := S.ψ
   unit := by
@@ -391,10 +391,7 @@ private theorem seedFiberBlockBornAmplitude
   rw [Finset.sum_comm]
   rw [← mul_assoc]
   congr 1
-  rw [← pow_two, inv_pow, ← Complex.ofReal_pow,
-    Real.sq_sqrt (Nat.cast_nonneg (L.q / L.m))]
-  norm_cast
-  exact Complex.ofReal_inv _
+  exact inv_sqrt_natCast_mul_self (L.q / L.m)
 
 /-- Correlated residue registers give the uniform average of the source-block
 Born weights. -/
