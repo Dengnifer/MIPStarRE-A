@@ -518,3 +518,18 @@ launch list; `local/README.md` documents the command.
 **Expected effect:** the operator launches from a computed list instead of
 re-reading a comment; a merged packet unblocks its dependents with no edit
 anywhere; the rooted traversal reports the tracker hierarchy and its leaves.
+
+## 2026-09-04 — Supported prerequisite writes and complete readiness budgeting
+
+**Trigger:** `results/telemetry/events.md` 2026-09-04 15:12Z, recording issue
+#177 and the two workflow findings deferred from PR #171.
+
+**Change:** `gh_common.py` and `issues-prs.md` add the supported
+`add-blocked-by ISSUE PREREQUISITE` lifecycle command. It adopts an existing
+edge before writing and re-reads after an ambiguous POST. The pre-commit
+infrastructure budget now counts `scripts/tests/test_ready_packets.py`, with a
+hook-level regression that stages 401 lines at that path.
+
+**Expected effect:** operators can create the prerequisite record without an
+ad hoc GitHub mutation or a duplicate edge after retry, and future readiness
+test growth remains subject to the owner-gated 400-line episode budget.
