@@ -23,7 +23,7 @@ open scoped BigOperators
 
 namespace MIPStarRE.QPBT
 
-open MIPStarRE.LDT
+open MIPStarRE.LDT hiding Measurement
 open MIPStarRE.LDT.Preliminaries
 open MIPStarRE.Quantum
 
