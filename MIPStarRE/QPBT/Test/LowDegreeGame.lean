@@ -119,7 +119,11 @@ noncomputable def chiIndex (P : LdParams) (s : ScalarQ P) : Fin P.m := by
     exact Nat.ne_of_gt (lt_of_lt_of_le Nat.zero_lt_one P.hm)⟩
   exact Fin.ofNat P.m ((binaryRepresentation P.model s).val / (P.q / P.m))
 
-/-! ### Equal fibers of the coordinate-index map -/
+/-! ### Formalization-only coordinate-index fibers
+
+The following decomposition supplies the equal-fiber calculation used in the
+uniform coordinate-index law.
+-/
 
 /-- The common residue set in a fiber of `chiIndex` is nonempty.  This is part
 of the exact seed decomposition supporting the balance assertion in

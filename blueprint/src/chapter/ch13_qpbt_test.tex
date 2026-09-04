@@ -123,15 +123,15 @@ representing the paper's coordinate $r+1$.
 \end{proof}
 
 \begin{definition}[Line-point distributions]\label{def:line-point-dist}
-	% Seed-bearing description declarations are linked at def:ld-line-description.
+	% A line description retains the seed used to select its coordinate.
 	\lean{MIPStarRE.QPBT.aLinePointDist, MIPStarRE.QPBT.dLinePointDist}
 	\lean{MIPStarRE.QPBT.linePointDist}
 	\lean{MIPStarRE.QPBT.aLinePointDist_isProbability}
 	\lean{MIPStarRE.QPBT.dLinePointDist_isProbability}
 	\lean{MIPStarRE.QPBT.linePointDist_isProbability}
-	% No completion mark: the linked laws retain seed and witness data absent from the source sample type.
+	% The refined laws retain data not present in the axis source law.
 	\uses{def:ld-question-distribution, def:ld-line-description}
-	The source \emph{axis line-point distribution} $D_{\mathsf{ALine}}$ is the law $\mu_{L_{\mathsf{ALine}}, L_{\mathsf{Point}}}$ on pairs $(\ell=(u_0,e_i),u)$, and the source \emph{diagonal line-point distribution} $D_{\mathsf{DLine}}$ is the corresponding law on pairs $(\ell=(u_0,s,v),u)$ from $\mu_{L_{\mathsf{DLine}}, L_{\mathsf{Point}}}$. Their equal mixture is $D_{\mathsf{Line}}$. The linked Lean declarations instead define refined laws on seed-bearing line descriptions. An axis description retains the seed $s$ selecting $i$, and both kinds of description include the equations certifying the canonical representative and diagonal prefix condition. Sending an axis description to $(u_0,e_{\chi(s)})$, sending a diagonal description to $(u_0,s,v)$, and forgetting the certificates pushes the refined laws forward to the respective source laws. Since the linked distributions and the source distributions have different sample types, this definition carries no completion mark.
+	The source \emph{axis line-point distribution} $D_{\mathsf{ALine}}$ is the law $\mu_{L_{\mathsf{ALine}}, L_{\mathsf{Point}}}$ on pairs $(\ell=(u_0,e_i),u)$, and the source \emph{diagonal line-point distribution} $D_{\mathsf{DLine}}$ is the corresponding law on pairs $(\ell=(u_0,s,v),u)$ from $\mu_{L_{\mathsf{DLine}}, L_{\mathsf{Point}}}$. Their equal mixture is $D_{\mathsf{Line}}$. We also use seed-bearing refinements of these laws. An axis description records $u_0$ and a seed $s$ selecting $i=\chi(s)$, subject to $L^{\mathrm{Ln}}_{e_i}(u_0)=u_0$. A diagonal description records $(u_0,s,v)$, subject to $L^{\mathrm{Ln}}_v(u_0)=u_0$ and to the prefix condition $v_j=0$ for $j<i$. Mapping the two kinds of description to $(u_0,e_{\chi(s)})$ and $(u_0,s,v)$, respectively, sends the refined laws to the source laws.
 \end{definition}
 
 \begin{definition}[Win predicate of the classical low individual degree game]\label{def:ld-win-predicate}
@@ -700,8 +700,8 @@ low-degree question and line-point laws above.
 	\lean{MIPStarRE.QPBT.seedOfIndexResidue, MIPStarRE.QPBT.seedFiberEquiv_seedOfIndexResidue, MIPStarRE.QPBT.chiIndex_seedOfIndexResidue}
 	\leanok
 	\uses{def:ld-game, def:ld-question-distribution, def:binary-representation}
-	Write $\chi_0(s)=\chi(s)-1$ for the zero-based index represented by Lean's
-	\texttt{chiIndex}. Every scalar seed has a unique
+	Write $\chi_0(s)=\chi(s)-1$ for the corresponding zero-based coordinate
+	index. Every scalar seed has a unique
 	representation as a pair
 	\[
 		(i,r)\in\{0,\ldots,m-1\}\times\{0,\ldots,q/m-1\},
@@ -721,9 +721,8 @@ low-degree question and line-point laws above.
 	\lean{MIPStarRE.QPBT.uniformDistribution_map_chiIndex}
 	\leanok
 	\uses{def:ld-question-distribution}
-	For a uniformly random $s\in\F_q$, the zero-based index
-	$\chi_0(s)=\chi(s)-1$ is uniform
-	on $\{0,\ldots,m-1\}$.
+	For a uniformly random $s\in\F_q$, the zero-based index $\chi_0(s)$ is
+	uniformly distributed on $\{0,\ldots,m-1\}$.
 \end{lemma}
 \begin{proof}
 	\leanok

@@ -410,9 +410,8 @@ theorem ldQuestionDistribution_map_parse (L : LdParams) :
     (ldQuestionDistribution L).map (parseLdQuestionPair L) =
         (uniformDistribution ((LdType × LdType) × LdSpace L)).map
           (parseLdQuestionPair L ∘ sourceMap) := by
-      exact distribution_map_map_of_isProbability
+      exact Distribution.map_map
         (uniformDistribution ((LdType × LdType) × LdSpace L))
-        (uniformDistribution_isProbability _)
         sourceMap (parseLdQuestionPair L)
     _ = (uniformDistribution ((LdType × LdType) × LdSpace L)).map
         (directMap ∘ ldQuestionSampleProjection L) := by
@@ -421,9 +420,8 @@ theorem ldQuestionDistribution_map_parse (L : LdParams) :
       exact parse_ldQuestionSample L source
     _ = ((uniformDistribution ((LdType × LdType) × LdSpace L)).map
           (ldQuestionSampleProjection L)).map directMap :=
-      (distribution_map_map_of_isProbability
+      (Distribution.map_map
         (uniformDistribution ((LdType × LdType) × LdSpace L))
-        (uniformDistribution_isProbability _)
         (ldQuestionSampleProjection L) directMap).symm
     _ = directLdQuestionDistribution L.toDirectLdParams := by
       rw [huniform]

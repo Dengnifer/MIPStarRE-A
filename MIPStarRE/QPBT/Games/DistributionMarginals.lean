@@ -22,10 +22,8 @@ namespace MIPStarRE.QPBT
 
 open MIPStarRE.LDT
 
-/-- Two probabilistic finite distributions with the same stored support and
-the same associated probability mass function are equal.  This is the PMF form
-of `Distribution.ext_of_support_of_weight`, retained for the low-degree
-marginal arguments that are stated using `Distribution.toPMF`. -/
+/-- Two finite probability distributions with the same support and the same
+probability mass at every point are equal. -/
 theorem distribution_eq_of_support_eq_of_toPMF_eq {alpha : Type*}
     (mu nu : Distribution alpha) (hmu : mu.IsProbability)
     (hnu : nu.IsProbability) (hsupport : mu.support = nu.support)
@@ -39,23 +37,11 @@ theorem distribution_eq_of_support_eq_of_toPMF_eq {alpha : Type*}
       _ = nu.weight a := Distribution.toPMF_apply_toReal nu hnu a
   exact Distribution.ext_of_support_of_weight hsupport hweight
 
-/-- Composition of two push-forwards of a probabilistic finite distribution
-is the push-forward by the composite map.  The probability hypothesis is
-retained for compatibility with sampling arguments that supply normalization;
-the underlying push-forward identity holds for every finite distribution. -/
-theorem distribution_map_map_of_isProbability
-    {alpha beta gamma : Type*} [DecidableEq beta] [DecidableEq gamma]
-    (mu : Distribution alpha) (_hmu : mu.IsProbability)
-    (f : alpha → beta) (g : beta → gamma) :
-    (mu.map f).map g = mu.map (g ∘ f) := by
-  change (mu.map f).map g = mu.map fun a => g (f a)
-  exact Distribution.map_map mu f g
-
-/-- Projection onto the first factor of an explicit finite product
-equivalence sends the uniform distribution to the uniform first marginal.
-This form combines invariance under equivalence with the uniform first-marginal
-identity; it is `lem:uniform-first-marginal-after-equivalence` in blueprint
-chapter 13. -/
+/-- Formalization-only lemma for the low-degree sampling laws: if an
+equivalence identifies a nonempty finite set with the product of two nonempty
+finite sets and a map agrees with the first projection, then the map sends the
+uniform law to the uniform law on the first factor.  This is
+`lem:uniform-first-marginal-after-equivalence` in blueprint chapter 13. -/
 theorem uniformDistribution_map_fst_of_equiv
     {alpha beta gamma : Type*}
     [Fintype alpha] [DecidableEq alpha] [Nonempty alpha]
