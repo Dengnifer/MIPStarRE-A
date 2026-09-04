@@ -2371,3 +2371,11 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 - **Lesson:** an authoritative GitHub relation needs both read and write paths,
   and every workflow test added outside `local/` must be named by the scope
   budget when the budget uses an explicit path set.
+
+## 2026-09-04 — Operator hand-back: codex main session resumes from the owner session
+
+- **Trigger:** owner decision (2026-09-04T21:14:46Z): the owner's Claude 5-hour window is nearly used; the
+  owner session retires; no takeover scheduled. Mode 2 ran since 2026-09-03 23:11Z with the merge daemon,
+  stacked lanes and the Opus/codex prover pools; Mode 1 resumes from /tmp/qpbt-main-handoff.md
+  (archived under results/telemetry/owner-messages/).
+- **State at hand-back:** main at 5b94709; open PRs: 203,202,198,197,195,193,192,191,189,188,185,179,178,175,169,160,155,153,152.
