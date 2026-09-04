@@ -455,3 +455,18 @@ gate 4 notes that a carried review counts.
 **Expected effect:** a fresh-base costs one CI run (about two minutes) and no
 reviewer time; the reviewer pool serves new patches only; merge throughput
 scales with the number of lanes instead of collapsing under them.
+
+
+## 2026-09-04 — Pre-commit budget exempts merge commits
+
+**Trigger:** `results/telemetry/events.md` 2026-09-04 (owner override for a
+merge commit): a fresh-base merge of `main` into a 130-line workflow PR staged
+520 inherited workflow-layer lines and the budget guard refused the merge
+commit; the operator had to use the owner override for content that was
+already reviewed on `main`.
+
+**Change:** `.githooks/pre-commit` skips the line budget when `MERGE_HEAD`
+exists (a merge commit) and says so; ordinary commits are unchanged.
+
+**Expected effect:** fresh-base merges never need the owner override; the
+budget keeps binding the PR's own commits, and the review reads the PR diff.
