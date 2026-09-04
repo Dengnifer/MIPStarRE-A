@@ -603,6 +603,8 @@ The state-dependent distance is the right tool for reasoning about the closeness
 	\]
 \end{lemma}
 \begin{proof}
+	\leanok
+	\uses{fact:triangle}
 	Stated in the source without proof; it is Fact 4.32 of \cite{Natarajan2018NEEXP}. Write the value difference as an average over $(x,y) \sim \mu$ of sums of terms of the form $\bra{\psi} (A^x_a - (A')^x_a) \ot B^y_b \ket{\psi}$ and $\bra{\psi} (A')^x_a \ot (B^y_b - (B')^y_b) \ket{\psi}$, replacing one player's measurements at a time. The Cauchy--Schwarz inequality bounds each group by the square root of the corresponding averaged squared state-dependent distance, and projectivity of one of the two strategies keeps the accompanying operator sums bounded, giving the total bound $O(\delta^{1/2})$.
 \end{proof}
 
