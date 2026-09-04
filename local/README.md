@@ -34,6 +34,16 @@ issue  →  branch + worktree  →  agent session(s)  →  local CI  →  review
 8. **Housekeeping / site**: `local/bin/housekeeping.sh all`,
    `local/bin/site.sh all`.
 
+**Choosing the next packet.** `local/bin/ready_packets.py` walks the packet tree
+under the Stage 4.3 tracker #47 — chapter trackers, their packets, and nested
+chains such as Magic Square rigidity — and prints the open leaf packets whose
+GitHub issue dependencies (`blocked_by`) are all closed. `--all` adds the
+blocked packets with their open blockers, `--json` feeds the lane launcher, and
+`--root N` restricts the walk to one tracker. Prerequisites live in those edges
+only: the "Dependencies" bullets in a packet body are commentary
+(`protocols/issues-prs.md` §1). A merged packet closes its issue and therefore
+unblocks its dependents with no edit anywhere.
+
 ## Ground rules for agents
 
 - Read `AGENTS.md` first; the faithfulness policy and proof-integrity

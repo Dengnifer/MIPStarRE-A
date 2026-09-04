@@ -1,5 +1,201 @@
 [
  {
+  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/177",
+  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
+  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/177/labels{/name}",
+  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/177/comments",
+  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/177/events",
+  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/177",
+  "id": 5348738187,
+  "node_id": "I_kwDOUJyJf88AAAABPs9Eiw",
+  "number": 177,
+  "title": "feat(local): add prerequisite writes and readiness test budgeting",
+  "user": {
+   "login": "Dengnifer",
+   "id": 89234078,
+   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
+   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/Dengnifer",
+   "html_url": "https://github.com/Dengnifer",
+   "followers_url": "https://api.github.com/users/Dengnifer/followers",
+   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
+   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
+   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
+   "repos_url": "https://api.github.com/users/Dengnifer/repos",
+   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
+   "type": "User",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "labels": [
+   {
+    "id": 12025011061,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8bdQ",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/infrastructure",
+    "name": "infrastructure",
+    "color": "ededed",
+    "default": false,
+    "description": "Foundational definitions, shared APIs, or supporting layers"
+   },
+   {
+    "id": 12025014642,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8pcg",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/follow-up",
+    "name": "follow-up",
+    "color": "ededed",
+    "default": false,
+    "description": "A mathematical obligation split out of a merged PR"
+   }
+  ],
+  "state": "open",
+  "locked": false,
+  "assignees": [],
+  "milestone": null,
+  "comments": 0,
+  "created_at": "2026-09-04T13:35:45Z",
+  "updated_at": "2026-09-04T13:35:45Z",
+  "closed_at": null,
+  "assignee": null,
+  "author_association": "OWNER",
+  "active_lock_reason": null,
+  "sub_issues_summary": {
+   "total": 0,
+   "completed": 0,
+   "percent_completed": 0
+  },
+  "issue_dependencies_summary": {
+   "blocked_by": 0,
+   "total_blocked_by": 0,
+   "blocking": 0,
+   "total_blocking": 0
+  },
+  "body": "<!-- mipstarre-issue-key: pr171-round2-workflow-followup -->\n## Context\n\nPR #171 implements the packet tree and read-only readiness command from #159.\nIts second exact-head review identified two additional workflow mechanisms that\nshould not enlarge that bounded infrastructure PR.\n\n## Scope\n\n- Add an adoption-safe `gh_common.py` API and documented lifecycle command for\n  writing GitHub issue prerequisite (`blocked_by`) edges.\n- Add fake-API coverage for successful creation, ambiguous-write adoption, and\n  duplicate-edge handling.\n- Include `local/tests/test_ready_packets.py` in the owner-gated infrastructure\n  line budget, with a regression test showing that future growth is enforced.\n\n## Acceptance\n\n- Operators can establish the prerequisite record through a supported local\n  command without an ad hoc GitHub mutation.\n- An ambiguous mutation is resolved by re-reading and adopting the edge.\n- The infrastructure budget covers the packet-readiness test module.\n\n## Provenance\n\nDeferred findings F1 and F2 from PR #171 at\n`c2f8eb4e3c1444c107fe16074afacc09164b2d99` under the owner review-churn rule.\n\n---\nAddresses #159",
+  "closed_by": null,
+  "reactions": {
+   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/177/reactions",
+   "total_count": 0,
+   "+1": 0,
+   "-1": 0,
+   "laugh": 0,
+   "hooray": 0,
+   "confused": 0,
+   "heart": 0,
+   "rocket": 0,
+   "eyes": 0
+  },
+  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/177/timeline",
+  "performed_via_github_app": null,
+  "state_reason": null,
+  "pinned_comment": null
+ },
+ {
+  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/176",
+  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
+  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/176/labels{/name}",
+  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/176/comments",
+  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/176/events",
+  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/176",
+  "id": 5348584511,
+  "node_id": "I_kwDOUJyJf88AAAABPszsPw",
+  "number": 176,
+  "title": "fix(QPBT/Combining): align linearity blueprint bounds and terminology",
+  "user": {
+   "login": "Dengnifer",
+   "id": 89234078,
+   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
+   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/Dengnifer",
+   "html_url": "https://github.com/Dengnifer",
+   "followers_url": "https://api.github.com/users/Dengnifer/followers",
+   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
+   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
+   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
+   "repos_url": "https://api.github.com/users/Dengnifer/repos",
+   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
+   "type": "User",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "labels": [
+   {
+    "id": 12015972669,
+    "node_id": "LA_kwDOUJyJf88AAAACzDUxPQ",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/documentation",
+    "name": "documentation",
+    "color": "0075ca",
+    "default": true,
+    "description": "Improvements or additions to documentation"
+   },
+   {
+    "id": 12025012183,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8f1w",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/qpbt-analysis",
+    "name": "qpbt-analysis",
+    "color": "ededed",
+    "default": false,
+    "description": "Soundness/rigidity analysis of the Pauli basis test \u2014 self-testing bounds and error terms"
+   },
+   {
+    "id": 12025013422,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8krg",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/blueprint-sync",
+    "name": "blueprint-sync",
+    "color": "ededed",
+    "default": false,
+    "description": "Blueprint to Lean synchronization issue"
+   }
+  ],
+  "state": "open",
+  "locked": false,
+  "assignees": [],
+  "milestone": null,
+  "comments": 0,
+  "created_at": "2026-09-04T13:22:14Z",
+  "updated_at": "2026-09-04T13:22:14Z",
+  "closed_at": null,
+  "assignee": null,
+  "author_association": "OWNER",
+  "active_lock_reason": null,
+  "sub_issues_summary": {
+   "total": 0,
+   "completed": 0,
+   "percent_completed": 0
+  },
+  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/166",
+  "issue_dependencies_summary": {
+   "blocked_by": 0,
+   "total_blocked_by": 0,
+   "blocking": 0,
+   "total_blocking": 0
+  },
+  "body": "<!-- mipstarre-issue-key: pr151-round3-linearity-blueprint-followup -->\n## Context\n\nPR #151 proves the quantum linearity route, including the corrected bounds\n`2 * delta` for squared state-dependent operator distance and `delta` for the\nassociated binary-measurement distance. Its third exact-head review identified\nfive documentation and blueprint inconsistencies that must not expand that PR\nunder the owner's review-churn rule.\n\n## Required corrections\n\n- In `lem:qld-4-10` in `blueprint/src/chapter/ch15_qpbt_combining.tex`, change\n  the displayed squared operator-distance bound from `delta_{x,z}/2` to\n  `delta_{x,z}`. The input to the corrected theorem is\n  `delta_{x,z}/2`, and its operator-distance conclusion doubles that input.\n- Update `docs/paper-gaps/qpbt_linearity-theorem-quotation.tex` so its account\n  reflects the proved `2 * delta` operator-distance theorem and the equivalent\n  `delta` binary-measurement theorem. Preserve its still-relevant discussion of\n  the common ancillary space.\n- Remove the transitive Fourier-square and one-measurement Naimark helper labels\n  from the statement-level dependency list for Boolean representation\n  stability; keep them in the proof dependency chain.\n- Replace the inaccurate uses of \"finite carrier\", \"ancillary carrier\", and\n  \"product carrier\" in the `Linearity.lean` and `Linearity/Stability.lean`\n  docstrings with finite-dimensional Hilbert-space terminology. Explain that\n  `Option (Fin t -> ZMod 2)` indexes an orthonormal basis of the ancillary\n  Hilbert space rather than being the Hilbert space itself.\n\n## Acceptance\n\n- The corrected blueprint bound agrees with\n  `exists_exactly_linear_observables` and with the normalization paper-gap note.\n- Both paper-gap notes give a coherent account of current proved status.\n- Blueprint dependencies are direct at statement level and complete in the\n  proof chain.\n- `leanblueprint web`, the paper-gap style audit, and changed-file Lean checks\n  pass.\n\nSource: PR #151 review at head\n`8d72bb32824be30026d95c83f186977457bbe336`, findings F1-F5.",
+  "closed_by": null,
+  "reactions": {
+   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/176/reactions",
+   "total_count": 0,
+   "+1": 0,
+   "-1": 0,
+   "laugh": 0,
+   "hooray": 0,
+   "confused": 0,
+   "heart": 0,
+   "rocket": 0,
+   "eyes": 0
+  },
+  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/176/timeline",
+  "performed_via_github_app": null,
+  "state_reason": null,
+  "pinned_comment": null
+ },
+ {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/174",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/174/labels{/name}",
@@ -530,9 +726,9 @@
   "author_association": "OWNER",
   "active_lock_reason": null,
   "sub_issues_summary": {
-   "total": 14,
-   "completed": 1,
-   "percent_completed": 7
+   "total": 15,
+   "completed": 2,
+   "percent_completed": 13
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
   "issue_dependencies_summary": {
@@ -840,8 +1036,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 4,
-   "completed": 2,
-   "percent_completed": 50
+   "completed": 3,
+   "percent_completed": 75
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
   "issue_dependencies_summary": {
@@ -1098,91 +1294,6 @@
    "eyes": 0
   },
   "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/156/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/146",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/146/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/146/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/146/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/146",
-  "id": 5346386064,
-  "node_id": "I_kwDOUJyJf88AAAABPqtgkA",
-  "number": 146,
-  "title": "chore(blueprint): sweep stale chapter-12 line-range citations outside PR 138",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-04T09:19:39Z",
-  "updated_at": "2026-09-04T12:06:08Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/163",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 0,
-   "blocking": 0,
-   "total_blocking": 0
-  },
-  "body": "Found during the PR #138 repair (2026-09-04): chapter-12 insertions shifted line numbers; about fourteen Lean modules outside that PR still cite ch12_qpbt_games.tex ranges that are now off. Recompute every ch12 citation under MIPStarRE/QPBT against the current chapter after PR #138 merges; no other changes.\n\nPrerequisites are recorded as GitHub issue dependencies (blocked_by); the prose above is commentary.\n",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/146/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/146/timeline",
   "performed_via_github_app": null,
   "state_reason": null,
   "pinned_comment": null
@@ -1613,91 +1724,6 @@
   "pinned_comment": null
  },
  {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/129",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/129/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/129/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/129/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/129",
-  "id": 5345232351,
-  "node_id": "I_kwDOUJyJf88AAAABPpnF3w",
-  "number": 129,
-  "title": "feat(QPBT/Combining): prove quantum linearity theorem",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-04T06:58:09Z",
-  "updated_at": "2026-09-04T12:05:26Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/166",
-  "issue_dependencies_summary": {
-   "blocked_by": 4,
-   "total_blocked_by": 4,
-   "blocking": 0,
-   "total_blocking": 0
-  },
-  "body": "<!-- mipstarre-issue-key: stage43-linearity-theorem-assembly -->\n### Target declarations\n\n- `MIPStarRE/QPBT/Combining/Linearity.lean:65` - prove\n  `exists_exactly_linear_observables` from the correlation hypothesis by #125\n  and the specialized stability theorem #128.\n- `MIPStarRE/QPBT/Combining/Linearity.lean:84-87` - correct the raw-distance\n  conclusion to `... <= 2 * \u03b4`; retain a normalized-distance corollary with\n  bound `\u03b4` if a downstream caller needs the provider's intended convention.\n- `MIPStarRE/QPBT/Combining/Linearity.lean:51` - replace the provider-faithful\n  claim with a `**Local fix:**` docstring citing\n  `docs/paper-gaps/qpbt_linearity-distance-normalization.tex`.\n- `blueprint/src/chapter/ch15_qpbt_combining.tex:81-147` - state the same\n  corrected raw-distance bound, explain its normalized equivalent, and replace\n  `\\notready` with `\\leanok` only after the proof and axiom audit pass.\n\n### Paper and blueprint references\n\n- Natarajan--Vidick, Theorem 10 of arXiv:1610.03574, equations (7)--(8).\n- QPBT quotation and use:\n  `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:711-725,787-832`.\n- Blueprint theorem and import remark:\n  `blueprint/src/chapter/ch15_qpbt_combining.tex:81-180`.\n- Current Lean declaration:\n  `MIPStarRE/QPBT/Combining/Linearity.lean:44-88`.\n- Normalization analysis and scalar counterexample: #124,\n  `docs/paper-gaps/qpbt_linearity-distance-normalization.tex`.\n\nThe provider source is not mirrored in this checkout; the owner must add it\nunder `references/` before this source-labelled node is marked complete. The\npaper-gap note establishes that the printed raw bound `\u03b4` is false and that\n`2 * \u03b4` is sharp under the present definition. This issue must not attempt to\nprove the false statement or silently redefine `stateDepDistSq`.\n\n### Dependencies\n\n- #124 supplies Fourier/distance foundations and the paper-gap note.\n- #125 supplies correlation-to-defect with the exact factor two.\n- #127 supplies the exact Naimark-rounded observables.\n- #128 supplies state-weighted Boolean representation stability.\n- The provider TeX mirror must be added by the owner before final blueprint\n  completion; no theorem is accepted as an external import meanwhile.\n\n### Acceptance\n\n- `exists_exactly_linear_observables` is proved after the documented local\n  correction, with no additional hypotheses and exact linearity for all pairs.\n- The statement-integrity audit lists unchanged paper/Lean assumptions and the\n  corrected conclusion, with verdict `Local fix: false printed normalization`.\n- All direct consumers are updated to absorb the universal factor two without\n  changing qualitative bounds.\n- `#print axioms MIPStarRE.QPBT.exists_exactly_linear_observables` contains no\n  `sorryAx`; direct Lean checking, full build, declaration checking, blueprint\n  rendering, paper-gap checks, exact-head CI, and independent review pass.\n- No `sorry`, axiom, prohibited bypass, bridge input, or external-result\n  assumption remains on this route.\n\n### Scope notes\n\nOwn `Linearity.lean`, its imports, the named blueprint node/remark, and only\ndownstream constant adjustments forced by the factor two. Do not edit the QPBT\npaper mirror, broaden hypotheses, weaken exact linearity, or build unrelated\nrepresentation theory. Main locators are from `c1c0af4`.\n\n---\nStage 4.3 proof packet under #47.\n\nPrerequisites are recorded as GitHub issue dependencies (blocked_by); the bullets above are commentary.\n",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/129/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/129/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/128",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/128/labels{/name}",
@@ -1760,7 +1786,7 @@
   "issue_dependencies_summary": {
    "blocked_by": 3,
    "total_blocked_by": 3,
-   "blocking": 1,
+   "blocking": 0,
    "total_blocking": 1
   },
   "body": "<!-- mipstarre-issue-key: stage43-linearity-boolean-stability -->\n### Target declarations\n\n- `MIPStarRE/QPBT/Combining/Linearity/Stability.lean:new` -\n  `exists_exact_boolean_representation`, the following specialized\n  approximate-representation stability theorem.\n\nFor every positive `t`, nonnegative `\u03b7`, finite carrier `\u03b9`, positive\nsemidefinite trace-one `\u03c1 : Op \u03b9`, and family\n`O : (Fin t -> ZMod 2) -> Op \u03b9` of binary observables, assume\n\n    avg_(u,v) stateDepDistSq (O u * O v) (O (u + v)) \u03c1 <= \u03b7.\n\nThen there are a finite ancillary carrier `\u03b9'`, a unit vector `anc`, and binary\nobservables `L : (Fin t -> ZMod 2) -> Op (\u03b9 \u00d7 \u03b9')` such that\n\n    L u * L v = L (u + v)\n\nfor all `u,v`, and\n\n    avg_u stateDepDistSq (L u) (heteroKron (O u) 1)\n      (heteroKron \u03c1 (ancProj anc)) <= \u03b7.\n\n- Same file - an equality, before weakening to the displayed inequality,\n  between the rounded family's average raw distance and the incoming average\n  multiplicative defect.\n\n### Paper and blueprint references\n\n- Natarajan--Vidick, arXiv:1610.03574, Theorem 10 and its Fourier/Naimark\n  proof; this is the exact `Z_2^t` Gowers--Hatami-type form needed by Lean.\n- QPBT quotation:\n  `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:711-725`.\n- Blueprint:\n  `blueprint/src/chapter/ch15_qpbt_combining.tex:98-147`.\n- Target public Lean theorem:\n  `MIPStarRE/QPBT/Combining/Linearity.lean:65-88`.\n- Normalization note from #124:\n  `docs/paper-gaps/qpbt_linearity-distance-normalization.tex`.\n\nThe theorem must use the state-dependent weighted distance above. It must not\nreplace `\u03c1` by normalized trace, require `\u03c1` to commute with the observables,\nor assume an invariant state. Mathlib has general finite-group representation\nand character theory but no reusable stability theorem with these hypotheses,\nfinite-matrix codomain, ancillary dilation, and state-weighted bound; the\nspecialized theorem is therefore project-local.\n\n### Dependencies\n\n- #124 supplies Boolean Fourier and distance identities.\n- #125 supplies the operator BLR/multiplicative-defect calculation.\n- #127 supplies the Fourier POVM's Naimark dilation and exact rounded family.\n- These dependencies are in proof order; no external stability result may be\n  imported as a bridge assumption.\n\n### Acceptance\n\n- `exists_exact_boolean_representation` is proved with exactly the quantified\n  data and bound above, including arbitrary positive semidefinite trace-one\n  weight and two-sided finite carriers.\n- The proof establishes the distance/defect identity through trace algebra and\n  uniform-variable reindexing, without commutation assumptions.\n- Direct Lean checking, the full build, paper-gap checks, exact-head CI, and\n  independent review pass.\n- `#print axioms` contains no `sorryAx`; no axiom, prohibited bypass,\n  conditional bridge, or stronger hypothesis is introduced.\n\n### Scope notes\n\nOwn only the new stability file and import edges. Keep this theorem specialized\nto `Fin t -> ZMod 2`; do not introduce a general Gowers--Hatami hierarchy. Do\nnot yet change `exists_exactly_linear_observables` or blueprint status. Main\nlocators are from `c1c0af4`.\n\n---\nStage 4.3 proof packet under #47.\n\nPrerequisites are recorded as GitHub issue dependencies (blocked_by); the bullets above are commentary.\n",
@@ -1845,7 +1871,7 @@
   "issue_dependencies_summary": {
    "blocked_by": 2,
    "total_blocked_by": 2,
-   "blocking": 2,
+   "blocking": 1,
    "total_blocking": 2
   },
   "body": "<!-- mipstarre-issue-key: stage43-linearity-naimark-rounding -->\n### Target declarations\n\n- `MIPStarRE/QPBT/Combining/Linearity/NaimarkRounding.lean:new` -\n  `fourierEffectMeasurement`, the POVM with effects\n  `(operatorFourier O u) ^ 2`.\n- Same file - `roundedFourierPVM`, obtained from the proved one-measurement\n  Naimark construction after folding its `none` outcome into the zero Fourier\n  outcome, together with its completeness, orthogonality, and compression\n  identities.\n- Same file - `roundedObservable`, the signed sum of the rounded Fourier\n  projectors for each Boolean-group element.\n- Same file - `roundedObservable_isBinaryObservable` and\n  `roundedObservable_mul`, proving\n  `L u * L v = L (u + v)` for every `u,v : Fin t -> ZMod 2`.\n- Same file - normalization of the canonical ancillary vector and the\n  identification of its rank-one density with `ancProj`.\n\n### Paper and blueprint references\n\n- Natarajan--Vidick, arXiv:1610.03574, proof of Theorem 10: square the\n  operator Fourier coefficients, apply Naimark, and take signed projector sums.\n- QPBT quotation:\n  `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:711-725`.\n- Blueprint:\n  `blueprint/src/chapter/ch15_qpbt_combining.tex:98-133`.\n- Existing reusable construction:\n  `MIPStarRE/LDT/MakingMeasurementsProjective/NaimarkOneMeas.lean:217-390`\n  and `MIPStarRE/LDT/MakingMeasurementsProjective/Defs.lean:175-243`.\n- Boolean Fourier input: #124. Operator BLR certificate: #125.\n\nThe local Naimark theorem uses outcome type `Option \u03b1`. The extra `none`\nprojector cannot simply be dropped: doing so would make the signed sum fail to\nsquare to the identity off the embedded subspace. Fold it into one Boolean\nFourier outcome and prove that this preserves the compression identities.\n\n### Dependencies\n\n- #124 must merge first for the Fourier-square POVM and character identities.\n- #125 must merge first so the resulting construction exposes the exact\n  overlap certificate consumed by the distance packet.\n- Reuse `oneMeasNaimark`; do not redeclare Naimark as an axiom or a new theorem\n  with an assumed dilation.\n\n### Acceptance\n\n- The constructed ancillary type is finite and the ancillary vector has norm\n  one.\n- Every rounded operator is Hermitian, squares to one, and satisfies the exact\n  Boolean-group multiplication law for all pairs.\n- The Fourier PVM compresses to the original Fourier-square POVM, including\n  the folded `none` outcome.\n- Direct Lean checking, the full build, exact-head CI, and independent review\n  pass, with no `sorry`, `admit`, axiom, prohibited bypass, or bridge input.\n\n### Scope notes\n\nOwn only the new Naimark-rounding file and necessary imports. Do not prove the\nfinal averaged distance bound or edit the public theorem/blueprint. Keep the\nrounding specialized to the finite Boolean group required here; do not build a\ngeneral finite-group representation library. Main locators are from `c1c0af4`.\n\n---\nStage 4.3 proof packet under #47.\n\nPrerequisites are recorded as GitHub issue dependencies (blocked_by); the bullets above are commentary.\n",
@@ -1930,7 +1956,7 @@
   "issue_dependencies_summary": {
    "blocked_by": 1,
    "total_blocked_by": 1,
-   "blocking": 3,
+   "blocking": 2,
    "total_blocking": 3
   },
   "body": "<!-- mipstarre-issue-key: stage43-linearity-operator-blr -->\n### Target declarations\n\n- `MIPStarRE/QPBT/Combining/Linearity/BLR.lean:new` -\n  `multiplicativeDefect`, the state-dependent squared defect of\n  `O u * O v` from `O (u + v)`.\n- Same file - `avg_multiplicativeDefect_eq_two_sub_two_mul_correlation`, with\n  the order reversal from taking the adjoint discharged by swapping the two\n  uniform variables.\n- Same file - `avg_multiplicativeDefect_le_two_mul_error`: from the correlation\n  hypothesis of `exists_exactly_linear_observables`, prove average defect at\n  most `2 * \u03b4`.\n- Same file - `operatorFourier_cube_trace_eq_correlation`, identifying the\n  sum of the cubic Fourier coefficients with the two-query BLR correlation.\n- Same file - the resulting overlap certificate for the Fourier-square POVM\n  used by Naimark rounding.\n\n### Paper and blueprint references\n\n- Natarajan--Vidick, arXiv:1610.03574, Theorem 10, equations (7)--(8), and the\n  proof beginning with the operator Fourier transform.\n- QPBT quotation and invocation:\n  `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:711-725,787-832`.\n- Blueprint:\n  `blueprint/src/chapter/ch15_qpbt_combining.tex:81-147`.\n- Lean hypothesis:\n  `MIPStarRE/QPBT/Combining/Linearity.lean:65-77`.\n- Normalization analysis:\n  `docs/paper-gaps/qpbt_linearity-distance-normalization.tex` from #124.\n\nThis packet is the operator-valued BLR step: it converts the test correlation\ninto an approximate homomorphism and the precise Fourier overlap certificate.\nIt does not assume pairwise commutation. The exact defect bound is `2 * \u03b4` for\nraw `stateDepDistSq`, equivalently `\u03b4` for normalized binary-observable\ndistance.\n\n### Dependencies\n\n- #124 must merge first for Boolean characters, Fourier inversion, Parseval,\n  and the normalized-distance identities.\n- No Gowers--Hatami theorem is imported. The state-weighted stability theorem\n  assembled later must consume the certificate proved here.\n\n### Acceptance\n\n- All listed BLR identities and inequalities are proved for arbitrary finite\n  matrix carrier, positive semidefinite trace-one `\u03c1`, and binary observables.\n- The proof handles complex traces by taking real parts and justifies every\n  cyclic or variable-swap step; it does not silently commute observables with\n  `\u03c1` or with one another.\n- Direct Lean checking, the full build, paper-gap checks, exact-head CI, and\n  independent review pass.\n- No `sorry`, `admit`, axiom, prohibited bypass, or conclusion-shaped\n  hypothesis is introduced.\n\n### Scope notes\n\nOwn only the new BLR file and required import edges. Keep helpers private unless\nthey are part of the later stability interface. Do not construct the Naimark\ndilation, alter the public linearity theorem, or edit blueprint status. Preserve\nthe correlation's uniform quantifier order and all constants. Main locators are\nfrom `c1c0af4`.\n\n---\nStage 4.3 proof packet under #47.\n\nPrerequisites are recorded as GitHub issue dependencies (blocked_by); the bullets above are commentary.\n",
@@ -2015,7 +2041,7 @@
   "issue_dependencies_summary": {
    "blocked_by": 0,
    "total_blocked_by": 0,
-   "blocking": 4,
+   "blocking": 3,
    "total_blocking": 4
   },
   "body": "<!-- mipstarre-issue-key: stage43-linearity-boolean-fourier -->\n### Target declarations\n\n- `MIPStarRE/QPBT/Combining/Linearity/BooleanFourier.lean:new` -\n  `booleanCharacter`, its multiplicativity law, and the two finite\n  orthogonality sums on `Fin t -> ZMod 2`.\n- Same file - `operatorFourier`, Fourier inversion, matrix-valued Parseval,\n  Hermiticity of the coefficients, and\n  `sum_operatorFourier_sq_eq_one` for a family of binary observables.\n- Same file - the raw/normalized observable-distance identities needed by the\n  stability proof, including\n  `binaryObservableDistSq = stateDepDistSq / 2` and its correlation formula.\n- `docs/paper-gaps/qpbt_linearity-distance-normalization.tex:new` - record the\n  normalization defect before any source-labelled statement is changed.\n\n### Paper and blueprint references\n\n- Provider theorem and proof: Natarajan--Vidick, Theorem 10 of\n  arXiv:1610.03574, equations (7)--(8) and the Fourier/Naimark proof.\n- QPBT quotation:\n  `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:711-725`.\n- Blueprint theorem:\n  `blueprint/src/chapter/ch15_qpbt_combining.tex:81-147`.\n- Lean definitions:\n  `MIPStarRE/QPBT/Combining/Linearity.lean:34-49`.\n\nNo source mirror for arXiv:1610.03574 is present under `references/`; the owner\nmust add it before source-labelled completion. A source inspection shows that\nthe provider correctly derives projective-measurement distance squared as\none half of raw observable distance squared, then incorrectly identifies the\ntwo. Consequently the present Lean conclusion with raw `stateDepDistSq <= \u03b4`\nis false. For example, on `(ZMod 2)^2`, take scalar signs equal to `-1` at one\nnonzero point and `1` elsewhere. The correlation hypothesis holds with\n`\u03b4 = 3/4`, while every character has average raw squared distance at least\n`1`. The valid alternatives are normalized distance at most `\u03b4`, or raw\ndistance at most `2 * \u03b4`.\n\nMathlib provides finite sums, matrices, and general representation-character\ntheory, while the repository has reusable finite-average and LDT Fourier\nmachinery. Neither Mathlib nor this repository supplies the Boolean\noperator-valued Parseval package or a state-weighted approximate-representation\nstability theorem in the required finite-matrix form.\n\n### Dependencies\n\n- No new proof packet must merge first.\n- Reuse the finite distribution API and the existing matrix/trace lemmas.\n- This packet precedes the operator BLR, Naimark rounding, stability, and\n  public-assembly packets in chain A.\n\n### Acceptance\n\n- All listed character, Fourier, Parseval, and distance identities are proved\n  without changing mathematics elsewhere.\n- The new paper-gap note states the counterexample, compares the provider,\n  blueprint, and Lean normalizations, and gives the correction plan.\n- Direct Lean checking, the full build, paper-gap build, blueprint rendering,\n  exact-head CI, and independent review pass.\n- No `sorry`, `admit`, axiom, prohibited bypass, or conditional bridge is\n  introduced.\n\n### Scope notes\n\nOwn only the new Boolean Fourier file, the new paper-gap note, required import\nedges, and the note's paper-gap index entry. Do not yet alter\n`exists_exactly_linear_observables` or mark `thm:linearity` `\\leanok`. Preserve\nraw `stateDepDistSq`; introduce an explicitly normalized auxiliary instead of\nsilently changing that definition's semantics. Main locators are from\n`c1c0af4`.\n\n---\nStage 4.3 proof packet under #47.\n\nPrerequisites are recorded as GitHub issue dependencies (blocked_by); the bullets above are commentary.\n",
@@ -4933,9 +4959,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 102,
+  "comments": 103,
   "created_at": "2026-09-02T08:30:04Z",
-  "updated_at": "2026-09-04T13:03:16Z",
+  "updated_at": "2026-09-04T13:37:48Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
