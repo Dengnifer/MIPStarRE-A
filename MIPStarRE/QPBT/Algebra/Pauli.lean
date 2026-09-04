@@ -45,7 +45,9 @@ character in their statement types. -/
 noncomputable def phaseSign (t : ZMod 2) : ℂ :=
   if t = 0 then 1 else -1
 
-private theorem phaseSign_eq_ffChar (t : ZMod 2) :
+/-- In characteristic two, the standard additive character is the sign
+character used by the binary Pauli definitions. -/
+theorem phaseSign_eq_ffChar (t : ZMod 2) :
     phaseSign t = ZMod.stdAddChar (N := 2) t := by
   by_cases ht : t = 0
   · subst t
@@ -71,7 +73,8 @@ private theorem phaseSign_add (s t : ZMod 2) :
 private theorem star_phaseSign (t : ZMod 2) : star (phaseSign t) = phaseSign t := by
   by_cases ht : t = 0 <;> simp [phaseSign, ht]
 
-private theorem phaseSign_sum {ι : Type*} [Fintype ι] (f : ι → ZMod 2) :
+/-- The binary sign character sends sums to products. -/
+theorem phaseSign_sum {ι : Type*} [Fintype ι] (f : ι → ZMod 2) :
     phaseSign (∑ i, f i) = ∏ i, phaseSign (f i) := by
   classical
   induction (Finset.univ : Finset ι) using Finset.induction_on with
@@ -80,7 +83,8 @@ private theorem phaseSign_sum {ι : Type*} [Fintype ι] (f : ι → ZMod 2) :
       rw [Finset.sum_insert hi, Finset.prod_insert hi, phaseSign_add, ih]
 
 omit [Fintype K] [DecidableEq K] in
-private theorem prod_phaseSign_binTrace_dotProduct {ι : Type*} [Fintype ι]
+/-- The product of the coordinate phases is the phase of the trace pairing. -/
+theorem prod_phaseSign_binTrace_dotProduct {ι : Type*} [Fintype ι]
     (u v : ι → K) :
     ∏ i, phaseSign (binTrace K (u i * v i)) =
       phaseSign (binTrace K (dotProduct u v)) := by
