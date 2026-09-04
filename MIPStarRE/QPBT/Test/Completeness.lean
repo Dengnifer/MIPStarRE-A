@@ -13,7 +13,7 @@ value-one SPCC completeness theorem.
 ## References
 
 The source statement is `lem:pauli-completeness` in
-`blueprint/src/chapter/ch13_qpbt_test.tex:500-505`, from
+`blueprint/src/chapter/ch13_qpbt_test.tex:510-515`, from
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1229-1421`.
 -/
 
@@ -94,7 +94,7 @@ theorem pauliBasisTestSymm_toGame (P : AdmissibleParams) :
   rfl
 
 /-- `lem:pauli-completeness`: every admissible Pauli basis test has a
-value-one SPCC strategy. Blueprint `ch13_qpbt_test.tex:500-505`, paper
+value-one SPCC strategy. Blueprint `ch13_qpbt_test.tex:510-515`, paper
 `08_classical_and_quantum_low_degree_tests.tex:1229-1421`. -/
 theorem exists_spcc_value_one (P : AdmissibleParams) :
     ∃ S : SymmetricStrategy (pauliBasisTestSymm P),

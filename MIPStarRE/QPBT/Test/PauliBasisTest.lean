@@ -16,7 +16,7 @@ Pauli basis test.  The quantitative soundness theorem is isolated in
 
 The source-facing nodes are `def:admissible`, `def:pauli-question-distribution`,
 and `def:pauli-win-predicate` in
-`blueprint/src/chapter/ch13_qpbt_test.tex:368-496`; their paper origin is
+`blueprint/src/chapter/ch13_qpbt_test.tex:368-506`; their paper origin is
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:908-1225`.
 -/
 
@@ -321,7 +321,7 @@ origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-
 abbrev PauliQuestion (P : AdmissibleParams) := PauliType × PauliSpace P
 
 /-- The Pauli question carrying no additional coefficient data, as in
-`def:pauli-win-predicate`, blueprint `ch13_qpbt_test.tex:460-496`, paper origin
+`def:pauli-win-predicate`, blueprint `ch13_qpbt_test.tex:470-506`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1006-1008`.
 Its ambient coefficient vector is zero. -/
 def pauliQuestion (P : AdmissibleParams) (W : PauliKind) : PauliQuestion P :=
@@ -384,7 +384,7 @@ def pauliAnswerOrZero {P : AdmissibleParams} : PauliAnswer P → PauliRegister P
 
 /-- A finite sum code used only to construct the `Fintype` instance for the
 answer alphabet in `def:pauli-win-predicate`, blueprint
-`ch13_qpbt_test.tex:460-496`, paper origin
+`ch13_qpbt_test.tex:470-506`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1126-1225`.
 -/
 abbrev PauliAnswerCode (P : AdmissibleParams) :=
@@ -396,7 +396,7 @@ abbrev PauliAnswerCode (P : AdmissibleParams) :=
 
 /-- The constructor-preserving finite-code equivalence for `PauliAnswer`.
 Lean-only infrastructure for `def:pauli-win-predicate`, blueprint
-`ch13_qpbt_test.tex:460-496`, paper origin
+`ch13_qpbt_test.tex:470-506`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1126-1225`.
 -/
 noncomputable def pauliAnswerEquiv (P : AdmissibleParams) :
@@ -450,7 +450,7 @@ instance (P : AdmissibleParams) : Inhabited (PauliAnswer P) :=
 /-- The phase bit `γ(u_X,u_Z,r_X,r_Z)` from `eq:gamma-value`.  It uses the
 fixed trace selected by `P.model`, as required by the paper's fixed
 self-dual-normal representation.  Blueprint
-`blueprint/src/chapter/ch13_qpbt_test.tex:460-496`; paper origin
+`blueprint/src/chapter/ch13_qpbt_test.tex:470-506`; paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1198-1212`.
 -/
 noncomputable def gammaValue (P : AdmissibleParams)
@@ -461,7 +461,7 @@ noncomputable def gammaValue (P : AdmissibleParams)
 
 /-- The commutation bit attached to a full Pauli ambient question, from
 `eq:gamma-value` in `def:pauli-win-predicate`, blueprint
-`ch13_qpbt_test.tex:460-496`, paper origin
+`ch13_qpbt_test.tex:470-506`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1198-1212`.
 -/
 noncomputable def pauliPairGamma (P : AdmissibleParams) (z : PauliSpace P) : ZMod 2 :=
@@ -470,7 +470,7 @@ noncomputable def pauliPairGamma (P : AdmissibleParams) (z : PauliSpace P) : ZMo
 
 /-- The answer constructor prescribed by each Pauli question type; this is the
 well-formedness part of `def:pauli-win-predicate`, blueprint
-`ch13_qpbt_test.tex:460-496`, paper origin
+`ch13_qpbt_test.tex:470-506`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1126-1225`.
 -/
 def validPauliAnswer {P : AdmissibleParams} (t : PauliType) (a : PauliAnswer P) : Bool :=
@@ -486,7 +486,7 @@ def validPauliAnswer {P : AdmissibleParams} (t : PauliType) (a : PauliAnswer P) 
   | _, _ => false
 
 /-- The axis-line versus point relation used by `def:pauli-win-predicate`,
-blueprint `ch13_qpbt_test.tex:460-496`, paper origin
+blueprint `ch13_qpbt_test.tex:470-506`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1126-1225`.
 -/
 def pauliAlinePointCondition (P : AdmissibleParams) (W : PauliKind)
@@ -500,7 +500,7 @@ def pauliAlinePointCondition (P : AdmissibleParams) (W : PauliKind)
       evalCoefficient f t = a
 
 /-- The diagonal-line versus point relation used by `def:pauli-win-predicate`,
-blueprint `ch13_qpbt_test.tex:460-496`, paper origin
+blueprint `ch13_qpbt_test.tex:470-506`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1126-1225`.
 -/
 def pauliDlinePointCondition (P : AdmissibleParams) (W : PauliKind)
@@ -512,7 +512,7 @@ def pauliDlinePointCondition (P : AdmissibleParams) (W : PauliKind)
       evalCoefficient f t = a
 
 /-- The raw Pauli-versus-point consistency relation from `def:pauli-win-predicate`,
-blueprint `ch13_qpbt_test.tex:460-496`, paper origin
+blueprint `ch13_qpbt_test.tex:470-506`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1126-1225`.
 -/
 def pauliPointPauliCondition (P : AdmissibleParams) (W : PauliKind)
@@ -520,7 +520,7 @@ def pauliPointPauliCondition (P : AdmissibleParams) (W : PauliKind)
   lowDegreeEnc h (pauliPointBlock W point) = a
 
 /-- The Pair/W consistency relation, including the one-sided gamma gate, from
-`def:pauli-win-predicate`, blueprint `ch13_qpbt_test.tex:460-496`, paper origin
+`def:pauli-win-predicate`, blueprint `ch13_qpbt_test.tex:470-506`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1126-1225`.
 -/
 def pauliPairCondition (P : AdmissibleParams) (W : PauliKind)
@@ -531,7 +531,7 @@ def pauliPairCondition (P : AdmissibleParams) (W : PauliKind)
     | .Z => bits.2 = β)
 
 /-- The point/Pair/W trace consistency relation from `def:pauli-win-predicate`,
-blueprint `ch13_qpbt_test.tex:460-496`, paper origin
+blueprint `ch13_qpbt_test.tex:470-506`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1126-1225`.
 -/
 def pauliPointPairCondition (P : AdmissibleParams) (W : PauliKind)
@@ -545,7 +545,7 @@ def pauliPointPairCondition (P : AdmissibleParams) (W : PauliKind)
 /-- The Point/Variable consistency clause of `def:pauli-win-predicate`.
 The check is gated by `gamma = 0` and only uses Variable 1 in the X basis or
 Variable 5 in the Z basis.  Blueprint
-`blueprint/src/chapter/ch13_qpbt_test.tex:460-496`; paper origin
+`blueprint/src/chapter/ch13_qpbt_test.tex:470-506`; paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1126-1225`.
 -/
 def pauliPointVariableCondition (P : AdmissibleParams) (W : PauliKind)
@@ -557,7 +557,7 @@ def pauliPointVariableCondition (P : AdmissibleParams) (W : PauliKind)
         fixedBinTrace P.model (a * pauliRZBlock z) = β)
 
 /-- The Pauli win predicate, with constructor-shape rejection.  This is
-`def:pauli-win-predicate` in `blueprint/src/chapter/ch13_qpbt_test.tex:460-496`,
+`def:pauli-win-predicate` in `blueprint/src/chapter/ch13_qpbt_test.tex:470-506`,
 paper origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1126-1225`.
 -/
 noncomputable def pauliWinPredicate (P : AdmissibleParams) :
@@ -608,7 +608,7 @@ noncomputable def pauliWinPredicate (P : AdmissibleParams) :
 
 /-- The Pauli basis test game.  This is `def:pauli-question-distribution` and
 `def:pauli-win-predicate` packaged as the symmetric game of
-`blueprint/src/chapter/ch13_qpbt_test.tex:384-496`, paper origin
+`blueprint/src/chapter/ch13_qpbt_test.tex:384-506`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1225`.
 -/
 noncomputable def pauliBasisTest (P : AdmissibleParams) : Game where
