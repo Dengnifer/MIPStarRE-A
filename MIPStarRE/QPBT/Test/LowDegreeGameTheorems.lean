@@ -13,7 +13,7 @@ outcomes are bounded multivariate polynomials.
 ## References
 
 The principal definition and theorem are `def:ld-meas` and `lem:ld-soundness` in
-`blueprint/src/chapter/ch13_qpbt_test.tex:164-202`. Their paper origin is
+`blueprint/src/chapter/ch13_qpbt_test.tex:200-238`. Their paper origin is
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:243-287,392-480`.
 The dimension-divisibility hypothesis is documented in
 `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`.
@@ -202,7 +202,7 @@ private theorem prefixProjection_prefixProjection (L : LdParams) (i : Fin L.m)
   · simp only [prefixProjection, if_neg h]
 
 /-- `lem:alnf`: the point and axis-index marginals of the axis line-point
-distribution are uniform. Blueprint `ch13_qpbt_test.tex:101-106`, paper
+distribution are uniform. Blueprint `ch13_qpbt_test.tex:137-142`, paper
 `08_classical_and_quantum_low_degree_tests.tex:243-257`. -/
 theorem aLinePointDist_point_marginal_uniform (L : LdParams) :
     (aLinePointDist L).map Prod.snd =
@@ -229,7 +229,7 @@ theorem aLinePointDist_point_marginal_uniform (L : LdParams) :
     rw [hmap, map_uniformDistribution_seed, map_uniformDistribution_chiIndex]
 
 /-- The incidence conclusion of `lem:alnf`, blueprint
-`ch13_qpbt_test.tex:101-106`, paper
+`ch13_qpbt_test.tex:137-142`, paper
 `08_classical_and_quantum_low_degree_tests.tex:243-257`. -/
 theorem aLinePointDist_mem_line (L : LdParams) :
     ∀ sample ∈ (aLinePointDist L).support, sample.2 ∈ sample.1.pointSet := by
@@ -251,7 +251,7 @@ theorem aLinePointDist_mem_line (L : LdParams) :
   exact mem_linePoints_lineRepMap _ _
 
 /-- `lem:dlnf`: the point and prefix-index marginals of the diagonal
-line-point distribution are uniform. Blueprint `ch13_qpbt_test.tex:113-118`,
+line-point distribution are uniform. Blueprint `ch13_qpbt_test.tex:149-154`,
 paper `08_classical_and_quantum_low_degree_tests.tex:261-272`. -/
 theorem dLinePointDist_point_marginal_uniform (L : LdParams) :
     (dLinePointDist L).map Prod.snd =
@@ -278,7 +278,7 @@ theorem dLinePointDist_point_marginal_uniform (L : LdParams) :
     rw [hmap, map_uniformDistribution_seed, map_uniformDistribution_chiIndex]
 
 /-- The incidence conclusion of `lem:dlnf`, blueprint
-`ch13_qpbt_test.tex:113-118`, paper
+`ch13_qpbt_test.tex:149-154`, paper
 `08_classical_and_quantum_low_degree_tests.tex:261-272`. -/
 theorem dLinePointDist_mem_line (L : LdParams) :
     ∀ sample ∈ (dLinePointDist L).support, sample.2 ∈ sample.1.pointSet := by
@@ -304,7 +304,7 @@ theorem dLinePointDist_mem_line (L : LdParams) :
   exact mem_linePoints_lineRepMap _ _
 
 /-- The diagonal direction in every sampled description has the prefix-zero
-property of `lem:dlnf`, blueprint `ch13_qpbt_test.tex:113-118`, paper
+property of `lem:dlnf`, blueprint `ch13_qpbt_test.tex:149-154`, paper
 `08_classical_and_quantum_low_degree_tests.tex:261-272`. -/
 theorem dLinePointDist_prefix_zero (L : LdParams) :
     ∀ sample ∈ (dLinePointDist L).support,
@@ -336,10 +336,12 @@ theorem isTypedCondLinearFamily_ldCL (L : LdParams) :
   | dline =>
       exact isCondLinear_ldDLineCL L
 
-/-- The low-degree question sampler is the typed conditionally linear
-distribution on the complete type graph. This is `lem:ld-question-typed-cl`,
-blueprint `ch13_qpbt_test.tex:109-119`, which identifies the sampler with
-`def:typed-cl-distributions` (`ch12_qpbt_games.tex:1400-1404`); paper
+/-- The low-degree question sampler equals the distribution that the
+construction of `def:typed-cl-distributions` (`ch12_qpbt_games.tex:1414-1418`)
+produces from the family `ldCL` on the complete type graph. This is the completed
+distribution-identity component of `lem:ld-question-typed-cl`, blueprint
+`ch13_qpbt_test.tex:109-119`; the separate theorem
+`isTypedCondLinearFamily_ldCL` supplies the common-level family assertion. Paper
 `references/qpbt-paper/07_types.tex:84-94`. -/
 theorem ldQuestionDistribution_eq_typedCL (L : LdParams) :
     ldQuestionDistribution L =
@@ -394,7 +396,7 @@ theorem ldQuestionDistribution_isTypedCL (L : LdParams) :
 
 /-- Bounded multivariate polynomials form a finite set over a finite coefficient
 semiring. This is the finite outcome set required by `def:ld-meas`,
-blueprint `ch13_qpbt_test.tex:164-171`, paper
+blueprint `ch13_qpbt_test.tex:200-207`, paper
 `08_classical_and_quantum_low_degree_tests.tex:394-408`. -/
 noncomputable instance polyFuncFintype (m : ℕ) (K : Type*)
     [CommSemiring K] [Fintype K] (d : ℕ) : Fintype ↥(polyFunc m K d) := by
@@ -414,7 +416,7 @@ noncomputable abbrev PolyMeas (m : ℕ) (K : Type*) [CommSemiring K]
 
 /-- The dependent family in `def:ld-meas`: component `i` may
 have its own coefficient field, number of variables, and degree bound.
-Blueprint `ch13_qpbt_test.tex:164-171`, paper
+Blueprint `ch13_qpbt_test.tex:200-207`, paper
 `08_classical_and_quantum_low_degree_tests.tex:394-408`. -/
 noncomputable abbrev PolyMeasFamily (k : ℕ) (K : Fin k → Type*)
     [∀ i, CommSemiring (K i)] [∀ i, Fintype (K i)]
@@ -464,7 +466,7 @@ noncomputable def deltaLd (a b ε : ℝ) (q m d k : ℕ) : ℝ :=
       Real.rpow 2 (-(b * ((m * d : ℕ) : ℝ))))
 
 /-- Quantum soundness of the simultaneous classical low individual degree
-test (`lem:ld-soundness`, blueprint lines 135--160; paper theorem and proof
+test (`lem:ld-soundness`, blueprint lines 213--238; paper theorem and proof
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:413-458`).
 
 The first two consistency bounds compare the point-answer postprocessing of the

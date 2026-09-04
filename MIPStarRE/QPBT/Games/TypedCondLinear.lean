@@ -10,7 +10,7 @@ uniform seed.
 ## References
 
 These are `def:typed-cl-functions` and `def:typed-cl-distributions` in
-`blueprint/src/chapter/ch12_qpbt_games.tex:1355-1404`, with paper origin
+`blueprint/src/chapter/ch12_qpbt_games.tex:1370-1418`, with paper origin
 `references/qpbt-paper/07_types.tex:57-94`.
 -/
 
@@ -30,7 +30,7 @@ def IsTypedCondLinearFamily (K T : Type*) [Field K]
 
 /-- The typed CL distribution: sample a type pair from the graph distribution,
 then bind it to the CL distribution selected by those two types. This is
-`def:typed-cl-distributions`, blueprint `ch12_qpbt_games.tex:1400-1404`, paper
+`def:typed-cl-distributions`, blueprint `ch12_qpbt_games.tex:1414-1418`, paper
 `references/qpbt-paper/07_types.tex:84-94`. -/
 noncomputable def typedCLDistribution {K T ι : Type*}
     [Field K] [Fintype K] [DecidableEq K]
