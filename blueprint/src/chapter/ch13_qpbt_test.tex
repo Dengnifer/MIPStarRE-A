@@ -137,37 +137,37 @@ representing the paper's coordinate $r+1$.
 \begin{lemma}\label{lem:alnf}
 	\lean{MIPStarRE.QPBT.aLinePointDist_point_marginal_uniform, MIPStarRE.QPBT.aLinePointDist_mem_line}
 	\leanok
-	\uses{def:ld-question-distribution, def:line}
+	\uses{def:line-point-dist, def:line}
 	Consider the pair $(\ell, u)$ sampled in the following way: first, sample the tuple $\bigl((u_0,s,0),(u,0,0)\bigr)$ from the CL distribution $\mu_{L_{\mathsf{ALine}}, L_{\mathsf{Point}}}$, and let $\ell = \ell(u_0, e_i)$ where $i = \chi(s)$. Then $u$ is a uniformly random point in $\F_q^m$, and $\ell$ is a line that goes through $u$ and is parallel to a uniformly random axis $i \in \{1,2,\ldots,m\}$.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{def:cl-dist, def:ld-question-distribution, def:line-representative, lem:line-rep-incidence}
+	\uses{def:cl-dist, def:ld-question-distribution, def:ld-line-description, def:line-representative, lem:distribution-map-comp, lem:uniform-map-equivalence, lem:uniform-product-first-marginal, lem:uniform-product-second-marginal, lem:chi-index-uniform, lem:line-representative-idempotent, lem:line-rep-incidence}
 	By Definition~\ref{def:cl-dist} the distribution $\mu_{L_{\mathsf{ALine}}, L_{\mathsf{Point}}}$ is the push-forward of the uniform distribution on $V$ along $z \mapsto \bigl(L_{\mathsf{ALine}}(z), L_{\mathsf{Point}}(z)\bigr)$, so each marginal below is the push-forward of the uniform distribution on $V$ along the composite of that map with the corresponding coordinate. The point marginal is the image of the uniform distribution on $V$ under $(u,s,v) \mapsto u$, hence uniform on $\F_q^m$. The axis marginal is its image under $(u,s,v) \mapsto \chi(s)$; since $m$ divides $q$, every fibre of $\chi$ has exactly $q/m$ elements, so $i = \chi(s)$ is uniform on $\{1,2,\ldots,m\}$ and $(u_0,s)$ specifies a uniformly random axis-parallel line $\ell(u_0,e_i)$. Finally the base point recorded in the sample is $u_0 = L^{\mathrm{Ln}}_{e_i}(u)$, which is fixed by $L^{\mathrm{Ln}}_{e_i}$ (Definition~\ref{def:line-representative}) and satisfies $u \in \ell(u_0,e_i)$ by Lemma~\ref{lem:line-rep-incidence}.
 \end{proof}
 
 \begin{lemma}\label{lem:dlnf}
 	\lean{MIPStarRE.QPBT.dLinePointDist_point_marginal_uniform, MIPStarRE.QPBT.dLinePointDist_mem_line, MIPStarRE.QPBT.dLinePointDist_prefix_zero}
 	\leanok
-	\uses{def:ld-question-distribution, def:line}
+	\uses{def:line-point-dist, def:line}
 	Consider the pair $(\ell, u)$ sampled in the following way: first, sample the tuple $\bigl((u_0,s,v),(u,0,0)\bigr)$ from the CL distribution $\mu_{L_{\mathsf{DLine}}, L_{\mathsf{Point}}}$, and let $\ell = \ell(u_0, v)$ where $i = \chi(s)$. Then $u$ is a uniformly random point in $\F_q^m$, and $\ell$ is a random diagonal line that goes through $u$ and shares its first $i-1$ coordinates with $u$, for uniformly random $i \in \{1,2,\ldots,m\}$.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{def:cl-dist, def:ld-question-distribution, def:line-representative, lem:line-rep-incidence}
+	\uses{def:cl-dist, def:ld-question-distribution, def:ld-line-description, def:line-representative, lem:distribution-map-comp, lem:uniform-map-equivalence, lem:uniform-product-first-marginal, lem:uniform-product-second-marginal, lem:chi-index-uniform, lem:prefix-projection-idempotent, lem:line-representative-idempotent, lem:line-description-prefix, lem:line-rep-incidence}
 	The three steps are those of the proof of Lemma~\ref{lem:alnf}, and none of them depends on that lemma. The two marginals are again push-forwards of the uniform distribution on $V$ along coordinates of $z \mapsto \bigl(L_{\mathsf{DLine}}(z), L_{\mathsf{Point}}(z)\bigr)$, by Definition~\ref{def:cl-dist}: the point marginal is uniform on $\F_q^m$, and $i = \chi(s)$ is uniform on $\{1,2,\ldots,m\}$ because every fibre of $\chi$ has $q/m$ elements. The direction component of the sampled tuple is $v' = \pi_{i-1}(v)$, whose first $i-1$ coordinates vanish and which is unchanged by a further application of $\pi_{i-1}$. Finally $u_0 = L^{\mathrm{Ln}}_{v'}(u)$ is fixed by $L^{\mathrm{Ln}}_{v'}$ (Definition~\ref{def:line-representative}) and satisfies $u \in \ell(u_0,v')$ by Lemma~\ref{lem:line-rep-incidence}.
 \end{proof}
 
 \begin{definition}[Line-point distributions]\label{def:line-point-dist}
-	\lean{MIPStarRE.QPBT.LineKind, MIPStarRE.QPBT.LineDesc}
+	% A line description retains the seed used to select its coordinate.
 	\lean{MIPStarRE.QPBT.aLinePointDist, MIPStarRE.QPBT.dLinePointDist}
 	\lean{MIPStarRE.QPBT.linePointDist}
 	\lean{MIPStarRE.QPBT.aLinePointDist_isProbability}
 	\lean{MIPStarRE.QPBT.dLinePointDist_isProbability}
 	\lean{MIPStarRE.QPBT.linePointDist_isProbability}
-	\leanok
-	\uses{def:ld-question-distribution, lem:alnf, lem:dlnf}
-	The \emph{axis line-point distribution} $D_{\mathsf{ALine}}$ is the distribution $\mu_{L_{\mathsf{ALine}}, L_{\mathsf{Point}}}$ over pairs $(\ell = (u_0,e_i),\, u)$, where we omit the $0$ components for simplicity. The \emph{diagonal line-point distribution} $D_{\mathsf{DLine}}$ is the distribution $\mu_{L_{\mathsf{DLine}}, L_{\mathsf{Point}}}$ over pairs $(\ell = (u_0,s,v),\, u)$. The \emph{line-point distribution} $D_{\mathsf{Line}}$ is the equal mixture of the two: with probability $\tfrac12$ output a sample from $D_{\mathsf{ALine}}$, and with probability $\tfrac12$ output a sample from $D_{\mathsf{DLine}}$.
+	% The refined laws retain data not present in the axis source law.
+	\uses{def:ld-question-distribution, def:ld-line-description}
+	The source \emph{axis line-point distribution} $D_{\mathsf{ALine}}$ is the law $\mu_{L_{\mathsf{ALine}}, L_{\mathsf{Point}}}$ on pairs $(\ell=(u_0,e_i),u)$, and the source \emph{diagonal line-point distribution} $D_{\mathsf{DLine}}$ is the corresponding law on pairs $(\ell=(u_0,s,v),u)$ from $\mu_{L_{\mathsf{DLine}}, L_{\mathsf{Point}}}$. Their equal mixture is $D_{\mathsf{Line}}$. We also use seed-bearing refinements of these laws. An axis description records $u_0$ and a seed $s$ selecting $i=\chi(s)$, subject to $L^{\mathrm{Ln}}_{e_i}(u_0)=u_0$. A diagonal description records $(u_0,s,v)$, subject to $L^{\mathrm{Ln}}_v(u_0)=u_0$ and to the prefix condition $v_j=0$ for $j<i$. Mapping the two kinds of description to $(u_0,e_{\chi(s)})$ and $(u_0,s,v)$, respectively, sends the refined laws to the source laws.
 \end{definition}
 
 \begin{definition}[Win predicate of the classical low individual degree game]\label{def:ld-win-predicate}
@@ -627,3 +627,226 @@ We specify a canonical setting of the parameter tuple $\mathsf{qldparams}$ as a 
 \begin{remark}[A comparison of exponents in the source proof of Lemma~\ref{lem:delta-bound}]\label{rem:delta-bound-exponent-comparison}
 	The source proof bounds the third term of $\delta_{\mathrm{qld}}$ by asserting $2^{-bmd} \le q^{-b}$ ``because $k \le m$'', comparing the field exponent $k = c \lceil \log\log R \rceil + 1$ with $m = 2^j$. The inequality $k \le m$ does not follow from Definition~\ref{def:introparams}: if the universal constants of Theorem~\ref{thm:pauli} were $a = 1$ and $b = 1/2$, then $c = 4$, and $R = 5$ gives $k = 9$ and $m = 8$. The proof above instead bounds $2^{-bm} \le R^{-b}$ directly from $m \ge (c/2) \log R \ge \log R$, which yields the same conclusion after enlarging the universal constant $a'$.  The comparison and correction are documented in \cite{gap:qpbt_delta-bound-exponent-comparison}.
 \end{remark}
+
+\section{Formalization support for finite sampling}
+
+The following finite-distribution identities are not named statements of the
+source article.  They make explicit the push-forward calculations used in the
+low-degree question and line-point laws above.
+
+\begin{lemma}[Extensionality of finite distributions]\label{lem:distribution-ext-support}
+	\lean{MIPStarRE.QPBT.Distribution.ext_of_support_of_weight}
+	\leanok
+	Two finite distributions with the same support and the same weight at every
+	point are equal.
+\end{lemma}
+\begin{proof}
+	\leanok
+	The two laws have the same finite support and assign the same mass to every
+	point, so they coincide.
+\end{proof}
+
+\begin{lemma}[Composition of push-forwards]\label{lem:distribution-map-comp}
+	\lean{MIPStarRE.QPBT.Distribution.map_map}
+	\leanok
+	Let $\mu$ be a finite distribution on $A$, and let $e\colon A\to B$ and
+	$f\colon B\to C$. Then
+	\[
+		f_\ast(e_\ast\mu)=(f\circ e)_\ast\mu.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:distribution-ext-support}
+	The supports agree by composition of finite images.  For each $c\in C$,
+	partition the fiber of $f\circ e$ over $c$ by the intermediate value $e(a)$;
+	the corresponding sums of weights agree.
+\end{proof}
+
+\begin{lemma}[Weights of the uniform law]\label{lem:uniform-distribution-weight}
+	\lean{MIPStarRE.QPBT.uniformDistribution_weight_apply}
+	\leanok
+	If $A$ is a nonempty finite set, then its uniform distribution assigns weight
+	$1/|A|$ to every $a\in A$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	This is the defining weight of the uniform distribution on a nonempty finite
+	set.
+\end{proof}
+
+\begin{lemma}[Uniform push-forward along a balanced map]\label{lem:uniform-map-equal-fibers}
+	\lean{MIPStarRE.QPBT.uniformDistribution_map_of_card_fiber}
+	\leanok
+	Let $A$ and $B$ be nonempty finite sets and let $e\colon A\to B$. If there is
+	an integer $c$ such that $|e^{-1}(b)|=c$ for every $b\in B$, then
+	$e_\ast\operatorname{Unif}(A)=\operatorname{Unif}(B)$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:distribution-ext-support, lem:uniform-distribution-weight}
+	Every fiber is nonempty, so $e$ is surjective and both supports are $B$.
+	Counting the fibers gives $|A|=c|B|$; summing the weight $1/|A|$ over a
+	$c$-element fiber gives $1/|B|$.
+\end{proof}
+
+\begin{lemma}[Uniformity under an equivalence]\label{lem:uniform-map-equivalence}
+	\lean{MIPStarRE.QPBT.uniformDistribution_map_equiv}
+	\leanok
+	An equivalence $E\colon A\simeq B$ between nonempty finite sets satisfies
+	$E_\ast\operatorname{Unif}(A)=\operatorname{Unif}(B)$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:uniform-map-equal-fibers}
+	Every fiber of an equivalence has cardinality one, so the result follows from
+	Lemma~\ref{lem:uniform-map-equal-fibers}.
+\end{proof}
+
+\begin{lemma}[First marginal of a uniform product]\label{lem:uniform-product-first-marginal}
+	\lean{MIPStarRE.QPBT.uniformDistribution_map_fst}
+	\leanok
+	For nonempty finite sets $A$ and $B$, the first marginal of
+	$\operatorname{Unif}(A\times B)$ is $\operatorname{Unif}(A)$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:uniform-map-equal-fibers}
+	Every fiber of the first projection has cardinality $|B|$; apply
+	Lemma~\ref{lem:uniform-map-equal-fibers}.
+\end{proof}
+
+\begin{lemma}[Second marginal of a uniform product]\label{lem:uniform-product-second-marginal}
+	\lean{MIPStarRE.QPBT.uniformDistribution_map_snd}
+	\leanok
+	For nonempty finite sets $A$ and $B$, the second marginal of
+	$\operatorname{Unif}(A\times B)$ is $\operatorname{Unif}(B)$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:uniform-map-equal-fibers}
+	Every fiber of the second projection has cardinality $|A|$; apply
+	Lemma~\ref{lem:uniform-map-equal-fibers}.
+\end{proof}
+
+\begin{lemma}[Dependent uniform sampling as a product push-forward]\label{lem:uniform-bind-map}
+	\lean{MIPStarRE.QPBT.bind_uniformDistribution_map}
+	\leanok
+	Let $A$ and $B$ be nonempty finite sets and let $g\colon A\to B\to C$.
+	Sampling $a$ uniformly from $A$, then $b$ uniformly from $B$, and returning
+	$g(a,b)$ has the same law as pushing $\operatorname{Unif}(A\times B)$ forward
+	along $(a,b)\mapsto g(a,b)$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:distribution-ext-support, lem:uniform-distribution-weight}
+	Both supports are the image of $A\times B$ under $g$.  At each $c\in C$,
+	both weights are the number of pairs $(a,b)$ with $g(a,b)=c$, divided by
+	$|A||B|$.
+\end{proof}
+
+\begin{lemma}[Uniform first marginal after an equivalence]
+	\label{lem:uniform-first-marginal-after-equivalence}
+	\lean{MIPStarRE.QPBT.uniformDistribution_map_fst_of_equiv}
+	\leanok
+	Let $A$, $B$, and $C$ be nonempty finite sets, let $E\colon A\simeq B\times C$,
+	and suppose $f(a)$ is the first component of $E(a)$ for every $a\in A$. Then
+	$f_\ast\operatorname{Unif}(A)=\operatorname{Unif}(B)$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:distribution-map-comp, lem:uniform-map-equivalence, lem:uniform-product-first-marginal}
+	Push the uniform law along $E$, compose with the first projection, and apply
+	uniformity under the equivalence followed by the first-marginal identity.
+\end{proof}
+
+\begin{lemma}[Exact fibers of the coordinate-index map]\label{lem:chi-seed-fibers}
+	\lean{MIPStarRE.QPBT.LdParams.seedFiberCard_pos, MIPStarRE.QPBT.LdParams.seedFiberProduct_eq}
+	\lean{MIPStarRE.QPBT.seedFiberEquiv, MIPStarRE.QPBT.seedFiberEquiv_fst}
+	\lean{MIPStarRE.QPBT.seedOfIndexResidue, MIPStarRE.QPBT.seedFiberEquiv_seedOfIndexResidue, MIPStarRE.QPBT.chiIndex_seedOfIndexResidue}
+	\leanok
+	\uses{def:ld-game, def:ld-question-distribution, def:binary-representation}
+	Write $\chi_0(s)=\chi(s)-1$ for the corresponding zero-based coordinate
+	index. Every scalar seed has a unique
+	representation as a pair
+	\[
+		(i,r)\in\{0,\ldots,m-1\}\times\{0,\ldots,q/m-1\},
+	\]
+	and the first component is $\chi_0(s)$. Conversely, every such pair determines
+	a unique scalar seed. In particular, the residue set is nonempty and
+	$q=m(q/m)$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:binary-representation}
+	Use the fixed bijection between $\F_q$ and $\{0,\ldots,q-1\}$, the equality
+	$q=m(q/m)$, and quotient--remainder decomposition with divisor $q/m$.
+\end{proof}
+
+\begin{lemma}[Uniformity of the coordinate index]\label{lem:chi-index-uniform}
+	\lean{MIPStarRE.QPBT.uniformDistribution_map_chiIndex}
+	\leanok
+	\uses{def:ld-question-distribution}
+	For a uniformly random $s\in\F_q$, the zero-based index $\chi_0(s)$ is
+	uniformly distributed on $\{0,\ldots,m-1\}$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:chi-seed-fibers, lem:uniform-first-marginal-after-equivalence}
+	Under the equivalence of Lemma~\ref{lem:chi-seed-fibers}, $\chi_0$ is the first
+	projection. Apply Lemma~\ref{lem:uniform-first-marginal-after-equivalence}.
+\end{proof}
+
+\begin{lemma}[Idempotence of the prefix projection]
+	\label{lem:prefix-projection-idempotent}
+	\lean{MIPStarRE.QPBT.prefixProjection_idempotent}
+	\leanok
+	\uses{def:ld-question-distribution}
+	For every coordinate $i$ and direction $v$,
+	$\pi_i(\pi_i(v))=\pi_i(v)$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	A coordinate before $i$ is set to zero by both sides, while every coordinate
+	at or after $i$ is retained by both sides.
+\end{proof}
+
+\begin{lemma}[Idempotence of the canonical representative]
+	\label{lem:line-representative-idempotent}
+	\lean{MIPStarRE.QPBT.lineRepMap_apply_self}
+	\leanok
+	\uses{def:line-representative}
+	For all $u,v\in\F_q^m$,
+	$L^{\mathrm{Ln}}_v(L^{\mathrm{Ln}}_v(u))=L^{\mathrm{Ln}}_v(u)$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	The canonical representative map is a projection onto the chosen complement
+	of the span of $v$, and every projection is idempotent.
+\end{proof}
+
+\begin{definition}[Seed-bearing line descriptions]\label{def:ld-line-description}
+	\lean{MIPStarRE.QPBT.LineKind, MIPStarRE.QPBT.LineDesc}
+	\lean{MIPStarRE.QPBT.aLineDescOf, MIPStarRE.QPBT.dLineDescOf}
+	\leanok
+	\uses{def:ld-question-distribution, def:line-representative, lem:line-representative-idempotent}
+	An axis-line description records a canonical base point and a scalar seed,
+	whose coordinate index selects the axis direction. A diagonal-line
+	description records a canonical base point, a scalar seed, and a direction
+	whose coordinates preceding the selected index vanish. The axis and diagonal
+	CL outputs determine such descriptions by taking their canonical
+	representatives.
+\end{definition}
+
+\begin{lemma}[Prefix property of a diagonal description]
+	\label{lem:line-description-prefix}
+	\lean{MIPStarRE.QPBT.LineDesc.diagonal_prefix_zero}
+	\leanok
+	\uses{def:ld-line-description}
+	If a seed-bearing line description is diagonal, then every coordinate of its
+	direction preceding the index selected by its seed is zero.
+\end{lemma}
+\begin{proof}
+	\leanok
+	This is the prefix-zero property carried by a diagonal line description.
+\end{proof}

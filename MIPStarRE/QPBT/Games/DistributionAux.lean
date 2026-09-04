@@ -2,11 +2,10 @@ import MIPStarRE.LDT.Basic.Distribution
 
 /-! # Operations on finite distributions
 
-Products, convex mixtures, dependent binds, and normalized restrictions used by
-the QPBT distributions, together with the generic push-forward calculus for
-finite and uniform distributions. Their source uses occur in the line-point
-sampler, typed conditionally linear distributions, sandwich products, and
-restricted line distributions cited below.
+Finite distributions support products, convex mixtures, dependent binds,
+normalized restrictions, and push-forwards.  Uniform laws are preserved by
+bijections and balanced maps, their product projections are uniform, and
+dependent uniform sampling agrees with push-forward from a product.
 -/
 
 open scoped BigOperators
@@ -197,9 +196,9 @@ game and the identification of question distributions with typed conditionally
 linear distributions rely on.
 -/
 
-/-- Two finite distributions coincide as soon as their supports and their
-weight functions coincide.  Formalization-only extensionality principle for
-`Distribution`. -/
+/-- Formalization-only lemma: two finite distributions coincide as soon as
+their supports and weight functions coincide.  This is the support statement
+`lem:distribution-ext-support` in blueprint chapter 13. -/
 theorem Distribution.ext_of_support_of_weight {α : Type*} {μ ν : Distribution α}
     (hsupport : μ.support = ν.support) (hweight : μ.weight = ν.weight) :
     μ = ν := by
@@ -213,8 +212,8 @@ theorem Distribution.ext_of_support_of_weight {α : Type*} {μ ν : Distribution
       subst hw
       rfl
 
-/-- Successive push-forwards of a finite distribution compose.
-Formalization-only auxiliary for `Distribution.map`. -/
+/-- Formalization-only lemma: successive push-forwards of a finite distribution
+compose.  This is `lem:distribution-map-comp` in blueprint chapter 13. -/
 theorem Distribution.map_map {α β γ : Type*}
     [DecidableEq β] [DecidableEq γ]
     (μ : Distribution α) (e : α → β) (f : β → γ) :
@@ -245,16 +244,17 @@ theorem Distribution.map_map {α β γ : Type*}
     · rintro ⟨⟨ha1, -⟩, hae⟩
       exact ⟨ha1, hae⟩
 
-/-- Every point of a finite type carries the same uniform weight.
-Formalization-only auxiliary for `uniformDistribution`. -/
+/-- Formalization-only lemma: every point of a nonempty finite type carries the
+reciprocal of the type's cardinality as its uniform weight.  This is
+`lem:uniform-distribution-weight` in blueprint chapter 13. -/
 theorem uniformDistribution_weight_apply (α : Type*)
     [Fintype α] [DecidableEq α] [Nonempty α] (a : α) :
     (uniformDistribution α).weight a = 1 / (Fintype.card α : Error) := by
   simp [uniformDistribution]
 
-/-- A map whose fibers all have the same cardinality pushes the uniform
-distribution forward to the uniform distribution.  Formalization-only
-auxiliary for `uniformDistribution`. -/
+/-- Formalization-only lemma: a map whose fibers all have the same cardinality
+pushes the uniform distribution forward to the uniform distribution.  This is
+`lem:uniform-map-equal-fibers` in blueprint chapter 13. -/
 theorem uniformDistribution_map_of_card_fiber {α β : Type*}
     [Fintype α] [DecidableEq α] [Nonempty α]
     [Fintype β] [DecidableEq β] [Nonempty β]
@@ -294,8 +294,8 @@ theorem uniformDistribution_map_of_card_fiber {α β : Type*}
     push_cast
     field_simp
 
-/-- Relabelling along a bijection preserves uniformity.  Formalization-only
-auxiliary for `uniformDistribution`. -/
+/-- Formalization-only lemma: relabelling along a bijection preserves
+uniformity.  This is `lem:uniform-map-equivalence` in blueprint chapter 13. -/
 theorem uniformDistribution_map_equiv {α β : Type*}
     [Fintype α] [DecidableEq α] [Nonempty α]
     [Fintype β] [DecidableEq β] [Nonempty β] (E : α ≃ β) :
@@ -308,8 +308,9 @@ theorem uniformDistribution_map_equiv {α β : Type*}
   rw [hfilter]
   simp
 
-/-- The first marginal of the uniform distribution on a product is uniform.
-Formalization-only auxiliary for `uniformDistribution`. -/
+/-- Formalization-only lemma: the first marginal of the uniform distribution on
+a product is uniform.  This is `lem:uniform-product-first-marginal` in blueprint
+chapter 13. -/
 theorem uniformDistribution_map_fst {α β : Type*}
     [Fintype α] [DecidableEq α] [Nonempty α]
     [Fintype β] [DecidableEq β] [Nonempty β] :
@@ -323,8 +324,9 @@ theorem uniformDistribution_map_fst {α β : Type*}
   rw [hfilter, Finset.card_product]
   simp
 
-/-- The second marginal of the uniform distribution on a product is uniform.
-Formalization-only auxiliary for `uniformDistribution`. -/
+/-- Formalization-only lemma: the second marginal of the uniform distribution
+on a product is uniform.  This is `lem:uniform-product-second-marginal` in
+blueprint chapter 13. -/
 theorem uniformDistribution_map_snd {α β : Type*}
     [Fintype α] [DecidableEq α] [Nonempty α]
     [Fintype β] [DecidableEq β] [Nonempty β] :
@@ -338,9 +340,9 @@ theorem uniformDistribution_map_snd {α β : Type*}
   rw [hfilter, Finset.card_product]
   simp
 
-/-- Binding a uniform distribution to a family of uniformly seeded
-push-forwards is the push-forward of the uniform distribution on the product.
-Formalization-only auxiliary for `Distribution.bind`. -/
+/-- Formalization-only lemma: binding a uniform distribution to a family of
+uniformly seeded push-forwards is the push-forward of the uniform distribution
+on the product.  This is `lem:uniform-bind-map` in blueprint chapter 13. -/
 theorem bind_uniformDistribution_map {α β γ : Type*}
     [Fintype α] [DecidableEq α] [Nonempty α]
     [Fintype β] [DecidableEq β] [Nonempty β] [DecidableEq γ]
