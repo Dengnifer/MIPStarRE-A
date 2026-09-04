@@ -396,6 +396,13 @@ theorem avgOver_uniform_const {α : Type*}
   exact avgOver_const_of_isProbability
     (uniformDistribution α) (uniformDistribution_isProbability α) c
 
+/-- A uniform average over a finite type is its normalized finite sum. -/
+theorem avgOver_uniform_eq_inv_card_mul_sum {α : Type*}
+    [Fintype α] [DecidableEq α] [Nonempty α] (f : α → ℝ) :
+    avgOver (uniformDistribution α) f = (Fintype.card α : ℝ)⁻¹ * ∑ a, f a := by
+  unfold avgOver uniformDistribution Distribution.uniformOnFinset
+  simp only [Finset.mem_univ, if_true, Finset.card_univ, one_div, Finset.mul_sum]
+
 /-- Finite-sum expression for the uniform average, stated without measurable-space
 assumptions. -/
 theorem avgOver_uniform_eq_pmf_sum {α : Type*}
