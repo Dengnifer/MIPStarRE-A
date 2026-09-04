@@ -108,19 +108,6 @@ theorem trace_heteroKron_ancProj {ι ι' : Type} [Fintype ι] [Fintype ι']
   rw [Matrix.trace_kronecker, htrace, trace_ancProj, hanc]
   simp
 
-/-- The ampliation `O ⊗ 1` of a binary observable by the identity of an
-ancillary space is a binary observable.  This is the sense in which the
-original observables `A(a)` act on the extended space in display (8) of
-`references/nv-paper/fullpaper.tex:1083-1086`. -/
-theorem isBinaryObservable_heteroKron_one {ι ι' : Type} [Fintype ι] [DecidableEq ι]
-    [Fintype ι'] [DecidableEq ι'] {O : Op ι} (hO : IsBinaryObservable O) :
-    IsBinaryObservable (heteroKron O (1 : Op ι')) := by
-  unfold heteroKron
-  simp only [Matrix.kronecker]
-  refine ⟨?_, ?_⟩
-  · rw [Matrix.IsHermitian, Matrix.conjTranspose_kronecker, hO.1.eq, Matrix.conjTranspose_one]
-  · rw [← Matrix.mul_kronecker_mul, hO.2, Matrix.one_mul, Matrix.one_kronecker_one]
-
 /-! ## The distance/defect identity -/
 
 /-- The correlation between a rounded observable `L^u` and the ampliated
@@ -235,18 +222,22 @@ theorem avg_stateDepDistSq_roundedObservable_eq_avg_multiplicativeDefect {t : �
 /-! ## Boolean representation stability -/
 
 /-- Boolean representation stability.  Let `t` be positive, `η ≥ 0`, `ρ` a
-positive semidefinite trace-one operator on a finite carrier, and `O^u`, for
-`u ∈ F_2^t`, binary observables whose products satisfy
-`E_{u,v} d_ρ(O^u O^v, O^{u+v})^2 ≤ η`.  Then there are a finite ancillary
-carrier, a unit vector `anc` in it, and binary observables `L^u` on the
-product carrier with `L^u L^v = L^{u+v}` for all `u, v` and
+positive semidefinite trace-one operator on a finite-dimensional Hilbert space,
+and `O^u`, for `u ∈ F_2^t`, binary observables whose products satisfy
+`E_{u,v} d_ρ(O^u O^v, O^{u+v})^2 ≤ η`.  Then there are a finite-dimensional
+ancillary Hilbert space, a unit vector `anc` in it, and binary observables `L^u`
+on the tensor-product Hilbert space with `L^u L^v = L^{u+v}` for all `u, v` and
 `E_u d_{ρ'}(L^u, O^u ⊗ 1)^2 ≤ η`, where `ρ' = ρ ⊗ |anc⟩⟨anc|`.
 
-The ancillary carrier is `Option (F_2^t)`, the vector is the canonical
-ancillary vector of the Naimark dilation, and the family is the rounded
-observables of the Fourier-square POVM; the bound is the distance/defect
-identity `avg_stateDepDistSq_roundedObservable_eq_avg_multiplicativeDefect`
-weakened by the hypothesis.
+The ancillary Hilbert space used in the proof is
+`EuclideanSpace ℂ (Option (Fin t → ZMod 2))`.  The finite type
+`Option (Fin t → ZMod 2)` indexes an orthonormal basis, with one basis vector
+for each element of `F_2^t` and one extra basis vector; it is not itself the
+Hilbert space.  The vector is the canonical ancillary vector of the Naimark
+dilation, and the family is the rounded observables of the Fourier-square POVM;
+the bound is the distance/defect identity
+`avg_stateDepDistSq_roundedObservable_eq_avg_multiplicativeDefect` weakened by
+the hypothesis.
 
 **Local fix:** This is the mathematical content of Theorem 10 of
 Natarajan--Vidick, `references/nv-paper/fullpaper.tex:1074-1088`, quoted at

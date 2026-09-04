@@ -9,6 +9,7 @@ import shlex
 import subprocess
 import tempfile
 import unittest
+from unittest import mock
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -87,6 +88,20 @@ class DispatchCommandTests(unittest.TestCase):
 
         self.assert_common_exec_options(argv)
         self.assertEqual(argv[13:], ["resume", "--", THREAD_ID, "<prompt>"])
+
+    def test_workspace_write_grants_only_resolved_external_lake(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            worktree, target = root / "worktree", root / "lake" / "main"
+            worktree.mkdir()
+            subprocess.run(["git", "init", "-q", "-b", "main"], cwd=worktree, check=True)
+            target.mkdir(parents=True)
+            (worktree / ".lake").symlink_to(target, target_is_directory=True)
+            with mock.patch.dict(os.environ, {"MIPSTARRE_LAKE_ROOT": str(target.parent)}):
+                argv = self.dispatch_command("--role", "prover", "--worktree", str(worktree),
+                                             "--sandbox", "workspace-write")
+        self.assertEqual(argv[argv.index("--add-dir") + 1], str(target.resolve()))
+        self.assertLess(argv.index("--add-dir"), argv.index("-o"))
 
     def test_pre_commit_budget_counts_dispatch_tests(self) -> None:
         self.assertIn(
