@@ -1166,7 +1166,7 @@ Throughout this section $V$ denotes the linear space $\F^n$ for some integer $n 
 and $V_{\le k}$, $V_{\ge k}$ are understood to be $V_{<k+1}$ and $V_{>k-1}$, respectively. For a register subspace $V'$ of $V$, the symbol $x^{V'}$ denotes the projection of $x$ onto $V'$ parallel to the complementary register subspace (Definition~\ref{def:complementary}). Moreover, if $F \colon V' \to V'$ is a function and $x \in V$, we write $x^F$ for $F(x^{V'})$; for example, in the following definition $x^{L_1}$ is shorthand for $L_1(x^{V_1})$.
 
 \begin{definition}[Conditionally linear functions]\label{def:cl-func}
-	\uses{def:register-subspace, def:complementary}
+	\lean{MIPStarRE.QPBT.IsCondLinearOn, MIPStarRE.QPBT.IsCondLinear}\uses{def:register-subspace, def:complementary}
 	Let $V$ be $\F^n$ for some $n \ge 0$. For all integers $\ell \ge 0$ the collection of \emph{$\ell$-level conditionally linear functions} (implicitly, \emph{on $V$}) is defined inductively as follows.
 	\begin{enumerate}
 		\item There is a single $0$-level conditionally linear function, which is the $0$ function on $V$.
@@ -1180,7 +1180,7 @@ and $V_{\le k}$, $V_{\ge k}$ are understood to be $V_{<k+1}$ and $V_{>k-1}$, res
 We abbreviate ``conditionally linear'' as \emph{CL}. Operationally, an $\ell$-level CL function first applies $L_1$ to $x^{V_1}$; conditioned on the value $x^{L_1}$ it selects a register subspace $V_2$ and a linear map $L_2$ and applies $L_2$ to $x^{V_2}$; and so on, finally outputting $\sum_{k=1}^{\ell} x^{L_k}$. Every $1$-level CL function is linear, and conversely every linear map on $V$ is a $1$-level CL function. Moreover, for every $\ell \ge 1$ the collection of $\ell$-level CL functions contains the collection of $(\ell-1)$-level CL functions.
 
 \begin{definition}[Conditionally linear distributions]\label{def:cl-dist}
-	\uses{def:cl-func}
+	\lean{MIPStarRE.QPBT.clDistribution}\uses{def:cl-func}
 	Let $L, R \colon V \to V$ be conditionally linear functions. The \emph{conditionally linear distribution $\mu_{L,R}$ corresponding to $(L,R)$} is the distribution over pairs $(L(x), R(x)) \in V \times V$ for $x$ drawn uniformly at random from $V$.
 \end{definition}
 
@@ -1266,8 +1266,8 @@ The marginal functions, factor spaces, and linear maps of a given CL function $L
 \end{proof}
 
 % Formalization-support nodes.  The five statements below are not results of the source
-% article; each isolates one register-bookkeeping step of the Lean proofs of the lemmas
-% above, and is recorded here so that those proofs remain traceable.
+% article; each isolates one identity about restricting to, or summing over, registers
+% used in the Lean proofs of the lemmas above, so that those proofs remain traceable.
 \begin{lemma}[Formalization support for restriction to a subregister]\label{lem:cl-restriction-idem}
 	\lean{MIPStarRE.QPBT.coordinateRestriction_coordinateRestriction}
 	\leanok
@@ -1359,11 +1359,11 @@ The question distribution of the Pauli basis test is \emph{typed}: each question
 	This is identical to the uniform distribution over ordered pairs $(u,v) \in U \times U$ such that $\{u,v\} \in E$: each edge that is not a self-loop contributes two ordered pairs, and each self-loop contributes one, whence the normalization $2m-k$.
 \end{definition}
 
-\begin{lemma}[Total mass of the graph distribution]\label{lem:graph-distribution-mass}
+\begin{lemma}[Formalization support for normalization of the graph distribution]\label{lem:graph-distribution-mass}
 	\lean{MIPStarRE.QPBT.graphDistribution_isProbability}
 	\leanok
 	\uses{def:graph-distribution}
-	Let $G = (U, E)$ be an undirected graph with nonempty edge set $E$. Then the graph distribution $\mu_G$ of Definition~\ref{def:graph-distribution} has total mass one, that is, $\sum_{(u,v) \in U \times U} \mu_G(u,v) = 1$.
+	This is not a named statement of the source article; it records the normalization of the graph distribution of Definition~\ref{def:graph-distribution}, which the source leaves implicit. Let $G = (U, E)$ be an undirected graph with nonempty edge set $E$. Then the graph distribution $\mu_G$ has total mass one, that is, $\sum_{(u,v) \in U \times U} \mu_G(u,v) = 1$.
 \end{lemma}
 \begin{proof}
 	\leanok

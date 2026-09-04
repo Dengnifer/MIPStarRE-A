@@ -12,10 +12,14 @@ built on that predicate lives in
 
 ## References
 
-The source-facing nodes are `def:cl-func`, `def:cl-dist`, `lem:cl-concat`, and
-`def:graph-distribution` in `blueprint/src/chapter/ch12_qpbt_games.tex:1168-1360`.
+The source-facing nodes are `def:cl-func`
+(`blueprint/src/chapter/ch12_qpbt_games.tex:1168-1178`), `def:cl-dist`
+(`ch12_qpbt_games.tex:1182-1185`), `lem:cl-concat`
+(`ch12_qpbt_games.tex:1218-1232`), and `def:graph-distribution`
+(`ch12_qpbt_games.tex:1348-1360`).
 The paper origins are
-`references/qpbt-paper/05_conditionally_linear_functions.tex:35-57,282-314`
+`references/qpbt-paper/05_conditionally_linear_functions.tex:35-57,282-314`,
+`references/qpbt-paper/07_types.tex:65-82`,
 and `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1010`.
 -/
 
@@ -223,8 +227,9 @@ private theorem CondLinearTerm.liftRight_supportedOn {K ιU ιV : Type*}
       rw [← hsets]
       exact ih (fun i => y (.inr i)) (hrest (fun i => y (.inr i)))
 
-/-- Append a family of right-coordinate terms after a left-coordinate term,
-while recording the prefix accumulated by the preceding left levels. -/
+/-- Concatenate a family of conditionally linear representations on the right
+register with a conditionally linear representation on the left register, while
+recording the prefix accumulated by the preceding left levels. -/
 private def CondLinearTerm.concat {K ιU ιV : Type*} [Field K]
     [Fintype ιU] [DecidableEq ιU] [Fintype ιV] [DecidableEq ιV]
     {ell : ℕ} (rTerm : (ιU → K) → CondLinearTerm K (ι := ιV) ell)
@@ -379,7 +384,8 @@ noncomputable def graphDistribution {T : Type*} [Fintype T] [DecidableEq T]
     (Finset.univ.filter fun ab : T × T => Sym2.mk ab.1 ab.2 ∈ E)
 
 /-- The graph distribution has total mass one whenever its edge set is
-nonempty.  This is `lem:graph-distribution-mass` in
+nonempty.  This is not a named statement of the source article; it is
+`lem:graph-distribution-mass` in
 `blueprint/src/chapter/ch12_qpbt_games.tex:1362-1372`. -/
 theorem graphDistribution_isProbability {T : Type*} [Fintype T] [DecidableEq T]
     (E : Finset (Sym2 T)) (hE : E.Nonempty) :

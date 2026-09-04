@@ -11,9 +11,10 @@ these results build on is in
 
 ## References
 
-The source results are `lem:cl-kth`, `lem:cl-func-prod`, and
-`lem:cl-dist-prod` in `blueprint/src/chapter/ch12_qpbt_games.tex:1189-1266`, with
-paper origin
+The source results are `lem:cl-kth`
+(`blueprint/src/chapter/ch12_qpbt_games.tex:1189-1209`), `lem:cl-func-prod`
+(`ch12_qpbt_games.tex:1238-1249`), and `lem:cl-dist-prod`
+(`ch12_qpbt_games.tex:1256-1261`), with paper origin
 `references/qpbt-paper/05_conditionally_linear_functions.tex:150-379`.
 -/
 
