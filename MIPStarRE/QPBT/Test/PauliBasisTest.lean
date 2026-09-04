@@ -1,5 +1,6 @@
 import MIPStarRE.QPBT.Algebra.LowDegreeCode
 import MIPStarRE.QPBT.Algebra.Pauli
+import MIPStarRE.QPBT.Games.TypedCondLinear
 import MIPStarRE.QPBT.Test.LowDegreeGame
 import MIPStarRE.QPBT.Test.MagicSquare
 
@@ -251,14 +252,38 @@ noncomputable def pauliCL (P : AdmissibleParams) (t : PauliType) :
   | .pair => pauliSharedProjection
   | .ms _ => pauliSharedProjection
 
-/-- Level assertions for the typed Pauli CL maps.  These are Lean-only
-proof obligations corresponding to the prose following `def:pauli-question-distribution`
-(`blueprint/src/chapter/ch13_qpbt_test.tex:285-329`; paper
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1120`).
+/-- Level assertions for the typed Pauli CL maps. These are the component
+obligations in `def:pauli-question-distribution` (blueprint
+`blueprint/src/chapter/ch13_qpbt_test.tex:384-428`; paper
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1084-1113`).
+
+**Unfaithful:** These assertions are not yet derived from
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1084-1113`;
+their proof remains open under issue #180. Elimination: transport the completed
+low-degree representations along the two basis-register embeddings and prove
+the shared projection linear.
 -/
 theorem isCondLinear_pauliCL (P : AdmissibleParams) (t : PauliType) :
     IsCondLinearOn (PauliScalar P) Finset.univ (pauliCLLevel t) (pauliCL P t) := by
   sorry
+
+/-- The Pauli question maps form a typed family of three-level conditionally
+linear functions, after raising each component from the level specified by
+`pauliCLLevel`. This is the family condition in
+`lem:pauli-question-typed-cl`, blueprint `ch13_qpbt_test.tex:430-438`, paper
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1084-1120`.
+
+**Unfaithful:** This proof currently relies on `isCondLinear_pauliCL`, whose
+component representations are not yet derived from
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1084-1113`.
+This is tracked by issue #180. Elimination: prove `isCondLinear_pauliCL` from
+the displayed Pauli maps.
+-/
+theorem isTypedCondLinearFamily_pauliCL (P : AdmissibleParams) :
+    IsTypedCondLinearFamily (PauliScalar P) PauliType 3 (pauliCL P) := by
+  intro t
+  exact IsCondLinearOn.mono_level (isCondLinear_pauliCL P t) (by
+    cases t <;> simp [pauliCLLevel])
 
 /-- A finite edge set for the typed Pauli question graph.  The self-loops and
 the displayed type-incidence families are the graph used by the sampler in

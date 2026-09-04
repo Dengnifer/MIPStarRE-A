@@ -58,6 +58,18 @@ The classical low individual degree game is a two-player game based on the low i
 	The question distribution of $\mathfrak{G}^{\mathrm{ld}}$ is the typed CL distribution obtained as follows: sample a type pair $(t_{\mathrm A}, t_{\mathrm B})$ uniformly from $\mathcal T^{\mathrm{ld}} \times \mathcal T^{\mathrm{ld}}$, sample $z = (u,s,v)$ uniformly from $V$, and send each player $w \in \{\mathrm A,\mathrm B\}$ the question $(t_w, L_{t_w}(z))$.
 \end{definition}
 
+\begin{lemma}[Level of the point map]\label{lem:ld-point-level}
+	\lean{MIPStarRE.QPBT.isCondLinear_ldPointCL}
+	\leanok
+	\uses{def:ld-question-distribution, def:cl-func}
+	Fix $\mathsf{ldparams} = (q,m,d,k)$ as in Definition~\ref{def:ld-game}. The map $L_{\mathsf{Point}}$ of Equation~\eqref{eq:cl-ptf} is a $1$-level conditionally linear function on $V$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:cl-func}
+	The map $L_{\mathsf{Point}}$ is the linear projection onto the point register $V_X$, hence is a $1$-level CL function.
+\end{proof}
+
 \begin{lemma}[Level of the axis-parallel line map]\label{lem:ld-aline-level}
 	\lean{MIPStarRE.QPBT.isCondLinear_ldALineCL}
 	\leanok
@@ -82,16 +94,40 @@ The classical low individual degree game is a two-player game based on the low i
 	$L_{\mathsf{DLine}}$ is the concatenation of the identity on $V_I$, of the family $v \mapsto \pi_{i-1}(v)$ of $1$-level CL functions on $V_V$ indexed by $i = \chi(s)$, and of the family $L^{\mathrm{Ln}}_{v'}$ of $1$-level CL functions on $V_X$ indexed by the pair $(s,v')$; by Lemma~\ref{lem:cl-concat} the concatenation is $1+1+1 = 3$-level conditionally linear.
 \end{proof}
 
-\begin{lemma}[The low-degree question distribution is a typed CL distribution]\label{lem:ld-question-typed-cl}
+\begin{lemma}[Formalization support for the low-degree typed CL family]\label{lem:ld-question-cl-family}
+	\lean{MIPStarRE.QPBT.isTypedCondLinearFamily_ldCL}
+	\leanok
+	\uses{def:typed-cl-functions, lem:cl-level-mono, lem:ld-point-level, lem:ld-aline-level, lem:ld-dline-level}
+	This is not a separately named statement of the source article; it isolates the family condition in Lemma~\ref{lem:ld-question-typed-cl}. For every low-degree type $t \in \mathcal T^{\mathrm{ld}}$, the map $L_t$ of Definition~\ref{def:ld-question-distribution} is a $3$-level CL function. Thus $L = \{L_t\}_{t \in \mathcal T^{\mathrm{ld}}}$ is a finite typed family of $3$-level CL functions.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:cl-level-mono, lem:ld-point-level, lem:ld-aline-level, lem:ld-dline-level}
+	The point, axis-line, and diagonal-line maps have levels $1$, $2$, and $3$, respectively. Raise the first two representations to level $3$ by Lemma~\ref{lem:cl-level-mono}.
+\end{proof}
+
+\begin{lemma}[Formalization support for the low-degree typed distribution equality]\label{lem:ld-question-typed-equality}
 	\lean{MIPStarRE.QPBT.ldQuestionDistribution_eq_typedCL}
 	\leanok
-	\uses{def:ld-question-distribution, def:typed-cl-distributions, def:graph-distribution, lem:ld-aline-level, lem:ld-dline-level}
-	Fix $\mathsf{ldparams} = (q,m,d,k)$ as in Definition~\ref{def:ld-game}, let $L = \{L_t\}_{t \in \mathcal T^{\mathrm{ld}}}$ be the family of Definition~\ref{def:ld-question-distribution}, and let $G^{\mathrm{ld}}$ be the graph on $\mathcal T^{\mathrm{ld}}$ all of whose unordered pairs, self-loops included, are edges. Then the question distribution of $\mathfrak{G}^{\mathrm{ld}}$ is the $(\mathcal T^{\mathrm{ld}}, G^{\mathrm{ld}})$-typed conditionally linear distribution $\mu^{G^{\mathrm{ld}}}_{L,\,L}$ of Definition~\ref{def:typed-cl-distributions}.
+	\uses{def:ld-question-distribution, def:typed-cl-distributions, def:graph-distribution}
+	This is not a separately named statement of the source article; it isolates the distribution equality in Lemma~\ref{lem:ld-question-typed-cl}. For the complete type graph $G^{\mathrm{ld}}$ and the family $L$ of Definition~\ref{def:ld-question-distribution}, the question distribution of $\mathfrak G^{\mathrm{ld}}$ equals $\mu^{G^{\mathrm{ld}}}_{L,L}$.
 \end{lemma}
 \begin{proof}
 	\leanok
 	\uses{def:typed-cl-distributions, def:graph-distribution, def:cl-dist}
-	Every unordered pair of types is an edge of $G^{\mathrm{ld}}$, so the graph distribution $\mu_{G^{\mathrm{ld}}}$ of Definition~\ref{def:graph-distribution} is the uniform distribution on $\mathcal T^{\mathrm{ld}} \times \mathcal T^{\mathrm{ld}}$. For each ordered type pair $(t_{\mathrm A}, t_{\mathrm B})$ the CL distribution $\mu_{L_{t_{\mathrm A}},\, L_{t_{\mathrm B}}}$ is the push-forward of the uniform distribution on $V$ along $z \mapsto \bigl(L_{t_{\mathrm A}}(z), L_{t_{\mathrm B}}(z)\bigr)$. Binding the uniform type pair to these push-forwards and tagging each content with its type is exactly the two-stage sampling procedure of Definition~\ref{def:ld-question-distribution}.
+	The graph distribution of the complete type graph is uniform on $\mathcal T^{\mathrm{ld}} \times \mathcal T^{\mathrm{ld}}$. Conditional on an ordered type pair, both definitions apply the corresponding maps to one common uniform seed in $V$.
+\end{proof}
+
+\begin{lemma}[The low-degree question distribution is a typed CL distribution]\label{lem:ld-question-typed-cl}
+	\lean{MIPStarRE.QPBT.ldQuestionDistribution_isTypedCL}
+	\leanok
+	\uses{def:ld-question-distribution, def:typed-cl-distributions, lem:ld-question-cl-family, lem:ld-question-typed-equality}
+	Fix $\mathsf{ldparams} = (q,m,d,k)$ as in Definition~\ref{def:ld-game}, let $L = \{L_t\}_{t \in \mathcal T^{\mathrm{ld}}}$ be the family of Definition~\ref{def:ld-question-distribution}, and let $G^{\mathrm{ld}}$ be the graph on $\mathcal T^{\mathrm{ld}}$ all of whose unordered pairs, self-loops included, are edges. The family $L$ is a finite $\mathcal T^{\mathrm{ld}}$-typed family of $3$-level conditionally linear functions, and the question distribution of $\mathfrak{G}^{\mathrm{ld}}$ equals the $(\mathcal T^{\mathrm{ld}}, G^{\mathrm{ld}})$-typed conditionally linear distribution $\mu^{G^{\mathrm{ld}}}_{L,\,L}$ of Definition~\ref{def:typed-cl-distributions}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:ld-question-cl-family, lem:ld-question-typed-equality}
+	Combine Lemma~\ref{lem:ld-question-cl-family}, which supplies the typed-family hypothesis, with Lemma~\ref{lem:ld-question-typed-equality}, which identifies the two distributions.
 \end{proof}
 
 The next two lemmas show that the CL functions $L_{\mathsf{Point}}$, $L_{\mathsf{ALine}}$, $L_{\mathsf{DLine}}$ give rise to the axis-parallel and diagonal line-versus-point distributions.
@@ -391,14 +427,34 @@ The Pauli basis test is the quantum low individual degree test of Natarajan and 
 	The question distribution of $\mathfrak{G}^{\mathrm{Pauli}}$ is the typed CL distribution on $\mathcal T^{\mathrm{pauli}} \times V^{\mathrm{pauli}} \times \mathcal T^{\mathrm{pauli}} \times V^{\mathrm{pauli}}$ obtained by sampling the type pair $(t_{\mathrm A}, t_{\mathrm B})$ from the graph distribution $\mu_{G^{\mathrm{pauli}}}$ of Definition~\ref{def:graph-distribution}, that is, uniformly at random among all ordered pairs of types whose underlying unordered pair $\{t_{\mathrm A}, t_{\mathrm B}\}$ is an edge of $G^{\mathrm{pauli}}$, self-loops included; sampling $z \in V^{\mathrm{pauli}}$ uniformly at random; and setting $x_w = L_{t_w}(z)$ for $w \in \{\mathrm A,\mathrm B\}$. Explicitly, if $z = (u_X,u_Z,s,v,r_X,r_Z)$, then a player whose type is $(\mathsf{Point},W)$ receives $u_W$; a player whose type is $(\mathsf{ALine},W)$ receives $(u_0, s)$ with $u_0 = L^{\mathrm{Ln}}_{e_i}(u_W)$ and $i = \chi(s)$; a player whose type is $(\mathsf{DLine},W)$ receives $(u_0, s, v')$ with $i = \chi(s)$, $v' = \pi_{i-1}(v)$, and $u_0 = L^{\mathrm{Ln}}_{v'}(u_W)$; a player whose type lies in $\mathcal T^{\mathrm{ms}} \cup \{\mathsf{Pair}, (\mathsf{Pair},X), (\mathsf{Pair},Z)\}$ receives $(u_X, u_Z, r_X, r_Z)$; and a player whose type is $(\mathsf{Pauli},W)$ receives $0$.
 \end{definition}
 
-\begin{lemma}[The Pauli question distribution is a typed CL distribution]\label{lem:pauli-question-typed-cl}
+\begin{lemma}[Open Pauli typed-family obligation]\label{lem:pauli-question-cl-family-obligation}
+	\lean{MIPStarRE.QPBT.isTypedCondLinearFamily_pauliCL}
+	\uses{def:pauli-question-distribution, def:typed-cl-functions, lem:cl-level-mono}
+	This is not a separately named statement of the source article; it isolates the typed-family condition used in Lemma~\ref{lem:pauli-question-typed-cl}. For every Pauli question type $t \in \mathcal T^{\mathrm{pauli}}$, the map $L_t$ of Definition~\ref{def:pauli-question-distribution} is a $3$-level CL function. Thus $L = \{L_t\}_{t \in \mathcal T^{\mathrm{pauli}}}$ is a finite typed family of $3$-level CL functions. Its Lean proof remains open under issue~\#180: the low-degree representations must be transported into each basis register and the shared projection must be represented as a linear map.
+\end{lemma}
+\begin{proof}
+	\uses{lem:cl-level-mono, lem:ld-point-level, lem:ld-aline-level, lem:ld-dline-level}
+	The five classes of maps in Definition~\ref{def:pauli-question-distribution} have levels $1$, $2$, $3$, $1$, and $0$, respectively. Transport the first three low-degree representations into the selected basis register, represent the shared projection linearly, and raise all component representations to level $3$.
+\end{proof}
+
+\begin{lemma}[Open Pauli typed-distribution equality]\label{lem:pauli-question-typed-equality-obligation}
 	\lean{MIPStarRE.QPBT.pauliQuestionDistribution_eq_typedCL}
 	\uses{def:pauli-question-distribution, def:typed-cl-distributions, def:graph-distribution}
-	Fix an admissible tuple $\mathsf{qldparams} = (q,m,d)$ (Definition~\ref{def:admissible}) and let $L = \{L_t\}_{t \in \mathcal T^{\mathrm{pauli}}}$ be the family of Definition~\ref{def:pauli-question-distribution}. Then the question distribution of $\mathfrak{G}^{\mathrm{Pauli}}_{\mathsf{qldparams}}$ is the $(\mathcal T^{\mathrm{pauli}}, G^{\mathrm{pauli}})$-typed conditionally linear distribution $\mu^{G^{\mathrm{pauli}}}_{L,\,L}$ of Definition~\ref{def:typed-cl-distributions}.
+	This is not a separately named statement of the source article; it isolates the distribution equality used in Lemma~\ref{lem:pauli-question-typed-cl}. For the Pauli type graph $G^{\mathrm{pauli}}$ and the family $L$ of Definition~\ref{def:pauli-question-distribution}, the Pauli question distribution equals $\mu^{G^{\mathrm{pauli}}}_{L,L}$. Its Lean proof remains open under issue~\#180.
 \end{lemma}
 \begin{proof}
 	\uses{def:typed-cl-distributions, def:graph-distribution, def:cl-dist}
-	The type pair is drawn from $\mu_{G^{\mathrm{pauli}}}$ by definition, and for each ordered type pair the content pair is the image of a single uniform $z \in V^{\mathrm{pauli}}$ under the corresponding pair of CL functions, that is, a sample from $\mu_{L_{t_{\mathrm A}},\, L_{t_{\mathrm B}}}$.
+	Identify the uniform sampler on the subtype of ordered Pauli edges with the graph distribution, then unfold the common uniform seed in both definitions.
+\end{proof}
+
+\begin{lemma}[The Pauli question distribution is a typed CL distribution]\label{lem:pauli-question-typed-cl}
+	\lean{MIPStarRE.QPBT.pauliQuestionDistribution_isTypedCL}
+	\uses{def:pauli-question-distribution, def:typed-cl-distributions, lem:pauli-question-cl-family-obligation, lem:pauli-question-typed-equality-obligation}
+	Fix an admissible tuple $\mathsf{qldparams} = (q,m,d)$ (Definition~\ref{def:admissible}) and let $L = \{L_t\}_{t \in \mathcal T^{\mathrm{pauli}}}$ be the family of Definition~\ref{def:pauli-question-distribution}. The family $L$ is a finite $\mathcal T^{\mathrm{pauli}}$-typed family of $3$-level conditionally linear functions, and the question distribution of $\mathfrak{G}^{\mathrm{Pauli}}_{\mathsf{qldparams}}$ equals the $(\mathcal T^{\mathrm{pauli}}, G^{\mathrm{pauli}})$-typed conditionally linear distribution $\mu^{G^{\mathrm{pauli}}}_{L,\,L}$ of Definition~\ref{def:typed-cl-distributions}.
+\end{lemma}
+\begin{proof}
+	\uses{lem:pauli-question-cl-family-obligation, lem:pauli-question-typed-equality-obligation}
+	Combine the common-level family assertion of Lemma~\ref{lem:pauli-question-cl-family-obligation} with the distribution identity of Lemma~\ref{lem:pauli-question-typed-equality-obligation}.
 \end{proof}
 
 \begin{definition}[Win predicate of the Pauli basis test]\label{def:pauli-win-predicate}

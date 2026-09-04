@@ -359,6 +359,34 @@ private theorem coordinateRestriction_direction (P : LdParams) (x : LdSpace P) :
     Finset.mem_image_of_mem _ (Finset.mem_univ j)
   simp [LdSpace.direction, coordinateRestriction, hmem]
 
+/-- Formalization-only auxiliary: the point-register projection as a linear
+map on the ambient low-degree space. -/
+private def ldPointLinear (P : LdParams) :
+    LdSpace P →ₗ[ScalarQ P] LdSpace P where
+  toFun := ldPointCL P
+  map_add' x y := by
+    funext i
+    rcases i with (j | u) | j <;> simp [ldPointCL]
+  map_smul' c x := by
+    funext i
+    rcases i with (j | u) | j <;> simp [ldPointCL]
+
+/-- The point projection is a one-level conditionally linear function. This is
+the level assertion for `L_Point` in `def:ld-question-distribution`, blueprint
+`blueprint/src/chapter/ch13_qpbt_test.tex:34-59`, paper
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:203-207`. -/
+theorem isCondLinear_ldPointCL (P : LdParams) :
+    IsCondLinearOn (ScalarQ P) Finset.univ 1 (ldPointCL P) := by
+  refine ⟨.succ Finset.univ (ldPointLinear P)
+      (fun _ i hi => absurd (Finset.mem_univ i) hi) (fun _ => .zero),
+    ⟨Finset.subset_univ _, fun _ => trivial⟩, ?_⟩
+  funext x
+  have hx : coordinateRestriction (Finset.univ : Finset (LdIndex P)) x = x := by
+    funext i
+    simp [coordinateRestriction]
+  change ldPointCL P (coordinateRestriction Finset.univ x) + 0 = ldPointCL P x
+  rw [hx, add_zero]
+
 /-- Formalization-only auxiliary: a two-level representation of the
 affine-line map as a conditionally linear function. -/
 private noncomputable def ldALineTerm (P : LdParams) :

@@ -72,8 +72,12 @@ private theorem CondLinearTerm.raiseBy_supportedOn {K ι : Type*} [Field K]
   | zero => exact ht
   | succ d ih => exact CondLinearTerm.raiseLevel_supportedOn ih
 
-/-- Conditional linearity is monotone in the number of levels. -/
-private theorem IsCondLinearOn.mono_level {K ι : Type*} [Field K]
+/-- Conditional linearity is monotone in the number of levels: empty linear
+contributions raise an `ell`-level representation to any level `k ≥ ell`.
+This is the containment observation following `def:cl-func`, blueprint
+`blueprint/src/chapter/ch12_qpbt_games.tex:1197`, paper
+`references/qpbt-paper/05_conditionally_linear_functions.tex:124-132`. -/
+theorem IsCondLinearOn.mono_level {K ι : Type*} [Field K]
     [Fintype ι] [DecidableEq ι] {S : Finset ι} {ell k : ℕ}
     {L : (ι → K) → (ι → K)} (hL : IsCondLinearOn K S ell L)
     (h : ell ≤ k) : IsCondLinearOn K S k L := by

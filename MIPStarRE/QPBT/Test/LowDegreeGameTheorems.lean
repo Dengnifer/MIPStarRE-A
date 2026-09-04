@@ -319,9 +319,26 @@ theorem dLinePointDist_prefix_zero (L : LdParams) :
   obtain ⟨s, -, rfl⟩ := Finset.mem_image.mp hsample
   exact LineDesc.diagonal_prefix_zero (dLineDescOf L s.1) rfl
 
+/-- The three low-degree question maps form a typed family of three-level
+conditionally linear functions. The point and axis-line representations are
+raised from levels one and two using monotonicity. This is the family condition
+in `lem:ld-question-typed-cl`, blueprint `ch13_qpbt_test.tex:97-107`, paper
+`references/qpbt-paper/07_types.tex:57-63` and
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:203-237`. -/
+theorem isTypedCondLinearFamily_ldCL (L : LdParams) :
+    IsTypedCondLinearFamily (ScalarQ L) LdType 3 (ldCL L) := by
+  intro t
+  cases t with
+  | point =>
+      exact IsCondLinearOn.mono_level (isCondLinear_ldPointCL L) (by omega)
+  | aline =>
+      exact IsCondLinearOn.mono_level (isCondLinear_ldALineCL L) (by omega)
+  | dline =>
+      exact isCondLinear_ldDLineCL L
+
 /-- The low-degree question sampler is the typed conditionally linear
 distribution on the complete type graph. This is `lem:ld-question-typed-cl`,
-blueprint `ch13_qpbt_test.tex:85-95`, which identifies the sampler with
+blueprint `ch13_qpbt_test.tex:109-119`, which identifies the sampler with
 `def:typed-cl-distributions` (`ch12_qpbt_games.tex:1400-1404`); paper
 `references/qpbt-paper/07_types.tex:84-94`. -/
 theorem ldQuestionDistribution_eq_typedCL (L : LdParams) :
@@ -361,6 +378,19 @@ theorem ldQuestionDistribution_eq_typedCL (L : LdParams) :
     change Distribution.bind (graphDistribution _ hE) _ = _
     rw [hgraph hE, hfamily]
   rw [hleft, hright]
+
+/-- `lem:ld-question-typed-cl`: the low-degree maps form a common-level typed
+conditionally linear family, and their typed distribution is exactly the
+question distribution of the low-degree game. Blueprint
+`ch13_qpbt_test.tex:121-131`, paper
+`references/qpbt-paper/07_types.tex:84-93` and
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:203-243`. -/
+theorem ldQuestionDistribution_isTypedCL (L : LdParams) :
+    IsTypedCondLinearFamily (ScalarQ L) LdType 3 (ldCL L) ∧
+      ldQuestionDistribution L =
+        typedCLDistribution (Finset.univ : Finset (Sym2 LdType)) (by simp)
+          (ldCL L) (ldCL L) := by
+  exact ⟨isTypedCondLinearFamily_ldCL L, ldQuestionDistribution_eq_typedCL L⟩
 
 /-- Bounded multivariate polynomials form a finite set over a finite coefficient
 semiring. This is the finite outcome set required by `def:ld-meas`,

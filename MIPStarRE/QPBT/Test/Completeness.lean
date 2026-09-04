@@ -21,16 +21,45 @@ namespace MIPStarRE.QPBT
 
 noncomputable section
 
-/-- The Pauli question sampler equals the typed conditionally linear distribution
-on the Pauli type graph from `def:typed-cl-distributions`; blueprint
-`ch12_qpbt_games.tex:1377-1382`,
-paper `references/qpbt-paper/07_types.tex:84-94`. -/
+/-- The Pauli question sampler equals the generalized typed distribution on the
+Pauli type graph. This is the distribution-equality obligation supporting
+`lem:pauli-question-typed-cl`, blueprint `ch13_qpbt_test.tex:440-448`, paper
+`references/qpbt-paper/07_types.tex:84-93`.
+
+**Unfaithful:** The equality asserted in
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1115-1120`
+is not yet proved and is tracked by issue #180. Elimination: identify the
+uniform `PauliEdge` sampler with `graphDistribution` and unfold the common-seed
+push-forward in `typedCLDistribution`.
+-/
 theorem pauliQuestionDistribution_eq_typedCL (P : AdmissibleParams) :
     pauliQuestionDistribution P =
       typedCLDistribution pauliEdges (by
         refine ⟨Sym2.mk (.point .X) (.point .X), ?_⟩
         simp [pauliEdges]) (pauliCL P) (pauliCL P) := by
   sorry
+
+/-- `lem:pauli-question-typed-cl`: the Pauli maps form a common-level typed
+conditionally linear family, and their typed distribution is exactly the
+question distribution of the Pauli basis test. Blueprint
+`ch13_qpbt_test.tex:450-458`, paper
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-966,1084-1120`.
+
+**Unfaithful:** This proof currently relies on the open declarations
+`isTypedCondLinearFamily_pauliCL` and
+`pauliQuestionDistribution_eq_typedCL`, which are not yet proved from
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1084-1120`.
+This is tracked by issue #180. Elimination: complete those component family and
+distribution-equality proofs.
+-/
+theorem pauliQuestionDistribution_isTypedCL (P : AdmissibleParams) :
+    IsTypedCondLinearFamily (PauliScalar P) PauliType 3 (pauliCL P) ∧
+      pauliQuestionDistribution P =
+        typedCLDistribution pauliEdges (by
+          refine ⟨Sym2.mk (.point .X) (.point .X), ?_⟩
+          simp [pauliEdges]) (pauliCL P) (pauliCL P) := by
+  exact ⟨isTypedCondLinearFamily_pauliCL P,
+    pauliQuestionDistribution_eq_typedCL P⟩
 
 /-- Symmetry of the Pauli question distribution in the symmetric game appearing
 in `lem:pauli-completeness`. -/
