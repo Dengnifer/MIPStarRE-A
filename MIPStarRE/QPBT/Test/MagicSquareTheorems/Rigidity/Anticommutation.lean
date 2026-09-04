@@ -199,8 +199,11 @@ theorem CloseOn.neg {ι : Type} [Fintype ι] [DecidableEq ι]
     {ψ : EuclideanSpace ℂ ι} {δ : ℝ} {M N : Op ι} (h : CloseOn ψ δ M N) :
     CloseOn ψ δ (-M) (-N) := by
   change ‖applyOperatorToState (-M - -N) ψ‖ ≤ δ
-  rw [show -M - -N = (0 : Op ι) - (M - N) by abel, applyOperatorToState_sub,
-    applyOperatorToState_zero, zero_sub, norm_neg]
+  rw [show -M - -N = -(M - N) by abel]
+  have happ : applyOperatorToState (-(M - N)) ψ = -applyOperatorToState (M - N) ψ := by
+    unfold applyOperatorToState
+    simp only [map_neg, LinearMap.neg_apply]
+  rw [happ, norm_neg]
   exact h
 
 /-- Formalization-only: closeness to a negative is symmetric in the two
