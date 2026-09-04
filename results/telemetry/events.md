@@ -951,3 +951,5 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 - **Hand-back:** to be recorded here and in `stages.jsonl` when the owner
   says so; the codex main session then resumes from `~/.codex/prompts/goal.md`
   plus the #27 log.
+
+- **2026-09-04 budget guard vs merge commits:** a fresh-base merge of main into the 130-line issue-60 branch staged 520 inherited workflow-layer lines and the pre-commit budget refused the merge commit. The operator did not use the owner override; the merge was aborted and a hook fix (exempt merge commits) was filed and landed first, after which the fresh-base merges were redone.
