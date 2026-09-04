@@ -362,7 +362,7 @@ noncomputable def pauliQuestionDistribution (P : AdmissibleParams) :
             (s.1.1.2, pauliCL P s.1.1.2 s.2)))
 
 /-- The finite answer alphabet for the Pauli basis test.  Its constructors are
-the seven answer forms in `def:pauli-win-predicate`, blueprint lines 460-496,
+the seven answer forms in `def:pauli-win-predicate`, blueprint lines 470-506,
 paper origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1126-1225`.
 -/
 inductive PauliAnswer (P : AdmissibleParams) where

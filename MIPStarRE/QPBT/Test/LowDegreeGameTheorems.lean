@@ -249,10 +249,10 @@ theorem isTypedCondLinearFamily_ldCL (L : LdParams) :
 
 /-- The low-degree question sampler equals the distribution that the
 construction of `def:typed-cl-distributions` (`ch12_qpbt_games.tex:1414-1418`)
-produces from the family `ldCL` on the complete type graph. This is the completed
-distribution-identity component of `lem:ld-question-typed-cl`, blueprint
+produces from the family `ldCL` on the complete type graph. This equality is the
+distribution identity in `lem:ld-question-typed-cl`, blueprint
 `ch13_qpbt_test.tex:109-119`; the separate theorem
-`isTypedCondLinearFamily_ldCL` supplies the common-level family assertion. Paper
+`isTypedCondLinearFamily_ldCL` states that the family has a common level. Paper
 `references/qpbt-paper/07_types.tex:84-94`. -/
 theorem ldQuestionDistribution_eq_typedCL (L : LdParams) :
     ldQuestionDistribution L =

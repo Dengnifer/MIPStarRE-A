@@ -19,8 +19,8 @@ namespace MIPStarRE.QPBT
 open MIPStarRE.LDT
 
 /-- A typed family whose member at every type is `ell`-level conditionally
-linear. This predicate generalizes `def:typed-cl-functions` by permitting an
-arbitrary type `T`; concrete source-facing uses supply a finite type. Blueprint
+linear. Finiteness of the index type is not needed for this pointwise condition;
+it is required when the family indexes a typed distribution. Blueprint
 `ch12_qpbt_games.tex:1370-1374`, paper
 `references/qpbt-paper/07_types.tex:57-63`. -/
 def IsTypedCondLinearFamily (K T : Type*) [Field K]

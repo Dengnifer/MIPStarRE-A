@@ -66,7 +66,7 @@ The classical low individual degree game is a two-player game based on the low i
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{def:cl-func}
+	\uses{def:ld-question-distribution, def:cl-func}
 	The map $L_{\mathsf{Point}}$ is the linear projection onto the point register $V_X$, hence is a $1$-level CL function.
 \end{proof}
 
@@ -114,7 +114,7 @@ The classical low individual degree game is a two-player game based on the low i
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{def:ld-question-distribution, def:typed-cl-distributions, def:graph-distribution, def:cl-dist}
+	\uses{def:ld-question-distribution, def:typed-cl-distributions, def:graph-distribution, def:cl-dist, lem:distribution-map-comp, lem:uniform-bind-map}
 	Every unordered pair of types is an edge of $G^{\mathrm{ld}}$, so the graph distribution $\mu_{G^{\mathrm{ld}}}$ of Definition~\ref{def:graph-distribution} is uniform on $\mathcal T^{\mathrm{ld}} \times \mathcal T^{\mathrm{ld}}$. For each ordered type pair $(t_{\mathrm A}, t_{\mathrm B})$, the CL distribution $\mu_{L_{t_{\mathrm A}},\, L_{t_{\mathrm B}}}$ is the push-forward of the uniform distribution on $V$ along $z \mapsto \bigl(L_{t_{\mathrm A}}(z), L_{t_{\mathrm B}}(z)\bigr)$. Binding the uniform type pair to these push-forwards and tagging each content with its type is exactly the two-stage sampling procedure of Definition~\ref{def:ld-question-distribution}.
 \end{proof}
 
@@ -429,7 +429,7 @@ The Pauli basis test is the quantum low individual degree test of Natarajan and 
 
 \begin{lemma}[Conditionally linear Pauli question maps]\label{lem:pauli-question-cl-components}
 	\lean{MIPStarRE.QPBT.isCondLinear_pauliCL}
-	\uses{def:pauli-question-distribution, def:typed-cl-functions}
+	\uses{def:pauli-question-distribution, def:cl-func}
 	For every Pauli question type $t \in \mathcal T^{\mathrm{pauli}}$, the map $L_t$ of Definition~\ref{def:pauli-question-distribution} is conditionally linear. Its levels are $1$ for the point maps, $2$ for the axis-parallel line maps, $3$ for the diagonal line maps, $1$ for the shared projection maps, and $0$ for the Pauli maps.
 \end{lemma}
 \begin{proof}
