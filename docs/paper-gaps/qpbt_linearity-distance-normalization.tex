@@ -187,14 +187,43 @@ counterexample.%
 \leanid{stateDepDistSq} in
 \doclink{MIPStarRE/QPBT/Combining/Linearity.lean}.}
 
+The mathematical content of the theorem is nevertheless available in the
+correct normalization.  The stability theorem
+\leanid{exists\_exact\_boolean\_representation} assumes the mean squared
+state-dependent multiplicative defect
+\[
+  \mathbb E_{a,b}\, d_\rho\big(A(a)A(b), A(a+b)\big)^2 \le \eta
+\]
+and produces an ancillary space, a unit vector $\ket{\mathrm{anc}}$ in it and
+an exactly linear family $\{\mathcal A(a)\}$ of binary observables with
+$\mathbb E_a\, d_{\rho'}(\mathcal A(a), A(a)\otimes\Id)^2 \le \eta$, where
+$\rho' = \rho \otimes \ket{\mathrm{anc}}\bra{\mathrm{anc}}$.
+Its bound rests on an identity rather than an inequality:
+\leanid{avg\_stateDepDistSq\_roundedObservable\_eq\_avg\_multiplicativeDefect}
+proves that the two averages above coincide, both being $2-2C$ for the
+two-query correlation
+$C = \mathbb E_{a,b}\Re\tr(A(a)A(b)A(a+b)\rho)$ of the linearity test.%
+\footnote{Both declarations are in
+\doclink{MIPStarRE/QPBT/Combining/Linearity/Stability.lean}; the blueprint
+records them as \texttt{lem:boolean-representation-stability}.}
+The source hypothesis $C \ge 1-\delta$ is therefore exactly the hypothesis of
+the stability theorem with $\eta = 2\delta$, and the theorem then yields the
+mean squared state-dependent operator distance bound $2\delta$: the corrected
+conclusion identified above, with no restriction on $\delta$ and no commutation
+assumption on the $A(a)$.  This reparameterization is the entire
+content of the repair, so the corrected source-facing statement is obtained
+from \leanid{exists\_exact\_boolean\_representation} by substituting
+$\eta = 2\delta$.
+
 The Boolean Fourier foundation keeps the state-dependent operator distance
 unchanged and adds the separately named binary-measurement distance together
 with equations~\eqref{eq:normalization}--\eqref{eq:binary-correlation}.  It
 does not advertise the current source-labelled theorem as proved.  The
 statement repair should change the conclusion either to mean squared
 binary-measurement distance at most $\delta$ or to mean squared
-state-dependent operator distance at most $2\delta$, and synchronize the
-blueprint at the same time.%
+state-dependent operator distance at most $2\delta$, deriving the latter from
+the stability theorem by the reparameterization just described, and
+synchronize the blueprint at the same time.%
 \footnote{The normalization investigation is tracked in
 \ghissue{124}; the source-facing statement repair is assigned to
 \ghissue{129}.}
