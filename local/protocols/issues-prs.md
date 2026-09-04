@@ -18,6 +18,16 @@ repository (`list-labels`, paginated), so `local/labels.yml` is retired and a
 label absent from GitHub is reported, never invented. Briefs (the design record
 per issue) live in `local/briefs/`: agent input, not lifecycle state.
 
+Prerequisites between issues are **GitHub issue dependencies**
+(`GET`/`POST …/issues/{n}/dependencies/blocked_by`), one edge per prerequisite.
+The edge is retained even when the prerequisite closes, so reopening it restores the block.
+A prerequisite carried by a pull request is the packet issue that PR closes. The
+"Dependencies" bullets in an issue body are commentary on those edges, never
+the record. A packet is **ready** when it is an open leaf of the tracker tree
+and every issue blocking it is closed; `local/bin/ready_packets.py` computes
+that list, and the operator launches lanes from it rather than from a
+hand-kept order or a dependency table in a comment (EVOLUTION.md 2026-09-04).
+
 Every GitHub call goes through `local/bin/gh_common.py` — a module for Python
 callers, and for the shell scripts a CLI (`pr-view`, `post-status`,
 `latest-statuses`, `ensure-pr-comment`, `post-review`, `merge-pr`,
