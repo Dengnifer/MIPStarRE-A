@@ -18,7 +18,8 @@ open scoped BigOperators MatrixOrder Matrix ComplexOrder
 
 namespace MIPStarRE.QPBT
 
-open MIPStarRE.LDT MIPStarRE.Quantum
+open MIPStarRE.LDT hiding Measurement
+open MIPStarRE.Quantum
 
 /-- The ordered product
 `G^k_{g_k} ... G^1_{g_1} ... G^k_{g_k}` of `lem:ld-sandwich`.
