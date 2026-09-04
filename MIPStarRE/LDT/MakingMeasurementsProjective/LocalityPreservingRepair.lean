@@ -81,8 +81,9 @@ private lemma leftMarginalDensity_nonneg {ιA ιB : Type*}
   simpa [leftMarginalDensity] using smul_nonneg hcoeff hsum
 
 /-- The local state on the left factor defined by the left marginal density
-of a bipartite state. This is the formalization-only definition recorded by
-`def:left-marginal-state` in `blueprint/src/chapter/ch04_projective.tex`. -/
+of a bipartite state. This formalization-only definition supports
+`leftLiftedProjectivizationRepair` and
+`MIPStarRE.QPBT.projective_rounding_with_explicit_constant`. -/
 def leftMarginalState {ιA ιB : Type*}
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB] [Nonempty ιB]
     (ψ : QuantumState (ιA × ιB)) : QuantumState ιA where
@@ -148,33 +149,45 @@ private lemma normalizedTrace_leftMarginalDensity_mul_eq
   simp [Fintype.card_prod]
   ring
 
-/-- The left marginal of a normalized bipartite state is normalized. This is
-formalization support for `lem:locality-preserving-projectivization` and
-`lem:ortho-explicit-constant`, recorded by `lem:left-marginal-state-normalization`. -/
+/-- The complex normalized trace of a local operator is preserved by passage to
+the left marginal. This formalization-only identity supports
+`leftLiftedProjectivizationRepair` and
+`MIPStarRE.QPBT.projective_rounding_with_explicit_constant`. -/
+lemma normalizedTrace_leftMarginalState_density_mul_eq
+    {ιA ιB : Type*}
+    [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB] [Nonempty ιB]
+    (ψ : QuantumState (ιA × ιB)) (X : MIPStarRE.Quantum.Op ιA) :
+    MIPStarRE.Quantum.normalizedTrace ((leftMarginalState ψ).density * X) =
+      MIPStarRE.Quantum.normalizedTrace (ψ.density * leftTensor (ι₂ := ιB) X) := by
+  simpa [leftMarginalState] using
+    normalizedTrace_leftMarginalDensity_mul_eq (ρ := ψ.density) (X := X)
+
+/-- The left marginal of a normalized bipartite state is normalized. This
+formalization-only lemma supports `leftLiftedProjectivizationRepair` and
+`MIPStarRE.QPBT.projective_rounding_with_explicit_constant`. -/
 lemma leftMarginalState_isNormalized {ιA ιB : Type*}
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB] [Nonempty ιB]
     {ψ : QuantumState (ιA × ιB)} (hψ : ψ.IsNormalized) :
     (leftMarginalState ψ).IsNormalized := by
   unfold QuantumState.IsNormalized
   have hnorm :
-      MIPStarRE.Quantum.normalizedTrace (leftMarginalDensity ψ.density) =
+      MIPStarRE.Quantum.normalizedTrace (leftMarginalState ψ).density =
         MIPStarRE.Quantum.normalizedTrace ψ.density := by
     simpa [leftTensor_one] using
-      normalizedTrace_leftMarginalDensity_mul_eq (ρ := ψ.density)
+      normalizedTrace_leftMarginalState_density_mul_eq (ψ := ψ)
         (X := (1 : MIPStarRE.Quantum.Op ιA))
-  simpa [leftMarginalState] using hnorm.trans hψ
+  exact hnorm.trans hψ
 
 /-- Local evaluation in the left marginal equals bipartite evaluation of the
-left tensor placement. This is the formalization-only identity recorded by
-`lem:left-marginal-state-evaluation` in Chapter 4 of the blueprint. -/
+left tensor placement. This formalization-only identity supports
+`leftLiftedProjectivizationRepair` and
+`MIPStarRE.QPBT.projective_rounding_with_explicit_constant`. -/
 lemma leftMarginal_ev_eq {ιA ιB : Type*}
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB] [Nonempty ιB]
     (ψ : QuantumState (ιA × ιB)) (X : MIPStarRE.Quantum.Op ιA) :
     ev ψ (leftTensor (ι₂ := ιB) X) = ev (leftMarginalState ψ) X := by
-  unfold ev
-  rw [← Complex.ofReal_inj]
-  simp [normalizedTrace_leftMarginalDensity_mul_eq (ρ := ψ.density) (X := X),
-    leftMarginalState]
+  simpa [ev] using congrArg Complex.re
+    (normalizedTrace_leftMarginalState_density_mul_eq (ψ := ψ) (X := X)).symm
 
 private def rightDiagBlock {ιA ιB : Type*}
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
@@ -326,8 +339,9 @@ private lemma one_le_orthonormalizationMainLemmaError_of_quarter_lt {ζ : Error}
   exact hone.trans hscaled
 
 /-- A finite complex matrix of rank zero is the zero matrix. This
-formalization-only linear-algebra fact is recorded by `lem:matrix-rank-zero`
-in Chapter 4 of the blueprint. -/
+formalization-only linear-algebra lemma supports the zero-rank alternatives in
+`leftLiftedProjectivizationRepair` and
+`MIPStarRE.QPBT.projective_rounding_with_explicit_constant`. -/
 lemma matrix_eq_zero_of_rank_eq_zero {m n : Type*}
     [Finite m] [Fintype n] (A : Matrix m n ℂ) (hA : A.rank = 0) :
     A = 0 := by

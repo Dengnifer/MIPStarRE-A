@@ -369,11 +369,15 @@
 	\uses{lem:projective-non-measurement, lem:projective-low-rank-sum,
 		lem:xa-t, lem:qa-restated, lem:X-squared, lem:X-hat-squared,
 		lem:X-times-X-hat, lem:squared-difference, lem:P-projectivity, lem:P-Q-approx,
-		prop:triangle-inequality-for-approx_delta}
+		prop:triangle-inequality-for-approx_delta, def:left-marginal-state,
+		lem:left-marginal-state-evaluation, lem:left-marginal-state-normalization,
+		lem:matrix-rank-zero}
 	Pass to the left marginal state, apply the rank-reduction and
 	$Q/X/\widehat X/P$ construction there, and transport the resulting
 	$\approx_{84\zeta^{1/4}}$ estimate back to left lifts via the left-marginal
-	expectation formula.
+	expectation formula. If the rank-sum space is empty, every rank-reduced effect
+	has rank zero; Lemma~\ref{lem:matrix-rank-zero} then identifies the family
+	with the zero projective sub-measurement, which gives the alternative branch.
 \end{proof}
 
 \begin{proposition}[Measurement-level orthogonalization from consistency]\label{prop:orthonormalization-measurement-of-consistency}
@@ -1484,7 +1488,7 @@ Lemma~\ref{lem:ortho-explicit-constant}.
 
 \begin{lemma}[Formalization support for marginal evaluation]
 	\label{lem:left-marginal-state-evaluation}
-	\lean{MIPStarRE.LDT.MakingMeasurementsProjective.leftMarginal_ev_eq}
+	\lean{MIPStarRE.LDT.MakingMeasurementsProjective.normalizedTrace_leftMarginalState_density_mul_eq, MIPStarRE.LDT.MakingMeasurementsProjective.leftMarginal_ev_eq}
 	\leanok
 	\uses{def:left-marginal-state}
 	For every operator $X$ on $\hilb_{\mathsf A}$,
@@ -1492,6 +1496,8 @@ Lemma~\ref{lem:ortho-explicit-constant}.
 		\operatorname{Tr}_{\mathrm{norm}}\!\bigl(\rho(X\ot\Id_{\mathsf B})\bigr)
 		= \operatorname{Tr}_{\mathrm{norm}}\!\bigl(\rho_{\mathsf A}X\bigr).
 	\]
+	Taking real parts gives the corresponding equality of state evaluations used
+	to transport squared distances between the bipartite and marginal states.
 \end{lemma}
 \begin{proof}
 	\leanok
@@ -1503,12 +1509,13 @@ Lemma~\ref{lem:ortho-explicit-constant}.
 	\label{lem:left-marginal-state-normalization}
 	\lean{MIPStarRE.LDT.MakingMeasurementsProjective.leftMarginalState_isNormalized}
 	\leanok
-	\uses{def:left-marginal-state, lem:left-marginal-state-evaluation}
+	\uses{def:left-marginal-state}
 	If $\rho$ is normalized, then its normalized left marginal
 	$\rho_{\mathsf A}$ is normalized as well.
 \end{lemma}
 \begin{proof}
 	\leanok
+	\uses{lem:left-marginal-state-evaluation}
 	Take $X=\Id_{\mathsf A}$ in the marginal-evaluation identity and use the
 	normalization of $\rho$.
 \end{proof}
