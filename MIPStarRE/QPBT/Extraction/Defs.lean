@@ -183,7 +183,7 @@ noncomputable def bracketOp {α β ι : Type*} [Fintype α] [DecidableEq β]
 /-- The effect of a postprocessed measurement is the corresponding
 coarse-grained operator sum. This equality is used by `def:bracket` and
 `def:tau-dot-product-projector`, blueprint
-`ch12_qpbt_games.tex:8-26` and `ch16_qpbt_extraction.tex:85-93`. -/
+`ch12_qpbt_games.tex:28-41` and `ch16_qpbt_extraction.tex:85-93`. -/
 theorem postprocess_effect_eq_bracketOp {α β ι : Type*}
     [Fintype α] [DecidableEq α] [Fintype β] [DecidableEq β]
     [Fintype ι] [DecidableEq ι] (M : Measurement α ι) (f : α → β) (b : β) :
