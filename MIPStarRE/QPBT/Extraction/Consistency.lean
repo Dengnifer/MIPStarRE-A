@@ -39,8 +39,8 @@ This is Equation `eq:qld-sg-cons` of
 `14_analysis_of_the_pauli_basis_test.tex:1609-1635`.
 
 The source absorbs constant factors and the game error into `deltaS`. Here
-`deltaG` is the raw global-witness error, and `deltaConstructPaulis` records
-that enlargement explicitly.
+`deltaG` is the global polynomial-pair witness error, and
+`deltaConstructPaulis` records that enlargement explicitly.
 
 **Proof obligation:** issue #47 tracks the agreement calculation converting
 `GlobalPairWitness.point_consistent_alice`, its Bob-side counterpart, and the
@@ -149,8 +149,8 @@ of Item 1 in `lem:qld-construct-the-paulis`, blueprint
 `14_analysis_of_the_pauli_basis_test.tex:1463-1492`.
 
 The source reuses `deltaS` after absorbing the non-encoding and game-error
-terms. The Lean conclusion keeps the raw witness error `deltaG` separate in
-`deltaConstructPaulis`.
+terms. The bound keeps the global polynomial-pair witness error `deltaG`
+separate in `deltaConstructPaulis`.
 
 **Proof obligation:** issue #47 tracks the non-encoding-mass estimate required
 by the restricted decoder identity; see

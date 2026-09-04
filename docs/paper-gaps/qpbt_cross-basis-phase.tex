@@ -33,7 +33,7 @@
 
 \section{Key theorem forms}
 
-Let $e_1,\ldots,e_t$ be the fixed self-dual basis of $\mathbb F_q$ over
+Let $e_0,\ldots,e_{t-1}$ be the fixed self-dual basis of $\mathbb F_q$ over
 $\mathbb F_2$.  With the phase convention of the source, generalized Pauli
 observables satisfy
 \[
@@ -83,12 +83,22 @@ statement.
 
 \section{Blueprint and formalization status}
 
-The discussion following the product-form calculation in
-\path{blueprint/src/chapter/ch16_qpbt_extraction.tex}, lines~69--95, records
-the full phase and notes that the false dichotomy is not used later in the
-extraction argument.  A formal theorem may therefore retain the mathematically
-correct uniform phase relation with a \textbf{Local fix} marker.  It must not
-assert exact commutation merely from $j\neq j'$.
+Equation~\path{eq:tildew-twisted-commutation} and
+Remark~\path{rem:qld-cross-phase} in
+\path{blueprint/src/chapter/ch16_qpbt_extraction.tex} record the full phase and
+note that the false dichotomy is not used later in the extraction argument.
+The declaration \path{tildeObs_twisted_commutation} in
+\path{MIPStarRE/QPBT/Extraction/Observables.lean} quantifies
+$j,j'$ over the zero-based type
+$\operatorname{Fin}(\texttt{P.model.basisDim})$ and concludes exactly the
+uniform phase relation displayed above.  Its docstring carries the required
+\textbf{Local fix} marker.  Thus the Lean statement agrees with the corrected
+blueprint and deliberately differs from the false cross-basis commutation
+claim in the paper; it introduces no extra hypothesis.
+
+The declaration is present but its proof remains open.  Issue~\#19 owns the
+Stage~4.2 statement and this discrepancy record; \ghissue{47} owns the
+Stage~4.3 proof from the product form and generalized Pauli commutation.
 
 This correction changes neither the definition of the extracted observables
 nor the source-faithful consistency and extraction conclusions.  It repairs an

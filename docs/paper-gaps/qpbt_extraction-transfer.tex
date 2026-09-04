@@ -118,14 +118,30 @@ residual assumption, or hypothesis of the source-labelled soundness theorem.
 
 \section{Blueprint and formalization status}
 
-The proof of the extraction lemma in
-\path{blueprint/src/chapter/ch16_qpbt_extraction.tex}, lines~267--274, uses the
-correct positive-contraction estimate and explicit small-error convention.
-Lines~299--330 isolate the range projection and give the transfer strategy.
-The chapter therefore preserves the source's state and observable conclusions
-while exposing the missing argument.  Stage~4.2 should provide only the
-concrete extraction data and comparison theorems; the range-projection lemma
-belongs to Stage~4.3.
+The proof of Lemma~\path{lem:qld-unitary} and the soundness proof in
+\path{blueprint/src/chapter/ch16_qpbt_extraction.tex} use the corrected
+positive-contraction estimate, make the small-error case distinction explicit,
+and isolate the range-projection calculation.  The chapter therefore preserves
+the source's state and observable conclusions while exposing the omitted
+argument.
+
+The structure \path{ExtractionWitness} in
+\path{MIPStarRE/QPBT/Extraction/Unitary.lean} contains only the two-sided
+unitarity equations for the concrete swap maps, a normalized auxiliary state,
+the transformed-state estimate, and the two-player Pauli-projector comparison.
+The theorem \path{exists_extractionWitness} concludes the existence of this
+data at the explicit extraction scale from the projective strategy and its
+\path{GlobalPairWitness}; it assumes no range-projection transfer, bridge, or
+residual package.  Thus these declarations match the Stage~4.2 extraction
+lemma, including the corrected numerical estimates, but do not formalize the
+later passage to the isometries in the soundness theorem.  No declaration yet
+states that passage.
+
+Issue~\#19 owns this concrete Stage~4.2 interface and discrepancy record.
+\ghissue{47} owns the Stage~4.3 proof of
+\path{exists_extractionWitness} and the separate range-projection theorem
+needed by \path{pauli_soundness}; that theorem must be derived from the
+concrete data rather than stored in the witness.
 
 \section{Conclusion}
 

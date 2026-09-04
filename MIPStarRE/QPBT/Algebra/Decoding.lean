@@ -5,8 +5,9 @@ import MIPStarRE.QPBT.Combining.Defs
 
 This module provides the Chapter 16 decoder on the Chapter 15 bounded
 polynomial representative type.  The generic retained-value decoder and its
-raw polynomial specialization live in `Algebra/LowDegreeCodeTheorems`; this
-module supplies the exact `Poly`-facing names used by the extraction chapter.
+specialization to polynomial representatives live in
+`Algebra/LowDegreeCodeTheorems`; this module states the corresponding maps on
+`Poly P` used in the extraction chapter.
 
 ## References
 
@@ -26,11 +27,10 @@ open MIPStarRE.LDT MIPStarRE.LDT.Preliminaries
 
 /-! ## Representative evaluation and decoding -/
 
-/-- Evaluate the underlying representative carried by `Poly P`.
+/-- Evaluate the polynomial representative carried by `Poly P`.
 
-This is a Lean-only helper corresponding to polynomial evaluation in the
-source's `\ideg_{d,m}(\F_q)` carrier.  It does not quotient representatives by
-functional equality and introduces no second polynomial carrier. -/
+This is polynomial evaluation on the source's `\ideg_{d,m}(\F_q)` carrier.  It
+does not identify representatives that induce the same polynomial function. -/
 noncomputable def evalPoly {P : AdmissibleParams} (g : Poly P)
     (x : Fin P.m → PauliScalar P) : PauliScalar P :=
   MvPolynomial.eval x g.1
@@ -49,18 +49,18 @@ noncomputable def decodeOn {P : AdmissibleParams}
 The retained-value set is `Finset.univ`, so every field value is kept.  This
 choice is the correction recorded in
 `docs/paper-gaps/qpbt_decoding-identity.tex:87-123`. -/
-noncomputable abbrev decodeOn_univ {P : AdmissibleParams} (g : Poly P) :
+noncomputable abbrev decodeOnUniv {P : AdmissibleParams} (g : Poly P) :
     PauliRegister P :=
   decodeOn (Finset.univ : Finset (PauliScalar P)) g
 
 /-- The full-field decoder `\operatorname{Dec}_{\F_q}` on `Poly P`.
 
-The previous algebra layer's raw representative name is `decodeFqRep`; this
-exact `Poly`-facing name is kept here so Chapter 16 does not expose the
-underlying subtype projection. -/
+The map `decodeFqRep` has the same definition on arbitrary polynomial
+representatives; `decodeFq` restricts its domain to the bounded-degree class
+`Poly P`. -/
 noncomputable abbrev decodeFq {P : AdmissibleParams} (g : Poly P) :
     PauliRegister P :=
-  decodeOn_univ g
+  decodeOnUniv g
 
 /-! ## The encoding image -/
 
@@ -80,10 +80,9 @@ theorem lowDegreeEncoding_mem_poly {P : AdmissibleParams}
       MIPStarRE.LDT.Preliminaries.polyFunc P.m (PauliScalar P) P.d := by
   sorry
 
-/-- Package the multilinear encoding as the Chapter 15 representative type.
+/-- The multilinear encoding as a bounded polynomial representative.
 
-This constructor is only a subtype wrapper around `lowDegreeEncoding`; its
-degree proof is isolated in `lowDegreeEncoding_mem_poly`. -/
+The individual-degree bound is supplied by `lowDegreeEncoding_mem_poly`. -/
 noncomputable def encodingPoly {P : AdmissibleParams} (h : PauliRegister P) :
     Poly P :=
   ⟨lowDegreeEncoding h, lowDegreeEncoding_mem_poly h⟩

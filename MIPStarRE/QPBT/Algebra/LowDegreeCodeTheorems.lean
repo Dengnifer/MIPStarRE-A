@@ -4,9 +4,9 @@ import MIPStarRE.QPBT.Algebra.LowDegreeCode
 
 This file supplies `def:decoding-map` and the Boolean cube embedding from
 `blueprint/src/chapter/ch11_qpbt_algebra.tex:445-455`, paper
-`references/qpbt-paper/04_preliminaries.tex:917-924`.  The raw polynomial
-specialization is named `decodeFqRep`; the Chapter 16 `Poly` API is kept in
-`Algebra/Decoding`.
+`references/qpbt-paper/04_preliminaries.tex:917-924`.  The specialization to
+polynomial representatives is `decodeFqRep`; its restriction to the bounded
+class `Poly` is defined in `Algebra/Decoding`.
 -/
 
 open scoped BigOperators

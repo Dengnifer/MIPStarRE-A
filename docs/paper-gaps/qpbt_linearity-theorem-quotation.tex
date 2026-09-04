@@ -97,14 +97,28 @@ or to the source's eventual combined-measurement conclusion.
 
 \section{Blueprint and formalization status}
 
-The blueprint records the averaged theorem form and the common-ancilla
-obligation in
-\path{blueprint/src/chapter/ch15_qpbt_combining.tex}, lines~82--180.  No
-source-labelled Lean theorem should assert pointwise closeness or a common
-auxiliary space until that finite-family reduction has been proved.
-The chapter-16 extraction statements may consume the resulting global-pair
-witness once the reduction is discharged; they must not assume a new
-fiberwise linearity hypothesis.
+Theorem~\path{thm:linearity} and
+Remark~\path{rem:linearity-import} in
+\path{blueprint/src/chapter/ch15_qpbt_combining.tex} record respectively the
+averaged provider theorem and the common-ancilla obligation for its fiberwise
+use.  The relevant material is at lines~98--147 and 149--191 of that chapter.
+
+The declaration \path{exists_exactly_linear_observables} in
+\path{MIPStarRE/QPBT/Combining/Linearity.lean} assumes a nonnegative defect, a
+positive semidefinite trace-one operator, binary observables, and the averaged
+three-observable correlation.  It returns one finite ancillary space and
+normalized ancillary vector for that family, exactly linear binary observables
+on the extension, and only the averaged squared-distance bound with the same
+defect.  It neither assumes $\delta\leq1$ nor asserts pointwise closeness.  Its
+statement therefore matches the provider-faithful blueprint theorem rather
+than the strengthened quotation in the QPBT paper.  Its proof remains open,
+and no Lean declaration yet supplies the finite common-extension construction
+for the family indexed by $(x,z)$.
+
+Issue~\#19 introduced this discrepancy record for the extraction skeleton;
+\ghissue{47} owns the Stage~4.3 proof work consumed downstream.  The chapter-16
+extraction declarations consume the concrete \path{GlobalPairWitness}; they
+do not assume a new fiberwise linearity hypothesis or a common ancillary space.
 
 \section{Conclusion}
 

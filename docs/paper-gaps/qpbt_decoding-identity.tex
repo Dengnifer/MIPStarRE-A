@@ -107,13 +107,32 @@ $\operatorname{Dec}(g_h)=h$ are needed
 
 \section{Blueprint and formalization status}
 
-The decoding-identity remark and the proof of the pulled-apart consistency
-lemma in
-\path{blueprint/src/chapter/ch16_qpbt_extraction.tex} state the restricted
-identity and isolate the non-encoding-mass estimate.  The Lean API should
-therefore require encoding membership at every use of the dot-product
-evaluation theorem.  No unrestricted theorem, residual assumption, or witness
-field is source-faithful.
+Definition~\path{def:qld-full-field-decoder} and
+Lemmas~\path{lem:qld-decoder-linearity} and
+\path{lem:qld-decoder-evaluation} in
+\path{blueprint/src/chapter/ch16_qpbt_extraction.tex} state the full-field
+decoder, its linearity and inverse, and the evaluation identity restricted to
+encoding outcomes.  Lemma~\path{lem:qld-nonencoding-mass-bound}
+separately records the estimate on the remaining outcomes.
+
+The declarations \path{decodeFq_add}, \path{decodeFq_smul}, and
+\path{decodeFq_lowDegreeEncoding} in
+\path{MIPStarRE/QPBT/Algebra/Decoding.lean} match the three algebraic assertions.
+In the same file, \path{IsEncoding} is the equality
+$g_{\operatorname{Dec}(g)}=g$ of polynomial representatives, and
+\path{decodeFq_dotProduct_indicatorVec} requires an explicit hypothesis
+of that predicate.  It therefore matches the corrected evaluation lemma and
+does not assert the false unrestricted identity.  Finally,
+\path{nonencodingMarginalMass_le} in
+\path{MIPStarRE/QPBT/Extraction/Consistency.lean} concludes the complementary
+mass bound from the projective strategy and global polynomial-pair witness; it
+does not add the bound as a witness field or theorem hypothesis.
+
+These proposition-valued declarations are present with open proofs.  Issue~\#19
+owns their Stage~4.2 statements and this discrepancy record; \ghissue{47} owns
+the Stage~4.3 decoder calculations and non-encoding support estimate.  No
+unrestricted theorem, residual assumption, or additional witness field is
+source-faithful.
 
 \section{Conclusion}
 

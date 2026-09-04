@@ -15,8 +15,9 @@ placements. The generalized Pauli projectors use the field and basis fixed by
 The extraction witness formalizes `lem:qld-unitary` in
 `blueprint/src/chapter/ch16_qpbt_extraction.tex:295-314`, from
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1666-1860`.
-The error-form comparison records `rem:pauli-robustness-form`, blueprint lines
-380-385 and paper lines 1855-1858 and 1868-1876.
+The error-form comparison formalizes `lem:qld-extraction-error-form` and
+supports `rem:pauli-robustness-form` in the blueprint; its paper source is
+lines 1855-1858 and 1868-1876.
 -/
 
 open scoped BigOperators Matrix
@@ -103,9 +104,9 @@ of `thm:pauli`: when `deltaG` has the form
 `deltaQld a b epsilon m d q`, the result is bounded by another member of that
 family after decreasing the exponent and enlarging the universal constant.
 
-This is the named quantitative obligation behind
-`rem:pauli-robustness-form`, blueprint
-`ch16_qpbt_extraction.tex:380-385`, and the concluding comparison at paper
+This is `lem:qld-extraction-error-form` in the blueprint and the named
+quantitative obligation behind `rem:pauli-robustness-form`; the concluding
+paper comparison is at
 `14_analysis_of_the_pauli_basis_test.tex:1855-1858,1868-1876`.
 
 **Proof obligation:** issue #47 tracks this real-power estimate. Discharge:

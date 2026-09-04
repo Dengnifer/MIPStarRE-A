@@ -3,8 +3,8 @@ import MIPStarRE.QPBT.Observables.ExpandedDefs
 /-!
 # Extraction foundations
 
-This module supplies the witness-independent register bookkeeping used to pull
-the Pauli measurements apart. It retains the distinct local spaces of a
+This module defines the register identifications used to pull the Pauli
+measurements apart. It retains the distinct local spaces of a
 heterogeneous strategy, coarse-grains the generalized Pauli projectors by a
 dot product, and records the state and error expressions needed by the later
 extraction witness.
@@ -53,7 +53,7 @@ paper `14_analysis_of_the_pauli_basis_test.tex:1666-1685`. -/
 abbrev ExtractionAuxRegisters (P : AdmissibleParams) (ιA ιB : Type*) :=
   (ιA × PauliRegister P) × (ιB × PauliRegister P)
 
-/-- Reassociate the landed six-register order with the two extraction blocks.
+/-- Reassociate the six-register order with the two extraction blocks.
 This equivalence identifies the register order in paper
 `14_analysis_of_the_pauli_basis_test.tex:1429-1435,1687-1713`. -/
 def sixRegExtractionEquiv (P : AdmissibleParams) (ιA ιB : Type*) :
@@ -65,8 +65,8 @@ def sixRegExtractionEquiv (P : AdmissibleParams) (ιA ιB : Type*) :
   left_inv p := by cases p; rfl
   right_inv p := by cases p; rfl
 
-/-- Shuffle `AA'BB' | A''B''` into the landed six-register order. This is
-Lean-only bookkeeping for the ideal state in `lem:qld-unitary`, blueprint
+/-- Shuffle `AA'BB' | A''B''` into the six-register order. This equivalence
+places the ideal state in the order used in `lem:qld-unitary`, blueprint
 `ch16_qpbt_extraction.tex:245-260`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1666-1685`. -/
 def extractionIdealShuffle (P : AdmissibleParams) (ιA ιB : Type*) :
@@ -101,8 +101,8 @@ noncomputable def placeSide (S : ProjectiveSetting P ε) (side : PlayerSide)
         (heteroKron 1 O)
 
 /-- Lift an operator on a player's original strategy register to that player's
-full extraction block. This is Lean-only support for the raw Pauli and point
-measurements in `lem:qld-construct-the-paulis` and `lem:qld-unitary`, blueprint
+full extraction block. This places the Pauli and point measurements appearing
+in `lem:qld-construct-the-paulis` and `lem:qld-unitary`, blueprint
 `ch16_qpbt_extraction.tex:105-124,245-260`. -/
 noncomputable def onPlayer (S : ProjectiveSetting P ε) (side : PlayerSide)
     (O : Op (S.LocalSpace side)) :
@@ -110,8 +110,7 @@ noncomputable def onPlayer (S : ProjectiveSetting P ε) (side : PlayerSide)
   heteroKron (heteroKron O 1) 1
 
 /-- Place an operator on the original strategy register of the selected
-player. This helper uses the landed `ProjectiveSetting.place` API and is
-Lean-only support for the player-side conclusions of `lem:qld-unitary`,
+player. This is the player-side placement used in `lem:qld-unitary`,
 blueprint `ch16_qpbt_extraction.tex:245-260`. -/
 noncomputable def placePlayer (S : ProjectiveSetting P ε) (side : PlayerSide)
     (O : Op (S.LocalSpace side)) :
@@ -121,8 +120,8 @@ noncomputable def placePlayer (S : ProjectiveSetting P ε) (side : PlayerSide)
   | bob => exact S.place .BB' (heteroKron O 1)
 
 /-- Place an operator on the selected extracted register `A''` or `B''`.
-The unused strategy register in the landed crossed placement is assigned the
-identity. This is Lean-only support for the ideal Pauli operators in
+The unused strategy register in the crossed placement is assigned the
+identity. This is the placement of the ideal Pauli operators in
 `lem:qld-unitary`, blueprint `ch16_qpbt_extraction.tex:245-260`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1666-1685`. -/
 noncomputable def placeExtractedRegister (S : ProjectiveSetting P ε)
@@ -135,7 +134,7 @@ noncomputable def placeExtractedRegister (S : ProjectiveSetting P ε)
       exact S.place .AB'' (heteroKron (1 : Op S.toStrategy.ιA) O)
 
 /-- Place a pair of block operators simultaneously on `AA'A''` and
-`BB'B''`. This is Lean-only support for the transformed state in
+`BB'B''`. This is the simultaneous placement used for the transformed state in
 `lem:qld-unitary`, blueprint `ch16_qpbt_extraction.tex:245-260`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1666-1685`. -/
 noncomputable def placeBoth (S : ProjectiveSetting P ε)
@@ -157,7 +156,7 @@ noncomputable def applyBoth (S : ProjectiveSetting P ε)
     EuclideanSpace ℂ (SixReg P S.toStrategy.ιA S.toStrategy.ιB) :=
   applyOperatorToState (S.placeBoth VA VB) ψ
 
-/-- The state `aux tensor EPR_q^{tensor M}` in the landed six-register order.
+/-- The state `aux tensor EPR_q^{tensor M}` in the six-register order.
 This is the ideal state in Item 1 of `lem:qld-unitary`, blueprint
 `ch16_qpbt_extraction.tex:245-260`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1666-1685`. -/
@@ -227,8 +226,8 @@ theorem sum_tauDotProj_eq_one {P : AdmissibleParams} (W : PauliKind)
 
 /-! ## Conjugation and extraction error -/
 
-/-- Conjugation of an operator by a square matrix. This is Lean-only notation
-for the exact conjugation equations in `lem:v-swap-conjugation`, blueprint
+/-- Conjugation of an operator by a square matrix, as used in the exact
+conjugation equations in `lem:v-swap-conjugation`, blueprint
 `ch16_qpbt_extraction.tex:216-230`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1687-1713`. -/
 noncomputable def conjBy {ι : Type*} [Fintype ι]
@@ -236,8 +235,8 @@ noncomputable def conjBy {ι : Type*} [Fintype ι]
   V * N * Vᴴ
 
 /-- The common error scale for constructing the pulled-apart measurements from
-a global polynomial-pair witness. Here `deltaG` is the raw consistency error of
-the global witness. The remaining terms record the point-measurement transfer
+a global polynomial-pair witness. Here `deltaG` is its consistency error. The
+remaining terms record the point-measurement transfer
 and the Schwartz--Zippel loss; when `0 ≤ epsilon ≤ 1`, `sqrt epsilon` also
 dominates terms of order `epsilon`.
 
