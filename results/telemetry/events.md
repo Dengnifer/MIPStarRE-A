@@ -2285,3 +2285,17 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 - **Fix:** no merge occurred and no changes were lost. Paused the merge path to
   identify and use the documented non-destructive telemetry/persona flush
   workflow, then will rerun the full preflight.
+
+## 2026-09-04 11:55Z - hand-tracked packet dependencies (owner session)
+
+- Symptom: for most of 2026-09-04 the operator launched lanes by reading the dependency tables on #47 and packet bodies by hand; several ready packets sat unlaunched for 30-90 min after their prerequisites merged (codex under 5 of 7 slots at 07:45Z and 10:50Z; see owner-log). Four packets (#122, #126, #146, #156) had no parent in the #47 tree.
+- Diagnosis (owner-audits/issue-tree-study-20260904.md): the upstream tree encodes containment and roll-up only; GitHub issue dependencies (blocked_by) are available on this repository and unused.
+- Change: #159 - chapter/chain parents under #47, blocked_by edges transcribed from the prose prerequisites, local/bin/ready_packets.py; protocol clause in issues-prs.md; EVOLUTION entry in the PR.
+
+## 2026-09-04 — Operator hand-back: codex main session resumes from the owner session
+
+- **Trigger:** owner decision (2026-09-04T13:03:08Z): the owner's Claude 5-hour window is nearly used; the
+  owner session returns at 14:50Z. Mode 2 ran since 2026-09-03 23:11Z with the merge daemon,
+  stacked lanes and the Opus/codex prover pools; Mode 1 resumes from /tmp/qpbt-main-handoff.md
+  (archived under results/telemetry/owner-messages/).
+- **State at hand-back:** main at 4eaf968; open PRs: 171,170,169,162,161,160,158,155,154,153,152,151,150,149.
