@@ -53,8 +53,9 @@ blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:441-463`, paper origin
 def coordinateRestriction (S : Finset ι) (x : ι → K) : ι → K :=
   fun i => if i ∈ S then x i else 0
 
-/-- Evaluation of a conditionally-linear syntax term.  Lean-only support for
-`def:cl-func`, blueprint `ch12_qpbt_games.tex:453-463`, paper origin
+/-- Evaluation of a representation of a conditionally linear function.
+Lean-only support for `def:cl-func`, blueprint
+`ch12_qpbt_games.tex:453-463`, paper origin
 `references/qpbt-paper/05_conditionally_linear_functions.tex:35-57`.
 -/
 def CondLinearTerm.eval {ι : Type*} [Fintype ι] [DecidableEq ι]
@@ -66,8 +67,8 @@ def CondLinearTerm.eval {ι : Type*} [Fintype ι] [DecidableEq ι]
         let x₁ := coordinateRestriction S₁ x
         L₁ x₁ + CondLinearTerm.eval (rest (L₁ x₁)) x
 
-/-- The support invariant for a conditionally-linear syntax term.  This is a
-Lean-only companion to `def:cl-func`, blueprint
+/-- The support invariant for a representation of a conditionally linear
+function.  This is a Lean-only companion to `def:cl-func`, blueprint
 `blueprint/src/chapter/ch12_qpbt_games.tex:453-463`, paper origin
 `references/qpbt-paper/05_conditionally_linear_functions.tex:35-57`.
 -/
@@ -97,9 +98,9 @@ def IsCondLinearOn (K : Type*) [Field K] {ι : Type*} [Fintype ι]
 def IsCondLinear (ell : ℕ) (L : (ι → K) → (ι → K)) : Prop :=
   IsCondLinearOn K Finset.univ ell L
 
-/-- The zero conditionally-linear syntax term at an arbitrary level.  This is
-formalization-only support for totalizing families whose source index is a
-range. -/
+/-- The zero conditionally linear function at every level, used to extend the
+family `R u` from the image `L(U)` to all indices in the concatenation
+construction of `lem:cl-concat`. -/
 private def CondLinearTerm.zeroOfLevel {K ι : Type*} [Field K]
     [Fintype ι] [DecidableEq ι] : (ell : ℕ) → CondLinearTerm K (ι := ι) ell
   | 0 => .zero
@@ -136,7 +137,7 @@ private theorem CondLinearTerm.supportedOn_mono {K ι : Type*} [Field K]
       refine ⟨hS₁.trans hST, fun y => ih y (hrest y) ?_⟩
       exact Finset.sdiff_subset_sdiff hST (fun _ h => h)
 
-/-- Lift a linear map to the left coordinates of a sum type. -/
+/-- Lift a linear map to the left summand of a direct sum of registers. -/
 private def condLinearLiftLeft {K ιU ιV : Type*} [Field K]
     (L : (ιU → K) →ₗ[K] (ιU → K)) :
     (ιU ⊕ ιV → K) →ₗ[K] (ιU ⊕ ιV → K) where
@@ -152,7 +153,7 @@ private def condLinearLiftLeft {K ιU ιV : Type*} [Field K]
     | inl i => exact congrFun (L.map_smul c _) i
     | inr i => simp
 
-/-- Lift a linear map to the right coordinates of a sum type. -/
+/-- Lift a linear map to the right summand of a direct sum of registers. -/
 private def condLinearLiftRight {K ιU ιV : Type*} [Field K]
     (L : (ιV → K) →ₗ[K] (ιV → K)) :
     (ιU ⊕ ιV → K) →ₗ[K] (ιU ⊕ ιV → K) where
@@ -168,8 +169,8 @@ private def condLinearLiftRight {K ιU ιV : Type*} [Field K]
     | inl i => simp
     | inr i => exact congrFun (L.map_smul c _) i
 
-/-- Lift a conditionally-linear syntax term to the right coordinates of a sum
-type. -/
+/-- Lift a representation of a conditionally linear function to the right
+summand of a direct sum of registers. -/
 private def CondLinearTerm.liftRight {K ιU ιV : Type*} [Field K]
     [Fintype ιU] [DecidableEq ιU] [Fintype ιV] [DecidableEq ιV] :
     {ell : ℕ} → CondLinearTerm K (ι := ιV) ell →
@@ -287,7 +288,9 @@ private theorem CondLinearTerm.concat_supportedOn {K ιU ιV : Type*} [Field K]
         cases i <;> simp
       simpa only [hsets] using hrec
 
-/-- The evaluation of a supported syntax term vanishes off its register. -/
+/-- A representation of a conditionally linear function supported on a register
+takes values that vanish off that register.  This is a formalization-only
+auxiliary for `lem:cl-dist-prod`, blueprint `lem:cl-supported-vanishing`. -/
 theorem CondLinearTerm.eval_eq_zero_of_not_mem {K ι : Type*} [Field K]
     [Fintype ι] [DecidableEq ι] {ell : ℕ}
     {t : CondLinearTerm K (ι := ι) ell} {S : Finset ι}
@@ -303,7 +306,8 @@ theorem CondLinearTerm.eval_eq_zero_of_not_mem {K ι : Type*} [Field K]
       rw [ih _ (hrest _) (fun haDiff => ha (Finset.mem_sdiff.mp haDiff).1)]
       exact zero_add 0
 
-/-- A supported syntax term depends only on the coordinates in its register. -/
+/-- A supported representation of a conditionally linear function depends only
+on the coordinates in its register. -/
 private theorem CondLinearTerm.eval_congr_of_eq_on {K ι : Type*} [Field K]
     [Fintype ι] [DecidableEq ι] {ell : ℕ}
     {t : CondLinearTerm K (ι := ι) ell} {S : Finset ι}
@@ -322,7 +326,10 @@ private theorem CondLinearTerm.eval_congr_of_eq_on {K ι : Type*} [Field K]
       simp only [CondLinearTerm.eval, hrestrict]
       rw [ih _ (hrest _) (fun a ha => hxy a (Finset.mem_sdiff.mp ha).1)]
 
-/-- Restricting the input to a term's support does not change its value. -/
+/-- Restricting the input to the register supporting a conditionally linear
+function does not change its value.  This is a formalization-only auxiliary
+for `lem:cl-func-prod` and `lem:cl-dist-prod`, blueprint
+`lem:cl-supported-restriction`. -/
 theorem CondLinearTerm.eval_coordinateRestriction {K ι : Type*} [Field K]
     [Fintype ι] [DecidableEq ι] {ell : ℕ}
     {t : CondLinearTerm K (ι := ι) ell} {S : Finset ι}
@@ -332,7 +339,9 @@ theorem CondLinearTerm.eval_coordinateRestriction {K ι : Type*} [Field K]
     simp [coordinateRestriction, ha]
 
 /-- Restricting first to a larger register does not affect a subsequent
-restriction to a smaller register. -/
+restriction to a smaller register.  This is a formalization-only auxiliary
+for `lem:cl-kth` and `lem:cl-func-prod`, blueprint
+`lem:cl-restriction-idem`. -/
 theorem coordinateRestriction_coordinateRestriction {K ι : Type*} [Field K]
     [DecidableEq ι] {S T : Finset ι} (hST : S ⊆ T) (x : ι → K) :
     coordinateRestriction S (coordinateRestriction T x) = coordinateRestriction S x := by
@@ -342,7 +351,9 @@ theorem coordinateRestriction_coordinateRestriction {K ι : Type*} [Field K]
   · simp [coordinateRestriction, ha]
 
 /-- In a register partition, restricting a sum of supported vectors selects
-the corresponding summand. -/
+the corresponding summand.  This is a formalization-only auxiliary for
+`lem:cl-func-prod` and `lem:cl-dist-prod`, blueprint
+`lem:cl-restriction-sum`. -/
 theorem coordinateRestriction_sum_eq {K ι J : Type*} [Field K]
     [DecidableEq ι] [Fintype J]
     (V : J → Finset ι) (hDisjoint : ∀ i j, i ≠ j → Disjoint (V i) (V j))
@@ -436,8 +447,8 @@ private def condLinearHeadSum {K ι J : Type*} [Field K]
     ext b
     by_cases hb : b ∈ (t j).headSupport <;> simp [coordinateRestriction, hb]
 
-/-- Combine equal-level conditionally-linear syntax terms on disjoint
-registers. -/
+/-- Combine equal-level representations of conditionally linear functions on
+disjoint registers. -/
 private def CondLinearTerm.directSum {K ι J : Type*} [Field K]
     [Fintype ι] [DecidableEq ι] [Fintype J] [DecidableEq J]
     (V : J → Finset ι) :
@@ -612,7 +623,9 @@ private theorem CondLinearTerm.eval_directSum {K ι J : Type*} [Field K]
               exact (hcomponent j).symm
 
 /-- Equal-level direct sums of maps on disjoint registers are conditionally
-linear on the union of those registers. -/
+linear on the union of those registers.  This is a formalization-only
+auxiliary for `lem:cl-func-prod`, blueprint
+`lem:cl-func-prod-same-level`. -/
 theorem IsCondLinearOn.directSum_sameLevel {K ι J : Type*} [Field K]
     [Fintype ι] [DecidableEq ι] [Fintype J]
     (V : J → Finset ι) (ell : ℕ) (L : J → (ι → K) → (ι → K))
@@ -660,7 +673,7 @@ def condLinearConcat {ιU ιV : Type*} [Fintype ιU] [DecidableEq ιU]
 Concatenating an outer and an indexed inner CL map adds their levels.  This is
 `lem:cl-concat` in `blueprint/src/chapter/ch12_qpbt_games.tex:548-559`, with
 paper origin `references/qpbt-paper/05_conditionally_linear_functions.tex:282-314`.
-The sum-type coordinate bookkeeping is represented by `condLinearConcat`.
+The map `condLinearConcat` realizes this concatenation on the direct sum.
 -/
 theorem IsCondLinearOn.concat {ιU ιV : Type*} [Fintype ιU] [DecidableEq ιU]
     [Fintype ιV] [DecidableEq ιV] {ell k : ℕ}
@@ -706,9 +719,9 @@ theorem IsCondLinearOn.concat {ιU ιV : Type*} [Fintype ιU] [DecidableEq ιU]
     rfl
 
 /--
-The graph distribution samples an ordered endpoint pair whose unordered edge
-`s(a,b)` lies in `E`, including self-loops.  It is the inlined graph sampler of
-`def:graph-distribution` in `blueprint/src/chapter/ch12_qpbt_games.tex:553-563`;
+The graph distribution is uniform on ordered pairs `(a, b)` whose unordered
+pair belongs to `E`, including self-loops.  This is `def:graph-distribution`
+in `blueprint/src/chapter/ch12_qpbt_games.tex:679-691`;
 paper origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:984-1009`.
 The underlying graph-distribution definition is
 `references/qpbt-paper/07_types.tex:65-82`.
@@ -718,7 +731,9 @@ noncomputable def graphDistribution {T : Type*} [Fintype T] [DecidableEq T]
   Distribution.uniformOnFinset
     (Finset.univ.filter fun ab : T × T => Sym2.mk ab.1 ab.2 ∈ E)
 
-/-- The graph sampler has unit mass whenever its edge set is nonempty. -/
+/-- The graph distribution has total mass one whenever its edge set is
+nonempty.  This is `lem:graph-distribution-mass` in
+`blueprint/src/chapter/ch12_qpbt_games.tex:693-698`. -/
 theorem graphDistribution_isProbability {T : Type*} [Fintype T] [DecidableEq T]
     (E : Finset (Sym2 T)) (hE : E.Nonempty) :
     (graphDistribution E hE).IsProbability := by

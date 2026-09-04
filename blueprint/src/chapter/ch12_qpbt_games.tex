@@ -540,7 +540,7 @@ Note that both players' questions are generated from the \emph{same} uniformly r
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{def:cl-func}
+	\uses{def:cl-func, lem:cl-restriction-idem}
 	For the ``if'' direction, conditions 1 and 4 immediately exhibit $L$ as an $\ell$-level CL function. For the ``only if'' direction one constructs the marginals, factor spaces, and linear maps by induction on $\ell$. In the base case $\ell = 1$ take $L_{\le 1} = L$, $V_1 = V$, and $L_1 = L$. For the inductive step, write $L(x) = x^{L_1} + L_{>1,\,x^{L_1}}(x^{V_{>1}})$ as in Definition~\ref{def:cl-func} and apply the inductive hypothesis to each $(\ell-1)$-level function $L_{>1,\,v}$, obtaining its marginals, factor spaces, and linear maps over $V_{>1}$. Define $L_{\le 1} = L_1$ with first factor space $V_1$, and for $k \ge 2$ define $L_{\le k}(x) = x^{L_1} + L'_{x^{L_1},\,<k}(x^{V_{>1}})$, with the $k$-th factor space and linear map of $L$ with prefix $u$ given by those of $L_{>1,\,v}$ at index $k-1$ with prefix $w$, where $v = u^{V_1}$ and $w = u^{V_{>1}}$. Conditions 1--4 are then verified directly from the inductive hypothesis: the direct-sum decomposition of $V_{>1}$ extends to $V$ by adjoining $V_1$, and the sum formula for $L_{\le k}$ follows by unfolding the inductive marginals.
 \end{proof}
 
@@ -580,7 +580,7 @@ The marginal functions, factor spaces, and linear maps of a given CL function $L
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{def:cl-func}
+	\uses{def:cl-func, lem:cl-func-prod-same-level}
 	Since an $\ell$-level CL function is also $k$-level conditionally linear for all $k \ge \ell$, it suffices to prove the claim when $\ell_j = \ell$ for all $j$. Proceed by induction on $\ell$. For $\ell = 0$ every $L^{(j)}$ is the zero function on $V^{(j)}$, so $L$ is the zero function on $V$, which is the unique $0$-level CL function on $V$ (Definition~\ref{def:cl-func}). For the inductive step with $\ell \ge 1$, decompose each $L^{(j)}$ into its first-level linear part $L^{(j)}_1$ on $V^{(j)}_1$ and its family of $(\ell-1)$-level remainders $L^{(j)}_{>1,\,v_j}$ on $V^{(j)}_{>1}$. The direct sums of the first-level parts define a linear map on $V_1 = \bigoplus_j V^{(j)}_1$, and, for each prefix value $v = \sum_j v_j$, the direct sums of the remainders are $(\ell-1)$-level conditionally linear on $V_{>1} = \bigoplus_j V^{(j)}_{>1}$ by the induction hypothesis. This exhibits $L$ in the form required by Definition~\ref{def:cl-func}.
 \end{proof}
 
@@ -592,7 +592,69 @@ The marginal functions, factor spaces, and linear maps of a given CL function $L
 \end{lemma}
 \begin{proof}
 	\leanok
+	\uses{lem:cl-supported-vanishing, lem:cl-supported-restriction, lem:cl-restriction-sum}
 	A uniformly random $x \in V$ has independent components $x^{(i)}$, each uniformly distributed in $V^{(i)}$. Hence the pair $(L(x), R(x)) = \bigl( (L^{(i)}(x^{(i)}))_{i=1}^m,\, (R^{(i)}(x^{(i)}))_{i=1}^m \bigr)$ is distributed exactly as the product of the distributions $\mu_{L^{(i)},\,R^{(i)}}$ for $i = 1, 2, \dots, m$.
+\end{proof}
+
+% Formalization-support nodes.  The five statements below are not results of the source
+% article; each isolates one register-bookkeeping step of the Lean proofs of the lemmas
+% above, and is recorded here so that those proofs remain traceable.
+\begin{lemma}[Formalization support for restriction to a subregister]\label{lem:cl-restriction-idem}
+	\lean{MIPStarRE.QPBT.coordinateRestriction_coordinateRestriction}
+	\leanok
+	\uses{def:register-subspace}
+	This is not a named statement of the source article; it isolates a step used in the Lean proofs of Lemma~\ref{lem:cl-kth} and Lemma~\ref{lem:cl-func-prod}. Let $S$ and $S'$ be register subspaces of $V$ with $S \subseteq S'$. Then $(x^{S'})^S = x^S$ for every $x \in V$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	The two sides agree coordinatewise: a coordinate of $S$ is retained by both restrictions, since $S \subseteq S'$, and a coordinate outside $S$ is set to zero by both.
+\end{proof}
+
+\begin{lemma}[Formalization support for restricting a sum to one register]\label{lem:cl-restriction-sum}
+	\lean{MIPStarRE.QPBT.coordinateRestriction_sum_eq}
+	\leanok
+	\uses{def:register-subspace}
+	This is not a named statement of the source article; it isolates a step used in the Lean proofs of Lemma~\ref{lem:cl-func-prod} and Lemma~\ref{lem:cl-dist-prod}. Let $V^{(1)}, \dots, V^{(m)}$ be pairwise disjoint register subspaces of $V$ and, for each $j$, let $f_j \in V$ vanish outside $V^{(j)}$. Then $\bigl( \sum_{i=1}^m f_i \bigr)^{V^{(j)}} = f_j$ for every $j$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	On a coordinate of $V^{(j)}$ every summand $f_i$ with $i \neq j$ vanishes, by disjointness, so the sum agrees there with $f_j$; outside $V^{(j)}$ both sides vanish.
+\end{proof}
+
+\begin{lemma}[Formalization support for the values of a supported CL function]\label{lem:cl-supported-vanishing}
+	\lean{MIPStarRE.QPBT.CondLinearTerm.eval_eq_zero_of_not_mem}
+	\leanok
+	\uses{def:cl-func, def:register-subspace}
+	This is not a named statement of the source article; it isolates a step used in the Lean proof of Lemma~\ref{lem:cl-dist-prod}. Let $S$ be a register subspace of $V$ and let $L$ be a CL function on $V$ all of whose factor spaces are contained in $S$. Then $L(x) \in S$ for every $x \in V$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:cl-func}
+	Induction on the level of $L$. The $0$-level function is the zero function. At level $\ell \ge 1$ we have $L(x) = x^{L_1} + L_{>1,\,x^{L_1}}(x^{V_{>1}})$, where the first summand lies in $V_1 \subseteq S$ and the second lies in $S$ by the induction hypothesis, the factor spaces of $L_{>1,\,x^{L_1}}$ being contained in $S$ as well.
+\end{proof}
+
+\begin{lemma}[Formalization support for the arguments of a supported CL function]\label{lem:cl-supported-restriction}
+	\lean{MIPStarRE.QPBT.CondLinearTerm.eval_coordinateRestriction}
+	\leanok
+	\uses{def:cl-func, def:register-subspace}
+	This is not a named statement of the source article; it isolates a step used in the Lean proofs of Lemma~\ref{lem:cl-func-prod} and Lemma~\ref{lem:cl-dist-prod}. Let $S$ be a register subspace of $V$ and let $L$ be a CL function on $V$ all of whose factor spaces are contained in $S$. Then $L(x^S) = L(x)$ for every $x \in V$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:cl-func}
+	Induction on the level of $L$: the value of $L$ depends on $x$ only through the projections of $x$ onto the factor spaces of $L$, and $x^S$ and $x$ have the same projection onto every register subspace contained in $S$.
+\end{proof}
+
+\begin{lemma}[Formalization support for equal-level direct sums]\label{lem:cl-func-prod-same-level}
+	\lean{MIPStarRE.QPBT.IsCondLinearOn.directSum_sameLevel}
+	\leanok
+	\uses{def:cl-func, def:register-subspace}
+	This is not a named statement of the source article; it is the equal-level case of Lemma~\ref{lem:cl-func-prod}, isolated because the Lean proof of that lemma first raises every level $\ell_j$ to $\ell = \max_j \ell_j$. Let $V^{(1)}, \dots, V^{(m)}$ be pairwise disjoint register subspaces of $V$ and, for each $j$, let $L^{(j)}$ be an $\ell$-level CL function on $V^{(j)}$. Then the function $x \mapsto \sum_{j=1}^m L^{(j)}(x^{V^{(j)}})$ is an $\ell$-level CL function on $\bigoplus_{j=1}^m V^{(j)}$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:cl-func, lem:cl-restriction-idem, lem:cl-restriction-sum, lem:cl-supported-restriction}
+	Induction on $\ell$, as in the proof of Lemma~\ref{lem:cl-func-prod}: at level $0$ every summand is the zero function, and at level $\ell \ge 1$ the first-level linear maps combine to a linear map on $\bigoplus_j V^{(j)}_1$ while, for each prefix value, the remainders combine to an $(\ell-1)$-level CL function by the induction hypothesis. Identifying the restriction of the common input to each register $V^{(j)}$ with the input of the $j$-th summand uses Lemma~\ref{lem:cl-restriction-idem}, Lemma~\ref{lem:cl-restriction-sum}, and Lemma~\ref{lem:cl-supported-restriction}.
 \end{proof}
 
 \section{Typed conditionally linear distributions}
@@ -615,7 +677,7 @@ The question distribution of the Pauli basis test is \emph{typed}: each question
 % normalization 1/(2m-k) below is undefined. The source
 % (references/qpbt-paper/07_types.tex:65-82) leaves this boundary hypothesis implicit.
 \begin{definition}[Graph distribution]\label{def:graph-distribution}
-	\lean{MIPStarRE.QPBT.graphDistribution, MIPStarRE.QPBT.graphDistribution_isProbability}
+	\lean{MIPStarRE.QPBT.graphDistribution}
 	\leanok
 	Let $G = (U, E)$ be an undirected graph with vertex set $U$ and nonempty edge set $E$. Edges in $E$ are written as multisets $\{u, v\}$ of two vertices; the case $u = v$ represents a self-loop. Suppose there are $m \ge 1$ edges, $k$ of which are self-loops. Then the \emph{graph distribution $\mu_G$ of $G$} is the distribution over $U \times U$ such that for every $(u,v) \in U \times U$,
 	\[
@@ -627,6 +689,18 @@ The question distribution of the Pauli basis test is \emph{typed}: each question
 	\]
 	This is identical to the uniform distribution over ordered pairs $(u,v) \in U \times U$ such that $\{u,v\} \in E$: each edge that is not a self-loop contributes two ordered pairs, and each self-loop contributes one, whence the normalization $2m-k$.
 \end{definition}
+
+\begin{lemma}[Total mass of the graph distribution]\label{lem:graph-distribution-mass}
+	\lean{MIPStarRE.QPBT.graphDistribution_isProbability}
+	\leanok
+	\uses{def:graph-distribution}
+	Let $G = (U, E)$ be an undirected graph with nonempty edge set $E$. Then the graph distribution $\mu_G$ of Definition~\ref{def:graph-distribution} has total mass one, that is, $\sum_{(u,v) \in U \times U} \mu_G(u,v) = 1$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:graph-distribution}
+	The distribution $\mu_G$ is uniform on the set of ordered pairs $(u,v) \in U \times U$ with $\{u,v\} \in E$, and that set is nonempty because $E$ is: an edge $\{u,v\} \in E$ yields the ordered pair $(u,v)$. A uniform distribution on a nonempty finite set has total mass one.
+\end{proof}
 
 % The nonempty-edge hypothesis on G is inherited from def:graph-distribution, where it is
 % needed for the graph distribution mu_G to be defined; the source

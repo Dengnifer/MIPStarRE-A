@@ -20,7 +20,8 @@ namespace MIPStarRE.QPBT
 
 open MIPStarRE.LDT
 
-/-- Add one empty first stage to a conditionally-linear syntax term. -/
+/-- Add one empty first stage to a representation of a conditionally linear
+function. -/
 private def CondLinearTerm.raiseLevel {K ι : Type*} [Field K]
     [Fintype ι] [DecidableEq ι] {ell : ℕ}
     (t : CondLinearTerm K (ι := ι) ell) : CondLinearTerm K (ι := ι) (ell + 1) :=
@@ -40,7 +41,8 @@ private theorem CondLinearTerm.raiseLevel_supportedOn {K ι : Type*} [Field K]
     CondLinearTerm.supportedOn t.raiseLevel S := by
   exact ⟨Finset.empty_subset S, fun _ => by simpa using ht⟩
 
-/-- Raise a syntax term by a specified number of empty stages. -/
+/-- Raise a representation of a conditionally linear function by a specified
+number of empty stages. -/
 private def CondLinearTerm.raiseBy {K ι : Type*} [Field K]
     [Fintype ι] [DecidableEq ι] :
     (d : ℕ) → {ell : ℕ} → CondLinearTerm K (ι := ι) ell →
@@ -224,8 +226,8 @@ structure CLData (K ι : Type*) [Field K] [Fintype ι] [DecidableEq ι]
   top : ∀ h : 0 < ell,
     marginal ⟨ell - 1, Nat.sub_lt h (by decide)⟩ = L
 
-/-- Prefix decomposition data relative to a register `S`. This is the
-support-sensitive induction invariant used to prove `lem:cl-kth`. -/
+/-- Prefix decomposition data on a register `S`, refining the decomposition
+in `lem:cl-kth`. -/
 private structure CLDataOn (K ι : Type*) [Field K] [Fintype ι]
     [DecidableEq ι] (S : Finset ι) (ell : ℕ)
     (L : (ι → K) → (ι → K)) where
@@ -279,7 +281,8 @@ private theorem CondLinearTerm.eval_zero {K ι : Type*} [Field K]
   cases t
   rfl
 
-/-- A one-level syntax term has support-relative prefix decomposition data. -/
+/-- A one-level representation of a conditionally linear function has
+support-relative prefix decomposition data. -/
 private theorem CondLinearTerm.nonempty_clDataOn_one {K ι : Type*} [Field K]
     [Fintype ι] [DecidableEq ι] (t : CondLinearTerm K (ι := ι) 1)
     {S : Finset ι} (ht : CondLinearTerm.supportedOn t S) :
@@ -648,8 +651,8 @@ private theorem CondLinearTerm.nonempty_clDataOn_succ
     rw [congrFun ((d (clDataFirst S₁ L₁ x)).top hTail) x]
     rfl
 
-/-- Every positive-level supported syntax term admits support-relative prefix
-decomposition data. -/
+/-- Every positive-level supported representation of a conditionally linear
+function admits support-relative prefix decomposition data. -/
 private theorem CondLinearTerm.nonempty_clDataOn {K ι : Type*} [Field K]
     [Fintype ι] [DecidableEq ι] {ell : ℕ} (hEll : 1 ≤ ell)
     (t : CondLinearTerm K (ι := ι) ell) {S : Finset ι}
