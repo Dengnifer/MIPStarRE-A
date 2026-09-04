@@ -1,13 +1,14 @@
 import MIPStarRE.QPBT.Algebra.Pauli
 import MIPStarRE.QPBT.Test.MagicSquareTheorems.Basic
 import MIPStarRE.QPBT.Test.MagicSquareTheorems.PerfectStrategy
+import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.Relations
 
 /-!
 # Magic Square rigidity
 
-This stable public facade re-exports the elementary symmetry facts and perfect
-strategy construction while retaining the imported rigidity theorem and its
-supporting definitions.
+This stable public facade re-exports the elementary symmetry facts, the
+value-to-parity relation layer, and the perfect strategy construction while
+retaining the imported rigidity theorem and its supporting definitions.
 
 ## References
 

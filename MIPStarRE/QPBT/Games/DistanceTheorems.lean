@@ -17,7 +17,7 @@ The operator-level inequalities they rest on live in
 
 The source results are `fact:agreement` through
 `lem:close-strategies-have-close-values` in
-`blueprint/src/chapter/ch12_qpbt_games.tex:245-511`, with paper origin
+`blueprint/src/chapter/ch12_qpbt_games.tex:245-577`, with paper origin
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:295-461` and
 `:531-540`. The observable conversion lemmas come from
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:95-131`.
@@ -534,7 +534,7 @@ private theorem strategy_value_eq_selected (G : Game) (S : Strategy G) :
 /-- Strategies on identified local spaces and the same transported state have
 close values. The asymptotic constant is universal for the game. This is
 `lem:close-strategies-have-close-values`, blueprint
-`ch12_qpbt_games.tex:503-511`, paper
+`ch12_qpbt_games.tex:569-577`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:531-540`. -/
 theorem abs_value_sub_le_of_areClose :
     ∃ C₀ : ℝ, 1 ≤ C₀ ∧ ∀ (G : Game) (S S' : Strategy G) (δ : ℝ)
