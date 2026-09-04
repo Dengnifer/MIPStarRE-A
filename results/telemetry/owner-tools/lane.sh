@@ -47,9 +47,10 @@ BEFORE=$(git -C "$W" merge-base github/main HEAD)
 if [ "$SKIP_DISPATCH" != 1 ]; then
   # concurrency gate: the codex API rate-limits (HTTP 429) above ~5 sessions
   MAX_CODEX="${MAX_CODEX:-7}"
+  cap() { if [ -n "${MAX_CODEX_FIXED:-}" ]; then echo "$MAX_CODEX_FIXED"; return; fi; b=$(pgrep -fa codex | grep "MIPStarRE-auto\|/tmp/qpbt-" | grep -o "\-C /[^ ]*" | sort -u | wc -l); b=$((b+1)); c=$((9-b)); [ "$c" -lt 4 ] && c=4; echo "$c"; }
   live() { pgrep -fa 'codex exec' | grep -o '\-C [^ ]*' | sort -u | wc -l; }
   exec 9>"$HOME/.cache/mipstarre-dev/watchdog/launch.lock"; flock 9
-  for _ in $(seq 1 720); do [ "$(live)" -lt "$MAX_CODEX" ] && break; sleep 30; done
+  for _ in $(seq 1 720); do [ "$(live)" -lt "$(cap)" ] && break; sleep 30; done
   RESUME=(); [ -s "$STATE/$N.thread" ] && RESUME=(--resume "$(cat "$STATE/$N.thread")")
   for attempt in 1 2 3; do
     log "dispatch $ROLE for #$N (model $MIPSTARRE_CODEX_MODEL, attempt $attempt${RESUME:+, resuming ${RESUME[1]}})"
@@ -94,8 +95,9 @@ echo "PR=$PR"
 for _ in $(seq 1 30); do [ "$(gh pr view "$PR" --json headRefOid --jq .headRefOid)" = "$AFTER" ] && break; sleep 10; done
 log "ci.sh $PR"; local/bin/ci.sh "$PR" >> "$STATE/$N.ci.log" 2>&1; echo "CI_EXIT=$?"
 MAXR="${MAX_CODEX:-7}"
+cap() { if [ -n "${MAX_CODEX_FIXED:-}" ]; then echo "$MAX_CODEX_FIXED"; return; fi; b=$(pgrep -fa codex | grep "MIPStarRE-auto\|/tmp/qpbt-" | grep -o "\-C /[^ ]*" | sort -u | wc -l); b=$((b+1)); c=$((9-b)); [ "$c" -lt 4 ] && c=4; echo "$c"; }
 exec 9>"$HOME/.cache/mipstarre-dev/watchdog/launch.lock"; flock 9
-for _ in $(seq 1 720); do [ "$(pgrep -fa 'codex exec' | grep -o '\-C [^ ]*' | sort -u | wc -l)" -lt "$MAXR" ] && break; sleep 30; done
+for _ in $(seq 1 720); do [ "$(pgrep -fa 'codex exec' | grep -o '\-C [^ ]*' | sort -u | wc -l)" -lt "$(cap)" ] && break; sleep 30; done
 log "review.sh $PR"; local/bin/review.sh "$PR" >> "$STATE/$N.review.log" 2>&1 &
 RPID=$!; sleep 25; flock -u 9; wait "$RPID"; echo "REVIEW_EXIT=$?"
 gh api "repos/Dengnifer/MIPStarRE-A/commits/$AFTER/status" --jq '.statuses[] | select(.context|endswith("summary")) | .context+" "+.state+" "+(.description // "")'
