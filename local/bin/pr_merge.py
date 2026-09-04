@@ -66,7 +66,8 @@ VERDICT_RE = re.compile(r"^VERDICT:\s*([A-Z_]+)", re.MULTILINE)
 HEAD_FIELD_RE = re.compile(r"^head=([0-9a-f]{40})$", re.MULTILINE)
 DISPOSITION_RE = re.compile(
     r"^\s*[-*]\s*\[[xX]\]\s*(F\d+)\b.*?\s+[—–]\s+"
-    r"(?:fixed in [0-9a-f]{7,40}|moot:\s*\S.*|deferred to issue #(\d+):\s*\S.*)$",
+    r"(?:fixed in [0-9a-f]{7,40}|moot:\s*\S.*|out of scope:\s*\S.*|"
+    r"deferred to issue #(\d+):\s*\S.*)$",
     re.MULTILINE)
 
 #: autofix.sh:62-63 ``PREFIX_AUTO``/``PREFIX_REVIEW`` — the ping-pong guard's subject
@@ -196,9 +197,9 @@ def check_review(number: int, head_sha: str, reviews: list[dict], statuses: dict
     round_marker = re.compile(rf"mipstarre-review pr={number} head=([0-9a-f]{{40}})")
     reviewed_heads = {m.group(1) for row in reviews
                       if (m := round_marker.search(row.get("body") or ""))}
-    if len(reviewed_heads - {head_sha}) < 4:
-        raise GateFailure("gate 4 (review): adjudication is available only from review round "
-                          "5; fewer than four prior rounds were found.")
+    if not reviewed_heads - {head_sha}:
+        raise GateFailure("gate 4 (review): adjudication is available after two review rounds; "
+                          "no prior reviewed head was found.")
     finding_ids = UNCHECKED_ID_RE.findall(body)
     if len(finding_ids) != unchecked or len(set(finding_ids)) != unchecked:
         raise GateFailure("gate 4 (review): every unresolved finding must have one unique F<n> "

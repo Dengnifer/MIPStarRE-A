@@ -429,7 +429,7 @@ class MergeGateTests(LayerTestCase):
         marker = f"<!-- mipstarre-review pr=7 head={self.head} -->"
         current = marker + "\nVERDICT: COMMENTED\n- [ ] F1 (changes) `x:1` — fix\n"
         reviews = [{"commit_id": self.head, "body": current}]
-        for digit in "1234":
+        for digit in "1":
             sha = digit * 40
             reviews.append({"commit_id": sha,
                             "body": f"<!-- mipstarre-review pr=7 head={sha} -->"})
@@ -442,6 +442,12 @@ class MergeGateTests(LayerTestCase):
                                else {"number": 24, "state": "open"}):
             deferred = pr_merge.check_review(7, self.head, reviews, statuses, adjudicated=True)
         self.assertEqual(deferred, {24})
+
+        out_of_scope = {"id": 10, "body": ("ADJUDICATION\nhead=" + self.head
+                                             + "\n- [x] F1 — out of scope: new mechanism")}
+        with mock.patch.object(pr_merge.gh_common, "api", return_value=[out_of_scope]):
+            deferred = pr_merge.check_review(7, self.head, reviews, statuses, adjudicated=True)
+        self.assertEqual(deferred, set())
 
         merge_base = _git(self.repo, "merge-base", "main", self.head)
         with mock.patch.object(pr_merge.gh_common, "open_sub_issues", return_value=[]):
@@ -464,7 +470,7 @@ class MergeGateTests(LayerTestCase):
             with self.assertRaisesRegex(LayerError, "open tracked issue"):
                 pr_merge.check_review(7, self.head, reviews, statuses, adjudicated=True)
 
-        with self.assertRaisesRegex(LayerError, "round 5"):
+        with self.assertRaisesRegex(LayerError, "two review rounds"):
             pr_merge.check_review(7, self.head, reviews[:-1], statuses, adjudicated=True)
 
 
