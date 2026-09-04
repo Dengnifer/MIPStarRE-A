@@ -242,8 +242,8 @@ noncomputable def ldALineCL (P : LdParams) (z : LdSpace P) : LdSpace P :=
   | .inl (.inr _) => z (.inl (.inr ()))
   | .inr _ => 0
 
-/-- The diagonal-line CL map, using the same canonical representative interface
-for the direction block.  This is the `L_DLine` clause of
+/-- The diagonal-line CL map, using the same canonical line representative
+map for the direction block.  This is the `L_DLine` clause of
 `def:ld-question-distribution` (blueprint
 `blueprint/src/chapter/ch13_qpbt_test.tex:34-59`; paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`).
@@ -624,8 +624,9 @@ abbrev LdAnswerCode (P : LdParams) :=
     ((Fin P.k → Fin (P.d + 1) → ScalarQ P) ⊕
       (Fin P.k → Fin (P.m * P.d + 1) → ScalarQ P))
 
-/-- The constructor-preserving code equivalence for `LdAnswer` (Lean-only
-finite-carrier infrastructure for `def:ld-win-predicate`, blueprint
+/-- The canonical code equivalence for `LdAnswer`, sending point, axis-line,
+and diagonal-line answers to the three summands (Lean-only finite-carrier
+support for `def:ld-win-predicate`, blueprint
 `blueprint/src/chapter/ch13_qpbt_test.tex:137-156`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`).
 -/
