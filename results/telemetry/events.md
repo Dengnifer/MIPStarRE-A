@@ -1,6 +1,27 @@
 # Incident and observation log
 Dated bullets, one incident each: symptom → diagnosis → fix → lesson.
 This file is the raw feed for `local/protocols/EVOLUTION.md`.
+## 2026-09-05
+- **Owner-side `.lake` relocation shim.** Worktree build directories consumed the
+  87%-full root volume, whose fsync writes measured nine times slower than the
+  NVMe ZFS pool. Temporary owner launchers moved each `.lake` to `/data` before
+  bootstrap, but merge cleanup left the external directory behind. Issue #190
+  replaces that untracked ordering dependency with an opt-in Lake root shared by
+  setup and warming, plus guarded post-worktree cleanup. Lesson: storage
+  placement and lifecycle cleanup belong in the workflow boundary that creates
+  and retires the worktree.
+- **External Lake-root review guards.** PR #198 round-1 review found that root
+  aliases, symlinked branch ancestors, `hot-main` targets, and the Codex sandbox
+  were outside the initial safety model. The repair canonicalizes before create
+  and delete, preserves both containment boundaries, and grants only the checked
+  branch target to writable sessions. Lesson: external placement needs filesystem
+  and execution-sandbox containment to be designed as one boundary.
+- **Canonical Lake target ownership.** PR #198 reviews found shared-cache and
+  checkout overlap, nested or aliased branch targets, detached owners, and silent
+  retry cleanup. Setup and cleanup now accept one-component branches, protect
+  packages, `hot-main`, and every checkout, and compare canonical ownership;
+  retries warn when the root is unavailable. Lesson: destructive cleanup needs
+  collision-free names and operator-visible ownership inputs at deletion time.
 ## 2026-08-30
 - **Stale seed clone.** Symptom: files copied from the sibling `../MIPStarRE`
   checkout were dated Jul 5 while upstream main was Aug 25. Diagnosis: the
@@ -2379,3 +2400,146 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   stacked lanes and the Opus/codex prover pools; Mode 1 resumes from /tmp/qpbt-main-handoff.md
   (archived under results/telemetry/owner-messages/).
 - **State at hand-back:** main at 5b94709; open PRs: 203,202,198,197,195,193,192,191,189,188,185,179,178,175,169,160,155,153,152.
+
+## 2026-09-05 05:25+08:00 - PR 197 stops at the workflow review cap
+
+- **Symptom:** round 2 of workflow PR #197 fixed the mutable-ref and emergency-
+  bypass defects, then requested two further edge-case mechanisms for no-op
+  pushes and stale or redirected native hooks; the accumulated PR diff had
+  already grown beyond its initial 396 changed lines.
+- **Diagnosis:** a third repair round would harden a hardening layer and violate
+  the binding two-round workflow cap and the owner's instruction not to grow a
+  PR to satisfy further findings.
+- **Fix:** adjudicate both round-2 findings at exact head `d1ff07d` as out of
+  scope for issue #157, add PR #197 to the merge daemon's adjudication queue,
+  and make no further code changes.
+- **Lesson:** once a workflow repair reaches its review ceiling, preserve the
+  bounded operational fix and stop expanding it into support for invalid or
+  update-free publication environments.
+
+## 2026-09-05 05:31+08:00 - Packet 204 lacked prerequisite edges
+
+- **Symptom:** `ready_packets.py --all` reported cleanup packet #204 as ready,
+  although its issue body says to run only after #113 and #115 merge.
+- **Diagnosis:** the prose prerequisites had not been recorded as GitHub
+  `blocked_by` relations, so the authoritative dependency graph was incomplete.
+- **Fix:** add idempotent `#204 blocked_by #113` and `#204 blocked_by #115`
+  edges through `gh_common.py`; hold the packet while both issues remain open.
+- **Lesson:** scheduling prose must be translated into dependency edges when a
+  packet is created; `ready_packets.py` correctly follows the graph rather than
+  attempting to interpret issue bodies.
+
+## 2026-09-05 05:36+08:00 - PR 198 external-Lake scope adjudicated
+
+- **Symptom:** review round 5 of workflow PR #198 requested support for the
+  slash-named `codex/issue-*` branch form after the deletion-safety repair had
+  converged; the PR was already beyond the workflow review and line budgets.
+- **Diagnosis:** safely mapping slash-named branches into one cleanup-owned
+  directory requires another path-encoding mechanism, while relaxing the
+  one-component guard would reopen the recursive-deletion risks fixed in the
+  preceding round.
+- **Fix:** adjudicate the optional `MIPSTARRE_LAKE_ROOT` feature as restricted
+  to the operator's one-component `issue-*` branches, add PR #198 to the merge
+  daemon's adjudication queue, and make no further workflow changes.
+- **Lesson:** a narrow, fail-closed storage feature at its review cap should
+  retain an explicit scope restriction instead of expanding its deletion
+  authority to cover another naming scheme.
+
+## 2026-09-05 05:42+08:00 - Packet 199 was outside the packet graph
+
+- **Symptom:** the handoff named cleanup packet #199 as pending, but readiness
+  traversal could not report it at all.
+- **Diagnosis:** #199 had no tracker parent and its body-only prerequisites
+  (packets #132 and #134) had not been recorded as dependency edges.
+- **Fix:** attach #199 beneath Combining tracker #166 and add both authoritative
+  `blocked_by` relations through `gh_common.py`.
+- **Lesson:** a follow-up packet needs both tracker containment and dependency
+  edges at creation time; body prose alone is invisible to the scheduler.
+
+## 2026-09-05 05:47+08:00 - Stacked packet 134 lost its review tail
+
+- **Symptom:** after #133 merged, stack-watch removed #134 from its registry and
+  reran the lane, but PR #191 ended with green CI, zero reviews, and a log line
+  saying review was skipped.
+- **Diagnosis:** the completed tail retained the stacked-lane skip behavior even
+  though the watcher process itself had no `SKIP_REVIEW` setting; the exact
+  inheritance/race is not needed to unblock the mathematical packet.
+- **Fix:** rerun #134 with `SKIP_DISPATCH=1` and explicit `SKIP_REVIEW=0`, leaving
+  its clean implementation untouched and requesting the missing review only.
+- **Lesson:** removing a stack entry is not evidence that review ran; verify the
+  exact-head `local-review/summary` before considering a released stack ready.
+
+## 2026-09-05 05:42+08:00 - Adjudication disposition wording missed the merge gate
+
+- **Symptom:** the daemon refused adjudicated PR #198 even though its exact-head
+  comment accounted for the sole unresolved finding.
+- **Diagnosis:** the comment said `out of scope for issue #190:`, whereas the
+  gate accepts the literal disposition prefix `out of scope:`.  PR #197 used
+  the same nonmatching form and would have failed at the same gate.
+- **Fix:** change both exact-head comments and reusable templates to the valid
+  `out of scope:` form, verify their finding IDs with the merge-gate parser, and
+  clear only PR #198's retry marker for the daemon.
+- **Lesson:** operator adjudications should be validated against
+  `DISPOSITION_RE` before entering the merge queue; semantically equivalent
+  prose is not protocol-equivalent evidence.
+
+## 2026-09-05 05:48+08:00 - PR 179 stops at the mathematics review cap
+
+- **Symptom:** the post-conflict exact-head review accepted the low-degree
+  transport mathematics but repeated five cleanup obligations as twelve code
+  and prose findings.
+- **Diagnosis:** PR #179 has exceeded the four-round mathematics cap; the EPR
+  and consistency citations are owned by #174, while the direct-parameter
+  domain, dependency prose, redundant instance, and temporary aliases are
+  owned by the post-#134 transport sweep #199.
+- **Fix:** post one valid disposition for every exact-head finding, retain the
+  proof PR unchanged, and release its old conflict marker to the merge daemon.
+- **Lesson:** parallel reviewer lanes may duplicate one obligation under
+  separate finding IDs; adjudication must preserve every ID while tracking the
+  underlying work only once.
+
+## 2026-09-05 05:53+08:00 - Owner-gated packet 105 removed from auto-release
+
+- **Symptom:** merging prerequisite PR #169 made stack entry #105 eligible for
+  the next automatic release even though owner blocker B5 still holds its
+  Magic Square rigidity statement.
+- **Diagnosis:** the stack watcher has no owner-decision hold mechanism; an
+  entry becomes runnable solely when its recorded base reaches `main`.
+- **Fix:** remove only #105 from the runtime stack registry, preserving its
+  branch for explicit re-queue after the owner chooses A′, B, or C.
+- **Lesson:** owner-gated packets must not remain in an automatic dependency
+  release registry once their technical prerequisite becomes merge-complete.
+
+## 2026-09-05 06:06+08:00 - Worker cleanup removed a managed Lake link
+
+- **Symptom:** packet #180's fresh-base publication build attempted to clone
+  Mathlib and failed with a transient TLS error, despite the worktree having a
+  prepared build-products directory under `/data`.
+- **Diagnosis:** the resumed worker's temporary-validation cleanup removed the
+  worktree's managed `.lake` symlink and left an empty `.lake/packages`
+  directory. The lane therefore treated the directory as local Lake state and
+  allowed Lake to fetch dependencies from the network.
+- **Fix:** remove the two empty directories, restore the exact worktree link to
+  `/data/users/drx/mipstarre-cache/lake/issue-180-typed-conditionally-linear-question-laws`,
+  and restart the v14 publication tail with dispatch skipped.
+- **Lesson:** temporary validation cleanup must preserve the managed `.lake`
+  link. A worker that replaces it should restore and verify the link before
+  reporting a clean handoff.
+
+## 2026-09-04 — Operator takeover: owner's Claude session replaces the codex main session
+
+- **Trigger:** owner decision (2026-09-03, after the eight-hour stall and the
+  reviewer-churn episode): the owner's Claude Fable 5.1 session, working from
+  the owner's machine over ssh, takes the operator role for about one to two
+  days. Dispatched worker sessions (orc/prover/reviewer/…) remain codex
+  sessions on ghz via `dispatch.sh` (model gpt-5.6-sol until "astra" is
+  available in codex's configuration, then astra; an hourly codex poller
+  `owner-tools/astra-poll.sh` reports the switch to #26).
+- **Handover:** the codex main session posted its exact in-flight state to
+  #27 ("Handover to owner session") and exited at 2026-09-04T22:30:18Z. The owner session
+  picks up every lane from that report. The same protocols, gates and telemetry
+  duties bind the owner session; owner-side records continue in
+  `owner-log.md`.
+- **Hand-back:** to be recorded here and in `stages.jsonl` when the owner
+  says so; the codex main session then resumes from `~/.codex/prompts/goal.md`
+  plus the #27 log.
