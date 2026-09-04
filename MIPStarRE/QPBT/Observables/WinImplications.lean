@@ -1,4 +1,4 @@
-import MIPStarRE.QPBT.Observables.WinImplications.PointObs
+import MIPStarRE.QPBT.Observables.WinImplications.TwistedCommutation
 
 /-!
 # Winning implications for strategy observables
@@ -300,8 +300,8 @@ theorem pointObs_twisted_commutation :
           heteroKron
             (S.pointObs .alice .Z ω.2.2.2 ω.2.1 *
               S.pointObs .alice .X ω.2.2.1 ω.1) 1)
-        S.toStrategy.ψ ≤ C * Real.sqrt ε := by
-  sorry
+        S.toStrategy.ψ ≤ C * Real.sqrt ε :=
+  WinImplications.pointObs_twisted_commutation_proof
 
 /-- The factor-interchanged phase-signed commutation relation on Bob's factor.
 This is the trailing clause of `lem:qld-win-implications-obs`, paper
