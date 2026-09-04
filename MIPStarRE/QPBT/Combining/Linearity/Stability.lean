@@ -258,8 +258,9 @@ than the two-query correlation.  By
 `avg_multiplicativeDefect_le_two_mul_error`, a correlation at least `1 - δ`
 gives the present hypothesis with `η = 2δ`, so the conclusion obtained from a
 correlation hypothesis is the bound `2δ` for the average squared
-state-dependent operator distance, whereas `thm:linearity` displays the bound
-`δ`.  That factor of two is the normalization refuted in
+state-dependent operator distance.  The provider theorem displays `δ` for
+that distance, while `thm:linearity` records the corrected `2δ` bound.  That
+factor of two is the normalization refuted in
 `docs/paper-gaps/qpbt_linearity-distance-normalization.tex`; the blueprint
 entry for the present statement is `lem:boolean-representation-stability`.
 The positivity of `t` and the nonnegativity of `η` are part of the quoted
