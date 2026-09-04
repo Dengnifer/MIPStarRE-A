@@ -140,6 +140,201 @@ theorem tauObservable_conjTranspose (W : PauliKind) (a : ι → K) :
   refine Finset.sum_congr rfl fun e _ => ?_
   rw [Matrix.conjTranspose_smul, star_phaseSign', pauliProj_conjTranspose]
 
+/-- The generalized Pauli projectors are symmetric matrices, being real linear
+combinations of the symmetric generalized Pauli observables. -/
+theorem pauliProj_transpose (W : PauliKind) (e : ι → K) :
+    (pauliProj W e)ᵀ = pauliProj W e := by
+  rw [pauliProj_eq_avg_tauObservable, Matrix.transpose_smul, Matrix.transpose_sum]
+  congr 1
+  refine Finset.sum_congr rfl fun a _ => ?_
+  rw [Matrix.transpose_smul, tauObservable_transpose]
+
+/-! ### Orthogonality of the generalized Pauli projectors
+
+The generalized Pauli projectors in a fixed basis are pairwise orthogonal, so
+every coarse-graining of a Pauli basis measurement is again projective.  This is
+the projectivity used throughout the honest strategy of `lem:pauli-completeness`,
+paper `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1364-1370`.
+-/
+
+/-- Formalization-only auxiliary: the binary sign character is multiplicative.
+It is derived here from the public `phaseSign_sum`. -/
+private theorem phaseSign_add' (s t : ZMod 2) :
+    phaseSign (s + t) = phaseSign s * phaseSign t := by
+  have h := phaseSign_sum (ι := Fin 2) ![s, t]
+  simpa [Fin.sum_univ_two, Fin.prod_univ_two] using h
+
+omit [Fintype K] [DecidableEq K] in
+/-- Formalization-only auxiliary: the binary sign character on `K` is the
+canonical additive character of the finite field. -/
+private theorem phaseSign_binTrace_eq_ffChar (y : K) :
+    phaseSign (binTrace K y) =
+      MIPStarRE.LDT.Preliminaries.ffChar (p := 2) (F := K) y := by
+  rw [phaseSign_eq_ffChar, MIPStarRE.LDT.Preliminaries.ffChar_apply]
+
+/-- Formalization-only auxiliary: the scalar character sum over a finite field.
+This is Fourier orthogonality `prop:fourier-fact-scalar` written multiplicatively
+for the binary sign character. -/
+private theorem sum_phaseSign_binTrace_mul (c : K) :
+    ∑ x : K, phaseSign (binTrace K (x * c)) =
+      if c = 0 then (Fintype.card K : ℂ) else 0 := by
+  have hexp := MIPStarRE.LDT.Preliminaries.fourier_fact_scalar (p := 2) (F := K) c
+  have hsum : ∑ x : K, MIPStarRE.LDT.Preliminaries.ffChar (p := 2) (F := K) (x * c) =
+      (Fintype.card K) • (if c = 0 then (1 : ℂ) else 0) := by
+    rw [← hexp]
+    exact (Fintype.card_smul_expect _).symm
+  calc ∑ x : K, phaseSign (binTrace K (x * c))
+      = ∑ x : K, MIPStarRE.LDT.Preliminaries.ffChar (p := 2) (F := K) (x * c) :=
+        Finset.sum_congr rfl fun x _ => phaseSign_binTrace_eq_ffChar _
+    _ = (Fintype.card K) • (if c = 0 then (1 : ℂ) else 0) := hsum
+    _ = if c = 0 then (Fintype.card K : ℂ) else 0 := by
+        by_cases hc : c = 0 <;> simp [hc]
+
+/-- Formalization-only auxiliary: the vector character sum over a finite field,
+obtained from the scalar case by factorizing the trace pairing. -/
+private theorem sum_phaseSign_binTrace_dotProduct (v : ι → K) :
+    ∑ a : ι → K, phaseSign (binTrace K (dotProduct a v)) =
+      if v = 0 then (Fintype.card (ι → K) : ℂ) else 0 := by
+  have hfactor : ∏ i : ι, ∑ x : K, phaseSign (binTrace K (x * v i)) =
+      ∑ a : ι → K, phaseSign (binTrace K (dotProduct a v)) := by
+    rw [Finset.prod_univ_sum, Fintype.piFinset_univ]
+    exact Finset.sum_congr rfl fun a _ => prod_phaseSign_binTrace_dotProduct a v
+  rw [← hfactor]
+  by_cases hv : v = 0
+  · subst hv
+    rw [if_pos rfl, Fintype.card_fun]
+    have hterm : ∀ i : ι, ∑ x : K, phaseSign (binTrace K (x * (0 : ι → K) i)) =
+        (Fintype.card K : ℂ) := fun i => by simp [phaseSign]
+    rw [Finset.prod_congr rfl fun i _ => hterm i, Finset.prod_const, Finset.card_univ]
+    push_cast
+    ring
+  · obtain ⟨i₀, hi₀⟩ : ∃ i : ι, v i ≠ 0 := by
+      by_contra hcon
+      exact hv (funext fun i => not_not.mp (fun h => hcon ⟨i, h⟩))
+    rw [if_neg hv]
+    refine Finset.prod_eq_zero (Finset.mem_univ i₀) ?_
+    rw [sum_phaseSign_binTrace_mul, if_neg hi₀]
+
+/-- A generalized Pauli observable acts on a generalized Pauli projector of the
+same basis by the character value of its label.  This is the eigenvalue relation
+implicit in `lem:pauli-observable-expansion`, blueprint
+`blueprint/src/chapter/ch11_qpbt_algebra.tex:674-688`, paper origin
+`references/qpbt-paper/04_preliminaries.tex:1151-1161`. -/
+theorem tauObservable_mul_pauliProj (W : PauliKind) (a f : ι → K) :
+    tauObservable W a * pauliProj W f =
+      phaseSign (binTrace K (dotProduct a f)) • pauliProj W f := by
+  haveI : CharP K 2 := (Algebra.charP_iff (ZMod 2) K 2).mp (ZMod.charP 2)
+  have hchar2 : ∀ x : ι → K, a + (a + x) = x := by
+    intro x
+    funext i
+    simp [← add_assoc, CharTwo.add_self_eq_zero]
+  calc tauObservable W a * pauliProj W f
+      = (Fintype.card (ι → K) : ℂ)⁻¹ •
+          ∑ b : ι → K,
+            phaseSign (binTrace K (dotProduct b f)) • tauObservable W (a + b) := by
+        rw [pauliProj_eq_avg_tauObservable, Matrix.mul_smul, Matrix.mul_sum]
+        congr 1
+        refine Finset.sum_congr rfl fun b _ => ?_
+        rw [Matrix.mul_smul, tauObservable_mul]
+    _ = (Fintype.card (ι → K) : ℂ)⁻¹ •
+          ∑ c : ι → K,
+            phaseSign (binTrace K (dotProduct (a + c) f)) • tauObservable W c := by
+        congr 1
+        refine Fintype.sum_equiv (Equiv.addLeft a) _ _ fun b => ?_
+        show phaseSign (binTrace K (dotProduct b f)) • tauObservable W (a + b) =
+          phaseSign (binTrace K (dotProduct (a + (a + b)) f)) • tauObservable W (a + b)
+        rw [hchar2 b]
+    _ = phaseSign (binTrace K (dotProduct a f)) • pauliProj W f := by
+        rw [pauliProj_eq_avg_tauObservable (W := W) (e := f)]
+        simp only [Finset.smul_sum, smul_smul]
+        refine Finset.sum_congr rfl fun c _ => ?_
+        congr 1
+        rw [add_dotProduct, map_add, phaseSign_add']
+        ring
+
+/-- The generalized Pauli projectors of a fixed basis are pairwise orthogonal
+idempotents.  This is the orthogonality half of `def:generalized-pauli`,
+blueprint `blueprint/src/chapter/ch11_qpbt_algebra.tex:529-571`, paper origin
+`references/qpbt-paper/04_preliminaries.tex:1101-1122`. -/
+theorem pauliProj_mul_pauliProj (W : PauliKind) (e f : ι → K) :
+    pauliProj W e * pauliProj W f = if e = f then pauliProj W e else 0 := by
+  haveI : CharP K 2 := (Algebra.charP_iff (ZMod 2) K 2).mp (ZMod.charP 2)
+  have hzero : ∀ x y : ι → K, x + y = 0 ↔ x = y := by
+    intro x y
+    constructor
+    · intro h
+      funext i
+      have hi : x i + y i = 0 := congrFun h i
+      exact CharTwo.add_eq_zero.mp hi
+    · rintro rfl
+      funext i
+      simp [CharTwo.add_self_eq_zero]
+  have hcard : (Fintype.card (ι → K) : ℂ) ≠ 0 := by positivity
+  calc pauliProj W e * pauliProj W f
+      = (Fintype.card (ι → K) : ℂ)⁻¹ •
+          ∑ a : ι → K,
+            (phaseSign (binTrace K (dotProduct a (e + f)))) • pauliProj W f := by
+        rw [pauliProj_eq_avg_tauObservable (W := W) (e := e), Matrix.smul_mul,
+          Finset.sum_mul]
+        congr 1
+        refine Finset.sum_congr rfl fun a _ => ?_
+        rw [Matrix.smul_mul, tauObservable_mul_pauliProj, smul_smul, ← phaseSign_add',
+          ← map_add, ← dotProduct_add]
+    _ = ((Fintype.card (ι → K) : ℂ)⁻¹ *
+          ∑ a : ι → K, phaseSign (binTrace K (dotProduct a (e + f)))) • pauliProj W f := by
+        rw [← Finset.sum_smul, smul_smul]
+    _ = if e = f then pauliProj W e else 0 := by
+        rw [sum_phaseSign_binTrace_dotProduct]
+        by_cases hef : e = f
+        · rw [if_pos ((hzero e f).mpr hef), if_pos hef, inv_mul_cancel₀ hcard, one_smul, hef]
+        · rw [if_neg (fun h => hef ((hzero e f).mp h)), if_neg hef, mul_zero, zero_smul]
+
+/-- Every generalized Pauli projector is a projector. -/
+theorem pauliProj_isProj (W : PauliKind) (e : ι → K) : IsProj (pauliProj W e) := by
+  refine isStarProjection_iff'.2 ⟨?_, ?_⟩
+  · simpa using pauliProj_mul_pauliProj W e e
+  · rw [Matrix.star_eq_conjTranspose, pauliProj_conjTranspose]
+
+/-- Every coarse-graining of a generalized Pauli basis measurement is
+projective.  This is the projectivity of the honest Point, Line and Pauli
+measurements in the proof of `lem:pauli-completeness`, paper
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1364-1370`. -/
+theorem pauliBasisMeasurement_postprocess_projective {β : Type*} [Fintype β]
+    [DecidableEq β] (W : PauliKind) (g : (ι → K) → β) :
+    MIPStarRE.QPBT.Measurement.IsProjective ((pauliBasisMeasurement W).postprocess g) := by
+  classical
+  intro b
+  rw [Measurement.postprocess_effect]
+  refine isStarProjection_iff'.2 ⟨?_, ?_⟩
+  · rw [Finset.sum_mul_sum]
+    refine Finset.sum_congr rfl fun e he => ?_
+    have hterm : ∀ f ∈ Finset.univ.filter (fun a : ι → K => g a = b),
+        (pauliBasisMeasurement W).effect e * (pauliBasisMeasurement W).effect f =
+          if e = f then pauliProj W e else 0 :=
+      fun f _ => pauliProj_mul_pauliProj W e f
+    rw [Finset.sum_congr rfl hterm,
+      Finset.sum_ite_eq_of_mem _ e (fun _ => pauliProj W e) he]
+    rfl
+  · rw [Matrix.star_eq_conjTranspose, Matrix.conjTranspose_sum]
+    refine Finset.sum_congr rfl fun e _ => ?_
+    exact pauliProj_conjTranspose W e
+
+/-- Every coarse-graining of a generalized Pauli basis measurement has symmetric
+effects, hence is consistent on the EPR state.  This is the consistency of the
+honest Point, Line and Pauli measurements in the proof of
+`lem:pauli-completeness`, paper
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1368-1372`. -/
+theorem pauliBasisMeasurement_postprocess_isConsistentOn {β : Type*} [Fintype β]
+    [DecidableEq β] [Nonempty ι] (W : PauliKind) (g : (ι → K) → β) :
+    MIPStarRE.QPBT.Measurement.IsConsistentOn ((pauliBasisMeasurement W).postprocess g)
+      (eprState (ι → K)) := by
+  classical
+  intro b
+  refine epr_action_eq_of_transpose _ ?_
+  rw [Measurement.postprocess_effect, Matrix.transpose_sum]
+  refine Finset.sum_congr rfl fun e _ => ?_
+  exact pauliProj_transpose W e
+
 /-! ### The honest Pair/W measurements
 
 For an ambient question `ω = (u_X, u_Z, r_X, r_Z)` the honest player measures
@@ -272,6 +467,75 @@ theorem pauliTraceMeasurement_isConsistentOn (P : AdmissibleParams) (W : PauliKi
     MIPStarRE.QPBT.Measurement.IsConsistentOn (pauliTraceMeasurement P W u r)
       (eprState (PauliRegister P)) := fun b =>
   epr_action_eq_of_transpose _ (pauliTraceMeasurement_effect_transpose P W u r b)
+
+/-! ### The honest Point/W measurements -/
+
+/-- The honest Point/W measurement: the generalized Pauli basis measurement
+coarse-grained by the value `g_h(u)` of the low-degree encoding at the point
+`u`.  Paper
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1290-1300`. -/
+noncomputable def pauliPointMeasurement (P : AdmissibleParams) (W : PauliKind)
+    (u : Fin P.m → PauliScalar P) : Measurement (PauliScalar P) (PauliRegister P) :=
+  (pauliBasisMeasurement W).postprocess (fun h => lowDegreeEnc h u)
+
+/-- The honest Point/W measurement is projective. -/
+theorem pauliPointMeasurement_projective (P : AdmissibleParams) (W : PauliKind)
+    (u : Fin P.m → PauliScalar P) :
+    MIPStarRE.QPBT.Measurement.IsProjective (pauliPointMeasurement P W u) :=
+  pauliBasisMeasurement_postprocess_projective W _
+
+/-- The honest Point/W measurement is consistent on the EPR state. -/
+theorem pauliPointMeasurement_isConsistentOn (P : AdmissibleParams) (W : PauliKind)
+    (u : Fin P.m → PauliScalar P) :
+    MIPStarRE.QPBT.Measurement.IsConsistentOn (pauliPointMeasurement P W u)
+      (eprState (PauliRegister P)) :=
+  pauliBasisMeasurement_postprocess_isConsistentOn W _
+
+/-- The Point/W measurement coarse-grained by the trace against `r` is the
+Pair/W measurement.  This is the displayed identity
+`E^{(Point,W),y}_{[tr(· r_W) = a]} = E^{(Pair,W),ω}_a` used twice in the
+value-one argument of `lem:pauli-completeness`, paper
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1396-1420`. -/
+theorem pauliPointMeasurement_postprocess_trace_effect (P : AdmissibleParams)
+    (W : PauliKind) (u : Fin P.m → PauliScalar P) (r : PauliScalar P) (b : ZMod 2) :
+    ((pauliPointMeasurement P W u).postprocess
+        (fun a => fixedBinTrace P.model (a * r))).effect b =
+      (pauliTraceMeasurement P W u r).effect b := by
+  have hmaps : ∀ h ∈ Finset.univ.filter
+      (fun h : PauliRegister P => pauliTraceBit P u r h = b),
+      lowDegreeEnc h u ∈ Finset.univ.filter
+        (fun a : PauliScalar P => fixedBinTrace P.model (a * r) = b) := fun h hh =>
+    Finset.mem_filter.mpr ⟨Finset.mem_univ _, (Finset.mem_filter.mp hh).2⟩
+  have hinner : ∀ a ∈ Finset.univ.filter
+      (fun a : PauliScalar P => fixedBinTrace P.model (a * r) = b),
+      (Finset.univ.filter fun h : PauliRegister P => lowDegreeEnc h u = a) =
+        (Finset.univ.filter fun h : PauliRegister P =>
+          pauliTraceBit P u r h = b).filter fun h => lowDegreeEnc h u = a := by
+    intro a ha
+    ext h
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+    constructor
+    · intro hh
+      refine ⟨?_, hh⟩
+      show fixedBinTrace P.model (lowDegreeEnc h u * r) = b
+      rw [hh]
+      exact (Finset.mem_filter.mp ha).2
+    · exact fun hh => hh.2
+  calc ((pauliPointMeasurement P W u).postprocess
+        (fun a => fixedBinTrace P.model (a * r))).effect b
+      = ∑ a ∈ Finset.univ.filter
+          (fun a : PauliScalar P => fixedBinTrace P.model (a * r) = b),
+          ∑ h ∈ Finset.univ.filter (fun h : PauliRegister P => lowDegreeEnc h u = a),
+            pauliProj W h := rfl
+    _ = ∑ a ∈ Finset.univ.filter
+          (fun a : PauliScalar P => fixedBinTrace P.model (a * r) = b),
+          ∑ h ∈ (Finset.univ.filter fun h : PauliRegister P =>
+              pauliTraceBit P u r h = b).filter (fun h => lowDegreeEnc h u = a),
+            pauliProj W h :=
+        Finset.sum_congr rfl fun a ha => by rw [hinner a ha]
+    _ = ∑ h ∈ Finset.univ.filter (fun h : PauliRegister P => pauliTraceBit P u r h = b),
+          pauliProj W h := Finset.sum_fiberwise_of_maps_to hmaps _
+    _ = (pauliTraceMeasurement P W u r).effect b := rfl
 
 /-! ### The commutation law of the honest pair -/
 
