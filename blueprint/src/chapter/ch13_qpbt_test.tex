@@ -61,25 +61,25 @@ The classical low individual degree game is a two-player game based on the low i
 \begin{lemma}[Level of the axis-parallel line map]\label{lem:ld-aline-level}
 	\lean{MIPStarRE.QPBT.isCondLinear_ldALineCL}
 	\leanok
-	\uses{def:ld-question-distribution, def:cl-func, lem:cl-concat}
+	\uses{def:ld-question-distribution, def:cl-func}
 	Fix $\mathsf{ldparams} = (q,m,d,k)$ as in Definition~\ref{def:ld-game}. The map $L_{\mathsf{ALine}}$ of Equation~\eqref{eq:cl-alnf} is a $2$-level conditionally linear function on $V$.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{def:cl-func, lem:cl-concat, def:line-representative}
-	$L_{\mathsf{ALine}}$ is the concatenation of the $1$-level CL function projecting $V_I \oplus V_V$ onto $V_I$ with the family $\{L^{\mathrm{Ln}}_{e_i}\}_{i \in \{1,\ldots,m\}}$ of $1$-level CL functions on $V_X$, selected by $i = \chi(s)$; by Lemma~\ref{lem:cl-concat} the concatenation is $1+1 = 2$-level conditionally linear.
+	\uses{def:cl-func, def:line-representative}
+	The two-level decomposition of $L_{\mathsf{ALine}}$ is exhibited directly: the first stage is the $1$-level CL function projecting $V_I \oplus V_V$ onto $V_I$, and the second stage, on the complementary register $V_X$, is the $1$-level CL function $L^{\mathrm{Ln}}_{e_i}$ with $i = \chi(s)$ read off the first stage. The two stages act on disjoint registers and sum to $L_{\mathsf{ALine}}$, which is therefore $1+1 = 2$-level conditionally linear.
 \end{proof}
 
 \begin{lemma}[Level of the diagonal line map]\label{lem:ld-dline-level}
 	\lean{MIPStarRE.QPBT.isCondLinear_ldDLineCL}
 	\leanok
-	\uses{def:ld-question-distribution, def:cl-func, lem:cl-concat}
+	\uses{def:ld-question-distribution, def:cl-func}
 	Fix $\mathsf{ldparams} = (q,m,d,k)$ as in Definition~\ref{def:ld-game}. The map $L_{\mathsf{DLine}}$ of Equation~\eqref{eq:cl-dlnf} is a $3$-level conditionally linear function on $V$.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{def:cl-func, lem:cl-concat, def:line-representative}
-	$L_{\mathsf{DLine}}$ is the concatenation of the identity on $V_I$, of the family $v \mapsto \pi_{i-1}(v)$ of $1$-level CL functions on $V_V$ indexed by $i = \chi(s)$, and of the family $L^{\mathrm{Ln}}_{v'}$ of $1$-level CL functions on $V_X$ indexed by the pair $(s,v')$; by Lemma~\ref{lem:cl-concat} the concatenation is $1+1+1 = 3$-level conditionally linear.
+	\uses{def:cl-func, def:line-representative}
+	The three-level decomposition of $L_{\mathsf{DLine}}$ is exhibited directly: the first stage is the identity on $V_I$; the second, on $V_V$, is the $1$-level CL function $v \mapsto \pi_{i-1}(v)$ with $i = \chi(s)$ read off the first stage; and the third, on $V_X$, is the $1$-level CL function $L^{\mathrm{Ln}}_{v'}$ selected by the pair $(s,v')$ read off the first two. The three stages act on pairwise disjoint registers and sum to $L_{\mathsf{DLine}}$, which is therefore $1+1+1 = 3$-level conditionally linear.
 \end{proof}
 
 \begin{lemma}[The low-degree question distribution is a typed CL distribution]\label{lem:ld-question-typed-cl}
@@ -350,7 +350,7 @@ The Pauli basis test is the quantum low individual degree test of Natarajan and 
 \begin{definition}[Question distribution of the Pauli basis test]\label{def:pauli-question-distribution}
 	\lean{MIPStarRE.QPBT.PauliType, MIPStarRE.QPBT.pauliCLLevel, MIPStarRE.QPBT.pauliCL}
 	\lean{MIPStarRE.QPBT.isCondLinear_pauliCL, MIPStarRE.QPBT.pauliEdges}
-	\lean{MIPStarRE.QPBT.pauliQuestionDistribution, MIPStarRE.QPBT.pauliBasisTest}
+	\lean{MIPStarRE.QPBT.pauliQuestionDistribution}
 	\leanok
 	\uses{def:admissible, def:ld-question-distribution, def:ms-game, def:cl-func, def:cl-dist, def:graph-distribution}
 	% Admissibility of the full tuple is required here, not only the divisibility m | q:
@@ -408,6 +408,9 @@ The Pauli basis test is the quantum low individual degree test of Natarajan and 
 \end{proof}
 
 \begin{definition}[Win predicate of the Pauli basis test]\label{def:pauli-win-predicate}
+	\lean{MIPStarRE.QPBT.PauliAnswer, MIPStarRE.QPBT.validPauliAnswer}
+	\lean{MIPStarRE.QPBT.pauliWinPredicate, MIPStarRE.QPBT.pauliBasisTest}
+	\leanok
 	\uses{def:pauli-question-distribution, def:ld-win-predicate, def:ms-game, def:indicator-vector, def:admissible}
 	Fix an admissible tuple $\mathsf{qldparams} = (q,m,d)$ (Definition~\ref{def:admissible}) and let $M = 2^m$. Answers in the game $\mathfrak{G}^{\mathrm{Pauli}}_{\mathsf{qldparams}}$ take the following forms, depending on the question type; answers not of the prescribed form are rejected.
 	% The paper's format table writes the line contents loosely as (u_W, s) and (u_W, s, v);
