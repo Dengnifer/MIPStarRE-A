@@ -18,15 +18,29 @@ repository (`list-labels`, paginated), so `local/labels.yml` is retired and a
 label absent from GitHub is reported, never invented. Briefs (the design record
 per issue) live in `local/briefs/`: agent input, not lifecycle state.
 
+Prerequisites between issues are **GitHub issue dependencies**
+(`GET`/`POST …/issues/{n}/dependencies/blocked_by`), one edge per prerequisite.
+The edge is retained even when the prerequisite closes, so reopening it restores the block.
+A prerequisite carried by a pull request is the packet issue that PR closes. The
+"Dependencies" bullets in an issue body are commentary on those edges, never
+the record. A packet is **ready** when it is an open leaf of the tracker tree
+and every issue blocking it is closed; `local/bin/ready_packets.py` computes
+that list, and the operator launches lanes from it rather than from a
+hand-kept order or a dependency table in a comment (EVOLUTION.md 2026-09-04).
+Establish or adopt each edge with
+`local/bin/gh_common.py add-blocked-by ISSUE PREREQUISITE`. The command first
+reads the edge, makes at most one mutation, and re-reads after an ambiguous
+failure; it is therefore safe to repeat. Record closed prerequisites too.
+
 Every GitHub call goes through `local/bin/gh_common.py` — a module for Python
 callers, and for the shell scripts a CLI (`pr-view`, `post-status`,
 `latest-statuses`, `ensure-pr-comment`, `post-review`, `merge-pr`,
-`issue-create`, `issue-close`, `snapshot`, …; `--help` lists them) owning CLI
-discovery, repository resolution, API version headers, bounded retry of
-transient failures and the exit-2-with-stderr convention. Nothing else shells
-out to `gh`. `issue_new.py`, `issue_close.py`, `pr_open.py`, `ci.sh`,
-`review.sh`, `autofix.sh`, `pr_merge.py`, `github-sync.sh` take GitHub numbers;
-`track.py`, `validate_tree.py` and `export_issues.py` are deleted.
+`issue-create`, `add-blocked-by`, `issue-close`, `snapshot`, …; `--help` lists
+them) owning CLI discovery, repository resolution, API version headers,
+bounded retry of transient failures and the exit-2-with-stderr convention.
+Nothing else shells out to `gh`. `issue_new.py`, `issue_close.py`, `pr_open.py`,
+`ci.sh`, `review.sh`, `autofix.sh`, `pr_merge.py`, `github-sync.sh` take GitHub
+numbers; `track.py`, `validate_tree.py` and `export_issues.py` are deleted.
 
 * Branches: `issue-<github-number>-<slug>`, or `codex/issue-<number>-<slug>`
   from an agent; `pr_open.py` rejects what `git check-ref-format` would.

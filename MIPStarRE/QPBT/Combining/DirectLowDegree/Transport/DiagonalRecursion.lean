@@ -546,7 +546,7 @@ private theorem diagonal_line_point_branch_eq :
             ((Fin D.m → DirectScalarQ D) × (Fin D.m → DirectScalarQ D))) fun pv =>
           diagonalLinePointRejection D S pv.1 i (directPrefixProjection i pv.2) := by
   rw [directLdBranchRejectionProbability_eq_avgOver,
-    avgOver_uniform_equiv_prod (directLdSpaceIndexSplitEquiv D)]
+    avgOver_uniform_equiv_prod (directLdSpaceIndexEquiv D)]
   apply avgOver_congr
   intro i
   apply avgOver_congr
@@ -562,7 +562,7 @@ private theorem diagonal_point_line_branch_eq :
             ((Fin D.m → DirectScalarQ D) × (Fin D.m → DirectScalarQ D))) fun pv =>
           diagonalPointLineRejection D S pv.1 i (directPrefixProjection i pv.2) := by
   rw [directLdBranchRejectionProbability_eq_avgOver,
-    avgOver_uniform_equiv_prod (directLdSpaceIndexSplitEquiv D)]
+    avgOver_uniform_equiv_prod (directLdSpaceIndexEquiv D)]
   apply avgOver_congr
   intro i
   apply avgOver_congr
