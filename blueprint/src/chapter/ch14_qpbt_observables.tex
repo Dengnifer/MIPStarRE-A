@@ -160,6 +160,7 @@ this is the source of the terminology.
 	\label{fact:omega-anticomm-prob}
 	\lean{MIPStarRE.QPBT.anticommProb, MIPStarRE.QPBT.anticommProb_eq}
 	\lean{MIPStarRE.QPBT.commProb, MIPStarRE.QPBT.commProb_ge_half}
+	\lean{MIPStarRE.QPBT.commProb_eq_one_sub_anticommProb}
 	\lean{MIPStarRE.QPBT.anticommProb_ge_of_m_le_q}
 	\lean{MIPStarRE.QPBT.anticommProb_ge_of_one_le_md}
 	\leanok
@@ -191,6 +192,7 @@ this is the source of the terminology.
 	$\big(1 - \frac{3md}{q}\big) \cdot \frac{1}{2}$.
 \end{lemma}
 \begin{proof}
+	\leanok
 	\uses{def:low-degree-encoding, def:indicator-vector, def:admissible-size, def:binary-representation, lem:downsize_field, lem:one}
 	By the definition of the indicator vector
 	(Definition~\ref{def:indicator-vector}), expanding the product over the
