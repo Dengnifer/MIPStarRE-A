@@ -249,16 +249,11 @@ theorem pauliTraceMeasurement_projective (P : AdmissibleParams) (W : PauliKind)
   exact reflectionMeasurement_projective (tauObservable W (r • indicatorVec u))
     (tauObservable_conjTranspose W _) (tauObservable_sq W _) b
 
-/-- The honest Pair/W measurement is consistent on the EPR state, because its
-effects are symmetric matrices.  This is the consistency assertion for the
-Pauli basis measurements in the proof of `lem:pauli-completeness`, paper
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1364-1372`. -/
-theorem pauliTraceMeasurement_isConsistentOn (P : AdmissibleParams) (W : PauliKind)
-    (u : Fin P.m → PauliScalar P) (r : PauliScalar P) :
-    MIPStarRE.QPBT.Measurement.IsConsistentOn (pauliTraceMeasurement P W u r)
-      (eprState (PauliRegister P)) := by
-  intro b
-  refine epr_action_eq_of_transpose _ ?_
+/-- The effects of the honest Pair/W measurement are symmetric matrices. -/
+theorem pauliTraceMeasurement_effect_transpose (P : AdmissibleParams) (W : PauliKind)
+    (u : Fin P.m → PauliScalar P) (r : PauliScalar P) (b : ZMod 2) :
+    ((pauliTraceMeasurement P W u r).effect b)ᵀ =
+      (pauliTraceMeasurement P W u r).effect b := by
   rw [pauliTraceMeasurement_effect_eq_reflectionEffect]
   rcases zmod_two_eq_zero_or_one b with rfl | rfl
   · simp only [reflectionEffect, if_pos]
@@ -267,6 +262,16 @@ theorem pauliTraceMeasurement_isConsistentOn (P : AdmissibleParams) (W : PauliKi
   · simp only [reflectionEffect, if_neg one_ne_zero]
     rw [Matrix.transpose_smul, Matrix.transpose_sub, Matrix.transpose_one,
       tauObservable_transpose]
+
+/-- The honest Pair/W measurement is consistent on the EPR state, because its
+effects are symmetric matrices.  This is the consistency assertion for the
+Pauli basis measurements in the proof of `lem:pauli-completeness`, paper
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1364-1372`. -/
+theorem pauliTraceMeasurement_isConsistentOn (P : AdmissibleParams) (W : PauliKind)
+    (u : Fin P.m → PauliScalar P) (r : PauliScalar P) :
+    MIPStarRE.QPBT.Measurement.IsConsistentOn (pauliTraceMeasurement P W u r)
+      (eprState (PauliRegister P)) := fun b =>
+  epr_action_eq_of_transpose _ (pauliTraceMeasurement_effect_transpose P W u r b)
 
 /-! ### The commutation law of the honest pair -/
 
@@ -327,6 +332,105 @@ theorem exists_ms_perfect_strategy_of_pauliPairGamma_ne_zero (P : AdmissiblePara
     (pauliTraceMeasurement_isConsistentOn P .X _ _)
     (pauliTraceMeasurement_isConsistentOn P .Z _ _)
     (obsOf_pauliTraceMeasurement_anticommute P z hgamma)
+
+/-! ### The Pair measurement in the case `γ = 0`
+
+If the phase bit vanishes, the two honest Pair/W measurements commute and their
+product is the Pair measurement `E^{Pair,ω}_{β_X, β_Z} = A_{β_X} B_{β_Z}` of
+Equation `eq:pair-definition` in the proof of `lem:pauli-completeness`, paper
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1331-1344`.
+-/
+
+/-- If the phase bit `γ` of `eq:gamma-value` vanishes, the two honest Pair/W
+observables commute.  Paper
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1316-1330`. -/
+theorem obsOf_pauliTraceMeasurement_commute (P : AdmissibleParams)
+    (z : PauliSpace P) (hgamma : pauliPairGamma P z = 0) :
+    Commute (obsOf (pauliTraceMeasurement P .X (pauliXBlock z) (pauliRXBlock z)))
+      (obsOf (pauliTraceMeasurement P .Z (pauliZBlock z) (pauliRZBlock z))) := by
+  rw [commute_iff_eq, obsOf_pauliTraceMeasurement_mul_comm, hgamma]
+  simp [phaseSign]
+
+/-- If the phase bit `γ` vanishes, the effects of the two honest Pair/W
+measurements commute; this is the commutation assertion of the honest strategy
+in the case `γ = 0`, paper
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1374-1382`. -/
+theorem pauliTraceMeasurement_effect_commute (P : AdmissibleParams)
+    (z : PauliSpace P) (hgamma : pauliPairGamma P z = 0) (a b : ZMod 2) :
+    Commute ((pauliTraceMeasurement P .X (pauliXBlock z) (pauliRXBlock z)).effect a)
+      ((pauliTraceMeasurement P .Z (pauliZBlock z) (pauliRZBlock z)).effect b) := by
+  have hOO :
+      Commute (tauObservable PauliKind.X (pauliRXBlock z • indicatorVec (pauliXBlock z)))
+        (tauObservable PauliKind.Z (pauliRZBlock z • indicatorVec (pauliZBlock z))) := by
+    rw [← obsOf_pauliTraceMeasurement P .X (pauliXBlock z) (pauliRXBlock z),
+      ← obsOf_pauliTraceMeasurement P .Z (pauliZBlock z) (pauliRZBlock z)]
+    exact obsOf_pauliTraceMeasurement_commute P z hgamma
+  rw [pauliTraceMeasurement_effect_eq_reflectionEffect,
+    pauliTraceMeasurement_effect_eq_reflectionEffect]
+  exact reflectionEffect_commute hOO a b
+
+/-- The Pair effect `E^{Pair,ω}_{β_X, β_Z} = A_{β_X} B_{β_Z}` of Equation
+`eq:pair-definition`, paper
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1331-1339`. -/
+noncomputable def pauliPairEffect (P : AdmissibleParams) (z : PauliSpace P)
+    (β : ZMod 2 × ZMod 2) : Op (PauliRegister P) :=
+  (pauliTraceMeasurement P .X (pauliXBlock z) (pauliRXBlock z)).effect β.1 *
+    (pauliTraceMeasurement P .Z (pauliZBlock z) (pauliRZBlock z)).effect β.2
+
+/-- For `γ = 0` the Pair effects are projectors, being products of commuting
+projectors.  Paper
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1331-1344`. -/
+theorem pauliPairEffect_isProj (P : AdmissibleParams) (z : PauliSpace P)
+    (hgamma : pauliPairGamma P z = 0) (β : ZMod 2 × ZMod 2) :
+    IsProj (pauliPairEffect P z β) :=
+  IsStarProjection.mul (pauliTraceMeasurement_projective P .X _ _ β.1)
+    (pauliTraceMeasurement_projective P .Z _ _ β.2)
+    (pauliTraceMeasurement_effect_commute P z hgamma β.1 β.2)
+
+/-- The Pair effects sum to the identity. -/
+theorem sum_pauliPairEffect (P : AdmissibleParams) (z : PauliSpace P) :
+    ∑ β : ZMod 2 × ZMod 2, pauliPairEffect P z β = 1 := by
+  calc ∑ β : ZMod 2 × ZMod 2, pauliPairEffect P z β
+      = ∑ a : ZMod 2, ∑ b : ZMod 2,
+          (pauliTraceMeasurement P .X (pauliXBlock z) (pauliRXBlock z)).effect a *
+            (pauliTraceMeasurement P .Z (pauliZBlock z) (pauliRZBlock z)).effect b :=
+        Fintype.sum_prod_type _
+    _ = ∑ a : ZMod 2,
+          (pauliTraceMeasurement P .X (pauliXBlock z) (pauliRXBlock z)).effect a *
+            ∑ b : ZMod 2,
+              (pauliTraceMeasurement P .Z (pauliZBlock z) (pauliRZBlock z)).effect b :=
+        Finset.sum_congr rfl fun a _ => by rw [Finset.mul_sum]
+    _ = 1 := by
+        rw [(pauliTraceMeasurement P .Z (pauliZBlock z) (pauliRZBlock z)).sum_eq_one]
+        simp [(pauliTraceMeasurement P .X (pauliXBlock z) (pauliRXBlock z)).sum_eq_one]
+
+/-- The Pair measurement of Equation `eq:pair-definition` in the case `γ = 0`,
+paper `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1331-1344`,
+blueprint `blueprint/src/chapter/ch13_qpbt_test.tex:390-395`. -/
+noncomputable def pauliPairMeasurement (P : AdmissibleParams) (z : PauliSpace P)
+    (hgamma : pauliPairGamma P z = 0) : Measurement (ZMod 2 × ZMod 2) (PauliRegister P) :=
+  Measurement.ofSumEqOne (pauliPairEffect P z)
+    (fun β => (pauliPairEffect_isProj P z hgamma β).nonneg) (sum_pauliPairEffect P z)
+
+/-- The Pair measurement is projective. -/
+theorem pauliPairMeasurement_projective (P : AdmissibleParams) (z : PauliSpace P)
+    (hgamma : pauliPairGamma P z = 0) :
+    MIPStarRE.QPBT.Measurement.IsProjective (pauliPairMeasurement P z hgamma) :=
+  pauliPairEffect_isProj P z hgamma
+
+/-- The Pair measurement is consistent on the EPR state.  This is the
+consistency assertion for the Pair measurement in the case `γ = 0`, paper
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1368-1372`. -/
+theorem pauliPairMeasurement_isConsistentOn (P : AdmissibleParams) (z : PauliSpace P)
+    (hgamma : pauliPairGamma P z = 0) :
+    MIPStarRE.QPBT.Measurement.IsConsistentOn (pauliPairMeasurement P z hgamma)
+      (eprState (PauliRegister P)) := by
+  intro β
+  refine epr_action_eq_of_transpose _ ?_
+  show (pauliPairEffect P z β)ᵀ = pauliPairEffect P z β
+  rw [pauliPairEffect, Matrix.transpose_mul, pauliTraceMeasurement_effect_transpose,
+    pauliTraceMeasurement_effect_transpose]
+  exact (pauliTraceMeasurement_effect_commute P z hgamma β.1 β.2).eq.symm
 
 end
 
