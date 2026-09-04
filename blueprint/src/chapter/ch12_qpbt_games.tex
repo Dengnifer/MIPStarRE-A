@@ -1373,9 +1373,14 @@ The question distribution of the Pauli basis test is \emph{typed}: each question
 % The nonempty-edge hypothesis on G is inherited from def:graph-distribution, where it is
 % needed for the graph distribution mu_G to be defined; the source
 % (references/qpbt-paper/07_types.tex:84-93) leaves it implicit here as well.
+% The Lean declaration typedCLDistribution is stated for arbitrary T-indexed families of maps
+% on V: it carries neither a level nor the IsTypedCondLinearFamily hypotheses that this
+% definition imposes on L and R, so it is a strict generalization of the definition below and
+% the node is left unmarked, exactly as for def:cl-dist. The identifications of the two
+% concrete samplers with this construction are stated separately as lem:ld-question-typed-cl
+% and lem:pauli-question-typed-cl in Chapter chap:qpbt-test.
 \begin{definition}[Typed conditionally linear distributions]\label{def:typed-cl-distributions}
-	\lean{MIPStarRE.QPBT.typedCLDistribution, MIPStarRE.QPBT.ldQuestionDistribution_eq_typedCL, MIPStarRE.QPBT.pauliQuestionDistribution_eq_typedCL}
-	\leanok
+	\lean{MIPStarRE.QPBT.typedCLDistribution}
 	\uses{def:typed-cl-functions, def:graph-distribution, def:cl-dist}
 	Let $\mathcal T$ be a type set and let $L = \{L_u\}_{u \in \mathcal T}$ and $R = \{R_v\}_{v \in \mathcal T}$ be $\mathcal T$-typed families of conditionally linear functions on $V$. Let $G = (\mathcal T, E)$ be a graph with vertex set $\mathcal T$ and nonempty edge set $E$, so that the graph distribution $\mu_G$ of Definition~\ref{def:graph-distribution} is defined. The \emph{$(\mathcal T, G)$-typed conditionally linear distribution $\mu^G_{L,\,R}$ corresponding to $(L, R)$} is the distribution over pairs $\bigl( (u, x), (v, y) \bigr)$, where the type pair $(u,v)$ is drawn from the graph distribution $\mu_G$ and the content pair $(x,y)$ is drawn from $\mu_{L_u,\,R_v}$.
 \end{definition}
