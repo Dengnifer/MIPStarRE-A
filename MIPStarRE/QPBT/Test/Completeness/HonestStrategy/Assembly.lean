@@ -493,6 +493,49 @@ theorem honestMeasurement_isConsistentOn (P : AdmissibleParams) (t : PauliType)
       (eprState (HonestIndex P)) := fun a =>
   epr_action_eq_of_transpose _ (honestMeasurement_effect_transpose P t z a)
 
+/-- Two coarse-grainings of one projective measurement of the Pauli register
+still have commuting effects after tensor placement and answer relabelling.
+This is the commutation of the honest measurements sharing a Pauli basis in the
+proof of `lem:pauli-completeness`, paper
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1364-1372`. -/
+theorem placedPauliMeasurement_postprocess_commute {P : AdmissibleParams}
+    {ζ α β : Type*} [Fintype ζ] [DecidableEq ζ] [Fintype α] [DecidableEq α]
+    [Fintype β] [DecidableEq β]
+    (M : Measurement ζ (PauliRegister P))
+    (hM : MIPStarRE.QPBT.Measurement.IsProjective M)
+    (g₁ : ζ → α) (g₂ : ζ → β)
+    (u : α → PauliAnswer P) (v : β → PauliAnswer P) (a b : PauliAnswer P) :
+    Commute ((placedPauliMeasurement (M.postprocess g₁) u).effect a)
+      ((placedPauliMeasurement (M.postprocess g₂) v).effect b) := by
+  classical
+  change Commute
+    (((DistanceCalculus.leftPlacedMeasurement (ιB := ZMod 2)
+        (M.postprocess g₁)).postprocess u).effect a)
+    (((DistanceCalculus.leftPlacedMeasurement (ιB := ZMod 2)
+        (M.postprocess g₂)).postprocess v).effect b)
+  rw [Measurement.postprocess_effect, Measurement.postprocess_effect]
+  refine Commute.sum_left _ _ _ fun x _ => Commute.sum_right _ _ _ fun y _ => ?_
+  change Commute (heteroKron ((M.postprocess g₁).effect x) (1 : Op (ZMod 2)))
+    (heteroKron ((M.postprocess g₂).effect y) (1 : Op (ZMod 2)))
+  exact leftPlaced_commute (postprocess_effect_commute M hM g₁ g₂ x y)
+
+/-- The effects of one honest measurement commute with one another; this is the
+commutation along the self-loops of the Pauli question graph in
+`lem:pauli-completeness`, paper
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1364-1372`. -/
+theorem honestMeasurement_self_commute (P : AdmissibleParams) (t : PauliType)
+    (z : PauliSpace P) (a b : PauliAnswer P) :
+    Commute ((honestMeasurement P t z).effect a)
+      ((honestMeasurement P t z).effect b) := by
+  by_cases hab : a = b
+  · subst hab
+    exact Commute.refl _
+  · rw [commute_iff_eq,
+      DistanceCalculus.projective_effect_mul_effect_eq_zero _
+        (honestMeasurement_projective P t z) hab,
+      DistanceCalculus.projective_effect_mul_effect_eq_zero _
+        (honestMeasurement_projective P t z) (Ne.symm hab)]
+
 end
 
 end MIPStarRE.QPBT
