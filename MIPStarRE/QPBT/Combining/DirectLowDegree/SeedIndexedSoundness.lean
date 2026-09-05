@@ -1,5 +1,6 @@
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Soundness
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.PointAgreement
+import MIPStarRE.QPBT.Games.Sandwich.Support
 
 /-!
 # Seed-indexed low-degree soundness for one simultaneous coordinate
@@ -67,7 +68,7 @@ private theorem consistencyDefect_prod_unit
       consistencyDefect (uniformDistribution Y)
         (fun y => A ((), y)) (fun y => B ((), y)) psi := by
   unfold consistencyDefect
-  rw [SandwichInternal.avgOver_distribution_prod,
+  rw [SandwichProduct.avgOver_distribution_prod,
     avgOver_uniform_eq_inv_card_mul_sum]
   simp
 
@@ -153,7 +154,8 @@ theorem exists_ld_soundness_of_k_eq_one :
   refine ⟨a, b, ha, hb, hb1, ?_⟩
   intro L ε hk hε S hS hwin
   haveI : Nonempty (Fin L.m → ScalarQ L) :=
-    directPointNonempty L.toDirectLdParams
+    Nonempty.map (directPointEquiv L.toDirectLdParams).symm
+      (directLdtPointNonempty L.toDirectLdParams)
   set E : ℝ :=
     Test.mainFormalError L.toDirectLdParams.toLDTParameters
       (directLdAuxParameter L.toDirectLdParams) (3 * ε) with hE
@@ -217,7 +219,7 @@ theorem exists_ld_soundness_of_k_eq_one :
       (fun _ g => heteroKron (GA.effect g) 1)
       (fun _ g => heteroKron 1 (GB.effect g)) S.ψ ≤
       E + 2 * Real.sqrt (9 * ε + E) + ((L.m : ℝ) * (L.d : ℝ)) / (L.q : ℝ) := by
-    have hstep := SandwichInternal.consistencyDefect_codewords_le_evaluated_add
+    have hstep := SandwichProduct.consistencyDefect_codewords_le_evaluated_add
       (uniformDistribution Unit) (fun _ : Unit => GA) (fun _ : Unit => GB) S.ψ
       (fun g u => evalPolyTupleAt u g) (((L.m : ℝ) * (L.d : ℝ)) / (L.q : ℝ))
       (uniformDistribution_isProbability _) S.ψ_norm hmdq
