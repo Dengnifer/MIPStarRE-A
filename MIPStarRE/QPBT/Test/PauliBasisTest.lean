@@ -16,7 +16,7 @@ Pauli basis test.  The quantitative soundness theorem is isolated in
 
 The source-facing nodes are `def:admissible`, `def:pauli-question-distribution`,
 and `def:pauli-win-predicate` in
-`blueprint/src/chapter/ch13_qpbt_test.tex:370-520`; their paper origin is
+`blueprint/src/chapter/ch13_qpbt_test.tex`; their paper origin is
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:908-1225`.
 -/
 
@@ -32,7 +32,7 @@ noncomputable section
 uses the once-and-for-all model `fixedFieldModel q hq`, so the paper's fixed
 self-dual-normal identification is not quantified in the test statement.  This
 is `def:admissible` in
-`blueprint/src/chapter/ch13_qpbt_test.tex:370-386`, paper origin
+`blueprint/src/chapter/ch13_qpbt_test.tex`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:958-961`.
 -/
 structure AdmissibleParams where
@@ -46,7 +46,7 @@ structure AdmissibleParams where
 /-- Every admissible parameter tuple has positive ambient dimension. This
 follows from positivity of the admissible field size and the divisibility
 `P.m ∣ P.q` in `def:admissible`, blueprint
-`blueprint/src/chapter/ch13_qpbt_test.tex:370-386`, paper origin
+`blueprint/src/chapter/ch13_qpbt_test.tex`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:958-961`.
 -/
 theorem AdmissibleParams.one_le_m (P : AdmissibleParams) : 1 ≤ P.m := by
@@ -59,16 +59,17 @@ theorem AdmissibleParams.one_le_m (P : AdmissibleParams) : 1 ≤ P.m := by
 
 /-- The fixed scalar model of an admissible parameter tuple.  It is a
 compatibility view of the global `fixedFieldModel` selector, not an independently
-quantified field representation.  Blueprint `ch13_qpbt_test.tex:370-386`; paper
+quantified field representation.  This is the field representation of
+`def:admissible`, blueprint `ch13_qpbt_test.tex`; paper
 origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:958-961`.
 -/
 noncomputable def AdmissibleParams.model (P : AdmissibleParams) : FixedFieldModel P.q :=
   fixedFieldModel P.q P.hq
 
-/-- The low-degree parameter view of an admissible Pauli-test tuple.  This is
-a Lean-only bridge supporting the statement closure; it is not an additional
-hypothesis of `thm:pauli`.  Blueprint
-`blueprint/src/chapter/ch13_qpbt_test.tex:17-34`, paper origin
+/-- The low-degree parameter tuple determined by an admissible Pauli-test
+tuple.  It is not an additional hypothesis of `thm:pauli`.  The low-degree
+parameters are those of `def:ld-game`, blueprint
+`blueprint/src/chapter/ch13_qpbt_test.tex`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:958-961`.
 -/
 def AdmissibleParams.toLdParams (P : AdmissibleParams) : LdParams where
@@ -85,13 +86,13 @@ def AdmissibleParams.toLdParams (P : AdmissibleParams) : LdParams where
 /-- The scalar carrier associated with an admissible parameter tuple.  It is
 the globally fixed field carrier selected by `AdmissibleParams.model` in
 `def:admissible`, blueprint
-`blueprint/src/chapter/ch13_qpbt_test.tex:370-386`, paper origin
+`blueprint/src/chapter/ch13_qpbt_test.tex`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:958-961`.
 -/
 abbrev PauliScalar (P : AdmissibleParams) := P.model.K
 
 /-- The six families of Pauli-test questions.  This is part of
-`def:pauli-question-distribution`, blueprint `ch13_qpbt_test.tex:388-435`,
+`def:pauli-question-distribution`, blueprint `ch13_qpbt_test.tex`,
 paper origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1120`.
 -/
 inductive PauliType where
@@ -106,14 +107,14 @@ inductive PauliType where
 
 /-- The register blocks used by the Pauli question space.  These are the
 coordinates displayed in `def:pauli-question-distribution`, blueprint
-`ch13_qpbt_test.tex:388-435`, paper origin
+`ch13_qpbt_test.tex`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1120`.
 -/
 abbrev PauliIndex (P : AdmissibleParams) :=
   (((((Fin P.m ⊕ Fin P.m) ⊕ Unit) ⊕ Fin P.m) ⊕ Unit) ⊕ Unit)
 
 /-- The ambient Pauli question coefficient space (`def:pauli-question-distribution`,
-blueprint `ch13_qpbt_test.tex:388-435`; paper origin
+blueprint `ch13_qpbt_test.tex`; paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1120`).
 -/
 abbrev PauliSpace (P : AdmissibleParams) := PauliIndex P → PauliScalar P
@@ -127,48 +128,48 @@ abbrev PauliRegister (P : AdmissibleParams) := Cube P.m → PauliScalar P
 /- The nested sum is the fixed register order
 `V_X ⊕ V_Z ⊕ V_I ⊕ V_V ⊕ V_{R_X} ⊕ V_{R_Z}` from the blueprint. -/
 /-- The `V_X` block of an ambient Pauli vector (`def:pauli-question-distribution`,
-blueprint `ch13_qpbt_test.tex:388-435`; paper origin
+blueprint `ch13_qpbt_test.tex`; paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1120`). -/
 def pauliXBlock {P : AdmissibleParams} (z : PauliSpace P) : Fin P.m → PauliScalar P :=
   fun i => z (.inl (.inl (.inl (.inl (.inl i)))))
 
 /-- The `V_Z` block of an ambient Pauli vector in `def:pauli-question-distribution`,
-blueprint `ch13_qpbt_test.tex:388-435`, paper origin
+blueprint `ch13_qpbt_test.tex`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1120`.
 -/
 def pauliZBlock {P : AdmissibleParams} (z : PauliSpace P) : Fin P.m → PauliScalar P :=
   fun i => z (.inl (.inl (.inl (.inl (.inr i)))))
 
 /-- The scalar block `V_I` of an ambient Pauli vector in
-`def:pauli-question-distribution`, blueprint `ch13_qpbt_test.tex:388-435`,
+`def:pauli-question-distribution`, blueprint `ch13_qpbt_test.tex`,
 paper origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1120`.
 -/
 def pauliScalarBlock {P : AdmissibleParams} (z : PauliSpace P) : PauliScalar P :=
   z (.inl (.inl (.inl (.inr ()))))
 
 /-- The direction block `V_V` of an ambient Pauli vector in
-`def:pauli-question-distribution`, blueprint `ch13_qpbt_test.tex:388-435`,
+`def:pauli-question-distribution`, blueprint `ch13_qpbt_test.tex`,
 paper origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1120`.
 -/
 def pauliDirectionBlock {P : AdmissibleParams} (z : PauliSpace P) : Fin P.m → PauliScalar P :=
   fun i => z (.inl (.inl (.inr i)))
 
 /-- The `r_X` scalar block in the Pauli question content from
-`def:pauli-question-distribution`, blueprint `ch13_qpbt_test.tex:388-435`,
+`def:pauli-question-distribution`, blueprint `ch13_qpbt_test.tex`,
 paper origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1120`.
 -/
 def pauliRXBlock {P : AdmissibleParams} (z : PauliSpace P) : PauliScalar P :=
   z (.inl (.inr ()))
 
 /-- The `r_Z` scalar block in the Pauli question content from
-`def:pauli-question-distribution`, blueprint `ch13_qpbt_test.tex:388-435`,
+`def:pauli-question-distribution`, blueprint `ch13_qpbt_test.tex`,
 paper origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1120`.
 -/
 def pauliRZBlock {P : AdmissibleParams} (z : PauliSpace P) : PauliScalar P :=
   z (.inr ())
 
 /-- Select the basis-dependent point block from a Pauli question content in
-`def:pauli-question-distribution`, blueprint `ch13_qpbt_test.tex:388-435`,
+`def:pauli-question-distribution`, blueprint `ch13_qpbt_test.tex`,
 paper origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1120`.
 -/
 def pauliPointBlock {P : AdmissibleParams} (W : PauliKind) (z : PauliSpace P) :
@@ -178,8 +179,8 @@ def pauliPointBlock {P : AdmissibleParams} (W : PauliKind) (z : PauliSpace P) :
   | .Z => pauliZBlock z
 
 /-- Read the low-degree register selected by a basis from an ambient Pauli
-vector.  Lean-only coordinate plumbing for `def:pauli-question-distribution`,
-blueprint `ch13_qpbt_test.tex:388-435`, paper origin
+vector.  This is restriction to the basis-selected registers of
+`def:pauli-question-distribution`, blueprint `ch13_qpbt_test.tex`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1120`.
 -/
 def pauliToLd (P : AdmissibleParams) (W : PauliKind) (z : PauliSpace P) :
@@ -190,9 +191,9 @@ def pauliToLd (P : AdmissibleParams) (W : PauliKind) (z : PauliSpace P) :
   | .inr j => pauliDirectionBlock z j
 
 /-- Embed a low-degree vector into the basis-selected Pauli blocks, clearing the
-other basis and the two `r` registers.  This is Lean-only coordinate plumbing
-for `def:pauli-question-distribution`, blueprint
-`blueprint/src/chapter/ch13_qpbt_test.tex:388-435`, paper origin
+other basis and the two `r` registers.  This is extension into the
+basis-selected registers of `def:pauli-question-distribution`, blueprint
+`blueprint/src/chapter/ch13_qpbt_test.tex`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1120`.
 -/
 def embedLd (P : AdmissibleParams) (W : PauliKind)
@@ -212,7 +213,7 @@ def embedLd (P : AdmissibleParams) (W : PauliKind)
   | .inr _ => 0
 
 /-- The type-4 projection retaining `V_X`, `V_Z`, `V_{R_X}`, and `V_{R_Z}` from
-`def:pauli-question-distribution`, blueprint `ch13_qpbt_test.tex:388-435`, paper
+`def:pauli-question-distribution`, blueprint `ch13_qpbt_test.tex`, paper
 origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1120`.
 -/
 def pauliSharedProjection {P : AdmissibleParams} (z : PauliSpace P) : PauliSpace P :=
@@ -228,7 +229,7 @@ def pauliSharedProjection {P : AdmissibleParams} (z : PauliSpace P) : PauliSpace
 exact levels in items 1--5 of `def:pauli-question-distribution`: point, line,
 and diagonal maps have levels 1, 2, and 3, the Pauli map has level 0, and the
 shared projection has level 1.  Blueprint
-`blueprint/src/chapter/ch13_qpbt_test.tex:388-435`; paper origin
+`blueprint/src/chapter/ch13_qpbt_test.tex`; paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1120`.
 -/
 def pauliCLLevel : PauliType → ℕ
@@ -240,11 +241,12 @@ def pauliCLLevel : PauliType → ℕ
   | .pair => 1
   | .ms _ => 1
 
-/-- The typed CL dispatcher.  The point/line maps are the corresponding
+/-- The conditionally linear map attached to each Pauli question type.  The
+point and line maps are the corresponding
 low-degree maps embedded in the selected basis block; Pair, Magic Square, and
 Pair/W types use the shared projection; Pauli/W is the zero-level map.  This
 is the direct finite-space form of `def:pauli-question-distribution`,
-blueprint `ch13_qpbt_test.tex:388-435`, paper origin
+blueprint `ch13_qpbt_test.tex`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1120`.
 -/
 noncomputable def pauliCL (P : AdmissibleParams) (t : PauliType) :
@@ -258,212 +260,9 @@ noncomputable def pauliCL (P : AdmissibleParams) (t : PauliType) :
   | .pair => pauliSharedProjection
   | .ms _ => pauliSharedProjection
 
-/-- Formalization-only auxiliary: a linear map of the ambient coefficient space
-is conditionally linear with a single level on the full register.  This is the
-one-level case of `def:cl-func`, blueprint
-`blueprint/src/chapter/ch12_qpbt_games.tex:1701-1711`,
-paper origin `references/qpbt-paper/05_conditionally_linear_functions.tex:35-57`. -/
-private theorem isCondLinearOn_one_of_linear {K ι : Type*} [Field K]
-    [Fintype ι] [DecidableEq ι] (L : (ι → K) →ₗ[K] (ι → K)) :
-    IsCondLinearOn K Finset.univ 1 (fun x => L x) := by
-  refine ⟨.succ Finset.univ L (fun _ i hi => absurd (Finset.mem_univ i) hi)
-      (fun _ => .zero), ⟨Finset.subset_univ _, fun _ => trivial⟩, ?_⟩
-  funext x
-  have hx : coordinateRestriction (Finset.univ : Finset ι) x = x := by
-    funext i
-    simp [coordinateRestriction]
-  show L (coordinateRestriction Finset.univ x) + 0 = L x
-  rw [hx, add_zero]
-
-/-- Formalization-only auxiliary: extend a coefficient vector along an injective
-reindexing of registers, setting every coordinate outside the image to zero.
-The extension is used to reindex a conditionally linear map along `f`, with zero
-coordinates outside its image. This supports the transport of conditional
-linearity between the register spaces of `def:cl-func`,
-blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:1701-1711`,
-paper origin `references/qpbt-paper/05_conditionally_linear_functions.tex:35-57`. -/
-private def clExtend {K κ ι : Type*} [Zero K] (f : κ → ι) (u : κ → K) : ι → K :=
-  Function.extend f u 0
-
-/-- Formalization-only auxiliary: the extension recovers the original
-coordinates along an injective reindexing. -/
-private theorem clExtend_apply {K κ ι : Type*} [Zero K] {f : κ → ι}
-    (hf : Function.Injective f) (u : κ → K) (k : κ) :
-    clExtend f u (f k) = u k :=
-  hf.extend_apply u 0 k
-
-/-- Formalization-only auxiliary: the extension vanishes at any coordinate
-outside the image of the reindexing. -/
-private theorem clExtend_eq_zero_of_not_mem {K κ ι : Type*} [Zero K]
-    (f : κ → ι) (u : κ → K) (i : ι) (h : ∀ k, f k ≠ i) :
-    clExtend f u i = 0 :=
-  Function.extend_apply' u (0 : ι → K) i
-    (fun hex => h hex.choose hex.choose_spec)
-
-/-- Formalization-only auxiliary: restriction along an injective reindexing
-inverts the extension. -/
-private theorem clExtend_comp {K κ ι : Type*} [Zero K] {f : κ → ι}
-    (hf : Function.Injective f) (u : κ → K) :
-    (fun k => clExtend f u (f k)) = u :=
-  funext fun k => clExtend_apply hf u k
-
-/-- Formalization-only auxiliary: the extension of the zero vector vanishes. -/
-private theorem clExtend_zero {K κ ι : Type*} [Zero K] {f : κ → ι}
-    (hf : Function.Injective f) : clExtend f (0 : κ → K) = 0 := by
-  funext i
-  by_cases h : ∃ k, f k = i
-  · obtain ⟨k, rfl⟩ := h
-    simp [clExtend_apply hf]
-  · simp [clExtend, Function.extend_apply' _ _ _ h]
-
-/-- Formalization-only auxiliary: the extension is additive. -/
-private theorem clExtend_add {K κ ι : Type*} [AddZeroClass K] {f : κ → ι}
-    (hf : Function.Injective f) (u v : κ → K) :
-    clExtend f (u + v) = clExtend f u + clExtend f v := by
-  funext i
-  by_cases h : ∃ k, f k = i
-  · obtain ⟨k, rfl⟩ := h
-    simp [clExtend_apply hf]
-  · simp [clExtend, Function.extend_apply' _ _ _ h]
-
-/-- Formalization-only auxiliary: the extension commutes with scalars. -/
-private theorem clExtend_smul {K κ ι : Type*} [Semiring K] {f : κ → ι}
-    (hf : Function.Injective f) (c : K) (u : κ → K) :
-    clExtend f (c • u) = c • clExtend f u := by
-  funext i
-  by_cases h : ∃ k, f k = i
-  · obtain ⟨k, rfl⟩ := h
-    simp [clExtend_apply hf]
-  · simp [clExtend, Function.extend_apply' _ _ _ h]
-
-/-- Formalization-only auxiliary: transport a linear map of coefficient vectors
-along an injective reindexing of registers; see `clExtend`.  Supports
-`def:cl-func`, blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:1701-1711`,
-paper origin `references/qpbt-paper/05_conditionally_linear_functions.tex:35-57`. -/
-private def clReindexLinear {K κ ι : Type*} [Field K] {f : κ → ι}
-    (hf : Function.Injective f) (L : (κ → K) →ₗ[K] (κ → K)) :
-    (ι → K) →ₗ[K] (ι → K) where
-  toFun x := clExtend f (L (fun k => x (f k)))
-  map_add' x y := by
-    show clExtend f (L (fun k => (x + y) (f k))) =
-      clExtend f (L (fun k => x (f k))) + clExtend f (L (fun k => y (f k)))
-    have h : (fun k => (x + y) (f k)) =
-        (fun k => x (f k)) + (fun k => y (f k)) := rfl
-    rw [h, map_add, clExtend_add hf]
-  map_smul' c x := by
-    show clExtend f (L (fun k => (c • x) (f k))) =
-      c • clExtend f (L (fun k => x (f k)))
-    have h : (fun k => (c • x) (f k)) = c • (fun k => x (f k)) := rfl
-    rw [h, map_smul, clExtend_smul hf]
-
-/-- Formalization-only auxiliary: transport a conditionally linear syntax tree
-along an injective reindexing of registers; see `clExtend`.  Supports
-`def:cl-func`, blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:1701-1711`,
-paper origin `references/qpbt-paper/05_conditionally_linear_functions.tex:35-57`. -/
-private def clReindexTerm {K κ ι : Type*} [Field K] [Fintype κ] [DecidableEq κ]
-    [Fintype ι] [DecidableEq ι] {f : κ → ι} (hf : Function.Injective f) :
-    {ell : ℕ} → CondLinearTerm K (ι := κ) ell → CondLinearTerm K (ι := ι) ell
-  | _, .zero => .zero
-  | _, .succ S₁ L₁ h rest =>
-      .succ (S₁.image f) (clReindexLinear hf L₁)
-        (by
-          intro x i hi
-          by_cases hex : ∃ k, f k = i
-          · obtain ⟨k, rfl⟩ := hex
-            have hk : k ∉ S₁ := fun hk => hi (Finset.mem_image_of_mem f hk)
-            show clExtend f (L₁ (fun j => x (f j))) (f k) = 0
-            rw [clExtend_apply hf]
-            exact h _ k hk
-          · show clExtend f (L₁ (fun j => x (f j))) i = 0
-            simp [clExtend, Function.extend_apply' _ _ _ hex])
-        (fun y => clReindexTerm hf (rest (fun k => y (f k))))
-
-/-- Formalization-only auxiliary: the transported syntax tree is supported on
-any register containing the image of the original support. -/
-private theorem clReindexTerm_supportedOn {K κ ι : Type*} [Field K]
-    [Fintype κ] [DecidableEq κ] [Fintype ι] [DecidableEq ι] {f : κ → ι}
-    (hf : Function.Injective f) :
-    ∀ {ell : ℕ} (t : CondLinearTerm K (ι := κ) ell) (S : Finset κ)
-      (T : Finset ι), t.supportedOn S → S.image f ⊆ T →
-      (clReindexTerm hf t).supportedOn T := by
-  intro ell t
-  induction t with
-  | zero => intro S T _ _; trivial
-  | succ S₁ L₁ hL rest ih =>
-      intro S T hsupp hST
-      obtain ⟨h1, h2⟩ := hsupp
-      refine ⟨fun i hi => hST (Finset.image_subset_image h1 hi), fun y => ?_⟩
-      refine ih (fun k => y (f k)) (S \ S₁) (T \ S₁.image f) (h2 _) ?_
-      intro i hi
-      obtain ⟨k, hk, rfl⟩ := Finset.mem_image.mp hi
-      obtain ⟨hkS, hkS₁⟩ := Finset.mem_sdiff.mp hk
-      refine Finset.mem_sdiff.mpr ⟨hST (Finset.mem_image_of_mem f hkS), ?_⟩
-      intro hmem
-      obtain ⟨k', hk', hk'eq⟩ := Finset.mem_image.mp hmem
-      exact hkS₁ (hf hk'eq ▸ hk')
-
-/-- Formalization-only auxiliary: evaluation commutes with the transport of a
-conditionally linear syntax tree along an injective reindexing. -/
-private theorem clReindexTerm_eval {K κ ι : Type*} [Field K]
-    [Fintype κ] [DecidableEq κ] [Fintype ι] [DecidableEq ι] {f : κ → ι}
-    (hf : Function.Injective f) :
-    ∀ {ell : ℕ} (t : CondLinearTerm K (ι := κ) ell) (x : ι → K),
-      CondLinearTerm.eval (clReindexTerm hf t) x =
-        clExtend f (CondLinearTerm.eval t (fun k => x (f k))) := by
-  intro ell t
-  induction t with
-  | zero => intro x; exact (clExtend_zero hf).symm
-  | succ S₁ L₁ hL rest ih =>
-      intro x
-      have hres : (fun k => coordinateRestriction (S₁.image f) x (f k)) =
-          coordinateRestriction S₁ (fun k => x (f k)) := by
-        funext k
-        by_cases hk : k ∈ S₁
-        · have hmem : f k ∈ S₁.image f := Finset.mem_image_of_mem f hk
-          simp [coordinateRestriction, hk, hmem]
-        · have hni : f k ∉ S₁.image f := by
-            intro hmem
-            obtain ⟨k', hk', hk'eq⟩ := Finset.mem_image.mp hmem
-            exact hk (hf hk'eq ▸ hk')
-          simp [coordinateRestriction, hk, hni]
-      have hhead : clReindexLinear hf L₁ (coordinateRestriction (S₁.image f) x) =
-          clExtend f (L₁ (coordinateRestriction S₁ (fun k => x (f k)))) := by
-        show clExtend f (L₁ (fun k => coordinateRestriction (S₁.image f) x (f k))) = _
-        rw [hres]
-      have hcomp : (fun k => clReindexLinear hf L₁
-            (coordinateRestriction (S₁.image f) x) (f k)) =
-          L₁ (coordinateRestriction S₁ (fun k => x (f k))) := by
-        rw [hhead]
-        exact clExtend_comp hf _
-      show clReindexLinear hf L₁ (coordinateRestriction (S₁.image f) x) +
-          CondLinearTerm.eval (clReindexTerm hf (rest
-            (fun k => clReindexLinear hf L₁
-              (coordinateRestriction (S₁.image f) x) (f k)))) x =
-        clExtend f (L₁ (coordinateRestriction S₁ (fun k => x (f k))) +
-          CondLinearTerm.eval
-            (rest (L₁ (coordinateRestriction S₁ (fun k => x (f k)))))
-            (fun k => x (f k)))
-      rw [hcomp, ih _ x, hhead, ← clExtend_add hf]
-
-/-- Formalization-only auxiliary: conditional linearity is preserved by an
-injective reindexing of registers, the coordinates outside the image of the
-reindexing being set to zero. -/
-private theorem isCondLinearOn_reindex {K κ ι : Type*} [Field K]
-    [Fintype κ] [DecidableEq κ] [Fintype ι] [DecidableEq ι] {f : κ → ι}
-    (hf : Function.Injective f) {ell : ℕ} {L : (κ → K) → (κ → K)}
-    (h : IsCondLinearOn K Finset.univ ell L) :
-    IsCondLinearOn K Finset.univ ell
-      (fun x => clExtend f (L (fun k => x (f k)))) := by
-  obtain ⟨t, hsupp, hval⟩ := h
-  refine ⟨clReindexTerm hf t,
-    clReindexTerm_supportedOn hf t Finset.univ Finset.univ hsupp
-      (Finset.subset_univ _), ?_⟩
-  funext x
-  rw [clReindexTerm_eval hf t x, hval]
-
 /-- Formalization-only auxiliary: the type-4 projection of the ambient Pauli
 coefficient space, presented as a linear map; see `pauliSharedProjection` and
-`def:pauli-question-distribution`, blueprint `ch13_qpbt_test.tex:388-435`,
+`def:pauli-question-distribution`, blueprint `ch13_qpbt_test.tex`,
 paper origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1120`. -/
 private def pauliSharedProjectionLinear (P : AdmissibleParams) :
     PauliSpace P →ₗ[PauliScalar P] PauliSpace P where
@@ -478,7 +277,7 @@ private def pauliSharedProjectionLinear (P : AdmissibleParams) :
 /-- Formalization-only auxiliary: the inclusion of the low-degree register index
 into the ambient Pauli register index selected by a basis.  It realizes the
 natural embedding of the range of the low-degree maps described in
-`def:pauli-question-distribution`, blueprint `ch13_qpbt_test.tex:388-435`,
+`def:pauli-question-distribution`, blueprint `ch13_qpbt_test.tex`,
 paper origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1120`. -/
 private def pauliLdIndex (P : AdmissibleParams) (W : PauliKind) :
     LdIndex P.toLdParams → PauliIndex P
@@ -499,7 +298,7 @@ private theorem pauliLdIndex_injective (P : AdmissibleParams) (W : PauliKind) :
 
 /-- Formalization-only auxiliary: reading the low-degree register out of an
 ambient Pauli vector is restriction along `pauliLdIndex`; see
-`def:pauli-question-distribution`, blueprint `ch13_qpbt_test.tex:388-435`,
+`def:pauli-question-distribution`, blueprint `ch13_qpbt_test.tex`,
 paper origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1120`. -/
 private theorem pauliToLd_eq (P : AdmissibleParams) (W : PauliKind)
     (z : PauliSpace P) :
@@ -508,42 +307,44 @@ private theorem pauliToLd_eq (P : AdmissibleParams) (W : PauliKind)
   rcases k with (j | u) | j <;> cases W <;> rfl
 
 /-- Formalization-only auxiliary: writing a low-degree vector into the ambient
-Pauli registers is extension along `pauliLdIndex`; see
-`def:pauli-question-distribution`, blueprint `ch13_qpbt_test.tex:388-435`,
+Pauli registers is extension by zero along `pauliLdIndex`; see
+`def:pauli-question-distribution`, blueprint `ch13_qpbt_test.tex`,
 paper origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1120`. -/
 private theorem embedLd_eq (P : AdmissibleParams) (W : PauliKind)
     (w : LdSpace P.toLdParams) :
-    embedLd P W w = clExtend (pauliLdIndex P W) w := by
+    embedLd P W w = Function.extend (pauliLdIndex P W) w 0 := by
   have hf := pauliLdIndex_injective P W
+  have hz : ∀ i : PauliIndex P, (∀ k, pauliLdIndex P W k ≠ i) →
+      Function.extend (pauliLdIndex P W) w (0 : PauliSpace P) i = 0 :=
+    fun i hi => Function.extend_apply' w (0 : PauliSpace P) i
+      (fun hex => hi hex.choose hex.choose_spec)
   funext i
   rcases i with ((((j | j) | u) | j) | u) | u
   · cases W
-    · exact (clExtend_apply hf w (Sum.inl (Sum.inl j))).symm
-    · exact (clExtend_eq_zero_of_not_mem _ w _ (by
-        rintro ((j' | u') | j') <;> simp [pauliLdIndex])).symm
+    · exact (hf.extend_apply w 0 (Sum.inl (Sum.inl j))).symm
+    · exact (hz _ (by rintro ((j' | u') | j') <;> simp [pauliLdIndex])).symm
   · cases W
-    · exact (clExtend_eq_zero_of_not_mem _ w _ (by
-        rintro ((j' | u') | j') <;> simp [pauliLdIndex])).symm
-    · exact (clExtend_apply hf w (Sum.inl (Sum.inl j))).symm
-  · exact (clExtend_apply hf w (Sum.inl (Sum.inr ()))).symm
-  · exact (clExtend_apply hf w (Sum.inr j)).symm
-  · exact (clExtend_eq_zero_of_not_mem _ w _ (by
+    · exact (hz _ (by rintro ((j' | u') | j') <;> simp [pauliLdIndex])).symm
+    · exact (hf.extend_apply w 0 (Sum.inl (Sum.inl j))).symm
+  · exact (hf.extend_apply w 0 (Sum.inl (Sum.inr ()))).symm
+  · exact (hf.extend_apply w 0 (Sum.inr j)).symm
+  · exact (hz _ (by
       intro k
       cases W <;> rcases k with (j' | u') | j' <;> simp [pauliLdIndex])).symm
-  · exact (clExtend_eq_zero_of_not_mem _ w _ (by
+  · exact (hz _ (by
       intro k
       cases W <;> rcases k with (j' | u') | j' <;> simp [pauliLdIndex])).symm
 
 /-- Formalization-only auxiliary: the typed Pauli point, axis-line, and
 diagonal-line maps are the corresponding low-degree maps reindexed along
 `pauliLdIndex`.  This is items 1--3 of `def:pauli-question-distribution`,
-blueprint `ch13_qpbt_test.tex:388-435`,
+blueprint `ch13_qpbt_test.tex`,
 paper origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1120`. -/
 private theorem pauliCL_reindex (P : AdmissibleParams) (W : PauliKind)
     (L : LdSpace P.toLdParams → LdSpace P.toLdParams) :
     (fun z : PauliSpace P => embedLd P W (L (pauliToLd P W z))) =
-      fun z => clExtend (pauliLdIndex P W)
-        (L (fun k => z (pauliLdIndex P W k))) := by
+      fun z => Function.extend (pauliLdIndex P W)
+        (L (fun k => z (pauliLdIndex P W k))) 0 := by
   funext z
   rw [embedLd_eq, pauliToLd_eq]
 
@@ -551,7 +352,7 @@ private theorem pauliCL_reindex (P : AdmissibleParams) (W : PauliKind)
 point maps have level one, axis-line maps level two, diagonal-line maps level
 three, Pauli maps level zero, and all pair and Magic Square maps level one.
 This is `lem:pauli-question-cl-components` in
-`blueprint/src/chapter/ch13_qpbt_test.tex:437-447`, with paper origin
+`blueprint/src/chapter/ch13_qpbt_test.tex`, with paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1120`.
 The assertion concerns the individual levels and does not choose one common
 level for the whole family. -/
@@ -590,7 +391,7 @@ theorem isCondLinear_pauliCL (P : AdmissibleParams) (t : PauliType) :
 /-- The Pauli question maps form a typed family of three-level conditionally
 linear functions after each component is raised from its specified level. This
 is `lem:pauli-question-cl-family` in
-`blueprint/src/chapter/ch13_qpbt_test.tex:449-459`, with paper origin
+`blueprint/src/chapter/ch13_qpbt_test.tex`, with paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1084-1120`.
 -/
 theorem isTypedCondLinearFamily_pauliCL (P : AdmissibleParams) :
@@ -601,7 +402,7 @@ theorem isTypedCondLinearFamily_pauliCL (P : AdmissibleParams) :
 
 /-- A finite edge set for the typed Pauli question graph.  The self-loops and
 the displayed type-incidence families are the graph used by the sampler in
-`def:pauli-question-distribution`, blueprint `ch13_qpbt_test.tex:388-435`, paper origin
+`def:pauli-question-distribution`, blueprint `ch13_qpbt_test.tex`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1120`.
 -/
 def pauliEdges : Finset (Sym2 PauliType) :=
@@ -628,22 +429,22 @@ def pauliEdges : Finset (Sym2 PauliType) :=
   loops ∪ lineEdges ∪ basisEdges ∪ pairEdges ∪ msEdges'
 
 /-- A Pauli question is a type together with a full ambient coefficient vector
-(`def:pauli-question-distribution`, blueprint `ch13_qpbt_test.tex:388-435`; paper
+(`def:pauli-question-distribution`, blueprint `ch13_qpbt_test.tex`; paper
 origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1120`).
 -/
 abbrev PauliQuestion (P : AdmissibleParams) := PauliType × PauliSpace P
 
 /-- The Pauli question carrying no additional coefficient data, as in
-`def:pauli-win-predicate`, blueprint `ch13_qpbt_test.tex:481-520`, paper origin
+`def:pauli-win-predicate`, blueprint `ch13_qpbt_test.tex`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1006-1008`.
 Its ambient coefficient vector is zero. -/
 def pauliQuestion (P : AdmissibleParams) (W : PauliKind) : PauliQuestion P :=
   (.pauli W, 0)
 
 /-- The ordered-edge subtype used by the Pauli question sampler.  This is
-the finite carrier underlying `graphDistribution pauliEdges`; it is Lean-only
-infrastructure for `def:pauli-question-distribution`, blueprint
-`ch13_qpbt_test.tex:388-435`, paper origin
+the finite carrier underlying `graphDistribution pauliEdges`, used to state
+`def:pauli-question-distribution`, blueprint
+`ch13_qpbt_test.tex`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1120`.
 -/
 abbrev PauliEdge :=
@@ -659,7 +460,7 @@ theorem pauliEdge_nonempty : Nonempty PauliEdge := by
   simp [pauliEdges]
 
 /-- The Pauli question distribution from `def:pauli-question-distribution`,
-blueprint `ch13_qpbt_test.tex:388-435`, paper origin
+blueprint `ch13_qpbt_test.tex`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1070-1120`.
 -/
 noncomputable def pauliQuestionDistribution (P : AdmissibleParams) :
@@ -676,7 +477,7 @@ noncomputable def pauliQuestionDistribution (P : AdmissibleParams) :
 
 /-- The finite answer alphabet for the Pauli basis test.  Its constructors are
 the seven answer forms in `def:pauli-win-predicate`, blueprint
-`ch13_qpbt_test.tex:481-520`,
+`ch13_qpbt_test.tex`,
 paper origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1126-1225`.
 -/
 inductive PauliAnswer (P : AdmissibleParams) where
@@ -698,7 +499,7 @@ def pauliAnswerOrZero {P : AdmissibleParams} : PauliAnswer P → PauliRegister P
 
 /-- A finite sum code used only to construct the `Fintype` instance for the
 answer alphabet in `def:pauli-win-predicate`, blueprint
-`ch13_qpbt_test.tex:481-520`, paper origin
+`ch13_qpbt_test.tex`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1126-1225`.
 -/
 abbrev PauliAnswerCode (P : AdmissibleParams) :=
@@ -708,9 +509,9 @@ abbrev PauliAnswerCode (P : AdmissibleParams) :=
         ((ZMod 2 × ZMod 2) ⊕
           (ZMod 2 ⊕ ((Fin 3 → ZMod 2) ⊕ PauliRegister P)))))
 
-/-- The constructor-preserving finite-code equivalence for `PauliAnswer`.
-Lean-only infrastructure for `def:pauli-win-predicate`, blueprint
-`ch13_qpbt_test.tex:481-520`, paper origin
+/-- The constructor-preserving finite-code equivalence for `PauliAnswer`.  It
+is the finite encoding used to state `def:pauli-win-predicate`, blueprint
+`ch13_qpbt_test.tex`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1126-1225`.
 -/
 noncomputable def pauliAnswerEquiv (P : AdmissibleParams) :
@@ -764,7 +565,7 @@ instance (P : AdmissibleParams) : Inhabited (PauliAnswer P) :=
 /-- The phase bit `γ(u_X,u_Z,r_X,r_Z)` from `eq:gamma-value`.  It uses the
 fixed trace selected by `P.model`, as required by the paper's fixed
 self-dual-normal representation.  Blueprint
-`blueprint/src/chapter/ch13_qpbt_test.tex:481-520`; paper origin
+`blueprint/src/chapter/ch13_qpbt_test.tex`; paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1198-1212`.
 -/
 noncomputable def gammaValue (P : AdmissibleParams)
@@ -775,7 +576,7 @@ noncomputable def gammaValue (P : AdmissibleParams)
 
 /-- The commutation bit attached to a full Pauli ambient question, from
 `eq:gamma-value` in `def:pauli-win-predicate`, blueprint
-`ch13_qpbt_test.tex:481-520`, paper origin
+`ch13_qpbt_test.tex`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1198-1212`.
 -/
 noncomputable def pauliPairGamma (P : AdmissibleParams) (z : PauliSpace P) : ZMod 2 :=
@@ -784,7 +585,7 @@ noncomputable def pauliPairGamma (P : AdmissibleParams) (z : PauliSpace P) : ZMo
 
 /-- The answer constructor prescribed by each Pauli question type; this is the
 well-formedness part of `def:pauli-win-predicate`, blueprint
-`ch13_qpbt_test.tex:481-520`, paper origin
+`ch13_qpbt_test.tex`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1126-1225`.
 -/
 def validPauliAnswer {P : AdmissibleParams} (t : PauliType) (a : PauliAnswer P) : Bool :=
@@ -800,7 +601,7 @@ def validPauliAnswer {P : AdmissibleParams} (t : PauliType) (a : PauliAnswer P) 
   | _, _ => false
 
 /-- The axis-line versus point relation used by `def:pauli-win-predicate`,
-blueprint `ch13_qpbt_test.tex:481-520`, paper origin
+blueprint `ch13_qpbt_test.tex`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1126-1225`.
 -/
 def pauliAlinePointCondition (P : AdmissibleParams) (W : PauliKind)
@@ -814,7 +615,7 @@ def pauliAlinePointCondition (P : AdmissibleParams) (W : PauliKind)
       evalCoefficient f t = a
 
 /-- The diagonal-line versus point relation used by `def:pauli-win-predicate`,
-blueprint `ch13_qpbt_test.tex:481-520`, paper origin
+blueprint `ch13_qpbt_test.tex`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1126-1225`.
 -/
 def pauliDlinePointCondition (P : AdmissibleParams) (W : PauliKind)
@@ -826,7 +627,7 @@ def pauliDlinePointCondition (P : AdmissibleParams) (W : PauliKind)
       evalCoefficient f t = a
 
 /-- The raw Pauli-versus-point consistency relation from `def:pauli-win-predicate`,
-blueprint `ch13_qpbt_test.tex:481-520`, paper origin
+blueprint `ch13_qpbt_test.tex`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1126-1225`.
 -/
 def pauliPointPauliCondition (P : AdmissibleParams) (W : PauliKind)
@@ -834,7 +635,7 @@ def pauliPointPauliCondition (P : AdmissibleParams) (W : PauliKind)
   lowDegreeEnc h (pauliPointBlock W point) = a
 
 /-- The Pair/W consistency relation, including the one-sided gamma gate, from
-`def:pauli-win-predicate`, blueprint `ch13_qpbt_test.tex:481-520`, paper origin
+`def:pauli-win-predicate`, blueprint `ch13_qpbt_test.tex`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1126-1225`.
 -/
 def pauliPairCondition (P : AdmissibleParams) (W : PauliKind)
@@ -845,7 +646,7 @@ def pauliPairCondition (P : AdmissibleParams) (W : PauliKind)
     | .Z => bits.2 = β)
 
 /-- The point/Pair/W trace consistency relation from `def:pauli-win-predicate`,
-blueprint `ch13_qpbt_test.tex:481-520`, paper origin
+blueprint `ch13_qpbt_test.tex`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1126-1225`.
 -/
 def pauliPointPairCondition (P : AdmissibleParams) (W : PauliKind)
@@ -859,7 +660,7 @@ def pauliPointPairCondition (P : AdmissibleParams) (W : PauliKind)
 /-- The Point/Variable consistency clause of `def:pauli-win-predicate`.
 The check is gated by `gamma = 0` and only uses Variable 1 in the X basis or
 Variable 5 in the Z basis.  Blueprint
-`blueprint/src/chapter/ch13_qpbt_test.tex:481-520`; paper origin
+`blueprint/src/chapter/ch13_qpbt_test.tex`; paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1126-1225`.
 -/
 def pauliPointVariableCondition (P : AdmissibleParams) (W : PauliKind)
@@ -871,7 +672,7 @@ def pauliPointVariableCondition (P : AdmissibleParams) (W : PauliKind)
         fixedBinTrace P.model (a * pauliRZBlock z) = β)
 
 /-- The Pauli win predicate, with constructor-shape rejection.  This is
-`def:pauli-win-predicate` in `blueprint/src/chapter/ch13_qpbt_test.tex:481-520`,
+`def:pauli-win-predicate` in `blueprint/src/chapter/ch13_qpbt_test.tex`,
 paper origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1126-1225`.
 -/
 noncomputable def pauliWinPredicate (P : AdmissibleParams) :
@@ -923,7 +724,7 @@ noncomputable def pauliWinPredicate (P : AdmissibleParams) :
 /-- The Pauli basis test determined by the question distribution
 `pauliQuestionDistribution` and the win predicate `pauliWinPredicate`.  These
 are `def:pauli-question-distribution` and `def:pauli-win-predicate` in
-`blueprint/src/chapter/ch13_qpbt_test.tex:388-520`, with paper origin
+`blueprint/src/chapter/ch13_qpbt_test.tex`, with paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1225`.
 -/
 noncomputable def pauliBasisTest (P : AdmissibleParams) : Game where

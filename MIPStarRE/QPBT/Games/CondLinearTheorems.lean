@@ -1,5 +1,6 @@
 import MIPStarRE.QPBT.Games.CondLinear
 import MIPStarRE.QPBT.Games.CondLinearTheorems.DirectSumSupport
+import MIPStarRE.QPBT.Games.CondLinearTheorems.Reindex
 
 /-! # Structure and direct sums of conditionally linear functions
 
