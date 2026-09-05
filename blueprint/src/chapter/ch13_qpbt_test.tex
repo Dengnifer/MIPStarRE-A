@@ -246,6 +246,392 @@ Quantum soundness of a version of the classical low-degree test for polynomials 
 	% blueprint definition yet, so no \lean link is attached here.
 \end{remark}
 
+% The nodes of this subsection are formalization-support nodes recording the
+% reduction cited in the proof of Theorem lem:ld-soundness; the paper states
+% none of them separately.
+\subsection{The combining reduction to simultaneity parameter one}
+\label{sec:ld-combining-reduction}
+
+The extension from $k = 1$ to general $k$ cited in the proof of
+Theorem~\ref{lem:ld-soundness} is recorded here in the form in which it is
+formalized.  The nodes below are formalization-support nodes: the source states
+none of them separately, and together they constitute its derivation of
+Theorem~4.43 from Theorem~4.40 in~\cite{Natarajan2018NEEXP}.  The game in
+question is the directly indexed low-degree game of
+\cite{gap:qpbt_ld-dimension-divisibility}, which samples the coordinate index of
+a line directly instead of through a fiber of $\chi$; its point questions, line
+questions, answer formats and win predicate are those of
+Definition~\ref{def:ld-game}, and it is used here because the reduction applies
+the case $k = 1$ at dimension $m + k$, where the divisibility condition of
+Definition~\ref{def:ld-game} is not available.  A node carries $\leanok$ only
+when the Lean declarations it names are complete and sorry-free.
+
+\begin{definition}[Combined parameters of the reduction]
+	\label{def:ld-combining-parameters}
+	\lean{MIPStarRE.QPBT.DirectLdParams.combined}
+	\leanok
+	\uses{def:ld-game}
+	For a parameter tuple $\mathsf{ldparams} = (q,m,d,k)$ as in
+	Definition~\ref{def:ld-game}, the \emph{combined parameter tuple} is
+	\[
+		\mathsf{ldparams}^{\mathrm c} = (q,\; m+k,\; d,\; 1)\;:
+	\]
+	the dimension grows by the simultaneity parameter, the simultaneity
+	parameter becomes $1$, and the field size, the degree and the admissibility
+	of the field size are unchanged.  The degree is unchanged because the
+	combining map of Definition~\ref{def:ld-combining-map} is linear in the
+	fresh coordinates and therefore, in the individual-degree class of
+	Definition~\ref{def:polyfunc}, raises no individual degree above $d$ as soon
+	as $d \ge 1$.  The source works with total degree and passes from $d$ to
+	$d+1$ at this step; that increment is an artifact of the total-degree
+	formulation and does not occur here.
+\end{definition}
+
+\begin{definition}[The combining map on polynomial tuples]
+	\label{def:ld-combining-map}
+	\lean{MIPStarRE.QPBT.combinePolyTuple, MIPStarRE.QPBT.combinePolyTuple_eval}
+	\lean{MIPStarRE.QPBT.combinePolyTuple_mem_polyFunc}
+	\lean{MIPStarRE.QPBT.directCombinedPolynomial}
+	\lean{MIPStarRE.QPBT.directCombinedPolynomial_eval}
+	\leanok
+	\uses{def:polyfunc, def:ld-meas, def:ld-combining-parameters}
+	Coordinates of $\F_q^{m+k}$ are written $(u,\alpha)$, with $u \in \F_q^m$
+	occupying the first $m$ coordinates and $\alpha \in \F_q^k$ the last $k$;
+	the coordinates carrying $\alpha$ are called the \emph{combining
+	coordinates}.  For a tuple $g = (g_0,\ldots,g_{k-1})$ of polynomials
+	$g_r \in \polyfunc{m}{q}{d}$, the \emph{combined polynomial} is
+	\[
+		\mathrm{comb}_g(u,\alpha) \;=\; \sum_{r=0}^{k-1} \alpha_r\, g_r(u)\;.
+	\]
+	It lies in $\polyfunc{m+k}{q}{d}$ whenever $d \ge 1$: a component $g_r$
+	involves no combining coordinate, so multiplying it by $\alpha_r$ leaves its
+	individual degrees in the first $m$ coordinates unchanged and produces
+	individual degree $1$ in the coordinate carrying $\alpha_r$.
+
+	The order of the two coordinate blocks is part of the construction.  The
+	point coordinates precede the combining coordinates, so that zeroing a
+	prefix of a direction of $\F_q^{m+k}$, as the diagonal-line branch of
+	Definition~\ref{def:ld-question-distribution} does, restricts on the first
+	$m$ coordinates to zeroing the corresponding prefix of the point part of
+	that direction; this is what makes the diagonal-line questions of the
+	combined game project to diagonal-line questions of the original game in
+	Definition~\ref{def:ld-combined-strategy}.  Definition~\ref{def:combine-map}
+	is a variant of the same construction with two components in \emph{disjoint}
+	blocks of point coordinates; the map above keeps one common block of point
+	coordinates, as the reduction requires.
+\end{definition}
+
+\begin{lemma}[Recovery of the components of a combined polynomial]
+	\label{lem:ld-combining-split}
+	\lean{MIPStarRE.QPBT.splitCombinedPoly}
+	\lean{MIPStarRE.QPBT.splitCombinedPoly_combinePolyTuple}
+	\lean{MIPStarRE.QPBT.combinePolyTuple_injective}
+	\lean{MIPStarRE.QPBT.IsDirectCombined, MIPStarRE.QPBT.directTupleOfCombined}
+	\lean{MIPStarRE.QPBT.directTupleOfCombined_directCombinedPolynomial}
+	\leanok
+	\uses{def:ld-combining-map}
+	Let $\mathrm{split}_r$ denote the substitution of the $r$-th standard basis
+	vector of $\F_q^k$ for the combining coordinates, a ring homomorphism
+	$\F_q[u,\alpha] \to \F_q[u]$ fixing the point coordinates.  Then
+	$\mathrm{split}_r(\mathrm{comb}_g) = g_r$ for every tuple $g$ and every
+	$r$.  Consequently $g \mapsto \mathrm{comb}_g$ is injective, and the map
+	sending $p \in \polyfunc{m+k}{q}{d}$ to the unique tuple $g$ with
+	$\mathrm{comb}_g = p$ when $p$ is of that form, and to the zero tuple
+	otherwise, is a well-defined total map $\mathrm{split}$ with
+	$\mathrm{split}(\mathrm{comb}_g) = g$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:ld-combining-map}
+	Applying the homomorphism $\mathrm{split}_r$ to the sum defining
+	$\mathrm{comb}_g$ sends the summand of index $s$ to $g_s$ when $s = r$ and to
+	$0$ otherwise, since the combining coordinate carrying $\alpha_s$ is sent to
+	$1$ for $s = r$ and to $0$ otherwise, while $g_s$, which involves no
+	combining coordinate, is fixed; the sum is therefore $g_r$.
+	Injectivity follows, and it makes the case distinction defining
+	$\mathrm{split}$ unambiguous.  The value on polynomials that are not
+	combined is immaterial: the source leaves it arbitrary, and the estimates
+	below use only the value on combined polynomials.
+\end{proof}
+
+\begin{lemma}[Collision of two linear forms in the combining variables]
+	\label{lem:ld-combining-collision}
+	\lean{MIPStarRE.QPBT.combiningLinearForm}
+	\lean{MIPStarRE.QPBT.combiningLinearForm_injective}
+	\lean{MIPStarRE.QPBT.combiningLinearForm_agreementProbability_le}
+	\lean{MIPStarRE.QPBT.directCombiningCollision_avg_le}
+	\leanok
+	\uses{lem:schwartz-zippel-total-degree}
+	Let $c, b \in \F_q^k$ with $c \neq b$.  Then
+	\[
+		\Pr_{\alpha \in \F_q^k}\Bigl[\; \sum_{r} c_r \alpha_r
+			= \sum_{r} b_r \alpha_r \;\Bigr] \;\le\; \frac1q\;,
+	\]
+	the probability being over a uniformly random $\alpha$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:schwartz-zippel-total-degree}
+	The two sides are the evaluations at $\alpha$ of the linear forms
+	$\sum_r c_r X_r$ and $\sum_r b_r X_r$ in $k$ variables.  The coefficient of
+	$X_r$ in such a form is $c_r$, so the two forms are distinct polynomials,
+	and each has total degree at most $1$.  Lemma~\ref{lem:schwartz-zippel-total-degree}
+	bounds the probability that two distinct polynomials of total degree at most
+	$1$ agree at a uniformly random point of $\F_q^k$ by $1/q$.
+\end{proof}
+
+\begin{definition}[The combined strategy]
+	\label{def:ld-combined-strategy}
+	\uses{def:ld-game, def:ld-question-distribution, def:ld-win-predicate,
+		def:projective-strategy-general, def:ld-combining-parameters,
+		def:ld-combining-map}
+	Let $\mathcal S = (\psi, A, B)$ be a projective strategy for the directly
+	indexed low-degree game with parameters $\mathsf{ldparams}$.  The
+	\emph{combined strategy} $\mathcal S^{\mathrm c}$ for the directly indexed
+	low-degree game with parameters $\mathsf{ldparams}^{\mathrm c}$ has the same
+	state and the same two Hilbert spaces, and answers each question of the
+	combined game by measuring one question of $\mathcal S$ and post-processing
+	its outcome.  Writing questions of the combined game in the coordinates of
+	Definition~\ref{def:ld-combining-map}, the five cases are the following.
+	\begin{enumerate}
+		\item On the point question $(u,\alpha) \in \F_q^{m+k}$: measure the
+		point question $u$, obtaining $b \in \F_q^k$, and answer
+		$\sum_r \alpha_r b_r$.
+		\item On the axis-parallel line question with stored index $i < m$ and
+		canonical base $(u_0,\alpha_0)$: measure the axis-parallel line question
+		with index $i$ and base $u_0$, obtaining univariate polynomials
+		$f_0,\ldots,f_{k-1}$ of degree at most $d$, and answer
+		$\sum_r (\alpha_0)_r f_r$, again of degree at most $d$.
+		\item On the axis-parallel line question with stored index $m + r$ and
+		canonical base $(u_0,\alpha_0)$, a line along which $u$ is constant and
+		only the coordinate $\alpha_r$ varies: measure the point question $u_0$,
+		obtaining $b$, and answer the degree-one polynomial
+		$t \mapsto \sum_s (\alpha_0)_s b_s + t\, b_r$.
+		\item On the diagonal line question with stored index $i < m$, canonical
+		base $(u_0,\alpha_0)$ and direction $(v,w)$: measure the diagonal line
+		question with index $i$, direction $v$ and the canonical base of the
+		line $\ell(u_0, v)$, rebase the answer along the affine change of
+		parameter relating the two presentations of that line, obtaining
+		univariate polynomials $f_0,\ldots,f_{k-1}$ of degree at most $md$ in the
+		parameter of the combined line, and answer
+		$t \mapsto \sum_r \bigl((\alpha_0)_r + t\, w_r\bigr) f_r(t)$, of degree
+		at most $md+1 \le (m+k)d$.
+		\item On the diagonal line question with stored index $i \ge m$,
+		canonical base $(u_0,\alpha_0)$ and direction $(0,w)$, a line along which
+		$u$ is constant: measure the point question $u_0$, obtaining $b$, and
+		answer $t \mapsto \sum_r (\alpha_0)_r b_r + t \sum_r w_r b_r$.
+	\end{enumerate}
+	Each case measures a single measurement of $\mathcal S$ and relabels its
+	outcome, so $\mathcal S^{\mathrm c}$ is again a projective strategy, on the
+	same state.  Cases~3 and~5 use that a line of $\F_q^{m+k}$ whose direction
+	has vanishing point part is contained in a fiber of the projection to
+	$\F_q^m$, so that the combined polynomial restricted to it is determined by
+	the $k$ values of the tuple at the single point $u_0$; the rebasing in
+	case~4 is the operation of \texttt{Transport.Questions}, needed because the
+	canonical base of a line of $\F_q^{m+k}$ need not project to the canonical
+	base of its image line in $\F_q^m$.
+\end{definition}
+
+\begin{lemma}[The questions measured by the combined strategy]
+	\label{lem:ld-combined-question-law}
+	\uses{def:ld-question-distribution, def:ld-combined-strategy}
+	Sample a question pair of the directly indexed game with parameters
+	$\mathsf{ldparams}^{\mathrm c}$, and let $\mathbf{i}$ be the coordinate index
+	of its common sample, uniform on $\{0,1,\ldots,m+k-1\}$.  Conditioned on
+	$\mathbf{i} < m$, an event of probability $m/(m+k)$, the pair of questions
+	measured by $\mathcal S^{\mathrm c}$ in Definition~\ref{def:ld-combined-strategy}
+	is distributed as the question pair of the directly indexed game with
+	parameters $\mathsf{ldparams}$ conditioned on the same ordered type pair.
+	Conditioned on $\mathbf{i} \ge m$, both measured questions are the point
+	question at the point part of the sampled point, and that point part is
+	uniform on $\F_q^m$; that is, the measured pair is a point-versus-point pair
+	of the game with parameters $\mathsf{ldparams}$.
+\end{lemma}
+\begin{proof}
+	\uses{def:ld-question-distribution, def:ld-combining-map}
+	The common sample of the combined game consists of a uniform point
+	$(u,\alpha) \in \F_q^{m+k}$, a uniform index $\mathbf{i}$, and a uniform
+	direction $(v,w)$, the three independent.  Conditioned on $\mathbf{i} < m$,
+	the triple $(u, \mathbf{i}, v)$ is uniform on
+	$\F_q^m \times \{0,\ldots,m-1\} \times \F_q^m$, which is the common sample of
+	the game with parameters $\mathsf{ldparams}$, and $\alpha$ and $w$ are
+	independent of it.  Under this conditioning the coordinate direction of an
+	axis-parallel question and the prefix projection of a diagonal direction have
+	point parts equal to the coordinate direction and the prefix projection
+	computed in $\F_q^m$, by the coordinate order fixed in
+	Definition~\ref{def:ld-combining-map}, and cases~2 and~4 of
+	Definition~\ref{def:ld-combined-strategy} measure exactly the canonical
+	question of the game with parameters $\mathsf{ldparams}$ attached to that
+	sample.  Conditioned on $\mathbf{i} \ge m$, every direction produced by the
+	question distribution has vanishing point part, so cases~1, 3 and~5 apply and
+	all measure the point question at $u$, which is uniform.
+\end{proof}
+
+\begin{lemma}[Value of the combined strategy]
+	\label{lem:ld-combined-value}
+	\uses{def:ld-combined-strategy, lem:ld-combined-question-law,
+		def:ld-win-predicate, def:tensor-product-value}
+	There is a universal constant $C$ such that the following holds.  If
+	$\mathcal S$ succeeds with probability at least $1 - \eps$ in the directly
+	indexed low-degree game with parameters $\mathsf{ldparams}$, then
+	$\mathcal S^{\mathrm c}$ succeeds with probability at least $1 - C\eps$ in the
+	directly indexed low-degree game with parameters
+	$\mathsf{ldparams}^{\mathrm c}$.
+\end{lemma}
+\begin{proof}
+	\uses{def:ld-combined-strategy, lem:ld-combined-question-law,
+		def:ld-win-predicate}
+	Both games weight their nine ordered type pairs uniformly, so it suffices to
+	bound the rejection probability of each branch of the combined game by a
+	bounded number of branch rejection probabilities of the original game and to
+	sum.  Fix a branch and split according to the event of
+	Lemma~\ref{lem:ld-combined-question-law}.
+
+	On the event $\mathbf{i} < m$ the two combined answers are the images of the
+	two original answers under the relabelings of
+	Definition~\ref{def:ld-combined-strategy}, and each clause of
+	Definition~\ref{def:ld-win-predicate} for the combined game follows from the
+	corresponding clause for the original game.  For the point-versus-point
+	clause this is immediate.  For a line-versus-point clause, let $t$ present
+	the sampled combined point on the sampled combined line; then $t$ presents
+	the point part of the sampled point on the image line, the combining part of
+	the sampled point is $\alpha_0 + t w$ in the diagonal case and $\alpha_0$ in
+	the axis-parallel case, and the combined line answer evaluated at $t$ is
+	$\sum_r (\alpha_0 + t w)_r f_r(t)$, respectively $\sum_r (\alpha_0)_r f_r(t)$;
+	substituting the original clause $f_r(t) = b_r$ for every $r$ turns this into
+	the combined point answer $\sum_r \alpha_r b_r$.  For a line-versus-line
+	clause, equality of the two original tuples of line answers gives equality of
+	their combinations.
+
+	On the event $\mathbf{i} \ge m$ all measured questions are the point question
+	at the same point $u$, and every clause of the combined game follows from the
+	agreement $b = b'$ of the two original point answers, which is the
+	point-versus-point clause of the original game: in cases~3 and~5 the combined
+	line answer is a fixed affine function of the measured tuple, and evaluating
+	it at the parameter presenting the sampled combined point returns
+	$\sum_r \alpha_r b_r$, the combined point answer computed from the same
+	tuple.
+
+	Each branch of the combined game is therefore rejected with probability at
+	most the sum of two branch rejection probabilities of the original game, and
+	summing over the nine branches bounds the rejection probability of
+	$\mathcal S^{\mathrm c}$ by an absolute multiple of that of $\mathcal S$.
+\end{proof}
+
+\begin{lemma}[Exact linearity in the combining variables]
+	\label{lem:ld-combining-exact-linearity}
+	\uses{def:ld-combining-map, lem:schwartz-zippel-total-degree}
+	Let $p \in \polyfunc{m+k}{q}{d}$ be a polynomial which is not the combined
+	polynomial of any tuple.  Then, for a uniformly random $u \in \F_q^m$, the
+	polynomial $p(u,\cdot) \in \F_q[\alpha_0,\ldots,\alpha_{k-1}]$ obtained by
+	substituting $u$ for the point coordinates is a linear form
+	$\sum_r c_r \alpha_r$ with probability at most $md/q$.
+\end{lemma}
+\begin{proof}
+	\uses{lem:schwartz-zippel-total-degree, def:ld-combining-map}
+	Write $p = \sum_{\mu} c_\mu \, \alpha^\mu$, the sum over exponent vectors
+	$\mu \in \N^k$ of the combining coordinates, with coefficients
+	$c_\mu \in \polyfunc{m}{q}{d}$.  By
+	Definition~\ref{def:ld-combining-map} and
+	Lemma~\ref{lem:ld-combining-split}, $p$ is a combined polynomial precisely
+	when $c_\mu = 0$ for every $\mu$ outside the $k$ standard basis vectors, and
+	$p(u,\cdot)$ is a linear form precisely when $c_\mu(u) = 0$ for every such
+	$\mu$.  If $p$ is not combined, fix one such $\mu$ with $c_\mu \neq 0$; the
+	total degree of $c_\mu$ is at most $md$, so
+	Lemma~\ref{lem:schwartz-zippel-total-degree} bounds the probability of
+	$c_\mu(u) = 0$ by $md/q$.
+\end{proof}
+
+\begin{lemma}[Recovery of the polynomial-tuple measurements]
+	\label{lem:ld-combining-recovery}
+	\uses{def:ld-meas, def:consistency, def:bracket, def:ld-combining-map,
+		lem:ld-combining-split, lem:ld-combining-collision,
+		lem:ld-combining-exact-linearity, def:ld-combined-strategy}
+	Let $\mathcal S$ be a projective strategy for the directly indexed game with
+	parameters $\mathsf{ldparams}$, and let $G^{\mathrm A}$, $G^{\mathrm B}$ be
+	measurements with outcomes in $\polyfunc{m+k}{q}{d}$ satisfying, for the
+	combined strategy $\mathcal S^{\mathrm c}$ and with error $\delta$, the three
+	conclusions of Theorem~\ref{lem:ld-soundness} at parameters
+	$\mathsf{ldparams}^{\mathrm c}$.  Let $H^w$ be $G^w$ post-processed by the
+	map $\mathrm{split}$ of Lemma~\ref{lem:ld-combining-split}, so that
+	$H^w \in \mathrm{PolyMeas}(m,q,d,k)$.  Then the three conclusions of
+	Theorem~\ref{lem:ld-soundness} hold for $\mathcal S$ at parameters
+	$\mathsf{ldparams}$, with the measurements $H^{\mathrm A}$, $H^{\mathrm B}$
+	and with error $O(\delta + (m+k)d/q)$.
+\end{lemma}
+\begin{proof}
+	\uses{lem:ld-combining-collision, lem:ld-combining-exact-linearity,
+		lem:ld-combining-split, def:bracket, lem:schwartz-zippel-total-degree}
+	The first conclusion for $\mathcal S^{\mathrm c}$ says that, on average over
+	a uniform $(u,\alpha) \in \F_q^{m+k}$, the value $p(u,\alpha)$ of the outcome
+	$p$ of $G^{\mathrm B}$ agrees with the combined point answer
+	$\sum_r \alpha_r b_r$ computed from the outcome $b$ of the point measurement
+	of $\mathcal S$ at $u$, up to $\delta$.
+
+	The outcome is a combined polynomial with probability at least
+	$1 - O(\delta + (m+k)d/q)$.  Indeed, condition on an outcome $p$ that is not
+	combined.  By Lemma~\ref{lem:ld-combining-exact-linearity}, $p(u,\cdot)$ fails
+	to be a linear form except with probability $md/q$ over $u$; the combined
+	point answer is a linear form in $\alpha$ by construction; and two distinct
+	polynomials in $\alpha$ of total degree at most $kd$ agree at a uniform
+	$\alpha$ with probability at most $kd/q$ by
+	Lemma~\ref{lem:schwartz-zippel-total-degree}.  Hence, conditioned on a
+	non-combined outcome, the agreement above holds with probability at most
+	$(m+k)d/q$, and comparing with the bound $\delta$ gives the claim.
+
+	Replacing $G^w$ by $H^w$ therefore changes each of the first two relations by
+	at most $O(\delta + (m+k)d/q)$, since the two measurements differ only on the
+	event that the outcome is not combined, and
+	$\mathrm{split}(\mathrm{comb}_g) = g$ on its complement; the third relation
+	for $H^{\mathrm A}$, $H^{\mathrm B}$ follows from the third relation for
+	$G^{\mathrm A}$, $G^{\mathrm B}$ by data processing, $H^w$ being a
+	post-processing of $G^w$.
+
+	It remains to upgrade the first relation from the combined value to the tuple
+	of values.  Let $g$ be the outcome of $H^{\mathrm B}$ and $b$ the outcome of
+	the point measurement at $u$.  If $(g_0(u),\ldots,g_{k-1}(u)) \neq b$, then by
+	Lemma~\ref{lem:ld-combining-collision} the combined values
+	$\sum_r \alpha_r g_r(u)$ and $\sum_r \alpha_r b_r$ agree with probability at
+	most $1/q$ over a uniform $\alpha$.  Averaging over $\alpha$ therefore
+	converts the relation for the combined values into the tuple relation
+	\[
+		A^{\mathsf{Point},\,u}_{a_1,\ldots,a_k} \ot \Id_{\mathrm B}
+		\simeq \Id_{\mathrm A} \ot
+			H^{\mathrm B}_{[(g_1(u),\ldots,g_k(u)) = (a_1,\ldots,a_k)]}
+	\]
+	with error $O(\delta + 1/q)$, and symmetrically for the second relation.
+\end{proof}
+
+\begin{proposition}[Simultaneous polynomial measurements for general $k$]
+	\label{prop:ld-simultaneous-general-k}
+	\uses{def:ld-meas, def:consistency, def:bracket,
+		def:projective-strategy-general, def:ld-combining-parameters,
+		lem:ld-combined-value, lem:ld-combining-recovery}
+	Let $\mathsf{ldparams} = (q,m,d,k)$ and let $\mathcal S = (\psi, A, B)$ be a
+	projective strategy succeeding with probability at least $1 - \eps$ in the
+	directly indexed low-degree game with parameters $\mathsf{ldparams}$.  Then
+	there exist measurements $G^{\mathrm A}, G^{\mathrm B} \in
+	\mathrm{PolyMeas}(m,q,d,k)$ satisfying the three consistency relations of
+	Theorem~\ref{lem:ld-soundness} with an error of the form
+	$\delta_{\mathrm{ld}}(\eps, q, m+k, d, 1) + O((m+k)d/q)$, which is absorbed
+	into $\delta_{\mathrm{ld}}(\eps,q,m,d,k)$ by enlarging its universal
+	constants.
+\end{proposition}
+\begin{proof}
+	\uses{lem:ld-combined-value, lem:ld-combining-recovery,
+		def:ld-combining-parameters}
+	Apply Lemma~\ref{lem:ld-combined-value} to obtain a projective strategy
+	$\mathcal S^{\mathrm c}$ for the directly indexed game with parameters
+	$\mathsf{ldparams}^{\mathrm c}$ succeeding with probability at least
+	$1 - C\eps$.  That game has simultaneity parameter $1$, so the case $k = 1$
+	of Theorem~\ref{lem:ld-soundness} applies and produces measurements
+	$G^{\mathrm A}$, $G^{\mathrm B}$ with outcomes in $\polyfunc{m+k}{q}{d}$
+	satisfying the three relations with error
+	$\delta_{\mathrm{ld}}(C\eps, q, m+k, d, 1)$.  Lemma~\ref{lem:ld-combining-recovery}
+	converts them into measurements in $\mathrm{PolyMeas}(m,q,d,k)$ satisfying
+	the three relations for $\mathcal S$ with the stated error.
+\end{proof}
+
 \section{The Magic Square game}
 % Paper label sec:ms kept for cross-reference fidelity.
 \label{sec:ms}

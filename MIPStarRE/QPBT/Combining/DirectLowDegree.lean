@@ -6,6 +6,7 @@ import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.PassConversion
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.SeedFiberValue
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Error
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Simultaneous
+import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.Linearity
 
 /-!
 # The directly indexed low-degree game
@@ -47,6 +48,17 @@ product of `lem:ld-sandwich`, and proves the polynomial-tuple conclusion of
 `lem:ld-soundness` for simultaneity parameter `1`; it also records why the
 coordinate conclusions do not determine simultaneous measurements for larger
 parameters.
+
+`Transport.Combining` develops the reduction by which the source obtains the
+polynomial-tuple conclusion for a general simultaneity parameter: the combined
+parameters `DirectLdParams.combined`, of dimension `m + k` and simultaneity
+parameter `1`; the combining map on polynomial tuples and its individual-degree
+bound; the substitution recovering the components of a combined polynomial,
+which exhibits the combining map as injective; and the Schwartz--Zippel
+collision estimate for two linear forms in the combining variables.  The
+combined strategy and the transport of its value remain to be formalized;
+see `blueprint/src/chapter/ch13_qpbt_test.tex`, the subsection on the
+combining reduction.
 
 ## References
 
