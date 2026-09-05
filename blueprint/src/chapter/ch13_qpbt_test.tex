@@ -887,7 +887,7 @@ The strategies appearing in Lemma~\ref{lem:pauli-completeness} and in the conclu
 % statements of that subsection are outside the scope of this development).
 \label{sec:qld-complexity}
 
-We specify a canonical setting of the parameter tuple $\mathsf{qldparams}$ as a function of an integer $R$, and bound the resulting soundness function. All logarithms are base $2$.
+We specify a canonical setting of the parameter tuple $\mathsf{qldparams}$ as a function of an integer $R$, and bound the resulting soundness function. Here $\log$ denotes the base-two logarithm, and $\ln$ denotes the natural logarithm.
 
 \begin{definition}[Canonical parameters of the Pauli basis test]\label{def:introparams}
 	\lean{MIPStarRE.QPBT.introParamsC, MIPStarRE.QPBT.introParamsTuple, MIPStarRE.QPBT.AdmissibleParams.ofTuple, MIPStarRE.QPBT.introParams}
@@ -918,13 +918,13 @@ We specify a canonical setting of the parameter tuple $\mathsf{qldparams}$ as a 
 
 	For the soundness bound, write $\delta_{\mathrm{qld}}(\eps,m,d,q) = a(md)^a \eps^b + a(md)^a q^{-b} + a(md)^a 2^{-bmd}$ and use $d = 1$, $\log R \le m \le 2c \log R$, and $q = 2^k \ge \log^c R$. Set
 	\[
-		C = \frac{\lceil a + b \rceil !}{(b \log 2)^{\lceil a + b \rceil}}
+		C = \frac{\lceil a + b \rceil !}{(b \ln 2)^{\lceil a + b \rceil}}
 		\qquad \text{and} \qquad
 		a' = a\bigl( (2c)^a + C \bigr)\;,
 	\]
-	both depending only on the universal constants $a$ and $b$; since $a \ge 1$, $c \ge 2$ and $C \ge 0$, one has $a' \ge a \ge 1$. The first term is at most $a(2c)^a (\log R)^a \eps^b \le a' (\log R)^{a'} \eps^b$, using $\log R \ge 2 \ge 1$ and $a \le a'$. The second term is at most $a(2c)^a (\log R)^{a - cb} \le a(2c)^a (\log R)^{-b}$, since $cb - a \ge b$ by the choice of $c$. For the third term, split $m^a = m^{a+b} \cdot m^{-b}$ and bound the first factor against the exponential: for all real $s$, all $t > 0$ and all $x \ge 1$, the Taylor estimate $y^n / n! \le e^y$ of the exponential, taken at $y = (t \log 2) x$ and $n = \lceil s \rceil_{+} = \max(\lceil s \rceil, 0)$, gives
+	both depending only on the universal constants $a$ and $b$; since $a \ge 1$, $c \ge 2$ and $C \ge 0$, one has $a' \ge a \ge 1$. The first term is at most $a(2c)^a (\log R)^a \eps^b \le a' (\log R)^{a'} \eps^b$, using $\log R \ge 2 \ge 1$ and $a \le a'$. The second term is at most $a(2c)^a (\log R)^{a - cb} \le a(2c)^a (\log R)^{-b}$, since $cb - a \ge b$ by the choice of $c$. For the third term, split $m^a = m^{a+b} \cdot m^{-b}$ and bound the first factor against the exponential: for all real $s$, all $t > 0$ and all $x \ge 1$, the Taylor estimate $y^n / n! \le e^y$ of the exponential, taken at $y = (t \ln 2) x$ and $n = \lceil s \rceil_{+} = \max(\lceil s \rceil, 0)$, gives
 	\[
-		x^s\, 2^{-tx} \le \frac{\lceil s \rceil_{+}!}{(t \log 2)^{\lceil s \rceil_{+}}}\;.
+		x^s\, 2^{-tx} \le \frac{\lceil s \rceil_{+}!}{(t \ln 2)^{\lceil s \rceil_{+}}}\;.
 	\]
 	With $s = a + b$, $t = b$ and $x = m$ the right-hand side is the constant $C$ above, so
 	\[
@@ -942,13 +942,13 @@ We specify a canonical setting of the parameter tuple $\mathsf{qldparams}$ as a 
 \leanok
 For real $s$, $t > 0$ and $x \ge 1$, writing $\lceil s \rceil_{+} = \max(\lceil s \rceil, 0)$,
 \[
-  x^{s}\, 2^{-t x} \le \frac{\lceil s \rceil_{+}!}{(t \log 2)^{\lceil s \rceil_{+}}} .
+  x^{s}\, 2^{-t x} \le \frac{\lceil s \rceil_{+}!}{(t \ln 2)^{\lceil s \rceil_{+}}} .
 \]
 This is the explicit envelope used for the third term in the proof of Lemma~\ref{lem:delta-bound}, with $x = m$, $s = a + b$ and $t = b$.
 \end{lemma}
 \begin{proof}
 \leanok
-Since $x \ge 1$, $x^{s} \le x^{\lceil s \rceil_{+}}$, and the Taylor lower bound $y^{n}/n! \le e^{y}$ at $y = t x \log 2$ and $n = \lceil s \rceil_{+}$ gives $x^{n} (t \log 2)^{n} \le n!\, 2^{t x}$.
+Since $x \ge 1$, $x^{s} \le x^{\lceil s \rceil_{+}}$, and the Taylor lower bound $y^{n}/n! \le e^{y}$ at $y = t x \ln 2$ and $n = \lceil s \rceil_{+}$ gives $x^{n} (t \ln 2)^{n} \le n!\, 2^{t x}$.
 \end{proof}
 
 \begin{remark}[A comparison of exponents in the source proof of Lemma~\ref{lem:delta-bound}]\label{rem:delta-bound-exponent-comparison}
