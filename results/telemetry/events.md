@@ -2983,6 +2983,22 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   17:34Z was posted approximately two minutes before that heading; this entry
   records the correction rather than treating that heading as a precise clock.
 
+- 2026-09-06 — In `prover-112-20260906-01` (PR #185), the first direct
+  check of the resolved `Anticommuting.lean` could not find the shared
+  indicator-product and admissible-size lemmas because the branch's compiled
+  dependencies predated the incoming main sources. A targeted
+  `lake build MIPStarRE.QPBT.Observables.WinImplications` refreshed the
+  dependency closure in the branch-private Lake directory; both conflicted
+  Lean files then passed direct checks. No full build was started. The seven
+  winning-implication declarations and six probability declarations checked
+  against the fresh artifacts depend only on `propext`, `Classical.choice`,
+  and `Quot.sound`. The nine existing approximate/observable proof holes in
+  the unchanged root module remain unchanged. Lesson: validate a shared-API
+  merge against refreshed dependencies before interpreting missing identifiers
+  as source errors. All individual session artifacts from both parents remain
+  byte-identical, all session/build/stage/estimate records are retained, and
+  all owner-session identities remain present with main's recorded corrections.
+
 ## 2026-09-05T17:40Z — Owner account-routing lane and MAIN handoff
 
 - Owner issue 232 supersedes 231. The sol worker completed clean commit6ae352b
