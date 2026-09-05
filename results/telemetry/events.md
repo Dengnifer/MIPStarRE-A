@@ -2725,6 +2725,27 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 ## 2026-09-05T14:50Z — codex resumed (owner); ratio codex:opus 1:1; astra not yet
 - The owner re-enabled codex subagents on ghz: model gpt-5.6-sol as before (astra is unstable; the owner will announce its readiness explicitly), dispatch ratio codex:opus 1:1, Fable only when necessary. The pause marker watchdog/codex-paused was removed at 14:47Z, so lanes dispatch again and the review step returns to local/bin/review.sh (codex reviewers); the Claude review mailbox stays available for Opus reviews when the ratio needs them. First codex lanes after the pause: #222 (repository-side post-merge silent-loss guard), #219 (review round counter), #218 (six duplicate private helper groups), #216 (pre-commit persona test during merges). Opus side: PR 205 fix round, the 135/174 worktree merge repairs. Fable: #118 math-fix session 1.
 
+## 2026-09-05T16:43Z — Follow-up to the stacked-merge loss incident
+
+- This follow-up records the completed diagnosis and audit without rewriting
+  the original 11:28Z incident or the 12:42Z lane-runner report.
+- Merges `35bdc2a` and `8ad1de8` have trees identical to their first parents;
+  preceding ordinary merges are recorded differently in the reflog. The
+  prepared index was reset while `MERGE_HEAD` remained. Five modules were
+  deleted and two existing modules reverted; an ordinary three-way merge
+  preserves all seven paths. Incoming versions were restored in `7731a97`
+  and `21cd0cf`.
+- The recorded audit covered the latest merge on each of thirteen stacked
+  branches. Apparent criss-cross candidates were recorded conflicts,
+  deliberate branch-owned prose, or combined results rather than lost files.
+- PR 230's durable guard detects incoming-only deletions and blob reversions,
+  handles multiple best merge bases, and audits existing two-parent merges.
+  On Git 2.34, automatic `pre-merge-commit` does not expose `MERGE_HEAD`, so a
+  reference-transaction hook checks the completed merge before the ref moves;
+  pre-commit checks manually completed merges. Neither accepts the blanket
+  tooling bypass. Committed-merge checks reconstruct conflicts in a disposable
+  local clone. These implementation details supplement the earlier report.
+
 ## 2026-09-05 — Operator hand-back: astra main session (Mode 1) takes over from the owner session
 
 - **Trigger:** owner decision (2026-09-05T15:45:27Z): gpt-6-astra reached through the codex relay on ghz (poller ASTRA=gpt-6-astra);
@@ -2977,3 +2998,74 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   as source errors. All individual session artifacts from both parents remain
   byte-identical, all session/build/stage/estimate records are retained, and
   all owner-session identities remain present with main's recorded corrections.
+
+## 2026-09-05T17:40Z — Owner account-routing lane and MAIN handoff
+
+- Owner issue 232 supersedes 231. The sol worker completed clean commit6ae352b
+  for explicit model recording; no separate PR is opened. Launched the requested
+  astra lane232. Its first two attempts stopped without edits because the prover
+  persona forbade workflow edits, and the lane repair attachment was explicitly
+  untrusted. Recovered through dispatch.sh with the trusted orchestrator persona
+  and direct task-specific owner authorization, retaining the prover registry
+  role and normal checked lane tail. Session prover-232-20260906-03 is verified
+  live on the same secondary-account thread and is inspecting implementation.
+- PR225's refresh conflict was only the sum_ldType docstring; preserved main's
+  fuller source explanation with the same theorem statement/proof. Normal merge
+  hooks and the lane tail are running; the merge daemon remains sole publisher
+  of merges to main. PR229 has exact-head CI success on6e754fc and astra review.
+- At17:39:39Z, /proc showed eight top-level Codex execs: four primary and four
+  secondary, excluding fan-out children. Added the verified running loops,
+  decisions, source-proof gap budget, account affinities, and next actions to the
+  end of /tmp/qpbt-main-handoff-v3.md for the owner-requested second-account
+  relaunch. MAIN stops after publishing that handoff; the full goal remains open.
+
+## 2026-09-05T18:20Z — Main-session relaunch and critical-path recovery
+
+- Read the owner handoff, main persona, and last five progress reports. The
+  relaunch paragraph has blank export names; the installed router identifies
+  MIPSTARRE_ACCOUNT_CAP_PRIMARY and MIPSTARRE_ACCOUNT_CAP_SECOND. Set them in
+  ~/.profile to 10 and 9 respectively, reserving one secondary-account request
+  for this main session. A fresh login shell confirms those caps and both astra
+  model defaults. Routing retirement remains contingent on issue 232 merging.
+- Verified the merge daemon and stack watcher remain live. PR 229 merged through
+  the daemon at 18:01:25Z. Restarted exact-head CI and independent review for
+  PR 185; sent PR 178's remaining stale-heading finding through labelled autofix.
+- PR 202's previously rejected fix is still staged; the normal pre-commit hook
+  now passes. An attempted labelled autofix correctly refused this dirty tree.
+  Started a normal repair commit of that existing fix, checked publication, CI,
+  and independent review without bypassing any guard or expanding its scope.
+- Resolved issue 232's sole telemetry merge conflict by retaining both appended
+  histories. Merge commit cd8a7c6 passed normal hooks; its existing lane tail is
+  running. No protocol or router implementation changes were made by this main.
+- Revalidated the clean PR 225 and 230 recovery heads and their terminal review
+  ledgers. Updated PR 225's daemon adjudication to identify the recursive parser
+  fallback precisely; PR 230 retains its documented conservative directory-rename
+  limitation. Cleared their stale retry markers; merges remain daemon-only.
+- Math-fix slot 5 completed the Schmidt-mirror construction and distinct-family
+  bounds, not the pasting theorem. Resumed the same primary-account thread for
+  averaged mirror consistency and fine-commutator assembly as slot 6 of 10,
+  retaining the September 6, 11:45 UTC deadline. The first dispatch used a wrong
+  worktree suffix and failed before starting a worker; the corrected dispatch is
+  live. Resumed issue 119 separately for quantitative restriction bounds, with
+  explicit instructions not to duplicate issue 201 or 118 constructions.
+- The initial progress-comment read supplied a redundant repository prefix to
+  gh_common.api and received HTTP 404; retrying its repository-relative endpoint
+  succeeded. No write was attempted in that failed call. Existing staged and
+  untracked session telemetry is preserved; no human decision is requested.
+
+## 2026-09-05 — Owner session retires after the 90-minute watch of the astra main session (2026-09-05T18:29:15Z)
+
+- The watch (15:46Z to 18:29:15Z) found the main session (gpt-6-astra) following the rules: daemon-only merges (PRs 228 and 227
+  merged during the watch), labelled autofix loops, #27 reports and telemetry. Guidance given during the watch: an over-read of the
+  handoff parked PRs 178 and 185 (released explicitly); fix loops had stalled unnoticed (PR 229's fixer commit rejected by the
+  paper-gap note style guard; PRs 153, 225, 230, 205 waiting) and the operating rhythm was written into the handoff (guidance
+  sections 1 and 2); the concurrency target was replaced by a critical-path priority at the owner's request; the #201 reopening was
+  pointed at the recorded design decision for eq:pasting-1-sym. The main session's context dropped to about 39% by 16:33Z, so
+  later messages were kept short.
+- Two-account routing (owner request 16:2xZ, decision "both" 17:3xZ): the second endpoint serves gpt-6-astra; the main session
+  installed the router shim v2 at 17:20Z (the owner session's classifier had refused to), and the router log shows balanced picks
+  (4 second / 4 primary at 17:40Z); issue #232 moves the routing into dispatch.sh (lane running); the main session relaunches on the
+  second account with fan-out off at low context (/tmp/relaunch-main-v4.sh, /tmp/main-session-astra-v2.sh staged).
+- State at retirement: main 3f00de0; open PRs 233,230,225,213,212,207,205,202,195,185,178; live codex worker sessions 2;
+  merges recorded by the daemon so far 40. All Claude-held worktrees were released (#118 at 691b671, #174 at bece2e6).
+  This owner session stops; the owner decides when an owner session returns.
