@@ -8,7 +8,7 @@ collision predicate used by the sandwich and pasting lemmas.
 
 ## References
 
-Blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:469-1004`; paper
+Blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:469-1014`; paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:465-525`.
 -/
 
@@ -68,7 +68,7 @@ noncomputable def sandwichProduct {k : ℕ} {X ι : Type*}
 
 /-- The two-family sandwiched product
 `(G₂)_{g₂} (G₁)_{g₁} (G₂)_{g₂}` from `eq:pasting-2a`; blueprint
-`ch12_qpbt_games.tex:954-979`, paper
+`ch12_qpbt_games.tex:960-990`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:504-525`. -/
 def pastedMeasurement {ι : Type*} [Fintype ι] [DecidableEq ι]
     {G₁ G₂ : Type*} (M₁ : G₁ → Op ι) (M₂ : G₂ → Op ι)
@@ -86,7 +86,7 @@ def evalFunctionTuple {k : ℕ} {Y : Type*} {R Γ : Fin k → Type*}
 
 /-- The positive-mass conditional collision bound used by `lem:pasting`.
 This is a formalization-only spelling of the conditional probability in
-`blueprint/src/chapter/ch12_qpbt_games.tex:954-979`, with paper origin
+`blueprint/src/chapter/ch12_qpbt_games.tex:960-990`, with paper origin
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:504-525`. -/
 def HasConditionalCollisionBound {X Y₁ Y₂ R₂ Γ₂ : Type*}
     [Fintype X] [DecidableEq X] [Fintype Y₁] [DecidableEq Y₁]

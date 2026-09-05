@@ -9,7 +9,7 @@ analysis.
 ## References
 
 The source results are `lem:ld-sandwich` and `lem:pasting` in
-`blueprint/src/chapter/ch12_qpbt_games.tex:469-1004`, with paper origin
+`blueprint/src/chapter/ch12_qpbt_games.tex:469-1014`, with paper origin
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:465-525`.
 -/
 
@@ -74,7 +74,7 @@ theorem consistencyDefect_sandwich_le :
 
 /-- The effects obtained by sandwiching one measurement with a projective
 measurement form a POVM. This is `lem:pasting-measurement`, the measurement
-assertion for `eq:pasting-2a`; blueprint `ch12_qpbt_games.tex:986-1004`, paper
+assertion for `eq:pasting-2a`; blueprint `ch12_qpbt_games.tex:995-1014`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:514-524`. -/
 theorem pastedMeasurement_isMeasurement {Γ₁ Γ₂ ι : Type*}
     [Fintype Γ₁] [Fintype Γ₂] [Fintype ι] [DecidableEq ι]
@@ -111,7 +111,7 @@ theorem pastedMeasurement_isMeasurement {Γ₁ Γ₂ ι : Type*}
       _ = 1 := G₂.sum_eq_one
 /-- Pasting two consistent measurements yields an additive polynomial error.
 All operator families in the conclusion are the postprocessed source
-families. This is `lem:pasting`, blueprint `ch12_qpbt_games.tex:954-990`, paper
+families. This is `lem:pasting`, blueprint `ch12_qpbt_games.tex:960-990`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:504-525`.
 
 **Boundary hypothesis (ambient convention of the source):** the source states
