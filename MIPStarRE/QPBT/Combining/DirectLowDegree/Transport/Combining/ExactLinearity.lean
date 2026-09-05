@@ -161,6 +161,79 @@ theorem directCombinedExactLinearity_avg_le (D : DirectLdParams)
         push_cast
         ring
 
+/-! ## The collision estimate at a fixed point -/
+
+/-- A nonzero coefficient of `μ` comes from a monomial of `p` whose combining
+block is `μ`. -/
+theorem exists_mem_support_of_combinedCoef_ne_zero {K : Type*} [CommSemiring K] {m k : ℕ}
+    {p : MvPolynomial (Fin (m + k)) K} {μ : Fin k →₀ ℕ} (h : combinedCoef p μ ≠ 0) :
+    ∃ s ∈ p.support, combinedCoefExp s = μ := by
+  classical
+  by_contra hcon
+  push Not at hcon
+  refine h ?_
+  rw [combinedCoef_eq_sum]
+  exact Finset.sum_eq_zero fun s hs => if_neg (hcon s hs)
+
+/-- The restriction of `p` to a point inherits the individual-degree bound of
+`p` in the combining variables. -/
+theorem degreeOf_combinedRestrict_le {K : Type*} [CommSemiring K] {m k d : ℕ}
+    {p : MvPolynomial (Fin (m + k)) K} (hp : ∀ i, p.degreeOf i ≤ d) (u : Fin m → K)
+    (r : Fin k) : (combinedRestrict p u).degreeOf r ≤ d := by
+  classical
+  rw [MvPolynomial.degreeOf_le_iff]
+  intro μ hμ
+  have hne : combinedCoef p μ ≠ 0 := by
+    intro h0
+    refine MvPolynomial.mem_support_iff.mp hμ ?_
+    rw [← eval_combinedCoef, h0, map_zero]
+  obtain ⟨s, hs, rfl⟩ := exists_mem_support_of_combinedCoef_ne_zero hne
+  exact MvPolynomial.degreeOf_le_iff.mp (hp (combinedCoefficientVar m k r)) s hs
+
+/-- The restriction of a polynomial of individual degree at most `d` to a point
+has total degree at most `k d` in the combining variables. -/
+theorem totalDegree_combinedRestrict_le {K : Type*} [CommSemiring K] {m k d : ℕ}
+    {p : MvPolynomial (Fin (m + k)) K} (hp : p ∈ polyFunc (m + k) K d) (u : Fin m → K) :
+    (combinedRestrict p u).totalDegree ≤ k * d :=
+  totalDegree_le_mul_of_degreeOf_le
+    (degreeOf_combinedRestrict_le (degreeOf_le_of_mem_polyFunc hp) u)
+
+open scoped Classical in
+/-- The collision estimate of the recovery step at a fixed point: if the
+restriction of `p` at `u` is not a linear form, then the value of `p` at the
+combined point agrees with the combined point answer of a tuple `b` at a
+uniformly sampled combining vector with probability at most `k d / q`.  Both
+polynomials in the combining variables have total degree at most `k d`, and
+they are distinct because one of them is a linear form. -/
+theorem combinedRestrict_collision_avg_le {K : Type*} [Field K] [Fintype K]
+    [DecidableEq K] {m k d : ℕ} {p : MvPolynomial (Fin (m + k)) K}
+    (hp : p ∈ polyFunc (m + k) K d) (hkd : 1 ≤ k * d) (u : Fin m → K) (b : Fin k → K)
+    (hu : ∀ c : Fin k → K, combinedRestrict p u ≠ combiningLinearForm c) :
+    avgOver (uniformDistribution (Fin k → K))
+        (fun α => if MvPolynomial.eval (combinedPoint u α) p =
+          ∑ r : Fin k, b r * α r then (1 : Error) else 0) ≤
+      ((((k * d : ℕ) : ℚ≥0) / Fintype.card K : ℚ≥0) : Error) := by
+  classical
+  have hdeg : (combinedRestrict p u).totalDegree ≤ k * d :=
+    totalDegree_combinedRestrict_le hp u
+  have hlin : (combiningLinearForm b).totalDegree ≤ k * d :=
+    le_trans (combiningLinearForm_totalDegree_le_one b) hkd
+  calc
+    avgOver (uniformDistribution (Fin k → K))
+        (fun α => if MvPolynomial.eval (combinedPoint u α) p =
+          ∑ r : Fin k, b r * α r then (1 : Error) else 0)
+      = avgOver (uniformDistribution (Fin k → K))
+          (fun α => if MvPolynomial.eval α (combinedRestrict p u) =
+            MvPolynomial.eval α (combiningLinearForm b) then (1 : Error) else 0) := by
+        apply avgOver_congr
+        intro α
+        rw [eval_combinedRestrict, combiningLinearForm_eval]
+    _ = (polynomialAgreementProbability k K (combinedRestrict p u)
+          (combiningLinearForm b) : Error) :=
+        polynomialAgreement_avg_eq_agreementProbability _ _
+    _ ≤ ((((k * d : ℕ) : ℚ≥0) / Fintype.card K : ℚ≥0) : Error) := by
+        exact_mod_cast schwartzZippel_totalDegree (hu b) hdeg hlin
+
 end
 
 end MIPStarRE.QPBT
