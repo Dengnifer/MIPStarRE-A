@@ -51,11 +51,11 @@ parameters.
 
 ## References
 
-The underlying game is `def:ld-game` in
-`blueprint/src/chapter/ch13_qpbt_test.tex:17-105`, with source origin
+The underlying game is blueprint
+`def:ld-game`, with source origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
 The need for the directly indexed repair in Chapter 15 is explained around
-`rem:qld-4-7-divisibility` in
-`blueprint/src/chapter/ch15_qpbt_combining.tex:1257-1293` and in
+blueprint
+`rem:qld-4-7-divisibility` and in
 `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`.
 -/

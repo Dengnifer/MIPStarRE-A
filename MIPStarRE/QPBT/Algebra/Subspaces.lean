@@ -11,9 +11,9 @@ construction theorem.
 
 ## References
 
-The statement-level definitions are `def:register-subspace`,
+The statement-level definitions are blueprint `def:register-subspace`,
 `def:dot-product-orthogonal`, `def:canonical-complement`, and
-`def:cl-canonical` in `blueprint/src/chapter/ch11_qpbt_algebra.tex`;
+`def:cl-canonical`;
 the paper origin is `references/qpbt-paper/04_preliminaries.tex:231-384`.
 -/
 
@@ -25,8 +25,8 @@ variable {K ι : Type*} [Field K] [Fintype ι] [DecidableEq ι]
 
 /--
 `registerSubmodule K S` is the span of the standard coordinate vectors indexed
-by `S`.  It is the Lean encoding of `def:register-subspace` from
-`blueprint/src/chapter/ch11_qpbt_algebra.tex:24-29`, whose paper origin is
+by `S`.  It is the Lean encoding of blueprint `def:register-subspace`, whose
+paper origin is
 `references/qpbt-paper/04_preliminaries.tex:231-239`.
 -/
 def registerSubmodule (K : Type*) [Field K] (S : Finset ι) : Submodule K (ι → K) :=
@@ -34,8 +34,8 @@ def registerSubmodule (K : Type*) [Field K] (S : Finset ι) : Submodule K (ι �
 
 /--
 `dotOrthogonal W` consists of vectors whose coordinate dot product with every
-member of `W` vanishes.  This is `def:dot-product-orthogonal` in
-`blueprint/src/chapter/ch11_qpbt_algebra.tex:31-42`, with paper origin
+member of `W` vanishes.  This is blueprint
+`def:dot-product-orthogonal`, with paper origin
 `references/qpbt-paper/04_preliminaries.tex:241-255`.
 -/
 def dotOrthogonal (W : Submodule K (ι → K)) : Submodule K (ι → K) where
@@ -61,8 +61,8 @@ def dotOrthogonal (W : Submodule K (ι → K)) : Submodule K (ι → K) where
       _ = 0 := by rw [hu v hv, mul_zero]
 
 /-- Restrict a coordinate vector to the first `k` coordinates.  Lean-only rank
-infrastructure for `def:canonical-complement`, blueprint
-`ch11_qpbt_algebra.tex:84-110`, paper `references/qpbt-paper/04_preliminaries.tex:231-384`.
+infrastructure for blueprint
+`def:canonical-complement`, paper `references/qpbt-paper/04_preliminaries.tex:231-384`.
 -/
 private def prefixMap (k n : ℕ) (hk : k ≤ n) :
     (Fin n → K) →ₗ[K] (Fin k → K) :=
@@ -82,7 +82,7 @@ private noncomputable def prefixRank {n : ℕ} (W : Submodule K (Fin n → K))
 /--
 The non-pivot coordinate set of `W`, defined by the rank-increase
 characterization of pivots.  This is the basis-free encoding approved for
-`def:canonical-complement` in `blueprint/src/chapter/ch11_qpbt_algebra.tex:84-110`;
+blueprint `def:canonical-complement`;
 the paper's Gaussian-elimination presentation is
 `references/qpbt-paper/04_preliminaries.tex:303-320`.
 -/
@@ -176,8 +176,8 @@ private lemma card_strict_steps_le {n : ℕ} (r : ℕ → ℕ)
 
 /--
 The canonical coordinate complement spans a complement of `W`.  This is the
-proposition `lem:canonical-complement` in
-`blueprint/src/chapter/ch11_qpbt_algebra.tex:112-120`, with paper origin
+proposition blueprint
+`lem:canonical-complement`, with paper origin
 `references/qpbt-paper/04_preliminaries.tex:342-373`.
 The proof uses the intrinsic prefix-rank characterization; equivalence with a
 particular reduced-row-echelon algorithm is outside this statement.
@@ -262,7 +262,7 @@ theorem isCompl_registerSubmodule_canonicalComplement {n : ℕ}
 
 /--
 The projector onto the canonical coordinate complement along `W`.  This is
-`def:cl-canonical` in `blueprint/src/chapter/ch11_qpbt_algebra.tex:133-145`,
+blueprint `def:cl-canonical`,
 originating at `references/qpbt-paper/04_preliminaries.tex:375-384`.
 -/
 noncomputable def canonicalProjOfKernel {n : ℕ}

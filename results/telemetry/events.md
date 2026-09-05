@@ -2725,6 +2725,45 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 ## 2026-09-05T14:50Z — codex resumed (owner); ratio codex:opus 1:1; astra not yet
 - The owner re-enabled codex subagents on ghz: model gpt-5.6-sol as before (astra is unstable; the owner will announce its readiness explicitly), dispatch ratio codex:opus 1:1, Fable only when necessary. The pause marker watchdog/codex-paused was removed at 14:47Z, so lanes dispatch again and the review step returns to local/bin/review.sh (codex reviewers); the Claude review mailbox stays available for Opus reviews when the ratio needs them. First codex lanes after the pause: #222 (repository-side post-merge silent-loss guard), #219 (review round counter), #218 (six duplicate private helper groups), #216 (pre-commit persona test during merges). Opus side: PR 205 fix round, the 135/174 worktree merge repairs. Fable: #118 math-fix session 1.
 
+## 2026-09-05 - Blueprint numeric locator churn
+
+- **Symptom:** issue #174 records nine stale blueprint spans in PR #152's first
+  review and same-day conflicts in four active lanes; earlier PR #29 had the
+  same downstream-locator failure after a two-line chapter insertion.
+- **Diagnosis:** mutable blueprint line numbers were stored as source metadata
+  in Lean docstrings, so unrelated chapter edits invalidated citations and
+  changed otherwise independent Lean files.
+- **Fix:** issue #174 adopts blueprint labels as the stored citation and makes
+  current file and line spans deterministic reviewer output.
+- **Lesson:** stable identifiers belong in maintained source; positional
+  context should be derived at the point of review.
+
+## 2026-09-05 - Citation evidence starved by the review diff
+
+- **Symptom:** PR #202 round 1 found that a large diff could consume the
+  dispatcher's aggregate attachment allowance before the derived blueprint
+  citation map, while the no-dispatch fallback embedded the raw branch-derived
+  map.
+- **Diagnosis:** `review.sh` appended an independently unbounded map after the
+  diff and sanitized only the diff artifact.
+- **Fix:** cap and sanitize the map separately, attach it before the diff, and
+  use the same bounded artifact in the fallback prompt.
+- **Lesson:** required review evidence needs an explicit per-artifact budget;
+  aggregate truncation alone depends incorrectly on attachment order.
+
+## 2026-09-05 - Citation failures lost inside their own evidence budget
+
+- **Symptom:** PR #202 round 2 found that prefix truncation of the derived
+  citation map removed unresolved and duplicate rows, and the no-dispatch
+  prompt still placed the map after the diff.
+- **Diagnosis:** the byte cap operated after row semantics had been erased, so
+  it could not distinguish successful resolutions from merge-blocking failures.
+- **Fix:** compact repeated origins, retain failure rows before truncating
+  resolved rows, fail closed if failure evidence cannot fit, and put the map
+  before the diff in both review paths.
+- **Lesson:** evidence budgets must encode priority before byte truncation;
+  ordering guarantees must be tested at every dispatch boundary.
+
 ## 2026-09-05 — Operator hand-back: astra main session (Mode 1) takes over from the owner session
 
 - **Trigger:** owner decision (2026-09-05T15:45:27Z): gpt-6-astra reached through the codex relay on ghz (poller ASTRA=gpt-6-astra);

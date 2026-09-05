@@ -10,10 +10,10 @@ stored in the canonical `FixedFieldModel`.
 
 ## References
 
-The conversion is `lem:pauli-binary` in
-`blueprint/src/chapter/ch11_qpbt_algebra.tex:710-741`, from
+The conversion is blueprint
+`lem:pauli-binary`, from
 `references/qpbt-paper/04_preliminaries.tex:1163-1208`. The resulting
-`cor:pauli-binary` is in `blueprint/src/chapter/ch13_qpbt_test.tex:430-454`,
+statement is blueprint `cor:pauli-binary`,
 from `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1450-1491`.
 -/
 
@@ -132,7 +132,7 @@ noncomputable def qubitOperatorDistanceB
       (idealQubitState P w.aux)‖ ^ 2
 
 /-- `cor:pauli-binary`: soundness of the Pauli basis test in qubit
-coordinates. Blueprint `ch13_qpbt_test.tex:430-454`, paper
+coordinates. Blueprint `cor:pauli-binary`, paper
 `08_classical_and_quantum_low_degree_tests.tex:1450-1491`.
 
 The theorem assumes a nonnegative error parameter, as in the source, and uses

@@ -12,9 +12,8 @@ the observable analysis and gives its explicit zero-padding isometries.
 
 ## References
 
-The setup is `lem:projective-strategy-setup` and
-`def:projective-strategy-general` in
-`blueprint/src/chapter/ch14_qpbt_observables.tex:385-475`, with paper origin
+The setup is blueprint `lem:projective-strategy-setup` and
+`def:projective-strategy-general`, with paper origin
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:155-172`.
 -/
 
@@ -30,8 +29,8 @@ noncomputable section
 
 /-- Embed a finite Euclidean space into an equivalently indexed space by
 placing its coordinates in the all-zero ancilla sector. This is the
-zero-padding isometry in `lem:projective-strategy-setup`, blueprint
-`ch14_qpbt_observables.tex:412-475`, paper
+zero-padding isometry in blueprint
+`lem:projective-strategy-setup`, paper
 `14_analysis_of_the_pauli_basis_test.tex:155-172`. -/
 noncomputable def padWithZeros {ι κ : Type*}
     [Fintype ι] [DecidableEq ι] [Fintype κ] [DecidableEq κ] {n : ℕ}
@@ -78,8 +77,8 @@ noncomputable def padWithZeros {ι κ : Type*}
 
 /-- Reindex the product of two padded local spaces into the source bipartite
 space followed by the two ancilla spaces. This is the explicit shuffle in
-`lem:projective-strategy-setup`, blueprint
-`ch14_qpbt_observables.tex:412-475`. -/
+blueprint
+`lem:projective-strategy-setup`. -/
 def paddedProdShuffle {ιA ιB κA κB : Type*} {nA nB : ℕ}
     (eA : κA ≃ ιA × (Fin nA → Bool))
     (eB : κB ≃ ιB × (Fin nB → Bool)) :
@@ -293,8 +292,8 @@ private theorem paddedProjectiveStrategy_value {G : Game} (S : Strategy G)
 
 /-- Every finite tensor-product strategy has an equal-value projective
 dilation whose state is obtained by local zero padding. This is
-`lem:projective-strategy-setup`, blueprint
-`blueprint/src/chapter/ch14_qpbt_observables.tex:412-475`, paper
+blueprint
+`lem:projective-strategy-setup`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:155-172`.
 The proof route is Naimark dilation followed by residual-projector completion. -/
 theorem exists_projective_padded_strategy (G : Game) (S : Strategy G) :

@@ -36,8 +36,7 @@ This is the last step of the proof of
 `references/ldt-paper/self_improvement.tex`, lines 407--414: after evaluating
 the original input measurement `G` at a random point, `ConsRel ... nu` says the
 off-diagonal mass is at most `nu`, hence the diagonal matching mass is at least
-`1 - nu`. The blueprint mirror is
-`blueprint/src/chapter/ch07_self_improvement.tex`, lines 137--142. -/
+`1 - nu`. The blueprint mirror is `eq:first-moved-completeness`. -/
 theorem input_consistency_match_mass_lower_bound
     (params : Parameters)
     [FieldModel params.q]
@@ -118,8 +117,7 @@ This is the algebraic content of `references/ldt-paper/self_improvement.tex`,
 lines 410--411: the pointwise match mass
 `E_u Σ_a ⟨ψ, A^u_a ⊗ G_[g(u)=a] ψ⟩` is the same expression as
 `Σ_g ⟨ψ, (E_u A^u_{g(u)}) ⊗ G_g ψ⟩`, after reindexing by the value of `g` at
-`u`. The blueprint mirror is
-`blueprint/src/chapter/ch07_self_improvement.tex`, lines 137--141. -/
+`u`. The blueprint mirror is `eq:first-moved-completeness`. -/
 theorem input_match_mass_eq_sdp_overlap
     (params : Parameters)
     [FieldModel params.q]

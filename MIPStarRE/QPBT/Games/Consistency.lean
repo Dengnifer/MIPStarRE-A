@@ -5,8 +5,8 @@ import MIPStarRE.QPBT.State
 
 /-! # State-dependent consistency and strategy closeness
 
-The definitions are the finite-dimensional forms of `def:consistency` and
-`def:strategy-distance` in `blueprint/src/chapter/ch12_qpbt_games.tex:195-237`,
+The definitions are the finite-dimensional forms of blueprint
+`def:consistency` and `def:strategy-distance`,
 from `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:219-288`.
 -/
 
@@ -16,8 +16,8 @@ namespace MIPStarRE.QPBT
 
 open MIPStarRE.LDT MIPStarRE.Quantum
 
-/-- The off-diagonal defect in `def:consistency`, blueprint
-`ch12_qpbt_games.tex:195-208`, paper `06_nonlocal_games_and_mipstar.tex:232-248`. -/
+/-- The off-diagonal defect in blueprint
+`def:consistency`, paper `06_nonlocal_games_and_mipstar.tex:232-248`. -/
 noncomputable def consistencyDefect {X α ι : Type*}
     [Fintype X] [DecidableEq X] [Fintype α] [DecidableEq α]
     [Fintype ι] [DecidableEq ι]
@@ -140,8 +140,8 @@ theorem consistencyDefect_congr
   · simp only [hab, if_false]
     rw [hA x a, hB x b]
 
-/-- The quantitative relation in `def:consistency`, blueprint
-`ch12_qpbt_games.tex:195-208`, paper `06_nonlocal_games_and_mipstar.tex:232-248`. -/
+/-- The quantitative relation in blueprint
+`def:consistency`, paper `06_nonlocal_games_and_mipstar.tex:232-248`. -/
 def IsConsistentWithin {X α ι : Type*}
     [Fintype X] [DecidableEq X] [Fintype α] [DecidableEq α]
     [Fintype ι] [DecidableEq ι]
@@ -149,15 +149,15 @@ def IsConsistentWithin {X α ι : Type*}
     (ψ : EuclideanSpace ℂ ι) (δ : ℝ) : Prop :=
   consistencyDefect μ A B ψ ≤ δ
 
-/-- Unit-alphabet specialization of `def:povm-distance`, blueprint
-`ch12_qpbt_games.tex:219-226`, paper `06_nonlocal_games_and_mipstar.tex:258-271`. -/
+/-- Unit-alphabet specialization of blueprint
+`def:povm-distance`, paper `06_nonlocal_games_and_mipstar.tex:258-271`. -/
 noncomputable def opDistSq {X ι : Type*}
     [Fintype X] [DecidableEq X] [Fintype ι] [DecidableEq ι]
     (μ : Distribution X) (M N : X → Op ι) (ψ : EuclideanSpace ℂ ι) : ℝ :=
   opFamilyDistSq μ (fun x (_ : Unit) => M x) (fun x (_ : Unit) => N x) ψ
 
 /-- The unit-alphabet operator distance equals its one-outcome family form from
-`def:povm-distance`, blueprint `ch12_qpbt_games.tex:219-226`, paper
+blueprint `def:povm-distance`, paper
 `06_nonlocal_games_and_mipstar.tex:258-271`. -/
 theorem opDistSq_eq_opFamilyDistSq {X ι : Type*}
     [Fintype X] [DecidableEq X] [Fintype ι] [DecidableEq ι]
@@ -168,7 +168,7 @@ theorem opDistSq_eq_opFamilyDistSq {X ι : Type*}
 /-- The strategy-distance relation `def:strategy-distance`. The two strategies'
 local Hilbert spaces are identified, and both measurement distances are
 evaluated on the first strategy's state. Blueprint
-`ch12_qpbt_games.tex:228-237`, paper `06_nonlocal_games_and_mipstar.tex:273-285`. -/
+`def:strategy-distance`, paper `06_nonlocal_games_and_mipstar.tex:273-285`. -/
 structure AreCloseStrategies (G : Game) (S S' : Strategy G) (δ : ℝ) : Prop where
   /-- Identification of Alice's local Hilbert spaces. -/
   hA : S.ιA = S'.ιA

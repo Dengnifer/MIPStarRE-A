@@ -63,8 +63,7 @@ dimension is `2 * P.m + 2`; no divisibility assertion is introduced.
 
 The construction has dimension `2 * P.m + 2` without requiring
 `2 * P.m + 2 ∣ P.q`; it supplies the directly indexed line and coordinate
-spaces used in the dimension-extension argument of
-`blueprint/src/chapter/ch15_qpbt_combining.tex:1257-1293`.
+spaces used in the dimension-extension argument of blueprint `lem:qld-sublines`.
 -/
 def AdmissibleParams.extendedDirectLd (P : AdmissibleParams) : DirectLdParams where
   q := P.q

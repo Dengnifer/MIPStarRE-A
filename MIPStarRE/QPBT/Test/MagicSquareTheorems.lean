@@ -35,8 +35,8 @@ hypothesis with `δ = 0` (`exists_ms_rigidity_of_symmetric_consistent`).
 
 ## References
 
-The source statement is `thm:ms-rigidity` in
-`blueprint/src/chapter/ch13_qpbt_test.tex`, from
+The source statement is blueprint
+`thm:ms-rigidity`, from
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652`.
 
 The variable indices below are zero-based: indices 0 and 4 represent the
@@ -147,7 +147,7 @@ conclusion are contractions and that the ideal state is a unit vector
 that carries the regime `1 ≤ sqrt ε + sqrt δ` of `exists_ms_rigidity`, in which
 the asserted bound `C * (sqrt ε + sqrt δ)` is at least the constant `C`; see
 `exists_ms_rigidity_of_one_le_sqrt_add`.  Blueprint
-`ch13_qpbt_test.tex:224-253`, paper
+`thm:ms-rigidity`, paper
 `08_classical_and_quantum_low_degree_tests.tex:612-652`. -/
 theorem ms_rigidity_coarse_bounds (S : Strategy msGame) :
     ∃ w : MsRigidityWitness S,
@@ -306,7 +306,7 @@ theorem sum_sq_le_two_mul {ι : Type} [Fintype ι] [DecidableEq ι]
 dilation for Alice: her variable effects, conjugated by her two-qubit
 controlled-swap embedding, are close on the ideal state to the marginals of the
 two-qubit Pauli basis, at the scale of the transport defect plus twice the state
-distance.  Blueprint `ch13_qpbt_test.tex:224-253`, paper
+distance.  Blueprint `thm:ms-rigidity`, paper
 `08_classical_and_quantum_low_degree_tests.tex:612-652`. -/
 theorem ms_dilated_operator_distance_A (S : Strategy msGame) (j : Fin 9) (W : PauliKind)
     (r : EuclideanSpace ℂ ((msDilatedStrategy S).ιA × (msDilatedStrategy S).ιB))
@@ -391,7 +391,7 @@ theorem ms_dilated_operator_distance_B (S : Strategy msGame) (j : Fin 9) (W : Pa
 /-- The anticommutator estimate of `thm:ms-rigidity` on the projective dilation
 for Alice: products compose under conjugation by an isometry, so the estimate is
 the anticommutator defect of her first logical pair transported to the ideal
-state.  Blueprint `ch13_qpbt_test.tex:224-253`. -/
+state.  Blueprint `thm:ms-rigidity`. -/
 theorem ms_dilated_anticommutator_A (S : Strategy msGame)
     (r : EuclideanSpace ℂ ((msDilatedStrategy S).ιA × (msDilatedStrategy S).ιB))
     (κ η : ℝ)

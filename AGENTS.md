@@ -406,6 +406,13 @@ Required:
 - **Docstrings** on every `def`, `structure`, `class`, and significant `theorem`
 - Mathematical prose in Lean docstrings and comments should follow
   `docs/mathematical_language.md`
+- Cite blueprint nodes by their stable LaTeX label, for example blueprint
+  `lem:cl-concat`. Do not store blueprint line numbers in Lean docstrings. When
+  reviewing, derive the current span with
+  `python3 scripts/blueprint_citations.py resolve lem:cl-concat`.
+- Cite paper mirrors by a paper label when one exists, or by a repository path
+  plus a narrow anchored passage when the source has no suitable label. Paper
+  mirror line ranges are acceptable because those mirrors are immutable.
 
 When formalizing a statement from the blueprint, add corresponding `\lean{...}`
 and `\leanok` tags in the relevant `blueprint/src/chapter/*.tex` file.
