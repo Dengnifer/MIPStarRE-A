@@ -387,7 +387,20 @@ form are folded into the zero tuple so that the point family remains a POVM.
 The source reduction still requires proofs of the claimed game correspondence
 and of the auxiliary parameter bound. These two open facts are detailed in
 `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex` and
-`rem:ld-soundness-provider`, and are tracked by issue #16. -/
+`rem:ld-soundness-provider`, and are tracked by issue #16.
+
+A third obligation is the simultaneity of the polynomial measurements for
+`L.k ≥ 2`. The source obtains it from the case `L.k = 1` by the combining
+reduction of Theorem 4.43 in the NEEXP paper, not coordinatewise; the
+coordinatewise route planned for the formalization is refuted in
+`docs/paper-gaps/qpbt_ld-simultaneous-sandwich.tex`. The combining reduction
+is proved for the directly indexed game in
+`MIPStarRE/QPBT/Combining/DirectLowDegree/Transport/Combining/SimultaneousGeneral.lean`;
+the general-`k` seed-indexed theorem remains open. See issue #210.
+The case `L.k = 1`, which is the only
+one instantiated by the Chapter 15 combining argument, is proved with the
+present conclusions as `exists_ld_soundness_of_k_eq_one` in
+`MIPStarRE/QPBT/Combining/DirectLowDegree/SeedIndexedSoundness.lean`. -/
 theorem exists_ld_soundness :
     ∃ a b : ℝ, 1 ≤ a ∧ 0 < b ∧ b ≤ 1 ∧
       ∀ (L : LdParams) (ε : ℝ), 0 < ε →

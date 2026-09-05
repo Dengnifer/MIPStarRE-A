@@ -38,9 +38,11 @@
   \item \textbf{Estimated weight:} the directly indexed game, its soundness
   theorem, the reduction from general simultaneity to one, the correlated
   residue lift from the seed-indexed game, and the compression of the two
-  mixed consistency conclusions are formalized.  The remaining seed-indexed
-  theorem requires a compression theorem for the global/global consistency
-  conclusion.  Independently, discharging the original import obligations of
+  mixed consistency conclusions are formalized. For $k=1$, the global
+  relation is recovered from point agreement and Schwartz--Zippel, completing
+  seed-indexed soundness. The general-$k$ seed-indexed theorem and the
+  downstream use at dimension $2m+2$ remain open. Independently, discharging
+  the original import obligations of
   Section~\ref{sec:import-obligations} adds the pair-measurement
   construction with its distributional matching, the branch-weight value
   bound, and the parameter-bound case split; this remains several hundred
@@ -49,7 +51,7 @@
   \item \textbf{Mathlib/project split:} approximately \textbf{15\% Mathlib}
   and \textbf{85\% project-local}.  Mathlib supplies uniform distributions on
   finite types and pushforward identities; the remaining substance is the
-  global/global compression and the reduction to the tensor-code test.
+  recovery of global polynomial agreement and the reduction to the tensor-code test.
   \item \textbf{Key Mathlib inputs:} uniform distributions on finite types
   and their maps, and elementary divisibility arithmetic on powers of two.
   The main inputs are project-local: the two classical games, the
@@ -108,9 +110,10 @@ theorem forms.
   Theorem~4.7 of \cite{Ji2021Quantum} or verify that theorem's distinct
   condition $K \ge 12m'(d+1)$.  Thus it avoids rather than discharges the
   two source-import obligations of Section~\ref{sec:import-obligations}.
-  The seed-indexed source theorem remains open because the third,
-  global/global consistency conclusion has not yet been compressed back from
-  the correlated residue registers.
+  For $k=1$, transport to the seed-indexed game is established: the two
+  mixed relations compress exactly and the global relation is recovered
+  from point agreement on the original Hilbert spaces. The general-$k$
+  seed-indexed source theorem remains open.
 \end{enumerate}
 
 \section{The source assertion and the obstruction}
@@ -184,8 +187,8 @@ simultaneity parameter --- chosen as $(m')^3 d$.  Neither
 the asserted identity nor the instantiation is complete as stated, so the
 import carries two verification obligations, which this section details and
 which the blueprint's proof node for the soundness statement records as
-open.  Both obligations are independent of the divisibility question and
-remain open for the source's seed-indexed soundness theorem at every dimension
+open for the printed tensor-code route. Both obligations are independent of
+the divisibility question and remain open for that route at every dimension
 where that game is defined.  They would also arise from an attempt to prove
 soundness of the directly indexed game by the same tensor-code import.  The
 established proof for the directly indexed game takes a different route through
@@ -310,7 +313,8 @@ $i-1$ coordinates directly.  In the resulting game, line questions carry
 the index $i$ (and, for diagonal lines, the projected direction) in place
 of the seed $s \in \F_q$.  Soundness form~4 is established for this game
 through the low individual degree theorem and the general-simultaneity
-combining reduction.  This removes the divisibility obstruction for the
+combining reduction analysed in \cite{gap:qpbt_ld-simultaneous-sandwich}.
+This removes the divisibility obstruction for the
 auxiliary directly indexed game.  Because the proof does not use the
 tensor-code import, it leaves both original import obligations open rather
 than establishing them.
@@ -364,10 +368,21 @@ residues.  Neither quantity bounds the other in general.  For example, on a
 two-element residue register, if both deterministic measurements report the
 residue, the equal-residue disagreement is zero while the independent-residue
 disagreement is $1/2$.  If Alice reports the residue and Bob reports its
-complement, the corresponding disagreements are $1$ and $1/2$.  No current
-theorem transports this third relation, so a joint compression or another
-argument controlling the global/global defect is the sole remaining transport
-obligation in the direct-game route to the seed-indexed soundness theorem.
+complement, the corresponding disagreements are $1$ and $1/2$. For $k=1$,
+the third relation is instead recovered on the original Hilbert spaces.
+The point-agreement branch has weight $1/9$, so the two point measurements
+have consistency defect at most $9\eps$. The triangle inequality combines
+this with the two compressed mixed relations to give agreement of evaluated
+polynomials; Schwartz--Zippel then gives global polynomial agreement with
+an additional error $m'd/q$. Absorption into $\delta_{\mathrm{ld}}$ completes
+the seed-indexed theorem for $k=1$.%
+\footnote{The point-agreement estimates are proved in
+\doclink{MIPStarRE/QPBT/Combining/DirectLowDegree/Transport/PointAgreement.lean}.
+The resulting theorem is \leanid{exists\_ld\_soundness\_of\_k\_eq\_one} in
+\doclink{MIPStarRE/QPBT/Combining/DirectLowDegree/SeedIndexedSoundness.lean};
+its direct specialization is
+\leanid{exists\_direct\_ld\_soundness\_of\_k\_eq\_one} in
+\doclink{MIPStarRE/QPBT/Combining/DirectLowDegree/Soundness.lean}.}
 
 The combining reduction has now been formalized with the direct distribution
 and the directly indexed game, so it is well defined at dimension
@@ -376,9 +391,11 @@ all positive parameters.  Its proof uses the sampled geometric data and then
 applies the low individual degree theorem at the combined dimension.  This
 establishes soundness of the directly indexed game, but it does not change the
 source-shaped sub-line and polynomial-pair statements or prove the
-seed-indexed soundness theorem.  It already supplies the first two consistency
-conclusions after correlated-residue compression; the third remains open as
-described above.  Completing that transport must respect the subtree protocol
+general-$k$ seed-indexed soundness theorem. It already supplies the first two
+consistency conclusions after correlated-residue compression; for $k=1$ the
+third is recovered as described above. The downstream use at dimension
+$2m+2$ still requires verification. Completing that application must respect
+the subtree protocol
 for a definition-level mismatch rather than adding a divisibility hypothesis
 to the paper statements.
 The external check that the tensor-code test of arXiv:2111.08131 samples
@@ -450,9 +467,11 @@ condition $400Md \le N$ for $M=m'+\kappa$ and $N=2560000M^3d$.  It neither
 applies the tensor-code theorem nor verifies its bound on $K$, so it bypasses
 rather than discharges both source-import obligations.  The correlated-residue
 lift now transports projectivity, game value, and the two mixed consistency
-conclusions from this direct proof.  The seed-indexed soundness theorem remains
-open specifically because the global/global consistency conclusion has not
-been compressed.  Separately, the source-shaped polynomial-pair construction
+conclusions from this direct proof. For $k=1$, point agreement and
+Schwartz--Zippel recover the global relation on the original Hilbert spaces,
+completing the seed-indexed soundness theorem without asserting a false
+double-compression identity. The general-$k$ seed-indexed theorem remains open.
+Separately, the source-shaped polynomial-pair construction
 still has its declared construction and carrier-transport obligations; repairing
 the original tensor-code import would provide another route to soundness.  We
 do not assert that either conclusion is false; the open points are verification

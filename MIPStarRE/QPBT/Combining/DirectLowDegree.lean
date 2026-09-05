@@ -20,6 +20,8 @@ import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.RecoveryDefe
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.RecoveryTransport
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.SimultaneousGeneral
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.Error
+import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.PointAgreement
+import MIPStarRE.QPBT.Combining.DirectLowDegree.SeedIndexedSoundness
 
 /-!
 # The directly indexed low-degree game
@@ -61,7 +63,11 @@ the Schwartz--Zippel collision estimate to the direct polynomial
 representatives, and proves the polynomial-tuple conclusion of
 `lem:ld-soundness` for simultaneity parameter `1`.  It also records why the
 coordinate conclusions do not determine simultaneous measurements for larger
-parameters.
+parameters.  `Transport.PointAgreement` reads the point-agreement branch of
+either game as a consistency estimate, and `SeedIndexedSoundness` transports
+the polynomial-tuple conclusions back to the seed-indexed game `ldGame` by
+compressing the correlated residue register, recovering the global polynomial
+relation from the two point relations and the point-agreement branch.
 
 For a general simultaneity parameter, the reduction introduces the combined
 parameters `DirectLdParams.combined`, of dimension `m + k` and simultaneity
