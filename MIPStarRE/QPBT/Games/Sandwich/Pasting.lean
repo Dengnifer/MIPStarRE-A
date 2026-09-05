@@ -424,4 +424,134 @@ theorem consistencyDefect_codeword_fine_le_coarse_add
       (fun q => (G₂ q.1.1).postprocess (fun g => eval₂ g q.2)) ψ]
   rw [avgOver_congr D _ _ hkey, avgOver_add]
   linarith
+
+/-- The colliding part of the pinched cross term averages to at most `η`. The
+weights are the overlaps of the second codeword family with its own pinching by
+a first codeword family on the opposite factor; they are nonnegative, being
+expectations of tensor products of positive operators, and their total over the
+distinct pairs is at most one, so the conditional collision bound of
+`lem:pasting` applies. This is the discarded part of the coarse cross term in
+step 5 of the proof of the adopted statement in
+`docs/paper-gaps/qpbt_pasting-product-error.tex`; blueprint
+`ch12_qpbt_games.tex:960-990`. -/
+theorem avgOver_pinched_collision_le
+    {X Y₁ Y₂ R₁ R₂ Γ₂ ι : Type*}
+    [Fintype X] [DecidableEq X] [Fintype Y₁] [DecidableEq Y₁]
+    [Fintype Y₂] [DecidableEq Y₂] [Fintype R₁] [DecidableEq R₁]
+    [Fintype R₂] [DecidableEq R₂] [Fintype Γ₂] [DecidableEq Γ₂]
+    [Fintype ι] [DecidableEq ι]
+    (D : Distribution ((X × Y₁) × Y₂)) (eval₂ : Γ₂ → Y₂ → R₂)
+    (G₂ : X → Measurement Γ₂ ι) (P : (X × Y₁) → Measurement R₁ ι)
+    (ψ : EuclideanSpace ℂ (ι × ι)) (η : ℝ)
+    (hD : D.IsProbability) (hψ : ‖ψ‖ = 1) (hη : 0 ≤ η)
+    (hcoll : ∀ x y₁, 0 < (D.map Prod.fst).weight (x, y₁) →
+      ∀ g g' : Γ₂, g ≠ g' →
+        (∑ y₂ : Y₂, D.weight ((x, y₁), y₂) *
+          if eval₂ g y₂ = eval₂ g' y₂ then 1 else 0) ≤
+          η * (D.map Prod.fst).weight (x, y₁)) :
+    avgOver D (fun q => ∑ g : Γ₂, ∑ g' : Γ₂, if g = g' then 0 else
+      if eval₂ g q.2 = eval₂ g' q.2 then
+        ∑ a : R₁, stateQForm ψ (heteroKron ((G₂ q.1.1).effect g')
+          ((P q.1).effect a * (G₂ q.1.1).effect g * (P q.1).effect a))
+      else 0) ≤ η := by
+  classical
+  have hconj : ∀ (p : X × Y₁) (a : R₁) (g : Γ₂),
+      0 ≤ (P p).effect a * (G₂ p.1).effect g * (P p).effect a := by
+    intro p a g
+    apply Matrix.nonneg_iff_posSemidef.mpr
+    have hpos : (((P p).effect a)ᴴ * (G₂ p.1).effect g *
+        (P p).effect a).PosSemidef :=
+      (Matrix.nonneg_iff_posSemidef.mp ((G₂ p.1).pos g)).conjTranspose_mul_mul_same
+        ((P p).effect a)
+    rw [measurement_effect_hermitian (P p) a] at hpos
+    exact hpos
+  have hcnn : ∀ (p : X × Y₁) (g g' : Γ₂),
+      0 ≤ ∑ a : R₁, stateQForm ψ (heteroKron ((G₂ p.1).effect g')
+        ((P p).effect a * (G₂ p.1).effect g * (P p).effect a)) := by
+    intro p g g'
+    exact Finset.sum_nonneg fun a _ =>
+      stateQForm_nonneg ψ (kronecker_nonneg ((G₂ p.1).pos g') (hconj p a g))
+  -- The unit quadratic form of the identity is inlined here; see issue #204.
+  have hone : stateQForm ψ (1 : Op (ι × ι)) = ‖ψ‖ ^ 2 := by
+    have hid : applyOperatorToState (1 : Op (ι × ι)) ψ = ψ := by
+      simp [applyOperatorToState]
+    rw [stateQForm, hid]
+    simpa using (inner_self_eq_norm_sq (𝕜 := ℂ) ψ)
+  have htotal : ∀ p : X × Y₁,
+      (∑ g : Γ₂, ∑ g' : Γ₂, ∑ a : R₁, stateQForm ψ
+        (heteroKron ((G₂ p.1).effect g')
+          ((P p).effect a * (G₂ p.1).effect g * (P p).effect a))) ≤ 1 := by
+    intro p
+    have hin : ∀ g : Γ₂,
+        (∑ g' : Γ₂, ∑ a : R₁, stateQForm ψ (heteroKron ((G₂ p.1).effect g')
+          ((P p).effect a * (G₂ p.1).effect g * (P p).effect a))) =
+        ∑ a : R₁, ∑ g' : Γ₂, stateQForm ψ (heteroKron ((G₂ p.1).effect g')
+          ((P p).effect a * (G₂ p.1).effect g * (P p).effect a)) :=
+      fun g => Finset.sum_comm
+    rw [Finset.sum_congr rfl (fun g (_ : g ∈ Finset.univ) => hin g), Finset.sum_comm]
+    have hfill : ∀ (a : R₁) (g : Γ₂),
+        (∑ g' : Γ₂, stateQForm ψ (heteroKron ((G₂ p.1).effect g')
+          ((P p).effect a * (G₂ p.1).effect g * (P p).effect a))) =
+        stateQForm ψ (heteroKron 1
+          ((P p).effect a * (G₂ p.1).effect g * (P p).effect a)) := by
+      intro a g
+      rw [← stateQForm_finset_sum, ← heteroKron_finset_sum_left,
+        (G₂ p.1).sum_eq_one]
+    simp_rw [hfill]
+    have hmid : ∀ a : R₁,
+        (∑ g : Γ₂, stateQForm ψ (heteroKron 1
+          ((P p).effect a * (G₂ p.1).effect g * (P p).effect a))) =
+        stateQForm ψ (heteroKron 1 ((P p).effect a * (P p).effect a)) := by
+      intro a
+      rw [← stateQForm_finset_sum, ← heteroKron_finset_sum_right]
+      congr 2
+      rw [← Finset.sum_mul, ← Finset.mul_sum, (G₂ p.1).sum_eq_one, mul_one]
+    simp_rw [hmid]
+    rw [← stateQForm_finset_sum, ← heteroKron_finset_sum_right]
+    have hS : (∑ a : R₁, (P p).effect a * (P p).effect a) ≤ 1 := by
+      refine le_of_eq_of_le ?_ (SandwichProduct.measurement_sum_adjoint_mul_le_one (P p))
+      refine Finset.sum_congr rfl fun a _ => ?_
+      rw [measurement_effect_hermitian (P p) a]
+    have hmono : heteroKron (1 : Op ι)
+        (∑ a : R₁, (P p).effect a * (P p).effect a) ≤ (1 : Op (ι × ι)) := by
+      have hsub : (1 : Op (ι × ι)) -
+          heteroKron (1 : Op ι) (∑ a : R₁, (P p).effect a * (P p).effect a) =
+          heteroKron (1 : Op ι)
+            (1 - ∑ a : R₁, (P p).effect a * (P p).effect a) := by
+        have hbil : heteroKron (1 : Op ι)
+            (1 - ∑ a : R₁, (P p).effect a * (P p).effect a) =
+            heteroKron (1 : Op ι) 1 -
+              heteroKron (1 : Op ι)
+                (∑ a : R₁, (P p).effect a * (P p).effect a) := by
+          ext u v
+          simp only [heteroKron, Matrix.kronecker, Matrix.kroneckerMap_apply,
+            Matrix.sub_apply, Matrix.one_apply, mul_sub]
+        rw [hbil, heteroKron_one_one]
+      have hnn : 0 ≤ (1 : Op (ι × ι)) -
+          heteroKron (1 : Op ι)
+            (∑ a : R₁, (P p).effect a * (P p).effect a) := by
+        rw [hsub]
+        exact kronecker_nonneg (Matrix.PosSemidef.one.nonneg) (sub_nonneg.mpr hS)
+      exact sub_nonneg.mp hnn
+    calc stateQForm ψ (heteroKron (1 : Op ι)
+        (∑ a : R₁, (P p).effect a * (P p).effect a))
+        ≤ stateQForm ψ (1 : Op (ι × ι)) := quadratic_form_mono hmono ψ
+      _ = ‖ψ‖ ^ 2 := hone
+      _ = 1 := by rw [hψ]; norm_num
+  have hmass : ∀ p : X × Y₁,
+      (∑ g : Γ₂, ∑ g' : Γ₂, if g = g' then 0 else
+        ∑ a : R₁, stateQForm ψ (heteroKron ((G₂ p.1).effect g')
+          ((P p).effect a * (G₂ p.1).effect g * (P p).effect a))) ≤ 1 := by
+    intro p
+    refine le_trans ?_ (htotal p)
+    refine Finset.sum_le_sum fun g _ => Finset.sum_le_sum fun g' _ => ?_
+    by_cases hgg : g = g'
+    · simp only [if_pos hgg]
+      exact hcnn p g g'
+    · simp only [if_neg hgg]
+      exact le_rfl
+  exact avgOver_collision_le D eval₂
+    (fun p g g' => ∑ a : R₁, stateQForm ψ (heteroKron ((G₂ p.1).effect g')
+      ((P p).effect a * (G₂ p.1).effect g * (P p).effect a))) η hD hη
+    hcnn hmass hcoll
 end MIPStarRE.QPBT

@@ -1173,6 +1173,35 @@ postprocessing, and operator-contraction steps used to formalize
 	and their total over the distinct pairs is at most one, so
 	Lemma~\ref{lem:pasting-collision-averaging} bounds their average by $\eta$.
 \end{proof}
+\begin{lemma}[Formalization support for Lemma~\ref{lem:pasting}]
+	\label{lem:pasting-pinched-collision}
+	\lean{MIPStarRE.QPBT.avgOver_pinched_collision_le}
+	\leanok
+	\uses{lem:pasting-collision-averaging, def:pasting-tensor-placement}
+	In the setting of Lemma~\ref{lem:pasting}, write $G_{g_2} = (G_2)^x_{g_2}$
+	and let $P_{a_1}$ be any measurement depending on $(x, y_1)$ only. Then the
+	colliding part of the cross term of $G$ against its pinching by $P$ is small
+	on average:
+	\[
+		\E_{(x,y_1,y_2) \sim \mathcal D}
+			\sum_{\substack{g_2 \ne g_2' \\ g_2(y_2) = g_2'(y_2)}}
+				\sum_{a_1} \bra{\psi} G_{g_2'} \ot
+					P_{a_1} G_{g_2} P_{a_1} \ket{\psi} \le \eta\,.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:pasting-collision-averaging}
+	Each summand is the expectation of a tensor product of positive operators,
+	the second factor being a conjugate of a positive operator by a self-adjoint
+	effect, so the weights are nonnegative. Summing over all pairs of codewords
+	replaces both codeword effects by the identity and leaves
+	$\sum_{a_1} \bra{\psi} \Id \ot P_{a_1}^2 \ket{\psi}$, which is at most
+	$\|\psi\|^2 = 1$ because the squares of the effects of a measurement sum to
+	at most the identity. Lemma~\ref{lem:pasting-collision-averaging} then
+	applies to these weights.
+\end{proof}
+
 
 \begin{lemma}[Close strategies have close values; Fact 4.32 in \cite{Natarajan2018NEEXP}]\label{lem:close-strategies-have-close-values}
 	\lean{MIPStarRE.QPBT.abs_value_sub_le_of_areClose}
