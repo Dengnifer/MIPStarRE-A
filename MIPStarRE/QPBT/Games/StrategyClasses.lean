@@ -156,65 +156,115 @@ noncomputable section
 open MIPStarRE.LDT.MakingMeasurementsProjective
 open MIPStarRE.LDT.Preliminaries
 
-/-- The real quadratic form of an operator evaluated on a finite vector. -/
-private def vectorQForm {I : Type*} [Fintype I] [DecidableEq I]
+/-- The real quadratic form of an operator evaluated on a finite vector. This
+is the Born expression averaged by `def:tensor-product-value`, blueprint
+`ch12_qpbt_games.tex:71-82`, paper origin
+`references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:40-48`. -/
+def vectorQForm {I : Type*} [Fintype I] [DecidableEq I]
     (ψ : EuclideanSpace ℂ I) (A : Op I) : ℝ :=
   (inner ℂ ψ (Matrix.toEuclideanLin A ψ)).re
 
-/-- Embed a bipartite state into the distinguished Naimark ancilla coordinates. -/
-private def padState
-    {I J α β : Type*} [Fintype I] [DecidableEq I]
-    [Fintype J] [DecidableEq J] [Fintype α] [DecidableEq α]
-    [Fintype β] [DecidableEq β]
-    (ψ : EuclideanSpace ℂ (I × J)) :
-    EuclideanSpace ℂ ((I × Option α) × (J × Option β)) :=
-  (EuclideanSpace.equiv ((I × Option α) × (J × Option β)) ℂ).symm
-    (fun p => if p.1.2 = none ∧ p.2.2 = none then ψ.ofLp (p.1.1, p.2.1) else 0)
+/-- Embed a bipartite state into one distinguished coordinate of each local
+ancilla space, extending it by zero elsewhere. This is the zero padding used by
+the dilations of `def:projective-strategy-general`, blueprint
+`ch12_qpbt_games.tex:89-94`, and of `lem:projective-strategy-setup`, blueprint
+`ch14_qpbt_observables.tex:504-523`, paper
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:155-172`. -/
+def padState
+    {I J κA κB : Type*} [Fintype I] [DecidableEq I]
+    [Fintype J] [DecidableEq J] [Fintype κA] [DecidableEq κA]
+    [Fintype κB] [DecidableEq κB]
+    (aA : κA) (bB : κB) (ψ : EuclideanSpace ℂ (I × J)) :
+    EuclideanSpace ℂ ((I × κA) × (J × κB)) :=
+  (EuclideanSpace.equiv ((I × κA) × (J × κB)) ℂ).symm
+    (fun p => if p.1.2 = aA then
+      if p.2.2 = bB then ψ.ofLp (p.1.1, p.2.1) else 0 else 0)
 
-/-- Padding a state by zero ancilla coordinates preserves its norm. -/
-private theorem padState_norm
-    {I J α β : Type*} [Fintype I] [DecidableEq I]
-    [Fintype J] [DecidableEq J] [Fintype α] [DecidableEq α]
-    [Fintype β] [DecidableEq β]
-    (ψ : EuclideanSpace ℂ (I × J)) :
-    ‖padState (α := α) (β := β) ψ‖ = ‖ψ‖ := by
+/-- Padding a state at the two distinguished ancilla coordinates preserves its
+norm. -/
+theorem padState_norm
+    {I J κA κB : Type*} [Fintype I] [DecidableEq I]
+    [Fintype J] [DecidableEq J] [Fintype κA] [DecidableEq κA]
+    [Fintype κB] [DecidableEq κB]
+    (aA : κA) (bB : κB) (ψ : EuclideanSpace ℂ (I × J)) :
+    ‖padState aA bB ψ‖ = ‖ψ‖ := by
   apply (sq_eq_sq₀ (norm_nonneg _) (norm_nonneg _)).mp
   rw [EuclideanSpace.norm_sq_eq, EuclideanSpace.norm_sq_eq]
-  simp [padState, Fintype.sum_prod_type]
+  simp only [padState, Fintype.sum_prod_type]
+  apply Finset.sum_congr rfl
+  intro i _
+  rw [Finset.sum_eq_single aA]
+  · apply Finset.sum_congr rfl
+    intro j _
+    rw [Finset.sum_eq_single bB]
+    · simp
+    · intro b _ hb
+      simp [hb]
+    · intro h
+      exact (h (Finset.mem_univ _)).elim
+  · intro a _ ha
+    simp [ha]
+  · intro h
+    exact (h (Finset.mem_univ _)).elim
 
-/-- The padded-state quadratic form depends only on the distinguished
-compression of each local operator. -/
-private theorem stateQForm_padState
-    {I J α β : Type*} [Fintype I] [DecidableEq I]
-    [Fintype J] [DecidableEq J] [Fintype α] [DecidableEq α]
-    [Fintype β] [DecidableEq β]
-    (ψ : EuclideanSpace ℂ (I × J))
-    (A : Op I) (B : Op J)
-    (A' : Op (I × Option α)) (B' : Op (J × Option β))
-    (hA : ∀ i j, A' (i, none) (j, none) = A i j)
-    (hB : ∀ i j, B' (i, none) (j, none) = B i j) :
-    vectorQForm (padState (α := α) (β := β) ψ) (heteroKron A' B') =
+/-- The quadratic form of a padded state depends only on the compression of
+each local operator at the distinguished ancilla coordinate. -/
+theorem stateQForm_padState
+    {I J κA κB : Type*} [Fintype I] [DecidableEq I]
+    [Fintype J] [DecidableEq J] [Fintype κA] [DecidableEq κA]
+    [Fintype κB] [DecidableEq κB]
+    (aA : κA) (bB : κB) (ψ : EuclideanSpace ℂ (I × J))
+    (A : Op I) (B : Op J) (A' : Op (I × κA)) (B' : Op (J × κB))
+    (hA : ∀ i j, A' (i, aA) (j, aA) = A i j)
+    (hB : ∀ i j, B' (i, bB) (j, bB) = B i j) :
+    vectorQForm (padState aA bB ψ) (heteroKron A' B') =
       vectorQForm ψ (heteroKron A B) := by
   unfold vectorQForm
-  rw [EuclideanSpace.inner_eq_star_dotProduct, EuclideanSpace.inner_eq_star_dotProduct]
-  change Complex.re (∑ p : (I × Option α) × (J × Option β),
-      (∑ q : (I × Option α) × (J × Option β),
-        heteroKron A' B' p q *
-          (padState (α := α) (β := β) ψ).ofLp q) *
-        star (padState (α := α) (β := β) ψ).ofLp p) =
-    Complex.re (∑ p : I × J,
+  apply congrArg Complex.re
+  rw [EuclideanSpace.inner_eq_star_dotProduct,
+    EuclideanSpace.inner_eq_star_dotProduct]
+  change (∑ p : (I × κA) × (J × κB),
+      (∑ q : (I × κA) × (J × κB),
+        heteroKron A' B' p q * (padState aA bB ψ).ofLp q) *
+        star (padState aA bB ψ).ofLp p) =
+    (∑ p : I × J,
       (∑ q : I × J, heteroKron A B p q * ψ.ofLp q) * star ψ.ofLp p)
-  simp [padState, heteroKron, Matrix.kronecker, Fintype.sum_prod_type, hA, hB]
+  suffices hExpanded :
+      (∑ i : I, ∑ a : κA, ∑ j : J, ∑ b : κB,
+        (∑ k : I, ∑ l : J,
+          A' (i, a) (k, aA) * B' (j, b) (l, bB) * ψ.ofLp (k, l)) *
+            star (if a = aA then if b = bB then ψ.ofLp (i, j) else 0 else 0)) =
+        ∑ i : I, ∑ j : J,
+          (∑ k : I, ∑ l : J, A i k * B j l * ψ.ofLp (k, l)) *
+            star (ψ.ofLp (i, j)) by
+    simpa [padState, heteroKron, Matrix.kronecker,
+      Fintype.sum_prod_type] using hExpanded
+  apply Finset.sum_congr rfl
+  intro i _
+  rw [Finset.sum_eq_single aA]
+  · apply Finset.sum_congr rfl
+    intro j _
+    rw [Finset.sum_eq_single bB]
+    · simp_rw [hA, hB]
+      simp
+    · intro b _ hb
+      simp [hb]
+    · intro h
+      exact (h (Finset.mem_univ _)).elim
+  · intro a _ ha
+    simp [ha]
+  · intro h
+    exact (h (Finset.mem_univ _)).elim
 
 /-- Choose the one-measurement Naimark dilation data for a POVM. -/
-private def oneMeasData
+def oneMeasData
     {α I : Type} [Fintype α] [DecidableEq α]
     [Fintype I] [DecidableEq I]
     (M : MIPStarRE.Quantum.Measurement α I) : OneMeasNaimarkData α I :=
   Classical.choose (oneMeasNaimark M.toSubmeasurement)
 
 /-- The source submeasurement of the chosen Naimark data is the original POVM. -/
-private theorem oneMeasData_source_effect
+theorem oneMeasData_source_effect
     {α I : Type} [Fintype α] [DecidableEq α]
     [Fintype I] [DecidableEq I]
     (M : MIPStarRE.Quantum.Measurement α I) :
@@ -223,7 +273,7 @@ private theorem oneMeasData_source_effect
     (Classical.choose_spec (oneMeasNaimark M.toSubmeasurement))
 
 /-- Complete the Naimark projectors at one outcome to obtain a projective POVM. -/
-private def dilatedMeasurement
+def dilatedMeasurement
     {α I : Type} [Fintype α] [DecidableEq α]
     [Fintype I] [DecidableEq I]
     (a₀ : α) (M : MIPStarRE.Quantum.Measurement α I) :
@@ -233,7 +283,7 @@ private def dilatedMeasurement
     rw [P.sum_eq_total, P.total_eq_one]
 
 /-- Every effect of the completed Naimark measurement is a projection. -/
-private theorem dilatedMeasurement_isProjective
+theorem dilatedMeasurement_isProjective
     {α I : Type} [Fintype α] [DecidableEq α]
     [Fintype I] [DecidableEq I]
     (a₀ : α) (M : MIPStarRE.Quantum.Measurement α I) :
@@ -248,7 +298,7 @@ private theorem dilatedMeasurement_isProjective
 
 /-- Compressing a completed Naimark effect to the distinguished ancilla
 coordinate recovers the original POVM effect. -/
-private theorem dilatedMeasurement_compression
+theorem dilatedMeasurement_compression
     {α I : Type} [Fintype α] [DecidableEq α]
     [Fintype I] [DecidableEq I]
     (a₀ a : α) (M : MIPStarRE.Quantum.Measurement α I) (i j : I) :
@@ -278,7 +328,7 @@ private theorem dilatedMeasurement_compression
     exact hcompress a
 
 /-- A unit vector has a nonempty coordinate type. -/
-private theorem nonempty_of_unit_vector
+theorem nonempty_of_unit_vector
     {I : Type*} [Fintype I] [DecidableEq I]
     (ψ : EuclideanSpace ℂ I) (hψ : ‖ψ‖ = 1) : Nonempty I := by
   classical
@@ -289,7 +339,7 @@ private theorem nonempty_of_unit_vector
   norm_num at hψ
 
 /-- A POVM on a nonzero finite-dimensional space has an outcome. -/
-private theorem measurement_outcome_nonempty
+theorem measurement_outcome_nonempty
     {α I : Type*} [Fintype α] [Fintype I] [DecidableEq I] [Nonempty I]
     (M : MIPStarRE.Quantum.Measurement α I) : Nonempty α := by
   classical
@@ -299,32 +349,47 @@ private theorem measurement_outcome_nonempty
   have heq := congrArg (fun X : Op I => X i i) M.sum_eq_one
   simp [Matrix.sum_apply] at heq
 
-/-- Dilate both local POVM families of a strategy and pad its state by the two
-distinguished ancilla coordinates. -/
-private def projectiveDilation {G : Game} (S : Strategy G)
-    (a₀ : G.AnswerA) (b₀ : G.AnswerB) : Strategy G where
-  ιA := S.ιA × Option G.AnswerA
-  ιB := S.ιB × Option G.AnswerB
-  ψ := padState S.ψ
-  ψ_norm := (padState_norm S.ψ).trans S.ψ_norm
-  A := fun x => dilatedMeasurement a₀ (S.A x)
-  B := fun y => dilatedMeasurement b₀ (S.B y)
+/-- Replace both local measurement families of a strategy by families on the
+enlarged local registers and pad the state at the distinguished ancilla
+coordinates. This is the dilation step shared by
+`def:projective-strategy-general`, blueprint `ch12_qpbt_games.tex:89-94`, and
+`lem:projective-strategy-setup`, blueprint
+`ch14_qpbt_observables.tex:504-523`. -/
+def paddedStrategy {G : Game} (S : Strategy G) {κA κB : Type}
+    [Fintype κA] [DecidableEq κA] [Fintype κB] [DecidableEq κB]
+    (aA : κA) (bB : κB)
+    (A' : G.QuestionA → MIPStarRE.Quantum.Measurement G.AnswerA (S.ιA × κA))
+    (B' : G.QuestionB → MIPStarRE.Quantum.Measurement G.AnswerB (S.ιB × κB)) :
+    Strategy G where
+  ιA := S.ιA × κA
+  ιB := S.ιB × κB
+  ψ := padState aA bB S.ψ
+  ψ_norm := (padState_norm aA bB S.ψ).trans S.ψ_norm
+  A := A'
+  B := B'
 
-/-- The local measurements of the Naimark-dilated strategy are projective. -/
-private theorem projectiveDilation_isProjective {G : Game} (S : Strategy G)
-    (a₀ : G.AnswerA) (b₀ : G.AnswerB) :
-    (projectiveDilation S a₀ b₀).IsProjective := by
-  constructor
-  · intro x
-    exact dilatedMeasurement_isProjective a₀ (S.A x)
-  · intro y
-    exact dilatedMeasurement_isProjective b₀ (S.B y)
+/-- The padded strategy is projective as soon as both enlarged families are. -/
+theorem paddedStrategy_isProjective {G : Game} (S : Strategy G) {κA κB : Type}
+    [Fintype κA] [DecidableEq κA] [Fintype κB] [DecidableEq κB]
+    (aA : κA) (bB : κB)
+    (A' : G.QuestionA → MIPStarRE.Quantum.Measurement G.AnswerA (S.ιA × κA))
+    (B' : G.QuestionB → MIPStarRE.Quantum.Measurement G.AnswerB (S.ιB × κB))
+    (hA : ∀ x, MIPStarRE.QPBT.Measurement.IsProjective (A' x))
+    (hB : ∀ y, MIPStarRE.QPBT.Measurement.IsProjective (B' y)) :
+    (paddedStrategy S aA bB A' B').IsProjective :=
+  ⟨fun x => hA x, fun y => hB y⟩
 
-/-- Naimark dilation and state padding preserve every game correlation and
-hence preserve the strategy value. -/
-private theorem projectiveDilation_value {G : Game} (S : Strategy G)
-    (a₀ : G.AnswerA) (b₀ : G.AnswerB) :
-    (projectiveDilation S a₀ b₀).value = S.value := by
+/-- Local dilation and padding preserve every game correlation, hence the
+strategy value, as soon as each enlarged family compresses to the original one
+at the distinguished ancilla coordinate. -/
+theorem paddedStrategy_value {G : Game} (S : Strategy G) {κA κB : Type}
+    [Fintype κA] [DecidableEq κA] [Fintype κB] [DecidableEq κB]
+    (aA : κA) (bB : κB)
+    (A' : G.QuestionA → MIPStarRE.Quantum.Measurement G.AnswerA (S.ιA × κA))
+    (B' : G.QuestionB → MIPStarRE.Quantum.Measurement G.AnswerB (S.ιB × κB))
+    (hA : ∀ x a i j, (A' x).effect a (i, aA) (j, aA) = (S.A x).effect a i j)
+    (hB : ∀ y b i j, (B' y).effect b (i, bB) (j, bB) = (S.B y).effect b i j) :
+    (paddedStrategy S aA bB A' B').value = S.value := by
   unfold Strategy.value
   apply avgOver_congr
   intro xy
@@ -334,16 +399,38 @@ private theorem projectiveDilation_value {G : Game} (S : Strategy G)
   intro b _
   by_cases hw : G.decide xy.1 xy.2 a b
   · simp only [hw, if_true]
-    exact stateQForm_padState (α := G.AnswerA) (β := G.AnswerB)
-      S.ψ ((S.A xy.1).effect a) ((S.B xy.2).effect b)
-      ((dilatedMeasurement a₀ (S.A xy.1)).effect a)
-      ((dilatedMeasurement b₀ (S.B xy.2)).effect b)
-      (dilatedMeasurement_compression a₀ a (S.A xy.1))
-      (dilatedMeasurement_compression b₀ b (S.B xy.2))
+    exact stateQForm_padState aA bB S.ψ ((S.A xy.1).effect a)
+      ((S.B xy.2).effect b) ((A' xy.1).effect a) ((B' xy.2).effect b)
+      (hA xy.1 a) (hB xy.2 b)
   · simp [hw]
 
+/-- Dilate both local POVM families of a strategy and pad its state by the two
+distinguished ancilla coordinates. -/
+private def projectiveDilation {G : Game} (S : Strategy G)
+    (a₀ : G.AnswerA) (b₀ : G.AnswerB) : Strategy G :=
+  paddedStrategy S (none : Option G.AnswerA) (none : Option G.AnswerB)
+    (fun x => dilatedMeasurement a₀ (S.A x))
+    (fun y => dilatedMeasurement b₀ (S.B y))
+
+/-- The local measurements of the Naimark-dilated strategy are projective. -/
+private theorem projectiveDilation_isProjective {G : Game} (S : Strategy G)
+    (a₀ : G.AnswerA) (b₀ : G.AnswerB) :
+    (projectiveDilation S a₀ b₀).IsProjective :=
+  paddedStrategy_isProjective S none none _ _
+    (fun x => dilatedMeasurement_isProjective a₀ (S.A x))
+    (fun y => dilatedMeasurement_isProjective b₀ (S.B y))
+
+/-- Naimark dilation and state padding preserve every game correlation and
+hence preserve the strategy value. -/
+private theorem projectiveDilation_value {G : Game} (S : Strategy G)
+    (a₀ : G.AnswerA) (b₀ : G.AnswerB) :
+    (projectiveDilation S a₀ b₀).value = S.value :=
+  paddedStrategy_value S none none _ _
+    (fun x a => dilatedMeasurement_compression a₀ a (S.A x))
+    (fun y b => dilatedMeasurement_compression b₀ b (S.B y))
+
 /-- Form the block-diagonal direct sum of two POVMs with the same outcome type. -/
-private def blockMeasurement
+def blockMeasurement
     {α I J : Type*} [Fintype α] [Fintype I] [DecidableEq I]
     [Fintype J] [DecidableEq J]
     (A : MIPStarRE.Quantum.Measurement α I)
@@ -365,7 +452,7 @@ private def blockMeasurement
             MIPStarRE.LDT.ProjStrat.localDirectSumBlock_one])
 
 /-- A direct sum of projective POVMs is projective. -/
-private theorem blockMeasurement_isProjective
+theorem blockMeasurement_isProjective
     {α I J : Type*} [Fintype α] [Fintype I] [DecidableEq I]
     [Fintype J] [DecidableEq J]
     (A : MIPStarRE.Quantum.Measurement α I)
@@ -386,6 +473,36 @@ private theorem blockMeasurement_isProjective
     rw [MIPStarRE.LDT.ProjStrat.localDirectSumBlock_conjTranspose,
       (hA a).isSelfAdjoint.isHermitian.eq,
       (hB a).isSelfAdjoint.isHermitian.eq]
+/-- Transport a POVM along an equivalence of its finite coordinate type. -/
+noncomputable def reindexMeasurement
+    {α I J : Type*} [Fintype α]
+    [Fintype I] [DecidableEq I] [Fintype J] [DecidableEq J]
+    (e : I ≃ J) (M : MIPStarRE.Quantum.Measurement α J) :
+    MIPStarRE.Quantum.Measurement α I :=
+  MIPStarRE.Quantum.Measurement.ofSumEqOne
+    (fun a => reindexOp e (M.effect a))
+    (fun a => MIPStarRE.Quantum.reindex_nonneg e.symm (M.pos a))
+    (by
+      change ∑ a : α, (Matrix.reindexAlgEquiv ℂ ℂ e.symm) (M.effect a) = 1
+      rw [← map_sum, M.sum_eq_one, map_one])
+
+/-- Reindexing a projective POVM preserves projectivity. -/
+theorem reindexMeasurement_isProjective
+    {α I J : Type*} [Fintype α]
+    [Fintype I] [DecidableEq I] [Fintype J] [DecidableEq J]
+    (e : I ≃ J) (M : MIPStarRE.Quantum.Measurement α J)
+    (hM : MIPStarRE.QPBT.Measurement.IsProjective M) :
+    MIPStarRE.QPBT.Measurement.IsProjective (reindexMeasurement e M) := by
+  intro a
+  change IsProj (reindexOp e (M.effect a))
+  refine { isIdempotentElem := ?_, isSelfAdjoint := ?_ }
+  · change (Matrix.reindexAlgEquiv ℂ ℂ e.symm) (M.effect a) *
+        (Matrix.reindexAlgEquiv ℂ ℂ e.symm) (M.effect a) =
+      (Matrix.reindexAlgEquiv ℂ ℂ e.symm) (M.effect a)
+    rw [← map_mul, (hM a).isIdempotentElem.eq]
+  · exact (Matrix.IsHermitian.ext fun i j => by
+      simp [reindexOp, Matrix.reindex_apply,
+        (hM a).isSelfAdjoint.isHermitian.apply]).isSelfAdjoint
 
 /-- Put a bipartite vector in the two exchanged off-diagonal sectors of the
 local direct sum, with equal amplitudes. -/
@@ -734,7 +851,7 @@ private theorem symmetrizedStrategy_value {G : SymmetricGame}
                   ring
 
 /-- A probability distribution has a nonempty ambient sample type. -/
-private theorem nonempty_of_probability {α : Type*}
+theorem nonempty_of_probability {α : Type*}
     (μ : Distribution α) (hμ : μ.IsProbability) : Nonempty α := by
   classical
   by_contra hα
