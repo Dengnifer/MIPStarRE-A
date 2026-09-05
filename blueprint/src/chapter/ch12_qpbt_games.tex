@@ -1724,6 +1724,35 @@ We abbreviate ``conditionally linear'' as \emph{CL}. Operationally, an $\ell$-le
 	Adjoin $k-\ell$ empty factor spaces with zero linear maps before the given representation. Each added linear contribution is zero, so the represented function and its support are unchanged.
 \end{proof}
 
+% Formalization-support nodes.  The two statements below are not results of the source
+% article; the first is the converse half of the observation preceding
+% Lemma~\ref{lem:cl-level-mono}, and the second isolates the transport of a conditionally
+% linear function along an injective identification of registers, so that the Lean proofs
+% of the question maps of the Pauli basis test remain traceable.
+\begin{lemma}[Formalization support for linear maps as one-level CL functions]\label{lem:cl-one-level-linear}
+	\lean{MIPStarRE.QPBT.isCondLinearOn_one_of_linear}
+	\leanok
+	\uses{def:cl-func, def:register-subspace}
+	This is the support-relative form of the converse observation following Definition~\ref{def:cl-func}. Let $L$ be a linear map on $V$. Then $L$ is a $1$-level CL function all of whose factor spaces are contained in $V$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:cl-func}
+	Take the single factor space $V_1 = V$ with first-level linear map $L_1 = L$, and take the $0$-level function on $V_{>1}$ for every value of $x^{L_1}$. Since $x^V = x$, the represented function sends $x$ to $L(x) + 0 = L(x)$.
+\end{proof}
+
+\begin{lemma}[Formalization support for reindexing a CL function]\label{lem:cl-reindex}
+	\lean{MIPStarRE.QPBT.isCondLinearOn_reindex}
+	\leanok
+	\uses{def:cl-func, def:register-subspace}
+	This is not a named statement of the source article; it isolates the transport of a CL function between register spaces used in the Lean proof of the conditional linearity of the Pauli question maps. Let $V' = \F^{n'}$ and $V = \F^{n}$, and let $f$ be an injective map of the coordinates of $V'$ into the coordinates of $V$, so that every register subspace of $V'$ is carried to a register subspace of $V$. Let $L$ be an $\ell$-level CL function on $V'$. Let $\tilde L \colon V \to V$ send $x$ to the vector whose coordinate at $f(k)$ is the $k$-th coordinate of $L\bigl( (x_{f(k)})_k \bigr)$ and whose coordinates outside the image of $f$ are zero. Then $\tilde L$ is an $\ell$-level CL function on $V$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:cl-func}
+	Induction on $\ell$. At level $0$ both functions are zero. At level $\ell \ge 1$, transport a representation of $L$ term by term: the factor space $V'_1$ is carried to its image under $f$, the first-level linear map $L_1$ to the composition of restriction along $f$ with $L_1$ followed by extension by zero off the image, and the conditional remainders are transported by the induction hypothesis, their prefix values being transported along $f$ as well. Since $f$ is injective, the coordinate at $f(k)$ of a transported vector is the $k$-th coordinate of the vector transported, so the transported representation evaluates to the transport of the value of $L$; outside the image of $f$ both sides vanish.
+\end{proof}
+
 \begin{definition}[Conditionally linear distributions]\label{def:cl-dist}
 	\lean{MIPStarRE.QPBT.clDistribution}\uses{def:cl-func}
 	Let $L, R \colon V \to V$ be conditionally linear functions. The \emph{conditionally linear distribution $\mu_{L,R}$ corresponding to $(L,R)$} is the distribution over pairs $(L(x), R(x)) \in V \times V$ for $x$ drawn uniformly at random from $V$.

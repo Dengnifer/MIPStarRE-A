@@ -229,9 +229,8 @@ private theorem CondLinearTerm.liftRight_supportedOn {K ιU ιV : Type*}
       rw [← hsets]
       exact ih (fun i => y (.inr i)) (hrest (fun i => y (.inr i)))
 
-/-- Concatenate a family of conditionally linear representations on the right
-register with a conditionally linear representation on the left register, while
-recording the prefix accumulated by the preceding left levels. -/
+/-- Append a family of right-coordinate terms after a left-coordinate term,
+while recording the prefix accumulated by the preceding left levels. -/
 private def CondLinearTerm.concat {K ιU ιV : Type*} [Field K]
     [Fintype ιU] [DecidableEq ιU] [Fintype ιV] [DecidableEq ιV]
     {ell : ℕ} (rTerm : (ιU → K) → CondLinearTerm K (ι := ιV) ell)
