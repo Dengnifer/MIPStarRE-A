@@ -152,6 +152,57 @@ theorem heteroKron_neg_right {ιA ιB : Type*} (A : Op ιA) (C : Op ιB) :
   ext p q
   simp [heteroKron, Matrix.kronecker]
 
+/-- Formalization-only auxiliary lemma for `def:tensor-product-strategy`
+(blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:61-69`): tensor placement
+is additive in the left factor. -/
+theorem heteroKron_add_left {ιA ιB : Type*} (A B : Op ιA) (C : Op ιB) :
+    heteroKron (A + B) C = heteroKron A C + heteroKron B C := by
+  ext p q
+  simp [heteroKron, Matrix.kronecker, add_mul]
+
+/-- Formalization-only auxiliary lemma for `def:tensor-product-strategy`
+(blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:61-69`): tensor placement
+is additive in the right factor. -/
+theorem heteroKron_add_right {ιA ιB : Type*} (A : Op ιA) (B C : Op ιB) :
+    heteroKron A (B + C) = heteroKron A B + heteroKron A C := by
+  ext p q
+  simp [heteroKron, Matrix.kronecker, mul_add]
+
+/-- Formalization-only auxiliary lemma for `def:tensor-product-strategy`: the
+tensor placement of possibly rectangular matrices respects differences in the
+left factor.  This is the general form of `heteroKron_sub_left` below, needed
+where the left factor is the matrix of an isometry between distinct index
+types (`thm:ms-rigidity`, blueprint
+`blueprint/src/chapter/ch13_qpbt_test.tex:224-253`). -/
+theorem kroneckerMap_sub_left {m n p q : Type*} (A B : Matrix m n ℂ) (C : Matrix p q ℂ) :
+    Matrix.kroneckerMap (· * ·) (A - B) C =
+      Matrix.kroneckerMap (· * ·) A C - Matrix.kroneckerMap (· * ·) B C := by
+  ext p' q'
+  simp [Matrix.kroneckerMap, sub_mul]
+
+/-- Formalization-only auxiliary lemma for `def:tensor-product-strategy`: the
+tensor placement of possibly rectangular matrices respects differences in the
+right factor.  This is the general form of `heteroKron_sub_right` below. -/
+theorem kroneckerMap_sub_right {m n p q : Type*} (A : Matrix m n ℂ) (B C : Matrix p q ℂ) :
+    Matrix.kroneckerMap (· * ·) A (B - C) =
+      Matrix.kroneckerMap (· * ·) A B - Matrix.kroneckerMap (· * ·) A C := by
+  ext p' q'
+  simp [Matrix.kroneckerMap, mul_sub]
+
+/-- Formalization-only auxiliary lemma for `def:tensor-product-strategy`
+(blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:61-69`): tensor placement
+respects differences in the left factor. -/
+theorem heteroKron_sub_left {ιA ιB : Type*} (A B : Op ιA) (C : Op ιB) :
+    heteroKron (A - B) C = heteroKron A C - heteroKron B C :=
+  kroneckerMap_sub_left A B C
+
+/-- Formalization-only auxiliary lemma for `def:tensor-product-strategy`
+(blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:61-69`): tensor placement
+respects differences in the right factor. -/
+theorem heteroKron_sub_right {ιA ιB : Type*} (A : Op ιA) (B C : Op ιB) :
+    heteroKron A (B - C) = heteroKron A B - heteroKron A C :=
+  kroneckerMap_sub_right A B C
+
 /- The Euclidean linear map is the shared action used by the value and distance
 functionals.  Keeping it at the Euclidean-space level avoids accidentally
 using the function-space supremum norm of `Matrix.mulVec`. -/
