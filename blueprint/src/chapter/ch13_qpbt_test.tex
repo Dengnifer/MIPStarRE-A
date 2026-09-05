@@ -476,6 +476,21 @@ Definition~\ref{def:ld-game} is not available.
 	corresponding case, the post-processing returns the zero answer of the form
 	required by the combined question.  This convention makes the
 	post-processing a total map on the common answer alphabet.
+	For the point measurements of the original strategy, let $r$ be the map
+	that sends a point answer to its tuple in $\F_q^k$ and sends either kind of
+	line answer to the zero tuple.  Write
+	\[
+		\widehat A^{\mathsf{Point},u}_a
+		= \sum_{x:\,r(x)=a} A^{\mathsf{Point},u}_x,
+		\qquad
+		\widehat B^{\mathsf{Point},u}_a
+		= \sum_{x:\,r(x)=a} B^{\mathsf{Point},u}_x.
+	\]
+	These are the point measurements post-processed by
+	\texttt{directLdPointValuesOrZero}.  In particular, each zero-tuple effect
+	is the original zero-tuple point effect plus all wrong-form answer effects;
+	those additional effects need not vanish.  Use the same convention for the
+	combined strategy, with its own answer alphabet.
 
 	Cases~3 and~5 use that a line of $\F_q^{m+k}$ whose direction
 	has vanishing point part is contained in a fiber of the projection to
@@ -669,12 +684,15 @@ Definition~\ref{def:ld-game} is not available.
 	measurements with outcomes in $\polyfunc{m+k}{q}{d}$ satisfying, for the
 	combined strategy $\mathcal S^{\mathrm c}$ and with error $\delta$, the three
 	conclusions of Theorem~\ref{lem:ld-soundness} at parameters
-	$\mathsf{ldparams}^{\mathrm c}$.  Let $H^w$ be $G^w$ post-processed by the
+	$\mathsf{ldparams}^{\mathrm c}$, using the relabeled point measurements of
+	Definition~\ref{def:ld-combined-strategy}.  Let $H^w$ be $G^w$ post-processed by the
 	map $\mathrm{split}$ of Lemma~\ref{lem:ld-combining-split}, so that
 	$H^w \in \mathrm{PolyMeas}(m,q,d,k)$.  Then the three conclusions of
 	Theorem~\ref{lem:ld-soundness} hold for $\mathcal S$ at parameters
 	$\mathsf{ldparams}$, with the measurements $H^{\mathrm A}$, $H^{\mathrm B}$
-	and with error $O(\delta + (m+k)d/q)$.
+	and with error $O(\delta + (m+k)d/q)$, where the point effects in the first
+	two conclusions are $\widehat A^{\mathsf{Point},u}$ and
+	$\widehat B^{\mathsf{Point},u}$, respectively.
 \end{lemma}
 \begin{proof}
 	\leanok
@@ -684,7 +702,7 @@ Definition~\ref{def:ld-game} is not available.
 	a uniform $(u,\alpha) \in \F_q^{m+k}$, the value $p(u,\alpha)$ of the outcome
 	$p$ of $G^{\mathrm B}$ agrees with the combined point answer
 	$\sum_r \alpha_r b_r$ computed from the outcome $b$ of the point measurement
-	of $\mathcal S$ at $u$, up to $\delta$.
+	$\widehat A^{\mathsf{Point},u}$ of $\mathcal S$ at $u$, up to $\delta$.
 
 	The outcome is a combined polynomial with probability at least
 	$1 - O(\delta + (m+k)d/q)$.  Indeed, condition on an outcome $p$ that is not
@@ -707,13 +725,14 @@ Definition~\ref{def:ld-game} is not available.
 
 	It remains to upgrade the first relation from the combined value to the tuple
 	of values.  Let $g$ be the outcome of $H^{\mathrm B}$ and $b$ the outcome of
-	the point measurement at $u$.  If $(g_0(u),\ldots,g_{k-1}(u)) \neq b$, then by
+	the relabeled point measurement $\widehat A^{\mathsf{Point},u}$.
+	If $(g_0(u),\ldots,g_{k-1}(u)) \neq b$, then by
 	Lemma~\ref{lem:ld-combining-collision} the combined values
 	$\sum_r \alpha_r g_r(u)$ and $\sum_r \alpha_r b_r$ agree with probability at
 	most $1/q$ over a uniform $\alpha$.  Averaging over $\alpha$ therefore
 	converts the relation for the combined values into the tuple relation
 	\[
-		A^{\mathsf{Point},\,u}_{a_0,\ldots,a_{k-1}} \ot \Id_{\mathrm B}
+		\widehat A^{\mathsf{Point},\,u}_{a_0,\ldots,a_{k-1}} \ot \Id_{\mathrm B}
 		\simeq \Id_{\mathrm A} \ot
 			H^{\mathrm B}_{[(g_0(u),\ldots,g_{k-1}(u)) =
 				(a_0,\ldots,a_{k-1})]}
@@ -739,7 +758,9 @@ Definition~\ref{def:ld-game} is not available.
 	there exist measurements $G^{\mathrm A}, G^{\mathrm B} \in
 	\mathrm{PolyMeas}(m,q,d,k)$ satisfying the three consistency relations of
 	Theorem~\ref{lem:ld-soundness} with error
-	$\delta_{\mathrm{ld}}(\eps,q,m,d,k)$ evaluated at these constants.
+	$\delta_{\mathrm{ld}}(\eps,q,m,d,k)$ evaluated at these constants, using
+	$\widehat A^{\mathsf{Point},u}$ and $\widehat B^{\mathsf{Point},u}$ from
+	Definition~\ref{def:ld-combined-strategy} in the first two relations.
 
 	Before scalar absorption, the first two relations hold with the error of
 	Theorem~\ref{thm:main-formal} at the combined parameters
