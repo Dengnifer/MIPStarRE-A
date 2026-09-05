@@ -2981,3 +2981,37 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   decisions, source-proof gap budget, account affinities, and next actions to the
   end of /tmp/qpbt-main-handoff-v3.md for the owner-requested second-account
   relaunch. MAIN stops after publishing that handoff; the full goal remains open.
+
+## 2026-09-05T18:20Z — Main-session relaunch and critical-path recovery
+
+- Read the owner handoff, main persona, and last five progress reports. The
+  relaunch paragraph has blank export names; the installed router identifies
+  MIPSTARRE_ACCOUNT_CAP_PRIMARY and MIPSTARRE_ACCOUNT_CAP_SECOND. Set them in
+  ~/.profile to 10 and 9 respectively, reserving one secondary-account request
+  for this main session. A fresh login shell confirms those caps and both astra
+  model defaults. Routing retirement remains contingent on issue 232 merging.
+- Verified the merge daemon and stack watcher remain live. PR 229 merged through
+  the daemon at 18:01:25Z. Restarted exact-head CI and independent review for
+  PR 185; sent PR 178's remaining stale-heading finding through labelled autofix.
+- PR 202's previously rejected fix is still staged; the normal pre-commit hook
+  now passes. An attempted labelled autofix correctly refused this dirty tree.
+  Started a normal repair commit of that existing fix, checked publication, CI,
+  and independent review without bypassing any guard or expanding its scope.
+- Resolved issue 232's sole telemetry merge conflict by retaining both appended
+  histories. Merge commit cd8a7c6 passed normal hooks; its existing lane tail is
+  running. No protocol or router implementation changes were made by this main.
+- Revalidated the clean PR 225 and 230 recovery heads and their terminal review
+  ledgers. Updated PR 225's daemon adjudication to identify the recursive parser
+  fallback precisely; PR 230 retains its documented conservative directory-rename
+  limitation. Cleared their stale retry markers; merges remain daemon-only.
+- Math-fix slot 5 completed the Schmidt-mirror construction and distinct-family
+  bounds, not the pasting theorem. Resumed the same primary-account thread for
+  averaged mirror consistency and fine-commutator assembly as slot 6 of 10,
+  retaining the September 6, 11:45 UTC deadline. The first dispatch used a wrong
+  worktree suffix and failed before starting a worker; the corrected dispatch is
+  live. Resumed issue 119 separately for quantitative restriction bounds, with
+  explicit instructions not to duplicate issue 201 or 118 constructions.
+- The initial progress-comment read supplied a redundant repository prefix to
+  gh_common.api and received HTTP 404; retrying its repository-relative endpoint
+  succeeded. No write was attempted in that failed call. Existing staged and
+  untracked session telemetry is preserved; no human decision is requested.
