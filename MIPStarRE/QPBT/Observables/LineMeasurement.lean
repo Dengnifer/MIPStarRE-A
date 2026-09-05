@@ -1,5 +1,5 @@
 import MIPStarRE.QPBT.Observables.PointConsistency
-import MIPStarRE.QPBT.Observables.LineMeasurement.Expanded
+import MIPStarRE.QPBT.Observables.LineMeasurement.SelfConsistency
 
 /-!
 # Expanded line measurements
@@ -12,8 +12,10 @@ The construction is split over the submodules `LineMeasurement.Restriction`
 (restriction of low-degree encodings to lines and its degree bound),
 `LineMeasurement.Projector` (the Pauli-register line projectors), and
 `LineMeasurement.Expanded` (the convolution measurement, its projectivity, and
-its vanishing outside the degree-`d` outcomes on axis lines). This file states
-the three consistency conclusions and the source's existential form.
+its vanishing outside the degree-`d` outcomes on axis lines),
+`LineMeasurement.SquareRootError` (passage from linear to square-root errors),
+and `LineMeasurement.SelfConsistency` (item 1 on both bipartitions). This file
+states the three consistency conclusions and the source's existential form.
 
 ## References
 
@@ -31,6 +33,9 @@ open MIPStarRE.LDT hiding Measurement
 open MIPStarRE.Quantum
 
 noncomputable section
+
+local instance pauliEdgeNonemptyLineMeasurement : Nonempty PauliEdge :=
+  pauliEdge_nonempty
 
 /-- The square-root error exhibited by the expanded-line consistency proof.
 This is the final quantitative conclusion of `lem:qld-comm-line-cons`, paper
@@ -106,7 +111,38 @@ theorem expLine_self_cons :
           (fun sample f => S.place p₂
             ((S.lineMeasExp p₂.side W sample.1).effect f))
           S.psiHat ≤ C * deltaLine ε := by
-  sorry
+  have hcard : (1 : ℝ) ≤ Fintype.card PauliEdge := by
+    exact_mod_cast (Fintype.card_pos : 0 < Fintype.card PauliEdge)
+  refine ⟨2 * (Fintype.card PauliEdge : ℝ) + 4, by linarith, ?_⟩
+  intro P ε S p₁ p₂ hopp W
+  have key : ∀ x : ℝ, 0 ≤ x → x ≤ 2 * ((Fintype.card PauliEdge : ℝ) * ε) →
+      x ≤ 4 → x ≤ (2 * (Fintype.card PauliEdge : ℝ) + 4) * deltaLine ε := by
+    intro x hx0 hxε hx4
+    exact le_mul_sqrt_of_le_mul_of_le_four (by linarith) hx0
+      (by rw [mul_assoc]; exact hxε) hx4
+  cases p₁ <;> cases p₂ <;> simp only [Placement.IsOpposite] at hopp
+  · exact key _ (DistanceCalculus.opFamilyDistSq_nonneg _ _ _ _)
+      (by simpa only [Placement.side] using
+        ProjectiveSetting.expLineDist_aaBa_le S W)
+      (by simpa only [Placement.side] using
+        ProjectiveSetting.expLineDist_aaBa_le_four S W)
+  · rw [DistanceCalculus.opFamilyDistSq_symm]
+    exact key _ (DistanceCalculus.opFamilyDistSq_nonneg _ _ _ _)
+      (by simpa only [Placement.side] using
+        ProjectiveSetting.expLineDist_aaBa_le S W)
+      (by simpa only [Placement.side] using
+        ProjectiveSetting.expLineDist_aaBa_le_four S W)
+  · rw [DistanceCalculus.opFamilyDistSq_symm]
+    exact key _ (DistanceCalculus.opFamilyDistSq_nonneg _ _ _ _)
+      (by simpa only [Placement.side] using
+        ProjectiveSetting.expLineDist_abBb_le S W)
+      (by simpa only [Placement.side] using
+        ProjectiveSetting.expLineDist_abBb_le_four S W)
+  · exact key _ (DistanceCalculus.opFamilyDistSq_nonneg _ _ _ _)
+      (by simpa only [Placement.side] using
+        ProjectiveSetting.expLineDist_abBb_le S W)
+      (by simpa only [Placement.side] using
+        ProjectiveSetting.expLineDist_abBb_le_four S W)
 
 /-- An expanded line effect is consistent with itself followed by the
 expanded point effect selected by its value at the sampled point, with the
