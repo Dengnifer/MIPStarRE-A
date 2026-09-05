@@ -32,7 +32,7 @@ local instance pauliEdgeNonemptyApproxLines : Nonempty PauliEdge := pauliEdge_no
 
 /-- Operator-distance and factor-interchanged companions to the consistency
 item of `lem:qld-win-implications`. This is the trailing clause at paper
-`14_analysis_of_the_pauli_basis_test.tex:264-266`, blueprint
+`14_analysis_of_the_pauli_basis_test.tex:227,263-264`, blueprint
 `ch14_qpbt_observables.tex:699-701`. -/
 theorem win_cons_approx_proof :
     ∃ C : ℝ, 1 ≤ C ∧
@@ -285,7 +285,7 @@ theorem win_low_degree_interchanged_proof :
 
 /-- Operator-distance and factor-interchanged companions to the low-degree
 item of `lem:qld-win-implications`. This is the trailing clause at paper
-`14_analysis_of_the_pauli_basis_test.tex:264-266`, blueprint
+`14_analysis_of_the_pauli_basis_test.tex:227,263-264`, blueprint
 `ch14_qpbt_observables.tex:699-701`. -/
 theorem win_low_degree_approx_proof :
     ∃ C : ℝ, 1 ≤ C ∧
@@ -448,7 +448,7 @@ theorem win_pauli_basis_cons_interchanged_proof :
 
 /-- Operator-distance and factor-interchanged companions to Pauli-basis
 consistency. This is the trailing clause of `lem:qld-win-implications`, paper
-`14_analysis_of_the_pauli_basis_test.tex:264-266`, blueprint
+`14_analysis_of_the_pauli_basis_test.tex:227,263-264`, blueprint
 `ch14_qpbt_observables.tex:699-701`. -/
 theorem win_pauli_basis_cons_approx_proof :
     ∃ C : ℝ, 1 ≤ C ∧

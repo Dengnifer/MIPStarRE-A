@@ -12,7 +12,7 @@ consequences used by the expanded-state argument.
 
 The declarations formalize `lem:qld-win-implications` and
 `lem:qld-win-implications-obs` in
-`blueprint/src/chapter/ch14_qpbt_observables.tex:505-733`. Their paper source
+`blueprint/src/chapter/ch14_qpbt_observables.tex:616-794`. Their paper source
 is `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:192-354`.
 -/
 
@@ -28,7 +28,7 @@ noncomputable section
 /-- The consistency subtest bounds the off-diagonal defect of the two strategy
 measurement families. This is item 1 of `lem:qld-win-implications`, paper
 `14_analysis_of_the_pauli_basis_test.tex:197-199`, blueprint
-`ch14_qpbt_observables.tex:515-522`. -/
+`ch14_qpbt_observables.tex:633-637`. -/
 theorem win_cons :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
@@ -44,7 +44,7 @@ theorem win_cons :
 completed point measurements. This is item 2 of
 `lem:qld-win-implications`, paper
 `14_analysis_of_the_pauli_basis_test.tex:200-204`, blueprint
-`ch14_qpbt_observables.tex:523-548`. -/
+`ch14_qpbt_observables.tex:638-648`. -/
 theorem win_low_degree :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
@@ -60,7 +60,7 @@ theorem win_low_degree :
 low-degree encodings of Pauli answers. This is item 3 of
 `lem:qld-win-implications`, paper
 `14_analysis_of_the_pauli_basis_test.tex:205-209`, blueprint
-`ch14_qpbt_observables.tex:549-566`. -/
+`ch14_qpbt_observables.tex:649-656`. -/
 theorem win_pauli_basis_cons :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
@@ -73,7 +73,7 @@ theorem win_pauli_basis_cons :
 /-- On commuting tuples, Pair/W answers agree with the corresponding
 component of Pair answers. This is item 4 of `lem:qld-win-implications`, paper
 `14_analysis_of_the_pauli_basis_test.tex:210-231`, blueprint
-`ch14_qpbt_observables.tex:567-582`. -/
+`ch14_qpbt_observables.tex:657-662`. -/
 theorem win_comm :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
@@ -87,7 +87,7 @@ theorem win_comm :
 /-- On commuting tuples, trace-coarse-grained point answers agree with Pair/W
 answers. This is item 5 of `lem:qld-win-implications`, paper
 `14_analysis_of_the_pauli_basis_test.tex:232-239`, blueprint
-`ch14_qpbt_observables.tex:583-598`. -/
+`ch14_qpbt_observables.tex:663-667`. -/
 theorem win_comm_cons :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
@@ -105,7 +105,7 @@ theorem win_comm_cons :
 to one on anticommuting tuples. This is item 6 of
 `lem:qld-win-implications`, paper
 `14_analysis_of_the_pauli_basis_test.tex:240-249`, blueprint
-`ch14_qpbt_observables.tex:599-625`. -/
+`ch14_qpbt_observables.tex:668-676`. -/
 theorem win_magic_square :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
@@ -117,7 +117,7 @@ theorem win_magic_square :
 Magic Square variables 1 and 5. This is item 7 of
 `lem:qld-win-implications`, paper
 `14_analysis_of_the_pauli_basis_test.tex:250-263`, blueprint
-`ch14_qpbt_observables.tex:626-660`. -/
+`ch14_qpbt_observables.tex:677-684`. -/
 theorem win_ms_cons :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
@@ -134,7 +134,7 @@ theorem win_ms_cons :
 /-- Operator-distance and factor-interchanged companions to the consistency
 item of `lem:qld-win-implications`. This is the trailing clause at paper
 `14_analysis_of_the_pauli_basis_test.tex:227,263-264`, blueprint
-`ch14_qpbt_observables.tex:699-701`. -/
+`ch14_qpbt_observables.tex:701-703`. -/
 theorem win_cons_approx :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
@@ -156,7 +156,7 @@ theorem win_cons_approx :
 /-- Operator-distance and factor-interchanged companions to the low-degree
 item of `lem:qld-win-implications`. This is the trailing clause at paper
 `14_analysis_of_the_pauli_basis_test.tex:227,263-264`, blueprint
-`ch14_qpbt_observables.tex:699-701`. -/
+`ch14_qpbt_observables.tex:701-703`. -/
 theorem win_low_degree_approx :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
@@ -178,7 +178,7 @@ theorem win_low_degree_approx :
 /-- Operator-distance and factor-interchanged companions to Pauli-basis
 consistency. This is the trailing clause of `lem:qld-win-implications`, paper
 `14_analysis_of_the_pauli_basis_test.tex:227,263-264`, blueprint
-`ch14_qpbt_observables.tex:699-701`. -/
+`ch14_qpbt_observables.tex:701-703`. -/
 theorem win_pauli_basis_cons_approx :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
@@ -196,7 +196,7 @@ theorem win_pauli_basis_cons_approx :
 /-- Operator-distance and factor-interchanged companions to the commuting
 Pair check. This is the trailing clause of `lem:qld-win-implications`, paper
 `14_analysis_of_the_pauli_basis_test.tex:227,263-264`, blueprint
-`ch14_qpbt_observables.tex:699-701`. -/
+`ch14_qpbt_observables.tex:701-703`. -/
 theorem win_comm_approx :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
@@ -216,7 +216,7 @@ theorem win_comm_approx :
 /-- Operator-distance and factor-interchanged companions to commuting point
 consistency. This is the trailing clause of `lem:qld-win-implications`, paper
 `14_analysis_of_the_pauli_basis_test.tex:227,263-264`, blueprint
-`ch14_qpbt_observables.tex:699-701`. -/
+`ch14_qpbt_observables.tex:701-703`. -/
 theorem win_comm_cons_approx :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
@@ -243,7 +243,7 @@ theorem win_comm_cons_approx :
 variable consistency. This is the trailing clause of
 `lem:qld-win-implications`, paper
 `14_analysis_of_the_pauli_basis_test.tex:227,263-264`, blueprint
-`ch14_qpbt_observables.tex:699-701`. -/
+`ch14_qpbt_observables.tex:701-703`. -/
 theorem win_ms_cons_approx :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
@@ -269,7 +269,7 @@ theorem win_ms_cons_approx :
 /-- Observable self-consistency on both tensor-factor orientations. This is
 Equation `eq:pts-obs-consistency` in `lem:qld-win-implications-obs`, paper
 `14_analysis_of_the_pauli_basis_test.tex:294-308`, blueprint
-`ch14_qpbt_observables.tex:663-682`. -/
+`ch14_qpbt_observables.tex:778-782`. -/
 theorem pointObs_self_consistent :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
@@ -287,7 +287,7 @@ theorem pointObs_self_consistent :
 /-- The strategy observables satisfy the phase-signed commutation relation on
 Alice's factor. This is Equation `eq:pts-obs-commutation`, paper
 `14_analysis_of_the_pauli_basis_test.tex:309-354`, blueprint
-`ch14_qpbt_observables.tex:683-733`. -/
+`ch14_qpbt_observables.tex:761-794`. -/
 theorem pointObs_twisted_commutation :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
@@ -306,7 +306,7 @@ theorem pointObs_twisted_commutation :
 /-- The factor-interchanged phase-signed commutation relation on Bob's factor.
 This is the trailing clause of `lem:qld-win-implications-obs`, paper
 `14_analysis_of_the_pauli_basis_test.tex:309-354`, blueprint
-`ch14_qpbt_observables.tex:683-733`. -/
+`ch14_qpbt_observables.tex:761-794`. -/
 theorem pointObs_twisted_commutation_interchanged :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
