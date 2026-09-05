@@ -93,5 +93,5 @@ git config core.hooksPath .githooks
 
 echo "Installed MIPStarRE Git hooks by setting core.hooksPath to .githooks."
 echo "Verify with scripts/install_git_hooks.sh --check."
-echo "Set MIPSTARRE_SKIP_HOOKS=1 for a one-off bypass of the tooling checks (the workflow-layer line budget still runs)."
+echo "Set MIPSTARRE_SKIP_HOOKS=1 for a one-off bypass of the tooling checks (the workflow-layer line budget and merge-loss guard still run)."
 echo "Set MIPSTARRE_HOOK_FULL=1 when invoking local/bin/checked-push.sh for the full local gate."

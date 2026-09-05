@@ -3,8 +3,8 @@
 
 The pending-merge mode compares the staged index with ``HEAD``, ``MERGE_HEAD``,
 and all of their best merge bases.  The committed mode performs the same check for an
-existing two-parent merge commit.  A path may be absent from the result only
-when the branch itself deleted a path that existed at the merge base.
+existing two-parent merge commit.  Outside recorded conflicts, a path may be
+absent only when the branch deleted a path that existed at the merge base.
 
 Usage:
 
@@ -41,6 +41,7 @@ class MergeTrees:
     incoming: Mapping[bytes, TreeEntry]
     result: Mapping[bytes, TreeEntry]
     conflicts: frozenset[bytes] = frozenset()
+    automatic: Mapping[bytes, TreeEntry] | None = None
 
 
 @dataclass(frozen=True)
@@ -188,8 +189,10 @@ def pending_conflicts(repo: Path) -> frozenset[bytes]:
     return frozenset(conflicts)
 
 
-def reconstructed_conflicts(repo: Path, branch: str, incoming: str) -> frozenset[bytes]:
-    """Recover a committed merge's conflicts in a disposable shared local clone."""
+def reconstructed_merge(
+    repo: Path, branch: str, incoming: str
+) -> tuple[dict[bytes, TreeEntry], frozenset[bytes]]:
+    """Recover Git's clean merge entries and conflicts in a disposable local clone."""
 
     with tempfile.TemporaryDirectory(prefix="mipstarre-merge-audit-") as directory:
         clone = Path(directory) / "repo"
@@ -226,8 +229,7 @@ def reconstructed_conflicts(repo: Path, branch: str, incoming: str) -> frozenset
         if merge_result.returncode not in (0, 1) or not merge_head.is_file():
             detail = os.fsdecode(merge_result.stderr.strip() or merge_result.stdout.strip())
             raise GuardError(f"automatic merge reconstruction failed: {detail}")
-        _entries, conflicts = read_index_state(clone)
-        return conflicts
+        return read_index_state(clone)
 
 
 def pending_trees(repo: Path) -> tuple[MergeTrees, tuple[str, ...], str, str]:
@@ -238,12 +240,18 @@ def pending_trees(repo: Path) -> tuple[MergeTrees, tuple[str, ...], str, str]:
         raise GuardError("no merge is in progress")
     branch = resolve(repo, "HEAD")
     bases = merge_bases(repo, branch, incoming)
+    automatic = None
+    conflicts = pending_conflicts(repo)
+    if len(bases) > 1:
+        automatic, reconstructed = reconstructed_merge(repo, branch, incoming)
+        conflicts |= reconstructed
     trees = MergeTrees(
         bases=tuple(read_tree(repo, base) for base in bases),
         branch=read_tree(repo, branch),
         incoming=read_tree(repo, incoming),
         result=read_index(repo),
-        conflicts=pending_conflicts(repo),
+        conflicts=conflicts,
+        automatic=automatic,
     )
     return trees, bases, branch, incoming
 
@@ -260,10 +268,10 @@ def committed_trees(
         raise GuardError(f"{commit} is not a two-parent merge commit")
     branch, incoming = parents
     bases = merge_bases(repo, branch, incoming)
-    conflicts = (
-        frozenset()
+    automatic, conflicts = (
+        (None, frozenset())
         if incoming in bases
-        else reconstructed_conflicts(repo, branch, incoming)
+        else reconstructed_merge(repo, branch, incoming)
     )
     trees = MergeTrees(
         bases=tuple(read_tree(repo, base) for base in bases),
@@ -271,6 +279,7 @@ def committed_trees(
         incoming=read_tree(repo, incoming),
         result=read_tree(repo, commit),
         conflicts=conflicts,
+        automatic=automatic if len(bases) > 1 else None,
     )
     return trees, bases, branch, incoming
 
@@ -279,10 +288,10 @@ def inspect(trees: MergeTrees) -> list[Finding]:
     """Find incoming paths deleted or wholly reverted by the result.
 
     Deletion is branch-owned only when the path existed at a merge base and is
-    absent from the pre-merge branch tree.  For non-deletions, the guard catches
-    an incoming change when the branch left a best-base entry unchanged.  Paths
-    modified on both sides remain the responsibility of conflict resolution and
-    normal review.
+    absent from the pre-merge branch tree. Recorded conflicts are exempt.
+    For multiple bases, Git's reconstructed clean result identifies incoming-only
+    changes without comparing against incompatible raw bases. Combined changes
+    remain the responsibility of normal review.
     """
 
     findings: list[Finding] = []
@@ -290,6 +299,8 @@ def inspect(trees: MergeTrees) -> list[Finding]:
     for base in trees.bases:
         paths.update(base)
     for path in sorted(paths):
+        if path in trees.conflicts:
+            continue
         base_entries = tuple(base.get(path) for base in trees.bases)
         branch_entry = trees.branch.get(path)
         incoming_entry = trees.incoming.get(path)
@@ -303,10 +314,17 @@ def inspect(trees: MergeTrees) -> list[Finding]:
                 findings.append(Finding("deleted", path))
             continue
 
+        if trees.automatic is not None:
+            if (
+                incoming_entry != branch_entry
+                and trees.automatic.get(path) == incoming_entry
+                and result_entry == branch_entry
+            ):
+                findings.append(Finding("reverted", path))
+            continue
+
         incoming_changed = all(incoming_entry != entry for entry in base_entries)
         if not incoming_changed or result_entry == incoming_entry:
-            continue
-        if path in trees.conflicts:
             continue
         branch_matches_base = all(branch_entry == entry for entry in base_entries)
         if branch_matches_base and result_entry == branch_entry:
@@ -338,8 +356,8 @@ def report(
     for finding in findings:
         print(f"  {finding.kind.upper():8} {os.fsdecode(finding.path)}")
     print(
-        "A missing path is permitted only when it existed at the merge base and "
-        "the pre-merge branch deleted it. Restore or combine the incoming content "
+        "Outside recorded conflicts, a missing path is permitted only when it existed "
+        "at the merge base and the pre-merge branch deleted it. Restore or combine the incoming content "
         "before committing."
     )
     return 1

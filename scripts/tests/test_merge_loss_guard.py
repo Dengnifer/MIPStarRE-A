@@ -197,7 +197,7 @@ class MergeLossGuardTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertEqual(result.stdout, "")
 
-    def test_criss_cross_history_with_multiple_merge_bases_passes(self) -> None:
+    def new_criss_cross_merge(self) -> Path:
         temporary_directory = tempfile.TemporaryDirectory()
         self.addCleanup(temporary_directory.cleanup)
         repo = Path(temporary_directory.name)
@@ -223,7 +223,7 @@ class MergeLossGuardTests(unittest.TestCase):
         self.git(repo, "merge", "--quiet", "--no-edit", right)
         self.git(repo, "switch", "--quiet", "incoming")
         self.git(repo, "merge", "--quiet", "--no-edit", left)
-        self.write(repo, "incoming-after.txt", "incoming after\n")
+        self.write(repo, "left.txt", "incoming after\n")
         self.git(repo, "add", ".")
         self.git(repo, "commit", "--quiet", "-m", "incoming after")
         self.git(repo, "switch", "--quiet", "branch")
@@ -231,14 +231,45 @@ class MergeLossGuardTests(unittest.TestCase):
         self.git(repo, "add", ".")
         self.git(repo, "commit", "--quiet", "-m", "branch after")
         self.prepare_merge(repo)
+        return repo
 
+    def test_criss_cross_history_with_multiple_merge_bases_passes(self) -> None:
+        repo = self.new_criss_cross_merge()
         bases = self.git(repo, "merge-base", "--all", "HEAD", "MERGE_HEAD")
         result = self.run_guard(repo)
 
         self.assertEqual(len(bases.stdout.splitlines()), 2)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.git(repo, "config", "core.hooksPath", os.fspath(PROJECT_HOOKS))
+        self.git(repo, "commit", "--quiet", "--no-verify", "-m", "clean merge")
+        result = self.run_guard(repo, "--commit", "HEAD")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
-    def test_explicit_ours_resolution_of_recorded_conflict_passes(self) -> None:
+    def test_criss_cross_whole_tree_reset_is_rejected(self) -> None:
+        repo = self.new_criss_cross_merge()
+        self.reset_merge_result_to_branch(repo)
+        result = self.run_guard(repo)
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("REVERTED left.txt", result.stdout)
+        self.git(repo, "commit", "--quiet", "--no-verify", "-m", "lossy merge")
+        result = self.run_guard(repo, "--commit", "HEAD")
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("REVERTED left.txt", result.stdout)
+
+    def test_criss_cross_reference_transaction_rejects_reset(self) -> None:
+        repo = self.new_criss_cross_merge()
+        self.reset_merge_result_to_branch(repo)
+        original_head = self.git(repo, "rev-parse", "HEAD").stdout
+        self.git(repo, "config", "core.hooksPath", os.fspath(PROJECT_HOOKS))
+        result = subprocess.run(
+            ["git", "commit", "--no-verify", "-m", "lossy merge"],
+            cwd=repo, check=False, capture_output=True, text=True,
+        )
+        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("REVERTED left.txt", result.stdout + result.stderr)
+        self.assertEqual(self.git(repo, "rev-parse", "HEAD").stdout, original_head)
+
+    def new_conflicted_merge(self) -> Path:
         temporary_directory = tempfile.TemporaryDirectory()
         self.addCleanup(temporary_directory.cleanup)
         repo = Path(temporary_directory.name)
@@ -263,11 +294,26 @@ class MergeLossGuardTests(unittest.TestCase):
             text=True,
         )
         self.assertEqual(merge.returncode, 1)
+        return repo
+
+    def test_explicit_ours_resolution_of_recorded_conflict_passes(self) -> None:
+        repo = self.new_conflicted_merge()
         self.git(repo, "checkout", "--ours", "conflict.txt")
         self.git(repo, "add", "conflict.txt")
 
         result = self.run_guard(repo)
 
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_deleted_resolution_of_recorded_conflict_passes(self) -> None:
+        repo = self.new_conflicted_merge()
+        self.git(repo, "rm", "--quiet", "conflict.txt")
+        result = self.run_guard(repo)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.git(repo, "config", "core.hooksPath", os.fspath(PROJECT_HOOKS))
+        result = self.git(repo, "commit", "--no-verify", "-m", "delete conflict")
+        self.assertIn("reference transaction: checking merge", result.stdout + result.stderr)
+        result = self.run_guard(repo, "--commit", "HEAD")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
 
