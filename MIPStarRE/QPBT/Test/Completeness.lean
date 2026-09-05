@@ -13,7 +13,7 @@ value-one SPCC completeness theorem.
 ## References
 
 The source statement is `lem:pauli-completeness` in
-`blueprint/src/chapter/ch13_qpbt_test.tex:390-395`, from
+`blueprint/src/chapter/ch13_qpbt_test.tex:512-517`, from
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1229-1421`.
 -/
 
@@ -21,16 +21,45 @@ namespace MIPStarRE.QPBT
 
 noncomputable section
 
-/-- The Pauli question sampler equals the typed conditionally linear distribution
-on the Pauli type graph from `def:typed-cl-distributions`; blueprint
-`ch12_qpbt_games.tex:624-629`,
-paper `references/qpbt-paper/07_types.tex:84-94`. -/
+/-- The Pauli question sampler equals the distribution produced by
+`def:typed-cl-distributions` (`ch12_qpbt_games.tex:1414-1418`) from the family
+`pauliCL` on the Pauli type graph. This is the distribution identity in
+`lem:pauli-question-typed-equality`, blueprint
+`ch13_qpbt_test.tex:452-460`, while the common-level family assertion is stated
+separately there. Paper
+`references/qpbt-paper/07_types.tex:84-93`.
+
+**Unfaithful:** This equality is an unproved assertion from
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1115-1120`.
+Issue #180 tracks its derivation: both sides are the push-forward of the uniform
+law on ordered Pauli edges together with a common uniform seed.
+-/
 theorem pauliQuestionDistribution_eq_typedCL (P : AdmissibleParams) :
     pauliQuestionDistribution P =
       typedCLDistribution pauliEdges (by
         refine ⟨Sym2.mk (.point .X) (.point .X), ?_⟩
         simp [pauliEdges]) (pauliCL P) (pauliCL P) := by
   sorry
+
+/-- `lem:pauli-question-typed-cl`: the Pauli maps form a common-level typed
+conditionally linear family, and their typed distribution is exactly the
+question distribution of the Pauli basis test. Blueprint
+`ch13_qpbt_test.tex:462-470`, paper
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-966,1084-1120`.
+
+**Unfaithful:** This assertion depends on the unproved assertions
+`isTypedCondLinearFamily_pauliCL` and `pauliQuestionDistribution_eq_typedCL`.
+Issue #180 tracks their mathematical derivations: establish the common level of
+the Pauli maps and identify the two common-seed distributions.
+-/
+theorem pauliQuestionDistribution_isTypedCL (P : AdmissibleParams) :
+    IsTypedCondLinearFamily (PauliScalar P) PauliType 3 (pauliCL P) ∧
+      pauliQuestionDistribution P =
+        typedCLDistribution pauliEdges (by
+          refine ⟨Sym2.mk (.point .X) (.point .X), ?_⟩
+          simp [pauliEdges]) (pauliCL P) (pauliCL P) := by
+  exact ⟨isTypedCondLinearFamily_pauliCL P,
+    pauliQuestionDistribution_eq_typedCL P⟩
 
 /-- Symmetry of the Pauli question distribution in the symmetric game appearing
 in `lem:pauli-completeness`. -/
@@ -65,7 +94,7 @@ theorem pauliBasisTestSymm_toGame (P : AdmissibleParams) :
   rfl
 
 /-- `lem:pauli-completeness`: every admissible Pauli basis test has a
-value-one SPCC strategy. Blueprint `ch13_qpbt_test.tex:390-395`, paper
+value-one SPCC strategy. Blueprint `ch13_qpbt_test.tex:512-517`, paper
 `08_classical_and_quantum_low_degree_tests.tex:1229-1421`. -/
 theorem exists_spcc_value_one (P : AdmissibleParams) :
     ∃ S : SymmetricStrategy (pauliBasisTestSymm P),

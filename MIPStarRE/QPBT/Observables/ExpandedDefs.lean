@@ -20,7 +20,8 @@ open scoped BigOperators Matrix MatrixOrder ComplexOrder
 
 namespace MIPStarRE.QPBT
 
-open MIPStarRE.LDT MIPStarRE.Quantum
+open MIPStarRE.LDT hiding Measurement
+open MIPStarRE.Quantum
 open MIPStarRE.LDT.Preliminaries
 
 noncomputable section
