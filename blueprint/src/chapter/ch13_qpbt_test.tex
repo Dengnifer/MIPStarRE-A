@@ -579,7 +579,19 @@ when the Lean declarations it names are complete and sorry-free.
 
 \begin{lemma}[Exact linearity in the combining variables]
 	\label{lem:ld-combining-exact-linearity}
-	\uses{def:ld-combining-map, lem:schwartz-zippel-total-degree}
+	\lean{MIPStarRE.QPBT.combinedRestrict}
+	\lean{MIPStarRE.QPBT.eval_combinedRestrict}
+	\lean{MIPStarRE.QPBT.combinedRestrict_combinePolyTuple}
+	\lean{MIPStarRE.QPBT.combinedRestrict_eq_of_eq_combiningLinearForm}
+	\lean{MIPStarRE.QPBT.combinedCoef}
+	\lean{MIPStarRE.QPBT.combinePolyTuple_combinedCoef_iff}
+	\lean{MIPStarRE.QPBT.exists_eq_combiningLinearForm_combinedRestrict_iff}
+	\lean{MIPStarRE.QPBT.totalDegree_combinedCoef_le}
+	\lean{MIPStarRE.QPBT.combinedRestrict_combiningLinearForm_avg_le}
+	\lean{MIPStarRE.QPBT.directCombinedExactLinearity_avg_le}
+	\leanok
+	\uses{def:ld-combining-map, lem:ld-combining-split,
+		lem:schwartz-zippel-total-degree}
 	Let $p \in \polyfunc{m+k}{q}{d}$ be a polynomial which is not the combined
 	polynomial of any tuple.  Then, for a uniformly random $u \in \F_q^m$, the
 	polynomial $p(u,\cdot) \in \F_q[\alpha_0,\ldots,\alpha_{k-1}]$ obtained by
@@ -587,7 +599,9 @@ when the Lean declarations it names are complete and sorry-free.
 	$\sum_r c_r \alpha_r$ with probability at most $md/q$.
 \end{lemma}
 \begin{proof}
-	\uses{lem:schwartz-zippel-total-degree, def:ld-combining-map}
+	\leanok
+	\uses{lem:schwartz-zippel-total-degree, def:ld-combining-map,
+		lem:ld-combining-split}
 	Write $p = \sum_{\mu} c_\mu \, \alpha^\mu$, the sum over exponent vectors
 	$\mu \in \N^k$ of the combining coordinates, with coefficients
 	$c_\mu \in \polyfunc{m}{q}{d}$.  By
