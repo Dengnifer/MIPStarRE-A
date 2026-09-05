@@ -524,6 +524,9 @@ when the Lean declarations it names are complete and sorry-free.
 
 \begin{lemma}[Value of the combined strategy]
 	\label{lem:ld-combined-value}
+	\lean{MIPStarRE.QPBT.directLdRejectionProbability_directCombinedStrategy_le}
+	\lean{MIPStarRE.QPBT.directCombinedStrategy_value_ge}
+	\leanok
 	\uses{def:ld-combined-strategy, lem:ld-combined-question-law,
 		def:ld-win-predicate, def:tensor-product-value}
 	There is a universal constant $C$ such that the following holds.  If
@@ -534,6 +537,7 @@ when the Lean declarations it names are complete and sorry-free.
 	$\mathsf{ldparams}^{\mathrm c}$.
 \end{lemma}
 \begin{proof}
+	\leanok
 	\uses{def:ld-combined-strategy, lem:ld-combined-question-law,
 		def:ld-win-predicate}
 	Both games weight their nine ordered type pairs uniformly, so it suffices to

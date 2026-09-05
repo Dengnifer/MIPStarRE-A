@@ -200,6 +200,43 @@ theorem directLdBranchRejectionProbability_directCombinedStrategy_le
   rw [inv_mul_eq_div, div_le_iff₀ (by linarith)]
   nlinarith [mul_nonneg hm.le hP, mul_nonneg hk.le hB]
 
+/-- `lem:ld-combined-value`, rejection form.  Both the directly indexed
+low-degree game with the original parameters and the one with the combined
+parameters weight their nine ordered type pairs uniformly, so averaging the
+branch-wise bound over the nine pairs bounds the rejection probability of the
+combined strategy by the rejection probability of the original strategy plus
+its point-versus-point branch; that branch is in turn at most nine times the
+rejection probability of the original strategy.  The universal constant of the
+source statement is therefore `10`. -/
+theorem directLdRejectionProbability_directCombinedStrategy_le
+    (D : DirectLdParams) (S : Strategy (directLdGame D)) :
+    directLdRejectionProbability D.combined (directCombinedStrategy D S) ≤
+      10 * directLdRejectionProbability D S := by
+  have hle := directLdBranchRejectionProbability_directCombinedStrategy_le D S
+  have hnn := directLdBranchRejectionProbability_nonneg D S
+  rw [directLdRejectionProbability, directLdRejectionProbability,
+    avgOver_ldType_pair, avgOver_ldType_pair]
+  linarith [hle (.point, .point), hle (.point, .aline), hle (.point, .dline),
+    hle (.aline, .point), hle (.aline, .aline), hle (.aline, .dline),
+    hle (.dline, .point), hle (.dline, .aline), hle (.dline, .dline),
+    hnn (.point, .point), hnn (.point, .aline), hnn (.point, .dline),
+    hnn (.aline, .point), hnn (.aline, .aline), hnn (.aline, .dline),
+    hnn (.dline, .point), hnn (.dline, .aline), hnn (.dline, .dline)]
+
+/-- `lem:ld-combined-value`: if a projective strategy succeeds with probability
+at least `1 - ε` in the directly indexed low-degree game with the original
+parameters, then the combined strategy of `def:ld-combined-strategy` succeeds
+with probability at least `1 - 10 ε` in the directly indexed low-degree game
+with the combined parameters.  The universal constant of the source statement
+is `10`. -/
+theorem directCombinedStrategy_value_ge (D : DirectLdParams)
+    (S : Strategy (directLdGame D)) (ε : ℝ) (hvalue : 1 - ε ≤ S.value) :
+    1 - 10 * ε ≤ (directCombinedStrategy D S).value := by
+  have hcomb := directLdRejectionProbability_directCombinedStrategy_le D S
+  rw [directLdRejectionProbability_eq_one_sub_value,
+    directLdRejectionProbability_eq_one_sub_value] at hcomb
+  linarith
+
 end
 
 end MIPStarRE.QPBT

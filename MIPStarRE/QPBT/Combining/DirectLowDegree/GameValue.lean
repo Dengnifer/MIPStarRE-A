@@ -97,13 +97,21 @@ noncomputable def directLdLdtWeightedFailureProbability
       B (.point, .point) +
       (B (.dline, .point) + B (.point, .dline)) / 2) / 3
 
-private theorem sum_ldType (f : LdType → ℝ) :
+/-- A sum over the three low-degree question types is the sum of its three
+terms. -/
+theorem sum_ldType (f : LdType → ℝ) :
     ∑ t : LdType, f t = f .point + f .aline + f .dline := by
   change (Finset.univ : Finset LdType).sum f = _
   rw [show (Finset.univ : Finset LdType) = {.point, .aline, .dline} by decide]
   simp [add_assoc]
 
-private theorem avgOver_ldType_pair (f : LdType × LdType → ℝ) :
+/-- The uniform average over the nine ordered pairs of low-degree question
+types is the arithmetic mean of the nine values.  Both the directly indexed
+game with the original parameters and the one with the combined parameters
+weight their ordered type pairs uniformly, so the assembly of
+`lem:ld-combined-value` sums its nine branch-wise bounds through this
+identity. -/
+theorem avgOver_ldType_pair (f : LdType × LdType → ℝ) :
     avgOver (uniformDistribution (LdType × LdType)) f =
       (f (.point, .point) + f (.point, .aline) + f (.point, .dline) +
         (f (.aline, .point) + f (.aline, .aline) + f (.aline, .dline)) +
