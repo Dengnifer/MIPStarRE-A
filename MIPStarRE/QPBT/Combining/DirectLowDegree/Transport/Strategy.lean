@@ -1,4 +1,3 @@
-import MIPStarRE.QPBT.Algebra.Pauli
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Questions
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.SeedFiber
 
