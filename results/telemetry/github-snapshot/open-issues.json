@@ -464,91 +464,6 @@
   "pinned_comment": null
  },
  {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/201",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/201/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/201/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/201/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/201",
-  "id": 5352274357,
-  "node_id": "I_kwDOUJyJf88AAAABPwU5tQ",
-  "number": 201,
-  "title": "fix(QPBT/Games): encode the pasting error contract as the source's polynomial bound and prove exists_pasting_error (#196 follow-up)",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 4,
-  "created_at": "2026-09-04T19:38:39Z",
-  "updated_at": "2026-09-05T12:09:12Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/163",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 1,
-   "blocking": 1,
-   "total_blocking": 1
-  },
-  "body": "The #196 worker proved consistencyDefect_sandwich_le (C0 = 8) and found that exists_pasting_error (MIPStarRE/QPBT/Games/Sandwich.lean, lem:pasting = Fact 4.35 of Natarajan-Wright NEEXP, blueprint ch12_qpbt_games.tex:533-564) is false as currently stated because the repository's shared scalar predicate encodes the source's poly(eta, delta) error as a product-form bound that must vanish when the collision error eta is zero even at fixed positive consistency error delta; a two-dimensional counterexample is recorded in docs/paper-gaps/qpbt_pasting-product-error.tex on branch issue-196-quantitative-sandwich-theorem. This is a formalization-side encoding error, not a gap in the source: the paper asks for a bound polynomial in both inputs (vanishing only at (0,0)). Deliverables: (1) correct the shared predicate to the source's meaning (a sum-form polynomial contract such as C * (eta^a + delta^b) with explicit positive exponents, used consistently by every consumer; list the consumers with rg), keeping the paper-labelled statement source-shaped; (2) prove exists_pasting_error with explicit constants (the note estimates 300-600 lines of consistency and Cauchy-Schwarz calculus on the existing distance calculus); (3) update the note's status section and the blueprint proof tag only when sorry-free; (4) no other hypothesis may be added. Stack on branch issue-196-quantitative-sandwich-theorem until PR 201-or-later for #196 merges. Codex packet.",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/201/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/201/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/168",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/168/labels{/name}",
@@ -1108,8 +1023,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 7,
-   "completed": 6,
-   "percent_completed": 85
+   "completed": 7,
+   "percent_completed": 100
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
   "issue_dependencies_summary": {
@@ -1623,7 +1538,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/166",
   "issue_dependencies_summary": {
-   "blocked_by": 2,
+   "blocked_by": 1,
    "total_blocked_by": 4,
    "blocking": 1,
    "total_blocking": 1
