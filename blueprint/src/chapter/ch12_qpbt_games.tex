@@ -1027,6 +1027,21 @@ postprocessing, and operator-contraction steps used to formalize
 	of measurements and the consistency calculus applies to them.
 \end{definition}
 
+\begin{definition}[Formalization support for Lemma~\ref{lem:pasting}]
+	\label{def:pasting-alphabet-relabelling}
+	\lean{MIPStarRE.QPBT.Measurement.congrAlphabet, MIPStarRE.QPBT.Measurement.congrAlphabet_effect, MIPStarRE.QPBT.Measurement.isProjective_congrAlphabet, MIPStarRE.QPBT.Measurement.postprocess_congrAlphabet}
+	\leanok
+	\uses{def:povm-conventions}
+	This formalization-only definition relabels the outcome set of a POVM along
+	a bijection: the effect at an outcome of the new set is the effect at its
+	image. The relabelled family is a POVM, it is projective whenever the
+	original one is, and postprocessing it along a map agrees with
+	postprocessing the original family along the transported map. The
+	comparisons of Lemma~\ref{lem:pasting} are indexed by pairs of answers,
+	while the commutation estimate they feed is indexed by triples; the
+	relabelling mediates between the two indexings.
+\end{definition}
+
 \begin{lemma}[Formalization support for Lemma~\ref{lem:pasting}]
 	\label{lem:pasting-tensor-placement}
 	\lean{MIPStarRE.QPBT.Measurement.isProjective_leftPlacement, MIPStarRE.QPBT.Measurement.isProjective_rightPlacement, MIPStarRE.QPBT.Measurement.leftPlacement_postprocess, MIPStarRE.QPBT.Measurement.rightPlacement_postprocess}

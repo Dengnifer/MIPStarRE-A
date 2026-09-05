@@ -203,4 +203,43 @@ theorem Measurement.rightPlacement_postprocess {α β ιA ιB : Type*}
   simp only [Measurement.rightPlacement_effect, Measurement.postprocess_effect,
     heteroKron_finset_sum_right]
 
+
+/-- The measurement obtained by relabelling the outcome set along a bijection.
+Formalization support for `lem:pasting`, blueprint
+`ch12_qpbt_games.tex:960-990`. -/
+noncomputable def Measurement.congrAlphabet {α β ι : Type*} [Fintype α]
+    [Fintype β] [Fintype ι] [DecidableEq ι] (e : β ≃ α) (M : Measurement α ι) :
+    Measurement β ι :=
+  Measurement.ofSumEqOne (fun b => M.effect (e b)) (fun b => M.pos (e b))
+    ((e.sum_comp M.effect).trans M.sum_eq_one)
+
+/-- The effects of a relabelled measurement. -/
+@[simp] theorem Measurement.congrAlphabet_effect {α β ι : Type*} [Fintype α]
+    [Fintype β] [Fintype ι] [DecidableEq ι] (e : β ≃ α) (M : Measurement α ι)
+    (b : β) :
+    (Measurement.congrAlphabet e M).effect b = M.effect (e b) := rfl
+
+/-- Relabelling the outcome set preserves projectivity. Formalization support
+for `lem:pasting`, blueprint `ch12_qpbt_games.tex:960-990`. -/
+theorem Measurement.isProjective_congrAlphabet {α β ι : Type*} [Fintype α]
+    [Fintype β] [Fintype ι] [DecidableEq ι] (e : β ≃ α) (M : Measurement α ι)
+    (hM : MIPStarRE.QPBT.Measurement.IsProjective M) :
+    MIPStarRE.QPBT.Measurement.IsProjective (Measurement.congrAlphabet e M) :=
+  fun b => hM (e b)
+
+/-- Postprocessing a relabelled measurement is the postprocessing of the
+original measurement along the transported map. Formalization support for
+`lem:pasting`, blueprint `ch12_qpbt_games.tex:960-990`. -/
+theorem Measurement.postprocess_congrAlphabet {α β γ ι : Type*} [Fintype α]
+    [DecidableEq α] [Fintype β] [DecidableEq β] [Fintype γ] [DecidableEq γ]
+    [Fintype ι] [DecidableEq ι] (e : β ≃ α) (M : Measurement α ι)
+    (f : β → γ) (c : γ) :
+    ((Measurement.congrAlphabet e M).postprocess f).effect c =
+      (M.postprocess (fun a => f (e.symm a))).effect c := by
+  classical
+  simp only [Measurement.postprocess_effect, Measurement.congrAlphabet_effect,
+    Finset.sum_filter]
+  rw [← Equiv.sum_comp e (fun a => if f (e.symm a) = c then M.effect a else 0)]
+  simp
+
 end MIPStarRE.QPBT
