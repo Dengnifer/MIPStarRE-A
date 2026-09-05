@@ -12,8 +12,8 @@ strategy.
 
 ## References
 
-The source statement is `lem:pauli-completeness` in
-`blueprint/src/chapter/ch13_qpbt_test.tex`, from
+The source statement is blueprint
+`lem:pauli-completeness`, from
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1229-1421`.
 -/
 
@@ -187,7 +187,7 @@ theorem pauliBasisTestSymm_toGame (P : AdmissibleParams) :
   rfl
 
 /-- `lem:pauli-completeness`: every admissible Pauli basis test has a
-value-one SPCC strategy. Blueprint `ch13_qpbt_test.tex`, paper
+value-one SPCC strategy. Blueprint `lem:pauli-completeness`, paper
 `08_classical_and_quantum_low_degree_tests.tex:1229-1421`. -/
 theorem exists_spcc_value_one (P : AdmissibleParams) :
     ∃ S : SymmetricStrategy (pauliBasisTestSymm P),

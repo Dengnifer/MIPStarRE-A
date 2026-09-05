@@ -24,7 +24,8 @@ rejection.
 
 - `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:214-458`
 - `references/ldt-paper/test_definition.tex:49-65,130-151`
-- `blueprint/src/chapter/ch13_qpbt_test.tex:38-121`
+- Blueprint `def:ld-question-distribution`, `lem:ld-aline-level`,
+  `lem:ld-dline-level`, `lem:ld-question-typed-cl`, `lem:alnf`, and `lem:dlnf`
 - `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`
 -/
 

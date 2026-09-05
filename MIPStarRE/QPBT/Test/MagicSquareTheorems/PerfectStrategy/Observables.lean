@@ -13,8 +13,8 @@ commutation, and constraint-product identities.
 
 ## References
 
-The source statement is `thm:ms-from-ac` in
-`blueprint/src/chapter/ch13_qpbt_test.tex:257-267`, from
+The source statement is blueprint
+`thm:ms-from-ac`, from
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:654-722`.
 -/
 
@@ -33,8 +33,8 @@ noncomputable def msPerfectState (ι : Type*) [Fintype ι] [DecidableEq ι]
   reindexState prodShuffle (vecTensor (eprState ι) (eprState (ZMod 2)))
 
 /-- Formalization-only auxiliary lemma for
-`exists_ms_perfect_strategy_of_anticommuting` (`thm:ms-from-ac`, blueprint
-`ch13_qpbt_test.tex:257-267`): the state of the perfect strategy, obtained by
+`exists_ms_perfect_strategy_of_anticommuting` (blueprint
+`thm:ms-from-ac`): the state of the perfect strategy, obtained by
 tensoring the EPR state on `ι` with the one-qubit EPR state and reshuffling the
 four factors, is the EPR state on `ι × ZMod 2`. -/
 theorem msPerfectState_eq_eprState
@@ -62,8 +62,8 @@ theorem msPerfectState_eq_eprState
   · simp [msPerfectState, reindexState, vecTensor, eprState, prodShuffle, hij]
 
 /-- Formalization-only auxiliary lemma for
-`exists_ms_perfect_strategy_of_anticommuting` (`thm:ms-from-ac`, blueprint
-`ch13_qpbt_test.tex:257-267`): the EPR state on `V` is invariant under
+`exists_ms_perfect_strategy_of_anticommuting` (blueprint
+`thm:ms-from-ac`): the EPR state on `V` is invariant under
 exchanging its two tensor factors. -/
 theorem reindexState_prodComm_eprState
     (V : Type*) [Fintype V] [DecidableEq V] [Nonempty V] :
@@ -80,8 +80,8 @@ theorem reindexState_prodComm_eprState
     simp [hij, hji]
 
 /-- Formalization-only auxiliary lemma for
-`exists_ms_perfect_strategy_of_anticommuting` (`thm:ms-from-ac`, blueprint
-`ch13_qpbt_test.tex:257-267`): a symmetric operator acting on the first factor
+`exists_ms_perfect_strategy_of_anticommuting` (blueprint
+`thm:ms-from-ac`): a symmetric operator acting on the first factor
 of the EPR state acts on it exactly as it does on the second factor. -/
 theorem epr_action_eq_of_transpose
     {V : Type*} [Fintype V] [DecidableEq V] [Nonempty V]
@@ -94,8 +94,8 @@ theorem epr_action_eq_of_transpose
     eprState, Matrix.one_apply] using congrFun (congrFun hE j) i
 
 /-- Formalization-only auxiliary lemma for
-`exists_ms_perfect_strategy_of_anticommuting` (`thm:ms-from-ac`, blueprint
-`ch13_qpbt_test.tex:257-267`): conversely, an operator whose actions on the two
+`exists_ms_perfect_strategy_of_anticommuting` (blueprint
+`thm:ms-from-ac`): conversely, an operator whose actions on the two
 factors of the EPR state agree is symmetric. -/
 theorem transpose_eq_of_epr_action
     {V : Type*} [Fintype V] [DecidableEq V] [Nonempty V]
@@ -134,8 +134,8 @@ private theorem binary_effects_orthogonal
     exact (hM 0).one_sub_mul_self
 
 /-- Formalization-only auxiliary lemma for
-`exists_ms_perfect_strategy_of_anticommuting` (`thm:ms-from-ac`, blueprint
-`ch13_qpbt_test.tex:257-267`): the ±1-valued observable attached to a binary
+`exists_ms_perfect_strategy_of_anticommuting` (blueprint
+`thm:ms-from-ac`): the ±1-valued observable attached to a binary
 projective measurement is Hermitian. -/
 theorem obsOf_conjTranspose
     {V : Type*} [Fintype V] [DecidableEq V]
@@ -147,8 +147,8 @@ theorem obsOf_conjTranspose
     (hM 1).isSelfAdjoint.isHermitian.eq]
 
 /-- Formalization-only auxiliary lemma for
-`exists_ms_perfect_strategy_of_anticommuting` (`thm:ms-from-ac`, blueprint
-`ch13_qpbt_test.tex:257-267`): the ±1-valued observable attached to a binary
+`exists_ms_perfect_strategy_of_anticommuting` (blueprint
+`thm:ms-from-ac`): the ±1-valued observable attached to a binary
 projective measurement is an involution, that is, it squares to the identity. -/
 theorem obsOf_sq
     {V : Type*} [Fintype V] [DecidableEq V]
@@ -209,8 +209,8 @@ noncomputable def reflectionMeasurement
       module)
 
 /-- Formalization-only auxiliary lemma for
-`exists_ms_perfect_strategy_of_anticommuting` (`thm:ms-from-ac`, blueprint
-`ch13_qpbt_test.tex:257-267`): the binary measurement built from a Hermitian
+`exists_ms_perfect_strategy_of_anticommuting` (blueprint
+`thm:ms-from-ac`): the binary measurement built from a Hermitian
 involution is projective. -/
 theorem reflectionMeasurement_projective
     {V : Type*} [Fintype V] [DecidableEq V]
@@ -229,8 +229,8 @@ private theorem reflectionEffect_obsOf
   module
 
 /-- Formalization-only auxiliary lemma for
-`exists_ms_perfect_strategy_of_anticommuting` (`thm:ms-from-ac`, blueprint
-`ch13_qpbt_test.tex:257-267`): passing from a binary projective measurement to
+`exists_ms_perfect_strategy_of_anticommuting` (blueprint
+`thm:ms-from-ac`): passing from a binary projective measurement to
 its ±1-valued observable and back recovers the original effects. -/
 theorem reflectionEffect_obsOf_measurement
     {V : Type*} [Fintype V] [DecidableEq V]
@@ -306,8 +306,8 @@ def msCellObservable
     heteroKron (OA * OB) (qubitZ * qubitX)]
 
 /-- Formalization-only auxiliary lemma for
-`exists_ms_perfect_strategy_of_anticommuting` (`thm:ms-from-ac`, blueprint
-`ch13_qpbt_test.tex:257-267`): each of the nine cell observables of the operator
+`exists_ms_perfect_strategy_of_anticommuting` (blueprint
+`thm:ms-from-ac`): each of the nine cell observables of the operator
 table is Hermitian whenever `OA` and `OB` are Hermitian and anticommute. -/
 theorem msCellObservable_conjTranspose
     {V : Type*} [Fintype V] [DecidableEq V]
@@ -325,8 +325,8 @@ theorem msCellObservable_conjTranspose
       heteroKron_neg_neg]
 
 /-- Formalization-only auxiliary lemma for
-`exists_ms_perfect_strategy_of_anticommuting` (`thm:ms-from-ac`, blueprint
-`ch13_qpbt_test.tex:257-267`): each of the nine cell observables of the operator
+`exists_ms_perfect_strategy_of_anticommuting` (blueprint
+`thm:ms-from-ac`): each of the nine cell observables of the operator
 table is an involution whenever `OA` and `OB` are anticommuting involutions. -/
 theorem msCellObservable_sq
     {V : Type*} [Fintype V] [DecidableEq V]
@@ -342,8 +342,8 @@ theorem msCellObservable_sq
       binaryTauPhase_sq, hAB, hZX, heteroKron_neg_neg, heteroKron_one_one]
 
 /-- Formalization-only auxiliary lemma for
-`exists_ms_perfect_strategy_of_anticommuting` (`thm:ms-from-ac`, blueprint
-`ch13_qpbt_test.tex:257-267`): each of the nine cell observables of the operator
+`exists_ms_perfect_strategy_of_anticommuting` (blueprint
+`thm:ms-from-ac`): each of the nine cell observables of the operator
 table is symmetric whenever `OA` and `OB` are symmetric and anticommute. -/
 theorem msCellObservable_transpose
     {V : Type*} [Fintype V] [DecidableEq V]
@@ -361,8 +361,8 @@ theorem msCellObservable_transpose
       heteroKron_neg_neg]
 
 /-- Formalization-only auxiliary lemma for
-`exists_ms_perfect_strategy_of_anticommuting` (`thm:ms-from-ac`, blueprint
-`ch13_qpbt_test.tex:257-267`): the observables attached to any two cells of the
+`exists_ms_perfect_strategy_of_anticommuting` (blueprint
+`thm:ms-from-ac`): the observables attached to any two cells of the
 same Magic Square constraint commute. -/
 theorem msConstraintObservable_commute
     {V : Type*} [Fintype V] [DecidableEq V]
@@ -407,8 +407,8 @@ theorem msConstraintObservable_commute
       heteroKron_neg_right]
 
 /-- Formalization-only auxiliary lemma for
-`exists_ms_perfect_strategy_of_anticommuting` (`thm:ms-from-ac`, blueprint
-`ch13_qpbt_test.tex:257-267`): the three observables of a Magic Square
+`exists_ms_perfect_strategy_of_anticommuting` (blueprint
+`thm:ms-from-ac`): the three observables of a Magic Square
 constraint multiply to `1` for the five even constraints and to `-1` for the
 last one, which is the anticommuting column of the operator table. -/
 theorem msConstraintObservable_product
@@ -430,8 +430,8 @@ theorem msConstraintObservable_product
       heteroKron_one_one]
 
 /-- Formalization-only auxiliary lemma for
-`exists_ms_perfect_strategy_of_anticommuting` (`thm:ms-from-ac`, blueprint
-`ch13_qpbt_test.tex:257-267`): the two effects of a binary projective
+`exists_ms_perfect_strategy_of_anticommuting` (blueprint
+`thm:ms-from-ac`): the two effects of a binary projective
 measurement are orthogonal idempotents: their product is the common effect when
 the outcomes agree and `0` otherwise. -/
 theorem binary_effect_mul
@@ -446,8 +446,8 @@ theorem binary_effect_mul
       simp [(hM _).isIdempotentElem.eq, h01, h10]
 
 /-- Formalization-only auxiliary lemma for
-`exists_ms_perfect_strategy_of_anticommuting` (`thm:ms-from-ac`, blueprint
-`ch13_qpbt_test.tex:257-267`): the reflection effects of two commuting Hermitian
+`exists_ms_perfect_strategy_of_anticommuting` (blueprint
+`thm:ms-from-ac`): the reflection effects of two commuting Hermitian
 involutions commute. -/
 theorem reflectionEffect_commute
     {V : Type*} [Fintype V] [DecidableEq V]
@@ -518,8 +518,8 @@ private theorem reflection_pair_mul_observables
     _ = (s0 * s1) • (P0 * P1) := by rw [smul_mul_smul]
 
 /-- Formalization-only auxiliary lemma for
-`exists_ms_perfect_strategy_of_anticommuting` (`thm:ms-from-ac`, blueprint
-`ch13_qpbt_test.tex:257-267`): if `O0` and `O1` are commuting involutions and
+`exists_ms_perfect_strategy_of_anticommuting` (blueprint
+`thm:ms-from-ac`): if `O0` and `O1` are commuting involutions and
 the product `O0 * O1 * O2` equals `(-1) ^ p`, then the third reflection effect
 taken at the outcome `p - b0 - b1` forced by the parity acts as the identity on
 the product of the first two reflection effects. -/

@@ -19,11 +19,11 @@ factorization `pauliProj W e = v vᴴ` for the normalized Pauli eigenvector `v`.
 
 ## References
 
-`def:generalized-pauli` and `lem:pauli-observable-expansion`, blueprint
-`blueprint/src/chapter/ch11_qpbt_algebra.tex:494-688`, paper
+`def:generalized-pauli` and blueprint
+`lem:pauli-observable-expansion`, paper
 `references/qpbt-paper/04_preliminaries.tex:908-1161`; the target of the
-rigidity theorem is `thm:ms-rigidity`, blueprint
-`blueprint/src/chapter/ch13_qpbt_test.tex:224-253`, paper
+rigidity theorem is blueprint
+`thm:ms-rigidity`, paper
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652`.
 -/
 
@@ -36,7 +36,6 @@ open MIPStarRE.Quantum
 noncomputable section
 
 variable {K : Type*} [Field K] [Fintype K] [DecidableEq K] [Algebra (ZMod 2) K]
-
 /-! ## Marginals of the Pauli basis -/
 
 /-- A marginal of the Pauli basis projectors, over any set of labels, is
@@ -76,8 +75,8 @@ theorem sum_binary_marginal_pauliProj {ι : Type*} [Fintype ι] [DecidableEq ι]
 
 /-- The binary measurement on the Pauli basis attached to a binary function of
 the labels: its effects are the two marginals of the Pauli basis projectors.
-This is the ideal target family of `thm:ms-rigidity`, blueprint
-`ch13_qpbt_test.tex:224-253`. -/
+This is the ideal target family of blueprint
+`thm:ms-rigidity`. -/
 noncomputable def pauliMarginalMeasurement {ι : Type*} [Fintype ι] [DecidableEq ι]
     (W : PauliKind) (f : (ι → K) → ZMod 2) :
     MIPStarRE.Quantum.Measurement (ZMod 2) (ι → K) :=
@@ -110,7 +109,7 @@ extracted registers tensored with an auxiliary bipartite state and shuffled into
 local player order, has the norm of the auxiliary state.  In particular it is a
 unit vector whenever the auxiliary state is.  The norm identities for the
 coordinate operations are `reindexState_norm_eq` and `vecTensor_norm_eq` in
-`MIPStarRE/QPBT/State.lean`.  Blueprint `ch13_qpbt_test.tex:224-253`. -/
+`MIPStarRE/QPBT/State.lean`.  Blueprint `thm:ms-rigidity`. -/
 theorem norm_reindexState_prodShuffle_vecTensor_eprState {V ιA'' ιB'' : Type*}
     [Fintype V] [DecidableEq V] [Nonempty V] [Fintype ιA''] [DecidableEq ιA'']
     [Fintype ιB''] [DecidableEq ιB''] (aux : EuclideanSpace ℂ (ιA'' × ιB'')) :

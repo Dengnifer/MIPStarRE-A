@@ -11,8 +11,7 @@ analysis.
 
 ## References
 
-The source results are `lem:ld-sandwich` and `lem:pasting` in
-`blueprint/src/chapter/ch12_qpbt_games.tex:469-1014`, with paper origin
+The source results are blueprint `lem:ld-sandwich` and `lem:pasting`, with paper origin
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:465-525`.
 -/
 
@@ -26,7 +25,7 @@ open DistanceCalculus
 
 /-- The palindromic effects form a POVM when each constituent measurement is
 projective. This is `lem:ld-sandwich-measurement`, the measurement assertion
-implicit in `lem:ld-sandwich`; blueprint `ch12_qpbt_games.tex:548-568`, paper
+implicit in `lem:ld-sandwich`; blueprint `lem:ld-sandwich-measurement`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:484-494`. -/
 theorem sandwichProduct_isMeasurement {k : ℕ} {X ι : Type*}
     [Fintype ι] [DecidableEq ι] {Γ : Fin k → Type*}
@@ -41,7 +40,7 @@ theorem sandwichProduct_isMeasurement {k : ℕ} {X ι : Type*}
 /-- The sandwiched simultaneous-measurement estimate of `lem:ld-sandwich`.
 One universal asymptotic constant applies independently of the distribution,
 measurements, state, and error parameters. Blueprint
-`ch12_qpbt_games.tex:469-496`, paper
+`lem:ld-sandwich`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:465-501`. -/
 theorem consistencyDefect_sandwich_le :
     ∃ C₀ : ℝ, 1 ≤ C₀ ∧
@@ -77,7 +76,7 @@ theorem consistencyDefect_sandwich_le :
 
 /-- The effects obtained by sandwiching one measurement with a projective
 measurement form a POVM. This is `lem:pasting-measurement`, the measurement
-assertion for `eq:pasting-2a`; blueprint `ch12_qpbt_games.tex:995-1014`, paper
+assertion for `eq:pasting-2a`; blueprint `lem:pasting-measurement`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:514-524`. -/
 theorem pastedMeasurement_isMeasurement {Γ₁ Γ₂ ι : Type*}
     [Fintype Γ₁] [Fintype Γ₂] [Fintype ι] [DecidableEq ι]

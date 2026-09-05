@@ -10,7 +10,7 @@ This module proves the exact line-point and Pauli-basis consistency bounds.
 The line-point and Pauli-basis consistency theorems prove items 2 and 3
 of `lem:qld-win-implications`
 from `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:192-267`
-and `blueprint/src/chapter/ch14_qpbt_observables.tex:505-660`.
+and blueprint `lem:qld-win-implications` and `lem:qld-win-implications-obs`.
 -/
 
 open scoped BigOperators Matrix ComplexOrder
@@ -612,7 +612,7 @@ theorem lowDegreeConsistency_eq_mismatch {P : AdmissibleParams} {ε : ℝ}
 completed point measurements. This is item 2 of
 `lem:qld-win-implications`, paper
 `14_analysis_of_the_pauli_basis_test.tex:200-204`, blueprint
-`ch14_qpbt_observables.tex:523-548`. -/
+`lem:qld-win-implications`. -/
 theorem win_low_degree :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
@@ -766,7 +766,7 @@ theorem pauliBasisConsistency_eq_mismatch {P : AdmissibleParams} {ε : ℝ}
 low-degree encodings of Pauli answers. This is item 3 of
 `lem:qld-win-implications`, paper
 `14_analysis_of_the_pauli_basis_test.tex:205-209`, blueprint
-`ch14_qpbt_observables.tex:549-566`. -/
+`lem:qld-win-implications`. -/
 theorem win_pauli_basis_cons :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),

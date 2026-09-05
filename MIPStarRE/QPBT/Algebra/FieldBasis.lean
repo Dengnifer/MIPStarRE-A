@@ -9,10 +9,9 @@ and records the resulting fixed field model for later proofs.
 
 ## References
 
-The declarations correspond to `def:admissible-size`,
+The declarations correspond to blueprint `def:admissible-size`,
 `def:dual-self-dual-normal-basis`, `def:subfields-kappa`, `def:subfield-trace`,
-and `def:binary-representation` in
-`blueprint/src/chapter/ch11_qpbt_algebra.tex:182-257` and `298-315`.
+and `def:binary-representation`.
 Their paper origin is `references/qpbt-paper/04_preliminaries.tex:433-502,653-728`.
 -/
 
@@ -21,15 +20,14 @@ open scoped BigOperators
 namespace MIPStarRE.QPBT
 
 /-- `IsAdmissibleSize q` is the predicate `q = 2^k` for an odd exponent.
-This is `def:admissible-size` in the blueprint
-`blueprint/src/chapter/ch11_qpbt_algebra.tex:210-212`, with paper origin
+This is blueprint `def:admissible-size`, with paper origin
 `references/qpbt-paper/04_preliminaries.tex:662-667`.
 -/
 def IsAdmissibleSize (q : ℕ) : Prop := ∃ k : ℕ, Odd k ∧ q = 2 ^ k
 
 /-- An admissible field size is at least two, its binary exponent being odd
-and therefore positive.  This is a property of `def:admissible-size`,
-blueprint `blueprint/src/chapter/ch11_qpbt_algebra.tex:210-212`, paper origin
+and therefore positive.  This is a property of blueprint
+`def:admissible-size`, paper origin
 `references/qpbt-paper/04_preliminaries.tex:662-667`.
 -/
 theorem IsAdmissibleSize.two_le {q : ℕ} (hq : IsAdmissibleSize q) : 2 ≤ q := by
@@ -41,8 +39,8 @@ theorem IsAdmissibleSize.two_le {q : ℕ} (hq : IsAdmissibleSize q) : 2 ≤ q :=
 
 /-- An admissible field size is either two or a multiple of eight: its binary
 exponent is odd, hence either one or at least three.  This is a property of
-`def:admissible-size`, blueprint
-`blueprint/src/chapter/ch11_qpbt_algebra.tex:210-212`, paper origin
+blueprint
+`def:admissible-size`, paper origin
 `references/qpbt-paper/04_preliminaries.tex:662-667`.
 -/
 theorem IsAdmissibleSize.eq_two_or_eight_dvd {q : ℕ} (hq : IsAdmissibleSize q) :
@@ -59,22 +57,22 @@ theorem IsAdmissibleSize.eq_two_or_eight_dvd {q : ℕ} (hq : IsAdmissibleSize q)
     congr 1
     omega
 
-/-- A dual pair of bases for `def:dual-self-dual-normal-basis`, blueprint
-`ch11_qpbt_algebra.tex:241-257`, paper `04_preliminaries.tex:494-496`. -/
+/-- A dual pair of bases for blueprint
+`def:dual-self-dual-normal-basis`, paper `04_preliminaries.tex:494-496`. -/
 def IsDualBasisPair {F K ι : Type*} [CommRing F] [CommRing K] [DecidableEq ι]
     [Algebra F K] (b b' : Module.Basis ι F K) : Prop :=
   ∀ i j, Algebra.trace F K (b i * b' j) = if i = j then 1 else 0
 
 namespace Basis
 
-/-- Self-duality in `def:dual-self-dual-normal-basis`, blueprint
-`ch11_qpbt_algebra.tex:241-257`, paper `04_preliminaries.tex:494-497`. -/
+/-- Self-duality in blueprint
+`def:dual-self-dual-normal-basis`, paper `04_preliminaries.tex:494-497`. -/
 def IsSelfDual {F K ι : Type*} [CommRing F] [CommRing K] [DecidableEq ι]
     [Algebra F K] (b : Module.Basis ι F K) : Prop :=
   IsDualBasisPair b b
 
-/-- Normality in `def:dual-self-dual-normal-basis`, blueprint
-`ch11_qpbt_algebra.tex:241-257`, paper `04_preliminaries.tex:498-502`. The
+/-- Normality in blueprint
+`def:dual-self-dual-normal-basis`, paper `04_preliminaries.tex:498-502`. The
 Frobenius exponent uses the cardinality of the base field. -/
 def IsNormal {F K : Type*} [CommSemiring F] [Fintype F] [Field K] [Algebra F K]
     {k : ℕ} (b : Module.Basis (Fin k) F K) : Prop :=
@@ -387,7 +385,7 @@ private theorem exists_self_dual_normal_basis_gal (hodd : Odd (Nat.card G)) :
 end NormalTraceDual
 
 /-- Existence over the binary extension of cardinality `2^k` for odd `k`;
-`def:dual-self-dual-normal-basis`, blueprint `ch11_qpbt_algebra.tex:241-257`,
+blueprint `def:dual-self-dual-normal-basis`,
 paper `04_preliminaries.tex:702-725`. -/
 theorem exists_selfDualNormalBasis {K : Type*} [Field K] [Fintype K]
     [Algebra (ZMod 2) K] (k : ℕ) (hk : Odd k)
@@ -435,8 +433,8 @@ A fixed finite-field model records the carrier and the chosen coding of its
 elements by `Fin q`.  The algebra structure and stored basis data make explicit
 the paper's once-and-for-all self-dual normal-basis convention; they are
 deliberately part of the model rather than quantified afresh by the soundness
-theorem.  This is the Lean carrier for `def:binary-representation`, blueprint
-`blueprint/src/chapter/ch11_qpbt_algebra.tex:298-315`, paper origin
+theorem.  This is the Lean carrier for blueprint
+`def:binary-representation`, paper origin
 `references/qpbt-paper/04_preliminaries.tex:653-728`.
 -/
 /- The finite-field carrier is specialized to `Type 0`, as are the finite
@@ -457,8 +455,8 @@ structure FixedFieldModel (q : ℕ) extends MIPStarRE.LDT.FieldModel.{0} q where
   The inherited coding of `K` is the natural binary encoding of the stored
   basis coordinates.  This field records the source's `downsize` convention
   rather than allowing an unrelated permutation of `Fin q`.  It is the
-  coordinate clause of `def:binary-representation` in
-  `blueprint/src/chapter/ch11_qpbt_algebra.tex:298-315`, with paper origin
+  coordinate clause of blueprint
+  `def:binary-representation`, with paper origin
   `references/qpbt-paper/04_preliminaries.tex:669-680`.
   -/
   representation_natural :
@@ -481,8 +479,8 @@ selector itself is the resulting noncomputable choice.
 
 /-- An admissible binary field size admits the fixed self-dual normal model used
 by the Pauli basis test.  This is the existence assertion implicit in
-`def:dual-self-dual-normal-basis` and `def:binary-representation`, blueprint
-`blueprint/src/chapter/ch11_qpbt_algebra.tex:234-246,298-315`, paper origin
+`def:dual-self-dual-normal-basis` and blueprint
+`def:binary-representation`, paper origin
 `references/qpbt-paper/04_preliminaries.tex:653-680,702-725`.
 
 This theorem constructs the finite field and its little-endian coordinate
@@ -542,7 +540,7 @@ theorem exists_fixed_field_model (q : ℕ) (hq : IsAdmissibleSize q) :
 /-- The once-and-for-all field model selected for an admissible size.  Every
 QPBT parameter record uses this same choice, matching the paper's fixed
 self-dual normal-basis identification rather than quantifying over arbitrary
-representations.  Blueprint `ch11_qpbt_algebra.tex:298-315`; paper origin
+representations.  Blueprint `def:binary-representation`; paper origin
 `references/qpbt-paper/04_preliminaries.tex:653-680`.
 -/
 noncomputable def fixedFieldModel (q : ℕ) (hq : IsAdmissibleSize q) :
@@ -560,7 +558,7 @@ noncomputable def binaryRepresentation {q : ℕ} (F : FixedFieldModel q) : F.K �
 
 /--
 The coordinate map associated with a finite basis.  This is the `κ` of
-`def:subfields-kappa` in `blueprint/src/chapter/ch11_qpbt_algebra.tex:182-208`,
+blueprint `def:subfields-kappa`,
 whose paper origin is `references/qpbt-paper/04_preliminaries.tex:433-502`.
 -/
 noncomputable abbrev kappa {F K ι : Type*} [CommSemiring F] [Semiring K]
@@ -570,9 +568,9 @@ noncomputable abbrev kappa {F K ι : Type*} [CommSemiring F] [Semiring K]
 
 /--
 Multiplication by `a` in basis coordinates, using Mathlib's
-`Algebra.leftMulMatrix`.  It is the multiplication table `K_a` in
-`def:subfields-kappa` (blueprint lines 196-199; paper
-`references/qpbt-paper/04_preliminaries.tex:481-502`).
+`Algebra.leftMulMatrix`.  It is the multiplication table `K_a` in blueprint
+`def:subfields-kappa`; paper
+`references/qpbt-paper/04_preliminaries.tex:481-502`.
 -/
 noncomputable abbrev multiplicationTable {F K ι : Type*} [CommSemiring F]
     [Semiring K] [Algebra F K] [Fintype ι] [DecidableEq ι]
@@ -581,8 +579,8 @@ noncomputable abbrev multiplicationTable {F K ι : Type*} [CommSemiring F]
 
 /--
 The finite-field trace used by the Pauli phases.  This is a thin wrapper around
-Mathlib's basis-independent `Algebra.trace`, matching `def:subfield-trace` and
-Equation `eq:def-trace` in `blueprint/src/chapter/ch11_qpbt_algebra.tex:217-232`
+Mathlib's basis-independent `Algebra.trace`, matching Equation `eq:def-trace`
+in blueprint `def:subfield-trace`
 (`references/qpbt-paper/04_preliminaries.tex:481-502`).
 -/
 noncomputable abbrev binTrace (K : Type*) [CommRing K] [Algebra (ZMod 2) K] :
@@ -590,15 +588,15 @@ noncomputable abbrev binTrace (K : Type*) [CommRing K] [Algebra (ZMod 2) K] :
   Algebra.trace (ZMod 2) K
 
 /-- The trace selected by a fixed model; this is the map denoted `tr` in the
-paper's `def:binary-representation`, blueprint `ch11_qpbt_algebra.tex:298-315`,
+paper's blueprint `def:binary-representation`,
 paper origin `references/qpbt-paper/04_preliminaries.tex:653-680`. -/
 noncomputable def fixedBinTrace {q : ℕ} (F : FixedFieldModel q) : F.K → ZMod 2 :=
   binTrace F.K
 
 /--
 The matrix-trace presentation of `fixedBinTrace`, a statement-level bridge to
-Equation `eq:def-trace`.  It is the trace assertion in `def:subfield-trace`,
-blueprint `blueprint/src/chapter/ch11_qpbt_algebra.tex:217-232`, paper origin
+Equation `eq:def-trace`.  It is the trace assertion in blueprint
+`def:subfield-trace`, paper origin
 `references/qpbt-paper/04_preliminaries.tex:481-502`.  Mathlib's
 `Algebra.trace_eq_matrix_trace` supplies the basis-independent equality.
 -/

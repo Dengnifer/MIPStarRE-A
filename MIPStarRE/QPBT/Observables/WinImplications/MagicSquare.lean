@@ -11,7 +11,7 @@ consistency bounds on anticommuting Pauli tuples.
 The Magic Square value and consistency theorems prove items 6 and 7
 of `lem:qld-win-implications`
 from `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:192-267`
-and `blueprint/src/chapter/ch14_qpbt_observables.tex:505-660`.
+and blueprint `lem:qld-win-implications` and `lem:qld-win-implications-obs`.
 -/
 
 open scoped BigOperators Matrix ComplexOrder
@@ -172,7 +172,7 @@ theorem msConsConsistency_eq_mismatch {P : AdmissibleParams} {ε : ℝ}
 Magic Square variables 1 and 5. This is item 7 of
 `lem:qld-win-implications`, paper
 `14_analysis_of_the_pauli_basis_test.tex:250-263`, blueprint
-`ch14_qpbt_observables.tex:626-660`. -/
+`lem:qld-win-implications`. -/
 theorem win_ms_cons :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
@@ -465,7 +465,7 @@ theorem gatedMsRejection_le_fixedEdge {P : AdmissibleParams} {ε : ℝ}
 to one on anticommuting tuples. This is item 6 of
 `lem:qld-win-implications`, paper
 `14_analysis_of_the_pauli_basis_test.tex:240-249`, blueprint
-`ch14_qpbt_observables.tex:599-625`. -/
+`lem:qld-win-implications`. -/
 theorem win_magic_square :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),

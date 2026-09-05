@@ -11,9 +11,8 @@ states are vectors in `EuclideanSpace`, and POVMs use the project's matrix
 
 ## References
 
-The source-facing nodes are `def:game`, `def:povm-conventions`,
-`def:tensor-product-strategy`, and `def:tensor-product-value` in
-`blueprint/src/chapter/ch12_qpbt_games.tex:47-82` and `8-26`.
+The source-facing nodes are blueprint `def:game`, `def:povm-conventions`,
+`def:tensor-product-strategy`, and `def:tensor-product-value`.
 The paper origin is `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:10-57`.
 -/
 
@@ -26,8 +25,8 @@ open MIPStarRE.Quantum
 
 /--
 A finite two-player one-round game with a probability distribution on question
-pairs and a Boolean decision predicate.  This is `def:game` in
-`blueprint/src/chapter/ch12_qpbt_games.tex:51-59`, with paper origin
+pairs and a Boolean decision predicate.  This is blueprint
+`def:game`, with paper origin
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:10-24`.
 -/
 structure Game where
@@ -53,8 +52,8 @@ attribute [instance] Game.questionAFintype Game.questionBFintype
 
 /--
 The marginal of a joint POVM obtained by post-processing its answer pair.  This
-is the POVM convention of `def:povm-conventions` in
-`blueprint/src/chapter/ch12_qpbt_games.tex:8-26`; the post-processing operation
+is the POVM convention of blueprint
+`def:povm-conventions`; the post-processing operation
 is the already formalized `Measurement.postprocess`, with paper origin
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:26-38`.
 -/
@@ -64,8 +63,8 @@ noncomputable def marginalLeft {α β d : Type*}
     (M : Measurement (α × β) d) : Measurement α d :=
   M.postprocess Prod.fst
 
-/-- The right marginal of a joint POVM, obtained using `Prod.snd` in
-`def:povm-conventions`, `blueprint/src/chapter/ch12_qpbt_games.tex:8-26`,
+/-- The right marginal of a joint POVM, obtained using `Prod.snd` in blueprint
+`def:povm-conventions`,
 paper origin `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:26-38`.
 -/
 noncomputable def marginalRight {α β d : Type*}
@@ -74,16 +73,16 @@ noncomputable def marginalRight {α β d : Type*}
     (M : Measurement (α × β) d) : Measurement β d :=
   M.postprocess Prod.snd
 
-/-- Projectivity of every effect in a POVM (`def:povm-conventions`, blueprint
-`blueprint/src/chapter/ch12_qpbt_games.tex:8-26`; paper origin
+/-- Projectivity of every effect in a POVM (blueprint
+`def:povm-conventions`; paper origin
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:68-72`). -/
 def Measurement.IsProjective {α d : Type*} [Fintype α] [Fintype d] [DecidableEq d]
     (M : Measurement α d) : Prop :=
   ∀ a, IsProj (M.effect a)
 
 /--
-The tensor-product strategy of `def:tensor-product-strategy` in
-`blueprint/src/chapter/ch12_qpbt_games.tex:61-69` (paper origin
+The tensor-product strategy of blueprint
+`def:tensor-product-strategy` (paper origin
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:26-38`).
 -/
 structure Strategy (G : Game) where
@@ -102,8 +101,8 @@ attribute [instance] Strategy.ιAFintype Strategy.ιBFintype
   Strategy.ιADecidableEq Strategy.ιBDecidableEq
 
 /-- The rectangular tensor placement used in strategy probabilities.  This is
-the finite-matrix realization of `def:tensor-product-strategy`, blueprint
-`blueprint/src/chapter/ch12_qpbt_games.tex:61-69`; paper origin
+the finite-matrix realization of blueprint
+`def:tensor-product-strategy`; paper origin
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:26-38`.
 -/
 def heteroKron {ιA ιB : Type*} (A : Op ιA) (B : Op ιB) : Op (ιA × ιB) :=
@@ -112,13 +111,12 @@ def heteroKron {ιA ιB : Type*} (A : Op ιA) (B : Op ιB) : Op (ιA × ιB) :=
 /-! ### Algebra of the tensor placement
 
 The shared tensor-placement API.  These identities are used both by the perfect
-Magic Square strategy (`thm:ms-from-ac`, blueprint
-`blueprint/src/chapter/ch13_qpbt_test.tex:257-267`) and by the rigidity transfer
-step (`thm:ms-rigidity`, blueprint `ch13_qpbt_test.tex:224-253`), so they live
+Magic Square strategy (blueprint `thm:ms-from-ac`) and by the rigidity transfer
+step (blueprint `thm:ms-rigidity`), so they live
 with the definition rather than in either development. -/
 
 /-- Formalization-only auxiliary lemma for `def:tensor-product-strategy`
-(blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:61-69`, paper
+(blueprint `def:tensor-product-strategy`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:26-38`): the tensor
 placement is multiplicative, `(A ⊗ C) * (B ⊗ D) = (A * B) ⊗ (C * D)`. -/
 theorem heteroKron_mul {ιA ιB : Type*} [Fintype ιA] [Fintype ιB]
@@ -128,7 +126,7 @@ theorem heteroKron_mul {ιA ιB : Type*} [Fintype ιA] [Fintype ιB]
   exact (Matrix.mul_kronecker_mul A B C D).symm
 
 /-- Formalization-only auxiliary lemma for `def:tensor-product-strategy`
-(blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:61-69`): the tensor
+(blueprint `def:tensor-product-strategy`): the tensor
 placement of the two identity operators is the identity operator on the product
 space. -/
 theorem heteroKron_one_one {ιA ιB : Type*} [DecidableEq ιA] [DecidableEq ιB] :
@@ -137,7 +135,7 @@ theorem heteroKron_one_one {ιA ιB : Type*} [DecidableEq ιA] [DecidableEq ιB]
   exact Matrix.one_kronecker_one
 
 /-- Formalization-only auxiliary lemma for `def:tensor-product-strategy`
-(blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:61-69`): tensor placement
+(blueprint `def:tensor-product-strategy`): tensor placement
 respects negation in the left factor. -/
 theorem heteroKron_neg_left {ιA ιB : Type*} (A : Op ιA) (C : Op ιB) :
     heteroKron (-A) C = -heteroKron A C := by
@@ -145,7 +143,7 @@ theorem heteroKron_neg_left {ιA ιB : Type*} (A : Op ιA) (C : Op ιB) :
   simp [heteroKron, Matrix.kronecker]
 
 /-- Formalization-only auxiliary lemma for `def:tensor-product-strategy`
-(blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:61-69`): tensor placement
+(blueprint `def:tensor-product-strategy`): tensor placement
 respects negation in the right factor. -/
 theorem heteroKron_neg_right {ιA ιB : Type*} (A : Op ιA) (C : Op ιB) :
     heteroKron A (-C) = -heteroKron A C := by
@@ -153,7 +151,7 @@ theorem heteroKron_neg_right {ιA ιB : Type*} (A : Op ιA) (C : Op ιB) :
   simp [heteroKron, Matrix.kronecker]
 
 /-- Formalization-only auxiliary lemma for `def:tensor-product-strategy`
-(blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:61-69`): tensor placement
+(blueprint `def:tensor-product-strategy`): tensor placement
 is additive in the left factor. -/
 theorem heteroKron_add_left {ιA ιB : Type*} (A B : Op ιA) (C : Op ιB) :
     heteroKron (A + B) C = heteroKron A C + heteroKron B C := by
@@ -161,7 +159,7 @@ theorem heteroKron_add_left {ιA ιB : Type*} (A B : Op ιA) (C : Op ιB) :
   simp [heteroKron, Matrix.kronecker, add_mul]
 
 /-- Formalization-only auxiliary lemma for `def:tensor-product-strategy`
-(blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:61-69`): tensor placement
+(blueprint `def:tensor-product-strategy`): tensor placement
 is additive in the right factor. -/
 theorem heteroKron_add_right {ιA ιB : Type*} (A : Op ιA) (B C : Op ιB) :
     heteroKron A (B + C) = heteroKron A B + heteroKron A C := by
@@ -172,8 +170,8 @@ theorem heteroKron_add_right {ιA ιB : Type*} (A : Op ιA) (B C : Op ιB) :
 tensor placement of possibly rectangular matrices respects differences in the
 left factor.  This is the general form of `heteroKron_sub_left` below, needed
 where the left factor is the matrix of an isometry between distinct index
-types (`thm:ms-rigidity`, blueprint
-`blueprint/src/chapter/ch13_qpbt_test.tex:224-253`). -/
+types (blueprint
+`thm:ms-rigidity`). -/
 theorem kroneckerMap_sub_left {m n p q : Type*} (A B : Matrix m n ℂ) (C : Matrix p q ℂ) :
     Matrix.kroneckerMap (· * ·) (A - B) C =
       Matrix.kroneckerMap (· * ·) A C - Matrix.kroneckerMap (· * ·) B C := by
@@ -190,14 +188,14 @@ theorem kroneckerMap_sub_right {m n p q : Type*} (A : Matrix m n ℂ) (B C : Mat
   simp [Matrix.kroneckerMap, mul_sub]
 
 /-- Formalization-only auxiliary lemma for `def:tensor-product-strategy`
-(blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:61-69`): tensor placement
+(blueprint `def:tensor-product-strategy`): tensor placement
 respects differences in the left factor. -/
 theorem heteroKron_sub_left {ιA ιB : Type*} (A B : Op ιA) (C : Op ιB) :
     heteroKron (A - B) C = heteroKron A C - heteroKron B C :=
   kroneckerMap_sub_left A B C
 
 /-- Formalization-only auxiliary lemma for `def:tensor-product-strategy`
-(blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:61-69`): tensor placement
+(blueprint `def:tensor-product-strategy`): tensor placement
 respects differences in the right factor. -/
 theorem heteroKron_sub_right {ιA ιB : Type*} (A : Op ιA) (B C : Op ιB) :
     heteroKron A (B - C) = heteroKron A B - heteroKron A C :=
@@ -214,7 +212,7 @@ noncomputable def applyOperatorToState {ι : Type*} [Fintype ι] [DecidableEq ι
   Matrix.toEuclideanLin M ψ
 
 /-- The Born weight of an answer pair for a strategy.  Lean-only support for
-`def:tensor-product-value`, blueprint `ch12_qpbt_games.tex:71-82`, paper
+blueprint `def:tensor-product-value`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:40-48`. -/
 noncomputable def outcomeWeight {G : Game} (S : Strategy G)
     (x : G.QuestionA) (y : G.QuestionB) (a : G.AnswerA) (b : G.AnswerB) : ℝ :=
@@ -299,8 +297,8 @@ theorem outcomeWeight_sum_eq_one {G : Game} (S : Strategy G)
       simp [applyOperatorToState, S.ψ_norm]
 /-- A left-local sum of effects has Born mass equal to the corresponding sum
 of joint outcome weights.  This is formalization-only support for the
-marginal Born probabilities of `def:tensor-product-value`, blueprint
-`ch12_qpbt_games.tex:71-82`. -/
+marginal Born probabilities of blueprint
+`def:tensor-product-value`. -/
 theorem leftEffectMass_eq {G : Game} (S : Strategy G)
     (x : G.QuestionA) (y : G.QuestionB) (p : G.AnswerA → Bool) :
     (inner ℂ S.ψ
@@ -333,8 +331,8 @@ theorem leftEffectMass_eq {G : Game} (S : Strategy G)
 
 /-- A right-local sum of effects has Born mass equal to the corresponding sum
 of joint outcome weights.  This is formalization-only support for the
-marginal Born probabilities of `def:tensor-product-value`, blueprint
-`ch12_qpbt_games.tex:71-82`. -/
+marginal Born probabilities of blueprint
+`def:tensor-product-value`. -/
 theorem rightEffectMass_eq {G : Game} (S : Strategy G)
     (x : G.QuestionA) (y : G.QuestionB) (p : G.AnswerB → Bool) :
     (inner ℂ S.ψ
@@ -484,8 +482,8 @@ theorem outcome_event_weight_mono {G : Game} (S : Strategy G)
 
 /--
 The tensor-product value, expressed as the distribution average of the Born
-probabilities.  This is `def:tensor-product-value` in
-`blueprint/src/chapter/ch12_qpbt_games.tex:71-82`, with paper origin
+probabilities.  This is blueprint
+`def:tensor-product-value`, with paper origin
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:40-57`.
 -/
 noncomputable def Strategy.value {G : Game} (S : Strategy G) : ℝ :=
@@ -493,8 +491,8 @@ noncomputable def Strategy.value {G : Game} (S : Strategy G) : ℝ :=
     ∑ a : G.AnswerA, ∑ b : G.AnswerB,
       if G.decide xy.1 xy.2 a b then outcomeWeight S xy.1 xy.2 a b else 0)
 /-- The average mass of the rejected answer pairs is one minus the strategy
-value.  This is formalization-only support for `def:tensor-product-value`,
-blueprint `ch12_qpbt_games.tex:71-82`. -/
+value.  This is formalization-only support for blueprint
+`def:tensor-product-value`. -/
 theorem rejectionMass_eq_one_sub_value {G : Game} (S : Strategy G) :
     avgOver G.μ (fun questions =>
       ∑ a, ∑ b,
@@ -550,8 +548,8 @@ theorem rejectionMass_eq_one_sub_value {G : Game} (S : Strategy G) :
 /--
 The tensor-product game value as a conditional supremum over all finite
 strategies.  The `sSup (Set.range ...)` form is the csSup formulation requested
-for `def:tensor-product-value`, blueprint
-`blueprint/src/chapter/ch12_qpbt_games.tex:71-82`, paper origin
+for blueprint
+`def:tensor-product-value`, paper origin
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:40-57`; attainment is
 intentionally not asserted here.
 -/

@@ -9,9 +9,8 @@ the expanded point measurements on all four register placements.
 
 ## References
 
-The declarations formalize `def:expanded-line-measurement` and
-`lem:qld-comm-line-cons` in
-`blueprint/src/chapter/ch14_qpbt_observables.tex:1034-1210`. Their paper source
+The declarations formalize blueprint `def:expanded-line-measurement` and
+`lem:qld-comm-line-cons`. Their paper source
 is `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:506-679`.
 -/
 
@@ -28,7 +27,7 @@ noncomputable section
 multivariate polynomial. This is the polynomial `g_h(u₀ + tv)` used in
 `def:expanded-line-measurement`, paper
 `14_analysis_of_the_pauli_basis_test.tex:535-557`, blueprint
-`ch14_qpbt_observables.tex:1034-1080`. -/
+`def:expanded-line-measurement`. -/
 noncomputable def polynomialOnLine (L : LdParams) (line : LineDesc L)
     (g : MvPolynomial (Fin L.m) (ScalarQ L)) : Polynomial (ScalarQ L) :=
   MvPolynomial.eval₂Hom _root_.Polynomial.C
@@ -40,7 +39,7 @@ noncomputable def polynomialOnLine (L : LdParams) (line : LineDesc L)
 /-- The degree-`m*d` coefficient list obtained by restricting `g` to `line`.
 This is the concrete restriction operation in `def:expanded-line-measurement`,
 paper `14_analysis_of_the_pauli_basis_test.tex:535-557`, blueprint
-`ch14_qpbt_observables.tex:1034-1080`. -/
+`def:expanded-line-measurement`. -/
 noncomputable def restrictToLine (L : LdParams) (line : LineDesc L)
     (g : MvPolynomial (Fin L.m) (ScalarQ L)) : DegPoly L (L.m * L.d) :=
   fun i => (polynomialOnLine L line g).coeff i.val
@@ -48,7 +47,7 @@ noncomputable def restrictToLine (L : LdParams) (line : LineDesc L)
 /-- Restricting a multilinear low-degree encoding to a line has degree at most
 `m*d`. This is the degree justification in `def:expanded-line-measurement`,
 paper `14_analysis_of_the_pauli_basis_test.tex:535-557`, blueprint
-`ch14_qpbt_observables.tex:1034-1080`. -/
+`def:expanded-line-measurement`. -/
 theorem polynomialOnLine_lowDegreeEncoding_natDegree_le (L : LdParams)
     (line : LineDesc L) (h : Cube L.m → ScalarQ L) :
     (polynomialOnLine L line (lowDegreeEncoding h)).natDegree ≤ L.m * L.d := by
@@ -67,7 +66,7 @@ def DegPoly.FitsDegree {L : LdParams} {c : ℕ} (d : ℕ)
 restricts to `f` on `line`. This is `tau^{W,line}_f` in the proof of
 `lem:qld-comm-line-cons`, paper
 `14_analysis_of_the_pauli_basis_test.tex:535-557`, blueprint
-`ch14_qpbt_observables.tex:1034-1080`. -/
+`lem:qld-comm-line-cons`. -/
 noncomputable def tauLineProj (P : AdmissibleParams) (W : PauliKind)
     (line : LineDesc P.toLdParams) (f : DegPoly P.toLdParams (P.m * P.d)) :
     Op (PauliRegister P) :=
@@ -83,7 +82,7 @@ variable {P : AdmissibleParams} {ε : ℝ}
 Pauli-register line projector. This is the displayed definition of
 `hat M^(Line,W),line_f`, paper
 `14_analysis_of_the_pauli_basis_test.tex:530-557`, blueprint
-`ch14_qpbt_observables.tex:1034-1080`. -/
+`def:expanded-line-measurement`. -/
 noncomputable def expLineOp (S : ProjectiveSetting P ε) (side : PlayerSide)
     (W : PauliKind) (line : LineDesc P.toLdParams)
     (f : DegPoly P.toLdParams (P.m * P.d)) : Op (S.ExpandedLocalSpace side) :=
@@ -113,7 +112,7 @@ theorem expLineOp_sum_eq_one (S : ProjectiveSetting P ε) (side : PlayerSide)
 /-- The concrete expanded line measurement exhibited in the proof of
 `lem:qld-comm-line-cons`. Paper
 `14_analysis_of_the_pauli_basis_test.tex:530-557`, blueprint
-`ch14_qpbt_observables.tex:1034-1080`. -/
+`lem:qld-comm-line-cons`. -/
 noncomputable def lineMeasExp (S : ProjectiveSetting P ε) (side : PlayerSide)
     (W : PauliKind) (line : LineDesc P.toLdParams) :
     Measurement (DegPoly P.toLdParams (P.m * P.d))
@@ -133,7 +132,7 @@ theorem lineMeasExp_isProjective (S : ProjectiveSetting P ε)
 space vanish. This is the last assertion of
 `def:expanded-line-measurement`, paper
 `14_analysis_of_the_pauli_basis_test.tex:548-557`, blueprint
-`ch14_qpbt_observables.tex:1034-1080`. -/
+`def:expanded-line-measurement`. -/
 theorem expLineOp_zero_of_not_deg_d (S : ProjectiveSetting P ε)
     (side : PlayerSide) (W : PauliKind) (line : LineDesc P.toLdParams)
     (haxis : line.kind = .axis) (f : DegPoly P.toLdParams (P.m * P.d))
@@ -143,8 +142,8 @@ theorem expLineOp_zero_of_not_deg_d (S : ProjectiveSetting P ε)
 
 /-- Evaluation classes of the expanded line measurement, including the
 explicit `none` class for a non-evaluating canonical line. This is the
-completed bracket family used in item 3 of `lem:qld-comm-line-cons`, blueprint
-`ch14_qpbt_observables.tex:1120-1140`. -/
+completed bracket family used in item 3 of blueprint
+`lem:qld-comm-line-cons`. -/
 noncomputable def lineEvalMeasExp (S : ProjectiveSetting P ε)
     (side : PlayerSide) (W : PauliKind) (line : LineDesc P.toLdParams)
     (u : Fin P.m → PauliScalar P) :
@@ -153,8 +152,8 @@ noncomputable def lineEvalMeasExp (S : ProjectiveSetting P ε)
 
 /-- Complete an expanded point measurement with a zero `none` outcome. This
 is the right-hand family in the corrected item 3 of
-`lem:qld-comm-line-cons`, blueprint
-`ch14_qpbt_observables.tex:1120-1140`. -/
+blueprint
+`lem:qld-comm-line-cons`. -/
 noncomputable def pointMeasExpOption (S : ProjectiveSetting P ε)
     (side : PlayerSide) (W : PauliKind) (u : Fin P.m → PauliScalar P) :
     Measurement (Option (PauliScalar P)) (S.ExpandedLocalSpace side) :=
@@ -162,8 +161,8 @@ noncomputable def pointMeasExpOption (S : ProjectiveSetting P ε)
 
 /-- The point effect indexed by a line answer, with zero assigned when the
 answer has no evaluation at the sampled point. This is the zero-direction
-completion used in item 2 of `lem:qld-comm-line-cons`, blueprint
-`ch14_qpbt_observables.tex:1098-1118`. -/
+completion used in item 2 of blueprint
+`lem:qld-comm-line-cons`. -/
 noncomputable def expPointEffectAtLineAnswer (S : ProjectiveSetting P ε)
     (side : PlayerSide) (W : PauliKind) (line : LineDesc P.toLdParams)
     (u : Fin P.m → PauliScalar P) (f : DegPoly P.toLdParams (P.m * P.d)) :
@@ -177,14 +176,14 @@ end ProjectiveSetting
 /-- The square-root error exhibited by the expanded-line consistency proof.
 This is the final quantitative conclusion of `lem:qld-comm-line-cons`, paper
 `14_analysis_of_the_pauli_basis_test.tex:657-679`, blueprint
-`ch14_qpbt_observables.tex:1082-1210`. -/
+`lem:qld-comm-line-cons`. -/
 noncomputable def deltaLine (ε : ℝ) : ℝ :=
   Real.sqrt ε
 
 /-- The concrete expanded-line error is polynomially small. This discharges
 the error-function component of `lem:qld-comm-line-cons`, using the value
 proved at paper `14_analysis_of_the_pauli_basis_test.tex:657-679`, blueprint
-`ch14_qpbt_observables.tex:1082-1210`. -/
+`lem:qld-comm-line-cons`. -/
 theorem deltaLine_isPolyErr : IsPolyErr deltaLine := by
   refine ⟨1, (2 : ℝ)⁻¹, le_rfl, by positivity, ?_⟩
   intro x hx
@@ -197,7 +196,7 @@ theorem deltaLine_isPolyErr : IsPolyErr deltaLine := by
 function. This proposition collects the full existential content of
 `lem:qld-comm-line-cons`, paper
 `14_analysis_of_the_pauli_basis_test.tex:559-679`, blueprint
-`ch14_qpbt_observables.tex:1082-1210`. -/
+`lem:qld-comm-line-cons`. -/
 def ExpandedLineConclusions (δ : ℝ → ℝ) : Prop :=
   (∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε)
       (side : PlayerSide) (W : PauliKind) (line : LineDesc P.toLdParams),
@@ -237,7 +236,7 @@ def ExpandedLineConclusions (δ : ℝ → ℝ) : Prop :=
 directed opposite-placement pairs. The universal constant precedes all test
 parameters and strategies. This is item 1 of `lem:qld-comm-line-cons`, paper
 `14_analysis_of_the_pauli_basis_test.tex:559-568`, blueprint
-`ch14_qpbt_observables.tex:1082-1102`. -/
+`lem:qld-comm-line-cons`. -/
 theorem expLine_self_cons :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε)
@@ -254,7 +253,7 @@ theorem expLine_self_cons :
 expanded point effect selected by its value at the sampled point, with the
 common square-root error. This is item 2 of `lem:qld-comm-line-cons`, paper
 `14_analysis_of_the_pauli_basis_test.tex:569-620`, blueprint
-`ch14_qpbt_observables.tex:1103-1119`. -/
+`lem:qld-comm-line-cons`. -/
 theorem expLine_point_cons :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε)
@@ -273,7 +272,7 @@ theorem expLine_point_cons :
 completed expanded point family, including the `none` class. This is item 3 of
 `lem:qld-comm-line-cons`, paper
 `14_analysis_of_the_pauli_basis_test.tex:621-679`, blueprint
-`ch14_qpbt_observables.tex:1120-1210`. -/
+`lem:qld-comm-line-cons`. -/
 theorem expLine_point_cons' :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε)
@@ -290,7 +289,7 @@ theorem expLine_point_cons' :
 expanded-line witnesses and square-root error. This is
 `lem:qld-comm-line-cons`, paper
 `14_analysis_of_the_pauli_basis_test.tex:506-679`, blueprint
-`ch14_qpbt_observables.tex:1082-1210`. -/
+`lem:qld-comm-line-cons`. -/
 theorem exists_deltaLine :
     ∃ δ : ℝ → ℝ, IsPolyErr δ ∧ ExpandedLineConclusions δ := by
   refine ⟨deltaLine, deltaLine_isPolyErr, ?_⟩
