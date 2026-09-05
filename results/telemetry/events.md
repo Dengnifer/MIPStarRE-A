@@ -2927,3 +2927,37 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   daemon queue. All original safety findings were resolved by independent review.
 - Re-ran the owner's model-comparison report at this operational boundary.
   Secondary capacity is available for useful work, not a slot-filling quota.
+
+## 2026-09-05T17:35Z — Model defaults and downstream proof preparation
+
+- Per the owner's correction, ~/.profile now explicitly exports both
+  MIPSTARRE_CODEX_MODEL and MIPSTARRE_REVIEW_MODEL as gpt-6-astra. A fresh
+  login-shell check confirms both and owner-bin routing. Direct executions now
+  use bash -lc explicitly; this tool's inherited shell otherwise retains its old
+  PATH. Small tasks override both CODEX_MODEL and FIX_MODEL to sol. Existing
+  healthy processes were not restarted solely to change models.
+- PR 153 merged through the daemon at 17:24:23Z, commit 22a426882ecedb36146990fb4fb059e11694b03d.
+  Dispatched #119 on a new branch stacked on the released #118 commit 691b671.
+  Its first worker encountered eight main-integration conflicts, aborted the
+  merge cleanly, and made no proof change. Resumed the same secondary-account
+  thread with explicit authority to reconcile those prerequisite paths using
+  the merged transport APIs while preserving the inherited claims. No source
+  statement redesign is authorized; final proof edits remain packet-scoped.
+- PR 225's first post-fix code reviewer exited without a verdict; its orphaned
+  prose process was terminated after verifying the parent review was terminal.
+  A routed astra review completed: code APPROVED, prose reported zero remaining
+  findings and COMMENTED for operator round-cap closeout. The parser created a
+  fallback finding for that trailer; its written operator disposition is in the
+  adjudication template, queued for daemon-only merge. No substantive finding
+  was waived. PR 178's separate live reviewer was not duplicated.
+- PR 202's remaining two citation findings received labelled sol autofix after
+  explicitly adding its missing auto-fix-codex label. The first attempted call
+  correctly did nothing without the opt-in label. PR 230's telemetry-only merge
+  conflict retained both appended histories; normal hooks and the loss guard
+  passed, producing merge commit 5ac4d72 before its checked lane tail resumed.
+- Session-evidence publication normalized two trailing Markdown spaces in a
+  reviewer final-message copy without changing findings or verdicts; the raw
+  event capture remains intact. Model-comparison changes were committed in
+  d62b3b0 and completed session evidence in 05a47a9. The #27 update headed
+  17:34Z was posted approximately two minutes before that heading; this entry
+  records the correction rather than treating that heading as a precise clock.
