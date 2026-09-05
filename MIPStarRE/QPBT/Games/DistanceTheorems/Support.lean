@@ -307,7 +307,7 @@ private theorem stateQForm_sum {α ι : Type*} [Fintype α]
   simp [stateQForm, applyOperatorToState]
 
 /-- The quadratic form of the identity is the squared vector norm. -/
-private theorem stateQForm_one {ι : Type*} [Fintype ι] [DecidableEq ι]
+theorem stateQForm_one {ι : Type*} [Fintype ι] [DecidableEq ι]
     (ψ : EuclideanSpace ℂ ι) :
     stateQForm ψ (1 : Op ι) = ‖ψ‖ ^ 2 := by
   have hone : applyOperatorToState (1 : Op ι) ψ = ψ := by

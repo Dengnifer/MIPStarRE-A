@@ -1,21 +1,30 @@
-import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Simultaneous
+import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.Error
+import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.SimultaneousGeneral
 
 /-!
 # Soundness for the directly indexed low-degree game
 
-This module isolates the quantum soundness obligation for the directly indexed
-low-degree game and proves the specialization to simultaneity parameter `1`,
-which is the case that the Chapter 15 combining argument instantiates.
+This module proves the quantum soundness statement for the directly indexed
+low-degree game, in the form used by the Chapter 15 combining argument: the
+polynomial-tuple measurements of `prop:ld-simultaneous-general-k` satisfy the
+three consistency relations of `lem:ld-soundness` with the error function
+`deltaLd` at the parameters `(q, m, d, k)` of the game.
 
-## Main results
+In the regime `0 < ε ≤ 1` the error carried by
+`prop:ld-simultaneous-general-k` — the error of `thm:main-formal` at the
+combined parameters of `def:ld-combining-parameters` together with the recovery
+loss `(m + k) d / q` — is absorbed into `deltaLd` at the universal constants
+`a = 10^23` and `b = 1/80000` by
+`exists_directCombinedTransportConstants`.  In the regime `1 ≤ ε` the error
+function is at least one, while every bipartite consistency defect on a unit
+state is at most one, so the conclusion carries no information there.
 
-* `exists_direct_ld_soundness` is the obligation for arbitrary simultaneity
-  parameter.  Its proof is open: the coordinatewise route is refuted in
-  `docs/paper-gaps/qpbt_ld-simultaneous-sandwich.tex`, and the source's own
-  route is the combining reduction of the NEEXP paper, which remains to be
-  proved; see issue #210.
-* `exists_direct_ld_soundness_of_k_eq_one` proves the same three consistency
-  conclusions, with universal constants of the same shape, for `D.k = 1`.
+## Main statements
+
+* `exists_direct_ld_soundness` — quantum soundness of the directly indexed
+  low-degree game, with the error function `deltaLd`.
+* `exists_direct_ld_soundness_of_k_eq_one` retains the one-coordinate proof
+  used by the seed-indexed soundness transport.
 
 ## References
 
@@ -33,26 +42,26 @@ open MIPStarRE.Quantum
 
 noncomputable section
 
-/-- Quantum soundness obligation for the directly indexed low-degree game.
-This is the repaired import form proposed in
+/-- Quantum soundness of the directly indexed low-degree game.
+This is the established directly indexed auxiliary form described in
 `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`, needed by the Chapter 15
 combining argument at paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1267-1288`.
 
 This is a formalization auxiliary assertion, not the source-labelled
-`lem:ld-soundness`.  The game correspondence and auxiliary-parameter bounds
-for the direct reduction are established, yielding the case `D.k = 1` below;
-neither is assumed as a hypothesis here.
-
-The remaining obligation for arbitrary `D.k` is the construction of
-simultaneous polynomial measurements.  The coordinatewise route through the
-palindromic sandwich of `lem:ld-sandwich` is refuted for `D.k ≥ 2` by the
-explicit example of `docs/paper-gaps/qpbt_ld-simultaneous-sandwich.tex`; the
-source obtains general `k` from one application of the `k = 1` theorem in
-dimension `m + k` by the combining reduction of Theorem 4.43 in
-`references/neexp-paper/05_quantum_preliminaries.tex:1409-1503`.  This combining
-reduction remains to be proved; see issue #210.  For `D.k = 1` the present conclusions
-are proved in `exists_direct_ld_soundness_of_k_eq_one` below. -/
+`lem:ld-soundness`.  Its proof invokes `MIPStarRE.LDT.Test.mainFormal` and
+verifies that theorem's sampling condition `400 M d <= N` at combined dimension
+`M = m + k`, using `N = 2560000 M^3 d`.  It does not invoke the tensor-code
+theorem used in the source proof of `lem:ld-soundness`.  At seed-indexed
+dimension `m`, that route chooses `K = m^3 d` but requires
+`K >= 12 m (d + 1)`.  The direct proof therefore discharges neither that bound
+nor the claimed game correspondence; both remain open for the printed source route.
+The measurements are those of `prop:ld-simultaneous-general-k`, and the
+universal constants exhibited are `a = 10^23` and `b = 1/80000`: for
+`0 < ε ≤ 1` the error of that proposition is absorbed into `deltaLd` by
+`exists_directCombinedTransportConstants`, and for `1 ≤ ε` the error function
+is at least one while every bipartite consistency defect on a unit state is at
+most one. -/
 theorem exists_direct_ld_soundness :
     ∃ a b : ℝ, 1 ≤ a ∧ 0 < b ∧ b ≤ 1 ∧
       ∀ (D : DirectLdParams) (ε : ℝ), 0 < ε →
@@ -83,7 +92,30 @@ theorem exists_direct_ld_soundness :
                   (fun _ g => heteroKron (GA.effect g) 1)
                   (fun _ g => heteroKron 1 (GB.effect g))
                   S.ψ ≤ deltaLd a b ε D.q D.m D.d D.k := by
-  sorry
+  obtain ⟨a, b, ha, hb0, hb1, habs⟩ := exists_directCombinedTransportConstants
+  refine ⟨a, b, ha, hb0, hb1, ?_⟩
+  intro D ε hε S hS hwin
+  obtain ⟨GA, GB, h1, h2, h3⟩ :=
+    exists_directSimultaneousPolynomialMeasurements_combinedError D S hS ε hwin
+  refine ⟨GA, GB, ?_, ?_, ?_⟩
+  all_goals by_cases hε1 : ε ≤ 1
+  · exact le_trans h1 (habs D ε hε hε1)
+  · exact le_trans
+      (consistencyDefect_heteroKron_le_one _ (uniformDistribution_isProbability _) _ _
+        S.ψ S.ψ_norm)
+      (one_le_deltaLd_of_one_le_error ha hb0.le (not_le.mp hε1).le D.hm D.hd D.hk)
+  · exact le_trans h2 (habs D ε hε hε1)
+  · exact le_trans
+      (consistencyDefect_heteroKron_le_one _ (uniformDistribution_isProbability _) _ _
+        S.ψ S.ψ_norm)
+      (one_le_deltaLd_of_one_le_error ha hb0.le (not_le.mp hε1).le D.hm D.hd D.hk)
+  · refine le_trans h3 (le_trans ?_ (habs D ε hε hε1))
+    have hloss : (0 : ℝ) ≤ ((D.combined.m * D.d : ℕ) : ℝ) / (D.q : ℝ) := by positivity
+    linarith
+  · exact le_trans
+      (consistencyDefect_heteroKron_le_one _ (uniformDistribution_isProbability _) _ _
+        S.ψ S.ψ_norm)
+      (one_le_deltaLd_of_one_le_error ha hb0.le (not_le.mp hε1).le D.hm D.hd D.hk)
 
 /-! ## Absorbing the error bound from the low individual degree theorem
 

@@ -628,30 +628,33 @@ private theorem strategyMeasurement_isProjective
   | bob => exact S.isProjective.2 question
 
 /-- The typed point measurement remains projective after answer folding. -/
-private theorem pointMeas_isProjective (S : ProjectiveSetting P ε)
+theorem pointMeas_isProjective (S : ProjectiveSetting P ε)
     (side : PlayerSide) (W : PauliKind) (u : Fin P.m → PauliScalar P) :
     Measurement.IsProjective (S.pointMeas side W u) := by
   apply SandwichProduct.postprocess_isProjective
   exact strategyMeasurement_isProjective S side _
 
-/-- The point observable squares to the identity. This is the assertion that
-the operator in `def:strategy-observables` has eigenvalues in `{+1,-1}`;
-paper `14_analysis_of_the_pauli_basis_test.tex:174-190`, blueprint
-`ch14_qpbt_observables.tex:480-503`. -/
-theorem pointObs_sq_eq_one (S : ProjectiveSetting P ε) (side : PlayerSide)
-    (W : PauliKind) (r : PauliScalar P) (u : Fin P.m → PauliScalar P) :
-    S.pointObs side W r u * S.pointObs side W r u = 1 := by
+/-- The point observables form an additive representation, as follows from
+`eq:qld-strat-obs`, paper `14_analysis_of_the_pauli_basis_test.tex:174-190`.
+This multiplication law is a formalization-only consequence of that definition. -/
+theorem pointObs_mul (S : ProjectiveSetting P ε) (side : PlayerSide)
+    (W : PauliKind) (r s : PauliScalar P)
+    (u : Fin P.m → PauliScalar P) :
+    S.pointObs side W r u * S.pointObs side W s u =
+      S.pointObs side W (r + s) u := by
   classical
   let M := S.pointMeas side W u
   have hM : Measurement.IsProjective M := pointMeas_isProjective S side W u
   change (∑ a : PauliScalar P,
       phaseSign (fixedBinTrace P.model (a * r)) • M.effect a) *
       (∑ a : PauliScalar P,
-        phaseSign (fixedBinTrace P.model (a * r)) • M.effect a) = 1
+        phaseSign (fixedBinTrace P.model (a * s)) • M.effect a) =
+    ∑ a : PauliScalar P,
+      phaseSign (fixedBinTrace P.model (a * (r + s))) • M.effect a
   calc
     _ = ∑ a : PauliScalar P, ∑ b : PauliScalar P,
         (phaseSign (fixedBinTrace P.model (a * r)) *
-          phaseSign (fixedBinTrace P.model (b * r))) •
+          phaseSign (fixedBinTrace P.model (b * s))) •
             (M.effect a * M.effect b) := by
       rw [Finset.sum_mul]
       apply Finset.sum_congr rfl
@@ -660,18 +663,38 @@ theorem pointObs_sq_eq_one (S : ProjectiveSetting P ε) (side : PlayerSide)
       apply Finset.sum_congr rfl
       intro b hb
       rw [Matrix.smul_mul, Matrix.mul_smul, smul_smul]
-    _ = ∑ a : PauliScalar P, M.effect a := by
+    _ = ∑ a : PauliScalar P,
+        phaseSign (fixedBinTrace P.model (a * (r + s))) • M.effect a := by
       apply Finset.sum_congr rfl
       intro a ha
       rw [Finset.sum_eq_single a]
-      · rw [(hM a).isIdempotentElem.eq, phaseSign_mul_self, one_smul]
+      · rw [(hM a).isIdempotentElem.eq]
+        congr 1
+        rw [mul_add, fixedBinTrace, map_add, phaseSign_add]
       · intro b hb hba
         have hab : a ≠ b := fun h => hba h.symm
         rw [DistanceCalculus.projective_effect_mul_effect_eq_zero M hM hab]
         simp
       · intro ha'
         exact (ha' (Finset.mem_univ a)).elim
-    _ = 1 := M.sum_eq_one
+
+/-- The zero-label point observable is the identity by measurement completeness. -/
+theorem pointObs_zero (S : ProjectiveSetting P ε) (side : PlayerSide)
+    (W : PauliKind) (u : Fin P.m → PauliScalar P) :
+    S.pointObs side W 0 u = 1 := by
+  classical
+  simpa [pointObs, fixedBinTrace, phaseSign] using (S.pointMeas side W u).sum_eq_one
+
+/-- The point observable squares to the identity. This is the assertion that
+the operator in `def:strategy-observables` has eigenvalues in `{+1,-1}`;
+paper `14_analysis_of_the_pauli_basis_test.tex:174-190`, blueprint
+`ch14_qpbt_observables.tex:480-503`. -/
+theorem pointObs_sq_eq_one (S : ProjectiveSetting P ε) (side : PlayerSide)
+    (W : PauliKind) (r : PauliScalar P) (u : Fin P.m → PauliScalar P) :
+    S.pointObs side W r u * S.pointObs side W r u = 1 := by
+  haveI : CharP (PauliScalar P) 2 :=
+    (Algebra.charP_iff (ZMod 2) (PauliScalar P) 2).mp (ZMod.charP 2)
+  rw [pointObs_mul, CharTwo.add_self_eq_zero, pointObs_zero]
 
 /-- The point observable is Hermitian. This is the self-adjoint part of the
 observable assertion following `eq:qld-strat-obs`, paper

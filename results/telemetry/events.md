@@ -2873,6 +2873,26 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 ## 2026-09-05T16:10Z — #118 math-fix gap closed by session 1 (claims 17-2 and 17-3 proved)
 - One Fable math-fix session (626k tokens, 100 min) settled the gap opened at 14:37Z: the printed claim 17-2 is false for an arbitrary combined-lines witness (the source uses the sandwich form of T, internal to the proof of lem:qld-xz-lines, while the witness records only the pair consistency); restated with error C·√m·(δP^{1/4}+δQ^{1/4}) through lines.consistent and proved. Claim 17-3 is proved as printed: the joint (line, point) mixture the blueprint proof seemed to need is not needed because the integrand depends only on (ℓX, ℓZ, z), and the source's Cauchy–Schwarz step there is vacuous. The deficit-form Cauchy–Schwarz lemma now lives in Combining/OverlapGap.lean. Paper-gap note docs/paper-gaps/qpbt_subline-claims-line-marginal.tex, register row and blueprint nodes updated; lem:claim-17-2/17-3 carry \leanok. Commit 691b671 on the #118 branch. The optional strengthening of CombinedLinesWitness by the X-marginal identity (restores the source error for 17-2) is left to the astra main session per the owner (16:02Z: no B7 for it). Worktree released to the main session.
 
+## 2026-09-06T01:30+08:00 — Codex session rows omit the selected model
+
+- The model-comparison report had to recover Codex models from rollout files or
+  time-based inference because `sessions.jsonl` did not record the model passed
+  by `dispatch.sh`; the inference cannot reliably preserve per-dispatch
+  `MIPSTARRE_CODEX_MODEL` overrides. Issue #231 requests recording the exact
+  explicit selection on new rows while leaving historical rows unchanged.
+
+## 2026-09-05 — Two accounts and router shim (recorded 2026-09-06)
+
+- Issue #232's supplied operator report describes two configured Codex accounts
+  and a temporary PATH router deployed at 17:20Z on September 5, comparing live
+  process counts against capacities 9/10. The owner requested moving selection
+  into the dispatcher, with per-account reservations and recorded account/model
+  identity. This is reported operational evidence, not a live probe by this
+  implementation session; no runtime shim, configuration, or credentials were
+  inspected or changed here. The completed #231 model-telemetry change is reused
+  in #232 rather than published separately. After merge the operator must retire
+  shim routing and restore the aggregate watchdog cap to the sum of account caps.
+
 ## 2026-09-05T16:52Z — Released worktrees and final scoped repairs
 
 - Owner reports on progress log 27 release issue 118 at 16:12Z and all remaining
@@ -3079,6 +3099,29 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   merges to the daemon. Issue #234 records the durable persona update so future
   main turns dispatch, observe, record, and report instead of implementing.
 
+### 2026-09-06 — PR 178 adjudication syntax recovery
+
+- Session `orc-114-20260906-01` investigated the daemon failure at
+  2026-09-05 19:23 UTC, recorded in
+  `~/.cache/mipstarre-dev/watchdog/lanes/pr178.merge.log`.
+  Gates 1–3, including current-main ancestry, passed at head
+  `7bd5cceca2d8f460b1b17587f1ac9da64eeed20d`. Gate 4 rejected the existing
+  exact-head adjudication because `accepted as` is not a recognized disposition.
+- Through the primary `gh_common` module, updated comment 5554211262 in place
+  to use `F1 — moot:` while preserving the terminal wording-advisory rationale.
+  The primary gate implementation subsequently confirmed all nine CI contexts
+  and the exact-head adjudicated review pass. No review status was rewritten,
+  no mathematical finding was waived, and no reviewer or fixer was launched.
+- The branch was already clean, with no pending main-merge conflict. The primary
+  merge-loss guard passed for HEAD; primary `checked-push.sh` passed and reported
+  everything up to date. No branch commit or merge was needed.
+- A full primary `pr_merge.py 178 --check-only --adjudicated` check now stops at
+  gate 2 because the primary checkout contains staged and unstaged telemetry.
+  Those records were left untouched. The daemon failure marker is retained until
+  main preserves and publishes its telemetry and rechecks all prerequisites.
+  Main should use the normal primary tools for any refreshed-head CI/review;
+  no new independent review is required for this comment-only correction.
+
 ## 2026-09-05T18:42Z — Owner-priority merge recovery and pasting completion report
 
 - The owner requested priority recovery of PRs 185 and 225 and reported five
@@ -3221,3 +3264,21 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   daemon refreshing PRs 225 and 233; loops on 202 and 205; #232 (dispatch.sh account routing) approved and merging. Follow-ups assigned
   to the main session: persona amendment (cycle and two-minute delegation rule), /goal briefing refresh in both codex homes, shim
   reduction after #232 merges. The owner session stops here; the owner retires it.
+
+### 2026-09-06 — PR 178 dirty-telemetry refresh recovery
+
+- Session `orc-114-20260906-02` preserved the preceding adjudication recovery
+  record in commit `e406816` under normal hooks, then merged published main
+  `dadd6fc` in history-preserving commit `0246baa`. The only merge conflict was
+  in this incident ledger; both sides' records were retained. Normal commit
+  hooks and the primary merge-loss guard passed. No source was manually edited.
+- Primary `checked-push.sh` stopped before publication: the single-file check
+  of `MIPStarRE/QPBT/Combining/DirectLowDegree.lean` could not find the imported
+  `Transport/Combining/Linearity.olean`. The log is
+  `/tmp/orc-114-20260906-02.checked-push.log`. The parent-owned build/publication
+  tail must refresh branch artifacts and repeat checked push before publishing
+  exact-head gate evidence; no hook was bypassed and no review was launched.
+- `/tmp/adjudication-178-template.md` remains byte-for-byte unchanged with the
+  parser-valid `F1 — moot:` disposition. The daemon's `pr178.failed` marker is
+  retained pending published, verified recovery. Committing recovery telemetry
+  before main integration prevents that telemetry from blocking the refresh.
