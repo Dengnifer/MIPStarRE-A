@@ -2724,3 +2724,103 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 
 ## 2026-09-05T14:50Z — codex resumed (owner); ratio codex:opus 1:1; astra not yet
 - The owner re-enabled codex subagents on ghz: model gpt-5.6-sol as before (astra is unstable; the owner will announce its readiness explicitly), dispatch ratio codex:opus 1:1, Fable only when necessary. The pause marker watchdog/codex-paused was removed at 14:47Z, so lanes dispatch again and the review step returns to local/bin/review.sh (codex reviewers); the Claude review mailbox stays available for Opus reviews when the ratio needs them. First codex lanes after the pause: #222 (repository-side post-merge silent-loss guard), #219 (review round counter), #218 (six duplicate private helper groups), #216 (pre-commit persona test during merges). Opus side: PR 205 fix round, the 135/174 worktree merge repairs. Fable: #118 math-fix session 1.
+
+## 2026-09-05 — Operator hand-back: astra main session (Mode 1) takes over from the owner session
+
+- **Trigger:** owner decision (2026-09-05T15:45:27Z): gpt-6-astra reached through the codex relay on ghz (poller ASTRA=gpt-6-astra);
+  the owner asked for a new astra main session in tmux qpbt and the handover of the main-session role to it. Mode 2 ran
+  2026-09-05 from the takeover to this hand-back. Workers stay on gpt-6-astra; math-fix moves to dispatch.sh --role
+  mathfix with gpt-6-astra (ultra). The Claude agents running at the hand-back finish on their own; their worktrees are
+  listed in the handoff (results/telemetry/owner-messages/). The owner session watches for 90 minutes, then #26/#27 only.
+- **State at hand-back:** main at c1b001a; open PRs: 230,229,228,227,225,213,212,207,205,202,195,185,178,153.
+
+## 2026-09-05T15:51Z — Main session accepts Mode 1 operation
+
+- Read the v3 handoff before the standing goal and repository protocols, and verified the
+  last three progress reports through `local/bin/gh_common.py`. The running merge daemon
+  and stack watcher remain responsible for merging and propagating bases. Existing
+  review-fix loops on PRs 153, 225, and 227 remain undisturbed.
+- The owner's direct instruction supersedes the older worker-model sentence in the
+  handoff: new workers use `gpt-6-astra`; mathematical-gap sessions use that model with
+  ultra effort and retain the cumulative ten-session / 1.5-working-day limit.
+- Worktrees for issues 118 and 174 and the Claude review mailboxes for PRs 178 and 185
+  remain reserved until an explicit release on progress log 27. Owner decisions posted
+  to inbox 26 remain parked pending the owner's answer. Dependency readiness is being
+  checked against GitHub before dispatching additional mathematical work.
+- The readiness check found only assigned proof packets. Recorded the missing dependency
+  of issue 156 on issue 116, as required by its existing stack and the handoff. Dispatched
+  a read-only `gpt-6-astra` scout for issue 224 to determine whether instance-congruence
+  helpers can be removed without changing mathematical definitions or public assumptions;
+  no implementation or owner decision is authorized by this scouting task.
+
+## 2026-09-05T15:57Z — Recover a disconnected review-fix worker
+
+- PR 227's inherited first review-fix attempt has remained in connection retries since
+  dispatch, with no completed work in its captured event stream. The live child uses
+  `gpt-5.6-sol`, whereas a new `gpt-6-astra` scout is making progress.
+- Stop only the verified Codex child for that worktree, allowing `dispatch.sh` and
+  `autofix.sh` to record the failed attempt and release their locks; then restart through
+  `autofix.sh` with `MIPSTARRE_CODEX_MODEL=gpt-6-astra`. No findings, review evidence,
+  or iteration counters are bypassed. Do not terminate other workers by substring.
+- PR 229's first review has returned eleven documentation/status findings. Its next
+  step is a labelled review-fix round limited to the existing theorem documentation
+  and blueprint synchronization, without changing mathematical statements or expanding
+  the implementation scope.
+- The stopped PR 227 capture records zero turns and zero tokens but its wrapper reports
+  exit 0 / status done; this is not evidence of a completed fix. The old loop exited
+  without changes and released its processes before the replacement was dispatched.
+
+## 2026-09-05T16:00Z — Complete the post-fix review step for PR 225
+
+- The inherited `autofix.sh` round published head `241cb9f0eb36d3efdc919e04a8053925f91c667d`
+  and green CI, then exited after one fix without publishing a review on that head.
+  The checked-in script forces review only at its cap, unlike the v3 handoff's
+  description of a review after every fix round.
+- Complete the owner's required independent post-fix review using `review.sh 225
+  --force-review`, after confirming the fix loop has released its lock. This is a
+  review of new evidence, not a waiver of findings or an increase of the round cap;
+  no workflow implementation is changed.
+
+## 2026-09-05T16:04Z — PR 228 merged; recover disconnected PR 205 reviews
+
+- The running daemon merged PR 228 (issue 218) after refreshing its base and obtaining
+  exact-head evidence. Posted the merge and active queue to progress log 27.
+- Both inherited PR 205 reviewers on `gpt-5.6-sol` have spent over forty minutes in
+  connection retries. Their only completed items are transport errors, not review
+  findings. Stop only the two verified Codex children, let the review wrapper finish
+  and release its locks, then dispatch independent reviews on `gpt-6-astra`. Preserve
+  any failed-run evidence; do not treat the failed connections as completed reviews.
+
+## 2026-09-05T16:07Z — Bound issue 224 to proof-only instance cleanup
+
+- Scout `scout-224-20260905-01` found that the scalar model already stores and forwards
+  decidable equality. The issue's proposed additional field is unnecessary. The two
+  private congruence helpers only identify subsingleton instance arguments; their
+  removal can be attempted without changing the distribution or theorem hypotheses.
+- Recorded the implementation scope on issue 224: prefer `Test/Completeness.lean`
+  alone, keep the sampler and public statements unchanged, and validate the exact
+  congruence proof in Lean. Added dependency on issue 156 to avoid conflict with its
+  completed honest-strategy construction in that same file. No definition change or
+  mathematical-gap attempt was authorized.
+- PR 205's disconnected review wrapper exited with no verdict; new independent astra
+  reviews are running. PR 153's fix reached green CI and likewise received its required
+  post-fix independent review dispatch, under the operational remedy recorded for PR 225.
+
+## 2026-09-05T16:10Z — Advance exact-head review evidence after fixes
+
+- PR 227's replacement astra worker completed its scoped fix and reached green CI.
+  Dispatched the independent second review. PR 225's second review reduced its ledger
+  to two findings: an existing Mathlib lemma should replace a duplicate proof, and the
+  blueprint must retain the recovery error in the Lean statement. Started its second
+  labelled autofix round without changing the theorem's assumptions or conclusion.
+- PR 230's checked push succeeded at `366d1061e1228b2cec921b4f2c6b741bdeb23af3`, but
+  the immediate CI read still returned the old GitHub PR head. A fresh authoritative
+  read now agrees with the clean local head. Re-run CI and then independent review;
+  no repush, code change, evidence override, or auto-fix iteration is needed for this
+  transient metadata delay.
+
+## 2026-09-05T15:50Z — mailbox reviews for PRs 153, 178, 185 through a verify-before-publish workflow
+- The three Claude review requests left by lanes 109, 112 and 114 were served by a workflow: one Opus drafter per PR reads task.md, persona.md and the context files and lists findings; one Opus skeptic per finding tries to refute it against the PR head (five of 37 drafts were refuted: wrong at head, already handled, or outside the task's scope); one Opus writer per lane composes reply.md from the survivors in the review contract. Results: PR 153 round 3 code COMMENTED / prose CHANGES_REQUESTED (4 ledger lines); PR 178 CHANGES_REQUESTED (12: mostly duplicated proofs of existing facts); PR 185 CHANGES_REQUESTED (11: shadowing helpers and stranded generic lemmas). Cost 3.94M tokens over 43 agents in 50 minutes. The reviews name concrete originals for every duplicate, so the fix rounds are mechanical.
+
+## 2026-09-05T16:10Z — #118 math-fix gap closed by session 1 (claims 17-2 and 17-3 proved)
+- One Fable math-fix session (626k tokens, 100 min) settled the gap opened at 14:37Z: the printed claim 17-2 is false for an arbitrary combined-lines witness (the source uses the sandwich form of T, internal to the proof of lem:qld-xz-lines, while the witness records only the pair consistency); restated with error C·√m·(δP^{1/4}+δQ^{1/4}) through lines.consistent and proved. Claim 17-3 is proved as printed: the joint (line, point) mixture the blueprint proof seemed to need is not needed because the integrand depends only on (ℓX, ℓZ, z), and the source's Cauchy–Schwarz step there is vacuous. The deficit-form Cauchy–Schwarz lemma now lives in Combining/OverlapGap.lean. Paper-gap note docs/paper-gaps/qpbt_subline-claims-line-marginal.tex, register row and blueprint nodes updated; lem:claim-17-2/17-3 carry \leanok. Commit 691b671 on the #118 branch. The optional strengthening of CombinedLinesWitness by the X-marginal identity (restores the source error for 17-2) is left to the astra main session per the owner (16:02Z: no B7 for it). Worktree released to the main session.
