@@ -41,7 +41,8 @@ For a $g$ that is not an encoding the two sides of this identity are the evaluat
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{def:qld-full-field-decoder, def:low-degree-encoding}
+	\uses{def:qld-full-field-decoder, def:low-degree-encoding,
+		def:decoding-map}
 	The decoder is given coordinatewise by evaluation of the representative at the points of the hypercube, and evaluation at a fixed point is $\F_q$-linear in the representative, which gives the two displayed identities. For the third, the multilinear encoding $g_h$ takes the value $h_y$ at each point $y$ of the hypercube, because the indicator polynomials of \eqref{eq:low-degree-encoding-definition} vanish at every other such point; hence the vector of its evaluations is $h$.
 \end{proof}
 
@@ -386,7 +387,12 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 		where the $\approx$ statements hold with respect to the state $\ket{\mathrm{aux}}_{\mathrm{A}\mathrm{A}'\mathrm{B}\mathrm{B}'} \ot \ket{\mathrm{EPR}_q}^{\ot M}_{\mathrm{A}''\mathrm{B}''}$, with the answer summation over $h \in \F_q^{M}$ and no average over questions.
 	\end{enumerate}
 	The unitaries may be taken to be $V_{\mathrm{A}}$ and $V_{\mathrm{B}}$ of Definition~\ref{def:v-swap-unitary}.
-	No Lean declaration states this lemma. The only existence declaration available assumes the global polynomial-pair measurement of Lemma~\ref{lem:qld-4-7} as data, instead of obtaining it from that lemma as the proof below does; it is therefore a conditional helper, it does not certify the statement above, and it is not linked here. It is recorded instead in the formalization-support node Lemma~\ref{lem:qld-unitary-given-global-pair} below, as the proof-gap protocol requires. The discrepancy and the source-facing declaration that must replace it are recorded in \cite{gap:qpbt_extraction-transfer}.
+	The conditional result below assumes the global polynomial-pair measurement
+	of Lemma~\ref{lem:qld-4-7}, whereas the present proof obtains that measurement
+	from the lemma. It therefore establishes the extraction conclusions only
+	after the measurement and its consistency estimates are supplied, not the
+	existence claim above. The missing composition and the range-projection
+	transfer are recorded in \cite{gap:qpbt_extraction-transfer}.
 \end{lemma}
 \begin{proof}
 	\uses{def:v-swap-unitary, lem:v-swap-conjugation, lem:tildew-product-form, lem:qld-construct-the-paulis, lem:qld-win-implications, fact:triangle-for-simeq, def:bracket, lem:cancellation, lem:schwartz-zippel-total-degree, lem:qld-4-7}
@@ -396,20 +402,37 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 	If $\delta_P > 1/8$, then, after enlarging the universal constant in $\delta_{\mathrm{qld}}$, both items of the lemma hold with $\ket{\mathrm{aux}}$ an arbitrary unit state, since their left-hand sides never exceed $4$; assume therefore $\delta_P \leq 1/8$. Then the vector $(\bra{\mathrm{EPR}_q}^{\ot M})_{\mathrm{A}''\mathrm{B}''} \ket{\vartheta}$ has squared norm at least $1 - 4\delta_P \geq 1/2 > 0$, and $\ket{\mathrm{aux}}$ may be defined as its normalization; the overlap of $\ket{\vartheta}$ with $\ket{\mathrm{aux}} \ot \ket{\mathrm{EPR}_q}^{\ot M}$ equals the norm of that vector and is at least $\sqrt{1 - 4\delta_P} \geq 1 - 4\delta_P$, which yields the first item with a bound of $8\delta_P = O(\sqrt{\delta_P})$. For the second item, Lemma~\ref{lem:qld-win-implications} gives, on average over $u \in \F_q^m$, $M^{(\mathrm{Pauli},W)}_{[g_h(u)=a]} \ot \Id \simeq_\eps \Id \ot M^{(\mathrm{Point},W),u}_a$ and $\Id \ot M^{(\mathrm{Point},W),u}_a \simeq_\eps M^{(\mathrm{Point},W),u}_a \ot \Id$, where $M^{(\mathrm{Pauli},W)}_{[g_h(u)=a]} = \sum_{h : g_h(u) = a} M^{(\mathrm{Pauli},W)}_h$; combining these with Item~1 of Lemma~\ref{lem:qld-construct-the-paulis} by Lemma~\ref{fact:triangle-for-simeq}, using $\eps \leq \sqrt{\eps} \leq \delta_P$, yields $M^{(\mathrm{Pauli},W)}_{[g_h(u)=a]} \ot \Id \simeq_{\sqrt{\delta_P}} \Id \ot \tilde{M}^{W,\mathrm{ind}_m(u)}_a$. Writing $\ket{\Delta} = \ket{\mathrm{aux}} \ot \ket{\mathrm{EPR}_q}^{\ot M}$, the quantity to be bounded for the $\mathrm{A}$-side relation equals $2 - 2\sum_h \bra{\Delta} V_{\mathrm{A}} M^{(\mathrm{Pauli},W)}_h V_{\mathrm{A}}^\dagger \ot (\tau^W_h)_{\mathrm{B}''} \ket{\Delta}$, since $(\tau^W_h)_{\mathrm{A}''} \ket{\mathrm{EPR}_q}^{\ot M} = (\tau^W_h)_{\mathrm{B}''} \ket{\mathrm{EPR}_q}^{\ot M}$. Replacing $(\tau^W_h)_{\mathrm{B}''}$ by the averaged coarse-graining $\E_u \sum_{h' : g_{h'}(u) = g_h(u)} (\tau^W_{h'})_{\mathrm{B}''}$ costs at most $md/q$ by Lemma~\ref{lem:schwartz-zippel-total-degree} (distinct $h \neq h'$ have distinct encodings $g_h \neq g_{h'}$, of total degree at most $md$), and by \eqref{eq:qld-unitary-6} the resulting sum equals $\E_u \sum_{a} \bra{\Delta} V_{\mathrm{A}} M^{(\mathrm{Pauli},W)}_{[g_h(u)=a]} V_{\mathrm{A}}^\dagger \ot V_{\mathrm{B}} \tilde{M}^{W,\mathrm{ind}_m(u)}_a V_{\mathrm{B}}^\dagger \ket{\Delta}$. Exchanging $\ket{\Delta}$ for $\ket{\vartheta}$ costs $O(\delta_P^{1/4})$ by the first item, and the resulting expression $\E_u \sum_a \bra{\hat\psi} M^{(\mathrm{Pauli},W)}_{[g_h(u)=a]} \ot \tilde{M}^{W,\mathrm{ind}_m(u)}_a \ket{\hat\psi}$ is at least $1 - O(\sqrt{\delta_P})$ by the $\simeq_{\sqrt{\delta_P}}$ relation above. Altogether the distance is $O(\delta_P^{1/4} + md/q)$; the $\mathrm{B}$-side relation is proved identically.
 \end{proof}
 
-% This support node records a conditional Lean helper; it is not a statement
-% from the paper.
-\begin{lemma}[Formalization support for Lemma~\ref{lem:qld-unitary}]
+\begin{example}[Conditional extraction given a global polynomial-pair witness]
 	\label{lem:qld-unitary-given-global-pair}
-	\lean{MIPStarRE.QPBT.exists_extractionWitness}
-	\leanok
-	\uses{lem:qld-4-7, def:v-swap-unitary, def:expanded-state, lem:projective-strategy-setup, def:generalized-pauli, def:EPR, def:povm-distance}
-	This formalization-only auxiliary is not a named statement of the paper. It is the conditional, given-witness form of Lemma~\ref{lem:qld-unitary}: the projective global polynomial-pair measurement $\{\hat{S}_{g_X,g_Z}\}$ of Lemma~\ref{lem:qld-4-7}, together with the two point-consistency estimates that lemma asserts at a parameter $\delta_G \geq 0$, is assumed as data rather than obtained from that lemma. There is a universal constant $C_{\mathrm{ext}} \geq 1$ such that the following holds for every admissible $(q,m,d)$, every $0 \leq \eps \leq 1$, every projective strategy setup at error $\eps$ (Lemma~\ref{lem:projective-strategy-setup}), every $\delta_G \geq 0$, and every assumed measurement as above. The swap unitaries $V_{\mathrm{A}}$ and $V_{\mathrm{B}}$ built from that measurement by Definition~\ref{def:v-swap-unitary} are two-sided unitaries, and there is a normalized state $\ket{\mathrm{aux}}$ on registers $\mathrm{A}\mathrm{A}'\mathrm{B}\mathrm{B}'$ for which items 1 and 2 of Lemma~\ref{lem:qld-unitary} hold at the scale $\delta_{\mathrm{qld}}$ of that lemma, computed from $\eps$ and the assumed $\delta_G$.
-	The statement-level mark records that the linked declaration has exactly this shape, assumed measurement included; it does not certify Lemma~\ref{lem:qld-unitary}, whose proof obtains that measurement from Lemma~\ref{lem:qld-4-7}. By the criterion of the proof-gap protocol the assumed measurement is proof debt rather than a faithful boundary hypothesis. The source-facing declaration that must replace it, and the correction of the linked declaration's name and docstring, which still describe it as source-facing, are recorded in \cite{gap:qpbt_extraction-transfer}.
-\end{lemma}
-\begin{proof}
-	\uses{def:v-swap-unitary, lem:v-swap-conjugation, lem:tildew-product-form, lem:qld-construct-the-paulis, lem:qld-win-implications, fact:triangle-for-simeq, def:bracket, lem:cancellation, lem:schwartz-zippel-total-degree}
-	The proof of Lemma~\ref{lem:qld-unitary} above, with its appeal to Lemma~\ref{lem:qld-4-7} replaced by the assumed measurement. The proof of the linked declaration is open, so no proof-level mark is placed here.
-\end{proof}
+	\lean{MIPStarRE.QPBT.exists_extractionWitness_ofGlobalPairWitness}
+	\uses{lem:qld-4-7, def:v-swap-unitary, def:expanded-state,
+		lem:projective-strategy-setup, def:generalized-pauli, def:EPR,
+		def:povm-distance}
+	This formalization-only auxiliary is not a named statement of the paper. It is
+	the conditional, given-witness form
+	of Lemma~\ref{lem:qld-unitary}: the projective global polynomial-pair measurement
+	$\{\hat{S}_{g_X,g_Z}\}$ of Lemma~\ref{lem:qld-4-7}, together with the two
+	point-consistency estimates that lemma asserts at a parameter $\delta_G \geq 0$,
+	is assumed as data rather than obtained from that lemma. There is a universal
+	constant $C_{\mathrm{ext}} \geq 1$ such that the following holds for every
+	admissible $(q,m,d)$, every $0 \leq \eps \leq 1$, every projective strategy
+	setup at error $\eps$ (Lemma~\ref{lem:projective-strategy-setup}), every
+	$\delta_G \geq 0$, and every assumed measurement as above. The swap unitaries
+	$V_{\mathrm{A}}$ and $V_{\mathrm{B}}$ built from that measurement by
+	Definition~\ref{def:v-swap-unitary} are two-sided unitaries, and there is a
+	normalized state $\ket{\mathrm{aux}}$ on registers
+	$\mathrm{A}\mathrm{A}'\mathrm{B}\mathrm{B}'$ for which items 1 and 2 of
+	Lemma~\ref{lem:qld-unitary} hold at the scale $\delta_{\mathrm{qld}}$ of that
+	lemma, computed from $\eps$ and the assumed $\delta_G$.
+	The assumed measurement is proof debt rather than a faithful boundary
+	hypothesis: Lemma~\ref{lem:qld-unitary} obtains it from
+	Lemma~\ref{lem:qld-4-7} before constructing the swap unitaries. Eliminating
+	the assumption requires carrying out that construction first; this missing
+	composition is recorded in \cite{gap:qpbt_extraction-transfer}.
+	The corresponding proof obligation repeats the argument of
+	Lemma~\ref{lem:qld-unitary} above, using the assumed
+	measurement in place of the appeal to Lemma~\ref{lem:qld-4-7}.
+\end{example}
 
 \begin{lemma}[Preservation of the robustness error family]\label{lem:qld-extraction-error-form}
 	\lean{MIPStarRE.QPBT.deltaExtract_le_deltaQld}
