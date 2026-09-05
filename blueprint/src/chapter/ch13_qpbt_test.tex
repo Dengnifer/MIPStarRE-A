@@ -624,6 +624,12 @@ when the Lean declarations it names are complete and sorry-free.
 	\lean{MIPStarRE.QPBT.directCombinedRecoveryLocalBound_avg_le}
 	\lean{MIPStarRE.QPBT.directCombinedRecoveryBadEvent_avg_le}
 	\lean{MIPStarRE.QPBT.consistencyDefect_le_of_recoveryBound}
+	\lean{MIPStarRE.QPBT.consistencyDefect_le_of_recoveryBound_right}
+	\lean{MIPStarRE.QPBT.directCombinedPointEquiv}
+	\lean{MIPStarRE.QPBT.directCombinedRecovery_relation_one}
+	\lean{MIPStarRE.QPBT.directCombinedRecovery_relation_two}
+	\lean{MIPStarRE.QPBT.directCombinedRecovery_relation_three}
+	\leanok
 	\uses{def:ld-meas, def:consistency, def:bracket, def:ld-combining-map,
 		lem:ld-combining-split, lem:ld-combining-collision,
 		lem:ld-combining-exact-linearity, def:ld-combined-strategy}
@@ -640,6 +646,7 @@ when the Lean declarations it names are complete and sorry-free.
 	and with error $O(\delta + (m+k)d/q)$.
 \end{lemma}
 \begin{proof}
+	\leanok
 	\uses{lem:ld-combining-collision, lem:ld-combining-exact-linearity,
 		lem:ld-combining-split, def:bracket, lem:schwartz-zippel-total-degree}
 	The first conclusion for $\mathcal S^{\mathrm c}$ says that, on average over
