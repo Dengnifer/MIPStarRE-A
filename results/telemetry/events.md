@@ -2705,3 +2705,6 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 
 ## 2026-09-05T12:15Z — prop:ld-simultaneous-general-k proved (packet #210 complete)
 - exists_direct_ld_soundness is sorry-free: the general-k low-degree soundness via the NEEXP combining reduction (combined strategy, question law, value transport with constant 10, exact linearity m d / q, recovery (m+k) d / q, scalar absorption with a = 1e23 and b = 1/80000). Ten Opus sessions after the #196 math-fix refuted the coordinatewise sandwich route for k at least 2. Commit e1d8eaa on the #210 branch; publication tail launched (base #134 merged as PR 191).
+
+## 2026-09-05T12:42Z — lane runner v17: post-merge silent-loss guard (issue #222 task 2)
+- After merging github/main the lane now lists every path present on main but absent in the result; unless a non-merge branch commit deleted it, the lane stops with needs-attention naming the paths. Merge daemon v8 and stack-watch v3 use v17; lanes already running on v16 finish on v16.
