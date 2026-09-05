@@ -1,4 +1,6 @@
 import MIPStarRE.QPBT.Games.Defs
+import MIPStarRE.QPBT.Games.DistanceTheorems
+import MIPStarRE.QPBT.Games.ErrorFunctions
 
 /-! # Definitions for sandwiched measurements
 
