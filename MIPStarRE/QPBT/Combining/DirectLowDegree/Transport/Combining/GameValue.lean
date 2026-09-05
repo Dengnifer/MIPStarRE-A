@@ -118,6 +118,115 @@ theorem directLdBranchRejectionProbability_point_point_eq
       funext (directLdIndexedBranchRejectionProbability_point_point D S)]
   exact avgOver_uniform_const _
 
+/-! ## The rejected mass of the combined strategy -/
+
+private theorem heteroKron_sum_sum {ιA ιB α β : Type*}
+    (s : Finset α) (t : Finset β) (X : α → Op ιA) (Y : β → Op ιB) :
+    heteroKron (∑ a ∈ s, X a) (∑ b ∈ t, Y b) =
+      ∑ a ∈ s, ∑ b ∈ t, heteroKron (X a) (Y b) := by
+  ext ⟨i₁, i₂⟩ ⟨j₁, j₂⟩
+  simp only [Matrix.sum_apply, heteroKron, Matrix.kronecker,
+    Matrix.kroneckerMap_apply]
+  exact Finset.sum_mul_sum s t (fun a => X a i₁ j₁) (fun b => Y b i₂ j₂)
+
+private theorem applyOperatorToState_sum {ι α : Type*} [Fintype ι] [DecidableEq ι]
+    (s : Finset α) (M : α → Op ι) (ψ : EuclideanSpace ℂ ι) :
+    applyOperatorToState (∑ a ∈ s, M a) ψ =
+      ∑ a ∈ s, applyOperatorToState (M a) ψ := by
+  simp only [applyOperatorToState, map_sum, LinearMap.sum_apply]
+
+private theorem born_sum {ι α : Type*} [Fintype ι] [DecidableEq ι]
+    (ψ : EuclideanSpace ℂ ι) (s : Finset α) (M : α → Op ι) :
+    (inner ℂ ψ (applyOperatorToState (∑ a ∈ s, M a) ψ)).re =
+      ∑ a ∈ s, (inner ℂ ψ (applyOperatorToState (M a) ψ)).re := by
+  rw [applyOperatorToState_sum, inner_sum, Complex.re_sum]
+
+/-- The Born weight of an answer pair of the combined strategy is the total
+Born weight, at the measured questions, of the answer pairs of the original
+strategy that the relabelling of `def:ld-combined-strategy` sends to it.  Each
+measurement of the combined strategy is a coarse-graining of a measurement of
+the original strategy, so its effects are the fiber sums of the original
+effects. -/
+theorem outcomeWeight_directCombinedStrategy (D : DirectLdParams)
+    (S : Strategy (directLdGame D)) (x y : DirectLdQuestion D.combined)
+    (a' b' : DirectLdAnswer D.combined) :
+    outcomeWeight (directCombinedStrategy D S) x y a' b' =
+      ∑ a ∈ Finset.univ.filter (fun a => directCombinedAnswerMap D x a = a'),
+        ∑ b ∈ Finset.univ.filter (fun b => directCombinedAnswerMap D y b = b'),
+          outcomeWeight S (directCombinedMeasuredQuestion D x)
+            (directCombinedMeasuredQuestion D y) a b := by
+  classical
+  show (inner ℂ S.ψ (applyOperatorToState
+      (heteroKron
+        (((S.A (directCombinedMeasuredQuestion D x)).postprocess
+            (directCombinedAnswerMap D x)).effect a')
+        (((S.B (directCombinedMeasuredQuestion D y)).postprocess
+            (directCombinedAnswerMap D y)).effect b')) S.ψ)).re = _
+  rw [Measurement.postprocess_effect, Measurement.postprocess_effect,
+    heteroKron_sum_sum, born_sum]
+  exact Finset.sum_congr rfl fun a _ => born_sum _ _ _
+
+/-- Rejected-mass comparison for `def:ld-combined-strategy`.  If every answer
+pair accepted by the win predicate of the original game at the measured
+questions is relabelled to an answer pair accepted by the win predicate of the
+combined game, then the rejected mass of the combined strategy at a question
+pair of the combined game is at most the rejected mass of the original strategy
+at the measured question pair.  This reduces the branch-wise estimates of
+`lem:ld-combined-value` to the win-predicate implications of that lemma. -/
+theorem directRejectedMass_directCombinedStrategy_le (D : DirectLdParams)
+    (S : Strategy (directLdGame D)) (x y : DirectLdQuestion D.combined)
+    (himp : ∀ a b : DirectLdAnswer D,
+      directLdWinPredicate D (directCombinedMeasuredQuestion D x)
+          (directCombinedMeasuredQuestion D y) a b = true →
+        directLdWinPredicate D.combined x y
+          (directCombinedAnswerMap D x a) (directCombinedAnswerMap D y b) = true) :
+    directRejectedMass D.combined (directCombinedStrategy D S) x y ≤
+      directRejectedMass D S (directCombinedMeasuredQuestion D x)
+        (directCombinedMeasuredQuestion D y) := by
+  classical
+  set mx := directCombinedMeasuredQuestion D x with hmx
+  set my := directCombinedMeasuredQuestion D y with hmy
+  set F : DirectLdAnswer D → DirectLdAnswer D → ℝ := fun a b =>
+    if directLdWinPredicate D.combined x y
+        (directCombinedAnswerMap D x a) (directCombinedAnswerMap D y b) then 0
+    else outcomeWeight S mx my a b with hF
+  have hmass : directRejectedMass D.combined (directCombinedStrategy D S) x y =
+      ∑ a : DirectLdAnswer D, ∑ b : DirectLdAnswer D, F a b := by
+    have step : ∀ a' b' : DirectLdAnswer D.combined,
+        (if directLdWinPredicate D.combined x y a' b' then 0
+          else outcomeWeight (directCombinedStrategy D S) x y a' b') =
+          ∑ a ∈ Finset.univ.filter (fun a => directCombinedAnswerMap D x a = a'),
+            ∑ b ∈ Finset.univ.filter (fun b => directCombinedAnswerMap D y b = b'),
+              F a b := by
+      intro a' b'
+      by_cases hw : directLdWinPredicate D.combined x y a' b' = true
+      · rw [if_pos hw]
+        refine (Finset.sum_eq_zero fun a ha => Finset.sum_eq_zero fun b hb => ?_).symm
+        rw [Finset.mem_filter] at ha hb
+        rw [hF]
+        simp only [ha.2, hb.2, hw, if_true]
+      · rw [if_neg hw, outcomeWeight_directCombinedStrategy]
+        refine Finset.sum_congr rfl fun a ha => Finset.sum_congr rfl fun b hb => ?_
+        rw [Finset.mem_filter] at ha hb
+        simp [hF, ha.2, hb.2, hw, hmx, hmy]
+    rw [directRejectedMass]
+    simp_rw [step]
+    rw [← Finset.sum_fiberwise Finset.univ (directCombinedAnswerMap D x)
+      (fun a => ∑ b : DirectLdAnswer D, F a b)]
+    refine Finset.sum_congr rfl fun a' _ => ?_
+    rw [Finset.sum_comm]
+    exact Finset.sum_congr rfl fun a _ =>
+      Finset.sum_fiberwise Finset.univ (directCombinedAnswerMap D y) (F a)
+  rw [hmass, directRejectedMass]
+  refine Finset.sum_le_sum fun a _ => Finset.sum_le_sum fun b _ => ?_
+  simp only [hF]
+  by_cases hw : directLdWinPredicate D mx my a b = true
+  · simp only [if_pos hw, if_pos (himp a b hw), le_refl]
+  · rw [if_neg hw]
+    split_ifs
+    · exact outcomeWeight_nonneg S mx my a b
+    · exact le_rfl
+
 end
 
 end MIPStarRE.QPBT
