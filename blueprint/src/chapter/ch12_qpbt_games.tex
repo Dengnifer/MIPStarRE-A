@@ -1724,6 +1724,35 @@ We abbreviate ``conditionally linear'' as \emph{CL}. Operationally, an $\ell$-le
 	Adjoin $k-\ell$ empty factor spaces with zero linear maps before the given representation. Each added linear contribution is zero, so the represented function and its support are unchanged.
 \end{proof}
 
+% Formalization-support nodes.  The two statements below are not results of the source
+% article; the first is the converse half of the observation preceding
+% Lemma~\ref{lem:cl-level-mono}, and the second isolates the transport of a conditionally
+% linear function along an injective identification of registers, so that the Lean proofs
+% of the question maps of the Pauli basis test remain traceable.
+\begin{lemma}[Formalization support for linear maps as one-level CL functions]\label{lem:cl-one-level-linear}
+	\lean{MIPStarRE.QPBT.isCondLinearOn_one_of_linear}
+	\leanok
+	\uses{def:cl-func, def:register-subspace}
+	This is the support-relative form of the converse observation following Definition~\ref{def:cl-func}. Let $L$ be a linear map on $V$. Then $L$ is a $1$-level CL function all of whose factor spaces are contained in $V$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:cl-func}
+	Take the single factor space $V_1 = V$ with first-level linear map $L_1 = L$, and take the $0$-level function on $V_{>1}$ for every value of $x^{L_1}$. Since $x^V = x$, the represented function sends $x$ to $L(x) + 0 = L(x)$.
+\end{proof}
+
+\begin{lemma}[Formalization support for reindexing a CL function]\label{lem:cl-reindex}
+	\lean{MIPStarRE.QPBT.isCondLinearOn_reindex}
+	\leanok
+	\uses{def:cl-func, def:register-subspace}
+	This is not a named statement of the source article; it isolates the transport of a CL function between register spaces used in the Lean proof of the conditional linearity of the Pauli question maps. Let $V' = \F^{n'}$ and $V = \F^{n}$, and let $f$ be an injective map of the coordinates of $V'$ into the coordinates of $V$, so that every register subspace of $V'$ is carried to a register subspace of $V$. Let $L$ be an $\ell$-level CL function on $V'$. Let $\tilde L \colon V \to V$ send $x$ to the vector whose coordinate at $f(k)$ is the $k$-th coordinate of $L\bigl( (x_{f(k)})_k \bigr)$ and whose coordinates outside the image of $f$ are zero. Then $\tilde L$ is an $\ell$-level CL function on $V$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:cl-func}
+	Induction on $\ell$. At level $0$ both functions are zero. At level $\ell \ge 1$, transport a representation of $L$ term by term: the factor space $V'_1$ is carried to its image under $f$, the first-level linear map $L_1$ to the composition of restriction along $f$ with $L_1$ followed by extension by zero off the image, and the conditional remainders are transported by the induction hypothesis, their prefix values being transported along $f$ as well. Since $f$ is injective, the coordinate at $f(k)$ of a transported vector is the $k$-th coordinate of the vector transported, so the transported representation evaluates to the transport of the value of $L$; outside the image of $f$ both sides vanish.
+\end{proof}
+
 \begin{definition}[Conditionally linear distributions]\label{def:cl-dist}
 	\lean{MIPStarRE.QPBT.clDistribution}\uses{def:cl-func}
 	Let $L, R \colon V \to V$ be conditionally linear functions. The \emph{conditionally linear distribution $\mu_{L,R}$ corresponding to $(L,R)$} is the distribution over pairs $(L(x), R(x)) \in V \times V$ for $x$ drawn uniformly at random from $V$.
@@ -1918,6 +1947,18 @@ The question distribution of the Pauli basis test is \emph{typed}: each question
 	The distribution $\mu_G$ is uniform on the set of ordered pairs $(u,v) \in U \times U$ with $\{u,v\} \in E$, and that set is nonempty because $E$ is: an edge $\{u,v\} \in E$ yields the ordered pair $(u,v)$. A uniform distribution on a nonempty finite set has total mass one.
 \end{proof}
 
+\begin{lemma}[Formalization support for symmetry of the graph distribution]\label{lem:graph-distribution-symm}
+	\lean{MIPStarRE.QPBT.graphDistribution_symm}
+	\leanok
+	\uses{def:graph-distribution}
+	This is not a named statement of the source article; it records the symmetry of the graph distribution of Definition~\ref{def:graph-distribution}, which the source leaves implicit when it presents a typed game as a symmetric game. Let $G = (U, E)$ be an undirected graph with nonempty edge set $E$. Then $\mu_G(u,v) = \mu_G(v,u)$ for all $u, v \in U$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:graph-distribution}
+	The distribution $\mu_G$ is uniform on the ordered pairs $(u,v)$ with $\{u,v\} \in E$. The multisets $\{u,v\}$ and $\{v,u\}$ are equal, so $(u,v)$ belongs to that set exactly when $(v,u)$ does, and the two ordered pairs receive the same weight.
+\end{proof}
+
 % The nonempty-edge hypothesis on G is inherited from def:graph-distribution, where it is
 % needed for the graph distribution mu_G to be defined; the source
 % (references/qpbt-paper/07_types.tex:84-93) leaves it implicit here as well.
@@ -1932,3 +1973,19 @@ The question distribution of the Pauli basis test is \emph{typed}: each question
 	\uses{def:typed-cl-functions, def:graph-distribution, def:cl-dist}
 	Let $\mathcal T$ be a type set and let $L = \{L_u\}_{u \in \mathcal T}$ and $R = \{R_v\}_{v \in \mathcal T}$ be $\mathcal T$-typed families of conditionally linear functions on $V$. Let $G = (\mathcal T, E)$ be a graph with vertex set $\mathcal T$ and nonempty edge set $E$, so that the graph distribution $\mu_G$ of Definition~\ref{def:graph-distribution} is defined. The \emph{$(\mathcal T, G)$-typed conditionally linear distribution $\mu^G_{L,\,R}$ corresponding to $(L, R)$} is the distribution over pairs $\bigl( (u, x), (v, y) \bigr)$, where the type pair $(u,v)$ is drawn from the graph distribution $\mu_G$ and the content pair $(x,y)$ is drawn from $\mu_{L_u,\,R_v}$.
 \end{definition}
+
+\begin{lemma}[Formalization support for symmetry of a typed CL distribution]\label{lem:typed-cl-distribution-symm}
+	\lean{MIPStarRE.QPBT.typedCLDistribution_symm}
+	\leanok
+	\uses{def:typed-cl-distributions, def:graph-distribution, def:cl-dist}
+	This is not a named statement of the source article; it records the symmetry that the source uses when it presents a typed game built from a single family as a symmetric game. Let $L$ be a $\mathcal T$-typed family of conditionally linear functions on $V$ and let $G = (\mathcal T, E)$ have nonempty edge set $E$. Then
+	\[
+		\mu^G_{L,\,L}\bigl((u, x), (v, y)\bigr) = \mu^G_{L,\,L}\bigl((v, y), (u, x)\bigr)
+	\]
+	for all types $u, v \in \mathcal T$ and all $x, y \in V$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:graph-distribution-symm, def:cl-dist}
+	Conditioned on the type pair $(u,v)$, the mass of $\bigl((u,x),(v,y)\bigr)$ is the number of seeds $z \in V$ with $L_u(z) = x$ and $L_v(z) = y$, divided by $|V|$; that count is unchanged when the two coordinates are exchanged together with the two types. Reindexing the sum over type pairs by the exchange $(u,v) \mapsto (v,u)$ and applying Lemma~\ref{lem:graph-distribution-symm} to the edge law gives the claim.
+\end{proof}

@@ -95,15 +95,16 @@ class DispatchCommandTests(unittest.TestCase):
         self.assertEqual(argv[13:], ["resume", "--", THREAD_ID, "<prompt>"])
 
     def test_future_astra_mathfix_selects_model_effort_and_persona(self) -> None:
+        # HEAD remains the pre-merge branch tip while a merge commit is being prepared.
         argv = self.dispatch_command(
-            "--role", "mathfix", "--sandbox", "workspace-write", "--persona-ref", "HEAD",
+            "--role", "mathfix", "--sandbox", "workspace-write", "--persona-ref", "main",
             model="astra", effort="ultra", include_persona=True,
         )
 
         self.assertEqual(argv[3:7], ["-C", str(REPO_ROOT), "--sandbox", "workspace-write"])
         self.assertEqual(argv[argv.index("-m") + 1], "astra")
         self.assertIn("model_reasoning_effort=ultra", argv)
-        self.assertIn("persona: HEAD:local/personas/mathfix.md", self.last_dispatch_stdout)
+        self.assertIn("persona: main:local/personas/mathfix.md", self.last_dispatch_stdout)
         self.assertIn("# Persona: mathematical-gap repair", self.last_dispatch_stdout)
 
     def test_mathfix_rejects_non_astra_or_non_ultra_dispatches(self) -> None:
@@ -191,7 +192,7 @@ class PreCommitBudgetTests(unittest.TestCase):
         repo, root = self.new_repo()
         self.commit_file(repo, "feature.txt", 1)
         self.git(repo, "switch", "--create", "main", root)
-        self.commit_file(repo, "local/inherited.txt", 401)
+        self.commit_file(repo, "local/inherited.txt", 1001)
         self.git(repo, "update-ref", "refs/remotes/github/main", "HEAD")
         self.git(repo, "switch", "feature")
         self.git(repo, "merge", "--no-commit", "--no-ff", "main")
@@ -206,7 +207,7 @@ class PreCommitBudgetTests(unittest.TestCase):
         self.commit_file(repo, "feature.txt", 1)
         self.git(repo, "update-ref", "refs/remotes/github/main", root)
         self.git(repo, "switch", "--create", "side", root)
-        self.commit_file(repo, "local/side.txt", 401)
+        self.commit_file(repo, "local/side.txt", 1001)
         self.git(repo, "switch", "feature")
         self.git(repo, "merge", "--no-commit", "--no-ff", "side")
 
@@ -214,20 +215,25 @@ class PreCommitBudgetTests(unittest.TestCase):
 
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn("non-main merge", result.stdout)
-        self.assertIn("staged workflow-layer change is 401 lines", result.stdout)
+        self.assertIn("staged workflow-layer change is 1001 lines", result.stdout)
 
-    def test_ready_packets_test_growth_is_budgeted(self) -> None:
-        repo, _ = self.new_repo()
-        path = "scripts/tests/test_ready_packets.py"
-        target = repo / path
-        target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text("line\n" * 401, encoding="utf-8")
-        self.git(repo, "add", path)
+    def test_standalone_workflow_test_growth_is_budgeted(self) -> None:
+        paths = (
+            "scripts/tests/test_pre_push_hook.py",
+            "scripts/tests/test_ready_packets.py",
+        )
+        for path in paths:
+            with self.subTest(path=path):
+                repo, _ = self.new_repo()
+                target = repo / path
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text("line\n" * 1001, encoding="utf-8")
+                self.git(repo, "add", path)
 
-        result = self.run_hook(repo)
+                result = self.run_hook(repo)
 
-        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
-        self.assertIn("staged workflow-layer change is 401 lines", result.stdout)
+                self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                self.assertIn("staged workflow-layer change is 1001 lines", result.stdout)
 
 
 if __name__ == "__main__":
