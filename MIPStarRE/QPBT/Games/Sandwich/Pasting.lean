@@ -294,4 +294,134 @@ theorem avgOver_collision_le {X Y₁ Y₂ R₂ Γ₂ : Type*}
         exact Finset.sum_congr rfl fun p _ => by ring
     _ = η := by rw [hWsum, mul_one]
 
+
+/-- Fine-to-coarse comparison of the cross consistency of the second codeword
+family. Two distinct fine codewords contribute to the coarse cross term exactly
+when they disagree at the sampled second question, so the fine cross term
+exceeds the coarse one by the colliding pairs, whose average is at most the
+conditional collision bound of `lem:pasting`. This is the operator identity of
+step 4 of the proof of the adopted statement in
+`docs/paper-gaps/qpbt_pasting-product-error.tex`; blueprint
+`ch12_qpbt_games.tex:960-990`. -/
+theorem consistencyDefect_codeword_fine_le_coarse_add
+    {X Y₁ Y₂ R₂ Γ₂ ι : Type*}
+    [Fintype X] [DecidableEq X] [Fintype Y₁] [DecidableEq Y₁]
+    [Fintype Y₂] [DecidableEq Y₂] [Fintype R₂] [DecidableEq R₂]
+    [Fintype Γ₂] [DecidableEq Γ₂] [Fintype ι] [DecidableEq ι]
+    (D : Distribution ((X × Y₁) × Y₂)) (eval₂ : Γ₂ → Y₂ → R₂)
+    (G₂ : X → Measurement Γ₂ ι) (ψ : EuclideanSpace ℂ (ι × ι)) (η : ℝ)
+    (hD : D.IsProbability) (hψ : ‖ψ‖ = 1) (hη : 0 ≤ η)
+    (hcoll : ∀ x y₁, 0 < (D.map Prod.fst).weight (x, y₁) →
+      ∀ g g' : Γ₂, g ≠ g' →
+        (∑ y₂ : Y₂, D.weight ((x, y₁), y₂) *
+          if eval₂ g y₂ = eval₂ g' y₂ then 1 else 0) ≤
+          η * (D.map Prod.fst).weight (x, y₁)) :
+    consistencyDefect D
+        (fun q g => heteroKron ((G₂ q.1.1).effect g) 1)
+        (fun q g => heteroKron 1 ((G₂ q.1.1).effect g)) ψ ≤
+      consistencyDefect D
+        (fun q a₂ => heteroKron (((G₂ q.1.1).postprocess
+          (fun g => eval₂ g q.2)).effect a₂) 1)
+        (fun q a₂ => heteroKron 1 (((G₂ q.1.1).postprocess
+          (fun g => eval₂ g q.2)).effect a₂)) ψ + η := by
+  classical
+  have hcnn : ∀ (x : X) (g g' : Γ₂), 0 ≤ stateQForm ψ
+      (heteroKron ((G₂ x).effect g) ((G₂ x).effect g')) := by
+    intro x g g'
+    exact stateQForm_nonneg ψ (kronecker_nonneg ((G₂ x).pos g) ((G₂ x).pos g'))
+  have hfine : ∀ x : X,
+      (∑ g : Γ₂, ∑ g' : Γ₂, if g = g' then 0 else stateQForm ψ
+        (heteroKron ((G₂ x).effect g) ((G₂ x).effect g'))) =
+      ‖ψ‖ ^ 2 - ∑ g : Γ₂, stateQForm ψ
+        (heteroKron ((G₂ x).effect g) ((G₂ x).effect g)) := by
+    intro x
+    have h := point_defect_eq (leftPlacedMeasurement (ιB := ι) (G₂ x))
+      (rightPlacedMeasurement (ιA := ι) (G₂ x)) ψ
+    simp only [leftPlacedMeasurement, rightPlacedMeasurement,
+      MIPStarRE.Quantum.Measurement.ofSumEqOne] at h
+    simp_rw [placed_product_stateQForm_eq] at h
+    exact h
+  have hcoarse : ∀ (x : X) (y₂ : Y₂),
+      (∑ r : R₂, ∑ r' : R₂, if r = r' then 0 else stateQForm ψ
+        (heteroKron (((G₂ x).postprocess (fun g => eval₂ g y₂)).effect r)
+          (((G₂ x).postprocess (fun g => eval₂ g y₂)).effect r'))) =
+      ‖ψ‖ ^ 2 - ∑ r : R₂, stateQForm ψ
+        (heteroKron (((G₂ x).postprocess (fun g => eval₂ g y₂)).effect r)
+          (((G₂ x).postprocess (fun g => eval₂ g y₂)).effect r)) := by
+    intro x y₂
+    have h := point_defect_eq
+      (leftPlacedMeasurement (ιB := ι)
+        ((G₂ x).postprocess (fun g => eval₂ g y₂)))
+      (rightPlacedMeasurement (ιA := ι)
+        ((G₂ x).postprocess (fun g => eval₂ g y₂))) ψ
+    simp only [leftPlacedMeasurement, rightPlacedMeasurement,
+      MIPStarRE.Quantum.Measurement.ofSumEqOne] at h
+    simp_rw [placed_product_stateQForm_eq] at h
+    exact h
+  have hsplit : ∀ (x : X) (y₂ : Y₂),
+      (∑ g : Γ₂, ∑ g' : Γ₂, if eval₂ g y₂ = eval₂ g' y₂ then stateQForm ψ
+        (heteroKron ((G₂ x).effect g) ((G₂ x).effect g')) else 0) =
+      (∑ g : Γ₂, stateQForm ψ
+        (heteroKron ((G₂ x).effect g) ((G₂ x).effect g))) +
+      (∑ g : Γ₂, ∑ g' : Γ₂, if g = g' then 0 else
+        if eval₂ g y₂ = eval₂ g' y₂ then stateQForm ψ
+          (heteroKron ((G₂ x).effect g) ((G₂ x).effect g')) else 0) := by
+    intro x y₂
+    rw [← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl fun g _ => ?_
+    have hterm : ∀ g' : Γ₂,
+        (if g = g' then (0 : ℝ) else
+          if eval₂ g y₂ = eval₂ g' y₂ then stateQForm ψ
+            (heteroKron ((G₂ x).effect g) ((G₂ x).effect g')) else 0) =
+        (if eval₂ g y₂ = eval₂ g' y₂ then stateQForm ψ
+            (heteroKron ((G₂ x).effect g) ((G₂ x).effect g')) else 0) -
+        (if g = g' then stateQForm ψ
+            (heteroKron ((G₂ x).effect g) ((G₂ x).effect g')) else 0) := by
+      intro g'
+      by_cases hg : g = g'
+      · subst hg; simp
+      · simp [hg]
+    rw [Finset.sum_congr rfl (fun g' (_ : g' ∈ Finset.univ) => hterm g'),
+      Finset.sum_sub_distrib]
+    have hdel : (∑ g' : Γ₂, if g = g' then stateQForm ψ
+        (heteroKron ((G₂ x).effect g) ((G₂ x).effect g')) else 0) =
+        stateQForm ψ (heteroKron ((G₂ x).effect g) ((G₂ x).effect g)) := by
+      simp
+    rw [hdel]
+    ring
+  have hkey : ∀ q : (X × Y₁) × Y₂,
+      (∑ g : Γ₂, ∑ g' : Γ₂, if g = g' then 0 else stateQForm ψ
+        (heteroKron ((G₂ q.1.1).effect g) ((G₂ q.1.1).effect g'))) =
+      (∑ r : R₂, ∑ r' : R₂, if r = r' then 0 else stateQForm ψ
+        (heteroKron (((G₂ q.1.1).postprocess (fun g => eval₂ g q.2)).effect r)
+          (((G₂ q.1.1).postprocess
+            (fun g => eval₂ g q.2)).effect r'))) +
+      (∑ g : Γ₂, ∑ g' : Γ₂, if g = g' then 0 else
+        if eval₂ g q.2 = eval₂ g' q.2 then stateQForm ψ
+          (heteroKron ((G₂ q.1.1).effect g) ((G₂ q.1.1).effect g')) else 0) := by
+    intro q
+    rw [hfine q.1.1, hcoarse q.1.1 q.2,
+      SandwichProduct.diagonal_postprocess_stateQForm_eq_pair_sum (G₂ q.1.1) (G₂ q.1.1) ψ
+        (fun g => eval₂ g q.2), hsplit q.1.1 q.2]
+    ring
+  have hmass : ∀ p : X × Y₁,
+      (∑ g : Γ₂, ∑ g' : Γ₂, if g = g' then 0 else stateQForm ψ
+        (heteroKron ((G₂ p.1).effect g) ((G₂ p.1).effect g'))) ≤ 1 := by
+    intro p
+    rw [hfine p.1, hψ, one_pow]
+    have hnn : 0 ≤ ∑ g : Γ₂, stateQForm ψ
+        (heteroKron ((G₂ p.1).effect g) ((G₂ p.1).effect g)) :=
+      Finset.sum_nonneg fun g _ => hcnn p.1 g g
+    linarith
+  have havg := avgOver_collision_le D eval₂
+    (fun p g g' => stateQForm ψ
+      (heteroKron ((G₂ p.1).effect g) ((G₂ p.1).effect g'))) η hD hη
+    (fun p g g' => hcnn p.1 g g') hmass hcoll
+  rw [SandwichProduct.consistencyDefect_placed_eq_avg_point D (fun q => G₂ q.1.1)
+      (fun q => G₂ q.1.1) ψ,
+    SandwichProduct.consistencyDefect_placed_eq_avg_point D
+      (fun q => (G₂ q.1.1).postprocess (fun g => eval₂ g q.2))
+      (fun q => (G₂ q.1.1).postprocess (fun g => eval₂ g q.2)) ψ]
+  rw [avgOver_congr D _ _ hkey, avgOver_add]
+  linarith
 end MIPStarRE.QPBT

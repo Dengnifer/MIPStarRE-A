@@ -1142,6 +1142,38 @@ postprocessing, and operator-contraction steps used to formalize
 	the assertion.
 \end{proof}
 
+\begin{lemma}[Formalization support for Lemma~\ref{lem:pasting}]
+	\label{lem:pasting-fine-coarse-cross}
+	\lean{MIPStarRE.QPBT.consistencyDefect_codeword_fine_le_coarse_add}
+	\leanok
+	\uses{lem:pasting-collision-averaging, def:pasting-tensor-placement}
+	In the setting of Lemma~\ref{lem:pasting}, write $G_{g_2} = (G_2)^x_{g_2}$
+	for the fine second codeword family and
+	$Q_{a_2} = (G_2)^x_{[\operatorname{eval}_{y_2}(\cdot)=a_2]}$ for its
+	coarse-graining, and let
+	\[
+		\epsilon_f = \E_{(x,y_1,y_2) \sim \mathcal D}
+			\sum_{g_2 \ne g_2'} \bra{\psi} G_{g_2} \ot G_{g_2'} \ket{\psi},
+		\qquad
+		\epsilon_c = \E_{(x,y_1,y_2) \sim \mathcal D}
+			\sum_{a_2 \ne a_2'} \bra{\psi} Q_{a_2} \ot Q_{a_2'} \ket{\psi}
+	\]
+	be the cross consistency defects of the two families. Then
+	$\epsilon_f \le \epsilon_c + \eta$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:pasting-collision-averaging}
+	At a fixed question both defects equal $\|\psi\|^2$ minus the corresponding
+	diagonal overlap, and the diagonal overlap of the coarse family is the sum
+	of the fine overlaps over the pairs of codewords agreeing at $y_2$.
+	Subtracting, the fine defect exceeds the coarse one exactly by the fine
+	overlaps of the distinct pairs colliding at $y_2$. Those overlaps are
+	nonnegative, being expectations of tensor products of positive operators,
+	and their total over the distinct pairs is at most one, so
+	Lemma~\ref{lem:pasting-collision-averaging} bounds their average by $\eta$.
+\end{proof}
+
 \begin{lemma}[Close strategies have close values; Fact 4.32 in \cite{Natarajan2018NEEXP}]\label{lem:close-strategies-have-close-values}
 	\lean{MIPStarRE.QPBT.abs_value_sub_le_of_areClose}
 	\leanok
