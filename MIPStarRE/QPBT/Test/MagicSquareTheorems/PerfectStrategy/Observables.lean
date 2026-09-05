@@ -111,29 +111,6 @@ theorem transpose_eq_of_epr_action
   simp only [Matrix.transpose_apply]
   simpa using hij
 
-private theorem sum_zmod_two {M : Type*} [AddCommMonoid M] (f : ZMod 2 → M) :
-    ∑ b, f b = f 0 + f 1 := by
-  calc
-    ∑ b, f b = ∑ i : Fin 2, f (ZMod.finEquiv 2 i) := by
-      exact Fintype.sum_equiv (ZMod.finEquiv 2).symm f
-        (fun i : Fin 2 => f (ZMod.finEquiv 2 i)) (fun _ => rfl)
-    _ = f (ZMod.finEquiv 2 0) + f (ZMod.finEquiv 2 1) := Fin.sum_univ_two _
-    _ = f 0 + f 1 := by rfl
-
-/-- Formalization-only auxiliary lemma for
-`exists_ms_perfect_strategy_of_anticommuting` (blueprint
-`thm:ms-from-ac`): every element of `ZMod 2` is either `0` or `1`;
-used to split the binary outcome of a reflection measurement into its two cases.
--/
-theorem zmod_two_eq_zero_or_one (b : ZMod 2) : b = 0 ∨ b = 1 := by
-  by_cases hb : b = 0
-  · exact Or.inl hb
-  · right
-    have hval_ne : b.val ≠ 0 := (ZMod.val_ne_zero b).mpr hb
-    have hval_lt : b.val < 2 := ZMod.val_lt b
-    have hval : b.val = 1 := by omega
-    exact (ZMod.val_eq_one (by omega) b).mp hval
-
 private theorem binary_effects_sum
     {V : Type*} [Fintype V] [DecidableEq V]
     (M : Measurement (ZMod 2) V) :
@@ -268,61 +245,8 @@ theorem reflectionEffect_obsOf_measurement
     rw [show (1 : Op V) = M.effect 0 + M.effect 1 from hsum.symm]
     module
 
-/-- The real Pauli `X` matrix on the binary register. -/
-private def qubitX : Op (ZMod 2) :=
-  fun i j => if i = j then 0 else 1
-
-/-- The real Pauli `Z` matrix on the binary register. -/
-private def qubitZ : Op (ZMod 2) :=
-  fun i j => if i = j then if i = 0 then 1 else -1 else 0
-
-private theorem qubitX_conjTranspose : qubitXᴴ = qubitX := by
-  ext i j
-  rcases zmod_two_eq_zero_or_one i with rfl | rfl <;>
-    rcases zmod_two_eq_zero_or_one j with rfl | rfl <;>
-      norm_num [qubitX, Matrix.conjTranspose_apply]
-
-private theorem qubitZ_conjTranspose : qubitZᴴ = qubitZ := by
-  ext i j
-  rcases zmod_two_eq_zero_or_one i with rfl | rfl <;>
-    rcases zmod_two_eq_zero_or_one j with rfl | rfl <;>
-      norm_num [qubitZ, Matrix.conjTranspose_apply]
-
-private theorem qubitX_transpose : qubitXᵀ = qubitX := by
-  ext i j
-  rcases zmod_two_eq_zero_or_one i with rfl | rfl <;>
-    rcases zmod_two_eq_zero_or_one j with rfl | rfl <;>
-      norm_num [qubitX, Matrix.transpose_apply]
-
-private theorem qubitZ_transpose : qubitZᵀ = qubitZ := by
-  ext i j
-  rcases zmod_two_eq_zero_or_one i with rfl | rfl <;>
-    rcases zmod_two_eq_zero_or_one j with rfl | rfl <;>
-      norm_num [qubitZ, Matrix.transpose_apply]
-
-private theorem qubitX_sq : qubitX * qubitX = 1 := by
-  ext i j
-  simp only [Matrix.mul_apply]
-  rw [sum_zmod_two]
-  rcases zmod_two_eq_zero_or_one i with rfl | rfl <;>
-    rcases zmod_two_eq_zero_or_one j with rfl | rfl <;>
-      norm_num [qubitX, Matrix.one_apply]
-
-private theorem qubitZ_sq : qubitZ * qubitZ = 1 := by
-  ext i j
-  simp only [Matrix.mul_apply]
-  rw [sum_zmod_two]
-  rcases zmod_two_eq_zero_or_one i with rfl | rfl <;>
-    rcases zmod_two_eq_zero_or_one j with rfl | rfl <;>
-      norm_num [qubitZ, Matrix.one_apply]
-
-private theorem qubitX_mul_qubitZ : qubitX * qubitZ = -(qubitZ * qubitX) := by
-  ext i j
-  change (∑ k, qubitX i k * qubitZ k j) = -(∑ k, qubitZ i k * qubitX k j)
-  rw [sum_zmod_two, sum_zmod_two]
-  rcases zmod_two_eq_zero_or_one i with rfl | rfl <;>
-    rcases zmod_two_eq_zero_or_one j with rfl | rfl <;>
-      norm_num [qubitX, qubitZ]
+local notation "qubitX" => (tauShift (K := ZMod 2) 1)
+local notation "qubitZ" => (tauPhase (K := ZMod 2) 1)
 
 private theorem heteroKron_conjTranspose
     {V W : Type*} (A : Op V) (B : Op W) :
@@ -391,13 +315,13 @@ theorem msCellObservable_conjTranspose
     (hac : OA * OB = -(OB * OA)) (j : Fin 9) :
     (msCellObservable OA OB j)ᴴ = msCellObservable OA OB j := by
   have hAB := anti_mul_conjTranspose OA OB hOA hOB hac
-  have hZX := anti_mul_conjTranspose qubitZ qubitX qubitZ_conjTranspose
-    qubitX_conjTranspose (by
-      rw [qubitX_mul_qubitZ]
+  have hZX := anti_mul_conjTranspose qubitZ qubitX binaryTauPhase_conjTranspose
+    binaryTauShift_conjTranspose (by
+      rw [binaryTauShift_mul_tauPhase]
       simp)
   fin_cases j <;>
     simp [msCellObservable, heteroKron_conjTranspose, hOA, hOB,
-      qubitX_conjTranspose, qubitZ_conjTranspose, hAB, hZX,
+      binaryTauShift_conjTranspose, binaryTauPhase_conjTranspose, hAB, hZX,
       heteroKron_neg_neg]
 
 /-- Formalization-only auxiliary lemma for
@@ -410,12 +334,12 @@ theorem msCellObservable_sq
     (hac : OA * OB = -(OB * OA)) (j : Fin 9) :
     msCellObservable OA OB j * msCellObservable OA OB j = 1 := by
   have hAB := anti_mul_sq OA OB hOA hOB hac
-  have hZX := anti_mul_sq qubitZ qubitX qubitZ_sq qubitX_sq (by
-    rw [qubitX_mul_qubitZ]
+  have hZX := anti_mul_sq qubitZ qubitX binaryTauPhase_sq binaryTauShift_sq (by
+    rw [binaryTauShift_mul_tauPhase]
     simp)
   fin_cases j <;>
-    simp [msCellObservable, heteroKron_mul, hOA, hOB, qubitX_sq,
-      qubitZ_sq, hAB, hZX, heteroKron_neg_neg, heteroKron_one_one]
+    simp [msCellObservable, heteroKron_mul, hOA, hOB, binaryTauShift_sq,
+      binaryTauPhase_sq, hAB, hZX, heteroKron_neg_neg, heteroKron_one_one]
 
 /-- Formalization-only auxiliary lemma for
 `exists_ms_perfect_strategy_of_anticommuting` (blueprint
@@ -427,13 +351,13 @@ theorem msCellObservable_transpose
     (hac : OA * OB = -(OB * OA)) (j : Fin 9) :
     (msCellObservable OA OB j)ᵀ = msCellObservable OA OB j := by
   have hAB := anti_mul_transpose OA OB hOA hOB hac
-  have hZX := anti_mul_transpose qubitZ qubitX qubitZ_transpose
-    qubitX_transpose (by
-      rw [qubitX_mul_qubitZ]
+  have hZX := anti_mul_transpose qubitZ qubitX binaryTauPhase_transpose
+    binaryTauShift_transpose (by
+      rw [binaryTauShift_mul_tauPhase]
       simp)
   fin_cases j <;>
     simp [msCellObservable, heteroKron_transpose, hOA, hOB,
-      qubitX_transpose, qubitZ_transpose, hAB, hZX,
+      binaryTauShift_transpose, binaryTauPhase_transpose, hAB, hZX,
       heteroKron_neg_neg]
 
 /-- Formalization-only auxiliary lemma for
@@ -459,26 +383,26 @@ theorem msConstraintObservable_commute
       _ = OB * (-(OB * OA)) := by rw [hac]
       _ = -OA := by rw [mul_neg, ← mul_assoc, hOB, one_mul]
   have hZ_ZX : qubitZ * (qubitZ * qubitX) = qubitX := by
-    rw [← mul_assoc, qubitZ_sq, one_mul]
+    rw [← mul_assoc, binaryTauPhase_sq, one_mul]
   have hZX_Z : qubitZ * qubitX * qubitZ = -qubitX := by
     calc
       qubitZ * qubitX * qubitZ = -(qubitX * qubitZ) * qubitZ := by
         rw [show qubitZ * qubitX = -(qubitX * qubitZ) by
-          rw [qubitX_mul_qubitZ]
+          rw [binaryTauShift_mul_tauPhase]
           simp]
-      _ = -qubitX := by rw [neg_mul, mul_assoc, qubitZ_sq, mul_one]
+      _ = -qubitX := by rw [neg_mul, mul_assoc, binaryTauPhase_sq, mul_one]
   have hX_ZX : qubitX * (qubitZ * qubitX) = -qubitZ := by
     calc
       qubitX * (qubitZ * qubitX) = (qubitX * qubitZ) * qubitX :=
         (mul_assoc _ _ _).symm
-      _ = (-(qubitZ * qubitX)) * qubitX := by rw [qubitX_mul_qubitZ]
-      _ = -qubitZ := by rw [neg_mul, mul_assoc, qubitX_sq, mul_one]
+      _ = (-(qubitZ * qubitX)) * qubitX := by rw [binaryTauShift_mul_tauPhase]
+      _ = -qubitZ := by rw [neg_mul, mul_assoc, binaryTauShift_sq, mul_one]
   have hZX_X : qubitZ * qubitX * qubitX = qubitZ := by
-    rw [mul_assoc, qubitX_sq, mul_one]
+    rw [mul_assoc, binaryTauShift_sq, mul_one]
   fin_cases i <;> fin_cases k <;> fin_cases l <;>
     simp [commute_iff_eq, msConstraintVars, msCellObservable,
-      heteroKron_mul, hOA, hOB, hac, qubitX_sq, qubitZ_sq,
-      qubitX_mul_qubitZ, hA_BA, hBA_A, hB_BA, hBA_B, hZ_ZX,
+      heteroKron_mul, hOA, hOB, hac, binaryTauShift_sq, binaryTauPhase_sq,
+      binaryTauShift_mul_tauPhase, hA_BA, hBA_A, hB_BA, hBA_B, hZ_ZX,
       hZX_Z, hX_ZX, hZX_X, heteroKron_neg_left,
       heteroKron_neg_right]
 
@@ -496,12 +420,12 @@ theorem msConstraintObservable_product
     msCellObservable OA OB (msConstraintVars i 2) =
       if i = 5 then -1 else 1 := by
   have hAB := anti_mul_sq OA OB hOA hOB hac
-  have hZX := anti_mul_sq qubitZ qubitX qubitZ_sq qubitX_sq (by
-    rw [qubitX_mul_qubitZ]
+  have hZX := anti_mul_sq qubitZ qubitX binaryTauPhase_sq binaryTauShift_sq (by
+    rw [binaryTauShift_mul_tauPhase]
     simp)
   fin_cases i <;>
     simp [msConstraintVars, msCellObservable, heteroKron_mul, hOA, hOB,
-      qubitX_sq, qubitZ_sq, qubitX_mul_qubitZ, hAB, hZX,
+      binaryTauShift_sq, binaryTauPhase_sq, binaryTauShift_mul_tauPhase, hAB, hZX,
       heteroKron_neg_left, heteroKron_neg_right,
       heteroKron_one_one]
 

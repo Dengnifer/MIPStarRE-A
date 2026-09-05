@@ -534,6 +534,13 @@ hook-level regression that stages 401 lines at that path.
 ad hoc GitHub mutation or a duplicate edge after retry, and future readiness
 test growth remains subject to the owner-gated 400-line episode budget.
 
+## 2026-09-05 — Branch-private Lake products may use a separate volume
+
+**Trigger:** `results/telemetry/events.md` 2026-09-05, issue #190 and PR #198.
+**Change:** `MIPSTARRE_LAKE_ROOT` uses `<root>/<branch>` for one-component branches;
+the helper rejects protected overlap and duplicate ownership, and dispatch grants its target.
+**Expected effect:** native relocation without cache corruption or leaked build data.
+
 ## 2026-09-05 — Blueprint citations use labels; reviewers derive spans
 
 **Trigger:** `results/telemetry/events.md` 2026-09-05 "Blueprint numeric

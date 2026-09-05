@@ -83,9 +83,10 @@ projections whose sum is at most the identity is mutually orthogonal: for two
 distinct indices the two projections already sum to at most the identity, so the
 previous lemma applies. -/
 theorem mul_eq_zero_of_isProj_family {d α : Type*} [Fintype d] [DecidableEq d]
-    [Fintype α] [DecidableEq α] {P : α → Op d} (hP : ∀ a, IsProj (P a))
+    [Fintype α] {P : α → Op d} (hP : ∀ a, IsProj (P a))
     (hsum : ∑ a, P a ≤ 1) {a b : α} (hab : a ≠ b) :
     P a * P b = 0 := by
+  classical
   refine mul_eq_zero_of_isProj_of_add_le_one (hP a) (hP b).nonneg ?_
   refine le_trans ?_ hsum
   have hpair : ∑ c ∈ ({a, b} : Finset α), P c = P a + P b := by
@@ -99,11 +100,12 @@ theorem mul_eq_zero_of_isProj_family {d α : Type*} [Fintype d] [DecidableEq d]
 family of projections is again an orthogonal projection; mutual orthogonality is
 supplied by the hypothesis that the sum is at most the identity. -/
 theorem isProj_sum_of_isProj_of_sum_le_one {d α : Type*} [Fintype d] [DecidableEq d]
-    [Fintype α] [DecidableEq α] {P : α → Op d} (hP : ∀ a, IsProj (P a))
+    [Fintype α] {P : α → Op d} (hP : ∀ a, IsProj (P a))
     (hsum : ∑ a, P a ≤ 1) :
     IsProj (∑ a, P a) := by
+  classical
   constructor
-  · show (∑ a, P a) * (∑ a, P a) = ∑ a, P a
+  · change (∑ a, P a) * (∑ a, P a) = ∑ a, P a
     rw [Finset.sum_mul]
     refine Finset.sum_congr rfl fun a _ => ?_
     rw [Matrix.mul_sum, Finset.sum_eq_single a]
@@ -111,7 +113,7 @@ theorem isProj_sum_of_isProj_of_sum_le_one {d α : Type*} [Fintype d] [Decidable
     · exact fun b _ hba => mul_eq_zero_of_isProj_family hP hsum (Ne.symm hba)
     · intro ha
       exact absurd (Finset.mem_univ a) ha
-  · show star (∑ a, P a) = ∑ a, P a
+  · change star (∑ a, P a) = ∑ a, P a
     rw [star_sum]
     exact Finset.sum_congr rfl fun a _ => (hP a).isSelfAdjoint
 
@@ -499,7 +501,7 @@ theorem msDilatedStrategy_isProjective_B (S : Strategy msGame) (y : MsType) :
 theorem ms_dilated_strategy_outcome_weight (S : Strategy msGame) (x y : MsType)
     (a b : MsAnswer) :
     outcomeWeight (msDilatedStrategy S) x y a b = outcomeWeight S x y a b := by
-  show (inner ℂ (naimarkDilatedState MsAnswer S.ψ)
+  change (inner ℂ (naimarkDilatedState MsAnswer S.ψ)
       (applyOperatorToState
         (heteroKron (naimarkDilatedEffect (α := MsAnswer) (S.A x) (MsAnswer.bit 0) a)
           (naimarkDilatedEffect (α := MsAnswer) (S.B y) (MsAnswer.bit 0) b))
