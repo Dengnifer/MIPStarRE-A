@@ -23,26 +23,21 @@ open MIPStarRE.LDT hiding Measurement
 open MIPStarRE.Quantum
 open DistanceCalculus
 
-/-- The move estimate of `lem:pasting` at a fixed question. The cross term of
-the commutator mass of a first codeword family against a second codeword
-family, both placed on the second tensor factor, differs from the expectation
-of the tensor products of the second codeword effects against their pinchings
-of the first family by at most the square root of the summed squared distance
-between the two placements of the second family. This is the move of step 5 of
-the proof of the adopted statement in
-`docs/paper-gaps/qpbt_pasting-product-error.tex`; blueprint
-`ch12_qpbt_games.tex:960-990`. -/
-theorem abs_cross_move_gap_le_sqrt {R₁ Γ₂ ι : Type*}
+/-- The cross move with independently chosen opposite-register and Bob families.
+The error is their actual cross distance; no identical-copy or symmetry
+assumption is used. This is the generalization needed for the Schmidt mirror
+in `docs/paper-gaps/qpbt_pasting-product-error.tex`, issue #201. -/
+theorem abs_cross_move_gap_le_sqrt_distinct_families {R₁ Γ₂ ι : Type*}
     [Fintype R₁] [DecidableEq R₁] [Fintype Γ₂] [DecidableEq Γ₂]
     [Fintype ι] [DecidableEq ι]
-    (P : Measurement R₁ ι) (G : Measurement Γ₂ ι)
+    (P : Measurement R₁ ι) (G opposite : Measurement Γ₂ ι)
     (ψ : EuclideanSpace ℂ (ι × ι)) (hψ : ‖ψ‖ = 1) :
     |(∑ a : R₁, ∑ g : Γ₂, stateQForm ψ (heteroKron 1
           (G.effect g * P.effect a * G.effect g * P.effect a))) -
-        ∑ g : Γ₂, stateQForm ψ (heteroKron (G.effect g)
+        ∑ g : Γ₂, stateQForm ψ (heteroKron (opposite.effect g)
           (∑ a : R₁, P.effect a * G.effect g * P.effect a))| ≤
       Real.sqrt (∑ g : Γ₂, ‖applyOperatorToState
-        (heteroKron 1 (G.effect g) - heteroKron (G.effect g) 1) ψ‖ ^ 2) := by
+        (heteroKron 1 (G.effect g) - heteroKron (opposite.effect g) 1) ψ‖ ^ 2) := by
   classical
   -- the inlined identities of the distance calculus; see issue #204
   have hqf : ∀ M N : Op (ι × ι), stateQForm ψ (M * N) =
@@ -69,14 +64,14 @@ theorem abs_cross_move_gap_le_sqrt {R₁ Γ₂ ι : Type*}
     exact Matrix.conjTranspose_kronecker M N
   set u : R₁ × Γ₂ → EuclideanSpace ℂ (ι × ι) := fun p =>
     applyOperatorToState (heteroKron 1 (P.effect p.1) *
-      (heteroKron 1 (G.effect p.2) - heteroKron (G.effect p.2) 1)) ψ with hu
+      (heteroKron 1 (G.effect p.2) - heteroKron (opposite.effect p.2) 1)) ψ with hu
   set v : R₁ × Γ₂ → EuclideanSpace ℂ (ι × ι) := fun p =>
     applyOperatorToState (heteroKron 1 (G.effect p.2 * P.effect p.1)) ψ with hv
   -- the pointwise gap is the overlap of the moved vector with the cross vector
   have hpt : ∀ (a : R₁) (g : Γ₂),
       stateQForm ψ (heteroKron 1
           (G.effect g * P.effect a * G.effect g * P.effect a)) -
-        stateQForm ψ (heteroKron (G.effect g)
+        stateQForm ψ (heteroKron (opposite.effect g)
           (P.effect a * G.effect g * P.effect a)) =
         (inner ℂ (u (a, g)) (v (a, g))).re := by
     intro a g
@@ -88,8 +83,8 @@ theorem abs_cross_move_gap_le_sqrt {R₁ Γ₂ ι : Type*}
       congr 1
       · rw [one_mul]
       · simp [mul_assoc]
-    have e2 : heteroKron (G.effect g) (P.effect a * G.effect g * P.effect a) =
-        heteroKron (G.effect g) (P.effect a) *
+    have e2 : heteroKron (opposite.effect g) (P.effect a * G.effect g * P.effect a) =
+        heteroKron (opposite.effect g) (P.effect a) *
           heteroKron 1 (G.effect g * P.effect a) := by
       rw [heteroKron_mul]
       congr 1
@@ -99,16 +94,16 @@ theorem abs_cross_move_gap_le_sqrt {R₁ Γ₂ ι : Type*}
         heteroKron 1 (P.effect a * G.effect g) := by
       rw [hct]
       simp [Matrix.conjTranspose_mul, measurement_effect_hermitian]
-    have h2 : (heteroKron (G.effect g) (P.effect a))ᴴ =
-        heteroKron (G.effect g) (P.effect a) := by
+    have h2 : (heteroKron (opposite.effect g) (P.effect a))ᴴ =
+        heteroKron (opposite.effect g) (P.effect a) := by
       rw [hct, measurement_effect_hermitian, measurement_effect_hermitian]
     have hudiff : applyOperatorToState (heteroKron 1 (P.effect a * G.effect g)) ψ -
-        applyOperatorToState (heteroKron (G.effect g) (P.effect a)) ψ = u (a, g) := by
+        applyOperatorToState (heteroKron (opposite.effect g) (P.effect a)) ψ = u (a, g) := by
       simp only [hu]
       rw [show heteroKron (1 : Op ι) (P.effect a) *
-          (heteroKron 1 (G.effect g) - heteroKron (G.effect g) 1) =
+          (heteroKron 1 (G.effect g) - heteroKron (opposite.effect g) 1) =
           heteroKron 1 (P.effect a * G.effect g) -
-            heteroKron (G.effect g) (P.effect a) by
+            heteroKron (opposite.effect g) (P.effect a) by
         simp [mul_sub, heteroKron_mul]]
       simp [applyOperatorToState]
     rw [e1, e2, hqf, hqf, h1, h2, ← Complex.sub_re, ← inner_sub_left, hudiff]
@@ -123,12 +118,12 @@ theorem abs_cross_move_gap_le_sqrt {R₁ Γ₂ ι : Type*}
       (Measurement.rightPlacement (ιA := ι) G)
   have hmassU : (∑ p : R₁ × Γ₂, ‖u p‖ ^ 2) ≤
       ∑ g : Γ₂, ‖applyOperatorToState
-        (heteroKron 1 (G.effect g) - heteroKron (G.effect g) 1) ψ‖ ^ 2 := by
+        (heteroKron 1 (G.effect g) - heteroKron (opposite.effect g) 1) ψ‖ ^ 2 := by
     rw [Fintype.sum_prod_type, Finset.sum_comm]
     refine Finset.sum_le_sum fun g _ => ?_
     simpa [hu] using sum_norm_mul_apply_le
       (fun a : R₁ => heteroKron (1 : Op ι) (P.effect a))
-      (heteroKron 1 (G.effect g) - heteroKron (G.effect g) 1) ψ hCP
+      (heteroKron 1 (G.effect g) - heteroKron (opposite.effect g) 1) ψ hCP
   have hmassV : (∑ p : R₁ × Γ₂, ‖v p‖ ^ 2) ≤ 1 := by
     have hone : applyOperatorToState (1 : Op (ι × ι)) ψ = ψ := by
       simp [applyOperatorToState]
@@ -147,12 +142,12 @@ theorem abs_cross_move_gap_le_sqrt {R₁ Γ₂ ι : Type*}
   -- the expansion of the gap over the pairs
   have hexpand : (∑ a : R₁, ∑ g : Γ₂, stateQForm ψ (heteroKron 1
         (G.effect g * P.effect a * G.effect g * P.effect a))) -
-      (∑ g : Γ₂, stateQForm ψ (heteroKron (G.effect g)
+      (∑ g : Γ₂, stateQForm ψ (heteroKron (opposite.effect g)
         (∑ a : R₁, P.effect a * G.effect g * P.effect a))) =
       ∑ p : R₁ × Γ₂, (inner ℂ (u p) (v p)).re := by
-    have hB : (∑ g : Γ₂, stateQForm ψ (heteroKron (G.effect g)
+    have hB : (∑ g : Γ₂, stateQForm ψ (heteroKron (opposite.effect g)
         (∑ a : R₁, P.effect a * G.effect g * P.effect a))) =
-        ∑ a : R₁, ∑ g : Γ₂, stateQForm ψ (heteroKron (G.effect g)
+        ∑ a : R₁, ∑ g : Γ₂, stateQForm ψ (heteroKron (opposite.effect g)
           (P.effect a * G.effect g * P.effect a)) := by
       rw [Finset.sum_comm]
       refine Finset.sum_congr rfl fun g _ => ?_
@@ -171,14 +166,36 @@ theorem abs_cross_move_gap_le_sqrt {R₁ Γ₂ ι : Type*}
         simpa using Real.sum_mul_le_sqrt_mul_sqrt
           (Finset.univ : Finset (R₁ × Γ₂)) (fun p => ‖u p‖) (fun p => ‖v p‖)
     _ ≤ Real.sqrt (∑ g : Γ₂, ‖applyOperatorToState
-          (heteroKron 1 (G.effect g) - heteroKron (G.effect g) 1) ψ‖ ^ 2) * 1 := by
+          (heteroKron 1 (G.effect g) - heteroKron (opposite.effect g) 1) ψ‖ ^ 2) * 1 := by
         refine mul_le_mul (Real.sqrt_le_sqrt hmassU) ?_ (Real.sqrt_nonneg _)
           (Real.sqrt_nonneg _)
         rw [show (1 : ℝ) = Real.sqrt 1 by rw [Real.sqrt_one]]
         exact Real.sqrt_le_sqrt hmassV
     _ = Real.sqrt (∑ g : Γ₂, ‖applyOperatorToState
-          (heteroKron 1 (G.effect g) - heteroKron (G.effect g) 1) ψ‖ ^ 2) := by
+          (heteroKron 1 (G.effect g) - heteroKron (opposite.effect g) 1) ψ‖ ^ 2) := by
         rw [mul_one]
+
+/-- The move estimate of `lem:pasting` at a fixed question. The cross term of
+the commutator mass of a first codeword family against a second codeword
+family, both placed on the second tensor factor, differs from the expectation
+of the tensor products of the second codeword effects against their pinchings
+of the first family by at most the square root of the summed squared distance
+between the two placements of the second family. This is the move of step 5 of
+the proof of the adopted statement in
+`docs/paper-gaps/qpbt_pasting-product-error.tex`; blueprint
+`ch12_qpbt_games.tex:960-990`. -/
+theorem abs_cross_move_gap_le_sqrt {R₁ Γ₂ ι : Type*}
+    [Fintype R₁] [DecidableEq R₁] [Fintype Γ₂] [DecidableEq Γ₂]
+    [Fintype ι] [DecidableEq ι]
+    (P : Measurement R₁ ι) (G : Measurement Γ₂ ι)
+    (ψ : EuclideanSpace ℂ (ι × ι)) (hψ : ‖ψ‖ = 1) :
+    |(∑ a : R₁, ∑ g : Γ₂, stateQForm ψ (heteroKron 1
+          (G.effect g * P.effect a * G.effect g * P.effect a))) -
+        ∑ g : Γ₂, stateQForm ψ (heteroKron (G.effect g)
+          (∑ a : R₁, P.effect a * G.effect g * P.effect a))| ≤
+      Real.sqrt (∑ g : Γ₂, ‖applyOperatorToState
+        (heteroKron 1 (G.effect g) - heteroKron (G.effect g) 1) ψ‖ ^ 2) := by
+  exact abs_cross_move_gap_le_sqrt_distinct_families P G G ψ hψ
 
 /-- The expansion of the commutator mass of `lem:pasting` at a fixed question.
 For a measurement and a projective measurement placed on the second tensor

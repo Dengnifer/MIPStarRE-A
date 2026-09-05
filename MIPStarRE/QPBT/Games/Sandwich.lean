@@ -1,4 +1,5 @@
 import MIPStarRE.QPBT.Games.Sandwich.Pasting.Assembly
+import MIPStarRE.QPBT.Games.Sandwich.Pasting.SchmidtMirror
 import MIPStarRE.QPBT.Games.Sandwich.Quantitative
 import MIPStarRE.QPBT.Games.ErrorFunctions
 
@@ -111,29 +112,26 @@ theorem pastedMeasurement_isMeasurement {Γ₁ Γ₂ ι : Type*}
         intro g₂ _
         rw [G₁.sum_eq_one, mul_one, (hG₂ g₂).isIdempotentElem.eq]
       _ = 1 := G₂.sum_eq_one
-/-- Pasting two consistent measurements yields an additive polynomial error.
-All operator families in the conclusion are the postprocessed source
-families. This is `lem:pasting`, blueprint `ch12_qpbt_games.tex:960-990`, paper
-`references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:504-525`.
+/-- Conditional pasting estimate with an additional register-exchanged comparison.
 
-**Boundary hypothesis (ambient convention of the source):** the source states
-the lemma for symmetric strategies
-(`references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:84-86,174-176`), and
-the imported proof
-(`references/neexp-paper/05_quantum_preliminaries.tex:1150-1175`) exchanges
-the tensor factors of the second codeword measurement. The fourth comparison
-hypothesis below, `eq:pasting-1-sym`, is that register exchange of the second
-comparison in `eq:pasting-1`; it is the first symmetric equivalent of that
-comparison in the sense of `def:symmetric-equivalents`, it holds verbatim for
-a symmetric strategy, and it is the only consequence of the convention the
-proof uses. Without it the statement is unattested; the reduction to the
-pinched defect and the proof of the present form are recorded in
-`docs/paper-gaps/qpbt_pasting-product-error.tex`. The lemma is proved with the
+**Scope restriction:** this is not the printed `lem:pasting` in
+`references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:504-525`.
+The fourth comparison, `eq:pasting-1-sym`, is not a source hypothesis and does
+not follow from the other assumptions, even at zero error. The symmetric-strategy
+definition at lines 84--86 and the qualified convention at lines 174--176 do not
+establish an ambient assumption for this operator lemma. See issue #201 and
+`docs/paper-gaps/qpbt_pasting-product-error.tex`.
+
+This separate conditional theorem preserves the earlier proof. It is not used
+by `exists_pasting_error`, whose proof constructs a Schmidt mirror and needs
+no fourth comparison. Its blueprint entry displays the extra hypothesis;
+only the independently proved one-sided theorem matches the source entry.
+The lemma is proved with the
 error function `δp η δ = (3 * C + 19) * (η ^ (1/4) + δ ^ (1/8))`, where `C`
 is the constant of the coarse commutator estimate; on the unit square this
 dominates the assembled bound `2 * δ + Real.sqrt K`, and elsewhere it exceeds
 one, which bounds the defect of any two placed measurement families. -/
-theorem exists_pasting_error :
+theorem exists_pasting_error_of_register_exchange :
     ∃ δp : ℝ → ℝ → ℝ, IsPolyErr₂ δp ∧
       ∀ {X Y₁ Y₂ R₁ R₂ Γ₁ Γ₂ ι : Type*}
         [Fintype X] [DecidableEq X] [Fintype Y₁] [DecidableEq Y₁]
@@ -211,6 +209,110 @@ theorem exists_pasting_error :
   · rcases le_or_gt η 1 with hη1 | hηgt
     · refine le_trans (consistencyDefect_pasted_le_sqrt D eval₁ eval₂ G₁ G₂ A ψ
         η δ C hD hψ hη hG₂ hA hcoll h₁ h₂ h₃ h₄
+        (hCbound D eval₁ eval₂ G₁ G₂ A ψ δ hA h₁ h₂)) ?_
+      exact pasting_error_sqrt_le_rpow C δ η hC1 hδ hδ1 hη hη1
+    · refine le_trans hle1 ?_
+      have hb : (0:ℝ) ≤ δ ^ (1/8 : ℝ) := Real.rpow_nonneg hδ _
+      have ha : (1:ℝ) ≤ η ^ (1/4 : ℝ) := by
+        calc (1:ℝ) = (1:ℝ) ^ (1/4 : ℝ) := (Real.one_rpow _).symm
+          _ ≤ η ^ (1/4 : ℝ) :=
+            Real.rpow_le_rpow zero_le_one hηgt.le (by norm_num)
+      nlinarith [mul_nonneg (sub_nonneg.mpr hC1) (sub_nonneg.mpr ha),
+        mul_nonneg (show (0:ℝ) ≤ 3 * C + 19 by linarith) hb]
+  · refine le_trans hle1 ?_
+    have ha : (0:ℝ) ≤ η ^ (1/4 : ℝ) := Real.rpow_nonneg hη _
+    have hb : (1:ℝ) ≤ δ ^ (1/8 : ℝ) := by
+      calc (1:ℝ) = (1:ℝ) ^ (1/8 : ℝ) := (Real.one_rpow _).symm
+        _ ≤ δ ^ (1/8 : ℝ) :=
+          Real.rpow_le_rpow zero_le_one hδgt.le (by norm_num)
+    nlinarith [mul_nonneg (sub_nonneg.mpr hC1) (sub_nonneg.mpr hb),
+      mul_nonneg (show (0:ℝ) ≤ 3 * C + 19 by linarith) ha]
+
+/-- The one-sided pasting assertion `lem:pasting`, with the independently justified
+additive polynomial-error correction. Paper:
+`references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:504-525`.
+
+**Local fix:** `IsPolyErr₂` uses a sum of positive powers, not the refuted product
+interpretation; see `docs/paper-gaps/qpbt_pasting-product-error.tex`, issue #201.
+
+The proof constructs the state-dependent Schmidt mirror and applies
+`consistencyDefect_pasted_le_sqrt_one_sided`. It does not use the conditional
+register-exchange theorem. The printed self-consistency assumption is retained,
+although the mirror argument only needs the two forward marginal comparisons. -/
+theorem exists_pasting_error :
+    ∃ δp : ℝ → ℝ → ℝ, IsPolyErr₂ δp ∧
+      ∀ {X Y₁ Y₂ R₁ R₂ Γ₁ Γ₂ ι : Type*}
+        [Fintype X] [DecidableEq X] [Fintype Y₁] [DecidableEq Y₁]
+        [Fintype Y₂] [DecidableEq Y₂] [Fintype R₁] [DecidableEq R₁]
+        [Fintype R₂] [DecidableEq R₂]
+        [Fintype Γ₁] [DecidableEq Γ₁] [Fintype Γ₂] [DecidableEq Γ₂]
+        [Fintype ι] [DecidableEq ι]
+        (D : Distribution ((X × Y₁) × Y₂))
+        (eval₁ : Γ₁ → Y₁ → R₁) (eval₂ : Γ₂ → Y₂ → R₂)
+        (G₁ : X → Measurement Γ₁ ι) (G₂ : X → Measurement Γ₂ ι)
+        (A : ((X × Y₁) × Y₂) → Measurement (R₁ × R₂) ι)
+        (ψ : EuclideanSpace ℂ (ι × ι)) (η δ : ℝ),
+        D.IsProbability → ‖ψ‖ = 1 → 0 ≤ η → 0 ≤ δ →
+        (∀ x, MIPStarRE.QPBT.Measurement.IsProjective (G₂ x)) →
+        (∀ q, MIPStarRE.QPBT.Measurement.IsProjective (A q)) →
+        HasConditionalCollisionBound D eval₂ η →
+        consistencyDefect D
+          (fun q a₁ => heteroKron (((A q).postprocess Prod.fst).effect a₁) 1)
+          (fun q a₁ => heteroKron 1 (((G₁ q.1.1).postprocess
+            (fun g => eval₁ g q.1.2)).effect a₁)) ψ ≤ δ →
+        consistencyDefect D
+          (fun q a₂ => heteroKron (((A q).postprocess Prod.snd).effect a₂) 1)
+          (fun q a₂ => heteroKron 1 (((G₂ q.1.1).postprocess
+            (fun g => eval₂ g q.2)).effect a₂)) ψ ≤ δ →
+        consistencyDefect D (fun q a => heteroKron ((A q).effect a) 1)
+          (fun q a => heteroKron 1 ((A q).effect a)) ψ ≤ δ →
+        consistencyDefect D (fun q a => heteroKron ((A q).effect a) 1)
+          (fun q a => heteroKron 1 (∑ g₁ : Γ₁, ∑ g₂ : Γ₂,
+            if (eval₁ g₁ q.1.2, eval₂ g₂ q.2) = a then
+              pastedMeasurement (fun g => (G₁ q.1.1).effect g)
+                (fun g => (G₂ q.1.1).effect g) g₁ g₂ else 0)) ψ ≤ δp η δ := by
+  classical
+  obtain ⟨C, hC1, hCbound⟩ := exists_coarse_commutator_bound
+  refine ⟨fun x y => (3 * C + 19) * (x ^ (1/4 : ℝ) + y ^ (1/8 : ℝ)), ?_, ?_⟩
+  · refine ⟨3 * C + 19, 1/4, 1/8, by linarith, by norm_num, by norm_num, ?_⟩
+    intro x y hx hy
+    exact ⟨mul_nonneg (by linarith)
+      (add_nonneg (Real.rpow_nonneg hx _) (Real.rpow_nonneg hy _)), le_rfl⟩
+  intro X Y₁ Y₂ R₁ R₂ Γ₁ Γ₂ ι _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+    D eval₁ eval₂ G₁ G₂ A ψ η δ hD hψ hη hδ hG₂ hA hcoll h₁ h₂ _h₃
+  have hpm : ∀ q : (X × Y₁) × Y₂,
+      (∀ g : Γ₁ × Γ₂, 0 ≤ pastedMeasurement (fun g => (G₁ q.1.1).effect g)
+          (fun g => (G₂ q.1.1).effect g) g.1 g.2) ∧
+        (∑ g : Γ₁ × Γ₂, pastedMeasurement (fun g => (G₁ q.1.1).effect g)
+          (fun g => (G₂ q.1.1).effect g) g.1 g.2) = 1 :=
+    fun q => pastedMeasurement_isMeasurement (G₁ q.1.1) (G₂ q.1.1) (hG₂ q.1.1)
+  set Bp : ((X × Y₁) × Y₂) → Measurement (R₁ × R₂) ι := fun q =>
+    (Measurement.ofSumEqOne
+      (fun g : Γ₁ × Γ₂ => pastedMeasurement (fun g => (G₁ q.1.1).effect g)
+        (fun g => (G₂ q.1.1).effect g) g.1 g.2) (hpm q).1 (hpm q).2).postprocess
+      (fun g => (eval₁ g.1 q.1.2, eval₂ g.2 q.2)) with hBpdef
+  have heff : ∀ (q : (X × Y₁) × Y₂) (a : R₁ × R₂), (Bp q).effect a =
+      ∑ g₁ : Γ₁, ∑ g₂ : Γ₂, if (eval₁ g₁ q.1.2, eval₂ g₂ q.2) = a then
+        pastedMeasurement (fun g => (G₁ q.1.1).effect g)
+          (fun g => (G₂ q.1.1).effect g) g₁ g₂ else 0 := by
+    intro q a
+    rw [hBpdef]
+    simp only [Measurement.postprocess_effect, Measurement.ofSumEqOne]
+    rw [Finset.sum_filter, Fintype.sum_prod_type]
+  have hle1 := consistencyDefect_placed_le_one D A Bp ψ hD hψ
+  have hfam : (fun (q : (X × Y₁) × Y₂) (a : R₁ × R₂) =>
+        heteroKron (1 : Op ι) ((Bp q).effect a)) =
+      fun (q : (X × Y₁) × Y₂) (a : R₁ × R₂) => heteroKron (1 : Op ι)
+        (∑ g₁ : Γ₁, ∑ g₂ : Γ₂, if (eval₁ g₁ q.1.2, eval₂ g₂ q.2) = a then
+          pastedMeasurement (fun g => (G₁ q.1.1).effect g)
+            (fun g => (G₂ q.1.1).effect g) g₁ g₂ else 0) := by
+    funext q a
+    rw [heff q a]
+  rw [hfam] at hle1
+  rcases le_or_gt δ 1 with hδ1 | hδgt
+  · rcases le_or_gt η 1 with hη1 | hηgt
+    · refine le_trans (consistencyDefect_pasted_le_sqrt_one_sided D eval₁ eval₂ G₁ G₂ A ψ
+        η δ C hD hψ hη hG₂ hA hcoll h₁ h₂ hδ hδ1
         (hCbound D eval₁ eval₂ G₁ G₂ A ψ δ hA h₁ h₂)) ?_
       exact pasting_error_sqrt_le_rpow C δ η hC1 hδ hδ1 hη hη1
     · refine le_trans hle1 ?_

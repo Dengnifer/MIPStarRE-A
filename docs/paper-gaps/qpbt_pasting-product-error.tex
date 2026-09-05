@@ -20,13 +20,15 @@
 
 \begin{itemize}
   \item \textbf{Difficulty.} Medium.  The operator estimate imported by the
-  source is plausible, but its stated two-variable polynomial contract is
+  source now has a one-sided proof, but its stated two-variable polynomial contract is
   contradicted by a two-dimensional example at every fixed positive input
   consistency error.
   \item \textbf{Estimated weight.} Correcting the scalar contract changes one
-  shared predicate.  Formalizing the resulting quantitative pasting estimate
-  is expected to require roughly 300--600 lines using the existing distance
-  calculus.
+  shared predicate. The conditional quantitative estimates are now formalized;
+  the Schmidt construction, norm estimate, measurement transport, and
+  distinct-family cross moves and collision bounds are now also formalized.
+  The averaged mirror estimate, distinct-family commutator comparison, and
+  one-sided error assembly are now also formalized.
   \item \textbf{Mathlib/project split.} The obstruction is elementary real
   analysis and finite-dimensional measurement theory.  The repaired proof is
   primarily project-local consistency and Cauchy--Schwarz calculus.
@@ -34,10 +36,13 @@
   at zero, while a fixed positive consistency error need not decrease with the
   collision error.
   The discrepancy is tracked in \ghissue{196}.
-  \item \textbf{Adopted statement.}  The paper-facing declaration carries
-  the register exchange of the second-marginal comparison, the only
-  consequence of the source's symmetric-strategy convention its proof uses;
-  the one-sided form without it is unattested.  Tracked in \ghissue{201}.
+  \item \textbf{Current verdict.} The additive scalar correction is retained.
+  The claimed symmetric domain of the operator lemma is not established by
+  the source. A dimension-independent one-sided proof using Schmidt mirrors
+  is given below. Its state-dependent mirror and norm estimate, as well as the
+  distinct-family cross moves and collision bounds, are formalized. The
+  source-facing theorem is proved without the fourth comparison. The proved
+  register-exchange theorem is kept separately and is not its dependency. Tracked in \ghissue{201}.
 \end{itemize}
 
 \section{Key theorem forms}
@@ -78,6 +83,33 @@ fact, however, bounds the two sources of error independently; see
 and \path{references/neexp-paper/05_quantum_preliminaries.tex},
 lines~1030--1209.}
 
+More explicitly, fix a probability distribution $\mathcal D$ on
+$(x,y_1,y_2)$, a unit bipartite state $\psi$, and nonnegative $\eta,\delta$.
+Let $G_i^x$ be measurements indexed by functions
+$g_i:\mathcal Y_i\to\mathcal R_i$, with $G_2^x$ projective, and let
+$A^{x,y_1,y_2}$ be a projective joint answer measurement. Assume that distinct
+second codewords agree with conditional probability at most $\eta$, given
+$(x,y_1)$ whenever this conditioning has positive probability. Write
+$Q_{i,a_i}=(G_i)^x_{[\operatorname{eval}_{y_i}(\cdot)=a_i]}$.
+The input comparisons, averaged over $\mathcal D$, are
+\begin{equation}\label{eq:pasting-1}
+ A^{x,y_1,y_2}_{a_i}\ot\mathrm{Id}
+ \simeq_\delta\mathrm{Id}\ot Q_{i,a_i}\quad(i=1,2),
+\end{equation}
+\begin{equation}\label{eq:pasting-2}
+ A^{x,y_1,y_2}_{a_1,a_2}\ot\mathrm{Id}
+ \simeq_\delta\mathrm{Id}\ot A^{x,y_1,y_2}_{a_1,a_2}.
+\end{equation}
+Define $J^x_{g_1,g_2}=(G_2)^x_{g_2}(G_1)^x_{g_1}(G_2)^x_{g_2}$.
+The asserted universal function $\delta_{\mathrm{pasting}}$ bounds
+\begin{equation}\label{eq:pasting-3}
+ A^{x,y_1,y_2}_{a_1,a_2}\ot\mathrm{Id}
+ \simeq_{\delta_{\mathrm{pasting}}(\eta,\delta)}
+ \mathrm{Id}\ot J^x_{[g_1(y_1)=a_1,\,g_2(y_2)=a_2]}.
+\end{equation}
+The error function is chosen before the distribution, alphabets, dimension,
+state, and measurements; no constant may depend on these objects.
+
 \section{A two-dimensional counterexample}
 
 Fix $0<\rho<1$.  Let every question set, both codeword sets, and the second
@@ -117,52 +149,51 @@ be arbitrarily small, this failure is not confined to the large-error boundary.
 
 \section{Comparison with the blueprint and formalization}
 
-The blueprint reproduces the source theorem and its unrestricted nonnegative
-error parameters.  The formal predicate now states the corrected sum bound
-$A(\eta^r+\delta^s)$ on the closed nonnegative quadrant, and the paper-facing
-pasting declaration carries, in addition, the register exchange of the
-second-marginal comparison as a boundary hypothesis encoding the source's
-symmetric-strategy convention (see the status section below).%
-\footnote{The polynomial predicate is defined in
-\doclink{MIPStarRE/QPBT/Games/ErrorFunctions.lean}; the paper-facing theorem is
+The predicate for the corrected scalar contract remains
+$A(\eta^r+\delta^s)$ on the closed nonnegative quadrant. No definition of a
+measurement, pasted operator, strategy, or game is changed in this recheck.
+The source-facing declaration
 \leanid{exists\_pasting\_error} in
-\doclink{MIPStarRE/QPBT/Games/Sandwich.lean}.}
-The declaration must remain without a proof-complete blueprint marker until
-the quantitative estimate is formalized.  The operator-valued pasting
-construction itself is not refuted by this example.
+\doclink{MIPStarRE/QPBT/Games/Sandwich.lean} now has the three printed
+comparisons and one tracked proof hole. The previous proof is preserved as
+\leanid{exists\_pasting\_error\_of\_register\_exchange}; only the separate,
+explicitly conditional blueprint entry has a proof-complete marker.
 
 \section{Status of the one-sided formal statement}
 
-The corrected scalar contract removes the obstruction above, and the
-paper-facing declaration is proved (\ghissue{201}) with the explicit error
-function
-\[
-  \delta_{\mathrm{pasting}}(\eta,\delta)
-    =(3C+19)\bigl(\eta^{1/4}+\delta^{1/8}\bigr),
-\]
-where $C$ is the universal constant of the coarse commutator estimate.  This
-section records the obstacle that makes the extra comparison hypothesis of the
-adopted statement necessary.
+\subsection*{Source-domain audit}
 
-\subsection*{The two theorem forms}
+The definition of a symmetric strategy in
+\cite[lines~84--86]{Ji2020MIPStar} requires a swap-invariant state and identical
+measurements. The sentence at lines~174--176 says that attention is
+\emph{almost always} restricted to symmetric strategies. Neither passage
+imposes this hypothesis on every subsequent operator lemma. In particular,
+\texttt{lem:pasting}, lines~504--525, states the two forward marginal
+comparisons and the self-consistency of the joint answer measurement, not
+swap invariance or a fourth comparison. The earlier assertion in this note
+that the one-sided form was unattested is withdrawn.
 
-The source states the lemma for symmetric strategies: the shared state is a
-vector in $\mathcal H\ot\mathcal H$ invariant under the permutation of the two
-factors, and both players use the same measurement operators
-(\cite[lines~84--86 and~174--176]{Ji2020MIPStar}).  Under this convention the
-relation $X\ot\mathrm{Id}\simeq_\delta\mathrm{Id}\ot Y$ implies
-$Y\ot\mathrm{Id}\simeq_\delta\mathrm{Id}\ot X$, and the imported proof
-(\cite[lines~1150--1175]{Natarajan2018NEEXP}) uses this freely: it moves the
-fine-grained second codeword effect $(G_2)^x_{g_2}$ between the two factors and
-bounds the resulting collision term by $\eta$ using the positivity of
-$\langle\psi|\,(G_1G_2G_1)\ot G_2\,|\psi\rangle$.
+The imported Fact~4.35, \texttt{fact:low-degree-sandwich-on-steroids} in
+\cite[lines~1000--1030]{Natarajan2018NEEXP}, likewise states the forward
+comparisons and joint self-consistency. Its move at lines~1150--1185 requires
+consistency of the second codeword family with its identical opposite-register
+copy. The invocation of the triangle estimate does not justify this from the
+three printed comparisons. This invalidates that particular proof step, not
+necessarily its conclusion.
 
-The formal declaration quantifies over an arbitrary unit vector of the
-bipartite space and assumes only the three forward comparisons
-\eqref{eq:pasting-1}--\eqref{eq:pasting-2} of the source, in which every
-answer operator acts on the first factor and every codeword operator on the
-second.  No operator indexed by a codeword $g_2$ acts on the first factor, so
-the register move of the source is not available.
+Indeed, the extra comparison need not follow even when $\eta=\delta=0$.
+Take one question of each kind, $\mathcal H=\mathbb C^2$, and
+$\psi=|0\rangle\ot|1\rangle$. Let the first answer alphabet have one element,
+let $G_1=\mathrm{Id}$, and let the two second codewords have different values
+$0,1$ at the unique second question. Set $G_{2,0}=|0\rangle\langle0|$,
+$G_{2,1}=|1\rangle\langle1|$. Let $A$ always answer $(\ast,1)$:
+$A_{\ast,1}=\mathrm{Id}$ and $A_{\ast,0}=0$.
+The conditional collision probability and all three printed defects are zero.
+The defect of the register-exchanged second comparison is one. Nevertheless
+$J_{\ast,b}=G_{2,b}$, so the conclusion also has defect zero. Thus this is a
+counterexample to deriving the extra comparison, \emph{not} to the one-sided
+pasting theorem. The previously documented counterexample to the product
+error contract is separate and remains valid.
 
 \subsection*{A one-sided reduction}
 
@@ -173,12 +204,14 @@ evaluating to $a_2$ at $y_2$.  Since the first-factor projections are
 orthogonal and commute with every second-factor operator, the defect of the
 conclusion \eqref{eq:pasting-3} at a fixed question equals
 \[
-  \sum_a\sum_{g_2\notin[a_2]}
-    \bigl\|(\mathrm{Id}\ot G_{g_2})\psi_a\bigr\|^2
-  +\sum_a\sum_{g_2\in[a_2]}
+ \begin{aligned}
+  &\sum_a\sum_{g_2\notin[a_2]}
+    \bigl\|(\mathrm{Id}\ot G_{g_2})\psi_a\bigr\|^2\\
+  &\quad+\sum_a\sum_{g_2\in[a_2]}
     \bigl\langle(\mathrm{Id}\ot G_{g_2})\psi_a\bigm|
       \mathrm{Id}\ot(\mathrm{Id}-P_{a_1})\bigm|
       (\mathrm{Id}\ot G_{g_2})\psi_a\bigr\rangle .
+ \end{aligned}
 \]
 The first sum is the second-marginal defect of \eqref{eq:pasting-1}, at most
 $\delta$ on average.  The second sum is at most the \emph{pinched defect}
@@ -187,95 +220,460 @@ $\delta$ on average.  The second sum is at most the \emph{pinched defect}
     \bigl\langle(\mathrm{Id}\ot G_{g_2})\psi_{a_1}\bigm|
       \mathrm{Id}\ot(\mathrm{Id}-P_{a_1})\bigm|
       (\mathrm{Id}\ot G_{g_2})\psi_{a_1}\bigr\rangle,
-  \qquad \psi_{a_1}=(A_{a_1}\ot\mathrm{Id})\psi,
 \]
-which is the defect of the first-marginal comparison against the family
+where $\psi_{a_1}=(A_{a_1}\ot\mathrm{Id})\psi$. This is the defect of the
+first-marginal comparison against the family
 $\sum_{g_2}G_{g_2}P_{a_1}G_{g_2}$.  The hypothesis \eqref{eq:pasting-1} for
 $i=1$ bounds the same expression without the pinching by $G_2$.  The theorem
 is therefore equivalent, up to an additive $\delta$, to the assertion that
 measuring the second codeword family on the second factor does not destroy the
 first-codeword mass of the vectors $\psi_{a_1}$.
 
-\subsection*{The obstacle}
+\subsection*{Why the earlier estimates stopped}
 
-In the exact case $\delta=\eta=0$ the pinched defect vanishes one-sidedly:
-every fine effect $G_{g_2}$ then coincides with a coarse projector
-$Q^{y_2}_{a_2}=(G_2)^x_{[\operatorname{eval}_{y_2}=a_2]}$, the coarse
-projector moves to the first factor by \eqref{eq:pasting-1} for $i=2$, and
-there it commutes with $\mathrm{Id}\ot P_{a_1}$.  For $\eta>0$ the fine
-effects differ from the coarse projectors by the collision cross terms
-\[
-  \sum_{a}\;\sum_{\substack{g_2\neq g_2'\\ g_2,g_2'\in[a_2]}}
-    \bigl\langle\psi\bigm|(A_a\ot\mathrm{Id})
-      (\mathrm{Id}\ot G_{g_2}P_{a_1}G_{g_2'})\bigm|\psi\bigr\rangle .
-\]
-These terms are not positive, and no operator on the first factor is indexed
-by the second codeword.  The available one-sided estimates bound each term by
-$\|(\mathrm{Id}\ot G_{g_2})\psi\|\,\|(\mathrm{Id}\ot G_{g_2'})\psi\|$, and the
-conditional collision bound then yields, after averaging over $y_2$, a bound
-of order $\eta$ times the expected number of second codewords colliding with a
-given one.  In the intended applications this number is comparable to
-$|\mathcal G_2|/|\mathcal R_2|$, so the resulting bound is not polynomial in
-$(\eta,\delta)$ with universal constants.  Expressing a fine effect as an
-average of coarse projectors over independent samples of $y_2$ carries the
-same multiplicity.  The symmetric convention avoids this: the second-factor
-codeword effect is replaced by the identical effect on the first factor, the
-cross term becomes an expectation of a tensor product of positive operators,
-and the collision indicator can be averaged against a total mass at most one.
+Bounding each off-diagonal collision term in the pinched defect separately
+loses a factor depending on the number of codewords. Assuming the
+register-exchanged comparison avoids that loss, but the preceding example
+shows that this is not a consequence of the source assumptions. It does not
+show that such a restriction is necessary for the conclusion. The following
+argument replaces the identical opposite-register copy by a constructed one.
 
-\subsection*{What is known about the one-sided statement}
+\subsection*{A dimension-independent Schmidt-mirror argument}
 
-No counterexample is known.  The self-consistency hypothesis
-\eqref{eq:pasting-2} together with \eqref{eq:pasting-1} for $i=2$ forces the
-post-measurement vectors $(\mathrm{Id}\ot G_{g_2})\psi$ to be approximately
-fixed by the first-factor projector $A^{x,y_1,y_2}_{[g_2]}$ for every $y_2$,
-and hence, using the collision bound, the reduced state of the second player
-is nearly diagonal in the eigenbasis of $G_2$ (its off-diagonal part has
-squared Frobenius norm at most $4\delta/(1-\eta)$).  This suggests that the
-hypotheses force the strategy to behave symmetrically where the codeword
-operators act, and that the one-sided statement is true, but a quantitative
-argument turning this into a bound on $\Delta_1$ is not in the source and is
-not available.
+This is an additional finite-dimensional argument, not a claimed passage of
+the cited proof. Choose Schmidt bases once for the state and write
+$\psi=\sum_i s_i e_i\ot f_i$, with $s_i\geq0$. The bases are completed across
+the zero Schmidt coefficients. Put $S=\operatorname{diag}(s_i)$.
+For a Bob operator $B$, define $\widetilde B$ on Alice to have matrix $B^T$
+in these bases. Transposition preserves positivity, projectivity, sums, and
+coarse-graining; hence a projective family is sent to a projective family.
+This construction depends only on the state and on $B$, not on the sampled
+second question. It does not change any operator in the conclusion.
 
-\subsection*{The adopted statement}
-
-Following the protocol in \path{docs/paper-gaps/proof-gap-protocol.tex}, an
-extra hypothesis is admissible on the paper-facing declaration only as a
-documented faithful encoding of the source's ambient hypotheses.  The
-symmetric-strategy convention of the source is such an ambient hypothesis,
-and the imported proof uses exactly one consequence of it: the second
-comparison in \eqref{eq:pasting-1} read from the other player,
-\begin{equation}\label{eq:pasting-1-sym}
-  (G_2)^x_{[\operatorname{eval}_{y_2}(\cdot)=a_2]}\ot\mathrm{Id}
-    \simeq_\delta \mathrm{Id}\ot A^{x,y_1,y_2}_{a_2}\,,
+For any Hermitian Alice operator $H$ and Hermitian Bob operator $B$, one has
+\begin{equation}\label{eq:schmidt-mirror}
+ \| (\widetilde B\ot\mathrm{Id}-\mathrm{Id}\ot B)\psi\|^2
+ \leq 2\| (H\ot\mathrm{Id}-\mathrm{Id}\ot B)\psi\|^2.
 \end{equation}
-the first symmetric equivalent of that comparison in the sense of the
-blueprint definition \texttt{def:symmetric-equivalents}.  The paper-facing
-declaration now carries \eqref{eq:pasting-1-sym} as a fourth comparison
-hypothesis, with all other hypotheses and the conclusion unchanged.  This is
-the minimal form: it is weaker than permutation invariance of the shared
-vector, which yields every register exchange at once; it follows verbatim
-from the source convention; no register exchange of the first comparison or
-of the self-consistency is assumed; and the proof below uses it in exactly
-one step.  The earlier one-sided form is retired, since it is not the source
-statement and the preceding subsections record why it is unattested.
+Here is a proof that includes singular states and complex entries. For real
+$s,t\geq0$ and complex $u,v$,
+\begin{align*}
+ |tu-sv|^2+|su-tv|^2-(s-t)^2|v|^2
+   &=(s-t)^2|u|^2+2st|u-v|^2\geq0.
+\end{align*}
+Apply this with $u=H_{ij}$ and $v=(B^T)_{ij}$. Hermiticity identifies the two
+terms on the left with the errors at $(i,j)$ and $(j,i)$ of $HS-SB^T$.
+Summing over all ordered pairs gives
+$\|B^TS-SB^T\|_F^2\leq2\|HS-SB^T\|_F^2$.
+Vectorizing the coefficient matrix of $\psi$ proves
+\eqref{eq:schmidt-mirror}. No inverse of $S$ or lower bound on its nonzero
+entries is used. The scalar, diagonal-matrix, and Hilbert-norm estimates are
+now kernel-checked as \leanid{schmidt\_pair\_mirror\_estimate},
+\leanid{schmidt\_diagonal\_mirror\_estimate}, and
+\leanid{schmidtMirror\_norm\_sq\_le}, respectively, in
+\doclink{MIPStarRE/QPBT/Games/Sandwich/Pasting/SchmidtMirror.lean}.
 
-\subsection*{Sufficiency at the single use}
+For completeness, the formal construction obtains unitary $U,V$ and
+$s_i\geq0$ with $C=U\operatorname{diag}(s_i)V^*$ for the coefficient matrix
+$C$ of $\psi$. The Bob Schmidt basis consists of the conjugated columns of
+$V$, so the mirror in the computational bases is $UV^*B^TVU^*$, not
+$UB^TU^*$. The unitary choices are fixed once for $C$; they do not depend on
+$B$, $H$, or any sampled question. The theorem
+\leanid{exists\_schmidt\_coordinates} derives this decomposition by
+reusing the project's proved positive-Gram completion: diagonalize $C^*C$,
+normalize $Cv_i$ only when its eigenvalue is positive, and complete these
+orthonormal images on the left. On zero-eigenvalue directions $Cv_i=0$, so
+arbitrary orthonormal completion still gives the exact factorization.
+The reused construction is in
+\doclink{MIPStarRE/LDT/MakingMeasurementsProjective/QXPLayerIdentities/PositiveGram/Completion.lean};
+its spectral input comes from
+\doclink{.lake/packages/mathlib/Mathlib/Analysis/Matrix/Spectrum.lean}.
+This is a derived representation of the state, not supplied proof data.
 
-The blueprint applies the pasting lemma once, in the combined line
-measurements of the quantum low-degree test (blueprint node
-\texttt{lem:qld-xz-lines}, paper
-\path{references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:938-962}).
-There the roles of $A$, $G_1$, $G_2$ are played by the combined point
-measurement $\hat Q^{x,z}$ and the two expanded line measurements, all acting
-on the parties of the expanded state, and the input relations are the marginal
-consistencies and the self-consistency of \texttt{lem:qld-4-10}, for which
-that lemma establishes all symmetric equivalents.  Hence
-\eqref{eq:pasting-1-sym} is available at the use, and the source itself
-asserts the conclusion for all symmetric equivalents.  No other blueprint node
-or Lean declaration invokes the pasting theorem.
+The linear map \leanid{schmidtMirror} preserves the identity, adjoints,
+and positivity, and reverses multiplication. Consequently
+\leanid{schmidtMirrorMeasurement} is a complete measurement, is projective
+when the input is projective, and commutes with every coarse-graining.
+These properties are proved in the same module. The norm estimate is stated
+for every vector and every pair of Hermitian operators; it needs neither
+normalization of the vector nor faithfulness of the reduced state.
 
-\subsection*{Proof of the adopted statement}
+Apply \eqref{eq:schmidt-mirror} to each coarse second-codeword projector
+$Q_{a_2}$ and the corresponding Alice marginal $A_{a_2}$. For two projective
+measurements on opposite registers, the summed squared distance is twice
+the consistency defect. The second forward comparison therefore gives
+\[
+ \mathbb E\sum_{a_2}
+ \|(\widetilde Q_{a_2}\ot\mathrm{Id}-\mathrm{Id}\ot Q_{a_2})\psi\|^2
+ \leq4\delta.
+\]
+Let $\epsilon_c$ and $\epsilon_f$ denote the coarse and fine consistency
+defects between the mirror family and the Bob family. Thus
+$\epsilon_c\leq2\delta$. The positive weights
+$\langle\psi|\widetilde G_h\ot G_g|\psi\rangle$ sum to one.
+For $g\neq h$, split according to whether $g(y_2)=h(y_2)$.
+After conditioning on $(x,y_1)$, the collision assumption bounds the agreeing
+part by $\eta$, since these weights are independent of $y_2$.
+The disagreeing part is the coarse defect. Consequently
+\[
+ \epsilon_f\leq\epsilon_c+\eta\leq2\delta+\eta,
+ \qquad
+ \mathbb E\sum_g\|(\widetilde G_g\ot\mathrm{Id}
+                   -\mathrm{Id}\ot G_g)\psi\|^2\leq4\delta+2\eta.
+\]
+Zero-probability conditional fibers contribute zero and need no assumption.
+
+The two forward comparisons give the coarse commutator estimate
+$K_0\leq C\delta$ for a universal $C\geq1$, by the source's joint-projective
+commutation calculus, formalized in \leanid{exists\_coarse\_commutator\_bound}.
+The ordered-product mass estimate \leanid{mass\_ordered\_product\_ge} gives
+an averaged mass at least $1-m$, where
+\[
+ m=2\sqrt{2\delta}+2\delta+2\sqrt{C\delta}+C\delta.
+\]
+This is the explicit bound used in Lean; neither estimate requires register
+exchange. For the cross terms, replace every Alice occurrence of $G_g$ by
+$\widetilde G_g$ and of $Q_{a_2}$ by $\widetilde Q_{a_2}$.
+The fiber expansion uses linearity and compatibility with coarse-graining,
+which the mirror preserves. In particular, the coarse pinched cross term
+minus the fine one becomes
+\[
+ \sum_{a_1}\sum_{g\neq h,\ g(y_2)=h(y_2)}
+ \langle\psi|\widetilde G_h\ot P_{a_1}G_gP_{a_1}|\psi\rangle.
+\]
+Each term is nonnegative. Summing without the collision condition is at most
+$\sum_{a_1}\langle\psi|\mathrm{Id}\ot P_{a_1}^2|\psi\rangle\leq1$.
+Its conditional average is therefore at most $\eta$, with no codeword-count
+factor. Expanding the four commutator terms, the reversed-product masses
+agree, the ordered-product masses differ by at most $m$, and Cauchy--Schwarz
+in the two cross moves gives
+\[
+ K\leq C\delta+m+2\eta+2\sqrt{4\delta+2\eta}+2\sqrt{4\delta}.
+\]
+This is the distinct-family estimate
+\leanid{commutator\_mass\_fine\_le\_distinct\_families} applied to the
+constructed mirror. The pinched reduction bounds the final defect by
+$2\delta+\sqrt K$.
+
+For the final scalar calculation on $[0,1]^2$, Lean uses the convenient
+upper bound $2\delta\leq t=\delta+2\sqrt{2\delta}$ in the coarse mirror
+consistency estimate. It therefore bounds $K$ by
+\[
+ \widehat K=C\delta+m+2\eta+2\sqrt{2(t+\eta)}+2\sqrt{2t}.
+\]
+Writing $u=\delta^{1/8}$ and $v=\eta^{1/4}$, the existing scalar estimate
+\leanid{pasting\_error\_sqrt\_le\_rpow} bounds
+$\widehat K$ by $(3C+18)u^2+6v^2$ and yields
+\[
+ 2\delta+\sqrt{\widehat K}\leq(3C+19)(\eta^{1/4}+\delta^{1/8}).
+\]
+Outside the unit square the same error function exceeds one, which bounds
+every consistency defect between opposite-register measurements of a unit
+vector. Thus the universal error function can be chosen, before any types,
+state, distribution, or measurements, as
+\[
+ \delta_{\mathrm{pasting}}(\eta,\delta)
+   =(3C+19)(\eta^{1/4}+\delta^{1/8}).
+\]
+The joint self-consistency assumption is not needed by this argument but is
+retained in the public statement. No state symmetry, faithful reduced state,
+or reversed marginal comparison is assumed.
+
+\subsection*{Adversarial checks and completed formal argument}
+
+The argument permits zero Schmidt coefficients, arbitrarily unequal positive
+coefficients, complex Hermitian effects (the mirror is a transpose, not an
+identical copy), a nonprojective first family, arbitrary finite codeword
+cardinality, and correlated question distributions. At $\delta=0$ it gives
+an error tending to zero with $\eta$; at $\eta=0$ it gives an error tending to
+zero with $\delta$. For the product-state example above, the mirror of
+$G_{2,1}$ is the projection onto Alice's Schmidt partner $|0\rangle$, not the
+original matrix $|1\rangle\langle1|$. Thus the construction does not purport
+to derive the disproved extra comparison.
+
+The public theorem \leanid{exists\_pasting\_error} now has a complete proof
+from its source-aligned hypotheses. Its former single proof hole is removed.
+The averaged coarse estimate is
+\leanid{consistencyDefect\_schmidtMirror\_le}; it holds even for an
+unnormalized vector and a nonprojective Alice predictor. Projectivity is
+required only for the Bob family, so that the mirror and Bob distances equal
+twice their consistency defect. Averaging uses nonnegative distribution
+weights and introduces no dimension-dependent factor.
+
+The independently proved cross-move and collision estimates are integrated
+through \leanid{pinched\_coarse\_sub\_fine\_eq\_distinct\_families} and
+\leanid{commutator\_mass\_fine\_le\_distinct\_families}.
+Their identical-family versions remain proved specializations with unchanged
+signatures. The final analytic estimate is
+\leanid{consistencyDefect\_pasted\_le\_sqrt\_one\_sided}; it takes the
+two forward comparisons, not a fourth comparison or self-consistency.
+Its unit-interval restriction is used only to reuse a conservative scalar
+majorant and is discharged by the trivial bound outside that interval in
+\leanid{exists\_pasting\_error}. It is not a restriction of the public theorem.
+
+The separate conditional result
+\leanid{exists\_pasting\_error\_of\_register\_exchange} still assumes
+\begin{equation}\label{eq:pasting-1-sym}
+ (G_2)^x_{[\operatorname{eval}_{y_2}(\cdot)=a_2]}\ot\mathrm{Id}
+ \simeq_\delta\mathrm{Id}\ot A^{x,y_1,y_2}_{a_2}.
+\end{equation}
+It is not used by the source-facing theorem. Its earlier proposed use as a
+source-domain correction is withdrawn: the mirror proof shows that no
+additional operator hypothesis is necessary. The original forward hypotheses
+are weaker than either register-exchange or state-symmetry restrictions and
+are sufficient. No mathematical definition or game specification is changed.
+
+\subsection*{Use analysis}
+
+A search of both paper mirrors finds one direct application of
+\texttt{lem:pasting} in the QPBT paper, in the proof of
+\texttt{lem:qld-xz-lines}, lines~938--962 of
+\path{references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex}.
+There $A=\hat Q$, the two codeword families are the expanded line
+measurements, and the collision bound is $md/q$ by Schwartz--Zippel.
+The displayed assignment of $G_1,G_2$ in the source reverses the order of its
+displayed sandwich $T=M_XM_ZM_X$. To obtain precisely that $T$, take $G_1=M_Z$,
+$G_2=M_X$, and exchange the two answer coordinates in $A$ and in the final
+postprocessing. Both line families are projective and the same conditional
+Schwartz--Zippel bound holds with the roles exchanged. This is an application
+and outcome relabelling, not a change to the definition of $T$.
+The input comparisons come from \texttt{lem:qld-4-10}; that lemma is an
+\emph{input}, not a consequence of pasting. Its symmetric equivalents also
+permit the conditional theorem at this application, but do not establish a
+symmetric domain for the general operator lemma. The mirror proof leaves
+$J$ unchanged, so the definition of the joint line measurement $T$ and every
+subsequent use of its consistency, positivity, and completeness are unchanged.
+
+This is one direct application, not a single dependent theorem. The
+\texttt{lem:qld-xz-lines} conclusion is used for restricted line laws, for
+the combined line construction following \texttt{lem:qld-sublines}, and for
+the three consistency calculations leading to \texttt{lem:qld-4-13} and
+\texttt{lem:qld-4-7}. The extraction construction then uses the resulting
+combined measurement, through \texttt{lem:qld-construct-the-paulis} and
+\texttt{lem:qld-unitary}, ending at the proof of
+\texttt{thm:pauli-appendix}, lines~1862--1876 of the same source file.
+These uses require only the same joint measurement,
+the same directed comparisons, and an unspecified universal polynomial-small
+error. Replacing that error by a sum of positive powers, and then composing
+with $\delta_Q$, remains a sum of positive powers. No use requires the
+particular exponents of the conditional proof.
+
+The transitive \verb|\uses{}| descendants of the source-labelled blueprint
+node are as follows. Detached proofs must be attached to the declaration
+named by \verb|\proves{}|, not to the nearest preceding declaration;
+otherwise the final soundness theorem and its descendants are missed.
+Chapter numbers identify the files under \path{blueprint/src/chapter/}:
+\begin{itemize}
+ \item Chapter~13: \path{thm:pauli}, \path{cor:pauli-binary},
+ \path{def:introparams}, and \path{lem:delta-bound}. The detached proof
+ of \path{thm:pauli} is in Chapter~16. These use the same robustness error
+ family with possibly different universal constants and positive exponents;
+ they impose no particular pasting exponent.
+ \item Chapter~15: \path{lem:qld-xz-lines},
+ \path{lem:restricted-line-mixture-bounds},
+ \path{lem:claim-17-1}, \path{lem:claim-17-2}, \path{lem:claim-17-3},
+ \path{lem:qld-4-13}, \path{lem:qld-4-13-established}, and
+ \path{lem:qld-4-7}.
+ \item Chapter~16: \path{def:s-w-marginals},
+ \path{lem:s-w-marginals-projective}, \path{def:tilde-m-measurement},
+ \path{lem:tilde-m-projective}, \path{def:tilde-w-observables},
+ \path{lem:tildew-product-form}, \path{lem:qld-construct-the-paulis},
+ \path{lem:qld-nonencoding-mass-bound},
+ \path{lem:qld-constructing-the-paulis-helper},
+ \path{def:v-swap-unitary}, \path{lem:v-swap-conjugation},
+ \path{lem:qld-unitary}, and \path{lem:qld-extraction-error-form}.
+\end{itemize}
+Actual textual references also occur in the local pasting support entries,
+the definition of the restricted line law, the construction preceding
+\texttt{lem:claim-17-1}, and the explanatory proof of
+\texttt{lem:qld-xz-lines}. A textual reference to an input definition is
+not a proof dependency in the reverse direction. In particular, this
+investigation changes neither \texttt{lem:qld-4-10} nor the definitions of
+the combined and extracted measurements.
+
+The secondary paper has a further direct application of Fact~4.35, in
+\path{references/neexp-paper/18_answer_reduction.tex:540-558}, in the proof
+of \texttt{thm:answer-reduction}. The three-measurement version follows by
+the induction at lines~1031--1051 of the quantum preliminaries: the first
+family may be a POVM, and one pastes a projective next family at each step.
+The one-sided argument has exactly those hypotheses and retains the same
+ordered sandwich. The additional random index gives the required conditional
+collision bounds. Thus the answer-reduction use also needs no new restriction.
+
+In this checkout, no Lean proof calls \leanid{exists\_pasting\_error}; the
+only other occurrence before the recheck is a distance-calculus docstring.
+The intended consumers
+\leanid{exists\_combinedLinesWitness\_ofPointsWitness} and
+\leanid{exists\_combinedLinesWitness} in
+\doclink{MIPStarRE/QPBT/Combining/Lines.lean} still have their own proof
+holes, and the combining/application and extraction chain is not a completed
+proof of the combining and extraction results in Lean. Closing the generic
+pasting theorem does not close those independent obligations. The renamed
+conditional theorem retains its proof and internal dependencies; the
+one-sided theorem has no dependence on it. All import consumers of the
+changed pasting modules are checked in the validation record below.
+
+\subsection*{Statement integrity and budget}
+
+The printed hypotheses are a probability law, normalized state, nonnegative
+errors, projectivity of $G_2$ and $A$, conditional collisions, two forward
+marginal comparisons, and joint self-consistency. The restored Lean statement
+has precisely these, together with finite-type and decidability instances and
+an explicit evaluation map; zero-probability conditional fibers are omitted.
+Both conclusions compare $A$ with the same coarse-grained sandwich $J$.
+The verdict is faithful finite-dimensional boundary hypotheses, with the
+separately justified additive scalar correction and a complete proof of the
+generic pasting theorem. The public quantifier order and all three printed
+comparisons are retained; the proof actually does not need joint
+self-consistency.
+The conditional theorem has an extra comparison and is not source-equivalent.
+
+The preceding recheck was designated mathematical-gap session three,
+conservatively charged as slot four of ten. The original start remains September~4, 2026, 23:45 UTC;
+prior charged worker time is about 4 hours 31 minutes, including the partial
+prover attempt. Operator investigation time is not known here and must also
+be charged. This recheck does not reset the ten-session or approximately
+one-and-a-half-working-day limit. The operator brief is retained unchanged.
+At the end of that recheck, the mathematical argument and scalar estimate
+were progress, not a fully formalized correction. The preceding continuation
+was the fourth designated mathematical-gap
+session, conservatively slot five of ten, started at September~5, 2026,
+17:21:55 UTC. Its operator-supplied absolute deadline remains September~6,
+2026, 11:45 UTC. The preceding handoff recorded about 5 hours 8 minutes of
+worker time; this continuation must be charged in addition, together with
+operator investigation time. Neither limit is reset. The next mathematical
+step at that handoff was the averaged mirror estimate and its integration
+into the fine-commutator assembly, not another Schmidt construction or
+source-domain search. Both tasks are completed in the present continuation.
+
+The present continuation is conservative slot six of ten, started September~5,
+2026, 18:18:22 UTC. The original start and September~6, 11:45 UTC deadline
+are unchanged. Prior recorded worker time is approximately 5 hours 46 minutes;
+operator investigation time remains additional and is not known here.
+At the September~5, 18:38 UTC validation cutoff, this continuation has used
+about 20 minutes, for approximately 6 hours 6 minutes of recorded worker
+time before operator accounting. Neither the session count nor the absolute
+deadline requires escalation at this cutoff.
+The correction is ready for independent review, not self-reviewed or
+operator-adopted. No change to the session limit is requested.
+
+\subsection*{Validation record of the preceding recheck}
+
+The three edited Lean files, \path{Games/Sandwich.lean},
+\path{Games/Sandwich/Pasting/CodewordConsistency.lean}, and
+\path{Games/Sandwich/Pasting/Assembly.lean} under \path{MIPStarRE/QPBT/},
+type-check. There is exactly one direct proof hole, in the restored
+\leanid{exists\_pasting\_error}, and no added axiom. The conditional
+dependency through \leanid{consistencyDefect\_codeword\_cross\_le} and
+\leanid{consistencyDefect\_pasted\_le\_sqrt} is explicitly marked as
+unfaithful as a derivation of the printed theorem.
+
+The complete affected import chain was recompiled in a private temporary
+copy of the compiled library: \path{CodewordConsistency.lean},
+\path{PinchedReduction.lean}, \path{CrossMove.lean}, \path{Assembly.lean},
+\path{Sandwich.lean}, the \path{QPBT.lean} aggregate, and the
+root import file. All seven checks passed; the only warning in
+that run was the tracked proof hole. The declaration checker resolved all
+1521 blueprint names against these fresh artifacts. Its initial invocation
+against the unchanged branch cache missed the two newly named declarations;
+that stale-artifact result is not a missing source declaration.
+
+As a computational check, NumPy with seed 201 tested the Schmidt matrix
+estimate on 360 samples in dimensions $1,2,4,8,16,32$, including zero Schmidt
+coefficients, coefficients decreasing to $10^{-12}$, and complex Hermitian
+operators. No violation beyond the $10^{-10}$ tolerance occurred. A separate
+two-dimensional computation returned forward and pasted defects zero and
+reverse defect one for the product-state example. These checks supplement,
+and do not replace, the scalar proof and the mathematical argument.
+
+The blueprint web build, blueprint LaTeX convention check, and paper-gap
+style check pass. The note builds with LaTeX and BibTeX. The global
+blueprint/source synchronization script is not green: it reports 231 issues
+outside the changed pasting entries. Those findings are not repaired here.
+No full \verb|lake build| was run; the affected import-chain checks above
+are not described as a full build or as proof convergence. No shared cache,
+paper mirror, game definition, or operator-owned runtime record was edited.
+
+\subsection*{Validation of the Schmidt-mirror continuation}
+
+The new module \path{Games/Sandwich/Pasting/SchmidtMirror.lean} under
+\path{MIPStarRE/QPBT/} type-checks without warnings or proof holes. The
+generalized codeword-consistency and cross-move files also type-check, and
+their old signatures remain proved specializations. The existing scalar
+lemma was moved into the new module without changing its name or statement.
+All earlier source-realignment edits and the operator brief are preserved.
+
+Fresh temporary artifacts were used to recompile all eight affected modules:
+\path{SchmidtMirror.lean}, \path{CodewordConsistency.lean},
+\path{PinchedReduction.lean}, \path{CrossMove.lean}, \path{Assembly.lean},
+\path{Sandwich.lean}, the QPBT aggregate, and the project root. All passed.
+The only proof-hole warning is the existing one-sided pasting obligation;
+no new proof hole or axiom was introduced. All 1540 blueprint declarations
+resolve against these fresh artifacts. The blueprint web build, LaTeX
+convention check, paper-gap style check, and standalone note build pass.
+There was no full build or competing cache writer.
+
+Kernel dependency checks of \leanid{exists\_schmidt\_coordinates},
+\leanid{schmidtMirror\_norm\_sq\_le},
+\leanid{schmidtMirrorMeasurement\_isProjective}, and all three new
+distinct-family inequalities report only propositional extensionality,
+classical choice, and quotient soundness. None depends on a proof-hole
+axiom. An explicit interface check also instantiates the norm theorem on
+the empty index type and zero vector; the general theorem itself permits
+all singular and zero-coefficient cases. Thus the bounded mirror
+construction task is complete, while the source pasting theorem remains
+unfinished at that handoff pending the averaged estimate and fine-commutator
+assembly. The next validation record supersedes that proof status.
+
+\subsection*{Validation of the one-sided assembly}
+
+In conservative session slot six, focused Lean checks succeed in dependency
+order for the following eight modules, using a temporary copy of the compiled
+library and writing fresh artifacts only under \path{/tmp/pasting-201-check}:
+\begin{itemize}
+ \item \doclink{MIPStarRE/QPBT/Games/Sandwich/Pasting/SchmidtMirror.lean};
+ \item \doclink{MIPStarRE/QPBT/Games/Sandwich/Pasting/CodewordConsistency.lean};
+ \item \doclink{MIPStarRE/QPBT/Games/Sandwich/Pasting/PinchedReduction.lean};
+ \item \doclink{MIPStarRE/QPBT/Games/Sandwich/Pasting/CrossMove.lean};
+ \item \doclink{MIPStarRE/QPBT/Games/Sandwich/Pasting/Assembly.lean};
+ \item \doclink{MIPStarRE/QPBT/Games/Sandwich.lean};
+ \item the QPBT re-export and project root import files.
+\end{itemize}
+The last two import checks are not a full rebuild of all project proofs.
+The eight modules form the complete actual import-consumer closure of the
+changed pasting implementation in this checkout. The intended combining
+consumers identified above have no call to the pasting theorem yet and retain
+their independent proof holes.
+
+The focused checks produce no proof-hole warning. The subsequent
+\verb|sorry|/\verb|axiom| scan finds no occurrence in any of the five
+modified or new Lean implementation files. Kernel dependency checks for
+\leanid{exists\_pasting\_error},
+\leanid{consistencyDefect\_schmidtMirror\_le},
+\leanid{commutator\_mass\_fine\_le\_distinct\_families}, and
+\leanid{consistencyDefect\_pasted\_le\_sqrt\_one\_sided} report only
+\leanid{propext}, \leanid{Classical.choice}, and \leanid{Quot.sound};
+in particular, the source theorem has no \leanid{sorryAx} dependency.
+
+The blueprint web build succeeds, and the declaration checker against the
+fresh temporary artifacts resolves all 1,544 linked declarations. The
+paper-gap prose checker and blueprint LaTeX convention checker pass.
+Two PDF compilation passes produce a 17-page note without unresolved
+references or overfull boxes; the whitespace check also passes.
+The global blueprint synchronization checker still reports 231 pre-existing
+findings, the same count as in slot five; none concerns the changed pasting
+entries. No guard is weakened, and no unrelated finding is repaired.
+No full build, shared-cache write, push, merge, or independent review is
+performed in this session. The operator brief is retained unchanged.
+
+This continuation edits the sandwich root module, its codeword-consistency
+and assembly modules, the Chapter 12 blueprint, and this note. The earlier
+Schmidt-mirror module and cross-move edits are preserved. The theorem is
+proved and ready for independent review; operator adoption and the unrelated
+combining and extraction obligations remain outside this result.
+
+\subsection*{Proof of the conditional register-exchange statement}
+
 
 Fix a question $(x,y_1,y_2)$ and keep the notation of the reduction above,
 with $Q_{a_2}=(G_2)^x_{[\operatorname{eval}_{y_2}=a_2]}$.  Write
@@ -340,7 +738,9 @@ coarse commutator bound of step 3, one has
 $K\le(3C+18)\delta^{1/4}+6\sqrt\eta$ on $[0,1]^2$, whence
 $2\delta+\sqrt K\le(3C+19)(\eta^{1/4}+\delta^{1/8})$ there; outside the unit
 square the same function exceeds $1$, which bounds every defect of two placed
-families.  The formalization of this argument is complete (\ghissue{201}).
+families.  The formalization of this conditional argument is complete (\ghissue{201});
+it is not the proof of the one-sided theorem, which is now independently
+proved by the mirror argument above.
 
 \section{Conclusion}
 
