@@ -18,6 +18,7 @@ import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.ExactLineari
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.Recovery
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.RecoveryDefect
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.RecoveryTransport
+import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.SimultaneousGeneral
 
 /-!
 # The directly indexed low-degree game
