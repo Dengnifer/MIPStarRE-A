@@ -439,7 +439,7 @@ The Pauli basis test is the quantum low individual degree test of Natarajan and 
 	Transport the point, axis-parallel line, and diagonal line representations to the selected basis register. The shared projection onto the point and auxiliary registers is linear, while the Pauli maps are zero. These representations have levels $1$, $2$, $3$, $1$, and $0$, respectively.
 \end{proof}
 
-\begin{lemma}[Common level of the Pauli question maps]\label{lem:pauli-question-cl-family-obligation}
+\begin{lemma}[Common level of the Pauli question maps]\label{lem:pauli-question-cl-family}
 	\lean{MIPStarRE.QPBT.isTypedCondLinearFamily_pauliCL}
 	\uses{def:pauli-question-distribution, def:typed-cl-functions}
 	For every Pauli question type $t \in \mathcal T^{\mathrm{pauli}}$, the map $L_t$ of Definition~\ref{def:pauli-question-distribution} is a $3$-level CL function. Thus $L = \{L_t\}_{t \in \mathcal T^{\mathrm{pauli}}}$ is a finite typed family of $3$-level CL functions.
@@ -449,7 +449,7 @@ The Pauli basis test is the quantum low individual degree test of Natarajan and 
 	The component maps have levels at most $3$ by Lemma~\ref{lem:pauli-question-cl-components}. Lemma~\ref{lem:cl-level-mono} raises each representation to the common level $3$.
 \end{proof}
 
-\begin{lemma}[Pauli question-distribution identity]\label{lem:pauli-question-typed-equality-obligation}
+\begin{lemma}[Pauli question-distribution identity]\label{lem:pauli-question-typed-equality}
 	\lean{MIPStarRE.QPBT.pauliQuestionDistribution_eq_typedCL}
 	\uses{def:pauli-question-distribution, def:typed-cl-distributions, def:graph-distribution}
 	For the Pauli type graph $G^{\mathrm{pauli}}$ and the family $L$ of Definition~\ref{def:pauli-question-distribution}, the Pauli question distribution equals $\mu^{G^{\mathrm{pauli}}}_{L,L}$.
@@ -465,8 +465,8 @@ The Pauli basis test is the quantum low individual degree test of Natarajan and 
 	Fix an admissible tuple $\mathsf{qldparams} = (q,m,d)$ (Definition~\ref{def:admissible}) and let $L = \{L_t\}_{t \in \mathcal T^{\mathrm{pauli}}}$ be the family of Definition~\ref{def:pauli-question-distribution}. The family $L$ is a finite $\mathcal T^{\mathrm{pauli}}$-typed family of $3$-level conditionally linear functions, and the question distribution of $\mathfrak{G}^{\mathrm{Pauli}}_{\mathsf{qldparams}}$ equals the $(\mathcal T^{\mathrm{pauli}}, G^{\mathrm{pauli}})$-typed conditionally linear distribution $\mu^{G^{\mathrm{pauli}}}_{L,\,L}$ of Definition~\ref{def:typed-cl-distributions}.
 \end{lemma}
 \begin{proof}
-	\uses{lem:pauli-question-cl-family-obligation, lem:pauli-question-typed-equality-obligation}
-	Combine the common-level family assertion of Lemma~\ref{lem:pauli-question-cl-family-obligation} with the distribution identity of Lemma~\ref{lem:pauli-question-typed-equality-obligation}.
+	\uses{lem:pauli-question-cl-family, lem:pauli-question-typed-equality}
+	Combine the common-level family assertion of Lemma~\ref{lem:pauli-question-cl-family} with the distribution identity of Lemma~\ref{lem:pauli-question-typed-equality}.
 \end{proof}
 
 \begin{definition}[Win predicate of the Pauli basis test]\label{def:pauli-win-predicate}

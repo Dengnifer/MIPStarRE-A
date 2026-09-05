@@ -56,7 +56,7 @@ theorem Distribution.prod_isProbability {α β : Type*}
 
 /-- The convex mixture with a coefficient in `[0,1]`, as used for
 the equal mixture in `def:line-point-dist`, blueprint
-`ch13_qpbt_test.tex:161-171`, paper
+`ch13_qpbt_test.tex:163-173`, paper
 `08_classical_and_quantum_low_degree_tests.tex:274-287`. -/
 noncomputable def Distribution.mix {α : Type*} [DecidableEq α]
     (t : ℝ) (ht0 : 0 ≤ t) (ht1 : t ≤ 1)
@@ -73,7 +73,7 @@ noncomputable def Distribution.mix {α : Type*} [DecidableEq α]
     simp [μ.outsideSupport a hμ, ν.outsideSupport a hν]
 
 /-- A convex mixture of probability distributions is a probability distribution;
-`def:line-point-dist`, blueprint `ch13_qpbt_test.tex:161-171`, paper
+`def:line-point-dist`, blueprint `ch13_qpbt_test.tex:163-173`, paper
 `08_classical_and_quantum_low_degree_tests.tex:274-287`. -/
 theorem Distribution.mix_isProbability {α : Type*} [DecidableEq α]
     (t : ℝ) (μ ν : Distribution α) (hμ : μ.IsProbability)
