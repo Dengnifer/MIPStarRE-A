@@ -8,6 +8,8 @@ import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.Transfer
 import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.AnticommutatorB
 import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.Swap
 import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.Consistency
+import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.SecondPair
+import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.IdealTarget
 
 /-!
 # Magic Square rigidity
