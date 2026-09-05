@@ -121,9 +121,14 @@ constants and contains no divisibility hypothesis or residual construction input
 
 The argument uses low-degree soundness at dimension `2 * m + 2`.  The current
 direct carrier realizes the required dimension without assuming
-`2 * m + 2 ∣ q`, but it does not itself prove the game-correspondence and
-auxiliary-parameter estimates required by the soundness import; those obligations
-are exposed by `exists_direct_ld_soundness` and documented in
+`2 * m + 2 ∣ q`.  `exists_direct_ld_soundness` proves that soundness statement
+for the directly indexed game by applying `MIPStarRE.LDT.Test.mainFormal` and
+verifying `400 M d <= N` at each LDT application dimension `M`, with sampling
+count `N = 2560000 M^3 d`.  The source import at seed-indexed dimension `M`
+instead chooses `K = M^3 d` for a tensor-code theorem requiring
+`K >= 12 M (d + 1)`.  The direct proof establishes neither that bound nor the
+claimed tensor-code game correspondence.  Both source-import obligations
+remain open and are documented in
 `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`.  Absorption of the established
 combined-lines prefactor into the final universal constants is to use
 `deltaQld_mono` on its stated source parameter domain.
