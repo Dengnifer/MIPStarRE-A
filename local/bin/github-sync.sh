@@ -57,5 +57,13 @@ if ! python3 "$LOCAL_BIN/gh_common.py" snapshot \
       --out-dir "$ROOT/results/telemetry/github-snapshot"; then
   echo "$PROG: warning: the GitHub record snapshot failed; the push above still stands" >&2
 fi
+# checked-push.sh requires the primary checkout to match the pushed commit
+# exactly, so the snapshot just written (and any build ledger rows) must be
+# committed before the next publish; otherwise every later push is refused.
+if ! git -C "$ROOT" diff --quiet -- results/telemetry/github-snapshot results/telemetry/builds.jsonl 2>/dev/null; then
+  git -C "$ROOT" commit -q -m "chore(telemetry): GitHub record snapshot" \
+    -- results/telemetry/github-snapshot results/telemetry/builds.jsonl \
+    || echo "$PROG: warning: could not commit the snapshot; the next push will need a clean tree" >&2
+fi
 
 exit "$RC"
