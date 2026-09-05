@@ -27,6 +27,38 @@ This is `def:admissible-size` in the blueprint
 -/
 def IsAdmissibleSize (q : ℕ) : Prop := ∃ k : ℕ, Odd k ∧ q = 2 ^ k
 
+/-- An admissible field size is at least two, its binary exponent being odd
+and therefore positive.  This is a property of `def:admissible-size`,
+blueprint `blueprint/src/chapter/ch11_qpbt_algebra.tex:210-212`, paper origin
+`references/qpbt-paper/04_preliminaries.tex:662-667`.
+-/
+theorem IsAdmissibleSize.two_le {q : ℕ} (hq : IsAdmissibleSize q) : 2 ≤ q := by
+  obtain ⟨k, hk, hqk⟩ := hq
+  obtain ⟨j, hj⟩ := hk
+  rw [hqk, hj]
+  calc 2 = 2 ^ 1 := by norm_num
+    _ ≤ 2 ^ (2 * j + 1) := Nat.pow_le_pow_right (by norm_num) (by omega)
+
+/-- An admissible field size is either two or a multiple of eight: its binary
+exponent is odd, hence either one or at least three.  This is a property of
+`def:admissible-size`, blueprint
+`blueprint/src/chapter/ch11_qpbt_algebra.tex:210-212`, paper origin
+`references/qpbt-paper/04_preliminaries.tex:662-667`.
+-/
+theorem IsAdmissibleSize.eq_two_or_eight_dvd {q : ℕ} (hq : IsAdmissibleSize q) :
+    q = 2 ∨ 8 ∣ q := by
+  obtain ⟨k, hk, hqk⟩ := hq
+  obtain ⟨j, hj⟩ := hk
+  rcases Nat.eq_zero_or_pos j with hj0 | hj0
+  · left
+    rw [hqk, hj, hj0]
+    norm_num
+  · right
+    refine ⟨2 ^ (2 * j + 1 - 3), ?_⟩
+    rw [hqk, hj, show (8 : ℕ) = 2 ^ 3 by norm_num, ← pow_add]
+    congr 1
+    omega
+
 /-- A dual pair of bases for `def:dual-self-dual-normal-basis`, blueprint
 `ch11_qpbt_algebra.tex:241-257`, paper `04_preliminaries.tex:494-496`. -/
 def IsDualBasisPair {F K ι : Type*} [CommRing F] [CommRing K] [DecidableEq ι]
