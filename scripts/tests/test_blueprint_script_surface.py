@@ -34,6 +34,10 @@ BLUEPRINT_SUPPORT_SCRIPTS = {
         "tests": {"scripts/tests/test_check_blueprint_latex.py"},
         "workflows": set(),
     },
+    "scripts/blueprint_citations.py": {
+        "tests": {"scripts/tests/test_blueprint_citations.py"},
+        "workflows": {".github/workflows/pr-ci.yml"},
+    },
     "scripts/tex_utils.py": {
         # Shared utility: the behavior is covered through both consumers rather
         # than by a separate duplicate test module.

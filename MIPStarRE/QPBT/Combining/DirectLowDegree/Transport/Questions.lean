@@ -25,7 +25,7 @@ value at the base point, following `rem:ld-win-zero-direction`.
 
 - `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:230-272`
 - `references/ldt-paper/test_definition.tex:49-65`
-- `blueprint/src/chapter/ch13_qpbt_test.tex:120-121`
+- `rem:ld-win-zero-direction`
 - `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`
 -/
 

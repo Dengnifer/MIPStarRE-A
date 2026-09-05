@@ -19,10 +19,10 @@ player's register through the completeness of the residual factors.
 
 ## References
 
-`thm:ms-rigidity`, blueprint `blueprint/src/chapter/ch13_qpbt_test.tex:224-253`,
+blueprint `thm:ms-rigidity`,
 paper `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652`;
-the generalized Pauli basis is `def:generalized-pauli`, blueprint
-`ch11_qpbt_algebra.tex:494-688`, paper `04_preliminaries.tex:908-1161`.
+the generalized Pauli basis is blueprint
+`def:generalized-pauli`, paper `04_preliminaries.tex:908-1161`.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder

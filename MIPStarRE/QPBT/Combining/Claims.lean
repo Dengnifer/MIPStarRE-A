@@ -11,8 +11,8 @@ so no field value is substituted when an evaluation is undefined.
 
 ## References
 
-The claims are `lem:claim-17-1`, `lem:claim-17-2`, and `lem:claim-17-3` in
-`blueprint/src/chapter/ch15_qpbt_combining.tex:852-991`, with paper origin
+The claims are blueprint `lem:claim-17-1`, `lem:claim-17-2`, and
+`lem:claim-17-3`, with paper origin
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1140-1209`.
 -/
 

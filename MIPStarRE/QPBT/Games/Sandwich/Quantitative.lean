@@ -8,7 +8,7 @@ quantitative estimate for the sandwiched simultaneous measurement.
 
 ## References
 
-Blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:469-568`; paper
+Blueprint `lem:ld-sandwich` and `lem:ld-sandwich-measurement`; paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:465-501`.
 -/
 
@@ -266,7 +266,7 @@ private theorem sqrt_opFamilyDistSq_joint_sandwich_le
 
 /-- The palindromic effects form a POVM when each constituent measurement is
 projective. This is `lem:ld-sandwich-measurement`, the measurement assertion
-implicit in `lem:ld-sandwich`; blueprint `ch12_qpbt_games.tex:548-568`, paper
+implicit in blueprint `lem:ld-sandwich`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:484-494`. -/
 theorem sandwichProduct_isMeasurement {k : ℕ} {X ι : Type*}
     [Fintype ι] [DecidableEq ι] {Γ : Fin k → Type*}
@@ -618,7 +618,7 @@ private theorem sqrt_opFamilyDistSq_sandwichProduct_le
 /-- The sandwiched simultaneous-measurement estimate of `lem:ld-sandwich`.
 One universal asymptotic constant applies independently of the distribution,
 measurements, state, and error parameters. Blueprint
-`ch12_qpbt_games.tex:469-496`, paper
+`lem:ld-sandwich`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:465-501`. -/
 theorem consistencyDefect_sandwich_le :
     ∃ C₀ : ℝ, 1 ≤ C₀ ∧

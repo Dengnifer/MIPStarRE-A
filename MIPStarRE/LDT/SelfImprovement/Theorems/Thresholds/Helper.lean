@@ -24,10 +24,8 @@ The helper-stage absorptions formalize the displayed paper inequalities:
 The final-stage comparisons with `selfImprovementError` are collected in
 `Thresholds.Final`.
 
-Blueprint mirrors:
-
-* `blueprint/src/chapter/ch07_self_improvement.tex`, lines 161--168 (point
-  consistency) and 256--279 (strong self-consistency / boundedness).
+Blueprint mirrors: `eq:explicit-bound-for-A-consistency`,
+`item:self-improvement-self`, and `item:self-improvement-boundedness`.
 -/
 
 namespace MIPStarRE.LDT.SelfImprovement

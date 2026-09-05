@@ -18,12 +18,10 @@ for the completed line-evaluation classes.
 
 The ambient strategy convention and the observable `W^r(u)` are in
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:160-190`,
-corresponding to `def:strategy-observables` in
-`blueprint/src/chapter/ch14_qpbt_observables.tex:480-503`. The typed question
-and answer forms come from `def:pauli-question-distribution` and
-`def:pauli-win-predicate`, paper
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1225`
-and blueprint `blueprint/src/chapter/ch13_qpbt_test.tex:310-392`.
+corresponding to blueprint `def:strategy-observables`. The typed question
+and answer forms come from blueprint `def:pauli-question-distribution` and
+`def:pauli-win-predicate`, with paper origin
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1225`.
 -/
 
 open scoped BigOperators Matrix ComplexOrder
@@ -47,7 +45,7 @@ inductive PlayerSide where
 Section `sec:commutation`. The structure retains the distinct player spaces and
 measurement families of `Strategy`. Paper
 `14_analysis_of_the_pauli_basis_test.tex:160-172`; blueprint
-`ch14_qpbt_observables.tex:385-475`. -/
+`sec:commutation`. -/
 structure ProjectiveSetting (P : AdmissibleParams) (ε : ℝ) where
   toStrategy : Strategy (pauliBasisTest P)
   isProjective : toStrategy.IsProjective
@@ -85,7 +83,7 @@ def strategyMeasurement (S : ProjectiveSetting P ε) (side : PlayerSide)
 /-- Embed a point into the full Pauli question space in basis `W`. This is the
 point-question content from `def:pauli-question-distribution`, paper
 `08_classical_and_quantum_low_degree_tests.tex:997-1008`, blueprint
-`ch13_qpbt_test.tex:310-354`. -/
+`def:pauli-question-distribution`. -/
 def contentOfPoint (P : AdmissibleParams) (W : PauliKind)
     (u : Fin P.m → PauliScalar P) : PauliSpace P :=
   embedLd P W fun i =>
@@ -98,7 +96,7 @@ def contentOfPoint (P : AdmissibleParams) (W : PauliKind)
 Axis lines clear the direction block, whereas diagonal lines retain their
 canonical projected direction. Paper
 `08_classical_and_quantum_low_degree_tests.tex:997-1008`; blueprint
-`ch13_qpbt_test.tex:310-354` and `rem:deg-line-representatives`. -/
+`def:pauli-question-distribution` and `rem:deg-line-representatives`. -/
 def contentOfLine (P : AdmissibleParams) (W : PauliKind)
     (line : LineDesc P.toLdParams) : PauliSpace P :=
   embedLd P W fun i =>
@@ -114,7 +112,7 @@ def contentOfLine (P : AdmissibleParams) (W : PauliKind)
 Square questions. This is the type-4 content of
 `def:pauli-question-distribution`, paper
 `08_classical_and_quantum_low_degree_tests.tex:1030-1120`, blueprint
-`ch13_qpbt_test.tex:310-354`. -/
+`def:pauli-question-distribution`. -/
 def contentOfTuple (P : AdmissibleParams)
     (uX uZ : Fin P.m → PauliScalar P) (rX rZ : PauliScalar P) : PauliSpace P :=
   fun i =>
@@ -128,7 +126,7 @@ def contentOfTuple (P : AdmissibleParams)
 
 /-- The typed point question in basis `W`, from the strategy notation at paper
 `14_analysis_of_the_pauli_basis_test.tex:174-190` and
-`def:pauli-question-distribution`, blueprint `ch13_qpbt_test.tex:310-354`. -/
+blueprint `def:pauli-question-distribution`. -/
 def pointQuestion (P : AdmissibleParams) (W : PauliKind)
     (u : Fin P.m → PauliScalar P) : PauliQuestion P :=
   (.point W, contentOfPoint P W u)
@@ -166,7 +164,7 @@ def msQuestion (P : AdmissibleParams) (t : MsType)
 /-- A typed question occurs in the Pauli-test distribution when it is the first
 or second component of a question pair in the support. This is the support
 condition satisfied by the typed question embeddings; blueprint
-`def:pauli-question-distribution`, `ch13_qpbt_test.tex:310-354`, paper
+`def:pauli-question-distribution`, paper
 `08_classical_and_quantum_low_degree_tests.tex:964-1120`. -/
 def QuestionAppearsInSupport (P : AdmissibleParams) (question : PauliQuestion P) : Prop :=
   ∃ other : PauliQuestion P,
@@ -207,8 +205,8 @@ private theorem questionAppearsInSupport_of_fixed (P : AdmissibleParams)
   simpa only [sample, edge, hfixed] using himage
 
 /-- Point embeddings occur in the typed Pauli question support. This is the
-support well-formedness companion to `def:pauli-question-distribution`,
-blueprint `ch13_qpbt_test.tex:310-354`, paper
+support well-formedness companion to blueprint
+`def:pauli-question-distribution`, paper
 `08_classical_and_quantum_low_degree_tests.tex:997-1008`. -/
 theorem pointQuestion_appears_in_support (P : AdmissibleParams) (W : PauliKind)
     (u : Fin P.m → PauliScalar P) :
@@ -219,7 +217,7 @@ theorem pointQuestion_appears_in_support (P : AdmissibleParams) (W : PauliKind)
 
 /-- Canonical axis and diagonal line embeddings occur in the typed Pauli
 question support. This is the line companion to
-`def:pauli-question-distribution`, blueprint `ch13_qpbt_test.tex:310-354`,
+blueprint `def:pauli-question-distribution`,
 paper `08_classical_and_quantum_low_degree_tests.tex:997-1008`. -/
 theorem lineQuestion_appears_in_support (P : AdmissibleParams) (W : PauliKind)
     (line : LineDesc P.toLdParams) :
@@ -270,8 +268,8 @@ theorem lineQuestion_appears_in_support (P : AdmissibleParams) (W : PauliKind)
       · exact congrFun hprojection j
 
 /-- Pair embeddings occur in the typed Pauli question support. This is the
-Pair companion to `def:pauli-question-distribution`, blueprint
-`ch13_qpbt_test.tex:310-354`, paper
+Pair companion to blueprint
+`def:pauli-question-distribution`, paper
 `08_classical_and_quantum_low_degree_tests.tex:1030-1057`. -/
 theorem pairQuestion_appears_in_support (P : AdmissibleParams)
     (uX uZ : Fin P.m → PauliScalar P) (rX rZ : PauliScalar P) :
@@ -281,8 +279,8 @@ theorem pairQuestion_appears_in_support (P : AdmissibleParams)
   rcases i with ((((j | j) | x) | j) | x) | x <;> rfl
 
 /-- Pair/W embeddings occur in the typed Pauli question support. This is the
-Pair/W companion to `def:pauli-question-distribution`, blueprint
-`ch13_qpbt_test.tex:310-354`, paper
+Pair/W companion to blueprint
+`def:pauli-question-distribution`, paper
 `08_classical_and_quantum_low_degree_tests.tex:1030-1057`. -/
 theorem pairWQuestion_appears_in_support (P : AdmissibleParams) (W : PauliKind)
     (uX uZ : Fin P.m → PauliScalar P) (rX rZ : PauliScalar P) :
@@ -292,8 +290,8 @@ theorem pairWQuestion_appears_in_support (P : AdmissibleParams) (W : PauliKind)
   rcases i with ((((j | j) | x) | j) | x) | x <;> rfl
 
 /-- Magic Square embeddings occur in the typed Pauli question support. This is
-the Magic Square companion to `def:pauli-question-distribution`, blueprint
-`ch13_qpbt_test.tex:310-354`, paper
+the Magic Square companion to blueprint
+`def:pauli-question-distribution`, paper
 `08_classical_and_quantum_low_degree_tests.tex:1059-1120`. -/
 theorem msQuestion_appears_in_support (P : AdmissibleParams) (t : MsType)
     (uX uZ : Fin P.m → PauliScalar P) (rX rZ : PauliScalar P) :
@@ -303,8 +301,8 @@ theorem msQuestion_appears_in_support (P : AdmissibleParams) (t : MsType)
   rcases i with ((((j | j) | x) | j) | x) | x <;> rfl
 
 /-- Pauli/W embeddings occur in the typed Pauli question support. This is the
-zero-content companion to `def:pauli-question-distribution`, blueprint
-`ch13_qpbt_test.tex:310-354`, paper
+zero-content companion to blueprint
+`def:pauli-question-distribution`, paper
 `08_classical_and_quantum_low_degree_tests.tex:1006-1008`. -/
 theorem pauliQuestion_appears_in_support (P : AdmissibleParams) (W : PauliKind) :
     QuestionAppearsInSupport P (MIPStarRE.QPBT.pauliQuestion P W) := by
@@ -324,7 +322,7 @@ def pointAnswerOrZero {P : AdmissibleParams} : PauliAnswer P → PauliScalar P
 list. Axis answers are padded from degree `d` to degree `m*d`. This realizes
 the coefficient convention of `def:ideg-deg-polynomials`, paper
 `14_analysis_of_the_pauli_basis_test.tex:51-62`, blueprint
-`ch14_qpbt_observables.tex:51-118`. -/
+`def:ideg-deg-polynomials`. -/
 def lineAnswerOrZero (P : AdmissibleParams) (line : LineDesc P.toLdParams) :
     PauliAnswer P → DegPoly P.toLdParams (P.m * P.d) :=
   match line with
@@ -391,7 +389,7 @@ noncomputable def lineMeas (S : ProjectiveSetting P ε) (side : PlayerSide)
 only strategy-side family whose outcome uses `Option`; `none` is precisely the
 non-evaluating class of `def:ideg-deg-polynomials`, paper
 `14_analysis_of_the_pauli_basis_test.tex:51-62`, blueprint
-`ch14_qpbt_observables.tex:51-118`. -/
+`def:ideg-deg-polynomials`. -/
 noncomputable def lineEvalMeas (S : ProjectiveSetting P ε) (side : PlayerSide)
     (W : PauliKind) (line : LineDesc P.toLdParams)
     (u : Fin P.m → PauliScalar P) :
@@ -612,7 +610,7 @@ theorem wrongFormMass_bob_le_error (S : ProjectiveSetting P ε) :
 character `phaseSign` and the fixed trace of `P.model`. This is
 `def:strategy-observables`, paper
 `14_analysis_of_the_pauli_basis_test.tex:174-190`, blueprint
-`ch14_qpbt_observables.tex:480-503`. -/
+`def:strategy-observables`. -/
 noncomputable def pointObs (S : ProjectiveSetting P ε) (side : PlayerSide)
     (W : PauliKind) (r : PauliScalar P) (u : Fin P.m → PauliScalar P) :
     Op (S.LocalSpace side) :=
@@ -688,7 +686,7 @@ theorem pointObs_zero (S : ProjectiveSetting P ε) (side : PlayerSide)
 /-- The point observable squares to the identity. This is the assertion that
 the operator in `def:strategy-observables` has eigenvalues in `{+1,-1}`;
 paper `14_analysis_of_the_pauli_basis_test.tex:174-190`, blueprint
-`ch14_qpbt_observables.tex:480-503`. -/
+`def:strategy-observables`. -/
 theorem pointObs_sq_eq_one (S : ProjectiveSetting P ε) (side : PlayerSide)
     (W : PauliKind) (r : PauliScalar P) (u : Fin P.m → PauliScalar P) :
     S.pointObs side W r u * S.pointObs side W r u = 1 := by

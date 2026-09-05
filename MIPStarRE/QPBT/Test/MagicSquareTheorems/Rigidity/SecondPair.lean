@@ -47,7 +47,7 @@ reflections at a shared constraint and needs no consistency.
 
 ## References
 
-`thm:ms-rigidity`, blueprint `blueprint/src/chapter/ch13_qpbt_test.tex:224-253`,
+blueprint `thm:ms-rigidity`,
 paper `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652`;
 the Magic Square grid is `08_classical_and_quantum_low_degree_tests.tex:512-610`.
 The cited robust self-test is Coladangelo--Stark, arXiv:1709.09267v2,
@@ -114,7 +114,7 @@ constraint pairs sharing the cells `0`, `8`, `4`, in the order
 
 so that the pair of cells `(1, 3)` is carried to `(2, 6)`, then to `(5, 7)`, and
 finally to `(3, 1)`.  The single traversal of the exceptional third column
-reverses the sign.  Blueprint `ch13_qpbt_test.tex:224-253`; the first-pair
+reverses the sign.  Blueprint `thm:ms-rigidity`; the first-pair
 analogue is the body of `msVarObsA_anticommute`. -/
 private theorem msCellObsA_second_pair_path (S : Strategy msGame) (ε : ℝ)
     (hwin : 1 - ε ≤ S.value) :
@@ -152,7 +152,7 @@ The closed path of `msCellObsA_second_pair_path` gives the scale
 `504 * sqrt ε`, and the two endpoint substitutions add `24 * sqrt ε` each, so
 the argument closes at `552 * sqrt ε`; the bound is stated at the scale
 `624 * sqrt ε` of the first-pair estimate `msVarObsA_anticommute`, so that the
-assembly may use one scale for both pairs.  Blueprint `ch13_qpbt_test.tex:224-253`, paper
+assembly may use one scale for both pairs.  Blueprint `thm:ms-rigidity`, paper
 `08_classical_and_quantum_low_degree_tests.tex:612-652`. -/
 theorem msCellObsA_second_pair_anticommute (S : Strategy msGame) (ε : ℝ)
     (hwin : 1 - ε ≤ S.value) :
@@ -179,7 +179,7 @@ variable reflections that the game compares to it.  The path gives the scale
 `504 * sqrt ε` and each of the two endpoint replacements `24 * sqrt ε`, so the
 argument closes at `552 * sqrt ε`; the bound is stated at the first-pair scale
 `624 * sqrt ε`.
-Blueprint `ch13_qpbt_test.tex:224-253`. -/
+Blueprint `thm:ms-rigidity`. -/
 theorem msVarObsB_second_pair_anticommute (S : Strategy msGame) (ε : ℝ)
     (hwin : 1 - ε ≤ S.value) :
     NormCloseOn (msDilatedStrategy S).ψ (624 * Real.sqrt ε)
@@ -228,7 +228,7 @@ of `X` and `Y` is also close to a reflection `Xb`, respectively `Yb`, of the
 other player, which commutes with everything the substitution moves past.  The
 two applications of `NormCloseOn.mul_left_subst` are the two places where the
 substituted operator sits on the left of a product.  Formalization-only support
-for `thm:ms-rigidity`, blueprint `ch13_qpbt_test.tex:224-253`. -/
+for blueprint `thm:ms-rigidity`. -/
 private theorem normCloseOn_comm_subst {ι : Type} [Fintype ι] [DecidableEq ι]
     {ψ : EuclideanSpace ℂ ι} {a b c d : ℝ} {X Xc Xb Y Yc Yb : Op ι}
     (hX : IsBinaryObservable X) (hXc : IsBinaryObservable Xc)
@@ -261,7 +261,7 @@ uses only the value of the strategy.  Applied to the four pairs of cells
 `(0, 1)`, `(0, 3)`, `(4, 1)` and `(4, 3)`, taken respectively in the first row,
 the first column, the second column and the second row, it is the inter-pair
 commutation that the two-qubit swap-isometry extraction needs on Bob's side.
-Blueprint `ch13_qpbt_test.tex:224-253`. -/
+Blueprint `thm:ms-rigidity`. -/
 theorem msVarObsB_comm_of_shared_constraint (S : Strategy msGame) (ε : ℝ)
     (hwin : 1 - ε ≤ S.value) (i : Fin 6) (k l : Fin 3) :
     NormCloseOn (msDilatedStrategy S).ψ (96 * Real.sqrt ε)
@@ -297,7 +297,7 @@ because the game does not compare Alice's variable reflection with her own
 constraint-read reflection at the same cell.  Applied with `j = 0, 4` and the
 second-pair reflections `msCellObsA S 0 1` and `msCellObsA S 1 0`, it gives the
 four estimates the two-qubit extraction needs.  Blueprint
-`ch13_qpbt_test.tex:224-253`; the consistency defect is
+`thm:ms-rigidity`; the consistency defect is
 `msVariableConsistencyDefect`, `Rigidity/Consistency.lean`. -/
 theorem msVarObsA_comm_msCellObsA_of_shared_constraint (S : Strategy msGame)
     (ε δ : ℝ) (hwin : 1 - ε ≤ S.value) (j : Fin 9)
