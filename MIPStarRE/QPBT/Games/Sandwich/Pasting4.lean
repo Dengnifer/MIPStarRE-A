@@ -367,4 +367,151 @@ theorem pinched_coarse_sub_fine_eq {R₁ R₂ Γ₂ ι : Type*}
   simp only [hF]
   ring
 
+/-- The averaged commutator mass of the first codeword family against the fine
+second codeword family of `lem:pasting`, in terms of the coarse commutator mass.
+The two masses are expanded term by term: the reversed products contribute the
+same expectation, the ordered products differ by at most the deficiency of the
+coarse mass, and the two cross terms are compared after moving the rightmost
+effect to the opposite tensor factor, the coarse one exceeding the fine one by
+the colliding pairs of second codewords. This is step 5 of the proof of the
+adopted statement in `docs/paper-gaps/qpbt_pasting-product-error.tex`; blueprint
+`ch12_qpbt_games.tex:960-990`. -/
+theorem commutator_mass_fine_le {X Y₁ Y₂ R₁ R₂ Γ₂ ι : Type*}
+    [Fintype X] [DecidableEq X] [Fintype Y₁] [DecidableEq Y₁]
+    [Fintype Y₂] [DecidableEq Y₂] [Fintype R₁] [DecidableEq R₁]
+    [Fintype R₂] [DecidableEq R₂] [Fintype Γ₂] [DecidableEq Γ₂]
+    [Fintype ι] [DecidableEq ι]
+    (D : Distribution ((X × Y₁) × Y₂)) (eval₂ : Γ₂ → Y₂ → R₂)
+    (G₂ : X → Measurement Γ₂ ι) (P : (X × Y₁) → Measurement R₁ ι)
+    (ψ : EuclideanSpace ℂ (ι × ι)) (η K₀ m εc εf : ℝ)
+    (hD : D.IsProbability) (hψ : ‖ψ‖ = 1) (hη : 0 ≤ η)
+    (hG₂ : ∀ x, MIPStarRE.QPBT.Measurement.IsProjective (G₂ x))
+    (hcoll : ∀ x y₁, 0 < (D.map Prod.fst).weight (x, y₁) →
+      ∀ g g' : Γ₂, g ≠ g' →
+        (∑ y₂ : Y₂, D.weight ((x, y₁), y₂) *
+          if eval₂ g y₂ = eval₂ g' y₂ then 1 else 0) ≤
+          η * (D.map Prod.fst).weight (x, y₁))
+    (hK₀ : opFamilyDistSq D (fun q (ab : R₁ × R₂) => heteroKron 1
+      ((P q.1).effect ab.1 * ((G₂ q.1.1).postprocess
+          (fun g => eval₂ g q.2)).effect ab.2 -
+        ((G₂ q.1.1).postprocess (fun g => eval₂ g q.2)).effect ab.2 *
+          (P q.1).effect ab.1)) (fun _ _ => 0) ψ ≤ K₀)
+    (hmass : 1 - m ≤ avgOver D (fun q => ∑ ab : R₁ × R₂,
+      ‖applyOperatorToState (heteroKron 1 ((P q.1).effect ab.1 *
+        ((G₂ q.1.1).postprocess (fun g => eval₂ g q.2)).effect ab.2)) ψ‖ ^ 2))
+    (hglc : opFamilyDistSq D
+      (fun q b => heteroKron 1 (((G₂ q.1.1).postprocess
+        (fun g => eval₂ g q.2)).effect b))
+      (fun q b => heteroKron (((G₂ q.1.1).postprocess
+        (fun g => eval₂ g q.2)).effect b) 1) ψ ≤ εc)
+    (hglf : opFamilyDistSq D (fun q g => heteroKron 1 ((G₂ q.1.1).effect g))
+      (fun q g => heteroKron ((G₂ q.1.1).effect g) 1) ψ ≤ εf) :
+    avgOver D (fun q => ∑ a : R₁, ∑ g : Γ₂, ‖applyOperatorToState
+        (heteroKron 1 ((P q.1).effect a * (G₂ q.1.1).effect g -
+          (G₂ q.1.1).effect g * (P q.1).effect a)) ψ‖ ^ 2) ≤
+      K₀ + m + 2 * η + 2 * Real.sqrt εf + 2 * Real.sqrt εc := by
+  classical
+  set Qm : ((X × Y₁) × Y₂) → Measurement R₂ ι :=
+    fun q => (G₂ q.1.1).postprocess (fun g => eval₂ g q.2) with hQm
+  have hQproj : ∀ q, MIPStarRE.QPBT.Measurement.IsProjective (Qm q) := by
+    intro q
+    exact SandwichProduct.postprocess_isProjective (G₂ q.1.1) (hG₂ q.1.1) _
+  set F1 : ((X × Y₁) × Y₂) → ℝ := fun q => ∑ a : R₁, ∑ g : Γ₂,
+    ‖applyOperatorToState (heteroKron 1 ((P q.1).effect a *
+      (G₂ q.1.1).effect g)) ψ‖ ^ 2 with hF1d
+  set C1 : ((X × Y₁) × Y₂) → ℝ := fun q => ∑ a : R₁, ∑ b : R₂,
+    ‖applyOperatorToState (heteroKron 1 ((P q.1).effect a *
+      (Qm q).effect b)) ψ‖ ^ 2 with hC1d
+  set Sq : ((X × Y₁) × Y₂) → ℝ := fun q => ∑ a : R₁,
+    stateQForm ψ (heteroKron 1 ((P q.1).effect a * (P q.1).effect a)) with hSd
+  set F3 : ((X × Y₁) × Y₂) → ℝ := fun q => ∑ a : R₁, ∑ g : Γ₂,
+    stateQForm ψ (heteroKron 1 ((G₂ q.1.1).effect g * (P q.1).effect a *
+      (G₂ q.1.1).effect g * (P q.1).effect a)) with hF3d
+  set C3 : ((X × Y₁) × Y₂) → ℝ := fun q => ∑ a : R₁, ∑ b : R₂,
+    stateQForm ψ (heteroKron 1 ((Qm q).effect b * (P q.1).effect a *
+      (Qm q).effect b * (P q.1).effect a)) with hC3d
+  set MF : ((X × Y₁) × Y₂) → ℝ := fun q => ∑ g : Γ₂,
+    stateQForm ψ (heteroKron ((G₂ q.1.1).effect g)
+      (∑ a : R₁, (P q.1).effect a * (G₂ q.1.1).effect g * (P q.1).effect a))
+    with hMFd
+  set MC : ((X × Y₁) × Y₂) → ℝ := fun q => ∑ b : R₂,
+    stateQForm ψ (heteroKron ((Qm q).effect b)
+      (∑ a : R₁, (P q.1).effect a * (Qm q).effect b * (P q.1).effect a))
+    with hMCd
+  set glf : ((X × Y₁) × Y₂) → ℝ := fun q => ∑ g : Γ₂, ‖applyOperatorToState
+    (heteroKron 1 ((G₂ q.1.1).effect g) -
+      heteroKron ((G₂ q.1.1).effect g) 1) ψ‖ ^ 2 with hglfd
+  set glc : ((X × Y₁) × Y₂) → ℝ := fun q => ∑ b : R₂, ‖applyOperatorToState
+    (heteroKron 1 ((Qm q).effect b) - heteroKron ((Qm q).effect b) 1) ψ‖ ^ 2
+    with hglcd
+  set col : ((X × Y₁) × Y₂) → ℝ := fun q => ∑ g : Γ₂, ∑ g' : Γ₂,
+    if g = g' then 0 else if eval₂ g q.2 = eval₂ g' q.2 then
+      ∑ a : R₁, stateQForm ψ (heteroKron ((G₂ q.1.1).effect g')
+        ((P q.1).effect a * (G₂ q.1.1).effect g * (P q.1).effect a))
+    else 0 with hcold
+  -- the two expansions of the commutator masses
+  have hfine : ∀ q, (∑ a : R₁, ∑ g : Γ₂, ‖applyOperatorToState
+      (heteroKron 1 ((P q.1).effect a * (G₂ q.1.1).effect g -
+        (G₂ q.1.1).effect g * (P q.1).effect a)) ψ‖ ^ 2) =
+      F1 q + Sq q - 2 * F3 q := fun q =>
+    commutator_mass_eq_expansion (P q.1) (G₂ q.1.1) ψ (hG₂ q.1.1)
+  have hcoarse : ∀ q, (∑ a : R₁, ∑ b : R₂, ‖applyOperatorToState
+      (heteroKron 1 ((P q.1).effect a * (Qm q).effect b -
+        (Qm q).effect b * (P q.1).effect a)) ψ‖ ^ 2) =
+      C1 q + Sq q - 2 * C3 q := fun q =>
+    commutator_mass_eq_expansion (P q.1) (Qm q) ψ (hQproj q)
+  -- the two moves and the collision split
+  have hmoveF : ∀ q, |F3 q - MF q| ≤ Real.sqrt (glf q) := fun q =>
+    abs_cross_move_gap_le_sqrt (P q.1) (G₂ q.1.1) ψ hψ
+  have hmoveC : ∀ q, |C3 q - MC q| ≤ Real.sqrt (glc q) := fun q =>
+    abs_cross_move_gap_le_sqrt (P q.1) (Qm q) ψ hψ
+  have hsplit : ∀ q, MC q - MF q = col q := fun q =>
+    pinched_coarse_sub_fine_eq (P q.1) (G₂ q.1.1) (fun g => eval₂ g q.2) ψ
+  have hF1le : ∀ q, F1 q ≤ 1 := fun q =>
+    sum_norm_ordered_product_le_one (P q.1) (G₂ q.1.1) ψ hψ
+  -- averaging
+  have hglfnn : ∀ q, 0 ≤ glf q := fun q => Finset.sum_nonneg fun g _ => sq_nonneg _
+  have hglcnn : ∀ q, 0 ≤ glc q := fun q => Finset.sum_nonneg fun b _ => sq_nonneg _
+  have hJf : |avgOver D F3 - avgOver D MF| ≤ Real.sqrt (avgOver D glf) := by
+    rw [← avgOver_sub]
+    exact MIPStarRE.LDT.Preliminaries.avgOver_abs_le_sqrt_of_pointwise D _ glf
+      hmoveF hglfnn (by rw [hD.weight_sum_eq_one])
+  have hJc : |avgOver D C3 - avgOver D MC| ≤ Real.sqrt (avgOver D glc) := by
+    rw [← avgOver_sub]
+    exact MIPStarRE.LDT.Preliminaries.avgOver_abs_le_sqrt_of_pointwise D _ glc
+      hmoveC hglcnn (by rw [hD.weight_sum_eq_one])
+  have hcolavg : avgOver D MC - avgOver D MF ≤ η := by
+    rw [← avgOver_sub, avgOver_congr D _ col hsplit]
+    exact avgOver_pinched_collision_le D eval₂ G₂ P ψ η hD hψ hη hcoll
+  have hF1avg : avgOver D F1 ≤ 1 := by
+    have := avgOver_mono D F1 (fun _ => (1 : ℝ)) hF1le
+    rwa [avgOver_const_of_isProbability D hD] at this
+  have hC1avg : 1 - m ≤ avgOver D C1 := by
+    refine le_trans hmass (le_of_eq (avgOver_congr D _ C1 fun q => ?_))
+    rw [hC1d, Fintype.sum_prod_type]
+  have hK₀avg : avgOver D C1 + avgOver D Sq - 2 * avgOver D C3 ≤ K₀ := by
+    have hEq : avgOver D (fun q => C1 q + Sq q - 2 * C3 q) =
+        avgOver D C1 + avgOver D Sq - 2 * avgOver D C3 := by
+      rw [avgOver_sub, avgOver_add, avgOver_const_mul]
+    rw [← hEq]
+    refine le_trans (le_of_eq ?_) hK₀
+    refine avgOver_congr D _ _ fun q => ?_
+    rw [← hcoarse q, Fintype.sum_prod_type]
+    exact Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ => by
+      rw [sub_zero]
+  have hglfavg : avgOver D glf ≤ εf := hglf
+  have hglcavg : avgOver D glc ≤ εc := hglc
+  have hsf : Real.sqrt (avgOver D glf) ≤ Real.sqrt εf := Real.sqrt_le_sqrt hglfavg
+  have hsc : Real.sqrt (avgOver D glc) ≤ Real.sqrt εc := Real.sqrt_le_sqrt hglcavg
+  have hgoal : avgOver D (fun q => ∑ a : R₁, ∑ g : Γ₂, ‖applyOperatorToState
+      (heteroKron 1 ((P q.1).effect a * (G₂ q.1.1).effect g -
+        (G₂ q.1.1).effect g * (P q.1).effect a)) ψ‖ ^ 2) =
+      avgOver D F1 + avgOver D Sq - 2 * avgOver D F3 := by
+    rw [avgOver_congr D _ (fun q => F1 q + Sq q - 2 * F3 q) hfine,
+      avgOver_sub, avgOver_add, avgOver_const_mul]
+  rw [hgoal]
+  have h1 := abs_le.mp hJf
+  have h2 := abs_le.mp hJc
+  linarith [h1.1, h1.2, h2.1, h2.2, hcolavg, hF1avg, hC1avg, hK₀avg, hsf, hsc]
+
 end MIPStarRE.QPBT
