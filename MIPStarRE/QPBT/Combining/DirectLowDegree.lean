@@ -13,6 +13,7 @@ import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.GameValue
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.WinPredicate
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.Value
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.Restriction
+import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.Coefficients
 
 /-!
 # The directly indexed low-degree game
