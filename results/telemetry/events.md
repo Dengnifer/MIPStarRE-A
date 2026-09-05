@@ -3053,3 +3053,26 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 - State at retirement: main 3f00de0; open PRs 233,230,225,213,212,207,205,202,195,185,178; live codex worker sessions 2;
   merges recorded by the daemon so far 40. All Claude-held worktrees were released (#118 at 691b671, #174 at bece2e6).
   This owner session stops; the owner decides when an owner session returns.
+
+### 2026-09-06 — PR 178 adjudication syntax recovery
+
+- Session `orc-114-20260906-01` investigated the daemon failure at
+  2026-09-05 19:23 UTC, recorded in
+  `~/.cache/mipstarre-dev/watchdog/lanes/pr178.merge.log`.
+  Gates 1–3, including current-main ancestry, passed at head
+  `7bd5cceca2d8f460b1b17587f1ac9da64eeed20d`. Gate 4 rejected the existing
+  exact-head adjudication because `accepted as` is not a recognized disposition.
+- Through the primary `gh_common` module, updated comment 5554211262 in place
+  to use `F1 — moot:` while preserving the terminal wording-advisory rationale.
+  The primary gate implementation subsequently confirmed all nine CI contexts
+  and the exact-head adjudicated review pass. No review status was rewritten,
+  no mathematical finding was waived, and no reviewer or fixer was launched.
+- The branch was already clean, with no pending main-merge conflict. The primary
+  merge-loss guard passed for HEAD; primary `checked-push.sh` passed and reported
+  everything up to date. No branch commit or merge was needed.
+- A full primary `pr_merge.py 178 --check-only --adjudicated` check now stops at
+  gate 2 because the primary checkout contains staged and unstaged telemetry.
+  Those records were left untouched. The daemon failure marker is retained until
+  main preserves and publishes its telemetry and rechecks all prerequisites.
+  Main should use the normal primary tools for any refreshed-head CI/review;
+  no new independent review is required for this comment-only correction.
