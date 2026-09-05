@@ -28,7 +28,7 @@ open MIPStarRE.LDT
 
 noncomputable section
 
-/-- The numerical admissible Pauli-test parameter package.  Its scalar carrier
+/-- The numerical admissible Pauli-test parameter tuple.  Its scalar carrier
 uses the once-and-for-all model `fixedFieldModel q hq`, so the paper's fixed
 self-dual-normal identification is not quantified in the test statement.  This
 is `def:admissible` in
@@ -57,7 +57,7 @@ theorem AdmissibleParams.one_le_m (P : AdmissibleParams) : 1 ≤ P.m := by
   exact Nat.one_le_iff_ne_zero.mpr
     (ne_zero_of_dvd_ne_zero (Nat.ne_of_gt hqpos) P.hdvd)
 
-/-- The fixed model accessor for an admissible parameter package.  It is a
+/-- The fixed scalar model of an admissible parameter tuple.  It is a
 compatibility view of the global `fixedFieldModel` selector, not an independently
 quantified field representation.  Blueprint `ch13_qpbt_test.tex:370-386`; paper
 origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:958-961`.
@@ -65,7 +65,7 @@ origin `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:958-
 noncomputable def AdmissibleParams.model (P : AdmissibleParams) : FixedFieldModel P.q :=
   fixedFieldModel P.q P.hq
 
-/-- The low-degree parameter view of an admissible Pauli-test package.  This is
+/-- The low-degree parameter view of an admissible Pauli-test tuple.  This is
 a Lean-only bridge supporting the statement closure; it is not an additional
 hypothesis of `thm:pauli`.  Blueprint
 `blueprint/src/chapter/ch13_qpbt_test.tex:17-34`, paper origin
@@ -82,7 +82,7 @@ def AdmissibleParams.toLdParams (P : AdmissibleParams) : LdParams where
   hq := P.hq
   hdvd := P.hdvd
 
-/-- The scalar carrier associated with an admissible parameter package.  It is
+/-- The scalar carrier associated with an admissible parameter tuple.  It is
 the globally fixed field carrier selected by `AdmissibleParams.model` in
 `def:admissible`, blueprint
 `blueprint/src/chapter/ch13_qpbt_test.tex:370-386`, paper origin

@@ -389,7 +389,8 @@ The Pauli basis test is the quantum low individual degree test of Natarajan and 
 	\lean{MIPStarRE.QPBT.PauliType, MIPStarRE.QPBT.pauliCLLevel, MIPStarRE.QPBT.pauliCL}
 	\lean{MIPStarRE.QPBT.pauliEdges}
 	\lean{MIPStarRE.QPBT.pauliQuestionDistribution}
-	\uses{def:admissible, def:ld-question-distribution, lem:ld-aline-level, lem:ld-dline-level, def:ms-game, def:cl-func, def:cl-dist, def:graph-distribution}
+	\leanok
+	\uses{def:admissible, def:ld-question-distribution, lem:ld-point-level, lem:ld-aline-level, lem:ld-dline-level, def:ms-game, def:cl-func, def:cl-dist, def:graph-distribution}
 	% Admissibility of the full tuple is required here, not only the divisibility m | q:
 	% the source parametrizes the Pauli basis test by the tuple qldparams introduced
 	% together with Definition def:admissible (references/qpbt-paper/
@@ -471,12 +472,16 @@ The Pauli basis test is the quantum low individual degree test of Natarajan and 
 \begin{lemma}[The Pauli question distribution is a typed CL distribution]\label{lem:pauli-question-typed-cl}
 	\lean{MIPStarRE.QPBT.pauliQuestionDistribution_isTypedCL}
 	\uses{def:pauli-question-distribution, def:typed-cl-distributions}
-	Fix an admissible tuple $\mathsf{qldparams} = (q,m,d)$ (Definition~\ref{def:admissible}) and let $L = \{L_t\}_{t \in \mathcal T^{\mathrm{pauli}}}$ be the family of Definition~\ref{def:pauli-question-distribution}. The family $L$ is a finite $\mathcal T^{\mathrm{pauli}}$-typed family of $3$-level conditionally linear functions, and the question distribution of $\mathfrak{G}^{\mathrm{Pauli}}_{\mathsf{qldparams}}$ equals the $(\mathcal T^{\mathrm{pauli}}, G^{\mathrm{pauli}})$-typed conditionally linear distribution $\mu^{G^{\mathrm{pauli}}}_{L,\,L}$ of Definition~\ref{def:typed-cl-distributions}. The common-level assertion is established by Lemma~\ref{lem:pauli-question-cl-family}; the distribution identity of Lemma~\ref{lem:pauli-question-typed-equality} remains open.
+	Fix an admissible tuple $\mathsf{qldparams} = (q,m,d)$ (Definition~\ref{def:admissible}) and let $L = \{L_t\}_{t \in \mathcal T^{\mathrm{pauli}}}$ be the family of Definition~\ref{def:pauli-question-distribution}. The family $L$ is a finite $\mathcal T^{\mathrm{pauli}}$-typed family of $3$-level conditionally linear functions, and the question distribution of $\mathfrak{G}^{\mathrm{Pauli}}_{\mathsf{qldparams}}$ equals the $(\mathcal T^{\mathrm{pauli}}, G^{\mathrm{pauli}})$-typed conditionally linear distribution $\mu^{G^{\mathrm{pauli}}}_{L,\,L}$ of Definition~\ref{def:typed-cl-distributions}.
 \end{lemma}
 \begin{proof}
 	\uses{lem:pauli-question-cl-family, lem:pauli-question-typed-equality}
 	Combine the common-level family assertion of Lemma~\ref{lem:pauli-question-cl-family} with the distribution identity of Lemma~\ref{lem:pauli-question-typed-equality}.
 \end{proof}
+
+\begin{remark}[Formalization status of Lemma~\ref{lem:pauli-question-typed-cl}]\label{rem:pauli-question-typed-cl-status}
+	The common-level assertion of Lemma~\ref{lem:pauli-question-typed-cl} is established by Lemma~\ref{lem:pauli-question-cl-family}; the distribution identity of Lemma~\ref{lem:pauli-question-typed-equality} remains open.
+\end{remark}
 
 \begin{definition}[Win predicate of the Pauli basis test]\label{def:pauli-win-predicate}
 	\lean{MIPStarRE.QPBT.PauliAnswer, MIPStarRE.QPBT.validPauliAnswer}
