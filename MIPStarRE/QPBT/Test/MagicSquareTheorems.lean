@@ -127,12 +127,13 @@ noncomputable def msAnticommutatorDistanceB (S : Strategy msGame)
 /-- `thm:ms-rigidity` in the corrected form adopted on issue #172 (owner
 decision B5 on issue #26), imported from Coladangelo--Stark, Theorem 6.9.
 Blueprint `ch13_qpbt_test.tex`, paper
-`08_classical_and_quantum_low_degree_tests.tex:612-652`; the correction is
-recorded in `docs/paper-gaps/qpbt_ms-rigidity-symmetric-strategies.tex`.
+`08_classical_and_quantum_low_degree_tests.tex:612-652`.
 
-**The correction.** The source quantifies over all strategies of value
-`1 - ε`.  That statement is false: its conclusion forces the two players'
-variable-0 and variable-4 measurements to agree on the shared state, while
+**Local fix:** The source quantifies over all strategies of value `1 - ε`.
+That statement is false; the refutation and the corrected form adopted here
+are recorded in `docs/paper-gaps/qpbt_ms-rigidity-symmetric-strategies.tex`.
+The source's conclusion forces the two players' variable-0 and variable-4
+measurements to agree on the shared state, while
 `msGame` samples only constraint-variable pairs and never sends the same
 question to both players, and a perfect strategy answering the two orientations
 of each edge on independent copies of two EPR pairs, or its symmetric role-flag

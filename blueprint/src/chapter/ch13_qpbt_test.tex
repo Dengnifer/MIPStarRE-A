@@ -316,8 +316,12 @@ $4$, respectively.
 	\[
 		\Delta_j(\mathcal S) = \sum_{b \in \F_2} \bigl\| \bigl( \hat A^{\mathsf{Variable}_j}_b \ot I_{\mathrm B} - I_{\mathrm A} \ot \hat B^{\mathsf{Variable}_j}_b \bigr) \ket{\psi} \bigr\|^2 \;,
 	\]
-	the squared state-dependent distance of Definition~\ref{def:povm-distance} between the two players' binary $\mathsf{Variable}_j$ effects on $\ket{\psi}$, under the one-point distribution and with the constant inside the $O(\cdot)$ taken to be $1$. It is not the consistency defect of Definition~\ref{def:consistency}, which is an off-diagonal outcome weight; the Lean name records that the quantity measures the failure of the two players' $\mathsf{Variable}_j$ measurements to be consistent with one another.
+	the squared state-dependent distance of Definition~\ref{def:povm-distance} between the two players' binary $\mathsf{Variable}_j$ effects on $\ket{\psi}$, under the one-point distribution and with the constant inside the $O(\cdot)$ taken to be $1$. It is not the consistency defect of Definition~\ref{def:consistency}, which is an off-diagonal outcome weight.
 \end{definition}
+
+\begin{remark}[The name of the agreement distance in the formalization]\label{rem:ms-variable-agreement-name}
+	The Lean declaration for Definition~\ref{def:ms-variable-agreement} is \texttt{msVariableConsistencyDefect}. The word \emph{consistency} there names the failure of the two players' $\mathsf{Variable}_j$ measurements to be consistent with one another, which is what $\Delta_j(\mathcal S)$ measures; it does not name the consistency defect of Definition~\ref{def:consistency}, the off-diagonal outcome weight of a pair of measurements. The two quantities are different, and only the second is the source's consistency defect.
+\end{remark}
 
 \begin{theorem}[Rigidity of the Magic Square game]\label{thm:ms-rigidity}
 	\lean{MIPStarRE.QPBT.exists_ms_rigidity}
@@ -383,7 +387,7 @@ $4$, respectively.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{def:ms-variable-agreement, def:consistent-measurement}
+	\uses{def:ms-variable-agreement, def:consistent-measurement, lem:ms-variable-agreement-support}
 	Each summand of $\Delta_j(\mathcal S)$ is the squared norm of a vector that the hypothesis makes zero. For the second assertion, consistency of $\{M^{\mathsf{Variable}_j}_a\}$ on $\ket{\psi}$ gives $(M^{\mathsf{Variable}_j}_a \ot I)\ket{\psi} = (I \ot M^{\mathsf{Variable}_j}_a)\ket{\psi}$ for every answer $a$, and the binary effects of Definition~\ref{def:ms-variable-agreement} are finite sums of such effects, so the same equality holds for $\hat M^{\mathsf{Variable}_j}_b$ for both $b$. The third assertion is the second applied at every cell.
 \end{proof}
 
@@ -399,7 +403,7 @@ $4$, respectively.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{def:ms-variable-agreement, lem:povm-to-obs, thm:naimark}
+	\uses{def:ms-variable-agreement, lem:povm-to-obs, thm:naimark, lem:ms-variable-agreement-support}
 	Compress each dilated reflection to the ground slice of the dilation. The compressed difference acts on the dilated state exactly as the difference of the original binary observables $\hat{\mathcal O}_{\mathrm A} = \hat A^{\mathsf{Variable}_j}_0 - \hat A^{\mathsf{Variable}_j}_1$ and $\hat{\mathcal O}_{\mathrm B}$ acts on $\ket{\psi}$, and passing from the two binary effects to their observable costs the answer-alphabet cardinality $2$ by Lemma~\ref{lem:povm-to-obs}, so that squared difference is at most $2\,\Delta_j(\mathcal S) \le 2\delta$. The two complementary terms are the leakages of the dilated reflections out of the ground slice; each has squared norm at most $144\,\eps$, because the cell of index $j$ is incident to a constraint and the corresponding cell-consistency mass of a strategy of value $1-\eps$ is $O(\eps)$. A triangle inequality on the three terms, followed by the inequality $(x+y+z)^2 \le 3(x^2+y^2+z^2)$, gives the displayed bound. The unsquared form follows by taking square roots.
 \end{proof}
 

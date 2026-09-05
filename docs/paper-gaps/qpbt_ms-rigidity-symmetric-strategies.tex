@@ -336,9 +336,7 @@ so the symmetrization construction of \path{lem:symmetric-strat}
 (\path{references/qpbt-paper/06_nonlocal_games_and_mipstar.tex}, lines~94--130)
 does not repair the statement either: it is value-preserving and moves the two
 role-dependent families into two blocks of one family, which is exactly what
-the flag register does above.  The value, the swap invariance, and the two
-vanishing correlations have also been verified numerically for the explicit
-$32$-dimensional local spaces described here.}
+the flag register does above.}
 
 \section{What the cited self-test provides}
 
@@ -628,6 +626,28 @@ proof-level completion mark either.  The blueprint records these as
 \path{def:ms-variable-agreement}, \path{lem:ms-variable-agreement-zero},
 \path{lem:ms-varobs-cross-player}, \path{lem:ms-variable-agreement-support} and
 \path{cor:ms-rigidity-symmetric-consistent}.
+
+The blueprint departs from the source in one further respect, smaller and
+not mathematical, which is recorded here for the same reason.  The source
+reads the relation $M \approx_\zeta N$ between operators that are not POVM
+elements on the original state, as
+$\bra{\psi}(M-N)^\dagger(M-N)\ket{\psi} \le O(\zeta)$.%
+\footnote{\path{references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex},
+lines~644--646.}
+The operators to which the source applies that relation are the products
+$\tilde A^{\Variable_1} \tilde A^{\Variable_5} \ot \Id_{\mathrm{B'B''}}$ of the
+transported observables, which act on
+$\mH_{\mathrm A'} \ot \mH_{\mathrm A''} \ot \mH_{\mathrm B'} \ot
+\mH_{\mathrm B''}$ and cannot be evaluated on $\ket{\psi}$ at all; the state
+is therefore forced to be the extracted ideal state
+$\ket{\Theta} = \ket{\EPR_2}^{\ot 2} \ot \ket{\aux}$ of
+(\path{thm:ms-rigidity},~1).  The blueprint says so where it states the
+convention, and \leanid{MIPStarRE.QPBT.msAnticommutatorDistanceA} and
+\leanid{MIPStarRE.QPBT.msAnticommutatorDistanceB} are accordingly defined on
+\leanid{MIPStarRE.QPBT.idealMsState}.  The difference is a local slip of the
+source rather than a mathematical divergence, the intended reading being
+forced by the domains of the operators; it is nonetheless a difference
+between the formal statement and the printed one, so it is written down.
 
 What remains for \ghissue{105} is the assembly of the corrected theorem from
 the chain: the approximate anticommutation and cross-commutation of the second

@@ -20,9 +20,12 @@ and fifth variables.
 That distance is not the consistency defect of `def:consistency`, which is the
 off-diagonal outcome weight of a pair of measurements (`consistencyDefect`); it
 is the squared state-dependent distance `opFamilyDistSq` of
-`def:povm-distance`.  The declaration name `msVariableConsistencyDefect` records
-what the distance measures: the failure of the two players' variable
-measurements to be consistent with one another.
+`def:povm-distance`.  In the declaration name `msVariableConsistencyDefect` the
+word `Consistency` records the failure of the two players' variable
+measurements to be consistent with one another, which is what the distance
+measures, and not the defect of `def:consistency`; the blueprint states the
+distinction as `rem:ms-variable-agreement-name`.  The name itself is kept
+unchanged because the rigidity assembly of issue #105 is stated in terms of it.
 
 This file defines that distance on the original, possibly non-projective,
 strategy and relates it to the reflections of the projective dilation on which
@@ -73,11 +76,12 @@ to a bit by `msBitOrZero`, on the shared state.  The corrected
 `docs/paper-gaps/qpbt_ms-rigidity-symmetric-strategies.tex`) assumes this
 distance to be at most `δ` at the cells `0` and `4`.
 
-The declaration name records what the distance measures, namely the failure of
-the two players' variable measurements to be consistent with one another.  The
-quantity itself is the squared state-dependent distance `opFamilyDistSq` of
-`def:povm-distance`, not the outcome-disagreement weight `consistencyDefect` of
-`def:consistency`.
+The word `Consistency` in the declaration name records the failure of the two
+players' variable measurements to be consistent with one another, which is what
+the distance measures.  The quantity itself is the squared state-dependent
+distance `opFamilyDistSq` of `def:povm-distance`, not the outcome-disagreement
+weight `consistencyDefect` of `def:consistency`; the blueprint records the
+distinction as `rem:ms-variable-agreement-name`.
 
 The distance vanishes for a symmetric strategy whose variable measurements are
 consistent in the sense of `def:consistent-measurement`, paper
@@ -106,7 +110,12 @@ theorem msVariableConsistencyDefect_eq_sum (S : Strategy msGame) (j : Fin 9) :
 /-! ## Exact consistency -/
 
 /-- Formalization-only: the action on a state is additive over finite sums of
-operators. -/
+operators.  This is the `Finset` form of
+`MagicSquareRigidity.applyOperatorToState_sum`, which sums over a `Fintype`;
+the general form is the one `Measurement.postprocess_effect` needs, a
+postprocessed effect being a sum over a fibre.  The two are kept apart because
+the rigidity assembly of issue #105 already refers to this name; their
+consolidation is issue #204. -/
 theorem applyOperatorToState_finset_sum {β ι : Type*} [Fintype ι] [DecidableEq ι]
     (s : Finset β) (M : β → Op ι) (ψ : EuclideanSpace ℂ ι) :
     applyOperatorToState (∑ b ∈ s, M b) ψ = ∑ b ∈ s, applyOperatorToState (M b) ψ := by
@@ -241,11 +250,6 @@ theorem norm_compressed_varObs_sub_eq (S : Strategy msGame) (j : Fin 9) :
     applyOperatorToState_rightTensor_naimarkInflation, ← naimarkDilatedState_sub,
     naimarkDilatedState_norm, ← applyOperatorToState_sub_op]
 
-/-- Formalization-only: a sum over the two-element answer alphabet. -/
-private theorem sum_univ_zmod_two {M : Type*} [AddCommMonoid M] (f : ZMod 2 → M) :
-    ∑ b : ZMod 2, f b = f 0 + f 1 :=
-  Fin.sum_univ_two f
-
 /-- The original variable observables of the two players differ on the state by
 at most the square root of twice the agreement distance.  This is the
 answer-cardinality bound `povm_to_obs` (`lem:povm-to-obs`) for the two-outcome
@@ -261,15 +265,19 @@ theorem norm_varObs_sub_sq_le_two_mul_defect (S : Strategy msGame) (j : Fin 9) :
   have hcnorm : ∀ b : ZMod 2, ‖c b‖ = 1 := by
     intro b
     by_cases hb : b = 0 <;> simp [hcdef, hb]
+  -- `ZMod 2` is `Fin 2`; retyping the sum makes `Fin.sum_univ_two` apply to it,
+  -- as in `sq_add_le_of_sum_sq_le` and `conjTranspose_mul_le_one_of_obsOf`.
+  have hsum : ∀ g : ZMod 2 → Op (S.ιA × S.ιB), ∑ b, g b = g 0 + g 1 :=
+    fun g => Fin.sum_univ_two g
   have hA : (∑ b : ZMod 2, c b •
       heteroKron (((S.A (.var j)).postprocess msBitOrZero).effect b) (1 : Op S.ιB)) =
       heteroKron (obsOf ((S.A (.var j)).postprocess msBitOrZero)) 1 := by
-    rw [sum_univ_zmod_two]
+    rw [hsum]
     simp [hcdef, obsOf, heteroKron_sub_left, ← sub_eq_add_neg]
   have hB : (∑ b : ZMod 2, c b •
       heteroKron (1 : Op S.ιA) (((S.B (.var j)).postprocess msBitOrZero).effect b)) =
       heteroKron 1 (obsOf ((S.B (.var j)).postprocess msBitOrZero)) := by
-    rw [sum_univ_zmod_two]
+    rw [hsum]
     simp [hcdef, obsOf, heteroKron_sub_right, ← sub_eq_add_neg]
   have hkey := povm_to_obs (uniformDistribution Unit)
     (fun (_ : Unit) (b : ZMod 2) =>
