@@ -5,16 +5,17 @@ import MIPStarRE.QPBT.Test.SoundnessDefs
 # Applying the classical low-degree test
 
 This module states the two application obligations at the end of the Pauli-basis
-combining argument.  The combined-line measurement is recorded both with the error
-form asserted by the source and with the weaker estimate established by its first
-proof route.  The final witness consists of a projective measurement of a pair of
-global bounded individual-degree polynomials.  The proposition-valued declarations
-below are intentionally open proof obligations in this skeleton; their statement
-links do not claim proof closure.
+combining argument.  Directly indexed combined-line measurements are recorded both
+with the error form printed in the source and with the weaker estimate established by
+its first proof route.  The final witness consists of a projective measurement of a
+pair of global bounded individual-degree polynomials.  The existence assertions below
+record the measurements and quantitative estimates required by the combining argument;
+their derivations remain open.
 
 ## References
 
-The combined-line declarations formalize `lem:qld-4-13` in
+The combined-line declarations record directly indexed auxiliary forms of
+`lem:qld-4-13` in
 `blueprint/src/chapter/ch15_qpbt_combining.tex`, with paper source
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1020-1034`.
 The global-pair declaration formalizes `lem:qld-4-7` in the same blueprint, with
@@ -26,21 +27,21 @@ namespace MIPStarRE.QPBT
 
 noncomputable section
 
-/-- Conditional construction of the extended-line measurements with the source error
-`poly(m^2 * epsilon, md / q)`.  This is the source-facing statement of
-`lem:qld-4-13`, paper lines 1020--1034.
+/-- Conditional directly indexed construction of the extended-line measurements with
+the error expression `poly(m^2 * epsilon, md / q)` printed in `lem:qld-4-13`, paper
+lines 1020--1034. This is an auxiliary obligation, not the source-facing statement.
 
 The printed proof does not establish this error form: its first route gives
 `m * poly(epsilon, md / q)`, while its second route gives a different bound and
 uses a joint-law decomposition absent from the subline lemma.  The discrepancy is
 documented in `docs/paper-gaps/qpbt_combined-lines-error-term.tex` and
-`rem:qld-4-13-source-defects` in the blueprint.  The directly indexed line carrier
-used by `ExtendedLinesWitness` represents the required extended-dimensional
-line-point law without the invalid divisibility guard; it is a directly indexed
-line-space construction and does
-not identify the source's seed-bearing verifier game with the directly indexed game.
-This declaration takes an already constructed point witness; the
-source-facing declaration below supplies that witness existentially.
+`rem:qld-4-13-source-defects` in the blueprint. `ExtendedLinesWitness` uses the
+directly indexed question carrier and line-point law documented in
+`docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`, and the completed answer
+alphabet documented in `docs/paper-gaps/qpbt_combined-lines-error-term.tex`.
+Their conversion to the source's verifier game remains open. This declaration takes
+an already constructed point witness; the companion obligation below supplies that
+witness existentially.
 -/
 theorem exists_extendedLinesWitness_ofPointsWitness :
     ∃ deltaCombine : ℝ → ℝ → ℝ, IsPolyErr₂ deltaCombine ∧
@@ -51,14 +52,15 @@ theorem exists_extendedLinesWitness_ofPointsWitness :
             ((P.m * P.d : ℕ) / (P.q : ℝ)))) := by
   sorry
 
-/-! The source-facing declaration supplies the point witness from
-`lem:qld-4-10` rather than taking it as an unproved external hypothesis. -/
+/-! The following directly indexed obligation supplies the point witness from
+`lem:qld-4-10` rather than taking it as an external hypothesis. -/
 
-/-- The source-facing extended-line construction of `lem:qld-4-13`, paper
-lines 1020--1034.
+/-- Directly indexed extended-line obligation with the numerical error expression
+printed in `lem:qld-4-13`, paper lines 1020--1034.
 
-The `_ofPointsWitness` companion is the conditional, Lean-only form retained
-for calculations that already have a point witness. -/
+The `_ofPointsWitness` companion assumes a point witness, while this declaration
+supplies one existentially. Both declarations use the directly indexed questions,
+law, and completed answer alphabet, so neither is the source-facing paper statement. -/
 theorem exists_extendedLinesWitness :
     ∃ deltaQ : ℝ → ℝ, IsPolyErr deltaQ ∧
       ∃ deltaCombine : ℝ → ℝ → ℝ, IsPolyErr₂ deltaCombine ∧
@@ -73,13 +75,13 @@ theorem exists_extendedLinesWitness :
 delivered by the first proof route, `C * m * poly(epsilon, md / q)`.
 
 This is an established auxiliary form of the argument, not the source-labelled
-`lem:qld-4-13`; it must not be advertised as that theorem.  The source discrepancy
-is analyzed in `docs/paper-gaps/qpbt_combined-lines-error-term.tex`.  As in the
-source-facing declaration, the extended questions use the directly indexed line-space
-construction.  This conditional declaration takes an already constructed point witness;
-the source-facing construction below supplies it existentially.  Relating its game to the source's
-seed-bearing game requires the transport
-and soundness obligations in
+`lem:qld-4-13`; it must not be advertised as that theorem. The source discrepancy
+is analyzed in `docs/paper-gaps/qpbt_combined-lines-error-term.tex`. As in the
+companion directly indexed declaration, the extended questions use the directly
+indexed line-space construction. This conditional declaration takes an already
+constructed point witness; the obligation below supplies it existentially. Relating
+its game to the source's seed-bearing game requires the transport and soundness
+obligations in
 `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`.
 -/
 theorem exists_extendedLinesWitness_established_ofPointsWitness :
@@ -92,9 +94,16 @@ theorem exists_extendedLinesWitness_established_ofPointsWitness :
               deltaCombine ε ((P.m * P.d : ℕ) / (P.q : ℝ)))) := by
   sorry
 
-/-- Source-facing construction for the established auxiliary estimate.  This is
-the same Lean-only bound as `exists_extendedLinesWitness_established_ofPointsWitness`,
-with the point witness existentially supplied rather than assumed. -/
+/-- Directly indexed construction for the auxiliary estimate
+`C * m * poly(epsilon, md / q)`. This has the same directly indexed estimate as
+`exists_extendedLinesWitness_established_ofPointsWitness`, with the point witness
+existentially supplied rather than assumed.
+
+Its question carrier and line-point law are documented in
+`docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`; its `Option`-completed answer
+alphabet is documented in `docs/paper-gaps/qpbt_combined-lines-error-term.tex`.
+Transport to `lem:qld-4-13` must convert this completed comparison to the source's
+sum over field answers, including degenerate zero-direction singleton lines. -/
 theorem exists_extendedLinesWitness_established :
     ∃ deltaQ : ℝ → ℝ, IsPolyErr deltaQ ∧
       ∃ C : ℝ, 0 < C ∧

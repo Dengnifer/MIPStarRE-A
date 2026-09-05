@@ -587,7 +587,8 @@ cap_reached() {
   # would otherwise be stranded unreviewed and statusless (PR 7 review, F6).
   CAP_PUSHED=0
   for _attempt in 1 2 3; do
-    if git -C "$ROOT" push github "refs/heads/$BRANCH:refs/heads/$BRANCH"; then
+    if "$ROOT/local/bin/checked-push.sh" --repo-root "$WORKTREE" github \
+        "refs/heads/$BRANCH:refs/heads/$BRANCH"; then
       CAP_PUSHED=1
       break
     fi
@@ -872,7 +873,8 @@ if [ "$FIXED_ANY" -eq 1 ]; then
   # statuses (and the old head's stale failures standing).
   PUSHED=0
   for attempt in 1 2 3; do
-    if git -C "$ROOT" push github "refs/heads/$BRANCH:refs/heads/$BRANCH"; then
+    if "$ROOT/local/bin/checked-push.sh" --repo-root "$WORKTREE" github \
+        "refs/heads/$BRANCH:refs/heads/$BRANCH"; then
       PUSHED=1
       break
     fi

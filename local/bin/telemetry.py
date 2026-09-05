@@ -82,7 +82,16 @@ KNOWN_STAGES = (
 KNOWN_BUILD_KINDS = ("warm", "rebuild", "cache-get", "ci-build")
 KNOWN_OUTCOMES = ("success", "failed", "partial", "skipped")
 KNOWN_STATUSES = ("active", "done", "failed", "archived")
-ROLES = ("orc", "prover", "reviewer", "simplifier", "blueprint", "splitter", "scout")
+ROLES = (
+    "orc",
+    "prover",
+    "reviewer",
+    "simplifier",
+    "blueprint",
+    "splitter",
+    "scout",
+    "mathfix",
+)
 
 TOKEN_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 

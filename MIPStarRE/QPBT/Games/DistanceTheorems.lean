@@ -360,8 +360,11 @@ private theorem reindexMeasurement_isProjective
       simp [reindexOp, Matrix.reindex_apply,
         (hM a).isSelfAdjoint.isHermitian.apply]).isSelfAdjoint
 
-/-- The sum of the squared effects of a POVM is bounded by the identity. -/
-private theorem measurement_sum_adjoint_mul_le_one
+/-- The squared effects of a POVM sum to at most the identity. This is the
+formalization-only estimate `lem:sandwich-povm-square-sum` used in the
+contractions underlying `lem:ld-sandwich`; detailed source argument
+`references/neexp-paper/05_quantum_preliminaries.tex:930-946`. -/
+theorem measurement_sum_adjoint_mul_le_one
     {α I : Type*} [Fintype α] [Fintype I] [DecidableEq I]
     (M : Measurement α I) :
     ∑ a : α, (M.effect a)ᴴ * M.effect a ≤ 1 := by

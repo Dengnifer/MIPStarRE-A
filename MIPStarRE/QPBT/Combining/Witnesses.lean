@@ -15,9 +15,14 @@ not require a dimension-divisibility hypothesis.
 
 ## References
 
-The witnesses formalize `lem:qld-4-10`, `lem:qld-xz-lines`,
-`lem:qld-sublines`, `lem:qld-4-13`, and `lem:qld-4-7` in
-`blueprint/src/chapter/ch15_qpbt_combining.tex`.  Their paper source is
+`CombinedPointsWitness`, `CombinedLinesWitness`, and `GlobalPairWitness` record
+the measurement conclusions of `lem:qld-4-10`, `lem:qld-xz-lines`, and
+`lem:qld-4-7`, respectively, in
+`blueprint/src/chapter/ch15_qpbt_combining.tex`.  `SubLineWitness` and
+`ExtendedLinesWitness` instead support `lem:qld-sublines` and `lem:qld-4-13`
+through the directly indexed extended-line carrier and probability law.  The
+latter also uses the completed answer alphabet, rather than the field-valued
+answer sum in the source statement.  The paper source is
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:689-709,
 882-894,1020-1069,1267-1274`.
 -/
@@ -232,9 +237,14 @@ noncomputable def subLineZComponentDist (P : AdmissibleParams)
     (restrictedLinePointDist P component.1 component.2.2)).map
       fun sample => ((sample.1, sample.2.1), sample.2.2)
 
-/-- The subline distribution of `lem:qld-sublines`, paper lines 1063--1069.
-Its source-mixture field records the X and Z point marginals separately; it
-does not assert a joint conditional law for the pair of projected points. -/
+/-- Directly indexed form of the subline distribution of `lem:qld-sublines`,
+paper lines 1063--1069.  Its extended-line marginal is the directly indexed
+line-point law rather than the seed-indexed line-point distribution over
+`F_q^(2m+2)` of the source statement; that replacement is documented in
+`docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`, so this is a
+formalization auxiliary record, not the source-labelled statement.  Its
+source-mixture field records the X and Z point marginals separately; it does
+not assert a joint conditional law for the pair of projected points. -/
 structure SubLineWitness (P : AdmissibleParams) where
   /-- The actual distribution of an extended line and two projected lines. -/
   D : Distribution (SubLineTriple P)
@@ -271,9 +281,9 @@ structure SubLineWitness (P : AdmissibleParams) where
 
 /-! ## Extended lines and global polynomial pairs -/
 
-/-- Extended-line POVMs and the two source consistency displays from
-`lem:qld-4-13`, paper lines 1020--1034.  The direct line carrier avoids the
-dimension-divisibility obstruction documented in
+/-- Extended-line POVMs and directly indexed, completed-answer forms of the two
+consistency relations in `lem:qld-4-13`, paper lines 1020--1034. The direct line
+carrier avoids the dimension-divisibility obstruction documented in
 `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`. -/
 structure ExtendedLinesWitness {P : AdmissibleParams} {ε δQ : ℝ}
     (S : ProjectiveSetting P ε) (points : CombinedPointsWitness S δQ)

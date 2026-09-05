@@ -56,7 +56,7 @@ theorem Distribution.prod_isProbability {α β : Type*}
 
 /-- The convex mixture with a coefficient in `[0,1]`, as used for
 the equal mixture in `def:line-point-dist`, blueprint
-`ch13_qpbt_test.tex:125-135`, paper
+`ch13_qpbt_test.tex:163-173`, paper
 `08_classical_and_quantum_low_degree_tests.tex:274-287`. -/
 noncomputable def Distribution.mix {α : Type*} [DecidableEq α]
     (t : ℝ) (ht0 : 0 ≤ t) (ht1 : t ≤ 1)
@@ -73,7 +73,7 @@ noncomputable def Distribution.mix {α : Type*} [DecidableEq α]
     simp [μ.outsideSupport a hμ, ν.outsideSupport a hν]
 
 /-- A convex mixture of probability distributions is a probability distribution;
-`def:line-point-dist`, blueprint `ch13_qpbt_test.tex:125-135`, paper
+`def:line-point-dist`, blueprint `ch13_qpbt_test.tex:163-173`, paper
 `08_classical_and_quantum_low_degree_tests.tex:274-287`. -/
 theorem Distribution.mix_isProbability {α : Type*} [DecidableEq α]
     (t : ℝ) (μ ν : Distribution α) (hμ : μ.IsProbability)
@@ -96,7 +96,7 @@ theorem Distribution.mix_isProbability {α : Type*} [DecidableEq α]
   ring
 
 /-- The dependent bind of finite distributions used for typed question
-distributions, blueprint `ch12_qpbt_games.tex:1400-1404`, paper
+distributions, blueprint `ch12_qpbt_games.tex:1414-1418`, paper
 `07_types.tex:84-94`. -/
 noncomputable def Distribution.bind {α β : Type*} [DecidableEq β]
     (μ : Distribution α) (ν : α → Distribution β) : Distribution β where
@@ -113,7 +113,7 @@ noncomputable def Distribution.bind {α β : Type*} [DecidableEq β]
 
 /-- A dependent bind of probability distributions is a probability distribution;
 blueprint
-`ch12_qpbt_games.tex:1400-1404`, paper `07_types.tex:84-94`. -/
+`ch12_qpbt_games.tex:1414-1418`, paper `07_types.tex:84-94`. -/
 theorem Distribution.bind_isProbability {α β : Type*} [DecidableEq β]
     (μ : Distribution α) (ν : α → Distribution β) (hμ : μ.IsProbability)
     (hν : ∀ a ∈ μ.support, (ν a).IsProbability) :

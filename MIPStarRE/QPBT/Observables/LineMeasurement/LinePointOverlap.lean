@@ -38,17 +38,6 @@ noncomputable section
 
 namespace DistanceCalculus
 
-/-- The state quadratic form is additive over finite sums of operators. The
-same statement is proved as `stateQForm_finset_sum` in the Magic Square
-rigidity development
-(`MIPStarRE/QPBT/Test/MagicSquareTheorems/Rigidity/GroundSlice.lean`); it is
-recorded here in the namespace where `stateQForm` is defined, and merging the
-two copies is tracked by issue #204. -/
-theorem stateQForm_finset_sum {ι : Type*} [Fintype ι] [DecidableEq ι]
-    (ψ : EuclideanSpace ℂ ι) {γ : Type*} (s : Finset γ) (M : γ → Op ι) :
-    stateQForm ψ (∑ g ∈ s, M g) = ∑ g ∈ s, stateQForm ψ (M g) := by
-  simp [stateQForm, applyOperatorToState]
-
 /-- The state quadratic form of the zero operator vanishes. -/
 theorem stateQForm_zero {ι : Type*} [Fintype ι] [DecidableEq ι]
     (ψ : EuclideanSpace ℂ ι) : stateQForm ψ (0 : Op ι) = 0 := by
