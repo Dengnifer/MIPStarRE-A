@@ -220,16 +220,6 @@ private theorem degreeOf_X_le_one {τ K : Type*} [CommSemiring K] (c i : τ) :
   · simp [h]
   · simp [h]
 
-private theorem degreeOf_X_eq_zero_of_ne {τ K : Type*} [CommSemiring K] {c i : τ}
-    (h : i ≠ c) : (MvPolynomial.X c : MvPolynomial τ K).degreeOf i = 0 := by
-  rw [← Nat.le_zero, MvPolynomial.degreeOf_le_iff]
-  intro s hs
-  have hs' : s ∈ ({Finsupp.single c 1} : Finset (τ →₀ ℕ)) :=
-    MvPolynomial.support_monomial_subset hs
-  rw [Finset.mem_singleton] at hs'
-  subst hs'
-  simp [Ne.symm h]
-
 private theorem degreeOf_rename_le {σ τ K : Type*} [CommSemiring K]
     {f : σ → τ} (hf : Function.Injective f) {p : MvPolynomial σ K} {d : ℕ}
     (hp : ∀ j : σ, p.degreeOf j ≤ d) (i : τ) :
@@ -276,7 +266,7 @@ theorem combinePolyTuple_mem_polyFunc {K : Type*} [CommSemiring K] {m k d : ℕ}
   · have hne : i ≠ combinedCoefficientVar m k r := by
       rintro rfl
       exact combinedCoefficientVar_notMem_range m k r hi
-    rw [degreeOf_X_eq_zero_of_ne hne, zero_add]
+    rw [MvPolynomial.degreeOf_X_of_ne hne, zero_add]
     exact degreeOf_rename_le (combinedPointVar_injective m k)
       (fun j => degreeOf_le_of_mem_polyFunc (hg r) j) i
   · rw [degreeOf_rename_eq_zero_of_notMem_range (combinedPointVar_injective m k) _ hi,
