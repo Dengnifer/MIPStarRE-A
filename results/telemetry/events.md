@@ -2982,3 +2982,74 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   d62b3b0 and completed session evidence in 05a47a9. The #27 update headed
   17:34Z was posted approximately two minutes before that heading; this entry
   records the correction rather than treating that heading as a precise clock.
+
+## 2026-09-05T17:40Z — Owner account-routing lane and MAIN handoff
+
+- Owner issue 232 supersedes 231. The sol worker completed clean commit6ae352b
+  for explicit model recording; no separate PR is opened. Launched the requested
+  astra lane232. Its first two attempts stopped without edits because the prover
+  persona forbade workflow edits, and the lane repair attachment was explicitly
+  untrusted. Recovered through dispatch.sh with the trusted orchestrator persona
+  and direct task-specific owner authorization, retaining the prover registry
+  role and normal checked lane tail. Session prover-232-20260906-03 is verified
+  live on the same secondary-account thread and is inspecting implementation.
+- PR225's refresh conflict was only the sum_ldType docstring; preserved main's
+  fuller source explanation with the same theorem statement/proof. Normal merge
+  hooks and the lane tail are running; the merge daemon remains sole publisher
+  of merges to main. PR229 has exact-head CI success on6e754fc and astra review.
+- At17:39:39Z, /proc showed eight top-level Codex execs: four primary and four
+  secondary, excluding fan-out children. Added the verified running loops,
+  decisions, source-proof gap budget, account affinities, and next actions to the
+  end of /tmp/qpbt-main-handoff-v3.md for the owner-requested second-account
+  relaunch. MAIN stops after publishing that handoff; the full goal remains open.
+
+## 2026-09-05T18:20Z — Main-session relaunch and critical-path recovery
+
+- Read the owner handoff, main persona, and last five progress reports. The
+  relaunch paragraph has blank export names; the installed router identifies
+  MIPSTARRE_ACCOUNT_CAP_PRIMARY and MIPSTARRE_ACCOUNT_CAP_SECOND. Set them in
+  ~/.profile to 10 and 9 respectively, reserving one secondary-account request
+  for this main session. A fresh login shell confirms those caps and both astra
+  model defaults. Routing retirement remains contingent on issue 232 merging.
+- Verified the merge daemon and stack watcher remain live. PR 229 merged through
+  the daemon at 18:01:25Z. Restarted exact-head CI and independent review for
+  PR 185; sent PR 178's remaining stale-heading finding through labelled autofix.
+- PR 202's previously rejected fix is still staged; the normal pre-commit hook
+  now passes. An attempted labelled autofix correctly refused this dirty tree.
+  Started a normal repair commit of that existing fix, checked publication, CI,
+  and independent review without bypassing any guard or expanding its scope.
+- Resolved issue 232's sole telemetry merge conflict by retaining both appended
+  histories. Merge commit cd8a7c6 passed normal hooks; its existing lane tail is
+  running. No protocol or router implementation changes were made by this main.
+- Revalidated the clean PR 225 and 230 recovery heads and their terminal review
+  ledgers. Updated PR 225's daemon adjudication to identify the recursive parser
+  fallback precisely; PR 230 retains its documented conservative directory-rename
+  limitation. Cleared their stale retry markers; merges remain daemon-only.
+- Math-fix slot 5 completed the Schmidt-mirror construction and distinct-family
+  bounds, not the pasting theorem. Resumed the same primary-account thread for
+  averaged mirror consistency and fine-commutator assembly as slot 6 of 10,
+  retaining the September 6, 11:45 UTC deadline. The first dispatch used a wrong
+  worktree suffix and failed before starting a worker; the corrected dispatch is
+  live. Resumed issue 119 separately for quantitative restriction bounds, with
+  explicit instructions not to duplicate issue 201 or 118 constructions.
+- The initial progress-comment read supplied a redundant repository prefix to
+  gh_common.api and received HTTP 404; retrying its repository-relative endpoint
+  succeeded. No write was attempted in that failed call. Existing staged and
+  untracked session telemetry is preserved; no human decision is requested.
+
+## 2026-09-05 — Owner session retires after the 90-minute watch of the astra main session (2026-09-05T18:29:15Z)
+
+- The watch (15:46Z to 18:29:15Z) found the main session (gpt-6-astra) following the rules: daemon-only merges (PRs 228 and 227
+  merged during the watch), labelled autofix loops, #27 reports and telemetry. Guidance given during the watch: an over-read of the
+  handoff parked PRs 178 and 185 (released explicitly); fix loops had stalled unnoticed (PR 229's fixer commit rejected by the
+  paper-gap note style guard; PRs 153, 225, 230, 205 waiting) and the operating rhythm was written into the handoff (guidance
+  sections 1 and 2); the concurrency target was replaced by a critical-path priority at the owner's request; the #201 reopening was
+  pointed at the recorded design decision for eq:pasting-1-sym. The main session's context dropped to about 39% by 16:33Z, so
+  later messages were kept short.
+- Two-account routing (owner request 16:2xZ, decision "both" 17:3xZ): the second endpoint serves gpt-6-astra; the main session
+  installed the router shim v2 at 17:20Z (the owner session's classifier had refused to), and the router log shows balanced picks
+  (4 second / 4 primary at 17:40Z); issue #232 moves the routing into dispatch.sh (lane running); the main session relaunches on the
+  second account with fan-out off at low context (/tmp/relaunch-main-v4.sh, /tmp/main-session-astra-v2.sh staged).
+- State at retirement: main 3f00de0; open PRs 233,230,225,213,212,207,205,202,195,185,178; live codex worker sessions 2;
+  merges recorded by the daemon so far 40. All Claude-held worktrees were released (#118 at 691b671, #174 at bece2e6).
+  This owner session stops; the owner decides when an owner session returns.
