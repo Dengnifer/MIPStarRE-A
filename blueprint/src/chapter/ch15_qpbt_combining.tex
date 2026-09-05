@@ -1992,6 +1992,120 @@ projective measurement whose outcomes are pairs of global polynomials.
 	\cite{gap:qpbt_ld-dimension-divisibility}.
 \end{remark}
 
+% The two lemmas below are not statements of the source; they record the
+% coordinate change for the LDT consistency conclusions and the compression of
+% the correlated residue register discussed in the preceding remark.
+\begin{lemma}[Formalization support for the consistency conclusions in directly indexed coordinates]
+	\label{lem:direct-ld-consistency-coordinates}
+	\lean{MIPStarRE.QPBT.directPointPolynomial_consistencyDefect_le}
+	\lean{MIPStarRE.QPBT.directPolynomialPoint_consistencyDefect_le}
+	\lean{MIPStarRE.QPBT.directPolynomialPolynomial_consistencyDefect_le}
+	\leanok
+	\uses{def:consistency, def:ld-game, thm:main-formal}
+	This is not a named statement of \cite{Ji2020MIPStar}. It records the
+	three consistency implications obtained from the projective polynomial
+	measurements of Theorem~\ref{thm:main-formal} after changing to the
+	directly indexed coordinates. In that presentation the sampled coordinate
+	is carried by the question itself rather than by a residue class of
+	$\F_q$; see Remark~\ref{rem:qld-4-7-divisibility}.
+
+	Fix directly indexed parameters $D=(q,m,d,k)$ and let $\delta\in\R$.
+	The following three implications hold:
+	\begin{enumerate}
+		\item let $S=(\psi,A,B)$ be a projective strategy for the
+		      directly indexed game, fix
+		      $r\in\operatorname{Fin}(k)=\{0,\ldots,k-1\}$, and let
+		      $G^{\mathrm B}$ be a projective measurement on
+		      $\hilb_{\mathrm B}$ indexed by single $m$-variate
+		      polynomials of individual degree at most $d$, consistency with
+		      error $\delta$ between the coordinate-$r$ LDT point family of
+		      Alice and the evaluation family of $G^{\mathrm B}$ implies
+		      that the corresponding directly indexed point/polynomial
+		      off-diagonal defect, evaluated on $\psi$ and averaged uniformly
+		      over $u\in\F_q^m$, is at most $\delta$;
+		\item let $S=(\psi,A,B)$ be a projective strategy for the
+		      directly indexed game, fix
+		      $r\in\operatorname{Fin}(k)=\{0,\ldots,k-1\}$, and let
+		      $G^{\mathrm A}$ be a projective measurement on
+		      $\hilb_{\mathrm A}$ indexed by the same single polynomials,
+		      consistency with error $\delta$ between its evaluation family
+		      and the coordinate-$r$ LDT point family of Bob implies the
+		      corresponding directly indexed polynomial/point defect bound
+		      $\delta$, again averaged uniformly over $u\in\F_q^m$;
+		\item let $S=(\psi,A,B)$ be an arbitrary strategy for the
+		      directly indexed game, with no projectivity assumption on $S$,
+		      and let $G^{\mathrm A}$ and $G^{\mathrm B}$ be projective
+		      measurements on the two players' spaces indexed by single
+		      polynomials. Consistency with error $\delta$ between these two
+		      constant LDT measurement families over the one-element question
+		      set implies that the corresponding directly indexed
+		      polynomial/polynomial defect is at most $\delta$.
+	\end{enumerate}
+	Thus the first two implications concern one fixed coordinate and the
+	third concerns no coordinate. All three use single-polynomial projective
+	measurements; they do not construct a joint measurement of a
+	$k$-tuple of polynomials.
+\end{lemma}
+\begin{proof}
+	\leanok
+	For each implication, the density-state consistency relation is changed
+	to the identical off-diagonal defect on the vector $\psi$. The first two
+	defects are then reindexed by the point and scalar bijections and by
+	polynomial evaluation; the third is reindexed by the polynomial-outcome
+	bijection. These changes preserve the bound $\delta$ exactly.
+\end{proof}
+
+\begin{lemma}[Formalization support for the compression of a correlated residue register]
+	\label{lem:direct-ld-residue-compression}
+	\lean{MIPStarRE.QPBT.ldStrategyToDirect_pointPolynomial_compression}
+	\lean{MIPStarRE.QPBT.ldStrategyToDirect_polynomialPoint_compression}
+	\leanok
+	\uses{def:consistency, def:ld-game, def:ld-question-distribution}
+	This is not a named statement of \cite{Ji2020MIPStar}. It records two
+	compression identities between the classical low individual degree game
+	and its directly indexed presentation.
+
+	Let $(\psi, A, B)$ be a strategy for the classical game with parameters
+	$(q,m,d,k)$, and extend it to the directly indexed game by adjoining to
+	each player a register of dimension $q/m$, the common size of the
+	classes of the index function $\chi$ of
+	Definition~\ref{def:ld-question-distribution}; the two copies of that
+	register are perfectly correlated in the extended state. For a
+	polynomial-tuple POVM $G^{\mathrm B}$ on
+	$\hilb_{\mathrm B}\ot\C^{q/m}$, let $\bar G^{\mathrm B}$ be the
+	normalized average of its diagonal blocks over the residue register.
+	Then, over a uniformly random point $u\in\F_q^m$, the off-diagonal
+	defect between Alice's point measurement and the evaluation of
+	$G^{\mathrm B}$ on the extended strategy equals the defect between
+	Alice's original point measurement and the evaluation of
+	$\bar G^{\mathrm B}$ on $(\psi,A,B)$.
+
+	Similarly, for every polynomial-tuple POVM $G^{\mathrm A}$ on
+	$\hilb_{\mathrm A}\ot\C^{q/m}$, compression gives equality between
+	the extended polynomial/point defect and the defect between the
+	evaluation of $\bar G^{\mathrm A}$ and Bob's original point
+	measurement. No projectivity hypothesis is imposed on the strategy or
+	on either polynomial-tuple POVM.
+\end{lemma}
+\begin{proof}
+	\leanok
+	The point measurement of the extended strategy is the block-diagonal
+	amplification of the original point measurement, while polynomial
+	evaluation commutes with averaging the diagonal blocks. The quadratic
+	form of the correlated state against each mixed pair of operators is
+	therefore the quadratic form of the original state against the
+	compressed pair, and summing the off-diagonal terms gives both identities.
+\end{proof}
+
+\begin{remark}[Compression of two polynomial measurements]
+	The preceding lemma does not compare defects in which both families are
+	polynomial measurements on the extended carriers. The extended state
+	pairs equal residues, whereas separate compression averages independently
+	over two residues; in general neither resulting quantity bounds the other.
+	This obstruction is analyzed in
+	\cite{gap:qpbt_ld-dimension-divisibility}.
+\end{remark}
+
 \begin{remark}[Constant regimes in the quotation of the classical soundness
 	theorem]
 	\label{rem:qld-4-7-constants}

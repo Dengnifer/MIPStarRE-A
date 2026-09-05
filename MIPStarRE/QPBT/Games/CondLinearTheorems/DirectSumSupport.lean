@@ -3,21 +3,20 @@ import MIPStarRE.QPBT.Games.CondLinear
 /-!
 # Coordinate direct sums of conditionally linear representations
 
-This module constructs the direct sum of equal-level representations of
-conditionally linear functions over pairwise disjoint registers.  Restriction
-to one register selects the corresponding supported summand, and a supported
-representation is unchanged when its input is restricted to that register.
-Consequently the direct-sum representation is supported on the union of the
-registers and evaluates as the sum of the component maps.
+Equal-level representations of conditionally linear functions over pairwise
+disjoint registers have a coordinatewise direct sum. Restriction to one
+register selects its supported summand, and a supported representation is
+unchanged when its input is restricted to that register. These identities give
+the support and evaluation properties used by the shared-seed product law.
 
 ## References
 
 The source result is `lem:cl-func-prod` in
-`blueprint/src/chapter/ch12_qpbt_games.tex:1255-1266`, approached through the
+`blueprint/src/chapter/ch12_qpbt_games.tex:1783-1799`, approached through the
 formalization support nodes `lem:cl-supported-vanishing`,
 `lem:cl-restriction-idem`, `lem:cl-restriction-sum`,
 `lem:cl-supported-restriction`, and `lem:cl-func-prod-same-level` at
-`ch12_qpbt_games.tex:1288-1344`.  The paper origin is
+`ch12_qpbt_games.tex:1816-1872`.  The paper origin is
 `references/qpbt-paper/05_conditionally_linear_functions.tex:150-379`.
 -/
 

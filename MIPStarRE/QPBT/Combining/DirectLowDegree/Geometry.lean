@@ -247,17 +247,13 @@ theorem directALinePointDist_point_index_marginal_uniform (D : DirectLdParams) :
         uniformDistribution (Fin D.m) := by
   constructor
   · unfold directALinePointDist
-    rw [distribution_map_map_of_isProbability
-      (uniformDistribution (DirectLdSpace D))
-      (uniformDistribution_isProbability (DirectLdSpace D))]
+    rw [Distribution.map_map]
     simpa [Function.comp_def] using
       (uniformDistribution_map_fst_of_equiv
         (e := directLdSpacePointEquiv D)
         (f := fun sample : DirectLdSpace D => sample.point) (by intro; rfl))
   · unfold directALinePointDist
-    rw [distribution_map_map_of_isProbability
-      (uniformDistribution (DirectLdSpace D))
-      (uniformDistribution_isProbability (DirectLdSpace D))]
+    rw [Distribution.map_map]
     simpa [Function.comp_def, directALineDescOf, DirectLineDesc.index] using
       (uniformDistribution_map_fst_of_equiv
         (e := directLdSpaceIndexEquiv D)
@@ -289,17 +285,13 @@ theorem directDLinePointDist_point_index_marginal_uniform (D : DirectLdParams) :
         uniformDistribution (Fin D.m) := by
   constructor
   · unfold directDLinePointDist
-    rw [distribution_map_map_of_isProbability
-      (uniformDistribution (DirectLdSpace D))
-      (uniformDistribution_isProbability (DirectLdSpace D))]
+    rw [Distribution.map_map]
     simpa [Function.comp_def] using
       (uniformDistribution_map_fst_of_equiv
         (e := directLdSpacePointEquiv D)
         (f := fun sample : DirectLdSpace D => sample.point) (by intro; rfl))
   · unfold directDLinePointDist
-    rw [distribution_map_map_of_isProbability
-      (uniformDistribution (DirectLdSpace D))
-      (uniformDistribution_isProbability (DirectLdSpace D))]
+    rw [Distribution.map_map]
     simpa [Function.comp_def, directDLineDescOf, DirectLineDesc.index] using
       (uniformDistribution_map_fst_of_equiv
         (e := directLdSpaceIndexEquiv D)
