@@ -2744,6 +2744,39 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   remain reserved until an explicit release on progress log 27. Owner decisions posted
   to inbox 26 remain parked pending the owner's answer. Dependency readiness is being
   checked against GitHub before dispatching additional mathematical work.
+- The readiness check found only assigned proof packets. Recorded the missing dependency
+  of issue 156 on issue 116, as required by its existing stack and the handoff. Dispatched
+  a read-only `gpt-6-astra` scout for issue 224 to determine whether instance-congruence
+  helpers can be removed without changing mathematical definitions or public assumptions;
+  no implementation or owner decision is authorized by this scouting task.
+
+## 2026-09-05T15:57Z — Recover a disconnected review-fix worker
+
+- PR 227's inherited first review-fix attempt has remained in connection retries since
+  dispatch, with no completed work in its captured event stream. The live child uses
+  `gpt-5.6-sol`, whereas a new `gpt-6-astra` scout is making progress.
+- Stop only the verified Codex child for that worktree, allowing `dispatch.sh` and
+  `autofix.sh` to record the failed attempt and release their locks; then restart through
+  `autofix.sh` with `MIPSTARRE_CODEX_MODEL=gpt-6-astra`. No findings, review evidence,
+  or iteration counters are bypassed. Do not terminate other workers by substring.
+- PR 229's first review has returned eleven documentation/status findings. Its next
+  step is a labelled review-fix round limited to the existing theorem documentation
+  and blueprint synchronization, without changing mathematical statements or expanding
+  the implementation scope.
+- The stopped PR 227 capture records zero turns and zero tokens but its wrapper reports
+  exit 0 / status done; this is not evidence of a completed fix. The old loop exited
+  without changes and released its processes before the replacement was dispatched.
+
+## 2026-09-05T16:00Z — Complete the post-fix review step for PR 225
+
+- The inherited `autofix.sh` round published head `241cb9f0eb36d3efdc919e04a8053925f91c667d`
+  and green CI, then exited after one fix without publishing a review on that head.
+  The checked-in script forces review only at its cap, unlike the v3 handoff's
+  description of a review after every fix round.
+- Complete the owner's required independent post-fix review using `review.sh 225
+  --force-review`, after confirming the fix loop has released its lock. This is a
+  review of new evidence, not a waiver of findings or an increase of the round cap;
+  no workflow implementation is changed.
 
 ## 2026-09-05T15:50Z — mailbox reviews for PRs 153, 178, 185 through a verify-before-publish workflow
 - The three Claude review requests left by lanes 109, 112 and 114 were served by a workflow: one Opus drafter per PR reads task.md, persona.md and the context files and lists findings; one Opus skeptic per finding tries to refute it against the PR head (five of 37 drafts were refuted: wrong at head, already handled, or outside the task's scope); one Opus writer per lane composes reply.md from the survivors in the review contract. Results: PR 153 round 3 code COMMENTED / prose CHANGES_REQUESTED (4 ledger lines); PR 178 CHANGES_REQUESTED (12: mostly duplicated proofs of existing facts); PR 185 CHANGES_REQUESTED (11: shadowing helpers and stranded generic lemmas). Cost 3.94M tokens over 43 agents in 50 minutes. The reviews name concrete originals for every duplicate, so the fix rounds are mechanical.
