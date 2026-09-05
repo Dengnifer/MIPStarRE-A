@@ -232,15 +232,6 @@ if [ -n "$EFFORT" ]; then
   esac
 fi
 
-if [ "$ROLE" = "mathfix" ]; then
-  case "${MIPSTARRE_CODEX_MODEL:-}:$EFFORT" in
-    *astra*:ultra) ;;
-    *) die 4 "mathfix requires an astra model in MIPSTARRE_CODEX_MODEL and --effort ultra.
-  Until the archived astra poller reports availability on #26, request the owner
-  session's Claude Fable 5.1 math-fix lane on #27." ;;
-  esac
-fi
-
 if [ -n "$RESUME_ID" ]; then
   case "$RESUME_ID" in
     *[!A-Za-z0-9-]*) die 2 "--resume takes a codex thread id (uuid), got '$RESUME_ID'" ;;
@@ -632,6 +623,22 @@ if [ "$ACCOUNT" = second ]; then
   ACCOUNT_ENV+=("CODEX_HOME=${MIPSTARRE_CODEX_HOME_SECOND:-$HOME/.cache/mipstarre-dev/codex-home-yxy}")
 fi
 
+# Astra does not honour the legacy `ultra` setting. Resolve effort only after
+# account routing, when the exact model selected from the account config is
+# known. Other explicit efforts and every non-astra request remain unchanged.
+case "$MIPSTARRE_CODEX_MODEL:$EFFORT" in
+  *astra*:|*astra*:ultra) EFFORT="xhigh" ;;
+esac
+
+if [ "$ROLE" = "mathfix" ]; then
+  case "$MIPSTARRE_CODEX_MODEL:$EFFORT" in
+    *astra*:xhigh) ;;
+    *) die 4 "mathfix requires an astra model at effective effort xhigh.
+  Omitted effort and legacy --effort ultra normalize to xhigh for astra;
+  other models and effort levels are rejected for the math-fix lane." ;;
+  esac
+fi
+
 CODEX_ARGS=(exec)
 CODEX_ARGS[${#CODEX_ARGS[@]}]="--json"
 CODEX_ARGS[${#CODEX_ARGS[@]}]="-C"
@@ -719,13 +726,22 @@ if [ -n "${MIPSTARRE_CODEX_MODEL:-}" ]; then
   TELEM_ARGS[${#TELEM_ARGS[@]}]="--model"
   TELEM_ARGS[${#TELEM_ARGS[@]}]="$MIPSTARRE_CODEX_MODEL"
 fi
+if [ -n "$EFFORT" ]; then
+  TELEM_ARGS[${#TELEM_ARGS[@]}]="--requested-effort"
+  TELEM_ARGS[${#TELEM_ARGS[@]}]="$EFFORT"
+fi
+
+REPLAY_EFFORT_ARG=""
+if [ -n "$EFFORT" ]; then
+  REPLAY_EFFORT_ARG=" --requested-effort $EFFORT"
+fi
 
 if ! "${ACCOUNT_ENV[@]}" python3 "$TELEMETRY_PY" "${TELEM_ARGS[@]}" >/dev/null; then
   die 6 "telemetry append failed for $NAME.
   The event stream is intact at $CAPTURE — replay it with:
     python3 $TELEMETRY_PY session-summarize $CAPTURE --name $NAME \\
       --role $ROLE --issue $ISSUE --start $START_TS --end $END_TS \\
-      --exit-code $CODEX_EXIT --account $ACCOUNT --model $MIPSTARRE_CODEX_MODEL \\
+      --exit-code $CODEX_EXIT --account $ACCOUNT --model $MIPSTARRE_CODEX_MODEL$REPLAY_EFFORT_ARG \\
       --append-to $REGISTRY
   Do not leave the session unrecorded (meta.md, telemetry duties)."
 fi

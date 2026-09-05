@@ -132,9 +132,10 @@ documented failure modes. Sources are cited in `local/protocols/*.md`.
 All appends are one-line JSON; schemas documented in `protocols/meta.md`.
 
 - `results/telemetry/sessions.jsonl` — one line per agent session: name, role,
-  selected account and model (optional on legacy rows), issue/pr, thread_id, start/end, wall
-  seconds, token usage (input, cached, output, reasoning), exit status,
-  dispatcher.
+  selected account and model, effective requested effort (all optional on legacy
+  rows), issue/pr, thread_id, start/end, wall seconds, token usage (input,
+  cached, output, reasoning), exit status, dispatcher. Requested effort is a CLI
+  input, not provider-measured effort.
 - `results/telemetry/stages.jsonl` — one line per project stage/substage
   transition with timestamps and manual token/agent tallies.
 - `results/telemetry/builds.jsonl` — one line per full build / cache event:
@@ -147,10 +148,11 @@ All appends are one-line JSON; schemas documented in `protocols/meta.md`.
 
 ## Model policy
 
-- codex CLI (`gpt-5.6-sol`, ultra effort) drives orchestrator/prover/reviewer/
-  simplifier sessions (`codex exec`, `codex exec review`); `dispatch.sh` also
-  admits the `mathfix` role for astra only after `owner-tools/astra-poll.sh`
-  reports availability on #26.
+- codex CLI drives orchestrator/prover/reviewer/simplifier sessions (`codex exec`,
+  `codex exec review`). Sol retains the legacy `ultra` request; astra uses
+  `xhigh`, normalized centrally by `dispatch.sh`. The dispatcher also admits the
+  `mathfix` role for astra only after `owner-tools/astra-poll.sh` reports
+  availability on #26.
 - Claude-side subagents: easy/mechanical tasks run on Opus-tier. The current
   `mathfix` lane is Claude Fable 5.1, launched by the owner session through its
   Agent tool and recorded in `results/telemetry/owner-sessions.jsonl`; Fable

@@ -30,7 +30,9 @@ SPEC.loader.exec_module(router)
 
 class DispatchCommandTests(unittest.TestCase):
     def recorded_dispatch(self, model: str | None, account: str = "auto",
-                          exit_code: int = 0, empty_second_home: bool = False) -> dict[str, object]:
+                          exit_code: int = 0, empty_second_home: bool = False,
+                          effort: str | None = None,
+                          config_model: str = "gpt-config-default") -> dict[str, object]:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             repo = root / "repo"
@@ -60,7 +62,9 @@ class DispatchCommandTests(unittest.TestCase):
             home.mkdir()
             primary = home / ".codex"
             primary.mkdir()
-            (primary / "config.toml").write_text('model = "gpt-config-default"\n')
+            (primary / "config.toml").write_text(
+                f'model = "{config_model}"\n', encoding="utf-8"
+            )
             second = (home / ".cache/mipstarre-dev/codex-home-yxy"
                       if empty_second_home else root / "second")
             second.mkdir(parents=True)
@@ -85,20 +89,22 @@ class DispatchCommandTests(unittest.TestCase):
             if model is not None:
                 env["MIPSTARRE_CODEX_MODEL"] = model
 
+            dispatch_args = [
+                str(local_bin / "dispatch.sh"),
+                "--role",
+                "scout",
+                "--issue",
+                "model-record",
+                "--worktree",
+                str(repo),
+                "--no-persona",
+                "--skip-hook-check",
+            ]
+            if effort is not None:
+                dispatch_args.extend(["--effort", effort])
+            dispatch_args.extend(["--", "test prompt"])
             result = subprocess.run(
-                [
-                    str(local_bin / "dispatch.sh"),
-                    "--role",
-                    "scout",
-                    "--issue",
-                    "model-record",
-                    "--worktree",
-                    str(repo),
-                    "--no-persona",
-                    "--skip-hook-check",
-                    "--",
-                    "test prompt",
-                ],
+                dispatch_args,
                 cwd=repo,
                 env=env,
                 check=False,
@@ -119,7 +125,7 @@ class DispatchCommandTests(unittest.TestCase):
             return record
 
     def dispatch_command(
-        self, *extra: str, model: str = "test-model", effort: str = "high",
+        self, *extra: str, model: str = "test-model", effort: str | None = "high",
         include_persona: bool = False,
     ) -> list[str]:
         with tempfile.TemporaryDirectory() as cache_root:
@@ -143,26 +149,26 @@ class DispatchCommandTests(unittest.TestCase):
                     "PATH": f"{fake_bin}{os.pathsep}{env.get('PATH', '')}",
                 }
             )
+            dispatch_args = [
+                str(DISPATCH),
+                "--role",
+                "scout",
+                "--issue",
+                "dispatch-argv",
+                "--worktree",
+                str(REPO_ROOT),
+                "--sandbox",
+                "read-only",
+                *([] if include_persona else ["--no-persona"]),
+                "--skip-hook-check",
+                "--dry-run",
+                *extra,
+            ]
+            if effort is not None:
+                dispatch_args.extend(["--effort", effort])
+            dispatch_args.extend(["--", "test prompt"])
             result = subprocess.run(
-                [
-                    str(DISPATCH),
-                    "--role",
-                    "scout",
-                    "--issue",
-                    "dispatch-argv",
-                    "--worktree",
-                    str(REPO_ROOT),
-                    "--sandbox",
-                    "read-only",
-                    *([] if include_persona else ["--no-persona"]),
-                    "--skip-hook-check",
-                    "--effort",
-                    effort,
-                    "--dry-run",
-                    *extra,
-                    "--",
-                    "test prompt",
-                ],
+                dispatch_args,
                 cwd=REPO_ROOT,
                 env=env,
                 check=True,
@@ -199,21 +205,43 @@ class DispatchCommandTests(unittest.TestCase):
         self.assert_common_exec_options(argv)
         self.assertEqual(argv[13:], ["resume", "--", THREAD_ID, "<prompt>"])
 
-    def test_future_astra_mathfix_selects_model_effort_and_persona(self) -> None:
-        # HEAD remains the pre-merge branch tip while a merge commit is being prepared.
-        argv = self.dispatch_command(
-            "--role", "mathfix", "--sandbox", "workspace-write", "--persona-ref", "main",
-            model="astra", effort="ultra", include_persona=True,
-        )
+    def test_astra_normalizes_omitted_and_legacy_ultra_effort(self) -> None:
+        for effort, expected in ((None, "xhigh"), ("ultra", "xhigh"),
+                                 ("xhigh", "xhigh"), ("high", "high")):
+            with self.subTest(effort=effort):
+                argv = self.dispatch_command(model="gpt-6-astra", effort=effort)
+                self.assertIn(f"model_reasoning_effort={expected}", argv)
 
-        self.assertEqual(argv[3:7], ["-C", str(REPO_ROOT), "--sandbox", "workspace-write"])
-        self.assertEqual(argv[argv.index("-m") + 1], "astra")
+    def test_sol_effort_is_unchanged(self) -> None:
+        argv = self.dispatch_command(model="gpt-5.6-sol", effort=None)
+        self.assertNotIn("-c", argv)
+        argv = self.dispatch_command(model="gpt-5.6-sol", effort="ultra")
         self.assertIn("model_reasoning_effort=ultra", argv)
-        self.assertIn("persona: main:local/personas/mathfix.md", self.last_dispatch_stdout)
-        self.assertIn("# Persona: mathematical-gap repair", self.last_dispatch_stdout)
 
-    def test_mathfix_rejects_non_astra_or_non_ultra_dispatches(self) -> None:
-        for model, effort in (("", "ultra"), ("test-model", "ultra"), ("astra", "high")):
+    def test_astra_mathfix_selects_xhigh_effort_and_persona(self) -> None:
+        for effort in (None, "ultra", "xhigh"):
+            with self.subTest(effort=effort):
+                argv = self.dispatch_command(
+                    "--role", "mathfix", "--sandbox", "workspace-write",
+                    "--persona-ref", "main", model="astra", effort=effort,
+                    include_persona=True,
+                )
+
+                self.assertEqual(
+                    argv[3:7], ["-C", str(REPO_ROOT), "--sandbox", "workspace-write"]
+                )
+                self.assertEqual(argv[argv.index("-m") + 1], "astra")
+                self.assertIn("model_reasoning_effort=xhigh", argv)
+                self.assertIn(
+                    "persona: main:local/personas/mathfix.md", self.last_dispatch_stdout
+                )
+                self.assertIn(
+                    "# Persona: mathematical-gap repair", self.last_dispatch_stdout
+                )
+
+    def test_mathfix_rejects_non_astra_or_non_xhigh_dispatches(self) -> None:
+        for model, effort in (("gpt-5.6-sol", "ultra"),
+                              ("test-model", "xhigh"), ("astra", "high")):
             with self.subTest(model=model, effort=effort):
                 with self.assertRaises(subprocess.CalledProcessError) as failure:
                     self.dispatch_command("--role", "mathfix", model=model, effort=effort)
@@ -234,6 +262,22 @@ class DispatchCommandTests(unittest.TestCase):
         record = self.recorded_dispatch("gpt-test-explicit")
 
         self.assertEqual(record["model"], "gpt-test-explicit")
+
+    def test_registry_records_effective_requested_effort(self) -> None:
+        for effort in (None, "ultra", "xhigh"):
+            with self.subTest(model="astra", effort=effort):
+                record = self.recorded_dispatch("gpt-6-astra", effort=effort)
+                self.assertEqual(record["requested_effort"], "xhigh")
+
+        record = self.recorded_dispatch(
+            None, effort=None, config_model="gpt-6-astra"
+        )
+        self.assertEqual(record["requested_effort"], "xhigh")
+
+        record = self.recorded_dispatch("gpt-5.6-sol", effort="ultra")
+        self.assertEqual(record["requested_effort"], "ultra")
+        record = self.recorded_dispatch("gpt-5.6-sol")
+        self.assertNotIn("requested_effort", record)
 
     def test_registry_resolves_account_config_model(self) -> None:
         for model in (None, ""):
@@ -303,6 +347,7 @@ class DispatchCommandTests(unittest.TestCase):
             archived = json.loads(result.stdout)
             self.assertEqual(archived["status"], "archived")
             self.assertNotIn("model", archived)
+            self.assertNotIn("requested_effort", archived)
 
     def test_workspace_write_grants_only_resolved_external_lake(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

@@ -133,7 +133,14 @@ variables unchanged. New dispatch rows record the selected account and model:
 `MIPSTARRE_CODEX_MODEL` wins, otherwise a simple quoted top-level `model` ID in
 the selected home's `config.toml` is resolved and explicitly passed to the CLI.
 An unresolved model fails preflight rather than recording a guessed identity.
-Dry runs select without reserving capacity or waiting.
+Effort is resolved only after that model is known. For an astra model, omitted
+effort and the legacy `ultra` value both become `xhigh`; other explicit values
+are preserved. Non-astra effort is unchanged. The `mathfix` guard then requires
+astra at effective `xhigh`, so explicit `xhigh` and normalized legacy calls are
+accepted. New session rows record a nonempty effective CLI override as
+`requested_effort`; this is a request, not provider-measured effort. Omission on
+a historical row or a non-astra call with no override does not assert any
+provider value. Dry runs select without reserving capacity or waiting.
 
 Preconditions the dispatcher (human or orchestrator) owns:
 
@@ -335,8 +342,9 @@ fix sessions; no role name identifies one, so `dispatch.sh` cannot.
 The registry line schema is in `meta.md`. Beyond it, `dispatch.sh` records
 `turns` (completed model turns), `capture` (repo-relative path to the event
 stream) and, when resolvable, `rollout`. New dispatches record `account` and the
-explicitly resolved `model` as described in §4.1; historical rows are unchanged.
-Token usage is summed over
+explicitly resolved `model` as described in §4.1. They also record
+`requested_effort` when §4.1 produces a nonempty override; historical rows are
+unchanged. Token usage is summed over
 `turn.completed` events and normalized to
 `{input, cached_input, cache_write, output, reasoning}`; `dispatch.sh` writes
 `status: done` or `failed` at the end of a run, and `active` is reserved for

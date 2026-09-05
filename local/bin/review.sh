@@ -51,7 +51,8 @@
 #   MIPSTARRE_CITATION_MAX_BYTES bytes reserved for the derived blueprint
 #                              citation map (default 30000)
 #   MIPSTARRE_REVIEW_TIMEOUT   reviewer safety timeout in seconds (default 10800)
-#   MIPSTARRE_REVIEW_EFFORT    pinned reasoning effort (default ultra)
+#   MIPSTARRE_REVIEW_EFFORT    pre-normalization effort (default ultra;
+#                              dispatch.sh maps astra ultra to xhigh)
 #   MIPSTARRE_GITHUB_REPO      owner/repo override for gh_common.py
 #
 set -euo pipefail

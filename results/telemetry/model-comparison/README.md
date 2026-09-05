@@ -1,6 +1,11 @@
 # codex model comparison — `gpt-5.6-sol` vs `gpt-6-astra`
 
-Both models run at the same reasoning effort: the global default `model_reasoning_effort = "ultra"` in the codex configuration on ghz applies to every dispatched session, and the owner decided (2026-09-05) not to lower it for the easy sol tasks, so the tables compare sol and astra at ultra effort throughout.
+The models did not historically run at the same provider-reported effort.
+Debug probes on 2026-09-05 showed that the astra endpoint reported `medium` for
+an `ultra` request, while it honoured `xhigh`; sol honoured its legacy `ultra`
+request as `max`. Astra rows before the 22:25Z handoff boundary must therefore
+be read as provider-reported `medium`. New astra dispatches request `xhigh`, and
+sol retains `ultra`. The tables do not stratify these periods by effort.
 
 A side product of the model switch on 2026-09-05: `gpt-6-astra` became the
 default for codex sessions at 2026-09-05T15:46Z, and `gpt-5.6-sol` — used for
@@ -45,6 +50,11 @@ and reports how many rows came from each source:
 
 Models other than sol and astra appear as their own rows when they show up
 (smoke tests have used `gpt-5.6-luna` and `gpt-5`).
+
+New rows may also contain `requested_effort`, the effective override passed to
+the CLI after dispatcher normalization. It is request telemetry, not a measured
+provider response. Historical rows omit it, and the September 5 probes above
+remain the evidence for provider-reported effort in those sessions.
 
 ## Reading the tables
 

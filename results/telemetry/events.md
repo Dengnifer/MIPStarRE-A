@@ -3394,3 +3394,30 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   parser-valid `F1 — moot:` disposition. The daemon's `pr178.failed` marker is
   retained pending published, verified recovery. Committing recovery telemetry
   before main integration prevents that telemetry from blocking the refresh.
+
+## 2026-09-05 — Incident: astra sessions ran at medium effort
+
+- Debug probes at 22:21Z showed that requesting `model_reasoning_effort=ultra`
+  on `gpt-6-astra` produced a response reporting `medium`; `xhigh` and `high`
+  were honoured as requested. On `gpt-5.6-sol`, `ultra` was honoured as `max`.
+  Consequently, astra sessions from the 15:46Z switch through the 22:25Z
+  handoff boundary ran at provider-reported medium effort even though local
+  configuration and dispatch output said `ultra`.
+- The immediate mitigation requested `xhigh` for astra while retaining `ultra`
+  for sol. Historical astra rows before the boundary must be interpreted using
+  the measured provider response, not their local request string.
+
+## 2026-09-05T22:40Z — Effort downgrade confirmed on both Codex endpoints
+
+- The same probes through the second account at 22:37Z matched the primary
+  endpoint: astra reported `medium` for `ultra` and `xhigh` for `xhigh`, while
+  sol reported `max` for `ultra`. The normalization rule is therefore per model,
+  not per account.
+
+## 2026-09-06 — Owner effort decision
+
+- Owner decision at 2026-09-05T22:45Z: astra requests `xhigh` on both accounts;
+  sol keeps `ultra`. Runtime profile and shim changes are temporary mitigation.
+  Durable dispatcher normalization, guard behavior, and effective-request
+  telemetry are tracked by issue #237. Requested effort must not be reported as
+  provider-measured effort.

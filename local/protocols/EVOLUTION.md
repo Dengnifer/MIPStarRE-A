@@ -750,3 +750,23 @@ with #26 reserved for human decisions.
 **Expected effect:** the main session remains responsive while independent work
 advances in parallel, failed lanes receive prompt recovery, and merge authority
 and owner escalation stay unambiguous.
+
+## 2026-09-06 — Normalize astra effort requests to xhigh
+
+**Trigger:** `results/telemetry/events.md` 2026-09-05, "Incident: astra sessions
+ran at medium effort", measured before the 22:25Z handoff and confirmed on both
+Codex endpoints at 22:40Z; and the owner's 2026-09-05T22:45Z decision that astra
+must request `xhigh` while sol retains `ultra` (issue #237).
+
+**Change:** after account routing resolves the exact model, `dispatch.sh` maps
+omitted or legacy `ultra` effort to `xhigh` only for astra. Other explicit astra
+efforts and every sol effort remain unchanged. The `mathfix` guard validates the
+normalized astra `xhigh` request. `telemetry.py` and the session schema record
+the nonempty effective CLI request as optional `requested_effort`, explicitly
+distinct from provider-measured behavior. Session, math-fix, review, architecture,
+and model-comparison documentation now state the same model-specific policy.
+
+**Expected effect:** both astra accounts receive the highest effort they honour,
+sol keeps its established request, legacy callers remain valid, and future
+session rows preserve what the dispatcher asked for without overstating what the
+provider executed.

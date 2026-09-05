@@ -358,6 +358,7 @@ def session_record(
     rollout: str | None,
     model: str | None = None,
     account: str | None = None,
+    requested_effort: str | None = None,
 ) -> dict[str, Any]:
     record: dict[str, Any] = {
         "name": name,
@@ -367,6 +368,8 @@ def session_record(
         record["model"] = model
     if account:
         record["account"] = account
+    if requested_effort:
+        record["requested_effort"] = requested_effort
     record["issue"] = issue
     if pr:
         record["pr"] = pr
@@ -581,6 +584,7 @@ def cmd_session_summarize(args: argparse.Namespace) -> int:
         role=role,
         model=args.model,
         account=args.account,
+        requested_effort=args.requested_effort,
         issue=args.issue,
         pr=args.pr,
         thread_id=thread_id,
@@ -744,6 +748,10 @@ def _build_parser() -> argparse.ArgumentParser:
     summarize.add_argument("--role", choices=ROLES, help="agent role")
     summarize.add_argument("--model", help="explicitly selected Codex model")
     summarize.add_argument("--account", choices=("primary", "second"))
+    summarize.add_argument(
+        "--requested-effort",
+        help="effective reasoning effort requested from Codex, not provider measurement",
+    )
     summarize.add_argument("--issue", help="issue id or scope this session serves")
     summarize.add_argument("--pr", help="PR id, when the session works on one")
     summarize.add_argument("--start", help="ISO-8601 start timestamp with offset")

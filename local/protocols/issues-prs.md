@@ -199,7 +199,7 @@ session instead of dispatching an ordinary Codex worker.
 
 After `results/telemetry/owner-tools/astra-poll.sh` reports on #26 that astra is
 available in Codex, the lane switches to astra through
-`MIPSTARRE_CODEX_MODEL=astra local/bin/dispatch.sh --role mathfix --effort ultra`.
+`MIPSTARRE_CODEX_MODEL=astra local/bin/dispatch.sh --role mathfix --effort xhigh`.
 Until that report, this Codex dispatch path is not used. Every request or
 dispatch carries the exact source path, label and line range; the counterexample
 or obstruction; the paper-gap note; the relevant blueprint dependency graph and
