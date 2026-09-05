@@ -538,36 +538,20 @@ private theorem diagonalPointLineDefect_le (p v : Fin D.m → DirectScalarQ D) :
   refine le_trans h (le_of_eq ?_)
   rw [directDiagonalQuestionOf_ldtDiagonalLineOf_eq, directPointQuestionOf_directPointEquiv]
 
-/-- The diagonal-line/point branch rejection as an average over the index and
-the point-direction pair. -/
-private theorem diagonal_line_point_branch_eq :
-    directLdBranchRejectionProbability D S (.dline, .point) =
+/-- Formalization-only decomposition of a fixed ordered branch rejection into
+the stored index and the remaining point-direction pair of a direct sample.
+This supports the direct-to-LDT comparison corresponding to
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:214-458`. -/
+theorem directLdBranchRejectionProbability_eq_index_avg (types : LdType × LdType) :
+    directLdBranchRejectionProbability D S types =
       avgOver (uniformDistribution (Fin D.m)) fun i =>
         avgOver (uniformDistribution
             ((Fin D.m → DirectScalarQ D) × (Fin D.m → DirectScalarQ D))) fun pv =>
-          diagonalLinePointRejection D S pv.1 i (directPrefixProjection i pv.2) := by
+          directRejectedMass D S
+            (types.1, directLdMap D types.1 (⟨pv.1, i, pv.2⟩ : DirectLdSpace D))
+            (types.2, directLdMap D types.2 (⟨pv.1, i, pv.2⟩ : DirectLdSpace D)) := by
   rw [directLdBranchRejectionProbability_eq_avgOver,
     avgOver_uniform_equiv_prod (directLdSpaceIndexEquiv D)]
-  apply avgOver_congr
-  intro i
-  apply avgOver_congr
-  intro pv
-  rfl
-
-/-- The point/diagonal-line branch rejection as an average over the index and
-the point-direction pair. -/
-private theorem diagonal_point_line_branch_eq :
-    directLdBranchRejectionProbability D S (.point, .dline) =
-      avgOver (uniformDistribution (Fin D.m)) fun i =>
-        avgOver (uniformDistribution
-            ((Fin D.m → DirectScalarQ D) × (Fin D.m → DirectScalarQ D))) fun pv =>
-          diagonalPointLineRejection D S pv.1 i (directPrefixProjection i pv.2) := by
-  rw [directLdBranchRejectionProbability_eq_avgOver,
-    avgOver_uniform_equiv_prod (directLdSpaceIndexEquiv D)]
-  apply avgOver_congr
-  intro i
-  apply avgOver_congr
-  intro pv
   rfl
 
 /-- The LDT line of the decoded data of an LDT line is that line. -/
@@ -640,18 +624,19 @@ private theorem sum_rev_avgOver_eq
 /-- The direct index average of a diagonal quantity, with the point average
 taken outside. -/
 private theorem avgOver_index_eq
-    (F : (Fin D.m → DirectScalarQ D) → Fin D.m → (Fin D.m → DirectScalarQ D) → ℝ) :
+    (F : Fin D.m →
+      ((Fin D.m → DirectScalarQ D) × (Fin D.m → DirectScalarQ D)) → ℝ) :
     avgOver (uniformDistribution (Fin D.m)) (fun i =>
         avgOver (uniformDistribution
           ((Fin D.m → DirectScalarQ D) × (Fin D.m → DirectScalarQ D)))
-          (fun pv => F pv.1 i (directPrefixProjection i pv.2))) =
+          (F i)) =
       (D.m : ℝ)⁻¹ * avgOver (uniformDistribution (Fin D.m → DirectScalarQ D)) fun p =>
         ∑ i : Fin D.m, avgOver (uniformDistribution (Fin D.m → DirectScalarQ D))
-          (fun v => F p i (directPrefixProjection i v)) := by
+          (fun v => F i (p, v)) := by
   rw [avgOver_uniform_eq_inv_card_mul_sum, Fintype.card_fin, avgOver_sum]
   congr 1
   refine Finset.sum_congr rfl fun i _ => ?_
-  exact avgOver_uniform_prod (fun p v => F p i (directPrefixProjection i v))
+  exact avgOver_uniform_prod (fun p v => F i (p, v))
 
 /-- The diagonal-line failure with the line on the left is at most twice the
 diagonal-line/point branch rejection of the direct game. -/
@@ -661,7 +646,7 @@ theorem directCoordinate_diagonal_line_point_le :
       2 * directLdBranchRejectionProbability D S (.dline, .point) := by
   letI := D.toLDTFieldModel
   unfold ProjStrat.diagonalLineLeftPointRightFailureProbability
-  rw [diagonal_line_point_branch_eq, avgOver_index_eq,
+  rw [directLdBranchRejectionProbability_eq_index_avg, avgOver_index_eq,
     Finset.sum_congr rfl (fun j _ => diagonal_line_point_term_eq D S hS r j),
     sum_rev_avgOver_eq D (fun p _ v => diagonalLinePointDefect D S hS r p v), one_div]
   have hmain :
@@ -680,7 +665,9 @@ theorem directCoordinate_diagonal_line_point_le :
   rw [avgOver_const_mul] at hmain
   have hm : (0 : ℝ) ≤ (D.m : ℝ)⁻¹ := by positivity
   calc (D.m : ℝ)⁻¹ * _ ≤ (D.m : ℝ)⁻¹ * (2 * _) := mul_le_mul_of_nonneg_left hmain hm
-    _ = _ := by ring
+    _ = _ := by
+      simp only [diagonalLinePointRejection, directLdMap, directLdPointQuestionOf]
+      ring
 
 /-- The diagonal-line failure with the point on the left is at most twice the
 point/diagonal-line branch rejection of the direct game. -/
@@ -690,7 +677,7 @@ theorem directCoordinate_diagonal_point_line_le :
       2 * directLdBranchRejectionProbability D S (.point, .dline) := by
   letI := D.toLDTFieldModel
   unfold ProjStrat.diagonalPointLeftLineRightFailureProbability
-  rw [diagonal_point_line_branch_eq, avgOver_index_eq,
+  rw [directLdBranchRejectionProbability_eq_index_avg, avgOver_index_eq,
     Finset.sum_congr rfl (fun j _ => diagonal_point_line_term_eq D S hS r j),
     sum_rev_avgOver_eq D (fun p _ v => diagonalPointLineDefect D S hS r p v), one_div]
   have hmain :
@@ -709,7 +696,9 @@ theorem directCoordinate_diagonal_point_line_le :
   rw [avgOver_const_mul] at hmain
   have hm : (0 : ℝ) ≤ (D.m : ℝ)⁻¹ := by positivity
   calc (D.m : ℝ)⁻¹ * _ ≤ (D.m : ℝ)⁻¹ * (2 * _) := mul_le_mul_of_nonneg_left hmain hm
-    _ = _ := by ring
+    _ = _ := by
+      simp only [diagonalPointLineRejection, directLdMap, directLdPointQuestionOf]
+      ring
 
 end DiagonalBranches
 

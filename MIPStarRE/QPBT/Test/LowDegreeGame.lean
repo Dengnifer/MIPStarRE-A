@@ -397,21 +397,17 @@ private theorem ldDirectionCLLinear_supported (P : LdParams) (i : Fin P.m) :
   · rfl
   · exact absurd (Finset.mem_image_of_mem _ (Finset.mem_univ j)) hk
 
-/-- Formalization-only auxiliary lemma: the point register is disjoint from
-the scalar register. -/
-private theorem ldPointRegister_subset_sdiff_seed (P : LdParams) :
-    ldPointRegister P ⊆ Finset.univ \ ldSeedRegister P := by
+/-- Formalization-only disjointness lemma for the conditional-linearity
+decomposition: the image of any coordinate embedding that avoids the scalar
+coordinate lies in the complement of the scalar register.  This supports
+`def:ld-question-distribution` in
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`. -/
+theorem ldCoordinateRegister_subset_sdiff_seed (P : LdParams)
+    (e : Fin P.m → LdIndex P) (he : ∀ j, e j ≠ Sum.inl (Sum.inr ())) :
+    Finset.univ.image e ⊆ Finset.univ \ {Sum.inl (Sum.inr ())} := by
   intro i hi
   obtain ⟨j, -, rfl⟩ := Finset.mem_image.mp hi
-  simp [ldSeedRegister]
-
-/-- Formalization-only auxiliary lemma: the direction register is disjoint
-from the scalar register. -/
-private theorem ldDirectionRegister_subset_sdiff_seed (P : LdParams) :
-    ldDirectionRegister P ⊆ Finset.univ \ ldSeedRegister P := by
-  intro i hi
-  obtain ⟨j, -, rfl⟩ := Finset.mem_image.mp hi
-  simp [ldSeedRegister]
+  simp [he j]
 
 /-- Formalization-only auxiliary lemma: the point register is disjoint from
 both the scalar and the direction registers. -/
@@ -511,8 +507,12 @@ private noncomputable def ldDLineTerm (P : LdParams) :
 -/
 theorem isCondLinear_ldALineCL (P : LdParams) :
     IsCondLinearOn (ScalarQ P) Finset.univ 2 (ldALineCL P) := by
+  have hpointSeed : ldPointRegister P ⊆ Finset.univ \ ldSeedRegister P := by
+    simpa [ldPointRegister, ldSeedRegister] using
+      ldCoordinateRegister_subset_sdiff_seed P
+        (fun j => (Sum.inl (Sum.inl j) : LdIndex P)) (by simp)
   refine ⟨ldALineTerm P, ⟨Finset.subset_univ _, fun _ =>
-    ⟨ldPointRegister_subset_sdiff_seed P, fun _ => trivial⟩⟩, ?_⟩
+    ⟨hpointSeed, fun _ => trivial⟩⟩, ?_⟩
   funext x
   have hseed :
       LdSpace.seed (ldSeedLinear P (coordinateRestriction (ldSeedRegister P) x)) =
@@ -552,8 +552,12 @@ theorem isCondLinear_ldALineCL (P : LdParams) :
 -/
 theorem isCondLinear_ldDLineCL (P : LdParams) :
     IsCondLinearOn (ScalarQ P) Finset.univ 3 (ldDLineCL P) := by
+  have hdirectionSeed : ldDirectionRegister P ⊆ Finset.univ \ ldSeedRegister P := by
+    simpa [ldDirectionRegister, ldSeedRegister] using
+      ldCoordinateRegister_subset_sdiff_seed P
+        (fun j => (Sum.inr j : LdIndex P)) (by simp)
   refine ⟨ldDLineTerm P, ⟨Finset.subset_univ _, fun _ =>
-    ⟨ldDirectionRegister_subset_sdiff_seed P, fun _ =>
+    ⟨hdirectionSeed, fun _ =>
       ⟨ldPointRegister_subset_sdiff_seed_direction P, fun _ => trivial⟩⟩⟩, ?_⟩
   funext x
   have hseed :
