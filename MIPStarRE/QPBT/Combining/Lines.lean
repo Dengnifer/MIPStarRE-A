@@ -6,15 +6,17 @@ import MIPStarRE.QPBT.Combining.Witnesses
 This module states the construction of the joint X/Z line measurements, the
 mixture and error-inflation estimates for restricted line distributions, and
 the sub-line distribution used to combine the two bases.  The extended line
-in the sub-line construction uses the directly indexed carrier, so none of the
-source-facing statements requires a divisibility hypothesis at dimension
-`2 * m + 2`.
+in the sub-line construction uses the directly indexed carrier, so the
+sub-line statement is a formalization auxiliary assertion and carries no
+divisibility hypothesis at dimension `2 * m + 2`.
 
 ## References
 
-The declarations formalize `lem:qld-xz-lines`,
-`lem:restricted-line-mixture-bounds`, and `lem:qld-sublines` in
-`blueprint/src/chapter/ch15_qpbt_combining.tex:345-846`.  Their paper sources
+The declarations formalize `lem:qld-xz-lines` and
+`lem:restricted-line-mixture-bounds` in
+`blueprint/src/chapter/ch15_qpbt_combining.tex`; `exists_subLineWitness`
+instead supports `lem:qld-sublines` through the directly indexed extended-line
+carrier and probability law.  Their paper sources
 are `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:882-894`
 and `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1038-1069`.
 -/
@@ -165,16 +167,19 @@ theorem restricted_lines_consistency_bound :
 
 /-! ## The sub-line distribution -/
 
-/-- Existence of the sub-line distribution with its two separate projected
-point marginals and axis-line closure.
+/-- Existence of the directly indexed sub-line distribution with its two
+separate projected point marginals and axis-line closure.  It supports
+`lem:qld-sublines` and `rem:qld-sublines-property-three` in
+`blueprint/src/chapter/ch15_qpbt_combining.tex`, whose source is
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1063-1069` with
+its proof at lines 1071--1116.
 
-**Source statement:** `lem:qld-sublines` and
-`rem:qld-sublines-property-three` in
-`blueprint/src/chapter/ch15_qpbt_combining.tex:647-846`, from
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1063-1069` and
-its proof at lines 1071--1116.  The witness uses the directly indexed extended
-line law described in `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`, so
-the statement has no divisibility hypothesis.  Its `source_mixture` field
+This is a formalization auxiliary assertion, not the source-labelled
+`lem:qld-sublines`.  The extended line uses the directly indexed carrier and
+line-point law of `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex` in
+place of the seed-indexed line-point distribution over `F_q^(2m+2)` of the
+source statement, so the statement carries no divisibility hypothesis and its
+transport to the source carrier remains open.  Its `source_mixture` field
 asserts only the separate X and Z marginal mixtures, not a stronger joint
 conditional law.  The proof is tracked by issue #18.  Discharge: formalize the
 two sampling cases of the cited construction for `DirectLineDesc`. -/

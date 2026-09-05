@@ -104,17 +104,6 @@ private theorem bitSign_msParity_five_eq_neg_one :
   rw [hp]
   norm_num [bitSign, ZMod.val_one]
 
-/-- Formalization-only: closeness to a negation is symmetric in the two
-operators, because `M - (-N) = N - (-M)`.  The first-pair computation in
-`Rigidity/Anticommutation.lean` uses the same identity through a private helper
-of that file, which is not exported. -/
-private theorem normCloseOn_neg_symm {ι : Type} [Fintype ι] [DecidableEq ι]
-    {ψ : EuclideanSpace ℂ ι} {δ : ℝ} {M N : Op ι} (h : NormCloseOn ψ δ M (-N)) :
-    NormCloseOn ψ δ N (-M) := by
-  change ‖applyOperatorToState (N - -M) ψ‖ ≤ δ
-  rw [show N - -M = M - -N by abel]
-  exact h
-
 /-! ## The second closed path of the solution-group computation -/
 
 /-- The solution-group computation for the second logical pair, in the form in
@@ -160,9 +149,10 @@ on the dilated state.  These are the operators whose ideal images are
 pair required by the two-qubit swap-isometry extraction of `thm:ms-rigidity`.
 
 The closed path of `msCellObsA_second_pair_path` gives the scale
-`552 * sqrt ε`; the bound is stated at the scale `624 * sqrt ε` of the
-first-pair estimate `msVarObsA_anticommute`, so that the assembly may use one
-scale for both pairs.  Blueprint `ch13_qpbt_test.tex:224-253`, paper
+`504 * sqrt ε`, and the two endpoint substitutions add `24 * sqrt ε` each, so
+the argument closes at `552 * sqrt ε`; the bound is stated at the scale
+`624 * sqrt ε` of the first-pair estimate `msVarObsA_anticommute`, so that the
+assembly may use one scale for both pairs.  Blueprint `ch13_qpbt_test.tex:224-253`, paper
 `08_classical_and_quantum_low_degree_tests.tex:612-652`. -/
 theorem msCellObsA_second_pair_anticommute (S : Strategy msGame) (ε : ℝ)
     (hwin : 1 - ε ≤ S.value) :
@@ -186,7 +176,9 @@ fourth variables approximately anticommute on the dilated state.  These are
 Bob's counterparts of `msCellObsA_second_pair_anticommute`, obtained from the
 same closed path by replacing each of its two endpoints with the pair of Bob
 variable reflections that the game compares to it.  The path gives the scale
-`552 * sqrt ε`; the bound is stated at the first-pair scale `624 * sqrt ε`.
+`504 * sqrt ε` and each of the two endpoint replacements `24 * sqrt ε`, so the
+argument closes at `552 * sqrt ε`; the bound is stated at the first-pair scale
+`624 * sqrt ε`.
 Blueprint `ch13_qpbt_test.tex:224-253`. -/
 theorem msVarObsB_second_pair_anticommute (S : Strategy msGame) (ε : ℝ)
     (hwin : 1 - ε ≤ S.value) :
@@ -199,7 +191,7 @@ theorem msVarObsB_second_pair_anticommute (S : Strategy msGame) (ε : ℝ)
   have hend := msCellObsA_mul_close S ε hwin 1 4 0 0
   rw [show msConstraintVars 4 0 = 1 from by decide,
     show msConstraintVars 1 0 = 3 from by decide] at hend
-  refine normCloseOn_neg_symm
+  refine normCloseOn_neg_swap
     (((hstart.trans (msCellObsA_second_pair_path S ε hwin)).trans hend.neg).mono ?_)
   linarith
 
