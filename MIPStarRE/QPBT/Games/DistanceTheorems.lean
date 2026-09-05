@@ -330,36 +330,6 @@ private theorem tensorMeasurement_isProjective
       simp [Matrix.kronecker, (hA ab.1).isSelfAdjoint.isHermitian.apply,
         (hB ab.2).isSelfAdjoint.isHermitian.apply]).isSelfAdjoint
 
-/-- Transport a POVM along an equivalence of its finite-dimensional coordinate type. -/
-private noncomputable def reindexMeasurement
-    {α I J : Type*} [Fintype α]
-    [Fintype I] [DecidableEq I] [Fintype J] [DecidableEq J]
-    (e : I ≃ J) (M : Measurement α J) : Measurement α I :=
-  Measurement.ofSumEqOne
-    (fun a => reindexOp e (M.effect a))
-    (fun a => MIPStarRE.Quantum.reindex_nonneg e.symm (M.pos a))
-    (by
-      change ∑ a : α, (Matrix.reindexAlgEquiv ℂ ℂ e.symm) (M.effect a) = 1
-      rw [← map_sum, M.sum_eq_one, map_one])
-
-/-- Reindexing a projective POVM preserves projectivity. -/
-private theorem reindexMeasurement_isProjective
-    {α I J : Type*} [Fintype α]
-    [Fintype I] [DecidableEq I] [Fintype J] [DecidableEq J]
-    (e : I ≃ J) (M : Measurement α J)
-    (hM : MIPStarRE.QPBT.Measurement.IsProjective M) :
-    MIPStarRE.QPBT.Measurement.IsProjective (reindexMeasurement e M) := by
-  intro a
-  change IsProj (reindexOp e (M.effect a))
-  refine { isIdempotentElem := ?_, isSelfAdjoint := ?_ }
-  · change (Matrix.reindexAlgEquiv ℂ ℂ e.symm) (M.effect a) *
-        (Matrix.reindexAlgEquiv ℂ ℂ e.symm) (M.effect a) =
-      (Matrix.reindexAlgEquiv ℂ ℂ e.symm) (M.effect a)
-    rw [← map_mul, (hM a).isIdempotentElem.eq]
-  · exact (Matrix.IsHermitian.ext fun i j => by
-      simp [reindexOp, Matrix.reindex_apply,
-        (hM a).isSelfAdjoint.isHermitian.apply]).isSelfAdjoint
-
 /-- The squared effects of a POVM sum to at most the identity. This is the
 formalization-only estimate `lem:sandwich-povm-square-sum` used in the
 contractions underlying `lem:ld-sandwich`; detailed source argument

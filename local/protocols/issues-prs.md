@@ -42,6 +42,19 @@ Nothing else shells out to `gh`. `issue_new.py`, `issue_close.py`, `pr_open.py`,
 `ci.sh`, `review.sh`, `autofix.sh`, `pr_merge.py`, `github-sync.sh` take GitHub
 numbers; `track.py`, `validate_tree.py` and `export_issues.py` are deleted.
 
+Every repository-owned branch publication runs through `checked-push.sh` with
+one explicit `refs/heads/...:refs/heads/...` mapping.  The helper reads the
+remote tip with a short `ls-remote`, resolves the local ref's registered
+worktree, and refuses a checkout whose HEAD or working tree differs from the
+captured commit.  It runs that checkout's `.githooks/pre-push` against the exact
+ref tuple before starting `receive-pack`, then pushes the captured commit under
+an exact remote-tip lease.  The native hook performs a short defense-in-depth
+comparison when selected, while the helper's lease makes a moved remote ref fail
+closed even when that hook is stale or absent.  A caller's explicit
+`MIPSTARRE_SKIP_HOOKS=1` remains the documented emergency bypass.  It skips
+validation only: implicit tag following stays disabled, so publication remains
+limited to the explicit branch mapping.
+
 * Branches: `issue-<github-number>-<slug>`, or `codex/issue-<number>-<slug>`
   from an agent; `pr_open.py` rejects what `git check-ref-format` would.
 * Titles, slugs and branch names are **bracket-free**: bot-generated branch
@@ -152,6 +165,9 @@ in the layer. `MIPSTARRE_LLM_ENABLED` and
 
 `github-sync.sh` pushes explicit refs and writes an atomic, paginated read-only
 snapshot of open issues and PRs to `results/telemetry/github-snapshot/`
+(and, since the push goes through `checked-push.sh`, commits that snapshot and
+`results/telemetry/builds.jsonl` to the primary checkout so the next publish
+finds a clean tree)
 (`open-issues.json`, `open-pulls.json`, `metadata.json`; PRs filtered out of the
 issue endpoint) — audit and recovery telemetry, never lifecycle input. The
 retired trees stay archived under `results/telemetry/registry-archive/` (commit

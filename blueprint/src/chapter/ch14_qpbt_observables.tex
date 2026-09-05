@@ -504,6 +504,8 @@ generality.
 \begin{lemma}[Reduction to a projective strategy]
 	\label{lem:projective-strategy-setup}
 	\lean{MIPStarRE.QPBT.exists_projective_padded_strategy}
+	\lean{MIPStarRE.QPBT.padWithZeros}
+	\lean{MIPStarRE.QPBT.paddedProdShuffle}
 	\leanok
 	\uses{def:admissible, def:pauli-question-distribution, def:pauli-win-predicate, def:tensor-product-strategy, def:tensor-product-value, def:projective-strategy-general}
 	Let $(q,m,d)$ be an admissible parameter tuple
@@ -522,7 +524,10 @@ generality.
 	state $\ket{0}$, adjoined to each of the two registers.
 \end{lemma}
 \begin{proof}
-	\uses{thm:naimark, def:tensor-product-value, def:tensor-product-strategy}
+	\leanok
+	\uses{thm:naimark, lem:naimark-helper, def:measurement-completion,
+		lem:bipartite-strategy-block-identities, def:tensor-product-strategy,
+		def:tensor-product-value, def:projective-strategy-general}
 	Naimark's theorem (Theorem~\ref{thm:naimark}), applied with the
 	families of all of the first player's measurements on register
 	$\mathsf{A}$ and all of the second player's on register $\mathsf{B}$,

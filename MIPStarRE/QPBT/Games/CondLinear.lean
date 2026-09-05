@@ -229,8 +229,9 @@ private theorem CondLinearTerm.liftRight_supportedOn {K ιU ιV : Type*}
       rw [← hsets]
       exact ih (fun i => y (.inr i)) (hrest (fun i => y (.inr i)))
 
-/-- Append a family of right-coordinate terms after a left-coordinate term,
-while recording the prefix accumulated by the preceding left levels. -/
+/-- Concatenate a family of conditionally linear representations on the right
+register with a conditionally linear representation on the left register, while
+recording the prefix accumulated by the preceding left levels. -/
 private def CondLinearTerm.concat {K ιU ιV : Type*} [Field K]
     [Fintype ιU] [DecidableEq ιU] [Fintype ιV] [DecidableEq ιV]
     {ell : ℕ} (rTerm : (ιU → K) → CondLinearTerm K (ι := ιV) ell)
@@ -396,5 +397,17 @@ theorem graphDistribution_isProbability {T : Type*} [Fintype T] [DecidableEq T]
   obtain ⟨⟨a, b⟩, rfl⟩ := Sym2.mk_surjective e
   change s(a, b) ∈ E at he
   exact ⟨(a, b), Finset.mem_filter.mpr ⟨Finset.mem_univ _, he⟩⟩
+
+/-- The graph distribution is symmetric in its two arguments: it is uniform on
+the ordered pairs whose unordered pair is an edge, and that condition does not
+depend on the order of the pair.  This is not a named statement of the source
+article; it is `lem:graph-distribution-symm` in
+`blueprint/src/chapter/ch12_qpbt_games.tex`. -/
+theorem graphDistribution_symm {T : Type*} [Fintype T] [DecidableEq T]
+    (E : Finset (Sym2 T)) (hE : E.Nonempty) (a b : T) :
+    (graphDistribution E hE).weight (a, b) =
+      (graphDistribution E hE).weight (b, a) := by
+  classical
+  simp [graphDistribution, Distribution.uniformOnFinset_weight, Sym2.eq_swap]
 
 end MIPStarRE.QPBT
