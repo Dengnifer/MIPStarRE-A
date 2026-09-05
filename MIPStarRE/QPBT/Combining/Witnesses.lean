@@ -15,9 +15,12 @@ not require a dimension-divisibility hypothesis.
 
 ## References
 
-The witnesses formalize `lem:qld-4-10`, `lem:qld-xz-lines`,
-`lem:qld-sublines`, `lem:qld-4-13`, and `lem:qld-4-7` in
-`blueprint/src/chapter/ch15_qpbt_combining.tex`.  Their paper source is
+The source-shaped witness interfaces encode `lem:qld-4-10`,
+`lem:qld-xz-lines`, `lem:qld-sublines`, and `lem:qld-4-7` in
+`blueprint/src/chapter/ch15_qpbt_combining.tex`.  `ExtendedLinesWitness`
+instead records the directly indexed, completed-answer auxiliary supporting
+`lem:qld-4-13`; its carrier, probability law, and answer alphabet differ from
+that source statement.  The paper source is
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:689-709,
 882-894,1020-1069,1267-1274`.
 -/
