@@ -644,4 +644,130 @@ theorem consistencyDefect_pasted_le_sqrt {X Y₁ Y₂ R₁ R₂ Γ₁ Γ₂ ι :
     G₁ G₂ A ψ hψ hG₂
   linarith [hpaste, hpinch, h₁, h₂]
 
+/-- The defect of two placed measurement families never exceeds one. The
+diagonal overlaps of the two placements are nonnegative and the total overlap
+equals the squared norm of the state, so the off-diagonal sum of
+`def:consistency` is at most one. Formalization-only auxiliary of the trivial
+regime of `lem:pasting`, blueprint `ch12_qpbt_games.tex:195-208,960-990`. -/
+theorem consistencyDefect_placed_le_one {X α ιA ιB : Type*}
+    [Fintype X] [DecidableEq X] [Fintype α] [DecidableEq α]
+    [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
+    (μ : Distribution X) (A : X → Measurement α ιA) (B : X → Measurement α ιB)
+    (ψ : EuclideanSpace ℂ (ιA × ιB)) (hμ : μ.IsProbability) (hψ : ‖ψ‖ = 1) :
+    consistencyDefect μ (fun x a => heteroKron ((A x).effect a) 1)
+      (fun x a => heteroKron 1 ((B x).effect a)) ψ ≤ 1 := by
+  classical
+  rw [SandwichProduct.consistencyDefect_placed_eq_avg_point]
+  refine avgOver_le_of_weight_sum_le_one μ _ 1 (le_of_eq hμ.weight_sum_eq_one)
+    zero_le_one ?_
+  intro x
+  have hpoint := point_defect_eq (leftPlacedMeasurement (ιB := ιB) (A x))
+    (rightPlacedMeasurement (ιA := ιA) (B x)) ψ
+  simp only [leftPlacedMeasurement, rightPlacedMeasurement,
+    MIPStarRE.Quantum.Measurement.ofSumEqOne] at hpoint
+  simp_rw [placed_product_stateQForm_eq] at hpoint
+  have hdiag : 0 ≤ ∑ a : α, stateQForm ψ
+      (heteroKron ((A x).effect a) ((B x).effect a)) :=
+    Finset.sum_nonneg fun a _ => stateQForm_nonneg _
+      (MIPStarRE.Quantum.kronecker_nonneg ((A x).pos a) ((B x).pos a))
+  rw [hpoint, hψ]
+  norm_num
+  exact hdiag
+
+/-- A square root is bounded by any nonnegative number whose square dominates
+the radicand. Formalization-only arithmetic auxiliary. -/
+private theorem sqrt_le_of_sq_le (X B : ℝ) (hB : 0 ≤ B) (h : X ≤ B ^ 2) :
+    Real.sqrt X ≤ B := by
+  calc Real.sqrt X ≤ Real.sqrt (B ^ 2) := Real.sqrt_le_sqrt h
+    _ = B := Real.sqrt_sq hB
+
+/-- The assembled error of the pasting estimate, written in the variables
+`u = δ ^ (1/8)` and `v = η ^ (1/4)`, is at most `(3 * C + 19) * (v + u)` on the
+unit square. Every summand of the radicand is dominated by `u ^ 2` or by
+`v ^ 2`, and the square root of `(3 * C + 18) * u ^ 2 + 6 * v ^ 2` is at most
+`(3 * C + 19) / 2 * u + 3 * v`. Formalization-only arithmetic auxiliary of
+`lem:pasting`, blueprint `ch12_qpbt_games.tex:960-990`. -/
+private theorem pasting_error_numeric_aux (C u v : ℝ) (hC : 1 ≤ C)
+    (hu0 : 0 ≤ u) (hu1 : u ≤ 1) (hv0 : 0 ≤ v) (hv1 : v ≤ 1) :
+    2 * u ^ 8 + Real.sqrt (C * u ^ 8 +
+      (2 * Real.sqrt (2 * u ^ 8) + 2 * u ^ 8 + 2 * Real.sqrt (C * u ^ 8) +
+        C * u ^ 8) + 2 * v ^ 4 +
+      2 * Real.sqrt (2 * ((u ^ 8 + 2 * Real.sqrt (2 * u ^ 8)) + v ^ 4)) +
+      2 * Real.sqrt (2 * (u ^ 8 + 2 * Real.sqrt (2 * u ^ 8)))) ≤
+      (3 * C + 19) * (v + u) := by
+  have hC0 : (0:ℝ) ≤ C := le_trans zero_le_one hC
+  have hu82 : u ^ 8 ≤ u ^ 2 := pow_le_pow_of_le_one hu0 hu1 (by norm_num)
+  have hu84 : u ^ 8 ≤ u ^ 4 := pow_le_pow_of_le_one hu0 hu1 (by norm_num)
+  have hu42 : u ^ 4 ≤ u ^ 2 := pow_le_pow_of_le_one hu0 hu1 (by norm_num)
+  have hu81 : u ^ 8 ≤ u := by
+    simpa using pow_le_pow_of_le_one hu0 hu1 (show 1 ≤ 8 by norm_num)
+  have hv42 : v ^ 4 ≤ v ^ 2 := pow_le_pow_of_le_one hv0 hv1 (by norm_num)
+  have h1 : Real.sqrt (2 * u ^ 8) ≤ 3 / 2 * u ^ 4 := by
+    refine sqrt_le_of_sq_le _ _ (by positivity) ?_
+    nlinarith [pow_nonneg hu0 8]
+  have h2 : Real.sqrt (C * u ^ 8) ≤ (C + 1) / 2 * u ^ 4 := by
+    refine sqrt_le_of_sq_le _ _ (by positivity) ?_
+    nlinarith [sq_nonneg (C - 1), pow_nonneg hu0 8]
+  have h3 : Real.sqrt (2 * (u ^ 8 + 2 * Real.sqrt (2 * u ^ 8))) ≤ 3 * u ^ 2 := by
+    refine sqrt_le_of_sq_le _ _ (by positivity) ?_
+    nlinarith [h1, hu84, pow_nonneg hu0 4]
+  have h4 : Real.sqrt (2 * ((u ^ 8 + 2 * Real.sqrt (2 * u ^ 8)) + v ^ 4)) ≤
+      3 * u ^ 2 + 2 * v ^ 2 := by
+    refine sqrt_le_of_sq_le _ _ (by positivity) ?_
+    nlinarith [h1, hu84, pow_nonneg hu0 4, pow_nonneg hv0 4,
+      mul_nonneg (sq_nonneg u) (sq_nonneg v)]
+  have hCu8 : C * u ^ 8 ≤ C * u ^ 2 := mul_le_mul_of_nonneg_left hu82 hC0
+  have hC1u : (C + 1) * u ^ 4 ≤ (C + 1) * u ^ 2 :=
+    mul_le_mul_of_nonneg_left hu42 (by linarith)
+  have hK : C * u ^ 8 +
+      (2 * Real.sqrt (2 * u ^ 8) + 2 * u ^ 8 + 2 * Real.sqrt (C * u ^ 8) +
+        C * u ^ 8) + 2 * v ^ 4 +
+      2 * Real.sqrt (2 * ((u ^ 8 + 2 * Real.sqrt (2 * u ^ 8)) + v ^ 4)) +
+      2 * Real.sqrt (2 * (u ^ 8 + 2 * Real.sqrt (2 * u ^ 8))) ≤
+      (3 * C + 18) * u ^ 2 + 6 * v ^ 2 := by
+    nlinarith [h1, h2, h3, h4, hu82, hu42, hv42, hCu8, hC1u]
+  have hsK : Real.sqrt (C * u ^ 8 +
+      (2 * Real.sqrt (2 * u ^ 8) + 2 * u ^ 8 + 2 * Real.sqrt (C * u ^ 8) +
+        C * u ^ 8) + 2 * v ^ 4 +
+      2 * Real.sqrt (2 * ((u ^ 8 + 2 * Real.sqrt (2 * u ^ 8)) + v ^ 4)) +
+      2 * Real.sqrt (2 * (u ^ 8 + 2 * Real.sqrt (2 * u ^ 8)))) ≤
+      (3 * C + 19) / 2 * u + 3 * v := by
+    refine sqrt_le_of_sq_le _ _ (by positivity) ?_
+    nlinarith [hK, mul_nonneg hu0 hv0, sq_nonneg u, sq_nonneg v,
+      sq_nonneg (C * u), mul_nonneg (mul_nonneg hC0 hu0) hv0,
+      mul_nonneg hC0 (sq_nonneg u)]
+  nlinarith [hsK, hu81, mul_nonneg (sub_nonneg.mpr hC) hu0,
+    mul_nonneg (sub_nonneg.mpr hC) hv0]
+
+/-- On the unit square the assembled error of the pasting estimate is at most
+`(3 * C + 19) * (η ^ (1/4) + δ ^ (1/8))`. Substituting `δ = u ^ 8` and
+`η = v ^ 4` turns every summand of the radicand into a polynomial in the two
+roots. Formalization-only arithmetic auxiliary of `lem:pasting`, blueprint
+`ch12_qpbt_games.tex:960-990`. -/
+theorem pasting_error_sqrt_le_rpow (C δ η : ℝ) (hC : 1 ≤ C) (hδ0 : 0 ≤ δ)
+    (hδ1 : δ ≤ 1) (hη0 : 0 ≤ η) (hη1 : η ≤ 1) :
+    2 * δ + Real.sqrt (C * δ +
+      (2 * Real.sqrt (2 * δ) + 2 * δ + 2 * Real.sqrt (C * δ) + C * δ) + 2 * η +
+      2 * Real.sqrt (2 * ((δ + 2 * Real.sqrt (2 * δ)) + η)) +
+      2 * Real.sqrt (2 * (δ + 2 * Real.sqrt (2 * δ)))) ≤
+      (3 * C + 19) * (η ^ (1/4 : ℝ) + δ ^ (1/8 : ℝ)) := by
+  have hu0' : 0 ≤ δ ^ (1/8 : ℝ) := Real.rpow_nonneg hδ0 _
+  have hv0' : 0 ≤ η ^ (1/4 : ℝ) := Real.rpow_nonneg hη0 _
+  have hu1' : δ ^ (1/8 : ℝ) ≤ 1 := Real.rpow_le_one hδ0 hδ1 (by norm_num)
+  have hv1' : η ^ (1/4 : ℝ) ≤ 1 := Real.rpow_le_one hη0 hη1 (by norm_num)
+  have hδu' : δ = (δ ^ (1/8 : ℝ)) ^ 8 := by
+    rw [← Real.rpow_natCast (δ ^ (1/8 : ℝ)) 8, ← Real.rpow_mul hδ0]
+    norm_num
+  have hηv' : η = (η ^ (1/4 : ℝ)) ^ 4 := by
+    rw [← Real.rpow_natCast (η ^ (1/4 : ℝ)) 4, ← Real.rpow_mul hη0]
+    norm_num
+  obtain ⟨u, hu0, hu1, hδu, hue⟩ :
+      ∃ u : ℝ, 0 ≤ u ∧ u ≤ 1 ∧ δ = u ^ 8 ∧ δ ^ (1/8 : ℝ) = u :=
+    ⟨δ ^ (1/8 : ℝ), hu0', hu1', hδu', rfl⟩
+  obtain ⟨v, hv0, hv1, hηv, hve⟩ :
+      ∃ v : ℝ, 0 ≤ v ∧ v ≤ 1 ∧ η = v ^ 4 ∧ η ^ (1/4 : ℝ) = v :=
+    ⟨η ^ (1/4 : ℝ), hv0', hv1', hηv', rfl⟩
+  rw [hue, hve, hδu, hηv]
+  exact pasting_error_numeric_aux C u v hC hu0 hu1 hv0 hv1
+
 end MIPStarRE.QPBT

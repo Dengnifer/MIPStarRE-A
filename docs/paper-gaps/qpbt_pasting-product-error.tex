@@ -133,9 +133,16 @@ construction itself is not refuted by this example.
 
 \section{Status of the one-sided formal statement}
 
-The corrected scalar contract removes the obstruction above, but the proof of
-the paper-facing declaration remains open (\ghissue{201}).  This section
-records the precise obstacle.
+The corrected scalar contract removes the obstruction above, and the
+paper-facing declaration is proved (\ghissue{201}) with the explicit error
+function
+\[
+  \delta_{\mathrm{pasting}}(\eta,\delta)
+    =(3C+19)\bigl(\eta^{1/4}+\delta^{1/8}\bigr),
+\]
+where $C$ is the universal constant of the coarse commutator estimate.  This
+section records the obstacle that makes the extra comparison hypothesis of the
+adopted statement necessary.
 
 \subsection*{The two theorem forms}
 
@@ -328,8 +335,12 @@ the square roots.
 Combining, the averaged defect of \eqref{eq:pasting-3} is at most
 $2\delta+\sqrt K$ with $K$ bounded by a universal sum of positive powers of
 $\delta$ and $\eta$, so $\delta_{\mathrm{pasting}}$ satisfies the corrected
-contract of the previous sections.  The formalization of this argument is
-tracked in \ghissue{201}.
+contract of the previous sections.  Explicitly, with $C$ the constant of the
+coarse commutator bound of step 3, one has
+$K\le(3C+18)\delta^{1/4}+6\sqrt\eta$ on $[0,1]^2$, whence
+$2\delta+\sqrt K\le(3C+19)(\eta^{1/4}+\delta^{1/8})$ there; outside the unit
+square the same function exceeds $1$, which bounds every defect of two placed
+families.  The formalization of this argument is complete (\ghissue{201}).
 
 \section{Conclusion}
 
