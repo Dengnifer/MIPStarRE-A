@@ -2596,3 +2596,6 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 
 ## 2026-09-05T09:17Z — telemetry note: operator-recorded session times drifted
 - The start and end times the operator wrote into owner-sessions.jsonl between about 06:00Z and 09:20Z on 2026-09-05 were estimates and run up to 90 minutes ahead of the ghz clock (the names carry the same estimated stamps). The wall_s durations and token counts come from the harness and are accurate; use them, not the stamps, for timing analyses of that window.
+
+## 2026-09-05T10:03Z — workflow-layer budget raised to 1000; exemption fixed (owner decision)
+- The pre-commit scope guard now budgets workflow-layer changes at 1000 lines (was 400 since 2026-09-01). Owner decision after B6: PR 197 (a hooks fix) had grown to 836 lines across seven review rounds, and the stack propagation (merging a parent branch that already contains main) was refused at 1215 lines because only merge heads contained in main were exempt. New rule: a merge head that contains github/main measures the budget against github/main, so inherited main content counts zero while anything beyond main still counts. Unit tests updated to the new ceiling; persona text updated. MIPSTARRE_INFRA_OVERRIDE stays owner-only.
