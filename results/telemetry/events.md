@@ -2702,3 +2702,6 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 
 ## 2026-09-05T12:09Z — lem:pasting proved (math gap #201 closed end to end)
 - exists_pasting_error is sorry-free with error (3C+19)(eta^(1/4) + delta^(1/8)), C the constant of the coarse commutator bound; the adopted statement (with eq:pasting-1-sym) stands. Two Fable math-fix sessions and eight Opus prover sessions over about ten hours, following the constant-explicit proof written into the paper-gap note. Commit e1289bd on the #201 branch (PR 205); publication tail launched.
+
+## 2026-09-05T12:15Z — prop:ld-simultaneous-general-k proved (packet #210 complete)
+- exists_direct_ld_soundness is sorry-free: the general-k low-degree soundness via the NEEXP combining reduction (combined strategy, question law, value transport with constant 10, exact linearity m d / q, recovery (m+k) d / q, scalar absorption with a = 1e23 and b = 1/80000). Ten Opus sessions after the #196 math-fix refuted the coordinatewise sandwich route for k at least 2. Commit e1d8eaa on the #210 branch; publication tail launched (base #134 merged as PR 191).
