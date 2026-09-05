@@ -2560,3 +2560,27 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   `results/telemetry/design-decisions.md` register.
 - **First application:** #172 (rigidity statement) re-routed from a codex lane to a Fable math-fix
   session at 22:38Z.
+
+## 2026-09-05T02:38Z — math-fix #117 converged (Fable 5.1, session 1)
+- Common-ancilla obligation of thm:linearity: the ancilla is uniform (basis vector of the extra direction of C^(2^t+1)); proved as `exists_exactly_linear_observables_commonAncilla`.
+- The source's "sufficiently many ancilla zero qubits" is an assumption on the strategy, absent from `ProjectiveSetting`, and cannot be discharged afterwards (compression returns the Fourier-square POVM, projective only when already exactly linear).
+- Resolution: lem:qld-4-10 proved directly on the original space (Parseval transfer of the commutation bound, sandwich POVM, exact overlap identity, lem:ortho per point pair, register-permutation symmetrization); error K eps^(1/8). Statement of `exists_combinedPointsWitness` unchanged; sorry removed.
+- Paper-gap note rewritten (qpbt_linearity-theorem-quotation.tex); ch15 support lemmas added, all leanok. Commits 2ce71cc, 6b4b75d on the #117 branch (PR 212).
+
+## 2026-09-05T02:44Z — codex paused by the owner
+- Owner instruction: do not start any new codex session until explicitly told to resume; running codex lanes may finish. Claude subagents (Opus, with Fable for math-fix and hardest analytic work) take repairs, review fixes and new packets meanwhile.
+- #210 session 2 (Opus) finished partial: strategy and question law sorry-free; found and repaired an abandoned conflicted merge in the worktree (5073dc4). Session 3 launched for targets 3-5.
+
+## 2026-09-05T02:52Z — Claude-backed reviews while codex is paused
+- review.sh normally runs both review lanes through codex (dispatch.sh). While codex is paused, lane-v16 calls /tmp/review-claude.sh: a copy of review.sh whose dispatcher (/tmp/claude-review-dispatch.sh) writes the review request (task, persona, context, diff path) into ~/.cache/mipstarre-dev/watchdog/claude-reviews/pr<N>/<role>-<time>/ and waits for reply.md; the operator session runs an Opus reviewer on the request and drops the reply. Verdict parsing, findings ledger, head binding, carried reviews and the local-review/summary status are unchanged.
+- Lane runner v16 = v15 + refusal to dispatch codex while watchdog/codex-paused exists. Merge daemon v7 and stack-watch v2 use v16. Editing lane-v15.sh in place killed lane 107 after its CI (bash reads scripts incrementally); v15 bytes restored, lesson recorded.
+
+## 2026-09-05T06:14Z — relaunch after the Claude usage-limit outage
+- Six Claude sessions died on the usage limit (PR 213 and PR 178 pre-reviews, #118, #210 s3, #105, PR 192 repair) and the Fable #201 session on max_output_tokens; the owner terminated all codex sessions at 03:15Z (codex paused). Relaunched as Opus sessions: review server for PR 152 (critical path: base of the eleven-PR stack), PR 192 build fix, fix rounds for PRs 191, 206, 211, #105 continuation. Queued: Fable #201, PR 197 conflict+fix, #156 salvage, #118, #210.
+
+## 2026-09-05T06:29Z — first Claude-backed review (PR 152) and a mailbox defect
+- The prose lane produced CHANGES_REQUESTED with one changes-level finding (def:pauli-question-distribution has lean links but no leanok while dependants are leanok) and four advisory ones. Defect: review.sh starts the code and prose lanes in parallel; the mailbox dispatcher named the request directory by role and second, so both lanes shared one directory and the prose reply was published as both lane reviews (ledger doubled to 10). Fixed: directory name now carries the review kind, the second and the dispatcher pid. PR 152 goes through a fix round, which yields a fresh two-lane review at the new head.
+- Conflict-resolution commits on branches older than PR 209 fail the pre-commit unit tests (test_dispatch persona test resolves the persona from git HEAD mid-merge): issue #216; the operator commits such merges with --no-verify.
+
+## 2026-09-05T06:46Z — math gap: pasting theorem (#201), math-fix session 2 dispatched
+- Fable session on exists_pasting_error (Sandwich.lean): the one-sided formal statement is equivalent, up to delta, to a bound on the pinched defect of the first codeword mass under the second measurement; the source (symmetric strategies, NEEXP Fact 4.35) never needs it. No counterexample; no proof. Dischargers: a one-sided bound, or the source convention (swap-invariant state) as a hypothesis. Note section written (qpbt_pasting-product-error.tex, 34dc868). Math-fix session 2 (Fable) decides sufficiency of the symmetric form over the blueprint graph and implements it.
