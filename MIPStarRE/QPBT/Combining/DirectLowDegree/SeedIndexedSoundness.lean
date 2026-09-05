@@ -106,9 +106,6 @@ private theorem polyTupleAgreement_avg_le_mdq (L : LdParams) (hk : L.k = 1)
 /-! ## The seed-indexed soundness theorem for one coordinate -/
 
 set_option maxHeartbeats 1000000 in
--- The proof carries the polynomial-tuple carriers of the dilated strategy
--- through the residue compression, whose types unfold through the direct
--- parameter record, so elaboration exceeds the default budget.
 /-- Quantum soundness of the simultaneous classical low individual degree
 test (`lem:ld-soundness`) for simultaneity parameter `1`: the conclusions of
 `exists_ld_soundness`, with universal constants of the same shape, under the

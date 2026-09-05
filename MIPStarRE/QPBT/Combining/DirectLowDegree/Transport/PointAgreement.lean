@@ -77,8 +77,8 @@ private theorem directLdPointValuesOrZero_eq_of_win (D : DirectLdParams)
       simp [directLdWinPredicate, directLdPointQuestionOf,
         validDirectLdAnswer] at hwin
 
-/-- Reading out a matrix measurement in the mature projective interface is
-reading it out in the matrix interface. -/
+/-- Postprocessing the associated projective measurement has the same effects
+as postprocessing the original measurement. -/
 private theorem projMeas_postprocess_outcome_eq
     {alpha beta iota : Type*} [Fintype alpha] [DecidableEq alpha]
     [Fintype beta] [DecidableEq beta] [Fintype iota] [DecidableEq iota]
@@ -142,9 +142,6 @@ private theorem directLdBranchRejectionProbability_le_nine_mul
   linarith
 
 set_option maxHeartbeats 1000000 in
--- The answer alphabet of the direct game is a noncomputable `Fintype.ofEquiv`
--- transport of a three-fold sum type, so unifying the readout measurements
--- with the mature projective interface exceeds the default budget.
 /-- The two point readouts of a projective direct strategy of value at least
 `1 - ε` are consistent up to `9 ε` on a uniformly random point.
 

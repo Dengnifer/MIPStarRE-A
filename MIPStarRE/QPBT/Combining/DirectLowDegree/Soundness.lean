@@ -12,7 +12,8 @@ which is the case that the Chapter 15 combining argument instantiates.
 * `exists_direct_ld_soundness` is the obligation for arbitrary simultaneity
   parameter.  Its proof is open: the coordinatewise route is refuted in
   `docs/paper-gaps/qpbt_ld-simultaneous-sandwich.tex`, and the source's own
-  route is the combining reduction of the NEEXP paper, a separate packet.
+  route is the combining reduction of the NEEXP paper, which remains to be
+  proved; see issue #210.
 * `exists_direct_ld_soundness_of_k_eq_one` proves the same three consistency
   conclusions, with universal constants of the same shape, for `D.k = 1`.
 
@@ -39,9 +40,9 @@ combining argument at paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1267-1288`.
 
 This is a formalization auxiliary assertion, not the source-labelled
-`lem:ld-soundness`.  Its proof must establish the game-correspondence and
-auxiliary-parameter bounds catalogued in the cited gap note; neither is hidden
-as a hypothesis here.
+`lem:ld-soundness`.  The game correspondence and auxiliary-parameter bounds
+for the direct reduction are established, yielding the case `D.k = 1` below;
+neither is assumed as a hypothesis here.
 
 The remaining obligation for arbitrary `D.k` is the construction of
 simultaneous polynomial measurements.  The coordinatewise route through the
@@ -49,8 +50,8 @@ palindromic sandwich of `lem:ld-sandwich` is refuted for `D.k ≥ 2` by the
 explicit example of `docs/paper-gaps/qpbt_ld-simultaneous-sandwich.tex`; the
 source obtains general `k` from one application of the `k = 1` theorem in
 dimension `m + k` by the combining reduction of Theorem 4.43 in
-`references/neexp-paper/05_quantum_preliminaries.tex:1409-1503`, which is the
-separate packet tracked by issue #210.  For `D.k = 1` the present conclusions
+`references/neexp-paper/05_quantum_preliminaries.tex:1409-1503`.  This combining
+reduction remains to be proved; see issue #210.  For `D.k = 1` the present conclusions
 are proved in `exists_direct_ld_soundness_of_k_eq_one` below. -/
 theorem exists_direct_ld_soundness :
     ∃ a b : ℝ, 1 ≤ a ∧ 0 < b ∧ b ≤ 1 ∧

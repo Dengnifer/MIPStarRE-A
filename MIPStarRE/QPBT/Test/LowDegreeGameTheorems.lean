@@ -393,8 +393,8 @@ A third obligation is the simultaneity of the polynomial measurements for
 `L.k ≥ 2`. The source obtains it from the case `L.k = 1` by the combining
 reduction of Theorem 4.43 in the NEEXP paper, not coordinatewise; the
 coordinatewise route planned for the formalization is refuted in
-`docs/paper-gaps/qpbt_ld-simultaneous-sandwich.tex`, and the reduction is the
-separate packet tracked by issue #210. The case `L.k = 1`, which is the only
+`docs/paper-gaps/qpbt_ld-simultaneous-sandwich.tex`. The combining reduction
+remains to be proved; see issue #210. The case `L.k = 1`, which is the only
 one instantiated by the Chapter 15 combining argument, is proved with the
 present conclusions as `exists_ld_soundness_of_k_eq_one` in
 `MIPStarRE/QPBT/Combining/DirectLowDegree/SeedIndexedSoundness.lean`. -/
