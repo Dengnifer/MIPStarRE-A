@@ -621,6 +621,232 @@ theorem honest_point_msVar_Z_rejected_mul (P : AdmissibleParams)
       Or.inr (Or.inr ⟨by decide, rfl, rfl⟩)
     simpa [pauliWinPredicate, validPauliAnswer] using hcond
 
+/-! ### The Pair/W versus Pair incidence form -/
+
+/-- The effect of a placed and injectively relabelled measurement of the Pauli
+register at a relabelled outcome is the placed original effect. -/
+theorem placedPauliMeasurement_effect_image {P : AdmissibleParams}
+    {α : Type*} [Fintype α] [DecidableEq α]
+    (M : Measurement α (PauliRegister P)) (f : α → PauliAnswer P)
+    (hf : Function.Injective f) (a : α) :
+    (placedPauliMeasurement M f).effect (f a) =
+      heteroKron (M.effect a) (1 : Op (ZMod 2)) := by
+  rw [placedPauliMeasurement_effect_eq, postprocess_effect_of_injective _ _ hf]
+
+/-- Along the Pair/W versus Pair incidence form the honest measurements have
+zero operator product at every rejected answer pair: with a vanishing phase bit
+the Pair effect is the product of the two Pair/W effects, and with a nonzero
+phase bit every well-formed answer pair is accepted. -/
+theorem honest_pairW_pair_rejected_mul (P : AdmissibleParams) (W : PauliKind)
+    (z : PauliSpace P) (a b : PauliAnswer P)
+    (hrej : pauliWinPredicate P (.pairW W, pauliCL P (.pairW W) z)
+      (.pair, pauliCL P .pair z) a b = false) :
+    (honestMeasurement P (.pairW W) (pauliCL P (.pairW W) z)).effect a *
+      (honestMeasurement P .pair (pauliCL P .pair z)).effect b = 0 := by
+  classical
+  rcases (Bool.eq_false_or_eq_true
+    (validPauliAnswer (P := P) (PauliType.pairW W) a)).symm with hva | hva
+  · rw [honestMeasurement_effect_eq_zero_of_invalid P _ _ hva, zero_mul]
+  rcases (Bool.eq_false_or_eq_true
+    (validPauliAnswer (P := P) PauliType.pair b)).symm with hvb | hvb
+  · rw [honestMeasurement_effect_eq_zero_of_invalid P _ _ hvb, mul_zero]
+  obtain ⟨β, rfl⟩ : ∃ c, a = PauliAnswer.bit c := by
+    cases a <;> first | exact ⟨_, rfl⟩ | exact absurd hva (by simp [validPauliAnswer])
+  obtain ⟨bits, rfl⟩ : ∃ c, b = PauliAnswer.pairBits c := by
+    cases b <;> first | exact ⟨_, rfl⟩ | exact absurd hvb (by simp [validPauliAnswer])
+  have hacc : pauliPairCondition P W (pauliCL P (.pairW W) z) β bits →
+      pauliWinPredicate P (PauliType.pairW W, pauliCL P (.pairW W) z)
+        (PauliType.pair, pauliCL P .pair z) (PauliAnswer.bit β)
+        (PauliAnswer.pairBits bits) = true := by
+    intro hc
+    simpa [pauliWinPredicate, validPauliAnswer] using hc
+  by_cases hg : pauliPairGamma P (pauliSharedProjection z) = 0
+  · have hcond : ¬ pauliPairCondition P W (pauliCL P (.pairW W) z) β bits := by
+      intro hc
+      rw [hacc hc] at hrej
+      exact Bool.noConfusion hrej
+    have hpair : honestMeasurement P PauliType.pair (pauliCL P PauliType.pair z) =
+        placedPauliMeasurement (pauliPairMeasurement P (pauliSharedProjection z) hg)
+          (fun c => PauliAnswer.pairBits c) := by
+      change honestPairMeasurement P (pauliSharedProjection z) = _
+      simp [honestPairMeasurement, hg]
+    have h2 : (honestMeasurement P PauliType.pair
+          (pauliCL P PauliType.pair z)).effect (PauliAnswer.pairBits bits) =
+        heteroKron ((pauliTraceMeasurement P .X (pauliXBlock (pauliSharedProjection z))
+              (pauliRXBlock (pauliSharedProjection z))).effect bits.1 *
+            (pauliTraceMeasurement P .Z (pauliZBlock (pauliSharedProjection z))
+              (pauliRZBlock (pauliSharedProjection z))).effect bits.2)
+          (1 : Op (ZMod 2)) := by
+      rw [hpair]
+      exact placedPauliMeasurement_effect_image _ _ (by intro; simp) bits
+    cases W with
+    | X =>
+        have hne : β ≠ bits.1 := by
+          intro h
+          refine hcond ?_
+          simp only [pauliPairCondition]
+          exact Or.inr h.symm
+        have h1 : (honestMeasurement P (PauliType.pairW PauliKind.X)
+              (pauliCL P (.pairW .X) z)).effect (PauliAnswer.bit β) =
+            heteroKron ((pauliTraceMeasurement P .X (pauliXBlock (pauliSharedProjection z))
+              (pauliRXBlock (pauliSharedProjection z))).effect β) (1 : Op (ZMod 2)) :=
+          placedPauliMeasurement_effect_image _ _ (by intro; simp) β
+        rw [h1, h2]
+        refine leftPlaced_mul_eq_zero ?_
+        rw [← mul_assoc,
+          DistanceCalculus.projective_effect_mul_effect_eq_zero
+            (pauliTraceMeasurement P .X (pauliXBlock (pauliSharedProjection z))
+              (pauliRXBlock (pauliSharedProjection z)))
+            (pauliTraceMeasurement_projective P .X _ _) hne,
+          zero_mul]
+    | Z =>
+        have hne : β ≠ bits.2 := by
+          intro h
+          refine hcond ?_
+          simp only [pauliPairCondition]
+          exact Or.inr h.symm
+        have h1 : (honestMeasurement P (PauliType.pairW PauliKind.Z)
+              (pauliCL P (.pairW .Z) z)).effect (PauliAnswer.bit β) =
+            heteroKron ((pauliTraceMeasurement P .Z (pauliZBlock (pauliSharedProjection z))
+              (pauliRZBlock (pauliSharedProjection z))).effect β) (1 : Op (ZMod 2)) :=
+          placedPauliMeasurement_effect_image _ _ (by intro; simp) β
+        rw [h1, h2]
+        refine leftPlaced_mul_eq_zero ?_
+        rw [← mul_assoc,
+          ← (pauliTraceMeasurement_effect_commute P (pauliSharedProjection z) hg
+            bits.1 β).eq, mul_assoc,
+          DistanceCalculus.projective_effect_mul_effect_eq_zero
+            (pauliTraceMeasurement P .Z (pauliZBlock (pauliSharedProjection z))
+              (pauliRZBlock (pauliSharedProjection z)))
+            (pauliTraceMeasurement_projective P .Z _ _) hne,
+          mul_zero]
+  · exfalso
+    rw [hacc (Or.inl hg)] at hrej
+    exact Bool.noConfusion hrej
+
+/-! ### The Magic Square incidence forms -/
+
+/-- Along every edge of the Magic Square type graph the honest measurements have
+zero operator product at every rejected answer pair: a vanishing phase bit makes
+the decision predicate accept, and otherwise the honest measurements are the
+relabelled Magic Square measurements of `thm:ms-from-ac`. -/
+theorem honest_ms_rejected_mul (P : AdmissibleParams) (z : PauliSpace P)
+    {s₁ s₂ : MsType} (hms : Sym2.mk s₁ s₂ ∈ msEdges) (a b : PauliAnswer P)
+    (hrej : pauliWinPredicate P (.ms s₁, pauliCL P (.ms s₁) z)
+      (.ms s₂, pauliCL P (.ms s₂) z) a b = false) :
+    (honestMeasurement P (.ms s₁) (pauliCL P (.ms s₁) z)).effect a *
+      (honestMeasurement P (.ms s₂) (pauliCL P (.ms s₂) z)).effect b = 0 := by
+  classical
+  have hcl : ∀ s : MsType, pauliCL P (PauliType.ms s) z = pauliSharedProjection z :=
+    fun _ => rfl
+  simp only [hcl] at hrej ⊢
+  have hsupp : (s₁, s₂) ∈ msGameSymm.μ.support := by
+    change (s₁, s₂) ∈ (Finset.univ : Finset (MsType × MsType)).filter
+      (fun ab => Sym2.mk ab.1 ab.2 ∈ msEdges)
+    exact Finset.mem_filter.mpr ⟨Finset.mem_univ _, hms⟩
+  rcases (Bool.eq_false_or_eq_true
+    (validPauliAnswer (P := P) (PauliType.ms s₁) a)).symm with hva | hva
+  · rw [honestMeasurement_effect_eq_zero_of_invalid P _ _ hva, zero_mul]
+  rcases (Bool.eq_false_or_eq_true
+    (validPauliAnswer (P := P) (PauliType.ms s₂) b)).symm with hvb | hvb
+  · rw [honestMeasurement_effect_eq_zero_of_invalid P _ _ hvb, mul_zero]
+  obtain ⟨a', rfl⟩ : ∃ c, a = pauliAnswerOfMs c := by
+    cases a
+    case msTriple β => exact ⟨MsAnswer.triple β, rfl⟩
+    case bit c => exact ⟨MsAnswer.bit c, rfl⟩
+    all_goals exact absurd hva (by cases s₁ <;> simp [validPauliAnswer])
+  obtain ⟨b', rfl⟩ : ∃ c, b = pauliAnswerOfMs c := by
+    cases b
+    case msTriple β => exact ⟨MsAnswer.triple β, rfl⟩
+    case bit c => exact ⟨MsAnswer.bit c, rfl⟩
+    all_goals exact absurd hvb (by cases s₂ <;> simp [validPauliAnswer])
+  by_cases hg : pauliPairGamma P (pauliSharedProjection z) = 0
+  · exfalso
+    have hpos : pauliWinPredicate P (.ms s₁, pauliSharedProjection z)
+        (.ms s₂, pauliSharedProjection z)
+        (pauliAnswerOfMs a') (pauliAnswerOfMs b') = true := by
+      clear hrej
+      rcases msGame_support_incidence s₁ s₂ hsupp with
+        ⟨i, k, rfl, rfl⟩ | ⟨i, k, rfl, rfl⟩ <;>
+        cases a' <;> cases b' <;>
+        simp_all [pauliWinPredicate, validPauliAnswer, pauliAnswerOfMs, msWinPredicate]
+    rw [hpos] at hrej
+    exact Bool.noConfusion hrej
+  · have hmsrej : msWinPredicate s₁ s₂ a' b' = false := by
+      rcases Bool.eq_false_or_eq_true (msWinPredicate s₁ s₂ a' b') with hmsw | hmsw
+      · exfalso
+        have hpos : pauliWinPredicate P (.ms s₁, pauliSharedProjection z)
+            (.ms s₂, pauliSharedProjection z)
+            (pauliAnswerOfMs a') (pauliAnswerOfMs b') = true := by
+          clear hrej
+          rcases msGame_support_incidence s₁ s₂ hsupp with
+            ⟨i, k, rfl, rfl⟩ | ⟨i, k, rfl, rfl⟩ <;>
+            cases a' <;> cases b' <;>
+            simp_all [pauliWinPredicate, validPauliAnswer, pauliAnswerOfMs, msWinPredicate]
+        rw [hpos] at hrej
+        exact Bool.noConfusion hrej
+      · exact hmsw
+    have hM : ∀ s : MsType, honestMeasurement P (.ms s) (pauliSharedProjection z) =
+        (pauliMagicMeasurement P (pauliSharedProjection z) hg s).postprocess
+          (pauliAnswerOfMs (P := P)) := by
+      intro s
+      change honestMagicMeasurement P s (pauliSharedProjection z) = _
+      simp [honestMagicMeasurement, hg]
+    have hmul : ∀ (i : Fin 6) (k : Fin 3) (ab : ZMod 2 × ZMod 2) (c : ZMod 2),
+        (msConstraintJoint (pauliMagicCellMeasurement P (pauliSharedProjection z) hg)
+              (pauliMagicCellMeasurement_projective P (pauliSharedProjection z) hg)
+              (pauliMagicCellMeasurement_commute P (pauliSharedProjection z) hg)
+              i).effect ab *
+            (pauliMagicCellMeasurement P (pauliSharedProjection z) hg
+              (msConstraintVars i k)).effect c =
+          if parityTriple i ab k = c then
+            (msConstraintJoint (pauliMagicCellMeasurement P (pauliSharedProjection z) hg)
+              (pauliMagicCellMeasurement_projective P (pauliSharedProjection z) hg)
+              (pauliMagicCellMeasurement_commute P (pauliSharedProjection z) hg)
+              i).effect ab
+          else 0 := by
+      intro i k ab c
+      exact msCellConstraintJoint_mul _ _
+        (obsOf_conjTranspose _ (pauliTraceMeasurement_projective P .X
+          (pauliXBlock (pauliSharedProjection z))
+          (pauliRXBlock (pauliSharedProjection z))))
+        (obsOf_conjTranspose _ (pauliTraceMeasurement_projective P .Z
+          (pauliZBlock (pauliSharedProjection z))
+          (pauliRZBlock (pauliSharedProjection z))))
+        (obsOf_sq _ (pauliTraceMeasurement_projective P .X
+          (pauliXBlock (pauliSharedProjection z))
+          (pauliRXBlock (pauliSharedProjection z))))
+        (obsOf_sq _ (pauliTraceMeasurement_projective P .Z
+          (pauliZBlock (pauliSharedProjection z))
+          (pauliRZBlock (pauliSharedProjection z))))
+        (obsOf_pauliTraceMeasurement_anticommute P (pauliSharedProjection z) hg)
+        i k ab c
+    rw [hM s₁, hM s₂,
+      postprocess_effect_of_injective _ _ pauliAnswerOfMs_injective a',
+      postprocess_effect_of_injective _ _ pauliAnswerOfMs_injective b']
+    exact msStrategyMeasurement_rejected_mul_on_support _ _ _ hmul s₁ s₂ hsupp a' b' hmsrej
+
+/-! ### Zero products along the oriented incidence forms -/
+
+/-- Along every ordered incidence form of the Pauli type graph the honest
+measurements have zero operator product at every rejected answer pair. -/
+theorem honest_oriented_rejected_mul (P : AdmissibleParams) {t₁ t₂ : PauliType}
+    (h : PauliEdgeOriented t₁ t₂) (z : PauliSpace P) (a b : PauliAnswer P)
+    (hrej : pauliWinPredicate P (t₁, pauliCL P t₁ z) (t₂, pauliCL P t₂ z) a b = false) :
+    (honestMeasurement P t₁ (pauliCL P t₁ z)).effect a *
+      (honestMeasurement P t₂ (pauliCL P t₂ z)).effect b = 0 := by
+  rcases h with ⟨W, rfl, hW⟩ | ⟨W, rfl, rfl⟩ | ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩
+  · rcases hW with rfl | rfl | rfl | rfl
+    · exact honest_point_aline_rejected_mul P W z a b hrej
+    · exact honest_point_dline_rejected_mul P W z a b hrej
+    · exact honest_point_pauli_rejected_mul P W z a b hrej
+    · cases W with
+      | X => exact honest_point_pairW_X_rejected_mul P z a b hrej
+      | Z => exact honest_point_pairW_Z_rejected_mul P z a b hrej
+  · exact honest_pairW_pair_rejected_mul P W z a b hrej
+  · exact honest_point_msVar_X_rejected_mul P z a b hrej
+  · exact honest_point_msVar_Z_rejected_mul P z a b hrej
+
 end
 
 end MIPStarRE.QPBT
