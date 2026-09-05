@@ -635,6 +635,40 @@ that bypass controls validation only, not ref scope.
 **Expected effect:** `MIPSTARRE_SKIP_HOOKS=1` can recover from local tooling
 failures without publishing any ref outside the requested branch mapping.
 
+## 2026-09-06 — Record explicitly selected Codex models
+
+**Trigger:** `results/telemetry/events.md` 2026-09-06, "Codex session rows omit
+the selected model" (issue #231).
+
+**Change:** `dispatch.sh` forwards its nonempty `MIPSTARRE_CODEX_MODEL` override
+to `telemetry.py`, and the session schema admits that exact value as optional
+`model`. Rows created without an explicitly resolved model continue to omit the
+field; historical rows are not rewritten.
+
+**Expected effect:** new explicitly pinned sessions retain their model identity
+without changing Codex selection behavior or inventing values for CLI-default
+sessions.
+
+## 2026-09-06 — Reserve dispatcher capacity per account
+
+**Trigger:** `results/telemetry/events.md`, "2026-09-05 — Two accounts and router
+shim (recorded 2026-09-06)", and the September 6 model-identity incident (#231).
+The owner authorized issue #232 to subsume #231.
+
+**Change:** `sessions.md` §4.1 specifies locked per-account PID reservations,
+ratio-based auto selection, bounded waits, and resume affinity. `dispatch.sh`
+and its `account_router.py` helper implement that contract; `telemetry.py`,
+`meta.md`, and `DESIGN.md` record selected account/model identity. Review and
+autofix pass account environment variables through. Model comparison prefers
+explicit registry data while retaining historical fallback. This extends the
+earlier #231 amendment by resolving and pinning account-config model defaults.
+
+**Expected effect:** concurrent dispatchers do not race for the same capacity;
+resumes stay with their original account and telemetry retains their identity.
+Timeout remains an explicitly authorized overflow, not a hard-cap guarantee.
+Operator cutover after merge restores the v1 multi-agent-off-only shim and sets
+the aggregate `max-codex` to the sum of the two configured caps (19 by default).
+
 ## 2026-09-05 — Reject silent loss from branch-integration merges
 
 **Trigger:** `results/telemetry/events.md` 2026-09-05, "incident: silent file

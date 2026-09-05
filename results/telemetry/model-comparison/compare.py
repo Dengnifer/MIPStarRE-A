@@ -121,6 +121,8 @@ def parse_ts(value):
 
 
 def derive_model(row, lanes):
+    if row.get("model"):
+        return row["model"], "registry"
     for src, path in (("capture", row.get("capture")), ("rollout", row.get("rollout"))):
         full = path if (path and os.path.isabs(path)) else (os.path.join(ROOT, path) if path else None)
         got = model_from_stream(full)
