@@ -22,7 +22,7 @@ namespace MIPStarRE.QPBT
 noncomputable section
 
 /-- The Pauli question sampler equals the distribution produced by
-`def:typed-cl-distributions` (`ch12_qpbt_games.tex:1930-1934`) from the family
+`def:typed-cl-distributions` (`ch12_qpbt_games.tex`) from the family
 `pauliCL` on the Pauli type graph. This is the distribution identity in
 `lem:pauli-question-typed-equality`, blueprint
 `ch13_qpbt_test.tex`, while the common-level family assertion is stated

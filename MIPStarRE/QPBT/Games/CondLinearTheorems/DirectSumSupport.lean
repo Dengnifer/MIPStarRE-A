@@ -12,11 +12,11 @@ the support and evaluation properties used by the shared-seed product law.
 ## References
 
 The source result is `lem:cl-func-prod` in
-`blueprint/src/chapter/ch12_qpbt_games.tex:1783-1799`, approached through the
+`blueprint/src/chapter/ch12_qpbt_games.tex`, approached through the
 formalization support nodes `lem:cl-supported-vanishing`,
 `lem:cl-restriction-idem`, `lem:cl-restriction-sum`,
-`lem:cl-supported-restriction`, and `lem:cl-func-prod-same-level` at
-`ch12_qpbt_games.tex:1816-1872`.  The paper origin is
+`lem:cl-supported-restriction`, and `lem:cl-func-prod-same-level` in
+`ch12_qpbt_games.tex`.  The paper origin is
 `references/qpbt-paper/05_conditionally_linear_functions.tex:150-379`.
 -/
 
