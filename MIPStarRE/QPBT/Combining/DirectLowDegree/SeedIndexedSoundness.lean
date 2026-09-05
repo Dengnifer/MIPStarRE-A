@@ -14,8 +14,8 @@ indexed low-degree game back to the seed-indexed game `ldGame` of
 A seed-indexed strategy is dilated to a direct strategy by the correlated
 seed-residue register of `Transport.SeedFiber`; the dilation preserves the
 value exactly, so the low individual degree theorem applies to it and produces
-polynomial-tuple measurements on the dilated carriers.  Compressing the
-residue register returns polynomial measurements on the original carriers.
+polynomial-tuple measurements on the extended Hilbert spaces.  Compressing the
+residue register returns polynomial measurements on the original Hilbert spaces.
 
 Compression is exact for the two point-versus-polynomial relations, because
 the point measurement on the opposite side is a block-diagonal amplification
@@ -24,7 +24,7 @@ that leaves the correlated register untouched
 global polynomial relation, where both measurements act on the correlated
 register: on a maximally entangled residue pair the two compressed
 measurements can be far apart while the uncompressed ones agree exactly.  The
-global relation is therefore recovered on the compressed carriers instead of
+global relation is therefore recovered on the original Hilbert spaces instead of
 transported: the two compressed polynomial measurements are consistent with
 the point measurement of the opposite player, the point-agreement branch of
 the game (`ldPointPair_consistencyDefect_le`) links the two point

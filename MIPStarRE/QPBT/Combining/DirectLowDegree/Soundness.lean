@@ -85,10 +85,10 @@ theorem exists_direct_ld_soundness :
                   S.ψ ≤ deltaLd a b ε D.q D.m D.d D.k := by
   sorry
 
-/-! ## Absorbing the mature error into the error function of `lem:ld-soundness`
+/-! ## Absorbing the error bound from the low individual degree theorem
 
 The specializations below combine three inputs: polynomial-tuple conclusions
-whose error is built from the mature error `mainFormalError` of
+whose error is built from `mainFormalError`, the error bound of
 `thm:main-formal` at the auxiliary sampling parameter; the absorption
 `exists_directLdTransportConstants` of that error into `deltaLd`; and the
 coarse bound `consistencyDefect_heteroKron_le_one`, which closes both the
@@ -200,7 +200,7 @@ constants of the same shape, under the hypothesis `D.k = 1`.
 The proof reads the coordinate conclusions of the low individual degree
 theorem as one-coordinate tuples
 (`exists_directSimultaneousPolynomialMeasurements_of_k_eq_one`) and absorbs
-the resulting mature error into `deltaLd` by
+the resulting error bound into `deltaLd` by
 `exists_directLdTransportConstants` at the constant `C₀ = 1`, no sandwich
 being formed when there is one coordinate.  This is the case instantiated by
 the Chapter 15 combining argument at paper
