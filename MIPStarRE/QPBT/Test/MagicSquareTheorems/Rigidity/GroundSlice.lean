@@ -42,14 +42,6 @@ noncomputable section
 
 /-! ## Contractions and their action on states -/
 
-/-- Applying a product of operators is successive application. -/
-theorem applyOperatorToState_mul {ι : Type*} [Fintype ι] [DecidableEq ι]
-    (M N : Op ι) (v : EuclideanSpace ℂ ι) :
-    applyOperatorToState (M * N) v =
-      applyOperatorToState M (applyOperatorToState N v) := by
-  unfold applyOperatorToState
-  simp [Matrix.toEuclideanLin, Matrix.toLpLin_mul_same]
-
 /-- The identity acts trivially. -/
 theorem applyOperatorToState_one {ι : Type*} [Fintype ι] [DecidableEq ι]
     (v : EuclideanSpace ℂ ι) :
@@ -233,17 +225,36 @@ theorem heteroKron_add_right {ιA ιB : Type*} (A : Op ιA) (B C : Op ιB) :
   ext p q
   simp [heteroKron, Matrix.kronecker, mul_add]
 
+/-- Formalization-only auxiliary lemma for `def:tensor-product-strategy`: the
+tensor placement of possibly rectangular matrices respects differences in the
+left factor.  This is the general form of `heteroKron_sub_left` below, needed
+where the left factor is the matrix of an isometry between distinct index
+types (`thm:ms-rigidity`, blueprint
+`blueprint/src/chapter/ch13_qpbt_test.tex:224-253`). -/
+theorem kroneckerMap_sub_left {m n p q : Type*} (A B : Matrix m n ℂ) (C : Matrix p q ℂ) :
+    Matrix.kroneckerMap (· * ·) (A - B) C =
+      Matrix.kroneckerMap (· * ·) A C - Matrix.kroneckerMap (· * ·) B C := by
+  ext p' q'
+  simp [Matrix.kroneckerMap, sub_mul]
+
+/-- Formalization-only auxiliary lemma for `def:tensor-product-strategy`: the
+tensor placement of possibly rectangular matrices respects differences in the
+right factor.  This is the general form of `heteroKron_sub_right` below. -/
+theorem kroneckerMap_sub_right {m n p q : Type*} (A : Matrix m n ℂ) (B C : Matrix p q ℂ) :
+    Matrix.kroneckerMap (· * ·) A (B - C) =
+      Matrix.kroneckerMap (· * ·) A B - Matrix.kroneckerMap (· * ·) A C := by
+  ext p' q'
+  simp [Matrix.kroneckerMap, mul_sub]
+
 /-- Tensor placement respects differences in the left factor. -/
 theorem heteroKron_sub_left {ιA ιB : Type*} (A B : Op ιA) (C : Op ιB) :
-    heteroKron (A - B) C = heteroKron A C - heteroKron B C := by
-  ext p q
-  simp [heteroKron, Matrix.kronecker, sub_mul]
+    heteroKron (A - B) C = heteroKron A C - heteroKron B C :=
+  kroneckerMap_sub_left A B C
 
 /-- Tensor placement respects differences in the right factor. -/
 theorem heteroKron_sub_right {ιA ιB : Type*} (A : Op ιA) (B C : Op ιB) :
-    heteroKron A (B - C) = heteroKron A B - heteroKron A C := by
-  ext p q
-  simp [heteroKron, Matrix.kronecker, mul_sub]
+    heteroKron A (B - C) = heteroKron A B - heteroKron A C :=
+  kroneckerMap_sub_right A B C
 
 /-- Tensor placement distributes over a finite sum in the left factor. -/
 theorem heteroKron_finset_sum_left {β ιA ιB : Type*} (s : Finset β)

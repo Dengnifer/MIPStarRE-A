@@ -437,11 +437,10 @@ measurements.
 	on $\hilb_{\mathsf{A}}$ and $\hilb_{\mathsf{B}}$ respectively, and let
 	$\delta \geq 0$ satisfy the exact consistency-defect bound
 	\[
-	\operatorname{consistencyDefect}\!\left(
-		\operatorname{uniformDistribution}(\mathrm{Unit}),
-		(u,a) \mapsto Q_a \ot \Id_{\mathsf{B}},
-		(u,a) \mapsto \Id_{\mathsf{A}} \ot R_a,
-		\ket{\psi}\right) \leq \delta\,.
+		\sum_{\substack{a,b \\ a \ne b}}
+		\bra{\psi}
+		Q_a \ot R_b \ket{\psi}
+		\leq \delta\,.
 	\]
 	Then there is a projective measurement $\{P_a\}$ on $\hilb_{\mathsf{A}}$ with
 	\[
@@ -452,23 +451,24 @@ measurements.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{lem:projective-low-rank-sum, lem:Q-completeness, lem:P-Q-approx,
-		def:projective-P}
-	Work with Alice's reduced state $\rho_A$, for which the consistency
-	hypothesis gives
-	$\sum_a \operatorname{Tr}\!\left(\rho_A(Q_a-Q_a^2)\right) \leq 2\delta$.
-	When $\delta^{1/4} \leq 1/24$, rank reduction
-	(Lemma~\ref{lem:projective-low-rank-sum}) replaces $\{Q_a\}$ by a family of
-	projectors, Lemma~\ref{lem:Q-completeness} shows that this family is almost
-	complete on $\rho_A$, and the operator $P$ of
-	Definition~\ref{def:projective-P} is projective and close to it by
-	Lemma~\ref{lem:P-Q-approx}. Completing $P$ at one fixed outcome and summing the
-	two estimates gives the bound $220\,\delta^{1/4}$, the completion contributing
-	the residual mass controlled by Lemma~\ref{lem:Q-completeness}. When
-	$\delta^{1/4} > 1/24$, the bound $220\,\delta^{1/4} > 9$ exceeds the universal
-	bound $4$ on the distance between any two sub-measurements on a normalized
-	state, so the completion of the zero sub-measurement already satisfies the
-	conclusion.
+	\uses{lem:projective-low-rank-sum, lem:Q-completeness, def:projective-P,
+		lem:sqrt-Q-completeness, lem:P-projectivity, lem:P-Q-approx,
+		prop:triangle-inequality-for-approx_delta, def:left-marginal-state,
+		lem:matrix-rank-zero, lem:left-marginal-state-evaluation, lem:left-marginal-state-normalization}
+	Pass to Alice's reduced state $\rho_{\mathsf A}$. Consistency gives
+	$\sum_a \operatorname{Tr}_{\mathrm{norm}}\!\left(
+	\rho_{\mathsf A}(Q_a-Q_a^2)\right) \leq 2\delta$.
+	When $\delta^{1/4} \leq 1/24$, Lemma~\ref{lem:projective-low-rank-sum}
+	replaces $\{Q_a\}$ by projectors. Lemma~\ref{lem:Q-completeness} rules out
+	the alternative in which all ranks vanish, so the rank-sum space used by the
+	$Q/X/\widehat X/P$ construction is nonzero. Lemma~\ref{lem:sqrt-Q-completeness}
+	controls the square root of their total operator on $\rho_{\mathsf A}$.
+	Lemma~\ref{lem:P-projectivity} supplies $P$ and its total-operator identity,
+	while Lemma~\ref{lem:P-Q-approx} makes $P$ close to $Q$. Completing $P$ at one
+	fixed outcome and applying the squared-distance triangle bound gives
+	$220\,\delta^{1/4}$, with residual mass controlled by square-root completeness.
+	When $\delta^{1/4} > 1/24$, the target exceeds the universal bound $4$, so
+	completing the zero sub-measurement already proves the conclusion.
 \end{proof}
 
 \section{Strategies}

@@ -653,7 +653,8 @@ postprocessing, and operator-contraction steps used to formalize
 \begin{proof}
 	\leanok
 	\uses{lem:sandwich-diagonal-postprocess,
-		lem:distance-qform-nonnegative, lem:distance-point-defect}
+		lem:distance-qform-nonnegative, lem:distance-point-defect,
+		lem:distance-placed-product-qform}
 	Split equal and unequal original outcomes. The equal terms give the original
 	diagonal overlap; collision bounds each unequal term by $\eps$, and their
 	nonnegative total is at most one.
@@ -665,14 +666,21 @@ postprocessing, and operator-contraction steps used to formalize
 	\leanok
 	\uses{def:distance-state-quadratic-form}
 	This formalization-only auxiliary isolates the complementary form of the
-	collision estimate in \cite[Fact~4.34]{Natarajan2018NEEXP}. The off-diagonal overlap of two
-	codeword measurements is at most the averaged off-diagonal overlap of their
-	evaluations plus $\eps$.
+	collision estimate in \cite[Fact~4.34]{Natarajan2018NEEXP}. Let $A$ and $B$ be
+	measurements with codeword outcome set $\Gamma$, let $\ket\psi$ be a unit
+	state, and let $\eps\geq 0$. If the evaluation map satisfies
+	\[
+		\Pr_{y}\big[\operatorname{eval}(g,y)
+			=\operatorname{eval}(g',y)\big]\leq\eps
+		\qquad(g\neq g'),
+	\]
+	then the off-diagonal overlap of $A$ and $B$ is at most the averaged
+	off-diagonal overlap of their evaluated measurements plus $\eps$.
 \end{lemma}
 \begin{proof}
 	\leanok
 	\uses{lem:sandwich-evaluated-diagonal-overlap,
-		lem:distance-point-defect}
+		lem:distance-point-defect, lem:distance-placed-product-qform}
 	Express each off-diagonal overlap as the complement of its diagonal overlap
 	and apply Lemma~\ref{lem:sandwich-evaluated-diagonal-overlap}.
 \end{proof}
@@ -731,6 +739,7 @@ postprocessing, and operator-contraction steps used to formalize
 \end{lemma}
 \begin{proof}
 	\leanok
+	\uses{lem:distance-nonnegative}
 	For each outcome write $(A-C)\ket\psi=(A-B)\ket\psi+(B-C)\ket\psi$,
 	apply Cauchy--Schwarz to the averaged cross term, and take square roots.
 \end{proof}
@@ -746,6 +755,7 @@ postprocessing, and operator-contraction steps used to formalize
 \end{lemma}
 \begin{proof}
 	\leanok
+	\uses{lem:distance-projective-orthogonality}
 	Sum the original orthogonal projectors in each fiber of the outcome map;
 	their cross products vanish and their sum is self-adjoint.
 \end{proof}
@@ -782,7 +792,7 @@ postprocessing, and operator-contraction steps used to formalize
 
 \begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
 	\label{lem:sandwich-povm-square-sum}
-	\lean{MIPStarRE.QPBT.SandwichProduct.measurement_sum_adjoint_mul_le_one}
+	\lean{MIPStarRE.QPBT.measurement_sum_adjoint_mul_le_one}
 	\leanok
 	\uses{def:povm-conventions}
 	This formalization-only auxiliary isolates a contraction bound underlying
@@ -838,7 +848,7 @@ postprocessing, and operator-contraction steps used to formalize
 
 \begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
 	\label{lem:sandwich-tensor-projector}
-	\lean{MIPStarRE.QPBT.SandwichProduct.heteroKron_isProj}
+	\lean{MIPStarRE.LDT.MakingMeasurementsProjective.isProj_kronecker}
 	\leanok
 	This formalization-only auxiliary isolates the projectivity assertion used
 	when converting distance back to consistency in
@@ -851,7 +861,7 @@ postprocessing, and operator-contraction steps used to formalize
 
 \begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
 	\label{lem:sandwich-pair-fiber-sum}
-	\lean{MIPStarRE.QPBT.SandwichProduct.measurement_pair_fiber_sum_adjoint_mul_le_one}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.measurement_fiber_sum_adjoint_mul_le_one}
 	\leanok
 	\uses{def:povm-conventions}
 	This formalization-only auxiliary isolates a marginal contraction used in the
@@ -863,13 +873,15 @@ postprocessing, and operator-contraction steps used to formalize
 \end{lemma}
 \begin{proof}
 	\leanok
+	\uses{lem:distance-measurement-effect-le-one,
+		lem:distance-measurement-effect-hermitian}
 	Bound each squared effect by the effect itself, enlarge the fixed-coordinate
 	sum to the full outcome sum, and use completeness.
 \end{proof}
 
 \begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
 	\label{lem:sandwich-postprocess-effect-left}
-	\lean{MIPStarRE.QPBT.SandwichProduct.postprocess_effect_mul_effect}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.postprocess_effect_mul_effect}
 	\leanok
 	\uses{def:povm-conventions, def:bracket}
 	This formalization-only auxiliary isolates an orthogonality identity in the
@@ -881,6 +893,7 @@ postprocessing, and operator-contraction steps used to formalize
 \end{lemma}
 \begin{proof}
 	\leanok
+	\uses{lem:distance-projective-orthogonality}
 	Expand the postprocessed effect and use orthogonality of distinct projective
 	effects.
 \end{proof}
@@ -898,7 +911,8 @@ postprocessing, and operator-contraction steps used to formalize
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{lem:sandwich-postprocess-effect-left}
+	\uses{lem:sandwich-postprocess-effect-left,
+		lem:distance-measurement-effect-hermitian}
 	Take adjoints in the left-handed identity and use self-adjointness.
 \end{proof}
 
@@ -928,13 +942,18 @@ postprocessing, and operator-contraction steps used to formalize
 	\leanok
 	\uses{def:povm-distance}
 	This formalization-only auxiliary isolates the contraction applied at each
-	palindromic insertion in \cite[Fact~4.34]{Natarajan2018NEEXP}. If the multipliers $S_z^x$
-	satisfy
+	palindromic insertion in \cite[Fact~4.34]{Natarajan2018NEEXP}. Let
+	$A^x=\{A^x_a\}_a$ and $B^x=\{B^x_a\}_a$ be measurement families with a
+	common outcome set, and suppose that $D_\psi(A,B)\leq\delta$. If the
+	multipliers $S_z^x$ satisfy
 	\[
 		\sum_{z:\,\operatorname{eval}_x(z)=a}(S_z^x)^\dagger S_z^x\leq\Id
 	\]
-	for every $x,a$, then left multiplication by $S_z^x$ does not increase the
-	operator-family distance after reindexing by $\operatorname{eval}_x$.
+	for every $x,a$, then the reindexed families obey
+	\[
+		D_\psi\big((S_z^xA^x_{\operatorname{eval}_x(z)})_{x,z},
+			(S_z^xB^x_{\operatorname{eval}_x(z)})_{x,z}\big)\leq\delta.
+	\]
 \end{lemma}
 \begin{proof}
 	\leanok
@@ -2164,6 +2183,47 @@ and $V_{\le k}$, $V_{\ge k}$ are understood to be $V_{<k+1}$ and $V_{>k-1}$, res
 
 We abbreviate ``conditionally linear'' as \emph{CL}. Operationally, an $\ell$-level CL function first applies $L_1$ to $x^{V_1}$; conditioned on the value $x^{L_1}$ it selects a register subspace $V_2$ and a linear map $L_2$ and applies $L_2$ to $x^{V_2}$; and so on, finally outputting $\sum_{k=1}^{\ell} x^{L_k}$. Every $1$-level CL function is linear, and conversely every linear map on $V$ is a $1$-level CL function. Moreover, for every $\ell \ge 1$ the collection of $\ell$-level CL functions contains the collection of $(\ell-1)$-level CL functions.
 
+\begin{lemma}[Formalization support for monotonicity of CL levels]\label{lem:cl-level-mono}
+	\lean{MIPStarRE.QPBT.IsCondLinearOn.mono_level}
+	\leanok
+	\uses{def:cl-func}
+	This is the support-relative form of the containment observation following Definition~\ref{def:cl-func}. Let $S$ be a register subspace of $V$, let $L$ be an $\ell$-level CL function all of whose factor spaces are contained in $S$, and suppose $\ell \le k$. Then $L$ is also a $k$-level CL function all of whose factor spaces are contained in $S$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:cl-func}
+	Adjoin $k-\ell$ empty factor spaces with zero linear maps before the given representation. Each added linear contribution is zero, so the represented function and its support are unchanged.
+\end{proof}
+
+% Formalization-support nodes.  The two statements below are not results of the source
+% article; the first is the converse half of the observation preceding
+% Lemma~\ref{lem:cl-level-mono}, and the second isolates the transport of a conditionally
+% linear function along an injective identification of registers, so that the Lean proofs
+% of the question maps of the Pauli basis test remain traceable.
+\begin{lemma}[Formalization support for linear maps as one-level CL functions]\label{lem:cl-one-level-linear}
+	\lean{MIPStarRE.QPBT.isCondLinearOn_one_of_linear}
+	\leanok
+	\uses{def:cl-func, def:register-subspace}
+	This is the support-relative form of the converse observation following Definition~\ref{def:cl-func}. Let $L$ be a linear map on $V$. Then $L$ is a $1$-level CL function all of whose factor spaces are contained in $V$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:cl-func}
+	Take the single factor space $V_1 = V$ with first-level linear map $L_1 = L$, and take the $0$-level function on $V_{>1}$ for every value of $x^{L_1}$. Since $x^V = x$, the represented function sends $x$ to $L(x) + 0 = L(x)$.
+\end{proof}
+
+\begin{lemma}[Formalization support for reindexing a CL function]\label{lem:cl-reindex}
+	\lean{MIPStarRE.QPBT.isCondLinearOn_reindex}
+	\leanok
+	\uses{def:cl-func, def:register-subspace}
+	This is not a named statement of the source article; it isolates the transport of a CL function between register spaces used in the Lean proof of the conditional linearity of the Pauli question maps. Let $V' = \F^{n'}$ and $V = \F^{n}$, and let $f$ be an injective map of the coordinates of $V'$ into the coordinates of $V$, so that every register subspace of $V'$ is carried to a register subspace of $V$. Let $L$ be an $\ell$-level CL function on $V'$. Let $\tilde L \colon V \to V$ send $x$ to the vector whose coordinate at $f(k)$ is the $k$-th coordinate of $L\bigl( (x_{f(k)})_k \bigr)$ and whose coordinates outside the image of $f$ are zero. Then $\tilde L$ is an $\ell$-level CL function on $V$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:cl-func}
+	Induction on $\ell$. At level $0$ both functions are zero. At level $\ell \ge 1$, transport a representation of $L$ term by term: the factor space $V'_1$ is carried to its image under $f$, the first-level linear map $L_1$ to the composition of restriction along $f$ with $L_1$ followed by extension by zero off the image, and the conditional remainders are transported by the induction hypothesis, their prefix values being transported along $f$ as well. Since $f$ is injective, the coordinate at $f(k)$ of a transported vector is the $k$-th coordinate of the vector transported, so the transported representation evaluates to the transport of the value of $L$; outside the image of $f$ both sides vanish.
+\end{proof}
+
 \begin{definition}[Conditionally linear distributions]\label{def:cl-dist}
 	\lean{MIPStarRE.QPBT.clDistribution}\uses{def:cl-func}
 	Let $L, R \colon V \to V$ be conditionally linear functions. The \emph{conditionally linear distribution $\mu_{L,R}$ corresponding to $(L,R)$} is the distribution over pairs $(L(x), R(x)) \in V \times V$ for $x$ drawn uniformly at random from $V$.
@@ -2320,11 +2380,13 @@ The marginal functions, factor spaces, and linear maps of a given CL function $L
 
 The question distribution of the Pauli basis test is \emph{typed}: each question is a pair consisting of a type, drawn together with the other player's type from the edges of a fixed \emph{type graph}, and a question content, drawn from a CL distribution determined by the pair of types.
 
+% IsTypedCondLinearFamily permits an arbitrary index type T, whereas the source assumes
+% that the type set is finite. It is therefore a strict generalization and is not marked
+% \leanok; the concrete low-degree and Pauli families below use finite inductive types.
 \begin{definition}[Typed conditionally linear functions]\label{def:typed-cl-functions}
 	\lean{MIPStarRE.QPBT.IsTypedCondLinearFamily}
-	\leanok
 	\uses{def:cl-func}
-	Let $\mathcal T$ be a set (the \emph{type set}) and let $V$ be $\F^n$ for some integer $n \ge 0$. A \emph{$\mathcal T$-typed family of $\ell$-level conditionally linear functions} (implicitly, \emph{on $V$}) is a collection $\{L_t\}_{t \in \mathcal T}$ such that, for each $t \in \mathcal T$, $L_t$ is an $\ell$-level conditionally linear function on $V$. Finiteness of $\mathcal T$ plays no part in this definition, which is therefore stated, as in the linked declaration, for an arbitrary type set; it is required from Definition~\ref{def:graph-distribution} onwards, where $\mathcal T$ indexes a distribution. The source states the definition for a finite type set, and every type set occurring below is finite.
+	Let $\mathcal T$ be a set (the \emph{type set}) and let $V$ be $\F^n$ for some integer $n \ge 0$. A \emph{$\mathcal T$-typed family of $\ell$-level conditionally linear functions} (implicitly, \emph{on $V$}) is a collection $\{L_t\}_{t \in \mathcal T}$ such that, for each $t \in \mathcal T$, $L_t$ is an $\ell$-level conditionally linear function on $V$. Finiteness of $\mathcal T$ is not needed for this pointwise condition, so the definition applies to an arbitrary type set. A finite type set is required from Definition~\ref{def:graph-distribution} onwards, where $\mathcal T$ indexes a distribution. The source states the definition for a finite type set, and every type set occurring below is finite.
 \end{definition}
 
 % Nonemptiness of the edge set is stated explicitly here: with E empty, m = k = 0 and the

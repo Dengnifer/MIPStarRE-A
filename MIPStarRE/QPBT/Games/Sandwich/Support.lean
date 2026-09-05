@@ -1,3 +1,4 @@
+import MIPStarRE.QPBT.Games.DistanceTheorems
 import MIPStarRE.QPBT.Games.Sandwich.Defs
 
 /-! # Quantitative support for sandwiched measurements
@@ -125,8 +126,7 @@ theorem consistencyDefect_placed_eq_avg_point
     rw [consistency_term_eq_stateQForm, placed_product_stateQForm_eq]
 
 set_option maxHeartbeats 600000 in
--- Inferring finite outcome instances for the two postprocessed families is
--- expensive because both relabelings occur beneath nested outcome sums.
+-- The collision estimate expands two nested outcome sums at each evaluation point.
 /-- Averaged diagonal overlap after evaluation exceeds the original diagonal
 overlap by at most the collision probability. This is the formalization-only
 estimate `lem:sandwich-evaluated-diagonal-overlap` used in the proof of
@@ -254,8 +254,7 @@ theorem avg_diagonal_postprocess_stateQForm_le
       simpa using mul_le_mul_of_nonneg_left hoffdiag_le_one hε
 
 set_option maxHeartbeats 600000 in
--- Inferring finite outcome instances for the complementary overlaps is
--- expensive because evaluation introduces a second finite outcome family.
+-- Complementary overlaps require simultaneous expansions before averaging.
 /-- Taking complements converts the diagonal-overlap estimate into a
 pointwise consistency-defect estimate. This is the formalization-only estimate
 `lem:sandwich-point-codeword-defect` used in the proof of `lem:ld-sandwich`;
@@ -315,8 +314,7 @@ theorem point_codeword_defect_le_avg_evaluated_add
   linarith
 
 set_option maxHeartbeats 600000 in
--- Inferring finite outcome instances through both distribution averages is
--- expensive because the evaluated families depend on the sampled point.
+-- The proof rearranges question, evaluation, and two outcome sums.
 /-- If distinct codewords collide under a random evaluation with probability
 at most `ε`, their full-outcome consistency defect is at most the evaluated
 defect plus `ε`. This is the formalization-only estimate
@@ -387,8 +385,7 @@ theorem consistencyDefect_codewords_le_evaluated_add
     _ = _ := by rw [avgOver_const_of_isProbability μ hμ]
 
 set_option maxHeartbeats 600000 in
--- Inferring finite outcome instances for both postprocessed defects is
--- expensive because the relabeling varies with the independent sample.
+-- The relabeling argument compares two nested outcome sums at every sample.
 /-- Averaging the fixed-map data-processing inequality over an independent
 random relabeling preserves its bound. This is the formalization-only estimate
 `lem:sandwich-random-postprocess` for the last step of `lem:ld-sandwich`;
@@ -570,42 +567,16 @@ theorem postprocess_isProjective {α β ι : Type*}
 composition. This is the formalization-only identity
 `lem:sandwich-postprocess-compose` used to align the coordinate marginals in
 `lem:ld-sandwich`; detailed source argument
-`references/neexp-paper/05_quantum_preliminaries.tex:952-994`. -/
+`references/neexp-paper/05_quantum_preliminaries.tex:952-994`. It reads at a
+single outcome the equality of the twice-relabeled measurement with the
+measurement relabeled along the composite map. -/
 theorem postprocess_postprocess_effect {α β γ ι : Type*}
     [Fintype α] [DecidableEq α] [Fintype β] [DecidableEq β]
     [Fintype γ] [DecidableEq γ] [Fintype ι] [DecidableEq ι]
     (M : Measurement α ι) (f : α → β) (g : β → γ) (c : γ) :
     ((M.postprocess f).postprocess g).effect c =
       (M.postprocess (fun a => g (f a))).effect c := by
-  classical
-  simp only [MIPStarRE.Quantum.Measurement.postprocess_effect, Finset.sum_filter]
-  calc
-    (∑ b : β, if g b = c then
-        ∑ a : α, if f a = b then M.effect a else 0 else 0) =
-        ∑ b : β, ∑ a : α,
-          if g b = c ∧ f a = b then M.effect a else 0 := by
-      apply Finset.sum_congr rfl
-      intro b _
-      by_cases hbc : g b = c <;> simp [hbc]
-    _ = ∑ a : α, ∑ b : β,
-        if g b = c ∧ f a = b then M.effect a else 0 := by
-      rw [Finset.sum_comm]
-    _ = ∑ a : α, if g (f a) = c then M.effect a else 0 := by
-      apply Finset.sum_congr rfl
-      intro a _
-      by_cases hac : g (f a) = c
-      · rw [Finset.sum_eq_single (f a)]
-        · simp [hac]
-        · intro b _ hba
-          simp [Ne.symm hba]
-        · simp
-      · apply Eq.trans (Finset.sum_eq_zero (fun b _ => by
-          by_cases hab : f a = b
-          · subst b
-            simp [hac]
-          · simp [hab]))
-        simp [hac]
-    _ = ∑ a : α, if g (f a) = c then M.effect a else 0 := rfl
+  rw [MIPStarRE.Quantum.Measurement.postprocess_comp]
 
 /-- An injective relabeling does not merge the effect at a relabeled
 outcome. This is the formalization-only identity
@@ -623,26 +594,6 @@ theorem postprocess_effect_of_injective {α β ι : Type*}
   · intro z hza
     rw [if_neg]
     exact fun h => hza (hf h)
-
-/-- The squared effects of a POVM sum to at most the identity. This is the
-formalization-only estimate `lem:sandwich-povm-square-sum` used in the
-contractions underlying `lem:ld-sandwich`; detailed source argument
-`references/neexp-paper/05_quantum_preliminaries.tex:930-946`. -/
-theorem measurement_sum_adjoint_mul_le_one {α ι : Type*}
-    [Fintype α] [Fintype ι] [DecidableEq ι] (M : Measurement α ι) :
-    ∑ a : α, (M.effect a)ᴴ * M.effect a ≤ 1 := by
-  calc
-    ∑ a : α, (M.effect a)ᴴ * M.effect a =
-        ∑ a : α, M.effect a * M.effect a := by
-      apply Finset.sum_congr rfl
-      intro a _
-      rw [DistanceCalculus.measurement_effect_hermitian]
-    _ ≤ ∑ a : α, M.effect a := by
-      apply Finset.sum_le_sum
-      intro a _
-      exact MIPStarRE.Quantum.sq_le_self (M.pos a)
-        (DistanceCalculus.measurement_effect_le_one M a)
-    _ = 1 := M.sum_eq_one
 
 /-- The equal-outcome part of the tensor product of two POVMs is bounded by
 the identity. This is the formalization-only estimate
@@ -702,76 +653,7 @@ theorem projective_mul_measurement_sum_adjoint_mul_le_one
       intro a _
       simpa [Matrix.star_eq_conjTranspose] using
         star_left_conjugate_le_conjugate hP.le_one (M.effect a)
-    _ ≤ 1 := measurement_sum_adjoint_mul_le_one M
-
-/-- Tensoring two projectors gives a projector on the product space. This is
-the formalization-only fact `lem:sandwich-tensor-projector` used when converting
-distance back to consistency in `lem:ld-sandwich`; detailed source argument
-`references/neexp-paper/05_quantum_preliminaries.tex:930-946`. -/
-theorem heteroKron_isProj {ιA ιB : Type*}
-    [Fintype ιA] [Fintype ιB]
-    {P : Op ιA} {Q : Op ιB} (hP : IsProj P) (hQ : IsProj Q) :
-    IsProj (heteroKron P Q) := by
-  refine { isIdempotentElem := ?_, isSelfAdjoint := ?_ }
-  · change heteroKron P Q * heteroKron P Q = heteroKron P Q
-    rw [heteroKron_mul, hP.isIdempotentElem.eq, hQ.isIdempotentElem.eq]
-  · change (heteroKron P Q)ᴴ = heteroKron P Q
-    unfold heteroKron
-    simp only [Matrix.kronecker]
-    rw [Matrix.conjTranspose_kronecker, hP.isSelfAdjoint.isHermitian.eq,
-      hQ.isSelfAdjoint.isHermitian.eq]
-
-/-- The squared effects in one fiber of a pair-valued measurement sum to at
-most the identity. This is the formalization-only estimate
-`lem:sandwich-pair-fiber-sum` used for a joint-measurement marginal in
-`lem:ld-sandwich`; detailed source argument
-`references/neexp-paper/05_quantum_preliminaries.tex:930-946`. -/
-theorem measurement_pair_fiber_sum_adjoint_mul_le_one
-    {α β ι : Type*} [Fintype α] [Fintype β]
-    [Fintype ι] [DecidableEq ι]
-    (M : Measurement (α × β) ι) (a : α) :
-    ∑ b : β, (M.effect (a, b))ᴴ * M.effect (a, b) ≤ 1 := by
-  have hsquare (z : α × β) : (M.effect z)ᴴ * M.effect z ≤ M.effect z := by
-    rw [DistanceCalculus.measurement_effect_hermitian]
-    exact MIPStarRE.Quantum.sq_le_self (M.pos z)
-      (DistanceCalculus.measurement_effect_le_one M z)
-  calc
-    ∑ b : β, (M.effect (a, b))ᴴ * M.effect (a, b) ≤
-        ∑ b : β, M.effect (a, b) := by
-      exact Finset.sum_le_sum fun b _ => hsquare (a, b)
-    _ ≤ ∑ a' : α, ∑ b : β, M.effect (a', b) := by
-      exact Finset.single_le_sum
-        (fun a' _ => Finset.sum_nonneg fun b _ => M.pos (a', b))
-        (Finset.mem_univ a)
-    _ = ∑ z : α × β, M.effect z := (Fintype.sum_prod_type _).symm
-    _ = 1 := M.sum_eq_one
-
-/-- A projective joint effect is selected exactly by the matching
-postprocessing fiber. This is the formalization-only identity
-`lem:sandwich-postprocess-effect-left` used in the joint-family comparison for
-`lem:ld-sandwich`; detailed source argument
-`references/neexp-paper/05_quantum_preliminaries.tex:930-946`. -/
-theorem postprocess_effect_mul_effect {α β ι : Type*}
-    [Fintype α] [DecidableEq α] [Fintype β] [DecidableEq β]
-    [Fintype ι] [DecidableEq ι]
-    (M : Measurement α ι) (hM : MIPStarRE.QPBT.Measurement.IsProjective M)
-    (f : α → β) (b : β) (a : α) :
-    (M.postprocess f).effect b * M.effect a =
-      if f a = b then M.effect a else 0 := by
-  classical
-  rw [MIPStarRE.Quantum.Measurement.postprocess_effect, Finset.sum_mul]
-  calc
-    (∑ z ∈ Finset.univ.filter (fun z => f z = b), M.effect z * M.effect a) =
-        ∑ z ∈ Finset.univ.filter (fun z => f z = b),
-          if z = a then M.effect a else 0 := by
-      apply Finset.sum_congr rfl
-      intro z _
-      by_cases hza : z = a
-      · subst z
-        simp [(hM a).isIdempotentElem.eq]
-      · rw [if_neg hza]
-        exact DistanceCalculus.projective_effect_mul_effect_eq_zero M hM hza
-    _ = if f a = b then M.effect a else 0 := by simp
+    _ ≤ 1 := MIPStarRE.QPBT.measurement_sum_adjoint_mul_le_one M
 
 /-- A projective joint effect selects its matching postprocessing fiber when
 multiplied on the right. This is the formalization-only identity
@@ -786,7 +668,7 @@ theorem effect_mul_postprocess_effect {α β ι : Type*}
     M.effect a * (M.postprocess f).effect b =
       if f a = b then M.effect a else 0 := by
   have h := congrArg Matrix.conjTranspose
-    (postprocess_effect_mul_effect M hM f b a)
+    (DistanceCalculus.postprocess_effect_mul_effect M hM f b a)
   rw [Matrix.conjTranspose_mul,
     DistanceCalculus.measurement_effect_hermitian M a,
     DistanceCalculus.measurement_effect_hermitian (M.postprocess f) b] at h
@@ -816,7 +698,7 @@ theorem postprocess_product_eq_effect {α β γ ι : Type*}
           if f z = f a then M.effect z else 0 := by
       apply Finset.sum_congr rfl
       intro z _
-      exact postprocess_effect_mul_effect M hM f (f a) z
+      exact DistanceCalculus.postprocess_effect_mul_effect M hM f (f a) z
     _ = M.effect a := by
       rw [Finset.sum_eq_single a]
       · simp
@@ -898,87 +780,5 @@ theorem opFamilyDistSq_mul_fiber_le {X α Γ ι : Type*}
     _ ≤ ‖applyOperatorToState ((A x).effect a - (B x).effect a) ψ‖ ^ 2 := hmul
 
 end SandwichProduct
-
-namespace SandwichInternal
-
-@[deprecated SandwichProduct.avgOver_distribution_prod (since := "2026-09-05")]
-alias avgOver_distribution_prod := SandwichProduct.avgOver_distribution_prod
-
-@[deprecated SandwichProduct.diagonal_postprocess_stateQForm_eq_pair_sum
-  (since := "2026-09-05")]
-alias diagonal_postprocess_stateQForm_eq_pair_sum :=
-  SandwichProduct.diagonal_postprocess_stateQForm_eq_pair_sum
-
-@[deprecated SandwichProduct.consistencyDefect_placed_eq_avg_point
-  (since := "2026-09-05")]
-alias consistencyDefect_placed_eq_avg_point :=
-  SandwichProduct.consistencyDefect_placed_eq_avg_point
-
-@[deprecated SandwichProduct.avg_diagonal_postprocess_stateQForm_le
-  (since := "2026-09-05")]
-alias avg_diagonal_postprocess_stateQForm_le :=
-  SandwichProduct.avg_diagonal_postprocess_stateQForm_le
-
-@[deprecated SandwichProduct.point_codeword_defect_le_avg_evaluated_add
-  (since := "2026-09-05")]
-alias point_codeword_defect_le_avg_evaluated_add :=
-  SandwichProduct.point_codeword_defect_le_avg_evaluated_add
-
-@[deprecated SandwichProduct.consistencyDefect_codewords_le_evaluated_add
-  (since := "2026-09-05")]
-alias consistencyDefect_codewords_le_evaluated_add :=
-  SandwichProduct.consistencyDefect_codewords_le_evaluated_add
-
-@[deprecated SandwichProduct.consistencyDefect_prod_postprocess_le
-  (since := "2026-09-05")]
-alias consistencyDefect_prod_postprocess_le :=
-  SandwichProduct.consistencyDefect_prod_postprocess_le
-
-@[deprecated SandwichProduct.sqrt_opFamilyDistSq_triangle (since := "2026-09-05")]
-alias sqrt_opFamilyDistSq_triangle := SandwichProduct.sqrt_opFamilyDistSq_triangle
-
-@[deprecated SandwichProduct.postprocess_isProjective (since := "2026-09-05")]
-alias postprocess_isProjective := SandwichProduct.postprocess_isProjective
-
-@[deprecated SandwichProduct.postprocess_postprocess_effect (since := "2026-09-05")]
-alias postprocess_postprocess_effect := SandwichProduct.postprocess_postprocess_effect
-
-@[deprecated SandwichProduct.postprocess_effect_of_injective (since := "2026-09-05")]
-alias postprocess_effect_of_injective := SandwichProduct.postprocess_effect_of_injective
-
-@[deprecated SandwichProduct.measurement_sum_adjoint_mul_le_one
-  (since := "2026-09-05")]
-alias measurement_sum_adjoint_mul_le_one :=
-  SandwichProduct.measurement_sum_adjoint_mul_le_one
-
-@[deprecated SandwichProduct.matched_tensor_sum_le_one (since := "2026-09-05")]
-alias matched_tensor_sum_le_one := SandwichProduct.matched_tensor_sum_le_one
-
-@[deprecated SandwichProduct.projective_mul_measurement_sum_adjoint_mul_le_one
-  (since := "2026-09-05")]
-alias projective_mul_measurement_sum_adjoint_mul_le_one :=
-  SandwichProduct.projective_mul_measurement_sum_adjoint_mul_le_one
-
-@[deprecated SandwichProduct.heteroKron_isProj (since := "2026-09-05")]
-alias heteroKron_isProj := SandwichProduct.heteroKron_isProj
-
-@[deprecated SandwichProduct.measurement_pair_fiber_sum_adjoint_mul_le_one
-  (since := "2026-09-05")]
-alias measurement_pair_fiber_sum_adjoint_mul_le_one :=
-  SandwichProduct.measurement_pair_fiber_sum_adjoint_mul_le_one
-
-@[deprecated SandwichProduct.postprocess_effect_mul_effect (since := "2026-09-05")]
-alias postprocess_effect_mul_effect := SandwichProduct.postprocess_effect_mul_effect
-
-@[deprecated SandwichProduct.effect_mul_postprocess_effect (since := "2026-09-05")]
-alias effect_mul_postprocess_effect := SandwichProduct.effect_mul_postprocess_effect
-
-@[deprecated SandwichProduct.postprocess_product_eq_effect (since := "2026-09-05")]
-alias postprocess_product_eq_effect := SandwichProduct.postprocess_product_eq_effect
-
-@[deprecated SandwichProduct.opFamilyDistSq_mul_fiber_le (since := "2026-09-05")]
-alias opFamilyDistSq_mul_fiber_le := SandwichProduct.opFamilyDistSq_mul_fiber_le
-
-end SandwichInternal
 
 end MIPStarRE.QPBT

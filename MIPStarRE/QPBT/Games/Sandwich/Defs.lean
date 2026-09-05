@@ -1,5 +1,4 @@
-import MIPStarRE.QPBT.Games.DistanceTheorems
-import MIPStarRE.QPBT.Games.ErrorFunctions
+import MIPStarRE.QPBT.Games.Defs
 
 /-! # Definitions for sandwiched measurements
 
@@ -16,9 +15,8 @@ open scoped BigOperators MatrixOrder Matrix ComplexOrder
 
 namespace MIPStarRE.QPBT
 
-open MIPStarRE.LDT hiding Measurement
+open MIPStarRE.LDT
 open MIPStarRE.Quantum
-open DistanceCalculus
 
 namespace SandwichProduct
 
@@ -40,14 +38,6 @@ noncomputable def orderedCoordinateProduct {ι : Type*}
         G (Fin.last (k + 1)) (g (Fin.last (k + 1)))
 
 end SandwichProduct
-
-namespace SandwichInternal
-
-@[deprecated SandwichProduct.orderedCoordinateProduct (since := "2026-09-05")]
-noncomputable abbrev sandwichProductCore :=
-  @SandwichProduct.orderedCoordinateProduct
-
-end SandwichInternal
 
 /-- The ordered product
 `G^k_{g_k} ... G^1_{g_1} ... G^k_{g_k}` of `lem:ld-sandwich`.

@@ -1,4 +1,5 @@
 import MIPStarRE.QPBT.Games.Sandwich.Support
+import MIPStarRE.LDT.MakingMeasurementsProjective.NaimarkCore
 
 /-! # Quantitative sandwiched-measurement estimate
 
@@ -22,8 +23,7 @@ open DistanceCalculus
 namespace SandwichProduct
 
 set_option maxHeartbeats 400000 in
--- Inferring finite outcome instances for three nested postprocessings is
--- expensive because the joint measurement has a product outcome type.
+-- Three marginal substitutions expand products over the joint outcome space.
 /-- Replacing the two outer copies and the inner marginal in a joint
 projective effect costs two outer distances and one inner distance. -/
 private theorem sqrt_opFamilyDistSq_joint_sandwich_le
@@ -89,7 +89,7 @@ private theorem sqrt_opFamilyDistSq_joint_sandwich_le
         · simp
         · intro a' ha'
           simp [ha']
-      _ ≤ 1 := measurement_pair_fiber_sum_adjoint_mul_le_one (JL x) a
+      _ ≤ 1 := DistanceCalculus.measurement_fiber_sum_adjoint_mul_le_one (JL x) a
   have hstep₀raw : opFamilyDistSq μ
       (fun x (ab : α × β) => (JL x).effect ab * (JAL x).effect ab.1)
       (fun x (ab : α × β) => (JL x).effect ab * (GR x).effect ab.1) ψ ≤ q :=
@@ -144,8 +144,10 @@ private theorem sqrt_opFamilyDistSq_joint_sandwich_le
         intro a _
         rw [Fintype.sum_eq_single b]
         · simp only [if_pos]
-          have hp := heteroKron_isProj
-            (postprocess_isProjective (J x) (hJ x) Prod.fst a) (hG x a)
+          have hp : IsProj (heteroKron ((JA x).effect a) ((G x).effect a)) := by
+            simpa only [JA, heteroKron] using
+              MIPStarRE.LDT.MakingMeasurementsProjective.isProj_kronecker
+                (postprocess_isProjective (J x) (hJ x) Prod.fst a) (hG x a)
           simp only [GR, JAL, DistanceCalculus.rightPlacedMeasurement,
             DistanceCalculus.leftPlacedMeasurement,
             MIPStarRE.Quantum.Measurement.ofSumEqOne]
@@ -733,7 +735,9 @@ theorem consistencyDefect_sandwich_le :
   have hone : IsProj (1 : Op ιB) := IsStarProjection.one _
   have hAL (x : X) : MIPStarRE.QPBT.Measurement.IsProjective (AL x) := by
     intro g
-    exact heteroKron_isProj (hA x g) hone
+    change IsProj (heteroKron ((A x).effect g) (1 : Op ιB))
+    simpa only [heteroKron] using
+      MIPStarRE.LDT.MakingMeasurementsProjective.isProj_kronecker (hA x g) hone
   have hbaseRaw := consistencyDefect_le_sqrt_of_projective_left
     μ AL BR ψ hμ hψ hAL
   have hbase : consistencyDefect μ
@@ -784,15 +788,5 @@ theorem consistencyDefect_sandwich_le :
   exact htarget.trans hbase
 
 end SandwichProduct
-
-namespace SandwichInternal
-
-@[deprecated SandwichProduct.sandwichProduct_isMeasurement (since := "2026-09-05")]
-alias sandwichProduct_isMeasurement := SandwichProduct.sandwichProduct_isMeasurement
-
-@[deprecated SandwichProduct.consistencyDefect_sandwich_le (since := "2026-09-05")]
-alias consistencyDefect_sandwich_le := SandwichProduct.consistencyDefect_sandwich_le
-
-end SandwichInternal
 
 end MIPStarRE.QPBT

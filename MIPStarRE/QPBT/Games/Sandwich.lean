@@ -1,4 +1,6 @@
 import MIPStarRE.QPBT.Games.Sandwich.Pasting4
+import MIPStarRE.QPBT.Games.Sandwich.Quantitative
+import MIPStarRE.QPBT.Games.ErrorFunctions
 
 /-! # Sandwiched measurements and pasting
 

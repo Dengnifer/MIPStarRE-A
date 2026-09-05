@@ -9,16 +9,21 @@ import shlex
 import subprocess
 import tempfile
 import unittest
+from unittest import mock
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DISPATCH = REPO_ROOT / "local" / "bin" / "dispatch.sh"
+TELEMETRY = REPO_ROOT / "local" / "bin" / "telemetry.py"
 PRE_COMMIT = REPO_ROOT / ".githooks" / "pre-commit"
 THREAD_ID = "019e93a5-e370-7aa1-ba77-6373dbdd6a61"
 
 
 class DispatchCommandTests(unittest.TestCase):
-    def dispatch_command(self, *extra: str) -> list[str]:
+    def dispatch_command(
+        self, *extra: str, model: str = "test-model", effort: str = "high",
+        include_persona: bool = False,
+    ) -> list[str]:
         with tempfile.TemporaryDirectory() as cache_root:
             fake_bin = Path(cache_root) / "bin"
             fake_bin.mkdir()
@@ -29,7 +34,7 @@ class DispatchCommandTests(unittest.TestCase):
             env.update(
                 {
                     "MIPSTARRE_CACHE_ROOT": cache_root,
-                    "MIPSTARRE_CODEX_MODEL": "test-model",
+                    "MIPSTARRE_CODEX_MODEL": model,
                     "PATH": f"{fake_bin}{os.pathsep}{env.get('PATH', '')}",
                 }
             )
@@ -44,10 +49,10 @@ class DispatchCommandTests(unittest.TestCase):
                     str(REPO_ROOT),
                     "--sandbox",
                     "read-only",
-                    "--no-persona",
+                    *([] if include_persona else ["--no-persona"]),
                     "--skip-hook-check",
                     "--effort",
-                    "high",
+                    effort,
                     "--dry-run",
                     *extra,
                     "--",
@@ -59,6 +64,7 @@ class DispatchCommandTests(unittest.TestCase):
                 capture_output=True,
                 text=True,
             )
+        self.last_dispatch_stdout = result.stdout
         command_line = next(
             line.removeprefix("command: ")
             for line in result.stdout.splitlines()
@@ -87,6 +93,50 @@ class DispatchCommandTests(unittest.TestCase):
 
         self.assert_common_exec_options(argv)
         self.assertEqual(argv[13:], ["resume", "--", THREAD_ID, "<prompt>"])
+
+    def test_future_astra_mathfix_selects_model_effort_and_persona(self) -> None:
+        argv = self.dispatch_command(
+            "--role", "mathfix", "--sandbox", "workspace-write", "--persona-ref", "HEAD",
+            model="astra", effort="ultra", include_persona=True,
+        )
+
+        self.assertEqual(argv[3:7], ["-C", str(REPO_ROOT), "--sandbox", "workspace-write"])
+        self.assertEqual(argv[argv.index("-m") + 1], "astra")
+        self.assertIn("model_reasoning_effort=ultra", argv)
+        self.assertIn("persona: HEAD:local/personas/mathfix.md", self.last_dispatch_stdout)
+        self.assertIn("# Persona: mathematical-gap repair", self.last_dispatch_stdout)
+
+    def test_mathfix_rejects_non_astra_or_non_ultra_dispatches(self) -> None:
+        for model, effort in (("", "ultra"), ("test-model", "ultra"), ("astra", "high")):
+            with self.subTest(model=model, effort=effort):
+                with self.assertRaises(subprocess.CalledProcessError) as failure:
+                    self.dispatch_command("--role", "mathfix", model=model, effort=effort)
+                self.assertEqual(failure.exception.returncode, 4)
+                self.assertIn("mathfix requires an astra model", failure.exception.stderr)
+
+    def test_telemetry_accepts_mathfix_role(self) -> None:
+        result = subprocess.run(
+            ["python3", str(TELEMETRY), "session-summarize", "--help"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertIn("mathfix", result.stdout)
+
+    def test_workspace_write_grants_only_resolved_external_lake(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            worktree, target = root / "worktree", root / "lake" / "main"
+            worktree.mkdir()
+            subprocess.run(["git", "init", "-q", "-b", "main"], cwd=worktree, check=True)
+            target.mkdir(parents=True)
+            (worktree / ".lake").symlink_to(target, target_is_directory=True)
+            with mock.patch.dict(os.environ, {"MIPSTARRE_LAKE_ROOT": str(target.parent)}):
+                argv = self.dispatch_command("--role", "prover", "--worktree", str(worktree),
+                                             "--sandbox", "workspace-write")
+        self.assertEqual(argv[argv.index("--add-dir") + 1], str(target.resolve()))
+        self.assertLess(argv.index("--add-dir"), argv.index("-o"))
 
     def test_pre_commit_budget_counts_dispatch_tests(self) -> None:
         self.assertIn(
@@ -141,7 +191,7 @@ class PreCommitBudgetTests(unittest.TestCase):
         repo, root = self.new_repo()
         self.commit_file(repo, "feature.txt", 1)
         self.git(repo, "switch", "--create", "main", root)
-        self.commit_file(repo, "local/inherited.txt", 401)
+        self.commit_file(repo, "local/inherited.txt", 1001)
         self.git(repo, "update-ref", "refs/remotes/github/main", "HEAD")
         self.git(repo, "switch", "feature")
         self.git(repo, "merge", "--no-commit", "--no-ff", "main")
@@ -156,7 +206,7 @@ class PreCommitBudgetTests(unittest.TestCase):
         self.commit_file(repo, "feature.txt", 1)
         self.git(repo, "update-ref", "refs/remotes/github/main", root)
         self.git(repo, "switch", "--create", "side", root)
-        self.commit_file(repo, "local/side.txt", 401)
+        self.commit_file(repo, "local/side.txt", 1001)
         self.git(repo, "switch", "feature")
         self.git(repo, "merge", "--no-commit", "--no-ff", "side")
 
@@ -164,20 +214,25 @@ class PreCommitBudgetTests(unittest.TestCase):
 
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn("non-main merge", result.stdout)
-        self.assertIn("staged workflow-layer change is 401 lines", result.stdout)
+        self.assertIn("staged workflow-layer change is 1001 lines", result.stdout)
 
-    def test_ready_packets_test_growth_is_budgeted(self) -> None:
-        repo, _ = self.new_repo()
-        path = "scripts/tests/test_ready_packets.py"
-        target = repo / path
-        target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text("line\n" * 401, encoding="utf-8")
-        self.git(repo, "add", path)
+    def test_standalone_workflow_test_growth_is_budgeted(self) -> None:
+        paths = (
+            "scripts/tests/test_pre_push_hook.py",
+            "scripts/tests/test_ready_packets.py",
+        )
+        for path in paths:
+            with self.subTest(path=path):
+                repo, _ = self.new_repo()
+                target = repo / path
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text("line\n" * 1001, encoding="utf-8")
+                self.git(repo, "add", path)
 
-        result = self.run_hook(repo)
+                result = self.run_hook(repo)
 
-        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
-        self.assertIn("staged workflow-layer change is 401 lines", result.stdout)
+                self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                self.assertIn("staged workflow-layer change is 1001 lines", result.stdout)
 
 
 if __name__ == "__main__":
