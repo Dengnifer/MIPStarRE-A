@@ -6,7 +6,8 @@ import MIPStarRE.QPBT.Observables.Defs
 
 This module adjoins two EPR pairs to a heterogeneous Pauli-basis-test strategy,
 records the four register placements used in the analysis, and defines the
-expanded point observables and measurements.
+expanded point observables and measurements. Fourier inversion identifies their
+effects with a convolution of projectors and proves completeness and projectivity.
 
 ## References
 
@@ -163,55 +164,53 @@ noncomputable def tauPointProj (W : PauliKind)
     pauliProj W h
 
 /-- The phase induced by the fixed binary trace is an additive character. -/
-private theorem fixedCharacter_add (x y : PauliScalar P) :
+private theorem phaseSign_fixedBinTrace_mul (x y : PauliScalar P) :
     phaseSign (fixedBinTrace P.model x) * phaseSign (fixedBinTrace P.model y) =
       phaseSign (fixedBinTrace P.model (x + y)) := by
-  rw [fixedBinTrace, map_add, phaseSign_eq_ffChar,
-    phaseSign_eq_ffChar, phaseSign_eq_ffChar]
-  exact ((ZMod.stdAddChar (N := 2)).map_add_eq_mul _ _).symm
+  rw [fixedBinTrace, map_add]
+  exact (phaseSign_add _ _).symm
 
-private theorem fixedCharacter_mul_add (x y r : PauliScalar P) :
+/-- The trace phase converts addition of coefficients to multiplication. -/
+private theorem phaseSign_fixedBinTrace_mul_add (x y r : PauliScalar P) :
     phaseSign (fixedBinTrace P.model (x * r)) *
         phaseSign (fixedBinTrace P.model (y * r)) =
       phaseSign (fixedBinTrace P.model ((x + y) * r)) := by
   rw [add_mul]
-  exact fixedCharacter_add (x * r) (y * r)
+  exact phaseSign_fixedBinTrace_mul (x * r) (y * r)
 
 /-- Orthogonality of the fixed trace character over the Pauli scalar field. -/
-private theorem fixedCharacter_expect (c : PauliScalar P) :
+private theorem phaseSign_fixedBinTrace_expect (c : PauliScalar P) :
     (𝔼 r : PauliScalar P, phaseSign (fixedBinTrace P.model (c * r))) =
       if c = 0 then (1 : ℂ) else 0 := by
   simpa only [fixedBinTrace, phaseSign_eq_ffChar,
     MIPStarRE.LDT.Preliminaries.ffChar_apply, mul_comm c] using
     (fourier_fact_scalar (p := 2) (F := PauliScalar P) c)
 
-private theorem average_fixedCharacter_smul
+/-- Averaging a trace phase times an operator selects the zero coefficient. -/
+private theorem average_phaseSign_fixedBinTrace_smul
     {ι : Type*} [Fintype ι] [DecidableEq ι]
     (c : PauliScalar P) (A : Op ι) :
     averageOperatorOverDistribution (uniformDistribution (PauliScalar P))
         (fun r => phaseSign (fixedBinTrace P.model (c * r)) • A) =
       if c = 0 then A else 0 := by
   classical
-  ext i j
-  simp only [averageOperatorOverDistribution, uniformDistribution,
-    Distribution.uniformOnFinset, Finset.mem_univ, if_true, Matrix.sum_apply,
-    Matrix.smul_apply, Complex.real_smul]
-  simp_rw [smul_eq_mul]
-  rw [← Finset.mul_sum, ← Finset.sum_mul]
-  have havg := fixedCharacter_expect (P := P) c
+  rw [averageOperatorOverDistribution_smul_const]
+  simp only [uniformDistribution, Distribution.uniformOnFinset,
+    Finset.mem_univ, if_true, Finset.card_univ, ← Finset.mul_sum]
+  have havg := phaseSign_fixedBinTrace_expect (P := P) c
   rw [Fintype.expect_eq_sum_div_card] at havg
   have hcoeff :
       ((1 / (Fintype.card (PauliScalar P) : ℝ) : ℝ) : ℂ) *
           (∑ r : PauliScalar P,
             phaseSign (fixedBinTrace P.model (c * r))) =
         if c = 0 then (1 : ℂ) else 0 := by
-    convert havg using 1
-    all_goals (push_cast; ring)
-  rw [Finset.card_univ, ← mul_assoc, hcoeff]
+    push_cast
+    simpa only [one_div, div_eq_mul_inv, one_mul, mul_comm] using havg
+  rw [hcoeff]
   by_cases hc : c = 0 <;> simp [hc]
 
 /-- Averaging three fixed trace characters imposes the convolution constraint. -/
-private theorem average_three_fixedCharacters_smul
+private theorem average_three_phaseSign_fixedBinTrace_smul
     {ι : Type*} [Fintype ι] [DecidableEq ι]
     (a x y : PauliScalar P) (A : Op ι) :
     averageOperatorOverDistribution (uniformDistribution (PauliScalar P))
@@ -237,47 +236,35 @@ private theorem average_three_fixedCharacters_smul
         (fun r => phaseSign (fixedBinTrace P.model ((a + x + y) * r)) • A) := by
           apply averageOperatorOverDistribution_congr
           intro r
-          rw [smul_smul, fixedCharacter_mul_add a x r, smul_smul,
-            fixedCharacter_mul_add (a + x) y r]
+          rw [smul_smul, phaseSign_fixedBinTrace_mul_add a x r, smul_smul,
+            phaseSign_fixedBinTrace_mul_add (a + x) y r]
     _ = if a + x + y = 0 then A else 0 :=
-      average_fixedCharacter_smul (a + x + y) A
+      average_phaseSign_fixedBinTrace_smul (a + x + y) A
     _ = if x + y = a then A else 0 := if_congr hzero rfl rfl
 
+/-- A scalar in the indicator vector factors out of the dot product. -/
 private theorem dot_smul_indicator (r : PauliScalar P)
     (u : Fin P.m → PauliScalar P) (e : PauliRegister P) :
     dotProduct (fun h => r * indicatorVec u h) e =
       dotProduct e (indicatorVec u) * r := by
-  simp only [dotProduct, Finset.sum_mul]
-  apply Finset.sum_congr rfl
-  intro i hi
-  ring
+  change dotProduct (r • indicatorVec u) e = _
+  rw [smul_dotProduct, dotProduct_comm, smul_eq_mul, mul_comm]
 
+/-- Tensor products distribute over the sums in both factors. -/
 private theorem heteroKron_sum_sum {α β ι κ : Type*}
     [Fintype α] [Fintype β] (A : α → Op ι) (B : β → Op κ) :
     heteroKron (∑ x, A x) (∑ y, B y) =
       ∑ x, ∑ y, heteroKron (A x) (B y) := by
-  ext ⟨i, k⟩ ⟨j, l⟩
-  unfold heteroKron Matrix.kronecker Matrix.kroneckerMap
-  simp only [Matrix.of_apply, Matrix.sum_apply]
-  rw [Finset.sum_mul]
-  apply Finset.sum_congr rfl
-  intro x hx
-  rw [Finset.mul_sum]
+  rw [DistanceCalculus.heteroKron_finset_sum_left]
+  exact Finset.sum_congr rfl fun x _ =>
+    DistanceCalculus.heteroKron_finset_sum_right _ _ _
 
-private theorem heteroKron_finset_sum_right {α ι κ : Type*}
-    (A : Op ι) (s : Finset α) (B : α → Op κ) :
-    heteroKron A (∑ y ∈ s, B y) = ∑ y ∈ s, heteroKron A (B y) := by
-  ext ⟨i, k⟩ ⟨j, l⟩
-  unfold heteroKron Matrix.kronecker Matrix.kroneckerMap
-  simp only [Matrix.of_apply, Matrix.sum_apply]
-  rw [Finset.mul_sum]
-
+/-- Scalars in the two tensor factors act successively on their tensor product. -/
 private theorem heteroKron_smul_smul {ι κ : Type*}
     (c d : ℂ) (A : Op ι) (B : Op κ) :
     heteroKron (c • A) (d • B) = c • (d • heteroKron A B) := by
-  ext ⟨i, k⟩ ⟨j, l⟩
-  change (c * A i j) * (d * B k l) = c * (d * (A i j * B k l))
-  ring
+  unfold heteroKron Matrix.kronecker
+  rw [Matrix.smul_kronecker, Matrix.kronecker_smul]
 
 /-- The expanded point effect is the convolution of the strategy point
 measurement and the Pauli-register point projection. This is the final display
@@ -321,7 +308,7 @@ theorem expPointOp_eq_convolution (S : ProjectiveSetting P ε)
           else 0 := by
       rw [averageOperatorOverDistribution_sum]
       simp_rw [averageOperatorOverDistribution_sum]
-      simp_rw [average_three_fixedCharacters_smul]
+      simp_rw [average_three_phaseSign_fixedBinTrace_smul]
     _ = ∑ p ∈ Finset.univ.filter (fun p : PauliScalar P × PauliScalar P =>
           p.1 + p.2 = a),
         heteroKron ((S.pointMeas side W u).effect p.1)
@@ -354,7 +341,7 @@ theorem expPointOp_eq_convolution (S : ProjectiveSetting P ε)
           apply Finset.sum_congr rfl
           intro y hy
           by_cases hxy : x + y = a
-          · rw [if_pos hxy, heteroKron_finset_sum_right]
+          · rw [if_pos hxy, DistanceCalculus.heteroKron_finset_sum_right]
             apply Finset.sum_congr rfl
             intro e he
             rw [if_pos]
@@ -369,34 +356,14 @@ theorem expPointOp_eq_convolution (S : ProjectiveSetting P ε)
             rw [← (Finset.mem_filter.mp he).2]
             exact heq
 
-/-- Each generalized Pauli eigenspace projector is positive semidefinite. -/
-private theorem pauliProj_nonneg {K ι : Type*} [Field K] [Fintype K]
-    [DecidableEq K] [Algebra (ZMod 2) K] [Fintype ι] [DecidableEq ι]
-    (W : PauliKind) (e : ι → K) : 0 ≤ pauliProj W e :=
-  Matrix.nonneg_iff_posSemidef.mpr
-    (Matrix.posSemidef_vecMulVec_self_star (pauliVec W e))
-
+/-- Each point fiber is a sum of positive Pauli projectors. -/
 private theorem tauPointProj_nonneg (W : PauliKind)
     (u : Fin P.m → PauliScalar P) (a : PauliScalar P) :
     0 ≤ tauPointProj W u a := by
   classical
   unfold tauPointProj
-  exact Finset.sum_nonneg fun e he => pauliProj_nonneg W e
-
-private theorem tauObservable_zero {K ι : Type*} [Field K] [Finite K]
-    [DecidableEq K] [Algebra (ZMod 2) K] [Fintype ι] [DecidableEq ι]
-    (W : PauliKind) : tauObservable W (0 : ι → K) = 1 := by
-  letI : Fintype K := Fintype.ofFinite K
-  have hmul := tauObservable_mul W (0 : ι → K) 0
-  rw [add_zero, tauObservable_sq] at hmul
-  exact hmul.symm
-
-private theorem sum_pauliProj_eq_one {K ι : Type*} [Field K] [Fintype K]
-    [DecidableEq K] [Algebra (ZMod 2) K] [Fintype ι] [DecidableEq ι]
-    (W : PauliKind) : ∑ e : ι → K, pauliProj W e = 1 := by
-  have h := tauObservable_eq_sum_pauliProj W (0 : ι → K)
-  rw [tauObservable_zero] at h
-  simpa [dotProduct, phaseSign] using h.symm
+  exact Finset.sum_nonneg fun e he =>
+    Matrix.nonneg_iff_posSemidef.mpr (posSemidef_pauliProj W e)
 
 /-- The point fibers partition the complete family of Pauli eigenspace projectors. -/
 private theorem sum_tauPointProj_eq_one (W : PauliKind)
@@ -464,97 +431,6 @@ noncomputable def pointMeasExp (S : ProjectiveSetting P ε) (side : PlayerSide)
   Measurement.ofSumEqOne (S.expPointOp side W u)
     (S.expPointOp_nonneg side W u) (S.expPointOp_sum_eq_one side W u)
 
-/-- Folding malformed point answers into zero preserves the strategy projectors. -/
-private theorem pointMeas_isProjective (S : ProjectiveSetting P ε)
-    (side : PlayerSide) (W : PauliKind) (u : Fin P.m → PauliScalar P) :
-    Measurement.IsProjective (S.pointMeas side W u) := by
-  classical
-  let M := S.strategyMeasurement side (pointQuestion P W u)
-  have hM : Measurement.IsProjective M := by
-    cases side with
-    | alice => exact S.isProjective.1 _
-    | bob => exact S.isProjective.2 _
-  change Measurement.IsProjective (M.postprocess pointAnswerOrZero)
-  intro b
-  refine ⟨?_, ?_⟩
-  · change (M.postprocess pointAnswerOrZero).effect b *
-      (M.postprocess pointAnswerOrZero).effect b =
-        (M.postprocess pointAnswerOrZero).effect b
-    let fiber : Finset (PauliAnswer P) :=
-      Finset.univ.filter fun a => pointAnswerOrZero a = b
-    calc
-      (M.postprocess pointAnswerOrZero).effect b *
-          (M.postprocess pointAnswerOrZero).effect b =
-        (∑ a ∈ fiber, M.effect a) * (∑ a' ∈ fiber, M.effect a') := by
-          rw [MIPStarRE.Quantum.Measurement.postprocess_effect]
-      _ = ∑ a ∈ fiber, ∑ a' ∈ fiber, M.effect a * M.effect a' := by
-          rw [Finset.sum_mul]
-          simp_rw [Finset.mul_sum]
-      _ = ∑ a ∈ fiber, ∑ a' ∈ fiber,
-          if a' = a then M.effect a else 0 := by
-          refine Finset.sum_congr rfl ?_
-          intro a ha
-          refine Finset.sum_congr rfl ?_
-          intro a' ha'
-          by_cases haa' : a' = a
-          · subst a'
-            simp [(hM a).isIdempotentElem.eq]
-          · have hne : a ≠ a' := fun h => haa' h.symm
-            simp [DistanceCalculus.projective_effect_mul_effect_eq_zero M hM hne,
-              haa']
-      _ = ∑ a ∈ fiber, M.effect a := by
-          refine Finset.sum_congr rfl ?_
-          intro a ha
-          simp [fiber, ha]
-      _ = (M.postprocess pointAnswerOrZero).effect b := by
-          rw [MIPStarRE.Quantum.Measurement.postprocess_effect]
-  · change ((M.postprocess pointAnswerOrZero).effect b)ᴴ =
-      (M.postprocess pointAnswerOrZero).effect b
-    exact (Matrix.nonneg_iff_posSemidef.mp
-      ((M.postprocess pointAnswerOrZero).pos b)).isHermitian.eq
-
-/-- Point observables form a representation of the additive Pauli scalar group. -/
-private theorem pointObs_mul (S : ProjectiveSetting P ε) (side : PlayerSide)
-    (W : PauliKind) (r s : PauliScalar P)
-    (u : Fin P.m → PauliScalar P) :
-    S.pointObs side W r u * S.pointObs side W s u =
-      S.pointObs side W (r + s) u := by
-  classical
-  let M := S.pointMeas side W u
-  have hM : Measurement.IsProjective M := pointMeas_isProjective S side W u
-  change (∑ a : PauliScalar P,
-      phaseSign (fixedBinTrace P.model (a * r)) • M.effect a) *
-      (∑ a : PauliScalar P,
-        phaseSign (fixedBinTrace P.model (a * s)) • M.effect a) =
-    ∑ a : PauliScalar P,
-      phaseSign (fixedBinTrace P.model (a * (r + s))) • M.effect a
-  calc
-    _ = ∑ a : PauliScalar P, ∑ b : PauliScalar P,
-        (phaseSign (fixedBinTrace P.model (a * r)) *
-          phaseSign (fixedBinTrace P.model (b * s))) •
-            (M.effect a * M.effect b) := by
-      rw [Finset.sum_mul]
-      apply Finset.sum_congr rfl
-      intro a ha
-      rw [Finset.mul_sum]
-      apply Finset.sum_congr rfl
-      intro b hb
-      rw [Matrix.smul_mul, Matrix.mul_smul, smul_smul]
-    _ = ∑ a : PauliScalar P,
-        phaseSign (fixedBinTrace P.model (a * (r + s))) • M.effect a := by
-      apply Finset.sum_congr rfl
-      intro a ha
-      rw [Finset.sum_eq_single a]
-      · rw [(hM a).isIdempotentElem.eq]
-        congr 1
-        simpa only [mul_add] using fixedCharacter_add (P := P) (a * r) (a * s)
-      · intro b hb hba
-        have hab : a ≠ b := fun h => hba h.symm
-        rw [DistanceCalculus.projective_effect_mul_effect_eq_zero M hM hab]
-        simp
-      · intro ha'
-        exact (ha' (Finset.mem_univ a)).elim
-
 /-- Expanded observables inherit the additive representation law. -/
 private theorem expObs_mul (S : ProjectiveSetting P ε) (side : PlayerSide)
     (W : PauliKind) (r s : PauliScalar P)
@@ -581,51 +457,9 @@ private theorem expObs_mul (S : ProjectiveSetting P ε) (side : PlayerSide)
       simp only [Pi.add_apply]
       ring
 
-private theorem star_phaseSign (t : ZMod 2) :
-    star (phaseSign t) = phaseSign t := by
-  by_cases ht : t = 0 <;> simp [phaseSign, ht]
-
-private theorem tauObservable_isHermitian {K ι : Type*} [Field K]
-    [Finite K] [DecidableEq K] [Algebra (ZMod 2) K]
-    [Fintype ι] [DecidableEq ι]
-    (W : PauliKind) (v : ι → K) : (tauObservable W v).IsHermitian := by
-  letI : Fintype K := Fintype.ofFinite K
-  rw [tauObservable_eq_sum_pauliProj, Matrix.IsHermitian,
-    Matrix.conjTranspose_sum]
-  apply Finset.sum_congr rfl
-  intro e he
-  rw [Matrix.conjTranspose_smul, star_phaseSign]
-  exact congrArg (fun A : Op (ι → K) =>
-    phaseSign (binTrace K (dotProduct v e)) • A)
-      (Matrix.nonneg_iff_posSemidef.mp (pauliProj_nonneg W e)).isHermitian.eq
-
-private theorem expObs_isHermitian (S : ProjectiveSetting P ε)
-    (side : PlayerSide) (W : PauliKind) (r : PauliScalar P)
-    (u : Fin P.m → PauliScalar P) :
-    (S.expObs side W r u).IsHermitian := by
-  rw [Matrix.IsHermitian]
-  calc
-    (S.expObs side W r u)ᴴ = heteroKron
-        (S.pointObs side W r u)ᴴ
-        (tauObservable W (fun h => r * indicatorVec u h))ᴴ := by
-      exact Matrix.conjTranspose_kronecker _ _
-    _ = S.expObs side W r u := by
-      rw [(S.pointObs_isHermitian side W r u).eq,
-        (tauObservable_isHermitian W (fun h => r * indicatorVec u h)).eq]
-      rfl
-
-private theorem expPointOp_isHermitian (S : ProjectiveSetting P ε)
-    (side : PlayerSide) (W : PauliKind) (u : Fin P.m → PauliScalar P)
-    (a : PauliScalar P) : (S.expPointOp side W u a).IsHermitian := by
-  classical
-  rw [expPointOp, averageOperatorOverDistribution, Matrix.IsHermitian,
-    Matrix.conjTranspose_sum]
-  apply Finset.sum_congr rfl
-  intro r hr
-  rw [Matrix.conjTranspose_smul, Matrix.conjTranspose_smul, star_phaseSign,
-    (expObs_isHermitian S side W r u).eq]
-  simp
-
+/-- Idempotence of the expanded point effect, the idempotence half of projectivity
+in `def:expanded-point-measurement`, paper
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:384-418`. -/
 private theorem expPointOp_mul_self (S : ProjectiveSetting P ε)
     (side : PlayerSide) (W : PauliKind) (u : Fin P.m → PauliScalar P)
     (a : PauliScalar P) :
@@ -659,7 +493,7 @@ private theorem expPointOp_mul_self (S : ProjectiveSetting P ε)
       rw [Matrix.smul_mul, Matrix.mul_smul, smul_smul, expObs_mul]
       congr 1
       simpa only [mul_add] using
-        fixedCharacter_add (P := P) (a * r) (a * s)
+        phaseSign_fixedBinTrace_mul (P := P) (a * r) (a * s)
     _ = averageOperatorOverDistribution D
           (fun _ => averageOperatorOverDistribution D F) := by
       apply averageOperatorOverDistribution_congr
@@ -676,7 +510,7 @@ private theorem expPointOp_isProj (S : ProjectiveSetting P ε)
     (a : PauliScalar P) : IsProj (S.expPointOp side W u a) := by
   refine isStarProjection_iff'.2 ⟨expPointOp_mul_self S side W u a, ?_⟩
   rw [Matrix.star_eq_conjTranspose]
-  exact (expPointOp_isHermitian S side W u a).eq
+  exact (Matrix.nonneg_iff_posSemidef.mp (S.expPointOp_nonneg side W u a)).isHermitian.eq
 
 /-- The expanded point measurement is projective, as asserted after the
 convolution formula in `def:expanded-point-measurement`, paper
@@ -768,7 +602,7 @@ private theorem expObs_eq_sum_expPointOp (S : ProjectiveSetting P ε)
       intro x hx
       apply Finset.sum_congr rfl
       intro y hy
-      rw [smul_smul, fixedCharacter_mul_add]
+      rw [smul_smul, phaseSign_fixedBinTrace_mul_add]
     _ = ∑ a, ∑ p ∈ Finset.univ.filter
           (fun p : PauliScalar P × PauliScalar P => p.1 + p.2 = a),
         phaseSign (fixedBinTrace P.model ((p.1 + p.2) * r)) •
@@ -795,11 +629,6 @@ private theorem expObs_eq_sum_expPointOp (S : ProjectiveSetting P ε)
       apply Finset.sum_congr rfl
       intro a ha
       rw [expPointOp_eq_convolution]
-
-private theorem zmod_two_eq_zero_or_one (b : ZMod 2) : b = 0 ∨ b = 1 := by
-  fin_cases b
-  · exact Or.inl rfl
-  · exact Or.inr rfl
 
 /-- A binary coarse-graining is the spectral effect of its signed observable. -/
 private theorem postprocess_binary_effect_eq_half_add

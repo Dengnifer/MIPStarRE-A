@@ -612,6 +612,48 @@ $\{M^{(\mathrm{Point},W),u}_a\}_{a \in \F_q}$ for all $u \in \F_q^m$.
 	$M^{(\mathrm{Point},W),u}_a$ denotes.
 \end{definition}
 
+\begin{lemma}[Multiplication of point observables]
+\label{lem:point-observable-multiplication}
+\lean{MIPStarRE.QPBT.ProjectiveSetting.pointObs_mul}
+\lean{MIPStarRE.QPBT.ProjectiveSetting.pointObs_zero}
+\lean{MIPStarRE.QPBT.ProjectiveSetting.pointMeas_isProjective}
+\leanok
+\uses{def:strategy-observables}
+For a projective strategy, the answer-folded point measurement is projective.
+For either player, fixed $W$ and $u$, and all $r,s\in\F_q$, its observables satisfy
+\[
+W^r(u)W^s(u)=W^{r+s}(u),\qquad W^0(u)=\Id.
+\]
+These are formalization-only consequences of Equation~\eqref{eq:qld-strat-obs}.
+\end{lemma}
+\begin{proof}
+\leanok
+Answer folding preserves projectivity by summing orthogonal projections.
+Expanding the product of the two observable sums, orthogonality eliminates
+unequal outcomes, and additivity of the trace combines the two phase factors.
+At $r=0$, completeness of the point measurement gives the identity.
+\end{proof}
+
+\begin{lemma}[Averaging scalar multiples of an operator]
+\label{lem:operator-average-scalar-constant}
+\lean{MIPStarRE.LDT.averageOperatorOverDistribution_smul_const}
+\leanok
+Let $D$ be a finite-support distribution on a type $T$, with weights $w(t)$,
+let $c:T\to\mathbb C$, and let $A$ be a fixed finite-dimensional operator.
+Then
+\[
+\sum_{t\in\operatorname{supp}(D)} w(t)\bigl(c(t)A\bigr)
+=\left(\sum_{t\in\operatorname{supp}(D)}w(t)c(t)\right)A.
+\]
+This formalization-only identity supplies the scalar averaging rule used in
+Fourier inversion for expanded point effects.
+\end{lemma}
+\begin{proof}
+\leanok
+Use compatibility of real and complex scalar multiplication and distribute
+scalar multiplication over the finite sum.
+\end{proof}
+
 The observable $W^r(u)$ is the candidate for the generalized Pauli
 observable $\tau^W(r \cdot \mathrm{ind}_m(u))$ that the analysis eventually
 extracts from the strategy.

@@ -39,61 +39,6 @@ variable {K : Type*} [Field K] [Fintype K] [DecidableEq K] [Algebra (ZMod 2) K]
 
 /-! ## The Pauli basis is a complete projective measurement -/
 
-omit [Field K] [Fintype K] [Algebra (ZMod 2) K] in
-/-- Formalization-only: a product of coordinate indicators is the indicator of
-equality of the two tuples. -/
-private theorem prod_indicator_eq_one_apply {ι : Type*} [Fintype ι]
-    (x y : ι → K) :
-    (∏ _i : ι, (if x _i = y _i then (1 : ℂ) else 0)) = if x = y then 1 else 0 := by
-  by_cases h : x = y
-  · subst h
-    simp
-  · rw [if_neg h]
-    obtain ⟨i, hi⟩ := Function.ne_iff.mp h
-    exact Finset.prod_eq_zero (Finset.mem_univ i) (if_neg hi)
-
-omit [Fintype K] in
-/-- The generalized Pauli observable at the zero label is the identity, for
-either Pauli kind.  `def:generalized-pauli`, blueprint
-`ch11_qpbt_algebra.tex:529-571`. -/
-theorem tauObservable_zero {ι : Type*} [Fintype ι] [DecidableEq ι] (W : PauliKind) :
-    tauObservable (K := K) W (0 : ι → K) = 1 := by
-  ext x y
-  rw [Matrix.one_apply, ← prod_indicator_eq_one_apply (K := K) x y]
-  simp only [tauObservable]
-  cases W <;>
-    exact Finset.prod_congr rfl fun i _ => by
-      simp [tauShift, tauPhase, phaseSign]
-
-/-- The Pauli basis projectors of one kind sum to the identity: they are the
-effects of a complete measurement.  This is the Fourier expansion
-`tauObservable_eq_sum_pauliProj` of `lem:pauli-observable-expansion` at the zero
-label, blueprint `ch11_qpbt_algebra.tex:674-688`, paper
-`references/qpbt-paper/04_preliminaries.tex:1151-1161`. -/
-theorem sum_pauliProj_eq_one {ι : Type*} [Fintype ι] [DecidableEq ι] (W : PauliKind) :
-    (∑ e : ι → K, pauliProj W e) = 1 := by
-  have h := tauObservable_eq_sum_pauliProj (K := K) W (0 : ι → K)
-  rw [tauObservable_zero] at h
-  rw [h]
-  refine Finset.sum_congr rfl fun e _ => ?_
-  have hzero : dotProduct (0 : ι → K) e = 0 := by
-    simp [dotProduct]
-  rw [hzero]
-  simp [phaseSign]
-
-/-- Each Pauli basis projector is positive semidefinite: it is the rank-one
-outer product of the normalized Pauli eigenvector with itself. -/
-theorem posSemidef_pauliProj {ι : Type*} [Fintype ι] [DecidableEq ι]
-    (W : PauliKind) (e : ι → K) : (pauliProj W e).PosSemidef := by
-  set A : Matrix Unit (ι → K) ℂ :=
-    Matrix.of (fun (_ : Unit) (x : ι → K) => star (pauliVec W e x)) with hA
-  have h : pauliProj W e = Aᴴ * A := by
-    ext x y
-    rw [Matrix.mul_apply]
-    simp [hA, pauliProj, Matrix.vecMulVec_apply, Matrix.conjTranspose_apply]
-  rw [h]
-  exact Matrix.posSemidef_conjTranspose_mul_self A
-
 /-! ## Marginals of the Pauli basis -/
 
 /-- A marginal of the Pauli basis projectors, over any set of labels, is
