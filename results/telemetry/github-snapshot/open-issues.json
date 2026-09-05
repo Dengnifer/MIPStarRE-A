@@ -912,8 +912,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 8,
-   "completed": 4,
-   "percent_completed": 50
+   "completed": 5,
+   "percent_completed": 62
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
   "issue_dependencies_summary": {
@@ -1463,7 +1463,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/167",
   "issue_dependencies_summary": {
-   "blocked_by": 2,
+   "blocked_by": 1,
    "total_blocked_by": 3,
    "blocking": 1,
    "total_blocking": 1
@@ -1803,7 +1803,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/165",
   "issue_dependencies_summary": {
-   "blocked_by": 2,
+   "blocked_by": 1,
    "total_blocked_by": 5,
    "blocking": 2,
    "total_blocking": 4
@@ -1823,91 +1823,6 @@
    "eyes": 0
   },
   "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/115/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/114",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/114/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/114/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/114/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/114",
-  "id": 5345139972,
-  "node_id": "I_kwDOUJyJf88AAAABPphdBA",
-  "number": 114,
-  "title": "feat(QPBT/Observables): prove expanded point operators",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-04T06:45:58Z",
-  "updated_at": "2026-09-04T12:03:21Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/165",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 1,
-   "blocking": 2,
-   "total_blocking": 2
-  },
-  "body": "<!-- mipstarre-issue-key: stage43-unfiled-observables-expanded-points -->\n### Target declarations\n\n- `MIPStarRE/QPBT/Observables/ExpandedDefs.lean:169` \u2014 `expPointOp_nonneg`\n- `MIPStarRE/QPBT/Observables/ExpandedDefs.lean:177` \u2014 `expPointOp_sum_eq_one`\n- `MIPStarRE/QPBT/Observables/ExpandedDefs.lean:201` \u2014 `expPointOp_eq_convolution`\n- `MIPStarRE/QPBT/Observables/ExpandedDefs.lean:209` \u2014 `pointMeasExp_isProjective`\n- `MIPStarRE/QPBT/Observables/ExpandedDefs.lean:229` \u2014 `expPointTrace_eq_half_add`\n\n### Paper and blueprint references\n\n- Expanded state, observables, measurements, and trace projection:\n  `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:364-418`.\n- `blueprint/src/chapter/ch14_qpbt_observables.tex:803-913`,\n  definitions `def:expanded-state` through\n  `def:expanded-point-trace-projection`.\n\n### Dependencies\n\n- #111 must merge for the underlying projective point measurements.\n- #64 and #68 must merge for axiom-clean binary Pauli projector and observable identities.\n- This packet has exclusive ownership of `ExpandedDefs.lean`.\n\n### Acceptance\n\n- All five target declarations are proved with unchanged signatures.\n- `lake env lean MIPStarRE/QPBT/Observables/ExpandedDefs.lean` and direct consumers are green.\n- Every fully discharged source definition/lemma receives proof-level\n  `\\leanok` according to the blueprint status convention.\n- No new `sorry`, `admit`, axiom, prohibited bypass, register-identification\n  assumption, or altered convolution is introduced.\n- Full build, declaration checking, blueprint rendering, exact-head CI, and\n  independent review pass.\n\n### Scope notes\n\nOwn only `ExpandedDefs.lean` and matching proof status. Preserve all six\nregister placements, heterogeneous player spaces, the fixed field basis, and\nthe exact half-plus-trace formula. Main locators are from `c1c0af4`.\n\n---\nStage 4.3 proof packet under #47.\n\nPrerequisites are recorded as GitHub issue dependencies (blocked_by); the bullets above are commentary.\n",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/114/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/114/timeline",
   "performed_via_github_app": null,
   "state_reason": null,
   "pinned_comment": null
