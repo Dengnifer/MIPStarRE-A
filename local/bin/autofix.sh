@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 #
 # autofix.sh — serialized, capped auto-fix loop for a local PR.
+# Account routing passes MIPSTARRE_CODEX_ACCOUNT, MIPSTARRE_ACCOUNT_WAIT and
+# MIPSTARRE_CODEX_HOME_SECOND through unchanged to dispatch.sh.
 #
 # Usage:
 #   local/bin/autofix.sh <pr-id> --mode {ci|blueprint|review|auto} [--dry-run]

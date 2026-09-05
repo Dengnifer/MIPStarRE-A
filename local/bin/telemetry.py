@@ -357,6 +357,7 @@ def session_record(
     capture: str | None,
     rollout: str | None,
     model: str | None = None,
+    account: str | None = None,
 ) -> dict[str, Any]:
     record: dict[str, Any] = {
         "name": name,
@@ -364,6 +365,8 @@ def session_record(
     }
     if model:
         record["model"] = model
+    if account:
+        record["account"] = account
     record["issue"] = issue
     if pr:
         record["pr"] = pr
@@ -577,6 +580,7 @@ def cmd_session_summarize(args: argparse.Namespace) -> int:
         name=name,
         role=role,
         model=args.model,
+        account=args.account,
         issue=args.issue,
         pr=args.pr,
         thread_id=thread_id,
@@ -739,6 +743,7 @@ def _build_parser() -> argparse.ArgumentParser:
     summarize.add_argument("--name", help="session name (default: capture file stem)")
     summarize.add_argument("--role", choices=ROLES, help="agent role")
     summarize.add_argument("--model", help="explicitly selected Codex model")
+    summarize.add_argument("--account", choices=("primary", "second"))
     summarize.add_argument("--issue", help="issue id or scope this session serves")
     summarize.add_argument("--pr", help="PR id, when the session works on one")
     summarize.add_argument("--start", help="ISO-8601 start timestamp with offset")
