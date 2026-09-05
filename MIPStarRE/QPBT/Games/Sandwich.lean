@@ -1,16 +1,16 @@
 import MIPStarRE.QPBT.Games.Sandwich.Quantitative
+import MIPStarRE.QPBT.Games.ErrorFunctions
 
 /-! # Sandwiched measurements and pasting
 
-This module collects the ordered palindromic products used to combine
-measurements and the two quantitative consistency statements imported by the
-QPBT analysis: the sandwiched simultaneous-measurement estimate and the
-two-measurement pasting estimate.
+This module records the ordered palindromic products used to combine
+measurements and the two quantitative consistency statements used in the QPBT
+analysis.
 
 ## References
 
 The source results are `lem:ld-sandwich` and `lem:pasting` in
-`blueprint/src/chapter/ch12_qpbt_games.tex:454-546`, with paper origin
+`blueprint/src/chapter/ch12_qpbt_games.tex:469-1004`, with paper origin
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:465-525`.
 -/
 
@@ -24,7 +24,7 @@ open DistanceCalculus
 
 /-- The palindromic effects form a POVM when each constituent measurement is
 projective. This is `lem:ld-sandwich-measurement`, the measurement assertion
-implicit in `lem:ld-sandwich`; blueprint `ch12_qpbt_games.tex:489-507`, paper
+implicit in `lem:ld-sandwich`; blueprint `ch12_qpbt_games.tex:548-568`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:484-494`. -/
 theorem sandwichProduct_isMeasurement {k : ℕ} {X ι : Type*}
     [Fintype ι] [DecidableEq ι] {Γ : Fin k → Type*}
@@ -34,12 +34,12 @@ theorem sandwichProduct_isMeasurement {k : ℕ} {X ι : Type*}
       0 ≤ sandwichProduct (fun i x' a => (G i x').effect a) x g) ∧
       (∑ g : (i : Fin k) → Γ i,
         sandwichProduct (fun i x' a => (G i x').effect a) x g) = 1 := by
-  exact SandwichInternal.sandwichProduct_isMeasurement G hG x
+  exact SandwichProduct.sandwichProduct_isMeasurement G hG x
 
 /-- The sandwiched simultaneous-measurement estimate of `lem:ld-sandwich`.
 One universal asymptotic constant applies independently of the distribution,
 measurements, state, and error parameters. Blueprint
-`ch12_qpbt_games.tex:454-480`, paper
+`ch12_qpbt_games.tex:469-496`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:465-501`. -/
 theorem consistencyDefect_sandwich_le :
     ∃ C₀ : ℝ, 1 ≤ C₀ ∧
@@ -71,11 +71,11 @@ theorem consistencyDefect_sandwich_le :
           if evalFunctionTuple eval xy.2 g = a then
             sandwichProduct (fun i x h => (G i x).effect h) xy.1 g else 0)) ψ ≤
         C₀ * (k : ℝ) * Real.sqrt (δ + ε) := by
-  exact SandwichInternal.consistencyDefect_sandwich_le
+  exact SandwichProduct.consistencyDefect_sandwich_le
 
 /-- The effects obtained by sandwiching one measurement with a projective
 measurement form a POVM. This is `lem:pasting-measurement`, the measurement
-assertion for `eq:pasting-2a`; blueprint `ch12_qpbt_games.tex:548-567`, paper
+assertion for `eq:pasting-2a`; blueprint `ch12_qpbt_games.tex:986-1004`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:514-524`. -/
 theorem pastedMeasurement_isMeasurement {Γ₁ Γ₂ ι : Type*}
     [Fintype Γ₁] [Fintype Γ₂] [Fintype ι] [DecidableEq ι]
@@ -113,11 +113,11 @@ theorem pastedMeasurement_isMeasurement {Γ₁ Γ₂ ι : Type*}
 
 /-- Pasting two consistent measurements yields a product-form polynomial
 error. All operator families in the conclusion are the postprocessed source
-families. This is `lem:pasting`, blueprint `ch12_qpbt_games.tex:517-546`, paper
+families. This is `lem:pasting`, blueprint `ch12_qpbt_games.tex:954-979`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:504-525`.
 
-**Unfaithful:** This source-shaped declaration remains admitted because the
-current product-form predicate `IsPolyErr₂` makes the cited assertion false.
+**Unfaithful:** The product-form predicate `IsPolyErr₂` is incompatible with
+the cited assertion.
 For every fixed `0 < δ < 1`, a two-dimensional correlated strategy can have
 pasting defect `δ` for every `η > 0`, whereas `IsPolyErr₂ δp` forces
 `δp η δ` to tend to zero with `η`. This is documented in

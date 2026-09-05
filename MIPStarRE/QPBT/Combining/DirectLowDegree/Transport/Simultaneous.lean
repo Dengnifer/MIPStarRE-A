@@ -125,7 +125,7 @@ noncomputable def directSandwichPolynomialMeasurement
     (G : Fin D.k → PolyMeas D.m (DirectScalarQ D) D.d iota)
     (hG : ∀ r, Measurement.IsProjective (G r)) :
     DirectPolyMeasTuple D iota := by
-  let hmeasurement := sandwichProduct_isMeasurement
+  let hmeasurement := SandwichProduct.sandwichProduct_isMeasurement
     (G := fun r (_ : Unit) => G r) (hG := fun r (_ : Unit) => hG r) ()
   exact Quantum.Measurement.ofSumEqOne
     (fun g => sandwichProduct (fun r (_ : Unit) h => (G r).effect h) () g)

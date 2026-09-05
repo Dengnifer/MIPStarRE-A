@@ -42,14 +42,6 @@ noncomputable section
 
 /-! ## Contractions and their action on states -/
 
-/-- Applying a product of operators is successive application. -/
-theorem applyOperatorToState_mul {ι : Type*} [Fintype ι] [DecidableEq ι]
-    (M N : Op ι) (v : EuclideanSpace ℂ ι) :
-    applyOperatorToState (M * N) v =
-      applyOperatorToState M (applyOperatorToState N v) := by
-  unfold applyOperatorToState
-  simp [Matrix.toEuclideanLin, Matrix.toLpLin_mul_same]
-
 /-- The identity acts trivially. -/
 theorem applyOperatorToState_one {ι : Type*} [Fintype ι] [DecidableEq ι]
     (v : EuclideanSpace ℂ ι) :
@@ -245,22 +237,19 @@ theorem heteroKron_sub_right {ιA ιB : Type*} (A : Op ιA) (B C : Op ιB) :
   ext p q
   simp [heteroKron, Matrix.kronecker, mul_sub]
 
-/-- The finite-sum tensor identity in the left factor, obtained from the
-shared state-dependent distance calculus. -/
+/-- Tensor placement distributes over a finite sum in the left factor. -/
 theorem heteroKron_finset_sum_left {β ιA ιB : Type*} (s : Finset β)
     (A : β → Op ιA) (C : Op ιB) :
     heteroKron (∑ b ∈ s, A b) C = ∑ b ∈ s, heteroKron (A b) C :=
   DistanceCalculus.heteroKron_finset_sum_left s A C
 
-/-- The finite-sum tensor identity in the right factor, obtained from the
-shared state-dependent distance calculus. -/
+/-- Tensor placement distributes over a finite sum in the right factor. -/
 theorem heteroKron_finset_sum_right {β ιA ιB : Type*} (s : Finset β)
     (A : Op ιA) (C : β → Op ιB) :
     heteroKron A (∑ b ∈ s, C b) = ∑ b ∈ s, heteroKron A (C b) :=
   DistanceCalculus.heteroKron_finset_sum_right s A C
 
-/-- Additivity of the state quadratic form over finite sums, obtained from the
-shared state-dependent distance calculus. -/
+/-- The state quadratic form is additive over finite sums. -/
 theorem stateQForm_finset_sum {β ι : Type*} [Fintype ι] [DecidableEq ι]
     (ψ : EuclideanSpace ℂ ι) (s : Finset β) (M : β → Op ι) :
     stateQForm ψ (∑ b ∈ s, M b) = ∑ b ∈ s, stateQForm ψ (M b) :=

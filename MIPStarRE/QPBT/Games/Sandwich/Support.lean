@@ -1,3 +1,4 @@
+import MIPStarRE.QPBT.Games.DistanceTheorems
 import MIPStarRE.QPBT.Games.Sandwich.Defs
 
 /-! # Quantitative support for sandwiched measurements
@@ -7,7 +8,7 @@ in the quantitative sandwich argument.
 
 ## References
 
-Blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:454-507`; paper
+Blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:469-568`; paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:465-501`.
 -/
 
@@ -19,10 +20,12 @@ open MIPStarRE.LDT hiding Measurement
 open MIPStarRE.Quantum
 open DistanceCalculus
 
-namespace SandwichInternal
+namespace SandwichProduct
 
 /-- Averaging over the product of two finite distributions is iterated
-averaging. -/
+averaging. This is the formalization-only identity
+`lem:sandwich-product-average` used in the proof of `lem:ld-sandwich`; detailed
+source argument `references/neexp-paper/05_quantum_preliminaries.tex:952-994`. -/
 theorem avgOver_distribution_prod {X Y : Type*}
     [DecidableEq X] [DecidableEq Y] (μ : Distribution X) (ν : Distribution Y)
     (f : X × Y → ℝ) :
@@ -47,7 +50,10 @@ theorem avgOver_distribution_prod {X Y : Type*}
       ring
 
 /-- The diagonal overlap after a common relabeling is the sum over pairs of
-original outcomes with equal labels. -/
+original outcomes with equal labels. This is the formalization-only identity
+`lem:sandwich-diagonal-postprocess` used in the proof of `lem:ld-sandwich`;
+detailed source argument
+`references/neexp-paper/05_quantum_preliminaries.tex:952-994`. -/
 theorem diagonal_postprocess_stateQForm_eq_pair_sum
     {α β ιA ιB : Type*} [Fintype α] [DecidableEq α]
     [Fintype β] [DecidableEq β]
@@ -92,7 +98,10 @@ theorem diagonal_postprocess_stateQForm_eq_pair_sum
     simp [haa']
 
 /-- The consistency defect of tensor-placed local measurements is the average
-of their pointwise off-diagonal tensor overlap. -/
+of their pointwise off-diagonal tensor overlap. This is the formalization-only
+identity `lem:sandwich-placed-defect-expansion` used in the proof of
+`lem:ld-sandwich`; detailed source argument
+`references/neexp-paper/05_quantum_preliminaries.tex:952-994`. -/
 theorem consistencyDefect_placed_eq_avg_point
     {X α ιA ιB : Type*}
     [Fintype X] [DecidableEq X] [Fintype α] [DecidableEq α]
@@ -117,8 +126,12 @@ theorem consistencyDefect_placed_eq_avg_point
     rw [consistency_term_eq_stateQForm, placed_product_stateQForm_eq]
 
 set_option maxHeartbeats 600000 in
+-- The collision estimate expands two nested outcome sums at each evaluation point.
 /-- Averaged diagonal overlap after evaluation exceeds the original diagonal
-overlap by at most the collision probability. -/
+overlap by at most the collision probability. This is the formalization-only
+estimate `lem:sandwich-evaluated-diagonal-overlap` used in the proof of
+`lem:ld-sandwich`; detailed source argument
+`references/neexp-paper/05_quantum_preliminaries.tex:975-987`. -/
 theorem avg_diagonal_postprocess_stateQForm_le
     {Y Γ R ιA ιB : Type*}
     [Fintype Y] [DecidableEq Y] [Nonempty Y]
@@ -241,8 +254,12 @@ theorem avg_diagonal_postprocess_stateQForm_le
       simpa using mul_le_mul_of_nonneg_left hoffdiag_le_one hε
 
 set_option maxHeartbeats 600000 in
+-- Complementary overlaps require simultaneous expansions before averaging.
 /-- Taking complements converts the diagonal-overlap estimate into a
-pointwise consistency-defect estimate. -/
+pointwise consistency-defect estimate. This is the formalization-only estimate
+`lem:sandwich-point-codeword-defect` used in the proof of `lem:ld-sandwich`;
+detailed source argument
+`references/neexp-paper/05_quantum_preliminaries.tex:975-987`. -/
 theorem point_codeword_defect_le_avg_evaluated_add
     {Y Γ R ιA ιB : Type*}
     [Fintype Y] [DecidableEq Y] [Nonempty Y]
@@ -297,9 +314,13 @@ theorem point_codeword_defect_le_avg_evaluated_add
   linarith
 
 set_option maxHeartbeats 600000 in
+-- The proof rearranges question, evaluation, and two outcome sums.
 /-- If distinct codewords collide under a random evaluation with probability
 at most `ε`, their full-outcome consistency defect is at most the evaluated
-defect plus `ε`. -/
+defect plus `ε`. This is the formalization-only estimate
+`lem:sandwich-codeword-defect` for the first step of `lem:ld-sandwich`;
+detailed source argument
+`references/neexp-paper/05_quantum_preliminaries.tex:975-987`. -/
 theorem consistencyDefect_codewords_le_evaluated_add
     {X Y Γ R ιA ιB : Type*}
     [Fintype X] [DecidableEq X] [Fintype Y] [DecidableEq Y] [Nonempty Y]
@@ -364,8 +385,12 @@ theorem consistencyDefect_codewords_le_evaluated_add
     _ = _ := by rw [avgOver_const_of_isProbability μ hμ]
 
 set_option maxHeartbeats 600000 in
+-- The relabeling argument compares two nested outcome sums at every sample.
 /-- Averaging the fixed-map data-processing inequality over an independent
-random relabeling preserves its bound. -/
+random relabeling preserves its bound. This is the formalization-only estimate
+`lem:sandwich-random-postprocess` for the last step of `lem:ld-sandwich`;
+detailed source argument
+`references/neexp-paper/05_quantum_preliminaries.tex:988-994`. -/
 theorem consistencyDefect_prod_postprocess_le
     {X Y α β ιA ιB : Type*}
     [Fintype X] [DecidableEq X] [Fintype Y] [DecidableEq Y] [Nonempty Y]
@@ -408,7 +433,10 @@ theorem consistencyDefect_prod_postprocess_le
     _ = _ := avgOver_uniform_const _
 
 /-- The square root of the average squared operator distance satisfies the
-ordinary triangle inequality. -/
+ordinary triangle inequality. This is the formalization-only estimate
+`lem:sandwich-root-distance-triangle` used for the repeated replacements in
+`lem:ld-sandwich`; detailed source argument
+`references/neexp-paper/05_quantum_preliminaries.tex:930-946`. -/
 theorem sqrt_opFamilyDistSq_triangle {X α ι : Type*}
     [Fintype α] [Fintype ι] [DecidableEq ι]
     (μ : Distribution X) (A B C : X → α → Op ι)
@@ -493,7 +521,10 @@ theorem sqrt_opFamilyDistSq_triangle {X α ι : Type*}
       rw [abs_of_nonneg (add_nonneg (Real.sqrt_nonneg _) (Real.sqrt_nonneg _))]
 
 /-- Coarsening the outcomes of a projective measurement preserves
-projectivity. -/
+projectivity. This is the formalization-only fact
+`lem:sandwich-postprocess-projective` used in the palindromic construction of
+`lem:ld-sandwich`; detailed source argument
+`references/neexp-paper/05_quantum_preliminaries.tex:930-946`. -/
 theorem postprocess_isProjective {α β ι : Type*}
     [Fintype α] [DecidableEq α] [Fintype β] [DecidableEq β]
     [Fintype ι] [DecidableEq ι]
@@ -533,7 +564,10 @@ theorem postprocess_isProjective {α β ι : Type*}
       (Matrix.nonneg_iff_posSemidef.mp ((M.postprocess f).pos b)).isHermitian.eq
 
 /-- Performing two outcome relabelings has the same effects as their
-composition. -/
+composition. This is the formalization-only identity
+`lem:sandwich-postprocess-compose` used to align the coordinate marginals in
+`lem:ld-sandwich`; detailed source argument
+`references/neexp-paper/05_quantum_preliminaries.tex:952-994`. -/
 theorem postprocess_postprocess_effect {α β γ ι : Type*}
     [Fintype α] [DecidableEq α] [Fintype β] [DecidableEq β]
     [Fintype γ] [DecidableEq γ] [Fintype ι] [DecidableEq ι]
@@ -571,7 +605,10 @@ theorem postprocess_postprocess_effect {α β γ ι : Type*}
     _ = ∑ a : α, if g (f a) = c then M.effect a else 0 := rfl
 
 /-- An injective relabeling does not merge the effect at a relabeled
-outcome. -/
+outcome. This is the formalization-only identity
+`lem:sandwich-injective-postprocess` used to identify product outcomes in
+`lem:ld-sandwich`; detailed source argument
+`references/neexp-paper/05_quantum_preliminaries.tex:930-946`. -/
 theorem postprocess_effect_of_injective {α β ι : Type*}
     [Fintype α] [DecidableEq α] [Fintype β] [DecidableEq β]
     [Fintype ι] [DecidableEq ι]
@@ -584,25 +621,11 @@ theorem postprocess_effect_of_injective {α β ι : Type*}
     rw [if_neg]
     exact fun h => hza (hf h)
 
-/-- The squared effects of a POVM sum to at most the identity. -/
-theorem measurement_sum_adjoint_mul_le_one {α ι : Type*}
-    [Fintype α] [Fintype ι] [DecidableEq ι] (M : Measurement α ι) :
-    ∑ a : α, (M.effect a)ᴴ * M.effect a ≤ 1 := by
-  calc
-    ∑ a : α, (M.effect a)ᴴ * M.effect a =
-        ∑ a : α, M.effect a * M.effect a := by
-      apply Finset.sum_congr rfl
-      intro a _
-      rw [DistanceCalculus.measurement_effect_hermitian]
-    _ ≤ ∑ a : α, M.effect a := by
-      apply Finset.sum_le_sum
-      intro a _
-      exact MIPStarRE.Quantum.sq_le_self (M.pos a)
-        (DistanceCalculus.measurement_effect_le_one M a)
-    _ = 1 := M.sum_eq_one
-
 /-- The equal-outcome part of the tensor product of two POVMs is bounded by
-the identity. -/
+the identity. This is the formalization-only estimate
+`lem:sandwich-matched-tensor-sum` used in the joint-family comparison for
+`lem:ld-sandwich`; detailed source argument
+`references/neexp-paper/05_quantum_preliminaries.tex:930-946`. -/
 theorem matched_tensor_sum_le_one {α ιA ιB : Type*}
     [Fintype α] [Fintype ιA] [DecidableEq ιA]
     [Fintype ιB] [DecidableEq ιB]
@@ -629,7 +652,10 @@ theorem matched_tensor_sum_le_one {α ιA ιB : Type*}
         (Matrix.one_kronecker_one (m := ιA) (n := ιB) (α := ℂ)) i) j
 
 /-- Multiplying every effect of a POVM on the left by a fixed projective
-effect preserves square-summability. -/
+effect preserves square-summability. This is the formalization-only estimate
+`lem:sandwich-projective-multiplier-sum` used for an outer palindromic factor in
+`lem:ld-sandwich`; detailed source argument
+`references/neexp-paper/05_quantum_preliminaries.tex:930-946`. -/
 theorem projective_mul_measurement_sum_adjoint_mul_le_one
     {α ι : Type*} [Fintype α] [Fintype ι] [DecidableEq ι]
     (P : Op ι) (hP : IsProj P) (M : Measurement α ι) :
@@ -653,69 +679,13 @@ theorem projective_mul_measurement_sum_adjoint_mul_le_one
       intro a _
       simpa [Matrix.star_eq_conjTranspose] using
         star_left_conjugate_le_conjugate hP.le_one (M.effect a)
-    _ ≤ 1 := measurement_sum_adjoint_mul_le_one M
+    _ ≤ 1 := MIPStarRE.QPBT.measurement_sum_adjoint_mul_le_one M
 
-/-- Tensoring two projectors gives a projector on the product space. -/
-theorem heteroKron_isProj {ιA ιB : Type*}
-    [Fintype ιA] [Fintype ιB]
-    {P : Op ιA} {Q : Op ιB} (hP : IsProj P) (hQ : IsProj Q) :
-    IsProj (heteroKron P Q) := by
-  refine { isIdempotentElem := ?_, isSelfAdjoint := ?_ }
-  · change heteroKron P Q * heteroKron P Q = heteroKron P Q
-    rw [heteroKron_mul, hP.isIdempotentElem.eq, hQ.isIdempotentElem.eq]
-  · change (heteroKron P Q)ᴴ = heteroKron P Q
-    unfold heteroKron
-    simp only [Matrix.kronecker]
-    rw [Matrix.conjTranspose_kronecker, hP.isSelfAdjoint.isHermitian.eq,
-      hQ.isSelfAdjoint.isHermitian.eq]
-
-/-- The squared effects in one fiber of a pair-valued measurement sum to at
-most the identity. -/
-theorem measurement_pair_fiber_sum_adjoint_mul_le_one
-    {α β ι : Type*} [Fintype α] [Fintype β]
-    [Fintype ι] [DecidableEq ι]
-    (M : Measurement (α × β) ι) (a : α) :
-    ∑ b : β, (M.effect (a, b))ᴴ * M.effect (a, b) ≤ 1 := by
-  have hsquare (z : α × β) : (M.effect z)ᴴ * M.effect z ≤ M.effect z := by
-    rw [DistanceCalculus.measurement_effect_hermitian]
-    exact MIPStarRE.Quantum.sq_le_self (M.pos z)
-      (DistanceCalculus.measurement_effect_le_one M z)
-  calc
-    ∑ b : β, (M.effect (a, b))ᴴ * M.effect (a, b) ≤
-        ∑ b : β, M.effect (a, b) := by
-      exact Finset.sum_le_sum fun b _ => hsquare (a, b)
-    _ ≤ ∑ a' : α, ∑ b : β, M.effect (a', b) := by
-      exact Finset.single_le_sum
-        (fun a' _ => Finset.sum_nonneg fun b _ => M.pos (a', b))
-        (Finset.mem_univ a)
-    _ = ∑ z : α × β, M.effect z := (Fintype.sum_prod_type _).symm
-    _ = 1 := M.sum_eq_one
-
-/-- A projective joint effect is selected exactly by the matching
-postprocessing fiber. -/
-theorem postprocess_effect_mul_effect {α β ι : Type*}
-    [Fintype α] [DecidableEq α] [Fintype β] [DecidableEq β]
-    [Fintype ι] [DecidableEq ι]
-    (M : Measurement α ι) (hM : MIPStarRE.QPBT.Measurement.IsProjective M)
-    (f : α → β) (b : β) (a : α) :
-    (M.postprocess f).effect b * M.effect a =
-      if f a = b then M.effect a else 0 := by
-  classical
-  rw [MIPStarRE.Quantum.Measurement.postprocess_effect, Finset.sum_mul]
-  calc
-    (∑ z ∈ Finset.univ.filter (fun z => f z = b), M.effect z * M.effect a) =
-        ∑ z ∈ Finset.univ.filter (fun z => f z = b),
-          if z = a then M.effect a else 0 := by
-      apply Finset.sum_congr rfl
-      intro z _
-      by_cases hza : z = a
-      · subst z
-        simp [(hM a).isIdempotentElem.eq]
-      · rw [if_neg hza]
-        exact DistanceCalculus.projective_effect_mul_effect_eq_zero M hM hza
-    _ = if f a = b then M.effect a else 0 := by simp
-
-/-- Right-handed form of `postprocess_effect_mul_effect`. -/
+/-- A projective joint effect selects its matching postprocessing fiber when
+multiplied on the right. This is the formalization-only identity
+`lem:sandwich-postprocess-effect-right` used in the joint-family comparison for
+`lem:ld-sandwich`; detailed source argument
+`references/neexp-paper/05_quantum_preliminaries.tex:930-946`. -/
 theorem effect_mul_postprocess_effect {α β ι : Type*}
     [Fintype α] [DecidableEq α] [Fintype β] [DecidableEq β]
     [Fintype ι] [DecidableEq ι]
@@ -724,7 +694,7 @@ theorem effect_mul_postprocess_effect {α β ι : Type*}
     M.effect a * (M.postprocess f).effect b =
       if f a = b then M.effect a else 0 := by
   have h := congrArg Matrix.conjTranspose
-    (postprocess_effect_mul_effect M hM f b a)
+    (DistanceCalculus.postprocess_effect_mul_effect M hM f b a)
   rw [Matrix.conjTranspose_mul,
     DistanceCalculus.measurement_effect_hermitian M a,
     DistanceCalculus.measurement_effect_hermitian (M.postprocess f) b] at h
@@ -733,7 +703,10 @@ theorem effect_mul_postprocess_effect {α β ι : Type*}
   · simpa [hab] using h
 
 /-- Two compatible marginals of a joint projective measurement multiply to
-the unique joint effect in their common fiber. -/
+the unique joint effect in their common fiber. This is the formalization-only
+identity `lem:sandwich-joint-marginal-product` used in the palindromic insertion
+for `lem:ld-sandwich`; detailed source argument
+`references/neexp-paper/05_quantum_preliminaries.tex:930-946`. -/
 theorem postprocess_product_eq_effect {α β γ ι : Type*}
     [Fintype α] [DecidableEq α] [Fintype β] [DecidableEq β]
     [Fintype γ] [DecidableEq γ] [Fintype ι] [DecidableEq ι]
@@ -751,7 +724,7 @@ theorem postprocess_product_eq_effect {α β γ ι : Type*}
           if f z = f a then M.effect z else 0 := by
       apply Finset.sum_congr rfl
       intro z _
-      exact postprocess_effect_mul_effect M hM f (f a) z
+      exact DistanceCalculus.postprocess_effect_mul_effect M hM f (f a) z
     _ = M.effect a := by
       rw [Finset.sum_eq_single a]
       · simp
@@ -762,7 +735,10 @@ theorem postprocess_product_eq_effect {α β γ ι : Type*}
       · simp
 
 /-- Left multiplication contracts an operator-family distance when the
-multipliers are square-summable on every fiber of the outcome map. -/
+multipliers are square-summable on every fiber of the outcome map. This is the
+formalization-only estimate `lem:sandwich-fiber-contraction` used in each
+palindromic insertion for `lem:ld-sandwich`; detailed source argument
+`references/neexp-paper/05_quantum_preliminaries.tex:930-946`. -/
 theorem opFamilyDistSq_mul_fiber_le {X α Γ ι : Type*}
     [Fintype α] [DecidableEq α] [Fintype Γ] [Fintype ι] [DecidableEq ι]
     (μ : Distribution X) (A B : X → Measurement α ι)
@@ -829,6 +805,6 @@ theorem opFamilyDistSq_mul_fiber_le {X α Γ ι : Type*}
       by_cases hza : eval z x = a <;> simp [hza, applyOperatorToState]
     _ ≤ ‖applyOperatorToState ((A x).effect a - (B x).effect a) ψ‖ ^ 2 := hmul
 
-end SandwichInternal
+end SandwichProduct
 
 end MIPStarRE.QPBT
