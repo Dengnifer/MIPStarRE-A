@@ -42,7 +42,7 @@ def coordinateDirection {m : ℕ}
 
 /--
 `IsAxisParallel v` means that `v` is a standard coordinate direction.  This is
-the axis-parallel clause of `def:line` (blueprint lines 445-450; paper
+the axis-parallel clause of `def:line` (blueprint lines 464-478; paper
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:106-124`).
 -/
 def IsAxisParallel {m : ℕ} (v : Fin m → K) : Prop :=

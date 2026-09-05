@@ -491,3 +491,69 @@ Regression tests exercise both kinds of merge; ordinary commits are unchanged.
 **Expected effect:** fresh-base merges do not need the owner override solely for
 inherited main content; the budget keeps binding the PR's own changes, and the
 review reads the PR diff.
+
+## 2026-09-04 — Packet tree under #47; prerequisites become issue dependencies
+
+**Trigger:** owner decision on #159 (2026-09-04, after studying
+LionSR/MIPStarRE#449), and `results/telemetry/owner-log.md` 2026-09-04 07:25Z
+and 08:35Z, where lane order was carried by hand against tables kept in
+comments on #47 — "#125 (operator BLR, stacked on #124)", "Opus prover pilot
+started on #102 (stacked on #101)" — while #47 itself had grown to 50 flat
+sub-issues (19 closed) and two open packets (#146, #156) had no parent at all.
+
+**Change:** (1) five chapter trackers (#163 games, #164 test, #165 observables,
+#166 combining, #167 extraction) are now open sub-issues of #47. The 35 direct
+tracker children migrated then were #63, #77, #97-#99, #106-#121, #123-#125,
+#127-#135, #146 and #156; #77 retained its five nested rigidity packets #101-#105.
+Closed foundation packets such as #100, #122 and #126 remained direct children
+of #47, whose body became an index over its trackers.
+(2) Every open packet's prose prerequisites are transcribed into `blocked_by`
+issue dependencies (69 edges) and the bullets are demoted to commentary by a
+line in the body itself. (3) `local/bin/ready_packets.py` walks that tree and
+prints the open leaves whose blockers are all closed (`--all`, `--json`,
+`--root`), covered by `scripts/tests/test_ready_packets.py` against a fake API.
+(4) `issues-prs.md` §1 makes the edges normative and names the script as the
+launch list; `local/README.md` documents the command.
+
+**Expected effect:** the operator launches from a computed list instead of
+re-reading a comment; a merged packet unblocks its dependents with no edit
+anywhere; the rooted traversal reports the tracker hierarchy and its leaves.
+
+## 2026-09-04 — Supported prerequisite writes and complete readiness budgeting
+
+**Trigger:** `results/telemetry/events.md` 2026-09-04 15:12Z, recording issue
+#177 and the two workflow findings deferred from PR #171.
+
+**Change:** `gh_common.py` and `issues-prs.md` add the supported
+`add-blocked-by ISSUE PREREQUISITE` lifecycle command. It adopts an existing
+edge before writing and re-reads after an ambiguous POST. The pre-commit
+infrastructure budget now counts `scripts/tests/test_ready_packets.py`, with a
+hook-level regression that stages 401 lines at that path.
+
+**Expected effect:** operators can create the prerequisite record without an
+ad hoc GitHub mutation or a duplicate edge after retry, and future readiness
+test growth remains subject to the owner-gated 400-line episode budget.
+
+## 2026-09-05 — Branch-private Lake products may use a separate volume
+
+**Trigger:** `results/telemetry/events.md` 2026-09-05, issue #190 and PR #198.
+**Change:** `MIPSTARRE_LAKE_ROOT` uses `<root>/<branch>` for one-component branches;
+the helper rejects protected overlap and duplicate ownership, and dispatch grants its target.
+**Expected effect:** native relocation without cache corruption or leaked build data.
+
+## 2026-09-05 — Mathematical repair precedes owner escalation
+
+**Trigger:** `results/telemetry/owner-log.md` entries at 2026-09-04 22:35Z and
+23:05Z and the corresponding `results/telemetry/events.md` owner-rule entry;
+issue #208 records the confirmed defaults, and PR #209 reviews exposed missing
+launch and accounting guards.
+
+**Change:** `issues-prs.md` defines the bounded repair and escalation rule. The
+owner launches Fable 5.1; `dispatch.sh` enforces astra with ultra effort for the
+future Codex lane; the activation poller is archived under `owner-tools/`; and
+`meta.md` specifies owner-session accounting. The paper-gap policy points to
+the rule, and `local/README.md` points to the design-decisions register.
+
+**Expected effect:** the fleet resolves theorem-statement defects against their
+complete dependency graph, while #26 receives only definition/game decisions or
+an evidence-backed nonconvergence packet after the shared budget is exhausted.

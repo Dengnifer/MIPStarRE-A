@@ -9,7 +9,7 @@ export MAX_CODEX="${MAX_CODEX:-7}"
 export PATH="$HOME/.cache/mipstarre-dev/owner-bin:$HOME/.local/bin:$HOME/.elan/bin:$PATH"
 L=$HOME/.cache/mipstarre-dev/watchdog/lanes; D=$HOME/.cache/mipstarre-dev/watchdog/daemon; mkdir -p "$D"
 cd "$HOME/MIPStarRE-qpbt" || exit 1
-ADJ=" 92 42 79 "
+ADJ=" $(cat "$D/adj-list" 2>/dev/null || echo 92 42 79) "
 PAR=4
 log() { echo "== $(date -u +%FT%TZ) $*"; }
 status_of() { gh api "repos/Dengnifer/MIPStarRE-A/commits/$1/status" --jq '[.statuses[] | select(.context|endswith("summary")) | .context[6:]+"="+.state]|join(" ")'; }
@@ -21,7 +21,7 @@ refresh() { # PR N BR SLUG MODE
     git -C "$W" checkout github/main -- .githooks/pre-commit && git -C "$W" commit -qm "chore(hooks): take the merge-budget exemption from main"
   fi
   rm -f "$L/$N.done" "$L/$N.needs-attention"
-  LANE_BRANCH=$BR SKIP_DISPATCH=1 bash /tmp/lane-v10.sh "$N" "$SLUG" prover > "$L/$N.lane.log" 2>&1
+  LANE_BRANCH=$BR SKIP_DISPATCH=1 bash /tmp/lane-v12.sh "$N" "$SLUG" prover > "$L/$N.lane.log" 2>&1
   [ -e "$L/$N.done" ] || { log "refresh failed for PR $PR"; tail -2 "$L/$N.lane.log"; touch "$D/pr$PR.failed"; return 1; }
 }
 while true; do

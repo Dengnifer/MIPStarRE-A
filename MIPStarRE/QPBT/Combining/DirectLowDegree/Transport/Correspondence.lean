@@ -4,9 +4,9 @@ import MIPStarRE.QPBT.Combining.DirectLowDegree.Game
 /-!
 # Question correspondence for the directly indexed low-degree game
 
-This module identifies the finite-field coordinates, polynomial answers, and
-question law of the directly indexed game with their seed-indexed and mature
-low individual degree counterparts.
+The finite-field coordinates, polynomial answers, and question law of the
+directly indexed game are equivalent to their seed-indexed and low individual
+degree counterparts.
 
 ## References
 
@@ -26,7 +26,7 @@ noncomputable section
 
 /-! ## Parameters and finite-field coordinates -/
 
-/-- Regard direct-game parameters as parameters of the mature LDT interface.
+/-- Regard direct-game parameters as low individual degree test parameters.
 The field size, dimension, and degree are unchanged. -/
 @[reducible] def DirectLdParams.toLDTParameters (D : DirectLdParams) : Parameters where
   m := D.m
@@ -41,24 +41,25 @@ The field size, dimension, and degree are unchanged. -/
     obtain ⟨n, hn, hq⟩ := D.hq
     exact ⟨2, n, Nat.prime_two, hn.pos, hq⟩
 
-/-- The fixed QPBT field model, viewed as the model used by the mature LDT
-interface. -/
+/-- The fixed QPBT field model, viewed as the field model of the low
+individual degree test. -/
 @[reducible] noncomputable def DirectLdParams.toLDTFieldModel (D : DirectLdParams) :
     FieldModel D.toLDTParameters.q :=
   D.model.toFieldModel
 
-/-- Coordinate coding from the direct scalar field to the mature LDT carrier. -/
+/-- Coordinate coding from the direct scalar field to the LDT carrier. -/
 noncomputable def directScalarEquiv (D : DirectLdParams) :
     DirectScalarQ D ≃ Fq D.toLDTParameters :=
   binaryRepresentation D.model
 
-/-- Coordinate coding identifies direct points with mature LDT points, with
-the coordinate order reversed: direct coordinate `j` is mature coordinate
+/-- Coordinate coding identifies direct points with LDT points, with the
+coordinate order reversed: direct coordinate `j` is LDT coordinate
 `Fin.rev j`.  The direct game zeroes a *prefix* of a sampled diagonal
 direction (`directPrefixProjection`, paper equation `eq:cl-dlnf`), whereas
-the mature test zeroes a *suffix* (`extendRestrictedDirection`,
-`references/ldt-paper/test_definition.tex:49-65`).  Reversing the coordinate
-order aligns the two restriction conventions, as required by the game
+the low individual degree test zeroes a *suffix*
+(`extendRestrictedDirection`, `references/ldt-paper/test_definition.tex:49-65`).
+Reversing the coordinate order aligns the two restriction conventions, as
+required by the game
 correspondence in `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`. -/
 noncomputable def directPointEquiv (D : DirectLdParams) :
     (Fin D.m → DirectScalarQ D) ≃ Point D.toLDTParameters where
@@ -114,7 +115,7 @@ private theorem coefficientPolynomial_eval
     (Polynomial.eval_eq_sum_degreeLTEquiv
       (((Polynomial.degreeLTEquiv K (n + 1)).symm c).2) t)
 
-/-- Direct axis-line coefficients are equivalent to mature bounded axis-line
+/-- Direct axis-line coefficients are equivalent to LDT bounded axis-line
 polynomials over the fixed field model. -/
 noncomputable def directAxisAnswerEquiv (D : DirectLdParams) :
     letI := D.toLDTFieldModel
@@ -138,7 +139,7 @@ noncomputable def directAxisAnswerEquiv (D : DirectLdParams) :
     intro i
     exact coefficientPolynomial_coeff D.d (fun j => f.poly.coeff j) i
 
-/-- Direct diagonal-line coefficients are equivalent to mature bounded
+/-- Direct diagonal-line coefficients are equivalent to LDT bounded
 diagonal-line polynomials over the fixed field model. -/
 noncomputable def directDiagonalAnswerEquiv (D : DirectLdParams) :
     letI := D.toLDTFieldModel
@@ -162,7 +163,7 @@ noncomputable def directDiagonalAnswerEquiv (D : DirectLdParams) :
     intro i
     exact coefficientPolynomial_coeff (D.m * D.d) (fun j => f.poly.coeff j) i
 
-/-- Coefficient evaluation agrees with evaluation of the corresponding mature
+/-- Coefficient evaluation agrees with evaluation of the corresponding LDT
 axis-line polynomial. -/
 theorem directAxisAnswerEquiv_apply (D : DirectLdParams)
     (c : DirectDegPoly D D.d) (t : DirectScalarQ D) :
@@ -179,7 +180,7 @@ theorem directAxisAnswerEquiv_apply (D : DirectLdParams)
   exact congrArg (FieldModel.equiv (q := D.q))
     (coefficientPolynomial_eval D.d c t)
 
-/-- Coefficient evaluation agrees with evaluation of the corresponding mature
+/-- Coefficient evaluation agrees with evaluation of the corresponding LDT
 diagonal-line polynomial. -/
 theorem directDiagonalAnswerEquiv_apply (D : DirectLdParams)
     (c : DirectDegPoly D (D.m * D.d)) (t : DirectScalarQ D) :
@@ -196,7 +197,7 @@ theorem directDiagonalAnswerEquiv_apply (D : DirectLdParams)
   exact congrArg (FieldModel.equiv (q := D.q))
     (coefficientPolynomial_eval (D.m * D.d) c t)
 
-/-! ## Seed fibers for the two QPBT game presentations -/
+/-! ## Parameters and answers of the two QPBT game presentations -/
 
 /-- Forget the divisibility field and expose the directly indexed parameters. -/
 def LdParams.toDirectLdParams (L : LdParams) : DirectLdParams where
@@ -214,69 +215,10 @@ def LdParams.toDirectLdParams (L : LdParams) : DirectLdParams where
   unfold DirectLdParams.model LdParams.model LdParams.toDirectLdParams
   congr
 
-/-- The positive cardinality of every seed-fiber residue type. -/
-theorem LdParams.seedFiberCard_pos (L : LdParams) : 0 < L.q / L.m := by
-  exact Nat.div_pos (Nat.le_of_dvd (by
-    obtain ⟨n, hn, hq⟩ := L.hq
-    rw [hq]
-    exact Nat.pow_pos (by decide)) L.hdvd) L.hm
-
-/-- Divisibility identifies the field cardinality with the product of the
-index cardinality and the common fiber cardinality. -/
-theorem LdParams.seedFiberProduct_eq (L : LdParams) :
-    L.q = L.m * (L.q / L.m) :=
-  (Nat.mul_div_cancel' L.hdvd).symm
-
-/-- Casting between equal finite cardinalities preserves the underlying
-natural-number representative. -/
-@[simp] private theorem equivCastFin_val {m n : ℕ} (h : m = n) (i : Fin m) :
-    (Equiv.cast (congrArg Fin h) i).val = i.val := by
-  subst n
-  rfl
-
-/-- A field seed is uniquely a coordinate index and a residue in its equal
-`chiIndex` fiber. -/
-noncomputable def seedFiberEquiv (L : LdParams) :
-    ScalarQ L ≃ Fin L.m × Fin (L.q / L.m) :=
-  (binaryRepresentation L.model).trans <|
-    (Equiv.cast <| congrArg Fin L.seedFiberProduct_eq).trans
-      finProdFinEquiv.symm
-
-@[simp] theorem seedFiberEquiv_fst (L : LdParams) (s : ScalarQ L) :
-    (seedFiberEquiv L s).1 = chiIndex L s := by
-  letI : NeZero L.m := ⟨Nat.ne_of_gt (lt_of_lt_of_le Nat.zero_lt_one L.hm)⟩
-  have hquot : (binaryRepresentation L.model s).val / (L.q / L.m) < L.m := by
-    apply (Nat.div_lt_iff_lt_mul L.seedFiberCard_pos).mpr
-    rw [Nat.mul_div_cancel' L.hdvd]
-    exact (binaryRepresentation L.model s).isLt
-  simp only [seedFiberEquiv, Equiv.trans_apply]
-  apply Fin.ext
-  change
-    (Equiv.cast (congrArg Fin L.seedFiberProduct_eq)
-      (binaryRepresentation L.model s)).val / (L.q / L.m) =
-      (Fin.ofNat L.m ((binaryRepresentation L.model s).val / (L.q / L.m))).val
-  rw [equivCastFin_val]
-  · exact (Nat.mod_eq_of_lt hquot).symm
-  · exact L.seedFiberProduct_eq
-
-/-- Reconstruct the seed belonging to a coordinate and its fiber residue. -/
-noncomputable def seedOfIndexResidue (L : LdParams)
-    (i : Fin L.m) (r : Fin (L.q / L.m)) : ScalarQ L :=
-  (seedFiberEquiv L).symm (i, r)
-
-@[simp] theorem seedFiberEquiv_seedOfIndexResidue (L : LdParams)
-    (i : Fin L.m) (r : Fin (L.q / L.m)) :
-    seedFiberEquiv L (seedOfIndexResidue L i r) = (i, r) :=
-  (seedFiberEquiv L).apply_symm_apply (i, r)
-
-@[simp] theorem chiIndex_seedOfIndexResidue (L : LdParams)
-    (i : Fin L.m) (r : Fin (L.q / L.m)) :
-    chiIndex L (seedOfIndexResidue L i r) = i := by
-  rw [← seedFiberEquiv_fst]
-  simp
-
-/-- Constructor-preserving equivalence between answers of the seed-indexed
-and directly indexed QPBT games. -/
+/-- The canonical answer equivalence between the seed-indexed and directly
+indexed QPBT games: point answers correspond to point answers, axis-line
+answers to axis-line answers, and diagonal-line answers to diagonal-line
+answers. -/
 noncomputable def ldDirectAnswerEquiv (L : LdParams) :
     LdAnswer L ≃ DirectLdAnswer L.toDirectLdParams where
   toFun
@@ -471,9 +413,8 @@ theorem ldQuestionDistribution_map_parse (L : LdParams) :
     (ldQuestionDistribution L).map (parseLdQuestionPair L) =
         (uniformDistribution ((LdType × LdType) × LdSpace L)).map
           (parseLdQuestionPair L ∘ sourceMap) := by
-      exact distribution_map_map_of_isProbability
+      exact Distribution.map_map
         (uniformDistribution ((LdType × LdType) × LdSpace L))
-        (uniformDistribution_isProbability _)
         sourceMap (parseLdQuestionPair L)
     _ = (uniformDistribution ((LdType × LdType) × LdSpace L)).map
         (directMap ∘ ldQuestionSampleProjection L) := by
@@ -482,9 +423,8 @@ theorem ldQuestionDistribution_map_parse (L : LdParams) :
       exact parse_ldQuestionSample L source
     _ = ((uniformDistribution ((LdType × LdType) × LdSpace L)).map
           (ldQuestionSampleProjection L)).map directMap :=
-      (distribution_map_map_of_isProbability
+      (Distribution.map_map
         (uniformDistribution ((LdType × LdType) × LdSpace L))
-        (uniformDistribution_isProbability _)
         (ldQuestionSampleProjection L) directMap).symm
     _ = directLdQuestionDistribution L.toDirectLdParams := by
       rw [huniform]

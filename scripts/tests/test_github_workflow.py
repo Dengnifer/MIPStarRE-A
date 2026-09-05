@@ -16,11 +16,11 @@ the route, the method and the JSON payload — rather than on a mock's call list
 An unmatched route fails the call: a test that forgets to declare one sees it.
 
 Coverage mirrors the layer's failure modes, one test each: status reduction and
-posting, comment/review idempotency and post-failure adoption, the merge
-topology check, label validation and key-marker adoption, the ``pr_merge.py``
-gate ladder (fail-closed on missing CI evidence and on an adverse verdict), the
-audit snapshot, and a hygiene check that no live tool still reaches for the
-retired registry trees.
+posting, comment/review idempotency and post-failure adoption, prerequisite
+edge creation and adoption, the merge topology check, label validation and
+key-marker adoption, the ``pr_merge.py`` gate ladder (fail-closed on missing CI
+evidence and on an adverse verdict), the audit snapshot, and a hygiene check
+that no live tool still reaches for the retired registry trees.
 """
 
 from __future__ import annotations
@@ -306,6 +306,44 @@ class GitHubLayerTests(LayerTestCase):
                                             key="qpbt-pauli")
             self.assertEqual(number, 42, "a pull request row must never be adopted")
             self.assertEqual(len(self.gh.payloads("POST", r"^issues$")), 1)
+
+    def test_add_blocked_by_cli_creates_edge(self) -> None:
+        self.gh.route(r"^issues/177/dependencies/blocked_by", [])
+        self.gh.route(r"^issues/159$", {"id": 5159, "number": 159})
+        self.gh.route(r"^issues/177/dependencies/blocked_by", {"number": 159},
+                      method="POST")
+
+        self.assertEqual(gh_common.main(["add-blocked-by", "177", "159"]), 0)
+
+        self.assertEqual(
+            self.gh.payloads("POST", r"^issues/177/dependencies/blocked_by"),
+            [{"issue_id": 5159}],
+        )
+
+    def test_add_blocked_by_adopts_after_ambiguous_write(self) -> None:
+        self.gh.route(r"^issues/177/dependencies/blocked_by", [], once=True)
+        self.gh.route(r"^issues/159$", {"id": 5159, "number": 159})
+        self.gh.route(r"^issues/177/dependencies/blocked_by", fail=True,
+                      method="POST")
+        self.gh.route(r"^issues/177/dependencies/blocked_by", [{"number": 159}])
+
+        gh_common.add_blocked_by(177, 159)
+
+        self.assertEqual(
+            len(self.gh.payloads("POST", r"^issues/177/dependencies/blocked_by")),
+            1,
+        )
+
+    def test_add_blocked_by_adopts_duplicate_without_writing(self) -> None:
+        self.gh.route(r"^issues/177/dependencies/blocked_by", [{"number": 159}])
+
+        gh_common.add_blocked_by(177, 159)
+
+        self.assertEqual(
+            self.gh.payloads("POST", r"^issues/177/dependencies/blocked_by"),
+            [],
+        )
+        self.assertEqual(len(self.gh.calls()), 1)
 
     def test_snapshot_writes_three_files_and_drops_pull_requests(self) -> None:
         self.gh.route(r"^issues\?state=open", [
