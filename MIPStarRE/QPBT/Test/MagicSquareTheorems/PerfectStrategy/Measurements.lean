@@ -96,7 +96,9 @@ private theorem binaryJointMeasurement_mul_second
   · simp only [if_pos h]
   · simp only [if_neg h, mul_zero]
 
-private theorem postprocess_effect_of_injective
+/-- Relabelling a measurement by an injective map preserves the effect at each
+outcome in the image. -/
+theorem postprocess_effect_of_injective
     {α β V : Type*} [Fintype α] [Fintype β]
     [DecidableEq α] [DecidableEq β] [Fintype V] [DecidableEq V]
     (M : Measurement α V) (f : α → β) (hf : Function.Injective f) (a : α) :
@@ -108,7 +110,8 @@ private theorem postprocess_effect_of_injective
     have hfb : f b ≠ f a := fun h => hba (hf h)
     simp [hfb]
 
-private theorem postprocess_effect_eq_zero_of_notMem
+/-- Relabelling a measurement assigns zero to outcomes outside the image. -/
+theorem postprocess_effect_eq_zero_of_notMem
     {α β V : Type*} [Fintype α] [Fintype β]
     [DecidableEq α] [DecidableEq β] [Fintype V] [DecidableEq V]
     (M : Measurement α V) (f : α → β) {b : β}
@@ -119,7 +122,8 @@ private theorem postprocess_effect_eq_zero_of_notMem
   intro a ha
   exact (hb ⟨a, (Finset.mem_filter.mp ha).2⟩).elim
 
-private theorem postprocess_projective_of_injective
+/-- Injective relabelling preserves projectivity of a measurement. -/
+theorem postprocess_projective_of_injective
     {α β V : Type*} [Fintype α] [Fintype β]
     [DecidableEq α] [DecidableEq β] [Fintype V] [DecidableEq V]
     (M : Measurement α V) (hM : MIPStarRE.QPBT.Measurement.IsProjective M)

@@ -42,7 +42,9 @@ private theorem msConstraintVars_exists_iff
   · intro h
     exact ⟨k, rfl, h⟩
 
-private theorem msStrategyMeasurement_incident_commute
+/-- The constraint and variable measurements of the perfect Magic Square
+construction commute whenever the variable is incident to the constraint. -/
+theorem msStrategyMeasurement_incident_commute
     {V : Type*} [Fintype V] [DecidableEq V]
     (P : Fin 9 → Measurement (ZMod 2) V)
     (hP : ∀ j, MIPStarRE.QPBT.Measurement.IsProjective (P j))
@@ -123,7 +125,9 @@ private theorem msStrategyMeasurement_rejected_mul_reverse
   exact msStrategyMeasurement_rejected_mul P hP hcomm hmul i k b a
     (by simpa [msWinPredicate_symm] using hrej)
 
-private theorem msGame_support_incidence (x y : MsType)
+/-- Every supported Magic Square question pair is an incident
+constraint-variable pair, in one of the two orders. -/
+theorem msGame_support_incidence (x y : MsType)
     (hxy : (x, y) ∈ msGameSymm.μ.support) :
     (∃ i : Fin 6, ∃ k : Fin 3,
       x = .constraint i ∧ y = .var (msConstraintVars i k)) ∨
@@ -152,7 +156,10 @@ private theorem msGame_positive_incidence (x y : MsType)
   rw [msGameSymm.μ.outsideSupport (x, y) hnot] at hxy
   exact (lt_irrefl 0 hxy)
 
-private theorem msStrategyMeasurement_commuting
+/-- The perfect Magic Square measurement family commutes on the support of its
+game distribution.  This is an auxiliary interface for transporting the
+construction to larger answer alphabets. -/
+theorem msStrategyMeasurement_commuting
     {V : Type*} [Fintype V] [DecidableEq V]
     (P : Fin 9 → Measurement (ZMod 2) V)
     (hP : ∀ j, MIPStarRE.QPBT.Measurement.IsProjective (P j))
@@ -169,7 +176,9 @@ private theorem msStrategyMeasurement_commuting
   · rcases hxy with ⟨i, k, rfl, rfl⟩
     exact (msStrategyMeasurement_incident_commute P hP hcomm i k b a).symm
 
-private theorem msStrategyMeasurement_rejected_mul_on_support
+/-- On a supported Magic Square edge, a rejected answer pair has zero operator
+product.  This is the operator form of perfect acceptance. -/
+theorem msStrategyMeasurement_rejected_mul_on_support
     {V : Type*} [Fintype V] [DecidableEq V]
     (P : Fin 9 → Measurement (ZMod 2) V)
     (hP : ∀ j, MIPStarRE.QPBT.Measurement.IsProjective (P j))
@@ -191,7 +200,9 @@ private theorem msStrategyMeasurement_rejected_mul_on_support
   · rcases hxy with ⟨i, k, rfl, rfl⟩
     exact msStrategyMeasurement_rejected_mul_reverse P hP hcomm hmul i k a b hrej
 
-private theorem msStrategyMeasurement_effect_transpose
+/-- Every effect in the perfect Magic Square measurement family is symmetric
+when the nine underlying cell measurements have symmetric effects. -/
+theorem msStrategyMeasurement_effect_transpose
     {V : Type*} [Fintype V] [DecidableEq V]
     (P : Fin 9 → Measurement (ZMod 2) V)
     (hP : ∀ j, MIPStarRE.QPBT.Measurement.IsProjective (P j))
@@ -210,7 +221,9 @@ private theorem msStrategyMeasurement_effect_transpose
         (fun ab => .triple (parityTriple i ab))
         (msConstraintJoint_effect_transpose P hP hcomm hPt i) a
 
-private theorem heteroKron_mulVec_epr_eq_zero_of_mul_eq_zero
+/-- A zero product of symmetric local effects annihilates the EPR vector after
+tensor placement. -/
+theorem heteroKron_mulVec_epr_eq_zero_of_mul_eq_zero
     {V : Type*} [Fintype V] [DecidableEq V] [Nonempty V]
     (E F : Op V) (hFt : Fᵀ = F) (hEF : E * F = 0) :
     (heteroKron E F).mulVec (eprState V) = 0 := by
@@ -330,7 +343,9 @@ private theorem rejected_born_weight_eq_zero
   rw [hacted]
   simp
 
-private theorem accepted_born_weights_eq_one
+/-- On every supported Magic Square question pair, the perfect measurement
+family assigns total Born weight one to accepted answer pairs. -/
+theorem accepted_born_weights_eq_one
     {V : Type*} [Fintype V] [DecidableEq V] [Nonempty V]
     (P : Fin 9 → Measurement (ZMod 2) V)
     (hP : ∀ j, MIPStarRE.QPBT.Measurement.IsProjective (P j))
@@ -385,7 +400,8 @@ private theorem accepted_born_weights_eq_one
       (msStrategyMeasurement P hP hcomm y)
       (eprState V) (eprState_norm V)
 
-private theorem reflectionEffect_heteroKron_one
+/-- Reflection effects commute with adjoining an identity tensor factor. -/
+theorem reflectionEffect_heteroKron_one
     {V W : Type*} [Fintype V] [DecidableEq V]
     [Fintype W] [DecidableEq W]
     (O : Op V) (b : ZMod 2) :

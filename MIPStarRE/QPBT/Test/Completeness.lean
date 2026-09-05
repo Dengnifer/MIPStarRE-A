@@ -1,6 +1,7 @@
 import MIPStarRE.QPBT.Games.StrategyClasses
 import MIPStarRE.QPBT.Games.TypedCondLinear
 import MIPStarRE.QPBT.Test.Completeness.HonestStrategy
+import MIPStarRE.QPBT.Test.Completeness.HonestStrategy.Assembly
 import MIPStarRE.QPBT.Test.LowDegreeGameTheorems
 import MIPStarRE.QPBT.Test.MagicSquareTheorems
 import MIPStarRE.QPBT.Test.PauliBasisTest

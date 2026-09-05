@@ -1,4 +1,6 @@
 import MIPStarRE.QPBT.Algebra.PauliTheorems
+import MIPStarRE.QPBT.Games.DistanceTheorems.TensorSupport
+import MIPStarRE.QPBT.Observables.LineMeasurement.Restriction
 import MIPStarRE.QPBT.Test.MagicSquareTheorems
 import MIPStarRE.QPBT.Test.PauliBasisTest
 
@@ -33,7 +35,8 @@ open scoped BigOperators Matrix MatrixOrder ComplexOrder
 
 namespace MIPStarRE.QPBT
 
-open MIPStarRE.LDT MIPStarRE.Quantum
+open MIPStarRE.LDT hiding Measurement
+open MIPStarRE.Quantum
 
 noncomputable section
 
@@ -140,15 +143,6 @@ theorem tauObservable_conjTranspose (W : PauliKind) (a : ι → K) :
   refine Finset.sum_congr rfl fun e _ => ?_
   rw [Matrix.conjTranspose_smul, star_phaseSign', pauliProj_conjTranspose]
 
-/-- The generalized Pauli projectors are symmetric matrices, being real linear
-combinations of the symmetric generalized Pauli observables. -/
-theorem pauliProj_transpose (W : PauliKind) (e : ι → K) :
-    (pauliProj W e)ᵀ = pauliProj W e := by
-  rw [pauliProj_eq_avg_tauObservable, Matrix.transpose_smul, Matrix.transpose_sum]
-  congr 1
-  refine Finset.sum_congr rfl fun a _ => ?_
-  rw [Matrix.transpose_smul, tauObservable_transpose]
-
 /-! ### Orthogonality of the generalized Pauli projectors
 
 The generalized Pauli projectors in a fixed basis are pairwise orthogonal, so
@@ -157,137 +151,6 @@ the projectivity used throughout the honest strategy of `lem:pauli-completeness`
 paper `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1364-1370`.
 -/
 
-/-- Formalization-only auxiliary: the binary sign character is multiplicative.
-It is derived here from the public `phaseSign_sum`. -/
-private theorem phaseSign_add' (s t : ZMod 2) :
-    phaseSign (s + t) = phaseSign s * phaseSign t := by
-  have h := phaseSign_sum (ι := Fin 2) ![s, t]
-  simpa [Fin.sum_univ_two, Fin.prod_univ_two] using h
-
-omit [Fintype K] [DecidableEq K] in
-/-- Formalization-only auxiliary: the binary sign character on `K` is the
-canonical additive character of the finite field. -/
-private theorem phaseSign_binTrace_eq_ffChar (y : K) :
-    phaseSign (binTrace K y) =
-      MIPStarRE.LDT.Preliminaries.ffChar (p := 2) (F := K) y := by
-  rw [phaseSign_eq_ffChar, MIPStarRE.LDT.Preliminaries.ffChar_apply]
-
-/-- Formalization-only auxiliary: the scalar character sum over a finite field.
-This is Fourier orthogonality `prop:fourier-fact-scalar` written multiplicatively
-for the binary sign character. -/
-private theorem sum_phaseSign_binTrace_mul (c : K) :
-    ∑ x : K, phaseSign (binTrace K (x * c)) =
-      if c = 0 then (Fintype.card K : ℂ) else 0 := by
-  have hexp := MIPStarRE.LDT.Preliminaries.fourier_fact_scalar (p := 2) (F := K) c
-  have hsum : ∑ x : K, MIPStarRE.LDT.Preliminaries.ffChar (p := 2) (F := K) (x * c) =
-      (Fintype.card K) • (if c = 0 then (1 : ℂ) else 0) := by
-    rw [← hexp]
-    exact (Fintype.card_smul_expect _).symm
-  calc ∑ x : K, phaseSign (binTrace K (x * c))
-      = ∑ x : K, MIPStarRE.LDT.Preliminaries.ffChar (p := 2) (F := K) (x * c) :=
-        Finset.sum_congr rfl fun x _ => phaseSign_binTrace_eq_ffChar _
-    _ = (Fintype.card K) • (if c = 0 then (1 : ℂ) else 0) := hsum
-    _ = if c = 0 then (Fintype.card K : ℂ) else 0 := by
-        by_cases hc : c = 0 <;> simp [hc]
-
-/-- Formalization-only auxiliary: the vector character sum over a finite field,
-obtained from the scalar case by factorizing the trace pairing. -/
-private theorem sum_phaseSign_binTrace_dotProduct (v : ι → K) :
-    ∑ a : ι → K, phaseSign (binTrace K (dotProduct a v)) =
-      if v = 0 then (Fintype.card (ι → K) : ℂ) else 0 := by
-  have hfactor : ∏ i : ι, ∑ x : K, phaseSign (binTrace K (x * v i)) =
-      ∑ a : ι → K, phaseSign (binTrace K (dotProduct a v)) := by
-    rw [Finset.prod_univ_sum, Fintype.piFinset_univ]
-    exact Finset.sum_congr rfl fun a _ => prod_phaseSign_binTrace_dotProduct a v
-  rw [← hfactor]
-  by_cases hv : v = 0
-  · subst hv
-    rw [if_pos rfl, Fintype.card_fun]
-    have hterm : ∀ i : ι, ∑ x : K, phaseSign (binTrace K (x * (0 : ι → K) i)) =
-        (Fintype.card K : ℂ) := fun i => by simp [phaseSign]
-    rw [Finset.prod_congr rfl fun i _ => hterm i, Finset.prod_const, Finset.card_univ]
-    push_cast
-    ring
-  · obtain ⟨i₀, hi₀⟩ : ∃ i : ι, v i ≠ 0 := by
-      by_contra hcon
-      exact hv (funext fun i => not_not.mp (fun h => hcon ⟨i, h⟩))
-    rw [if_neg hv]
-    refine Finset.prod_eq_zero (Finset.mem_univ i₀) ?_
-    rw [sum_phaseSign_binTrace_mul, if_neg hi₀]
-
-/-- A generalized Pauli observable acts on a generalized Pauli projector of the
-same basis by the character value of its label.  This is the eigenvalue relation
-implicit in `lem:pauli-observable-expansion`, blueprint
-`blueprint/src/chapter/ch11_qpbt_algebra.tex:674-688`, paper origin
-`references/qpbt-paper/04_preliminaries.tex:1151-1161`. -/
-theorem tauObservable_mul_pauliProj (W : PauliKind) (a f : ι → K) :
-    tauObservable W a * pauliProj W f =
-      phaseSign (binTrace K (dotProduct a f)) • pauliProj W f := by
-  haveI : CharP K 2 := (Algebra.charP_iff (ZMod 2) K 2).mp (ZMod.charP 2)
-  have hchar2 : ∀ x : ι → K, a + (a + x) = x := by
-    intro x
-    funext i
-    simp [← add_assoc, CharTwo.add_self_eq_zero]
-  calc tauObservable W a * pauliProj W f
-      = (Fintype.card (ι → K) : ℂ)⁻¹ •
-          ∑ b : ι → K,
-            phaseSign (binTrace K (dotProduct b f)) • tauObservable W (a + b) := by
-        rw [pauliProj_eq_avg_tauObservable, Matrix.mul_smul, Matrix.mul_sum]
-        congr 1
-        refine Finset.sum_congr rfl fun b _ => ?_
-        rw [Matrix.mul_smul, tauObservable_mul]
-    _ = (Fintype.card (ι → K) : ℂ)⁻¹ •
-          ∑ c : ι → K,
-            phaseSign (binTrace K (dotProduct (a + c) f)) • tauObservable W c := by
-        congr 1
-        refine Fintype.sum_equiv (Equiv.addLeft a) _ _ fun b => ?_
-        change phaseSign (binTrace K (dotProduct b f)) • tauObservable W (a + b) =
-          phaseSign (binTrace K (dotProduct (a + (a + b)) f)) • tauObservable W (a + b)
-        rw [hchar2 b]
-    _ = phaseSign (binTrace K (dotProduct a f)) • pauliProj W f := by
-        rw [pauliProj_eq_avg_tauObservable (W := W) (e := f)]
-        simp only [Finset.smul_sum, smul_smul]
-        refine Finset.sum_congr rfl fun c _ => ?_
-        congr 1
-        rw [add_dotProduct, map_add, phaseSign_add']
-        ring
-
-/-- The generalized Pauli projectors of a fixed basis are pairwise orthogonal
-idempotents.  This is the orthogonality half of `def:generalized-pauli`,
-blueprint `blueprint/src/chapter/ch11_qpbt_algebra.tex:529-571`, paper origin
-`references/qpbt-paper/04_preliminaries.tex:1101-1122`. -/
-theorem pauliProj_mul_pauliProj (W : PauliKind) (e f : ι → K) :
-    pauliProj W e * pauliProj W f = if e = f then pauliProj W e else 0 := by
-  haveI : CharP K 2 := (Algebra.charP_iff (ZMod 2) K 2).mp (ZMod.charP 2)
-  have hzero : ∀ x y : ι → K, x + y = 0 ↔ x = y := by
-    intro x y
-    constructor
-    · intro h
-      funext i
-      have hi : x i + y i = 0 := congrFun h i
-      exact CharTwo.add_eq_zero.mp hi
-    · rintro rfl
-      funext i
-      simp [CharTwo.add_self_eq_zero]
-  have hcard : (Fintype.card (ι → K) : ℂ) ≠ 0 := by positivity
-  calc pauliProj W e * pauliProj W f
-      = (Fintype.card (ι → K) : ℂ)⁻¹ •
-          ∑ a : ι → K,
-            (phaseSign (binTrace K (dotProduct a (e + f)))) • pauliProj W f := by
-        rw [pauliProj_eq_avg_tauObservable (W := W) (e := e), Matrix.smul_mul,
-          Finset.sum_mul]
-        congr 1
-        refine Finset.sum_congr rfl fun a _ => ?_
-        rw [Matrix.smul_mul, tauObservable_mul_pauliProj, smul_smul, ← phaseSign_add',
-          ← map_add, ← dotProduct_add]
-    _ = ((Fintype.card (ι → K) : ℂ)⁻¹ *
-          ∑ a : ι → K, phaseSign (binTrace K (dotProduct a (e + f)))) • pauliProj W f := by
-        rw [← Finset.sum_smul, smul_smul]
-    _ = if e = f then pauliProj W e else 0 := by
-        rw [sum_phaseSign_binTrace_dotProduct]
-        by_cases hef : e = f
-        · rw [if_pos ((hzero e f).mpr hef), if_pos hef, inv_mul_cancel₀ hcard, one_smul, hef]
-        · rw [if_neg (fun h => hef ((hzero e f).mp h)), if_neg hef, mul_zero, zero_smul]
 
 /-- Every generalized Pauli projector is a projector. -/
 theorem pauliProj_isProj (W : PauliKind) (e : ι → K) : IsProj (pauliProj W e) := by
@@ -491,6 +354,84 @@ theorem pauliPointMeasurement_isConsistentOn (P : AdmissibleParams) (W : PauliKi
       (eprState (PauliRegister P)) :=
   pauliBasisMeasurement_postprocess_isConsistentOn W _
 
+/-! ### Honest line measurements -/
+
+/-- Restrict a multivariate polynomial to an axis-parallel line, retaining the
+coefficients through degree `d`.  This is the degree-`d` answer used for the
+axis-line clause of `lem:pauli-completeness`, paper
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1290-1305`. -/
+noncomputable def restrictToAxisLine (L : LdParams) (line : LineDesc L)
+    (g : MvPolynomial (Fin L.m) (ScalarQ L)) : DegPoly L L.d :=
+  fun i => (polynomialOnLine L line g).coeff i.val
+
+/-- The coefficient-list restriction to an axis line evaluates to the original
+low-degree encoding at every point of that line. -/
+theorem evalCoefficient_restrictToAxisLine_lowDegreeEncoding
+    (L : LdParams) (line : LineDesc L) (hline : line.kind = .axis)
+    (h : Cube L.m → ScalarQ L) (t : ScalarQ L) :
+    evalCoefficient (restrictToAxisLine L line (lowDegreeEncoding h)) t =
+      MvPolynomial.eval (line.base + t • line.direction) (lowDegreeEncoding h) := by
+  calc
+    evalCoefficient (restrictToAxisLine L line (lowDegreeEncoding h)) t =
+        Polynomial.eval t (polynomialOnLine L line (lowDegreeEncoding h)) := by
+      unfold evalCoefficient restrictToAxisLine
+      rw [Polynomial.eval_eq_sum_range'
+        (Nat.lt_succ_of_le
+          ((polynomialOnLine_lowDegreeEncoding_natDegree_le_one_of_axis
+            L line hline h).trans L.hd)) t]
+      exact Fin.sum_univ_eq_sum_range
+        (fun i => (polynomialOnLine L line (lowDegreeEncoding h)).coeff i * t ^ i)
+        (L.d + 1)
+    _ = _ := eval_polynomialOnLine L line (lowDegreeEncoding h) t
+
+/-- The honest axis-line measurement is the generalized Pauli basis
+measurement coarse-grained by the degree-`d` restriction of `g_h` to the
+canonical line carried by the question. -/
+noncomputable def pauliALineMeasurement (P : AdmissibleParams) (W : PauliKind)
+    (z : PauliSpace P) :
+    Measurement (Fin (P.d + 1) → PauliScalar P) (PauliRegister P) :=
+    (pauliBasisMeasurement W).postprocess fun h =>
+    restrictToAxisLine P.toLdParams
+      (aLineDescOf P.toLdParams
+        (ldALineCL P.toLdParams (pauliToLd P W z))) (lowDegreeEncoding h)
+
+/-- The honest axis-line measurement is projective. -/
+theorem pauliALineMeasurement_projective (P : AdmissibleParams) (W : PauliKind)
+    (z : PauliSpace P) :
+    MIPStarRE.QPBT.Measurement.IsProjective (pauliALineMeasurement P W z) :=
+  pauliBasisMeasurement_postprocess_projective W _
+
+/-- The honest axis-line measurement is consistent on the EPR state. -/
+theorem pauliALineMeasurement_isConsistentOn (P : AdmissibleParams) (W : PauliKind)
+    (z : PauliSpace P) :
+    MIPStarRE.QPBT.Measurement.IsConsistentOn (pauliALineMeasurement P W z)
+      (eprState (PauliRegister P)) :=
+  pauliBasisMeasurement_postprocess_isConsistentOn W _
+
+/-- The honest diagonal-line measurement is the generalized Pauli basis
+measurement coarse-grained by the degree-`m d` restriction of `g_h` to the
+canonical line carried by the question. -/
+noncomputable def pauliDLineMeasurement (P : AdmissibleParams) (W : PauliKind)
+    (z : PauliSpace P) :
+    Measurement (Fin (P.m * P.d + 1) → PauliScalar P) (PauliRegister P) :=
+    (pauliBasisMeasurement W).postprocess fun h =>
+    restrictToLine P.toLdParams
+      (dLineDescOf P.toLdParams
+        (ldDLineCL P.toLdParams (pauliToLd P W z))) (lowDegreeEncoding h)
+
+/-- The honest diagonal-line measurement is projective. -/
+theorem pauliDLineMeasurement_projective (P : AdmissibleParams) (W : PauliKind)
+    (z : PauliSpace P) :
+    MIPStarRE.QPBT.Measurement.IsProjective (pauliDLineMeasurement P W z) :=
+  pauliBasisMeasurement_postprocess_projective W _
+
+/-- The honest diagonal-line measurement is consistent on the EPR state. -/
+theorem pauliDLineMeasurement_isConsistentOn (P : AdmissibleParams) (W : PauliKind)
+    (z : PauliSpace P) :
+    MIPStarRE.QPBT.Measurement.IsConsistentOn (pauliDLineMeasurement P W z)
+      (eprState (PauliRegister P)) :=
+  pauliBasisMeasurement_postprocess_isConsistentOn W _
+
 /-- The Point/W measurement coarse-grained by the trace against `r` is the
 Pair/W measurement.  This is the displayed identity
 `E^{(Point,W),y}_{[tr(· r_W) = a]} = E^{(Pair,W),ω}_a` used twice in the
@@ -596,6 +537,118 @@ theorem exists_ms_perfect_strategy_of_pauliPairGamma_ne_zero (P : AdmissiblePara
     (pauliTraceMeasurement_isConsistentOn P .X _ _)
     (pauliTraceMeasurement_isConsistentOn P .Z _ _)
     (obsOf_pauliTraceMeasurement_anticommute P z hgamma)
+
+/-! ### The pointwise Magic Square measurement -/
+
+/-- The nine cell measurements obtained from the anticommuting Pair/X and
+Pair/Z observables at a question with nonzero phase bit. -/
+noncomputable def pauliMagicCellMeasurement (P : AdmissibleParams)
+    (z : PauliSpace P) (hgamma : pauliPairGamma P z ≠ 0) :
+    Fin 9 → Measurement (ZMod 2) (PauliRegister P × ZMod 2) :=
+  let A := pauliTraceMeasurement P .X (pauliXBlock z) (pauliRXBlock z)
+  let B := pauliTraceMeasurement P .Z (pauliZBlock z) (pauliRZBlock z)
+  msCellMeasurement (obsOf A) (obsOf B)
+    (obsOf_conjTranspose A (pauliTraceMeasurement_projective P .X _ _))
+    (obsOf_conjTranspose B (pauliTraceMeasurement_projective P .Z _ _))
+    (obsOf_sq A (pauliTraceMeasurement_projective P .X _ _))
+    (obsOf_sq B (pauliTraceMeasurement_projective P .Z _ _))
+    (obsOf_pauliTraceMeasurement_anticommute P z hgamma)
+
+/-- Every Pauli-induced Magic Square cell measurement is projective. -/
+theorem pauliMagicCellMeasurement_projective (P : AdmissibleParams)
+    (z : PauliSpace P) (hgamma : pauliPairGamma P z ≠ 0) (j : Fin 9) :
+    MIPStarRE.QPBT.Measurement.IsProjective
+      (pauliMagicCellMeasurement P z hgamma j) := by
+  simp only [pauliMagicCellMeasurement]
+  exact msCellMeasurement_projective _ _
+    (obsOf_conjTranspose _ (pauliTraceMeasurement_projective P .X _ _))
+    (obsOf_conjTranspose _ (pauliTraceMeasurement_projective P .Z _ _))
+    (obsOf_sq _ (pauliTraceMeasurement_projective P .X _ _))
+    (obsOf_sq _ (pauliTraceMeasurement_projective P .Z _ _))
+    (obsOf_pauliTraceMeasurement_anticommute P z hgamma) j
+
+/-- Cell effects belonging to one Magic Square constraint commute. -/
+theorem pauliMagicCellMeasurement_commute (P : AdmissibleParams)
+    (z : PauliSpace P) (hgamma : pauliPairGamma P z ≠ 0)
+    (i : Fin 6) (k l : Fin 3) (a b : ZMod 2) :
+    Commute
+      ((pauliMagicCellMeasurement P z hgamma (msConstraintVars i k)).effect a)
+      ((pauliMagicCellMeasurement P z hgamma (msConstraintVars i l)).effect b) := by
+  simp only [pauliMagicCellMeasurement]
+  exact reflectionEffect_commute
+    (msConstraintObservable_commute _ _
+      (obsOf_sq _ (pauliTraceMeasurement_projective P .X _ _))
+      (obsOf_sq _ (pauliTraceMeasurement_projective P .Z _ _))
+      (obsOf_pauliTraceMeasurement_anticommute P z hgamma) i k l) a b
+
+/-- The Magic Square measurement family used at a Pauli question with nonzero
+phase bit. -/
+noncomputable def pauliMagicMeasurement (P : AdmissibleParams)
+    (z : PauliSpace P) (hgamma : pauliPairGamma P z ≠ 0) :
+    MsType → Measurement MsAnswer (PauliRegister P × ZMod 2) :=
+  msStrategyMeasurement (pauliMagicCellMeasurement P z hgamma)
+    (pauliMagicCellMeasurement_projective P z hgamma)
+    (pauliMagicCellMeasurement_commute P z hgamma)
+
+/-- The Pauli-induced Magic Square measurement is projective. -/
+theorem pauliMagicMeasurement_projective (P : AdmissibleParams)
+    (z : PauliSpace P) (hgamma : pauliPairGamma P z ≠ 0) (x : MsType) :
+    MIPStarRE.QPBT.Measurement.IsProjective
+      (pauliMagicMeasurement P z hgamma x) := by
+  exact msStrategyMeasurement_projective _ _ _ x
+
+/-- Every effect of the Pauli-induced Magic Square measurement is symmetric. -/
+theorem pauliMagicMeasurement_effect_transpose (P : AdmissibleParams)
+    (z : PauliSpace P) (hgamma : pauliPairGamma P z ≠ 0)
+    (x : MsType) (a : MsAnswer) :
+    ((pauliMagicMeasurement P z hgamma x).effect a)ᵀ =
+      (pauliMagicMeasurement P z hgamma x).effect a := by
+  apply msStrategyMeasurement_effect_transpose
+  intro j b
+  simp only [pauliMagicCellMeasurement]
+  apply msCellMeasurement_transpose
+  · rw [obsOf_pauliTraceMeasurement]
+    exact tauObservable_transpose _ _
+  · rw [obsOf_pauliTraceMeasurement]
+    exact tauObservable_transpose _ _
+
+/-- The Pauli-induced Magic Square measurements commute on an incident
+constraint-variable pair. -/
+theorem pauliMagicMeasurement_incident_commute (P : AdmissibleParams)
+    (z : PauliSpace P) (hgamma : pauliPairGamma P z ≠ 0)
+    (i : Fin 6) (k : Fin 3) (a b : MsAnswer) :
+    Commute ((pauliMagicMeasurement P z hgamma (.constraint i)).effect a)
+      ((pauliMagicMeasurement P z hgamma
+        (.var (msConstraintVars i k))).effect b) := by
+  exact msStrategyMeasurement_incident_commute _ _ _ i k a b
+
+/-- The distinguished variable effects of the Pauli-induced Magic Square
+measurement are the tensor placements of the Pair/X and Pair/Z effects. -/
+theorem pauliMagicMeasurement_var_effect (P : AdmissibleParams)
+    (z : PauliSpace P) (hgamma : pauliPairGamma P z ≠ 0) (b : ZMod 2) :
+    (pauliMagicMeasurement P z hgamma (.var 0)).effect (.bit b) =
+        heteroKron
+          ((pauliTraceMeasurement P .X (pauliXBlock z) (pauliRXBlock z)).effect b)
+          (1 : Op (ZMod 2)) ∧
+      (pauliMagicMeasurement P z hgamma (.var 4)).effect (.bit b) =
+        heteroKron
+          ((pauliTraceMeasurement P .Z (pauliZBlock z) (pauliRZBlock z)).effect b)
+          (1 : Op (ZMod 2)) := by
+  constructor
+  · unfold pauliMagicMeasurement
+    rw [msStrategyMeasurement_var_bit]
+    change reflectionEffect
+        (heteroKron
+          (obsOf (pauliTraceMeasurement P .X (pauliXBlock z) (pauliRXBlock z)))
+          (1 : Op (ZMod 2))) b = _
+    rw [reflectionEffect_heteroKron_one, reflectionEffect_obsOf_measurement]
+  · unfold pauliMagicMeasurement
+    rw [msStrategyMeasurement_var_bit]
+    change reflectionEffect
+        (heteroKron
+          (obsOf (pauliTraceMeasurement P .Z (pauliZBlock z) (pauliRZBlock z)))
+          (1 : Op (ZMod 2))) b = _
+    rw [reflectionEffect_heteroKron_one, reflectionEffect_obsOf_measurement]
 
 /-! ### The Pair measurement in the case `γ = 0`
 
