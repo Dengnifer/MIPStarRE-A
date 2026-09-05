@@ -2695,7 +2695,19 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 - The operator hotfix to github-sync.sh (commit the snapshot it writes) was refused by the local permission classifier as a direct edit of a reviewed publishing script; it goes through PR #220 (branch issue-220-github-sync-snapshot-commit, lane launched) with a Claude review. Until it merges the operator pushes main by hand after each daemon merge (git push github main runs the pre-push hook but not checked-push).
 
 ## 2026-09-05T11:28Z — incident: silent file loss on stacked branches 109 and 110
-- Earlier automated merges of issue-107 into issue-109 (35bdc2a) and issue-110 (8ad1de8), committed with an empty conflicts section, deleted five transport modules and reverted the PR 147 F3 fix; Transport/SeedFiber.lean and DirectLowDegree/Geometry.lean would have merged silently (no conflict). The 108/109/110 propagation session restored the MERGE_HEAD versions (7731a97, 21cd0cf). An audit of the other stacked branches for deleted or reverted paths relative to main is running; issue filed.
+- **Symptom:** earlier automated merges of issue-107 into issue-109 (`35bdc2a`)
+  and issue-110 (`8ad1de8`), committed with an empty conflicts section, deleted
+  five modules and reverted two existing modules.
+- **Diagnosis:** each merge tree is byte-for-byte its first-parent tree. The
+  reflog records preceding `ort` merges normally but records these two as later
+  `commit (merge)` operations. Thus the prepared index was reset wholesale to
+  `HEAD` while `MERGE_HEAD` remained; Git did not resolve delete/modify
+  conflicts this way. A normal three-way merge carries all seven paths.
+- **Recovery:** the propagation session restored the incoming versions in
+  `7731a97` and `21cd0cf`. The latest merge on each of the thirteen branches in
+  the recorded stack was audited; all preserve incoming-only paths. Apparent
+  candidates on criss-cross merges were recorded conflicts, deliberate
+  branch-owned prose, or genuine combined results rather than loss.
 
 ## 2026-09-05T12:05Z — publish path restored (PR 221 merged)
 - github-sync.sh now commits the record snapshot it writes; the first sync after the merge produced 253fa0d automatically. Merged today through the Claude review path: PRs 211, 192, 206, 191, 152, 197, 217, 221.
@@ -2708,6 +2720,11 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 
 ## 2026-09-05T12:42Z — lane runner v17: post-merge silent-loss guard (issue #222 task 2)
 - After merging github/main the lane now lists every path present on main but absent in the result; unless a non-merge branch commit deleted it, the lane stops with needs-attention naming the paths. Merge daemon v8 and stack-watch v3 use v17; lanes already running on v16 finish on v16.
+- The durable guard now also detects incoming-only files restored to an
+  unchanged branch blob, handles multiple best merge bases, and can audit an
+  existing two-parent merge. It runs from pre-commit before the blanket hook
+  bypass; the committed mode reconstructs Git's conflict set in a disposable
+  local clone.
 
 ## 2026-09-05T12:52Z — lem:qld-sublines proved (sub-line witness, packet #118)
 - exists_subLineWitness is sorry-free after eleven Opus sessions (about 2.6M tokens): the sampling procedure with deterministic source indices, block independence, the uniform law of the canonical representative plus affine parameter, and the six-factor mixture identity. The blueprint records that the formalized variant uses deterministic indices where the paper draws fresh uniform ones (Property 2 asserts only some mixture, so no weakening). Commits cac257f, 93bf62c on the #118 branch. Remaining on #118: claims 17-1/2/3, the conditional lem:qld-4-13 forms, and the combined lines witness (needs lem:pasting from PR 205).

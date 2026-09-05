@@ -96,6 +96,12 @@ documented failure modes. Sources are cited in `local/protocols/*.md`.
 11. **Faithfulness policy is unchanged.** AGENTS.md's faithful-formalization
     rules, anti-pattern catalog, and statement-integrity audits apply to QPBT
     exactly as to LDT.
+12. **Merge inputs do not disappear silently.** Before a merge commit, the
+    merge-loss guard compares the staged result with the pre-merge branch,
+    every best merge base, and `MERGE_HEAD`. An incoming path may be absent
+    only when the branch deleted a path present at a merge base. An
+    unambiguous incoming-only change may return to the unchanged branch blob
+    only when Git recorded a conflict.
 
 ## Naming and identity conventions
 

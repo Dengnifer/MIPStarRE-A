@@ -634,3 +634,23 @@ that bypass controls validation only, not ref scope.
 
 **Expected effect:** `MIPSTARRE_SKIP_HOOKS=1` can recover from local tooling
 failures without publishing any ref outside the requested branch mapping.
+
+## 2026-09-05 — Reject silent loss from branch-integration merges
+
+**Trigger:** `results/telemetry/events.md` 2026-09-05, "incident: silent file
+loss on stacked branches 109 and 110" (issue #222). Merge commits `35bdc2a`
+and `8ad1de8` had trees identical to their first parents even though their
+second parent added five modules and changed two existing modules.
+
+**Change:** `merge_loss_guard.py` compares a pending index, or an existing
+two-parent merge, with both parents and every best merge base. It blocks an
+incoming path deleted without a branch-side deletion and an unambiguous
+incoming-only change restored to the unchanged branch blob. Recorded conflict
+paths remain ordinary resolution decisions. `.githooks/pre-commit` runs the
+guard before the blanket bypass, and focused tests cover the historical
+whole-tree failure, an intentional branch deletion, recorded conflict
+resolution, multiple merge bases, and committed-merge auditing.
+
+**Expected effect:** resetting a prepared merge index to `HEAD` cannot create a
+quietly lossy stack or fresh-base merge, while deliberate branch deletions and
+conflict resolutions remain possible.
