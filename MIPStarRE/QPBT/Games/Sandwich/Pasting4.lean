@@ -1,0 +1,370 @@
+import MIPStarRE.QPBT.Games.Sandwich.Pasting3
+
+/-! # Masses of the ordered products of the pasting estimate
+
+This module records the mass estimates of step 3 of the proof of the adopted
+statement of `lem:pasting` in `docs/paper-gaps/qpbt_pasting-product-error.tex`.
+
+## References
+
+Blueprint `ch12_qpbt_games.tex:960-990`, paper origin
+`references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:504-525`.
+-/
+
+open scoped BigOperators MatrixOrder Matrix ComplexOrder
+
+namespace MIPStarRE.QPBT
+
+open MIPStarRE.LDT hiding Measurement
+open MIPStarRE.Quantum
+open DistanceCalculus
+
+/-- The squared norm of the image of a state is the quadratic form of the
+operator against its adjoint. The identity of the distance calculus is inlined
+here; see issue #204. -/
+private theorem norm_sq_eq_stateQForm' {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (X : Op ι) (ψ : EuclideanSpace ℂ ι) :
+    ‖applyOperatorToState X ψ‖ ^ 2 = stateQForm ψ (Xᴴ * X) := by
+  have hqf : ∀ M N : Op ι, stateQForm ψ (M * N) =
+      (inner ℂ (applyOperatorToState Mᴴ ψ) (applyOperatorToState N ψ)).re := by
+    intro M N
+    have happ : applyOperatorToState (M * N) ψ =
+        applyOperatorToState M (applyOperatorToState N ψ) := by
+      unfold applyOperatorToState
+      simp [Matrix.toEuclideanLin, Matrix.toLpLin_mul_same]
+    have hadj : (Matrix.toEuclideanLin M).adjoint = Matrix.toEuclideanLin Mᴴ := by
+      rw [← Matrix.toEuclideanLin_conjTranspose_eq_adjoint]
+    have h1 : (inner ℂ ((Matrix.toEuclideanLin M).adjoint ψ)
+        (applyOperatorToState N ψ) : ℂ) =
+        inner ℂ ψ (Matrix.toEuclideanLin M (applyOperatorToState N ψ)) :=
+      LinearMap.adjoint_inner_left _ _ _
+    rw [stateQForm, happ]
+    rw [show applyOperatorToState Mᴴ ψ = (Matrix.toEuclideanLin M).adjoint ψ by
+      rw [hadj]; rfl]
+    rw [h1]
+    rfl
+  have hkey := hqf Xᴴ X
+  rw [Matrix.conjTranspose_conjTranspose] at hkey
+  rw [hkey]
+  simpa using (inner_self_eq_norm_sq (𝕜 := ℂ) (applyOperatorToState X ψ)).symm
+
+/-- A family whose adjoint products sum to the identity preserves the total
+mass of a state. -/
+private theorem sum_norm_sq_eq_of_sum_adjoint_mul_eq_one {γ ι : Type*}
+    [Fintype γ] [Fintype ι] [DecidableEq ι]
+    (C : γ → Op ι) (ψ : EuclideanSpace ℂ ι)
+    (hC : (∑ c : γ, (C c)ᴴ * C c) = 1) :
+    (∑ c : γ, ‖applyOperatorToState (C c) ψ‖ ^ 2) = ‖ψ‖ ^ 2 := by
+  have hone : stateQForm ψ (1 : Op ι) = ‖ψ‖ ^ 2 := by
+    have hid : applyOperatorToState (1 : Op ι) ψ = ψ := by
+      simp [applyOperatorToState]
+    rw [stateQForm, hid]
+    simpa using (inner_self_eq_norm_sq (𝕜 := ℂ) ψ)
+  calc (∑ c : γ, ‖applyOperatorToState (C c) ψ‖ ^ 2)
+      = ∑ c : γ, stateQForm ψ ((C c)ᴴ * C c) :=
+        Finset.sum_congr rfl fun c _ => norm_sq_eq_stateQForm' (C c) ψ
+    _ = stateQForm ψ (∑ c : γ, (C c)ᴴ * C c) := (stateQForm_finset_sum ψ _ _).symm
+    _ = ‖ψ‖ ^ 2 := by rw [hC, hone]
+
+/-- A perturbation estimate for the total mass of a finite family of vectors:
+the mass of a family of mass at most one increases by at most twice the square
+root of the summed squared distance, plus that distance. -/
+private theorem sum_norm_sq_le_of_mass_le_one {α ι : Type*} [Fintype α]
+    [Fintype ι] [DecidableEq ι]
+    (u v : α → EuclideanSpace ℂ ι) (hu : (∑ a : α, ‖u a‖ ^ 2) ≤ 1) :
+    (∑ a : α, ‖v a‖ ^ 2) ≤ (∑ a : α, ‖u a‖ ^ 2) +
+      2 * Real.sqrt (∑ a : α, ‖u a - v a‖ ^ 2) + ∑ a : α, ‖u a - v a‖ ^ 2 := by
+  have hpt : ∀ a : α, ‖v a‖ ^ 2 ≤
+      ‖u a‖ ^ 2 + 2 * (‖u a‖ * ‖u a - v a‖) + ‖u a - v a‖ ^ 2 := by
+    intro a
+    have hle : ‖v a‖ ≤ ‖u a‖ + ‖u a - v a‖ := by
+      have := norm_sub_le (u a) (u a - v a)
+      simpa using this
+    nlinarith [norm_nonneg (v a), norm_nonneg (u a), norm_nonneg (u a - v a)]
+  have hsum : (∑ a : α, ‖v a‖ ^ 2) ≤
+      (∑ a : α, ‖u a‖ ^ 2) + 2 * (∑ a : α, ‖u a‖ * ‖u a - v a‖) +
+        ∑ a : α, ‖u a - v a‖ ^ 2 := by
+    have := Finset.sum_le_sum (fun a (_ : a ∈ Finset.univ) => hpt a)
+    simpa [Finset.sum_add_distrib, Finset.mul_sum] using this
+  have hcs : (∑ a : α, ‖u a‖ * ‖u a - v a‖) ≤
+      Real.sqrt (∑ a : α, ‖u a‖ ^ 2) * Real.sqrt (∑ a : α, ‖u a - v a‖ ^ 2) := by
+    simpa using Real.sum_mul_le_sqrt_mul_sqrt (s := (Finset.univ : Finset α))
+      (f := fun a => ‖u a‖) (g := fun a => ‖u a - v a‖)
+  have hsq : Real.sqrt (∑ a : α, ‖u a‖ ^ 2) ≤ 1 := by
+    rw [show (1 : ℝ) = Real.sqrt 1 by rw [Real.sqrt_one]]
+    exact Real.sqrt_le_sqrt hu
+  have hnn : 0 ≤ Real.sqrt (∑ a : α, ‖u a - v a‖ ^ 2) := Real.sqrt_nonneg _
+  nlinarith [hsum, hcs, hsq, hnn]
+
+/-- The mass of the ordered products of the two coarse codeword families of
+`lem:pasting` is almost one: the first family is close to a projective
+measurement on the opposite factor, and reversing the order of the two
+placements costs the commutator mass. This is the mass estimate of step 3 of the
+proof of the adopted statement in
+`docs/paper-gaps/qpbt_pasting-product-error.tex`; blueprint
+`ch12_qpbt_games.tex:960-990`. -/
+theorem mass_ordered_product_ge {X R₁ R₂ ι : Type*}
+    [Fintype X] [DecidableEq X] [Fintype R₁] [DecidableEq R₁]
+    [Fintype R₂] [DecidableEq R₂] [Fintype ι] [DecidableEq ι]
+    (D : Distribution X) (Ac P : X → Measurement R₁ ι) (Q : X → Measurement R₂ ι)
+    (ψ : EuclideanSpace ℂ (ι × ι)) (d K : ℝ)
+    (hD : D.IsProbability) (hψ : ‖ψ‖ = 1)
+    (hAc : ∀ q, MIPStarRE.QPBT.Measurement.IsProjective (Ac q))
+    (hQ : ∀ q, MIPStarRE.QPBT.Measurement.IsProjective (Q q))
+    (hd : opFamilyDistSq D (fun q a => heteroKron ((Ac q).effect a) 1)
+      (fun q a => heteroKron 1 ((P q).effect a)) ψ ≤ d)
+    (hK : opFamilyDistSq D (fun q (ab : R₁ × R₂) => heteroKron 1
+      ((P q).effect ab.1 * (Q q).effect ab.2 -
+        (Q q).effect ab.2 * (P q).effect ab.1)) (fun _ _ => 0) ψ ≤ K) :
+    1 - 2 * Real.sqrt d - d - 2 * Real.sqrt K - K ≤
+      avgOver D (fun q => ∑ ab : R₁ × R₂, ‖applyOperatorToState
+        (heteroKron 1 ((P q).effect ab.1 * (Q q).effect ab.2)) ψ‖ ^ 2) := by
+  classical
+  -- the inlined identities of the distance calculus; see issue #204
+  have hct : ∀ M N : Op ι, (heteroKron M N)ᴴ = heteroKron Mᴴ Nᴴ := by
+    intro M N
+    unfold heteroKron
+    exact Matrix.conjTranspose_kronecker M N
+  have hmulapp : ∀ (M N : Op (ι × ι)), applyOperatorToState (M * N) ψ =
+      applyOperatorToState M (applyOperatorToState N ψ) := by
+    intro M N
+    unfold applyOperatorToState
+    simp [Matrix.toEuclideanLin, Matrix.toLpLin_mul_same]
+  have hlin : ∀ M N : Op (ι × ι), applyOperatorToState (M - N) ψ =
+      applyOperatorToState M ψ - applyOperatorToState N ψ := by
+    intro M N
+    simp [applyOperatorToState]
+  have hsubr : ∀ M N : Op ι,
+      heteroKron (1 : Op ι) (M - N) = heteroKron 1 M - heteroKron 1 N := by
+    intro M N
+    ext p r
+    simp [heteroKron, Matrix.kronecker, mul_sub]
+  set S : X → ℝ := fun q => ∑ a : R₁,
+    ‖applyOperatorToState (heteroKron 1 ((P q).effect a)) ψ‖ ^ 2 with hS
+  set C1 : X → ℝ := fun q => ∑ ab : R₁ × R₂, ‖applyOperatorToState
+    (heteroKron 1 ((P q).effect ab.1 * (Q q).effect ab.2)) ψ‖ ^ 2 with hC1
+  set dq : X → ℝ := fun q => ∑ a : R₁, ‖applyOperatorToState
+    (heteroKron ((Ac q).effect a) 1 - heteroKron 1 ((P q).effect a)) ψ‖ ^ 2 with hdq
+  set kq : X → ℝ := fun q => ∑ ab : R₁ × R₂, ‖applyOperatorToState
+    (heteroKron 1 ((P q).effect ab.1 * (Q q).effect ab.2 -
+      (Q q).effect ab.2 * (P q).effect ab.1)) ψ‖ ^ 2 with hkq
+  -- the projective family placed on the first factor carries the whole mass
+  have hAcmass : ∀ q : X, (∑ a : R₁,
+      ‖applyOperatorToState (heteroKron ((Ac q).effect a) 1) ψ‖ ^ 2) = 1 := by
+    intro q
+    have hterm : ∀ a : R₁, (heteroKron ((Ac q).effect a) (1 : Op ι))ᴴ *
+        heteroKron ((Ac q).effect a) 1 = heteroKron ((Ac q).effect a) 1 := by
+      intro a
+      rw [hct, Matrix.conjTranspose_one, heteroKron_mul, mul_one,
+        measurement_effect_hermitian (Ac q) a, (hAc q a).isIdempotentElem.eq]
+    have hsum : (∑ a : R₁, (heteroKron ((Ac q).effect a) (1 : Op ι))ᴴ *
+        heteroKron ((Ac q).effect a) 1) = 1 := by
+      rw [Finset.sum_congr rfl fun a _ => hterm a,
+        ← heteroKron_finset_sum_left, (Ac q).sum_eq_one, heteroKron_one_one]
+    rw [sum_norm_sq_eq_of_sum_adjoint_mul_eq_one _ ψ hsum, hψ, one_pow]
+  -- the mass of a placed measurement is at most one
+  have hone : applyOperatorToState (1 : Op (ι × ι)) ψ = ψ := by
+    simp [applyOperatorToState]
+  have hSle : ∀ q : X, S q ≤ 1 := by
+    intro q
+    have hCP : ∑ a : R₁, (heteroKron (1 : Op ι) ((P q).effect a))ᴴ *
+        heteroKron 1 ((P q).effect a) ≤ 1 := by
+      simpa using SandwichProduct.measurement_sum_adjoint_mul_le_one
+        (Measurement.rightPlacement (ιA := ι) (P q))
+    have h := sum_norm_mul_apply_le
+      (fun a : R₁ => heteroKron (1 : Op ι) ((P q).effect a))
+      (1 : Op (ι × ι)) ψ hCP
+    rw [hone, hψ, one_pow] at h
+    simpa [hS] using h
+  have hC1le : ∀ q : X, C1 q ≤ 1 := by
+    intro q
+    simp only [hC1]
+    rw [Fintype.sum_prod_type]
+    exact sum_norm_ordered_product_le_one (P q) (Q q) ψ hψ
+  -- reversing the order of the placements preserves the mass
+  have hRv : ∀ q : X, (∑ ab : R₁ × R₂, ‖applyOperatorToState
+      (heteroKron 1 ((Q q).effect ab.2 * (P q).effect ab.1)) ψ‖ ^ 2) = S q := by
+    intro q
+    have hQsum : (∑ b : R₂, (heteroKron (1 : Op ι) ((Q q).effect b))ᴴ *
+        heteroKron 1 ((Q q).effect b)) = 1 := by
+      have hterm : ∀ b : R₂, (heteroKron (1 : Op ι) ((Q q).effect b))ᴴ *
+          heteroKron 1 ((Q q).effect b) = heteroKron 1 ((Q q).effect b) := by
+        intro b
+        rw [hct, Matrix.conjTranspose_one, heteroKron_mul, mul_one,
+          measurement_effect_hermitian (Q q) b, (hQ q b).isIdempotentElem.eq]
+      rw [Finset.sum_congr rfl fun b _ => hterm b,
+        ← heteroKron_finset_sum_right, (Q q).sum_eq_one, heteroKron_one_one]
+    rw [Fintype.sum_prod_type, hS]
+    refine Finset.sum_congr rfl fun a _ => ?_
+    have hsplit : ∀ b : R₂, applyOperatorToState
+        (heteroKron 1 ((Q q).effect b * (P q).effect a)) ψ =
+        applyOperatorToState (heteroKron (1 : Op ι) ((Q q).effect b))
+          (applyOperatorToState (heteroKron 1 ((P q).effect a)) ψ) := by
+      intro b
+      rw [← hmulapp, heteroKron_mul, one_mul]
+    rw [Finset.sum_congr rfl fun b _ => by rw [hsplit b]]
+    exact sum_norm_sq_eq_of_sum_adjoint_mul_eq_one _ _ hQsum
+  -- the two perturbation estimates at a fixed question
+  have hP1 : ∀ q : X, 1 ≤ S q + 2 * Real.sqrt (dq q) + dq q := by
+    intro q
+    have h := sum_norm_sq_le_of_mass_le_one
+      (fun a : R₁ => applyOperatorToState (heteroKron 1 ((P q).effect a)) ψ)
+      (fun a : R₁ => applyOperatorToState (heteroKron ((Ac q).effect a) 1) ψ)
+      (by simpa [hS] using hSle q)
+    have hdist : (∑ a : R₁, ‖applyOperatorToState (heteroKron 1 ((P q).effect a)) ψ -
+        applyOperatorToState (heteroKron ((Ac q).effect a) 1) ψ‖ ^ 2) = dq q := by
+      rw [hdq]
+      refine Finset.sum_congr rfl fun a _ => ?_
+      rw [hlin, norm_sub_rev]
+    rw [hAcmass q, hdist] at h
+    simpa [hS] using h
+  have hP2 : ∀ q : X, S q ≤ C1 q + 2 * Real.sqrt (kq q) + kq q := by
+    intro q
+    have h := sum_norm_sq_le_of_mass_le_one
+      (fun ab : R₁ × R₂ => applyOperatorToState
+        (heteroKron 1 ((P q).effect ab.1 * (Q q).effect ab.2)) ψ)
+      (fun ab : R₁ × R₂ => applyOperatorToState
+        (heteroKron 1 ((Q q).effect ab.2 * (P q).effect ab.1)) ψ)
+      (by simpa [hC1] using hC1le q)
+    have hdist : (∑ ab : R₁ × R₂, ‖applyOperatorToState
+        (heteroKron 1 ((P q).effect ab.1 * (Q q).effect ab.2)) ψ -
+        applyOperatorToState
+          (heteroKron 1 ((Q q).effect ab.2 * (P q).effect ab.1)) ψ‖ ^ 2) = kq q := by
+      rw [hkq]
+      refine Finset.sum_congr rfl fun ab _ => ?_
+      rw [hsubr, hlin]
+    rw [hRv q, hdist] at h
+    simpa [hC1] using h
+  -- averaging the two estimates over the question
+  have hdnn : ∀ q : X, 0 ≤ dq q := fun q => Finset.sum_nonneg fun a _ => sq_nonneg _
+  have hknn : ∀ q : X, 0 ≤ kq q := fun q => Finset.sum_nonneg fun ab _ => sq_nonneg _
+  have hdavg : avgOver D dq ≤ d := hd
+  have hkavg : avgOver D kq ≤ K := by
+    refine le_trans (le_of_eq ?_) hK
+    refine (avgOver_congr D _ _ fun q => ?_).symm
+    exact Finset.sum_congr rfl fun ab _ => by rw [sub_zero]
+  have hJd : avgOver D (fun q => Real.sqrt (dq q)) ≤ Real.sqrt (avgOver D dq) :=
+    le_trans (le_abs_self _)
+      (MIPStarRE.LDT.Preliminaries.avgOver_abs_le_sqrt_of_pointwise D _ dq
+        (fun q => by rw [abs_of_nonneg (Real.sqrt_nonneg _)]) hdnn
+        (by rw [hD.weight_sum_eq_one]))
+  have hJk : avgOver D (fun q => Real.sqrt (kq q)) ≤ Real.sqrt (avgOver D kq) :=
+    le_trans (le_abs_self _)
+      (MIPStarRE.LDT.Preliminaries.avgOver_abs_le_sqrt_of_pointwise D _ kq
+        (fun q => by rw [abs_of_nonneg (Real.sqrt_nonneg _)]) hknn
+        (by rw [hD.weight_sum_eq_one]))
+  have hA1 : (1 : ℝ) ≤ avgOver D S + 2 * avgOver D (fun q => Real.sqrt (dq q)) +
+      avgOver D dq := by
+    have hmono := avgOver_mono D (fun _ : X => (1 : ℝ))
+      (fun q => S q + 2 * Real.sqrt (dq q) + dq q) hP1
+    rw [avgOver_const_of_isProbability D hD, avgOver_add, avgOver_add,
+      avgOver_const_mul] at hmono
+    exact hmono
+  have hA2 : avgOver D S ≤ avgOver D C1 + 2 * avgOver D (fun q => Real.sqrt (kq q)) +
+      avgOver D kq := by
+    have hmono := avgOver_mono D S
+      (fun q => C1 q + 2 * Real.sqrt (kq q) + kq q) hP2
+    rw [avgOver_add, avgOver_add, avgOver_const_mul] at hmono
+    exact hmono
+  have hsd : Real.sqrt (avgOver D dq) ≤ Real.sqrt d := Real.sqrt_le_sqrt hdavg
+  have hsk : Real.sqrt (avgOver D kq) ≤ Real.sqrt K := Real.sqrt_le_sqrt hkavg
+  linarith
+
+/-- The coarse pinched cross term exceeds the fine one by the colliding pairs of
+second codewords. Grouping the fine effects into the fibers of the evaluation
+map splits the coarse expectation into its diagonal, which is the fine
+expectation, and the pairs of distinct codewords agreeing at the sampled second
+question. This is the term comparison of step 5 of the proof of the adopted
+statement in `docs/paper-gaps/qpbt_pasting-product-error.tex`; blueprint
+`ch12_qpbt_games.tex:960-990`. -/
+theorem pinched_coarse_sub_fine_eq {R₁ R₂ Γ₂ ι : Type*}
+    [Fintype R₁] [DecidableEq R₁] [Fintype R₂] [DecidableEq R₂]
+    [Fintype Γ₂] [DecidableEq Γ₂] [Fintype ι] [DecidableEq ι]
+    (P : Measurement R₁ ι) (G : Measurement Γ₂ ι) (eval : Γ₂ → R₂)
+    (ψ : EuclideanSpace ℂ (ι × ι)) :
+    (∑ b : R₂, stateQForm ψ (heteroKron ((G.postprocess eval).effect b)
+        (∑ a : R₁, P.effect a * (G.postprocess eval).effect b * P.effect a))) -
+      (∑ g : Γ₂, stateQForm ψ (heteroKron (G.effect g)
+        (∑ a : R₁, P.effect a * G.effect g * P.effect a))) =
+    ∑ g : Γ₂, ∑ g' : Γ₂, if g = g' then 0 else
+      if eval g = eval g' then
+        ∑ a : R₁, stateQForm ψ (heteroKron (G.effect g')
+          (P.effect a * G.effect g * P.effect a)) else 0 := by
+  classical
+  set F : Γ₂ → Γ₂ → ℝ := fun g g' => ∑ a : R₁, stateQForm ψ
+    (heteroKron (G.effect g') (P.effect a * G.effect g * P.effect a)) with hF
+  -- the coarse term is the sum of the fine terms over the fibers
+  have hcoarse : ∀ b : R₂, stateQForm ψ
+      (heteroKron ((G.postprocess eval).effect b)
+        (∑ a : R₁, P.effect a * (G.postprocess eval).effect b * P.effect a)) =
+      ∑ g' ∈ Finset.univ.filter (fun g' : Γ₂ => eval g' = b),
+        ∑ g ∈ Finset.univ.filter (fun g : Γ₂ => eval g = b), F g g' := by
+    intro b
+    have hmid : (∑ a : R₁, P.effect a * (G.postprocess eval).effect b * P.effect a) =
+        ∑ g ∈ Finset.univ.filter (fun g : Γ₂ => eval g = b),
+          ∑ a : R₁, P.effect a * G.effect g * P.effect a := by
+      simp only [MIPStarRE.Quantum.Measurement.postprocess_effect, Finset.mul_sum,
+        Finset.sum_mul]
+      rw [Finset.sum_comm]
+    rw [hmid, MIPStarRE.Quantum.Measurement.postprocess_effect,
+      heteroKron_finset_sum_left, stateQForm_finset_sum]
+    refine Finset.sum_congr rfl fun g' _ => ?_
+    rw [heteroKron_finset_sum_right, stateQForm_finset_sum]
+    refine Finset.sum_congr rfl fun g _ => ?_
+    simp only [hF]
+    rw [heteroKron_finset_sum_right, stateQForm_finset_sum]
+  -- the fibers of the evaluation map assemble into the colliding pairs
+  have hfib : (∑ b : R₂, ∑ g' ∈ Finset.univ.filter (fun g' : Γ₂ => eval g' = b),
+      ∑ g ∈ Finset.univ.filter (fun g : Γ₂ => eval g = b), F g g') =
+      ∑ g' : Γ₂, ∑ g : Γ₂, if eval g = eval g' then F g g' else 0 := by
+    have hstep : ∀ b : R₂, (∑ g' ∈ Finset.univ.filter (fun g' : Γ₂ => eval g' = b),
+        ∑ g ∈ Finset.univ.filter (fun g : Γ₂ => eval g = b), F g g') =
+        ∑ g' : Γ₂, ∑ g : Γ₂,
+          if eval g' = b then (if eval g = b then F g g' else 0) else 0 := by
+      intro b
+      rw [Finset.sum_filter]
+      refine Finset.sum_congr rfl fun g' _ => ?_
+      by_cases h : eval g' = b
+      · simp [h, Finset.sum_filter]
+      · simp [h]
+    rw [Finset.sum_congr rfl fun b _ => hstep b]
+    rw [Finset.sum_comm]
+    refine Finset.sum_congr rfl fun g' _ => ?_
+    rw [Finset.sum_comm]
+    refine Finset.sum_congr rfl fun g _ => ?_
+    rw [Finset.sum_ite_eq Finset.univ (eval g')
+      (fun b => if eval g = b then F g g' else 0)]
+    simp
+  -- splitting off the diagonal
+  have hsplit : ∀ g g' : Γ₂, (if eval g = eval g' then F g g' else 0) =
+      (if g = g' then F g' g' else 0) +
+        (if g = g' then 0 else if eval g = eval g' then F g g' else 0) := by
+    intro g g'
+    by_cases h : g = g'
+    · subst h
+      simp
+    · simp [h]
+  have hdiag : (∑ g' : Γ₂, ∑ g : Γ₂, if g = g' then F g' g' else 0) =
+      ∑ g : Γ₂, F g g := by
+    refine Finset.sum_congr rfl fun g' _ => ?_
+    rw [Finset.sum_ite_eq' Finset.univ g' (fun _ => F g' g')]
+    simp
+  have hfine : (∑ g : Γ₂, stateQForm ψ (heteroKron (G.effect g)
+      (∑ a : R₁, P.effect a * G.effect g * P.effect a))) = ∑ g : Γ₂, F g g := by
+    refine Finset.sum_congr rfl fun g _ => ?_
+    simp only [hF]
+    rw [heteroKron_finset_sum_right, stateQForm_finset_sum]
+  rw [Finset.sum_congr rfl fun b _ => hcoarse b, hfib, hfine]
+  rw [Finset.sum_congr rfl fun g' _ =>
+    Finset.sum_congr rfl fun g _ => hsplit g g']
+  simp only [Finset.sum_add_distrib]
+  rw [hdiag]
+  have hcomm : (∑ g' : Γ₂, ∑ g : Γ₂, if g = g' then 0 else
+      if eval g = eval g' then F g g' else 0) =
+      ∑ g : Γ₂, ∑ g' : Γ₂, if g = g' then 0 else
+        if eval g = eval g' then F g g' else 0 := Finset.sum_comm
+  rw [hcomm]
+  simp only [hF]
+  ring
+
+end MIPStarRE.QPBT

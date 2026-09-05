@@ -1343,6 +1343,66 @@ postprocessing, and operator-contraction steps used to formalize
 	bounds the remaining sum by $\|\psi\|^2 = 1$.
 \end{proof}
 
+\begin{lemma}[Formalization support for Lemma~\ref{lem:pasting}]
+	\label{lem:pasting-ordered-product-mass-lower}
+	\lean{MIPStarRE.QPBT.mass_ordered_product_ge}
+	\leanok
+	\uses{def:pasting-tensor-placement, def:povm-distance}
+	Let $P_{a_1}$ and $Q_{a_2}$ be measurements placed on the second tensor
+	factor, with $Q$ projective, let $A_{a_1}$ be a projective measurement
+	placed on the first tensor factor, all three depending on a question drawn
+	from a distribution, and let $\ket{\psi}$ be a unit vector. If the averaged
+	squared distance between $A_{a_1} \ot \Id$ and $\Id \ot P_{a_1}$ is at most
+	$d$ and the averaged mass of the commutators $[P_{a_1}, Q_{a_2}]$ placed on
+	the second factor is at most $K$, then the averaged mass of the ordered
+	products satisfies
+	\[
+		\Exp \sum_{a_1, a_2}
+			\bigl\| (\Id \ot P_{a_1} Q_{a_2}) \ket{\psi} \bigr\|^2
+			\ge 1 - 2\sqrt{d} - d - 2\sqrt{K} - K\,.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:pasting-tensor-placement, def:povm-distance}
+	A projective measurement placed on one tensor factor carries the whole mass
+	of the state, so the first family has mass at least $1 - 2\sqrt{d} - d$ by
+	the perturbation estimate for the total mass of a finite family of vectors.
+	Placing the second family, projective and complete, to the left of the first
+	one preserves that mass. Restoring the order of the two placements changes
+	each vector by the corresponding commutator, and the same perturbation
+	estimate costs a further $2\sqrt{K} + K$. The averages of the square roots
+	are bounded by the square roots of the averages.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:pasting}]
+	\label{lem:pasting-pinched-collision-split}
+	\lean{MIPStarRE.QPBT.pinched_coarse_sub_fine_eq}
+	\leanok
+	\uses{def:pasting-tensor-placement}
+	Let $G_{g_2}$ be a measurement on the second tensor factor, let $Q_{a_2}$ be
+	its coarse-graining along an evaluation map, let $P_{a_1}$ be a measurement,
+	and let $\ket{\psi}$ be a state. Then
+	\[
+		\sum_{a_2} \bra{\psi} Q_{a_2} \ot
+				\sum_{a_1} P_{a_1} Q_{a_2} P_{a_1} \ket{\psi}
+			- \sum_{g_2} \bra{\psi} G_{g_2} \ot
+				\sum_{a_1} P_{a_1} G_{g_2} P_{a_1} \ket{\psi}
+			= \sum_{\substack{g_2 \neq g_2' \\ \text{colliding}}} \sum_{a_1}
+				\bra{\psi} G_{g_2'} \ot P_{a_1} G_{g_2} P_{a_1} \ket{\psi}\,,
+	\]
+	where a pair is colliding when the two codewords have the same evaluation.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:pasting-tensor-placement}
+	Each coarse effect is the sum of the fine effects over the fiber of the
+	evaluation map, and both tensor placement and the quadratic form are
+	additive, so the coarse sum is the sum over all pairs of fine codewords with
+	equal evaluations. The diagonal pairs reproduce the fine sum and the
+	remaining pairs are the colliding ones.
+\end{proof}
+
 \begin{lemma}[Close strategies have close values; Fact 4.32 in \cite{Natarajan2018NEEXP}]\label{lem:close-strategies-have-close-values}
 	\lean{MIPStarRE.QPBT.abs_value_sub_le_of_areClose}
 	\leanok
