@@ -179,4 +179,119 @@ theorem exists_coarse_commutator_bound :
   refine le_trans (le_of_eq ?_) (le_trans hconc (le_of_eq (by ring)))
   exact opFamilyDistSq_congr D _ _ _ _ ψ (fun q a => rfl) (fun q a => rfl)
 
+/-- Averaging a collision term against the conditional collision bound. A
+family of nonnegative weights indexed by pairs of distinct second codewords,
+of total mass at most one for every question of the first marginal, has
+average at most `η` once each pair is restricted to the second questions at
+which the two codewords agree. This is the averaging step used twice in the
+proof of the adopted statement in
+`docs/paper-gaps/qpbt_pasting-product-error.tex`, the hypothesis being the
+conditional collision assumption of `lem:pasting` written out; in step 4 to pass from the
+coarse to the fine second codeword family and in step 5 to discard the
+colliding part of the coarse cross term; blueprint
+`ch12_qpbt_games.tex:960-990`. -/
+theorem avgOver_collision_le {X Y₁ Y₂ R₂ Γ₂ : Type*}
+    [Fintype X] [DecidableEq X] [Fintype Y₁] [DecidableEq Y₁]
+    [Fintype Y₂] [DecidableEq Y₂] [Fintype R₂] [DecidableEq R₂]
+    [Fintype Γ₂] [DecidableEq Γ₂]
+    (D : Distribution ((X × Y₁) × Y₂)) (eval₂ : Γ₂ → Y₂ → R₂)
+    (c : (X × Y₁) → Γ₂ → Γ₂ → ℝ) (η : ℝ)
+    (hD : D.IsProbability) (hη : 0 ≤ η)
+    (hc : ∀ p g g', 0 ≤ c p g g')
+    (hmass : ∀ p, (∑ g : Γ₂, ∑ g' : Γ₂, if g = g' then 0 else c p g g') ≤ 1)
+    (hcoll : ∀ x y₁, 0 < (D.map Prod.fst).weight (x, y₁) →
+      ∀ g g' : Γ₂, g ≠ g' →
+        (∑ y₂ : Y₂, D.weight ((x, y₁), y₂) *
+          if eval₂ g y₂ = eval₂ g' y₂ then 1 else 0) ≤
+          η * (D.map Prod.fst).weight (x, y₁)) :
+    avgOver D (fun q => ∑ g : Γ₂, ∑ g' : Γ₂,
+      if g = g' then 0 else
+        if eval₂ g q.2 = eval₂ g' q.2 then c q.1 g g' else 0) ≤ η := by
+  classical
+  set FF : ((X × Y₁) × Y₂) → ℝ := fun q => ∑ g : Γ₂, ∑ g' : Γ₂,
+    if g = g' then 0 else
+      if eval₂ g q.2 = eval₂ g' q.2 then c q.1 g g' else 0 with hFF
+  have hmarg : ∀ p : X × Y₁,
+      (∑ y₂ : Y₂, D.weight (p, y₂)) = (D.map Prod.fst).weight p := by
+    intro p
+    have h1 : (D.map Prod.fst).weight p
+        = ∑ a ∈ Finset.univ.filter (fun a : (X × Y₁) × Y₂ => a.1 = p),
+            D.weight a := by
+      rw [Distribution.map_weight]
+      refine Finset.sum_subset
+        (Finset.filter_subset_filter _ (Finset.subset_univ _)) ?_
+      intro a ha hna
+      refine D.outsideSupport a fun hsupp => hna ?_
+      exact Finset.mem_filter.mpr ⟨hsupp, (Finset.mem_filter.mp ha).2⟩
+    rw [h1, Finset.sum_filter, Fintype.sum_prod_type, Finset.sum_comm]
+    exact Finset.sum_congr rfl fun y₂ _ => by simp
+  have hWnn : ∀ p : X × Y₁, 0 ≤ (D.map Prod.fst).weight p :=
+    fun p => (D.map Prod.fst).nonnegative p
+  have hWsum : (∑ p : X × Y₁, (D.map Prod.fst).weight p) = 1 := by
+    refine Distribution.IsProbability.weight_sum_univ_eq_one ?_
+    unfold Distribution.IsProbability
+    rw [Distribution.map_totalWeight]
+    exact hD
+  have hkey : ∀ (p : X × Y₁) (g g' : Γ₂),
+      (∑ y₂ : Y₂, D.weight (p, y₂) *
+        (if g = g' then 0 else
+          if eval₂ g y₂ = eval₂ g' y₂ then c p g g' else 0)) ≤
+        (if g = g' then 0 else c p g g') * (η * (D.map Prod.fst).weight p) := by
+    rintro ⟨x, y₁⟩ g g'
+    by_cases hgg : g = g'
+    · simp [hgg]
+    have hrw : ∀ y₂ : Y₂, D.weight ((x, y₁), y₂) *
+        (if g = g' then 0 else
+          if eval₂ g y₂ = eval₂ g' y₂ then c (x, y₁) g g' else 0) =
+        c (x, y₁) g g' * (D.weight ((x, y₁), y₂) *
+          (if eval₂ g y₂ = eval₂ g' y₂ then 1 else 0)) := by
+      intro y₂
+      rw [if_neg hgg]
+      by_cases hcol : eval₂ g y₂ = eval₂ g' y₂
+      · simp [hcol]
+        ring
+      · simp [hcol]
+    rw [Finset.sum_congr rfl (fun y₂ _ => hrw y₂), ← Finset.mul_sum, if_neg hgg]
+    rcases lt_or_eq_of_le (hWnn (x, y₁)) with hpos | hzero
+    · exact mul_le_mul_of_nonneg_left (hcoll x y₁ hpos g g' hgg) (hc (x, y₁) g g')
+    · have hz : ∀ y₂ : Y₂, D.weight ((x, y₁), y₂) = 0 := by
+        intro y₂
+        have hsum : (∑ z : Y₂, D.weight ((x, y₁), z)) = 0 := by
+          rw [hmarg (x, y₁), ← hzero]
+        exact le_antisymm
+          ((Finset.single_le_sum (fun z _ => D.nonnegative ((x, y₁), z))
+            (Finset.mem_univ y₂)).trans_eq hsum) (D.nonnegative _)
+      rw [← hzero]
+      simp [hz]
+  calc avgOver D FF
+      = ∑ q : (X × Y₁) × Y₂, D.weight q * FF q :=
+        (Distribution.sum_univ_eq_sum_support D (fun q => D.weight q * FF q)
+          (fun q hq => by rw [D.outsideSupport q hq, zero_mul])).symm
+    _ = ∑ p : X × Y₁, ∑ y₂ : Y₂, D.weight (p, y₂) * FF (p, y₂) :=
+        Fintype.sum_prod_type _
+    _ = ∑ p : X × Y₁, ∑ g : Γ₂, ∑ g' : Γ₂, ∑ y₂ : Y₂,
+          D.weight (p, y₂) *
+            (if g = g' then 0 else
+              if eval₂ g y₂ = eval₂ g' y₂ then c p g g' else 0) := by
+        refine Finset.sum_congr rfl fun p _ => ?_
+        simp only [hFF, Finset.mul_sum]
+        rw [Finset.sum_comm]
+        exact Finset.sum_congr rfl fun g _ => Finset.sum_comm
+    _ ≤ ∑ p : X × Y₁, ∑ g : Γ₂, ∑ g' : Γ₂,
+          (if g = g' then 0 else c p g g') *
+            (η * (D.map Prod.fst).weight p) :=
+        Finset.sum_le_sum fun p _ => Finset.sum_le_sum fun g _ =>
+          Finset.sum_le_sum fun g' _ => hkey p g g'
+    _ = ∑ p : X × Y₁,
+          (∑ g : Γ₂, ∑ g' : Γ₂, if g = g' then 0 else c p g g') *
+            (η * (D.map Prod.fst).weight p) := by
+        simp only [← Finset.sum_mul]
+    _ ≤ ∑ p : X × Y₁, 1 * (η * (D.map Prod.fst).weight p) :=
+        Finset.sum_le_sum fun p _ => mul_le_mul_of_nonneg_right (hmass p)
+          (mul_nonneg hη (hWnn p))
+    _ = η * ∑ p : X × Y₁, (D.map Prod.fst).weight p := by
+        rw [Finset.mul_sum]
+        exact Finset.sum_congr rfl fun p _ => by ring
+    _ = η := by rw [hWsum, mul_one]
+
 end MIPStarRE.QPBT

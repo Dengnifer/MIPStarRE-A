@@ -1115,6 +1115,33 @@ postprocessing, and operator-contraction steps used to formalize
 	twice its constant.
 \end{proof}
 
+\begin{lemma}[Formalization support for Lemma~\ref{lem:pasting}]
+	\label{lem:pasting-collision-averaging}
+	\lean{MIPStarRE.QPBT.avgOver_collision_le}
+	\leanok
+	\uses{lem:pasting}
+	In the setting of Lemma~\ref{lem:pasting}, let
+	$c_{x,y_1}(g_2, g_2') \ge 0$ be weights indexed by pairs of second
+	codewords, with $\sum_{g_2 \ne g_2'} c_{x,y_1}(g_2, g_2') \le 1$ for every
+	pair $(x, y_1)$. Then the average against $\mathcal D$ of the part of that
+	total carried by the colliding pairs is at most $\eta$:
+	\[
+		\E_{(x,y_1,y_2) \sim \mathcal D}
+			\sum_{\substack{g_2 \ne g_2' \\ g_2(y_2) = g_2'(y_2)}}
+				c_{x,y_1}(g_2, g_2') \le \eta\,.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	Exchange the average over $y_2$ with the sum over pairs. A pair of distinct
+	codewords contributes its weight times the mass of the second questions at
+	which the two codewords agree, which is at most $\eta$ times the marginal
+	mass of $(x, y_1)$ by the conditional collision hypothesis; a pair
+	$(x, y_1)$ of zero marginal mass contributes nothing. Bounding the total
+	weight of the pairs by one and summing the marginal over $(x, y_1)$ gives
+	the assertion.
+\end{proof}
+
 \begin{lemma}[Close strategies have close values; Fact 4.32 in \cite{Natarajan2018NEEXP}]\label{lem:close-strategies-have-close-values}
 	\lean{MIPStarRE.QPBT.abs_value_sub_le_of_areClose}
 	\leanok
