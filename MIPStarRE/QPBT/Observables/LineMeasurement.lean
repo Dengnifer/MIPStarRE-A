@@ -1,4 +1,5 @@
 import MIPStarRE.QPBT.Observables.PointConsistency
+import MIPStarRE.QPBT.Observables.LineMeasurement.LinePointConsistency
 
 /-!
 # Expanded line measurements
@@ -6,6 +7,19 @@ import MIPStarRE.QPBT.Observables.PointConsistency
 This module restricts low-degree encodings to canonical lines, constructs the
 expanded line measurements by convolution, and records their consistency with
 the expanded point measurements on all four register placements.
+
+The construction is split over the submodules `LineMeasurement.Restriction`
+(restriction of low-degree encodings to lines and its degree bound),
+`LineMeasurement.Projector` (the Pauli-register line projectors), and
+`LineMeasurement.Expanded` (the convolution measurement, its projectivity, and
+its vanishing outside the degree-`d` outcomes on axis lines),
+`LineMeasurement.SquareRootError` (passage from linear to square-root errors),
+`LineMeasurement.SelfConsistency` (item 1 on both bipartitions),
+`LineMeasurement.LinePointOverlap` (the exact overlap identity behind items 2
+and 3), `LineMeasurement.BipartiteTransport`,
+`LineMeasurement.EvalClassConsistency` (item 3), and
+`LineMeasurement.LinePointConsistency` (item 2). This file states the three
+consistency conclusions and the source's existential form.
 
 ## References
 
@@ -19,159 +33,13 @@ open scoped BigOperators Matrix MatrixOrder ComplexOrder
 
 namespace MIPStarRE.QPBT
 
-open MIPStarRE.LDT MIPStarRE.Quantum
+open MIPStarRE.LDT hiding Measurement
+open MIPStarRE.Quantum
 
 noncomputable section
 
-/-- Substitute the affine parameterization of a canonical line into a
-multivariate polynomial. This is the polynomial `g_h(u₀ + tv)` used in
-`def:expanded-line-measurement`, paper
-`14_analysis_of_the_pauli_basis_test.tex:535-557`, blueprint
-`ch14_qpbt_observables.tex:1034-1080`. -/
-noncomputable def polynomialOnLine (L : LdParams) (line : LineDesc L)
-    (g : MvPolynomial (Fin L.m) (ScalarQ L)) : Polynomial (ScalarQ L) :=
-  MvPolynomial.eval₂Hom _root_.Polynomial.C
-    (fun i : Fin L.m =>
-      (_root_.Polynomial.C (line.base i) +
-        _root_.Polynomial.X * _root_.Polynomial.C (line.direction i) :
-        Polynomial (ScalarQ L))) g
-
-/-- The degree-`m*d` coefficient list obtained by restricting `g` to `line`.
-This is the concrete restriction operation in `def:expanded-line-measurement`,
-paper `14_analysis_of_the_pauli_basis_test.tex:535-557`, blueprint
-`ch14_qpbt_observables.tex:1034-1080`. -/
-noncomputable def restrictToLine (L : LdParams) (line : LineDesc L)
-    (g : MvPolynomial (Fin L.m) (ScalarQ L)) : DegPoly L (L.m * L.d) :=
-  fun i => (polynomialOnLine L line g).coeff i.val
-
-/-- Restricting a multilinear low-degree encoding to a line has degree at most
-`m*d`. This is the degree justification in `def:expanded-line-measurement`,
-paper `14_analysis_of_the_pauli_basis_test.tex:535-557`, blueprint
-`ch14_qpbt_observables.tex:1034-1080`. -/
-theorem polynomialOnLine_lowDegreeEncoding_natDegree_le (L : LdParams)
-    (line : LineDesc L) (h : Cube L.m → ScalarQ L) :
-    (polynomialOnLine L line (lowDegreeEncoding h)).natDegree ≤ L.m * L.d := by
-  sorry
-
-/-- A degree-`m*d` coefficient list actually lies in the embedded degree-`d`
-subspace when all coefficients above `d` vanish. This is the coefficient
-interpretation of `deg_d(line) ⊆ deg_md(line)` in
-`def:expanded-line-measurement`, paper
-`14_analysis_of_the_pauli_basis_test.tex:548-557`. -/
-def DegPoly.FitsDegree {L : LdParams} {c : ℕ} (d : ℕ)
-    (f : DegPoly L c) : Prop :=
-  ∀ i : Fin (c + 1), d < i.val → f i = 0
-
-/-- The Pauli-register projector onto labels whose low-degree encoding
-restricts to `f` on `line`. This is `tau^{W,line}_f` in the proof of
-`lem:qld-comm-line-cons`, paper
-`14_analysis_of_the_pauli_basis_test.tex:535-557`, blueprint
-`ch14_qpbt_observables.tex:1034-1080`. -/
-noncomputable def tauLineProj (P : AdmissibleParams) (W : PauliKind)
-    (line : LineDesc P.toLdParams) (f : DegPoly P.toLdParams (P.m * P.d)) :
-    Op (PauliRegister P) :=
-  ∑ h ∈ Finset.univ.filter (fun h : PauliRegister P =>
-      restrictToLine P.toLdParams line (lowDegreeEncoding h) = f),
-    pauliProj W h
-
-namespace ProjectiveSetting
-
-variable {P : AdmissibleParams} {ε : ℝ}
-
-/-- The convolution of a strategy line effect with the corresponding
-Pauli-register line projector. This is the displayed definition of
-`hat M^(Line,W),line_f`, paper
-`14_analysis_of_the_pauli_basis_test.tex:530-557`, blueprint
-`ch14_qpbt_observables.tex:1034-1080`. -/
-noncomputable def expLineOp (S : ProjectiveSetting P ε) (side : PlayerSide)
-    (W : PauliKind) (line : LineDesc P.toLdParams)
-    (f : DegPoly P.toLdParams (P.m * P.d)) : Op (S.ExpandedLocalSpace side) :=
-  ∑ pair ∈ Finset.univ.filter
-      (fun pair : DegPoly P.toLdParams (P.m * P.d) ×
-          DegPoly P.toLdParams (P.m * P.d) => pair.1 + pair.2 = f),
-    heteroKron ((S.lineMeas side W line).effect pair.1)
-      (tauLineProj P W line pair.2)
-
-/-- Expanded line effects are positive semidefinite. This is the positivity
-obligation of `def:expanded-line-measurement`, paper
-`14_analysis_of_the_pauli_basis_test.tex:530-557`. -/
-theorem expLineOp_nonneg (S : ProjectiveSetting P ε) (side : PlayerSide)
-    (W : PauliKind) (line : LineDesc P.toLdParams)
-    (f : DegPoly P.toLdParams (P.m * P.d)) :
-    0 ≤ S.expLineOp side W line f := by
-  sorry
-
-/-- Expanded line effects sum to the identity. This is the completeness
-obligation of `def:expanded-line-measurement`, paper
-`14_analysis_of_the_pauli_basis_test.tex:530-557`. -/
-theorem expLineOp_sum_eq_one (S : ProjectiveSetting P ε) (side : PlayerSide)
-    (W : PauliKind) (line : LineDesc P.toLdParams) :
-    ∑ f, S.expLineOp side W line f = 1 := by
-  sorry
-
-/-- The concrete expanded line measurement exhibited in the proof of
-`lem:qld-comm-line-cons`. Paper
-`14_analysis_of_the_pauli_basis_test.tex:530-557`, blueprint
-`ch14_qpbt_observables.tex:1034-1080`. -/
-noncomputable def lineMeasExp (S : ProjectiveSetting P ε) (side : PlayerSide)
-    (W : PauliKind) (line : LineDesc P.toLdParams) :
-    Measurement (DegPoly P.toLdParams (P.m * P.d))
-      (S.ExpandedLocalSpace side) :=
-  Measurement.ofSumEqOne (S.expLineOp side W line)
-    (S.expLineOp_nonneg side W line) (S.expLineOp_sum_eq_one side W line)
-
-/-- The expanded line measurement is projective. This is the projectivity
-assertion in `def:expanded-line-measurement`, paper
-`14_analysis_of_the_pauli_basis_test.tex:530-557`. -/
-theorem lineMeasExp_isProjective (S : ProjectiveSetting P ε)
-    (side : PlayerSide) (W : PauliKind) (line : LineDesc P.toLdParams) :
-    MIPStarRE.QPBT.Measurement.IsProjective (S.lineMeasExp side W line) := by
-  sorry
-
-/-- On an axis line, expanded effects outside the embedded degree-`d` outcome
-space vanish. This is the last assertion of
-`def:expanded-line-measurement`, paper
-`14_analysis_of_the_pauli_basis_test.tex:548-557`, blueprint
-`ch14_qpbt_observables.tex:1034-1080`. -/
-theorem expLineOp_zero_of_not_deg_d (S : ProjectiveSetting P ε)
-    (side : PlayerSide) (W : PauliKind) (line : LineDesc P.toLdParams)
-    (haxis : line.kind = .axis) (f : DegPoly P.toLdParams (P.m * P.d))
-    (hf : ¬ f.FitsDegree P.d) :
-    S.expLineOp side W line f = 0 := by
-  sorry
-
-/-- Evaluation classes of the expanded line measurement, including the
-explicit `none` class for a non-evaluating canonical line. This is the
-completed bracket family used in item 3 of `lem:qld-comm-line-cons`, blueprint
-`ch14_qpbt_observables.tex:1120-1140`. -/
-noncomputable def lineEvalMeasExp (S : ProjectiveSetting P ε)
-    (side : PlayerSide) (W : PauliKind) (line : LineDesc P.toLdParams)
-    (u : Fin P.m → PauliScalar P) :
-    Measurement (Option (PauliScalar P)) (S.ExpandedLocalSpace side) :=
-  (S.lineMeasExp side W line).postprocess (evalOpt line u)
-
-/-- Complete an expanded point measurement with a zero `none` outcome. This
-is the right-hand family in the corrected item 3 of
-`lem:qld-comm-line-cons`, blueprint
-`ch14_qpbt_observables.tex:1120-1140`. -/
-noncomputable def pointMeasExpOption (S : ProjectiveSetting P ε)
-    (side : PlayerSide) (W : PauliKind) (u : Fin P.m → PauliScalar P) :
-    Measurement (Option (PauliScalar P)) (S.ExpandedLocalSpace side) :=
-  (S.pointMeasExp side W u).postprocess some
-
-/-- The point effect indexed by a line answer, with zero assigned when the
-answer has no evaluation at the sampled point. This is the zero-direction
-completion used in item 2 of `lem:qld-comm-line-cons`, blueprint
-`ch14_qpbt_observables.tex:1098-1118`. -/
-noncomputable def expPointEffectAtLineAnswer (S : ProjectiveSetting P ε)
-    (side : PlayerSide) (W : PauliKind) (line : LineDesc P.toLdParams)
-    (u : Fin P.m → PauliScalar P) (f : DegPoly P.toLdParams (P.m * P.d)) :
-    Op (S.ExpandedLocalSpace side) :=
-  match evalOpt line u f with
-  | some a => (S.pointMeasExp side W u).effect a
-  | none => 0
-
-end ProjectiveSetting
+local instance pauliEdgeNonemptyLineMeasurement : Nonempty PauliEdge :=
+  pauliEdge_nonempty
 
 /-- The square-root error exhibited by the expanded-line consistency proof.
 This is the final quantitative conclusion of `lem:qld-comm-line-cons`, paper
@@ -247,7 +115,38 @@ theorem expLine_self_cons :
           (fun sample f => S.place p₂
             ((S.lineMeasExp p₂.side W sample.1).effect f))
           S.psiHat ≤ C * deltaLine ε := by
-  sorry
+  have hcard : (1 : ℝ) ≤ Fintype.card PauliEdge := by
+    exact_mod_cast (Fintype.card_pos : 0 < Fintype.card PauliEdge)
+  refine ⟨2 * (Fintype.card PauliEdge : ℝ) + 4, by linarith, ?_⟩
+  intro P ε S p₁ p₂ hopp W
+  have key : ∀ x : ℝ, 0 ≤ x → x ≤ 2 * ((Fintype.card PauliEdge : ℝ) * ε) →
+      x ≤ 4 → x ≤ (2 * (Fintype.card PauliEdge : ℝ) + 4) * deltaLine ε := by
+    intro x hx0 hxε hx4
+    exact le_mul_sqrt_of_le_mul_of_le_four (by linarith) hx0
+      (by rw [mul_assoc]; exact hxε) hx4
+  cases p₁ <;> cases p₂ <;> simp only [Placement.IsOpposite] at hopp
+  · exact key _ (DistanceCalculus.opFamilyDistSq_nonneg _ _ _ _)
+      (by simpa only [Placement.side] using
+        ProjectiveSetting.expLineDist_aaBa_le S W)
+      (by simpa only [Placement.side] using
+        ProjectiveSetting.expLineDist_aaBa_le_four S W)
+  · rw [DistanceCalculus.opFamilyDistSq_symm]
+    exact key _ (DistanceCalculus.opFamilyDistSq_nonneg _ _ _ _)
+      (by simpa only [Placement.side] using
+        ProjectiveSetting.expLineDist_aaBa_le S W)
+      (by simpa only [Placement.side] using
+        ProjectiveSetting.expLineDist_aaBa_le_four S W)
+  · rw [DistanceCalculus.opFamilyDistSq_symm]
+    exact key _ (DistanceCalculus.opFamilyDistSq_nonneg _ _ _ _)
+      (by simpa only [Placement.side] using
+        ProjectiveSetting.expLineDist_abBb_le S W)
+      (by simpa only [Placement.side] using
+        ProjectiveSetting.expLineDist_abBb_le_four S W)
+  · exact key _ (DistanceCalculus.opFamilyDistSq_nonneg _ _ _ _)
+      (by simpa only [Placement.side] using
+        ProjectiveSetting.expLineDist_abBb_le S W)
+      (by simpa only [Placement.side] using
+        ProjectiveSetting.expLineDist_abBb_le_four S W)
 
 /-- An expanded line effect is consistent with itself followed by the
 expanded point effect selected by its value at the sampled point, with the
@@ -266,7 +165,51 @@ theorem expLine_point_cons :
               S.place p₂ (S.expPointEffectAtLineAnswer p₂.side W
                 sample.1 sample.2 f))
           S.psiHat ≤ C * deltaLine ε := by
-  sorry
+  obtain ⟨C₁, hC₁, h₁⟩ := WinImplications.win_low_degree_proof
+  obtain ⟨C₂, hC₂, h₂⟩ := WinImplications.win_low_degree_interchanged_proof
+  refine ⟨2 * (C₁ + C₂) + 4, by linarith, ?_⟩
+  intro P ε S p₁ p₂ hopp W
+  have hε : 0 ≤ ε := S.eps_nonneg
+  have key : ∀ (x a : ℝ), 1 ≤ a → a ≤ C₁ + C₂ → 0 ≤ x → x ≤ 2 * (a * ε) →
+      x ≤ 4 → x ≤ (2 * (C₁ + C₂) + 4) * deltaLine ε := by
+    intro x a ha haC hx0 hxa hx4
+    calc
+      x ≤ (2 * a + 4) * Real.sqrt ε :=
+        le_mul_sqrt_of_le_mul_of_le_four (by linarith) hx0
+          (by rw [mul_assoc]; exact hxa) hx4
+      _ ≤ (2 * (C₁ + C₂) + 4) * Real.sqrt ε := by
+        apply mul_le_mul_of_nonneg_right _ (Real.sqrt_nonneg ε)
+        linarith
+  have htwo : (0 : ℝ) ≤ 2 := by norm_num
+  cases p₁ <;> cases p₂ <;> simp only [Placement.IsOpposite] at hopp
+  · have hb := ((ProjectiveSetting.linePointDist_aaBa_le S W).trans
+      (ProjectiveSetting.evalClassDist_aaBa_le S W)).trans
+      (mul_le_mul_of_nonneg_left (h₁ P ε S hε W) htwo)
+    have h4 := (ProjectiveSetting.linePointDist_aaBa_le S W).trans
+      (ProjectiveSetting.evalClassDist_aaBa_le_four S W)
+    simpa only [Placement.side] using key _ C₁ hC₁ (by linarith)
+      (DistanceCalculus.opFamilyDistSq_nonneg _ _ _ _) hb h4
+  · have hb := ((ProjectiveSetting.linePointDist_baAa_le S W).trans
+      (ProjectiveSetting.evalClassDist_baAa_le S W)).trans
+      (mul_le_mul_of_nonneg_left (h₂ P ε S hε W) htwo)
+    have h4 := (ProjectiveSetting.linePointDist_baAa_le S W).trans
+      (ProjectiveSetting.evalClassDist_baAa_le_four S W)
+    simpa only [Placement.side] using key _ C₂ hC₂ (by linarith)
+      (DistanceCalculus.opFamilyDistSq_nonneg _ _ _ _) hb h4
+  · have hb := ((ProjectiveSetting.linePointDist_bbAb_le S W).trans
+      (ProjectiveSetting.evalClassDist_bbAb_le S W)).trans
+      (mul_le_mul_of_nonneg_left (h₂ P ε S hε W) htwo)
+    have h4 := (ProjectiveSetting.linePointDist_bbAb_le S W).trans
+      (ProjectiveSetting.evalClassDist_bbAb_le_four S W)
+    simpa only [Placement.side] using key _ C₂ hC₂ (by linarith)
+      (DistanceCalculus.opFamilyDistSq_nonneg _ _ _ _) hb h4
+  · have hb := ((ProjectiveSetting.linePointDist_abBb_le S W).trans
+      (ProjectiveSetting.evalClassDist_abBb_le S W)).trans
+      (mul_le_mul_of_nonneg_left (h₁ P ε S hε W) htwo)
+    have h4 := (ProjectiveSetting.linePointDist_abBb_le S W).trans
+      (ProjectiveSetting.evalClassDist_abBb_le_four S W)
+    simpa only [Placement.side] using key _ C₁ hC₁ (by linarith)
+      (DistanceCalculus.opFamilyDistSq_nonneg _ _ _ _) hb h4
 
 /-- Evaluation classes of expanded line measurements are consistent with the
 completed expanded point family, including the `none` class. This is item 3 of
@@ -283,7 +226,43 @@ theorem expLine_point_cons' :
           (fun sample a => S.place p₂
             ((S.pointMeasExpOption p₂.side W sample.2).effect a))
           S.psiHat ≤ C * deltaLine ε := by
-  sorry
+  obtain ⟨C₁, hC₁, h₁⟩ := WinImplications.win_low_degree_proof
+  obtain ⟨C₂, hC₂, h₂⟩ := WinImplications.win_low_degree_interchanged_proof
+  refine ⟨2 * (C₁ + C₂) + 4, by linarith, ?_⟩
+  intro P ε S p₁ p₂ hopp W
+  have hε : 0 ≤ ε := S.eps_nonneg
+  have key : ∀ (x a : ℝ), 1 ≤ a → a ≤ C₁ + C₂ → 0 ≤ x → x ≤ 2 * (a * ε) →
+      x ≤ 4 → x ≤ (2 * (C₁ + C₂) + 4) * deltaLine ε := by
+    intro x a ha haC hx0 hxa hx4
+    calc
+      x ≤ (2 * a + 4) * Real.sqrt ε :=
+        le_mul_sqrt_of_le_mul_of_le_four (by linarith) hx0
+          (by rw [mul_assoc]; exact hxa) hx4
+      _ ≤ (2 * (C₁ + C₂) + 4) * Real.sqrt ε := by
+        apply mul_le_mul_of_nonneg_right _ (Real.sqrt_nonneg ε)
+        linarith
+  have htwo : (0 : ℝ) ≤ 2 := by norm_num
+  cases p₁ <;> cases p₂ <;> simp only [Placement.IsOpposite] at hopp
+  · have hb := (ProjectiveSetting.evalClassDist_aaBa_le S W).trans
+      (mul_le_mul_of_nonneg_left (h₁ P ε S hε W) htwo)
+    simpa only [Placement.side] using key _ C₁ hC₁ (by linarith)
+      (DistanceCalculus.opFamilyDistSq_nonneg _ _ _ _) hb
+      (ProjectiveSetting.evalClassDist_aaBa_le_four S W)
+  · have hb := (ProjectiveSetting.evalClassDist_baAa_le S W).trans
+      (mul_le_mul_of_nonneg_left (h₂ P ε S hε W) htwo)
+    simpa only [Placement.side] using key _ C₂ hC₂ (by linarith)
+      (DistanceCalculus.opFamilyDistSq_nonneg _ _ _ _) hb
+      (ProjectiveSetting.evalClassDist_baAa_le_four S W)
+  · have hb := (ProjectiveSetting.evalClassDist_bbAb_le S W).trans
+      (mul_le_mul_of_nonneg_left (h₂ P ε S hε W) htwo)
+    simpa only [Placement.side] using key _ C₂ hC₂ (by linarith)
+      (DistanceCalculus.opFamilyDistSq_nonneg _ _ _ _) hb
+      (ProjectiveSetting.evalClassDist_bbAb_le_four S W)
+  · have hb := (ProjectiveSetting.evalClassDist_abBb_le S W).trans
+      (mul_le_mul_of_nonneg_left (h₁ P ε S hε W) htwo)
+    simpa only [Placement.side] using key _ C₁ hC₁ (by linarith)
+      (DistanceCalculus.opFamilyDistSq_nonneg _ _ _ _) hb
+      (ProjectiveSetting.evalClassDist_abBb_le_four S W)
 
 /-- The source's existential polynomial-error form, derived from the concrete
 expanded-line witnesses and square-root error. This is

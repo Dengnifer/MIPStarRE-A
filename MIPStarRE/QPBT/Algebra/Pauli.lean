@@ -45,6 +45,28 @@ character in their statement types. -/
 noncomputable def phaseSign (t : ZMod 2) : ℂ :=
   if t = 0 then 1 else -1
 
+/-- Formalization-only expansion of a sum over the binary field into its two
+terms. -/
+theorem sum_zmod_two {M : Type*} [AddCommMonoid M] (f : ZMod 2 → M) :
+    ∑ b, f b = f 0 + f 1 := by
+  calc
+    ∑ b, f b = ∑ i : Fin 2, f (ZMod.finEquiv 2 i) := by
+      exact Fintype.sum_equiv (ZMod.finEquiv 2).symm f
+        (fun i : Fin 2 => f (ZMod.finEquiv 2 i)) (fun _ => rfl)
+    _ = f (ZMod.finEquiv 2 0) + f (ZMod.finEquiv 2 1) := Fin.sum_univ_two _
+    _ = f 0 + f 1 := by rfl
+
+/-- Formalization-only case split for the binary field: every element is zero
+or one. -/
+theorem zmod_two_eq_zero_or_one (b : ZMod 2) : b = 0 ∨ b = 1 := by
+  by_cases hb : b = 0
+  · exact Or.inl hb
+  · right
+    have hval_ne : b.val ≠ 0 := (ZMod.val_ne_zero b).mpr hb
+    have hval_lt : b.val < 2 := ZMod.val_lt b
+    have hval : b.val = 1 := by omega
+    exact (ZMod.val_eq_one (by omega) b).mp hval
+
 /-- In characteristic two, the standard additive character is the sign
 character used by the binary Pauli definitions. -/
 theorem phaseSign_eq_ffChar (t : ZMod 2) :
@@ -92,29 +114,44 @@ theorem prod_phaseSign_binTrace_dotProduct {ι : Type*} [Fintype ι]
   congr 2
   simp [dotProduct]
 
-omit [DecidableEq K] [Algebra (ZMod 2) K] in
-private theorem inv_sqrt_card_mul_self :
-    (Real.sqrt (Fintype.card K : ℝ) : ℂ)⁻¹ *
-        (Real.sqrt (Fintype.card K : ℝ) : ℂ)⁻¹ =
-      (Fintype.card K : ℂ)⁻¹ := by
-  have hcard : 0 < (Fintype.card K : ℝ) := by positivity
-  calc
-    (Real.sqrt (Fintype.card K : ℝ) : ℂ)⁻¹ *
-          (Real.sqrt (Fintype.card K : ℝ) : ℂ)⁻¹ =
-        ((Real.sqrt (Fintype.card K : ℝ) : ℂ) ^ 2)⁻¹ := by
-      rw [pow_two, mul_inv_rev]
-    _ = ((Fintype.card K : ℝ) : ℂ)⁻¹ := by
-      rw [← Complex.ofReal_pow, Real.sq_sqrt hcard.le]
-    _ = (Fintype.card K : ℂ)⁻¹ := by norm_num
+/-- The complex amplitude `(√n)⁻¹` normalizing a uniform superposition over `n`
+basis vectors squares to `n⁻¹`.
 
-omit [DecidableEq K] [Algebra (ZMod 2) K] in
+This formalization-only normalization identity supports the Pauli normalizer
+of `def:EPR`, blueprint `ch11_qpbt_algebra.tex:494-528`, paper origin
+`references/qpbt-paper/04_preliminaries.tex:908-950`, and the seed-fiber and
+correlated-ancilla amplitudes of the direct low-degree transport. -/
+theorem inv_sqrt_natCast_mul_self (n : ℕ) :
+    (Real.sqrt (n : ℝ) : ℂ)⁻¹ * (Real.sqrt (n : ℝ) : ℂ)⁻¹ =
+      (n : ℂ)⁻¹ := by
+  calc
+    (Real.sqrt (n : ℝ) : ℂ)⁻¹ * (Real.sqrt (n : ℝ) : ℂ)⁻¹ =
+        ((Real.sqrt (n : ℝ) : ℂ) ^ 2)⁻¹ := by
+      rw [pow_two, mul_inv_rev]
+    _ = ((n : ℝ) : ℂ)⁻¹ := by
+      rw [← Complex.ofReal_pow, Real.sq_sqrt (Nat.cast_nonneg n)]
+    _ = (n : ℂ)⁻¹ := by norm_num
+
+/-- Conjugated form of `inv_sqrt_natCast_mul_self`: the normalizing amplitude
+`(√n)⁻¹` is real, so pairing it with its conjugate again gives `n⁻¹`.  This
+formalization-only auxiliary is the form in which the identity occurs in Born
+amplitudes, where the bra side carries the conjugate. -/
+theorem inv_sqrt_natCast_mul_conj (n : ℕ) :
+    (Real.sqrt (n : ℝ) : ℂ)⁻¹ *
+        (starRingEnd ℂ) (Real.sqrt (n : ℝ) : ℂ)⁻¹ =
+      (n : ℂ)⁻¹ := by
+  rw [show (starRingEnd ℂ) (Real.sqrt (n : ℝ) : ℂ)⁻¹ =
+      (Real.sqrt (n : ℝ) : ℂ)⁻¹ by simp]
+  exact inv_sqrt_natCast_mul_self n
+
+omit [Field K] [DecidableEq K] [Algebra (ZMod 2) K] in
 private theorem pauliNormalizer_mul_self {ι : Type*} [Fintype ι]
     [DecidableEq ι] :
     (∏ _i : ι, (Real.sqrt (Fintype.card K : ℝ) : ℂ)⁻¹) *
         (∏ _i : ι, (Real.sqrt (Fintype.card K : ℝ) : ℂ)⁻¹) =
       (Fintype.card (ι → K) : ℂ)⁻¹ := by
   simp only [Finset.prod_const, Finset.card_univ]
-  rw [← mul_pow, inv_sqrt_card_mul_self, inv_pow, Fintype.card_fun]
+  rw [← mul_pow, inv_sqrt_natCast_mul_self, inv_pow, Fintype.card_fun]
   norm_cast
 
 omit [Fintype K] [DecidableEq K] in
@@ -223,6 +260,80 @@ the second operator of `def:generalized-pauli` (blueprint lines 529-571; paper
 noncomputable def tauPhase (b : K) : Op K :=
   fun i j => if i = j then phaseSign (binTrace K (b * j)) else 0
 
+/-- The binary shift Pauli operator is Hermitian.  This is a
+formalization-only specialization of the generalized Pauli definition. -/
+theorem binaryTauShift_conjTranspose :
+    (tauShift (K := ZMod 2) 1)ᴴ = tauShift (K := ZMod 2) 1 := by
+  ext i j
+  have hiff : j = i + 1 ↔ i = j + 1 := by
+    rw [CharTwo.eq_add_iff_add_eq, eq_comm]
+  simp [tauShift, Matrix.conjTranspose_apply, hiff]
+
+/-- The binary phase Pauli operator is Hermitian.  This is a
+formalization-only specialization of the generalized Pauli definition. -/
+theorem binaryTauPhase_conjTranspose :
+    (tauPhase (K := ZMod 2) 1)ᴴ = tauPhase (K := ZMod 2) 1 := by
+  ext i j
+  rcases zmod_two_eq_zero_or_one i with rfl | rfl <;>
+    rcases zmod_two_eq_zero_or_one j with rfl | rfl <;>
+      norm_num [tauPhase, phaseSign, Matrix.conjTranspose_apply,
+        Algebra.trace_self_apply]
+
+/-- The binary shift Pauli operator is symmetric.  This formalization-only
+identity supports transport across an EPR state. -/
+theorem binaryTauShift_transpose :
+    (tauShift (K := ZMod 2) 1)ᵀ = tauShift (K := ZMod 2) 1 := by
+  ext i j
+  have hiff : j = i + 1 ↔ i = j + 1 := by
+    rw [CharTwo.eq_add_iff_add_eq, eq_comm]
+  simp [tauShift, Matrix.transpose_apply, hiff]
+
+/-- The binary phase Pauli operator is symmetric.  This formalization-only
+identity supports transport across an EPR state. -/
+theorem binaryTauPhase_transpose :
+    (tauPhase (K := ZMod 2) 1)ᵀ = tauPhase (K := ZMod 2) 1 := by
+  ext i j
+  rcases zmod_two_eq_zero_or_one i with rfl | rfl <;>
+    rcases zmod_two_eq_zero_or_one j with rfl | rfl <;>
+      norm_num [tauPhase, phaseSign, Matrix.transpose_apply,
+        Algebra.trace_self_apply]
+
+/-- The binary shift Pauli operator squares to the identity.  This is a
+formalization-only specialization of the generalized Pauli definition. -/
+theorem binaryTauShift_sq :
+    tauShift (K := ZMod 2) 1 * tauShift (K := ZMod 2) 1 = 1 := by
+  ext i j
+  simp only [Matrix.mul_apply]
+  rw [sum_zmod_two]
+  rcases zmod_two_eq_zero_or_one i with rfl | rfl <;>
+    rcases zmod_two_eq_zero_or_one j with rfl | rfl <;>
+      simp +decide [tauShift]
+
+/-- The binary phase Pauli operator squares to the identity.  This is a
+formalization-only specialization of the generalized Pauli definition. -/
+theorem binaryTauPhase_sq :
+    tauPhase (K := ZMod 2) 1 * tauPhase (K := ZMod 2) 1 = 1 := by
+  ext i j
+  simp only [Matrix.mul_apply]
+  rw [sum_zmod_two]
+  rcases zmod_two_eq_zero_or_one i with rfl | rfl <;>
+    rcases zmod_two_eq_zero_or_one j with rfl | rfl <;>
+      norm_num [tauPhase, phaseSign, Matrix.one_apply, Algebra.trace_self_apply]
+
+/-- The binary shift and phase Pauli operators anticommute.  This is a
+formalization-only specialization of their generalized definitions. -/
+theorem binaryTauShift_mul_tauPhase :
+    tauShift (K := ZMod 2) 1 * tauPhase (K := ZMod 2) 1 =
+      -(tauPhase (K := ZMod 2) 1 * tauShift (K := ZMod 2) 1) := by
+  ext i j
+  change
+    (∑ k, tauShift (K := ZMod 2) 1 i k * tauPhase (K := ZMod 2) 1 k j) =
+      -(∑ k, tauPhase (K := ZMod 2) 1 i k * tauShift (K := ZMod 2) 1 k j)
+  rw [sum_zmod_two, sum_zmod_two]
+  rcases zmod_two_eq_zero_or_one i with rfl | rfl <;>
+    rcases zmod_two_eq_zero_or_one j with rfl | rfl <;>
+      simp +decide [tauShift, tauPhase, phaseSign]
+
 /-- The single-qudit eigenvector coordinate used in the tensor-product basis;
 see `references/qpbt-paper/04_preliminaries.tex:1126-1161`. -/
 private noncomputable def singlePauliVec (W : PauliKind) (e x : K) : ℂ :=
@@ -280,6 +391,89 @@ private theorem pauliProj_X_apply {ι : Type*} [Fintype ι] [DecidableEq ι]
               phaseSign (binTrace K (dotProduct e y))) := by ring
     _ = _ := by
       rw [pauliNormalizer_mul_self, phaseSign_binTrace_dotProduct_add]
+
+/-- Generalized Pauli eigenspace projectors are symmetric matrices in
+characteristic two. For the `X` basis this uses `x + y = y + x` in the
+character formula; for the `Z` basis the projector is diagonal. This is the
+EPR-transport property used in `lem:qld-comm-cons`, paper
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:455-465`. -/
+theorem pauliProj_transpose {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (W : PauliKind) (e : ι → K) :
+    (pauliProj W e)ᵀ = pauliProj W e := by
+  ext x y
+  rw [Matrix.transpose_apply]
+  cases W with
+  | X =>
+      rw [pauliProj_X_apply, pauliProj_X_apply, add_comm]
+  | Z =>
+      have hreal (z : ι → K) : star (pauliVec .Z e z) = pauliVec .Z e z := by
+        simp [pauliVec, singlePauliVec]
+      change pauliVec .Z e y * star (pauliVec .Z e x) =
+        pauliVec .Z e x * star (pauliVec .Z e y)
+      rw [hreal x, hreal y, mul_comm]
+
+/-- Generalized Pauli eigenspace projectors are mutually orthogonal. This is
+the orthogonal-projector calculation used for the ancillary point measurement
+in `lem:qld-comm-cons`, paper
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:455-465`. -/
+theorem pauliProj_mul_pauliProj {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (W : PauliKind) (e f : ι → K) :
+    pauliProj W e * pauliProj W f =
+      if e = f then pauliProj W e else 0 := by
+  classical
+  ext x z
+  cases W with
+  | X =>
+      rw [Matrix.mul_apply]
+      simp_rw [pauliProj_X_apply]
+      have hsum :
+          (∑ y : ι → K,
+              ((Fintype.card (ι → K) : ℂ)⁻¹ *
+                  phaseSign (binTrace K (dotProduct e (x + y)))) *
+                ((Fintype.card (ι → K) : ℂ)⁻¹ *
+                  phaseSign (binTrace K (dotProduct f (y + z))))) =
+            (Fintype.card (ι → K) : ℂ)⁻¹ *
+                (Fintype.card (ι → K) : ℂ)⁻¹ *
+              phaseSign (binTrace K (dotProduct e x)) *
+              phaseSign (binTrace K (dotProduct f z)) *
+              ∑ y : ι → K,
+                phaseSign (binTrace K (dotProduct y (e + f))) := by
+        rw [Finset.mul_sum]
+        apply Finset.sum_congr rfl
+        intro y _
+        rw [← phaseSign_binTrace_dotProduct_add e x y,
+          ← phaseSign_binTrace_dotProduct_add f y z,
+          ← phaseSign_binTrace_dotProduct_add y e f,
+          dotProduct_comm e y, dotProduct_comm f y]
+        ring
+      rw [hsum, sum_phaseSign_dotProduct]
+      letI : CharP K 2 :=
+        (Algebra.charP_iff (ZMod 2) K 2).mp (ZMod.charP 2)
+      by_cases hef : e = f
+      · subst f
+        have hzero : e + e = 0 := by
+          funext i
+          exact CharTwo.add_self_eq_zero (e i)
+        rw [if_pos rfl, if_pos hzero]
+        rw [pauliProj_X_apply]
+        have hcard : (Fintype.card (ι → K) : ℂ) ≠ 0 := by positivity
+        field_simp
+        rw [← phaseSign_binTrace_dotProduct_add e x z]
+      · have hadd : e + f ≠ 0 := by
+          intro h
+          apply hef
+          funext i
+          exact CharTwo.add_eq_zero.mp (congrFun h i)
+        simp [hef, hadd]
+  | Z =>
+      have hz (g y : ι → K) :
+          pauliVec .Z g y = if y = g then 1 else 0 := by
+        simp [pauliVec, singlePauliVec, Fintype.prod_ite_zero, ← funext_iff]
+      by_cases hef : e = f
+      · subst f
+        simp [pauliProj, Matrix.mul_apply, Matrix.vecMulVec_apply, hz]
+      · have hfe : f ≠ e := Ne.symm hef
+        simp [pauliProj, Matrix.mul_apply, Matrix.vecMulVec_apply, hz, hef, hfe]
 
 /-- A compact operator-valued form of a generalized Pauli observable from
 `def:generalized-pauli`, blueprint `ch11_qpbt_algebra.tex:529-571`, paper origin

@@ -1,4 +1,5 @@
 import MIPStarRE.QPBT.Games.Consistency
+import MIPStarRE.QPBT.Games.DistributionMarginals
 import MIPStarRE.QPBT.Games.StrategyClasses
 import MIPStarRE.QPBT.Games.TypedCondLinear
 import MIPStarRE.QPBT.Observables.LineDefs
@@ -6,9 +7,10 @@ import MIPStarRE.QPBT.Observables.LineDefs
 /-!
 # Low-degree polynomial measurements and soundness
 
-This file defines the finite polynomial-measurement index and states the
-low-degree soundness theorem used by the QPBT combining argument. Polynomial
-outcomes are bounded multivariate polynomials.
+The low-degree question laws have uniform point and coordinate-index marginals,
+and every sampled line is incident to its paired point.  Polynomial outcomes
+are bounded multivariate polynomials, and the corresponding projective
+strategies satisfy the low-degree soundness theorem used in the QPBT argument.
 
 ## References
 
@@ -96,110 +98,18 @@ private theorem map_uniformDistribution_seed (L : LdParams) :
           rw [uniformDistribution_map_fst]
     _ = uniformDistribution (ScalarQ L) := uniformDistribution_map_snd
 
-/-- Formalization-only auxiliary lemma: an admissible field size is positive. -/
-private theorem ldParams_q_pos (L : LdParams) : 0 < L.q := by
-  obtain ⟨j, -, hj⟩ := L.hq
-  rw [hj]
-  exact Nat.pow_pos (by norm_num)
-
-/-- Formalization-only auxiliary lemma: the coordinate index of a scalar is
-read off from its binary representation. -/
-private theorem chiIndex_eq_iff (L : LdParams) (s : ScalarQ L) (i : Fin L.m) :
-    chiIndex L s = i ↔
-      ((binaryRepresentation L.model s).val / (L.q / L.m)) % L.m = i.val := by
-  rw [Fin.ext_iff]
-  simp [chiIndex]
-
-/-- Formalization-only auxiliary lemma: every fiber of the coordinate index has
-exactly `q / m` elements.  This is the balance property used in
-`def:ld-question-distribution`, blueprint `ch13_qpbt_test.tex:34-59`, paper
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`. -/
-private theorem card_chiIndex_fiber (L : LdParams) (i : Fin L.m) :
-    ((Finset.univ : Finset (ScalarQ L)).filter fun s => chiIndex L s = i).card
-      = L.q / L.m := by
-  have hq : 0 < L.q := ldParams_q_pos L
-  have hqk : L.m * (L.q / L.m) = L.q := Nat.mul_div_cancel' L.hdvd
-  have hkpos : 0 < L.q / L.m := by
-    rcases Nat.eq_zero_or_pos (L.q / L.m) with h | h
-    · rw [h, Nat.mul_zero] at hqk
-      omega
-    · exact h
-  have hstep1 :
-      ((Finset.univ : Finset (ScalarQ L)).filter fun s => chiIndex L s = i).card
-        = ((Finset.univ : Finset (Fin L.q)).filter
-            fun n => (n.val / (L.q / L.m)) % L.m = i.val).card := by
-    refine Finset.card_equiv (binaryRepresentation L.model) fun s => ?_
-    simp only [Finset.mem_filter, Finset.mem_univ, true_and, chiIndex_eq_iff]
-  have hstep2 :
-      ((Finset.range L.q).filter fun t => (t / (L.q / L.m)) % L.m = i.val)
-        = ((Finset.univ : Finset (Fin L.q)).filter
-            fun n => (n.val / (L.q / L.m)) % L.m = i.val).image Fin.val := by
-    ext t
-    simp only [Finset.mem_filter, Finset.mem_range, Finset.mem_image,
-      Finset.mem_univ, true_and]
-    constructor
-    · rintro ⟨ht, hP⟩
-      exact ⟨⟨t, ht⟩, hP, rfl⟩
-    · rintro ⟨n, hP, rfl⟩
-      exact ⟨n.isLt, hP⟩
-  have hstep3 :
-      ((Finset.range L.q).filter fun t => (t / (L.q / L.m)) % L.m = i.val)
-        = Finset.Ico (i.val * (L.q / L.m)) (i.val * (L.q / L.m) + L.q / L.m) := by
-    ext t
-    simp only [Finset.mem_filter, Finset.mem_range, Finset.mem_Ico]
-    constructor
-    · rintro ⟨htq, hP⟩
-      have hlt : t / (L.q / L.m) < L.m := by
-        rw [Nat.div_lt_iff_lt_mul hkpos]
-        omega
-      have hdiv : t / (L.q / L.m) = i.val := by
-        rwa [Nat.mod_eq_of_lt hlt] at hP
-      have hle : t / (L.q / L.m) * (L.q / L.m) ≤ t := Nat.div_mul_le_self t _
-      have hupper : t < (i.val + 1) * (L.q / L.m) := by
-        rw [← Nat.div_lt_iff_lt_mul hkpos, hdiv]
-        omega
-      have hexp : (i.val + 1) * (L.q / L.m)
-          = i.val * (L.q / L.m) + L.q / L.m := by ring
-      rw [hdiv] at hle
-      omega
-    · rintro ⟨hlo, hhi⟩
-      have hexp : (i.val + 1) * (L.q / L.m)
-          = i.val * (L.q / L.m) + L.q / L.m := by ring
-      have hdiv : t / (L.q / L.m) = i.val := by
-        have h1 : i.val ≤ t / (L.q / L.m) := (Nat.le_div_iff_mul_le hkpos).mpr hlo
-        have h2 : t / (L.q / L.m) < i.val + 1 := by
-          rw [Nat.div_lt_iff_lt_mul hkpos]
-          omega
-        omega
-      refine ⟨?_, ?_⟩
-      · have hbound : (i.val + 1) * (L.q / L.m) ≤ L.m * (L.q / L.m) :=
-          Nat.mul_le_mul_right _ i.isLt
-        omega
-      · rw [hdiv, Nat.mod_eq_of_lt i.isLt]
-  rw [hstep1, ← Finset.card_image_of_injective
-      ((Finset.univ : Finset (Fin L.q)).filter
-        fun n => (n.val / (L.q / L.m)) % L.m = i.val) Fin.val_injective,
-    ← hstep2, hstep3, Nat.card_Ico]
-  omega
-
-/-- Formalization-only auxiliary lemma: the coordinate index of a uniformly
-random scalar is uniform.  This is the balance assertion made in
-`def:ld-question-distribution`, blueprint `ch13_qpbt_test.tex:34-59`, paper
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`. -/
-private theorem map_uniformDistribution_chiIndex (L : LdParams) :
+/-- The coordinate index of a uniformly random scalar is uniform.  This is the
+balance assertion in `def:ld-question-distribution`, blueprint
+`lem:chi-index-uniform`, paper
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:215-221`.
+-/
+theorem uniformDistribution_map_chiIndex (L : LdParams) :
     (uniformDistribution (ScalarQ L)).map (chiIndex L) =
-      uniformDistribution (Fin L.m) :=
-  uniformDistribution_map_of_card_fiber _ (L.q / L.m) (card_chiIndex_fiber L)
-
-/-- Formalization-only auxiliary lemma: zeroing an initial segment of the
-coordinates is idempotent. -/
-private theorem prefixProjection_prefixProjection (L : LdParams) (i : Fin L.m)
-    (v : Fin L.m → ScalarQ L) :
-    prefixProjection i (prefixProjection i v) = prefixProjection i v := by
-  funext j
-  by_cases h : j.val < i.val
-  · simp only [prefixProjection, if_pos h]
-  · simp only [prefixProjection, if_neg h]
+      uniformDistribution (Fin L.m) := by
+  letI : Nonempty (Fin (L.q / L.m)) :=
+    Fin.pos_iff_nonempty.mp L.seedFiberCard_pos
+  exact uniformDistribution_map_fst_of_equiv
+    (seedFiberEquiv L) (chiIndex L) fun s => (seedFiberEquiv_fst L s).symm
 
 /-- `lem:alnf`: the point and axis-index marginals of the axis line-point
 distribution are uniform. Blueprint `ch13_qpbt_test.tex:101-106`, paper
@@ -226,7 +136,7 @@ theorem aLinePointDist_point_marginal_uniform (L : LdParams) :
           fun sample => chiIndex L sample.1.seed) = _
       rw [Distribution.map_map, Distribution.map_map, Distribution.map_map]
       rfl
-    rw [hmap, map_uniformDistribution_seed, map_uniformDistribution_chiIndex]
+    rw [hmap, map_uniformDistribution_seed, uniformDistribution_map_chiIndex]
 
 /-- The incidence conclusion of `lem:alnf`, blueprint
 `ch13_qpbt_test.tex:101-106`, paper
@@ -275,7 +185,7 @@ theorem dLinePointDist_point_marginal_uniform (L : LdParams) :
           fun sample => chiIndex L sample.1.seed) = _
       rw [Distribution.map_map, Distribution.map_map, Distribution.map_map]
       rfl
-    rw [hmap, map_uniformDistribution_seed, map_uniformDistribution_chiIndex]
+    rw [hmap, map_uniformDistribution_seed, uniformDistribution_map_chiIndex]
 
 /-- The incidence conclusion of `lem:dlnf`, blueprint
 `ch13_qpbt_test.tex:113-118`, paper
@@ -300,7 +210,7 @@ theorem dLinePointDist_mem_line (L : LdParams) :
           (LdSpace.point z)))
       (prefixProjection (chiIndex L (LdSpace.seed z))
         (prefixProjection (chiIndex L (LdSpace.seed z)) (LdSpace.direction z)))
-  rw [prefixProjection_prefixProjection, lineRepMap_apply_self]
+  rw [prefixProjection_idempotent, lineRepMap_apply_self]
   exact mem_linePoints_lineRepMap _ _
 
 /-- The diagonal direction in every sampled description has the prefix-zero
@@ -319,10 +229,13 @@ theorem dLinePointDist_prefix_zero (L : LdParams) :
   obtain ⟨s, -, rfl⟩ := Finset.mem_image.mp hsample
   exact LineDesc.diagonal_prefix_zero (dLineDescOf L s.1) rfl
 
-/-- The low-degree question sampler is the typed conditionally linear
-distribution on the complete type graph. This is `lem:ld-question-typed-cl`,
-blueprint `ch13_qpbt_test.tex:85-95`, which identifies the sampler with
-`def:typed-cl-distributions` (`ch12_qpbt_games.tex:1268-1272`); paper
+/-- The low-degree question sampler equals the distribution that the
+construction of `def:typed-cl-distributions` (`ch12_qpbt_games.tex:1400-1404`)
+produces from the family `ldCL` on the complete type graph. This is the
+distribution identity of `lem:ld-question-typed-cl`, blueprint
+`ch13_qpbt_test.tex:85-95`; the assertion that `ldCL` is a typed family of
+conditionally linear maps of one common level is not proved here, and that
+open obligation is tracked by issue #180. Paper
 `references/qpbt-paper/07_types.tex:84-94`. -/
 theorem ldQuestionDistribution_eq_typedCL (L : LdParams) :
     ldQuestionDistribution L =
@@ -379,7 +292,8 @@ noncomputable abbrev PolyIndex (m : ℕ) (K : Type*) [CommSemiring K]
 /-- A POVM indexed by one bounded multivariate polynomial. -/
 noncomputable abbrev PolyMeas (m : ℕ) (K : Type*) [CommSemiring K]
     [Fintype K] [DecidableEq K] (d : ℕ) (ι : Type*)
-    [Fintype ι] [DecidableEq ι] := Measurement (PolyIndex m K d) ι
+    [Fintype ι] [DecidableEq ι] :=
+  MIPStarRE.Quantum.Measurement (PolyIndex m K d) ι
 
 /-- The dependent family in `def:ld-meas`: component `i` may
 have its own coefficient field, number of variables, and degree bound.
@@ -389,7 +303,7 @@ noncomputable abbrev PolyMeasFamily (k : ℕ) (K : Fin k → Type*)
     [∀ i, CommSemiring (K i)] [∀ i, Fintype (K i)]
     [∀ i, DecidableEq (K i)] (m d : Fin k → ℕ) (ι : Type*)
     [Fintype ι] [DecidableEq ι] :=
-  Measurement ((i : Fin k) → PolyIndex (m i) (K i) (d i)) ι
+  MIPStarRE.Quantum.Measurement ((i : Fin k) → PolyIndex (m i) (K i) (d i)) ι
 
 /-- A simultaneous tuple of `L.k` bounded polynomial representatives. -/
 noncomputable abbrev PolyTuple (L : LdParams) :=
@@ -433,7 +347,7 @@ noncomputable def deltaLd (a b ε : ℝ) (q m d k : ℕ) : ℝ :=
       Real.rpow 2 (-(b * ((m * d : ℕ) : ℝ))))
 
 /-- Quantum soundness of the simultaneous classical low individual degree
-test (`lem:ld-soundness`, blueprint lines 135--160; paper theorem and proof
+test (`lem:ld-soundness`, blueprint lines 177--202; paper theorem and proof
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:413-458`).
 
 The first two consistency bounds compare the point-answer postprocessing of the
