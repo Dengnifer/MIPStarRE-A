@@ -299,7 +299,7 @@ theorem pauliCL_dline_eq (P : AdmissibleParams) (W : PauliKind)
     rw [prefixProjection_idem]
 
 /-- A successful sampled axis-line check gives the corresponding evaluation identity. -/
-theorem alineWinningCondition (P : AdmissibleParams) (W : PauliKind)
+theorem aline_winning_condition (P : AdmissibleParams) (W : PauliKind)
     (z : PauliSpace P) (f : Fin (P.d + 1) → PauliScalar P)
     (a : PauliScalar P)
     (hwin : pauliWinPredicate P
@@ -327,7 +327,7 @@ theorem alineWinningCondition (P : AdmissibleParams) (W : PauliKind)
   exact congrFun ht j
 
 /-- A successful sampled diagonal-line check gives the corresponding evaluation identity. -/
-theorem dlineWinningCondition (P : AdmissibleParams) (W : PauliKind)
+theorem dline_winning_condition (P : AdmissibleParams) (W : PauliKind)
     (z : PauliSpace P) (f : Fin (P.m * P.d + 1) → PauliScalar P)
     (a : PauliScalar P)
     (hwin : pauliWinPredicate P
@@ -383,7 +383,7 @@ theorem alineLabels_eq_of_win (P : AdmissibleParams) (W : PauliKind)
       (.alinePoly f) = DegPoly.padTo hpad f by rfl]
   rw [evalCoefficient_padTo hpad]
   change evalCoefficient f t = a
-  exact alineWinningCondition P W z f a (by
+  exact aline_winning_condition P W z f a (by
     simpa [pauliWinPredicate, validPauliAnswer] using hwin) t ht
 
 /-- Winning the sampled diagonal-line branch forces equality of exposed labels. -/
@@ -410,7 +410,7 @@ theorem dlineLabels_eq_of_win (P : AdmissibleParams) (W : PauliKind)
       (dLineDescOf P.toLdParams (ldDLineCL P.toLdParams (pauliToLd P W z)))
       (.dlinePoly f) = f by rfl]
   change evalCoefficient f t = a
-  exact dlineWinningCondition P W z f a (by
+  exact dline_winning_condition P W z f a (by
     simpa [pauliWinPredicate, validPauliAnswer] using hwin) t ht
 
 /-- The axis-line/point verifier edge in one Pauli basis. -/
