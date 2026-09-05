@@ -55,6 +55,19 @@ closed even when that hook is stale or absent.  A caller's explicit
 validation only: implicit tag following stays disabled, so publication remains
 limited to the explicit branch mapping.
 
+Every merge of `github/main` or a stack parent into an issue branch runs the
+merge-loss guard before the merge commit is created. The guard compares the
+pending index with `HEAD`, `MERGE_HEAD`, and every best merge base. It refuses
+an incoming path that disappeared without a branch-side deletion and an
+incoming-only entry restored wholesale to the unchanged branch blob. Paths
+recorded by Git as conflicts remain resolution decisions. The
+`reference-transaction` hook checks an automatic merge's commit object before
+the branch ref moves; `pre-commit` checks the pending index for a merge
+committed later. Neither path permits `MIPSTARRE_SKIP_HOOKS` to bypass this
+check. A lane checking an existing merge uses the primary checkout's
+`local/bin/merge_loss_guard.py --repo <worktree> --commit <merge>` so a stale
+branch copy cannot weaken the audit.
+
 * Branches: `issue-<github-number>-<slug>`, or `codex/issue-<number>-<slug>`
   from an agent; `pr_open.py` rejects what `git check-ref-format` would.
 * Titles, slugs and branch names are **bracket-free**: bot-generated branch
