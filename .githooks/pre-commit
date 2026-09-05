@@ -14,7 +14,7 @@ run_without_git_local_env() (
 )
 
 # Scope-control guard (EVOLUTION.md 2026-09-01, the issue-0007 overbuild):
-# workflow scaffolding is budgeted at <=400 changed lines per commit.  This is
+# workflow scaffolding is budgeted at <=1000 changed lines per commit (400 until the owner raised it on 2026-09-05).  This is
 # mechanical enforcement — repeated verbal correction of scaffolding bloat did
 # not stick, so the budget lives in the hook.  The override env var is granted
 # by the OWNER per commit, never self-granted by an agent session.  Runs
@@ -22,15 +22,22 @@ run_without_git_local_env() (
 # (numstat includes deletions; PR 7 round 3, F8), and before the
 # MIPSTARRE_SKIP_HOOKS exit so a blanket hook skip cannot launder the
 # owner-only budget override.
-# A main merge stages already-reviewed content.  Measure against MERGE_HEAD so
-# inherited main content counts zero while the PR's cumulative workflow diff
-# and merge-time edits still count.  A side-branch merge stays budgeted against
-# HEAD; only merge heads contained in github/main qualify for the exemption.
+# A merge that carries main stages already-reviewed content.  A merge head
+# contained in github/main measures the budget against MERGE_HEAD; a merge head
+# that contains github/main (a parent branch of a stack that already merged
+# main; owner decision 2026-09-05) measures it against github/main, so inherited
+# main content counts zero while the PR's cumulative workflow diff and any
+# side-branch content beyond main still count.  Any other side-branch merge
+# stays budgeted against HEAD.
 MERGE_HEAD_PATH="$(git rev-parse --git-path MERGE_HEAD)"
 if [ -f "$MERGE_HEAD_PATH" ] &&
     git merge-base --is-ancestor MERGE_HEAD refs/remotes/github/main 2>/dev/null; then
   BUDGET_BASE="$(git rev-parse MERGE_HEAD)"
   echo "MIPStarRE pre-commit: main-history merge; budget measured against MERGE_HEAD."
+elif [ -f "$MERGE_HEAD_PATH" ] &&
+    git merge-base --is-ancestor refs/remotes/github/main MERGE_HEAD 2>/dev/null; then
+  BUDGET_BASE="$(git rev-parse refs/remotes/github/main)"
+  echo "MIPStarRE pre-commit: non-main merge carrying github/main; workflow-layer content beyond github/main is budgeted."
 else
   BUDGET_BASE=""
   if [ -f "$MERGE_HEAD_PATH" ]; then
@@ -39,10 +46,11 @@ else
 fi
 INFRA_CHANGED="$(git diff --cached --numstat $BUDGET_BASE -- local/ .githooks/ \
   scripts/tests/test_dispatch.py scripts/tests/test_github_workflow.py \
-  scripts/tests/test_lake_root.py scripts/tests/test_ready_packets.py \
+  scripts/tests/test_lake_root.py scripts/tests/test_pre_push_hook.py \
+  scripts/tests/test_ready_packets.py \
   | awk '{added=$1; deleted=$2; if (added != "-") total+=added+deleted} END {print total+0}')"
-if [ "${INFRA_CHANGED:-0}" -gt 400 ] && [ "${MIPSTARRE_INFRA_OVERRIDE:-}" != "1" ]; then
-  echo "MIPStarRE pre-commit: staged workflow-layer change is ${INFRA_CHANGED} lines (budget: 400)."
+if [ "${INFRA_CHANGED:-0}" -gt 1000 ] && [ "${MIPSTARRE_INFRA_OVERRIDE:-}" != "1" ]; then
+  echo "MIPStarRE pre-commit: staged workflow-layer change is ${INFRA_CHANGED} lines (budget: 1000)."
   echo "Scope control (local/personas/main.md): the budget is PER EPISODE, not per"
   echo "commit — serial oversized commits are the same violation and show in the"
   echo "telemetry. Shrink the change, or ask the OWNER to authorize this commit"

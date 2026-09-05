@@ -274,6 +274,15 @@ Quantum soundness of a version of the classical low-degree test for polynomials 
 	Theorem~\ref{lem:ld-soundness} is imported: the proof above records the source's reduction to Theorem~4.7 of~\cite{Ji2021Quantum}, instantiated with that theorem's auxiliary parameter chosen as $m^3 d$ and followed by the extension to simultaneous $k$-tuples of~\cite{Natarajan2018NEEXP}, together with the two open facts required by the identification, which remain to be proved, --- the game correspondence and the parameter bound, detailed in~\cite{gap:qpbt_ld-dimension-divisibility}. The result of~\cite{Ji2020LowIndividualDegree} that underlies it is proved here as Theorem~\ref{thm:main-formal}: for every projective strategy passing the $(m,q,d)$ low individual degree test of Definition~\ref{def:low-individual-degree-test} with probability at least $1-\eps$, that theorem produces measurements in $\polymeas{m}{q}{d}$ satisfying consistency relations of the same shape as the three approximations of Theorem~\ref{lem:ld-soundness}. Theorem~\ref{lem:ld-soundness} is not a consequence of Theorem~\ref{thm:main-formal} alone: a derivation from it would require, in addition, an equivalence between the typed game $\mathfrak{G}^{\mathrm{ld}}_{(q,m,d,1)}$ and the $(m,q,d)$ test of Chapter~\ref{chap:test} --- matching the two question distributions, the two win conditions, and the two error functions --- together with the extension from $k = 1$ to general $k$ by the reduction of~\cite{Natarajan2018NEEXP} cited above. Neither implication is proved in this chapter, and the proof of Theorem~\ref{lem:ld-soundness} given above does not invoke Theorem~\ref{thm:main-formal}.
 \end{remark}
 
+% This remark records the formal status of the extension to general k;
+% it is not a statement from the paper.
+\begin{remark}[The extension to general $k$ is not coordinatewise]\label{rem:ld-soundness-simultaneity}
+	The extension from $k = 1$ to general $k$ cited in the proof of Theorem~\ref{lem:ld-soundness} is the reduction deriving Theorem~4.43 from Theorem~4.40 in \cite{Natarajan2018NEEXP}: the $k$ answer polynomials are combined into the single polynomial $(\alpha, u) \mapsto \sum_i \alpha_i g_i(u)$ in $m + k$ variables, whose restriction to a queried subspace has degree $d + 1$; the case $k = 1$ is applied once to the combined strategy at that degree, and the $k$ polynomials are recovered from the resulting measurement by exact linearity in $\alpha$ and the Schwartz--Zippel lemma at degree $d + 1$. It cannot be replaced by applying the case $k = 1$ to each coordinate separately and combining the coordinate measurements by the sandwich of Lemma~\ref{lem:ld-sandwich}: over $\F_{2^s}$ with $d = 1$ and $k = 2$ there are a joint point measurement and coordinate polynomial measurements, on the maximally entangled state, for which every coordinate relation of the theorem holds with error $0$ while every POVM with polynomial-pair outcomes has consistency defect at least $1 - 2/q$ against the joint point measurement; the computation is in \cite{gap:qpbt_ld-simultaneous-sandwich}. The formalization accordingly proves, for $k = 1$, the polynomial-tuple conclusion of Theorem~\ref{lem:ld-soundness} with its three consistency defects bounded by the error function of Theorem~\ref{thm:main-formal} at the auxiliary sampling parameter $2560000\,m^3d$ and pass bound $3\eps$, and not by $\delta_{\mathrm{ld}}$: the absorption of that error into $\delta_{\mathrm{ld}}$ is a separate estimate, and the identification of the two games remains open. The value $k = 1$ is the only one instantiated in the proof of Lemma~\ref{lem:qld-4-7}; the general case awaits a formalization of the combining reduction. The one-coordinate conclusion, obtained for the directly indexed game of Remark~\ref{rem:qld-4-7-divisibility}, is Lemma~\ref{lem:direct-ld-simultaneous-single}, and the coordinatewise soundness conclusion it rests on is Lemma~\ref{lem:direct-ld-coordinate-soundness}; the collision estimate for the directly indexed polynomial representatives is Lemma~\ref{lem:direct-ld-polynomial-agreement}.
+	% This remark carries no Lean metadata, since remarks are not blueprint
+	% dependency nodes; the Lean declarations are linked from the
+	% formalization support nodes cited above.
+\end{remark}
+
 \section{The Magic Square game}
 % Paper label sec:ms kept for cross-reference fidelity.
 \label{sec:ms}
@@ -632,6 +641,8 @@ The converse construction shows that any pair of anticommuting binary observable
 The Pauli basis test is the quantum low individual degree test of Natarajan and Vidick, in the slightly modified form introduced by Natarajan and Wright~\cite{Natarajan2018NEEXP}. Informally, the test certifies that the players share the state $\ket{\mathrm{EPR}_q}^{\ot M}$, where $M = 2^m$. On a question of type $(\mathsf{Pauli}, W)$ with $W \in \{X,Z\}$, a player is expected to measure the generalized Pauli basis POVM $\{\tau^W_h\}_{h \in \F_q^M}$ of Chapter~\ref{chap:qpbt-algebra} and report the outcome $h$. Most subtests probe limited information about $h$: given a point $u_W \in \F_q^m$, a player is expected to report the evaluation $g_h(u_W)$ of the low-degree encoding $g_h$ of $h$, and for a fixed basis $W$ these probes are checked against each other by the classical low individual degree game of Section~\ref{sec:ld-verifier}. Consistency \emph{between} the two bases is checked through two-outcome probes: given additionally $r_W \in \F_q$, a player reports $\tr(g_h(u_W)\, r_W) \in \F_2$. The two binary measurements obtained in this way for $W = X$ and $W = Z$ either commute or anticommute, according to the value $\gamma \in \F_2$ of Equation~\eqref{eq:gamma-value} below. When $\gamma = 0$ the verifier checks commutation directly by asking for both bits simultaneously; when $\gamma = 1$ the verifier checks anticommutation by playing the Magic Square game, using Theorem~\ref{thm:ms-from-ac}.
 
 \begin{definition}[Admissible parameters]\label{def:admissible}
+	\lean{MIPStarRE.QPBT.AdmissibleParams, MIPStarRE.QPBT.AdmissibleParams.one_le_m}
+	\leanok
 	\uses{def:admissible-size}
 	% The source introduces q, m, d in \N with \N the positive integers
 	% (references/qpbt-paper/04_preliminaries.tex:6 and
@@ -648,7 +659,11 @@ The Pauli basis test is the quantum low individual degree test of Natarajan and 
 \end{definition}
 
 \begin{definition}[Question distribution of the Pauli basis test]\label{def:pauli-question-distribution}
-	\uses{def:admissible, def:ld-question-distribution, def:ms-game, def:cl-func, def:cl-dist, def:graph-distribution}
+	\lean{MIPStarRE.QPBT.PauliType, MIPStarRE.QPBT.pauliCLLevel, MIPStarRE.QPBT.pauliCL}
+	\lean{MIPStarRE.QPBT.pauliEdges}
+	\lean{MIPStarRE.QPBT.pauliQuestionDistribution}
+	\leanok
+	\uses{def:admissible, def:ld-question-distribution, lem:ld-point-level, lem:ld-aline-level, lem:ld-dline-level, def:ms-game, def:cl-func, def:cl-dist, def:graph-distribution}
 	% Admissibility of the full tuple is required here, not only the divisibility m | q:
 	% the source parametrizes the Pauli basis test by the tuple qldparams introduced
 	% together with Definition def:admissible (references/qpbt-paper/
@@ -695,20 +710,24 @@ The Pauli basis test is the quantum low individual degree test of Natarajan and 
 
 \begin{lemma}[Conditionally linear Pauli question maps]\label{lem:pauli-question-cl-components}
 	\lean{MIPStarRE.QPBT.isCondLinear_pauliCL}
-	\uses{def:pauli-question-distribution, def:cl-func}
+	\leanok
+	\uses{def:pauli-question-distribution, def:cl-func, lem:ld-point-level, lem:ld-aline-level, lem:ld-dline-level}
 	For every Pauli question type $t \in \mathcal T^{\mathrm{pauli}}$, the map $L_t$ of Definition~\ref{def:pauli-question-distribution} is conditionally linear. Its levels are $1$ for the point maps, $2$ for the axis-parallel line maps, $3$ for the diagonal line maps, $1$ for the shared projection maps, and $0$ for the Pauli maps.
 \end{lemma}
 \begin{proof}
-	\uses{lem:ld-point-level, lem:ld-aline-level, lem:ld-dline-level}
+	\leanok
+	\uses{lem:ld-point-level, lem:ld-aline-level, lem:ld-dline-level, lem:cl-reindex, lem:cl-one-level-linear}
 	Transport the point, axis-parallel line, and diagonal line representations to the selected basis register. The shared projection onto the point and auxiliary registers is linear, while the Pauli maps are zero. These representations have levels $1$, $2$, $3$, $1$, and $0$, respectively.
 \end{proof}
 
 \begin{lemma}[Common level of the Pauli question maps]\label{lem:pauli-question-cl-family}
 	\lean{MIPStarRE.QPBT.isTypedCondLinearFamily_pauliCL}
+	\leanok
 	\uses{def:pauli-question-distribution, def:typed-cl-functions}
 	For every Pauli question type $t \in \mathcal T^{\mathrm{pauli}}$, the map $L_t$ of Definition~\ref{def:pauli-question-distribution} is a $3$-level CL function. Thus $L = \{L_t\}_{t \in \mathcal T^{\mathrm{pauli}}}$ is a finite typed family of $3$-level CL functions.
 \end{lemma}
 \begin{proof}
+	\leanok
 	\uses{lem:pauli-question-cl-components, lem:cl-level-mono}
 	The component maps have levels at most $3$ by Lemma~\ref{lem:pauli-question-cl-components}. Lemma~\ref{lem:cl-level-mono} raises each representation to the common level $3$.
 \end{proof}
@@ -733,8 +752,15 @@ The Pauli basis test is the quantum low individual degree test of Natarajan and 
 	Combine the common-level family assertion of Lemma~\ref{lem:pauli-question-cl-family} with the distribution identity of Lemma~\ref{lem:pauli-question-typed-equality}.
 \end{proof}
 
+\begin{remark}[Formalization status of Lemma~\ref{lem:pauli-question-typed-cl}]\label{rem:pauli-question-typed-cl-status}
+	The common-level assertion of Lemma~\ref{lem:pauli-question-typed-cl} is established by Lemma~\ref{lem:pauli-question-cl-family}; the distribution identity of Lemma~\ref{lem:pauli-question-typed-equality} remains open.
+\end{remark}
+
 \begin{definition}[Win predicate of the Pauli basis test]\label{def:pauli-win-predicate}
-	\uses{def:pauli-question-distribution, def:ld-win-predicate, def:ms-game, def:indicator-vector, def:admissible}
+	\lean{MIPStarRE.QPBT.PauliAnswer, MIPStarRE.QPBT.validPauliAnswer}
+	\lean{MIPStarRE.QPBT.pauliWinPredicate, MIPStarRE.QPBT.pauliBasisTest}
+	\leanok
+	\uses{def:pauli-question-distribution, def:ld-win-predicate, def:ms-game, def:indicator-vector, def:admissible, def:game, def:low-degree-encoding, def:subfield-trace}
 	Fix an admissible tuple $\mathsf{qldparams} = (q,m,d)$ (Definition~\ref{def:admissible}) and let $M = 2^m$. Answers in the game $\mathfrak{G}^{\mathrm{Pauli}}_{\mathsf{qldparams}}$ take the following forms, depending on the question type; answers not of the prescribed form are rejected.
 	% The paper's format table writes the line contents loosely as (u_W, s) and (u_W, s, v);
 	% by the sampling procedure the actual contents are the canonical pairs (u_0, s) and

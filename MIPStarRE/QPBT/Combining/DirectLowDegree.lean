@@ -5,6 +5,7 @@ import MIPStarRE.QPBT.Combining.DirectLowDegree.GameValue
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.PassConversion
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.SeedFiberValue
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Error
+import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Simultaneous
 
 /-!
 # The directly indexed low-degree game
@@ -38,9 +39,15 @@ pass hypothesis of the low individual degree theorem for every
 coordinate strategy.  `GameValue` supplies the rejection calculus relating the
 direct value to the LDT branch weights.  `Transport.Error` carries the
 scalar half of the transport: the auxiliary sampling parameter with which
-the low individual degree theorem is applied, bounds on the three terms of
-its error function, and the absorption of the resulting simultaneous-measurement
-estimate into the error function of `lem:ld-soundness`.
+the low individual degree theorem is applied, bounds on the three terms of its
+error function, and the absorption of the resulting simultaneous-measurement
+estimate into the error function of `lem:ld-soundness`; and
+`Transport.Simultaneous` applies that theorem to every coordinate, carries
+the Schwartz--Zippel collision estimate to the direct polynomial
+representatives, and proves the polynomial-tuple conclusion of
+`lem:ld-soundness` for simultaneity parameter `1`.  It also records why the
+coordinate conclusions do not determine simultaneous measurements for larger
+parameters.
 
 ## References
 

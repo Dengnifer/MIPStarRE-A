@@ -278,9 +278,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 3,
+  "comments": 6,
   "created_at": "2026-09-04T23:03:03Z",
-  "updated_at": "2026-09-05T07:57:29Z",
+  "updated_at": "2026-09-05T09:56:05Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
@@ -487,100 +487,6 @@
   "pinned_comment": null
  },
  {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/200",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/200/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/200/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/200/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/200",
-  "id": 5352119420,
-  "node_id": "I_kwDOUJyJf88AAAABPwLcfA",
-  "number": 200,
-  "title": "docs(QPBT): paper-gap audit round-4 leftovers (stale notready tag, uses lists, source-facing wording in Apply.lean and Unitary.lean, prose terminology)",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12015972669,
-    "node_id": "LA_kwDOUJyJf88AAAACzDUxPQ",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/documentation",
-    "name": "documentation",
-    "color": "0075ca",
-    "default": true,
-    "description": "Improvements or additions to documentation"
-   },
-   {
-    "id": 12025013422,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8krg",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/blueprint-sync",
-    "name": "blueprint-sync",
-    "color": "ededed",
-    "default": false,
-    "description": "Blueprint to Lean synchronization issue"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-04T19:19:45Z",
-  "updated_at": "2026-09-04T19:19:45Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 0,
-   "blocking": 0,
-   "total_blocking": 0
-  },
-  "body": "Deferred from PR 184 (#173) at its round cap; all eight round-4 findings are wording or tag-level: (1) ch15_qpbt_combining.tex:806 stale \\notready on exists_combinedPointsWitness; (2) ch16_qpbt_extraction.tex:44 add def:decoding-map to the decoder proof uses; (3) Combining/Apply.lean:95 docstring still says source-facing for the directly indexed auxiliary; (4) Extraction/Unitary.lean:75 docstring calls the conditional extraction theorem source-facing; (5) ch11_qpbt_algebra.tex:786 proof sketch uses progress-report language; (6) ch15:272 provider-side wording; (7) ch15:1786 support lemma narrates tag status; (8) ch16:389 exposes Lean declarations in visible prose. Docstring-only Lean edits are allowed here. Codex packet.",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/200/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/200/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/174",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/174/labels{/name}",
@@ -627,9 +533,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 0,
+  "comments": 1,
   "created_at": "2026-09-04T12:48:03Z",
-  "updated_at": "2026-09-04T12:48:03Z",
+  "updated_at": "2026-09-05T08:38:10Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
@@ -915,8 +821,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 17,
-   "completed": 12,
-   "percent_completed": 70
+   "completed": 13,
+   "percent_completed": 76
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
   "issue_dependencies_summary": {
@@ -1121,8 +1027,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 9,
-   "completed": 4,
-   "percent_completed": 44
+   "completed": 5,
+   "percent_completed": 55
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
   "issue_dependencies_summary": {
@@ -1374,9 +1280,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 3,
+  "comments": 5,
   "created_at": "2026-09-04T11:19:43Z",
-  "updated_at": "2026-09-05T07:50:55Z",
+  "updated_at": "2026-09-05T09:10:04Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
@@ -1388,7 +1294,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/164",
   "issue_dependencies_summary": {
-   "blocked_by": 2,
+   "blocked_by": 1,
    "total_blocked_by": 3,
    "blocking": 0,
    "total_blocking": 0
@@ -1473,7 +1379,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/166",
   "issue_dependencies_summary": {
-   "blocked_by": 1,
+   "blocked_by": 0,
    "total_blocked_by": 4,
    "blocking": 0,
    "total_blocking": 0
@@ -1493,91 +1399,6 @@
    "eyes": 0
   },
   "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/135/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/134",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/134/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/134/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/134/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/134",
-  "id": 5345309886,
-  "node_id": "I_kwDOUJyJf88AAAABPpr0vg",
-  "number": 134,
-  "title": "feat(QPBT/Combining): prove simultaneous polynomial measurements",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 4,
-  "created_at": "2026-09-04T07:07:50Z",
-  "updated_at": "2026-09-05T06:24:20Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/166",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 4,
-   "blocking": 1,
-   "total_blocking": 2
-  },
-  "body": "<!-- mipstarre-issue-key: stage43-ld-simultaneous-measurements -->\n### Target declarations\n\n- `MIPStarRE/QPBT/Combining/DirectLowDegree/Transport/Simultaneous.lean:new` -\n  a point-reference sandwich lemma: coordinate polynomial PVMs individually\n  consistent with the coordinate marginals of one joint point PVM yield a\n  tuple-polynomial POVM whose evaluated tuple is consistent with that joint\n  point PVM, with an explicit `C * k * sqrt(\u03b4 + m*d/q)` bound.\n- Same file - a two-sided sandwich lemma: coordinate PVMs on Alice and Bob that\n  are pairwise consistent across the state yield sandwiched tuple POVMs that\n  are globally consistent, with the same one-square-root error shape.\n- Same file - reuse `polynomialAgreement_avg_le_mdq` under #132's polynomial\n  equivalence to discharge the distinct-polynomial collision hypothesis.\n- Same file - `directCoordinateMainFormal`: invoke\n  `MIPStarRE.LDT.Test.mainFormal` for every `r : Fin D.k` with the strategy and\n  pass proof from #130/#131 and `directLdAuxParameter` from #133.\n- Same file - `exists_directSimultaneousPolynomialMeasurements`, constructing\n  `GA : DirectPolyMeasTuple D S.\u03b9A` and\n  `GB : DirectPolyMeasTuple D S.\u03b9B` whose two point-consistency defects and\n  global-consistency defect are bounded by the explicit transport envelope\n  absorbed in #133.\n\n### Paper and blueprint references\n\n- Simultaneous low-degree conclusion:\n  `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:413-458`\n  and `blueprint/src/chapter/ch13_qpbt_test.tex:139-164`.\n- Sandwiched simultaneous measurement:\n  `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:465-501` and\n  `MIPStarRE/QPBT/Games/Sandwich.lean:58-107`.\n- Mature scalar conclusion:\n  `references/ldt-paper/test_definition.tex:180-202` and\n  `MIPStarRE/LDT/Test/MainTheorem/MainFormal.lean:300-327`.\n- Reusable Schwartz--Zippel bound:\n  `MIPStarRE/LDT/Preliminaries/PolynomialAgreement.lean:90-163`.\n- The paper-gap note applying to this packet is\n  `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`; this is the product\n  argument that discharges its open simultaneity warning.\n\nIndependent applications of `mainFormal` do not make the resulting coordinate\nPVMs commute. Define the tuple effects by the existing palindromic\n`sandwichProduct`; prove measurement validity and transfer factors across the\nbipartite state one at a time. The global/global bound must be proved directly\nfrom the coordinate global consistencies, rather than by a second square-root\ntriangle through point measurements. This keeps the envelope within the\n`b = 1/80000` scale allowed by #133.\n\n### Dependencies\n\n- #130 and #131 supply coordinate strategies and `PassesLowIndividualDegreeTest`.\n- #132 supplies polynomial, measurement, and `ConsRel` conversions.\n- #133 supplies the auxiliary parameter and scalar envelope.\n- #49 must merge for the core distance calculus; #99 must merge for\n  `sandwichProduct_isMeasurement` and its insertion estimates.\n- The packet handles arbitrary positive `D.k`; it does not restrict the public\n  theorem to the route's special value `k = 1`.\n\n### Acceptance\n\n- `mainFormal` is applied separately to all coordinates with no extra\n  hypotheses, and finite choice produces the two coordinate families.\n- `GA` and `GB` are valid POVMs for arbitrary `D.k`; no commutativity of the\n  coordinate PVMs is assumed.\n- All three required defects have a proved explicit bound that #133 turns into\n  `deltaLd a b \u03b5 D.q D.m D.d D.k`.\n- Direct Lean checks, full build, paper-gap checks, exact-head CI, and\n  independent review pass with no `sorry`, axiom, bypass, bridge, or external\n  theorem import.\n\n### Scope notes\n\nOwn only the new simultaneity file and necessary imports. Generalize sandwich\nmachinery only in this file unless a minimal reusable theorem clearly belongs\nbeside #99 after its owner merges. Do not change `mainFormal`, `deltaLd`, either\npublic soundness signature, or the paper mirror. Main locators are from\n`c1c0af4`.\n\n---\nStage 4.3 proof packet under #47.\n\nPrerequisites are recorded as GitHub issue dependencies (blocked_by); the bullets above are commentary.\n",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/134/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/134/timeline",
   "performed_via_github_app": null,
   "state_reason": null,
   "pinned_comment": null
@@ -1969,9 +1790,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 2,
+  "comments": 6,
   "created_at": "2026-09-04T06:47:53Z",
-  "updated_at": "2026-09-05T07:59:14Z",
+  "updated_at": "2026-09-05T10:21:33Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
@@ -2408,7 +2229,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/165",
   "issue_dependencies_summary": {
-   "blocked_by": 3,
+   "blocked_by": 2,
    "total_blocked_by": 3,
    "blocking": 1,
    "total_blocking": 1
@@ -2493,7 +2314,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/165",
   "issue_dependencies_summary": {
-   "blocked_by": 1,
+   "blocked_by": 0,
    "total_blocked_by": 2,
    "blocking": 2,
    "total_blocking": 2
@@ -2578,7 +2399,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/165",
   "issue_dependencies_summary": {
-   "blocked_by": 1,
+   "blocked_by": 0,
    "total_blocked_by": 2,
    "blocking": 2,
    "total_blocking": 2
@@ -2663,7 +2484,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/164",
   "issue_dependencies_summary": {
-   "blocked_by": 1,
+   "blocked_by": 0,
    "total_blocked_by": 2,
    "blocking": 3,
    "total_blocking": 4
@@ -2748,7 +2569,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/164",
   "issue_dependencies_summary": {
-   "blocked_by": 1,
+   "blocked_by": 0,
    "total_blocked_by": 2,
    "blocking": 1,
    "total_blocking": 1
@@ -2768,91 +2589,6 @@
    "eyes": 0
   },
   "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/108/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/107",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/107/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/107/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/107/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/107",
-  "id": 5345109124,
-  "node_id": "I_kwDOUJyJf88AAAABPpfkhA",
-  "number": 107,
-  "title": "feat(QPBT/Test): prove Pauli sampler and canonical parameters",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-04T06:42:27Z",
-  "updated_at": "2026-09-04T12:02:23Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/164",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 2,
-   "blocking": 6,
-   "total_blocking": 6
-  },
-  "body": "<!-- mipstarre-issue-key: stage43-unfiled-test-pauli-sampler-params -->\n### Target declarations\n\n- `MIPStarRE/QPBT/Test/PauliBasisTest.lean:51` \u2014 `AdmissibleParams.one_le_m`\n- `MIPStarRE/QPBT/Test/PauliBasisTest.lean:261` \u2014 `isCondLinear_pauliCL`\n- `MIPStarRE/QPBT/Test/PauliBasisTest.lean:594` \u2014 `pauliBasisTest` (`\u03bc_prob`)\n- `MIPStarRE/QPBT/Test/CanonicalParams.lean:52` \u2014 `introParamsTuple_isAdmissible`\n- `MIPStarRE/QPBT/Test/CanonicalParams.lean:66` \u2014 `le_two_pow_introParams_m`\n\n### Paper and blueprint references\n\n- Pauli test admissibility, sampler, and verifier:\n  `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:908-1225`;\n  `blueprint/src/chapter/ch13_qpbt_test.tex:269-367`.\n- Canonical parameters:\n  `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1503-1562`;\n  `blueprint/src/chapter/ch13_qpbt_test.tex:470-515`.\n\n### Dependencies\n\n- #97 and #106 must merge first for generic and low-degree\n  conditional-linearity facts.\n- #64 supplies the axiom-clean binary Pauli definitions used by downstream\n  consumers, but is not a file-ownership dependency.\n\n### Acceptance\n\n- All five target declarations are proved with unchanged signatures and game definition.\n- `lake env lean` is green for `PauliBasisTest.lean`,\n  `CanonicalParams.lean`, and direct consumers.\n- Fully discharged source nodes receive proof-level `\\leanok`; the numerical\n  error-bound node remains pending for its later packet.\n- No new `sorry`, `admit`, axiom, prohibited bypass, model hypothesis, or\n  parameter bridge is introduced.\n- Full build, declaration checking, blueprint rendering, exact-head CI, and\n  independent review pass.\n\n### Scope notes\n\nOwn all three current holes in `PauliBasisTest.lean` and only the first two\nholes in `CanonicalParams.lean`. Preserve the exact question distribution,\nadmissibility fields, and natural-number parameter formulas. The later\nsoundness-transport packet owns `exists_deltaQld_introParams_bound` and must\ndepend on this issue. Main locators are from `c1c0af4`.\n\n---\nStage 4.3 proof packet under #47.\n\nPrerequisites are recorded as GitHub issue dependencies (blocked_by); the bullets above are commentary.\n",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/107/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/107/timeline",
   "performed_via_github_app": null,
   "state_reason": null,
   "pinned_comment": null
@@ -2904,9 +2640,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 5,
+  "comments": 6,
   "created_at": "2026-09-04T06:40:53Z",
-  "updated_at": "2026-09-05T06:40:11Z",
+  "updated_at": "2026-09-05T08:06:41Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
@@ -3408,8 +3144,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 24,
-   "completed": 18,
-   "percent_completed": 75
+   "completed": 19,
+   "percent_completed": 79
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/1",
   "issue_dependencies_summary": {
@@ -3968,9 +3704,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 121,
+  "comments": 123,
   "created_at": "2026-09-02T08:30:04Z",
-  "updated_at": "2026-09-05T07:15:45Z",
+  "updated_at": "2026-09-05T09:10:06Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
@@ -4052,9 +3788,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 27,
+  "comments": 28,
   "created_at": "2026-09-02T08:29:59Z",
-  "updated_at": "2026-09-05T06:40:19Z",
+  "updated_at": "2026-09-05T10:05:16Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
@@ -4070,7 +3806,7 @@
    "blocking": 0,
    "total_blocking": 0
   },
-  "body": "## Open now (answer in a comment)\n\n| id | question | reply with |\n|---|---|---|\n| \u2014 | none open (B5 resolved 2026-09-04 21:26Z: A\u2032, with latitude for A\u2033 if correct and sufficient) | |\n| B6 | PR 197 infra budget override or split | open |\n\nOlder comments that were superseded or were automatic alerts are hidden as outdated so the thread stays short.\n\n---\n\nThis issue is the single place where the operator session (qpbt-main) asks the owner for a decision. It stays open and pinned; nothing else uses the `needs-owner` label. The owner is a human who checks GitHub occasionally and wants to catch up in one minute; every comment here also reaches the owner by email.\n\n## When to post here \u2014 the test\n\nPost ONLY if all three hold:\n1. the item cannot move at all without the owner (credentials; the scope budget `MIPSTARRE_INFRA_OVERRIDE`; a mathematical design choice that changes what is being proved or what the paper claims);\n2. no protocol, persona rule, or standing briefing lets you decide it yourself \u2014 if one does, decide, record the reason in `results/telemetry/events.md`, and continue;\n3. you have already parked the item and have other queue work to do meanwhile.\n\n**Mathematical gaps are not owner blockers by default (owner rule, 2026-09-04 22:35Z; defaults confirmed 23:05Z).** When a source statement is found mathematically wrong, the operator does not open an item here. Instead: (1) dispatch a Fable 5.1 math-fix session (astra once available; if Fable's window is exhausted, Opus iterates and Fable checks the result before adoption) to produce a corrected statement that is *correct* (no counterexample; a proof sketch from the cited source theorem) and *sufficient* (supports every use in the paper and in the blueprint dependency graph, not only the consumer that exposed the gap), preferring the option closest to the source (smallest added hypothesis, no change to definitions or the game); (2) iterate between the mathematics and the Lean implementation: convergence means the corrected statement type-checks, the downstream consumers still compile, and the gap note carries the counterexample and the proof sketch \u2014 a machine-checked proof of the corrected theorem is the proving packet's job, not a convergence condition; (3) budget: at most 10 math-fix sessions per gap, or roughly 1.5 working days, then an item here with all attempts attached; escalate immediately only if the fix would change a paper definition or the game itself; (4) record every adopted correction as a paper-gap note plus blueprint fix, announce it in one line on #27 (corrected statement and note path) so the owner can veto, and log it in `results/telemetry/events.md` and `results/telemetry/design-decisions.md`.\n\nIf in doubt, decide it yourself and record it. A wrong self-decision is recoverable; an idle project is not. Reviewer findings, workflow ergonomics, tooling choices, and \"which order\" questions are never owner blockers.\n\n## Format \u2014 plain and short (hard cap: 10 lines above the fold)\n\nWrite for a human who has not seen the project in days. No jargon, no SHAs, no file paths above the fold, no protocol section numbers. Question first.\n\n```\n### BLOCKER <id> \u2014 <plain title, \u2264 8 words>\n<!-- owner-inbox id=<id> status=open -->\n**What I need from you:** one question, with the options (A/B/\u2026) and which one I recommend and why, in \u2264 3 sentences.\n**Why only you can decide:** one sentence.\n**What happens meanwhile:** one sentence (what I am working on instead; nothing is waiting idle).\n<details><summary>Details, if you want them</summary>\nIssue/PR numbers, heads, file paths, the full reasoning, alternatives considered.\n</details>\n```\n\n`<id>` is `B` + a running number (B1, B2, \u2026). One blocker per comment. Do not repeat a blocker; do not add commentary.\n\n**Owner \u2014 to answer:** reply with a comment starting with `DECISION <id>:` in plain words (e.g. `DECISION B3: agree`, or `DECISION B3: option B, and also \u2026`).\n\n**Operator \u2014 closing the loop:** at the start of every loop iteration and at every stage boundary, read this issue's comments (`gh api repos/Dengnifer/MIPStarRE-A/issues/26/comments --paginate`), find `DECISION <id>` comments for ids still `status=open`, act, then post `RESOLVED <id>: <one line>` and edit the original BLOCKER comment's marker to `status=resolved`. A blocker with no decision stays parked; never re-ask.\n\n**Everything else** (progress, stage reports, what merged / what is dispatched / what is next) goes to the pinned \"Progress log\" issue #27, not here.\n\n\n\n\n\n\n\n",
+  "body": "## Open now (answer in a comment)\n\n| id | question | reply with |\n|---|---|---|\n| \u2014 | none open (B5 resolved 2026-09-04 21:26Z: A\u2032, with latitude for A\u2033 if correct and sufficient) | |\n| B6 | PR 197 infra budget override or split | resolved (ceiling 1000, exemption fixed) |\n\nOlder comments that were superseded or were automatic alerts are hidden as outdated so the thread stays short.\n\n---\n\nThis issue is the single place where the operator session (qpbt-main) asks the owner for a decision. It stays open and pinned; nothing else uses the `needs-owner` label. The owner is a human who checks GitHub occasionally and wants to catch up in one minute; every comment here also reaches the owner by email.\n\n## When to post here \u2014 the test\n\nPost ONLY if all three hold:\n1. the item cannot move at all without the owner (credentials; the scope budget `MIPSTARRE_INFRA_OVERRIDE`; a mathematical design choice that changes what is being proved or what the paper claims);\n2. no protocol, persona rule, or standing briefing lets you decide it yourself \u2014 if one does, decide, record the reason in `results/telemetry/events.md`, and continue;\n3. you have already parked the item and have other queue work to do meanwhile.\n\n**Mathematical gaps are not owner blockers by default (owner rule, 2026-09-04 22:35Z; defaults confirmed 23:05Z).** When a source statement is found mathematically wrong, the operator does not open an item here. Instead: (1) dispatch a Fable 5.1 math-fix session (astra once available; if Fable's window is exhausted, Opus iterates and Fable checks the result before adoption) to produce a corrected statement that is *correct* (no counterexample; a proof sketch from the cited source theorem) and *sufficient* (supports every use in the paper and in the blueprint dependency graph, not only the consumer that exposed the gap), preferring the option closest to the source (smallest added hypothesis, no change to definitions or the game); (2) iterate between the mathematics and the Lean implementation: convergence means the corrected statement type-checks, the downstream consumers still compile, and the gap note carries the counterexample and the proof sketch \u2014 a machine-checked proof of the corrected theorem is the proving packet's job, not a convergence condition; (3) budget: at most 10 math-fix sessions per gap, or roughly 1.5 working days, then an item here with all attempts attached; escalate immediately only if the fix would change a paper definition or the game itself; (4) record every adopted correction as a paper-gap note plus blueprint fix, announce it in one line on #27 (corrected statement and note path) so the owner can veto, and log it in `results/telemetry/events.md` and `results/telemetry/design-decisions.md`.\n\nIf in doubt, decide it yourself and record it. A wrong self-decision is recoverable; an idle project is not. Reviewer findings, workflow ergonomics, tooling choices, and \"which order\" questions are never owner blockers.\n\n## Format \u2014 plain and short (hard cap: 10 lines above the fold)\n\nWrite for a human who has not seen the project in days. No jargon, no SHAs, no file paths above the fold, no protocol section numbers. Question first.\n\n```\n### BLOCKER <id> \u2014 <plain title, \u2264 8 words>\n<!-- owner-inbox id=<id> status=open -->\n**What I need from you:** one question, with the options (A/B/\u2026) and which one I recommend and why, in \u2264 3 sentences.\n**Why only you can decide:** one sentence.\n**What happens meanwhile:** one sentence (what I am working on instead; nothing is waiting idle).\n<details><summary>Details, if you want them</summary>\nIssue/PR numbers, heads, file paths, the full reasoning, alternatives considered.\n</details>\n```\n\n`<id>` is `B` + a running number (B1, B2, \u2026). One blocker per comment. Do not repeat a blocker; do not add commentary.\n\n**Owner \u2014 to answer:** reply with a comment starting with `DECISION <id>:` in plain words (e.g. `DECISION B3: agree`, or `DECISION B3: option B, and also \u2026`).\n\n**Operator \u2014 closing the loop:** at the start of every loop iteration and at every stage boundary, read this issue's comments (`gh api repos/Dengnifer/MIPStarRE-A/issues/26/comments --paginate`), find `DECISION <id>` comments for ids still `status=open`, act, then post `RESOLVED <id>: <one line>` and edit the original BLOCKER comment's marker to `status=resolved`. A blocker with no decision stays parked; never re-ask.\n\n**Everything else** (progress, stage reports, what merged / what is dispatched / what is next) goes to the pinned \"Progress log\" issue #27, not here.\n\n\n\n\n\n\n\n\n",
   "closed_by": null,
   "reactions": {
    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/26/reactions",

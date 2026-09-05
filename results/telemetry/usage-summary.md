@@ -1,20 +1,21 @@
-# Subagent token usage (generated 2026-09-05T07:13Z)
+# Subagent token usage (generated 2026-09-05T10:38Z)
 
 Codex totals count input + output tokens (cached input shown separately); Claude totals are the harness-reported subagent totals.
 
 | pool:model | role | sessions | total tokens | input | cached input | output | reasoning | tool uses | wall hours |
 |---|---|---|---|---|---|---|---|---|---|
+| claude:claude-fable-5-1 | math-fix | 1 | 206,974 | 0 | 0 | 0 | 0 | 42 | 0.4 |
 | claude:claude-fable-5-1 | mathfix | 3 | 1,344,540 | 0 | 0 | 0 | 0 | 101 | 2.6 |
-| claude:claude-fable-5-1 | prover | 21 | 6,959,343 | 0 | 0 | 0 | 0 | 325 | 15.5 |
+| claude:claude-fable-5-1 | prover | 37 | 6,959,343 | 0 | 0 | 0 | 0 | 325 | 15.5 |
 | claude:claude-fable-5-1 | repair | 2 | 758,703 | 0 | 0 | 0 | 0 | 125 | 1.5 |
 | claude:claude-opus-5 | cleanup | 1 | 155,865 | 0 | 0 | 0 | 0 | 65 | 0.5 |
 | claude:claude-opus-5 | orc | 1 | 157,204 | 0 | 0 | 0 | 0 | 72 | 0.7 |
-| claude:claude-opus-5 | prereview | 5 | 858,971 | 0 | 0 | 0 | 0 | 241 | 1.8 |
-| claude:claude-opus-5 | prover | 28 | 7,151,751 | 0 | 0 | 0 | 0 | 1024 | 23.9 |
+| claude:claude-opus-5 | prereview | 6 | 1,195,728 | 0 | 0 | 0 | 0 | 376 | 2.6 |
+| claude:claude-opus-5 | prover | 53 | 11,524,086 | 0 | 0 | 0 | 0 | 2238 | 35.5 |
 | claude:claude-opus-5 | refactor | 2 | 249,514 | 0 | 0 | 0 | 0 | 78 | 0.4 |
-| claude:claude-opus-5 | repair | 48 | 6,767,511 | 0 | 0 | 0 | 0 | 2099 | 13.2 |
-| claude:claude-opus-5 | review-fix | 5 | 650,112 | 0 | 0 | 0 | 0 | 218 | 1.4 |
-| claude:claude-opus-5 | reviewer | 4 | 840,649 | 0 | 0 | 0 | 0 | 159 | 1.4 |
+| claude:claude-opus-5 | repair | 52 | 7,014,865 | 0 | 0 | 0 | 0 | 2214 | 14.4 |
+| claude:claude-opus-5 | review-fix | 12 | 1,839,750 | 0 | 0 | 0 | 0 | 567 | 4.2 |
+| claude:claude-opus-5 | reviewer | 14 | 2,759,030 | 0 | 0 | 0 | 0 | 592 | 5.5 |
 | claude:claude-opus-5 | reviewer-shadow | 1 | 185,012 | 0 | 0 | 0 | 0 | 42 | 0.3 |
 | claude:claude-opus-5 | study | 1 | 83,405 | 0 | 0 | 0 | 0 | 24 | 0.1 |
 | codex:dengnifer@local | orc | 1 | 71,950,470 | 71,723,864 | 70,171,392 | 226,606 | 100,596 | 0 | 3.3 |
@@ -35,6 +36,6 @@ Codex totals count input + output tokens (cached input shown separately); Claude
 | codex:owner-operator | prover | 118 | 3,183,448,274 | 3,172,188,198 | 3,087,738,752 | 11,260,076 | 5,028,801 | 0 | 57.1 |
 | codex:owner-operator | reviewer | 250 | 1,288,315,831 | 1,280,085,595 | 1,207,140,864 | 8,230,236 | 5,193,859 | 0 | 66.1 |
 
-Grand totals: claude: 26,162,580, codex: 5,951,425,882
+Grand totals: claude: 34,434,019, codex: 5,951,425,882
 
-Claude records still marked running (no end record yet): 32
+Claude records still marked running (no end record yet): 6
