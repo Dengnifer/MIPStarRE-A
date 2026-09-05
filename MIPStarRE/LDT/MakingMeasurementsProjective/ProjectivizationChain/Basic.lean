@@ -55,8 +55,7 @@ cascade uses the slightly widened absorbed scalar
   (`thm:orthonormalization`).
 - Paper: `references/ldt-paper/preliminaries.tex` lines 1101–1170
   (`prop:completing-to-measurement`).
-- Blueprint: `blueprint/src/chapter/ch10_induction.tex` lines 350–360
-  (`eq:G-with-Q-A`).
+- Blueprint: `eq:G-with-Q-A`.
 - Blueprint: `blueprint/src/chapter/ch04_projective.tex`
   (orthonormalization theorem).
 -/

@@ -20,7 +20,7 @@ answers remain in the event masses when `msBitOrZero` and
 
 The Magic Square game is defined in
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:512-610`
-and `blueprint/src/chapter/ch13_qpbt_test.tex:201-222`.  These relations are the
+and blueprint `def:ms-game`.  These relations are the
 probabilistic input to the rigidity result cited at paper lines 612-652 from
 Coladangelo--Stark, Theorem 6.9.
 -/

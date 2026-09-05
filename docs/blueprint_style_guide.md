@@ -143,7 +143,9 @@ look as if the paper stated them.
 - If a public declaration is an auxiliary lemma introduced only for the Lean
   proof, make that status explicit. Its Lean docstring should say that it is a
   formalization-only auxiliary lemma and should name the nearby paper equation,
-  line range, or blueprint result it supports.
+  anchored paper passage, or blueprint label it supports. Blueprint line
+  ranges are derived review context, not stored docstring citations; resolve a
+  label with `python3 scripts/blueprint_citations.py resolve <label>`.
 - If such an auxiliary declaration is important enough to be referenced from
   the blueprint, give it a clearly subordinate blueprint node, for example
   `[Formalization support for ...]`, and state in the first sentence that the

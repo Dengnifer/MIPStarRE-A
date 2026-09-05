@@ -2,8 +2,7 @@ import MIPStarRE.QPBT.Algebra.SelfDualBasis
 
 /-! # Trace and coordinate identities for self-dual bases
 
-Source `lem:downsize_field` and `lem:one`; blueprint
-`blueprint/src/chapter/ch11_qpbt_algebra.tex:259-311`; paper
+Blueprint `lem:downsize_field` and `lem:one`; paper
 `references/qpbt-paper/04_preliminaries.tex:505-550,730-767`.
 -/
 
@@ -15,7 +14,7 @@ open MIPStarRE.LDT
 
 -- The paper-facing interface fixes `Fintype ι`; its value is needed only for the matrix sum.
 set_option linter.unusedFintypeInType false in
-/-- Item 1 of `lem:downsize_field`, blueprint `ch11_qpbt_algebra.tex:259-277`,
+/-- Item 1 of blueprint `lem:downsize_field`,
 paper `04_preliminaries.tex:509-550`. -/
 theorem basisCoord_apply_eq_trace {F K ι : Type*} [Field F] [Field K]
     [Algebra F K] [Fintype ι] [DecidableEq ι] (b : Module.Basis ι F K)
@@ -28,7 +27,7 @@ theorem basisCoord_apply_eq_trace {F K ι : Type*} [Field F] [Field K]
   rw [htraceMatrix] at h
   simpa using h
 
-/-- Item 2 of `lem:downsize_field`, blueprint `ch11_qpbt_algebra.tex:259-277`,
+/-- Item 2 of blueprint `lem:downsize_field`,
 paper `04_preliminaries.tex:509-550`. -/
 theorem trace_mul_eq_dotProduct_basisCoord {F K ι : Type*} [Field F] [Field K]
     [Algebra F K] [Fintype ι] [DecidableEq ι] (b : Module.Basis ι F K)
@@ -59,8 +58,8 @@ private theorem trace_sq_eq_trace {K : Type*} [Field K] [Finite K]
 
 -- The finite carrier is part of the fixed source-aligned interface for the binary field model.
 set_option linter.unusedFintypeInType false in
-/-- The trace-one assertion of `lem:one`, blueprint
-`ch11_qpbt_algebra.tex:290-311`, paper `04_preliminaries.tex:730-765`. -/
+/-- The trace-one assertion of blueprint
+`lem:one`, paper `04_preliminaries.tex:730-765`. -/
 theorem trace_basis_eq_one_of_selfDual_normal {K : Type*} [Field K] [Fintype K]
     [Algebra (ZMod 2) K] {k : ℕ} (hk : Odd k)
     (b : Module.Basis (Fin k) (ZMod 2) K)
@@ -92,8 +91,8 @@ theorem trace_basis_eq_one_of_selfDual_normal {K : Type*} [Field K] [Fintype K]
 
 -- The finite carrier is part of the fixed source-aligned interface for the binary field model.
 set_option linter.unusedFintypeInType false in
-/-- The all-ones coordinate assertion of `lem:one`, blueprint
-`ch11_qpbt_algebra.tex:290-311`, paper `04_preliminaries.tex:730-765`. -/
+/-- The all-ones coordinate assertion of blueprint
+`lem:one`, paper `04_preliminaries.tex:730-765`. -/
 theorem basisCoord_one_of_selfDual_normal {K : Type*} [Field K] [Fintype K]
     [Algebra (ZMod 2) K] {k : ℕ} (hk : Odd k)
     (b : Module.Basis (Fin k) (ZMod 2) K)
@@ -103,39 +102,39 @@ theorem basisCoord_one_of_selfDual_normal {K : Type*} [Field K] [Fintype K]
   rw [basisCoord_apply_eq_trace b hself]
   simpa using trace_basis_eq_one_of_selfDual_normal hk b hself hnormal i
 
-/-- Fixed-model specialization of the trace-one assertion in `lem:one`,
-blueprint `ch11_qpbt_algebra.tex:290-311`, paper `04_preliminaries.tex:730-765`. -/
+/-- Fixed-model specialization of the trace-one assertion in blueprint
+`lem:one`, paper `04_preliminaries.tex:730-765`. -/
 theorem fixedFieldModel_trace_basis_eq_one {q : ℕ} (F : FixedFieldModel q)
     (i : Fin F.basisDim) : Algebra.trace (ZMod 2) F.K (F.basis i) = 1 := by
   apply trace_basis_eq_one_of_selfDual_normal F.basisDimOdd F.basis
   · simpa [Basis.IsSelfDual, IsDualBasisPair] using F.selfDual
   · simpa [Basis.IsNormal, ZMod.card] using F.normal
 
-/-- Fixed-model specialization of the all-ones assertion in `lem:one`, blueprint
-`ch11_qpbt_algebra.tex:290-311`, paper `04_preliminaries.tex:730-765`. -/
+/-- Fixed-model specialization of the all-ones assertion in blueprint
+`lem:one`, paper `04_preliminaries.tex:730-765`. -/
 theorem fixedFieldModel_basisCoord_one {q : ℕ} (F : FixedFieldModel q) :
     F.binaryCoordinates 1 = fun _ => 1 := by
   apply basisCoord_one_of_selfDual_normal F.basisDimOdd F.basis
   · simpa [Basis.IsSelfDual, IsDualBasisPair] using F.selfDual
   · simpa [Basis.IsNormal, ZMod.card] using F.normal
 
-/-- Fixed-model specialization of item 1 of `lem:downsize_field`, blueprint
-`ch11_qpbt_algebra.tex:259-277`, paper `04_preliminaries.tex:509-550`. -/
+/-- Fixed-model specialization of item 1 of blueprint
+`lem:downsize_field`, paper `04_preliminaries.tex:509-550`. -/
 theorem basisCoord_apply_eq_fixedBinTrace {q : ℕ} (F : FixedFieldModel q)
     (x : F.K) (i : Fin F.basisDim) :
     F.basis.equivFun x i = fixedBinTrace F (x * F.basis i) := by
   apply basisCoord_apply_eq_trace F.basis
   simpa [Basis.IsSelfDual, IsDualBasisPair] using F.selfDual
 
-/-- Canonical binary-trace spelling of item 1 of `lem:downsize_field`, blueprint
-`ch11_qpbt_algebra.tex:259-277`, paper `04_preliminaries.tex:509-550`. -/
+/-- Canonical binary-trace spelling of item 1 of blueprint
+`lem:downsize_field`, paper `04_preliminaries.tex:509-550`. -/
 theorem kappa_apply_eq_binTrace {q : ℕ} (F : FixedFieldModel q)
     (x : F.K) (i : Fin F.basisDim) :
     F.binaryCoordinates x i = binTrace F.K (x * F.basis i) := by
   exact basisCoord_apply_eq_fixedBinTrace F x i
 
-/-- Canonical specialization of item 2 of `lem:downsize_field`, blueprint
-`ch11_qpbt_algebra.tex:259-277`, paper `04_preliminaries.tex:509-550`. -/
+/-- Canonical specialization of item 2 of blueprint
+`lem:downsize_field`, paper `04_preliminaries.tex:509-550`. -/
 theorem binTrace_mul_eq_dotProduct {q : ℕ} (F : FixedFieldModel q)
     (x y : F.K) :
     binTrace F.K (x * y) = dotProduct (F.binaryCoordinates x) (F.binaryCoordinates y) := by
@@ -143,7 +142,7 @@ theorem binTrace_mul_eq_dotProduct {q : ℕ} (F : FixedFieldModel q)
   simpa [Basis.IsSelfDual, IsDualBasisPair] using F.selfDual
 
 /-- Fixed-model coordinate vector for item 3 of
-`lem:downsize_field`, blueprint `ch11_qpbt_algebra.tex:259-277`, paper
+blueprint `lem:downsize_field`, paper
 `04_preliminaries.tex:509-550`. -/
 noncomputable def kappaVec {q : ℕ} {ι : Type*} (F : FixedFieldModel q)
     (v : ι → F.K) : ι × Fin F.basisDim → ZMod 2 :=
@@ -152,7 +151,7 @@ noncomputable def kappaVec {q : ℕ} {ι : Type*} (F : FixedFieldModel q)
 -- The fixed interface supplies decidable basis indices for the multiplication-table calculation.
 set_option linter.unusedDecidableInType false in
 /-- Basis-generic item 3 of `lem:downsize_field`, with no self-duality
-hypothesis; blueprint `ch11_qpbt_algebra.tex:259-277`, paper
+hypothesis; blueprint `lem:downsize_field`, paper
 `04_preliminaries.tex:509-550`. -/
 theorem chi_mulVec_basisCoord {F K : Type*} [Field F] [Field K] [Algebra F K]
     {κ : Type*} [Fintype κ] [DecidableEq κ] {s t : ℕ}
@@ -167,15 +166,15 @@ theorem chi_mulVec_basisCoord {F K : Type*} [Field F] [Field K] [Algebra F K]
   have h := congrFun (Algebra.leftMulMatrix_mulVec_repr b (M i j) (v j)) r
   simpa [Matrix.mulVec_apply_eq_sum, Algebra.leftMulMatrix_eq_repr_mul] using h
 
-/-- Fixed-model specialization of item 3 of `lem:downsize_field`, blueprint
-`ch11_qpbt_algebra.tex:259-277`, paper `04_preliminaries.tex:509-550`. -/
+/-- Fixed-model specialization of item 3 of blueprint
+`lem:downsize_field`, paper `04_preliminaries.tex:509-550`. -/
 theorem fixedFieldModel_chi_mulVec_basisCoord {q s t : ℕ} (F : FixedFieldModel q)
     (M : Matrix (Fin s) (Fin t) F.K) (v : Fin t → F.K) :
     chi F M *ᵥ kappaVec F v = kappaVec F (M *ᵥ v) := by
   exact chi_mulVec_basisCoord F.basis M v
 
 /-- The identity `chi_mulVec_kappa` expressing compatibility of `chi` and `kappa`;
-`lem:downsize_field`, blueprint `ch11_qpbt_algebra.tex:259-277`, paper
+blueprint `lem:downsize_field`, paper
 `04_preliminaries.tex:509-550`. -/
 theorem chi_mulVec_kappa {q s t : ℕ} (F : FixedFieldModel q)
     (M : Matrix (Fin s) (Fin t) F.K) (v : Fin t → F.K) :

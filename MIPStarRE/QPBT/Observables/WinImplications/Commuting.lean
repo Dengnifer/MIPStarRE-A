@@ -11,7 +11,7 @@ commuting Pauli tuples.
 The commuting-tuple consistency theorems prove items 4 and 5
 of `lem:qld-win-implications`
 from `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:192-267`
-and `blueprint/src/chapter/ch14_qpbt_observables.tex:505-660`.
+and blueprint `lem:qld-win-implications` and `lem:qld-win-implications-obs`.
 -/
 
 open scoped BigOperators Matrix ComplexOrder
@@ -132,7 +132,7 @@ private theorem commConsistency_eq_mismatch {P : AdmissibleParams} {ε : ℝ}
 /-- On commuting tuples, Pair/W answers agree with the corresponding
 component of Pair answers. This is item 4 of `lem:qld-win-implications`, paper
 `14_analysis_of_the_pauli_basis_test.tex:210-231`, blueprint
-`ch14_qpbt_observables.tex:567-582`. -/
+`lem:qld-win-implications`. -/
 theorem win_comm :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
@@ -331,7 +331,7 @@ theorem commConsConsistency_eq_mismatch {P : AdmissibleParams} {ε : ℝ}
 /-- On commuting tuples, trace-coarse-grained point answers agree with Pair/W
 answers. This is item 5 of `lem:qld-win-implications`, paper
 `14_analysis_of_the_pauli_basis_test.tex:232-239`, blueprint
-`ch14_qpbt_observables.tex:583-598`. -/
+`lem:qld-win-implications`. -/
 theorem win_comm_cons :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),

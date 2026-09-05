@@ -11,7 +11,7 @@ used by all seven exact winning implications.
 The formalization-only averaging and conditioning auxiliaries support items 1–7
 of `lem:qld-win-implications`
 from `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:192-267`
-and `blueprint/src/chapter/ch14_qpbt_observables.tex:505-660`.
+and blueprint `lem:qld-win-implications` and `lem:qld-win-implications-obs`.
 -/
 
 open scoped BigOperators Matrix ComplexOrder
