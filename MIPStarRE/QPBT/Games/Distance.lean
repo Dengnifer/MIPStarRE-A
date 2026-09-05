@@ -10,7 +10,7 @@ estimates to later proof stages.
 ## References
 
 These are `def:state-distance` and `def:povm-distance` in
-`blueprint/src/chapter/ch12_qpbt_games.tex:171-220`; the paper origin is
+`blueprint/src/chapter/ch12_qpbt_games.tex:187-226`; the paper origin is
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:219-271`.
 -/
 
@@ -23,7 +23,7 @@ open MIPStarRE.Quantum
 
 /--
 Squared Euclidean distance between pure states.  Blueprint `def:state-distance`
-(`blueprint/src/chapter/ch12_qpbt_games.tex:171-179`), paper origin
+(`blueprint/src/chapter/ch12_qpbt_games.tex:187-193`), paper origin
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:219-271`.
 -/
 noncomputable def stateDistSq {ι : Type*} [Fintype ι]
@@ -33,7 +33,7 @@ noncomputable def stateDistSq {ι : Type*} [Fintype ι]
 
 /--
 Average squared state-dependent distance between two operator families.  This
-is `def:povm-distance` in `blueprint/src/chapter/ch12_qpbt_games.tex:203-210`,
+is `def:povm-distance` in `blueprint/src/chapter/ch12_qpbt_games.tex:219-226`,
 with paper origin `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:219-271`.
 -/
 noncomputable def opFamilyDistSq {X α ι : Type*}

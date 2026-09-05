@@ -47,7 +47,7 @@ BEFORE=$(git -C "$W" merge-base github/main HEAD)
 if [ "$SKIP_DISPATCH" != 1 ]; then
   # concurrency gate: the codex API rate-limits (HTTP 429) above ~5 sessions
   MAX_CODEX="${MAX_CODEX:-7}"
-  cap() { if [ -n "${MAX_CODEX_FIXED:-}" ]; then echo "$MAX_CODEX_FIXED"; return; fi; b=$(pgrep -fa codex | grep "MIPStarRE-auto\|/tmp/qpbt-" | grep -o "\-C /[^ ]*" | sort -u | wc -l); b=$((b+1)); c=$((9-b)); [ "$c" -lt 4 ] && c=4; echo "$c"; }
+  cap() { if [ -s "$HOME/.cache/mipstarre-dev/watchdog/max-codex" ]; then cat "$HOME/.cache/mipstarre-dev/watchdog/max-codex"; return; fi; if [ -n "${MAX_CODEX_FIXED:-}" ]; then echo "$MAX_CODEX_FIXED"; return; fi; b=$(pgrep -fa codex | grep "MIPStarRE-auto\|/tmp/qpbt-" | grep -o "\-C /[^ ]*" | sort -u | wc -l); b=$((b+1)); c=$((9-b)); [ "$c" -lt 4 ] && c=4; echo "$c"; }
   live() { pgrep -fa 'codex exec' | grep -o '\-C [^ ]*' | sort -u | wc -l; }
   exec 9>"$HOME/.cache/mipstarre-dev/watchdog/launch.lock"; flock 9
   for _ in $(seq 1 720); do [ "$(live)" -lt "$(cap)" ] && break; sleep 30; done
@@ -88,18 +88,23 @@ PRB="$STATE/$N.pr.md"
 TITLE=$(gh issue view "$N" --json title --jq .title)
 PR=$(local/bin/pr_open.py --branch "$BR" --issue "$N" --title "$TITLE" --body-file "$PRB" --label formalization) || {
   log "pr_open failed; pushing directly and retrying (pre-push output in $STATE/$N.push.log)"
-  git -C "$W" push github "refs/heads/$BR:refs/heads/$BR" > "$STATE/$N.push.log" 2>&1 || fail "direct push failed (see $STATE/$N.push.log)"
+  REMOTE_SHA=$(git -C "$W" ls-remote github "refs/heads/$BR" | cut -f1); [ -n "$REMOTE_SHA" ] || REMOTE_SHA=0000000000000000000000000000000000000000
+  ( cd "$W" && printf "%s %s %s %s\n" "refs/heads/$BR" "$(git rev-parse HEAD)" "refs/heads/$BR" "$REMOTE_SHA" | sh .githooks/pre-push github "$(git remote get-url github)" ) > "$STATE/$N.push.log" 2>&1 || true
+  grep -q "MIPStarRE pre-push: ok" "$STATE/$N.push.log" || fail "pre-push gate failed (see $STATE/$N.push.log)"
+  MIPSTARRE_SKIP_HOOKS=1 git -C "$W" push github "refs/heads/$BR:refs/heads/$BR" >> "$STATE/$N.push.log" 2>&1 || fail "direct push failed (see $STATE/$N.push.log)"
   PR=$(local/bin/pr_open.py --branch "$BR" --issue "$N" --title "$TITLE" --body-file "$PRB" --label formalization) || fail "pr_open failed after direct push"
 }
 echo "PR=$PR"
 for _ in $(seq 1 30); do [ "$(gh pr view "$PR" --json headRefOid --jq .headRefOid)" = "$AFTER" ] && break; sleep 10; done
 log "ci.sh $PR"; local/bin/ci.sh "$PR" >> "$STATE/$N.ci.log" 2>&1; echo "CI_EXIT=$?"
 MAXR="${MAX_CODEX:-7}"
-cap() { if [ -n "${MAX_CODEX_FIXED:-}" ]; then echo "$MAX_CODEX_FIXED"; return; fi; b=$(pgrep -fa codex | grep "MIPStarRE-auto\|/tmp/qpbt-" | grep -o "\-C /[^ ]*" | sort -u | wc -l); b=$((b+1)); c=$((9-b)); [ "$c" -lt 4 ] && c=4; echo "$c"; }
+cap() { if [ -s "$HOME/.cache/mipstarre-dev/watchdog/max-codex" ]; then cat "$HOME/.cache/mipstarre-dev/watchdog/max-codex"; return; fi; if [ -n "${MAX_CODEX_FIXED:-}" ]; then echo "$MAX_CODEX_FIXED"; return; fi; b=$(pgrep -fa codex | grep "MIPStarRE-auto\|/tmp/qpbt-" | grep -o "\-C /[^ ]*" | sort -u | wc -l); b=$((b+1)); c=$((9-b)); [ "$c" -lt 4 ] && c=4; echo "$c"; }
 exec 9>"$HOME/.cache/mipstarre-dev/watchdog/launch.lock"; flock 9
 for _ in $(seq 1 720); do [ "$(pgrep -fa 'codex exec' | grep -o '\-C [^ ]*' | sort -u | wc -l)" -lt "$(cap)" ] && break; sleep 30; done
+if [ "${SKIP_REVIEW:-0}" = 1 ]; then log "review skipped (stacked PR; base still open)"; flock -u 9; else
 log "review.sh $PR"; local/bin/review.sh "$PR" >> "$STATE/$N.review.log" 2>&1 &
 RPID=$!; sleep 25; flock -u 9; wait "$RPID"; echo "REVIEW_EXIT=$?"
+fi
 gh api "repos/Dengnifer/MIPStarRE-A/commits/$AFTER/status" --jq '.statuses[] | select(.context|endswith("summary")) | .context+" "+.state+" "+(.description // "")'
 echo "PR=$PR HEAD=$AFTER" > "$STATE/$N.done"
 log "lane done"
