@@ -134,8 +134,9 @@ theorem applyOperatorToState_postprocess_effect_eq_of_isConsistentOn
     applyOperatorToState (heteroKron ((M.postprocess f).effect b) 1) ψ =
       applyOperatorToState (heteroKron 1 ((M.postprocess f).effect b)) ψ := by
   classical
-  rw [MIPStarRE.Quantum.Measurement.postprocess_effect, heteroKron_finset_sum_left,
-    heteroKron_finset_sum_right, applyOperatorToState_finset_sum,
+  rw [MIPStarRE.Quantum.Measurement.postprocess_effect,
+    MagicSquareRigidity.heteroKron_finset_sum_left,
+    MagicSquareRigidity.heteroKron_finset_sum_right, applyOperatorToState_finset_sum,
     applyOperatorToState_finset_sum]
   exact Finset.sum_congr rfl fun a _ => applyOperatorToState_eq_of_mulVec_eq (hM a)
 
