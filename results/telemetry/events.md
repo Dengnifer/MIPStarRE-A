@@ -3317,3 +3317,10 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   label resolutions pass. Commit and publication remain subject to normal gates;
   this entry does not claim fresh CI or independent review. The parent tail owns
   exact-head evidence recovery, and the failed refresh marker remains untouched.
+- Merge commit `a93a368` passed the normal pre-commit and reference-transaction
+  gates. Its first checked-push stopped before transport because the private
+  build lacked `MIPStarRE/LDT/Basic/RpowBounds.olean`. The worktree still had
+  the September 4 snapshot. Primary `warm-worktree.sh --force --no-build`
+  restored the complete, key-matched `dadd6fc` snapshot into private build
+  artifacts; no full build or hot-cache write was needed. Publication must
+  rerun the unmodified checked-push gate; the initial failure is not CI evidence.
