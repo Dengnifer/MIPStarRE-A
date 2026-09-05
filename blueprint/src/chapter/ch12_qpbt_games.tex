@@ -1231,6 +1231,37 @@ postprocessing, and operator-contraction steps used to formalize
 	required direction.
 \end{proof}
 
+\begin{lemma}[Formalization support for Lemma~\ref{lem:pasting}]
+	\label{lem:pasting-pinched-cauchy-schwarz}
+	\lean{MIPStarRE.QPBT.consistencyDefect_pinched_le_marginal_add_sqrt}
+	\leanok
+	\uses{def:pasting-tensor-placement, lem:pasting-pinched-reduction}
+	In the setting of Lemma~\ref{lem:pasting-pinched-reduction}, let $K$ be an
+	upper bound for the average over the question of
+	$\sum_{a_1, g_2} \| (\Id \ot [P_{a_1}, G_{g_2}]) \ket{\psi} \|^2$. Then
+	$\Delta_1$ is at most the defect of the first marginal comparison plus
+	$\sqrt K$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:pasting-tensor-placement}
+	Both defects equal $1$ minus the corresponding averaged overlap, so it
+	suffices to bound the difference of the two overlaps at a fixed question.
+	The second codeword effects being idempotent and summing to the identity,
+	$P_{a_1} - \sum_{g_2} G_{g_2} P_{a_1} G_{g_2}
+	= \sum_{g_2} [P_{a_1}, G_{g_2}] G_{g_2}$, and the answer effects being
+	idempotent, $A_{a_1} \ot [P_{a_1}, G_{g_2}] G_{g_2}
+	= (A_{a_1} \ot [P_{a_1}, G_{g_2}]) (A_{a_1} \ot G_{g_2})$. The commutator is
+	anti-self-adjoint, so the quadratic form of that product is the real part of
+	the inner product of the two applied vectors, and the Cauchy--Schwarz
+	inequality over the pairs $(a_1, g_2)$ bounds the difference by the product
+	of the two square roots. The second factor is at most $1$, the operators
+	$A_{a_1} \ot G_{g_2}$ being the effects of a measurement; in the first factor
+	the answer effect is dropped, which leaves the square root of the commutator
+	mass at that question. Jensen's inequality for the square root gives the
+	averaged form.
+\end{proof}
+
 \begin{lemma}[Close strategies have close values; Fact 4.32 in \cite{Natarajan2018NEEXP}]\label{lem:close-strategies-have-close-values}
 	\lean{MIPStarRE.QPBT.abs_value_sub_le_of_areClose}
 	\leanok
