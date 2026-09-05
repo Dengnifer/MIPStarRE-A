@@ -189,7 +189,8 @@ this is the source of the terminology.
 		\,\geq\, \Big(1 - \frac{3md}{q}\Big) \cdot \frac{1}{2}\,,
 	\]
 	and the probability that $\omega$ is commuting is also at least
-	$\big(1 - \frac{3md}{q}\big) \cdot \frac{1}{2}$.
+	$\big(1 - \frac{3md}{q}\big) \cdot \frac{1}{2}$.  These corrections are
+	documented in \cite{gap:qpbt_anticommuting-probability}.
 \end{lemma}
 \begin{proof}
 	\leanok
@@ -278,7 +279,8 @@ this is the source of the terminology.
 	$\mathrm{ind}_m(u_X) \cdot \mathrm{ind}_m(u_Z)$, in place of the
 	source's argument via the Schwartz--Zippel lemma; the exact value also
 	supplies the unconditional constant lower bounds used in the proof of
-	Lemma~\ref{lem:qld-win-implications}.
+	Lemma~\ref{lem:qld-win-implications}.  The full comparison is in
+	\cite{gap:qpbt_anticommuting-probability}.
 \end{remark}
 
 \begin{definition}[Closeness of question-indexed operators]
@@ -437,11 +439,10 @@ measurements.
 	on $\hilb_{\mathsf{A}}$ and $\hilb_{\mathsf{B}}$ respectively, and let
 	$\delta \geq 0$ satisfy the exact consistency-defect bound
 	\[
-	\operatorname{consistencyDefect}\!\left(
-		\operatorname{uniformDistribution}(\mathrm{Unit}),
-		(u,a) \mapsto Q_a \ot \Id_{\mathsf{B}},
-		(u,a) \mapsto \Id_{\mathsf{A}} \ot R_a,
-		\ket{\psi}\right) \leq \delta\,.
+		\sum_{\substack{a,b \\ a \ne b}}
+		\bra{\psi}
+		Q_a \ot R_b \ket{\psi}
+		\leq \delta\,.
 	\]
 	Then there is a projective measurement $\{P_a\}$ on $\hilb_{\mathsf{A}}$ with
 	\[
@@ -452,23 +453,24 @@ measurements.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{lem:projective-low-rank-sum, lem:Q-completeness, lem:P-Q-approx,
-		def:projective-P}
-	Work with Alice's reduced state $\rho_A$, for which the consistency
-	hypothesis gives
-	$\sum_a \operatorname{Tr}\!\left(\rho_A(Q_a-Q_a^2)\right) \leq 2\delta$.
-	When $\delta^{1/4} \leq 1/24$, rank reduction
-	(Lemma~\ref{lem:projective-low-rank-sum}) replaces $\{Q_a\}$ by a family of
-	projectors, Lemma~\ref{lem:Q-completeness} shows that this family is almost
-	complete on $\rho_A$, and the operator $P$ of
-	Definition~\ref{def:projective-P} is projective and close to it by
-	Lemma~\ref{lem:P-Q-approx}. Completing $P$ at one fixed outcome and summing the
-	two estimates gives the bound $220\,\delta^{1/4}$, the completion contributing
-	the residual mass controlled by Lemma~\ref{lem:Q-completeness}. When
-	$\delta^{1/4} > 1/24$, the bound $220\,\delta^{1/4} > 9$ exceeds the universal
-	bound $4$ on the distance between any two sub-measurements on a normalized
-	state, so the completion of the zero sub-measurement already satisfies the
-	conclusion.
+	\uses{lem:projective-low-rank-sum, lem:Q-completeness, def:projective-P,
+		lem:sqrt-Q-completeness, lem:P-projectivity, lem:P-Q-approx,
+		prop:triangle-inequality-for-approx_delta, def:left-marginal-state,
+		lem:matrix-rank-zero, lem:left-marginal-state-evaluation, lem:left-marginal-state-normalization}
+	Pass to Alice's reduced state $\rho_{\mathsf A}$. Consistency gives
+	$\sum_a \operatorname{Tr}_{\mathrm{norm}}\!\left(
+	\rho_{\mathsf A}(Q_a-Q_a^2)\right) \leq 2\delta$.
+	When $\delta^{1/4} \leq 1/24$, Lemma~\ref{lem:projective-low-rank-sum}
+	replaces $\{Q_a\}$ by projectors. Lemma~\ref{lem:Q-completeness} rules out
+	the alternative in which all ranks vanish, so the rank-sum space used by the
+	$Q/X/\widehat X/P$ construction is nonzero. Lemma~\ref{lem:sqrt-Q-completeness}
+	controls the square root of their total operator on $\rho_{\mathsf A}$.
+	Lemma~\ref{lem:P-projectivity} supplies $P$ and its total-operator identity,
+	while Lemma~\ref{lem:P-Q-approx} makes $P$ close to $Q$. Completing $P$ at one
+	fixed outcome and applying the squared-distance triangle bound gives
+	$220\,\delta^{1/4}$, with residual mass controlled by square-root completeness.
+	When $\delta^{1/4} > 1/24$, the target exceeds the universal bound $4$, so
+	completing the zero sub-measurement already proves the conclusion.
 \end{proof}
 
 \section{Strategies}
@@ -698,7 +700,9 @@ extracts from the strategy.
 	$M^{\mathrm{Pair},\omega}_{[\beta_W=a]}$ denotes its coarse-graining
 	onto the $W$-component. Furthermore, all of the approximations above
 	also hold with $\approx_\eps$ in place of $\simeq_\eps$, and with the
-	tensor factors interchanged.
+	tensor factors interchanged.  The corrected conditioning event,
+	zero-direction completion, and unrestricted parameter proof are documented
+	in \cite{gap:qpbt_win-implications-corrections}.
 \end{lemma}
 \begin{proof}
 	\uses{fact:omega-anticomm-prob, fact:agreement, def:admissible, def:pauli-question-distribution, def:pauli-win-predicate, def:ld-win-predicate, def:ideg-deg-polynomials, def:consistency}
@@ -740,7 +744,8 @@ extracts from the strategy.
 	Item~\ref{enu:qld-ms} follows in the same way, because the Magic Square
 	check is executed with constant probability over the choice of a pair
 	of questions and the anticommuting event has probability at least
-	$2^{-4}$. Finally, that all approximations
+	$2^{-4}$.  This replacement for the source's circular parameter reduction
+	is documented in \cite{gap:qpbt_win-implications-corrections}. Finally, that all approximations
 	also hold with $\approx_\eps$ in place of $\simeq_\eps$ is immediate
 	from Lemma~\ref{fact:agreement}.
 \end{proof}
@@ -865,7 +870,8 @@ extracts from the strategy.
 	an explicit $\bot$ outcome; the same implicit completeness assumption
 	occurs in the source proof of the statement corresponding to
 	Lemma~\ref{lem:qld-comm-line-cons}, whose proof below invokes the
-	completed families instead.
+	completed families instead.  These corrections are collected in
+	\cite{gap:qpbt_win-implications-corrections}.
 \end{remark}
 
 \section{Expanding the Hilbert space and defining commuting observables}
@@ -1132,7 +1138,7 @@ exactly these variants.
 	exist $A \geq 1$ and $r>0$ such that
 	$0 \leq \delta(x) \leq A x^r$ for every $x \geq 0$. Separating the
 	prefactor and exponent is necessary to include the square-root bound;
-	see \path{docs/paper-gaps/qpbt_polynomial-error-square-root.tex}.
+	see \cite{gap:qpbt_polynomial-error-square-root}.
 	There exists a function $\delta_{\mathrm{Anticom}}(\eps) = \poly(\eps)$
 	such that the following holds, with respect to the state
 	$\ket{\hat{\psi}}$ of Definition~\ref{def:expanded-state}.
@@ -1254,7 +1260,7 @@ exactly these variants.
 	exist $A \geq 1$ and $r>0$ such that
 	$0 \leq \delta(x) \leq A x^r$ for every $x \geq 0$. Separating the
 	prefactor and exponent is necessary to include the square-root bound;
-	see \path{docs/paper-gaps/qpbt_polynomial-error-square-root.tex}.
+	see \cite{gap:qpbt_polynomial-error-square-root}.
 	There exists a function $\delta_{\mathrm{Line}}(\eps) = \poly(\eps)$
 	such that the following holds, with respect to the state
 	$\ket{\hat{\psi}}$ of Definition~\ref{def:expanded-state}. For all

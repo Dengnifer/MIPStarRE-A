@@ -2,10 +2,10 @@ import MIPStarRE.LDT.Basic.Distribution
 
 /-! # Operations on finite distributions
 
-Products, convex mixtures, dependent binds, and normalized restrictions used by
-the QPBT distributions. Their source uses occur in the line-point sampler,
-typed conditionally linear distributions, sandwich products, and restricted
-line distributions cited below.
+Finite distributions support products, convex mixtures, dependent binds,
+normalized restrictions, and push-forwards.  Uniform laws are preserved by
+bijections and balanced maps, their product projections are uniform, and
+dependent uniform sampling agrees with push-forward from a product.
 -/
 
 open scoped BigOperators
@@ -56,7 +56,7 @@ theorem Distribution.prod_isProbability {α β : Type*}
 
 /-- The convex mixture with a coefficient in `[0,1]`, as used for
 the equal mixture in `def:line-point-dist`, blueprint
-`ch13_qpbt_test.tex:85-95`, paper
+`ch13_qpbt_test.tex:163-173`, paper
 `08_classical_and_quantum_low_degree_tests.tex:274-287`. -/
 noncomputable def Distribution.mix {α : Type*} [DecidableEq α]
     (t : ℝ) (ht0 : 0 ≤ t) (ht1 : t ≤ 1)
@@ -73,7 +73,7 @@ noncomputable def Distribution.mix {α : Type*} [DecidableEq α]
     simp [μ.outsideSupport a hμ, ν.outsideSupport a hν]
 
 /-- A convex mixture of probability distributions is a probability distribution;
-`def:line-point-dist`, blueprint `ch13_qpbt_test.tex:85-95`, paper
+`def:line-point-dist`, blueprint `ch13_qpbt_test.tex:163-173`, paper
 `08_classical_and_quantum_low_degree_tests.tex:274-287`. -/
 theorem Distribution.mix_isProbability {α : Type*} [DecidableEq α]
     (t : ℝ) (μ ν : Distribution α) (hμ : μ.IsProbability)
@@ -96,7 +96,7 @@ theorem Distribution.mix_isProbability {α : Type*} [DecidableEq α]
   ring
 
 /-- The dependent bind of finite distributions used for typed question
-distributions, blueprint `ch12_qpbt_games.tex:1377-1382`, paper
+distributions, blueprint `ch12_qpbt_games.tex:1414-1418`, paper
 `07_types.tex:84-94`. -/
 noncomputable def Distribution.bind {α β : Type*} [DecidableEq β]
     (μ : Distribution α) (ν : α → Distribution β) : Distribution β where
@@ -113,7 +113,7 @@ noncomputable def Distribution.bind {α β : Type*} [DecidableEq β]
 
 /-- A dependent bind of probability distributions is a probability distribution;
 blueprint
-`ch12_qpbt_games.tex:1377-1382`, paper `07_types.tex:84-94`. -/
+`ch12_qpbt_games.tex:1414-1418`, paper `07_types.tex:84-94`. -/
 theorem Distribution.bind_isProbability {α β : Type*} [DecidableEq β]
     (μ : Distribution α) (ν : α → Distribution β) (hμ : μ.IsProbability)
     (hν : ∀ a ∈ μ.support, (ν a).IsProbability) :
@@ -147,7 +147,7 @@ theorem Distribution.bind_isProbability {α β : Type*} [DecidableEq β]
 
 /-- Restrict a distribution to a decidable positive-mass event and normalize it,
 as in `def:ith-restricted-line`; blueprint
-`ch15_qpbt_combining.tex:578-592`, paper
+`ch15_qpbt_combining.tex:600-618`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1038-1048`. -/
 noncomputable def Distribution.restrict {α : Type*} [DecidableEq α]
     (μ : Distribution α) (p : α → Prop) [DecidablePred p]
@@ -166,7 +166,7 @@ noncomputable def Distribution.restrict {α : Type*} [DecidableEq α]
 
 /-- Restriction to a positive-mass event preserves total probability;
 `def:ith-restricted-line`, blueprint
-`ch15_qpbt_combining.tex:578-592`, paper
+`ch15_qpbt_combining.tex:600-618`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1038-1048`. -/
 theorem Distribution.restrict_isProbability {α : Type*} [DecidableEq α]
     (μ : Distribution α) (p : α → Prop) [DecidablePred p]
@@ -186,5 +186,206 @@ theorem Distribution.restrict_isProbability {α : Type*} [DecidableEq α]
         ∑ b ∈ μ.support.filter p, μ.weight b := by
       rw [Finset.sum_div]
     _ = 1 := div_self hpos.ne'
+
+/-! ### Push-forwards of finite and uniform distributions
+
+The results of this section are not named in the paper.  They record the
+elementary behaviour of push-forwards of finite distributions, and of uniform
+distributions on finite types, that the line-point samplers of the low-degree
+game and the identification of question distributions with typed conditionally
+linear distributions rely on.
+-/
+
+/-- Formalization-only lemma: two finite distributions coincide as soon as
+their supports and weight functions coincide.  This is the support statement
+`lem:distribution-ext-support` in blueprint chapter 13. -/
+theorem Distribution.ext_of_support_of_weight {α : Type*} {μ ν : Distribution α}
+    (hsupport : μ.support = ν.support) (hweight : μ.weight = ν.weight) :
+    μ = ν := by
+  cases μ with
+  | mk s w hn ho =>
+    cases ν with
+    | mk s' w' hn' ho' =>
+      have hs : s = s' := hsupport
+      have hw : w = w' := hweight
+      subst hs
+      subst hw
+      rfl
+
+/-- Formalization-only lemma: successive push-forwards of a finite distribution
+compose.  This is `lem:distribution-map-comp` in blueprint chapter 13. -/
+theorem Distribution.map_map {α β γ : Type*}
+    [DecidableEq β] [DecidableEq γ]
+    (μ : Distribution α) (e : α → β) (f : β → γ) :
+    (μ.map e).map f = μ.map fun a => f (e a) := by
+  refine Distribution.ext_of_support_of_weight ?_ ?_
+  · change (μ.support.image e).image f = μ.support.image fun a => f (e a)
+    rw [Finset.image_image]
+    rfl
+  · funext c
+    have hmaps : ∀ a ∈ μ.support.filter fun a => f (e a) = c,
+        e a ∈ (μ.support.image e).filter fun b => f b = c := by
+      intro a ha
+      obtain ⟨ha1, ha2⟩ := Finset.mem_filter.mp ha
+      exact Finset.mem_filter.mpr ⟨Finset.mem_image_of_mem _ ha1, ha2⟩
+    have hkey := Finset.sum_fiberwise_of_maps_to hmaps μ.weight
+    change (∑ b ∈ (μ.support.image e).filter fun b => f b = c,
+        ∑ a ∈ μ.support.filter fun a => e a = b, μ.weight a) =
+      ∑ a ∈ μ.support.filter fun a => f (e a) = c, μ.weight a
+    rw [← hkey]
+    refine Finset.sum_congr rfl fun b hb => ?_
+    obtain ⟨-, hb2⟩ := Finset.mem_filter.mp hb
+    congr 1
+    ext a
+    simp only [Finset.mem_filter]
+    constructor
+    · rintro ⟨ha1, rfl⟩
+      exact ⟨⟨ha1, hb2⟩, rfl⟩
+    · rintro ⟨⟨ha1, -⟩, hae⟩
+      exact ⟨ha1, hae⟩
+
+/-- Formalization-only lemma: every point of a nonempty finite type carries the
+reciprocal of the type's cardinality as its uniform weight.  This is
+`lem:uniform-distribution-weight` in blueprint chapter 13. -/
+theorem uniformDistribution_weight_apply (α : Type*)
+    [Fintype α] [DecidableEq α] [Nonempty α] (a : α) :
+    (uniformDistribution α).weight a = 1 / (Fintype.card α : Error) := by
+  simp [uniformDistribution]
+
+/-- Formalization-only lemma: a map whose fibers all have the same cardinality
+pushes the uniform distribution forward to the uniform distribution.  This is
+`lem:uniform-map-equal-fibers` in blueprint chapter 13. -/
+theorem uniformDistribution_map_of_card_fiber {α β : Type*}
+    [Fintype α] [DecidableEq α] [Nonempty α]
+    [Fintype β] [DecidableEq β] [Nonempty β]
+    (e : α → β) (c : ℕ)
+    (hc : ∀ b : β, ((Finset.univ : Finset α).filter fun a => e a = b).card = c) :
+    (uniformDistribution α).map e = uniformDistribution β := by
+  have hcpos : 0 < c := by
+    obtain ⟨a₀⟩ := (inferInstance : Nonempty α)
+    have hmem : a₀ ∈ (Finset.univ : Finset α).filter fun a => e a = e a₀ :=
+      Finset.mem_filter.mpr ⟨Finset.mem_univ _, rfl⟩
+    have hpos := Finset.card_pos.mpr ⟨a₀, hmem⟩
+    rwa [hc] at hpos
+  have hcard : Fintype.card α = Fintype.card β * c := by
+    have h := Finset.card_eq_sum_card_fiberwise
+      (f := e) (s := (Finset.univ : Finset α)) (t := (Finset.univ : Finset β))
+      (fun a _ => Finset.mem_univ _)
+    rw [Finset.card_univ] at h
+    rw [h, Finset.sum_congr rfl fun b _ => hc b]
+    simp [Finset.card_univ, mul_comm]
+  refine Distribution.ext_of_support_of_weight ?_ ?_
+  · change (Finset.univ : Finset α).image e = (Finset.univ : Finset β)
+    ext b
+    simp only [Finset.mem_image, Finset.mem_univ, iff_true, true_and]
+    have hne : ((Finset.univ : Finset α).filter fun a => e a = b).Nonempty := by
+      rw [← Finset.card_pos, hc]
+      exact hcpos
+    obtain ⟨a, ha⟩ := hne
+    exact ⟨a, (Finset.mem_filter.mp ha).2⟩
+  · funext b
+    have hbeta : (Fintype.card β : Error) ≠ 0 := by
+      exact_mod_cast Fintype.card_ne_zero (α := β)
+    have hc' : (c : Error) ≠ 0 := by exact_mod_cast hcpos.ne'
+    change (∑ a ∈ (Finset.univ : Finset α).filter fun a => e a = b,
+        (uniformDistribution α).weight a) = (uniformDistribution β).weight b
+    rw [Finset.sum_congr rfl fun a _ => uniformDistribution_weight_apply α a,
+      uniformDistribution_weight_apply, Finset.sum_const, hc, nsmul_eq_mul, hcard]
+    push_cast
+    field_simp
+
+/-- Formalization-only lemma: relabelling along a bijection preserves
+uniformity.  This is `lem:uniform-map-equivalence` in blueprint chapter 13. -/
+theorem uniformDistribution_map_equiv {α β : Type*}
+    [Fintype α] [DecidableEq α] [Nonempty α]
+    [Fintype β] [DecidableEq β] [Nonempty β] (E : α ≃ β) :
+    (uniformDistribution α).map E = uniformDistribution β := by
+  refine uniformDistribution_map_of_card_fiber _ 1 fun b => ?_
+  have hfilter :
+      ((Finset.univ : Finset α).filter fun a => E a = b) = {E.symm b} := by
+    ext a
+    simp [Equiv.apply_eq_iff_eq_symm_apply]
+  rw [hfilter]
+  simp
+
+/-- Formalization-only lemma: the first marginal of the uniform distribution on
+a product is uniform.  This is `lem:uniform-product-first-marginal` in blueprint
+chapter 13. -/
+theorem uniformDistribution_map_fst {α β : Type*}
+    [Fintype α] [DecidableEq α] [Nonempty α]
+    [Fintype β] [DecidableEq β] [Nonempty β] :
+    (uniformDistribution (α × β)).map Prod.fst = uniformDistribution α := by
+  refine uniformDistribution_map_of_card_fiber _ (Fintype.card β) fun a => ?_
+  have hfilter : ((Finset.univ : Finset (α × β)).filter fun p => p.1 = a)
+      = ({a} : Finset α) ×ˢ (Finset.univ : Finset β) := by
+    ext p
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_product,
+      Finset.mem_singleton, and_true]
+  rw [hfilter, Finset.card_product]
+  simp
+
+/-- Formalization-only lemma: the second marginal of the uniform distribution
+on a product is uniform.  This is `lem:uniform-product-second-marginal` in
+blueprint chapter 13. -/
+theorem uniformDistribution_map_snd {α β : Type*}
+    [Fintype α] [DecidableEq α] [Nonempty α]
+    [Fintype β] [DecidableEq β] [Nonempty β] :
+    (uniformDistribution (α × β)).map Prod.snd = uniformDistribution β := by
+  refine uniformDistribution_map_of_card_fiber _ (Fintype.card α) fun b => ?_
+  have hfilter : ((Finset.univ : Finset (α × β)).filter fun p => p.2 = b)
+      = (Finset.univ : Finset α) ×ˢ ({b} : Finset β) := by
+    ext p
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_product,
+      Finset.mem_singleton]
+  rw [hfilter, Finset.card_product]
+  simp
+
+/-- Formalization-only lemma: binding a uniform distribution to a family of
+uniformly seeded push-forwards is the push-forward of the uniform distribution
+on the product.  This is `lem:uniform-bind-map` in blueprint chapter 13. -/
+theorem bind_uniformDistribution_map {α β γ : Type*}
+    [Fintype α] [DecidableEq α] [Nonempty α]
+    [Fintype β] [DecidableEq β] [Nonempty β] [DecidableEq γ]
+    (g : α → β → γ) :
+    Distribution.bind (uniformDistribution α)
+        (fun a => (uniformDistribution β).map (g a)) =
+      (uniformDistribution (α × β)).map fun p => g p.1 p.2 := by
+  refine Distribution.ext_of_support_of_weight ?_ ?_
+  · change (Finset.univ : Finset α).biUnion
+        (fun a => (Finset.univ : Finset β).image (g a)) =
+      (Finset.univ : Finset (α × β)).image fun p => g p.1 p.2
+    ext c
+    simp [Prod.exists]
+  · funext c
+    have hcount :
+        ((Finset.univ : Finset (α × β)).filter fun p => g p.1 p.2 = c).card
+          = ∑ a : α, ((Finset.univ : Finset β).filter fun b => g a b = c).card := by
+      simp only [Finset.card_filter]
+      rw [Fintype.sum_prod_type]
+    have hinner : ∀ a : α,
+        ((uniformDistribution β).map (g a)).weight c
+          = (((Finset.univ : Finset β).filter fun b => g a b = c).card : Error) *
+              (1 / (Fintype.card β : Error)) := by
+      intro a
+      change (∑ b ∈ (Finset.univ : Finset β).filter fun b => g a b = c,
+          (uniformDistribution β).weight b) = _
+      rw [Finset.sum_congr rfl fun b _ => uniformDistribution_weight_apply β b,
+        Finset.sum_const, nsmul_eq_mul]
+    have key : ∀ a : α, (uniformDistribution α).weight a *
+        ((uniformDistribution β).map (g a)).weight c
+        = (((Finset.univ : Finset β).filter fun b => g a b = c).card : Error) *
+            (1 / ((Fintype.card α : Error) * (Fintype.card β : Error))) := by
+      intro a
+      rw [uniformDistribution_weight_apply, hinner a]
+      ring
+    change (∑ a ∈ (Finset.univ : Finset α), (uniformDistribution α).weight a *
+        ((uniformDistribution β).map (g a)).weight c) =
+      ∑ p ∈ (Finset.univ : Finset (α × β)).filter fun p => g p.1 p.2 = c,
+        (uniformDistribution (α × β)).weight p
+    rw [Finset.sum_congr rfl fun a _ => key a, ← Finset.sum_mul,
+      Finset.sum_congr rfl fun p _ => uniformDistribution_weight_apply (α × β) p,
+      Finset.sum_const, nsmul_eq_mul, hcount, Fintype.card_prod]
+    push_cast
+    ring
 
 end MIPStarRE.QPBT

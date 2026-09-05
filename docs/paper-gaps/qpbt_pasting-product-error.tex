@@ -1,0 +1,142 @@
+\documentclass[11pt]{article}
+
+\usepackage{amsmath,amssymb}
+\usepackage{xurl}
+\usepackage[hidelinks]{hyperref}
+\setlength{\emergencystretch}{2em}
+
+\input{command}
+\renewcommand{\ghissue}[1]{%
+  \href{https://github.com/Dengnifer/MIPStarRE-A/issues/#1}{GitHub issue \##1}}
+
+\title{The Product-Form Error in the Two-Measurement Pasting Lemma}
+\author{}
+\date{2026-09-05}
+
+\begin{document}
+\maketitle
+
+\section{At a glance}
+
+\begin{itemize}
+  \item \textbf{Difficulty.} Medium.  The operator estimate imported by the
+  source is plausible, but its stated two-variable polynomial contract is
+  contradicted by a two-dimensional example at every fixed positive input
+  consistency error.
+  \item \textbf{Estimated weight.} Correcting the scalar contract changes one
+  shared predicate.  Formalizing the resulting quantitative pasting estimate
+  is expected to require roughly 300--600 lines using the existing distance
+  calculus.
+  \item \textbf{Mathlib/project split.} The obstruction is elementary real
+  analysis and finite-dimensional measurement theory.  The repaired proof is
+  primarily project-local consistency and Cauchy--Schwarz calculus.
+  \item \textbf{Key mathematical inputs.} A positive real power tends to zero
+  at zero, while a fixed positive consistency error need not decrease with the
+  collision error.
+  The discrepancy is tracked in \ghissue{196}.
+\end{itemize}
+
+\section{Key theorem forms}
+
+The source asks for an error function
+$\delta_{\mathrm{pasting}}(\eta,\delta)$ satisfying
+\[
+  \delta_{\mathrm{pasting}}(\eta,\delta)
+    = \operatorname{poly}(\eta,\delta)
+\]
+and bounding the final consistency defect whenever the three input defects are
+at most $\delta$ and the codeword-collision probability is at most $\eta$.
+Under the paper's global convention, the displayed polynomial assertion means
+that there is a universal $C>0$ such that
+\[
+  0 \leq \delta_{\mathrm{pasting}}(\eta,\delta)
+    \leq C(\eta\delta)^C
+  \qquad (\eta,\delta>0).
+  \tag{product contract}
+\]
+The imported proof instead accumulates terms depending separately on the two
+errors, including $O(\delta^{1/2})$, $O((\delta+\eta)^{1/2})$, and $\eta$.
+A compatible corrected theorem form would use, for example, an upper bound by
+$A(\eta^r+\delta^s)$ for universal $A\geq1$ and $r,s>0$.
+
+\section{The source assertion}
+
+Lemma~\texttt{lem:pasting} of \cite[lines~504--525]{Ji2020MIPStar} imports
+Fact~4.35 from the NEEXP paper.  Its error is declared to be
+$\operatorname{poly}(\eta,\delta)$.  The asymptotic convention in
+\cite[lines~19--29]{Ji2020MIPStar} requires every variable to occur in the
+product on the right side of the product contract.  The proof of the imported
+fact, however, bounds the two sources of error independently; see
+\cite[lines~1030--1209]{Natarajan2018NEEXP}.%
+\footnote{The mirrored passages are
+\path{references/qpbt-paper/04_preliminaries.tex}, lines~19--29;
+\path{references/qpbt-paper/06_nonlocal_games_and_mipstar.tex}, lines~504--525;
+and \path{references/neexp-paper/05_quantum_preliminaries.tex},
+lines~1030--1209.}
+
+\section{A two-dimensional counterexample}
+
+Fix $0<\rho<1$.  Let every question set, both codeword sets, and the second
+answer set be a singleton, and let the first answer set be $\{0,1\}$.  Use the
+point-mass question distribution and local Hilbert spaces $\C^2$.  In the
+standard basis, take the normalized bipartite state
+\[
+  \ket{\psi_\rho}
+    = \sqrt{1-\rho}\ket{0,0}+\sqrt{\rho}\ket{1,1}.
+\]
+Let both codeword measurements have their sole effect equal to the identity,
+and evaluate the sole first codeword to $0$.  Let the joint answer measurement
+be the standard-basis projective measurement: its effects at $(0,*)$ and
+$(1,*)$ are respectively $\ket{0}\!\bra{0}$ and $\ket{1}\!\bra{1}$.
+
+The second codeword set is a singleton, so its pairwise-collision hypothesis is
+vacuous for every $\eta\geq0$.  The second marginal is exactly consistent, and
+the perfectly correlated state makes the joint answer measurement exactly
+self-consistent.  The first marginal differs from the constantly-zero
+codeword answer precisely on the $\ket{1,1}$ component, so its consistency
+defect is $\rho$.  Consequently all hypotheses of the pasting lemma hold with
+$\delta=\rho$.
+
+The pasted measurement also has a single codeword outcome and its effect is the
+identity.  After evaluation it is deterministic at $(0,*)$, whereas the joint
+answer measurement returns $(1,*)$ with probability $\rho$.  Their final
+consistency defect is therefore $\rho$.  Thus the asserted conclusion would
+require
+\[
+  \rho \leq \delta_{\mathrm{pasting}}(\eta,\rho)
+  \qquad\text{for every }\eta>0.
+\]
+The product contract gives the opposite asymptotic bound
+$\delta_{\mathrm{pasting}}(\eta,\rho)\leq C(\eta\rho)^C$.  Since $C>0$, the
+right side tends to zero with $\eta$, which is a contradiction.  As $\rho$ can
+be arbitrarily small, this failure is not confined to the large-error boundary.
+
+\section{Comparison with the blueprint and formalization}
+
+The blueprint reproduces the source theorem and its unrestricted nonnegative
+error parameters.  The formal predicate implements the product contract
+literally, and the paper-facing pasting declaration retains the same theorem
+form.%
+\footnote{The polynomial predicate is defined in
+\doclink{MIPStarRE/QPBT/Games/ErrorFunctions.lean}; the paper-facing theorem is
+\leanid{exists\_pasting\_error} in
+\doclink{MIPStarRE/QPBT/Games/Sandwich.lean}.}
+The declaration must remain without a proof-complete blueprint marker until the
+scalar contract is corrected or the source theorem is restricted.  The
+operator-valued pasting construction itself is not refuted by this example.
+
+\section{Conclusion}
+
+The literal product-form interpretation of
+$\operatorname{poly}(\eta,\delta)$ makes the stated pasting lemma false.  This
+is a theorem-level scalar discrepancy, not a missing formal-library lemma.  The
+natural repair is to adopt a multivariate polynomial-smallness convention that
+allows separate positive powers of the input errors, matching the terms in the
+imported proof.  Adding an unadvertised coupling hypothesis between $\eta$ and
+$\delta$ would also avoid the counterexample, but would strengthen the source
+theorem and is therefore not the preferred repair.
+
+\bibliographystyle{alpha}
+\bibliography{references}
+
+\end{document}

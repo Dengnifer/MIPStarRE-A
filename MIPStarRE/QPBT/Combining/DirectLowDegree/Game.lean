@@ -18,7 +18,7 @@ open scoped BigOperators
 
 namespace MIPStarRE.QPBT
 
-open MIPStarRE.LDT hiding Measurement
+open MIPStarRE.LDT
 open MIPStarRE.LDT.Preliminaries
 open MIPStarRE.Quantum
 
@@ -94,8 +94,8 @@ abbrev DirectLdAnswerCode (D : DirectLdParams) :=
     ((Fin D.k → Fin (D.d + 1) → DirectScalarQ D) ⊕
       (Fin D.k → Fin (D.m * D.d + 1) → DirectScalarQ D))
 
-/-- Constructor-preserving equivalence between the inductive answer type and
-its finite code. -/
+/-- The canonical code equivalence for `DirectLdAnswer`, sending point,
+axis-line, and diagonal-line answers to the three summands. -/
 noncomputable def directLdAnswerEquiv (D : DirectLdParams) :
     DirectLdAnswer D ≃ DirectLdAnswerCode D where
   toFun
@@ -205,7 +205,7 @@ noncomputable abbrev DirectPolyTuple (D : DirectLdParams) :=
 /-- A polynomial-tuple POVM for the directly indexed game. -/
 noncomputable abbrev DirectPolyMeasTuple (D : DirectLdParams) (ι : Type*)
     [Fintype ι] [DecidableEq ι] :=
-  Measurement (DirectPolyTuple D) ι
+  MIPStarRE.Quantum.Measurement (DirectPolyTuple D) ι
 
 /-- Evaluate every component of a direct polynomial tuple at a point. -/
 def evalDirectPolyTupleAt {D : DirectLdParams}
