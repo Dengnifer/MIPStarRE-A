@@ -20,10 +20,12 @@ The rigidity theorem is stated in the corrected form adopted on issue #172: the
 source quantifies over all strategies, which is false for the role-symmetric
 game (`docs/paper-gaps/qpbt_ms-rigidity-symmetric-strategies.tex`), and the
 corrected statement assumes that the two players' `Variable_1` and `Variable_5`
-measurements are consistent between the players up to a defect `δ`
+measurements agree between the players up to `δ` in the squared
+state-dependent distance of `def:povm-distance`
 (`msVariableConsistencyDefect`, in `Rigidity/Consistency.lean`).  Symmetric
-consistent strategies satisfy the hypothesis with `δ = 0`
-(`exists_ms_rigidity_of_symmetric_consistent`).
+consistent strategies in the sense of `def:consistent-strategy`, which are
+projective, and in particular the SPCC strategies of `def:spcc`, satisfy the
+hypothesis with `δ = 0` (`exists_ms_rigidity_of_symmetric_consistent`).
 
 ## References
 
@@ -136,27 +138,28 @@ question to both players, and a perfect strategy answering the two orientations
 of each edge on independent copies of two EPR pairs, or its symmetric role-flag
 version, violates the conclusion at `ε = 0`.  The corrected statement assumes,
 in addition to the value, that the two players' bit measurements at the cells
-`0` and `4` agree on the state up to a consistency defect `δ`
-(`msVariableConsistencyDefect`); the conclusion is the source's display with
-`sqrt ε` replaced by `sqrt ε + sqrt δ`, so that `δ = 0` is the source's display
-verbatim.  Symmetric strategies that are consistent on their state, the class
-named in the owner decision, satisfy the hypothesis with `δ = 0`
-(`exists_ms_rigidity_of_symmetric_consistent`); symmetry itself is not needed
-and not assumed.  Both counterexamples have defect `1` and are excluded.
+`0` and `4` agree on the state up to `δ` in the squared state-dependent
+distance of `def:povm-distance` (`msVariableConsistencyDefect`); the conclusion
+is the source's display with `sqrt ε` replaced by `sqrt ε + sqrt δ`, so that
+`δ = 0` is the source's display verbatim.  Symmetric projective strategies that
+are consistent on their state, the class named in the owner decision, satisfy
+the hypothesis with `δ = 0` (`exists_ms_rigidity_of_symmetric_consistent`);
+neither symmetry nor projectivity is needed or assumed here.  Both
+counterexamples have agreement distance `1` and are excluded.
 
 The paper states the Euclidean estimate at scale `sqrt ε` at lines 624--626
 and explains the norm conversion and local basis change at lines 650--652. One
 universal constant applies to every strategy and every pair of nonnegative
 error parameters.
 
-**Proof obligation.** The `sorry` is the assembly of issue #105: the one-way
-Coladangelo--Stark self-test for the orientation in which Alice holds the
-constraint, or equivalently the swap-isometry extraction from
-`Rigidity/Swap.lean` fed by the approximate anticommutation of
-`Rigidity/Anticommutation.lean` and by the cross-player agreement
-`MagicSquareRigidity.msVarObsA_close_msVarObsB` derived from the consistency
-hypothesis in `Rigidity/Consistency.lean`, followed by the transfer theorems of
-`Rigidity/Transfer.lean` and `Rigidity/AnticommutatorB.lean`. -/
+**Remaining proof.** It remains to combine the one-way Coladangelo--Stark
+self-test for the orientation in which Alice holds the constraint --- or,
+equivalently, the swap-isometry extraction of `Rigidity/Swap.lean` --- with the
+approximate anticommutation of `Rigidity/Anticommutation.lean`, the
+cross-player agreement `MagicSquareRigidity.msVarObsA_close_msVarObsB` that the
+hypothesis yields in `Rigidity/Consistency.lean`, and the transfer estimates of
+`Rigidity/Transfer.lean` and `Rigidity/AnticommutatorB.lean`; issue #105 tracks
+this derivation. -/
 theorem exists_ms_rigidity :
     ∃ C : ℝ, 1 ≤ C ∧ ∀ (ε δ : ℝ), 0 ≤ ε → 0 ≤ δ →
       ∀ S : Strategy msGame, 1 - ε ≤ S.value →
@@ -174,19 +177,25 @@ theorem exists_ms_rigidity :
   sorry
 
 /-- `thm:ms-rigidity` on the class fixed by owner decision B5 on issue #26:
-symmetric strategies of the Magic Square game that are consistent on their
-state (`def:consistent-strategy`, paper
-`06_nonlocal_games_and_mipstar.tex:162-174`).  Their variable measurements have
-zero consistency defect, so this is the case `δ = 0` of `exists_ms_rigidity`,
-and its conclusion is the source's display verbatim.  The witness and the
-distances are those of the underlying `Strategy msGame`, which the symmetric
-presentation `msGameSymm` yields definitionally (`msGameSymm_toGame`).
-Blueprint `ch13_qpbt_test.tex`, paper
-`08_classical_and_quantum_low_degree_tests.tex:612-652`; the proof is that of
-`exists_ms_rigidity`, whose obligation is issue #105. -/
+the symmetric consistent strategies of the Magic Square game, that is, the
+symmetric strategies that are projective and all of whose measurements are
+consistent on their state (`def:consistent-strategy`, paper
+`06_nonlocal_games_and_mipstar.tex:162-174`, where a consistent strategy is
+projective by definition).  Every SPCC strategy (`def:spcc`) is one of these, so
+the corollary covers the SPCC class as well.  Their variable measurements have
+zero agreement distance, so this is the case `δ = 0` of `exists_ms_rigidity`,
+and its conclusion is the source's display verbatim.  Projectivity is assumed
+so that the hypothesis is exactly the source's class; the derivation below uses
+only consistency.  The witness and the distances are those of the underlying
+`Strategy msGame`, which the symmetric presentation `msGameSymm` yields
+definitionally (`msGameSymm_toGame`).  Blueprint
+`cor:ms-rigidity-symmetric-consistent` in `ch13_qpbt_test.tex`, paper
+`08_classical_and_quantum_low_degree_tests.tex:612-652`; its proof is that of
+`exists_ms_rigidity`, which issue #105 tracks. -/
 theorem exists_ms_rigidity_of_symmetric_consistent :
     ∃ C : ℝ, 1 ≤ C ∧ ∀ (ε : ℝ), 0 ≤ ε →
-      ∀ S : SymmetricStrategy msGameSymm, S.IsConsistent →
+      ∀ S : SymmetricStrategy msGameSymm, S.toStrategy.IsProjective →
+        S.IsConsistent →
         1 - ε ≤ S.toStrategy.value →
         ∃ w : MsRigidityWitness S.toStrategy,
           ‖isometryTensor w.φA w.φB S.toStrategy.ψ - idealMsState w.aux‖ ≤
@@ -198,7 +207,7 @@ theorem exists_ms_rigidity_of_symmetric_consistent :
           msAnticommutatorDistanceA S.toStrategy w ≤ C * Real.sqrt ε ∧
           msAnticommutatorDistanceB S.toStrategy w ≤ C * Real.sqrt ε := by
   obtain ⟨C, hC, h⟩ := exists_ms_rigidity
-  refine ⟨C, hC, fun ε hε S hS hwin => ?_⟩
+  refine ⟨C, hC, fun ε hε S _hproj hS hwin => ?_⟩
   have h0 := msVariableConsistencyDefect_eq_zero_of_isConsistent S hS 0
   have h4 := msVariableConsistencyDefect_eq_zero_of_isConsistent S hS 4
   obtain ⟨w, h1, h2, h3, h4', h5, h6, h7⟩ :=

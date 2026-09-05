@@ -3,7 +3,7 @@ import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.AnticommutatorB
 import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.CellRelations
 
 /-!
-# Cross-player consistency of the Magic Square variable measurements
+# Cross-player agreement of the Magic Square variable measurements
 
 The rigidity theorem `thm:ms-rigidity` is false for arbitrary strategies of the
 role-symmetric Magic Square game: its conclusion forces the two players'
@@ -11,22 +11,30 @@ role-symmetric Magic Square game: its conclusion forces the two players'
 game never tests that agreement.  The corrected statement adopted on issue #172
 (owner decision B5 on issue #26; the note is
 `docs/paper-gaps/qpbt_ms-rigidity-symmetric-strategies.tex`) assumes that
-agreement, quantitatively.  The *consistency defect* of a variable measurement
-is the summed squared state-dependent distance between Alice's and Bob's
-postprocessed bit effects on the shared state, in the `≈_δ` convention of
-`def:povm-distance`, and the corrected theorem takes the defects at the paper's
-first and fifth variables as its hypothesis.
+agreement, quantitatively.  The *variable-measurement agreement distance* at a
+variable is the summed squared state-dependent distance between Alice's and
+Bob's binary variable effects on the shared state, in the `≈_δ` convention of
+`def:povm-distance`, and the corrected theorem bounds it at the paper's first
+and fifth variables.
 
-This file defines that defect on the original, possibly non-projective,
+That distance is not the consistency defect of `def:consistency`, which is the
+off-diagonal outcome weight of a pair of measurements (`consistencyDefect`); it
+is the squared state-dependent distance `opFamilyDistSq` of
+`def:povm-distance`.  The declaration name `msVariableConsistencyDefect` records
+what the distance measures: the failure of the two players' variable
+measurements to be consistent with one another.
+
+This file defines that distance on the original, possibly non-projective,
 strategy and relates it to the reflections of the projective dilation on which
 the self-testing argument operates.
 
 * For a symmetric strategy whose variable measurements are consistent in the
-  exact sense of `def:consistent-measurement`, the defect vanishes, so the
-  corrected theorem specializes to the class of symmetric consistent strategies
-  named in the owner decision.
+  exact sense of `def:consistent-measurement`, the distance vanishes, so the
+  corrected theorem specializes to the symmetric consistent strategies named in
+  the owner decision.
 * The two players' dilated variable reflections `msVarObsA S j` and
-  `msVarObsB S j` are close on the dilated state whenever the defect is small.
+  `msVarObsB S j` are close on the dilated state whenever that distance is
+  small.
   The loss is the leakage of the dilated observables out of the ground slice,
   which `Rigidity/Transfer.lean` controls by the cell-consistency masses of a
   strategy of value `1 - ε`.  This is the cross-player input that the
@@ -53,17 +61,26 @@ open MIPStarRE.QPBT.MagicSquareRigidity
 
 noncomputable section
 
-/-! ## The consistency defect of a variable measurement -/
+/-! ## The agreement distance of a variable measurement -/
 
-/-- The consistency defect between the two players' bit measurements at the
-variable `j` of a Magic Square strategy: the summed squared state-dependent
-distance `∑_b ‖(A_b ⊗ 1 - 1 ⊗ B_b) ψ‖²` of `def:povm-distance` between Alice's
-and Bob's postprocessed `Variable_j` effects on the shared state.  The corrected
-`thm:ms-rigidity` (blueprint `ch13_qpbt_test.tex`, correction recorded in
+/-- The variable-measurement agreement distance between the two players'
+binary measurements at the variable `j` of a Magic Square strategy: the summed
+squared state-dependent distance `∑_b ‖(A_b ⊗ 1 - 1 ⊗ B_b) ψ‖²` of
+`def:povm-distance` between Alice's and Bob's `Variable_j` effects, relabelled
+to a bit by `msBitOrZero`, on the shared state.  The corrected
+`thm:ms-rigidity` (blueprint `def:ms-variable-agreement` and
+`thm:ms-rigidity` in `ch13_qpbt_test.tex`, correction recorded in
 `docs/paper-gaps/qpbt_ms-rigidity-symmetric-strategies.tex`) assumes this
-defect to be at most `δ` at the cells `0` and `4`.  It vanishes for a symmetric
-strategy whose variable measurements are consistent in the sense of
-`def:consistent-measurement`, paper
+distance to be at most `δ` at the cells `0` and `4`.
+
+The declaration name records what the distance measures, namely the failure of
+the two players' variable measurements to be consistent with one another.  The
+quantity itself is the squared state-dependent distance `opFamilyDistSq` of
+`def:povm-distance`, not the outcome-disagreement weight `consistencyDefect` of
+`def:consistency`.
+
+The distance vanishes for a symmetric strategy whose variable measurements are
+consistent in the sense of `def:consistent-measurement`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:144-160`; see
 `msVariableConsistencyDefect_eq_zero_of_isConsistent`. -/
 noncomputable def msVariableConsistencyDefect (S : Strategy msGame) (j : Fin 9) : ℝ :=
@@ -72,12 +89,12 @@ noncomputable def msVariableConsistencyDefect (S : Strategy msGame) (j : Fin 9) 
     (fun _ b => heteroKron 1 (((S.B (.var j)).postprocess msBitOrZero).effect b))
     S.ψ
 
-/-- The consistency defect is nonnegative. -/
+/-- The agreement distance is nonnegative. -/
 theorem msVariableConsistencyDefect_nonneg (S : Strategy msGame) (j : Fin 9) :
     0 ≤ msVariableConsistencyDefect S j :=
   opFamilyDistSq_nonneg _ _ _ _
 
-/-- The consistency defect as a sum of two squared state-dependent norms. -/
+/-- The agreement distance as a sum of two squared state-dependent norms. -/
 theorem msVariableConsistencyDefect_eq_sum (S : Strategy msGame) (j : Fin 9) :
     msVariableConsistencyDefect S j =
       ∑ b : ZMod 2, ‖applyOperatorToState
@@ -96,8 +113,8 @@ theorem applyOperatorToState_finset_sum {β ι : Type*} [Fintype ι] [DecidableE
   unfold applyOperatorToState
   simp only [map_sum, LinearMap.sum_apply]
 
-/-- Formalization-only bridge: two operators with the same matrix-vector action
-on a state have the same action on it. -/
+/-- Formalization-only: equality of the matrix-vector products implies equality
+of the corresponding operator actions on the state. -/
 theorem applyOperatorToState_eq_of_mulVec_eq {ι : Type*} [Fintype ι] [DecidableEq ι]
     {M N : Op ι} {ψ : EuclideanSpace ℂ ι} (h : M.mulVec ψ = N.mulVec ψ) :
     applyOperatorToState M ψ = applyOperatorToState N ψ := by
@@ -123,7 +140,7 @@ theorem applyOperatorToState_postprocess_effect_eq_of_isConsistentOn
   exact Finset.sum_congr rfl fun a _ => applyOperatorToState_eq_of_mulVec_eq (hM a)
 
 /-- A strategy whose two players' bit effects at variable `j` act alike on the
-shared state has zero consistency defect at `j`. -/
+shared state has zero agreement distance at `j`. -/
 theorem msVariableConsistencyDefect_eq_zero_of_forall (T : Strategy msGame) (j : Fin 9)
     (h : ∀ b : ZMod 2,
       applyOperatorToState
@@ -137,7 +154,7 @@ theorem msVariableConsistencyDefect_eq_zero_of_forall (T : Strategy msGame) (j :
   simp
 
 /-- A symmetric strategy whose measurement at variable `j` is consistent on its
-state has zero consistency defect at `j`: exact consistency in the sense of
+state has zero agreement distance at `j`: exact consistency in the sense of
 `def:consistent-measurement` is the case `δ = 0` of the hypothesis of the
 corrected `thm:ms-rigidity`.  Paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:144-174`. -/
@@ -149,11 +166,12 @@ theorem msVariableConsistencyDefect_eq_zero_of_isConsistentOn
     applyOperatorToState_postprocess_effect_eq_of_isConsistentOn (S.M (.var j)) S.ψ hS
       msBitOrZero b
 
-/-- A symmetric consistent strategy (`def:consistent-strategy`, paper
-`references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:162-174`) has zero
-consistency defect at every variable.  This is the class named in owner
-decision B5 on issue #26, and the corrected `thm:ms-rigidity` applies to it with
-`δ = 0`. -/
+/-- A symmetric strategy all of whose measurements are consistent on its state
+has zero agreement distance at every variable.  Together with projectivity this
+is a consistent strategy in the sense of `def:consistent-strategy`, paper
+`references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:162-174`, the class
+named in owner decision B5 on issue #26, to which the corrected
+`thm:ms-rigidity` applies with `δ = 0`; projectivity is not needed here. -/
 theorem msVariableConsistencyDefect_eq_zero_of_isConsistent
     (S : SymmetricStrategy msGameSymm) (hS : S.IsConsistent) (j : Fin 9) :
     msVariableConsistencyDefect S.toStrategy j = 0 :=
@@ -222,34 +240,44 @@ theorem norm_compressed_varObs_sub_eq (S : Strategy msGame) (j : Fin 9) :
     applyOperatorToState_rightTensor_naimarkInflation, ← naimarkDilatedState_sub,
     naimarkDilatedState_norm, ← applyOperatorToState_sub_op]
 
+/-- Formalization-only: a sum over the two-element answer alphabet. -/
+private theorem sum_univ_zmod_two {M : Type*} [AddCommMonoid M] (f : ZMod 2 → M) :
+    ∑ b : ZMod 2, f b = f 0 + f 1 :=
+  Fin.sum_univ_two f
+
 /-- The original variable observables of the two players differ on the state by
-at most the square root of twice the consistency defect. -/
+at most the square root of twice the agreement distance.  This is the
+answer-cardinality bound `povm_to_obs` (`lem:povm-to-obs`) for the two-outcome
+alphabet, with the unit-modulus weights `1` and `-1` that assemble the two
+effects of a binary measurement into its observable. -/
 theorem norm_varObs_sub_sq_le_two_mul_defect (S : Strategy msGame) (j : Fin 9) :
     ‖applyOperatorToState
         (heteroKron (obsOf ((S.A (.var j)).postprocess msBitOrZero)) 1 -
           heteroKron 1 (obsOf ((S.B (.var j)).postprocess msBitOrZero))) S.ψ‖ ^ 2 ≤
       2 * msVariableConsistencyDefect S j := by
-  have hsum := msVariableConsistencyDefect_eq_sum S j
-  set v : ZMod 2 → EuclideanSpace ℂ (S.ιA × S.ιB) := fun b => applyOperatorToState
-    (heteroKron (((S.A (.var j)).postprocess msBitOrZero).effect b) 1 -
-      heteroKron 1 (((S.B (.var j)).postprocess msBitOrZero).effect b)) S.ψ with hv
-  have h2 : ∑ b : Fin 2, ‖v b‖ ^ 2 = msVariableConsistencyDefect S j := hsum.symm
-  rw [Fin.sum_univ_two] at h2
-  have h3 : ‖v 0‖ ^ 2 + ‖v 1‖ ^ 2 = msVariableConsistencyDefect S j := h2
-  have hop : heteroKron (obsOf ((S.A (.var j)).postprocess msBitOrZero)) 1 -
-      heteroKron 1 (obsOf ((S.B (.var j)).postprocess msBitOrZero)) =
-      (heteroKron (((S.A (.var j)).postprocess msBitOrZero).effect 0) 1 -
-        heteroKron 1 (((S.B (.var j)).postprocess msBitOrZero).effect 0)) -
-      (heteroKron (((S.A (.var j)).postprocess msBitOrZero).effect 1) 1 -
-        heteroKron 1 (((S.B (.var j)).postprocess msBitOrZero).effect 1)) := by
-    simp only [obsOf, heteroKron_sub_left, heteroKron_sub_right]
-    abel
-  rw [hop, applyOperatorToState_sub_op]
-  have htri : ‖v 0 - v 1‖ ≤ ‖v 0‖ + ‖v 1‖ := norm_sub_le _ _
-  have hsq : ‖v 0 - v 1‖ ^ 2 ≤ (‖v 0‖ + ‖v 1‖) ^ 2 :=
-    pow_le_pow_left₀ (norm_nonneg _) htri 2
-  change ‖v 0 - v 1‖ ^ 2 ≤ 2 * msVariableConsistencyDefect S j
-  nlinarith [hsq, h3, sq_nonneg (‖v 0‖ - ‖v 1‖)]
+  classical
+  set c : ZMod 2 → ℂ := fun b => if b = 0 then 1 else -1 with hcdef
+  have hcnorm : ∀ b : ZMod 2, ‖c b‖ = 1 := by
+    intro b
+    by_cases hb : b = 0 <;> simp [hcdef, hb]
+  have hA : (∑ b : ZMod 2, c b •
+      heteroKron (((S.A (.var j)).postprocess msBitOrZero).effect b) (1 : Op S.ιB)) =
+      heteroKron (obsOf ((S.A (.var j)).postprocess msBitOrZero)) 1 := by
+    rw [sum_univ_zmod_two]
+    simp [hcdef, obsOf, heteroKron_sub_left, ← sub_eq_add_neg]
+  have hB : (∑ b : ZMod 2, c b •
+      heteroKron (1 : Op S.ιA) (((S.B (.var j)).postprocess msBitOrZero).effect b)) =
+      heteroKron 1 (obsOf ((S.B (.var j)).postprocess msBitOrZero)) := by
+    rw [sum_univ_zmod_two]
+    simp [hcdef, obsOf, heteroKron_sub_right, ← sub_eq_add_neg]
+  have hkey := povm_to_obs (uniformDistribution Unit)
+    (fun (_ : Unit) (b : ZMod 2) =>
+      heteroKron (((S.A (.var j)).postprocess msBitOrZero).effect b) (1 : Op S.ιB))
+    (fun (_ : Unit) (b : ZMod 2) =>
+      heteroKron (1 : Op S.ιA) (((S.B (.var j)).postprocess msBitOrZero).effect b))
+    c hcnorm S.ψ
+  simp only [opDistSq_uniform_unit, hA, hB] at hkey
+  simpa [msVariableConsistencyDefect] using hkey
 
 /-- The leakage of Alice's dilated variable reflection out of the ground slice is
 controlled by the value of the strategy. -/
@@ -281,10 +309,10 @@ theorem norm_leak_varObs_sq_le_B (S : Strategy msGame) (ε : ℝ) (hwin : 1 - ε
   linarith
 
 /-- The two players' dilated variable reflections at cell `j` agree on the
-dilated state up to the consistency defect of the original variable
+dilated state up to the agreement distance of the original variable
 measurements and the leakage out of the ground slice: the squared
 state-dependent distance is at most `864 ε + 6 δ` for a strategy of value
-`1 - ε` whose defect at `j` is at most `δ`.  This is the cross-player agreement
+`1 - ε` whose agreement distance at `j` is at most `δ`.  This is the cross-player agreement
 that the hypothesis of the corrected `thm:ms-rigidity` provides to the
 swap-isometry extraction (issue #105); blueprint `ch13_qpbt_test.tex:224-253`,
 paper `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652`. -/
