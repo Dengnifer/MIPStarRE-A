@@ -656,3 +656,18 @@ multiple merge bases, both hook paths, and committed-merge auditing.
 **Expected effect:** resetting a prepared merge index to `HEAD` cannot create a
 quietly lossy stack or fresh-base merge, while deliberate branch deletions and
 conflict resolutions remain possible.
+
+## 2026-09-06 — Make main turns snapshot-driven and delegation-first
+
+**Trigger:** `results/telemetry/events.md` 2026-09-06, "Main-turn work serialized
+detached recovery", and owner directive #234.
+
+**Change:** `local/personas/main.md` now starts each short turn with the status
+snapshot, delegates work exceeding about two minutes, and orders recovery,
+labelled autofix or adjudication, stack propagation, and critical ready-packet
+dispatch. It makes daemon-only merges and #27 live-worker reporting explicit,
+with #26 reserved for human decisions.
+
+**Expected effect:** the main session remains responsive while independent work
+advances in parallel, failed lanes receive prompt recovery, and merge authority
+and owner escalation stay unambiguous.

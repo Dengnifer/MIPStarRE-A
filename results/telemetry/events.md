@@ -3053,3 +3053,12 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 - State at retirement: main 3f00de0; open PRs 233,230,225,213,212,207,205,202,195,185,178; live codex worker sessions 2;
   merges recorded by the daemon so far 40. All Claude-held worktrees were released (#118 at 691b671, #174 at bece2e6).
   This owner session stops; the owner decides when an owner session returns.
+
+## 2026-09-06 — Main-turn work serialized detached recovery
+
+- The main session spent about twenty minutes resolving PR #185's merge conflict
+  inside one turn while 13 of 19 worker slots were idle. The owner identified
+  the missing operating rhythm: snapshot first, delegate work over about two
+  minutes, recover failed and attention lanes before new packets, and leave
+  merges to the daemon. Issue #234 records the durable persona update so future
+  main turns dispatch, observe, record, and report instead of implementing.
