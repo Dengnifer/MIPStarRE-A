@@ -1000,15 +1000,58 @@ postprocessing, and operator-contraction steps used to formalize
 \begin{proof}
 	\leanok
 	\uses{lem:pasting-one-sided-explicit-error, lem:pasting-coarse-commutator,
-		lem:pasting-measurement}
+		lem:pasting-measurement, lem:pasting-scalar-error, lem:pasting-defect-bound}
 	Use the fixed Schmidt mirror of the second codeword family on Alice's
 	register. Its coarse consistency defect is at most $2\delta$ and its fine
 	defect at most $2\delta+\eta$. The distinct-family commutator comparison
 	then proves the conclusion without a register-exchange assumption.
 	For the universal coarse-commutator constant $C\geq1$, one may take
 	$\delta_{\mathrm{pasting}}=(3C+19)(\eta^{1/4}+\delta^{1/8})$.
+	On the unit square use Lemma~\ref{lem:pasting-scalar-error}; outside it,
+	this error is at least $1$, so Lemma~\ref{lem:pasting-defect-bound} applies.
 	Thus the polynomial notation here uses the additive correction documented
 	in \cite{gap:qpbt_pasting-product-error}, not the refuted product contract.
+\end{proof}
+
+\begin{lemma}[Universal bound for placed consistency defects]
+	\label{lem:pasting-defect-bound}
+	\lean{MIPStarRE.QPBT.consistencyDefect_placed_le_one}
+	\leanok
+	\uses{def:consistency, def:povm-conventions}
+	Let $\mu$ be a probability law on a finite question set, let $A^x_a$ and
+	$B^x_a$ be measurements on the two tensor factors with the same finite
+	outcome set, and let $\psi$ be a unit vector. Then
+	\[
+		\Exp_{x\sim\mu}\sum_{a\ne b}
+		\langle\psi|A^x_a\ot B^x_b|\psi\rangle\leq1.
+	\]
+	This is formalization support for the complementary error regime of
+	Lemma~\ref{lem:pasting}; projectivity is not required.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Completeness makes the sum over all outcome pairs equal to $1$.
+	Removing the nonnegative diagonal terms can only decrease it.
+\end{proof}
+
+\begin{lemma}[Scalar comparison for the pasting error]
+	\label{lem:pasting-scalar-error}
+	\lean{MIPStarRE.QPBT.pasting_error_sqrt_le_rpow}
+	\leanok
+	For $C\geq1$ and $0\leq\eta,\delta\leq1$, set
+	\[
+		K=C\delta+(2\sqrt{2\delta}+2\delta+2\sqrt{C\delta}+C\delta)
+		  +2\eta+2\sqrt{2(\delta+2\sqrt{2\delta}+\eta)}
+		  +2\sqrt{2(\delta+2\sqrt{2\delta})}.
+	\]
+	Then $2\delta+\sqrt K\leq(3C+19)(\eta^{1/4}+\delta^{1/8})$.
+	This is a formalization-only scalar estimate for Lemma~\ref{lem:pasting}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Put $u=\delta^{1/8}$ and $v=\eta^{1/4}$. Both lie in $[0,1]$.
+	Bound the successive square roots using these variables and compare
+	the resulting nonnegative polynomials.
 \end{proof}
 
 \begin{lemma}[Paired-entry estimate for the Schmidt mirror]
@@ -1104,8 +1147,8 @@ postprocessing, and operator-contraction steps used to formalize
 	Let $P,G,H$ be measurements, with $G,H$ indexed by the same codewords,
 	and let $\psi$ be a unit vector. Then
 	\begin{align*}
-	 &\left|\sum_{a,g}\langle\psi|\Id\ot G_gP_aG_gP_a|\psi\rangle
-	   -\sum_{g,a}\langle\psi|H_g\ot P_aG_gP_a|\psi\rangle\right|\\
+	 &\left|\operatorname{Re}\sum_{a,g}\langle\psi|\Id\ot G_gP_aG_gP_a|\psi\rangle
+	   -\operatorname{Re}\sum_{g,a}\langle\psi|H_g\ot P_aG_gP_a|\psi\rangle\right|\\
 	 &\qquad\leq
 	 \sqrt{\sum_g\|(\Id\ot G_g-H_g\ot\Id)\psi\|^2}.
 	\end{align*}
@@ -1237,9 +1280,12 @@ postprocessing, and operator-contraction steps used to formalize
 \begin{proof}
 	\leanok
 	\uses{lem:pasting-measurement, lem:pasting-coarse-commutator,
-		lem:pasting-explicit-error}
+		lem:pasting-explicit-error, lem:pasting-scalar-error, lem:pasting-defect-bound}
 	Apply the explicit defect bound and dominate it by the universal additive
-	polynomial error. The full conditional argument is recorded in
+	polynomial error using Lemma~\ref{lem:pasting-scalar-error} on the unit
+	square. Outside that square the error is at least $1$, and
+	Lemma~\ref{lem:pasting-defect-bound} suffices.
+	The full conditional argument is recorded in
 	\cite{gap:qpbt_pasting-product-error}.
 \end{proof}
 
@@ -1521,8 +1567,9 @@ postprocessing, and operator-contraction steps used to formalize
 	Let $P_{a_1}$ and $G_{g_2}$ be measurements placed on the second tensor
 	factor and let $\ket{\psi}$ be a unit vector. Then
 	\[
-		\Bigl| \sum_{a_1, g_2} \bra{\psi} \Id \ot G_{g_2} P_{a_1} G_{g_2} P_{a_1}
-			\ket{\psi} - \sum_{g_2} \bra{\psi} G_{g_2} \ot \sum_{a_1} P_{a_1}
+		\Bigl| \operatorname{Re}\sum_{a_1, g_2}
+			\bra{\psi} \Id \ot G_{g_2} P_{a_1} G_{g_2} P_{a_1}
+			\ket{\psi} - \operatorname{Re}\sum_{g_2} \bra{\psi} G_{g_2} \ot \sum_{a_1} P_{a_1}
 			G_{g_2} P_{a_1} \ket{\psi} \Bigr| \le \Bigl( \sum_{g_2} \bigl\|
 			(\Id \ot G_{g_2} - G_{g_2} \ot \Id) \ket{\psi} \bigr\|^2
 		\Bigr)^{1/2}\,.
@@ -1554,8 +1601,9 @@ postprocessing, and operator-contraction steps used to formalize
 	\[
 		\sum_{a_1, g_2} \bigl\| (\Id \ot [P_{a_1}, G_{g_2}]) \ket{\psi} \bigr\|^2
 		= \sum_{a_1, g_2} \bigl\| (\Id \ot P_{a_1} G_{g_2}) \ket{\psi} \bigr\|^2
-			+ \sum_{a_1} \bra{\psi} \Id \ot P_{a_1}^2 \ket{\psi}
-			- 2 \sum_{a_1, g_2} \bra{\psi} \Id \ot G_{g_2} P_{a_1} G_{g_2} P_{a_1}
+			+ \operatorname{Re}\sum_{a_1} \bra{\psi} \Id \ot P_{a_1}^2 \ket{\psi}
+			- 2 \operatorname{Re}\sum_{a_1, g_2}
+				\bra{\psi} \Id \ot G_{g_2} P_{a_1} G_{g_2} P_{a_1}
 				\ket{\psi}\,.
 	\]
 \end{lemma}
@@ -1659,11 +1707,15 @@ postprocessing, and operator-contraction steps used to formalize
 	\lean{MIPStarRE.QPBT.commutator_mass_fine_le}
 	\leanok
 	\uses{def:pasting-tensor-placement, def:povm-distance}
-	Let $G_{g_2}$ be a projective measurement on the second tensor factor
-	depending on a question, let $Q_{a_2}$ be its coarse-graining along the
-	evaluation map at the sampled second question, let $P_{a_1}$ be a
-	measurement, and let $\ket{\psi}$ be a unit vector. Assume the conditional
-	collision bound with parameter $\eta$, and assume that the averaged coarse
+	Let $\mathcal D$ be a probability law on $(x,y_1,y_2)$, let
+	$G^x_{g_2}$ be a projective measurement, and let $P^{x,y_1}_{a_1}$ be a
+	measurement, both on the second tensor factor. Set
+	$Q^{x,y_2}_{a_2}=G^x_{[\operatorname{eval}_{y_2}(\cdot)=a_2]}$.
+	In particular, $G$ depends only on $x$, and $P$ only on $(x,y_1)$,
+	not on $y_2$. Let $\ket{\psi}$ be a unit vector and $\eta\geq0$.
+	All averages below are over $\mathcal D$, and question superscripts are
+	suppressed. Assume the conditional collision bound given $(x,y_1)$ of
+	positive probability with parameter $\eta$, and assume that the averaged coarse
 	commutator mass is at most $K_0$, that the averaged mass of the ordered
 	products $\Id \ot P_{a_1} Q_{a_2}$ is at least $1 - m$, and that the summed
 	squared distances between the two placements of the coarse and of the fine

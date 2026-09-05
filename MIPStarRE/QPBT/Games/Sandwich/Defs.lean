@@ -100,31 +100,21 @@ The operator families compared in `lem:pasting` are placed on one factor of a
 bipartite space. The two constructions below present such a placed family as a
 measurement, so that the consistency calculus applies to it verbatim. -/
 
-/-- The measurement whose effects are the left tensor placements of the effects
-of `M`. Formalization support for `lem:pasting`, blueprint
+/-- An alias of `DistanceCalculus.leftPlacedMeasurement`, whose effects are the
+left tensor placements of the effects of `M`. Formalization support for `lem:pasting`, blueprint
 `ch12_qpbt_games.tex:960-990`. -/
 noncomputable def Measurement.leftPlacement {α ιA ιB : Type*} [Fintype α]
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
     (M : Measurement α ιA) : Measurement α (ιA × ιB) :=
-  Measurement.ofSumEqOne (fun a => heteroKron (M.effect a) 1)
-    (fun a => kronecker_nonneg (M.pos a)
-      (Matrix.nonneg_iff_posSemidef.mpr Matrix.PosSemidef.one))
-    (by
-      classical
-      rw [← heteroKron_finset_sum_left, M.sum_eq_one, heteroKron_one_one])
+  DistanceCalculus.leftPlacedMeasurement M
 
-/-- The measurement whose effects are the right tensor placements of the
-effects of `M`. Formalization support for `lem:pasting`, blueprint
+/-- An alias of `DistanceCalculus.rightPlacedMeasurement`, whose effects are the
+right tensor placements of the effects of `M`. Formalization support for `lem:pasting`, blueprint
 `ch12_qpbt_games.tex:960-990`. -/
 noncomputable def Measurement.rightPlacement {α ιA ιB : Type*} [Fintype α]
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
     (M : Measurement α ιB) : Measurement α (ιA × ιB) :=
-  Measurement.ofSumEqOne (fun a => heteroKron 1 (M.effect a))
-    (fun a => kronecker_nonneg
-      (Matrix.nonneg_iff_posSemidef.mpr Matrix.PosSemidef.one) (M.pos a))
-    (by
-      classical
-      rw [← heteroKron_finset_sum_right, M.sum_eq_one, heteroKron_one_one])
+  DistanceCalculus.rightPlacedMeasurement M
 
 /-- The effects of the left placement. -/
 @[simp] theorem Measurement.leftPlacement_effect {α ιA ιB : Type*} [Fintype α]
