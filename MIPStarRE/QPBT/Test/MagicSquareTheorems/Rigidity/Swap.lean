@@ -220,14 +220,14 @@ two observables. -/
 theorem reflectionEffect_zero_mul_X_sub_X_mul_one
     {ι : Type} [Fintype ι] [DecidableEq ι] (X Z : Op ι) :
     reflectionEffect Z 0 * X - X * reflectionEffect Z 1 =
-      (2 : ℂ)⁻¹ • (X * Z - -(Z * X)) := by
+      (2 : ℂ)⁻¹ • (X * Z + Z * X) := by
   simp only [reflectionEffect, if_pos, if_neg one_ne_zero]
   calc
     ((2 : ℂ)⁻¹ • (1 + Z)) * X - X * ((2 : ℂ)⁻¹ • (1 - Z)) =
         (2 : ℂ)⁻¹ • ((1 + Z) * X - X * (1 - Z)) := by
       rw [Matrix.smul_mul, Matrix.mul_smul]
       module
-    _ = (2 : ℂ)⁻¹ • (X * Z - -(Z * X)) := by
+    _ = (2 : ℂ)⁻¹ • (X * Z + Z * X) := by
       congr 1
       noncomm_ring
 
@@ -239,19 +239,19 @@ theorem X_mul_reflectionEffect_one_mul_X_sub_zero
     {ι : Type} [Fintype ι] [DecidableEq ι]
     (X Z : Op ι) (hX : IsBinaryObservable X) :
     X * reflectionEffect Z 1 * X - reflectionEffect Z 0 =
-      -(2 : ℂ)⁻¹ • (X * (X * Z - -(Z * X))) := by
+      -(2 : ℂ)⁻¹ • (X * (X * Z + Z * X)) := by
   simp only [reflectionEffect, if_pos, if_neg one_ne_zero]
   calc
     X * ((2 : ℂ)⁻¹ • (1 - Z)) * X - (2 : ℂ)⁻¹ • (1 + Z) =
         (2 : ℂ)⁻¹ • (X * (1 - Z) * X - (1 + Z)) := by
       rw [Matrix.mul_smul, Matrix.smul_mul]
       module
-    _ = (2 : ℂ)⁻¹ • (-(X * (X * Z - -(Z * X)))) := by
+    _ = (2 : ℂ)⁻¹ • (-(X * (X * Z + Z * X))) := by
       congr 1
       have hXXZ : X * (X * Z) = Z := by
         rw [← Matrix.mul_assoc, hX.mul_self_eq_one, one_mul]
       noncomm_ring [hX.mul_self_eq_one, hXXZ]
-    _ = -(2 : ℂ)⁻¹ • (X * (X * Z - -(Z * X))) := by
+    _ = -(2 : ℂ)⁻¹ • (X * (X * Z + Z * X)) := by
       module
 
 /-- Formalization-only transport estimate for `thm:ms-rigidity`: the failure of
@@ -266,7 +266,8 @@ theorem norm_binarySwap_intertwines_X_sub_le {ι : Type} [Fintype ι]
           (heteroKron (tauShift (K := ZMod 2) 1) (1 : Op ι))
           (binarySwapIsometry X Z hX hZ ψ)‖ ≤
       ‖applyOperatorToState (X * Z - -(Z * X)) ψ‖ := by
-  let d := applyOperatorToState (X * Z - -(Z * X)) ψ
+  rw [sub_neg_eq_add]
+  let d := applyOperatorToState (X * Z + Z * X) ψ
   have apply_sub (M N : Op ι) :
       applyOperatorToState (M - N) ψ =
         applyOperatorToState M ψ - applyOperatorToState N ψ := by

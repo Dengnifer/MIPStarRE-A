@@ -410,7 +410,7 @@ theorem norm_swapComponent_diag_sub_le
         heteroKron XA (1 : Op ιB) * heteroKron (XA * ZA + ZA * XA) (1 : Op ιB) := by
       rw [heteroKron_mul, mul_one]
     rw [← applyOperatorToState_sub_op, ← heteroKron_sub_left,
-      X_mul_reflectionEffect_one_mul_X_sub_zero XA ZA hXA, sub_neg_eq_add,
+      X_mul_reflectionEffect_one_mul_X_sub_zero XA ZA hXA,
       heteroKron_smul_left, applyOperatorToState_smul, norm_smul, hfac,
       norm_applyOperatorToState_isometry_mul hLXiso,
       show ‖(-(2 : ℂ)⁻¹ : ℂ)‖ = (2 : ℝ)⁻¹ by rw [norm_neg]; norm_num]

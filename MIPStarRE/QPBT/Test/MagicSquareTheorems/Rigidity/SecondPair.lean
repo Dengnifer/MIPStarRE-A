@@ -104,17 +104,6 @@ private theorem bitSign_msParity_five_eq_neg_one :
   rw [hp]
   norm_num [bitSign, ZMod.val_one]
 
-/-- Formalization-only: closeness to a negation is symmetric in the two
-operators, because `M - (-N) = N - (-M)`.  The first-pair computation in
-`Rigidity/Anticommutation.lean` uses the same identity through a private helper
-of that file, which is not exported. -/
-private theorem normCloseOn_neg_symm {ι : Type} [Fintype ι] [DecidableEq ι]
-    {ψ : EuclideanSpace ℂ ι} {δ : ℝ} {M N : Op ι} (h : NormCloseOn ψ δ M (-N)) :
-    NormCloseOn ψ δ N (-M) := by
-  change ‖applyOperatorToState (N - -M) ψ‖ ≤ δ
-  rw [show N - -M = M - -N by abel]
-  exact h
-
 /-! ## The second closed path of the solution-group computation -/
 
 /-- The solution-group computation for the second logical pair, in the form in
@@ -202,7 +191,7 @@ theorem msVarObsB_second_pair_anticommute (S : Strategy msGame) (ε : ℝ)
   have hend := msCellObsA_mul_close S ε hwin 1 4 0 0
   rw [show msConstraintVars 4 0 = 1 from by decide,
     show msConstraintVars 1 0 = 3 from by decide] at hend
-  refine normCloseOn_neg_symm
+  refine normCloseOn_neg_swap
     (((hstart.trans (msCellObsA_second_pair_path S ε hwin)).trans hend.neg).mono ?_)
   linarith
 

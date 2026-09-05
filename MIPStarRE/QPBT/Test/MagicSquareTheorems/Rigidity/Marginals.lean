@@ -204,7 +204,7 @@ theorem swapFactor_shift_defect_zero (X Z : Op ι) :
       -((2 : ℂ)⁻¹ • (X * Z + Z * X)) := by
   have hid : reflectionEffect Z 0 * X - X * reflectionEffect Z 1 =
       (2 : ℂ)⁻¹ • (X * Z + Z * X) := by
-    rw [reflectionEffect_zero_mul_X_sub_X_mul_one X Z, sub_neg_eq_add]
+    rw [reflectionEffect_zero_mul_X_sub_X_mul_one X Z]
   rw [zero_add, swapFactor_one, swapFactor_zero, ← hid]
   abel
 
@@ -214,7 +214,7 @@ theorem swapFactor_shift_defect_one (X Z : Op ι) (hX : IsBinaryObservable X) :
       (2 : ℂ)⁻¹ • (X * (X * Z + Z * X)) := by
   have hid : X * reflectionEffect Z 1 * X - reflectionEffect Z 0 =
       -((2 : ℂ)⁻¹ • (X * (X * Z + Z * X))) := by
-    rw [X_mul_reflectionEffect_one_mul_X_sub_zero X Z hX, sub_neg_eq_add, neg_smul]
+    rw [X_mul_reflectionEffect_one_mul_X_sub_zero X Z hX, neg_smul]
   have hz : swapFactor X Z (1 + 1) = reflectionEffect Z 0 := by
     rw [show (1 : ZMod 2) + 1 = 0 from by decide, swapFactor_zero]
   have hs : swapFactor X Z 1 * X = X * reflectionEffect Z 1 * X := by rw [swapFactor_one]

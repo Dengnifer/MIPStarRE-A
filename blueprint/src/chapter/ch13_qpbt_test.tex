@@ -440,7 +440,7 @@ $4$, respectively.
 % the theorem rests on, and the proof of the theorem lists them in its \uses.
 
 \begin{lemma}[Formalization support for the spectral algebra of the controlled swaps]\label{lem:ms-rigidity-support-swap-algebra}
-	\lean{MIPStarRE.QPBT.MagicSquareRigidity.reflectionEffect_zero_mul_reflection, MIPStarRE.QPBT.MagicSquareRigidity.reflectionEffect_one_mul_reflection, MIPStarRE.QPBT.MagicSquareRigidity.reflectionEffect_zero_mul_X_sub_X_mul_one, MIPStarRE.QPBT.MagicSquareRigidity.X_mul_reflectionEffect_one_mul_X_sub_zero, MIPStarRE.QPBT.MagicSquareRigidity.kroneckerMap_sub_left, MIPStarRE.QPBT.MagicSquareRigidity.kroneckerMap_sub_right}
+	\lean{MIPStarRE.QPBT.MagicSquareRigidity.reflectionEffect_zero_mul_reflection, MIPStarRE.QPBT.MagicSquareRigidity.reflectionEffect_one_mul_reflection, MIPStarRE.QPBT.MagicSquareRigidity.reflectionEffect_zero_mul_X_sub_X_mul_one, MIPStarRE.QPBT.MagicSquareRigidity.X_mul_reflectionEffect_one_mul_X_sub_zero, MIPStarRE.QPBT.MagicSquareRigidity.kroneckerMap_sub_left, MIPStarRE.QPBT.MagicSquareRigidity.kroneckerMap_sub_right, MIPStarRE.QPBT.MagicSquareRigidity.heteroKron_sub_left, MIPStarRE.QPBT.MagicSquareRigidity.heteroKron_sub_right}
 	\leanok
 	\uses{def:tensor-product-strategy}
 	None of the following is a named statement of the source article; each isolates one step of the Lean proof of Theorem~\ref{thm:ms-rigidity}. Let $X$ and $Z$ be $\pm 1$-valued observables on a finite-dimensional space and let $P^Z_0 = \tfrac12(I + Z)$ and $P^Z_1 = \tfrac12(I - Z)$ be the spectral effects of $Z$. Then $P^Z_0 Z = P^Z_0$ and $P^Z_1 Z = -P^Z_1$, and
