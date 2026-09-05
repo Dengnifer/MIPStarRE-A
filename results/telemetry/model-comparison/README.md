@@ -23,21 +23,23 @@ nothing outside this directory except a pull-request cache under
 
 ## How the model is derived
 
-`sessions.jsonl` has **no model field**, so `compare.py` derives one per session
+New dispatcher rows in `sessions.jsonl` record the selected model and account.
+`compare.py` prefers that explicit identity, retaining fallback for older rows,
 and reports how many rows came from each source:
 
-1. **capture / rollout** — the codex event stream. The rollout named in the
+1. **registry** — the nonempty `model` field, explicitly pinned by the dispatcher.
+2. **capture / rollout** — the codex event stream. The rollout named in the
    `rollout` field carries the model in three places (`session_meta`'s
    `base_instructions.provenance.model`, `turn_context.model`,
    `world_state.state.model`). The per-session capture
    (`results/telemetry/sessions/<name>.jsonl`, `codex exec --json`) carries no
    model field today; it is scanned first anyway so a future capture format is
    picked up for free.
-2. **lane log** — `dispatch <role> for #N (model <name>, attempt k)` in
+3. **lane log** — `dispatch <role> for #N (model <name>, attempt k)` in
    `~/.cache/mipstarre-dev/watchdog/lanes/<issue>.lane.log`, used only when every
    such line for that issue names the same model. Lane logs are a runtime cache
    and cover only recent lanes.
-3. **time rule** — last resort: sessions starting before 2026-09-05T15:46Z are
+4. **time rule** — last resort: sessions starting before 2026-09-05T15:46Z are
    attributed to sol, later ones to astra. This is the weakest source; it cannot
    see a per-dispatch `MIPSTARRE_CODEX_MODEL` override.
 

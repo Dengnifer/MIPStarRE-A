@@ -55,13 +55,13 @@ Schemas (all JSONL, one object per line; timestamps ISO-8601 with offset):
   Stages: `1-skeleton`, `2-references`, `3-blueprint`, `4.1-minimal`,
   `4.2-full-skeleton`, `4.3-proofs` (extend as needed).
 - `results/telemetry/sessions.jsonl` —
-  `{name, role, model?, issue, pr?, thread_id, start, end, wall_s,
+  `{name, role, model?, account?, issue, pr?, thread_id, start, end, wall_s,
     usage: {input, cached_input, cache_write, output, reasoning},
     exit, dispatcher, worktree, status: active|done|failed|archived}`
-  Written only by `local/bin/dispatch.sh` / `telemetry.py`. The optional
-  `model` is the exact nonempty `MIPSTARRE_CODEX_MODEL` selected by the
-  dispatcher; it is absent from historical rows and when the Codex CLI default
-  was not explicitly resolved.
+  Written only by `local/bin/dispatch.sh` / `telemetry.py`. New dispatches always
+  supply `account` (`primary` or `second`) and the exact resolved `model`
+  passed to the CLI (environment override, otherwise selected-account config).
+  Both fields remain optional for historical rows and legacy replay callers.
 - `results/telemetry/owner-sessions.jsonl` —
   `{name, role, model, issue, pr?, worktree?, base?, start, end?, wall_s?,
     status, tokens?, tool_uses?, findings_fixed?, commits?, note?}`.
