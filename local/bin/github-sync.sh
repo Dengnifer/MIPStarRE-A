@@ -61,9 +61,8 @@ fi
 # exactly, so the snapshot just written (and any build ledger rows) must be
 # committed before the next publish; otherwise every later push is refused.
 if ! git -C "$ROOT" diff --quiet -- results/telemetry/github-snapshot results/telemetry/builds.jsonl 2>/dev/null; then
-  git -C "$ROOT" add results/telemetry/github-snapshot results/telemetry/builds.jsonl 2>/dev/null
   git -C "$ROOT" commit -q -m "chore(telemetry): GitHub record snapshot" \
-    -- results/telemetry/github-snapshot results/telemetry/builds.jsonl 2>/dev/null \
+    -- results/telemetry/github-snapshot results/telemetry/builds.jsonl \
     || echo "$PROG: warning: could not commit the snapshot; the next push will need a clean tree" >&2
 fi
 
