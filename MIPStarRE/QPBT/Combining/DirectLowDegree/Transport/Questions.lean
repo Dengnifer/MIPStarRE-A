@@ -551,25 +551,6 @@ theorem directDiagonalAnswerReadout_rebase (D : DirectLdParams) (r : Fin D.k)
         exact (DiagonalLinePolynomial.reparamAt_reparamAt
           (directDiagonalAnswerEquiv D (a r)) _ _).symm
 
-/-! ## Deprecated names
-
-The names below were used before these constructions were named after the low
-individual degree test they belong to.  The deprecated aliases are required by
-the open `issue-134` branch and will be deleted in the cleanup after that branch
-migrates.
--/
-
-/-- Former name of `ldtDiagonalLineOf`, kept for the branches stacked on this
-module. -/
-@[deprecated (since := "2026-09-05")]
-alias matureDiagonalLineOf := ldtDiagonalLineOf
-
-/-- Former name of `directDiagonalQuestionOf_ldtDiagonalLineOf`, kept for the
-branches stacked on this module. -/
-@[deprecated (since := "2026-09-05")]
-alias directDiagonalQuestionOf_matureDiagonalLineOf :=
-  directDiagonalQuestionOf_ldtDiagonalLineOf
-
 end
 
 end MIPStarRE.QPBT
