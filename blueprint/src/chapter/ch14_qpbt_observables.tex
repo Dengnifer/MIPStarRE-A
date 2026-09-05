@@ -764,6 +764,44 @@ extracts from the strategy.
 	from Lemma~\ref{fact:agreement}.
 \end{proof}
 
+\begin{lemma}[Consistency and value part of Lemma~\ref{lem:qld-win-implications}]
+	\label{lem:qld-win-implications-exact}
+	\lean{MIPStarRE.QPBT.win_cons, MIPStarRE.QPBT.win_low_degree}
+	\lean{MIPStarRE.QPBT.win_pauli_basis_cons, MIPStarRE.QPBT.win_comm}
+	\lean{MIPStarRE.QPBT.win_comm_cons, MIPStarRE.QPBT.win_magic_square}
+	\lean{MIPStarRE.QPBT.win_ms_cons}
+	\leanok
+	\uses{lem:qld-win-implications}
+	Under the hypotheses and notation of
+	Lemma~\ref{lem:qld-win-implications}, each of its seven numbered conclusions
+	holds in the displayed tensor order: Items~\ref{enu:qld-cons}--\ref{enu:qld-comm-cons}
+	and~\ref{enu:qld-ms-cons} hold with the consistency relation
+	$\simeq_\eps$, and Item~\ref{enu:qld-ms} gives the stated average Magic
+	Square value. This assertion does not include the operator-distance or
+	tensor-interchanged conclusions in the final sentence of that lemma.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{fact:omega-anticomm-prob, lem:graph-distribution-mass,
+		def:admissible,
+		def:pauli-question-distribution, def:pauli-win-predicate,
+		def:ld-win-predicate, def:line-point-dist,
+		def:ideg-deg-polynomials, def:consistency, def:ms-game,
+		def:tensor-product-value}
+	For each consistency assertion, rewrite the defect as the mass of unequal
+	coarse-grained labels. Every such mismatch violates the corresponding clause
+	of the Pauli basis test, so its mass is bounded by rejection on the associated
+	edge of the finite type graph; for the low-degree check, first split the
+	line-point average into its axis-parallel and diagonal parts. Uniform edge
+	sampling bounds each resulting rejection average by a universal constant
+	times $\eps$. For the commuting and anticommuting items, conditioning costs
+	factors at most $2$ and $2^4$, respectively, by
+	Lemma~\ref{fact:omega-anticomm-prob}. Finally, identify one minus the value of
+	the induced Magic Square strategy with its average rejection mass, apply the
+	same anticommuting and fixed-edge bounds, and average over the Magic Square
+	question pairs to obtain Item~\ref{enu:qld-ms}.
+\end{proof}
+
 \begin{lemma}[Winning implications for observables]
 	\label{lem:qld-win-implications-obs}
 	\lean{MIPStarRE.QPBT.pointObs_self_consistent}

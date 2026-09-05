@@ -276,17 +276,689 @@ Quantum soundness of a version of the classical low-degree test for polynomials 
 \end{proof}
 
 \begin{remark}[Relation to the low individual degree test of Chapter~\ref{chap:test}]\label{rem:ld-soundness-provider}
-	Theorem~\ref{lem:ld-soundness} is imported: the proof above records the source's reduction to Theorem~4.7 of~\cite{Ji2021Quantum}, instantiated with that theorem's auxiliary parameter chosen as $m^3 d$ and followed by the extension to simultaneous $k$-tuples of~\cite{Natarajan2018NEEXP}, together with the two open facts required by the identification, which remain to be proved, --- the game correspondence and the parameter bound, detailed in~\cite{gap:qpbt_ld-dimension-divisibility}. The result of~\cite{Ji2020LowIndividualDegree} that underlies it is proved here as Theorem~\ref{thm:main-formal}: for every projective strategy passing the $(m,q,d)$ low individual degree test of Definition~\ref{def:low-individual-degree-test} with probability at least $1-\eps$, that theorem produces measurements in $\polymeas{m}{q}{d}$ satisfying consistency relations of the same shape as the three approximations of Theorem~\ref{lem:ld-soundness}. Theorem~\ref{lem:ld-soundness} is not a consequence of Theorem~\ref{thm:main-formal} alone: a derivation from it would require, in addition, an equivalence between the typed game $\mathfrak{G}^{\mathrm{ld}}_{(q,m,d,1)}$ and the $(m,q,d)$ test of Chapter~\ref{chap:test} --- matching the two question distributions, the two win conditions, and the two error functions --- together with the extension from $k = 1$ to general $k$ by the reduction of~\cite{Natarajan2018NEEXP} cited above. Neither implication is proved in this chapter, and the proof of Theorem~\ref{lem:ld-soundness} given above does not invoke Theorem~\ref{thm:main-formal}.
+	Theorem~\ref{lem:ld-soundness} is imported: the proof above records the source's reduction to Theorem~4.7 of~\cite{Ji2021Quantum}, instantiated with that theorem's auxiliary parameter chosen as $m^3 d$ and followed by the extension to simultaneous $k$-tuples of~\cite{Natarajan2018NEEXP}, together with the two open facts required by the identification, which remain to be proved, --- the game correspondence and the parameter bound, detailed in~\cite{gap:qpbt_ld-dimension-divisibility}. The result of~\cite{Ji2020LowIndividualDegree} that underlies it is proved here as Theorem~\ref{thm:main-formal}: for every projective strategy passing the $(m,q,d)$ low individual degree test of Definition~\ref{def:low-individual-degree-test} with probability at least $1-\eps$, that theorem produces measurements in $\polymeas{m}{q}{d}$ satisfying consistency relations of the same shape as the three approximations of Theorem~\ref{lem:ld-soundness}. Theorem~\ref{lem:ld-soundness} is not a consequence of Theorem~\ref{thm:main-formal} alone: a derivation from it would require, in addition, an equivalence between the typed game $\mathfrak{G}^{\mathrm{ld}}_{(q,m,d,1)}$ and the $(m,q,d)$ test of Chapter~\ref{chap:test} --- matching the two question distributions, the two win conditions, and the two error functions --- together with the extension from $k = 1$ to general $k$ by the reduction of~\cite{Natarajan2018NEEXP} cited above. The direct reduction and its transport now establish the case $k=1$ in Theorem~\ref{lem:ld-soundness-k-one}; the extension to general $k$ for the seed-indexed game remains open, while Proposition~\ref{prop:ld-simultaneous-general-k} establishes the directly indexed combining reduction. The printed tensor-code route above does not invoke Theorem~\ref{thm:main-formal}.
 \end{remark}
 
 % This remark records the formal status of the extension to general k;
 % it is not a statement from the paper.
 \begin{remark}[The extension to general $k$ is not coordinatewise]\label{rem:ld-soundness-simultaneity}
-	The extension from $k = 1$ to general $k$ cited in the proof of Theorem~\ref{lem:ld-soundness} is the reduction deriving Theorem~4.43 from Theorem~4.40 in \cite{Natarajan2018NEEXP}: the $k$ answer polynomials are combined into the single polynomial $(\alpha, u) \mapsto \sum_i \alpha_i g_i(u)$ in $m + k$ variables, whose restriction to a queried subspace has degree $d + 1$; the case $k = 1$ is applied once to the combined strategy at that degree, and the $k$ polynomials are recovered from the resulting measurement by exact linearity in $\alpha$ and the Schwartz--Zippel lemma at degree $d + 1$. It cannot be replaced by applying the case $k = 1$ to each coordinate separately and combining the coordinate measurements by the sandwich of Lemma~\ref{lem:ld-sandwich}: over $\F_{2^s}$ with $d = 1$ and $k = 2$ there are a joint point measurement and coordinate polynomial measurements, on the maximally entangled state, for which every coordinate relation of the theorem holds with error $0$ while every POVM with polynomial-pair outcomes has consistency defect at least $1 - 2/q$ against the joint point measurement; the computation is in \cite{gap:qpbt_ld-simultaneous-sandwich}. The formalization accordingly proves, for $k = 1$, the polynomial-tuple conclusion of Theorem~\ref{lem:ld-soundness} with its three consistency defects bounded by the error function of Theorem~\ref{thm:main-formal} at the auxiliary sampling parameter $2560000\,m^3d$ and pass bound $3\eps$, and not by $\delta_{\mathrm{ld}}$: the absorption of that error into $\delta_{\mathrm{ld}}$ is a separate estimate, and the identification of the two games remains open. The value $k = 1$ is the only one instantiated in the proof of Lemma~\ref{lem:qld-4-7}; the general case awaits a formalization of the combining reduction. The one-coordinate conclusion, obtained for the directly indexed game of Remark~\ref{rem:qld-4-7-divisibility}, is Lemma~\ref{lem:direct-ld-simultaneous-single}, and the coordinatewise soundness conclusion it rests on is Lemma~\ref{lem:direct-ld-coordinate-soundness}; the collision estimate for the directly indexed polynomial representatives is Lemma~\ref{lem:direct-ld-polynomial-agreement}.
+	The extension from $k = 1$ to general $k$ cited in the proof of Theorem~\ref{lem:ld-soundness} is the reduction deriving Theorem~4.43 from Theorem~4.40 in \cite{Natarajan2018NEEXP}: the $k$ answer polynomials are combined into the single polynomial $(\alpha, u) \mapsto \sum_i \alpha_i g_i(u)$ in $m + k$ variables, the case $k = 1$ is applied once to the combined strategy, and the $k$ polynomials are recovered from the resulting measurement by exact linearity in $\alpha$ and the Schwartz--Zippel lemma. It cannot be replaced by applying the case $k = 1$ to each coordinate separately and combining the coordinate measurements by the sandwich of Lemma~\ref{lem:ld-sandwich}: over $\F_{2^s}$ with $d = 1$ and $k = 2$ there are a joint point measurement and coordinate polynomial measurements, on the maximally entangled state, for which every coordinate relation of the theorem holds with error $0$ while every POVM with polynomial-pair outcomes has consistency defect at least $1 - 2/q$ against the joint point measurement; the computation is in \cite{gap:qpbt_ld-simultaneous-sandwich}. The formalization accordingly proves the polynomial-tuple conclusion of Theorem~\ref{lem:ld-soundness} for $k = 1$ from Theorem~\ref{thm:main-formal}, which is the only value instantiated in the proof of Lemma~\ref{lem:qld-4-7}; the general case is the combining reduction of Proposition~\ref{prop:ld-simultaneous-general-k}, carried out for the directly indexed game. The correlated seed-fibre dilation and compression yield the seed-indexed case $k = 1$ in Theorem~\ref{lem:ld-soundness-k-one}; the general-$k$ seed-indexed theorem remains open. The two games and the transport are compared in \cite{gap:qpbt_ld-dimension-divisibility}.
 	% This remark carries no Lean metadata, since remarks are not blueprint
 	% dependency nodes; the Lean declarations are linked from the
 	% formalization support nodes cited above.
 \end{remark}
+
+% The nodes of this subsection are formalization-support nodes recording the
+% reduction cited in the proof of Theorem lem:ld-soundness; the paper states
+% none of them separately.
+\subsection{The combining reduction to simultaneity parameter one}
+\label{sec:ld-combining-reduction}
+
+The extension from $k = 1$ to general $k$ cited in the proof of
+Theorem~\ref{lem:ld-soundness} is recorded here in the form in which it is
+formalized.  The nodes below are formalization-support nodes: the source states
+none of them separately, and together they constitute its derivation of
+Theorem~4.43 from Theorem~4.40 in~\cite{Natarajan2018NEEXP}.  The game in
+question is the directly indexed low-degree game of
+\cite{gap:qpbt_ld-dimension-divisibility}, which samples the coordinate index of
+a line directly instead of through a fiber of $\chi$; its point questions, line
+questions, answer formats and win predicate are those of
+Definition~\ref{def:ld-game}, and it is used here because the reduction applies
+the case $k = 1$ at dimension $m + k$, where the divisibility condition of
+Definition~\ref{def:ld-game} is not available.
+% A node of this subsection is marked as formalized only when the Lean
+% declarations it names are complete and carry no unproved placeholder.
+
+\begin{definition}[Combined parameters of the reduction]
+	\label{def:ld-combining-parameters}
+	\lean{MIPStarRE.QPBT.DirectLdParams, MIPStarRE.QPBT.DirectLdParams.combined}
+	\leanok
+	\uses{def:admissible-size}
+	For directly indexed parameters $\mathsf{ldparams} = (q,m,d,k)$, where
+	$m,d,k \ge 1$ are integers and $q$ is an admissible field size, no condition
+	$m \mid q$ is imposed.  The \emph{combined parameter tuple} is
+	\[
+		\mathsf{ldparams}^{\mathrm c} = (q,\; m+k,\; d,\; 1)\;:
+	\]
+	the dimension grows by the simultaneity parameter, the simultaneity
+	parameter becomes $1$, and the field size, the degree and the admissibility
+	of the field size are unchanged.  The degree is unchanged because the
+	combining map of Definition~\ref{def:ld-combining-map} is linear in the
+	fresh coordinates and therefore, in the individual-degree class of
+	Definition~\ref{def:polyfunc}, raises no individual degree above $d$ as soon
+	as $d \ge 1$.  The source works with total degree and passes from $d$ to
+	$d+1$ at this step; that increment is an artifact of the total-degree
+	formulation and does not occur here.
+\end{definition}
+
+\begin{definition}[The combining map on polynomial tuples]
+	\label{def:ld-combining-map}
+	\lean{MIPStarRE.QPBT.combinePolyTuple, MIPStarRE.QPBT.combinePolyTuple_eval}
+	\lean{MIPStarRE.QPBT.combinePolyTuple_mem_polyFunc}
+	\lean{MIPStarRE.QPBT.directCombinedPolynomial}
+	\lean{MIPStarRE.QPBT.directCombinedPolynomial_eval}
+	\leanok
+	\uses{def:polyfunc, def:ld-meas, def:ld-combining-parameters}
+	Coordinates of $\F_q^{m+k}$ are written $(u,\alpha)$, with $u \in \F_q^m$
+	occupying the first $m$ coordinates and $\alpha \in \F_q^k$ the last $k$;
+	the coordinates carrying $\alpha$ are called the \emph{combining
+	coordinates}.  For a tuple $g = (g_0,\ldots,g_{k-1})$ of polynomials
+	$g_r \in \polyfunc{m}{q}{d}$, the \emph{combined polynomial} is
+	\[
+		\mathrm{comb}_g(u,\alpha) \;=\; \sum_{r=0}^{k-1} \alpha_r\, g_r(u)\;.
+	\]
+	It lies in $\polyfunc{m+k}{q}{d}$ whenever $d \ge 1$: a component $g_r$
+	involves no combining coordinate, so multiplying it by $\alpha_r$ leaves its
+	individual degrees in the first $m$ coordinates unchanged and produces
+	individual degree $1$ in the coordinate carrying $\alpha_r$.
+
+	The order of the two coordinate blocks is part of the construction.  The
+	point coordinates precede the combining coordinates, so that zeroing a
+	prefix of a direction of $\F_q^{m+k}$, as the diagonal-line branch of
+	Definition~\ref{def:ld-question-distribution} does, restricts on the first
+	$m$ coordinates to zeroing the corresponding prefix of the point part of
+	that direction; this is what makes the diagonal-line questions of the
+	combined game project to diagonal-line questions of the original game in
+	Definition~\ref{def:ld-combined-strategy}.  Definition~\ref{def:combine-map}
+	is a variant of the same construction with two components in \emph{disjoint}
+	blocks of point coordinates; the map above keeps one common block of point
+	coordinates, as the reduction requires.
+\end{definition}
+
+\begin{lemma}[Recovery of the components of a combined polynomial]
+	\label{lem:ld-combining-split}
+	\lean{MIPStarRE.QPBT.splitCombinedPoly}
+	\lean{MIPStarRE.QPBT.splitCombinedPoly_combinePolyTuple}
+	\lean{MIPStarRE.QPBT.combinePolyTuple_injective}
+	\lean{MIPStarRE.QPBT.IsDirectCombined, MIPStarRE.QPBT.directTupleOfCombined}
+	\lean{MIPStarRE.QPBT.directTupleOfCombined_directCombinedPolynomial}
+	\leanok
+	\uses{def:ld-combining-map}
+	Let $\mathrm{split}_r$ denote the substitution of the $r$-th standard basis
+	vector of $\F_q^k$ for the combining coordinates, a ring homomorphism
+	$\F_q[u,\alpha] \to \F_q[u]$ fixing the point coordinates.  Then
+	$\mathrm{split}_r(\mathrm{comb}_g) = g_r$ for every tuple $g$ and every
+	$r$.  Consequently $g \mapsto \mathrm{comb}_g$ is injective, and the map
+	sending $p \in \polyfunc{m+k}{q}{d}$ to the unique tuple $g$ with
+	$\mathrm{comb}_g = p$ when $p$ is of that form, and to the zero tuple
+	otherwise, is a well-defined total map $\mathrm{split}$ with
+	$\mathrm{split}(\mathrm{comb}_g) = g$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:ld-combining-map}
+	Applying the homomorphism $\mathrm{split}_r$ to the sum defining
+	$\mathrm{comb}_g$ sends the summand of index $s$ to $g_s$ when $s = r$ and to
+	$0$ otherwise, since the combining coordinate carrying $\alpha_s$ is sent to
+	$1$ for $s = r$ and to $0$ otherwise, while $g_s$, which involves no
+	combining coordinate, is fixed; the sum is therefore $g_r$.
+	Injectivity follows, and it makes the case distinction defining
+	$\mathrm{split}$ unambiguous.  The value on polynomials that are not
+	combined is immaterial: the source leaves it arbitrary, and the estimates
+	below use only the value on combined polynomials.
+\end{proof}
+
+\begin{lemma}[Collision of two linear forms in the combining variables]
+	\label{lem:ld-combining-collision}
+	\lean{MIPStarRE.QPBT.combiningLinearForm}
+	\lean{MIPStarRE.QPBT.combiningLinearForm_injective}
+	\lean{MIPStarRE.QPBT.combiningLinearForm_agreementProbability_le}
+	\lean{MIPStarRE.QPBT.directCombiningCollision_avg_le}
+	\leanok
+	\uses{lem:schwartz-zippel-total-degree}
+	Let $c, b \in \F_q^k$ with $c \neq b$.  Then
+	\[
+		\Pr_{\alpha \in \F_q^k}\Bigl[\; \sum_{r} c_r \alpha_r
+			= \sum_{r} b_r \alpha_r \;\Bigr] \;\le\; \frac1q\;,
+	\]
+	the probability being over a uniformly random $\alpha$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:schwartz-zippel-total-degree}
+	The two sides are the evaluations at $\alpha$ of the linear forms
+	$\sum_r c_r X_r$ and $\sum_r b_r X_r$ in $k$ variables.  The coefficient of
+	$X_r$ in such a form is $c_r$, so the two forms are distinct polynomials,
+	and each has total degree at most $1$.  Lemma~\ref{lem:schwartz-zippel-total-degree}
+	bounds the probability that two distinct polynomials of total degree at most
+	$1$ agree at a uniformly random point of $\F_q^k$ by $1/q$.
+\end{proof}
+
+\begin{definition}[The combined strategy]
+	\label{def:ld-combined-strategy}
+	\lean{MIPStarRE.QPBT.directCombinedMeasuredQuestion}
+	\lean{MIPStarRE.QPBT.directCombinedMeasuredDirection}
+	\lean{MIPStarRE.QPBT.directCombinedRebaseParameter}
+	\lean{MIPStarRE.QPBT.directCombinedAnswerMap}
+	\lean{MIPStarRE.QPBT.directCombinedStrategy}
+	\leanok
+	\uses{def:ld-game, def:ld-question-distribution, def:ld-win-predicate,
+		def:tensor-product-strategy, def:bracket,
+		def:ld-combining-parameters, def:ld-combining-map}
+	Let $\mathcal S = (\psi, A, B)$ be a strategy for the directly indexed
+	low-degree game with parameters $\mathsf{ldparams}$.  The
+	\emph{combined strategy} $\mathcal S^{\mathrm c}$ for the directly indexed
+	low-degree game with parameters $\mathsf{ldparams}^{\mathrm c}$ has the same
+	state and the same two Hilbert spaces, and answers each question of the
+	combined game by measuring one question of $\mathcal S$ and post-processing
+	its outcome.  Writing questions of the combined game in the coordinates of
+	Definition~\ref{def:ld-combining-map}, the five cases are the following.
+	\begin{enumerate}
+		\item On the point question $(u,\alpha) \in \F_q^{m+k}$: measure the
+		point question $u$, obtaining $b \in \F_q^k$, and answer
+		$\sum_r \alpha_r b_r$.
+		\item On the axis-parallel line question with stored index $i < m$ and
+		canonical base $(u_0,\alpha_0)$: measure the axis-parallel line question
+		with index $i$ and base $u_0$, obtaining univariate polynomials
+		$f_0,\ldots,f_{k-1}$ of degree at most $d$, and answer
+		$\sum_r (\alpha_0)_r f_r$, again of degree at most $d$.
+		\item On the axis-parallel line question with stored index $m + r$ and
+		canonical base $(u_0,\alpha_0)$, a line along which $u$ is constant and
+		only the coordinate $\alpha_r$ varies: measure the point question $u_0$,
+		obtaining $b$, and answer the degree-one polynomial
+		$t \mapsto \sum_s (\alpha_0)_s b_s + t\, b_r$.
+		\item On the diagonal line question with stored index $i < m$, canonical
+		base $(u_0,\alpha_0)$ and direction $(v,w)$: measure the diagonal line
+		question with index $i$, direction $v$ and the canonical base of the
+		line $\ell(u_0, v)$, rebase the answer along the affine change of
+		parameter relating the two presentations of that line, obtaining
+		univariate polynomials $f_0,\ldots,f_{k-1}$ of degree at most $md$ in the
+		parameter of the combined line, and answer
+		$t \mapsto \sum_r \bigl((\alpha_0)_r + t\, w_r\bigr) f_r(t)$, of degree
+		at most $md+1 \le (m+k)d$.
+		\item On the diagonal line question with stored index $i \ge m$,
+		canonical base $(u_0,\alpha_0)$ and direction $(0,w)$, a line along which
+		$u$ is constant: measure the point question $u_0$, obtaining $b$, and
+		answer $t \mapsto \sum_r (\alpha_0)_r b_r + t \sum_r w_r b_r$.
+	\end{enumerate}
+	For any of these five question forms, if the outcome of the measured
+	question has a different answer form from the one specified in the
+	corresponding case, the post-processing returns the zero answer of the form
+	required by the combined question.  This convention makes the
+	post-processing a total map on the common answer alphabet.
+	For the point measurements of the original strategy, let $r$ be the map
+	that sends a point answer to its tuple in $\F_q^k$ and sends either kind of
+	line answer to the zero tuple.  Write
+	\[
+		\widehat A^{\mathsf{Point},u}_a
+		= \sum_{x:\,r(x)=a} A^{\mathsf{Point},u}_x,
+		\qquad
+		\widehat B^{\mathsf{Point},u}_a
+		= \sum_{x:\,r(x)=a} B^{\mathsf{Point},u}_x.
+	\]
+	These are the point measurements post-processed by
+	\texttt{directLdPointValuesOrZero}.  In particular, each zero-tuple effect
+	is the original zero-tuple point effect plus all wrong-form answer effects;
+	those additional effects need not vanish.  Use the same convention for the
+	combined strategy, with its own answer alphabet.
+
+	Cases~3 and~5 use that a line of $\F_q^{m+k}$ whose direction
+	has vanishing point part is contained in a fiber of the projection to
+	$\F_q^m$, so that the combined polynomial restricted to it is determined by
+	the $k$ values of the tuple at the single point $u_0$; the rebasing in
+	case~4 is the affine change of parameter of the previous paragraph, needed
+	because the
+	canonical base of a line of $\F_q^{m+k}$ need not project to the canonical
+	base of its image line in $\F_q^m$.
+\end{definition}
+
+\begin{theorem}[Projectivity of the combined strategy]
+	\label{thm:ld-combined-strategy-projective}
+	\lean{MIPStarRE.QPBT.directCombinedStrategy_isProjective}
+	\leanok
+	\uses{def:ld-combined-strategy, def:projective-strategy-general}
+	For every strategy $\mathcal S$ for the directly indexed low-degree game, if
+	$\mathcal S$ is projective, then the combined strategy
+	$\mathcal S^{\mathrm c}$ is projective.
+\end{theorem}
+\begin{proof}
+	\leanok
+	\uses{def:ld-combined-strategy, lem:sandwich-postprocess-projective}
+	For either player and every question of the combined game, the corresponding
+	measurement of $\mathcal S^{\mathrm c}$ is obtained by relabelling the outcomes
+	of one measurement of $\mathcal S$.  Every such post-processing of a
+	projective measurement is projective.
+\end{proof}
+
+\begin{lemma}[The questions measured by the combined strategy]
+	\label{lem:ld-combined-question-law}
+	\lean{MIPStarRE.QPBT.directCombined_measuredQuestion_of_pointVar}
+	\lean{MIPStarRE.QPBT.directCombined_measuredQuestion_of_coefficientVar}
+	\lean{MIPStarRE.QPBT.directCombinedSample_pointParts_uniform}
+	\lean{MIPStarRE.QPBT.directCombinedSample_index_uniform}
+	\lean{MIPStarRE.QPBT.directCombinedSample_indexPointParts_uniform}
+	\leanok
+	\uses{def:ld-question-distribution, def:ld-combined-strategy}
+	Sample a question pair of the directly indexed game with parameters
+	$\mathsf{ldparams}^{\mathrm c}$, and let $\mathbf{i}$ be the coordinate index
+	of its common sample, uniform on $\{0,1,\ldots,m+k-1\}$.  Conditioned on
+	$\mathbf{i} < m$, an event of probability $m/(m+k)$, the pair of questions
+	measured by $\mathcal S^{\mathrm c}$ in Definition~\ref{def:ld-combined-strategy}
+	is distributed as the question pair of the directly indexed game with
+	parameters $\mathsf{ldparams}$ conditioned on the same ordered type pair.
+	Conditioned on $\mathbf{i} \ge m$, both measured questions are the point
+	question at the point part of the sampled point, and that point part is
+	uniform on $\F_q^m$; that is, the measured pair is a point-versus-point pair
+	of the game with parameters $\mathsf{ldparams}$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:ld-question-distribution, def:ld-combining-map}
+	The common sample of the combined game consists of a uniform point
+	$(u,\alpha) \in \F_q^{m+k}$, a uniform index $\mathbf{i}$, and a uniform
+	direction $(v,w)$, the three independent.  Conditioned on $\mathbf{i} < m$,
+	the triple $(u, \mathbf{i}, v)$ is uniform on
+	$\F_q^m \times \{0,\ldots,m-1\} \times \F_q^m$, which is the common sample of
+	the game with parameters $\mathsf{ldparams}$, and $\alpha$ and $w$ are
+	independent of it.  Under this conditioning the coordinate direction of an
+	axis-parallel question and the prefix projection of a diagonal direction have
+	point parts equal to the coordinate direction and the prefix projection
+	computed in $\F_q^m$, by the coordinate order fixed in
+	Definition~\ref{def:ld-combining-map}, and cases~2 and~4 of
+	Definition~\ref{def:ld-combined-strategy} measure exactly the canonical
+	question of the game with parameters $\mathsf{ldparams}$ attached to that
+	sample.  Conditioned on $\mathbf{i} \ge m$, every direction produced by the
+	question distribution has vanishing point part, so cases~1, 3 and~5 apply and
+	all measure the point question at $u$, which is uniform.
+
+	The two conditionings are legitimate because the coordinate index and
+	the two point parts of the common sample are jointly uniform on
+	$\{0,\ldots,m+k-1\} \times \F_q^m \times \F_q^m$, so the index is
+	independent of the point parts.
+\end{proof}
+
+\begin{lemma}[Value of the combined strategy]
+	\label{lem:ld-combined-value}
+	\lean{MIPStarRE.QPBT.directLdRejectionProbability_directCombinedStrategy_le}
+	\lean{MIPStarRE.QPBT.directCombinedStrategy_value_ge}
+	\leanok
+	\uses{def:ld-combined-strategy, lem:ld-combined-question-law,
+		def:ld-win-predicate, def:tensor-product-value}
+	The statement holds with the universal constant $C = 10$: if $\mathcal S$
+	succeeds with probability at least $1 - \eps$ in the directly indexed
+	low-degree game with parameters $\mathsf{ldparams}$, then
+	$\mathcal S^{\mathrm c}$ succeeds with probability at least $1 - 10\eps$ in
+	the directly indexed low-degree game with parameters
+	$\mathsf{ldparams}^{\mathrm c}$.  The value $10$ is used in the absorption of
+	Proposition~\ref{prop:ld-simultaneous-general-k}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:ld-combined-strategy, lem:ld-combined-question-law,
+		def:ld-win-predicate}
+	Both games weight their nine ordered type pairs uniformly, so it suffices to
+	bound the rejection probability of each branch of the combined game by a
+	bounded number of branch rejection probabilities of the original game and to
+	sum.  Fix a branch and split according to the event of
+	Lemma~\ref{lem:ld-combined-question-law}.
+
+	On the event $\mathbf{i} < m$ the two combined answers are the images of the
+	two original answers under the relabelings of
+	Definition~\ref{def:ld-combined-strategy}, and each clause of
+	Definition~\ref{def:ld-win-predicate} for the combined game follows from the
+	corresponding clause for the original game.  For the point-versus-point
+	clause this is immediate.  For a line-versus-point clause, let $t$ present
+	the sampled combined point on the sampled combined line; then $t$ presents
+	the point part of the sampled point on the image line, the combining part of
+	the sampled point is $\alpha_0 + t w$ in the diagonal case and $\alpha_0$ in
+	the axis-parallel case, and the combined line answer evaluated at $t$ is
+	$\sum_r (\alpha_0 + t w)_r f_r(t)$, respectively $\sum_r (\alpha_0)_r f_r(t)$;
+	substituting the original clause $f_r(t) = b_r$ for every $r$ turns this into
+	the combined point answer $\sum_r \alpha_r b_r$.  For a line-versus-line
+	clause, equality of the two original tuples of line answers gives equality of
+	their combinations.
+
+	On the event $\mathbf{i} \ge m$ all measured questions are the point question
+	at the same point $u$, and every clause of the combined game follows from the
+	agreement $b = b'$ of the two original point answers, which is the
+	point-versus-point clause of the original game: in cases~3 and~5 the combined
+	line answer is a fixed affine function of the measured tuple, and evaluating
+	it at the parameter presenting the sampled combined point returns
+	$\sum_r \alpha_r b_r$, the combined point answer computed from the same
+	tuple.
+
+	Each branch of the combined game is therefore rejected with probability at
+	most the sum of two branch rejection probabilities of the original game, and
+	summing over the nine branches bounds the rejection probability of
+	$\mathcal S^{\mathrm c}$ by an absolute multiple of that of $\mathcal S$.
+\end{proof}
+
+\begin{lemma}[Exact linearity in the combining variables]
+	\label{lem:ld-combining-exact-linearity}
+	\lean{MIPStarRE.QPBT.combinedRestrict}
+	\lean{MIPStarRE.QPBT.eval_combinedRestrict}
+	\lean{MIPStarRE.QPBT.combinedRestrict_combinePolyTuple}
+	\lean{MIPStarRE.QPBT.combinedRestrict_eq_of_eq_combiningLinearForm}
+	\lean{MIPStarRE.QPBT.combinedCoef}
+	\lean{MIPStarRE.QPBT.combinePolyTuple_combinedCoef_iff}
+	\lean{MIPStarRE.QPBT.exists_eq_combiningLinearForm_combinedRestrict_iff}
+	\lean{MIPStarRE.QPBT.totalDegree_combinedCoef_le}
+	\lean{MIPStarRE.QPBT.combinedRestrict_combiningLinearForm_avg_le}
+	\lean{MIPStarRE.QPBT.directCombinedExactLinearity_avg_le}
+	\leanok
+	\uses{def:ld-combining-map, lem:ld-combining-split,
+		lem:schwartz-zippel-total-degree}
+	Let $p \in \polyfunc{m+k}{q}{d}$ be a polynomial which is not the combined
+	polynomial of any tuple.  Then, for a uniformly random $u \in \F_q^m$, the
+	polynomial $p(u,\cdot) \in \F_q[\alpha_0,\ldots,\alpha_{k-1}]$ obtained by
+	substituting $u$ for the point coordinates is a linear form
+	$\sum_r c_r \alpha_r$ with probability at most $md/q$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:schwartz-zippel-total-degree, def:ld-combining-map,
+		lem:ld-combining-split}
+	Write $p = \sum_{\mu} c_\mu \, \alpha^\mu$, the sum over exponent vectors
+	$\mu \in \N^k$ of the combining coordinates, with coefficients
+	$c_\mu \in \polyfunc{m}{q}{d}$.  By
+	Definition~\ref{def:ld-combining-map} and
+	Lemma~\ref{lem:ld-combining-split}, $p$ is a combined polynomial precisely
+	when $c_\mu = 0$ for every $\mu$ outside the $k$ standard basis vectors, and
+	$p(u,\cdot)$ is a linear form precisely when $c_\mu(u) = 0$ for every such
+	$\mu$.  If $p$ is not combined, fix one such $\mu$ with $c_\mu \neq 0$; the
+	total degree of $c_\mu$ is at most $md$, so
+	Lemma~\ref{lem:schwartz-zippel-total-degree} bounds the probability of
+	$c_\mu(u) = 0$ by $md/q$.
+\end{proof}
+
+\begin{lemma}[Recovery of the polynomial-tuple measurements]
+	\label{lem:ld-combining-recovery}
+	\lean{MIPStarRE.QPBT.totalDegree_combinedRestrict_le}
+	\lean{MIPStarRE.QPBT.combinedRestrict_collision_avg_le}
+	\lean{MIPStarRE.QPBT.directCombinedRecoveryLocalBound}
+	\lean{MIPStarRE.QPBT.directCombinedRecoveryEvent_avg_le}
+	\lean{MIPStarRE.QPBT.directCombinedRecoveryLocalBound_avg_le}
+	\lean{MIPStarRE.QPBT.directCombinedRecoveryBadEvent_avg_le}
+	\lean{MIPStarRE.QPBT.consistencyDefect_le_of_recoveryBound}
+	\lean{MIPStarRE.QPBT.consistencyDefect_le_of_recoveryBound_right}
+	\lean{MIPStarRE.QPBT.directCombinedPointEquiv}
+	\lean{MIPStarRE.QPBT.directCombinedRecovery_relation_one}
+	\lean{MIPStarRE.QPBT.directCombinedRecovery_relation_two}
+	\lean{MIPStarRE.QPBT.directCombinedRecovery_relation_three}
+	\leanok
+	\uses{def:ld-meas, def:consistency, def:bracket, def:ld-combining-map,
+		lem:ld-combining-split, lem:ld-combining-collision,
+		lem:ld-combining-exact-linearity, def:ld-combined-strategy}
+	Let $\mathcal S$ be a projective strategy for the directly indexed game with
+	parameters $\mathsf{ldparams}$, and let $G^{\mathrm A}$, $G^{\mathrm B}$ be
+	measurements with outcomes in $\polyfunc{m+k}{q}{d}$ satisfying, for the
+	combined strategy $\mathcal S^{\mathrm c}$ and with error $\delta$, the three
+	conclusions of Theorem~\ref{lem:ld-soundness} at parameters
+	$\mathsf{ldparams}^{\mathrm c}$, using the relabeled point measurements of
+	Definition~\ref{def:ld-combined-strategy}.  Let $H^w$ be $G^w$ post-processed by the
+	map $\mathrm{split}$ of Lemma~\ref{lem:ld-combining-split}, so that
+	$H^w \in \mathrm{PolyMeas}(m,q,d,k)$.  Then the three conclusions of
+	Theorem~\ref{lem:ld-soundness} hold for $\mathcal S$ at parameters
+	$\mathsf{ldparams}$, with the measurements $H^{\mathrm A}$, $H^{\mathrm B}$
+	and with error $O(\delta + (m+k)d/q)$, where the point effects in the first
+	two conclusions are $\widehat A^{\mathsf{Point},u}$ and
+	$\widehat B^{\mathsf{Point},u}$, respectively.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:ld-combining-collision, lem:ld-combining-exact-linearity,
+		lem:ld-combining-split, def:bracket, lem:schwartz-zippel-total-degree}
+	The first conclusion for $\mathcal S^{\mathrm c}$ says that, on average over
+	a uniform $(u,\alpha) \in \F_q^{m+k}$, the value $p(u,\alpha)$ of the outcome
+	$p$ of $G^{\mathrm B}$ agrees with the combined point answer
+	$\sum_r \alpha_r b_r$ computed from the outcome $b$ of the point measurement
+	$\widehat A^{\mathsf{Point},u}$ of $\mathcal S$ at $u$, up to $\delta$.
+
+	The outcome is a combined polynomial with probability at least
+	$1 - O(\delta + (m+k)d/q)$.  Indeed, condition on an outcome $p$ that is not
+	combined.  By Lemma~\ref{lem:ld-combining-exact-linearity}, $p(u,\cdot)$ fails
+	to be a linear form except with probability $md/q$ over $u$; the combined
+	point answer is a linear form in $\alpha$ by construction; and two distinct
+	polynomials in $\alpha$ of total degree at most $kd$ agree at a uniform
+	$\alpha$ with probability at most $kd/q$ by
+	Lemma~\ref{lem:schwartz-zippel-total-degree}.  Hence, conditioned on a
+	non-combined outcome, the agreement above holds with probability at most
+	$(m+k)d/q$, and comparing with the bound $\delta$ gives the claim.
+
+	Replacing $G^w$ by $H^w$ therefore changes each of the first two relations by
+	at most $O(\delta + (m+k)d/q)$, since the two measurements differ only on the
+	event that the outcome is not combined, and
+	$\mathrm{split}(\mathrm{comb}_g) = g$ on its complement; the third relation
+	for $H^{\mathrm A}$, $H^{\mathrm B}$ follows from the third relation for
+	$G^{\mathrm A}$, $G^{\mathrm B}$ by data processing, $H^w$ being a
+	post-processing of $G^w$.
+
+	It remains to upgrade the first relation from the combined value to the tuple
+	of values.  Let $g$ be the outcome of $H^{\mathrm B}$ and $b$ the outcome of
+	the relabeled point measurement $\widehat A^{\mathsf{Point},u}$.
+	If $(g_0(u),\ldots,g_{k-1}(u)) \neq b$, then by
+	Lemma~\ref{lem:ld-combining-collision} the combined values
+	$\sum_r \alpha_r g_r(u)$ and $\sum_r \alpha_r b_r$ agree with probability at
+	most $1/q$ over a uniform $\alpha$.  Averaging over $\alpha$ therefore
+	converts the relation for the combined values into the tuple relation
+	\[
+		\widehat A^{\mathsf{Point},\,u}_{a_0,\ldots,a_{k-1}} \ot \Id_{\mathrm B}
+		\simeq \Id_{\mathrm A} \ot
+			H^{\mathrm B}_{[(g_0(u),\ldots,g_{k-1}(u)) =
+				(a_0,\ldots,a_{k-1})]}
+	\]
+	with error $O(\delta + (m+k)d/q)$, and symmetrically for the second relation.
+\end{proof}
+
+\begin{proposition}[Simultaneous polynomial measurements for general $k$]
+	\label{prop:ld-simultaneous-general-k}
+	\lean{MIPStarRE.QPBT.exists_directSimultaneousPolynomialMeasurements_combinedError}
+	\lean{MIPStarRE.QPBT.exists_directCombinedTransportConstants}
+	\lean{MIPStarRE.QPBT.exists_direct_ld_soundness}
+	\leanok
+	\uses{def:ld-meas, def:consistency, def:bracket,
+		def:projective-strategy-general, def:ld-combining-parameters,
+		lem:ld-combined-value, lem:ld-combining-recovery, lem:ld-soundness,
+		thm:main-formal}
+	There exist universal constants $a \ge 1$ and $0 < b \le 1$ such that the
+	following holds.  For every directly indexed parameter tuple
+	$\mathsf{ldparams} = (q,m,d,k)$, every $\eps > 0$, and every projective
+	strategy $\mathcal S = (\psi, A, B)$ succeeding with probability at least
+	$1 - \eps$ in the directly indexed low-degree game with those parameters,
+	there exist measurements $G^{\mathrm A}, G^{\mathrm B} \in
+	\mathrm{PolyMeas}(m,q,d,k)$ satisfying the three consistency relations of
+	Theorem~\ref{lem:ld-soundness} with error
+	$\delta_{\mathrm{ld}}(\eps,q,m,d,k)$ evaluated at these constants, using
+	$\widehat A^{\mathsf{Point},u}$ and $\widehat B^{\mathsf{Point},u}$ from
+	Definition~\ref{def:ld-combined-strategy} in the first two relations.
+
+	Before scalar absorption, the first two relations hold with the error of
+	Theorem~\ref{thm:main-formal} at the combined parameters
+	$\mathsf{ldparams}^{\mathrm c}$ of
+	Definition~\ref{def:ld-combining-parameters}, sampling parameter
+	$2560000\,(m+k)^{3}d$ and pass bound $30\eps$ --- increased by the recovery
+	loss $(m+k)d/q$; the polynomial/polynomial relation carries the same error
+	without the recovery loss.  For $0 < \eps \le 1$ the former error is at most
+	$\delta_{\mathrm{ld}}(\eps,q,m,d,k)$, and for $\eps \ge 1$ this error
+	function is at least one while a consistency defect on a unit state is at
+	most one.
+
+	The source records this error in the abbreviated form
+	$\delta_{\mathrm{ld}}(\eps, q, m+k, d, 1) + O((m+k)d/q)$; the first summand
+	is the error function of Theorem~\ref{lem:ld-soundness} at the combined
+	parameters, which is not identified here with the error of
+	Theorem~\ref{thm:main-formal} at those parameters.
+\end{proposition}
+\begin{proof}
+	\leanok
+	\uses{lem:ld-combined-value, lem:ld-combining-recovery,
+		def:ld-combining-parameters, lem:direct-ld-simultaneous-single,
+		thm:ld-combined-strategy-projective, thm:main-formal, lem:ld-soundness}
+	By Theorem~\ref{thm:ld-combined-strategy-projective},
+	$\mathcal S^{\mathrm c}$ is projective, and
+	Lemma~\ref{lem:ld-combined-value} shows that it succeeds with probability at
+	least $1 - 10\eps$ in the directly indexed game with parameters
+	$\mathsf{ldparams}^{\mathrm c}$.  That game has simultaneity parameter $1$, so
+	Lemma~\ref{lem:direct-ld-simultaneous-single} --- the polynomial-tuple
+	conclusion for simultaneity parameter $1$, obtained for the directly indexed
+	game from Theorem~\ref{thm:main-formal} --- applies and produces measurements
+	$G^{\mathrm A}$, $G^{\mathrm B}$ with outcomes in $\polyfunc{m+k}{q}{d}$
+	satisfying the three relations with the error of
+	Theorem~\ref{thm:main-formal} at the combined parameters, sampling parameter
+	$2560000\,(m+k)^{3}d$ and pass bound $3 \cdot 10\eps = 30\eps$.
+	Lemma~\ref{lem:ld-combining-recovery} converts them into measurements in
+	$\mathrm{PolyMeas}(m,q,d,k)$ satisfying the three relations for
+	$\mathcal S$ with the stated error.
+
+	The absorption is carried out with the universal constants $a = 10^{23}$ and
+	$b = 1/80000$, the exponent being half the exponent $1/40000$ carried by
+	Theorem~\ref{thm:main-formal}.  For $0 < \eps \le 1$ the error of
+	Theorem~\ref{thm:main-formal} at the combined parameters and the sampling
+	parameter $2560000\,(m+k)^{3}d$ carries the prefactor
+	$655360000000000000\,(m+k)^{10}d^{2}$, and its three terms are bounded by
+	$30\,\eps^{b}$, $d\,q^{-b}$ and $2^{-bmd}$, while the recovery loss
+	$(m+k)d/q$ is bounded by $(m+k)d\,q^{-b}$.  Since $m + k \le 2dmk$ and
+	$d \le dmk$, the total is at most
+	$2.048 \cdot 10^{22}\,(dmk)^{13}\bigl(\eps^{b} + q^{-b} + 2^{-bmd}\bigr)$,
+	hence at most $\delta_{\mathrm{ld}}(\eps,q,m,d,k)$ at those constants.  For
+	$\eps \ge 1$ the error function is at least one, while the consistency defect
+	of a pair of measurement families on a unit bipartite state is at most one, so
+	the three relations hold for any witnesses.
+\end{proof}
+
+% This node is not a statement from the paper: it is the formalization-support
+% specialization of Theorem lem:ld-soundness to the simultaneity parameter
+% k = 1, which the proof of Lemma lem:qld-4-7 is the only consumer of.
+\begin{theorem}[Formalization support for Theorem~\ref{lem:ld-soundness}: one simultaneous coordinate]
+	\label{lem:ld-soundness-k-one}
+	\lean{MIPStarRE.QPBT.exists_ld_soundness_of_k_eq_one}
+	\leanok
+	\uses{def:ld-game, def:ld-question-distribution, def:ld-win-predicate, def:ld-meas, def:projective-strategy-general, def:tensor-product-value, def:consistency, def:bracket}
+	This formalization-only auxiliary is not a named statement of the paper; it is the case $k = 1$ of Theorem~\ref{lem:ld-soundness}, the only value instantiated in the proof of Lemma~\ref{lem:qld-4-7} and, by Remark~\ref{rem:ld-soundness-simultaneity}, the only value the coordinatewise route can supply. There exists a function $\delta_{\mathrm{ld}}$ of the shape displayed in Theorem~\ref{lem:ld-soundness}, for universal constants $a \ge 1$ and $0 < b \le 1$, such that all three consistency conclusions of that theorem hold verbatim for every parameter tuple $\mathsf{ldparams} = (q,m,d,k)$ with $k = 1$, every $\eps > 0$, and every projective strategy succeeding with probability at least $1-\eps$ in $\mathfrak{G}^{\mathrm{ld}}_{\mathsf{ldparams}}$.
+\end{theorem}
+\begin{proof}
+	\leanok
+	\uses{lem:direct-ld-simultaneous-single, lem:direct-ld-residue-compression, fact:triangle-for-simeq, lem:sandwich-codeword-defect, lem:direct-ld-polynomial-agreement, lem:ld-point-agreement, lem:ld-transport-absorption, lem:ld-scalar-square-root}
+	The proof does not follow the source's route through the tensor-code test; it applies Theorem~\ref{thm:main-formal} directly, and therefore neither of the two obligations enumerated in the proof of Theorem~\ref{lem:ld-soundness} is used or assumed.
+
+	The game $\mathfrak{G}^{\mathrm{ld}}_{\mathsf{ldparams}}$ carries a seed $s$ whose fibre $\chi^{-1}(i)$ is not recorded by the $(m,q,d)$ low individual degree test of Definition~\ref{def:low-individual-degree-test}. Dilate the given strategy by a maximally correlated register indexed by that fibre and let each player answer the reconstructed seed-indexed question in the block selected by their copy; the dilation is projective and has exactly the original value, because the residue is uniform and shared. The dilated strategy plays the directly indexed variant of the game, in which the coordinate index is sampled directly instead of through a seed, and its coordinate reading passes the low individual degree test with failure probability at most $3\eps$, the factor three being the ratio of the branch weights of the two tests. Theorem~\ref{thm:main-formal}, instantiated at the auxiliary sampling parameter $2560000\,m^3 d$ --- which satisfies that theorem's large-sampling hypothesis for every admissible tuple --- produces polynomial measurements on the extended Hilbert spaces satisfying the three consistency relations with the error of that theorem. For $k = 1$ these are already the polynomial-tuple measurements required here.
+
+	Compressing the correlated register by its normalized diagonal-block average returns measurements on the original Hilbert spaces. The compression is exact for the two point-versus-polynomial relations, because in each of them the opposite player's operator is the block-diagonal amplification of the original point measurement and therefore leaves the correlated register untouched. It is not exact for the third relation, in which both operators act on that register: on a maximally correlated pair the compressed measurements need not remain close while the uncompressed ones agree exactly. The third relation is therefore reproved on the original Hilbert spaces. The consistency test of Definition~\ref{def:ld-win-predicate} accepts the point-versus-point branch only on equal answers, and that branch carries one ninth of the question law, so the two point measurements are consistent up to $9\eps$.
+	The triangle inequality of Lemma~\ref{fact:triangle-for-simeq} combines the three point relations into consistency of the evaluated polynomial measurements. Lemma~\ref{lem:sandwich-codeword-defect}, with the collision bound of Lemma~\ref{lem:direct-ld-polynomial-agreement}, then gives consistency of the polynomial measurements with an additional error $md/q$.
+
+	The resulting error is $C\bigl(\mathrm{poly}(m,d) \cdot \mathrm{poly}(\eps, q^{-1}, e^{-md}) + md/q + \eps\bigr)^{1/2}$ with $C=10$, which is at most $\delta_{\mathrm{ld}}(\eps,q,m,d,k)$ for the universal constants $a = 2.5 \cdot 10^{10}$ and $b = 1/80000$: the square root halves the exponent $1/40000$ carried by the error of Theorem~\ref{thm:main-formal}, and the polynomial prefactor is absorbed by $(dmk)^a$. Outside the regime where both $\eps$ and that argument are at most one the conclusion is vacuous, since $\delta_{\mathrm{ld}} \ge 1$ there while a consistency defect of a pair of measurement families on a unit state never exceeds $1$.
+\end{proof}
+
+\begin{theorem}[Formalization support: a scalar square-root bound]
+\label{lem:ld-scalar-square-root}
+\lean{MIPStarRE.QPBT.le_sqrt_of_le_of_le_one}
+\leanok
+For real numbers $x,T$ with $x\le T\le1$, one has $x\le\sqrt T$,
+where the real square root is zero on negative arguments.
+This is a scalar auxiliary, not a statement of the source paper.
+\end{theorem}
+\begin{proof}
+\leanok
+If $x\le0$, use nonnegativity of the square root. Otherwise
+$0<x\le T\le1$ implies $x^2\le x\le T$.
+\end{proof}
+
+\begin{theorem}[Formalization support: absorption of transport bounds]
+\label{lem:ld-transport-absorption}
+\lean{MIPStarRE.QPBT.consistencyDefect_le_deltaLd_of_transportBound}
+\leanok
+\uses{def:consistency, lem:direct-ld-coordinate-soundness}
+For directly indexed parameters $D=(q,m,d,k)$, write
+\[
+ T_D(\eps)=E_D(\eps)+md/q+\eps,
+\]
+where $E_D(\eps)$ is the error of Theorem~\ref{thm:main-formal} at
+sampling parameter $2560000m^3d$ and pass bound $3\eps$.
+Fix $a\ge1$, $b>0$, and $C_0\ge1$, and assume that for every such $D$
+and $0<\eps\le1$,
+\[
+ C_0 k\sqrt{T_D(\eps)}\le
+ \delta_{\mathrm{ld}}(\eps,q,m,d,k).
+\]
+Here $\delta_{\mathrm{ld}}$ has the displayed formula of
+Theorem~\ref{lem:ld-soundness} with constants $a,b$.
+For any fixed $D$ and $\eps>0$, let $\mu$ be a probability distribution
+on a finite question set, let $A,B$ be families of POVMs with a common
+finite outcome set on finite-dimensional Hilbert spaces, and let $\psi$
+be a unit bipartite state. Denote their consistency defect by $\Delta$.
+If $\Delta\le C_0\sqrt{T_D(\eps)}$ whenever both $\eps\le1$ and
+$T_D(\eps)\le1$, then
+$\Delta\le\delta_{\mathrm{ld}}(\eps,q,m,d,k)$.
+This is an auxiliary estimate with its scalar absorption hypothesis
+displayed explicitly, not an additional hypothesis of the paper theorem.
+\end{theorem}
+\begin{proof}
+\leanok
+A POVM consistency defect on a unit state is at most one. If $\eps>1$,
+the error formula is at least one. If $\eps\le1<T_D(\eps)$, use
+$1\le C_0\sqrt{T_D(\eps)}$; otherwise use the assumed defect bound.
+In the latter two cases, $k\ge1$ and the scalar absorption hypothesis
+give the conclusion.
+\end{proof}
+
+\begin{theorem}[Formalization support: directly indexed soundness for $k=1$]
+\label{lem:direct-ld-soundness-k-one}
+\lean{MIPStarRE.QPBT.exists_direct_ld_soundness_of_k_eq_one}
+\leanok
+\uses{lem:direct-ld-simultaneous-single, def:ld-meas, def:consistency}
+There exist universal constants $a\ge1$ and $0<b\le1$ such that for
+every directly indexed parameter tuple $D=(q,m,d,k)$ with $k=1$, every
+$\eps>0$, and every projective strategy of value at least $1-\eps$
+for the directly indexed game, there are polynomial-tuple POVMs
+$G^{\mathrm A},G^{\mathrm B}$ satisfying all three conclusions of
+Theorem~\ref{lem:ld-soundness} with error
+$\delta_{\mathrm{ld}}(\eps,q,m,d,k)$: the point/polynomial and
+polynomial/point defects are averaged over uniform $u\in\F_q^m$,
+and the polynomial/polynomial defect has no question parameter.
+The directly indexed domain requires $m,d,k\ge1$ and admissible $q$,
+but not $m\mid q$. This is a formalization-only specialization for that
+game, not the unrestricted source theorem.
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{lem:direct-ld-simultaneous-single, lem:ld-scalar-square-root,
+lem:ld-transport-absorption}
+Apply Lemma~\ref{lem:direct-ld-simultaneous-single}. Its error $E_D(\eps)$
+is at most $T_D(\eps)$, hence at most $\sqrt{T_D(\eps)}$ when
+$T_D(\eps)\le1$. The scalar absorption estimate holds with
+$C_0=1$, $a=2.5\cdot10^9$, and $b=1/80000$.
+Theorem~\ref{lem:ld-transport-absorption} applies to each defect.
+\end{proof}
+
+\begin{theorem}[Formalization support: point agreement and residue compression]
+\label{lem:ld-point-agreement}
+\lean{MIPStarRE.QPBT.directLdPointPair_consistencyDefect_le}
+\lean{MIPStarRE.QPBT.averageDiagonalBlock_blockDiagonal_const}
+\lean{MIPStarRE.QPBT.ldStrategyToDirect_pointPair_compression}
+\lean{MIPStarRE.QPBT.ldPointPair_consistencyDefect_le}
+\leanok
+\uses{def:ld-game, def:consistency, lem:direct-ld-residue-compression}
+These are formalization auxiliaries, not named assertions of the paper.
+For directly indexed parameters $D=(q,m,d,k)$, a projective strategy of
+value at least $1-\eps$, with $\eps\in\R$, has point-readout consistency
+defect at most $9\eps$, averaged over uniform $u\in\F_q^m$.
+The readouts send malformed point answers to the zero tuple.
+The same assertion holds for seed-indexed parameters $L=(q,m,d,k)$
+(which additionally require $m\mid q$).
+
+More precisely, for any seed-indexed strategy, without projectivity or
+value assumptions, its point-readout defect equals that of its
+correlated-residue extension from Lemma~\ref{lem:direct-ld-residue-compression}.
+The matrix identity used here is valid for every operator $M$ on a finite
+Hilbert space and every nonempty finite register $R$:
+\[
+ \frac1{|R|}\sum_{r\in R}
+ (M\ot I_R)_{r,r}=M,
+\]
+where the subscripts denote diagonal blocks indexed by the register.
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{lem:direct-ld-residue-compression}
+In the directly indexed game, unequal point readouts imply rejection of
+the point-versus-point branch. That branch has weight $1/9$, giving the
+bound $9\eps$. Every diagonal block of $M\ot I_R$ equals $M$, so its
+normalized average is $M$. Point measurements in the extended strategy
+are these constant block-diagonal amplifications; compression on one side
+and this identity on the other give equality of the point defects.
+The extension preserves projectivity and value, so the seed-indexed bound
+follows from the directly indexed bound.
+\end{proof}
 
 \section{The Magic Square game}
 % Paper label sec:ms kept for cross-reference fidelity.
@@ -887,7 +1559,7 @@ The strategies appearing in Lemma~\ref{lem:pauli-completeness} and in the conclu
 % statements of that subsection are outside the scope of this development).
 \label{sec:qld-complexity}
 
-We specify a canonical setting of the parameter tuple $\mathsf{qldparams}$ as a function of an integer $R$, and bound the resulting soundness function. All logarithms are base $2$.
+We specify a canonical setting of the parameter tuple $\mathsf{qldparams}$ as a function of an integer $R$, and bound the resulting soundness function. Here $\log$ denotes the base-two logarithm, and $\ln$ denotes the natural logarithm.
 
 \begin{definition}[Canonical parameters of the Pauli basis test]\label{def:introparams}
 	\lean{MIPStarRE.QPBT.introParamsC, MIPStarRE.QPBT.introParamsTuple, MIPStarRE.QPBT.AdmissibleParams.ofTuple, MIPStarRE.QPBT.introParams}
@@ -912,21 +1584,47 @@ We specify a canonical setting of the parameter tuple $\mathsf{qldparams}$ as a 
 	\]
 \end{lemma}
 \begin{proof}
-	\uses{def:introparams, def:admissible, def:admissible-size, thm:pauli}
+	\leanok
+	\uses{def:introparams, def:admissible, def:admissible-size, thm:pauli, lem:delta-bound-envelope-support}
 	Since $c$ is even, the exponent $k = c \lceil \log\log R \rceil + 1$ is odd, so $q = 2^k$ is an admissible field size; $m$ divides $q$ because $2^j \le c \lceil \log R \rceil + 1 \le 2 \log^c R \le 2^k$, so $j \le k$ and both are powers of $2$; and $d = 1 \ge 1$. Hence the tuple is admissible. Since $m = 2^j \ge (c/2) \log R$, we get $2^m \ge R^{c/2} \ge R$, using $c \ge 2$.
 
-	For the soundness bound, write $\delta_{\mathrm{qld}}(\eps,m,d,q) = a(md)^a \eps^b + a(md)^a q^{-b} + a(md)^a 2^{-bmd}$ and use $d = 1$, $m \le 2c \log R$, and $q = 2^k \ge \log^c R$. The first term is at most $a(2c)^a (\log R)^a \eps^b$. The second term is at most $a(2c)^a (\log R)^{a - cb} \le a(2c)^a (\log R)^{-b}$, since $cb - a \ge b$ by the choice of $c$. For the third term, $m \ge (c/2) \log R \ge \log R$ gives $2^{-bm} \le R^{-b}$, so
+	For the soundness bound, write $\delta_{\mathrm{qld}}(\eps,m,d,q) = a(md)^a \eps^b + a(md)^a q^{-b} + a(md)^a 2^{-bmd}$ and use $d = 1$, $\log R \le m \le 2c \log R$, and $q = 2^k \ge \log^c R$. Set
+	\[
+		C = \frac{\lceil a + b \rceil !}{(b \ln 2)^{\lceil a + b \rceil}}
+		\qquad \text{and} \qquad
+		a' = a\bigl( (2c)^a + C \bigr)\;,
+	\]
+	both depending only on the universal constants $a$ and $b$; since $a \ge 1$, $c \ge 2$ and $C \ge 0$, one has $a' \ge a \ge 1$. The first term is at most $a(2c)^a (\log R)^a \eps^b \le a' (\log R)^{a'} \eps^b$, using $\log R \ge 2 \ge 1$ and $a \le a'$. The second term is at most $a(2c)^a (\log R)^{a - cb} \le a(2c)^a (\log R)^{-b}$, since $cb - a \ge b$ by the choice of $c$. For the third term, split $m^a = m^{a+b} \cdot m^{-b}$ and bound the first factor against the exponential: for all real $s$, all $t > 0$ and all $x \ge 1$, the Taylor estimate $y^n / n! \le e^y$ of the exponential, taken at $y = (t \ln 2) x$ and $n = \lceil s \rceil_{+} = \max(\lceil s \rceil, 0)$, gives
+	\[
+		x^s\, 2^{-tx} \le \frac{\lceil s \rceil_{+}!}{(t \ln 2)^{\lceil s \rceil_{+}}}\;.
+	\]
+	With $s = a + b$, $t = b$ and $x = m$ the right-hand side is the constant $C$ above, so
 	\[
 		a(md)^a\, 2^{-bm}
-		\le a(2c)^a (\log R)^a R^{-b}
-		= a(2c)^a \bigl( (\log R)^{a+b} R^{-b} \bigr) (\log R)^{-b}
-		\le a(2c)^a\, C\, (\log R)^{-b}\;,
+		= a \bigl( m^{a+b}\, 2^{-bm} \bigr) m^{-b}
+		\le a\, C\, m^{-b}
+		\le a\, C\, (\log R)^{-b}\;,
 	\]
-	where $C = \sup_{R' \ge 4} (\log R')^{a+b} (R')^{-b}$ is finite --- the function is continuous in $R'$ and tends to $0$ as $R' \to \infty$ --- and depends only on the universal constants $a$ and $b$. Summing the three bounds, the statement follows with $a' = a(2c)^a (1 + C)$ and $b' = b$.
+	the last step using $m \ge \log R \ge 1$. Summing the three bounds, the statement follows with $a'$ as above and $b' = b$.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:delta-bound}]
+\label{lem:delta-bound-envelope-support}
+\lean{MIPStarRE.LDT.rpow_mul_two_rpow_neg_le}
+\leanok
+For real $s$, $t > 0$ and $x \ge 1$, writing $\lceil s \rceil_{+} = \max(\lceil s \rceil, 0)$,
+\[
+  x^{s}\, 2^{-t x} \le \frac{\lceil s \rceil_{+}!}{(t \ln 2)^{\lceil s \rceil_{+}}} .
+\]
+This is the explicit envelope used for the third term in the proof of Lemma~\ref{lem:delta-bound}, with $x = m$, $s = a + b$ and $t = b$.
+\end{lemma}
+\begin{proof}
+\leanok
+Since $x \ge 1$, $x^{s} \le x^{\lceil s \rceil_{+}}$, and the Taylor lower bound $y^{n}/n! \le e^{y}$ at $y = t x \ln 2$ and $n = \lceil s \rceil_{+}$ gives $x^{n} (t \ln 2)^{n} \le n!\, 2^{t x}$.
 \end{proof}
 
 \begin{remark}[A comparison of exponents in the source proof of Lemma~\ref{lem:delta-bound}]\label{rem:delta-bound-exponent-comparison}
-	The source proof bounds the third term of $\delta_{\mathrm{qld}}$ by asserting $2^{-bmd} \le q^{-b}$ ``because $k \le m$'', comparing the field exponent $k = c \lceil \log\log R \rceil + 1$ with $m = 2^j$. The inequality $k \le m$ does not follow from Definition~\ref{def:introparams}: if the universal constants of Theorem~\ref{thm:pauli} were $a = 1$ and $b = 1/2$, then $c = 4$, and $R = 5$ gives $k = 9$ and $m = 8$. The proof above instead bounds $2^{-bm} \le R^{-b}$ directly from $m \ge (c/2) \log R \ge \log R$, which yields the same conclusion after enlarging the universal constant $a'$.  The comparison and correction are documented in \cite{gap:qpbt_delta-bound-exponent-comparison}.
+	The source proof bounds the third term of $\delta_{\mathrm{qld}}$ by asserting $2^{-bmd} \le q^{-b}$ ``because $k \le m$'', comparing the field exponent $k = c \lceil \log\log R \rceil + 1$ with $m = 2^j$. The inequality $k \le m$ does not follow from Definition~\ref{def:introparams}: if the universal constants of Theorem~\ref{thm:pauli} were $a = 1$ and $b = 1/2$, then $c = 4$, and $R = 5$ gives $k = 9$ and $m = 8$. The proof above instead bounds the third term directly, comparing $m^{a+b} 2^{-bm}$ with an explicit constant and using only $m \ge (c/2) \log R \ge \log R$, which yields the same conclusion after enlarging the universal constant $a'$.  The comparison and correction are documented in \cite{gap:qpbt_delta-bound-exponent-comparison}.
 \end{remark}
 
 \section{Formalization support for finite sampling}

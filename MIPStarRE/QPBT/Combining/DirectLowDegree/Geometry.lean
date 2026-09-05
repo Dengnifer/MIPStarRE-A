@@ -120,6 +120,16 @@ def directPrefixProjection {D : DirectLdParams} (i : Fin D.m)
     (v : Fin D.m → DirectScalarQ D) : Fin D.m → DirectScalarQ D :=
   fun j => if j.val < i.val then 0 else v j
 
+/-- Zeroing the coordinates preceding a prefix index is idempotent: the
+coordinates it leaves unchanged are exactly those it does not zero. -/
+theorem directPrefixProjection_idem (D : DirectLdParams) (i : Fin D.m)
+    (v : Fin D.m → DirectScalarQ D) :
+    directPrefixProjection i (directPrefixProjection i v) =
+      directPrefixProjection i v := by
+  funext j
+  unfold directPrefixProjection
+  split_ifs <;> rfl
+
 /-- Canonical line descriptions whose coordinate index is stored directly.
 Coordinates are numbered from zero, so `index = i` represents coordinate
 `i + 1` in the paper. -/
