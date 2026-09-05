@@ -2683,3 +2683,7 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 
 ## 2026-09-05T10:05Z — B6 resolved; PR 197 merge commit faf362f
 - Owner decision (DECISION B6 equivalent, given in chat): ceiling 1000 and the exemption fix (commit 413979c on main). The PR 197 worktree merge of main was then committed as faf362f (836 workflow-layer lines, within the new budget). Operator note: the hook copy inside that worktree still carried the 400 ceiling at commit time, so the operator script committed with --no-verify instead of through the guard; the guard was not overridden by MIPSTARRE_INFRA_OVERRIDE and the change is within the owner-set budget, but the admission was mechanical, not the hook's. Lane 157 relaunched (merges main, which carries the new hook).
+
+## 2026-09-05T10:58Z — stack propagation and a build-lock overlap
+- Main propagated main-first into 111, 112 and 114 (five merges), then the parents; no budget refusal recurred after the 1000-line rule. Children private copies of what PR 152 made public (ldPointCL, the reindexing API) were removed; the dropped paper-origin citation in Games/CondLinear.lean was restored.
+- Incident: the propagation session build wrapper released the machine-wide full-build lock from an exit trap without checking ownership, so around 10:34Z two of its builds overlapped the cache-warmer full build. No build failed and no cache was written; build telemetry for that window shows concurrent full builds. The wrapper was corrected in-session (release only an owned lock).
