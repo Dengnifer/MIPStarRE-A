@@ -106,6 +106,20 @@ A failed tactic search, a missing formal lemma, or an inconvenient coercion is
 not enough.  The obstruction must survive translation back into ordinary
 mathematics.
 
+Once a cited statement is established to be mathematically false, the repair
+and escalation procedure is governed by Section~6 of
+\path{local/protocols/issues-prs.md}.  Before asking the human owner to choose a
+replacement, a dedicated mathematical-gap session must produce a correction
+which is correct, sufficient for every paper and blueprint use, and minimal,
+then iterate it against the Lean statement and its downstream consumers.  A
+Claude Fable~5.1 session is currently launched by the owner session through its
+Agent tool; a Codex main session requests that lane on progress log~\#27 rather
+than dispatching a Codex worker.  Only after the astra poller reports
+availability on owner inbox~\#26 does the Codex route become
+\texttt{dispatch.sh --role mathfix} with astra.  A change to a mathematical
+definition or game is escalated immediately; other repairs reach the owner
+inbox only after the shared convergence budget expires.
+
 Sometimes an investigation uncovers an improvement that is not a discrepancy:
 the formalization works correctly, but it could be simplified by using an
 existing library, replacing a custom type, or adopting a cleaner proof route.
