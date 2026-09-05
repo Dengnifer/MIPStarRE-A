@@ -3,9 +3,11 @@
 
 from __future__ import annotations
 
+import json
 import os
 from pathlib import Path
 import shlex
+import shutil
 import subprocess
 import tempfile
 import unittest
@@ -20,6 +22,68 @@ THREAD_ID = "019e93a5-e370-7aa1-ba77-6373dbdd6a61"
 
 
 class DispatchCommandTests(unittest.TestCase):
+    def recorded_dispatch(self, model: str | None) -> dict[str, object]:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            repo = root / "repo"
+            local_bin = repo / "local" / "bin"
+            local_bin.mkdir(parents=True)
+            shutil.copy2(DISPATCH, local_bin / "dispatch.sh")
+            shutil.copy2(TELEMETRY, local_bin / "telemetry.py")
+            (repo / "AGENTS.md").write_text("# Test repository\n", encoding="utf-8")
+            subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
+
+            fake_bin = root / "bin"
+            fake_bin.mkdir()
+            fake_codex = fake_bin / "codex"
+            fake_codex.write_text(
+                "#!/bin/sh\n"
+                f"printf '%s\\n' '{{\"type\":\"thread.started\","
+                f"\"thread_id\":\"{THREAD_ID}\"}}'\n",
+                encoding="utf-8",
+            )
+            fake_codex.chmod(0o755)
+
+            home = root / "home"
+            home.mkdir()
+            env = os.environ.copy()
+            env.update(
+                {
+                    "HOME": str(home),
+                    "MIPSTARRE_CACHE_ROOT": str(root / "cache"),
+                    "PATH": f"{fake_bin}{os.pathsep}{env.get('PATH', '')}",
+                }
+            )
+            env.pop("MIPSTARRE_CODEX_MODEL", None)
+            if model is not None:
+                env["MIPSTARRE_CODEX_MODEL"] = model
+
+            subprocess.run(
+                [
+                    str(local_bin / "dispatch.sh"),
+                    "--role",
+                    "scout",
+                    "--issue",
+                    "model-record",
+                    "--worktree",
+                    str(repo),
+                    "--no-persona",
+                    "--skip-hook-check",
+                    "--",
+                    "test prompt",
+                ],
+                cwd=repo,
+                env=env,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            records = (repo / "results" / "telemetry" / "sessions.jsonl").read_text(
+                encoding="utf-8"
+            ).splitlines()
+            self.assertEqual(len(records), 1)
+            return json.loads(records[0])
+
     def dispatch_command(
         self, *extra: str, model: str = "test-model", effort: str = "high",
         include_persona: bool = False,
@@ -124,6 +188,50 @@ class DispatchCommandTests(unittest.TestCase):
         )
 
         self.assertIn("mathfix", result.stdout)
+
+    def test_registry_records_explicit_model_override(self) -> None:
+        record = self.recorded_dispatch("gpt-test-explicit")
+
+        self.assertEqual(record["model"], "gpt-test-explicit")
+
+    def test_registry_omits_model_when_dispatch_leaves_it_unresolved(self) -> None:
+        for model in (None, ""):
+            with self.subTest(model=model):
+                record = self.recorded_dispatch(model)
+
+                self.assertNotIn("model", record)
+
+    def test_session_status_preserves_legacy_row_without_model(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            registry = Path(directory) / "sessions.jsonl"
+            legacy = {
+                "name": "scout-legacy-20260830-01",
+                "role": "scout",
+                "issue": "legacy",
+                "status": "done",
+            }
+            registry.write_text(json.dumps(legacy) + "\n", encoding="utf-8")
+
+            result = subprocess.run(
+                [
+                    "python3",
+                    str(TELEMETRY),
+                    "session-status",
+                    "--name",
+                    legacy["name"],
+                    "--status",
+                    "archived",
+                    "--registry",
+                    str(registry),
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+
+            archived = json.loads(result.stdout)
+            self.assertEqual(archived["status"], "archived")
+            self.assertNotIn("model", archived)
 
     def test_workspace_write_grants_only_resolved_external_lake(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

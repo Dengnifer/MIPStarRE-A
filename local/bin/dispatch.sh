@@ -688,6 +688,10 @@ if [ -n "$PR_ID" ]; then
   TELEM_ARGS[${#TELEM_ARGS[@]}]="--pr"
   TELEM_ARGS[${#TELEM_ARGS[@]}]="$PR_ID"
 fi
+if [ -n "${MIPSTARRE_CODEX_MODEL:-}" ]; then
+  TELEM_ARGS[${#TELEM_ARGS[@]}]="--model"
+  TELEM_ARGS[${#TELEM_ARGS[@]}]="$MIPSTARRE_CODEX_MODEL"
+fi
 
 if ! python3 "$TELEMETRY_PY" "${TELEM_ARGS[@]}" >/dev/null; then
   die 6 "telemetry append failed for $NAME.

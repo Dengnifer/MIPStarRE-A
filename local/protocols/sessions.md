@@ -313,7 +313,10 @@ fix sessions; no role name identifies one, so `dispatch.sh` cannot.
 
 The registry line schema is in `meta.md`. Beyond it, `dispatch.sh` records
 `turns` (completed model turns), `capture` (repo-relative path to the event
-stream) and, when resolvable, `rollout`. Token usage is summed over
+stream) and, when resolvable, `rollout`. A nonempty
+`MIPSTARRE_CODEX_MODEL` is recorded verbatim as `model`; when no model was
+explicitly selected, the field is omitted rather than inferred from the CLI
+default. Token usage is summed over
 `turn.completed` events and normalized to
 `{input, cached_input, cache_write, output, reasoning}`; `dispatch.sh` writes
 `status: done` or `failed` at the end of a run, and `active` is reserved for

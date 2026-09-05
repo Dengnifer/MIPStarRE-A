@@ -634,3 +634,17 @@ that bypass controls validation only, not ref scope.
 
 **Expected effect:** `MIPSTARRE_SKIP_HOOKS=1` can recover from local tooling
 failures without publishing any ref outside the requested branch mapping.
+
+## 2026-09-06 — Record explicitly selected Codex models
+
+**Trigger:** `results/telemetry/events.md` 2026-09-06, "Codex session rows omit
+the selected model" (issue #231).
+
+**Change:** `dispatch.sh` forwards its nonempty `MIPSTARRE_CODEX_MODEL` override
+to `telemetry.py`, and the session schema admits that exact value as optional
+`model`. Rows created without an explicitly resolved model continue to omit the
+field; historical rows are not rewritten.
+
+**Expected effect:** new explicitly pinned sessions retain their model identity
+without changing Codex selection behavior or inventing values for CLI-default
+sessions.

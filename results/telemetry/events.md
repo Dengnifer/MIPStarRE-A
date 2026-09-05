@@ -2851,3 +2851,11 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 
 ## 2026-09-05T16:10Z — #118 math-fix gap closed by session 1 (claims 17-2 and 17-3 proved)
 - One Fable math-fix session (626k tokens, 100 min) settled the gap opened at 14:37Z: the printed claim 17-2 is false for an arbitrary combined-lines witness (the source uses the sandwich form of T, internal to the proof of lem:qld-xz-lines, while the witness records only the pair consistency); restated with error C·√m·(δP^{1/4}+δQ^{1/4}) through lines.consistent and proved. Claim 17-3 is proved as printed: the joint (line, point) mixture the blueprint proof seemed to need is not needed because the integrand depends only on (ℓX, ℓZ, z), and the source's Cauchy–Schwarz step there is vacuous. The deficit-form Cauchy–Schwarz lemma now lives in Combining/OverlapGap.lean. Paper-gap note docs/paper-gaps/qpbt_subline-claims-line-marginal.tex, register row and blueprint nodes updated; lem:claim-17-2/17-3 carry \leanok. Commit 691b671 on the #118 branch. The optional strengthening of CombinedLinesWitness by the X-marginal identity (restores the source error for 17-2) is left to the astra main session per the owner (16:02Z: no B7 for it). Worktree released to the main session.
+
+## 2026-09-06T01:30+08:00 — Codex session rows omit the selected model
+
+- The model-comparison report had to recover Codex models from rollout files or
+  time-based inference because `sessions.jsonl` did not record the model passed
+  by `dispatch.sh`; the inference cannot reliably preserve per-dispatch
+  `MIPSTARRE_CODEX_MODEL` overrides. Issue #231 requests recording the exact
+  explicit selection on new rows while leaving historical rows unchanged.

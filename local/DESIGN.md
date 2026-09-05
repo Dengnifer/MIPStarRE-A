@@ -124,8 +124,9 @@ documented failure modes. Sources are cited in `local/protocols/*.md`.
 All appends are one-line JSON; schemas documented in `protocols/meta.md`.
 
 - `results/telemetry/sessions.jsonl` — one line per agent session: name, role,
-  issue/pr, thread_id, start/end, wall seconds, token usage (input, cached,
-  output, reasoning), exit status, dispatcher.
+  explicitly selected model (when known), issue/pr, thread_id, start/end, wall
+  seconds, token usage (input, cached, output, reasoning), exit status,
+  dispatcher.
 - `results/telemetry/stages.jsonl` — one line per project stage/substage
   transition with timestamps and manual token/agent tallies.
 - `results/telemetry/builds.jsonl` — one line per full build / cache event:

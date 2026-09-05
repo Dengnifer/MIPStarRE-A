@@ -356,12 +356,15 @@ def session_record(
     status: str,
     capture: str | None,
     rollout: str | None,
+    model: str | None = None,
 ) -> dict[str, Any]:
     record: dict[str, Any] = {
         "name": name,
         "role": role,
-        "issue": issue,
     }
+    if model:
+        record["model"] = model
+    record["issue"] = issue
     if pr:
         record["pr"] = pr
     record.update(
@@ -573,6 +576,7 @@ def cmd_session_summarize(args: argparse.Namespace) -> int:
     record = session_record(
         name=name,
         role=role,
+        model=args.model,
         issue=args.issue,
         pr=args.pr,
         thread_id=thread_id,
@@ -734,6 +738,7 @@ def _build_parser() -> argparse.ArgumentParser:
     summarize.add_argument("capture", type=Path, help="captured JSONL event stream")
     summarize.add_argument("--name", help="session name (default: capture file stem)")
     summarize.add_argument("--role", choices=ROLES, help="agent role")
+    summarize.add_argument("--model", help="explicitly selected Codex model")
     summarize.add_argument("--issue", help="issue id or scope this session serves")
     summarize.add_argument("--pr", help="PR id, when the session works on one")
     summarize.add_argument("--start", help="ISO-8601 start timestamp with offset")
