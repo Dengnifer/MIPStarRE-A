@@ -2819,6 +2819,33 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   no repush, code change, evidence override, or auto-fix iteration is needed for this
   transient metadata delay.
 
+## 2026-09-05T16:30Z — Reopen the pasting source-assumption gap
+
+- PR 205 review F1 identifies a genuine unresolved source justification: the cited
+  passages define symmetric strategies and say they are almost always considered,
+  but do not explicitly impose symmetry on the printed operator lemma. The reverse
+  second-marginal comparison is load-bearing in the current proof. The previous
+  adoption is therefore under mathematical re-examination, not waived to obtain
+  green review evidence. The independently justified additive-error correction stays.
+- Announced reopening on progress log 27 and dispatched astra/ultra mathfix on issue
+  201 with a source-and-consumer brief. This is designated math-fix attempt 3, charged
+  conservatively as gap-related slot 4/10 including the partial Fable prover. The
+  original September 4 23:45Z start and roughly 4 hours 31 minutes of logged prior
+  worker time are retained. No definition or game change is authorized; no human
+  decision has been posted to inbox 26.
+- PR 229's autofix-generated six-file documentation repair was stranded by the
+  paper-gap guard because it deleted the required effort summary. Preserved all
+  staged work, restored only that summary with the completed-versus-remaining work
+  distinguished, and completed the interrupted commit as operator repair `6e57725`
+  with the normal hooks. No Lean signature or proof body changed. The next steps
+  are checked publication, CI, and independent review; this was not a new manual
+  review-fix round or a hook bypass.
+- PR 153's fourth published review has one genuine notation correction: natural
+  logarithms in the Lean envelope must not be displayed as base-two logarithms.
+  Its final repair runs through autofix with the stricter combined fix cap 2.
+  The script's terminal exact-head review remains required; any remaining findings
+  then receive operator adjudication rather than an open-ended repair cycle.
+
 ## 2026-09-05T15:50Z — mailbox reviews for PRs 153, 178, 185 through a verify-before-publish workflow
 - The three Claude review requests left by lanes 109, 112 and 114 were served by a workflow: one Opus drafter per PR reads task.md, persona.md and the context files and lists findings; one Opus skeptic per finding tries to refute it against the PR head (five of 37 drafts were refuted: wrong at head, already handled, or outside the task's scope); one Opus writer per lane composes reply.md from the survivors in the review contract. Results: PR 153 round 3 code COMMENTED / prose CHANGES_REQUESTED (4 ledger lines); PR 178 CHANGES_REQUESTED (12: mostly duplicated proofs of existing facts); PR 185 CHANGES_REQUESTED (11: shadowing helpers and stranded generic lemmas). Cost 3.94M tokens over 43 agents in 50 minutes. The reviews name concrete originals for every duplicate, so the fix rounds are mechanical.
 
