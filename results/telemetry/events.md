@@ -2719,6 +2719,9 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 - PR 155 (#110, observables sampling bounds) merged at 14:11Z. Session 13 on #118 proved lem:claim-17-1 (the sub-line replaced by the ordered product, C = 2) with a new module Combining/UniformLinePoint.lean. It also found that claims 17-2 and 17-3 cannot be proved from the witness data as the blueprint proof is written: 17-2 identifies the x-marginal of the combined-lines measurement with the X-line evaluation class, which CombinedLinesWitness does not record, and 17-3 averages jointly over the two (line, point) pairs while SubLineWitness.source_mixture supplies only the one-point marginals; both need a deficit-form Cauchy–Schwarz lemma not in OverlapGap.lean. Per the math-gap rule a Fable math-fix session (1 of at most 10) was dispatched to find statements that are correct and sufficient; #26 only if the sessions fail or a definition change is required.
 - PR 205 (#201, pasting) round 1: both lanes CHANGES_REQUESTED with thirteen consistency findings; the corrected statement with eq:pasting-1-sym was accepted as mathematically right. Opus fix round dispatched (module renaming by content allowed).
 
+## 2026-09-05T14:46Z — carried reviews inflated the reviewer round counter
+- On PR 197's eighth fresh review, the generated task header reported round 11. The counter deduplicated published marker reviews by head SHA but still counted three carried-forward reviews, even though review.md section 13 defines those copies as non-rounds; a duplicate publication was already collapsed by the head key. The history filter now excludes the explicit `mipstarre-review-carried` marker before counting rounds and assembling the prior ledger. An offline dry-run regression mixes seven fresh heads, three carried heads, and a duplicate publication and requires the next task to report round 8 with only fresh ledgers attached. Lesson: publication records and reviewer dispatches are different event types even when both use the exact-head review marker.
+
 ## 2026-09-05T14:50Z — codex resumed (owner); ratio codex:opus 1:1; astra not yet
 - The owner re-enabled codex subagents on ghz: model gpt-5.6-sol as before (astra is unstable; the owner will announce its readiness explicitly), dispatch ratio codex:opus 1:1, Fable only when necessary. The pause marker watchdog/codex-paused was removed at 14:47Z, so lanes dispatch again and the review step returns to local/bin/review.sh (codex reviewers); the Claude review mailbox stays available for Opus reviews when the ratio needs them. First codex lanes after the pause: #222 (repository-side post-merge silent-loss guard), #219 (review round counter), #218 (six duplicate private helper groups), #216 (pre-commit persona test during merges). Opus side: PR 205 fix round, the 135/174 worktree merge repairs. Fable: #118 math-fix session 1.
 
@@ -2854,6 +2857,33 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   read now agrees with the clean local head. Re-run CI and then independent review;
   no repush, code change, evidence override, or auto-fix iteration is needed for this
   transient metadata delay.
+
+## 2026-09-05T16:30Z — Reopen the pasting source-assumption gap
+
+- PR 205 review F1 identifies a genuine unresolved source justification: the cited
+  passages define symmetric strategies and say they are almost always considered,
+  but do not explicitly impose symmetry on the printed operator lemma. The reverse
+  second-marginal comparison is load-bearing in the current proof. The previous
+  adoption is therefore under mathematical re-examination, not waived to obtain
+  green review evidence. The independently justified additive-error correction stays.
+- Announced reopening on progress log 27 and dispatched astra/ultra mathfix on issue
+  201 with a source-and-consumer brief. This is designated math-fix attempt 3, charged
+  conservatively as gap-related slot 4/10 including the partial Fable prover. The
+  original September 4 23:45Z start and roughly 4 hours 31 minutes of logged prior
+  worker time are retained. No definition or game change is authorized; no human
+  decision has been posted to inbox 26.
+- PR 229's autofix-generated six-file documentation repair was stranded by the
+  paper-gap guard because it deleted the required effort summary. Preserved all
+  staged work, restored only that summary with the completed-versus-remaining work
+  distinguished, and completed the interrupted commit as operator repair `6e57725`
+  with the normal hooks. No Lean signature or proof body changed. The next steps
+  are checked publication, CI, and independent review; this was not a new manual
+  review-fix round or a hook bypass.
+- PR 153's fourth published review has one genuine notation correction: natural
+  logarithms in the Lean envelope must not be displayed as base-two logarithms.
+  Its final repair runs through autofix with the stricter combined fix cap 2.
+  The script's terminal exact-head review remains required; any remaining findings
+  then receive operator adjudication rather than an open-ended repair cycle.
 
 ## 2026-09-05T15:50Z — mailbox reviews for PRs 153, 178, 185 through a verify-before-publish workflow
 - The three Claude review requests left by lanes 109, 112 and 114 were served by a workflow: one Opus drafter per PR reads task.md, persona.md and the context files and lists findings; one Opus skeptic per finding tries to refute it against the PR head (five of 37 drafts were refuted: wrong at head, already handled, or outside the task's scope); one Opus writer per lane composes reply.md from the survivors in the review contract. Results: PR 153 round 3 code COMMENTED / prose CHANGES_REQUESTED (4 ledger lines); PR 178 CHANGES_REQUESTED (12: mostly duplicated proofs of existing facts); PR 185 CHANGES_REQUESTED (11: shadowing helpers and stranded generic lemmas). Cost 3.94M tokens over 43 agents in 50 minutes. The reviews name concrete originals for every duplicate, so the fix rounds are mechanical.
