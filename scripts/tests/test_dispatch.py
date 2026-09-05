@@ -95,15 +95,16 @@ class DispatchCommandTests(unittest.TestCase):
         self.assertEqual(argv[13:], ["resume", "--", THREAD_ID, "<prompt>"])
 
     def test_future_astra_mathfix_selects_model_effort_and_persona(self) -> None:
+        # HEAD remains the pre-merge branch tip while a merge commit is being prepared.
         argv = self.dispatch_command(
-            "--role", "mathfix", "--sandbox", "workspace-write", "--persona-ref", "HEAD",
+            "--role", "mathfix", "--sandbox", "workspace-write", "--persona-ref", "main",
             model="astra", effort="ultra", include_persona=True,
         )
 
         self.assertEqual(argv[3:7], ["-C", str(REPO_ROOT), "--sandbox", "workspace-write"])
         self.assertEqual(argv[argv.index("-m") + 1], "astra")
         self.assertIn("model_reasoning_effort=ultra", argv)
-        self.assertIn("persona: HEAD:local/personas/mathfix.md", self.last_dispatch_stdout)
+        self.assertIn("persona: main:local/personas/mathfix.md", self.last_dispatch_stdout)
         self.assertIn("# Persona: mathematical-gap repair", self.last_dispatch_stdout)
 
     def test_mathfix_rejects_non_astra_or_non_ultra_dispatches(self) -> None:
