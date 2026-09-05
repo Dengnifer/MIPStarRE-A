@@ -2696,3 +2696,6 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 
 ## 2026-09-05T11:28Z — incident: silent file loss on stacked branches 109 and 110
 - Earlier automated merges of issue-107 into issue-109 (35bdc2a) and issue-110 (8ad1de8), committed with an empty conflicts section, deleted five transport modules and reverted the PR 147 F3 fix; Transport/SeedFiber.lean and DirectLowDegree/Geometry.lean would have merged silently (no conflict). The 108/109/110 propagation session restored the MERGE_HEAD versions (7731a97, 21cd0cf). An audit of the other stacked branches for deleted or reverted paths relative to main is running; issue filed.
+
+## 2026-09-05T12:05Z — publish path restored (PR 221 merged)
+- github-sync.sh now commits the record snapshot it writes; the first sync after the merge produced 253fa0d automatically. Merged today through the Claude review path: PRs 211, 192, 206, 191, 152, 197, 217, 221.
