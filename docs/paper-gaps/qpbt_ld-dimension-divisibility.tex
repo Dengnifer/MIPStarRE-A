@@ -10,7 +10,7 @@
 \title{Dimension Divisibility in the Classical Test Instantiation of the
 	Pauli Basis Analysis}
 \author{}
-\date{2026-08-30}
+\date{2026-09-05}
 
 \begin{document}
 \maketitle
@@ -23,27 +23,26 @@
   classical low individual degree game at dimension $2m+2$, and the game's
   question distribution is undefined at that dimension for the admissible
   parameters: it requires $2m+2$ to divide $q$, while admissibility supplies
-  only $m \mid q$; the repair is a statement-level reformulation of an
-  imported theorem, not a new proof.  Second, the import of the classical
+  only $m \mid q$. The directly indexed reformulation and its soundness
+  proof are established for $k=1$; their use in the combining subtree
+  remains to be verified. Second, the source's import of the classical
   game's quantum soundness from the tensor-code paper carries two open
   verification obligations at every dimension: the asserted identity with
   the cited tensor-code test is not an identity and must be replaced by a
   reduction with a value bound, and the source's instantiation of the
   theorem's auxiliary parameter violates its lower bound at small
   dimensions (Section~\ref{sec:import-obligations}).
-  \item \textbf{Estimated weight:} for the recommended direction, about
-  \textbf{3--5 new definitions or interfaces} (a line-point distribution with
-  directly sampled index at arbitrary dimension, the directly indexed game,
-  and a restated soundness import) plus \textbf{7--10 supporting lemmas},
-  including the strategy-transport layer between the directly indexed game
-  and the $\chi$-based game (parsing pullback, seed-fiber averaging with
-  its open synchronicity-branch control, and a dilation--compression round
-  trip of the soundness conclusion); several hundred lines of formal proof.
-  Discharging the import obligations of
-  Section~\ref{sec:import-obligations} adds the pair-measurement
-  construction with its distributional matching, the branch-weight value
-  bound, and the parameter-bound case split.  The padding fallback is
-  heavier, roughly 6--10 reworked lemmas.
+  \item \textbf{Formal status:} direct index sampling, parsing pullback,
+  value-preserving correlated-register dilation, and the compression
+  argument are proved. They yield all three soundness conclusions with
+  error $\delta_{\mathrm{ld}}$ for $k=1$. The proof applies the low
+  individual degree theorem directly and avoids the two obligations of
+  the printed tensor-code import. The arbitrary-$k$ combining reduction
+  and the downstream use at dimension $2m+2$ remain open.
+  \item \textbf{Estimated weight:} the completed $k=1$ transport requires
+  no further definitions or supporting lemmas. Remaining work concerns
+  the arbitrary-$k$ combining reduction and its downstream application,
+  rather than the seed-fiber transport proved here.
   \item \textbf{Mathlib/project split:} approximately \textbf{15\% Mathlib}
   and \textbf{85\% project-local}.  Mathlib supplies uniform distributions on
   finite types and pushforward identities; the substance is choosing the
@@ -97,12 +96,11 @@ theorem forms.
   function on $\F_q$, and line questions carry the sampled index itself in
   place of the seed $s \in \F_q$; the error is
   $\delta_{\mathrm{ld}}(\eps,q,m',d,k) = a(dm'k)^a(\eps^b + q^{-b} +
-  2^{-bm'd})$.  This is a candidate target form, not an established one:
-  proving it carries the same two import obligations as the $\chi$-based
-  import (Section~\ref{sec:import-obligations}), and deriving the present
-  form from it when $m' \mid q$ requires the strategy transport described
-  under the candidate repairs below, whose synchronicity step is an open
-  obligation.
+  2^{-bm'd})$. This form is proved for $k=1$, as is its transport to the
+  seed-indexed game when $m'\mid q$. The proof uses the low individual
+  degree theorem directly, rather than the tensor-code import of
+  Section~\ref{sec:import-obligations}. Only the extension to arbitrary
+  $k$ remains open in this soundness assertion.
 \end{enumerate}
 
 \section{The source assertion and the obstruction}
@@ -176,10 +174,10 @@ simultaneity parameter --- chosen as $(m')^3 d$.  Neither
 the asserted identity nor the instantiation is complete as stated, so the
 import carries two verification obligations, which this section details and
 which the blueprint's proof node for the soundness statement records as
-open.  Both obligations are independent of the divisibility question: they
-arise at every dimension, for the $\chi$-based game where it is defined and
-equally for the directly indexed variant proposed under the candidate
-repairs.
+open for the printed tensor-code route. Both are independent of the
+divisibility question and would arise if that route were used for the
+directly indexed variant as well. The established $k=1$ proof instead
+uses the low individual degree theorem directly, as described below.
 
 \paragraph{The cited test.}
 In the two-prover tensor-code test (Figures~1 and~2 of
@@ -231,8 +229,10 @@ hidden-subcube pair with the law induced by the game's diagonal sampling.
 (ii)~The game's line questions carry the seed $s \in \F_q$; the test's
 carry only the line.  A strategy may depend on the seed beyond its class
 $\chi^{-1}(i)$, and removing this dependence runs into the fiber-averaging
-difficulty made explicit under the candidate repairs: averaging preserves
-the line-versus-point branches exactly but not the synchronicity branches.
+difficulty described below: averaging preserves the line-versus-point
+branches exactly but not the synchronicity branches. The correlated-register
+construction avoids this loss in the direct reduction; it does not establish
+the printed identification with the tensor-code test.
 (iii)~The branch weights differ: each nontrivial cross-test has mass $1/3$
 in the test against $2/9$ in the game.  Once the per-branch predicates are
 matched, the intended bookkeeping bound is that the constructed strategy's
@@ -288,22 +288,20 @@ $2m+2$ never appears in a verifier; it is an internal analysis device in the
 proof of the polynomial-pair lemma, so nothing there requires its question
 distribution to be conditionally linear.
 
-\section{Candidate repairs}
+\section{Direct repair and padding alternative}
 
-\paragraph{Direct index sampling (candidate direction, recommended).}
-Define, for arbitrary $m' \ge 1$, the line-point distribution over
+\paragraph{Direct index sampling (established for $k=1$).}
+The formalization defines, for arbitrary $m' \ge 1$, the line-point distribution over
 $\F_q^{m'}$ that samples the uniform point, the uniform axis index
 $i \in \{1,\ldots,m'\}$, and the diagonal direction with vanishing first
-$i-1$ coordinates, directly; define the \emph{directly indexed game} with
+$i-1$ coordinates, directly, and the \emph{directly indexed game} with
 this question distribution, whose line questions carry the index $i$ (and,
 for diagonal lines, the projected direction) in place of the seed
-$s \in \F_q$; and state the imported soundness theorem for that game
-(form~4 above).  This removes the divisibility obstruction and nothing
-else: the directly indexed game still asks for polynomials on revealed
-lines, has no pair questions, and weighs its branches as the present game
-does, so establishing form~4 carries the same two import obligations as
-the $\chi$-based import (Section~\ref{sec:import-obligations}), now at
-arbitrary dimension.
+$s \in \F_q$. Soundness for this game (form~4 above) is proved for $k=1$
+by a reduction to the low individual degree theorem with failure bound
+$3\eps$ and auxiliary parameter $2560000(m')^3d$. Thus the proof avoids
+both obligations of the printed tensor-code import. The extension to
+arbitrary $k$ remains the combining reduction, not an index-sampling issue.
 
 The relation to the present game when $m' \mid q$ must moreover be proved
 at the level of games, not merely of question distributions, because the
@@ -313,7 +311,9 @@ question a triple $(u_0, s, v')$, so a strategy may select different
 measurements for seeds $s \ne s'$ with $\chi(s) = \chi(s')$, and equality
 of the induced laws of the geometric data does not by itself transport
 such a strategy.  The transport layer decomposes into the following
-obligations, none of which is carried out here.
+steps. The distribution and pullback identities are proved; independent
+seed averaging is inadequate, and the proved transport instead uses a
+correlated register as described below.
 \begin{itemize}
   \item \emph{Distribution lemma.}  When $m' \mid q$, the image of the
   conditionally linear question distribution under the parsing map
@@ -348,30 +348,23 @@ obligations, none of which is carried out here.
   the players' measurements vary across a fiber in a correlated way (if
   both apply a common seed-dependent relabelling, every diagonal term is
   large and the cross terms are not), and neither quantity dominates the
-  other in general.  An earlier revision of this note claimed that the
-  averaging preserves the exact value, and with it synchronicity; that
-  claim was wrong and is withdrawn.  What needs proof is control of the
-  synchronicity branches under de-seeding.  Candidate approaches: show
-  that a strategy of value $1-\eps$ in the $\chi$-based game is, with
-  polynomial loss, close to a seed-oblivious one; or state form~4 with a
-  synchronicity hypothesis in the doubled-average form and re-derive it on
-  the tensor-code side.  Choosing and proving one of these is an open
-  obligation.
-  \item \emph{Projectivity round trip.}  The averaged strategy is a POVM
-  strategy even when the given one is projective, while the imported
-  theorem, like the present one, takes projective strategies.  The
-  intended round trip is: dilate the averaged strategy to a projective one
-  (Naimark preserves all product correlations
-  $\langle X \ot Y \rangle$ of the given strategy against the dilated
-  state --- hence the value of every branch the averaging preserved ---
-  but nothing restores the diagonal seed correlations once the averaging
-  has been performed); apply form~4; and compress the resulting polynomial
-  measurement along the dilation isometry back to a POVM in the required
-  measurement class on the original space.  That this compression
-  preserves the consistency conclusions must itself be proved; it is
-  stated here as an obligation, not established.  (Alternatively, form~4
-  may be stated for POVM strategies outright, moving the dilation inside
-  the import.)
+  other in general. The proved construction avoids independent averaging:
+  a maximally correlated register of dimension $q/m'$ selects the same
+  residue for both players. Block-diagonal measurements reconstruct the
+  seed from its index and residue. This preserves projectivity and the
+  value of every branch, including synchronicity, exactly
+  (\leanid{ldStrategyToDirect\_value\_eq}).
+  \item \emph{Recovery on the original Hilbert spaces.} Apply direct
+  soundness to this extended strategy, then average the diagonal blocks
+  of each polynomial measurement. The resulting POVMs satisfy the two
+  point-versus-polynomial consistency bounds exactly. Compression need
+  not preserve global polynomial consistency, since it removes the shared
+  residue correlation. Instead, the point-versus-point branch gives a
+  $9\eps$ bound on the original state. Chaining the point relations and
+  applying the polynomial collision estimate with loss $m'd/q$ recovers
+  global polynomial consistency there. For $k=1$, absorption into
+  $\delta_{\mathrm{ld}}$ completes the round trip, as proved in
+  \doclink{MIPStarRE/QPBT/Combining/DirectLowDegree/SeedIndexedSoundness.lean}.
 \end{itemize}
 
 The combining subtree would then be reread with the direct distribution
@@ -385,12 +378,9 @@ only the laws of the sampled objects and never the conditional linearity
 of the sampling is part of this direction's obligations.  This follows the
 subtree protocol for a definition-level mismatch: the definition is
 corrected at the lowest point rather than each downstream lemma acquiring
-a hypothesis.  The transport layer costs one parsing-map definition, the
-distribution lemma, the pullback lemma, whichever synchronicity control is
-chosen, and the dilation--compression lemma; the first three are an
-estimated one to two hundred lines on top of the restated import, with the
-blueprint's existing Naimark interface supplying the dilation, while the
-synchronicity control is the step whose weight is genuinely uncertain.
+a hypothesis. The transport identities are established for general $k$;
+the soundness round trip is complete for $k=1$, while simultaneous
+polynomial measurements for arbitrary $k$ still require the combining reduction.
 The external check that the tensor-code test of arXiv:2111.08131 samples
 its axes and subcubes directly has been made against that source: Figure~1
 there draws the axis index and the subcube data uniformly and directly,
@@ -457,15 +447,45 @@ violates the theorem's lower bound at the small dimensions listed there.
 We do not assert that any conclusion is false: the underlying tensor-code
 soundness is insensitive to how the axis index is sampled, and both import
 obligations concern verification, not counterexample.  For the divisibility
-repair, the recommended candidate direction is direct index sampling ---
-restate the imported soundness theorem for the directly indexed game at
-arbitrary dimension; prove the distribution and parsing-pullback lemmas;
-settle the synchronicity control for de-seeding together with the
-dilation--compression round trip, so that the present soundness statement
-would follow from the repaired import; and reread the combining subtree
-against the directly indexed game --- a direction whose open obligations
-are enumerated under the candidate repairs, not an established route, with
-dimension padding as the fallback confined to the present game definition.
+repair, direct index sampling is established for the simultaneity parameter $k = 1$,
+with dimension padding remaining the fallback confined to the present game
+definition.
+
+Concretely: the imported soundness theorem is restated for the directly
+indexed game at arbitrary dimension (\leanid{exists\_direct\_ld\_soundness}
+in \doclink{MIPStarRE/QPBT/Combining/DirectLowDegree/Soundness.lean}), whose
+question law is defined for every admissible tuple, so the divisibility
+obstruction described above does not arise there; the
+distribution and parsing-pullback lemmas are proved in
+\doclink{MIPStarRE/QPBT/Combining/DirectLowDegree/Transport/Correspondence.lean};
+and the de-seeding round trip is settled by dilating the seed-indexed
+strategy with a maximally correlated register indexed by the seed fibre,
+which preserves the value exactly
+(\leanid{ldStrategyToDirect\_value\_eq}), and compressing that register
+afterwards.  The compression is exact for the two point-versus-polynomial
+relations and not for the global one; the global relation is instead
+recovered on the original Hilbert spaces from the point-agreement branch of the
+game, as described in
+\doclink{MIPStarRE/QPBT/Combining/DirectLowDegree/SeedIndexedSoundness.lean}.
+For $k = 1$ the round trip therefore does yield the source-shaped soundness
+statement for the seed-indexed game, as
+\leanid{exists\_ld\_soundness\_of\_k\_eq\_one}, and its directly indexed form
+as \leanid{exists\_direct\_ld\_soundness\_of\_k\_eq\_one}.
+
+Neither of those two theorems relies on the asserted identity with the
+two-prover tensor-code test, and neither instantiates Theorem~4.7 of
+\cite{Ji2021Quantum}: both apply the low individual degree theorem
+\leanid{MIPStarRE.LDT.Test.mainFormal} directly, at the auxiliary sampling
+parameter $2560000\,m^3 d$, which satisfies that theorem's own large-sampling
+hypothesis for every admissible tuple.  The two import obligations of
+Section~\ref{sec:import-obligations} are thus avoided rather than
+discharged: they remain the open content of the source's printed route, and
+the arbitrary-$k$ statements keep that route and their tracked proof debt.
+What remains open for the directly indexed route itself is the extension
+from $k = 1$ to arbitrary $k$, which is the combining reduction analysed in
+\cite{gap:qpbt_ld-simultaneous-sandwich} and not a divisibility question,
+and the rereading of the combining subtree against the directly indexed
+game.
 
 \bibliographystyle{alpha}
 \bibliography{references}
