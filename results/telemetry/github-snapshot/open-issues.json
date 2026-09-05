@@ -688,109 +688,6 @@
   "pinned_comment": null
  },
  {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/182",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/182/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/182/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/182/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/182",
-  "id": 5349054532,
-  "node_id": "I_kwDOUJyJf88AAAABPtQYRA",
-  "number": 182,
-  "title": "docs(QPBT): align projective rounding support and dependencies",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12015972669,
-    "node_id": "LA_kwDOUJyJf88AAAACzDUxPQ",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/documentation",
-    "name": "documentation",
-    "color": "0075ca",
-    "default": true,
-    "description": "Improvements or additions to documentation"
-   },
-   {
-    "id": 12025013422,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8krg",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/blueprint-sync",
-    "name": "blueprint-sync",
-    "color": "ededed",
-    "default": false,
-    "description": "Blueprint to Lean synchronization issue"
-   },
-   {
-    "id": 12025014642,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8pcg",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/follow-up",
-    "name": "follow-up",
-    "color": "ededed",
-    "default": false,
-    "description": "A mathematical obligation split out of a merged PR"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-04T14:05:45Z",
-  "updated_at": "2026-09-04T14:05:45Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/163",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 0,
-   "blocking": 0,
-   "total_blocking": 0
-  },
-  "body": "<!-- mipstarre-issue-key: pr158-terminal-rounding-blueprint-followup -->\n## Context\n\nPR #158 closes the strategy-transformation, game-value stability, and\nprojective-rounding proofs from issue #98. Its third exact-head review approves\nthe mathematics and leaves four blueprint-support and documentation findings.\nThey are tracked here so the completed proof packet does not grow.\n\n## Scope\n\n- Add the completeness-of-`sqrt Q` and squared-distance triangle dependencies\n  used by the projective-rounding proof to the Chapter 14 proof graph, using\n  existing labels or clearly subordinate support nodes.\n- Restore private visibility for implementation-only declarations exposed by\n  the locality-preserving repair, or add mathematical formalization-support\n  blueprint entries for those that genuinely form reusable public API.\n- Replace the Lean-shaped `consistencyDefect (uniformDistribution Unit) ...`\n  hypothesis in the blueprint with the equivalent displayed off-diagonal\n  correlation sum.\n- Recompute stale blueprint line-range citations throughout the changed QPBT\n  modules after the support-node insertions, including `Calculus.lean`,\n  `DistanceTheorems.lean`, `StrategyClasses.lean`, and\n  `ProjectiveRounding.lean`.\n\n## Acceptance\n\n- The Chapter 14 dependency list includes every direct mathematical input used\n  by the projective-rounding proof.\n- Public declarations have intentional subordinate blueprint coverage; purely\n  local implementation lemmas are private.\n- Blueprint prose states the consistency condition in mathematical notation.\n- All cited chapter ranges match the resulting files.\n- Changed-file Lean checks, blueprint checks, and full local CI pass.\n\nProvenance: PR #158 at\n`8a9619a7b4302aba7e205be6747e8224a9efb7c2`, terminal findings F1-F4.\n\n---\nAddresses #98",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/182/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/182/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/180",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/180/labels{/name}",
@@ -1117,9 +1014,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 3,
+  "comments": 4,
   "created_at": "2026-09-04T11:58:10Z",
-  "updated_at": "2026-09-04T16:02:09Z",
+  "updated_at": "2026-09-05T00:01:37Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
@@ -1640,8 +1537,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 7,
-   "completed": 4,
-   "percent_completed": 57
+   "completed": 5,
+   "percent_completed": 71
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
   "issue_dependencies_summary": {
