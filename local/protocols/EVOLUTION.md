@@ -566,6 +566,23 @@ preflight tuple.  Local or remote ref movement fails closed.  A caller's plain
 **Expected effect:** the ref update that passed the long gate is exactly the one
 offered to the remote, while operators retain the explicit recovery path.
 
+## 2026-09-05 — Mathematical repair precedes owner escalation
+
+**Trigger:** `results/telemetry/owner-log.md` entries at 2026-09-04 22:35Z and
+23:05Z and the corresponding `results/telemetry/events.md` owner-rule entry;
+issue #208 records the confirmed defaults, and PR #209 reviews exposed missing
+launch and accounting guards.
+
+**Change:** `issues-prs.md` defines the bounded repair and escalation rule. The
+owner launches Fable 5.1; `dispatch.sh` enforces astra with ultra effort for the
+future Codex lane; the activation poller is archived under `owner-tools/`; and
+`meta.md` specifies owner-session accounting. The paper-gap policy points to
+the rule, and `local/README.md` points to the design-decisions register.
+
+**Expected effect:** the fleet resolves theorem-statement defects against their
+complete dependency graph, while #26 receives only definition/game decisions or
+an evidence-backed nonconvergence packet after the shared budget is exhausted.
+
 ## 2026-09-05 — Make checked publication independent of hook selection
 
 **Trigger:** `results/telemetry/events.md` 2026-09-05, "Checked publication

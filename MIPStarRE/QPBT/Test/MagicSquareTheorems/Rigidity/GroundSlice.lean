@@ -237,25 +237,23 @@ theorem heteroKron_sub_right {ιA ιB : Type*} (A : Op ιA) (B C : Op ιB) :
   ext p q
   simp [heteroKron, Matrix.kronecker, mul_sub]
 
-/-- Tensor placement is additive over finite sums in the left factor. -/
+/-- Tensor placement distributes over a finite sum in the left factor. -/
 theorem heteroKron_finset_sum_left {β ιA ιB : Type*} (s : Finset β)
     (A : β → Op ιA) (C : Op ιB) :
-    heteroKron (∑ b ∈ s, A b) C = ∑ b ∈ s, heteroKron (A b) C := by
-  ext p q
-  simp [heteroKron, Matrix.kronecker, Matrix.sum_apply, Finset.sum_mul]
+    heteroKron (∑ b ∈ s, A b) C = ∑ b ∈ s, heteroKron (A b) C :=
+  DistanceCalculus.heteroKron_finset_sum_left s A C
 
-/-- Tensor placement is additive over finite sums in the right factor. -/
+/-- Tensor placement distributes over a finite sum in the right factor. -/
 theorem heteroKron_finset_sum_right {β ιA ιB : Type*} (s : Finset β)
     (A : Op ιA) (C : β → Op ιB) :
-    heteroKron A (∑ b ∈ s, C b) = ∑ b ∈ s, heteroKron A (C b) := by
-  ext p q
-  simp [heteroKron, Matrix.kronecker, Matrix.sum_apply, Finset.mul_sum]
+    heteroKron A (∑ b ∈ s, C b) = ∑ b ∈ s, heteroKron A (C b) :=
+  DistanceCalculus.heteroKron_finset_sum_right s A C
 
-/-- The quadratic form is additive over finite sums of operators. -/
+/-- The state quadratic form is additive over finite sums. -/
 theorem stateQForm_finset_sum {β ι : Type*} [Fintype ι] [DecidableEq ι]
     (ψ : EuclideanSpace ℂ ι) (s : Finset β) (M : β → Op ι) :
-    stateQForm ψ (∑ b ∈ s, M b) = ∑ b ∈ s, stateQForm ψ (M b) := by
-  simp [stateQForm, applyOperatorToState]
+    stateQForm ψ (∑ b ∈ s, M b) = ∑ b ∈ s, stateQForm ψ (M b) :=
+  DistanceCalculus.stateQForm_finset_sum ψ s M
 
 /-- The average over the one-point uniform distribution is the sum over the
 outcomes. -/

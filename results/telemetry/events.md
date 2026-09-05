@@ -2641,3 +2641,13 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   command, and extend the bypass regression to require the tag to remain local.
 - **Lesson:** bypassing validation must not bypass publication scope; shared
   transport constraints belong on every exit path that publishes refs.
+
+## 2026-09-05T02:38Z — math-fix #117 converged (Fable 5.1, session 1)
+- Common-ancilla obligation of thm:linearity: the ancilla is uniform (basis vector of the extra direction of C^(2^t+1)); proved as `exists_exactly_linear_observables_commonAncilla`.
+- The source's "sufficiently many ancilla zero qubits" is an assumption on the strategy, absent from `ProjectiveSetting`, and cannot be discharged afterwards (compression returns the Fourier-square POVM, projective only when already exactly linear).
+- Resolution: lem:qld-4-10 proved directly on the original space (Parseval transfer of the commutation bound, sandwich POVM, exact overlap identity, lem:ortho per point pair, register-permutation symmetrization); error K eps^(1/8). Statement of `exists_combinedPointsWitness` unchanged; sorry removed.
+- Paper-gap note rewritten (qpbt_linearity-theorem-quotation.tex); ch15 support lemmas added, all leanok. Commits 2ce71cc, 6b4b75d on the #117 branch (PR 212).
+
+## 2026-09-05T02:44Z — codex paused by the owner
+- Owner instruction: do not start any new codex session until explicitly told to resume; running codex lanes may finish. Claude subagents (Opus, with Fable for math-fix and hardest analytic work) take repairs, review fixes and new packets meanwhile.
+- #210 session 2 (Opus) finished partial: strategy and question law sorry-free; found and repaired an abandoned conflicted merge in the worktree (5073dc4). Session 3 launched for targets 3-5.
