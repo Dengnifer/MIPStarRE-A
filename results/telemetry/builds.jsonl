@@ -556,3 +556,4 @@
 {"ts": "2026-09-05T21:37:44+0800", "kind": "ci-build", "trigger": "ci.sh pr=155", "seconds": 104, "outcome": "success", "sha": "dcedb9c00973f8c0fe31d4b0d68c40f638edb6ed", "note": "branch issue-110-observables-sampling-bounds"}
 {"ts": "2026-09-05T21:45:45+0800", "kind": "ci-build", "trigger": "ci.sh pr=153", "seconds": 30, "outcome": "success", "sha": "27fa866b852090a9a213a0d25b503ac6ce25baeb", "note": "branch issue-109-ld-transport-bounds"}
 {"ts": "2026-09-05T21:47:19+0800", "kind": "ci-build", "trigger": "ci.sh pr=175", "seconds": 31, "outcome": "success", "sha": "c9d876926491b2281f152fbce7a89ab7e60649a0", "note": "branch issue-111-projective-setup-point-observables"}
+{"ts": "2026-09-05T22:07:52+0800", "kind": "ci-build", "trigger": "ci.sh pr=155", "seconds": 30, "outcome": "success", "sha": "c485dd8d324df3f29c27f252fe59ae8b3f278841", "note": "branch issue-110-observables-sampling-bounds"}
