@@ -21,8 +21,10 @@ relations.
 
 The error obtained here is the error of `lem:ld-soundness` for the combined
 game plus `(m + k) d / q`, which is the form displayed in the source; its
-absorption into `deltaLd` at the original parameters is a scalar estimate in
-the style of `exists_directLdTransportConstants`, and is not carried out here.
+absorption into `deltaLd` at the original parameters, with the universal
+constants `a = 10^23` and `b = 1/80000`, is
+`exists_directCombinedTransportConstants`, and the absorbed form of the
+conclusion is `exists_direct_ld_soundness`.
 
 ## Main statements
 

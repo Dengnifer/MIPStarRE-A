@@ -277,7 +277,7 @@ Quantum soundness of a version of the classical low-degree test for polynomials 
 % This remark records the formal status of the extension to general k;
 % it is not a statement from the paper.
 \begin{remark}[The extension to general $k$ is not coordinatewise]\label{rem:ld-soundness-simultaneity}
-	The extension from $k = 1$ to general $k$ cited in the proof of Theorem~\ref{lem:ld-soundness} is the reduction deriving Theorem~4.43 from Theorem~4.40 in \cite{Natarajan2018NEEXP}: the $k$ answer polynomials are combined into the single polynomial $(\alpha, u) \mapsto \sum_i \alpha_i g_i(u)$ in $m + k$ variables, the case $k = 1$ is applied once to the combined strategy, and the $k$ polynomials are recovered from the resulting measurement by exact linearity in $\alpha$ and the Schwartz--Zippel lemma. It cannot be replaced by applying the case $k = 1$ to each coordinate separately and combining the coordinate measurements by the sandwich of Lemma~\ref{lem:ld-sandwich}: over $\F_{2^s}$ with $d = 1$ and $k = 2$ there are a joint point measurement and coordinate polynomial measurements, on the maximally entangled state, for which every coordinate relation of the theorem holds with error $0$ while every POVM with polynomial-pair outcomes has consistency defect at least $1 - 2/q$ against the joint point measurement; the computation is in \cite{gap:qpbt_ld-simultaneous-sandwich}. The formalization accordingly proves the polynomial-tuple conclusion of Theorem~\ref{lem:ld-soundness} for $k = 1$ from Theorem~\ref{thm:main-formal}, which is the only value instantiated in the proof of Lemma~\ref{lem:qld-4-7}; the general case awaits a formalization of the combining reduction.
+	The extension from $k = 1$ to general $k$ cited in the proof of Theorem~\ref{lem:ld-soundness} is the reduction deriving Theorem~4.43 from Theorem~4.40 in \cite{Natarajan2018NEEXP}: the $k$ answer polynomials are combined into the single polynomial $(\alpha, u) \mapsto \sum_i \alpha_i g_i(u)$ in $m + k$ variables, the case $k = 1$ is applied once to the combined strategy, and the $k$ polynomials are recovered from the resulting measurement by exact linearity in $\alpha$ and the Schwartz--Zippel lemma. It cannot be replaced by applying the case $k = 1$ to each coordinate separately and combining the coordinate measurements by the sandwich of Lemma~\ref{lem:ld-sandwich}: over $\F_{2^s}$ with $d = 1$ and $k = 2$ there are a joint point measurement and coordinate polynomial measurements, on the maximally entangled state, for which every coordinate relation of the theorem holds with error $0$ while every POVM with polynomial-pair outcomes has consistency defect at least $1 - 2/q$ against the joint point measurement; the computation is in \cite{gap:qpbt_ld-simultaneous-sandwich}. The formalization accordingly proves the polynomial-tuple conclusion of Theorem~\ref{lem:ld-soundness} for $k = 1$ from Theorem~\ref{thm:main-formal}, which is the only value instantiated in the proof of Lemma~\ref{lem:qld-4-7}; the general case is the combining reduction of Proposition~\ref{prop:ld-simultaneous-general-k}, carried out for the directly indexed game.
 	% The k = 1 conclusion is MIPStarRE.QPBT.exists_directSimultaneousPolynomialMeasurements_of_k_eq_one
 	% (MIPStarRE/QPBT/Combining/DirectLowDegree/Transport/Simultaneous.lean); it is stated for the
 	% directly indexed game of docs/paper-gaps/qpbt_ld-dimension-divisibility.tex, which has no
@@ -691,7 +691,8 @@ when the Lean declarations it names are complete and sorry-free.
 
 \begin{proposition}[Simultaneous polynomial measurements for general $k$]
 	\label{prop:ld-simultaneous-general-k}
-	\lean{MIPStarRE.QPBT.exists_directSimultaneousPolynomialMeasurements_combinedError}
+	\lean{MIPStarRE.QPBT.exists_directSimultaneousPolynomialMeasurements_combinedError, MIPStarRE.QPBT.exists_direct_ld_soundness}
+	\leanok
 	\uses{def:ld-meas, def:consistency, def:bracket,
 		def:projective-strategy-general, def:ld-combining-parameters,
 		lem:ld-combined-value, lem:ld-combining-recovery}
@@ -706,6 +707,7 @@ when the Lean declarations it names are complete and sorry-free.
 	constants.
 \end{proposition}
 \begin{proof}
+	\leanok
 	\uses{lem:ld-combined-value, lem:ld-combining-recovery,
 		def:ld-combining-parameters}
 	Apply Lemma~\ref{lem:ld-combined-value} to obtain a projective strategy
@@ -718,6 +720,21 @@ when the Lean declarations it names are complete and sorry-free.
 	$\delta_{\mathrm{ld}}(C\eps, q, m+k, d, 1)$.  Lemma~\ref{lem:ld-combining-recovery}
 	converts them into measurements in $\mathrm{PolyMeas}(m,q,d,k)$ satisfying
 	the three relations for $\mathcal S$ with the stated error.
+
+	The absorption is carried out with the universal constants $a = 10^{23}$ and
+	$b = 1/80000$, the exponent being half the exponent $1/40000$ carried by
+	Theorem~\ref{thm:main-formal}.  For $0 < \eps \le 1$ the error of
+	Theorem~\ref{thm:main-formal} at the combined parameters and the sampling
+	parameter $2560000\,(m+k)^{3}d$ carries the prefactor
+	$655360000000000000\,(m+k)^{10}d^{2}$, and its three terms are bounded by
+	$30\,\eps^{b}$, $d\,q^{-b}$ and $2^{-bmd}$, while the recovery loss
+	$(m+k)d/q$ is bounded by $(m+k)d\,q^{-b}$.  Since $m + k \le 2dmk$ and
+	$d \le dmk$, the total is at most
+	$2.048 \cdot 10^{22}\,(dmk)^{13}\bigl(\eps^{b} + q^{-b} + 2^{-bmd}\bigr)$,
+	hence at most $\delta_{\mathrm{ld}}(\eps,q,m,d,k)$ at those constants.  For
+	$\eps \ge 1$ the error function is at least one, while the consistency defect
+	of a pair of measurement families on a unit bipartite state is at most one, so
+	the three relations hold for any witnesses.
 \end{proof}
 
 \section{The Magic Square game}

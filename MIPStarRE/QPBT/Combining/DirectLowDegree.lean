@@ -19,6 +19,7 @@ import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.Recovery
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.RecoveryDefect
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.RecoveryTransport
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.SimultaneousGeneral
+import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.Error
 
 /-!
 # The directly indexed low-degree game
@@ -70,9 +71,13 @@ which exhibits the combining map as injective; and the Schwartz--Zippel
 collision estimate for two linear forms in the combining variables; and the
 combined strategy itself, which answers every question of the combined game by
 measuring one question of the original strategy and relabelling its outcome,
-together with its projectivity and with the identification of the measured
-questions on each sample of the combined game.  The distributional half of the
-question law and the transport of the value remain to be formalized; see
+together with its projectivity, the identification of the measured questions on
+each sample of the combined game, and the transport of its value.  The recovery
+of the components of a combined outcome costs `(m + k) d / q` in the two point
+relations, `Transport.Combining.SimultaneousGeneral` assembles the
+polynomial-tuple conclusion for a general simultaneity parameter, and
+`Transport.Combining.Error` absorbs the resulting error into the error function
+of `lem:ld-soundness`, so that `Soundness` carries the absorbed form; see
 `blueprint/src/chapter/ch13_qpbt_test.tex`, the subsection on the combining
 reduction.
 
