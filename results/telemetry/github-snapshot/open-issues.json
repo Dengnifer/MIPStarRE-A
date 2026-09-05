@@ -1135,8 +1135,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 8,
-   "completed": 1,
-   "percent_completed": 12
+   "completed": 2,
+   "percent_completed": 25
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
   "issue_dependencies_summary": {
@@ -2196,7 +2196,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/165",
   "issue_dependencies_summary": {
-   "blocked_by": 1,
+   "blocked_by": 0,
    "total_blocked_by": 1,
    "blocking": 2,
    "total_blocking": 2
@@ -2366,7 +2366,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/165",
   "issue_dependencies_summary": {
-   "blocked_by": 2,
+   "blocked_by": 1,
    "total_blocked_by": 3,
    "blocking": 1,
    "total_blocking": 1
@@ -2386,91 +2386,6 @@
    "eyes": 0
   },
   "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/112/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/111",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/111/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/111/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/111/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/111",
-  "id": 5345132979,
-  "node_id": "I_kwDOUJyJf88AAAABPphBsw",
-  "number": 111,
-  "title": "feat(QPBT/Observables): prove projective setup and point observables",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-04T06:45:09Z",
-  "updated_at": "2026-09-04T12:02:56Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/165",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 2,
-   "blocking": 2,
-   "total_blocking": 2
-  },
-  "body": "<!-- mipstarre-issue-key: stage43-unfiled-observables-setup-defs -->\n### Target declarations\n\n- `MIPStarRE/QPBT/Observables/Setup.lean:97` \u2014 `exists_projective_padded_strategy`\n- `MIPStarRE/QPBT/Observables/Defs.lean:180` \u2014 `pointQuestion_appears_in_support`\n- `MIPStarRE/QPBT/Observables/Defs.lean:189` \u2014 `lineQuestion_appears_in_support`\n- `MIPStarRE/QPBT/Observables/Defs.lean:198` \u2014 `pairQuestion_appears_in_support`\n- `MIPStarRE/QPBT/Observables/Defs.lean:207` \u2014 `pairWQuestion_appears_in_support`\n- `MIPStarRE/QPBT/Observables/Defs.lean:216` \u2014 `msQuestion_appears_in_support`\n- `MIPStarRE/QPBT/Observables/Defs.lean:224` \u2014 `pauliQuestion_appears_in_support`\n- `MIPStarRE/QPBT/Observables/Defs.lean:384` \u2014 `wrongFormMass_alice_le_error`\n- `MIPStarRE/QPBT/Observables/Defs.lean:391` \u2014 `wrongFormMass_bob_le_error`\n- `MIPStarRE/QPBT/Observables/Defs.lean:412` \u2014 `pointObs_sq_eq_one`\n- `MIPStarRE/QPBT/Observables/Defs.lean:421` \u2014 `pointObs_isHermitian`\n\n### Paper and blueprint references\n\n- Projective strategy setup:\n  `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:155-172`;\n  `blueprint/src/chapter/ch14_qpbt_observables.tex:385-475`.\n- Typed strategy measurements and point observables:\n  `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:160-190`;\n  `blueprint/src/chapter/ch14_qpbt_observables.tex:480-532`.\n- Question forms:\n  `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1225`;\n  `blueprint/src/chapter/ch13_qpbt_test.tex:310-392`.\n\n### Dependencies\n\n- #98 must merge for projective rounding and strategy-value stability.\n- #107 must merge for the complete Pauli game sampler and support facts.\n- No other packet may edit `Setup.lean` or `Defs.lean` concurrently.\n\n### Acceptance\n\n- All eleven target declarations are proved with unchanged signatures.\n- `lake env lean` is green for both target files and direct consumers.\n- Fully discharged source nodes receive proof-level `\\leanok`.\n- No new `sorry`, `admit`, axiom, prohibited bypass, bridge package, or\n  homogeneous-space assumption is introduced.\n- Full build, statement audit, declaration checking, blueprint rendering,\n  exact-head CI, and independent review pass.\n\n### Scope notes\n\nPreserve heterogeneous local spaces, explicit zero-padding isometries,\nwrong-form mass, projectivity, and the exact point-observable definitions.\nOwn only the listed files and matching blueprint proof status. Main locators\nare from `c1c0af4`.\n\n---\nStage 4.3 proof packet under #47.\n\nPrerequisites are recorded as GitHub issue dependencies (blocked_by); the bullets above are commentary.\n",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/111/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/111/timeline",
   "performed_via_github_app": null,
   "state_reason": null,
   "pinned_comment": null
