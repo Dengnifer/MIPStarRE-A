@@ -100,4 +100,107 @@ def HasConditionalCollisionBound {X Y₁ Y₂ R₂ Γ₂ : Type*}
         if eval₂ g y₂ = eval₂ g' y₂ then 1 else 0) ≤
         η * (D.map Prod.fst).weight (x, y₁)
 
+
+/-! ### Tensor placements of measurements
+
+The operator families compared in `lem:pasting` are placed on one factor of a
+bipartite space. The two constructions below present such a placed family as a
+measurement, so that the consistency calculus applies to it verbatim. -/
+
+/-- The measurement whose effects are the left tensor placements of the effects
+of `M`. Formalization support for `lem:pasting`, blueprint
+`ch12_qpbt_games.tex:960-990`. -/
+noncomputable def Measurement.leftPlacement {α ιA ιB : Type*} [Fintype α]
+    [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
+    (M : Measurement α ιA) : Measurement α (ιA × ιB) :=
+  Measurement.ofSumEqOne (fun a => heteroKron (M.effect a) 1)
+    (fun a => kronecker_nonneg (M.pos a)
+      (Matrix.nonneg_iff_posSemidef.mpr Matrix.PosSemidef.one))
+    (by
+      classical
+      rw [← heteroKron_finset_sum_left, M.sum_eq_one, heteroKron_one_one])
+
+/-- The measurement whose effects are the right tensor placements of the
+effects of `M`. Formalization support for `lem:pasting`, blueprint
+`ch12_qpbt_games.tex:960-990`. -/
+noncomputable def Measurement.rightPlacement {α ιA ιB : Type*} [Fintype α]
+    [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
+    (M : Measurement α ιB) : Measurement α (ιA × ιB) :=
+  Measurement.ofSumEqOne (fun a => heteroKron 1 (M.effect a))
+    (fun a => kronecker_nonneg
+      (Matrix.nonneg_iff_posSemidef.mpr Matrix.PosSemidef.one) (M.pos a))
+    (by
+      classical
+      rw [← heteroKron_finset_sum_right, M.sum_eq_one, heteroKron_one_one])
+
+/-- The effects of the left placement. -/
+@[simp] theorem Measurement.leftPlacement_effect {α ιA ιB : Type*} [Fintype α]
+    [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
+    (M : Measurement α ιA) (a : α) :
+    (Measurement.leftPlacement (ιB := ιB) M).effect a = heteroKron (M.effect a) 1 := rfl
+
+/-- The effects of the right placement. -/
+@[simp] theorem Measurement.rightPlacement_effect {α ιA ιB : Type*} [Fintype α]
+    [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
+    (M : Measurement α ιB) (a : α) :
+    (Measurement.rightPlacement (ιA := ιA) M).effect a = heteroKron 1 (M.effect a) := rfl
+
+/-- The left placement of a projective measurement is projective.
+Formalization support for `lem:pasting`, blueprint
+`ch12_qpbt_games.tex:960-990`. -/
+theorem Measurement.isProjective_leftPlacement {α ιA ιB : Type*} [Fintype α]
+    [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
+    (M : Measurement α ιA) (hM : MIPStarRE.QPBT.Measurement.IsProjective M) :
+    MIPStarRE.QPBT.Measurement.IsProjective (Measurement.leftPlacement (ιB := ιB) M) := by
+  intro a
+  constructor
+  · show heteroKron (M.effect a) 1 * heteroKron (M.effect a) 1 =
+      heteroKron (M.effect a) 1
+    rw [heteroKron_mul, (hM a).isIdempotentElem.eq, mul_one]
+  · show (heteroKron (M.effect a) (1 : Op ιB))ᴴ = heteroKron (M.effect a) 1
+    unfold heteroKron Matrix.kronecker
+    rw [Matrix.conjTranspose_kronecker, measurement_effect_hermitian M a,
+      Matrix.conjTranspose_one]
+
+/-- The right placement of a projective measurement is projective.
+Formalization support for `lem:pasting`, blueprint
+`ch12_qpbt_games.tex:960-990`. -/
+theorem Measurement.isProjective_rightPlacement {α ιA ιB : Type*} [Fintype α]
+    [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
+    (M : Measurement α ιB) (hM : MIPStarRE.QPBT.Measurement.IsProjective M) :
+    MIPStarRE.QPBT.Measurement.IsProjective (Measurement.rightPlacement (ιA := ιA) M) := by
+  intro a
+  constructor
+  · show heteroKron (1 : Op ιA) (M.effect a) * heteroKron 1 (M.effect a) =
+      heteroKron 1 (M.effect a)
+    rw [heteroKron_mul, (hM a).isIdempotentElem.eq, mul_one]
+  · show (heteroKron (1 : Op ιA) (M.effect a))ᴴ = heteroKron 1 (M.effect a)
+    unfold heteroKron Matrix.kronecker
+    rw [Matrix.conjTranspose_kronecker, measurement_effect_hermitian M a,
+      Matrix.conjTranspose_one]
+
+/-- Postprocessing commutes with the left tensor placement. Formalization
+support for `lem:pasting`, blueprint `ch12_qpbt_games.tex:960-990`. -/
+theorem Measurement.leftPlacement_postprocess {α β ιA ιB : Type*}
+    [Fintype α] [DecidableEq α] [Fintype β] [DecidableEq β]
+    [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
+    (M : Measurement α ιA) (f : α → β) (b : β) :
+    (Measurement.leftPlacement (ιB := ιB) (M.postprocess f)).effect b =
+      ((Measurement.leftPlacement (ιB := ιB) M).postprocess f).effect b := by
+  classical
+  simp only [Measurement.leftPlacement_effect, Measurement.postprocess_effect,
+    heteroKron_finset_sum_left]
+
+/-- Postprocessing commutes with the right tensor placement. Formalization
+support for `lem:pasting`, blueprint `ch12_qpbt_games.tex:960-990`. -/
+theorem Measurement.rightPlacement_postprocess {α β ιA ιB : Type*}
+    [Fintype α] [DecidableEq α] [Fintype β] [DecidableEq β]
+    [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
+    (M : Measurement α ιB) (f : α → β) (b : β) :
+    (Measurement.rightPlacement (ιA := ιA) (M.postprocess f)).effect b =
+      ((Measurement.rightPlacement (ιA := ιA) M).postprocess f).effect b := by
+  classical
+  simp only [Measurement.rightPlacement_effect, Measurement.postprocess_effect,
+    heteroKron_finset_sum_right]
+
 end MIPStarRE.QPBT
