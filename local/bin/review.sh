@@ -504,8 +504,14 @@ ghc pr-reviews "$PR_NUM" >"$ROUND_JSON" 2>/dev/null ||
   die "could not read prior review history for PR #$PR_NUM"
 ROUND="$(python3 - "$ROUND_JSON" "$RUN_DIR/prior-ledger.md" <<'PY'
 import json, re, sys
-rows = [r for r in json.load(open(sys.argv[1], encoding="utf-8"))
-        if "mipstarre-review pr=" in (r.get("body") or "")]
+rows = []
+for row in json.load(open(sys.argv[1], encoding="utf-8")):
+    body = row.get("body") or ""
+    # A carried exact-head publication reuses an earlier dispatch; review.md
+    # section 13 therefore excludes it from both the round and prior ledger.
+    if ("mipstarre-review pr=" in body
+            and "<!-- mipstarre-review-carried" not in body):
+        rows.append(row)
 distinct = {}
 for row in rows:
     m = re.search(r"head=([0-9a-f]+)", row.get("body", ""))
