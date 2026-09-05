@@ -41,11 +41,11 @@ The variable indices below are zero-based: indices 0 and 4 represent the
 paper's first and fifth variables, respectively.
 -/
 
-open scoped BigOperators Matrix
+open scoped BigOperators Matrix MatrixOrder ComplexOrder
 
 namespace MIPStarRE.QPBT
 
-open MIPStarRE.LDT MIPStarRE.Quantum
+open MIPStarRE.LDT MIPStarRE.Quantum MagicSquareRigidity
 
 noncomputable section
 
@@ -263,6 +263,323 @@ theorem exists_ms_rigidity_of_one_le_sqrt_add (C ε δ : ℝ) (hC : 8 ≤ C)
     (hB 0 .X).trans hCbound, (hB 4 .Z).trans hCbound, h6.trans hCbound,
     h7.trans hCbound⟩
 
+/-! ## The bit-measurement and anticommutator estimates on the dilation -/
+
+/-- Formalization-only: a state-dependent estimate for a difference of two
+contractions transfers from the transported dilated state to the ideal state at
+the cost of twice the distance between the two states. -/
+theorem norm_applyOperatorToState_sub_le_of_close {ι : Type} [Fintype ι] [DecidableEq ι]
+    (A B : Op ι) (u ξ : EuclideanSpace ℂ ι) (κ η : ℝ)
+    (hA : Aᴴ * A ≤ 1) (hB : Bᴴ * B ≤ 1)
+    (hu : ‖applyOperatorToState (A - B) u‖ ≤ κ) (hξ : ‖u - ξ‖ ≤ η) :
+    ‖applyOperatorToState (A - B) ξ‖ ≤ κ + 2 * η := by
+  have hadd : applyOperatorToState (A - B) (u + (ξ - u)) =
+      applyOperatorToState (A - B) u + applyOperatorToState (A - B) (ξ - u) := by
+    simp only [applyOperatorToState]
+    rw [map_add]
+  have hsplit : applyOperatorToState (A - B) ξ =
+      applyOperatorToState (A - B) u + applyOperatorToState (A - B) (ξ - u) := by
+    rw [← hadd]
+    congr 1
+    abel
+  have h2 : ‖applyOperatorToState (A - B) (ξ - u)‖ ≤ 2 * η := by
+    refine le_trans (norm_applyOperatorToState_sub_le hA hB _) ?_
+    have hrev : ‖ξ - u‖ = ‖u - ξ‖ := norm_sub_rev _ _
+    linarith
+  rw [hsplit]
+  exact le_trans (norm_add_le _ _) (add_le_add hu h2)
+
+/-- Formalization-only: summing a uniform per-outcome estimate over the two
+outcomes. -/
+theorem sum_sq_le_two_mul {ι : Type} [Fintype ι] [DecidableEq ι]
+    (f : ZMod 2 → EuclideanSpace ℂ ι) (c : ℝ) (h : ∀ b, ‖f b‖ ≤ c) :
+    (∑ b : ZMod 2, ‖f b‖ ^ 2) ≤ 2 * c ^ 2 := by
+  calc (∑ b : ZMod 2, ‖f b‖ ^ 2) ≤ ∑ _b : ZMod 2, c ^ 2 :=
+        Finset.sum_le_sum fun b _ => by nlinarith [h b, norm_nonneg (f b)]
+    _ = 2 * c ^ 2 := by
+        rw [Finset.sum_const, Finset.card_univ, ZMod.card, nsmul_eq_mul]
+        norm_num
+
+/-- The bit-measurement estimate of `thm:ms-rigidity` on the projective
+dilation for Alice: her variable effects, conjugated by her two-qubit
+controlled-swap embedding, are close on the ideal state to the marginals of the
+two-qubit Pauli basis, at the scale of the transport defect plus twice the state
+distance.  Blueprint `ch13_qpbt_test.tex:224-253`, paper
+`08_classical_and_quantum_low_degree_tests.tex:612-652`. -/
+theorem ms_dilated_operator_distance_A (S : Strategy msGame) (j : Fin 9) (W : PauliKind)
+    (r : EuclideanSpace ℂ ((msDilatedStrategy S).ιA × (msDilatedStrategy S).ιB))
+    (κ η : ℝ)
+    (hξ : ‖isometryTensor (msAliceTwoQubitSwapIsometry S)
+        (msBobTwoQubitSwapIsometry S) (msDilatedStrategy S).ψ -
+      idealMsState r‖ ≤ η)
+    (hdef : ∀ b : ZMod 2,
+      ‖applyOperatorToState (heteroKron (heteroKron (idealMagicBitProj W b) 1) 1)
+          (isometryTensor (msAliceTwoQubitSwapIsometry S)
+            (msBobTwoQubitSwapIsometry S) (msDilatedStrategy S).ψ) -
+        isometryTensor (msAliceTwoQubitSwapIsometry S)
+          (msBobTwoQubitSwapIsometry S)
+          (applyOperatorToState (heteroKron
+            ((((msDilatedStrategy S).A (.var j)).postprocess msBitOrZero).effect b) 1)
+            (msDilatedStrategy S).ψ)‖ ≤ κ) :
+    opFamilyDistSq (uniformDistribution Unit)
+        (fun _ b => heteroKron (conjIsometry
+          (msAliceTwoQubitSwapIsometry S)
+          ((((msDilatedStrategy S).A (.var j)).postprocess msBitOrZero).effect b)) 1)
+        (fun _ b => heteroKron (heteroKron (idealMagicBitProj W b) 1) 1)
+        (idealMsState r) ≤ 2 * (κ + 2 * η) ^ 2 := by
+  rw [opFamilyDistSq_uniform_unit]
+  refine sum_sq_le_two_mul _ (κ + 2 * η) fun b => ?_
+  refine norm_applyOperatorToState_sub_le_of_close _ _
+    (isometryTensor (msAliceTwoQubitSwapIsometry S)
+      (msBobTwoQubitSwapIsometry S) (msDilatedStrategy S).ψ)
+    _ κ η ?_ ?_ ?_ hξ
+  · exact conjTranspose_mul_le_one_leftTensor
+      (conjTranspose_mul_le_one_conjIsometry _
+        (conjTranspose_mul_le_one_of_effect _ b))
+  · exact conjTranspose_mul_le_one_leftTensor
+      (conjTranspose_mul_le_one_leftTensor
+        (conjTranspose_mul_le_one_sum_ite_pauliProj (K := ZMod 2) (ι := Fin 2) W
+          (fun e => e 0) b))
+  · rw [applyOperatorToState_sub_op,
+      applyOperatorToState_leftTensor_conjIsometry, ← norm_neg,
+      neg_sub]
+    exact hdef b
+
+/-- The bit-measurement estimate of `thm:ms-rigidity` on the projective
+dilation for Bob; see `ms_dilated_operator_distance_A`. -/
+theorem ms_dilated_operator_distance_B (S : Strategy msGame) (j : Fin 9) (W : PauliKind)
+    (r : EuclideanSpace ℂ ((msDilatedStrategy S).ιA × (msDilatedStrategy S).ιB))
+    (κ η : ℝ)
+    (hξ : ‖isometryTensor (msAliceTwoQubitSwapIsometry S)
+        (msBobTwoQubitSwapIsometry S) (msDilatedStrategy S).ψ -
+      idealMsState r‖ ≤ η)
+    (hdef : ∀ b : ZMod 2,
+      ‖applyOperatorToState (heteroKron 1 (heteroKron (idealMagicBitProj W b) 1))
+          (isometryTensor (msAliceTwoQubitSwapIsometry S)
+            (msBobTwoQubitSwapIsometry S) (msDilatedStrategy S).ψ) -
+        isometryTensor (msAliceTwoQubitSwapIsometry S)
+          (msBobTwoQubitSwapIsometry S)
+          (applyOperatorToState (heteroKron 1
+            ((((msDilatedStrategy S).B (.var j)).postprocess msBitOrZero).effect b))
+            (msDilatedStrategy S).ψ)‖ ≤ κ) :
+    opFamilyDistSq (uniformDistribution Unit)
+        (fun _ b => heteroKron 1 (conjIsometry
+          (msBobTwoQubitSwapIsometry S)
+          ((((msDilatedStrategy S).B (.var j)).postprocess msBitOrZero).effect b)))
+        (fun _ b => heteroKron 1 (heteroKron (idealMagicBitProj W b) 1))
+        (idealMsState r) ≤ 2 * (κ + 2 * η) ^ 2 := by
+  rw [opFamilyDistSq_uniform_unit]
+  refine sum_sq_le_two_mul _ (κ + 2 * η) fun b => ?_
+  refine norm_applyOperatorToState_sub_le_of_close _ _
+    (isometryTensor (msAliceTwoQubitSwapIsometry S)
+      (msBobTwoQubitSwapIsometry S) (msDilatedStrategy S).ψ)
+    _ κ η ?_ ?_ ?_ hξ
+  · exact conjTranspose_mul_le_one_rightTensor
+      (conjTranspose_mul_le_one_conjIsometry _
+        (conjTranspose_mul_le_one_of_effect _ b))
+  · exact conjTranspose_mul_le_one_rightTensor
+      (conjTranspose_mul_le_one_leftTensor
+        (conjTranspose_mul_le_one_sum_ite_pauliProj (K := ZMod 2) (ι := Fin 2) W
+          (fun e => e 0) b))
+  · rw [applyOperatorToState_sub_op,
+      applyOperatorToState_rightTensor_conjIsometry, ← norm_neg,
+      neg_sub]
+    exact hdef b
+
+/-- The anticommutator estimate of `thm:ms-rigidity` on the projective dilation
+for Alice: products compose under conjugation by an isometry, so the estimate is
+the anticommutator defect of her first logical pair transported to the ideal
+state.  Blueprint `ch13_qpbt_test.tex:224-253`. -/
+theorem ms_dilated_anticommutator_A (S : Strategy msGame)
+    (r : EuclideanSpace ℂ ((msDilatedStrategy S).ιA × (msDilatedStrategy S).ιB))
+    (κ η : ℝ)
+    (hξ : ‖isometryTensor (msAliceTwoQubitSwapIsometry S)
+        (msBobTwoQubitSwapIsometry S) (msDilatedStrategy S).ψ -
+      idealMsState r‖ ≤ η)
+    (hac : ‖applyOperatorToState (msJointAnticommutatorA S)
+      (msDilatedStrategy S).ψ‖ ≤ κ) :
+    opDistSq (uniformDistribution Unit)
+        (fun _ => heteroKron (conjIsometry
+            (msAliceTwoQubitSwapIsometry S)
+            (obsOf (((msDilatedStrategy S).A (.var 0)).postprocess msBitOrZero))) 1 *
+          heteroKron (conjIsometry
+            (msAliceTwoQubitSwapIsometry S)
+            (obsOf (((msDilatedStrategy S).A (.var 4)).postprocess msBitOrZero))) 1)
+        (fun _ => -(heteroKron (conjIsometry
+            (msAliceTwoQubitSwapIsometry S)
+            (obsOf (((msDilatedStrategy S).A (.var 4)).postprocess msBitOrZero))) 1 *
+          heteroKron (conjIsometry
+            (msAliceTwoQubitSwapIsometry S)
+            (obsOf (((msDilatedStrategy S).A (.var 0)).postprocess msBitOrZero))) 1))
+        (idealMsState r) ≤ (κ + 2 * η) ^ 2 := by
+  have hY : ∀ j : Fin 9,
+      obsOf (((msDilatedStrategy S).A (.var j)).postprocess msBitOrZero) =
+        msLocalVarObsA S j := fun j => by
+    rw [msLocalVarObsA,
+      signObs_eq_obsOf_postprocess]
+  have hcadd : ∀ A B : Op (msDilatedStrategy S).ιA,
+      conjIsometry (msAliceTwoQubitSwapIsometry S) (A + B) =
+        conjIsometry (msAliceTwoQubitSwapIsometry S) A +
+          conjIsometry (msAliceTwoQubitSwapIsometry S) B := by
+    intro A B
+    simp only [conjIsometry_eq, Matrix.add_mul, Matrix.mul_add]
+  rw [opDistSq_uniform_unit]
+  have hX0 := conjTranspose_mul_le_one_leftTensor
+    (ιB := (Fin 2 → ZMod 2) × (msDilatedStrategy S).ιB)
+    (conjTranspose_mul_le_one_conjIsometry
+      (msAliceTwoQubitSwapIsometry S)
+      (conjTranspose_mul_le_one_of_obsOf
+        (((msDilatedStrategy S).A (.var 0)).postprocess msBitOrZero)))
+  have hX4 := conjTranspose_mul_le_one_leftTensor
+    (ιB := (Fin 2 → ZMod 2) × (msDilatedStrategy S).ιB)
+    (conjTranspose_mul_le_one_conjIsometry
+      (msAliceTwoQubitSwapIsometry S)
+      (conjTranspose_mul_le_one_of_obsOf
+        (((msDilatedStrategy S).A (.var 4)).postprocess msBitOrZero)))
+  have hbound : ‖applyOperatorToState
+      (heteroKron (conjIsometry (msAliceTwoQubitSwapIsometry S)
+          (obsOf (((msDilatedStrategy S).A (.var 0)).postprocess msBitOrZero))) 1 *
+        heteroKron (conjIsometry (msAliceTwoQubitSwapIsometry S)
+          (obsOf (((msDilatedStrategy S).A (.var 4)).postprocess msBitOrZero))) 1 -
+      -(heteroKron (conjIsometry (msAliceTwoQubitSwapIsometry S)
+          (obsOf (((msDilatedStrategy S).A (.var 4)).postprocess msBitOrZero))) 1 *
+        heteroKron (conjIsometry (msAliceTwoQubitSwapIsometry S)
+          (obsOf (((msDilatedStrategy S).A (.var 0)).postprocess msBitOrZero))) 1))
+      (idealMsState r)‖ ≤ κ + 2 * η := by
+    refine norm_applyOperatorToState_sub_le_of_close _ _
+      (isometryTensor (msAliceTwoQubitSwapIsometry S)
+        (msBobTwoQubitSwapIsometry S) (msDilatedStrategy S).ψ)
+      _ κ η (conjTranspose_mul_le_one_mul hX0 hX4)
+      (conjTranspose_mul_le_one_neg
+        (conjTranspose_mul_le_one_mul hX4 hX0)) ?_ hξ
+    have hprod : heteroKron (conjIsometry
+          (msAliceTwoQubitSwapIsometry S)
+          (obsOf (((msDilatedStrategy S).A (.var 0)).postprocess msBitOrZero))) 1 *
+        heteroKron (conjIsometry (msAliceTwoQubitSwapIsometry S)
+          (obsOf (((msDilatedStrategy S).A (.var 4)).postprocess msBitOrZero))) 1 -
+        -(heteroKron (conjIsometry (msAliceTwoQubitSwapIsometry S)
+          (obsOf (((msDilatedStrategy S).A (.var 4)).postprocess msBitOrZero))) 1 *
+        heteroKron (conjIsometry (msAliceTwoQubitSwapIsometry S)
+          (obsOf (((msDilatedStrategy S).A (.var 0)).postprocess msBitOrZero))) 1) =
+        heteroKron (conjIsometry (msAliceTwoQubitSwapIsometry S)
+          (msLocalVarObsA S 0 * msLocalVarObsA S 4 +
+            msLocalVarObsA S 4 *
+              msLocalVarObsA S 0))
+          (1 : Op ((Fin 2 → ZMod 2) × (msDilatedStrategy S).ιB)) := by
+      rw [hY 0, hY 4, heteroKron_mul, heteroKron_mul, one_mul, sub_neg_eq_add,
+        ← heteroKron_add_left, conjIsometry_mul,
+        conjIsometry_mul, ← hcadd]
+    rw [hprod, applyOperatorToState_leftTensor_conjIsometry,
+      norm_isometryTensor]
+    rw [msJointAnticommutatorA] at hac
+    exact hac
+  nlinarith [hbound, norm_nonneg (applyOperatorToState
+      (heteroKron (conjIsometry (msAliceTwoQubitSwapIsometry S)
+          (obsOf (((msDilatedStrategy S).A (.var 0)).postprocess msBitOrZero))) 1 *
+        heteroKron (conjIsometry (msAliceTwoQubitSwapIsometry S)
+          (obsOf (((msDilatedStrategy S).A (.var 4)).postprocess msBitOrZero))) 1 -
+      -(heteroKron (conjIsometry (msAliceTwoQubitSwapIsometry S)
+          (obsOf (((msDilatedStrategy S).A (.var 4)).postprocess msBitOrZero))) 1 *
+        heteroKron (conjIsometry (msAliceTwoQubitSwapIsometry S)
+          (obsOf (((msDilatedStrategy S).A (.var 0)).postprocess msBitOrZero))) 1))
+      (idealMsState r))]
+
+/-- The anticommutator estimate of `thm:ms-rigidity` on the projective dilation
+for Bob; see `ms_dilated_anticommutator_A`. -/
+theorem ms_dilated_anticommutator_B (S : Strategy msGame)
+    (r : EuclideanSpace ℂ ((msDilatedStrategy S).ιA × (msDilatedStrategy S).ιB))
+    (κ η : ℝ)
+    (hξ : ‖isometryTensor (msAliceTwoQubitSwapIsometry S)
+        (msBobTwoQubitSwapIsometry S) (msDilatedStrategy S).ψ -
+      idealMsState r‖ ≤ η)
+    (hac : ‖applyOperatorToState (msJointAnticommutatorB S)
+      (msDilatedStrategy S).ψ‖ ≤ κ) :
+    opDistSq (uniformDistribution Unit)
+        (fun _ => heteroKron 1 (conjIsometry
+            (msBobTwoQubitSwapIsometry S)
+            (obsOf (((msDilatedStrategy S).B (.var 0)).postprocess msBitOrZero))) *
+          heteroKron 1 (conjIsometry
+            (msBobTwoQubitSwapIsometry S)
+            (obsOf (((msDilatedStrategy S).B (.var 4)).postprocess msBitOrZero))))
+        (fun _ => -(heteroKron 1 (conjIsometry
+            (msBobTwoQubitSwapIsometry S)
+            (obsOf (((msDilatedStrategy S).B (.var 4)).postprocess msBitOrZero))) *
+          heteroKron 1 (conjIsometry
+            (msBobTwoQubitSwapIsometry S)
+            (obsOf (((msDilatedStrategy S).B (.var 0)).postprocess msBitOrZero)))))
+        (idealMsState r) ≤ (κ + 2 * η) ^ 2 := by
+  have hY : ∀ j : Fin 9,
+      obsOf (((msDilatedStrategy S).B (.var j)).postprocess msBitOrZero) =
+        msLocalVarObsB S j := fun j => by
+    rw [msLocalVarObsB,
+      signObs_eq_obsOf_postprocess]
+  have hcadd : ∀ A B : Op (msDilatedStrategy S).ιB,
+      conjIsometry (msBobTwoQubitSwapIsometry S) (A + B) =
+        conjIsometry (msBobTwoQubitSwapIsometry S) A +
+          conjIsometry (msBobTwoQubitSwapIsometry S) B := by
+    intro A B
+    simp only [conjIsometry_eq, Matrix.add_mul, Matrix.mul_add]
+  rw [opDistSq_uniform_unit]
+  have hX0 := conjTranspose_mul_le_one_rightTensor
+    (ιA := (Fin 2 → ZMod 2) × (msDilatedStrategy S).ιA)
+    (conjTranspose_mul_le_one_conjIsometry
+      (msBobTwoQubitSwapIsometry S)
+      (conjTranspose_mul_le_one_of_obsOf
+        (((msDilatedStrategy S).B (.var 0)).postprocess msBitOrZero)))
+  have hX4 := conjTranspose_mul_le_one_rightTensor
+    (ιA := (Fin 2 → ZMod 2) × (msDilatedStrategy S).ιA)
+    (conjTranspose_mul_le_one_conjIsometry
+      (msBobTwoQubitSwapIsometry S)
+      (conjTranspose_mul_le_one_of_obsOf
+        (((msDilatedStrategy S).B (.var 4)).postprocess msBitOrZero)))
+  have hbound : ‖applyOperatorToState
+      (heteroKron 1 (conjIsometry (msBobTwoQubitSwapIsometry S)
+          (obsOf (((msDilatedStrategy S).B (.var 0)).postprocess msBitOrZero))) *
+        heteroKron 1 (conjIsometry (msBobTwoQubitSwapIsometry S)
+          (obsOf (((msDilatedStrategy S).B (.var 4)).postprocess msBitOrZero))) -
+      -(heteroKron 1 (conjIsometry (msBobTwoQubitSwapIsometry S)
+          (obsOf (((msDilatedStrategy S).B (.var 4)).postprocess msBitOrZero))) *
+        heteroKron 1 (conjIsometry (msBobTwoQubitSwapIsometry S)
+          (obsOf (((msDilatedStrategy S).B (.var 0)).postprocess msBitOrZero)))))
+      (idealMsState r)‖ ≤ κ + 2 * η := by
+    refine norm_applyOperatorToState_sub_le_of_close _ _
+      (isometryTensor (msAliceTwoQubitSwapIsometry S)
+        (msBobTwoQubitSwapIsometry S) (msDilatedStrategy S).ψ)
+      _ κ η (conjTranspose_mul_le_one_mul hX0 hX4)
+      (conjTranspose_mul_le_one_neg
+        (conjTranspose_mul_le_one_mul hX4 hX0)) ?_ hξ
+    have hprod : heteroKron 1 (conjIsometry
+          (msBobTwoQubitSwapIsometry S)
+          (obsOf (((msDilatedStrategy S).B (.var 0)).postprocess msBitOrZero))) *
+        heteroKron 1 (conjIsometry (msBobTwoQubitSwapIsometry S)
+          (obsOf (((msDilatedStrategy S).B (.var 4)).postprocess msBitOrZero))) -
+        -(heteroKron 1 (conjIsometry (msBobTwoQubitSwapIsometry S)
+          (obsOf (((msDilatedStrategy S).B (.var 4)).postprocess msBitOrZero))) *
+        heteroKron 1 (conjIsometry (msBobTwoQubitSwapIsometry S)
+          (obsOf (((msDilatedStrategy S).B (.var 0)).postprocess msBitOrZero)))) =
+        heteroKron (1 : Op ((Fin 2 → ZMod 2) × (msDilatedStrategy S).ιA))
+          (conjIsometry (msBobTwoQubitSwapIsometry S)
+          (msLocalVarObsB S 0 * msLocalVarObsB S 4 +
+            msLocalVarObsB S 4 *
+              msLocalVarObsB S 0)) := by
+      rw [hY 0, hY 4, heteroKron_mul, heteroKron_mul, one_mul, sub_neg_eq_add,
+        ← heteroKron_add_right, conjIsometry_mul,
+        conjIsometry_mul, ← hcadd]
+    rw [hprod, applyOperatorToState_rightTensor_conjIsometry,
+      norm_isometryTensor]
+    rw [msJointAnticommutatorB] at hac
+    exact hac
+  nlinarith [hbound, norm_nonneg (applyOperatorToState
+      (heteroKron 1 (conjIsometry (msBobTwoQubitSwapIsometry S)
+          (obsOf (((msDilatedStrategy S).B (.var 0)).postprocess msBitOrZero))) *
+        heteroKron 1 (conjIsometry (msBobTwoQubitSwapIsometry S)
+          (obsOf (((msDilatedStrategy S).B (.var 4)).postprocess msBitOrZero))) -
+      -(heteroKron 1 (conjIsometry (msBobTwoQubitSwapIsometry S)
+          (obsOf (((msDilatedStrategy S).B (.var 4)).postprocess msBitOrZero))) *
+        heteroKron 1 (conjIsometry (msBobTwoQubitSwapIsometry S)
+          (obsOf (((msDilatedStrategy S).B (.var 0)).postprocess msBitOrZero)))))
+      (idealMsState r))]
+
 /-- `thm:ms-rigidity` in the corrected form adopted on issue #172 (owner
 decision B5 on issue #26), imported from Coladangelo--Stark, Theorem 6.9.
 Blueprint `ch13_qpbt_test.tex`, paper
@@ -290,54 +607,29 @@ and explains the norm conversion and local basis change at lines 650--652. One
 universal constant applies to every strategy and every pair of nonnegative
 error parameters.
 
-**Proof obligation.** The `sorry` is the part of the assembly of issue #105
-that concerns the regime `sqrt ε + sqrt δ < 1`.  The complementary regime is
-proved: `exists_ms_rigidity_of_one_le_sqrt_add` gives all seven conclusions
-whenever `1 ≤ sqrt ε + sqrt δ` and `8 ≤ C`, from the coarse witness
-`ms_rigidity_coarse_bounds`.
-
-The following inputs to the small-error regime are available and sorry-free.
-The first logical pair, at the cells `0` and `4`, approximately anticommutes on
-the dilated state for each player (`MagicSquareRigidity.msVarObsA_anticommute`
-and `msVarObsB_anticommute`), and the two players agree there through the
-consistency hypothesis (`MagicSquareRigidity.msVarObsA_close_msVarObsB`).  The
-second logical pair, at the cells `1` and `3`, approximately anticommutes for
-each player (`MagicSquareRigidity.msCellObsA_second_pair_anticommute` and
-`msVarObsB_second_pair_anticommute`), the two players agree there through the
-constraint questions (`MagicSquareRigidity.msCellObsA_close_msVarObsB_second_x`
-and `msCellObsA_close_msVarObsB_second_z`), and the two pairs approximately
-commute on both sides
-(`MagicSquareRigidity.msVarObsA_comm_msCellObsA_of_shared_constraint` and
-`msVarObsB_comm_of_shared_constraint`).  The one-qubit controlled-swap
-extraction and its intertwining relations are
-`MagicSquareRigidity.binarySwapIsometry`, `binarySwap_intertwines_Z` and
-`norm_binarySwap_intertwines_X_sub_le`; the two-qubit embeddings themselves are
-`MagicSquareRigidity.msAliceTwoQubitSwapIsometry` and
-`msBobTwoQubitSwapIsometry`, built from the two logical pairs of each player by
-`MagicSquareRigidity.twoBinarySwapIsometry`.  The conclusions are transported
-from the dilation to the original strategy by `ms_state_transfer`,
-`ms_effect_transfer_A`, `ms_effect_transfer_B`, `ms_anticommutator_transfer_A`
-and `ms_anticommutator_transfer_B`.
-
-The joint state estimate for those two embeddings is also proved:
-`MagicSquareRigidity.ms_dilated_state_estimate` carries the dilated state to
-within a universal multiple of `sqrt ε + sqrt δ` of two EPR pairs tensored with
-a unit residual state, and `ms_state_transfer` moves it to the original
-strategy.  This is the step at which `δ` enters, through the cross-player
+**The proof.** For `1 <= sqrt eps + sqrt delta` the coarse witness of
+`ms_rigidity_coarse_bounds` already satisfies all seven conclusions, through
+`exists_ms_rigidity_of_one_le_sqrt_add`.  In the complementary regime the
+witness is the tensor of the two players' two-qubit controlled-swap embeddings
+composed with the dilation embedding, and the auxiliary state is the residual
+state of `MagicSquareRigidity.ms_dilated_state_estimate`, which is the state
+conclusion and the step at which `delta` enters, through the cross-player
 agreement of the first logical pair.
 
-What remains is the bit-measurement estimate on the dilation: that the
-two-qubit controlled swap carries each player's variable-0 and variable-4
-effects to the marginals of the two-qubit Pauli basis over the first register
-coordinate, up to `O(sqrt ε + sqrt δ)` on the transported state.  The one-qubit
-intertwining relations are `MagicSquareRigidity.binarySwap_intertwines_Z` and
-`norm_binarySwap_intertwines_X_sub_le`, and their two-qubit ingredients --- the
-identification of those marginals with the spectral effects of the two-qubit
-Pauli observable and the completeness of the residual factors of the second
-swap --- are `MagicSquareRigidity.sum_ite_pauliProj_eq_reflectionEffect`,
-`sum_twoSwapFactor_conjTranspose_mul` and `sum_rightTensor_twoSwapFactor`.
-Their transport through the second controlled swap is the only step of the
-argument that is not yet formalized. -/
+The bit-measurement conclusions come from the transport of the first logical
+pair through the two-qubit controlled swap: the phase observable is transported
+exactly and the shift observable up to the anticommutator defect of that pair
+(`MagicSquareRigidity.norm_ms_effect_defect_A_X`, `norm_ms_effect_defect_A_Z`
+and their counterparts for the second player), and the spectral effects inherit
+those estimates.  The anticommutator conclusions come from the approximate
+anticommutation of the first pair on the dilated state
+(`MagicSquareRigidity.msVarObsA_anticommute`, `msVarObsB_anticommute`), since
+products compose under conjugation by an isometry.  Both are then moved from the
+dilated state to the ideal state at the cost of twice the state distance, and
+from the dilated strategy to the original one by
+`MagicSquareRigidity.ms_effect_transfer_A`, `ms_effect_transfer_B`,
+`ms_anticommutator_transfer_A`, `ms_anticommutator_transfer_B` and
+`ms_state_transfer`. -/
 theorem exists_ms_rigidity :
     ∃ C : ℝ, 1 ≤ C ∧ ∀ (ε δ : ℝ), 0 ≤ ε → 0 ≤ δ →
       ∀ S : Strategy msGame, 1 - ε ≤ S.value →
@@ -352,7 +644,112 @@ theorem exists_ms_rigidity :
           msOperatorDistanceB S w 4 .Z ≤ C * (Real.sqrt ε + Real.sqrt δ) ∧
           msAnticommutatorDistanceA S w ≤ C * (Real.sqrt ε + Real.sqrt δ) ∧
           msAnticommutatorDistanceB S w ≤ C * (Real.sqrt ε + Real.sqrt δ) := by
-  sorry
+  classical
+  refine ⟨2 * 10 ^ 12, by norm_num, fun ε δ hε hδ S hwin hd0 hd4 => ?_⟩
+  by_cases hbig : 1 ≤ Real.sqrt ε + Real.sqrt δ
+  · exact exists_ms_rigidity_of_one_le_sqrt_add _ ε δ (by norm_num) hbig S
+  push_neg at hbig
+  have hse : 0 ≤ Real.sqrt ε := Real.sqrt_nonneg ε
+  have hsd : 0 ≤ Real.sqrt δ := Real.sqrt_nonneg δ
+  have hsqe : Real.sqrt ε ^ 2 = ε := Real.sq_sqrt hε
+  have hεt : ε ≤ Real.sqrt ε + Real.sqrt δ := by nlinarith
+  obtain ⟨r, hrnorm, hstate⟩ :=
+    ms_dilated_state_estimate S ε δ hε hδ hwin hd0 hd4
+  have hξ : ‖isometryTensor (msAliceTwoQubitSwapIsometry S)
+      (msBobTwoQubitSwapIsometry S) (msDilatedStrategy S).ψ -
+      idealMsState r‖ ≤ 172608 * (Real.sqrt ε + Real.sqrt δ) := hstate
+  have hacA := norm_msJointAnticommutatorA_le S ε hwin
+  have hacB := norm_msJointAnticommutatorB_le S ε hwin
+  have hκt : (624 : ℝ) * Real.sqrt ε ≤ 624 * (Real.sqrt ε + Real.sqrt δ) := by nlinarith
+  have htt : (Real.sqrt ε + Real.sqrt δ) ^ 2 ≤ Real.sqrt ε + Real.sqrt δ := by nlinarith
+  have hX0 : (0 : ℝ) ≤ 624 * Real.sqrt ε + 2 * (172608 * (Real.sqrt ε + Real.sqrt δ)) := by
+    positivity
+  have hkey : (624 * Real.sqrt ε + 2 * (172608 * (Real.sqrt ε + Real.sqrt δ))) ^ 2 ≤
+      345840 ^ 2 * (Real.sqrt ε + Real.sqrt δ) := by
+    have h1 : 624 * Real.sqrt ε + 2 * (172608 * (Real.sqrt ε + Real.sqrt δ)) ≤
+        345840 * (Real.sqrt ε + Real.sqrt δ) := by linarith
+    have h2 : (624 * Real.sqrt ε + 2 * (172608 * (Real.sqrt ε + Real.sqrt δ))) ^ 2 ≤
+        (345840 * (Real.sqrt ε + Real.sqrt δ)) ^ 2 := pow_le_pow_left₀ hX0 h1 2
+    nlinarith [h2, htt]
+  have hη2 : (172608 * (Real.sqrt ε + Real.sqrt δ)) ^ 2 ≤
+      172608 ^ 2 * (Real.sqrt ε + Real.sqrt δ) := by nlinarith [htt]
+  have hproj : ∀ (W : PauliKind) (b : ZMod 2),
+      idealMagicBitProj W b =
+        reflectionEffect (twoQubitPauliObs W) b :=
+    fun W b => sum_ite_pauliProj_eq_reflectionEffect W b
+  refine ⟨{ ιA'' := (msDilatedStrategy S).ιA
+            ιB'' := (msDilatedStrategy S).ιB
+            φA := (msAliceTwoQubitSwapIsometry S).comp
+              (naimarkEmbedding S.ιA MsAnswer)
+            φB := (msBobTwoQubitSwapIsometry S).comp
+              (naimarkEmbedding S.ιB MsAnswer)
+            aux := r
+            aux_norm := hrnorm }, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+  · refine le_trans (le_of_eq (ms_state_transfer S (msAliceTwoQubitSwapIsometry S)
+      (msBobTwoQubitSwapIsometry S) (idealMsState r))) (le_trans hξ ?_)
+    nlinarith
+  · refine le_trans (ms_effect_transfer_A S _ _ (idealMsState r)
+      (fun b => heteroKron (heteroKron (idealMagicBitProj (.X) b) 1) 1) ε
+      (172608 * (Real.sqrt ε + Real.sqrt δ)) hwin 0 hξ) ?_
+    have hdil := ms_dilated_operator_distance_A S 0 .X r (624 * Real.sqrt ε)
+      (172608 * (Real.sqrt ε + Real.sqrt δ)) hξ (fun b => by
+        rw [hproj, dilatedEffect_var_A_eq]
+        exact le_trans (norm_ms_effect_defect_A_X S b) hacA)
+    refine le_trans (add_le_add (add_le_add
+      (mul_le_mul_of_nonneg_left hdil (by norm_num : (0:ℝ) ≤ 3)) (le_refl _))
+      (le_refl _)) ?_
+    linarith [hkey, hη2, hεt]
+  · refine le_trans (ms_effect_transfer_A S _ _ (idealMsState r)
+      (fun b => heteroKron (heteroKron (idealMagicBitProj (.Z) b) 1) 1) ε
+      (172608 * (Real.sqrt ε + Real.sqrt δ)) hwin 4 hξ) ?_
+    have hdil := ms_dilated_operator_distance_A S 4 .Z r (624 * Real.sqrt ε)
+      (172608 * (Real.sqrt ε + Real.sqrt δ)) hξ (fun b => by
+        rw [hproj, dilatedEffect_var_A_eq]
+        refine le_trans (norm_ms_effect_defect_A_Z S b) ?_
+        positivity)
+    refine le_trans (add_le_add (add_le_add
+      (mul_le_mul_of_nonneg_left hdil (by norm_num : (0:ℝ) ≤ 3)) (le_refl _))
+      (le_refl _)) ?_
+    linarith [hkey, hη2, hεt]
+  · refine le_trans (ms_effect_transfer_B S _ _ (idealMsState r)
+      (fun b => heteroKron 1 (heteroKron (idealMagicBitProj (.X) b) 1)) ε
+      (172608 * (Real.sqrt ε + Real.sqrt δ)) hwin 0 hξ) ?_
+    have hdil := ms_dilated_operator_distance_B S 0 .X r (624 * Real.sqrt ε)
+      (172608 * (Real.sqrt ε + Real.sqrt δ)) hξ (fun b => by
+        rw [hproj, dilatedEffect_var_B_eq]
+        exact le_trans (norm_ms_effect_defect_B_X S b) hacB)
+    refine le_trans (add_le_add (add_le_add
+      (mul_le_mul_of_nonneg_left hdil (by norm_num : (0:ℝ) ≤ 3)) (le_refl _))
+      (le_refl _)) ?_
+    linarith [hkey, hη2, hεt]
+  · refine le_trans (ms_effect_transfer_B S _ _ (idealMsState r)
+      (fun b => heteroKron 1 (heteroKron (idealMagicBitProj (.Z) b) 1)) ε
+      (172608 * (Real.sqrt ε + Real.sqrt δ)) hwin 4 hξ) ?_
+    have hdil := ms_dilated_operator_distance_B S 4 .Z r (624 * Real.sqrt ε)
+      (172608 * (Real.sqrt ε + Real.sqrt δ)) hξ (fun b => by
+        rw [hproj, dilatedEffect_var_B_eq]
+        refine le_trans (norm_ms_effect_defect_B_Z S b) ?_
+        positivity)
+    refine le_trans (add_le_add (add_le_add
+      (mul_le_mul_of_nonneg_left hdil (by norm_num : (0:ℝ) ≤ 3)) (le_refl _))
+      (le_refl _)) ?_
+    linarith [hkey, hη2, hεt]
+  · refine le_trans (ms_anticommutator_transfer_A S _ _
+      (idealMsState r) ε (172608 * (Real.sqrt ε + Real.sqrt δ)) hwin hξ) ?_
+    have hdil := ms_dilated_anticommutator_A S r (624 * Real.sqrt ε)
+      (172608 * (Real.sqrt ε + Real.sqrt δ)) hξ hacA
+    refine le_trans (add_le_add (add_le_add
+      (mul_le_mul_of_nonneg_left hdil (by norm_num : (0:ℝ) ≤ 3)) (le_refl _))
+      (le_refl _)) ?_
+    linarith [hkey, hη2, hεt]
+  · refine le_trans (ms_anticommutator_transfer_B S _ _
+      (idealMsState r) ε (172608 * (Real.sqrt ε + Real.sqrt δ)) hwin hξ) ?_
+    have hdil := ms_dilated_anticommutator_B S r (624 * Real.sqrt ε)
+      (172608 * (Real.sqrt ε + Real.sqrt δ)) hξ hacB
+    refine le_trans (add_le_add (add_le_add
+      (mul_le_mul_of_nonneg_left hdil (by norm_num : (0:ℝ) ≤ 3)) (le_refl _))
+      (le_refl _)) ?_
+    linarith [hkey, hη2, hεt]
 
 /-- `thm:ms-rigidity` on the class fixed by owner decision B5 on issue #26:
 symmetric strategies of the Magic Square game that are consistent on their
