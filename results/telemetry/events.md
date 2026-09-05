@@ -3178,6 +3178,29 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   merges recorded by the daemon so far 40. All Claude-held worktrees were released (#118 at 691b671, #174 at bece2e6).
   This owner session stops; the owner decides when an owner session returns.
 
+### 2026-09-06 — PR 178 adjudication syntax recovery
+
+- Session `orc-114-20260906-01` investigated the daemon failure at
+  2026-09-05 19:23 UTC, recorded in
+  `~/.cache/mipstarre-dev/watchdog/lanes/pr178.merge.log`.
+  Gates 1–3, including current-main ancestry, passed at head
+  `7bd5cceca2d8f460b1b17587f1ac9da64eeed20d`. Gate 4 rejected the existing
+  exact-head adjudication because `accepted as` is not a recognized disposition.
+- Through the primary `gh_common` module, updated comment 5554211262 in place
+  to use `F1 — moot:` while preserving the terminal wording-advisory rationale.
+  The primary gate implementation subsequently confirmed all nine CI contexts
+  and the exact-head adjudicated review pass. No review status was rewritten,
+  no mathematical finding was waived, and no reviewer or fixer was launched.
+- The branch was already clean, with no pending main-merge conflict. The primary
+  merge-loss guard passed for HEAD; primary `checked-push.sh` passed and reported
+  everything up to date. No branch commit or merge was needed.
+- A full primary `pr_merge.py 178 --check-only --adjudicated` check now stops at
+  gate 2 because the primary checkout contains staged and unstaged telemetry.
+  Those records were left untouched. The daemon failure marker is retained until
+  main preserves and publishes its telemetry and rechecks all prerequisites.
+  Main should use the normal primary tools for any refreshed-head CI/review;
+  no new independent review is required for this comment-only correction.
+
 ## 2026-09-05T18:42Z — Owner-priority merge recovery and pasting completion report
 
 - The owner requested priority recovery of PRs 185 and 225 and reported five
@@ -3344,3 +3367,21 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   restored the complete, key-matched `dadd6fc` snapshot into private build
   artifacts; no full build or hot-cache write was needed. Publication must
   rerun the unmodified checked-push gate; the initial failure is not CI evidence.
+
+### 2026-09-06 — PR 178 dirty-telemetry refresh recovery
+
+- Session `orc-114-20260906-02` preserved the preceding adjudication recovery
+  record in commit `e406816` under normal hooks, then merged published main
+  `dadd6fc` in history-preserving commit `0246baa`. The only merge conflict was
+  in this incident ledger; both sides' records were retained. Normal commit
+  hooks and the primary merge-loss guard passed. No source was manually edited.
+- Primary `checked-push.sh` stopped before publication: the single-file check
+  of `MIPStarRE/QPBT/Combining/DirectLowDegree.lean` could not find the imported
+  `Transport/Combining/Linearity.olean`. The log is
+  `/tmp/orc-114-20260906-02.checked-push.log`. The parent-owned build/publication
+  tail must refresh branch artifacts and repeat checked push before publishing
+  exact-head gate evidence; no hook was bypassed and no review was launched.
+- `/tmp/adjudication-178-template.md` remains byte-for-byte unchanged with the
+  parser-valid `F1 — moot:` disposition. The daemon's `pr178.failed` marker is
+  retained pending published, verified recovery. Committing recovery telemetry
+  before main integration prevents that telemetry from blocking the refresh.
