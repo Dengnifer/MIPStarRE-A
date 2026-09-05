@@ -2730,3 +2730,20 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   mathfix with gpt-6-astra (ultra). The Claude agents running at the hand-back finish on their own; their worktrees are
   listed in the handoff (results/telemetry/owner-messages/). The owner session watches for 90 minutes, then #26/#27 only.
 - **State at hand-back:** main at c1b001a; open PRs: 230,229,228,227,225,213,212,207,205,202,195,185,178,153.
+
+## 2026-09-05T15:51Z — Main session accepts Mode 1 operation
+
+- Read the v3 handoff before the standing goal and repository protocols, and verified the
+  last three progress reports through `local/bin/gh_common.py`. The running merge daemon
+  and stack watcher remain responsible for merging and propagating bases. Existing
+  review-fix loops on PRs 153, 225, and 227 remain undisturbed.
+- The owner's direct instruction supersedes the older worker-model sentence in the
+  handoff: new workers use `gpt-6-astra`; mathematical-gap sessions use that model with
+  ultra effort and retain the cumulative ten-session / 1.5-working-day limit.
+- Worktrees for issues 118 and 174 and the Claude review mailboxes for PRs 178 and 185
+  remain reserved until an explicit release on progress log 27. Owner decisions posted
+  to inbox 26 remain parked pending the owner's answer. Dependency readiness is being
+  checked against GitHub before dispatching additional mathematical work.
+
+## 2026-09-05T15:50Z — mailbox reviews for PRs 153, 178, 185 through a verify-before-publish workflow
+- The three Claude review requests left by lanes 109, 112 and 114 were served by a workflow: one Opus drafter per PR reads task.md, persona.md and the context files and lists findings; one Opus skeptic per finding tries to refute it against the PR head (five of 37 drafts were refuted: wrong at head, already handled, or outside the task's scope); one Opus writer per lane composes reply.md from the survivors in the review contract. Results: PR 153 round 3 code COMMENTED / prose CHANGES_REQUESTED (4 ledger lines); PR 178 CHANGES_REQUESTED (12: mostly duplicated proofs of existing facts); PR 185 CHANGES_REQUESTED (11: shadowing helpers and stranded generic lemmas). Cost 3.94M tokens over 43 agents in 50 minutes. The reviews name concrete originals for every duplicate, so the fix rounds are mechanical.
