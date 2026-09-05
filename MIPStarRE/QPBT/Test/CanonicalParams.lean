@@ -1,3 +1,4 @@
+import MIPStarRE.LDT.Basic.RpowBounds
 import MIPStarRE.QPBT.Test.SoundnessDefs
 
 /-!
@@ -75,6 +76,14 @@ private theorem log_two_le_mul_add_one (c r s : ℕ) (hs : 1 ≤ s)
         Nat.log_mono_right hkey
     _ = c * s + 1 := Nat.log_pow (by norm_num) _
 
+/-- Formalization-only auxiliary: for `R ≥ 4` the base-two ceiling logarithm
+of `R` is at least `2`.  This is the lower bound on `⌈log R⌉` used throughout
+the analysis of the canonical tuple of `def:introparams`. -/
+private theorem two_le_clog_two (R : ℕ) (hR : 4 ≤ R) : 2 ≤ Nat.clog 2 R := by
+  have hpow : Nat.clog 2 (2 ^ 2) ≤ Nat.clog 2 R :=
+    Nat.clog_mono_right 2 (by simpa using hR)
+  rwa [Nat.clog_pow 2 2 (by norm_num)] at hpow
+
 /-- The canonical tuple is admissible. This is the numerical
 admissibility part of `lem:delta-bound`, blueprint
 `ch13_qpbt_test.tex`, paper
@@ -82,10 +91,7 @@ admissibility part of `lem:delta-bound`, blueprint
 theorem introParamsTuple_isAdmissible (a b : ℝ) (R : ℕ) (hR : 4 ≤ R) :
     IsAdmissibleTuple (introParamsTuple (introParamsC a b) R) := by
   have hEven : Even (introParamsC a b) := ⟨⌈(b + a) / (2 * b)⌉₊, two_mul _⟩
-  have hpow : Nat.clog 2 (2 ^ 2) ≤ Nat.clog 2 R :=
-    Nat.clog_mono_right 2 (by simpa using hR)
-  have hr2 : 2 ≤ Nat.clog 2 R := by
-    rwa [Nat.clog_pow 2 2 (by norm_num)] at hpow
+  have hr2 : 2 ≤ Nat.clog 2 R := two_le_clog_two R hR
   have hs1 : 1 ≤ Nat.clog 2 (Nat.clog 2 R) := Nat.clog_pos (by norm_num) hr2
   have hrs : Nat.clog 2 R ≤ 2 ^ Nat.clog 2 (Nat.clog 2 R) :=
     Nat.le_pow_clog (by norm_num) _
@@ -101,16 +107,22 @@ noncomputable def introParams (a b : ℝ) (R : ℕ) (hR : 4 ≤ R) :
     AdmissibleParams :=
   AdmissibleParams.ofTuple _ (introParamsTuple_isAdmissible a b R hR)
 
+/-- Formalization-only auxiliary: the canonical even integer `c` of
+`def:introparams` is at least `2`, since `(b + a) / b > 1` for `a ≥ 1` and
+`b > 0`. -/
+private theorem two_le_introParamsC (a b : ℝ) (ha : 1 ≤ a) (hb : 0 < b) :
+    2 ≤ introParamsC a b := by
+  have hceil : 0 < ⌈(b + a) / (2 * b)⌉₊ :=
+    Nat.ceil_pos.mpr (div_pos (by linarith) (by linarith))
+  change 2 ≤ 2 * ⌈(b + a) / (2 * b)⌉₊
+  omega
+
 /-- The canonical parameter dimension supplies at least `R` encoded
 coordinates, as asserted in `lem:delta-bound`. -/
 theorem le_two_pow_introParams_m (a b : ℝ) (ha : 1 ≤ a) (hb : 0 < b)
     (R : ℕ) (hR : 4 ≤ R) :
     R ≤ 2 ^ (introParams a b R hR).m := by
-  have hc2 : 2 ≤ introParamsC a b := by
-    have hceil : 0 < ⌈(b + a) / (2 * b)⌉₊ :=
-      Nat.ceil_pos.mpr (div_pos (by linarith) (by linarith))
-    show 2 ≤ 2 * ⌈(b + a) / (2 * b)⌉₊
-    omega
+  have hc2 : 2 ≤ introParamsC a b := two_le_introParamsC a b ha hb
   have hlt : introParamsC a b * Nat.clog 2 R + 1 <
       2 ^ Nat.log 2 (introParamsC a b * Nat.clog 2 R + 1) * 2 := by
     simpa [pow_succ] using
@@ -125,16 +137,6 @@ theorem le_two_pow_introParams_m (a b : ℝ) (ha : 1 ≤ a) (hb : 0 < b)
     _ ≤ 2 ^ (2 ^ Nat.log 2 (introParamsC a b * Nat.clog 2 R + 1)) :=
         Nat.pow_le_pow_right (by norm_num) key
     _ = 2 ^ (introParams a b R hR).m := rfl
-
-/-- Formalization-only auxiliary: the canonical even integer `c` of
-`def:introparams` is at least `2`, since `(b + a) / b > 1` for `a ≥ 1` and
-`b > 0`. -/
-private theorem two_le_introParamsC (a b : ℝ) (ha : 1 ≤ a) (hb : 0 < b) :
-    2 ≤ introParamsC a b := by
-  have hceil : 0 < ⌈(b + a) / (2 * b)⌉₊ :=
-    Nat.ceil_pos.mpr (div_pos (by linarith) (by linarith))
-  change 2 ≤ 2 * ⌈(b + a) / (2 * b)⌉₊
-  omega
 
 /-- Formalization-only auxiliary: the defining inequality `c ≥ (b + a) / b` of
 the canonical even integer of `def:introparams`, in the form `a + b ≤ c b`
@@ -151,43 +153,6 @@ private theorem add_le_introParamsC_mul (a b : ℝ) (hb : 0 < b) :
         unfold introParamsC
         push_cast
         ring
-
-/-- Formalization-only auxiliary: a fixed real power is dominated by an
-exponential.  For `x ≥ 1` and `t > 0`, the product
-`x ^ s · 2 ^ (-t x)` is at most `⌈s⌉! / (t log 2) ^ ⌈s⌉`, a constant depending
-only on `s` and `t`.  This is the explicit form of the finiteness of the
-supremum `sup_{R ≥ 4} (log R) ^ (a + b) R ^ (-b)` invoked in the proof of
-`lem:delta-bound`, blueprint `ch13_qpbt_test.tex:504-515`, obtained from the
-Taylor lower bound `y ^ n / n! ≤ exp y` on the exponential. -/
-private theorem rpow_mul_two_rpow_neg_le {s t x : ℝ} (ht : 0 < t) (hx : 1 ≤ x) :
-    x ^ s * (2 : ℝ) ^ (-(t * x)) ≤
-      (Nat.factorial ⌈s⌉₊ : ℝ) / (t * Real.log 2) ^ ⌈s⌉₊ := by
-  have hlog : 0 < Real.log 2 := Real.log_pos (by norm_num)
-  have hK : 0 < (t * Real.log 2) ^ ⌈s⌉₊ := by positivity
-  have hE : 0 < Real.exp (Real.log 2 * (t * x)) := Real.exp_pos _
-  have hxs : x ^ s ≤ x ^ ⌈s⌉₊ := by
-    rw [← Real.rpow_natCast]
-    exact Real.rpow_le_rpow_of_exponent_le hx (Nat.le_ceil s)
-  have hexp : (t * Real.log 2) ^ ⌈s⌉₊ * x ^ ⌈s⌉₊ ≤
-      (Nat.factorial ⌈s⌉₊ : ℝ) * Real.exp (Real.log 2 * (t * x)) := by
-    have h := Real.pow_div_factorial_le_exp (x := Real.log 2 * (t * x))
-      (mul_nonneg hlog.le (mul_nonneg ht.le (by linarith))) ⌈s⌉₊
-    rw [div_le_iff₀ (by positivity)] at h
-    calc (t * Real.log 2) ^ ⌈s⌉₊ * x ^ ⌈s⌉₊
-        = (Real.log 2 * (t * x)) ^ ⌈s⌉₊ := by ring
-      _ ≤ _ := le_of_le_of_eq h (mul_comm _ _)
-  rw [Real.rpow_neg (show (0 : ℝ) ≤ 2 by norm_num),
-    Real.rpow_def_of_pos (show (0 : ℝ) < 2 by norm_num), le_div_iff₀ hK]
-  calc x ^ s * (Real.exp (Real.log 2 * (t * x)))⁻¹ * (t * Real.log 2) ^ ⌈s⌉₊
-      ≤ x ^ ⌈s⌉₊ * (Real.exp (Real.log 2 * (t * x)))⁻¹ *
-          (t * Real.log 2) ^ ⌈s⌉₊ := by
-        gcongr
-    _ = (t * Real.log 2) ^ ⌈s⌉₊ * x ^ ⌈s⌉₊ *
-          (Real.exp (Real.log 2 * (t * x)))⁻¹ := by ring
-    _ ≤ (Nat.factorial ⌈s⌉₊ : ℝ) * Real.exp (Real.log 2 * (t * x)) *
-          (Real.exp (Real.log 2 * (t * x)))⁻¹ :=
-        mul_le_mul_of_nonneg_right hexp (inv_nonneg.mpr hE.le)
-    _ = Nat.factorial ⌈s⌉₊ := mul_inv_cancel_right₀ hE.ne' _
 
 /-- `lem:delta-bound`: the Pauli soundness error at the canonical parameters
 has polylogarithmic dependence on `R`. Blueprint
@@ -212,8 +177,8 @@ theorem exists_deltaQld_introParams_bound (a b : ℝ) (ha : 1 ≤ a)
           a' * (Real.rpow (Real.logb 2 R) a' * Real.rpow ε b' +
             Real.rpow (Real.logb 2 R) (-b')) := by
   have ha0 : 0 ≤ a := by linarith
-  set c := introParamsC a b with hc
-  set C : ℝ := (Nat.factorial ⌈a + b⌉₊ : ℝ) / (b * Real.log 2) ^ ⌈a + b⌉₊ with hC
+  set c := introParamsC a b
+  set C : ℝ := (Nat.factorial ⌈a + b⌉₊ : ℝ) / (b * Real.log 2) ^ ⌈a + b⌉₊
   have hc2 : (2 : ℝ) ≤ c := by exact_mod_cast two_le_introParamsC a b ha hb
   have hcb : a + b ≤ (c : ℝ) * b := add_le_introParamsC_mul a b hb
   have hlog : 0 < Real.log 2 := Real.log_pos (by norm_num)
@@ -233,9 +198,8 @@ theorem exists_deltaQld_introParams_bound (a b : ℝ) (ha : 1 ≤ a)
   simp only [Real.rpow_eq_pow]
   -- Integer bounds on the canonical parameters.
   have hR0 : (0 : ℝ) < R := by exact_mod_cast (by omega : 0 < R)
-  have hn2 : 2 ≤ Nat.clog 2 R := by
-    have h := Nat.clog_mono_right 2 (show 2 ^ 2 ≤ R by omega)
-    rwa [Nat.clog_pow 2 2 (by norm_num)] at h
+  have hR4 : (4 : ℝ) ≤ (R : ℝ) := by exact_mod_cast hR
+  have hn2 : 2 ≤ Nat.clog 2 R := two_le_clog_two R hR
   have hpred : 2 ^ (Nat.clog 2 R - 1) < R :=
     Nat.pow_pred_clog_lt_self (by norm_num) (by omega)
   have hRn : R ≤ 2 ^ Nat.clog 2 R := Nat.le_pow_clog (by norm_num) R
@@ -253,15 +217,17 @@ theorem exists_deltaQld_introParams_bound (a b : ℝ) (ha : 1 ≤ a)
       _ = 2 ^ (c * Nat.clog 2 (Nat.clog 2 R)) := by rw [← pow_mul, mul_comm]
       _ ≤ 2 ^ (c * Nat.clog 2 (Nat.clog 2 R) + 1) :=
           Nat.pow_le_pow_right (by norm_num) (Nat.le_succ _)
-  set n := Nat.clog 2 R with hn
+  set n := Nat.clog 2 R
   set m := 2 ^ Nat.log 2 (c * n + 1) with hm
-  set q := 2 ^ (c * Nat.clog 2 n + 1) with hq
+  set q := 2 ^ (c * Nat.clog 2 n + 1)
   set L := Real.logb 2 (R : ℝ) with hL
   -- Real bounds: `2 ≤ L ≤ m ≤ 2 c L` and `L ^ c ≤ q`.
-  have hL2 : (2 : ℝ) ≤ L := by
-    rw [hL, Real.le_logb_iff_rpow_le (by norm_num) hR0, Real.rpow_two]
+  have hrpow2 : (2 : ℝ) ^ (2 : ℝ) = 4 := by
+    rw [Real.rpow_two]
     norm_num
-    exact_mod_cast hR
+  have hL2 : (2 : ℝ) ≤ L := by
+    rw [hL, Real.le_logb_iff_rpow_le (by norm_num) hR0, hrpow2]
+    exact hR4
   have hL0 : 0 ≤ L := by linarith
   have hL1 : 1 ≤ L := by linarith
   have hLpos : 0 < L := by linarith
@@ -338,7 +304,7 @@ theorem exists_deltaQld_introParams_bound (a b : ℝ) (ha : 1 ≤ a)
       congr 1
       ring
     have h1 : (m : ℝ) ^ (a + b) * (2 : ℝ) ^ (-(b * m)) ≤ C :=
-      rpow_mul_two_rpow_neg_le hb hm1
+      MIPStarRE.LDT.rpow_mul_two_rpow_neg_le hb hm1
     have h2 : (m : ℝ) ^ (-b) ≤ L ^ (-b) :=
       Real.rpow_le_rpow_of_nonpos hLpos hLm (by linarith)
     calc a * (m : ℝ) ^ a * (2 : ℝ) ^ (-(b * m))

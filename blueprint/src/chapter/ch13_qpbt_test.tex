@@ -747,18 +747,28 @@ We specify a canonical setting of the parameter tuple $\mathsf{qldparams}$ as a 
 	\uses{def:introparams, def:admissible, def:admissible-size, thm:pauli}
 	Since $c$ is even, the exponent $k = c \lceil \log\log R \rceil + 1$ is odd, so $q = 2^k$ is an admissible field size; $m$ divides $q$ because $2^j \le c \lceil \log R \rceil + 1 \le 2 \log^c R \le 2^k$, so $j \le k$ and both are powers of $2$; and $d = 1 \ge 1$. Hence the tuple is admissible. Since $m = 2^j \ge (c/2) \log R$, we get $2^m \ge R^{c/2} \ge R$, using $c \ge 2$.
 
-	For the soundness bound, write $\delta_{\mathrm{qld}}(\eps,m,d,q) = a(md)^a \eps^b + a(md)^a q^{-b} + a(md)^a 2^{-bmd}$ and use $d = 1$, $m \le 2c \log R$, and $q = 2^k \ge \log^c R$. The first term is at most $a(2c)^a (\log R)^a \eps^b$. The second term is at most $a(2c)^a (\log R)^{a - cb} \le a(2c)^a (\log R)^{-b}$, since $cb - a \ge b$ by the choice of $c$. For the third term, $m \ge (c/2) \log R \ge \log R$ gives $2^{-bm} \le R^{-b}$, so
+	For the soundness bound, write $\delta_{\mathrm{qld}}(\eps,m,d,q) = a(md)^a \eps^b + a(md)^a q^{-b} + a(md)^a 2^{-bmd}$ and use $d = 1$, $\log R \le m \le 2c \log R$, and $q = 2^k \ge \log^c R$. Set
+	\[
+		C = \frac{\lceil a + b \rceil !}{(b \log 2)^{\lceil a + b \rceil}}
+		\qquad \text{and} \qquad
+		a' = a\bigl( (2c)^a + C \bigr)\;,
+	\]
+	both depending only on the universal constants $a$ and $b$; since $a \ge 1$, $c \ge 2$ and $C \ge 0$, one has $a' \ge a \ge 1$. The first term is at most $a(2c)^a (\log R)^a \eps^b \le a' (\log R)^{a'} \eps^b$, using $\log R \ge 2 \ge 1$ and $a \le a'$. The second term is at most $a(2c)^a (\log R)^{a - cb} \le a(2c)^a (\log R)^{-b}$, since $cb - a \ge b$ by the choice of $c$. For the third term, split $m^a = m^{a+b} \cdot m^{-b}$ and bound the first factor against the exponential: for all real $s$, all $t > 0$ and all $x \ge 1$, the Taylor estimate $y^n / n! \le e^y$ of the exponential, taken at $y = (t \log 2) x$ and $n = \lceil s \rceil$, gives
+	\[
+		x^s\, 2^{-tx} \le \frac{\lceil s \rceil !}{(t \log 2)^{\lceil s \rceil}}\;.
+	\]
+	With $s = a + b$, $t = b$ and $x = m$ the right-hand side is the constant $C$ above, so
 	\[
 		a(md)^a\, 2^{-bm}
-		\le a(2c)^a (\log R)^a R^{-b}
-		= a(2c)^a \bigl( (\log R)^{a+b} R^{-b} \bigr) (\log R)^{-b}
-		\le a(2c)^a\, C\, (\log R)^{-b}\;,
+		= a \bigl( m^{a+b}\, 2^{-bm} \bigr) m^{-b}
+		\le a\, C\, m^{-b}
+		\le a\, C\, (\log R)^{-b}\;,
 	\]
-	where $C = \sup_{R' \ge 4} (\log R')^{a+b} (R')^{-b}$ is finite --- the function is continuous in $R'$ and tends to $0$ as $R' \to \infty$ --- and depends only on the universal constants $a$ and $b$. Summing the three bounds, the statement follows with $a' = a(2c)^a (1 + C)$ and $b' = b$.
+	the last step using $m \ge \log R \ge 1$. Summing the three bounds, the statement follows with $a'$ as above and $b' = b$.
 \end{proof}
 
 \begin{remark}[A comparison of exponents in the source proof of Lemma~\ref{lem:delta-bound}]\label{rem:delta-bound-exponent-comparison}
-	The source proof bounds the third term of $\delta_{\mathrm{qld}}$ by asserting $2^{-bmd} \le q^{-b}$ ``because $k \le m$'', comparing the field exponent $k = c \lceil \log\log R \rceil + 1$ with $m = 2^j$. The inequality $k \le m$ does not follow from Definition~\ref{def:introparams}: if the universal constants of Theorem~\ref{thm:pauli} were $a = 1$ and $b = 1/2$, then $c = 4$, and $R = 5$ gives $k = 9$ and $m = 8$. The proof above instead bounds $2^{-bm} \le R^{-b}$ directly from $m \ge (c/2) \log R \ge \log R$, which yields the same conclusion after enlarging the universal constant $a'$.  The comparison and correction are documented in \cite{gap:qpbt_delta-bound-exponent-comparison}.
+	The source proof bounds the third term of $\delta_{\mathrm{qld}}$ by asserting $2^{-bmd} \le q^{-b}$ ``because $k \le m$'', comparing the field exponent $k = c \lceil \log\log R \rceil + 1$ with $m = 2^j$. The inequality $k \le m$ does not follow from Definition~\ref{def:introparams}: if the universal constants of Theorem~\ref{thm:pauli} were $a = 1$ and $b = 1/2$, then $c = 4$, and $R = 5$ gives $k = 9$ and $m = 8$. The proof above instead bounds the third term directly, comparing $m^{a+b} 2^{-bm}$ with an explicit constant and using only $m \ge (c/2) \log R \ge \log R$, which yields the same conclusion after enlarging the universal constant $a'$.  The comparison and correction are documented in \cite{gap:qpbt_delta-bound-exponent-comparison}.
 \end{remark}
 
 \section{Formalization support for finite sampling}

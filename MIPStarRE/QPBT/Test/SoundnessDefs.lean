@@ -39,11 +39,11 @@ noncomputable def deltaQld (a b ε : ℝ) (m d q : ℕ) : ℝ :=
 
 /-- Monotonicity obligation for adjusting the universal constants in
 `deltaQld` on the source parameter domain. This Lean-only helper supports the
-enlargement of `a` and shrinkage of `b` for `0 ≤ ε ≤ 1` described in the
-Chapter 16 preamble (`blueprint/src/chapter/ch16_qpbt_extraction.tex:101-104`);
-the source makes this constant adjustment at
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1402`. It is not
-an additional hypothesis of `thm:pauli` or `lem:qld-4-7`. -/
+enlargement of `a` and shrinkage of `b` for `0 ≤ ε ≤ 1` recorded in
+`rem:pauli-robustness-form` and stated as `lem:delta-qld-mono-support`,
+blueprint `ch16_qpbt_extraction.tex`; the source makes this constant adjustment
+at `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1402`. It is
+not an additional hypothesis of `thm:pauli` or `lem:qld-4-7`. -/
 theorem deltaQld_mono {P : AdmissibleParams} {a a' b b' ε : ℝ}
     (ha0 : 1 ≤ a) (ha : a ≤ a') (hb : b' ≤ b) (hb' : 0 < b')
     (hε0 : 0 ≤ ε) (hε1 : ε ≤ 1) :
