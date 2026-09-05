@@ -564,3 +564,17 @@ artifact in the no-dispatch fallback. `review.md` section 4 makes the default
 **Expected effect:** reviewers receive bounded label-resolution evidence even
 for large patches, and neither review path interpolates raw branch-derived map
 content.
+
+## 2026-09-05 — Citation failures survive evidence truncation
+
+**Trigger:** `results/telemetry/events.md` 2026-09-05, "Citation failures lost
+inside their own evidence budget", recording PR #202 round 2 findings F4 and
+F5.
+
+**Change:** the resolver compacts repeated citation origins and gives unresolved
+and duplicate rows priority over successful resolutions when producing a
+bounded map. It fails closed when those failure rows cannot fit. Both dispatcher
+and no-dispatch review prompts attach the sanitized map before the diff.
+
+**Expected effect:** a large citation map cannot hide the entries that block
+review, and attachment order no longer depends on which review path executes.

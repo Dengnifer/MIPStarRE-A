@@ -23,6 +23,12 @@ from tex_utils import strip_tex_comment
 
 TOKEN_RE = re.compile(r"\\(?P<kind>begin|end|label)\{(?P<value>[^}]+)\}")
 CODE_LABEL_RE = re.compile(r"`(?P<label>[A-Za-z][A-Za-z0-9_.:-]+)`")
+BLUEPRINT_LABEL_RE = re.compile(
+    r"(?:def|lem|thm|fact|rem|cor|prop):[A-Za-z][A-Za-z0-9_.-]*\Z"
+)
+BARE_BLUEPRINT_LABEL_RE = re.compile(
+    r"(?:def|lem|thm|fact|rem|cor|prop):[a-z0-9][a-z0-9-]*\Z"
+)
 CANONICAL_CITATION_RE = re.compile(
     r"\b[Bb]lueprint(?:\s+(?:node|nodes|label|labels|entry|entries))?\s+"
     r"`(?P<label>[A-Za-z][A-Za-z0-9_.:-]+)`"
@@ -42,6 +48,7 @@ STATEMENT_ENVS = {
     "example",
 }
 LEAN_LINE_WIDTH = 100
+MARKDOWN_ORIGIN_LIMIT = 3
 
 
 @dataclass(frozen=True)
@@ -202,19 +209,21 @@ def find_citation_uses(
     uses: set[CitationUse] = set()
     unknown: set[CitationUse] = set()
     for path in files:
+        if path.suffix != ".lean":
+            continue
         text = path.read_text(encoding="utf-8", errors="replace")
         rel_path = path.relative_to(root).as_posix()
         for match in CODE_LABEL_RE.finditer(text):
             label = match.group("label")
             if label in index:
                 uses.add(CitationUse(label, rel_path, text.count("\n", 0, match.start()) + 1))
-            elif ":" in label:
+            elif BARE_BLUEPRINT_LABEL_RE.fullmatch(label):
                 unknown.add(
                     CitationUse(label, rel_path, text.count("\n", 0, match.start()) + 1)
                 )
         for match in CANONICAL_CITATION_RE.finditer(text):
             label = match.group("label")
-            if label not in index:
+            if label not in index and BLUEPRINT_LABEL_RE.fullmatch(label):
                 unknown.add(
                     CitationUse(label, rel_path, text.count("\n", 0, match.start()) + 1)
                 )
@@ -228,7 +237,11 @@ def _format_resolutions(
     origins: dict[str, list[CitationUse]],
     index: dict[str, list[LabelLocation]],
     output_format: str,
+    max_bytes: int | None = None,
 ) -> tuple[str, bool]:
+    if max_bytes is not None and max_bytes <= 0:
+        raise ValueError("--max-bytes must be positive")
+
     rows: list[dict[str, object]] = []
     failed = False
     for label in labels:
@@ -242,9 +255,13 @@ def _format_resolutions(
         })
 
     if output_format == "json":
+        if max_bytes is not None:
+            raise ValueError("--max-bytes requires markdown output")
         return json.dumps(rows, indent=2, sort_keys=True) + "\n", failed
 
     if output_format == "plain":
+        if max_bytes is not None:
+            raise ValueError("--max-bytes requires markdown output")
         rendered = []
         for row in rows:
             locations = row["locations"]
@@ -252,23 +269,76 @@ def _format_resolutions(
             rendered.append(f"{row['label']}\t{value}")
         return "\n".join(rendered) + ("\n" if rendered else ""), failed
 
-    rendered = [
+    header = [
         "# Resolved blueprint citations",
         "",
         "Numeric spans below are derived from durable labels; they are not stored citations.",
         "",
     ]
-    if not rows:
-        rendered.append("_No blueprint labels were found in the selected files._")
+    rendered_rows: list[tuple[str, bool]] = []
     for row in rows:
         locations = row["locations"]
-        location_text = ", ".join(f"`{item}`" for item in locations) or "**UNRESOLVED**"
+        if not locations:
+            location_text = "**UNRESOLVED**"
+        elif len(locations) > 1:
+            location_text = "**DUPLICATE:** " + ", ".join(
+                f"`{item}`" for item in locations
+            )
+        else:
+            location_text = f"`{locations[0]}`"
         origin_text = row["cited_at"]
         suffix = ""
         if origin_text:
-            suffix = "; cited at " + ", ".join(f"`{item}`" for item in origin_text)
-        rendered.append(f"- `{row['label']}` -> {location_text}{suffix}")
-    return "\n".join(rendered) + "\n", failed
+            shown = origin_text[:MARKDOWN_ORIGIN_LIMIT]
+            suffix = "; cited at " + ", ".join(f"`{item}`" for item in shown)
+            if len(origin_text) > len(shown):
+                suffix += f", ... ({len(origin_text) - len(shown)} more)"
+        rendered_rows.append((
+            f"- `{row['label']}` -> {location_text}{suffix}",
+            len(locations) != 1,
+        ))
+
+    if not rendered_rows:
+        rendered = header + ["_No blueprint labels were found in the selected files._"]
+        full = "\n".join(rendered) + "\n"
+        if max_bytes is None or len(full.encode("utf-8")) <= max_bytes:
+            return full, failed
+        compact = "# Resolved blueprint citations\n\n_No blueprint labels found._\n"
+        if len(compact.encode("utf-8")) > max_bytes:
+            raise ValueError("citation budget is too small for the empty-map marker")
+        return compact, failed
+
+    rendered = header + [line for line, _is_failure in rendered_rows]
+    full = "\n".join(rendered) + "\n"
+    if max_bytes is None or len(full.encode("utf-8")) <= max_bytes:
+        return full, failed
+    failures = [line for line, is_failure in rendered_rows if is_failure]
+    resolved = [line for line, is_failure in rendered_rows if not is_failure]
+    compact_header = [header[0], ""]
+
+    def omitted_marker(count: int) -> str:
+        return f"_{count} resolved citation rows omitted; full map on disk._"
+
+    required = compact_header + failures + [omitted_marker(len(resolved))]
+    if len(("\n".join(required) + "\n").encode("utf-8")) > max_bytes:
+        raise ValueError(
+            "citation budget is too small to retain all unresolved and duplicate rows"
+        )
+
+    kept: list[str] = []
+    for line in resolved:
+        remaining = len(resolved) - len(kept) - 1
+        candidate = compact_header + failures + kept + [line]
+        if remaining:
+            candidate.append(omitted_marker(remaining))
+        candidate_text = "\n".join(candidate) + "\n"
+        if len(candidate_text.encode("utf-8")) > max_bytes:
+            break
+        kept.append(line)
+    bounded = compact_header + failures + kept
+    if len(kept) < len(resolved):
+        bounded.append(omitted_marker(len(resolved) - len(kept)))
+    return "\n".join(bounded) + "\n", failed
 
 
 def _comment_bounds(text: str, position: int) -> tuple[int, int]:
@@ -358,10 +428,54 @@ def _wrap_blueprint_citation_lines(text: str) -> str:
     return "".join(wrapped)
 
 
+def _normalize_rewritten_comment(text: str) -> str:
+    """Clean up legacy wording within a comment where a locator was replaced."""
+
+    def collapse_duplicate(match: re.Match[str]) -> str:
+        link = match.group("link")
+        label = match.group("label")
+        if "\n" not in link:
+            return f"blueprint `{label}`"
+        indent_match = re.search(r"\n(?P<indent>[ \t]*)", link)
+        indent = indent_match.group("indent") if indent_match else ""
+        return f"blueprint\n{indent}`{label}`"
+
+    text = re.sub(
+        r"`(?P<label>[A-Za-z][A-Za-z0-9_.:-]+)`"
+        r"(?P<link>,\s+[Bb]lueprint\s+|;\s+[Bb]lueprint\s+|\s+in\s+)"
+        r"`(?P=label)`",
+        collapse_duplicate,
+        text,
+    )
+    text = re.sub(
+        r"(?P<prefix>\b[Bb]lueprint\s+)"
+        r"`(?P<label>[A-Za-z][A-Za-z0-9_.:-]+)`\s*[,;]\s*`(?P=label)`",
+        lambda match: f"{match.group('prefix')}`{match.group('label')}`",
+        text,
+    )
+
+    def collapse_parenthetical(match: re.Match[str]) -> str:
+        label = match.group("label")
+        whitespace = match.group("whitespace")
+        if "\n" not in whitespace:
+            return f"blueprint `{label}`"
+        indent_match = re.search(r"\n(?P<indent>[ \t]*)", whitespace)
+        indent = indent_match.group("indent") if indent_match else ""
+        return f"blueprint\n{indent}`{label}`"
+
+    text = re.sub(
+        r"`(?P<label>[A-Za-z][A-Za-z0-9_.:-]+)`\s*"
+        r"(?P<whitespace>\(\s*)`(?P=label)`\s*\)",
+        collapse_parenthetical,
+        text,
+    )
+    return _wrap_blueprint_citation_lines(text)
+
+
 def rewrite_text(
     text: str, index: dict[str, list[LabelLocation]]
 ) -> tuple[str, list[str]]:
-    """Rewrite unambiguous legacy locators and return unresolved locator text."""
+    """Rewrite legacy locators, normalizing only comments actually changed."""
 
     replacements: list[tuple[int, int, str]] = []
     unresolved: list[str] = []
@@ -372,49 +486,28 @@ def rewrite_text(
             continue
         replacements.append((match.start(), match.end(), f"`{label}`"))
 
+    if not replacements:
+        return text, unresolved
+
+    comment_ranges = sorted(
+        {_comment_bounds(text, start) for start, _end, _replacement in replacements},
+        reverse=True,
+    )
     rewritten = text
-    for start, end, replacement in reversed(replacements):
-        rewritten = rewritten[:start] + replacement + rewritten[end:]
-
-    # Collapse the common legacy wording after the locator itself is replaced.
-    def collapse_duplicate(match: re.Match[str]) -> str:
-        link = match.group("link")
-        label = match.group("label")
-        if "\n" not in link:
-            return f"blueprint `{label}`"
-        indent_match = re.search(r"\n(?P<indent>[ \t]*)", link)
-        indent = indent_match.group("indent") if indent_match else ""
-        return f"blueprint\n{indent}`{label}`"
-
-    rewritten = re.sub(
-        r"`(?P<label>[A-Za-z][A-Za-z0-9_.:-]+)`"
-        r"(?P<link>,\s+[Bb]lueprint\s+|;\s+[Bb]lueprint\s+|\s+in\s+)"
-        r"`(?P=label)`",
-        collapse_duplicate,
-        rewritten,
-    )
-    rewritten = re.sub(
-        r"(?P<prefix>\b[Bb]lueprint\s+)"
-        r"`(?P<label>[A-Za-z][A-Za-z0-9_.:-]+)`\s*[,;]\s*`(?P=label)`",
-        lambda match: f"{match.group('prefix')}`{match.group('label')}`",
-        rewritten,
-    )
-    def collapse_parenthetical(match: re.Match[str]) -> str:
-        label = match.group("label")
-        whitespace = match.group("whitespace")
-        if "\n" not in whitespace:
-            return f"blueprint `{label}`"
-        indent_match = re.search(r"\n(?P<indent>[ \t]*)", whitespace)
-        indent = indent_match.group("indent") if indent_match else ""
-        return f"blueprint\n{indent}`{label}`"
-
-    rewritten = re.sub(
-        r"`(?P<label>[A-Za-z][A-Za-z0-9_.:-]+)`\s*"
-        r"(?P<whitespace>\(\s*)`(?P=label)`\s*\)",
-        collapse_parenthetical,
-        rewritten,
-    )
-    return _wrap_blueprint_citation_lines(rewritten), unresolved
+    for block_start, block_end in comment_ranges:
+        block = text[block_start:block_end]
+        block_replacements = [
+            replacement
+            for replacement in replacements
+            if block_start <= replacement[0] and replacement[1] <= block_end
+        ]
+        for start, end, replacement in reversed(block_replacements):
+            relative_start = start - block_start
+            relative_end = end - block_start
+            block = block[:relative_start] + replacement + block[relative_end:]
+        block = _normalize_rewritten_comment(block)
+        rewritten = rewritten[:block_start] + block + rewritten[block_end:]
+    return rewritten, unresolved
 
 
 def _resolve_command(args: argparse.Namespace, root: Path) -> int:
@@ -431,7 +524,12 @@ def _resolve_command(args: argparse.Namespace, root: Path) -> int:
         if use.label not in labels:
             labels.append(use.label)
         origins.setdefault(use.label, []).append(use)
-    rendered, failed = _format_resolutions(labels, origins, index, args.format)
+    full, failed = _format_resolutions(labels, origins, index, args.format)
+    if args.full_output is not None:
+        args.full_output.write_text(full, encoding="utf-8")
+    rendered, _ = _format_resolutions(
+        labels, origins, index, args.format, max_bytes=args.max_bytes
+    )
     sys.stdout.write(rendered)
     return 1 if failed else 0
 
@@ -492,6 +590,10 @@ def main(argv: list[str] | None = None) -> int:
                          help="scan repository paths listed one per line")
     resolve.add_argument("--format", choices=("markdown", "plain", "json"),
                          default="plain")
+    resolve.add_argument("--max-bytes", type=int,
+                         help="cap markdown output while retaining failure rows")
+    resolve.add_argument("--full-output", type=Path,
+                         help="also write the uncapped output to this path")
 
     rewrite = subparsers.add_parser("rewrite", help="replace unambiguous legacy locators")
     rewrite.add_argument("paths", nargs="*", help="repository files or directories to rewrite")

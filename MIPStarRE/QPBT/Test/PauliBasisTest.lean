@@ -60,7 +60,7 @@ noncomputable def AdmissibleParams.model (P : AdmissibleParams) : FixedFieldMode
 /-- The low-degree parameter view of an admissible Pauli-test package.  This is
 a Lean-only bridge supporting the statement closure; it is not an additional
 hypothesis of `thm:pauli`.  Blueprint
-`thm:pauli`, paper origin
+`def:ld-game`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:958-961`.
 -/
 def AdmissibleParams.toLdParams (P : AdmissibleParams) : LdParams where

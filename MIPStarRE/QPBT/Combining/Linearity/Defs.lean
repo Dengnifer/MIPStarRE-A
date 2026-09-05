@@ -101,7 +101,7 @@ theorem isBinaryObservable_heteroKron_one {ι ι' : Type} [Fintype ι] [Decidabl
 /-- The ampliation `1 ⊗ O` of a binary observable by the identity of the first
 tensor factor is a binary observable; this is the mirror of
 `isBinaryObservable_heteroKron_one` for the second player's factor in
-`thm:ms-rigidity`, blueprint `blueprint/src/chapter/ch13_qpbt_test.tex:224-253`. -/
+blueprint `thm:ms-rigidity`. -/
 theorem isBinaryObservable_one_heteroKron {ι ι' : Type} [Fintype ι] [DecidableEq ι]
     [Fintype ι'] [DecidableEq ι'] {O : Op ι'} (hO : IsBinaryObservable O) :
     IsBinaryObservable (heteroKron (1 : Op ι) O) := by

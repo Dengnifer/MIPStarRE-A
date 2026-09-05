@@ -14,7 +14,9 @@ SCRIPT_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SCRIPT_DIR))
 
 from blueprint_citations import (  # noqa: E402
+    CitationUse,
     LabelLocation,
+    _format_resolutions,
     build_label_index,
     collect_input_files,
     find_citation_uses,
@@ -76,19 +78,26 @@ class BlueprintCitationTests(unittest.TestCase):
 
     def test_scan_finds_known_tokens_and_unknown_blueprint_labels(self) -> None:
         lean = self.root / "MIPStarRE" / "Example.lean"
+        fixture = self.root / "scripts" / "fixture.py"
         _write(
             lean,
-            "/-- See blueprint `lem:alpha`, `def:missing`, and bare "
-            "`rem:missing`; ignore Lean name `Example.value`. -/\n",
+            "/-- See blueprint `lem:alpha`, `sec:example`, `def:missing`, and bare "
+            "`rem:missing`; ignore `CONTRIBUTING.md:122-124`, paper label "
+            "`lem:efficient_basis`, equation `eq:paper`, and Lean name `Example.value`; "
+            "but reject Blueprint `lem:explicit_missing`. -/\n",
         )
+        _write(fixture, "# Test fixture token `thm:not-a-lean-citation`.\n")
         index = build_label_index(self.root)
 
-        uses, unknown = find_citation_uses([lean], self.root, index)
+        uses, unknown = find_citation_uses([lean, fixture], self.root, index)
 
-        self.assertEqual([(use.label, use.line) for use in uses], [("lem:alpha", 1)])
+        self.assertEqual(
+            [(use.label, use.line) for use in uses],
+            [("lem:alpha", 1), ("sec:example", 1)],
+        )
         self.assertEqual(
             [(use.label, use.line) for use in unknown],
-            [("def:missing", 1), ("rem:missing", 1)],
+            [("def:missing", 1), ("lem:explicit_missing", 1), ("rem:missing", 1)],
         )
 
     def test_rewrite_uses_label_named_in_same_docstring(self) -> None:
@@ -212,19 +221,32 @@ class BlueprintCitationTests(unittest.TestCase):
             "`lem:symmetric-strat-given-strategy`. -/\n",
         )
 
-    def test_rewrite_wraps_long_blueprint_citation_lines_idempotently(self) -> None:
+    def test_rewrite_does_not_wrap_text_without_a_legacy_locator(self) -> None:
         text = (
             "/-- The source-facing nodes are blueprint `def:one`, blueprint `def:two`, "
             "blueprint `lem:three`, and blueprint `def:a-very-long-fourth-label`. -/\n"
         )
 
         rewritten, unresolved = rewrite_text(text, {})
-        second, second_unresolved = rewrite_text(rewritten, {})
 
         self.assertEqual(unresolved, [])
-        self.assertEqual(second_unresolved, [])
-        self.assertEqual(second, rewritten)
-        self.assertTrue(all(len(line) <= 100 for line in rewritten.splitlines()))
+        self.assertEqual(rewritten, text)
+
+    def test_rewrite_normalizes_only_comments_with_a_replaced_locator(self) -> None:
+        text = (
+            "/-- Blueprint `lem:alpha`, `lem:alpha`. -/\n"
+            "/-- Lean support for `lem:alpha`, blueprint "
+            "`blueprint/src/chapter/ch12_example.tex:20-26`. -/\n"
+        )
+
+        rewritten, unresolved = rewrite_text(text, build_label_index(self.root))
+
+        self.assertEqual(unresolved, [])
+        self.assertEqual(
+            rewritten,
+            "/-- Blueprint `lem:alpha`, `lem:alpha`. -/\n"
+            "/-- Lean support for blueprint `lem:alpha`. -/\n",
+        )
 
     def test_resolve_scan_fails_for_bare_and_list_unknown_labels(self) -> None:
         lean = self.root / "MIPStarRE" / "Example.lean"
@@ -253,12 +275,7 @@ class BlueprintCitationTests(unittest.TestCase):
 
         rewritten, unresolved = rewrite_text(text, build_label_index(self.root))
 
-        self.assertEqual(
-            rewritten,
-            "/-- Compare `lem:alpha` with `def:beta`. The first source is\n"
-            "`blueprint/src/chapter/ch12_example.tex:80-90`; the second is\n"
-            "`blueprint/src/chapter/ch12_example.tex:91-100`. -/\n",
-        )
+        self.assertEqual(rewritten, text)
         self.assertEqual(
             unresolved,
             [
@@ -374,6 +391,49 @@ class BlueprintCitationTests(unittest.TestCase):
     def test_location_locator_uses_one_line_form(self) -> None:
         location = LabelLocation("sec:x", "blueprint/src/chapter/ch.tex", 7, 7, 7)
         self.assertEqual(location.locator, "blueprint/src/chapter/ch.tex:7")
+
+    def test_markdown_resolution_compacts_repeated_origins(self) -> None:
+        origins = {
+            "lem:alpha": [
+                CitationUse("lem:alpha", "MIPStarRE/Example.lean", line)
+                for line in range(1, 7)
+            ]
+        }
+
+        rendered, failed = _format_resolutions(
+            ["lem:alpha"], origins, build_label_index(self.root), "markdown"
+        )
+
+        self.assertFalse(failed)
+        self.assertIn("... (3 more)", rendered)
+        self.assertNotIn("Example.lean:6", rendered)
+
+    def test_markdown_budget_keeps_unresolved_and_duplicate_rows(self) -> None:
+        index: dict[str, list[LabelLocation]] = {}
+        labels = [f"lem:resolved-{number}" for number in range(20)]
+        for number, label in enumerate(labels, 1):
+            index[label] = [LabelLocation(
+                label, "blueprint/src/chapter/ch12_example.tex", number, number, number
+            )]
+        index["lem:duplicate"] = [
+            LabelLocation("lem:duplicate", "blueprint/src/chapter/a.tex", 1, 1, 2),
+            LabelLocation("lem:duplicate", "blueprint/src/chapter/b.tex", 3, 3, 4),
+        ]
+        labels.extend(["def:missing", "lem:duplicate"])
+
+        rendered, failed = _format_resolutions(
+            labels, {}, index, "markdown", max_bytes=450
+        )
+
+        self.assertTrue(failed)
+        self.assertLessEqual(len(rendered.encode("utf-8")), 450)
+        self.assertIn("`def:missing` -> **UNRESOLVED**", rendered)
+        self.assertIn("`lem:duplicate` -> **DUPLICATE:**", rendered)
+        self.assertIn("resolved citation rows omitted", rendered)
+        self.assertNotIn("`lem:resolved-19`", rendered)
+
+        with self.assertRaisesRegex(ValueError, "retain all unresolved"):
+            _format_resolutions(labels, {}, index, "markdown", max_bytes=80)
 
 
 if __name__ == "__main__":

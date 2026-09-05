@@ -128,9 +128,12 @@ statement/proof span. A uniquely resolved label suppresses locator-drift
 findings; an unknown, duplicate, or mathematically incorrect label does not.
 The branch-derived map is sanitized and truncated to
 `MIPSTARRE_CITATION_MAX_BYTES` (default 30000) with an explicit marker. It is
-attached before the diff, reserving its own share of the dispatcher's aggregate
-attachment budget; the direct-execution fallback receives this same bounded
-artifact rather than the raw resolver output.
+attached before the diff in both dispatch paths, reserving its own share of the
+dispatcher's aggregate attachment budget. When the map exceeds that budget,
+resolved rows are truncated first; every unknown or duplicate-label row is
+retained, and review fails closed if those rows themselves cannot fit. The
+direct-execution fallback receives this same bounded artifact rather than the
+raw resolver output.
 The rewrite subcommand exists for the one-time legacy migration, but review
 never rewrites the branch.
 

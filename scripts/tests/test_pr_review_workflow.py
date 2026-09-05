@@ -72,7 +72,15 @@ class PRReviewWorkflowTests(unittest.TestCase):
             self.local_review,
         )
         self.assertIn(
-            'sanitize_to "$BLUEPRINT_CITATION_MAP_RAW" "$BLUEPRINT_CITATION_MAP"',
+            '--max-bytes "$CITATION_MAX_BYTES"',
+            self.local_review,
+        )
+        self.assertIn(
+            '--full-output "$BLUEPRINT_CITATION_MAP_RAW"',
+            self.local_review,
+        )
+        self.assertIn(
+            'sanitize_to "$BLUEPRINT_CITATION_MAP_BOUNDED" "$BLUEPRINT_CITATION_MAP"',
             self.local_review,
         )
         self.assertIn("truncated by review.sh attachment budget", self.local_review)
@@ -91,6 +99,11 @@ class PRReviewWorkflowTests(unittest.TestCase):
         )[0]
         self.assertIn('cat "$BLUEPRINT_CITATION_MAP"', fallback)
         self.assertNotIn("BLUEPRINT_CITATION_MAP_RAW", fallback)
+        self.assertNotIn("BLUEPRINT_CITATION_MAP_BOUNDED", fallback)
+        self.assertLess(
+            fallback.index('name="blueprint-citations.md"'),
+            fallback.index('name="diff.patch"'),
+        )
 
 
 if __name__ == "__main__":

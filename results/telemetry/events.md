@@ -2397,3 +2397,16 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   use the same bounded artifact in the fallback prompt.
 - **Lesson:** required review evidence needs an explicit per-artifact budget;
   aggregate truncation alone depends incorrectly on attachment order.
+
+## 2026-09-05 - Citation failures lost inside their own evidence budget
+
+- **Symptom:** PR #202 round 2 found that prefix truncation of the derived
+  citation map removed unresolved and duplicate rows, and the no-dispatch
+  prompt still placed the map after the diff.
+- **Diagnosis:** the byte cap operated after row semantics had been erased, so
+  it could not distinguish successful resolutions from merge-blocking failures.
+- **Fix:** compact repeated origins, retain failure rows before truncating
+  resolved rows, fail closed if failure evidence cannot fit, and put the map
+  before the diff in both review paths.
+- **Lesson:** evidence budgets must encode priority before byte truncation;
+  ordering guarantees must be tested at every dispatch boundary.
