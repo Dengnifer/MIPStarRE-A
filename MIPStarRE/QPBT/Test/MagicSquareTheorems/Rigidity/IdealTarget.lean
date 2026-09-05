@@ -162,47 +162,17 @@ theorem conjTranspose_mul_le_one_sum_ite_pauliProj {ι : Type*} [Fintype ι]
 
 /-! ## The ideal state is normalized -/
 
-/-- Formalization-only: reindexing Euclidean coordinates along an equivalence
-preserves the norm.  The same identity is proved for the seed-fiber lift as
-`reindexState_norm_eq` in
-`MIPStarRE/QPBT/Combining/DirectLowDegree/Transport/SeedFiber.lean`; it belongs
-with `reindexState` in `MIPStarRE/QPBT/State.lean`, and hoisting it there is
-left to a follow-up so that the Magic Square rigidity chain does not acquire a
-dependency on the low-degree transport modules. -/
-private theorem norm_reindexState {ι κ : Type*} [Fintype ι] [DecidableEq ι]
-    [Fintype κ] [DecidableEq κ] (e : ι ≃ κ) (ψ : EuclideanSpace ℂ ι) :
-    ‖reindexState e ψ‖ = ‖ψ‖ := by
-  rw [← sq_eq_sq₀ (norm_nonneg _) (norm_nonneg _)]
-  rw [EuclideanSpace.norm_sq_eq, EuclideanSpace.norm_sq_eq]
-  change (∑ j : κ, ‖ψ (e.symm j)‖ ^ 2) = ∑ i : ι, ‖ψ i‖ ^ 2
-  exact e.symm.sum_comp (fun i => ‖ψ i‖ ^ 2)
-
-/-- Formalization-only: the coordinate tensor of two Euclidean vectors has the
-product norm.  See the note on `norm_reindexState` for the relation to
-`vecTensor_norm_eq` in the low-degree transport modules. -/
-private theorem norm_vecTensor {ι κ : Type*} [Fintype ι] [DecidableEq ι]
-    [Fintype κ] [DecidableEq κ] (u : EuclideanSpace ℂ ι) (v : EuclideanSpace ℂ κ) :
-    ‖vecTensor u v‖ = ‖u‖ * ‖v‖ := by
-  rw [← sq_eq_sq₀ (norm_nonneg _) (mul_nonneg (norm_nonneg _) (norm_nonneg _))]
-  rw [EuclideanSpace.norm_sq_eq, mul_pow, EuclideanSpace.norm_sq_eq,
-    EuclideanSpace.norm_sq_eq]
-  change (∑ p : ι × κ, ‖u p.1 * v p.2‖ ^ 2) =
-    (∑ i : ι, ‖u i‖ ^ 2) * ∑ j : κ, ‖v j‖ ^ 2
-  simp only [norm_mul, mul_pow]
-  rw [← Finset.univ_product_univ, Finset.sum_product, Finset.sum_mul]
-  refine Finset.sum_congr rfl fun i _ => ?_
-  rw [Finset.mul_sum]
-
 /-- The ideal state of `thm:ms-rigidity`, a maximally entangled state on the
 extracted registers tensored with an auxiliary bipartite state and shuffled into
 local player order, has the norm of the auxiliary state.  In particular it is a
-unit vector whenever the auxiliary state is.  Blueprint
-`ch13_qpbt_test.tex:224-253`. -/
+unit vector whenever the auxiliary state is.  The norm identities for the
+coordinate operations are `reindexState_norm_eq` and `vecTensor_norm_eq` in
+`MIPStarRE/QPBT/State.lean`.  Blueprint `ch13_qpbt_test.tex:224-253`. -/
 theorem norm_reindexState_prodShuffle_vecTensor_eprState {V ιA'' ιB'' : Type*}
     [Fintype V] [DecidableEq V] [Nonempty V] [Fintype ιA''] [DecidableEq ιA'']
     [Fintype ιB''] [DecidableEq ιB''] (aux : EuclideanSpace ℂ (ιA'' × ιB'')) :
     ‖reindexState prodShuffle (vecTensor (eprState V) aux)‖ = ‖aux‖ := by
-  rw [norm_reindexState, norm_vecTensor, eprState_norm, one_mul]
+  rw [reindexState_norm_eq, vecTensor_norm_eq, eprState_norm, one_mul]
 
 end
 
