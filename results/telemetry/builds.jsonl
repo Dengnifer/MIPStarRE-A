@@ -635,3 +635,6 @@
 {"ts": "2026-09-06T05:09:17+0800", "kind": "ci-build", "trigger": "ci.sh pr=202", "seconds": 684, "outcome": "success", "sha": "b7cdbcb015f0a2fc5c2377fa458afcbe67dd944d", "note": "branch issue-174-replace-blueprint-line-range-citations-i"}
 {"ts": "2026-09-06T05:13:28+0800", "kind": "ci-build", "trigger": "ci.sh pr=236", "seconds": 168, "outcome": "success", "sha": "227bc711d716f5d3521479fd40dc91abb76c76ab", "note": "branch issue-234-main-operating-cycle"}
 {"ts": "2026-09-06T05:14:24+0800", "kind": "ci-build", "trigger": "ci.sh pr=195", "seconds": 116, "outcome": "success", "sha": "0179348482b33d9287d12211e9c2f72b467167d5", "note": "branch issue-113-approximate-winning-implications"}
+{"ts": "2026-09-06T05:28:44+0800", "kind": "ci-build", "trigger": "ci.sh pr=195", "seconds": 24, "outcome": "success", "sha": "20634df06b2a6c2fa4f5507c8cfb50b879d8953c", "note": "branch issue-113-approximate-winning-implications"}
+{"ts": "2026-09-06T06:10:15+0800", "kind": "ci-build", "trigger": "ci.sh pr=236", "seconds": 51, "outcome": "success", "sha": "e03137e1c074e2fbfee2e1abf5cb1d2331668134", "note": "branch issue-234-main-operating-cycle"}
+{"ts": "2026-09-06T06:13:11+0800", "kind": "ci-build", "trigger": "ci.sh pr=205", "seconds": 52, "outcome": "success", "sha": "71bedebd8f99f3289aa490a08cc3e90ca6f00009", "note": "branch issue-201-pasting-error-contract"}
