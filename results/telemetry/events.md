@@ -2570,3 +2570,7 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 ## 2026-09-05T02:44Z — codex paused by the owner
 - Owner instruction: do not start any new codex session until explicitly told to resume; running codex lanes may finish. Claude subagents (Opus, with Fable for math-fix and hardest analytic work) take repairs, review fixes and new packets meanwhile.
 - #210 session 2 (Opus) finished partial: strategy and question law sorry-free; found and repaired an abandoned conflicted merge in the worktree (5073dc4). Session 3 launched for targets 3-5.
+
+## 2026-09-05T02:52Z — Claude-backed reviews while codex is paused
+- review.sh normally runs both review lanes through codex (dispatch.sh). While codex is paused, lane-v16 calls /tmp/review-claude.sh: a copy of review.sh whose dispatcher (/tmp/claude-review-dispatch.sh) writes the review request (task, persona, context, diff path) into ~/.cache/mipstarre-dev/watchdog/claude-reviews/pr<N>/<role>-<time>/ and waits for reply.md; the operator session runs an Opus reviewer on the request and drops the reply. Verdict parsing, findings ledger, head binding, carried reviews and the local-review/summary status are unchanged.
+- Lane runner v16 = v15 + refusal to dispatch codex while watchdog/codex-paused exists. Merge daemon v7 and stack-watch v2 use v16. Editing lane-v15.sh in place killed lane 107 after its CI (bash reads scripts incrementally); v15 bytes restored, lesson recorded.
