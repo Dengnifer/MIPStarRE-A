@@ -114,6 +114,27 @@ with the event stream teed to `results/telemetry/sessions/<name>.jsonl`;
 registry append; and a final report of `name`, `thread_id` and the
 last-message path.
 
+Account routing uses `--account auto|primary|second`, overriding
+`MIPSTARRE_CODEX_ACCOUNT` (default `auto`). Under a shared reservation lock,
+auto selects the smaller live/cap ratio, with primary winning ties. Live counts
+come from `$MIPSTARRE_CACHE_ROOT/accounts/<account>/<dispatcher-pid>` markers;
+each read removes stale PIDs, and exit cleanup removes the current reservation.
+Caps are positive integers in `watchdog/max-codex-primary` and
+`watchdog/max-codex-second` under that cache root (defaults 9 and 10). Full
+accounts are polled every 20 seconds for `MIPSTARRE_ACCOUNT_WAIT` seconds
+(default 1800), after which auto uses the less loaded account even above cap;
+explicit and resumed dispatches wait on their pinned account and never switch.
+Resume affinity comes from registry account fields or rollout files in either
+home; unknown, ambiguous, or conflicting selections fail before execution.
+Primary unsets inherited `CODEX_HOME`; second sets it for execution and rollout
+lookup to `MIPSTARRE_CODEX_HOME_SECOND` (default
+`~/.cache/mipstarre-dev/codex-home-yxy`). Review and autofix inherit these
+variables unchanged. New dispatch rows record the selected account and model:
+`MIPSTARRE_CODEX_MODEL` wins, otherwise a simple quoted top-level `model` ID in
+the selected home's `config.toml` is resolved and explicitly passed to the CLI.
+An unresolved model fails preflight rather than recording a guessed identity.
+Dry runs select without reserving capacity or waiting.
+
 Preconditions the dispatcher (human or orchestrator) owns:
 
 1. The worktree exists and has been prepared by `local/bin/worktree-setup.sh`.
@@ -313,7 +334,9 @@ fix sessions; no role name identifies one, so `dispatch.sh` cannot.
 
 The registry line schema is in `meta.md`. Beyond it, `dispatch.sh` records
 `turns` (completed model turns), `capture` (repo-relative path to the event
-stream) and, when resolvable, `rollout`. Token usage is summed over
+stream) and, when resolvable, `rollout`. New dispatches record `account` and the
+explicitly resolved `model` as described in §4.1; historical rows are unchanged.
+Token usage is summed over
 `turn.completed` events and normalized to
 `{input, cached_input, cache_write, output, reasoning}`; `dispatch.sh` writes
 `status: done` or `failed` at the end of a run, and `active` is reserved for
