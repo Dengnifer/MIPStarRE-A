@@ -2590,3 +2590,9 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 
 ## 2026-09-05T08:06Z — thm:ms-rigidity proved (packet #105 complete)
 - exists_ms_rigidity is sorry-free with explicit constant C = 2e12 in the corrected form A (value at least 1 - eps, variable-0/4 agreement up to delta, conclusions at scale C (sqrt eps + sqrt delta)). Key step (session 5): the transport of the one-qubit intertwining relations through the second controlled swap done at the level of the embedding matrix, with the exact Gram identity for the shift-observable defect. Commits ce9b82b, 5a46cb0. Publication tail launched (base #172 merged as PR 192).
+
+## 2026-09-05T09:09Z — lem:pauli-completeness proved (packet #156 complete)
+- exists_spcc_value_one is sorry-free: the honest Pauli strategy is a value-one symmetric projective consistent commuting strategy of the Pauli basis test (four Opus sessions: salvage of the terminated codex diff, the commutation layer, the rejection layer, the assembly). Commits 9937a9b..01f3efb on the #156 branch (stacked on #116).
+
+## 2026-09-05T09:17Z — telemetry note: operator-recorded session times drifted
+- The start and end times the operator wrote into owner-sessions.jsonl between about 06:00Z and 09:20Z on 2026-09-05 were estimates and run up to 90 minutes ahead of the ghz clock (the names carry the same estimated stamps). The wall_s durations and token counts come from the harness and are accurate; use them, not the stamps, for timing analyses of that window.
