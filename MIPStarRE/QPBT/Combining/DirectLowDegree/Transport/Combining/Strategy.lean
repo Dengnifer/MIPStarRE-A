@@ -135,8 +135,8 @@ def directCombinedMeasuredDirection (D : DirectLdParams)
 
 /-- The change of parameter between the presentation of the measured line by
 the point part of the canonical base of the combined line and its presentation
-by its own canonical base.  It is the canonical rebase parameter of
-`Transport.Questions`; it is needed because the canonical base of a line of the
+by its own canonical base.  It is the canonical parameter of that line for the
+measured direction; it is needed because the canonical base of a line of the
 combined space need not project to the canonical base of its image line. -/
 def directCombinedRebaseParameter (D : DirectLdParams)
     (q : DirectLdQuestion D.combined) : DirectScalarQ D :=

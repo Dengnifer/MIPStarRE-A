@@ -19,8 +19,8 @@ The absorption is the estimate
 for `0 < ε ≤ 1`, with the universal constants `a = 10^23` and `b = 1/80000`.
 The exponent is the transport exponent of `exists_directLdTransportConstants`,
 half the exponent `1/40000` carried by `mainFormalError`; the constant is
-obtained from the prefactor `655360000000000000 (m + k)^{10} d²` of the mature
-error at the combined parameters, the factor `30 d` by which the three envelope
+obtained from the prefactor `655360000000000000 (m + k)^{10} d²` of the error
+of `thm:main-formal` at the combined parameters, the factor `30 d` by which the three envelope
 terms of that error exceed the corresponding terms of `deltaLd`, and the bound
 `m + k ≤ 2 d m k`.
 
@@ -42,7 +42,7 @@ namespace MIPStarRE.QPBT
 
 open MIPStarRE.LDT MIPStarRE.Quantum
 
-/-! ## The mature error at the combined parameters -/
+/-! ## The error of `thm:main-formal` at the combined parameters -/
 
 /-- The auxiliary sampling parameter at the combined parameters, in the
 parameters of the original directly indexed game. -/
@@ -54,8 +54,9 @@ private theorem directCombinedAux_cast (D : DirectLdParams) :
   push_cast
   ring
 
-/-- The mature error at the combined parameters and the pass bound `30 ε`,
-written out in the parameters of the original directly indexed game. -/
+/-- The error of `thm:main-formal` at the combined parameters and the pass
+bound `30 ε`, written out in the parameters of the original directly indexed
+game. -/
 private theorem mainFormalError_combined_eq (D : DirectLdParams) (ε : ℝ) :
     Test.mainFormalError D.combined.toLDTParameters
         (directLdAuxParameter D.combined) (3 * (10 * ε)) =
@@ -66,7 +67,8 @@ private theorem mainFormalError_combined_eq (D : DirectLdParams) (ε : ℝ) :
           Real.exp (-((directLdAuxParameter D.combined : ℝ) /
             (2560000 * (((D.m + D.k : ℕ) : ℝ) ^ (2 : ℕ)))))) := rfl
 
-/-- The polynomial prefactor of the mature error at the combined parameters. -/
+/-- The polynomial prefactor of the error of `thm:main-formal` at the combined
+parameters. -/
 private theorem directCombinedPrefactor_eq (D : DirectLdParams) :
     100000 * ((directLdAuxParameter D.combined : ℝ) ^ (2 : ℕ)) *
         (((D.m + D.k : ℕ) : ℝ) ^ (4 : ℕ)) =
@@ -75,8 +77,8 @@ private theorem directCombinedPrefactor_eq (D : DirectLdParams) :
   ring
 
 /-- With the auxiliary sampling parameter of the combined parameters the
-exponential scale of the mature error collapses: the argument of its
-exponential term is exactly `(m + k) d`. -/
+exponential scale of the error of `thm:main-formal` collapses: the argument of
+its exponential term is exactly `(m + k) d`. -/
 private theorem directCombinedAux_exp_arg (D : DirectLdParams) :
     (directLdAuxParameter D.combined : ℝ) /
         (2560000 * (((D.m + D.k : ℕ) : ℝ) ^ (2 : ℕ))) =
@@ -89,10 +91,11 @@ private theorem directCombinedAux_exp_arg (D : DirectLdParams) :
   rw [directCombinedAux_cast, div_eq_iff hne]
   ring
 
-/-! ## The three terms of the mature error at the combined parameters -/
+/-! ## The three terms of the error of `thm:main-formal` at the combined
+parameters -/
 
-/-- The test term of the mature error at the pass bound `30 ε`, bounded by the
-constant `30` times `ε^(1/80000)` in the regime `0 < ε ≤ 1`. -/
+/-- The test term of the error of `thm:main-formal` at the pass bound `30 ε`,
+bounded by the constant `30` times `ε^(1/80000)` in the regime `0 < ε ≤ 1`. -/
 private theorem directCombined_test_term_le {ε : ℝ} (hε0 : 0 < ε) (hε1 : ε ≤ 1) :
     Real.rpow (3 * (10 * ε)) (1 / 40000) ≤ 30 * Real.rpow ε (1 / 80000) := by
   have h30 : (3 : ℝ) * (10 * ε) = 30 * ε := by ring
@@ -107,8 +110,8 @@ private theorem directCombined_test_term_le {ε : ℝ} (hε0 : 0 < ε) (hε1 : �
     Real.rpow_le_rpow_of_exponent_ge hε0 hε1 (by norm_num)
   exact mul_le_mul hc he (Real.rpow_nonneg hε0.le _) (by norm_num)
 
-/-- The field term of the mature error, bounded by the polynomial `d` times
-`q^(-1/80000)`. -/
+/-- The field term of the error of `thm:main-formal`, bounded by the polynomial
+`d` times `q^(-1/80000)`. -/
 private theorem directCombined_field_term_le (D : DirectLdParams) :
     Real.rpow ((D.d : ℝ) / (D.q : ℝ)) (1 / 40000) ≤
       (D.d : ℝ) * Real.rpow (D.q : ℝ) (-(1 / 80000)) := by
@@ -126,8 +129,8 @@ private theorem directCombined_field_term_le (D : DirectLdParams) :
     Real.rpow_le_rpow_of_exponent_le hq1 (by norm_num)
   exact mul_le_mul hd hq (Real.rpow_nonneg (by linarith) _) (by linarith)
 
-/-- The exponential term of the mature error at the auxiliary sampling
-parameter of the combined parameters is `exp (-(m + k) d)`, hence at most the
+/-- The exponential term of the error of `thm:main-formal` at the auxiliary
+sampling parameter of the combined parameters is `exp (-(m + k) d)`, hence at most the
 base-two decay `2^(-m d/80000)` of `deltaLd`. -/
 private theorem directCombined_exponential_term_le (D : DirectLdParams) :
     Real.exp (-(((D.m + D.k : ℕ) : ℝ) * (D.d : ℝ))) ≤
@@ -151,8 +154,8 @@ private theorem directCombined_exponential_term_le (D : DirectLdParams) :
 
 /-! ## The two contributions of the reduction -/
 
-/-- The mature error at the combined parameters and the pass bound `30 ε`,
-bounded by an explicit polynomial in the parameters times the inner factor of
+/-- The error of `thm:main-formal` at the combined parameters and the pass
+bound `30 ε`, bounded by an explicit polynomial in the parameters times the inner factor of
 `deltaLd` at the transport exponent `b = 1/80000`. -/
 private theorem mainFormalError_combined_le (D : DirectLdParams) {ε : ℝ}
     (hε0 : 0 < ε) (hε1 : ε ≤ 1) :

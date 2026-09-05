@@ -126,11 +126,6 @@ def directCombinedTuple (D : DirectLdParams) (g : DirectPolyTuple D) :
     (r : Fin D.combined.k) :
     directCombinedTuple D g r = directCombinedPolynomial D g := rfl
 
-theorem directCombinedTuple_injective (D : DirectLdParams) :
-    Function.Injective (directCombinedTuple D) := by
-  intro g g' h
-  exact directCombinedPolynomial_injective D (congrFun h default)
-
 /-! ## Recovering the polynomial tuple -/
 
 /-- A polynomial in the variables of the combined parameters is combined when it

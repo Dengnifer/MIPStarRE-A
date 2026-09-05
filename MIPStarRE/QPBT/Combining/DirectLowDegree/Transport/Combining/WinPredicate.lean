@@ -610,7 +610,7 @@ theorem directCombinedWinTransport_dline_point (D : DirectLdParams)
           simp only [directCombinedMeasuredDirection, directLdMap, hindex,
             directCombinedIndexSplit_combinedPointVar,
             directCombinedPointPart_directPrefixProjection_pointVar,
-            directPrefixProjection_idempotent]
+            directPrefixProjection_idem]
         have hs : directCombinedPointPart D
               (lineRepMap (directPrefixProjection sample.index sample.direction) sample.point) =
             lineRepMap (directCombinedPointPart D (directPrefixProjection sample.index
@@ -746,7 +746,7 @@ theorem directCombinedWinTransport_point_dline (D : DirectLdParams)
           simp only [directCombinedMeasuredDirection, directLdMap, hindex,
             directCombinedIndexSplit_combinedPointVar,
             directCombinedPointPart_directPrefixProjection_pointVar,
-            directPrefixProjection_idempotent]
+            directPrefixProjection_idem]
         have hs : directCombinedPointPart D
               (lineRepMap (directPrefixProjection sample.index sample.direction) sample.point) =
             lineRepMap (directCombinedPointPart D (directPrefixProjection sample.index

@@ -277,7 +277,7 @@ Quantum soundness of a version of the classical low-degree test for polynomials 
 % This remark records the formal status of the extension to general k;
 % it is not a statement from the paper.
 \begin{remark}[The extension to general $k$ is not coordinatewise]\label{rem:ld-soundness-simultaneity}
-	The extension from $k = 1$ to general $k$ cited in the proof of Theorem~\ref{lem:ld-soundness} is the reduction deriving Theorem~4.43 from Theorem~4.40 in \cite{Natarajan2018NEEXP}: the $k$ answer polynomials are combined into the single polynomial $(\alpha, u) \mapsto \sum_i \alpha_i g_i(u)$ in $m + k$ variables, the case $k = 1$ is applied once to the combined strategy, and the $k$ polynomials are recovered from the resulting measurement by exact linearity in $\alpha$ and the Schwartz--Zippel lemma. It cannot be replaced by applying the case $k = 1$ to each coordinate separately and combining the coordinate measurements by the sandwich of Lemma~\ref{lem:ld-sandwich}: over $\F_{2^s}$ with $d = 1$ and $k = 2$ there are a joint point measurement and coordinate polynomial measurements, on the maximally entangled state, for which every coordinate relation of the theorem holds with error $0$ while every POVM with polynomial-pair outcomes has consistency defect at least $1 - 2/q$ against the joint point measurement; the computation is in \cite{gap:qpbt_ld-simultaneous-sandwich}. The formalization accordingly proves the polynomial-tuple conclusion of Theorem~\ref{lem:ld-soundness} for $k = 1$ from Theorem~\ref{thm:main-formal}, which is the only value instantiated in the proof of Lemma~\ref{lem:qld-4-7}; the general case is the combining reduction of Proposition~\ref{prop:ld-simultaneous-general-k}, carried out for the directly indexed game.
+	The extension from $k = 1$ to general $k$ cited in the proof of Theorem~\ref{lem:ld-soundness} is the reduction deriving Theorem~4.43 from Theorem~4.40 in \cite{Natarajan2018NEEXP}: the $k$ answer polynomials are combined into the single polynomial $(\alpha, u) \mapsto \sum_i \alpha_i g_i(u)$ in $m + k$ variables, the case $k = 1$ is applied once to the combined strategy, and the $k$ polynomials are recovered from the resulting measurement by exact linearity in $\alpha$ and the Schwartz--Zippel lemma. It cannot be replaced by applying the case $k = 1$ to each coordinate separately and combining the coordinate measurements by the sandwich of Lemma~\ref{lem:ld-sandwich}: over $\F_{2^s}$ with $d = 1$ and $k = 2$ there are a joint point measurement and coordinate polynomial measurements, on the maximally entangled state, for which every coordinate relation of the theorem holds with error $0$ while every POVM with polynomial-pair outcomes has consistency defect at least $1 - 2/q$ against the joint point measurement; the computation is in \cite{gap:qpbt_ld-simultaneous-sandwich}. The formalization accordingly proves the polynomial-tuple conclusion of Theorem~\ref{lem:ld-soundness} for $k = 1$ from Theorem~\ref{thm:main-formal}, which is the only value instantiated in the proof of Lemma~\ref{lem:qld-4-7}; the general case is the combining reduction of Proposition~\ref{prop:ld-simultaneous-general-k}, carried out for the directly indexed game. The identification of that game with the game $\mathfrak{G}^{\mathrm{ld}}_{\mathsf{ldparams}}$ of Definition~\ref{def:ld-game} remains open, so neither the case $k = 1$ nor the general case yields Theorem~\ref{lem:ld-soundness} itself; the two games are compared in \cite{gap:qpbt_ld-dimension-divisibility}.
 	% This remark carries no Lean metadata, since remarks are not blueprint
 	% dependency nodes; the Lean declarations are linked from the
 	% formalization support nodes cited above.
@@ -300,8 +300,9 @@ a line directly instead of through a fiber of $\chi$; its point questions, line
 questions, answer formats and win predicate are those of
 Definition~\ref{def:ld-game}, and it is used here because the reduction applies
 the case $k = 1$ at dimension $m + k$, where the divisibility condition of
-Definition~\ref{def:ld-game} is not available.  A node carries $\leanok$ only
-when the Lean declarations it names are complete and sorry-free.
+Definition~\ref{def:ld-game} is not available.
+% A node of this subsection is marked as formalized only when the Lean
+% declarations it names are complete and carry no unproved placeholder.
 
 \begin{definition}[Combined parameters of the reduction]
 	\label{def:ld-combining-parameters}
@@ -420,6 +421,8 @@ when the Lean declarations it names are complete and sorry-free.
 \begin{definition}[The combined strategy]
 	\label{def:ld-combined-strategy}
 	\lean{MIPStarRE.QPBT.directCombinedMeasuredQuestion}
+	\lean{MIPStarRE.QPBT.directCombinedMeasuredDirection}
+	\lean{MIPStarRE.QPBT.directCombinedRebaseParameter}
 	\lean{MIPStarRE.QPBT.directCombinedAnswerMap}
 	\lean{MIPStarRE.QPBT.directCombinedStrategy}
 	\lean{MIPStarRE.QPBT.directCombinedStrategy_isProjective}
@@ -469,7 +472,8 @@ when the Lean declarations it names are complete and sorry-free.
 	has vanishing point part is contained in a fiber of the projection to
 	$\F_q^m$, so that the combined polynomial restricted to it is determined by
 	the $k$ values of the tuple at the single point $u_0$; the rebasing in
-	case~4 is the operation of \texttt{Transport.Questions}, needed because the
+	case~4 is the affine change of parameter of the previous paragraph, needed
+	because the
 	canonical base of a line of $\F_q^{m+k}$ need not project to the canonical
 	base of its image line in $\F_q^m$.
 \end{definition}
@@ -528,12 +532,13 @@ when the Lean declarations it names are complete and sorry-free.
 	\leanok
 	\uses{def:ld-combined-strategy, lem:ld-combined-question-law,
 		def:ld-win-predicate, def:tensor-product-value}
-	There is a universal constant $C$ such that the following holds.  If
-	$\mathcal S$ succeeds with probability at least $1 - \eps$ in the directly
-	indexed low-degree game with parameters $\mathsf{ldparams}$, then
-	$\mathcal S^{\mathrm c}$ succeeds with probability at least $1 - C\eps$ in the
-	directly indexed low-degree game with parameters
-	$\mathsf{ldparams}^{\mathrm c}$.
+	The statement holds with the universal constant $C = 10$: if $\mathcal S$
+	succeeds with probability at least $1 - \eps$ in the directly indexed
+	low-degree game with parameters $\mathsf{ldparams}$, then
+	$\mathcal S^{\mathrm c}$ succeeds with probability at least $1 - 10\eps$ in
+	the directly indexed low-degree game with parameters
+	$\mathsf{ldparams}^{\mathrm c}$.  The value $10$ is used in the absorption of
+	Proposition~\ref{prop:ld-simultaneous-general-k}.
 \end{lemma}
 \begin{proof}
 	\leanok
@@ -694,31 +699,51 @@ when the Lean declarations it names are complete and sorry-free.
 	\leanok
 	\uses{def:ld-meas, def:consistency, def:bracket,
 		def:projective-strategy-general, def:ld-combining-parameters,
-		lem:ld-combined-value, lem:ld-combining-recovery}
+		lem:ld-combined-value, lem:ld-combining-recovery, lem:ld-soundness,
+		thm:main-formal}
 	Let $\mathsf{ldparams} = (q,m,d,k)$ and let $\mathcal S = (\psi, A, B)$ be a
 	projective strategy succeeding with probability at least $1 - \eps$ in the
 	directly indexed low-degree game with parameters $\mathsf{ldparams}$.  Then
 	there exist measurements $G^{\mathrm A}, G^{\mathrm B} \in
 	\mathrm{PolyMeas}(m,q,d,k)$ satisfying the three consistency relations of
-	Theorem~\ref{lem:ld-soundness} with an error of the form
-	$\delta_{\mathrm{ld}}(\eps, q, m+k, d, 1) + O((m+k)d/q)$, which is absorbed
-	into $\delta_{\mathrm{ld}}(\eps,q,m,d,k)$ by enlarging its universal
-	constants.
+	Theorem~\ref{lem:ld-soundness}, with the error of
+	Theorem~\ref{thm:main-formal} at the combined parameters
+	$\mathsf{ldparams}^{\mathrm c}$ of
+	Definition~\ref{def:ld-combining-parameters}, sampling parameter
+	$2560000\,(m+k)^{3}d$ and pass bound $30\eps$ --- increased by the recovery
+	loss $(m+k)d/q$ for the two point/polynomial relations, and taken alone for
+	the polynomial/polynomial relation.  For $0 < \eps \le 1$ that error is at
+	most $\delta_{\mathrm{ld}}(\eps,q,m,d,k)$ at the universal constants
+	$a = 10^{23}$ and $b = 1/80000$, and for $\eps \ge 1$ the latter is at least
+	one while a consistency defect on a unit state is at most one; so for every
+	$\eps > 0$ the three relations hold with the error
+	$\delta_{\mathrm{ld}}(\eps,q,m,d,k)$ at those constants as well.
+
+	The source records this error in the abbreviated form
+	$\delta_{\mathrm{ld}}(\eps, q, m+k, d, 1) + O((m+k)d/q)$; the first summand
+	is the error function of Theorem~\ref{lem:ld-soundness} at the combined
+	parameters, which is not identified here with the error of
+	Theorem~\ref{thm:main-formal} at those parameters.
 \end{proposition}
 \begin{proof}
 	\leanok
 	\uses{lem:ld-combined-value, lem:ld-combining-recovery,
-		def:ld-combining-parameters}
+		def:ld-combining-parameters, lem:direct-ld-simultaneous-single,
+		thm:main-formal, lem:ld-soundness}
 	Apply Lemma~\ref{lem:ld-combined-value} to obtain a projective strategy
 	$\mathcal S^{\mathrm c}$ for the directly indexed game with parameters
 	$\mathsf{ldparams}^{\mathrm c}$ succeeding with probability at least
-	$1 - C\eps$.  That game has simultaneity parameter $1$, so the case $k = 1$
-	of Theorem~\ref{lem:ld-soundness} applies and produces measurements
+	$1 - 10\eps$.  That game has simultaneity parameter $1$, so
+	Lemma~\ref{lem:direct-ld-simultaneous-single} --- the polynomial-tuple
+	conclusion for simultaneity parameter $1$, obtained for the directly indexed
+	game from Theorem~\ref{thm:main-formal} --- applies and produces measurements
 	$G^{\mathrm A}$, $G^{\mathrm B}$ with outcomes in $\polyfunc{m+k}{q}{d}$
-	satisfying the three relations with error
-	$\delta_{\mathrm{ld}}(C\eps, q, m+k, d, 1)$.  Lemma~\ref{lem:ld-combining-recovery}
-	converts them into measurements in $\mathrm{PolyMeas}(m,q,d,k)$ satisfying
-	the three relations for $\mathcal S$ with the stated error.
+	satisfying the three relations with the error of
+	Theorem~\ref{thm:main-formal} at the combined parameters, sampling parameter
+	$2560000\,(m+k)^{3}d$ and pass bound $3 \cdot 10\eps = 30\eps$.
+	Lemma~\ref{lem:ld-combining-recovery} converts them into measurements in
+	$\mathrm{PolyMeas}(m,q,d,k)$ satisfying the three relations for
+	$\mathcal S$ with the stated error.
 
 	The absorption is carried out with the universal constants $a = 10^{23}$ and
 	$b = 1/80000$, the exponent being half the exponent $1/40000$ carried by

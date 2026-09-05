@@ -120,27 +120,6 @@ theorem directLdBranchRejectionProbability_point_point_eq
 
 /-! ## The rejected mass of the combined strategy -/
 
-private theorem heteroKron_sum_sum {ιA ιB α β : Type*}
-    (s : Finset α) (t : Finset β) (X : α → Op ιA) (Y : β → Op ιB) :
-    heteroKron (∑ a ∈ s, X a) (∑ b ∈ t, Y b) =
-      ∑ a ∈ s, ∑ b ∈ t, heteroKron (X a) (Y b) := by
-  ext ⟨i₁, i₂⟩ ⟨j₁, j₂⟩
-  simp only [Matrix.sum_apply, heteroKron, Matrix.kronecker,
-    Matrix.kroneckerMap_apply]
-  exact Finset.sum_mul_sum s t (fun a => X a i₁ j₁) (fun b => Y b i₂ j₂)
-
-private theorem applyOperatorToState_sum {ι α : Type*} [Fintype ι] [DecidableEq ι]
-    (s : Finset α) (M : α → Op ι) (ψ : EuclideanSpace ℂ ι) :
-    applyOperatorToState (∑ a ∈ s, M a) ψ =
-      ∑ a ∈ s, applyOperatorToState (M a) ψ := by
-  simp only [applyOperatorToState, map_sum, LinearMap.sum_apply]
-
-private theorem born_sum {ι α : Type*} [Fintype ι] [DecidableEq ι]
-    (ψ : EuclideanSpace ℂ ι) (s : Finset α) (M : α → Op ι) :
-    (inner ℂ ψ (applyOperatorToState (∑ a ∈ s, M a) ψ)).re =
-      ∑ a ∈ s, (inner ℂ ψ (applyOperatorToState (M a) ψ)).re := by
-  rw [applyOperatorToState_sum, inner_sum, Complex.re_sum]
-
 /-- The Born weight of an answer pair of the combined strategy is the total
 Born weight, at the measured questions, of the answer pairs of the original
 strategy that the relabelling of `def:ld-combined-strategy` sends to it.  Each
@@ -156,15 +135,19 @@ theorem outcomeWeight_directCombinedStrategy (D : DirectLdParams)
           outcomeWeight S (directCombinedMeasuredQuestion D x)
             (directCombinedMeasuredQuestion D y) a b := by
   classical
-  show (inner ℂ S.ψ (applyOperatorToState
+  show DistanceCalculus.stateQForm S.ψ
       (heteroKron
         (((S.A (directCombinedMeasuredQuestion D x)).postprocess
             (directCombinedAnswerMap D x)).effect a')
         (((S.B (directCombinedMeasuredQuestion D y)).postprocess
-            (directCombinedAnswerMap D y)).effect b')) S.ψ)).re = _
+            (directCombinedAnswerMap D y)).effect b')) = _
   rw [Measurement.postprocess_effect, Measurement.postprocess_effect,
-    heteroKron_sum_sum, born_sum]
-  exact Finset.sum_congr rfl fun a _ => born_sum _ _ _
+    DistanceCalculus.heteroKron_finset_sum_left,
+    DistanceCalculus.stateQForm_finset_sum]
+  refine Finset.sum_congr rfl fun a _ => ?_
+  rw [DistanceCalculus.heteroKron_finset_sum_right,
+    DistanceCalculus.stateQForm_finset_sum]
+  exact Finset.sum_congr rfl fun b _ => rfl
 
 /-- Rejected-mass comparison for `def:ld-combined-strategy`.  If every answer
 pair accepted by the win predicate of the original game at the measured

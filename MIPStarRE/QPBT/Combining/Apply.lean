@@ -121,9 +121,11 @@ constants and contains no divisibility hypothesis or residual construction input
 
 The argument uses low-degree soundness at dimension `2 * m + 2`.  The current
 direct carrier realizes the required dimension without assuming
-`2 * m + 2 ∣ q`, but it does not itself prove the game-correspondence and
-auxiliary-parameter estimates required by the soundness import; those obligations
-are exposed by `exists_direct_ld_soundness` and documented in
+`2 * m + 2 ∣ q`.  `exists_direct_ld_soundness` proves that soundness statement
+for the directly indexed game and meets the auxiliary-parameter estimate of the
+import by its choice of sampling parameter; the remaining estimate, the
+identification of the directly indexed game with the game of `def:ld-game`, is
+not proved and is documented in
 `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`.  Absorption of the established
 combined-lines prefactor into the final universal constants is to use
 `deltaQld_mono` on its stated source parameter domain.

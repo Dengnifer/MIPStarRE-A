@@ -47,8 +47,12 @@ combining argument at paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1267-1288`.
 
 This is a formalization auxiliary assertion, not the source-labelled
-`lem:ld-soundness`; the game-correspondence and auxiliary-parameter bounds
-catalogued in the cited gap note are established, not hidden as hypotheses.
+`lem:ld-soundness`.  Of the two obligations catalogued in the cited gap note the
+auxiliary-parameter bound is established, by the choice of sampling parameter,
+and it is not hidden as a hypothesis; the game correspondence is neither
+established nor hidden, but avoided, since the statement speaks about the
+directly indexed game rather than the game of `def:ld-game`.  Relating the two
+games remains open.
 The measurements are those of `prop:ld-simultaneous-general-k`, and the
 universal constants exhibited are `a = 10^23` and `b = 1/80000`: for
 `0 < ε ≤ 1` the error of that proposition is absorbed into `deltaLd` by

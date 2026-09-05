@@ -54,18 +54,6 @@ noncomputable section
     (combinedCoefficientVar m k r).val = m + r.val := by
   simp [combinedCoefficientVar]
 
-/-- Prefix restriction is idempotent.  Public copy of the private
-`directPrefixProjection_idem` of
-`MIPStarRE/QPBT/Combining/DirectLowDegree/Transport/SeedFiberValue.lean`; see
-issue #204 on private originals. -/
-theorem directPrefixProjection_idempotent (D : DirectLdParams) (i : Fin D.m)
-    (v : Fin D.m → DirectScalarQ D) :
-    directPrefixProjection i (directPrefixProjection i v) =
-      directPrefixProjection i v := by
-  funext j
-  unfold directPrefixProjection
-  split_ifs <;> rfl
-
 /-- The coordinate direction of a point coordinate of the combined dimension
 has point part the corresponding coordinate direction. -/
 @[simp] theorem directCombinedPointPart_coordinateDirection_pointVar
@@ -200,7 +188,7 @@ theorem directCombined_measuredQuestion_of_pointVar (D : DirectLdParams)
         directCombinedIndexSplit_combinedPointVar,
         directCombinedSampleProjection,
         directCombinedPointPart_directPrefixProjection_pointVar,
-        directPrefixProjection_idempotent]
+        directPrefixProjection_idem]
       exact congrArg (fun x : Fin D.m → DirectScalarQ D =>
         ((LdType.dline, ⟨x, j,
           directPrefixProjection j

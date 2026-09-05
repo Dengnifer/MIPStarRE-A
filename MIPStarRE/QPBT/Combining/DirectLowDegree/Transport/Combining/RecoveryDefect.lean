@@ -55,29 +55,6 @@ noncomputable section
 
 namespace RecoveryInternal
 
-/-! ## The quadratic form of the identity -/
-
-/-- The one-outcome measurement, whose single effect is the identity. -/
-private def unitMeasurement (ι : Type*) [Fintype ι] [DecidableEq ι] :
-    Measurement (Fin 1) ι :=
-  Measurement.ofSumEqOne (fun _ => (1 : Op ι))
-    (fun _ => (Matrix.PosSemidef.one.nonneg : (0 : Op ι) ≤ 1)) (by simp)
-
-/-- The quadratic form of the identity in a state vector is its squared norm. -/
-private theorem stateQForm_one_eq {ι : Type*} [Fintype ι] [DecidableEq ι]
-    (ψ : EuclideanSpace ℂ ι) : stateQForm ψ (1 : Op ι) = ‖ψ‖ ^ 2 := by
-  classical
-  have h := point_defect_eq (unitMeasurement ι) (unitMeasurement ι) ψ
-  have hzero : ∀ a b : Fin 1,
-      (if a = b then (0 : ℝ) else stateQForm ψ
-        ((unitMeasurement ι).effect a * (unitMeasurement ι).effect b)) = 0 :=
-    fun a b => if_pos (Subsingleton.elim a b)
-  simp only [hzero, Finset.sum_const_zero] at h
-  simp only [Fin.sum_univ_one] at h
-  have heff : (unitMeasurement ι).effect 0 = (1 : Op ι) := rfl
-  rw [heff, one_mul] at h
-  linarith
-
 /-! ## Pair expansions of the diagonal overlap -/
 
 /-- The diagonal overlap of a measurement against a relabelled measurement on the
@@ -361,7 +338,7 @@ theorem consistencyDefect_le_of_recoveryBound
     rw [hWdef]
     simp only
     rw [← stateQForm_finset_sum, ← heteroKron_finset_sum_right, B.sum_eq_one,
-      heteroKron_one_one, stateQForm_one_eq, hψ, one_pow]
+      heteroKron_one_one, stateQForm_one, hψ, one_pow]
   -- the two diagonal overlaps
   set AgrG : X → ℝ := fun x =>
     ∑ b : β, ∑ g : Γ, if f x g = b then w x b g else 0 with hAgrG
@@ -467,7 +444,7 @@ theorem consistencyDefect_le_of_recoveryBound_right
     rw [hWdef]
     simp only
     rw [← stateQForm_finset_sum, ← heteroKron_finset_sum_left, B.sum_eq_one,
-      heteroKron_one_one, stateQForm_one_eq, hψ, one_pow]
+      heteroKron_one_one, stateQForm_one, hψ, one_pow]
   set AgrG : X → ℝ := fun x =>
     ∑ b : β, ∑ g : Γ, if f x g = b then w x b g else 0 with hAgrG
   set AgrH : X → Y → ℝ := fun x y =>
