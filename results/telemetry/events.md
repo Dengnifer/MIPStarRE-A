@@ -3069,3 +3069,36 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 - State at retirement: main 3f00de0; open PRs 233,230,225,213,212,207,205,202,195,185,178; live codex worker sessions 2;
   merges recorded by the daemon so far 40. All Claude-held worktrees were released (#118 at 691b671, #174 at bece2e6).
   This owner session stops; the owner decides when an owner session returns.
+
+## 2026-09-06 — Issue 113 imported API repair
+- **PR #195 after merge `c7fe9cd` (session `orc-113-20260906-02`).**
+  `watchdog/lanes/113.build.log` in the runtime cache reports unknown exact-winning
+  theorem names and the removed measurement composition helper in `ApproxLines.lean`.
+  PR #185 renamed the exact theorems and replaced effect-level composition with
+  `Quantum.Measurement.postprocess_comp`. Both approximate modules now use those
+  existing declarations. A subsequent targeted check of `Approx.lean` also found
+  three imported declarations made private: `selectedPairBit`, `pairLabels_eq_of_win`,
+  and `selectedMsVar`. Their original definitions and proof are retained and exported;
+  no duplicate helper is introduced. Lesson: check approximate consumers when changing
+  visibility or names in the exact-winning API.
+- **Statement integrity.** The source is `lem:qld-win-implications` in
+  `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:192-264`, with the
+  projective-strategy convention at lines 160-172. Paper assumptions are admissible
+  parameters, a projective strategy winning with probability at least `1 - ε`, and
+  `ε ≥ 0`. Lean retains `AdmissibleParams`, `ProjectiveSetting P ε`, and `0 ≤ ε`.
+  The paper concludes average operator-distance bounds of order `ε`, also with
+  tensor factors interchanged. Lean retains existential universal constants and
+  the two `opFamilyDistSq ≤ C * ε` conclusions, with `swappedState` representing
+  the factor interchange. The low-degree outcome completion by `Option` is unchanged
+  and is explained in the blueprint immediately after this lemma's item list.
+  Verdict: faithful boundary encodings retained; no new assumptions, changed
+  constants, weakened conclusions, or proof holes. All theorem types remain unchanged;
+  proof edits only update declaration references and unfold function composition to
+  match the existing measurement composition theorem's lambda expression.
+- **Validation.** Targeted `lake env lean` checks pass for `Commuting`, `MagicSquare`,
+  `Consistency`, `Interchange`, `ApproxLines`, `Approx`, and the public
+  `Observables/WinImplications.lean` wrapper. Only branch-private module artifacts
+  were refreshed; no full build was launched. The four edited Lean files contain
+  no `sorry` or `axiom`; the unchanged wrapper still reports its existing `sorry`
+  warnings at lines 276, 294, and 313. `git diff --check` and the hook installation
+  check pass. Publication CI and independent review remain the parent tail's task.

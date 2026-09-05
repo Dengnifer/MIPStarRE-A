@@ -26,7 +26,7 @@ noncomputable section
 namespace WinImplications
 
 /-- Select the Magic Square variable used by one Pauli basis. -/
-private def selectedMsVar : PauliKind → Fin 9
+def selectedMsVar : PauliKind → Fin 9
   | .X => 0
   | .Z => 4
 

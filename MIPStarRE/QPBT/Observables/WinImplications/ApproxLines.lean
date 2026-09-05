@@ -50,7 +50,7 @@ theorem win_cons_approx_proof :
         (fun question a => heteroKron 1
           ((S.strategyMeasurement .alice question).effect a))
         S.swappedState ≤ C * ε := by
-  obtain ⟨C, hC, hbound⟩ := win_cons_proof
+  obtain ⟨C, hC, hbound⟩ := win_cons
   refine ⟨2 * C, by linarith, ?_⟩
   intro P ε S hε
   have hkey := opFamilyDistSq_placed_le_of_consistencyDefect_le
@@ -215,7 +215,7 @@ theorem lowDegreeConsistency_eq_mismatch_interchanged {P : AdmissibleParams}
     intro sample c
     congr 1
     unfold ProjectiveSetting.pointMeasOption ProjectiveSetting.pointMeas qA fA
-    rw [measurement_postprocess_comp_effect]
+    rw [MIPStarRE.Quantum.Measurement.postprocess_comp]
     rfl
   have hB : ∀ (sample : X) c,
       heteroKron (1 : Op S.toStrategy.ιA)
@@ -225,7 +225,7 @@ theorem lowDegreeConsistency_eq_mismatch_interchanged {P : AdmissibleParams}
     intro sample c
     congr 1
     unfold ProjectiveSetting.lineEvalMeas ProjectiveSetting.lineMeas qB fB
-    rw [measurement_postprocess_comp_effect]
+    rw [MIPStarRE.Quantum.Measurement.postprocess_comp]
     rfl
   calc
     _ = consistencyDefect (linePointDist P.toLdParams)
@@ -303,7 +303,7 @@ theorem win_low_degree_approx_proof :
         (fun sample a => heteroKron 1
           ((S.pointMeasOption .alice W sample.2).effect a))
         S.swappedState ≤ C * ε := by
-  obtain ⟨C₁, hC₁, h₁⟩ := win_low_degree_proof
+  obtain ⟨C₁, hC₁, h₁⟩ := win_low_degree
   obtain ⟨C₂, hC₂, h₂⟩ := win_low_degree_interchanged_proof
   refine ⟨2 * (C₁ + C₂), by linarith, ?_⟩
   intro P ε S hε W
@@ -399,7 +399,7 @@ theorem pauliBasisConsistency_eq_mismatch_interchanged {P : AdmissibleParams}
     intro u c
     congr 1
     unfold ProjectiveSetting.pauliEvalMeas ProjectiveSetting.pauliMeas fA qA
-    rw [measurement_postprocess_comp_effect]
+    rw [MIPStarRE.Quantum.Measurement.postprocess_comp]
     rfl
   have hB : ∀ (u : X) c,
       heteroKron (1 : Op S.toStrategy.ιA) ((S.pointMeas .bob W u).effect c) =
@@ -462,7 +462,7 @@ theorem win_pauli_basis_cons_approx_proof :
         (fun u a => heteroKron ((S.pointMeas .bob W u).effect a) 1)
         (fun u a => heteroKron 1 ((S.pauliEvalMeas .alice W u).effect a))
         S.swappedState ≤ C * ε := by
-  obtain ⟨C₁, hC₁, h₁⟩ := win_pauli_basis_cons_proof
+  obtain ⟨C₁, hC₁, h₁⟩ := win_pauli_basis_cons
   obtain ⟨C₂, hC₂, h₂⟩ := win_pauli_basis_cons_interchanged_proof
   refine ⟨2 * (C₁ + C₂), by linarith, ?_⟩
   intro P ε S hε W
