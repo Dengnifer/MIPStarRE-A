@@ -398,6 +398,11 @@ class ReviewRoundCounterTests(LayerTestCase):
         local_bin.mkdir(parents=True)
         for name in ("review.sh", "gh_common.py", "wf_util.py"):
             shutil.copy2(LOCAL_BIN / name, local_bin / name)
+        scripts = self.repo / "scripts"
+        scripts.mkdir()
+        for name in ("blueprint_citations.py", "tex_utils.py"):
+            shutil.copy2(REPO_ROOT / "scripts" / name, scripts / name)
+        (self.repo / "blueprint" / "src" / "chapter").mkdir(parents=True)
         persona = self.repo / "local" / "personas" / "orchestrator.md"
         persona.parent.mkdir(parents=True)
         persona.write_text("Review workflow changes.\n", encoding="utf-8")

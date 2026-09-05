@@ -100,6 +100,28 @@ class BlueprintCitationTests(unittest.TestCase):
             [("def:missing", 1), ("lem:explicit_missing", 1), ("rem:missing", 1)],
         )
 
+    def test_scan_reports_unknown_explicit_label_families(self) -> None:
+        lean = self.root / "MIPStarRE" / "Example.lean"
+        _write(
+            lean,
+            "/-- Blueprint `eq:missing-equation`, blueprint node `sec:missing-section`, "
+            "and Blueprint label `item:missing-item`. -/\n",
+        )
+
+        uses, unknown = find_citation_uses(
+            [lean], self.root, build_label_index(self.root)
+        )
+
+        self.assertEqual(uses, [])
+        self.assertEqual(
+            [(use.label, use.line) for use in unknown],
+            [
+                ("eq:missing-equation", 1),
+                ("item:missing-item", 1),
+                ("sec:missing-section", 1),
+            ],
+        )
+
     def test_rewrite_uses_label_named_in_same_docstring(self) -> None:
         text = (
             "/-- Lean support for `lem:alpha`, blueprint "

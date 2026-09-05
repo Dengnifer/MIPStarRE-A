@@ -23,9 +23,6 @@ from tex_utils import strip_tex_comment
 
 TOKEN_RE = re.compile(r"\\(?P<kind>begin|end|label)\{(?P<value>[^}]+)\}")
 CODE_LABEL_RE = re.compile(r"`(?P<label>[A-Za-z][A-Za-z0-9_.:-]+)`")
-BLUEPRINT_LABEL_RE = re.compile(
-    r"(?:def|lem|thm|fact|rem|cor|prop):[A-Za-z][A-Za-z0-9_.-]*\Z"
-)
 BARE_BLUEPRINT_LABEL_RE = re.compile(
     r"(?:def|lem|thm|fact|rem|cor|prop):[a-z0-9][a-z0-9-]*\Z"
 )
@@ -223,7 +220,7 @@ def find_citation_uses(
                 )
         for match in CANONICAL_CITATION_RE.finditer(text):
             label = match.group("label")
-            if label not in index and BLUEPRINT_LABEL_RE.fullmatch(label):
+            if label not in index:
                 unknown.add(
                     CitationUse(label, rel_path, text.count("\n", 0, match.start()) + 1)
                 )
