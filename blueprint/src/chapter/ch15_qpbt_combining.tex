@@ -2001,16 +2001,24 @@ projective measurement whose outcomes are pairs of global polynomials.
 	\lean{MIPStarRE.QPBT.directPolynomialPoint_consistencyDefect_le}
 	\lean{MIPStarRE.QPBT.directPolynomialPolynomial_consistencyDefect_le}
 	\leanok
-	\uses{def:consistency, def:ld-game, thm:main-formal,
+	\uses{def:consistency, def:ld-game, def:admissible-size,
 		lem:direct-ld-consistency-defect-equivalence}
-	This is not a named statement of \cite{Ji2020MIPStar}. It records the
-	three consistency implications obtained from the projective polynomial
-	measurements of Theorem~\ref{thm:main-formal} after changing to the
-	directly indexed coordinates. In that presentation the sampled coordinate
-	is carried by the question itself rather than by a residue class of
-	$\F_q$; see Remark~\ref{rem:qld-4-7-divisibility}.
+	This is not a named statement of \cite{Ji2020MIPStar}. It records three
+	consistency implications in the directly indexed coordinates, in which the
+	sampled coordinate is carried by the question itself rather than by a
+	residue class of $\F_q$; see Remark~\ref{rem:qld-4-7-divisibility}. The
+	hypothesis of each implication is an arbitrary consistency relation
+	between measurement families of the stated kinds; no implication produces
+	such a relation or constructs the measurements it relates. They may in
+	particular be applied to the three consistency relations in the conclusion
+	of Theorem~\ref{thm:main-formal}.
 
-	Fix directly indexed parameters $D=(q,m,d,k)$ and let $\delta\in\R$.
+	Fix a directly indexed parameter tuple $D=(q,m,d,k)$, where $m,d,k \ge 1$
+	are integers and $q$ is an admissible field size
+	(Definition~\ref{def:admissible-size}). In contrast with the parameters of
+	the classical game (Definition~\ref{def:ld-game}), no divisibility
+	condition $m \mid q$ is imposed; dropping that condition is the only
+	difference between the two parameter domains. Let $\delta\in\R$.
 	The following three implications hold:
 	\begin{enumerate}
 		\item let $S=(\psi,A,B)$ be a projective strategy for the
@@ -2061,15 +2069,22 @@ projective measurement whose outcomes are pairs of global polynomials.
 	\lean{MIPStarRE.QPBT.ldStrategyToDirect_pointPolynomial_compression}
 	\lean{MIPStarRE.QPBT.ldStrategyToDirect_polynomialPoint_compression}
 	\leanok
-	\uses{def:consistency, def:ld-game, def:ld-question-distribution}
+	\uses{def:consistency, def:ld-game, def:ld-question-distribution, def:admissible-size}
 	This is not a named statement of \cite{Ji2020MIPStar}. It records two
 	compression identities between the classical low individual degree game
 	and its directly indexed presentation.
 
-	Let $(\psi, A, B)$ be a strategy for the classical game with parameters
-	$(q,m,d,k)$, and extend it to the directly indexed game by adjoining to
-	each player a register of dimension $q/m$, the common size of the
-	classes of the index function $\chi$ of
+	Fix parameters $\mathsf{ldparams}=(q,m,d,k)$ of the classical game as in
+	Definition~\ref{def:ld-game}: integers $m,d,k \ge 1$, an admissible field
+	size $q$ (Definition~\ref{def:admissible-size}), and $m \mid q$. Unlike
+	in Lemma~\ref{lem:direct-ld-consistency-coordinates}, the divisibility
+	belongs to the domain here, since it is what gives the residue register
+	below its dimension; the directly indexed parameters appearing on the
+	other side of the identities are this tuple with the divisibility
+	condition dropped. Let $(\psi, A, B)$ be a strategy for the classical
+	game, and extend it to the directly indexed game by adjoining to each
+	player a register of dimension $q/m$, the common size of the classes of
+	the index function $\chi$ of
 	Definition~\ref{def:ld-question-distribution}; the two copies of that
 	register are perfectly correlated in the extended state. For a
 	polynomial-tuple POVM $G^{\mathrm B}$ on

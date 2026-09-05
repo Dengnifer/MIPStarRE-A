@@ -4,17 +4,17 @@ import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.DiagonalRecursion
 # Pass conversion for the directly indexed low-degree game
 
 This module converts a value bound for a projective strategy of the directly
-indexed low-degree game into the hypothesis of the mature low individual
-degree theorem for each coordinate strategy `directCoordinateProjStrat`.
+indexed low-degree game into the hypothesis of the low individual degree
+theorem for each coordinate strategy `directCoordinateProjStrat`.
 
-The mature failure probability gives weight `1/3` to point agreement and
+The LDT failure probability gives weight `1/3` to point agreement and
 `1/6` to each of the four oriented line-versus-point checks.  The branch
 comparisons of `Transport.BranchComparison` and `Transport.DiagonalRecursion`
 bound the point and axis-line branches by the corresponding direct branch
 rejections and each diagonal branch by twice its direct branch rejection.  The
 factor-three rejection calculus of `GameValue` gives the line branches half the
 weight of the point branch, so the factor two is absorbed: a direct strategy of
-value at least `1 - ε` has coordinate strategies of mature failure at most
+value at least `1 - ε` has coordinate strategies of LDT failure at most
 `3 * ε`, which is exactly `PassesLowIndividualDegreeTest (3 * ε)`.
 
 ## References
@@ -55,7 +55,7 @@ private theorem directLdRejectionProbability_eq_sum (D : DirectLdParams)
     show Fintype.card LdType = 3 by decide, div_eq_inv_mul]
   norm_num
 
-/-- Failure of the coordinate strategy compared with the mature-weighted
+/-- Failure of the coordinate strategy compared with the LDT-weighted
 rejection of the direct game.  The point and axis-line branches are dominated
 termwise, while each diagonal branch is dominated up to the factor two of the
 leading-index rereading; the surplus is the extra half weight of the diagonal
@@ -109,8 +109,8 @@ theorem directCoordinate_failure_le_three_mul_rejection
   have hdd := hnonneg (.dline, .dline)
   linarith
 
-/-- The error passed to the mature theorem is nonnegative: the direct value
-never exceeds one. -/
+/-- The error passed to the low individual degree theorem is nonnegative:
+the direct value never exceeds one. -/
 theorem directLd_error_nonneg_of_value (D : DirectLdParams)
     (S : Strategy (directLdGame D)) (ε : ℝ) (hwin : 1 - ε ≤ S.value) :
     0 ≤ ε := by
@@ -119,7 +119,8 @@ theorem directLd_error_nonneg_of_value (D : DirectLdParams)
   rw [directLdRejectionProbability_eq_one_sub_value] at h0
   linarith
 
-/-- The error `3 * ε` passed to the mature theorem is nonnegative. -/
+/-- The error `3 * ε` passed to the low individual degree theorem is
+nonnegative. -/
 theorem directCoordinate_three_mul_error_nonneg (D : DirectLdParams)
     (S : Strategy (directLdGame D)) (ε : ℝ) (hwin : 1 - ε ≤ S.value) :
     0 ≤ 3 * ε := by
@@ -144,7 +145,7 @@ theorem directCoordinate_failure_le_three_mul_error
       directCoordinate_failure_le_three_mul_rejection D S hS r
     _ ≤ 3 * ε := by linarith
 
-/-- The pass hypothesis of the mature low individual degree theorem for every
+/-- The pass hypothesis of the low individual degree theorem for every
 coordinate of a direct strategy of value at least `1 - ε`, with error
 `3 * ε` and no further assumption. -/
 theorem directCoordinate_passes

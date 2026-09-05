@@ -26,7 +26,7 @@ noncomputable section
 
 /-! ## Parameters and finite-field coordinates -/
 
-/-- Regard direct-game parameters as parameters of the mature LDT interface.
+/-- Regard direct-game parameters as low individual degree test parameters.
 The field size, dimension, and degree are unchanged. -/
 @[reducible] def DirectLdParams.toLDTParameters (D : DirectLdParams) : Parameters where
   m := D.m
@@ -41,24 +41,25 @@ The field size, dimension, and degree are unchanged. -/
     obtain ⟨n, hn, hq⟩ := D.hq
     exact ⟨2, n, Nat.prime_two, hn.pos, hq⟩
 
-/-- The fixed QPBT field model, viewed as the model used by the mature LDT
-interface. -/
+/-- The fixed QPBT field model, viewed as the field model of the low
+individual degree test. -/
 @[reducible] noncomputable def DirectLdParams.toLDTFieldModel (D : DirectLdParams) :
     FieldModel D.toLDTParameters.q :=
   D.model.toFieldModel
 
-/-- Coordinate coding from the direct scalar field to the mature LDT carrier. -/
+/-- Coordinate coding from the direct scalar field to the LDT carrier. -/
 noncomputable def directScalarEquiv (D : DirectLdParams) :
     DirectScalarQ D ≃ Fq D.toLDTParameters :=
   binaryRepresentation D.model
 
-/-- Coordinate coding identifies direct points with mature LDT points, with
-the coordinate order reversed: direct coordinate `j` is mature coordinate
+/-- Coordinate coding identifies direct points with LDT points, with the
+coordinate order reversed: direct coordinate `j` is LDT coordinate
 `Fin.rev j`.  The direct game zeroes a *prefix* of a sampled diagonal
 direction (`directPrefixProjection`, paper equation `eq:cl-dlnf`), whereas
-the mature test zeroes a *suffix* (`extendRestrictedDirection`,
-`references/ldt-paper/test_definition.tex:49-65`).  Reversing the coordinate
-order aligns the two restriction conventions, as required by the game
+the low individual degree test zeroes a *suffix*
+(`extendRestrictedDirection`, `references/ldt-paper/test_definition.tex:49-65`).
+Reversing the coordinate order aligns the two restriction conventions, as
+required by the game
 correspondence in `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`. -/
 noncomputable def directPointEquiv (D : DirectLdParams) :
     (Fin D.m → DirectScalarQ D) ≃ Point D.toLDTParameters where
@@ -114,7 +115,7 @@ private theorem coefficientPolynomial_eval
     (Polynomial.eval_eq_sum_degreeLTEquiv
       (((Polynomial.degreeLTEquiv K (n + 1)).symm c).2) t)
 
-/-- Direct axis-line coefficients are equivalent to mature bounded axis-line
+/-- Direct axis-line coefficients are equivalent to LDT bounded axis-line
 polynomials over the fixed field model. -/
 noncomputable def directAxisAnswerEquiv (D : DirectLdParams) :
     letI := D.toLDTFieldModel
@@ -138,7 +139,7 @@ noncomputable def directAxisAnswerEquiv (D : DirectLdParams) :
     intro i
     exact coefficientPolynomial_coeff D.d (fun j => f.poly.coeff j) i
 
-/-- Direct diagonal-line coefficients are equivalent to mature bounded
+/-- Direct diagonal-line coefficients are equivalent to LDT bounded
 diagonal-line polynomials over the fixed field model. -/
 noncomputable def directDiagonalAnswerEquiv (D : DirectLdParams) :
     letI := D.toLDTFieldModel
@@ -162,7 +163,7 @@ noncomputable def directDiagonalAnswerEquiv (D : DirectLdParams) :
     intro i
     exact coefficientPolynomial_coeff (D.m * D.d) (fun j => f.poly.coeff j) i
 
-/-- Coefficient evaluation agrees with evaluation of the corresponding mature
+/-- Coefficient evaluation agrees with evaluation of the corresponding LDT
 axis-line polynomial. -/
 theorem directAxisAnswerEquiv_apply (D : DirectLdParams)
     (c : DirectDegPoly D D.d) (t : DirectScalarQ D) :
@@ -179,7 +180,7 @@ theorem directAxisAnswerEquiv_apply (D : DirectLdParams)
   exact congrArg (FieldModel.equiv (q := D.q))
     (coefficientPolynomial_eval D.d c t)
 
-/-- Coefficient evaluation agrees with evaluation of the corresponding mature
+/-- Coefficient evaluation agrees with evaluation of the corresponding LDT
 diagonal-line polynomial. -/
 theorem directDiagonalAnswerEquiv_apply (D : DirectLdParams)
     (c : DirectDegPoly D (D.m * D.d)) (t : DirectScalarQ D) :
@@ -214,8 +215,10 @@ def LdParams.toDirectLdParams (L : LdParams) : DirectLdParams where
   unfold DirectLdParams.model LdParams.model LdParams.toDirectLdParams
   congr
 
-/-- Constructor-preserving equivalence between answers of the seed-indexed
-and directly indexed QPBT games. -/
+/-- The canonical answer equivalence between the seed-indexed and directly
+indexed QPBT games: point answers correspond to point answers, axis-line
+answers to axis-line answers, and diagonal-line answers to diagonal-line
+answers. -/
 noncomputable def ldDirectAnswerEquiv (L : LdParams) :
     LdAnswer L ≃ DirectLdAnswer L.toDirectLdParams where
   toFun

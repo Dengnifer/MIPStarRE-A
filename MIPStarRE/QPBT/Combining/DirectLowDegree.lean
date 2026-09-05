@@ -28,10 +28,11 @@ presentations; `Transport.SeedFiber` dilates a seed-indexed strategy to a
 direct strategy by a correlated residue register, and `Transport.SeedFiberValue`
 shows that the dilation preserves the value exactly; `Transport.Questions`
 reads LDT lines as canonical direct questions and rebases direct answers;
-`Transport.Strategy` reads one coordinate of a projective direct strategy as an
-LDT projective strategy, with exact Born-weight formulas for both constructions;
-`Transport.Consistency` reexpresses the three single-polynomial LDT consistency
-relations in direct coordinates, the first two at a fixed tuple coordinate; and
+`Transport.Strategy` reads one coordinate of a projective direct strategy as
+an LDT projective strategy, with exact Born-weight formulas for both
+constructions; `Transport.Consistency` reexpresses the three
+single-polynomial LDT consistency relations in direct coordinates, the first
+two at a fixed tuple coordinate; and
 `Transport.BranchComparison`, `Transport.DiagonalRecursion`, and
 `Transport.PassConversion` convert a value bound of the direct game into the
 pass hypothesis of the low individual degree theorem for every
