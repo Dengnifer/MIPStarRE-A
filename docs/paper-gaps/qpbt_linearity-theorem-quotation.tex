@@ -11,7 +11,7 @@
 
 \title{The Quoted Quantum Linearity Theorem in the Pauli Basis Analysis}
 \author{}
-\date{2026-09-04}
+\date{2026-09-05}
 
 \begin{document}
 \maketitle
@@ -22,32 +22,49 @@
   \item \textbf{Difficulty.} Medium.  The source quotes a fiberwise consequence
   of a state-dependent quantum linearity theorem, but suppresses an average,
   inserts an unnecessary bound on the error, appends an identity at the origin,
-  and leaves implicit a compatibility argument for the auxiliary spaces.  The
-  factor of two lost between measurement distance and operator distance is not
-  one of these: it is a defect of the provider's own printed statement, treated
-  in a separate note.
-  \item \textbf{Estimated weight.} The corrected single-family theorem and its
-  two distance formulations are proved.  The remaining task is a finite
-  common-extension construction that makes the auxiliary space uniform over
-  the outer parameters.
-  \item \textbf{Mathlib/project split.} Finite direct sums, extensions of
-  operators, and squared norms are standard linear algebra.  The proved
-  Fourier--Naimark stability theorem and the two state-dependent distance
-  conventions are project-level results.
+  and leaves implicit an ancilla assumption on the strategy.  The factor of two
+  lost between measurement distance and operator distance is not one of these:
+  it is a defect of the provider's own printed statement, treated in a separate
+  note.
+  \item \textbf{Estimated weight.} Resolved.  The corrected single-family
+  theorem and its two distance formulations are proved, and so is its
+  common-ancilla form: the ancillary space and vector of the Fourier--Naimark
+  argument depend only on the length of the index group.  The remaining
+  obligation was not the uniformity of the ancilla but the source's assumption
+  that the strategy carries zero-state padding.  That assumption is not part of the formal
+  setting, and the combined point measurements of the source's Lemma~4.10 are
+  therefore constructed on the original space by a route that needs no
+  ancilla: the sandwich of the two expanded point measurements, with outcomes
+  in $\F_q^2$ from the start, is approximately self-consistent by the same
+  calculation as in the source, and the orthonormalization lemma makes it
+  projective.  The only new ingredient is a Parseval identity transferring
+  the approximate commutation of the binary refinements to the
+  $\F_q$-valued measurements without loss.
+  \item \textbf{Mathlib/project split.} Finite Fourier orthogonality on a
+  finite field, inner-product expansions of squared norms, and the
+  submatrix/Kronecker calculus of positive semidefinite matrices are standard.
+  The Fourier--Naimark stability theorem, the orthonormalization lemma with
+  explicit constant, the expanded-state placement bookkeeping, and the
+  approximate commutation of the expanded point projections are project-level
+  results.
   \item \textbf{Key mathematical inputs.} Theorem~10 of
-  \cite{Natarajan2017Linearity}, the operator BLR identity, finite averaging,
-  and extension by the identity on orthogonal summands.  The remaining
-  common-extension reduction is tracked in \ghissue{19}.
+  \cite{Natarajan2017Linearity}, the operator BLR identity, Parseval's identity
+  for the additive characters of $\F_q$, the orthonormalization lemma of
+  \cite{Ji2020MIPStar} in its explicit-constant form, Jensen's inequality for
+  the concave function $x \mapsto x^{1/4}$, and the invariance of the expanded
+  state under the crosswise exchange of its two EPR pairs.  The discrepancy
+  record was opened in \ghissue{19}; the resolution below is carried out in
+  \ghissue{117}.
 \end{itemize}
 
 \section{Key theorem forms}
 
 Let $H$ be a finite-dimensional Hilbert space, let $\rho$ be an arbitrary
 density operator on $H$, and let $u\mapsto O^u$ be binary observables on $H$,
-indexed by $\mathbb F_2^t$.  The cited theorem assumes the averaged
+indexed by $\F_2^t$.  The cited theorem assumes the averaged
 correlation estimate
 \[
-  \mathop{\mathbb E}_{u,v}
+  \E_{u,v}
   \operatorname{Re}\operatorname{Tr}\!\left(
     O^u O^v O^{u+v}\rho\right) \geq 1-\delta.
 \]
@@ -61,14 +78,14 @@ $\rho'=\rho\otimes|\mathrm{anc}\rangle\langle\mathrm{anc}|$,
 \]
 Moreover,
 \[
-  \mathop{\mathbb E}_{u}
+  \E_{u}
   \operatorname{Tr}\!\left((L^u-O^u\otimes I_{H'})^\dagger
     (L^u-O^u\otimes I_{H'})\,\rho'\right)\leq2\delta.
 \]
 Equivalently, if $d^{\mathrm{bin}}_{\rho'}$ denotes the distance between the
 binary projective measurements associated with the two observables, then
 \[
-  \mathop{\mathbb E}_{u}
+  \E_{u}
   d^{\mathrm{bin}}_{\rho'}(L^u,O^u\otimes I_{H'})^2\leq\delta.
 \]
 The provider prints $\delta$ for the first, operator-distance bound.  Its
@@ -80,16 +97,55 @@ a counterexample to the printed operator bound are given in
 In particular, $L^0=I$: exact linearity gives $(L^0)^2=L^0$, while an
 observable is invertible.
 
-The chapter needs a parameterized version.  For each pair $(x,z)$ it applies
-the theorem to $(r,s)\mapsto O^{x,z,r,s}$.  If $\delta_{x,z}$ is the mean
-squared multiplicative defect on that fiber, the corresponding correlation
-error is $\delta_{x,z}/2$.  The corrected theorem therefore gives mean squared
-operator distance at most $\delta_{x,z}$, equivalently mean squared binary-
-measurement distance at most $\delta_{x,z}/2$.  Since the theorem accepts the
-actual nonnegative error on each fiber, no assumption that a fiber error is at
-most one, and no good--bad fiber split, is needed.  One must still formulate
-the finite common-extension step that makes the auxiliary space uniform over
-$(x,z)$.
+\paragraph{Common-ancilla form.}
+The auxiliary space and vector do not depend on $H$, $\rho$, $\delta$, or the
+family $O$.  For every $t\geq1$ there are a Hilbert space $H'_t$ of dimension
+$2^t+1$ and a unit vector $\mathrm{anc}_t\in H'_t$ such that, for every
+finite-dimensional $H$, every density operator $\rho$ on $H$, every
+$\delta\geq0$, and every family of binary observables $O^u$ on $H$ satisfying
+the correlation estimate, there are exactly linear binary observables $L^u$ on
+$H\otimes H'_t$ with the two conclusions displayed above for
+$\rho'=\rho\otimes|\mathrm{anc}_t\rangle\langle\mathrm{anc}_t|$.  Indeed,
+in the proof the space $H'_t$ has an orthonormal basis indexed by
+$\F_2^t\sqcup\{\bot\}$, the vector $\mathrm{anc}_t$ is the basis vector of
+$\bot$, and the projective measurement $\{C^v\}$ dilating the Fourier-square
+POVM $B^v=(\widehat{O}^v)^2$ is realized on $H\otimes H'_t$ by the
+one-measurement Naimark construction, whatever $H$, $\rho$, and $O$ are.
+
+\paragraph{The statement proved for the combined point measurements.}
+Let $\hat{M}^{(\mathrm{Point},X),x}_a$ and $\hat{M}^{(\mathrm{Point},Z),z}_b$,
+$a,b\in\F_q$, be the expanded point measurements, projective measurements on
+$\mathcal{H}\otimes(\C^q)^{\otimes M}$.  Write $\delta_{\mathrm{Anticom}}(\eps)$ for
+the approximate-commutation error of their binary refinements and $\eps$ for
+their self-consistency error, both on average over the points and with respect
+to the expanded state $|\hat\psi\rangle$.  Then, for every pair $(x,z)$, the
+sandwich
+\[
+  R^{x,z}_{a,b}
+  \,=\,\hat{M}^{(\mathrm{Point},Z),z}_b\,
+  \hat{M}^{(\mathrm{Point},X),x}_a\,
+  \hat{M}^{(\mathrm{Point},Z),z}_b ,
+  \qquad a,b\in\F_q ,
+\]
+is a POVM on the same space, and there is a universal constant $C$ such that,
+on average over uniformly random $x,z\in\F_q^m$ and for either bipartition
+scheme of the six registers,
+\[
+  \sum_{a,b}\bigl\|\bigl(R^{x,z}_{a,b}
+    -\hat{M}^{(\mathrm{Point},Z),z}_b\hat{M}^{(\mathrm{Point},X),x}_a\bigr)
+    |\hat\psi\rangle\bigr\|^2
+  \leq C\,\delta_{\mathrm{Anticom}} ,
+  \qquad
+  \sum_{(a,b)\neq(a',b')}
+  \langle\hat\psi|\,(R^{x,z}_{a,b})_{\mathsf{A}\mathsf{A}'}\,
+  (R^{x,z}_{a',b'})_{\mathsf{B}\mathsf{A}''}\,|\hat\psi\rangle
+  \leq C\,(\eps+\delta_{\mathrm{Anticom}}) .
+\]
+Applying the orthonormalization lemma to $R^{x,z}$ for each fixed $(x,z)$
+yields projective measurements $\hat{Q}^{x,z}_{a,b}$ on
+$\mathcal{H}\otimes(\C^q)^{\otimes M}$ with all the conclusions of the source's
+Lemma~4.10 and error $\delta_Q(\eps)=O(\eps^{1/8})$.  No auxiliary space, no
+linearity theorem, and no Fourier averaging over binary refinements enter.
 
 \section{Comparison with the quoted statement}
 
@@ -117,18 +173,159 @@ are the provider's and are treated in
 
 Lines~825--832 construct the family $O^{x,z,r,s}$ and establish approximate
 linearity only after averaging over $x,z,r,r',s,s'$.  They then apply the
-single-family theorem separately for every $(x,z)$ and state that sufficiently
-many zero ancillas avoid a further extension.  The remaining implicit step is
-to make the theorem's possibly fiber-dependent auxiliary spaces uniform.
+single-family theorem separately for every $(x,z)$ and state that
+``by assuming that $|\hat\psi\rangle$ has sufficiently many ancilla zero
+qubits, we do not need to extend the state further.''  Two things are implicit
+here: that the auxiliary spaces returned for different pairs $(x,z)$ can be
+taken to be one and the same, and that the strategy space already contains
+that auxiliary space in a zero state.  The next section treats both.
 
-The finite setting admits a standard repair.  Apply the theorem on each fiber
-with its actual defect, choose one finite auxiliary space large enough for all
-returned spaces, and embed each returned space so that its unit vector maps to
-one fixed vector.  Extend the conjugated observables by the identity on the
-orthogonal complement.  The embeddings may depend on the fiber because the
-observables do.  Averaging then yields the conclusion used later in the
-chapter.  This is an open reduction, not a counterexample to the quoted theorem
-or to the source's eventual combined-measurement conclusion.
+\section{The common-ancilla obligation and the padding assumption}
+
+\paragraph{The ancilla is uniform.}
+The first implicit point is settled by the common-ancilla form of the theorem
+stated in Section~2: the auxiliary space $H'_t$ and the vector
+$\mathrm{anc}_t$ are functions of $t=2\log_2 q$ alone.  Applying the theorem
+to the family $(r,s)\mapsto O^{x,z,r,s}$ for each pair $(x,z)$ therefore
+produces exactly linear observables $L^{x,z,r,s}$, all acting on the one space
+$\mathcal{H}\otimes(\C^q)^{\otimes M}\otimes H'_t$, all compared with the ampliated
+originals in the one state
+$|\hat\psi\rangle\otimes|\mathrm{anc}_t\rangle$.  Averaging the fiberwise
+bounds over $(x,z)$ is then legitimate, and the finite common-extension
+construction envisaged in the earlier version of this note (embedding
+fiber-dependent spaces into a common one) is unnecessary.
+
+\paragraph{The padding is essential and is not available.}
+The second implicit point is a genuine assumption on the strategy, not a
+property of the theorem.  Write $H=\mathcal{H}\otimes(\C^q)^{\otimes M}$.  The
+exactly linear family lives on $H\otimes H'_t$, and the operator
+$\hat{Q}^{x,z}_{a,b}=\E_{r,s}(-1)^{\tr(ra+sb)}L^{x,z,r,s}$ of the source is a
+projector on $H\otimes H'_t$.  The source needs it on $H$, and obtains this
+by assuming $\mathcal{H}=\mathcal{H}_0\otimes H'_t$ with $|\hat\psi\rangle$ supported on
+$|\mathrm{anc}_t\rangle$ in the second factor and every measurement of the
+strategy acting as the identity there.  Every strategy is unitarily
+equivalent to a padded one, so the assumption costs nothing for the source's
+final theorem, which is stated up to local isometries.  It does, however,
+change the statement of Lemma~4.10: read on a fixed strategy, the source's
+proof establishes the lemma only for padded strategies, which is a
+conditional statement of exactly the kind excluded from paper-facing
+declarations by \path{docs/paper-gaps/proof-gap-protocol.tex}.
+
+The ancilla cannot be removed afterwards.  Compressing the family along the
+ancilla returns the Fourier-square POVM: since $\{C^v\}$ dilates
+$\{B^v\}$, one has
+$\langle\mathrm{anc}_t|\,\hat{Q}^{x,z}_{a,b}\,|\mathrm{anc}_t\rangle
+=\E_{r,s}(-1)^{\tr(ra+sb)}\sum_v(-1)^{v\cdot(r,s)}B^v
+=B^{(a,b)}=\bigl(\widehat{O}^{x,z,(a,b)}\bigr)^2$,
+where $\widehat{O}^{x,z,(a,b)}=\E_{r,s}(-1)^{\tr(ra+sb)}O^{x,z,r,s}$ is the
+Fourier coefficient of the original family.  This is a POVM on $H$, but it is
+projective only when the original family is already exactly linear.  Thus no
+choice of ancilla and no compression produces the projective measurement the
+lemma asserts from the output of the linearity theorem; the projectivity is
+purchased precisely by the extra dimensions.
+
+\paragraph{A direct construction on the original space.}
+The formal statement of Lemma~4.10 quantifies over every projective strategy
+and asks for projective measurements on $H$ for that strategy.  It is proved
+as stated, by observing that the passage through binary refinements, exact
+linearity, and Fourier averaging can be bypassed.  The source uses the binary
+refinements $\hat{M}^{(\mathrm{Point},W),u,r}_b$ because the approximate
+commutation of the expanded point projections is established for them
+(Lemma~4.9(2) of the source), and the linearity theorem is the device that
+returns from $\F_2$-valued to $\F_q$-valued outcomes.  But the commutation
+estimate transfers to the $\F_q$-valued measurements exactly.  With
+$\chi(a)=(-1)^{\tr(a)}$ and $\hat{W}^r(u)$ the expanded observables, the
+definitions give
+$\hat{M}^{(\mathrm{Point},X),x}_a=\E_r\chi(ar)\hat{X}^r(x)$ and
+$\hat{M}^{(\mathrm{Point},Z),z}_b=\E_s\chi(bs)\hat{Z}^s(z)$, hence
+\[
+  \bigl[\hat{M}^{(\mathrm{Point},X),x}_a,\hat{M}^{(\mathrm{Point},Z),z}_b\bigr]
+  =\E_{r,s}\,\chi(ar)\chi(bs)\,
+  \bigl[\hat{X}^r(x),\hat{Z}^s(z)\bigr] .
+\]
+Parseval's identity for the characters $a\mapsto\chi(ar)$ of $\F_q$, which are
+orthogonal, states that for any vectors $v_{r,s}$,
+\[
+  \sum_{a,b\in\F_q}
+  \Bigl\|\E_{r,s}\chi(ar)\chi(bs)\,v_{r,s}\Bigr\|^2
+  \,=\,\E_{r,s}\,\|v_{r,s}\|^2 ,
+\]
+so that, for every placement of the operators on the expanded state,
+\[
+  \E_{x,z}\sum_{a,b}
+  \bigl\|\bigl[\hat{M}^{(\mathrm{Point},X),x}_a,
+    \hat{M}^{(\mathrm{Point},Z),z}_b\bigr]|\hat\psi\rangle\bigr\|^2
+  =\E_{x,z,r,s}
+  \bigl\|\bigl[\hat{X}^r(x),\hat{Z}^s(z)\bigr]|\hat\psi\rangle\bigr\|^2
+  =4\,\E_{\omega}\sum_{b,b'}
+  \bigl\|\bigl[\hat{M}^{(\mathrm{Point},X),x,r}_b,
+    \hat{M}^{(\mathrm{Point},Z),z,s}_{b'}\bigr]|\hat\psi\rangle\bigr\|^2 ,
+\]
+the last equality because the binary refinements are
+$\tfrac12(I\pm\hat{W}^r(u))$.  The right-hand side is
+$O(\delta_{\mathrm{Anticom}})$ by the source's Lemma~4.9.  There is no loss
+in $q$; an application of Jensen's inequality in place of Parseval would lose
+a factor $q^2$ and would not give a polynomial in $\eps$.
+
+Given this, the source's first step goes through verbatim with $\F_q$-valued
+outcomes.  The sandwich $R^{x,z}_{a,b}$ of Section~2 is a POVM, and
+$R^{x,z}_{a,b}-\hat{M}^Z_b\hat{M}^X_a=\hat{M}^Z_b[\hat{M}^X_a,\hat{M}^Z_b]$
+with $\hat{M}^Z_b$ a contraction, so $R^{x,z}$ is
+$O(\delta_{\mathrm{Anticom}})$-close to the ordered product.  For the
+self-consistency of $R^{x,z}$ between the placements
+$\mathsf{A}\mathsf{A}'$ and $\mathsf{B}\mathsf{A}''$ an exact identity replaces
+the source's Cauchy--Schwarz chain.  Writing $P_1,P_2$ for the two placements
+of an operator $P$, $D^W_c=(\hat{M}^W_c)_1-(\hat{M}^W_c)_2$, and
+$w_b=(\hat{M}^Z_b)_1(\hat{M}^Z_b)_2|\hat\psi\rangle$, the placements commute
+and the effects are Hermitian projectors, so
+\[
+  \sum_{(a,b)\neq(a',b')}
+  \langle\hat\psi|(R^{x,z}_{a,b})_1(R^{x,z}_{a',b'})_2|\hat\psi\rangle
+  \,=\,1-\sum_{a,b}\langle w_b|(\hat{M}^X_a)_1(\hat{M}^X_a)_2|w_b\rangle
+  \,=\,\tfrac12\sum_b\|D^Z_b|\hat\psi\rangle\|^2
+  +\tfrac12\sum_{a,b}\|D^X_a w_b\|^2 ,
+\]
+using twice the identity
+$\sum_c\langle w|P_cQ_c|w\rangle=\|w\|^2-\tfrac12\sum_c\|(P_c-Q_c)w\|^2$ for
+commuting projective measurements $\{P_c\}$ and $\{Q_c\}$.  Expanding
+$D^X_a w_b$ as
+$(\hat{M}^Z_b)_1(\hat{M}^Z_b)_2D^X_a|\hat\psi\rangle
++(\hat{M}^Z_b)_2([\hat{M}^X_a,\hat{M}^Z_b])_1|\hat\psi\rangle
+-(\hat{M}^Z_b)_1([\hat{M}^X_a,\hat{M}^Z_b])_2|\hat\psi\rangle$
+and using that the $\hat{M}^Z_b$ are contractions summing to the identity
+bounds the consistency defect by
+$\tfrac12\sum_b\|D^Z_b\hat\psi\|^2
++\tfrac32\bigl(\sum_a\|D^X_a\hat\psi\|^2+K_1+K_2\bigr)$,
+where $K_i$ is the squared commutator sum at placement $i$; on average over
+$(x,z)$ this is $O(\eps+\delta_{\mathrm{Anticom}})$.  The defect is manifestly
+nonnegative, being a sum of squares.
+
+The orthonormalization lemma (Lemma~4.2 of the source, with explicit constant
+$220\,\delta^{1/4}$ in the formalization) applied for each fixed $(x,z)$ to the
+POVM $R^{x,z}$ on $\mathsf{A}\mathsf{A}'$ against $R^{x,z}$ on
+$\mathsf{B}\mathsf{A}''$ produces a projective measurement
+$\hat{Q}^{x,z}_{a,b}$ on $H$ with
+$\sum_{a,b}\|((\hat{Q}^{x,z}_{a,b}-R^{x,z}_{a,b})_{\mathsf{A}\mathsf{A}'})
+\hat\psi\|^2\leq220\,c_{x,z}^{1/4}$, where $c_{x,z}$ is the bound on the
+defect just obtained; since $x\mapsto x^{1/4}$ is concave,
+$\E_{x,z}c_{x,z}^{1/4}\leq(\E_{x,z}c_{x,z})^{1/4}$, which is
+$O(\eps^{1/8})$.  The measurement for Bob's side is obtained in the same way
+from the bipartition $\mathsf{B}\mathsf{A}''\mid\mathsf{A}\mathsf{A}'
+\mathsf{B}'\mathsf{B}''$.  The remaining conclusions of Lemma~4.10 are the
+triangle inequality along
+$\hat{Q}\approx R\approx\hat{M}^Z\hat{M}^X\approx\hat{M}^X\hat{M}^Z$, together
+with the consistency of the ordered products across opposite placements,
+$(\hat{M}^Z_b\hat{M}^X_a)_1\approx(\hat{M}^X_a\hat{M}^Z_b)_2$, which follows
+from the self-consistency of each factor and the contraction property of the
+other, exactly as in the source's calculation.  The symmetric equivalents on
+$\mathsf{B}\mathsf{B}'$ and $\mathsf{A}\mathsf{B}''$ do not require a symmetric
+strategy: the permutation of the six registers that exchanges
+$\mathsf{A}'\leftrightarrow\mathsf{B}''$ and
+$\mathsf{A}''\leftrightarrow\mathsf{B}'$ fixes $|\hat\psi\rangle$, because
+each EPR vector is symmetric, and carries the placement
+$\mathsf{A}\mathsf{A}'$ to $\mathsf{A}\mathsf{B}''$ and
+$\mathsf{B}\mathsf{A}''$ to $\mathsf{B}\mathsf{B}'$, so every squared distance
+on one placement equals the same squared distance on its image.
 
 \section{Blueprint and formalization status}
 
@@ -136,7 +333,9 @@ Theorem~\path{thm:linearity} and
 Remark~\path{rem:linearity-import} in
 \path{blueprint/src/chapter/ch15_qpbt_combining.tex} record respectively the
 averaged provider theorem with the corrected distance normalization and the
-common-ancilla obligation for its fiberwise use.
+obligations of its fiberwise use; the common-ancilla form is recorded as a
+formalization-support lemma next to the theorem, and the proof of
+Lemma~\path{lem:qld-4-10} is the direct construction of Section~4.
 
 The declaration \path{exists_exactly_linear_observables} in
 \path{MIPStarRE/QPBT/Combining/Linearity.lean} assumes a nonnegative defect, a
@@ -146,20 +345,32 @@ normalized ancillary vector for that family, exactly linear binary observables
 on the extension, and the averaged squared operator-distance bound $2\delta$.
 The companion declaration
 \path{exists_exactly_linear_observables_binaryObservableDistSq} gives the
-equivalent squared binary-measurement bound $\delta$.  Both declarations are
-proved.  They neither assume $\delta\leq1$ nor assert pointwise closeness, and
-the first declaration records the correction to the provider's printed
-operator bound.  Both are linked from Theorem~\path{thm:linearity}.  The
+equivalent squared binary-measurement bound $\delta$.  The declaration
+\path{exists_exactly_linear_observables_commonAncilla} in the same file states
+the common-ancilla form: the ancillary space and vector are chosen first,
+depending on $t$ alone, and the conclusion is asserted for every space,
+weight, error, and family satisfying the hypothesis.  All three are proved.
+They neither assume $\delta\leq1$ nor assert pointwise closeness, and the
+first records the correction to the provider's printed operator bound.  The
 normalization analysis was carried out in \ghissue{124} and the statement
-repair in \ghissue{129}; both are closed.  No Lean declaration yet supplies
-the finite common-extension construction for the family indexed by $(x,z)$.
-The complete QPBT audit status is recorded in
-\path{docs/paper-gaps/qpbt-gap-register.md}.
+repair in \ghissue{129}; both are closed.
 
-Issue~\#19 introduced this discrepancy record for the extraction skeleton;
-\ghissue{47} owns the Stage~4.3 proof work consumed downstream.  The chapter-16
-extraction declarations consume the concrete \path{GlobalPairWitness}; they
-do not assume a new fiberwise linearity hypothesis or a common ancillary space.
+The direct construction is formalized under
+\path{MIPStarRE/QPBT/Combining/Points/}: the placement calculus and the
+EPR-exchange invariance, the Parseval transfer of the commutation estimate to
+the $\F_q$-valued point measurements, the sandwich POVM with its closeness to
+the ordered product and its consistency defect, and the fiberwise
+orthonormalization with the concavity step.  The declaration
+\path{exists_combinedPointsWitness} in
+\path{MIPStarRE/QPBT/Combining/Points.lean} is the source-facing statement of
+Lemma~4.10, with the source's hypotheses and conclusion, and it is proved
+without \texttt{sorry} by this route; the blueprint entry
+\path{lem:qld-4-10} carries statement- and proof-level \leanok, and the
+supporting declarations are recorded there as formalization-support lemmas.
+The chapter-16 extraction declarations consume the concrete
+\path{GlobalPairWitness}; they do not assume a fiberwise linearity hypothesis
+or a common ancillary space.  \ghissue{47} owns the Stage~4.3 proof work
+consumed downstream.
 
 \section{Conclusion}
 
@@ -168,11 +379,18 @@ unnecessary upper bound on $\delta$, and appends an assertion at the identity
 that is derivable from exact linearity.  It does not reproduce the provider's
 factor-of-two normalization defect, since it states its conclusion in a
 relation that absorbs constant factors; that defect is the provider's own and
-is treated separately.  The single-family theorem is now
-proved with mean squared operator error at most $2\delta$, equivalently mean
-squared binary-measurement error at most $\delta$.  Its use for the family
-indexed by $(x,z)$ still requires an explicit finite common-extension argument;
-that is the remaining open formal reduction.
+is treated separately.  The single-family theorem is proved with mean squared
+operator error at most $2\delta$, equivalently mean squared binary-measurement
+error at most $\delta$, and its ancilla depends only on the index length, so
+the fiberwise application is uniform.  What the source additionally assumes,
+zero-state padding of the strategy, is not a property of an arbitrary
+projective strategy and cannot be dispensed with in the source's route, since
+the ancilla is what makes the Fourier-averaged family projective.  The combined
+point measurements are therefore constructed on the original space directly:
+Parseval's identity transfers the approximate commutation to the
+$\F_q$-valued point measurements without loss, the sandwich POVM is then
+approximately self-consistent, and the orthonormalization lemma makes it
+projective with error $O(\eps^{1/8})$.
 
 \bibliographystyle{alpha}
 \bibliography{references}
