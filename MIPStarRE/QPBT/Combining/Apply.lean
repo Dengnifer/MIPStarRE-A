@@ -42,6 +42,15 @@ alphabet documented in `docs/paper-gaps/qpbt_combined-lines-error-term.tex`.
 Their conversion to the source's verifier game remains open. This declaration takes
 an already constructed point witness; the companion obligation below supplies that
 witness existentially.
+
+**Error contract:** the polynomial bound printed in the source is carried
+by `IsPolyErr₂`, which states the corrected sum form
+`f x y ≤ C * (x ^ r + y ^ s)` with `1 ≤ C` and positive exponents on the
+closed nonnegative quadrant, in place of the product form `C * (x * y) ^ C`
+of the source shorthand at `04_preliminaries.tex:22-29`.  The correction and
+the two-dimensional strategy that refutes the product form are recorded in
+`docs/paper-gaps/qpbt_pasting-product-error.tex` and tracked by issue #196.
+Here `poly(m^2 * epsilon, md / q)` is read in that sense.
 -/
 theorem exists_extendedLinesWitness_ofPointsWitness :
     ∃ deltaCombine : ℝ → ℝ → ℝ, IsPolyErr₂ deltaCombine ∧
@@ -60,7 +69,16 @@ printed in `lem:qld-4-13`, paper lines 1020--1034.
 
 The `_ofPointsWitness` companion assumes a point witness, while this declaration
 supplies one existentially. Both declarations use the directly indexed questions,
-law, and completed answer alphabet, so neither is the source-facing paper statement. -/
+law, and completed answer alphabet, so neither is the source-facing paper statement.
+
+**Error contract:** the polynomial bound printed in the source is carried
+by `IsPolyErr₂`, which states the corrected sum form
+`f x y ≤ C * (x ^ r + y ^ s)` with `1 ≤ C` and positive exponents on the
+closed nonnegative quadrant, in place of the product form `C * (x * y) ^ C`
+of the source shorthand at `04_preliminaries.tex:22-29`.  The correction and
+the two-dimensional strategy that refutes the product form are recorded in
+`docs/paper-gaps/qpbt_pasting-product-error.tex` and tracked by issue #196.
+Here `poly(m^2 * epsilon, md / q)` is read in that sense. -/
 theorem exists_extendedLinesWitness :
     ∃ deltaQ : ℝ → ℝ, IsPolyErr deltaQ ∧
       ∃ deltaCombine : ℝ → ℝ → ℝ, IsPolyErr₂ deltaCombine ∧
@@ -83,6 +101,15 @@ constructed point witness; the obligation below supplies it existentially. Relat
 its game to the source's seed-bearing game requires the transport and soundness
 obligations in
 `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`.
+
+**Error contract:** the polynomial bound printed in the source is carried
+by `IsPolyErr₂`, which states the corrected sum form
+`f x y ≤ C * (x ^ r + y ^ s)` with `1 ≤ C` and positive exponents on the
+closed nonnegative quadrant, in place of the product form `C * (x * y) ^ C`
+of the source shorthand at `04_preliminaries.tex:22-29`.  The correction and
+the two-dimensional strategy that refutes the product form are recorded in
+`docs/paper-gaps/qpbt_pasting-product-error.tex` and tracked by issue #196.
+Here `poly(epsilon, md / q)` is read in that sense.
 -/
 theorem exists_extendedLinesWitness_established_ofPointsWitness :
     ∃ C : ℝ, 0 < C ∧
@@ -103,7 +130,16 @@ Its question carrier and line-point law are documented in
 `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`; its `Option`-completed answer
 alphabet is documented in `docs/paper-gaps/qpbt_combined-lines-error-term.tex`.
 Transport to `lem:qld-4-13` must convert this completed comparison to the source's
-sum over field answers, including degenerate zero-direction singleton lines. -/
+sum over field answers, including degenerate zero-direction singleton lines.
+
+**Error contract:** the polynomial bound printed in the source is carried
+by `IsPolyErr₂`, which states the corrected sum form
+`f x y ≤ C * (x ^ r + y ^ s)` with `1 ≤ C` and positive exponents on the
+closed nonnegative quadrant, in place of the product form `C * (x * y) ^ C`
+of the source shorthand at `04_preliminaries.tex:22-29`.  The correction and
+the two-dimensional strategy that refutes the product form are recorded in
+`docs/paper-gaps/qpbt_pasting-product-error.tex` and tracked by issue #196.
+Here `poly(epsilon, md / q)` is read in that sense. -/
 theorem exists_extendedLinesWitness_established :
     ∃ deltaQ : ℝ → ℝ, IsPolyErr deltaQ ∧
       ∃ C : ℝ, 0 < C ∧

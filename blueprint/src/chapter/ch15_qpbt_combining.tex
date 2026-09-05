@@ -964,8 +964,12 @@ assembled by Fourier averaging.
 	\uses{lem:qld-4-10, def:line, def:line-point-dist, def:consistency,
 		def:bracket, def:expanded-state, def:symmetric-equivalents,
 		def:ideg-deg-polynomials}
-	There exists a function $\delta_P(\eps,m,d,q) = \poly(\eps, md/q)$ such
-	that the following holds. For
+	There exists a function $\delta_P(\eps,m,d,q) = \poly(\eps, md/q)$, the
+	two-variable polynomial error read in the corrected sum sense of
+	\cite{gap:qpbt_pasting-product-error}, that is, a bound
+	$C\bigl(\eps^{r} + (md/q)^{s}\bigr)$ with $C \ge 1$ and $r, s > 0$ on the
+	closed nonnegative quadrant rather than the literal product form of the
+	shorthand, such that the following holds. For
 	$\hilb \in \{\hilb_{\mathsf{A}}, \hilb_{\mathsf{B}}\}$ and every pair of
 	lines $\ell_X$ and $\ell_Z$ in $\F_q^m$ there exists a POVM
 	$\{T^{\ell_X,\ell_Z}_{f_X,f_Z}\}$ acting on $\hilb \ot (\C^q)^{\ot M}$,
@@ -987,7 +991,8 @@ assembled by Fourier averaging.
 \begin{proof}
 	\uses{def:expanded-line-measurement, lem:qld-4-10, fact:add-a-proj,
 		lem:cool-closeness-fact, lem:qld-comm-line-cons, fact:agreement,
-		fact:data-processing, lem:pasting, lem:schwartz-zippel-total-degree}
+		fact:data-processing, lem:pasting, lem:schwartz-zippel-total-degree,
+		def:symmetric-equivalents}
 	Define, for all lines $\ell_X, \ell_Z$ and
 	$(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$, the sandwich
 	operator
@@ -1036,7 +1041,10 @@ assembled by Fourier averaging.
 	applied to the polynomials $f_X, f_Z$ of total degree at most $md$; the
 	two hypotheses of the pasting lemma are supplied by the preceding display
 	and by \eqref{eq:qld-q-self-cons}, and the distribution over
-	$(\ell_X, \ell_Z)$ is that of two independent uniformly random lines.
+	$(\ell_X, \ell_Z)$ is that of two independent uniformly random lines. The
+	register-exchanged comparison \eqref{eq:pasting-1-sym} is supplied by the
+	symmetric equivalents of that preceding display, which
+	Lemma~\ref{lem:qld-4-10} establishes for all of its approximations.
 	This gives the stated relation with $\delta_P$ equal to the pasting
 	error, a $\poly(\eps, md/q)$ function, and the identical argument with
 	the registers modified gives all symmetric equivalents.
@@ -1172,8 +1180,12 @@ analyzed, together with candidate repairs, in
 	% distribution over F_q^{2m+2} presupposes that 2m+2 divides q; see
 	% rem:qld-4-7-divisibility.
 	There exists a function
-	$\delta_{\mathrm{combine}}(\eps,m,d,q) = \poly(m^2\eps, md/q)$
-	such that the following holds. For
+	$\delta_{\mathrm{combine}}(\eps,m,d,q) = \poly(m^2\eps, md/q)$, the
+	two-variable polynomial error read in the corrected sum sense of
+	\cite{gap:qpbt_pasting-product-error}, that is, a bound
+	$C\bigl((m^2\eps)^{r} + (md/q)^{s}\bigr)$ with $C \ge 1$ and $r, s > 0$ on
+	the closed nonnegative quadrant rather than the literal product form of the
+	shorthand, such that the following holds. For
 	every line $\ell$ in $\F_q^{2m+2}$ and
 	$\hilb \in \{\hilb_{\mathsf{A}}, \hilb_{\mathsf{B}}\}$ there exists a
 	POVM $\{\hat{Q}^{\ell}_{f}\}$ acting on $\hilb \ot (\C^q)^{\ot M}$ with
