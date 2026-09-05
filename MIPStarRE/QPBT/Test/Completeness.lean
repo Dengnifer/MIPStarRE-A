@@ -1,5 +1,6 @@
 import MIPStarRE.QPBT.Games.StrategyClasses
 import MIPStarRE.QPBT.Games.TypedCondLinear
+import MIPStarRE.QPBT.Test.Completeness.Commutation
 import MIPStarRE.QPBT.Test.Completeness.HonestStrategy
 import MIPStarRE.QPBT.Test.Completeness.HonestStrategy.Assembly
 import MIPStarRE.QPBT.Test.LowDegreeGameTheorems
@@ -355,6 +356,15 @@ theorem honestStrategy_projective (P : AdmissibleParams) (x : PauliQuestion P) :
 theorem honestStrategy_isConsistent (P : AdmissibleParams) :
     (honestStrategy P).IsConsistent :=
   fun x => honestMeasurement_isConsistentOn P x.1 x.2
+
+/-- The honest strategy is a symmetric projective consistent commuting
+strategy: every measurement is projective, the family is consistent on the
+maximally entangled state, and the effects commute on every question pair of
+positive weight. -/
+theorem honestStrategy_isSPCC (P : AdmissibleParams) :
+    (honestStrategy P).IsSPCC :=
+  ⟨honestStrategy_projective P, honestStrategy_isConsistent P,
+    honestMeasurement_commuting P⟩
 
 /-- `lem:pauli-completeness`: every admissible Pauli basis test has a
 value-one SPCC strategy. Blueprint `ch13_qpbt_test.tex:390-395`, paper
