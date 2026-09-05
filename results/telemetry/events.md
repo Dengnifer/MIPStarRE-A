@@ -2560,3 +2560,9 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   `results/telemetry/design-decisions.md` register.
 - **First application:** #172 (rigidity statement) re-routed from a codex lane to a Fable math-fix
   session at 22:38Z.
+
+## 2026-09-05T02:38Z — math-fix #117 converged (Fable 5.1, session 1)
+- Common-ancilla obligation of thm:linearity: the ancilla is uniform (basis vector of the extra direction of C^(2^t+1)); proved as `exists_exactly_linear_observables_commonAncilla`.
+- The source's "sufficiently many ancilla zero qubits" is an assumption on the strategy, absent from `ProjectiveSetting`, and cannot be discharged afterwards (compression returns the Fourier-square POVM, projective only when already exactly linear).
+- Resolution: lem:qld-4-10 proved directly on the original space (Parseval transfer of the commutation bound, sandwich POVM, exact overlap identity, lem:ortho per point pair, register-permutation symmetrization); error K eps^(1/8). Statement of `exists_combinedPointsWitness` unchanged; sorry removed.
+- Paper-gap note rewritten (qpbt_linearity-theorem-quotation.tex); ch15 support lemmas added, all leanok. Commits 2ce71cc, 6b4b75d on the #117 branch (PR 212).
