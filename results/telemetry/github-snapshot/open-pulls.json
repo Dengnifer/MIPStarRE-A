@@ -1,16 +1,16 @@
 [
  {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/pulls/217",
-  "id": 4449619200,
-  "node_id": "PR_kwDOUJyJf88AAAABCTfNAA",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/pull/217",
-  "diff_url": "https://github.com/Dengnifer/MIPStarRE-A/pull/217.diff",
-  "patch_url": "https://github.com/Dengnifer/MIPStarRE-A/pull/217.patch",
-  "issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/217",
-  "number": 217,
+  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/pulls/221",
+  "id": 4450266602,
+  "node_id": "PR_kwDOUJyJf88AAAABCUGt6g",
+  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/pull/221",
+  "diff_url": "https://github.com/Dengnifer/MIPStarRE-A/pull/221.diff",
+  "patch_url": "https://github.com/Dengnifer/MIPStarRE-A/pull/221.patch",
+  "issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/221",
+  "number": 221,
   "state": "open",
   "locked": false,
-  "title": "feat(QPBT/Test): prove Magic Square rigidity constants",
+  "title": "github-sync.sh must commit the record snapshot it writes (checked-push refuses dirty checkouts)",
   "user": {
    "login": "Dengnifer",
    "id": 89234078,
@@ -32,12 +32,12 @@
    "user_view_type": "public",
    "site_admin": false
   },
-  "body": "## Motivation\n\nStage 4.3 proof packet for issue #105 (see the issue body for targets, sources and plan).\n\n## Description\n\n- Merge remote-tracking branch 'github/main' into issue-105-ms-rigidity-constants\n- fix(review): address PR 217 round-2 findings\n- chore(telemetry): records around PR 197 merge\n- Merge pull request #197 from Dengnifer/issue-157-pre-push-declines-the-push-with-exit-141\n- Merge remote-tracking branch 'github/main' into issue-157-pre-push-declines-the-push-with-exit-141\n- chore(telemetry): usage summary at the PR 152 milestone\n- chore(telemetry): records around PR 152 merge\n- Merge pull request #152 from Dengnifer/issue-107-pauli-sampler-canonical-params\n- Merge remote-tracking branch 'github/main' into issue-107-pauli-sampler-canonical-params\n- Merge remote-tracking branch 'github/main' into issue-157-pre-push-declines-the-push-with-exit-141\n- Merge remote-tracking branch 'github/main' into issue-157-pre-push-declines-the-push-with-exit-141\n- chore(telemetry): B6 resolved; PR 197 merge note\n- Merge remote-tracking branch 'github/main' into issue-157-pre-push-declines-the-push-with-exit-141\n- chore(hooks): raise the workflow-layer budget to 1000 lines; exempt merges carrying main (owner decision)\n- chore(telemetry): records around PR 191 merge\n- Merge pull request #191 from Dengnifer/issue-134-simultaneous-polynomial-measurements\n- Merge remote-tracking branch 'github/main' into issue-134-simultaneous-polynomial-measurements\n- Merge remote-tracking branch 'github/main' into issue-107-pauli-sampler-canonical-params\n- fix(review): cite chapter-12 nodes by label (PR 152 round 5)\n- Merge remote-tracking branch 'github/main' into issue-105-ms-rigidity-constants\n- fix(review): address PR 217 round-1 findings\n- Merge remote-tracking branch 'github/main' into issue-107-pauli-sampler-canonical-params\n- fix(review): address PR 152 round-4 findings\n- Merge remote-tracking branch 'github/main' into issue-134-simultaneous-polynomial-measurements\n- Merge remote-tracking branch 'github/main' into issue-105-ms-rigidity-constants\n- Merge remote-tracking branch 'github/main' into issue-105-ms-rigidity-constants\n- feat(QPBT/Test): Magic Square rigidity, sorry-free with explicit constants\n- Merge remote-tracking branch 'github/main' into issue-107-pauli-sampler-canonical-params\n- fix(review): address PR 152 round-3 findings\n- Merge remote-tracking branch 'github/main' into issue-134-simultaneous-polynomial-measurements\n- fix(review): address PR 191 round-2 findings\n- feat(QPBT/Test): transport of the first logical pair through the two-qubit swap\n- Merge remote-tracking branch 'github/main' into issue-134-simultaneous-polynomial-measurements\n- fix(review): address PR 191 findings\n- Merge remote-tracking branch 'github/main' into issue-107-pauli-sampler-canonical-params\n- fix(review): address PR 152 round findings\n- feat(QPBT/Test): state estimate of Magic Square rigidity on the dilation\n- feat(QPBT/Test): joint two-qubit state estimate and intertwining blocks\n- feat(QPBT/Test): swap-component and transport estimates for MS rigidity\n- Merge remote-tracking branch 'github/main' into issue-107-pauli-sampler-canonical-params\n- Merge remote-tracking branch 'github/main' into issue-134-simultaneous-polynomial-measurements\n- fix(review): merge consolidated QPBT support\n- chore(QPBT/Games): merge renamed sandwich API\n- chore(QPBT/Combining): merge main for simultaneous measurements\n- fix(QPBT/Test): qualify applyOperatorToState_mul in TwoQubitSwap\n- fix(review): correct QPBT blueprint status and prose\n- Merge remote-tracking branch 'github/main' into issue-157-pre-push-declines-the-push-with-exit-141\n- fix(review): keep emergency bypass ref-scoped\n- Merge remote-tracking branch 'github/main' into issue-105-ms-rigidity-constants\n- feat(QPBT/Test): two-qubit controlled-swap isometry for Magic Square rigidity\n- feat(QPBT/Test): coarse Magic Square rigidity witness and large-error regime\n- fix(review): suppress unvalidated tag publication\n- feat(QPBT/Test): second Magic Square logical pair and ideal-target facts\n- Merge remote-tracking branch 'github/main' into issue-157-pre-push-declines-the-push-with-exit-141\n- Merge remote-tracking branch 'github/main' into issue-157-pre-push-declines-the-push-with-exit-141\n- Merge remote-tracking branch 'github/main' into issue-157-pre-push-declines-the-push-with-exit-141\n- fix(review): bind preflight to published checkout\n- Merge remote-tracking branch 'github/main' into issue-157-pre-push-declines-the-push-with-exit-141\n- fix(review): enforce checked push tuple\n- docs(paper-gaps): simultaneous measurements are not obtained coordinatewise\n- fix(review): PR 191 prose findings on the sandwich and transport modules\n- feat(QPBT/Combining): one-coordinate simultaneous polynomial measurements\n- fix(review): merge current main for adjudication\n- Merge remote-tracking branch 'github/main' into issue-134-simultaneous-polynomial-measurements\n- fix(review): merge current telemetry for adjudicati\n\n---\nCloses #105\n",
-  "created_at": "2026-09-05T08:26:05Z",
-  "updated_at": "2026-09-05T11:05:49Z",
+  "body": "## Motivation\n\nStage 4.3 proof packet for issue #220 (see the issue body for targets, sources and plan).\n\n## Description\n\n- Merge remote-tracking branch 'github/main' into issue-220-github-sync-snapshot-commit\n- fix(review): address PR 221 findings (pathspec commit only, visible errors, protocol note)\n- chore(telemetry): silent-loss incident on 109/110; sessions\n- chore(telemetry): publish-path note; snapshot\n- fix(local): github-sync commits the record snapshot it writes so checked-push can publish (#220)\n\n## Testing\n\nWorker checked every changed file with `lake env lean`; exact-head CI and review follow.\n\n---\nCloses #220\n",
+  "created_at": "2026-09-05T11:13:00Z",
+  "updated_at": "2026-09-05T11:35:35Z",
   "closed_at": null,
   "merged_at": null,
-  "merge_commit_sha": "e6d1ba1f6fea04e0bc4c957bc66f81c3340a1851",
+  "merge_commit_sha": "99472b0c0dde40993b3fd53f4cca7572c2b38abb",
   "assignees": [],
   "requested_reviewers": [],
   "requested_teams": [],
@@ -54,15 +54,15 @@
   ],
   "milestone": null,
   "draft": false,
-  "commits_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/pulls/217/commits",
-  "review_comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/pulls/217/comments",
+  "commits_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/pulls/221/commits",
+  "review_comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/pulls/221/comments",
   "review_comment_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/pulls/comments{/number}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/217/comments",
-  "statuses_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/statuses/631edf625b5c3d899ccd46baaa501a06df253633",
+  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/221/comments",
+  "statuses_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/statuses/bf527c0adbd616f8a067fd5888ea78e01b200e04",
   "head": {
-   "label": "Dengnifer:issue-105-ms-rigidity-constants",
-   "ref": "issue-105-ms-rigidity-constants",
-   "sha": "631edf625b5c3d899ccd46baaa501a06df253633",
+   "label": "Dengnifer:issue-220-github-sync-snapshot-commit",
+   "ref": "issue-220-github-sync-snapshot-commit",
+   "sha": "bf527c0adbd616f8a067fd5888ea78e01b200e04",
    "user": {
     "login": "Dengnifer",
     "id": 89234078,
@@ -152,8 +152,8 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-05T11:02:02Z",
-    "pushed_at": "2026-09-05T11:02:24Z",
+    "updated_at": "2026-09-05T11:39:46Z",
+    "pushed_at": "2026-09-05T11:40:07Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-A.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-A.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-A.git",
@@ -173,7 +173,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 69,
+    "open_issues_count": 70,
     "license": null,
     "allow_forking": true,
     "is_template": false,
@@ -183,7 +183,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 69,
+    "open_issues": 70,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -191,7 +191,7 @@
   "base": {
    "label": "Dengnifer:main",
    "ref": "main",
-   "sha": "02695355f9d2059a87ba832a91ec87d932a43786",
+   "sha": "c8a40037c6f2532782d55dc7aebffd46e0204d7f",
    "user": {
     "login": "Dengnifer",
     "id": 89234078,
@@ -281,8 +281,8 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-05T11:02:02Z",
-    "pushed_at": "2026-09-05T11:02:24Z",
+    "updated_at": "2026-09-05T11:39:46Z",
+    "pushed_at": "2026-09-05T11:40:07Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-A.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-A.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-A.git",
@@ -302,7 +302,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 69,
+    "open_issues_count": 70,
     "license": null,
     "allow_forking": true,
     "is_template": false,
@@ -312,35 +312,35 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 69,
+    "open_issues": 70,
     "watchers": 1,
     "default_branch": "main"
    }
   },
   "_links": {
    "self": {
-    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/pulls/217"
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/pulls/221"
    },
    "html": {
-    "href": "https://github.com/Dengnifer/MIPStarRE-A/pull/217"
+    "href": "https://github.com/Dengnifer/MIPStarRE-A/pull/221"
    },
    "issue": {
-    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/217"
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/221"
    },
    "comments": {
-    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/217/comments"
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/221/comments"
    },
    "review_comments": {
-    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/pulls/217/comments"
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/pulls/221/comments"
    },
    "review_comment": {
     "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/pulls/comments{/number}"
    },
    "commits": {
-    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/pulls/217/commits"
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/pulls/221/commits"
    },
    "statuses": {
-    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/statuses/631edf625b5c3d899ccd46baaa501a06df253633"
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/statuses/bf527c0adbd616f8a067fd5888ea78e01b200e04"
    }
   },
   "author_association": "OWNER",
@@ -501,8 +501,8 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-05T11:02:02Z",
-    "pushed_at": "2026-09-05T11:02:24Z",
+    "updated_at": "2026-09-05T11:39:46Z",
+    "pushed_at": "2026-09-05T11:40:07Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-A.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-A.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-A.git",
@@ -522,7 +522,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 69,
+    "open_issues_count": 70,
     "license": null,
     "allow_forking": true,
     "is_template": false,
@@ -532,7 +532,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 69,
+    "open_issues": 70,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -630,8 +630,8 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-05T11:02:02Z",
-    "pushed_at": "2026-09-05T11:02:24Z",
+    "updated_at": "2026-09-05T11:39:46Z",
+    "pushed_at": "2026-09-05T11:40:07Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-A.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-A.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-A.git",
@@ -651,7 +651,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 69,
+    "open_issues_count": 70,
     "license": null,
     "allow_forking": true,
     "is_template": false,
@@ -661,7 +661,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 69,
+    "open_issues": 70,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -850,8 +850,8 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-05T11:02:02Z",
-    "pushed_at": "2026-09-05T11:02:24Z",
+    "updated_at": "2026-09-05T11:39:46Z",
+    "pushed_at": "2026-09-05T11:40:07Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-A.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-A.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-A.git",
@@ -871,7 +871,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 69,
+    "open_issues_count": 70,
     "license": null,
     "allow_forking": true,
     "is_template": false,
@@ -881,7 +881,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 69,
+    "open_issues": 70,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -979,8 +979,8 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-05T11:02:02Z",
-    "pushed_at": "2026-09-05T11:02:24Z",
+    "updated_at": "2026-09-05T11:39:46Z",
+    "pushed_at": "2026-09-05T11:40:07Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-A.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-A.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-A.git",
@@ -1000,7 +1000,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 69,
+    "open_issues_count": 70,
     "license": null,
     "allow_forking": true,
     "is_template": false,
@@ -1010,7 +1010,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 69,
+    "open_issues": 70,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -1199,8 +1199,8 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-05T11:02:02Z",
-    "pushed_at": "2026-09-05T11:02:24Z",
+    "updated_at": "2026-09-05T11:39:46Z",
+    "pushed_at": "2026-09-05T11:40:07Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-A.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-A.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-A.git",
@@ -1220,7 +1220,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 69,
+    "open_issues_count": 70,
     "license": null,
     "allow_forking": true,
     "is_template": false,
@@ -1230,7 +1230,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 69,
+    "open_issues": 70,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -1328,8 +1328,8 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-05T11:02:02Z",
-    "pushed_at": "2026-09-05T11:02:24Z",
+    "updated_at": "2026-09-05T11:39:46Z",
+    "pushed_at": "2026-09-05T11:40:07Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-A.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-A.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-A.git",
@@ -1349,7 +1349,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 69,
+    "open_issues_count": 70,
     "license": null,
     "allow_forking": true,
     "is_template": false,
@@ -1359,7 +1359,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 69,
+    "open_issues": 70,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -1548,8 +1548,8 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-05T11:02:02Z",
-    "pushed_at": "2026-09-05T11:02:24Z",
+    "updated_at": "2026-09-05T11:39:46Z",
+    "pushed_at": "2026-09-05T11:40:07Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-A.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-A.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-A.git",
@@ -1569,7 +1569,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 69,
+    "open_issues_count": 70,
     "license": null,
     "allow_forking": true,
     "is_template": false,
@@ -1579,7 +1579,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 69,
+    "open_issues": 70,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -1677,8 +1677,8 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-05T11:02:02Z",
-    "pushed_at": "2026-09-05T11:02:24Z",
+    "updated_at": "2026-09-05T11:39:46Z",
+    "pushed_at": "2026-09-05T11:40:07Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-A.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-A.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-A.git",
@@ -1698,7 +1698,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 69,
+    "open_issues_count": 70,
     "license": null,
     "allow_forking": true,
     "is_template": false,
@@ -1708,7 +1708,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 69,
+    "open_issues": 70,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -1897,8 +1897,8 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-05T11:02:02Z",
-    "pushed_at": "2026-09-05T11:02:24Z",
+    "updated_at": "2026-09-05T11:39:46Z",
+    "pushed_at": "2026-09-05T11:40:07Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-A.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-A.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-A.git",
@@ -1918,7 +1918,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 69,
+    "open_issues_count": 70,
     "license": null,
     "allow_forking": true,
     "is_template": false,
@@ -1928,7 +1928,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 69,
+    "open_issues": 70,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -2026,8 +2026,8 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-05T11:02:02Z",
-    "pushed_at": "2026-09-05T11:02:24Z",
+    "updated_at": "2026-09-05T11:39:46Z",
+    "pushed_at": "2026-09-05T11:40:07Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-A.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-A.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-A.git",
@@ -2047,7 +2047,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 69,
+    "open_issues_count": 70,
     "license": null,
     "allow_forking": true,
     "is_template": false,
@@ -2057,7 +2057,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 69,
+    "open_issues": 70,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -2246,8 +2246,8 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-05T11:02:02Z",
-    "pushed_at": "2026-09-05T11:02:24Z",
+    "updated_at": "2026-09-05T11:39:46Z",
+    "pushed_at": "2026-09-05T11:40:07Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-A.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-A.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-A.git",
@@ -2267,7 +2267,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 69,
+    "open_issues_count": 70,
     "license": null,
     "allow_forking": true,
     "is_template": false,
@@ -2277,7 +2277,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 69,
+    "open_issues": 70,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -2375,8 +2375,8 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-05T11:02:02Z",
-    "pushed_at": "2026-09-05T11:02:24Z",
+    "updated_at": "2026-09-05T11:39:46Z",
+    "pushed_at": "2026-09-05T11:40:07Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-A.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-A.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-A.git",
@@ -2396,7 +2396,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 69,
+    "open_issues_count": 70,
     "license": null,
     "allow_forking": true,
     "is_template": false,
@@ -2406,7 +2406,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 69,
+    "open_issues": 70,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -2595,8 +2595,8 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-05T11:02:02Z",
-    "pushed_at": "2026-09-05T11:02:24Z",
+    "updated_at": "2026-09-05T11:39:46Z",
+    "pushed_at": "2026-09-05T11:40:07Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-A.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-A.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-A.git",
@@ -2616,7 +2616,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 69,
+    "open_issues_count": 70,
     "license": null,
     "allow_forking": true,
     "is_template": false,
@@ -2626,7 +2626,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 69,
+    "open_issues": 70,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -2724,8 +2724,8 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-05T11:02:02Z",
-    "pushed_at": "2026-09-05T11:02:24Z",
+    "updated_at": "2026-09-05T11:39:46Z",
+    "pushed_at": "2026-09-05T11:40:07Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-A.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-A.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-A.git",
@@ -2745,7 +2745,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 69,
+    "open_issues_count": 70,
     "license": null,
     "allow_forking": true,
     "is_template": false,
@@ -2755,7 +2755,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 69,
+    "open_issues": 70,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -2944,8 +2944,8 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-05T11:02:02Z",
-    "pushed_at": "2026-09-05T11:02:24Z",
+    "updated_at": "2026-09-05T11:39:46Z",
+    "pushed_at": "2026-09-05T11:40:07Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-A.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-A.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-A.git",
@@ -2965,7 +2965,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 69,
+    "open_issues_count": 70,
     "license": null,
     "allow_forking": true,
     "is_template": false,
@@ -2975,7 +2975,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 69,
+    "open_issues": 70,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -3073,8 +3073,8 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-05T11:02:02Z",
-    "pushed_at": "2026-09-05T11:02:24Z",
+    "updated_at": "2026-09-05T11:39:46Z",
+    "pushed_at": "2026-09-05T11:40:07Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-A.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-A.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-A.git",
@@ -3094,7 +3094,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 69,
+    "open_issues_count": 70,
     "license": null,
     "allow_forking": true,
     "is_template": false,
@@ -3104,7 +3104,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 69,
+    "open_issues": 70,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -3173,12 +3173,12 @@
    "user_view_type": "public",
    "site_admin": false
   },
-  "body": "## Motivation\n\nStage 4.3 proof packet for issue #111 (see the issue body for targets, sources and plan).\n\n## Description\n\n- Merge remote-tracking branch 'github/main' into issue-111-projective-setup-point-observables\n- chore(telemetry): operator hand-back to the codex main session (until 14:50Z)\n- Merge branch 'issue-106-ld-geometry-sampling'\n- Merge branch 'issue-107-pauli-sampler-canonical-params'\n- fix(review): refresh QPBT blueprint citations\n- Merge remote-tracking branch 'github/main' into issue-111-projective-setup-point-observables\n- Merge remote-tracking branch 'github/main' into issue-111-projective-setup-point-observables\n- Merge branch 'issue-98-strategy-transformations' into issue-111-projective-setup-point-observables\n- feat(QPBT/Observables): prove setup and point observables\n- fix(review): chapter-13 citations and the Pauli-game blueprint link (PR 152 round 1, own files)\n- Merge branch 'issue-106-ld-geometry-sampling' into issue-107-pauli-sampler-canonical-params\n- Merge remote-tracking branch 'github/main' into issue-106-ld-geometry-sampling\n- Merge remote-tracking branch 'github/main' into issue-98-strategy-transformations\n- Merge branch 'issue-106-ld-geometry-sampling' into issue-107-pauli-sampler-canonical-params\n- fix(build): use the shared line-representative incidence lemma after the merge (PR 150)\n- Merge remote-tracking branch 'github/main' into issue-98-strategy-transformations\n- Merge branch 'issue-106-ld-geometry-sampling' into issue-107-pauli-sampler-canonical-params\n- Merge remote-tracking branch 'github/main' into issue-98-strategy-transformations\n- Merge remote-tracking branch 'github/main' into issue-106-ld-geometry-sampling\n- fix(review): mathematical wording and recomputed blueprint spans (PR 150 round 1)\n- fix(review): move the CL direct-sum development out of Games/CondLinear (PR 150 round 1)\n- fix(review): move generic distribution lemmas into Games/DistributionAux (PR 150 round 1)\n- Merge branch 'issue-98-strategy-transformations' into issue-111-projective-setup-point-observables\n- fix(review): split typed-CL specializations, add level and line-rep nodes (PR 150 round 1)\n- refactor(QPBT/Games): split the distance theorems module under the file-size limit\n- docs(QPBT/Test): cite blueprint sources for the Pauli reindexing auxiliaries\n- Merge remote-tracking branch 'github/main' into issue-98-strategy-transformations\n- docs(blueprint): mark Pauli admissibility and question distribution proved\n- feat(QPBT/Games): prove transformations and rounding\n- feat(QPBT/Test): prove Pauli admissible dimension, typed CL levels, and sampler\n- feat(QPBT/Test): prove canonical parameter admissibility and dimension bound\n- Merge remote-tracking branch 'github/main' into issue-106-ld-geometry-sampling\n- Merge branch 'issue-97-conditional-linearity-structure' into issue-106-ld-geometry-sampling\n- docs(QPBT/Test): document low-degree conditional-linearity auxiliaries\n- docs(blueprint): mark line equivalence and low-degree line-point lemmas proved\n- feat(QPBT/Test): prove low-degree line-point marginals, incidence, and typed CL identification\n- feat(QPBT/Test): prove line-equivalence, low-degree CL levels, and game probability\n- Merge remote-tracking branch 'github/main' into issue-98-strategy-transformations\n\n## Testing\n\nWorker checked every changed file with `lake env lean`; exact-head CI and review follow.\n\n---\nCloses #111\n",
+  "body": "## Motivation\n\nStage 4.3 proof packet for issue #111 (see the issue body for targets, sources and plan).\n\n## Description\n\n- Merge remote-tracking branch 'github/main' into issue-111-projective-setup-point-observables\n- chore(telemetry): stack propagation record; build-lock overlap note\n- chore(telemetry): records around PR 197 merge\n- Merge pull request #197 from Dengnifer/issue-157-pre-push-declines-the-push-with-exit-141\n- Merge remote-tracking branch 'github/main' into issue-157-pre-push-declines-the-push-with-exit-141\n- chore(telemetry): usage summary at the PR 152 milestone\n- chore(telemetry): records around PR 152 merge\n- Merge pull request #152 from Dengnifer/issue-107-pauli-sampler-canonical-params\n- Merge remote-tracking branch 'github/main' into issue-107-pauli-sampler-canonical-params\n- Merge commit 'ba111ad' into issue-111-projective-setup-point-observables\n- Merge branch 'issue-107-pauli-sampler-canonical-params' into issue-111-projective-setup-point-observables\n- Merge remote-tracking branch 'github/main' into issue-111-projective-setup-point-observables\n- Merge remote-tracking branch 'github/main' into issue-157-pre-push-declines-the-push-with-exit-141\n- Merge remote-tracking branch 'github/main' into issue-157-pre-push-declines-the-push-with-exit-141\n- Merge remote-tracking branch 'github/main' into issue-157-pre-push-declines-the-push-with-exit-141\n- Merge remote-tracking branch 'github/main' into issue-107-pauli-sampler-canonical-params\n- fix(review): cite chapter-12 nodes by label (PR 152 round 5)\n- Merge remote-tracking branch 'github/main' into issue-107-pauli-sampler-canonical-params\n- fix(review): address PR 152 round-4 findings\n- Merge remote-tracking branch 'github/main' into issue-107-pauli-sampler-canonical-params\n- fix(review): address PR 152 round-3 findings\n- Merge remote-tracking branch 'github/main' into issue-107-pauli-sampler-canonical-params\n- fix(review): address PR 152 round findings\n- Merge remote-tracking branch 'github/main' into issue-107-pauli-sampler-canonical-params\n- fix(review): merge consolidated QPBT support\n- fix(review): correct QPBT blueprint status and prose\n- Merge remote-tracking branch 'github/main' into issue-157-pre-push-declines-the-push-with-exit-141\n- fix(review): keep emergency bypass ref-scoped\n- fix(review): suppress unvalidated tag publication\n- Merge remote-tracking branch 'github/main' into issue-157-pre-push-declines-the-push-with-exit-141\n- Merge remote-tracking branch 'github/main' into issue-157-pre-push-declines-the-push-with-exit-141\n- Merge remote-tracking branch 'github/main' into issue-157-pre-push-declines-the-push-with-exit-141\n- fix(review): bind preflight to published checkout\n- Merge remote-tracking branch 'github/main' into issue-157-pre-push-declines-the-push-with-exit-141\n- fix(review): enforce checked push tuple\n- fix(review): merge current main for adjudication\n- fix(review): merge current telemetry for adjudication\n- Merge remote-tracking branch 'github/main' into issue-107-pauli-sampler-canonical-params\n- fix(review): correct Pauli sampler blueprint claims\n- Merge remote-tracking branch 'github/main' into issue-107-pauli-sampler-canonical-params\n- Merge remote-tracking branch 'github/main' into issue-157-pre-push-declines-the-push-with-exit-141\n- fix(review): bind checked push to validated refs\n- fix(hooks): preflight checks before push transport\n- Merge remote-tracking branch 'github/main' into issue-111-projective-setup-point-observables\n- Merge branch 'issue-106-ld-geometry-sampling'\n- Merge branch 'issue-107-pauli-sampler-canonical-params'\n- Merge remote-tracking branch 'github/main' into issue-111-projective-setup-point-observables\n- Merge remote-tracking branch 'github/main' into issue-111-projective-setup-point-observables\n- Merge branch 'issue-98-strategy-transformations' into issue-111-projective-setup-point-observables\n- feat(QPBT/Observables): prove setup and point observables\n- fix(review): chapter-13 citations and the Pauli-game blueprint link (PR 152 round 1, own files)\n- Merge branch 'issue-106-ld-geometry-sampling' into issue-107-pauli-sampler-canonical-params\n- Merge branch 'issue-106-ld-geometry-sampling' into issue-107-pauli-sampler-canonical-params\n- Merge branch 'issue-106-ld-geometry-sampling' into issue-107-pauli-sampler-canonical-params\n- Merge branch 'issue-98-strategy-transformations' into issue-111-projective-setup-point-observables\n- docs(QPBT/Test): cite blueprint sources for the Pauli reindexing auxiliaries\n- docs(blueprint): mark Pauli admissibility and question distribution proved\n- feat(QPBT/Test): prove Pauli admissible dimension, typed CL levels, and sampler\n- feat(QPBT/Test): prove canonical parameter admissibility and dimension bound\n\n## Testing\n\nWorker checked every changed file with `lake env lean`; exact-head CI and review follow.\n\n---\nCloses #111\n",
   "created_at": "2026-09-04T13:12:51Z",
-  "updated_at": "2026-09-04T13:15:54Z",
+  "updated_at": "2026-09-05T11:27:56Z",
   "closed_at": null,
   "merged_at": null,
-  "merge_commit_sha": null,
+  "merge_commit_sha": "8ca2c204656324bbf37a570c82c60810c0237f64",
   "assignees": [],
   "requested_reviewers": [],
   "requested_teams": [],
@@ -3199,11 +3199,11 @@
   "review_comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/pulls/175/comments",
   "review_comment_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/pulls/comments{/number}",
   "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/175/comments",
-  "statuses_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/statuses/32a57e0452f9b1c50c4f586a6c9f1ac111be8232",
+  "statuses_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/statuses/3820ea4fba212913299a47981e1987a66d17ae32",
   "head": {
    "label": "Dengnifer:issue-111-projective-setup-point-observables",
    "ref": "issue-111-projective-setup-point-observables",
-   "sha": "32a57e0452f9b1c50c4f586a6c9f1ac111be8232",
+   "sha": "3820ea4fba212913299a47981e1987a66d17ae32",
    "user": {
     "login": "Dengnifer",
     "id": 89234078,
@@ -3293,8 +3293,8 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-05T11:02:02Z",
-    "pushed_at": "2026-09-05T11:02:24Z",
+    "updated_at": "2026-09-05T11:39:46Z",
+    "pushed_at": "2026-09-05T11:40:07Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-A.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-A.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-A.git",
@@ -3314,7 +3314,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 69,
+    "open_issues_count": 70,
     "license": null,
     "allow_forking": true,
     "is_template": false,
@@ -3324,7 +3324,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 69,
+    "open_issues": 70,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -3332,7 +3332,7 @@
   "base": {
    "label": "Dengnifer:main",
    "ref": "main",
-   "sha": "0c001409896d925cb0435e08d8a6cb4c1450d3b5",
+   "sha": "4f34219c61482cff999ac7713119f47cb3c9db1a",
    "user": {
     "login": "Dengnifer",
     "id": 89234078,
@@ -3422,8 +3422,8 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-05T11:02:02Z",
-    "pushed_at": "2026-09-05T11:02:24Z",
+    "updated_at": "2026-09-05T11:39:46Z",
+    "pushed_at": "2026-09-05T11:40:07Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-A.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-A.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-A.git",
@@ -3443,7 +3443,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 69,
+    "open_issues_count": 70,
     "license": null,
     "allow_forking": true,
     "is_template": false,
@@ -3453,7 +3453,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 69,
+    "open_issues": 70,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -3481,7 +3481,7 @@
     "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/pulls/175/commits"
    },
    "statuses": {
-    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/statuses/32a57e0452f9b1c50c4f586a6c9f1ac111be8232"
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/statuses/3820ea4fba212913299a47981e1987a66d17ae32"
    }
   },
   "author_association": "OWNER",
@@ -3522,12 +3522,12 @@
    "user_view_type": "public",
    "site_admin": false
   },
-  "body": "## Motivation\n\nStage 4.3 proof packet for issue #108 (see the issue body for targets, sources and plan).\n\n## Description\n\n- Merge branch 'issue-107-pauli-sampler-canonical-params' into issue-108-pauli-test-completeness\n- Merge branch 'issue-106-ld-geometry-sampling' into issue-107-pauli-sampler-canonical-params\n- Merge remote-tracking branch 'github/main' into issue-106-ld-geometry-sampling\n- Merge branch 'issue-107-pauli-sampler-canonical-params' into issue-108-pauli-test-completeness\n- style(QPBT/Test): use change for definitional goal rewrites\n- feat(QPBT/Test): prove Pauli sampler typed-CL identity and game symmetry\n- Merge branch 'issue-106-ld-geometry-sampling' into issue-107-pauli-sampler-canonical-params\n- fix(build): use the shared line-representative incidence lemma after the merge (PR 150)\n- Merge branch 'issue-106-ld-geometry-sampling' into issue-107-pauli-sampler-canonical-params\n- Merge remote-tracking branch 'github/main' into issue-106-ld-geometry-sampling\n- fix(review): mathematical wording and recomputed blueprint spans (PR 150 round 1)\n- fix(review): move the CL direct-sum development out of Games/CondLinear (PR 150 round 1)\n- fix(review): move generic distribution lemmas into Games/DistributionAux (PR 150 round 1)\n- fix(review): split typed-CL specializations, add level and line-rep nodes (PR 150 round 1)\n- Merge branch 'issue-76-ms-perfect-strategy' into issue-108-pauli-test-completeness\n- docs(QPBT/Test): cite blueprint sources for the Pauli reindexing auxiliaries\n- docs(blueprint): mark Pauli admissibility and question distribution proved\n- feat(QPBT/Test): prove Pauli admissible dimension, typed CL levels, and sampler\n- feat(QPBT/Test): prove canonical parameter admissibility and dimension bound\n- Merge remote-tracking branch 'github/main' into issue-106-ld-geometry-sampling\n- Merge branch 'issue-97-conditional-linearity-structure' into issue-106-ld-geometry-sampling\n- docs(QPBT/Test): document low-degree conditional-linearity auxiliaries\n- docs(blueprint): mark line equivalence and low-degree line-point lemmas proved\n- feat(QPBT/Test): prove low-degree line-point marginals, incidence, and typed CL identification\n- feat(QPBT/Test): prove line-equivalence, low-degree CL levels, and game probability\n- Merge remote-tracking branch 'github/main' into issue-97-conditional-linearity-structure\n- fix(review): conditional-linearity blueprint entries and prose (PR 142 round 1)\n- Merge remote-tracking branch 'github/main' into issue-97-conditional-linearity-structure\n- feat(QPBT/Games): prove conditional-linearity structure\n\n## Testing\n\nWorker checked every changed file with `lake env lean`; exact-head CI and review follow.\n\n---\nCloses #108\n",
+  "body": "## Motivation\n\nStage 4.3 proof packet for issue #108 (see the issue body for targets, sources and plan).\n\n## Description\n\n- Merge remote-tracking branch 'github/main' into issue-108-pauli-test-completeness\n- Merge remote-tracking branch 'github/main' into issue-108-pauli-test-completeness\n- chore(telemetry): stack propagation record; build-lock overlap note\n- chore(telemetry): records around PR 197 merge\n- Merge pull request #197 from Dengnifer/issue-157-pre-push-declines-the-push-with-exit-141\n- Merge remote-tracking branch 'github/main' into issue-157-pre-push-declines-the-push-with-exit-141\n- chore(telemetry): usage summary at the PR 152 milestone\n- Merge remote-tracking branch 'github/main' into issue-157-pre-push-declines-the-push-with-exit-141\n- Merge remote-tracking branch 'github/main' into issue-157-pre-push-declines-the-push-with-exit-141\n- Merge remote-tracking branch 'github/main' into issue-157-pre-push-declines-the-push-with-exit-141\n- Merge remote-tracking branch 'github/main' into issue-157-pre-push-declines-the-push-with-exit-141\n- fix(review): keep emergency bypass ref-scoped\n- fix(review): suppress unvalidated tag publication\n- Merge remote-tracking branch 'github/main' into issue-157-pre-push-declines-the-push-with-exit-141\n- Merge remote-tracking branch 'github/main' into issue-157-pre-push-declines-the-push-with-exit-141\n- Merge remote-tracking branch 'github/main' into issue-157-pre-push-declines-the-push-with-exit-141\n- fix(review): bind preflight to published checkout\n- Merge remote-tracking branch 'github/main' into issue-157-pre-push-declines-the-push-with-exit-141\n- fix(review): enforce checked push tuple\n- fix(review): merge current main for adjudication\n- fix(review): merge current telemetry for adjudication\n- Merge remote-tracking branch 'github/main' into issue-157-pre-push-declines-the-push-with-exit-141\n- fix(review): bind checked push to validated refs\n- fix(hooks): preflight checks before push transport\n- Merge branch 'issue-107-pauli-sampler-canonical-params' into issue-108-pauli-test-completeness\n- Merge branch 'issue-107-pauli-sampler-canonical-params' into issue-108-pauli-test-completeness\n- style(QPBT/Test): use change for definitional goal rewrites\n- feat(QPBT/Test): prove Pauli sampler typed-CL identity and game symmetry\n- Merge branch 'issue-76-ms-perfect-strategy' into issue-108-pauli-test-completeness\n\n## Testing\n\nWorker checked every changed file with `lake env lean`; exact-head CI and review follow.\n\n---\nCloses #108\n",
   "created_at": "2026-09-04T11:47:14Z",
-  "updated_at": "2026-09-04T11:50:43Z",
+  "updated_at": "2026-09-05T11:30:50Z",
   "closed_at": null,
   "merged_at": null,
-  "merge_commit_sha": null,
+  "merge_commit_sha": "af65061b2ab12727afa7a19f719383a937d342d6",
   "assignees": [],
   "requested_reviewers": [],
   "requested_teams": [],
@@ -3548,11 +3548,11 @@
   "review_comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/pulls/160/comments",
   "review_comment_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/pulls/comments{/number}",
   "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/160/comments",
-  "statuses_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/statuses/5dff8d7eaa56fd3adf964a63d12c889b42194ebd",
+  "statuses_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/statuses/fd3ce0dddfc67d12a726926a9003fbec0a203cf6",
   "head": {
    "label": "Dengnifer:issue-108-pauli-test-completeness",
    "ref": "issue-108-pauli-test-completeness",
-   "sha": "5dff8d7eaa56fd3adf964a63d12c889b42194ebd",
+   "sha": "fd3ce0dddfc67d12a726926a9003fbec0a203cf6",
    "user": {
     "login": "Dengnifer",
     "id": 89234078,
@@ -3642,8 +3642,8 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-05T11:02:02Z",
-    "pushed_at": "2026-09-05T11:02:24Z",
+    "updated_at": "2026-09-05T11:39:46Z",
+    "pushed_at": "2026-09-05T11:40:07Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-A.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-A.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-A.git",
@@ -3663,7 +3663,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 69,
+    "open_issues_count": 70,
     "license": null,
     "allow_forking": true,
     "is_template": false,
@@ -3673,7 +3673,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 69,
+    "open_issues": 70,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -3681,7 +3681,7 @@
   "base": {
    "label": "Dengnifer:main",
    "ref": "main",
-   "sha": "5ef61d37a0451629a1d45a0001fcd586d170f289",
+   "sha": "4f34219c61482cff999ac7713119f47cb3c9db1a",
    "user": {
     "login": "Dengnifer",
     "id": 89234078,
@@ -3771,8 +3771,8 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-05T11:02:02Z",
-    "pushed_at": "2026-09-05T11:02:24Z",
+    "updated_at": "2026-09-05T11:39:46Z",
+    "pushed_at": "2026-09-05T11:40:07Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-A.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-A.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-A.git",
@@ -3792,7 +3792,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 69,
+    "open_issues_count": 70,
     "license": null,
     "allow_forking": true,
     "is_template": false,
@@ -3802,7 +3802,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 69,
+    "open_issues": 70,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -3830,7 +3830,7 @@
     "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/pulls/160/commits"
    },
    "statuses": {
-    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/statuses/5dff8d7eaa56fd3adf964a63d12c889b42194ebd"
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/statuses/fd3ce0dddfc67d12a726926a9003fbec0a203cf6"
    }
   },
   "author_association": "OWNER",
@@ -3991,8 +3991,8 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-05T11:02:02Z",
-    "pushed_at": "2026-09-05T11:02:24Z",
+    "updated_at": "2026-09-05T11:39:46Z",
+    "pushed_at": "2026-09-05T11:40:07Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-A.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-A.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-A.git",
@@ -4012,7 +4012,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 69,
+    "open_issues_count": 70,
     "license": null,
     "allow_forking": true,
     "is_template": false,
@@ -4022,7 +4022,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 69,
+    "open_issues": 70,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -4120,8 +4120,8 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-05T11:02:02Z",
-    "pushed_at": "2026-09-05T11:02:24Z",
+    "updated_at": "2026-09-05T11:39:46Z",
+    "pushed_at": "2026-09-05T11:40:07Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-A.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-A.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-A.git",
@@ -4141,7 +4141,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 69,
+    "open_issues_count": 70,
     "license": null,
     "allow_forking": true,
     "is_template": false,
@@ -4151,7 +4151,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 69,
+    "open_issues": 70,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -4340,8 +4340,8 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-05T11:02:02Z",
-    "pushed_at": "2026-09-05T11:02:24Z",
+    "updated_at": "2026-09-05T11:39:46Z",
+    "pushed_at": "2026-09-05T11:40:07Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-A.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-A.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-A.git",
@@ -4361,7 +4361,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 69,
+    "open_issues_count": 70,
     "license": null,
     "allow_forking": true,
     "is_template": false,
@@ -4371,7 +4371,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 69,
+    "open_issues": 70,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -4469,8 +4469,8 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-05T11:02:02Z",
-    "pushed_at": "2026-09-05T11:02:24Z",
+    "updated_at": "2026-09-05T11:39:46Z",
+    "pushed_at": "2026-09-05T11:40:07Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-A.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-A.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-A.git",
@@ -4490,7 +4490,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 69,
+    "open_issues_count": 70,
     "license": null,
     "allow_forking": true,
     "is_template": false,
@@ -4500,7 +4500,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 69,
+    "open_issues": 70,
     "watchers": 1,
     "default_branch": "main"
    }
