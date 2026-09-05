@@ -313,28 +313,30 @@ theorem exists_directSimultaneousPolynomialMeasurements_of_k_eq_one
       (constTupleEquiv (Fin D.k) (DirectScalarQ D)) _ _ S.ψ).symm.trans
       (consistencyDefect_congr _ _ _ _ _ S.ψ ?_ ?_)).trans_le h1'
     · intro u a
-      show heteroKron (((S.A (directLdPointQuestionOf D u)).postprocess
+      change heteroKron (((S.A (directLdPointQuestionOf D u)).postprocess
         (directLdPointValuesOrZero D)).effect (fun _ => a)) 1 = _
       rw [postprocess_effect_const_tuple]
       rfl
     · intro u a
-      show heteroKron 1 ((((directPolynomialMeasurement D GB₀).postprocess
+      change heteroKron 1 ((((directPolynomialMeasurement D GB₀).postprocess
         (fun g _ => g)).postprocess (evalDirectPolyTupleAt u)).effect
           (fun _ => a)) = _
-      rw [matrixMeasurement_postprocess_comp, postprocess_effect_const_tuple]
+      rw [MIPStarRE.Quantum.Measurement.postprocess_comp,
+        postprocess_effect_const_tuple]
       rfl
   · have h2' := directPolynomialPoint_consistencyDefect_le D S hS default GA₀ _ h2
     refine ((consistencyDefect_outcome_equiv _
       (constTupleEquiv (Fin D.k) (DirectScalarQ D)) _ _ S.ψ).symm.trans
       (consistencyDefect_congr _ _ _ _ _ S.ψ ?_ ?_)).trans_le h2'
     · intro u a
-      show heteroKron ((((directPolynomialMeasurement D GA₀).postprocess
+      change heteroKron ((((directPolynomialMeasurement D GA₀).postprocess
         (fun g _ => g)).postprocess (evalDirectPolyTupleAt u)).effect
           (fun _ => a)) 1 = _
-      rw [matrixMeasurement_postprocess_comp, postprocess_effect_const_tuple]
+      rw [MIPStarRE.Quantum.Measurement.postprocess_comp,
+        postprocess_effect_const_tuple]
       rfl
     · intro u a
-      show heteroKron 1 (((S.B (directLdPointQuestionOf D u)).postprocess
+      change heteroKron 1 (((S.B (directLdPointQuestionOf D u)).postprocess
         (directLdPointValuesOrZero D)).effect (fun _ => a)) = _
       rw [postprocess_effect_const_tuple]
       rfl
@@ -344,11 +346,11 @@ theorem exists_directSimultaneousPolynomialMeasurements_of_k_eq_one
         S.ψ).symm.trans
       (consistencyDefect_congr _ _ _ _ _ S.ψ ?_ ?_)).trans_le h3'
     · intro _ p
-      show heteroKron (((directPolynomialMeasurement D GA₀).postprocess
+      change heteroKron (((directPolynomialMeasurement D GA₀).postprocess
         (fun g _ => g)).effect (fun _ => p)) 1 = _
       rw [postprocess_const_tuple_effect_self]
     · intro _ p
-      show heteroKron 1 (((directPolynomialMeasurement D GB₀).postprocess
+      change heteroKron 1 (((directPolynomialMeasurement D GB₀).postprocess
         (fun g _ => g)).effect (fun _ => p)) = _
       rw [postprocess_const_tuple_effect_self]
 

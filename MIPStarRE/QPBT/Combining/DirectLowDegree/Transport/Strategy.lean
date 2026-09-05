@@ -1,3 +1,4 @@
+import MIPStarRE.QPBT.Algebra.Pauli
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Questions
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.SeedFiber
 
@@ -391,10 +392,7 @@ private theorem seedFiberBlockBornAmplitude
   rw [Finset.sum_comm]
   rw [← mul_assoc]
   congr 1
-  rw [← pow_two, inv_pow, ← Complex.ofReal_pow,
-    Real.sq_sqrt (Nat.cast_nonneg (L.q / L.m))]
-  norm_cast
-  exact Complex.ofReal_inv _
+  exact inv_sqrt_natCast_mul_self (L.q / L.m)
 
 /-- Correlated residue registers give the uniform average of the source-block
 Born weights. -/

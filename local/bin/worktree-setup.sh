@@ -39,6 +39,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LAKE_ROOT_HELPER="$SCRIPT_DIR/lake-root.sh"
 
 WORKTREE=""
 CHECK_ONLY=0
@@ -268,6 +269,11 @@ main() {
   else
     log "bootstrapping $WORKTREE"
   fi
+
+  # 0. Place .lake before any bootstrap step reads or writes it.
+  [ -x "$LAKE_ROOT_HELPER" ] || die "Lake-root helper is missing: $LAKE_ROOT_HELPER"
+  if [ "$CHECK_ONLY" -eq 1 ]; then "$LAKE_ROOT_HELPER" prepare "$WORKTREE" --check || status=1
+  else "$LAKE_ROOT_HELPER" prepare "$WORKTREE" || die "could not prepare external .lake"; fi
 
   # 1. elan and the pinned toolchain.
   assert_elan
