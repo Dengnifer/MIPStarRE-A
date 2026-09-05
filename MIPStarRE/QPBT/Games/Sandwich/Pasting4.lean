@@ -169,7 +169,7 @@ theorem mass_ordered_product_ge {X R₁ R₂ ι : Type*}
     intro q
     have hCP : ∑ a : R₁, (heteroKron (1 : Op ι) ((P q).effect a))ᴴ *
         heteroKron 1 ((P q).effect a) ≤ 1 := by
-      simpa using SandwichProduct.measurement_sum_adjoint_mul_le_one
+      simpa using MIPStarRE.QPBT.measurement_sum_adjoint_mul_le_one
         (Measurement.rightPlacement (ιA := ι) (P q))
     have h := sum_norm_mul_apply_le
       (fun a : R₁ => heteroKron (1 : Op ι) ((P q).effect a))

@@ -115,11 +115,11 @@ theorem abs_cross_move_gap_le_sqrt {R₁ Γ₂ ι : Type*}
   -- the two mass estimates
   have hCP : ∑ a : R₁, (heteroKron (1 : Op ι) (P.effect a))ᴴ *
       heteroKron 1 (P.effect a) ≤ 1 := by
-    simpa using SandwichProduct.measurement_sum_adjoint_mul_le_one
+    simpa using MIPStarRE.QPBT.measurement_sum_adjoint_mul_le_one
       (Measurement.rightPlacement (ιA := ι) P)
   have hCG : ∑ g : Γ₂, (heteroKron (1 : Op ι) (G.effect g))ᴴ *
       heteroKron 1 (G.effect g) ≤ 1 := by
-    simpa using SandwichProduct.measurement_sum_adjoint_mul_le_one
+    simpa using MIPStarRE.QPBT.measurement_sum_adjoint_mul_le_one
       (Measurement.rightPlacement (ιA := ι) G)
   have hmassU : (∑ p : R₁ × Γ₂, ‖u p‖ ^ 2) ≤
       ∑ g : Γ₂, ‖applyOperatorToState
@@ -338,11 +338,11 @@ theorem sum_norm_ordered_product_le_one {R₁ Γ₂ ι : Type*}
     simp [applyOperatorToState]
   have hCP : ∑ a : R₁, (heteroKron (1 : Op ι) (P.effect a))ᴴ *
       heteroKron 1 (P.effect a) ≤ 1 := by
-    simpa using SandwichProduct.measurement_sum_adjoint_mul_le_one
+    simpa using MIPStarRE.QPBT.measurement_sum_adjoint_mul_le_one
       (Measurement.rightPlacement (ιA := ι) P)
   have hCG : ∑ g : Γ₂, (heteroKron (1 : Op ι) (G.effect g))ᴴ *
       heteroKron 1 (G.effect g) ≤ 1 := by
-    simpa using SandwichProduct.measurement_sum_adjoint_mul_le_one
+    simpa using MIPStarRE.QPBT.measurement_sum_adjoint_mul_le_one
       (Measurement.rightPlacement (ιA := ι) G)
   rw [Finset.sum_comm]
   calc (∑ g : Γ₂, ∑ a : R₁, ‖applyOperatorToState

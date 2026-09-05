@@ -403,7 +403,7 @@ private theorem abs_pinch_overlap_gap_le_sqrt {R₁ Γ₂ ι : Type*}
   have hmass : (∑ p : R₁ × Γ₂,
       ‖applyOperatorToState (heteroKron (A.effect p.1) (G.effect p.2)) ψ‖ ^ 2) ≤ 1 := by
     have h := sum_norm_mul_apply_le (fun p : R₁ × Γ₂ => M.effect p) (1 : Op (ι × ι)) ψ
-      (SandwichProduct.measurement_sum_adjoint_mul_le_one M)
+      (MIPStarRE.QPBT.measurement_sum_adjoint_mul_le_one M)
     simp only [M, MIPStarRE.Quantum.Measurement.ofSumEqOne, mul_one] at h
     rw [hone1, hψ, one_pow] at h
     exact h

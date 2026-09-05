@@ -17,8 +17,9 @@ open scoped BigOperators MatrixOrder Matrix ComplexOrder
 
 namespace MIPStarRE.QPBT
 
-open MIPStarRE.LDT
+open MIPStarRE.LDT hiding Measurement
 open MIPStarRE.Quantum
+open DistanceCalculus
 
 namespace SandwichProduct
 

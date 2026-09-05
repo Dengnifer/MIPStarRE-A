@@ -509,7 +509,7 @@ theorem avgOver_pinched_collision_le
     simp_rw [hmid]
     rw [← stateQForm_finset_sum, ← heteroKron_finset_sum_right]
     have hS : (∑ a : R₁, (P p).effect a * (P p).effect a) ≤ 1 := by
-      refine le_of_eq_of_le ?_ (SandwichProduct.measurement_sum_adjoint_mul_le_one (P p))
+      refine le_of_eq_of_le ?_ (MIPStarRE.QPBT.measurement_sum_adjoint_mul_le_one (P p))
       refine Finset.sum_congr rfl fun a _ => ?_
       rw [measurement_effect_hermitian (P p) a]
     have hmono : heteroKron (1 : Op ι)
