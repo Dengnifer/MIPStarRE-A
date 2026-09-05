@@ -534,12 +534,37 @@ hook-level regression that stages 401 lines at that path.
 ad hoc GitHub mutation or a duplicate edge after retry, and future readiness
 test growth remains subject to the owner-gated 400-line episode budget.
 
+## 2026-09-05 — Complete pre-push checks before transport startup
+
+**Trigger:** `results/telemetry/events.md` 2026-09-05, "Pre-push gate outlived
+the GitHub transport" (issue #157).
+
+**Change:** `checked-push.sh` preflights one explicit branch ref before starting
+`receive-pack`; `pr_open.py`, `github-sync.sh`, and both autofix push paths use
+it.  `issues-prs.md` makes this the repository-owned publication contract.
+
+**Expected effect:** long Lean gates no longer turn a successful hook into exit
+141, while gate failures still publish no ref and exact-head CI remains intact.
+
 ## 2026-09-05 — Branch-private Lake products may use a separate volume
 
 **Trigger:** `results/telemetry/events.md` 2026-09-05, issue #190 and PR #198.
 **Change:** `MIPSTARRE_LAKE_ROOT` uses `<root>/<branch>` for one-component branches;
 the helper rejects protected overlap and duplicate ownership, and dispatch grants its target.
 **Expected effect:** native relocation without cache corruption or leaked build data.
+
+## 2026-09-05 — Bind checked publication to the preflight tuple
+
+**Trigger:** `results/telemetry/events.md` 2026-09-05, "Checked push did not
+bind publication to preflight" (round-1 review of PR #197).
+
+**Change:** `checked-push.sh` publishes the captured commit object and asks the
+native pre-push hook to compare Git's single advertised tuple with the captured
+preflight tuple.  Local or remote ref movement fails closed.  A caller's plain
+`MIPSTARRE_SKIP_HOOKS=1` continues to request the documented emergency bypass.
+
+**Expected effect:** the ref update that passed the long gate is exactly the one
+offered to the remote, while operators retain the explicit recovery path.
 
 ## 2026-09-05 — Mathematical repair precedes owner escalation
 
@@ -557,3 +582,55 @@ the rule, and `local/README.md` points to the design-decisions register.
 **Expected effect:** the fleet resolves theorem-statement defects against their
 complete dependency graph, while #26 receives only definition/game decisions or
 an evidence-backed nonconvergence packet after the shared budget is exhausted.
+
+## 2026-09-05 — Make checked publication independent of hook selection
+
+**Trigger:** `results/telemetry/events.md` 2026-09-05, "Checked publication
+relied on ambient native-hook selection" (round-3 review of PR #197).
+
+**Change:** `checked-push.sh` now binds the captured remote tip with an atomic
+lease and preserves fast-forward-only publication.  Native confirmation accepts
+an already-current ref, its test module is budgeted, and installation guidance
+routes full checks through the helper.
+
+**Expected effect:** stale, absent, or redirected native hooks cannot weaken the
+validated tuple, while idempotent publication and full-mode guidance remain
+usable.
+
+## 2026-09-05 — Bind preflight files to the captured local commit
+
+**Trigger:** `results/telemetry/events.md` 2026-09-05, "Checked push validated a
+different checkout" (round-4 review of PR #197).
+
+**Change:** `checked-push.sh` resolves the registered worktree owning the local
+ref, requires its HEAD and status to match the captured commit before and after
+preflight, and runs the gate from that checkout.  A two-worktree regression
+binds the checked payload to the published ref.
+
+**Expected effect:** publication cannot approve bytes from main while pushing a
+feature commit, and dirty, detached, or unregistered ref checkouts fail before
+transport startup.
+
+## 2026-09-05 — Prevent implicit refs in checked publication
+
+**Trigger:** `results/telemetry/events.md` 2026-09-05, "Checked push published
+an unvalidated tag" (round-6 review of PR #197).
+
+**Change:** the final validated push overrides `push.followTags` and passes
+`--no-follow-tags`; a regression exercises an annotated tag with native hook
+selection disabled.
+
+**Expected effect:** the transport can publish only the branch tuple that passed
+preflight, regardless of repository or user follow-tag configuration.
+
+## 2026-09-05 — Keep the emergency bypass ref-scoped
+
+**Trigger:** `results/telemetry/events.md` 2026-09-05, "Emergency bypass
+broadened a checked push" (round-7 review of PR #197).
+
+**Change:** the bypass path now disables implicit tag following just like the
+validated path.  The publication protocol and operator documentation clarify
+that bypass controls validation only, not ref scope.
+
+**Expected effect:** `MIPSTARRE_SKIP_HOOKS=1` can recover from local tooling
+failures without publishing any ref outside the requested branch mapping.
