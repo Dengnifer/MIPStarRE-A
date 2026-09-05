@@ -151,12 +151,12 @@ conclusion matches the Stage~4.2 extraction lemma, including the corrected
 numerical estimates; the later passage to the isometries in the soundness
 theorem is not formalized, and no declaration yet states that passage.
 
-The misleading source-facing description has been removed.  The suffix
-\path{ofGlobalPairWitness} now quarantines the extra premise in the helper's
-name, and its docstring explicitly identifies the result as conditional and
-marks its dependence on the witness as unfaithful.  Discharging the debt still
+The conditional character of the result is visible wherever the declaration is
+invoked: the suffix \path{ofGlobalPairWitness} names the extra premise in the
+declaration itself, and its docstring records the statement as conditional and
+its dependence on the assumed witness as unfaithful.  Discharging the debt
 requires composing \path{exists_globalPairWitness} with this helper to obtain
-the source lemma; no declaration currently carries out that composition.
+the source lemma; no declaration carries out that composition.
 
 Issue~\#19 owns this concrete Stage~4.2 interface and discrepancy record.
 \ghissue{123} owns the source-facing composition through
