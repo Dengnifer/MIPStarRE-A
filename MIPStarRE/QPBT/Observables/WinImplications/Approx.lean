@@ -188,13 +188,13 @@ theorem win_comm_approx_proof :
     (fun ω => S.pairComponentMeas .alice W ω)
     (fun ω => S.pairWMeas .bob W ω.1 ω.2.1 ω.2.2.1 ω.2.2.2)
     S.toStrategy.ψ (h₂ P ε S hε W)
-  refine ⟨approxBound_of_left hC₂ hε hforward, ?_⟩
+  refine ⟨approx_bound_of_left hC₂ hε hforward, ?_⟩
   have hswap := opFamilyDistSq_swappedState (ιA := S.toStrategy.ιA)
     (ιB := S.toStrategy.ιB) (commTupleDist P)
     (fun ω a => (S.pairComponentMeas .alice W ω).effect a)
     (fun ω a => (S.pairWMeas .bob W ω.1 ω.2.1 ω.2.2.1 ω.2.2.2).effect a)
     S.toStrategy.ψ
-  exact hswap.trans_le (approxBound_of_right hC₁ hε hreverse)
+  exact hswap.trans_le (approx_bound_of_right hC₁ hε hreverse)
 
 /-! ## Commutation consistency check -/
 
@@ -370,14 +370,14 @@ theorem win_comm_cons_approx_proof :
     (fun ω => S.pointTraceMeas .bob W (selectedTuplePoint W ω)
       (selectedTupleScalar W ω))
     S.toStrategy.ψ (h₂ P ε S hε W)
-  refine ⟨approxBound_of_left hC₂ hε hforward, ?_⟩
+  refine ⟨approx_bound_of_left hC₂ hε hforward, ?_⟩
   have hswap := opFamilyDistSq_swappedState (ιA := S.toStrategy.ιA)
     (ιB := S.toStrategy.ιB) (commTupleDist P)
     (fun ω a => (S.pairWMeas .alice W ω.1 ω.2.1 ω.2.2.1 ω.2.2.2).effect a)
     (fun ω a => (S.pointTraceMeas .bob W (selectedTuplePoint W ω)
       (selectedTupleScalar W ω)).effect a)
     S.toStrategy.ψ
-  exact hswap.trans_le (approxBound_of_right hC₁ hε hreverse)
+  exact hswap.trans_le (approx_bound_of_right hC₁ hε hreverse)
 
 /-! ## Magic square consistency check -/
 
@@ -576,14 +576,14 @@ theorem win_ms_cons_approx_proof :
     (fun ω => S.pointTraceMeas .bob W (selectedTuplePoint W ω)
       (selectedTupleScalar W ω))
     S.toStrategy.ψ (h₂ P ε S hε W)
-  refine ⟨approxBound_of_left hC₂ hε hforward, ?_⟩
+  refine ⟨approx_bound_of_left hC₂ hε hforward, ?_⟩
   have hswap := opFamilyDistSq_swappedState (ιA := S.toStrategy.ιA)
     (ιB := S.toStrategy.ιB) (anticommTupleDist P)
     (fun ω a => (S.msVarBitMeas .alice (selectedMsVar W) ω).effect a)
     (fun ω a => (S.pointTraceMeas .bob W (selectedTuplePoint W ω)
       (selectedTupleScalar W ω)).effect a)
     S.toStrategy.ψ
-  exact hswap.trans_le (approxBound_of_right hC₁ hε hreverse)
+  exact hswap.trans_le (approx_bound_of_right hC₁ hε hreverse)
 
 end WinImplications
 

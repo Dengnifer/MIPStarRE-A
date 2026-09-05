@@ -317,13 +317,13 @@ theorem win_low_degree_approx_proof :
     (fun sample => S.pointMeasOption .alice W sample.2)
     (fun sample => S.lineEvalMeas .bob W sample.1 sample.2) S.toStrategy.ψ
     (h₂ P ε S hε W)
-  refine ⟨approxBound_of_left hC₂ hε hforward, ?_⟩
+  refine ⟨approx_bound_of_left hC₂ hε hforward, ?_⟩
   have hswap := opFamilyDistSq_swappedState (ιA := S.toStrategy.ιA)
     (ιB := S.toStrategy.ιB) (linePointDist P.toLdParams)
     (fun sample a => (S.pointMeasOption .alice W sample.2).effect a)
     (fun sample a => (S.lineEvalMeas .bob W sample.1 sample.2).effect a)
     S.toStrategy.ψ
-  exact hswap.trans_le (approxBound_of_right hC₁ hε hreverse)
+  exact hswap.trans_le (approx_bound_of_right hC₁ hε hreverse)
 
 /-! ## Pauli basis consistency check -/
 
@@ -474,12 +474,12 @@ theorem win_pauli_basis_cons_approx_proof :
     (uniformDistribution (Fin P.m → PauliScalar P))
     (fun u => S.pauliEvalMeas .alice W u)
     (fun u => S.pointMeas .bob W u) S.toStrategy.ψ (h₂ P ε S hε W)
-  refine ⟨approxBound_of_left hC₂ hε hforward, ?_⟩
+  refine ⟨approx_bound_of_left hC₂ hε hforward, ?_⟩
   have hswap := opFamilyDistSq_swappedState (ιA := S.toStrategy.ιA)
     (ιB := S.toStrategy.ιB) (uniformDistribution (Fin P.m → PauliScalar P))
     (fun u a => (S.pauliEvalMeas .alice W u).effect a)
     (fun u a => (S.pointMeas .bob W u).effect a) S.toStrategy.ψ
-  exact hswap.trans_le (approxBound_of_right hC₁ hε hreverse)
+  exact hswap.trans_le (approx_bound_of_right hC₁ hε hreverse)
 
 end WinImplications
 

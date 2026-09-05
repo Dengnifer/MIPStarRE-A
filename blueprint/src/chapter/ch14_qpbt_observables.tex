@@ -720,7 +720,7 @@ extracts from the strategy.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{fact:omega-anticomm-prob, fact:agreement, def:admissible, def:pauli-question-distribution, def:pauli-win-predicate, def:ld-win-predicate, def:ideg-deg-polynomials, def:consistency}
+	\uses{fact:omega-anticomm-prob, fact:agreement, def:admissible, def:pauli-question-distribution, def:pauli-win-predicate, def:ld-win-predicate, def:ideg-deg-polynomials, def:consistency, lem:qld-reversed-consistency, lem:qld-distance-interchange}
 	The question types are sampled according to the type graph of the Pauli
 	basis test (Definition~\ref{def:pauli-question-distribution}), which has
 	constant size, so each subtest of the win predicate
@@ -773,6 +773,88 @@ extracts from the strategy.
 	relabels the joint coordinates: it exchanges the two placements of a pair
 	of operators and carries $\ket{\psi}$ to the interchanged state, so the
 	state-dependent distance of the two families is unchanged.
+	The reversed consistency estimates are recorded in
+	Lemma~\ref{lem:qld-reversed-consistency}; the distance identity used
+	after applying Lemma~\ref{fact:agreement} is
+	Lemma~\ref{lem:qld-distance-interchange}.
+\end{proof}
+
+\begin{lemma}[Distance under tensor interchange]
+	\label{lem:qld-distance-interchange}
+	\lean{MIPStarRE.QPBT.WinImplications.opFamilyDistSq_swappedState}
+	\leanok
+	\uses{def:povm-distance}
+	Let $\mathcal H_A,\mathcal H_B$ be finite-dimensional complex coordinate
+	spaces, $\mathcal A$ a finite outcome set, and $\mu$ a finitely supported
+	nonnegative weight on a question set $X$. Let $M_a^x$ and $N_a^x$ be
+	arbitrary operators on $\mathcal H_A$ and $\mathcal H_B$, respectively.
+	For any vector $\psi\in\mathcal H_A\otimes\mathcal H_B$, let
+	$U:\mathcal H_A\otimes\mathcal H_B\to\mathcal H_B\otimes\mathcal H_A$
+	be the coordinate interchange $U(v\otimes w)=w\otimes v$. Then
+	\[
+	\sum_x\mu(x)\sum_{a\in\mathcal A}
+	 \big\|(N_a^x\otimes\Id_A-\Id_B\otimes M_a^x)U\psi\big\|^2
+	=
+	\sum_x\mu(x)\sum_{a\in\mathcal A}
+	 \big\|(M_a^x\otimes\Id_B-\Id_A\otimes N_a^x)\psi\big\|^2.
+	\]
+	This is a formalization-only auxiliary identity for the final sentence
+	of Lemma~\ref{lem:qld-win-implications}; neither normalization nor
+	positivity of the operators is required.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Conjugating by $U$ exchanges the tensor placements. The operator
+	difference on the left becomes the negative of that on the right.
+	Coordinate interchange and negation preserve the norm, so the identity
+	holds term by term in both sums.
+\end{proof}
+
+\begin{lemma}[Reversed-orientation consistency estimates]
+	\label{lem:qld-reversed-consistency}
+	\lean{MIPStarRE.QPBT.WinImplications.win_low_degree_interchanged_proof}
+	\lean{MIPStarRE.QPBT.WinImplications.win_pauli_basis_cons_interchanged_proof}
+	\lean{MIPStarRE.QPBT.WinImplications.win_comm_interchanged_proof}
+	\lean{MIPStarRE.QPBT.WinImplications.win_comm_cons_interchanged_proof}
+	\lean{MIPStarRE.QPBT.WinImplications.win_ms_cons_interchanged_proof}
+	\leanok
+	\uses{lem:projective-strategy-setup, def:admissible, def:consistency,
+		def:line-point-dist, def:low-degree-encoding, def:ideg-deg-polynomials}
+	For each of Items~\ref{enu:qld-ld}, \ref{enu:qld-pauli-basis-cons},
+	\ref{enu:qld-comm}, \ref{enu:qld-comm-cons}, and \ref{enu:qld-ms-cons},
+	there is a universal real constant $C\geq1$ with the following property.
+	For every admissible parameter tuple and projective strategy succeeding
+	in the Pauli basis test with probability at least $1-\eps$, where
+	$\eps\geq0$, the reversed consistency defect is at most $C\eps$,
+	for each $W\in\{X,Z\}$.
+	More precisely, write $L_a^x$ and $R_a^x$ for the local measurement
+	families on the left and right of the corresponding item, and $\mu$
+	for its sampling distribution. With superscripts $A,B$ indicating
+	which player's measurement is used, the assertion is
+	\[
+	\E_{x\sim\mu}\sum_{a\ne b}
+	 \langle\psi|R_a^{x,A}\otimes L_b^{x,B}|\psi\rangle
+	\leq C\eps.
+	\]
+	The low-degree item uses the completed outcome set
+	$\F_q\cup\{\bot\}$ and line-point distribution described above;
+	the Pauli basis item uses uniform points and outcomes in $\F_q$;
+	the remaining three items use binary outcomes and the respective
+	commuting or anticommuting conditional tuple distribution.
+	These auxiliary estimates give the reversed forms of precisely those
+	five items, without assuming that the strategy is symmetric.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:pauli-question-distribution, def:pauli-win-predicate,
+		def:ld-win-predicate, fact:omega-anticomm-prob}
+	Each disagreement event is rejected by the clause for the reversed
+	ordered question pair. Averaging over that clause bounds its mass by
+	the total rejection probability times the constant number of type-graph
+	edges. For the last three items, conditioning costs at most $2$, $2$,
+	and $16$, respectively, by Lemma~\ref{fact:omega-anticomm-prob}.
+	For the low-degree item the completed outcome $\bot$ is treated by
+	the same rejection clause, with zero mass on the point side.
 \end{proof}
 
 \begin{lemma}[Consistency and value part of Lemma~\ref{lem:qld-win-implications}]
