@@ -514,4 +514,134 @@ theorem commutator_mass_fine_le {X Y₁ Y₂ R₁ R₂ Γ₂ ι : Type*}
   have h2 := abs_le.mp hJc
   linarith [h1.1, h1.2, h2.1, h2.2, hcolavg, hF1avg, hC1avg, hK₀avg, hsf, hsc]
 
+/-- The quantitative form of `lem:pasting` with the error written out. Combining
+the pinched reduction, the Cauchy--Schwarz estimate for the pinched defect and
+the bound on the fine commutator mass, the defect of the pasted family is at
+most twice the consistency error plus the square root of an explicit sum of
+positive powers of the two errors. This is the assembly of the proof of the
+adopted statement in `docs/paper-gaps/qpbt_pasting-product-error.tex`; blueprint
+`ch12_qpbt_games.tex:960-990`. -/
+theorem consistencyDefect_pasted_le_sqrt {X Y₁ Y₂ R₁ R₂ Γ₁ Γ₂ ι : Type*}
+    [Fintype X] [DecidableEq X] [Fintype Y₁] [DecidableEq Y₁]
+    [Fintype Y₂] [DecidableEq Y₂] [Fintype R₁] [DecidableEq R₁]
+    [Fintype R₂] [DecidableEq R₂] [Fintype Γ₁] [DecidableEq Γ₁]
+    [Fintype Γ₂] [DecidableEq Γ₂] [Fintype ι] [DecidableEq ι]
+    (D : Distribution ((X × Y₁) × Y₂))
+    (eval₁ : Γ₁ → Y₁ → R₁) (eval₂ : Γ₂ → Y₂ → R₂)
+    (G₁ : X → Measurement Γ₁ ι) (G₂ : X → Measurement Γ₂ ι)
+    (A : ((X × Y₁) × Y₂) → Measurement (R₁ × R₂) ι)
+    (ψ : EuclideanSpace ℂ (ι × ι)) (η δ C : ℝ)
+    (hD : D.IsProbability) (hψ : ‖ψ‖ = 1) (hη : 0 ≤ η)
+    (hG₂ : ∀ x, MIPStarRE.QPBT.Measurement.IsProjective (G₂ x))
+    (hA : ∀ q, MIPStarRE.QPBT.Measurement.IsProjective (A q))
+    (hcoll : ∀ x y₁, 0 < (D.map Prod.fst).weight (x, y₁) →
+      ∀ g g' : Γ₂, g ≠ g' →
+        (∑ y₂ : Y₂, D.weight ((x, y₁), y₂) *
+          if eval₂ g y₂ = eval₂ g' y₂ then 1 else 0) ≤
+          η * (D.map Prod.fst).weight (x, y₁))
+    (h₁ : consistencyDefect D
+      (fun q a₁ => heteroKron (((A q).postprocess Prod.fst).effect a₁) 1)
+      (fun q a₁ => heteroKron 1 (((G₁ q.1.1).postprocess
+        (fun g => eval₁ g q.1.2)).effect a₁)) ψ ≤ δ)
+    (h₂ : consistencyDefect D
+      (fun q a₂ => heteroKron (((A q).postprocess Prod.snd).effect a₂) 1)
+      (fun q a₂ => heteroKron 1 (((G₂ q.1.1).postprocess
+        (fun g => eval₂ g q.2)).effect a₂)) ψ ≤ δ)
+    (h₃ : consistencyDefect D (fun q a => heteroKron ((A q).effect a) 1)
+      (fun q a => heteroKron 1 ((A q).effect a)) ψ ≤ δ)
+    (h₄ : consistencyDefect D
+      (fun q a₂ => heteroKron (((G₂ q.1.1).postprocess
+        (fun g => eval₂ g q.2)).effect a₂) 1)
+      (fun q a₂ => heteroKron 1 (((A q).postprocess Prod.snd).effect a₂)) ψ ≤ δ)
+    (hK₀ : opFamilyDistSq D (fun q (ab : R₁ × R₂) => heteroKron 1
+      (((G₁ q.1.1).postprocess (fun g => eval₁ g q.1.2)).effect ab.1 *
+          ((G₂ q.1.1).postprocess (fun g => eval₂ g q.2)).effect ab.2 -
+        ((G₂ q.1.1).postprocess (fun g => eval₂ g q.2)).effect ab.2 *
+          ((G₁ q.1.1).postprocess (fun g => eval₁ g q.1.2)).effect ab.1))
+      (fun _ _ => 0) ψ ≤ C * δ) :
+    consistencyDefect D (fun q a => heteroKron ((A q).effect a) 1)
+        (fun q a => heteroKron 1 (∑ g₁ : Γ₁, ∑ g₂ : Γ₂,
+          if (eval₁ g₁ q.1.2, eval₂ g₂ q.2) = a then
+            pastedMeasurement (fun g => (G₁ q.1.1).effect g)
+              (fun g => (G₂ q.1.1).effect g) g₁ g₂ else 0)) ψ ≤
+      2 * δ + Real.sqrt (C * δ +
+        (2 * Real.sqrt (2 * δ) + 2 * δ + 2 * Real.sqrt (C * δ) + C * δ) + 2 * η +
+        2 * Real.sqrt (2 * ((δ + 2 * Real.sqrt (2 * δ)) + η)) +
+        2 * Real.sqrt (2 * (δ + 2 * Real.sqrt (2 * δ)))) := by
+  classical
+  set P : (X × Y₁) → Measurement R₁ ι :=
+    fun p => (G₁ p.1).postprocess (fun g => eval₁ g p.2) with hPd
+  set Ac : ((X × Y₁) × Y₂) → Measurement R₁ ι :=
+    fun q => (A q).postprocess Prod.fst with hAcd
+  have hAcproj : ∀ q, MIPStarRE.QPBT.Measurement.IsProjective (Ac q) := fun q =>
+    SandwichProduct.postprocess_isProjective (A q) (hA q) Prod.fst
+  have hQproj : ∀ q : (X × Y₁) × Y₂, MIPStarRE.QPBT.Measurement.IsProjective
+      ((G₂ q.1.1).postprocess (fun g => eval₂ g q.2)) := fun q =>
+    SandwichProduct.postprocess_isProjective (G₂ q.1.1) (hG₂ q.1.1) _
+  -- cross consistency of the coarse and of the fine second codeword family
+  have hεc : consistencyDefect D
+      (fun q a₂ => heteroKron (((G₂ q.1.1).postprocess
+        (fun g => eval₂ g q.2)).effect a₂) 1)
+      (fun q a₂ => heteroKron 1 (((G₂ q.1.1).postprocess
+        (fun g => eval₂ g q.2)).effect a₂)) ψ ≤ δ + 2 * Real.sqrt (2 * δ) :=
+    consistencyDefect_codeword_cross_le D eval₂ G₂ A ψ δ hD hψ h₄ h₃ h₂
+  have hεf : consistencyDefect D
+      (fun q g => heteroKron ((G₂ q.1.1).effect g) 1)
+      (fun q g => heteroKron 1 ((G₂ q.1.1).effect g)) ψ ≤
+      (δ + 2 * Real.sqrt (2 * δ)) + η := by
+    refine le_trans (consistencyDefect_codeword_fine_le_coarse_add D eval₂ G₂ ψ η
+      hD hψ hη hcoll) ?_
+    linarith [hεc]
+  -- the two placements of the second codeword families are close
+  have hglf : opFamilyDistSq D (fun q g => heteroKron 1 ((G₂ q.1.1).effect g))
+      (fun q g => heteroKron ((G₂ q.1.1).effect g) 1) ψ ≤
+      2 * ((δ + 2 * Real.sqrt (2 * δ)) + η) := by
+    rw [← opFamilyDistSq_symm]
+    refine le_trans (opFamilyDistSq_le_two_mul_consistencyDefect D
+      (fun q => Measurement.leftPlacement (ιB := ι) (G₂ q.1.1))
+      (fun q => Measurement.rightPlacement (ιA := ι) (G₂ q.1.1)) ψ) ?_
+    simp only [Measurement.leftPlacement_effect, Measurement.rightPlacement_effect]
+    linarith [hεf]
+  have hglc : opFamilyDistSq D
+      (fun q b => heteroKron 1 (((G₂ q.1.1).postprocess
+        (fun g => eval₂ g q.2)).effect b))
+      (fun q b => heteroKron (((G₂ q.1.1).postprocess
+        (fun g => eval₂ g q.2)).effect b) 1) ψ ≤
+      2 * (δ + 2 * Real.sqrt (2 * δ)) := by
+    rw [← opFamilyDistSq_symm]
+    refine le_trans (opFamilyDistSq_le_two_mul_consistencyDefect D
+      (fun q => Measurement.leftPlacement (ιB := ι)
+        ((G₂ q.1.1).postprocess (fun g => eval₂ g q.2)))
+      (fun q => Measurement.rightPlacement (ιA := ι)
+        ((G₂ q.1.1).postprocess (fun g => eval₂ g q.2))) ψ) ?_
+    simp only [Measurement.leftPlacement_effect, Measurement.rightPlacement_effect]
+    linarith [hεc]
+  -- the first codeword family is close to the first marginal of the answers
+  have hd : opFamilyDistSq D (fun q a => heteroKron ((Ac q).effect a) 1)
+      (fun q a => heteroKron 1 ((P q.1).effect a)) ψ ≤ 2 * δ := by
+    refine le_trans (opFamilyDistSq_le_two_mul_consistencyDefect D
+      (fun q => Measurement.leftPlacement (ιB := ι) (Ac q))
+      (fun q => Measurement.rightPlacement (ιA := ι) (P q.1)) ψ) ?_
+    simp only [Measurement.leftPlacement_effect, Measurement.rightPlacement_effect]
+    linarith [h₁]
+  -- the mass of the coarse ordered products and the fine commutator mass
+  have hmass := mass_ordered_product_ge D Ac (fun q => P q.1)
+    (fun q => (G₂ q.1.1).postprocess (fun g => eval₂ g q.2)) ψ (2 * δ) (C * δ)
+    hD hψ hAcproj hQproj hd hK₀
+  have hKfine := commutator_mass_fine_le D eval₂ G₂ P ψ η (C * δ)
+    (2 * Real.sqrt (2 * δ) + 2 * δ + 2 * Real.sqrt (C * δ) + C * δ)
+    (2 * (δ + 2 * Real.sqrt (2 * δ)))
+    (2 * ((δ + 2 * Real.sqrt (2 * δ)) + η))
+    hD hψ hη hG₂ hcoll hK₀ (by linarith [hmass]) hglc hglf
+  -- the pinched reduction and the Cauchy--Schwarz estimate
+  have hpinch := consistencyDefect_pinched_le_marginal_add_sqrt D G₂
+    (fun q => P q.1) Ac ψ (C * δ +
+      (2 * Real.sqrt (2 * δ) + 2 * δ + 2 * Real.sqrt (C * δ) + C * δ) + 2 * η +
+      2 * Real.sqrt (2 * ((δ + 2 * Real.sqrt (2 * δ)) + η)) +
+      2 * Real.sqrt (2 * (δ + 2 * Real.sqrt (2 * δ))))
+    hD hψ hAcproj hG₂ hKfine
+  have hpaste := consistencyDefect_pasted_le_marginal_add_pinched D eval₁ eval₂
+    G₁ G₂ A ψ hψ hG₂
+  linarith [hpaste, hpinch, h₁, h₂]
+
 end MIPStarRE.QPBT

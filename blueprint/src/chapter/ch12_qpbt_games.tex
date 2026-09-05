@@ -1438,6 +1438,41 @@ postprocessing, and operator-contraction steps used to formalize
 	the averages.
 \end{proof}
 
+\begin{lemma}[Formalization support for Lemma~\ref{lem:pasting}]
+	\label{lem:pasting-explicit-error}
+	\lean{MIPStarRE.QPBT.consistencyDefect_pasted_le_sqrt}
+	\leanok
+	\uses{lem:pasting-pinched-reduction, lem:pasting-pinched-cauchy-schwarz,
+		lem:pasting-fine-commutator-mass, lem:pasting-codeword-cross-consistency,
+		lem:pasting-fine-coarse-cross, lem:pasting-ordered-product-mass-lower}
+	In the setting of Lemma~\ref{lem:pasting}, assume moreover that the averaged
+	commutator mass of the two coarse codeword families is at most $C\delta$.
+	Then the defect of the pasted family satisfies
+	\[
+		2\delta + \sqrt{K}, \qquad
+		K = C\delta + \bigl(2\sqrt{2\delta} + 2\delta + 2\sqrt{C\delta}
+			+ C\delta\bigr) + 2\eta
+			+ 2\sqrt{2(\delta + 2\sqrt{2\delta} + \eta)}
+			+ 2\sqrt{2(\delta + 2\sqrt{2\delta})}
+	\]
+	as an upper bound.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:pasting-pinched-reduction, lem:pasting-pinched-cauchy-schwarz,
+		lem:pasting-fine-commutator-mass, lem:pasting-codeword-cross-consistency,
+		lem:pasting-fine-coarse-cross, lem:pasting-ordered-product-mass-lower}
+	The pinched reduction bounds the defect of the pasted family by the second
+	marginal comparison plus the pinched defect, and the pinched defect is
+	bounded by the first marginal comparison plus the square root of the
+	averaged fine commutator mass. The cross consistency of the coarse second
+	codeword family is at most $\delta + 2\sqrt{2\delta}$, that of the fine
+	family at most $\eta$ more, and both bound the summed squared distance
+	between the two placements of the corresponding family by twice their value.
+	With the mass of the coarse ordered products, these are the inputs of the
+	bound on the fine commutator mass.
+\end{proof}
+
 \begin{lemma}[Close strategies have close values; Fact 4.32 in \cite{Natarajan2018NEEXP}]\label{lem:close-strategies-have-close-values}
 	\lean{MIPStarRE.QPBT.abs_value_sub_le_of_areClose}
 	\leanok
