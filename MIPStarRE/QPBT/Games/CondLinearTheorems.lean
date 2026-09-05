@@ -3,11 +3,12 @@ import MIPStarRE.QPBT.Games.CondLinearTheorems.DirectSumSupport
 
 /-! # Structure and direct sums of conditionally linear functions
 
-This module records the prefix decomposition of a conditionally linear map and
-the behavior of such maps and their shared-seed distributions under finite
-coordinate direct sums.  The direct-sum construction on representations that
-these results build on is in
-`MIPStarRE/QPBT/Games/CondLinearTheorems/DirectSumSupport.lean`.
+This module establishes the prefix decomposition of a conditionally linear map
+and closure under finite coordinate direct sums.  Equal-level representations
+on pairwise disjoint registers combine into a representation on their direct
+sum; after raising shorter representations by zero linear contributions, the
+same construction applies at arbitrary levels.  The corresponding shared-seed
+distributions factor as products.
 
 ## References
 

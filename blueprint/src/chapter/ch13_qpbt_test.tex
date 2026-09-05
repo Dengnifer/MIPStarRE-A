@@ -15,11 +15,11 @@ Throughout, the two players are denoted $\mathrm A$ and $\mathrm B$; for $w \in 
 The classical low individual degree game is a two-player game based on the low individual degree variant of the multilinearity test of Babai, Fortnow, and Lund. In the basic version, one player (the ``points player'') receives a uniformly random point $u \in \F_q^m$ and answers with a value $a \in \F_q$, while the other player (the ``lines player'') receives a random line through $u$ --- either axis-parallel or diagonal --- and answers with a univariate polynomial describing the restriction of a global function to that line. If the players share a polynomial $g\colon \F_q^m \to \F_q$ of individual degree at most $d$ and answer with $g(u)$ and with the restriction $g|_\ell$, they win with probability $1$; the soundness theorem below states that the converse approximately holds. In the simultaneous version, the players' answers are $k$-tuples, checked coordinatewise against a $k$-tuple of low individual degree polynomials.
 
 \begin{definition}[The classical low individual degree game: parameters and registers]\label{def:ld-game}
+	\lean{MIPStarRE.QPBT.ldGame}
+	\leanok
 	\uses{def:game, def:admissible-size}
-	% The source fixes \N to be the set of positive integers
-	% (references/qpbt-paper/04_preliminaries.tex:6) and takes m, d, ldc in \N
-	% (references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:33-35),
-	% so the positivity below is the source's implicit domain, stated explicitly.
+	% The source fixes \N to be the positive integers (04_preliminaries.tex:6) and takes
+	% m, d, ldc in \N (08_classical_and_quantum_low_degree_tests.tex:33-35), so positivity is explicit.
 	% It is load-bearing: at d = 0 or k = 0 the prefactor a(dmk)^a of delta_ld in
 	% lem:ld-soundness vanishes, and at d = 0 the resulting exact conclusions fail
 	% (e.g. at (q,m,d,k) = (2,1,0,1) with eps = 1). The case k = 0, though it would
@@ -90,7 +90,7 @@ The classical low individual degree game is a two-player game based on the low i
 \end{lemma}
 \begin{proof}
 	% No completion mark: the Lean proof establishes the distribution identity only; the typed-family hypotheses on L are open and tracked by issue 180.
-	\uses{def:typed-cl-distributions, def:graph-distribution, def:cl-dist}
+	\uses{def:typed-cl-distributions, def:graph-distribution, def:cl-dist, lem:uniform-bind-map, lem:distribution-map-map}
 	Every unordered pair of types is an edge of $G^{\mathrm{ld}}$, so the graph distribution $\mu_{G^{\mathrm{ld}}}$ of Definition~\ref{def:graph-distribution} is the uniform distribution on $\mathcal T^{\mathrm{ld}} \times \mathcal T^{\mathrm{ld}}$. For each ordered type pair $(t_{\mathrm A}, t_{\mathrm B})$ the CL distribution $\mu_{L_{t_{\mathrm A}},\, L_{t_{\mathrm B}}}$ is the push-forward of the uniform distribution on $V$ along $z \mapsto \bigl(L_{t_{\mathrm A}}(z), L_{t_{\mathrm B}}(z)\bigr)$. Binding the uniform type pair to these push-forwards and tagging each content with its type is exactly the two-stage sampling procedure of Definition~\ref{def:ld-question-distribution}. This establishes the distribution identity; the typed-family hypotheses on $L$ are not established here.
 \end{proof}
 
@@ -106,7 +106,7 @@ representing the paper's coordinate $r+1$.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{def:cl-dist, def:ld-question-distribution, def:line-representative, lem:line-rep-incidence}
+	\uses{def:cl-dist, def:ld-question-distribution, def:line-representative, lem:line-rep-incidence, lem:distribution-map-map, lem:uniform-distribution-map-equivalence, lem:uniform-distribution-map-equi-cardinal-fibers, lem:uniform-product-first-marginal}
 	By Definition~\ref{def:cl-dist} the distribution $\mu_{L_{\mathsf{ALine}}, L_{\mathsf{Point}}}$ is the push-forward of the uniform distribution on $V$ along $z \mapsto \bigl(L_{\mathsf{ALine}}(z), L_{\mathsf{Point}}(z)\bigr)$, so each marginal below is the push-forward of the uniform distribution on $V$ along the composite of that map with the corresponding coordinate. The point marginal is the image of the uniform distribution on $V$ under $(u,s,v) \mapsto u$, hence uniform on $\F_q^m$. The axis marginal is its image under $(u,s,v) \mapsto \chi(s)$; since $m$ divides $q$, every fibre of $\chi$ has exactly $q/m$ elements, so $i = \chi(s)$ is uniform on $\{1,2,\ldots,m\}$ and $(u_0,s)$ specifies a uniformly random axis-parallel line $\ell(u_0,e_i)$. Finally the base point recorded in the sample is $u_0 = L^{\mathrm{Ln}}_{e_i}(u)$, which is fixed by $L^{\mathrm{Ln}}_{e_i}$ (Definition~\ref{def:line-representative}) and satisfies $u \in \ell(u_0,e_i)$ by Lemma~\ref{lem:line-rep-incidence}.
 \end{proof}
 
@@ -118,7 +118,7 @@ representing the paper's coordinate $r+1$.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{def:cl-dist, def:ld-question-distribution, def:line-representative, lem:line-rep-incidence}
+	\uses{def:cl-dist, def:ld-question-distribution, def:line-representative, lem:line-rep-incidence, lem:distribution-map-map, lem:uniform-distribution-map-equivalence, lem:uniform-distribution-map-equi-cardinal-fibers, lem:uniform-product-first-marginal, lem:uniform-product-second-marginal}
 	The three steps are those of the proof of Lemma~\ref{lem:alnf}, and none of them depends on that lemma. The two marginals are again push-forwards of the uniform distribution on $V$ along coordinates of $z \mapsto \bigl(L_{\mathsf{DLine}}(z), L_{\mathsf{Point}}(z)\bigr)$, by Definition~\ref{def:cl-dist}: the point marginal is uniform on $\F_q^m$, and $i = \chi(s)$ is uniform on $\{1,2,\ldots,m\}$ because every fibre of $\chi$ has $q/m$ elements. The direction component of the sampled tuple is $v' = \pi_{i-1}(v)$, whose first $i-1$ coordinates vanish and which is unchanged by a further application of $\pi_{i-1}$. Finally $u_0 = L^{\mathrm{Ln}}_{v'}(u)$ is fixed by $L^{\mathrm{Ln}}_{v'}$ (Definition~\ref{def:line-representative}) and satisfies $u \in \ell(u_0,v')$ by Lemma~\ref{lem:line-rep-incidence}.
 \end{proof}
 
@@ -349,7 +349,7 @@ The Pauli basis test is the quantum low individual degree test of Natarajan and 
 
 \begin{definition}[Question distribution of the Pauli basis test]\label{def:pauli-question-distribution}
 	\lean{MIPStarRE.QPBT.PauliType, MIPStarRE.QPBT.pauliCLLevel, MIPStarRE.QPBT.pauliCL}
-	\lean{MIPStarRE.QPBT.isCondLinear_pauliCL, MIPStarRE.QPBT.pauliEdges}
+	\lean{MIPStarRE.QPBT.pauliEdges}
 	\lean{MIPStarRE.QPBT.pauliQuestionDistribution}
 	\uses{def:admissible, def:ld-question-distribution, lem:ld-aline-level, lem:ld-dline-level, def:ms-game, def:cl-func, def:cl-dist, def:graph-distribution}
 	% Admissibility of the full tuple is required here, not only the divisibility m | q:
@@ -394,17 +394,29 @@ The Pauli basis test is the quantum low individual degree test of Natarajan and 
 	% twice the relative mass of an oriented non-loop pair, and G^pauli has a self-loop
 	% at every vertex.
 	The question distribution of $\mathfrak{G}^{\mathrm{Pauli}}$ is obtained by sampling the type pair $(t_{\mathrm A}, t_{\mathrm B})$ from the graph distribution $\mu_{G^{\mathrm{pauli}}}$ of Definition~\ref{def:graph-distribution}, that is, uniformly at random among all ordered pairs of types whose underlying unordered pair $\{t_{\mathrm A}, t_{\mathrm B}\}$ is an edge of $G^{\mathrm{pauli}}$, self-loops included; sampling $z \in V^{\mathrm{pauli}}$ uniformly at random; and setting $x_w = L_{t_w}(z)$ for $w \in \{\mathrm A,\mathrm B\}$. Explicitly, if $z = (u_X,u_Z,s,v,r_X,r_Z)$, then a player whose type is $(\mathsf{Point},W)$ receives $u_W$; a player whose type is $(\mathsf{ALine},W)$ receives $(u_0, s)$ with $u_0 = L^{\mathrm{Ln}}_{e_i}(u_W)$ and $i = \chi(s)$; a player whose type is $(\mathsf{DLine},W)$ receives $(u_0, s, v')$ with $i = \chi(s)$, $v' = \pi_{i-1}(v)$, and $u_0 = L^{\mathrm{Ln}}_{v'}(u_W)$; a player whose type lies in $\mathcal T^{\mathrm{ms}} \cup \{\mathsf{Pair}, (\mathsf{Pair},X), (\mathsf{Pair},Z)\}$ receives $(u_X, u_Z, r_X, r_Z)$; and a player whose type is $(\mathsf{Pauli},W)$ receives $0$.
-	The displayed level of each individual map $L_t$ is proved. These assertions do not yet provide one common level for the family, and the identification of this sampler with the general typed CL construction remains open; both assertions are stated separately in Lemma~\ref{lem:pauli-question-typed-cl}.
+	The displayed levels of the individual maps are the content of Lemma~\ref{lem:pauli-cl-levels}. A common-level representation of the whole family and the identification of this sampler with the general typed CL distribution are the two assertions of Lemma~\ref{lem:pauli-question-typed-cl}; both remain open.
 \end{definition}
+
+\begin{lemma}[Formalization support for the levels of the Pauli maps]\label{lem:pauli-cl-levels}
+	\lean{MIPStarRE.QPBT.isCondLinear_pauliCL}
+	\leanok
+	\uses{def:pauli-question-distribution, def:cl-func, lem:ld-aline-level, lem:ld-dline-level}
+	For every admissible tuple and every $t \in \mathcal T^{\mathrm{pauli}}$, the map $L_t$ is conditionally linear at its displayed level: the point, axis-line, diagonal-line, and Pauli maps have levels $1$, $2$, $3$, and $0$, respectively, while the remaining pair and Magic Square maps have level $1$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:cl-func, lem:ld-aline-level, lem:ld-dline-level}
+	The point, axis-line, and diagonal-line maps are obtained from their low-degree counterparts by reindexing the relevant registers, which preserves the level. The Pauli map is zero. Every remaining map is the linear projection onto the two point registers and the two scalar registers, and hence has one level.
+\end{proof}
 
 \begin{lemma}[The Pauli question distribution is a typed CL distribution]\label{lem:pauli-question-typed-cl}
 	\lean{MIPStarRE.QPBT.pauliQuestionDistribution_eq_typedCL}
 	\uses{def:pauli-question-distribution, def:typed-cl-distributions, def:graph-distribution}
-	Fix an admissible tuple $\mathsf{qldparams} = (q,m,d)$ (Definition~\ref{def:admissible}) and let $L = \{L_t\}_{t \in \mathcal T^{\mathrm{pauli}}}$ be the family of Definition~\ref{def:pauli-question-distribution}. Then the question distribution of $\mathfrak{G}^{\mathrm{Pauli}}_{\mathsf{qldparams}}$ is the $(\mathcal T^{\mathrm{pauli}}, G^{\mathrm{pauli}})$-typed conditionally linear distribution $\mu^{G^{\mathrm{pauli}}}_{L,\,L}$ of Definition~\ref{def:typed-cl-distributions}. As in Lemma~\ref{lem:ld-question-typed-cl}, the linked declaration states the distribution identity alone: an equality between the question sampler of $\mathfrak{G}^{\mathrm{Pauli}}_{\mathsf{qldparams}}$ and the distribution that the construction of Definition~\ref{def:typed-cl-distributions} produces from the pair $(L, L)$ and the graph $G^{\mathrm{pauli}}$, a construction that is available for an arbitrary family of maps. The Lean proof of that equality remains open. The level assertions for the individual maps $L_t$ listed in Definition~\ref{def:pauli-question-distribution} are formalized, but their promotion to a typed family of one common level is also open. These two remaining obligations are tracked by issue~\#180, so the statement and the proof below carry no completion mark.
+	Fix an admissible tuple $\mathsf{qldparams} = (q,m,d)$ (Definition~\ref{def:admissible}) and let $L = \{L_t\}_{t \in \mathcal T^{\mathrm{pauli}}}$ be the family of Definition~\ref{def:pauli-question-distribution}. Then the question distribution of $\mathfrak{G}^{\mathrm{Pauli}}_{\mathsf{qldparams}}$ is the $(\mathcal T^{\mathrm{pauli}}, G^{\mathrm{pauli}})$-typed conditionally linear distribution $\mu^{G^{\mathrm{pauli}}}_{L,\,L}$ of Definition~\ref{def:typed-cl-distributions}. This assertion consists of an equality between the two-stage question sampler and the distribution obtained from $(L,L)$ and $G^{\mathrm{pauli}}$, together with a representation of all maps $L_t$ at one common level. Lemma~\ref{lem:pauli-cl-levels} gives their individual levels, but neither the common-level representation nor the sampler identity has yet been established. These two assertions are tracked by issue~\#180.
 \end{lemma}
 \begin{proof}
 	\uses{def:typed-cl-distributions, def:graph-distribution, def:cl-dist}
-	The type pair is drawn from $\mu_{G^{\mathrm{pauli}}}$ by definition, and for each ordered type pair the content pair is the image of a single uniform $z \in V^{\mathrm{pauli}}$ under the corresponding pair of CL functions, that is, a sample from $\mu_{L_{t_{\mathrm A}},\, L_{t_{\mathrm B}}}$. This is the argument of the source; the distribution identity and the common-level typed-family assertion are not yet formalized.
+	The type pair is drawn from $\mu_{G^{\mathrm{pauli}}}$ by definition, and for each ordered type pair the content pair is the image of a single uniform $z \in V^{\mathrm{pauli}}$ under the corresponding pair of CL functions, that is, a sample from $\mu_{L_{t_{\mathrm A}},\, L_{t_{\mathrm B}}}$. Completing the argument requires the resulting equality of finite distributions and a common-level representation of the family; both remain open.
 \end{proof}
 
 \begin{definition}[Win predicate of the Pauli basis test]\label{def:pauli-win-predicate}

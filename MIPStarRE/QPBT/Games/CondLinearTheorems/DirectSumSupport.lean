@@ -3,13 +3,12 @@ import MIPStarRE.QPBT.Games.CondLinear
 /-!
 # Coordinate direct sums of conditionally linear representations
 
-This module assembles the direct sum of equal-level representations of
-conditionally linear functions over a family of pairwise disjoint registers,
-together with the coordinate-restriction identities its support and
-evaluation proofs rely on.  These constructions yield the direct-sum results
-for conditionally linear maps and for their shared-seed distributions under
-finite coordinate direct sums, which are proved in
-`MIPStarRE/QPBT/Games/CondLinearTheorems.lean`.
+This module constructs the direct sum of equal-level representations of
+conditionally linear functions over pairwise disjoint registers.  Restriction
+to one register selects the corresponding supported summand, and a supported
+representation is unchanged when its input is restricted to that register.
+Consequently the direct-sum representation is supported on the union of the
+registers and evaluates as the sum of the component maps.
 
 ## References
 

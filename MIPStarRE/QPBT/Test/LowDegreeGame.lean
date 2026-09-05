@@ -633,7 +633,8 @@ noncomputable def ldWinPredicate (P : LdParams) :
         | _, _, _, _ => true
       else false
 
-/-- The low-degree game packaged as a `Game`.  This is `def:ld-game` in
+/-- The low-degree game determined by its question distribution and win
+predicate.  This is `def:ld-game` in
 `blueprint/src/chapter/ch13_qpbt_test.tex:17-156`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
 -/
