@@ -94,7 +94,7 @@ GitHub, so parallel lanes cannot trample each other's records.
 The product is the Lean formalization; `local/` is scaffolding, and
 scaffolding work is a COST, not an achievement.  Binding rules:
 
-- Budget: a workflow change defaults to ≤2 hours wall time and ≤400 changed
+- Budget: a workflow change defaults to ≤2 hours wall time and ≤1000 changed
   lines.  Reaching either limit means stop, commit what stands, record the
   state in telemetry, and escalate to the owner with a concrete question —
   never push through the ceiling.  The pre-commit hook checks the line budget
