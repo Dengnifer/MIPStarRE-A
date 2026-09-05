@@ -11,6 +11,7 @@ import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.Consistency
 import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.SecondPair
 import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.IdealTarget
 import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.Constants
+import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.TwoQubitSwap
 
 /-!
 # Magic Square rigidity
@@ -308,18 +309,22 @@ commute on both sides
 `msVarObsB_comm_of_shared_constraint`).  The one-qubit controlled-swap
 extraction and its intertwining relations are
 `MagicSquareRigidity.binarySwapIsometry`, `binarySwap_intertwines_Z` and
-`norm_binarySwap_intertwines_X_sub_le`, and the conclusions are transported
+`norm_binarySwap_intertwines_X_sub_le`; the two-qubit embeddings themselves are
+`MagicSquareRigidity.msAliceTwoQubitSwapIsometry` and
+`msBobTwoQubitSwapIsometry`, built from the two logical pairs of each player by
+`MagicSquareRigidity.twoBinarySwapIsometry`.  The conclusions are transported
 from the dilation to the original strategy by `ms_state_transfer`,
 `ms_effect_transfer_A`, `ms_effect_transfer_B`, `ms_anticommutator_transfer_A`
 and `ms_anticommutator_transfer_B`.
 
-What remains is the joint two-qubit extraction: the product of the two
-one-qubit controlled swaps on each player's space, the estimate showing that
-the resulting pair of local isometries carries the dilated state to within
-`O(sqrt ε + sqrt δ)` of two EPR pairs tensored with a residual bipartite
-vector, and the normalization of that residual vector to the unit auxiliary
-state `aux` of the witness.  This is the step at which `δ` enters, and it is
-the only step of the argument that is not yet formalized. -/
+What remains is the joint estimate for those two embeddings: that
+`isometryTensor` of the two two-qubit embeddings carries the dilated state to
+within `O(sqrt ε + sqrt δ)` of two EPR pairs tensored with a residual
+bipartite vector, and the normalization of that residual vector to the unit
+auxiliary state `aux` of the witness, followed by the transport of the two
+one-qubit intertwining relations through the second controlled swap.  This is
+the step at which `δ` enters, and it is the only step of the argument that is
+not yet formalized. -/
 theorem exists_ms_rigidity :
     ∃ C : ℝ, 1 ≤ C ∧ ∀ (ε δ : ℝ), 0 ≤ ε → 0 ≤ δ →
       ∀ S : Strategy msGame, 1 - ε ≤ S.value →
