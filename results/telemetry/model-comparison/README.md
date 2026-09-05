@@ -1,5 +1,7 @@
 # codex model comparison — `gpt-5.6-sol` vs `gpt-6-astra`
 
+Both models run at the same reasoning effort: the global default `model_reasoning_effort = "ultra"` in the codex configuration on ghz applies to every dispatched session, and the owner decided (2026-09-05) not to lower it for the easy sol tasks, so the tables compare sol and astra at ultra effort throughout.
+
 A side product of the model switch on 2026-09-05: `gpt-6-astra` became the
 default for codex sessions at 2026-09-05T15:46Z, and `gpt-5.6-sol` — used for
 everything before that — is now kept by operator choice for "really easy"
