@@ -603,194 +603,6 @@
   "pinned_comment": null
  },
  {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/183",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/183/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/183/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/183/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/183",
-  "id": 5349439078,
-  "node_id": "I_kwDOUJyJf88AAAABPtn2Zg",
-  "number": 183,
-  "title": "refactor(QPBT/Test): clean Magic Square dilation proof support",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025014642,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8pcg",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/follow-up",
-    "name": "follow-up",
-    "color": "ededed",
-    "default": false,
-    "description": "A mathematical obligation split out of a merged PR"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 1,
-  "created_at": "2026-09-04T14:40:31Z",
-  "updated_at": "2026-09-04T16:34:28Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/77",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 0,
-   "blocking": 0,
-   "total_blocking": 0
-  },
-  "body": "<!-- mipstarre-issue-key: pr149-terminal-dilation-cleanup -->\n## Context\n\nPR #149 supplies the Magic Square projective-dilation and ground-slice\ntransfer layer for issue #102. Its third exact-head review approves the\nmathematics and source alignment and leaves three bounded code-hygiene\nfindings. They are tracked here so the completed proof packet does not grow.\n\n## Scope\n\n- Remove the unused `[DecidableEq alpha]` assumptions from the two\n  family-projection theorem signatures in `Dilation.lean`, introducing local\n  classical instances inside proofs if required.\n- Replace the three linter-reported goal-changing `show` tactics in\n  `Dilation.lean` with `change` or direct goal statements.\n- Promote or reuse the existing `applyOperatorToState_mul` helper from\n  `Games/DistanceTheorems/Support.lean` so `GroundSlice.lean` does not carry an\n  exact duplicate proof.\n\n## Acceptance\n\n- The affected public theorem signatures have no unused typeclass assumptions.\n- The three `style.show` warnings are eliminated at their source.\n- Both call sites use one appropriately shared multiplication helper.\n- Changed-file Lean checks, the duplicate-helper audit, and local CI pass.\n\nProvenance: PR #149 at\n`da0d0061c7a1a583fe43927632b2d97b45614065`, terminal findings F1-F3.\n\n---\nAddresses #102",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/183/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/183/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/180",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/180/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/180/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/180/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/180",
-  "id": 5348993981,
-  "node_id": "I_kwDOUJyJf88AAAABPtMrvQ",
-  "number": 180,
-  "title": "fix(QPBT/Test): establish typed conditionally linear question laws",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement"
-   },
-   {
-    "id": 12025011921,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8e0Q",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/qpbt-test",
-    "name": "qpbt-test",
-    "color": "ededed",
-    "default": false,
-    "description": "The quantum Pauli basis test itself \u2014 game definition, questions, answers, and scoring"
-   },
-   {
-    "id": 12025014642,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8pcg",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/follow-up",
-    "name": "follow-up",
-    "color": "ededed",
-    "default": false,
-    "description": "A mathematical obligation split out of a merged PR"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-04T13:59:47Z",
-  "updated_at": "2026-09-04T13:59:47Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/164",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 0,
-   "blocking": 0,
-   "total_blocking": 0
-  },
-  "body": "<!-- mipstarre-issue-key: pr150-terminal-typed-cl-followup -->\n## Context\n\nPR #150 proves the low-degree geometry and sampling identities from issue #106.\nIts terminal exact-head review found that the surrounding typed conditionally\nlinear (CL) claims still overstate what the linked Lean declarations prove.\nThis work is tracked separately so the reviewed geometry packet does not grow.\n\n## Mathematical scope\n\n- Prove the point-level conditional-linearity result for `ldPointCL` and a\n  common-level `IsTypedCondLinearFamily` theorem for the low-degree family.\n- Pair that family theorem with `ldQuestionDistribution_eq_typedCL`, so the\n  source-labelled low-degree typed-distribution result states both the CL\n  hypotheses and the distribution equality.\n- State and track the analogous source-faithful Pauli typed-family obligation;\n  do not advertise the existing equality-only theorem or its open proof as the\n  source lemma.\n- Reconcile the finite type-set hypothesis in the paper with\n  `IsTypedCondLinearFamily`: add the faithful boundary instance where needed,\n  or document a genuine generalization without giving it a source `\\leanok`.\n- Correct the Chapter 12 and Chapter 13 `\\lean`, `\\leanok`, and subordinate\n  obligation placement to match the resulting Lean statements and proof debt.\n\n## Sources\n\n- `references/qpbt-paper/07_types.tex:84-93`\n- `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:203-237`\n- `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-966`\n- `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1084-1120`\n\n## Acceptance\n\n- The low-degree and Pauli blueprint nodes state exactly the corresponding\n  typed-family and distribution content.\n- Every statement/proof `\\leanok` is justified by a source-faithful completed\n  declaration; open obligations remain explicit and tracked.\n- No bridge hypothesis, strengthened win assumption, or new untracked proof\n  hole is introduced.\n- Changed Lean files type-check; blueprint checks and the full local CI pass.\n\nProvenance: PR #150 at\n`789dfbcccc083fbd254f68375dfc38510c4a30fa`, terminal findings F1, F2,\nF5-F8.\n\n---\nAddresses #106",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/180/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/180/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/174",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/174/labels{/name}",
@@ -1434,8 +1246,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 9,
-   "completed": 2,
-   "percent_completed": 22
+   "completed": 3,
+   "percent_completed": 33
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
   "issue_dependencies_summary": {
@@ -2452,9 +2264,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 0,
+  "comments": 1,
   "created_at": "2026-09-04T06:46:33Z",
-  "updated_at": "2026-09-04T12:03:43Z",
+  "updated_at": "2026-09-05T01:22:03Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
@@ -3507,8 +3319,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 6,
-   "completed": 4,
-   "percent_completed": 66
+   "completed": 5,
+   "percent_completed": 83
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/164",
   "issue_dependencies_summary": {
