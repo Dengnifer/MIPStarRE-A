@@ -4,22 +4,25 @@ import MIPStarRE.QPBT.Observables.LineMeasurement.LinePointOverlap
 # Bipartite estimates and transport for the expanded line measurements
 
 This module collects the generic distance estimates used by items 2 and 3 of
-the expanded-line consistency lemma, and the bookkeeping that transports the
+the expanded-line consistency lemma, and the identities that transport the
 placed families of the six-register expanded state to the two opposite-
 placement bipartitions. The generic estimates are: the distance between two
 oppositely placed complete measurements is at most twice the complement of
 their diagonal overlap (`fact:agreement`), and a projective family compared
 with itself followed by an effect selected through a coarse-graining is at
 most as far as the coarse-grained families are from each other
-(`fact:add-a-proj2` for a projective refinement).
+(`fact:add-a-proj2` for a projective refinement). The transport identities
+are formalization-only auxiliaries: they carry a relation between placed
+operators on the six-register expanded state to the product shape in which the
+generic estimates are stated, a step the source leaves implicit.
 
 ## References
 
 Items 2 and 3 of `lem:qld-comm-line-cons`, paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:569-679`,
-blueprint `blueprint/src/chapter/ch14_qpbt_observables.tex:1103-1210`, and
-`fact:agreement`, `fact:add-a-proj2` in
-`blueprint/src/chapter/ch12_qpbt_games.tex:245-313`.
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:534-545`,
+blueprint `eq:qld-comm-line-pt-cons` and `eq:qld-comm-line-pt-cons2`, and
+the generic estimates `fact:agreement` and `fact:add-a-proj2` of
+`blueprint/src/chapter/ch12_qpbt_games.tex`.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder
@@ -35,8 +38,9 @@ noncomputable section
 
 namespace DistanceCalculus
 
-/-- A projective effect is absorbed by the postprocessed effect of its own
-fiber. -/
+/-- A projective effect is absorbed by the postprocessed effect of the fiber
+containing its own outcome. Formalization-only auxiliary for the projective
+refinement of `fact:add-a-proj2` used by `eq:qld-comm-line-pt-cons`. -/
 theorem effect_mul_postprocess_effect_self {α β ι : Type*} [Fintype α]
     [DecidableEq α] [Fintype β] [DecidableEq β] [Fintype ι] [DecidableEq ι]
     (M : MIPStarRE.Quantum.Measurement α ι)
@@ -53,8 +57,7 @@ theorem effect_mul_postprocess_effect_self {α β ι : Type*} [Fintype α]
 
 /-- The distance between two oppositely placed complete measurements is at
 most twice their inconsistency, expressed through the diagonal overlap. This
-is `fact:agreement` combined with the overlap form of the consistency defect,
-blueprint `ch12_qpbt_games.tex:245-254`. -/
+is `fact:agreement` combined with the overlap form of the consistency defect. -/
 theorem opFamilyDistSq_placed_le_two_mul_one_sub_overlap {X α ιA ιB : Type*}
     [Finite X] [Fintype α]
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
@@ -81,7 +84,7 @@ right-placed effect selected through a coarse-graining, is at most as far
 from it as the coarse-grained families are from each other. This is the
 projective refinement step (`fact:add-a-proj2`) used to derive item 2 of
 `lem:qld-comm-line-cons` from item 3, paper
-`14_analysis_of_the_pauli_basis_test.tex:569-620`. -/
+`14_analysis_of_the_pauli_basis_test.tex:534-539`. -/
 theorem opFamilyDistSq_left_refine_le {X α β ιA ιB : Type*}
     [Fintype α] [DecidableEq α] [Fintype β] [DecidableEq β]
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
@@ -116,7 +119,10 @@ theorem opFamilyDistSq_left_refine_le {X α β ιA ιB : Type*}
       heteroKron 1 ((B x).effect b)) ψ
     (leftPlaced_sum_adjoint_mul_le_one (M x))
 
-/-- The right-placed form of the projective refinement step. -/
+/-- A right-placed projective family, compared with itself followed by a
+left-placed effect selected through a coarse-graining, is at most as far from
+it as the coarse-grained families are from each other. This is the projective
+refinement of `fact:add-a-proj2` on the reversed directed pair. -/
 theorem opFamilyDistSq_right_refine_le {X α β ιA ιB : Type*}
     [Fintype α] [DecidableEq α] [Fintype β] [DecidableEq β]
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
@@ -185,7 +191,8 @@ theorem norm_place_AA'_sub_mul_place_BA'' (S : ProjectiveSetting P ε)
     reindexOp_aaBaBipartition_left, reindexOp_aaBaBipartition_right]
 
 set_option synthInstance.maxSize 400 in
-/-- The `BA''`-first analogue of the previous transport. -/
+/-- The same transport with the roles of the two placements exchanged, so
+that the `BA''` placement carries the left factor of the difference. -/
 theorem norm_place_BA''_sub_mul_place_AA' (S : ProjectiveSetting P ε)
     (X : Op (S.toStrategy.ιA × PauliRegister P))
     (Y : Op (S.toStrategy.ιB × PauliRegister P)) :
@@ -243,7 +250,9 @@ theorem norm_place_AB''_sub_mul_place_BB' (S : ProjectiveSetting P ε)
     reindexOp_abBbBipartition_left, reindexOp_abBbBipartition_right]
 
 set_option synthInstance.maxSize 400 in
-/-- The `BB'`-first analogue of the previous transport. -/
+/-- The same transport on the `AB'' | BB'` bipartition with the roles of the
+two placements exchanged, so that the `BB'` placement carries the left factor
+of the difference. -/
 theorem norm_place_BB'_sub_mul_place_AB'' (S : ProjectiveSetting P ε)
     (X : Op (S.toStrategy.ιA × PauliRegister P))
     (Y : Op (S.toStrategy.ιB × PauliRegister P)) :

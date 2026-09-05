@@ -13,9 +13,9 @@ point-effect families used by the consistency estimates.
 
 ## References
 
-The declarations formalize `def:expanded-line-measurement` in
-`blueprint/src/chapter/ch14_qpbt_observables.tex:1034-1080`, whose paper
-source is `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:530-557`.
+The declarations formalize `def:expanded-line-measurement`, whose paper
+source is
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:552-556`.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder
@@ -27,10 +27,12 @@ open MIPStarRE.Quantum
 
 noncomputable section
 
-/-- The tensor placement respects finite sums in both factors. A private copy
-of this identity (`heteroKron_sum_sum`) belongs to
-`Observables/ExpandedDefs.lean`; it is restated here because that copy is not
-exported. -/
+/-- The tensor placement of a sum of operators is the sum of the tensor
+placements, in both factors. Formalization-only auxiliary for the convolution
+of `def:expanded-line-measurement`. The same identity is proved as
+`heteroKron_sum_sum` in `MIPStarRE/QPBT/Observables/ExpandedDefs.lean`, where
+it is `private` and therefore invisible from this file; consolidating the two
+copies into the module that defines `heteroKron` is tracked by issue #204. -/
 private theorem heteroKron_sum_sum {α β ι κ : Type*}
     [Fintype α] [Fintype β] (A : α → Op ι) (B : β → Op κ) :
     heteroKron (∑ x, A x) (∑ y, B y) =
@@ -43,14 +45,19 @@ private theorem heteroKron_sum_sum {α β ι κ : Type*}
   intro x hx
   rw [Finset.mul_sum]
 
-/-- The tensor placement of a zero left factor vanishes. -/
-private theorem heteroKron_zero_left {ι κ : Type*} (B : Op κ) :
+/-- The tensor placement of a zero left factor vanishes. This zero law and its
+companion below are the two remaining linearity facts about `heteroKron` used
+by the expanded line measurements; they are stated here, in the first module
+that needs them, because the tensor-placement lemmas of
+`MIPStarRE/QPBT/Games/Defs.lean` do not yet record them. Moving them there,
+next to `heteroKron_mul` and `heteroKron_one_one`, is tracked by issue #204. -/
+theorem heteroKron_zero_left {ι κ : Type*} (B : Op κ) :
     heteroKron (0 : Op ι) B = 0 := by
   unfold heteroKron
   exact Matrix.zero_kronecker B
 
 /-- The tensor placement of a zero right factor vanishes. -/
-private theorem heteroKron_zero_right {ι κ : Type*} (A : Op ι) :
+theorem heteroKron_zero_right {ι κ : Type*} (A : Op ι) :
     heteroKron A (0 : Op κ) = 0 := by
   unfold heteroKron
   exact Matrix.kronecker_zero A
@@ -59,11 +66,15 @@ namespace ProjectiveSetting
 
 variable {P : AdmissibleParams} {ε : ℝ}
 
-/-- The typed line measurement remains projective after answer folding. A
-private copy of the point analogue (`pointMeas_isProjective`) belongs to
-`Observables/Defs.lean`; the line statement is needed by the projectivity of
-the expanded line measurement in `def:expanded-line-measurement`, paper
-`14_analysis_of_the_pauli_basis_test.tex:530-557`. -/
+/-- The line measurement of a projective strategy is again projective: folding
+the answers of a line question into a coefficient list is a postprocessing, and
+postprocessing preserves projectivity. This is the line analogue of the point
+statement `pointMeas_isProjective` of
+`MIPStarRE/QPBT/Observables/Defs.lean`, which is `private` there and so cannot
+be reused; the line form is what the projectivity assertion of
+`def:expanded-line-measurement` needs, paper
+`14_analysis_of_the_pauli_basis_test.tex:552-556`. Stating the two uniformly
+in one place is tracked by issue #204. -/
 theorem lineMeas_isProjective (S : ProjectiveSetting P ε) (side : PlayerSide)
     (W : PauliKind) (line : LineDesc P.toLdParams) :
     MIPStarRE.QPBT.Measurement.IsProjective (S.lineMeas side W line) := by
@@ -76,8 +87,7 @@ theorem lineMeas_isProjective (S : ProjectiveSetting P ε) (side : PlayerSide)
 embedded degree-`d` subspace: every prescribed answer is a degree-`d`
 coefficient list padded by zero. This is the strategy half of the last
 assertion of `def:expanded-line-measurement`, paper
-`14_analysis_of_the_pauli_basis_test.tex:548-557`, blueprint
-`ch14_qpbt_observables.tex:1034-1080`. -/
+`14_analysis_of_the_pauli_basis_test.tex:552-556`. -/
 theorem lineMeas_effect_eq_zero_of_axis (S : ProjectiveSetting P ε)
     (side : PlayerSide) (W : PauliKind) (line : LineDesc P.toLdParams)
     (haxis : line.kind = .axis) (f : DegPoly P.toLdParams (P.m * P.d))
@@ -101,8 +111,8 @@ theorem lineMeas_effect_eq_zero_of_axis (S : ProjectiveSetting P ε)
 /-- The convolution of a strategy line effect with the corresponding
 Pauli-register line projector. This is the displayed definition of
 `hat M^(Line,W),line_f`, paper
-`14_analysis_of_the_pauli_basis_test.tex:530-557`, blueprint
-`ch14_qpbt_observables.tex:1034-1080`. -/
+`14_analysis_of_the_pauli_basis_test.tex:552-556`, blueprint
+`def:expanded-line-measurement`. -/
 noncomputable def expLineOp (S : ProjectiveSetting P ε) (side : PlayerSide)
     (W : PauliKind) (line : LineDesc P.toLdParams)
     (f : DegPoly P.toLdParams (P.m * P.d)) : Op (S.ExpandedLocalSpace side) :=
@@ -114,7 +124,7 @@ noncomputable def expLineOp (S : ProjectiveSetting P ε) (side : PlayerSide)
 
 /-- Expanded line effects are positive semidefinite. This is the positivity
 obligation of `def:expanded-line-measurement`, paper
-`14_analysis_of_the_pauli_basis_test.tex:530-557`. -/
+`14_analysis_of_the_pauli_basis_test.tex:552-556`. -/
 theorem expLineOp_nonneg (S : ProjectiveSetting P ε) (side : PlayerSide)
     (W : PauliKind) (line : LineDesc P.toLdParams)
     (f : DegPoly P.toLdParams (P.m * P.d)) :
@@ -125,7 +135,7 @@ theorem expLineOp_nonneg (S : ProjectiveSetting P ε) (side : PlayerSide)
 
 /-- Expanded line effects sum to the identity. This is the completeness
 obligation of `def:expanded-line-measurement`, paper
-`14_analysis_of_the_pauli_basis_test.tex:530-557`. -/
+`14_analysis_of_the_pauli_basis_test.tex:552-556`. -/
 theorem expLineOp_sum_eq_one (S : ProjectiveSetting P ε) (side : PlayerSide)
     (W : PauliKind) (line : LineDesc P.toLdParams) :
     ∑ f, S.expLineOp side W line f = 1 := by
@@ -149,8 +159,8 @@ theorem expLineOp_sum_eq_one (S : ProjectiveSetting P ε) (side : PlayerSide)
 
 /-- The concrete expanded line measurement exhibited in the proof of
 `lem:qld-comm-line-cons`. Paper
-`14_analysis_of_the_pauli_basis_test.tex:530-557`, blueprint
-`ch14_qpbt_observables.tex:1034-1080`. -/
+`14_analysis_of_the_pauli_basis_test.tex:552-556`, blueprint
+`def:expanded-line-measurement`. -/
 noncomputable def lineMeasExp (S : ProjectiveSetting P ε) (side : PlayerSide)
     (W : PauliKind) (line : LineDesc P.toLdParams) :
     Measurement (DegPoly P.toLdParams (P.m * P.d))
@@ -167,7 +177,7 @@ operators. -/
 
 /-- The fine product measurement underlying the convolution definition of an
 expanded line measurement. Its outcome records the strategy and Pauli line
-polynomials separately. Paper `14_analysis_of_the_pauli_basis_test.tex:559-568`. -/
+polynomials separately. Paper `14_analysis_of_the_pauli_basis_test.tex:527-532`. -/
 noncomputable def lineTauMeas (S : ProjectiveSetting P ε) (side : PlayerSide)
     (W : PauliKind) (line : LineDesc P.toLdParams) :
     Measurement (DegPoly P.toLdParams (P.m * P.d) ×
@@ -204,7 +214,7 @@ products of strategy and Pauli line effects. -/
 /-- The expanded line measurement is the addition postprocessing of its fine
 strategy--Pauli product measurement. This is the data-processing presentation
 used in item 1 of `lem:qld-comm-line-cons`, paper
-`14_analysis_of_the_pauli_basis_test.tex:559-568`. -/
+`14_analysis_of_the_pauli_basis_test.tex:527-532`. -/
 theorem lineMeasExp_effect_eq_lineTauMeas_postprocess
     (S : ProjectiveSetting P ε) (side : PlayerSide) (W : PauliKind)
     (line : LineDesc P.toLdParams) (f : DegPoly P.toLdParams (P.m * P.d)) :
@@ -219,7 +229,7 @@ theorem lineMeasExp_effect_eq_lineTauMeas_postprocess
 the Pauli line projectors are both orthogonal families, so distinct
 convolution terms annihilate one another. This is the projectivity
 calculation of `def:expanded-line-measurement`, paper
-`14_analysis_of_the_pauli_basis_test.tex:530-557`. -/
+`14_analysis_of_the_pauli_basis_test.tex:552-556`. -/
 private theorem expLineOp_mul_self (S : ProjectiveSetting P ε)
     (side : PlayerSide) (W : PauliKind) (line : LineDesc P.toLdParams)
     (f : DegPoly P.toLdParams (P.m * P.d)) :
@@ -259,7 +269,7 @@ private theorem expLineOp_mul_self (S : ProjectiveSetting P ε)
 
 /-- The expanded line measurement is projective. This is the projectivity
 assertion in `def:expanded-line-measurement`, paper
-`14_analysis_of_the_pauli_basis_test.tex:530-557`. -/
+`14_analysis_of_the_pauli_basis_test.tex:552-556`. -/
 theorem lineMeasExp_isProjective (S : ProjectiveSetting P ε)
     (side : PlayerSide) (W : PauliKind) (line : LineDesc P.toLdParams) :
     MIPStarRE.QPBT.Measurement.IsProjective (S.lineMeasExp side W line) := by
@@ -276,8 +286,7 @@ theorem lineMeasExp_isProjective (S : ProjectiveSetting P ε)
 /-- On an axis line, expanded effects outside the embedded degree-`d` outcome
 space vanish. This is the last assertion of
 `def:expanded-line-measurement`, paper
-`14_analysis_of_the_pauli_basis_test.tex:548-557`, blueprint
-`ch14_qpbt_observables.tex:1034-1080`. -/
+`14_analysis_of_the_pauli_basis_test.tex:552-556`. -/
 theorem expLineOp_zero_of_not_deg_d (S : ProjectiveSetting P ε)
     (side : PlayerSide) (W : PauliKind) (line : LineDesc P.toLdParams)
     (haxis : line.kind = .axis) (f : DegPoly P.toLdParams (P.m * P.d))
@@ -301,7 +310,7 @@ theorem expLineOp_zero_of_not_deg_d (S : ProjectiveSetting P ε)
 /-- Evaluation classes of the expanded line measurement, including the
 explicit `none` class for a non-evaluating canonical line. This is the
 completed bracket family used in item 3 of `lem:qld-comm-line-cons`, blueprint
-`ch14_qpbt_observables.tex:1120-1140`. -/
+`eq:qld-comm-line-pt-cons2`. -/
 noncomputable def lineEvalMeasExp (S : ProjectiveSetting P ε)
     (side : PlayerSide) (W : PauliKind) (line : LineDesc P.toLdParams)
     (u : Fin P.m → PauliScalar P) :
@@ -311,7 +320,7 @@ noncomputable def lineEvalMeasExp (S : ProjectiveSetting P ε)
 /-- Complete an expanded point measurement with a zero `none` outcome. This
 is the right-hand family in the corrected item 3 of
 `lem:qld-comm-line-cons`, blueprint
-`ch14_qpbt_observables.tex:1120-1140`. -/
+`eq:qld-comm-line-pt-cons2`. -/
 noncomputable def pointMeasExpOption (S : ProjectiveSetting P ε)
     (side : PlayerSide) (W : PauliKind) (u : Fin P.m → PauliScalar P) :
     Measurement (Option (PauliScalar P)) (S.ExpandedLocalSpace side) :=
@@ -320,7 +329,7 @@ noncomputable def pointMeasExpOption (S : ProjectiveSetting P ε)
 /-- The point effect indexed by a line answer, with zero assigned when the
 answer has no evaluation at the sampled point. This is the zero-direction
 completion used in item 2 of `lem:qld-comm-line-cons`, blueprint
-`ch14_qpbt_observables.tex:1098-1118`. -/
+`eq:qld-comm-line-pt-cons`. -/
 noncomputable def expPointEffectAtLineAnswer (S : ProjectiveSetting P ε)
     (side : PlayerSide) (W : PauliKind) (line : LineDesc P.toLdParams)
     (u : Fin P.m → PauliScalar P) (f : DegPoly P.toLdParams (P.m * P.d)) :

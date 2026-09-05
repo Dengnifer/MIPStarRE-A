@@ -13,9 +13,8 @@ exceeds `4`, and a quantity bounded by both `a * ε` and `4` is bounded by
 
 ## References
 
-`lem:qld-comm-line-cons`, blueprint
-`blueprint/src/chapter/ch14_qpbt_observables.tex:1082-1210`, paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:559-679`.
+`lem:qld-comm-line-cons`, paper
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:527-545`.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder
@@ -29,8 +28,10 @@ namespace DistanceCalculus
 
 /-- The adjoint squares of the effects of a complete measurement sum to at
 most the identity. Formalization-only auxiliary for the trivial distance
-bound; the fiberwise form is private to
-`Games/DistanceTheorems/TensorSupport.lean`. -/
+bound. The same statement is proved as `measurement_sum_adjoint_mul_le_one` in
+`MIPStarRE/QPBT/Games/DistanceTheorems.lean`, where it is `private` and
+therefore invisible from this file; consolidating the two copies is tracked by
+issue #204. -/
 theorem measurement_sum_adjoint_mul_le_one {α ι : Type*} [Fintype α]
     [Fintype ι] [DecidableEq ι] (M : MIPStarRE.Quantum.Measurement α ι) :
     ∑ a : α, (M.effect a)ᴴ * M.effect a ≤ 1 := by
@@ -42,7 +43,12 @@ theorem measurement_sum_adjoint_mul_le_one {α ι : Type*} [Fintype α]
     _ = 1 := M.sum_eq_one
 
 /-- A left-placed complete measurement is square-summable on the product
-space. Formalization-only auxiliary for the trivial distance bound. -/
+space. Formalization-only auxiliary for the trivial distance bound. The same
+statement, phrased through `leftTensor`, is proved as
+`leftPlacedMeasurement_sum_adjoint_mul_le_one` in
+`MIPStarRE/QPBT/Games/DistanceTheorems.lean`, where it is `private` and
+therefore invisible from this file; consolidating the two copies is tracked by
+issue #204. -/
 theorem leftPlaced_sum_adjoint_mul_le_one {α ιA ιB : Type*} [Fintype α]
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
     (M : MIPStarRE.Quantum.Measurement α ιA) :
@@ -63,7 +69,12 @@ theorem leftPlaced_sum_adjoint_mul_le_one {α ιA ιB : Type*} [Fintype α]
     _ = 1 := leftTensor_one
 
 /-- A right-placed complete measurement is square-summable on the product
-space. Formalization-only auxiliary for the trivial distance bound. -/
+space. Formalization-only auxiliary for the trivial distance bound. The same
+statement, phrased through `rightTensor`, is proved as
+`rightPlacedMeasurement_sum_adjoint_mul_le_one` in
+`MIPStarRE/QPBT/Games/DistanceTheorems.lean`, where it is `private` and
+therefore invisible from this file; consolidating the two copies is tracked by
+issue #204. -/
 theorem rightPlaced_sum_adjoint_mul_le_one {α ιA ιB : Type*} [Fintype α]
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
     (M : MIPStarRE.Quantum.Measurement α ιB) :
@@ -120,10 +131,10 @@ theorem sum_norm_sub_apply_sq_le_four {α ι : Type*} [Fintype α]
     _ ≤ 4 := by linarith
 
 /-- The state-dependent distance between two complete measurements placed on
-opposite tensor factors is at most four. This is the trivial bound used to
-pass from a linear error to the common square-root error of
-`lem:qld-comm-line-cons`, paper
-`14_analysis_of_the_pauli_basis_test.tex:559-679`. -/
+opposite tensor factors is at most four. Formalization-only auxiliary: this is
+the trivial bound used to pass from a linear error to the common square-root
+error of `lem:qld-comm-line-cons`, paper
+`14_analysis_of_the_pauli_basis_test.tex:527-545`. -/
 theorem opFamilyDistSq_placed_le_four {X α ιA ιB : Type*}
     [Fintype α] [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
     (μ : Distribution X) (hμ : μ.IsProbability)
@@ -149,9 +160,10 @@ end DistanceCalculus
 
 /-- A nonnegative quantity bounded by a linear error `a * ε` with `1 ≤ a` and
 by the trivial bound `4` is bounded by `(a + 4) * √ε`: for `ε ≤ 1` the linear
-bound dominates, and for `ε ≥ 1` the trivial bound does. This is the passage
-to the common square-root error of `lem:qld-comm-line-cons`, paper
-`14_analysis_of_the_pauli_basis_test.tex:559-679`. -/
+bound dominates, and for `ε ≥ 1` the trivial bound does. Formalization-only
+auxiliary: this is the passage to the common square-root error of
+`lem:qld-comm-line-cons`, paper
+`14_analysis_of_the_pauli_basis_test.tex:527-545`. -/
 theorem le_mul_sqrt_of_le_mul_of_le_four {x ε a : ℝ} (ha : 1 ≤ a) (hx0 : 0 ≤ x)
     (hxa : x ≤ a * ε) (hx4 : x ≤ 4) : x ≤ (a + 4) * Real.sqrt ε := by
   have hε : 0 ≤ ε := by

@@ -14,11 +14,15 @@ convolution fibers identifies the expanded overlap with the overlap of the
 strategy's evaluation classes and its completed point measurement. This is the
 computation displayed in items 2 and 3 of the expanded-line consistency lemma.
 
+The sections on the linearity of the state quadratic form, on register
+placements, and on the completed point measurements collect formalization-only
+auxiliaries: the source uses these facts without stating them.
+
 ## References
 
 Items 2 and 3 of `lem:qld-comm-line-cons`, paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:569-679`,
-blueprint `blueprint/src/chapter/ch14_qpbt_observables.tex:1103-1210`.
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:534-545`,
+blueprint `eq:qld-comm-line-pt-cons`, `eq:qld-comm-line-pt-cons2`.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder
@@ -30,11 +34,16 @@ open MIPStarRE.Quantum
 
 noncomputable section
 
-/-! ## Linearity of the state quadratic form and of tensor placements -/
+/-! ## Linearity of the state quadratic form -/
 
 namespace DistanceCalculus
 
-/-- The state quadratic form is additive over finite sums of operators. -/
+/-- The state quadratic form is additive over finite sums of operators. The
+same statement is proved as `stateQForm_finset_sum` in the Magic Square
+rigidity development
+(`MIPStarRE/QPBT/Test/MagicSquareTheorems/Rigidity/GroundSlice.lean`); it is
+recorded here in the namespace where `stateQForm` is defined, and merging the
+two copies is tracked by issue #204. -/
 theorem stateQForm_finset_sum {ι : Type*} [Fintype ι] [DecidableEq ι]
     (ψ : EuclideanSpace ℂ ι) {γ : Type*} (s : Finset γ) (M : γ → Op ι) :
     stateQForm ψ (∑ g ∈ s, M g) = ∑ g ∈ s, stateQForm ψ (M g) := by
@@ -47,45 +56,14 @@ theorem stateQForm_zero {ι : Type*} [Fintype ι] [DecidableEq ι]
 
 end DistanceCalculus
 
-/-- The tensor placement respects finite sums in the left factor. A public
-form of this identity lives in the Magic Square rigidity development, outside
-the import closure of this file. -/
-private theorem heteroKron_finset_sum_left {γ ι κ : Type*} (s : Finset γ)
-    (A : γ → Op ι) (B : Op κ) :
-    heteroKron (∑ g ∈ s, A g) B = ∑ g ∈ s, heteroKron (A g) B := by
-  ext ⟨i, k⟩ ⟨j, l⟩
-  unfold heteroKron Matrix.kronecker Matrix.kroneckerMap
-  simp only [Matrix.of_apply, Matrix.sum_apply]
-  rw [Finset.sum_mul]
-
-/-- The tensor placement respects finite sums in the right factor. -/
-private theorem heteroKron_finset_sum_right {γ ι κ : Type*} (A : Op ι)
-    (s : Finset γ) (B : γ → Op κ) :
-    heteroKron A (∑ g ∈ s, B g) = ∑ g ∈ s, heteroKron A (B g) := by
-  ext ⟨i, k⟩ ⟨j, l⟩
-  unfold heteroKron Matrix.kronecker Matrix.kroneckerMap
-  simp only [Matrix.of_apply, Matrix.sum_apply]
-  rw [Finset.mul_sum]
-
-/-- The tensor placement of a zero right factor vanishes. -/
-private theorem heteroKron_zero_right {ι κ : Type*} (A : Op ι) :
-    heteroKron A (0 : Op κ) = 0 := by
-  unfold heteroKron
-  exact Matrix.kronecker_zero A
-
-/-- The tensor placement of a zero left factor vanishes. -/
-private theorem heteroKron_zero_left {ι κ : Type*} (B : Op κ) :
-    heteroKron (0 : Op ι) B = 0 := by
-  unfold heteroKron
-  exact Matrix.zero_kronecker B
-
 namespace ProjectiveSetting
 
 variable {P : AdmissibleParams} {ε : ℝ}
 
-/-- A register placement respects finite sums of operators. Paper
-`14_analysis_of_the_pauli_basis_test.tex:420-450`, blueprint
-`ch14_qpbt_observables.tex:876-922`. -/
+/-- A register placement respects finite sums of operators.
+Formalization-only auxiliary for the register placements of
+`def:symmetric-equivalents`; the source uses this additivity without stating
+it. -/
 theorem place_finset_sum (S : ProjectiveSetting P ε) (p : Placement)
     {γ : Type*} (s : Finset γ) (O : γ → Op (S.ExpandedLocalSpace p.side)) :
     S.place p (∑ g ∈ s, O g) = ∑ g ∈ s, S.place p (O g) := by
@@ -193,7 +171,7 @@ theorem pointMeasExpOption_effect_none (S : ProjectiveSetting P ε)
 /-- The expanded point effect selected by a line answer is the completed
 expanded point effect at the partial evaluation of the answer. This
 identifies the two presentations of item 2 and item 3 of
-`lem:qld-comm-line-cons`, blueprint `ch14_qpbt_observables.tex:1098-1140`. -/
+`lem:qld-comm-line-cons`, blueprint `eq:qld-comm-line-pt-cons`, `eq:qld-comm-line-pt-cons2`. -/
 theorem pointMeasExpOption_effect_evalOpt (S : ProjectiveSetting P ε)
     (side : PlayerSide) (W : PauliKind) (line : LineDesc P.toLdParams)
     (u : Fin P.m → PauliScalar P) (f : DegPoly P.toLdParams (P.m * P.d)) :
@@ -275,7 +253,7 @@ set_option synthInstance.maxSize 400 in
 Pauli factors factors into the strategy overlap and the first EPR-pair
 overlap. This is the factorization behind the ancillary consistency in items
 2 and 3 of `lem:qld-comm-line-cons`, paper
-`14_analysis_of_the_pauli_basis_test.tex:569-620`. -/
+`14_analysis_of_the_pauli_basis_test.tex:534-545`. -/
 theorem stateQForm_place_AA'_mul_BA''_two (S : ProjectiveSetting P ε)
     (A : Op S.toStrategy.ιA) (B : Op S.toStrategy.ιB)
     (T T' : Op (PauliRegister P)) (hA : A.IsHermitian) (hB : B.IsHermitian)
@@ -303,7 +281,7 @@ set_option synthInstance.maxSize 400 in
 /-- The diagonal quadratic form for the `AB''`--`BB'` product with distinct
 Pauli factors factors into the strategy overlap and the second EPR-pair
 overlap, the Pauli factor of `BB'` acting on the first half of the pair.
-Paper `14_analysis_of_the_pauli_basis_test.tex:569-620`. -/
+Paper `14_analysis_of_the_pauli_basis_test.tex:534-545`. -/
 theorem stateQForm_place_AB''_mul_BB'_two (S : ProjectiveSetting P ε)
     (A : Op S.toStrategy.ιA) (B : Op S.toStrategy.ιB)
     (T T' : Op (PauliRegister P)) (hA : A.IsHermitian) (hB : B.IsHermitian)
@@ -366,15 +344,18 @@ end ProjectiveSetting
 
 /-! ## The overlap identity -/
 
-/-- The convolution-fiber rearrangement behind items 2 and 3 of
-`lem:qld-comm-line-cons`, at a point of the line. Here `Φ` is the expanded
-overlap of two product operators on opposite placements, `Ψ` is the strategy
-overlap, and `Φ` on a line term and a point term factorizes through the
-ancillary consistency `tau^{W,line}_{f''}` versus `tau^{W,u}_{f''(u)}`.
-Summing over the convolution fibers of the expanded line and point effects
-yields the overlap of the strategy's evaluation classes with its completed
-point measurement. Paper `14_analysis_of_the_pauli_basis_test.tex:569-620`,
-blueprint `ch14_qpbt_observables.tex:1103-1210`. -/
+/-- The convolution-fiber rearrangement behind `eq:qld-comm-line-pt-cons`
+and `eq:qld-comm-line-pt-cons2`, at a point of the line. The statement is an
+abstract bilinear identity: `Φ` and `Ψ` are any two functions of a pair of
+operators subject to the vanishing, additivity and factorization hypotheses
+below, and the conclusion sums `Φ` over the convolution fibers of the expanded
+line and point effects. It is applied with `Φ` the expanded overlap of two
+product operators on opposite placements and `Ψ` the strategy overlap, the
+factorization hypothesis then being the exact agreement of the ancillary
+projectors `tau^{W,line}_{f''}` and `tau^{W,u}_{f''(u)}` on the EPR pairs; the
+conclusion is the overlap of the strategy's evaluation classes with its
+completed point measurement. Paper `14_analysis_of_the_pauli_basis_test.tex:534-545`,
+blueprint `eq:qld-comm-line-pt-cons`, `eq:qld-comm-line-pt-cons2`. -/
 theorem overlap_identity_of_mem (P : AdmissibleParams) (W : PauliKind)
     {ιL ιP : Type*} [Fintype ιL] [DecidableEq ιL] [Fintype ιP] [DecidableEq ιP]
     (LM : Measurement (DegPoly P.toLdParams (P.m * P.d)) ιL)
@@ -587,27 +568,27 @@ variable {P : AdmissibleParams} {ε : ℝ}
 
 /-! ## The four placement pairs -/
 
-/-- Hermitian-ness of a strategy line effect. -/
+/-- A strategy line effect is Hermitian, being positive semidefinite. -/
 private theorem lineMeas_effect_isHermitian (S : ProjectiveSetting P ε)
     (side : PlayerSide) (W : PauliKind) (line : LineDesc P.toLdParams)
     (f : DegPoly P.toLdParams (P.m * P.d)) :
     ((S.lineMeas side W line).effect f).IsHermitian :=
   (Matrix.nonneg_iff_posSemidef.mp ((S.lineMeas side W line).pos f)).isHermitian
 
-/-- Hermitian-ness of a strategy point effect. -/
+/-- A strategy point effect is Hermitian, being positive semidefinite. -/
 private theorem pointMeas_effect_isHermitian (S : ProjectiveSetting P ε)
     (side : PlayerSide) (W : PauliKind) (u : Fin P.m → PauliScalar P)
     (b : PauliScalar P) :
     ((S.pointMeas side W u).effect b).IsHermitian :=
   (Matrix.nonneg_iff_posSemidef.mp ((S.pointMeas side W u).pos b)).isHermitian
 
-/-- Hermitian-ness of a Pauli line projector. -/
+/-- A Pauli line projector is Hermitian, being positive semidefinite. -/
 private theorem tauLineProj_isHermitian (W : PauliKind)
     (line : LineDesc P.toLdParams) (f : DegPoly P.toLdParams (P.m * P.d)) :
     (tauLineProj P W line f).IsHermitian :=
   (Matrix.nonneg_iff_posSemidef.mp (tauLineProj_nonneg P W line f)).isHermitian
 
-/-- Hermitian-ness of a Pauli point projector. -/
+/-- A Pauli point projector is Hermitian, being positive semidefinite. -/
 private theorem tauPointProj_isHermitian (W : PauliKind)
     (u : Fin P.m → PauliScalar P) (b : PauliScalar P) :
     (tauPointProj W u b).IsHermitian :=
@@ -619,7 +600,7 @@ selected point effects on `BA''` is the strategy overlap of Alice's
 evaluation classes with Bob's completed point measurement. This is the
 computation `eq:qld-mhat-line-1`--`eq:qld-comm-line-pt-cons-eps` of
 `lem:qld-comm-line-cons`, paper
-`14_analysis_of_the_pauli_basis_test.tex:569-620`. -/
+`14_analysis_of_the_pauli_basis_test.tex:560-596`. -/
 theorem overlap_AA'_BA''_eq (S : ProjectiveSetting P ε) (W : PauliKind)
     (line : LineDesc P.toLdParams) (u : Fin P.m → PauliScalar P) :
     ∑ f : DegPoly P.toLdParams (P.m * P.d),
@@ -662,7 +643,8 @@ theorem overlap_AA'_BA''_eq (S : ProjectiveSetting P ε) (W : PauliKind)
       (B : Op S.toStrategy.ιB), Ψ (∑ i ∈ s, A i) B = ∑ i ∈ s, Ψ (A i) B := by
     intro s A B
     simp only [Ψ]
-    rw [heteroKron_finset_sum_left, DistanceCalculus.stateQForm_finset_sum]
+    rw [MagicSquareRigidity.heteroKron_finset_sum_left,
+      DistanceCalculus.stateQForm_finset_sum]
   have hΨ0 : ∀ A, Ψ A 0 = 0 := by
     intro A
     simp only [Ψ]
@@ -703,7 +685,7 @@ set_option synthInstance.maxSize 400 in
 selected point effects on `AA'` is the strategy overlap of Alice's completed
 point measurement with Bob's evaluation classes. This is the interchanged
 form of the computation in items 2 and 3 of `lem:qld-comm-line-cons`, paper
-`14_analysis_of_the_pauli_basis_test.tex:569-620`. -/
+`14_analysis_of_the_pauli_basis_test.tex:560-596`. -/
 theorem overlap_BA''_AA'_eq (S : ProjectiveSetting P ε) (W : PauliKind)
     (line : LineDesc P.toLdParams) (u : Fin P.m → PauliScalar P) :
     ∑ f : DegPoly P.toLdParams (P.m * P.d),
@@ -746,7 +728,8 @@ theorem overlap_BA''_AA'_eq (S : ProjectiveSetting P ε) (W : PauliKind)
       (B : Op S.toStrategy.ιA), Ψ (∑ i ∈ s, A i) B = ∑ i ∈ s, Ψ (A i) B := by
     intro s A B
     simp only [Ψ]
-    rw [heteroKron_finset_sum_right, DistanceCalculus.stateQForm_finset_sum]
+    rw [MagicSquareRigidity.heteroKron_finset_sum_right,
+      DistanceCalculus.stateQForm_finset_sum]
   have hΨ0 : ∀ A, Ψ A 0 = 0 := by
     intro A
     simp only [Ψ]
@@ -788,7 +771,7 @@ theorem overlap_BA''_AA'_eq (S : ProjectiveSetting P ε) (W : PauliKind)
 set_option synthInstance.maxSize 400 in
 /-- The expanded overlap of Alice's line measurement on `AB''` with Bob's
 selected point effects on `BB'`, on the second bipartition. Paper
-`14_analysis_of_the_pauli_basis_test.tex:569-620`. -/
+`14_analysis_of_the_pauli_basis_test.tex:560-596`. -/
 theorem overlap_AB''_BB'_eq (S : ProjectiveSetting P ε) (W : PauliKind)
     (line : LineDesc P.toLdParams) (u : Fin P.m → PauliScalar P) :
     ∑ f : DegPoly P.toLdParams (P.m * P.d),
@@ -831,7 +814,8 @@ theorem overlap_AB''_BB'_eq (S : ProjectiveSetting P ε) (W : PauliKind)
       (B : Op S.toStrategy.ιB), Ψ (∑ i ∈ s, A i) B = ∑ i ∈ s, Ψ (A i) B := by
     intro s A B
     simp only [Ψ]
-    rw [heteroKron_finset_sum_left, DistanceCalculus.stateQForm_finset_sum]
+    rw [MagicSquareRigidity.heteroKron_finset_sum_left,
+      DistanceCalculus.stateQForm_finset_sum]
   have hΨ0 : ∀ A, Ψ A 0 = 0 := by
     intro A
     simp only [Ψ]
@@ -870,7 +854,7 @@ theorem overlap_AB''_BB'_eq (S : ProjectiveSetting P ε) (W : PauliKind)
 set_option synthInstance.maxSize 400 in
 /-- The expanded overlap of Bob's line measurement on `BB'` with Alice's
 selected point effects on `AB''`, on the second bipartition. Paper
-`14_analysis_of_the_pauli_basis_test.tex:569-620`. -/
+`14_analysis_of_the_pauli_basis_test.tex:560-596`. -/
 theorem overlap_BB'_AB''_eq (S : ProjectiveSetting P ε) (W : PauliKind)
     (line : LineDesc P.toLdParams) (u : Fin P.m → PauliScalar P) :
     ∑ f : DegPoly P.toLdParams (P.m * P.d),
@@ -913,7 +897,8 @@ theorem overlap_BB'_AB''_eq (S : ProjectiveSetting P ε) (W : PauliKind)
       (B : Op S.toStrategy.ιA), Ψ (∑ i ∈ s, A i) B = ∑ i ∈ s, Ψ (A i) B := by
     intro s A B
     simp only [Ψ]
-    rw [heteroKron_finset_sum_right, DistanceCalculus.stateQForm_finset_sum]
+    rw [MagicSquareRigidity.heteroKron_finset_sum_right,
+      DistanceCalculus.stateQForm_finset_sum]
   have hΨ0 : ∀ A, Ψ A 0 = 0 := by
     intro A
     simp only [Ψ]

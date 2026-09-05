@@ -14,8 +14,8 @@ distance supplies the large-`ε` case of the common square-root error.
 ## References
 
 Item 3 of `lem:qld-comm-line-cons`, paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:621-679`,
-blueprint `blueprint/src/chapter/ch14_qpbt_observables.tex:1120-1210`.
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:540-545`,
+blueprint `eq:qld-comm-line-pt-cons2`.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder
@@ -33,9 +33,13 @@ variable {P : AdmissibleParams} {ε : ℝ}
 
 /-! ## Overlaps of the evaluation classes -/
 
-/-- The overlap of Alice's expanded evaluation classes with Bob's completed
-expanded point measurement, summed over outcomes, is the overlap of the
-expanded line measurement with the selected point effects. -/
+/-- Summed over outcomes, the overlap of Alice's expanded evaluation classes
+with Bob's completed expanded point measurement on the expanded state equals
+the corresponding overlap of the strategy's own evaluation classes with its
+completed point measurement on the strategy state. The ancillary Pauli
+projectors cancel because they agree exactly on the EPR pairs. This is the
+identity behind `eq:qld-comm-line-pt-cons2`, paper
+`14_analysis_of_the_pauli_basis_test.tex:540-545`. -/
 theorem sum_stateQForm_evalClass_AA'_BA''_eq (S : ProjectiveSetting P ε)
     (W : PauliKind) (line : LineDesc P.toLdParams)
     (u : Fin P.m → PauliScalar P) :
@@ -70,7 +74,11 @@ theorem sum_stateQForm_evalClass_AA'_BA''_eq (S : ProjectiveSetting P ε)
     _ = _ := by
       simp_rw [pointMeasExpOption_effect_evalOpt]
 
-/-- The interchanged overlap on the `AA'`--`BA''` pair. -/
+/-- The identity of `sum_stateQForm_evalClass_AA'_BA''_eq` with the two
+placements exchanged, so that the evaluation classes are carried by the `BA''`
+registers and the completed point measurement by `AA'`. This is the symmetric equivalent
+of `eq:qld-comm-line-pt-cons2` on the reversed directed pair, paper
+`14_analysis_of_the_pauli_basis_test.tex:540-548`. -/
 theorem sum_stateQForm_evalClass_BA''_AA'_eq (S : ProjectiveSetting P ε)
     (W : PauliKind) (line : LineDesc P.toLdParams)
     (u : Fin P.m → PauliScalar P) :
@@ -106,7 +114,10 @@ theorem sum_stateQForm_evalClass_BA''_AA'_eq (S : ProjectiveSetting P ε)
     _ = _ := by
       simp_rw [pointMeasExpOption_effect_evalOpt]
 
-/-- The overlap on the `AB''`--`BB'` pair. -/
+/-- The identity of `sum_stateQForm_evalClass_AA'_BA''_eq` on the second
+bipartition: summed over outcomes, the overlap of Alice's expanded evaluation
+classes on `AB''` with Bob's completed expanded point measurement on `BB'`
+equals the corresponding strategy overlap. -/
 theorem sum_stateQForm_evalClass_AB''_BB'_eq (S : ProjectiveSetting P ε)
     (W : PauliKind) (line : LineDesc P.toLdParams)
     (u : Fin P.m → PauliScalar P) :
@@ -141,7 +152,9 @@ theorem sum_stateQForm_evalClass_AB''_BB'_eq (S : ProjectiveSetting P ε)
     _ = _ := by
       simp_rw [pointMeasExpOption_effect_evalOpt]
 
-/-- The interchanged overlap on the `AB''`--`BB'` pair. -/
+/-- The identity of `sum_stateQForm_evalClass_AB''_BB'_eq` with the two
+placements exchanged, so that the completed point measurement is carried by
+`AB''` and the evaluation classes by `BB'`. -/
 theorem sum_stateQForm_evalClass_BB'_AB''_eq (S : ProjectiveSetting P ε)
     (W : PauliKind) (line : LineDesc P.toLdParams)
     (u : Fin P.m → PauliScalar P) :
@@ -184,7 +197,7 @@ set_option synthInstance.maxSize 400 in
 pair equals the distance of the left- and right-placed families on the
 corresponding bipartition. Formalization-only transport for item 3 of
 `lem:qld-comm-line-cons`, paper
-`14_analysis_of_the_pauli_basis_test.tex:621-679`. -/
+`14_analysis_of_the_pauli_basis_test.tex:540-545`. -/
 theorem evalClassDist_aaBa_eq (S : ProjectiveSetting P ε) (W : PauliKind) :
     opFamilyDistSq (linePointDist P.toLdParams)
         (fun sample a => S.place .AA'
@@ -211,10 +224,14 @@ theorem evalClassDist_aaBa_eq (S : ProjectiveSetting P ε) (W : PauliKind) :
 
 set_option synthInstance.maxSize 400 in
 /-- Expanded evaluation-class consistency on the directed `AA'`--`BA''`
-pair is bounded by twice the strategy's line-point inconsistency. This is the
-passage from `eq:qld-comm-line-1` to item 3 of `lem:qld-comm-line-cons`,
-paper `14_analysis_of_the_pauli_basis_test.tex:621-679`, obtained here
-through the exact overlap identity. -/
+pair is bounded by twice the strategy's line-point inconsistency. This is
+`eq:qld-comm-line-pt-cons2`, paper
+`14_analysis_of_the_pauli_basis_test.tex:540-545`. The source reaches it from
+`eq:qld-comm-line-pt-cons` through an elementary sub-measurement inequality,
+at the cost of a square root, paper
+`14_analysis_of_the_pauli_basis_test.tex:598-677`; here it comes directly from
+the exact overlap identity together with `fact:agreement`, so the bound is
+linear in the error of the strategy. -/
 theorem evalClassDist_aaBa_le (S : ProjectiveSetting P ε) (W : PauliKind) :
     opFamilyDistSq (linePointDist P.toLdParams)
         (fun sample a => S.place .AA'
@@ -276,7 +293,7 @@ set_option synthInstance.maxSize 400 in
 /-- The expanded evaluation-class distance on the directed `AA'`--`BA''`
 pair is at most four. This trivial bound supplies the large-`ε` case of the
 common square-root error in item 3 of `lem:qld-comm-line-cons`, paper
-`14_analysis_of_the_pauli_basis_test.tex:621-679`. -/
+`14_analysis_of_the_pauli_basis_test.tex:540-545`. -/
 theorem evalClassDist_aaBa_le_four (S : ProjectiveSetting P ε) (W : PauliKind) :
     opFamilyDistSq (linePointDist P.toLdParams)
         (fun sample a => S.place .AA'
@@ -294,7 +311,7 @@ set_option synthInstance.maxSize 400 in
 pair equals the distance of the left- and right-placed families on the
 corresponding bipartition. Formalization-only transport for item 3 of
 `lem:qld-comm-line-cons`, paper
-`14_analysis_of_the_pauli_basis_test.tex:621-679`. -/
+`14_analysis_of_the_pauli_basis_test.tex:540-545`. -/
 theorem evalClassDist_baAa_eq (S : ProjectiveSetting P ε) (W : PauliKind) :
     opFamilyDistSq (linePointDist P.toLdParams)
         (fun sample a => S.place .BA''
@@ -323,7 +340,7 @@ theorem evalClassDist_baAa_eq (S : ProjectiveSetting P ε) (W : PauliKind) :
 set_option synthInstance.maxSize 400 in
 /-- Expanded evaluation-class consistency on the directed `BA''`--`AA'`
 pair, bounded by twice the interchanged strategy line-point inconsistency.
-Paper `14_analysis_of_the_pauli_basis_test.tex:621-679`. -/
+Paper `14_analysis_of_the_pauli_basis_test.tex:540-545`. -/
 theorem evalClassDist_baAa_le (S : ProjectiveSetting P ε) (W : PauliKind) :
     opFamilyDistSq (linePointDist P.toLdParams)
         (fun sample a => S.place .BA''
@@ -385,7 +402,7 @@ set_option synthInstance.maxSize 400 in
 /-- The expanded evaluation-class distance on the directed `BA''`--`AA'`
 pair is at most four. This trivial bound supplies the large-`ε` case of the
 common square-root error in item 3 of `lem:qld-comm-line-cons`, paper
-`14_analysis_of_the_pauli_basis_test.tex:621-679`. -/
+`14_analysis_of_the_pauli_basis_test.tex:540-545`. -/
 theorem evalClassDist_baAa_le_four (S : ProjectiveSetting P ε) (W : PauliKind) :
     opFamilyDistSq (linePointDist P.toLdParams)
         (fun sample a => S.place .BA''
@@ -403,7 +420,7 @@ set_option synthInstance.maxSize 400 in
 pair equals the distance of the left- and right-placed families on the
 corresponding bipartition. Formalization-only transport for item 3 of
 `lem:qld-comm-line-cons`, paper
-`14_analysis_of_the_pauli_basis_test.tex:621-679`. -/
+`14_analysis_of_the_pauli_basis_test.tex:540-545`. -/
 theorem evalClassDist_abBb_eq (S : ProjectiveSetting P ε) (W : PauliKind) :
     opFamilyDistSq (linePointDist P.toLdParams)
         (fun sample a => S.place .AB''
@@ -430,7 +447,7 @@ theorem evalClassDist_abBb_eq (S : ProjectiveSetting P ε) (W : PauliKind) :
 
 set_option synthInstance.maxSize 400 in
 /-- Expanded evaluation-class consistency on the directed `AB''`--`BB'`
-pair. Paper `14_analysis_of_the_pauli_basis_test.tex:621-679`. -/
+pair. Paper `14_analysis_of_the_pauli_basis_test.tex:540-545`. -/
 theorem evalClassDist_abBb_le (S : ProjectiveSetting P ε) (W : PauliKind) :
     opFamilyDistSq (linePointDist P.toLdParams)
         (fun sample a => S.place .AB''
@@ -492,7 +509,7 @@ set_option synthInstance.maxSize 400 in
 /-- The expanded evaluation-class distance on the directed `AB''`--`BB'`
 pair is at most four. This trivial bound supplies the large-`ε` case of the
 common square-root error in item 3 of `lem:qld-comm-line-cons`, paper
-`14_analysis_of_the_pauli_basis_test.tex:621-679`. -/
+`14_analysis_of_the_pauli_basis_test.tex:540-545`. -/
 theorem evalClassDist_abBb_le_four (S : ProjectiveSetting P ε) (W : PauliKind) :
     opFamilyDistSq (linePointDist P.toLdParams)
         (fun sample a => S.place .AB''
@@ -510,7 +527,7 @@ set_option synthInstance.maxSize 400 in
 pair equals the distance of the left- and right-placed families on the
 corresponding bipartition. Formalization-only transport for item 3 of
 `lem:qld-comm-line-cons`, paper
-`14_analysis_of_the_pauli_basis_test.tex:621-679`. -/
+`14_analysis_of_the_pauli_basis_test.tex:540-545`. -/
 theorem evalClassDist_bbAb_eq (S : ProjectiveSetting P ε) (W : PauliKind) :
     opFamilyDistSq (linePointDist P.toLdParams)
         (fun sample a => S.place .BB'
@@ -538,7 +555,7 @@ theorem evalClassDist_bbAb_eq (S : ProjectiveSetting P ε) (W : PauliKind) :
 
 set_option synthInstance.maxSize 400 in
 /-- Expanded evaluation-class consistency on the directed `BB'`--`AB''`
-pair. Paper `14_analysis_of_the_pauli_basis_test.tex:621-679`. -/
+pair. Paper `14_analysis_of_the_pauli_basis_test.tex:540-545`. -/
 theorem evalClassDist_bbAb_le (S : ProjectiveSetting P ε) (W : PauliKind) :
     opFamilyDistSq (linePointDist P.toLdParams)
         (fun sample a => S.place .BB'
@@ -600,7 +617,7 @@ set_option synthInstance.maxSize 400 in
 /-- The expanded evaluation-class distance on the directed `BB'`--`AB''`
 pair is at most four. This trivial bound supplies the large-`ε` case of the
 common square-root error in item 3 of `lem:qld-comm-line-cons`, paper
-`14_analysis_of_the_pauli_basis_test.tex:621-679`. -/
+`14_analysis_of_the_pauli_basis_test.tex:540-545`. -/
 theorem evalClassDist_bbAb_le_four (S : ProjectiveSetting P ε) (W : PauliKind) :
     opFamilyDistSq (linePointDist P.toLdParams)
         (fun sample a => S.place .BB'

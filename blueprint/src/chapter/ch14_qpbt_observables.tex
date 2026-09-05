@@ -1212,6 +1212,11 @@ exactly these variants.
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.lineMeasExp}
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.lineMeasExp_isProjective}
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.expLineOp_zero_of_not_deg_d}
+	\lean{MIPStarRE.QPBT.tauLineMeas}
+	\lean{MIPStarRE.QPBT.polynomialOnLine_lowDegreeEncoding_natDegree_le_one_of_axis}
+	\lean{MIPStarRE.QPBT.restrictToLine_lowDegreeEncoding_fitsDegree_of_axis}
+	\lean{MIPStarRE.QPBT.DegPoly.FitsDegree}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.lineTauMeas}
 	\leanok
 	% In the source this measurement is defined inside the proof of the lemma
 	% labelled lem:qld-comm-line-cons (lines 552-556); it is recorded as a
@@ -1262,6 +1267,10 @@ exactly these variants.
 	\lean{MIPStarRE.QPBT.deltaLine, MIPStarRE.QPBT.deltaLine_isPolyErr}
 	\lean{MIPStarRE.QPBT.expLine_self_cons, MIPStarRE.QPBT.expLine_point_cons}
 	\lean{MIPStarRE.QPBT.expLine_point_cons', MIPStarRE.QPBT.exists_deltaLine}
+	\lean{MIPStarRE.QPBT.ExpandedLineConclusions}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.lineEvalMeasExp}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.pointMeasExpOption}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.expPointEffectAtLineAnswer}
 	\leanok
 	\uses{def:expanded-point-measurement, def:expanded-line-measurement, def:expanded-state, def:line-point-dist, def:approx-question-indexed-operators, def:povm-distance, def:ideg-deg-polynomials, def:symmetric-equivalents}
 	Here $\poly(\eps)$ uses the corrected one-parameter convention: there
@@ -1324,7 +1333,7 @@ exactly these variants.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{def:expanded-line-measurement, def:expanded-point-measurement, lem:qld-win-implications, fact:data-processing, fact:add-a-proj2, fact:agreement, def:line-point-dist, def:ideg-deg-polynomials, def:pauli-win-predicate, lem:symmetric-equivalents-transfer}
+	\uses{def:expanded-line-measurement, def:expanded-point-measurement, lem:qld-win-implications, fact:data-processing, fact:add-a-proj2, fact:agreement, def:line-point-dist, def:ideg-deg-polynomials, def:pauli-win-predicate, def:symmetric-equivalents}
 	Take $\{\hat{M}^{(\mathrm{Line},W),\ell}_f\}$ to be the measurement of
 	Definition~\ref{def:expanded-line-measurement}.
 	Item~\ref{enu:qld-comm-line-self-cons} follows from the fact that the
@@ -1409,9 +1418,37 @@ exactly these variants.
 	hypothesis unchanged, since the term for the outcome $\bot$ vanishes.
 	Restricted to the outcomes in $\F_q$, the conclusion yields
 	item~\ref{eq:qld-comm-line-pt-cons2} with error $\sqrt{\eps}$, so that
-	$\delta_{\mathrm{Line}}(\eps) = \sqrt{\eps}$. The symmetric
-	equivalents follow from
-	Lemma~\ref{lem:symmetric-equivalents-transfer}.
+	$\delta_{\mathrm{Line}}(\eps) = \sqrt{\eps}$.
+
+	The last two items admit a second route, which is the one carried out in
+	the formalization and which establishes them in the opposite order.
+	Item~\ref{eq:qld-comm-line-pt-cons2} is proved first, directly from the
+	exact overlap identity
+	$\bra{\hat{\psi}} \hat{M}^{(\mathrm{Line},W),\ell}_{[\mathrm{eval}_u(\cdot)=a]}
+	\ot \hat{M}^{(\mathrm{Point},W),u}_{a} \ket{\hat{\psi}}
+	= \bra{\psi} M^{(\mathrm{Line},W),\ell}_{[\mathrm{eval}_u(\cdot)=a]}
+	\ot M^{(\mathrm{Point},W),u}_{a} \ket{\psi}$
+	between the expanded and the strategy overlaps, which holds because the
+	ancillary projectors $\tau^{W,\ell}$ and $\tau^{W,u}$ agree exactly on
+	the EPR pairs, together with item~1 of Lemma~\ref{fact:agreement}; this
+	gives item~\ref{eq:qld-comm-line-pt-cons2} with error linear in $\eps$.
+	Item~\ref{eq:qld-comm-line-pt-cons} then follows from it by the
+	projective refinement of Lemma~\ref{fact:add-a-proj2}, again with error
+	linear in $\eps$, so that the elementary sub-measurement inequality
+	displayed above is not needed. The three linear estimates are weakened to
+	the common error $\delta_{\mathrm{Line}}(\eps) = \sqrt{\eps}$, using
+	the universal bound $4$ on the distance between two complete measurements
+	on a normalized state, because the statement of the lemma requires a
+	single error function; for $\eps \leq 1$ the linear estimates are the
+	stronger ones.
+
+	The symmetric equivalents are obtained without the transfer of
+	Lemma~\ref{lem:symmetric-equivalents-transfer}: all three items are
+	proved separately on each of the four register pairs
+	$\mathsf{A}\mathsf{A}'$, $\mathsf{B}\mathsf{A}''$,
+	$\mathsf{B}\mathsf{B}'$ and $\mathsf{A}\mathsf{B}''$ of
+	Definition~\ref{def:symmetric-equivalents}, so no symmetry hypothesis on
+	the strategy is used.
 \end{proof}
 
 The expanded point and line measurements constructed in this section, being

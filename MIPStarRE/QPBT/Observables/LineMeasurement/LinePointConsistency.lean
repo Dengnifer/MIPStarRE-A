@@ -13,8 +13,8 @@ distance of item 3.
 ## References
 
 Item 2 of `lem:qld-comm-line-cons`, paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:569-620`,
-blueprint `blueprint/src/chapter/ch14_qpbt_observables.tex:1103-1119`.
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:534-539`,
+blueprint `eq:qld-comm-line-pt-cons`.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder
@@ -33,11 +33,13 @@ variable {P : AdmissibleParams} {ε : ℝ}
 /-! ## Item 2: line effects versus selected point effects -/
 
 set_option synthInstance.maxSize 400 in
-/-- On the directed `AA'`--`BA''` pair, the distance of item 2 is dominated by
-the distance of item 3: the expanded line effects are orthogonal projectors
-refining the evaluation classes. This is the projective refinement
-`eq:qld-mhat-line-1` of `lem:qld-comm-line-cons`, paper
-`14_analysis_of_the_pauli_basis_test.tex:569-620`. -/
+/-- On the directed `AA'`--`BA''` pair, the distance of
+`eq:qld-comm-line-pt-cons` is dominated by that of
+`eq:qld-comm-line-pt-cons2`: the expanded line effects are orthogonal
+projectors refining the evaluation classes, so the projective refinement of
+`fact:add-a-proj2` applies. The source uses the same two ingredients in the
+opposite direction, as `eq:qld-mhat-line-1` and `eq:qld-mhat-line-2`, paper
+`14_analysis_of_the_pauli_basis_test.tex:566-574`. -/
 theorem linePointDist_aaBa_le (S : ProjectiveSetting P ε) (W : PauliKind) :
     opFamilyDistSq (linePointDist P.toLdParams)
         (fun sample f => S.place .AA'
@@ -126,7 +128,7 @@ theorem linePointDist_aaBa_le (S : ProjectiveSetting P ε) (W : PauliKind) :
 
 set_option synthInstance.maxSize 400 in
 /-- On the directed `BA''`--`AA'` pair, the distance of item 2 is dominated by
-the distance of item 3. Paper `14_analysis_of_the_pauli_basis_test.tex:569-620`. -/
+the distance of item 3. Paper `14_analysis_of_the_pauli_basis_test.tex:534-539`. -/
 theorem linePointDist_baAa_le (S : ProjectiveSetting P ε) (W : PauliKind) :
     opFamilyDistSq (linePointDist P.toLdParams)
         (fun sample f => S.place .BA''
@@ -235,7 +237,7 @@ theorem linePointDist_baAa_le (S : ProjectiveSetting P ε) (W : PauliKind) :
 
 set_option synthInstance.maxSize 400 in
 /-- On the directed `AB''`--`BB'` pair, the distance of item 2 is dominated by
-the distance of item 3. Paper `14_analysis_of_the_pauli_basis_test.tex:569-620`. -/
+the distance of item 3. Paper `14_analysis_of_the_pauli_basis_test.tex:534-539`. -/
 theorem linePointDist_abBb_le (S : ProjectiveSetting P ε) (W : PauliKind) :
     opFamilyDistSq (linePointDist P.toLdParams)
         (fun sample f => S.place .AB''
@@ -324,7 +326,7 @@ theorem linePointDist_abBb_le (S : ProjectiveSetting P ε) (W : PauliKind) :
 
 set_option synthInstance.maxSize 400 in
 /-- On the directed `BB'`--`AB''` pair, the distance of item 2 is dominated by
-the distance of item 3. Paper `14_analysis_of_the_pauli_basis_test.tex:569-620`. -/
+the distance of item 3. Paper `14_analysis_of_the_pauli_basis_test.tex:534-539`. -/
 theorem linePointDist_bbAb_le (S : ProjectiveSetting P ε) (W : PauliKind) :
     opFamilyDistSq (linePointDist P.toLdParams)
         (fun sample f => S.place .BB'

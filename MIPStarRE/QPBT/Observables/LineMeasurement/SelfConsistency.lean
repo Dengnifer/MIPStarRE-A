@@ -14,11 +14,15 @@ perfectly consistent on an EPR pair; and the data-processing inequality
 transfers the product estimate to the addition postprocessing that defines the
 expanded line measurement.
 
+The module also records that the error parameter of a projective setting is
+nonnegative, which is not assumed by the structure and is needed by the other
+two items as well.
+
 ## References
 
-The declarations formalize item 1 of `lem:qld-comm-line-cons` in
-`blueprint/src/chapter/ch14_qpbt_observables.tex:1082-1102`, whose paper
-source is `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:559-568`.
+The declarations formalize `enu:qld-comm-line-self-cons`, item 1 of
+`lem:qld-comm-line-cons`, whose paper source is
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:527-532`.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder
@@ -30,15 +34,12 @@ open MIPStarRE.Quantum
 
 noncomputable section
 
-local instance pauliEdgeNonemptyLineConsistency : Nonempty PauliEdge :=
-  pauliEdge_nonempty
-
 /-! ## Self-consistency of the unexpanded line measurements -/
 
 /-- Mismatch mass of the two folded line answers at one sampled line.
 Formalization-only auxiliary for the strategy input to item 1 of
 `lem:qld-comm-line-cons`, paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:559-568`. -/
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:527-532`. -/
 noncomputable def lineSelfMismatchMass {P : AdmissibleParams} {ε : ℝ}
     (S : ProjectiveSetting P ε) (W : PauliKind)
     (sample : LineDesc P.toLdParams × (Fin P.m → PauliScalar P)) : ℝ :=
@@ -51,7 +52,7 @@ noncomputable def lineSelfMismatchMass {P : AdmissibleParams} {ε : ℝ}
 /-- Full line-measurement inconsistency is the probability that the two
 folded line answers differ. This is the line self-loop specialization used in
 item 1 of `lem:qld-comm-line-cons`, paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:559-568`. -/
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:527-532`. -/
 theorem lineConsistency_eq_mismatch {P : AdmissibleParams} {ε : ℝ}
     (S : ProjectiveSetting P ε) (W : PauliKind) :
     consistencyDefect (linePointDist P.toLdParams)
@@ -96,7 +97,7 @@ theorem lineConsistency_eq_mismatch {P : AdmissibleParams} {ε : ℝ}
 /-- The axis component of the line-point sampler is the axis-line self-loop
 branch of the Pauli basis test. Formalization-only auxiliary for item 1 of
 `lem:qld-comm-line-cons`, paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:559-568`. -/
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:527-532`. -/
 theorem avg_alineSelfMismatch_eq_source {P : AdmissibleParams} {ε : ℝ}
     (S : ProjectiveSetting P ε) (W : PauliKind) :
     avgOver (aLinePointDist P.toLdParams) (lineSelfMismatchMass S W) =
@@ -122,7 +123,7 @@ theorem avg_alineSelfMismatch_eq_source {P : AdmissibleParams} {ε : ℝ}
 /-- The diagonal component of the line-point sampler is the diagonal-line
 self-loop branch of the Pauli basis test. Formalization-only auxiliary for
 item 1 of `lem:qld-comm-line-cons`, paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:559-568`. -/
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:527-532`. -/
 theorem avg_dlineSelfMismatch_eq_source {P : AdmissibleParams} {ε : ℝ}
     (S : ProjectiveSetting P ε) (W : PauliKind) :
     avgOver (dLinePointDist P.toLdParams) (lineSelfMismatchMass S W) =
@@ -148,7 +149,7 @@ theorem avg_dlineSelfMismatch_eq_source {P : AdmissibleParams} {ε : ℝ}
 /-- The two strategy line measurements are self-consistent on average over
 the line-point distribution, with the rejection bound of the two line
 self-loops. This is the strategy input to item 1 of `lem:qld-comm-line-cons`,
-paper `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:559-568`. -/
+paper `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:527-532`. -/
 theorem line_self_consistency_le {P : AdmissibleParams} {ε : ℝ}
     (S : ProjectiveSetting P ε) (W : PauliKind) :
     consistencyDefect (linePointDist P.toLdParams)
@@ -191,19 +192,33 @@ theorem line_self_consistency_le {P : AdmissibleParams} {ε : ℝ}
   rw [linePointDist, WinImplications.avgOver_mix]
   linarith
 
--- The four-level product indices below exceed the default instance-search size.
 namespace ProjectiveSetting
 
 variable {P : AdmissibleParams} {ε : ℝ}
 
+/-! ## The error parameter -/
+
+/-- The error parameter of a projective setting is nonnegative. Nothing in the
+structure assumes this: it follows from the winning premise `1 - ε ≤ value`
+together with the bound `value ≤ 1` satisfied by the value of every strategy.
+Formalization-only auxiliary supplying the sign condition of the winning
+implications used in items 2 and 3 of `lem:qld-comm-line-cons`. -/
+theorem eps_nonneg (S : ProjectiveSetting P ε) : 0 ≤ ε := by
+  have hv := WinImplications.strategy_value_le_one S.toStrategy
+  have hw := S.win
+  linarith
+
 /-! ## Placement of differences on the two bipartitions -/
+
+-- The four-level product indices below exceed the default instance-search
+-- size.
 
 set_option synthInstance.maxSize 400 in
 /-- On the `AA' | BA''(B'B'')` bipartition, the difference of an `AA'` and a
 `BA''` placement acts on the expanded state as the corresponding difference
-of left and right tensor placements. Formalization-only bookkeeping for the
+of left and right tensor placements. Formalization-only transport for the
 placement pairs of `lem:qld-comm-line-cons`, paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:559-679`. -/
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:527-545`. -/
 theorem norm_place_AA'_sub_place_BA'' (S : ProjectiveSetting P ε)
     (O₁ : Op (S.toStrategy.ιA × PauliRegister P))
     (O₂ : Op (S.toStrategy.ιB × PauliRegister P)) :
@@ -222,9 +237,9 @@ theorem norm_place_AA'_sub_place_BA'' (S : ProjectiveSetting P ε)
 set_option synthInstance.maxSize 400 in
 /-- On the `AB'' | BB'(A'A'')` bipartition, the difference of an `AB''` and a
 `BB'` placement acts on the expanded state as the corresponding difference of
-left and right tensor placements. Formalization-only bookkeeping for the
+left and right tensor placements. Formalization-only transport for the
 placement pairs of `lem:qld-comm-line-cons`, paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:559-679`. -/
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:527-545`. -/
 theorem norm_place_AB''_sub_place_BB' (S : ProjectiveSetting P ε)
     (O₁ : Op (S.toStrategy.ιA × PauliRegister P))
     (O₂ : Op (S.toStrategy.ιB × PauliRegister P)) :
@@ -241,7 +256,10 @@ theorem norm_place_AB''_sub_place_BB' (S : ProjectiveSetting P ε)
     reindexOp_abBbBipartition_right]
 
 set_option synthInstance.maxSize 400 in
-/-- The expanded state is a unit vector on either bipartition. -/
+/-- Reindexing the expanded state along any equivalence onto a product of
+the six registers leaves it a unit vector. Formalization-only auxiliary
+carrying the normalization of `def:expanded-state` to the two bipartitions
+used by the consistency estimates. -/
 theorem norm_reindexState_psiHat (S : ProjectiveSetting P ε)
     (e : SixReg P S.toStrategy.ιA S.toStrategy.ιB ≃
       (S.toStrategy.ιA × PauliRegister P) ×
@@ -257,7 +275,7 @@ set_option synthInstance.maxSize 400 in
 Pauli line measurement does not change their consistency defect on the
 `AA' | BA''(B'B'')` bipartition. This is the product step in item 1 of
 `lem:qld-comm-line-cons`, paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:559-568`. -/
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:527-532`. -/
 theorem lineTauConsistency_aaBa_eq (S : ProjectiveSetting P ε) (W : PauliKind) :
     consistencyDefect (linePointDist P.toLdParams)
         (fun sample p => heteroKron ((S.lineTauMeas .alice W sample.1).effect p)
@@ -392,7 +410,7 @@ set_option synthInstance.maxSize 400 in
 Pauli line measurement does not change their consistency defect on the
 `AB'' | BB'(A'A'')` bipartition. This is the second explicit product placement
 in item 1 of `lem:qld-comm-line-cons`, paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:559-568`. -/
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:527-532`. -/
 theorem lineTauConsistency_abBb_eq (S : ProjectiveSetting P ε) (W : PauliKind) :
     consistencyDefect (linePointDist P.toLdParams)
         (fun sample p => heteroKron ((S.lineTauMeas .alice W sample.1).effect p)
@@ -529,7 +547,7 @@ set_option synthInstance.maxSize 400 in
 distance of the left- and right-placed expanded line measurements on the
 `AA' | BA''(B'B'')` bipartition. Formalization-only transport for item 1 of
 `lem:qld-comm-line-cons`, paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:559-568`. -/
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:527-532`. -/
 theorem expLineDist_aaBa_eq (S : ProjectiveSetting P ε) (W : PauliKind) :
     opFamilyDistSq (linePointDist P.toLdParams)
         (fun sample f => S.place .AA' ((S.lineMeasExp .alice W sample.1).effect f))
@@ -558,7 +576,7 @@ set_option synthInstance.maxSize 400 in
 distance of the left- and right-placed expanded line measurements on the
 `AB'' | BB'(A'A'')` bipartition. Formalization-only transport for item 1 of
 `lem:qld-comm-line-cons`, paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:559-568`. -/
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:527-532`. -/
 theorem expLineDist_abBb_eq (S : ProjectiveSetting P ε) (W : PauliKind) :
     opFamilyDistSq (linePointDist P.toLdParams)
         (fun sample f => S.place .AB'' ((S.lineMeasExp .alice W sample.1).effect f))
@@ -586,8 +604,8 @@ set_option synthInstance.maxSize 400 in
 /-- Expanded line consistency for the directed `AA'`--`BA''` placement pair,
 with the linear error of the strategy self-consistency. This is the explicit
 data-processing estimate for item 1 of `lem:qld-comm-line-cons`, paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:559-568`,
-blueprint `ch14_qpbt_observables.tex:1082-1102`. -/
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:527-532`,
+blueprint `enu:qld-comm-line-self-cons`. -/
 theorem expLineDist_aaBa_le (S : ProjectiveSetting P ε) (W : PauliKind) :
     opFamilyDistSq (linePointDist P.toLdParams)
         (fun sample f => S.place .AA' ((S.lineMeasExp .alice W sample.1).effect f))
@@ -671,8 +689,8 @@ set_option synthInstance.maxSize 400 in
 /-- Expanded line consistency for the directed `AB''`--`BB'` placement pair,
 with the linear error of the strategy self-consistency. This is the second
 bipartition of item 1 and does not assume strategy symmetry; paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:559-568`,
-blueprint `ch14_qpbt_observables.tex:1082-1102`. -/
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:527-532`,
+blueprint `enu:qld-comm-line-self-cons`. -/
 theorem expLineDist_abBb_le (S : ProjectiveSetting P ε) (W : PauliKind) :
     opFamilyDistSq (linePointDist P.toLdParams)
         (fun sample f => S.place .AB'' ((S.lineMeasExp .alice W sample.1).effect f))
@@ -756,7 +774,7 @@ set_option synthInstance.maxSize 400 in
 /-- The expanded line distance on the `AA'`--`BA''` placement pair is at most
 four. This trivial bound supplies the large-`ε` case of the common
 square-root error in item 1 of `lem:qld-comm-line-cons`, paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:559-568`. -/
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:527-532`. -/
 theorem expLineDist_aaBa_le_four (S : ProjectiveSetting P ε) (W : PauliKind) :
     opFamilyDistSq (linePointDist P.toLdParams)
         (fun sample f => S.place .AA' ((S.lineMeasExp .alice W sample.1).effect f))
@@ -771,7 +789,7 @@ set_option synthInstance.maxSize 400 in
 /-- The expanded line distance on the `AB''`--`BB'` placement pair is at most
 four. This trivial bound supplies the large-`ε` case of the common
 square-root error in item 1 of `lem:qld-comm-line-cons`, paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:559-568`. -/
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:527-532`. -/
 theorem expLineDist_abBb_le_four (S : ProjectiveSetting P ε) (W : PauliKind) :
     opFamilyDistSq (linePointDist P.toLdParams)
         (fun sample f => S.place .AB'' ((S.lineMeasExp .alice W sample.1).effect f))
@@ -781,21 +799,6 @@ theorem expLineDist_abBb_le_four (S : ProjectiveSetting P ε) (W : PauliKind) :
   exact DistanceCalculus.opFamilyDistSq_placed_le_four _
     (linePointDist_isProbability P.toLdParams) _ _ _
     (norm_reindexState_psiHat S _)
-
-/-- The error parameter of a projective setting is nonnegative: the expanded
-line distance is nonnegative and bounded by a positive multiple of `ε`.
-Formalization-only auxiliary supplying the sign hypothesis of the winning
-implications used in items 2 and 3 of `lem:qld-comm-line-cons`. -/
-theorem eps_nonneg (S : ProjectiveSetting P ε) : 0 ≤ ε := by
-  have h := expLineDist_aaBa_le S .X
-  have h0 := DistanceCalculus.opFamilyDistSq_nonneg (linePointDist P.toLdParams)
-    (fun sample f => S.place .AA' ((S.lineMeasExp .alice .X sample.1).effect f))
-    (fun sample f => S.place .BA'' ((S.lineMeasExp .bob .X sample.1).effect f))
-    S.psiHat
-  have hcard : (0 : ℝ) < Fintype.card PauliEdge := by
-    exact_mod_cast (Fintype.card_pos : 0 < Fintype.card PauliEdge)
-  have hprod : 0 ≤ (Fintype.card PauliEdge : ℝ) * ε := by linarith
-  exact (mul_nonneg_iff_of_pos_left hcard).mp hprod
 
 end ProjectiveSetting
 

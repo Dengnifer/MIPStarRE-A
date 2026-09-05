@@ -1,32 +1,56 @@
-import MIPStarRE.QPBT.Observables.PointConsistency
 import MIPStarRE.QPBT.Observables.LineMeasurement.LinePointConsistency
 
 /-!
 # Expanded line measurements
 
-This module restricts low-degree encodings to canonical lines, constructs the
-expanded line measurements by convolution, and records their consistency with
-the expanded point measurements on all four register placements.
+For a generalized-Pauli basis `W` and a canonical line, the expanded line
+measurement is the convolution of the strategy line measurement with the
+projective measurement of one Pauli register whose outcome is the restriction
+to that line of the low-degree encoding of the measured basis label. This file
+states the three consistency conclusions the source draws for that family,
+together with the existential form in which the source states them.
 
-The construction is split over the submodules `LineMeasurement.Restriction`
-(restriction of low-degree encodings to lines and its degree bound),
-`LineMeasurement.Projector` (the Pauli-register line projectors), and
-`LineMeasurement.Expanded` (the convolution measurement, its projectivity, and
-its vanishing outside the degree-`d` outcomes on axis lines),
-`LineMeasurement.SquareRootError` (passage from linear to square-root errors),
-`LineMeasurement.SelfConsistency` (item 1 on both bipartitions),
-`LineMeasurement.LinePointOverlap` (the exact overlap identity behind items 2
-and 3), `LineMeasurement.BipartiteTransport`,
-`LineMeasurement.EvalClassConsistency` (item 3), and
-`LineMeasurement.LinePointConsistency` (item 2). This file states the three
-consistency conclusions and the source's existential form.
+The argument runs as follows. Restricting a multilinear low-degree encoding to
+a line gives a polynomial of degree at most `m*d` in the line parameter, and at
+most `d` on an axis-parallel line (`LineMeasurement.Restriction`), whose
+partial evaluation at a sampled point obeys the elementary calculus of
+`LineMeasurement.Evaluation`.
+Coarse-graining the generalized Pauli basis measurement along that restriction
+gives the ancillary projectors `tau^{W,line}`, which are symmetric and hence
+perfectly self-consistent on an EPR pair (`LineMeasurement.Projector`). Their
+convolution with the strategy line measurement is again projective and vanishes
+outside the degree-`d` outcomes on an axis line (`LineMeasurement.Expanded`).
+Self-consistency of the convolution follows from self-consistency of the
+strategy line measurements and the data-processing inequality
+(`LineMeasurement.SelfConsistency`). The overlap of an expanded line
+measurement with the expanded point effects selected by evaluation at the
+sampled point factorizes exactly through the ancillary consistency of
+`tau^{W,line}` with `tau^{W,u}` (`LineMeasurement.LinePointOverlap`); the
+generic bipartite estimates of `LineMeasurement.BipartiteTransport` carry that
+overlap to the two bipartitions of the six registers, giving the
+evaluation-class conclusion (`LineMeasurement.EvalClassConsistency`) and, by
+projective refinement, the line-versus-point conclusion
+(`LineMeasurement.LinePointConsistency`).
+
+Two features of this route differ from the source. The source derives its third
+item from its second; here the evaluation-class estimate comes first, from the
+exact overlap identity, and the second item follows from it by projective
+refinement, so that the source's elementary sub-measurement inequality is not
+needed. The source also transports a relation proved for one pair of register
+placements to the remaining three by the symmetry of the test
+(`lem:symmetric-equivalents-transfer`, which is not formalized); here each of
+the four directed opposite-placement pairs is proved directly. The estimates
+established are linear in `ε` for all three items, hence stronger than the
+square-root error whenever `ε ≤ 1`; they are weakened to the common error
+`deltaLine ε = √ε` only because the source states the three items with a single
+error function (`LineMeasurement.SquareRootError`).
 
 ## References
 
 The declarations formalize `def:expanded-line-measurement` and
-`lem:qld-comm-line-cons` in
-`blueprint/src/chapter/ch14_qpbt_observables.tex:1034-1210`. Their paper source
-is `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:506-679`.
+`lem:qld-comm-line-cons` of `blueprint/src/chapter/ch14_qpbt_observables.tex`.
+Their paper source is
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:523-678`.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder
@@ -43,15 +67,13 @@ local instance pauliEdgeNonemptyLineMeasurement : Nonempty PauliEdge :=
 
 /-- The square-root error exhibited by the expanded-line consistency proof.
 This is the final quantitative conclusion of `lem:qld-comm-line-cons`, paper
-`14_analysis_of_the_pauli_basis_test.tex:657-679`, blueprint
-`ch14_qpbt_observables.tex:1082-1210`. -/
+`14_analysis_of_the_pauli_basis_test.tex:675-677`. -/
 noncomputable def deltaLine (ε : ℝ) : ℝ :=
   Real.sqrt ε
 
 /-- The concrete expanded-line error is polynomially small. This discharges
 the error-function component of `lem:qld-comm-line-cons`, using the value
-proved at paper `14_analysis_of_the_pauli_basis_test.tex:657-679`, blueprint
-`ch14_qpbt_observables.tex:1082-1210`. -/
+proved at paper `14_analysis_of_the_pauli_basis_test.tex:675-677`. -/
 theorem deltaLine_isPolyErr : IsPolyErr deltaLine := by
   refine ⟨1, (2 : ℝ)⁻¹, le_rfl, by positivity, ?_⟩
   intro x hx
@@ -63,8 +85,7 @@ theorem deltaLine_isPolyErr : IsPolyErr deltaLine := by
 /-- The three conclusions of expanded-line consistency at an abstract error
 function. This proposition collects the full existential content of
 `lem:qld-comm-line-cons`, paper
-`14_analysis_of_the_pauli_basis_test.tex:559-679`, blueprint
-`ch14_qpbt_observables.tex:1082-1210`. -/
+`14_analysis_of_the_pauli_basis_test.tex:527-545`. -/
 def ExpandedLineConclusions (δ : ℝ → ℝ) : Prop :=
   (∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε)
       (side : PlayerSide) (W : PauliKind) (line : LineDesc P.toLdParams),
@@ -103,8 +124,13 @@ def ExpandedLineConclusions (δ : ℝ → ℝ) : Prop :=
 /-- Expanded line measurements are self-consistent for each of the four
 directed opposite-placement pairs. The universal constant precedes all test
 parameters and strategies. This is item 1 of `lem:qld-comm-line-cons`, paper
-`14_analysis_of_the_pauli_basis_test.tex:559-568`, blueprint
-`ch14_qpbt_observables.tex:1082-1102`. -/
+`14_analysis_of_the_pauli_basis_test.tex:527-532`, blueprint
+`enu:qld-comm-line-self-cons`.
+
+The estimate established below is the linear bound
+`2 * (|PauliEdge| * ε)` coming from the two line self-loops of the Pauli basis
+test; it is weakened to the common square-root error exactly as for the other
+two items. -/
 theorem expLine_self_cons :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε)
@@ -148,11 +174,19 @@ theorem expLine_self_cons :
       (by simpa only [Placement.side] using
         ProjectiveSetting.expLineDist_abBb_le_four S W)
 
-/-- An expanded line effect is consistent with itself followed by the
-expanded point effect selected by its value at the sampled point, with the
-common square-root error. This is item 2 of `lem:qld-comm-line-cons`, paper
-`14_analysis_of_the_pauli_basis_test.tex:569-620`, blueprint
-`ch14_qpbt_observables.tex:1103-1119`. -/
+/-- An expanded line effect is consistent with itself followed by the expanded
+point effect selected by its value at the sampled point. This is item 2 of
+`lem:qld-comm-line-cons`, paper
+`14_analysis_of_the_pauli_basis_test.tex:534-539`, blueprint
+`eq:qld-comm-line-pt-cons`.
+
+The estimate established below is linear in `ε`, matching the error `ε` with
+which the source states this item. Combined with the universal bound `4` on the
+distance between two placed complete measurements, it is weakened by
+`le_mul_sqrt_of_le_mul_of_le_four` to the square-root form `C * √ε`, so that the
+three items of the lemma share the single error function `deltaLine ε = √ε`
+that the source requires; for `ε ≤ 1` the linear bound is the stronger
+statement. -/
 theorem expLine_point_cons :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε)
@@ -214,8 +248,14 @@ theorem expLine_point_cons :
 /-- Evaluation classes of expanded line measurements are consistent with the
 completed expanded point family, including the `none` class. This is item 3 of
 `lem:qld-comm-line-cons`, paper
-`14_analysis_of_the_pauli_basis_test.tex:621-679`, blueprint
-`ch14_qpbt_observables.tex:1120-1210`. -/
+`14_analysis_of_the_pauli_basis_test.tex:540-545`, blueprint
+`eq:qld-comm-line-pt-cons2`.
+
+The source obtains this item from its second one through an elementary
+inequality for projective sub-measurements, which costs a square root. Here the
+exact overlap identity of `LineMeasurement.LinePointOverlap` gives a bound
+linear in `ε` directly; as for item 2 it is combined with the universal bound
+`4` and weakened to the common square-root error of the lemma. -/
 theorem expLine_point_cons' :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε)
@@ -267,8 +307,7 @@ theorem expLine_point_cons' :
 /-- The source's existential polynomial-error form, derived from the concrete
 expanded-line witnesses and square-root error. This is
 `lem:qld-comm-line-cons`, paper
-`14_analysis_of_the_pauli_basis_test.tex:506-679`, blueprint
-`ch14_qpbt_observables.tex:1082-1210`. -/
+`14_analysis_of_the_pauli_basis_test.tex:523-678`. -/
 theorem exists_deltaLine :
     ∃ δ : ℝ → ℝ, IsPolyErr δ ∧ ExpandedLineConclusions δ := by
   refine ⟨deltaLine, deltaLine_isPolyErr, ?_⟩
