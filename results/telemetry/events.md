@@ -3102,3 +3102,12 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   no `sorry` or `axiom`; the unchanged wrapper still reports its existing `sorry`
   warnings at lines 276, 294, and 313. `git diff --check` and the hook installation
   check pass. Publication CI and independent review remain the parent tail's task.
+- **Checked publication of `8cca8bc`.** Normal pre-commit and checked-push gates
+  passed, including changed-file Lean checks, targeted artifact refreshes, statement
+  integrity audits, the blueprint web smoke check, and resolution of all 1272
+  blueprint declarations. The gate found no changed source-labelled public headers.
+  The subsequent SSH `git-receive-pack` transport remained silent for more than
+  three minutes; only this session's stalled SSH child was terminated. Checked-push
+  exited 128 without confirming publication. The parent tail must verify the remote
+  tip and retry checked publication before running exact-head CI and review. No
+  hooks were bypassed, no full-project build was launched, and no PR was merged.
