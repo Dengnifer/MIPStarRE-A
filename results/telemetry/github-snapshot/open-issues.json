@@ -537,8 +537,8 @@
   "issue_dependencies_summary": {
    "blocked_by": 0,
    "total_blocked_by": 1,
-   "blocking": 0,
-   "total_blocking": 0
+   "blocking": 1,
+   "total_blocking": 1
   },
   "body": "The #196 worker proved consistencyDefect_sandwich_le (C0 = 8) and found that exists_pasting_error (MIPStarRE/QPBT/Games/Sandwich.lean, lem:pasting = Fact 4.35 of Natarajan-Wright NEEXP, blueprint ch12_qpbt_games.tex:533-564) is false as currently stated because the repository's shared scalar predicate encodes the source's poly(eta, delta) error as a product-form bound that must vanish when the collision error eta is zero even at fixed positive consistency error delta; a two-dimensional counterexample is recorded in docs/paper-gaps/qpbt_pasting-product-error.tex on branch issue-196-quantitative-sandwich-theorem. This is a formalization-side encoding error, not a gap in the source: the paper asks for a bound polynomial in both inputs (vanishing only at (0,0)). Deliverables: (1) correct the shared predicate to the source's meaning (a sum-form polynomial contract such as C * (eta^a + delta^b) with explicit positive exponents, used consistently by every consumer; list the consumers with rg), keeping the paper-labelled statement source-shaped; (2) prove exists_pasting_error with explicit constants (the note estimates 300-600 lines of consistency and Cauchy-Schwarz calculus on the existing distance calculus); (3) update the note's status section and the blueprint proof tag only when sorry-free; (4) no other hypothesis may be added. Stack on branch issue-196-quantitative-sandwich-theorem until PR 201-or-later for #196 merges. Codex packet.",
   "closed_by": null,
@@ -1803,8 +1803,8 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/166",
   "issue_dependencies_summary": {
-   "blocked_by": 2,
-   "total_blocked_by": 3,
+   "blocked_by": 3,
+   "total_blocked_by": 4,
    "blocking": 1,
    "total_blocking": 1
   },
@@ -3363,9 +3363,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 135,
+  "comments": 138,
   "created_at": "2026-09-02T08:30:04Z",
-  "updated_at": "2026-09-05T16:27:20Z",
+  "updated_at": "2026-09-05T17:24:03Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
