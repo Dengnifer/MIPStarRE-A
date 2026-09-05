@@ -3220,6 +3220,18 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   tip and retry checked publication before running exact-head CI and review. No
   hooks were bypassed, no full-project build was launched, and no PR was merged.
 
+## 2026-09-06 — Issue 201 integration validation setup
+
+- Session `prover-201-20260906-01` initially looked for the slot-6 handoff in the
+  branch checkout, where it was absent; it was read from the primary checkout
+  as requested. The first isolated Lean check failed because an empty temporary
+  `MIPStarRE` namespace shadowed the existing compiled module tree. Seeding the
+  temporary directory from branch-private artifacts fixed the search path; all
+  eight focused checks then passed. No source or shared cache was changed.
+  GitHub reads and staging initially hit sandbox restrictions and were retried
+  through approved escalation. Evidence and remaining validation limits:
+  `results/telemetry/prover-201-20260906-01-validation.md`.
+
 ## 2026-09-06 — Main-turn work serialized detached recovery
 
 - The main session spent about twenty minutes resolving PR #185's merge conflict
