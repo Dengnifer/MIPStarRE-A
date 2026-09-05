@@ -333,6 +333,29 @@ theorem pauliBasisTestSymm_toGame (P : AdmissibleParams) :
     (pauliBasisTestSymm P).toGame = pauliBasisTest P := by
   rfl
 
+/-- The honest strategy of `lem:pauli-completeness`: the total honest
+measurement family of `MIPStarRE.QPBT.Test.Completeness.HonestStrategy.Assembly`
+on the maximally entangled state of the Pauli register tensored with the Magic
+Square qubit.  Blueprint `ch13_qpbt_test.tex:390-395`, paper
+`08_classical_and_quantum_low_degree_tests.tex:1290-1360`. -/
+noncomputable def honestStrategy (P : AdmissibleParams) :
+    SymmetricStrategy (pauliBasisTestSymm P) where
+  ι := HonestIndex P
+  ψ := eprState (HonestIndex P)
+  ψ_norm := eprState_norm (HonestIndex P)
+  ψ_swap := reindexState_prodComm_eprState (HonestIndex P)
+  M := fun q => honestMeasurement P q.1 q.2
+
+/-- Every measurement of the honest strategy is projective. -/
+theorem honestStrategy_projective (P : AdmissibleParams) (x : PauliQuestion P) :
+    MIPStarRE.QPBT.Measurement.IsProjective ((honestStrategy P).M x) :=
+  honestMeasurement_projective P x.1 x.2
+
+/-- The honest strategy is consistent on its maximally entangled state. -/
+theorem honestStrategy_isConsistent (P : AdmissibleParams) :
+    (honestStrategy P).IsConsistent :=
+  fun x => honestMeasurement_isConsistentOn P x.1 x.2
+
 /-- `lem:pauli-completeness`: every admissible Pauli basis test has a
 value-one SPCC strategy. Blueprint `ch13_qpbt_test.tex:390-395`, paper
 `08_classical_and_quantum_low_degree_tests.tex:1229-1421`. -/

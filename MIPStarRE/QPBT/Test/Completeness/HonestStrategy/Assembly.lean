@@ -485,6 +485,14 @@ theorem honestMeasurement_effect_transpose (P : AdmissibleParams) (t : PauliType
             pauliAnswerOfMs
             (fun b => pauliMagicMeasurement_effect_transpose P z hg t b) a)
 
+/-- The global honest measurement is consistent on the maximally entangled
+state of the honest local space, every effect being symmetric. -/
+theorem honestMeasurement_isConsistentOn (P : AdmissibleParams) (t : PauliType)
+    (z : PauliSpace P) :
+    MIPStarRE.QPBT.Measurement.IsConsistentOn (honestMeasurement P t z)
+      (eprState (HonestIndex P)) := fun a =>
+  epr_action_eq_of_transpose _ (honestMeasurement_effect_transpose P t z a)
+
 end
 
 end MIPStarRE.QPBT
