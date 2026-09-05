@@ -97,8 +97,10 @@ noncomputable def directLdLdtWeightedFailureProbability
       B (.point, .point) +
       (B (.dline, .point) + B (.point, .dline)) / 2) / 3
 
-/-- A sum over the three low-degree question types is the sum of its three
-terms. -/
+/-- Formalization-only expansion of a sum over the three low-degree question
+types, in point, axis-line, and diagonal-line order.  This supports the uniform
+branch calculation for the game in
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:178-186`. -/
 theorem sum_ldType (f : LdType → ℝ) :
     ∑ t : LdType, f t = f .point + f .aline + f .dline := by
   change (Finset.univ : Finset LdType).sum f = _
