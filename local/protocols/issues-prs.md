@@ -165,6 +165,9 @@ in the layer. `MIPSTARRE_LLM_ENABLED` and
 
 `github-sync.sh` pushes explicit refs and writes an atomic, paginated read-only
 snapshot of open issues and PRs to `results/telemetry/github-snapshot/`
+(and, since the push goes through `checked-push.sh`, commits that snapshot and
+`results/telemetry/builds.jsonl` to the primary checkout so the next publish
+finds a clean tree)
 (`open-issues.json`, `open-pulls.json`, `metadata.json`; PRs filtered out of the
 issue endpoint) — audit and recovery telemetry, never lifecycle input. The
 retired trees stay archived under `results/telemetry/registry-archive/` (commit
