@@ -17,7 +17,7 @@ anticommutation, and the conclusion is transported back to
 
 The declarations formalize the trailing clause of
 `lem:qld-win-implications-obs` in
-`blueprint/src/chapter/ch14_qpbt_observables.tex:683-733`, whose paper source
+`blueprint/src/chapter/ch14_qpbt_observables.tex:761-794`, whose paper source
 is `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:309-362`.
 -/
 
@@ -41,7 +41,7 @@ local instance pauliEdgeNonemptyInterchanged : Nonempty PauliEdge :=
 factor-interchanged form of item 5 of `lem:qld-win-implications`, transported
 to the interchanged state; paper
 `14_analysis_of_the_pauli_basis_test.tex:227,232-239`, blueprint
-`ch14_qpbt_observables.tex:699-701`. -/
+`ch14_qpbt_observables.tex:701-703`. -/
 theorem win_comm_cons_swapped_proof :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
@@ -65,7 +65,7 @@ theorem win_comm_cons_swapped_proof :
 /-- Pair-W self-consistency with Bob on the left factor, transported to the
 interchanged state. Paper
 `14_analysis_of_the_pauli_basis_test.tex:315-320`, blueprint
-`ch14_qpbt_observables.tex:683-733`. -/
+`ch14_qpbt_observables.tex:761-794`. -/
 theorem pairW_self_consistency_comm_swapped {P : AdmissibleParams} {ε : ℝ}
     (S : ProjectiveSetting P ε) (W : PauliKind) :
     consistencyDefect (commTupleDist P)
@@ -83,7 +83,7 @@ theorem pairW_self_consistency_comm_swapped {P : AdmissibleParams} {ε : ℝ}
 /-- The commuting Pair check with Bob on the left factor, transported to the
 interchanged state. Paper
 `14_analysis_of_the_pauli_basis_test.tex:210-231`, blueprint
-`ch14_qpbt_observables.tex:699-701`. -/
+`ch14_qpbt_observables.tex:701-703`. -/
 theorem win_comm_swapped_proof :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
@@ -106,7 +106,7 @@ theorem win_comm_swapped_proof :
 /-- Magic Square variable consistency with Bob on the left factor, transported
 to the interchanged state. Paper
 `14_analysis_of_the_pauli_basis_test.tex:250-263`, blueprint
-`ch14_qpbt_observables.tex:699-701`. -/
+`ch14_qpbt_observables.tex:701-703`. -/
 theorem win_ms_cons_swapped_proof :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
@@ -132,7 +132,7 @@ theorem win_ms_cons_swapped_proof :
 /-- The point observables of Bob approximately commute on commuting tuples,
 read on the interchanged state. Paper
 `14_analysis_of_the_pauli_basis_test.tex:311-341`, blueprint
-`ch14_qpbt_observables.tex:683-733`. -/
+`ch14_qpbt_observables.tex:761-794`. -/
 theorem exists_pointObs_commutator_comm_le_bob :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε), 0 ≤ ε →
@@ -186,7 +186,7 @@ theorem exists_pointObs_commutator_comm_le_bob :
 
 /-- Alice's Magic Square variable anticommutator read on the interchanged
 state.  Paper `14_analysis_of_the_pauli_basis_test.tex:349-356`, blueprint
-`ch14_qpbt_observables.tex:683-733`. -/
+`ch14_qpbt_observables.tex:761-794`. -/
 theorem msVarBitObsA_anticommutator_swapped_le {P : AdmissibleParams} {ε : ℝ}
     (S : ProjectiveSetting P ε) (ω : PauliTuple P) :
     ‖applyOperatorToState
@@ -211,7 +211,7 @@ theorem msVarBitObsA_anticommutator_swapped_le {P : AdmissibleParams} {ε : ℝ}
 /-- The point observables of Bob approximately anticommute on anticommuting
 tuples, read on the interchanged state. Paper
 `14_analysis_of_the_pauli_basis_test.tex:342-362`, blueprint
-`ch14_qpbt_observables.tex:683-733`. -/
+`ch14_qpbt_observables.tex:761-794`. -/
 theorem exists_pointObs_anticommutator_anticomm_le_bob :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε), 0 ≤ ε →
@@ -289,7 +289,7 @@ theorem exists_pointObs_anticommutator_anticomm_le_bob :
 /-- The factor-interchanged phase-signed commutation relation on Bob's factor.
 This is the trailing clause of `lem:qld-win-implications-obs`, paper
 `14_analysis_of_the_pauli_basis_test.tex:309-354`, blueprint
-`ch14_qpbt_observables.tex:683-733`. -/
+`ch14_qpbt_observables.tex:761-794`. -/
 theorem pointObs_twisted_commutation_interchanged_proof :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),

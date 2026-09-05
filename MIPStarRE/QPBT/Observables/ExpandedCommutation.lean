@@ -15,7 +15,7 @@ player side.  Both player sides are treated explicitly.
 ## References
 
 The declarations prove item 2 of `lem:qld-comm-cons` in
-`blueprint/src/chapter/ch14_qpbt_observables.tex:932-1032`, whose paper source
+`blueprint/src/chapter/ch14_qpbt_observables.tex:1139-1178`, whose paper source
 is `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:466-505`.
 -/
 
@@ -36,19 +36,25 @@ theorem phaseSign_mul_self (t : ZMod 2) : phaseSign t * phaseSign t = 1 := by
   by_cases h : t = 0 <;> simp [phaseSign, h]
 
 /-- The binary phase is a real scalar. Paper
-`references/qpbt-paper/04_preliminaries.tex:1052-1081`. -/
+`references/qpbt-paper/04_preliminaries.tex:1052-1081`. Two private copies of
+this statement exist, at `MIPStarRE/QPBT/Algebra/Pauli.lean:95` and
+`MIPStarRE/QPBT/Observables/ExpandedDefs.lean:688`; neither is reachable from
+here, and promoting one of them is issue #204. The primed name marks the public
+copy and disappears with that promotion. -/
 theorem star_phaseSign' (t : ZMod 2) : star (phaseSign t) = phaseSign t := by
   by_cases h : t = 0 <;> simp [phaseSign, h]
 
 /-- The generalized Pauli observables are self-adjoint. A private copy of this
-statement, phrased through `Matrix.IsHermitian`, belongs to
-`Observables/ExpandedDefs.lean`; this form is the one used by
-`lem:qld-comm-cons`. Blueprint `ch11_qpbt_algebra.tex:529-571`, paper
-`references/qpbt-paper/04_preliminaries.tex:1052-1096`. -/
-theorem tauObservable_conjTranspose {K ι : Type*} [Field K] [Fintype K]
+statement, phrased through `Matrix.IsHermitian`, lives at
+`MIPStarRE/QPBT/Observables/ExpandedDefs.lean:692` and is unreachable from
+here; this form is the one used by `lem:qld-comm-cons`, and promoting the
+private original is issue #204. Blueprint `ch11_qpbt_algebra.tex:587-634`,
+paper `references/qpbt-paper/04_preliminaries.tex:1052-1096`. -/
+theorem tauObservable_conjTranspose {K ι : Type*} [Field K] [Finite K]
     [DecidableEq K] [Algebra (ZMod 2) K] [Fintype ι] [DecidableEq ι]
     (W : PauliKind) (v : ι → K) :
     (tauObservable W v)ᴴ = tauObservable W v := by
+  cases nonempty_fintype K
   rw [tauObservable_eq_sum_pauliProj, Matrix.conjTranspose_sum]
   refine Finset.sum_congr rfl (fun e _ => ?_)
   rw [Matrix.conjTranspose_smul, star_phaseSign']
@@ -56,7 +62,7 @@ theorem tauObservable_conjTranspose {K ι : Type*} [Field K] [Fintype K]
   exact (Matrix.posSemidef_vecMulVec_self_star (pauliVec W e)).isHermitian.eq
 
 /-- The generalized Pauli observables are reflections. Blueprint
-`ch11_qpbt_algebra.tex:599-633`, paper
+`ch11_qpbt_algebra.tex:587-634`, paper
 `references/qpbt-paper/04_preliminaries.tex:1088-1089`. -/
 theorem tauObservable_conjTranspose_mul_self {K ι : Type*} [Field K]
     [Fintype K] [DecidableEq K] [Algebra (ZMod 2) K] [Fintype ι]
@@ -81,7 +87,7 @@ noncomputable def tauZ (P : AdmissibleParams) (ω : PauliTuple P) :
   tauObservable .Z (fun h => ω.2.2.2 * indicatorVec ω.2.1 h)
 
 /-- The product of the two Pauli-register factors is an isometry. Blueprint
-`ch11_qpbt_algebra.tex:599-633`, paper
+`ch11_qpbt_algebra.tex:587-634`, paper
 `references/qpbt-paper/04_preliminaries.tex:1088-1095`. -/
 theorem tauX_mul_tauZ_isometry (P : AdmissibleParams) (ω : PauliTuple P) :
     (tauX P ω * tauZ P ω)ᴴ * (tauX P ω * tauZ P ω) = 1 :=
@@ -91,7 +97,7 @@ theorem tauX_mul_tauZ_isometry (P : AdmissibleParams) (ω : PauliTuple P) :
 
 /-- The two Pauli-register factors commute up to the tuple's commutation sign.
 This is the exact half of the argument of `lem:qld-comm-cons`; blueprint
-`ch11_qpbt_algebra.tex:599-633`, paper
+`ch11_qpbt_algebra.tex:587-634`, paper
 `14_analysis_of_the_pauli_basis_test.tex:495-505`. -/
 theorem tauZ_mul_tauX (P : AdmissibleParams) (ω : PauliTuple P) :
     tauZ P ω * tauX P ω =
@@ -130,7 +136,7 @@ noncomputable def twistedCommutator (S : ProjectiveSetting P ε)
 commutator of the point observables on the strategy register. This is the
 display following `eq:lc-23` in the proof of `lem:qld-comm-cons`, paper
 `14_analysis_of_the_pauli_basis_test.tex:487-505`, blueprint
-`ch14_qpbt_observables.tex:960-1032`. -/
+`ch14_qpbt_observables.tex:1164-1175`. -/
 theorem expObs_commutator (S : ProjectiveSetting P ε) (side : PlayerSide)
     (ω : PauliTuple P) :
     S.expObs side .X ω.2.2.1 ω.1 * S.expObs side .Z ω.2.2.2 ω.2.1 -
@@ -149,7 +155,7 @@ theorem expObs_commutator (S : ProjectiveSetting P ε) (side : PlayerSide)
 unit-modulus multiple of one quarter of the factorized commutator. This is the
 first display in the proof of item 2 of `lem:qld-comm-cons`, paper
 `14_analysis_of_the_pauli_basis_test.tex:487-495`, blueprint
-`ch14_qpbt_observables.tex:960-1032`. -/
+`ch14_qpbt_observables.tex:1164-1175`. -/
 theorem expPointTrace_commutator (S : ProjectiveSetting P ε)
     (side : PlayerSide) (ω : PauliTuple P) (b b' : ZMod 2) :
     (S.expPointTrace side .X ω.1 ω.2.2.1).effect b *
@@ -184,7 +190,7 @@ theorem expPointTrace_commutator (S : ProjectiveSetting P ε)
 
 /-- The placement of a scalar multiple is the scalar multiple of the
 placement. Paper `14_analysis_of_the_pauli_basis_test.tex:420-450`,
-blueprint `ch14_qpbt_observables.tex:876-922`. -/
+blueprint `ch14_qpbt_observables.tex:1002-1031`. -/
 theorem place_smul (S : ProjectiveSetting P ε) (p : Placement) (c : ℂ)
     (O : Op (S.ExpandedLocalSpace p.side)) :
     S.place p (c • O) = c • S.place p O := by
@@ -195,7 +201,7 @@ theorem place_smul (S : ProjectiveSetting P ε) (p : Placement) (c : ℂ)
 either player side. This packages both orientations of
 `eq:pts-obs-commutation`; paper
 `14_analysis_of_the_pauli_basis_test.tex:309-354`, blueprint
-`ch14_qpbt_observables.tex:683-733`. -/
+`ch14_qpbt_observables.tex:761-794`. -/
 theorem exists_twistedCommutator_avg_le :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε)
@@ -265,7 +271,7 @@ theorem exists_twistedCommutator_avg_le :
 /-- Trace-coarse-grained expanded point projections approximately commute on
 each of the four register placements. This is item 2 of `lem:qld-comm-cons`,
 paper `14_analysis_of_the_pauli_basis_test.tex:466-505`, blueprint
-`ch14_qpbt_observables.tex:960-1032`. -/
+`ch14_qpbt_observables.tex:1164-1175`. -/
 theorem expPointTrace_comm_proof :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε)

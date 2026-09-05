@@ -12,7 +12,7 @@ terms of the trace-coarse-grained point projections.
 ## References
 
 The declarations support `lem:qld-win-implications-obs` in
-`blueprint/src/chapter/ch14_qpbt_observables.tex:683-733`, whose paper source
+`blueprint/src/chapter/ch14_qpbt_observables.tex:761-794`, whose paper source
 is `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:309-341`.
 -/
 
@@ -32,9 +32,12 @@ local instance pauliEdgeNonemptyCommObs : Nonempty PauliEdge :=
 
 /-! ## Algebraic preliminaries -/
 
-/-- The left tensor placement is additive in its left factor. Formalization-only
-support for `eq:lc-12`, paper
-`14_analysis_of_the_pauli_basis_test.tex:330-341`. -/
+/-- The left tensor placement carries a difference of its left factors to the
+difference of the two placements. Formalization-only support for `eq:lc-12`,
+paper `14_analysis_of_the_pauli_basis_test.tex:330-341`.
+`MagicSquareRigidity.heteroKron_sub_left` states the same identity in the
+reverse orientation; that module is not in the import closure of this file, so
+the copy is kept here. Consolidating the two is issue #204. -/
 theorem heteroKron_sub_left {ιA ιB : Type*} (M N : Op ιA) (B : Op ιB) :
     heteroKron M B - heteroKron N B = heteroKron (M - N) B := by
   ext i j
@@ -49,7 +52,7 @@ theorem heteroKron_smul_left {ιA ιB : Type*} (c : ℂ) (M : Op ιA) (B : Op ι
   simp [heteroKron, Matrix.kronecker, mul_assoc]
 
 /-- A sum over the two-element binary alphabet. Formalization-only support for
-`def:strategy-observables`, blueprint `ch14_qpbt_observables.tex:480-503`. -/
+`def:strategy-observables`, blueprint `ch14_qpbt_observables.tex:573-610`. -/
 theorem sum_over_zmodTwo {M : Type*} [AddCommMonoid M] (f : ZMod 2 → M) :
     ∑ b : ZMod 2, f b = f 0 + f 1 := by
   rw [show (Finset.univ : Finset (ZMod 2)) = {0, 1} from by decide]
@@ -58,7 +61,7 @@ theorem sum_over_zmodTwo {M : Type*} [AddCommMonoid M] (f : ZMod 2 → M) :
 /-- The commutator of two reflections written as `1 - 2P` is four times the
 commutator of the projections. This is the algebra of Equation `eq:lc-12`,
 paper `14_analysis_of_the_pauli_basis_test.tex:330-341`, blueprint
-`ch14_qpbt_observables.tex:683-733`. -/
+`ch14_qpbt_observables.tex:761-794`. -/
 theorem reflection_commutator_eq {ι : Type*} [Fintype ι] [DecidableEq ι]
     (A B : Op ι) :
     (1 - (2 : ℂ) • A) * (1 - (2 : ℂ) • B) -
@@ -71,9 +74,12 @@ theorem reflection_commutator_eq {ι : Type*} [Fintype ι] [DecidableEq ι]
   rw [h2, h2, h4]
   noncomm_ring
 
-/-- Regrouping the outcomes of a projective POVM preserves projectivity. A
-private copy of this statement belongs to `Observables/Defs.lean`; this public
-form is the one used by `lem:commutation-analysis` below. -/
+/-- Regrouping the outcomes of a projective POVM preserves projectivity.
+Formalization-only support for `lem:commutation-analysis`, blueprint
+`ch12_qpbt_games.tex:418-431`. A private copy of this statement lives at
+`MIPStarRE/QPBT/Observables/Defs.lean:747` and is unreachable from here; this
+public form is the one used by `lem:commutation-analysis` below. Promoting the
+private original is issue #204. -/
 theorem postprocess_isProjective {α β ι : Type*}
     [Fintype α] [DecidableEq α] [Fintype β] [DecidableEq β]
     [Fintype ι] [DecidableEq ι]
@@ -119,7 +125,7 @@ theorem postprocess_isProjective {α β ι : Type*}
 grained point projection at label one. This is the first display of
 Equation `eq:lc-12`, paper
 `14_analysis_of_the_pauli_basis_test.tex:330-336`, blueprint
-`ch14_qpbt_observables.tex:683-733`. -/
+`ch14_qpbt_observables.tex:761-794`. -/
 theorem pointObs_eq_one_sub_two_smul {P : AdmissibleParams} {ε : ℝ}
     (S : ProjectiveSetting P ε) (side : PlayerSide) (W : PauliKind)
     (r : PauliScalar P) (u : Fin P.m → PauliScalar P) :
@@ -147,7 +153,7 @@ theorem pointObs_eq_one_sub_two_smul {P : AdmissibleParams} {ε : ℝ}
 /-- Pair/W self-consistency is the Pair/W self-loop label mismatch. This is
 item 1 of `lem:qld-win-implications` read on the Pair/W questions, paper
 `14_analysis_of_the_pauli_basis_test.tex:197-199,315-320`, blueprint
-`ch14_qpbt_observables.tex:515-522`. -/
+`ch14_qpbt_observables.tex:633-637`. -/
 theorem pairWConsistency_eq_mismatch {P : AdmissibleParams} {ε : ℝ}
     (S : ProjectiveSetting P ε) (W : PauliKind) :
     consistencyDefect (commTupleDist P)
@@ -200,7 +206,7 @@ theorem pairWConsistency_eq_mismatch {P : AdmissibleParams} {ε : ℝ}
 item 1 of `lem:qld-win-implications` on the Pair/W questions, used in the
 chain leading to Equation `eq:lc-11`, paper
 `14_analysis_of_the_pauli_basis_test.tex:315-320`, blueprint
-`ch14_qpbt_observables.tex:683-733`. -/
+`ch14_qpbt_observables.tex:761-794`. -/
 theorem pairW_self_consistency_comm_le {P : AdmissibleParams} {ε : ℝ}
     (S : ProjectiveSetting P ε) (W : PauliKind) :
     consistencyDefect (commTupleDist P)
@@ -256,7 +262,7 @@ theorem pairW_self_consistency_comm_le {P : AdmissibleParams} {ε : ℝ}
 relation `eq:lc-11`. The statement is generic in the two tensor factors and in
 the state, so that both orientations of `eq:pts-obs-commutation` use it. Paper
 `14_analysis_of_the_pauli_basis_test.tex:311-322`, blueprint
-`ch14_qpbt_observables.tex:683-733`. -/
+`ch14_qpbt_observables.tex:761-794`. -/
 theorem pointTrace_pairComponent_dist_le {P : AdmissibleParams}
     {ιL ιR : Type} [Fintype ιL] [DecidableEq ιL] [Fintype ιR] [DecidableEq ιR]
     (MP QL : PauliTuple P → MIPStarRE.Quantum.Measurement (ZMod 2) ιL)
@@ -289,7 +295,7 @@ theorem pointTrace_pairComponent_dist_le {P : AdmissibleParams}
 
 /-- Padding an answer alphabet by a unit factor does not change the operator
 distance. Formalization-only support for `lem:commutation-analysis`, blueprint
-`ch12_qpbt_games.tex:403-416`. -/
+`ch12_qpbt_games.tex:418-431`. -/
 theorem opFamilyDistSq_unit_prod {X β ι : Type*} [Fintype β]
     [Fintype ι] [DecidableEq ι]
     (μ : Distribution X) (M N : X → β → Op ι) (ψ : EuclideanSpace ℂ ι) :
@@ -301,7 +307,9 @@ theorem opFamilyDistSq_unit_prod {X β ι : Type*} [Fintype β]
   rw [Fintype.sum_prod_type]
   simp
 
-/-- The one-point relabeling of a binary measurement has the same effects. -/
+/-- Relabelling the outcomes of a measurement along the inclusion into a
+one-point product leaves every effect unchanged. Formalization-only support for
+`lem:commutation-analysis`, blueprint `ch12_qpbt_games.tex:418-431`. -/
 theorem unitProd_postprocess_effect {β ι : Type*} [Fintype β] [DecidableEq β]
     [Fintype ι] [DecidableEq ι] (M : MIPStarRE.Quantum.Measurement β ι)
     (b : β) :
@@ -318,7 +326,7 @@ theorem unitProd_postprocess_effect {β ι : Type*} [Fintype β] [DecidableEq β
 on commuting tuples. This is Equation `eq:qld-obs-comm`, obtained from
 `lem:commutation-analysis`; the statement is generic in the two tensor factors
 and in the state. Paper `14_analysis_of_the_pauli_basis_test.tex:322-329`,
-blueprint `ch14_qpbt_observables.tex:683-733`. -/
+blueprint `ch14_qpbt_observables.tex:761-794`. -/
 theorem exists_pointTrace_commutator_comm_le :
     ∃ C₀ : ℝ, 1 ≤ C₀ ∧
       ∀ {P : AdmissibleParams} {ιL ιR : Type} [Fintype ιL] [DecidableEq ιL]
@@ -445,11 +453,13 @@ theorem applyOperatorToState_smul_op {ι : Type*} [Fintype ι] [DecidableEq ι]
   unfold applyOperatorToState
   rw [map_smul, LinearMap.smul_apply]
 
-/-- The observable commutator is sixteen times the squared projection
-commutator, on every state and both tensor factors. This is the passage from
-Equation `eq:qld-obs-comm` to the observables in Equation `eq:lc-12`, paper
-`14_analysis_of_the_pauli_basis_test.tex:330-341`, blueprint
-`ch14_qpbt_observables.tex:683-733`. -/
+/-- Writing the two observables as the reflections `1 - 2P` makes their
+commutator four times the commutator of the two projections, so the squared
+state-dependent norm of the observable commutator is sixteen times that of the
+projection commutator, on every state and both tensor factors. This is the
+passage from Equation `eq:qld-obs-comm` to the observables in Equation
+`eq:lc-12`, paper `14_analysis_of_the_pauli_basis_test.tex:330-341`, blueprint
+`ch14_qpbt_observables.tex:761-794`. -/
 theorem norm_pointObs_commutator_sq {ιL ιR : Type*} [Fintype ιL]
     [DecidableEq ιL] [Fintype ιR] [DecidableEq ιR] (PX PZ OX OZ : Op ιL)
     (hX : OX = 1 - (2 : ℂ) • PX) (hZ : OZ = 1 - (2 : ℂ) • PZ)
@@ -467,9 +477,17 @@ theorem norm_pointObs_commutator_sq {ιL ιR : Type*} [Fintype ιL]
 
 /-- The point observables approximately commute on commuting tuples. This is
 the commuting half of Equation `eq:pts-obs-commutation`, stated generically in
-the two tensor factors and the state. Paper
+the two tensor factors and the state.
+
+The error has the form `c₁ + √(c₂ + c₃)` because the chain of Equation
+`eq:lc-11` is closed by the transitivity estimate for the consistency relation
+`≃`, which is not additive. Composing a consistency relation with a detour
+through a third family passes through a squared state-dependent distance and a
+Cauchy--Schwarz step, so the two defects `c₂` and `c₃` of the detour appear
+under a square root, while the defect `c₁` of the step used directly enters
+linearly. Paper
 `14_analysis_of_the_pauli_basis_test.tex:311-341`, blueprint
-`ch14_qpbt_observables.tex:683-733`. -/
+`ch14_qpbt_observables.tex:761-794`. -/
 theorem exists_pointObs_commutator_comm_le :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ {P : AdmissibleParams} {ιL ιR : Type} [Fintype ιL] [DecidableEq ιL]

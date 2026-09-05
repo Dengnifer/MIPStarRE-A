@@ -16,8 +16,8 @@ interchanged side.
 
 The declarations support the trailing clause of `lem:qld-win-implications` and
 the second assertion of `lem:qld-win-implications-obs` in
-`blueprint/src/chapter/ch14_qpbt_observables.tex:683-733` and
-`blueprint/src/chapter/ch14_qpbt_observables.tex:699-701`.  Their paper source
+`blueprint/src/chapter/ch14_qpbt_observables.tex:761-794` and
+`blueprint/src/chapter/ch14_qpbt_observables.tex:701-703`.  Their paper source
 is `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:227,309-362`.
 -/
 
@@ -36,7 +36,7 @@ namespace WinImplications
 
 /-- Reindexing the identity operator gives the identity operator.
 Formalization-only support for the interchanged conclusions of
-`lem:qld-win-implications`, blueprint `ch14_qpbt_observables.tex:699-701`. -/
+`lem:qld-win-implications`, blueprint `ch14_qpbt_observables.tex:701-703`. -/
 theorem reindexOp_one {ι κ : Type*} [DecidableEq ι] [DecidableEq κ]
     (e : ι ≃ κ) : reindexOp e (1 : Op κ) = (1 : Op ι) := by
   ext i j
@@ -44,7 +44,7 @@ theorem reindexOp_one {ι κ : Type*} [DecidableEq ι] [DecidableEq κ]
 
 /-- The interchanged strategy state is again a unit vector.  This is needed to
 chain consistency relations on the interchanged side of
-`lem:qld-win-implications`, blueprint `ch14_qpbt_observables.tex:699-701`,
+`lem:qld-win-implications`, blueprint `ch14_qpbt_observables.tex:701-703`,
 paper `14_analysis_of_the_pauli_basis_test.tex:227`. -/
 theorem norm_swappedState {P : AdmissibleParams} {ε : ℝ}
     (S : ProjectiveSetting P ε) : ‖S.swappedState‖ = 1 := by
@@ -58,7 +58,7 @@ theorem norm_swappedState {P : AdmissibleParams} {ε : ℝ}
 /-! ## Transport of the consistency defect -/
 
 /-- Left and right placements of local operators commute.  Formalization-only
-support for `def:consistency`, blueprint `ch12_qpbt_games.tex:195-208`. -/
+support for `def:consistency`, blueprint `ch12_qpbt_games.tex:210-223`. -/
 theorem heteroKron_left_right_comm {ιA ιB : Type*} [Fintype ιA]
     [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB] (A : Op ιA) (B : Op ιB) :
     heteroKron A (1 : Op ιB) * heteroKron (1 : Op ιA) B =
@@ -67,9 +67,9 @@ theorem heteroKron_left_right_comm {ιA ιB : Type*} [Fintype ιA]
 
 /-- Reindexing an operator along an equivalence is multiplicative.
 Formalization-only support for the interchanged conclusions of
-`lem:qld-win-implications`, blueprint `ch14_qpbt_observables.tex:699-701`. -/
-theorem reindexOp_mul {ι κ : Type*} [Fintype ι] [Fintype κ] [DecidableEq ι]
-    [DecidableEq κ] (e : ι ≃ κ) (M N : Op κ) :
+`lem:qld-win-implications`, blueprint `ch14_qpbt_observables.tex:701-703`. -/
+theorem reindexOp_mul {ι κ : Type*} [Fintype ι] [Fintype κ]
+    (e : ι ≃ κ) (M N : Op κ) :
     reindexOp e (M * N) = reindexOp e M * reindexOp e N := by
   ext i j
   change (M * N) (e i) (e j) = ∑ k : ι, M (e i) (e k) * N (e k) (e j)
@@ -77,9 +77,11 @@ theorem reindexOp_mul {ι κ : Type*} [Fintype ι] [Fintype κ] [DecidableEq ι]
 
 /-- The state quadratic form is transported by reindexing the state and the
 operator together.  A private variant of this transport, stated for the
-inverse equivalence, lives at `MIPStarRE/QPBT/Games/DistanceTheorems.lean:250`;
+inverse equivalence, lives at
+`MIPStarRE/QPBT/Games/DistanceTheorems.lean:250` and is unreachable from here;
 this public form is the one used by the interchanged conclusions of
-`lem:qld-win-implications`, blueprint `ch14_qpbt_observables.tex:699-701`. -/
+`lem:qld-win-implications`, blueprint `ch14_qpbt_observables.tex:701-703`.
+Promoting the private original is issue #204. -/
 theorem stateQForm_reindexState {ι κ : Type*} [Fintype ι] [DecidableEq ι]
     [Fintype κ] [DecidableEq κ] (e : ι ≃ κ) (T : Op κ)
     (ψ : EuclideanSpace ℂ ι) :
@@ -118,7 +120,7 @@ theorem stateQForm_reindexState {ι κ : Type*} [Fintype ι] [DecidableEq ι]
 /-- The consistency defect of two oppositely placed families is unchanged by
 interchanging the tensor factors of both the families and the state.  This is
 the transport carrying the interchanged clause of `lem:qld-win-implications`
-to the interchanged state, blueprint `ch14_qpbt_observables.tex:699-701`,
+to the interchanged state, blueprint `ch14_qpbt_observables.tex:701-703`,
 paper `14_analysis_of_the_pauli_basis_test.tex:227`. -/
 theorem consistencyDefect_swappedState {X α ιA ιB : Type*}
     [Fintype X] [DecidableEq X] [Fintype α] [DecidableEq α]
@@ -154,7 +156,7 @@ theorem consistencyDefect_swappedState {X α ιA ιB : Type*}
 /-- Reindexing an operator commutes with scalar multiplication.
 Formalization-only support for the second assertion of
 `lem:qld-win-implications-obs`, blueprint
-`ch14_qpbt_observables.tex:683-733`. -/
+`ch14_qpbt_observables.tex:761-794`. -/
 theorem reindexOp_smul {ι κ : Type*} (e : ι ≃ κ) (c : ℂ) (M : Op κ) :
     reindexOp e (c • M) = c • reindexOp e M := rfl
 
@@ -162,7 +164,7 @@ theorem reindexOp_smul {ι κ : Type*} (e : ι ≃ κ) (c : ℂ) (M : Op κ) :
 unchanged by interchanging the tensor factors of the families and the state.
 This is the transport used by the second assertion of
 `lem:qld-win-implications-obs`, blueprint
-`ch14_qpbt_observables.tex:683-733`, paper
+`ch14_qpbt_observables.tex:761-794`, paper
 `14_analysis_of_the_pauli_basis_test.tex:309-354`. -/
 theorem opDistSq_smul_swappedState {X ιA ιB : Type*}
     [Fintype X] [DecidableEq X] [Fintype ιA] [DecidableEq ιA]
