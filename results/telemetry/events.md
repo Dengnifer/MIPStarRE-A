@@ -3235,3 +3235,21 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   daemon refreshing PRs 225 and 233; loops on 202 and 205; #232 (dispatch.sh account routing) approved and merging. Follow-ups assigned
   to the main session: persona amendment (cycle and two-minute delegation rule), /goal briefing refresh in both codex homes, shim
   reduction after #232 merges. The owner session stops here; the owner retires it.
+
+### 2026-09-06 — PR 178 dirty-telemetry refresh recovery
+
+- Session `orc-114-20260906-02` preserved the preceding adjudication recovery
+  record in commit `e406816` under normal hooks, then merged published main
+  `dadd6fc` in history-preserving commit `0246baa`. The only merge conflict was
+  in this incident ledger; both sides' records were retained. Normal commit
+  hooks and the primary merge-loss guard passed. No source was manually edited.
+- Primary `checked-push.sh` stopped before publication: the single-file check
+  of `MIPStarRE/QPBT/Combining/DirectLowDegree.lean` could not find the imported
+  `Transport/Combining/Linearity.olean`. The log is
+  `/tmp/orc-114-20260906-02.checked-push.log`. The parent-owned build/publication
+  tail must refresh branch artifacts and repeat checked push before publishing
+  exact-head gate evidence; no hook was bypassed and no review was launched.
+- `/tmp/adjudication-178-template.md` remains byte-for-byte unchanged with the
+  parser-valid `F1 — moot:` disposition. The daemon's `pr178.failed` marker is
+  retained pending published, verified recovery. Committing recovery telemetry
+  before main integration prevents that telemetry from blocking the refresh.
