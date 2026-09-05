@@ -7,7 +7,8 @@ This module proves the exact line-point and Pauli-basis consistency bounds.
 
 ## References
 
-The proof infrastructure in this module supports `lem:qld-win-implications`
+The line-point and Pauli-basis consistency theorems prove items 2 and 3
+of `lem:qld-win-implications`
 from `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:192-267`
 and `blueprint/src/chapter/ch14_qpbt_observables.tex:505-660`.
 -/
@@ -23,14 +24,12 @@ noncomputable section
 
 namespace WinImplications
 
-local instance pauliEdgeNonemptyLowDegree : Nonempty PauliEdge := pauliEdge_nonempty
-
 /-- Coordinates outside one low-degree register in the Pauli seed. -/
 abbrev PauliLdRemainder (P : AdmissibleParams) :=
   (Fin P.m → PauliScalar P) × PauliScalar P × PauliScalar P
 
 /-- Split a Pauli seed into a basis-selected low-degree seed and unused coordinates. -/
-def pauliLdSplit (P : AdmissibleParams) (W : PauliKind) :
+private def pauliLdSplit (P : AdmissibleParams) (W : PauliKind) :
     PauliSpace P ≃ LdSpace P.toLdParams × PauliLdRemainder P where
   toFun z :=
     (pauliToLd P W z,
@@ -86,7 +85,7 @@ def pauliSharedSplit (P : AdmissibleParams) :
     rfl
 
 /-- Split a low-degree seed into its point and unused scalar/direction blocks. -/
-def ldPointSplit (L : LdParams) :
+private def ldPointSplit (L : LdParams) :
     LdSpace L ≃ (Fin L.m → ScalarQ L) × (ScalarQ L × (Fin L.m → ScalarQ L)) where
   toFun z := (z.point, z.seed, z.direction)
   invFun zr := fun i =>
@@ -300,7 +299,7 @@ theorem pauliCL_dline_eq (P : AdmissibleParams) (W : PauliKind)
     rw [prefixProjection_idem]
 
 /-- A successful sampled axis-line check gives the corresponding evaluation identity. -/
-theorem alineWinningCondition (P : AdmissibleParams) (W : PauliKind)
+theorem aline_winning_condition (P : AdmissibleParams) (W : PauliKind)
     (z : PauliSpace P) (f : Fin (P.d + 1) → PauliScalar P)
     (a : PauliScalar P)
     (hwin : pauliWinPredicate P
@@ -313,7 +312,7 @@ theorem alineWinningCondition (P : AdmissibleParams) (W : PauliKind)
             (ldALineCL P.toLdParams (pauliToLd P W z))).base +
             t • (aLineDescOf P.toLdParams
               (ldALineCL P.toLdParams (pauliToLd P W z))).direction →
-        evalCoefficient f (scalarToPauli P t) = a := by
+        evalCoefficient f t = a := by
   rw [pauliCL_aline_eq, pauliCL_point_eq] at hwin
   have hc : pauliAlinePointCondition P W
       (ProjectiveSetting.contentOfLine P W
@@ -321,22 +320,14 @@ theorem alineWinningCondition (P : AdmissibleParams) (W : PauliKind)
       (ProjectiveSetting.contentOfPoint P W (pauliToLd P W z).point) f a := by
     simpa [pauliWinPredicate, validPauliAnswer] using hwin
   intro t ht
-  apply hc (scalarToPauli P t)
+  apply hc t
   rw [pauliPointBlock_contentOfPoint, pauliPointBlock_contentOfLine,
     pauliScalarBlock_contentOfLine]
   funext j
-  have hj := congrFun ht j
-  have hp := congrArg (scalarToPauli P) hj
-  change scalarToPauli P ((pauliToLd P W z).point j) =
-    scalarToPauli P
-      ((aLineDescOf P.toLdParams
-        (ldALineCL P.toLdParams (pauliToLd P W z))).base j +
-        t * (aLineDescOf P.toLdParams
-          (ldALineCL P.toLdParams (pauliToLd P W z))).direction j)
-  exact hp
+  exact congrFun ht j
 
 /-- A successful sampled diagonal-line check gives the corresponding evaluation identity. -/
-theorem dlineWinningCondition (P : AdmissibleParams) (W : PauliKind)
+theorem dline_winning_condition (P : AdmissibleParams) (W : PauliKind)
     (z : PauliSpace P) (f : Fin (P.m * P.d + 1) → PauliScalar P)
     (a : PauliScalar P)
     (hwin : pauliWinPredicate P
@@ -349,7 +340,7 @@ theorem dlineWinningCondition (P : AdmissibleParams) (W : PauliKind)
             (ldDLineCL P.toLdParams (pauliToLd P W z))).base +
             t • (dLineDescOf P.toLdParams
               (ldDLineCL P.toLdParams (pauliToLd P W z))).direction →
-        evalCoefficient f (scalarToPauli P t) = a := by
+        evalCoefficient f t = a := by
   rw [pauliCL_dline_eq, pauliCL_point_eq] at hwin
   have hc : pauliDlinePointCondition P W
       (ProjectiveSetting.contentOfLine P W
@@ -357,21 +348,13 @@ theorem dlineWinningCondition (P : AdmissibleParams) (W : PauliKind)
       (ProjectiveSetting.contentOfPoint P W (pauliToLd P W z).point) f a := by
     simpa [pauliWinPredicate, validPauliAnswer] using hwin
   intro t ht
-  apply hc (scalarToPauli P t)
+  apply hc t
   rw [pauliPointBlock_contentOfPoint, pauliPointBlock_contentOfLine,
     pauliDirectionBlock_contentOfLine P W
       (dLineDescOf P.toLdParams (ldDLineCL P.toLdParams (pauliToLd P W z)))
       (by rfl)]
   funext j
-  have hj := congrFun ht j
-  have hp := congrArg (scalarToPauli P) hj
-  change scalarToPauli P ((pauliToLd P W z).point j) =
-    scalarToPauli P
-      ((dLineDescOf P.toLdParams
-        (ldDLineCL P.toLdParams (pauliToLd P W z))).base j +
-        t * (dLineDescOf P.toLdParams
-          (ldDLineCL P.toLdParams (pauliToLd P W z))).direction j)
-  exact hp
+  exact congrFun ht j
 
 /-- Winning the sampled axis-line branch forces equality of the exposed labels. -/
 theorem alineLabels_eq_of_win (P : AdmissibleParams) (W : PauliKind)
@@ -399,8 +382,8 @@ theorem alineLabels_eq_of_win (P : AdmissibleParams) (W : PauliKind)
       (aLineDescOf P.toLdParams (ldALineCL P.toLdParams (pauliToLd P W z)))
       (.alinePoly f) = DegPoly.padTo hpad f by rfl]
   rw [evalCoefficient_padTo hpad]
-  change evalCoefficient f (scalarToPauli P t) = a
-  exact alineWinningCondition P W z f a (by
+  change evalCoefficient f t = a
+  exact aline_winning_condition P W z f a (by
     simpa [pauliWinPredicate, validPauliAnswer] using hwin) t ht
 
 /-- Winning the sampled diagonal-line branch forces equality of exposed labels. -/
@@ -426,8 +409,8 @@ theorem dlineLabels_eq_of_win (P : AdmissibleParams) (W : PauliKind)
   rw [show ProjectiveSetting.lineAnswerOrZero P
       (dLineDescOf P.toLdParams (ldDLineCL P.toLdParams (pauliToLd P W z)))
       (.dlinePoly f) = f by rfl]
-  change evalCoefficient f (scalarToPauli P t) = a
-  exact dlineWinningCondition P W z f a (by
+  change evalCoefficient f t = a
+  exact dline_winning_condition P W z f a (by
     simpa [pauliWinPredicate, validPauliAnswer] using hwin) t ht
 
 /-- The axis-line/point verifier edge in one Pauli basis. -/
@@ -497,7 +480,7 @@ theorem dlineMismatch_le_rejection {P : AdmissibleParams} {ε : ℝ}
   exact hne (dlineLabels_eq_of_win P W z A B htrue)
 
 /-- Source-answer mismatch mass for the completed line and point readouts. -/
-noncomputable def lowDegreeMismatchMass {P : AdmissibleParams} {ε : ℝ}
+private noncomputable def lowDegreeMismatchMass {P : AdmissibleParams} {ε : ℝ}
     (S : ProjectiveSetting P ε) (W : PauliKind)
     (sample : LineDesc P.toLdParams × (Fin P.m → PauliScalar P)) : ℝ :=
   outcomeEventWeight S.toStrategy
@@ -595,7 +578,7 @@ theorem lowDegreeConsistency_eq_mismatch {P : AdmissibleParams} {ε : ℝ}
     intro sample c
     congr 1
     unfold ProjectiveSetting.lineEvalMeas ProjectiveSetting.lineMeas qA fA
-    rw [measurement_postprocess_comp_effect]
+    rw [MIPStarRE.Quantum.Measurement.postprocess_comp]
     rfl
   have hB : ∀ (sample : X) c,
       heteroKron (1 : Op S.toStrategy.ιA)
@@ -605,7 +588,7 @@ theorem lowDegreeConsistency_eq_mismatch {P : AdmissibleParams} {ε : ℝ}
     intro sample c
     congr 1
     unfold ProjectiveSetting.pointMeasOption ProjectiveSetting.pointMeas qB fB
-    rw [measurement_postprocess_comp_effect]
+    rw [MIPStarRE.Quantum.Measurement.postprocess_comp]
     rfl
   calc
     consistencyDefect (linePointDist P.toLdParams)
@@ -630,7 +613,7 @@ completed point measurements. This is item 2 of
 `lem:qld-win-implications`, paper
 `14_analysis_of_the_pauli_basis_test.tex:200-204`, blueprint
 `ch14_qpbt_observables.tex:523-548`. -/
-theorem win_low_degree_proof :
+theorem win_low_degree :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
       0 ≤ ε → ∀ W : PauliKind,
@@ -642,7 +625,7 @@ theorem win_low_degree_proof :
         S.toStrategy.ψ ≤ C * ε := by
   refine ⟨(Fintype.card PauliEdge : ℝ), ?_, ?_⟩
   · exact_mod_cast (Fintype.card_pos : 0 < Fintype.card PauliEdge)
-  intro P ε S hε W
+  intro P ε S _ W
   rw [lowDegreeConsistency_eq_mismatch]
   change avgOver (linePointDist P.toLdParams) (lowDegreeMismatchMass S W) ≤ _
   have ha : avgOver (aLinePointDist P.toLdParams) (lowDegreeMismatchMass S W) ≤
@@ -681,7 +664,9 @@ theorem pauliBasisLabels_eq_of_win (P : AdmissibleParams) (W : PauliKind)
     ProjectiveSetting.pointAnswerOrZero A =
       lowDegreeEnc (pauliAnswerOrZero B) (pauliToLd P W z).point := by
   cases A <;> cases B <;>
-    simp [pauliWinPredicate, validPauliAnswer] at hwin
+    simp only [pauliWinPredicate, validPauliAnswer, Bool.and_true,
+      Bool.and_self, Bool.and_false, Bool.false_eq_true, ↓reduceIte,
+      reduceCtorEq, decide_eq_true_eq] at hwin
   rename_i a h
   change a = lowDegreeEnc h (pauliToLd P W z).point
   simpa [pauliCL_point_eq, pauliPointPauliCondition,
@@ -763,7 +748,7 @@ theorem pauliBasisConsistency_eq_mismatch {P : AdmissibleParams} {ε : ℝ}
     intro u c
     congr 1
     unfold ProjectiveSetting.pauliEvalMeas ProjectiveSetting.pauliMeas fB qB
-    rw [measurement_postprocess_comp_effect]
+    rw [MIPStarRE.Quantum.Measurement.postprocess_comp]
     rfl
   calc
     _ = consistencyDefect (uniformDistribution X)
@@ -782,7 +767,7 @@ low-degree encodings of Pauli answers. This is item 3 of
 `lem:qld-win-implications`, paper
 `14_analysis_of_the_pauli_basis_test.tex:205-209`, blueprint
 `ch14_qpbt_observables.tex:549-566`. -/
-theorem win_pauli_basis_cons_proof :
+theorem win_pauli_basis_cons :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
       0 ≤ ε → ∀ W : PauliKind,

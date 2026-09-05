@@ -8,6 +8,9 @@ and their operator-distance companions. It also constructs the actual Magic
 Square strategy associated with a Pauli tuple and records the two observable
 consequences used by the expanded-state argument.
 
+The root names retain the blueprint-facing API; their proofs are in the
+corresponding `WinImplications` leaves, re-exported here for compatibility.
+
 ## References
 
 The declarations formalize `lem:qld-win-implications` and
@@ -38,7 +41,7 @@ theorem win_cons :
           ((S.strategyMeasurement .alice question).effect a) 1)
         (fun question a => heteroKron 1
           ((S.strategyMeasurement .bob question).effect a))
-        S.toStrategy.ψ ≤ C * ε := WinImplications.win_cons_proof
+        S.toStrategy.ψ ≤ C * ε := WinImplications.win_cons
 
 /-- The low-degree subtest bounds completed line-evaluation classes against
 completed point measurements. This is item 2 of
@@ -54,7 +57,7 @@ theorem win_low_degree :
           ((S.lineEvalMeas .alice W sample.1 sample.2).effect a) 1)
         (fun sample a => heteroKron 1
           ((S.pointMeasOption .bob W sample.2).effect a))
-        S.toStrategy.ψ ≤ C * ε := WinImplications.win_low_degree_proof
+        S.toStrategy.ψ ≤ C * ε := WinImplications.win_low_degree
 
 /-- The Pauli-basis consistency subtest compares point values with evaluated
 low-degree encodings of Pauli answers. This is item 3 of
@@ -68,7 +71,7 @@ theorem win_pauli_basis_cons :
       consistencyDefect (uniformDistribution (Fin P.m → PauliScalar P))
         (fun u a => heteroKron ((S.pointMeas .alice W u).effect a) 1)
         (fun u a => heteroKron 1 ((S.pauliEvalMeas .bob W u).effect a))
-        S.toStrategy.ψ ≤ C * ε := WinImplications.win_pauli_basis_cons_proof
+        S.toStrategy.ψ ≤ C * ε := WinImplications.win_pauli_basis_cons
 
 /-- On commuting tuples, Pair/W answers agree with the corresponding
 component of Pair answers. This is item 4 of `lem:qld-win-implications`, paper
@@ -82,7 +85,7 @@ theorem win_comm :
         (fun ω a => heteroKron
           ((S.pairWMeas .alice W ω.1 ω.2.1 ω.2.2.1 ω.2.2.2).effect a) 1)
         (fun ω a => heteroKron 1 ((S.pairComponentMeas .bob W ω).effect a))
-        S.toStrategy.ψ ≤ C * ε := WinImplications.win_comm_proof
+        S.toStrategy.ψ ≤ C * ε := WinImplications.win_comm
 
 /-- On commuting tuples, trace-coarse-grained point answers agree with Pair/W
 answers. This is item 5 of `lem:qld-win-implications`, paper
@@ -99,7 +102,7 @@ theorem win_comm_cons :
             (match W with | .X => ω.2.2.1 | .Z => ω.2.2.2)).effect a) 1)
         (fun ω a => heteroKron 1
           ((S.pairWMeas .bob W ω.1 ω.2.1 ω.2.2.1 ω.2.2.2).effect a))
-        S.toStrategy.ψ ≤ C * ε := WinImplications.win_comm_cons_proof
+        S.toStrategy.ψ ≤ C * ε := WinImplications.win_comm_cons
 
 /-- The average value of the actual induced Magic Square strategies is close
 to one on anticommuting tuples. This is item 6 of
@@ -111,7 +114,7 @@ theorem win_magic_square :
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
       0 ≤ ε →
       |1 - avgOver (anticommTupleDist P) S.msValueAt| ≤ C * ε :=
-  WinImplications.win_magic_square_proof
+  WinImplications.win_magic_square
 
 /-- On anticommuting tuples, the X and Z point traces agree respectively with
 Magic Square variables 1 and 5. This is item 7 of
@@ -129,7 +132,7 @@ theorem win_ms_cons :
             (match W with | .X => ω.2.2.1 | .Z => ω.2.2.2)).effect a) 1)
         (fun ω a => heteroKron 1
           ((S.msVarBitMeas .bob (match W with | .X => 0 | .Z => 4) ω).effect a))
-        S.toStrategy.ψ ≤ C * ε := WinImplications.win_ms_cons_proof
+        S.toStrategy.ψ ≤ C * ε := WinImplications.win_ms_cons
 
 /-- Operator-distance and factor-interchanged companions to the consistency
 item of `lem:qld-win-implications`. This is the trailing clause at paper

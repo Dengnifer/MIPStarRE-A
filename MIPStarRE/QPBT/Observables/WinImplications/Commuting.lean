@@ -8,7 +8,8 @@ commuting Pauli tuples.
 
 ## References
 
-The proof infrastructure in this module supports `lem:qld-win-implications`
+The commuting-tuple consistency theorems prove items 4 and 5
+of `lem:qld-win-implications`
 from `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:192-267`
 and `blueprint/src/chapter/ch14_qpbt_observables.tex:505-660`.
 -/
@@ -24,16 +25,14 @@ noncomputable section
 
 namespace WinImplications
 
-local instance pauliEdgeNonemptyCommuting : Nonempty PauliEdge := pauliEdge_nonempty
-
 /-- Select one component of a Pair answer. -/
-def selectedPairBit (W : PauliKind) (bits : ZMod 2 × ZMod 2) : ZMod 2 :=
+private def selectedPairBit (W : PauliKind) (bits : ZMod 2 × ZMod 2) : ZMod 2 :=
   match W with
   | .X => bits.1
   | .Z => bits.2
 
 /-- Winning the commuting Pair/W branch forces equality of the selected bits. -/
-theorem pairLabels_eq_of_win (P : AdmissibleParams) (W : PauliKind)
+private theorem pairLabels_eq_of_win (P : AdmissibleParams) (W : PauliKind)
     (z : PauliSpace P) (A B : PauliAnswer P)
     (hcomm : IsCommuting (pauliSharedSplit P z).1)
     (hwin : pauliWinPredicate P
@@ -42,7 +41,9 @@ theorem pairLabels_eq_of_win (P : AdmissibleParams) (W : PauliKind)
     ProjectiveSetting.pairWAnswerOrZero A =
       selectedPairBit W (ProjectiveSetting.pairAnswerOrZero B) := by
   cases A <;> cases B <;>
-    simp [pauliWinPredicate, validPauliAnswer] at hwin
+    simp only [pauliWinPredicate, validPauliAnswer, Bool.and_true,
+      Bool.and_self, Bool.and_false, Bool.false_eq_true, ↓reduceIte,
+      reduceCtorEq, decide_eq_true_eq] at hwin
   rename_i bit bits
   simp only [ProjectiveSetting.pairWAnswerOrZero,
     ProjectiveSetting.pairAnswerOrZero]
@@ -59,7 +60,7 @@ theorem pairLabels_eq_of_win (P : AdmissibleParams) (W : PauliKind)
     exact hwin.symm
 
 /-- Commuting Pair/W mismatch is contained in rejection. -/
-theorem pairMismatch_le_rejection {P : AdmissibleParams} {ε : ℝ}
+private theorem pairMismatch_le_rejection {P : AdmissibleParams} {ε : ℝ}
     (S : ProjectiveSetting P ε) (W : PauliKind) (z : PauliSpace P)
     (hcomm : IsCommuting (pauliSharedSplit P z).1) :
     outcomeEventWeight S.toStrategy
@@ -77,7 +78,7 @@ theorem pairMismatch_le_rejection {P : AdmissibleParams} {ε : ℝ}
   exact hne (pairLabels_eq_of_win P W z A B hcomm htrue)
 
 /-- The commuting consistency defect is the mismatch probability of source answers. -/
-theorem commConsistency_eq_mismatch {P : AdmissibleParams} {ε : ℝ}
+private theorem commConsistency_eq_mismatch {P : AdmissibleParams} {ε : ℝ}
     (S : ProjectiveSetting P ε) (W : PauliKind) :
     consistencyDefect (commTupleDist P)
         (fun ω a => heteroKron
@@ -114,7 +115,7 @@ theorem commConsistency_eq_mismatch {P : AdmissibleParams} {ε : ℝ}
     intro ω c
     congr 1
     unfold ProjectiveSetting.pairComponentMeas ProjectiveSetting.pairMeas fB qB
-    rw [measurement_postprocess_comp_effect]
+    rw [MIPStarRE.Quantum.Measurement.postprocess_comp]
     rfl
   calc
     _ = consistencyDefect (commTupleDist P)
@@ -132,7 +133,7 @@ theorem commConsistency_eq_mismatch {P : AdmissibleParams} {ε : ℝ}
 component of Pair answers. This is item 4 of `lem:qld-win-implications`, paper
 `14_analysis_of_the_pauli_basis_test.tex:210-231`, blueprint
 `ch14_qpbt_observables.tex:567-582`. -/
-theorem win_comm_proof :
+theorem win_comm :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
       0 ≤ ε → ∀ W : PauliKind,
@@ -306,7 +307,7 @@ theorem commConsConsistency_eq_mismatch {P : AdmissibleParams} {ε : ℝ}
     intro ω c
     congr 1
     unfold ProjectiveSetting.pointTraceMeas ProjectiveSetting.pointMeas fA
-    rw [measurement_postprocess_comp_effect]
+    rw [MIPStarRE.Quantum.Measurement.postprocess_comp]
     rfl
   have hB : ∀ ω c,
       heteroKron (1 : Op S.toStrategy.ιA)
@@ -331,7 +332,7 @@ theorem commConsConsistency_eq_mismatch {P : AdmissibleParams} {ε : ℝ}
 answers. This is item 5 of `lem:qld-win-implications`, paper
 `14_analysis_of_the_pauli_basis_test.tex:232-239`, blueprint
 `ch14_qpbt_observables.tex:583-598`. -/
-theorem win_comm_cons_proof :
+theorem win_comm_cons :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
       0 ≤ ε → ∀ W : PauliKind,

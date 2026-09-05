@@ -8,7 +8,8 @@ consistency bounds on anticommuting Pauli tuples.
 
 ## References
 
-The proof infrastructure in this module supports `lem:qld-win-implications`
+The Magic Square value and consistency theorems prove items 6 and 7
+of `lem:qld-win-implications`
 from `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:192-267`
 and `blueprint/src/chapter/ch14_qpbt_observables.tex:505-660`.
 -/
@@ -24,10 +25,8 @@ noncomputable section
 
 namespace WinImplications
 
-local instance pauliEdgeNonemptyMagicSquare : Nonempty PauliEdge := pauliEdge_nonempty
-
 /-- Select the Magic Square variable used by one Pauli basis. -/
-def selectedMsVar : PauliKind → Fin 9
+private def selectedMsVar : PauliKind → Fin 9
   | .X => 0
   | .Z => 4
 
@@ -138,7 +137,7 @@ theorem msConsConsistency_eq_mismatch {P : AdmissibleParams} {ε : ℝ}
     intro ω c
     congr 1
     unfold ProjectiveSetting.pointTraceMeas ProjectiveSetting.pointMeas fA
-    rw [measurement_postprocess_comp_effect]
+    rw [MIPStarRE.Quantum.Measurement.postprocess_comp]
     rfl
   have hB : ∀ ω c,
       heteroKron (1 : Op S.toStrategy.ιA)
@@ -148,12 +147,13 @@ theorem msConsConsistency_eq_mismatch {P : AdmissibleParams} {ε : ℝ}
     intro ω c
     congr 1
     unfold ProjectiveSetting.msVarBitMeas ProjectiveSetting.msMeas fB qB
-    rw [measurement_postprocess_comp_effect]
+    rw [MIPStarRE.Quantum.Measurement.postprocess_comp]
     have hmap : (msBitOrZero ∘
         ProjectiveSetting.msAnswerOrZero (P := P) (.var (selectedMsVar W))) =
         ProjectiveSetting.pairWAnswerOrZero (P := P) := by
       funext B
       cases B <;> rfl
+    rw [Function.comp_def] at hmap
     rw [hmap]
     rfl
   calc
@@ -173,7 +173,7 @@ Magic Square variables 1 and 5. This is item 7 of
 `lem:qld-win-implications`, paper
 `14_analysis_of_the_pauli_basis_test.tex:250-263`, blueprint
 `ch14_qpbt_observables.tex:626-660`. -/
-theorem win_ms_cons_proof :
+theorem win_ms_cons :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
       0 ≤ ε → ∀ W : PauliKind,
@@ -345,7 +345,7 @@ theorem msRejection_eq_source {P : AdmissibleParams} {ε : ℝ}
       by_cases hab : msWinPredicate x y a b = false <;> simp [hab]
 
 /-- Lift a supported Magic Square incidence to the corresponding Pauli verifier edge. -/
-def msImplicationEdge (xy : MsType × MsType)
+private def msImplicationEdge (xy : MsType × MsType)
     (hxy : xy ∈ (graphDistribution msEdges msEdges_nonempty).support) : PauliEdge :=
   ⟨((.ms xy.1), (.ms xy.2)), by
     have hedge : Sym2.mk xy.1 xy.2 ∈ msEdges :=
@@ -390,8 +390,10 @@ theorem msRejection_implies_pauliRejection
   rcases hor with hforward | hreverse
   · subst xy
     cases A <;> cases B <;>
-      simp_all [pauliWinPredicate, validPauliAnswer,
-        ProjectiveSetting.msAnswerOrZero]
+      simp_all only [Finset.mem_univ, ne_eq, ProjectiveSetting.msAnswerOrZero,
+        pauliWinPredicate, validPauliAnswer, Bool.and_self, Bool.and_true,
+        Bool.and_false, Bool.false_eq_true, ↓reduceIte, PauliType.ms.injEq,
+        reduceCtorEq, exists_apply_eq_apply, or_self, decide_false]
   · have hswap := congrArg Prod.swap hreverse
     have hxy : xy =
         ((.var (msConstraintVars ik.1 ik.2), .constraint ik.1) :
@@ -400,8 +402,10 @@ theorem msRejection_implies_pauliRejection
     subst xy
     clear hreverse hswap hedge heq
     cases A <;> cases B <;>
-      simp_all [pauliWinPredicate, validPauliAnswer,
-        ProjectiveSetting.msAnswerOrZero]
+      simp_all only [Finset.mem_univ, ne_eq, ProjectiveSetting.msAnswerOrZero,
+        pauliWinPredicate, validPauliAnswer, Bool.and_self, Bool.and_true,
+        Bool.and_false, Bool.false_eq_true, ↓reduceIte, PauliType.ms.injEq,
+        reduceCtorEq, exists_apply_eq_apply, or_self, decide_false]
 
 /-- At a supported Magic Square incidence, the induced rejection is contained in
 the rejection at the corresponding fixed Pauli edge. -/
@@ -421,7 +425,7 @@ theorem msRejection_le_pauliRejection {P : AdmissibleParams} {ε : ℝ}
   exact msRejection_implies_pauliRejection P z xy hxy hanti A B hreject
 
 /-- Rejection mass of the induced Magic Square strategy at one tuple and question pair. -/
-noncomputable def inducedMsRejection {P : AdmissibleParams} {ε : ℝ}
+private noncomputable def inducedMsRejection {P : AdmissibleParams} {ε : ℝ}
     (S : ProjectiveSetting P ε) (ω : PauliTuple P) (xy : MsType × MsType) : ℝ :=
   outcomeEventWeight (S.msStrategyAt ω) xy.1 xy.2
     (fun a b => msWinPredicate xy.1 xy.2 a b = false)
@@ -462,7 +466,7 @@ to one on anticommuting tuples. This is item 6 of
 `lem:qld-win-implications`, paper
 `14_analysis_of_the_pauli_basis_test.tex:240-249`, blueprint
 `ch14_qpbt_observables.tex:599-625`. -/
-theorem win_magic_square_proof :
+theorem win_magic_square :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
       0 ≤ ε →
@@ -480,7 +484,7 @@ theorem win_magic_square_proof :
           outcomeEventWeight (S.msStrategyAt ω) questions.1 questions.2
             (fun a b => msWinPredicate questions.1 questions.2 a b = false)) =
       1 - S.msValueAt ω
-    convert rejectionMass_eq_one_sub_value (S.msStrategyAt ω) using 1 <;>
+    convert rejectionEventAverage_eq_one_sub_value (S.msStrategyAt ω) using 1 <;>
       rfl
   have hvalue :
       1 - avgOver (anticommTupleDist P) S.msValueAt =

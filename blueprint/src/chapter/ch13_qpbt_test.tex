@@ -167,6 +167,11 @@ representing the paper's coordinate $r+1$.
 	\lean{MIPStarRE.QPBT.aLinePointDist_isProbability}
 	\lean{MIPStarRE.QPBT.dLinePointDist_isProbability}
 	\lean{MIPStarRE.QPBT.linePointDist_isProbability}
+	\leanok
+	% The statement-level \leanok records that the six declarations tagged
+	% above exist with matching statements, and that the three total-mass
+	% assertions among them are proved in Lean with no sorryAx in their
+	% axiom closure.
 	% The refined laws retain data not present in the axis source law.
 	\uses{def:ld-question-distribution, def:ld-line-description}
 	The source \emph{axis line-point distribution} $D_{\mathsf{ALine}}$ is the law $\mu_{L_{\mathsf{ALine}}, L_{\mathsf{Point}}}$ on pairs $(\ell=(u_0,e_i),u)$, and the source \emph{diagonal line-point distribution} $D_{\mathsf{DLine}}$ is the corresponding law on pairs $(\ell=(u_0,s,v),u)$ from $\mu_{L_{\mathsf{DLine}}, L_{\mathsf{Point}}}$. Their equal mixture is $D_{\mathsf{Line}}$. We also use seed-bearing refinements of these laws. An axis description records $u_0$ and a seed $s$ selecting $i=\chi(s)$, subject to $L^{\mathrm{Ln}}_{e_i}(u_0)=u_0$. A diagonal description records $(u_0,s,v)$, subject to $L^{\mathrm{Ln}}_v(u_0)=u_0$ and to the prefix condition $v_j=0$ for $j<i$. Mapping the two kinds of description to $(u_0,e_{\chi(s)})$ and $(u_0,s,v)$, respectively, sends the refined laws to the source laws.
@@ -271,17 +276,158 @@ Quantum soundness of a version of the classical low-degree test for polynomials 
 \end{proof}
 
 \begin{remark}[Relation to the low individual degree test of Chapter~\ref{chap:test}]\label{rem:ld-soundness-provider}
-	Theorem~\ref{lem:ld-soundness} is imported: the proof above records the source's reduction to Theorem~4.7 of~\cite{Ji2021Quantum}, instantiated with that theorem's auxiliary parameter chosen as $m^3 d$ and followed by the extension to simultaneous $k$-tuples of~\cite{Natarajan2018NEEXP}, together with the two open facts required by the identification, which remain to be proved, --- the game correspondence and the parameter bound, detailed in~\cite{gap:qpbt_ld-dimension-divisibility}. The result of~\cite{Ji2020LowIndividualDegree} that underlies it is proved here as Theorem~\ref{thm:main-formal}: for every projective strategy passing the $(m,q,d)$ low individual degree test of Definition~\ref{def:low-individual-degree-test} with probability at least $1-\eps$, that theorem produces measurements in $\polymeas{m}{q}{d}$ satisfying consistency relations of the same shape as the three approximations of Theorem~\ref{lem:ld-soundness}. Theorem~\ref{lem:ld-soundness} is not a consequence of Theorem~\ref{thm:main-formal} alone: a derivation from it would require, in addition, an equivalence between the typed game $\mathfrak{G}^{\mathrm{ld}}_{(q,m,d,1)}$ and the $(m,q,d)$ test of Chapter~\ref{chap:test} --- matching the two question distributions, the two win conditions, and the two error functions --- together with the extension from $k = 1$ to general $k$ by the reduction of~\cite{Natarajan2018NEEXP} cited above. Neither implication is proved in this chapter, and the proof of Theorem~\ref{lem:ld-soundness} given above does not invoke Theorem~\ref{thm:main-formal}.
+	Theorem~\ref{lem:ld-soundness} is imported: the proof above records the source's reduction to Theorem~4.7 of~\cite{Ji2021Quantum}, instantiated with that theorem's auxiliary parameter chosen as $m^3 d$ and followed by the extension to simultaneous $k$-tuples of~\cite{Natarajan2018NEEXP}, together with the two open facts required by the identification, which remain to be proved, --- the game correspondence and the parameter bound, detailed in~\cite{gap:qpbt_ld-dimension-divisibility}. The result of~\cite{Ji2020LowIndividualDegree} that underlies it is proved here as Theorem~\ref{thm:main-formal}: for every projective strategy passing the $(m,q,d)$ low individual degree test of Definition~\ref{def:low-individual-degree-test} with probability at least $1-\eps$, that theorem produces measurements in $\polymeas{m}{q}{d}$ satisfying consistency relations of the same shape as the three approximations of Theorem~\ref{lem:ld-soundness}. Theorem~\ref{lem:ld-soundness} is not a consequence of Theorem~\ref{thm:main-formal} alone: a derivation from it would require, in addition, an equivalence between the typed game $\mathfrak{G}^{\mathrm{ld}}_{(q,m,d,1)}$ and the $(m,q,d)$ test of Chapter~\ref{chap:test} --- matching the two question distributions, the two win conditions, and the two error functions --- together with the extension from $k = 1$ to general $k$ by the reduction of~\cite{Natarajan2018NEEXP} cited above. The direct reduction and its transport now establish the case $k=1$ in Theorem~\ref{lem:ld-soundness-k-one}; the extension to general $k$ remains open. The printed tensor-code route above does not invoke Theorem~\ref{thm:main-formal}.
 \end{remark}
 
 % This remark records the formal status of the extension to general k;
 % it is not a statement from the paper.
 \begin{remark}[The extension to general $k$ is not coordinatewise]\label{rem:ld-soundness-simultaneity}
-	The extension from $k = 1$ to general $k$ cited in the proof of Theorem~\ref{lem:ld-soundness} is the reduction deriving Theorem~4.43 from Theorem~4.40 in \cite{Natarajan2018NEEXP}: the $k$ answer polynomials are combined into the single polynomial $(\alpha, u) \mapsto \sum_i \alpha_i g_i(u)$ in $m + k$ variables, whose restriction to a queried subspace has degree $d + 1$; the case $k = 1$ is applied once to the combined strategy at that degree, and the $k$ polynomials are recovered from the resulting measurement by exact linearity in $\alpha$ and the Schwartz--Zippel lemma at degree $d + 1$. It cannot be replaced by applying the case $k = 1$ to each coordinate separately and combining the coordinate measurements by the sandwich of Lemma~\ref{lem:ld-sandwich}: over $\F_{2^s}$ with $d = 1$ and $k = 2$ there are a joint point measurement and coordinate polynomial measurements, on the maximally entangled state, for which every coordinate relation of the theorem holds with error $0$ while every POVM with polynomial-pair outcomes has consistency defect at least $1 - 2/q$ against the joint point measurement; the computation is in \cite{gap:qpbt_ld-simultaneous-sandwich}. The formalization accordingly proves, for $k = 1$, the polynomial-tuple conclusion of Theorem~\ref{lem:ld-soundness} with its three consistency defects bounded by the error function of Theorem~\ref{thm:main-formal} at the auxiliary sampling parameter $2560000\,m^3d$ and pass bound $3\eps$, and not by $\delta_{\mathrm{ld}}$: the absorption of that error into $\delta_{\mathrm{ld}}$ is a separate estimate, and the identification of the two games remains open. The value $k = 1$ is the only one instantiated in the proof of Lemma~\ref{lem:qld-4-7}; the general case awaits a formalization of the combining reduction. The one-coordinate conclusion, obtained for the directly indexed game of Remark~\ref{rem:qld-4-7-divisibility}, is Lemma~\ref{lem:direct-ld-simultaneous-single}, and the coordinatewise soundness conclusion it rests on is Lemma~\ref{lem:direct-ld-coordinate-soundness}; the collision estimate for the directly indexed polynomial representatives is Lemma~\ref{lem:direct-ld-polynomial-agreement}.
-	% This remark carries no Lean metadata, since remarks are not blueprint
-	% dependency nodes; the Lean declarations are linked from the
-	% formalization support nodes cited above.
+	The extension from $k = 1$ to general $k$ cited in the proof of Theorem~\ref{lem:ld-soundness} is the reduction deriving Theorem~4.43 from Theorem~4.40 in \cite{Natarajan2018NEEXP}: the $k$ answer polynomials are combined into the single polynomial $(\alpha, u) \mapsto \sum_i \alpha_i g_i(u)$ in $m + k$ variables, whose restriction to a queried subspace has degree $d + 1$; the case $k = 1$ is applied once to the combined strategy at that degree, and the $k$ polynomials are recovered from the resulting measurement by exact linearity in $\alpha$ and the Schwartz--Zippel lemma at degree $d + 1$. It cannot be replaced by applying the case $k = 1$ to each coordinate separately and combining the coordinate measurements by the sandwich of Lemma~\ref{lem:ld-sandwich}: over $\F_{2^s}$ with $d = 1$ and $k = 2$ there are a joint point measurement and coordinate polynomial measurements, on the maximally entangled state, for which every coordinate relation of the theorem holds with error $0$ while every POVM with polynomial-pair outcomes has consistency defect at least $1 - 2/q$ against the joint point measurement; the computation is in \cite{gap:qpbt_ld-simultaneous-sandwich}. The formalization accordingly proves, for $k = 1$, the polynomial-tuple conclusion of Theorem~\ref{lem:ld-soundness} with its three consistency defects bounded by the error function of Theorem~\ref{thm:main-formal} at the auxiliary sampling parameter $2560000\,m^3d$ and pass bound $3\eps$, as an intermediate bound. That error is now absorbed into $\delta_{\mathrm{ld}}$ and transported to the seed-indexed game by the correlated-register construction. The value $k = 1$ is the only one instantiated in the proof of Lemma~\ref{lem:qld-4-7}; the general case awaits a formalization of the combining reduction. The proved case $k=1$ is Theorem~\ref{lem:ld-soundness-k-one} below. The one-coordinate conclusion, obtained for the directly indexed game of Remark~\ref{rem:qld-4-7-divisibility}, is Lemma~\ref{lem:direct-ld-simultaneous-single}, and the coordinatewise soundness conclusion it rests on is Lemma~\ref{lem:direct-ld-coordinate-soundness}; the collision estimate for the directly indexed polynomial representatives is Lemma~\ref{lem:direct-ld-polynomial-agreement}.
 \end{remark}
+
+% This node is not a statement from the paper: it is the formalization-support
+% specialization of Theorem lem:ld-soundness to the simultaneity parameter
+% k = 1, which the proof of Lemma lem:qld-4-7 is the only consumer of.
+\begin{theorem}[Formalization support for Theorem~\ref{lem:ld-soundness}: one simultaneous coordinate]
+	\label{lem:ld-soundness-k-one}
+	\lean{MIPStarRE.QPBT.exists_ld_soundness_of_k_eq_one}
+	\leanok
+	\uses{def:ld-game, def:ld-question-distribution, def:ld-win-predicate, def:ld-meas, def:projective-strategy-general, def:tensor-product-value, def:consistency, def:bracket}
+	This formalization-only auxiliary is not a named statement of the paper; it is the case $k = 1$ of Theorem~\ref{lem:ld-soundness}, the only value instantiated in the proof of Lemma~\ref{lem:qld-4-7} and, by Remark~\ref{rem:ld-soundness-simultaneity}, the only value the coordinatewise route can supply. There exists a function $\delta_{\mathrm{ld}}$ of the shape displayed in Theorem~\ref{lem:ld-soundness}, for universal constants $a \ge 1$ and $0 < b \le 1$, such that all three consistency conclusions of that theorem hold verbatim for every parameter tuple $\mathsf{ldparams} = (q,m,d,k)$ with $k = 1$, every $\eps > 0$, and every projective strategy succeeding with probability at least $1-\eps$ in $\mathfrak{G}^{\mathrm{ld}}_{\mathsf{ldparams}}$.
+\end{theorem}
+\begin{proof}
+	\leanok
+	\uses{lem:direct-ld-simultaneous-single, lem:direct-ld-residue-compression, fact:triangle-for-simeq, lem:sandwich-codeword-defect, lem:direct-ld-polynomial-agreement, lem:ld-point-agreement, lem:ld-transport-absorption, lem:ld-scalar-square-root}
+	The proof does not follow the source's route through the tensor-code test; it applies Theorem~\ref{thm:main-formal} directly, and therefore neither of the two obligations enumerated in the proof of Theorem~\ref{lem:ld-soundness} is used or assumed.
+
+	The game $\mathfrak{G}^{\mathrm{ld}}_{\mathsf{ldparams}}$ carries a seed $s$ whose fibre $\chi^{-1}(i)$ is not recorded by the $(m,q,d)$ low individual degree test of Definition~\ref{def:low-individual-degree-test}. Dilate the given strategy by a maximally correlated register indexed by that fibre and let each player answer the reconstructed seed-indexed question in the block selected by their copy; the dilation is projective and has exactly the original value, because the residue is uniform and shared. The dilated strategy plays the directly indexed variant of the game, in which the coordinate index is sampled directly instead of through a seed, and its coordinate reading passes the low individual degree test with failure probability at most $3\eps$, the factor three being the ratio of the branch weights of the two tests. Theorem~\ref{thm:main-formal}, instantiated at the auxiliary sampling parameter $2560000\,m^3 d$ --- which satisfies that theorem's large-sampling hypothesis for every admissible tuple --- produces polynomial measurements on the extended Hilbert spaces satisfying the three consistency relations with the error of that theorem. For $k = 1$ these are already the polynomial-tuple measurements required here.
+
+	Compressing the correlated register by its normalized diagonal-block average returns measurements on the original Hilbert spaces. The compression is exact for the two point-versus-polynomial relations, because in each of them the opposite player's operator is the block-diagonal amplification of the original point measurement and therefore leaves the correlated register untouched. It is not exact for the third relation, in which both operators act on that register: on a maximally correlated pair the compressed measurements need not remain close while the uncompressed ones agree exactly. The third relation is therefore reproved on the original Hilbert spaces. The consistency test of Definition~\ref{def:ld-win-predicate} accepts the point-versus-point branch only on equal answers, and that branch carries one ninth of the question law, so the two point measurements are consistent up to $9\eps$.
+	The triangle inequality of Lemma~\ref{fact:triangle-for-simeq} combines the three point relations into consistency of the evaluated polynomial measurements. Lemma~\ref{lem:sandwich-codeword-defect}, with the collision bound of Lemma~\ref{lem:direct-ld-polynomial-agreement}, then gives consistency of the polynomial measurements with an additional error $md/q$.
+
+	The resulting error is $C\bigl(\mathrm{poly}(m,d) \cdot \mathrm{poly}(\eps, q^{-1}, e^{-md}) + md/q + \eps\bigr)^{1/2}$ with $C=10$, which is at most $\delta_{\mathrm{ld}}(\eps,q,m,d,k)$ for the universal constants $a = 2.5 \cdot 10^{10}$ and $b = 1/80000$: the square root halves the exponent $1/40000$ carried by the error of Theorem~\ref{thm:main-formal}, and the polynomial prefactor is absorbed by $(dmk)^a$. Outside the regime where both $\eps$ and that argument are at most one the conclusion is vacuous, since $\delta_{\mathrm{ld}} \ge 1$ there while a consistency defect of a pair of measurement families on a unit state never exceeds $1$.
+\end{proof}
+
+\begin{theorem}[Formalization support: a scalar square-root bound]
+\label{lem:ld-scalar-square-root}
+\lean{MIPStarRE.QPBT.le_sqrt_of_le_of_le_one}
+\leanok
+For real numbers $x,T$ with $x\le T\le1$, one has $x\le\sqrt T$,
+where the real square root is zero on negative arguments.
+This is a scalar auxiliary, not a statement of the source paper.
+\end{theorem}
+\begin{proof}
+\leanok
+If $x\le0$, use nonnegativity of the square root. Otherwise
+$0<x\le T\le1$ implies $x^2\le x\le T$.
+\end{proof}
+
+\begin{theorem}[Formalization support: absorption of transport bounds]
+\label{lem:ld-transport-absorption}
+\lean{MIPStarRE.QPBT.consistencyDefect_le_deltaLd_of_transportBound}
+\leanok
+\uses{def:consistency, lem:direct-ld-coordinate-soundness}
+For directly indexed parameters $D=(q,m,d,k)$, write
+\[
+ T_D(\eps)=E_D(\eps)+md/q+\eps,
+\]
+where $E_D(\eps)$ is the error of Theorem~\ref{thm:main-formal} at
+sampling parameter $2560000m^3d$ and pass bound $3\eps$.
+Fix $a\ge1$, $b>0$, and $C_0\ge1$, and assume that for every such $D$
+and $0<\eps\le1$,
+\[
+ C_0 k\sqrt{T_D(\eps)}\le
+ \delta_{\mathrm{ld}}(\eps,q,m,d,k).
+\]
+Here $\delta_{\mathrm{ld}}$ has the displayed formula of
+Theorem~\ref{lem:ld-soundness} with constants $a,b$.
+For any fixed $D$ and $\eps>0$, let $\mu$ be a probability distribution
+on a finite question set, let $A,B$ be families of POVMs with a common
+finite outcome set on finite-dimensional Hilbert spaces, and let $\psi$
+be a unit bipartite state. Denote their consistency defect by $\Delta$.
+If $\Delta\le C_0\sqrt{T_D(\eps)}$ whenever both $\eps\le1$ and
+$T_D(\eps)\le1$, then
+$\Delta\le\delta_{\mathrm{ld}}(\eps,q,m,d,k)$.
+This is an auxiliary estimate with its scalar absorption hypothesis
+displayed explicitly, not an additional hypothesis of the paper theorem.
+\end{theorem}
+\begin{proof}
+\leanok
+A POVM consistency defect on a unit state is at most one. If $\eps>1$,
+the error formula is at least one. If $\eps\le1<T_D(\eps)$, use
+$1\le C_0\sqrt{T_D(\eps)}$; otherwise use the assumed defect bound.
+In the latter two cases, $k\ge1$ and the scalar absorption hypothesis
+give the conclusion.
+\end{proof}
+
+\begin{theorem}[Formalization support: directly indexed soundness for $k=1$]
+\label{lem:direct-ld-soundness-k-one}
+\lean{MIPStarRE.QPBT.exists_direct_ld_soundness_of_k_eq_one}
+\leanok
+\uses{lem:direct-ld-simultaneous-single, def:ld-meas, def:consistency}
+There exist universal constants $a\ge1$ and $0<b\le1$ such that for
+every directly indexed parameter tuple $D=(q,m,d,k)$ with $k=1$, every
+$\eps>0$, and every projective strategy of value at least $1-\eps$
+for the directly indexed game, there are polynomial-tuple POVMs
+$G^{\mathrm A},G^{\mathrm B}$ satisfying all three conclusions of
+Theorem~\ref{lem:ld-soundness} with error
+$\delta_{\mathrm{ld}}(\eps,q,m,d,k)$: the point/polynomial and
+polynomial/point defects are averaged over uniform $u\in\F_q^m$,
+and the polynomial/polynomial defect has no question parameter.
+The directly indexed domain requires $m,d,k\ge1$ and admissible $q$,
+but not $m\mid q$. This is a formalization-only specialization for that
+game, not the unrestricted source theorem.
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{lem:direct-ld-simultaneous-single, lem:ld-scalar-square-root,
+lem:ld-transport-absorption}
+Apply Lemma~\ref{lem:direct-ld-simultaneous-single}. Its error $E_D(\eps)$
+is at most $T_D(\eps)$, hence at most $\sqrt{T_D(\eps)}$ when
+$T_D(\eps)\le1$. The scalar absorption estimate holds with
+$C_0=1$, $a=2.5\cdot10^9$, and $b=1/80000$.
+Theorem~\ref{lem:ld-transport-absorption} applies to each defect.
+\end{proof}
+
+\begin{theorem}[Formalization support: point agreement and residue compression]
+\label{lem:ld-point-agreement}
+\lean{MIPStarRE.QPBT.directLdPointPair_consistencyDefect_le}
+\lean{MIPStarRE.QPBT.averageDiagonalBlock_blockDiagonal_const}
+\lean{MIPStarRE.QPBT.ldStrategyToDirect_pointPair_compression}
+\lean{MIPStarRE.QPBT.ldPointPair_consistencyDefect_le}
+\leanok
+\uses{def:ld-game, def:consistency, lem:direct-ld-residue-compression}
+These are formalization auxiliaries, not named assertions of the paper.
+For directly indexed parameters $D=(q,m,d,k)$, a projective strategy of
+value at least $1-\eps$, with $\eps\in\R$, has point-readout consistency
+defect at most $9\eps$, averaged over uniform $u\in\F_q^m$.
+The readouts send malformed point answers to the zero tuple.
+The same assertion holds for seed-indexed parameters $L=(q,m,d,k)$
+(which additionally require $m\mid q$).
+
+More precisely, for any seed-indexed strategy, without projectivity or
+value assumptions, its point-readout defect equals that of its
+correlated-residue extension from Lemma~\ref{lem:direct-ld-residue-compression}.
+The matrix identity used here is valid for every operator $M$ on a finite
+Hilbert space and every nonempty finite register $R$:
+\[
+ \frac1{|R|}\sum_{r\in R}
+ (M\ot I_R)_{r,r}=M,
+\]
+where the subscripts denote diagonal blocks indexed by the register.
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{lem:direct-ld-residue-compression}
+In the directly indexed game, unequal point readouts imply rejection of
+the point-versus-point branch. That branch has weight $1/9$, giving the
+bound $9\eps$. Every diagonal block of $M\ot I_R$ equals $M$, so its
+normalized average is $M$. Point measurements in the extended strategy
+are these constant block-diagonal amplifications; compression on one side
+and this identity on the other give equality of the point defects.
+The extension preserves projectivity and value, so the seed-indexed bound
+follows from the directly indexed bound.
+\end{proof}
 
 \section{The Magic Square game}
 % Paper label sec:ms kept for cross-reference fidelity.
@@ -734,26 +880,30 @@ The Pauli basis test is the quantum low individual degree test of Natarajan and 
 
 \begin{lemma}[Pauli question-distribution identity]\label{lem:pauli-question-typed-equality}
 	\lean{MIPStarRE.QPBT.pauliQuestionDistribution_eq_typedCL}
+	\leanok
 	\uses{def:pauli-question-distribution, def:typed-cl-distributions, def:graph-distribution}
 	For the Pauli type graph $G^{\mathrm{pauli}}$ and the family $L$ of Definition~\ref{def:pauli-question-distribution}, the Pauli question distribution equals $\mu^{G^{\mathrm{pauli}}}_{L,L}$.
 \end{lemma}
 \begin{proof}
-	\uses{def:typed-cl-distributions, def:graph-distribution, def:cl-dist}
-	Both distributions first use the uniform law on ordered pairs whose unordered pair is an edge of $G^{\mathrm{pauli}}$, and then push forward a common uniform seed in $V^{\mathrm{pauli}}$ by the same pair of maps.
+	\leanok
+	\uses{def:typed-cl-distributions, def:graph-distribution, def:cl-dist, lem:distribution-map-comp, lem:uniform-bind-on-finset-map}
+	Both distributions first use the uniform law on ordered pairs whose unordered pair is an edge of $G^{\mathrm{pauli}}$, and then push forward a common uniform seed in $V^{\mathrm{pauli}}$ by the same pair of maps. Writing the ordered-edge law as the push-forward of the uniform law on the ordered-edge set, Lemma~\ref{lem:uniform-bind-on-finset-map} presents each side as the push-forward of the uniform law on the product of the ordered-edge set with $V^{\mathrm{pauli}}$ along the same map.
 \end{proof}
 
 \begin{lemma}[The Pauli question distribution is a typed CL distribution]\label{lem:pauli-question-typed-cl}
 	\lean{MIPStarRE.QPBT.pauliQuestionDistribution_isTypedCL}
+	\leanok
 	\uses{def:pauli-question-distribution, def:typed-cl-distributions}
 	Fix an admissible tuple $\mathsf{qldparams} = (q,m,d)$ (Definition~\ref{def:admissible}) and let $L = \{L_t\}_{t \in \mathcal T^{\mathrm{pauli}}}$ be the family of Definition~\ref{def:pauli-question-distribution}. The family $L$ is a finite $\mathcal T^{\mathrm{pauli}}$-typed family of $3$-level conditionally linear functions, and the question distribution of $\mathfrak{G}^{\mathrm{Pauli}}_{\mathsf{qldparams}}$ equals the $(\mathcal T^{\mathrm{pauli}}, G^{\mathrm{pauli}})$-typed conditionally linear distribution $\mu^{G^{\mathrm{pauli}}}_{L,\,L}$ of Definition~\ref{def:typed-cl-distributions}.
 \end{lemma}
 \begin{proof}
+	\leanok
 	\uses{lem:pauli-question-cl-family, lem:pauli-question-typed-equality}
 	Combine the common-level family assertion of Lemma~\ref{lem:pauli-question-cl-family} with the distribution identity of Lemma~\ref{lem:pauli-question-typed-equality}.
 \end{proof}
 
 \begin{remark}[Formalization status of Lemma~\ref{lem:pauli-question-typed-cl}]\label{rem:pauli-question-typed-cl-status}
-	The common-level assertion of Lemma~\ref{lem:pauli-question-typed-cl} is established by Lemma~\ref{lem:pauli-question-cl-family}; the distribution identity of Lemma~\ref{lem:pauli-question-typed-equality} remains open.
+	Both halves of Lemma~\ref{lem:pauli-question-typed-cl} are proved. The common-level assertion is Lemma~\ref{lem:pauli-question-cl-family}, and the distribution identity is Lemma~\ref{lem:pauli-question-typed-equality}, whose proof identifies the two common-seed laws through Lemma~\ref{lem:uniform-bind-on-finset-map}. The Pauli question distribution therefore carries the typed conditionally linear structure without further hypotheses, exactly as the low-degree question distribution does through Lemma~\ref{lem:ld-question-typed-cl}.
 \end{remark}
 
 \begin{definition}[Win predicate of the Pauli basis test]\label{def:pauli-win-predicate}
@@ -878,7 +1028,7 @@ The strategies appearing in Lemma~\ref{lem:pauli-completeness} and in the conclu
 % statements of that subsection are outside the scope of this development).
 \label{sec:qld-complexity}
 
-We specify a canonical setting of the parameter tuple $\mathsf{qldparams}$ as a function of an integer $R$, and bound the resulting soundness function. All logarithms are base $2$.
+We specify a canonical setting of the parameter tuple $\mathsf{qldparams}$ as a function of an integer $R$, and bound the resulting soundness function. Here $\log$ denotes the base-two logarithm, and $\ln$ denotes the natural logarithm.
 
 \begin{definition}[Canonical parameters of the Pauli basis test]\label{def:introparams}
 	\lean{MIPStarRE.QPBT.introParamsC, MIPStarRE.QPBT.introParamsTuple, MIPStarRE.QPBT.AdmissibleParams.ofTuple, MIPStarRE.QPBT.introParams}
@@ -903,21 +1053,47 @@ We specify a canonical setting of the parameter tuple $\mathsf{qldparams}$ as a 
 	\]
 \end{lemma}
 \begin{proof}
-	\uses{def:introparams, def:admissible, def:admissible-size, thm:pauli}
+	\leanok
+	\uses{def:introparams, def:admissible, def:admissible-size, thm:pauli, lem:delta-bound-envelope-support}
 	Since $c$ is even, the exponent $k = c \lceil \log\log R \rceil + 1$ is odd, so $q = 2^k$ is an admissible field size; $m$ divides $q$ because $2^j \le c \lceil \log R \rceil + 1 \le 2 \log^c R \le 2^k$, so $j \le k$ and both are powers of $2$; and $d = 1 \ge 1$. Hence the tuple is admissible. Since $m = 2^j \ge (c/2) \log R$, we get $2^m \ge R^{c/2} \ge R$, using $c \ge 2$.
 
-	For the soundness bound, write $\delta_{\mathrm{qld}}(\eps,m,d,q) = a(md)^a \eps^b + a(md)^a q^{-b} + a(md)^a 2^{-bmd}$ and use $d = 1$, $m \le 2c \log R$, and $q = 2^k \ge \log^c R$. The first term is at most $a(2c)^a (\log R)^a \eps^b$. The second term is at most $a(2c)^a (\log R)^{a - cb} \le a(2c)^a (\log R)^{-b}$, since $cb - a \ge b$ by the choice of $c$. For the third term, $m \ge (c/2) \log R \ge \log R$ gives $2^{-bm} \le R^{-b}$, so
+	For the soundness bound, write $\delta_{\mathrm{qld}}(\eps,m,d,q) = a(md)^a \eps^b + a(md)^a q^{-b} + a(md)^a 2^{-bmd}$ and use $d = 1$, $\log R \le m \le 2c \log R$, and $q = 2^k \ge \log^c R$. Set
+	\[
+		C = \frac{\lceil a + b \rceil !}{(b \ln 2)^{\lceil a + b \rceil}}
+		\qquad \text{and} \qquad
+		a' = a\bigl( (2c)^a + C \bigr)\;,
+	\]
+	both depending only on the universal constants $a$ and $b$; since $a \ge 1$, $c \ge 2$ and $C \ge 0$, one has $a' \ge a \ge 1$. The first term is at most $a(2c)^a (\log R)^a \eps^b \le a' (\log R)^{a'} \eps^b$, using $\log R \ge 2 \ge 1$ and $a \le a'$. The second term is at most $a(2c)^a (\log R)^{a - cb} \le a(2c)^a (\log R)^{-b}$, since $cb - a \ge b$ by the choice of $c$. For the third term, split $m^a = m^{a+b} \cdot m^{-b}$ and bound the first factor against the exponential: for all real $s$, all $t > 0$ and all $x \ge 1$, the Taylor estimate $y^n / n! \le e^y$ of the exponential, taken at $y = (t \ln 2) x$ and $n = \lceil s \rceil_{+} = \max(\lceil s \rceil, 0)$, gives
+	\[
+		x^s\, 2^{-tx} \le \frac{\lceil s \rceil_{+}!}{(t \ln 2)^{\lceil s \rceil_{+}}}\;.
+	\]
+	With $s = a + b$, $t = b$ and $x = m$ the right-hand side is the constant $C$ above, so
 	\[
 		a(md)^a\, 2^{-bm}
-		\le a(2c)^a (\log R)^a R^{-b}
-		= a(2c)^a \bigl( (\log R)^{a+b} R^{-b} \bigr) (\log R)^{-b}
-		\le a(2c)^a\, C\, (\log R)^{-b}\;,
+		= a \bigl( m^{a+b}\, 2^{-bm} \bigr) m^{-b}
+		\le a\, C\, m^{-b}
+		\le a\, C\, (\log R)^{-b}\;,
 	\]
-	where $C = \sup_{R' \ge 4} (\log R')^{a+b} (R')^{-b}$ is finite --- the function is continuous in $R'$ and tends to $0$ as $R' \to \infty$ --- and depends only on the universal constants $a$ and $b$. Summing the three bounds, the statement follows with $a' = a(2c)^a (1 + C)$ and $b' = b$.
+	the last step using $m \ge \log R \ge 1$. Summing the three bounds, the statement follows with $a'$ as above and $b' = b$.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:delta-bound}]
+\label{lem:delta-bound-envelope-support}
+\lean{MIPStarRE.LDT.rpow_mul_two_rpow_neg_le}
+\leanok
+For real $s$, $t > 0$ and $x \ge 1$, writing $\lceil s \rceil_{+} = \max(\lceil s \rceil, 0)$,
+\[
+  x^{s}\, 2^{-t x} \le \frac{\lceil s \rceil_{+}!}{(t \ln 2)^{\lceil s \rceil_{+}}} .
+\]
+This is the explicit envelope used for the third term in the proof of Lemma~\ref{lem:delta-bound}, with $x = m$, $s = a + b$ and $t = b$.
+\end{lemma}
+\begin{proof}
+\leanok
+Since $x \ge 1$, $x^{s} \le x^{\lceil s \rceil_{+}}$, and the Taylor lower bound $y^{n}/n! \le e^{y}$ at $y = t x \ln 2$ and $n = \lceil s \rceil_{+}$ gives $x^{n} (t \ln 2)^{n} \le n!\, 2^{t x}$.
 \end{proof}
 
 \begin{remark}[A comparison of exponents in the source proof of Lemma~\ref{lem:delta-bound}]\label{rem:delta-bound-exponent-comparison}
-	The source proof bounds the third term of $\delta_{\mathrm{qld}}$ by asserting $2^{-bmd} \le q^{-b}$ ``because $k \le m$'', comparing the field exponent $k = c \lceil \log\log R \rceil + 1$ with $m = 2^j$. The inequality $k \le m$ does not follow from Definition~\ref{def:introparams}: if the universal constants of Theorem~\ref{thm:pauli} were $a = 1$ and $b = 1/2$, then $c = 4$, and $R = 5$ gives $k = 9$ and $m = 8$. The proof above instead bounds $2^{-bm} \le R^{-b}$ directly from $m \ge (c/2) \log R \ge \log R$, which yields the same conclusion after enlarging the universal constant $a'$.  The comparison and correction are documented in \cite{gap:qpbt_delta-bound-exponent-comparison}.
+	The source proof bounds the third term of $\delta_{\mathrm{qld}}$ by asserting $2^{-bmd} \le q^{-b}$ ``because $k \le m$'', comparing the field exponent $k = c \lceil \log\log R \rceil + 1$ with $m = 2^j$. The inequality $k \le m$ does not follow from Definition~\ref{def:introparams}: if the universal constants of Theorem~\ref{thm:pauli} were $a = 1$ and $b = 1/2$, then $c = 4$, and $R = 5$ gives $k = 9$ and $m = 8$. The proof above instead bounds the third term directly, comparing $m^{a+b} 2^{-bm}$ with an explicit constant and using only $m \ge (c/2) \log R \ge \log R$, which yields the same conclusion after enlarging the universal constant $a'$.  The comparison and correction are documented in \cite{gap:qpbt_delta-bound-exponent-comparison}.
 \end{remark}
 
 \section{Formalization support for finite sampling}
@@ -965,6 +1141,23 @@ low-degree question and line-point laws above.
 	\leanok
 	This is the defining weight of the uniform distribution on a nonempty finite
 	set.
+\end{proof}
+
+\begin{lemma}[Fibre weights of a uniform push-forward]\label{lem:uniform-map-fibre-weight}
+	\lean{MIPStarRE.QPBT.uniformDistribution_map_weight}
+	\leanok
+	\uses{lem:uniform-distribution-weight}
+	Let $A$ be a nonempty finite set and let $e\colon A\to C$. Then for every
+	$c\in C$,
+	\[
+		(e_\ast\operatorname{Unif}(A))(c)=\frac{|e^{-1}(c)|}{|A|}.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:uniform-distribution-weight}
+	The push-forward assigns to $c$ the total uniform mass of its fibre, and
+	every point of $A$ carries mass $1/|A|$.
 \end{proof}
 
 \begin{lemma}[Uniform push-forward along a balanced map]\label{lem:uniform-map-equal-fibers}
@@ -1021,6 +1214,27 @@ low-degree question and line-point laws above.
 	Lemma~\ref{lem:uniform-map-equal-fibers}.
 \end{proof}
 
+\begin{lemma}[Dependent uniform sampling from a finite subset]
+	\label{lem:uniform-bind-on-finset-map}
+	\lean{MIPStarRE.QPBT.bind_uniformOnFinset_map}
+	\leanok
+	Let $S$ be a finite subset of $A$, let $B$ be a nonempty finite set, let
+	$g\colon A\to B\to C$, and let $f\colon\Sigma\to A$ be an injection from a
+	nonempty finite set $\Sigma$ with image $S$.  Sampling $a$ uniformly from
+	$S$, then $b$ uniformly from $B$, and returning $g(a,b)$ has the same law as
+	pushing $\operatorname{Unif}(\Sigma\times B)$ forward along
+	$(x,b)\mapsto g(f(x),b)$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:distribution-ext-support, lem:uniform-map-fibre-weight}
+	Both supports are the image of $S\times B$ under $g$.  Since $f$ is a
+	bijection from $\Sigma$ onto $S$, we have $|S|=|\Sigma|$, and sums over $S$
+	may be reindexed by $\Sigma$.  At each $c\in C$, both weights are the number
+	of pairs $(x,b)\in\Sigma\times B$ with $g(f(x),b)=c$, divided by
+	$|\Sigma|\,|B|$.
+\end{proof}
+
 \begin{lemma}[Dependent uniform sampling as a product push-forward]\label{lem:uniform-bind-map}
 	\lean{MIPStarRE.QPBT.bind_uniformDistribution_map}
 	\leanok
@@ -1031,10 +1245,9 @@ low-degree question and line-point laws above.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{lem:distribution-ext-support, lem:uniform-distribution-weight}
-	Both supports are the image of $A\times B$ under $g$.  At each $c\in C$,
-	both weights are the number of pairs $(a,b)$ with $g(a,b)=c$, divided by
-	$|A||B|$.
+	\uses{lem:uniform-bind-on-finset-map}
+	This is the case $S=A$, $\Sigma=A$, and $f$ the identity of
+	Lemma~\ref{lem:uniform-bind-on-finset-map}.
 \end{proof}
 
 \begin{lemma}[Uniform first marginal after an equivalence]

@@ -550,3 +550,26 @@ We can now prove the soundness theorem for the Pauli basis test, stated as Theor
 \begin{remark}[Norm conventions in the robustness bound]\label{rem:pauli-robustness-form}
 	The proof above, following the source, establishes the first conclusion of Theorem~\ref{thm:pauli} in the squared form $\| \phi_{\mathrm{A}} \ot \phi_{\mathrm{B}} \ket{\psi} - \ket{\mathrm{aux}} \ot \ket{\mathrm{EPR}_q}^{\ot M} \|^2 \leq \delta_{\mathrm{qld}}$, whereas the theorem bounds the unsquared norm by $\delta_{\mathrm{qld}}(\eps,m,d,q)$. The two are reconciled by replacing the exponent $b$ with $b/2$ and enlarging $a$, since the class of functions $a(md)^a(\eps^b + q^{-b} + 2^{-bmd})$ is closed under square roots up to such adjustments of the universal constants. Similarly, the closing sentence of the source proof asserts constants $a > 1$ and $0 < b < 1$, while Theorem~\ref{thm:pauli} requires only $a \geq 1$ and $0 < b < 1$; the former implies the latter.
 \end{remark}
+
+\section{Formalization support for the robustness bound}
+
+The following monotonicity statement is not a named result of the source
+article.  It records, as a single inequality, the adjustment of the universal
+constants of Theorem~\ref{thm:pauli} that is used when the robustness bound is
+passed from its squared to its unsquared form, and when several estimates are
+brought to a common scale.
+
+\begin{lemma}[Monotonicity of the robustness bound in its universal constants]\label{lem:delta-qld-mono-support}
+	\lean{MIPStarRE.QPBT.deltaQld_mono}
+	\leanok
+	\uses{thm:pauli}
+	Write $\delta_{\mathrm{qld}}^{a,b}(\eps,m,d,q) = a(md)^a\bigl(\eps^b + q^{-b} + 2^{-bmd}\bigr)$ for the soundness function of Theorem~\ref{thm:pauli} with universal constants $a$ and $b$. Let $(q,m,d)$ be an admissible parameter tuple (Definition~\ref{def:admissible}), let $1 \le a \le a'$, let $0 < b' \le b$, and let $0 \le \eps \le 1$. Then
+	\[
+		\delta_{\mathrm{qld}}^{a,b}(\eps,m,d,q) \le \delta_{\mathrm{qld}}^{a',b'}(\eps,m,d,q)\;.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:admissible}
+	Admissibility gives $md \ge 1$ and $q \ge 1$, so $a(md)^a \le a'(md)^{a'}$. In the bracket, $\eps^b \le \eps^{b'}$ because $0 \le \eps \le 1$ and $0 < b' \le b$; $q^{-b} \le q^{-b'}$ because $q \ge 1$ and $-b \le -b'$; and $2^{-bmd} \le 2^{-b'md}$ because $md \ge 0$ and $-bmd \le -b'md$. Both factors are nonnegative, so the two products compare factorwise.
+\end{proof}
