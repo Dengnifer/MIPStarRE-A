@@ -97,7 +97,8 @@ turning the missing proof into a new ambient assumption.
 For larger PRs, set `MIPSTARRE_HOOK_FULL=1` when invoking the checked-push helper.
 Use `MIPSTARRE_SKIP_HOOKS=1` only for a one-off local-tooling bypass (the
 workflow-layer line budget of `.githooks/pre-commit` still runs), and still
-report the corresponding validation in the PR body.
+report the corresponding validation in the PR body.  The bypass skips checks,
+not the helper's explicit one-ref publication boundary.
 
 ### Labels
 

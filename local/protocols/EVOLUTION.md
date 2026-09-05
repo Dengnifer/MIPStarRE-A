@@ -605,3 +605,15 @@ selection disabled.
 
 **Expected effect:** the transport can publish only the branch tuple that passed
 preflight, regardless of repository or user follow-tag configuration.
+
+## 2026-09-05 — Keep the emergency bypass ref-scoped
+
+**Trigger:** `results/telemetry/events.md` 2026-09-05, "Emergency bypass
+broadened a checked push" (round-7 review of PR #197).
+
+**Change:** the bypass path now disables implicit tag following just like the
+validated path.  The publication protocol and operator documentation clarify
+that bypass controls validation only, not ref scope.
+
+**Expected effect:** `MIPSTARRE_SKIP_HOOKS=1` can recover from local tooling
+failures without publishing any ref outside the requested branch mapping.

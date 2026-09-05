@@ -2629,3 +2629,15 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   behavioral regression.
 - **Lesson:** a one-ref preflight must disable implicit ref expansion in the
   transport command itself; a native hook remains defense in depth only.
+
+## 2026-09-05 09:31+08:00 - Emergency bypass broadened a checked push
+
+- **Symptom:** round-7 review of PR #197 found that the emergency bypass still
+  published a reachable annotated tag under `push.followTags=true`, outside its
+  explicit branch mapping.
+- **Diagnosis:** the round-6 repair constrained only the post-preflight push;
+  the early bypass exited through a separate unconstrained `git push` command.
+- **Fix:** apply `push.followTags=false` and `--no-follow-tags` to the bypass
+  command, and extend the bypass regression to require the tag to remain local.
+- **Lesson:** bypassing validation must not bypass publication scope; shared
+  transport constraints belong on every exit path that publishes refs.

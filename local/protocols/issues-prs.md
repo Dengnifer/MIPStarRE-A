@@ -51,7 +51,9 @@ ref tuple before starting `receive-pack`, then pushes the captured commit under
 an exact remote-tip lease.  The native hook performs a short defense-in-depth
 comparison when selected, while the helper's lease makes a moved remote ref fail
 closed even when that hook is stale or absent.  A caller's explicit
-`MIPSTARRE_SKIP_HOOKS=1` remains the documented emergency bypass.
+`MIPSTARRE_SKIP_HOOKS=1` remains the documented emergency bypass.  It skips
+validation only: implicit tag following stays disabled, so publication remains
+limited to the explicit branch mapping.
 
 * Branches: `issue-<github-number>-<slug>`, or `codex/issue-<number>-<slug>`
   from an agent; `pr_open.py` rejects what `git check-ref-format` would.

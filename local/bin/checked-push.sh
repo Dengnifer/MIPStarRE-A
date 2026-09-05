@@ -77,7 +77,9 @@ git -C "$REPO_ROOT" check-ref-format "$REMOTE_REF" >/dev/null ||
 
 if [ "${MIPSTARRE_SKIP_HOOKS:-}" = "1" ]; then
   unset MIPSTARRE_EXPECTED_PUSH_TUPLE
-  exec git -C "$REPO_ROOT" push "$REMOTE" "$REFSPEC"
+  # The bypass skips validation, not the explicit one-ref publication boundary.
+  exec git -C "$REPO_ROOT" -c push.followTags=false push --no-follow-tags \
+    "$REMOTE" "$REFSPEC"
 fi
 
 LOCAL_SHA="$(git -C "$REPO_ROOT" rev-parse --verify "$LOCAL_REF^{commit}")" ||

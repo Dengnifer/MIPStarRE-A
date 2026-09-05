@@ -534,7 +534,8 @@ smoke tier has not already run.
 
 For a one-off bypass, set `MIPSTARRE_SKIP_HOOKS=1`.  A bypass should be used
 only to recover from a local tooling problem; it is not a substitute for the
-corresponding PR checks.
+corresponding PR checks.  It still disables implicit tag following and publishes
+only the helper's explicit branch mapping.
 
 The local hooks intentionally cover some paths that are not safe triggers for
 Claude-powered review workflows.  In particular, changes under

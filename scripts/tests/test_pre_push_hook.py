@@ -431,6 +431,15 @@ exec git-receive-pack "$@"
                 Path(temporary_directory)
             )
             head = self.git(repo, "rev-parse", "HEAD").stdout.strip()
+            self.git(
+                repo,
+                "tag",
+                "--annotate",
+                "unvalidated-bypass",
+                "--message",
+                "unvalidated bypass tag",
+            )
+            self.git(repo, "config", "push.followTags", "true")
 
             result = self.run_checked_push(
                 repo,
@@ -448,6 +457,14 @@ exec git-receive-pack "$@"
                 self.git(remote, "rev-parse", "refs/heads/main").stdout.strip(),
                 head,
             )
+            remote_tag = subprocess.run(
+                ["git", "rev-parse", "--verify", "refs/tags/unvalidated-bypass"],
+                cwd=remote,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertNotEqual(remote_tag.returncode, 0)
 
     def test_pre_push_confirmation_requires_the_exact_tuple(self) -> None:
         expected = f"{'1' * 40} {'1' * 40} refs/heads/main {'0' * 40}"
