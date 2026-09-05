@@ -1,10 +1,10 @@
 import MIPStarRE.QPBT.Observables.WinImplications.Consistency
 
 /-!
-# Transport tools for the approximate winning implications
+# Interchange of the tensor factors in the winning implications
 
-This module collects the tools shared by the operator-distance companions of
-the winning implications and by their factor-interchanged forms: transport of
+This module collects the statements shared by the operator-distance companions
+of the winning implications and by their factor-interchanged forms: transport of
 the state-dependent distance along the interchange of the two tensor factors,
 the constant-factor passage from consistency to distance, the reversed
 verifier edges, and the clause-by-clause symmetry of the Pauli win predicate
@@ -28,8 +28,6 @@ open MIPStarRE.Quantum
 noncomputable section
 
 namespace WinImplications
-
-local instance pauliEdgeNonemptyInterchange : Nonempty PauliEdge := pauliEdge_nonempty
 
 /-! ## Transport of the distance functional along the factor interchange -/
 
@@ -93,8 +91,8 @@ theorem norm_applyOperatorToState_reindexState {ι κ : Type*}
 
 /-- The state-dependent distance of two oppositely placed operator families is
 unchanged by interchanging the tensor factors of both the families and the
-state. This is the transport used by the interchanged clause of
-`lem:qld-win-implications`, blueprint `ch14_qpbt_observables.tex:701-703`,
+state. Formalization-only support for the interchanged clause of
+`lem:qld-win-implications`, blueprint `ch14_qpbt_observables.tex:699-701`,
 paper `14_analysis_of_the_pauli_basis_test.tex:227`. -/
 theorem opFamilyDistSq_swappedState {X α ιA ιB : Type*}
     [Fintype α] [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
@@ -121,10 +119,10 @@ theorem opFamilyDistSq_swappedState {X α ιA ιB : Type*}
   simp only [applyOperatorToState, map_neg, LinearMap.neg_apply, norm_neg]
 
 /-- Consistency bounds the state-dependent distance of two oppositely placed
-measurement families. This is `fact:agreement` in the placed form used by the
-trailing clause of `lem:qld-win-implications`, blueprint
-`ch14_qpbt_observables.tex:701-703`, paper
-`14_analysis_of_the_pauli_basis_test.tex:263-264`. -/
+measurement families. This is the first item of `fact:agreement`, blueprint
+`ch12_qpbt_games.tex:260-276`, in the placed form used by the trailing clause
+of `lem:qld-win-implications`, blueprint `ch14_qpbt_observables.tex:699-701`,
+paper `14_analysis_of_the_pauli_basis_test.tex:263-264`. -/
 theorem opFamilyDistSq_placed_le_two_mul_consistencyDefect
     {X α ιA ιB : Type*} [Fintype X] [DecidableEq X] [Fintype α] [DecidableEq α]
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
@@ -138,11 +136,11 @@ theorem opFamilyDistSq_placed_le_two_mul_consistencyDefect
     (fun x => DistanceCalculus.leftPlacedMeasurement (A x))
     (fun x => DistanceCalculus.rightPlacedMeasurement (B x)) ψ
 
-
 /-- Consistency at level `c` gives operator distance at level `2 * c` for two
 oppositely placed measurement families. This is the quantitative form of
-`fact:agreement` used by the trailing clause of `lem:qld-win-implications`,
-blueprint `ch14_qpbt_observables.tex:701-703`, paper
+`fact:agreement`, blueprint `ch12_qpbt_games.tex:260-276`, used by the trailing
+clause of `lem:qld-win-implications`, blueprint
+`ch14_qpbt_observables.tex:699-701`, paper
 `14_analysis_of_the_pauli_basis_test.tex:263-264`. -/
 theorem opFamilyDistSq_placed_le_of_consistencyDefect_le
     {X α ιA ιB : Type*} [Fintype X] [DecidableEq X] [Fintype α] [DecidableEq α]
@@ -155,7 +153,6 @@ theorem opFamilyDistSq_placed_le_of_consistencyDefect_le
       (fun x a => heteroKron 1 ((B x).effect a)) ψ ≤ 2 * c := by
   have hstep := opFamilyDistSq_placed_le_two_mul_consistencyDefect μ A B ψ
   linarith
-
 
 /-! ## Reversed verifier edges
 
@@ -247,16 +244,16 @@ theorem win_symm_msvar_point (P : AdmissibleParams) (W : PauliKind)
 
 /-! ## Numeric bookkeeping -/
 
-/-- Enlarging the constant of a distance bound by a second admissible
-constant. Formalization-only support for the trailing clause of
-`lem:qld-win-implications`, blueprint `ch14_qpbt_observables.tex:701-703`. -/
+/-- Enlarging the constant of a distance bound proved with the first of two
+admissible constants. Formalization-only support for the trailing clause of
+`lem:qld-win-implications`, blueprint `ch14_qpbt_observables.tex:699-701`. -/
 theorem approxBound_of_left {C₁ C₂ ε x : ℝ} (hC₂ : 1 ≤ C₂) (hε : 0 ≤ ε)
     (h : x ≤ 2 * (C₁ * ε)) : x ≤ 2 * (C₁ + C₂) * ε := by
   nlinarith
 
-/-- Enlarging the constant of an interchanged distance bound. Formalization-only
-support for the trailing clause of `lem:qld-win-implications`, blueprint
-`ch14_qpbt_observables.tex:701-703`. -/
+/-- Enlarging the constant of a distance bound proved with the second of two
+admissible constants. Formalization-only support for the trailing clause of
+`lem:qld-win-implications`, blueprint `ch14_qpbt_observables.tex:699-701`. -/
 theorem approxBound_of_right {C₁ C₂ ε x : ℝ} (hC₁ : 1 ≤ C₁) (hε : 0 ≤ ε)
     (h : x ≤ 2 * (C₂ * ε)) : x ≤ 2 * (C₁ + C₂) * ε := by
   nlinarith
