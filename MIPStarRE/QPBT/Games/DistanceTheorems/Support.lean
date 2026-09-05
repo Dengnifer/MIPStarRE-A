@@ -246,27 +246,39 @@ noncomputable def stateQForm {ι : Type*} [Fintype ι] [DecidableEq ι]
     (ψ : EuclideanSpace ℂ ι) (M : Op ι) : ℝ :=
   (inner ℂ ψ (applyOperatorToState M ψ)).re
 
-/-- Tensor placement is additive over finite sums in the left factor. -/
+/-- Tensor placement is additive over finite sums in the left factor. This is
+the formalization-only identity `lem:distance-tensor-sum-left`, used to expand
+the relabeled overlaps in `lem:ld-sandwich`; detailed source proof
+`references/neexp-paper/05_quantum_preliminaries.tex:952-999`. -/
 theorem heteroKron_finset_sum_left {β ιA ιB : Type*} (s : Finset β)
     (A : β → Op ιA) (C : Op ιB) :
     heteroKron (∑ b ∈ s, A b) C = ∑ b ∈ s, heteroKron (A b) C := by
   ext p q
   simp [heteroKron, Matrix.kronecker, Matrix.sum_apply, Finset.sum_mul]
 
-/-- Tensor placement is additive over finite sums in the right factor. -/
+/-- Tensor placement is additive over finite sums in the right factor. This is
+the formalization-only identity `lem:distance-tensor-sum-right`, used to expand
+the relabeled overlaps in `lem:ld-sandwich`; detailed source proof
+`references/neexp-paper/05_quantum_preliminaries.tex:952-999`. -/
 theorem heteroKron_finset_sum_right {β ιA ιB : Type*} (s : Finset β)
     (A : Op ιA) (C : β → Op ιB) :
     heteroKron A (∑ b ∈ s, C b) = ∑ b ∈ s, heteroKron A (C b) := by
   ext p q
   simp [heteroKron, Matrix.kronecker, Matrix.sum_apply, Finset.mul_sum]
 
-/-- The quadratic form is additive over finite sums of operators. -/
+/-- The state quadratic form is additive over finite sums of operators. This is
+the formalization-only identity `lem:distance-qform-finset-sum`, used to expand
+the relabeled overlaps in `lem:ld-sandwich`; detailed source proof
+`references/neexp-paper/05_quantum_preliminaries.tex:952-999`. -/
 theorem stateQForm_finset_sum {β ι : Type*} [Fintype ι] [DecidableEq ι]
     (ψ : EuclideanSpace ℂ ι) (s : Finset β) (M : β → Op ι) :
     stateQForm ψ (∑ b ∈ s, M b) = ∑ b ∈ s, stateQForm ψ (M b) := by
   simp [stateQForm, applyOperatorToState]
 
-/-- A positive semidefinite operator has nonnegative state quadratic form. -/
+/-- A positive semidefinite operator has nonnegative state quadratic form. This
+is the formalization-only order fact `lem:distance-qform-nonnegative`, used for
+the nonnegative overlap terms in `lem:ld-sandwich`; detailed source proof
+`references/neexp-paper/05_quantum_preliminaries.tex:952-999`. -/
 theorem stateQForm_nonneg {ι : Type*} [Fintype ι] [DecidableEq ι]
     (ψ : EuclideanSpace ℂ ι) {M : Op ι} (hM : 0 ≤ M) :
     0 ≤ stateQForm ψ M := by

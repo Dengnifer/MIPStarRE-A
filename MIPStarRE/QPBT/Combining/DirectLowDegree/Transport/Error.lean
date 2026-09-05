@@ -8,9 +8,9 @@ import MIPStarRE.LDT.Test.MainTheorem.ScalarBounds.EnvelopeBounds
 
 This module supplies the scalar half of the soundness transport for the
 directly indexed low-degree game.  Its content is purely arithmetic: the
-auxiliary sampling parameter with which the mature low individual degree
-theorem is applied to a coordinate strategy, the resulting bounds on the three
-terms of the mature error `mainFormalError`, and the absorption of the
+auxiliary sampling parameter with which the low individual degree theorem is
+applied to a coordinate strategy, the resulting bounds on the three terms of
+the LDT error `mainFormalError`, and the absorption of the
 simultaneous-measurement estimate into the error function `deltaLd` of
 `lem:ld-soundness`.
 
@@ -19,7 +19,7 @@ simultaneous-measurement estimate into the error function `deltaLd` of
 * `directLdAuxParameter D = 2560000 m³ d` is the sampling parameter handed to
   `MIPStarRE.LDT.Test.mainFormal`.  It is the multiple of the exponential scale
   `2560000 m²` of `mainFormalError` with quotient `m d`, so that the
-  exponential term of the mature error is exactly `exp (-m d)`.
+  exponential term of the LDT error is exactly `exp (-m d)`.
 
 ## Main results
 
@@ -66,8 +66,8 @@ open MIPStarRE.LDT MIPStarRE.Quantum
 
 /-- The auxiliary sampling parameter of the low-degree soundness transport.
 
-The mature low individual degree theorem is applied to each coordinate
-strategy of a directly indexed strategy with `k = 2560000 m³ d` samples.  This
+The low individual degree theorem is applied to each coordinate strategy of
+a directly indexed strategy with `k = 2560000 m³ d` samples.  This
 is the multiple of the exponential scale `2560000 m²` of `mainFormalError`
 whose quotient is `m d`, and it dominates the corrected large-sampling
 hypothesis `400 m d ≤ k` of `MIPStarRE.LDT.Test.mainFormal` uniformly in the
@@ -114,7 +114,7 @@ private theorem directLd_one_le_q (D : DirectLdParams) : (1 : ℝ) ≤ (D.q : �
   have h : 1 ≤ D.q := D.toLDTParameters.hq
   exact_mod_cast h
 
-/-! ## The three terms of the mature error -/
+/-! ## The three terms of the LDT error -/
 
 /-- With the auxiliary sampling parameter the exponential scale of
 `mainFormalError` collapses: the argument of its exponential term is exactly
@@ -232,9 +232,9 @@ theorem transportEnvelope_nonneg (D : DirectLdParams) {ε : ℝ} (hε : 0 ≤ ε
   have hx : (0 : ℝ) ≤ Real.rpow ε (1 / 80000) := Real.rpow_nonneg hε _
   exact le_trans hx (transportEnvelope_rpow_eps_le D ε)
 
-/-! ## The mature error at the auxiliary sampling parameter -/
+/-! ## The LDT error at the auxiliary sampling parameter -/
 
-/-- The mature error at the auxiliary sampling parameter, written out in the
+/-- The LDT error at the auxiliary sampling parameter, written out in the
 parameters of the directly indexed game. -/
 private theorem mainFormalError_direct_eq (D : DirectLdParams) (ε : ℝ) :
     Test.mainFormalError D.toLDTParameters (directLdAuxParameter D) (3 * ε) =
@@ -261,7 +261,7 @@ private theorem mainFormalError_direct_nonneg (D : DirectLdParams) {ε : ℝ} (h
   rw [mainFormalError_direct_eq]
   exact mul_nonneg (by positivity) (directLdEnvelope_nonneg D hε)
 
-/-- The square root of the polynomial prefactor of the mature error at the
+/-- The square root of the polynomial prefactor of the LDT error at the
 auxiliary sampling parameter. -/
 private theorem sqrt_directLdPrefactor_le (D : DirectLdParams) :
     Real.sqrt (100000 * ((directLdAuxParameter D : ℝ) ^ (2 : ℕ)) * ((D.m : ℝ) ^ (4 : ℕ))) ≤
@@ -286,7 +286,7 @@ private theorem sqrt_directLdPrefactor_le (D : DirectLdParams) :
         exact mul_le_mul_of_nonneg_right (by norm_num) hX
     _ = 820000000 * (D.m : ℝ) ^ (5 : ℕ) * (D.d : ℝ) := Real.sqrt_sq hC
 
-/-- Halving the exponents: the square root of the mature envelope at the
+/-- Halving the exponents: the square root of the LDT envelope at the
 auxiliary sampling parameter is at most `3 d` times the transport envelope. -/
 private theorem sqrt_directLdEnvelope_le (D : DirectLdParams) {ε : ℝ} (hε0 : 0 < ε) :
     Real.sqrt (Real.rpow (3 * ε) (1 / 40000) +
