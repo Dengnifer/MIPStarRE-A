@@ -2401,6 +2401,34 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   (archived under results/telemetry/owner-messages/).
 - **State at hand-back:** main at 5b94709; open PRs: 203,202,198,197,195,193,192,191,189,188,185,179,178,175,169,160,155,153,152.
 
+## 2026-09-05 - Pre-push gate outlived the GitHub transport
+
+- **Symptom:** five lane publications exited 141 after the pre-push hook printed
+  its final `ok`; GitHub received none of the refs (owner-log 2026-09-04 11:25Z,
+  issue #157).
+- **Diagnosis:** Git starts `receive-pack` before invoking `pre-push`.  The long
+  Lean and blueprint gate left that transport idle until it closed, so the hook
+  succeeded but the parent `git push` later received SIGPIPE.
+- **Fix:** `checked-push.sh` now runs the exact hook ref tuple before opening
+  `receive-pack`; all repository publication paths use it and skip only the
+  duplicate native hook call.
+- **Lesson:** expensive validation must precede transport startup; an `ok` line
+  is gate evidence, not evidence that a ref reached the remote.
+
+## 2026-09-05 - Checked push did not bind publication to preflight
+
+- **Symptom:** round-1 review of PR #197 found that `checked-push.sh` validated
+  captured object IDs but then pushed a mutable branch ref, and it discarded the
+  documented `MIPSTARRE_SKIP_HOOKS=1` emergency bypass.
+- **Diagnosis:** moving the expensive hook before transport startup separated
+  validation from Git's final advertised ref tuple without preserving an exact
+  binding between them.
+- **Fix:** publish the captured commit, use the native hook only to compare the
+  advertised tuple with the preflight tuple, reject ref movement, and preserve
+  a caller-requested emergency bypass.
+- **Lesson:** validation evidence must bind the immutable object IDs that the
+  transport advertises; suppressing duplicate work must not suppress that check.
+
 ## 2026-09-05 05:25+08:00 - PR 197 stops at the workflow review cap
 
 - **Symptom:** round 2 of workflow PR #197 fixed the mutable-ref and emergency-
@@ -2526,6 +2554,20 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   link. A worker that replaces it should restore and verify the link before
   reporting a clean handoff.
 
+## 2026-09-05 06:49+08:00 - Checked publication relied on ambient native-hook selection
+
+- **Symptom:** round-3 review of PR #197 found that an unchanged retry failed,
+  while a stale or unselected native hook could silently remove the remote-tip
+  check after preflight.  The workflow budget also omitted the new regression
+  module, and hook installation still recommended a plain full-mode push.
+- **Diagnosis:** exact tuple binding was split between `checked-push.sh` and
+  ambient `core.hooksPath`, so the helper did not own the complete invariant.
+- **Fix:** enforce the captured remote SHA with an atomic push lease, accept the
+  native hook's zero-update case, budget the regression module, and route the
+  full-mode instruction through `checked-push.sh`.
+- **Lesson:** publication safety belongs in the helper that captures the tuple;
+  native hooks can confirm that tuple but cannot be its sole enforcement point.
+
 ## 2026-09-04 — Operator takeover: owner's Claude session replaces the codex main session
 
 - **Trigger:** owner decision (2026-09-03, after the eight-hour stall and the
@@ -2560,6 +2602,45 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   `results/telemetry/design-decisions.md` register.
 - **First application:** #172 (rigidity statement) re-routed from a codex lane to a Fable math-fix
   session at 22:38Z.
+
+## 2026-09-05 07:34+08:00 - Checked push validated a different checkout
+
+- **Symptom:** round-4 review of PR #197 found that callers could name a feature
+  ref while `checked-push.sh` ran the gate over files in another checkout.
+- **Diagnosis:** the helper captured the ref's object ID but kept `REPO_ROOT` as
+  the hook working directory; the hook used the ID only for its changed-file
+  list, while Lean and audit tools read the unrelated checkout's bytes.
+- **Fix:** resolve the registered worktree that owns the local ref, require its
+  HEAD and complete working-tree status to match the captured commit before and
+  after preflight, and run the hook from that worktree.
+- **Lesson:** an immutable push source does not bind validation unless every
+  filesystem-reading check runs over a checkout of that same object.
+
+## 2026-09-05 09:11+08:00 - Checked push published an unvalidated tag
+
+- **Symptom:** round-6 review of PR #197 found that `push.followTags=true`
+  could add an annotated tag to a checked branch push even though preflight saw
+  only the branch tuple.
+- **Diagnosis:** an explicit branch refspec does not disable Git's configured
+  follow-tag expansion, and the branch lease cannot constrain an added tag when
+  the native confirmation hook is stale or unselected.
+- **Fix:** override `push.followTags` for the final command, pass
+  `--no-follow-tags`, and cover the missing-native-hook configuration with a
+  behavioral regression.
+- **Lesson:** a one-ref preflight must disable implicit ref expansion in the
+  transport command itself; a native hook remains defense in depth only.
+
+## 2026-09-05 09:31+08:00 - Emergency bypass broadened a checked push
+
+- **Symptom:** round-7 review of PR #197 found that the emergency bypass still
+  published a reachable annotated tag under `push.followTags=true`, outside its
+  explicit branch mapping.
+- **Diagnosis:** the round-6 repair constrained only the post-preflight push;
+  the early bypass exited through a separate unconstrained `git push` command.
+- **Fix:** apply `push.followTags=false` and `--no-follow-tags` to the bypass
+  command, and extend the bypass regression to require the tag to remain local.
+- **Lesson:** bypassing validation must not bypass publication scope; shared
+  transport constraints belong on every exit path that publishes refs.
 
 ## 2026-09-05T02:38Z — math-fix #117 converged (Fable 5.1, session 1)
 - Common-ancilla obligation of thm:linearity: the ancilla is uniform (basis vector of the extra direction of C^(2^t+1)); proved as `exists_exactly_linear_observables_commonAncilla`.
