@@ -459,6 +459,47 @@ The state-dependent distance is the right tool for reasoning about the closeness
 	The claim follows by subtracting \eqref{eq:commutation-analysis-3} and \eqref{eq:commutation-analysis-4}.
 \end{proof}
 
+\begin{lemma}[Right-register commutation; formalization support]
+	\label{lem:commutation-analysis-right}
+	\lean{MIPStarRE.QPBT.opDistSq_commutator_right_le}
+	\leanok
+	\uses{def:povm-distance, def:povm-conventions}
+	There is a universal constant $C_0 \ge 1$ with the following property.
+	Let $\mu$ be a question distribution, $\ket{\psi}$ a bipartite vector,
+	and $\delta \in \mathbb{R}$. Let $\{A^x_{a,b}\}$ and $\{D^x_{a,c}\}$
+	be POVMs on the right register and $\{B^x_{a,b,c}\}$ a projective
+	measurement on the left register, with marginals
+	$B^x_{a,b}=\sum_c B^x_{a,b,c}$ and $B^x_{a,c}=\sum_b B^x_{a,b,c}$.
+	If
+	\begin{align*}
+		\mathop{\mathbb{E}}_{x\sim\mu}\sum_{a,b}
+		\big\|(B^x_{a,b}\ot\Id-\Id\ot A^x_{a,b})\ket{\psi}\big\|^2
+		&\le \delta,\\
+		\mathop{\mathbb{E}}_{x\sim\mu}\sum_{a,c}
+		\big\|(B^x_{a,c}\ot\Id-\Id\ot D^x_{a,c})\ket{\psi}\big\|^2
+		&\le \delta,
+	\end{align*}
+	then
+	\[
+		\mathop{\mathbb{E}}_{x\sim\mu}\sum_{a,b,c}
+		\big\|(\Id\ot[A^x_{a,b},D^x_{a,c}])\ket{\psi}\big\|^2
+		\le C_0\delta.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{fact:add-a-proj, fact:triangle,
+		lem:distance-left-fiber-contraction,
+		lem:distance-right-fiber-contraction,
+		lem:distance-joint-marginal-product,
+		lem:distance-joint-marginal-product-rev,
+		lem:distance-opposite-placements-commute, lem:distance-symmetry}
+	The argument of Lemma~\ref{lem:commutation-analysis} with the tensor
+	placements exchanged compares each ordered product to the left-placed
+	joint measurement. The triangle inequality and subtraction give the
+	assertion with $C_0=16$; no symmetry of the state is required.
+\end{proof}
+
 % The source (references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:465-495) leaves the
 % set Y unquantified (finiteness and nonemptiness are needed for the uniform sampling of
 % y) and places no finiteness condition on the targets R_i (needed for the post-processed
@@ -1326,18 +1367,37 @@ postprocessing, and operator-contraction steps used to formalize
 
 \begin{definition}[Formalization support for Lemma~\ref{lem:pasting}]
 	\label{def:pasting-alphabet-relabelling}
-	\lean{MIPStarRE.QPBT.Measurement.congrAlphabet, MIPStarRE.QPBT.Measurement.congrAlphabet_effect, MIPStarRE.QPBT.Measurement.isProjective_congrAlphabet, MIPStarRE.QPBT.Measurement.postprocess_congrAlphabet}
+	\lean{MIPStarRE.QPBT.Measurement.congrAlphabet, MIPStarRE.QPBT.Measurement.congrAlphabet_effect}
 	\leanok
 	\uses{def:povm-conventions}
 	This formalization-only definition relabels the outcome set of a POVM along
 	a bijection: the effect at an outcome of the new set is the effect at its
-	image. The relabelled family is a POVM, it is projective whenever the
-	original one is, and postprocessing it along a map agrees with
-	postprocessing the original family along the transported map. The
+	image. The relabelled family is a POVM. The
 	comparisons of Lemma~\ref{lem:pasting} are indexed by pairs of answers,
 	while the commutation estimate they feed is indexed by triples; the
-	relabelling mediates between the two indexings.
+	 relabelling mediates between the two indexings.
 \end{definition}
+
+\begin{lemma}[Properties of outcome relabelling; formalization support]
+	\label{lem:pasting-alphabet-relabelling}
+	\lean{MIPStarRE.QPBT.Measurement.isProjective_congrAlphabet, MIPStarRE.QPBT.Measurement.postprocess_congrAlphabet}
+	\leanok
+	\uses{def:pasting-alphabet-relabelling, def:povm-conventions}
+	Let $M$ be a POVM on a finite outcome set $\alpha$, let
+	$e:\beta\to\alpha$ be a bijection, and write $N_b=M_{e(b)}$ for the
+	relabelled POVM. If $M$ is projective, then $N$ is projective.
+	For any map $f:\beta\to\gamma$ to a finite set and any $c\in\gamma$,
+	\[
+		N_{[f(\cdot)=c]}=M_{[f(e^{-1}(\cdot))=c]}.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:pasting-alphabet-relabelling, def:povm-conventions}
+	Each effect of $N$ is an effect of $M$, so projectivity is preserved.
+	Reindexing the sum over $\{b:f(b)=c\}$ by $e$ gives the stated
+	postprocessing identity.
+\end{proof}
 
 \begin{lemma}[Formalization support for Lemma~\ref{lem:pasting}]
 	\label{lem:pasting-tensor-placement}
@@ -1385,7 +1445,7 @@ postprocessing, and operator-contraction steps used to formalize
 	\label{lem:pasting-coarse-commutator}
 	\lean{MIPStarRE.QPBT.exists_coarse_commutator_bound}
 	\leanok
-	\uses{def:pasting-alphabet-relabelling, lem:commutation-analysis,
+	\uses{def:pasting-alphabet-relabelling, lem:commutation-analysis-right,
 		fact:agreement, def:povm-distance}
 	In the setting of Lemma~\ref{lem:pasting}, write
 	$P_{a_1} = (G_1)^x_{[\operatorname{eval}_{y_1}(\cdot)=a_1]}$ and
@@ -1400,15 +1460,15 @@ postprocessing, and operator-contraction steps used to formalize
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{lem:commutation-analysis, fact:agreement,
-		def:pasting-alphabet-relabelling}
+	\uses{lem:commutation-analysis-right, fact:agreement,
+		def:pasting-alphabet-relabelling, lem:pasting-alphabet-relabelling}
 	The two comparisons bound the consistency of each coarse family with the
 	corresponding marginal of the joint projective measurement $A$ placed on the
 	opposite factor, hence by Lemma~\ref{fact:agreement} the state-dependent
 	distances of those two pairs by $2\delta$. Relabelling the outcome sets of
 	$P$, of $Q$ and of $A$ so that the two coarse families are the two marginals
 	of a common joint outcome set, the right-register form of
-	Lemma~\ref{lem:commutation-analysis} applies and gives the assertion with
+	Lemma~\ref{lem:commutation-analysis-right} applies and gives the assertion with
 	twice its constant.
 \end{proof}
 

@@ -155,9 +155,11 @@ measurement, pasted operator, strategy, or game is changed in this recheck.
 The source-facing declaration
 \leanid{exists\_pasting\_error} in
 \doclink{MIPStarRE/QPBT/Games/Sandwich.lean} now has the three printed
-comparisons and one tracked proof hole. The previous proof is preserved as
-\leanid{exists\_pasting\_error\_of\_register\_exchange}; only the separate,
-explicitly conditional blueprint entry has a proof-complete marker.
+comparisons and a completed one-sided proof with the documented additive
+error correction. Its source-labelled blueprint entry has a proof-complete
+marker. The separately proved conditional theorem
+\leanid{exists\_pasting\_error\_of\_register\_exchange} has its own explicitly
+conditional blueprint entry; it is not a dependency of the one-sided theorem.
 
 \section{Status of the one-sided formal statement}
 
