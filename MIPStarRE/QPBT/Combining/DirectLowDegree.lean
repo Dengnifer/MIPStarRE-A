@@ -23,28 +23,28 @@ determine one.  The game retains the point, axis-line, and diagonal-line answer
 formats and the nine ordered type branches of the original low-degree game.
 
 The `Transport` modules relate the direct game to the seed-indexed game and to
-the mature low individual degree test interface: `Transport.Correspondence`
+the low individual degree test: `Transport.Correspondence`
 identifies coordinates, answers, and the question law of the two QPBT
 presentations; `Transport.SeedFiber` dilates a seed-indexed strategy to a
 direct strategy by a correlated residue register, and `Transport.SeedFiberValue`
 shows that the dilation preserves the value exactly; `Transport.Questions`
-reads mature lines as canonical direct questions and rebases direct answers;
+reads LDT lines as canonical direct questions and rebases direct answers;
 `Transport.Strategy` reads one coordinate of a projective direct strategy as a
-mature `ProjStrat`, with exact Born-weight formulas for both adapters; and
+LDT projective strategy, with exact Born-weight formulas for both constructions;
+`Transport.Consistency` reexpresses the three single-polynomial LDT consistency
+relations in direct coordinates, the first two at a fixed tuple coordinate; and
 `Transport.BranchComparison`, `Transport.DiagonalRecursion`, and
 `Transport.PassConversion` convert a value bound of the direct game into the
-pass hypothesis of the mature low individual degree theorem for every
+pass hypothesis of the low individual degree theorem for every
 coordinate strategy.  `GameValue` supplies the rejection calculus relating the
-direct value to the mature branch weights.  `Transport.Error` carries the
+direct value to the LDT branch weights.  `Transport.Error` carries the
 scalar half of the transport: the auxiliary sampling parameter with which
-the mature theorem is applied, bounds on the three terms of its error
+the low individual degree theorem is applied, bounds on the three terms of its error
 function, and the absorption of the resulting simultaneous-measurement
 estimate into the error function of `lem:ld-soundness`.
-`Transport.Consistency` identifies polynomial outcomes and transports the
-three consistency conclusions of the low individual degree theorem to the
-direct game.  `Transport.Simultaneous` applies that theorem to every
-coordinate, combines coordinate polynomial measurements by the palindromic
-product of `lem:ld-sandwich`, and proves the polynomial-tuple conclusion of
+`Transport.Simultaneous` applies that theorem to every coordinate,
+combines coordinate polynomial measurements by the palindromic product of
+`lem:ld-sandwich`, and proves the polynomial-tuple conclusion of
 `lem:ld-soundness` for simultaneity parameter `1`; it also records why the
 coordinate conclusions do not determine simultaneous measurements for larger
 parameters.

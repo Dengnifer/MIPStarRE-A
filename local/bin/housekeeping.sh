@@ -43,6 +43,7 @@ LOCK_DIR="${CACHE_ROOT}/locks"
 usage() {
   cat <<'USAGE'
 Usage: local/bin/housekeeping.sh {standup|stale-audit|linter-sweep|readme-freshness|all}
+       local/bin/housekeeping.sh lake-cleanup <branch>
 
   standup           structured daily digest -> results/reports/standup/YYYY-MM-DD.md
                     (72h lookback on Mondays, 24h otherwise; no model call)
@@ -54,6 +55,7 @@ Usage: local/bin/housekeeping.sh {standup|stale-audit|linter-sweep|readme-freshn
 
 Reports are written to results/reports/. Build logs and intermediate JSON go to
 ${MIPSTARRE_CACHE_ROOT:-~/.cache/mipstarre-dev}/ and are never committed.
+External Lake cleanup uses MIPSTARRE_LAKE_ROOT when configured.
 
 Only `standup` writes anything into the repository, and only its own digest.
 The three audits are report-only by contract (docs/stale_issue_audit.md:143-144,
@@ -605,6 +607,12 @@ main() {
       [ "$#" -eq 2 ] || die "--internal-lean-build needs a log path"
       internal_lean_build "$2"
       exit 0
+      ;;
+    lake-cleanup)
+      [ "$#" -eq 2 ] || die "lake-cleanup needs exactly one branch name"
+      [ -x "${SCRIPT_DIR}/lake-root.sh" ] \
+        || die "missing executable ${SCRIPT_DIR}/lake-root.sh"
+      "${SCRIPT_DIR}/lake-root.sh" cleanup "${REPO_ROOT}" "$2"; exit 0
       ;;
   esac
 

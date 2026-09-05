@@ -56,8 +56,12 @@ theorem quadratic_form_mono {ι : Type*}
     Complex.add_re]
   exact le_add_of_nonneg_right hdiff
 
-/-- Applying a product of operators agrees with successive application. -/
-private theorem applyOperatorToState_mul {ι : Type*}
+/-- Formalization-only auxiliary lemma: applying a product of operators agrees
+with successive application. It supports the ground-slice transfer of the Magic
+Square rigidity bounds in `thm:ms-rigidity`; see blueprint
+`blueprint/src/chapter/ch13_qpbt_test.tex:268-290` and paper
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652`. -/
+theorem applyOperatorToState_mul {ι : Type*}
     [Fintype ι] [DecidableEq ι]
     (M N : Op ι) (v : EuclideanSpace ℂ ι) :
     applyOperatorToState (M * N) v =
@@ -621,16 +625,71 @@ private noncomputable def pureStateOfUnitVector {ι : Type*}
       _ = (‖ψ‖ ^ 2 : ℂ) := inner_self_eq_norm_sq_to_K ψ
       _ = 1 := by rw [hψ]; norm_num
 
-/-- For a unit vector, `stateQForm` agrees with the LDT pure-state expectation. -/
+/-- View the coordinate function of an LDT pure state as a Euclidean vector.
+
+This construction sends a pure state to its Euclidean coordinate vector, and
+`pureStateOfUnitVector` above reads a unit Euclidean vector as a pure state.
+The theorem `pureState_stateQForm_eq_ev` below identifies the
+quadratic form of that vector with evaluation in the associated density state.
+Both constructions and that identity are stated here for an arbitrary finite
+index type, and are used both by the distance calculus and by the low-degree
+consistency transport; the two formulations of consistency they relate are
+`references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:295-395` and
+`references/ldt-paper/preliminaries.tex:649-666`. -/
+noncomputable def pureStateEuclideanVector {ι : Type*}
+    [Fintype ι] [DecidableEq ι] [Nonempty ι]
+    (ψ : PureState ι) : EuclideanSpace ℂ ι :=
+  (EuclideanSpace.equiv ι ℂ).symm ψ.vector
+
+@[simp] theorem pureStateEuclideanVector_apply {ι : Type*}
+    [Fintype ι] [DecidableEq ι] [Nonempty ι]
+    (ψ : PureState ι) (i : ι) :
+    pureStateEuclideanVector ψ i = ψ.vector i :=
+  rfl
+
+/-- The Euclidean vector associated with an LDT pure state has norm one. -/
+theorem pureStateEuclideanVector_norm {ι : Type*}
+    [Fintype ι] [DecidableEq ι] [Nonempty ι]
+    (ψ : PureState ι) : ‖pureStateEuclideanVector ψ‖ = 1 := by
+  have hsquareComplex :
+      ((‖pureStateEuclideanVector ψ‖ ^ 2 : ℝ) : ℂ) = 1 := by
+    calc
+      ((‖pureStateEuclideanVector ψ‖ ^ 2 : ℝ) : ℂ) =
+          (‖pureStateEuclideanVector ψ‖ : ℂ) ^ 2 := by norm_cast
+      _ = inner ℂ (pureStateEuclideanVector ψ)
+          (pureStateEuclideanVector ψ) :=
+        (inner_self_eq_norm_sq_to_K (pureStateEuclideanVector ψ)).symm
+      _ = ψ.vector ⬝ᵥ star ψ.vector :=
+        EuclideanSpace.inner_eq_star_dotProduct _ _
+      _ = star ψ.vector ⬝ᵥ ψ.vector := dotProduct_comm _ _
+      _ = 1 := ψ.unit
+  have hsquare : ‖pureStateEuclideanVector ψ‖ ^ 2 = (1 : ℝ) := by
+    exact_mod_cast hsquareComplex
+  nlinarith [norm_nonneg (pureStateEuclideanVector ψ)]
+
+/-- Evaluation in a pure LDT density state is the quadratic form of its
+Euclidean vector.  This identity relates the density formulation of consistency
+to the vector formulation; see
+`references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:295-395`. -/
+theorem pureState_stateQForm_eq_ev {ι : Type*}
+    [Fintype ι] [DecidableEq ι] [Nonempty ι]
+    (ψ : PureState ι) (T : Op ι) :
+    stateQForm (pureStateEuclideanVector ψ) T = ev (ψ : QuantumState ι) T := by
+  rw [PureState.ev_eq_re_inner]
+  unfold stateQForm applyOperatorToState
+  change (inner ℂ (pureStateEuclideanVector ψ)
+      (WithLp.toLp 2 (T *ᵥ ψ.vector))).re =
+    (star ψ.vector ⬝ᵥ T *ᵥ ψ.vector).re
+  rw [EuclideanSpace.inner_eq_star_dotProduct, dotProduct_comm]
+  rfl
+
+/-- For a unit vector, `stateQForm` agrees with the LDT pure-state expectation.
+This is `pureState_stateQForm_eq_ev` read along `pureStateOfUnitVector`. -/
 private theorem stateQForm_eq_ev {ι : Type*}
     [Fintype ι] [DecidableEq ι] [Nonempty ι]
     (ψ : EuclideanSpace ℂ ι) (hψ : ‖ψ‖ = 1) (T : Op ι) :
-    stateQForm ψ T = ev (pureStateOfUnitVector ψ hψ : QuantumState ι) T := by
-  rw [PureState.ev_eq_re_inner]
-  simp only [pureStateOfUnitVector]
-  change (inner ℂ ψ (WithLp.toLp 2 (T *ᵥ ψ.ofLp))).re =
-    (star ψ.ofLp ⬝ᵥ T *ᵥ ψ.ofLp).re
-  rw [EuclideanSpace.inner_eq_star_dotProduct, dotProduct_comm]
+    stateQForm ψ T = ev (pureStateOfUnitVector ψ hψ : QuantumState ι) T :=
+  pureState_stateQForm_eq_ev (pureStateOfUnitVector ψ hψ) T
 
 /-- Pure-state evaluation of `Tᴴ T` is the squared norm of `T ψ`. -/
 private theorem ev_adjoint_mul_self_eq_norm_sq {ι : Type*}

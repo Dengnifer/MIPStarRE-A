@@ -188,3 +188,24 @@ and retire; no takeover is scheduled. The merge daemon, stack-watch,
 the 112 watcher and all detached lanes keep running across the hand-back; codex main is told not
 to merge by hand. Handoff: results/telemetry/owner-messages/handoff-to-codex-main-*.md.
 - 21:16Z: owner session retired after the hand-back (owner instruction of 16:08Z, executed by hand at 21:15Z because the scheduled job never found the session idle); no takeover scheduled. Codex main corrected on the lane runner version (v15).
+- 21:26Z: owner decision B5 (chat, recorded on #26): A-prime — symmetric and consistent strategies — with latitude for A-double-prime if the corrected statement needs it and stays correct and sufficient for section 14. #172 re-opened with A-prime instructions; codex main told to dispatch it (Mode 1).
+- 22:35Z: owner rule: math gaps go to a Fable/astra math-fix session first (correct + sufficient, iterate with Lean); #26 only if it does not converge. Recorded in the #26 body; #172 re-routed from codex to a Fable session.
+
+## 2026-09-04 — Owner session takes the operator role (2026-09-04T22:30:18Z)
+
+- **Why:** after the stall and reviewer-churn episode the owner asked the
+  Claude session to run the operator loop itself for one to two days, with
+  codex worker sessions on ghz unchanged.
+- **How:** codex main session posted its handover state to #27 and quit;
+  telemetry `stages.jsonl` event=takeover; astra availability polled hourly
+  by `owner-tools/astra-poll.sh` (cron :37); the stall watchdog keeps running
+  and now nudges the owner session through #26 rather than a tmux pane.
+- **Hand-back:** on the owner's word; recorded as event=handback with the
+  state at that moment.
+- 22:45Z: Mode 2 resumed on the owner order of 22:10Z (codex : Opus : Fable = 5:5:2); codex main posted its state and exited; takeover-telemetry.sh boilerplate describes the 2026-09-03 takeover, this entry is the accurate one. Dispatched: Fable #134, #116, #172 (math-fix); Opus #117, #199, pre-review PR 195; codex lanes 107, 157, 174, 180, 182, 183, 200 continue.
+- 23:05Z: owner confirmed the math-gap rule defaults with a larger budget (10 sessions / 1.5 working days) and asked that design choices be recorded in telemetry with a findable summary: results/telemetry/design-decisions.md created (register of all owner/operator design decisions so far) and the rule written into events.md and the #26 body.
+- 23:40Z: Fable #134: k = 1 simultaneous measurements proved; coordinatewise sandwich refuted for k >= 2 (note qpbt_ld-simultaneous-sandwich.tex); operator disposition under the math-gap rule: source-shaped statement kept with tracked sorry, #135 consumes k = 1, general k filed as #210; announced on #27.
+- 00:05Z: Fable math-fix #172 converged on A-double-prime (quantitative consistency of the two variable measurements, no symmetry); PR 192 to review; announced on #27; #105 resumes on the corrected statement (Opus).
+- 00:15Z: #115 complete (Opus x2 + codex continuation); PR 207 pre-review done; #116/#117 must merge issue-115 (9448c76, 593b8cd) before review.
+- 00:35Z: owner: subagent ratio codex : Opus : Fable = 5:5:1 from now on (running tasks continue). Applied: no new Fable session until the three running ones (#116, #201, #117 ancilla) finish; then at most one at a time, reserved for math-fix and the hardest analytic packets.
+- 01:15Z: the Claude usage limit cut off six subagents at about 00:45Z (Fable #116, #117 ancilla, #201; Opus #135, #105, #210); after the reset all six were resumed from their transcripts with their worktree state intact. During the outage the codex lanes finished: PRs 189 and 188 merged; PRs 193 and 203 adjudicated at their caps; repair rounds launched for PRs 197, 152, 202, 206, 209, 211; PR 192 (rigidity statement) to an Opus repair (12 findings, 3 blockers about statement faithfulness of the corrected theorem); #134 merge conflict with main handed to its codex worker.

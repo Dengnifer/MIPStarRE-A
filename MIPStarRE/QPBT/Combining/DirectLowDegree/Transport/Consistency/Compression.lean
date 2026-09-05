@@ -35,8 +35,8 @@ the original point question. -/
       ldPointQuestionOf L u :=
   rfl
 
-/-- The direct point-answer readout agrees with the seed-indexed readout under
-the canonical answer equivalence. -/
+/-- The direct point-answer readout agrees with the seed-indexed readout: the
+answer equivalence preserves point answers. -/
 @[simp] theorem ldPointValuesOrZero_ldDirectAnswerEquiv_symm
     (L : LdParams) (a : DirectLdAnswer L.toDirectLdParams) :
     ldPointValuesOrZero L ((ldDirectAnswerEquiv L).symm a) =
@@ -64,8 +64,8 @@ private theorem seedFiberPointMeasurement
   funext a
   cases a <;> rfl
 
-/-- The point POVM of the seed-fiber lift of the strategy is the block-diagonal
-amplification of Alice's original seed-indexed point POVM. -/
+/-- The point POVM of the correlated-residue extension of the strategy is the
+block-diagonal amplification of Alice's original seed-indexed point POVM. -/
 theorem ldStrategyToDirect_pointMeasurementA
     (L : LdParams) (S : Strategy (ldGame L))
     (u : Fin L.m → ScalarQ L) :
@@ -81,8 +81,8 @@ theorem ldStrategyToDirect_pointMeasurementA
       (directLdPointValuesOrZero L.toDirectLdParams) = _
   exact seedFiberPointMeasurement L S.A u
 
-/-- The point POVM of the seed-fiber lift of the strategy is the block-diagonal
-amplification of Bob's original seed-indexed point POVM. -/
+/-- The point POVM of the correlated-residue extension of the strategy is the
+block-diagonal amplification of Bob's original seed-indexed point POVM. -/
 theorem ldStrategyToDirect_pointMeasurementB
     (L : LdParams) (S : Strategy (ldGame L))
     (u : Fin L.m → ScalarQ L) :
@@ -97,20 +97,6 @@ theorem ldStrategyToDirect_pointMeasurementB
           (directLdPointQuestionOf L.toDirectLdParams u) residue))).postprocess
       (directLdPointValuesOrZero L.toDirectLdParams) = _
   exact seedFiberPointMeasurement L S.B u
-
-private theorem correlated_ancilla_scale
-    (block : Type*) [Fintype block] [Nonempty block] :
-    (Real.sqrt (Fintype.card block : ℝ) : ℂ)⁻¹ *
-        (starRingEnd ℂ)
-          (Real.sqrt (Fintype.card block : ℝ) : ℂ)⁻¹ =
-      (Fintype.card block : ℂ)⁻¹ := by
-  rw [show (starRingEnd ℂ)
-      (Real.sqrt (Fintype.card block : ℝ) : ℂ)⁻¹ =
-        (Real.sqrt (Fintype.card block : ℝ) : ℂ)⁻¹ by simp]
-  rw [← pow_two, inv_pow, ← Complex.ofReal_pow,
-    Real.sq_sqrt (Nat.cast_nonneg (Fintype.card block))]
-  norm_cast
-  exact Complex.ofReal_inv _
 
 private theorem correlatedState_compress_left
     {iotaA iotaB block : Type*}
@@ -169,7 +155,7 @@ private theorem correlatedState_compress_left
   apply Fintype.sum_congr
   intro r
   ring_nf
-  rw [correlated_ancilla_scale block]
+  rw [inv_sqrt_natCast_mul_conj (Fintype.card block)]
   ring
 
 private theorem correlatedState_compress_right
@@ -229,7 +215,7 @@ private theorem correlatedState_compress_right
   apply Fintype.sum_congr
   intro r
   ring_nf
-  rw [correlated_ancilla_scale block]
+  rw [inv_sqrt_natCast_mul_conj (Fintype.card block)]
   ring
 
 /-- Compressing Alice's ancillary register preserves every correlation against
@@ -330,9 +316,9 @@ theorem consistencyDefect_seedFiber_compress_right
   · simp only [if_neg hab]
     exact seedFiberLiftedState_compress_right S L (A x a) (B x b)
 
-/-- The point-on-Alice/global-on-Bob defect of the seed-fiber lift of the strategy is
-exactly the defect of the compressed polynomial tuple on the original
-seed-indexed strategy. -/
+/-- The point-on-Alice/global-on-Bob defect of the correlated-residue extension
+of the strategy is exactly the defect of the compressed polynomial tuple on the
+original seed-indexed strategy. -/
 theorem ldStrategyToDirect_pointPolynomial_compression
     (L : LdParams) (S : Strategy (ldGame L))
     (GB : DirectPolyMeasTuple L.toDirectLdParams
@@ -368,9 +354,9 @@ theorem ldStrategyToDirect_pointPolynomial_compression
       (GB.postprocess (evalDirectPolyTupleAt u)).effect outcome) using 1
   apply consistencyDefect_congr <;> intros <;> rfl
 
-/-- The global-on-Alice/point-on-Bob defect of the seed-fiber lift of the strategy is
-exactly the defect of the compressed polynomial tuple on the original
-seed-indexed strategy. -/
+/-- The global-on-Alice/point-on-Bob defect of the correlated-residue extension
+of the strategy is exactly the defect of the compressed polynomial tuple on the
+original seed-indexed strategy. -/
 theorem ldStrategyToDirect_polynomialPoint_compression
     (L : LdParams) (S : Strategy (ldGame L))
     (GA : DirectPolyMeasTuple L.toDirectLdParams

@@ -1198,6 +1198,18 @@ and $V_{\le k}$, $V_{\ge k}$ are understood to be $V_{<k+1}$ and $V_{>k-1}$, res
 
 We abbreviate ``conditionally linear'' as \emph{CL}. Operationally, an $\ell$-level CL function first applies $L_1$ to $x^{V_1}$; conditioned on the value $x^{L_1}$ it selects a register subspace $V_2$ and a linear map $L_2$ and applies $L_2$ to $x^{V_2}$; and so on, finally outputting $\sum_{k=1}^{\ell} x^{L_k}$. Every $1$-level CL function is linear, and conversely every linear map on $V$ is a $1$-level CL function. Moreover, for every $\ell \ge 1$ the collection of $\ell$-level CL functions contains the collection of $(\ell-1)$-level CL functions.
 
+\begin{lemma}[Formalization support for monotonicity of CL levels]\label{lem:cl-level-mono}
+	\lean{MIPStarRE.QPBT.IsCondLinearOn.mono_level}
+	\leanok
+	\uses{def:cl-func}
+	This is the support-relative form of the containment observation following Definition~\ref{def:cl-func}. Let $S$ be a register subspace of $V$, let $L$ be an $\ell$-level CL function all of whose factor spaces are contained in $S$, and suppose $\ell \le k$. Then $L$ is also a $k$-level CL function all of whose factor spaces are contained in $S$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:cl-func}
+	Adjoin $k-\ell$ empty factor spaces with zero linear maps before the given representation. Each added linear contribution is zero, so the represented function and its support are unchanged.
+\end{proof}
+
 \begin{definition}[Conditionally linear distributions]\label{def:cl-dist}
 	\lean{MIPStarRE.QPBT.clDistribution}\uses{def:cl-func}
 	Let $L, R \colon V \to V$ be conditionally linear functions. The \emph{conditionally linear distribution $\mu_{L,R}$ corresponding to $(L,R)$} is the distribution over pairs $(L(x), R(x)) \in V \times V$ for $x$ drawn uniformly at random from $V$.
@@ -1354,11 +1366,13 @@ The marginal functions, factor spaces, and linear maps of a given CL function $L
 
 The question distribution of the Pauli basis test is \emph{typed}: each question is a pair consisting of a type, drawn together with the other player's type from the edges of a fixed \emph{type graph}, and a question content, drawn from a CL distribution determined by the pair of types.
 
+% IsTypedCondLinearFamily permits an arbitrary index type T, whereas the source assumes
+% that the type set is finite. It is therefore a strict generalization and is not marked
+% \leanok; the concrete low-degree and Pauli families below use finite inductive types.
 \begin{definition}[Typed conditionally linear functions]\label{def:typed-cl-functions}
 	\lean{MIPStarRE.QPBT.IsTypedCondLinearFamily}
-	\leanok
 	\uses{def:cl-func}
-	Let $\mathcal T$ be a set (the \emph{type set}) and let $V$ be $\F^n$ for some integer $n \ge 0$. A \emph{$\mathcal T$-typed family of $\ell$-level conditionally linear functions} (implicitly, \emph{on $V$}) is a collection $\{L_t\}_{t \in \mathcal T}$ such that, for each $t \in \mathcal T$, $L_t$ is an $\ell$-level conditionally linear function on $V$. Finiteness of $\mathcal T$ plays no part in this definition, which is therefore stated, as in the linked declaration, for an arbitrary type set; it is required from Definition~\ref{def:graph-distribution} onwards, where $\mathcal T$ indexes a distribution. The source states the definition for a finite type set, and every type set occurring below is finite.
+	Let $\mathcal T$ be a set (the \emph{type set}) and let $V$ be $\F^n$ for some integer $n \ge 0$. A \emph{$\mathcal T$-typed family of $\ell$-level conditionally linear functions} (implicitly, \emph{on $V$}) is a collection $\{L_t\}_{t \in \mathcal T}$ such that, for each $t \in \mathcal T$, $L_t$ is an $\ell$-level conditionally linear function on $V$. Finiteness of $\mathcal T$ is not needed for this pointwise condition, so the definition applies to an arbitrary type set. A finite type set is required from Definition~\ref{def:graph-distribution} onwards, where $\mathcal T$ indexes a distribution. The source states the definition for a finite type set, and every type set occurring below is finite.
 \end{definition}
 
 % Nonemptiness of the edge set is stated explicitly here: with E empty, m = k = 0 and the
