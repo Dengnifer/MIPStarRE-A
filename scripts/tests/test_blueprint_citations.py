@@ -100,6 +100,32 @@ class BlueprintCitationTests(unittest.TestCase):
             [("def:missing", 1), ("lem:explicit_missing", 1), ("rem:missing", 1)],
         )
 
+    def test_scan_ignores_explicit_blueprint_filenames_and_numeric_locators(self) -> None:
+        lean = self.root / "MIPStarRE" / "Example.lean"
+        _write(
+            lean,
+            "/-- This is the field representation of\n"
+            "`def:beta`, blueprint `ch13_qpbt_test.tex`; paper origin elsewhere.\n"
+            "See blueprint `ch13_qpbt_test.tex:63`,\n"
+            "Blueprint node `ch13_qpbt_test.tex:63-70`, and\n"
+            "blueprint `blueprint/src/chapter/ch13_qpbt_test.tex:63-70`. -/\n",
+        )
+
+        uses, unknown = find_citation_uses(
+            [lean], self.root, build_label_index(self.root)
+        )
+
+        self.assertEqual([(use.label, use.line) for use in uses], [("def:beta", 2)])
+        self.assertEqual(unknown, [])
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            status = main([
+                "--root", str(self.root), "resolve", "--path", str(lean),
+                "--format", "plain",
+            ])
+        self.assertEqual(status, 0)
+        self.assertNotIn("UNRESOLVED", output.getvalue())
+
     def test_scan_reports_unknown_explicit_label_families(self) -> None:
         lean = self.root / "MIPStarRE" / "Example.lean"
         _write(

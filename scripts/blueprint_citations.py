@@ -28,7 +28,7 @@ BARE_BLUEPRINT_LABEL_RE = re.compile(
 )
 CANONICAL_CITATION_RE = re.compile(
     r"\b[Bb]lueprint(?:\s+(?:node|nodes|label|labels|entry|entries))?\s+"
-    r"`(?P<label>[A-Za-z][A-Za-z0-9_.:-]+)`"
+    r"`(?P<label>[A-Za-z][A-Za-z0-9_-]*:[A-Za-z0-9_.:-]+)`"
 )
 LEGACY_LOCATOR_RE = re.compile(
     r"`(?P<path>(?:blueprint/src/chapter/)?ch[0-9][A-Za-z0-9_.-]*\.tex):"
