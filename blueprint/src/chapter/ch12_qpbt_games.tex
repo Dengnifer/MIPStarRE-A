@@ -469,6 +469,7 @@ The state-dependent distance is the right tool for reasoning about the closeness
 \begin{lemma}[Sandwiched simultaneous measurement; modified from Fact 4.34 in \cite{Natarajan2018NEEXP}]\label{lem:ld-sandwich}
 	\lean{MIPStarRE.QPBT.sandwichProduct}
 	\lean{MIPStarRE.QPBT.consistencyDefect_sandwich_le}
+	\lean{MIPStarRE.QPBT.SandwichProduct.consistencyDefect_sandwich_le}
 	\leanok
 	\uses{def:consistency, def:bracket, def:povm-conventions}
 	Let $k \ge 0$ be an integer and let $\eps > 0$. Let $\mathcal X$ be a finite set and $\mu$ a distribution over $\mathcal X$, and let $\mathcal Y$ be a finite nonempty set; all statements below that sample $y \in \mathcal Y$ refer to the uniform distribution on $\mathcal Y$. For each $1 \le i \le k$ let $\mathcal R_i$ be a finite set, let $\mathcal G_i$ be a finite set of functions $g_i \colon \mathcal Y \to \mathcal R_i$, and for each $x \in \mathcal X$ let $\{G^{i,\,x}_g\}_{g \in \mathcal G_i}$ be a projective measurement. Suppose that for all $i \in \{1,\dots,k\}$ the set $\mathcal G_i$ satisfies the following property: for any two $g_i \ne g_i' \in \mathcal G_i$, the probability that $g_i(y) = g_i'(y)$ over a uniformly random $y \in \mathcal Y$ is at most $\eps$.
@@ -494,7 +495,50 @@ The state-dependent distance is the right tool for reasoning about the closeness
 	\end{equation}
 \end{lemma}
 \begin{proof}
-	The source proof is a citation: the argument is identical to the proof of Fact 4.34 in \cite{Natarajan2018NEEXP}, with the only modification being the insertion of the dependence on the question $x$ for all measurements considered. In outline, the consistency hypotheses \eqref{eq:ld-sandwich-1} allow one to insert the projective factors $G^{i,\,x}$ next to $A^x$ one index at a time, and the $\eps$-bound on the pairwise agreement of distinct functions in $\mathcal G_i$ controls the events on which two different outcomes collide at the sampled point $y$. Each of the $k$ insertions costs $(\delta+\eps)^{1/2}$ by the Cauchy--Schwarz inequality, producing the sandwich $C^x$ with total error $k(\delta+\eps)^{1/2}$.
+	\leanok
+	\uses{fact:agreement, lem:agreement-projective-left,
+		lem:ld-sandwich-measurement, lem:sandwich-codeword-defect,
+		lem:sandwich-random-postprocess,
+		lem:sandwich-root-distance-triangle,
+		lem:sandwich-postprocess-projective,
+		lem:sandwich-postprocess-compose,
+		lem:sandwich-injective-postprocess,
+		lem:sandwich-matched-tensor-sum,
+		lem:sandwich-projective-multiplier-sum,
+		lem:sandwich-tensor-projector,
+		lem:sandwich-pair-fiber-sum,
+		lem:sandwich-postprocess-effect-right,
+		lem:sandwich-joint-marginal-product,
+		lem:sandwich-fiber-contraction}
+	The source gives this argument by reference to
+	\cite[Fact~4.34]{Natarajan2018NEEXP}. First apply
+	Lemma~\ref{lem:sandwich-codeword-defect} to each coordinate: the evaluated
+	consistency bound $\delta$ and the collision bound $\eps$ give consistency
+	of the full codeword outcomes with error $\delta+\eps$. Fact~\ref{fact:agreement}
+	then bounds the squared operator-family distance for each coordinate by
+	$2(\delta+\eps)$.
+
+	Construct the POVM $C^x$ by Lemma~\ref{lem:ld-sandwich-measurement}. Induct
+	on the number of coordinates in its palindromic product. At an induction
+	step, combine the last coordinate marginal of $A^x$ with the marginal on the
+	preceding tuple. Their product is the corresponding joint projective effect
+	by Lemma~\ref{lem:sandwich-joint-marginal-product}. Replace the two outer
+	last-coordinate effects and the inner prefix in turn. The square-sum bounds
+	for the matched tensors, projective multipliers, and joint-measurement fibers,
+	together with Lemma~\ref{lem:sandwich-fiber-contraction}, make these
+	replacements contractions. The square-root triangle inequality therefore
+	gives
+	\[
+		\sqrt{D_\psi(A,C)}
+		\leq 2k\sqrt{2(\delta+\eps)}
+		\leq 4k\sqrt{\delta+\eps}.
+	\]
+	Lemma~\ref{lem:agreement-projective-left} converts this distance estimate
+	back to consistency, with a further factor at most two. Thus the explicit
+	universal choice $C_0=8$ gives the bound before evaluation. Finally apply
+	Lemma~\ref{lem:sandwich-random-postprocess} to evaluate the complete outcome
+	tuple at the independent uniform point $y$; this cannot increase the defect
+	and yields \eqref{eq:ld-sandwich-2}.
 \end{proof}
 
 \begin{remark}[Index pairing in the sandwich]\label{rem:ld-sandwich-indexing}
@@ -504,6 +548,7 @@ The state-dependent distance is the right tool for reasoning about the closeness
 \begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
 	\label{lem:ld-sandwich-measurement}
 	\lean{MIPStarRE.QPBT.sandwichProduct_isMeasurement}
+	\lean{MIPStarRE.QPBT.SandwichProduct.sandwichProduct_isMeasurement}
 	\leanok
 	\uses{def:povm-conventions}
 	This formalization-only auxiliary is not a named statement of the paper; it
@@ -519,6 +564,402 @@ The state-dependent distance is the right tool for reasoning about the closeness
 	inner indices gives $\Id$ by the inductive hypothesis, after which the
 	remaining outer pair collapses by idempotence to
 	$\sum_{g_k} G^{k,\,x}_{g_k} = \Id$.
+\end{proof}
+
+\paragraph{Formalization support for the sandwich estimate.}
+The following subordinate results isolate the finite-distribution,
+postprocessing, and operator-contraction steps used to formalize
+\cite[Fact~4.34]{Natarajan2018NEEXP}. They are not named statements of either source paper.
+
+\begin{definition}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{def:sandwich-ordered-coordinate-product}
+	\lean{MIPStarRE.QPBT.SandwichProduct.orderedCoordinateProduct}
+	\leanok
+	This formalization-only definition is the recursive form of the product in
+	\cite[Fact~4.34]{Natarajan2018NEEXP}. The empty product is $\Id$, the one-coordinate
+	product is $G^1_{g_1}$, and adjoining the last coordinate places its effect
+	on both sides of the preceding product.
+\end{definition}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:sandwich-product-average}
+	\lean{MIPStarRE.QPBT.SandwichProduct.avgOver_distribution_prod}
+	\leanok
+	This formalization-only auxiliary isolates the iterated expectation used in
+	the evaluation step of \cite[Fact~4.34]{Natarajan2018NEEXP}. For finite distributions
+	$\mu,\nu$ and a real-valued function $f$,
+	\[
+		\mathbb E_{(x,y)\sim\mu\times\nu}f(x,y)
+		=\mathbb E_{x\sim\mu}\mathbb E_{y\sim\nu}f(x,y).
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	Expand the product distribution and rearrange its finite double sum.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:sandwich-diagonal-postprocess}
+	\lean{MIPStarRE.QPBT.SandwichProduct.diagonal_postprocess_stateQForm_eq_pair_sum}
+	\leanok
+	\uses{def:distance-state-quadratic-form, def:bracket}
+	This formalization-only auxiliary isolates the relabeled diagonal overlap in
+	the first step of \cite[Fact~4.34]{Natarajan2018NEEXP}. If two measurements $A,B$ have
+	common outcome set $\mathcal A$ and $f\colon\mathcal A\to\mathcal B$, then
+	\[
+		\sum_b q_\psi(A_{[f=b]}\otimes B_{[f=b]})
+		=\sum_{a,a':\,f(a)=f(a')}q_\psi(A_a\otimes B_{a'}).
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:distance-tensor-sum-left,
+		lem:distance-tensor-sum-right, lem:distance-qform-finset-sum}
+	Expand both postprocessed effects, distribute the tensor product and
+	quadratic form over the finite sums, and collect pairs with equal labels.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:sandwich-placed-defect-expansion}
+	\lean{MIPStarRE.QPBT.SandwichProduct.consistencyDefect_placed_eq_avg_point}
+	\leanok
+	\uses{def:consistency, def:distance-state-quadratic-form}
+	This formalization-only auxiliary isolates the pointwise off-diagonal
+	expansion used in \cite[Fact~4.34]{Natarajan2018NEEXP}. For local measurement families
+	$A^x,B^x$, their consistency defect is
+	\[
+		\mathbb E_x\sum_{a\ne a'}q_\psi(A^x_a\otimes B^x_{a'}).
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:distance-consistency-term,
+		lem:distance-placed-product-qform}
+	Expand the defect and identify each tensor-placed matrix-vector term with
+	the corresponding state quadratic form.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:sandwich-evaluated-diagonal-overlap}
+	\lean{MIPStarRE.QPBT.SandwichProduct.avg_diagonal_postprocess_stateQForm_le}
+	\leanok
+	\uses{def:distance-state-quadratic-form, def:bracket}
+	This formalization-only auxiliary isolates the collision estimate in
+	\cite[Fact~4.34]{Natarajan2018NEEXP}. For a unit state, if distinct outcomes collide under
+	a random evaluation with probability at most $\eps$, then the averaged
+	diagonal overlap after evaluation is at most the original diagonal overlap
+	plus $\eps$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:sandwich-diagonal-postprocess,
+		lem:distance-qform-nonnegative, lem:distance-point-defect,
+		lem:distance-placed-product-qform}
+	Split equal and unequal original outcomes. The equal terms give the original
+	diagonal overlap; collision bounds each unequal term by $\eps$, and their
+	nonnegative total is at most one.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:sandwich-point-codeword-defect}
+	\lean{MIPStarRE.QPBT.SandwichProduct.point_codeword_defect_le_avg_evaluated_add}
+	\leanok
+	\uses{def:distance-state-quadratic-form}
+	This formalization-only auxiliary isolates the complementary form of the
+	collision estimate in \cite[Fact~4.34]{Natarajan2018NEEXP}. Let $A$ and $B$ be
+	measurements with codeword outcome set $\Gamma$, let $\ket\psi$ be a unit
+	state, and let $\eps\geq 0$. If the evaluation map satisfies
+	\[
+		\Pr_{y}\big[\operatorname{eval}(g,y)
+			=\operatorname{eval}(g',y)\big]\leq\eps
+		\qquad(g\neq g'),
+	\]
+	then the off-diagonal overlap of $A$ and $B$ is at most the averaged
+	off-diagonal overlap of their evaluated measurements plus $\eps$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:sandwich-evaluated-diagonal-overlap,
+		lem:distance-point-defect, lem:distance-placed-product-qform}
+	Express each off-diagonal overlap as the complement of its diagonal overlap
+	and apply Lemma~\ref{lem:sandwich-evaluated-diagonal-overlap}.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:sandwich-codeword-defect}
+	\lean{MIPStarRE.QPBT.SandwichProduct.consistencyDefect_codewords_le_evaluated_add}
+	\leanok
+	\uses{def:consistency, def:bracket}
+	This formalization-only auxiliary gives the quantitative first step of
+	\cite[Fact~4.34]{Natarajan2018NEEXP}. If distinct codewords collide under random evaluation
+	with probability at most $\eps$, then their full-outcome consistency defect
+	is at most their evaluated consistency defect plus $\eps$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:sandwich-product-average,
+		lem:sandwich-placed-defect-expansion,
+		lem:sandwich-point-codeword-defect}
+	Apply the pointwise codeword-defect estimate and average first over the
+	evaluation point and then over the original question.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:sandwich-random-postprocess}
+	\lean{MIPStarRE.QPBT.SandwichProduct.consistencyDefect_prod_postprocess_le}
+	\leanok
+	\uses{def:consistency, def:bracket}
+	This formalization-only auxiliary isolates the last data-processing step of
+	\cite[Fact~4.34]{Natarajan2018NEEXP}. Applying the same relabeling to both measurement
+	families, with the relabeling chosen by an independent finite sample, cannot
+	increase their consistency defect.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{fact:data-processing, lem:sandwich-product-average,
+		lem:sandwich-placed-defect-expansion}
+	Apply data processing for each fixed relabeling and average the resulting
+	inequality over the independent sample.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:sandwich-root-distance-triangle}
+	\lean{MIPStarRE.QPBT.SandwichProduct.sqrt_opFamilyDistSq_triangle}
+	\leanok
+	\uses{def:povm-distance}
+	This formalization-only auxiliary isolates the triangle inequality used for
+	the repeated replacements in \cite[Fact~4.34]{Natarajan2018NEEXP}. For three operator
+	families $A,B,C$,
+	\[
+		\sqrt{D_\psi(A,C)}
+		\leq\sqrt{D_\psi(A,B)}+\sqrt{D_\psi(B,C)},
+	\]
+	where $D_\psi$ is the explicit averaged squared distance underlying
+	Definition~\ref{def:povm-distance}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:distance-nonnegative}
+	For each outcome write $(A-C)\ket\psi=(A-B)\ket\psi+(B-C)\ket\psi$,
+	apply Cauchy--Schwarz to the averaged cross term, and take square roots.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:sandwich-postprocess-projective}
+	\lean{MIPStarRE.QPBT.SandwichProduct.postprocess_isProjective}
+	\leanok
+	\uses{def:povm-conventions, def:bracket}
+	This formalization-only auxiliary isolates a projectivity fact used in the
+	palindromic construction of \cite[Fact~4.34]{Natarajan2018NEEXP}. Every postprocessing of a
+	projective measurement is projective.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:distance-projective-orthogonality}
+	Sum the original orthogonal projectors in each fiber of the outcome map;
+	their cross products vanish and their sum is self-adjoint.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:sandwich-postprocess-compose}
+	\lean{MIPStarRE.QPBT.SandwichProduct.postprocess_postprocess_effect}
+	\leanok
+	\uses{def:bracket}
+	This formalization-only auxiliary isolates an outcome identity used to align
+	the coordinate marginals in \cite[Fact~4.34]{Natarajan2018NEEXP}. Successive
+	postprocessings by $f$ and $g$ have the same effects as postprocessing once
+	by $g\circ f$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Expand the two fiber sums and retain the unique intermediate label $f(a)$
+	for each original outcome $a$.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:sandwich-injective-postprocess}
+	\lean{MIPStarRE.QPBT.SandwichProduct.postprocess_effect_of_injective}
+	\leanok
+	\uses{def:bracket}
+	This formalization-only auxiliary isolates the reindexing step in the
+	palindromic induction of \cite[Fact~4.34]{Natarajan2018NEEXP}. If $f$ is injective, then
+	the postprocessed effect at $f(a)$ is exactly the original effect at $a$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Injectivity makes $a$ the unique member of its postprocessing fiber.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:sandwich-povm-square-sum}
+	\lean{MIPStarRE.QPBT.measurement_sum_adjoint_mul_le_one}
+	\leanok
+	\uses{def:povm-conventions}
+	This formalization-only auxiliary isolates a contraction bound underlying
+	the repeated insertion in \cite[Fact~4.34]{Natarajan2018NEEXP}. For a POVM $M$,
+	\[
+		\sum_a M_a^\dagger M_a\leq\Id.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:distance-measurement-effect-le-one,
+		lem:distance-measurement-effect-hermitian}
+	Each effect satisfies $M_a^\dagger M_a=M_a^2\leq M_a$; sum and use
+	completeness.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:sandwich-matched-tensor-sum}
+	\lean{MIPStarRE.QPBT.SandwichProduct.matched_tensor_sum_le_one}
+	\leanok
+	\uses{def:povm-conventions}
+	This formalization-only auxiliary isolates a joint-family contraction used in
+	the insertion step of \cite[Fact~4.34]{Natarajan2018NEEXP}. For two POVMs $A,B$ with the
+	same outcome set,
+	\[
+		\sum_a A_a\otimes B_a\leq\Id.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	Bound the matched sum by the full nonnegative double sum and use completeness
+	of both measurements.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:sandwich-projective-multiplier-sum}
+	\lean{MIPStarRE.QPBT.SandwichProduct.projective_mul_measurement_sum_adjoint_mul_le_one}
+	\leanok
+	\uses{def:povm-conventions}
+	This formalization-only auxiliary isolates the outer-factor contraction in
+	the palindromic insertion of \cite[Fact~4.34]{Natarajan2018NEEXP}. If $P$ is a projector
+	and $M$ is a POVM, then
+	\[
+		\sum_a(PM_a)^\dagger(PM_a)\leq\Id.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:sandwich-povm-square-sum}
+	Use $P^2=P\leq\Id$ inside each conjugation by $M_a$, then apply the POVM
+	square-sum bound.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:sandwich-tensor-projector}
+	\lean{MIPStarRE.LDT.MakingMeasurementsProjective.isProj_kronecker}
+	\leanok
+	This formalization-only auxiliary isolates the projectivity assertion used
+	when converting distance back to consistency in
+	\cite[Fact~4.34]{Natarajan2018NEEXP}. The tensor product of two projectors is a projector.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Tensor the idempotence and self-adjointness identities of the two factors.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:sandwich-pair-fiber-sum}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.measurement_fiber_sum_adjoint_mul_le_one}
+	\leanok
+	\uses{def:povm-conventions}
+	This formalization-only auxiliary isolates a marginal contraction used in the
+	joint-family comparison for \cite[Fact~4.34]{Natarajan2018NEEXP}. If $M$ is a measurement
+	with pair-valued outcomes, then for each first coordinate $a$,
+	\[
+		\sum_b M_{a,b}^\dagger M_{a,b}\leq\Id.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:distance-measurement-effect-le-one,
+		lem:distance-measurement-effect-hermitian}
+	Bound each squared effect by the effect itself, enlarge the fixed-coordinate
+	sum to the full outcome sum, and use completeness.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:sandwich-postprocess-effect-left}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.postprocess_effect_mul_effect}
+	\leanok
+	\uses{def:povm-conventions, def:bracket}
+	This formalization-only auxiliary isolates an orthogonality identity in the
+	joint-family comparison for \cite[Fact~4.34]{Natarajan2018NEEXP}. For a projective
+	measurement $M$,
+	\[
+		M_{[f=b]}M_a=\mathbf 1_{f(a)=b}M_a.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:distance-projective-orthogonality}
+	Expand the postprocessed effect and use orthogonality of distinct projective
+	effects.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:sandwich-postprocess-effect-right}
+	\lean{MIPStarRE.QPBT.SandwichProduct.effect_mul_postprocess_effect}
+	\leanok
+	\uses{def:povm-conventions, def:bracket}
+	This formalization-only auxiliary isolates the adjoint form of the preceding
+	identity in the proof of \cite[Fact~4.34]{Natarajan2018NEEXP}:
+	\[
+		M_aM_{[f=b]}=\mathbf 1_{f(a)=b}M_a.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:sandwich-postprocess-effect-left,
+		lem:distance-measurement-effect-hermitian}
+	Take adjoints in the left-handed identity and use self-adjointness.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:sandwich-joint-marginal-product}
+	\lean{MIPStarRE.QPBT.SandwichProduct.postprocess_product_eq_effect}
+	\leanok
+	\uses{def:povm-conventions, def:bracket}
+	This formalization-only auxiliary isolates the compatible-marginal identity
+	used in the palindromic insertion of \cite[Fact~4.34]{Natarajan2018NEEXP}. If the pair
+	$(f,g)$ uniquely identifies $a$, then
+	\[
+		M_{[f=f(a)]}M_{[g=g(a)]}=M_a
+	\]
+	for every projective measurement $M$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:sandwich-postprocess-effect-left}
+	Expand one marginal, apply the selection identity to each term, and use the
+	uniqueness of the common fiber.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:sandwich-fiber-contraction}
+	\lean{MIPStarRE.QPBT.SandwichProduct.opFamilyDistSq_mul_fiber_le}
+	\leanok
+	\uses{def:povm-distance}
+	This formalization-only auxiliary isolates the contraction applied at each
+	palindromic insertion in \cite[Fact~4.34]{Natarajan2018NEEXP}. Let
+	$A^x=\{A^x_a\}_a$ and $B^x=\{B^x_a\}_a$ be measurement families with a
+	common outcome set, and suppose that $D_\psi(A,B)\leq\delta$. If the
+	multipliers $S_z^x$ satisfy
+	\[
+		\sum_{z:\,\operatorname{eval}_x(z)=a}(S_z^x)^\dagger S_z^x\leq\Id
+	\]
+	for every $x,a$, then the reindexed families obey
+	\[
+		D_\psi\big((S_z^xA^x_{\operatorname{eval}_x(z)})_{x,z},
+			(S_z^xB^x_{\operatorname{eval}_x(z)})_{x,z}\big)\leq\delta.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:distance-sum-contraction}
+	Group outcomes by their evaluated value and apply the finite-family
+	contraction estimate on each fiber.
 \end{proof}
 
 % The source (references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:504-505) quantifies
@@ -554,7 +995,7 @@ The state-dependent distance is the right tool for reasoning about the closeness
 	\begin{equation}\label{eq:pasting-3}
 		A^{x,y_1,y_2}_{a_1,\,a_2} \ot \Id \simeq_{\delta_{\mathrm{pasting}}} \Id \ot J^x_{[\operatorname{eval}_{y_1}(\cdot)=a_1,\, \operatorname{eval}_{y_2}(\cdot)=a_2]}\,.
 	\end{equation}
-	Neither the exponent nor the constant in $\poly(\eta, \delta)$ is made explicit in the source; both are universal constants inherited from the proof of Fact 4.35 in \cite{Natarajan2018NEEXP}.
+	Neither the exponent nor the constant in $\poly(\eta, \delta)$ is made explicit in the source; both are universal constants inherited from the proof of Fact 4.35 in \cite{Natarajan2018NEEXP}. The literal product-form convention for this notation is incompatible with the unrestricted error domain in the lemma; a two-dimensional counterexample and the required correction are recorded in \cite{gap:qpbt_pasting-product-error}.
 \end{lemma}
 \begin{proof}
 	Stated in the source without proof, as an import of Fact 4.35 of \cite{Natarajan2018NEEXP}. The measurement $J^x$ sandwiches the family $(G_1)^x$ between two copies of the projective family $(G_2)^x$. The consistency hypotheses \eqref{eq:pasting-1} and the self-consistency \eqref{eq:pasting-2} allow the joint measurement $A^{x,y_1,y_2}$ to be compared with the sandwiched product one factor at a time, and the $\eta$-bound on the pairwise agreement of distinct functions in $\mathcal G_2$ controls the error terms arising when two different outcomes $g_2 \ne g_2'$ agree at the sampled point $y_2$.
@@ -712,6 +1153,81 @@ of the paper.
 \begin{proof}
 	\leanok
 	This follows from linearity in the second argument of the inner product.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:distance-tensor-sum-left}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.heteroKron_finset_sum_left}
+	\leanok
+	This formalization-only auxiliary is not a named statement of the paper; it
+	isolates a finite-sum expansion used in the relabeling step of
+	\cite[Fact~4.34]{Natarajan2018NEEXP}. For a finite set $S$, operators $A_b$, and an
+	operator $C$,
+	\[
+		\left(\sum_{b\in S}A_b\right)\otimes C
+		=\sum_{b\in S}(A_b\otimes C).
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	Expand the tensor placement entrywise and distribute scalar multiplication
+	over the finite sum.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:distance-tensor-sum-right}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.heteroKron_finset_sum_right}
+	\leanok
+	This formalization-only auxiliary is not a named statement of the paper; it
+	isolates the corresponding finite-sum expansion used in the relabeling step
+	of \cite[Fact~4.34]{Natarajan2018NEEXP}. For a finite set $S$, an operator $A$, and
+	operators $C_b$,
+	\[
+		A\otimes\left(\sum_{b\in S}C_b\right)
+		=\sum_{b\in S}(A\otimes C_b).
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	Expand the tensor placement entrywise and distribute scalar multiplication
+	over the finite sum.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:distance-qform-finset-sum}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.stateQForm_finset_sum}
+	\leanok
+	\uses{def:distance-state-quadratic-form}
+	This formalization-only auxiliary is not a named statement of the paper; it
+	isolates the linear expansion of overlap terms in the relabeling step of
+	\cite[Fact~4.34]{Natarajan2018NEEXP}. For a finite set $S$,
+	\[
+		q_\psi\!\left(\sum_{b\in S}M_b\right)
+		=\sum_{b\in S}q_\psi(M_b).
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:distance-state-quadratic-form}
+	Apply linearity of the matrix action and of the real part of the inner
+	product.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:distance-qform-nonnegative}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.stateQForm_nonneg}
+	\leanok
+	\uses{def:distance-state-quadratic-form}
+	This formalization-only auxiliary is not a named statement of the paper; it
+	isolates the positivity of the overlap terms in the relabeling step of
+	\cite[Fact~4.34]{Natarajan2018NEEXP}. If $M$ is positive semidefinite, then
+	$q_\psi(M)\geq 0$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:distance-state-quadratic-form,
+		lem:distance-quadratic-form-mono}
+	Compare $M$ with the zero operator in the quadratic-form order.
 \end{proof}
 
 \begin{lemma}[Formalization support for Fact~\ref{fact:agreement}]

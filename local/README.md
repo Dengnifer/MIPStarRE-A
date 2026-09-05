@@ -46,6 +46,15 @@ only: the "Dependencies" bullets in a packet body are commentary
 (`protocols/issues-prs.md` §1). A merged packet closes its issue and therefore
 unblocks its dependents with no edit anywhere.
 
+## Telemetry
+
+Session, stage, build, and incident records live under `results/telemetry/` as
+described in [`protocols/meta.md`](protocols/meta.md). The
+[`design-decisions.md`](../results/telemetry/design-decisions.md) register is
+the short, chronological index of owner and operator choices that shaped the
+workflow; each row points to the longer primary record. Record reasoning in the
+pointed event or owner log rather than expanding the index into a second log.
+
 ## Ground rules for agents
 
 - Read `AGENTS.md` first; the faithfulness policy and proof-integrity

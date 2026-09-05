@@ -283,30 +283,6 @@ theorem directPolynomialPolynomial_consistencyDefect_le
   rw [directPolynomialPolynomial_consistencyDefect_eq D S GA GB, heq]
   exact hldt
 
-/-- Deprecated specialization of `strategyConsRel_consistencyDefect_le` for
-Alice's LDT point family and Bob's polynomial-evaluation family. -/
-@[deprecated strategyConsRel_consistencyDefect_le (since := "2026-09-05")]
-theorem maturePointPolynomial_consistencyDefect_le
-    (D : DirectLdParams) (S : Strategy (directLdGame D))
-    (hS : S.IsProjective) (r : Fin D.k) :
-    letI := D.toLDTFieldModel
-    ∀ (G : ProjMeas (MIPStarRE.LDT.Polynomial D.toLDTParameters) S.ιB)
-      (delta : ℝ),
-      ConsRel (strategyQuantumState S)
-          (uniformDistribution (Point D.toLDTParameters))
-          (fun u => (ldtCoordinatePointMeasurementA D S hS r u).toSubMeas)
-          (fun u => (ldtPolynomialEvaluationMeasurement D G u).toSubMeas) delta →
-        consistencyDefect (uniformDistribution (Point D.toLDTParameters))
-          (ldtPointAPlaced D S hS r)
-          (ldtPolynomialEvaluationRight D G) S.ψ ≤ delta := by
-  letI := D.toLDTFieldModel
-  intro G delta h
-  exact strategyConsRel_consistencyDefect_le S
-    (uniformDistribution (Point D.toLDTParameters))
-    (uniformDistribution_isProbability (Point D.toLDTParameters))
-    (ldtCoordinatePointMeasurementA D S hS r)
-    (ldtPolynomialEvaluationMeasurement D G) delta h
-
 end
 
 end MIPStarRE.QPBT
