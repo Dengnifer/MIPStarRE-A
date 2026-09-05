@@ -201,3 +201,9 @@ and retire; no takeover is scheduled. The merge daemon, stack-watch,
 Owner command: astra is ready; create a new astra session in tmux qpbt and hand the main session over to it, then
 check for 1.5 hours. Probe: gpt-6-astra answers through the relay (the id is gpt-6-astra, not gpt-5.6-astra).
 Handoff: results/telemetry/owner-messages/handoff-to-codex-main-*.md (v3, overrides older helper references).
+
+## 2026-09-05 — Owner session retires (2026-09-05T18:29:15Z)
+
+Watch of the astra main session complete; guidance recorded in events.md and in /tmp/qpbt-main-handoff-v3.md (archived copy
+in results/telemetry/owner-messages/). Mode 1 continues under the gpt-6-astra main session; both codex accounts are in use
+through the router shim until #232 lands; the main session relaunches on the second account at low context. No owner action pending.

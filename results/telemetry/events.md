@@ -3015,3 +3015,20 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   gh_common.api and received HTTP 404; retrying its repository-relative endpoint
   succeeded. No write was attempted in that failed call. Existing staged and
   untracked session telemetry is preserved; no human decision is requested.
+
+## 2026-09-05 — Owner session retires after the 90-minute watch of the astra main session (2026-09-05T18:29:15Z)
+
+- The watch (15:46Z to 18:29:15Z) found the main session (gpt-6-astra) following the rules: daemon-only merges (PRs 228 and 227
+  merged during the watch), labelled autofix loops, #27 reports and telemetry. Guidance given during the watch: an over-read of the
+  handoff parked PRs 178 and 185 (released explicitly); fix loops had stalled unnoticed (PR 229's fixer commit rejected by the
+  paper-gap note style guard; PRs 153, 225, 230, 205 waiting) and the operating rhythm was written into the handoff (guidance
+  sections 1 and 2); the concurrency target was replaced by a critical-path priority at the owner's request; the #201 reopening was
+  pointed at the recorded design decision for eq:pasting-1-sym. The main session's context dropped to about 39% by 16:33Z, so
+  later messages were kept short.
+- Two-account routing (owner request 16:2xZ, decision "both" 17:3xZ): the second endpoint serves gpt-6-astra; the main session
+  installed the router shim v2 at 17:20Z (the owner session's classifier had refused to), and the router log shows balanced picks
+  (4 second / 4 primary at 17:40Z); issue #232 moves the routing into dispatch.sh (lane running); the main session relaunches on the
+  second account with fan-out off at low context (/tmp/relaunch-main-v4.sh, /tmp/main-session-astra-v2.sh staged).
+- State at retirement: main 3f00de0; open PRs 233,230,225,213,212,207,205,202,195,185,178; live codex worker sessions 2;
+  merges recorded by the daemon so far 40. All Claude-held worktrees were released (#118 at 691b671, #174 at bece2e6).
+  This owner session stops; the owner decides when an owner session returns.
