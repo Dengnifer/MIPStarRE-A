@@ -14,10 +14,10 @@ namespace MIPStarRE.LDT
 exponential.  For `x ≥ 1` and `t > 0`, the product `x ^ s * 2 ^ (-t x)` is at
 most `⌈s⌉! / (t log 2) ^ ⌈s⌉`, a constant depending only on `s` and `t`.
 
-Taking `x = log R`, `s = a + b` and `t = b`, this is the explicit form of the
-finiteness of the supremum `sup_{R ≥ 4} (log R) ^ (a + b) R ^ (-b)` invoked in
-the proof of `lem:delta-bound`, blueprint `ch13_qpbt_test.tex`.  It is obtained
-from the Taylor lower bound `y ^ n / n! ≤ exp y` on the exponential. -/
+Taking `x = m`, `s = a + b` and `t = b`, this bounds the third term in the
+proof of `lem:delta-bound` (blueprint node `lem:delta-bound-envelope-support`)
+by an explicit constant.  It is obtained from the Taylor lower bound
+`y ^ n / n! ≤ exp y` on the exponential. -/
 theorem rpow_mul_two_rpow_neg_le {s t x : ℝ} (ht : 0 < t) (hx : 1 ≤ x) :
     x ^ s * (2 : ℝ) ^ (-(t * x)) ≤
       (Nat.factorial ⌈s⌉₊ : ℝ) / (t * Real.log 2) ^ ⌈s⌉₊ := by

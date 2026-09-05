@@ -181,7 +181,6 @@ theorem exists_deltaQld_introParams_bound (a b : ℝ) (ha : 1 ≤ a)
   set C : ℝ := (Nat.factorial ⌈a + b⌉₊ : ℝ) / (b * Real.log 2) ^ ⌈a + b⌉₊
   have hc2 : (2 : ℝ) ≤ c := by exact_mod_cast two_le_introParamsC a b ha hb
   have hcb : a + b ≤ (c : ℝ) * b := add_le_introParamsC_mul a b hb
-  have hlog : 0 < Real.log 2 := Real.log_pos (by norm_num)
   have hC0 : 0 ≤ C := by positivity
   have h2c : (1 : ℝ) ≤ (2 * (c : ℝ)) ^ a := Real.one_le_rpow (by linarith) ha0
   have haa' : a ≤ a * ((2 * (c : ℝ)) ^ a + C) := by nlinarith

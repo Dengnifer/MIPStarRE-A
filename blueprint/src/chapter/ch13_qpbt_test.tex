@@ -908,7 +908,7 @@ We specify a canonical setting of the parameter tuple $\mathsf{qldparams}$ as a 
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{def:introparams, def:admissible, def:admissible-size, thm:pauli}
+	\uses{def:introparams, def:admissible, def:admissible-size, thm:pauli, lem:delta-bound-envelope-support}
 	Since $c$ is even, the exponent $k = c \lceil \log\log R \rceil + 1$ is odd, so $q = 2^k$ is an admissible field size; $m$ divides $q$ because $2^j \le c \lceil \log R \rceil + 1 \le 2 \log^c R \le 2^k$, so $j \le k$ and both are powers of $2$; and $d = 1 \ge 1$. Hence the tuple is admissible. Since $m = 2^j \ge (c/2) \log R$, we get $2^m \ge R^{c/2} \ge R$, using $c \ge 2$.
 
 	For the soundness bound, write $\delta_{\mathrm{qld}}(\eps,m,d,q) = a(md)^a \eps^b + a(md)^a q^{-b} + a(md)^a 2^{-bmd}$ and use $d = 1$, $\log R \le m \le 2c \log R$, and $q = 2^k \ge \log^c R$. Set
@@ -929,6 +929,21 @@ We specify a canonical setting of the parameter tuple $\mathsf{qldparams}$ as a 
 		\le a\, C\, (\log R)^{-b}\;,
 	\]
 	the last step using $m \ge \log R \ge 1$. Summing the three bounds, the statement follows with $a'$ as above and $b' = b$.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma lem:delta-bound]
+\label{lem:delta-bound-envelope-support}
+\lean{MIPStarRE.LDT.rpow_mul_two_rpow_neg_le}
+\leanok
+For real $s$, $t > 0$ and $x \ge 1$, writing $\lceil s \rceil_{+} = \max(\lceil s \rceil, 0)$,
+\[
+  x^{s}\, 2^{-t x} \le \frac{\lceil s \rceil_{+}!}{(t \log 2)^{\lceil s \rceil_{+}}} .
+\]
+This is the explicit envelope used for the third term in the proof of Lemma~\ref{lem:delta-bound}, with $x = m$, $s = a + b$ and $t = b$.
+\end{lemma}
+\begin{proof}
+\leanok
+Since $x \ge 1$, $x^{s} \le x^{\lceil s \rceil_{+}}$, and the Taylor lower bound $y^{n}/n! \le e^{y}$ at $y = t x \log 2$ and $n = \lceil s \rceil_{+}$ gives $x^{n} (t \log 2)^{n} \le n!\, 2^{t x}$.
 \end{proof}
 
 \begin{remark}[A comparison of exponents in the source proof of Lemma~\ref{lem:delta-bound}]\label{rem:delta-bound-exponent-comparison}
