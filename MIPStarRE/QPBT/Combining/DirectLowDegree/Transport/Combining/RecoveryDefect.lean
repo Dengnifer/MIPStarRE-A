@@ -49,7 +49,7 @@ namespace MIPStarRE.QPBT
 open MIPStarRE.LDT hiding Measurement
 open MIPStarRE.Quantum
 open DistanceCalculus
-open SandwichInternal
+open SandwichProduct
 
 noncomputable section
 
