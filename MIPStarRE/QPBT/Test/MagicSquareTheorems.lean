@@ -769,8 +769,8 @@ only consistency.  The witness and the distances are those of the underlying
 `Strategy msGame`, which the symmetric presentation `msGameSymm` yields
 definitionally (`msGameSymm_toGame`).  Blueprint
 `cor:ms-rigidity-symmetric-consistent` in `ch13_qpbt_test.tex`, paper
-`08_classical_and_quantum_low_degree_tests.tex:612-652`; its proof is that of
-`exists_ms_rigidity`, which issue #105 tracks. -/
+`08_classical_and_quantum_low_degree_tests.tex:612-652`; its proof specializes
+`exists_ms_rigidity` at `δ = 0`. -/
 theorem exists_ms_rigidity_of_symmetric_consistent :
     ∃ C : ℝ, 1 ≤ C ∧ ∀ (ε : ℝ), 0 ≤ ε →
       ∀ S : SymmetricStrategy msGameSymm, S.toStrategy.IsProjective →

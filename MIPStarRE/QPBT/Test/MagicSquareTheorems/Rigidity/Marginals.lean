@@ -202,30 +202,19 @@ theorem twoSwap_shift_defect_apply (X₁ Z₁ X₂ Z₂ : Op ι)
 theorem swapFactor_shift_defect_zero (X Z : Op ι) :
     swapFactor X Z (0 + 1) - swapFactor X Z 0 * X =
       -((2 : ℂ)⁻¹ • (X * Z + Z * X)) := by
-  rw [zero_add, swapFactor_one, swapFactor_zero, ← reflectionEffect_zero_mul_sub X Z]
+  have hid : reflectionEffect Z 0 * X - X * reflectionEffect Z 1 =
+      (2 : ℂ)⁻¹ • (X * Z + Z * X) := by
+    rw [reflectionEffect_zero_mul_X_sub_X_mul_one X Z, sub_neg_eq_add]
+  rw [zero_add, swapFactor_one, swapFactor_zero, ← hid]
   abel
 
-/-- The one-qubit shift transport defect at the unit register label.  The
-identity behind it is a public copy of the private
-`X_mul_reflectionEffect_one_mul_X_sub_zero` of `Rigidity/Swap.lean`, duplicated
-under the policy of issue #204. -/
+/-- The one-qubit shift transport defect at the unit register label. -/
 theorem swapFactor_shift_defect_one (X Z : Op ι) (hX : IsBinaryObservable X) :
     swapFactor X Z (1 + 1) - swapFactor X Z 1 * X =
       (2 : ℂ)⁻¹ • (X * (X * Z + Z * X)) := by
   have hid : X * reflectionEffect Z 1 * X - reflectionEffect Z 0 =
       -((2 : ℂ)⁻¹ • (X * (X * Z + Z * X))) := by
-    simp only [reflectionEffect, if_pos, if_neg one_ne_zero]
-    calc
-      X * ((2 : ℂ)⁻¹ • (1 - Z)) * X - (2 : ℂ)⁻¹ • (1 + Z) =
-          (2 : ℂ)⁻¹ • (X * (1 - Z) * X - (1 + Z)) := by
-        rw [Matrix.mul_smul, Matrix.smul_mul]
-        module
-      _ = (2 : ℂ)⁻¹ • (-(X * (X * Z + Z * X))) := by
-        congr 1
-        have hXXZ : X * (X * Z) = Z := by
-          rw [← Matrix.mul_assoc, hX.mul_self_eq_one, one_mul]
-        noncomm_ring [hX.mul_self_eq_one, hXXZ]
-      _ = -((2 : ℂ)⁻¹ • (X * (X * Z + Z * X))) := by module
+    rw [X_mul_reflectionEffect_one_mul_X_sub_zero X Z hX, sub_neg_eq_add, neg_smul]
   have hz : swapFactor X Z (1 + 1) = reflectionEffect Z 0 := by
     rw [show (1 : ZMod 2) + 1 = 0 from by decide, swapFactor_zero]
   have hs : swapFactor X Z 1 * X = X * reflectionEffect Z 1 * X := by rw [swapFactor_one]
@@ -343,22 +332,6 @@ theorem reflectionEffect_defect_conjTranspose_mul {κ : Type} [Fintype κ] [Deci
 
 variable {ιA ιB κA κB : Type} [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
   [Fintype κA] [DecidableEq κA] [Fintype κB] [DecidableEq κB]
-
-/-- Formalization-only: the tensor placement distributes over differences of
-rectangular matrices on the left. -/
-theorem kroneckerMap_sub_left {m n p q : Type*} (A B : Matrix m n ℂ) (C : Matrix p q ℂ) :
-    Matrix.kroneckerMap (· * ·) (A - B) C =
-      Matrix.kroneckerMap (· * ·) A C - Matrix.kroneckerMap (· * ·) B C := by
-  ext p' q'
-  simp [Matrix.kroneckerMap, sub_mul]
-
-/-- Formalization-only: the tensor placement distributes over differences of
-rectangular matrices on the right. -/
-theorem kroneckerMap_sub_right {m n p q : Type*} (A : Matrix m n ℂ) (B C : Matrix p q ℂ) :
-    Matrix.kroneckerMap (· * ·) A (B - C) =
-      Matrix.kroneckerMap (· * ·) A B - Matrix.kroneckerMap (· * ·) A C := by
-  ext p' q'
-  simp [Matrix.kroneckerMap, mul_sub]
 
 /-- The defect of a left-placed register operator against a local operator on
 the doubly transported state, in matrix form. -/

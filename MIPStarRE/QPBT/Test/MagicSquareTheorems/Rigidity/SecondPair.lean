@@ -160,9 +160,10 @@ on the dilated state.  These are the operators whose ideal images are
 pair required by the two-qubit swap-isometry extraction of `thm:ms-rigidity`.
 
 The closed path of `msCellObsA_second_pair_path` gives the scale
-`552 * sqrt ε`; the bound is stated at the scale `624 * sqrt ε` of the
-first-pair estimate `msVarObsA_anticommute`, so that the assembly may use one
-scale for both pairs.  Blueprint `ch13_qpbt_test.tex:224-253`, paper
+`504 * sqrt ε`, and the two endpoint substitutions add `24 * sqrt ε` each, so
+the argument closes at `552 * sqrt ε`; the bound is stated at the scale
+`624 * sqrt ε` of the first-pair estimate `msVarObsA_anticommute`, so that the
+assembly may use one scale for both pairs.  Blueprint `ch13_qpbt_test.tex:224-253`, paper
 `08_classical_and_quantum_low_degree_tests.tex:612-652`. -/
 theorem msCellObsA_second_pair_anticommute (S : Strategy msGame) (ε : ℝ)
     (hwin : 1 - ε ≤ S.value) :
@@ -186,7 +187,9 @@ fourth variables approximately anticommute on the dilated state.  These are
 Bob's counterparts of `msCellObsA_second_pair_anticommute`, obtained from the
 same closed path by replacing each of its two endpoints with the pair of Bob
 variable reflections that the game compares to it.  The path gives the scale
-`552 * sqrt ε`; the bound is stated at the first-pair scale `624 * sqrt ε`.
+`504 * sqrt ε` and each of the two endpoint replacements `24 * sqrt ε`, so the
+argument closes at `552 * sqrt ε`; the bound is stated at the first-pair scale
+`624 * sqrt ε`.
 Blueprint `ch13_qpbt_test.tex:224-253`. -/
 theorem msVarObsB_second_pair_anticommute (S : Strategy msGame) (ε : ℝ)
     (hwin : 1 - ε ≤ S.value) :

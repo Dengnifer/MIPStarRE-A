@@ -220,35 +220,6 @@ theorem isBinaryObservable_heteroKron_right {ι ι' : Type} [Fintype ι] [Decida
   · rw [← Matrix.mul_kronecker_mul, hO.mul_self_eq_one, Matrix.one_mul,
       Matrix.one_kronecker_one]
 
-/-- Formalization-only algebraic identity: conjugating the negative spectral
-effect of a binary observable by a second binary observable returns the positive
-spectral effect up to the anticommutator of the two.  This is a public copy of
-the private `X_mul_reflectionEffect_one_mul_X_sub_zero` of `Rigidity/Swap.lean`,
-duplicated here under the policy of issue #204 because the two-qubit assembly
-needs it outside that file. -/
-theorem mul_reflectionEffect_one_mul_sub_zero {ι : Type} [Fintype ι] [DecidableEq ι]
-    (X Z : Op ι) (hX : IsBinaryObservable X) :
-    X * reflectionEffect Z 1 * X - reflectionEffect Z 0 =
-      ((-2 : ℂ)⁻¹) • (X * (X * Z + Z * X)) := by
-  have h1 : X * X = 1 := hX.mul_self_eq_one
-  have key : X * (1 - Z) * X - (1 + Z) = -(X * (X * Z + Z * X)) := by
-    have expand : X * (1 - Z) * X - (1 + Z) = X * X - X * Z * X - 1 - Z := by
-      noncomm_ring
-    have expand2 : -(X * (X * Z + Z * X)) = -(X * X * Z) - X * Z * X := by
-      noncomm_ring
-    rw [expand, expand2, h1]
-    noncomm_ring
-  simp only [reflectionEffect, if_pos, if_neg one_ne_zero]
-  calc
-    X * ((2 : ℂ)⁻¹ • (1 - Z)) * X - (2 : ℂ)⁻¹ • (1 + Z) =
-        (2 : ℂ)⁻¹ • (X * (1 - Z) * X - (1 + Z)) := by
-      rw [Matrix.mul_smul, Matrix.smul_mul]
-      module
-    _ = (2 : ℂ)⁻¹ • (-(X * (X * Z + Z * X))) := by rw [key]
-    _ = ((-2 : ℂ)⁻¹) • (X * (X * Z + Z * X)) := by
-      rw [show ((-2 : ℂ)⁻¹) = -(2 : ℂ)⁻¹ by norm_num]
-      module
-
 /-! ## The two off-diagonal components -/
 
 /-- The residual component of the two controlled swaps at the label pair
@@ -439,10 +410,10 @@ theorem norm_swapComponent_diag_sub_le
         heteroKron XA (1 : Op ιB) * heteroKron (XA * ZA + ZA * XA) (1 : Op ιB) := by
       rw [heteroKron_mul, mul_one]
     rw [← applyOperatorToState_sub_op, ← heteroKron_sub_left,
-      mul_reflectionEffect_one_mul_sub_zero XA ZA hXA, heteroKron_smul_left,
-      applyOperatorToState_smul, norm_smul, hfac,
+      X_mul_reflectionEffect_one_mul_X_sub_zero XA ZA hXA, sub_neg_eq_add,
+      heteroKron_smul_left, applyOperatorToState_smul, norm_smul, hfac,
       norm_applyOperatorToState_isometry_mul hLXiso,
-      show ‖((-2 : ℂ)⁻¹ : ℂ)‖ = (2 : ℝ)⁻¹ by norm_num]
+      show ‖(-(2 : ℂ)⁻¹ : ℂ)‖ = (2 : ℝ)⁻¹ by rw [norm_neg]; norm_num]
   -- Assemble the four steps.
   have htri : ‖applyOperatorToState
         (heteroKron (XA * reflectionEffect ZA 1) (XB * reflectionEffect ZB 1)) v -

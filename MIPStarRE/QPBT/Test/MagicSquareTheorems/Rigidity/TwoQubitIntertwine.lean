@@ -33,45 +33,6 @@ open MIPStarRE.LDT MIPStarRE.Quantum
 
 noncomputable section
 
-/-! ## Public copies of the spectral identities of `Rigidity/Swap.lean` -/
-
-/-- The positive spectral effect absorbs its observable.  This is a public copy
-of the private `reflectionEffect_zero_mul_reflection` of `Rigidity/Swap.lean`,
-duplicated under the policy of issue #204 because the two-qubit intertwining
-needs it outside that file. -/
-theorem reflectionEffect_zero_mul_obs {ι : Type} [Fintype ι] [DecidableEq ι]
-    (Z : Op ι) (hZ : IsBinaryObservable Z) :
-    reflectionEffect Z 0 * Z = reflectionEffect Z 0 := by
-  simp only [reflectionEffect, if_pos, Matrix.smul_mul]
-  rw [add_mul, one_mul, hZ.mul_self_eq_one, add_comm]
-
-/-- The negative spectral effect anti-absorbs its observable.  This is a public
-copy of the private `reflectionEffect_one_mul_reflection` of
-`Rigidity/Swap.lean`, duplicated under the policy of issue #204. -/
-theorem reflectionEffect_one_mul_obs {ι : Type} [Fintype ι] [DecidableEq ι]
-    (Z : Op ι) (hZ : IsBinaryObservable Z) :
-    reflectionEffect Z 1 * Z = -reflectionEffect Z 1 := by
-  simp only [reflectionEffect, if_neg one_ne_zero, Matrix.smul_mul]
-  rw [sub_mul, one_mul, hZ.mul_self_eq_one]
-  module
-
-/-- The two spectral effects of a binary observable differ from the shifted
-product by the anticommutator.  This is a public copy of the private
-`reflectionEffect_zero_mul_X_sub_X_mul_one` of `Rigidity/Swap.lean`,
-duplicated under the policy of issue #204. -/
-theorem reflectionEffect_zero_mul_sub {ι : Type} [Fintype ι] [DecidableEq ι]
-    (X Z : Op ι) :
-    reflectionEffect Z 0 * X - X * reflectionEffect Z 1 = (2 : ℂ)⁻¹ • (X * Z + Z * X) := by
-  simp only [reflectionEffect, if_pos, if_neg one_ne_zero]
-  calc
-    ((2 : ℂ)⁻¹ • (1 + Z)) * X - X * ((2 : ℂ)⁻¹ • (1 - Z)) =
-        (2 : ℂ)⁻¹ • ((1 + Z) * X - X * (1 - Z)) := by
-      rw [Matrix.smul_mul, Matrix.mul_smul]
-      module
-    _ = (2 : ℂ)⁻¹ • (X * Z + Z * X) := by
-      congr 1
-      noncomm_ring
-
 /-! ## The residual factors of one controlled swap -/
 
 variable {ι : Type} [Fintype ι] [DecidableEq ι]
@@ -81,10 +42,10 @@ the sign of the register label. -/
 theorem swapFactor_mul_obs {X Z : Op ι} (hZ : IsBinaryObservable Z) (b : ZMod 2) :
     swapFactor X Z b * Z = phaseSign b • swapFactor X Z b := by
   rcases zmod_two_eq_zero_or_one b with rfl | rfl
-  · rw [swapFactor_zero, reflectionEffect_zero_mul_obs Z hZ, phaseSign, if_pos rfl,
-      one_smul]
+  · rw [swapFactor_zero, reflectionEffect_zero_mul_reflection Z hZ, phaseSign,
+      if_pos rfl, one_smul]
   · rw [swapFactor_one, phaseSign, if_neg one_ne_zero, Matrix.mul_assoc,
-      reflectionEffect_one_mul_obs Z hZ, mul_neg, neg_one_smul]
+      reflectionEffect_one_mul_reflection Z hZ, mul_neg, neg_one_smul]
 
 /-- The residual factors of a controlled swap form a complete family. -/
 theorem sum_swapFactor_conjTranspose_mul {X Z : Op ι} (hX : IsBinaryObservable X)

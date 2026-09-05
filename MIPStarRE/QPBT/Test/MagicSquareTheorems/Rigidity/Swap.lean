@@ -169,7 +169,9 @@ theorem apply_binaryTauShift_left {ι : Type} [Fintype ι] [DecidableEq ι]
     rw [sum_zmod_two]
     simp +decide [tauShift, Matrix.one_apply]
 
-private theorem reflectionEffect_zero_mul_reflection
+/-- Formalization-only spectral identity for `thm:ms-rigidity`: the positive
+spectral effect of a binary observable absorbs that observable. -/
+theorem reflectionEffect_zero_mul_reflection
     {ι : Type} [Fintype ι] [DecidableEq ι]
     (Z : Op ι) (hZ : IsBinaryObservable Z) :
     reflectionEffect Z 0 * Z = reflectionEffect Z 0 := by
@@ -177,7 +179,9 @@ private theorem reflectionEffect_zero_mul_reflection
   rw [add_mul, one_mul, hZ.mul_self_eq_one]
   rw [add_comm]
 
-private theorem reflectionEffect_one_mul_reflection
+/-- Formalization-only spectral identity for `thm:ms-rigidity`: the negative
+spectral effect of a binary observable anti-absorbs that observable. -/
+theorem reflectionEffect_one_mul_reflection
     {ι : Type} [Fintype ι] [DecidableEq ι]
     (Z : Op ι) (hZ : IsBinaryObservable Z) :
     reflectionEffect Z 1 * Z = -reflectionEffect Z 1 := by
@@ -208,7 +212,12 @@ theorem binarySwap_intertwines_Z {ι : Type} [Fintype ι] [DecidableEq ι]
       reflectionEffect_one_mul_reflection Z hZ]
     norm_num [bitSign, ZMod.val_one, applyOperatorToState]
 
-private theorem reflectionEffect_zero_mul_X_sub_X_mul_one
+/-- Formalization-only spectral identity for `thm:ms-rigidity`: the difference
+between the positive spectral effect of a binary observable multiplied by a
+second binary observable on the right and its negative spectral effect
+multiplied by that observable on the left is half the anticommutator of the
+two observables. -/
+theorem reflectionEffect_zero_mul_X_sub_X_mul_one
     {ι : Type} [Fintype ι] [DecidableEq ι] (X Z : Op ι) :
     reflectionEffect Z 0 * X - X * reflectionEffect Z 1 =
       (2 : ℂ)⁻¹ • (X * Z - -(Z * X)) := by
@@ -222,7 +231,11 @@ private theorem reflectionEffect_zero_mul_X_sub_X_mul_one
       congr 1
       noncomm_ring
 
-private theorem X_mul_reflectionEffect_one_mul_X_sub_zero
+/-- Formalization-only spectral identity for `thm:ms-rigidity`: conjugating the
+negative spectral effect of a binary observable by a second binary observable
+returns the positive spectral effect up to half the anticommutator of the
+two observables. -/
+theorem X_mul_reflectionEffect_one_mul_X_sub_zero
     {ι : Type} [Fintype ι] [DecidableEq ι]
     (X Z : Op ι) (hX : IsBinaryObservable X) :
     X * reflectionEffect Z 1 * X - reflectionEffect Z 0 =
