@@ -10,6 +10,7 @@
 #                         [--persona-ref REF]     trusted ref for personas (default: main)
 #                         [--no-persona]          dispatch with the built-in role frame only
 #                         [--resume THREAD_ID]    continue an existing codex thread
+#                         [--account ACCOUNT]     auto|primary|second (default auto)
 #                         [--effort LEVEL]        model_reasoning_effort override
 #                         [--context-file FILE]   untrusted data to attach (repeatable)
 #                         [--pr ID]               PR id recorded in the registry line
@@ -47,6 +48,8 @@
 #   MIPSTARRE_SESSION (dispatching session name), MIPSTARRE_DISPATCH_LOCK_WAIT,
 #   MIPSTARRE_MAX_CONTEXT_BYTES (default 100000), MIPSTARRE_LAKE_ROOT,
 #   LOCAL_REVIEW_ENABLED.
+#   MIPSTARRE_CODEX_ACCOUNT (auto|primary|second), MIPSTARRE_ACCOUNT_WAIT
+#   (seconds, default 1800), MIPSTARRE_CODEX_HOME_SECOND (second account home).
 
 set -euo pipefail
 
@@ -98,6 +101,9 @@ release_locks() {
 }
 
 cleanup() {
+  if [ "${ACCOUNT_ROUTING:-0}" -eq 1 ]; then
+    rm -f "$CACHE_ROOT/accounts/primary/$$" "$CACHE_ROOT/accounts/second/$$"
+  fi
   release_locks
   # A capture file is created early to reserve the sequence number. If we die
   # before codex ever ran, release it again so the number is not burned and no
@@ -153,6 +159,8 @@ PERSONA=""
 PERSONA_REF="${MIPSTARRE_PERSONA_REF:-main}"
 NO_PERSONA=0
 RESUME_ID=""
+ACCOUNT="${MIPSTARRE_CODEX_ACCOUNT:-auto}"
+ACCOUNT_WAIT="${MIPSTARRE_ACCOUNT_WAIT:-1800}"
 EFFORT=""
 PR_ID=""
 DRY_RUN=0
@@ -177,6 +185,7 @@ while [ "$#" -gt 0 ]; do
     --persona-ref) require_value "$1" "$#"; PERSONA_REF="$2"; shift 2 ;;
     --no-persona) NO_PERSONA=1; shift ;;
     --resume) require_value "$1" "$#"; RESUME_ID="$2"; shift 2 ;;
+    --account) require_value "$1" "$#"; ACCOUNT="$2"; shift 2 ;;
     --effort) require_value "$1" "$#"; EFFORT="$2"; shift 2 ;;
     --context-file)
       require_value "$1" "$#"
@@ -195,6 +204,14 @@ while [ "$#" -gt 0 ]; do
 done
 
 TASK_PROMPT="$*"
+
+case "$ACCOUNT" in
+  auto|primary|second) ;;
+  *) die 2 "--account must be auto, primary, or second" ;;
+esac
+case "$ACCOUNT_WAIT" in
+  ''|*[!0-9]*) die 2 "MIPSTARRE_ACCOUNT_WAIT must be a whole number of seconds" ;;
+esac
 
 [ -n "$ROLE" ] || die 2 "--role is required (one of: $ROLES)"
 [ -n "$ISSUE" ] || die 2 "--issue is required (an issue id such as 0042, or a scope word)"
@@ -598,6 +615,23 @@ PROMPT_TEXT="$(cat "$PROMPT_FILE")"
 # codex invocation
 # ---------------------------------------------------------------------------
 
+if [ "$DRY_RUN" -eq 0 ] && [ "$SANDBOX" != "read-only" ]; then
+  WT_KEY="$(printf '%s' "$WORKTREE_ABS" | cksum | tr -d ' ' | cut -c1-12)"
+  WT_BASE="$(printf '%s' "$(basename "$WORKTREE_ABS")" | tr -c 'A-Za-z0-9._-' '-')"
+  acquire_lock "worktree-$WT_BASE-$WT_KEY" "$LOCK_WAIT" "worktree $WORKTREE_ABS"
+fi
+ROUTER_ARGS=("$CACHE_ROOT" "$ACCOUNT" "$$" "$ACCOUNT_WAIT" "$REGISTRY")
+if [ -n "$RESUME_ID" ]; then ROUTER_ARGS+=(--resume "$RESUME_ID"); fi
+if [ "$DRY_RUN" -eq 1 ]; then ROUTER_ARGS+=(--dry-run); fi
+ACCOUNT_ROUTING=1
+ROUTING="$(python3 "$SCRIPT_DIR/account_router.py" "${ROUTER_ARGS[@]}")"
+ACCOUNT="${ROUTING%%$'\n'*}"
+MIPSTARRE_CODEX_MODEL="${ROUTING#*$'\n'}"
+ACCOUNT_ENV=(env -u CODEX_HOME)
+if [ "$ACCOUNT" = second ]; then
+  ACCOUNT_ENV+=("CODEX_HOME=${MIPSTARRE_CODEX_HOME_SECOND:-$HOME/.cache/mipstarre-dev/codex-home-yxy}")
+fi
+
 CODEX_ARGS=(exec)
 CODEX_ARGS[${#CODEX_ARGS[@]}]="--json"
 CODEX_ARGS[${#CODEX_ARGS[@]}]="-C"
@@ -629,6 +663,7 @@ CODEX_ARGS[${#CODEX_ARGS[@]}]="$PROMPT_TEXT"
 
 if [ "$DRY_RUN" -eq 1 ]; then
   printf 'name: %s\n' "$NAME"
+  printf 'account: %s\n' "$ACCOUNT"
   printf 'worktree: %s\n' "$WORKTREE_ABS"
   printf 'sandbox: %s\n' "$SANDBOX"
   printf 'persona: %s\n' "$PERSONA_LABEL"
@@ -643,16 +678,7 @@ if [ "$DRY_RUN" -eq 1 ]; then
   exit 0
 fi
 
-# One writing session per worktree: parallel write sessions in one worktree
-# collide on the same files and on .lake (study-map gotcha: parallel subagents
-# must live in separate worktrees).
-if [ "$SANDBOX" != "read-only" ]; then
-  WT_KEY="$(printf '%s' "$WORKTREE_ABS" | cksum | tr -d ' ' | cut -c1-12)"
-  WT_BASE="$(printf '%s' "$(basename "$WORKTREE_ABS")" | tr -c 'A-Za-z0-9._-' '-')"
-  acquire_lock "worktree-$WT_BASE-$WT_KEY" "$LOCK_WAIT" "worktree $WORKTREE_ABS"
-fi
-
-note "dispatching $NAME (role=$ROLE sandbox=$SANDBOX worktree=$WORKTREE_ABS)"
+note "dispatching $NAME (role=$ROLE account=$ACCOUNT sandbox=$SANDBOX worktree=$WORKTREE_ABS)"
 
 # stdin is closed: codex exec reads piped stdin as extra prompt input, which
 # would silently splice the caller's stdin into the session.
@@ -660,12 +686,13 @@ CODEX_STARTED=1
 set +e
 if [ -n "${MIPSTARRE_SESSION_TIMEOUT:-}" ]; then
   timeout --signal=TERM --kill-after=30s "$MIPSTARRE_SESSION_TIMEOUT" \
-    codex "${CODEX_ARGS[@]}" </dev/null | tee "$CAPTURE"
+    "${ACCOUNT_ENV[@]}" codex "${CODEX_ARGS[@]}" </dev/null | tee "$CAPTURE"
 else
-  codex "${CODEX_ARGS[@]}" </dev/null | tee "$CAPTURE"
+  "${ACCOUNT_ENV[@]}" codex "${CODEX_ARGS[@]}" </dev/null | tee "$CAPTURE"
 fi
 CODEX_EXIT="${PIPESTATUS[0]}"
 set -e
+rm -f "$CACHE_ROOT/accounts/$ACCOUNT/$$"
 
 END_TS="$(date +%Y-%m-%dT%H:%M:%S%z)"
 release_locks
@@ -680,7 +707,7 @@ cp "$LAST_MESSAGE" "$PUBLISHED_CAPTURE_DIR/$NAME.last.md" 2>/dev/null ||
 
 SUMMARY_SH="$RUN_TMPDIR/summary.sh"
 TELEM_ARGS=(--repo-root "$REPO_ROOT" session-summarize "$PUBLISHED_CAPTURE_DIR/$NAME.jsonl"
-  --name "$NAME" --role "$ROLE" --issue "$ISSUE"
+  --name "$NAME" --role "$ROLE" --issue "$ISSUE" --account "$ACCOUNT"
   --start "$START_TS" --end "$END_TS" --exit-code "$CODEX_EXIT"
   --dispatcher "$DISPATCHER" --worktree "$WORKTREE_ABS"
   --append-to "$REGISTRY" --shell-out "$SUMMARY_SH")
@@ -688,13 +715,18 @@ if [ -n "$PR_ID" ]; then
   TELEM_ARGS[${#TELEM_ARGS[@]}]="--pr"
   TELEM_ARGS[${#TELEM_ARGS[@]}]="$PR_ID"
 fi
+if [ -n "${MIPSTARRE_CODEX_MODEL:-}" ]; then
+  TELEM_ARGS[${#TELEM_ARGS[@]}]="--model"
+  TELEM_ARGS[${#TELEM_ARGS[@]}]="$MIPSTARRE_CODEX_MODEL"
+fi
 
-if ! python3 "$TELEMETRY_PY" "${TELEM_ARGS[@]}" >/dev/null; then
+if ! "${ACCOUNT_ENV[@]}" python3 "$TELEMETRY_PY" "${TELEM_ARGS[@]}" >/dev/null; then
   die 6 "telemetry append failed for $NAME.
   The event stream is intact at $CAPTURE — replay it with:
     python3 $TELEMETRY_PY session-summarize $CAPTURE --name $NAME \\
       --role $ROLE --issue $ISSUE --start $START_TS --end $END_TS \\
-      --exit-code $CODEX_EXIT --append-to $REGISTRY
+      --exit-code $CODEX_EXIT --account $ACCOUNT --model $MIPSTARRE_CODEX_MODEL \\
+      --append-to $REGISTRY
   Do not leave the session unrecorded (meta.md, telemetry duties)."
 fi
 

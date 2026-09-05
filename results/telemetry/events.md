@@ -2961,6 +2961,26 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   primary checked-push tool. The parent shell owns labelled autofix for F1;
   this session does not dispatch, run a full build, or conduct review.
 
+## 2026-09-06T01:30+08:00 — Codex session rows omit the selected model
+
+- The model-comparison report had to recover Codex models from rollout files or
+  time-based inference because `sessions.jsonl` did not record the model passed
+  by `dispatch.sh`; the inference cannot reliably preserve per-dispatch
+  `MIPSTARRE_CODEX_MODEL` overrides. Issue #231 requests recording the exact
+  explicit selection on new rows while leaving historical rows unchanged.
+
+## 2026-09-05 — Two accounts and router shim (recorded 2026-09-06)
+
+- Issue #232's supplied operator report describes two configured Codex accounts
+  and a temporary PATH router deployed at 17:20Z on September 5, comparing live
+  process counts against capacities 9/10. The owner requested moving selection
+  into the dispatcher, with per-account reservations and recorded account/model
+  identity. This is reported operational evidence, not a live probe by this
+  implementation session; no runtime shim, configuration, or credentials were
+  inspected or changed here. The completed #231 model-telemetry change is reused
+  in #232 rather than published separately. After merge the operator must retire
+  shim routing and restore the aggregate watchdog cap to the sum of account caps.
+
 ## 2026-09-05T16:52Z — Released worktrees and final scoped repairs
 
 - Owner reports on progress log 27 release issue 118 at 16:12Z and all remaining

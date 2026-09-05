@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 #
 # review.sh — model-backed review of a GitHub PR, chained after a green CI.
+# Account routing passes MIPSTARRE_CODEX_ACCOUNT, MIPSTARRE_ACCOUNT_WAIT and
+# MIPSTARRE_CODEX_HOME_SECOND through unchanged to dispatch.sh.
 #
 # Usage:
 #   local/bin/review.sh <pr-number> [--force-review] [--dry-run]
