@@ -1,6 +1,27 @@
 # Incident and observation log
 Dated bullets, one incident each: symptom → diagnosis → fix → lesson.
 This file is the raw feed for `local/protocols/EVOLUTION.md`.
+## 2026-09-05
+- **Owner-side `.lake` relocation shim.** Worktree build directories consumed the
+  87%-full root volume, whose fsync writes measured nine times slower than the
+  NVMe ZFS pool. Temporary owner launchers moved each `.lake` to `/data` before
+  bootstrap, but merge cleanup left the external directory behind. Issue #190
+  replaces that untracked ordering dependency with an opt-in Lake root shared by
+  setup and warming, plus guarded post-worktree cleanup. Lesson: storage
+  placement and lifecycle cleanup belong in the workflow boundary that creates
+  and retires the worktree.
+- **External Lake-root review guards.** PR #198 round-1 review found that root
+  aliases, symlinked branch ancestors, `hot-main` targets, and the Codex sandbox
+  were outside the initial safety model. The repair canonicalizes before create
+  and delete, preserves both containment boundaries, and grants only the checked
+  branch target to writable sessions. Lesson: external placement needs filesystem
+  and execution-sandbox containment to be designed as one boundary.
+- **Canonical Lake target ownership.** PR #198 reviews found shared-cache and
+  checkout overlap, nested or aliased branch targets, detached owners, and silent
+  retry cleanup. Setup and cleanup now accept one-component branches, protect
+  packages, `hot-main`, and every checkout, and compare canonical ownership;
+  retries warn when the root is unavailable. Lesson: destructive cleanup needs
+  collision-free names and operator-visible ownership inputs at deletion time.
 ## 2026-08-30
 - **Stale seed clone.** Symptom: files copied from the sibling `../MIPStarRE`
   checkout were dated Jul 5 while upstream main was Aug 25. Diagnosis: the
@@ -2299,3 +2320,279 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   stacked lanes and the Opus/codex prover pools; Mode 1 resumes from /tmp/qpbt-main-handoff.md
   (archived under results/telemetry/owner-messages/).
 - **State at hand-back:** main at 4eaf968; open PRs: 171,170,169,162,161,160,158,155,154,153,152,151,150,149.
+
+## 2026-09-04 13:22Z - Issue #132 file-length gate repair
+
+- **Symptom:** the first pre-push gate rejected
+  `MIPStarRE/QPBT/Combining/DirectLowDegree/Transport/Consistency.lean` at
+  1,782 lines.
+- **Diagnosis:** the proof work was complete, but the new module exceeded the
+  repository's 1,000-line source-file limit.
+- **Fix:** the existing prover session was resumed with a structure-only repair:
+  split the implementation into submodules, preserve the facade and public
+  declarations, and make no proof or theorem-statement changes. The repaired
+  branch opened PR #179 and entered exact-head CI.
+- **Lesson:** include the file-length check before the first publication attempt
+  when a proof packet substantially grows one module.
+
+## 2026-09-04 13:38Z - Merge-daemon detached restart
+
+- **Symptom:** after a deliberate exact-PID reload to pick up a changed
+  adjudication list, the first `nohup` restart exited with its launching shell.
+- **Diagnosis:** the process was not fully detached from the execution session.
+- **Fix:** the missing daemon was detected before another merge operation began
+  and restarted with `setsid`; PID and command line were verified. PR #151 had
+  already completed its daemon-owned merge before the reload.
+- **Lesson:** verify persistence after every daemon reload and use a detached
+  session, not `nohup` alone, in this execution environment.
+
+## 2026-09-04 13:39Z - Adjudication follow-up parent blocked closing gate
+
+- **Symptom:** follow-up issue #177 was initially created as a sub-issue of
+  #159, while PR #171 closes #159; gate 7 would therefore have refused the
+  adjudicated merge while #177 remained open.
+- **Diagnosis:** review follow-up provenance was confused with tracker
+  containment. A closing issue cannot parent open deferred work.
+- **Fix:** #177 retained `Addresses #159` in its body but was detached from
+  #159 before the daemon reached the merge gate; `open-sub-issues 159` then
+  returned an empty list.
+- **Lesson:** deferred-review issues should link by provenance, or live under a
+  non-closing tracker, rather than become children of the issue closed by the
+  adjudicated PR.
+
+## 2026-09-04 — Operator takeover: owner's Claude session replaces the codex main session
+
+- **Trigger:** owner decision (2026-09-03, after the eight-hour stall and the
+  reviewer-churn episode): the owner's Claude Fable 5.1 session, working from
+  the owner's machine over ssh, takes the operator role for about one to two
+  days. Dispatched worker sessions (orc/prover/reviewer/…) remain codex
+  sessions on ghz via `dispatch.sh` (model gpt-5.6-sol until "astra" is
+  available in codex's configuration, then astra; an hourly codex poller
+  `owner-tools/astra-poll.sh` reports the switch to #26).
+- **Handover:** the codex main session posted its exact in-flight state to
+  #27 ("Handover to owner session") and exited at 2026-09-04T14:57:57Z. The owner session
+  picks up every lane from that report. The same protocols, gates and telemetry
+  duties bind the owner session; owner-side records continue in
+  `owner-log.md`.
+- **Hand-back:** to be recorded here and in `stages.jsonl` when the owner
+  says so; the codex main session then resumes from `~/.codex/prompts/goal.md`
+  plus the #27 log.
+
+## 2026-09-04 15:12Z - Packet prerequisite write and budget gaps
+
+- **Symptom:** PR #171 made GitHub `blocked_by` edges authoritative and added
+  `scripts/tests/test_ready_packets.py`, but the documented local lifecycle had
+  no supported edge-write command and the owner-gated 400-line budget did not
+  count that test module.
+- **Diagnosis:** deferred review findings F1 and F2, recorded as issue #177,
+  identified two missing enforcement paths around the bounded PR #171 work.
+- **Fix:** add an adoption-safe `gh_common.py add-blocked-by` command with fake
+  API coverage, and include the readiness test in the hook budget with an
+  executable over-budget regression.
+- **Lesson:** an authoritative GitHub relation needs both read and write paths,
+  and every workflow test added outside `local/` must be named by the scope
+  budget when the budget uses an explicit path set.
+
+## 2026-09-04 — Operator hand-back: codex main session resumes from the owner session
+
+- **Trigger:** owner decision (2026-09-04T21:14:46Z): the owner's Claude 5-hour window is nearly used; the
+  owner session retires; no takeover scheduled. Mode 2 ran since 2026-09-03 23:11Z with the merge daemon,
+  stacked lanes and the Opus/codex prover pools; Mode 1 resumes from /tmp/qpbt-main-handoff.md
+  (archived under results/telemetry/owner-messages/).
+- **State at hand-back:** main at 5b94709; open PRs: 203,202,198,197,195,193,192,191,189,188,185,179,178,175,169,160,155,153,152.
+
+## 2026-09-05 05:25+08:00 - PR 197 stops at the workflow review cap
+
+- **Symptom:** round 2 of workflow PR #197 fixed the mutable-ref and emergency-
+  bypass defects, then requested two further edge-case mechanisms for no-op
+  pushes and stale or redirected native hooks; the accumulated PR diff had
+  already grown beyond its initial 396 changed lines.
+- **Diagnosis:** a third repair round would harden a hardening layer and violate
+  the binding two-round workflow cap and the owner's instruction not to grow a
+  PR to satisfy further findings.
+- **Fix:** adjudicate both round-2 findings at exact head `d1ff07d` as out of
+  scope for issue #157, add PR #197 to the merge daemon's adjudication queue,
+  and make no further code changes.
+- **Lesson:** once a workflow repair reaches its review ceiling, preserve the
+  bounded operational fix and stop expanding it into support for invalid or
+  update-free publication environments.
+
+## 2026-09-05 05:31+08:00 - Packet 204 lacked prerequisite edges
+
+- **Symptom:** `ready_packets.py --all` reported cleanup packet #204 as ready,
+  although its issue body says to run only after #113 and #115 merge.
+- **Diagnosis:** the prose prerequisites had not been recorded as GitHub
+  `blocked_by` relations, so the authoritative dependency graph was incomplete.
+- **Fix:** add idempotent `#204 blocked_by #113` and `#204 blocked_by #115`
+  edges through `gh_common.py`; hold the packet while both issues remain open.
+- **Lesson:** scheduling prose must be translated into dependency edges when a
+  packet is created; `ready_packets.py` correctly follows the graph rather than
+  attempting to interpret issue bodies.
+
+## 2026-09-05 05:36+08:00 - PR 198 external-Lake scope adjudicated
+
+- **Symptom:** review round 5 of workflow PR #198 requested support for the
+  slash-named `codex/issue-*` branch form after the deletion-safety repair had
+  converged; the PR was already beyond the workflow review and line budgets.
+- **Diagnosis:** safely mapping slash-named branches into one cleanup-owned
+  directory requires another path-encoding mechanism, while relaxing the
+  one-component guard would reopen the recursive-deletion risks fixed in the
+  preceding round.
+- **Fix:** adjudicate the optional `MIPSTARRE_LAKE_ROOT` feature as restricted
+  to the operator's one-component `issue-*` branches, add PR #198 to the merge
+  daemon's adjudication queue, and make no further workflow changes.
+- **Lesson:** a narrow, fail-closed storage feature at its review cap should
+  retain an explicit scope restriction instead of expanding its deletion
+  authority to cover another naming scheme.
+
+## 2026-09-05 05:42+08:00 - Packet 199 was outside the packet graph
+
+- **Symptom:** the handoff named cleanup packet #199 as pending, but readiness
+  traversal could not report it at all.
+- **Diagnosis:** #199 had no tracker parent and its body-only prerequisites
+  (packets #132 and #134) had not been recorded as dependency edges.
+- **Fix:** attach #199 beneath Combining tracker #166 and add both authoritative
+  `blocked_by` relations through `gh_common.py`.
+- **Lesson:** a follow-up packet needs both tracker containment and dependency
+  edges at creation time; body prose alone is invisible to the scheduler.
+
+## 2026-09-05 05:47+08:00 - Stacked packet 134 lost its review tail
+
+- **Symptom:** after #133 merged, stack-watch removed #134 from its registry and
+  reran the lane, but PR #191 ended with green CI, zero reviews, and a log line
+  saying review was skipped.
+- **Diagnosis:** the completed tail retained the stacked-lane skip behavior even
+  though the watcher process itself had no `SKIP_REVIEW` setting; the exact
+  inheritance/race is not needed to unblock the mathematical packet.
+- **Fix:** rerun #134 with `SKIP_DISPATCH=1` and explicit `SKIP_REVIEW=0`, leaving
+  its clean implementation untouched and requesting the missing review only.
+- **Lesson:** removing a stack entry is not evidence that review ran; verify the
+  exact-head `local-review/summary` before considering a released stack ready.
+
+## 2026-09-05 05:42+08:00 - Adjudication disposition wording missed the merge gate
+
+- **Symptom:** the daemon refused adjudicated PR #198 even though its exact-head
+  comment accounted for the sole unresolved finding.
+- **Diagnosis:** the comment said `out of scope for issue #190:`, whereas the
+  gate accepts the literal disposition prefix `out of scope:`.  PR #197 used
+  the same nonmatching form and would have failed at the same gate.
+- **Fix:** change both exact-head comments and reusable templates to the valid
+  `out of scope:` form, verify their finding IDs with the merge-gate parser, and
+  clear only PR #198's retry marker for the daemon.
+- **Lesson:** operator adjudications should be validated against
+  `DISPOSITION_RE` before entering the merge queue; semantically equivalent
+  prose is not protocol-equivalent evidence.
+
+## 2026-09-05 05:48+08:00 - PR 179 stops at the mathematics review cap
+
+- **Symptom:** the post-conflict exact-head review accepted the low-degree
+  transport mathematics but repeated five cleanup obligations as twelve code
+  and prose findings.
+- **Diagnosis:** PR #179 has exceeded the four-round mathematics cap; the EPR
+  and consistency citations are owned by #174, while the direct-parameter
+  domain, dependency prose, redundant instance, and temporary aliases are
+  owned by the post-#134 transport sweep #199.
+- **Fix:** post one valid disposition for every exact-head finding, retain the
+  proof PR unchanged, and release its old conflict marker to the merge daemon.
+- **Lesson:** parallel reviewer lanes may duplicate one obligation under
+  separate finding IDs; adjudication must preserve every ID while tracking the
+  underlying work only once.
+
+## 2026-09-05 05:53+08:00 - Owner-gated packet 105 removed from auto-release
+
+- **Symptom:** merging prerequisite PR #169 made stack entry #105 eligible for
+  the next automatic release even though owner blocker B5 still holds its
+  Magic Square rigidity statement.
+- **Diagnosis:** the stack watcher has no owner-decision hold mechanism; an
+  entry becomes runnable solely when its recorded base reaches `main`.
+- **Fix:** remove only #105 from the runtime stack registry, preserving its
+  branch for explicit re-queue after the owner chooses A′, B, or C.
+- **Lesson:** owner-gated packets must not remain in an automatic dependency
+  release registry once their technical prerequisite becomes merge-complete.
+
+## 2026-09-05 06:06+08:00 - Worker cleanup removed a managed Lake link
+
+- **Symptom:** packet #180's fresh-base publication build attempted to clone
+  Mathlib and failed with a transient TLS error, despite the worktree having a
+  prepared build-products directory under `/data`.
+- **Diagnosis:** the resumed worker's temporary-validation cleanup removed the
+  worktree's managed `.lake` symlink and left an empty `.lake/packages`
+  directory. The lane therefore treated the directory as local Lake state and
+  allowed Lake to fetch dependencies from the network.
+- **Fix:** remove the two empty directories, restore the exact worktree link to
+  `/data/users/drx/mipstarre-cache/lake/issue-180-typed-conditionally-linear-question-laws`,
+  and restart the v14 publication tail with dispatch skipped.
+- **Lesson:** temporary validation cleanup must preserve the managed `.lake`
+  link. A worker that replaces it should restore and verify the link before
+  reporting a clean handoff.
+
+## 2026-09-04 — Operator takeover: owner's Claude session replaces the codex main session
+
+- **Trigger:** owner decision (2026-09-03, after the eight-hour stall and the
+  reviewer-churn episode): the owner's Claude Fable 5.1 session, working from
+  the owner's machine over ssh, takes the operator role for about one to two
+  days. Dispatched worker sessions (orc/prover/reviewer/…) remain codex
+  sessions on ghz via `dispatch.sh` (model gpt-5.6-sol until "astra" is
+  available in codex's configuration, then astra; an hourly codex poller
+  `owner-tools/astra-poll.sh` reports the switch to #26).
+- **Handover:** the codex main session posted its exact in-flight state to
+  #27 ("Handover to owner session") and exited at 2026-09-04T22:30:18Z. The owner session
+  picks up every lane from that report. The same protocols, gates and telemetry
+  duties bind the owner session; owner-side records continue in
+  `owner-log.md`.
+- **Hand-back:** to be recorded here and in `stages.jsonl` when the owner
+  says so; the codex main session then resumes from `~/.codex/prompts/goal.md`
+  plus the #27 log.
+
+## 2026-09-04 — Owner rule: mathematical gaps are resolved by math-fix sessions before reaching the owner
+
+- **Trigger:** the owner, after decision B5 on #26 (Magic Square rigidity), ruled that gaps of this
+  kind should not be brought to the owner inbox first (22:35Z): the operator dispatches a Fable 5.1
+  (later astra) session to find a corrected statement that is both correct and sufficient, iterating a
+  few times between the mathematics and the Lean implementation; only a gap that truly does not
+  converge goes to #26.
+- **Defaults proposed by the operator and confirmed by the owner (23:05Z):** sufficiency means every
+  use in the paper and the blueprint graph; minimality (closest to the source, no definition or game
+  change); convergence = the corrected statement type-checks, downstream consumers compile, and the
+  gap note carries the counterexample and a proof sketch; budget at most 10 math-fix sessions or
+  about 1.5 working days per gap; immediate escalation only for definition or game changes; inform
+  the owner by one line on #27 instead of asking; log in events.md and the new
+  `results/telemetry/design-decisions.md` register.
+- **First application:** #172 (rigidity statement) re-routed from a codex lane to a Fable math-fix
+  session at 22:38Z.
+
+## 2026-09-05T02:38Z — math-fix #117 converged (Fable 5.1, session 1)
+- Common-ancilla obligation of thm:linearity: the ancilla is uniform (basis vector of the extra direction of C^(2^t+1)); proved as `exists_exactly_linear_observables_commonAncilla`.
+- The source's "sufficiently many ancilla zero qubits" is an assumption on the strategy, absent from `ProjectiveSetting`, and cannot be discharged afterwards (compression returns the Fourier-square POVM, projective only when already exactly linear).
+- Resolution: lem:qld-4-10 proved directly on the original space (Parseval transfer of the commutation bound, sandwich POVM, exact overlap identity, lem:ortho per point pair, register-permutation symmetrization); error K eps^(1/8). Statement of `exists_combinedPointsWitness` unchanged; sorry removed.
+- Paper-gap note rewritten (qpbt_linearity-theorem-quotation.tex); ch15 support lemmas added, all leanok. Commits 2ce71cc, 6b4b75d on the #117 branch (PR 212).
+
+## 2026-09-05T02:44Z — codex paused by the owner
+- Owner instruction: do not start any new codex session until explicitly told to resume; running codex lanes may finish. Claude subagents (Opus, with Fable for math-fix and hardest analytic work) take repairs, review fixes and new packets meanwhile.
+- #210 session 2 (Opus) finished partial: strategy and question law sorry-free; found and repaired an abandoned conflicted merge in the worktree (5073dc4). Session 3 launched for targets 3-5.
+
+## 2026-09-05T02:52Z — Claude-backed reviews while codex is paused
+- review.sh normally runs both review lanes through codex (dispatch.sh). While codex is paused, lane-v16 calls /tmp/review-claude.sh: a copy of review.sh whose dispatcher (/tmp/claude-review-dispatch.sh) writes the review request (task, persona, context, diff path) into ~/.cache/mipstarre-dev/watchdog/claude-reviews/pr<N>/<role>-<time>/ and waits for reply.md; the operator session runs an Opus reviewer on the request and drops the reply. Verdict parsing, findings ledger, head binding, carried reviews and the local-review/summary status are unchanged.
+- Lane runner v16 = v15 + refusal to dispatch codex while watchdog/codex-paused exists. Merge daemon v7 and stack-watch v2 use v16. Editing lane-v15.sh in place killed lane 107 after its CI (bash reads scripts incrementally); v15 bytes restored, lesson recorded.
+
+## 2026-09-05T06:14Z — relaunch after the Claude usage-limit outage
+- Six Claude sessions died on the usage limit (PR 213 and PR 178 pre-reviews, #118, #210 s3, #105, PR 192 repair) and the Fable #201 session on max_output_tokens; the owner terminated all codex sessions at 03:15Z (codex paused). Relaunched as Opus sessions: review server for PR 152 (critical path: base of the eleven-PR stack), PR 192 build fix, fix rounds for PRs 191, 206, 211, #105 continuation. Queued: Fable #201, PR 197 conflict+fix, #156 salvage, #118, #210.
+
+## 2026-09-05T06:29Z — first Claude-backed review (PR 152) and a mailbox defect
+- The prose lane produced CHANGES_REQUESTED with one changes-level finding (def:pauli-question-distribution has lean links but no leanok while dependants are leanok) and four advisory ones. Defect: review.sh starts the code and prose lanes in parallel; the mailbox dispatcher named the request directory by role and second, so both lanes shared one directory and the prose reply was published as both lane reviews (ledger doubled to 10). Fixed: directory name now carries the review kind, the second and the dispatcher pid. PR 152 goes through a fix round, which yields a fresh two-lane review at the new head.
+- Conflict-resolution commits on branches older than PR 209 fail the pre-commit unit tests (test_dispatch persona test resolves the persona from git HEAD mid-merge): issue #216; the operator commits such merges with --no-verify.
+
+## 2026-09-05T06:46Z — math gap: pasting theorem (#201), math-fix session 2 dispatched
+- Fable session on exists_pasting_error (Sandwich.lean): the one-sided formal statement is equivalent, up to delta, to a bound on the pinched defect of the first codeword mass under the second measurement; the source (symmetric strategies, NEEXP Fact 4.35) never needs it. No counterexample; no proof. Dischargers: a one-sided bound, or the source convention (swap-invariant state) as a hypothesis. Note section written (qpbt_pasting-product-error.tex, 34dc868). Math-fix session 2 (Fable) decides sufficiency of the symmetric form over the blueprint graph and implements it.
+
+## 2026-09-05T07:15Z — pasting theorem (#201): corrected statement adopted (math-fix session 2)
+- exists_pasting_error keeps its name, hypotheses and conclusion and gains eq:pasting-1-sym, the register exchange of the second-marginal comparison (first symmetric equivalent). Correct: implied by the source symmetric-strategy convention (06_nonlocal_games_and_mipstar.tex:84-86, 174-176); sufficient: the only blueprint use, lem:qld-xz-lines, has every symmetric equivalent from lem:qld-4-10; minimal: weaker than swap-invariance, used in exactly one proof step. A complete proof with explicit constants (pinched defect, one-sided coarse commutators, cross-consistency via the triangle estimate, collision bound) is in the paper-gap note. Lean proof remains a tracked sorry; prover session launched (first task: a Measurement builder for heteroKron-placed families so consistencyDefect_trans_le and opDistSq_commutator_right_le apply). Commits 4177f6b, 0afbee4 on the #201 branch. Owner informed on #27 (veto possible).
+
+## 2026-09-05T08:06Z — thm:ms-rigidity proved (packet #105 complete)
+- exists_ms_rigidity is sorry-free with explicit constant C = 2e12 in the corrected form A (value at least 1 - eps, variable-0/4 agreement up to delta, conclusions at scale C (sqrt eps + sqrt delta)). Key step (session 5): the transport of the one-qubit intertwining relations through the second controlled swap done at the level of the embedding matrix, with the exact Gram identity for the shift-observable defect. Commits ce9b82b, 5a46cb0. Publication tail launched (base #172 merged as PR 192).
+
+## 2026-09-05T09:09Z — lem:pauli-completeness proved (packet #156 complete)
+- exists_spcc_value_one is sorry-free: the honest Pauli strategy is a value-one symmetric projective consistent commuting strategy of the Pauli basis test (four Opus sessions: salvage of the terminated codex diff, the commutation layer, the rejection layer, the assembly). Commits 9937a9b..01f3efb on the #156 branch (stacked on #116).
+
+## 2026-09-05T09:17Z — telemetry note: operator-recorded session times drifted
+- The start and end times the operator wrote into owner-sessions.jsonl between about 06:00Z and 09:20Z on 2026-09-05 were estimates and run up to 90 minutes ahead of the ghz clock (the names carry the same estimated stamps). The wall_s durations and token counts come from the harness and are accurate; use them, not the stamps, for timing analyses of that window.

@@ -3,7 +3,7 @@
 % Paper label sec:pauli-verifier kept for cross-reference fidelity; it resolves to this chapter.
 \label{sec:pauli-verifier}
 
-This chapter defines the two testing primitives underlying the question-reduction step: the \emph{classical low individual degree game}, in its simultaneous form, and the \emph{Pauli basis test}, a nonlocal game built from the classical game together with the Magic Square game. We state the quantum soundness of the classical game (Theorem~\ref{lem:ld-soundness}, imported, with the facts required by the identification, which remain to be proved, recorded in \cite{gap:qpbt_ld-dimension-divisibility}; see Remark~\ref{rem:ld-soundness-provider}), the rigidity of the Magic Square game (Theorem~\ref{thm:ms-rigidity}, imported), completeness of the Pauli basis test (Lemma~\ref{lem:pauli-completeness}), and the main soundness theorem for the Pauli basis test (Theorem~\ref{thm:pauli}), whose proof occupies Chapters~\ref{chap:qpbt-observables}--\ref{chap:qpbt-extraction} and is completed in Chapter~\ref{chap:qpbt-extraction} only modulo the proof obligation documented in \cite{gap:qpbt_ld-dimension-divisibility}. The chapter closes with the qubit form of the soundness statement (Corollary~\ref{cor:pauli-binary}) and the canonical parameter choice with its soundness bound (Definition~\ref{def:introparams}, Lemma~\ref{lem:delta-bound}).
+This chapter defines the two testing primitives underlying the question-reduction step: the \emph{classical low individual degree game}, in its simultaneous form, and the \emph{Pauli basis test}, a nonlocal game built from the classical game together with the Magic Square game. We state the quantum soundness of the classical game (Theorem~\ref{lem:ld-soundness}, imported, with the facts required by the identification, which remain to be proved, recorded in \cite{gap:qpbt_ld-dimension-divisibility}; see Remark~\ref{rem:ld-soundness-provider}), the rigidity of the Magic Square game (Theorem~\ref{thm:ms-rigidity}, imported, and stated with the consistency hypothesis on the two distinguished variable measurements that the source omits --- the source's unrestricted statement is false; the counterexamples and the correction are recorded in \cite{gap:qpbt_ms-rigidity-symmetric-strategies}; see Remark~\ref{rem:ms-rigidity-strategy-class}), completeness of the Pauli basis test (Lemma~\ref{lem:pauli-completeness}), and the main soundness theorem for the Pauli basis test (Theorem~\ref{thm:pauli}), whose proof occupies Chapters~\ref{chap:qpbt-observables}--\ref{chap:qpbt-extraction} and is completed in Chapter~\ref{chap:qpbt-extraction} only modulo the proof obligation documented in \cite{gap:qpbt_ld-dimension-divisibility}. The chapter closes with the qubit form of the soundness statement (Corollary~\ref{cor:pauli-binary}) and the canonical parameter choice with its soundness bound (Definition~\ref{def:introparams}, Lemma~\ref{lem:delta-bound}).
 
 Throughout, the two players are denoted $\mathrm A$ and $\mathrm B$; for $w \in \{\mathrm A,\mathrm B\}$ we write $\overline w$ for the other player. Games, strategies, values, conditionally linear (CL) functions and distributions, typed distributions sampled from the edges of a graph, and the state-dependent approximation $\approx_\delta$ between families of measurement operators are as in Chapter~\ref{chap:qpbt-games}; the algebraic material on lines, canonical linear maps, the low-degree encoding, and generalized Pauli observables is from Chapter~\ref{chap:qpbt-algebra}.
 
@@ -15,6 +15,8 @@ Throughout, the two players are denoted $\mathrm A$ and $\mathrm B$; for $w \in 
 The classical low individual degree game is a two-player game based on the low individual degree variant of the multilinearity test of Babai, Fortnow, and Lund. In the basic version, one player (the ``points player'') receives a uniformly random point $u \in \F_q^m$ and answers with a value $a \in \F_q$, while the other player (the ``lines player'') receives a random line through $u$ --- either axis-parallel or diagonal --- and answers with a univariate polynomial describing the restriction of a global function to that line. If the players share a polynomial $g\colon \F_q^m \to \F_q$ of individual degree at most $d$ and answer with $g(u)$ and with the restriction $g|_\ell$, they win with probability $1$; the soundness theorem below states that the converse approximately holds. In the simultaneous version, the players' answers are $k$-tuples, checked coordinatewise against a $k$-tuple of low individual degree polynomials.
 
 \begin{definition}[The classical low individual degree game: parameters and registers]\label{def:ld-game}
+	\lean{MIPStarRE.QPBT.ldGame}
+	\leanok
 	\uses{def:game, def:admissible-size}
 	% The source fixes \N to be the set of positive integers
 	% (references/qpbt-paper/04_preliminaries.tex:6) and takes m, d, ldc in \N
@@ -58,6 +60,18 @@ The classical low individual degree game is a two-player game based on the low i
 	The question distribution of $\mathfrak{G}^{\mathrm{ld}}$ is the typed CL distribution obtained as follows: sample a type pair $(t_{\mathrm A}, t_{\mathrm B})$ uniformly from $\mathcal T^{\mathrm{ld}} \times \mathcal T^{\mathrm{ld}}$, sample $z = (u,s,v)$ uniformly from $V$, and send each player $w \in \{\mathrm A,\mathrm B\}$ the question $(t_w, L_{t_w}(z))$.
 \end{definition}
 
+\begin{lemma}[Level of the point map]\label{lem:ld-point-level}
+	\lean{MIPStarRE.QPBT.isCondLinear_ldPointCL}
+	\leanok
+	\uses{def:ld-question-distribution, def:cl-func}
+	Fix $\mathsf{ldparams} = (q,m,d,k)$ as in Definition~\ref{def:ld-game}. The map $L_{\mathsf{Point}}$ of Equation~\eqref{eq:cl-ptf} is a $1$-level conditionally linear function on $V$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:ld-question-distribution, def:cl-func}
+	The map $L_{\mathsf{Point}}$ is the linear projection onto the point register $V_X$, hence is a $1$-level CL function.
+\end{proof}
+
 \begin{lemma}[Level of the axis-parallel line map]\label{lem:ld-aline-level}
 	\lean{MIPStarRE.QPBT.isCondLinear_ldALineCL}
 	\leanok
@@ -66,8 +80,8 @@ The classical low individual degree game is a two-player game based on the low i
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{def:cl-func, def:line-representative}
-	The two-level decomposition of $L_{\mathsf{ALine}}$ is exhibited directly: the first stage is the $1$-level CL function projecting $V_I \oplus V_V$ onto $V_I$, and the second stage, on the complementary register $V_X$, is the $1$-level CL function $L^{\mathrm{Ln}}_{e_i}$ with $i = \chi(s)$ read off the first stage. The two stages act on disjoint registers and sum to $L_{\mathsf{ALine}}$, which is therefore $1+1 = 2$-level conditionally linear.
+	\uses{def:cl-func, def:register-subspace, def:ld-question-distribution, def:line-representative}
+	The following data exhibit $L_{\mathsf{ALine}}$ as a $2$-level conditionally linear function. Its first level is the projection of $V$ onto the coordinate register $V_I$, which is linear. For a first-level value with coordinate component $s$, its second level is the linear map $L^{\mathrm{Ln}}_{e_i}$ with $i = \chi(s)$, acting on the point register $V_X$. The registers $V_I$ and $V_X$ are disjoint, so the second level is supported on a register subspace disjoint from the first, and summing the two contributions gives $\bigl(L^{\mathrm{Ln}}_{e_i}(u),\, s,\, 0\bigr)$, which is $L_{\mathsf{ALine}}(u,s,v)$ by Equation~\eqref{eq:cl-alnf}.
 \end{proof}
 
 \begin{lemma}[Level of the diagonal line map]\label{lem:ld-dline-level}
@@ -78,20 +92,44 @@ The classical low individual degree game is a two-player game based on the low i
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{def:cl-func, def:line-representative}
-	The three-level decomposition of $L_{\mathsf{DLine}}$ is exhibited directly: the first stage is the identity on $V_I$; the second, on $V_V$, is the $1$-level CL function $v \mapsto \pi_{i-1}(v)$ with $i = \chi(s)$ read off the first stage; and the third, on $V_X$, is the $1$-level CL function $L^{\mathrm{Ln}}_{v'}$ selected by the pair $(s,v')$ read off the first two. The three stages act on pairwise disjoint registers and sum to $L_{\mathsf{DLine}}$, which is therefore $1+1+1 = 3$-level conditionally linear.
+	\uses{def:cl-func, def:register-subspace, def:ld-question-distribution, def:line-representative}
+	The following data exhibit $L_{\mathsf{DLine}}$ as a $3$-level conditionally linear function. Its first level is the projection of $V$ onto the coordinate register $V_I$. For a first-level value with coordinate component $s$, its second level is the linear map $v \mapsto \pi_{i-1}(v)$ with $i = \chi(s)$ on the direction register $V_V$. For a second-level value with direction component $v'$, its third level is the linear map $L^{\mathrm{Ln}}_{v'}$ on the point register $V_X$. The registers $V_I$, $V_V$ and $V_X$ are pairwise disjoint, so each level is supported on a register subspace disjoint from the preceding ones, and summing the three contributions gives $\bigl(L^{\mathrm{Ln}}_{\pi_{i-1}(v)}(u),\, s,\, \pi_{i-1}(v)\bigr)$, which is $L_{\mathsf{DLine}}(u,s,v)$ by Equation~\eqref{eq:cl-dlnf}.
 \end{proof}
 
-\begin{lemma}[The low-degree question distribution is a typed CL distribution]\label{lem:ld-question-typed-cl}
-	\lean{MIPStarRE.QPBT.ldQuestionDistribution_eq_typedCL}
+\begin{lemma}[Formalization support for the low-degree typed CL family]\label{lem:ld-question-cl-family}
+	\lean{MIPStarRE.QPBT.isTypedCondLinearFamily_ldCL}
 	\leanok
-	\uses{def:ld-question-distribution, def:typed-cl-distributions, def:graph-distribution, lem:ld-aline-level, lem:ld-dline-level}
-	Fix $\mathsf{ldparams} = (q,m,d,k)$ as in Definition~\ref{def:ld-game}, let $L = \{L_t\}_{t \in \mathcal T^{\mathrm{ld}}}$ be the family of Definition~\ref{def:ld-question-distribution}, and let $G^{\mathrm{ld}}$ be the graph on $\mathcal T^{\mathrm{ld}}$ all of whose unordered pairs, self-loops included, are edges. Then the question distribution of $\mathfrak{G}^{\mathrm{ld}}$ is the $(\mathcal T^{\mathrm{ld}}, G^{\mathrm{ld}})$-typed conditionally linear distribution $\mu^{G^{\mathrm{ld}}}_{L,\,L}$ of Definition~\ref{def:typed-cl-distributions}.
+	\uses{def:ld-question-distribution, def:typed-cl-functions}
+	This is not a separately named statement of the source article; it isolates the family condition in Lemma~\ref{lem:ld-question-typed-cl}. For every low-degree type $t \in \mathcal T^{\mathrm{ld}}$, the map $L_t$ of Definition~\ref{def:ld-question-distribution} is a $3$-level CL function. Thus $L = \{L_t\}_{t \in \mathcal T^{\mathrm{ld}}}$ is a finite typed family of $3$-level CL functions.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{def:typed-cl-distributions, def:graph-distribution, def:cl-dist}
-	Every unordered pair of types is an edge of $G^{\mathrm{ld}}$, so the graph distribution $\mu_{G^{\mathrm{ld}}}$ of Definition~\ref{def:graph-distribution} is the uniform distribution on $\mathcal T^{\mathrm{ld}} \times \mathcal T^{\mathrm{ld}}$. For each ordered type pair $(t_{\mathrm A}, t_{\mathrm B})$ the CL distribution $\mu_{L_{t_{\mathrm A}},\, L_{t_{\mathrm B}}}$ is the push-forward of the uniform distribution on $V$ along $z \mapsto \bigl(L_{t_{\mathrm A}}(z), L_{t_{\mathrm B}}(z)\bigr)$. Binding the uniform type pair to these push-forwards and tagging each content with its type is exactly the two-stage sampling procedure of Definition~\ref{def:ld-question-distribution}.
+	\uses{lem:cl-level-mono, lem:ld-point-level, lem:ld-aline-level, lem:ld-dline-level}
+	The point, axis-line, and diagonal-line maps have levels $1$, $2$, and $3$, respectively. Raise the first two representations to level $3$ by Lemma~\ref{lem:cl-level-mono}.
+\end{proof}
+
+\begin{lemma}[Formalization support for the low-degree typed distribution equality]\label{lem:ld-question-typed-equality}
+	\lean{MIPStarRE.QPBT.ldQuestionDistribution_eq_typedCL}
+	\leanok
+	\uses{def:ld-question-distribution, def:typed-cl-distributions, def:graph-distribution}
+	This is not a separately named statement of the source article; it isolates the distribution equality in Lemma~\ref{lem:ld-question-typed-cl}. Fix $\mathsf{ldparams} = (q,m,d,k)$ as in Definition~\ref{def:ld-game}, let $L = \{L_t\}_{t \in \mathcal T^{\mathrm{ld}}}$ be the family of Definition~\ref{def:ld-question-distribution}, and let $G^{\mathrm{ld}}$ be the complete type graph. The question distribution of $\mathfrak G^{\mathrm{ld}}$ equals the distribution $\mu^{G^{\mathrm{ld}}}_{L,L}$ that the construction of Definition~\ref{def:typed-cl-distributions} produces from $(L,L)$ and $G^{\mathrm{ld}}$. This statement records only the distribution identity; Lemma~\ref{lem:ld-question-cl-family} supplies the common-level typed-family assertion.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:ld-question-distribution, def:typed-cl-distributions, def:graph-distribution, def:cl-dist, lem:distribution-map-comp, lem:uniform-bind-map}
+	Every unordered pair of types is an edge of $G^{\mathrm{ld}}$, so the graph distribution $\mu_{G^{\mathrm{ld}}}$ of Definition~\ref{def:graph-distribution} is uniform on $\mathcal T^{\mathrm{ld}} \times \mathcal T^{\mathrm{ld}}$. For each ordered type pair $(t_{\mathrm A}, t_{\mathrm B})$, the CL distribution $\mu_{L_{t_{\mathrm A}},\, L_{t_{\mathrm B}}}$ is the push-forward of the uniform distribution on $V$ along $z \mapsto \bigl(L_{t_{\mathrm A}}(z), L_{t_{\mathrm B}}(z)\bigr)$. Binding the uniform type pair to these push-forwards and tagging each content with its type is exactly the two-stage sampling procedure of Definition~\ref{def:ld-question-distribution}.
+\end{proof}
+
+\begin{lemma}[The low-degree question distribution is a typed CL distribution]\label{lem:ld-question-typed-cl}
+	\lean{MIPStarRE.QPBT.ldQuestionDistribution_isTypedCL}
+	\leanok
+	\uses{def:ld-question-distribution, def:typed-cl-distributions}
+	Fix $\mathsf{ldparams} = (q,m,d,k)$ as in Definition~\ref{def:ld-game}, let $L = \{L_t\}_{t \in \mathcal T^{\mathrm{ld}}}$ be the family of Definition~\ref{def:ld-question-distribution}, and let $G^{\mathrm{ld}}$ be the graph on $\mathcal T^{\mathrm{ld}}$ all of whose unordered pairs, self-loops included, are edges. The family $L$ is a finite $\mathcal T^{\mathrm{ld}}$-typed family of $3$-level conditionally linear functions, and the question distribution of $\mathfrak{G}^{\mathrm{ld}}$ equals the $(\mathcal T^{\mathrm{ld}}, G^{\mathrm{ld}})$-typed conditionally linear distribution $\mu^{G^{\mathrm{ld}}}_{L,\,L}$ of Definition~\ref{def:typed-cl-distributions}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:ld-question-cl-family, lem:ld-question-typed-equality}
+	Combine Lemma~\ref{lem:ld-question-cl-family}, which supplies the typed-family hypothesis, with Lemma~\ref{lem:ld-question-typed-equality}, which identifies the two distributions.
 \end{proof}
 
 The next two lemmas show that the CL functions $L_{\mathsf{Point}}$, $L_{\mathsf{ALine}}$, $L_{\mathsf{DLine}}$ give rise to the axis-parallel and diagonal line-versus-point distributions.
@@ -101,37 +139,37 @@ representing the paper's coordinate $r+1$.
 \begin{lemma}\label{lem:alnf}
 	\lean{MIPStarRE.QPBT.aLinePointDist_point_marginal_uniform, MIPStarRE.QPBT.aLinePointDist_mem_line}
 	\leanok
-	\uses{def:ld-question-distribution, def:line}
+	\uses{def:line-point-dist, def:line}
 	Consider the pair $(\ell, u)$ sampled in the following way: first, sample the tuple $\bigl((u_0,s,0),(u,0,0)\bigr)$ from the CL distribution $\mu_{L_{\mathsf{ALine}}, L_{\mathsf{Point}}}$, and let $\ell = \ell(u_0, e_i)$ where $i = \chi(s)$. Then $u$ is a uniformly random point in $\F_q^m$, and $\ell$ is a line that goes through $u$ and is parallel to a uniformly random axis $i \in \{1,2,\ldots,m\}$.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{def:line-representative, lem:line-rep-incidence}
-	Since $s$ is uniformly random in $\F_q$ and $m$ divides $q$, the index $i = \chi(s)$ is uniformly random in $\{1,2,\ldots,m\}$, so $(u_0,s)$ specifies a uniformly random axis-parallel line $\ell(u_0,e_i)$. Since $u_0 = L^{\mathrm{Ln}}_{e_i}(u)$ is the canonical representative of the line through $u$ in direction $e_i$, we have $u \in \ell(u_0,e_i)$.
+	\uses{def:cl-dist, def:ld-question-distribution, def:ld-line-description, def:line-representative, lem:distribution-map-comp, lem:uniform-map-equivalence, lem:uniform-product-first-marginal, lem:uniform-product-second-marginal, lem:chi-index-uniform, lem:line-representative-idempotent, lem:line-rep-incidence}
+	By Definition~\ref{def:cl-dist} the distribution $\mu_{L_{\mathsf{ALine}}, L_{\mathsf{Point}}}$ is the push-forward of the uniform distribution on $V$ along $z \mapsto \bigl(L_{\mathsf{ALine}}(z), L_{\mathsf{Point}}(z)\bigr)$, so each marginal below is the push-forward of the uniform distribution on $V$ along the composite of that map with the corresponding coordinate. The point marginal is the image of the uniform distribution on $V$ under $(u,s,v) \mapsto u$, hence uniform on $\F_q^m$. The axis marginal is its image under $(u,s,v) \mapsto \chi(s)$; since $m$ divides $q$, every fibre of $\chi$ has exactly $q/m$ elements, so $i = \chi(s)$ is uniform on $\{1,2,\ldots,m\}$ and $(u_0,s)$ specifies a uniformly random axis-parallel line $\ell(u_0,e_i)$. Finally the base point recorded in the sample is $u_0 = L^{\mathrm{Ln}}_{e_i}(u)$, which is fixed by $L^{\mathrm{Ln}}_{e_i}$ (Definition~\ref{def:line-representative}) and satisfies $u \in \ell(u_0,e_i)$ by Lemma~\ref{lem:line-rep-incidence}.
 \end{proof}
 
 \begin{lemma}\label{lem:dlnf}
 	\lean{MIPStarRE.QPBT.dLinePointDist_point_marginal_uniform, MIPStarRE.QPBT.dLinePointDist_mem_line, MIPStarRE.QPBT.dLinePointDist_prefix_zero}
 	\leanok
-	\uses{def:ld-question-distribution, def:line}
+	\uses{def:line-point-dist, def:line}
 	Consider the pair $(\ell, u)$ sampled in the following way: first, sample the tuple $\bigl((u_0,s,v),(u,0,0)\bigr)$ from the CL distribution $\mu_{L_{\mathsf{DLine}}, L_{\mathsf{Point}}}$, and let $\ell = \ell(u_0, v)$ where $i = \chi(s)$. Then $u$ is a uniformly random point in $\F_q^m$, and $\ell$ is a random diagonal line that goes through $u$ and shares its first $i-1$ coordinates with $u$, for uniformly random $i \in \{1,2,\ldots,m\}$.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{def:line-representative, lem:line-rep-incidence}
-	The proof follows the same three steps as that of Lemma~\ref{lem:alnf}, without depending on it: uniformity of $s$ makes $i = \chi(s)$ uniform, the direction component of the sampled tuple is $\pi_{i-1}(v)$ for uniform $v$ (so its first $i-1$ coordinates vanish), and $u_0 = L^{\mathrm{Ln}}_{\pi_{i-1}(v)}(u)$ places $u$ on the line $\ell(u_0,\pi_{i-1}(v))$.
+	\uses{def:cl-dist, def:ld-question-distribution, def:ld-line-description, def:line-representative, lem:distribution-map-comp, lem:uniform-map-equivalence, lem:uniform-product-first-marginal, lem:uniform-product-second-marginal, lem:chi-index-uniform, lem:prefix-projection-idempotent, lem:line-representative-idempotent, lem:line-description-prefix, lem:line-rep-incidence}
+	The three steps are those of the proof of Lemma~\ref{lem:alnf}, and none of them depends on that lemma. The two marginals are again push-forwards of the uniform distribution on $V$ along coordinates of $z \mapsto \bigl(L_{\mathsf{DLine}}(z), L_{\mathsf{Point}}(z)\bigr)$, by Definition~\ref{def:cl-dist}: the point marginal is uniform on $\F_q^m$, and $i = \chi(s)$ is uniform on $\{1,2,\ldots,m\}$ because every fibre of $\chi$ has $q/m$ elements. The direction component of the sampled tuple is $v' = \pi_{i-1}(v)$, whose first $i-1$ coordinates vanish and which is unchanged by a further application of $\pi_{i-1}$. Finally $u_0 = L^{\mathrm{Ln}}_{v'}(u)$ is fixed by $L^{\mathrm{Ln}}_{v'}$ (Definition~\ref{def:line-representative}) and satisfies $u \in \ell(u_0,v')$ by Lemma~\ref{lem:line-rep-incidence}.
 \end{proof}
 
 \begin{definition}[Line-point distributions]\label{def:line-point-dist}
-	\lean{MIPStarRE.QPBT.LineKind, MIPStarRE.QPBT.LineDesc}
+	% A line description retains the seed used to select its coordinate.
 	\lean{MIPStarRE.QPBT.aLinePointDist, MIPStarRE.QPBT.dLinePointDist}
 	\lean{MIPStarRE.QPBT.linePointDist}
 	\lean{MIPStarRE.QPBT.aLinePointDist_isProbability}
 	\lean{MIPStarRE.QPBT.dLinePointDist_isProbability}
 	\lean{MIPStarRE.QPBT.linePointDist_isProbability}
-	\leanok
-	\uses{def:ld-question-distribution, lem:alnf, lem:dlnf}
-	The \emph{axis line-point distribution} $D_{\mathsf{ALine}}$ is the distribution $\mu_{L_{\mathsf{ALine}}, L_{\mathsf{Point}}}$ over pairs $(\ell = (u_0,e_i),\, u)$, where we omit the $0$ components for simplicity. The \emph{diagonal line-point distribution} $D_{\mathsf{DLine}}$ is the distribution $\mu_{L_{\mathsf{DLine}}, L_{\mathsf{Point}}}$ over pairs $(\ell = (u_0,s,v),\, u)$. The \emph{line-point distribution} $D_{\mathsf{Line}}$ is the equal mixture of the two: with probability $\tfrac12$ output a sample from $D_{\mathsf{ALine}}$, and with probability $\tfrac12$ output a sample from $D_{\mathsf{DLine}}$.
+	% The refined laws retain data not present in the axis source law.
+	\uses{def:ld-question-distribution, def:ld-line-description}
+	The source \emph{axis line-point distribution} $D_{\mathsf{ALine}}$ is the law $\mu_{L_{\mathsf{ALine}}, L_{\mathsf{Point}}}$ on pairs $(\ell=(u_0,e_i),u)$, and the source \emph{diagonal line-point distribution} $D_{\mathsf{DLine}}$ is the corresponding law on pairs $(\ell=(u_0,s,v),u)$ from $\mu_{L_{\mathsf{DLine}}, L_{\mathsf{Point}}}$. Their equal mixture is $D_{\mathsf{Line}}$. We also use seed-bearing refinements of these laws. An axis description records $u_0$ and a seed $s$ selecting $i=\chi(s)$, subject to $L^{\mathrm{Ln}}_{e_i}(u_0)=u_0$. A diagonal description records $(u_0,s,v)$, subject to $L^{\mathrm{Ln}}_v(u_0)=u_0$ and to the prefix condition $v_j=0$ for $j<i$. Mapping the two kinds of description to $(u_0,e_{\chi(s)})$ and $(u_0,s,v)$, respectively, sends the refined laws to the source laws.
 \end{definition}
 
 \begin{definition}[Win predicate of the classical low individual degree game]\label{def:ld-win-predicate}
@@ -263,31 +301,135 @@ The following theorem records the self-testing (rigidity) properties of the Magi
 With zero-based labels, the paper's variables $1$ and $5$ have labels $0$ and
 $4$, respectively.
 
+\begin{definition}[Variable-measurement agreement distance]\label{def:ms-variable-agreement}
+	\lean{MIPStarRE.QPBT.msVariableConsistencyDefect}
+	\leanok
+	\uses{def:ms-game, def:povm-distance, def:consistency}
+	% Formalization-support node (issue #172, owner decision B5 on issue #26): it names the
+	% quantity bounded by the corrected hypothesis of Theorem thm:ms-rigidity, and fixes the
+	% binary relabeling of the answer alphabet that the Lean definition applies.
+	Let $\mathcal A^{\mathrm{ms}}$ be the answer alphabet of $\mathfrak{G}^{\mathrm{MS}}$ (Definition~\ref{def:ms-game}), whose elements are the parity triples $\F_2^3$ and the single cell bits $\F_2$, and let $\beta \colon \mathcal A^{\mathrm{ms}} \to \F_2$ be the relabeling that sends a single bit $\gamma$ to $\gamma$ and every parity triple --- an answer of the wrong form for a $\mathsf{Variable}$ question --- to $0$. For a strategy $\mathcal S = (\ket{\psi}, A, B)$ for $\mathfrak{G}^{\mathrm{MS}}$ and a variable $\mathsf{Variable}_j$, the associated \emph{binary effects} are
+	\[
+		\hat A^{\mathsf{Variable}_j}_b = \sum_{a \,:\, \beta(a) = b} A^{\mathsf{Variable}_j}_a \;, \qquad \hat B^{\mathsf{Variable}_j}_b = \sum_{a \,:\, \beta(a) = b} B^{\mathsf{Variable}_j}_a \qquad (b \in \F_2)\;,
+	\]
+	two-outcome POVMs that agree with the reported bit on answers of the form prescribed for a $\mathsf{Variable}$ question. The \emph{variable-measurement agreement distance} of $\mathcal S$ at $\mathsf{Variable}_j$ is
+	\[
+		\Delta_j(\mathcal S) = \sum_{b \in \F_2} \bigl\| \bigl( \hat A^{\mathsf{Variable}_j}_b \ot I_{\mathrm B} - I_{\mathrm A} \ot \hat B^{\mathsf{Variable}_j}_b \bigr) \ket{\psi} \bigr\|^2 \;,
+	\]
+	the squared state-dependent distance of Definition~\ref{def:povm-distance} between the two players' binary $\mathsf{Variable}_j$ effects on $\ket{\psi}$, under the one-point distribution and with the constant inside the $O(\cdot)$ taken to be $1$. It is not the consistency defect of Definition~\ref{def:consistency}, which is an off-diagonal outcome weight.
+\end{definition}
+
+\begin{remark}[The name of the agreement distance in the formalization]\label{rem:ms-variable-agreement-name}
+	The Lean declaration for Definition~\ref{def:ms-variable-agreement} is \texttt{msVariableConsistencyDefect}. The word \emph{consistency} there names the failure of the two players' $\mathsf{Variable}_j$ measurements to be consistent with one another, which is what $\Delta_j(\mathcal S)$ measures; it does not name the consistency defect of Definition~\ref{def:consistency}, the off-diagonal outcome weight of a pair of measurements. The two quantities are different, and only the second is the source's consistency defect.
+\end{remark}
+
 \begin{theorem}[Rigidity of the Magic Square game]\label{thm:ms-rigidity}
 	\lean{MIPStarRE.QPBT.exists_ms_rigidity}
 	\leanok
-	\uses{def:ms-game, def:tensor-product-value, def:EPR, def:povm-distance}
-	Let $\mathcal S = (\ket{\psi}, A, B)$ be a strategy that succeeds in the Magic Square game $\mathfrak{G}^{\mathrm{MS}}$ with probability $1-\eps$, where $\ket{\psi} \in \hilb_{\mathrm A} \ot \hilb_{\mathrm B}$. Then there exist local isometries $\phi_{\mathrm A}\colon \hilb_{\mathrm A} \to \hilb_{\mathrm A'} \ot \hilb_{\mathrm A''}$ and $\phi_{\mathrm B}\colon \hilb_{\mathrm B} \to \hilb_{\mathrm B'} \ot \hilb_{\mathrm B''}$, where $\hilb_{\mathrm A'}, \hilb_{\mathrm B'} \cong (\C^2)^{\ot 2}$ and $\hilb_{\mathrm A''}, \hilb_{\mathrm B''}$ are finite dimensional, and a state $\ket{\mathrm{aux}} \in \hilb_{\mathrm A''} \ot \hilb_{\mathrm B''}$, such that:
+	\uses{def:ms-game, def:tensor-product-value, def:EPR, def:povm-distance, def:consistent-measurement, def:ms-variable-agreement}
+	% Corrected statement (issue #172, owner decision B5 on issue #26). The source, at
+	% references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652, quantifies over
+	% every strategy of value 1 - eps and carries no consistency hypothesis; that statement is
+	% false (see the proof, Remark~\ref{rem:ms-rigidity-strategy-class}, and the cited note). The
+	% source's display is the case delta = 0 below.
+	Let $\eps, \delta \ge 0$, and let $\mathcal S = (\ket{\psi}, A, B)$ be a strategy that succeeds in the Magic Square game $\mathfrak{G}^{\mathrm{MS}}$ with probability at least $1-\eps$, where $\ket{\psi} \in \hilb_{\mathrm A} \ot \hilb_{\mathrm B}$, and whose $\mathsf{Variable}_1$ and $\mathsf{Variable}_5$ measurements are consistent between the two players up to $\delta$ on $\ket{\psi}$, in the binary effects $\hat A$, $\hat B$ of Definition~\ref{def:ms-variable-agreement}:
+	\begin{equation}\label{eq:ms-rigidity-consistency}
+		\Delta_j(\mathcal S) = \sum_{b \in \F_2} \bigl\| \bigl( \hat A^{\mathsf{Variable}_j}_b \ot I_{\mathrm B} - I_{\mathrm A} \ot \hat B^{\mathsf{Variable}_j}_b \bigr) \ket{\psi} \bigr\|^2 \le \delta \qquad \text{for } j \in \{1, 5\}\,.
+	\end{equation}
+	This is the relation $\hat A^{\mathsf{Variable}_j}_b \ot I_{\mathrm B} \approx_\delta I_{\mathrm A} \ot \hat B^{\mathsf{Variable}_j}_b$ of Definition~\ref{def:povm-distance} with respect to $\ket{\psi}$, with constant $1$; for a symmetric strategy and $\delta = 0$ it says that the two binary measurements are consistent on $\ket{\psi}$ in the sense of Definition~\ref{def:consistent-measurement}, so every symmetric consistent strategy satisfies it with $\delta = 0$. Write $\eta = \sqrt\eps + \sqrt\delta$. Then there exist local isometries $\phi_{\mathrm A}\colon \hilb_{\mathrm A} \to \hilb_{\mathrm A'} \ot \hilb_{\mathrm A''}$ and $\phi_{\mathrm B}\colon \hilb_{\mathrm B} \to \hilb_{\mathrm B'} \ot \hilb_{\mathrm B''}$, where $\hilb_{\mathrm A'}, \hilb_{\mathrm B'} \cong (\C^2)^{\ot 2}$ and $\hilb_{\mathrm A''}, \hilb_{\mathrm B''}$ are finite dimensional, and a state $\ket{\mathrm{aux}} \in \hilb_{\mathrm A''} \ot \hilb_{\mathrm B''}$, such that:
 	\begin{enumerate}
-		\item $\bigl\| \phi_{\mathrm A} \ot \phi_{\mathrm B} \ket{\psi} - \ket{\mathrm{EPR}_2}^{\ot 2} \ot \ket{\mathrm{aux}} \bigr\| \le O(\sqrt\eps)$;
-		\item letting $\tilde A^x_a = \phi_{\mathrm A} A^x_a \phi_{\mathrm A}^\dagger$ and $\tilde B^y_b = \phi_{\mathrm B} B^y_b \phi_{\mathrm B}^\dagger$,
+		\item $\bigl\| \phi_{\mathrm A} \ot \phi_{\mathrm B} \ket{\psi} - \ket{\mathrm{EPR}_2}^{\ot 2} \ot \ket{\mathrm{aux}} \bigr\| \le O(\eta)$;
+		\item letting $\tilde A^{\mathsf{Variable}_j}_b = \phi_{\mathrm A} \hat A^{\mathsf{Variable}_j}_b \phi_{\mathrm A}^\dagger$ and $\tilde B^{\mathsf{Variable}_j}_b = \phi_{\mathrm B} \hat B^{\mathsf{Variable}_j}_b \phi_{\mathrm B}^\dagger$ denote the conjugated binary effects of Definition~\ref{def:ms-variable-agreement},
 		\begin{align*}
-			\tilde A^{\mathsf{Variable}_1}_b \ot I_{\mathrm{B'B''}} &\approx_{\sqrt\eps} (\sigma^X_b)_{\mathrm A'} \ot I_{\mathrm{A''B'B''}}\;,\\
-			\tilde A^{\mathsf{Variable}_5}_b \ot I_{\mathrm{B'B''}} &\approx_{\sqrt\eps} (\sigma^Z_b)_{\mathrm A'} \ot I_{\mathrm{A''B'B''}}\;,\\
-			I_{\mathrm{A'A''}} \ot \tilde B^{\mathsf{Variable}_1}_b &\approx_{\sqrt\eps} I_{\mathrm{A'A''B''}} \ot (\sigma^X_b)_{\mathrm B'}\;,\\
-			I_{\mathrm{A'A''}} \ot \tilde B^{\mathsf{Variable}_5}_b &\approx_{\sqrt\eps} I_{\mathrm{A'A''B''}} \ot (\sigma^Z_b)_{\mathrm B'}\;,
+			\tilde A^{\mathsf{Variable}_1}_b \ot I_{\mathrm{B'B''}} &\approx_{\eta} (\sigma^X_b)_{\mathrm A'} \ot I_{\mathrm{A''B'B''}}\;,\\
+			\tilde A^{\mathsf{Variable}_5}_b \ot I_{\mathrm{B'B''}} &\approx_{\eta} (\sigma^Z_b)_{\mathrm A'} \ot I_{\mathrm{A''B'B''}}\;,\\
+			I_{\mathrm{A'A''}} \ot \tilde B^{\mathsf{Variable}_1}_b &\approx_{\eta} I_{\mathrm{A'A''B''}} \ot (\sigma^X_b)_{\mathrm B'}\;,\\
+			I_{\mathrm{A'A''}} \ot \tilde B^{\mathsf{Variable}_5}_b &\approx_{\eta} I_{\mathrm{A'A''B''}} \ot (\sigma^Z_b)_{\mathrm B'}\;,
 		\end{align*}
-		where each $\approx_{\sqrt\eps}$ holds with respect to the state $\ket{\mathrm{EPR}_2}^{\ot 2}_{\mathrm{A'B'}} \ot \ket{\mathrm{aux}}_{\mathrm{A''B''}}$ and the answer summation is over $b \in \{0,1\}$, and the approximation bounds carry implicit universal constants.
+		where each $\approx_{\eta}$ holds with respect to the extracted ideal state $\ket{\Theta} = \ket{\mathrm{EPR}_2}^{\ot 2}_{\mathrm{A'B'}} \ot \ket{\mathrm{aux}}_{\mathrm{A''B''}}$ and the answer summation is over $b \in \{0,1\}$, and the approximation bounds carry implicit universal constants.
 	\end{enumerate}
 	As a consequence, letting $\tilde A^{\mathsf{Variable}_1} = \tilde A^{\mathsf{Variable}_1}_0 - \tilde A^{\mathsf{Variable}_1}_1$ and $\tilde A^{\mathsf{Variable}_5} = \tilde A^{\mathsf{Variable}_5}_0 - \tilde A^{\mathsf{Variable}_5}_1$ denote the associated observables, it holds that
 	\begin{align*}
-		\tilde A^{\mathsf{Variable}_1} \tilde A^{\mathsf{Variable}_5} \ot I_{\mathrm{B'B''}} &\approx_{\sqrt\eps} -\, \tilde A^{\mathsf{Variable}_5} \tilde A^{\mathsf{Variable}_1} \ot I_{\mathrm{B'B''}}\;,\\
-		I_{\mathrm{A'A''}} \ot \tilde B^{\mathsf{Variable}_1} \tilde B^{\mathsf{Variable}_5} &\approx_{\sqrt\eps} -\, I_{\mathrm{A'A''}} \ot \tilde B^{\mathsf{Variable}_5} \tilde B^{\mathsf{Variable}_1}\;,
+		\tilde A^{\mathsf{Variable}_1} \tilde A^{\mathsf{Variable}_5} \ot I_{\mathrm{B'B''}} &\approx_{\eta} -\, \tilde A^{\mathsf{Variable}_5} \tilde A^{\mathsf{Variable}_1} \ot I_{\mathrm{B'B''}}\;,\\
+		I_{\mathrm{A'A''}} \ot \tilde B^{\mathsf{Variable}_1} \tilde B^{\mathsf{Variable}_5} &\approx_{\eta} -\, I_{\mathrm{A'A''}} \ot \tilde B^{\mathsf{Variable}_5} \tilde B^{\mathsf{Variable}_1}\;,
 	\end{align*}
-	where, for operators $M$, $N$ that are not POVM elements, the notation $M \approx_\delta N$ means $\bra{\psi} (M-N)^\dagger (M-N) \ket{\psi} \le O(\delta)$ with respect to the same state.
+	where, for operators $M$, $N$ that are not POVM elements, the notation $M \approx_\zeta N$ means $\bra{\Theta} (M-N)^\dagger (M-N) \ket{\Theta} \le O(\zeta)$, evaluated on the extracted ideal state $\ket{\Theta}$ of item~2 --- the state on which the transported operators act --- and not on $\ket{\psi}$. For $\delta = 0$, in particular for every symmetric consistent strategy, the conclusion is the source's display, with $\eta = \sqrt\eps$.
 \end{theorem}
 \begin{proof}
-	This result is imported from Theorem~6.9 of~\cite{Coladangelo2017Robust}. There are two minor differences between their statement and the one given here. First, they state a robustness of $O(\eps)$, but measure the closeness of the actual and ideal states in trace norm; expressed as the Euclidean distance between $\phi_{\mathrm A} \ot \phi_{\mathrm B}\ket{\psi}$ and $\ket{\mathrm{EPR}_2}^{\ot 2} \ot \ket{\mathrm{aux}}$, this becomes $O(\sqrt\eps)$. Second, their ideal observables for the $\mathsf{Variable}_1$ and $\mathsf{Variable}_5$ questions are $I \ot \sigma^Z$ and $\sigma^Z\sigma^X \ot \sigma^Z\sigma^X$; under a local change of basis these are equivalent to $\sigma^X \ot I$ and $\sigma^Z \ot I$, respectively.
+	The source imports this result, for every strategy of value $1-\eps$, from Theorem~6.9 of~\cite{Coladangelo2017Robust}, noting two minor differences between the statements. First, that theorem states a robustness of $O(\eps)$, but measures the closeness of the actual and ideal states in trace norm; expressed as the Euclidean distance between $\phi_{\mathrm A} \ot \phi_{\mathrm B}\ket{\psi}$ and $\ket{\mathrm{EPR}_2}^{\ot 2} \ot \ket{\mathrm{aux}}$, this becomes $O(\sqrt\eps)$. Second, its ideal observables for the $\mathsf{Variable}_1$ and $\mathsf{Variable}_5$ questions are $I \ot \sigma^Z$ and $\sigma^Z\sigma^X \ot \sigma^Z\sigma^X$; under a local change of basis these are equivalent to $\sigma^X \ot I$ and $\sigma^Z \ot I$, respectively.
+
+	Stated for every strategy, as in the source, the result is false, and the hypothesis~\eqref{eq:ms-rigidity-consistency} is the correction adopted for this formalization (\cite{gap:qpbt_ms-rigidity-symmetric-strategies}; owner decision B5 on issue~\#26). Theorem~6.9 of~\cite{Coladangelo2017Robust} is a self-test for the \emph{one-way} linear constraint system game, in which one player always receives a constraint and the other always receives a variable; its conclusion constrains the constraint player's observables and the variable player's observables, and says nothing about the constraint player's variable observables, which that game never asks for. In the game of Definition~\ref{def:ms-game} both players receive both kinds of question, and the conclusion above forces the two players' $\mathsf{Variable}_1$ and $\mathsf{Variable}_5$ measurements to agree on $\ket{\psi}$ --- a pair of questions that the question distribution never samples, being supported on constraint--variable pairs. Remark~\ref{rem:ms-rigidity-strategy-class} gives a strategy of value $1$ violating the source's conclusion at $\eps = 0$, and a symmetric one, so neither the value nor symmetry supplies that agreement; both strategies have $\delta = 1$ in~\eqref{eq:ms-rigidity-consistency}, which is precisely the agreement that the conclusion needs.
+
+	Under the hypothesis, the derivation from the cited self-test is the following. Write $p_{\mathrm A}$ and $p_{\mathrm B}$ for the success probabilities of the two orientations, so that the hypothesis reads $\tfrac12(p_{\mathrm A} + p_{\mathrm B}) \ge 1-\eps$. Conditioning on the orientation in which player~$\mathrm A$ receives the constraint gives a strategy for the one-way game of value $p_{\mathrm A} \ge 1-2\eps$, since $p_{\mathrm B} \le 1$; when $\mathcal S$ is symmetric the two orientations have the same success probability and the bound improves to $p_{\mathrm A} \ge 1-\eps$. It is a strategy to which Theorem~6.9 of~\cite{Coladangelo2017Robust} applies after a Naimark dilation (Theorem~\ref{thm:naimark}); it yields $\phi_{\mathrm A}$, $\phi_{\mathrm B}$ and $\ket{\mathrm{aux}}$ with item~1 and with the two relations of item~2 for player~$\mathrm B$ at scale $\sqrt\eps$. For player~$\mathrm A$, the hypothesis gives that $(\tilde A^{\mathsf{Variable}_j}_b \ot I)\,(\phi_{\mathrm A} \ot \phi_{\mathrm B})\ket{\psi} = (\phi_{\mathrm A} \ot \phi_{\mathrm B})\,(A^{\mathsf{Variable}_j}_b \ot I)\ket{\psi}$ is within $\sqrt\delta$ of $(\phi_{\mathrm A} \ot \phi_{\mathrm B})\,(I \ot B^{\mathsf{Variable}_j}_b)\ket{\psi} = (I \ot \tilde B^{\mathsf{Variable}_j}_b)\,(\phi_{\mathrm A} \ot \phi_{\mathrm B})\ket{\psi}$; player~$\mathrm B$'s relation and item~1 move this to $(I \ot \sigma^W_b)\ket{\mathrm{EPR}_2}^{\ot 2} \ot \ket{\mathrm{aux}}$, and $(I \ot \sigma^W_b)\ket{\mathrm{EPR}_2}^{\ot 2} = (\sigma^W_b \ot I)\ket{\mathrm{EPR}_2}^{\ot 2}$ because $\sigma^X_b$ and $\sigma^Z_b$ are real symmetric. Since every operator involved is a contraction, player~$\mathrm A$'s relations hold at scale $\sqrt\eps + \sqrt\delta$, and the anticommutation consequences follow from the four relations as in the source, by the same transposition identity. A second derivation, which avoids importing the cited theorem, stays finite dimensional and extracts the two EPR pairs by swap isometries: the approximate anticommutation of each player's two variable reflections comes from the solution-group computation on the projective dilation of Theorem~\ref{thm:naimark}, their cross-player agreement from~\eqref{eq:ms-rigidity-consistency} through the leakage bounds of that dilation (Lemma~\ref{lem:ms-varobs-cross-player}), and item~1 from both together. In either derivation this is where the hypothesis enters, and it is also why symmetry is neither assumed nor used.
+
+	\textbf{Remaining proof.} It remains to combine the one-way self-test, approximate anticommutation, cross-player agreement, and transfer estimates; issue~\#105 tracks this derivation.
+	% Formalization status is carried by the tags: the statement-level \leanok records that the
+	% Lean statement matches the statement above, over an arbitrary strategy with both agreement
+	% distances bounded by delta; no proof-level \leanok is claimed. The specialization to
+	% symmetric consistent strategies (delta = 0) is Corollary cor:ms-rigidity-symmetric-consistent,
+	% and the cross-player agreement of the dilated reflections is Lemma lem:ms-varobs-cross-player.
+\end{proof}
+
+\begin{remark}[The strategy class in Theorem~\ref{thm:ms-rigidity}]\label{rem:ms-rigidity-strategy-class}
+	Fix the canonical Mermin--Peres operator solution on $\C^2 \ot \C^2$ --- the nine $\pm 1$ observables $\sigma^X \ot I$, $I \ot \sigma^X$, $\sigma^X \ot \sigma^X$ in the first row, $I \ot \sigma^Z$, $\sigma^Z \ot I$, $\sigma^Z \ot \sigma^Z$ in the second, and $\sigma^X \ot \sigma^Z$, $\sigma^Z \ot \sigma^X$, $\sigma^Y \ot \sigma^Y$ in the third --- and let $\ket{\Omega}$ be the maximally entangled state of two copies of $\C^2 \ot \C^2$. Measuring the three commuting observables of a row or column on a $\mathsf{Constraint}$ question, and the single observable of a cell on a $\mathsf{Variable}$ question, is a symmetric, projective, consistent strategy of value $1$ (Theorem~\ref{thm:ms-from-ac}). Now give each player two copies of $\C^2 \ot \C^2$ paired into two copies of $\ket{\Omega}$, and split the two roles across them: on a constraint question the first player measures copy~$1$ and the second copy~$2$, and on a variable question the first player measures copy~$2$ and the second copy~$1$. Every sampled question pair consists of one constraint and one variable, so the two measurements actually performed are the canonical perfect pair acting on a single copy of $\ket{\Omega}$, and the value is $1$. The two players' $\mathsf{Variable}_1$ observables, however, act on halves of different copies, whose joint reduced state is a product of maximally mixed states, so their correlation is $0$, while the second item of Theorem~\ref{thm:ms-rigidity} forces it to be $1$ at $\eps = \delta = 0$; the same computation applies to $\mathsf{Variable}_5$. Giving each player a flag qubit, putting the two flags in the state $(\ket{01}+\ket{10})/\sqrt2$, and letting each player's flag select which of the two roles it plays turns this into a \emph{symmetric} strategy with the same value and the same vanishing correlations, so a restriction to symmetric strategies (Definition~\ref{def:symmetric-game}) would not repair the source's statement. Agreement of the two players' $\mathsf{Variable}_1$ and $\mathsf{Variable}_5$ measurements on the state, that is, the hypothesis~\eqref{eq:ms-rigidity-consistency} --- exact consistency in the sense of Definition~\ref{def:consistent-measurement} when the strategy is symmetric and $\delta = 0$ --- does force the correlation to be $1$ up to $O(\delta)$, and both strategies above have agreement distance $\Delta_1 = \Delta_5 = 1$ (Definition~\ref{def:ms-variable-agreement}). It is also what the analysis of the Pauli basis test has available when it applies Theorem~\ref{thm:ms-rigidity}: the Magic Square strategy induced at an anticommuting tuple has, on average over the tuple, agreement distances of order $\eps$ by items~1 and~7 of Lemma~\ref{lem:qld-win-implications} (the point measurements are consistent between the players, and each player's point measurement agrees with the other player's variable measurement), once item~1 is conditioned on the anticommutation event and both are passed through the binary relabeling of Definition~\ref{def:ms-variable-agreement}; that analysis uses only the anticommutation consequence for one player. The theorem is therefore stated with that agreement as its hypothesis, for arbitrary and not necessarily symmetric strategies; the class of symmetric consistent strategies named in the owner decision is the case $\delta = 0$. The details are in \cite{gap:qpbt_ms-rigidity-symmetric-strategies}.
+\end{remark}
+
+% Formalization-support and specialization nodes for Theorem~\ref{thm:ms-rigidity}. None of
+% the four statements below is a named result of the source article: the first two isolate
+% the facts about Definition~\ref{def:ms-variable-agreement} that the formalization proves,
+% the third is the estimate that carries the hypothesis to the projective dilation, and the
+% last is the specialization to the strategy class of owner decision B5 on issue #26.
+\begin{lemma}[Vanishing of the agreement distance on consistent measurements]\label{lem:ms-variable-agreement-zero}
+	\lean{MIPStarRE.QPBT.msVariableConsistencyDefect_eq_zero_of_forall, MIPStarRE.QPBT.msVariableConsistencyDefect_eq_zero_of_isConsistentOn, MIPStarRE.QPBT.msVariableConsistencyDefect_eq_zero_of_isConsistent}
+	\leanok
+	\uses{def:ms-variable-agreement, def:consistent-measurement, def:consistent-strategy, def:symmetric-game}
+	Let $\mathcal S = (\ket{\psi}, A, B)$ be a strategy for $\mathfrak{G}^{\mathrm{MS}}$ and let $j$ be a cell. If $(\hat A^{\mathsf{Variable}_j}_b \ot I)\ket{\psi} = (I \ot \hat B^{\mathsf{Variable}_j}_b)\ket{\psi}$ for both $b \in \F_2$, then $\Delta_j(\mathcal S) = 0$. In particular, if $\mathcal S = (\ket{\psi}, M)$ is symmetric and its $\mathsf{Variable}_j$ measurement is consistent on $\ket{\psi}$ in the sense of Definition~\ref{def:consistent-measurement}, then $\Delta_j(\mathcal S) = 0$; and a symmetric strategy all of whose measurements are consistent on $\ket{\psi}$ --- in particular a symmetric consistent strategy in the sense of Definition~\ref{def:consistent-strategy}, projectivity not being used --- has $\Delta_j(\mathcal S) = 0$ at every cell $j$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:ms-variable-agreement, def:consistent-measurement, lem:ms-variable-agreement-support}
+	Each summand of $\Delta_j(\mathcal S)$ is the squared norm of a vector that the hypothesis makes zero. For the second assertion, consistency of $\{M^{\mathsf{Variable}_j}_a\}$ on $\ket{\psi}$ gives $(M^{\mathsf{Variable}_j}_a \ot I)\ket{\psi} = (I \ot M^{\mathsf{Variable}_j}_a)\ket{\psi}$ for every answer $a$, and the binary effects of Definition~\ref{def:ms-variable-agreement} are finite sums of such effects, so the same equality holds for $\hat M^{\mathsf{Variable}_j}_b$ for both $b$. The third assertion is the second applied at every cell.
+\end{proof}
+
+\begin{lemma}[Cross-player agreement of the dilated variable reflections]\label{lem:ms-varobs-cross-player}
+	\lean{MIPStarRE.QPBT.MagicSquareRigidity.norm_msVarObsA_sub_msVarObsB_sq_le, MIPStarRE.QPBT.MagicSquareRigidity.msVarObsA_close_msVarObsB_opDistSq, MIPStarRE.QPBT.MagicSquareRigidity.msVarObsA_close_msVarObsB}
+	\leanok
+	\uses{def:ms-variable-agreement, def:ms-game, def:povm-distance, thm:naimark, def:tensor-product-value}
+	Let $\mathcal S = (\ket{\psi}, A, B)$ be a strategy for $\mathfrak{G}^{\mathrm{MS}}$ of value at least $1-\eps$, let $j$ be a cell, and let $\Delta_j(\mathcal S) \le \delta$. Apply the questionwise Naimark dilation of Theorem~\ref{thm:naimark} to both players, and let $\ket{\psi'}$ be the dilated state and $X_{\mathrm A}$, $X_{\mathrm B}$ the two players' $\pm 1$-valued reflections associated with the dilated, projective $\mathsf{Variable}_j$ measurements. Then
+	\[
+		\bigl\| \bigl( X_{\mathrm A} \ot I - I \ot X_{\mathrm B} \bigr) \ket{\psi'} \bigr\|^2 \le 864\,\eps + 6\,\delta \;,
+	\]
+	that is, $X_{\mathrm A} \ot I \approx_{864\eps + 6\delta} I \ot X_{\mathrm B}$ on $\ket{\psi'}$ in the convention of Definition~\ref{def:povm-distance}, and the two reflections are within $\sqrt{864\eps + 6\delta}$ of each other in norm on $\ket{\psi'}$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:ms-variable-agreement, lem:povm-to-obs, thm:naimark, lem:ms-variable-agreement-support}
+	Compress each dilated reflection to the ground slice of the dilation. The compressed difference acts on the dilated state exactly as the difference of the original binary observables $\hat{\mathcal O}_{\mathrm A} = \hat A^{\mathsf{Variable}_j}_0 - \hat A^{\mathsf{Variable}_j}_1$ and $\hat{\mathcal O}_{\mathrm B}$ acts on $\ket{\psi}$, and passing from the two binary effects to their observable costs the answer-alphabet cardinality $2$ by Lemma~\ref{lem:povm-to-obs}, so that squared difference is at most $2\,\Delta_j(\mathcal S) \le 2\delta$. The two complementary terms are the leakages of the dilated reflections out of the ground slice; each has squared norm at most $144\,\eps$, because the cell of index $j$ is incident to a constraint and the corresponding cell-consistency mass of a strategy of value $1-\eps$ is $O(\eps)$. A triangle inequality on the three terms, followed by the inequality $(x+y+z)^2 \le 3(x^2+y^2+z^2)$, gives the displayed bound. The unsquared form follows by taking square roots.
+\end{proof}
+
+\begin{lemma}[Formalization support for the agreement distance and its transfer]\label{lem:ms-variable-agreement-support}
+	\lean{MIPStarRE.QPBT.msVariableConsistencyDefect_nonneg, MIPStarRE.QPBT.msVariableConsistencyDefect_eq_sum, MIPStarRE.QPBT.applyOperatorToState_finset_sum, MIPStarRE.QPBT.applyOperatorToState_eq_of_mulVec_eq, MIPStarRE.QPBT.applyOperatorToState_postprocess_effect_eq_of_isConsistentOn, MIPStarRE.QPBT.MagicSquareRigidity.naimarkDilatedState_sub, MIPStarRE.QPBT.MagicSquareRigidity.applyOperatorToState_leftTensor_naimarkInflation, MIPStarRE.QPBT.MagicSquareRigidity.applyOperatorToState_rightTensor_naimarkInflation, MIPStarRE.QPBT.MagicSquareRigidity.norm_compressed_varObs_sub_eq, MIPStarRE.QPBT.MagicSquareRigidity.norm_varObs_sub_sq_le_two_mul_defect, MIPStarRE.QPBT.MagicSquareRigidity.norm_leak_varObs_sq_le_A, MIPStarRE.QPBT.MagicSquareRigidity.norm_leak_varObs_sq_le_B}
+	\leanok
+	\uses{def:ms-variable-agreement, def:consistent-measurement, def:povm-distance, thm:naimark, lem:povm-to-obs}
+	None of the following is a named statement of the source article; each isolates one step of the proofs of Lemma~\ref{lem:ms-variable-agreement-zero} and Lemma~\ref{lem:ms-varobs-cross-player}. Let $\mathcal S$ be a strategy for $\mathfrak{G}^{\mathrm{MS}}$ and $j$ a cell. (i) $\Delta_j(\mathcal S) \ge 0$, and $\Delta_j(\mathcal S)$ equals the two-term sum displayed in Definition~\ref{def:ms-variable-agreement}. (ii) The action of an operator on a state is additive over finite sums of operators, and two operators whose matrix-vector products on a state agree act alike on that state; consequently a measurement consistent on a state in the sense of Definition~\ref{def:consistent-measurement} has each of its postprocessed effects acting alike on the two tensor factors of that state. (iii) On the dilated state of Theorem~\ref{thm:naimark}, the dilated state map is additive over differences, an inflated operator placed on either factor acts as the original operator does on the original state, and hence the ground compressions of the two players' dilated $\mathsf{Variable}_j$ reflections differ on the dilated state exactly as the original binary observables differ on $\ket{\psi}$. (iv) That difference has squared norm at most $2\,\Delta_j(\mathcal S)$, by Lemma~\ref{lem:povm-to-obs} with the unit-modulus weights $1$ and $-1$. (v) For a strategy of value at least $1-\eps$, each player's leakage term has squared norm at most $144\,\eps$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:ms-variable-agreement, lem:povm-to-obs, thm:naimark}
+	Item~(i) is immediate from the definition. In item~(ii) the first two assertions are the linearity of the map $M \mapsto M\ket{\varphi}$ and the definition of that map; the third follows by writing a postprocessed effect as the finite sum of the effects in its fibre. In item~(iii) the first two assertions hold coordinatewise on the dilated space, and the third is obtained by inserting the ground projection on the opposite factor and cancelling it. Item~(iv) is Lemma~\ref{lem:povm-to-obs} for the two-outcome alphabet. Item~(v) combines the leakage estimate for the dilated observable of a cell with the bound on the cell-consistency mass of a strategy of value $1-\eps$, every cell being incident to some constraint.
+\end{proof}
+
+\begin{corollary}[Rigidity for symmetric consistent strategies]\label{cor:ms-rigidity-symmetric-consistent}
+	\lean{MIPStarRE.QPBT.exists_ms_rigidity_of_symmetric_consistent}
+	\leanok
+	\uses{thm:ms-rigidity, def:ms-variable-agreement, lem:ms-variable-agreement-zero, def:consistent-strategy, def:spcc, def:symmetric-game}
+	% No proof-level \leanok: the derivation is complete in Lean but rests on Theorem
+	% thm:ms-rigidity, whose proof is open.
+	Let $\eps \ge 0$ and let $\mathcal S = (\ket{\psi}, M)$ be a symmetric consistent strategy for $\mathfrak{G}^{\mathrm{MS}}$ in the sense of Definition~\ref{def:consistent-strategy}, so that $\mathcal S$ is projective and every measurement $\{M^x_a\}$ is consistent on $\ket{\psi}$; every SPCC strategy (Definition~\ref{def:spcc}) is of this form. Suppose that $\mathcal S$ succeeds in $\mathfrak{G}^{\mathrm{MS}}$ with probability at least $1-\eps$. Then the conclusion of Theorem~\ref{thm:ms-rigidity} holds with $\eta = \sqrt\eps$, that is, in the form printed in the source.
+\end{corollary}
+\begin{proof}
+	\uses{thm:ms-rigidity, lem:ms-variable-agreement-zero}
+	By Lemma~\ref{lem:ms-variable-agreement-zero} the agreement distances $\Delta_1(\mathcal S)$ and $\Delta_5(\mathcal S)$ vanish, so Theorem~\ref{thm:ms-rigidity} applies with $\delta = 0$ and $\eta = \sqrt\eps + \sqrt{0} = \sqrt\eps$. Projectivity is part of Definition~\ref{def:consistent-strategy} and is not otherwise used.
 \end{proof}
 
 The converse construction shows that any pair of anticommuting binary observables yields a perfect strategy for the Magic Square game.
@@ -397,14 +539,44 @@ The Pauli basis test is the quantum low individual degree test of Natarajan and 
 	The question distribution of $\mathfrak{G}^{\mathrm{Pauli}}$ is the typed CL distribution on $\mathcal T^{\mathrm{pauli}} \times V^{\mathrm{pauli}} \times \mathcal T^{\mathrm{pauli}} \times V^{\mathrm{pauli}}$ obtained by sampling the type pair $(t_{\mathrm A}, t_{\mathrm B})$ from the graph distribution $\mu_{G^{\mathrm{pauli}}}$ of Definition~\ref{def:graph-distribution}, that is, uniformly at random among all ordered pairs of types whose underlying unordered pair $\{t_{\mathrm A}, t_{\mathrm B}\}$ is an edge of $G^{\mathrm{pauli}}$, self-loops included; sampling $z \in V^{\mathrm{pauli}}$ uniformly at random; and setting $x_w = L_{t_w}(z)$ for $w \in \{\mathrm A,\mathrm B\}$. Explicitly, if $z = (u_X,u_Z,s,v,r_X,r_Z)$, then a player whose type is $(\mathsf{Point},W)$ receives $u_W$; a player whose type is $(\mathsf{ALine},W)$ receives $(u_0, s)$ with $u_0 = L^{\mathrm{Ln}}_{e_i}(u_W)$ and $i = \chi(s)$; a player whose type is $(\mathsf{DLine},W)$ receives $(u_0, s, v')$ with $i = \chi(s)$, $v' = \pi_{i-1}(v)$, and $u_0 = L^{\mathrm{Ln}}_{v'}(u_W)$; a player whose type lies in $\mathcal T^{\mathrm{ms}} \cup \{\mathsf{Pair}, (\mathsf{Pair},X), (\mathsf{Pair},Z)\}$ receives $(u_X, u_Z, r_X, r_Z)$; and a player whose type is $(\mathsf{Pauli},W)$ receives $0$.
 \end{definition}
 
-\begin{lemma}[The Pauli question distribution is a typed CL distribution]\label{lem:pauli-question-typed-cl}
+\begin{lemma}[Conditionally linear Pauli question maps]\label{lem:pauli-question-cl-components}
+	\lean{MIPStarRE.QPBT.isCondLinear_pauliCL}
+	\uses{def:pauli-question-distribution, def:cl-func}
+	For every Pauli question type $t \in \mathcal T^{\mathrm{pauli}}$, the map $L_t$ of Definition~\ref{def:pauli-question-distribution} is conditionally linear. Its levels are $1$ for the point maps, $2$ for the axis-parallel line maps, $3$ for the diagonal line maps, $1$ for the shared projection maps, and $0$ for the Pauli maps.
+\end{lemma}
+\begin{proof}
+	\uses{lem:ld-point-level, lem:ld-aline-level, lem:ld-dline-level}
+	Transport the point, axis-parallel line, and diagonal line representations to the selected basis register. The shared projection onto the point and auxiliary registers is linear, while the Pauli maps are zero. These representations have levels $1$, $2$, $3$, $1$, and $0$, respectively.
+\end{proof}
+
+\begin{lemma}[Common level of the Pauli question maps]\label{lem:pauli-question-cl-family}
+	\lean{MIPStarRE.QPBT.isTypedCondLinearFamily_pauliCL}
+	\uses{def:pauli-question-distribution, def:typed-cl-functions}
+	For every Pauli question type $t \in \mathcal T^{\mathrm{pauli}}$, the map $L_t$ of Definition~\ref{def:pauli-question-distribution} is a $3$-level CL function. Thus $L = \{L_t\}_{t \in \mathcal T^{\mathrm{pauli}}}$ is a finite typed family of $3$-level CL functions.
+\end{lemma}
+\begin{proof}
+	\uses{lem:pauli-question-cl-components, lem:cl-level-mono}
+	The component maps have levels at most $3$ by Lemma~\ref{lem:pauli-question-cl-components}. Lemma~\ref{lem:cl-level-mono} raises each representation to the common level $3$.
+\end{proof}
+
+\begin{lemma}[Pauli question-distribution identity]\label{lem:pauli-question-typed-equality}
 	\lean{MIPStarRE.QPBT.pauliQuestionDistribution_eq_typedCL}
 	\uses{def:pauli-question-distribution, def:typed-cl-distributions, def:graph-distribution}
-	Fix an admissible tuple $\mathsf{qldparams} = (q,m,d)$ (Definition~\ref{def:admissible}) and let $L = \{L_t\}_{t \in \mathcal T^{\mathrm{pauli}}}$ be the family of Definition~\ref{def:pauli-question-distribution}. Then the question distribution of $\mathfrak{G}^{\mathrm{Pauli}}_{\mathsf{qldparams}}$ is the $(\mathcal T^{\mathrm{pauli}}, G^{\mathrm{pauli}})$-typed conditionally linear distribution $\mu^{G^{\mathrm{pauli}}}_{L,\,L}$ of Definition~\ref{def:typed-cl-distributions}.
+	For the Pauli type graph $G^{\mathrm{pauli}}$ and the family $L$ of Definition~\ref{def:pauli-question-distribution}, the Pauli question distribution equals $\mu^{G^{\mathrm{pauli}}}_{L,L}$.
 \end{lemma}
 \begin{proof}
 	\uses{def:typed-cl-distributions, def:graph-distribution, def:cl-dist}
-	The type pair is drawn from $\mu_{G^{\mathrm{pauli}}}$ by definition, and for each ordered type pair the content pair is the image of a single uniform $z \in V^{\mathrm{pauli}}$ under the corresponding pair of CL functions, that is, a sample from $\mu_{L_{t_{\mathrm A}},\, L_{t_{\mathrm B}}}$.
+	Both distributions first use the uniform law on ordered pairs whose unordered pair is an edge of $G^{\mathrm{pauli}}$, and then push forward a common uniform seed in $V^{\mathrm{pauli}}$ by the same pair of maps.
+\end{proof}
+
+\begin{lemma}[The Pauli question distribution is a typed CL distribution]\label{lem:pauli-question-typed-cl}
+	\lean{MIPStarRE.QPBT.pauliQuestionDistribution_isTypedCL}
+	\uses{def:pauli-question-distribution, def:typed-cl-distributions}
+	Fix an admissible tuple $\mathsf{qldparams} = (q,m,d)$ (Definition~\ref{def:admissible}) and let $L = \{L_t\}_{t \in \mathcal T^{\mathrm{pauli}}}$ be the family of Definition~\ref{def:pauli-question-distribution}. The family $L$ is a finite $\mathcal T^{\mathrm{pauli}}$-typed family of $3$-level conditionally linear functions, and the question distribution of $\mathfrak{G}^{\mathrm{Pauli}}_{\mathsf{qldparams}}$ equals the $(\mathcal T^{\mathrm{pauli}}, G^{\mathrm{pauli}})$-typed conditionally linear distribution $\mu^{G^{\mathrm{pauli}}}_{L,\,L}$ of Definition~\ref{def:typed-cl-distributions}.
+\end{lemma}
+\begin{proof}
+	\uses{lem:pauli-question-cl-family, lem:pauli-question-typed-equality}
+	Combine the common-level family assertion of Lemma~\ref{lem:pauli-question-cl-family} with the distribution identity of Lemma~\ref{lem:pauli-question-typed-equality}.
 \end{proof}
 
 \begin{definition}[Win predicate of the Pauli basis test]\label{def:pauli-win-predicate}
@@ -568,5 +740,228 @@ We specify a canonical setting of the parameter tuple $\mathsf{qldparams}$ as a 
 \end{proof}
 
 \begin{remark}[A comparison of exponents in the source proof of Lemma~\ref{lem:delta-bound}]\label{rem:delta-bound-exponent-comparison}
-	The source proof bounds the third term of $\delta_{\mathrm{qld}}$ by asserting $2^{-bmd} \le q^{-b}$ ``because $k \le m$'', comparing the field exponent $k = c \lceil \log\log R \rceil + 1$ with $m = 2^j$. The inequality $k \le m$ does not follow from Definition~\ref{def:introparams}: if the universal constants of Theorem~\ref{thm:pauli} were $a = 1$ and $b = 1/2$, then $c = 4$, and $R = 5$ gives $k = 9$ and $m = 8$. The proof above instead bounds $2^{-bm} \le R^{-b}$ directly from $m \ge (c/2) \log R \ge \log R$, which yields the same conclusion after enlarging the universal constant $a'$.
+	The source proof bounds the third term of $\delta_{\mathrm{qld}}$ by asserting $2^{-bmd} \le q^{-b}$ ``because $k \le m$'', comparing the field exponent $k = c \lceil \log\log R \rceil + 1$ with $m = 2^j$. The inequality $k \le m$ does not follow from Definition~\ref{def:introparams}: if the universal constants of Theorem~\ref{thm:pauli} were $a = 1$ and $b = 1/2$, then $c = 4$, and $R = 5$ gives $k = 9$ and $m = 8$. The proof above instead bounds $2^{-bm} \le R^{-b}$ directly from $m \ge (c/2) \log R \ge \log R$, which yields the same conclusion after enlarging the universal constant $a'$.  The comparison and correction are documented in \cite{gap:qpbt_delta-bound-exponent-comparison}.
 \end{remark}
+
+\section{Formalization support for finite sampling}
+
+The following finite-distribution identities are not named statements of the
+source article.  They make explicit the push-forward calculations used in the
+low-degree question and line-point laws above.
+
+\begin{lemma}[Extensionality of finite distributions]\label{lem:distribution-ext-support}
+	\lean{MIPStarRE.QPBT.Distribution.ext_of_support_of_weight}
+	\leanok
+	Two finite distributions with the same support and the same weight at every
+	point are equal.
+\end{lemma}
+\begin{proof}
+	\leanok
+	The two laws have the same finite support and assign the same mass to every
+	point, so they coincide.
+\end{proof}
+
+\begin{lemma}[Composition of push-forwards]\label{lem:distribution-map-comp}
+	\lean{MIPStarRE.QPBT.Distribution.map_map}
+	\leanok
+	Let $\mu$ be a finite distribution on $A$, and let $e\colon A\to B$ and
+	$f\colon B\to C$. Then
+	\[
+		f_\ast(e_\ast\mu)=(f\circ e)_\ast\mu.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:distribution-ext-support}
+	The supports agree by composition of finite images.  For each $c\in C$,
+	partition the fiber of $f\circ e$ over $c$ by the intermediate value $e(a)$;
+	the corresponding sums of weights agree.
+\end{proof}
+
+\begin{lemma}[Weights of the uniform law]\label{lem:uniform-distribution-weight}
+	\lean{MIPStarRE.QPBT.uniformDistribution_weight_apply}
+	\leanok
+	If $A$ is a nonempty finite set, then its uniform distribution assigns weight
+	$1/|A|$ to every $a\in A$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	This is the defining weight of the uniform distribution on a nonempty finite
+	set.
+\end{proof}
+
+\begin{lemma}[Uniform push-forward along a balanced map]\label{lem:uniform-map-equal-fibers}
+	\lean{MIPStarRE.QPBT.uniformDistribution_map_of_card_fiber}
+	\leanok
+	Let $A$ and $B$ be nonempty finite sets and let $e\colon A\to B$. If there is
+	an integer $c$ such that $|e^{-1}(b)|=c$ for every $b\in B$, then
+	$e_\ast\operatorname{Unif}(A)=\operatorname{Unif}(B)$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:distribution-ext-support, lem:uniform-distribution-weight}
+	Every fiber is nonempty, so $e$ is surjective and both supports are $B$.
+	Counting the fibers gives $|A|=c|B|$; summing the weight $1/|A|$ over a
+	$c$-element fiber gives $1/|B|$.
+\end{proof}
+
+\begin{lemma}[Uniformity under an equivalence]\label{lem:uniform-map-equivalence}
+	\lean{MIPStarRE.QPBT.uniformDistribution_map_equiv}
+	\leanok
+	An equivalence $E\colon A\simeq B$ between nonempty finite sets satisfies
+	$E_\ast\operatorname{Unif}(A)=\operatorname{Unif}(B)$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:uniform-map-equal-fibers}
+	Every fiber of an equivalence has cardinality one, so the result follows from
+	Lemma~\ref{lem:uniform-map-equal-fibers}.
+\end{proof}
+
+\begin{lemma}[First marginal of a uniform product]\label{lem:uniform-product-first-marginal}
+	\lean{MIPStarRE.QPBT.uniformDistribution_map_fst}
+	\leanok
+	For nonempty finite sets $A$ and $B$, the first marginal of
+	$\operatorname{Unif}(A\times B)$ is $\operatorname{Unif}(A)$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:uniform-map-equal-fibers}
+	Every fiber of the first projection has cardinality $|B|$; apply
+	Lemma~\ref{lem:uniform-map-equal-fibers}.
+\end{proof}
+
+\begin{lemma}[Second marginal of a uniform product]\label{lem:uniform-product-second-marginal}
+	\lean{MIPStarRE.QPBT.uniformDistribution_map_snd}
+	\leanok
+	For nonempty finite sets $A$ and $B$, the second marginal of
+	$\operatorname{Unif}(A\times B)$ is $\operatorname{Unif}(B)$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:uniform-map-equal-fibers}
+	Every fiber of the second projection has cardinality $|A|$; apply
+	Lemma~\ref{lem:uniform-map-equal-fibers}.
+\end{proof}
+
+\begin{lemma}[Dependent uniform sampling as a product push-forward]\label{lem:uniform-bind-map}
+	\lean{MIPStarRE.QPBT.bind_uniformDistribution_map}
+	\leanok
+	Let $A$ and $B$ be nonempty finite sets and let $g\colon A\to B\to C$.
+	Sampling $a$ uniformly from $A$, then $b$ uniformly from $B$, and returning
+	$g(a,b)$ has the same law as pushing $\operatorname{Unif}(A\times B)$ forward
+	along $(a,b)\mapsto g(a,b)$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:distribution-ext-support, lem:uniform-distribution-weight}
+	Both supports are the image of $A\times B$ under $g$.  At each $c\in C$,
+	both weights are the number of pairs $(a,b)$ with $g(a,b)=c$, divided by
+	$|A||B|$.
+\end{proof}
+
+\begin{lemma}[Uniform first marginal after an equivalence]
+	\label{lem:uniform-first-marginal-after-equivalence}
+	\lean{MIPStarRE.QPBT.uniformDistribution_map_fst_of_equiv}
+	\leanok
+	Let $A$, $B$, and $C$ be nonempty finite sets, let $E\colon A\simeq B\times C$,
+	and suppose $f(a)$ is the first component of $E(a)$ for every $a\in A$. Then
+	$f_\ast\operatorname{Unif}(A)=\operatorname{Unif}(B)$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:distribution-map-comp, lem:uniform-map-equivalence, lem:uniform-product-first-marginal}
+	Push the uniform law along $E$, compose with the first projection, and apply
+	uniformity under the equivalence followed by the first-marginal identity.
+\end{proof}
+
+\begin{lemma}[Exact fibers of the coordinate-index map]\label{lem:chi-seed-fibers}
+	\lean{MIPStarRE.QPBT.LdParams.seedFiberCard_pos, MIPStarRE.QPBT.LdParams.seedFiberProduct_eq}
+	\lean{MIPStarRE.QPBT.seedFiberEquiv, MIPStarRE.QPBT.seedFiberEquiv_fst}
+	\lean{MIPStarRE.QPBT.seedOfIndexResidue, MIPStarRE.QPBT.seedFiberEquiv_seedOfIndexResidue, MIPStarRE.QPBT.chiIndex_seedOfIndexResidue}
+	\leanok
+	\uses{def:ld-game, def:ld-question-distribution, def:binary-representation}
+	Write $\chi_0(s)=\chi(s)-1$ for the corresponding zero-based coordinate
+	index. Every scalar seed has a unique
+	representation as a pair
+	\[
+		(i,r)\in\{0,\ldots,m-1\}\times\{0,\ldots,q/m-1\},
+	\]
+	and the first component is $\chi_0(s)$. Conversely, every such pair determines
+	a unique scalar seed. In particular, the residue set is nonempty and
+	$q=m(q/m)$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:binary-representation}
+	Use the fixed bijection between $\F_q$ and $\{0,\ldots,q-1\}$, the equality
+	$q=m(q/m)$, and quotient--remainder decomposition with divisor $q/m$.
+\end{proof}
+
+\begin{lemma}[Uniformity of the coordinate index]\label{lem:chi-index-uniform}
+	\lean{MIPStarRE.QPBT.uniformDistribution_map_chiIndex}
+	\leanok
+	\uses{def:ld-question-distribution}
+	For a uniformly random $s\in\F_q$, the zero-based index $\chi_0(s)$ is
+	uniformly distributed on $\{0,\ldots,m-1\}$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:chi-seed-fibers, lem:uniform-first-marginal-after-equivalence}
+	Under the equivalence of Lemma~\ref{lem:chi-seed-fibers}, $\chi_0$ is the first
+	projection. Apply Lemma~\ref{lem:uniform-first-marginal-after-equivalence}.
+\end{proof}
+
+\begin{lemma}[Idempotence of the prefix projection]
+	\label{lem:prefix-projection-idempotent}
+	\lean{MIPStarRE.QPBT.prefixProjection_idempotent}
+	\leanok
+	\uses{def:ld-question-distribution}
+	For every coordinate $i$ and direction $v$,
+	$\pi_i(\pi_i(v))=\pi_i(v)$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	A coordinate before $i$ is set to zero by both sides, while every coordinate
+	at or after $i$ is retained by both sides.
+\end{proof}
+
+\begin{lemma}[Idempotence of the canonical representative]
+	\label{lem:line-representative-idempotent}
+	\lean{MIPStarRE.QPBT.lineRepMap_apply_self}
+	\leanok
+	\uses{def:line-representative}
+	For all $u,v\in\F_q^m$,
+	$L^{\mathrm{Ln}}_v(L^{\mathrm{Ln}}_v(u))=L^{\mathrm{Ln}}_v(u)$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	The canonical representative map is a projection onto the chosen complement
+	of the span of $v$, and every projection is idempotent.
+\end{proof}
+
+\begin{definition}[Seed-bearing line descriptions]\label{def:ld-line-description}
+	\lean{MIPStarRE.QPBT.LineKind, MIPStarRE.QPBT.LineDesc}
+	\lean{MIPStarRE.QPBT.aLineDescOf, MIPStarRE.QPBT.dLineDescOf}
+	\leanok
+	\uses{def:ld-question-distribution, def:line-representative, lem:line-representative-idempotent}
+	An axis-line description records a canonical base point and a scalar seed,
+	whose coordinate index selects the axis direction. A diagonal-line
+	description records a canonical base point, a scalar seed, and a direction
+	whose coordinates preceding the selected index vanish. The axis and diagonal
+	CL outputs determine such descriptions by taking their canonical
+	representatives.
+\end{definition}
+
+\begin{lemma}[Prefix property of a diagonal description]
+	\label{lem:line-description-prefix}
+	\lean{MIPStarRE.QPBT.LineDesc.diagonal_prefix_zero}
+	\leanok
+	\uses{def:ld-line-description}
+	If a seed-bearing line description is diagonal, then every coordinate of its
+	direction preceding the index selected by its seed is zero.
+\end{lemma}
+\begin{proof}
+	\leanok
+	This is the prefix-zero property carried by a diagonal line description.
+\end{proof}

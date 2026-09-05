@@ -2,7 +2,7 @@
 # dispatch.sh — the only sanctioned way to start a codex agent session.
 #
 # Usage:
-#   local/bin/dispatch.sh --role <orc|prover|reviewer|simplifier|blueprint|splitter|scout>
+#   local/bin/dispatch.sh --role <orc|prover|reviewer|simplifier|blueprint|splitter|scout|mathfix>
 #                         --issue <id|scope>
 #                         [--worktree DIR]        working root (default: repo root)
 #                         [--sandbox MODE]        read-only|workspace-write|danger-full-access
@@ -45,13 +45,14 @@
 # Environment: MIPSTARRE_CACHE_ROOT (runtime state root, default
 #   ~/.cache/mipstarre-dev), MIPSTARRE_PERSONA_REF, MIPSTARRE_CODEX_MODEL,
 #   MIPSTARRE_SESSION (dispatching session name), MIPSTARRE_DISPATCH_LOCK_WAIT,
-#   MIPSTARRE_MAX_CONTEXT_BYTES (default 100000), LOCAL_REVIEW_ENABLED.
+#   MIPSTARRE_MAX_CONTEXT_BYTES (default 100000), MIPSTARRE_LAKE_ROOT,
+#   LOCAL_REVIEW_ENABLED.
 
 set -euo pipefail
 
 PROG="${0##*/}"
 
-ROLES="orc prover reviewer simplifier blueprint splitter scout"
+ROLES="orc prover reviewer simplifier blueprint splitter scout mathfix"
 READ_ONLY_ROLES="reviewer scout"
 
 # Prompt-size guards. The study fleet lost a session to an oversized prompt
@@ -214,6 +215,15 @@ if [ -n "$EFFORT" ]; then
   esac
 fi
 
+if [ "$ROLE" = "mathfix" ]; then
+  case "${MIPSTARRE_CODEX_MODEL:-}:$EFFORT" in
+    *astra*:ultra) ;;
+    *) die 4 "mathfix requires an astra model in MIPSTARRE_CODEX_MODEL and --effort ultra.
+  Until the archived astra poller reports availability on #26, request the owner
+  session's Claude Fable 5.1 math-fix lane on #27." ;;
+  esac
+fi
+
 if [ -n "$RESUME_ID" ]; then
   case "$RESUME_ID" in
     *[!A-Za-z0-9-]*) die 2 "--resume takes a codex thread id (uuid), got '$RESUME_ID'" ;;
@@ -297,6 +307,14 @@ case " $READ_ONLY_ROLES " in
     fi
     ;;
 esac
+
+LAKE_WRITE_DIR=""
+if [ "$SANDBOX" = "workspace-write" ] && [ -n "${MIPSTARRE_LAKE_ROOT:-}" ]; then
+  [ -x "$SCRIPT_DIR/lake-root.sh" ] || die 4 "missing $SCRIPT_DIR/lake-root.sh"
+  "$SCRIPT_DIR/lake-root.sh" prepare "$WORKTREE_ABS" --check
+  LAKE_WRITE_DIR="$(realpath -e -- "$WORKTREE_ABS/.lake")" \
+    || die 4 "cannot resolve the configured external .lake target"
+fi
 
 # ---------------------------------------------------------------------------
 # Scope sanitization — bracket-free naming (DESIGN.md invariant 9;
@@ -393,6 +411,9 @@ builtin_frame() {
     blueprint) printf '%s\n' "You are a blueprint writer: you keep blueprint/src in sync with the Lean development and with the source paper, in mathematical prose." ;;
     splitter) printf '%s\n' "You are a splitter: you divide oversized files and oversized tasks into coherent units without changing content." ;;
     scout) printf '%s\n' "You are a scout: you search Mathlib and the repository, report what exists, and change nothing." ;;
+    mathfix) printf '%s\n' \
+      "You are a mathematical-gap specialist: derive the closest correct and sufficient repair," \
+      "verify every downstream use, and confirm it in Lean before adoption." ;;
   esac
 }
 
@@ -583,6 +604,10 @@ CODEX_ARGS[${#CODEX_ARGS[@]}]="-C"
 CODEX_ARGS[${#CODEX_ARGS[@]}]="$WORKTREE_ABS"
 CODEX_ARGS[${#CODEX_ARGS[@]}]="--sandbox"
 CODEX_ARGS[${#CODEX_ARGS[@]}]="$SANDBOX"
+if [ -n "$LAKE_WRITE_DIR" ]; then
+  CODEX_ARGS[${#CODEX_ARGS[@]}]="--add-dir"
+  CODEX_ARGS[${#CODEX_ARGS[@]}]="$LAKE_WRITE_DIR"
+fi
 CODEX_ARGS[${#CODEX_ARGS[@]}]="-o"
 CODEX_ARGS[${#CODEX_ARGS[@]}]="$LAST_MESSAGE"
 if [ -n "${MIPSTARRE_CODEX_MODEL:-}" ]; then

@@ -100,7 +100,7 @@ private def directLdSpacePointEquiv (D : DirectLdParams) :
 
 /-- Decompose a direct sample into its stored index and the remaining
 independent coordinates. -/
-private def directLdSpaceIndexEquiv (D : DirectLdParams) :
+def directLdSpaceIndexEquiv (D : DirectLdParams) :
     DirectLdSpace D ≃
       Fin D.m ×
         ((Fin D.m → DirectScalarQ D) ×
@@ -109,6 +109,12 @@ private def directLdSpaceIndexEquiv (D : DirectLdParams) :
   invFun sample := ⟨sample.2.1, sample.1, sample.2.2⟩
   left_inv sample := by cases sample; rfl
   right_inv sample := by cases sample; rfl
+
+/-- Compatibility name for the index-first direct-sample decomposition. -/
+abbrev directLdSpaceIndexSplitEquiv (D : DirectLdParams) :
+    DirectLdSpace D ≃
+      Fin D.m × ((Fin D.m → DirectScalarQ D) × (Fin D.m → DirectScalarQ D)) :=
+  directLdSpaceIndexEquiv D
 
 /-- Zero the coordinates preceding the directly sampled prefix index. -/
 def directPrefixProjection {D : DirectLdParams} (i : Fin D.m)
@@ -241,17 +247,13 @@ theorem directALinePointDist_point_index_marginal_uniform (D : DirectLdParams) :
         uniformDistribution (Fin D.m) := by
   constructor
   · unfold directALinePointDist
-    rw [distribution_map_map_of_isProbability
-      (uniformDistribution (DirectLdSpace D))
-      (uniformDistribution_isProbability (DirectLdSpace D))]
+    rw [Distribution.map_map]
     simpa [Function.comp_def] using
       (uniformDistribution_map_fst_of_equiv
         (e := directLdSpacePointEquiv D)
         (f := fun sample : DirectLdSpace D => sample.point) (by intro; rfl))
   · unfold directALinePointDist
-    rw [distribution_map_map_of_isProbability
-      (uniformDistribution (DirectLdSpace D))
-      (uniformDistribution_isProbability (DirectLdSpace D))]
+    rw [Distribution.map_map]
     simpa [Function.comp_def, directALineDescOf, DirectLineDesc.index] using
       (uniformDistribution_map_fst_of_equiv
         (e := directLdSpaceIndexEquiv D)
@@ -283,17 +285,13 @@ theorem directDLinePointDist_point_index_marginal_uniform (D : DirectLdParams) :
         uniformDistribution (Fin D.m) := by
   constructor
   · unfold directDLinePointDist
-    rw [distribution_map_map_of_isProbability
-      (uniformDistribution (DirectLdSpace D))
-      (uniformDistribution_isProbability (DirectLdSpace D))]
+    rw [Distribution.map_map]
     simpa [Function.comp_def] using
       (uniformDistribution_map_fst_of_equiv
         (e := directLdSpacePointEquiv D)
         (f := fun sample : DirectLdSpace D => sample.point) (by intro; rfl))
   · unfold directDLinePointDist
-    rw [distribution_map_map_of_isProbability
-      (uniformDistribution (DirectLdSpace D))
-      (uniformDistribution_isProbability (DirectLdSpace D))]
+    rw [Distribution.map_map]
     simpa [Function.comp_def, directDLineDescOf, DirectLineDesc.index] using
       (uniformDistribution_map_fst_of_equiv
         (e := directLdSpaceIndexEquiv D)

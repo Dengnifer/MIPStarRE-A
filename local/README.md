@@ -14,7 +14,9 @@ issue  →  branch + worktree  →  agent session(s)  →  local CI  →  review
 
 1. **File an issue**: `local/bin/issue_new.py --title "..." --body-file b.md --label ...` opens
    a GitHub issue and prints its number; `--parent N` attaches it as a native
-   sub-issue. The brief for it goes in `local/briefs/`.
+   sub-issue. Record each prerequisite, including one already closed, with
+   `local/bin/gh_common.py add-blocked-by ISSUE PREREQUISITE`; the command is
+   safe to repeat. The brief for the issue goes in `local/briefs/`.
 2. **Open a PR**: create branch `issue-<number>-slug`, worktree under
    `.worktrees/`, run `local/bin/worktree-setup.sh` there, then
    `local/bin/pr_open.py --branch issue-<number>-slug --title "..." --body-file pr.md --issue N` (the body follows the PR template in `local/protocols/issues-prs.md`),
@@ -33,6 +35,25 @@ issue  →  branch + worktree  →  agent session(s)  →  local CI  →  review
    exact-SHA guard. Then pokes the cache warmer.
 8. **Housekeeping / site**: `local/bin/housekeeping.sh all`,
    `local/bin/site.sh all`.
+
+**Choosing the next packet.** `local/bin/ready_packets.py` walks the packet tree
+under the Stage 4.3 tracker #47 — chapter trackers, their packets, and nested
+chains such as Magic Square rigidity — and prints the open leaf packets whose
+GitHub issue dependencies (`blocked_by`) are all closed. `--all` adds the
+blocked packets with their open blockers, `--json` feeds the lane launcher, and
+`--root N` restricts the walk to one tracker. Prerequisites live in those edges
+only: the "Dependencies" bullets in a packet body are commentary
+(`protocols/issues-prs.md` §1). A merged packet closes its issue and therefore
+unblocks its dependents with no edit anywhere.
+
+## Telemetry
+
+Session, stage, build, and incident records live under `results/telemetry/` as
+described in [`protocols/meta.md`](protocols/meta.md). The
+[`design-decisions.md`](../results/telemetry/design-decisions.md) register is
+the short, chronological index of owner and operator choices that shaped the
+workflow; each row points to the longer primary record. Record reasoning in the
+pointed event or owner log rather than expanding the index into a second log.
 
 ## Ground rules for agents
 
