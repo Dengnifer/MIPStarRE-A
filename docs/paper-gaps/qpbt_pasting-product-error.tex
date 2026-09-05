@@ -125,6 +125,126 @@ The declaration must remain without a proof-complete blueprint marker until
 the quantitative estimate is formalized.  The operator-valued pasting
 construction itself is not refuted by this example.
 
+\section{Status of the one-sided formal statement}
+
+The corrected scalar contract removes the obstruction above, but the proof of
+the paper-facing declaration remains open (\ghissue{201}).  This section
+records the precise obstacle.
+
+\subsection*{The two theorem forms}
+
+The source states the lemma for symmetric strategies: the shared state is a
+vector in $\mathcal H\ot\mathcal H$ invariant under the permutation of the two
+factors, and both players use the same measurement operators
+(\cite[lines~84--86 and~174--176]{Ji2020MIPStar}).  Under this convention the
+relation $X\ot\mathrm{Id}\simeq_\delta\mathrm{Id}\ot Y$ implies
+$Y\ot\mathrm{Id}\simeq_\delta\mathrm{Id}\ot X$, and the imported proof
+(\cite[lines~1150--1175]{Natarajan2018NEEXP}) uses this freely: it moves the
+fine-grained second codeword effect $(G_2)^x_{g_2}$ between the two factors and
+bounds the resulting collision term by $\eta$ using the positivity of
+$\langle\psi|\,(G_1G_2G_1)\ot G_2\,|\psi\rangle$.
+
+The formal declaration quantifies over an arbitrary unit vector of the
+bipartite space and assumes only the three forward comparisons
+\eqref{eq:pasting-1}--\eqref{eq:pasting-2} of the source, in which every
+answer operator acts on the first factor and every codeword operator on the
+second.  No operator indexed by a codeword $g_2$ acts on the first factor, so
+the register move of the source is not available.
+
+\subsection*{A one-sided reduction}
+
+Write $\psi_a=(A_a\ot\mathrm{Id})\psi$ for the post-measurement vectors of the
+joint answer measurement, $P_{a_1}=(G_1)^x_{[\operatorname{eval}_{y_1}=a_1]}$,
+$G_{g_2}=(G_2)^x_{g_2}$, and $[a_2]$ for the set of second codewords
+evaluating to $a_2$ at $y_2$.  Since the first-factor projections are
+orthogonal and commute with every second-factor operator, the defect of the
+conclusion \eqref{eq:pasting-3} at a fixed question equals
+\[
+  \sum_a\sum_{g_2\notin[a_2]}
+    \bigl\|(\mathrm{Id}\ot G_{g_2})\psi_a\bigr\|^2
+  +\sum_a\sum_{g_2\in[a_2]}
+    \bigl\langle(\mathrm{Id}\ot G_{g_2})\psi_a\bigm|
+      \mathrm{Id}\ot(\mathrm{Id}-P_{a_1})\bigm|
+      (\mathrm{Id}\ot G_{g_2})\psi_a\bigr\rangle .
+\]
+The first sum is the second-marginal defect of \eqref{eq:pasting-1}, at most
+$\delta$ on average.  The second sum is at most the \emph{pinched defect}
+\[
+  \Delta_1=\sum_{a_1}\sum_{g_2}
+    \bigl\langle(\mathrm{Id}\ot G_{g_2})\psi_{a_1}\bigm|
+      \mathrm{Id}\ot(\mathrm{Id}-P_{a_1})\bigm|
+      (\mathrm{Id}\ot G_{g_2})\psi_{a_1}\bigr\rangle,
+  \qquad \psi_{a_1}=(A_{a_1}\ot\mathrm{Id})\psi,
+\]
+which is the defect of the first-marginal comparison against the family
+$\sum_{g_2}G_{g_2}P_{a_1}G_{g_2}$.  The hypothesis \eqref{eq:pasting-1} for
+$i=1$ bounds the same expression without the pinching by $G_2$.  The theorem
+is therefore equivalent, up to an additive $\delta$, to the assertion that
+measuring the second codeword family on the second factor does not destroy the
+first-codeword mass of the vectors $\psi_{a_1}$.
+
+\subsection*{The obstacle}
+
+In the exact case $\delta=\eta=0$ the pinched defect vanishes one-sidedly:
+every fine effect $G_{g_2}$ then coincides with a coarse projector
+$Q^{y_2}_{a_2}=(G_2)^x_{[\operatorname{eval}_{y_2}=a_2]}$, the coarse
+projector moves to the first factor by \eqref{eq:pasting-1} for $i=2$, and
+there it commutes with $\mathrm{Id}\ot P_{a_1}$.  For $\eta>0$ the fine
+effects differ from the coarse projectors by the collision cross terms
+\[
+  \sum_{a}\;\sum_{\substack{g_2\neq g_2'\\ g_2,g_2'\in[a_2]}}
+    \bigl\langle\psi\bigm|(A_a\ot\mathrm{Id})
+      (\mathrm{Id}\ot G_{g_2}P_{a_1}G_{g_2'})\bigm|\psi\bigr\rangle .
+\]
+These terms are not positive, and no operator on the first factor is indexed
+by the second codeword.  The available one-sided estimates bound each term by
+$\|(\mathrm{Id}\ot G_{g_2})\psi\|\,\|(\mathrm{Id}\ot G_{g_2'})\psi\|$, and the
+conditional collision bound then yields, after averaging over $y_2$, a bound
+of order $\eta$ times the expected number of second codewords colliding with a
+given one.  In the intended applications this number is comparable to
+$|\mathcal G_2|/|\mathcal R_2|$, so the resulting bound is not polynomial in
+$(\eta,\delta)$ with universal constants.  Expressing a fine effect as an
+average of coarse projectors over independent samples of $y_2$ carries the
+same multiplicity.  The symmetric convention avoids this: the second-factor
+codeword effect is replaced by the identical effect on the first factor, the
+cross term becomes an expectation of a tensor product of positive operators,
+and the collision indicator can be averaged against a total mass at most one.
+
+\subsection*{What is known about the one-sided statement}
+
+No counterexample is known.  The self-consistency hypothesis
+\eqref{eq:pasting-2} together with \eqref{eq:pasting-1} for $i=2$ forces the
+post-measurement vectors $(\mathrm{Id}\ot G_{g_2})\psi$ to be approximately
+fixed by the first-factor projector $A^{x,y_1,y_2}_{[g_2]}$ for every $y_2$,
+and hence, using the collision bound, the reduced state of the second player
+is nearly diagonal in the eigenbasis of $G_2$ (its off-diagonal part has
+squared Frobenius norm at most $4\delta/(1-\eta)$).  This suggests that the
+hypotheses force the strategy to behave symmetrically where the codeword
+operators act, and that the one-sided statement is true, but a quantitative
+argument turning this into a bound on $\Delta_1$ is not in the source and is
+not available.
+
+\subsection*{Repair options}
+
+Following the protocol in \path{docs/paper-gaps/proof-gap-protocol.tex}, the
+paper-facing declaration keeps the source form with a tracked incomplete
+proof.  Two dischargers are possible.
+\begin{enumerate}
+  \item Prove a one-sided bound on the pinched defect $\Delta_1$ from the
+  three forward comparisons and the collision bound.  This closes the
+  declaration as stated.
+  \item Expose the source's ambient convention as a faithful boundary
+  hypothesis: assume that the shared vector is invariant under the permutation
+  of the two factors, and restate the comparisons with the common operator
+  families.  Under this hypothesis the coarse consistency of $G_2$ across the
+  factors, the fine consistency (with error $\delta+\eta$ by the collision
+  bound), and the register move follow as in the imported proof.
+\end{enumerate}
+No declaration on the main branch or on any open branch invokes the pasting
+theorem, so every consumer accepts either form.  The formalization of the
+blueprint proof of Lemma~\texttt{lem:pasting} is deferred until one of the two
+dischargers is chosen.
+
 \section{Conclusion}
 
 The literal product-form interpretation of

@@ -122,10 +122,16 @@ the available proof still uses the symmetric-strategy convention stated at
 the argument at `05_quantum_preliminaries.tex:1158-1175` moves a `G₂` effect
 between the two tensor factors. This declaration quantifies an arbitrary
 bipartite vector and assumes only the forward marginal comparisons, so that
-move is not derivable from its hypotheses. This remaining boundary is tracked
-by issue #201. Elimination: prove a one-sided replacement for the register-move
-step, or expose the source's permutation-invariance boundary in a paper-aligned
-statement. -/
+move is not derivable from its hypotheses. Up to the second-marginal defect,
+the defect of the conclusion equals the defect of the first-marginal comparison
+against the second-codeword pinching of the first codeword family; the source
+controls this pinched defect only through the fine-grained register move and
+the positivity of the resulting collision term, neither of which is available
+one-sidedly. The precise obstacle is recorded in the status section of
+`docs/paper-gaps/qpbt_pasting-product-error.tex`. This remaining boundary is
+tracked by issue #201. Elimination: prove a one-sided bound on the pinched
+defect, or expose the source's permutation-invariance convention as a boundary
+hypothesis in a paper-aligned statement. -/
 theorem exists_pasting_error :
     ∃ δp : ℝ → ℝ → ℝ, IsPolyErr₂ δp ∧
       ∀ {X Y₁ Y₂ R₁ R₂ Γ₁ Γ₂ ι : Type*}
