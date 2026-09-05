@@ -15,12 +15,14 @@ not require a dimension-divisibility hypothesis.
 
 ## References
 
-The source-shaped witness interfaces encode `lem:qld-4-10`,
-`lem:qld-xz-lines`, `lem:qld-sublines`, and `lem:qld-4-7` in
-`blueprint/src/chapter/ch15_qpbt_combining.tex`.  `ExtendedLinesWitness`
-instead records the directly indexed, completed-answer auxiliary supporting
-`lem:qld-4-13`; its carrier, probability law, and answer alphabet differ from
-that source statement.  The paper source is
+`CombinedPointsWitness`, `CombinedLinesWitness`, and `GlobalPairWitness` record
+the measurement conclusions of `lem:qld-4-10`, `lem:qld-xz-lines`, and
+`lem:qld-4-7`, respectively, in
+`blueprint/src/chapter/ch15_qpbt_combining.tex`.  `SubLineWitness` and
+`ExtendedLinesWitness` instead support `lem:qld-sublines` and `lem:qld-4-13`
+through the directly indexed extended-line carrier and probability law.  The
+latter also uses the completed answer alphabet, rather than the field-valued
+answer sum in the source statement.  The paper source is
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:689-709,
 882-894,1020-1069,1267-1274`.
 -/
