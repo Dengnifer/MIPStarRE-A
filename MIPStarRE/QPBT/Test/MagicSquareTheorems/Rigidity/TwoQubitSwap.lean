@@ -130,7 +130,7 @@ theorem twoBinarySwapMap_norm {ι : Type} [Fintype ι] [DecidableEq ι]
           (applyOperatorToState
             (X₁ ^ (e 0).val * reflectionEffect Z₁ (e 0)) ψ)‖ ^ 2 := by
     intro e
-    rw [← applyOperatorToState_mul]
+    rw [← MIPStarRE.QPBT.DistanceCalculus.applyOperatorToState_mul]
     exact (EuclideanSpace.norm_sq_eq (applyOperatorToState
       (X₂ ^ (e 1).val * reflectionEffect Z₂ (e 1) *
         (X₁ ^ (e 0).val * reflectionEffect Z₁ (e 0))) ψ)).symm
