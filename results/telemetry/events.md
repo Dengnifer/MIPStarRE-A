@@ -2699,3 +2699,6 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 
 ## 2026-09-05T12:05Z — publish path restored (PR 221 merged)
 - github-sync.sh now commits the record snapshot it writes; the first sync after the merge produced 253fa0d automatically. Merged today through the Claude review path: PRs 211, 192, 206, 191, 152, 197, 217, 221.
+
+## 2026-09-05T12:09Z — lem:pasting proved (math gap #201 closed end to end)
+- exists_pasting_error is sorry-free with error (3C+19)(eta^(1/4) + delta^(1/8)), C the constant of the coarse commutator bound; the adopted statement (with eq:pasting-1-sym) stands. Two Fable math-fix sessions and eight Opus prover sessions over about ten hours, following the constant-explicit proof written into the paper-gap note. Commit e1289bd on the #201 branch (PR 205); publication tail launched.
