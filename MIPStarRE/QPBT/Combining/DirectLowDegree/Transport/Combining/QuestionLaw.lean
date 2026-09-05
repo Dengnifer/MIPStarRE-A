@@ -238,6 +238,77 @@ theorem directCombined_measuredQuestion_of_coefficientVar (D : DirectLdParams)
       exact congrArg (fun x : Fin D.m → DirectScalarQ D =>
         directLdPointQuestionOf D x) hbase
 
+/-! ## The law of the projected sample -/
+
+/-- A point of the combined space is recovered from its two parts. -/
+@[simp] theorem combinedPoint_combinedPointPart_combinedCoefficientPart
+    {K : Type*} {m k : ℕ} (z : Fin (m + k) → K) :
+    combinedPoint (combinedPointPart z) (combinedCoefficientPart z) = z := by
+  funext i
+  rw [combinedPoint]
+  rcases hi : finSumFinEquiv.symm i with j | r
+  · show combinedPointPart z j = z i
+    rw [combinedPointPart, combinedPointVar, ← hi, Equiv.apply_symm_apply]
+  · show combinedCoefficientPart z r = z i
+    rw [combinedCoefficientPart, combinedCoefficientVar, ← hi,
+      Equiv.apply_symm_apply]
+
+/-- The decomposition of a sample of the combined game into its two point
+parts, its two combining parts, and its coordinate index. -/
+private def directCombinedSpaceEquiv (D : DirectLdParams) :
+    DirectLdSpace D.combined ≃
+      (((Fin D.m → DirectScalarQ D) × (Fin D.m → DirectScalarQ D)) ×
+        (((Fin D.k → DirectScalarQ D) × (Fin D.k → DirectScalarQ D)) ×
+          Fin D.combined.m)) where
+  toFun sample :=
+    ((directCombinedPointPart D sample.point,
+        directCombinedPointPart D sample.direction),
+      ((directCombinedCoefficientPart D sample.point,
+        directCombinedCoefficientPart D sample.direction), sample.index))
+  invFun x :=
+    ⟨combinedPoint x.1.1 x.2.1.1, x.2.2, combinedPoint x.1.2 x.2.1.2⟩
+  left_inv sample := by
+    obtain ⟨point, index, direction⟩ := sample
+    dsimp only
+    congr 1 <;>
+      first
+        | rfl
+        | exact combinedPoint_combinedPointPart_combinedCoefficientPart _
+  right_inv x := by
+    obtain ⟨⟨u, v⟩, ⟨α, w⟩, i⟩ := x
+    dsimp only
+    simp only [Prod.mk.injEq]
+    exact ⟨⟨combinedPointPart_combinedPoint u α,
+        combinedPointPart_combinedPoint v w⟩,
+      ⟨combinedCoefficientPart_combinedPoint u α,
+        combinedCoefficientPart_combinedPoint v w⟩, trivial⟩
+
+/-- The distributional half of `lem:ld-combined-question-law`: the two point
+parts of a uniform sample of the combined game are jointly uniform, hence
+independent of the combining parts and of the coordinate index.  Together with
+`directCombined_measuredQuestion_of_pointVar` this says that, conditioned on a
+point coordinate index, the questions measured by the combined strategy are the
+canonical questions of a uniform sample of the original game. -/
+theorem directCombinedSample_pointParts_uniform (D : DirectLdParams) :
+    (uniformDistribution (DirectLdSpace D.combined)).map
+        (fun sample => (directCombinedPointPart D sample.point,
+          directCombinedPointPart D sample.direction)) =
+      uniformDistribution
+        ((Fin D.m → DirectScalarQ D) × (Fin D.m → DirectScalarQ D)) :=
+  uniformDistribution_map_fst_of_equiv (e := directCombinedSpaceEquiv D) _
+    fun _ => rfl
+
+/-- The coordinate index of a uniform sample of the combined game is uniform on
+the `m + k` coordinates of the combined dimension; this is the index of
+`lem:ld-combined-question-law`, whose two cases are the point coordinates and
+the combining coordinates. -/
+theorem directCombinedSample_index_uniform (D : DirectLdParams) :
+    (uniformDistribution (DirectLdSpace D.combined)).map
+        (fun sample => sample.index) =
+      uniformDistribution (Fin D.combined.m) :=
+  uniformDistribution_map_fst_of_equiv (e := directLdSpaceIndexEquiv D.combined)
+    _ fun _ => rfl
+
 end
 
 end MIPStarRE.QPBT
