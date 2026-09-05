@@ -215,6 +215,15 @@ if [ -n "$EFFORT" ]; then
   esac
 fi
 
+if [ "$ROLE" = "mathfix" ]; then
+  case "${MIPSTARRE_CODEX_MODEL:-}:$EFFORT" in
+    *astra*:ultra) ;;
+    *) die 4 "mathfix requires an astra model in MIPSTARRE_CODEX_MODEL and --effort ultra.
+  Until the archived astra poller reports availability on #26, request the owner
+  session's Claude Fable 5.1 math-fix lane on #27." ;;
+  esac
+fi
+
 if [ -n "$RESUME_ID" ]; then
   case "$RESUME_ID" in
     *[!A-Za-z0-9-]*) die 2 "--resume takes a codex thread id (uuid), got '$RESUME_ID'" ;;

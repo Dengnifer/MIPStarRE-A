@@ -106,6 +106,14 @@ class DispatchCommandTests(unittest.TestCase):
         self.assertIn("persona: HEAD:local/personas/mathfix.md", self.last_dispatch_stdout)
         self.assertIn("# Persona: mathematical-gap repair", self.last_dispatch_stdout)
 
+    def test_mathfix_rejects_non_astra_or_non_ultra_dispatches(self) -> None:
+        for model, effort in (("", "ultra"), ("test-model", "ultra"), ("astra", "high")):
+            with self.subTest(model=model, effort=effort):
+                with self.assertRaises(subprocess.CalledProcessError) as failure:
+                    self.dispatch_command("--role", "mathfix", model=model, effort=effort)
+                self.assertEqual(failure.exception.returncode, 4)
+                self.assertIn("mathfix requires an astra model", failure.exception.stderr)
+
     def test_telemetry_accepts_mathfix_role(self) -> None:
         result = subprocess.run(
             ["python3", str(TELEMETRY), "session-summarize", "--help"],

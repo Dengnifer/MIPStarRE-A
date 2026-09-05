@@ -85,12 +85,6 @@ GitHub, so parallel lanes cannot trample each other's records.
   implementation convenience: paper-labelled statements stay source-shaped;
   genuine source defects become `docs/paper-gaps/` notes (key `qpbt`,
   traceability `\localissue{NNNN}`).
-- A mathematically false source statement follows `issues-prs.md` section 6:
-  request the owner session's Fable 5.1 math-fix lane on #27, iterate
-  correctness, sufficiency, minimality, and Lean consumers within the shared
-  gap budget, and escalate immediately only if a mathematical definition or
-  game must change. Switch to astra through `dispatch.sh --role mathfix` only
-  after the astra poller reports availability on #26.
 - Model economy: reserve your highest reasoning effort for mathematics and
   adjudication; dispatch mechanical work at lower effort. Watch quota —
   it is a scheduling constraint (events.md 2026-08-31).

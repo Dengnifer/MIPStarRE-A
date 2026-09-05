@@ -59,8 +59,12 @@ Schemas (all JSONL, one object per line; timestamps ISO-8601 with offset):
     usage: {input, cached_input, cache_write, output, reasoning},
     exit, dispatcher, worktree, status: active|done|failed|archived}`
   Written only by `local/bin/dispatch.sh` / `telemetry.py`.
-- `results/telemetry/owner-sessions.jsonl` — Claude-side sessions launched by
-  the owner session, including the current Fable 5.1 math-fix lane.
+- `results/telemetry/owner-sessions.jsonl` —
+  `{name, role, model, issue, pr?, worktree?, base?, start, end?, wall_s?,
+    status, tokens?, tool_uses?, findings_fixed?, commits?, note?}`.
+  Written only by the owner session and `/tmp/claude-lane-prep.sh` /
+  `/tmp/claude-lane-finish.sh`; `tokens` is the harness-reported subagent total.
+  For `role: mathfix`, `issue` identifies the gap whose shared budget is charged.
 - `results/telemetry/builds.jsonl` —
   `{ts, kind: warm|rebuild|cache-get|ci-build, trigger, seconds, outcome,
     sha?, note?}`

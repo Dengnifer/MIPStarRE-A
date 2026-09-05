@@ -544,21 +544,15 @@ the helper rejects protected overlap and duplicate ownership, and dispatch grant
 ## 2026-09-05 — Mathematical repair precedes owner escalation
 
 **Trigger:** `results/telemetry/owner-log.md` entries at 2026-09-04 22:35Z and
-23:05Z, and `results/telemetry/events.md` entry "Owner rule: mathematical gaps
-are resolved by math-fix sessions before reaching the owner"; issue #208 records
-the owner's confirmed defaults.
+23:05Z and the corresponding `results/telemetry/events.md` owner-rule entry;
+issue #208 records the confirmed defaults, and PR #209 reviews exposed missing
+launch and accounting guards.
 
-**Change:** `issues-prs.md` section 6 now makes a bounded `mathfix` pass the
-default response to a false source statement and defines correctness,
-sufficiency, minimality, Lean convergence, adoption records, and escalation.
-`dispatch.sh` and the fixed-role documentation admit the new persona;
-`docs/paper-gaps/policy.tex` points mathematical notes to the operational rule;
-and `local/README.md` identifies the design-decisions register. PR #209
-round-one review clarified the launch boundary: the owner session's Agent tool
-runs Fable 5.1 and records it in `owner-sessions.jsonl` today; Codex main files
-the request on #27; and the `dispatch.sh` route is reserved for astra after its
-poller reports availability on #26. `sessions.md` and `meta.md` distinguish the
-two telemetry paths explicitly.
+**Change:** `issues-prs.md` defines the bounded repair and escalation rule. The
+owner launches Fable 5.1; `dispatch.sh` enforces astra with ultra effort for the
+future Codex lane; the activation poller is archived under `owner-tools/`; and
+`meta.md` specifies owner-session accounting. The paper-gap policy points to
+the rule, and `local/README.md` points to the design-decisions register.
 
 **Expected effect:** the fleet resolves theorem-statement defects against their
 complete dependency graph, while #26 receives only definition/game decisions or
