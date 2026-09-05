@@ -1084,6 +1084,37 @@ postprocessing, and operator-contraction steps used to formalize
 	comparison in \eqref{eq:pasting-1} yields the assertion.
 \end{proof}
 
+\begin{lemma}[Formalization support for Lemma~\ref{lem:pasting}]
+	\label{lem:pasting-coarse-commutator}
+	\lean{MIPStarRE.QPBT.exists_coarse_commutator_bound}
+	\leanok
+	\uses{def:pasting-alphabet-relabelling, lem:commutation-analysis,
+		fact:agreement, def:povm-distance}
+	In the setting of Lemma~\ref{lem:pasting}, write
+	$P_{a_1} = (G_1)^x_{[\operatorname{eval}_{y_1}(\cdot)=a_1]}$ and
+	$Q_{a_2} = (G_2)^x_{[\operatorname{eval}_{y_2}(\cdot)=a_2]}$ for the two
+	coarse codeword families. There is a universal constant $C \ge 1$,
+	independent of the finite sets, of the space, of the distribution, of the
+	measurements, of the state and of the error, such that the two comparisons
+	in \eqref{eq:pasting-1} give
+	\[
+		\Id \ot [P_{a_1},\, Q_{a_2}] \approx_{C \delta} 0\,.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:commutation-analysis, fact:agreement,
+		def:pasting-alphabet-relabelling}
+	The two comparisons bound the consistency of each coarse family with the
+	corresponding marginal of the joint projective measurement $A$ placed on the
+	opposite factor, hence by Lemma~\ref{fact:agreement} the state-dependent
+	distances of those two pairs by $2\delta$. Relabelling the outcome sets of
+	$P$, of $Q$ and of $A$ so that the two coarse families are the two marginals
+	of a common joint outcome set, the right-register form of
+	Lemma~\ref{lem:commutation-analysis} applies and gives the assertion with
+	twice its constant.
+\end{proof}
+
 \begin{lemma}[Close strategies have close values; Fact 4.32 in \cite{Natarajan2018NEEXP}]\label{lem:close-strategies-have-close-values}
 	\lean{MIPStarRE.QPBT.abs_value_sub_le_of_areClose}
 	\leanok
