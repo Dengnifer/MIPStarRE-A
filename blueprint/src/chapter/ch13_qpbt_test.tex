@@ -491,10 +491,10 @@ The Pauli basis test is the quantum low individual degree test of Natarajan and 
 
 \begin{definition}[Question distribution of the Pauli basis test]\label{def:pauli-question-distribution}
 	\lean{MIPStarRE.QPBT.PauliType, MIPStarRE.QPBT.pauliCLLevel, MIPStarRE.QPBT.pauliCL}
-	\lean{MIPStarRE.QPBT.isCondLinear_pauliCL, MIPStarRE.QPBT.pauliEdges}
+	\lean{MIPStarRE.QPBT.pauliEdges}
 	\lean{MIPStarRE.QPBT.pauliQuestionDistribution}
 	\leanok
-	\uses{def:admissible, def:ld-question-distribution, def:ms-game, def:cl-func, def:cl-dist, def:graph-distribution}
+	\uses{def:admissible, def:ld-question-distribution, lem:ld-point-level, lem:ld-aline-level, lem:ld-dline-level, def:ms-game, def:cl-func, def:cl-dist, def:graph-distribution}
 	% Admissibility of the full tuple is required here, not only the divisibility m | q:
 	% the source parametrizes the Pauli basis test by the tuple qldparams introduced
 	% together with Definition def:admissible (references/qpbt-paper/
@@ -541,20 +541,24 @@ The Pauli basis test is the quantum low individual degree test of Natarajan and 
 
 \begin{lemma}[Conditionally linear Pauli question maps]\label{lem:pauli-question-cl-components}
 	\lean{MIPStarRE.QPBT.isCondLinear_pauliCL}
-	\uses{def:pauli-question-distribution, def:cl-func}
+	\leanok
+	\uses{def:pauli-question-distribution, def:cl-func, lem:ld-point-level, lem:ld-aline-level, lem:ld-dline-level}
 	For every Pauli question type $t \in \mathcal T^{\mathrm{pauli}}$, the map $L_t$ of Definition~\ref{def:pauli-question-distribution} is conditionally linear. Its levels are $1$ for the point maps, $2$ for the axis-parallel line maps, $3$ for the diagonal line maps, $1$ for the shared projection maps, and $0$ for the Pauli maps.
 \end{lemma}
 \begin{proof}
-	\uses{lem:ld-point-level, lem:ld-aline-level, lem:ld-dline-level}
+	\leanok
+	\uses{lem:ld-point-level, lem:ld-aline-level, lem:ld-dline-level, lem:cl-reindex, lem:cl-one-level-linear}
 	Transport the point, axis-parallel line, and diagonal line representations to the selected basis register. The shared projection onto the point and auxiliary registers is linear, while the Pauli maps are zero. These representations have levels $1$, $2$, $3$, $1$, and $0$, respectively.
 \end{proof}
 
 \begin{lemma}[Common level of the Pauli question maps]\label{lem:pauli-question-cl-family}
 	\lean{MIPStarRE.QPBT.isTypedCondLinearFamily_pauliCL}
+	\leanok
 	\uses{def:pauli-question-distribution, def:typed-cl-functions}
 	For every Pauli question type $t \in \mathcal T^{\mathrm{pauli}}$, the map $L_t$ of Definition~\ref{def:pauli-question-distribution} is a $3$-level CL function. Thus $L = \{L_t\}_{t \in \mathcal T^{\mathrm{pauli}}}$ is a finite typed family of $3$-level CL functions.
 \end{lemma}
 \begin{proof}
+	\leanok
 	\uses{lem:pauli-question-cl-components, lem:cl-level-mono}
 	The component maps have levels at most $3$ by Lemma~\ref{lem:pauli-question-cl-components}. Lemma~\ref{lem:cl-level-mono} raises each representation to the common level $3$.
 \end{proof}
@@ -579,11 +583,15 @@ The Pauli basis test is the quantum low individual degree test of Natarajan and 
 	Combine the common-level family assertion of Lemma~\ref{lem:pauli-question-cl-family} with the distribution identity of Lemma~\ref{lem:pauli-question-typed-equality}.
 \end{proof}
 
+\begin{remark}[Formalization status of Lemma~\ref{lem:pauli-question-typed-cl}]\label{rem:pauli-question-typed-cl-status}
+	The common-level assertion of Lemma~\ref{lem:pauli-question-typed-cl} is established by Lemma~\ref{lem:pauli-question-cl-family}; the distribution identity of Lemma~\ref{lem:pauli-question-typed-equality} remains open.
+\end{remark}
+
 \begin{definition}[Win predicate of the Pauli basis test]\label{def:pauli-win-predicate}
 	\lean{MIPStarRE.QPBT.PauliAnswer, MIPStarRE.QPBT.validPauliAnswer}
 	\lean{MIPStarRE.QPBT.pauliWinPredicate, MIPStarRE.QPBT.pauliBasisTest}
 	\leanok
-	\uses{def:pauli-question-distribution, def:ld-win-predicate, def:ms-game, def:indicator-vector, def:admissible}
+	\uses{def:pauli-question-distribution, def:ld-win-predicate, def:ms-game, def:indicator-vector, def:admissible, def:game, def:low-degree-encoding, def:subfield-trace}
 	Fix an admissible tuple $\mathsf{qldparams} = (q,m,d)$ (Definition~\ref{def:admissible}) and let $M = 2^m$. Answers in the game $\mathfrak{G}^{\mathrm{Pauli}}_{\mathsf{qldparams}}$ take the following forms, depending on the question type; answers not of the prescribed form are rejected.
 	% The paper's format table writes the line contents loosely as (u_W, s) and (u_W, s, v);
 	% by the sampling procedure the actual contents are the canonical pairs (u_0, s) and
