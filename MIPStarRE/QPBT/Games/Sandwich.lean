@@ -109,29 +109,25 @@ theorem pastedMeasurement_isMeasurement {Γ₁ Γ₂ ι : Type*}
         intro g₂ _
         rw [G₁.sum_eq_one, mul_one, (hG₂ g₂).isIdempotentElem.eq]
       _ = 1 := G₂.sum_eq_one
-
 /-- Pasting two consistent measurements yields an additive polynomial error.
 All operator families in the conclusion are the postprocessed source
-families. This is `lem:pasting`, blueprint `ch12_qpbt_games.tex:954-979`, paper
+families. This is `lem:pasting`, blueprint `ch12_qpbt_games.tex:954-990`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:504-525`.
 
-**Unfaithful:** The additive correction to `IsPolyErr₂` removes the scalar
-obstruction documented in `docs/paper-gaps/qpbt_pasting-product-error.tex`, but
-the available proof still uses the symmetric-strategy convention stated at
-`references/neexp-paper/05_quantum_preliminaries.tex:176-180`. In particular,
-the argument at `05_quantum_preliminaries.tex:1158-1175` moves a `G₂` effect
-between the two tensor factors. This declaration quantifies an arbitrary
-bipartite vector and assumes only the forward marginal comparisons, so that
-move is not derivable from its hypotheses. Up to the second-marginal defect,
-the defect of the conclusion equals the defect of the first-marginal comparison
-against the second-codeword pinching of the first codeword family; the source
-controls this pinched defect only through the fine-grained register move and
-the positivity of the resulting collision term, neither of which is available
-one-sidedly. The precise obstacle is recorded in the status section of
-`docs/paper-gaps/qpbt_pasting-product-error.tex`. This remaining boundary is
-tracked by issue #201. Elimination: prove a one-sided bound on the pinched
-defect, or expose the source's permutation-invariance convention as a boundary
-hypothesis in a paper-aligned statement. -/
+**Boundary hypothesis (ambient convention of the source):** the source states
+the lemma for symmetric strategies
+(`references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:84-86,174-176`), and
+the imported proof
+(`references/neexp-paper/05_quantum_preliminaries.tex:1150-1175`) exchanges
+the tensor factors of the second codeword measurement. The fourth comparison
+hypothesis below, `eq:pasting-1-sym`, is that register exchange of the second
+comparison in `eq:pasting-1`; it is the first symmetric equivalent of that
+comparison in the sense of `def:symmetric-equivalents`, it holds verbatim for
+a symmetric strategy, and it is the only consequence of the convention the
+proof uses. Without it the statement is unattested; the reduction to the
+pinched defect and the proof of the present form are recorded in
+`docs/paper-gaps/qpbt_pasting-product-error.tex`. The proof is tracked by
+issue #201. -/
 theorem exists_pasting_error :
     ∃ δp : ℝ → ℝ → ℝ, IsPolyErr₂ δp ∧
       ∀ {X Y₁ Y₂ R₁ R₂ Γ₁ Γ₂ ι : Type*}
@@ -159,6 +155,10 @@ theorem exists_pasting_error :
             (fun g => eval₂ g q.2)).effect a₂)) ψ ≤ δ →
         consistencyDefect D (fun q a => heteroKron ((A q).effect a) 1)
           (fun q a => heteroKron 1 ((A q).effect a)) ψ ≤ δ →
+        consistencyDefect D
+          (fun q a₂ => heteroKron (((G₂ q.1.1).postprocess
+            (fun g => eval₂ g q.2)).effect a₂) 1)
+          (fun q a₂ => heteroKron 1 (((A q).postprocess Prod.snd).effect a₂)) ψ ≤ δ →
         consistencyDefect D (fun q a => heteroKron ((A q).effect a) 1)
           (fun q a => heteroKron 1 (∑ g₁ : Γ₁, ∑ g₂ : Γ₂,
             if (eval₁ g₁ q.1.2, eval₂ g₂ q.2) = a then

@@ -34,6 +34,10 @@
   at zero, while a fixed positive consistency error need not decrease with the
   collision error.
   The discrepancy is tracked in \ghissue{196}.
+  \item \textbf{Adopted statement.}  The paper-facing declaration carries
+  the register exchange of the second-marginal comparison, the only
+  consequence of the source's symmetric-strategy convention its proof uses;
+  the one-sided form without it is unattested.  Tracked in \ghissue{201}.
 \end{itemize}
 
 \section{Key theorem forms}
@@ -116,7 +120,9 @@ be arbitrarily small, this failure is not confined to the large-error boundary.
 The blueprint reproduces the source theorem and its unrestricted nonnegative
 error parameters.  The formal predicate now states the corrected sum bound
 $A(\eta^r+\delta^s)$ on the closed nonnegative quadrant, and the paper-facing
-pasting declaration retains the same theorem form.%
+pasting declaration carries, in addition, the register exchange of the
+second-marginal comparison as a boundary hypothesis encoding the source's
+symmetric-strategy convention (see the status section below).%
 \footnote{The polynomial predicate is defined in
 \doclink{MIPStarRE/QPBT/Games/ErrorFunctions.lean}; the paper-facing theorem is
 \leanid{exists\_pasting\_error} in
@@ -224,26 +230,106 @@ operators act, and that the one-sided statement is true, but a quantitative
 argument turning this into a bound on $\Delta_1$ is not in the source and is
 not available.
 
-\subsection*{Repair options}
+\subsection*{The adopted statement}
 
-Following the protocol in \path{docs/paper-gaps/proof-gap-protocol.tex}, the
-paper-facing declaration keeps the source form with a tracked incomplete
-proof.  Two dischargers are possible.
+Following the protocol in \path{docs/paper-gaps/proof-gap-protocol.tex}, an
+extra hypothesis is admissible on the paper-facing declaration only as a
+documented faithful encoding of the source's ambient hypotheses.  The
+symmetric-strategy convention of the source is such an ambient hypothesis,
+and the imported proof uses exactly one consequence of it: the second
+comparison in \eqref{eq:pasting-1} read from the other player,
+\begin{equation}\label{eq:pasting-1-sym}
+  (G_2)^x_{[\operatorname{eval}_{y_2}(\cdot)=a_2]}\ot\mathrm{Id}
+    \simeq_\delta \mathrm{Id}\ot A^{x,y_1,y_2}_{a_2}\,,
+\end{equation}
+the first symmetric equivalent of that comparison in the sense of the
+blueprint definition \texttt{def:symmetric-equivalents}.  The paper-facing
+declaration now carries \eqref{eq:pasting-1-sym} as a fourth comparison
+hypothesis, with all other hypotheses and the conclusion unchanged.  This is
+the minimal form: it is weaker than permutation invariance of the shared
+vector, which yields every register exchange at once; it follows verbatim
+from the source convention; no register exchange of the first comparison or
+of the self-consistency is assumed; and the proof below uses it in exactly
+one step.  The earlier one-sided form is retired, since it is not the source
+statement and the preceding subsections record why it is unattested.
+
+\subsection*{Sufficiency at the single use}
+
+The blueprint applies the pasting lemma once, in the combined line
+measurements of the quantum low-degree test (blueprint node
+\texttt{lem:qld-xz-lines}, paper
+\path{references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:938-962}).
+There the roles of $A$, $G_1$, $G_2$ are played by the combined point
+measurement $\hat Q^{x,z}$ and the two expanded line measurements, all acting
+on the parties of the expanded state, and the input relations are the marginal
+consistencies and the self-consistency of \texttt{lem:qld-4-10}, for which
+that lemma establishes all symmetric equivalents.  Hence
+\eqref{eq:pasting-1-sym} is available at the use, and the source itself
+asserts the conclusion for all symmetric equivalents.  No other blueprint node
+or Lean declaration invokes the pasting theorem.
+
+\subsection*{Proof of the adopted statement}
+
+Fix a question $(x,y_1,y_2)$ and keep the notation of the reduction above,
+with $Q_{a_2}=(G_2)^x_{[\operatorname{eval}_{y_2}=a_2]}$.  Write
+$\delta_1,\delta_2,\delta_3\le\delta$ for the defects of the three forward
+comparisons and $\delta_2'\le\delta$ for that of \eqref{eq:pasting-1-sym};
+averages over the question are taken at the end, with Jensen's inequality for
+the square roots.
 \begin{enumerate}
-  \item Prove a one-sided bound on the pinched defect $\Delta_1$ from the
-  three forward comparisons and the collision bound.  This closes the
-  declaration as stated.
-  \item Expose the source's ambient convention as a faithful boundary
-  hypothesis: assume that the shared vector is invariant under the permutation
-  of the two factors, and restate the comparisons with the common operator
-  families.  Under this hypothesis the coarse consistency of $G_2$ across the
-  factors, the fine consistency (with error $\delta+\eta$ by the collision
-  bound), and the register move follow as in the imported proof.
+  \item \emph{Reduction.}  By the reduction above, the defect of
+  \eqref{eq:pasting-3} is at most $\delta_2+\Delta_1$.
+  \item \emph{From the pinched defect to a commutator.}  Since
+  $\sum_{g_2}G_{g_2}=\mathrm{Id}$, the quantity $1-\Delta_1$ differs from
+  $\sum_{a_1}\langle\psi|A_{a_1}\ot P_{a_1}|\psi\rangle=1-\delta_1$ by
+  $\sum_{a_1,g_2}\langle\psi|A_{a_1}\ot[G_{g_2},P_{a_1}]G_{g_2}|\psi\rangle$,
+  and Cauchy--Schwarz bounds this by $\sqrt K$, where
+  $K=\sum_{a_1,g_2}\|\,\mathrm{Id}\ot[P_{a_1},G_{g_2}]\,\psi\|^2$.  Hence
+  $\Delta_1\le\delta_1+\sqrt K$.
+  \item \emph{Coarse commutators.}  The comparisons \eqref{eq:pasting-1}
+  move $P_{a_1}$ and $Q_{a_2}$ one at a time onto the joint projective
+  measurement on the first factor: in the summed square norm,
+  $(\mathrm{Id}\ot P_{a_1}Q_{a_2})\psi$ and
+  $(\mathrm{Id}\ot Q_{a_2}P_{a_1})\psi$ are both within $2\sqrt{2\delta}$ of
+  $(A_{a_1,a_2}\ot\mathrm{Id})\psi$.  Thus
+  $K_0=\sum_{a_1,a_2}\|\,\mathrm{Id}\ot[P_{a_1},Q_{a_2}]\,\psi\|^2\le32\delta$
+  and $\sum_{a_1,a_2}\|(\mathrm{Id}\ot P_{a_1}Q_{a_2})\psi\|^2\ge
+  1-4\sqrt{2\delta}$ when $8\delta\le1$ (larger values are absorbed by the
+  constant, the defect being at most $1$).  This step is one-sided.
+  \item \emph{Cross consistency of $G_2$.}  From \eqref{eq:pasting-1-sym},
+  the marginal of the self-consistency \eqref{eq:pasting-2}, and the second
+  comparison in \eqref{eq:pasting-1}, the triangle estimate for consistency
+  gives
+  $\epsilon_c=\sum_{a_2\neq a_2'}\langle\psi|Q_{a_2}\ot Q_{a_2'}|\psi\rangle
+  \le\delta+2\sqrt{2\delta}$.  Splitting the pairs $g_2\neq g_2'$ according
+  to whether $g_2(y_2)=g_2'(y_2)$, the collision bound and the positivity of
+  $\langle\psi|G_{g_2}\ot G_{g_2'}|\psi\rangle$ give, on average over $y_2$,
+  $\epsilon_f=\sum_{g_2\neq g_2'}\langle\psi|G_{g_2}\ot G_{g_2'}|\psi\rangle
+  \le\epsilon_c+\eta$.  Both families being projective,
+  $\sum_{g_2}\|(G_{g_2}\ot\mathrm{Id}-\mathrm{Id}\ot G_{g_2})\psi\|^2
+  =2\epsilon_f$, and likewise $2\epsilon_c$ for the coarse family.  This is
+  the only step using \eqref{eq:pasting-1-sym}.
+  \item \emph{Fine commutators.}  Expand $K$ and $K_0$ into four terms each
+  and compare term by term.  The first fine term is at most $1$ and the first
+  coarse term is at least $1-4\sqrt{2\delta}$ by step 3.  The second terms
+  agree, both being $\sum_{a_1}\langle\psi|\mathrm{Id}\ot P_{a_1}^2|\psi\rangle$.
+  In the two cross terms, written with the vectors
+  $(\mathrm{Id}\ot G_{g_2}P_{a_1})\psi$ on the left, the rightmost effect is
+  moved to the first factor at cost $\sqrt{2\epsilon_f}$ (fine) and
+  $\sqrt{2\epsilon_c}$ (coarse); after the move the coarse expression exceeds
+  the fine one by
+  $\sum_{a_1}\sum_{g_2\neq g_2',\,g_2(y_2)=g_2'(y_2)}
+  \langle\psi|G_{g_2'}\ot P_{a_1}G_{g_2}P_{a_1}|\psi\rangle$, a sum of
+  expectations of tensor products of positive operators, which is
+  nonnegative and, by the collision bound, at most $\eta$ on average.
+  Altogether
+  $K\le K_0+4\sqrt{2\delta}+2\eta+2\sqrt{2\epsilon_f}+2\sqrt{2\epsilon_c}$.
 \end{enumerate}
-No declaration on the main branch or on any open branch invokes the pasting
-theorem, so every consumer accepts either form.  The formalization of the
-blueprint proof of Lemma~\texttt{lem:pasting} is deferred until one of the two
-dischargers is chosen.
+Combining, the averaged defect of \eqref{eq:pasting-3} is at most
+$2\delta+\sqrt K$ with $K$ bounded by a universal sum of positive powers of
+$\delta$ and $\eta$, so $\delta_{\mathrm{pasting}}$ satisfies the corrected
+contract of the previous sections.  The formalization of this argument is
+tracked in \ghissue{201}.
 
 \section{Conclusion}
 
