@@ -2961,3 +2961,23 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   d62b3b0 and completed session evidence in 05a47a9. The #27 update headed
   17:34Z was posted approximately two minutes before that heading; this entry
   records the correction rather than treating that heading as a precise clock.
+
+## 2026-09-05T17:40Z — Owner account-routing lane and MAIN handoff
+
+- Owner issue 232 supersedes 231. The sol worker completed clean commit6ae352b
+  for explicit model recording; no separate PR is opened. Launched the requested
+  astra lane232. Its first two attempts stopped without edits because the prover
+  persona forbade workflow edits, and the lane repair attachment was explicitly
+  untrusted. Recovered through dispatch.sh with the trusted orchestrator persona
+  and direct task-specific owner authorization, retaining the prover registry
+  role and normal checked lane tail. Session prover-232-20260906-03 is verified
+  live on the same secondary-account thread and is inspecting implementation.
+- PR225's refresh conflict was only the sum_ldType docstring; preserved main's
+  fuller source explanation with the same theorem statement/proof. Normal merge
+  hooks and the lane tail are running; the merge daemon remains sole publisher
+  of merges to main. PR229 has exact-head CI success on6e754fc and astra review.
+- At17:39:39Z, /proc showed eight top-level Codex execs: four primary and four
+  secondary, excluding fan-out children. Added the verified running loops,
+  decisions, source-proof gap budget, account affinities, and next actions to the
+  end of /tmp/qpbt-main-handoff-v3.md for the owner-requested second-account
+  relaunch. MAIN stops after publishing that handoff; the full goal remains open.
