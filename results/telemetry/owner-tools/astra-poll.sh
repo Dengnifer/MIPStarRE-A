@@ -12,7 +12,7 @@ CFG="$HOME/.codex/config.toml"
 # inside a trusted git checkout on ghz; $HOME is not one, which made every earlier poll "unknown").
 REPO="$HOME/MIPStarRE-qpbt"
 answer=""
-for cand in $(grep -o -E '[A-Za-z0-9._-]*astra[A-Za-z0-9._-]*' "$CFG" 2>/dev/null | sort -u) gpt-5.6-astra; do
+for cand in $(grep -o -E '[A-Za-z0-9._-]*astra[A-Za-z0-9._-]*' "$CFG" 2>/dev/null | sort -u) gpt-6-astra gpt-5.6-astra; do
   if (cd "$REPO" && timeout 240 codex exec --sandbox read-only --skip-git-repo-check -m "$cand" \
         "Reply with exactly one line: PROBE-OK" 2>/dev/null | grep -q "PROBE-OK"); then answer="ASTRA=$cand"; break; fi
 done
