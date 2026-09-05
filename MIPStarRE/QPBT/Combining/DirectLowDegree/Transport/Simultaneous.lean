@@ -3,19 +3,16 @@ import MIPStarRE.LDT.Test.MainTheorem.MainFormal
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Consistency.Defect
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Error
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.PassConversion
-import MIPStarRE.QPBT.Games.Sandwich
 
 /-!
 # Simultaneous polynomial measurements for the direct low-degree game
 
 This module applies the quantum soundness theorem of the low individual
 degree test to each coordinate of a projective strategy for the directly
-indexed low-degree game, combines coordinate polynomial projective
-measurements into a polynomial-tuple POVM by the palindromic product of
-`lem:ld-sandwich`, transports the Schwartz--Zippel collision estimate to the
-direct polynomial representatives, and, for simultaneity parameter `1`,
-packages the coordinate conclusions as the polynomial-tuple conclusion of
-`lem:ld-soundness`.
+indexed low-degree game, transports the Schwartz--Zippel collision estimate
+to the direct polynomial representatives, and, for simultaneity parameter
+`1`, obtains the polynomial-tuple conclusion of `lem:ld-soundness` from the
+coordinate conclusions.
 
 ## The simultaneity obstruction
 
@@ -52,7 +49,7 @@ status are recorded in `docs/paper-gaps/qpbt_ld-simultaneous-sandwich.tex`.
 * `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:465-501`
 * `references/neexp-paper/05_quantum_preliminaries.tex:912-1060` and `:1409-1503`
 * `references/ldt-paper/test_definition.tex:180-202`
-* `blueprint/src/chapter/ch13_qpbt_test.tex:170-215`
+* `lem:ld-soundness` in `blueprint/src/chapter/ch13_qpbt_test.tex`
 * `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`
 * `docs/paper-gaps/qpbt_ld-simultaneous-sandwich.tex`
 -/
@@ -112,51 +109,6 @@ theorem directPolynomialAgreement_avg_le_mdq (D : DirectLdParams)
     _ ≤ (D.m * D.d : Error) / D.q :=
       polynomialAgreement_avg_le_mdq D.toLDTParameters gLdt g'Ldt hneqLdt
 
-/-! ## Palindromic tuple measurements -/
-
-/-- Combine coordinate polynomial projective measurements into a tuple-valued
-POVM by the ordered palindromic product of `lem:ld-sandwich` (blueprint
-`ch12_qpbt_games.tex:454-507`, paper
-`references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:465-501`).
-
-No commutativity between different coordinate measurements is assumed. -/
-noncomputable def directSandwichPolynomialMeasurement
-    (D : DirectLdParams) {iota : Type*} [Fintype iota] [DecidableEq iota]
-    (G : Fin D.k → PolyMeas D.m (DirectScalarQ D) D.d iota)
-    (hG : ∀ r, Measurement.IsProjective (G r)) :
-    DirectPolyMeasTuple D iota := by
-  let hmeasurement := SandwichProduct.sandwichProduct_isMeasurement
-    (G := fun r (_ : Unit) => G r) (hG := fun r (_ : Unit) => hG r) ()
-  exact Quantum.Measurement.ofSumEqOne
-    (fun g => sandwichProduct (fun r (_ : Unit) h => (G r).effect h) () g)
-    hmeasurement.1 hmeasurement.2
-
-/-- The effects of the tuple POVM are its defining palindromic products. -/
-@[simp] theorem directSandwichPolynomialMeasurement_effect
-    (D : DirectLdParams) {iota : Type*} [Fintype iota] [DecidableEq iota]
-    (G : Fin D.k → PolyMeas D.m (DirectScalarQ D) D.d iota)
-    (hG : ∀ r, Measurement.IsProjective (G r))
-    (g : DirectPolyTuple D) :
-    (directSandwichPolynomialMeasurement D G hG).effect g =
-      sandwichProduct (fun r (_ : Unit) h => (G r).effect h) () g :=
-  rfl
-
-/-- Relabeling a polynomial projective measurement of the low individual
-degree test by direct polynomial representatives preserves projectivity. -/
-theorem directPolynomialMeasurement_isProjective
-    (D : DirectLdParams) :
-    letI := D.toLDTFieldModel
-    ∀ {iota : Type*} [Fintype iota] [DecidableEq iota]
-      (G : ProjMeas (Polynomial D.toLDTParameters) iota),
-      Measurement.IsProjective (directPolynomialMeasurement D G) := by
-  letI := D.toLDTFieldModel
-  intro iota _ _ G g
-  rw [directPolynomialMeasurement_effect]
-  refine { isIdempotentElem := ?_, isSelfAdjoint := ?_ }
-  · exact G.proj (directPolyEquivPolynomial D g)
-  · exact (Matrix.nonneg_iff_posSemidef.mp
-      (G.outcome_pos (directPolyEquivPolynomial D g))).1.isSelfAdjoint
-
 /-! ## Coordinatewise low individual degree soundness -/
 
 /-- Quantum soundness of the low individual degree test (`thm:main-formal`,
@@ -167,7 +119,7 @@ The coordinate strategy passes the test with failure probability at most
 `3 ε`, and the theorem is instantiated at the auxiliary sampling parameter
 `directLdAuxParameter D`; both numerical side conditions of the theorem follow
 from the positivity of the dimension and of the degree.  Blueprint
-`ch13_qpbt_test.tex:170-215`, paper
+`lem:ld-soundness`, paper
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:413-458`. -/
 theorem directCoordinateMainFormal
     (D : DirectLdParams) (S : Strategy (directLdGame D))
@@ -209,14 +161,8 @@ theorem directCoordinateMainFormal
 selected by the value of the tuple at the unique index. -/
 private theorem const_tuple_eq_iff {iota beta : Type*} [Unique iota]
     (v : iota → beta) (b : beta) :
-    v = (fun _ => b) ↔ v default = b := by
-  constructor
-  · intro h
-    exact congrFun h default
-  · intro h
-    funext i
-    rw [Unique.eq_default i]
-    exact h
+    v = (fun _ => b) ↔ v default = b :=
+  funext_iff.trans Unique.forall_iff
 
 /-- The effect of a tuple-relabeled measurement at a constant tuple over a
 one-element index set is the effect of the relabeling by the unique
@@ -244,17 +190,6 @@ private theorem postprocess_const_tuple_effect_self
   simp only [Quantum.Measurement.postprocess_effect, Finset.filter_eq',
     Finset.mem_univ, if_true, Finset.sum_singleton]
 
-/-- The identification of values with constant tuples over a one-element
-index set. -/
-private def constTupleEquiv (iota beta : Type*) [Unique iota] :
-    beta ≃ (iota → beta) where
-  toFun b := fun _ => b
-  invFun v := v default
-  left_inv _ := rfl
-  right_inv v := by
-    funext i
-    rw [Unique.eq_default i]
-
 /-- The polynomial-tuple conclusion of `lem:ld-soundness` for simultaneity
 parameter `1`: the coordinate conclusions of the low individual degree
 theorem, read as one-coordinate tuples.
@@ -266,7 +201,7 @@ absorption into the error function `deltaLd` is
 the coordinate conclusions do not determine simultaneous polynomial
 measurements; see the module docstring and
 `docs/paper-gaps/qpbt_ld-simultaneous-sandwich.tex`.  Blueprint
-`ch13_qpbt_test.tex:170-215`, paper
+`lem:ld-soundness`, paper
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:413-458`. -/
 theorem exists_directSimultaneousPolynomialMeasurements_of_k_eq_one
     (D : DirectLdParams) (hk : D.k = 1) (S : Strategy (directLdGame D))
@@ -310,7 +245,7 @@ theorem exists_directSimultaneousPolynomialMeasurements_of_k_eq_one
     (directPolynomialMeasurement D GB₀).postprocess (fun g _ => g), ?_, ?_, ?_⟩
   · have h1' := directPointPolynomial_consistencyDefect_le D S hS default GB₀ _ h1
     refine ((consistencyDefect_outcome_equiv _
-      (constTupleEquiv (Fin D.k) (DirectScalarQ D)) _ _ S.ψ).symm.trans
+      (Equiv.funUnique (Fin D.k) (DirectScalarQ D)).symm _ _ S.ψ).symm.trans
       (consistencyDefect_congr _ _ _ _ _ S.ψ ?_ ?_)).trans_le h1'
     · intro u a
       change heteroKron (((S.A (directLdPointQuestionOf D u)).postprocess
@@ -326,7 +261,7 @@ theorem exists_directSimultaneousPolynomialMeasurements_of_k_eq_one
       rfl
   · have h2' := directPolynomialPoint_consistencyDefect_le D S hS default GA₀ _ h2
     refine ((consistencyDefect_outcome_equiv _
-      (constTupleEquiv (Fin D.k) (DirectScalarQ D)) _ _ S.ψ).symm.trans
+      (Equiv.funUnique (Fin D.k) (DirectScalarQ D)).symm _ _ S.ψ).symm.trans
       (consistencyDefect_congr _ _ _ _ _ S.ψ ?_ ?_)).trans_le h2'
     · intro u a
       change heteroKron ((((directPolynomialMeasurement D GA₀).postprocess
@@ -342,7 +277,7 @@ theorem exists_directSimultaneousPolynomialMeasurements_of_k_eq_one
       rfl
   · have h3' := directPolynomialPolynomial_consistencyDefect_le D S GA₀ GB₀ _ h3
     refine ((consistencyDefect_outcome_equiv _
-      (constTupleEquiv (Fin D.k) (PolyIndex D.m (DirectScalarQ D) D.d)) _ _
+      (Equiv.funUnique (Fin D.k) (PolyIndex D.m (DirectScalarQ D) D.d)).symm _ _
         S.ψ).symm.trans
       (consistencyDefect_congr _ _ _ _ _ S.ψ ?_ ?_)).trans_le h3'
     · intro _ p

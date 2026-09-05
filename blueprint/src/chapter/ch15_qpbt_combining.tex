@@ -2002,7 +2002,7 @@ projective measurement whose outcomes are pairs of global polynomials.
 	\lean{MIPStarRE.QPBT.directPolynomialPolynomial_consistencyDefect_le}
 	\leanok
 	\uses{def:consistency, def:ld-game, thm:main-formal,
-		lem:direct-ld-consistency-defect-bridge}
+		lem:direct-ld-consistency-defect-equivalence}
 	This is not a named statement of \cite{Ji2020MIPStar}. It records the
 	three consistency implications obtained from the projective polynomial
 	measurements of Theorem~\ref{thm:main-formal} after changing to the
@@ -2107,13 +2107,12 @@ projective measurement whose outcomes are pairs of global polynomials.
 	\cite{gap:qpbt_ld-dimension-divisibility}.
 \end{remark}
 
-% The five results below are not statements of the source. They record the
+% The results below are not statements of the source. They record the
 % coordinatewise application of Theorem~\ref{thm:main-formal} to the directly
-% indexed game, the palindromic assembly of coordinate polynomial measurements,
-% and the one-coordinate polynomial-tuple conclusion discussed in
+% indexed game and the one-coordinate polynomial-tuple conclusion discussed in
 % Remark~\ref{rem:ld-soundness-simultaneity}.
 \begin{lemma}[Formalization support: consistency relations as bipartite consistency defects]
-	\label{lem:direct-ld-consistency-defect-bridge}
+	\label{lem:direct-ld-consistency-defect-equivalence}
 	\lean{MIPStarRE.QPBT.consRel_iff_consistencyDefect}
 	\leanok
 	\uses{def:consistency, def:simeq, def:povm-conventions}
@@ -2156,41 +2155,6 @@ projective measurement whose outcomes are pairs of global polynomials.
 	are bijections, so the agreement event is carried to the corresponding event
 	for the seed-indexed carriers, where
 	Lemma~\ref{lem:polynomial-agreement-mdq} applies.
-\end{proof}
-
-\begin{definition}[Formalization support: the palindromic tuple measurement in directly indexed coordinates]
-	\label{def:direct-ld-sandwich-tuple}
-	\lean{MIPStarRE.QPBT.directSandwichPolynomialMeasurement}
-	\lean{MIPStarRE.QPBT.directSandwichPolynomialMeasurement_effect}
-	\leanok
-	\uses{lem:ld-sandwich, lem:ld-sandwich-measurement, def:ld-meas}
-	This formalization-only definition is not a named statement of
-	\cite{Ji2020MIPStar}. Fix directly indexed parameters $D=(q,m,d,k)$ and, for
-	each $r\in\{0,\ldots,k-1\}$, a projective measurement on a common space
-	indexed by the $m$-variate polynomial representatives of individual degree at
-	most $d$. The ordered palindromic product of Lemma~\ref{lem:ld-sandwich}
-	assembles them into a POVM whose outcomes are the $k$-tuples of such
-	representatives and whose effect at a tuple is the corresponding palindromic
-	product. No commutation between the measurements of different coordinates is
-	assumed. The assembled POVM is not compared here with any point measurement;
-	Remark~\ref{rem:ld-soundness-simultaneity} records that for $k\ge2$ no such
-	comparison follows from the coordinate conclusions.
-\end{definition}
-
-\begin{lemma}[Formalization support: projectivity in directly indexed polynomial coordinates]
-	\label{lem:direct-ld-polynomial-measurement-projective}
-	\lean{MIPStarRE.QPBT.directPolynomialMeasurement_isProjective}
-	\leanok
-	\uses{def:ld-meas, def:povm-conventions}
-	This is not a named statement of \cite{Ji2020MIPStar}. Relabeling a
-	projective measurement indexed by the polynomials of
-	Theorem~\ref{thm:main-formal} along the bijection onto the directly indexed
-	polynomial representatives again yields a projective measurement.
-\end{lemma}
-\begin{proof}
-	\leanok
-	Every effect of the relabeled family is an effect of the original family, so
-	idempotence and self-adjointness are inherited.
 \end{proof}
 
 \begin{lemma}[Formalization support for the coordinatewise soundness conclusion]

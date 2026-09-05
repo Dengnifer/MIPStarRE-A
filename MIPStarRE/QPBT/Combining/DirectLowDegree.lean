@@ -41,9 +41,9 @@ scalar half of the transport: the auxiliary sampling parameter with which
 the low individual degree theorem is applied, bounds on the three terms of its
 error function, and the absorption of the resulting simultaneous-measurement
 estimate into the error function of `lem:ld-soundness`; and
-`Transport.Simultaneous` applies that theorem to every coordinate, combines
-coordinate polynomial measurements by the palindromic product of
-`lem:ld-sandwich`, and proves the polynomial-tuple conclusion of
+`Transport.Simultaneous` applies that theorem to every coordinate, carries
+the Schwartz--Zippel collision estimate to the direct polynomial
+representatives, and proves the polynomial-tuple conclusion of
 `lem:ld-soundness` for simultaneity parameter `1`.  It also records why the
 coordinate conclusions do not determine simultaneous measurements for larger
 parameters.
