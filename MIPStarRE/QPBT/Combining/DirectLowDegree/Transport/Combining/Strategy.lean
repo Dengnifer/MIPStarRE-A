@@ -252,8 +252,8 @@ theorem directCombinedStrategy_isProjective (D : DirectLdParams)
     (S : Strategy (directLdGame D)) (hS : S.IsProjective) :
     (directCombinedStrategy D S).IsProjective := by
   refine ⟨fun q => ?_, fun q => ?_⟩
-  · exact SandwichInternal.postprocess_isProjective _ (hS.1 _) _
-  · exact SandwichInternal.postprocess_isProjective _ (hS.2 _) _
+  · exact MIPStarRE.QPBT.SandwichProduct.postprocess_isProjective _ (hS.1 _) _
+  · exact MIPStarRE.QPBT.SandwichProduct.postprocess_isProjective _ (hS.2 _) _
 
 end
 
