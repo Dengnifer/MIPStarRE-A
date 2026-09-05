@@ -1,19 +1,20 @@
 import MIPStarRE.QPBT.Games.CondLinear
 import MIPStarRE.QPBT.Games.CondLinearTheorems.DirectSumSupport
+import MIPStarRE.QPBT.Games.CondLinearTheorems.Reindex
 
 /-! # Structure and direct sums of conditionally linear functions
 
-This module records the prefix decomposition of a conditionally linear map and
-the behavior of such maps and their shared-seed distributions under finite
-coordinate direct sums.  The direct-sum construction on representations that
-these results build on is in
-`MIPStarRE/QPBT/Games/CondLinearTheorems/DirectSumSupport.lean`.
+A conditionally linear map admits a prefix decomposition. Equal-level
+representations on pairwise disjoint registers combine coordinatewise, and the
+corresponding shared-seed distributions factor as products. A representation
+may first be raised to a larger level by adjoining zero linear contributions.
 
 ## References
 
-The source results are `lem:cl-kth`, `lem:cl-func-prod`, and
-`lem:cl-dist-prod` in `blueprint/src/chapter/ch12_qpbt_games.tex:1074-1146`, with
-paper origin
+The source results are `lem:cl-kth`
+(`blueprint/src/chapter/ch12_qpbt_games.tex`), `lem:cl-func-prod`
+(`ch12_qpbt_games.tex`), and `lem:cl-dist-prod`
+(`ch12_qpbt_games.tex`), with paper origin
 `references/qpbt-paper/05_conditionally_linear_functions.tex:150-379`.
 -/
 
@@ -23,8 +24,8 @@ namespace MIPStarRE.QPBT
 
 open MIPStarRE.LDT
 
-/-- Add one empty first stage to a representation of a conditionally linear
-function. -/
+/-- Raise a representation of a conditionally linear function by one level,
+whose linear contribution is zero. -/
 private def CondLinearTerm.raiseLevel {K ι : Type*} [Field K]
     [Fintype ι] [DecidableEq ι] {ell : ℕ}
     (t : CondLinearTerm K (ι := ι) ell) : CondLinearTerm K (ι := ι) (ell + 1) :=
@@ -45,7 +46,7 @@ private theorem CondLinearTerm.raiseLevel_supportedOn {K ι : Type*} [Field K]
   exact ⟨Finset.empty_subset S, fun _ => by simpa using ht⟩
 
 /-- Raise a representation of a conditionally linear function by a specified
-number of empty stages. -/
+number of levels, each with zero linear contribution. -/
 private def CondLinearTerm.raiseBy {K ι : Type*} [Field K]
     [Fintype ι] [DecidableEq ι] :
     (d : ℕ) → {ell : ℕ} → CondLinearTerm K (ι := ι) ell →
@@ -71,8 +72,13 @@ private theorem CondLinearTerm.raiseBy_supportedOn {K ι : Type*} [Field K]
   | zero => exact ht
   | succ d ih => exact CondLinearTerm.raiseLevel_supportedOn ih
 
-/-- Conditional linearity is monotone in the number of levels. -/
-private theorem IsCondLinearOn.mono_level {K ι : Type*} [Field K]
+/-- Conditional linearity is monotone in the number of levels: empty linear
+contributions raise an `ell`-level representation to any level `k ≥ ell`.
+This is `lem:cl-level-mono`, the support-relative form of the containment
+observation following `def:cl-func`; blueprint
+`blueprint/src/chapter/ch12_qpbt_games.tex`, paper
+`references/qpbt-paper/05_conditionally_linear_functions.tex:124-132`. -/
+theorem IsCondLinearOn.mono_level {K ι : Type*} [Field K]
     [Fintype ι] [DecidableEq ι] {S : Finset ι} {ell k : ℕ}
     {L : (ι → K) → (ι → K)} (hL : IsCondLinearOn K S ell L)
     (h : ell ≤ k) : IsCondLinearOn K S k L := by
@@ -102,8 +108,8 @@ private theorem IsCondLinearOn.apply_coordinateRestriction {K ι : Type*} [Field
   rw [← congrFun ht_eval, CondLinearTerm.eval_coordinateRestriction ht,
     congrFun ht_eval]
 
-/-- Prepend one supported linear stage to a family of residual
-conditionally-linear maps. -/
+/-- Prepend a first-level linear contribution, supported on one register, to a
+family of residual conditionally linear maps indexed by its value. -/
 private theorem IsCondLinearOn.cons {K ι : Type*} [Field K]
     [Fintype ι] [DecidableEq ι] {S S₁ : Finset ι} {ell : ℕ}
     (L₁ : (ι → K) →ₗ[K] (ι → K))
@@ -191,7 +197,7 @@ private theorem sum_eq_iff_coordinateRestriction_eq {K ι J : Type*} [Field K]
 
 /-- The value of the strict-prefix marginal preceding `k`. This is a
 formalization-only auxiliary for `lem:cl-kth`, blueprint
-`ch12_qpbt_games.tex:1074-1094`, paper
+`ch12_qpbt_games.tex`, paper
 `references/qpbt-paper/05_conditionally_linear_functions.tex:150-178`. -/
 def clPrefix {K ι : Type*} [Zero K] {ell : ℕ}
     (marginal : Fin ell → (ι → K) → (ι → K)) (k : Fin ell)
@@ -201,7 +207,7 @@ def clPrefix {K ι : Type*} [Zero K] {ell : ℕ}
 
 /-- Prefix-indexed decomposition data from `lem:cl-kth`. Factor spaces are
 represented by their coordinate sets, matching the register-subspace encoding
-used by `IsCondLinearOn`. Blueprint `ch12_qpbt_games.tex:1074-1094`, paper
+used by `IsCondLinearOn`. Blueprint `ch12_qpbt_games.tex`, paper
 `references/qpbt-paper/05_conditionally_linear_functions.tex:150-178`. -/
 structure CLData (K ι : Type*) [Field K] [Fintype ι] [DecidableEq ι]
     (ell : ℕ) (L : (ι → K) → (ι → K)) where
@@ -677,7 +683,7 @@ private theorem CondLinearTerm.nonempty_clDataOn {K ι : Type*} [Field K]
                   exact ih (n + 1) (by omega) (by omega) (rest y) (ht.2 y)
 
 /-- A map is `ell`-level conditionally linear exactly when it admits the
-prefix decomposition of `lem:cl-kth`; blueprint `ch12_qpbt_games.tex:1074-1094`,
+prefix decomposition of `lem:cl-kth`; blueprint `ch12_qpbt_games.tex`,
 paper `references/qpbt-paper/05_conditionally_linear_functions.tex:150-262`. -/
 theorem isCondLinear_iff_nonempty_clData {K ι : Type*} [Field K]
     [Fintype ι] [DecidableEq ι] {ell : ℕ} (hEll : 1 ≤ ell)
@@ -707,7 +713,7 @@ theorem isCondLinear_iff_nonempty_clData {K ι : Type*} [Field K]
 
 /-- Coordinate direct sum of maps supported on a finite register partition.
 This is a formalization-only auxiliary for `lem:cl-func-prod`, blueprint
-`ch12_qpbt_games.tex:1123-1134`, paper
+`ch12_qpbt_games.tex`, paper
 `references/qpbt-paper/05_conditionally_linear_functions.tex:315-364`. -/
 def condLinearDirectSum {K ι : Type*} [Field K] [DecidableEq ι] {m : ℕ}
     (V : Fin m → Finset ι) (L : Fin m → (ι → K) → (ι → K))
@@ -722,7 +728,7 @@ def directSumLevel {m : ℕ} (ell : Fin m → ℕ) : ℕ :=
 
 /-- Direct sums over a register partition preserve conditional linearity. The
 level-zero case is included explicitly, as required by the local correction to
-`lem:cl-func-prod`; blueprint `ch12_qpbt_games.tex:1123-1134`, paper
+`lem:cl-func-prod`; blueprint `ch12_qpbt_games.tex`, paper
 `references/qpbt-paper/05_conditionally_linear_functions.tex:315-364`. -/
 theorem IsCondLinear.directSum {K ι : Type*} [Field K]
     [Fintype ι] [DecidableEq ι] {m : ℕ} (hm : 1 ≤ m)
@@ -853,7 +859,7 @@ private theorem clDistribution_weight_eq_card_filter_div {K ι : Type*}
 /-- The CL distribution of coordinate direct sums factors into the component
 CL distributions. The equality is stated pointwise on weights, which is the
 finite-distribution meaning of the product in `lem:cl-dist-prod`; blueprint
-`ch12_qpbt_games.tex:1141-1146`, paper
+`ch12_qpbt_games.tex`, paper
 `references/qpbt-paper/05_conditionally_linear_functions.tex:366-379`. -/
 theorem clDistribution_directSum_eq_prod {K ι : Type*} [Field K]
     [Fintype K] [DecidableEq K] [Fintype ι] [DecidableEq ι]

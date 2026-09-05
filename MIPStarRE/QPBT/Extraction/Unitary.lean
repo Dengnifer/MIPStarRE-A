@@ -12,7 +12,7 @@ placements. The generalized Pauli projectors use the field and basis fixed by
 
 ## References
 
-The extraction witness formalizes `lem:qld-unitary` in
+The extraction witness records the conclusion of `lem:qld-unitary` in
 `blueprint/src/chapter/ch16_qpbt_extraction.tex:348-375`, from
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1666-1860`.
 The error-form comparison formalizes `lem:qld-extraction-error-form` and
@@ -69,13 +69,18 @@ structure ExtractionWitness {P : AdmissibleParams} {epsilon deltaS : ℝ}
         S.placeExtractedRegister side (pauliProj W h))
       (S.idealExpState aux) ≤ delta
 
-/-- `lem:qld-unitary`: the concrete swap maps admit extraction data at the
-explicit extraction scale applied to `deltaConstructPaulis`.
+/-- Conditional extraction for the concrete swap maps at the explicit scale
+obtained by applying `deltaExtract` to `deltaConstructPaulis`. Given a
+`GlobalPairWitness`, it supplies the extraction data appearing in
+`lem:qld-unitary`, blueprint `ch16_qpbt_extraction.tex:348-375` and paper
+`14_analysis_of_the_pauli_basis_test.tex:1666-1860`.
 
-This is the source-facing existence statement from blueprint
-`ch16_qpbt_extraction.tex:348-375` and paper
-`14_analysis_of_the_pauli_basis_test.tex:1666-1860`. It introduces no transfer
-premise or additional basis parameter.
+**Unfaithful:** This result assumes `w : GlobalPairWitness S deltaG`, which is
+derived inside `lem:qld-unitary` rather than assumed by the paper statement.
+The discrepancy is documented in
+`docs/paper-gaps/qpbt_extraction-transfer.tex`. Elimination: obtain `w` from
+`exists_globalPairWitness` before applying this conditional extraction result; issue
+#123 tracks that composition.
 
 **Local fix:** the positive-contraction estimate and normalization case split
 repair the two numerical defects at paper lines 1743-1783 without changing the
@@ -86,7 +91,7 @@ Schwartz-Zippel comparison at paper lines 1715-1858. Discharge: construct
 `aux` from the EPR projection of the swapped state, use the corrected
 small-error case split, and combine the point-measurement consistency with the
 exact swap conjugation identities. -/
-theorem exists_extractionWitness :
+theorem exists_extractionWitness_ofGlobalPairWitness :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (epsilon deltaG : ℝ),
         0 ≤ epsilon → epsilon ≤ 1 → 0 ≤ deltaG →

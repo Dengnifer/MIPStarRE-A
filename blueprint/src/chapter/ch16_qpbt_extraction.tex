@@ -29,6 +29,7 @@ For a $g$ that is not an encoding the two sides of this identity are the evaluat
 
 \begin{lemma}[Linearity and inversion of the full-field decoder]\label{lem:qld-decoder-linearity}
 	\lean{MIPStarRE.QPBT.decodeFq_add, MIPStarRE.QPBT.decodeFq_smul, MIPStarRE.QPBT.decodeFq_lowDegreeEncoding}
+	\leanok
 	\uses{def:qld-full-field-decoder}
 	For bounded polynomial representatives $g,g'$ and $c\in\F_q$, one has
 	\[
@@ -38,9 +39,16 @@ For a $g$ that is not an encoding the two sides of this identity are the evaluat
 	\]
 	and $\mathrm{Dec}_{\F_q}(g_h)=h$ for every $h\in\F_q^M$.
 \end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:qld-full-field-decoder, def:low-degree-encoding,
+		def:decoding-map}
+	The decoder is given coordinatewise by evaluation of the representative at the points of the hypercube, and evaluation at a fixed point is $\F_q$-linear in the representative, which gives the two displayed identities. For the third, the multilinear encoding $g_h$ takes the value $h_y$ at each point $y$ of the hypercube, because the indicator polynomials of \eqref{eq:low-degree-encoding-definition} vanish at every other such point; hence the vector of its evaluations is $h$.
+\end{proof}
 
 \begin{lemma}[Evaluation identity for encoding outcomes]\label{lem:qld-decoder-evaluation}
 	\lean{MIPStarRE.QPBT.decodeFq_dotProduct_indicatorVec}
+	\leanok
 	\uses{def:qld-full-field-decoder, def:indicator-vector}
 	If $g$ is an encoding, then
 	\[
@@ -48,6 +56,11 @@ For a $g$ that is not an encoding the two sides of this identity are the evaluat
 	\]
 	for every $u\in\F_q^m$.
 \end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:qld-full-field-decoder, def:indicator-vector, def:low-degree-encoding}
+	By \eqref{eq:low-degree-encoding-definition} the left-hand side is the value at $u$ of the multilinear encoding $g_{\mathrm{Dec}_{\F_q}(g)}$. Since $g$ is an encoding, that representative equals $g$, so the value is $g(u)$.
+\end{proof}
 
 % Local correction of the source (lines 1419 and 1492 of
 % 14_analysis_of_the_pauli_basis_test.tex): the source invokes its boolean
@@ -56,6 +69,8 @@ For a $g$ that is not an encoding the two sides of this identity are the evaluat
 % most d. The remark below records the corrected statements.
 \begin{remark}[Choice of decoding map and the decoder--encoder identity]\label{rem:qld-decoding-identity}
 	The source states the constructions of this chapter in terms of its boolean decoding map (the case $H = \{0,1\}$ of Definition~\ref{def:decoding-map}) while describing that map as returning the string of \emph{all} evaluations of $g$ on the hypercube. The proofs require the latter reading, $H = \F_q$, which is adopted throughout this chapter: the linearity of $\mathrm{Dec}$ and the identity $\mathrm{Dec}(g_h) = h$ for all $h \in \F_q^{M}$, both of which fail for the boolean map, are used in the symmetry step of the proof of Lemma~\ref{lem:qld-construct-the-paulis}. The source further asserts the identity $\mathrm{Dec}(g) \cdot \mathrm{ind}_m(u) = g(u)$ for every $g \in \mathrm{ideg}_{d,m}(\F_q)$. Since the left-hand side equals $g_{\mathrm{Dec}(g)}(u)$, the identity, taken for all $u \in \F_q^m$, states that the multilinear representative $g_{\mathrm{Dec}(g)}$ and $g$ induce the same function on $\F_q^m$. Every encoding satisfies it, because then $g_{\mathrm{Dec}(g)} = g$ as polynomial representatives; a polynomial that is not an encoding need not: for $m = 1$, $d \geq 2$, and $q > 2$, the polynomial $g(x) = x^2$ has $\mathrm{Dec}(g) \cdot \mathrm{ind}_1(u) = u$, which differs from $g(u) = u^2$ at every $u \notin \{0,1\}$. When $d \leq q-1$ the failure at some $u$ characterizes the polynomials that are not encodings, since evaluation is injective on representatives of individual degree at most $q-1$ (Definition~\ref{def:polynomials-degree}); when $d \geq q$ it does not: for the admissible tuple $(q,m,d) = (8,1,8)$, the polynomial $g(x) = x^8$ is not an encoding, yet $\mathrm{Dec}(g) \cdot \mathrm{ind}_1(u) = u = u^8 = g(u)$ for every $u \in \F_8$. Accordingly, the proofs below invoke the identity only for encodings; in the proof of Lemma~\ref{lem:qld-construct-the-paulis} the contribution of the remaining outcomes is controlled by the bound \eqref{eq:qld-nonencoding-mass} on the mass that the measurement of Lemma~\ref{lem:qld-4-7} places on polynomials that are not encodings, while in the conjugation identity \eqref{eq:qld-unitary-6} the quantity $\mathrm{Dec}(g) \cdot \mathrm{ind}_m(u)$ cancels exactly.
+	The discrepancy and these two corrections are documented in
+	\cite{gap:qpbt_decoding-identity}.
 \end{remark}
 
 \section{The pulled-apart measurements and observables}
@@ -164,6 +179,8 @@ The measurement $\{\hat{S}_{g_X,g_Z}\}$ reads out an $X$-polynomial and a $Z$-po
 % whenever j != j'.
 \begin{remark}[The commutation phase across basis indices]\label{rem:qld-cross-phase}
 	For $j \neq j'$ the source asserts that $\tilde{X}^j(\tilde{u})$ and $\tilde{Z}^{j'}(\tilde{v})$ commute for all $\tilde{u}, \tilde{v} \in \F_q^M$. Since $e_j e_{j'} \neq 0$ and the bilinear form $(a,b) \mapsto \tr(ab)$ on $\F_q$ is nondegenerate, there exist $\tilde{u}, \tilde{v}$ with $\tr(e_j e_{j'} (\tilde{u} \cdot \tilde{v})) = 1$, and for these \eqref{eq:tildew-twisted-commutation} yields anticommutation instead. By self-duality of the basis $\{e_j\}$, the dichotomy asserted by the source --- commutation for $j \neq j'$, and the phase $(-1)^{\tr((e_j\tilde{u}) \cdot (e_j\tilde{v}))}$ for $j = j'$ --- agrees with \eqref{eq:tildew-twisted-commutation} whenever $\tilde{u} \cdot \tilde{v} \in \{0,1\}$, in particular for all $\tilde{u}, \tilde{v} \in \{0,1\}^M$. The relations \eqref{eq:tildew-twisted-commutation} are not used in the remainder of the chapter.
+	The counterexample and corrected phase are documented in
+	\cite{gap:qpbt_cross-basis-phase}.
 \end{remark}
 
 \section{Consistency with the points measurements}
@@ -347,9 +364,7 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 
 \begin{lemma}[Extraction of the EPR state and the Pauli observables]\label{lem:qld-unitary}
 	\lean{MIPStarRE.QPBT.ExtractionWitness}
-	\lean{MIPStarRE.QPBT.exists_extractionWitness}
 	\lean{MIPStarRE.QPBT.deltaExtract}
-	\leanok
 	\uses{lem:qld-4-7, def:v-swap-unitary, def:expanded-state, lem:projective-strategy-setup, def:generalized-pauli, def:EPR, def:povm-distance}
 	There is a universal constant $C_{\mathrm{ext}}\geq1$. Set
 	\[
@@ -372,6 +387,12 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 		where the $\approx$ statements hold with respect to the state $\ket{\mathrm{aux}}_{\mathrm{A}\mathrm{A}'\mathrm{B}\mathrm{B}'} \ot \ket{\mathrm{EPR}_q}^{\ot M}_{\mathrm{A}''\mathrm{B}''}$, with the answer summation over $h \in \F_q^{M}$ and no average over questions.
 	\end{enumerate}
 	The unitaries may be taken to be $V_{\mathrm{A}}$ and $V_{\mathrm{B}}$ of Definition~\ref{def:v-swap-unitary}.
+	The conditional result below assumes the global polynomial-pair measurement
+	of Lemma~\ref{lem:qld-4-7}, whereas the present proof obtains that measurement
+	from the lemma. It therefore establishes the extraction conclusions only
+	after the measurement and its consistency estimates are supplied, not the
+	existence claim above. The missing composition and the range-projection
+	transfer are recorded in \cite{gap:qpbt_extraction-transfer}.
 \end{lemma}
 \begin{proof}
 	\uses{def:v-swap-unitary, lem:v-swap-conjugation, lem:tildew-product-form, lem:qld-construct-the-paulis, lem:qld-win-implications, fact:triangle-for-simeq, def:bracket, lem:cancellation, lem:schwartz-zippel-total-degree, lem:qld-4-7}
@@ -380,6 +401,38 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 	% without ensuring that it is nonzero; see Remark rem:qld-unitary-triangle-slip.
 	If $\delta_P > 1/8$, then, after enlarging the universal constant in $\delta_{\mathrm{qld}}$, both items of the lemma hold with $\ket{\mathrm{aux}}$ an arbitrary unit state, since their left-hand sides never exceed $4$; assume therefore $\delta_P \leq 1/8$. Then the vector $(\bra{\mathrm{EPR}_q}^{\ot M})_{\mathrm{A}''\mathrm{B}''} \ket{\vartheta}$ has squared norm at least $1 - 4\delta_P \geq 1/2 > 0$, and $\ket{\mathrm{aux}}$ may be defined as its normalization; the overlap of $\ket{\vartheta}$ with $\ket{\mathrm{aux}} \ot \ket{\mathrm{EPR}_q}^{\ot M}$ equals the norm of that vector and is at least $\sqrt{1 - 4\delta_P} \geq 1 - 4\delta_P$, which yields the first item with a bound of $8\delta_P = O(\sqrt{\delta_P})$. For the second item, Lemma~\ref{lem:qld-win-implications} gives, on average over $u \in \F_q^m$, $M^{(\mathrm{Pauli},W)}_{[g_h(u)=a]} \ot \Id \simeq_\eps \Id \ot M^{(\mathrm{Point},W),u}_a$ and $\Id \ot M^{(\mathrm{Point},W),u}_a \simeq_\eps M^{(\mathrm{Point},W),u}_a \ot \Id$, where $M^{(\mathrm{Pauli},W)}_{[g_h(u)=a]} = \sum_{h : g_h(u) = a} M^{(\mathrm{Pauli},W)}_h$; combining these with Item~1 of Lemma~\ref{lem:qld-construct-the-paulis} by Lemma~\ref{fact:triangle-for-simeq}, using $\eps \leq \sqrt{\eps} \leq \delta_P$, yields $M^{(\mathrm{Pauli},W)}_{[g_h(u)=a]} \ot \Id \simeq_{\sqrt{\delta_P}} \Id \ot \tilde{M}^{W,\mathrm{ind}_m(u)}_a$. Writing $\ket{\Delta} = \ket{\mathrm{aux}} \ot \ket{\mathrm{EPR}_q}^{\ot M}$, the quantity to be bounded for the $\mathrm{A}$-side relation equals $2 - 2\sum_h \bra{\Delta} V_{\mathrm{A}} M^{(\mathrm{Pauli},W)}_h V_{\mathrm{A}}^\dagger \ot (\tau^W_h)_{\mathrm{B}''} \ket{\Delta}$, since $(\tau^W_h)_{\mathrm{A}''} \ket{\mathrm{EPR}_q}^{\ot M} = (\tau^W_h)_{\mathrm{B}''} \ket{\mathrm{EPR}_q}^{\ot M}$. Replacing $(\tau^W_h)_{\mathrm{B}''}$ by the averaged coarse-graining $\E_u \sum_{h' : g_{h'}(u) = g_h(u)} (\tau^W_{h'})_{\mathrm{B}''}$ costs at most $md/q$ by Lemma~\ref{lem:schwartz-zippel-total-degree} (distinct $h \neq h'$ have distinct encodings $g_h \neq g_{h'}$, of total degree at most $md$), and by \eqref{eq:qld-unitary-6} the resulting sum equals $\E_u \sum_{a} \bra{\Delta} V_{\mathrm{A}} M^{(\mathrm{Pauli},W)}_{[g_h(u)=a]} V_{\mathrm{A}}^\dagger \ot V_{\mathrm{B}} \tilde{M}^{W,\mathrm{ind}_m(u)}_a V_{\mathrm{B}}^\dagger \ket{\Delta}$. Exchanging $\ket{\Delta}$ for $\ket{\vartheta}$ costs $O(\delta_P^{1/4})$ by the first item, and the resulting expression $\E_u \sum_a \bra{\hat\psi} M^{(\mathrm{Pauli},W)}_{[g_h(u)=a]} \ot \tilde{M}^{W,\mathrm{ind}_m(u)}_a \ket{\hat\psi}$ is at least $1 - O(\sqrt{\delta_P})$ by the $\simeq_{\sqrt{\delta_P}}$ relation above. Altogether the distance is $O(\delta_P^{1/4} + md/q)$; the $\mathrm{B}$-side relation is proved identically.
 \end{proof}
+
+\begin{example}[Conditional extraction given a global polynomial-pair witness]
+	\label{lem:qld-unitary-given-global-pair}
+	\lean{MIPStarRE.QPBT.exists_extractionWitness_ofGlobalPairWitness}
+	\uses{lem:qld-4-7, def:v-swap-unitary, def:expanded-state,
+		lem:projective-strategy-setup, def:generalized-pauli, def:EPR,
+		def:povm-distance}
+	This formalization-only auxiliary is not a named statement of the paper. It is
+	the conditional, given-witness form
+	of Lemma~\ref{lem:qld-unitary}: the projective global polynomial-pair measurement
+	$\{\hat{S}_{g_X,g_Z}\}$ of Lemma~\ref{lem:qld-4-7}, together with the two
+	point-consistency estimates that lemma asserts at a parameter $\delta_G \geq 0$,
+	is assumed as data rather than obtained from that lemma. There is a universal
+	constant $C_{\mathrm{ext}} \geq 1$ such that the following holds for every
+	admissible $(q,m,d)$, every $0 \leq \eps \leq 1$, every projective strategy
+	setup at error $\eps$ (Lemma~\ref{lem:projective-strategy-setup}), every
+	$\delta_G \geq 0$, and every assumed measurement as above. The swap unitaries
+	$V_{\mathrm{A}}$ and $V_{\mathrm{B}}$ built from that measurement by
+	Definition~\ref{def:v-swap-unitary} are two-sided unitaries, and there is a
+	normalized state $\ket{\mathrm{aux}}$ on registers
+	$\mathrm{A}\mathrm{A}'\mathrm{B}\mathrm{B}'$ for which items 1 and 2 of
+	Lemma~\ref{lem:qld-unitary} hold at the scale $\delta_{\mathrm{qld}}$ of that
+	lemma, computed from $\eps$ and the assumed $\delta_G$.
+	The assumed measurement is proof debt rather than a faithful boundary
+	hypothesis: Lemma~\ref{lem:qld-unitary} obtains it from
+	Lemma~\ref{lem:qld-4-7} before constructing the swap unitaries. Eliminating
+	the assumption requires carrying out that construction first; this missing
+	composition is recorded in \cite{gap:qpbt_extraction-transfer}.
+	The corresponding proof obligation repeats the argument of
+	Lemma~\ref{lem:qld-unitary} above, using the assumed
+	measurement in place of the appeal to Lemma~\ref{lem:qld-4-7}.
+\end{example}
 
 \begin{lemma}[Preservation of the robustness error family]\label{lem:qld-extraction-error-form}
 	\lean{MIPStarRE.QPBT.deltaExtract_le_deltaQld}
@@ -401,6 +454,8 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 
 \begin{remark}[Two steps in the source proof of the extraction lemma]\label{rem:qld-unitary-triangle-slip}
 	In the source proof of Lemma~\ref{lem:qld-unitary}, the triangle inequality gives $\| H_X \ket{\vartheta} - H_Z \ket{\vartheta} \| \leq \| (\Id - H_X)\ket{\vartheta} \| + \| (\Id - H_Z)\ket{\vartheta} \| \leq 2\sqrt{\delta_P}$, so that $\| H_X \ket{\vartheta} - H_Z \ket{\vartheta} \|^2 \leq 4\delta_P$; the source instead asserts the bound $2\sqrt{\delta_P}$ for the \emph{squared} norm, which holds only when $\sqrt{\delta_P} \leq 1/2$, and consequently carries the term $\sqrt{\delta_P}$ into an overlap bound of $1 - 2\delta_P - \sqrt{\delta_P}$. The proof above uses the corrected bound $4\delta_P$, which gives the overlap bound $1 - 4\delta_P$ and leaves the final bound $\delta_{\mathrm{qld}} = O(\delta_P^{1/4} + md/q)$ unchanged. The source proof also normalizes the vector $(\bra{\mathrm{EPR}_q}^{\ot M})_{\mathrm{A}''\mathrm{B}''} \ket{\vartheta}$ without ensuring that it is nonzero; the case distinction on $\delta_P$ in the proof above supplies this, the conclusions of the lemma being trivial when $\delta_P$ exceeds a universal constant.
+	The numerical corrections and their role in the extraction argument are
+	documented in \cite{gap:qpbt_extraction-transfer}.
 \end{remark}
 
 \section{Proof of the soundness of the Pauli basis test}
@@ -423,7 +478,36 @@ We can now prove the soundness theorem for the Pauli basis test, stated as Theor
 	% individual degree test at dimension 2m+2 without a divisibility
 	% hypothesis; the sentence below records the resulting outstanding
 	% obligation.
-	This invocation is where the analysis of the classical low individual degree test enters: Lemma~\ref{lem:qld-unitary} rests on the polynomial-pair measurement of Lemma~\ref{lem:qld-4-7}, whose proof instantiates the classical test in $2m+2$ variables and at present does so only when $2m+2$ divides $q$ --- a divisibility that fails for every admissible tuple with $m \geq 2$. Three further steps of that same chain are likewise unproved. The classical soundness statement invoked there, Theorem~\ref{lem:ld-soundness}, is imported from Theorem~4.7 of~\cite{Ji2021Quantum} through an identification of the game $\mathfrak{G}^{\mathrm{ld}}_{(q,m,d,1)}$ with the two-prover tensor-code test for $\code^{\ot m}$, and neither that game correspondence nor the bound on the auxiliary parameter of Theorem~4.7 under which the stated error function $\delta_{\mathrm{ld}}$ is obtained has been established; both, with the divisibility obstruction, are documented in \cite{gap:qpbt_ld-dimension-divisibility}. Furthermore, the combined-lines consistency of Lemma~\ref{lem:qld-4-13}, which Lemma~\ref{lem:qld-4-7} consumes, is established here only with the error $m \cdot \poly(\eps, md/q)$, the error form $\poly(m^2 \eps, md/q)$ carried in its statement remaining unproved (see \cite{gap:qpbt_combined-lines-error-term}). The present proof is therefore complete only modulo these four obligations. Since the expanded state $\ket{\hat\psi}$ of Definition~\ref{def:expanded-state} is exactly $\ket{\psi}$ with the halves of $M$ pairs $\ket{\mathrm{EPR}_q}$ appended locally in registers $\mathrm{A}'\mathrm{A}''$ and $\mathrm{B}'\mathrm{B}''$, we have $\phi_{\mathrm{A}} \ot \phi_{\mathrm{B}} \ket{\psi} = V_{\mathrm{A}} \ot V_{\mathrm{B}} \ket{\hat\psi}$. Lemma~\ref{lem:qld-unitary} therefore yields a state $\ket{\mathrm{aux}}$ on registers $\mathrm{A}\mathrm{A}'\mathrm{B}\mathrm{B}'$ such that
+	This invocation is where the analysis of the classical low individual degree
+	test enters. Lemma~\ref{lem:qld-unitary} rests on the polynomial-pair
+	measurement of Lemma~\ref{lem:qld-4-7}, whose proof instantiates the
+	classical test in $2m+2$ variables and at present does so only when $2m+2$
+	divides $q$ --- a divisibility that fails for every admissible tuple with
+	$m \geq 2$. Three further steps of that same chain are likewise unproved.
+	The classical soundness statement invoked there,
+	Theorem~\ref{lem:ld-soundness},
+	is imported from Theorem~4.7 of~\cite{Ji2021Quantum} through an
+	identification of the game $\mathfrak{G}^{\mathrm{ld}}_{(q,m,d,1)}$ with
+	the two-prover tensor-code test for $\code^{\ot m}$, and neither that game
+	correspondence nor the bound on the auxiliary parameter of Theorem~4.7 under
+	which the stated error function $\delta_{\mathrm{ld}}$ is obtained has been
+	established. Both, with the divisibility obstruction, are documented in
+	\cite{gap:qpbt_ld-dimension-divisibility}. Furthermore, the combined-lines
+	consistency of Lemma~\ref{lem:qld-4-13}, on which
+	Lemma~\ref{lem:qld-4-7} relies, is established here only with the error
+	$m \cdot \poly(\eps, md/q)$, the error form $\poly(m^2 \eps, md/q)$
+	carried in its statement remaining unproved; the discrepancy and the
+	established form are documented in
+	\cite{gap:qpbt_combined-lines-error-term}. The present proof is therefore
+	complete only modulo these four obligations. Since the
+	expanded state $\ket{\hat\psi}$ of Definition~\ref{def:expanded-state} is
+	exactly $\ket{\psi}$ with the halves of $M$ pairs
+	$\ket{\mathrm{EPR}_q}$ appended locally in registers
+	$\mathrm{A}'\mathrm{A}''$ and $\mathrm{B}'\mathrm{B}''$, we have
+	$\phi_{\mathrm{A}} \ot \phi_{\mathrm{B}} \ket{\psi}
+	= V_{\mathrm{A}} \ot V_{\mathrm{B}} \ket{\hat\psi}$.
+	Lemma~\ref{lem:qld-unitary} therefore yields a state $\ket{\mathrm{aux}}$
+	on registers $\mathrm{A}\mathrm{A}'\mathrm{B}\mathrm{B}'$ such that
 	\[
 		\bigl\| \phi_{\mathrm{A}} \ot \phi_{\mathrm{B}} \ket{\psi} - \ket{\mathrm{aux}} \ot \ket{\mathrm{EPR}_q}^{\ot M} \bigr\|^2 \leq \delta_{\mathrm{qld}}\;.
 	\]
@@ -459,6 +543,8 @@ We can now prove the soundness theorem for the Pauli basis test, stated as Theor
 		\phi_{\mathrm{B}} \, (M^{(\mathrm{Pauli},W)}_h)_{\mathrm{B}} \, \phi_{\mathrm{B}}^\dagger \approx_{\delta_{\mathrm{qld}}} (\tau^W_h)_{\mathrm{B}''}\;,
 	\]
 	where the $\approx$ statements hold with respect to the state $\ket{\mathrm{aux}} \ot \ket{\mathrm{EPR}_q}^{\ot M}$ and the answer summation is over $h \in \F_q^M$; the constant implicit in $\approx_{\delta_{\mathrm{qld}}}$ (Definition~\ref{def:povm-distance}) absorbs the factors accumulated above. This shows that the game $\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$ is a self-test, with robustness $\delta_{\mathrm{qld}}(\eps,m,d,q)$, for the canonical Pauli strategy of Lemma~\ref{lem:pauli-completeness}. Identifying the registers $\mathrm{A}\mathrm{A}'$ with $\mathrm{A}'$ and $\mathrm{B}\mathrm{B}'$ with $\mathrm{B}'$ matches the statement of Theorem~\ref{thm:pauli}, in which $\phi_{\mathrm{A}}\colon \mathcal{H}_{\mathrm{A}} \to \mathcal{H}_{\mathrm{A}'} \ot \mathcal{H}_{\mathrm{A}''}$. Finally, unpacking the dependence on the parameters $\eps, m, d, q$, the function $\delta_{\mathrm{qld}}(\eps,m,d,q) = O(\delta_P^{1/4} + md/q)$ has the form $a(md)^a(\eps^b + q^{-b} + 2^{-bmd})$ for universal constants $a > 1$ and $0 < b < 1$; here $\delta_P = C(\delta_G + \sqrt{\eps} + md/q)$ and $\delta_G$ already has that form. See Remark~\ref{rem:pauli-robustness-form} for the reconciliation with the statement of Theorem~\ref{thm:pauli}.
+	The range-projection transfer just used, which is omitted in the source,
+	is documented in \cite{gap:qpbt_extraction-transfer}.
 \end{proof}
 
 \begin{remark}[Norm conventions in the robustness bound]\label{rem:pauli-robustness-form}

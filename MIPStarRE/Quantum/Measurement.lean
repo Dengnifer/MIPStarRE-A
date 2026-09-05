@@ -144,6 +144,82 @@ noncomputable def postprocess [DecidableEq α] [DecidableEq β]
     (M.postprocess f).toSubmeasurement = M.toSubmeasurement.postprocess f :=
   rfl
 
+/-- A complete measurement is determined by its effects. -/
+theorem ext {M N : Measurement α d} (h : ∀ a, M.effect a = N.effect a) :
+    M = N := by
+  cases M with
+  | mk M hM =>
+      cases N with
+      | mk N hN =>
+          cases M with
+          | mk effectM posM leM =>
+              cases N with
+              | mk effectN posN leN =>
+                  simp only at h
+                  have heffect : effectM = effectN := funext h
+                  subst effectN
+                  rfl
+
+/-- Relabeling along `f` and then along `g` is relabeling along `g ∘ f`: the
+fiber of `g ∘ f` over `c` is the disjoint union of the fibers of `f` over the
+fiber of `g` over `c`, and regrouping a finite sum of effects along it does not
+change the sum. -/
+theorem postprocess_comp {γ : Type*} [Fintype γ]
+    [DecidableEq α] [DecidableEq β] [DecidableEq γ]
+    (M : Measurement α d) (f : α → β) (g : β → γ) :
+    (M.postprocess f).postprocess g = M.postprocess (fun a => g (f a)) := by
+  classical
+  apply ext
+  intro c
+  calc
+    ((M.postprocess f).postprocess g).effect c =
+        ∑ b : β, if g b = c then
+          ∑ a : α, if f a = b then M.effect a else 0
+        else 0 := by
+          change (∑ b ∈ Finset.univ.filter (fun b : β => g b = c),
+            ∑ a ∈ Finset.univ.filter (fun a : α => f a = b), M.effect a) = _
+          rw [Finset.sum_filter]
+          apply Finset.sum_congr rfl
+          intro b _
+          by_cases hgb : g b = c
+          · simp only [hgb, if_true]
+            rw [Finset.sum_filter]
+          · simp [hgb]
+    _ = ∑ b : β, ∑ a : α,
+        if g b = c ∧ f a = b then M.effect a else 0 := by
+          apply Finset.sum_congr rfl
+          intro b _
+          by_cases hgc : g b = c <;> simp [hgc]
+    _ = ∑ a : α, ∑ b : β,
+        if g b = c ∧ f a = b then M.effect a else 0 := by
+          rw [Finset.sum_comm]
+    _ = ∑ a : α,
+        if g (f a) = c then M.effect a else 0 := by
+          apply Finset.sum_congr rfl
+          intro a _
+          by_cases hgc : g (f a) = c
+          · rw [Finset.sum_eq_single (f a)]
+            · simp [hgc]
+            · intro b _ hba
+              by_cases hfa : f a = b
+              · exact (hba hfa.symm).elim
+              · simp [hfa]
+            · simp
+          · have hzero :
+                (∑ b : β,
+                  if g b = c ∧ f a = b then M.effect a else 0) = 0 := by
+              apply Finset.sum_eq_zero
+              intro b _
+              by_cases hfa : f a = b
+              · subst b
+                simp [hgc]
+              · simp [hfa]
+            simp [hgc, hzero]
+    _ = (M.postprocess (fun a => g (f a))).effect c := by
+          change _ = ∑ a ∈ Finset.univ.filter
+            (fun a : α => g (f a) = c), M.effect a
+          rw [Finset.sum_filter]
+
 end Measurement
 
 /-! ## Overlap definitions -/

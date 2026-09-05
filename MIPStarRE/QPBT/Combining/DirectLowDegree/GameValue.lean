@@ -5,7 +5,7 @@ import MIPStarRE.LDT.Basic.DistributionAvg
 # Rejection probabilities for the directly indexed low-degree game
 
 This module compares the rejection probability of the directly indexed game
-with the branch weights used by the mature low-individual-degree test.
+with the branch weights used by the low individual degree test.
 All declarations below are formalization-only support derived from the game
 value; none is a paper-labelled result.
 
@@ -13,8 +13,8 @@ value; none is a paper-labelled result.
 
 The uniform distribution on the three ordered question types is specified in
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:178-186`,
-and its verifier is specified in the same file at lines 320-392.  The mature
-low-individual-degree test's three equal outer weights and its uniform role
+and its verifier is specified in the same file at lines 320-392.  The three
+equal outer weights of the low individual degree test and its uniform role
 choices are specified in `references/ldt-paper/test_definition.tex:10-67`.
 -/
 
@@ -88,8 +88,8 @@ noncomputable def directLdRejectionProbability
   avgOver (uniformDistribution (LdType × LdType))
     (directLdBranchRejectionProbability D S)
 
-/-- The branch failure probability with the weights used by the mature
-low-individual-degree test. -/
+/-- The branch failure probability with the weights used by the low
+individual degree test. -/
 noncomputable def directLdLdtWeightedFailureProbability
     (D : DirectLdParams) (S : Strategy (directLdGame D)) : ℝ :=
   let B := directLdBranchRejectionProbability D S
@@ -174,8 +174,8 @@ theorem directLdRejectionProbability_eq_one_sub_value
   rw [directLdQuestionDistribution, Distribution.avgOver_map]
   exact avgOver_uniform_prod (f := accepted)
 
-/-- The mature low-individual-degree branch weighting is at most three times
-the uniformly weighted direct-game rejection probability. -/
+/-- The low individual degree branch weighting is at most three times the
+uniformly weighted direct-game rejection probability. -/
 theorem directLdLdtWeightedFailureProbability_le_three_mul_rejection
     (D : DirectLdParams) (S : Strategy (directLdGame D)) :
     directLdLdtWeightedFailureProbability D S ≤
@@ -195,7 +195,7 @@ theorem directLdLdtWeightedFailureProbability_le_three_mul_rejection
   dsimp only
   linarith
 
-/-- A strategy with value at least `1 - ε` has mature-LDT-weighted failure
+/-- A strategy with value at least `1 - ε` has LDT-weighted failure
 probability at most `3 * ε`. -/
 theorem directLdLdtWeightedFailureProbability_le_three_mul_error
     (D : DirectLdParams) (S : Strategy (directLdGame D))
