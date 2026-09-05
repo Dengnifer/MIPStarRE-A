@@ -79,4 +79,38 @@ def prodShuffle {α β γ δ : Type*} :
   left_inv p := by cases p; rfl
   right_inv p := by cases p; rfl
 
+/-! ## Norm identities for the coordinate operations -/
+
+/-- Reindexing Euclidean coordinates along an equivalence preserves norm.
+This is a formalization-only auxiliary identity (no source counterpart). -/
+theorem reindexState_norm_eq
+    {iota kappa : Type*}
+    [Fintype iota] [DecidableEq iota]
+    [Fintype kappa] [DecidableEq kappa]
+    (e : iota ≃ kappa) (psi : EuclideanSpace ℂ iota) :
+    ‖reindexState e psi‖ = ‖psi‖ := by
+  rw [← sq_eq_sq₀ (norm_nonneg _) (norm_nonneg _)]
+  rw [EuclideanSpace.norm_sq_eq, EuclideanSpace.norm_sq_eq]
+  change (∑ j : kappa, ‖psi (e.symm j)‖ ^ 2) = ∑ i : iota, ‖psi i‖ ^ 2
+  exact e.symm.sum_comp (fun i => ‖psi i‖ ^ 2)
+
+/-- The coordinate tensor of two Euclidean vectors has the product norm.
+This is a formalization-only auxiliary identity (no source counterpart). -/
+theorem vecTensor_norm_eq
+    {iota kappa : Type*}
+    [Fintype iota] [DecidableEq iota]
+    [Fintype kappa] [DecidableEq kappa]
+    (u : EuclideanSpace ℂ iota) (v : EuclideanSpace ℂ kappa) :
+    ‖vecTensor u v‖ = ‖u‖ * ‖v‖ := by
+  rw [← sq_eq_sq₀ (norm_nonneg _) (mul_nonneg (norm_nonneg _) (norm_nonneg _))]
+  rw [EuclideanSpace.norm_sq_eq, mul_pow, EuclideanSpace.norm_sq_eq,
+    EuclideanSpace.norm_sq_eq]
+  change (∑ p : iota × kappa, ‖u p.1 * v p.2‖ ^ 2) =
+    (∑ i : iota, ‖u i‖ ^ 2) * ∑ j : kappa, ‖v j‖ ^ 2
+  simp only [norm_mul, mul_pow]
+  rw [← Finset.univ_product_univ, Finset.sum_product, Finset.sum_mul]
+  apply Finset.sum_congr rfl
+  intro i _
+  rw [Finset.mul_sum]
+
 end MIPStarRE.QPBT

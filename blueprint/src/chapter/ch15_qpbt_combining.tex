@@ -81,7 +81,7 @@ assembled by Fourier averaging.
 % Statement as in Theorem 10 of the cited source \cite{Natarajan2017Linearity}
 % (arXiv:1610.03574): hypothesis as in its display (7), conclusion as in its
 % display (8) with the normalization of the distance bound corrected, see
-% rem:linearity-distance-normalization. The provider imposes no upper bound
+% rem:linearity-distance-normalization. The cited theorem imposes no upper bound
 % on delta, asserts the exact linearity for all pairs (u, u'), and guarantees
 % the closeness of L^u to O^u on average over uniformly random u only, in mean
 % squared state-dependent distance; it is stated for an arbitrary density
@@ -89,7 +89,7 @@ assembled by Fourier averaging.
 % under bitwise XOR (here F_2^t, additively) and Obs(H) denoting the Hermitian
 % unitaries, i.e. the binary observables of def:povm-conventions. In the
 % closeness conclusion an operator on H is compared with an operator on the
-% extension via its ampliation S ot Id. The provider prints the closeness
+% extension via its ampliation S ot Id. The cited theorem prints the closeness
 % bound as delta for the squared operator distance; what its argument
 % establishes is delta for the squared binary-measurement distance, i.e.
 % 2 delta for the squared operator distance, and the printed operator bound is
@@ -269,7 +269,7 @@ assembled by Fourier averaging.
 	calculation behind \cite[equation~(3)]{Natarajan2017Linearity} bounds
 	the mean squared distance between the associated binary projective
 	measurements, which is half the squared operator distance; the
-	provider-side correction to $2\delta$ is carried by
+	corrected bound $2\delta$ is stated in
 	Theorem~\ref{thm:linearity}. The quotation neither reproduces nor
 	asserts the erroneous constant, since it states its conclusion as
 	$\mathcal{L}^u \approx_\delta \mathcal{O}^u$, which by
@@ -277,8 +277,8 @@ assembled by Fourier averaging.
 	only by $O(\delta)$ and so absorbs a constant factor. These three
 	discrepancies, together with the common-extension obligation recorded
 	below, are analyzed in
-	\cite{gap:qpbt_linearity-theorem-quotation}, and the provider-side
-	normalization defect in
+	\cite{gap:qpbt_linearity-theorem-quotation}, while the normalization defect
+	in \cite[Theorem~10]{Natarajan2017Linearity} is analyzed in
 	\cite{gap:qpbt_linearity-distance-normalization}. The import carries two
 	conversion obligations, discharged in the proof of
 	Lemma~\ref{lem:qld-4-10}: the theorem is
@@ -803,7 +803,7 @@ assembled by Fourier averaging.
 	\label{lem:qld-4-10}
 	\lean{MIPStarRE.QPBT.CombinedPointsWitness}
 	\lean{MIPStarRE.QPBT.exists_combinedPointsWitness}
-	\notready
+	\leanok
 	\uses{def:expanded-state, def:expanded-point-measurement,
 		def:povm-distance, def:symmetric-equivalents}
 	There exists a function $\delta_Q(\eps) = \poly(\eps)$ such that the
@@ -1777,16 +1777,15 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\uses{lem:qld-4-12, def:line, def:line-point-dist, def:consistency,
 		def:bracket, def:expanded-state, def:ideg-deg-polynomials}
 	This formalization-only auxiliary is not a named statement of the paper.
-	It is the conclusion of Lemma~\ref{lem:qld-4-13} with the error form that
-	the proof of that lemma establishes: the statement is that of
-	Lemma~\ref{lem:qld-4-13} with $\delta_{\mathrm{combine}}$ replaced by
-	$C \cdot m \cdot \poly(\eps, md/q)$ for a universal constant $C > 0$.
-	The printed error form $\poly(m^2\eps, md/q)$ is not claimed here; see
+	It records a directly indexed auxiliary with the numerical error estimate
+	$C \cdot m \cdot \poly(\eps, md/q)$ obtained from the first route in the
+	printed proof, for a universal constant $C > 0$. It does not claim either
+	the printed error form $\poly(m^2\eps, md/q)$ or a source-shaped replacement
+	for Lemma~\ref{lem:qld-4-13}; see
 	Remark~\ref{rem:qld-4-13-source-defects}.
-	The error form is the only change this node makes to
-	Lemma~\ref{lem:qld-4-13}, and no formalization mark is placed on the
-	statement: the linked declaration differs from it in three further
-	respects, which the blueprint does not adopt. Its extended questions are
+	The intended comparison with Lemma~\ref{lem:qld-4-13} changes only the
+	error form. The available auxiliary construction also differs from that
+	lemma in three respects. Its extended questions are
 	drawn from the directly indexed line space of
 	\cite{gap:qpbt_ld-dimension-divisibility} rather than from the lines of
 	$\F_q^{2m+2}$ used above; its average is taken over the corresponding
@@ -1797,20 +1796,27 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	its two consistency displays are compared on the completed answer
 	alphabet $\F_q \cup \{\bot\}$, whose extra outcome collects the line
 	polynomials that admit no evaluation at the sampled point, rather than
-	under the answer summation over $a \in \F_q$ used above. Relating the two
-	formulations is the transport obligation of
-	\cite{gap:qpbt_ld-dimension-divisibility}.
+	under the answer summation over $a \in \F_q$ used above. Thus the auxiliary
+	construction does not establish this formulation until the question carrier
+	and law are related by the transport obligation of
+	\cite{gap:qpbt_ld-dimension-divisibility} and the completed answer comparison
+	is related to the source sum by
+	\cite{gap:qpbt_combined-lines-error-term}.
 \end{lemma}
 \begin{proof}
 	\uses{lem:qld-xz-lines, lem:qld-sublines, def:combine-map,
 		lem:qld-4-12, lem:claim-17-1, lem:claim-17-2, lem:claim-17-3}
-	This is what the proof of Lemma~\ref{lem:qld-4-13} above establishes: the
-	chaining of the three claims bounds
+	Chaining the three claims gives the numerical estimate
 	\eqref{eq:qld-combined-lines-consistency} by
 	$O(m(\eps^{1/4} + \delta_P^{1/4} + \delta_Q^{1/4} +
 	\delta_{\mathrm{Line}}^{1/2}))$, a function of the form
-	$m \cdot \poly(\eps, md/q)$, and the remaining steps of that proof are
-	unchanged.
+	$m \cdot \poly(\eps, md/q)$. This calculation is the only established part
+	of the comparison. Applying it to the source statement remains conditional
+	on transporting the question space and distribution and on converting the
+	completed answer comparison, including zero-direction singleton lines, to
+	the source sum over $a \in \F_q$; these obligations are recorded in
+	\cite{gap:qpbt_ld-dimension-divisibility} and
+	\cite{gap:qpbt_combined-lines-error-term}.
 \end{proof}
 
 The measurements of Lemma~\ref{lem:qld-4-12} and Lemma~\ref{lem:qld-4-13}
@@ -1865,23 +1871,28 @@ projective measurement whose outcomes are pairs of global polynomials.
 		lem:ld-soundness, def:ld-game, fact:agreement, fact:add-a-proj2,
 		fact:data-processing, lem:schwartz-zippel-total-degree,
 		def:combine-map}
-	By Lemmas~\ref{lem:qld-4-12} and~\ref{lem:qld-4-13-established}, the
-	expanded state $\ket{\hat\psi}$ together with the lines measurements
-	$\{\hat{Q}^{\ell}_{f}\}$ and the points measurements
-	$\{\hat{Q}^{x,z,\alpha,\beta}_{a}\}$ constitutes a strategy for the
-	classical low individual degree game (Definition~\ref{def:ld-game}) with
-	parameters $(q, 2m+2, d, 1)$ succeeding with probability
-	$1 - \delta_{\mathrm{combine}}$; the axis-parallel clause of
-	Lemma~\ref{lem:qld-4-13-established} supplies the degree-$d$ answer
-	format that the game requires on axis-parallel lines. Here
-	$\delta_{\mathrm{combine}}$ is the error established by the proof of
-	Lemma~\ref{lem:qld-4-13}, namely the bound
-	$C \cdot m \cdot \poly(\eps, md/q)$ of
-	Lemma~\ref{lem:qld-4-13-established}, and not the form
-	$\poly(m^2\eps, md/q)$ printed in the statement of
-	Lemma~\ref{lem:qld-4-13}, which remains unproved
-	(Remark~\ref{rem:qld-4-13-source-defects}); the error function
-	$\delta_S$ of the statement absorbs the prefactor $m$ into $(md)^a$.
+	Lemma~\ref{lem:qld-4-13-established} supplies measurements on the directly
+	indexed line carrier: an axis line records its base point and directly sampled
+	coordinate index, while a diagonal line also records a direction whose earlier
+	coordinates vanish. Its averages use the corresponding
+	directly indexed line-point law, and its consistency relations use the completed
+	answer alphabet $\F_q \cup \{\bot\}$. These data are not yet a strategy for the
+	classical low individual degree game of Definition~\ref{def:ld-game}, whose line
+	questions retain a field-valued seed. Such a strategy requires a transport from
+	the directly indexed carrier and law to the seed-indexed question distribution,
+	and a conversion from the completed-answer relations, including degenerate
+	zero-direction lines, to the game's field-valued answer checks. These open
+	transports are recorded in \cite{gap:qpbt_ld-dimension-divisibility} and
+	\cite{gap:qpbt_combined-lines-error-term}.
+	Conditional on these transports, Lemmas~\ref{lem:qld-4-12}
+	and~\ref{lem:qld-4-13-established} give a strategy with parameters
+	$(q,2m+2,d,1)$ and success probability $1-\delta_{\mathrm{combine}}$; the
+	axis-parallel clause supplies the required degree-$d$ answer format. The
+	numerical estimate available for $\delta_{\mathrm{combine}}$ is
+	$C \cdot m \cdot \poly(\eps,md/q)$, not the unproved form
+	$\poly(m^2\eps,md/q)$ printed in Lemma~\ref{lem:qld-4-13}
+	(Remark~\ref{rem:qld-4-13-source-defects}). The error function $\delta_S$
+	absorbs the prefactor $m$ into $(md)^a$.
 	(For $(q, 2m+2, d, 1)$ to be a parameter tuple of
 	Definition~\ref{def:ld-game} the dimension $2m+2$ must divide $q$;
 	admissibility of $(q,m,d)$ supplies only that $m$ divides $q$, and for
@@ -2001,15 +2012,24 @@ projective measurement whose outcomes are pairs of global polynomials.
 	\lean{MIPStarRE.QPBT.directPolynomialPoint_consistencyDefect_le}
 	\lean{MIPStarRE.QPBT.directPolynomialPolynomial_consistencyDefect_le}
 	\leanok
-	\uses{def:consistency, def:ld-game, thm:main-formal}
-	This is not a named statement of \cite{Ji2020MIPStar}. It records the
-	three consistency implications obtained from the projective polynomial
-	measurements of Theorem~\ref{thm:main-formal} after changing to the
-	directly indexed coordinates. In that presentation the sampled coordinate
-	is carried by the question itself rather than by a residue class of
-	$\F_q$; see Remark~\ref{rem:qld-4-7-divisibility}.
+	\uses{def:consistency, def:ld-game, def:admissible-size,
+		lem:direct-ld-consistency-defect-equivalence}
+	This is not a named statement of \cite{Ji2020MIPStar}. It records three
+	consistency implications in the directly indexed coordinates, in which the
+	sampled coordinate is carried by the question itself rather than by a
+	residue class of $\F_q$; see Remark~\ref{rem:qld-4-7-divisibility}. The
+	hypothesis of each implication is an arbitrary consistency relation
+	between measurement families of the stated kinds; no implication produces
+	such a relation or constructs the measurements it relates. They may in
+	particular be applied to the three consistency relations in the conclusion
+	of Theorem~\ref{thm:main-formal}.
 
-	Fix directly indexed parameters $D=(q,m,d,k)$ and let $\delta\in\R$.
+	Fix a directly indexed parameter tuple $D=(q,m,d,k)$, where $m,d,k \ge 1$
+	are integers and $q$ is an admissible field size
+	(Definition~\ref{def:admissible-size}). In contrast with the parameters of
+	the classical game (Definition~\ref{def:ld-game}), no divisibility
+	condition $m \mid q$ is imposed; dropping that condition is the only
+	difference between the two parameter domains. Let $\delta\in\R$.
 	The following three implications hold:
 	\begin{enumerate}
 		\item let $S=(\psi,A,B)$ be a projective strategy for the
@@ -2060,15 +2080,22 @@ projective measurement whose outcomes are pairs of global polynomials.
 	\lean{MIPStarRE.QPBT.ldStrategyToDirect_pointPolynomial_compression}
 	\lean{MIPStarRE.QPBT.ldStrategyToDirect_polynomialPoint_compression}
 	\leanok
-	\uses{def:consistency, def:ld-game, def:ld-question-distribution}
+	\uses{def:consistency, def:ld-game, def:ld-question-distribution, def:admissible-size}
 	This is not a named statement of \cite{Ji2020MIPStar}. It records two
 	compression identities between the classical low individual degree game
 	and its directly indexed presentation.
 
-	Let $(\psi, A, B)$ be a strategy for the classical game with parameters
-	$(q,m,d,k)$, and extend it to the directly indexed game by adjoining to
-	each player a register of dimension $q/m$, the common size of the
-	classes of the index function $\chi$ of
+	Fix parameters $\mathsf{ldparams}=(q,m,d,k)$ of the classical game as in
+	Definition~\ref{def:ld-game}: integers $m,d,k \ge 1$, an admissible field
+	size $q$ (Definition~\ref{def:admissible-size}), and $m \mid q$. Unlike
+	in Lemma~\ref{lem:direct-ld-consistency-coordinates}, the divisibility
+	belongs to the domain here, since it is what gives the residue register
+	below its dimension; the directly indexed parameters appearing on the
+	other side of the identities are this tuple with the divisibility
+	condition dropped. Let $(\psi, A, B)$ be a strategy for the classical
+	game, and extend it to the directly indexed game by adjoining to each
+	player a register of dimension $q/m$, the common size of the classes of
+	the index function $\chi$ of
 	Definition~\ref{def:ld-question-distribution}; the two copies of that
 	register are perfectly correlated in the extended state. For a
 	polynomial-tuple POVM $G^{\mathrm B}$ on
@@ -2105,6 +2132,122 @@ projective measurement whose outcomes are pairs of global polynomials.
 	This obstruction is analyzed in
 	\cite{gap:qpbt_ld-dimension-divisibility}.
 \end{remark}
+
+% The results below are not statements of the source. They record the
+% coordinatewise application of Theorem~\ref{thm:main-formal} to the directly
+% indexed game and the one-coordinate polynomial-tuple conclusion discussed in
+% Remark~\ref{rem:ld-soundness-simultaneity}.
+\begin{lemma}[Formalization support: consistency relations as bipartite consistency defects]
+	\label{lem:direct-ld-consistency-defect-equivalence}
+	\lean{MIPStarRE.QPBT.consRel_iff_consistencyDefect}
+	\leanok
+	\uses{def:consistency, def:simeq, def:povm-conventions}
+	This is not a named statement of \cite{Ji2020MIPStar}. Let $\psi$ be a unit
+	vector on a bipartite space with nonempty index set, let $\mu$ be a
+	probability distribution on a finite question set, and let $A$ and $B$ be
+	families of complete projective measurements with a common finite outcome set
+	on the two factors. The consistency relation of Definition~\ref{def:simeq},
+	formed for the density state of $\psi$, holds with error $\delta$ if and only
+	if the off-diagonal defect of Definition~\ref{def:consistency} between the
+	left placement of $A$ and the right placement of $B$, evaluated on the
+	coordinate vector of $\psi$, is at most $\delta$. Passing between the two
+	formulations therefore loses nothing in the error parameter.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Both quantities are the same average over questions of the same finite sum of
+	quadratic forms: the expectation of an operator in the density state of
+	$\psi$ is the Euclidean quadratic form of the coordinate vector of $\psi$ at
+	that operator, and the two placements realize the tensor factors of the
+	operators appearing in either formulation.
+\end{proof}
+
+\begin{lemma}[Formalization support for the collision estimate in directly indexed coordinates]
+	\label{lem:direct-ld-polynomial-agreement}
+	\lean{MIPStarRE.QPBT.directPolynomialAgreement_avg_le_mdq}
+	\leanok
+	\uses{lem:polynomial-agreement-mdq, def:ld-game}
+	This is not a named statement of \cite{Ji2020MIPStar}. Fix directly indexed
+	parameters $D=(q,m,d,k)$. Two distinct $m$-variate polynomial representatives
+	of individual degree at most $d$ over the scalar field of $D$ take the same
+	value at a uniformly random point of $\F_q^m$ with probability at most
+	$md/q$. This is the collision hypothesis of Lemma~\ref{lem:ld-sandwich},
+	stated for the directly indexed point and polynomial carriers.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:polynomial-agreement-mdq}
+	The point and polynomial identifications of the directly indexed presentation
+	are bijections, so the agreement event is carried to the corresponding event
+	for the seed-indexed carriers, where
+	Lemma~\ref{lem:polynomial-agreement-mdq} applies.
+\end{proof}
+
+\begin{lemma}[Formalization support for the coordinatewise soundness conclusion]
+	\label{lem:direct-ld-coordinate-soundness}
+	\lean{MIPStarRE.QPBT.directCoordinateMainFormal}
+	\leanok
+	\uses{thm:main-formal, def:ld-game, def:consistency, def:ld-meas}
+	This is not a named statement of \cite{Ji2020MIPStar}. Fix directly indexed
+	parameters $D=(q,m,d,k)$, let $\eps\in\R$, let $S$ be a projective strategy
+	for the directly indexed game with value at least $1-\eps$, and fix a
+	coordinate $r\in\{0,\ldots,k-1\}$. Reading coordinate $r$ of $S$ as a
+	projective strategy for the $(m,q,d)$ low individual degree test of
+	Chapter~\ref{chap:test} gives a strategy that passes that test with
+	probability at least $1-3\eps$. Theorem~\ref{thm:main-formal}, applied to it
+	at the sampling parameter $2560000\,m^3d$, then produces projective
+	measurements on the two players' spaces indexed by single $m$-variate
+	polynomials of individual degree at most $d$ satisfying the three consistency
+	relations of that theorem, with error the error function of
+	Theorem~\ref{thm:main-formal} at that sampling parameter and at pass bound
+	$3\eps$. Both numerical side conditions of Theorem~\ref{thm:main-formal},
+	positivity of the sampling parameter and the lower bound $400md$, hold for
+	this choice because the dimension and the degree are positive.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{thm:main-formal}
+	Instantiate Theorem~\ref{thm:main-formal} at the coordinate reading of $S$
+	and at the stated sampling parameter, supplying the pass bound of that
+	reading and the two numerical side conditions.
+\end{proof}
+
+\begin{lemma}[Formalization support: the polynomial-tuple conclusion for a single coordinate]
+	\label{lem:direct-ld-simultaneous-single}
+	\lean{MIPStarRE.QPBT.exists_directSimultaneousPolynomialMeasurements_of_k_eq_one}
+	\leanok
+	\uses{lem:direct-ld-coordinate-soundness, lem:direct-ld-consistency-coordinates,
+		def:ld-meas, def:consistency, def:ld-game}
+	This is not a named statement of \cite{Ji2020MIPStar}. It is the
+	polynomial-tuple conclusion of Theorem~\ref{lem:ld-soundness} for
+	simultaneity parameter $k=1$, obtained for the directly indexed game rather
+	than for the seed-indexed game of Definition~\ref{def:ld-game}; see
+	Remark~\ref{rem:qld-4-7-divisibility}.
+
+	Fix directly indexed parameters $D=(q,m,d,k)$ with $k=1$, let $\eps\in\R$,
+	and let $S=(\psi,A,B)$ be a projective strategy for the directly indexed game
+	with value at least $1-\eps$. Then there are POVMs on the two players' spaces
+	whose outcomes are $k$-tuples of $m$-variate polynomial representatives of
+	individual degree at most $d$ for which the three consistency defects of the
+	conclusion of Theorem~\ref{lem:ld-soundness} --- the two point/polynomial
+	defects averaged uniformly over $u\in\F_q^m$ and the polynomial/polynomial
+	defect over the one-element question set --- are each at most the error
+	function of Theorem~\ref{thm:main-formal} at the sampling parameter
+	$2560000\,m^3d$ and pass bound $3\eps$. For $k\ge2$ the coordinate
+	conclusions do not yield such POVMs;
+	Remark~\ref{rem:ld-soundness-simultaneity} records the obstruction.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:direct-ld-coordinate-soundness, lem:direct-ld-consistency-coordinates}
+	Apply Lemma~\ref{lem:direct-ld-coordinate-soundness} at the unique coordinate
+	and transport its three consistency relations to directly indexed consistency
+	defects by Lemma~\ref{lem:direct-ld-consistency-coordinates}. Since the index
+	set of coordinates is a singleton, sending a value to the constant tuple
+	carrying it is a bijection of outcome sets, under which each defect is
+	unchanged; relabeling a single-polynomial measurement by one-coordinate
+	tuples likewise leaves its effects unchanged.
+\end{proof}
 
 \begin{remark}[Constant regimes in the quotation of the classical soundness
 	theorem]

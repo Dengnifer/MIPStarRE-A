@@ -1,13 +1,13 @@
 import MIPStarRE.QPBT.Games.CondLinear
 import MIPStarRE.QPBT.Games.CondLinearTheorems.DirectSumSupport
+import MIPStarRE.QPBT.Games.CondLinearTheorems.Reindex
 
 /-! # Structure and direct sums of conditionally linear functions
 
-A conditionally linear map admits a prefix decomposition, and conditionally
-linear maps and their shared-seed distributions are stable under finite
-coordinate direct sums.  A representation may be raised to a larger level by
-adjoining zero linear contributions, after which equal-level representations
-combine coordinatewise on pairwise disjoint registers.
+A conditionally linear map admits a prefix decomposition. Equal-level
+representations on pairwise disjoint registers combine coordinatewise, and the
+corresponding shared-seed distributions factor as products. A representation
+may first be raised to a larger level by adjoining zero linear contributions.
 
 ## References
 
@@ -70,8 +70,13 @@ private theorem CondLinearTerm.raiseBy_supportedOn {K ι : Type*} [Field K]
   | zero => exact ht
   | succ d ih => exact CondLinearTerm.raiseLevel_supportedOn ih
 
-/-- Conditional linearity is monotone in the number of levels. -/
-private theorem IsCondLinearOn.mono_level {K ι : Type*} [Field K]
+/-- Conditional linearity is monotone in the number of levels: empty linear
+contributions raise an `ell`-level representation to any level `k ≥ ell`.
+This is `lem:cl-level-mono`, the support-relative form of the containment
+observation following `def:cl-func`; blueprint
+`blueprint/src/chapter/ch12_qpbt_games.tex`, paper
+`references/qpbt-paper/05_conditionally_linear_functions.tex:124-132`. -/
+theorem IsCondLinearOn.mono_level {K ι : Type*} [Field K]
     [Fintype ι] [DecidableEq ι] {S : Finset ι} {ell k : ℕ}
     {L : (ι → K) → (ι → K)} (hL : IsCondLinearOn K S ell L)
     (h : ell ≤ k) : IsCondLinearOn K S k L := by

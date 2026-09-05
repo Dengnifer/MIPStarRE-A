@@ -252,6 +252,20 @@ theorem uniformDistribution_weight_apply (α : Type*)
     (uniformDistribution α).weight a = 1 / (Fintype.card α : Error) := by
   simp [uniformDistribution]
 
+/-- Formalization-only lemma: a push-forward of a uniform law assigns to a point
+the cardinality of its fibre divided by the cardinality of the source.  This is
+`lem:uniform-map-fibre-weight` in blueprint chapter 13. -/
+theorem uniformDistribution_map_weight {α γ : Type*}
+    [Fintype α] [DecidableEq α] [Nonempty α] [DecidableEq γ]
+    (e : α → γ) (c : γ) :
+    ((uniformDistribution α).map e).weight c =
+      (((Finset.univ : Finset α).filter fun x => e x = c).card : Error) *
+        (1 / (Fintype.card α : Error)) := by
+  change (∑ x ∈ (Finset.univ : Finset α).filter (fun x => e x = c),
+      (uniformDistribution α).weight x) = _
+  rw [Finset.sum_congr rfl fun x _ => uniformDistribution_weight_apply α x,
+    Finset.sum_const, nsmul_eq_mul]
+
 /-- Formalization-only lemma: a map whose fibers all have the same cardinality
 pushes the uniform distribution forward to the uniform distribution.  This is
 `lem:uniform-map-equal-fibers` in blueprint chapter 13. -/
@@ -340,6 +354,66 @@ theorem uniformDistribution_map_snd {α β : Type*}
   rw [hfilter, Finset.card_product]
   simp
 
+/-- Formalization-only lemma: binding the uniform law on a finite subset to a
+family of uniformly seeded push-forwards is the push-forward of the uniform law
+on the product of an indexing type for that subset with the seed space.  This is
+`lem:uniform-bind-on-finset-map` in blueprint chapter 13. -/
+theorem bind_uniformOnFinset_map {α β γ σ : Type*} [DecidableEq α]
+    [Fintype σ] [DecidableEq σ] [Nonempty σ]
+    [Fintype β] [DecidableEq β] [Nonempty β] [DecidableEq γ]
+    (s : Finset α) (f : σ → α) (hinj : Function.Injective f)
+    (himage : (Finset.univ : Finset σ).image f = s) (g : α → β → γ) :
+    Distribution.bind (Distribution.uniformOnFinset s)
+        (fun a => (uniformDistribution β).map (g a)) =
+      (uniformDistribution (σ × β)).map fun q => g (f q.1) q.2 := by
+  have hmem : ∀ a, a ∈ s ↔ ∃ x : σ, f x = a := by
+    intro a
+    rw [← himage]
+    simp
+  have hcard : s.card = Fintype.card σ := by
+    rw [← himage, Finset.card_image_of_injective _ hinj, Finset.card_univ]
+  have hsum : ∀ h : α → Error, ∑ a ∈ s, h a = ∑ x : σ, h (f x) := by
+    intro h
+    rw [← himage, Finset.sum_image fun x _ y _ hxy => hinj hxy]
+  refine Distribution.ext_of_support_of_weight ?_ ?_
+  · change s.biUnion (fun a => (Finset.univ : Finset β).image (g a)) =
+      (Finset.univ : Finset (σ × β)).image fun q => g (f q.1) q.2
+    ext c
+    simp only [Finset.mem_biUnion, Finset.mem_image, Finset.mem_univ, true_and,
+      Prod.exists]
+    constructor
+    · rintro ⟨a, ha, b, rfl⟩
+      obtain ⟨xx, rfl⟩ := (hmem a).mp ha
+      exact ⟨xx, b, rfl⟩
+    · rintro ⟨xx, b, rfl⟩
+      exact ⟨f xx, (hmem _).mpr ⟨xx, rfl⟩, b, rfl⟩
+  · funext c
+    have key : ∀ a ∈ s, (Distribution.uniformOnFinset s).weight a *
+        ((uniformDistribution β).map (g a)).weight c =
+        (((Finset.univ : Finset β).filter fun b => g a b = c).card : Error) *
+          (1 / ((Fintype.card σ : Error) * (Fintype.card β : Error))) := by
+      intro a ha
+      rw [Distribution.uniformOnFinset_weight, if_pos ha,
+        uniformDistribution_map_weight, hcard]
+      ring
+    have hcount :
+        ((Finset.univ : Finset (σ × β)).filter fun q => g (f q.1) q.2 = c).card =
+          ∑ x : σ, ((Finset.univ : Finset β).filter fun b => g (f x) b = c).card := by
+      simp only [Finset.card_filter]
+      rw [Fintype.sum_prod_type]
+    change (∑ a ∈ s, (Distribution.uniformOnFinset s).weight a *
+        ((uniformDistribution β).map (g a)).weight c) =
+      ∑ q ∈ (Finset.univ : Finset (σ × β)).filter fun q => g (f q.1) q.2 = c,
+        (uniformDistribution (σ × β)).weight q
+    rw [Finset.sum_congr rfl key,
+      hsum fun a => (((Finset.univ : Finset β).filter fun b => g a b = c).card : Error) *
+        (1 / ((Fintype.card σ : Error) * (Fintype.card β : Error))),
+      ← Finset.sum_mul,
+      Finset.sum_congr rfl fun q _ => uniformDistribution_weight_apply (σ × β) q,
+      Finset.sum_const, nsmul_eq_mul, hcount, Fintype.card_prod]
+    push_cast
+    ring
+
 /-- Formalization-only lemma: binding a uniform distribution to a family of
 uniformly seeded push-forwards is the push-forward of the uniform distribution
 on the product.  This is `lem:uniform-bind-map` in blueprint chapter 13. -/
@@ -349,43 +423,8 @@ theorem bind_uniformDistribution_map {α β γ : Type*}
     (g : α → β → γ) :
     Distribution.bind (uniformDistribution α)
         (fun a => (uniformDistribution β).map (g a)) =
-      (uniformDistribution (α × β)).map fun p => g p.1 p.2 := by
-  refine Distribution.ext_of_support_of_weight ?_ ?_
-  · change (Finset.univ : Finset α).biUnion
-        (fun a => (Finset.univ : Finset β).image (g a)) =
-      (Finset.univ : Finset (α × β)).image fun p => g p.1 p.2
-    ext c
-    simp [Prod.exists]
-  · funext c
-    have hcount :
-        ((Finset.univ : Finset (α × β)).filter fun p => g p.1 p.2 = c).card
-          = ∑ a : α, ((Finset.univ : Finset β).filter fun b => g a b = c).card := by
-      simp only [Finset.card_filter]
-      rw [Fintype.sum_prod_type]
-    have hinner : ∀ a : α,
-        ((uniformDistribution β).map (g a)).weight c
-          = (((Finset.univ : Finset β).filter fun b => g a b = c).card : Error) *
-              (1 / (Fintype.card β : Error)) := by
-      intro a
-      change (∑ b ∈ (Finset.univ : Finset β).filter fun b => g a b = c,
-          (uniformDistribution β).weight b) = _
-      rw [Finset.sum_congr rfl fun b _ => uniformDistribution_weight_apply β b,
-        Finset.sum_const, nsmul_eq_mul]
-    have key : ∀ a : α, (uniformDistribution α).weight a *
-        ((uniformDistribution β).map (g a)).weight c
-        = (((Finset.univ : Finset β).filter fun b => g a b = c).card : Error) *
-            (1 / ((Fintype.card α : Error) * (Fintype.card β : Error))) := by
-      intro a
-      rw [uniformDistribution_weight_apply, hinner a]
-      ring
-    change (∑ a ∈ (Finset.univ : Finset α), (uniformDistribution α).weight a *
-        ((uniformDistribution β).map (g a)).weight c) =
-      ∑ p ∈ (Finset.univ : Finset (α × β)).filter fun p => g p.1 p.2 = c,
-        (uniformDistribution (α × β)).weight p
-    rw [Finset.sum_congr rfl fun a _ => key a, ← Finset.sum_mul,
-      Finset.sum_congr rfl fun p _ => uniformDistribution_weight_apply (α × β) p,
-      Finset.sum_const, nsmul_eq_mul, hcount, Fintype.card_prod]
-    push_cast
-    ring
+      (uniformDistribution (α × β)).map fun p => g p.1 p.2 :=
+  bind_uniformOnFinset_map (Finset.univ : Finset α) id Function.injective_id
+    Finset.image_id g
 
 end MIPStarRE.QPBT

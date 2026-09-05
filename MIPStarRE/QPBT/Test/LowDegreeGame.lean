@@ -52,9 +52,9 @@ used by the uniform axis and prefix-index marginals. -/
 instance (L : LdParams) : Nonempty (Fin L.m) :=
   ⟨⟨0, lt_of_lt_of_le Nat.zero_lt_one L.hm⟩⟩
 
-/-- The fixed model accessor for an `LdParams` record.  It is a compatibility
-view of the global `fixedFieldModel` selector, not an independently quantified
-parameter.  Blueprint `def:ld-game`; paper origin
+/-- The fixed scalar model of a low-degree parameter tuple.  It is a
+compatibility view of the global `fixedFieldModel` selector, not an
+independently quantified field representation.  Blueprint `def:ld-game`; paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
 -/
 noncomputable def LdParams.model (P : LdParams) : FixedFieldModel P.q :=
@@ -240,8 +240,9 @@ noncomputable def ldALineCL (P : LdParams) (z : LdSpace P) : LdSpace P :=
   | .inl (.inr _) => z (.inl (.inr ()))
   | .inr _ => 0
 
-/-- The diagonal-line CL map, using the same canonical representative interface
-for the direction block.  This is the `L_DLine` clause of
+/-- The diagonal-line CL map applies the canonical line representative map to
+the point block and stores the prefix-projected direction in the direction
+block.  This is the `L_DLine` clause of
 `def:ld-question-distribution` (blueprint
 `def:ld-question-distribution`; paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`).
@@ -255,8 +256,8 @@ noncomputable def ldDLineCL (P : LdParams) (z : LdSpace P) : LdSpace P :=
   | .inl (.inr _) => z (.inl (.inr ()))
   | .inr j => direction j
 
-/-- Dispatch the three low-degree CL maps by question type.  This is the typed
-construction in blueprint
+/-- The conditionally linear map attached to each low-degree question type.
+This is the typed construction in blueprint
 `def:ld-question-distribution`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
 -/
@@ -449,6 +450,34 @@ private theorem coordinateRestriction_direction (P : LdParams) (x : LdSpace P) :
     Finset.mem_image_of_mem _ (Finset.mem_univ j)
   simp [LdSpace.direction, coordinateRestriction, hmem]
 
+/-- Formalization-only auxiliary: the point-register projection as a linear
+map on the ambient low-degree space. -/
+private def ldPointLinear (P : LdParams) :
+    LdSpace P →ₗ[ScalarQ P] LdSpace P where
+  toFun := ldPointCL P
+  map_add' x y := by
+    funext i
+    rcases i with (j | u) | j <;> simp [ldPointCL]
+  map_smul' c x := by
+    funext i
+    rcases i with (j | u) | j <;> simp [ldPointCL]
+
+/-- The point projection is a one-level conditionally linear function. This is
+the level assertion for `L_Point` in `def:ld-question-distribution`, blueprint
+`lem:ld-point-level`, paper
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:203-207`. -/
+theorem isCondLinear_ldPointCL (P : LdParams) :
+    IsCondLinearOn (ScalarQ P) Finset.univ 1 (ldPointCL P) := by
+  refine ⟨.succ Finset.univ (ldPointLinear P)
+      (fun _ i hi => absurd (Finset.mem_univ i) hi) (fun _ => .zero),
+    ⟨Finset.subset_univ _, fun _ => trivial⟩, ?_⟩
+  funext x
+  have hx : coordinateRestriction (Finset.univ : Finset (LdIndex P)) x = x := by
+    funext i
+    simp [coordinateRestriction]
+  change ldPointCL P (coordinateRestriction Finset.univ x) + 0 = ldPointCL P x
+  rw [hx, add_zero]
+
 /-- Formalization-only auxiliary: a two-level representation of the
 affine-line map as a conditionally linear function. -/
 private noncomputable def ldALineTerm (P : LdParams) :
@@ -622,8 +651,9 @@ abbrev LdAnswerCode (P : LdParams) :=
     ((Fin P.k → Fin (P.d + 1) → ScalarQ P) ⊕
       (Fin P.k → Fin (P.m * P.d + 1) → ScalarQ P))
 
-/-- The constructor-preserving code equivalence for `LdAnswer` (Lean-only
-finite-carrier infrastructure for blueprint
+/-- The canonical code equivalence for `LdAnswer`, sending point, axis-line,
+and diagonal-line answers to the three summands (Lean-only finite-carrier
+support for blueprint
 `def:ld-win-predicate`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`).
 -/
@@ -723,7 +753,8 @@ noncomputable def ldWinPredicate (P : LdParams) :
         | _, _, _, _ => true
       else false
 
-/-- The low-degree game packaged as a `Game`.  This is blueprint
+/-- The low-degree game determined by its question distribution and win
+predicate. This is blueprint
 `def:ld-game`, paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
 -/

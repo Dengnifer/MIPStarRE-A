@@ -1,3 +1,5 @@
+import Mathlib.Algebra.CharP.Two
+import Mathlib.Tactic.LinearCombination
 import MIPStarRE.LDT.Preliminaries.Polynomials
 
 /-!
@@ -77,5 +79,54 @@ theorem lowDegreeEnc_eq_dotProduct {K : Type*} [CommRing K] {m : ℕ}
     (a : Cube m → K) (x : Fin m → K) :
     lowDegreeEnc a x = dotProduct a (indicatorVec x) := by
   simp [lowDegreeEnc, lowDegreeEncoding, indicatorVec, dotProduct]
+
+/--
+The coordinatewise product form of an entry of the indicator vector: at a cube
+point `y` the entry is the product of `x i` over the coordinates with `y i`
+true and of `1 - x i` over the remaining ones.  Blueprint
+`def:indicator-vector`;
+paper origin: `references/qpbt-paper/04_preliminaries.tex:832-897`.
+-/
+theorem indicatorVec_apply_eq_prod {K : Type*} [CommRing K] {m : ℕ}
+    (x : Fin m → K) (y : Cube m) :
+    indicatorVec x y = ∏ i : Fin m, if y i then x i else 1 - x i := by
+  simp [indicatorVec, indicatorPoly, apply_ite]
+
+/--
+Over a commutative ring of characteristic two, the inner product of two
+indicator vectors is the product of the coordinate sums `1 + x_i + z_i`.  This
+is the product expansion of blueprint
+`def:indicator-vector`; it is the first step of
+the proof of blueprint
+`fact:omega-anticomm-prob`, paper origin
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:70-95`.
+-/
+theorem sum_indicatorVec_mul_indicatorVec {K : Type*} [CommRing K]
+    [CharP K 2] {m : ℕ} (x z : Fin m → K) :
+    ∑ y : Cube m, indicatorVec x y * indicatorVec z y
+      = ∏ i : Fin m, (1 + x i + z i) := by
+  have h2 : (2 : K) = 0 := CharTwo.two_eq_zero
+  have hfac : ∀ i : Fin m,
+      ∑ b : Bool, ((if b then x i else 1 - x i) * (if b then z i else 1 - z i))
+        = 1 + x i + z i := by
+    intro i
+    have h1 :
+        ∑ b : Bool, ((if b then x i else 1 - x i) * (if b then z i else 1 - z i))
+          = x i * z i + (1 - x i) * (1 - z i) := by
+      rw [Fintype.sum_bool]
+      simp
+    rw [h1]
+    linear_combination (x i * z i - x i - z i) * h2
+  calc ∑ y : Cube m, indicatorVec x y * indicatorVec z y
+      = ∑ y : Cube m, ∏ i : Fin m,
+          ((if y i then x i else 1 - x i) * (if y i then z i else 1 - z i)) := by
+        refine Finset.sum_congr rfl ?_
+        intro y _
+        rw [indicatorVec_apply_eq_prod x y, indicatorVec_apply_eq_prod z y,
+          ← Finset.prod_mul_distrib]
+    _ = ∏ i : Fin m, ∑ b : Bool,
+          ((if b then x i else 1 - x i) * (if b then z i else 1 - z i)) := by
+        rw [Finset.prod_univ_sum, Fintype.piFinset_univ]
+    _ = ∏ i : Fin m, (1 + x i + z i) := Finset.prod_congr rfl fun i _ => hfac i
 
 end MIPStarRE.QPBT

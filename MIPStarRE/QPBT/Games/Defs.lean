@@ -1,4 +1,5 @@
 import MIPStarRE.Quantum.Measurement
+import MIPStarRE.LDT.Basic.DistributionAvg
 import MIPStarRE.LDT.Basic.Distribution
 
 /-!
@@ -243,6 +244,84 @@ theorem outcomeWeight_sum_eq_one {G : Game} (S : Strategy G)
     _ = (inner ℂ S.ψ (applyOperatorToState 1 S.ψ)).re := by rw [hsum]
     _ = 1 := by
       simp [applyOperatorToState, S.ψ_norm]
+/-- A left-local sum of effects has Born mass equal to the corresponding sum
+of joint outcome weights.  This is formalization-only support for the
+marginal Born probabilities of blueprint
+`def:tensor-product-value`. -/
+theorem leftEffectMass_eq {G : Game} (S : Strategy G)
+    (x : G.QuestionA) (y : G.QuestionB) (p : G.AnswerA → Bool) :
+    (inner ℂ S.ψ
+      (applyOperatorToState
+        (heteroKron
+          (∑ a ∈ Finset.univ.filter (fun a => p a = false), (S.A x).effect a) 1)
+        S.ψ)).re =
+      ∑ a ∈ Finset.univ.filter (fun a => p a = false),
+        ∑ b : G.AnswerB, outcomeWeight S x y a b := by
+  classical
+  let invalid := Finset.univ.filter (fun a : G.AnswerA => p a = false)
+  have hop :
+      heteroKron (∑ a ∈ invalid, (S.A x).effect a) 1 =
+        ∑ a ∈ invalid, ∑ b : G.AnswerB,
+          heteroKron ((S.A x).effect a) ((S.B y).effect b) := by
+    ext i j
+    simp only [Matrix.sum_apply, heteroKron, Matrix.kronecker,
+      Matrix.kroneckerMap_apply]
+    simp_rw [← Finset.mul_sum]
+    rw [show (∑ b : G.AnswerB, (S.B y).effect b i.2 j.2) =
+        (1 : Op S.ιB) i.2 j.2 by
+      simpa only [Matrix.sum_apply] using
+        congrFun (congrFun (S.B y).sum_eq_one i.2) j.2]
+    rw [Finset.sum_mul]
+  change (inner ℂ S.ψ
+      (applyOperatorToState
+        (heteroKron (∑ a ∈ invalid, (S.A x).effect a) 1) S.ψ)).re = _
+  rw [hop]
+  simp [outcomeWeight, applyOperatorToState, invalid]
+
+/-- A right-local sum of effects has Born mass equal to the corresponding sum
+of joint outcome weights.  This is formalization-only support for the
+marginal Born probabilities of blueprint
+`def:tensor-product-value`. -/
+theorem rightEffectMass_eq {G : Game} (S : Strategy G)
+    (x : G.QuestionA) (y : G.QuestionB) (p : G.AnswerB → Bool) :
+    (inner ℂ S.ψ
+      (applyOperatorToState
+        (heteroKron 1
+          (∑ b ∈ Finset.univ.filter (fun b => p b = false), (S.B y).effect b))
+        S.ψ)).re =
+      ∑ a : G.AnswerA,
+        ∑ b ∈ Finset.univ.filter (fun b => p b = false),
+          outcomeWeight S x y a b := by
+  classical
+  let invalid := Finset.univ.filter (fun b : G.AnswerB => p b = false)
+  have hop :
+      heteroKron 1 (∑ b ∈ invalid, (S.B y).effect b) =
+        ∑ a : G.AnswerA, ∑ b ∈ invalid,
+          heteroKron ((S.A x).effect a) ((S.B y).effect b) := by
+    ext i j
+    simp only [Matrix.sum_apply, heteroKron, Matrix.kronecker,
+      Matrix.kroneckerMap_apply]
+    have hA : (∑ a : G.AnswerA, (S.A x).effect a i.1 j.1) =
+        (1 : Op S.ιA) i.1 j.1 := by
+      simpa only [Matrix.sum_apply] using
+        congrFun (congrFun (S.A x).sum_eq_one i.1) j.1
+    calc
+      (1 : Op S.ιA) i.1 j.1 *
+          (∑ b ∈ invalid, (S.B y).effect b i.2 j.2) =
+          (∑ a : G.AnswerA, (S.A x).effect a i.1 j.1) *
+            (∑ b ∈ invalid, (S.B y).effect b i.2 j.2) := by rw [hA]
+      _ = ∑ a : G.AnswerA, (S.A x).effect a i.1 j.1 *
+          (∑ b ∈ invalid, (S.B y).effect b i.2 j.2) := by rw [Finset.sum_mul]
+      _ = ∑ a : G.AnswerA, ∑ b ∈ invalid,
+          (S.A x).effect a i.1 j.1 * (S.B y).effect b i.2 j.2 := by
+            apply Finset.sum_congr rfl
+            intro a ha
+            rw [Finset.mul_sum]
+  change (inner ℂ S.ψ
+      (applyOperatorToState
+        (heteroKron 1 (∑ b ∈ invalid, (S.B y).effect b)) S.ψ)).re = _
+  rw [hop]
+  simp [outcomeWeight, applyOperatorToState, invalid]
 
 /-- Summing over Bob's answers gives Alice's marginal Born weight. -/
 theorem sum_outcome_weight_right {G : Game} (S : Strategy G)
@@ -360,6 +439,60 @@ noncomputable def Strategy.value {G : Game} (S : Strategy G) : ℝ :=
   avgOver G.μ (fun xy =>
     ∑ a : G.AnswerA, ∑ b : G.AnswerB,
       if G.decide xy.1 xy.2 a b then outcomeWeight S xy.1 xy.2 a b else 0)
+/-- The average mass of the rejected answer pairs is one minus the strategy
+value.  This is formalization-only support for blueprint
+`def:tensor-product-value`. -/
+theorem rejectionMass_eq_one_sub_value {G : Game} (S : Strategy G) :
+    avgOver G.μ (fun questions =>
+      ∑ a, ∑ b,
+        if G.decide questions.1 questions.2 a b then 0
+        else outcomeWeight S questions.1 questions.2 a b) =
+      1 - S.value := by
+  classical
+  rw [show avgOver G.μ (fun questions =>
+      ∑ a, ∑ b,
+        if G.decide questions.1 questions.2 a b then 0
+        else outcomeWeight S questions.1 questions.2 a b) =
+      avgOver G.μ (fun questions =>
+        1 - ∑ a, ∑ b,
+          if G.decide questions.1 questions.2 a b then
+            outcomeWeight S questions.1 questions.2 a b else 0) by
+    apply avgOver_congr
+    intro questions
+    calc
+      (∑ a, ∑ b,
+          if G.decide questions.1 questions.2 a b then 0
+          else outcomeWeight S questions.1 questions.2 a b) =
+          ∑ a, ∑ b,
+            (outcomeWeight S questions.1 questions.2 a b -
+              if G.decide questions.1 questions.2 a b then
+                outcomeWeight S questions.1 questions.2 a b else 0) := by
+        apply Finset.sum_congr rfl
+        intro a ha
+        apply Finset.sum_congr rfl
+        intro b hb
+        split <;> simp
+      _ = (∑ a, ∑ b, outcomeWeight S questions.1 questions.2 a b) -
+          ∑ a, ∑ b,
+            if G.decide questions.1 questions.2 a b then
+              outcomeWeight S questions.1 questions.2 a b else 0 := by
+        rw [show (∑ a, ∑ b,
+            (outcomeWeight S questions.1 questions.2 a b -
+              if G.decide questions.1 questions.2 a b then
+                outcomeWeight S questions.1 questions.2 a b else 0)) =
+            ∑ a, ((∑ b, outcomeWeight S questions.1 questions.2 a b) -
+              ∑ b, if G.decide questions.1 questions.2 a b then
+                outcomeWeight S questions.1 questions.2 a b else 0) by
+          apply Finset.sum_congr rfl
+          intro a ha
+          rw [Finset.sum_sub_distrib]]
+        rw [Finset.sum_sub_distrib]
+      _ = 1 - ∑ a, ∑ b,
+          if G.decide questions.1 questions.2 a b then
+            outcomeWeight S questions.1 questions.2 a b else 0 := by
+        rw [outcomeWeight_sum_eq_one]]
+  rw [avgOver_sub, avgOver_const_of_isProbability G.μ G.μ_prob]
+  rfl
 
 /--
 The tensor-product game value as a conditional supremum over all finite

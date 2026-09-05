@@ -1,4 +1,6 @@
 import MIPStarRE.QPBT.Games.StrategyClasses
+import MIPStarRE.QPBT.Games.DistanceTheorems.Support
+import MIPStarRE.QPBT.Games.Sandwich.Support
 import MIPStarRE.QPBT.Observables.LineDefs
 import MIPStarRE.QPBT.Test.PauliBasisTest
 
@@ -169,6 +171,39 @@ def QuestionAppearsInSupport (P : AdmissibleParams) (question : PauliQuestion P)
     (question, other) ∈ (pauliQuestionDistribution P).support ∨
       (other, question) ∈ (pauliQuestionDistribution P).support
 
+/-- Reading a low-degree vector immediately after embedding it in either Pauli
+basis recovers the original vector. -/
+private theorem pauliToLd_embedLd (P : AdmissibleParams) (W : PauliKind)
+    (z : LdSpace P.toLdParams) :
+    pauliToLd P W (embedLd P W z) = z := by
+  funext i
+  rcases i with ((j | x) | j) <;> cases W <;> rfl
+
+-- The support rewrites below elaborate the `Fintype` instance of
+-- `PauliEdge × PauliSpace P`, whose nested sigma/sum instance chain exceeds the
+-- default recursion depth.
+set_option maxRecDepth 2000 in
+/-- A fixed point of a conditioning map occurs in the Pauli sampler through
+the corresponding self-loop. -/
+private theorem questionAppearsInSupport_of_fixed (P : AdmissibleParams)
+    (t : PauliType) (z : PauliSpace P) (hfixed : pauliCL P t z = z) :
+    QuestionAppearsInSupport P (t, z) := by
+  classical
+  letI : Nonempty PauliEdge := pauliEdge_nonempty
+  let edge : PauliEdge := ⟨(t, t), by simp [pauliEdges]⟩
+  let sample : PauliEdge × PauliSpace P := (edge, z)
+  refine ⟨(t, z), Or.inl ?_⟩
+  rw [pauliQuestionDistribution, Distribution.map_support]
+  have hsample : sample ∈ (uniformDistribution (PauliEdge × PauliSpace P)).support := by
+    rw [uniformDistribution_support]
+    exact Finset.mem_univ sample
+  have himage := Finset.mem_image_of_mem
+    (fun s : PauliEdge × PauliSpace P =>
+      ((s.1.1.1, pauliCL P s.1.1.1 s.2),
+        (s.1.1.2, pauliCL P s.1.1.2 s.2)))
+    hsample
+  simpa only [sample, edge, hfixed] using himage
+
 /-- Point embeddings occur in the typed Pauli question support. This is the
 support well-formedness companion to blueprint
 `def:pauli-question-distribution`, paper
@@ -176,7 +211,9 @@ support well-formedness companion to blueprint
 theorem pointQuestion_appears_in_support (P : AdmissibleParams) (W : PauliKind)
     (u : Fin P.m → PauliScalar P) :
     QuestionAppearsInSupport P (pointQuestion P W u) := by
-  sorry
+  apply questionAppearsInSupport_of_fixed P (.point W) (contentOfPoint P W u)
+  funext i
+  rcases i with ((((j | j) | x) | j) | x) | x <;> cases W <;> rfl
 
 /-- Canonical axis and diagonal line embeddings occur in the typed Pauli
 question support. This is the line companion to
@@ -185,7 +222,50 @@ paper `08_classical_and_quantum_low_degree_tests.tex:997-1008`. -/
 theorem lineQuestion_appears_in_support (P : AdmissibleParams) (W : PauliKind)
     (line : LineDesc P.toLdParams) :
     QuestionAppearsInSupport P (lineQuestion P W line) := by
-  sorry
+  cases line with
+  | axis base seed baseFixed =>
+      apply questionAppearsInSupport_of_fixed P (.aline W)
+        (contentOfLine P W (.axis base seed baseFixed))
+      let z : LdSpace P.toLdParams := fun i =>
+        match i with
+        | .inl (.inl j) => base j
+        | .inl (.inr _) => seed
+        | .inr _ => 0
+      change pauliCL P (.aline W) (embedLd P W z) = embedLd P W z
+      dsimp only [pauliCL]
+      rw [pauliToLd_embedLd]
+      apply congrArg (embedLd P W)
+      funext i
+      rcases i with ((j | x) | j)
+      · exact congrFun baseFixed j
+      · rfl
+      · rfl
+  | diagonal base seed direction baseFixed prefixZero =>
+      apply questionAppearsInSupport_of_fixed P (.dline W)
+        (contentOfLine P W (.diagonal base seed direction baseFixed prefixZero))
+      let z : LdSpace P.toLdParams := fun i =>
+        match i with
+        | .inl (.inl j) => base j
+        | .inl (.inr _) => seed
+        | .inr j => direction j
+      change pauliCL P (.dline W) (embedLd P W z) = embedLd P W z
+      dsimp only [pauliCL]
+      rw [pauliToLd_embedLd]
+      have hprojection :
+          prefixProjection (chiIndex P.toLdParams seed) direction = direction := by
+        funext j
+        by_cases hj : j.val < (chiIndex P.toLdParams seed).val
+        · simp [prefixProjection, hj, prefixZero j hj]
+        · simp [prefixProjection, hj]
+      apply congrArg (embedLd P W)
+      funext i
+      rcases i with ((j | x) | j)
+      · change (lineRepMap (prefixProjection (chiIndex P.toLdParams seed) direction)
+            base) j = base j
+        rw [hprojection]
+        exact congrFun baseFixed j
+      · rfl
+      · exact congrFun hprojection j
 
 /-- Pair embeddings occur in the typed Pauli question support. This is the
 Pair companion to blueprint
@@ -194,7 +274,9 @@ Pair companion to blueprint
 theorem pairQuestion_appears_in_support (P : AdmissibleParams)
     (uX uZ : Fin P.m → PauliScalar P) (rX rZ : PauliScalar P) :
     QuestionAppearsInSupport P (pairQuestion P uX uZ rX rZ) := by
-  sorry
+  apply questionAppearsInSupport_of_fixed P .pair (contentOfTuple P uX uZ rX rZ)
+  funext i
+  rcases i with ((((j | j) | x) | j) | x) | x <;> rfl
 
 /-- Pair/W embeddings occur in the typed Pauli question support. This is the
 Pair/W companion to blueprint
@@ -203,7 +285,9 @@ Pair/W companion to blueprint
 theorem pairWQuestion_appears_in_support (P : AdmissibleParams) (W : PauliKind)
     (uX uZ : Fin P.m → PauliScalar P) (rX rZ : PauliScalar P) :
     QuestionAppearsInSupport P (pairWQuestion P W uX uZ rX rZ) := by
-  sorry
+  apply questionAppearsInSupport_of_fixed P (.pairW W) (contentOfTuple P uX uZ rX rZ)
+  funext i
+  rcases i with ((((j | j) | x) | j) | x) | x <;> rfl
 
 /-- Magic Square embeddings occur in the typed Pauli question support. This is
 the Magic Square companion to blueprint
@@ -212,7 +296,9 @@ the Magic Square companion to blueprint
 theorem msQuestion_appears_in_support (P : AdmissibleParams) (t : MsType)
     (uX uZ : Fin P.m → PauliScalar P) (rX rZ : PauliScalar P) :
     QuestionAppearsInSupport P (msQuestion P t uX uZ rX rZ) := by
-  sorry
+  apply questionAppearsInSupport_of_fixed P (.ms t) (contentOfTuple P uX uZ rX rZ)
+  funext i
+  rcases i with ((((j | j) | x) | j) | x) | x <;> rfl
 
 /-- Pauli/W embeddings occur in the typed Pauli question support. This is the
 zero-content companion to blueprint
@@ -220,7 +306,8 @@ zero-content companion to blueprint
 `08_classical_and_quantum_low_degree_tests.tex:1006-1008`. -/
 theorem pauliQuestion_appears_in_support (P : AdmissibleParams) (W : PauliKind) :
     QuestionAppearsInSupport P (MIPStarRE.QPBT.pauliQuestion P W) := by
-  sorry
+  apply questionAppearsInSupport_of_fixed P (.pauli W) 0
+  rfl
 
 /-- Fold every non-point answer into the fixed point answer `0`. This realizes
 the typed point family without adding a bottom outcome; wrong-form mass remains
@@ -375,19 +462,148 @@ noncomputable def wrongFormMass (S : ProjectiveSetting P ε) (side : PlayerSide)
               (wrongFormEffect questions.2.1 (S.toStrategy.B questions.2)))
             S.toStrategy.ψ)).re
 
+/-- Expand the Alice wrong-form effect into its joint Born weights. -/
+private theorem leftWrongFormEffectMass_eq {P : AdmissibleParams}
+    (S : Strategy (pauliBasisTest P))
+    (questions : (pauliBasisTest P).QuestionA × (pauliBasisTest P).QuestionB) :
+    (inner ℂ S.ψ
+      (applyOperatorToState
+        (heteroKron (wrongFormEffect questions.1.1 (S.A questions.1)) 1)
+        S.ψ)).re =
+      ∑ a ∈ Finset.univ.filter
+          (fun a => validPauliAnswer questions.1.1 a = false),
+        ∑ b, outcomeWeight S questions.1 questions.2 a b := by
+  classical
+  exact leftEffectMass_eq S questions.1 questions.2
+    (validPauliAnswer questions.1.1)
+
+/-- Expand the Bob wrong-form effect into its joint Born weights. -/
+private theorem rightWrongFormEffectMass_eq {P : AdmissibleParams}
+    (S : Strategy (pauliBasisTest P))
+    (questions : (pauliBasisTest P).QuestionA × (pauliBasisTest P).QuestionB) :
+    (inner ℂ S.ψ
+      (applyOperatorToState
+        (heteroKron 1 (wrongFormEffect questions.2.1 (S.B questions.2)))
+        S.ψ)).re =
+      ∑ a, ∑ b ∈ Finset.univ.filter
+          (fun b => validPauliAnswer questions.2.1 b = false),
+        outcomeWeight S questions.1 questions.2 a b := by
+  classical
+  exact rightEffectMass_eq S questions.1 questions.2
+    (validPauliAnswer questions.2.1)
+
+/-- Alice's wrong-form mass at fixed questions is part of the rejection mass. -/
+private theorem leftInvalidMass_le_rejection {P : AdmissibleParams}
+    (S : Strategy (pauliBasisTest P))
+    (questions : (pauliBasisTest P).QuestionA × (pauliBasisTest P).QuestionB) :
+    (∑ a ∈ Finset.univ.filter
+        (fun a => validPauliAnswer questions.1.1 a = false),
+      ∑ b, outcomeWeight S questions.1 questions.2 a b) ≤
+    ∑ a, ∑ b,
+      if (pauliBasisTest P).decide questions.1 questions.2 a b then 0
+      else outcomeWeight S questions.1 questions.2 a b := by
+  classical
+  rcases questions with ⟨⟨tA, xA⟩, ⟨tB, xB⟩⟩
+  let invalid := Finset.univ.filter
+    (fun a : (pauliBasisTest P).AnswerA => validPauliAnswer tA a = false)
+  calc
+    (∑ a ∈ invalid, ∑ b, outcomeWeight S (tA, xA) (tB, xB) a b) =
+        ∑ a ∈ invalid, ∑ b,
+          if (pauliBasisTest P).decide (tA, xA) (tB, xB) a b then 0
+          else outcomeWeight S (tA, xA) (tB, xB) a b := by
+      apply Finset.sum_congr rfl
+      intro a ha
+      apply Finset.sum_congr rfl
+      intro b hb
+      have hvalid := (Finset.mem_filter.mp ha).2
+      have hdecide :
+          (pauliBasisTest P).decide (tA, xA) (tB, xB) a b = false := by
+        change pauliWinPredicate P (tA, xA) (tB, xB) a b = false
+        simp [pauliWinPredicate, hvalid]
+      simp [hdecide]
+    _ ≤ ∑ a, ∑ b,
+        if (pauliBasisTest P).decide (tA, xA) (tB, xB) a b then 0
+        else outcomeWeight S (tA, xA) (tB, xB) a b := by
+      apply Finset.sum_le_sum_of_subset_of_nonneg (Finset.filter_subset _ _)
+      intro a ha haInvalid
+      apply Finset.sum_nonneg
+      intro b hb
+      split <;> simp [outcomeWeight_nonneg]
+
+/-- Bob's wrong-form mass at fixed questions is part of the rejection mass. -/
+private theorem rightInvalidMass_le_rejection {P : AdmissibleParams}
+    (S : Strategy (pauliBasisTest P))
+    (questions : (pauliBasisTest P).QuestionA × (pauliBasisTest P).QuestionB) :
+    (∑ a, ∑ b ∈ Finset.univ.filter
+        (fun b => validPauliAnswer questions.2.1 b = false),
+      outcomeWeight S questions.1 questions.2 a b) ≤
+    ∑ a, ∑ b,
+      if (pauliBasisTest P).decide questions.1 questions.2 a b then 0
+      else outcomeWeight S questions.1 questions.2 a b := by
+  classical
+  rcases questions with ⟨⟨tA, xA⟩, ⟨tB, xB⟩⟩
+  let invalid := Finset.univ.filter
+    (fun b : (pauliBasisTest P).AnswerB => validPauliAnswer tB b = false)
+  apply Finset.sum_le_sum
+  intro a ha
+  calc
+    (∑ b ∈ invalid, outcomeWeight S (tA, xA) (tB, xB) a b) =
+        ∑ b ∈ invalid,
+          if (pauliBasisTest P).decide (tA, xA) (tB, xB) a b then 0
+          else outcomeWeight S (tA, xA) (tB, xB) a b := by
+      apply Finset.sum_congr rfl
+      intro b hb
+      have hvalid := (Finset.mem_filter.mp hb).2
+      have hdecide :
+          (pauliBasisTest P).decide (tA, xA) (tB, xB) a b = false := by
+        change pauliWinPredicate P (tA, xA) (tB, xB) a b = false
+        simp [pauliWinPredicate, hvalid]
+      simp [hdecide]
+    _ ≤ ∑ b,
+        if (pauliBasisTest P).decide (tA, xA) (tB, xB) a b then 0
+        else outcomeWeight S (tA, xA) (tB, xB) a b := by
+      apply Finset.sum_le_sum_of_subset_of_nonneg (Finset.filter_subset _ _)
+      intro b hb hbInvalid
+      split <;> simp [outcomeWeight_nonneg]
+
+/-- Wrong-form mass on either player side is bounded by the winning error. -/
+private theorem wrongFormMass_le_error (S : ProjectiveSetting P ε)
+    (side : PlayerSide) : S.wrongFormMass side ≤ ε := by
+  classical
+  have hmass : S.wrongFormMass side ≤ 1 - S.toStrategy.value := by
+    calc
+      S.wrongFormMass side ≤
+          avgOver (pauliBasisTest P).μ (fun questions =>
+            ∑ a, ∑ b,
+              if (pauliBasisTest P).decide questions.1 questions.2 a b then 0
+              else outcomeWeight S.toStrategy questions.1 questions.2 a b) := by
+        apply avgOver_mono
+        intro questions
+        cases side with
+        | alice =>
+            simp only
+            rw [leftWrongFormEffectMass_eq S.toStrategy questions]
+            exact leftInvalidMass_le_rejection S.toStrategy questions
+        | bob =>
+            simp only
+            rw [rightWrongFormEffectMass_eq S.toStrategy questions]
+            exact rightInvalidMass_le_rejection S.toStrategy questions
+      _ = 1 - S.toStrategy.value := rejectionMass_eq_one_sub_value S.toStrategy
+  linarith [S.win]
+
 /-- The Alice-side wrong-form mass is at most the strategy's rejection
 probability. Paper `08_classical_and_quantum_low_degree_tests.tex:1126-1225`, used at
 `14_analysis_of_the_pauli_basis_test.tex:197-266`. -/
 theorem wrongFormMass_alice_le_error (S : ProjectiveSetting P ε) :
     S.wrongFormMass .alice ≤ ε := by
-  sorry
+  exact wrongFormMass_le_error S .alice
 
 /-- The Bob-side wrong-form mass is at most the strategy's rejection
 probability. Paper `08_classical_and_quantum_low_degree_tests.tex:1126-1225`, used at
 `14_analysis_of_the_pauli_basis_test.tex:197-266`. -/
 theorem wrongFormMass_bob_le_error (S : ProjectiveSetting P ε) :
     S.wrongFormMass .bob ≤ ε := by
-  sorry
+  exact wrongFormMass_le_error S .bob
 
 /-- The side-indexed strategy observable
 `W^r(u) = sum_a (-1)^(tr(ar)) M_a^((Point,W),u)`. It uses the canonical
@@ -401,6 +617,21 @@ noncomputable def pointObs (S : ProjectiveSetting P ε) (side : PlayerSide)
   ∑ a : PauliScalar P,
     phaseSign (fixedBinTrace P.model (a * r)) • (S.pointMeas side W u).effect a
 
+/-- Select projectivity of the strategy POVM on either local space. -/
+private theorem strategyMeasurement_isProjective
+    (S : ProjectiveSetting P ε) (side : PlayerSide) (question : PauliQuestion P) :
+    Measurement.IsProjective (S.strategyMeasurement side question) := by
+  cases side with
+  | alice => exact S.isProjective.1 question
+  | bob => exact S.isProjective.2 question
+
+/-- The typed point measurement remains projective after answer folding. -/
+private theorem pointMeas_isProjective (S : ProjectiveSetting P ε)
+    (side : PlayerSide) (W : PauliKind) (u : Fin P.m → PauliScalar P) :
+    Measurement.IsProjective (S.pointMeas side W u) := by
+  apply SandwichProduct.postprocess_isProjective
+  exact strategyMeasurement_isProjective S side _
+
 /-- The point observable squares to the identity. This is the assertion that
 the operator in `def:strategy-observables` has eigenvalues in `{+1,-1}`;
 paper `14_analysis_of_the_pauli_basis_test.tex:174-190`, blueprint
@@ -408,7 +639,37 @@ paper `14_analysis_of_the_pauli_basis_test.tex:174-190`, blueprint
 theorem pointObs_sq_eq_one (S : ProjectiveSetting P ε) (side : PlayerSide)
     (W : PauliKind) (r : PauliScalar P) (u : Fin P.m → PauliScalar P) :
     S.pointObs side W r u * S.pointObs side W r u = 1 := by
-  sorry
+  classical
+  let M := S.pointMeas side W u
+  have hM : Measurement.IsProjective M := pointMeas_isProjective S side W u
+  change (∑ a : PauliScalar P,
+      phaseSign (fixedBinTrace P.model (a * r)) • M.effect a) *
+      (∑ a : PauliScalar P,
+        phaseSign (fixedBinTrace P.model (a * r)) • M.effect a) = 1
+  calc
+    _ = ∑ a : PauliScalar P, ∑ b : PauliScalar P,
+        (phaseSign (fixedBinTrace P.model (a * r)) *
+          phaseSign (fixedBinTrace P.model (b * r))) •
+            (M.effect a * M.effect b) := by
+      rw [Finset.sum_mul]
+      apply Finset.sum_congr rfl
+      intro a ha
+      rw [Finset.mul_sum]
+      apply Finset.sum_congr rfl
+      intro b hb
+      rw [Matrix.smul_mul, Matrix.mul_smul, smul_smul]
+    _ = ∑ a : PauliScalar P, M.effect a := by
+      apply Finset.sum_congr rfl
+      intro a ha
+      rw [Finset.sum_eq_single a]
+      · rw [(hM a).isIdempotentElem.eq, phaseSign_mul_self, one_smul]
+      · intro b hb hba
+        have hab : a ≠ b := fun h => hba h.symm
+        rw [DistanceCalculus.projective_effect_mul_effect_eq_zero M hM hab]
+        simp
+      · intro ha'
+        exact (ha' (Finset.mem_univ a)).elim
+    _ = 1 := M.sum_eq_one
 
 /-- The point observable is Hermitian. This is the self-adjoint part of the
 observable assertion following `eq:qld-strat-obs`, paper
@@ -417,7 +678,14 @@ observable assertion following `eq:qld-strat-obs`, paper
 theorem pointObs_isHermitian (S : ProjectiveSetting P ε) (side : PlayerSide)
     (W : PauliKind) (r : PauliScalar P) (u : Fin P.m → PauliScalar P) :
     (S.pointObs side W r u).IsHermitian := by
-  sorry
+  classical
+  rw [pointObs, Matrix.IsHermitian]
+  rw [Matrix.conjTranspose_sum]
+  apply Finset.sum_congr rfl
+  intro a ha
+  rw [Matrix.conjTranspose_smul, star_phaseSign]
+  rw [(Matrix.nonneg_iff_posSemidef.mp
+    ((S.pointMeas side W u).pos a)).isHermitian.eq]
 
 end ProjectiveSetting
 

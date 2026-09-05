@@ -86,13 +86,31 @@ theorem phaseSign_eq_ffChar (t : ZMod 2) :
     convert Complex.exp_pi_mul_I.symm using 1
     all_goals ring_nf
 
-private theorem phaseSign_add (s t : ZMod 2) :
+/-- The binary sign character carries a sum to the product of the two signs.
+This is the character property underlying blueprint
+`def:generalized-pauli`, paper origin
+`references/qpbt-paper/04_preliminaries.tex:1052-1096`. -/
+theorem phaseSign_add (s t : ZMod 2) :
     phaseSign (s + t) = phaseSign s * phaseSign t := by
   rw [phaseSign_eq_ffChar, phaseSign_eq_ffChar, phaseSign_eq_ffChar]
   exact (ZMod.stdAddChar (N := 2)).map_add_eq_mul s t
 
-private theorem star_phaseSign (t : ZMod 2) : star (phaseSign t) = phaseSign t := by
+/-- The binary sign character takes real values, so conjugation fixes it. It is
+used by the observable expansions of blueprint
+`def:generalized-pauli`, paper origin
+`references/qpbt-paper/04_preliminaries.tex:1052-1096`. -/
+theorem star_phaseSign (t : ZMod 2) : star (phaseSign t) = phaseSign t := by
   by_cases ht : t = 0 <;> simp [phaseSign, ht]
+
+/-- The binary sign character squares to one, since the binary field has
+characteristic two. This is the eigenvalue property used by the observables of
+blueprint `def:generalized-pauli`, paper origin
+`references/qpbt-paper/04_preliminaries.tex:1052-1096`. -/
+theorem phaseSign_mul_self (t : ZMod 2) : phaseSign t * phaseSign t = 1 := by
+  rw [← phaseSign_add]
+  have hzero : t + t = 0 := by
+    rcases zmod_two_eq_zero_or_one t with ht | ht <;> subst ht <;> decide
+  rw [hzero, phaseSign, if_pos rfl]
 
 /-- The binary sign character sends sums to products. -/
 theorem phaseSign_sum {ι : Type*} [Fintype ι] (f : ι → ZMod 2) :
@@ -117,7 +135,7 @@ theorem prod_phaseSign_binTrace_dotProduct {ι : Type*} [Fintype ι]
 basis vectors squares to `n⁻¹`.
 
 This formalization-only normalization identity supports the Pauli normalizer
-of `def:EPR`, blueprint `ch11_qpbt_algebra.tex:494-528`, paper origin
+of blueprint `def:EPR`, paper origin
 `references/qpbt-paper/04_preliminaries.tex:908-950`, and the seed-fiber and
 correlated-ancilla amplitudes of the direct low-degree transport. -/
 theorem inv_sqrt_natCast_mul_self (n : ℕ) :

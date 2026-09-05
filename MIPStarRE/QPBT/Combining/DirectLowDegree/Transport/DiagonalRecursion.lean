@@ -3,22 +3,22 @@ import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.BranchComparison
 /-!
 # Diagonal branches of the coordinate strategies of the direct low-degree game
 
-The mature `j`-restricted diagonal sampler decodes to a direct direction with
+The LDT `j`-restricted diagonal sampler decodes to a direct direction with
 vanishing prefix below the reversed index `i = Fin.rev j`, and the transported
 question of `Transport.Questions` carries the leading index of that direction.
 On the generic event that the direction is nonzero at `i`, the leading index
 is `i` and the question is the canonical direct question of the direct sample
-`(p, i, v)`, where the mature defect is bounded by the direct rejection.
+`(p, i, v)`, where the LDT defect is bounded by the direct rejection.
 Otherwise the restricted direction is also the restriction at the next index,
-so the mature quantity recurses to that index with the factor `q⁻¹`, the
+so the LDT quantity recurses to that index with the factor `q⁻¹`, the
 probability that the sampled coordinate vanishes; at the last index the zero
 direction has the last coordinate as its leading index by convention and no
-recursion occurs.  Summing the recursion shows that each mature diagonal
-branch is at most `q / (q - 1) ≤ 2` times the corresponding branch rejection
-of the direct game.  The factor is genuine: a strategy that answers the
-canonical question of a direction badly and the non-canonical questions of the
-same geometric line well has mature diagonal failure exceeding the direct
-branch rejection.
+recursion occurs.  Summing the recursion shows that each LDT diagonal branch
+is at most `q / (q - 1) ≤ 2` times the corresponding branch rejection of the
+direct game.  The factor is genuine: a strategy that answers the canonical
+question of a direction badly and the non-canonical questions of the same
+geometric line well has LDT diagonal failure exceeding the direct branch
+rejection.
 
 ## References
 
@@ -40,13 +40,13 @@ noncomputable section
 
 /-! ## Direction coordinates and the one-coordinate recursion
 
-The mature `j`-restricted diagonal sampler decodes to a direct direction with
+The LDT `j`-restricted diagonal sampler decodes to a direct direction with
 vanishing prefix below the reversed index `i = Fin.rev j`, and the transported
 question carries the leading index of that direction.  On the generic event
 that the direction is nonzero at `i`, the leading index is `i` and the
 question is the canonical direct question of the direct sample `(p, i, v)`.
 Otherwise the restricted direction is also the restriction at the next index,
-so the mature quantity recurses with the factor `q⁻¹`, the probability that
+so the LDT quantity recurses with the factor `q⁻¹`, the probability that
 the sampled coordinate vanishes.  At the last index the zero direction has the
 last coordinate as its leading index by convention, and no recursion occurs. -/
 
@@ -167,7 +167,7 @@ private theorem avgOver_uniform_coord_zero (i i' : Fin D.m) (hi : i.val < i'.val
     mul_left_comm, ← mul_assoc ((Fintype.card (DirectScalarQ D) : ℝ)⁻¹)
       (Fintype.card (DirectScalarQ D) : ℝ), inv_mul_cancel₀ hq, one_mul]
 
-/-- Split a direct direction into the mature free coordinates of the
+/-- Split a direct direction into the LDT free coordinates of the
 `j`-restricted diagonal test, read in reversed coordinate order, and the
 coordinates below the reversed index. -/
 private def restrictedDirectionEquiv (j : Fin D.m) :
@@ -212,7 +212,7 @@ private def restrictedDirectionEquiv (j : Fin D.m) :
     · funext c
       simp only [dif_pos c.isLt, Fin.eta]
 
-/-- The decoded `j`-restricted mature direction of the free coordinates is the
+/-- The decoded `j`-restricted LDT direction of the free coordinates is the
 restriction of the direction at the reversed index. -/
 private theorem ldtPointToDirect_extend_restrictedDirectionEquiv (j : Fin D.m)
     (v : Fin D.m → DirectScalarQ D) :
@@ -239,7 +239,7 @@ private theorem ldtPointToDirect_extend_restrictedDirectionEquiv (j : Fin D.m)
     have hm := D.hm
     omega
 
-/-- Averaging over the mature `j`-restricted diagonal sample is averaging over
+/-- Averaging over the LDT `j`-restricted diagonal sample is averaging over
 a direct point and a direct direction restricted at the reversed index. -/
 private theorem avgOver_restrictedDiagonalSample_eq (j : Fin D.m)
     (H : (Fin D.m → DirectScalarQ D) → (Fin D.m → DirectScalarQ D) → ℝ) :
@@ -343,7 +343,7 @@ section DiagonalRecursion
 variable (D : DirectLdParams)
 
 /-- One step of the recursion at a fixed point.  On the generic event the
-leading index is the sampled index and the mature defect is bounded by the
+leading index is the sampled index and the LDT defect is bounded by the
 direct rejection there; on the vanishing event the restriction agrees with the
 restriction at the next index. -/
 private theorem diagonal_recursion_step
@@ -383,7 +383,7 @@ private theorem diagonal_recursion_step
       _ = rj i (directPrefixProjection i v) := by
         rw [directDiagonalIndexOf_prefixProjection D i v hv]
 
-/-- At the last index the mature defect is bounded by the direct rejection
+/-- At the last index the LDT defect is bounded by the direct rejection
 without recursion. -/
 private theorem diagonal_recursion_last
     (dd : (Fin D.m → DirectScalarQ D) → ℝ)
@@ -401,7 +401,7 @@ private theorem diagonal_recursion_last
     _ = rj i (directPrefixProjection i v) := by
       rw [directDiagonalIndexOf_prefixProjection_last D i hi v]
 
-/-- Summed over the restriction index, the mature diagonal quantities at a
+/-- Summed over the restriction index, the LDT diagonal quantities at a
 fixed point are at most twice the direct rejections. -/
 private theorem diagonal_sum_le
     (dd : (Fin D.m → DirectScalarQ D) → ℝ)
@@ -443,60 +443,60 @@ private def diagonalPointLineRejection (p : Fin D.m → DirectScalarQ D) (i : Fi
     (v : Fin D.m → DirectScalarQ D) : ℝ :=
   directRejectedMass D S (directLdPointQuestionOf D p) (.dline, ⟨lineRepMap v p, i, v⟩)
 
-/-- The mature diagonal defect with the line on the left, as a function of the
-decoded base point and decoded direction of the mature line. -/
+/-- The LDT diagonal defect with the line on the left, as a function of the
+decoded base point and decoded direction of the LDT line. -/
 private def diagonalLinePointDefect (p v : Fin D.m → DirectScalarQ D) : ℝ :=
   letI := D.toLDTFieldModel
   qBipartiteConsDefect (directCoordinateProjStrat D S hS r).state
     (postprocess ((directCoordinateProjStrat D S hS r).diagonalMeasurementA
-      (matureDiagonalLineOf D ⟨p, D.firstIndex, v⟩)).toSubMeas (fun g => g zeroCoord))
+      (ldtDiagonalLineOf D ⟨p, D.firstIndex, v⟩)).toSubMeas (fun g => g zeroCoord))
     ((directCoordinateProjStrat D S hS r).pointMeasurementB
       (directPointEquiv D p)).toSubMeas
 
-/-- The mature diagonal defect with the point on the left, as a function of the
-decoded base point and decoded direction of the mature line. -/
+/-- The LDT diagonal defect with the point on the left, as a function of the
+decoded base point and decoded direction of the LDT line. -/
 private def diagonalPointLineDefect (p v : Fin D.m → DirectScalarQ D) : ℝ :=
   letI := D.toLDTFieldModel
   qBipartiteConsDefect (directCoordinateProjStrat D S hS r).state
     ((directCoordinateProjStrat D S hS r).pointMeasurementA
       (directPointEquiv D p)).toSubMeas
     (postprocess ((directCoordinateProjStrat D S hS r).diagonalMeasurementB
-      (matureDiagonalLineOf D ⟨p, D.firstIndex, v⟩)).toSubMeas (fun g => g zeroCoord))
+      (ldtDiagonalLineOf D ⟨p, D.firstIndex, v⟩)).toSubMeas (fun g => g zeroCoord))
 
-/-- The canonical direct question of the mature line of a direct sample. -/
-private theorem directDiagonalQuestionOf_matureDiagonalLineOf_eq
+/-- The canonical direct question of the LDT line of a direct sample. -/
+private theorem directDiagonalQuestionOf_ldtDiagonalLineOf_eq
     (p v : Fin D.m → DirectScalarQ D) :
-    directDiagonalQuestionOf D (matureDiagonalLineOf D ⟨p, D.firstIndex, v⟩) =
+    directDiagonalQuestionOf D (ldtDiagonalLineOf D ⟨p, D.firstIndex, v⟩) =
       (.dline, ⟨lineRepMap v p, directDiagonalIndexOf D v, v⟩) := by
-  simp [directDiagonalQuestionOf, matureDiagonalLineOf, ldtPointToDirect]
+  simp [directDiagonalQuestionOf, ldtDiagonalLineOf, ldtPointToDirect]
 
 private theorem directPointQuestionOf_directPointEquiv (p : Fin D.m → DirectScalarQ D) :
     directPointQuestionOf D (directPointEquiv D p) = directLdPointQuestionOf D p := by
   simp [directPointQuestionOf, ldtPointToDirect]
 
-/-- The mature diagonal defect is at most the direct rejection at the
+/-- The LDT diagonal defect is at most the direct rejection at the
 canonical question carrying the leading index. -/
 private theorem diagonalLinePointDefect_le (p v : Fin D.m → DirectScalarQ D) :
     diagonalLinePointDefect D S hS r p v ≤
       diagonalLinePointRejection D S p (directDiagonalIndexOf D v) v := by
   letI := D.toLDTFieldModel
   have h := qBipartiteConsDefect_le_directRejectedMass D S hS
-    (directDiagonalQuestionOf D (matureDiagonalLineOf D ⟨p, D.firstIndex, v⟩))
+    (directDiagonalQuestionOf D (ldtDiagonalLineOf D ⟨p, D.firstIndex, v⟩))
     (directPointQuestionOf D (directPointEquiv D p))
     (fun a => directDiagonalAnswerReadout D r
-      (matureDiagonalLineOf D ⟨p, D.firstIndex, v⟩) a zeroCoord)
+      (ldtDiagonalLineOf D ⟨p, D.firstIndex, v⟩) a zeroCoord)
     (directPointAnswerReadout D r)
     (fun a b hab => directDiagonalAnswerReadout_zeroCoord_eq_of_win D r
-      (matureDiagonalLineOf D ⟨p, D.firstIndex, v⟩) a b hab)
+      (ldtDiagonalLineOf D ⟨p, D.firstIndex, v⟩) a b hab)
   unfold diagonalLinePointDefect diagonalLinePointRejection
   change qBipartiteConsDefect (strategyQuantumState S)
       (postprocess
         (ProjMeas.postprocess
           (matrixMeasurementToLDTProjMeas
-            (S.A (directDiagonalQuestionOf D (matureDiagonalLineOf D ⟨p, D.firstIndex, v⟩)))
+            (S.A (directDiagonalQuestionOf D (ldtDiagonalLineOf D ⟨p, D.firstIndex, v⟩)))
             (hS.1 _))
           (directDiagonalAnswerReadout D r
-            (matureDiagonalLineOf D ⟨p, D.firstIndex, v⟩))).toSubMeas
+            (ldtDiagonalLineOf D ⟨p, D.firstIndex, v⟩))).toSubMeas
         (fun g => g zeroCoord))
       (ProjMeas.postprocess
         (matrixMeasurementToLDTProjMeas
@@ -504,9 +504,9 @@ private theorem diagonalLinePointDefect_le (p v : Fin D.m → DirectScalarQ D) :
         (directPointAnswerReadout D r)).toSubMeas ≤ _
   simp only [ProjMeas.postprocess_toSubMeas, SubMeas.postprocess_comp] at h ⊢
   refine le_trans h (le_of_eq ?_)
-  rw [directDiagonalQuestionOf_matureDiagonalLineOf_eq, directPointQuestionOf_directPointEquiv]
+  rw [directDiagonalQuestionOf_ldtDiagonalLineOf_eq, directPointQuestionOf_directPointEquiv]
 
-/-- The mature diagonal defect with the point on the left is at most the
+/-- The LDT diagonal defect with the point on the left is at most the
 direct rejection at the canonical question carrying the leading index. -/
 private theorem diagonalPointLineDefect_le (p v : Fin D.m → DirectScalarQ D) :
     diagonalPointLineDefect D S hS r p v ≤
@@ -514,12 +514,12 @@ private theorem diagonalPointLineDefect_le (p v : Fin D.m → DirectScalarQ D) :
   letI := D.toLDTFieldModel
   have h := qBipartiteConsDefect_le_directRejectedMass D S hS
     (directPointQuestionOf D (directPointEquiv D p))
-    (directDiagonalQuestionOf D (matureDiagonalLineOf D ⟨p, D.firstIndex, v⟩))
+    (directDiagonalQuestionOf D (ldtDiagonalLineOf D ⟨p, D.firstIndex, v⟩))
     (directPointAnswerReadout D r)
     (fun b => directDiagonalAnswerReadout D r
-      (matureDiagonalLineOf D ⟨p, D.firstIndex, v⟩) b zeroCoord)
+      (ldtDiagonalLineOf D ⟨p, D.firstIndex, v⟩) b zeroCoord)
     (fun a b hab => directPointAnswerReadout_eq_diagonal_zeroCoord_of_win D r
-      (matureDiagonalLineOf D ⟨p, D.firstIndex, v⟩) a b hab)
+      (ldtDiagonalLineOf D ⟨p, D.firstIndex, v⟩) a b hab)
   unfold diagonalPointLineDefect diagonalPointLineRejection
   change qBipartiteConsDefect (strategyQuantumState S)
       (ProjMeas.postprocess
@@ -529,14 +529,14 @@ private theorem diagonalPointLineDefect_le (p v : Fin D.m → DirectScalarQ D) :
       (postprocess
         (ProjMeas.postprocess
           (matrixMeasurementToLDTProjMeas
-            (S.B (directDiagonalQuestionOf D (matureDiagonalLineOf D ⟨p, D.firstIndex, v⟩)))
+            (S.B (directDiagonalQuestionOf D (ldtDiagonalLineOf D ⟨p, D.firstIndex, v⟩)))
             (hS.2 _))
           (directDiagonalAnswerReadout D r
-            (matureDiagonalLineOf D ⟨p, D.firstIndex, v⟩))).toSubMeas
+            (ldtDiagonalLineOf D ⟨p, D.firstIndex, v⟩))).toSubMeas
         (fun g => g zeroCoord)) ≤ _
   simp only [ProjMeas.postprocess_toSubMeas, SubMeas.postprocess_comp] at h ⊢
   refine le_trans h (le_of_eq ?_)
-  rw [directDiagonalQuestionOf_matureDiagonalLineOf_eq, directPointQuestionOf_directPointEquiv]
+  rw [directDiagonalQuestionOf_ldtDiagonalLineOf_eq, directPointQuestionOf_directPointEquiv]
 
 /-- The diagonal-line/point branch rejection as an average over the index and
 the point-direction pair. -/
@@ -570,14 +570,14 @@ private theorem diagonal_point_line_branch_eq :
   intro pv
   rfl
 
-/-- The mature line of the decoded data of a mature line is that line. -/
-private theorem matureDiagonalLineOf_decode (u w : Point D.toLDTParameters) :
-    matureDiagonalLineOf D
+/-- The LDT line of the decoded data of an LDT line is that line. -/
+private theorem ldtDiagonalLineOf_decode (u w : Point D.toLDTParameters) :
+    ldtDiagonalLineOf D
         ⟨ldtPointToDirect D u, D.firstIndex, ldtPointToDirect D w⟩ =
       { base := u, direction := w } := by
-  simp [matureDiagonalLineOf, ldtPointToDirect]
+  simp [ldtDiagonalLineOf, ldtPointToDirect]
 
-/-- The mature `j`-restricted diagonal branch with the line on the left, as
+/-- The LDT `j`-restricted diagonal branch with the line on the left, as
 an average of the decoded defect over the point-direction pair. -/
 private theorem diagonal_line_point_term_eq (j : Fin D.m) :
     letI := D.toLDTFieldModel
@@ -594,10 +594,10 @@ private theorem diagonal_line_point_term_eq (j : Fin D.m) :
   apply avgOver_congr
   intro s
   unfold diagonalLinePointDefect
-  rw [matureDiagonalLineOf_decode, (directPointEquiv D).apply_symm_apply]
+  rw [ldtDiagonalLineOf_decode, (directPointEquiv D).apply_symm_apply]
   rfl
 
-/-- The mature `j`-restricted diagonal branch with the point on the left, as
+/-- The LDT `j`-restricted diagonal branch with the point on the left, as
 an average of the decoded defect over the point-direction pair. -/
 private theorem diagonal_point_line_term_eq (j : Fin D.m) :
     letI := D.toLDTFieldModel
@@ -614,7 +614,7 @@ private theorem diagonal_point_line_term_eq (j : Fin D.m) :
   apply avgOver_congr
   intro s
   unfold diagonalPointLineDefect
-  rw [matureDiagonalLineOf_decode, (directPointEquiv D).apply_symm_apply]
+  rw [ldtDiagonalLineOf_decode, (directPointEquiv D).apply_symm_apply]
   rfl
 
 /-- Summing a decoded diagonal quantity over the reversed index is summing it

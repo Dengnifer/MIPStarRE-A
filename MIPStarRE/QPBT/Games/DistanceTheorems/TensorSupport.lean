@@ -159,8 +159,12 @@ theorem diagonal_postprocess_stateQForm_ge {α β ιA ιB : Type*}
         leftTensor_mul_rightTensor_eq_opTensor,
         vectorQuantumState_ev_eq_stateQForm, MIPStarRE.QPBT.heteroKron] using h
 
-/-- Squared effects in one measurement fiber sum to at most the identity. -/
-private theorem measurement_fiber_sum_adjoint_mul_le_one {α β ι : Type*}
+/-- The squared effects in one fiber of a pair-valued measurement sum to at
+most the identity. This is the formalization-only estimate
+`lem:sandwich-pair-fiber-sum` used for a joint-measurement marginal in
+`lem:ld-sandwich`; detailed source argument
+`references/neexp-paper/05_quantum_preliminaries.tex:930-946`. -/
+theorem measurement_fiber_sum_adjoint_mul_le_one {α β ι : Type*}
     [Fintype α] [Fintype β] [Fintype ι] [DecidableEq ι]
     (M : MIPStarRE.Quantum.Measurement (α × β) ι) (a : α) :
     ∑ b : β, (M.effect (a, b))ᴴ * M.effect (a, b) ≤ 1 := by
@@ -230,8 +234,12 @@ theorem right_fiber_contraction {α β ιA ιB : Type*}
       rightTensor_mono (measurement_fiber_sum_adjoint_mul_le_one M a)
     _ = 1 := rightTensor_one
 
-/-- A projective effect survives exactly in its postprocessing fiber. -/
-private theorem postprocess_effect_mul_effect {ζ α ι : Type*}
+/-- A projective effect is selected exactly by its matching postprocessing
+fiber. This is the formalization-only identity
+`lem:sandwich-postprocess-effect-left` used in the joint-family comparison for
+`lem:ld-sandwich`; detailed source argument
+`references/neexp-paper/05_quantum_preliminaries.tex:930-946`. -/
+theorem postprocess_effect_mul_effect {ζ α ι : Type*}
     [Fintype ζ] [DecidableEq ζ] [Fintype α] [DecidableEq α]
     [Fintype ι] [DecidableEq ι]
     (M : MIPStarRE.Quantum.Measurement ζ ι)
