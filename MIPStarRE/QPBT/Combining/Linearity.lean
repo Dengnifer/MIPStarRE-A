@@ -169,6 +169,53 @@ theorem exists_exactly_linear_observables_binaryObservableDistSq {ι : Type}
     _ ≤ 2 * δ / 2 := by gcongr
     _ = δ := by ring
 
+/-- The common-ancilla form of the quantum linearity theorem.  The ancillary
+Hilbert space and its unit vector produced by the Fourier--Naimark argument
+depend only on the length `t` of the index group: they are the space with
+orthonormal basis indexed by `Option (F_2^t)` and the basis vector of the
+extra direction.  One ancilla therefore serves every family at once: for every
+finite-dimensional space `ι`, every positive semidefinite trace-one `ρ`, every
+`δ ≥ 0`, and every family of binary observables satisfying the correlation
+hypothesis, there are exactly linear binary observables on `ι × ι'` with the
+conclusion of `exists_exactly_linear_observables`.
+
+This is the uniformity of the ancilla over the pair `(x, z)` required by the
+fiberwise use of `thm:linearity` in the proof of `lem:qld-4-10`, recorded in
+`rem:linearity-import` (blueprint `ch15_qpbt_combining.tex:233-280`) and
+analyzed in `docs/paper-gaps/qpbt_linearity-theorem-quotation.tex`; the source
+sentence it discharges is
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:832`.  The
+proof exhibits the canonical ancillary vector of the Naimark dilation and the
+rounded observables of `MIPStarRE/QPBT/Combining/Linearity/NaimarkRounding.lean`
+for each family. -/
+theorem exists_exactly_linear_observables_commonAncilla (t : ℕ) (_ht : 0 < t) :
+    ∃ (ι' : Type) (_ : Fintype ι') (_ : DecidableEq ι')
+        (anc : EuclideanSpace ℂ ι'),
+      ‖anc‖ = 1 ∧
+        ∀ (ι : Type) [Fintype ι] [DecidableEq ι] (δ : ℝ), 0 ≤ δ →
+          ∀ (ρ : Op ι), ρ.PosSemidef → ρ.trace = 1 →
+          ∀ (O : (Fin t → ZMod 2) → Op ι), (∀ u, IsBinaryObservable (O u)) →
+          1 - δ ≤ avgOver
+            (uniformDistribution ((Fin t → ZMod 2) × (Fin t → ZMod 2)))
+            (fun pair =>
+              (Matrix.trace
+                (O pair.1 * O pair.2 * O (pair.1 + pair.2) * ρ)).re) →
+          ∃ L : (Fin t → ZMod 2) → Op (ι × ι'),
+            (∀ u, IsBinaryObservable (L u)) ∧
+            (∀ u u', L u * L u' = L (u + u')) ∧
+            avgOver (uniformDistribution (Fin t → ZMod 2))
+                (fun u => stateDepDistSq (L u)
+                  (heteroKron (O u) (1 : Op ι'))
+                  (heteroKron ρ (ancProj anc))) ≤ 2 * δ := by
+  refine ⟨Option (Fin t → ZMod 2), inferInstance, inferInstance,
+    naimarkAncilla t, norm_naimarkAncilla t, ?_⟩
+  intro ι _ _ δ _ ρ hρ htrace O hO hcorrelation
+  refine ⟨roundedObservable O hO, roundedObservable_isBinaryObservable O hO,
+    roundedObservable_mul O hO, ?_⟩
+  rw [avg_stateDepDistSq_roundedObservable_eq_avg_multiplicativeDefect O hO ρ hρ
+    htrace]
+  exact avg_multiplicativeDefect_le_two_mul_error O hO ρ hρ htrace δ hcorrelation
+
 end
 
 end MIPStarRE.QPBT
