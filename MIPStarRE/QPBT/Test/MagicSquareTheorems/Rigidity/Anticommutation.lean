@@ -202,9 +202,10 @@ private theorem normCloseOn_step {ιA ιB : Type} [Fintype ιA] [DecidableEq ιA
 
 /-! ## Negation and the sign of a constraint -/
 
-/-- Formalization-only: closeness to a negative is symmetric in the two
-operators. -/
-private theorem normCloseOn_neg_swap {ι : Type} [Fintype ι] [DecidableEq ι]
+/-- Formalization-only: closeness to a negation is symmetric in the two
+operators, because `M - (-N) = N - (-M)`.  Used by the solution-group
+computations of both logical Pauli pairs. -/
+theorem normCloseOn_neg_swap {ι : Type} [Fintype ι] [DecidableEq ι]
     {ψ : EuclideanSpace ℂ ι} {δ : ℝ} {M N : Op ι} (h : NormCloseOn ψ δ M (-N)) :
     NormCloseOn ψ δ N (-M) := by
   change ‖applyOperatorToState (N - -M) ψ‖ ≤ δ
