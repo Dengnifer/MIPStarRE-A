@@ -13,6 +13,7 @@ import unittest
 REPO_ROOT = Path(__file__).resolve().parents[2]
 GUARD = REPO_ROOT / "local" / "bin" / "merge_loss_guard.py"
 PRE_COMMIT = REPO_ROOT / ".githooks" / "pre-commit"
+PROJECT_HOOKS = REPO_ROOT / ".githooks"
 
 
 class MergeLossGuardTests(unittest.TestCase):
@@ -124,6 +125,55 @@ class MergeLossGuardTests(unittest.TestCase):
         self.assertIn("checking the merge result for silent incoming loss", result.stdout)
         self.assertIn("DELETED  incoming new.txt", result.stdout)
         self.assertNotIn("hook skipped", result.stdout)
+
+    def test_git_merge_invokes_reference_transaction_guard(self) -> None:
+        repo = self.new_diverged_repo()
+        self.git(repo, "config", "core.hooksPath", os.fspath(PROJECT_HOOKS))
+
+        result = self.git(repo, "merge", "--no-edit", "incoming")
+
+        output = result.stdout + result.stderr
+        self.assertIn("reference transaction: checking merge", output)
+        self.assertIn("merge-loss guard: ok", output)
+
+    def test_reference_transaction_guard_rejects_ours_strategy(self) -> None:
+        repo = self.new_diverged_repo()
+        self.git(repo, "config", "core.hooksPath", os.fspath(PROJECT_HOOKS))
+
+        result = subprocess.run(
+            ["git", "merge", "--strategy=ours", "--no-edit", "incoming"],
+            cwd=repo,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+
+        output = result.stdout + result.stderr
+        self.assertNotEqual(result.returncode, 0, output)
+        self.assertIn("reference transaction: checking merge", output)
+        self.assertIn("DELETED  incoming new.txt", output)
+        self.assertIn("REVERTED incoming-only.txt", output)
+        self.assertEqual(self.git(repo, "rev-list", "--count", "HEAD").stdout.strip(), "2")
+
+    def test_reference_transaction_guard_survives_no_verify(self) -> None:
+        repo = self.new_diverged_repo()
+        self.prepare_merge(repo)
+        self.reset_merge_result_to_branch(repo)
+        self.git(repo, "config", "core.hooksPath", os.fspath(PROJECT_HOOKS))
+
+        result = subprocess.run(
+            ["git", "commit", "--no-verify", "-m", "bad merge"],
+            cwd=repo,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+
+        output = result.stdout + result.stderr
+        self.assertNotEqual(result.returncode, 0, output)
+        self.assertIn("reference transaction: checking merge", output)
+        self.assertIn("DELETED  incoming new.txt", output)
+        self.assertEqual(self.git(repo, "rev-list", "--count", "HEAD").stdout.strip(), "2")
 
     def test_committed_whole_tree_ours_result_is_auditable(self) -> None:
         repo = self.new_diverged_repo()

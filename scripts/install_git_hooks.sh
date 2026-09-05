@@ -41,7 +41,7 @@ fi
 
 check_hook_files() {
   HOOK_STATUS=0
-  for HOOK in .githooks/pre-commit .githooks/pre-push
+  for HOOK in .githooks/pre-commit .githooks/pre-push .githooks/reference-transaction
   do
     if [ ! -f "$HOOK" ]; then
       echo "Missing hook file: $HOOK" >&2
@@ -88,7 +88,7 @@ if [ "$MODE" = "check" ]; then
   exit $?
 fi
 
-chmod +x .githooks/pre-commit .githooks/pre-push
+chmod +x .githooks/pre-commit .githooks/pre-push .githooks/reference-transaction
 git config core.hooksPath .githooks
 
 echo "Installed MIPStarRE Git hooks by setting core.hooksPath to .githooks."

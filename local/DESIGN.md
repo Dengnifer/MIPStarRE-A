@@ -101,7 +101,9 @@ documented failure modes. Sources are cited in `local/protocols/*.md`.
     every best merge base, and `MERGE_HEAD`. An incoming path may be absent
     only when the branch deleted a path present at a merge base. An
     unambiguous incoming-only change may return to the unchanged branch blob
-    only when Git recorded a conflict.
+    only when Git recorded a conflict. The pending-index check and the
+    pre-update reference transaction together cover manual and automatic
+    merge commits.
 
 ## Naming and identity conventions
 

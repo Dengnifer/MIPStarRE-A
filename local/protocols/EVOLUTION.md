@@ -646,10 +646,12 @@ second parent added five modules and changed two existing modules.
 two-parent merge, with both parents and every best merge base. It blocks an
 incoming path deleted without a branch-side deletion and an unambiguous
 incoming-only change restored to the unchanged branch blob. Recorded conflict
-paths remain ordinary resolution decisions. `.githooks/pre-commit` runs the
-guard before the blanket bypass, and focused tests cover the historical
-whole-tree failure, an intentional branch deletion, recorded conflict
-resolution, multiple merge bases, and committed-merge auditing.
+paths remain ordinary resolution decisions. `.githooks/reference-transaction`
+audits an automatic merge object before its branch ref moves, while
+`.githooks/pre-commit` checks a prepared merge's index; neither permits the
+blanket bypass to skip the guard. Focused tests cover the historical whole-tree
+failure, an intentional branch deletion, recorded conflict resolution,
+multiple merge bases, both hook paths, and committed-merge auditing.
 
 **Expected effect:** resetting a prepared merge index to `HEAD` cannot create a
 quietly lossy stack or fresh-base merge, while deliberate branch deletions and

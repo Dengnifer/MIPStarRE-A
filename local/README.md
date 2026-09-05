@@ -70,8 +70,10 @@ pointed event or owner log rather than expanding the index into a second log.
   (`/…/MIPStarRE-dev/local/bin/…`), never through a worktree's copy — a
   branch's copy can predate protocol fixes (EVOLUTION.md, 2026-08-30).
 - After merging `main` or a stack parent, preserve every incoming-only path.
-  The pre-commit hook runs `local/bin/merge_loss_guard.py` against the pending
-  index; `merge_loss_guard.py --repo <worktree> --commit HEAD` audits a merge
-  already committed by a lane whose branch copy predates the hook.
+  The reference-transaction hook checks the exact merge object before the
+  branch ref moves, while the pre-commit hook checks the pending index when a
+  merge is committed later. Both run `local/bin/merge_loss_guard.py`.
+  `merge_loss_guard.py --repo <worktree> --commit HEAD` audits a merge already
+  committed by a lane whose branch copy predates the hooks.
 - Friction with any protocol → log it in `results/telemetry/events.md`;
   propose amendments per `protocols/meta.md`.

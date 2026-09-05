@@ -55,6 +55,21 @@ class GuardError(RuntimeError):
     """A malformed or unsupported Git state that must fail closed."""
 
 
+def git_environment() -> dict[str, str]:
+    """Return an environment independent of the repository invoking a hook."""
+
+    environment = os.environ.copy()
+    local_variables = subprocess.run(
+        ["git", "rev-parse", "--local-env-vars"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.splitlines()
+    for variable in local_variables:
+        environment.pop(variable, None)
+    return environment
+
+
 def run_git(repo: Path, *args: str) -> bytes:
     """Run Git in ``repo`` and return stdout, or raise an operator-facing error."""
 
@@ -62,6 +77,7 @@ def run_git(repo: Path, *args: str) -> bytes:
         ["git", "-C", os.fspath(repo), *args],
         check=False,
         capture_output=True,
+        env=git_environment(),
     )
     if result.returncode != 0:
         detail = os.fsdecode(result.stderr.strip() or result.stdout.strip())
@@ -189,6 +205,7 @@ def reconstructed_conflicts(repo: Path, branch: str, incoming: str) -> frozenset
             ],
             check=False,
             capture_output=True,
+            env=git_environment(),
         )
         if clone_result.returncode != 0:
             detail = os.fsdecode(clone_result.stderr.strip() or clone_result.stdout.strip())
@@ -200,6 +217,7 @@ def reconstructed_conflicts(repo: Path, branch: str, incoming: str) -> frozenset
             ["git", "-C", os.fspath(clone), "merge", "--no-commit", "--no-ff", incoming],
             check=False,
             capture_output=True,
+            env=git_environment(),
         )
         merge_head_output = run_git(clone, "rev-parse", "--git-path", "MERGE_HEAD").strip()
         merge_head = Path(os.fsdecode(merge_head_output))
