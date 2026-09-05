@@ -9,6 +9,7 @@ import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Simultaneous
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.Linearity
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.Strategy
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.QuestionLaw
+import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.GameValue
 
 /-!
 # The directly indexed low-degree game
