@@ -7,6 +7,7 @@ import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.SeedFiberValue
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Error
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Simultaneous
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.Linearity
+import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.Strategy
 
 /-!
 # The directly indexed low-degree game
@@ -55,10 +56,13 @@ parameters `DirectLdParams.combined`, of dimension `m + k` and simultaneity
 parameter `1`; the combining map on polynomial tuples and its individual-degree
 bound; the substitution recovering the components of a combined polynomial,
 which exhibits the combining map as injective; and the Schwartz--Zippel
-collision estimate for two linear forms in the combining variables.  The
-combined strategy and the transport of its value remain to be formalized;
-see `blueprint/src/chapter/ch13_qpbt_test.tex`, the subsection on the
-combining reduction.
+collision estimate for two linear forms in the combining variables; and the
+combined strategy itself, which answers every question of the combined game by
+measuring one question of the original strategy and relabelling its outcome,
+together with its projectivity.  The question law of the combined strategy and
+the transport of its value remain to be formalized; see
+`blueprint/src/chapter/ch13_qpbt_test.tex`, the subsection on the combining
+reduction.
 
 ## References
 
