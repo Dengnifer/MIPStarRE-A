@@ -2721,3 +2721,12 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 
 ## 2026-09-05T14:50Z — codex resumed (owner); ratio codex:opus 1:1; astra not yet
 - The owner re-enabled codex subagents on ghz: model gpt-5.6-sol as before (astra is unstable; the owner will announce its readiness explicitly), dispatch ratio codex:opus 1:1, Fable only when necessary. The pause marker watchdog/codex-paused was removed at 14:47Z, so lanes dispatch again and the review step returns to local/bin/review.sh (codex reviewers); the Claude review mailbox stays available for Opus reviews when the ratio needs them. First codex lanes after the pause: #222 (repository-side post-merge silent-loss guard), #219 (review round counter), #218 (six duplicate private helper groups), #216 (pre-commit persona test during merges). Opus side: PR 205 fix round, the 135/174 worktree merge repairs. Fable: #118 math-fix session 1.
+
+## 2026-09-05 — Operator hand-back: astra main session (Mode 1) takes over from the owner session
+
+- **Trigger:** owner decision (2026-09-05T15:45:27Z): gpt-6-astra reached through the codex relay on ghz (poller ASTRA=gpt-6-astra);
+  the owner asked for a new astra main session in tmux qpbt and the handover of the main-session role to it. Mode 2 ran
+  2026-09-05 from the takeover to this hand-back. Workers stay on gpt-6-astra; math-fix moves to dispatch.sh --role
+  mathfix with gpt-6-astra (ultra). The Claude agents running at the hand-back finish on their own; their worktrees are
+  listed in the handoff (results/telemetry/owner-messages/). The owner session watches for 90 minutes, then #26/#27 only.
+- **State at hand-back:** main at c1b001a; open PRs: 230,229,228,227,225,213,212,207,205,202,195,185,178,153.
