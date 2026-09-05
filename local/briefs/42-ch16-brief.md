@@ -93,7 +93,8 @@ External imports as in 4.1 (b), plus `Mathlib.FieldTheory.Finite.GaloisField` an
 `Mathlib.LinearAlgebra.Dual` for the basis file.
 
 Skeleton pattern: the **witness-structure convention** proposed in ch15's brief (OPEN-2
-there) is adopted here for node 10 (`ExtractionWitness` + `exists_extractionWitness`);
+there) is adopted here for node 10
+(`ExtractionWitness` + `exists_extractionWitness_ofGlobalPairWitness`);
 nodes 1–9 are stated against a `w : GlobalPairWitness S δS` taken as a hypothesis, never
 re-skolemized. Error quantities are explicit reals, per 4.1 (e)8: the blueprint's hidden
 `≈_δ`/`≃_δ` constants are absorbed into the existentially quantified constants.
@@ -128,7 +129,7 @@ Ambient context for the whole (c) table:
 | lem:qld-construct-the-paulis | `tildeM_consistent_pointMeas`, `tildeM_consistent_pointMeas'`, `tildeObs_selfConsistent` | Extraction/Consistency | N | item 1, the two displays: `theorem tildeM_consistent_pointMeas (w) (W) : consistencyDefect (uniformDistribution (Fin P.m → K)) (fun u a => placeSide .alice (onA ((S.pointMeasRaw W u).effect a))) (fun u a => placeSide .bob (tildeM w W (indicatorVec u) a)) S.psiHat ≤ δS`, and `…'` with the sides exchanged; item 2: `theorem tildeObs_selfConsistent (e) (w) (W) (j) : opDistSq (uniformDistribution Reg) (fun ut => placeSide .alice (tildeObs e w W ut j)) (fun ut => placeSide .bob (tildeObs e w W ut j)) S.psiHat ≤ δS` — all `sorry`; paper 1458–1608. `onA : Op ι → Op Block` lifts a bare register-`A` operator (`heteroKron (heteroKron · 1) 1`); the vacuous `j` of the source's item 1 is dropped, per the blueprint comment at ch16:108–109 |
 | def:v-swap-unitary | `swapUnitary` | Extraction/Defs | N | `noncomputable def swapUnitary (w) : Op Block := ∑ gg : PolyPair P, heteroKron (w.Smeas.effect gg) (tauObservable .X (decodeFq gg.2) * tauObservable .Z (decodeFq gg.1))` — note the crossed arguments (`X` gets `Dec(g_Z)`, `Z` gets `Dec(g_X)`); real definition; paper 1687–1700 |
 | lem:v-swap-conjugation | `swapUnitary_mul_conjTranspose`, `conjTranspose_mul_swapUnitary`, `swapUnitary_conj_tildeObs`, `swapUnitary_conj_tildeM` | Extraction/Observables | N | `theorem swapUnitary_conj_tildeObs (e) (w) (W) (ut) (j) : conjBy (swapUnitary w) (tildeObs e w W ut j) = heteroKron (1 : Op Pair) (tauObservable W (e.toBasis j • ut))` (eq:v-swap-obs-conjugation); `theorem swapUnitary_conj_tildeM (w) (W) (u : Fin P.m → K) (a : K) : conjBy (swapUnitary w) (tildeM w W (indicatorVec u) a) = heteroKron (1 : Op Pair) (bracketOp (pauliProj W) (fun h => lowDegreeEnc h u) a)` (eq:qld-unitary-6, whose right-hand side is exactly `τ^W_{[g_h(u)=a]}`) — all `sorry`; `conjBy (V N : Op ι) : Op ι := V * N * Vᴴ` (Lean-only); the two unitarity statements replace the informal "are unitaries"; paper 1687–1713 |
-| lem:qld-unitary | `deltaExtract`, `ExtractionWitness`, `exists_extractionWitness`, `deltaExtract_le_deltaQld` | Extraction/Unitary | N | see (d) below; paper 1666–1685, 1715–1861 |
+| lem:qld-unitary | `deltaExtract`, `ExtractionWitness`, `exists_extractionWitness_ofGlobalPairWitness`, `deltaExtract_le_deltaQld` | Extraction/Unitary | N | see (d) below; paper 1666–1685, 1715–1861 |
 
 Lean-only helpers (each docstring-marked per AGENTS.md "Record formalization-only auxiliary
 lemmas explicitly"): `bracketOp`, `signOf`, `conjBy`, `onA`, `cubePoint : Cube P.m →
@@ -180,7 +181,7 @@ structure ExtractionWitness (S : ExpandedSetting P ε) (w : GlobalPairWitness S 
       (fun _ (h : Reg) => placeRegPP side (pauliProj W h))
       (idealExpState aux) ≤ delta
 
-theorem exists_extractionWitness :
+theorem exists_extractionWitness_ofGlobalPairWitness :
     ∃ C : ℝ, 1 ≤ C ∧ ∀ (P : AdmissibleParams) [FieldModel P.q] (ε deltaS : ℝ)
       (S : ExpandedSetting P ε) (w : GlobalPairWitness S deltaS),
       Nonempty (ExtractionWitness S w (deltaExtract C deltaS P.m P.d P.q)) := by
