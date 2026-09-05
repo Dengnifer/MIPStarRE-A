@@ -26,13 +26,13 @@
   Lemma~\texttt{lem:ld-sandwich}; an explicit pair of measurements refutes
   every bound this route could produce.  The source instead cites a
   reduction of the $k$-tuple test to the single-polynomial test in $m + k$
-  variables, which is not formalized.
+  variables at degree $d + 1$, which is not formalized.
   \item \textbf{Estimated weight.} The case $k = 1$ is closed by relabeling
   the coordinate conclusions (about 150 lines).  The combining reduction
   needs a combined strategy for the directly indexed game in dimension
-  $m + k$, a transfer of the success probability, and the extraction of
-  $k$ polynomials from one polynomial by linearity: roughly 8--15 new
-  definitions and 3000--5000 lines of formal proof.
+  $m + k$ and at degree $d + 1$, a transfer of the success probability, and
+  the extraction of $k$ polynomials from one polynomial by linearity:
+  roughly 8--15 new definitions and 3000--5000 lines of formal proof.
   \item \textbf{Mathlib/project split.} The counterexample is finite Fourier
   analysis over $\F_{2^s}$ and a Gram-matrix estimate.  The missing reduction
   is almost entirely project-local (game constructions and the consistency
@@ -123,16 +123,21 @@ examined in \path{docs/paper-gaps/qpbt_ld-dimension-divisibility.tex}) and
 then extends to general $k$ by reference to the derivation of Theorem~4.43
 from Theorem~4.40 in \cite[lines~1409--1503]{Natarajan2018NEEXP}.  That
 derivation is not coordinatewise.  It builds two combined provers who play
-the single-polynomial test in $m + k$ variables: on a point $(\alpha, u)$
-the combined prover asks the original prover for the $k$ values
-$(b_1,\dots,b_k)$ at $u$ and returns $\sum_i \alpha_i b_i$, and on a line
-it returns the corresponding combination of the $k$ answer polynomials.  The
-single-polynomial theorem then yields one measurement with outcomes
-$g(\alpha,u)$, and the $k$ polynomials are recovered from $g$ because
-$g$ is exactly linear in $\alpha$ with high probability, by the
-Schwartz--Zippel lemma.  The simultaneity of the $k$ outputs is thus
-inherited from the joint answers of the original provers through a single
-application of the $k = 1$ theorem.
+the single-polynomial test in $m + k$ variables at degree $d + 1$: on a
+point $(\alpha, u)$ the combined prover asks the original prover for the $k$
+values $(b_1,\dots,b_k)$ at $u$ and returns $\sum_i \alpha_i b_i$, and on a
+line it returns the corresponding combination of the $k$ answer polynomials.
+The degree rises by one because the combination
+$(\alpha, u) \mapsto \sum_i \alpha_i g_i(u)$ is linear in $\alpha$ and of
+degree $d$ in $u$, so its restriction to a queried subspace has degree
+$d + 1$; the single-polynomial theorem is therefore applied at degree $d + 1$
+and its error function is evaluated there.  That theorem then yields one
+measurement with outcomes $g(\alpha,u)$, and the $k$ polynomials are
+recovered from $g$ because $g$ is exactly linear in $\alpha$ with high
+probability, by the Schwartz--Zippel lemma; applied at degree $d + 1$, that
+lemma contributes the term $(d+1)/q$ twice in the recovery.  The
+simultaneity of the $k$ outputs is thus inherited from the joint answers of
+the original provers through a single application of the $k = 1$ theorem.
 
 \section{The counterexample}
 

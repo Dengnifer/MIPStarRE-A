@@ -1,13 +1,12 @@
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Strategy
-import MIPStarRE.QPBT.Games.DistanceTheorems.TensorSupport
 
 /-!
 # Low-degree consistency transport
 
-This module identifies the mature low individual degree polynomial outcomes
-with the bounded polynomial representatives used by the directly indexed QPBT
-game.  It also transports complete measurements and their evaluation
-postprocessings without changing either coordinate order or consistency error.
+This module identifies the low individual degree polynomial outcomes with the
+bounded polynomial representatives used by the directly indexed QPBT game.  It
+also transports complete measurements and their evaluation postprocessings
+without changing either coordinate order or consistency error.
 
 ## References
 
@@ -47,7 +46,7 @@ private theorem ldtPolynomial_ext
           subst hp
           rfl
 
-/-- Bounded QPBT polynomial representatives are equivalent to mature LDT
+/-- Bounded QPBT polynomial representatives are equivalent to LDT
 polynomial outcomes.  The variable renaming is the same coordinate reversal
 as `directPointEquiv`, so evaluation retains the direct coordinate order. -/
 noncomputable def directPolyEquivPolynomial (D : DirectLdParams) :
@@ -116,7 +115,7 @@ and scalar codings. -/
 
 /-! ## Complete measurements -/
 
-/-- Regard a complete mature LDT measurement as a matrix-valued QPBT
+/-- Regard a complete LDT measurement as a matrix-valued QPBT
 measurement, with exactly the same effects. -/
 noncomputable def ldtMeasurementToMatrixMeasurement
     {alpha iota : Type*} [Fintype alpha] [Fintype iota] [DecidableEq iota]
@@ -131,86 +130,7 @@ noncomputable def ldtMeasurementToMatrixMeasurement
     (ldtMeasurementToMatrixMeasurement M).effect a = M.outcome a :=
   rfl
 
-private theorem matrixMeasurement_ext
-    {alpha iota : Type*} [Fintype alpha] [Fintype iota] [DecidableEq iota]
-    {M N : MIPStarRE.Quantum.Measurement alpha iota}
-    (h : ∀ a, M.effect a = N.effect a) : M = N := by
-  cases M with
-  | mk M hM =>
-      cases N with
-      | mk N hN =>
-          cases M with
-          | mk effectM posM leM =>
-              cases N with
-              | mk effectN posN leN =>
-                  simp only at h
-                  have heffect : effectM = effectN := funext h
-                  subst effectN
-                  rfl
-
-/-- Postprocessing matrix-valued measurements is functorial. -/
-theorem matrixMeasurement_postprocess_comp
-    {alpha beta gamma iota : Type*}
-    [Fintype alpha] [DecidableEq alpha]
-    [Fintype beta] [DecidableEq beta]
-    [Fintype gamma] [DecidableEq gamma]
-    [Fintype iota] [DecidableEq iota]
-    (M : MIPStarRE.Quantum.Measurement alpha iota)
-    (f : alpha → beta) (g : beta → gamma) :
-    (M.postprocess f).postprocess g = M.postprocess (fun a => g (f a)) := by
-  classical
-  apply matrixMeasurement_ext
-  intro c
-  calc
-    ((M.postprocess f).postprocess g).effect c =
-        ∑ b : beta, if g b = c then
-          ∑ a : alpha, if f a = b then M.effect a else 0
-        else 0 := by
-          change (∑ b ∈ Finset.univ.filter (fun b : beta => g b = c),
-            ∑ a ∈ Finset.univ.filter (fun a : alpha => f a = b), M.effect a) = _
-          rw [Finset.sum_filter]
-          apply Finset.sum_congr rfl
-          intro b _
-          by_cases hgb : g b = c
-          · simp only [hgb, if_true]
-            rw [Finset.sum_filter]
-          · simp [hgb]
-    _ = ∑ b : beta, ∑ a : alpha,
-        if g b = c ∧ f a = b then M.effect a else 0 := by
-          apply Finset.sum_congr rfl
-          intro b _
-          by_cases hgc : g b = c <;> simp [hgc]
-    _ = ∑ a : alpha, ∑ b : beta,
-        if g b = c ∧ f a = b then M.effect a else 0 := by
-          rw [Finset.sum_comm]
-    _ = ∑ a : alpha,
-        if g (f a) = c then M.effect a else 0 := by
-          apply Finset.sum_congr rfl
-          intro a _
-          by_cases hgc : g (f a) = c
-          · rw [Finset.sum_eq_single (f a)]
-            · simp [hgc]
-            · intro b _ hba
-              by_cases hfa : f a = b
-              · exact (hba hfa.symm).elim
-              · simp [hfa]
-            · simp
-          · have hzero :
-                (∑ b : beta,
-                  if g b = c ∧ f a = b then M.effect a else 0) = 0 := by
-              apply Finset.sum_eq_zero
-              intro b _
-              by_cases hfa : f a = b
-              · subst b
-                simp [hgc]
-              · simp [hfa]
-            simp [hgc, hzero]
-    _ = (M.postprocess (fun a => g (f a))).effect c := by
-          change _ = ∑ a ∈ Finset.univ.filter
-            (fun a : alpha => g (f a) = c), M.effect a
-          rw [Finset.sum_filter]
-
-/-- Relabel a mature polynomial projective measurement by direct QPBT
+/-- Relabel an LDT polynomial projective measurement by direct QPBT
 polynomial representatives. -/
 noncomputable def directPolynomialMeasurement
     (D : DirectLdParams) :
@@ -260,7 +180,8 @@ theorem directPolyMeasTuple_evaluation_marginal
       (directPolyMeasTupleMarginal D G r).postprocess
         (fun g => MvPolynomial.eval u g.1) := by
   unfold directPolyMeasTupleMarginal
-  rw [matrixMeasurement_postprocess_comp, matrixMeasurement_postprocess_comp]
+  rw [MIPStarRE.Quantum.Measurement.postprocess_comp,
+    MIPStarRE.Quantum.Measurement.postprocess_comp]
   rfl
 
 /-- Evaluating a seed-indexed polynomial tuple and then selecting coordinate
@@ -273,11 +194,12 @@ theorem polyMeasTuple_evaluation_marginal
       (polyMeasTupleMarginal L G r).postprocess
         (fun g => MvPolynomial.eval u g.1) := by
   unfold polyMeasTupleMarginal
-  rw [matrixMeasurement_postprocess_comp, matrixMeasurement_postprocess_comp]
+  rw [MIPStarRE.Quantum.Measurement.postprocess_comp,
+    MIPStarRE.Quantum.Measurement.postprocess_comp]
   rfl
 
 /-- Evaluating the transported polynomial measurement is the relabeling of
-the mature evaluation postprocessing through `directScalarEquiv`. -/
+the LDT evaluation postprocessing through `directScalarEquiv`. -/
 theorem directPolynomialMeasurement_evaluation_effect
     (D : DirectLdParams) :
     letI := D.toLDTFieldModel
@@ -413,7 +335,7 @@ theorem correlatedAncillaCompressMeasurement_postprocess
     correlatedAncillaCompressMeasurement (M.postprocess f) =
       (correlatedAncillaCompressMeasurement M).postprocess f := by
   classical
-  apply matrixMeasurement_ext
+  apply MIPStarRE.Quantum.Measurement.ext
   intro b
   rw [MIPStarRE.Quantum.Measurement.postprocess_effect,
     correlatedAncillaCompressMeasurement_effect,
@@ -498,7 +420,7 @@ theorem blockDiagonalMeasurement_postprocess
     (blockDiagonalMeasurement M).postprocess f =
       blockDiagonalMeasurement (fun r => (M r).postprocess f) := by
   classical
-  apply matrixMeasurement_ext
+  apply MIPStarRE.Quantum.Measurement.ext
   intro b
   ext ⟨i, r⟩ ⟨j, s⟩
   simp only [MIPStarRE.Quantum.Measurement.postprocess_effect,
@@ -517,7 +439,7 @@ private theorem matrixMeasurementTransport_eq_postprocess
     (e : alpha ≃ beta) (M : MIPStarRE.Quantum.Measurement alpha iota) :
     matrixMeasurementTransport e M = M.postprocess e := by
   classical
-  apply matrixMeasurement_ext
+  apply MIPStarRE.Quantum.Measurement.ext
   intro b
   rw [MIPStarRE.Quantum.Measurement.postprocess_effect]
   rw [Finset.sum_eq_single (e.symm b)]
@@ -540,7 +462,7 @@ theorem matrixMeasurementTransport_postprocess
     (matrixMeasurementTransport e M).postprocess f =
       M.postprocess (fun a => f (e a)) := by
   rw [matrixMeasurementTransport_eq_postprocess,
-    matrixMeasurement_postprocess_comp]
+    MIPStarRE.Quantum.Measurement.postprocess_comp]
 
 end
 

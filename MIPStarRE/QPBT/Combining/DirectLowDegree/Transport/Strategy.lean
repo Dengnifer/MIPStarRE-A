@@ -5,10 +5,10 @@ import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.SeedFiber
 # Strategy transport for the directly indexed low-degree game
 
 This module reads one coordinate of a projective directly indexed strategy as
-a two-space mature low individual degree strategy.  The question and answer
+a two-space low individual degree test strategy.  The question and answer
 transport of `Transport.Questions` supplies the canonical direct question of
-every mature line, with the reversed coordinate order and the leading index
-of the decoded diagonal direction, together with answer readouts that are
+every LDT line, with the reversed coordinate order and the leading index of
+the decoded diagonal direction, together with answer readouts that are
 covariant under line rebasing; this establishes all four covariance
 conditions of `ProjStrat`.  The module also records exact Born-weight
 formulas for both directions of strategy transport.
@@ -29,10 +29,10 @@ open MIPStarRE.Quantum
 
 noncomputable section
 
-/-! ## From a direct strategy to a mature LDT strategy -/
+/-! ## From a direct strategy to an LDT strategy -/
 
 /-- Regard a matrix-valued projective measurement as a projective measurement
-in the mature LDT interface. -/
+of the low individual degree test. -/
 noncomputable def matrixMeasurementToLDTProjMeas
     {alpha iota : Type*} [Fintype alpha] [Fintype iota] [DecidableEq iota]
     (M : MIPStarRE.Quantum.Measurement alpha iota)
@@ -75,7 +75,7 @@ noncomputable def directCoordinatePointMeasurement
     (directPointAnswerReadout D r)
 
 /-- Axis-line measurements obtained by querying the canonical direct line and
-rebasing one coordinate polynomial to the mature line parametrization. -/
+rebasing one coordinate polynomial to the LDT line parametrization. -/
 noncomputable def directCoordinateAxisMeasurement
     (D : DirectLdParams) (r : Fin D.k)
     {iota : Type*} [Fintype iota] [DecidableEq iota]
@@ -93,7 +93,7 @@ noncomputable def directCoordinateAxisMeasurement
     (directAxisAnswerReadout D r line)
 
 /-- Diagonal-line measurements obtained by querying the canonical direct line
-and rebasing one coordinate polynomial to the mature line parametrization. -/
+and rebasing one coordinate polynomial to the LDT line parametrization. -/
 noncomputable def directCoordinateDiagonalMeasurement
     (D : DirectLdParams) (r : Fin D.k)
     {iota : Type*} [Fintype iota] [DecidableEq iota]
@@ -111,7 +111,7 @@ noncomputable def directCoordinateDiagonalMeasurement
     (directDiagonalAnswerReadout D r line)
 
 /-- The coordinate axis-line family is independent of the chosen affine
-parametrization of a mature line. -/
+parametrization of an LDT line. -/
 theorem directCoordinateAxisMeasurement_reparam
     (D : DirectLdParams) (r : Fin D.k)
     {iota : Type*} [Fintype iota] [DecidableEq iota]
@@ -187,8 +187,7 @@ noncomputable def strategyPureState {G : Game} (S : Strategy G)
       inner_self_eq_norm_sq_to_K, S.ψ_norm]
     norm_num
 
-/-- The mature density-matrix state represented by a game's unit strategy
-vector. -/
+/-- The density-matrix state represented by a game's unit strategy vector. -/
 noncomputable def strategyQuantumState {G : Game} (S : Strategy G) :
     QuantumState (S.ιA × S.ιB) := by
   letI : Nonempty (S.ιA × S.ιB) := strategy_carrier_nonempty S
@@ -391,10 +390,7 @@ private theorem seedFiberBlockBornAmplitude
   rw [Finset.sum_comm]
   rw [← mul_assoc]
   congr 1
-  rw [← pow_two, inv_pow, ← Complex.ofReal_pow,
-    Real.sq_sqrt (Nat.cast_nonneg (L.q / L.m))]
-  norm_cast
-  exact Complex.ofReal_inv _
+  exact inv_sqrt_natCast_mul_self (L.q / L.m)
 
 /-- Correlated residue registers give the uniform average of the source-block
 Born weights. -/
@@ -410,8 +406,9 @@ private theorem seedFiberBlockBornWeight
   rw [seedFiberBlockBornAmplitude]
   simp [Complex.mul_re, Complex.inv_re, Complex.inv_im]
 
-/-- The Born weight of the seed-bearing direct adapter is the uniform average
-of the original seed-dependent Born weights over the correlated residue. -/
+/-- The Born weight of the direct strategy obtained by dilating a seed-indexed
+strategy with a correlated residue register is the uniform average of the
+original seed-dependent Born weights over that residue. -/
 theorem ldStrategyToDirect_bornWeight
     (L : LdParams) (S : Strategy (ldGame L))
     (x y : DirectLdQuestion L.toDirectLdParams)
@@ -434,7 +431,7 @@ theorem ldStrategyToDirect_bornWeight
   exact seedFiberBlockBornWeight S L _ _
 
 /-- Read coordinate `r` of a projective direct-game strategy as a two-space
-projective strategy for the mature low individual degree interface. -/
+projective strategy for the low individual degree test. -/
 noncomputable def directCoordinateProjStrat
     (D : DirectLdParams) (S : Strategy (directLdGame D))
     (hS : S.IsProjective) (r : Fin D.k) :

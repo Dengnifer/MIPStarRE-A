@@ -17,7 +17,7 @@ The operator-level inequalities they rest on live in
 
 The source results are `fact:agreement` through
 `lem:close-strategies-have-close-values` in
-`blueprint/src/chapter/ch12_qpbt_games.tex:245-577`, with paper origin
+`blueprint/src/chapter/ch12_qpbt_games.tex:260-597`, with paper origin
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:295-461` and
 `:531-540`. The observable conversion lemmas come from
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:95-131`.
@@ -360,8 +360,11 @@ private theorem reindexMeasurement_isProjective
       simp [reindexOp, Matrix.reindex_apply,
         (hM a).isSelfAdjoint.isHermitian.apply]).isSelfAdjoint
 
-/-- The sum of the squared effects of a POVM is bounded by the identity. -/
-private theorem measurement_sum_adjoint_mul_le_one
+/-- The squared effects of a POVM sum to at most the identity. This is the
+formalization-only estimate `lem:sandwich-povm-square-sum` used in the
+contractions underlying `lem:ld-sandwich`; detailed source argument
+`references/neexp-paper/05_quantum_preliminaries.tex:930-946`. -/
+theorem measurement_sum_adjoint_mul_le_one
     {α I : Type*} [Fintype α] [Fintype I] [DecidableEq I]
     (M : Measurement α I) :
     ∑ a : α, (M.effect a)ᴴ * M.effect a ≤ 1 := by
@@ -534,7 +537,7 @@ private theorem strategy_value_eq_selected (G : Game) (S : Strategy G) :
 /-- Strategies on identified local spaces and the same transported state have
 close values. The asymptotic constant is universal for the game. This is
 `lem:close-strategies-have-close-values`, blueprint
-`ch12_qpbt_games.tex:569-577`, paper
+`ch12_qpbt_games.tex:584-597`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:531-540`. -/
 theorem abs_value_sub_le_of_areClose :
     ∃ C₀ : ℝ, 1 ≤ C₀ ∧ ∀ (G : Game) (S S' : Strategy G) (δ : ℝ)

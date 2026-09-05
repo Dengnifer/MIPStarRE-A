@@ -4,9 +4,10 @@ import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Consistency.Defect
 /-!
 # Low-degree consistency transport
 
-This stable public facade re-exports the polynomial and measurement
-conversions, pure-state and defect identities, the three mature consistency
-conclusions in direct coordinates, and correlated-ancilla compression.
+This module provides the identification of polynomial outcomes and complete
+measurements, the pure-state and defect identities, the three LDT consistency
+conclusions expressed in direct coordinates, and the compression of a
+correlated residue register.
 
 ## References
 

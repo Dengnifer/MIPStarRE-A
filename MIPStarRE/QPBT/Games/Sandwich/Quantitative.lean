@@ -1,13 +1,14 @@
 import MIPStarRE.QPBT.Games.Sandwich.Support
+import MIPStarRE.LDT.MakingMeasurementsProjective.NaimarkCore
 
 /-! # Quantitative sandwiched-measurement estimate
 
 This module proves the palindromic measurement construction and the linear
-quantitative sandwich estimate used by the public facade.
+quantitative estimate for the sandwiched simultaneous measurement.
 
 ## References
 
-Blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:454-507`; paper
+Blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:469-568`; paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:465-501`.
 -/
 
@@ -19,9 +20,10 @@ open MIPStarRE.LDT hiding Measurement
 open MIPStarRE.Quantum
 open DistanceCalculus
 
-namespace SandwichInternal
+namespace SandwichProduct
 
 set_option maxHeartbeats 400000 in
+-- Three marginal substitutions expand products over the joint outcome space.
 /-- Replacing the two outer copies and the inner marginal in a joint
 projective effect costs two outer distances and one inner distance. -/
 private theorem sqrt_opFamilyDistSq_joint_sandwich_le
@@ -87,7 +89,7 @@ private theorem sqrt_opFamilyDistSq_joint_sandwich_le
         · simp
         · intro a' ha'
           simp [ha']
-      _ ≤ 1 := measurement_pair_fiber_sum_adjoint_mul_le_one (JL x) a
+      _ ≤ 1 := DistanceCalculus.measurement_fiber_sum_adjoint_mul_le_one (JL x) a
   have hstep₀raw : opFamilyDistSq μ
       (fun x (ab : α × β) => (JL x).effect ab * (JAL x).effect ab.1)
       (fun x (ab : α × β) => (JL x).effect ab * (GR x).effect ab.1) ψ ≤ q :=
@@ -142,8 +144,10 @@ private theorem sqrt_opFamilyDistSq_joint_sandwich_le
         intro a _
         rw [Fintype.sum_eq_single b]
         · simp only [if_pos]
-          have hp := heteroKron_isProj
-            (postprocess_isProjective (J x) (hJ x) Prod.fst a) (hG x a)
+          have hp : IsProj (heteroKron ((JA x).effect a) ((G x).effect a)) := by
+            simpa only [JA, heteroKron] using
+              MIPStarRE.LDT.MakingMeasurementsProjective.isProj_kronecker
+                (postprocess_isProjective (J x) (hJ x) Prod.fst a) (hG x a)
           simp only [GR, JAL, DistanceCalculus.rightPlacedMeasurement,
             DistanceCalculus.leftPlacedMeasurement,
             MIPStarRE.Quantum.Measurement.ofSumEqOne]
@@ -262,7 +266,7 @@ private theorem sqrt_opFamilyDistSq_joint_sandwich_le
 
 /-- The palindromic effects form a POVM when each constituent measurement is
 projective. This is `lem:ld-sandwich-measurement`, the measurement assertion
-implicit in `lem:ld-sandwich`; blueprint `ch12_qpbt_games.tex:489-507`, paper
+implicit in `lem:ld-sandwich`; blueprint `ch12_qpbt_games.tex:548-568`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:484-494`. -/
 theorem sandwichProduct_isMeasurement {k : ℕ} {X ι : Type*}
     [Fintype ι] [DecidableEq ι] {Γ : Fin k → Type*}
@@ -279,7 +283,7 @@ theorem sandwichProduct_isMeasurement {k : ℕ} {X ι : Type*}
       · intro g
         change 0 ≤ (1 : Op ι)
         exact Matrix.PosSemidef.one.nonneg
-      · simp [sandwichProduct, sandwichProductCore]
+      · simp [sandwichProduct, orderedCoordinateProduct]
   | succ k ih =>
       cases k with
       | zero =>
@@ -311,7 +315,7 @@ theorem sandwichProduct_isMeasurement {k : ℕ} {X ι : Type*}
           · intro g
             change 0 ≤
               (G (Fin.last (k + 1)) x).effect (g (Fin.last (k + 1))) *
-                sandwichProductCore (k + 1) (fun i => Γ i.castSucc)
+                orderedCoordinateProduct (k + 1) (fun i => Γ i.castSucc)
                   (fun i a => (G i.castSucc x).effect a)
                   (fun i => g i.castSucc) *
                 (G (Fin.last (k + 1)) x).effect (g (Fin.last (k + 1)))
@@ -319,7 +323,7 @@ theorem sandwichProduct_isMeasurement {k : ℕ} {X ι : Type*}
             apply Matrix.nonneg_iff_posSemidef.mpr
             have hpos :
                 (((G (Fin.last (k + 1)) x).effect (g (Fin.last (k + 1))))ᴴ *
-                  sandwichProductCore (k + 1) (fun i => Γ i.castSucc)
+                  orderedCoordinateProduct (k + 1) (fun i => Γ i.castSucc)
                     (fun i a => (G i.castSucc x).effect a)
                     (fun i => g i.castSucc) *
                   (G (Fin.last (k + 1)) x).effect
@@ -329,22 +333,22 @@ theorem sandwichProduct_isMeasurement {k : ℕ} {X ι : Type*}
             exact hpos
           · change
               (∑ g : (i : Fin (k + 2)) → Γ i,
-                sandwichProductCore (k + 2) Γ
+                orderedCoordinateProduct (k + 2) Γ
                   (fun i a => (G i x).effect a) g) = 1
             calc
               (∑ g : (i : Fin (k + 2)) → Γ i,
-                  sandwichProductCore (k + 2) Γ
+                  orderedCoordinateProduct (k + 2) Γ
                     (fun i a => (G i x).effect a) g) =
                   ∑ p : Γ (Fin.last (k + 1)) ×
                       ((i : Fin (k + 1)) → Γ i.castSucc),
-                    sandwichProductCore (k + 2) Γ
+                    orderedCoordinateProduct (k + 2) Γ
                       (fun i a => (G i x).effect a) ((Fin.snocEquiv Γ) p) := by
                 exact Fintype.sum_equiv (Fin.snocEquiv Γ).symm _ _
                   (by intro g; rw [Equiv.apply_symm_apply])
               _ = ∑ a : Γ (Fin.last (k + 1)),
                     ∑ g : (i : Fin (k + 1)) → Γ i.castSucc,
                       (G (Fin.last (k + 1)) x).effect a *
-                        sandwichProductCore (k + 1) (fun i => Γ i.castSucc)
+                        orderedCoordinateProduct (k + 1) (fun i => Γ i.castSucc)
                           (fun i b => (G i.castSucc x).effect b) g *
                         (G (Fin.last (k + 1)) x).effect a := by
                 rw [Fintype.sum_prod_type]
@@ -352,11 +356,11 @@ theorem sandwichProduct_isMeasurement {k : ℕ} {X ι : Type*}
                 intro a _
                 apply Finset.sum_congr rfl
                 intro g _
-                simp [sandwichProductCore]
+                simp [orderedCoordinateProduct]
               _ = ∑ a : Γ (Fin.last (k + 1)),
                     (G (Fin.last (k + 1)) x).effect a *
                       (∑ g : (i : Fin (k + 1)) → Γ i.castSucc,
-                        sandwichProductCore (k + 1) (fun i => Γ i.castSucc)
+                        orderedCoordinateProduct (k + 1) (fun i => Γ i.castSucc)
                           (fun i b => (G i.castSucc x).effect b) g) *
                       (G (Fin.last (k + 1)) x).effect a := by
                 apply Finset.sum_congr rfl
@@ -367,7 +371,7 @@ theorem sandwichProduct_isMeasurement {k : ℕ} {X ι : Type*}
                 have hprevSum := hprev.2
                 change
                   (∑ g : (i : Fin (k + 1)) → Γ i.castSucc,
-                    sandwichProductCore (k + 1) (fun i => Γ i.castSucc)
+                    orderedCoordinateProduct (k + 1) (fun i => Γ i.castSucc)
                       (fun i b => (G i.castSucc x).effect b) g) = 1 at hprevSum
                 apply Finset.sum_congr rfl
                 intro a _
@@ -388,7 +392,7 @@ private theorem sandwichProduct_snoc {k : ℕ} {X ι : Type*}
       (G (Fin.last (k + 1)) x).effect p.1 *
         sandwichProduct (fun i x' a => (G i.castSucc x').effect a) x p.2 *
       (G (Fin.last (k + 1)) x).effect p.1 := by
-  simp [sandwichProduct, sandwichProductCore]
+  simp [sandwichProduct, orderedCoordinateProduct]
 
 /-- Iterating the joint replacement estimate gives a linear bound for the
 square root of the distance to the palindromic measurement. -/
@@ -430,7 +434,7 @@ private theorem sqrt_opFamilyDistSq_sandwichProduct_le
         · intro x g
           simp [hAone, heteroKron_one_one]
         · intro x g
-          simp [sandwichProduct, sandwichProductCore, heteroKron_one_one]
+          simp [sandwichProduct, orderedCoordinateProduct, heteroKron_one_one]
       rw [hdistzero]
       simp [opFamilyDistSq, applyOperatorToState, MIPStarRE.LDT.avgOver_zero]
   | one =>
@@ -614,7 +618,7 @@ private theorem sqrt_opFamilyDistSq_sandwichProduct_le
 /-- The sandwiched simultaneous-measurement estimate of `lem:ld-sandwich`.
 One universal asymptotic constant applies independently of the distribution,
 measurements, state, and error parameters. Blueprint
-`ch12_qpbt_games.tex:454-480`, paper
+`ch12_qpbt_games.tex:469-496`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:465-501`. -/
 theorem consistencyDefect_sandwich_le :
     ∃ C₀ : ℝ, 1 ≤ C₀ ∧
@@ -731,7 +735,9 @@ theorem consistencyDefect_sandwich_le :
   have hone : IsProj (1 : Op ιB) := IsStarProjection.one _
   have hAL (x : X) : MIPStarRE.QPBT.Measurement.IsProjective (AL x) := by
     intro g
-    exact heteroKron_isProj (hA x g) hone
+    change IsProj (heteroKron ((A x).effect g) (1 : Op ιB))
+    simpa only [heteroKron] using
+      MIPStarRE.LDT.MakingMeasurementsProjective.isProj_kronecker (hA x g) hone
   have hbaseRaw := consistencyDefect_le_sqrt_of_projective_left
     μ AL BR ψ hμ hψ hAL
   have hbase : consistencyDefect μ
@@ -781,6 +787,6 @@ theorem consistencyDefect_sandwich_le :
       MIPStarRE.Quantum.Measurement.postprocess_effect, Finset.sum_filter] using hprocessed
   exact htarget.trans hbase
 
-end SandwichInternal
+end SandwichProduct
 
 end MIPStarRE.QPBT
