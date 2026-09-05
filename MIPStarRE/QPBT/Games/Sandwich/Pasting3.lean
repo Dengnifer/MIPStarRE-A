@@ -180,4 +180,145 @@ theorem abs_cross_move_gap_le_sqrt {R₁ Γ₂ ι : Type*}
           (heteroKron 1 (G.effect g) - heteroKron (G.effect g) 1) ψ‖ ^ 2) := by
         rw [mul_one]
 
+/-- The expansion of the commutator mass of `lem:pasting` at a fixed question.
+For a measurement and a projective measurement placed on the second tensor
+factor, the summed squared norm of the commutators is the summed squared norm
+of the ordered products, plus the expectation of the squares of the effects of
+the first family, minus twice the cross term. This is the term-by-term
+expansion of step 5 of the proof of the adopted statement in
+`docs/paper-gaps/qpbt_pasting-product-error.tex`; blueprint
+`ch12_qpbt_games.tex:960-990`. -/
+theorem commutator_mass_eq_expansion {R₁ Γ₂ ι : Type*}
+    [Fintype R₁] [DecidableEq R₁] [Fintype Γ₂] [DecidableEq Γ₂]
+    [Fintype ι] [DecidableEq ι]
+    (P : Measurement R₁ ι) (G : Measurement Γ₂ ι)
+    (ψ : EuclideanSpace ℂ (ι × ι))
+    (hG : MIPStarRE.QPBT.Measurement.IsProjective G) :
+    (∑ a : R₁, ∑ g : Γ₂, ‖applyOperatorToState (heteroKron 1
+        (P.effect a * G.effect g - G.effect g * P.effect a)) ψ‖ ^ 2) =
+      (∑ a : R₁, ∑ g : Γ₂, ‖applyOperatorToState
+          (heteroKron 1 (P.effect a * G.effect g)) ψ‖ ^ 2) +
+        (∑ a : R₁, stateQForm ψ (heteroKron 1 (P.effect a * P.effect a))) -
+        2 * ∑ a : R₁, ∑ g : Γ₂, stateQForm ψ (heteroKron 1
+          (G.effect g * P.effect a * G.effect g * P.effect a)) := by
+  classical
+  -- the inlined identities of the distance calculus; see issue #204
+  have hqf : ∀ M N : Op (ι × ι), stateQForm ψ (M * N) =
+      (inner ℂ (applyOperatorToState Mᴴ ψ) (applyOperatorToState N ψ)).re := by
+    intro M N
+    have happ : applyOperatorToState (M * N) ψ =
+        applyOperatorToState M (applyOperatorToState N ψ) := by
+      unfold applyOperatorToState
+      simp [Matrix.toEuclideanLin, Matrix.toLpLin_mul_same]
+    have hadj : (Matrix.toEuclideanLin M).adjoint = Matrix.toEuclideanLin Mᴴ := by
+      rw [← Matrix.toEuclideanLin_conjTranspose_eq_adjoint]
+    have h1 : (inner ℂ ((Matrix.toEuclideanLin M).adjoint ψ)
+        (applyOperatorToState N ψ) : ℂ) =
+        inner ℂ ψ (Matrix.toEuclideanLin M (applyOperatorToState N ψ)) :=
+      LinearMap.adjoint_inner_left _ _ _
+    rw [stateQForm, happ]
+    rw [show applyOperatorToState Mᴴ ψ = (Matrix.toEuclideanLin M).adjoint ψ by
+      rw [hadj]; rfl]
+    rw [h1]
+    rfl
+  have hct : ∀ M N : Op ι, (heteroKron M N)ᴴ = heteroKron Mᴴ Nᴴ := by
+    intro M N
+    unfold heteroKron
+    exact Matrix.conjTranspose_kronecker M N
+  have hkr : ∀ B C : Op ι,
+      heteroKron (1 : Op ι) (B - C) = heteroKron 1 B - heteroKron 1 C := by
+    intro B C
+    ext p q
+    simp [heteroKron, Matrix.kronecker, mul_sub]
+  have hnorm : ∀ M : Op (ι × ι),
+      ‖applyOperatorToState M ψ‖ ^ 2 = stateQForm ψ (Mᴴ * M) := by
+    intro M
+    rw [hqf Mᴴ M, Matrix.conjTranspose_conjTranspose]
+    exact (inner_self_eq_norm_sq (𝕜 := ℂ) (applyOperatorToState M ψ)).symm
+  have hsub : ∀ M N : Op (ι × ι),
+      ‖applyOperatorToState (M - N) ψ‖ ^ 2 =
+        ‖applyOperatorToState M ψ‖ ^ 2 + ‖applyOperatorToState N ψ‖ ^ 2 -
+          2 * stateQForm ψ (Mᴴ * N) := by
+    intro M N
+    have hlin : applyOperatorToState (M - N) ψ =
+        applyOperatorToState M ψ - applyOperatorToState N ψ := by
+      simp [applyOperatorToState]
+    rw [hlin, norm_sub_sq (𝕜 := ℂ), hqf Mᴴ N, Matrix.conjTranspose_conjTranspose]
+    simp only [RCLike.re_to_complex]
+    ring
+  -- the pointwise expansion at a pair of an answer and a codeword
+  have hpt : ∀ (a : R₁) (g : Γ₂),
+      ‖applyOperatorToState (heteroKron 1
+          (P.effect a * G.effect g - G.effect g * P.effect a)) ψ‖ ^ 2 =
+        ‖applyOperatorToState (heteroKron 1 (P.effect a * G.effect g)) ψ‖ ^ 2 +
+          stateQForm ψ (heteroKron 1 (P.effect a * G.effect g * P.effect a)) -
+          2 * stateQForm ψ (heteroKron 1
+            (G.effect g * P.effect a * G.effect g * P.effect a)) := by
+    intro a g
+    have hH : (heteroKron (1 : Op ι) (P.effect a * G.effect g))ᴴ =
+        heteroKron 1 (G.effect g * P.effect a) := by
+      rw [hct]
+      simp [Matrix.conjTranspose_mul, measurement_effect_hermitian]
+    have hH2 : (heteroKron (1 : Op ι) (G.effect g * P.effect a))ᴴ =
+        heteroKron 1 (P.effect a * G.effect g) := by
+      rw [hct]
+      simp [Matrix.conjTranspose_mul, measurement_effect_hermitian]
+    have hNN : (heteroKron (1 : Op ι) (G.effect g * P.effect a))ᴴ *
+        heteroKron 1 (G.effect g * P.effect a) =
+        heteroKron 1 (P.effect a * G.effect g * P.effect a) := by
+      rw [hH2, heteroKron_mul, one_mul]
+      congr 1
+      rw [mul_assoc, ← mul_assoc (G.effect g), (hG g).isIdempotentElem.eq]
+      exact (mul_assoc _ _ _).symm
+    have hXN : (heteroKron (1 : Op ι) (P.effect a * G.effect g))ᴴ *
+        heteroKron 1 (G.effect g * P.effect a) =
+        heteroKron 1 (G.effect g * P.effect a * G.effect g * P.effect a) := by
+      rw [hH, heteroKron_mul, one_mul]
+      congr 1
+      simp [mul_assoc]
+    rw [hkr, hsub, hnorm (heteroKron 1 (G.effect g * P.effect a)),
+      hNN, hXN]
+  -- the row sum at a fixed answer
+  have hrow : ∀ a : R₁,
+      (∑ g : Γ₂, ‖applyOperatorToState (heteroKron 1
+          (P.effect a * G.effect g - G.effect g * P.effect a)) ψ‖ ^ 2) =
+        (∑ g : Γ₂, ‖applyOperatorToState
+            (heteroKron 1 (P.effect a * G.effect g)) ψ‖ ^ 2) +
+          stateQForm ψ (heteroKron 1 (P.effect a * P.effect a)) -
+          2 * ∑ g : Γ₂, stateQForm ψ (heteroKron 1
+            (G.effect g * P.effect a * G.effect g * P.effect a)) := by
+    intro a
+    have h2 : (∑ g : Γ₂, stateQForm ψ (heteroKron 1
+        (P.effect a * G.effect g * P.effect a))) =
+        stateQForm ψ (heteroKron 1 (P.effect a * P.effect a)) := by
+      rw [← stateQForm_finset_sum, ← heteroKron_finset_sum_right]
+      congr 2
+      rw [← Finset.sum_mul, ← Finset.mul_sum, G.sum_eq_one, mul_one]
+    calc (∑ g : Γ₂, ‖applyOperatorToState (heteroKron 1
+            (P.effect a * G.effect g - G.effect g * P.effect a)) ψ‖ ^ 2)
+        = ∑ g : Γ₂, (‖applyOperatorToState
+              (heteroKron 1 (P.effect a * G.effect g)) ψ‖ ^ 2 +
+            stateQForm ψ (heteroKron 1 (P.effect a * G.effect g * P.effect a)) -
+            2 * stateQForm ψ (heteroKron 1
+              (G.effect g * P.effect a * G.effect g * P.effect a))) :=
+          Finset.sum_congr rfl fun g _ => hpt a g
+      _ = (∑ g : Γ₂, ‖applyOperatorToState
+              (heteroKron 1 (P.effect a * G.effect g)) ψ‖ ^ 2) +
+            (∑ g : Γ₂, stateQForm ψ
+              (heteroKron 1 (P.effect a * G.effect g * P.effect a))) -
+            2 * ∑ g : Γ₂, stateQForm ψ (heteroKron 1
+              (G.effect g * P.effect a * G.effect g * P.effect a)) := by
+          rw [Finset.sum_sub_distrib, Finset.sum_add_distrib, Finset.mul_sum]
+      _ = _ := by rw [h2]
+  calc (∑ a : R₁, ∑ g : Γ₂, ‖applyOperatorToState (heteroKron 1
+          (P.effect a * G.effect g - G.effect g * P.effect a)) ψ‖ ^ 2)
+      = ∑ a : R₁, ((∑ g : Γ₂, ‖applyOperatorToState
+            (heteroKron 1 (P.effect a * G.effect g)) ψ‖ ^ 2) +
+          stateQForm ψ (heteroKron 1 (P.effect a * P.effect a)) -
+          2 * ∑ g : Γ₂, stateQForm ψ (heteroKron 1
+            (G.effect g * P.effect a * G.effect g * P.effect a))) :=
+        Finset.sum_congr rfl fun a _ => hrow a
+    _ = _ := by
+        rw [Finset.sum_sub_distrib, Finset.sum_add_distrib, Finset.mul_sum]
+
 end MIPStarRE.QPBT

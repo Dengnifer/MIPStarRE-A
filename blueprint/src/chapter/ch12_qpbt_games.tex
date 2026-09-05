@@ -1293,6 +1293,34 @@ postprocessing, and operator-contraction steps used to formalize
 	the second factor is at most $\|\psi\|^2 = 1$.
 \end{proof}
 
+\begin{lemma}[Formalization support for Lemma~\ref{lem:pasting}]
+	\label{lem:pasting-commutator-expansion}
+	\lean{MIPStarRE.QPBT.commutator_mass_eq_expansion}
+	\leanok
+	\uses{def:pasting-tensor-placement}
+	Let $P_{a_1}$ be a measurement and $G_{g_2}$ a projective measurement, both
+	placed on the second tensor factor. Then
+	\[
+		\sum_{a_1, g_2} \bigl\| (\Id \ot [P_{a_1}, G_{g_2}]) \ket{\psi} \bigr\|^2
+		= \sum_{a_1, g_2} \bigl\| (\Id \ot P_{a_1} G_{g_2}) \ket{\psi} \bigr\|^2
+			+ \sum_{a_1} \bra{\psi} \Id \ot P_{a_1}^2 \ket{\psi}
+			- 2 \sum_{a_1, g_2} \bra{\psi} \Id \ot G_{g_2} P_{a_1} G_{g_2} P_{a_1}
+				\ket{\psi}\,.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:pasting-tensor-placement}
+	Expand the squared norm of a difference at each pair: it is the sum of the
+	two squared norms minus twice the real part of the overlap of the two
+	vectors. The second squared norm is the expectation of
+	$P_{a_1} G_{g_2} P_{a_1}$, the second family being idempotent, and summing
+	over the codewords replaces the codeword effect by the identity, which
+	leaves the expectation of $P_{a_1}^2$. The overlap of the two vectors is the
+	expectation of $G_{g_2} P_{a_1} G_{g_2} P_{a_1}$, the effects of a
+	measurement being self-adjoint.
+\end{proof}
+
 \begin{lemma}[Close strategies have close values; Fact 4.32 in \cite{Natarajan2018NEEXP}]\label{lem:close-strategies-have-close-values}
 	\lean{MIPStarRE.QPBT.abs_value_sub_le_of_areClose}
 	\leanok
