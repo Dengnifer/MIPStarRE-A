@@ -37,8 +37,6 @@ noncomputable section
 
 variable {K : Type*} [Field K] [Fintype K] [DecidableEq K] [Algebra (ZMod 2) K]
 
-/-! ## The Pauli basis is a complete projective measurement -/
-
 /-! ## Marginals of the Pauli basis -/
 
 /-- A marginal of the Pauli basis projectors, over any set of labels, is
