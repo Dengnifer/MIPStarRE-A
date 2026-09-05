@@ -86,29 +86,47 @@ theorem exists_direct_ld_soundness :
 
 /-! ## Absorbing the mature error into the error function of `lem:ld-soundness`
 
-The specialization below combines three inputs: the polynomial-tuple
-conclusions for `D.k = 1`, whose error is the mature error
-`mainFormalError` of `thm:main-formal` at the auxiliary sampling parameter;
-the absorption `exists_directLdTransportConstants` of that error into
-`deltaLd`, applied with the trivial constant `C₀ = 1` because for `k = 1` the
-tuple measurements are the coordinate measurements themselves and no sandwich
-is formed; and the coarse bound `consistencyDefect_heteroKron_le_one`, which
-closes the regime `1 ≤ ε` where `deltaLd` is at least one. -/
+The specializations below combine three inputs: polynomial-tuple conclusions
+whose error is built from the mature error `mainFormalError` of
+`thm:main-formal` at the auxiliary sampling parameter; the absorption
+`exists_directLdTransportConstants` of that error into `deltaLd`; and the
+coarse bound `consistencyDefect_heteroKron_le_one`, which closes both the
+regime `1 ≤ ε` and the regime where the transport argument exceeds one, in
+each of which `deltaLd` is already at least one. -/
 
-/-- Formalization-only absorption step: a bipartite consistency defect on a
-unit state bounded by the mature error of `thm:main-formal` at the auxiliary
-sampling parameter is bounded by `deltaLd` at the transport constants.
+/-- Formalization-only scalar step: a quantity dominated by an argument that
+is itself at most one is dominated by the square root of that argument.
 
-In the regime `0 < ε ≤ 1` the defect is at most the minimum of the mature
-error and one, hence at most the square root of the transport argument, which
-`exists_directLdTransportConstants` absorbs at `C₀ = 1`; in the regime `1 < ε`
-the defect is at most one and `deltaLd` is at least one.  Blueprint
+Support for the transport of `lem:ld-soundness`, blueprint
 `ch13_qpbt_test.tex:139-167`, paper
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:413-458`. -/
-private theorem consistencyDefect_le_deltaLd_of_mainFormalError
-    {a b : ℝ} (ha : 1 ≤ a) (hb : 0 < b)
+theorem le_sqrt_of_le_of_le_one {x T : ℝ} (hxT : x ≤ T) (hT : T ≤ 1) :
+    x ≤ Real.sqrt T := by
+  rcases le_or_gt x 0 with hx | hx
+  · exact le_trans hx (Real.sqrt_nonneg T)
+  · have hx2 : x ^ 2 ≤ T := by nlinarith
+    calc x = Real.sqrt (x ^ 2) := (Real.sqrt_sq hx.le).symm
+      _ ≤ Real.sqrt T := Real.sqrt_le_sqrt hx2
+
+/-- Formalization-only absorption step for the low-degree soundness
+transport.  A bipartite consistency defect on a unit state that is at most
+`C₀` times the square root of the transport argument
+
+  `mainFormalError (2560000 m³ d) (3 ε) + m d / q + ε`
+
+whenever both `ε` and that argument are at most one is bounded by `deltaLd`
+at the constants supplied by `exists_directLdTransportConstants C₀`.
+
+Outside that regime the conclusion is vacuous quantitatively: the defect is
+at most one by `consistencyDefect_heteroKron_le_one`, while `deltaLd` is at
+least one, either by `one_le_deltaLd_of_one_le_error` when `1 < ε` or because
+the square root of an argument exceeding one is itself at least one.
+Blueprint `ch13_qpbt_test.tex:139-167`, paper
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:413-458`. -/
+theorem consistencyDefect_le_deltaLd_of_transportBound
+    {a b C₀ : ℝ} (ha : 1 ≤ a) (hb : 0 < b) (hC₀ : 1 ≤ C₀)
     (habs : ∀ (D : DirectLdParams) (ε : ℝ), 0 < ε → ε ≤ 1 →
-      1 * (D.k : ℝ) *
+      C₀ * (D.k : ℝ) *
           Real.sqrt
             (Test.mainFormalError D.toLDTParameters (directLdAuxParameter D) (3 * ε) +
               ((D.m : ℝ) * (D.d : ℝ)) / (D.q : ℝ) + ε) ≤
@@ -119,9 +137,15 @@ private theorem consistencyDefect_le_deltaLd_of_mainFormalError
     (μ : Distribution X) (hμ : μ.IsProbability)
     (A : X → Quantum.Measurement α ιA) (B : X → Quantum.Measurement α ιB)
     (ψ : EuclideanSpace ℂ (ιA × ιB)) (hψ : ‖ψ‖ = 1)
-    (hbound : consistencyDefect μ (fun x c => heteroKron ((A x).effect c) 1)
-        (fun x c => heteroKron 1 ((B x).effect c)) ψ ≤
-      Test.mainFormalError D.toLDTParameters (directLdAuxParameter D) (3 * ε)) :
+    (hbound : ε ≤ 1 →
+      Test.mainFormalError D.toLDTParameters (directLdAuxParameter D) (3 * ε) +
+            ((D.m : ℝ) * (D.d : ℝ)) / (D.q : ℝ) + ε ≤ 1 →
+        consistencyDefect μ (fun x c => heteroKron ((A x).effect c) 1)
+            (fun x c => heteroKron 1 ((B x).effect c)) ψ ≤
+          C₀ *
+            Real.sqrt
+              (Test.mainFormalError D.toLDTParameters (directLdAuxParameter D) (3 * ε) +
+                ((D.m : ℝ) * (D.d : ℝ)) / (D.q : ℝ) + ε)) :
     consistencyDefect μ (fun x c => heteroKron ((A x).effect c) 1)
         (fun x c => heteroKron 1 ((B x).effect c)) ψ ≤
       deltaLd a b ε D.q D.m D.d D.k := by
@@ -129,59 +153,40 @@ private theorem consistencyDefect_le_deltaLd_of_mainFormalError
       (fun x c => heteroKron 1 ((B x).effect c)) ψ ≤ 1 :=
     consistencyDefect_heteroKron_le_one μ hμ A B ψ hψ
   rcases le_or_gt ε 1 with hε1 | hε1
-  · have hE : 0 ≤
-        Test.mainFormalError D.toLDTParameters (directLdAuxParameter D) (3 * ε) := by
-      rw [Test.mainFormalError_eq_envelope]
-      exact mul_nonneg (by positivity)
-        (Test.mainFormalEnvelope_nonneg _ _ _ (by linarith))
-    have hmd : (0 : ℝ) ≤ ((D.m : ℝ) * (D.d : ℝ)) / (D.q : ℝ) := by positivity
-    have hT : 0 ≤
-        Test.mainFormalError D.toLDTParameters (directLdAuxParameter D) (3 * ε) +
-          ((D.m : ℝ) * (D.d : ℝ)) / (D.q : ℝ) + ε := by linarith
-    have hsqrt : consistencyDefect μ (fun x c => heteroKron ((A x).effect c) 1)
-        (fun x c => heteroKron 1 ((B x).effect c)) ψ ≤
+  · have hk : (1 : ℝ) ≤ (D.k : ℝ) := by exact_mod_cast D.hk
+    have hsqrtnn : (0 : ℝ) ≤
         Real.sqrt
           (Test.mainFormalError D.toLDTParameters (directLdAuxParameter D) (3 * ε) +
-            ((D.m : ℝ) * (D.d : ℝ)) / (D.q : ℝ) + ε) := by
+            ((D.m : ℝ) * (D.d : ℝ)) / (D.q : ℝ) + ε) := Real.sqrt_nonneg _
+    have hstep : consistencyDefect μ (fun x c => heteroKron ((A x).effect c) 1)
+        (fun x c => heteroKron 1 ((B x).effect c)) ψ ≤
+        C₀ *
+          Real.sqrt
+            (Test.mainFormalError D.toLDTParameters (directLdAuxParameter D) (3 * ε) +
+              ((D.m : ℝ) * (D.d : ℝ)) / (D.q : ℝ) + ε) := by
       rcases le_or_gt
-          (Test.mainFormalError D.toLDTParameters (directLdAuxParameter D) (3 * ε))
-          1 with hEle | hEgt
-      · have hsq :
-            Test.mainFormalError D.toLDTParameters (directLdAuxParameter D) (3 * ε) ^ 2 ≤
-              Test.mainFormalError D.toLDTParameters (directLdAuxParameter D) (3 * ε) +
-                ((D.m : ℝ) * (D.d : ℝ)) / (D.q : ℝ) + ε := by nlinarith
-        have hstep :
-            Test.mainFormalError D.toLDTParameters (directLdAuxParameter D) (3 * ε) ≤
-              Real.sqrt
-                (Test.mainFormalError D.toLDTParameters (directLdAuxParameter D) (3 * ε) +
-                  ((D.m : ℝ) * (D.d : ℝ)) / (D.q : ℝ) + ε) := by
-          calc Test.mainFormalError D.toLDTParameters (directLdAuxParameter D) (3 * ε)
-              = Real.sqrt
-                  (Test.mainFormalError D.toLDTParameters
-                    (directLdAuxParameter D) (3 * ε) ^ 2) := (Real.sqrt_sq hE).symm
-            _ ≤ _ := Real.sqrt_le_sqrt hsq
-        linarith
+          (Test.mainFormalError D.toLDTParameters (directLdAuxParameter D) (3 * ε) +
+            ((D.m : ℝ) * (D.d : ℝ)) / (D.q : ℝ) + ε) 1 with hT1 | hT1
+      · exact hbound hε1 hT1
       · have hone : (1 : ℝ) ≤
             Real.sqrt
               (Test.mainFormalError D.toLDTParameters (directLdAuxParameter D) (3 * ε) +
                 ((D.m : ℝ) * (D.d : ℝ)) / (D.q : ℝ) + ε) := by
           calc (1 : ℝ) = Real.sqrt 1 := Real.sqrt_one.symm
-            _ ≤ _ := Real.sqrt_le_sqrt (by linarith)
-        linarith
-    have hk : (1 : ℝ) ≤ (D.k : ℝ) := by exact_mod_cast D.hk
-    have hsqrtnn : (0 : ℝ) ≤
-        Real.sqrt
-          (Test.mainFormalError D.toLDTParameters (directLdAuxParameter D) (3 * ε) +
-            ((D.m : ℝ) * (D.d : ℝ)) / (D.q : ℝ) + ε) := Real.sqrt_nonneg _
+            _ ≤ _ := Real.sqrt_le_sqrt hT1.le
+        nlinarith [mul_nonneg (sub_nonneg.mpr hC₀) (sub_nonneg.mpr hone)]
     calc consistencyDefect μ (fun x c => heteroKron ((A x).effect c) 1)
           (fun x c => heteroKron 1 ((B x).effect c)) ψ
-        ≤ Real.sqrt
-            (Test.mainFormalError D.toLDTParameters (directLdAuxParameter D) (3 * ε) +
-              ((D.m : ℝ) * (D.d : ℝ)) / (D.q : ℝ) + ε) := hsqrt
-      _ ≤ 1 * (D.k : ℝ) *
+        ≤ C₀ *
             Real.sqrt
               (Test.mainFormalError D.toLDTParameters (directLdAuxParameter D) (3 * ε) +
-                ((D.m : ℝ) * (D.d : ℝ)) / (D.q : ℝ) + ε) := by nlinarith
+                ((D.m : ℝ) * (D.d : ℝ)) / (D.q : ℝ) + ε) := hstep
+      _ ≤ C₀ * (D.k : ℝ) *
+            Real.sqrt
+              (Test.mainFormalError D.toLDTParameters (directLdAuxParameter D) (3 * ε) +
+                ((D.m : ℝ) * (D.d : ℝ)) / (D.q : ℝ) + ε) :=
+          mul_le_mul_of_nonneg_right
+            (le_mul_of_one_le_right (by linarith) hk) hsqrtnn
       _ ≤ deltaLd a b ε D.q D.m D.d D.k := habs D ε hε hε1
   · have hone : (1 : ℝ) ≤ deltaLd a b ε D.q D.m D.d D.k :=
       one_le_deltaLd_of_one_le_error ha hb.le hε1.le D.hm D.hd D.hk
@@ -238,22 +243,41 @@ theorem exists_direct_ld_soundness_of_k_eq_one :
   intro D ε hk hε S hS hwin
   obtain ⟨GA, GB, h1, h2, h3⟩ :=
     exists_directSimultaneousPolynomialMeasurements_of_k_eq_one D hk S hS ε hwin
+  have hmd : (0 : ℝ) ≤ ((D.m : ℝ) * (D.d : ℝ)) / (D.q : ℝ) := by positivity
+  have hmature : ∀ hT :
+      Test.mainFormalError D.toLDTParameters (directLdAuxParameter D) (3 * ε) +
+          ((D.m : ℝ) * (D.d : ℝ)) / (D.q : ℝ) + ε ≤ 1,
+      Test.mainFormalError D.toLDTParameters (directLdAuxParameter D) (3 * ε) ≤
+        Real.sqrt
+          (Test.mainFormalError D.toLDTParameters (directLdAuxParameter D) (3 * ε) +
+            ((D.m : ℝ) * (D.d : ℝ)) / (D.q : ℝ) + ε) := by
+    intro hT
+    exact le_sqrt_of_le_of_le_one (by linarith) hT
   refine ⟨GA, GB, ?_, ?_, ?_⟩
-  · exact consistencyDefect_le_deltaLd_of_mainFormalError ha hb habs D ε hε
+  · refine consistencyDefect_le_deltaLd_of_transportBound ha hb le_rfl habs D ε hε
       (uniformDistribution (Fin D.m → DirectScalarQ D))
       (uniformDistribution_isProbability _)
       (fun u => (S.A (directLdPointQuestionOf D u)).postprocess
         (directLdPointValuesOrZero D))
-      (fun u => GB.postprocess (evalDirectPolyTupleAt u)) S.ψ S.ψ_norm h1
-  · exact consistencyDefect_le_deltaLd_of_mainFormalError ha hb habs D ε hε
+      (fun u => GB.postprocess (evalDirectPolyTupleAt u)) S.ψ S.ψ_norm ?_
+    intro _ hT
+    rw [one_mul]
+    exact le_trans h1 (hmature hT)
+  · refine consistencyDefect_le_deltaLd_of_transportBound ha hb le_rfl habs D ε hε
       (uniformDistribution (Fin D.m → DirectScalarQ D))
       (uniformDistribution_isProbability _)
       (fun u => GA.postprocess (evalDirectPolyTupleAt u))
       (fun u => (S.B (directLdPointQuestionOf D u)).postprocess
-        (directLdPointValuesOrZero D)) S.ψ S.ψ_norm h2
-  · exact consistencyDefect_le_deltaLd_of_mainFormalError ha hb habs D ε hε
+        (directLdPointValuesOrZero D)) S.ψ S.ψ_norm ?_
+    intro _ hT
+    rw [one_mul]
+    exact le_trans h2 (hmature hT)
+  · refine consistencyDefect_le_deltaLd_of_transportBound ha hb le_rfl habs D ε hε
       (uniformDistribution Unit) (uniformDistribution_isProbability _)
-      (fun _ => GA) (fun _ => GB) S.ψ S.ψ_norm h3
+      (fun _ => GA) (fun _ => GB) S.ψ S.ψ_norm ?_
+    intro _ hT
+    rw [one_mul]
+    exact le_trans h3 (hmature hT)
 
 end
 

@@ -457,15 +457,46 @@ violates the theorem's lower bound at the small dimensions listed there.
 We do not assert that any conclusion is false: the underlying tensor-code
 soundness is insensitive to how the axis index is sampled, and both import
 obligations concern verification, not counterexample.  For the divisibility
-repair, the recommended candidate direction is direct index sampling ---
-restate the imported soundness theorem for the directly indexed game at
-arbitrary dimension; prove the distribution and parsing-pullback lemmas;
-settle the synchronicity control for de-seeding together with the
-dilation--compression round trip, so that the present soundness statement
-would follow from the repaired import; and reread the combining subtree
-against the directly indexed game --- a direction whose open obligations
-are enumerated under the candidate repairs, not an established route, with
-dimension padding as the fallback confined to the present game definition.
+repair, the recommended candidate direction was direct index sampling, and
+that direction is now carried out for the simultaneity parameter $k = 1$,
+with dimension padding remaining the fallback confined to the present game
+definition.
+
+Concretely: the imported soundness theorem is restated for the directly
+indexed game at arbitrary dimension (\leanid{exists\_direct\_ld\_soundness}
+in \doclink{MIPStarRE/QPBT/Combining/DirectLowDegree/Soundness.lean}), whose
+question law is defined for every admissible tuple, so the divisibility
+obstruction described above does not arise there; the
+distribution and parsing-pullback lemmas are proved in
+\doclink{MIPStarRE/QPBT/Combining/DirectLowDegree/Transport/Correspondence.lean};
+and the de-seeding round trip is settled by dilating the seed-indexed
+strategy with a maximally correlated register indexed by the seed fibre,
+which preserves the value exactly
+(\leanid{ldStrategyToDirect\_value\_eq}), and compressing that register
+afterwards.  The compression is exact for the two point-versus-polynomial
+relations and not for the global one; the global relation is instead
+recovered on the compressed carriers from the point-agreement branch of the
+game, as described in
+\doclink{MIPStarRE/QPBT/Combining/DirectLowDegree/SeedIndexedSoundness.lean}.
+For $k = 1$ the round trip therefore does yield the source-shaped soundness
+statement for the seed-indexed game, as
+\leanid{exists\_ld\_soundness\_of\_k\_eq\_one}, and its directly indexed form
+as \leanid{exists\_direct\_ld\_soundness\_of\_k\_eq\_one}.
+
+Neither of those two theorems relies on the asserted identity with the
+two-prover tensor-code test, and neither instantiates Theorem~4.7 of
+\cite{Ji2021Quantum}: both apply the low individual degree theorem
+\leanid{MIPStarRE.LDT.Test.mainFormal} directly, at the auxiliary sampling
+parameter $2560000\,m^3 d$, which satisfies that theorem's own large-sampling
+hypothesis for every admissible tuple.  The two import obligations of
+Section~\ref{sec:import-obligations} are thus avoided rather than
+discharged: they remain the open content of the source's printed route, and
+the arbitrary-$k$ statements keep that route and their tracked proof debt.
+What remains open for the directly indexed route itself is the extension
+from $k = 1$ to arbitrary $k$, which is the combining reduction analysed in
+\cite{gap:qpbt_ld-simultaneous-sandwich} and not a divisibility question,
+and the rereading of the combining subtree against the directly indexed
+game.
 
 \bibliographystyle{alpha}
 \bibliography{references}
