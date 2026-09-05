@@ -309,6 +309,62 @@ theorem directCombinedSample_index_uniform (D : DirectLdParams) :
   uniformDistribution_map_fst_of_equiv (e := directLdSpaceIndexEquiv D.combined)
     _ fun _ => rfl
 
+/-- The decomposition of a sample of the combined game into its coordinate
+index and its two point parts on the one side, and its two combining parts on
+the other. -/
+private def directCombinedSpaceIndexEquiv (D : DirectLdParams) :
+    DirectLdSpace D.combined ≃
+      ((Fin D.combined.m ×
+          ((Fin D.m → DirectScalarQ D) × (Fin D.m → DirectScalarQ D))) ×
+        ((Fin D.k → DirectScalarQ D) × (Fin D.k → DirectScalarQ D))) where
+  toFun sample :=
+    ((sample.index,
+        (directCombinedPointPart D sample.point,
+          directCombinedPointPart D sample.direction)),
+      (directCombinedCoefficientPart D sample.point,
+        directCombinedCoefficientPart D sample.direction))
+  invFun x := ⟨combinedPoint x.1.2.1 x.2.1, x.1.1, combinedPoint x.1.2.2 x.2.2⟩
+  left_inv sample := by
+    obtain ⟨point, index, direction⟩ := sample
+    dsimp only
+    congr 1 <;>
+      first
+        | rfl
+        | exact combinedPoint_combinedPointPart_combinedCoefficientPart _
+  right_inv x := by
+    obtain ⟨⟨i, u, v⟩, α, w⟩ := x
+    dsimp only
+    simp only [Prod.mk.injEq]
+    exact ⟨⟨trivial, combinedPointPart_combinedPoint u α,
+        combinedPointPart_combinedPoint v w⟩,
+      combinedCoefficientPart_combinedPoint u α,
+      combinedCoefficientPart_combinedPoint v w⟩
+
+/-- The distributional half of `lem:ld-combined-question-law`: the coordinate
+index of a uniform sample of the combined game and the two point parts of that
+sample are jointly uniform on the product of the `m + k` coordinates with two
+copies of `F_q^m`.  Conditioned on a point coordinate index, the point parts
+are therefore uniform, so by
+`directCombined_measuredQuestion_of_pointVar` the questions measured by the
+combined strategy are the canonical questions of a uniform sample of the
+original game at the same ordered type pair; conditioned on a combining
+coordinate index, the point part of the sampled point is uniform, so by
+`directCombined_measuredQuestion_of_coefficientVar` both measured questions are
+the point question at a uniform point.  This single statement subsumes the two
+marginal laws `directCombinedSample_pointParts_uniform` and
+`directCombinedSample_index_uniform`, which it refines by recording that the
+index and the point parts are independent. -/
+theorem directCombinedSample_indexPointParts_uniform (D : DirectLdParams) :
+    (uniformDistribution (DirectLdSpace D.combined)).map
+        (fun sample => (sample.index,
+          (directCombinedPointPart D sample.point,
+            directCombinedPointPart D sample.direction))) =
+      uniformDistribution
+        (Fin D.combined.m ×
+          ((Fin D.m → DirectScalarQ D) × (Fin D.m → DirectScalarQ D))) :=
+  uniformDistribution_map_fst_of_equiv (e := directCombinedSpaceIndexEquiv D) _
+    fun _ => rfl
+
 end
 
 end MIPStarRE.QPBT
