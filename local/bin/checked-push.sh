@@ -138,10 +138,11 @@ require_validation_checkout
 printf '%s: gate passed before opening the push transport.\n' "$PROG" >&2
 # Freeze the source object and atomically require the preflight remote tip.  The
 # native hook is only a short defense-in-depth confirmation; the lease keeps the
-# tuple binding intact when that hook is stale or not selected.
+# tuple binding intact when that hook is stale or not selected.  Disable implicit
+# annotated-tag expansion so the transport contains only the validated ref.
 LEASE_SHA="$REMOTE_SHA"
 [ "$LEASE_SHA" != "$ZERO_SHA" ] || LEASE_SHA=""
 MIPSTARRE_SKIP_HOOKS=1 \
   MIPSTARRE_EXPECTED_PUSH_TUPLE="$LOCAL_SHA $LOCAL_SHA $REMOTE_REF $REMOTE_SHA" \
-  git -C "$REPO_ROOT" push --force-with-lease="$REMOTE_REF:$LEASE_SHA" \
-    "$REMOTE" "$LOCAL_SHA:$REMOTE_REF"
+  git -C "$REPO_ROOT" -c push.followTags=false push --no-follow-tags \
+    --force-with-lease="$REMOTE_REF:$LEASE_SHA" "$REMOTE" "$LOCAL_SHA:$REMOTE_REF"

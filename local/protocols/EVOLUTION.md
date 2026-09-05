@@ -593,3 +593,15 @@ binds the checked payload to the published ref.
 **Expected effect:** publication cannot approve bytes from main while pushing a
 feature commit, and dirty, detached, or unregistered ref checkouts fail before
 transport startup.
+
+## 2026-09-05 — Prevent implicit refs in checked publication
+
+**Trigger:** `results/telemetry/events.md` 2026-09-05, "Checked push published
+an unvalidated tag" (round-6 review of PR #197).
+
+**Change:** the final validated push overrides `push.followTags` and passes
+`--no-follow-tags`; a regression exercises an annotated tag with native hook
+selection disabled.
+
+**Expected effect:** the transport can publish only the branch tuple that passed
+preflight, regardless of repository or user follow-tag configuration.

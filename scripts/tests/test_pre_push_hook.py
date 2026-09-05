@@ -386,6 +386,45 @@ exec git-receive-pack "$@"
                     ],
                 )
 
+    def test_checked_push_never_follows_unvalidated_tags(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            repo, remote, hook_log, receive_marker = self.new_push_repo(root)
+            head = self.git(repo, "rev-parse", "HEAD").stdout.strip()
+            self.git(
+                repo,
+                "tag",
+                "--annotate",
+                "unvalidated",
+                "--message",
+                "unvalidated tag",
+            )
+            self.git(repo, "config", "push.followTags", "true")
+            self.git(repo, "config", "core.hooksPath", str(root / "missing-hooks"))
+
+            result = self.run_checked_push(repo, hook_log, receive_marker)
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertEqual(
+                self.git(remote, "rev-parse", "refs/heads/main").stdout.strip(),
+                head,
+            )
+            remote_tag = subprocess.run(
+                ["git", "rev-parse", "--verify", "refs/tags/unvalidated"],
+                cwd=remote,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertNotEqual(remote_tag.returncode, 0)
+            self.assertEqual(
+                hook_log.read_text(encoding="utf-8").splitlines(),
+                [
+                    "preflight|refs/heads/main|"
+                    f"{head}|refs/heads/main|{'0' * 40}",
+                ],
+            )
+
     def test_checked_push_preserves_emergency_bypass(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
             repo, remote, hook_log, receive_marker = self.new_push_repo(

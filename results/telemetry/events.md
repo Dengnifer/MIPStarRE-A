@@ -2615,3 +2615,17 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   after preflight, and run the hook from that worktree.
 - **Lesson:** an immutable push source does not bind validation unless every
   filesystem-reading check runs over a checkout of that same object.
+
+## 2026-09-05 09:11+08:00 - Checked push published an unvalidated tag
+
+- **Symptom:** round-6 review of PR #197 found that `push.followTags=true`
+  could add an annotated tag to a checked branch push even though preflight saw
+  only the branch tuple.
+- **Diagnosis:** an explicit branch refspec does not disable Git's configured
+  follow-tag expansion, and the branch lease cannot constrain an added tag when
+  the native confirmation hook is stale or unselected.
+- **Fix:** override `push.followTags` for the final command, pass
+  `--no-follow-tags`, and cover the missing-native-hook configuration with a
+  behavioral regression.
+- **Lesson:** a one-ref preflight must disable implicit ref expansion in the
+  transport command itself; a native hook remains defense in depth only.
