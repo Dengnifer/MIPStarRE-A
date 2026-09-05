@@ -2708,3 +2708,6 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 
 ## 2026-09-05T12:42Z — lane runner v17: post-merge silent-loss guard (issue #222 task 2)
 - After merging github/main the lane now lists every path present on main but absent in the result; unless a non-merge branch commit deleted it, the lane stops with needs-attention naming the paths. Merge daemon v8 and stack-watch v3 use v17; lanes already running on v16 finish on v16.
+
+## 2026-09-05T12:52Z — lem:qld-sublines proved (sub-line witness, packet #118)
+- exists_subLineWitness is sorry-free after eleven Opus sessions (about 2.6M tokens): the sampling procedure with deterministic source indices, block independence, the uniform law of the canonical representative plus affine parameter, and the six-factor mixture identity. The blueprint records that the formalized variant uses deterministic indices where the paper draws fresh uniform ones (Property 2 asserts only some mixture, so no weakening). Commits cac257f, 93bf62c on the #118 branch. Remaining on #118: claims 17-1/2/3, the conditional lem:qld-4-13 forms, and the combined lines witness (needs lem:pasting from PR 205).
