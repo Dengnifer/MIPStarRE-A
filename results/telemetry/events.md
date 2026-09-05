@@ -2851,3 +2851,113 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 
 ## 2026-09-05T16:10Z — #118 math-fix gap closed by session 1 (claims 17-2 and 17-3 proved)
 - One Fable math-fix session (626k tokens, 100 min) settled the gap opened at 14:37Z: the printed claim 17-2 is false for an arbitrary combined-lines witness (the source uses the sandwich form of T, internal to the proof of lem:qld-xz-lines, while the witness records only the pair consistency); restated with error C·√m·(δP^{1/4}+δQ^{1/4}) through lines.consistent and proved. Claim 17-3 is proved as printed: the joint (line, point) mixture the blueprint proof seemed to need is not needed because the integrand depends only on (ℓX, ℓZ, z), and the source's Cauchy–Schwarz step there is vacuous. The deficit-form Cauchy–Schwarz lemma now lives in Combining/OverlapGap.lean. Paper-gap note docs/paper-gaps/qpbt_subline-claims-line-marginal.tex, register row and blueprint nodes updated; lem:claim-17-2/17-3 carry \leanok. Commit 691b671 on the #118 branch. The optional strengthening of CombinedLinesWitness by the X-marginal identity (restores the source error for 17-2) is left to the astra main session per the owner (16:02Z: no B7 for it). Worktree released to the main session.
+
+## 2026-09-05T16:52Z — Released worktrees and final scoped repairs
+
+- Owner reports on progress log 27 release issue 118 at 16:12Z and all remaining
+  Claude-held worktrees at 16:18Z. The issue 118 mathematical correction and proof
+  remain on its branch; no optional witness-field change is authorized by this
+  operator cycle. Started labelled autofix rounds for the released PRs 178 and 185.
+  Dispositioned PR 178 F11 and PR 185 F5 as out-of-scope shared-API expansions in
+  their exact-head ledgers; duplicate elimination and mathematical findings remain
+  actionable. No new mechanism or follow-up infrastructure issue is requested.
+- The daemon merged PR 227 at 16:32Z. PR 153 reached its final scoped fix but hit
+  the same post-push metadata delay as PRs 225 and 230. Its new head now receives
+  fresh CI and independent review. PR 229 has one remaining proof-description
+  dependency correction and is in its next scoped autofix round.
+- PR 230's code regressions passed the second review; its only remaining finding
+  concerns rewritten incident history. Since autofix deliberately excludes operator
+  telemetry, restored the original two entries and moved the subsequent diagnosis
+  into a dated follow-up in operator commit e627264. No code or gate changed.
+  A final exact-head review is necessary for that changed head, not a new hardening
+  round. Issue 174's sole remaining merge conflict was likewise telemetry: retained
+  both append-only histories in merge aed0aa4 and restarted the released lane tail.
+- Initial short-lived shell jobs for those two commits ended before completion.
+  Verified that their handles were gone and neither commit existed. The PR 230
+  index lock had no open-file holder and no matching Git process; preserved it as
+  /tmp/qpbt-pr230-orphan-index-20260905T1647Z.lock before retrying. Both commits then
+  passed normal hooks. Long commands must retain tool session handles or use the
+  detached invocation pattern; a launched process is not evidence of completion.
+  Independent CI and review remain required before daemon merging.
+
+## 2026-09-05T17:06Z — Continue mathematical fixes and final evidence
+
+- Recorded issue 118's missing dependency on issue 201 from the owner's release
+  report: the combined-lines construction still requires the pasting theorem.
+- PR 225's third review has one remaining mathematical-description mismatch: the
+  point relation uses the relabeled point measurement, not the effects before
+  wrong-form answers are mapped to the zero tuple. Its final scoped autofix runs
+  with combined cap 3; the theorem statement and game stay unchanged. The final
+  exact-head independent review is required afterward, with no open-ended fix loop.
+- PR 229's new head again encountered transient post-push metadata lag; restarted
+  only CI and its independent review. PR 185's scoped repair reached green CI and
+  received a post-fix review dispatch. PR 178's repair is in checked publication.
+  CI waited for the live warm-worktree build on issue 114 under the machine-wide
+  lock; the holder was verified as a running process and was not restarted.
+
+## 2026-09-05T17:25Z — Account routing and critical-path continuation
+
+- Executed the explicitly owner-authorized `/tmp/owner-accounts-setup.sh` after
+  inspecting its header and router. Config backups are in
+  `~/.codex/backup-20260905T1720Z`; the login shell resolves the installed router;
+  watchdog max-codex is 20. The two owner-authorized direct smoke probes returned
+  `ROUTE-A OK` and `ROUTE-B OK`. Both chose secondary: observed loads were
+  primary/secondary 1/0 and 1/1, and the router compares ratios against 9/10.
+  Thus successful probes do not establish one probe on each account. Exact
+  router lines and the live probe count (1 primary, 2 secondary) were posted on
+  #27. No authentication contents were read or published.
+- Math-fix session mathfix-201-20260906-01 did not close the pasting gap. Its
+  product-state example disproves derivability of the extra reverse-marginal
+  premise, not the printed conclusion. It restored the source assumptions with
+  one tracked proof obligation, quarantined the conditional proof, and proved
+  the scalar Schmidt-pair estimate. The Schmidt-mirror construction and its
+  use in distinct-family collision estimates remain unproved. Resumed its
+  existing thread on astra/ultra, explicitly pinning the primary CODEX_HOME
+  where that thread lives. Conservative budget slot 5/10, original start
+  2026-09-04T23:45Z and 36-hour deadline 2026-09-06T11:45Z retained.
+- PR 185 has two small remaining naming/blueprint-completion findings; PR 229
+  has two terminology findings. Both received labelled sol autofix rounds via
+  MIPSTARRE_FIX_MODEL. PRs 178 and 225 were verified pushed after metadata lag
+  and received CI followed by forced independent review, without another fix.
+- PR 230's final review reproduces a fail-closed directory-rename false
+  positive. Accepted this limitation explicitly rather than grow the guard with
+  rename reconstruction after bounded infrastructure rounds. Preserve incoming
+  paths during the merge and perform intended relocation in an ordinary commit;
+  no bypass is authorized. Added the exact-head adjudication template to the
+  daemon queue. All original safety findings were resolved by independent review.
+- Re-ran the owner's model-comparison report at this operational boundary.
+  Secondary capacity is available for useful work, not a slot-filling quota.
+
+## 2026-09-05T17:35Z — Model defaults and downstream proof preparation
+
+- Per the owner's correction, ~/.profile now explicitly exports both
+  MIPSTARRE_CODEX_MODEL and MIPSTARRE_REVIEW_MODEL as gpt-6-astra. A fresh
+  login-shell check confirms both and owner-bin routing. Direct executions now
+  use bash -lc explicitly; this tool's inherited shell otherwise retains its old
+  PATH. Small tasks override both CODEX_MODEL and FIX_MODEL to sol. Existing
+  healthy processes were not restarted solely to change models.
+- PR 153 merged through the daemon at 17:24:23Z, commit 22a426882ecedb36146990fb4fb059e11694b03d.
+  Dispatched #119 on a new branch stacked on the released #118 commit 691b671.
+  Its first worker encountered eight main-integration conflicts, aborted the
+  merge cleanly, and made no proof change. Resumed the same secondary-account
+  thread with explicit authority to reconcile those prerequisite paths using
+  the merged transport APIs while preserving the inherited claims. No source
+  statement redesign is authorized; final proof edits remain packet-scoped.
+- PR 225's first post-fix code reviewer exited without a verdict; its orphaned
+  prose process was terminated after verifying the parent review was terminal.
+  A routed astra review completed: code APPROVED, prose reported zero remaining
+  findings and COMMENTED for operator round-cap closeout. The parser created a
+  fallback finding for that trailer; its written operator disposition is in the
+  adjudication template, queued for daemon-only merge. No substantive finding
+  was waived. PR 178's separate live reviewer was not duplicated.
+- PR 202's remaining two citation findings received labelled sol autofix after
+  explicitly adding its missing auto-fix-codex label. The first attempted call
+  correctly did nothing without the opt-in label. PR 230's telemetry-only merge
+  conflict retained both appended histories; normal hooks and the loss guard
+  passed, producing merge commit 5ac4d72 before its checked lane tail resumed.
+- Session-evidence publication normalized two trailing Markdown spaces in a
+  reviewer final-message copy without changing findings or verdicts; the raw
+  event capture remains intact. Model-comparison changes were committed in
+  d62b3b0 and completed session evidence in 05a47a9. The #27 update headed
+  17:34Z was posted approximately two minutes before that heading; this entry
+  records the correction rather than treating that heading as a precise clock.
