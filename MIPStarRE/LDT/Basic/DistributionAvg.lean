@@ -26,6 +26,18 @@ open scoped BigOperators MatrixOrder Matrix ComplexOrder
 
 namespace MIPStarRE.LDT
 
+/-- Averaging scalar multiples of a fixed operator averages their coefficients
+over the distribution's support. -/
+theorem averageOperatorOverDistribution_smul_const {α ι : Type*}
+    [Fintype ι] [DecidableEq ι] (𝒟 : Distribution α) (c : α → ℂ)
+    (A : MIPStarRE.Quantum.Op ι) :
+    averageOperatorOverDistribution 𝒟 (fun a => c a • A) =
+      (∑ a ∈ 𝒟.support, (𝒟.weight a : ℂ) * c a) • A := by
+  simp only [averageOperatorOverDistribution, Finset.sum_smul]
+  apply Finset.sum_congr rfl
+  intro a ha
+  rw [← Complex.real_smul, smul_assoc]
+
 /-! ### Averaging infrastructure
 
 Linearity proofs use `Distribution.weightedSumLinearMap`; order and support
