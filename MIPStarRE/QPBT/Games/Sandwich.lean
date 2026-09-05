@@ -1,4 +1,4 @@
-import MIPStarRE.QPBT.Games.Sandwich.Pasting
+import MIPStarRE.QPBT.Games.Sandwich.Pasting2
 
 /-! # Sandwiched measurements and pasting
 
