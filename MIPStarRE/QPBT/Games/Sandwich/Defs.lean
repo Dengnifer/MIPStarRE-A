@@ -155,9 +155,10 @@ theorem Measurement.isProjective_leftPlacement {α ιA ιB : Type*} [Fintype α]
     rw [Matrix.conjTranspose_kronecker, measurement_effect_hermitian M a,
       Matrix.conjTranspose_one]
 
-/-- The right placement of a projective measurement is projective.
-Formalization support for `lem:pasting`, blueprint
-`ch12_qpbt_games.tex:960-990`. -/
+/-- The right placement of a projective measurement is projective. This is the
+right-factor mirror of the preceding lemma and the second of the four
+properties of the placement collected in the formalization-support node
+`lem:pasting-tensor-placement`, blueprint `ch12_qpbt_games.tex:1063-1071`. -/
 theorem Measurement.isProjective_rightPlacement {α ιA ιB : Type*} [Fintype α]
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
     (M : Measurement α ιB) (hM : MIPStarRE.QPBT.Measurement.IsProjective M) :
@@ -172,8 +173,12 @@ theorem Measurement.isProjective_rightPlacement {α ιA ιB : Type*} [Fintype α
     rw [Matrix.conjTranspose_kronecker, measurement_effect_hermitian M a,
       Matrix.conjTranspose_one]
 
-/-- Postprocessing commutes with the left tensor placement. Formalization
-support for `lem:pasting`, blueprint `ch12_qpbt_games.tex:960-990`. -/
+/-- Postprocessing commutes with the left tensor placement. This is one of the
+four properties of the placement collected in the formalization-support node
+`lem:pasting-tensor-placement`, blueprint `ch12_qpbt_games.tex:1063-1071`; it
+records the compatibility of the placement of `lem:pasting` with the outcome
+coarse-grainings its statement applies, and is stated for the left factor
+alongside its right-factor mirror below. -/
 theorem Measurement.leftPlacement_postprocess {α β ιA ιB : Type*}
     [Fintype α] [DecidableEq α] [Fintype β] [DecidableEq β]
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
@@ -184,8 +189,10 @@ theorem Measurement.leftPlacement_postprocess {α β ιA ιB : Type*}
   simp only [Measurement.leftPlacement_effect, Measurement.postprocess_effect,
     heteroKron_finset_sum_left]
 
-/-- Postprocessing commutes with the right tensor placement. Formalization
-support for `lem:pasting`, blueprint `ch12_qpbt_games.tex:960-990`. -/
+/-- Postprocessing commutes with the right tensor placement. This is the
+right-factor mirror of the preceding compatibility, the fourth of the four
+properties of the placement collected in the formalization-support node
+`lem:pasting-tensor-placement`, blueprint `ch12_qpbt_games.tex:1063-1071`. -/
 theorem Measurement.rightPlacement_postprocess {α β ιA ιB : Type*}
     [Fintype α] [DecidableEq α] [Fintype β] [DecidableEq β]
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]

@@ -1,9 +1,13 @@
 import MIPStarRE.QPBT.Games.Sandwich.Quantitative
 
-/-! # Support lemmas for the pasting estimate
+/-! # Consistency and commutation of the pasting codeword families
 
-This module collects the quantitative steps of the proof of `lem:pasting`
-recorded in `docs/paper-gaps/qpbt_pasting-product-error.tex`.
+This module records the cross consistency of the coarse second codeword family,
+the commutator estimate for the two coarse families, the collision average of
+the distinct second codewords, and the comparison of the fine second codeword
+family with its coarse-graining.  These are the codeword-family steps of the
+proof of `lem:pasting` recorded in
+`docs/paper-gaps/qpbt_pasting-product-error.tex`.
 
 ## References
 

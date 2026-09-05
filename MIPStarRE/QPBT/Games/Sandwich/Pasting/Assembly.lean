@@ -1,9 +1,14 @@
-import MIPStarRE.QPBT.Games.Sandwich.Pasting3
+import MIPStarRE.QPBT.Games.Sandwich.Pasting.CrossMove
 
-/-! # Masses of the ordered products of the pasting estimate
+/-! # Ordered product masses and the assembly of the pasting estimate
 
 This module records the mass estimates of step 3 of the proof of the adopted
-statement of `lem:pasting` in `docs/paper-gaps/qpbt_pasting-product-error.tex`.
+statement of `lem:pasting`, the fine commutator mass of step 5, the assembly of
+those estimates into the explicit bound on the defect of the pasted family, the
+bound of one on the defect of an arbitrary pair of placed families, and the
+scalar comparison of the assembled bound with the error function of the
+theorem.  The proof of the adopted statement is recorded in
+`docs/paper-gaps/qpbt_pasting-product-error.tex`.
 
 ## References
 
@@ -20,9 +25,9 @@ open MIPStarRE.Quantum
 open DistanceCalculus
 
 /-- The squared norm of the image of a state is the quadratic form of the
-operator against its adjoint. The identity of the distance calculus is inlined
-here; see issue #204. -/
-private theorem norm_sq_eq_stateQForm' {ι : Type*} [Fintype ι] [DecidableEq ι]
+operator against its adjoint.  This is a formalization-only auxiliary of the
+distance calculus, stated here for the assembly of `lem:pasting`. -/
+private theorem norm_sq_eq_stateQForm {ι : Type*} [Fintype ι] [DecidableEq ι]
     (X : Op ι) (ψ : EuclideanSpace ℂ ι) :
     ‖applyOperatorToState X ψ‖ ^ 2 = stateQForm ψ (Xᴴ * X) := by
   have hqf : ∀ M N : Op ι, stateQForm ψ (M * N) =
@@ -62,7 +67,7 @@ private theorem sum_norm_sq_eq_of_sum_adjoint_mul_eq_one {γ ι : Type*}
     simpa using (inner_self_eq_norm_sq (𝕜 := ℂ) ψ)
   calc (∑ c : γ, ‖applyOperatorToState (C c) ψ‖ ^ 2)
       = ∑ c : γ, stateQForm ψ ((C c)ᴴ * C c) :=
-        Finset.sum_congr rfl fun c _ => norm_sq_eq_stateQForm' (C c) ψ
+        Finset.sum_congr rfl fun c _ => norm_sq_eq_stateQForm (C c) ψ
     _ = stateQForm ψ (∑ c : γ, (C c)ᴴ * C c) := (stateQForm_finset_sum ψ _ _).symm
     _ = ‖ψ‖ ^ 2 := by rw [hC, hone]
 

@@ -993,7 +993,7 @@ postprocessing, and operator-contraction steps used to formalize
 	\begin{equation}\label{eq:pasting-1-sym}
 		(G_2)^x_{[\operatorname{eval}_{y_2}(\cdot)=a_2]} \ot \Id \simeq_\delta \Id \ot A^{x,y_1,y_2}_{a_2}\,,
 	\end{equation}
-	the first symmetric equivalent of that comparison in the sense of Definition~\ref{def:symmetric-equivalents}. The source states the lemma for symmetric strategies, for which \eqref{eq:pasting-1-sym} is the second comparison in \eqref{eq:pasting-1} read from the other player; it is the only consequence of that convention used by the imported proof, and the statement without it is unattested (\cite{gap:qpbt_pasting-product-error}). Define a family of measurements $\{J^x_{g_1,\,g_2}\}$ by
+	the first symmetric equivalent of that comparison in the sense of Definition~\ref{def:symmetric-equivalents}. That definition is stated later, in Chapter~\ref{chap:qpbt-observables}, for the six registers of the expanded state; it is referred to here in its plain bipartite form, namely the same comparison with the two tensor factors exchanged. The source states the lemma for symmetric strategies, for which \eqref{eq:pasting-1-sym} is the second comparison in \eqref{eq:pasting-1} read from the other player; it is the only consequence of that convention used by the imported proof, and the statement without it is unattested (\cite{gap:qpbt_pasting-product-error}). Define a family of measurements $\{J^x_{g_1,\,g_2}\}$ by
 	\begin{equation}\label{eq:pasting-2a}
 		J^x_{g_1,\,g_2} = (G_2)^x_{g_2}\, (G_1)^x_{g_1}\, (G_2)^x_{g_2}\,.
 	\end{equation}
@@ -1009,6 +1009,8 @@ postprocessing, and operator-contraction steps used to formalize
 \end{lemma}
 \begin{proof}
 	\leanok
+	\uses{lem:pasting-measurement, lem:pasting-coarse-commutator,
+		lem:pasting-explicit-error}
 	Stated in the source without proof, as an import of Fact 4.35 of \cite{Natarajan2018NEEXP}; the argument below is recorded with explicit constants in \cite{gap:qpbt_pasting-product-error}. Write $P_{a_1} = (G_1)^x_{[\operatorname{eval}_{y_1}(\cdot)=a_1]}$, $Q_{a_2} = (G_2)^x_{[\operatorname{eval}_{y_2}(\cdot)=a_2]}$ and $G_{g_2} = (G_2)^x_{g_2}$. Since the answer projections act on the first factor and commute with every operator on the second, the defect of \eqref{eq:pasting-3} at a fixed question is the second-marginal defect of \eqref{eq:pasting-1} plus a term bounded by the pinched defect $\Delta_1 = \sum_{a_1,g_2} \langle \psi | A_{a_1} \ot G_{g_2} (\Id - P_{a_1}) G_{g_2} | \psi \rangle$, and by Cauchy--Schwarz $\Delta_1$ is at most the first-marginal defect plus the square root of the commutator sum $K = \sum_{a_1,g_2} \| \Id \ot [P_{a_1}, G_{g_2}] \, \psi \|^2$. The coarse commutators $[P_{a_1}, Q_{a_2}]$ are small on the second factor because both marginal families are consistent, by \eqref{eq:pasting-1}, with the marginals of the joint projective measurement $A$ on the first factor. Expanding $K$ and its coarse counterpart into four terms each and comparing term by term, the first difference is controlled by the near-projectivity of $P$ on the state, the second vanishes by projectivity of $(G_2)^x$, and in the two cross terms the rightmost effect is moved to the first factor. That move is where \eqref{eq:pasting-1-sym} enters: together with \eqref{eq:pasting-2} and the second comparison in \eqref{eq:pasting-1} it gives $Q_{a_2} \ot \Id \simeq_{\delta + 2\sqrt{2\delta}} \Id \ot Q_{a_2}$, and the $\eta$-bound on the agreement of distinct functions in $\mathcal G_2$ upgrades this to the fine effects $G_{g_2}$. After the move, the coarse cross term exceeds the fine one by a sum, over colliding pairs $g_2 \ne g_2'$, of expectations of tensor products of positive operators, which is nonnegative and at most $\eta$ on average. The resulting bound is a universal sum of positive powers of $\delta$ and $\eta$, as required by \eqref{eq:def-deltap}.
 \end{proof}
 
@@ -1139,7 +1141,6 @@ postprocessing, and operator-contraction steps used to formalize
 	\label{lem:pasting-collision-averaging}
 	\lean{MIPStarRE.QPBT.avgOver_collision_le}
 	\leanok
-	\uses{lem:pasting}
 	In the setting of Lemma~\ref{lem:pasting}, let
 	$c_{x,y_1}(g_2, g_2') \ge 0$ be weights indexed by pairs of second
 	codewords, with $\sum_{g_2 \ne g_2'} c_{x,y_1}(g_2, g_2') \le 1$ for every
@@ -1255,7 +1256,8 @@ postprocessing, and operator-contraction steps used to formalize
 	\label{lem:pasting-pinched-cauchy-schwarz}
 	\lean{MIPStarRE.QPBT.consistencyDefect_pinched_le_marginal_add_sqrt}
 	\leanok
-	\uses{def:pasting-tensor-placement, lem:pasting-pinched-reduction}
+	\uses{def:pasting-tensor-placement, lem:pasting-tensor-placement,
+		lem:pasting-pinched-reduction}
 	In the setting of Lemma~\ref{lem:pasting-pinched-reduction}, let $K$ be an
 	upper bound for the average over the question of
 	$\sum_{a_1, g_2} \| (\Id \ot [P_{a_1}, G_{g_2}]) \ket{\psi} \|^2$. Then
@@ -1467,15 +1469,21 @@ postprocessing, and operator-contraction steps used to formalize
 		lem:pasting-fine-coarse-cross, lem:pasting-ordered-product-mass-lower}
 	In the setting of Lemma~\ref{lem:pasting}, assume moreover that the averaged
 	commutator mass of the two coarse codeword families is at most $C\delta$.
-	Then the defect of the pasted family satisfies
+	Then the comparison \eqref{eq:pasting-3} holds with the explicit error
+	$2\delta + \sqrt{K}$, that is,
 	\[
-		2\delta + \sqrt{K}, \qquad
+		A^{x,y_1,y_2}_{a_1,\,a_2} \ot \Id
+			\simeq_{2\delta + \sqrt{K}}
+			\Id \ot J^x_{[\operatorname{eval}_{y_1}(\cdot)=a_1,\,
+				\operatorname{eval}_{y_2}(\cdot)=a_2]}\,,
+	\]
+	where
+	\[
 		K = C\delta + \bigl(2\sqrt{2\delta} + 2\delta + 2\sqrt{C\delta}
 			+ C\delta\bigr) + 2\eta
 			+ 2\sqrt{2(\delta + 2\sqrt{2\delta} + \eta)}
-			+ 2\sqrt{2(\delta + 2\sqrt{2\delta})}
+			+ 2\sqrt{2(\delta + 2\sqrt{2\delta})}\,.
 	\]
-	as an upper bound.
 \end{lemma}
 \begin{proof}
 	\leanok

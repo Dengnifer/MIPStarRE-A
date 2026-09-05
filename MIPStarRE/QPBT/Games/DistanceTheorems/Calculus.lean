@@ -641,8 +641,9 @@ is the right-register form of `lem:commutation-analysis`, blueprint
 `ch12_qpbt_games.tex:403-416`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:410-461`, with the
 same explicit constant. It is stated on the right factor because the pasting
-conclusion of `lem:pasting` carries the codeword families there. No declaration
-invokes it yet; the proof of `exists_pasting_error` is still open. -/
+conclusion of `lem:pasting` carries the codeword families there. It supplies the
+constant of `exists_coarse_commutator_bound`, the coarse commutator estimate of
+the proof of `exists_pasting_error`. -/
 theorem opDistSq_commutator_right_le :
     ∃ C₀ : ℝ, 1 ≤ C₀ ∧
       ∀ {X α β γ ιA ιB : Type*}

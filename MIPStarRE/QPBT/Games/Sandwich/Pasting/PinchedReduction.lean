@@ -1,4 +1,4 @@
-import MIPStarRE.QPBT.Games.Sandwich.Pasting
+import MIPStarRE.QPBT.Games.Sandwich.Pasting.CodewordConsistency
 
 /-! # The pinched reduction of the pasting estimate
 
@@ -51,21 +51,6 @@ private theorem pinched_sum_eq_one {Γ₂ R₁ ι : Type*} [Fintype Γ₂]
       rw [P.sum_eq_one, mul_one, (hG g).isIdempotentElem.eq]
     _ = 1 := G.sum_eq_one
 
-/-- Tensor placement is additive in the right factor. The identity is inlined
-here because the shared copy lives with the Magic Square rigidity development;
-see issue #204. -/
-private theorem heteroKron_add_right' {ιA ιB : Type*} (A : Op ιA) (B C : Op ιB) :
-    heteroKron A (B + C) = heteroKron A B + heteroKron A C := by
-  ext p q
-  simp [heteroKron, Matrix.kronecker, mul_add]
-
-/-- Tensor placement respects differences in the right factor. The identity is
-inlined here because the shared copy lives with the Magic Square rigidity
-development; see issue #204. -/
-private theorem heteroKron_sub_right' {ιA ιB : Type*} (A : Op ιA) (B C : Op ιB) :
-    heteroKron A (B - C) = heteroKron A B - heteroKron A C := by
-  ext p q
-  simp [heteroKron, Matrix.kronecker, mul_sub]
 /-- The pinched reduction of `lem:pasting`. The defect of the pasted family is
 at most the defect of the second marginal comparison plus the pinched defect,
 the defect of the first marginal comparison against the first codeword family
@@ -196,7 +181,7 @@ theorem consistencyDefect_pasted_le_marginal_add_pinched
     intro q a₁ a₂
     refine quadratic_form_mono ?_ ψ
     refine Matrix.le_iff.mpr ?_
-    rw [← heteroKron_sub_right', hdiff q a₁ a₂]
+    rw [← heteroKron_sub_right, hdiff q a₁ a₂]
     refine Matrix.nonneg_iff_posSemidef.mp
       (MIPStarRE.Quantum.kronecker_nonneg ((A q).pos (a₁, a₂)) ?_)
     refine Finset.sum_nonneg fun g _ => conj_effect_nonneg (G₂ q.1.1) g ?_
@@ -292,7 +277,7 @@ theorem consistencyDefect_pasted_le_marginal_add_pinched
           stateQForm ψ (heteroKron ((A q).effect (a₁, a₂)) (paste q (a₁, a₂))) := by
       intro a₁ a₂
       have hl := hmono q a₁ a₂
-      rw [heteroKron_add_right', stateQForm_add, heteroKron_add_right',
+      rw [heteroKron_add_right, stateQForm_add, heteroKron_add_right,
         stateQForm_add] at hl
       exact hl
     have hsum : (∑ a₁ : R₁, ∑ a₂ : R₂,
@@ -461,7 +446,7 @@ private theorem abs_pinch_overlap_gap_le_sqrt {R₁ Γ₂ ι : Type*}
           G.effect p.2)) := by
     rw [Fintype.sum_prod_type]
     refine Finset.sum_congr rfl fun a _ => ?_
-    rw [← hqsub, ← heteroKron_sub_right', hterm a, heteroKron_finset_sum_right,
+    rw [← hqsub, ← heteroKron_sub_right, hterm a, heteroKron_finset_sum_right,
       stateQForm_finset_sum]
   set u : R₁ × Γ₂ → EuclideanSpace ℂ (ι × ι) := fun p =>
     applyOperatorToState (heteroKron (A.effect p.1)

@@ -1,4 +1,4 @@
-import MIPStarRE.QPBT.Games.Sandwich.Pasting2
+import MIPStarRE.QPBT.Games.Sandwich.Pasting.PinchedReduction
 
 /-! # Moving a second codeword effect across the tensor factors
 
