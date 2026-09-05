@@ -2764,6 +2764,27 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 - **Lesson:** evidence budgets must encode priority before byte truncation;
   ordering guarantees must be tested at every dispatch boundary.
 
+## 2026-09-05T16:43Z — Follow-up to the stacked-merge loss incident
+
+- This follow-up records the completed diagnosis and audit without rewriting
+  the original 11:28Z incident or the 12:42Z lane-runner report.
+- Merges `35bdc2a` and `8ad1de8` have trees identical to their first parents;
+  preceding ordinary merges are recorded differently in the reflog. The
+  prepared index was reset while `MERGE_HEAD` remained. Five modules were
+  deleted and two existing modules reverted; an ordinary three-way merge
+  preserves all seven paths. Incoming versions were restored in `7731a97`
+  and `21cd0cf`.
+- The recorded audit covered the latest merge on each of thirteen stacked
+  branches. Apparent criss-cross candidates were recorded conflicts,
+  deliberate branch-owned prose, or combined results rather than lost files.
+- PR 230's durable guard detects incoming-only deletions and blob reversions,
+  handles multiple best merge bases, and audits existing two-parent merges.
+  On Git 2.34, automatic `pre-merge-commit` does not expose `MERGE_HEAD`, so a
+  reference-transaction hook checks the completed merge before the ref moves;
+  pre-commit checks manually completed merges. Neither accepts the blanket
+  tooling bypass. Committed-merge checks reconstruct conflicts in a disposable
+  local clone. These implementation details supplement the earlier report.
+
 ## 2026-09-05 — Operator hand-back: astra main session (Mode 1) takes over from the owner session
 
 - **Trigger:** owner decision (2026-09-05T15:45:27Z): gpt-6-astra reached through the codex relay on ghz (poller ASTRA=gpt-6-astra);
@@ -2922,3 +2943,20 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   No source changes, commit, push, independent review, or merge in this session.
   Remaining labelled-autofix and #119 dispatch actions require clarification of
   the no-subagent constraint; normal gates and daemon-only merge stay intact.
+
+## 2026-09-06 — orc-174-20260906-02 PR202 hook recovery
+
+- Primary `scripts/install_git_hooks.sh --check`, invoked from the #174
+  worktree, failed because `.githooks/reference-transaction` was absent.
+  The older branch-local installer did not check that hook, explaining the
+  previous session's successful but insufficient preflight.
+- Preserved the prior session's telemetry in `d7c393b`. Integrated the complete
+  reviewed PR230 change from `516758b8fe4bba2fd06669c2325aa65132a0ab84`
+  (first-parent patch), including its guard, hooks, tests, and protocol ledger.
+  Retained both sides of the two append-only documentation conflicts. No
+  unrelated main-history merge, citation repair, or #118/#119 edits were needed.
+- Primary hook preflight now passes from this worktree with
+  `core.hooksPath=.githooks`; `origin/main` resolves to `696af82`.
+  No hooks or integrity checks were disabled. Publication remains through the
+  primary checked-push tool. The parent shell owns labelled autofix for F1;
+  this session does not dispatch, run a full build, or conduct review.
