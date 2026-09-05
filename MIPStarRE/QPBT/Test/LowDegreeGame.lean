@@ -242,8 +242,9 @@ noncomputable def ldALineCL (P : LdParams) (z : LdSpace P) : LdSpace P :=
   | .inl (.inr _) => z (.inl (.inr ()))
   | .inr _ => 0
 
-/-- The diagonal-line CL map, using the same canonical line representative
-map for the direction block.  This is the `L_DLine` clause of
+/-- The diagonal-line CL map applies the canonical line representative map to
+the point block and stores the prefix-projected direction in the direction
+block.  This is the `L_DLine` clause of
 `def:ld-question-distribution` (blueprint
 `blueprint/src/chapter/ch13_qpbt_test.tex:34-59`; paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`).

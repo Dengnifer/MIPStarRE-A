@@ -554,8 +554,9 @@ theorem directDiagonalAnswerReadout_rebase (D : DirectLdParams) (r : Fin D.k)
 /-! ## Deprecated names
 
 The names below were used before these constructions were named after the low
-individual degree test they belong to.  They are retained only because the
-branches stacked on this module still refer to them.
+individual degree test they belong to.  The deprecated aliases are required by
+the open `issue-134` branch and will be deleted in the cleanup after that branch
+migrates.
 -/
 
 /-- Former name of `ldtDiagonalLineOf`, kept for the branches stacked on this

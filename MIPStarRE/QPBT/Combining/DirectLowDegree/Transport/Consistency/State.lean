@@ -207,11 +207,9 @@ theorem strategyConsRel_consistencyDefect_le
   unfold directPointQuestionOf ldtPointToDirect
   rw [(directPointEquiv D).symm_apply_apply]
 
-/-- The zero point witnesses that the LDT points of directly indexed
-parameters are nonempty.  This is not subsumed by the generic instance for
-`Point params`: `DirectLdParams.toLDTParameters` is reducible, so
-`Fq D.toLDTParameters` is already `Fin D.q`, and the LDT instance
-`Inhabited (Fq params)` no longer applies to it. -/
+/-- Since the field size is admissible and the dimension is positive, the zero
+vector witnesses that the LDT point space is nonempty.  The usual instance
+cannot be inferred here because `DirectLdParams.toLDTParameters` is reducible. -/
 instance directLdtPointNonempty (D : DirectLdParams) :
     Nonempty (Point D.toLDTParameters) :=
   ⟨fun _ => ⟨0, D.toLDTParameters.hq⟩⟩
