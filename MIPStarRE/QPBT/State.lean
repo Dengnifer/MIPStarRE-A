@@ -81,7 +81,8 @@ def prodShuffle {α β γ δ : Type*} :
 
 /-! ## Norm identities for the coordinate operations -/
 
-/-- Reindexing Euclidean coordinates along an equivalence preserves norm. -/
+/-- Reindexing Euclidean coordinates along an equivalence preserves norm.
+This is a formalization-only auxiliary identity (no source counterpart). -/
 theorem reindexState_norm_eq
     {iota kappa : Type*}
     [Fintype iota] [DecidableEq iota]
@@ -108,7 +109,7 @@ theorem vecTensor_norm_eq
   simp only [norm_mul, mul_pow]
   rw [← Finset.univ_product_univ, Finset.sum_product, Finset.sum_mul]
   apply Finset.sum_congr rfl
-  intro i hi
+  intro i _
   rw [Finset.mul_sum]
 
 end MIPStarRE.QPBT
