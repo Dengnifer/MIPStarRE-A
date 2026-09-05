@@ -81,3 +81,5 @@ deciding whether sol can keep a role.
 Appended by `compare.py`, one line per run.
 
 - 2026-09-05T16:05Z — 570 sessions: gpt-5.6-sol 560, gpt-5.6-luna 4, gpt-6-astra 4, gpt-5 2
+- 2026-09-05T17:22Z — 597 sessions: gpt-5.6-sol 560, gpt-6-astra 31, gpt-5.6-luna 4, gpt-5 2
+- 2026-09-05T17:35Z — 605 sessions: gpt-5.6-sol 564, gpt-6-astra 35, gpt-5.6-luna 4, gpt-5 2
