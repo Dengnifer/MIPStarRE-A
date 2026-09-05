@@ -2890,3 +2890,35 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 
 ## 2026-09-05T16:10Z — #118 math-fix gap closed by session 1 (claims 17-2 and 17-3 proved)
 - One Fable math-fix session (626k tokens, 100 min) settled the gap opened at 14:37Z: the printed claim 17-2 is false for an arbitrary combined-lines witness (the source uses the sandwich form of T, internal to the proof of lem:qld-xz-lines, while the witness records only the pair consistency); restated with error C·√m·(δP^{1/4}+δQ^{1/4}) through lines.consistent and proved. Claim 17-3 is proved as printed: the joint (line, point) mixture the blueprint proof seemed to need is not needed because the integrand depends only on (ℓX, ℓZ, z), and the source's Cauchy–Schwarz step there is vacuous. The deficit-form Cauchy–Schwarz lemma now lives in Combining/OverlapGap.lean. Paper-gap note docs/paper-gaps/qpbt_subline-claims-line-marginal.tex, register row and blueprint nodes updated; lem:claim-17-2/17-3 carry \leanok. Commit 691b671 on the #118 branch. The optional strengthening of CombinedLinesWitness by the X-marginal identity (restores the source error for 17-2) is left to the astra main session per the owner (16:02Z: no B7 for it). Worktree released to the main session.
+## 2026-09-06 — orc-174-20260906-01 prerequisite triage
+
+- PR202 remains at `559275a117cf3e7430f9e895002d9a0075ca2c30`, matching
+  GitHub; the index and worktree were clean on entry. The actual branch's
+  `scripts/install_git_hooks.sh --check` passes with `.githooks` selected and
+  `origin/main` resolving. No hook repair or integrity bypass was needed.
+- Exact-head GitHub evidence has successful local CI and a failed review with
+  one unresolved F1. The existing `auto-fix-codex` label is present. Reproduced
+  the false unresolved `ch13_qpbt_test.tex` using the citation resolver on
+  `MIPStarRE/QPBT/Test/PauliBasisTest.lean`; all 27 citation unit tests pass,
+  demonstrating the missing regression coverage rather than a resolved finding.
+  Did not launch autofix: it dispatches another session, forbidden by this
+  request's explicit no-subagent instruction. No replacement mechanism added.
+- The #118 coordination log records dispatcher hook preflight failure, but the
+  sibling branch now has uncommitted diagnostic work at `691b671`: telemetry
+  and `local/briefs/issue-118-pasting-interface-obstruction.md`. Preserved it.
+  Its old conflict marker no longer describes an active unmerged index, but
+  the lane remains blocked. The source proof of `lem:qld-xz-lines` uses the
+  constructed points and their controlled error; the current helper quantifies
+  over arbitrary point error while promising a bound independent of that error.
+  The diagnostic brief records an aborted prerequisite merge crossing #119's
+  ownership. Do not retire #118's attention marker as if these were resolved.
+- The existing #119 quantitative-resume log reports three remaining proof holes
+  in `Apply.lean`, the missing #118 extended-line estimate, and a duplicate
+  `phaseSign_mul_self` declaration blocking source-aligned dependency refresh.
+  No duplicate worker or full-chain build was launched. Reconcile prerequisite
+  histories and helper-interface ownership before resuming the existing stack.
+- GitHub confirms #73 closed at `2026-09-04T03:18:17Z`; removed only its stale
+  `watchdog/lanes/73.needs-attention` marker with approved filesystem access.
+  No source changes, commit, push, independent review, or merge in this session.
+  Remaining labelled-autofix and #119 dispatch actions require clarification of
+  the no-subagent constraint; normal gates and daemon-only merge stay intact.
