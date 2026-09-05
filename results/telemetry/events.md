@@ -2593,3 +2593,6 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 
 ## 2026-09-05T09:09Z — lem:pauli-completeness proved (packet #156 complete)
 - exists_spcc_value_one is sorry-free: the honest Pauli strategy is a value-one symmetric projective consistent commuting strategy of the Pauli basis test (four Opus sessions: salvage of the terminated codex diff, the commutation layer, the rejection layer, the assembly). Commits 9937a9b..01f3efb on the #156 branch (stacked on #116).
+
+## 2026-09-05T09:17Z — telemetry note: operator-recorded session times drifted
+- The start and end times the operator wrote into owner-sessions.jsonl between about 06:00Z and 09:20Z on 2026-09-05 were estimates and run up to 90 minutes ahead of the ghz clock (the names carry the same estimated stamps). The wall_s durations and token counts come from the harness and are accurate; use them, not the stamps, for timing analyses of that window.
