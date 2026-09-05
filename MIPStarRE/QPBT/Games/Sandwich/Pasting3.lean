@@ -321,4 +321,41 @@ theorem commutator_mass_eq_expansion {R₁ Γ₂ ι : Type*}
     _ = _ := by
         rw [Finset.sum_sub_distrib, Finset.sum_add_distrib, Finset.mul_sum]
 
+/-- The total mass of the ordered products of two measurements placed on the
+second tensor factor is at most one. This bounds the first fine term of the
+expansion of step 5 of the proof of the adopted statement in
+`docs/paper-gaps/qpbt_pasting-product-error.tex`; blueprint
+`ch12_qpbt_games.tex:960-990`. -/
+theorem sum_norm_ordered_product_le_one {R₁ Γ₂ ι : Type*}
+    [Fintype R₁] [DecidableEq R₁] [Fintype Γ₂] [DecidableEq Γ₂]
+    [Fintype ι] [DecidableEq ι]
+    (P : Measurement R₁ ι) (G : Measurement Γ₂ ι)
+    (ψ : EuclideanSpace ℂ (ι × ι)) (hψ : ‖ψ‖ = 1) :
+    (∑ a : R₁, ∑ g : Γ₂, ‖applyOperatorToState
+      (heteroKron 1 (P.effect a * G.effect g)) ψ‖ ^ 2) ≤ 1 := by
+  classical
+  have hone : applyOperatorToState (1 : Op (ι × ι)) ψ = ψ := by
+    simp [applyOperatorToState]
+  have hCP : ∑ a : R₁, (heteroKron (1 : Op ι) (P.effect a))ᴴ *
+      heteroKron 1 (P.effect a) ≤ 1 := by
+    simpa using SandwichProduct.measurement_sum_adjoint_mul_le_one
+      (Measurement.rightPlacement (ιA := ι) P)
+  have hCG : ∑ g : Γ₂, (heteroKron (1 : Op ι) (G.effect g))ᴴ *
+      heteroKron 1 (G.effect g) ≤ 1 := by
+    simpa using SandwichProduct.measurement_sum_adjoint_mul_le_one
+      (Measurement.rightPlacement (ιA := ι) G)
+  rw [Finset.sum_comm]
+  calc (∑ g : Γ₂, ∑ a : R₁, ‖applyOperatorToState
+          (heteroKron 1 (P.effect a * G.effect g)) ψ‖ ^ 2)
+      ≤ ∑ g : Γ₂, ‖applyOperatorToState (heteroKron 1 (G.effect g)) ψ‖ ^ 2 := by
+        refine Finset.sum_le_sum fun g _ => ?_
+        simpa [heteroKron_mul] using sum_norm_mul_apply_le
+          (fun a : R₁ => heteroKron (1 : Op ι) (P.effect a))
+          (heteroKron 1 (G.effect g)) ψ hCP
+    _ ≤ 1 := by
+        have h := sum_norm_mul_apply_le
+          (fun g : Γ₂ => heteroKron (1 : Op ι) (G.effect g)) (1 : Op (ι × ι)) ψ hCG
+        rw [hone, hψ, one_pow] at h
+        simpa using h
+
 end MIPStarRE.QPBT
