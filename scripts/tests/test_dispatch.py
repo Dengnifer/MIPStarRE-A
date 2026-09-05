@@ -4,8 +4,9 @@
 from __future__ import annotations
 
 import json
+import fcntl
 import importlib.util
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, TimeoutError
 import os
 from pathlib import Path
 import shlex
@@ -29,7 +30,7 @@ SPEC.loader.exec_module(router)
 
 class DispatchCommandTests(unittest.TestCase):
     def recorded_dispatch(self, model: str | None, account: str = "auto",
-                          exit_code: int = 0) -> dict[str, object]:
+                          exit_code: int = 0, empty_second_home: bool = False) -> dict[str, object]:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             repo = root / "repo"
@@ -60,8 +61,9 @@ class DispatchCommandTests(unittest.TestCase):
             primary = home / ".codex"
             primary.mkdir()
             (primary / "config.toml").write_text('model = "gpt-config-default"\n')
-            second = root / "second"
-            second.mkdir()
+            second = (home / ".cache/mipstarre-dev/codex-home-yxy"
+                      if empty_second_home else root / "second")
+            second.mkdir(parents=True)
             (second / "config.toml").write_text('model = "gpt-second-default"\n')
             rollout_home = second if account == "second" else primary
             rollout = rollout_home / "sessions/2026/09/06" / f"rollout-{THREAD_ID}.jsonl"
@@ -73,7 +75,7 @@ class DispatchCommandTests(unittest.TestCase):
                     "HOME": str(home),
                     "CODEX_HOME": "/inherited-home-must-not-leak",
                     "MIPSTARRE_CODEX_ACCOUNT": account,
-                    "MIPSTARRE_CODEX_HOME_SECOND": str(second),
+                    "MIPSTARRE_CODEX_HOME_SECOND": "" if empty_second_home else str(second),
                     "MIPSTARRE_ACCOUNT_WAIT": "0",
                     "MIPSTARRE_CACHE_ROOT": str(root / "cache"),
                     "PATH": f"{fake_bin}{os.pathsep}{env.get('PATH', '')}",
@@ -252,6 +254,11 @@ class DispatchCommandTests(unittest.TestCase):
         self.assertEqual(record["model"], "gpt-second-default")
         self.assertEqual(record["status"], "failed")
 
+    def test_empty_secondary_home_uses_default_for_model_and_execution(self) -> None:
+        record = self.recorded_dispatch(None, "second", empty_second_home=True)
+        self.assertEqual(record["account"], "second")
+        self.assertEqual(record["model"], "gpt-second-default")
+
     def test_account_argument_validation_and_override(self) -> None:
         for value in ("invalid", "", "secondary"):
             with self.subTest(value=value), self.assertRaises(subprocess.CalledProcessError) as failure:
@@ -319,6 +326,66 @@ class DispatchCommandTests(unittest.TestCase):
 
 
 class AccountRouterTests(unittest.TestCase):
+    def test_empty_secondary_home_resume_uses_default_rollout(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            second = root / ".cache/mipstarre-dev/codex-home-yxy"
+            rollout = second / "sessions" / f"rollout-{THREAD_ID}.jsonl"
+            rollout.parent.mkdir(parents=True)
+            rollout.touch()
+            (second / "config.toml").write_text('model = "gpt-second-default"\n')
+            with mock.patch.dict(os.environ, {
+                "HOME": str(root), "MIPSTARRE_CODEX_HOME_SECOND": "",
+                "MIPSTARRE_CODEX_MODEL": "",
+            }), mock.patch("sys.argv", [
+                str(ROUTER), str(root / "cache"), "auto", "123", "0",
+                str(root / "registry.jsonl"), "--resume", THREAD_ID, "--dry-run",
+            ]), mock.patch("builtins.print") as output:
+                router.main()
+            self.assertEqual(output.call_args_list,
+                             [mock.call("second"), mock.call("gpt-second-default")])
+
+    def test_resume_skips_bad_rows_without_losing_affinity_or_conflicts(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            registry = root / "registry.jsonl"
+            homes = {account: root / account for account in router.ACCOUNTS}
+            bad_rows = '\n  \n{"truncated":\nnull\n[]\n42\n'
+            record = json.dumps({"thread_id": THREAD_ID, "account": "second"})
+            registry.write_text(bad_rows + record + "\n")
+            with mock.patch("sys.stderr") as stderr:
+                self.assertEqual(router.resume_account(THREAD_ID, registry, homes), "second")
+            self.assertIn("skipping malformed registry record", str(stderr.write.call_args_list))
+            rollout = homes["second"] / "sessions" / f"rollout-{THREAD_ID}.jsonl"
+            rollout.parent.mkdir(parents=True)
+            rollout.touch()
+            with mock.patch("sys.stderr"):
+                registry.write_text(bad_rows)
+                self.assertEqual(router.resume_account(THREAD_ID, registry, homes), "second")
+                registry.write_text(bad_rows + json.dumps(
+                    {"thread_id": THREAD_ID, "account": "primary"}))
+                with self.assertRaises(ValueError):
+                    router.resume_account(THREAD_ID, registry, homes)
+
+    def test_resume_waits_for_registry_writer(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            registry = root / "registry.jsonl"
+            with registry.open("w") as writer, ThreadPoolExecutor(1) as pool:
+                fcntl.flock(writer, fcntl.LOCK_EX)
+                writer.write('{"thread_id":')
+                writer.flush()
+                homes = {account: root / account for account in router.ACCOUNTS}
+                try:
+                    pending = pool.submit(router.resume_account, THREAD_ID, registry, homes)
+                    with self.assertRaises(TimeoutError):
+                        pending.result(timeout=0.1)
+                    writer.write(json.dumps(THREAD_ID) + ', "account": "second"}\n')
+                    writer.flush()
+                finally:
+                    fcntl.flock(writer, fcntl.LOCK_UN)
+                self.assertEqual(pending.result(timeout=5), "second")
+
     def test_concurrent_reservations_do_not_overbook(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

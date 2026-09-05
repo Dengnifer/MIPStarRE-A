@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import re
+import sys
 import time
 
 
@@ -36,10 +37,21 @@ def live_count(directory: Path) -> int:
 def resume_account(thread: str, registry: Path, homes: dict[str, Path]) -> str:
     matches = set()
     if registry.exists():
-        for line in registry.read_text().splitlines():
-            row = json.loads(line)
-            if row.get("thread_id") == thread and row.get("account") in ACCOUNTS:
-                matches.add(row["account"])
+        with registry.open(encoding="utf-8", errors="replace") as handle:
+            fcntl.flock(handle, fcntl.LOCK_SH)
+            for number, line in enumerate(handle, 1):
+                if not line.strip():
+                    continue
+                try:
+                    row = json.loads(line)
+                except json.JSONDecodeError:
+                    row = None
+                if not isinstance(row, dict):
+                    print(f"account routing: {registry}:{number}: "
+                          "skipping malformed registry record", file=sys.stderr)
+                    continue
+                if row.get("thread_id") == thread and row.get("account") in ACCOUNTS:
+                    matches.add(row["account"])
     for account, home in homes.items():
         for area in ("sessions", "archived_sessions"):
             if any((home / area).rglob(f"rollout-*{thread}.jsonl")):
@@ -84,7 +96,7 @@ def main() -> None:
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
     homes = {"primary": Path.home() / ".codex", "second": Path(os.environ.get(
-        "MIPSTARRE_CODEX_HOME_SECOND", str(Path.home() / ".cache/mipstarre-dev/codex-home-yxy")))}
+        "MIPSTARRE_CODEX_HOME_SECOND") or Path.home() / ".cache/mipstarre-dev/codex-home-yxy")}
     try:
         if args.resume:
             affinity = resume_account(args.resume, args.registry, homes)
