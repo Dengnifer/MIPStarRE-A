@@ -618,6 +618,48 @@ $\{M^{(\mathrm{Point},W),u}_a\}_{a \in \F_q}$ for all $u \in \F_q^m$.
 	$M^{(\mathrm{Point},W),u}_a$ denotes.
 \end{definition}
 
+\begin{lemma}[Multiplication of point observables]
+\label{lem:point-observable-multiplication}
+\lean{MIPStarRE.QPBT.ProjectiveSetting.pointObs_mul}
+\lean{MIPStarRE.QPBT.ProjectiveSetting.pointObs_zero}
+\lean{MIPStarRE.QPBT.ProjectiveSetting.pointMeas_isProjective}
+\leanok
+\uses{def:strategy-observables}
+For a projective strategy, the answer-folded point measurement is projective.
+For either player, fixed $W$ and $u$, and all $r,s\in\F_q$, its observables satisfy
+\[
+W^r(u)W^s(u)=W^{r+s}(u),\qquad W^0(u)=\Id.
+\]
+These are formalization-only consequences of Equation~\eqref{eq:qld-strat-obs}.
+\end{lemma}
+\begin{proof}
+\leanok
+Answer folding preserves projectivity by summing orthogonal projections.
+Expanding the product of the two observable sums, orthogonality eliminates
+unequal outcomes, and additivity of the trace combines the two phase factors.
+At $r=0$, completeness of the point measurement gives the identity.
+\end{proof}
+
+\begin{lemma}[Averaging scalar multiples of an operator]
+\label{lem:operator-average-scalar-constant}
+\lean{MIPStarRE.LDT.averageOperatorOverDistribution_smul_const}
+\leanok
+Let $D$ be a finite-support distribution on a type $T$, with weights $w(t)$,
+let $c:T\to\mathbb C$, and let $A$ be a fixed finite-dimensional operator.
+Then
+\[
+\sum_{t\in\operatorname{supp}(D)} w(t)\bigl(c(t)A\bigr)
+=\left(\sum_{t\in\operatorname{supp}(D)}w(t)c(t)\right)A.
+\]
+This formalization-only identity supplies the scalar averaging rule used in
+Fourier inversion for expanded point effects.
+\end{lemma}
+\begin{proof}
+\leanok
+Use compatibility of real and complex scalar multiplication and distribute
+scalar multiplication over the finite sum.
+\end{proof}
+
 The observable $W^r(u)$ is the candidate for the generalized Pauli
 observable $\tau^W(r \cdot \mathrm{ind}_m(u))$ that the analysis eventually
 extracts from the strategy.
@@ -955,8 +997,6 @@ every tuple $\omega$.
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.expPointOp}
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.tauPointProj}
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.pointMeasExp}
-	\lean{MIPStarRE.QPBT.ProjectiveSetting.expPointOp_eq_convolution}
-	\lean{MIPStarRE.QPBT.ProjectiveSetting.pointMeasExp_isProjective}
 	\leanok
 	\uses{def:expanded-observables, lem:pauli-observable-expansion, def:low-degree-encoding, def:subfield-trace}
 	For $W \in \{X,Z\}$, $u \in \F_q^m$ and $a \in \F_q$, define
@@ -971,39 +1011,84 @@ every tuple $\omega$.
 	where $\{\tau^W_h\}_{h \in \F_q^{M}}$ are the joint eigenprojectors of
 	the generalized Pauli $W$-observables
 	(see Lemma~\ref{lem:pauli-observable-expansion}).
-	Expanding both tensor factors of $\hat{W}^r(u)$
-	by~\eqref{eq:qld-strat-obs} and by the Fourier expansion of the
-	generalized Pauli observables
-	(see Lemma~\ref{lem:pauli-observable-expansion}), and
-	averaging over $r$, gives the equivalent convolution form
+\end{definition}
+
+\begin{lemma}[Convolution and projectivity of expanded point measurements]
+	\label{lem:expanded-point-measurement-properties}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.expPointOp_eq_convolution}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.expPointOp_nonneg}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.expPointOp_sum_eq_one}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.pointMeasExp_isProjective}
+	\leanok
+	\uses{def:expanded-point-measurement}
+	For either player, $W \in \{X,Z\}$, $u \in \F_q^m$ and $a \in \F_q$,
+	the expanded point effects have the convolution form
 	\[
 		\hat{M}^{(\mathrm{Point},W),u}_a
 		\,=\, \sum_{\substack{a',a'' \in \F_q \\ a' + a'' = a}}
 		M^{(\mathrm{Point},W),u}_{a'} \ot \tau^{W,u}_{a''}\,.
 	\]
-	In particular each $\hat{M}^{(\mathrm{Point},W),u}_a$ is a projection
+	Each effect is positive semidefinite, and
+	$\sum_{a \in \F_q}\hat{M}^{(\mathrm{Point},W),u}_a=\Id$.
+	Moreover, each $\hat{M}^{(\mathrm{Point},W),u}_a$ is a projection
 	and $\{\hat{M}^{(\mathrm{Point},W),u}_a\}_{a \in \F_q}$ is a projective
 	measurement.
-\end{definition}
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:strategy-observables, def:expanded-observables,
+	lem:pauli-observable-expansion, prop:fourier-fact-scalar,
+	lem:operator-average-scalar-constant, lem:point-observable-multiplication,
+	lem:twisted-commutation}
+	Expand both tensor factors of $\hat{W}^r(u)$ and average over $r$.
+	Character orthogonality retains exactly the terms with $a'+a''=a$,
+	giving the convolution formula. Its summands are tensor products of
+	positive semidefinite operators, proving positivity. Summing over $a$
+	removes the convolution constraint; completeness of the strategy and
+	Pauli measurements then gives the identity.
+	For projectivity, multiplication of point observables and of Pauli
+	observables gives $\hat{W}^r(u)\hat{W}^s(u)=\hat{W}^{r+s}(u)$.
+	Squaring the Fourier average defining an effect and translating the
+	uniform summation variable therefore gives the same effect.
+	Positivity supplies self-adjointness, so each effect is a projection.
+\end{proof}
 
 \begin{definition}[Trace-coarse-grained point projections]
 	\label{def:expanded-point-trace-projection}
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.expPointTrace}
-	\lean{MIPStarRE.QPBT.ProjectiveSetting.expPointTrace_eq_half_add}
 	\leanok
-	\uses{def:expanded-point-measurement, def:expanded-observables, def:subfield-trace}
+	\uses{def:expanded-point-measurement, lem:expanded-point-measurement-properties,
+	def:expanded-observables, def:subfield-trace}
 	For fixed $u \in \F_q^m$, $r \in \F_q$ and $b \in \F_2$, define the
 	projection
 	\begin{equation}\label{eq:qld-def-mptur}
 		\hat{M}^{(\mathrm{Point},W),u,r}_b \,=\, \sum_{a \in \F_q \colon \tr(ar) = b} \hat{M}^{(\mathrm{Point},W),u}_a\,,
 	\end{equation}
-	which can be equivalently written as
-	\begin{equation}\label{eq:lc-22}
-		\hat{M}^{(\mathrm{Point},W),u,r}_b \,=\, \frac{1}{2} \Big( \Id + (-1)^b\, \hat{W}^r(u) \Big)\,.
-	\end{equation}
 	The register conventions are those of
 	Definition~\ref{def:expanded-observables}.
 \end{definition}
+
+\begin{lemma}[Trace coarse-graining identity]
+	\label{lem:expanded-point-trace-half-add}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.expPointTrace_eq_half_add}
+	\leanok
+	\uses{def:expanded-point-trace-projection, def:expanded-observables}
+	For either player, $W \in \{X,Z\}$, $u \in \F_q^m$, every $r \in \F_q$
+	(including $r=0$), and $b \in \F_2$, we have
+	\begin{equation}\label{eq:lc-22}
+		\hat{M}^{(\mathrm{Point},W),u,r}_b \,=\, \frac{1}{2} \Big( \Id + (-1)^b\, \hat{W}^r(u) \Big)\,.
+	\end{equation}
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:expanded-point-measurement-properties, prop:fourier-fact-scalar,
+	lem:operator-average-scalar-constant}
+	Fourier inversion gives
+	$\sum_a(-1)^{\tr(ar)}\hat{M}^{(\mathrm{Point},W),u}_a=\hat{W}^r(u)$.
+	The two trace classes sum to $\Id$ by completeness, and their difference
+	is this signed sum. Adding or subtracting these two identities and
+	dividing by two proves the formula.
+\end{proof}
 
 \begin{definition}[Symmetric equivalents]
 	\label{def:symmetric-equivalents}
