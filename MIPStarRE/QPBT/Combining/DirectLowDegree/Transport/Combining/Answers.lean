@@ -18,10 +18,8 @@ Line answers of both games are bounded coefficient vectors evaluated by
 `coefficientsOfPolynomial`; the degree bounds are what makes that round trip
 faithful.
 
-The affine shift `s` of the two line cases is the change of parameter between
-the canonical presentation of a line of the combined space and the canonical
-presentation of its image line, whose base points need not correspond; it is
-supplied by `directLineRepParameter` of `Transport.Questions`.
+The parameter `s` in the two line cases is the affine shift relating the two
+canonical parametrizations of the line.
 
 ## Main definitions
 

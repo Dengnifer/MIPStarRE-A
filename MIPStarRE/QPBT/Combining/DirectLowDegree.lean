@@ -63,8 +63,7 @@ representatives, and proves the polynomial-tuple conclusion of
 coordinate conclusions do not determine simultaneous measurements for larger
 parameters.
 
-`Transport.Combining` develops the reduction by which the source obtains the
-polynomial-tuple conclusion for a general simultaneity parameter: the combined
+For a general simultaneity parameter, the reduction introduces the combined
 parameters `DirectLdParams.combined`, of dimension `m + k` and simultaneity
 parameter `1`; the combining map on polynomial tuples and its individual-degree
 bound; the substitution recovering the components of a combined polynomial,
@@ -75,10 +74,9 @@ measuring one question of the original strategy and relabelling its outcome,
 together with its projectivity, the identification of the measured questions on
 each sample of the combined game, and the transport of its value.  The recovery
 of the components of a combined outcome costs `(m + k) d / q` in the two point
-relations, `Transport.Combining.SimultaneousGeneral` assembles the
-polynomial-tuple conclusion for a general simultaneity parameter, and
-`Transport.Combining.Error` absorbs the resulting error into the error function
-of `lem:ld-soundness`, so that `Soundness` carries the absorbed form; see
+relations.  The general-simultaneity theorem combines these constructions, and
+the scalar estimate absorbs the resulting error into the error function of
+`lem:ld-soundness`; see
 `blueprint/src/chapter/ch13_qpbt_test.tex`, the subsection on the combining
 reduction.
 

@@ -19,9 +19,9 @@ of `thm:main-formal` at the combined parameters, and
 `def:ld-combining-map`, at the cost of `(m + k) d / q` in the two point
 relations.
 
-The error obtained here is the error of `lem:ld-soundness` for the combined
-game plus `(m + k) d / q`, which is the form displayed in the source; its
-absorption into `deltaLd` at the original parameters, with the universal
+The displayed error is `Test.mainFormalError` from the direct `k = 1` result
+derived from `thm:main-formal` at the combined parameters, plus `(m + k) d / q`.
+Its absorption into `deltaLd` at the original parameters, with the universal
 constants `a = 10^23` and `b = 1/80000`, is
 `exists_directCombinedTransportConstants`, and the absorbed form of the
 conclusion is `exists_direct_ld_soundness`.
@@ -51,14 +51,14 @@ open DistanceCalculus
 noncomputable section
 
 set_option maxHeartbeats 1600000 in
-/-- `prop:ld-simultaneous-general-k`, with the error displayed as the error of
-`lem:ld-soundness` for the combined game at the combined parameters plus the
-recovery loss `(m + k) d / q`.
+/-- `prop:ld-simultaneous-general-k`, with `Test.mainFormalError` from the direct
+`k = 1` result derived from `thm:main-formal` at the combined parameters, plus
+the recovery loss `(m + k) d / q`.
 
 The combined strategy of `def:ld-combined-strategy` succeeds with probability
 at least `1 - 10 ε` at the combined parameters, whose simultaneity parameter is
-`1`; the case `k = 1` of `lem:ld-soundness` produces measurements with outcomes
-in the polynomials of `m + k` variables, and
+`1`; the direct `k = 1` result derived from `thm:main-formal` produces
+measurements with outcomes in the polynomials of `m + k` variables, and
 `lem:ld-combining-recovery` post-processes them by the recovery map. -/
 theorem exists_directSimultaneousPolynomialMeasurements_combinedError
     (D : DirectLdParams) (S : Strategy (directLdGame D)) (hS : S.IsProjective)

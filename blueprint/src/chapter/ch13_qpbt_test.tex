@@ -311,11 +311,12 @@ Definition~\ref{def:ld-game} is not available.
 
 \begin{definition}[Combined parameters of the reduction]
 	\label{def:ld-combining-parameters}
-	\lean{MIPStarRE.QPBT.DirectLdParams.combined}
+	\lean{MIPStarRE.QPBT.DirectLdParams, MIPStarRE.QPBT.DirectLdParams.combined}
 	\leanok
-	\uses{def:ld-game}
-	For a parameter tuple $\mathsf{ldparams} = (q,m,d,k)$ as in
-	Definition~\ref{def:ld-game}, the \emph{combined parameter tuple} is
+	\uses{def:admissible-size}
+	For directly indexed parameters $\mathsf{ldparams} = (q,m,d,k)$, where
+	$m,d,k \ge 1$ are integers and $q$ is an admissible field size, no condition
+	$m \mid q$ is imposed.  The \emph{combined parameter tuple} is
 	\[
 		\mathsf{ldparams}^{\mathrm c} = (q,\; m+k,\; d,\; 1)\;:
 	\]
@@ -430,13 +431,12 @@ Definition~\ref{def:ld-game} is not available.
 	\lean{MIPStarRE.QPBT.directCombinedRebaseParameter}
 	\lean{MIPStarRE.QPBT.directCombinedAnswerMap}
 	\lean{MIPStarRE.QPBT.directCombinedStrategy}
-	\lean{MIPStarRE.QPBT.directCombinedStrategy_isProjective}
 	\leanok
 	\uses{def:ld-game, def:ld-question-distribution, def:ld-win-predicate,
-		def:projective-strategy-general, def:ld-combining-parameters,
-		def:ld-combining-map}
-	Let $\mathcal S = (\psi, A, B)$ be a projective strategy for the directly
-	indexed low-degree game with parameters $\mathsf{ldparams}$.  The
+		def:tensor-product-strategy, def:bracket,
+		def:ld-combining-parameters, def:ld-combining-map}
+	Let $\mathcal S = (\psi, A, B)$ be a strategy for the directly indexed
+	low-degree game with parameters $\mathsf{ldparams}$.  The
 	\emph{combined strategy} $\mathcal S^{\mathrm c}$ for the directly indexed
 	low-degree game with parameters $\mathsf{ldparams}^{\mathrm c}$ has the same
 	state and the same two Hilbert spaces, and answers each question of the
@@ -471,9 +471,13 @@ Definition~\ref{def:ld-game} is not available.
 		$u$ is constant: measure the point question $u_0$, obtaining $b$, and
 		answer $t \mapsto \sum_r (\alpha_0)_r b_r + t \sum_r w_r b_r$.
 	\end{enumerate}
-	Each case measures a single measurement of $\mathcal S$ and relabels its
-	outcome, so $\mathcal S^{\mathrm c}$ is again a projective strategy, on the
-	same state.  Cases~3 and~5 use that a line of $\F_q^{m+k}$ whose direction
+	For any of these five question forms, if the outcome of the measured
+	question has a different answer form from the one specified in the
+	corresponding case, the post-processing returns the zero answer of the form
+	required by the combined question.  This convention makes the
+	post-processing a total map on the common answer alphabet.
+
+	Cases~3 and~5 use that a line of $\F_q^{m+k}$ whose direction
 	has vanishing point part is contained in a fiber of the projection to
 	$\F_q^m$, so that the combined polynomial restricted to it is determined by
 	the $k$ values of the tuple at the single point $u_0$; the rebasing in
@@ -482,6 +486,24 @@ Definition~\ref{def:ld-game} is not available.
 	canonical base of a line of $\F_q^{m+k}$ need not project to the canonical
 	base of its image line in $\F_q^m$.
 \end{definition}
+
+\begin{theorem}[Projectivity of the combined strategy]
+	\label{thm:ld-combined-strategy-projective}
+	\lean{MIPStarRE.QPBT.directCombinedStrategy_isProjective}
+	\leanok
+	\uses{def:ld-combined-strategy, def:projective-strategy-general}
+	For every strategy $\mathcal S$ for the directly indexed low-degree game, if
+	$\mathcal S$ is projective, then the combined strategy
+	$\mathcal S^{\mathrm c}$ is projective.
+\end{theorem}
+\begin{proof}
+	\leanok
+	\uses{def:ld-combined-strategy, lem:sandwich-postprocess-projective}
+	For either player and every question of the combined game, the corresponding
+	measurement of $\mathcal S^{\mathrm c}$ is obtained by relabelling the outcomes
+	of one measurement of $\mathcal S$.  Every such post-processing of a
+	projective measurement is projective.
+\end{proof}
 
 \begin{lemma}[The questions measured by the combined strategy]
 	\label{lem:ld-combined-question-law}
@@ -691,38 +713,44 @@ Definition~\ref{def:ld-game} is not available.
 	most $1/q$ over a uniform $\alpha$.  Averaging over $\alpha$ therefore
 	converts the relation for the combined values into the tuple relation
 	\[
-		A^{\mathsf{Point},\,u}_{a_1,\ldots,a_k} \ot \Id_{\mathrm B}
+		A^{\mathsf{Point},\,u}_{a_0,\ldots,a_{k-1}} \ot \Id_{\mathrm B}
 		\simeq \Id_{\mathrm A} \ot
-			H^{\mathrm B}_{[(g_1(u),\ldots,g_k(u)) = (a_1,\ldots,a_k)]}
+			H^{\mathrm B}_{[(g_0(u),\ldots,g_{k-1}(u)) =
+				(a_0,\ldots,a_{k-1})]}
 	\]
 	with error $O(\delta + 1/q)$, and symmetrically for the second relation.
 \end{proof}
 
 \begin{proposition}[Simultaneous polynomial measurements for general $k$]
 	\label{prop:ld-simultaneous-general-k}
-	\lean{MIPStarRE.QPBT.exists_directSimultaneousPolynomialMeasurements_combinedError, MIPStarRE.QPBT.exists_direct_ld_soundness}
+	\lean{MIPStarRE.QPBT.exists_directSimultaneousPolynomialMeasurements_combinedError}
+	\lean{MIPStarRE.QPBT.exists_directCombinedTransportConstants}
+	\lean{MIPStarRE.QPBT.exists_direct_ld_soundness}
 	\leanok
 	\uses{def:ld-meas, def:consistency, def:bracket,
 		def:projective-strategy-general, def:ld-combining-parameters,
 		lem:ld-combined-value, lem:ld-combining-recovery, lem:ld-soundness,
 		thm:main-formal}
-	Let $\mathsf{ldparams} = (q,m,d,k)$ and let $\mathcal S = (\psi, A, B)$ be a
-	projective strategy succeeding with probability at least $1 - \eps$ in the
-	directly indexed low-degree game with parameters $\mathsf{ldparams}$.  Then
+	There exist universal constants $a \ge 1$ and $0 < b \le 1$ such that the
+	following holds.  For every directly indexed parameter tuple
+	$\mathsf{ldparams} = (q,m,d,k)$, every $\eps > 0$, and every projective
+	strategy $\mathcal S = (\psi, A, B)$ succeeding with probability at least
+	$1 - \eps$ in the directly indexed low-degree game with those parameters,
 	there exist measurements $G^{\mathrm A}, G^{\mathrm B} \in
 	\mathrm{PolyMeas}(m,q,d,k)$ satisfying the three consistency relations of
-	Theorem~\ref{lem:ld-soundness}, with the error of
+	Theorem~\ref{lem:ld-soundness} with error
+	$\delta_{\mathrm{ld}}(\eps,q,m,d,k)$ evaluated at these constants.
+
+	Before scalar absorption, the first two relations hold with the error of
 	Theorem~\ref{thm:main-formal} at the combined parameters
 	$\mathsf{ldparams}^{\mathrm c}$ of
 	Definition~\ref{def:ld-combining-parameters}, sampling parameter
 	$2560000\,(m+k)^{3}d$ and pass bound $30\eps$ --- increased by the recovery
-	loss $(m+k)d/q$ for the two point/polynomial relations, and taken alone for
-	the polynomial/polynomial relation.  For $0 < \eps \le 1$ that error is at
-	most $\delta_{\mathrm{ld}}(\eps,q,m,d,k)$ at the universal constants
-	$a = 10^{23}$ and $b = 1/80000$, and for $\eps \ge 1$ the latter is at least
-	one while a consistency defect on a unit state is at most one; so for every
-	$\eps > 0$ the three relations hold with the error
-	$\delta_{\mathrm{ld}}(\eps,q,m,d,k)$ at those constants as well.
+	loss $(m+k)d/q$; the polynomial/polynomial relation carries the same error
+	without the recovery loss.  For $0 < \eps \le 1$ the former error is at most
+	$\delta_{\mathrm{ld}}(\eps,q,m,d,k)$, and for $\eps \ge 1$ this error
+	function is at least one while a consistency defect on a unit state is at
+	most one.
 
 	The source records this error in the abbreviated form
 	$\delta_{\mathrm{ld}}(\eps, q, m+k, d, 1) + O((m+k)d/q)$; the first summand
@@ -734,11 +762,12 @@ Definition~\ref{def:ld-game} is not available.
 	\leanok
 	\uses{lem:ld-combined-value, lem:ld-combining-recovery,
 		def:ld-combining-parameters, lem:direct-ld-simultaneous-single,
-		thm:main-formal, lem:ld-soundness}
-	Apply Lemma~\ref{lem:ld-combined-value} to obtain a projective strategy
-	$\mathcal S^{\mathrm c}$ for the directly indexed game with parameters
-	$\mathsf{ldparams}^{\mathrm c}$ succeeding with probability at least
-	$1 - 10\eps$.  That game has simultaneity parameter $1$, so
+		thm:ld-combined-strategy-projective, thm:main-formal, lem:ld-soundness}
+	By Theorem~\ref{thm:ld-combined-strategy-projective},
+	$\mathcal S^{\mathrm c}$ is projective, and
+	Lemma~\ref{lem:ld-combined-value} shows that it succeeds with probability at
+	least $1 - 10\eps$ in the directly indexed game with parameters
+	$\mathsf{ldparams}^{\mathrm c}$.  That game has simultaneity parameter $1$, so
 	Lemma~\ref{lem:direct-ld-simultaneous-single} --- the polynomial-tuple
 	conclusion for simultaneity parameter $1$, obtained for the directly indexed
 	game from Theorem~\ref{thm:main-formal} --- applies and produces measurements

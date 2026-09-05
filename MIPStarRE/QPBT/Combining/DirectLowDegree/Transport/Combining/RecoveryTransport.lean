@@ -11,16 +11,16 @@ for the original strategy at the original parameters, by post-processing the
 measurements of the combined game with the recovery map of
 `def:ld-combining-map`.
 
-The two point relations are wired by the abstract transport of
-`Transport.Combining.RecoveryDefect`.  At a point `(u, α)` of the combined
-space the point measurement of the combined strategy is the point measurement
-of the original strategy at `u` post-processed by the combination with
-coefficients `α`, and the polynomial measurement of the combined game read at
-that point is the same measurement read through the recovery map and then
-combined with the same coefficients; the two families therefore differ only on
-the discrepancy event of `Recovery`, whose average is `(m + k) d / q`.  The
-uniform law on the combined space is the product of the uniform laws on the
-point part and on the combining part, which is the reindexing along
+The two point relations follow from the consistency-defect transport
+inequality.  At a point `(u, α)` of the combined space the point measurement of
+the combined strategy is the point measurement of the original strategy at `u`
+post-processed by the combination with coefficients `α`, and the polynomial
+measurement of the combined game read at that point is the same measurement
+read through the recovery map and then combined with the same coefficients; the
+two families therefore differ only on the recovery discrepancy event, whose
+average is `(m + k) d / q`.  The uniform law on the combined space is the
+product of the uniform laws on the point part and on the combining part, which
+is the reindexing along
 `directCombinedPointEquiv`.
 
 The polynomial relation is data processing: the recovered measurements are
