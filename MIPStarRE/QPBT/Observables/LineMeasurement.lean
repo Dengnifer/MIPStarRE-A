@@ -1,5 +1,5 @@
 import MIPStarRE.QPBT.Observables.PointConsistency
-import MIPStarRE.QPBT.Observables.LineMeasurement.SelfConsistency
+import MIPStarRE.QPBT.Observables.LineMeasurement.LinePointConsistency
 
 /-!
 # Expanded line measurements
@@ -14,8 +14,12 @@ The construction is split over the submodules `LineMeasurement.Restriction`
 `LineMeasurement.Expanded` (the convolution measurement, its projectivity, and
 its vanishing outside the degree-`d` outcomes on axis lines),
 `LineMeasurement.SquareRootError` (passage from linear to square-root errors),
-and `LineMeasurement.SelfConsistency` (item 1 on both bipartitions). This file
-states the three consistency conclusions and the source's existential form.
+`LineMeasurement.SelfConsistency` (item 1 on both bipartitions),
+`LineMeasurement.LinePointOverlap` (the exact overlap identity behind items 2
+and 3), `LineMeasurement.BipartiteTransport`,
+`LineMeasurement.EvalClassConsistency` (item 3), and
+`LineMeasurement.LinePointConsistency` (item 2). This file states the three
+consistency conclusions and the source's existential form.
 
 ## References
 
@@ -161,7 +165,51 @@ theorem expLine_point_cons :
               S.place p₂ (S.expPointEffectAtLineAnswer p₂.side W
                 sample.1 sample.2 f))
           S.psiHat ≤ C * deltaLine ε := by
-  sorry
+  obtain ⟨C₁, hC₁, h₁⟩ := WinImplications.win_low_degree_proof
+  obtain ⟨C₂, hC₂, h₂⟩ := WinImplications.win_low_degree_interchanged_proof
+  refine ⟨2 * (C₁ + C₂) + 4, by linarith, ?_⟩
+  intro P ε S p₁ p₂ hopp W
+  have hε : 0 ≤ ε := S.eps_nonneg
+  have key : ∀ (x a : ℝ), 1 ≤ a → a ≤ C₁ + C₂ → 0 ≤ x → x ≤ 2 * (a * ε) →
+      x ≤ 4 → x ≤ (2 * (C₁ + C₂) + 4) * deltaLine ε := by
+    intro x a ha haC hx0 hxa hx4
+    calc
+      x ≤ (2 * a + 4) * Real.sqrt ε :=
+        le_mul_sqrt_of_le_mul_of_le_four (by linarith) hx0
+          (by rw [mul_assoc]; exact hxa) hx4
+      _ ≤ (2 * (C₁ + C₂) + 4) * Real.sqrt ε := by
+        apply mul_le_mul_of_nonneg_right _ (Real.sqrt_nonneg ε)
+        linarith
+  have htwo : (0 : ℝ) ≤ 2 := by norm_num
+  cases p₁ <;> cases p₂ <;> simp only [Placement.IsOpposite] at hopp
+  · have hb := ((ProjectiveSetting.linePointDist_aaBa_le S W).trans
+      (ProjectiveSetting.evalClassDist_aaBa_le S W)).trans
+      (mul_le_mul_of_nonneg_left (h₁ P ε S hε W) htwo)
+    have h4 := (ProjectiveSetting.linePointDist_aaBa_le S W).trans
+      (ProjectiveSetting.evalClassDist_aaBa_le_four S W)
+    simpa only [Placement.side] using key _ C₁ hC₁ (by linarith)
+      (DistanceCalculus.opFamilyDistSq_nonneg _ _ _ _) hb h4
+  · have hb := ((ProjectiveSetting.linePointDist_baAa_le S W).trans
+      (ProjectiveSetting.evalClassDist_baAa_le S W)).trans
+      (mul_le_mul_of_nonneg_left (h₂ P ε S hε W) htwo)
+    have h4 := (ProjectiveSetting.linePointDist_baAa_le S W).trans
+      (ProjectiveSetting.evalClassDist_baAa_le_four S W)
+    simpa only [Placement.side] using key _ C₂ hC₂ (by linarith)
+      (DistanceCalculus.opFamilyDistSq_nonneg _ _ _ _) hb h4
+  · have hb := ((ProjectiveSetting.linePointDist_bbAb_le S W).trans
+      (ProjectiveSetting.evalClassDist_bbAb_le S W)).trans
+      (mul_le_mul_of_nonneg_left (h₂ P ε S hε W) htwo)
+    have h4 := (ProjectiveSetting.linePointDist_bbAb_le S W).trans
+      (ProjectiveSetting.evalClassDist_bbAb_le_four S W)
+    simpa only [Placement.side] using key _ C₂ hC₂ (by linarith)
+      (DistanceCalculus.opFamilyDistSq_nonneg _ _ _ _) hb h4
+  · have hb := ((ProjectiveSetting.linePointDist_abBb_le S W).trans
+      (ProjectiveSetting.evalClassDist_abBb_le S W)).trans
+      (mul_le_mul_of_nonneg_left (h₁ P ε S hε W) htwo)
+    have h4 := (ProjectiveSetting.linePointDist_abBb_le S W).trans
+      (ProjectiveSetting.evalClassDist_abBb_le_four S W)
+    simpa only [Placement.side] using key _ C₁ hC₁ (by linarith)
+      (DistanceCalculus.opFamilyDistSq_nonneg _ _ _ _) hb h4
 
 /-- Evaluation classes of expanded line measurements are consistent with the
 completed expanded point family, including the `none` class. This is item 3 of
@@ -178,7 +226,43 @@ theorem expLine_point_cons' :
           (fun sample a => S.place p₂
             ((S.pointMeasExpOption p₂.side W sample.2).effect a))
           S.psiHat ≤ C * deltaLine ε := by
-  sorry
+  obtain ⟨C₁, hC₁, h₁⟩ := WinImplications.win_low_degree_proof
+  obtain ⟨C₂, hC₂, h₂⟩ := WinImplications.win_low_degree_interchanged_proof
+  refine ⟨2 * (C₁ + C₂) + 4, by linarith, ?_⟩
+  intro P ε S p₁ p₂ hopp W
+  have hε : 0 ≤ ε := S.eps_nonneg
+  have key : ∀ (x a : ℝ), 1 ≤ a → a ≤ C₁ + C₂ → 0 ≤ x → x ≤ 2 * (a * ε) →
+      x ≤ 4 → x ≤ (2 * (C₁ + C₂) + 4) * deltaLine ε := by
+    intro x a ha haC hx0 hxa hx4
+    calc
+      x ≤ (2 * a + 4) * Real.sqrt ε :=
+        le_mul_sqrt_of_le_mul_of_le_four (by linarith) hx0
+          (by rw [mul_assoc]; exact hxa) hx4
+      _ ≤ (2 * (C₁ + C₂) + 4) * Real.sqrt ε := by
+        apply mul_le_mul_of_nonneg_right _ (Real.sqrt_nonneg ε)
+        linarith
+  have htwo : (0 : ℝ) ≤ 2 := by norm_num
+  cases p₁ <;> cases p₂ <;> simp only [Placement.IsOpposite] at hopp
+  · have hb := (ProjectiveSetting.evalClassDist_aaBa_le S W).trans
+      (mul_le_mul_of_nonneg_left (h₁ P ε S hε W) htwo)
+    simpa only [Placement.side] using key _ C₁ hC₁ (by linarith)
+      (DistanceCalculus.opFamilyDistSq_nonneg _ _ _ _) hb
+      (ProjectiveSetting.evalClassDist_aaBa_le_four S W)
+  · have hb := (ProjectiveSetting.evalClassDist_baAa_le S W).trans
+      (mul_le_mul_of_nonneg_left (h₂ P ε S hε W) htwo)
+    simpa only [Placement.side] using key _ C₂ hC₂ (by linarith)
+      (DistanceCalculus.opFamilyDistSq_nonneg _ _ _ _) hb
+      (ProjectiveSetting.evalClassDist_baAa_le_four S W)
+  · have hb := (ProjectiveSetting.evalClassDist_bbAb_le S W).trans
+      (mul_le_mul_of_nonneg_left (h₂ P ε S hε W) htwo)
+    simpa only [Placement.side] using key _ C₂ hC₂ (by linarith)
+      (DistanceCalculus.opFamilyDistSq_nonneg _ _ _ _) hb
+      (ProjectiveSetting.evalClassDist_bbAb_le_four S W)
+  · have hb := (ProjectiveSetting.evalClassDist_abBb_le S W).trans
+      (mul_le_mul_of_nonneg_left (h₁ P ε S hε W) htwo)
+    simpa only [Placement.side] using key _ C₁ hC₁ (by linarith)
+      (DistanceCalculus.opFamilyDistSq_nonneg _ _ _ _) hb
+      (ProjectiveSetting.evalClassDist_abBb_le_four S W)
 
 /-- The source's existential polynomial-error form, derived from the concrete
 expanded-line witnesses and square-root error. This is
