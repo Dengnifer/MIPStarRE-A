@@ -194,7 +194,7 @@ this is the source of the terminology.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{def:low-degree-encoding, def:indicator-vector, def:admissible-size, def:binary-representation, lem:downsize_field, lem:one}
+	\uses{def:low-degree-encoding, def:indicator-vector, def:admissible-size, def:binary-representation, lem:one}
 	By the definition of the indicator vector
 	(Definition~\ref{def:indicator-vector}), expanding the product over the
 	coordinates $i \in \{1, \dots, m\}$ into a sum over $y \in \{0,1\}^m$
@@ -215,25 +215,29 @@ this is the source of the terminology.
 	independently, $r_X \neq 0$ with probability $1 - q^{-1}$. If $r_X = 0$
 	or some factor vanishes, then $\gamma(\omega) = 0$. Otherwise, over the
 	uniform choice of $r_Z$, the argument of the trace is a uniformly random
-	element of $\F_q$. Since $q = 2^k$ is admissible, the trace of an
-	element of $\F_q$ equals the coordinate sum of its binary
-	representation: writing $\kappa$ for the binary representation with
-	respect to the fixed self-dual normal basis
-	(Definition~\ref{def:binary-representation}), item~2 of
-	Lemma~\ref{lem:downsize_field} gives
-	$\tr(c) = \tr(c \cdot 1) = \kappa(c) \cdot \kappa(1)$, and $\kappa(1)$
-	is the all-ones vector by Lemma~\ref{lem:one}. As $\kappa$ is a
-	bijection onto $\F_2^k$, a uniformly random element of $\F_q$ has trace
-	$0$ with probability exactly $\frac12$. Combining, the probability that
+	element of $\F_q$, and a uniformly random element of $\F_q$ has trace
+	$0$ with probability exactly $\frac12$: the first vector $b_0$ of the
+	fixed self-dual normal basis satisfies $\tr(b_0) = 1$ by
+	Lemma~\ref{lem:one}, the trace
+	(Definition~\ref{def:binary-representation}) is additive, and $\F_q$
+	has characteristic $2$, so the translation $c \mapsto c + b_0$ is an
+	involution of $\F_q$ carrying $\{c : \tr(c) = 0\}$ bijectively onto
+	$\{c : \tr(c) \neq 0\}$; the two sets therefore have the same
+	cardinality. Combining, the probability that
 	$\gamma(\omega) \neq 0$ is exactly $(1-q^{-1})^{m+1} \cdot \frac12$, and
 	the probability that $\omega$ is commuting is the complement, which is
 	at least $\frac12$.
 
-	If $m \leq q$, then
-	$(1-q^{-1})^{m+1} \geq (1-q^{-1})^{q+1} = (1-q^{-1})^{q} \cdot (1-q^{-1})$,
-	a product of two positive functions of $q$ that are nondecreasing for
-	$q \geq 2$, so it is minimized at $q = 2$, where it equals $2^{-3}$;
-	hence the anticommuting probability is at least $2^{-4}$.
+	If $m \leq q$, then $(1-q^{-1})^{m+1} \geq (1-q^{-1})^{q+1}$, and this
+	last quantity is at least $2^{-3}$ in each of the two cases permitted
+	by admissibility (Definition~\ref{def:admissible-size}): the exponent
+	$k$ with $q = 2^k$ is odd, so either $q = 2$ or $8 \mid q$. If $q = 2$,
+	then $m \leq 2$ and $(1-q^{-1})^{m+1} = 2^{-(m+1)} \geq 2^{-3}$. If
+	$q = 8j$ with $j \geq 1$, then Bernoulli's inequality gives
+	$(1-q^{-1})^{j} \geq 1 - j q^{-1} = \frac78$, while
+	$m + 1 \leq q + 1 \leq 9j$, so
+	$(1-q^{-1})^{m+1} \geq \big( (1-q^{-1})^{j} \big)^{9} \geq \big( \frac78 \big)^{9} \geq \frac18$.
+	Hence the anticommuting probability is at least $2^{-4}$.
 
 	Finally, suppose $m, d \geq 1$, and consider the first inequality of
 	the display, which bounds the anticommuting probability from below.
@@ -622,6 +626,11 @@ extracts from the strategy.
 	\lean{MIPStarRE.QPBT.win_comm_cons, MIPStarRE.QPBT.win_comm_cons_approx}
 	\lean{MIPStarRE.QPBT.win_magic_square}
 	\lean{MIPStarRE.QPBT.win_ms_cons, MIPStarRE.QPBT.win_ms_cons_approx}
+	% The conditional sampling of items 4-7: the uniform laws on commuting
+	% and on anticommuting tuples, together with their total mass one.
+	\lean{MIPStarRE.QPBT.anticommTupleDist, MIPStarRE.QPBT.commTupleDist}
+	\lean{MIPStarRE.QPBT.anticommTupleDist_isProbability}
+	\lean{MIPStarRE.QPBT.commTupleDist_isProbability}
 	\leanok
 	\uses{lem:projective-strategy-setup, def:anticommuting-tuple, def:pauli-question-distribution, def:pauli-win-predicate, def:line-point-dist, def:consistency, def:povm-distance, def:ms-game, def:tensor-product-value, def:low-degree-encoding, def:ideg-deg-polynomials}
 	Assume that $\mathcal{S}$ succeeds in $\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$

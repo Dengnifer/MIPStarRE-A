@@ -1,3 +1,4 @@
+import MIPStarRE.QPBT.Algebra.SelfDualBasisTheorems
 import MIPStarRE.QPBT.Test.PauliBasisTest
 
 /-!
@@ -83,68 +84,6 @@ private theorem card_pauliScalar (P : AdmissibleParams) :
     Fintype.card (PauliScalar P) = P.q :=
   @FieldModel.card P.q P.model.toFieldModel
 
-/-- Formalization-only auxiliary: an admissible field size is at least two.
-Blueprint `ch14_qpbt_observables.tex:151-178`. -/
-private theorem two_le_q (P : AdmissibleParams) : 2 ≤ P.q := by
-  obtain ⟨k, hk, hq⟩ := P.hq
-  obtain ⟨j, hj⟩ := hk
-  rw [hq, hj]
-  calc 2 = 2 ^ 1 := by norm_num
-    _ ≤ 2 ^ (2 * j + 1) := Nat.pow_le_pow_right (by norm_num) (by omega)
-
-/-- Formalization-only auxiliary: an admissible field size is either two or a
-multiple of eight, because its binary exponent is odd. Blueprint
-`ch14_qpbt_observables.tex:151-178`. -/
-private theorem q_eq_two_or_eight_dvd (P : AdmissibleParams) :
-    P.q = 2 ∨ 8 ∣ P.q := by
-  obtain ⟨k, hk, hq⟩ := P.hq
-  obtain ⟨j, hj⟩ := hk
-  rcases Nat.eq_zero_or_pos j with hj0 | hj0
-  · left
-    rw [hq, hj, hj0]
-    norm_num
-  · right
-    refine ⟨2 ^ (2 * j + 1 - 3), ?_⟩
-    rw [hq, hj, show (8 : ℕ) = 2 ^ 3 by norm_num, ← pow_add]
-    congr 1
-    omega
-
-/-- Formalization-only auxiliary: over a commutative ring of characteristic
-two, the inner product of two indicator vectors is the product of the
-coordinate sums `1 + x_i + z_i`. This is the product expansion used in the
-proof of `fact:omega-anticomm-prob`, blueprint
-`ch14_qpbt_observables.tex:196-235`. -/
-private theorem sum_indicatorVec_mul_indicatorVec {K : Type*} [CommRing K]
-    [CharP K 2] {m : ℕ} (x z : Fin m → K) :
-    ∑ y : Cube m, indicatorVec x y * indicatorVec z y
-      = ∏ i : Fin m, (1 + x i + z i) := by
-  have h2 : (2 : K) = 0 := CharTwo.two_eq_zero
-  have hev : ∀ (u : Fin m → K) (y : Cube m),
-      indicatorVec u y = ∏ i : Fin m, if y i then u i else 1 - u i := by
-    intro u y
-    simp [indicatorVec, indicatorPoly, apply_ite]
-  have hfac : ∀ i : Fin m,
-      ∑ b : Bool, ((if b then x i else 1 - x i) * (if b then z i else 1 - z i))
-        = 1 + x i + z i := by
-    intro i
-    have h1 :
-        ∑ b : Bool, ((if b then x i else 1 - x i) * (if b then z i else 1 - z i))
-          = x i * z i + (1 - x i) * (1 - z i) := by
-      rw [Fintype.sum_bool]
-      simp
-    rw [h1]
-    linear_combination (x i * z i - x i - z i) * h2
-  calc ∑ y : Cube m, indicatorVec x y * indicatorVec z y
-      = ∑ y : Cube m, ∏ i : Fin m,
-          ((if y i then x i else 1 - x i) * (if y i then z i else 1 - z i)) := by
-        refine Finset.sum_congr rfl ?_
-        intro y _
-        rw [hev x y, hev z y, ← Finset.prod_mul_distrib]
-    _ = ∏ i : Fin m, ∑ b : Bool,
-          ((if b then x i else 1 - x i) * (if b then z i else 1 - z i)) := by
-        rw [Finset.prod_univ_sum, Fintype.piFinset_univ]
-    _ = ∏ i : Fin m, (1 + x i + z i) := Finset.prod_congr rfl fun i _ => hfac i
-
 /-- The phase bit of a Pauli tuple is the trace of `r_Z r_X` times the product
 of the coordinate sums `1 + u_{X,i} + u_{Z,i}`. This is the closed form of
 `γ(ω)` derived in the proof of `fact:omega-anticomm-prob`, blueprint
@@ -182,8 +121,8 @@ private theorem two_mul_card_trace_ne (P : AdmissibleParams) :
     have hpos : 0 < P.model.basisDim := by
       obtain ⟨j, hj⟩ := P.model.basisDimOdd
       omega
-    refine ⟨P.model.basis ⟨0, hpos⟩ * P.model.basis ⟨0, hpos⟩, ?_⟩
-    simpa [fixedBinTrace, binTrace] using P.model.selfDual ⟨0, hpos⟩ ⟨0, hpos⟩
+    exact ⟨P.model.basis ⟨0, hpos⟩,
+      fixedFieldModel_trace_basis_eq_one P.model ⟨0, hpos⟩⟩
   have hbb : b + b = 0 := CharTwo.add_self_eq_zero b
   have himg :
       (Finset.univ.filter
@@ -374,7 +313,7 @@ private theorem card_comm_add_card_anticomm (P : AdmissibleParams) :
 Blueprint `ch14_qpbt_observables.tex:151-178`. -/
 private theorem card_pauliTuple_pos (P : AdmissibleParams) :
     0 < Fintype.card (PauliTuple P) := by
-  have hq : 0 < P.q := lt_of_lt_of_le (by norm_num) (two_le_q P)
+  have hq : 0 < P.q := lt_of_lt_of_le (by norm_num) P.hq.two_le
   rw [card_pauliTuple P]
   exact Nat.mul_pos (pow_pos hq _) (Nat.mul_pos (pow_pos hq _) (Nat.mul_pos hq hq))
 
@@ -386,7 +325,7 @@ Schwartz--Zippel argument at paper
 `14_analysis_of_the_pauli_basis_test.tex:79-93`. -/
 theorem anticommProb_eq (P : AdmissibleParams) :
     anticommProb P = (1 - (P.q : ℝ)⁻¹) ^ (P.m + 1) / 2 := by
-  have hq2 : 2 ≤ P.q := two_le_q P
+  have hq2 : 2 ≤ P.q := P.hq.two_le
   have hqR : (0 : ℝ) < (P.q : ℝ) := by
     have h : 0 < P.q := by omega
     exact_mod_cast h
@@ -424,7 +363,7 @@ anticommuting probability lies in the unit interval. Blueprint
 `ch14_qpbt_observables.tex:151-178`. -/
 private theorem base_mem_unit_interval (P : AdmissibleParams) :
     (0 : ℝ) ≤ 1 - (P.q : ℝ)⁻¹ ∧ (1 : ℝ) - (P.q : ℝ)⁻¹ ≤ 1 := by
-  have hq2 : 2 ≤ P.q := two_le_q P
+  have hq2 : 2 ≤ P.q := P.hq.two_le
   have hqR : (2 : ℝ) ≤ (P.q : ℝ) := by exact_mod_cast hq2
   have hinv : (P.q : ℝ)⁻¹ ≤ 1 / 2 := by
     rw [inv_le_comm₀ (by linarith) (by norm_num)]
@@ -448,10 +387,10 @@ bound added in `fact:omega-anticomm-prob`, blueprint
 theorem anticommProb_ge_of_m_le_q (P : AdmissibleParams) (hmq : P.m ≤ P.q) :
     (2 : ℝ) ^ (-4 : ℤ) ≤ anticommProb P := by
   obtain ⟨h0, h1⟩ := base_mem_unit_interval P
-  have hq2 : 2 ≤ P.q := two_le_q P
+  have hq2 : 2 ≤ P.q := P.hq.two_le
   have hqR : (2 : ℝ) ≤ (P.q : ℝ) := by exact_mod_cast hq2
   have hmain : (1 : ℝ) / 8 ≤ (1 - (P.q : ℝ)⁻¹) ^ (P.m + 1) := by
-    rcases q_eq_two_or_eight_dvd P with hq | hdvd
+    rcases P.hq.eq_two_or_eight_dvd with hq | hdvd
     · have hm : P.m ≤ 2 := hq ▸ hmq
       have hb : (1 : ℝ) - (P.q : ℝ)⁻¹ = 1 / 2 := by
         rw [hq]
@@ -510,7 +449,7 @@ theorem anticommProb_ge_of_one_le_md (P : AdmissibleParams) :
       (1 - 3 * ((P.m * P.d : ℕ) : ℝ) / P.q) / 2 ≤ anticommProb P ∧
       (1 - 3 * ((P.m * P.d : ℕ) : ℝ) / P.q) / 2 ≤ commProb P := by
   obtain ⟨hb0, hb1⟩ := base_mem_unit_interval P
-  have hq2 : 2 ≤ P.q := two_le_q P
+  have hq2 : 2 ≤ P.q := P.hq.two_le
   have hqR : (2 : ℝ) ≤ (P.q : ℝ) := by exact_mod_cast hq2
   have hm1 : 1 ≤ P.m := P.one_le_m
   have hd1 : 1 ≤ P.d := P.hd
@@ -622,7 +561,7 @@ theorem anticommTupleDist_isProbability (P : AdmissibleParams) :
     (anticommTupleDist P).IsProbability := by
   refine Distribution.uniformOnFinset_isProbability _ ?_
   rw [← Finset.card_pos]
-  have hq2 : 2 ≤ P.q := two_le_q P
+  have hq2 : 2 ≤ P.q := P.hq.two_le
   have hcount := two_mul_card_anticommuting P
   have hpos : 0 < P.q ^ (P.m + 1) * (P.q - 1) ^ (P.m + 1) :=
     Nat.mul_pos (pow_pos (by omega) _) (pow_pos (by omega) _)
