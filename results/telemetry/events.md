@@ -2778,5 +2778,46 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   review of new evidence, not a waiver of findings or an increase of the round cap;
   no workflow implementation is changed.
 
+## 2026-09-05T16:04Z — PR 228 merged; recover disconnected PR 205 reviews
+
+- The running daemon merged PR 228 (issue 218) after refreshing its base and obtaining
+  exact-head evidence. Posted the merge and active queue to progress log 27.
+- Both inherited PR 205 reviewers on `gpt-5.6-sol` have spent over forty minutes in
+  connection retries. Their only completed items are transport errors, not review
+  findings. Stop only the two verified Codex children, let the review wrapper finish
+  and release its locks, then dispatch independent reviews on `gpt-6-astra`. Preserve
+  any failed-run evidence; do not treat the failed connections as completed reviews.
+
+## 2026-09-05T16:07Z — Bound issue 224 to proof-only instance cleanup
+
+- Scout `scout-224-20260905-01` found that the scalar model already stores and forwards
+  decidable equality. The issue's proposed additional field is unnecessary. The two
+  private congruence helpers only identify subsingleton instance arguments; their
+  removal can be attempted without changing the distribution or theorem hypotheses.
+- Recorded the implementation scope on issue 224: prefer `Test/Completeness.lean`
+  alone, keep the sampler and public statements unchanged, and validate the exact
+  congruence proof in Lean. Added dependency on issue 156 to avoid conflict with its
+  completed honest-strategy construction in that same file. No definition change or
+  mathematical-gap attempt was authorized.
+- PR 205's disconnected review wrapper exited with no verdict; new independent astra
+  reviews are running. PR 153's fix reached green CI and likewise received its required
+  post-fix independent review dispatch, under the operational remedy recorded for PR 225.
+
+## 2026-09-05T16:10Z — Advance exact-head review evidence after fixes
+
+- PR 227's replacement astra worker completed its scoped fix and reached green CI.
+  Dispatched the independent second review. PR 225's second review reduced its ledger
+  to two findings: an existing Mathlib lemma should replace a duplicate proof, and the
+  blueprint must retain the recovery error in the Lean statement. Started its second
+  labelled autofix round without changing the theorem's assumptions or conclusion.
+- PR 230's checked push succeeded at `366d1061e1228b2cec921b4f2c6b741bdeb23af3`, but
+  the immediate CI read still returned the old GitHub PR head. A fresh authoritative
+  read now agrees with the clean local head. Re-run CI and then independent review;
+  no repush, code change, evidence override, or auto-fix iteration is needed for this
+  transient metadata delay.
+
 ## 2026-09-05T15:50Z — mailbox reviews for PRs 153, 178, 185 through a verify-before-publish workflow
 - The three Claude review requests left by lanes 109, 112 and 114 were served by a workflow: one Opus drafter per PR reads task.md, persona.md and the context files and lists findings; one Opus skeptic per finding tries to refute it against the PR head (five of 37 drafts were refuted: wrong at head, already handled, or outside the task's scope); one Opus writer per lane composes reply.md from the survivors in the review contract. Results: PR 153 round 3 code COMMENTED / prose CHANGES_REQUESTED (4 ledger lines); PR 178 CHANGES_REQUESTED (12: mostly duplicated proofs of existing facts); PR 185 CHANGES_REQUESTED (11: shadowing helpers and stranded generic lemmas). Cost 3.94M tokens over 43 agents in 50 minutes. The reviews name concrete originals for every duplicate, so the fix rounds are mechanical.
+
+## 2026-09-05T16:10Z — #118 math-fix gap closed by session 1 (claims 17-2 and 17-3 proved)
+- One Fable math-fix session (626k tokens, 100 min) settled the gap opened at 14:37Z: the printed claim 17-2 is false for an arbitrary combined-lines witness (the source uses the sandwich form of T, internal to the proof of lem:qld-xz-lines, while the witness records only the pair consistency); restated with error C·√m·(δP^{1/4}+δQ^{1/4}) through lines.consistent and proved. Claim 17-3 is proved as printed: the joint (line, point) mixture the blueprint proof seemed to need is not needed because the integrand depends only on (ℓX, ℓZ, z), and the source's Cauchy–Schwarz step there is vacuous. The deficit-form Cauchy–Schwarz lemma now lives in Combining/OverlapGap.lean. Paper-gap note docs/paper-gaps/qpbt_subline-claims-line-marginal.tex, register row and blueprint nodes updated; lem:claim-17-2/17-3 carry \leanok. Commit 691b671 on the #118 branch. The optional strengthening of CombinedLinesWitness by the X-marginal identity (restores the source error for 17-2) is left to the astra main session per the owner (16:02Z: no B7 for it). Worktree released to the main session.
