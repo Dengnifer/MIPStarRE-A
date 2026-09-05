@@ -448,7 +448,7 @@ class ReviewRoundCounterTests(LayerTestCase):
 
         cache = self.tmp / "review-cache"
         env = dict(os.environ, **self.gh.env(), MIPSTARRE_CACHE_ROOT=str(cache),
-                   PYTHONDONTWRITEBYTECODE="1")
+                   LOCAL_REVIEW_ENABLED="true", PYTHONDONTWRITEBYTECODE="1")
         result = subprocess.run(
             ["bash", str(self.repo / "local" / "bin" / "review.sh"),
              "7", "--force-review", "--dry-run"],
