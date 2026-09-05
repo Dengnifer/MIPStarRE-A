@@ -11,11 +11,11 @@ the corresponding observables.
 
 ## References
 
-The marginal estimates formalize `lem:qld-constructing-the-paulis-helper` in
-`blueprint/src/chapter/ch16_qpbt_extraction.tex:266-297`, from
+The marginal estimates formalize blueprint
+`lem:qld-constructing-the-paulis-helper`, from
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1609-1664`.
-The remaining declarations formalize `lem:qld-construct-the-paulis` in
-blueprint lines 177-245, from paper lines 1458-1608.
+The remaining declarations formalize blueprint `lem:qld-construct-the-paulis`,
+from paper lines 1458-1608.
 -/
 
 open scoped BigOperators Matrix
@@ -34,8 +34,8 @@ opposite-placement relation gives all four instances of the source's
 symmetric-equivalents clause.
 
 This is Equation `eq:qld-sg-cons` of
-`lem:qld-constructing-the-paulis-helper`, blueprint
-`ch16_qpbt_extraction.tex:266-280`, paper
+blueprint
+`lem:qld-constructing-the-paulis-helper`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1609-1635`.
 
 The source absorbs constant factors and the game error into `deltaS`. Here
@@ -67,8 +67,8 @@ polynomial outcome, and quantification over `Placement` gives all four
 single-party symmetric equivalents.
 
 This is Equation `eq:qld-sg-cons2` of
-`lem:qld-constructing-the-paulis-helper`, blueprint
-`ch16_qpbt_extraction.tex:266-280`, paper
+blueprint
+`lem:qld-constructing-the-paulis-helper`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1617-1662`.
 
 The explicit `deltaConstructPaulis` bound retains the point-measurement error
@@ -99,8 +99,8 @@ outcomes outside the low-degree encoding image.  The finite support filter is
 written explicitly so the restricted decoder identity is never applied to an
 arbitrary polynomial representative.
 
-This is the left-hand side of `eq:qld-nonencoding-mass` in
-`blueprint/src/chapter/ch16_qpbt_extraction.tex:220-222`, from
+This is the left-hand side of blueprint
+`eq:qld-nonencoding-mass`, from
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1458-1602`.
 The bound remains a proposition-valued proof obligation, as required by
 `docs/paper-gaps/qpbt_decoding-identity.tex:87-123`. -/
@@ -121,8 +121,8 @@ argument. For either player side and either Pauli basis, the marginal mass on
 polynomial representatives outside the encoding image is bounded by the
 common construction error.
 
-This is the named obligation for `eq:qld-nonencoding-mass`, blueprint
-`blueprint/src/chapter/ch16_qpbt_extraction.tex:220-222`, paper
+This is the named obligation for blueprint
+`eq:qld-nonencoding-mass`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1458-1602`.
 The estimate is intentionally not folded into a decoder identity; its proof
 must use the point-consistency hypotheses and Schwartz--Zippel. See
@@ -144,8 +144,8 @@ theorem nonencodingMarginalMass_le :
 
 /-- Alice's original point measurement is consistent with Bob's pulled-apart
 measurement on average over uniformly random points. This is the first display
-of Item 1 in `lem:qld-construct-the-paulis`, blueprint
-`ch16_qpbt_extraction.tex:177-205`, paper
+of Item 1 in blueprint
+`lem:qld-construct-the-paulis`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1463-1492`.
 
 The source reuses `deltaS` after absorbing the non-encoding and game-error
@@ -173,8 +173,8 @@ theorem tildeM_consistent_pointMeas :
 
 /-- Alice's pulled-apart measurement is consistent with Bob's original point
 measurement on average over uniformly random points. This is the
-register-interchanged display of Item 1 in `lem:qld-construct-the-paulis`,
-blueprint `ch16_qpbt_extraction.tex:177-205`, paper
+register-interchanged display of Item 1 in blueprint
+`lem:qld-construct-the-paulis`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1463-1492`.
 
 The conclusion uses the same explicit construction scale as the first player
@@ -200,8 +200,8 @@ theorem tildeM_consistent_pointMeas' :
 
 /-- The pulled-apart observables on Alice's and Bob's extraction blocks are
 self-consistent on average over the uniformly random Pauli register. This is
-Item 2 of `lem:qld-construct-the-paulis`, blueprint
-`ch16_qpbt_extraction.tex:177-205`, paper
+Item 2 of blueprint
+`lem:qld-construct-the-paulis`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1476-1605`.
 
 The construction scale exposes the square-root game error and

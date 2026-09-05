@@ -15,9 +15,8 @@ The operator-level inequalities they rest on live in
 
 ## References
 
-The source results are `fact:agreement` through
-`lem:close-strategies-have-close-values` in
-`blueprint/src/chapter/ch12_qpbt_games.tex:260-597`, with paper origin
+The source results run from blueprint `fact:agreement` through
+`lem:close-strategies-have-close-values`, with paper origin
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:295-461` and
 `:531-540`. The observable conversion lemmas come from
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:95-131`.
@@ -506,8 +505,8 @@ private theorem strategy_value_eq_selected (G : Game) (S : Strategy G) :
 
 /-- Strategies on identified local spaces and the same transported state have
 close values. The asymptotic constant is universal for the game. This is
-`lem:close-strategies-have-close-values`, blueprint
-`ch12_qpbt_games.tex:584-597`, paper
+blueprint
+`lem:close-strategies-have-close-values`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:531-540`. -/
 theorem abs_value_sub_le_of_areClose :
     ∃ C₀ : ℝ, 1 ≤ C₀ ∧ ∀ (G : Game) (S S' : Strategy G) (δ : ℝ)
@@ -622,8 +621,8 @@ theorem abs_value_sub_le_of_areClose :
       congrArg (fun x : ℝ => 4 * x) (Real.sqrt_eq_rpow δ)
 
 /-- Averaging contractions preserves state-dependent operator closeness.
-This is `lem:avg-closeness`, blueprint
-`blueprint/src/chapter/ch14_qpbt_observables.tex:304-325`, paper
+This is blueprint
+`lem:avg-closeness`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:100-113`.
 The probability hypothesis is explicit because the proof uses Jensen's
 inequality for the average. -/
@@ -755,8 +754,8 @@ theorem povm_to_obs {X α ι : Type*}
 
 /-- Passing from answer-indexed POVM effects to unit-modulus weighted
 observables costs at most the answer-alphabet cardinality. This is
-`lem:povm-to-obs`, blueprint
-`blueprint/src/chapter/ch14_qpbt_observables.tex:361-378`, paper
+blueprint
+`lem:povm-to-obs`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:115-129`. -/
 theorem povm_to_obs_of_measurements {X α ι : Type*}
     [Fintype X] [DecidableEq X] [Fintype α]
@@ -772,8 +771,8 @@ theorem povm_to_obs_of_measurements {X α ι : Type*}
 
 /-- Orthonormalization of a consistent pair of POVMs. The resulting
 Alice-side measurement is projective and remains close to the original one on
-the unit bipartite state. This imported result is `lem:ortho`, blueprint
-`blueprint/src/chapter/ch14_qpbt_observables.tex:390-410`, paper
+the unit bipartite state. This imported result is blueprint
+`lem:ortho`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:131-153`;
 the source cites KV11 and the self-contained proof [ML20]. -/
 theorem exists_projective_close_of_consistent :

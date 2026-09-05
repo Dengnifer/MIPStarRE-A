@@ -60,8 +60,8 @@ The fiberwise definition `H_{[h(u)=a]} := ∑_{h : h(u)=a} H_h` collapses the
 
 This is the first equality of the boundedness display in the proof of
 `\ref{item:self-improvement-boundedness}`:
-`references/ldt-paper/self_improvement.tex` line 612, mirrored at
-`blueprint/src/chapter/ch07_self_improvement.tex` lines 274--282
+`references/ldt-paper/self_improvement.tex` line 612, mirrored in blueprint
+`item:self-improvement-boundedness`
 ("Reindexing the sum by~$h$"). It is a purely algebraic identity — no estimate,
 no measurement structure used beyond the postprocess fiber decomposition built
 into `evaluateAt`. -/
@@ -132,8 +132,8 @@ Combining the pointwise reindexing identity
 `⟨ψ| E_u Σ_a A^u_a ⊗ H_{[h(u)=a]} |ψ⟩` equals the polynomial-indexed expectation
 `E_u Σ_h ⟨ψ| A^u_{h(u)} ⊗ H_h |ψ⟩` from the second line of the boundedness
 display in the proof of `\ref{item:self-improvement-boundedness}`
-(`references/ldt-paper/self_improvement.tex` line 612;
-`blueprint/src/chapter/ch07_self_improvement.tex` lines 274--282). -/
+(`references/ldt-paper/self_improvement.tex` line 612; blueprint
+`item:self-improvement-boundedness`). -/
 theorem helper_agreement_average_ev_eq_polynomial_sum
     (params : Parameters) [FieldModel params.q]
     (strategy : SymStrat params ι)
@@ -177,8 +177,8 @@ of `opTensor`.
 
 This is the operator-level form of the second algebraic identity in the
 boundedness display in `\ref{item:self-improvement-boundedness}`
-(`references/ldt-paper/self_improvement.tex` line 613, mirrored at
-`blueprint/src/chapter/ch07_self_improvement.tex` lines 296--300, the step
+(`references/ldt-paper/self_improvement.tex` line 613, mirrored in blueprint
+`item:self-improvement-boundedness`, the step
 "Combined with $\sum_a A_a^u = I$ and~\eqref{eq:explicit-bound-for-A-consistency}
 this gives ..."). The averaged scalar form of the off-diagonal sum on the right
 is the LHS of `eq:explicit-bound-for-A-consistency` (line 435), which the paper
@@ -264,7 +264,7 @@ averaged off-diagonal scalar sum
 `E_u ∑_h ∑_{a ≠ h(u)} ⟨ψ, A^u_a ⊗ H_h, ψ⟩`,
 which is the LHS of `eq:explicit-bound-for-A-consistency`
 (`references/ldt-paper/self_improvement.tex` line 435; blueprint
-`ch07_self_improvement.tex` lines 153--168). -/
+`eq:explicit-bound-for-A-consistency`). -/
 theorem helper_boundedness_slack_average_ev_eq_off_diagonal_avg
     (params : Parameters) [FieldModel params.q]
     (strategy : SymStrat params ι)

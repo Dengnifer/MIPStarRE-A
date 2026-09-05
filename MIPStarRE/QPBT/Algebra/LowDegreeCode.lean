@@ -10,9 +10,8 @@ and packages the resulting low-degree code as honest polynomial representatives.
 
 ## References
 
-The source-facing nodes are `def:polynomials-degree`,
-`def:low-degree-encoding`, and `def:indicator-vector` in
-`blueprint/src/chapter/ch11_qpbt_algebra.tex:321-417`; the paper origin is
+The source-facing nodes are blueprint `def:polynomials-degree`,
+`def:low-degree-encoding`, and `def:indicator-vector`; the paper origin is
 `references/qpbt-paper/04_preliminaries.tex:832-897`.
 The polynomial class `def:polyfunc` is reused from
 `MIPStarRE.LDT.Preliminaries.polyFunc` (the LDT formalization).
@@ -25,17 +24,17 @@ namespace MIPStarRE.QPBT
 
 /- The Boolean cube indexes the `2^m` qudits in the low-degree encoding. -/
 /-- The Boolean cube indexing the `2^m` qudits of the test.  This is the index
-type in `def:low-degree-encoding`, blueprint
-`blueprint/src/chapter/ch11_qpbt_algebra.tex:381-401`, paper origin
+type in blueprint
+`def:low-degree-encoding`, paper origin
 `references/qpbt-paper/04_preliminaries.tex:832-897`.
 -/
 abbrev Cube (m : ℕ) := Fin m → Bool
 
 /--
 The representative polynomial which is `1` at `y` on the Boolean cube and
-zero at the other cube points.  This is the indicator polynomial in
-`def:low-degree-encoding` (blueprint lines 381-401; paper
-`references/qpbt-paper/04_preliminaries.tex:832-897`).
+zero at the other cube points.  This is the indicator polynomial in blueprint
+`def:low-degree-encoding`; paper
+`references/qpbt-paper/04_preliminaries.tex:832-897`.
 -/
 noncomputable def indicatorPoly {K : Type*} [CommRing K] {m : ℕ} (y : Cube m) :
     MvPolynomial (Fin m) K :=
@@ -44,8 +43,7 @@ noncomputable def indicatorPoly {K : Type*} [CommRing K] {m : ℕ} (y : Cube m) 
 /--
 The multilinear low-degree encoding of a coefficient string.  Polynomial
 representatives are used, as fixed by issue #0004, rather than quotienting by
-functional equality.  Blueprint: `def:low-degree-encoding`,
-`blueprint/src/chapter/ch11_qpbt_algebra.tex:381-401`; paper origin:
+functional equality.  Blueprint: `def:low-degree-encoding`; paper origin:
 `references/qpbt-paper/04_preliminaries.tex:832-897`.
 -/
 noncomputable def lowDegreeEncoding {K : Type*} [CommRing K] {m : ℕ}
@@ -55,7 +53,7 @@ noncomputable def lowDegreeEncoding {K : Type*} [CommRing K] {m : ℕ}
 /- Evaluation shorthand for the representative polynomial in
 `def:low-degree-encoding`; it is Lean-only notation. -/
 /-- Evaluation shorthand for the low-degree encoding.  Blueprint
-`blueprint/src/chapter/ch11_qpbt_algebra.tex:381-401`, paper origin
+`def:low-degree-encoding`, paper origin
 `references/qpbt-paper/04_preliminaries.tex:832-897`.
 -/
 noncomputable def lowDegreeEnc {K : Type*} [CommRing K] {m : ℕ}
@@ -64,7 +62,7 @@ noncomputable def lowDegreeEnc {K : Type*} [CommRing K] {m : ℕ}
 
 /--
 The indicator vector `ind_m(x)` of `def:indicator-vector`.
-Blueprint: `blueprint/src/chapter/ch11_qpbt_algebra.tex:403-417`; paper origin:
+Blueprint: `def:indicator-vector`; paper origin:
 `references/qpbt-paper/04_preliminaries.tex:832-897`.
 -/
 noncomputable def indicatorVec {K : Type*} [CommRing K] {m : ℕ}
@@ -74,7 +72,7 @@ noncomputable def indicatorVec {K : Type*} [CommRing K] {m : ℕ}
 /--
 The defining dot-product identity for the encoding, corresponding to
 Equation `eq:low-degree-encoding-definition` and `def:indicator-vector` in the
-blueprint `blueprint/src/chapter/ch11_qpbt_algebra.tex:403-417`, paper origin
+blueprint, with source node `def:indicator-vector`; paper origin
 `references/qpbt-paper/04_preliminaries.tex:832-897`.
 -/
 theorem lowDegreeEnc_eq_dotProduct {K : Type*} [CommRing K] {m : ℕ}
@@ -85,8 +83,8 @@ theorem lowDegreeEnc_eq_dotProduct {K : Type*} [CommRing K] {m : ℕ}
 /--
 The coordinatewise product form of an entry of the indicator vector: at a cube
 point `y` the entry is the product of `x i` over the coordinates with `y i`
-true and of `1 - x i` over the remaining ones.  Blueprint:
-`def:indicator-vector`, `blueprint/src/chapter/ch11_qpbt_algebra.tex:403-417`;
+true and of `1 - x i` over the remaining ones.  Blueprint
+`def:indicator-vector`;
 paper origin: `references/qpbt-paper/04_preliminaries.tex:832-897`.
 -/
 theorem indicatorVec_apply_eq_prod {K : Type*} [CommRing K] {m : ℕ}
@@ -97,10 +95,10 @@ theorem indicatorVec_apply_eq_prod {K : Type*} [CommRing K] {m : ℕ}
 /--
 Over a commutative ring of characteristic two, the inner product of two
 indicator vectors is the product of the coordinate sums `1 + x_i + z_i`.  This
-is the product expansion of `def:indicator-vector`, blueprint
-`blueprint/src/chapter/ch11_qpbt_algebra.tex:403-417`; it is the first step of
-the proof of `fact:omega-anticomm-prob`, blueprint
-`blueprint/src/chapter/ch14_qpbt_observables.tex:196-235`, paper origin
+is the product expansion of blueprint
+`def:indicator-vector`; it is the first step of
+the proof of blueprint
+`fact:omega-anticomm-prob`, paper origin
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:70-95`.
 -/
 theorem sum_indicatorVec_mul_indicatorVec {K : Type*} [CommRing K]

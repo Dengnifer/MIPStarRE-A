@@ -12,8 +12,8 @@ placements. The generalized Pauli projectors use the field and basis fixed by
 
 ## References
 
-The extraction witness records the conclusion of `lem:qld-unitary` in
-`blueprint/src/chapter/ch16_qpbt_extraction.tex:348-375`, from
+The extraction witness records the conclusion of blueprint `lem:qld-unitary`,
+from
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1666-1860`.
 The error-form comparison formalizes `lem:qld-extraction-error-form` and
 supports `rem:pauli-robustness-form` in the blueprint; its paper source is
@@ -34,7 +34,7 @@ Pauli projectors. The answer sum in `pauli_close` is over
 `PauliRegister P`; the uniform distribution on `Unit` records that there is no
 average over questions.
 
-Blueprint `ch16_qpbt_extraction.tex:348-375`; paper
+Blueprint `lem:qld-unitary`; paper
 `14_analysis_of_the_pauli_basis_test.tex:1666-1685,1827-1859`. The swap maps
 are `swapUnitary w .alice` and `swapUnitary w .bob`, defined from the
 side-indexed global measurements, and use only the basis fixed by `P.model`.
@@ -72,7 +72,7 @@ structure ExtractionWitness {P : AdmissibleParams} {epsilon deltaS : ℝ}
 /-- Conditional extraction for the concrete swap maps at the explicit scale
 obtained by applying `deltaExtract` to `deltaConstructPaulis`. Given a
 `GlobalPairWitness`, it supplies the extraction data appearing in
-`lem:qld-unitary`, blueprint `ch16_qpbt_extraction.tex:348-375` and paper
+blueprint `lem:qld-unitary` and paper
 `14_analysis_of_the_pauli_basis_test.tex:1666-1860`.
 
 **Unfaithful:** This result assumes `w : GlobalPairWitness S deltaG`, which is

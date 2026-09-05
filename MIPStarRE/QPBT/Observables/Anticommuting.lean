@@ -9,9 +9,8 @@ conditional uniform distributions used by its observable analysis.
 
 ## References
 
-The definitions and probability bounds formalize `def:anticommuting-tuple`
-and `fact:omega-anticomm-prob` in
-`blueprint/src/chapter/ch14_qpbt_observables.tex:128-267`, with paper origin
+The definitions and probability bounds formalize blueprint
+`def:anticommuting-tuple` and `fact:omega-anticomm-prob`, with paper origin
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:64-95`.
 -/
 
@@ -23,21 +22,21 @@ noncomputable section
 
 /-- A tuple `(u_X,u_Z,r_X,r_Z)` over the fixed field model of an admissible
 Pauli-test parameter tuple. This is the tuple space of
-`def:anticommuting-tuple`, blueprint `ch14_qpbt_observables.tex:128-148`, paper
+blueprint `def:anticommuting-tuple`, paper
 `14_analysis_of_the_pauli_basis_test.tex:64-68`. -/
 abbrev PauliTuple (P : AdmissibleParams) :=
   (Fin P.m → PauliScalar P) ×
     (Fin P.m → PauliScalar P) × PauliScalar P × PauliScalar P
 
 /-- A Pauli tuple is anticommuting when its phase bit is nonzero. This is
-`def:anticommuting-tuple`, blueprint `ch14_qpbt_observables.tex:128-148`, paper
+blueprint `def:anticommuting-tuple`, paper
 `14_analysis_of_the_pauli_basis_test.tex:64-68`. -/
 def IsAnticommuting {P : AdmissibleParams} (ω : PauliTuple P) : Prop :=
   gammaValue P ω.1 ω.2.1 ω.2.2.1 ω.2.2.2 ≠ 0
 
 /-- A Pauli tuple is commuting when its phase bit vanishes. This is the
-complementary case in `def:anticommuting-tuple`, blueprint
-`ch14_qpbt_observables.tex:128-148`, paper
+complementary case in blueprint
+`def:anticommuting-tuple`, paper
 `14_analysis_of_the_pauli_basis_test.tex:64-68`. -/
 def IsCommuting {P : AdmissibleParams} (ω : PauliTuple P) : Prop :=
   gammaValue P ω.1 ω.2.1 ω.2.2.1 ω.2.2.2 = 0
@@ -49,15 +48,15 @@ noncomputable instance (P : AdmissibleParams) :
     DecidablePred (@IsCommuting P) := Classical.decPred _
 
 /-- The uniform probability of the anticommuting event. This is the first
-quantity in `fact:omega-anticomm-prob`, blueprint
-`ch14_qpbt_observables.tex:151-178`, paper
+quantity in blueprint
+`fact:omega-anticomm-prob`, paper
 `14_analysis_of_the_pauli_basis_test.tex:70-77`. -/
 noncomputable def anticommProb (P : AdmissibleParams) : ℝ :=
   ((Finset.univ.filter (@IsAnticommuting P)).card : ℝ) /
     Fintype.card (PauliTuple P)
 
 /-- The complementary uniform probability of the commuting event in
-`fact:omega-anticomm-prob`, blueprint `ch14_qpbt_observables.tex:151-178`,
+blueprint `fact:omega-anticomm-prob`,
 paper `14_analysis_of_the_pauli_basis_test.tex:70-77`. -/
 noncomputable def commProb (P : AdmissibleParams) : ℝ :=
   ((Finset.univ.filter (@IsCommuting P)).card : ℝ) /
@@ -66,28 +65,28 @@ noncomputable def commProb (P : AdmissibleParams) : ℝ :=
 /-! ### Auxiliary counting lemmas
 
 The declarations of this section are formalization-only auxiliaries for the
-proof of `fact:omega-anticomm-prob`, blueprint
-`ch14_qpbt_observables.tex:151-267`. They record the cardinalities used by the
+proof of blueprint
+`fact:omega-anticomm-prob`. They record the cardinalities used by the
 exact computation of the anticommuting probability. -/
 
 /-- Formalization-only auxiliary: the scalar carrier of an admissible parameter
 tuple has characteristic two, since it is an algebra over the two-element
-field. Blueprint `ch14_qpbt_observables.tex:151-178`. -/
+field. Blueprint `fact:omega-anticomm-prob`. -/
 private theorem pauliScalar_charTwo (P : AdmissibleParams) :
     CharP (PauliScalar P) 2 :=
   (Algebra.charP_iff (ZMod 2) (PauliScalar P) 2).mp (ZMod.charP 2)
 
 /-- Formalization-only auxiliary: the scalar carrier of an admissible parameter
 tuple has exactly `q` elements. Blueprint
-`ch14_qpbt_observables.tex:151-178`. -/
+`fact:omega-anticomm-prob`. -/
 private theorem card_pauliScalar (P : AdmissibleParams) :
     Fintype.card (PauliScalar P) = P.q :=
   @FieldModel.card P.q P.model.toFieldModel
 
 /-- The phase bit of a Pauli tuple is the trace of `r_Z r_X` times the product
 of the coordinate sums `1 + u_{X,i} + u_{Z,i}`. This is the closed form of
-`γ(ω)` derived in the proof of `fact:omega-anticomm-prob`, blueprint
-`ch14_qpbt_observables.tex:196-235`. -/
+`γ(ω)` derived in the proof of blueprint
+`fact:omega-anticomm-prob`. -/
 private theorem gammaValue_eq_trace_prod (P : AdmissibleParams)
     (uX uZ : Fin P.m → PauliScalar P) (rX rZ : PauliScalar P) :
     gammaValue P uX uZ rX rZ =
@@ -104,8 +103,8 @@ private theorem gammaValue_eq_trace_prod (P : AdmissibleParams)
 
 /-- Formalization-only auxiliary: the field trace onto the two-element field
 takes each of its two values on exactly half of the scalars. This is the final
-step of the proof of `fact:omega-anticomm-prob`, blueprint
-`ch14_qpbt_observables.tex:236-249`. -/
+step of the proof of blueprint
+`fact:omega-anticomm-prob`. -/
 private theorem two_mul_card_trace_ne (P : AdmissibleParams) :
     2 * (Finset.univ.filter
         (fun a : PauliScalar P => fixedBinTrace P.model a ≠ 0)).card = P.q := by
@@ -164,15 +163,15 @@ private theorem two_mul_card_trace_ne (P : AdmissibleParams) :
   omega
 
 /-- Formalization-only auxiliary: the number of Pauli tuples. Blueprint
-`ch14_qpbt_observables.tex:151-178`. -/
+`fact:omega-anticomm-prob`. -/
 private theorem card_pauliTuple (P : AdmissibleParams) :
     Fintype.card (PauliTuple P) = P.q ^ P.m * (P.q ^ P.m * (P.q * P.q)) := by
   have hK := card_pauliScalar P
   simp [PauliTuple, Fintype.card_prod, hK]
 
 /-- Twice the number of anticommuting tuples is `q^{m+1}(q-1)^{m+1}`. This is
-the exact count established in the proof of `fact:omega-anticomm-prob`,
-blueprint `ch14_qpbt_observables.tex:196-249`. -/
+the exact count established in the proof of blueprint
+`fact:omega-anticomm-prob`. -/
 private theorem two_mul_card_anticommuting (P : AdmissibleParams) :
     2 * (Finset.univ.filter (@IsAnticommuting P)).card
       = P.q ^ (P.m + 1) * (P.q - 1) ^ (P.m + 1) := by
@@ -295,7 +294,7 @@ private theorem two_mul_card_anticommuting (P : AdmissibleParams) :
   ring
 
 /-- The anticommuting and commuting events partition the tuple space.
-Blueprint `ch14_qpbt_observables.tex:151-178`. -/
+Blueprint `fact:omega-anticomm-prob`. -/
 private theorem card_comm_add_card_anticomm (P : AdmissibleParams) :
     (Finset.univ.filter (@IsCommuting P)).card
       + (Finset.univ.filter (@IsAnticommuting P)).card
@@ -310,7 +309,7 @@ private theorem card_comm_add_card_anticomm (P : AdmissibleParams) :
   exact Finset.card_filter_add_card_filter_not _
 
 /-- Formalization-only auxiliary: the tuple space is nonempty and finite.
-Blueprint `ch14_qpbt_observables.tex:151-178`. -/
+Blueprint `fact:omega-anticomm-prob`. -/
 private theorem card_pauliTuple_pos (P : AdmissibleParams) :
     0 < Fintype.card (PauliTuple P) := by
   have hq : 0 < P.q := lt_of_lt_of_le (by norm_num) P.hq.two_le
@@ -319,8 +318,8 @@ private theorem card_pauliTuple_pos (P : AdmissibleParams) :
 
 /-! ### The exact anticommuting probability -/
 
-/-- Exact anticommuting probability from `fact:omega-anticomm-prob`, blueprint
-`ch14_qpbt_observables.tex:151-178`; its derivation replaces the erroneous
+/-- Exact anticommuting probability from blueprint
+`fact:omega-anticomm-prob`; its derivation replaces the erroneous
 Schwartz--Zippel argument at paper
 `14_analysis_of_the_pauli_basis_test.tex:79-93`. -/
 theorem anticommProb_eq (P : AdmissibleParams) :
@@ -345,7 +344,7 @@ theorem anticommProb_eq (P : AdmissibleParams) :
 
 /-- A tuple is commuting with the probability complementary to the
 anticommuting one. This is the complementarity clause of
-`fact:omega-anticomm-prob`, blueprint `ch14_qpbt_observables.tex:151-178`,
+blueprint `fact:omega-anticomm-prob`,
 paper `14_analysis_of_the_pauli_basis_test.tex:70-77`. -/
 theorem commProb_eq_one_sub_anticommProb (P : AdmissibleParams) :
     commProb P = 1 - anticommProb P := by
@@ -360,7 +359,7 @@ theorem commProb_eq_one_sub_anticommProb (P : AdmissibleParams) :
 
 /-- Formalization-only auxiliary: the base `1 - q^{-1}` of the exact
 anticommuting probability lies in the unit interval. Blueprint
-`ch14_qpbt_observables.tex:151-178`. -/
+`fact:omega-anticomm-prob`. -/
 private theorem base_mem_unit_interval (P : AdmissibleParams) :
     (0 : ℝ) ≤ 1 - (P.q : ℝ)⁻¹ ∧ (1 : ℝ) - (P.q : ℝ)⁻¹ ≤ 1 := by
   have hq2 : 2 ≤ P.q := P.hq.two_le
@@ -372,8 +371,8 @@ private theorem base_mem_unit_interval (P : AdmissibleParams) :
   constructor <;> linarith
 
 /-- The commuting event has probability at least one half. This is the
-complementary bound in `fact:omega-anticomm-prob`, blueprint
-`ch14_qpbt_observables.tex:151-178`, paper
+complementary bound in blueprint
+`fact:omega-anticomm-prob`, paper
 `14_analysis_of_the_pauli_basis_test.tex:70-77`. -/
 theorem commProb_ge_half (P : AdmissibleParams) : 1 / 2 ≤ commProb P := by
   obtain ⟨h0, h1⟩ := base_mem_unit_interval P
@@ -382,8 +381,8 @@ theorem commProb_ge_half (P : AdmissibleParams) : 1 / 2 ≤ commProb P := by
   linarith
 
 /-- When `m ≤ q`, the anticommuting event has the uniform constant lower
-bound added in `fact:omega-anticomm-prob`, blueprint
-`ch14_qpbt_observables.tex:151-178`. -/
+bound added in blueprint
+`fact:omega-anticomm-prob`. -/
 theorem anticommProb_ge_of_m_le_q (P : AdmissibleParams) (hmq : P.m ≤ P.q) :
     (2 : ℝ) ^ (-4 : ℤ) ≤ anticommProb P := by
   obtain ⟨h0, h1⟩ := base_mem_unit_interval P
@@ -436,8 +435,8 @@ theorem anticommProb_ge_of_m_le_q (P : AdmissibleParams) (hmq : P.m ≤ P.q) :
 
 /-- **Local fix:** For the positive parameters in `AdmissibleParams`, the
 source lower bounds hold with the missing hypotheses restored. This is the
-final display of `fact:omega-anticomm-prob`, blueprint
-`ch14_qpbt_observables.tex:151-178`, correcting paper
+final display of blueprint
+`fact:omega-anticomm-prob`, correcting paper
 `14_analysis_of_the_pauli_basis_test.tex:70-77`; see
 `rem:omega-anticomm-prob-correction`. -/
 theorem anticommProb_ge_of_one_le_md (P : AdmissibleParams) :
@@ -540,15 +539,15 @@ theorem anticommProb_ge_of_one_le_md (P : AdmissibleParams) :
 
 /-- The conditional uniform distribution on anticommuting tuples. This is the
 sampling convention for the anticommuting cases of
-`lem:qld-win-implications`, blueprint `ch14_qpbt_observables.tex:505-660`,
+blueprint `lem:qld-win-implications`,
 paper `14_analysis_of_the_pauli_basis_test.tex:210-287`. -/
 noncomputable def anticommTupleDist (P : AdmissibleParams) :
     Distribution (PauliTuple P) :=
   Distribution.uniformOnFinset (Finset.univ.filter (@IsAnticommuting P))
 
 /-- The conditional uniform distribution on commuting tuples. This is the
-sampling convention for the commuting cases of `lem:qld-win-implications`,
-blueprint `ch14_qpbt_observables.tex:505-660`, paper
+sampling convention for the commuting cases of blueprint
+`lem:qld-win-implications`, paper
 `14_analysis_of_the_pauli_basis_test.tex:210-287`. -/
 noncomputable def commTupleDist (P : AdmissibleParams) :
     Distribution (PauliTuple P) :=
@@ -556,7 +555,7 @@ noncomputable def commTupleDist (P : AdmissibleParams) :
 
 /-- The anticommuting conditional distribution is probabilistic. This is the
 well-formedness companion to the conditional sampling in
-`lem:qld-win-implications`, blueprint `ch14_qpbt_observables.tex:505-660`. -/
+blueprint `lem:qld-win-implications`. -/
 theorem anticommTupleDist_isProbability (P : AdmissibleParams) :
     (anticommTupleDist P).IsProbability := by
   refine Distribution.uniformOnFinset_isProbability _ ?_
@@ -569,7 +568,7 @@ theorem anticommTupleDist_isProbability (P : AdmissibleParams) :
 
 /-- The commuting conditional distribution is probabilistic. This is the
 well-formedness companion to the conditional sampling in
-`lem:qld-win-implications`, blueprint `ch14_qpbt_observables.tex:505-660`. -/
+blueprint `lem:qld-win-implications`. -/
 theorem commTupleDist_isProbability (P : AdmissibleParams) :
     (commTupleDist P).IsProbability := by
   refine Distribution.uniformOnFinset_isProbability _ ⟨0, ?_⟩

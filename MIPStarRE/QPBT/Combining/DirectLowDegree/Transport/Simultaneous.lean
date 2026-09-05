@@ -72,8 +72,8 @@ sampled direct point with probability at most `m d / q`.
 This is the Schwartz--Zippel estimate `polynomialAgreement_avg_le_mdq` of the
 low individual degree test, read through the polynomial and point
 identifications of the direct low-degree game; it is the collision
-hypothesis of `lem:ld-sandwich` (blueprint `ch12_qpbt_games.tex:454-480`,
-paper `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:465-501`). -/
+hypothesis of blueprint `lem:ld-sandwich`
+(paper `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:465-501`). -/
 theorem directPolynomialAgreement_avg_le_mdq (D : DirectLdParams)
     (g g' : PolyIndex D.m (DirectScalarQ D) D.d) (hneq : g ≠ g') :
     avgOver (uniformDistribution (Fin D.m → DirectScalarQ D))

@@ -46,7 +46,7 @@ the self-testing argument operates.
 
 ## References
 
-`thm:ms-rigidity`, blueprint `blueprint/src/chapter/ch13_qpbt_test.tex:224-253`,
+blueprint `thm:ms-rigidity`,
 paper `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652`.
 The consistency notions are `def:consistent-measurement` and `def:povm-distance`,
 paper `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:144-174` and
@@ -323,7 +323,7 @@ measurements and the leakage out of the ground slice: the squared
 state-dependent distance is at most `864 ε + 6 δ` for a strategy of value
 `1 - ε` whose agreement distance at `j` is at most `δ`.  This is the cross-player agreement
 that the hypothesis of the corrected `thm:ms-rigidity` provides to the
-swap-isometry extraction (issue #105); blueprint `ch13_qpbt_test.tex:224-253`,
+swap-isometry extraction (issue #105); blueprint `thm:ms-rigidity`,
 paper `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652`. -/
 theorem norm_msVarObsA_sub_msVarObsB_sq_le (S : Strategy msGame) (ε δ : ℝ)
     (hwin : 1 - ε ≤ S.value) (j : Fin 9) (hδ : msVariableConsistencyDefect S j ≤ δ) :

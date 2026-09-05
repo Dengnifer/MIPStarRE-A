@@ -2725,6 +2725,45 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 ## 2026-09-05T14:50Z — codex resumed (owner); ratio codex:opus 1:1; astra not yet
 - The owner re-enabled codex subagents on ghz: model gpt-5.6-sol as before (astra is unstable; the owner will announce its readiness explicitly), dispatch ratio codex:opus 1:1, Fable only when necessary. The pause marker watchdog/codex-paused was removed at 14:47Z, so lanes dispatch again and the review step returns to local/bin/review.sh (codex reviewers); the Claude review mailbox stays available for Opus reviews when the ratio needs them. First codex lanes after the pause: #222 (repository-side post-merge silent-loss guard), #219 (review round counter), #218 (six duplicate private helper groups), #216 (pre-commit persona test during merges). Opus side: PR 205 fix round, the 135/174 worktree merge repairs. Fable: #118 math-fix session 1.
 
+## 2026-09-05 - Blueprint numeric locator churn
+
+- **Symptom:** issue #174 records nine stale blueprint spans in PR #152's first
+  review and same-day conflicts in four active lanes; earlier PR #29 had the
+  same downstream-locator failure after a two-line chapter insertion.
+- **Diagnosis:** mutable blueprint line numbers were stored as source metadata
+  in Lean docstrings, so unrelated chapter edits invalidated citations and
+  changed otherwise independent Lean files.
+- **Fix:** issue #174 adopts blueprint labels as the stored citation and makes
+  current file and line spans deterministic reviewer output.
+- **Lesson:** stable identifiers belong in maintained source; positional
+  context should be derived at the point of review.
+
+## 2026-09-05 - Citation evidence starved by the review diff
+
+- **Symptom:** PR #202 round 1 found that a large diff could consume the
+  dispatcher's aggregate attachment allowance before the derived blueprint
+  citation map, while the no-dispatch fallback embedded the raw branch-derived
+  map.
+- **Diagnosis:** `review.sh` appended an independently unbounded map after the
+  diff and sanitized only the diff artifact.
+- **Fix:** cap and sanitize the map separately, attach it before the diff, and
+  use the same bounded artifact in the fallback prompt.
+- **Lesson:** required review evidence needs an explicit per-artifact budget;
+  aggregate truncation alone depends incorrectly on attachment order.
+
+## 2026-09-05 - Citation failures lost inside their own evidence budget
+
+- **Symptom:** PR #202 round 2 found that prefix truncation of the derived
+  citation map removed unresolved and duplicate rows, and the no-dispatch
+  prompt still placed the map after the diff.
+- **Diagnosis:** the byte cap operated after row semantics had been erased, so
+  it could not distinguish successful resolutions from merge-blocking failures.
+- **Fix:** compact repeated origins, retain failure rows before truncating
+  resolved rows, fail closed if failure evidence cannot fit, and put the map
+  before the diff in both review paths.
+- **Lesson:** evidence budgets must encode priority before byte truncation;
+  ordering guarantees must be tested at every dispatch boundary.
+
 ## 2026-09-05T16:43Z — Follow-up to the stacked-merge loss incident
 
 - This follow-up records the completed diagnosis and audit without rewriting
@@ -2872,6 +2911,55 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 
 ## 2026-09-05T16:10Z — #118 math-fix gap closed by session 1 (claims 17-2 and 17-3 proved)
 - One Fable math-fix session (626k tokens, 100 min) settled the gap opened at 14:37Z: the printed claim 17-2 is false for an arbitrary combined-lines witness (the source uses the sandwich form of T, internal to the proof of lem:qld-xz-lines, while the witness records only the pair consistency); restated with error C·√m·(δP^{1/4}+δQ^{1/4}) through lines.consistent and proved. Claim 17-3 is proved as printed: the joint (line, point) mixture the blueprint proof seemed to need is not needed because the integrand depends only on (ℓX, ℓZ, z), and the source's Cauchy–Schwarz step there is vacuous. The deficit-form Cauchy–Schwarz lemma now lives in Combining/OverlapGap.lean. Paper-gap note docs/paper-gaps/qpbt_subline-claims-line-marginal.tex, register row and blueprint nodes updated; lem:claim-17-2/17-3 carry \leanok. Commit 691b671 on the #118 branch. The optional strengthening of CombinedLinesWitness by the X-marginal identity (restores the source error for 17-2) is left to the astra main session per the owner (16:02Z: no B7 for it). Worktree released to the main session.
+## 2026-09-06 — orc-174-20260906-01 prerequisite triage
+
+- PR202 remains at `559275a117cf3e7430f9e895002d9a0075ca2c30`, matching
+  GitHub; the index and worktree were clean on entry. The actual branch's
+  `scripts/install_git_hooks.sh --check` passes with `.githooks` selected and
+  `origin/main` resolving. No hook repair or integrity bypass was needed.
+- Exact-head GitHub evidence has successful local CI and a failed review with
+  one unresolved F1. The existing `auto-fix-codex` label is present. Reproduced
+  the false unresolved `ch13_qpbt_test.tex` using the citation resolver on
+  `MIPStarRE/QPBT/Test/PauliBasisTest.lean`; all 27 citation unit tests pass,
+  demonstrating the missing regression coverage rather than a resolved finding.
+  Did not launch autofix: it dispatches another session, forbidden by this
+  request's explicit no-subagent instruction. No replacement mechanism added.
+- The #118 coordination log records dispatcher hook preflight failure, but the
+  sibling branch now has uncommitted diagnostic work at `691b671`: telemetry
+  and `local/briefs/issue-118-pasting-interface-obstruction.md`. Preserved it.
+  Its old conflict marker no longer describes an active unmerged index, but
+  the lane remains blocked. The source proof of `lem:qld-xz-lines` uses the
+  constructed points and their controlled error; the current helper quantifies
+  over arbitrary point error while promising a bound independent of that error.
+  The diagnostic brief records an aborted prerequisite merge crossing #119's
+  ownership. Do not retire #118's attention marker as if these were resolved.
+- The existing #119 quantitative-resume log reports three remaining proof holes
+  in `Apply.lean`, the missing #118 extended-line estimate, and a duplicate
+  `phaseSign_mul_self` declaration blocking source-aligned dependency refresh.
+  No duplicate worker or full-chain build was launched. Reconcile prerequisite
+  histories and helper-interface ownership before resuming the existing stack.
+- GitHub confirms #73 closed at `2026-09-04T03:18:17Z`; removed only its stale
+  `watchdog/lanes/73.needs-attention` marker with approved filesystem access.
+  No source changes, commit, push, independent review, or merge in this session.
+  Remaining labelled-autofix and #119 dispatch actions require clarification of
+  the no-subagent constraint; normal gates and daemon-only merge stay intact.
+
+## 2026-09-06 — orc-174-20260906-02 PR202 hook recovery
+
+- Primary `scripts/install_git_hooks.sh --check`, invoked from the #174
+  worktree, failed because `.githooks/reference-transaction` was absent.
+  The older branch-local installer did not check that hook, explaining the
+  previous session's successful but insufficient preflight.
+- Preserved the prior session's telemetry in `d7c393b`. Integrated the complete
+  reviewed PR230 change from `516758b8fe4bba2fd06669c2325aa65132a0ab84`
+  (first-parent patch), including its guard, hooks, tests, and protocol ledger.
+  Retained both sides of the two append-only documentation conflicts. No
+  unrelated main-history merge, citation repair, or #118/#119 edits were needed.
+- Primary hook preflight now passes from this worktree with
+  `core.hooksPath=.githooks`; `origin/main` resolves to `696af82`.
+  No hooks or integrity checks were disabled. Publication remains through the
+  primary checked-push tool. The parent shell owns labelled autofix for F1;
+  this session does not dispatch, run a full build, or conduct review.
 
 ## 2026-09-06T01:30+08:00 — Codex session rows omit the selected model
 
@@ -3264,6 +3352,30 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   daemon refreshing PRs 225 and 233; loops on 202 and 205; #232 (dispatch.sh account routing) approved and merging. Follow-ups assigned
   to the main session: persona amendment (cycle and two-minute delegation rule), /goal briefing refresh in both codex homes, shim
   reduction after #232 merges. The owner session stops here; the owner retires it.
+
+## 2026-09-06 — orc-174-20260906-03 PR202 main-history reconciliation
+
+- The daemon's failed refresh left an active merge of `dadd6fc` into reviewed
+  head `c491416`, with four unresolved paths. Resolved the actual pending
+  merge, not a replacement integration or a reset to either parent's tree.
+- Preserved main's completed `deltaQld_mono` proof and its specific blueprint
+  labels. Retained the incoming `WinImplications` module split and proofs,
+  transferring the reviewed citation-only changes to the corresponding leaves.
+  All 106 Lean paths differing from incoming main have identical non-comment
+  content; no game, definition, theorem hypothesis, or proof was changed by
+  reconciliation. Paper mirrors match incoming main exactly.
+- Kept both parents' telemetry and protocol entries, retaining identical shared
+  entries once. Primary hook installation checks and the four relevant blueprint
+  label resolutions pass. Commit and publication remain subject to normal gates;
+  this entry does not claim fresh CI or independent review. The parent tail owns
+  exact-head evidence recovery, and the failed refresh marker remains untouched.
+- Merge commit `a93a368` passed the normal pre-commit and reference-transaction
+  gates. Its first checked-push stopped before transport because the private
+  build lacked `MIPStarRE/LDT/Basic/RpowBounds.olean`. The worktree still had
+  the September 4 snapshot. Primary `warm-worktree.sh --force --no-build`
+  restored the complete, key-matched `dadd6fc` snapshot into private build
+  artifacts; no full build or hot-cache write was needed. Publication must
+  rerun the unmodified checked-push gate; the initial failure is not CI evidence.
 
 ### 2026-09-06 — PR 178 dirty-telemetry refresh recovery
 

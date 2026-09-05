@@ -11,8 +11,7 @@ the support and evaluation properties used by the shared-seed product law.
 
 ## References
 
-The source result is `lem:cl-func-prod` in
-`blueprint/src/chapter/ch12_qpbt_games.tex`, approached through the
+The source result is blueprint `lem:cl-func-prod`, approached through the
 formalization support nodes `lem:cl-supported-vanishing`,
 `lem:cl-restriction-idem`, `lem:cl-restriction-sum`,
 `lem:cl-supported-restriction`, and `lem:cl-func-prod-same-level` in

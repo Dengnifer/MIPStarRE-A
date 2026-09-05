@@ -13,10 +13,10 @@ are formed before decoding, while their field seed is still present.
 
 ## References
 
-The combining map is `def:combine-map` in
-`blueprint/src/chapter/ch15_qpbt_combining.tex:445-480`, with paper origin
+The combining map is blueprint
+`def:combine-map`, with paper origin
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:970-989`.
-The restricted laws are `def:ith-restricted-line` in blueprint lines 578--592,
+The restricted laws are blueprint `def:ith-restricted-line`,
 with paper origin in the same source at lines 1038--1048.
 -/
 
@@ -41,8 +41,8 @@ noncomputable abbrev PolyPair (P : AdmissibleParams) := Poly P × Poly P
 
 /-- Split the extended coordinate set into the `X` block, the `Z` block, and
 the two scalar coordinates.  This is formalization-only coordinate plumbing
-for `def:combine-map`, blueprint
-`blueprint/src/chapter/ch15_qpbt_combining.tex:445-480`, paper
+for blueprint
+`def:combine-map`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:970-989`. -/
 def finCombineEquiv (m : ℕ) :
     Fin (2 * m + 2) ≃ ((Fin m ⊕ Fin m) ⊕ Fin 2) :=
@@ -77,7 +77,7 @@ def projZ {K : Type*} {m : ℕ} (u : Fin (2 * m + 2) → K) : Fin m → K :=
 /-- Combine two multivariate polynomials by the formula
 `alpha * f(x) + beta * g(z)` from `def:combine-map`.
 
-Blueprint `blueprint/src/chapter/ch15_qpbt_combining.tex:445-480`; paper
+Blueprint `def:combine-map`; paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:970-983`. -/
 noncomputable def combinePoly {K : Type*} [CommSemiring K] {m : ℕ}
     (f g : MvPolynomial (Fin m) K) : MvPolynomial (Fin (2 * m + 2)) K :=
@@ -102,8 +102,8 @@ or `beta` preserves the degree bound on those old coordinates and gives degree
 one only in the corresponding fresh coordinate.  Thus `hd` supplies exactly
 the needed bound on the two fresh coordinates; no `d + 1` bound is introduced.
 The statement is the well-definedness assertion in
-`def:combine-map`, blueprint
-`blueprint/src/chapter/ch15_qpbt_combining.tex:445-480`, with source context
+blueprint
+`def:combine-map`, with source context
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:970-983` and the
 boundary-hypothesis discussion in `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`.
 -/
@@ -157,8 +157,8 @@ noncomputable def combineLinePolynomial {K : Type*} [CommSemiring K] {c : ℕ}
 
 /-- The polynomial underlying `combineLinePoly` has degree at most `c + 1`.
 This is the degree assertion accompanying Equation `eq:combine-lines` in
-`def:combine-map`, blueprint
-`blueprint/src/chapter/ch15_qpbt_combining.tex:459-479`, paper
+blueprint
+`def:combine-map`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:984-989`. -/
 theorem combineLinePolynomial_natDegree_le {K : Type*} [CommSemiring K] {c : ℕ}
     (aX bX aZ bZ uα vα uβ vβ : K) (f g : Fin (c + 1) → K) :
@@ -170,8 +170,8 @@ reparameterizations.  Coefficients through degree `c + 1` are extracted from
 the genuine composed polynomial, so the definition has no incompatibility
 fallback.
 
-This is Equation `eq:combine-lines` in `def:combine-map`, blueprint
-`blueprint/src/chapter/ch15_qpbt_combining.tex:459-479`, paper
+This is Equation `eq:combine-lines` in blueprint
+`def:combine-map`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:984-989`. -/
 noncomputable def combineLinePoly {K : Type*} [CommSemiring K] {c : ℕ}
     (aX bX aZ bZ uα vα uβ vβ : K)
@@ -195,8 +195,8 @@ def IsCombineLineCompatible {K : Type*} [Field K] {m : ℕ}
 /-- Under explicit line compatibility, `combineLinePoly` satisfies the
 advertised line equation and the two projected points have the stated affine
 parameters.  This is the specification obligation for Equation
-`eq:combine-lines`, blueprint
-`blueprint/src/chapter/ch15_qpbt_combining.tex:459-479`, paper
+blueprint
+`eq:combine-lines`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:984-989`. -/
 theorem combineLinePoly_spec {K : Type*} [Field K] {m c : ℕ}
     (u v : Fin (2 * m + 2) → K) (uX vX uZ vZ : Fin m → K)
@@ -228,8 +228,8 @@ instance restrictedLineSeedEvent_decidablePred (L : LdParams) (i : Fin L.m) :
 
 /-- The axis-line seed event has positive mass.  This named obligation makes
 normalization in `restrictedALinePreDist` explicit.  It belongs to
-`def:ith-restricted-line`, blueprint
-`blueprint/src/chapter/ch15_qpbt_combining.tex:578-592`, paper
+blueprint
+`def:ith-restricted-line`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1038-1048`. -/
 theorem restrictedALineSeedEvent_positive (L : LdParams) (i : Fin L.m) :
     0 < ∑ sample ∈
@@ -239,8 +239,8 @@ theorem restrictedALineSeedEvent_positive (L : LdParams) (i : Fin L.m) :
   sorry
 
 /-- The diagonal-line seed event has positive mass.  This is the corresponding
-normalization obligation from `def:ith-restricted-line`, blueprint lines
-578--592 and paper lines 1038--1048. -/
+normalization obligation from blueprint `def:ith-restricted-line`; paper lines
+1038--1048. -/
 theorem restrictedDLineSeedEvent_positive (L : LdParams) (i : Fin L.m) :
     0 < ∑ sample ∈
         (clDistribution (ldDLineCL L) (ldPointCL L)).support.filter
@@ -267,16 +267,16 @@ noncomputable def restrictedDLinePreDist (L : LdParams) (i : Fin L.m) :
 /-- The `i`-th restricted axis-line distribution from
 `def:ith-restricted-line`.  Restriction precedes decoding so the seed fiber is
 represented faithfully.  Blueprint
-`blueprint/src/chapter/ch15_qpbt_combining.tex:578-592`; paper
+`def:ith-restricted-line`; paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1038-1048`. -/
 noncomputable def restrictedALineDist (L : LdParams) (i : Fin L.m) :
     Distribution (LineDesc L × (Fin L.m → ScalarQ L)) :=
   (restrictedALinePreDist L i).map fun sample =>
     (aLineDescOf L sample.1, sample.2.point)
 
-/-- The `i`-th restricted diagonal-line distribution from
+/-- The `i`-th restricted diagonal-line distribution from blueprint
 `def:ith-restricted-line`.  The decoded direction already has all coordinates
-preceding `i` set to zero.  Blueprint lines 578--592; paper lines 1038--1048. -/
+preceding `i` set to zero.  Paper lines 1038--1048. -/
 noncomputable def restrictedDLineDist (L : LdParams) (i : Fin L.m) :
     Distribution (LineDesc L × (Fin L.m → ScalarQ L)) :=
   (restrictedDLinePreDist L i).map fun sample =>

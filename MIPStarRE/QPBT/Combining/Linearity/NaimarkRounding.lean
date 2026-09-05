@@ -48,8 +48,8 @@ is at lines 1099--1100, the observables `𝒜(a) = ∑_u (-1)^{u·a} C^u` at lin
 1100--1102, and their exact linearity at lines 1103--1104.  The QPBT paper
 quotes the theorem at
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:711-725`, and
-the blueprint statement is `thm:linearity` in
-`blueprint/src/chapter/ch15_qpbt_combining.tex:98-133`.  The one-measurement
+the blueprint statement is blueprint
+`thm:linearity`.  The one-measurement
 Naimark construction reused here is `oneMeasNaimark` in
 `MIPStarRE/LDT/MakingMeasurementsProjective/NaimarkOneMeas.lean`, with the
 associated dilation data defined in
