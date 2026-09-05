@@ -61,8 +61,8 @@
   trace identities for maximally entangled states.  The main inputs are the
   cited robust self-test of \cite{Coladangelo2017Robust} and the game and
   strategy vocabulary of \cite[Section~5]{Ji2020MIPStar}.  Tracked in
-  \ghissue{172}; the refutation is \ghissue{105}, which also owns the
-  remaining proof; the decision is item~B5 on \ghissue{26}.
+  \ghissue{172}; the refutation is \ghissue{105}, which also owned the
+  proof of the corrected statement; the decision is item~B5 on \ghissue{26}.
 \end{itemize}
 
 \section{Key theorem forms}
@@ -496,8 +496,8 @@ dilated state $\ket{\psi'}$
 this route the hypothesis enters through the state estimate
 (\path{thm:ms-rigidity},~1), and all operator relations then follow for both
 players alike; this is why the corrected statement carries $\eta$ uniformly.
-The remaining work, owned by \ghissue{105}, is listed in
-Section~\ref{sec:formal}.
+The assembly along this route, owned by \ghissue{105}, is carried out;
+Section~\ref{sec:formal} records the form it has.
 
 \section{Sufficiency for the source's application}
 \label{sec:sufficiency}
@@ -608,9 +608,9 @@ the cells $0$ and $4$ (the paper's $\Variable_1$ and $\Variable_5$) are at most
 $\delta$, and concludes the seven estimates of the source at scale
 $C(\sqrt\eps + \sqrt\delta)$ for one universal constant $C$, with the witness
 and distance definitions unchanged.  The statement-level \verb|\leanok| records
-that the Lean statement matches the blueprint statement; the proof is the
-tracked \verb|sorry| owned by \ghissue{105}, and no proof-level
-\verb|\leanok| is claimed.  Three companions accompany it.
+that the Lean statement matches the blueprint statement, and the proof-level
+\verb|\leanok| records that the Lean proof of that statement is complete, with
+the universal constant $C = 2 \cdot 10^{12}$.  Three companions accompany it.
 \leanid{MIPStarRE.QPBT.msVariableConsistencyDefect\_eq\_zero\_of\_isConsistent}
 shows that a symmetric strategy whose measurements are consistent on its state
 has zero agreement distances, and
@@ -621,8 +621,8 @@ from the theorem its specialization to the symmetric consistent strategies of
 \path{def:consistent-strategy}, whose conclusion is the source's display; it
 assumes projectivity as well, so that its hypothesis names exactly the source's
 class and covers in particular the SPCC strategies of \path{def:spcc}, and its
-own derivation is complete but rests on the open theorem, so it carries no
-proof-level completion mark either.  The blueprint records these as
+own derivation is complete, so that with the theorem above proved it carries a
+proof-level completion mark as well.  The blueprint records these as
 \path{def:ms-variable-agreement}, \path{lem:ms-variable-agreement-zero},
 \path{lem:ms-varobs-cross-player}, \path{lem:ms-variable-agreement-support} and
 \path{cor:ms-rigidity-symmetric-consistent}.
@@ -649,16 +649,32 @@ source rather than a mathematical divergence, the intended reading being
 forced by the domains of the operators; it is nonetheless a difference
 between the formal statement and the printed one, so it is written down.
 
-What remains for \ghissue{105} is the assembly of the corrected theorem from
-the chain: the approximate anticommutation and cross-commutation of the second
-logical pair, the reflections at the paper's $\Variable_2$ and $\Variable_4$,
-by the same solution-group computation; the joint swap-isometry extraction of
-the two EPR pairs from each player's two anticommuting pairs and from the
-cross-player agreement above, giving (\path{thm:ms-rigidity},~1) at scale
-$\sqrt\eps + \sqrt\delta$; the intertwining of each player's extracted qubit
-observables with $\sigma^X$ and $\sigma^Z$; and the post-isometry transfers,
-which already exist.  Nothing in this list needs symmetry, and nothing needs
-consistency beyond the two defects in the hypothesis.
+The assembly of the corrected theorem from the chain, which \ghissue{105}
+owned, is carried out: the approximate anticommutation and cross-commutation
+of a second logical pair for each player, by the same solution-group
+computation along a second closed path of constraints; the joint
+swap-isometry extraction of the two EPR pairs from each player's two
+anticommuting pairs and from the cross-player agreement above, giving
+(\path{thm:ms-rigidity},~1) at scale $\sqrt\eps + \sqrt\delta$; the
+intertwining of each player's extracted qubit observables with $\sigma^X$ and
+$\sigma^Z$; and the post-isometry transfers.  Nothing in it needs symmetry,
+and nothing needs consistency beyond the two defects in the hypothesis.
+
+The two players are not symmetric in that construction, and the asymmetry is
+forced by the corrected hypothesis rather than chosen for convenience.  Bob's
+second logical pair is his variable reflections at the cells of the paper's
+$\Variable_2$ and $\Variable_4$
+(\leanid{MIPStarRE.QPBT.MagicSquareRigidity.msVarObsB\_second\_pair\_anticommute}).
+Alice's second pair is not the corresponding pair of her variable reflections:
+\eqref{eq:defect} bounds the cross-player agreement only at $\Variable_1$ and
+$\Variable_5$, so the two players' $\Variable_2$ and $\Variable_4$
+measurements cannot be compared.  It is instead the pair of her constraint-read
+reflections at those two cells
+(\leanid{MIPStarRE.QPBT.MagicSquareRigidity.msCellObsA\_second\_pair\_anticommute}),
+matched against Bob's variable reflections by
+\leanid{MIPStarRE.QPBT.MagicSquareRigidity.msCellObsA\_close\_msVarObsB}, an
+orientation which the question distribution does sample; so no hypothesis
+beyond \eqref{eq:defect} is needed for it.
 
 \section{Conclusion}
 
@@ -677,7 +693,8 @@ distance $1$, the source's
 application supplies the defect up to $O(\eps)$ from its own consistency
 subtests, and the cited one-way self-test proves the corrected statement.
 The blueprint and \leanid{MIPStarRE.QPBT.exists\_ms\_rigidity} now carry this
-form; its proof is the assembly tracked by \ghissue{105}.
+form, and that statement is proved, with the universal constant
+$C = 2 \cdot 10^{12}$.
 
 \bibliographystyle{alpha}
 \bibliography{references}
