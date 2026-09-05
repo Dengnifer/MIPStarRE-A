@@ -194,7 +194,7 @@ this is the source of the terminology.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{def:low-degree-encoding, def:indicator-vector, def:admissible-size, def:binary-representation, lem:downsize_field, lem:one}
+	\uses{def:low-degree-encoding, def:indicator-vector, def:admissible-size, def:dual-self-dual-normal-basis}
 	By the definition of the indicator vector
 	(Definition~\ref{def:indicator-vector}), expanding the product over the
 	coordinates $i \in \{1, \dots, m\}$ into a sum over $y \in \{0,1\}^m$
@@ -215,25 +215,23 @@ this is the source of the terminology.
 	independently, $r_X \neq 0$ with probability $1 - q^{-1}$. If $r_X = 0$
 	or some factor vanishes, then $\gamma(\omega) = 0$. Otherwise, over the
 	uniform choice of $r_Z$, the argument of the trace is a uniformly random
-	element of $\F_q$. Since $q = 2^k$ is admissible, the trace of an
-	element of $\F_q$ equals the coordinate sum of its binary
-	representation: writing $\kappa$ for the binary representation with
-	respect to the fixed self-dual normal basis
-	(Definition~\ref{def:binary-representation}), item~2 of
-	Lemma~\ref{lem:downsize_field} gives
-	$\tr(c) = \tr(c \cdot 1) = \kappa(c) \cdot \kappa(1)$, and $\kappa(1)$
-	is the all-ones vector by Lemma~\ref{lem:one}. As $\kappa$ is a
-	bijection onto $\F_2^k$, a uniformly random element of $\F_q$ has trace
-	$0$ with probability exactly $\frac12$. Combining, the probability that
+	element of $\F_q$. Choose a basis element $e_0$ of the fixed self-dual
+	basis (Definition~\ref{def:dual-self-dual-normal-basis}). Self-duality gives
+	$\tr(e_0e_0)=1$. Since the trace is $\F_2$-linear, translation by
+	$e_0e_0$ interchanges its two fibres and is a bijection. Thus each fibre
+	has $q/2$ elements, and a uniform field element has trace $0$ with
+	probability exactly $\frac12$. Combining, the probability that
 	$\gamma(\omega) \neq 0$ is exactly $(1-q^{-1})^{m+1} \cdot \frac12$, and
 	the probability that $\omega$ is commuting is the complement, which is
 	at least $\frac12$.
 
-	If $m \leq q$, then
-	$(1-q^{-1})^{m+1} \geq (1-q^{-1})^{q+1} = (1-q^{-1})^{q} \cdot (1-q^{-1})$,
-	a product of two positive functions of $q$ that are nondecreasing for
-	$q \geq 2$, so it is minimized at $q = 2$, where it equals $2^{-3}$;
-	hence the anticommuting probability is at least $2^{-4}$.
+	If $m \leq q$, admissibility gives $q=2^k$ with $k$ positive and odd,
+	so either $q=2$ or $q=8j$ for an integer $j\geq1$. In the first case,
+	$(1-q^{-1})^{m+1}\geq(1/2)^3=1/8$. In the second case, Bernoulli's
+	inequality gives $(1-q^{-1})^j\geq1-j/q=7/8$. Since
+	$m+1\leq8j+1\leq9j$, it follows that
+	$(1-q^{-1})^{m+1}\geq(7/8)^9\geq1/8$.
+	In either case the anticommuting probability is at least $2^{-4}$.
 
 	Finally, suppose $m, d \geq 1$, and consider the first inequality of
 	the display, which bounds the anticommuting probability from below.
