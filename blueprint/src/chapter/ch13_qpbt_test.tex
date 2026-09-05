@@ -574,26 +574,30 @@ The Pauli basis test is the quantum low individual degree test of Natarajan and 
 
 \begin{lemma}[Pauli question-distribution identity]\label{lem:pauli-question-typed-equality}
 	\lean{MIPStarRE.QPBT.pauliQuestionDistribution_eq_typedCL}
+	\leanok
 	\uses{def:pauli-question-distribution, def:typed-cl-distributions, def:graph-distribution}
 	For the Pauli type graph $G^{\mathrm{pauli}}$ and the family $L$ of Definition~\ref{def:pauli-question-distribution}, the Pauli question distribution equals $\mu^{G^{\mathrm{pauli}}}_{L,L}$.
 \end{lemma}
 \begin{proof}
-	\uses{def:typed-cl-distributions, def:graph-distribution, def:cl-dist}
-	Both distributions first use the uniform law on ordered pairs whose unordered pair is an edge of $G^{\mathrm{pauli}}$, and then push forward a common uniform seed in $V^{\mathrm{pauli}}$ by the same pair of maps.
+	\leanok
+	\uses{def:typed-cl-distributions, def:graph-distribution, def:cl-dist, lem:distribution-map-comp, lem:uniform-bind-on-finset-map}
+	Both distributions first use the uniform law on ordered pairs whose unordered pair is an edge of $G^{\mathrm{pauli}}$, and then push forward a common uniform seed in $V^{\mathrm{pauli}}$ by the same pair of maps. Writing the ordered-edge law as the push-forward of the uniform law on the ordered-edge set, Lemma~\ref{lem:uniform-bind-on-finset-map} presents each side as the push-forward of the uniform law on the product of the ordered-edge set with $V^{\mathrm{pauli}}$ along the same map.
 \end{proof}
 
 \begin{lemma}[The Pauli question distribution is a typed CL distribution]\label{lem:pauli-question-typed-cl}
 	\lean{MIPStarRE.QPBT.pauliQuestionDistribution_isTypedCL}
+	\leanok
 	\uses{def:pauli-question-distribution, def:typed-cl-distributions}
 	Fix an admissible tuple $\mathsf{qldparams} = (q,m,d)$ (Definition~\ref{def:admissible}) and let $L = \{L_t\}_{t \in \mathcal T^{\mathrm{pauli}}}$ be the family of Definition~\ref{def:pauli-question-distribution}. The family $L$ is a finite $\mathcal T^{\mathrm{pauli}}$-typed family of $3$-level conditionally linear functions, and the question distribution of $\mathfrak{G}^{\mathrm{Pauli}}_{\mathsf{qldparams}}$ equals the $(\mathcal T^{\mathrm{pauli}}, G^{\mathrm{pauli}})$-typed conditionally linear distribution $\mu^{G^{\mathrm{pauli}}}_{L,\,L}$ of Definition~\ref{def:typed-cl-distributions}.
 \end{lemma}
 \begin{proof}
+	\leanok
 	\uses{lem:pauli-question-cl-family, lem:pauli-question-typed-equality}
 	Combine the common-level family assertion of Lemma~\ref{lem:pauli-question-cl-family} with the distribution identity of Lemma~\ref{lem:pauli-question-typed-equality}.
 \end{proof}
 
 \begin{remark}[Formalization status of Lemma~\ref{lem:pauli-question-typed-cl}]\label{rem:pauli-question-typed-cl-status}
-	The common-level assertion of Lemma~\ref{lem:pauli-question-typed-cl} is established by Lemma~\ref{lem:pauli-question-cl-family}; the distribution identity of Lemma~\ref{lem:pauli-question-typed-equality} remains open.
+	Both halves of Lemma~\ref{lem:pauli-question-typed-cl} are proved. The common-level assertion is Lemma~\ref{lem:pauli-question-cl-family}, and the distribution identity is Lemma~\ref{lem:pauli-question-typed-equality}, whose proof identifies the two common-seed laws through Lemma~\ref{lem:uniform-bind-on-finset-map}. The Pauli question distribution therefore carries the typed conditionally linear structure without further hypotheses, exactly as the low-degree question distribution does through Lemma~\ref{lem:ld-question-typed-cl}.
 \end{remark}
 
 \begin{definition}[Win predicate of the Pauli basis test]\label{def:pauli-win-predicate}
@@ -807,6 +811,23 @@ low-degree question and line-point laws above.
 	set.
 \end{proof}
 
+\begin{lemma}[Fibre weights of a uniform push-forward]\label{lem:uniform-map-fibre-weight}
+	\lean{MIPStarRE.QPBT.uniformDistribution_map_weight}
+	\leanok
+	\uses{lem:uniform-distribution-weight}
+	Let $A$ be a nonempty finite set and let $e\colon A\to C$. Then for every
+	$c\in C$,
+	\[
+		(e_\ast\operatorname{Unif}(A))(c)=\frac{|e^{-1}(c)|}{|A|}.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:uniform-distribution-weight}
+	The push-forward assigns to $c$ the total uniform mass of its fibre, and
+	every point of $A$ carries mass $1/|A|$.
+\end{proof}
+
 \begin{lemma}[Uniform push-forward along a balanced map]\label{lem:uniform-map-equal-fibers}
 	\lean{MIPStarRE.QPBT.uniformDistribution_map_of_card_fiber}
 	\leanok
@@ -861,6 +882,27 @@ low-degree question and line-point laws above.
 	Lemma~\ref{lem:uniform-map-equal-fibers}.
 \end{proof}
 
+\begin{lemma}[Dependent uniform sampling from a finite subset]
+	\label{lem:uniform-bind-on-finset-map}
+	\lean{MIPStarRE.QPBT.bind_uniformOnFinset_map}
+	\leanok
+	Let $S$ be a finite subset of $A$, let $B$ be a nonempty finite set, let
+	$g\colon A\to B\to C$, and let $f\colon\Sigma\to A$ be an injection from a
+	nonempty finite set $\Sigma$ with image $S$.  Sampling $a$ uniformly from
+	$S$, then $b$ uniformly from $B$, and returning $g(a,b)$ has the same law as
+	pushing $\operatorname{Unif}(\Sigma\times B)$ forward along
+	$(x,b)\mapsto g(f(x),b)$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:distribution-ext-support, lem:uniform-map-fibre-weight}
+	Both supports are the image of $S\times B$ under $g$.  Since $f$ is a
+	bijection from $\Sigma$ onto $S$, we have $|S|=|\Sigma|$, and sums over $S$
+	may be reindexed by $\Sigma$.  At each $c\in C$, both weights are the number
+	of pairs $(x,b)\in\Sigma\times B$ with $g(f(x),b)=c$, divided by
+	$|\Sigma|\,|B|$.
+\end{proof}
+
 \begin{lemma}[Dependent uniform sampling as a product push-forward]\label{lem:uniform-bind-map}
 	\lean{MIPStarRE.QPBT.bind_uniformDistribution_map}
 	\leanok
@@ -871,10 +913,9 @@ low-degree question and line-point laws above.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{lem:distribution-ext-support, lem:uniform-distribution-weight}
-	Both supports are the image of $A\times B$ under $g$.  At each $c\in C$,
-	both weights are the number of pairs $(a,b)$ with $g(a,b)=c$, divided by
-	$|A||B|$.
+	\uses{lem:uniform-bind-on-finset-map}
+	This is the case $S=A$, $\Sigma=A$, and $f$ the identity of
+	Lemma~\ref{lem:uniform-bind-on-finset-map}.
 \end{proof}
 
 \begin{lemma}[Uniform first marginal after an equivalence]
