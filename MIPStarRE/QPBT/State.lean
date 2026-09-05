@@ -94,7 +94,8 @@ theorem reindexState_norm_eq
   change (∑ j : kappa, ‖psi (e.symm j)‖ ^ 2) = ∑ i : iota, ‖psi i‖ ^ 2
   exact e.symm.sum_comp (fun i => ‖psi i‖ ^ 2)
 
-/-- The coordinate tensor of two Euclidean vectors has the product norm. -/
+/-- The coordinate tensor of two Euclidean vectors has the product norm.
+This is a formalization-only auxiliary identity (no source counterpart). -/
 theorem vecTensor_norm_eq
     {iota kappa : Type*}
     [Fintype iota] [DecidableEq iota]
