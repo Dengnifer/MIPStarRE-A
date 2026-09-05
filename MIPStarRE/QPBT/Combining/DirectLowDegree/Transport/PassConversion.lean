@@ -38,12 +38,6 @@ noncomputable section
 
 /-! ## The failure comparison and the pass hypothesis -/
 
-private theorem sum_ldType (f : LdType → ℝ) :
-    ∑ t : LdType, f t = f .point + f .aline + f .dline := by
-  change (Finset.univ : Finset LdType).sum f = _
-  rw [show (Finset.univ : Finset LdType) = {.point, .aline, .dline} by decide]
-  simp [add_assoc]
-
 /-- The uniformly weighted rejection is one ninth of the sum over the nine
 ordered type pairs. -/
 private theorem directLdRejectionProbability_eq_sum (D : DirectLdParams)
