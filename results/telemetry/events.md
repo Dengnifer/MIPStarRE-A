@@ -2873,6 +2873,26 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 ## 2026-09-05T16:10Z — #118 math-fix gap closed by session 1 (claims 17-2 and 17-3 proved)
 - One Fable math-fix session (626k tokens, 100 min) settled the gap opened at 14:37Z: the printed claim 17-2 is false for an arbitrary combined-lines witness (the source uses the sandwich form of T, internal to the proof of lem:qld-xz-lines, while the witness records only the pair consistency); restated with error C·√m·(δP^{1/4}+δQ^{1/4}) through lines.consistent and proved. Claim 17-3 is proved as printed: the joint (line, point) mixture the blueprint proof seemed to need is not needed because the integrand depends only on (ℓX, ℓZ, z), and the source's Cauchy–Schwarz step there is vacuous. The deficit-form Cauchy–Schwarz lemma now lives in Combining/OverlapGap.lean. Paper-gap note docs/paper-gaps/qpbt_subline-claims-line-marginal.tex, register row and blueprint nodes updated; lem:claim-17-2/17-3 carry \leanok. Commit 691b671 on the #118 branch. The optional strengthening of CombinedLinesWitness by the X-marginal identity (restores the source error for 17-2) is left to the astra main session per the owner (16:02Z: no B7 for it). Worktree released to the main session.
 
+## 2026-09-06T01:30+08:00 — Codex session rows omit the selected model
+
+- The model-comparison report had to recover Codex models from rollout files or
+  time-based inference because `sessions.jsonl` did not record the model passed
+  by `dispatch.sh`; the inference cannot reliably preserve per-dispatch
+  `MIPSTARRE_CODEX_MODEL` overrides. Issue #231 requests recording the exact
+  explicit selection on new rows while leaving historical rows unchanged.
+
+## 2026-09-05 — Two accounts and router shim (recorded 2026-09-06)
+
+- Issue #232's supplied operator report describes two configured Codex accounts
+  and a temporary PATH router deployed at 17:20Z on September 5, comparing live
+  process counts against capacities 9/10. The owner requested moving selection
+  into the dispatcher, with per-account reservations and recorded account/model
+  identity. This is reported operational evidence, not a live probe by this
+  implementation session; no runtime shim, configuration, or credentials were
+  inspected or changed here. The completed #231 model-telemetry change is reused
+  in #232 rather than published separately. After merge the operator must retire
+  shim routing and restore the aggregate watchdog cap to the sum of account caps.
+
 ## 2026-09-05T16:52Z — Released worktrees and final scoped repairs
 
 - Owner reports on progress log 27 release issue 118 at 16:12Z and all remaining
@@ -2983,6 +3003,22 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   17:34Z was posted approximately two minutes before that heading; this entry
   records the correction rather than treating that heading as a precise clock.
 
+- 2026-09-06 — In `prover-112-20260906-01` (PR #185), the first direct
+  check of the resolved `Anticommuting.lean` could not find the shared
+  indicator-product and admissible-size lemmas because the branch's compiled
+  dependencies predated the incoming main sources. A targeted
+  `lake build MIPStarRE.QPBT.Observables.WinImplications` refreshed the
+  dependency closure in the branch-private Lake directory; both conflicted
+  Lean files then passed direct checks. No full build was started. The seven
+  winning-implication declarations and six probability declarations checked
+  against the fresh artifacts depend only on `propext`, `Classical.choice`,
+  and `Quot.sound`. The nine existing approximate/observable proof holes in
+  the unchanged root module remain unchanged. Lesson: validate a shared-API
+  merge against refreshed dependencies before interpreting missing identifiers
+  as source errors. All individual session artifacts from both parents remain
+  byte-identical, all session/build/stage/estimate records are retained, and
+  all owner-session identities remain present with main's recorded corrections.
+
 ## 2026-09-05T17:40Z — Owner account-routing lane and MAIN handoff
 
 - Owner issue 232 supersedes 231. The sol worker completed clean commit6ae352b
@@ -3065,3 +3101,146 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   GitHub reads and staging initially hit sandbox restrictions and were retried
   through approved escalation. Evidence and remaining validation limits:
   `results/telemetry/prover-201-20260906-01-validation.md`.
+
+## 2026-09-05T18:42Z — Owner-priority merge recovery and pasting completion report
+
+- The owner requested priority recovery of PRs 185 and 225 and reported five
+  labelled autofix launches. Dispatched separate astra integration workers for
+  the pending main merges on 112 and 210; publication tails clear daemon retry
+  markers only after running checked CI/review. Existing stack-watch remains
+  responsible for 195, 207, and 213/212 when their parents merge.
+- Verified the owner loops rather than duplicating them: 178 produced 796236a
+  but its CI call observed stale GitHub metadata, so fresh validation follows
+  after verifying that pushed head. 233 continues its own CI/review loop. 205
+  and 202 refused dirty trees; 230 had nothing left to fix and merged through the
+  daemon at 18:39:15Z. A bounded recovery session now handles 202's rejected
+  staged citation fix, without another review-fix round or scope growth.
+- The primary hook installer now requires reference-transaction, added by 230,
+  which older branches do not yet contain. Two 202 dispatch attempts and the
+  initial 224 dispatch therefore stopped before a worker started, although their
+  branch-local hook checks pass. Explicit --skip-hook-check permits only worker
+  startup on those existing branches and on 201; normal commit and checked-push
+  gates remain enabled. The recovery workers must preserve and integrate main's
+  hooks when they refresh their branches. No hook bypass is authorized.
+- Prepared 215 on main and 224 on the existing 156 branch through worktree-setup
+  with --no-build. They do focused alias/instance cleanup only, with no full build
+  competing with the chain. The 224 scout establishes that DecidableEq already
+  exists; no model field or game change is authorized. The nested login shell
+  reset the initial 215 sol override to astra; the healthy worker was retained.
+  Subsequent sol overrides are placed directly on dispatch invocations.
+- Math-fix 201 slot 6 reports the one-sided pasting theorem proved without h4,
+  retaining only the documented additive-error correction. Its eight-module
+  checks and 1,544 blueprint links passed; independent review is still required.
+  Started a separate publication/integration worker preserving every uncommitted
+  proof and mirror file. This is no further mathematical-search slot. Issue 119
+  correctly stopped at the unfinished 118 extended-lines construction rather
+  than adding assumptions; its complete quantitative theorem remains open.
+- At the last process check there were six distinct top-level Codex workers:
+  112, 210, 215, 174, 201, and 224. Native child processes were not double counted.
+  No human decision is requested; the exact current count accompanies the #27
+  stage report.
+
+## 2026-09-05T18:56Z — Adopt short orchestration turns
+
+- Read owner guidance 3: all work exceeding about two minutes belongs to a
+  detached worker or lane; main turns read statuses, dispatch, record, report,
+  then yield. No conflict or build repair was performed in this turn.
+- The requested 225 repair was already delegated and completed as 8d59383;
+  its detached checked publication/CI/review tail remains live. Do not duplicate
+  that lane. The 215 and 224 workers also completed clean commits 2ad3428 and
+  71f3768, with single-file checks and normal hooks passing. The latter remains
+  stacked on 156; no model field or sampler definition changed.
+- GitHub still reports 185 open, unmerged, at d82bc5a as of this status check;
+  its detached recovery publication is running and pr185.failed remains until
+  checked publication completes. Consequently propagation into 195 has not yet
+  occurred. Stack-watch is live with the 113-on-112 entry intact. This is a
+  checked current-state correction to the owner's description, not a merge claim.
+- 202's staged fix is now committed and published at 559275a; exact-head CI is
+  running. 233's append-only protocol-history conflict was resolved earlier and
+  its refreshed head fbe9404 has CI/review in its detached loop. 201's one-sided
+  proof is committed at c14ea3a and integrated at fe74413; independent publication
+  checks continue. A prepare-ahead 118 worker now consumes that construction.
+- 178 has code approval and zero mathematical/status discrepancies; the single
+  wording advisory received a terminal scope adjudication template and daemon
+  queue entry. No substantive mathematical finding is waived. Existing source
+  gaps and unfaithful annotations are not declared closed by this disposition.
+
+## 2026-09-05T19:18Z — Fresh main v4 dispatch cycle
+
+- Snapshot at 19:15:48Z: load 58.40, two live workers (one per account), lane
+  114, no autofix loops, attention markers 118/232/73, no daemon failed markers,
+  ten open PRs and zero open owner blockers. Ready packets 112/114/201/210 all
+  already have PRs; no duplicate packet lanes launched. Existing 234/235 workers
+  own the durable persona and external briefing updates.
+- Delegated PR233 merge recovery and conditional post-merge shim retirement;
+  launched PR202 and PR205 labelled review autofix. Existing PR178/225 advisory
+  templates and daemon queue entries remain applicable to the same findings.
+  APPROVED PR185 remains daemon-owned; stack children still await its merge.
+- PR202 autofix and issue118 dispatch exited at old-branch hook preflight.
+  Delegated bounded recovery with dispatcher-only `--skip-hook-check`, following
+  the recorded 18:43Z precedent; workers must verify or repair branch hooks and
+  preserve all commit/push integrity gates. Issue118 worker also coordinates
+  actionable stacked issue119 work and verifies obsolete issue73 attention.
+  Lesson: distinguish a failed dispatch attempt from a live worker; no proof or
+  merge completion is inferred from launching a supervisor.
+
+## 2026-09-05T19:26Z — PR185 merge and critical-path continuation
+
+- Previous cycle made progress through detached dispatches and recorded evidence.
+  New snapshot at 19:22:25Z: four live workers (primary one, secondary three),
+  load 46.16, lane232, autofix205, attention118, no failed markers, zero owner
+  blockers. The snapshot is not atomic: PR185 merged during its collection and
+  PR236 appeared. GitHub confirms PR185 merged at 19:23:18Z.
+- PR233 recovery completed exact-head CI/review on 4fac73e; it remains open,
+  so shim retirement remains pending. PR178 gained a daemon failed marker;
+  delegated gate recovery without reopening its terminal wording advisory.
+- Started issue113's stack tail after observing PR185 merge. The tail stopped
+  with an actual main-merge conflict, including owner-sessions.jsonl. Delegated
+  history-preserving repair and tail continuation rather than repeating launch.
+- PR202's previous recovery verified hooks but stopped without repairing F1
+  because nested agents were prohibited. Main now owns a detached sequential
+  preparation/autofix supervisor: worker leaves clean, legitimate hook setup,
+  then the main-owned shell invokes labelled autofix. PR205 fixer remains live.
+- Opened issue118 point-error-dependence mathematical investigation, session one
+  of at most ten with a 1.5-working-day bound. Its brief reports an internal
+  helper promising an estimate independent of arbitrary point-witness error.
+  Authorized internal error-dependent helper repair and prerequisite integration,
+  not changes to source-facing statements, models or games. Astra mathfix owns
+  source verification and construction; issue119 waits on that missing estimate.
+  No proof completion or mathematical correction is certified by this dispatch.
+
+## 2026-09-05T19:29Z — Validation recovery and briefing verification
+
+- Prior goal turn made progress: PR185 merge verified and critical-path recovery
+  dispatched. Snapshot at 19:26:37Z reports six live workers (primary two,
+  secondary four), load 44.25, lanes210/232, autofix202/205, attention113/118,
+  failed marker178, and zero owner blockers. Recovery workers for 178 and113,
+  and mathfix118, are confirmed live; no duplicate workers were launched.
+- PR205 autofix produced and checked-pushed 7d0af71, then CI saw stale GitHub
+  head metadata and exited. Independently verified GitHub now advertises that
+  exact head and launched detached CI then independent review. Do not spend a
+  new fix iteration on a transient observation mismatch.
+- PR202 preparation completed and checked-pushed 8531017. Its subsequent
+  labelled autofix correctly found no current-head review ledger to act on.
+  Launched detached CI, independent review and then labelled autofix to restore
+  the exact-head sequence; the old F1 is not silently declared resolved.
+- Independently read both external goal briefings, compared them byte-for-byte
+  and verified active checksum 4b807d09c576fd9f350d1c6577da8dd66cc467e316b076bed60ed75522200235
+  and primary backup checksum 3686b5cb8f653ae1c0fe1b6050fbed5139f032e8c15f6363881b07655d263e09.
+  Closed explicitly authorized external-deployment issue235 via gh_common;
+  GitHub confirms closure at 19:27:44Z. This does not close formalization work.
+- Snapshot latest reviews show PR233 and new PR236 approved; the daemon owns
+  merges. Existing stack dependencies and ready packets already have owners.
+
+## 2026-09-05 — Owner session: second watch ends (2026-09-05T19:31:09Z); fresh main session runs the operating cycle autonomously
+- Second watch 18:31Z to 19:30Z at the owner request (maximum parallelism, main session to behave like the owner session). Findings and
+  fixes: parallelism had fallen to one worker because approved PRs sat behind failed daemon refreshes (merge conflicts in their worktrees)
+  and five PRs with findings had no loop; the owner session started the loops and the main session resolved the conflicts, at first by
+  hand (serializing the pipeline for twenty minutes) and, after guidance 3, through detached workers. Durable aids added: the operator
+  status tool results/telemetry/owner-tools/status-snapshot.sh, the consolidated handoff v4 (cycle, rules, open items; archived under
+  owner-messages/), and a fresh main session launched from it at 19:15Z with its standing goal set to the cycle. It now posts snapshot
+  numbers on #27 each cycle, dispatches workers per the order in the handoff, and ends its turns within minutes.
+- State at the end: main 696af82; PR 185 merged (critical-path head), lane 113 propagating into PR 195;
+  daemon refreshing PRs 225 and 233; loops on 202 and 205; #232 (dispatch.sh account routing) approved and merging. Follow-ups assigned
+  to the main session: persona amendment (cycle and two-minute delegation rule), /goal briefing refresh in both codex homes, shim
+  reduction after #232 merges. The owner session stops here; the owner retires it.

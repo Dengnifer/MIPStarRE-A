@@ -6,6 +6,20 @@ import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.PassConversion
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.SeedFiberValue
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Error
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Simultaneous
+import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.Linearity
+import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.Strategy
+import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.QuestionLaw
+import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.GameValue
+import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.WinPredicate
+import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.Value
+import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.Restriction
+import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.Coefficients
+import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.ExactLinearity
+import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.Recovery
+import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.RecoveryDefect
+import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.RecoveryTransport
+import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.SimultaneousGeneral
+import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.Error
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.PointAgreement
 import MIPStarRE.QPBT.Combining.DirectLowDegree.SeedIndexedSoundness
 
@@ -54,6 +68,23 @@ either game as a consistency estimate, and `SeedIndexedSoundness` transports
 the polynomial-tuple conclusions back to the seed-indexed game `ldGame` by
 compressing the correlated residue register, recovering the global polynomial
 relation from the two point relations and the point-agreement branch.
+
+For a general simultaneity parameter, the reduction introduces the combined
+parameters `DirectLdParams.combined`, of dimension `m + k` and simultaneity
+parameter `1`; the combining map on polynomial tuples and its individual-degree
+bound; the substitution recovering the components of a combined polynomial,
+which exhibits the combining map as injective; and the Schwartz--Zippel
+collision estimate for two linear forms in the combining variables; and the
+combined strategy itself, which answers every question of the combined game by
+measuring one question of the original strategy and relabelling its outcome,
+together with its projectivity, the identification of the measured questions on
+each sample of the combined game, and the transport of its value.  The recovery
+of the components of a combined outcome costs `(m + k) d / q` in the two point
+relations.  The general-simultaneity theorem combines these constructions, and
+the scalar estimate absorbs the resulting error into the error function of
+`lem:ld-soundness`; see
+`blueprint/src/chapter/ch13_qpbt_test.tex`, the subsection on the combining
+reduction.
 
 ## References
 
