@@ -1,5 +1,6 @@
 import MIPStarRE.QPBT.Games.StrategyClasses
 import MIPStarRE.QPBT.Games.DistanceTheorems.Support
+import MIPStarRE.QPBT.Games.Sandwich.Support
 import MIPStarRE.QPBT.Observables.LineDefs
 import MIPStarRE.QPBT.Test.PauliBasisTest
 
@@ -180,7 +181,10 @@ private theorem pauliToLd_embedLd (P : AdmissibleParams) (W : PauliKind)
   funext i
   rcases i with ((j | x) | j) <;> cases W <;> rfl
 
-set_option maxRecDepth 10000 in
+-- The support rewrites below elaborate the `Fintype` instance of
+-- `PauliEdge × PauliSpace P`, whose nested sigma/sum instance chain exceeds the
+-- default recursion depth.
+set_option maxRecDepth 2000 in
 /-- A fixed point of a conditioning map occurs in the Pauli sampler through
 the corresponding self-loop. -/
 private theorem questionAppearsInSupport_of_fixed (P : AdmissibleParams)
@@ -460,81 +464,6 @@ noncomputable def wrongFormMass (S : ProjectiveSetting P ε) (side : PlayerSide)
               (wrongFormEffect questions.2.1 (S.toStrategy.B questions.2)))
             S.toStrategy.ψ)).re
 
-/-- A left-local sum of effects has Born mass equal to the corresponding sum
-of joint outcome weights. -/
-private theorem leftEffectMass_eq {G : Game} (S : Strategy G)
-    (x : G.QuestionA) (y : G.QuestionB) (p : G.AnswerA → Bool) :
-    (inner ℂ S.ψ
-      (applyOperatorToState
-        (heteroKron
-          (∑ a ∈ Finset.univ.filter (fun a => p a = false), (S.A x).effect a) 1)
-        S.ψ)).re =
-      ∑ a ∈ Finset.univ.filter (fun a => p a = false),
-        ∑ b : G.AnswerB, outcomeWeight S x y a b := by
-  classical
-  let invalid := Finset.univ.filter (fun a : G.AnswerA => p a = false)
-  have hop :
-      heteroKron (∑ a ∈ invalid, (S.A x).effect a) 1 =
-        ∑ a ∈ invalid, ∑ b : G.AnswerB,
-          heteroKron ((S.A x).effect a) ((S.B y).effect b) := by
-    ext i j
-    simp only [Matrix.sum_apply, heteroKron, Matrix.kronecker,
-      Matrix.kroneckerMap_apply]
-    simp_rw [← Finset.mul_sum]
-    rw [show (∑ b : G.AnswerB, (S.B y).effect b i.2 j.2) =
-        (1 : Op S.ιB) i.2 j.2 by
-      simpa only [Matrix.sum_apply] using
-        congrFun (congrFun (S.B y).sum_eq_one i.2) j.2]
-    rw [Finset.sum_mul]
-  change (inner ℂ S.ψ
-      (applyOperatorToState
-        (heteroKron (∑ a ∈ invalid, (S.A x).effect a) 1) S.ψ)).re = _
-  rw [hop]
-  simp [outcomeWeight, applyOperatorToState, invalid]
-
-/-- A right-local sum of effects has Born mass equal to the corresponding sum
-of joint outcome weights. -/
-private theorem rightEffectMass_eq {G : Game} (S : Strategy G)
-    (x : G.QuestionA) (y : G.QuestionB) (p : G.AnswerB → Bool) :
-    (inner ℂ S.ψ
-      (applyOperatorToState
-        (heteroKron 1
-          (∑ b ∈ Finset.univ.filter (fun b => p b = false), (S.B y).effect b))
-        S.ψ)).re =
-      ∑ a : G.AnswerA,
-        ∑ b ∈ Finset.univ.filter (fun b => p b = false),
-          outcomeWeight S x y a b := by
-  classical
-  let invalid := Finset.univ.filter (fun b : G.AnswerB => p b = false)
-  have hop :
-      heteroKron 1 (∑ b ∈ invalid, (S.B y).effect b) =
-        ∑ a : G.AnswerA, ∑ b ∈ invalid,
-          heteroKron ((S.A x).effect a) ((S.B y).effect b) := by
-    ext i j
-    simp only [Matrix.sum_apply, heteroKron, Matrix.kronecker,
-      Matrix.kroneckerMap_apply]
-    have hA : (∑ a : G.AnswerA, (S.A x).effect a i.1 j.1) =
-        (1 : Op S.ιA) i.1 j.1 := by
-      simpa only [Matrix.sum_apply] using
-        congrFun (congrFun (S.A x).sum_eq_one i.1) j.1
-    calc
-      (1 : Op S.ιA) i.1 j.1 *
-          (∑ b ∈ invalid, (S.B y).effect b i.2 j.2) =
-          (∑ a : G.AnswerA, (S.A x).effect a i.1 j.1) *
-            (∑ b ∈ invalid, (S.B y).effect b i.2 j.2) := by rw [hA]
-      _ = ∑ a : G.AnswerA, (S.A x).effect a i.1 j.1 *
-          (∑ b ∈ invalid, (S.B y).effect b i.2 j.2) := by rw [Finset.sum_mul]
-      _ = ∑ a : G.AnswerA, ∑ b ∈ invalid,
-          (S.A x).effect a i.1 j.1 * (S.B y).effect b i.2 j.2 := by
-            apply Finset.sum_congr rfl
-            intro a ha
-            rw [Finset.mul_sum]
-  change (inner ℂ S.ψ
-      (applyOperatorToState
-        (heteroKron 1 (∑ b ∈ invalid, (S.B y).effect b)) S.ψ)).re = _
-  rw [hop]
-  simp [outcomeWeight, applyOperatorToState, invalid]
-
 /-- Expand the Alice wrong-form effect into its joint Born weights. -/
 private theorem leftWrongFormEffectMass_eq {P : AdmissibleParams}
     (S : Strategy (pauliBasisTest P))
@@ -639,59 +568,6 @@ private theorem rightInvalidMass_le_rejection {P : AdmissibleParams}
       intro b hb hbInvalid
       split <;> simp [outcomeWeight_nonneg]
 
-/-- The average rejection mass is one minus the strategy value. -/
-private theorem rejectionMass_eq_one_sub_value {G : Game} (S : Strategy G) :
-    avgOver G.μ (fun questions =>
-      ∑ a, ∑ b,
-        if G.decide questions.1 questions.2 a b then 0
-        else outcomeWeight S questions.1 questions.2 a b) =
-      1 - S.value := by
-  classical
-  rw [show avgOver G.μ (fun questions =>
-      ∑ a, ∑ b,
-        if G.decide questions.1 questions.2 a b then 0
-        else outcomeWeight S questions.1 questions.2 a b) =
-      avgOver G.μ (fun questions =>
-        1 - ∑ a, ∑ b,
-          if G.decide questions.1 questions.2 a b then
-            outcomeWeight S questions.1 questions.2 a b else 0) by
-    apply avgOver_congr
-    intro questions
-    calc
-      (∑ a, ∑ b,
-          if G.decide questions.1 questions.2 a b then 0
-          else outcomeWeight S questions.1 questions.2 a b) =
-          ∑ a, ∑ b,
-            (outcomeWeight S questions.1 questions.2 a b -
-              if G.decide questions.1 questions.2 a b then
-                outcomeWeight S questions.1 questions.2 a b else 0) := by
-        apply Finset.sum_congr rfl
-        intro a ha
-        apply Finset.sum_congr rfl
-        intro b hb
-        split <;> simp
-      _ = (∑ a, ∑ b, outcomeWeight S questions.1 questions.2 a b) -
-          ∑ a, ∑ b,
-            if G.decide questions.1 questions.2 a b then
-              outcomeWeight S questions.1 questions.2 a b else 0 := by
-        rw [show (∑ a, ∑ b,
-            (outcomeWeight S questions.1 questions.2 a b -
-              if G.decide questions.1 questions.2 a b then
-                outcomeWeight S questions.1 questions.2 a b else 0)) =
-            ∑ a, ((∑ b, outcomeWeight S questions.1 questions.2 a b) -
-              ∑ b, if G.decide questions.1 questions.2 a b then
-                outcomeWeight S questions.1 questions.2 a b else 0) by
-          apply Finset.sum_congr rfl
-          intro a ha
-          rw [Finset.sum_sub_distrib]]
-        rw [Finset.sum_sub_distrib]
-      _ = 1 - ∑ a, ∑ b,
-          if G.decide questions.1 questions.2 a b then
-            outcomeWeight S questions.1 questions.2 a b else 0 := by
-        rw [outcomeWeight_sum_eq_one]]
-  rw [avgOver_sub, avgOver_const_of_isProbability G.μ G.μ_prob]
-  rfl
-
 /-- Wrong-form mass on either player side is bounded by the winning error. -/
 private theorem wrongFormMass_le_error (S : ProjectiveSetting P ε)
     (side : PlayerSide) : S.wrongFormMass side ≤ ε := by
@@ -743,47 +619,6 @@ noncomputable def pointObs (S : ProjectiveSetting P ε) (side : PlayerSide)
   ∑ a : PauliScalar P,
     phaseSign (fixedBinTrace P.model (a * r)) • (S.pointMeas side W u).effect a
 
-/-- Regrouping the outcomes of a projective POVM preserves projectivity. -/
-private theorem postprocess_isProjective {α β ι : Type*}
-    [Fintype α] [DecidableEq α] [Fintype β] [DecidableEq β]
-    [Fintype ι] [DecidableEq ι]
-    (M : MIPStarRE.Quantum.Measurement α ι) (hM : Measurement.IsProjective M)
-    (f : α → β) : Measurement.IsProjective (M.postprocess f) := by
-  classical
-  intro b
-  refine ⟨?_, ?_⟩
-  · change (M.postprocess f).effect b * (M.postprocess f).effect b =
-      (M.postprocess f).effect b
-    let fiber : Finset α := Finset.univ.filter fun a => f a = b
-    calc
-      (M.postprocess f).effect b * (M.postprocess f).effect b =
-          (∑ a ∈ fiber, M.effect a) * (∑ a' ∈ fiber, M.effect a') := by
-            rw [MIPStarRE.Quantum.Measurement.postprocess_effect]
-      _ = ∑ a ∈ fiber, ∑ a' ∈ fiber, M.effect a * M.effect a' := by
-            rw [Finset.sum_mul]
-            simp_rw [Finset.mul_sum]
-      _ = ∑ a ∈ fiber, ∑ a' ∈ fiber, if a' = a then M.effect a else 0 := by
-            refine Finset.sum_congr rfl ?_
-            intro a ha
-            refine Finset.sum_congr rfl ?_
-            intro a' ha'
-            by_cases haa' : a' = a
-            · subst a'
-              simp [(hM a).isIdempotentElem.eq]
-            · have hne : a ≠ a' := fun h => haa' h.symm
-              simp [DistanceCalculus.projective_effect_mul_effect_eq_zero M hM hne,
-                haa']
-      _ = ∑ a ∈ fiber, M.effect a := by
-            refine Finset.sum_congr rfl ?_
-            intro a ha
-            simp [fiber, ha]
-      _ = (M.postprocess f).effect b := by
-            rw [MIPStarRE.Quantum.Measurement.postprocess_effect]
-  · change star ((M.postprocess f).effect b) = (M.postprocess f).effect b
-    change ((M.postprocess f).effect b)ᴴ = (M.postprocess f).effect b
-    exact (Matrix.nonneg_iff_posSemidef.mp
-      ((M.postprocess f).pos b)).isHermitian.eq
-
 /-- Select projectivity of the strategy POVM on either local space. -/
 private theorem strategyMeasurement_isProjective
     (S : ProjectiveSetting P ε) (side : PlayerSide) (question : PauliQuestion P) :
@@ -796,7 +631,7 @@ private theorem strategyMeasurement_isProjective
 private theorem pointMeas_isProjective (S : ProjectiveSetting P ε)
     (side : PlayerSide) (W : PauliKind) (u : Fin P.m → PauliScalar P) :
     Measurement.IsProjective (S.pointMeas side W u) := by
-  apply postprocess_isProjective
+  apply SandwichProduct.postprocess_isProjective
   exact strategyMeasurement_isProjective S side _
 
 /-- The point observable squares to the identity. This is the assertion that
@@ -829,10 +664,7 @@ theorem pointObs_sq_eq_one (S : ProjectiveSetting P ε) (side : PlayerSide)
       apply Finset.sum_congr rfl
       intro a ha
       rw [Finset.sum_eq_single a]
-      · rw [(hM a).isIdempotentElem.eq]
-        by_cases htrace : fixedBinTrace P.model (a * r) = 0
-        · simp [phaseSign, htrace]
-        · simp [phaseSign, htrace]
+      · rw [(hM a).isIdempotentElem.eq, phaseSign_mul_self, one_smul]
       · intro b hb hba
         have hab : a ≠ b := fun h => hba h.symm
         rw [DistanceCalculus.projective_effect_mul_effect_eq_zero M hM hab]
@@ -853,13 +685,7 @@ theorem pointObs_isHermitian (S : ProjectiveSetting P ε) (side : PlayerSide)
   rw [Matrix.conjTranspose_sum]
   apply Finset.sum_congr rfl
   intro a ha
-  rw [Matrix.conjTranspose_smul]
-  have hphase : star (phaseSign (fixedBinTrace P.model (a * r))) =
-      phaseSign (fixedBinTrace P.model (a * r)) := by
-    by_cases htrace : fixedBinTrace P.model (a * r) = 0
-    · simp [phaseSign, htrace]
-    · simp [phaseSign, htrace]
-  rw [hphase]
+  rw [Matrix.conjTranspose_smul, star_phaseSign]
   rw [(Matrix.nonneg_iff_posSemidef.mp
     ((S.pointMeas side W u).pos a)).isHermitian.eq]
 
