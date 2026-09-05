@@ -735,3 +735,18 @@ resumes stay with their original account and telemetry retains their identity.
 Timeout remains an explicitly authorized overflow, not a hard-cap guarantee.
 Operator cutover after merge restores the v1 multi-agent-off-only shim and sets
 the aggregate `max-codex` to the sum of the two configured caps (19 by default).
+
+## 2026-09-06 — Make main turns snapshot-driven and delegation-first
+
+**Trigger:** `results/telemetry/events.md` 2026-09-06, "Main-turn work serialized
+detached recovery", and owner directive #234.
+
+**Change:** `local/personas/main.md` now starts each short turn with the status
+snapshot, delegates work exceeding about two minutes, and orders recovery,
+labelled autofix or adjudication, stack propagation, and critical ready-packet
+dispatch. It makes daemon-only merges and #27 live-worker reporting explicit,
+with #26 reserved for human decisions.
+
+**Expected effect:** the main session remains responsive while independent work
+advances in parallel, failed lanes receive prompt recovery, and merge authority
+and owner escalation stay unambiguous.
