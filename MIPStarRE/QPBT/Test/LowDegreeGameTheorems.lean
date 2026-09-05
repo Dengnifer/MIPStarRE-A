@@ -394,7 +394,10 @@ A third obligation is the simultaneity of the polynomial measurements for
 reduction of Theorem 4.43 in the NEEXP paper, not coordinatewise; the
 coordinatewise route planned for the formalization is refuted in
 `docs/paper-gaps/qpbt_ld-simultaneous-sandwich.tex`. The combining reduction
-remains to be proved; see issue #210. The case `L.k = 1`, which is the only
+is proved for the directly indexed game in
+`MIPStarRE/QPBT/Combining/DirectLowDegree/Transport/Combining/SimultaneousGeneral.lean`;
+the general-`k` seed-indexed theorem remains open. See issue #210.
+The case `L.k = 1`, which is the only
 one instantiated by the Chapter 15 combining argument, is proved with the
 present conclusions as `exists_ld_soundness_of_k_eq_one` in
 `MIPStarRE/QPBT/Combining/DirectLowDegree/SeedIndexedSoundness.lean`. -/
