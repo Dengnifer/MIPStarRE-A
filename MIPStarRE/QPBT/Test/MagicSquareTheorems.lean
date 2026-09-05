@@ -13,6 +13,7 @@ import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.IdealTarget
 import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.Constants
 import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.TwoQubitSwap
 import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.Assembly
+import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.Marginals
 
 /-!
 # Magic Square rigidity
