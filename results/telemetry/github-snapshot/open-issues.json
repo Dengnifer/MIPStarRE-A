@@ -278,9 +278,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 5,
+  "comments": 6,
   "created_at": "2026-09-04T23:03:03Z",
-  "updated_at": "2026-09-05T09:04:33Z",
+  "updated_at": "2026-09-05T09:56:05Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
@@ -821,8 +821,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 17,
-   "completed": 12,
-   "percent_completed": 70
+   "completed": 13,
+   "percent_completed": 76
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
   "issue_dependencies_summary": {
@@ -1379,7 +1379,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/166",
   "issue_dependencies_summary": {
-   "blocked_by": 1,
+   "blocked_by": 0,
    "total_blocked_by": 4,
    "blocking": 0,
    "total_blocking": 0
@@ -1399,91 +1399,6 @@
    "eyes": 0
   },
   "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/135/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/134",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/134/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/134/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/134/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/134",
-  "id": 5345309886,
-  "node_id": "I_kwDOUJyJf88AAAABPpr0vg",
-  "number": 134,
-  "title": "feat(QPBT/Combining): prove simultaneous polynomial measurements",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 4,
-  "created_at": "2026-09-04T07:07:50Z",
-  "updated_at": "2026-09-05T06:24:20Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/166",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 4,
-   "blocking": 1,
-   "total_blocking": 2
-  },
-  "body": "<!-- mipstarre-issue-key: stage43-ld-simultaneous-measurements -->\n### Target declarations\n\n- `MIPStarRE/QPBT/Combining/DirectLowDegree/Transport/Simultaneous.lean:new` -\n  a point-reference sandwich lemma: coordinate polynomial PVMs individually\n  consistent with the coordinate marginals of one joint point PVM yield a\n  tuple-polynomial POVM whose evaluated tuple is consistent with that joint\n  point PVM, with an explicit `C * k * sqrt(\u03b4 + m*d/q)` bound.\n- Same file - a two-sided sandwich lemma: coordinate PVMs on Alice and Bob that\n  are pairwise consistent across the state yield sandwiched tuple POVMs that\n  are globally consistent, with the same one-square-root error shape.\n- Same file - reuse `polynomialAgreement_avg_le_mdq` under #132's polynomial\n  equivalence to discharge the distinct-polynomial collision hypothesis.\n- Same file - `directCoordinateMainFormal`: invoke\n  `MIPStarRE.LDT.Test.mainFormal` for every `r : Fin D.k` with the strategy and\n  pass proof from #130/#131 and `directLdAuxParameter` from #133.\n- Same file - `exists_directSimultaneousPolynomialMeasurements`, constructing\n  `GA : DirectPolyMeasTuple D S.\u03b9A` and\n  `GB : DirectPolyMeasTuple D S.\u03b9B` whose two point-consistency defects and\n  global-consistency defect are bounded by the explicit transport envelope\n  absorbed in #133.\n\n### Paper and blueprint references\n\n- Simultaneous low-degree conclusion:\n  `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:413-458`\n  and `blueprint/src/chapter/ch13_qpbt_test.tex:139-164`.\n- Sandwiched simultaneous measurement:\n  `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:465-501` and\n  `MIPStarRE/QPBT/Games/Sandwich.lean:58-107`.\n- Mature scalar conclusion:\n  `references/ldt-paper/test_definition.tex:180-202` and\n  `MIPStarRE/LDT/Test/MainTheorem/MainFormal.lean:300-327`.\n- Reusable Schwartz--Zippel bound:\n  `MIPStarRE/LDT/Preliminaries/PolynomialAgreement.lean:90-163`.\n- The paper-gap note applying to this packet is\n  `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`; this is the product\n  argument that discharges its open simultaneity warning.\n\nIndependent applications of `mainFormal` do not make the resulting coordinate\nPVMs commute. Define the tuple effects by the existing palindromic\n`sandwichProduct`; prove measurement validity and transfer factors across the\nbipartite state one at a time. The global/global bound must be proved directly\nfrom the coordinate global consistencies, rather than by a second square-root\ntriangle through point measurements. This keeps the envelope within the\n`b = 1/80000` scale allowed by #133.\n\n### Dependencies\n\n- #130 and #131 supply coordinate strategies and `PassesLowIndividualDegreeTest`.\n- #132 supplies polynomial, measurement, and `ConsRel` conversions.\n- #133 supplies the auxiliary parameter and scalar envelope.\n- #49 must merge for the core distance calculus; #99 must merge for\n  `sandwichProduct_isMeasurement` and its insertion estimates.\n- The packet handles arbitrary positive `D.k`; it does not restrict the public\n  theorem to the route's special value `k = 1`.\n\n### Acceptance\n\n- `mainFormal` is applied separately to all coordinates with no extra\n  hypotheses, and finite choice produces the two coordinate families.\n- `GA` and `GB` are valid POVMs for arbitrary `D.k`; no commutativity of the\n  coordinate PVMs is assumed.\n- All three required defects have a proved explicit bound that #133 turns into\n  `deltaLd a b \u03b5 D.q D.m D.d D.k`.\n- Direct Lean checks, full build, paper-gap checks, exact-head CI, and\n  independent review pass with no `sorry`, axiom, bypass, bridge, or external\n  theorem import.\n\n### Scope notes\n\nOwn only the new simultaneity file and necessary imports. Generalize sandwich\nmachinery only in this file unless a minimal reusable theorem clearly belongs\nbeside #99 after its owner merges. Do not change `mainFormal`, `deltaLd`, either\npublic soundness signature, or the paper mirror. Main locators are from\n`c1c0af4`.\n\n---\nStage 4.3 proof packet under #47.\n\nPrerequisites are recorded as GitHub issue dependencies (blocked_by); the bullets above are commentary.\n",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/134/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/134/timeline",
   "performed_via_github_app": null,
   "state_reason": null,
   "pinned_comment": null
@@ -1875,9 +1790,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 4,
+  "comments": 5,
   "created_at": "2026-09-04T06:47:53Z",
-  "updated_at": "2026-09-05T08:58:18Z",
+  "updated_at": "2026-09-05T09:30:46Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
