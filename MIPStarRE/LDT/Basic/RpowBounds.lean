@@ -12,7 +12,8 @@ namespace MIPStarRE.LDT
 
 /-- Formalization-only auxiliary: a fixed real power is dominated by an
 exponential.  For `x ≥ 1` and `t > 0`, the product `x ^ s * 2 ^ (-t x)` is at
-most `⌈s⌉! / (t log 2) ^ ⌈s⌉`, a constant depending only on `s` and `t`.
+most `⌈s⌉₊! / (t log 2) ^ ⌈s⌉₊`, where `⌈s⌉₊ = Nat.ceil s` is the nonnegative
+ceiling of `s`.  This constant depends only on `s` and `t`.
 
 Taking `x = m`, `s = a + b` and `t = b`, this bounds the third term in the
 proof of `lem:delta-bound` (blueprint node `lem:delta-bound-envelope-support`)

@@ -922,9 +922,9 @@ We specify a canonical setting of the parameter tuple $\mathsf{qldparams}$ as a 
 		\qquad \text{and} \qquad
 		a' = a\bigl( (2c)^a + C \bigr)\;,
 	\]
-	both depending only on the universal constants $a$ and $b$; since $a \ge 1$, $c \ge 2$ and $C \ge 0$, one has $a' \ge a \ge 1$. The first term is at most $a(2c)^a (\log R)^a \eps^b \le a' (\log R)^{a'} \eps^b$, using $\log R \ge 2 \ge 1$ and $a \le a'$. The second term is at most $a(2c)^a (\log R)^{a - cb} \le a(2c)^a (\log R)^{-b}$, since $cb - a \ge b$ by the choice of $c$. For the third term, split $m^a = m^{a+b} \cdot m^{-b}$ and bound the first factor against the exponential: for all real $s$, all $t > 0$ and all $x \ge 1$, the Taylor estimate $y^n / n! \le e^y$ of the exponential, taken at $y = (t \log 2) x$ and $n = \lceil s \rceil$, gives
+	both depending only on the universal constants $a$ and $b$; since $a \ge 1$, $c \ge 2$ and $C \ge 0$, one has $a' \ge a \ge 1$. The first term is at most $a(2c)^a (\log R)^a \eps^b \le a' (\log R)^{a'} \eps^b$, using $\log R \ge 2 \ge 1$ and $a \le a'$. The second term is at most $a(2c)^a (\log R)^{a - cb} \le a(2c)^a (\log R)^{-b}$, since $cb - a \ge b$ by the choice of $c$. For the third term, split $m^a = m^{a+b} \cdot m^{-b}$ and bound the first factor against the exponential: for all real $s$, all $t > 0$ and all $x \ge 1$, the Taylor estimate $y^n / n! \le e^y$ of the exponential, taken at $y = (t \log 2) x$ and $n = \lceil s \rceil_{+} = \max(\lceil s \rceil, 0)$, gives
 	\[
-		x^s\, 2^{-tx} \le \frac{\lceil s \rceil !}{(t \log 2)^{\lceil s \rceil}}\;.
+		x^s\, 2^{-tx} \le \frac{\lceil s \rceil_{+}!}{(t \log 2)^{\lceil s \rceil_{+}}}\;.
 	\]
 	With $s = a + b$, $t = b$ and $x = m$ the right-hand side is the constant $C$ above, so
 	\[
@@ -936,7 +936,7 @@ We specify a canonical setting of the parameter tuple $\mathsf{qldparams}$ as a 
 	the last step using $m \ge \log R \ge 1$. Summing the three bounds, the statement follows with $a'$ as above and $b' = b$.
 \end{proof}
 
-\begin{lemma}[Formalization support for Lemma lem:delta-bound]
+\begin{lemma}[Formalization support for Lemma~\ref{lem:delta-bound}]
 \label{lem:delta-bound-envelope-support}
 \lean{MIPStarRE.LDT.rpow_mul_two_rpow_neg_le}
 \leanok
