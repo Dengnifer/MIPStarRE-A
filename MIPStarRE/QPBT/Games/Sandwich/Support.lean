@@ -567,42 +567,16 @@ theorem postprocess_isProjective {α β ι : Type*}
 composition. This is the formalization-only identity
 `lem:sandwich-postprocess-compose` used to align the coordinate marginals in
 `lem:ld-sandwich`; detailed source argument
-`references/neexp-paper/05_quantum_preliminaries.tex:952-994`. -/
+`references/neexp-paper/05_quantum_preliminaries.tex:952-994`. It reads at a
+single outcome the equality of the twice-relabeled measurement with the
+measurement relabeled along the composite map. -/
 theorem postprocess_postprocess_effect {α β γ ι : Type*}
     [Fintype α] [DecidableEq α] [Fintype β] [DecidableEq β]
     [Fintype γ] [DecidableEq γ] [Fintype ι] [DecidableEq ι]
     (M : Measurement α ι) (f : α → β) (g : β → γ) (c : γ) :
     ((M.postprocess f).postprocess g).effect c =
       (M.postprocess (fun a => g (f a))).effect c := by
-  classical
-  simp only [MIPStarRE.Quantum.Measurement.postprocess_effect, Finset.sum_filter]
-  calc
-    (∑ b : β, if g b = c then
-        ∑ a : α, if f a = b then M.effect a else 0 else 0) =
-        ∑ b : β, ∑ a : α,
-          if g b = c ∧ f a = b then M.effect a else 0 := by
-      apply Finset.sum_congr rfl
-      intro b _
-      by_cases hbc : g b = c <;> simp [hbc]
-    _ = ∑ a : α, ∑ b : β,
-        if g b = c ∧ f a = b then M.effect a else 0 := by
-      rw [Finset.sum_comm]
-    _ = ∑ a : α, if g (f a) = c then M.effect a else 0 := by
-      apply Finset.sum_congr rfl
-      intro a _
-      by_cases hac : g (f a) = c
-      · rw [Finset.sum_eq_single (f a)]
-        · simp [hac]
-        · intro b _ hba
-          simp [Ne.symm hba]
-        · simp
-      · apply Eq.trans (Finset.sum_eq_zero (fun b _ => by
-          by_cases hab : f a = b
-          · subst b
-            simp [hac]
-          · simp [hab]))
-        simp [hac]
-    _ = ∑ a : α, if g (f a) = c then M.effect a else 0 := rfl
+  rw [MIPStarRE.Quantum.Measurement.postprocess_comp]
 
 /-- An injective relabeling does not merge the effect at a relabeled
 outcome. This is the formalization-only identity

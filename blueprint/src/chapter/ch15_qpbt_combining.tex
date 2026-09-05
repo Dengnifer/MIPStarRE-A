@@ -2012,7 +2012,8 @@ projective measurement whose outcomes are pairs of global polynomials.
 	\lean{MIPStarRE.QPBT.directPolynomialPoint_consistencyDefect_le}
 	\lean{MIPStarRE.QPBT.directPolynomialPolynomial_consistencyDefect_le}
 	\leanok
-	\uses{def:consistency, def:ld-game, def:admissible-size}
+	\uses{def:consistency, def:ld-game, def:admissible-size,
+		lem:direct-ld-consistency-defect-equivalence}
 	This is not a named statement of \cite{Ji2020MIPStar}. It records three
 	consistency implications in the directly indexed coordinates, in which the
 	sampled coordinate is carried by the question itself rather than by a
@@ -2131,6 +2132,122 @@ projective measurement whose outcomes are pairs of global polynomials.
 	This obstruction is analyzed in
 	\cite{gap:qpbt_ld-dimension-divisibility}.
 \end{remark}
+
+% The results below are not statements of the source. They record the
+% coordinatewise application of Theorem~\ref{thm:main-formal} to the directly
+% indexed game and the one-coordinate polynomial-tuple conclusion discussed in
+% Remark~\ref{rem:ld-soundness-simultaneity}.
+\begin{lemma}[Formalization support: consistency relations as bipartite consistency defects]
+	\label{lem:direct-ld-consistency-defect-equivalence}
+	\lean{MIPStarRE.QPBT.consRel_iff_consistencyDefect}
+	\leanok
+	\uses{def:consistency, def:simeq, def:povm-conventions}
+	This is not a named statement of \cite{Ji2020MIPStar}. Let $\psi$ be a unit
+	vector on a bipartite space with nonempty index set, let $\mu$ be a
+	probability distribution on a finite question set, and let $A$ and $B$ be
+	families of complete projective measurements with a common finite outcome set
+	on the two factors. The consistency relation of Definition~\ref{def:simeq},
+	formed for the density state of $\psi$, holds with error $\delta$ if and only
+	if the off-diagonal defect of Definition~\ref{def:consistency} between the
+	left placement of $A$ and the right placement of $B$, evaluated on the
+	coordinate vector of $\psi$, is at most $\delta$. Passing between the two
+	formulations therefore loses nothing in the error parameter.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Both quantities are the same average over questions of the same finite sum of
+	quadratic forms: the expectation of an operator in the density state of
+	$\psi$ is the Euclidean quadratic form of the coordinate vector of $\psi$ at
+	that operator, and the two placements realize the tensor factors of the
+	operators appearing in either formulation.
+\end{proof}
+
+\begin{lemma}[Formalization support for the collision estimate in directly indexed coordinates]
+	\label{lem:direct-ld-polynomial-agreement}
+	\lean{MIPStarRE.QPBT.directPolynomialAgreement_avg_le_mdq}
+	\leanok
+	\uses{lem:polynomial-agreement-mdq, def:ld-game}
+	This is not a named statement of \cite{Ji2020MIPStar}. Fix directly indexed
+	parameters $D=(q,m,d,k)$. Two distinct $m$-variate polynomial representatives
+	of individual degree at most $d$ over the scalar field of $D$ take the same
+	value at a uniformly random point of $\F_q^m$ with probability at most
+	$md/q$. This is the collision hypothesis of Lemma~\ref{lem:ld-sandwich},
+	stated for the directly indexed point and polynomial carriers.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:polynomial-agreement-mdq}
+	The point and polynomial identifications of the directly indexed presentation
+	are bijections, so the agreement event is carried to the corresponding event
+	for the seed-indexed carriers, where
+	Lemma~\ref{lem:polynomial-agreement-mdq} applies.
+\end{proof}
+
+\begin{lemma}[Formalization support for the coordinatewise soundness conclusion]
+	\label{lem:direct-ld-coordinate-soundness}
+	\lean{MIPStarRE.QPBT.directCoordinateMainFormal}
+	\leanok
+	\uses{thm:main-formal, def:ld-game, def:consistency, def:ld-meas}
+	This is not a named statement of \cite{Ji2020MIPStar}. Fix directly indexed
+	parameters $D=(q,m,d,k)$, let $\eps\in\R$, let $S$ be a projective strategy
+	for the directly indexed game with value at least $1-\eps$, and fix a
+	coordinate $r\in\{0,\ldots,k-1\}$. Reading coordinate $r$ of $S$ as a
+	projective strategy for the $(m,q,d)$ low individual degree test of
+	Chapter~\ref{chap:test} gives a strategy that passes that test with
+	probability at least $1-3\eps$. Theorem~\ref{thm:main-formal}, applied to it
+	at the sampling parameter $2560000\,m^3d$, then produces projective
+	measurements on the two players' spaces indexed by single $m$-variate
+	polynomials of individual degree at most $d$ satisfying the three consistency
+	relations of that theorem, with error the error function of
+	Theorem~\ref{thm:main-formal} at that sampling parameter and at pass bound
+	$3\eps$. Both numerical side conditions of Theorem~\ref{thm:main-formal},
+	positivity of the sampling parameter and the lower bound $400md$, hold for
+	this choice because the dimension and the degree are positive.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{thm:main-formal}
+	Instantiate Theorem~\ref{thm:main-formal} at the coordinate reading of $S$
+	and at the stated sampling parameter, supplying the pass bound of that
+	reading and the two numerical side conditions.
+\end{proof}
+
+\begin{lemma}[Formalization support: the polynomial-tuple conclusion for a single coordinate]
+	\label{lem:direct-ld-simultaneous-single}
+	\lean{MIPStarRE.QPBT.exists_directSimultaneousPolynomialMeasurements_of_k_eq_one}
+	\leanok
+	\uses{lem:direct-ld-coordinate-soundness, lem:direct-ld-consistency-coordinates,
+		def:ld-meas, def:consistency, def:ld-game}
+	This is not a named statement of \cite{Ji2020MIPStar}. It is the
+	polynomial-tuple conclusion of Theorem~\ref{lem:ld-soundness} for
+	simultaneity parameter $k=1$, obtained for the directly indexed game rather
+	than for the seed-indexed game of Definition~\ref{def:ld-game}; see
+	Remark~\ref{rem:qld-4-7-divisibility}.
+
+	Fix directly indexed parameters $D=(q,m,d,k)$ with $k=1$, let $\eps\in\R$,
+	and let $S=(\psi,A,B)$ be a projective strategy for the directly indexed game
+	with value at least $1-\eps$. Then there are POVMs on the two players' spaces
+	whose outcomes are $k$-tuples of $m$-variate polynomial representatives of
+	individual degree at most $d$ for which the three consistency defects of the
+	conclusion of Theorem~\ref{lem:ld-soundness} --- the two point/polynomial
+	defects averaged uniformly over $u\in\F_q^m$ and the polynomial/polynomial
+	defect over the one-element question set --- are each at most the error
+	function of Theorem~\ref{thm:main-formal} at the sampling parameter
+	$2560000\,m^3d$ and pass bound $3\eps$. For $k\ge2$ the coordinate
+	conclusions do not yield such POVMs;
+	Remark~\ref{rem:ld-soundness-simultaneity} records the obstruction.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:direct-ld-coordinate-soundness, lem:direct-ld-consistency-coordinates}
+	Apply Lemma~\ref{lem:direct-ld-coordinate-soundness} at the unique coordinate
+	and transport its three consistency relations to directly indexed consistency
+	defects by Lemma~\ref{lem:direct-ld-consistency-coordinates}. Since the index
+	set of coordinates is a singleton, sending a value to the constant tuple
+	carrying it is a bijection of outcome sets, under which each defect is
+	unchanged; relabeling a single-polynomial measurement by one-coordinate
+	tuples likewise leaves its effects unchanged.
+\end{proof}
 
 \begin{remark}[Constant regimes in the quotation of the classical soundness
 	theorem]
