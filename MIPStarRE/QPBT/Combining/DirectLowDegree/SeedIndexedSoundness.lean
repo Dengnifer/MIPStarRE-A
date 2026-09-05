@@ -113,8 +113,10 @@ hypothesis `L.k = 1`.
 
 For arbitrary `L.k` the source proof extends the case `L.k = 1` by the
 combining reduction of Theorem 4.43 in
-`references/neexp-paper/05_quantum_preliminaries.tex:1409-1503`, which is not
-formalized here; the coordinatewise alternative planned for the formalization
+`references/neexp-paper/05_quantum_preliminaries.tex:1409-1503`. That reduction
+is proved for the directly indexed game in `Transport.Combining.SimultaneousGeneral`;
+the general seed-indexed theorem remains open. The coordinatewise alternative
+planned for the formalization
 is refuted in `docs/paper-gaps/qpbt_ld-simultaneous-sandwich.tex`.  Blueprint
 `ch13_qpbt_test.tex:139-215`, paper
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:413-458`. -/

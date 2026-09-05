@@ -35,14 +35,6 @@ open MIPStarRE.Quantum
 
 noncomputable section
 
-/-- Prefix restriction is idempotent. -/
-private theorem directPrefixProjection_idem (D : DirectLdParams) (i : Fin D.m)
-    (v : Fin D.m → DirectScalarQ D) :
-    directPrefixProjection i (directPrefixProjection i v) = directPrefixProjection i v := by
-  funext j
-  unfold directPrefixProjection
-  split_ifs <;> rfl
-
 /-- Canonicalizing the seeded embedding of a canonical direct sample gives the
 canonical seeded sample of the original direct sample: the seed-indexed
 question asked in a residue block of the dilation is the seed-indexed
