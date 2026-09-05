@@ -237,9 +237,14 @@ noncomputable def subLineZComponentDist (P : AdmissibleParams)
     (restrictedLinePointDist P component.1 component.2.2)).map
       fun sample => ((sample.1, sample.2.1), sample.2.2)
 
-/-- The subline distribution of `lem:qld-sublines`, paper lines 1063--1069.
-Its source-mixture field records the X and Z point marginals separately; it
-does not assert a joint conditional law for the pair of projected points. -/
+/-- Directly indexed form of the subline distribution of `lem:qld-sublines`,
+paper lines 1063--1069.  Its extended-line marginal is the directly indexed
+line-point law rather than the seed-indexed line-point distribution over
+`F_q^(2m+2)` of the source statement; that replacement is documented in
+`docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`, so this is a
+formalization auxiliary record, not the source-labelled statement.  Its
+source-mixture field records the X and Z point marginals separately; it does
+not assert a joint conditional law for the pair of projected points. -/
 structure SubLineWitness (P : AdmissibleParams) where
   /-- The actual distribution of an extended line and two projected lines. -/
   D : Distribution (SubLineTriple P)
