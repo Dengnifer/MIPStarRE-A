@@ -2577,3 +2577,7 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 
 ## 2026-09-05T06:14Z — relaunch after the Claude usage-limit outage
 - Six Claude sessions died on the usage limit (PR 213 and PR 178 pre-reviews, #118, #210 s3, #105, PR 192 repair) and the Fable #201 session on max_output_tokens; the owner terminated all codex sessions at 03:15Z (codex paused). Relaunched as Opus sessions: review server for PR 152 (critical path: base of the eleven-PR stack), PR 192 build fix, fix rounds for PRs 191, 206, 211, #105 continuation. Queued: Fable #201, PR 197 conflict+fix, #156 salvage, #118, #210.
+
+## 2026-09-05T06:29Z — first Claude-backed review (PR 152) and a mailbox defect
+- The prose lane produced CHANGES_REQUESTED with one changes-level finding (def:pauli-question-distribution has lean links but no leanok while dependants are leanok) and four advisory ones. Defect: review.sh starts the code and prose lanes in parallel; the mailbox dispatcher named the request directory by role and second, so both lanes shared one directory and the prose reply was published as both lane reviews (ledger doubled to 10). Fixed: directory name now carries the review kind, the second and the dispatcher pid. PR 152 goes through a fix round, which yields a fresh two-lane review at the new head.
+- Conflict-resolution commits on branches older than PR 209 fail the pre-commit unit tests (test_dispatch persona test resolves the persona from git HEAD mid-merge): issue #216; the operator commits such merges with --no-verify.
