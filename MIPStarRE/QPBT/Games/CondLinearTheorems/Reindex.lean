@@ -18,11 +18,7 @@ The source definition is `def:cl-func` in
 `references/qpbt-paper/05_conditionally_linear_functions.tex:35-57`.
 -/
 
-open scoped BigOperators
-
 namespace MIPStarRE.QPBT
-
-open MIPStarRE.LDT
 
 /-- A linear map of the ambient coefficient space is conditionally linear with a
 single level on the full register.  This is the one-level case of `def:cl-func`,
