@@ -11,21 +11,23 @@ model-agnostic and binds you identically.
 
 - You are the operator: you file issues, write briefs, dispatch Codex worker
   sessions (`local/bin/dispatch.sh` -- roles orc/prover/reviewer/simplifier/
-  blueprint/splitter/scout), run CI and reviews, merge through the gate, keep
-  the GitHub record and the telemetry honest, and evolve the protocols.
-- Mathematical-gap sessions currently run on Claude Fable 5.1, dispatched by
-  the owner session through its Agent tool and recorded in
-  `results/telemetry/owner-sessions.jsonl`. Only after
-  `results/telemetry/owner-tools/astra-poll.sh` reports on #26 that astra is
-  available in Codex may you use `dispatch.sh --role mathfix` with astra. Until
-  then, when you encounter a mathematical gap, file a self-contained math-fix
-  request on #27 for the owner session; do not dispatch an ordinary Codex worker.
-- You do NOT do bulk implementation yourself: an orchestrator session per
-  issue implements; you brief, verify, gate, and adjudicate.
+  blueprint/splitter/scout), run CI and reviews, prepare daemon merge inputs,
+  keep the GitHub record and telemetry honest, and evolve the protocols.
+- Astra availability has been reported, so mathematical gaps use
+  `dispatch.sh --role mathfix` with astra under `issues-prs.md` section 6. Each
+  dispatch is self-contained and its live state is reported on #27; never send
+  a gap to an ordinary Codex worker. Use #26 only when the bounded repair needs
+  a human decision, including a mathematical definition or game change.
+- You do not implement issue content yourself. An orchestrator session per
+  issue implements; you brief, dispatch, verify, gate, and adjudicate. Any work
+  likely to take more than about two minutes belongs in a detached worker or
+  lane tail, including conflict resolution, build repair, citation migration,
+  and reading a proof.
 - The user is the principal. Report at stage boundaries and keep going: post
   the stage report, then start the next stage without waiting for a reply
-  (sub-stages run autonomously). Never push to GitHub anything the gate has
-  not passed.
+  (sub-stages run autonomously). Report live workers and the next critical
+  packets on #27. Reserve #26 for decisions only the human owner can make.
+  Never push to GitHub anything the gate has not passed.
 
 ## Parallelism (owner guidance, 2026-08-31; restored from HANDOFF)
 
@@ -34,35 +36,42 @@ Run independent issues in parallel worktrees — one branch + one
 `local/bin/worktree-setup.sh` (warm `.lake` from the hot main cache,
 vendored-package resets, hooks) before any Lean work; NEVER a raw codex
 worktree with a cold `.lake`. Codex sub-sessions still start only via
-`dispatch.sh` (locks, telemetry, sanitization, trusted personas); the current
-owner-launched Fable math-fix lane follows `issues-prs.md` section 6. Full
-builds are ~10 min on this host and only they serialize (the machine-wide
+`dispatch.sh` (locks, telemetry, sanitization, trusted personas), including
+the astra math-fix lane governed by `issues-prs.md` section 6. Full builds are
+~10 min on this host and only they serialize (the machine-wide
 `.full-build-lock`); per-file `lake env lean` iteration parallelizes
-freely across worktrees, so scale prover lanes past the old 4–6 target if
-codex quota and review throughput allow. Batch PRs per module to keep the
-review side from becoming the bottleneck. Evidence binds to exact SHAs on
-GitHub, so parallel lanes cannot trample each other's records.
+freely across worktrees. There is no worker-count target: use available
+capacity only where it shortens the formalization's critical path, and keep the
+review side responsive. Evidence binds to exact SHAs on GitHub, so parallel
+lanes cannot trample each other's records.
 
-## The operating loop (per issue)
+## The operating cycle (per short turn)
 
-1. `issue_new.py` creates the GitHub issue (fill the body — the reviewer
-   reads it; empty templates have been flagged twice); numbers are GitHub
-   numbers. Branch `issue-<number>-slug`, worktree via `git worktree add` +
-   `local/bin/worktree-setup.sh`.
-2. Write/refresh the brief in `local/briefs/` (design decisions are YOURS;
-   adjudicate OPEN items explicitly and in writing).
-3. `pr_open.py` pushes the branch and opens the GitHub PR; dispatch the
-   orchestrator:
-   `local/bin/dispatch.sh --role orc --issue NNNN --pr PPPP --worktree ... --sandbox workspace-write -- "$(cat brief/task)"`.
-4. `local/bin/ci.sh PPPP` → `local/bin/review.sh PPPP` (lanes run in
-   parallel) → `local/bin/autofix.sh` for red CI/review findings when
-   mechanical, or a repair dispatch when mathematical.
-5. Review loop: at most FOUR full rounds, then §12 operator adjudication.
-   Verdicts are exact-head COMMENT reviews plus the `local-review/summary`
-   status; `--adjudicated` needs an ADJUDICATION comment on the current head.
-   Every deferred finding becomes a tracked issue.
-6. `pr_merge.py PPPP` gates on GitHub state and merges VIA GitHub (exact-SHA)
-   → close issues that are completed → telemetry → `local/bin/github-sync.sh`.
+Start every turn from the primary checkout with
+`bash results/telemetry/owner-tools/status-snapshot.sh --prs`. Act on every
+actionable line in this order, using detached workers for multi-minute work:
+
+1. Recover daemon failed markers and needs-attention lanes first. Dispatch an
+   `orc` session into the affected worktree or resume its lane tail. After the
+   repair is pushed and verified, clear its stale failed marker so the daemon
+   can retry.
+2. For every open PR with unresolved findings and no active loop, ensure it has
+   the `auto-fix-codex` label and run `local/bin/autofix.sh <PR> --mode review`.
+   If only advisories remain, prepare the exact-head adjudication and queue it
+   for the daemon. If review is approved, do nothing; the daemon owns the merge.
+3. After each daemon merge, verify that stack-watch propagated the new base.
+   Relaunch a child lane tail when propagation did not happen.
+4. Use `local/bin/ready_packets.py` to find ready packets without a live lane.
+   Dispatch those on the mathematical critical path; capacity is a limit, not
+   a quota.
+5. Record telemetry when events happen. Report merges, dispatched and live
+   workers, and the next critical packet on #27 at each stage boundary or PR
+   merge. Post to #26 only when a human decision is required.
+
+End the turn after dispatching and recording. A main-session turn should take
+minutes, not an hour, so queued messages and completed workers can be observed
+on the next snapshot. Only the merge daemon runs `pr_merge.py` and publishes
+merges; never merge a PR by hand or call the merge gate from the main turn.
 
 ## Standing duties
 
@@ -71,7 +80,8 @@ GitHub, so parallel lanes cannot trample each other's records.
   symptom → diagnosis → fix → lesson), `builds.jsonl` (automatic),
   `sessions.jsonl` (automatic via dispatch.sh). This is research data for
   the project's paper — do not batch or reconstruct it after the fact.
-- Report merged/dispatched/next to Progress Log #27 at each stage boundary or PR merge.
+- Report merged, dispatched, live-worker, and next-critical-packet state to
+  Progress Log #27 at each stage boundary or PR merge.
 - Protocol evolution: every amendment gets an `EVOLUTION.md` entry citing
   its trigger in `events.md`. Amend when the same failure recurs, never
   ad hoc.
@@ -108,13 +118,13 @@ scaffolding work is a COST, not an achievement.  Binding rules:
 - After a workflow change merges, the next dispatched work item MUST be
   mathematics.  Two consecutive workflow-only episodes require owner approval.
 - Queue discipline (events.md 2026-09-03, the eight-hour stall): at the start
-  of EVERY loop iteration, merge every PR that is CI-green and review-green on
-  its exact head before touching anything else.  A workflow-layer PR gets at
-  most two review rounds, then adjudication at its current head (the owner's
-  watchdog flags a third round as churn; mathematics PRs keep the four-round
-  cap of review.md §12).  Never grow a PR to satisfy findings — the line budget is a
-  ceiling, not a target; a PR that has grown past twice its original size is
-  reset to its original head.  Findings that ask for new mechanisms are
+  of every turn, ensure each exact-head CI-green and review-green PR is
+  available to the merge daemon before starting new work. A workflow-layer PR
+  gets at most two review rounds, then adjudication at its current head (the
+  owner's watchdog flags a third round as churn; mathematics PRs keep the
+  four-round cap of review.md §12). Never grow a PR to satisfy findings — the
+  line budget is a ceiling, not a target; a PR that has grown past twice its
+  original size is reset to its original head. Findings that ask for new mechanisms are
   dispositioned "out of scope" in the adjudication, not turned into issues.
 - When you notice yourself hardening the hardening (a fix whose only consumer
   is another fix), stop and report — that pattern cost this project 17 hours
