@@ -880,3 +880,18 @@ the existing native route/lease/review implementation; its mechanics are unchang
 **Expected effect:** Fewer repeated scans and stale-instruction pauses; new or
 adopted PRs carry descriptive labels without implicitly enabling automation.
 **Outcome:** Pending focused tests, ordinary gates, and post-restart observation.
+
+
+## 2026-09-06 — Publish the final main snapshot in an explicit sync (#291)
+
+**Trigger:** events.md "Snapshot publication regression in migration #291";
+real-Git regressions show the valid main sync returned success with local main
+ahead because it committed the record snapshot after publication.
+**Change:** github-sync.sh retains the snapshot timing and, only after a successful
+requested main push and snapshot commit, checked-pushes main once more. Branch-only
+scope is unchanged; commit/publication failures return nonzero. issues-prs.md
+documents the argument and outcome contracts.
+**Expected effect:** An explicit successful main sync leaves its own snapshot
+published, so the merge service does not stall on that avoidable local-only commit.
+**Outcome:** Nine offline tests pass; three baseline regressions demonstrate the
+old failure. Final CI/review and deployed observation remain pending.

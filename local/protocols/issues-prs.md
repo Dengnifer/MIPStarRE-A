@@ -64,6 +64,14 @@ closed even when that hook is stale or absent.  A caller's explicit
 validation only: implicit tag following stays disabled, so publication remains
 limited to the explicit branch mapping.
 
+`github-sync.sh [ref ...]` takes branch names (default `main`), not a `push`
+subcommand. It retains the post-publication record snapshot. When an explicitly
+requested/default main push succeeded and the snapshot created a new telemetry
+commit, it checked-pushes main once more without creating another snapshot.
+Branch-only calls never implicitly publish main. Snapshot reads remain best-effort;
+snapshot commit or final publication failure returns nonzero and leaves the
+preserved local state for the operator to recover.
+
 Every merge of `github/main` or a stack parent into an issue branch runs the
 merge-loss guard before the merge commit is created. The guard compares the
 pending index with `HEAD`, `MERGE_HEAD`, and every best merge base. It refuses
