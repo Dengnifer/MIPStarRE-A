@@ -1,0 +1,23 @@
+{
+  "observed_utc": "2026-09-06T03:16:48Z",
+  "kind": "verified relay rejection and concurrency-metric limitation",
+  "source": "Owner asks why RPM is low despite high concurrency",
+  "live_workers": 11,
+  "main_sessions": 1,
+  "account": "primary",
+  "model": "gpt-6-astra",
+  "effort": "max",
+  "evidence": [
+    "qpbt-main TUI: remote compaction failed with Concurrency limit exceeded for user, please retry later",
+    "orc-239-20260906-01.jsonl: reconnect attempts1/5,2/5,3/5 with the same concurrency rejection",
+    "reviewer-pr238-20260906-03.jsonl: reconnect attempts1/5,2/5,3/5 with the same concurrency rejection"
+  ],
+  "conclusion": "Live Codex process occupancy overstates productive request concurrency while clients are retrying or waiting on tools. Relay request rejection is verified; exact provider-side accounting and RPM are not measured.",
+  "other_factors": "Earlier publication logs show Lean/pre-push tool waits. High reasoning effort can lengthen requests, so low RPM alone does not prove low token throughput. Relative contributions have not been quantified.",
+  "unknowns": "Actual relay in-flight count, mean request duration, successful RPM/TPM, scope of the provider limit, and whether other consumers or compaction requests contribute",
+  "meta_action_utc": "2026-09-06T03:18:23Z",
+  "meta_action": "Sent high-level guidance to prioritize actual relay throughput and diagnose admission/request accounting; no model/account changes, task assignments or process interventions by meta",
+  "receipt_verified_utc": "2026-09-06T03:19:06Z",
+  "receipt": "Warning visible as a user message; main working for42 seconds. Recovery not yet verified.",
+  "publication": "Pending main normal telemetry import and publication verification"
+}
