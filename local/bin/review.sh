@@ -331,6 +331,7 @@ run_agent() {
       ended="$(date +%s)"
       tokens="$(sed -n 's/^tokens_total: //p' "$dlog" | tail -1)"
       if [ "$rc" -ne 0 ] && [ "$attempt" -eq 1 ] \
+         && [ -z "${MIPSTARRE_QUEUE_TICKET:-}" ] \
          && [ "$(( ended - started ))" -lt 15 ] \
          && [ "${tokens:-0}" = "0" ]; then
         warn "dispatch failed pre-model (rc=$rc, $(( ended - started ))s, 0 tokens); retrying once"
@@ -404,6 +405,11 @@ PR_STATE="$(json_get "$PR_JSON" state)"
 
 [ -n "$BRANCH" ]   || die "PR #$PR_NUM has no head branch in the GitHub payload"
 [ -n "$HEAD_SHA" ] || die "PR #$PR_NUM has no head SHA in the GitHub payload"
+if [ -n "${MIPSTARRE_QUEUE_TICKET:-}" ]; then
+  [ "$HEAD_SHA" = "${MIPSTARRE_QUEUE_EXPECTED_HEAD:-}" ] && [ "$PR_STATE" = open ] ||
+    die "queued review no longer matches the selected open head"
+  [ "$FORCE_REVIEW" -eq 0 ] || die "queued review cannot force another round"
+fi
 BASE="${BASE:-main}"
 lint_branch_name "$BRANCH"
 lint_branch_name "$BASE"
@@ -546,6 +552,22 @@ print(len(rows) + 1)
 PY
 )"
 export MIPSTARRE_REVIEW_ROUND="$ROUND"
+if [ -n "${MIPSTARRE_QUEUE_TICKET:-}" ]; then
+  [ "$ROUND" -le 4 ] || die "queued review reached the four-round cap"
+  ghc latest-statuses "$HEAD_SHA" >"$RUN_ROOT/statuses.json" ||
+    die "queued review cannot recheck exact-head evidence"
+  [ "$(json_get "$RUN_ROOT/statuses.json" 'local-ci/summary.state')" = success ] ||
+    die "queued review lost green exact-head CI"
+  [ -z "$(json_get "$RUN_ROOT/statuses.json" 'local-review/summary.state')" ] ||
+    die "queued review already has summary evidence; adopt rather than repeat"
+  python3 - "$ROUND_JSON" "$HEAD_SHA" <<'PY' ||
+import json, sys
+rows = json.load(open(sys.argv[1]))
+sys.exit(any(row.get('commit_id') == sys.argv[2] and
+             'mipstarre-review pr=' in (row.get('body') or '') for row in rows))
+PY
+    die "queued review already has publication evidence; adoption required"
+fi
 
 MERGE_BASE="$(git -C "$ROOT" merge-base "$BASE" "$HEAD_SHA" 2>/dev/null || true)"
 [ -n "$MERGE_BASE" ] || die "no merge base between '$BASE' and $HEAD_SHA"

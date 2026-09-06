@@ -269,7 +269,7 @@ The input of low-degree soundness includes `error` as a positive slack when
 This is the numerical substitution at paper `lem:qld-4-7`, lines 1278--1288
 and 1402, not a construction of its measurements or a game transport theorem.
 See `docs/paper-gaps/qpbt_combined-lines-error-term.tex`. -/
-theorem exists_globalPair_error_bound (pointError : ℝ → ℝ)
+theorem exists_global_pair_error_bound (pointError : ℝ → ℝ)
     (hpoint : IsPolyErr pointError) (combinedError : ℝ → ℝ → ℝ)
     (hcombined : IsPolyErr₂ combinedError)
     (combineConstant soundnessConstant soundnessPower finalScale : ℝ)

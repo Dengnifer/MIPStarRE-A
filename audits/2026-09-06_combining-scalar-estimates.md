@@ -114,3 +114,14 @@ and changes none of the twelve recorded attempts or their 24242-second total.
 Publication CI and independent review bind to the eventual commit SHA and
 are recorded on the issue-linked pull request, rather than inferred from
 these prepublication checks.
+
+## 2026-09-06: declaration naming correction
+
+PR #276 review 5124737599, finding F1, requires the theorem name
+`exists_global_pair_error_bound`. This replaces the checkpoint spelling
+`exists_globalPair_error_bound` and updates the corresponding blueprint link.
+The exact-text comparisons above record the initial extraction, before this
+correction. After the correction, the three declaration texts agree with the
+checkpoint after only this identifier substitution; their hypotheses,
+conclusions, proof bodies, and declaration-local heartbeat setting are unchanged.
+The statement-integrity verdicts above therefore continue to apply.
