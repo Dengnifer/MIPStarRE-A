@@ -4219,3 +4219,247 @@ boundary comment is updated in place with these final supervisor handles;
 no second comment or extra review is created. Implementer supervisor2326711
 remains live under primary/max. Persistent router semantics still await the
 bounded PR238 amendment and normal gates.
+
+## 2026-09-06T01:28:21Z — Owner concurrency priority: three independent critical lanes
+
+The owner explicitly directed immediate parallel execution of existing PR238,
+PR195 gate recovery, and issue118 attempt8. The preceding turn had started
+telemetry publication but had not dispatched the latter two lanes. The
+publication handle is now terminal with exit0 at 01:11:03 UTC, publishing
+main a61ee55; no lane is waiting on that completed bookkeeping work.
+
+Ownership checks found clean checkpoints f1d1d3c7 for issue113 and cd1815e1
+for issue118, their former workers terminal, and only the existing issue237
+worker live. Main retained orc-237-20260906-02 (supervisor2326711) and admitted
+orc-113-20260906-07 (supervisor2384295, thread
+01a0744e-31d5-7392-8aee-642646efcd46) plus mathfix-118-20260906-08
+(supervisor2384296, thread01a0744e-2a5c-73f3-9d9f-3aa21f9a2667).
+Actual client processes2326792,2384838,2384387 all select primary,
+gpt-6-astra, literal max, and disabled fan-out. Four interactive primary-home
+uses, including main, plus three workers consume seven of twelve slots;
+the project worker ceiling remains eight, not a worker-count target.
+
+The remaining old mathfix guard accepts only the caller word ultra. The
+issue237 worker had already atomically installed the owner-authorized max
+shim. Main validated that exact installed shim offline against a local
+argument-recording stub, without contacting a provider, then verified the
+real mathfix client arguments contained max and no ultra/xhigh effort.
+The shim SHA256 is d086fe99827362b70a62d7bc4982f5fc5b31afcd6e9eeddca448428d978ca29f.
+The journal distinguishes the legacy dispatcher input from the actual max
+launch, rather than falsifying telemetry or serializing mathematics behind
+an unrelated reviewed guard change. A fresh primary thread preserves the
+old secondary history and carries12452 working seconds, attempt8/10, and
+anchor2026-09-05T19:24:00Z. The attempt timeout is2700 seconds. PR195's
+independent recovery timeout is1800 seconds; its fourth-review cap and prior
+dispositions are preserved, with no fifth or extra triage review authorized.
+
+GitHub dependency edges show issue115 blocked only by open issue113, and
+issues116/117 blocked only by open issue115. Thus PR207 waits for actual
+PR195 merge, then PR213/PR212 tails may advance together after actual PR207
+merge and refreshed ownership/dependency checks. No anticipated parent
+merge was used. Primary/max supervisors2339019 and2339020 remain live.
+One concurrency-boundary report is prepared for #27; publication is recorded
+only after the adapter confirms its comment ID. The owner directive is
+archived at owner-messages/qpbt-owner-concurrency-message-20260906.txt.
+
+The concurrency-boundary publication was confirmed as #27 comment5556073590.
+At 01:31:01 UTC all three dispatcher supervisors remained live, as did the
+primary/max merge daemon and stack watcher. Their recent captures show
+independent routing validation, PR195 recovery, and mathematical source/proof
+work respectively. No additional boundary comment or speculative downstream
+tail was created.
+
+## 2026-09-06 02:10 UTC — useful parallelism and preserved attempt8 checkpoint
+
+Observation boundary 2026-09-06T02:10:01Z, qpbt-main. The owner's renewed
+request for full useful parallelism is applied without raising the relay cap:
+three project Rust Codex clients are live, out of eight available worker
+slots. Main and three other primary-home interactive clients reserve four
+of the twelve total slots. Verified project clients2484957,2509076,2515632
+all request gpt-6-astra, literal max, primary home, and multi_agent=false.
+No unrelated client or secondary credential/history was changed.
+
+The added bounded read-only scout is scout-120-20260906-01,
+dispatcher2509018, thread01a07477-4ca2-7b01-ae49-b47f1c3ca162. It inventories
+independent projector/marginal/swap sublemmas in the extraction frontier,
+using paper and exact declaration inputs; it does not review an active PR,
+implement a blocked packet, remove dependency edges, or open a premature
+tail. The live adapter scan finds only issue113 dependency-ready. Issue120
+still depends on119,121 on120,119 on118,156 on116, and224 on156. Issue156
+and224 already have proof increments, so starting duplicate writers there
+would not shorten the critical path.
+
+The dispatcher records mathfix-118-20260906-08 as terminal exit124 at
+2026-09-06T02:06:14Z after2700 seconds. Its clean checkpoint includes proof
+f6a340c8dc3c12566d9312215c578939efeb8b4a and audit
+61750e7c41c1ea246333afc1f2aa173e915dba07. Lines has no sorry/axiom tokens;
+three Apply holes remain. This is preserved proof progress, not a successful
+session termination or a completed extended-line correction. The automatic
+timeout row has zero usage fields; those fields are not evidence of zero
+model work. Source-facing adoption is not claimed.
+
+Mathfix-118-20260906-09 was dispatched at02:08:43Z, supervisor2515551,
+client2515632, resuming the verified primary thread
+01a0744e-2a5c-73f3-9d9f-3aa21f9a2667. Attempt9/10 carries exactly15152
+completed working seconds (12452+2700), original anchor
+2026-09-05T19:24:00Z unchanged. It prioritizes the actual established
+extended-line conditional average and second-player comparison. The stronger
+printed-error and global-pair obligations remain explicit. Actual max was
+verified despite the old dispatcher's legacy mathfix guard spelling.
+
+Gate observation: PR195 remains open atc7adb95e1c7f7bdd6b9e971db765e5a53ac4a284,
+mergeable and green in all nine CI contexts. Recovery session
+orc-113-20260906-07 ended01:36:56Z, exit0,940 seconds. Four original full
+reviews are preserved; the exact current head has no review record. Owner
+decision B7 was published through gh_common as #26 comment5556192093 at
+01:53:18Z; it requests a labelled operator terminal-disposition record, not
+a fifth full-review or triage session. A literal-head adjudication template
+is queued for the daemon, without inventing automatic carry-forward or green
+review evidence. No main merge-gate invocation occurred. PR207 remains gated
+by actual PR195 merge, and PR213/212 by actual PR207 merge.
+
+PR238 author orc-237-20260906-02 ended01:39:43Z, exit124,2400 seconds, with
+its implementation safely committed. The already-running daemon-owned
+lane2445558 publishes head2e6b1441f8662f4f6c716b5f5756b3cc5276950e; all nine
+CI contexts are green and normal second full review is live, client2484957.
+Earlier main briefly launched a duplicate deterministic publication tail
+after missing the existing lane parent in its ownership query, then stopped
+only that duplicate PGID2463575 at01:48:51Z. Its trap's zero status was
+explicitly superseded by cancellation text and is not CI/review success.
+The original lane was retained; no duplicate reviewer or manual merge ran.
+Lesson: verify the owning lifecycle parent as well as immediate gate commands.
+
+The status-snapshot helper currently misses Codex clients whose global
+options precede exec, reporting zero while the actual three clients are
+live. The /proc census, not that snapshot count, governs admissions. No
+capacity increase or worker replacement was based on the undercount.
+Primary/max merge daemon2339019 and stack watcher2339020 remain active.
+One new #27 report covers this frontier/attempt9 boundary; its receipt is
+recorded only after publication. No speculative downstream tail was started.
+
+The adapter confirmed this single frontier/attempt9 boundary publication as
+#27 comment5556274834. No duplicate boundary comment was created.
+
+## 2026-09-06 02:20 UTC — eleven-worker allocation and independent extraction
+
+At2026-09-06T02:14:32Z qpbt-main applied the owner's explicit removal of
+FV/LDT-Lean-Paper/old-home reservations: max-codex11, max-codex-primary11,
+primary-external-reserved0 and an exact named interactive-cwd exclusion list.
+Account-mode stays primary and secondary remains disabled; saved both-mode
+limits, credentials, other sessions and processes remain untouched. The new
+policy supersedes the prior eight-worker boundary, not its historical facts.
+Existing supervisors read the cap file live and were not restarted.
+
+PR238's normal second review ended02:13:20Z with four changes-level findings
+(alternate fan-out overrides, undercharged continuation time, resume
+provenance loss, and telemetry recovery provenance). Its lane ended02:13:30Z;
+daemon correctly did not merge the adverse head. Main delegated all four
+repairs plus the named-exclusion router change to orc-237-20260906-03,
+dispatcher2537290/client2537371, resuming the verified primary author thread.
+The1000-line aggregate infrastructure limit and normal gates remain binding.
+No extra triage or writer overlap was introduced.
+
+The600-second extraction scout terminated exit124 without a final answer.
+The report-only continuation scout-120-20260906-02 returned source-grounded
+independence evidence, with stale artifacts explicitly not treated as
+fresh kernel proof. Main split two real implementation packets, created via
+gh_common under167, with closed prerequisite edges and exact published
+maina61ee55 bases:239 dot-projectors and240 pulled-apart algebra. Each has a
+separate warmed worktree and normal installed/checked hooks. They do not
+depend on a global-witness construction:239 has no such argument;240 proves
+existing given-witness algebra from measurement fields. Neither claims the
+source existence theorem or final extraction complete. Matching blueprint
+nodes are disjoint; Observables.lean has only one live writer.
+
+At2026-09-06T02:20:52Z four actual project Rust clients were live:
+2515632(issue118),2537371(issue237),2555157(issue239),2555618(issue240).
+All four request primary/gpt-6-astra/literal max/multi_agent=false, verified
+from actual argv and homes. This is four of eleven workers, not eleven
+occupied slots. Issue118 remains attempt9/10 with15152 completed seconds
+carried and original anchor2026-09-05T19:24:00Z. No proof budget reset.
+
+At02:16:04Z the daemon's own PR195 merge attempt concretely refused gate4
+for the absent exact-head review record atc7adb95e, after green gates1--3.
+The daemon's literal adjudication comment5556289532 did not waive that
+contract. B7 remains open, and this quota instruction explicitly does not
+decide it. Main did not invoke the merge gate, fabricate evidence, or add a
+fifth full/triage review. PR207 and then213/212 retain actual-parent-merge
+requirements. Issue119 still waits for the line construction. Spare slots
+remain available for useful independent work rather than duplicate writers.
+
+One #27 report is prepared for this allocation/decomposition boundary;
+receipt is recorded only after confirmation. Original120/121 ownership and
+integration dependencies are recorded without removing their existing gates.
+
+The adapter confirmed120<-239,120<-240 and121<-240 integration edges,
+ownership comments5556332442/5556332671, and the single #27 allocation/split
+boundary comment5556332976. Cap/exclusion files and the newest stage JSON
+validate; the focused whitespace check passes. Inspected extraction/algebra
+source blobs are unchanged between the scout's840e6ef snapshot and the new
+workers' published a61ee55 base. This is source provenance, not a proof claim.
+
+## 2026-09-06 02:25 UTC — owner corrects the meta/main role boundary
+
+Owner request observed2026-09-06T02:25:07Z; source correction recorded by meta
+at2026-09-06T02:06:47Z. The earlier detailed meta task-to-worker directions
+overstepped its guidance role. The owner withdraws those as dispatch
+instructions: meta guides priorities and constraints; qpbt-main owns task
+selection, decomposition, dispatch order, individual assignments and pipeline
+execution. Main must plan from owner goals and actual dependencies rather
+than treating meta's suggested worker mappings as binding instructions.
+
+Archive the exact owner-meta-boundary-correction.json from the sanitized meta
+packet, and a dated copy of the updated owner-concurrency guidance. Preserve
+their original content, including the artifact's historical quota-pending
+statement and pipeline_actions=none. Do not rewrite it to claim the later
+installation had already happened. Actual cap installation is separately
+recorded at02:14:32Z. Existing owner-session rows were not reimported or
+invented for this event. B7 remains unanswered; no approval is inferred.
+This reasserts the existing main persona and corrects a role overstep; it is
+not a new proof/review exception or authority for meta to operate the pipeline.
+
+The owner then prioritized the ten-worker deadline over housekeeping. Main
+therefore delayed the telemetry commit, not proof dispatch, until ten useful
+workers were verified. The next telemetry commit includes the artifact and
+this clarification as requested.
+
+## 2026-09-06 02:34 UTC — occupancy deadline met with ten actual workers
+
+Owner target:10--11 useful QPBT workers plus main by2026-09-06T02:35:06Z.
+At02:34:27Z the host census verified ten actual Rust Codex worker clients,
+all primary/gpt-6-astra/literal max/multi_agent=false. Main reported the
+count to the owner immediately before the deadline. No bootstrap, reserved
+slot, completed scout, Node wrapper or unrelated session was counted.
+
+The four existing workers continued: issue118 client2515632, issue237
+client2537371, issue239 client2555157, issue240 client2555618. Main selected
+three additional disjoint implementation packets, created through gh_common
+under167 with verified closed prerequisite63 and warmed a61ee55 worktrees:
+241 scalar extraction error absorption (client2604811),242 generic controlled
+unitary algebra (client2605488),243 direct-placement marginal agreement
+(client2605133). Their initial scopes and return limits are in local/briefs.
+No original source statement is weakened; any source discrepancy must be
+reported under the existing gap protocol rather than evading its budget.
+
+Three distinct read-only scouts were also dispatched through the primary
+dispatcher: global-pair-game thread01a07490-c501-7bc1-a2d9-3b168a4d5e1c,
+extraction-isometry thread01a07490-cca1-7d01-b476-14193f558a21, and binary-
+transport thread01a07490-bd1c-78e0-b65d-acbd2e3c0724. Their clients are
+2601749/2602220/2602565. They produce concrete future construction plans,
+not reviews or duplicate implementations; each excludes the active proof
+scopes. The count is seven implementation workers plus three construction
+scouts, not ten completed proofs or ten independent source-theorem repairs.
+
+The eleventh worker slot remains available within11 workers plus main.
+Other owner-exempt sessions were neither counted against that allocation
+nor changed. All normal gates and budgets persist; issue118 is attempt9/10
+with15152 completed seconds and its original anchor. PR195 gate4/B7 remains
+a concrete merge-chain constraint, not an excuse to serialize the newly
+independent mathematical work. One #27 deadline-boundary report is prepared;
+publication and the requested telemetry commit are claimed only on receipt.
+
+The adapter confirmed the single deadline-boundary report as #27
+comment5556393413. The archived role-correction artifact is byte-identical
+to the supplied source, SHA256
+8f60909ec4dfe6b2abceffe69f26fe7d3740878fdd47c50dd0e7cd5c0dabcbcf.
+The dated updated concurrency guidance also matches its supplied source.
