@@ -5,6 +5,7 @@ purpose: >
   Record the exact register, state, and operator transport identities for the
   extraction argument, their explicit hypotheses, and their validation evidence.
 issue: "#245"
+pr: "#253"
 ---
 
 # Extraction register transport — packet #245
