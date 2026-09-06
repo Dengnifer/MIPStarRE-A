@@ -5012,3 +5012,7 @@ the previous04:30 observation;247<-237 native dependency is recorded.
   cumulative time and attempt charges, budget anchors, dispatcher arguments and exit
   status. These are enforcement repairs under the existing sessions protocol;
   no protocol or installed-runtime change is required.
+  The first checked publication stalled in its SSH `ls-remote` read before
+  pushing. The session terminated only that read's SSH child and selected an
+  HTTPS retry with command-scoped Git configuration and authentication obtained
+  through `gh_common.py`; persistent remote configuration remained unchanged.
