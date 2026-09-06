@@ -4,8 +4,16 @@ packets and binds prerequisites to closed issues, actual merged PRs and ancestry
 No discovery, filler, merges, adjudication, budget resumes, inbox actions or shell tasks.
 Both --run and enabled:true are required; defaults disable. One admission per tick,
 watch interval >=5s, primary/Astra/max-or-xhigh only, existing fan-out/kill switches.
-Allocation eleven, recovery ceiling ten, twelve slots including nonexempt/external use;
-lower owner caps win. Review costs two slots, normal green-CI head only, cap four.
+For the active QPBT owner switch recorded in
+`results/telemetry/owner-messages/qpbt-space-cap5-switch-20260906.md`, the allocation
+is five total native sessions (main plus at most four descendants) on account `space`,
+with external admission zero. Count actual native turn activity once per process;
+ready packets, reservations, configured ceilings and idle processes do not count.
+After each completion, failure, unblock or compaction, main promptly dispatches a
+disjoint useful successor or records the concrete vacancy reason and elapsed time.
+The earlier relay allocation of eleven workers plus main and its recovery ceiling ten
+is historical evidence and does not apply to this run. Review costs two slots,
+normal green-CI head only, cap four.
 Intent precedes creation. Router lock serializes tickets/one-use descendant PID/start
 claims; unclaimed slots count with real clients/reservations, including global CLI flags.
 Worktree reservations exclude unrelated dispatch. Canonical locks/head checks persist.

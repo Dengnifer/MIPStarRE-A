@@ -823,3 +823,15 @@ review precede deployment; this amendment does not install or start anything.
 identities, diagnostic-only refusals and preserved Lake-root export; consolidate
 duplicate protocol exposition under `useful-queue.md`. **Expected effect:** correct
 reservations and holds within the original episode cap; deployment remains gated.
+
+## 2026-09-06 — Scoped native QPBT allocation switched to space/cap5
+
+**Trigger:** owner switch receipt `space-cap5-switch-20260906.json` and
+`events.md`, "space five-total native allocation". **Change:** the active QPBT
+queue now counts the main once plus at most four actual native descendants on
+the `space` account; external admission stays zero. Completion/failure/
+unblock/compaction events require prompt disjoint successor reassessment, with
+vacancy duration and concrete reasons recorded. Relay-1/cap8 observations
+remain historical and are not reclassified. **Expected effect:** no stale
+account labels or occupancy claims while preserving all proof, review, CI and
+merge gates.
