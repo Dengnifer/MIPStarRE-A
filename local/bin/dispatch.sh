@@ -284,7 +284,7 @@ fi
 [ -d "$WORKTREE" ] || die 4 "worktree '$WORKTREE' does not exist.
   Create it first (git worktree add .worktrees/<branch> -b <branch>) and run
   local/bin/worktree-setup.sh in it; dispatch.sh does not create worktrees."
-WORKTREE_ABS="$(cd -- "$WORKTREE" && pwd)"
+WORKTREE_ABS="$(cd -- "$WORKTREE" && pwd -P)"
 git -C "$WORKTREE_ABS" rev-parse --is-inside-work-tree >/dev/null 2>&1 \
   || die 4 "worktree '$WORKTREE_ABS' is not a git work tree; codex exec needs one"
 
@@ -636,6 +636,13 @@ if [ "$DRY_RUN" -eq 0 ] && [ "$SANDBOX" != "read-only" ]; then
   WT_BASE="$(printf '%s' "$(basename "$WORKTREE_ABS")" | tr -c 'A-Za-z0-9._-' '-')"
   acquire_lock "worktree-$WT_BASE-$WT_KEY" "$LOCK_WAIT" "worktree $WORKTREE_ABS"
 fi
+if [ -n "${MIPSTARRE_QUEUE_TICKET:-}" ]; then
+  [ "$(git -C "$WORKTREE_ABS" rev-parse HEAD)" = "${MIPSTARRE_QUEUE_EXPECTED_HEAD:-}" ] ||
+    die 4 "queued worktree head moved; adoption required"
+  [ -z "$RESUME_ID" ] && [ -z "$CONTINUATION_FILE" ] ||
+    die 4 "queued dispatch must be a fresh one-shot session"
+fi
+export MIPSTARRE_DISPATCH_WORKTREE="$WORKTREE_ABS"
 ROUTER_ARGS=("$CACHE_ROOT" "$ACCOUNT" "$$" "$ACCOUNT_WAIT" "$REGISTRY")
 if [ -n "$RESUME_ID" ]; then ROUTER_ARGS+=(--resume "$RESUME_ID"); fi
 if [ "$DRY_RUN" -eq 1 ]; then ROUTER_ARGS+=(--dry-run); fi
@@ -643,7 +650,7 @@ ACCOUNT_ROUTING=1
 ROUTING="$(python3 "$SCRIPT_DIR/account_router.py" "${ROUTER_ARGS[@]}")"
 ACCOUNT="${ROUTING%%$'\n'*}"
 MIPSTARRE_CODEX_MODEL="${ROUTING#*$'\n'}"
-ACCOUNT_ENV=(env -u CODEX_HOME)
+ACCOUNT_ENV=(env -u CODEX_HOME -u MIPSTARRE_QUEUE_TICKET -u MIPSTARRE_QUEUE_EXPECTED_HEAD)
 if [ "$ACCOUNT" = second ]; then
   ACCOUNT_ENV+=("CODEX_HOME=${MIPSTARRE_CODEX_HOME_SECOND:-$HOME/.cache/mipstarre-dev/codex-home-yxy}")
 fi
