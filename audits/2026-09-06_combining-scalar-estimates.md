@@ -29,9 +29,9 @@ Their differences from the paper's literal shorthand are documented in
 
 - Paper assumptions: the pasting application in `lem:qld-xz-lines`,
   lines 950-963, uses polynomial point and marginal errors and collision
-  error `md/q`. Conditioning away from degenerate lines is the formalization
-  correction discussed in
-  `docs/paper-gaps/qpbt_combined-lines-error-term.tex`.
+  error `md/q`. The scalar auxiliary quantifies separately over a mass in
+  `[1/2,1]`; it does not derive this mass bound from a line distribution.
+  Division by such a mass costs at most a factor of two.
 - Lean assumptions: a fixed one-variable polynomial error `p`, a fixed
   two-variable polynomial error `f`, and a fixed constant `c >= 1`.
   The inequality ranges over `error, ratio >= 0` and `1/2 <= mass <= 1`.
