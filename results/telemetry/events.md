@@ -4532,3 +4532,21 @@ and exact-head status rather than treating a launch command as completion.
   `scripts/install_git_hooks.sh --check` pass. The cumulative nontelemetry
   workflow diff against PR #260's base is 357 lines before this telemetry-only
   addition; normal commit/publication hooks and new exact-head CI still apply.
+
+## 2026-09-06 - PR260 F1 attached model option validation
+
+- **Trigger:** independent review `5124360396` of PR #260 at `df9b555`
+  identifies F1: the policy shim forwards attached short model options without
+  validation. Session `orc-247-20260906-05` handles this finding only.
+- **Fix:** validate `-mMODEL` and `-m=MODEL` against `gpt-6-astra`, removing
+  accepted duplicates before execution and rejecting other values with exit 4.
+  Existing primary-account, effort and fan-out policy remains unchanged.
+- **Validation:** the new regression reproduced the bypass before the fix;
+  all 47 dispatch and review-workflow tests pass afterwards (15.532 seconds).
+  The 24 attached-option cases use only a temporary fake executable, covering
+  global, exec and resume positions, max/xhigh effort, fan-out restrictions and
+  literal prompt text. Shell syntax, whitespace and installed-hook checks pass.
+- **Boundary:** no installed shim, main checkout source, other worktree, proof
+  ledger or owner session is edited. Normal commit, checked publication and
+  fresh exact-head CI apply; the author neither reviews nor merges this fix.
+  Main owns the second normal workflow review and its subsequent disposition.

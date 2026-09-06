@@ -21,6 +21,10 @@ while [ "$#" -gt 0 ]; do
     -m|--model)
       [ "${1:-}" = gpt-6-astra ] || { echo 'gpt-6-astra required' >&2; exit 4; }
       shift; continue ;;
+    -m?*)
+      model="${argument#-m}"
+      [ "${model#=}" = gpt-6-astra ] || { echo 'gpt-6-astra required' >&2; exit 4; }
+      continue ;;
     --model=*)
       [ "$argument" = --model=gpt-6-astra ] || exit 4
       continue ;;
