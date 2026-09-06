@@ -15,7 +15,16 @@ no frontmatter. Parent/child structure is the native sub-issue relation
 (`POST …/issues/{parent}/sub_issues`), one parent per issue exactly as the
 retired `parent:` scalar allowed; discussion is comments; labels come from the
 repository (`list-labels`, paginated), so `local/labels.yml` is retired and a
-label absent from GitHub is reported, never invented. Briefs (the design record
+label absent from GitHub is reported, never invented.
+`pr_open.py --issue N` inherits only its explicit descriptive-label allowlist
+from issue N, unions it with explicit `--label` values, and adds those labels
+without removing existing PR labels. Scheduling, approval and owner-state
+labels are never inherited. Before push, creation/adoption requires at least
+one descriptive label, supplied explicitly, inherited, or already on the PR;
+otherwise the command explains how the operator can classify the change.
+GitHub still validates label existence; the allowlist is an inheritance policy,
+not a replacement registry. Backfills use the same additive API and inspect
+the actual change when the source issue itself is unlabeled. Briefs (the design record
 per issue) live in `local/briefs/`: agent input, not lifecycle state.
 
 Prerequisites between issues are **GitHub issue dependencies**
@@ -54,6 +63,14 @@ closed even when that hook is stale or absent.  A caller's explicit
 `MIPSTARRE_SKIP_HOOKS=1` remains the documented emergency bypass.  It skips
 validation only: implicit tag following stays disabled, so publication remains
 limited to the explicit branch mapping.
+
+`github-sync.sh [ref ...]` takes branch names (default `main`), not a `push`
+subcommand. It retains the post-publication record snapshot. When an explicitly
+requested/default main push succeeded and the snapshot created a new telemetry
+commit, it checked-pushes main once more without creating another snapshot.
+Branch-only calls never implicitly publish main. Snapshot reads remain best-effort;
+snapshot commit or final publication failure returns nonzero and leaves the
+preserved local state for the operator to recover.
 
 Every merge of `github/main` or a stack parent into an issue branch runs the
 merge-loss guard before the merge commit is created. The guard compares the
@@ -227,7 +244,8 @@ A correction is adopted only when it meets all four conditions below.
    insufficient.
 3. **Minimality:** the correction is the closest sufficient statement to the
    source, with no unnecessary hypothesis or weakened conclusion and no change
-   to a mathematical definition or game.
+   to the source semantics; definition or game corrections require an explicit
+   faithfulness audit and independent mathematical review.
 4. **Lean convergence:** the corrected statement type-checks and all affected
    downstream consumers compile. Lean success alone does not establish the
    preceding three conditions.
@@ -235,12 +253,16 @@ A correction is adopted only when it meets all four conditions below.
 The operator iterates mathematics and Lean for at most ten `mathfix` sessions
 or about one and a half working days per gap, whichever comes first. The budget
 is shared across the historical owner-launched Fable lane and the Astra lane; a
-model or telemetry change does not reset it. If the correction requires
-changing a mathematical definition or game, the operator stops and escalates
-immediately. If the ordinary budget expires without a converged correction,
-#26 receives the attempted statements, counterexamples, proof sketches, and
-unresolved consumer failures. A still-running attempt is not grounds to reset
-the count.
+model or telemetry change does not reset it. Main decides mathematical
+corrections with the preceding evidence and independent review, including
+definition/game corrections that preserve the intended source semantics;
+changing the project goal is outside that authority. If the current authorized
+budget expires, stop that lane and record the attempted statements,
+counterexamples, proof sketches and unresolved consumers on #27 and in the gap
+note. Do not reset attempts or working time. Use #26 only for an owner-only
+permission, credential, access or scope/resource grant; mathematical difficulty
+alone is not an owner decision. An already-posted #26 item waits for the owner
+unless the owner explicitly returns it to main.
 
 An adopted correction follows the ordinary CI and independent-review gates. The
 operator announces it in one line on progress log #27 and records it in the
