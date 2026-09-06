@@ -1,3 +1,13 @@
+---
+title: Finite controlled-unitary algebra
+date: 2026-09-06
+purpose: >
+  Records the source comparison, statement integrity, validation, and dependencies
+  of the controlled-unitary lemmas proved for QPBT extraction.
+issue: "#242"
+pr: "#251"
+---
+
 # Packet #242: finite controlled-unitary algebra
 
 Date: 2026-09-06. Session: `prover-242-20260906-01`.
