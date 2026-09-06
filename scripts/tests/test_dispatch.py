@@ -576,6 +576,8 @@ class AccountRouterTests(unittest.TestCase):
             for arguments, expected in (([], 'max'), (['-c', 'model_reasoning_effort="max"'], 'max'),
                     (['--config=model_reasoning_effort=ultra'], 'max'),
                     (['-cmodel_reasoning_effort=xhigh'], 'xhigh'),
+                    (['-c=model_reasoning_effort=max'], 'max'),
+                    (['-c=model_reasoning_effort="xhigh"'], 'xhigh'),
                     (['--config', "model_reasoning_effort='xhigh'"], 'xhigh')):
                 result = subprocess.run(['bash', shim, 'exec', *arguments,
                                          '--config', 'features.multi_agent=true',
@@ -598,6 +600,48 @@ class AccountRouterTests(unittest.TestCase):
             environment['CODEX_HOME'] = str(home / 'second')
             self.assertEqual(subprocess.run(['bash', shim, 'exec'], env=environment,
                 capture_output=True).returncode, 4)
+
+    def test_runtime_shim_normalizes_attached_config_options(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            home = Path(directory)
+            binary = home / '.local/bin/codex'
+            binary.parent.mkdir(parents=True)
+            binary.write_text('#!/usr/bin/env python3\nimport json, sys\nprint(json.dumps(sys.argv[1:]))')
+            binary.chmod(0o755)
+            environment = dict(os.environ, HOME=directory, CODEX_HOME=str(home / '.codex'),
+                               MIPSTARRE_CACHE_ROOT=str(home / 'cache'))
+            shim = str(DISPATCH.with_name('codex-policy-shim.sh'))
+            prompt = 'literal -c=model_reasoning_effort=low\n-c=model="other-model"'
+            configs = ['sandbox_mode="read-only"', 'log_dir="logs with spaces=a=b"']
+            for command in ([], ['exec'], ['exec', 'resume', '--last']):
+                for prefix in ('-c', '-c=', '--config='):
+                    for effort, expected in (('max', 'max'), ('xhigh', 'xhigh'), ('ultra', 'max')):
+                        with self.subTest(command=command, prefix=prefix, effort=effort):
+                            result = subprocess.run(
+                                ['bash', shim, *command, prefix + 'model="gpt-6-astra"',
+                                 prefix + f'model_reasoning_effort={effort}',
+                                 prefix + 'features.multi_agent=true',
+                                 prefix + 'agents.max_concurrent_threads_per_session=2',
+                                 *[prefix + config for config in configs], '--', prompt],
+                                env=environment, capture_output=True, text=True, check=True)
+                            argv = json.loads(result.stdout)
+                            self.assertEqual(argv[:-1], [
+                                '-m', 'gpt-6-astra', '-c', f'model_reasoning_effort="{expected}"',
+                                '-c', 'features.multi_agent=false',
+                                '-c', 'agents.max_concurrent_threads_per_session=1',
+                                *command, '-c', configs[0], '-c', configs[1], '--'])
+                            self.assertEqual(argv[-1],
+                                'Complete this task in the current session. '
+                                'Do not use collaboration tools or spawn subagents.\n\n' + prompt)
+                    for config in ('model="other-model"', 'model_reasoning_effort=low',
+                                   'features={multi_agent=true}',
+                                   'agents={max_concurrent_threads_per_session=2}'):
+                        with self.subTest(command=command, prefix=prefix, rejected=config):
+                            result = subprocess.run(
+                                ['bash', shim, *command, prefix + config, '--', prompt],
+                                env=environment, capture_output=True, text=True)
+                            self.assertEqual(result.returncode, 4, result.stderr)
+                            self.assertEqual(result.stdout, '')
 
     def test_runtime_shim_validates_attached_model_options(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

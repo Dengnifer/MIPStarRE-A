@@ -30,7 +30,8 @@ while [ "$#" -gt 0 ]; do
       continue ;;
     -c|--config)
       value="${1:?missing config value}"; shift ;;
-    --config=*|-c?*) value="${argument#*=}"; [ "$argument" != "${argument#-c}" ] && value="${argument#-c}" ;;
+    --config=*) value="${argument#--config=}" ;;
+    -c?*) value="${argument#-c}"; value="${value#=}" ;;
     *) args+=("$argument"); continue ;;
   esac
   normalized="${value//[[:space:]]/}"
