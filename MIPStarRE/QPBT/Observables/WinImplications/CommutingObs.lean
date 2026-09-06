@@ -32,17 +32,6 @@ local instance pauliEdgeNonemptyCommObs : Nonempty PauliEdge :=
 
 /-! ## Algebraic preliminaries -/
 
-/-- The left tensor placement carries a difference of its left factors to the
-difference of the two placements. Formalization-only support for `eq:lc-12`,
-paper `14_analysis_of_the_pauli_basis_test.tex:330-341`.
-`MagicSquareRigidity.heteroKron_sub_left` states the same identity in the
-reverse orientation; that module is not in the import closure of this file, so
-the copy is kept here. Consolidating the two is issue #204. -/
-theorem heteroKron_sub_left {ιA ιB : Type*} (M N : Op ιA) (B : Op ιB) :
-    heteroKron M B - heteroKron N B = heteroKron (M - N) B := by
-  ext i j
-  simp [heteroKron, Matrix.kronecker, sub_mul]
-
 /-- The left tensor placement is homogeneous in its left factor.
 Formalization-only support for `eq:lc-12`, paper
 `14_analysis_of_the_pauli_basis_test.tex:330-341`. -/
@@ -50,13 +39,6 @@ theorem heteroKron_smul_left {ιA ιB : Type*} (c : ℂ) (M : Op ιA) (B : Op ι
     heteroKron (c • M) B = c • heteroKron M B := by
   ext i j
   simp [heteroKron, Matrix.kronecker, mul_assoc]
-
-/-- A sum over the two-element binary alphabet. Formalization-only support for
-`def:strategy-observables`, blueprint `ch14_qpbt_observables.tex:573-610`. -/
-theorem sum_over_zmodTwo {M : Type*} [AddCommMonoid M] (f : ZMod 2 → M) :
-    ∑ b : ZMod 2, f b = f 0 + f 1 := by
-  rw [show (Finset.univ : Finset (ZMod 2)) = {0, 1} from by decide]
-  rw [Finset.sum_insert (by decide), Finset.sum_singleton]
 
 /-- The commutator of two reflections written as `1 - 2P` is four times the
 commutator of the projections. This is the algebra of Equation `eq:lc-12`,
@@ -74,53 +56,6 @@ theorem reflection_commutator_eq {ι : Type*} [Fintype ι] [DecidableEq ι]
   rw [h2, h2, h4]
   noncomm_ring
 
-/-- Regrouping the outcomes of a projective POVM preserves projectivity.
-Formalization-only support for `lem:commutation-analysis`, blueprint
-`ch12_qpbt_games.tex:418-431`. A private copy of this statement lives at
-`MIPStarRE/QPBT/Observables/Defs.lean:747` and is unreachable from here; this
-public form is the one used by `lem:commutation-analysis` below. Promoting the
-private original is issue #204. -/
-theorem postprocess_isProjective {α β ι : Type*}
-    [Fintype α] [DecidableEq α] [Fintype β] [DecidableEq β]
-    [Fintype ι] [DecidableEq ι]
-    (M : MIPStarRE.Quantum.Measurement α ι)
-    (hM : MIPStarRE.QPBT.Measurement.IsProjective M) (f : α → β) :
-    MIPStarRE.QPBT.Measurement.IsProjective (M.postprocess f) := by
-  classical
-  intro b
-  refine ⟨?_, ?_⟩
-  · change (M.postprocess f).effect b * (M.postprocess f).effect b =
-      (M.postprocess f).effect b
-    let fiber : Finset α := Finset.univ.filter fun a => f a = b
-    calc
-      (M.postprocess f).effect b * (M.postprocess f).effect b =
-          (∑ a ∈ fiber, M.effect a) * (∑ a' ∈ fiber, M.effect a') := by
-            rw [MIPStarRE.Quantum.Measurement.postprocess_effect]
-      _ = ∑ a ∈ fiber, ∑ a' ∈ fiber, M.effect a * M.effect a' := by
-            rw [Finset.sum_mul]
-            simp_rw [Finset.mul_sum]
-      _ = ∑ a ∈ fiber, ∑ a' ∈ fiber, if a' = a then M.effect a else 0 := by
-            refine Finset.sum_congr rfl ?_
-            intro a _
-            refine Finset.sum_congr rfl ?_
-            intro a' _
-            by_cases haa' : a' = a
-            · subst a'
-              simp [(hM a).isIdempotentElem.eq]
-            · have hne : a ≠ a' := fun h => haa' h.symm
-              simp [DistanceCalculus.projective_effect_mul_effect_eq_zero M hM hne,
-                haa']
-      _ = ∑ a ∈ fiber, M.effect a := by
-            refine Finset.sum_congr rfl ?_
-            intro a ha
-            simp [fiber, ha]
-      _ = (M.postprocess f).effect b := by
-            rw [MIPStarRE.Quantum.Measurement.postprocess_effect]
-  · change star ((M.postprocess f).effect b) = (M.postprocess f).effect b
-    change ((M.postprocess f).effect b)ᴴ = (M.postprocess f).effect b
-    exact (Matrix.nonneg_iff_posSemidef.mp
-      ((M.postprocess f).pos b)).isHermitian.eq
-
 /-- The strategy point observable is the reflection about the trace-coarse
 grained point projection at label one. This is the first display of
 Equation `eq:lc-12`, paper
@@ -132,11 +67,11 @@ theorem pointObs_eq_one_sub_two_smul {P : AdmissibleParams} {ε : ℝ}
     S.pointObs side W r u =
       1 - (2 : ℂ) • (S.pointTraceMeas side W u r).effect 1 := by
   classical
-  rw [pointObs_eq_traceMeas_obs, sum_over_zmodTwo]
+  rw [pointObs_eq_traceMeas_obs, sum_zmod_two]
   have hsum : (S.pointTraceMeas side W u r).effect 0 +
       (S.pointTraceMeas side W u r).effect 1 = 1 := by
     have := (S.pointTraceMeas side W u r).sum_eq_one
-    rwa [sum_over_zmodTwo] at this
+    rwa [sum_zmod_two] at this
   have hzero : phaseSign (0 : ZMod 2) = 1 := by simp [phaseSign]
   have hone : phaseSign (1 : ZMod 2) = -1 := by
     have : (1 : ZMod 2) ≠ 0 := by decide
@@ -363,7 +298,7 @@ theorem exists_pointTrace_commutator_comm_le :
     (N ω).postprocess (fun bits => (((), bits.1), bits.2)) with hBdef
   have hBproj : ∀ ω, MIPStarRE.QPBT.Measurement.IsProjective (B ω) := by
     intro ω
-    exact postprocess_isProjective _ (hN ω) _
+    exact SandwichProduct.postprocess_isProjective _ (hN ω) _
   have hAB : opFamilyDistSq (commTupleDist P)
       (fun ω ab => heteroKron ((A ω).effect ab) 1)
       (fun ω ab => heteroKron 1
@@ -469,7 +404,7 @@ theorem norm_pointObs_commutator_sq {ιL ιR : Type*} [Fintype ιL]
           heteroKron (OZ * OX) (1 : Op ιR)) χ‖ ^ 2 =
       16 * ‖applyOperatorToState
         (heteroKron (PX * PZ - PZ * PX) (1 : Op ιR)) χ‖ ^ 2 := by
-  rw [heteroKron_sub_left, hX, hZ, reflection_commutator_eq,
+  rw [← heteroKron_sub_left, hX, hZ, reflection_commutator_eq,
     heteroKron_smul_left, applyOperatorToState_smul_op, norm_smul]
   have h4 : ‖(4 : ℂ)‖ = 4 := by norm_num
   rw [h4]

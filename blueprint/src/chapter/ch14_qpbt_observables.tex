@@ -974,6 +974,78 @@ extracts from the strategy.
 	question pairs to obtain Item~\ref{enu:qld-ms}.
 \end{proof}
 
+\begin{lemma}[Magic Square anticommutation on the original state]
+	\label{lem:qld-ms-anticommutator-original-state}
+	\lean{MIPStarRE.QPBT.WinImplications.msVarObs_anticommutator_le}
+	\lean{MIPStarRE.QPBT.WinImplications.msVarObsA_anticommutator_le}
+	\leanok
+	\uses{def:ms-game, def:tensor-product-value, def:ms-variable-agreement}
+	This auxiliary estimate isolates the one-player anticommutation used in
+	the proof of Lemma~\ref{lem:qld-win-implications-obs}.
+	Let $\mathcal S=(\ket{\psi},A,B)$ be a Magic Square strategy of value
+	at least $1-\eta$, with $\eta\geq0$. For $j\in\{1,5\}$, let
+	$V_j^B=\hat B^{\mathsf{Variable}_j}_0-\hat B^{\mathsf{Variable}_j}_1$,
+	where the binary effects are those of
+	Definition~\ref{def:ms-variable-agreement}. Then
+	\[
+	\big\|(\Id_A\otimes(V_1^B V_5^B+V_5^B V_1^B))\ket{\psi}\big\|^2
+	\leq 1183680\,\eta.
+	\]
+	The same bound holds for Alice's binary variable observables, placed
+	on the first tensor factor.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{thm:naimark, def:ms-game}
+	On the questionwise projective dilation, the constraint--variable
+	correlations and the Magic Square parity relations bound the norm of
+	each player's anticommutator by $624\sqrt\eta$. Compression to the
+	original space bounds the squared anticommutator norm by three times
+	this squared norm plus $15552\eta$.
+	The dilation embedding preserves norms, and an inflated operator acts
+	on the embedded state as the original operator acts on $\ket{\psi}$.
+	Thus the original-state bound is
+	$(3\cdot624^2+15552)\eta=1183680\eta$.
+\end{proof}
+
+\begin{lemma}[Point commutation averaged over commuting tuples]
+	\label{lem:qld-point-obs-commuting-estimate}
+	\lean{MIPStarRE.QPBT.WinImplications.exists_pointObs_commutator_comm_le_alice}
+	\leanok
+	\uses{lem:projective-strategy-setup, def:strategy-observables,
+		def:anticommuting-tuple}
+	This auxiliary estimate is the commuting part of the proof of
+	Lemma~\ref{lem:qld-win-implications-obs}.
+	There is a universal real constant $C\geq1$ such that, for every
+	admissible parameter tuple and projective strategy succeeding in the
+	Pauli basis test with probability at least $1-\eps$, where $\eps\geq0$,
+	\[
+	\E_{\omega\text{ commuting}}
+	\big\|\big((X^{r_X}(u_X)Z^{r_Z}(u_Z)
+	 -Z^{r_Z}(u_Z)X^{r_X}(u_X))\otimes\Id_B\big)\ket{\psi}\big\|^2
+	\leq C(\eps+\sqrt\eps).
+	\]
+	The expectation is uniform conditional on $\gamma(\omega)=0$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-win-implications-exact, fact:triangle-for-simeq,
+		fact:agreement, lem:commutation-analysis, def:strategy-observables}
+	Use the point--$\mathrm{Pair}/W$ consistency, the
+	$\mathrm{Pair}/W$ self-consistency, and the
+	$\mathrm{Pair}/W$--$\mathrm{Pair}$ marginal consistency.
+	If their defects are $c_1,c_2,c_3$, respectively, then
+	Lemmas~\ref{fact:triangle-for-simeq} and~\ref{fact:agreement} bound
+	the squared point--$\mathrm{Pair}$ marginal distance by
+	$2(c_1+2\sqrt{c_2+c_3})$. Each $c_i$ is $O(\eps)$ by
+	Lemma~\ref{lem:qld-win-implications-exact}, so this is
+	$O(\eps+\sqrt\eps)$. The $\mathrm{Pair}$ measurement is projective;
+	Lemma~\ref{lem:commutation-analysis} therefore gives the same order
+	for the projection commutator. Expanding
+	$W^r(u)=\Id-2M^{(\mathrm{Point},W),u}_{[\tr(\cdot\,r)=1]}$
+	multiplies that commutator by $4$, preserving the order of the bound.
+\end{proof}
+
 \begin{lemma}[Winning implications for observables]
 	\label{lem:qld-win-implications-obs}
 	\lean{MIPStarRE.QPBT.pointObs_self_consistent}
@@ -1009,7 +1081,12 @@ extracts from the strategy.
 	factors interchanged.
 \end{lemma}
 \begin{proof}
-	\leanok \uses{lem:qld-win-implications, lem:povm-to-obs, fact:data-processing, fact:agreement, lem:commutation-analysis, thm:ms-rigidity, fact:add-a-proj, def:strategy-observables}
+	\leanok
+	\uses{lem:qld-win-implications-exact, lem:povm-to-obs,
+		fact:data-processing, fact:agreement, fact:add-a-proj,
+		lem:qld-ms-anticommutator-original-state,
+		lem:qld-point-obs-commuting-estimate, lem:qld-reversed-consistency,
+		lem:qld-distance-interchange, def:strategy-observables}
 	For~\eqref{eq:pts-obs-consistency}: item~\ref{enu:qld-cons} of
 	Lemma~\ref{lem:qld-win-implications} and the data processing inequality
 	(Lemma~\ref{fact:data-processing}), using that the type
@@ -1018,38 +1095,34 @@ extracts from the strategy.
 	$\{M^{(\mathrm{Point},W),u}_{[\tr(\cdot\,r)=a]}\}_{a \in \F_2}$ on
 	average over $u$; Lemma~\ref{lem:povm-to-obs}, applied with
 	$\mathcal{A} = \F_2$ and $\alpha_a = (-1)^a$, converts this
-	to~\eqref{eq:pts-obs-consistency}. For the commuting case
-	of~\eqref{eq:pts-obs-commutation}: chaining
-	items~\ref{enu:qld-comm-cons},~\ref{enu:qld-comm}
-	and~\ref{enu:qld-cons} of Lemma~\ref{lem:qld-win-implications} via
-	Lemma~\ref{fact:agreement} gives, on average over commuting $\omega$,
-	$M^{(\mathrm{Point},W),u_W}_{[\tr(\cdot\,r_W)=a]} \ot \Id_{\mathsf{B}} \approx_\eps \Id_{\mathsf{A}} \ot M^{\mathrm{Pair},\omega}_{[\beta_W=a]}$;
-	since the measurement
-	$\{M^{\mathrm{Pair},\omega}_{\beta_X,\beta_Z}\}$ is projective,
-	Lemma~\ref{lem:commutation-analysis}, applied with the $X$- and
-	$Z$-point projections and the $\mathrm{Pair}$ measurement, yields the
-	approximate commutation of the projections
-	$M^{(\mathrm{Point},X),u_X}_{[\tr(\cdot\,r_X)=b]}$ and
-	$M^{(\mathrm{Point},Z),u_Z}_{[\tr(\cdot\,r_Z)=c]}$; expanding
-	$W^r(u) = \Id - 2 M^{(\mathrm{Point},W),u}_{[\tr(\cdot\,r)=1]}$
-	transfers this to the observables with error $\eps$. For the
-	anticommuting case: item~\ref{enu:qld-ms-cons} of
+	to~\eqref{eq:pts-obs-consistency}. For the commuting case of
+	\eqref{eq:pts-obs-commutation},
+	Lemma~\ref{lem:qld-point-obs-commuting-estimate} gives a conditional
+	average bounded by $C_c(\eps+\sqrt\eps)$.
+	For the anticommuting case, item~\ref{enu:qld-ms-cons} of
 	Lemma~\ref{lem:qld-win-implications} together with
 	Lemma~\ref{lem:povm-to-obs} relates $X^{r_X}(u_X)$ and $Z^{r_Z}(u_Z)$
 	to the Magic Square observables
 	$M^{\mathrm{Variable}_j,\omega} = M^{\mathrm{Variable}_j,\omega}_0 - M^{\mathrm{Variable}_j,\omega}_1$
-	for $j \in \{1,5\}$; for each anticommuting $\omega$, the Magic Square
-	rigidity theorem (Theorem~\ref{thm:ms-rigidity}) applied with
-	$\eps_\omega = 1 - \Lambda_\omega$ gives
-	$\Id \ot M^{\mathrm{Variable}_1,\omega} M^{\mathrm{Variable}_5,\omega} \approx_{\sqrt{\eps_\omega}} - \Id \ot M^{\mathrm{Variable}_5,\omega} M^{\mathrm{Variable}_1,\omega}$;
-	averaging over anticommuting $\omega$ with Jensen's inequality
-	($\E \eps_\omega^{1/2} \leq (\E \eps_\omega)^{1/2} = O(\eps^{1/2})$,
-	using item~\ref{enu:qld-ms}) and transferring across the tensor factor
-	with Lemma~\ref{fact:add-a-proj}, applied twice, yields the
-	anticommutation with error $\sqrt{\eps}$. The two cases combine into
-	the $(-1)^{\gamma(\omega)}$-signed statement over uniformly random
-	$\omega$, since the uniform average is bounded by the sum of the two
-	conditional averages.
+	for $j \in \{1,5\}$. Apply
+	Lemma~\ref{lem:qld-ms-anticommutator-original-state} to the induced
+	Magic Square strategy at each anticommuting $\omega$, with
+	$\eta=\eps_\omega=1-\Lambda_\omega$. This gives a squared
+	anticommutator norm at most $1183680\eps_\omega$ on $\ket{\psi}$.
+	Item~\ref{enu:qld-ms} bounds $\E\eps_\omega$ by $O(\eps)$, so
+	direct averaging gives an $O(\eps)$ bound for Bob's variable
+	anticommutator. Transferring both products across the tensor factors
+	using the point--variable consistency estimates and the reflection
+	identities gives a conditional point-anticommutator bound $C_a\eps$.
+	The uniform average is bounded by the sum of the two conditional
+	averages. For $0\leq\eps\leq1$, use $\eps\leq\sqrt\eps$ to
+	obtain $(2C_c+C_a)\sqrt\eps$. For $\eps\geq1$, each product of
+	reflections sends $\ket{\psi}$ to a unit vector, so the squared
+	distance is at most $4\leq4\sqrt\eps$.
+	Finally, interchange the tensor factors and use the reversed
+	consistency estimates of Lemma~\ref{lem:qld-reversed-consistency}
+	and Alice's original-state Magic Square bound. Coordinate interchange
+	preserves all the state-dependent norms, giving the final assertion.
 \end{proof}
 
 \begin{remark}[Source corrections]
@@ -1181,14 +1254,47 @@ every tuple $\omega$.
 	(see Lemma~\ref{lem:pauli-observable-expansion}).
 \end{definition}
 
+\begin{definition}[Ancillary point measurement]
+	\label{def:ancillary-point-measurement}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.tauPointMeas}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.tauPointMeas_effect}
+	\leanok
+	\uses{def:expanded-point-measurement}
+	The ancillary point measurement at $W\in\{X,Z\}$ and $u\in\F_q^m$
+	is the POVM $\{\tau^{W,u}_{a''}\}_{a''\in\F_q}$ on one Pauli
+	register. It is obtained by measuring the generalized Pauli basis
+	and reporting $a''=h\cdot\mathrm{ind}_m(u)$. Its effects are
+	positive and sum to the identity, since the fibres of this map
+	partition the Pauli basis labels.
+\end{definition}
+
+\begin{definition}[Product of strategy and ancillary point measurements]
+	\label{def:point-tau-measurement}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.pointTauMeas}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.pointTauMeas_effect}
+	\leanok
+	\uses{def:ancillary-point-measurement, def:strategy-observables}
+	For either player, the product measurement on the strategy register
+	and one Pauli register has separate outcomes $(a',a'')\in\F_q^2$
+	and effects
+	\[
+	N^{W,u}_{a',a''}
+	=M^{(\mathrm{Point},W),u}_{a'}\otimes\tau^{W,u}_{a''}.
+	\]
+	This auxiliary measurement records the two outcomes whose sum defines
+	the expanded point outcome. Tensor products preserve positivity, and
+	completeness of both factors gives $\sum_{a',a''}N^{W,u}_{a',a''}=\Id$.
+\end{definition}
+
 \begin{lemma}[Convolution and projectivity of expanded point measurements]
 	\label{lem:expanded-point-measurement-properties}
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.expPointOp_eq_convolution}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.pointMeasExp_effect_eq_pointTauMeas_postprocess}
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.expPointOp_nonneg}
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.expPointOp_sum_eq_one}
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.pointMeasExp_isProjective}
 	\leanok
-	\uses{def:expanded-point-measurement}
+	\uses{def:expanded-point-measurement, def:point-tau-measurement}
 	For either player, $W \in \{X,Z\}$, $u \in \F_q^m$ and $a \in \F_q$,
 	the expanded point effects have the convolution form
 	\[
@@ -1196,6 +1302,8 @@ every tuple $\omega$.
 		\,=\, \sum_{\substack{a',a'' \in \F_q \\ a' + a'' = a}}
 		M^{(\mathrm{Point},W),u}_{a'} \ot \tau^{W,u}_{a''}\,.
 	\]
+	Equivalently, the expanded point measurement is the postprocessing
+	of $\{N^{W,u}_{a',a''}\}$ by the addition map $(a',a'')\mapsto a'+a''$.
 	Each effect is positive semidefinite, and
 	$\sum_{a \in \F_q}\hat{M}^{(\mathrm{Point},W),u}_a=\Id$.
 	Moreover, each $\hat{M}^{(\mathrm{Point},W),u}_a$ is a projection
@@ -1207,11 +1315,12 @@ every tuple $\omega$.
 	\uses{def:strategy-observables, def:expanded-observables,
 	lem:pauli-observable-expansion, prop:fourier-fact-scalar,
 	lem:operator-average-scalar-constant, lem:point-observable-multiplication,
-	lem:twisted-commutation}
+	lem:twisted-commutation, def:point-tau-measurement}
 	Expand both tensor factors of $\hat{W}^r(u)$ and average over $r$.
 	Character orthogonality retains exactly the terms with $a'+a''=a$,
-	giving the convolution formula. Its summands are tensor products of
-	positive semidefinite operators, proving positivity. Summing over $a$
+	giving the convolution formula and the addition-postprocessing identity.
+	Its summands are tensor products of positive semidefinite operators,
+	proving positivity. Summing over $a$
 	removes the convolution constraint; completeness of the strategy and
 	Pauli measurements then gives the identity.
 	For projectivity, multiplication of point observables and of Pauli

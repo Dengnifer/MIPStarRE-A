@@ -4,14 +4,11 @@ import MIPStarRE.QPBT.Observables.WinImplications.TwistedCommutation
 /-!
 # The factor-interchanged phase-signed commutation relation
 
-This module runs the second pass of `lem:qld-win-implications-obs`.  The first
-pass places Alice's point observables on the left tensor factor of
-`S.toStrategy.psi`; here the same generic machinery is instantiated with Bob's
-point observables on the left factor of the interchanged state
-`ProjectiveSetting.swappedState`, fed by the factor-interchanged consistency
-implications of `lem:qld-win-implications` and by Alice's Magic Square
-anticommutation, and the conclusion is transported back to
-`S.toStrategy.psi`.  No symmetry principle between the two players is used.
+Interchanging the tensor factors places Bob's point observables on the left.
+The reversed consistency estimates of `lem:qld-win-implications` and Alice's
+Magic Square anticommutation give the bound, which is then transported to the
+original state. This proves the factor-interchanged relation in
+`lem:qld-win-implications-obs`.
 
 ## References
 
@@ -167,7 +164,7 @@ theorem exists_pointObs_commutator_comm_le_bob :
     (fun ω => S.pointObs .bob .X ω.2.2.1 ω.1)
     (fun ω => S.pointObs .bob .Z ω.2.2.2 ω.2.1)
     S.swappedState (norm_swappedState S) (by positivity)
-    (fun ω => postprocess_isProjective _ (S.isProjective.1 _) _)
+    (fun ω => SandwichProduct.postprocess_isProjective _ (S.isProjective.1 _) _)
     (fun ω => pointObs_eq_one_sub_two_smul S .bob .X ω.2.2.1 ω.1)
     (fun ω => pointObs_eq_one_sub_two_smul S .bob .Z ω.2.2.2 ω.2.1)
     (hcc P ε S hε .X) (hcc P ε S hε .Z)

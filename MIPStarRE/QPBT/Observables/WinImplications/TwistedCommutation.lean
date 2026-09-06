@@ -274,8 +274,8 @@ theorem twisted_commutation_of_halves {P : AdmissibleParams} {ιL ιR : Type}
 /-! ## The commuting half on Alice's factor -/
 
 /-- The point observables of Alice approximately commute on commuting tuples.
-This instantiates the generic commuting half at the standard placement of
-`lem:qld-win-implications-obs`.
+This auxiliary estimate is the commuting part of `lem:qld-win-implications-obs`
+in the standard tensor order.
 
 The error is `C * (ε + √ε)` rather than `C * ε` because Equation `eq:lc-11` is
 closed by the transitivity estimate for the consistency relation `≃`, which is
@@ -283,8 +283,8 @@ not additive. The detour through the Pair/W families passes through a squared
 state-dependent distance and a Cauchy--Schwarz step, so its two `O(ε)` defects
 contribute `O(√ε)`, while the defect of the step used directly contributes
 `O(ε)`. Paper
-`14_analysis_of_the_pauli_basis_test.tex:311-341`, blueprint
-`ch14_qpbt_observables.tex:761-794`. -/
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:311-341`,
+blueprint `lem:qld-point-obs-commuting-estimate`. -/
 theorem exists_pointObs_commutator_comm_le_alice :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε), 0 ≤ ε →
@@ -319,7 +319,7 @@ theorem exists_pointObs_commutator_comm_le_alice :
     (fun ω => S.pointObs .alice .X ω.2.2.1 ω.1)
     (fun ω => S.pointObs .alice .Z ω.2.2.2 ω.2.1)
     S.toStrategy.ψ S.toStrategy.ψ_norm (by positivity)
-    (fun ω => postprocess_isProjective _ (S.isProjective.2 _) _)
+    (fun ω => SandwichProduct.postprocess_isProjective _ (S.isProjective.2 _) _)
     (fun ω => pointObs_eq_one_sub_two_smul S .alice .X ω.2.2.1 ω.1)
     (fun ω => pointObs_eq_one_sub_two_smul S .alice .Z ω.2.2.2 ω.2.1)
     (hcc P ε S hε .X) (hcc P ε S hε .Z)

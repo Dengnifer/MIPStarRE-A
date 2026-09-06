@@ -30,11 +30,8 @@ noncomputable section
 
 /-! ## Algebraic preliminaries -/
 
-/-- The generalized Pauli observables are self-adjoint. A private copy of this
-statement, phrased through `Matrix.IsHermitian`, lives at
-`MIPStarRE/QPBT/Observables/ExpandedDefs.lean:692` and is unreachable from
-here; this form is the one used by `lem:qld-comm-cons`, and promoting the
-private original is issue #204. Blueprint `ch11_qpbt_algebra.tex:587-634`,
+/-- The generalized Pauli observables are self-adjoint. This identity supports
+`lem:qld-comm-cons`. Blueprint `lem:twisted-commutation`,
 paper `references/qpbt-paper/04_preliminaries.tex:1052-1096`. -/
 theorem tauObservable_conjTranspose {K ι : Type*} [Field K] [Finite K]
     [DecidableEq K] [Algebra (ZMod 2) K] [Fintype ι] [DecidableEq ι]
@@ -135,7 +132,7 @@ theorem expObs_commutator (S : ProjectiveSetting P ε) (side : PlayerSide)
       tauZ P ω from rfl]
   rw [tauZ_mul_tauX, MagicSquareRigidity.heteroKron_smul_right,
     ← WinImplications.heteroKron_smul_left,
-    WinImplications.heteroKron_sub_left, twistedCommutator]
+    ← heteroKron_sub_left, twistedCommutator]
 
 /-- The commutator of two trace-coarse-grained expanded point projections is a
 unit-modulus multiple of one quarter of the factorized commutator. This is the
@@ -221,7 +218,7 @@ theorem exists_twistedCommutator_avg_le :
                   (phaseSign (gammaValue P ω.1 ω.2.1 ω.2.2.1 ω.2.2.2) •
                     (S.pointObs .alice .Z ω.2.2.2 ω.2.1 *
                       S.pointObs .alice .X ω.2.2.1 ω.1)) 1 :=
-            (WinImplications.heteroKron_sub_left _ _ _).symm
+            heteroKron_sub_left _ _ _
           rw [← WinImplications.heteroKron_smul_left]
           exact h1
         rw [hop]

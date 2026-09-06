@@ -38,42 +38,6 @@ noncomputable section
 
 /-! ## Coordinate tensors -/
 
-/-- Reindexing a finite Euclidean vector preserves its norm.
-Formalization-only support for `def:expanded-state`, blueprint
-`ch14_qpbt_observables.tex:895-918`. The same statement is proved as
-`reindexState_norm_eq` at
-`MIPStarRE/QPBT/Combining/DirectLowDegree/Transport/SeedFiber.lean:144`, which
-is not in the import closure of this file; moving that lemma down beside
-`reindexState` and deleting this copy is issue #204. -/
-theorem norm_reindexState {ι κ : Type*} [Fintype ι] [DecidableEq ι]
-    [Fintype κ] [DecidableEq κ] (e : ι ≃ κ) (u : EuclideanSpace ℂ ι) :
-    ‖reindexState e u‖ = ‖u‖ := by
-  apply (sq_eq_sq₀ (norm_nonneg _) (norm_nonneg _)).mp
-  rw [EuclideanSpace.norm_sq_eq, EuclideanSpace.norm_sq_eq]
-  change (∑ j : κ, ‖u.ofLp (e.symm j)‖ ^ 2) = ∑ i : ι, ‖u.ofLp i‖ ^ 2
-  exact e.symm.sum_comp (fun i => ‖u.ofLp i‖ ^ 2)
-
-/-- The coordinate tensor of two vectors has the product norm.
-Formalization-only support for `def:expanded-state`, blueprint
-`ch14_qpbt_observables.tex:895-918`. The same statement is proved as
-`vecTensor_norm_eq` at
-`MIPStarRE/QPBT/Combining/DirectLowDegree/Transport/SeedFiber.lean:156`, which
-is not in the import closure of this file; moving that lemma down beside
-`vecTensor` and deleting this copy is issue #204. -/
-theorem norm_vecTensor {ι κ : Type*} [Fintype ι] [DecidableEq ι] [Fintype κ]
-    [DecidableEq κ] (u : EuclideanSpace ℂ ι) (v : EuclideanSpace ℂ κ) :
-    ‖vecTensor u v‖ = ‖u‖ * ‖v‖ := by
-  refine (sq_eq_sq₀ (norm_nonneg _) (by positivity)).mp ?_
-  rw [EuclideanSpace.norm_sq_eq, mul_pow, EuclideanSpace.norm_sq_eq,
-    EuclideanSpace.norm_sq_eq, Fintype.sum_prod_type, Finset.sum_mul]
-  refine Finset.sum_congr rfl ?_
-  intro i _
-  rw [Finset.mul_sum]
-  refine Finset.sum_congr rfl ?_
-  intro j _
-  change ‖u.ofLp i * v.ofLp j‖ ^ 2 = ‖u.ofLp i‖ ^ 2 * ‖v.ofLp j‖ ^ 2
-  rw [norm_mul, mul_pow]
-
 /-- A Kronecker product of operators acts factorwise on a coordinate tensor.
 Formalization-only support for `def:expanded-state`, blueprint
 `ch14_qpbt_observables.tex:895-918`. -/
@@ -267,8 +231,8 @@ theorem psiHat_eq_reindexState (S : ProjectiveSetting P ε) :
 
 /-- The expanded strategy state is normalized. -/
 theorem psiHat_norm (S : ProjectiveSetting P ε) : ‖S.psiHat‖ = 1 := by
-  rw [psiHat_eq_reindexState, norm_reindexState, norm_vecTensor,
-    norm_vecTensor, S.toStrategy.ψ_norm, eprState_norm]
+  rw [psiHat_eq_reindexState, reindexState_norm_eq, vecTensor_norm_eq,
+    vecTensor_norm_eq, S.toStrategy.ψ_norm, eprState_norm]
   norm_num
 
 /-! ## Opposite-placement bipartitions -/
@@ -534,7 +498,7 @@ theorem norm_place_AA'_heteroKron_psiHat (S : ProjectiveSetting P ε)
     WinImplications.norm_applyOperatorToState_reindexState,
     reindexOp_sixRegShuffle_place_AA'_heteroKron,
     applyOperatorToState_heteroKron_vecTensor,
-    applyOperatorToState_heteroKron_vecTensor, norm_vecTensor, norm_vecTensor,
+    applyOperatorToState_heteroKron_vecTensor, vecTensor_norm_eq, vecTensor_norm_eq,
     heteroKron_one_one, WinImplications.applyOperatorToState_one,
     WinImplications.norm_applyOperatorToState_of_isometry
       (WinImplications.heteroKron_left_isometry (ιB := PauliRegister P) V hV),
@@ -554,7 +518,7 @@ theorem norm_place_BA''_heteroKron_psiHat (S : ProjectiveSetting P ε)
     WinImplications.norm_applyOperatorToState_reindexState,
     reindexOp_sixRegShuffle_place_BA''_heteroKron,
     applyOperatorToState_heteroKron_vecTensor,
-    applyOperatorToState_heteroKron_vecTensor, norm_vecTensor, norm_vecTensor,
+    applyOperatorToState_heteroKron_vecTensor, vecTensor_norm_eq, vecTensor_norm_eq,
     heteroKron_one_one, WinImplications.applyOperatorToState_one,
     WinImplications.norm_applyOperatorToState_of_isometry
       (WinImplications.heteroKron_right_isometry (ιA := PauliRegister P) V hV),
@@ -574,7 +538,7 @@ theorem norm_place_BB'_heteroKron_psiHat (S : ProjectiveSetting P ε)
     WinImplications.norm_applyOperatorToState_reindexState,
     reindexOp_sixRegShuffle_place_BB'_heteroKron,
     applyOperatorToState_heteroKron_vecTensor,
-    applyOperatorToState_heteroKron_vecTensor, norm_vecTensor, norm_vecTensor,
+    applyOperatorToState_heteroKron_vecTensor, vecTensor_norm_eq, vecTensor_norm_eq,
     heteroKron_one_one, WinImplications.applyOperatorToState_one,
     WinImplications.norm_applyOperatorToState_of_isometry
       (WinImplications.heteroKron_left_isometry (ιB := PauliRegister P) V hV),
@@ -594,7 +558,7 @@ theorem norm_place_AB''_heteroKron_psiHat (S : ProjectiveSetting P ε)
     WinImplications.norm_applyOperatorToState_reindexState,
     reindexOp_sixRegShuffle_place_AB''_heteroKron,
     applyOperatorToState_heteroKron_vecTensor,
-    applyOperatorToState_heteroKron_vecTensor, norm_vecTensor, norm_vecTensor,
+    applyOperatorToState_heteroKron_vecTensor, vecTensor_norm_eq, vecTensor_norm_eq,
     heteroKron_one_one, WinImplications.applyOperatorToState_one,
     WinImplications.norm_applyOperatorToState_of_isometry
       (WinImplications.heteroKron_right_isometry (ιA := PauliRegister P) V hV),

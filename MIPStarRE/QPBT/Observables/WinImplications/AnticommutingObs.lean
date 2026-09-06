@@ -145,10 +145,10 @@ theorem msVarObsB_eq (S : Strategy msGame) (j : Fin 9) :
   rfl
 
 /-- Bob's Magic Square variable observables approximately anticommute on the
-strategy state. The approximate anticommutation is proved on the projective
-dilation and read back through the ground slice. Paper
-`14_analysis_of_the_pauli_basis_test.tex:342-356`, blueprint
-`ch13_qpbt_test.tex:266-288` and `ch14_qpbt_observables.tex:761-794`. -/
+strategy state. This auxiliary estimate is proved on the projective dilation
+and read back through the ground slice. Paper
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:342-356`,
+blueprint `lem:qld-ms-anticommutator-original-state`. -/
 theorem msVarObs_anticommutator_le (S : Strategy msGame) (ε : ℝ) (hε : 0 ≤ ε)
     (hwin : 1 - ε ≤ S.value) :
     ‖applyOperatorToState
@@ -284,10 +284,10 @@ theorem msVarObsA_eq (S : Strategy msGame) (j : Fin 9) :
   rfl
 
 /-- Alice's Magic Square variable observables approximately anticommute on the
-strategy state. This is the first-factor companion of the anticommutation
-input, proved on the projective dilation and read back through the ground
-slice. Paper `14_analysis_of_the_pauli_basis_test.tex:342-356`, blueprint
-`ch13_qpbt_test.tex:266-288` and `ch14_qpbt_observables.tex:761-794`. -/
+strategy state. This auxiliary estimate is proved on the projective dilation
+and read back through the ground slice on the first tensor factor. Paper
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:342-356`,
+blueprint `lem:qld-ms-anticommutator-original-state`. -/
 theorem msVarObsA_anticommutator_le (S : Strategy msGame) (ε : ℝ) (hε : 0 ≤ ε)
     (hwin : 1 - ε ≤ S.value) :
     ‖applyOperatorToState
@@ -403,7 +403,7 @@ theorem obsOf_conjTranspose_mul_self {ι : Type*} [Fintype ι] [DecidableEq ι]
     (obsOf M)ᴴ * obsOf M = 1 := by
   have hsum : M.effect 0 + M.effect 1 = 1 := by
     have := M.sum_eq_one
-    rwa [sum_over_zmodTwo] at this
+    rwa [sum_zmod_two] at this
   have h01 : M.effect 0 * M.effect 1 = 0 :=
     DistanceCalculus.projective_effect_mul_effect_eq_zero M hM (by decide)
   have h10 : M.effect 1 * M.effect 0 = 0 :=
@@ -460,7 +460,7 @@ Formalization-only support for `lem:povm-to-obs`, blueprint
 theorem sum_phaseSign_smul_effect_eq_obsOf {ι : Type*} [Fintype ι]
     [DecidableEq ι] (M : MIPStarRE.Quantum.Measurement (ZMod 2) ι) :
     ∑ b : ZMod 2, phaseSign b • M.effect b = obsOf M := by
-  rw [sum_over_zmodTwo, obsOf]
+  rw [sum_zmod_two, obsOf]
   have hzero : phaseSign (0 : ZMod 2) = 1 := by simp [phaseSign]
   have hone : phaseSign (1 : ZMod 2) = -1 := by
     have h : (1 : ZMod 2) ≠ 0 := by decide
@@ -717,17 +717,15 @@ theorem obs_anticommutator_avg_le {P : AdmissibleParams} {ιL ιR : Type}
 /-- The observable of a binary projective measurement obtained from a strategy
 measurement by two postprocessings is a reflection. Formalization-only support
 for `eq:qld-implication-ms-anticomm`, blueprint
-`ch14_qpbt_observables.tex:761-794`. The projectivity of the underlying
-strategy measurement is unfolded here because the corresponding named lemma,
-`strategyMeasurement_isProjective`, is private at
-`MIPStarRE/QPBT/Observables/Defs.lean:788`; promoting it is issue #204. -/
+`lem:qld-win-implications-obs`. -/
 theorem msVarBitObs_conjTranspose_mul_self {P : AdmissibleParams} {ε : ℝ}
     (S : ProjectiveSetting P ε) (side : PlayerSide) (j : Fin 9)
     (ω : PauliTuple P) :
     (obsOf (S.msVarBitMeas side j ω))ᴴ *
       obsOf (S.msVarBitMeas side j ω) = 1 := by
   refine obsOf_conjTranspose_mul_self (S.msVarBitMeas side j ω) ?_
-  refine postprocess_isProjective _ (postprocess_isProjective _ ?_ _) _
+  refine SandwichProduct.postprocess_isProjective _
+    (SandwichProduct.postprocess_isProjective _ ?_ _) _
   cases side with
   | alice => exact S.isProjective.1 _
   | bob => exact S.isProjective.2 _

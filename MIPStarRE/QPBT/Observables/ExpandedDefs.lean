@@ -423,7 +423,9 @@ private theorem sum_tauPointProj_eq_one (W : PauliKind)
 /-- The projective point measurement on one Pauli register obtained by
 coarse-graining the generalized Pauli basis according to its value at `u`.
 This is the ancillary measurement used in item 1 of `lem:qld-comm-cons`, paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:455-465`. -/
+`eq:qld-point-obs-def` in
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:385-411`,
+blueprint `def:ancillary-point-measurement`. -/
 noncomputable def tauPointMeas (W : PauliKind)
     (u : Fin P.m → PauliScalar P) :
     Measurement (PauliScalar P) (PauliRegister P) :=
@@ -437,7 +439,9 @@ noncomputable def tauPointMeas (W : PauliKind)
 
 /-- The fine product measurement underlying the convolution definition of an
 expanded point measurement. Its outcome records the strategy and Pauli point
-values separately. Paper `14_analysis_of_the_pauli_basis_test.tex:455-465`. -/
+values separately. Paper
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:390-411`,
+blueprint `def:point-tau-measurement`. -/
 noncomputable def pointTauMeas (S : ProjectiveSetting P ε) (side : PlayerSide)
     (W : PauliKind) (u : Fin P.m → PauliScalar P) :
     Measurement (PauliScalar P × PauliScalar P) (S.ExpandedLocalSpace side) :=
@@ -525,7 +529,8 @@ noncomputable def pointMeasExp (S : ProjectiveSetting P ε) (side : PlayerSide)
 /-- The expanded point measurement is the addition postprocessing of its fine
 strategy--Pauli product measurement. This is the data-processing presentation
 used in item 1 of `lem:qld-comm-cons`, paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:455-465`. -/
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:390-411`,
+blueprint `lem:expanded-point-measurement-properties`. -/
 theorem pointMeasExp_effect_eq_pointTauMeas_postprocess
     (S : ProjectiveSetting P ε) (side : PlayerSide) (W : PauliKind)
     (u : Fin P.m → PauliScalar P) (a : PauliScalar P) :

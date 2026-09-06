@@ -193,7 +193,7 @@ theorem pointTauConsistency_aaBa_eq {P : AdmissibleParams} {ε : ℝ}
     DistanceCalculus.rightPlacedMeasurement (S.pointMeas .bob W u)
   have hμ : μ.IsProbability := uniformDistribution_isProbability X
   have hgroup : ‖reindexState e S.psiHat‖ = 1 := by
-    rw [norm_reindexState, psiHat_norm]
+    rw [reindexState_norm_eq, psiHat_norm]
   have hfine :
       consistencyDefect μ (fun u p => (A u).effect p)
           (fun u p => (B u).effect p) (reindexState e S.psiHat) =
@@ -327,7 +327,7 @@ theorem pointTauConsistency_abBb_eq {P : AdmissibleParams} {ε : ℝ}
     DistanceCalculus.rightPlacedMeasurement (S.pointMeas .bob W u)
   have hμ : μ.IsProbability := uniformDistribution_isProbability X
   have hgroup : ‖reindexState e S.psiHat‖ = 1 := by
-    rw [norm_reindexState, psiHat_norm]
+    rw [reindexState_norm_eq, psiHat_norm]
   have hfine :
       consistencyDefect μ (fun u p => (A u).effect p)
           (fun u p => (B u).effect p) (reindexState e S.psiHat) =
