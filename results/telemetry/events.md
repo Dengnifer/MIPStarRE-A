@@ -5359,3 +5359,22 @@ the previous04:30 observation;247<-237 native dependency is recorded.
   `~/.cache/mipstarre-dev/recoveries/orc-113-20260906-09/`. CI uses the normal
   14400-second build-lock wait. This entry does not assert publication or CI
   success before those operations finish. No additional review is launched.
+
+## 2026-09-06 - PR260 refreshed dependency cache at publication
+
+- Session `orc-247-20260906-08` refreshed PR260 onto actual main
+  `928328ff4d45e5fdc2844b120329a2c241a3a58a` as `23d1394`, preserving both
+  event histories, raw telemetry rows, all incoming-only paths, and the
+  approved source patch. Runtime preservation evidence has no failures.
+- The normal checked-publication gate stopped before pushing because the
+  worktree lacked PR195's `WinImplications/Approx.olean`. Its populated build
+  directory predates the newly merged dependency; this is not a proof failure.
+  Recovery uses the primary checkout's `warm-worktree.sh --build` under the
+  machine-wide lock, then retries checked publication and canonical CI.
+- The last of two workflow reviews approved `ecba3e7`. Source patch equality
+  does not establish full-patch equality: incoming main relocated inherited
+  events, and this incident adds evidence. No review is carried, dispatched,
+  or adjudicated here. Main owns terminal disposition under the owner's
+  05:05Z authority; historical B7/B8 holds remain superseded. Final runtime
+  evidence records observed publication and CI outcomes without claiming them
+  in advance. No shim installation or PR merge is performed.
