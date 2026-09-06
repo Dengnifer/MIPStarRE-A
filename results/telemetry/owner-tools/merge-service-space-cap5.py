@@ -153,7 +153,7 @@ def tick(merge: bool) -> dict:
     fresh_candidates = [row for row in candidate if row.get("fresh_against_remote")]
     stale_candidates = [row for row in candidate if not row.get("fresh_against_remote")]
     oldest = fresh_candidates[0] if fresh_candidates else None
-    if stale_candidates:
+    if stale_candidates and not fresh_candidates:
         reasons.append("stale eligible PRs: " + ",".join(str(r["number"]) for r in stale_candidates))
     record = dict(ts=datetime.now(timezone.utc).isoformat(), local_main=local,
                   remote_main=remote, clean=clean, runtime=reason,
@@ -169,6 +169,14 @@ def tick(merge: bool) -> dict:
         record["merge_exit"] = subprocess.run(
             [sys.executable, str(ROOT / "local" / "bin" / "pr_merge.py"),
              str(oldest["number"])], timeout=3600).returncode
+        if record["merge_exit"] == 0:
+            try:
+                record["post_merge_remote_main"] = remote_main()
+                record["post_merge_remote_verified"] = True
+            except Exception as exc:
+                record["post_merge_remote_verified"] = False
+                record["hold_reasons"].append(
+                    f"post-merge remote reread failed: {type(exc).__name__}: {exc}")
     elif not oldest:
         record["hold_reasons"].append("no fresh exact-head CI/review-eligible PR")
     DAEMON.mkdir(parents=True, exist_ok=True)
