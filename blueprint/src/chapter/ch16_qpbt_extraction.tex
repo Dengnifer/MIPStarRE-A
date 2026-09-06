@@ -118,6 +118,11 @@ The measurement $\{\hat{S}_{g_X,g_Z}\}$ reads out an $X$-polynomial and a $Z$-po
 
 \begin{proof}
 	\leanok
+	\uses{def:tau-dot-product-projector, def:generalized-pauli,
+		lem:pauli-observable-expansion}
+	The zero-label case of Lemma~\ref{lem:pauli-observable-expansion} has
+	all phase factors equal to $1$. Since $\tau^W(0)=\Id$ by
+	Definition~\ref{def:generalized-pauli}, it gives $\sum_h\tau^W_h=\Id$.
 	Let $U$ be the square matrix whose columns are the $W$-basis vectors $v_h$,
 	so that $\tau^W_h=v_hv_h^\dagger$. Completeness gives $UU^\dagger=\Id$,
 	hence $U$ is unitary. For each $a$, let $D_a$ be the diagonal projector
