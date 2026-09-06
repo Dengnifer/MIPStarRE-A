@@ -1,3 +1,13 @@
+---
+title: "Absorption of the extraction error"
+date: 2026-09-06
+purpose: >
+  Records the source comparison, uniform constant absorption, and validation
+  of the scalar extraction-error estimate.
+issue: "#241"
+pr: "#249"
+---
+
 # Packet #241: absorption of the extraction error
 
 ## Scope and source

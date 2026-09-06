@@ -452,6 +452,30 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 		\leq a'(md)^{a'}\bigl(\eps^{b'}+q^{-b'}+2^{-b'md}\bigr).
 	\]
 \end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:admissible}
+	Write $D=md$, and set $\beta=b/8$, $A=4C^2a$, $H=aD^a$, and
+	$R=\eps^\beta+q^{-\beta}+2^{-\beta D}$.
+	Admissibility gives $D,q\geq1$, so $H\geq D\geq1$, $A\geq a>1$,
+	and $0<\beta<1$. Fourth-root subadditivity and monotonicity of real
+	powers, using $0\leq\eps\leq1$ and $\beta\leq b/4$, give
+	\[
+		\delta_G^{1/4}\leq HR,\qquad
+		\eps^{1/8}\leq HR,\qquad
+		(D/q)^{1/4}\leq HR,\qquad D/q\leq HR.
+	\]
+	Indeed, the fourth root of the sum defining $\delta_G/H$ is at most
+	$R$, while $H^{1/4}\leq H$, $D^{1/4}\leq D\leq H$,
+	$\eps^{1/8}\leq\eps^\beta$, and $q^{-1/4},q^{-1}\leq q^{-\beta}$.
+	Since $C^{1/4}\leq C$, subadditivity also gives
+	$\delta_P^{1/4}\leq3CHR$. Consequently,
+	\[
+		\delta_{\mathrm{ext}}
+		\leq C(3C+1)HR\leq4C^2HR=AD^aR\leq AD^AR.
+	\]
+	Thus $a'=A$ and $b'=\beta$ have the required properties.
+\end{proof}
 
 \begin{remark}[Two steps in the source proof of the extraction lemma]\label{rem:qld-unitary-triangle-slip}
 	In the source proof of Lemma~\ref{lem:qld-unitary}, the triangle inequality gives $\| H_X \ket{\vartheta} - H_Z \ket{\vartheta} \| \leq \| (\Id - H_X)\ket{\vartheta} \| + \| (\Id - H_Z)\ket{\vartheta} \| \leq 2\sqrt{\delta_P}$, so that $\| H_X \ket{\vartheta} - H_Z \ket{\vartheta} \|^2 \leq 4\delta_P$; the source instead asserts the bound $2\sqrt{\delta_P}$ for the \emph{squared} norm, which holds only when $\sqrt{\delta_P} \leq 1/2$, and consequently carries the term $\sqrt{\delta_P}$ into an overlap bound of $1 - 2\delta_P - \sqrt{\delta_P}$. The proof above uses the corrected bound $4\delta_P$, which gives the overlap bound $1 - 4\delta_P$ and leaves the final bound $\delta_{\mathrm{qld}} = O(\delta_P^{1/4} + md/q)$ unchanged. The source proof also normalizes the vector $(\bra{\mathrm{EPR}_q}^{\ot M})_{\mathrm{A}''\mathrm{B}''} \ket{\vartheta}$ without ensuring that it is nonzero; the case distinction on $\delta_P$ in the proof above supplies this, the conclusions of the lemma being trivial when $\delta_P$ exceeds a universal constant.
