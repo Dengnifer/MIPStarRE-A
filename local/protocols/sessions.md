@@ -65,12 +65,8 @@ exception: the role code `orc` maps to `local/personas/orchestrator.md`.
 Until such a file is committed, `dispatch.sh` warns and falls back to a
 one-line built-in frame — enough to run, not enough for load-bearing work.
 The `mathfix` role is the source-statement repair lane governed by
-`issues-prs.md` section 6. At present, the owner session launches that lane on
-Claude Fable 5.1 through its Agent tool and records it separately in
-`results/telemetry/owner-sessions.jsonl`; `dispatch.sh --role mathfix` is used
-only for astra after its availability is reported on #26. The per-gap attempt
-and elapsed-time budget is cumulative across both routes, and the operator
-supplies that state in each request or dispatch.
+`issues-prs.md` section 6: main selects Astra max/xhigh after the #26 availability report,
+supplying cumulative per-gap budgets; historical Fable records remain in `owner-sessions.jsonl`.
 
 ## 3. Naming
 
@@ -115,25 +111,47 @@ registry append; and a final report of `name`, `thread_id` and the
 last-message path.
 
 Account routing uses `--account auto|primary|second`, overriding
-`MIPSTARRE_CODEX_ACCOUNT` (default `auto`). Under a shared reservation lock,
-auto selects the smaller live/cap ratio, with primary winning ties. Live counts
-come from `$MIPSTARRE_CACHE_ROOT/accounts/<account>/<dispatcher-pid>` markers;
-each read removes stale PIDs, and exit cleanup removes the current reservation.
-Caps are positive integers in `watchdog/max-codex-primary` and
-`watchdog/max-codex-second` under that cache root (defaults 9 and 10). Full
-accounts are polled every 20 seconds for `MIPSTARRE_ACCOUNT_WAIT` seconds
-(default 1800), after which auto uses the less loaded account even above cap;
-explicit and resumed dispatches wait on their pinned account and never switch.
+`MIPSTARRE_CODEX_ACCOUNT` (default `auto`). Locked admissions read `watchdog/account-mode`
+(absent: `primary`; valid: `primary|both`). Only the owner may authorize `both`, reading
+`max_codex|primary|second` from `watchdog/account-mode-both-preserved.json` when present.
+Neither mode rewrites settings, credentials or history.
+Caps in `watchdog/max-codex-{primary,second}` default to 11 and 9; zero disables
+an account. `watchdog/max-codex` additionally caps total workers. Auto selects
+the smallest live/cap ratio among eligible accounts, with primary winning ties.
+Host `/proc` scans reconcile Codex executables and dispatcher reservations by ancestry,
+without counting Node wrappers twice. Twelve allocated primary slots reserve at least
+one for main; other interactives and unreserved workers reduce capacity. Each admission
+reads optional `watchdog/primary-excluded-interactive-cwds.json`: a duplicate-free list
+drawn only from `/home/drx/FV`, `/home/drx/LDT-Lean-Paper`, `/home/drx`; invalid lists fail.
+Only known-primary interactives qualify, never workers/reservations; absence exempts none.
+`watchdog/primary-external-reserved` reserves non-Codex key use (default zero), not
+already-observed processes. Unknown homes count against primary. Unavailable host
+visibility or unreadable live processes fail before stale cleanup; dead reservations
+are removed and permission-denied PIDs retained. Full accounts poll for
+`MIPSTARRE_ACCOUNT_WAIT` seconds (default 1800), then fail without reserving or spilling
+to second. Dry runs neither wait nor reserve and still require visibility and capacity.
 Resume affinity comes from registry account fields or rollout files in either
 home; unknown, ambiguous, or conflicting selections fail before execution.
+Primary mode rejects secondary-affinity resumes, including `auto`, without relabeling.
+`--continue-from FILE` starts a fresh primary thread from operator JSON: `previous_session`
+(terminal, same issue), `checkpoint` (ancestor of HEAD), and `budget_file` (shared path).
+The budget contains `anchor`, `attempt_limit`, `attempts`, `working_seconds`, and
+`sessions` (charged names including the predecessor); an unused attempt is required.
+Continuations retain path, anchor and limit; monotone charges include snapshot plus completed
+segments. Rows link original account/thread, checkpoint and budget. Operators enforce budgets;
+route switches grant no reset/attempt or change to old homes, captures or uncommitted work.
+Ordinary resumes recover prior provenance,
+skipping malformed/non-object history rows but rejecting invalid relevant metadata.
+Replay reads the private launch-time `.continuation.json`, never a later budget file.
+The shim rejects multi-agent enable flags and whole `features`/`agents` overrides only.
 Primary unsets inherited `CODEX_HOME`; second sets it for execution and rollout
 lookup to `MIPSTARRE_CODEX_HOME_SECOND` (default
 `~/.cache/mipstarre-dev/codex-home-yxy`). Review and autofix inherit these
-variables unchanged. New dispatch rows record the selected account and model:
-`MIPSTARRE_CODEX_MODEL` wins, otherwise a simple quoted top-level `model` ID in
-the selected home's `config.toml` is resolved and explicitly passed to the CLI.
-An unresolved model fails preflight rather than recording a guessed identity.
-Dry runs select without reserving capacity or waiting.
+variables unchanged. All roles require `gpt-6-astra`. Main stays `max` and chooses worker
+`max|xhigh` by role, difficulty, quality and latency, including resumes and mathfix.
+Dispatch `--effort`, `MIPSTARRE_REVIEW_EFFORT` and `MIPSTARRE_AUTOFIX_EFFORT` honor that
+choice through the shim; omitted means `max`, legacy `ultra` maps to `max`, others fail.
+`requested_effort` is configured, not verified; see `meta.md`. Missing dispatchers fail closed.
 
 Preconditions the dispatcher (human or orchestrator) owns:
 
@@ -335,8 +353,9 @@ fix sessions; no role name identifies one, so `dispatch.sh` cannot.
 The registry line schema is in `meta.md`. Beyond it, `dispatch.sh` records
 `turns` (completed model turns), `capture` (repo-relative path to the event
 stream) and, when resolvable, `rollout`. New dispatches record `account` and the
-explicitly resolved `model` as described in §4.1; historical rows are unchanged.
-Token usage is summed over
+explicitly resolved `model` as described in §4.1. They also record
+`requested_effort` when §4.1 produces a nonempty override; historical rows are
+unchanged. Token usage is summed over
 `turn.completed` events and normalized to
 `{input, cached_input, cache_write, output, reasoning}`; `dispatch.sh` writes
 `status: done` or `failed` at the end of a run, and `active` is reserved for

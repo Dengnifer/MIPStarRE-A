@@ -3020,6 +3020,49 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 - State at retirement: main 3f00de0; open PRs 233,230,225,213,212,207,205,202,195,185,178; live codex worker sessions 2;
   merges recorded by the daemon so far 40. All Claude-held worktrees were released (#118 at 691b671, #174 at bece2e6).
   This owner session stops; the owner decides when an owner session returns.
+
+## 2026-09-06 — Issue 113 imported API repair
+- **PR #195 after merge `c7fe9cd` (session `orc-113-20260906-02`).**
+  `watchdog/lanes/113.build.log` in the runtime cache reports unknown exact-winning
+  theorem names and the removed measurement composition helper in `ApproxLines.lean`.
+  PR #185 renamed the exact theorems and replaced effect-level composition with
+  `Quantum.Measurement.postprocess_comp`. Both approximate modules now use those
+  existing declarations. A subsequent targeted check of `Approx.lean` also found
+  three imported declarations made private: `selectedPairBit`, `pairLabels_eq_of_win`,
+  and `selectedMsVar`. Their original definitions and proof are retained and exported;
+  no duplicate helper is introduced. Lesson: check approximate consumers when changing
+  visibility or names in the exact-winning API.
+- **Statement integrity.** The source is `lem:qld-win-implications` in
+  `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:192-264`, with the
+  projective-strategy convention at lines 160-172. Paper assumptions are admissible
+  parameters, a projective strategy winning with probability at least `1 - ε`, and
+  `ε ≥ 0`. Lean retains `AdmissibleParams`, `ProjectiveSetting P ε`, and `0 ≤ ε`.
+  The paper concludes average operator-distance bounds of order `ε`, also with
+  tensor factors interchanged. Lean retains existential universal constants and
+  the two `opFamilyDistSq ≤ C * ε` conclusions, with `swappedState` representing
+  the factor interchange. The low-degree outcome completion by `Option` is unchanged
+  and is explained in the blueprint immediately after this lemma's item list.
+  Verdict: faithful boundary encodings retained; no new assumptions, changed
+  constants, weakened conclusions, or proof holes. All theorem types remain unchanged;
+  proof edits only update declaration references and unfold function composition to
+  match the existing measurement composition theorem's lambda expression.
+- **Validation.** Targeted `lake env lean` checks pass for `Commuting`, `MagicSquare`,
+  `Consistency`, `Interchange`, `ApproxLines`, `Approx`, and the public
+  `Observables/WinImplications.lean` wrapper. Only branch-private module artifacts
+  were refreshed; no full build was launched. The four edited Lean files contain
+  no `sorry` or `axiom`; the unchanged wrapper still reports its existing `sorry`
+  warnings at lines 276, 294, and 313. `git diff --check` and the hook installation
+  check pass. Publication CI and independent review remain the parent tail's task.
+- **Checked publication of `8cca8bc`.** Normal pre-commit and checked-push gates
+  passed, including changed-file Lean checks, targeted artifact refreshes, statement
+  integrity audits, the blueprint web smoke check, and resolution of all 1272
+  blueprint declarations. The gate found no changed source-labelled public headers.
+  The subsequent SSH `git-receive-pack` transport remained silent for more than
+  three minutes; only this session's stalled SSH child was terminated. Checked-push
+  exited 128 without confirming publication. The parent tail must verify the remote
+  tip and retry checked publication before running exact-head CI and review. No
+  hooks were bypassed, no full-project build was launched, and no PR was merged.
+
 ## 2026-09-06 — Issue 201 integration validation setup
 - Session `prover-201-20260906-01` initially looked for the slot-6 handoff in the
   branch checkout, where it was absent; it was read from the primary checkout
@@ -4068,6 +4111,11 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 - Telemetry publication validation found20 trailing-whitespace lines in seven archived Markdown handoff/final-report files. Normalized only those flagged lines to satisfy the existing pre-commit whitespace gate; every non-whitespace token and all raw JSONL captures are unchanged. The orphan diff3 delimiter is absent from the staged incident ledger. No hook setting, infrastructure override, worker state or mathematical source was changed.
 - Issue118 attempt6 completed at857681fc1cc60ec13925b1533c7269fdcf634b28: 14 theorems and3 proof-only definitions for heterogeneous pasting and complete register/answer transport; reported private Lean/axiom/downstream checks pass, no new debt, and clean worktree independently confirmed. Full source sufficiency remains OPEN: actual conditional application, mass restoration, deltaQ specialization and Apply remain. Six completed attempts total 9852 recorded working seconds, original anchor September5 19:24 UTC. Resumed the completed session through dispatch.sh as attempt7/10 at effective astra/xhigh to pursue those exact obligations; no definition/game change or source correction adopted, no duplicate live worker and no #27 micro-update.
 - 2026-09-05T23:31Z PR195 post-PR205 publication preflight found missing incoming build artifacts. The existing repair worker orc-113-20260906-06 remains live and is rebuilding only the affected module without changing source, rather than bypassing checked-push or starting a duplicate full build. Preserve the gate and existing lane ownership; this is a branch-artifact repair, not a new mathematical gap. PR238 is now CI-green at954c1bc and its existing sol lane is starting the standard independent workflow review.
+- orc-240-20260906-01: exact-head CI for PR #248 at bf26381a4b9074fce1c56cf2b6edbb4945d805a1 recorded build=error after its documented 60-second lock wait. The machine-wide full-build lease was held by live PID 2714178, tagged warm-worktree for issue-239-independent-dot-projectors since 2026-09-06T11:08:54+0800. The wait was bounded to respect the 2100-second publication-session deadline; no foreign build was killed, no lock was removed, and no shared cache was written. The remaining CI gates continue normally. Rerun local/bin/ci.sh 248 after the lease is free; independent review must wait for green exact-head CI. Evidence: ~/.cache/mipstarre-dev/ci-logs/248/bf26381a4b9074fce1c56cf2b6edbb4945d805a1/build.log.
+- orc-240-20260906-02: the checked update of PR #248 from bf26381a4b9074fce1c56cf2b6edbb4945d805a1 to documentation-fix commit 54be981fb6c0fccc5ad3dc4361f0603590e6e5db passed normal pre-push gates, then stalled in the SSH git-receive-pack transport for over four minutes. gh_common still reported the old PR head at 12:08:15 +0800. At 12:09:42 the author terminated only its verified SSH child PID 2917266; no build, lock, reviewer, or foreign process was stopped. One normal pr_open.py retry retains all hooks and the configured identity, adding process-local SSH ConnectTimeout=20, ServerAliveInterval=15, and ServerAliveCountMax=2. No repository transport configuration changed. Evidence: ~/.cache/mipstarre-dev/sessions/orc-240-20260906-02.pr-open.log and .pr-open-retry.log. Report the service delay separately from documentation work; do not mistake a passed local gate for publication.
+- Session orc-246-20260906-01: publication of the existing given-witness transport (966b9b8; documentation head fe26d4a) stalled at the read-only SSH ls-remote preflight. The session terminated only its own stalled SSH child before any push, then made bounded retries through primary pr_open.py: ssh.github.com:443 timed out, normal github.com:22 timed out, and a per-command retry retaining the configured identity and host-key policy with bounded timeouts, IPQoS=none, curve25519-sha256, ssh-ed25519, and chacha20-poly1305 entered the normal hooks. The underlying network cause is unverified; no gate bypass, persistent Git configuration change, or other session/process interruption occurred. Transport delay occupied part of approximately 12:06-12:11 +0800; three retries, no model/service benchmark. Final publication/CI evidence belongs to this session final report and exact-head GitHub statuses. Configured model/effort verified from process arguments and rollout: primary gpt-6-astra/xhigh; server-side effort is not verified. Session time and tokens are finalized by the dispatcher. Lesson: bound transport retries separately from checked publication and do not mistake an unpublished-commit statuses HTTP 404 for CI evidence.
+- orc-240-20260906-02 transport-incident outcome: the one bounded, normally checked retry succeeded at 12:12:09 +0800, adopting existing PR #248 at 54be981fb6c0fccc5ad3dc4361f0603590e6e5db. Canonical exact-head CI was launched detached as PID 2938966 with MIPSTARRE_CI_BUILD_LOCK_WAIT_S=14400; at 12:13:39 it was reparented to PID 1, GitHub local-ci/summary was pending, and the script was waiting for the live build lease held by PID 2917578. No live gate was duplicated and no review or merge was launched. Local worktree remained clean. Evidence: ~/.cache/mipstarre-dev/sessions/orc-240-20260906-02.pr-open-retry.log and .ci.log. CLI configuration is gpt-6-astra/xhigh on primary, not server-verified effort; final session tokens remain the dispatcher measurement.
+- Session orc-246-20260906-01 publication handoff: canonical checked publication reached the gates but failed at the aggregate declaration checker, which could not resolve existing declarations despite a passing QubitForm module check. The worktree stays clean at fe26d4ab1a19419594619b3e4b984eae2252f64b; the only publication edit is audit YAML metadata, preserving the given-witness construction and the original source corollary and sorry. No broad declaration index, import, source-gap marker, or soundness statement was edited to evade the gate. A syntax-checked deterministic detached supervisor PID 2948654 (child 2948664) runs the primary warm-worktree.sh --build --skip-packages --lock-timeout 14400, then primary checked pr_open.py, verifies the actual remote PR head, and runs primary ci.sh with its normal 14400-second full-build-lock wait. It stops on any failure and has no review, agent, or merge command. At this observation the repair waits behind live build owner 2917578; no PR is assigned and CI has not started. State, per-stage logs, and script are ~/.cache/mipstarre-dev/sessions/orc-246-20260906-01.publication-state.txt, *.repair.log, *.publish.log, *.ci.log, and *.publication.sh. Configured primary gpt-6-astra/xhigh is verified locally, server-side effort remains unverified. Observed at 2026-09-06T12:17:02+08:00: wall=906s, cumulative token snapshot={"input_tokens":2440751,"cached_input_tokens":2356608,"cache_write_input_tokens":0,"output_tokens":16250,"reasoning_output_tokens":6777,"total_tokens":2457001}; dispatcher supplies terminal usage rather than treating this snapshot as final. Three SSH transport retries preceded the gate failure; no model-service retry was observed. B7/B8 remain with the human owner; #118 remains 10/10 and 19931 seconds with its original anchor. Lesson: refresh branch-private aggregate artifacts under the shared lock and resume normal publication, never remove declaration checks.
 
 ## 2026-09-05T23:26:36Z — Codex meta succession and fresh effort verification
 
@@ -4236,3 +4284,883 @@ bounded PR238 amendment and normal gates.
   and `preflight-full-build.log`. No generated list is committed, no hook is
   bypassed, and no shared cache is written. A proof-only change can still
   require a root-artifact rebuild at the publication gate.
+
+## 2026-09-06 — PR 195 current-base mechanical recovery
+
+- Session `orc-113-20260906-07` independently fetched published main
+  `a61ee557b33a2d8a4721e92b08b6d06dcb69ed57` and refreshed branch head
+  `f1d1d3c7a1f421b255aec30c485ce593ad8e4905`. Git reported one conflict,
+  in this ledger. The resolution retains both parents' incident records;
+  incoming-only paths are retained without manual source edits.
+- GitHub's four existing full reviews are retained, including approved review
+  `5123351774` at `40cead390f610d894bb4264e0ca6789753476c6d`. This session
+  performs only preservation checks, normal checked publication, and exact-head
+  CI. It does not review, publish a review status, adjudicate, or merge PR 195.
+- Preservation and gate evidence are captured under
+  `~/.cache/mipstarre-dev/recoveries/orc-113-20260906-07/`. Fresh CI and final
+  GitHub state are not asserted by this pre-publication entry; the session's
+  terminal report records their observed results for main's adjudication.
+
+### Previous incident wording retained during the mechanical refresh
+
+The automatic merge incorporated main's revised incident wording. To retain
+both histories without replacing main's entries, the following previous
+versions are reproduced from parent `f1d1d3c7a1f4`. These are historical
+records, not new instructions or current operating-state assertions.
+
+## 2026-09-03 — Operator takeover: owner's Claude session replaces the codex main session
+- **Trigger:** owner decision (2026-09-03, after the eight-hour stall and the
+  reviewer-churn episode): the owner's Claude Fable 5.1 session, working from
+  the owner's machine over ssh, takes the operator role for about one to two
+  days. Dispatched worker sessions (orc/prover/reviewer/…) remain codex
+  sessions on ghz via `dispatch.sh` (model gpt-5.6-sol until "astra" is
+  available in codex's configuration, then astra; an hourly codex poller
+  `owner-tools/astra-poll.sh` reports the switch to #26).
+- **Handover:** the codex main session posted its exact in-flight state to
+  #27 ("Handover to owner session") and exited at 2026-09-03T23:21:32Z. The owner session
+  picks up every lane from that report. The same protocols, gates and telemetry
+  duties bind the owner session; owner-side records continue in
+  `owner-log.md`.
+- **Hand-back:** to be recorded here and in `stages.jsonl` when the owner
+  says so; the codex main session then resumes from `~/.codex/prompts/goal.md`
+  plus the #27 log.
+- **2026-09-04 budget guard vs merge commits:** a fresh-base merge of main into the 130-line issue-60 branch staged 520 inherited workflow-layer lines and the pre-commit budget refused the merge commit. The operator did not use the owner override; the merge was aborted and a hook fix (exempt merge commits) was filed and landed first, after which the fresh-base merges were redone.
+
+## 2026-09-04 — Operator hand-back: codex main session resumes from the owner session
+
+- **Trigger:** owner decision (2026-09-04T13:03:08Z): the owner's Claude 5-hour window is nearly used; the
+  owner session returns at 14:50Z. Mode 2 ran since 2026-09-03 23:11Z with the merge daemon,
+  stacked lanes and the Opus/codex prover pools; Mode 1 resumes from /tmp/qpbt-main-handoff.md
+  (archived under results/telemetry/owner-messages/).
+- **State at hand-back:** main at 4eaf968; open PRs: 171,170,169,162,161,160,158,155,154,153,152,151,150,149.
+
+## 2026-09-04 — Operator takeover: owner's Claude session replaces the codex main session
+
+- **Trigger:** owner decision (2026-09-03, after the eight-hour stall and the
+  reviewer-churn episode): the owner's Claude Fable 5.1 session, working from
+  the owner's machine over ssh, takes the operator role for about one to two
+  days. Dispatched worker sessions (orc/prover/reviewer/…) remain codex
+  sessions on ghz via `dispatch.sh` (model gpt-5.6-sol until "astra" is
+  available in codex's configuration, then astra; an hourly codex poller
+  `owner-tools/astra-poll.sh` reports the switch to #26).
+- **Handover:** the codex main session posted its exact in-flight state to
+  #27 ("Handover to owner session") and exited at 2026-09-04T14:57:57Z. The owner session
+  picks up every lane from that report. The same protocols, gates and telemetry
+  duties bind the owner session; owner-side records continue in
+  `owner-log.md`.
+- **Hand-back:** to be recorded here and in `stages.jsonl` when the owner
+  says so; the codex main session then resumes from `~/.codex/prompts/goal.md`
+  plus the #27 log.
+
+## 2026-09-06T01:28:21Z — Owner concurrency priority: three independent critical lanes
+
+The owner explicitly directed immediate parallel execution of existing PR238,
+PR195 gate recovery, and issue118 attempt8. The preceding turn had started
+telemetry publication but had not dispatched the latter two lanes. The
+publication handle is now terminal with exit0 at 01:11:03 UTC, publishing
+main a61ee55; no lane is waiting on that completed bookkeeping work.
+
+Ownership checks found clean checkpoints f1d1d3c7 for issue113 and cd1815e1
+for issue118, their former workers terminal, and only the existing issue237
+worker live. Main retained orc-237-20260906-02 (supervisor2326711) and admitted
+orc-113-20260906-07 (supervisor2384295, thread
+01a0744e-31d5-7392-8aee-642646efcd46) plus mathfix-118-20260906-08
+(supervisor2384296, thread01a0744e-2a5c-73f3-9d9f-3aa21f9a2667).
+Actual client processes2326792,2384838,2384387 all select primary,
+gpt-6-astra, literal max, and disabled fan-out. Four interactive primary-home
+uses, including main, plus three workers consume seven of twelve slots;
+the project worker ceiling remains eight, not a worker-count target.
+
+The remaining old mathfix guard accepts only the caller word ultra. The
+issue237 worker had already atomically installed the owner-authorized max
+shim. Main validated that exact installed shim offline against a local
+argument-recording stub, without contacting a provider, then verified the
+real mathfix client arguments contained max and no ultra/xhigh effort.
+The shim SHA256 is d086fe99827362b70a62d7bc4982f5fc5b31afcd6e9eeddca448428d978ca29f.
+The journal distinguishes the legacy dispatcher input from the actual max
+launch, rather than falsifying telemetry or serializing mathematics behind
+an unrelated reviewed guard change. A fresh primary thread preserves the
+old secondary history and carries12452 working seconds, attempt8/10, and
+anchor2026-09-05T19:24:00Z. The attempt timeout is2700 seconds. PR195's
+independent recovery timeout is1800 seconds; its fourth-review cap and prior
+dispositions are preserved, with no fifth or extra triage review authorized.
+
+GitHub dependency edges show issue115 blocked only by open issue113, and
+issues116/117 blocked only by open issue115. Thus PR207 waits for actual
+PR195 merge, then PR213/PR212 tails may advance together after actual PR207
+merge and refreshed ownership/dependency checks. No anticipated parent
+merge was used. Primary/max supervisors2339019 and2339020 remain live.
+One concurrency-boundary report is prepared for #27; publication is recorded
+only after the adapter confirms its comment ID. The owner directive is
+archived at owner-messages/qpbt-owner-concurrency-message-20260906.txt.
+
+The concurrency-boundary publication was confirmed as #27 comment5556073590.
+At 01:31:01 UTC all three dispatcher supervisors remained live, as did the
+primary/max merge daemon and stack watcher. Their recent captures show
+independent routing validation, PR195 recovery, and mathematical source/proof
+work respectively. No additional boundary comment or speculative downstream
+tail was created.
+
+## 2026-09-06 02:10 UTC — useful parallelism and preserved attempt8 checkpoint
+
+Observation boundary 2026-09-06T02:10:01Z, qpbt-main. The owner's renewed
+request for full useful parallelism is applied without raising the relay cap:
+three project Rust Codex clients are live, out of eight available worker
+slots. Main and three other primary-home interactive clients reserve four
+of the twelve total slots. Verified project clients2484957,2509076,2515632
+all request gpt-6-astra, literal max, primary home, and multi_agent=false.
+No unrelated client or secondary credential/history was changed.
+
+The added bounded read-only scout is scout-120-20260906-01,
+dispatcher2509018, thread01a07477-4ca2-7b01-ae49-b47f1c3ca162. It inventories
+independent projector/marginal/swap sublemmas in the extraction frontier,
+using paper and exact declaration inputs; it does not review an active PR,
+implement a blocked packet, remove dependency edges, or open a premature
+tail. The live adapter scan finds only issue113 dependency-ready. Issue120
+still depends on119,121 on120,119 on118,156 on116, and224 on156. Issue156
+and224 already have proof increments, so starting duplicate writers there
+would not shorten the critical path.
+
+The dispatcher records mathfix-118-20260906-08 as terminal exit124 at
+2026-09-06T02:06:14Z after2700 seconds. Its clean checkpoint includes proof
+f6a340c8dc3c12566d9312215c578939efeb8b4a and audit
+61750e7c41c1ea246333afc1f2aa173e915dba07. Lines has no sorry/axiom tokens;
+three Apply holes remain. This is preserved proof progress, not a successful
+session termination or a completed extended-line correction. The automatic
+timeout row has zero usage fields; those fields are not evidence of zero
+model work. Source-facing adoption is not claimed.
+
+Mathfix-118-20260906-09 was dispatched at02:08:43Z, supervisor2515551,
+client2515632, resuming the verified primary thread
+01a0744e-2a5c-73f3-9d9f-3aa21f9a2667. Attempt9/10 carries exactly15152
+completed working seconds (12452+2700), original anchor
+2026-09-05T19:24:00Z unchanged. It prioritizes the actual established
+extended-line conditional average and second-player comparison. The stronger
+printed-error and global-pair obligations remain explicit. Actual max was
+verified despite the old dispatcher's legacy mathfix guard spelling.
+
+Gate observation: PR195 remains open atc7adb95e1c7f7bdd6b9e971db765e5a53ac4a284,
+mergeable and green in all nine CI contexts. Recovery session
+orc-113-20260906-07 ended01:36:56Z, exit0,940 seconds. Four original full
+reviews are preserved; the exact current head has no review record. Owner
+decision B7 was published through gh_common as #26 comment5556192093 at
+01:53:18Z; it requests a labelled operator terminal-disposition record, not
+a fifth full-review or triage session. A literal-head adjudication template
+is queued for the daemon, without inventing automatic carry-forward or green
+review evidence. No main merge-gate invocation occurred. PR207 remains gated
+by actual PR195 merge, and PR213/212 by actual PR207 merge.
+
+PR238 author orc-237-20260906-02 ended01:39:43Z, exit124,2400 seconds, with
+its implementation safely committed. The already-running daemon-owned
+lane2445558 publishes head2e6b1441f8662f4f6c716b5f5756b3cc5276950e; all nine
+CI contexts are green and normal second full review is live, client2484957.
+Earlier main briefly launched a duplicate deterministic publication tail
+after missing the existing lane parent in its ownership query, then stopped
+only that duplicate PGID2463575 at01:48:51Z. Its trap's zero status was
+explicitly superseded by cancellation text and is not CI/review success.
+The original lane was retained; no duplicate reviewer or manual merge ran.
+Lesson: verify the owning lifecycle parent as well as immediate gate commands.
+
+The status-snapshot helper currently misses Codex clients whose global
+options precede exec, reporting zero while the actual three clients are
+live. The /proc census, not that snapshot count, governs admissions. No
+capacity increase or worker replacement was based on the undercount.
+Primary/max merge daemon2339019 and stack watcher2339020 remain active.
+One new #27 report covers this frontier/attempt9 boundary; its receipt is
+recorded only after publication. No speculative downstream tail was started.
+
+The adapter confirmed this single frontier/attempt9 boundary publication as
+#27 comment5556274834. No duplicate boundary comment was created.
+
+## 2026-09-06 02:20 UTC — eleven-worker allocation and independent extraction
+
+At2026-09-06T02:14:32Z qpbt-main applied the owner's explicit removal of
+FV/LDT-Lean-Paper/old-home reservations: max-codex11, max-codex-primary11,
+primary-external-reserved0 and an exact named interactive-cwd exclusion list.
+Account-mode stays primary and secondary remains disabled; saved both-mode
+limits, credentials, other sessions and processes remain untouched. The new
+policy supersedes the prior eight-worker boundary, not its historical facts.
+Existing supervisors read the cap file live and were not restarted.
+
+PR238's normal second review ended02:13:20Z with four changes-level findings
+(alternate fan-out overrides, undercharged continuation time, resume
+provenance loss, and telemetry recovery provenance). Its lane ended02:13:30Z;
+daemon correctly did not merge the adverse head. Main delegated all four
+repairs plus the named-exclusion router change to orc-237-20260906-03,
+dispatcher2537290/client2537371, resuming the verified primary author thread.
+The1000-line aggregate infrastructure limit and normal gates remain binding.
+No extra triage or writer overlap was introduced.
+
+The600-second extraction scout terminated exit124 without a final answer.
+The report-only continuation scout-120-20260906-02 returned source-grounded
+independence evidence, with stale artifacts explicitly not treated as
+fresh kernel proof. Main split two real implementation packets, created via
+gh_common under167, with closed prerequisite edges and exact published
+maina61ee55 bases:239 dot-projectors and240 pulled-apart algebra. Each has a
+separate warmed worktree and normal installed/checked hooks. They do not
+depend on a global-witness construction:239 has no such argument;240 proves
+existing given-witness algebra from measurement fields. Neither claims the
+source existence theorem or final extraction complete. Matching blueprint
+nodes are disjoint; Observables.lean has only one live writer.
+
+At2026-09-06T02:20:52Z four actual project Rust clients were live:
+2515632(issue118),2537371(issue237),2555157(issue239),2555618(issue240).
+All four request primary/gpt-6-astra/literal max/multi_agent=false, verified
+from actual argv and homes. This is four of eleven workers, not eleven
+occupied slots. Issue118 remains attempt9/10 with15152 completed seconds
+carried and original anchor2026-09-05T19:24:00Z. No proof budget reset.
+
+At02:16:04Z the daemon's own PR195 merge attempt concretely refused gate4
+for the absent exact-head review record atc7adb95e, after green gates1--3.
+The daemon's literal adjudication comment5556289532 did not waive that
+contract. B7 remains open, and this quota instruction explicitly does not
+decide it. Main did not invoke the merge gate, fabricate evidence, or add a
+fifth full/triage review. PR207 and then213/212 retain actual-parent-merge
+requirements. Issue119 still waits for the line construction. Spare slots
+remain available for useful independent work rather than duplicate writers.
+
+One #27 report is prepared for this allocation/decomposition boundary;
+receipt is recorded only after confirmation. Original120/121 ownership and
+integration dependencies are recorded without removing their existing gates.
+
+The adapter confirmed120<-239,120<-240 and121<-240 integration edges,
+ownership comments5556332442/5556332671, and the single #27 allocation/split
+boundary comment5556332976. Cap/exclusion files and the newest stage JSON
+validate; the focused whitespace check passes. Inspected extraction/algebra
+source blobs are unchanged between the scout's840e6ef snapshot and the new
+workers' published a61ee55 base. This is source provenance, not a proof claim.
+
+## 2026-09-06 02:25 UTC — owner corrects the meta/main role boundary
+
+Owner request observed2026-09-06T02:25:07Z; source correction recorded by meta
+at2026-09-06T02:06:47Z. The earlier detailed meta task-to-worker directions
+overstepped its guidance role. The owner withdraws those as dispatch
+instructions: meta guides priorities and constraints; qpbt-main owns task
+selection, decomposition, dispatch order, individual assignments and pipeline
+execution. Main must plan from owner goals and actual dependencies rather
+than treating meta's suggested worker mappings as binding instructions.
+
+Archive the exact owner-meta-boundary-correction.json from the sanitized meta
+packet, and a dated copy of the updated owner-concurrency guidance. Preserve
+their original content, including the artifact's historical quota-pending
+statement and pipeline_actions=none. Do not rewrite it to claim the later
+installation had already happened. Actual cap installation is separately
+recorded at02:14:32Z. Existing owner-session rows were not reimported or
+invented for this event. B7 remains unanswered; no approval is inferred.
+This reasserts the existing main persona and corrects a role overstep; it is
+not a new proof/review exception or authority for meta to operate the pipeline.
+
+The owner then prioritized the ten-worker deadline over housekeeping. Main
+therefore delayed the telemetry commit, not proof dispatch, until ten useful
+workers were verified. The next telemetry commit includes the artifact and
+this clarification as requested.
+
+## 2026-09-06 02:34 UTC — occupancy deadline met with ten actual workers
+
+Owner target:10--11 useful QPBT workers plus main by2026-09-06T02:35:06Z.
+At02:34:27Z the host census verified ten actual Rust Codex worker clients,
+all primary/gpt-6-astra/literal max/multi_agent=false. Main reported the
+count to the owner immediately before the deadline. No bootstrap, reserved
+slot, completed scout, Node wrapper or unrelated session was counted.
+
+The four existing workers continued: issue118 client2515632, issue237
+client2537371, issue239 client2555157, issue240 client2555618. Main selected
+three additional disjoint implementation packets, created through gh_common
+under167 with verified closed prerequisite63 and warmed a61ee55 worktrees:
+241 scalar extraction error absorption (client2604811),242 generic controlled
+unitary algebra (client2605488),243 direct-placement marginal agreement
+(client2605133). Their initial scopes and return limits are in local/briefs.
+No original source statement is weakened; any source discrepancy must be
+reported under the existing gap protocol rather than evading its budget.
+
+Three distinct read-only scouts were also dispatched through the primary
+dispatcher: global-pair-game thread01a07490-c501-7bc1-a2d9-3b168a4d5e1c,
+extraction-isometry thread01a07490-cca1-7d01-b476-14193f558a21, and binary-
+transport thread01a07490-bd1c-78e0-b65d-acbd2e3c0724. Their clients are
+2601749/2602220/2602565. They produce concrete future construction plans,
+not reviews or duplicate implementations; each excludes the active proof
+scopes. The count is seven implementation workers plus three construction
+scouts, not ten completed proofs or ten independent source-theorem repairs.
+
+The eleventh worker slot remains available within11 workers plus main.
+Other owner-exempt sessions were neither counted against that allocation
+nor changed. All normal gates and budgets persist; issue118 is attempt9/10
+with15152 completed seconds and its original anchor. PR195 gate4/B7 remains
+a concrete merge-chain constraint, not an excuse to serialize the newly
+independent mathematical work. One #27 deadline-boundary report is prepared;
+publication and the requested telemetry commit are claimed only on receipt.
+
+The adapter confirmed the single deadline-boundary report as #27
+comment5556393413. The archived role-correction artifact is byte-identical
+to the supplied source, SHA256
+8f60909ec4dfe6b2abceffe69f26fe7d3740878fdd47c50dd0e7cd5c0dabcbcf.
+The dated updated concurrency guidance also matches its supplied source.
+
+## 2026-09-06 03:29 UTC — relay admission recovery and worker effort choice
+
+The owner's standing allocation is eleven QPBT workers plus main, with a floor
+of eight useful live workers when dependencies and service permit. The floor
+was not uninterrupted: clustered completions after02:48 temporarily outpaced
+replacement admission; main observed eight actual clients again at03:00:01.
+Read-only scouts completed before distinct proof workers244--246 were admitted.
+Publication workers239--242, the third normal PR238 reviewer and the separate
+issue247 policy author were useful assignments, not idle reservations. The
+owner's supplied03:16:48 census reports eleven workers but also relay refusals;
+that count must not be represented as eleven productive concurrent requests.
+
+At03:23 main independently observed six actual worker clients, all with recent
+`Concurrency limit exceeded for user, please retry later` entries. The supplied
+incident also records main's failed remote compaction and PR238 reviewer retries.
+Process reservations are not measurements of provider in-flight requests.
+Exact relay accounting, other consumers' request activity, successful RPM/TPM,
+and any additional compaction admission are unknown. Other owner-exempt
+interactive sessions and all credentials were left untouched; their existence
+alone does not establish that they caused the incident.
+
+At03:24 main SIGSTOPped only automatic launch supervisors2339019 (merge daemon)
+and2339020 (stack watch), verifying both in stopped state. Existing workers,
+bounded timeouts, builds and CI were not signalled. No scripts were edited in
+place and no forbidden `codex-paused` fallback was enabled. The allocation cap
+remains11. A temporary manual recovery ceiling of six clients suppresses floor
+replenishment; it is not a claim that six is the relay's actual request limit.
+The reversible hold and unknowns are recorded in the dated owner-message
+artifact. Main must verify useful responses and bounded error observations
+before gradually restoring admissions, and resume the two supervisors only
+when their automatic launches can be admitted safely.
+
+PR238's third normal review completed03:19:04 with F5: malformed unrelated
+historical registry rows break otherwise valid resumes in the new continuation
+reader. At03:26:22 the existing author worktree was clean and unowned, with five
+other actual worker clients. Main admitted one bounded sole-author recovery
+session, orc-237-20260906-04, through primary dispatch, not to fill the floor.
+Its scope is F5 plus the owner's new effort-selection policy, with local-only
+request-accounting diagnosis; no probe, extra triage, self-review or merge.
+The less-than1000 nontelemetry-line bound and normal four-review cap persist.
+At03:29:15 its capture contains completed project inspection/tool work and zero
+concurrency-refusal entries. Other existing lanes also show completed work after
+the refusal burst. This is partial recovery evidence, not proof of stable
+full-capacity throughput or a provider-side root-cause finding.
+
+The latest owner effort update, recorded03:26:22, supersedes mandatory max for
+every worker: main remains max; main selects max or xhigh for each new/resumed
+primary/gpt-6-astra worker using role, difficulty, quality and latency. Fan-out
+stays disabled. Main selected max for orc23704 because continuation/admission
+and runtime-policy correctness are sensitive. Configured max is verified from
+the command; server-effective effort is not yet verified. Wall time, available
+tokens, outcome and review findings must be attached when available. No xhigh
+launch is claimed while the old runtime shim still normalizes it to max; the
+author is delegated the coherent dispatcher/shim/test change and atomic
+versioned runtime installation. Main's live configuration remains unchanged.
+
+The latest inbox correction remains binding: main decides routine blockers
+before escalation, but every already-posted issue26 item, including B7, awaits
+the human owner. The erroneous earlier delegation is withdrawn. Main removed
+PR195 from the daemon adjudication queue at03:05:39 to stop repeated gate4
+attempts while B7 waits; no review record, disposition or approval was created.
+Main owns task selection and assignments; meta guides only. The exact supplied
+role-correction JSON was already archived and committed at the prior boundary.
+Issue247's separate documentation author committed381bb4c at03:22:23; normal
+publication/review remains pending, and the new effort update still needs to
+be reflected consistently before installation. Issue118 attempt10/10 carries
+17558 completed seconds from prior attempts and original anchor
+2026-09-05T19:24:00Z; no budget reset or attempt11 is authorized by this incident.
+
+Independent proof publication progressed through the normal checked gate:
+PR248 (issue240) opened03:17:13, PR249 (issue241)03:17:33, and PR250 (issue239)
+03:22:08. Their visibility is separate from PR195/B7. Issue239's stale compiled
+declarations were repaired by a locked rebuild; all1387 declarations then
+resolved without committing a generated declaration-list rewrite. PR248 and
+PR250 subsequently received honest CI errors from an inherited60-second
+full-build-lock wait while another worktree built. At03:29:15 main queued
+canonical CI reruns for248/250 with the existing14400-second wait option,
+PIDs2788676/2788689. These are deterministic gate processes, not model workers;
+the single full-build lock is preserved. No success, independent review or
+merge is inferred from an earlier worker build or from queue admission.
+
+### 03:36 UTC — owner effort-research priority and first staged readmission
+
+The owner requires durable Astra max-vs-xhigh observational comparisons in
+results/telemetry/model-comparison/, including raw-session provenance,
+configured versus server-verified effort, role/task difficulty and outcomes,
+time/tokens, validation/review quality, retry/build/service delays and explicit
+sample counts. The owner explicitly rejects filler benchmarks and causal claims
+unsupported by the task mix. "High" in the latest owner context means xhigh.
+The comparison README's historical universal effective-ultra assertion is
+incorrect: the archived Astra probes showed ultra->medium, max->max and
+xhigh->xhigh on each probed account. Those probes do not identify the effort of
+every historical Sol/Astra run and are not project-quality comparison samples.
+Existing run logs and raw session history must be preserved, not relabelled.
+
+Main assigns this documentation/research continuation to the existing issue247
+policy lane, not a duplicate of issue237's implementation. The bounded brief
+is /tmp/qpbt-247-effort-research-continuation-20260906.md. Planned effort is xhigh
+for explicit-source evidence curation; admission waits until the runtime honors
+the choice and a fresh reduced-ceiling census permits it. No xhigh run is
+claimed yet. The required reviewed amendment will cite this event in EVOLUTION.
+
+From03:29:15 to03:33:04 the surviving captures' refusal counts stayed unchanged
+while they completed useful work; the new orc23704 had zero refusals. At the
+next census only three worker clients remained. Main staged a first additional
+normal admission: PR249's initial independent code/prose review after exact-head
+CI success, supervisor2807755, with room for both concurrent reviewer clients
+under the temporary six-client ceiling. Both are configured max because the
+source-facing extraction-error bound and completion claim need careful
+mathematical/prose review. Their effort verification, usage, findings and
+outcomes remain pending. This is controlled useful recovery, not an assurance
+of the provider’s true request capacity or uninterrupted eight-worker floor.
+
+## 2026-09-06 04:30 UTC — eight useful workers and durable effort research
+
+At04:30:50 main verified eight actual primary/gpt-6-astra worker clients with
+completed useful event streams and zero concurrency-refusal entries in their
+current captures: orc252 (2955275,max), orc23903 (2990170,xhigh), orc24302
+(2990313,xhigh), code/prose PR248 reviewers2991580/2992269 (xhigh), PR251 reviewer
+2991818 (max), publication-cache scout2995985 (xhigh), and nonencoding-mass
+source scout2996286 (max). Main remains max. These are three max and five xhigh
+clients, not eight measured server in-flight requests. Configured effort is
+verified in actual argv; project-run server-effective effort remains unverified.
+The allocation remains11 workers plus main, other owner-exempt sessions untouched,
+and the staged recovery ceiling is8. No account/model switch or fan-out occurred.
+
+The owner floor was repeatedly undershot as publications/reviews completed;
+04:19:59 had three clients, followed by genuine green-gate reviews, publication
+work and two bounded distinct scouts. Main does not claim uninterrupted floor
+compliance or a continuing server refusal where none is observed. The cache
+scout addresses repeated stale aggregate artifacts and670-second rebuilds; the
+source scout addresses the specific nonencoding marginal-mass bound without
+duplicating completed proofs or launching a tail from an anticipated merge.
+
+PR238 author132caf66ef70ef781256c198011bab11ae7545b5 is normally published,
+CI-green and approved by its fourth and final normal reviewer. There is no fifth
+review/triage. Its owner-authorized shim was atomically installed03:47:29 with
+source/runtime SHA66b0b168bbfb2e89acb776a7ee8f6e8ca2048f05c925a0aa42ecd4f44ab8097b;
+39 focused/545 normal-hook tests pass and the nontelemetry diff remains999 lines.
+The prior1200-second author timeout is preserved, not relabelled a successful
+zero-token run. Zero usage fields in timed-out captures are unavailable terminal
+usage, not measurements of no work. The max continuation completed the commit;
+xhigh publication/fix/research sessions then produced real project outcomes.
+
+The comparison report and dataset from validated worker commit
+3d009f5304ec081d65a9f784d89f21c564cf930d are archived byte-identically in primary
+results/telemetry/model-comparison/astra-effort-20260906.md and .json, hashes
+d5e86d298f074c7f92a475df20b877bf6eceaa3eb4203a91d290755b39505a4a and
+3660ad1a5ae296c0802bddaa5e62b1b742c16f3facf82569b057f911e256ef72. This imports
+observational telemetry only, not unreviewed normative policy. The frozen sample
+is two review attempts/two threads/one task, one client-recorded xhigh and one
+max, with zero server-verified project runs. Six historical configuration probes
+remain a separate denominator. Task/role/diff mix, caches, retries, service and
+build waits prevent a causal effort-performance conclusion. New useful xhigh
+publication/fix/review outcomes are preserved in canonical session captures for
+future append-only comparison, not silently folded into that frozen sample.
+
+The supplied nonurgent meta finding, recorded03:42:05 and delivered later, is
+archived unchanged at model-comparison/astra-max-ultra-label-finding-20260906.md,
+SHA3657dff1451107f08b69ae2f606f749e158368976a05dae67e9fa9d8619b3ceb. It distinguishes
+API effort, product UI mode, reported effort and delegation behavior, explicitly
+does not establish relay/full-mode equivalence, and is not a new policy decision.
+Main makes no independent server-mapping claim from that archive. No probe or
+benchmark was launched. The factual README correction belongs to reviewed
+PR238; the original floor/inbox and evidence-led protocol amendments remain in
+issue247 until normal integration after PR238 ACTUALLY merges. Main owns choices;
+meta remains guidance-only and the previously archived overstep correction is
+preserved at a9122d7, not duplicated into owner-session rows.
+
+Five independent PRs are now visible:248--251 and253 (issue245). PR249 is CI-green
+and approved after its normal documentation repair; PR250 needs only its first
+review’s proof-dependency documentation repair, now delegated. PR248’s normal
+follow-up and PR251’s first review run independently; publication243 and detached
+244/246 build/publication tails preserve source scopes and exact-head gates.
+Build waits use the existing14400-second option and one full-build lock.
+
+The original launch supervisors remain paused pending gate-safe recovery, not
+because any review was waived. Main identified that merge-v2 publishes ahead-
+of-remote local telemetry BEFORE the merge gate, which would advance the base
+and invalidate PR238’s final reviewed head. Independent operational issue252
+is delegated to preserve every normal gate/history and prepare an offline-tested
+daemon-only sequence; it is not another review and cannot move real refs or
+merge. No anticipated source-parent tail is expanded.
+
+B7 still awaits the human owner. Issue118 attempt10 ended03:36:00, exit0,2373
+seconds, so final shared accounting is17558+2373=19931 seconds across ten attempts,
+original anchor2026-09-05T19:24:00Z. Validated commit76f82b6 preserves useful
+increments but does not prove the missing second-player estimates or justify a
+fully sufficient source correction. Required exhaustion dossier B8 was posted
+once as issue26 comment5556698610. Both already-posted items now wait for the
+human owner; no attempt11 or unapproved source/game change is authorized.
+
+## 2026-09-06 — Packet 242 publication preflight refreshed stale root artifacts
+
+Session `orc-242-20260906-01` attempted normal checked PR opening for
+`6a67f7086d0ebbef855d6f36f889e0f7241c348b`. The standalone controlled-unitary
+file passed `lake env lean` and the proof-hole scan, and the normal push hook
+built its module. Publication nevertheless failed closed when `checkdecls`
+reported 57 existing blueprint declarations missing from the cached root
+environment. The source import paths already included the declarations; the
+private artifacts came from `snap-20260905T194526Z-dadd6fc4ba46`.
+
+The canonical `warm-worktree.sh --build --skip-packages` first exhausted a
+180-second wait for a live foreign full-build lease, which was not disturbed.
+A bounded retry acquired the same machine-wide lock and completed the private
+rebuild successfully in 670 seconds. An intermediate declaration check while
+that rebuild was running encountered the temporarily absent `MIPStarRE.LDT`
+artifact; only the completed-build check was accepted. At 11:36 +08:00, all
+1387 blueprint declarations resolved. Evidence: `results/telemetry/builds.jsonl`
+line 653 and runtime logs under
+`~/.cache/mipstarre-dev/sessions/orc-242-20260906-01-publication/`.
+
+No Lean source, re-export, blueprint entry, proof audit, shared package store,
+or hot-main snapshot was changed. The existing source-integrity audit remains
+the mathematical record. Lesson: a passing standalone module check does not
+refresh the aggregate environment loaded by the publication declaration check;
+repair stale private artifacts through the locked consumer build, not by
+weakening hooks or adding unrelated imports. The checked publication retry and
+exact-head CI retain their normal independent gates.
+
+## 2026-09-06 — Packet 242 bounded a stalled SSH publication lookup
+
+After the private rebuild, the checked publication retry stalled for several
+minutes in `git ls-remote`, before its hook preflight or receive transport.
+Session `orc-242-20260906-01` terminated only that owned, read-only SSH child
+and reran the canonical `pr_open.py` with the existing configured SSH identity
+and host-key policy, adding per-command connection and server-alive timeouts.
+No hook bypass or persistent Git configuration change was used. The normal
+checked push and PR opening then succeeded as PR #251, exact head
+`6a67f7086d0ebbef855d6f36f889e0f7241c348b`. Logs are
+`~/.cache/mipstarre-dev/sessions/orc-242-20260906-01-publication/pr-open-retry.log`
+and `pr-open-bounded-transport.log` in the same directory. Lesson: the short
+preflight lookup still needs a bounded SSH transport when publication has a
+session deadline; restarting that read is distinct from interrupting a push
+or a locked build.
+
+
+## 2026-09-06 — Issue244 checked-publication transport and build handoff
+
+Session `orc-244-20260906-01`, snapshot 2026-09-06T12:20:41+08:00
+(1127 elapsed seconds). The terminal prover packet is
+`1d028e2`; publication head is `0aa439066ee2d79c5c78a1a45f14d18530e5d317`,
+adding only the required audit YAML title/date/purpose and known issue #244.
+No PR number was guessed. The target Lean check passed without warnings in
+9.22 seconds; proof-hole/bypass and whitespace scans, audit metadata validation,
+and installed-hook checks passed. The preserved prover axiom scan covers all
+31 declarations without `sorryAx`. Source statements, holes, gap markers,
+blueprint tags, and imports were not changed. This is a construction from given
+witnesses, not a passing-value estimate or global-witness existence theorem.
+
+The canonical primary `pr_open.py` stalled at its read-only SSH lookup. The
+original port-22 lookup and a port-443 retry were terminated before any push;
+an HTTPS retry failed its 30-second low-speed bound. The static system hosts
+entry selected `140.82.114.3`; fresh DNS returned `20.205.243.166`. A
+command-local SSH Hostname override using the latter, with `HostKeyAlias=github.com`,
+the existing identity/host-key verification policy, and bounded connection and
+server-alive options, restored access. No persistent Git/hosts edit or hook
+bypass was made. The fourth canonical publication attempt started at
+12:13:16 +0800 and reached the normal targeted dependency rebuild in the
+pre-push gate. There was no manual broad declaration-index regeneration.
+At the last remote check (12:18 +0800), no issue244 PR existed; successful
+publication, CI, or review is not claimed in this snapshot.
+
+The deterministic continuation is detached as PID `2953077` (parent 1,
+independent session). It serializes behind the current publication process
+group `2939878`, adopts the actual number from successful `pr_open.py` output,
+and runs primary exact-head CI with the unchanged 14400-second full-build-lock
+wait. If session shutdown interrupts the original gate before it reports a
+result, it retries canonical publication once, using the same head and private
+incremental artifacts; a reported gate failure remains a failure. No subagent,
+review, merge, or `pr_merge.py` is invoked. Runtime status, logs, and exit files
+are under `~/.cache/mipstarre-dev/issue-244/publication/`; the controlling script
+is `finish-publication.sh`. The machine-wide full-build lock was last held by
+PID `2917578`, the issue245 worktree warmer; it was not bypassed or modified.
+
+The local rollout records configured `gpt-6-astra` / `xhigh`; server-verified
+effort is unavailable and is not inferred from the client setting. Usage at
+this snapshot is `{"cache_write_input_tokens": 0, "cached_input_tokens": 3070976, "input_tokens": 3165225, "output_tokens": 19860, "reasoning_output_tokens": 10585, "total_tokens": 3185085}`. These are in-progress
+cumulative counters, not terminal billing. The dispatcher records final session
+wall time and tokens. Service retries and rebuild delay are separate from Lean
+preflight time. No model benchmark/probe or duplicate agent assignment occurred.
+Issue119's original dependency on open issue118 is unchanged. The issue118
+10/10, 19931-second exhausted budget and its original anchor are untouched;
+B7/B8 remain with the human owner. Follow-up: inspect the detached continuation's
+actual PR/CI outcome; never substitute this handoff for exact-head gate evidence.
+
+- 2026-09-06, issue252 exact-head operational handoff
+  (`orc-252-20260906-01`, resumed as `orc-252-20260906-02`): pre-gate
+  github-sync in `/tmp/merge-v2.sh:42` can invalidate source-head freshness.
+  Fourteen offline fixture tests passed in 2.320 seconds; retained artifacts
+  are under `~/.cache/mipstarre-dev/issue-252-exact-head-v1/`. A private clean
+  checkpoint preserves the ordinary source gate, but writer coordination and
+  authority for post-merge divergent-main reconciliation remain prerequisites.
+  The conditional daemon command, exact hashes, current 9102b74 local tip, and
+  protocol constraints are in the supplied runtime brief
+  `/tmp/qpbt-exact-head-daemon-sequencing-20260906.md`. The prior attempt timed
+  out at 900 seconds with token usage unavailable; its documentation patch
+  failed and was not installed. No production helper/gate/protocol was changed;
+  no real ref, gate, publication, supervisor, review, or B7/B8 action occurred.
+
+## 2026-09-06 - Preserve incoming PR238 event additions during reconciliation
+
+The following insertion blocks are retained verbatim from the already merged
+source history 32a32edee16d3932525e4b1da9f84009e1fbb13b, in their original
+order. Existing private-main rows above are unchanged; no row deduplication
+or new owner disposition is performed by this archival reconciliation.
+
+
+## 2026-09-05 — Incident: astra sessions ran at medium effort
+
+- Debug probes at 22:21Z showed that requesting `model_reasoning_effort=ultra`
+  on `gpt-6-astra` produced a response reporting `medium`; `xhigh` and `high`
+  were honoured as requested. On `gpt-5.6-sol`, `ultra` was honoured as `max`.
+  Consequently, astra sessions from the 15:46Z switch through the 22:25Z
+  handoff boundary ran at provider-reported medium effort even though local
+  configuration and dispatch output said `ultra`.
+- The immediate mitigation requested `xhigh` for astra while retaining `ultra`
+  for sol. Historical astra rows before the boundary must be interpreted using
+  the measured provider response, not their local request string.
+
+## 2026-09-05T22:40Z — Effort downgrade confirmed on both Codex endpoints
+
+- The same probes through the second account at 22:37Z matched the primary
+  endpoint: astra reported `medium` for `ultra` and `xhigh` for `xhigh`, while
+  sol reported `max` for `ultra`. The normalization rule is therefore per model,
+  not per account.
+
+## 2026-09-06 — Owner effort decision
+
+- Owner decision at 2026-09-05T22:45Z: astra requests `xhigh` on both accounts;
+  sol keeps `ultra`. Runtime profile and shim changes are temporary mitigation.
+  Durable dispatcher normalization, guard behavior, and effective-request
+  telemetry are tracked by issue #237. Requested effort must not be reported as
+  provider-measured effort.
+
+## 2026-09-06 — PR238 primary relay/max amendment
+
+- Session `orc-237-20260906-02` implements the owner-authorized primary-only
+  relay/Astra-max amendment. Host inspection finds this one project worker,
+  four primary interactive processes (main plus three outside the operation),
+  no secondary project worker, and stopped supervisors 2950602/2950610.
+  The current worker ceiling remains eight; preserved both-mode settings are
+  19/10/9. No process was signalled, no mathematics launched, and no failed
+  marker removed. Issue118 retains seven completed attempts, 12452 working
+  seconds and anchor `2026-09-05T19:24:00Z`; no budget state is rewritten.
+- Refresh commit `34df914` preserves all incoming-only paths; the merge-loss
+  guard passes. Relative to incoming `36805da`, the event ledger adds exactly
+  the branch's 27 lines and deletes none. That incoming commit's intentional
+  historical duplicate cleanup is retained, not mistaken for conflict loss.
+- Focused routing/dispatcher/shim regressions pass without provider calls.
+  The owner shim `codex.astra-max-v3-20260906` and profile are installed by
+  atomic replacement, preserving old files and credential/config hashes.
+  Installation evidence is in runtime
+  `runtime-policy/237-astra-max-20260906/installed.json`. Future main v2,
+  lane v18, daemon v9 and stack-watch v4 are prepared under `/tmp`, not started.
+  Main retains supervisor lifecycle and the independent exact-head review;
+  the branch router is not installed into primary before the normal gates.
+
+### 2026-09-06 — PR238 publication dependency and host refresh
+
+- Checked publication of `37ec4b4` stopped at the normal Lean gate because
+  the inherited hot snapshot lacks `Sandwich/Pasting/Assembly.olean` from the
+  incoming main proofs. Build that named module, then repeat checked push;
+  no proof statement, hook, or cache-writer policy is changed.
+- At 01:26Z, host reconciliation finds three primary project workers and four
+  primary interactive processes. Main has independently admitted two workers;
+  this session did not dispatch them or modify their mathematical budgets.
+  Their versioned shim's global CLI options motivated a regression ensuring
+  worker classification finds `exec` before the prompt separator, rather than
+  assuming it is the first argument. Main plus three external interactive
+  uses still leave an eight-worker ceiling.
+  The regression also retains a genuine interactive Codex ancestor during a
+  synchronous dispatch: only wrappers are excluded, not other Codex sessions.
+
+## 2026-09-06 — PR238 allocation and review repairs
+
+- Session `orc-237-20260906-03` applies the owner's named interactive-CWD
+  exclusions and the completed independent review's F1–F4. This supersedes the
+  earlier eight-worker allocation, not any historical measurements. Main owns
+  the eleven-worker runtime caps; no excluded process, credential, mathematical
+  work, issue118 charge, PR195 evidence or review cap is changed here.
+- The fixes reject alternate multi-agent enable flags and parent-table
+  overrides; require original snapshot charges plus completed thread segments;
+  inherit and recover continuation provenance across ordinary resumes; and
+  retain a private launch-time snapshot for failed-append recovery. Offline
+  fixtures exercise the quoted 12452 + 2600 = 15052-second boundary, missing
+  legacy resume metadata, replay after budget-file mutation, and eleven slots.
+- Publication, CI, independent review, supervisor lifecycle and any further
+  main refresh remain main-owned; this repair session invokes none of them.
+- At 02:33Z the read-only host check sees four primary workers unchanged and
+  exactly three designated interactives excluded, retaining one main slot.
+  The tested shim is atomically installed as
+  `codex.astra-max-v4-pr238-review-20260906`, SHA-256
+  `d391af18dd881a23b6bf6af618497b03730a6778ad91e260bfc4168d7f93341c`.
+  The previous shim is preserved. Profile and quota-file hashes are unchanged;
+  no credential file is accessed and the unreviewed router is not installed.
+  Runtime evidence: `runtime-policy/237-review-fixes-20260906-03/installed.json`.
+- The first full suite failed eight assertions and one dispatch fixture when
+  concurrent real host occupancy saturated its unisolated temporary router.
+  The production router correctly failed closed. Stub-dispatch fixtures now
+  substitute an empty host view in their private Python launcher; production
+  admission has no test bypass. Host-scanning and quota tests remain explicit.
+
+## 2026-09-06 — PR238 F5 and per-worker effort selection
+
+- Session `orc-237-20260906-04` addresses F5 on reviewed head `64be227` and the
+  owner update recorded at 03:26 UTC: main remains max; main chooses max or
+  xhigh for each new/resumed primary-relay Astra worker. No fan-out, provider
+  probe, account change, publication, CI, review or supervisor action is authorized here.
+- F5 arose because continuation history decoded rows more strictly than account
+  affinity. Both now share the locked tolerant reader; relevant malformed
+  continuation objects still fail preflight. Initial regression-test attempts
+  exposed fixture errors (the copied dispatcher needs its own registry and
+  AGENTS file), not a reason to weaken validation. Existing proof-budget,
+  anchor, completed-segment and replay-snapshot checks remain covered.
+- Omitted effort defaults to max; the only retained alias is ultra → max.
+  Explicit max/xhigh survives dispatcher, review/fix launch and runtime shim;
+  unsupported values fail. Configured effort is not server verification;
+  server-verified effort is unknown without independent existing evidence.
+- The first segment reached its 1200-second bound at 03:47:45 UTC without
+  committing. The primary registry retains `orc-237-20260906-04` as failed,
+  exit 124, wall time 1200, at line 744. Segment `orc-237-20260906-05` resumes
+  the same thread `01a074c1-fec6-7253-b80e-e6350778a094` at 03:51:09 UTC;
+  neither the failed capture nor elapsed time is reset. Both segments were
+  configured max by the dispatcher request; the old registry's absent
+  `requested_effort` is not rewritten or treated as server verification.
+- At 03:47:29.159196 UTC the tested shim was installed through atomic replacement
+  as `codex.astra-effort-v5-pr238-20260906`. Source and runtime SHA256 are
+  `66b0b168bbfb2e89acb776a7ee8f6e8ca2048f05c925a0aa42ecd4f44ab8097b`;
+  previous SHA256 was `d391af18dd881a23b6bf6af618497b03730a6778ad91e260bfc4168d7f93341c`.
+  The prior script is preserved; `.profile` remains unchanged at SHA256
+  `803244914c7ffdb7b2a4d650eef8d0d94d7445e61fe80518a17ea6a369c9947d`.
+  Runtime evidence is under `~/.cache/mipstarre-dev/runtime-policy/237-effort-selection-20260906-04/`:
+  `installed.json` records six offline source/runtime argv comparisons (fresh
+  and resume forms for max, xhigh and legacy ultra), including exact forwarded
+  arguments. The executable was a local fake; this establishes forwarding,
+  not real CLI parsing or relay acceptance. No running shell was edited in
+  place and no unmerged router was installed into primary source.
+- Final focused validation passes 39 tests (`/tmp/pr238-focused-tests.log`),
+  including every role's fresh/resumed effort selection, F5 ordinary-resume
+  preflight with malformed/non-object history and invalid relevant metadata,
+  cumulative continuation charges, legacy provenance recovery, replay after
+  budget mutation, locks, account affinity, capacity and fan-out protections.
+  Overlapping model/effort assertions and fixture branches were consolidated,
+  not replaced by provider probes. Four shell syntax checks, three Python
+  compilation checks and `git diff --check` pass. Against the existing PR238
+  CI manifest's merge base `a61ee557b33a2d8a4721e92b08b6d06dcb69ed57`, the
+  aggregate nontelemetry diff is 787 additions + 212 deletions = 999 lines.
+- Local relay evidence: the sanitized incident at
+  `/tmp/qpbt-meta-20260905-230133/relay-throughput-limit-incident.json` records
+  eleven worker clients plus main at 03:16:48 UTC on September 6, including
+  main's remote-compaction concurrency rejection. Existing session captures
+  independently contain concurrency-error reconnect events: eight in
+  `orc-239-20260906-01.jsonl` (lines 111–137, counters reaching 4/5) and four in
+  `reviewer-pr238-20260906-03.jsonl` (lines 76–91, reaching 3/5), under
+  `~/.cache/mipstarre-dev/sessions/`. Those capture entries have no timestamps;
+  the timestamp above belongs to the incident observation, not each retry.
+  The reported 03:23 refusals and 03:24 supervisor stops are handoff observations,
+  not independently timed measurements made by this session.
+- The router counts process/reservation lifetime, not individual HTTP requests:
+  a worker waiting for tools or reconnecting still occupies its process slot.
+  Compaction is an additional request category observed in the incident, but
+  its overlap, retry timing and provider charging are unknown. The available
+  source checkout is sparse at `94311d447587411789533c47601fd8bc9d81eb48`
+  (August 28); the installed package reports `0.152.1`. Missing core retry and
+  compaction blobs and an unverified source/binary match prevent claims about
+  exact deployed retry defaults. No further research or request-layer change
+  is made. Operators should distinguish successful completions, retries and
+  compaction failures in existing logs rather than infer productive requests,
+  RPM/TPM, server in-flight counts or recovery from process occupancy alone.
+
+## 2026-09-06 — PR 195 B7-authorized exact-head recovery
+
+- Session `orc-113-20260906-08` resumes the existing recovery author thread
+  from published head `c7adb95e1c7f7bdd6b9e971db765e5a53ac4a284`. GitHub main
+  was independently read and fetched at
+  `32a32edee16d3932525e4b1da9f84009e1fbb13b`; no prospective PR 262 merge is
+  treated as published source. The only conflict is this incident ledger,
+  resolved by retaining both parents' records without editing Lean or blueprint.
+- The four-review cap and all existing dispositions remain unchanged. This
+  recovery verifies the seven owned blobs against approved head
+  `40cead390f610d894bb4264e0ca6789753476c6d`, preserves incoming-only paths,
+  and compares the authored nontelemetry patch before normal checked publication.
+  Main owns the B7 terminal disposition; this session publishes no review or
+  adjudication and requests no PR merge or subagent.
+- The machine-wide build lock was held by CI for PR 262 when observed.
+  PR 195 CI uses the normal 14400-second lock wait and is detached rather than
+  holding an idle model session. Runtime preservation, launch, and gate evidence
+  is kept under `~/.cache/mipstarre-dev/recoveries/orc-113-20260906-08/`.
+  This pre-publication incident entry does not assert successful CI completion.
+
+
+## 2026-09-06T04:59:15Z — Validated integration recovery and useful replenishment
+
+The unchanged normal gate, invoked only by the designated one-shot recovery
+daemon PID3054930, merged PR238 at2026-09-06T04:44:46Z as
+32a32edee16d3932525e4b1da9f84009e1fbb13b. All nine CI contexts and the fourth/final
+APPROVED review at132caf66ef70ef781256c198011bab11ae7545b5 passed. The daemon
+finished04:44:53Z; that finish time in the initial dispatch briefs was an
+observation boundary, not the GitHub merge timestamp. No fifth review or
+adjudication was used. Primary checkpoint2bb1a67 intentionally remains private;
+its complete history and dirty telemetry were backed up under
+~/.cache/mipstarre-dev/integration-recovery-20260906T044430Z/. The normal
+fast-forward tail refused divergence, without losing local history or warming
+the wrong source. Issue252 now owns a separately gated reconciliation PR;
+issue247 policy integration started only after the actual parent237 merge.
+The old merge/stack supervisors remain stopped because their pre-gate telemetry
+push and direct-GitHub/automatic-adjudication paths are not safe recovery paths.
+
+Useful floor8 was observed04:47:05Z and04:57:16Z, with all eight actual Rust
+clients recording completed useful events and zero concurrency-refusal entries
+in their current captures. It was NOT maintained continuously: completion bursts
+fell to5 at04:52:11Z while repair/review admissions and a failed worktree bootstrap
+were being replaced. A backgrounded AND-list lost the new issue257 checkout
+before nohup; after verifying no git/index-lock holder, the empty stale lock was
+archived and the untouched new checkout restored. No existing worker or branch
+work was reset. Corrected bootstrap is detached as one unit. Issue257 is the
+main-selected bounded useful-admission queue implementation, under normal review
+before installation; its existence is not yet a deployed replenishment service.
+The operational recovery ceiling is now10 within the unchanged allocation11.
+This is staged readmission on project-work evidence, not a measured relay limit.
+
+Completed independent reviews led immediately to concrete repairs: PR254 needs
+public import coverage (orc244 xhigh); PR255 needs shared binary-coordinate
+algebra rather than duplicate proofs (orc246 max). PR250 second code/prose
+review is APPROVED; PR253 first max review is APPROVED; PR248 citation-only F3
+repair has fresh green CI and a third normal xhigh review. PR256 first max
+review follows its actually green CI. Independent source-scout results selected
+issue258 reference-POVM construction (max) and issue259 real polynomial collision
+specialization (xhigh); both use already-merged definitions and do NOT activate
+the held quantitative nonencoding/global-witness tails. No idle or duplicate
+model jobs, provider probes or extra review rounds were launched for sampling.
+
+The cache scout found an outdated but complete hot snapshot, not a failed proof.
+Canonical warming of actual merged32a32ede first failed because the hot clone
+fetched only local heads and that new merge was then only remotely referenced.
+After the legitimate issue257 branch made the source reachable, the SAME
+canonical warmer was rescheduled and began building at04:51:32Z under its normal
+writer lease/full-build lock. No direct cache writes or active-worktree recloning.
+
+Owner clarification remains in force: main selects/decomposes/assigns work; meta
+guides only. Main decides routine blockers before escalation; ALL items already
+in issue26, including B7 and B8, await the human owner. The erroneous delegation
+of existing inbox items remains withdrawn. No change to review cap4, exhausted
+issue118 attempt10/10,19931 seconds, or original2026-09-05T19:24:00Z anchor.
+Main stays max; all workers stay primary/Astra with selected max/xhigh and
+fan-out off. Configured effort is not server-verified effort. Research samples
+and the supplied API-max versus official-Ultra distinction remain preserved
+with provenance under results/telemetry/model-comparison/, without policy change
+or a causal latency/quality claim. Boundary report5556912589 was posted once for
+the previous04:30 observation;247<-237 native dependency is recorded.
+
+## 2026-09-06 - PR195 refresh against the actual PR262 merge
+
+- Session `orc-113-20260906-09` verified through `gh_common.py` that PR262
+  merged as `b7705e02ef143e605981839009646c509f7df2ca`, then merged that
+  exact commit into clean PR195 head `1dfcbd2e8a73089b0bc75daf14cf624ca7aab07a`.
+  The only conflict was this ledger; both parents' incident text is retained.
+- The seven mathematical and blueprint blobs remain those of approved head
+  `40cead390f610d894bb4264e0ca6789753476c6d`. The three public-wrapper holes,
+  four model reviews, historical terminal disposition `5124401997`, and
+  telemetry histories are preserved. Main owns a new terminal disposition
+  after the refreshed head receives successful CI; this session publishes none.
+- Preservation evidence, checked-publication output, and detached exact-head
+  CI launch records are stored under
+  `~/.cache/mipstarre-dev/recoveries/orc-113-20260906-09/`. CI uses the normal
+  14400-second build-lock wait. This entry does not assert publication or CI
+  success before those operations finish. No additional review is launched.
