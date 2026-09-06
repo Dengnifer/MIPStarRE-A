@@ -16,6 +16,11 @@ disjoint useful successor or records the concrete vacancy reason and elapsed tim
 The earlier relay allocation of eleven workers plus main and its recovery ceiling ten
 is historical evidence and does not apply to this run. Review costs two slots,
 normal green-CI head only, cap four.
+Native descendants use the shared root lease and `telemetry.py native-record`:
+root/parent IDs, effective model and effort, key label, timestamps, status and
+unknown usage provenance are retained; parent counters are not summed without
+independent evidence. Native review uses the exact-head transport and cannot
+bypass CI, independent review or merge gates.
 Intent precedes creation. Router lock serializes tickets/one-use descendant PID/start
 claims; unclaimed slots count with real clients/reservations, including global CLI flags.
 Worktree reservations exclude unrelated dispatch. Canonical locks/head checks persist.

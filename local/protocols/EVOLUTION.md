@@ -848,3 +848,18 @@ vacancy duration and concrete reasons recorded. Relay-1/cap8 observations
 remain historical and are not reclassified. **Expected effect:** no stale
 account labels or occupancy claims while preserving all proof, review, CI and
 merge gates.
+
+## 2026-09-06 — Literal Ultra and shared native accounting
+
+**Trigger:** PR287's owner-authorized native workflow repair, following the
+space/cap5 switch recorded above; historical relay-1 and cap8 observations remain
+unchanged. **Change:** external dispatch, review, autofix, shim and useful-queue
+effort checks require literal Ultra. A native root lease charges its verified
+shared descendant cap against the same owner allocation, while native telemetry
+retains unknown usage aggregation and explicit key labels. The nonce-bound native
+review transport re-derives exact-head evidence from the live root, and session
+policy records disjoint successor chains and activity-based vacancy reasons.
+**Expected effect:** native mathematics and independent review can proceed under
+the current space five-total allocation without stale account labels, double
+admission, or manufactured review receipts. CLI Ultra selection is not a claim
+about backend compute equivalence.
