@@ -4275,6 +4275,38 @@ no second comment or extra review is created. Implementer supervisor2326711
 remains live under primary/max. Persistent router semantics still await the
 bounded PR238 amendment and normal gates.
 
+## 2026-09-06 — Issue245 checked publication requires private artifact refresh
+
+- Session `orc-245-20260906-01` confirmed the terminal prover record
+  `prover-245-20260906-01` (exit 0, 1820 seconds) and exclusive dispatcher
+  worktree ownership. The new Lean module remains byte-identical to `9b75a5f`.
+  Targeted Lean checking and the forbidden-token scan pass; the recorded kernel
+  log contains 29 standard-axiom closures (28 new declarations and the reused
+  normalization theorem). The only packet repair adds prescribed audit metadata.
+- Canonical `pr_open.py` publication of `3bf51e7` failed closed at 12:03:18
+  UTC+08, after approximately 394 seconds in the checked-push gate. The gate
+  rebuilt the new leaf but `checkdecls` could not resolve existing declarations
+  such as `exists_schmidt_coordinates` and `consistencyDefect_codeword_cross_le`.
+  Both remain present in the actual source; `Checkdecls.lean` loads the root
+  compiled environment. No PR number was returned. The remedy is a normal
+  machine-wide-locked build of this worktree's private artifacts, followed by
+  checked publication, actual-number audit metadata, and exact-head CI. No root
+  import, blueprint declaration index, source claim, or proof is changed.
+- Selection evidence: the live launch arguments specify primary `gpt-6-astra`
+  with configured effort `xhigh`, appropriate to bounded publication of already
+  validated given-isometry identities. Server-side effort is not independently
+  verified; no model probe or subagent is run. At 11:57 UTC+08 the CLI reported
+  62,410 input tokens against a 258,400-token context window (approximately
+  195,990 tokens of context capacity, not a remaining task-token budget).
+  The dispatcher enforces a 1200-second session limit; final usage is recorded
+  by the dispatcher rather than reconstructed here.
+- Two local validation mistakes were corrected without bypassing any gate: a
+  premature GitHub status lookup for the not-yet-published commit returned 404,
+  and a line-oriented reader misparsed a wrapped axiom list. The complete
+  multiline axiom record confirms only the standard axioms. GitHub remains the
+  sole source of publication and CI status; no success is inferred from either
+  failed check. B7/B8 and the issue118 mathematical budget are unchanged.
+
 ## 2026-09-06 — PR 195 current-base mechanical recovery
 
 - Session `orc-113-20260906-07` independently fetched published main
