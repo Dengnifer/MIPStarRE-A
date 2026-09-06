@@ -1,3 +1,12 @@
+---
+title: Exact binary transport of a supplied soundness witness
+date: 2026-09-06
+purpose: >
+  Records the exact binary-coordinate transport of a supplied Pauli soundness
+  witness, its validation, and the unchanged source-level existence obligation.
+issue: "#246"
+---
+
 # Exact binary transport of a supplied soundness witness
 
 Date: 2026-09-06. Packet: #246.
