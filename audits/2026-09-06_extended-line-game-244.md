@@ -1,3 +1,12 @@
+---
+title: "Extended-line game construction from supplied witnesses"
+date: 2026-09-06
+purpose: >
+  Record the direct-game construction from supplied extended-line and joint-point
+  witnesses, its validation, and the remaining passing-value and existence obligations.
+issue: "#244"
+---
+
 # Extended-line game construction: packet #244
 
 Date: 2026-09-06. Parent construction dependency: issue #119.
