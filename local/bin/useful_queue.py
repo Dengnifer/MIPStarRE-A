@@ -61,7 +61,7 @@ def configuration(path: Path) -> dict:
             raise ValueError('packet ids must be unique lowercase names')
         identifiers.add(packet['id'])
         if (type(packet['issue']) is not int or packet['issue'] <= 0 or
-                packet['effort'] not in ('max', 'xhigh') or
+                packet['effort'] != 'ultra' or
                 not isinstance(packet['head'], str) or not SHA.fullmatch(packet['head']) or
                 not isinstance(packet['worktree'], str) or
                 not Path(packet['worktree']).is_absolute() or

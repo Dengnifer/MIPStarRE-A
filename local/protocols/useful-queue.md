@@ -3,8 +3,9 @@ Normative supplement to sessions/review protocols (#257). Only main selects usef
 packets and binds prerequisites to closed issues, actual merged PRs and ancestry.
 No discovery, filler, merges, adjudication, budget resumes, inbox actions or shell tasks.
 Both --run and enabled:true are required; defaults disable. One admission per tick,
-watch interval >=5s, primary/Astra/max-or-xhigh only, existing fan-out/kill switches.
-Allocation eleven, recovery ceiling ten, twelve slots including nonexempt/external use;
+watch interval >=5s, primary/Astra/Ultra only, existing external fan-out/kill switches.
+For the current space episode, external admission is zero and the hard allocation is
+five total sessions including main, with at most four useful native descendants;
 lower owner caps win. Review costs two slots, normal green-CI head only, cap four.
 Intent precedes creation. Router lock serializes tickets/one-use descendant PID/start
 claims; unclaimed slots count with real clients/reservations, including global CLI flags.

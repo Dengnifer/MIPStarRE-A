@@ -21,7 +21,7 @@ so this protocol reconstructs each one explicitly:
 
 ## 1. One entry point
 
-**Every Codex session is started by `local/bin/dispatch.sh`.** Calling `codex` by
+**Every external Codex session is started by `local/bin/dispatch.sh`.** Calling `codex` by
 hand — including from inside an agent session — is a protocol violation, not a
 shortcut: the thread id, the token counts and the wall time exist only in the
 event stream that `dispatch.sh` captures, and a session started any other way
@@ -39,7 +39,43 @@ runner"). Locally the secrets are gone but the write access is not.
 An agent that needs a sub-session (an orchestrator splitting work, a prover
 asking for a scout) invokes `dispatch.sh` from inside its own session, with
 `MIPSTARRE_SESSION` set to its own name so the registry records the parent in
-the `dispatcher` field. The session prompt states this rule verbatim.
+the `dispatcher` field. External session prompts prohibit further fan-out.
+
+### Native descendants (owner amendment, 2026-09-06)
+
+Main may assign useful native Astra Ultra work without external admission. Before
+admitting either kind of worker, reserve the native root's configured descendant cap:
+`account_router.py native-lease CACHE ROOT_THREAD PID CAP`. The cap excludes the root;
+the process census separately charges the root. This command validates the live
+resume thread, process start identity, scoped space route, explicit Astra/Ultra
+defaults and shared descendant cap under the account-router lock. Python 3.10 needs
+`tomli` for this native-only TOML validation; Python 3.11 has `tomllib`.
+`watchdog/primary-key-capacity` is the owner allocation, not measured throughput. For
+the current space episode the owner allocation is five total sessions including main,
+external admission is zero, and at most four native descendants may be active.
+Native leases, external processes/reservations, interactives and reserved non-Codex
+use all consume it. Unknown/dead native leases are retained until explicit
+`native-lease ... --release` verifies the original root is no longer alive. A live
+lease cannot be resized; checkpoint and refresh the process with owner coordination.
+
+Main owns task selection, one-writer worktree assignments and native replenishment.
+Main preauthorizes bounded, disjoint successor chains; after sending task-end/start,
+workers continue an available assigned successor without awaiting another decision.
+The central integration coordinator may use native `followup_task` to refill an
+idle sibling from main's approved queue during a long main turn. Count actual native
+running state plus recent attributable activity. Record vacancy durations/reasons,
+including main-decision latency; unknown is not zero and configured capacity or a
+ready list is not measured occupancy. No nested extra pool may exceed the shared cap.
+Children do not write the primary index or shared telemetry concurrently. The primary
+telemetry owner records each child using `telemetry.py native-record ROLLOUT` with
+`--name --role --issue --thread-id --root-thread-id --key-label --worktree --status`
+and optional `--pr`; effective metadata must show Astra Ultra. Root/parent IDs,
+timestamps, outcome and raw observed counters are retained. Aggregation scope is
+unknown: never sum parent and child counters without independent evidence. Native
+review uses the exact-head transport in `review.md`; it cannot bypass CI or merge gates.
+The root's inherited permission envelope is unchanged; reviewers receive read-only
+assignments, not a falsely claimed separate read-only sandbox. Historical episodes,
+attempt counts and usage survive refreshes and route changes without a budget reset.
 
 ## 2. Roles and sandboxes
 
@@ -65,7 +101,7 @@ exception: the role code `orc` maps to `local/personas/orchestrator.md`.
 Until such a file is committed, `dispatch.sh` warns and falls back to a
 one-line built-in frame — enough to run, not enough for load-bearing work.
 The `mathfix` role is the source-statement repair lane governed by
-`issues-prs.md` section 6: main selects Astra max/xhigh after the #26 availability report,
+`issues-prs.md` section 6: main selects Astra Ultra after the #26 availability report,
 supplying cumulative per-gap budgets; historical Fable records remain in `owner-sessions.jsonl`.
 
 ## 3. Naming
@@ -99,7 +135,7 @@ supplying cumulative per-gap budgets; historical Fable records remain in `owner-
 ```bash
 local/bin/dispatch.sh --role prover --issue 0042 \
   --worktree .worktrees/issue-0042-pauli-basis \
-  --effort high \
+  --effort ultra \
   -- "Close the sorry at MIPStarRE/Quantum/PauliBasis.lean:212 ..."
 ```
 
@@ -147,10 +183,11 @@ The shim rejects multi-agent enable flags and whole `features`/`agents` override
 Primary unsets inherited `CODEX_HOME`; second sets it for execution and rollout
 lookup to `MIPSTARRE_CODEX_HOME_SECOND` (default
 `~/.cache/mipstarre-dev/codex-home-yxy`). Review and autofix inherit these
-variables unchanged. All roles require `gpt-6-astra`. Main stays `max` and chooses worker
-`max|xhigh` by role, difficulty, quality and latency, including resumes and mathfix.
-Dispatch `--effort`, `MIPSTARRE_REVIEW_EFFORT` and `MIPSTARRE_AUTOFIX_EFFORT` honor that
-choice through the shim; omitted means `max`, legacy `ultra` maps to `max`, others fail.
+variables unchanged. All roles require `gpt-6-astra` and literal CLI `ultra`, including
+resumes and mathfix. Dispatch `--effort`, `MIPSTARRE_REVIEW_EFFORT` and
+`MIPSTARRE_AUTOFIX_EFFORT` default to `ultra`; every other effort fails rather than
+being normalized. The owner's verified space login is not rewritten here; the
+historical scoped-home directory name may still contain `relay1` for continuity.
 `requested_effort` is configured, not verified; see `meta.md`. Missing dispatchers fail closed.
 
 Preconditions the dispatcher (human or orchestrator) owns:
@@ -177,7 +214,8 @@ bodies — is attached with `--context-file`, never pasted into the task text
 The session works in its worktree under its sandbox. The standing rules
 injected into every prompt are: read `AGENTS.md` first; treat
 `local/protocols/*.md` as normative; start no sub-session except through
-`dispatch.sh`; never review your own diff; keep runtime state out of the
+the applicable external/native protocol above; never review your own diff;
+keep runtime state out of the
 repository; and put the result, the residual risk and the hand-off in the
 final message, which is captured to
 `results/telemetry/sessions/<name>.last.md`.

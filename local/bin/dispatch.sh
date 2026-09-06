@@ -231,9 +231,8 @@ case "$LOCK_WAIT" in
 esac
 
 case "$EFFORT" in
-  ''|ultra) EFFORT=max ;;
-  max|xhigh) ;;
-  *) die 2 "--effort must be max or xhigh (legacy ultra maps to max)" ;;
+  ''|ultra) EFFORT=ultra ;;
+  *) die 2 "--effort must be ultra" ;;
 esac
 
 if [ -n "$RESUME_ID" ]; then
@@ -748,8 +747,10 @@ if [ -n "${MIPSTARRE_CODEX_MODEL:-}" ]; then
   TELEM_ARGS[${#TELEM_ARGS[@]}]="$MIPSTARRE_CODEX_MODEL"
 fi
 TELEM_ARGS+=(--requested-effort "$EFFORT")
+TELEM_ARGS+=(--key-label "$([ "$ACCOUNT" = primary ] && printf space || printf unknown)")
 
 REPLAY_EFFORT_ARG=" --requested-effort $EFFORT"
+REPLAY_EFFORT_ARG+=" --key-label $([ "$ACCOUNT" = primary ] && printf space || printf unknown)"
 REPLAY_CONTINUATION_ARG=""
 if [ -n "$CONTINUATION_JSON" ]; then
   printf -v REPLAY_CONTINUATION_ARG ' --continuation-json "$(cat %q)"' \
