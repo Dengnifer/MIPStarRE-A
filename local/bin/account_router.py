@@ -34,7 +34,7 @@ def live_pids(directory: Path) -> set[int]:
     return live
 
 
-def host_processes() -> tuple[dict[int, int], dict[int, tuple[str, bool]]]:
+def host_processes(exclusions=()) -> tuple[dict[int, int], dict[int, tuple[str, bool]]]:
     """Require a host PID view; count same-user Codex executables, not Node wrappers."""
     namespace = [line.split()[1:] for line in Path('/proc/self/status').read_text().splitlines()
                  if line.startswith('NSpid:')]
@@ -65,14 +65,25 @@ def host_processes() -> tuple[dict[int, int], dict[int, tuple[str, bool]]]:
                         environment.get(b'HOME', b'/unknown') + b'/.codex'))
             account = 'second' if home == second_home else 'primary'
             boundary = arguments.index(b'--') if b'--' in arguments else len(arguments)
-            candidates[pid] = (account, b'exec' not in arguments[:boundary])
+            interactive = not any(command in arguments[:boundary] for command in
+                                  (b'exec', b'e', b'review', b'app-server', b'mcp-server', b'exec-server'))
+            if (interactive and home == Path.home() / '.codex' and exclusions and
+                    os.readlink(process / 'cwd') in exclusions):
+                continue
+            candidates[pid] = (account, interactive)
         except FileNotFoundError:
             continue
     return parents, candidates
 
 
 def occupancy(root: Path) -> tuple[list[int], list[int]]:
-    parents, processes = host_processes()
+    path = root / 'watchdog/primary-excluded-interactive-cwds.json'
+    exclusions = json.loads(path.read_text()) if path.exists() else []
+    allowed = ('/home/drx/FV', '/home/drx/LDT-Lean-Paper', '/home/drx')
+    if (not isinstance(exclusions, list) or any(item not in allowed for item in exclusions) or
+            len(set(exclusions)) != len(exclusions)):
+        raise ValueError('invalid owner-designated interactive CWD exclusions')
+    parents, processes = host_processes(exclusions)
     reservations = [live_pids(root / 'accounts' / account) for account in ACCOUNTS]
     workers = [len(live) for live in reservations]
     interactive = [0, 0]
@@ -121,12 +132,31 @@ def resume_account(thread: str, registry: Path, homes: dict[str, Path]) -> str:
     return matches.pop()
 
 
+def session_rows(registry: Path) -> list[dict]:
+    if not registry.exists():
+        return []
+    with registry.open() as handle:
+        fcntl.flock(handle, fcntl.LOCK_SH)
+        return [json.loads(line) for line in handle if line.strip()]
+
+
+def resume_continuation(registry: Path, thread: str) -> dict:
+    """Carry the original snapshot and completed segments, deduplicating status appends."""
+    history = list({row['name']: row for row in session_rows(registry)
+                    if row.get('thread_id') == thread}.values())
+    for index in reversed(range(len(history))):
+        if history[index].get('continuation'):
+            prior = dict(history[index]['continuation'])
+            prior['completed_wall_s'] = prior.get('completed_wall_s', 0) + sum(
+                row['wall_s'] for row in history[index:])
+            return prior
+    return {}
+
+
 def continuation(path: Path, registry: Path, worktree: Path, issue: str) -> dict:
     """Validate an operator checkpoint handoff without changing the old thread or budget."""
     request = json.loads(path.read_text())
-    with registry.open() as handle:
-        fcntl.flock(handle, fcntl.LOCK_SH)
-        rows = [json.loads(line) for line in handle if line.strip()]
+    rows = session_rows(registry)
     previous = next(row for row in reversed(rows) if row.get('name') == request['previous_session'])
     if (previous.get('status') not in ('done', 'failed', 'archived') or
             previous.get('account') not in ACCOUNTS or not previous.get('thread_id') or
@@ -142,12 +172,13 @@ def continuation(path: Path, registry: Path, worktree: Path, issue: str) -> dict
             not 0 < budget['attempts'] < budget['attempt_limit'] or
             budget['working_seconds'] < previous.get('wall_s', 0)):
         raise ValueError('continuation requires the shared, charged, unexhausted budget')
-    prior = previous.get('continuation', {})
+    prior = resume_continuation(registry, previous['thread_id'])
     if prior and (prior['budget_file'] != str(budget_path) or
                   prior['budget']['anchor'] != budget['anchor'] or
                   prior['budget']['attempt_limit'] != budget['attempt_limit'] or
                   prior['budget']['attempts'] >= budget['attempts'] or
-                  prior['budget']['working_seconds'] > budget['working_seconds']):
+                  prior['budget']['working_seconds'] + prior['completed_wall_s'] >
+                  budget['working_seconds']):
         raise ValueError('continuation must retain its original budget and accumulated charges')
     return dict(previous_session=previous['name'], previous_thread_id=previous['thread_id'],
                 previous_account=previous['account'], checkpoint=checkpoint,

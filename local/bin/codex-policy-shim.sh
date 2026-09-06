@@ -13,6 +13,11 @@ while [ "$#" -gt 0 ]; do
   argument="$1"; shift
   if [ "$argument" = -- ]; then args+=(-- "$@"); task=1; break; fi
   case "$argument" in
+    --enable|--enable=*)
+      feature="${argument#--enable=}"
+      if [ "$argument" = --enable ]; then feature="${1:?missing feature}"; shift; fi
+      case "$feature" in *multi_agent*) echo 'fan-out must remain disabled' >&2; exit 4 ;; esac
+      args+=(--enable "$feature"); continue ;;
     -m|--model)
       [ "${1:-}" = gpt-6-astra ] || { echo 'gpt-6-astra required' >&2; exit 4; }
       shift; continue ;;
@@ -27,6 +32,7 @@ while [ "$#" -gt 0 ]; do
   normalized="${value//[[:space:]]/}"
   normalized="${normalized//\"/}"; normalized="${normalized//\'/}"
   case "$normalized" in
+    features=*|agents=*) echo 'whole feature/agent table overrides are forbidden' >&2; exit 4 ;;
     model=*) [ "$normalized" = model=gpt-6-astra ] || exit 4; continue ;;
     model_reasoning_effort=*|features.multi_agent=*|agents.max_concurrent_threads_per_session=*)
       continue ;;

@@ -4285,3 +4285,32 @@ bounded PR238 amendment and normal gates.
   uses still leave an eight-worker ceiling.
   The regression also retains a genuine interactive Codex ancestor during a
   synchronous dispatch: only wrappers are excluded, not other Codex sessions.
+
+## 2026-09-06 — PR238 allocation and review repairs
+
+- Session `orc-237-20260906-03` applies the owner's named interactive-CWD
+  exclusions and the completed independent review's F1–F4. This supersedes the
+  earlier eight-worker allocation, not any historical measurements. Main owns
+  the eleven-worker runtime caps; no excluded process, credential, mathematical
+  work, issue118 charge, PR195 evidence or review cap is changed here.
+- The fixes reject alternate multi-agent enable flags and parent-table
+  overrides; require original snapshot charges plus completed thread segments;
+  inherit and recover continuation provenance across ordinary resumes; and
+  retain a private launch-time snapshot for failed-append recovery. Offline
+  fixtures exercise the quoted 12452 + 2600 = 15052-second boundary, missing
+  legacy resume metadata, replay after budget-file mutation, and eleven slots.
+- Publication, CI, independent review, supervisor lifecycle and any further
+  main refresh remain main-owned; this repair session invokes none of them.
+- At 02:33Z the read-only host check sees four primary workers unchanged and
+  exactly three designated interactives excluded, retaining one main slot.
+  The tested shim is atomically installed as
+  `codex.astra-max-v4-pr238-review-20260906`, SHA-256
+  `d391af18dd881a23b6bf6af618497b03730a6778ad91e260bfc4168d7f93341c`.
+  The previous shim is preserved. Profile and quota-file hashes are unchanged;
+  no credential file is accessed and the unreviewed router is not installed.
+  Runtime evidence: `runtime-policy/237-review-fixes-20260906-03/installed.json`.
+- The first full suite failed eight assertions and one dispatch fixture when
+  concurrent real host occupancy saturated its unisolated temporary router.
+  The production router correctly failed closed. Stub-dispatch fixtures now
+  substitute an empty host view in their private Python launcher; production
+  admission has no test bypass. Host-scanning and quota tests remain explicit.

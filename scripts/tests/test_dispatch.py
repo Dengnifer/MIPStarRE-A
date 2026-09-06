@@ -12,6 +12,7 @@ from pathlib import Path
 import shlex
 import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
 from unittest import mock
@@ -29,12 +30,23 @@ SPEC.loader.exec_module(router)
 HOST_PROCESS_SCAN = router.host_processes
 
 
+def isolate_host(binary_dir: Path) -> None:
+    interpreter = binary_dir / 'python3'
+    interpreter.write_text(f'#!{sys.executable}\nimport os, runpy, sys\n'
+        'if sys.argv[1].endswith("/account_router.py"):\n'
+        '    loaded = runpy.run_path(sys.argv.pop(1))\n'
+        '    loaded["reserve"].__globals__["host_processes"] = lambda *args: ({}, {})\n'
+        '    loaded["main"]()\n'
+        'else: os.execv(sys.executable, [sys.executable, *sys.argv[1:]])\n')
+    interpreter.chmod(0o755)
+
+
 class DispatchCommandTests(unittest.TestCase):
     def recorded_dispatch(self, model: str | None, account: str = "auto",
                           exit_code: int = 0, empty_second_home: bool = False,
                           effort: str | None = None,
                           config_model: str = "gpt-config-default",
-                          continue_from: bool = False) -> dict[str, object]:
+                          continue_from: bool = False, recover_resume: bool = False) -> dict[str, object]:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             repo = root / "repo"
@@ -48,6 +60,7 @@ class DispatchCommandTests(unittest.TestCase):
 
             fake_bin = root / "bin"
             fake_bin.mkdir()
+            isolate_host(fake_bin)
             fake_codex = fake_bin / "codex"
             fake_codex.write_text(
                 "#!/bin/sh\n"
@@ -123,6 +136,8 @@ class DispatchCommandTests(unittest.TestCase):
                                                    budget_file=str(budget))))
                 dispatch_args.extend(['--continue-from', str(handoff)])
             dispatch_args.extend(["--", "test prompt"])
+            if recover_resume:
+                (local_bin / 'telemetry.py').write_text('raise SystemExit(1)\n')
             result = subprocess.run(
                 dispatch_args,
                 cwd=repo,
@@ -131,7 +146,18 @@ class DispatchCommandTests(unittest.TestCase):
                 capture_output=True,
                 text=True,
             )
-            self.assertEqual(result.returncode, exit_code, result.stderr)
+            self.assertEqual(result.returncode, 6 if recover_resume else exit_code, result.stderr)
+            if recover_resume:
+                shutil.copy2(TELEMETRY, local_bin / 'telemetry.py')
+                budget.write_text('{}')
+                replay = result.stderr.split('replay it with:\n')[1].split('\n  Do not leave')[0]
+                subprocess.run(['bash', '-c', replay], cwd=repo, env=env, check=True,
+                               capture_output=True, text=True)
+                record = json.loads(registry.read_text().splitlines()[-1])
+                self.assertEqual(record['continuation']['budget']['working_seconds'], 12452)
+                dispatch_args[dispatch_args.index('--continue-from'):] = [
+                    '--resume', THREAD_ID, '--', 'test prompt']
+                subprocess.run(dispatch_args, cwd=repo, env=env, check=True, capture_output=True)
             selected = "second" if account == "second" else "primary"
             self.assertEqual((home / "selected-home").read_text(),
                              str(second) if selected == "second" else "unset")
@@ -139,10 +165,11 @@ class DispatchCommandTests(unittest.TestCase):
             records = (repo / "results" / "telemetry" / "sessions.jsonl").read_text(
                 encoding="utf-8"
             ).splitlines()
-            self.assertEqual(len(records), 2 if continue_from else 1)
+            self.assertEqual(len(records), 3 if recover_resume else 2 if continue_from else 1)
             if continue_from:
                 self.assertEqual(json.loads(records[0]), previous)
-                self.assertEqual(json.loads(budget.read_text())['working_seconds'], 12452)
+                if not recover_resume:
+                    self.assertEqual(json.loads(budget.read_text())['working_seconds'], 12452)
             record = json.loads(records[-1])
             self.assertEqual(record["rollout"], str(rollout))
             return record
@@ -154,6 +181,7 @@ class DispatchCommandTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as cache_root:
             fake_bin = Path(cache_root) / "bin"
             fake_bin.mkdir()
+            isolate_host(fake_bin)
             fake_codex = fake_bin / "codex"
             fake_codex.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
             fake_codex.chmod(0o755)
@@ -297,9 +325,7 @@ class DispatchCommandTests(unittest.TestCase):
                 record = self.recorded_dispatch("gpt-6-astra", effort=effort)
                 self.assertEqual(record["requested_effort"], "max")
 
-        record = self.recorded_dispatch(
-            None, effort=None, config_model="gpt-6-astra"
-        )
+        record = self.recorded_dispatch(None)
         self.assertEqual(record["requested_effort"], "max")
 
     def test_registry_resolves_account_config_model(self) -> None:
@@ -314,7 +340,7 @@ class DispatchCommandTests(unittest.TestCase):
         self.assertIn('gpt-6-astra', self.dispatch_command(model=''))
 
     def test_secondary_checkpoint_continuation_preserves_budget_and_history(self) -> None:
-        record = self.recorded_dispatch(None, continue_from=True)
+        record = self.recorded_dispatch(None, continue_from=True, recover_resume=True)
         self.assertEqual(record['account'], 'primary')
         self.assertEqual(record['continuation']['previous_thread_id'], 'old-thread')
         self.assertEqual(record['continuation']['budget']['working_seconds'], 12452)
@@ -398,6 +424,38 @@ class DispatchCommandTests(unittest.TestCase):
 
 
 class AccountRouterTests(unittest.TestCase):
+    def test_continuation_charges_completed_time_even_after_a_legacy_resume(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            registry, budget, handoff = (root / name for name in ('registry', 'budget', 'handoff'))
+            original = dict(anchor='original', attempts=7, attempt_limit=10,
+                            working_seconds=12452, sessions=['prior', 'resumed'])
+            previous = dict(name='prior', thread_id='thread', account='primary', issue='scope',
+                            status='done', wall_s=2600, continuation=dict(
+                                budget_file=str(budget), budget=original))
+            for resumed in (False, True):
+                history = [previous] + ([dict(previous, name='resumed', wall_s=50,
+                                             continuation={})] if resumed else [])
+                registry.write_text('\n'.join(json.dumps(row) for row in history))
+                request = dict(previous_session=history[-1]['name'], checkpoint='HEAD',
+                               budget_file=str(budget))
+                handoff.write_text(json.dumps(request))
+                required = 15052 + (50 if resumed else 0)
+                charged = dict(original, attempts=8, working_seconds=required)
+                for change in ({'working_seconds': 12452}, {'working_seconds': required - 1},
+                               {'anchor': 'reset'}, {'attempts': 1}):
+                    budget.write_text(json.dumps(charged | change))
+                    with self.assertRaises(ValueError):
+                        router.continuation(handoff, registry, REPO_ROOT, 'scope')
+                budget.write_text(json.dumps(charged))
+                self.assertEqual(router.continuation(handoff, registry, REPO_ROOT, 'scope')[
+                    'budget']['working_seconds'], required)
+                other = root / 'reset-budget'
+                other.write_text(budget.read_text())
+                handoff.write_text(json.dumps(request | {'budget_file': str(other)}))
+                with self.assertRaises(ValueError):
+                    router.continuation(handoff, registry, REPO_ROOT, 'scope')
+
     def setUp(self) -> None:
         patcher = mock.patch.object(router, 'host_processes', return_value=({}, {}))
         patcher.start()
@@ -416,14 +474,18 @@ class AccountRouterTests(unittest.TestCase):
                 process = root / str(pid)
                 (process / 'status').write_text(f'Name:\tcodex\nPPid:\t{200 if pid == 100 else 1}')
                 (process / 'cmdline').write_bytes(b'\0'.join(arg.encode() for arg in arguments))
-                (process / 'environ').write_bytes(b'HOME=/test')
+                (process / 'environ').write_bytes(b'HOME=/home/drx')
+                (process / 'cwd').symlink_to('/home/drx/FV')
             def mapped_path(path):
                 return root / str(path).removeprefix('/proc').lstrip('/') if str(path).startswith(
                     '/proc') else Path(path)
-            with mock.patch.object(router, 'Path', side_effect=mapped_path), \
+            with mock.patch.object(router, 'Path', side_effect=mapped_path) as paths, \
                  mock.patch.dict(os.environ, {'MIPSTARRE_CODEX_HOME_SECOND': '/second'}):
+                paths.home.return_value = Path('/home/drx')
                 self.assertEqual(HOST_PROCESS_SCAN()[1],
                                  {100: ('primary', False), 200: ('primary', True)})
+                self.assertEqual(HOST_PROCESS_SCAN(['/home/drx/FV'])[1], {100: ('primary', False)})
+                self.assertEqual(len(HOST_PROCESS_SCAN(['/home/drx'])[1]), 2)
 
     def test_mode_changes_disabled_caps_and_preserved_both_settings(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -451,6 +513,11 @@ class AccountRouterTests(unittest.TestCase):
             mode.write_text('invalid')
             with self.assertRaises(ValueError):
                 router.reserve(root, 'auto', 123, 0, True)
+            mode.write_text('primary')
+            for exclusions in ('null', '{}', '["/tmp"]', '["/home/drx", "/home/drx"]', '{'):
+                (watchdog / 'primary-excluded-interactive-cwds.json').write_text(exclusions)
+                with self.assertRaises(ValueError):
+                    router.reserve(root, 'auto', 123, 0, True)
 
     def test_secondary_resume_cannot_override_primary_mode(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -504,15 +571,16 @@ class AccountRouterTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             (root / 'watchdog').mkdir()
-            (root / 'watchdog/max-codex-primary').write_text('1')
+            (root / 'watchdog/max-codex-primary').write_text('11')
+            (root / 'watchdog/primary-excluded-interactive-cwds.json').write_text('["/home/drx"]')
             def attempt(pid):
                 try:
                     return router.reserve(root, 'auto', pid, 0, False)
                 except ValueError:
                     return 'full'
-            with mock.patch.object(router.os, 'kill'), ThreadPoolExecutor(8) as pool:
-                results = list(pool.map(attempt, range(100, 108)))
-            self.assertEqual(results.count('primary'), 1)
+            with mock.patch.object(router.os, 'kill'), ThreadPoolExecutor(18) as pool:
+                results = list(pool.map(attempt, range(100, 118)))
+            self.assertEqual(results.count('primary'), 11)
             self.assertEqual(results.count('full'), 7)
 
     def test_runtime_shim_requests_max_and_preserves_prompt(self) -> None:
@@ -534,7 +602,10 @@ class AccountRouterTests(unittest.TestCase):
                 self.assertIn('model_reasoning_effort="max"', argv)
                 self.assertIn('features.multi_agent=false', argv)
                 self.assertTrue(argv[-1].endswith('prompt with model_reasoning_effort=ultra'))
-            for arguments in (['-m', 'gpt-5.6-sol'], ['-c', 'model="gpt-5.6-sol"']):
+            for arguments in (['-m', 'gpt-5.6-sol'], ['-c', 'model="gpt-5.6-sol"'],
+                              ['--enable', 'multi_agent'], ['--enable=foo,multi_agent'],
+                              ['-c', 'features={multi_agent=true}'],
+                              ['--config=agents={max_concurrent_threads_per_session=2}']):
                 self.assertEqual(subprocess.run(['bash', shim, *arguments], env=environment,
                     capture_output=True).returncode, 4)
             for arguments in (['--config=model_reasoning_effort=ultra'],
@@ -542,7 +613,11 @@ class AccountRouterTests(unittest.TestCase):
                               ['--config', 'features.multi_agent=true']):
                 result = subprocess.run(['bash', shim, 'exec', *arguments, '--', 'prompt'],
                     env=environment, capture_output=True, text=True, check=True)
-                self.assertIn('model_reasoning_effort="max"', json.loads(result.stdout))
+                argv = json.loads(result.stdout)
+                settings = dict(argv[index + 1].split('=', 1) for index, arg in enumerate(argv)
+                                if arg == '-c')
+                self.assertEqual(settings['features.multi_agent'], 'false')
+                self.assertEqual(settings['agents.max_concurrent_threads_per_session'], '1')
             environment['CODEX_HOME'] = str(home / 'second')
             self.assertEqual(subprocess.run(['bash', shim, 'exec'], env=environment,
                 capture_output=True).returncode, 4)

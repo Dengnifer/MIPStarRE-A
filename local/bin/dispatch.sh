@@ -414,17 +414,22 @@ fi
 # read directly.
 # ---------------------------------------------------------------------------
 
-if [ -n "$CONTINUATION_FILE" ]; then
-  [ -z "$RESUME_ID" ] && [ "$ACCOUNT" != second ] || die 4 "continuations use a fresh primary thread"
+if [ -n "$CONTINUATION_FILE$RESUME_ID" ]; then
+  [ -z "$CONTINUATION_FILE" ] || { [ -z "$RESUME_ID" ] && [ "$ACCOUNT" != second ]; } ||
+    die 4 "continuations use a fresh primary thread"
   CONTINUATION_JSON="$(python3 - "$SCRIPT_DIR" "$CONTINUATION_FILE" "$REGISTRY" \
-    "$WORKTREE_ABS" "$ISSUE" <<'PY'
+    "$WORKTREE_ABS" "$ISSUE" "$RESUME_ID" <<'PY'
 import json, sys
 from pathlib import Path
 sys.path.insert(0, sys.argv[1])
-from account_router import continuation
-print(json.dumps(continuation(Path(sys.argv[2]), Path(sys.argv[3]), Path(sys.argv[4]), sys.argv[5])))
+from account_router import continuation, resume_continuation
+value = (continuation(Path(sys.argv[2]), Path(sys.argv[3]), Path(sys.argv[4]), sys.argv[5])
+         if sys.argv[2] else resume_continuation(Path(sys.argv[3]), sys.argv[6]))
+print(json.dumps(value) if value else '')
 PY
   )" || die 4 "invalid continuation; preserve the checkpoint and shared budget"
+fi
+if [ -n "$CONTINUATION_FILE" ]; then
   ACCOUNT=primary
   CONTEXT_FILES+=("$CONTINUATION_FILE")
   TASK_PROMPT="Continue from the checkpoint and shared budget in the attached handoff; do not reset its anchor or charges. $TASK_PROMPT"
@@ -699,6 +704,9 @@ if [ "$DRY_RUN" -eq 1 ]; then
   exit 0
 fi
 
+if [ -n "$CONTINUATION_JSON" ]; then
+  (umask 077; set -C; printf '%s\n' "$CONTINUATION_JSON" > "$CAPTURE_DIR/$NAME.continuation.json")
+fi
 note "dispatching $NAME (role=$ROLE account=$ACCOUNT sandbox=$SANDBOX worktree=$WORKTREE_ABS)"
 
 # stdin is closed: codex exec reads piped stdin as extra prompt input, which
@@ -752,13 +760,19 @@ REPLAY_EFFORT_ARG=""
 if [ -n "$EFFORT" ]; then
   REPLAY_EFFORT_ARG=" --requested-effort $EFFORT"
 fi
+REPLAY_CONTINUATION_ARG=""
+if [ -n "$CONTINUATION_JSON" ]; then
+  printf -v REPLAY_CONTINUATION_ARG ' --continuation-json "$(cat %q)"' \
+    "$CAPTURE_DIR/$NAME.continuation.json"
+fi
 
 if ! "${ACCOUNT_ENV[@]}" python3 "$TELEMETRY_PY" "${TELEM_ARGS[@]}" >/dev/null; then
+  printf -v REPLAY_ACCOUNT_ENV '%q ' "${ACCOUNT_ENV[@]}"
   die 6 "telemetry append failed for $NAME.
   The event stream is intact at $CAPTURE — replay it with:
-    python3 $TELEMETRY_PY session-summarize $CAPTURE --name $NAME \\
+    ${REPLAY_ACCOUNT_ENV}python3 $TELEMETRY_PY session-summarize $CAPTURE --name $NAME \\
       --role $ROLE --issue $ISSUE --start $START_TS --end $END_TS \\
-      --exit-code $CODEX_EXIT --account $ACCOUNT --model $MIPSTARRE_CODEX_MODEL$REPLAY_EFFORT_ARG \\
+      --exit-code $CODEX_EXIT --account $ACCOUNT --model $MIPSTARRE_CODEX_MODEL$REPLAY_EFFORT_ARG$REPLAY_CONTINUATION_ARG \\
       --append-to $REGISTRY
   Do not leave the session unrecorded (meta.md, telemetry duties)."
 fi

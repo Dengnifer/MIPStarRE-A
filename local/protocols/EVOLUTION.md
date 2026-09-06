@@ -790,3 +790,11 @@ prepared but not started. No credentials or historical measurements change.
 **Expected effect:** no secondary spillover, timeout overbooking, Sol launch,
 or effort-request ambiguity. Both-account settings survive for an explicit
 later owner decision; unobservable host state blocks admission.
+
+## 2026-09-06 — Eleven-worker allocation and continuation review repairs
+
+**Trigger:** owner allocation, PR238 F1–F4, and "PR238 allocation and review repairs" in `events.md`.
+**Change:** exact interactive exclusions, rejection of fan-out overrides,
+cumulative completed-time charges, resume provenance and durable replay snapshots.
+**Expected effect:** eleven allocated workers plus main without touching exempt
+sessions, and no budget reset or provenance loss across resumes or append failures.

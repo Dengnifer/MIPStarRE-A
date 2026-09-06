@@ -153,8 +153,9 @@ All appends are one-line JSON; schemas documented in `protocols/meta.md`.
   requests `gpt-6-astra` at literal `max`. Conflicting models fail preflight;
   all effort overrides normalize to `max`. Automatic fan-out remains disabled.
 - Account mode defaults to primary and is read on every admission. Only a later
-  explicit owner decision may restore both accounts. Primary has twelve total
-  relay slots: at least one is reserved for main, and other same-key processes
+  explicit owner decision may restore both accounts. QPBT has twelve allocated
+  relay slots: one remains reserved for main; only owner-named interactive CWDs
+  are exempt, and other same-key processes
   further reduce worker capacity. See `protocols/sessions.md` for reconciliation
   and checkpoint continuations. Historical Sol/Fable measurements are unchanged.
 - Reviewer and prover roles must be **different sessions** — a session never

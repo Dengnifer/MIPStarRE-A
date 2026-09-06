@@ -125,8 +125,13 @@ an account. `watchdog/max-codex` additionally caps total workers. Auto selects
 the smallest live/cap ratio among eligible accounts, with primary winning ties.
 Host Linux `/proc` observations reconcile Codex executables with dispatcher PID
 reservations by ancestry, avoiding Node-wrapper and reservation double counts.
-Primary's twelve total slots always reserve at least one interactive main slot;
+The twelve allocated primary slots reserve at least one interactive main slot;
 additional interactive or unreserved worker use reduces admission capacity.
+The September 6 owner allocation exempts exactly designated interactive CWDs:
+`/home/drx/FV`, `/home/drx/LDT-Lean-Paper`, `/home/drx`. Each admission reads
+`watchdog/primary-excluded-interactive-cwds.json`, an optional JSON list of these
+paths without duplicates. Invalid lists fail closed; absent means no exclusions.
+Only known-primary interactive processes qualify, never workers or reservations.
 `watchdog/primary-external-reserved` additionally reserves known non-Codex key
 use (default zero); do not duplicate processes already observed by the router.
 Unknown homes count conservatively against primary. An unavailable host view or
@@ -150,6 +155,11 @@ thread, checkpoint, shared path and budget snapshot. The operator still owns
 charging completed working time and enforcing the mathematical budget; switching
 accounts neither creates a new budget nor authorizes another attempt. Old homes,
 captures and uncommitted proof work remain untouched.
+Required charges include the launch snapshot plus all completed thread segments.
+Ordinary resumes retain provenance, including legacy missing-link recovery.
+Telemetry replay uses the private per-session `.continuation.json` saved before
+launch, not a later budget read. The shim rejects multi-agent enable flags and
+whole `features`/`agents` table overrides, while retaining unrelated settings.
 Primary unsets inherited `CODEX_HOME`; second sets it for execution and rollout
 lookup to `MIPSTARRE_CODEX_HOME_SECOND` (default
 `~/.cache/mipstarre-dev/codex-home-yxy`). Review and autofix inherit these
