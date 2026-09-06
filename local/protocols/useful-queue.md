@@ -3,10 +3,24 @@ Normative supplement to sessions/review protocols (#257). Only main selects usef
 packets and binds prerequisites to closed issues, actual merged PRs and ancestry.
 No discovery, filler, merges, adjudication, budget resumes, inbox actions or shell tasks.
 Both --run and enabled:true are required; defaults disable. One admission per tick,
-watch interval >=5s, primary/Astra/Ultra only, existing external fan-out/kill switches.
-For the current space episode, external admission is zero and the hard allocation is
-five total sessions including main, with at most four useful native descendants;
-lower owner caps win. Review costs two slots, normal green-CI head only, cap four.
+watch interval >=5s, with the historical dispatcher policy limited to
+primary/Astra/max-or-xhigh; the active owner override below uses space/Astra/Ultra.
+Existing fan-out/kill switches remain binding.
+For the active QPBT owner switch recorded in
+`results/telemetry/owner-messages/qpbt-space-cap5-switch-20260906.md`, the allocation
+is five total native sessions (main plus at most four descendants) on account `space`,
+with external admission zero. Count actual native turn activity once per process;
+ready packets, reservations, configured ceilings and idle processes do not count.
+After each completion, failure, unblock or compaction, main promptly dispatches a
+disjoint useful successor or records the concrete vacancy reason and elapsed time.
+The earlier relay allocation of eleven workers plus main and its recovery ceiling ten
+is historical evidence and does not apply to this run. Review costs two slots,
+normal green-CI head only, cap four.
+Native descendants use the shared root lease and `telemetry.py native-record`:
+root/parent IDs, effective model and effort, key label, timestamps, status and
+unknown usage provenance are retained; parent counters are not summed without
+independent evidence. Native review uses the exact-head transport and cannot
+bypass CI, independent review or merge gates.
 Intent precedes creation. Router lock serializes tickets/one-use descendant PID/start
 claims; unclaimed slots count with real clients/reservations, including global CLI flags.
 Worktree reservations exclude unrelated dispatch. Canonical locks/head checks persist.

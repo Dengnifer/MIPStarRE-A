@@ -824,21 +824,29 @@ identities, diagnostic-only refusals and preserved Lake-root export; consolidate
 duplicate protocol exposition under `useful-queue.md`. **Expected effect:** correct
 reservations and holds within the original episode cap; deployment remains gated.
 
-## 2026-09-06 - Literal Ultra and shared native accounting
+## 2026-09-06 — Scoped native QPBT allocation switched to space/cap5
 
-**Trigger:** owner's relay-1 Astra Ultra migration and cap8 refresh, followed by
-the superseding space decision with a five-total cap, tracked in issues #27 and
-#287; activation/default-login/refresh receipts remain historical.
-**Change:** external dispatch, review, autofix, shim and useful-queue effort checks
-now require literal Ultra. A native root lease charges its verified shared child
-cap against the same owner allocation as external work. Native telemetry retains
-unknown aggregation; a nonce-bound independent native review transport consumes
-actual completed rollouts through the normal exact-head publisher. Session, main
-persona and operation summaries retain preauthorized disjoint successor chains,
-coordinator followup authority and activity-based vacancy accounting. No credential,
-home-routing, resume-affinity, runtime admission or deployment change is included.
-**Expected effect:** useful mathematics and independent review can continue under
-the shared native budget without double admission or manufactured review receipts.
-CLI Ultra selection is not a claim about backend compute equivalence. The space
-decision supersedes the historical relay-1 label; the scoped home directory name
-remains unchanged solely for state continuity.
+**Trigger:** owner switch receipt `space-cap5-switch-20260906.json` and
+`events.md`, "space five-total native allocation". **Change:** the active QPBT
+queue now counts the main once plus at most four actual native descendants on
+the `space` account; external admission stays zero. Completion/failure/
+unblock/compaction events require prompt disjoint successor reassessment, with
+vacancy duration and concrete reasons recorded. Relay-1/cap8 observations
+remain historical and are not reclassified. **Expected effect:** no stale
+account labels or occupancy claims while preserving all proof, review, CI and
+merge gates.
+
+## 2026-09-06 — Literal Ultra and shared native accounting
+
+**Trigger:** PR287's owner-authorized native workflow repair, following the
+space/cap5 switch recorded above; historical relay-1 and cap8 observations remain
+unchanged. **Change:** external dispatch, review, autofix, shim and useful-queue
+effort checks require literal Ultra. A native root lease charges its verified
+shared descendant cap against the same owner allocation, while native telemetry
+retains unknown usage aggregation and explicit key labels. The nonce-bound native
+review transport re-derives exact-head evidence from the live root, and session
+policy records disjoint successor chains and activity-based vacancy reasons.
+**Expected effect:** native mathematics and independent review can proceed under
+the current space five-total allocation without stale account labels, double
+admission, or manufactured review receipts. CLI Ultra selection is not a claim
+about backend compute equivalence.
