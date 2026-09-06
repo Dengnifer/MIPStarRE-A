@@ -159,6 +159,11 @@ a HOLD reason; it is never silently converted into a merge attempt. After a
 successful daemon-owned merge, the service re-reads remote `main` and records
 the new SHA before the next tick. The service may invoke `pr_merge.py` only as
 its daemon-owned final action after these checks; workers never merge directly.
+Each tick has bounded Git/GitHub reads and records failures as HOLD rather than
+exiting the loop. The cadence is monotonic: work time is subtracted from the
+configured interval (default 300 seconds). Candidate records distinguish stale
+exact-head PRs from fresh actionable PRs; `pr_age_s` is PR creation age, while
+eligibility onset remains unknown unless separately observed.
 
 ## 4. Untrusted text
 
