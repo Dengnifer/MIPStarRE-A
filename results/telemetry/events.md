@@ -5501,3 +5501,7 @@ not actual commit/publication hooks. No productive session was killed.
   remains deferred; PR280/282/207, source statements, credentials, hooks,
   gate logic and owner-inbox records were not changed by this session. No #27
   publication or model dispatch was attempted.
+
+## 2026-09-07
+
+- Space-cap5 merge-service checkpoint (2026-09-07): remote refs/heads/main and local main both resolve to 6989a351420e97f998ce6b7d68dd67de606ff5b1; transport is readable, runtime cap5/external0 is verified, and legacy merge-daemon-v8 PID2339019 remains SIGSTOPped after its historical SSH reset. The bounded service reports oldest exact-head CI/review-eligible PR254 created 2026-09-06T04:26:32Z (approximately 11h53m old at observation), but its head 7691c2cee6cf754c5add3661a15ec342799b1575 is stale against remote main. A direct daemon gate check of PR290 at a3eb4d57 refused gate2 because the primary tree held the uncommitted service file; no merge or manual gate bypass occurred. HOLD reasons and the required release conditions are durable in local/protocols/issues-prs.md and EVOLUTION.md.

@@ -824,6 +824,17 @@ identities, diagnostic-only refusals and preserved Lake-root export; consolidate
 duplicate protocol exposition under `useful-queue.md`. **Expected effect:** correct
 reservations and holds within the original episode cap; deployment remains gated.
 
+## 2026-09-07 — Space-cap5 merge-service checkpoint
+
+**Trigger:** `events.md`, "space-cap5 merge-service checkpoint"; legacy daemon
+v8 remains SIGSTOPped after its recorded SSH reset. **Change:** the bounded
+owner service records local/remote `main` SHAs, primary dirt, transport and
+lock state, the oldest exact-head CI/review-eligible PR age, and the concrete
+HOLD reason before delegating any merge. Space capacity 5 and external gate 0
+are required; successful daemon-owned merges re-read remote `main`. **Expected
+effect:** dirty-primary and stale-head stalls remain visible, and no worker or
+manual path can merge around the exact-head gate.
+
 ## 2026-09-06 — Scoped native QPBT allocation switched to space/cap5
 
 **Trigger:** owner switch receipt `space-cap5-switch-20260906.json` and
