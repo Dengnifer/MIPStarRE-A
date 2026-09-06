@@ -429,9 +429,6 @@ terminal review (pr-review.yml:69-72). See EVOLUTION.md for the trigger.
 
 ## 13. Evidence follows the diff: carry-forward across a fresh-base (2026-09-04)
 
-`useful-queue.md` adds exact-head/cap/publication rechecks under the review lock
-and disables the zero-token retry for queue tickets only. Other behavior is unchanged.
-
 The merge gate's fresh-base rule (issues-prs.md, gate 2b) moves a PR's head
 every time `main` advances, but a merge of `main` into the branch does not
 change the PR's own patch.  `review.sh` therefore compares a whitespace-

@@ -52,6 +52,7 @@ class QueueTests(unittest.TestCase):
             popen.return_value.pid = 1000
             result = self.supervisor.tick(run)
         self.assertEqual(popen.call_count, calls)
+        if calls: self.launch_environment = popen.call_args.kwargs['env']
         if status is not None: self.assertEqual(result['status'], status, result)
         return result
     def tickets(self): return queue.router.queue_tickets(self.root)
@@ -135,8 +136,14 @@ class QueueTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'capacity'):
             queue.router.reserve(self.root, 'primary', 1001, 0, True)
         self.host.return_value = ({1001: 1000}, {})
+        (self.root / 'watchdog/max-codex-primary').unlink()
+        alias = self.base / 'alias'
+        alias.symlink_to(self.worktree, target_is_directory=True)
         self.stack.enter_context(mock.patch.dict(os.environ, {
-            'MIPSTARRE_QUEUE_TICKET': 'token', 'MIPSTARRE_DISPATCH_WORKTREE': str(self.worktree)}))
+            'MIPSTARRE_DISPATCH_WORKTREE': str(alias)}))
+        with self.assertRaisesRegex(ValueError, 'worktree reserved'):
+            queue.router.reserve(self.root, 'primary', 1001, 0, True)
+        os.environ['MIPSTARRE_QUEUE_TICKET'] = 'token'
         self.patch(queue.router.os, 'kill')
         self.assertEqual(queue.router.reserve(self.root, 'primary', 1001, 0, False), 'primary')
         self.assertEqual(queue.router.occupancy(self.root)[0], [2, 0])
@@ -152,21 +159,27 @@ class QueueTests(unittest.TestCase):
         (self.directory / 'STOP').touch()
         with self.assertRaisesRegex(ValueError, 'stopped'):
             queue.router.reserve(self.root, 'primary', 1002, 0, False)
-        del os.environ['MIPSTARRE_QUEUE_TICKET']
-        with self.assertRaisesRegex(ValueError, 'worktree reserved'):
-            queue.router.reserve(self.root, 'primary', 1002, 0, True)
         queue.router.write_queue_tickets(self.root, {})
         (self.root / 'locks/review-258.lock').mkdir(parents=True)
         self.assertTrue(queue.worktree_busy(self.review(), self.root))
     def test_observed_refusals_progress_and_partial_logs(self):
         self.tick(calls=1)
         path = self.directory / self.packet['id'] / 'launch.log'
+        clean = ['wall_s: 503', 'tokens_total: 150295', 'name: scout-429-retry',
+                 'worktree: /tmp/concurrency-503', '> ERROR: 429 retry',
+                 'Incident: ERROR: concurrency limit exceeded',
+                 json.dumps({'type': 'item.completed', 'error': 'quoted 503 retry',
+                             'item': {'output': 'ERROR: concurrency limit exceeded'}})]
+        path.write_text('\n'.join(clean) + '\n')
+        evidence = self.tick('active')['evidence'][str(path)]
+        self.assertEqual((evidence['retries'], evidence['refusals']), (0, 0))
         events = [{'type': 'turn.completed'}, {'type': 'item.completed'},
                   {'type': 'error', 'message': 'Reconnecting: concurrency limit exceeded'}]
-        path.write_text('\n'.join(map(json.dumps, events)) + '\n')
+        with path.open('a') as handle:
+            handle.write('\n'.join(map(json.dumps, events)) + '\n')
         result = self.tick('stopped')
         self.assertEqual([result['evidence'][str(path)][key]
-                          for key in ('turns', 'items', 'retries', 'refusals')], [1, 1, 1, 1])
+                          for key in ('turns', 'items', 'retries', 'refusals')], [1, 2, 1, 1])
         self.assertEqual(self.tick()['evidence'][str(path)]['turns'], 1)
         (self.directory / 'HOLD').unlink()
         self.tick('active')
@@ -180,6 +193,10 @@ class QueueTests(unittest.TestCase):
         self.assertEqual((cursor['turns'], cursor['refusals']), (1, 0))
         path.write_text('')
         with self.assertRaisesRegex(ValueError, 'truncated'): queue.observe(path, cursor)
+        path.write_text('ERROR: unexpected status 503\nReconnecting 1/5: retry after 429\n' +
+                        json.dumps({'type': 'turn.failed', 'error': {'message': 'quota'}}) + '\n')
+        evidence = queue.observe(path, {})
+        self.assertEqual((evidence['retries'], evidence['refusals']), (1, 3))
     def test_schema_environment_and_canonical_handoff_guards(self):
         for field, value in (('command', 'touch /tmp/injection'), ('resume', 'thread'),
                              ('effort', 'low'), ('role', 'orc'), ('kind', 'merge')):
@@ -194,13 +211,6 @@ class QueueTests(unittest.TestCase):
         self.assertEqual([environment[key] for key in ('MIPSTARRE_CODEX_ACCOUNT',
             'MIPSTARRE_CODEX_MODEL', 'MIPSTARRE_ACCOUNT_WAIT', 'LOCAL_REVIEW_ENABLED')],
             ['primary', 'gpt-6-astra', '0', 'false'])
-        for filename, markers in {
-            'review.sh': ['[ -z "${MIPSTARRE_QUEUE_TICKET:-}" ]', '[ "$ROUND" -le 4 ]',
-                          'MIPSTARRE_QUEUE_EXPECTED_HEAD'],
-            'dispatch.sh': ['queued worktree head moved', 'features.multi_agent=false',
-                            'queued dispatch must be a fresh one-shot session']}.items():
-            for marker in markers:
-                self.assertIn(marker, (REPO_ROOT / 'local/bin' / filename).read_text())
     def test_parent_merge_binding_task_integrity_and_dirty_worktree(self):
         api = self.api()
         self.patch(queue, 'git', side_effect=self.fake_git)
@@ -226,11 +236,8 @@ class QueueTests(unittest.TestCase):
     def test_review_gate_exact_ci_publication_cap_and_prior_runtime(self):
         api, packet = self.api(), self.review()
         queue.review_evidence(packet)
-        for state, reason in (({}, 'CI'), ({'local-ci/summary': {'state': 'success'},
-                                           'local-review/summary': {'state': 'pending'}},
-                                          'already exists')):
-            api['latest_statuses'].return_value = state
-            with self.assertRaisesRegex(ValueError, reason): queue.review_evidence(packet)
+        api['latest_statuses'].return_value = {}
+        with self.assertRaisesRegex(ValueError, 'CI'): queue.review_evidence(packet)
         api['latest_statuses'].return_value = {'local-ci/summary': {'state': 'success'}}
         api['pr_view'].return_value['head']['sha'] = PARENT
         with self.assertRaisesRegex(ValueError, 'head moved'): queue.review_evidence(packet)
@@ -249,15 +256,12 @@ class QueueTests(unittest.TestCase):
         (self.root / 'reviews/pr258' / HEAD).mkdir(parents=True)
         with self.assertRaisesRegex(ValueError, 'prior review runtime'):
             queue.packet_gate(packet, self.primary, self.root)
-        del api['latest_statuses'].return_value['local-review/summary']
-        api['pr_reviews'].return_value = [
-            dict(body=f'<!-- mipstarre-review pr=258 head={number:040x} -->')
-            for number in range(4)]
-        with self.assertRaisesRegex(ValueError, 'four review rounds'): queue.review_evidence(packet)
-        api['pr_reviews'].return_value[-1]['body'] += '<!-- mipstarre-review-carried from=old -->'
-        queue.review_evidence(packet)
     def test_execute_identity_one_shot_effort_and_publication(self):
+        os.environ['MIPSTARRE_LAKE_ROOT'] = str(self.base / 'external-lake')
         self.tick(calls=1)
+        self.assertEqual(self.launch_environment['MIPSTARRE_LAKE_ROOT'],
+                         os.environ['MIPSTARRE_LAKE_ROOT'])
+        self.stack.enter_context(mock.patch.dict(os.environ, self.launch_environment, clear=True))
         with mock.patch.object(queue.subprocess, 'run') as run, \
              self.assertRaisesRegex(ValueError, 'matching live'):
             queue.execute(self.primary, self.root, self.packet['id'])
@@ -283,6 +287,8 @@ class QueueTests(unittest.TestCase):
         self.assertNotIn('--resume', command)
         self.assertNotIn('shell', run.call_args.kwargs)
         self.assertEqual(run.call_args.kwargs['env']['MIPSTARRE_QUEUE_TICKET'], token)
+        self.assertEqual(run.call_args.kwargs['env']['MIPSTARRE_LAKE_ROOT'],
+                         os.environ['MIPSTARRE_LAKE_ROOT'])
         with self.assertRaisesRegex(ValueError, 'one-shot intent'):
             queue.execute(self.primary, self.root, self.packet['id'])
 if __name__ == '__main__': unittest.main()

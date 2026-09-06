@@ -17,9 +17,11 @@ import account_router as router
 import gh_common
 from wf_util import LayerError, atomic_write, utcnow
 ROLES = {'prover', 'simplifier', 'blueprint', 'splitter', 'scout'}
-REFUSAL = re.compile(r'concurren|too many|429|rate.limit|quota|capacity exhausted|'
-                     r'service.unavailable|502|503', re.I)
+REFUSAL = re.compile(r'concurren|too many|\b(?:429|502|503)\b|rate.limit|quota|'
+                     r'capacity exhausted|service.unavailable', re.I)
 RETRY = re.compile(r'reconnect|retry|retrying', re.I)
+DIAGNOSTIC = re.compile(r'^(?:\d{4}-\d\d-\d\dT\S+\s+)?(?:ERROR[: ]|'
+                        r'(?:dispatch|review)\.sh: (?:error|warning):|Reconnecting \d+/\d+)', re.I)
 SHA = re.compile(r'[0-9a-f]{40}')
 def load(path: Path, default=None):
     return json.loads(path.read_text()) if path.exists() else default
@@ -171,15 +173,19 @@ def observe(path: Path, cursor: dict) -> dict:
                     raise ValueError('oversized evidence event; admission held')
                 break
             text = line.decode('utf-8', errors='replace')
+            diagnostic = ''
             try:
                 event = json.loads(text)
-            except ValueError: event = {}
+            except ValueError:
+                event = {}
+                if DIAGNOSTIC.match(text): diagnostic = text
             if isinstance(event, dict):
                 result['turns'] += event.get('type') == 'turn.completed'
                 result['items'] += event.get('type') == 'item.completed'
-                if event.get('type') in ('error', 'turn.failed') or 'error' in event or not event:
-                    result['retries'] += bool(RETRY.search(text))
-                    result['refusals'] += bool(REFUSAL.search(text))
+                if event.get('type') in ('error', 'turn.failed'):
+                    diagnostic = json.dumps(event.get('error') or event.get('message', ''))
+            result['retries'] += bool(RETRY.search(diagnostic))
+            result['refusals'] += bool(REFUSAL.search(diagnostic))
             result['offset'] = handle.tell()
         if handle.read(1):
             raise ValueError('evidence backlog or partial event; wait before admitting')
@@ -353,7 +359,8 @@ class Supervisor:
 def child_environment(root: Path) -> dict:
     """Do not inherit routing, prompt-ref, resume, model, or automatic-fix overrides."""
     environment = {key: value for key, value in os.environ.items()
-                   if not key.startswith('MIPSTARRE_') and key != 'CODEX_HOME'}
+                   if key == 'MIPSTARRE_LAKE_ROOT' or
+                   (not key.startswith('MIPSTARRE_') and key != 'CODEX_HOME')}
     environment.update(MIPSTARRE_CACHE_ROOT=str(root), MIPSTARRE_CODEX_ACCOUNT='primary',
                        MIPSTARRE_CODEX_MODEL='gpt-6-astra', MIPSTARRE_REVIEW_MODEL='gpt-6-astra',
                        MIPSTARRE_PROSE_MODEL='gpt-6-astra', MIPSTARRE_ACCOUNT_WAIT='0',

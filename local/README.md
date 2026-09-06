@@ -48,9 +48,7 @@ unblocks its dependents with no edit anywhere.
 
 ## Telemetry
 
-**Optional useful-work queue:** default-disabled `local/bin/useful_queue.py`
-admits only main-selected packets. Limits, adoption and reviewed deployment:
-`protocols/useful-queue.md`, `briefs/257-useful-admission-queue.md`.
+Optional useful-work queue: [protocol and rollout](protocols/useful-queue.md).
 
 Session, stage, build, and incident records live under `results/telemetry/` as
 described in [`protocols/meta.md`](protocols/meta.md). The

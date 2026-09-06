@@ -817,3 +817,9 @@ holds and stop-without-kill. Runtime stays outside git; only main selects work.
 **Expected effect:** no overbooking, duplicate writers, stale/fifth-round reviews
 or blind retries. Process counts are not server admission. Normal CI/independent
 review precede deployment; this amendment does not install or start anything.
+
+## 2026-09-06 - PR269 F1-F3 repairs
+**Trigger:** `events.md`, "PR269 first-review repair". **Change:** canonical worktree
+identities, diagnostic-only refusals and preserved Lake-root export; consolidate
+duplicate protocol exposition under `useful-queue.md`. **Expected effect:** correct
+reservations and holds within the original episode cap; deployment remains gated.

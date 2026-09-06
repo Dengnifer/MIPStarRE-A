@@ -284,7 +284,7 @@ fi
 [ -d "$WORKTREE" ] || die 4 "worktree '$WORKTREE' does not exist.
   Create it first (git worktree add .worktrees/<branch> -b <branch>) and run
   local/bin/worktree-setup.sh in it; dispatch.sh does not create worktrees."
-WORKTREE_ABS="$(cd -- "$WORKTREE" && pwd)"
+WORKTREE_ABS="$(cd -- "$WORKTREE" && pwd -P)"
 git -C "$WORKTREE_ABS" rev-parse --is-inside-work-tree >/dev/null 2>&1 \
   || die 4 "worktree '$WORKTREE_ABS' is not a git work tree; codex exec needs one"
 

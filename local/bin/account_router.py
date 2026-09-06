@@ -44,18 +44,8 @@ def queue_tickets(root: Path) -> dict:
 
 def write_queue_tickets(root: Path, tickets: dict) -> None:
     """Replace tickets under accounts/router.lock, retaining uncertain reservations."""
-    path = root / 'accounts/useful-queue.json'
-    temporary = path.with_suffix('.tmp')
-    with temporary.open('w') as handle:
-        json.dump(tickets, handle)
-        handle.flush()
-        os.fsync(handle.fileno())
-    temporary.replace(path)
-    directory = os.open(path.parent, os.O_RDONLY)
-    try:
-        os.fsync(directory)
-    finally:
-        os.close(directory)
+    from wf_util import atomic_write
+    atomic_write(root / 'accounts/useful-queue.json', json.dumps(tickets) + '\n')
 
 
 def admission_limits(root: Path, interactive: list[int]) -> tuple[list[int], int, str]:
@@ -281,6 +271,7 @@ def reserve(root: Path, requested: str, pid: int, wait: int, dry_run: bool) -> s
             token = os.environ.get('MIPSTARRE_QUEUE_TICKET')
             tickets = queue_tickets(root)
             worktree = os.environ.get('MIPSTARRE_DISPATCH_WORKTREE')
+            worktree = str(Path(worktree).resolve()) if worktree else None
             if any(ticket['worktree'] == worktree for key, ticket in tickets.items()
                    if key != token):
                 raise ValueError('worktree reserved by useful queue; no duplicate session')
