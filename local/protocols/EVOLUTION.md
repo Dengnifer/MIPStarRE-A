@@ -865,3 +865,31 @@ meta role correction without changing policy or research sample counts.
 **Expected effect:** a normal PR can review the standing-owner alignment against
 the actual routing merge without importing private primary history, changing
 runtime code, inferring server effort or bypassing CI/independent review.
+
+## 2026-09-06 — Access-only escalation and bounded main authority
+
+**Trigger:** `results/telemetry/events.md`, “Access-only owner escalation
+supersedes posted B7/B8 holds”, records the owner decision at 05:05Z, received
+at 05:17:03Z, and the explicit main tranche supplied to `orc-247-20260906-04`
+for issue #247/PR #260. This supersedes the 02:58:41Z posted-inbox hold; earlier
+entries remain historical evidence, not current policy or retroactive consent.
+
+**Change:** main/mathfix/orchestrator personas and issues-prs/sessions/review/
+meta/autofix protocols route mathematical and internal workflow decisions to
+main, including posted B7/B8; only actual access/permission blockers needing
+human action go to #26. Main records rationale and evidence; workers do not
+self-extend. The ordinary ten-attempt/about-one-and-a-half-working-day limit
+remains. The explicit #118 exception is attempts 11/12 at most 2700 seconds
+each, with 12 conditional on main's evaluation of 11, preserving the supplied
+ten attempts/19931 completed seconds and 2026-09-05T19:24:00Z anchor. No new
+tranche or reset is automatic. Unchanged continuation checks still reject
+changed historical limits; authorized new dispatches carry the complete ledger.
+B7 disposition still requires exact-head CI/review/finding evidence, with no
+fifth full review or forged carry-forward. Definition/game proposals return to
+main without weakening the mathematical correction and independent-review bar.
+
+**Expected effect:** obsolete human holds no longer stall internal decisions,
+while normal hooks, proof integrity, review caps and exact-head merge gates
+remain binding. No runtime routing changes, primary-main installation,
+subagents, new research samples, proof claims or merges are part of this
+amendment; the useful-worker floor/cap and effort-selection history are retained.

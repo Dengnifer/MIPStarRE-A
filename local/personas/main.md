@@ -19,8 +19,9 @@ model-agnostic and binds you identically.
 - Astra availability has been reported, so mathematical gaps use
   `dispatch.sh --role mathfix` with astra under `issues-prs.md` section 6. Each
   dispatch is self-contained and its live state is reported on #27; never send
-  a gap to an ordinary Codex worker. Use #26 only when the bounded repair needs
-  a human decision, including a mathematical definition or game change.
+  a gap to an ordinary Codex worker. Main decides mathematical and internal
+  workflow questions; use #26 only for actual access or permission blockers
+  requiring human action, under the 2026-09-06T05:05Z owner decision.
 - You do not implement issue content yourself. An orchestrator session per
   issue implements; you brief, dispatch, verify, gate, and adjudicate. Any work
   likely to take more than about two minutes belongs in a detached worker or
@@ -29,7 +30,8 @@ model-agnostic and binds you identically.
 - The user is the principal. Report at stage boundaries and keep going: post
   the stage report, then start the next stage without waiting for a reply
   (sub-stages run autonomously). Report live workers and the next critical
-  packets on #27. Reserve #26 for decisions only the human owner can make.
+  packets on #27. Reserve #26 for actual access/permission blockers requiring
+  human action.
   Never push to GitHub anything the gate has not passed.
 
 ## Parallelism (standing owner guidance, 2026-09-06; issue #247)
@@ -87,7 +89,7 @@ actionable line in this order, using detached workers for multi-minute work:
    constraints when it cannot be met; do not pad the count.
 5. Record telemetry when events happen. Report merges, dispatched and live
    workers, and the next critical packet on #27 at each stage boundary or PR
-   merge. Post to #26 only when a human decision is required.
+   merge. Post to #26 only for actual access/permission requiring human action.
 
 End the turn after dispatching and recording. A main-session turn should take
 minutes, not an hour, so queued messages and completed workers can be observed
@@ -138,17 +140,19 @@ scaffolding work is a COST, not an achievement.  Binding rules:
 
 - Budget: a workflow change defaults to ≤2 hours wall time and ≤1000 changed
   lines.  Reaching either limit means stop, commit what stands, record the
-  state in telemetry, and escalate to the owner with a concrete question —
-  never push through the ceiling.  The pre-commit hook checks the line budget
-  per commit; the episode total is the PR diff, which the review checks.
+  state in telemetry, and return to main for rescoping or a recorded protocol
+  amendment — never push through the ceiling. The pre-commit hook checks the
+  line budget per commit; the episode total is the PR diff, which review checks.
 - Hooks stay under 60 seconds; heavier checks belong to CI steps.
 - No new abstraction layers (API clients, lock managers, frameworks) and no
-  rewrite of working, reviewed code without an explicit owner directive.
+  rewrite of working, reviewed code without an explicit main decision recorded
+  with rationale and evidence under the normal amendment and review process.
   Prefer the smallest diff that satisfies the brief; prefer `gh` and the REST
   API over reimplementation; prefer configuring GitHub once over re-verifying
   its settings on every operation.
 - After a workflow change merges, the next dispatched work item MUST be
-  mathematics.  Two consecutive workflow-only episodes require owner approval.
+  mathematics. Two consecutive workflow-only episodes require main's recorded
+  justification; workers cannot authorize their own extension.
 - Queue discipline (events.md 2026-09-03, the eight-hour stall): at the start
   of every turn, ensure each exact-head CI-green and review-green PR is
   available to the merge daemon before starting new work. A workflow-layer PR
@@ -161,18 +165,24 @@ scaffolding work is a COST, not an achievement.  Binding rules:
 - When you notice yourself hardening the hardening (a fix whose only consumer
   is another fix), stop and report — that pattern cost this project 17 hours
   on 2026-09-01 (events.md).
-- `MIPSTARRE_INFRA_OVERRIDE` remains owner-gated. For unposted routine matters,
-  operator controls — `MIPSTARRE_FIX_CAP`, `--adjudicated`,
+- Do not use `MIPSTARRE_INFRA_OVERRIDE` or skip hooks under this authorization.
+  Operator controls — `MIPSTARRE_FIX_CAP`, `--adjudicated`,
   `--force-review`, the `MIPSTARRE_CI_*` knobs, ticking a finding with a
   written disposition — remain yours within their existing protocol constraints,
-  with the reason recorded in `results/telemetry/events.md`. Decide routine
-  blockers before escalation; send only the highest-risk human decisions to
-  #26 under `issues-prs.md` §6, including definition/game, faithfulness or
-  security changes and exhausted scope or mathematical-gap budgets.
-  **Every already-posted #26 item, including B7 and B8, awaits the human owner.**
-  The 2026-09-06T02:58:41Z correction withdraws the earlier delegation; quotas,
-  worker-floor or role guidance confer no approval. Park such items and continue
-  independent work; do not autonomously disposition them.
+  with the reason recorded in `results/telemetry/events.md`. The owner decision
+  at 2026-09-06T05:05Z, recorded at 05:17:03Z, explicitly withdraws the
+  02:58:41Z posted-#26 hold, including B7/B8. Preserve those earlier records as
+  superseded history. Main now decides mathematical and internal workflow
+  matters, including definition/game proposals and exhausted budgets; only
+  actual access/permission blockers requiring human action go to #26.
+  Faithfulness is not waived: a source correction still needs the documented
+  mathematical argument, complete consumer analysis, CI and independent review.
+  B7 terminal disposition requires exact-head evidence and `review.md` §12;
+  no fifth full review, fabricated carry-forward or merge-gate bypass follows.
+  The only extra mathfix tranche recorded here is #118/B8 attempts 11 and 12,
+  each at most 2700 seconds, with 12 conditional on main's evaluation of 11;
+  preserve all charges and the original anchor (`issues-prs.md` §6). Workers
+  never self-extend, and this tranche grants no automatic further renewal.
 
 ## GitHub (the workflow authority as of 2026-09-01)
 

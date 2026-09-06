@@ -4469,3 +4469,66 @@ records this interruption and relaunches deterministic CI in a separate OS
 session with the same 14400-second wait; the warmer and its lock stay untouched.
 No reviewer/subagent is launched. The final handoff reports the actual process
 and exact-head status rather than treating a launch command as completion.
+
+## 2026-09-06 — Access-only owner escalation supersedes posted B7/B8 holds
+
+- **Trigger and authority:** session `orc-247-20260906-04`, issue #247/PR #260,
+  receives the policy-alignment task after the owner's decision at
+  **2026-09-06T05:05Z**, recorded at **2026-09-06T05:17:03Z** in
+  `/tmp/qpbt-owner-concurrency-message.txt`. Its operative statement is:
+  “Only ACTUAL ACCESS/PERMISSION blockers go to the human owner”; mathematical
+  and internal workflow decisions belong to qpbt-main, “EXPLICITLY INCLUDING
+  posted B7/B8.” The same record explicitly withdraws the previous posted-#26
+  hold, requires rationale/evidence, preserves exact-head gates and review cap
+  four, and preserves cumulative attempts/time and original anchors. The
+  02:55:29Z delegation, 02:58:41Z withdrawal, prior B7/B8 holds and subsequent
+  effort-policy observations remain history, not erased or retroactive approval.
+  Source SHA-256 at inspection:
+  `386595c69b2ccd69cb729db1644adeede78db08460c2caad696c25adfcf4b610`.
+- **Bounded main decision:** the assignment record
+  `/tmp/qpbt-247-access-only-policy-correction-20260906.md` specifies #118/B8
+  attempts 11 and 12, each at most 2700 seconds on primary Astra max, carrying
+  ten completed attempts and 19931 completed seconds with original anchor
+  **2026-09-05T19:24:00Z**. Attempt 12 is conditional on main's evaluation of
+  11. This is at most 5400 additional allocated seconds, not completed work,
+  and not authorization for attempt 13 or unlimited renewal. This session
+  records that supplied baseline; it neither dispatches nor verifies a new
+  mathematical attempt. Assignment SHA-256:
+  `c7a5f598e11dda9f547bef10e355cba4141184f0fb2dea62f82b909f10e98620`.
+- **Diagnosis and resolution:** live main/mathfix/orchestrator personas and
+  sessions/issues-prs/review/meta/autofix protocols still routed mathematical
+  decisions to the human or retained the withdrawn hold. Align these living
+  documents with access-only escalation. Workers return decisions to main,
+  never self-extend, and stop on missing budget history. Definition/game
+  proposals require main's recorded decision and a scoped task; faithfulness,
+  correctness, sufficiency, minimality and downstream convergence still bind.
+  B7 terminal disposition requires actual exact-head evidence, not a fifth
+  full review, forged carry-forward, author review or a gate bypass.
+- **Enforcement audit:** inspected `account_router.py` continuation checks and
+  `dispatch.sh` handoffs, routing/effort policy in `sessions.md`, `review.sh`
+  round counting and patch carry-forward, `pr_merge.py` exact-head adjudication,
+  `ci.sh`, `autofix.sh`, `checked-push.sh` and `.githooks/pre-commit`. No runtime
+  implementation changes: continuation limits remain immutable and exhausted
+  continuations fail; an authorized tranche needs a separately bounded normal
+  dispatch with full predecessor/ledger context. The four-review ceiling is
+  an operator admission rule, not a newly implemented script refusal. Normal
+  hooks remain enabled; neither infrastructure override nor permission bypass
+  is authorized. Primary-main installation and routing state remain untouched.
+- **Research boundary and evidence:** preserve the 8–11 useful-worker floor,
+  eleven-worker cap, primary/Astra, main max and selected worker max/xhigh,
+  fan-out off, service-constraint reporting and all prior observations. This
+  task's xhigh is configured for explicit policy alignment with a 900-second
+  bound, not server-verified effort. No probes or duplicate effort-outcome
+  scouting are performed. Existing PR head `2de9996` has green exact-head CI
+  (942 seconds reported by `local-ci/summary`); those statuses do not validate
+  this forthcoming amendment. Checked publication and fresh CI are required;
+  no author review, mathematical proof claim or merge is made.
+- **Validation:** `python3 -m unittest scripts.tests.test_dispatch
+  scripts.tests.test_pr_review_workflow` passes all 46 tests in 14.807 seconds
+  using test fixtures, without model sessions. Focused assertions confirm
+  byte-preserved prior event/amendment prefixes, documentation-only scope,
+  the original effort-observation files untouched, explicit authority/tranche
+  values and retained floor/cap/review requirements. `git diff --check` and
+  `scripts/install_git_hooks.sh --check` pass. The cumulative nontelemetry
+  workflow diff against PR #260's base is 357 lines before this telemetry-only
+  addition; normal commit/publication hooks and new exact-head CI still apply.
