@@ -4272,6 +4272,35 @@ no second comment or extra review is created. Implementer supervisor2326711
 remains live under primary/max. Persistent router semantics still await the
 bounded PR238 amendment and normal gates.
 
+## 2026-09-06 — Issue 241 publication preflight finds inherited declaration-list drift
+
+- In session `orc-241-20260906-01`, the read-only command
+  `python3 scripts/blueprint_lean_sync.py --root . --ci` exits 1 with 231
+  stale entries in `blueprint/lean_decls`. The log is
+  `~/.cache/mipstarre-dev/sessions/orc-241-20260906-01-blueprint-sync.log`.
+  The list and blueprint sources in prover commit `c4f3c9b` are byte-identical
+  to those in `origin/main` (`a61ee55`); the follow-up adds only the
+  completion tag for `lem:qld-extraction-error-form`, with no declaration
+  reference changes. The drift is therefore inherited, not introduced by
+  this completion tag. Targeted Lean checking and `leanblueprint web` pass;
+  the sole file hole remains the unrelated extraction-witness construction.
+  The task excludes rewriting inherited declaration lists, so this session
+  preserves the list and normal publication gates. An authorized repair of
+  the generated index is required before those gates can pass; no hook
+  bypass or unrelated refresh is an acceptable substitute.
+
+- Correction from the same session: `blueprint/lean_decls` is an ignored,
+  generated local index, not a tracked file (`blueprint/.gitignore:4`). The
+  earlier empty `git diff` therefore did not establish byte identity with
+  `origin/main`, and the diagnosis requiring a separate authorized repair
+  was incorrect. Normal pre-push hooks regenerated the index, and the
+  subsequent read-only sync check exits 0; its log is
+  `~/.cache/mipstarre-dev/sessions/orc-241-20260906-01-blueprint-sync-after-hooks.log`.
+  Checked publication through `pr_open.py` succeeds as PR #249 at `8348eaa`.
+  No tracked declaration list or Lean file was changed by this follow-up.
+  Check whether a generated file is tracked before interpreting an empty
+  tracked diff as evidence of identical contents or declaring a blocker.
+
 ## 2026-09-06 — PR 195 current-base mechanical recovery
 
 - Session `orc-113-20260906-07` independently fetched published main
