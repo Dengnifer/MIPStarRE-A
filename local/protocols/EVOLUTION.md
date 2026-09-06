@@ -823,3 +823,14 @@ review precede deployment; this amendment does not install or start anything.
 identities, diagnostic-only refusals and preserved Lake-root export; consolidate
 duplicate protocol exposition under `useful-queue.md`. **Expected effect:** correct
 reservations and holds within the original episode cap; deployment remains gated.
+
+## 2026-09-06 - Explicit per-dispatch queue sandbox selection
+**Trigger:** task-specific owner authorization in `orc-257-20260906-08` and
+`events.md`, "Explicit queue sandbox selection after publication HOLD" (08:16:03 UTC incident).
+**Change:** `useful-queue.md` permits main-selected, validated, fingerprint-bound
+dispatch sandbox values. Omission preserves role defaults; scouts/reviews remain
+read-only. Historical packets are not migrated and sandbox changes grant no retry.
+**Expected effect:** authorized new assignments use their selected permissions;
+all recovery caps, locks, child identities and evidence gates remain in force.
+Normal CI and independent review precede deployment; this change neither deploys
+the queue nor reconciles the original held publication attempts.

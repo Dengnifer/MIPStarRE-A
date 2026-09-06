@@ -5276,3 +5276,21 @@ the previous04:30 observation;247<-237 native dependency is recorded.
   Both model-review rounds are exhausted; main retains terminal disposition
   after normal publication and detached CI. No third review, automatic adverse
   override, deployment, probe or merge is performed by this author session.
+
+## 2026-09-06 - Explicit queue sandbox selection after publication HOLD
+
+- `orc-257-20260906-08`: the task-specific owner authorization permits main to
+  select full access for assigned Track A workers, without changing defaults or
+  authorizing retries. The recorded PR269 activation incident at 08:16:03 UTC
+  reports sandbox-denied GitHub sockets in `prover-{243,244,246}-20260906-02`;
+  successful receipts did not establish publication success. Read-only runtime
+  inspection confirms the original `proof-publication-{243,244,246}-after-queue-merge`
+  identities, one attempt each, receipts' ticket identities, and retained HOLD.
+  The new extension binds optional sandbox selection to packet fingerprints and
+  canonical dispatch. No historical packet, permission, attempt, HOLD, or live
+  entrypoint is changed. Independent review remains main's responsibility:
+  this task forbids spawning agents, and the author cannot review its own diff.
+- Validation: 12 queue tests (6.759 s), 51 queue/dispatch tests (22.109 s), and
+  all 558 regressions (54.516 s) passed; Python/Bash syntax, whitespace and
+  installed hooks passed. Base `41b2a03` was integrated by fast-forward with
+  old `2766952` history preserved. Publication/CI evidence is recorded on the new PR.

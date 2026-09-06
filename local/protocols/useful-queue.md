@@ -8,6 +8,14 @@ Allocation eleven, recovery ceiling ten, twelve slots including nonexempt/extern
 lower owner caps win. Review costs two slots, normal green-CI head only, cap four.
 Intent precedes creation. Router lock serializes tickets/one-use descendant PID/start
 claims; unclaimed slots count with real clients/reservations, including global CLI flags.
+Main may select optional dispatch-only `sandbox`: `read-only`, `workspace-write`,
+or `danger-full-access`. Omission retains workspace-write (scout: read-only);
+scouts stay read-only and review packets accept no sandbox field. Unknown values,
+including null, fail closed. Selection is frozen in packet fingerprint and intent,
+validated again at execution and passed explicitly to canonical dispatch.sh.
+Never backfill historical packets or change attempted ones; changing sandbox or
+renaming a packet grants no retry. Owner authorization for assigned Track A work
+does not waive credentials, safety, locks, caps, HOLD/STOP or review requirements.
 Worktree reservations exclude unrelated dispatch. Canonical locks/head checks persist.
 Queued reviews cannot retry zero-token failures; uncertain launches/publication need adoption.
 Cache useful-queue/ holds state/census JSON, append-only events and packet intent/log/receipt.
