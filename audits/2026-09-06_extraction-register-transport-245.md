@@ -1,3 +1,12 @@
+---
+title: "Extraction register transport"
+date: 2026-09-06
+purpose: >
+  Record the exact register, state, and operator transport identities for the
+  extraction argument, their explicit hypotheses, and their validation evidence.
+issue: "#245"
+---
+
 # Extraction register transport — packet #245
 
 ## Scope and source
