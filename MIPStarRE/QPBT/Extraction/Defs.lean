@@ -199,27 +199,57 @@ noncomputable def tauDotProj {P : AdmissibleParams} (W : PauliKind)
 
 /-- Each dot-product coarse-graining is a projector, as asserted in
 blueprint
-`def:tau-dot-product-projector`, paper
+`lem:tau-dot-product-projective`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1426-1429`.
 
-**Proof obligation:** issue #47 tracks the orthogonal rank-one Pauli projector
-calculation. -/
+Completeness makes the matrix of Pauli basis vectors unitary. The coarse-grained
+operator is the conjugate of the diagonal projector onto the specified outcomes. -/
 theorem tauDotProj_isProj {P : AdmissibleParams} (W : PauliKind)
     (u : PauliRegister P) (a : PauliScalar P) :
     IsProj (tauDotProj W u a) := by
-  sorry
+  classical
+  let basisMatrix : Op (PauliRegister P) := fun row label => pauliVec W label row
+  have hbasis : basisMatrix * basisMatrixᴴ = 1 := by
+    calc
+      basisMatrix * basisMatrixᴴ = ∑ label : PauliRegister P, pauliProj W label := by
+        ext row column
+        simp [basisMatrix, Matrix.mul_apply, pauliProj, Matrix.sum_apply,
+          Matrix.vecMulVec_apply]
+      _ = 1 := sum_pauliProj_eq_one W
+  let diagonalProj : Op (PauliRegister P) :=
+    Matrix.diagonal (fun label => if dotProduct label u = a then (1 : ℂ) else 0)
+  have hdiagonal : IsProj diagonalProj := by
+    constructor
+    · change Matrix.diagonal _ * Matrix.diagonal _ = Matrix.diagonal _
+      rw [Matrix.diagonal_mul_diagonal]
+      congr 1
+      funext label
+      split_ifs <;> simp
+    · change diagonalProjᴴ = diagonalProj
+      simp [diagonalProj, Matrix.diagonal_conjTranspose]
+  have hcoarse : tauDotProj W u a = basisMatrix * diagonalProj * basisMatrixᴴ := by
+    ext row column
+    simp only [tauDotProj, bracketOp, Matrix.sum_apply, pauliProj, Matrix.vecMulVec_apply]
+    rw [Matrix.mul_apply]
+    simp only [diagonalProj, Matrix.mul_diagonal]
+    simp [basisMatrix, Finset.sum_filter, mul_ite, ite_mul]
+  rw [hcoarse]
+  exact hdiagonal.map (Unitary.conjStarAlgAut ℂ (Op (PauliRegister P))
+    ⟨basisMatrix, Matrix.mem_unitaryGroup_iff.mpr hbasis⟩)
 
 /-- For fixed `W` and `u`, the dot-product projectors sum to the identity.
 This is the completeness assertion of blueprint
-`def:tau-dot-product-projector`, paper
+`lem:tau-dot-product-projective`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1426-1429`.
 
-**Proof obligation:** issue #47 tracks completeness of the generalized-Pauli
-projector family. -/
+The dot-product fibers partition the complete Pauli outcome family. -/
 theorem sum_tauDotProj_eq_one {P : AdmissibleParams} (W : PauliKind)
     (u : PauliRegister P) :
     ∑ a : PauliScalar P, tauDotProj W u a = 1 := by
-  sorry
+  classical
+  unfold tauDotProj bracketOp
+  rw [Finset.sum_fiberwise]
+  exact sum_pauliProj_eq_one W
 
 /-! ## Conjugation and extraction error -/
 
