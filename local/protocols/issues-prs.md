@@ -210,6 +210,17 @@ work promptly and report concrete dependency or service constraints when the
 floor cannot be met. Idle reservations, duplicate writers and completed
 sessions do not count. The floor changes no account limits, proof budgets,
 review caps or integrity, validation and merge gates.
+Main may hold replenishment for a reported concrete service constraint while
+preserving the eleven-worker allocation; bounded recovery admissions follow a
+census and useful-work evidence, not an assumed server request count.
+
+Main stays at `max`; main selects exactly `max` or `xhigh` for each new or
+resumed primary/`gpt-6-astra` worker (the latest owner "high" means `xhigh`).
+Record effort, rationale and outcomes as observations, distinguishing client
+configuration from server verification. Preserve raw provenance, sample counts
+and unknowns in `results/telemetry/model-comparison/astra-effort-20260906.md` and
+its dataset; refine guidance through normal reviewed amendments and EVOLUTION.
+No benchmark, probe, filler session or gate/budget relaxation follows from this.
 
 A source statement found to be mathematically false does not go to #26 first
 unless it requires a mandatory escalation above. The current mathematical-gap
@@ -222,7 +233,8 @@ session instead of dispatching an ordinary Codex worker.
 
 After `results/telemetry/owner-tools/astra-poll.sh` reports on #26 that astra is
 available in Codex, the lane switches to astra through
-`MIPSTARRE_CODEX_MODEL=astra local/bin/dispatch.sh --role mathfix --effort ultra`.
+`local/bin/dispatch.sh --role mathfix` on primary/`gpt-6-astra`, with the exact
+`--effort max` or `--effort xhigh` chosen by main under the policy above.
 Until that report, this Codex dispatch path is not used. Every request or
 dispatch carries the exact source path, label and line range; the counterexample
 or obstruction; the paper-gap note; the relevant blueprint dependency graph and

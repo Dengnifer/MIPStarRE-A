@@ -770,3 +770,25 @@ owner approval. This is a documentation-only proposal on the issue branch, not
 an unreviewed installation into main; the owner correction already applies via
 standing guidance. Normal publication, CI, independent review and merge remain
 required outside this session.
+
+## 2026-09-06 — Select worker effort from useful-work observations
+
+**Trigger:** `results/telemetry/events.md` 2026-09-06, "Owner-selected effort
+and bounded initial comparison (#247)", the 03:26:22Z effort correction and
+03:36:00Z research priority in
+`results/telemetry/model-comparison/owner-priority-20260906.md`.
+
+**Change:** `local/personas/main.md` and `issues-prs.md` retain main at `max`
+while main selects `max` or `xhigh` for new/resumed primary Astra workers.
+They preserve the useful-worker allocation with honest temporary service
+constraints and require evidence-led, normally reviewed refinement. The initial
+`results/telemetry/model-comparison/astra-effort-20260906.md` and JSON dataset
+separate two useful review attempts from six historical configuration probes;
+neither project attempt has server-verified effort. No historical row is changed.
+
+**Expected effect:** preserve auditable effort/quality observations without
+inferring causal effects, inventing missing usage, or relaxing proof/review
+budgets. This supersedes only the earlier mandatory-max worker clause, not the
+main/meta, floor or posted-inbox authority boundaries. Issue #237 retains its
+README/runtime work; reconcile overlapping policy edits through normal
+integration only after PR #238 actually merges, never by installing this draft.

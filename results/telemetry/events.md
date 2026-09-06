@@ -4241,3 +4241,36 @@ bounded PR238 amendment and normal gates.
 - **Lesson:** replenish useful independent work ahead of completions and report
   concrete constraints honestly; concurrency or role guidance never grants
   approval for a posted owner decision or permission to relax budgets or gates.
+
+## 2026-09-06 — Owner-selected effort and bounded initial comparison (#247)
+
+- **Symptom:** the pending policy requires max for every worker, superseded by
+  the 03:26:22Z owner update. The comparison README still universally describes
+  historical runs as ultra despite six recorded Astra completion-metadata probes.
+- **Diagnosis:** main remains max, but selects max or xhigh for new/resumed
+  primary Astra workers; the 03:36:00Z research priority calls for observations
+  with explicit provenance and unknowns. Two committed PR238 review captures
+  provide one client-recorded xhigh and one max attempt, not server verification
+  or independent task replicates. The relay incident warrants honest temporary
+  floor exceptions, not an invented server-cap measurement.
+- **Fix:** `orc-247-20260906-02` extends the existing policy branch and adds
+  `model-comparison/astra-effort-20260906.md` plus its small JSON dataset.
+  This continuation is configured xhigh for bounded evidence curation; server
+  effort is unknown. Its still-pending terminal usage/outcome is not a sample.
+  No owner-session rows, historical reports, comparison scripts or raw logs are
+  rewritten. The issue237 author alone owns the README correction and runtime
+  enforcement; PR238 was observed open and unmerged at 03:54:46Z. Overlapping
+  persona/protocol edits await normal integration only after its actual merge.
+- **Lesson:** client context, completion metadata and backend computation are
+  different measurements. Count each canonical attempt once, distinguish tasks
+  from reviews/resumes, retain null for unknowns, and do not turn service delays
+  or unlike patch difficulty into a causal effort claim. Primary-only owner
+  decision records need main's normal telemetry preservation/publication; this
+  session neither publishes nor installs unreviewed policy into main.
+- **Validation:** dataset hashes, canonical registry/terminal usage, client
+  context, review heads/verdicts and six probe outcomes agree with their sources.
+  All relative links resolve in this checkout or primary; six require newer
+  primary files, including three owner records awaiting telemetry publication.
+  The branch retains all prior records and mathematical-gap budget text. The
+  direct diff against main also shows 91 lines of newer main-only briefs absent
+  from this old base; this lane neither deletes nor imports those briefs.

@@ -52,6 +52,10 @@ When the floor cannot be met, report the actual useful-live count and the
 concrete dependency or service constraint, rather than claiming compliance.
 Account limits, proof budgets, review caps and normal integrity, validation and
 merge gates still bind; the floor authorizes no relaxation or budget reset.
+A concrete temporary service constraint permits holding replenishment while
+preserving the eleven-worker allocation. Report the shortfall, admit only bounded
+useful recovery work after a census, and restore admissions gradually on evidence
+from useful project work. Client process count is not server request count.
 Evidence binds to exact SHAs on GitHub, so parallel lanes cannot trample each
 other's records.
 
@@ -106,10 +110,20 @@ merges; never merge a PR by hand or call the merge gate from the main turn.
   implementation convenience: paper-labelled statements stay source-shaped;
   genuine source defects become `docs/paper-gaps/` notes (key `qpbt`,
   traceability `\localissue{NNNN}`).
-- Session selection: primary relay only, `gpt-6-astra` at `max` for every
-  project session, with fan-out disabled. Preserve the future explicit
-  primary/both toggle. Leave FV, LDT-Lean-Paper and the old `/home/drx` session
-  untouched; their removed reservations are not permission to modify them.
+- Session selection (owner update, 2026-09-06T03:26:22Z): main stays at `max`.
+  All new or resumed workers stay primary/`gpt-6-astra`; main chooses exactly
+  `max` or `xhigh` by role, difficulty, observed quality and latency. The owner's
+  latest "high" means `xhigh`, not a third setting. Record the choice and
+  rationale; configured or client-recorded effort is not server verification.
+  Fan-out stays disabled. Preserve the future explicit primary/both toggle.
+  Leave FV, LDT-Lean-Paper and the old `/home/drx` session untouched; their
+  removed reservations are not permission to modify them.
+- Preserve effort observations and raw-session provenance under
+  `results/telemetry/model-comparison/`, with task/attempt counts and unknowns
+  explicit. Start with `astra-effort-20260906.md`; revise selection guidance
+  through normal reviewed documentation and EVOLUTION entries, not causal
+  claims from mixed tasks. Learn only from useful work: no benchmark, probe or
+  filler sessions, and no proof/review budget reset.
 
 ## Scope control (added 2026-09-01 after the issue-0007 overbuild)
 
