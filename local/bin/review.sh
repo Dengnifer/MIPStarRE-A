@@ -41,7 +41,7 @@
 #   MIPSTARRE_TRUSTED_REF      git ref the reviewer personas are read from
 #                              (default: main).  Never the branch under review.
 #   MIPSTARRE_REVIEW_MODEL     codex model for the code review
-#                              (default: gpt-5.6-sol)
+#                              (required: gpt-6-astra)
 #   MIPSTARRE_PROSE_MODEL      codex model for the blueprint prose review
 #                              (default: MIPSTARRE_REVIEW_MODEL)
 #   MIPSTARRE_CACHE_ROOT        runtime state root (default ~/.cache/mipstarre-dev)
@@ -51,7 +51,7 @@
 #   MIPSTARRE_CITATION_MAX_BYTES bytes reserved for the derived blueprint
 #                              citation map (default 30000)
 #   MIPSTARRE_REVIEW_TIMEOUT   reviewer safety timeout in seconds (default 10800)
-#   MIPSTARRE_REVIEW_EFFORT    pinned reasoning effort (default ultra)
+#   MIPSTARRE_REVIEW_EFFORT    max (default) or xhigh; legacy ultra maps to max
 #   MIPSTARRE_GITHUB_REPO      owner/repo override for gh_common.py
 #
 set -euo pipefail
@@ -81,13 +81,18 @@ GH_COMMON="$BIN_DIR/gh_common.py"
 CACHE="${MIPSTARRE_CACHE_ROOT:-$HOME/.cache/mipstarre-dev}"
 TRUSTED_REF="${MIPSTARRE_TRUSTED_REF:-main}"
 DISPATCH="$ROOT/local/bin/dispatch.sh"
-REVIEW_MODEL="${MIPSTARRE_REVIEW_MODEL:-${MIPSTARRE_CODEX_MODEL:-gpt-5.6-sol}}"
+REVIEW_MODEL="${MIPSTARRE_REVIEW_MODEL:-${MIPSTARRE_CODEX_MODEL:-gpt-6-astra}}"
 PROSE_MODEL="${MIPSTARRE_PROSE_MODEL:-$REVIEW_MODEL}"
 LOCK_WAIT="${MIPSTARRE_REVIEW_LOCK_WAIT:-1800}"
 DIFF_MAX_LINES="${MIPSTARRE_DIFF_MAX_LINES:-4000}"
 CITATION_MAX_BYTES="${MIPSTARRE_CITATION_MAX_BYTES:-30000}"
 REVIEW_TIMEOUT="${MIPSTARRE_REVIEW_TIMEOUT:-10800}"
-REVIEW_EFFORT="${MIPSTARRE_REVIEW_EFFORT:-ultra}"
+REVIEW_EFFORT="${MIPSTARRE_REVIEW_EFFORT:-max}"
+case "$REVIEW_EFFORT" in
+  ultra) REVIEW_EFFORT=max ;;
+  max|xhigh) ;;
+  *) echo 'MIPSTARRE_REVIEW_EFFORT must be max or xhigh' >&2; exit 2 ;;
+esac
 BOT_PREFIX_RE='^\[(claude|codex)-(auto|review)-fix\]'
 BLUEPRINT_CITATION_PATH="scripts/blueprint_citations.py"
 
@@ -326,6 +331,7 @@ run_agent() {
       ended="$(date +%s)"
       tokens="$(sed -n 's/^tokens_total: //p' "$dlog" | tail -1)"
       if [ "$rc" -ne 0 ] && [ "$attempt" -eq 1 ] \
+         && [ -z "${MIPSTARRE_QUEUE_TICKET:-}" ] \
          && [ "$(( ended - started ))" -lt 15 ] \
          && [ "${tokens:-0}" = "0" ]; then
         warn "dispatch failed pre-model (rc=$rc, $(( ended - started ))s, 0 tokens); retrying once"
@@ -344,20 +350,7 @@ run_agent() {
     return "$rc"
   fi
 
-  warn "local/bin/dispatch.sh not found; falling back to a direct 'codex exec'. This session will NOT appear in results/telemetry/sessions.jsonl."
-  command -v codex >/dev/null 2>&1 ||
-    die "codex CLI not found on PATH and no local/bin/dispatch.sh to delegate to"
-  set +e
-  if [ -n "$model" ]; then
-    MIPSTARRE_AUTOMATION=1 timeout --signal=TERM "$REVIEW_TIMEOUT" codex exec --sandbox "$sandbox" -C "$wt" </dev/null \
-      -m "$model" -o "$out" -- "$(cat "$standalone")" >"$dlog"
-  else
-    MIPSTARRE_AUTOMATION=1 timeout --signal=TERM "$REVIEW_TIMEOUT" codex exec --sandbox "$sandbox" -C "$wt" </dev/null \
-      -o "$out" -- "$(cat "$standalone")" >"$dlog"
-  fi
-  rc=$?
-  set -e
-  return "$rc"
+  die "dispatch.sh unavailable; refusing an unaccounted policy-bypassing launch"
 }
 
 # ------------------------------------------------------------------ arguments
@@ -412,6 +405,11 @@ PR_STATE="$(json_get "$PR_JSON" state)"
 
 [ -n "$BRANCH" ]   || die "PR #$PR_NUM has no head branch in the GitHub payload"
 [ -n "$HEAD_SHA" ] || die "PR #$PR_NUM has no head SHA in the GitHub payload"
+if [ -n "${MIPSTARRE_QUEUE_TICKET:-}" ]; then
+  [ "$HEAD_SHA" = "${MIPSTARRE_QUEUE_EXPECTED_HEAD:-}" ] && [ "$PR_STATE" = open ] ||
+    die "queued review no longer matches the selected open head"
+  [ "$FORCE_REVIEW" -eq 0 ] || die "queued review cannot force another round"
+fi
 BASE="${BASE:-main}"
 lint_branch_name "$BRANCH"
 lint_branch_name "$BASE"
@@ -554,6 +552,22 @@ print(len(rows) + 1)
 PY
 )"
 export MIPSTARRE_REVIEW_ROUND="$ROUND"
+if [ -n "${MIPSTARRE_QUEUE_TICKET:-}" ]; then
+  [ "$ROUND" -le 4 ] || die "queued review reached the four-round cap"
+  ghc latest-statuses "$HEAD_SHA" >"$RUN_ROOT/statuses.json" ||
+    die "queued review cannot recheck exact-head evidence"
+  [ "$(json_get "$RUN_ROOT/statuses.json" 'local-ci/summary.state')" = success ] ||
+    die "queued review lost green exact-head CI"
+  [ -z "$(json_get "$RUN_ROOT/statuses.json" 'local-review/summary.state')" ] ||
+    die "queued review already has summary evidence; adopt rather than repeat"
+  python3 - "$ROUND_JSON" "$HEAD_SHA" <<'PY' ||
+import json, sys
+rows = json.load(open(sys.argv[1]))
+sys.exit(any(row.get('commit_id') == sys.argv[2] and
+             'mipstarre-review pr=' in (row.get('body') or '') for row in rows))
+PY
+    die "queued review already has publication evidence; adoption required"
+fi
 
 MERGE_BASE="$(git -C "$ROOT" merge-base "$BASE" "$HEAD_SHA" 2>/dev/null || true)"
 [ -n "$MERGE_BASE" ] || die "no merge base between '$BASE' and $HEAD_SHA"

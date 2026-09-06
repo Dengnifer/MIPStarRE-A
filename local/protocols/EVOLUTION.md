@@ -750,3 +750,88 @@ with #26 reserved for human decisions.
 **Expected effect:** the main session remains responsive while independent work
 advances in parallel, failed lanes receive prompt recovery, and merge authority
 and owner escalation stay unambiguous.
+
+## 2026-09-06 — Normalize astra effort requests to xhigh
+
+**Trigger:** `results/telemetry/events.md` 2026-09-05, "Incident: astra sessions
+ran at medium effort", measured before the 22:25Z handoff and confirmed on both
+Codex endpoints at 22:40Z; and the owner's 2026-09-05T22:45Z decision that astra
+must request `xhigh` while sol retains `ultra` (issue #237).
+
+**Change:** after account routing resolves the exact model, `dispatch.sh` maps
+omitted or legacy `ultra` effort to `xhigh` only for astra. Other explicit astra
+efforts and every sol effort remain unchanged. The `mathfix` guard validates the
+normalized astra `xhigh` request. `telemetry.py` and the session schema record
+the nonempty effective CLI request as optional `requested_effort`, explicitly
+distinct from provider-measured behavior. Session, math-fix, review, architecture,
+and model-comparison documentation now state the same model-specific policy.
+
+**Expected effect:** both astra accounts receive the highest effort they honour,
+sol keeps its established request, legacy callers remain valid, and future
+session rows preserve what the dispatcher asked for without overstating what the
+provider executed.
+
+## 2026-09-06 — Primary relay and literal Astra max
+
+**Trigger:** issue #237 / PR #238; the owner's primary-relay/max decision and
+the incident entry "PR238 primary relay/max amendment" in `events.md`.
+
+**Change:** `account_router.py` reads primary/both mode at every admission,
+reconciles host processes with reservations, accounts for main and other key
+use within twelve primary slots, and rejects disabled accounts and saturated
+timeouts. Secondary threads require a fresh primary checkpoint continuation
+with linked history and the original shared mathematical budget. `dispatch.sh`,
+review and autofix request only `gpt-6-astra` at `max`, with fan-out disabled;
+missing dispatchers cannot trigger direct fallback. Session, model, mathfix and
+main-persona policies are synchronized. The owner-authorized profile/shim
+mitigation is installed atomically; future launcher/supervisor versions are
+prepared but not started. No credentials or historical measurements change.
+
+**Expected effect:** no secondary spillover, timeout overbooking, Sol launch,
+or effort-request ambiguity. Both-account settings survive for an explicit
+later owner decision; unobservable host state blocks admission.
+
+## 2026-09-06 — Eleven-worker allocation and continuation review repairs
+
+**Trigger:** owner allocation, PR238 F1–F4, and "PR238 allocation and review repairs" in `events.md`.
+**Change:** exact interactive exclusions, rejection of fan-out overrides,
+cumulative completed-time charges, resume provenance and durable replay snapshots.
+**Expected effect:** eleven allocated workers plus main without touching exempt
+sessions, and no budget reset or provenance loss across resumes or append failures.
+
+## 2026-09-06 — Preserve selected worker effort and tolerate historical damage
+
+**Trigger:** 03:26 UTC owner update and PR238 F5; `events.md`, "PR238 F5 and per-worker effort selection".
+**Change:** dispatch/review/autofix/shim honor main's max/xhigh choice; main stays max;
+omitted/legacy ultra map to max, other values fail. Shared history parsing tolerates
+non-record damage but validates relevant continuation metadata; budget rules persist.
+**Expected effect:** ordinary resumes recover, explicit xhigh survives, verification stays honest.
+
+## 2026-09-06 — Main-selected useful-work queue with adoption holds
+
+**Trigger:** #257; `events.md`, "Explicit useful-work admissions need durable
+handoff reservations" (`orc-257-20260906-01`, continued as `-02`).
+**Change:** `useful-queue.md` and queue/router/dispatch/review guards add explicit
+one-shot packets, parent-merge bindings, ceiling ten, two-slot reviews, adoption
+holds and stop-without-kill. Runtime stays outside git; only main selects work.
+**Expected effect:** no overbooking, duplicate writers, stale/fifth-round reviews
+or blind retries. Process counts are not server admission. Normal CI/independent
+review precede deployment; this amendment does not install or start anything.
+
+## 2026-09-06 - PR269 F1-F3 repairs
+**Trigger:** `events.md`, "PR269 first-review repair". **Change:** canonical worktree
+identities, diagnostic-only refusals and preserved Lake-root export; consolidate
+duplicate protocol exposition under `useful-queue.md`. **Expected effect:** correct
+reservations and holds within the original episode cap; deployment remains gated.
+
+## 2026-09-06 — Scoped native QPBT allocation switched to space/cap5
+
+**Trigger:** owner switch receipt `space-cap5-switch-20260906.json` and
+`events.md`, "space five-total native allocation". **Change:** the active QPBT
+queue now counts the main once plus at most four actual native descendants on
+the `space` account; external admission stays zero. Completion/failure/
+unblock/compaction events require prompt disjoint successor reassessment, with
+vacancy duration and concrete reasons recorded. Relay-1/cap8 observations
+remain historical and are not reclassified. **Expected effect:** no stale
+account labels or occupancy claims while preserving all proof, review, CI and
+merge gates.

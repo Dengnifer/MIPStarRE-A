@@ -1,0 +1,7 @@
+{"type":"thread.started","thread_id":"01a074b4-14f0-7253-a688-405d47141559"}
+{"type":"item.completed","item":{"id":"item_0","type":"error","message":"Model metadata for `gpt-6-astra` not found. Defaulting to fallback metadata; this can degrade performance and cause issues."}}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_1","type":"reasoning","text":"**Preparing observed-delta table**\n**Updating observed-delta table**"}}
+{"type":"item.completed","item":{"id":"item_2","type":"reasoning","text":"**Preparing session ID links**"}}
+{"type":"item.completed","item":{"id":"item_3","type":"reasoning","text":"**Reviewing dependency evidence**\n**Monitoring publication results**"}}
+{"type":"item.completed","item":{"id":"item_4","type":"reasoning","text":"**Checking eight restricted lemmas**"}}

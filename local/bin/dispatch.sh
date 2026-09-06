@@ -10,6 +10,7 @@
 #                         [--persona-ref REF]     trusted ref for personas (default: main)
 #                         [--no-persona]          dispatch with the built-in role frame only
 #                         [--resume THREAD_ID]    continue an existing codex thread
+#                         [--continue-from FILE]  fresh primary checkpoint/budget handoff JSON
 #                         [--account ACCOUNT]     auto|primary|second (default auto)
 #                         [--effort LEVEL]        model_reasoning_effort override
 #                         [--context-file FILE]   untrusted data to attach (repeatable)
@@ -159,6 +160,8 @@ PERSONA=""
 PERSONA_REF="${MIPSTARRE_PERSONA_REF:-main}"
 NO_PERSONA=0
 RESUME_ID=""
+CONTINUATION_FILE=""
+CONTINUATION_JSON=""
 ACCOUNT="${MIPSTARRE_CODEX_ACCOUNT:-auto}"
 ACCOUNT_WAIT="${MIPSTARRE_ACCOUNT_WAIT:-1800}"
 EFFORT=""
@@ -185,6 +188,7 @@ while [ "$#" -gt 0 ]; do
     --persona-ref) require_value "$1" "$#"; PERSONA_REF="$2"; shift 2 ;;
     --no-persona) NO_PERSONA=1; shift ;;
     --resume) require_value "$1" "$#"; RESUME_ID="$2"; shift 2 ;;
+    --continue-from) require_value "$1" "$#"; CONTINUATION_FILE="$2"; shift 2 ;;
     --account) require_value "$1" "$#"; ACCOUNT="$2"; shift 2 ;;
     --effort) require_value "$1" "$#"; EFFORT="$2"; shift 2 ;;
     --context-file)
@@ -226,20 +230,11 @@ case "$LOCK_WAIT" in
   ''|*[!0-9]*) die 2 "--lock-wait must be a whole number of seconds" ;;
 esac
 
-if [ -n "$EFFORT" ]; then
-  case "$EFFORT" in
-    *[!a-z]*) die 2 "--effort must be a bare lowercase word (e.g. low, medium, high, ultra)" ;;
-  esac
-fi
-
-if [ "$ROLE" = "mathfix" ]; then
-  case "${MIPSTARRE_CODEX_MODEL:-}:$EFFORT" in
-    *astra*:ultra) ;;
-    *) die 4 "mathfix requires an astra model in MIPSTARRE_CODEX_MODEL and --effort ultra.
-  Until the archived astra poller reports availability on #26, request the owner
-  session's Claude Fable 5.1 math-fix lane on #27." ;;
-  esac
-fi
+case "$EFFORT" in
+  ''|ultra) EFFORT=max ;;
+  max|xhigh) ;;
+  *) die 2 "--effort must be max or xhigh (legacy ultra maps to max)" ;;
+esac
 
 if [ -n "$RESUME_ID" ]; then
   case "$RESUME_ID" in
@@ -289,7 +284,7 @@ fi
 [ -d "$WORKTREE" ] || die 4 "worktree '$WORKTREE' does not exist.
   Create it first (git worktree add .worktrees/<branch> -b <branch>) and run
   local/bin/worktree-setup.sh in it; dispatch.sh does not create worktrees."
-WORKTREE_ABS="$(cd -- "$WORKTREE" && pwd)"
+WORKTREE_ABS="$(cd -- "$WORKTREE" && pwd -P)"
 git -C "$WORKTREE_ABS" rev-parse --is-inside-work-tree >/dev/null 2>&1 \
   || die 4 "worktree '$WORKTREE_ABS' is not a git work tree; codex exec needs one"
 
@@ -418,6 +413,27 @@ fi
 # tree of the branch under review; an absolute path outside the repository is
 # read directly.
 # ---------------------------------------------------------------------------
+
+if [ -n "$CONTINUATION_FILE$RESUME_ID" ]; then
+  [ -z "$CONTINUATION_FILE" ] || { [ -z "$RESUME_ID" ] && [ "$ACCOUNT" != second ]; } ||
+    die 4 "continuations use a fresh primary thread"
+  CONTINUATION_JSON="$(python3 - "$SCRIPT_DIR" "$CONTINUATION_FILE" "$REGISTRY" \
+    "$WORKTREE_ABS" "$ISSUE" "$RESUME_ID" <<'PY'
+import json, sys
+from pathlib import Path
+sys.path.insert(0, sys.argv[1])
+from account_router import continuation, resume_continuation
+value = (continuation(Path(sys.argv[2]), Path(sys.argv[3]), Path(sys.argv[4]), sys.argv[5])
+         if sys.argv[2] else resume_continuation(Path(sys.argv[3]), sys.argv[6]))
+print(json.dumps(value) if value else '')
+PY
+  )" || die 4 "invalid continuation; preserve the checkpoint and shared budget"
+fi
+if [ -n "$CONTINUATION_FILE" ]; then
+  ACCOUNT=primary
+  CONTEXT_FILES+=("$CONTINUATION_FILE")
+  TASK_PROMPT="Continue from the checkpoint and shared budget in the attached handoff; do not reset its anchor or charges. $TASK_PROMPT"
+fi
 
 builtin_frame() {
   case "$ROLE" in
@@ -620,6 +636,13 @@ if [ "$DRY_RUN" -eq 0 ] && [ "$SANDBOX" != "read-only" ]; then
   WT_BASE="$(printf '%s' "$(basename "$WORKTREE_ABS")" | tr -c 'A-Za-z0-9._-' '-')"
   acquire_lock "worktree-$WT_BASE-$WT_KEY" "$LOCK_WAIT" "worktree $WORKTREE_ABS"
 fi
+if [ -n "${MIPSTARRE_QUEUE_TICKET:-}" ]; then
+  [ "$(git -C "$WORKTREE_ABS" rev-parse HEAD)" = "${MIPSTARRE_QUEUE_EXPECTED_HEAD:-}" ] ||
+    die 4 "queued worktree head moved; adoption required"
+  [ -z "$RESUME_ID" ] && [ -z "$CONTINUATION_FILE" ] ||
+    die 4 "queued dispatch must be a fresh one-shot session"
+fi
+export MIPSTARRE_DISPATCH_WORKTREE="$WORKTREE_ABS"
 ROUTER_ARGS=("$CACHE_ROOT" "$ACCOUNT" "$$" "$ACCOUNT_WAIT" "$REGISTRY")
 if [ -n "$RESUME_ID" ]; then ROUTER_ARGS+=(--resume "$RESUME_ID"); fi
 if [ "$DRY_RUN" -eq 1 ]; then ROUTER_ARGS+=(--dry-run); fi
@@ -627,7 +650,7 @@ ACCOUNT_ROUTING=1
 ROUTING="$(python3 "$SCRIPT_DIR/account_router.py" "${ROUTER_ARGS[@]}")"
 ACCOUNT="${ROUTING%%$'\n'*}"
 MIPSTARRE_CODEX_MODEL="${ROUTING#*$'\n'}"
-ACCOUNT_ENV=(env -u CODEX_HOME)
+ACCOUNT_ENV=(env -u CODEX_HOME -u MIPSTARRE_QUEUE_TICKET -u MIPSTARRE_QUEUE_EXPECTED_HEAD)
 if [ "$ACCOUNT" = second ]; then
   ACCOUNT_ENV+=("CODEX_HOME=${MIPSTARRE_CODEX_HOME_SECOND:-$HOME/.cache/mipstarre-dev/codex-home-yxy}")
 fi
@@ -638,6 +661,7 @@ CODEX_ARGS[${#CODEX_ARGS[@]}]="-C"
 CODEX_ARGS[${#CODEX_ARGS[@]}]="$WORKTREE_ABS"
 CODEX_ARGS[${#CODEX_ARGS[@]}]="--sandbox"
 CODEX_ARGS[${#CODEX_ARGS[@]}]="$SANDBOX"
+CODEX_ARGS+=(-c 'features.multi_agent=false' -c 'agents.max_concurrent_threads_per_session=1')
 if [ -n "$LAKE_WRITE_DIR" ]; then
   CODEX_ARGS[${#CODEX_ARGS[@]}]="--add-dir"
   CODEX_ARGS[${#CODEX_ARGS[@]}]="$LAKE_WRITE_DIR"
@@ -678,6 +702,9 @@ if [ "$DRY_RUN" -eq 1 ]; then
   exit 0
 fi
 
+if [ -n "$CONTINUATION_JSON" ]; then
+  (umask 077; set -C; printf '%s\n' "$CONTINUATION_JSON" > "$CAPTURE_DIR/$NAME.continuation.json")
+fi
 note "dispatching $NAME (role=$ROLE account=$ACCOUNT sandbox=$SANDBOX worktree=$WORKTREE_ABS)"
 
 # stdin is closed: codex exec reads piped stdin as extra prompt input, which
@@ -711,6 +738,7 @@ TELEM_ARGS=(--repo-root "$REPO_ROOT" session-summarize "$PUBLISHED_CAPTURE_DIR/$
   --start "$START_TS" --end "$END_TS" --exit-code "$CODEX_EXIT"
   --dispatcher "$DISPATCHER" --worktree "$WORKTREE_ABS"
   --append-to "$REGISTRY" --shell-out "$SUMMARY_SH")
+[ -z "$CONTINUATION_JSON" ] || TELEM_ARGS+=(--continuation-json "$CONTINUATION_JSON")
 if [ -n "$PR_ID" ]; then
   TELEM_ARGS[${#TELEM_ARGS[@]}]="--pr"
   TELEM_ARGS[${#TELEM_ARGS[@]}]="$PR_ID"
@@ -719,13 +747,22 @@ if [ -n "${MIPSTARRE_CODEX_MODEL:-}" ]; then
   TELEM_ARGS[${#TELEM_ARGS[@]}]="--model"
   TELEM_ARGS[${#TELEM_ARGS[@]}]="$MIPSTARRE_CODEX_MODEL"
 fi
+TELEM_ARGS+=(--requested-effort "$EFFORT")
+
+REPLAY_EFFORT_ARG=" --requested-effort $EFFORT"
+REPLAY_CONTINUATION_ARG=""
+if [ -n "$CONTINUATION_JSON" ]; then
+  printf -v REPLAY_CONTINUATION_ARG ' --continuation-json "$(cat %q)"' \
+    "$CAPTURE_DIR/$NAME.continuation.json"
+fi
 
 if ! "${ACCOUNT_ENV[@]}" python3 "$TELEMETRY_PY" "${TELEM_ARGS[@]}" >/dev/null; then
+  printf -v REPLAY_ACCOUNT_ENV '%q ' "${ACCOUNT_ENV[@]}"
   die 6 "telemetry append failed for $NAME.
   The event stream is intact at $CAPTURE — replay it with:
-    python3 $TELEMETRY_PY session-summarize $CAPTURE --name $NAME \\
+    ${REPLAY_ACCOUNT_ENV}python3 $TELEMETRY_PY session-summarize $CAPTURE --name $NAME \\
       --role $ROLE --issue $ISSUE --start $START_TS --end $END_TS \\
-      --exit-code $CODEX_EXIT --account $ACCOUNT --model $MIPSTARRE_CODEX_MODEL \\
+      --exit-code $CODEX_EXIT --account $ACCOUNT --model $MIPSTARRE_CODEX_MODEL$REPLAY_EFFORT_ARG$REPLAY_CONTINUATION_ARG \\
       --append-to $REGISTRY
   Do not leave the session unrecorded (meta.md, telemetry duties)."
 fi
