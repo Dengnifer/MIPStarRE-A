@@ -5519,11 +5519,46 @@ not actual commit/publication hooks. No productive session was killed.
   gate logic and owner-inbox records were not changed by this session. No #27
   publication or model dispatch was attempted.
 
+
+## 2026-09-06 — Conservative Astra instructions and PR label publication (#291)
+
+- Owner ordered completion of the merge-liveness repair before migration. PR254
+  merged at 17:27:11Z as ad5adbed; at 17:38:56Z primary was clean and aligned
+  with GitHub at e1fba87, the checkpoint existed, and periodic service PID1664171
+  had completed checks at 17:32:59Z and 17:37:58Z. Old main was checkpointed,
+  its goal paused, and it exited normally before migration implementation.
+- The active persona still required relay, Max/Xhigh, fan-out off and a full
+  status scan each turn. Existing reviewed PR290 addresses native routing;
+  #291 is a small stacked follow-up, not a replacement of that work. It removes
+  remaining instruction conflicts, prompts bounded useful delegation and
+  follow-through, and retains permission, source, review and merge restrictions.
+- A live read at 17:46:27Z found 22 of 25 open PRs unlabeled. The creation path
+  only honored explicit labels; source-issue descriptive labels were ignored.
+  The fix inherits a narrow descriptive allowlist and refuses publication when
+  no descriptive label is supplied, inherited or retained. This refusal is a
+  new policy. Automation/approval/owner labels remain deliberate actions.
+- Basis: official OpenAI Astra guidance recommends auditing instruction files,
+  making initiative and delegation expectations explicit, and calibrating
+  validation. https://developers.openai.com/api/docs/guides/latest-model?model=gpt-6-astra
+  No provider capability or throughput conclusion is inferred from this guide.
+- Validation and post-restart outcomes are recorded separately when observed;
+  this entry does not claim a long-term occupancy improvement before measurement.
+
+- Validation outcome: five focused label regressions and all 571 workflow tests passed; `git diff --check` passed. Additive backfill verified all 22 audited open PRs while preserving their previous labels; per-PR receipts are in `owner-messages/qpbt-291-label-backfill-20260906.jsonl`.
+
 ## 2026-09-07
 
 - Space-cap5 merge-service checkpoint (2026-09-07): remote refs/heads/main and local main both resolve to 6989a351420e97f998ce6b7d68dd67de606ff5b1; transport is readable, runtime cap5/external0 is verified, and legacy merge-daemon-v8 PID2339019 remains SIGSTOPped after its historical SSH reset. The bounded service reports oldest exact-head CI/review-eligible PR254 created 2026-09-06T04:26:32Z (approximately 11h53m old at observation), but its head 7691c2cee6cf754c5add3661a15ec342799b1575 is stale against remote main. A direct daemon gate check of PR290 at a3eb4d57 refused gate2 because the primary tree held the uncommitted service file; no merge or manual gate bypass occurred. HOLD reasons and the required release conditions are durable in local/protocols/issues-prs.md and EVOLUTION.md.
 - Space-cap5 merge service one-shot (2026-09-07T16:25:01Z): after checked-push published main b4c6427562adcb42747e176ef2939c09f6924d7f, local and remote main aligned and primary clean; space cap5/external0 and no active fix lock were verified. The service observed six exact-head CI/review-eligible PRs; oldest is PR254, created 2026-09-06T04:26:32Z (about 11h57m old), head 7691c2cee6cf754c5add3661a15ec342799b1575, stale against remote main. Action HOLD; no pr_merge invocation, refresh, or manual merge. PR290 is also stale against this newly published main and requires an author-owned normal refresh before any new exact-head gates.
 - Space-cap5 merge-service cadence verification (2026-09-07T16:48:57Z): one-shot bounded tick held with local/remote main d2ef8ed aligned, clean primary check true before the read, and runtime cap5/external0 verified. GitHub eligibility reads exceeded the 30-second bound and were recorded as `ReadTimeout`; no fresh exact-head candidate was admitted and no pr_merge call occurred. PR254 refresh has now published head 5980914 but its CI/review statuses are still pending; the service remains HOLD until fresh gates are visible.
+- PR292 merged at2026-09-06T19:03:35Z as8deded332b5d7cab38c14ffde22298bfa9d3ff4c through the periodic service. Exactc25f429 CI and independent native Ultra review5126296800 were green; frozen main54676bb stayed unchanged through gates. Preserved CI/native rows in stashadbfe94a01faff89318d4d86955c8c515ed76d4d and quiet-G5uLN9 copies, then restored225+1048 bytes under file locks, verifying raw multiplicities, modes, and retention of the concurrent warmer prefix. Stash retained. Corrected prior paused-state claims: owner release18:28 and goal resume18:39 remain active; no further resume is required. Four disjoint successor assignments are extraction120/121 proofs, PR255 refresh, and disposable PR264 recovery. Account Space, literal Astra Ultra, shared root+4 cap and external0 remain. Detailed integration receipt: owner-messages/qpbt-pr292-integration-20260907.json.
+
+
+## 2026-09-06 — Snapshot publication regression in migration #291 (2026-09-06T18:37:46.043219+00:00)
+
+- Meta mistakenly invoked github-sync.sh with `push`; the helper takes branch names, so it refused that nonexistent branch and still committed its audit snapshot. Telemetry-only commits55f801e and54676bb were subsequently published through the explicit owner telemetry exception, with normal hooks. This operator error is recorded separately from the script defect.
+- Independent inspection and offline real-Git tests confirmed the valid default/main path also pushed before committing its snapshot, leaving local main ahead after reported success. A minimal follow-up now performs one final checked-push only after a requested main push and successful snapshot commit. It preserves branch-only scope, post-push snapshot timing, and visible failures; no snapshot recursion or new service is introduced.
+- Nine offline regression tests and bash syntax passed; three selected regressions fail against the original script. Normal final CI and independent review remain required for PR292. Main was resumed with the verified canonical Space lease and has launched four useful native assignments while meta retains author ownership of PR292.
 
 
 ## 2026-09-06 — Meta migration integration and main resume (2026-09-06T18:25:12.226750+00:00)
@@ -5532,3 +5567,5 @@ not actual commit/publication hooks. No productive session was killed.
 - Recovered pre-push failures without bypass: installed Lean PATH, then refreshed only branch-private generated build products from the completed main cache. An approval review initially applied the Mac mirror local-only rule to ghz; read-only ghz AGENTS.md/remote evidence established the authorized GitHub workflow and the same guarded push was accepted.
 - Main remained checkpointed during migration. Canonical native-lease released dead PID1064752 and bound resumed PID1792844, same root thread, Space/Astra Ultra, four descendants plus main, external0. Permissions, source integrity and merge/review gates remain unchanged. Old active handoff archived; current concise handoff is in owner-messages.
 - Preserved CI stash 5188e5e47bf64cdb5eb863c490044ddb39e1d54b. A post-merge warmer row made stash apply refuse; appended exactly the two verified CI deltas while retaining all746 current rows and every prior stash. Receipt: owner-messages/qpbt-291-restored-ci.json.
+
+- 2026-09-06T19:17:52.559119+00:00 — Meta migration #291 complete: PR292 merged, canonical review/CI green, all584 workflow tests passed,22 PR label backfills verified, and the deployed main sync published its post-push snapshot with clean remote equality. Main resumes the mathematical cycle on the preserved Space/Astra Ultra root+4 allocation. The design-decision index row was reformatted into its existing five columns without changing the decision. No routine meta heartbeat was reactivated.
