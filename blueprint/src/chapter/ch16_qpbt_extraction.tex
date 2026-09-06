@@ -116,6 +116,18 @@ The measurement $\{\hat{S}_{g_X,g_Z}\}$ reads out an $X$-polynomial and a $Z$-po
 	$\{\tau^W_a(\tilde{u})\}_{a\in\F_q}$ is a projective measurement.
 \end{lemma}
 
+\begin{proof}
+	\leanok
+	Let $U$ be the square matrix whose columns are the $W$-basis vectors $v_h$,
+	so that $\tau^W_h=v_hv_h^\dagger$. Completeness gives $UU^\dagger=\Id$,
+	hence $U$ is unitary. For each $a$, let $D_a$ be the diagonal projector
+	whose entry at $h$ is $1$ if $h\cdot\tilde{u}=a$ and $0$ otherwise.
+	Expanding the matrix product gives
+	$\tau^W_a(\tilde{u})=UD_aU^\dagger$, which is a projector.
+	The fibers of $h\mapsto h\cdot\tilde{u}$ partition $\F_q^M$, so
+	$\sum_a\tau^W_a(\tilde{u})=\sum_h\tau^W_h=\Id$.
+\end{proof}
+
 \begin{definition}[Pulled-apart Pauli basis measurements]\label{def:tilde-m-measurement}
 	\lean{MIPStarRE.QPBT.tildeM}
 	\leanok

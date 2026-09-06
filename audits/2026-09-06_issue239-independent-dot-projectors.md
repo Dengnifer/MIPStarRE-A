@@ -105,3 +105,29 @@ It supplies only these two targets of #120; that issue's other extraction
 obligations and its #119 dependency are unchanged. Independent review and the
 normal publication gates remain necessary. The principal proof step to inspect
 is the identification of the filtered sum with $UDU^*$.
+
+## 2026-09-06 publication preflight
+
+Session `orc-239-20260906-01` checks the completed proof at
+`49aa3cff77454ecfb8ab766f96c5ad13646b34ae` without changing Lean code.
+The completion tag mentioned in the first section is statement-level only.
+The matching proof environment for `lem:tau-dot-product-projective` now records
+the unitary-conjugation and finite-fiber arguments and carries proof-level
+`\leanok`. No other blueprint node or public statement changes.
+
+The targeted Lean check, the three linked declarations checked by `checkdecls`,
+the source-header comparison, and the blueprint LaTeX check pass. The repeated
+axiom check gives exactly `[propext, Classical.choice, Quot.sound]` for both
+theorems and their inputs. The proof-hole and bypass scan has no matches.
+`leanblueprint web` succeeds, with existing bibliography warnings.
+
+The earlier declaration-list omissions concern generated output:
+`blueprint/lean_decls` is ignored and absent from the starting revision's tree.
+Rendering generates that file; the normal pre-push hook subsequently regenerates
+its canonical contents before checking synchronization. No declaration-list
+change is included in this packet. Logs are under
+`~/.cache/mipstarre-dev/sessions/orc-239-20260906-01/`.
+
+The statement-integrity verdict remains faithful boundary hypotheses. Checked
+publication and exact-head CI are separate gates; independent review and merge
+are not performed by this preflight session.
