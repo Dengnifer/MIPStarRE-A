@@ -15,7 +15,16 @@ no frontmatter. Parent/child structure is the native sub-issue relation
 (`POST …/issues/{parent}/sub_issues`), one parent per issue exactly as the
 retired `parent:` scalar allowed; discussion is comments; labels come from the
 repository (`list-labels`, paginated), so `local/labels.yml` is retired and a
-label absent from GitHub is reported, never invented. Briefs (the design record
+label absent from GitHub is reported, never invented.
+`pr_open.py --issue N` inherits only its explicit descriptive-label allowlist
+from issue N, unions it with explicit `--label` values, and adds those labels
+without removing existing PR labels. Scheduling, approval and owner-state
+labels are never inherited. Before push, creation/adoption requires at least
+one descriptive label, supplied explicitly, inherited, or already on the PR;
+otherwise the command explains how the operator can classify the change.
+GitHub still validates label existence; the allowlist is an inheritance policy,
+not a replacement registry. Backfills use the same additive API and inspect
+the actual change when the source issue itself is unlabeled. Briefs (the design record
 per issue) live in `local/briefs/`: agent input, not lifecycle state.
 
 Prerequisites between issues are **GitHub issue dependencies**
@@ -54,6 +63,14 @@ closed even when that hook is stale or absent.  A caller's explicit
 `MIPSTARRE_SKIP_HOOKS=1` remains the documented emergency bypass.  It skips
 validation only: implicit tag following stays disabled, so publication remains
 limited to the explicit branch mapping.
+
+`github-sync.sh [ref ...]` takes branch names (default `main`), not a `push`
+subcommand. It retains the post-publication record snapshot. When an explicitly
+requested/default main push succeeded and the snapshot created a new telemetry
+commit, it checked-pushes main once more without creating another snapshot.
+Branch-only calls never implicitly publish main. Snapshot reads remain best-effort;
+snapshot commit or final publication failure returns nonzero and leaves the
+preserved local state for the operator to recover.
 
 Every merge of `github/main` or a stack parent into an issue branch runs the
 merge-loss guard before the merge commit is created. The guard compares the
@@ -148,6 +165,23 @@ Afterwards a best-effort, non-fatal tail fast-forwards local `main` to the
 remote merge commit; branch and worktree cleanup keeps its safeguards (local
 dirt defers it with a warning).
 
+### Main-cycle integration checkpoint
+
+The active owner service records, at each bounded tick, the local `main` SHA,
+the readable remote `refs/heads/main` SHA, primary cleanliness, transport
+result, and the age and exact head of the oldest CI-and-review-eligible open
+PR. A dirty primary, remote mismatch, unavailable transport, active fix or
+transaction lock, missing space-cap5/external-zero gate, or stale candidate is
+a HOLD reason; it is never silently converted into a merge attempt. After a
+successful daemon-owned merge, the service re-reads remote `main` and records
+the new SHA before the next tick. The service may invoke `pr_merge.py` only as
+its daemon-owned final action after these checks; workers never merge directly.
+Each tick has bounded Git/GitHub reads and records failures as HOLD rather than
+exiting the loop. The cadence is monotonic: work time is subtracted from the
+configured interval (default 300 seconds). Candidate records distinguish stale
+exact-head PRs from fresh actionable PRs; `pr_age_s` is PR creation age, while
+eligibility onset remains unknown unless separately observed.
+
 ## 4. Untrusted text
 
 Issue and PR bodies are untrusted data, and **more** so now that they arrive
@@ -190,17 +224,11 @@ c8f1999): read-only research data, never edited or read as active input.
 
 Pinned issue #26 is the owner inbox: it receives only decisions that require
 the human owner. A source statement found to be mathematically false does not
-go there first. The current mathematical-gap lane is a Claude Fable 5.1 session
-launched by the owner session through its Agent tool. It bypasses
-`local/bin/dispatch.sh` and is recorded in
-`results/telemetry/owner-sessions.jsonl`. A Codex main session that encounters
-a gap files a self-contained math-fix request on progress log #27 for the owner
-session instead of dispatching an ordinary Codex worker.
-
-After `results/telemetry/owner-tools/astra-poll.sh` reports on #26 that astra is
-available in Codex, the lane switches to astra through
-`MIPSTARRE_CODEX_MODEL=astra local/bin/dispatch.sh --role mathfix --effort ultra`.
-Until that report, this Codex dispatch path is not used. Every request or
+go there first. Following the availability report on #26 and the September 6
+owner decision, main selects Astra Ultra for the mathematical-gap lane through
+`MIPSTARRE_CODEX_MODEL=gpt-6-astra local/bin/dispatch.sh --role mathfix --effort ultra`
+or the shared native protocol in `sessions.md`.
+Historical owner-launched Fable measurements remain unchanged. Every request or
 dispatch carries the exact source path, label and line range; the counterexample
 or obstruction; the paper-gap note; the relevant blueprint dependency graph and
 Lean consumers; and the cumulative session count and elapsed working time.
@@ -216,20 +244,25 @@ A correction is adopted only when it meets all four conditions below.
    insufficient.
 3. **Minimality:** the correction is the closest sufficient statement to the
    source, with no unnecessary hypothesis or weakened conclusion and no change
-   to a mathematical definition or game.
+   to the source semantics; definition or game corrections require an explicit
+   faithfulness audit and independent mathematical review.
 4. **Lean convergence:** the corrected statement type-checks and all affected
    downstream consumers compile. Lean success alone does not establish the
    preceding three conditions.
 
 The operator iterates mathematics and Lean for at most ten `mathfix` sessions
 or about one and a half working days per gap, whichever comes first. The budget
-is shared across the owner-launched Fable lane and the future astra lane; a
-model or telemetry change does not reset it. If the correction requires
-changing a mathematical definition or game, the operator stops and escalates
-immediately. If the ordinary budget expires without a converged correction,
-#26 receives the attempted statements, counterexamples, proof sketches, and
-unresolved consumer failures. A still-running attempt is not grounds to reset
-the count.
+is shared across the historical owner-launched Fable lane and the Astra lane; a
+model or telemetry change does not reset it. Main decides mathematical
+corrections with the preceding evidence and independent review, including
+definition/game corrections that preserve the intended source semantics;
+changing the project goal is outside that authority. If the current authorized
+budget expires, stop that lane and record the attempted statements,
+counterexamples, proof sketches and unresolved consumers on #27 and in the gap
+note. Do not reset attempts or working time. Use #26 only for an owner-only
+permission, credential, access or scope/resource grant; mathematical difficulty
+alone is not an owner decision. An already-posted #26 item waits for the owner
+unless the owner explicitly returns it to main.
 
 An adopted correction follows the ordinary CI and independent-review gates. The
 operator announces it in one line on progress log #27 and records it in the

@@ -12,6 +12,7 @@ from pathlib import Path
 import shlex
 import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
 from unittest import mock
@@ -26,11 +27,25 @@ ROUTER = DISPATCH.with_name("account_router.py")
 SPEC = importlib.util.spec_from_file_location("account_router", ROUTER)
 router = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(router)
+HOST_PROCESS_SCAN = router.host_processes
+
+
+def isolate_host(binary_dir: Path) -> None:
+    interpreter = binary_dir / 'python3'
+    interpreter.write_text(f'#!{sys.executable}\nimport os, runpy, sys\n'
+        'if sys.argv[1].endswith("/account_router.py"):\n'
+        '    loaded = runpy.run_path(sys.argv.pop(1))\n'
+        '    loaded["reserve"].__globals__["host_processes"] = lambda *args: ({}, {})\n'
+        '    loaded["main"]()\n'
+        'else: os.execv(sys.executable, [sys.executable, *sys.argv[1:]])\n')
+    interpreter.chmod(0o755)
 
 
 class DispatchCommandTests(unittest.TestCase):
     def recorded_dispatch(self, model: str | None, account: str = "auto",
-                          exit_code: int = 0, empty_second_home: bool = False) -> dict[str, object]:
+                          exit_code: int = 0, empty_second_home: bool = False,
+                          effort: str | None = None,
+                          continue_from: bool = False) -> dict[str, object]:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             repo = root / "repo"
@@ -44,6 +59,7 @@ class DispatchCommandTests(unittest.TestCase):
 
             fake_bin = root / "bin"
             fake_bin.mkdir()
+            isolate_host(fake_bin)
             fake_codex = fake_bin / "codex"
             fake_codex.write_text(
                 "#!/bin/sh\n"
@@ -84,28 +100,51 @@ class DispatchCommandTests(unittest.TestCase):
             env.pop("MIPSTARRE_CODEX_MODEL", None)
             if model is not None:
                 env["MIPSTARRE_CODEX_MODEL"] = model
+            watchdog = root / 'cache/watchdog'
+            watchdog.mkdir(parents=True)
+            (watchdog / 'account-mode').write_text('both' if account == 'second' else 'primary')
 
+            dispatch_args = [str(local_bin / 'dispatch.sh'), '--role', 'scout',
+                             '--issue', 'model-record', '--worktree', str(repo),
+                             '--no-persona', '--skip-hook-check']
+            if effort is not None:
+                dispatch_args.extend(["--effort", effort])
+            if continue_from:
+                subprocess.run(['git', '-c', 'user.name=Test', '-c', 'user.email=test@test',
+                                'commit', '--allow-empty', '-qm', 'checkpoint'], cwd=repo, check=True)
+                previous = dict(name='prior', account='second', thread_id='old-thread',
+                                issue='model-record', status='done', wall_s=20)
+                registry = repo / 'results/telemetry/sessions.jsonl'
+                registry.parent.mkdir(parents=True)
+                registry.write_text(json.dumps(previous) + '\n')
+                budget = root / 'budget.json'
+                budget.write_text(json.dumps(dict(anchor='2026-09-05T19:24:00Z', attempts=7,
+                    attempt_limit=10, working_seconds=12452, sessions=['prior'])))
+                handoff = root / 'handoff.json'
+                handoff.write_text(json.dumps(dict(previous_session='prior', checkpoint='HEAD',
+                                                   budget_file=str(budget))))
+                dispatch_args.extend(['--continue-from', str(handoff)])
+            dispatch_args.extend(["--", "test prompt"])
+            if continue_from:
+                (local_bin / 'telemetry.py').write_text('raise SystemExit(1)\n')
             result = subprocess.run(
-                [
-                    str(local_bin / "dispatch.sh"),
-                    "--role",
-                    "scout",
-                    "--issue",
-                    "model-record",
-                    "--worktree",
-                    str(repo),
-                    "--no-persona",
-                    "--skip-hook-check",
-                    "--",
-                    "test prompt",
-                ],
+                dispatch_args,
                 cwd=repo,
                 env=env,
                 check=False,
                 capture_output=True,
                 text=True,
             )
-            self.assertEqual(result.returncode, exit_code, result.stderr)
+            self.assertEqual(result.returncode, 6 if continue_from else exit_code, result.stderr)
+            if continue_from:
+                shutil.copy2(TELEMETRY, local_bin / 'telemetry.py')
+                budget.write_text('{}')
+                replay = result.stderr.split('replay it with:\n')[1].split('\n  Do not leave')[0]
+                subprocess.run(['bash', '-c', replay], cwd=repo, env=env, check=True,
+                               capture_output=True, text=True)
+                dispatch_args[dispatch_args.index('--continue-from'):] = [
+                    '--resume', THREAD_ID, '--', 'test prompt']
+                subprocess.run(dispatch_args, cwd=repo, env=env, check=True, capture_output=True)
             selected = "second" if account == "second" else "primary"
             self.assertEqual((home / "selected-home").read_text(),
                              str(second) if selected == "second" else "unset")
@@ -113,18 +152,22 @@ class DispatchCommandTests(unittest.TestCase):
             records = (repo / "results" / "telemetry" / "sessions.jsonl").read_text(
                 encoding="utf-8"
             ).splitlines()
-            self.assertEqual(len(records), 1)
-            record = json.loads(records[0])
-            self.assertEqual(record["rollout"], str(rollout))
+            self.assertEqual(len(records), 3 if continue_from else 1)
+            if continue_from:
+                self.assertEqual(json.loads(records[0]), previous)
+            record = json.loads(records[-1])
+            self.assertEqual(record["rollout"], rollout.name)
+            self.assertIsNone(record['usage'])
             return record
 
     def dispatch_command(
-        self, *extra: str, model: str = "test-model", effort: str = "high",
-        include_persona: bool = False,
+        self, *extra: str, model: str = "gpt-6-astra", effort: str | None = "ultra",
+        include_persona: bool = False, registry_rows: str = "",
     ) -> list[str]:
         with tempfile.TemporaryDirectory() as cache_root:
             fake_bin = Path(cache_root) / "bin"
             fake_bin.mkdir()
+            isolate_host(fake_bin)
             fake_codex = fake_bin / "codex"
             fake_codex.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
             fake_codex.chmod(0o755)
@@ -143,26 +186,30 @@ class DispatchCommandTests(unittest.TestCase):
                     "PATH": f"{fake_bin}{os.pathsep}{env.get('PATH', '')}",
                 }
             )
+            (Path(cache_root) / 'watchdog').mkdir()
+            (Path(cache_root) / 'watchdog/account-mode').write_text('both')
+            worktree = REPO_ROOT
+            dispatch = DISPATCH
+            if registry_rows:
+                worktree = Path(cache_root) / 'repo'
+                registry = worktree / 'results/telemetry/sessions.jsonl'
+                registry.parent.mkdir(parents=True)
+                registry.write_text(registry_rows)
+                (worktree / 'AGENTS.md').write_text('# Test repository\n')
+                subprocess.run(['git', 'init', '-q', str(worktree)], check=True)
+                dispatch = worktree / 'local/bin/dispatch.sh'
+                dispatch.parent.mkdir(parents=True)
+                for source in (DISPATCH, ROUTER, TELEMETRY):
+                    shutil.copy2(source, dispatch.parent / source.name)
+            dispatch_args = [str(dispatch), '--role', 'scout', '--issue', 'dispatch-argv',
+                             '--worktree', str(worktree), '--sandbox', 'read-only',
+                             *([] if include_persona else ['--no-persona']),
+                             '--skip-hook-check', '--dry-run', *extra]
+            if effort is not None:
+                dispatch_args.extend(["--effort", effort])
+            dispatch_args.extend(["--", "test prompt"])
             result = subprocess.run(
-                [
-                    str(DISPATCH),
-                    "--role",
-                    "scout",
-                    "--issue",
-                    "dispatch-argv",
-                    "--worktree",
-                    str(REPO_ROOT),
-                    "--sandbox",
-                    "read-only",
-                    *([] if include_persona else ["--no-persona"]),
-                    "--skip-hook-check",
-                    "--effort",
-                    effort,
-                    "--dry-run",
-                    *extra,
-                    "--",
-                    "test prompt",
-                ],
+                dispatch_args,
                 cwd=REPO_ROOT,
                 env=env,
                 check=True,
@@ -180,45 +227,57 @@ class DispatchCommandTests(unittest.TestCase):
     def assert_common_exec_options(self, argv: list[str]) -> None:
         self.assertEqual(argv[:3], ["codex", "exec", "--json"])
         self.assertEqual(argv[3:7], ["-C", str(REPO_ROOT), "--sandbox", "read-only"])
-        self.assertEqual(argv[7], "-o")
-        self.assertTrue(argv[8].endswith(".last.md"))
+        self.assertEqual(argv[7:11], ['-c', 'features.multi_agent=false', '-c',
+                                    'agents.max_concurrent_threads_per_session=1'])
+        self.assertEqual(argv[11], "-o")
+        self.assertTrue(argv[12].endswith(".last.md"))
         self.assertEqual(
-            argv[9:13],
-            ["-m", "test-model", "-c", "model_reasoning_effort=high"],
+            argv[13:17],
+            ["-m", "gpt-6-astra", "-c", "model_reasoning_effort=ultra"],
         )
 
     def test_fresh_argv_keeps_all_exec_options_before_prompt(self) -> None:
         argv = self.dispatch_command()
 
         self.assert_common_exec_options(argv)
-        self.assertEqual(argv[13:], ["--", "<prompt>"])
+        self.assertEqual(argv[17:], ["--", "<prompt>"])
 
     def test_resume_argv_places_exec_options_before_subcommand(self) -> None:
         argv = self.dispatch_command("--resume", THREAD_ID)
 
         self.assert_common_exec_options(argv)
-        self.assertEqual(argv[13:], ["resume", "--", THREAD_ID, "<prompt>"])
+        self.assertEqual(argv[17:], ["resume", "--", THREAD_ID, "<prompt>"])
 
-    def test_future_astra_mathfix_selects_model_effort_and_persona(self) -> None:
-        # HEAD remains the pre-merge branch tip while a merge commit is being prepared.
-        argv = self.dispatch_command(
-            "--role", "mathfix", "--sandbox", "workspace-write", "--persona-ref", "main",
-            model="astra", effort="ultra", include_persona=True,
-        )
+    def test_astra_preserves_selected_effort_for_every_role_and_resume(self) -> None:
+        for role in ('orc', 'prover', 'reviewer', 'simplifier', 'blueprint', 'splitter',
+                     'scout', 'mathfix'):
+            for effort in (None, 'ultra'):
+                with self.subTest(role=role, effort=effort):
+                    for extra in ((), ('--resume', THREAD_ID)):
+                        argv = self.dispatch_command('--role', role, *extra, effort=effort)
+                        self.assertIn('model_reasoning_effort=ultra', argv)
 
-        self.assertEqual(argv[3:7], ["-C", str(REPO_ROOT), "--sandbox", "workspace-write"])
-        self.assertEqual(argv[argv.index("-m") + 1], "astra")
-        self.assertIn("model_reasoning_effort=ultra", argv)
-        self.assertIn("persona: main:local/personas/mathfix.md", self.last_dispatch_stdout)
-        self.assertIn("# Persona: mathematical-gap repair", self.last_dispatch_stdout)
+    def test_sol_is_rejected_for_every_role(self) -> None:
+        for role in ('orc', 'prover', 'reviewer', 'simplifier', 'blueprint', 'splitter',
+                     'scout', 'mathfix'):
+            with self.assertRaises(subprocess.CalledProcessError):
+                self.dispatch_command('--role', role, model='gpt-5.6-sol')
 
-    def test_mathfix_rejects_non_astra_or_non_ultra_dispatches(self) -> None:
-        for model, effort in (("", "ultra"), ("test-model", "ultra"), ("astra", "high")):
+    def test_astra_mathfix_selects_persona(self) -> None:
+        argv = self.dispatch_command('--role', 'mathfix', '--sandbox', 'workspace-write',
+                                     '--persona-ref', 'main', include_persona=True)
+        self.assertEqual(argv[3:7], ['-C', str(REPO_ROOT), '--sandbox', 'workspace-write'])
+        self.assertIn('persona: main:local/personas/mathfix.md', self.last_dispatch_stdout)
+        self.assertIn('# Persona: mathematical-gap repair', self.last_dispatch_stdout)
+
+    def test_mathfix_rejects_non_astra_dispatches(self) -> None:
+        for model, effort in (("gpt-5.6-sol", "ultra"),
+                              ("test-model", "ultra"), ("astra", "ultra")):
             with self.subTest(model=model, effort=effort):
                 with self.assertRaises(subprocess.CalledProcessError) as failure:
                     self.dispatch_command("--role", "mathfix", model=model, effort=effort)
                 self.assertEqual(failure.exception.returncode, 4)
-                self.assertIn("mathfix requires an astra model", failure.exception.stderr)
+                self.assertIn("owner policy requires gpt-6-astra", failure.exception.stderr)
 
     def test_telemetry_accepts_mathfix_role(self) -> None:
         result = subprocess.run(
@@ -230,34 +289,30 @@ class DispatchCommandTests(unittest.TestCase):
 
         self.assertIn("mathfix", result.stdout)
 
-    def test_registry_records_explicit_model_override(self) -> None:
-        record = self.recorded_dispatch("gpt-test-explicit")
+    def test_registry_records_effective_requested_effort(self) -> None:
+        for model, effort in ((None, None), ('', 'ultra'), ('gpt-6-astra', 'ultra')):
+            record = self.recorded_dispatch(model, effort=effort)
+            self.assertEqual(record['requested_effort'], 'ultra')
+            self.assertEqual(record['key_label'], 'unknown')
+            self.assertEqual(record['model'], 'gpt-6-astra')
+            self.assertEqual(record['account'], 'primary')
 
-        self.assertEqual(record["model"], "gpt-test-explicit")
-
-    def test_registry_resolves_account_config_model(self) -> None:
-        for model in (None, ""):
-            with self.subTest(model=model):
-                record = self.recorded_dispatch(model)
-
-                self.assertEqual(record["model"], "gpt-config-default")
-                self.assertEqual(record["account"], "primary")
-
-    def test_unresolved_model_fails_before_execution(self) -> None:
-        with self.assertRaises(subprocess.CalledProcessError) as failure:
-            self.dispatch_command(model="")
-        self.assertEqual(failure.exception.returncode, 4)
+    def test_secondary_checkpoint_continuation_preserves_budget_and_history(self) -> None:
+        record = self.recorded_dispatch(None, continue_from=True)
+        self.assertEqual(record['account'], 'primary')
+        self.assertEqual(record['continuation']['previous_thread_id'], 'old-thread')
+        self.assertEqual(record['continuation']['budget']['working_seconds'], 12452)
 
     def test_second_account_environment_and_failed_session_cleanup(self) -> None:
         record = self.recorded_dispatch(None, "second", exit_code=7)
         self.assertEqual(record["account"], "second")
-        self.assertEqual(record["model"], "gpt-second-default")
+        self.assertEqual(record["model"], "gpt-6-astra")
         self.assertEqual(record["status"], "failed")
 
     def test_empty_secondary_home_uses_default_for_model_and_execution(self) -> None:
         record = self.recorded_dispatch(None, "second", empty_second_home=True)
         self.assertEqual(record["account"], "second")
-        self.assertEqual(record["model"], "gpt-second-default")
+        self.assertEqual(record["model"], "gpt-6-astra")
 
     def test_account_argument_validation_and_override(self) -> None:
         for value in ("invalid", "", "secondary"):
@@ -271,6 +326,28 @@ class DispatchCommandTests(unittest.TestCase):
         with self.assertRaises(subprocess.CalledProcessError) as failure:
             self.dispatch_command("--resume", THREAD_ID, "--account", "second")
         self.assertIn("resume belongs to primary", failure.exception.stderr)
+
+    def test_resume_preflight_tolerates_bad_rows_but_rejects_invalid_metadata(self) -> None:
+        noise = '\n{"truncated":\nnull\n[]\n42\n{"thread_id":"other","continuation":42}\n'
+        row = dict(name='prior', thread_id=THREAD_ID, account='primary', wall_s=20)
+        metadata = dict(budget_file='/shared/budget', budget=dict(anchor='original', attempts=7,
+            attempt_limit=10, working_seconds=12452, sessions=['prior']))
+        for change in ({}, {'continuation': {}}, {'continuation': metadata}):
+            argv = self.dispatch_command('--resume', THREAD_ID,
+                                         registry_rows=noise + json.dumps(row | change))
+            self.assertIn('resume', argv)
+        for invalid in (None, [], False, 42, 'bad', {'budget_file': '/shared/budget'}):
+            with self.assertRaises(subprocess.CalledProcessError) as failure:
+                self.dispatch_command('--resume', THREAD_ID,
+                    registry_rows=noise + json.dumps(row | {'continuation': invalid}))
+            self.assertEqual(failure.exception.returncode, 4)
+            self.assertIn('invalid continuation', failure.exception.stderr)
+
+    def test_unsupported_efforts_fail_before_admission(self) -> None:
+        for effort in ('max', 'xhigh', 'high', 'low', 'unknown'):
+            with self.assertRaises(subprocess.CalledProcessError) as failure:
+                self.dispatch_command(effort=effort)
+            self.assertEqual(failure.exception.returncode, 2)
 
     def test_session_status_preserves_legacy_row_without_model(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -303,6 +380,7 @@ class DispatchCommandTests(unittest.TestCase):
             archived = json.loads(result.stdout)
             self.assertEqual(archived["status"], "archived")
             self.assertNotIn("model", archived)
+            self.assertNotIn("requested_effort", archived)
 
     def test_workspace_write_grants_only_resolved_external_lake(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -312,9 +390,12 @@ class DispatchCommandTests(unittest.TestCase):
             subprocess.run(["git", "init", "-q", "-b", "main"], cwd=worktree, check=True)
             target.mkdir(parents=True)
             (worktree / ".lake").symlink_to(target, target_is_directory=True)
+            alias = root / 'alias'
+            alias.symlink_to(worktree, target_is_directory=True)
             with mock.patch.dict(os.environ, {"MIPSTARRE_LAKE_ROOT": str(target.parent)}):
-                argv = self.dispatch_command("--role", "prover", "--worktree", str(worktree),
+                argv = self.dispatch_command("--role", "prover", "--worktree", str(alias),
                                              "--sandbox", "workspace-write")
+        self.assertEqual(argv[argv.index('-C') + 1], str(worktree))
         self.assertEqual(argv[argv.index("--add-dir") + 1], str(target.resolve()))
         self.assertLess(argv.index("--add-dir"), argv.index("-o"))
 
@@ -326,6 +407,206 @@ class DispatchCommandTests(unittest.TestCase):
 
 
 class AccountRouterTests(unittest.TestCase):
+    def test_continuation_charges_completed_time_even_after_a_legacy_resume(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            registry, budget, handoff = (root / name for name in ('registry', 'budget', 'handoff'))
+            original = dict(anchor='original', attempts=7, attempt_limit=10,
+                            working_seconds=12452, sessions=['prior', 'resumed'])
+            previous = dict(name='prior', thread_id='thread', account='primary', issue='scope',
+                            status='done', wall_s=2600, continuation=dict(
+                                budget_file=str(budget), budget=original))
+            for resumed in (False, True):
+                history = [previous] + ([dict(previous, name='resumed', wall_s=50,
+                                             continuation={})] if resumed else [])
+                registry.write_text('\n'.join(json.dumps(row) for row in history))
+                request = dict(previous_session=history[-1]['name'], checkpoint='HEAD',
+                               budget_file=str(budget))
+                handoff.write_text(json.dumps(request))
+                required = 15052 + (50 if resumed else 0)
+                charged = dict(original, attempts=8, working_seconds=required)
+                for change in ({'working_seconds': 12452}, {'working_seconds': required - 1},
+                               {'anchor': 'reset'}, {'attempts': 1}):
+                    budget.write_text(json.dumps(charged | change))
+                    with self.assertRaises(ValueError):
+                        router.continuation(handoff, registry, REPO_ROOT, 'scope')
+                budget.write_text(json.dumps(charged))
+                self.assertEqual(router.continuation(handoff, registry, REPO_ROOT, 'scope')[
+                    'budget']['working_seconds'], required)
+                other = root / 'reset-budget'
+                other.write_text(budget.read_text())
+                handoff.write_text(json.dumps(request | {'budget_file': str(other)}))
+                with self.assertRaises(ValueError):
+                    router.continuation(handoff, registry, REPO_ROOT, 'scope')
+
+    def setUp(self) -> None:
+        patcher = mock.patch.object(router, 'host_processes', return_value=({}, {}))
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def test_host_scan_handles_global_options_without_reading_prompt_as_command(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for name in ('1', 'self', '100', '200'):
+                (root / name).mkdir()
+            (root / '1/comm').write_text('systemd')
+            (root / 'self/status').write_text(f'NSpid:\t{os.getpid()}')
+            for pid, arguments in ((100, ['codex', '-m', 'gpt-6-astra', '-c',
+                                          'model_reasoning_effort=ultra', 'exec', '--', 'prompt']),
+                                   (200, ['codex', '-m', 'gpt-6-astra', '--', 'exec'])):
+                process = root / str(pid)
+                (process / 'status').write_text(f'Name:\tcodex\nPPid:\t{200 if pid == 100 else 1}')
+                (process / 'cmdline').write_bytes(b'\0'.join(arg.encode() for arg in arguments))
+                (process / 'environ').write_bytes(b'HOME=/home/drx')
+                (process / 'cwd').symlink_to('/home/drx/FV')
+            def mapped_path(path):
+                return root / str(path).removeprefix('/proc').lstrip('/') if str(path).startswith(
+                    '/proc') else Path(path)
+            with mock.patch.object(router, 'Path', side_effect=mapped_path) as paths, \
+                 mock.patch.dict(os.environ, {'MIPSTARRE_CODEX_HOME_SECOND': '/second'}):
+                paths.home.return_value = Path('/home/drx')
+                self.assertEqual(HOST_PROCESS_SCAN()[1],
+                                 {100: ('primary', False), 200: ('primary', True)})
+                self.assertEqual(HOST_PROCESS_SCAN(['/home/drx/FV'])[1], {100: ('primary', False)})
+                self.assertEqual(len(HOST_PROCESS_SCAN(['/home/drx'])[1]), 2)
+
+    def test_mode_changes_disabled_caps_and_preserved_both_settings(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            watchdog = root / 'watchdog'
+            watchdog.mkdir()
+            mode = watchdog / 'account-mode'
+            self.assertEqual(router.reserve(root, 'auto', 123, 0, True), 'primary')
+            with self.assertRaisesRegex(ValueError, 'disabled'):
+                router.reserve(root, 'second', 123, 0, True)
+            (watchdog / 'max-codex-primary').write_text('0')
+            with self.assertRaises(ValueError):
+                router.reserve(root, 'auto', 123, 0, True)
+            mode.write_text('both')
+            self.assertEqual(router.reserve(root, 'auto', 123, 0, True), 'second')
+            preserved = watchdog / 'account-mode-both-preserved.json'
+            settings = '{"max_codex":19,"primary":10,"second":9}'
+            preserved.write_text(settings)
+            self.assertEqual(router.reserve(root, 'auto', 123, 0, True), 'primary')
+            mode.write_text('primary')
+            with self.assertRaises(ValueError):
+                router.reserve(root, 'auto', 123, 0, True)
+            self.assertEqual(preserved.read_text(), settings)
+            self.assertEqual((watchdog / 'max-codex-primary').read_text(), '0')
+            mode.write_text('invalid')
+            with self.assertRaises(ValueError):
+                router.reserve(root, 'auto', 123, 0, True)
+            mode.write_text('primary')
+            for exclusions in ('null', '{}', '["/tmp"]', '["/home/drx", "/home/drx"]', '{'):
+                (watchdog / 'primary-excluded-interactive-cwds.json').write_text(exclusions)
+                with self.assertRaises(ValueError):
+                    router.reserve(root, 'auto', 123, 0, True)
+
+    def test_secondary_resume_cannot_override_primary_mode(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            registry = root / 'registry'
+            registry.write_text(json.dumps(dict(thread_id=THREAD_ID, account='second')))
+            with mock.patch.dict(os.environ, {'HOME': directory,
+                                              'MIPSTARRE_CODEX_MODEL': 'gpt-6-astra'}):
+                for account in ('auto', 'primary', 'second'):
+                    with mock.patch('sys.argv', [str(ROUTER), directory, account, '123', '0',
+                         str(registry), '--resume', THREAD_ID]), mock.patch('sys.stderr'), \
+                         self.assertRaises(SystemExit) as failure:
+                        router.main()
+                    self.assertEqual(failure.exception.code, 4)
+            self.assertFalse(list(root.glob('accounts/*/[0-9]*')))
+
+    def test_host_visibility_failure_does_not_delete_reservations(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            marker = root / 'accounts/primary/123'
+            marker.parent.mkdir(parents=True)
+            marker.touch()
+            with mock.patch.object(router, 'host_processes', side_effect=PermissionError), \
+                 mock.patch.object(router.os, 'kill', side_effect=ProcessLookupError), \
+                 self.assertRaises(PermissionError):
+                router.reserve(root, 'auto', 456, 0, False)
+            self.assertTrue(marker.exists())
+
+    def test_main_additional_uses_orphans_and_reservation_reconciliation(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            marker = root / 'accounts/primary/100'
+            marker.parent.mkdir(parents=True)
+            marker.touch()
+            parents = {101: 100, 100: 1, 200: 1, 300: 1, 400: 1, 500: 1, 600: 1}
+            processes = {101: ('primary', False), 600: ('primary', False),
+                         **{pid: ('primary', True) for pid in (200, 300, 400, 500)}}
+            with mock.patch.object(router, 'host_processes', return_value=(parents, processes)), \
+                 mock.patch.object(router.os, 'kill'):
+                self.assertEqual(router.occupancy(root), ([2, 0], [4, 0]))
+            with mock.patch.object(router, 'occupancy', return_value=([8, 0], [4, 0])), \
+                 self.assertRaises(ValueError):
+                router.reserve(root, 'auto', 123, 0, False)
+            (root / 'watchdog').mkdir()
+            (root / 'watchdog/primary-external-reserved').write_text('1')
+            with mock.patch.object(router, 'occupancy', return_value=([7, 0], [4, 0])), \
+                 self.assertRaises(ValueError):
+                router.reserve(root, 'auto', 123, 0, False)
+
+    def test_last_primary_slot_is_atomic_under_contention(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'watchdog').mkdir()
+            (root / 'watchdog/max-codex-primary').write_text('11')
+            (root / 'watchdog/primary-excluded-interactive-cwds.json').write_text('["/home/drx"]')
+            def attempt(pid):
+                try:
+                    return router.reserve(root, 'auto', pid, 0, False)
+                except ValueError:
+                    return 'full'
+            with mock.patch.object(router.os, 'kill'), ThreadPoolExecutor(18) as pool:
+                results = list(pool.map(attempt, range(100, 118)))
+            self.assertEqual(results.count('primary'), 10)
+            self.assertEqual(results.count('full'), 8)
+
+    def test_runtime_shim_preserves_selected_effort_and_prompt(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            home = Path(directory)
+            binary = home / '.local/bin/codex'
+            binary.parent.mkdir(parents=True)
+            binary.write_text('#!/usr/bin/env python3\nimport json, sys\nprint(json.dumps(sys.argv[1:]))')
+            binary.chmod(0o755)
+            environment = dict(os.environ, HOME=directory, CODEX_HOME=str(home / '.codex'),
+                               MIPSTARRE_CACHE_ROOT=str(home / 'cache'))
+            shim = str(DISPATCH.with_name('codex-policy-shim.sh'))
+            for arguments, expected in (([], 'ultra'), (['-c', 'model_reasoning_effort="ultra"'], 'ultra'),
+                    (['--config=model_reasoning_effort=ultra'], 'ultra'),
+                    (['-m=gpt-6-astra', '-c=model_reasoning_effort=ultra'], 'ultra'),
+                    (['-cmodel_reasoning_effort=ultra'], 'ultra'),
+                    (['--config', "model_reasoning_effort='ultra'"], 'ultra')):
+                result = subprocess.run(['bash', shim, 'exec', '-mgpt-6-astra', *arguments,
+                                         '--config', 'features.multi_agent=true',
+                                         '-c', 'agents.max_concurrent_threads_per_session=2',
+                                         '--', 'prompt with model_reasoning_effort=ultra'],
+                    env=environment, capture_output=True, text=True, check=True)
+                argv = json.loads(result.stdout)
+                self.assertEqual([item for item in argv if item.startswith('model_reasoning_effort=')],
+                                 [f'model_reasoning_effort="{expected}"'])
+                self.assertIn('features.multi_agent=false', argv)
+                self.assertIn('agents.max_concurrent_threads_per_session=1', argv)
+                self.assertTrue(argv[-1].endswith('prompt with model_reasoning_effort=ultra'))
+            for arguments in (['-m', 'gpt-5.6-sol'], ['-c', 'model="gpt-5.6-sol"'],
+                              ['-mgpt-5.6-sol'],
+                              ['-m=gpt-5.6-sol'], ['-c=model_reasoning_effort=xhigh'],
+                              ['-c', 'model_reasoning_effort=max'],
+                              ['--config=model_reasoning_effort=xhigh'],
+                              ['-c', 'model_reasoning_effort=low'],
+                              ['--enable', 'multi_agent'], ['--enable=foo,multi_agent'],
+                              ['-c', 'features={multi_agent=true}'],
+                              ['--config=agents={max_concurrent_threads_per_session=2}']):
+                self.assertEqual(subprocess.run(['bash', shim, *arguments], env=environment,
+                    capture_output=True).returncode, 4)
+            environment['CODEX_HOME'] = str(home / 'second')
+            self.assertEqual(subprocess.run(['bash', shim, 'exec'], env=environment,
+                capture_output=True).returncode, 4)
+
     def test_empty_secondary_home_resume_uses_default_rollout(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -334,6 +615,8 @@ class AccountRouterTests(unittest.TestCase):
             rollout.parent.mkdir(parents=True)
             rollout.touch()
             (second / "config.toml").write_text('model = "gpt-second-default"\n')
+            (root / 'cache/watchdog').mkdir(parents=True)
+            (root / 'cache/watchdog/account-mode').write_text('both')
             with mock.patch.dict(os.environ, {
                 "HOME": str(root), "MIPSTARRE_CODEX_HOME_SECOND": "",
                 "MIPSTARRE_CODEX_MODEL": "",
@@ -343,7 +626,7 @@ class AccountRouterTests(unittest.TestCase):
             ]), mock.patch("builtins.print") as output:
                 router.main()
             self.assertEqual(output.call_args_list,
-                             [mock.call("second"), mock.call("gpt-second-default")])
+                             [mock.call("second"), mock.call("gpt-6-astra")])
 
     def test_resume_skips_bad_rows_without_losing_affinity_or_conflicts(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -390,14 +673,19 @@ class AccountRouterTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             (root / "watchdog").mkdir()
+            (root / 'watchdog/account-mode').write_text('both')
             for account in router.ACCOUNTS:
                 (root / "watchdog" / f"max-codex-{account}").write_text("8")
+            def attempt(pid):
+                try:
+                    return router.reserve(root, "auto", pid, 0, False)
+                except ValueError:
+                    return 'full'
             with mock.patch.object(router.os, "kill"), ThreadPoolExecutor(16) as pool:
-                selected = list(pool.map(
-                    lambda pid: router.reserve(root, "auto", pid, 0, False), range(100, 116)
-                ))
+                selected = list(pool.map(attempt, range(100, 116)))
             self.assertEqual(selected.count("primary"), 8)
-            self.assertEqual(selected.count("second"), 8)
+            self.assertEqual(selected.count("second"), 7)
+            self.assertEqual(selected.count("full"), 1)
 
     def test_model_comparison_prefers_registry_and_keeps_rollout_fallback(self) -> None:
         spec = importlib.util.spec_from_file_location(
@@ -429,7 +717,7 @@ class AccountRouterTests(unittest.TestCase):
             with mock.patch.object(router.os, "kill", side_effect=[
                 ProcessLookupError(), None, PermissionError()
             ]):
-                self.assertEqual(router.live_count(root), 2)
+                self.assertEqual(len(router.live_pids(root)), 2)
             self.assertEqual(len(list(root.iterdir())), 2)
 
     def test_caps_wait_timeout_and_explicit_affinity(self) -> None:
@@ -438,14 +726,16 @@ class AccountRouterTests(unittest.TestCase):
             (root / "watchdog").mkdir()
             for account in router.ACCOUNTS:
                 (root / "watchdog" / f"max-codex-{account}").write_text("1")
-            with mock.patch.object(router, "live_count", return_value=1), \
+            with mock.patch.object(router, 'occupancy', return_value=([1, 0], [1, 0])), \
                  mock.patch.object(router.time, "monotonic", side_effect=[0, 0, 0, 21]), \
                  mock.patch.object(router.time, "sleep") as sleep:
                 for account in router.ACCOUNTS:
                     (root / "accounts" / account).mkdir(parents=True)
-                self.assertEqual(router.reserve(root, "auto", 123, 20, False), "primary")
+                with self.assertRaisesRegex(ValueError, 'capacity exhausted'):
+                    router.reserve(root, "auto", 123, 20, False)
                 sleep.assert_called_once_with(20)
-                self.assertTrue((root / "accounts/primary/123").exists())
+                self.assertFalse((root / "accounts/primary/123").exists())
+            (root / 'watchdog/account-mode').write_text('both')
             self.assertEqual(router.reserve(root, "second", os.getpid(), 0, False), "second")
 
     def test_resume_registry_and_legacy_rollout_affinity(self) -> None:

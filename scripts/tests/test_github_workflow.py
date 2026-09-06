@@ -453,7 +453,8 @@ class ReviewRoundCounterTests(LayerTestCase):
 
         cache = self.tmp / "review-cache"
         env = dict(os.environ, **self.gh.env(), MIPSTARRE_CACHE_ROOT=str(cache),
-                   LOCAL_REVIEW_ENABLED="true", PYTHONDONTWRITEBYTECODE="1")
+                   LOCAL_REVIEW_ENABLED="true", MIPSTARRE_REVIEW_EFFORT="ultra",
+                   PYTHONDONTWRITEBYTECODE="1")
         result = subprocess.run(
             ["bash", str(self.repo / "local" / "bin" / "review.sh"),
              "7", "--force-review", "--dry-run"],
@@ -471,6 +472,36 @@ class ReviewRoundCounterTests(LayerTestCase):
         self.assertIn("FRESH-7", prior)
         self.assertNotIn("CARRIED", prior)
         self.assertNotIn("DUPLICATE-PUBLICATION", prior)
+
+
+    def test_queue_refuses_fifth_round_and_existing_head_publication(self) -> None:
+        for label, reviews, statuses, expected in (
+            ('cap', [self._review(str(number) * 40, 'prior') for number in range(1, 5)],
+             [], 'four-round cap'),
+            ('partial', [self._review(self.head, 'already published')], [],
+             'publication evidence'),
+            ('summary', [], [{'context': 'local-review/summary', 'state': 'pending'}],
+             'summary evidence'),
+        ):
+            with self.subTest(label=label):
+                self.gh.reset()
+                self.gh.route(r'^pulls/7$', {
+                    'number': 7, 'state': 'open', 'head': {'sha': self.head, 'ref': self.BRANCH},
+                    'base': {'ref': 'main'},
+                })
+                self.gh.route(r'^commits/[0-9a-f]+/statuses', statuses + [
+                    {'context': 'local-ci/summary', 'state': 'success'}])
+                self.gh.route(r'^pulls/7/reviews', reviews)
+                environment = dict(os.environ, **self.gh.env(),
+                    MIPSTARRE_CACHE_ROOT=str(self.tmp / f'queue-{label}'),
+                    MIPSTARRE_QUEUE_TICKET='test-only', MIPSTARRE_QUEUE_EXPECTED_HEAD=self.head,
+                    LOCAL_REVIEW_ENABLED='true', MIPSTARRE_REVIEW_EFFORT='ultra',
+                    PYTHONDONTWRITEBYTECODE='1')
+                result = subprocess.run(['bash', str(self.repo / 'local/bin/review.sh'),
+                    '7', '--dry-run'], cwd=self.repo, capture_output=True, text=True,
+                    env=environment)
+                self.assertNotEqual(result.returncode, 0, result.stdout)
+                self.assertIn(expected, result.stderr)
 
 
 class MergeGateTests(LayerTestCase):

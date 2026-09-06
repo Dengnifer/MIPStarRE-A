@@ -5,21 +5,249 @@ import fcntl
 import json
 import os
 from pathlib import Path
-import re
+import subprocess
 import sys
 import time
+import uuid
 
 
 ACCOUNTS = ("primary", "second")
+NATIVE_KEY_LABELS = ("relay-1", "space")
+DEFAULT_NATIVE_KEY_LABEL = "space"
+DEFAULT_NATIVE_HOME = Path.home() / ".cache/mipstarre-dev/codex-home-qpbt-relay1"
+
+
+def native_key_label() -> str:
+    """Return the owner-selected key label for the current native episode."""
+    label = os.environ.get("MIPSTARRE_NATIVE_KEY_LABEL", DEFAULT_NATIVE_KEY_LABEL)
+    if label not in NATIVE_KEY_LABELS:
+        raise ValueError("MIPSTARRE_NATIVE_KEY_LABEL must be relay-1 or space")
+    return label
+
+
+def native_home() -> Path:
+    """Return the scoped native home without exposing credentials in telemetry."""
+    configured = os.environ.get("MIPSTARRE_NATIVE_CODEX_HOME")
+    return Path(configured).expanduser() if configured else DEFAULT_NATIVE_HOME
+
+
+def key_capacity(root: Path) -> int:
+    """Read the required owner allocation, not an estimate of provider throughput."""
+    path = root / 'watchdog/primary-key-capacity'
+    if not path.exists():
+        raise ValueError(f'{path}: owner key capacity is required for native admission')
+    capacity = int(path.read_text())
+    if capacity < 1:
+        raise ValueError('primary-key-capacity must be positive')
+    return capacity
+
+
+def admission_capacity(root: Path) -> int:
+    """Require an owner allocation whenever the runtime exposes its global cap."""
+    path = root / 'watchdog/primary-key-capacity'
+    if path.exists():
+        return key_capacity(root)
+    if (root / 'watchdog/max-codex').exists():
+        raise ValueError(f'{path}: owner key capacity is required for admission')
+    return 12
+
+
+def native_leases(root: Path) -> dict:
+    """Retain uncertain or dead leases until an explicit, verified release."""
+    path = root / 'accounts/native-leases.json'
+    leases = json.loads(path.read_text()) if path.exists() else {}
+    if not isinstance(leases, dict):
+        raise ValueError('invalid native leases')
+    identities = set()
+    for thread, lease in leases.items():
+        if (not isinstance(lease, dict) or not isinstance(thread, str) or not thread or
+                str(uuid.UUID(thread)) != thread or
+                type(lease.get('pid')) is not int or lease['pid'] <= 0 or
+                not isinstance(lease.get('start'), str) or not lease['start'].isdecimal() or
+                type(lease.get('slots')) is not int or lease['slots'] < 1 or
+                lease.get('key_label') not in ('relay-1', 'space') or
+                (lease['pid'], lease['start']) in identities):
+            raise ValueError('invalid native lease; operator reconciliation required')
+        identities.add((lease['pid'], lease['start']))
+    return leases
+
+
+def native_process(thread: str, pid: int, slots: int) -> dict:
+    """Verify the resumed root and its explicit, shared native CLI allocation."""
+    try:
+        import tomllib
+    except ImportError:
+        import tomli as tomllib
+    if str(uuid.UUID(thread)) != thread:
+        raise ValueError('native root thread must be a canonical UUID')
+    start = process_identity(pid)
+    if host_processes()[1].get(pid) != ('primary', True):
+        raise ValueError('native lease requires an observed primary interactive root')
+    process = Path(f'/proc/{pid}')
+    environment = dict(entry.split(b'=', 1) for entry in
+                       (process / 'environ').read_bytes().split(b'\0') if b'=' in entry)
+    home = Path(os.fsdecode(environment.get(b'CODEX_HOME', b'')))
+    if home != native_home():
+        raise ValueError('native root is not on the verified scoped native route')
+    arguments = [os.fsdecode(arg) for arg in (process / 'cmdline').read_bytes().split(b'\0')
+                 if arg]
+    if not any(arguments[i:i + 2] == ['resume', thread] for i in range(len(arguments))):
+        raise ValueError('native root thread does not match its live resume command')
+    settings = {}
+    args = iter(arguments[1:])
+    for arg in args:
+        if arg in ('-m', '--model'):
+            settings['model'] = next(args)
+        elif arg in ('-c', '--config'):
+            setting = tomllib.loads(next(args))
+            for key, value in setting.items():
+                if isinstance(value, dict):
+                    settings.update((key + '.' + name, item) for name, item in value.items())
+                else:
+                    settings[key] = value
+    expected = {'model': 'gpt-6-astra', 'model_reasoning_effort': 'ultra',
+                'agents.enabled': True, 'features.multi_agent': True,
+                'agents.default_subagent_model': 'gpt-6-astra',
+                'agents.default_subagent_reasoning_effort': 'ultra',
+                'agents.max_concurrent_threads_per_session': slots}
+    if (type(slots) is not int or slots < 1 or
+            type(settings.get('agents.max_concurrent_threads_per_session')) is not int or
+            any(settings.get(key) != value for key, value in expected.items()) or
+            process_identity(pid) != start):
+        raise ValueError('native root model, effort, cap or process identity changed')
+    return dict(pid=pid, start=start, slots=slots, key_label=native_key_label(), home=home)
+
+
+def native_lease(root: Path, thread: str, pid: int, slots: int, release: bool = False) -> None:
+    """Reserve the whole configured descendant pool under the account admission lock."""
+    from wf_util import atomic_write
+    accounts = root / 'accounts'
+    accounts.mkdir(parents=True, exist_ok=True)
+    with (accounts / 'router.lock').open('a') as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        leases = native_leases(root)
+        if release:
+            lease = leases.get(thread)
+            if lease is None:
+                raise ValueError('native root has no capacity lease')
+            if pid != lease['pid'] or slots != lease['slots']:
+                raise ValueError('native lease release identity does not match its reservation')
+            try:
+                alive = process_identity(lease['pid']) == lease['start']
+            except (FileNotFoundError, ProcessLookupError):
+                alive = False
+            if alive:
+                raise ValueError('cannot release capacity while its root is live')
+            del leases[thread]
+        else:
+            lease = native_process(thread, pid, slots)
+            lease.pop('home')
+            if thread in leases:
+                if leases[thread] != lease:
+                    raise ValueError('live native capacity cannot be changed')
+                return
+            if any(row['pid'] == pid for row in leases.values()):
+                raise ValueError('native root already has a capacity lease')
+            workers, interactive = occupancy(root)
+            if workers[0] + interactive[0] + slots + external_reservation(root) > key_capacity(root):
+                raise ValueError('shared key allocation exhausted')
+            leases[thread] = lease
+        atomic_write(accounts / 'native-leases.json', json.dumps(leases) + '\n')
+
+
+def external_reservation(root: Path) -> int:
+    """Count owner-reserved non-Codex use in both native and external admission."""
+    path = root / 'watchdog/primary-external-reserved'
+    external = int(path.read_text()) if path.exists() else 0
+    if external < 0:
+        raise ValueError('primary-external-reserved must be nonnegative')
+    return external
+
+
+def external_admission_enabled(root: Path) -> bool:
+    """Honor the owner gate before any external reservation is created."""
+    gate = root / 'watchdog/primary-external-admission'
+    if gate.exists():
+        value = gate.read_text().strip()
+        if value not in ('0', '1'):
+            raise ValueError(f'{gate}: expected 0 or 1')
+        return value == '1'
+    total = root / 'watchdog/max-codex'
+    if total.exists() and int(total.read_text().strip()) == 0:
+        return False
+    return True
+
+
+def process_identity(pid: int) -> str:
+    """Identify a live Linux process without mistaking PID reuse for a launch."""
+    fields = Path(f'/proc/{pid}/stat').read_text().rsplit(')', 1)[1].split()
+    if fields[0] == 'Z':
+        raise ProcessLookupError(pid)
+    return fields[19]
+
+
+def queue_tickets(root: Path) -> dict:
+    """Read durable, never automatically expired useful-queue reservations."""
+    path = root / 'accounts/useful-queue.json'
+    tickets = json.loads(path.read_text()) if path.exists() else {}
+    if not isinstance(tickets, dict):
+        raise ValueError('invalid useful-queue reservations; operator adoption required')
+    for ticket in tickets.values():
+        if (not isinstance(ticket, dict) or type(ticket.get('slots')) is not int or
+                ticket['slots'] not in (1, 2) or type(ticket.get('pid')) is not int or
+                ticket['pid'] <= 0 or not isinstance(ticket.get('start'), str) or
+                not ticket['start'].isdecimal() or
+                not isinstance(ticket.get('worktree'), str) or
+                not Path(ticket['worktree']).is_absolute() or
+                not isinstance(ticket.get('claims'), list) or
+                any(type(pid) is not int or pid <= 0 for pid in ticket['claims']) or
+                len(set(ticket['claims'])) != len(ticket['claims']) or
+                len(ticket['claims']) > ticket['slots']):
+            raise ValueError('invalid useful-queue ticket; operator adoption required')
+    return tickets
+
+
+def write_queue_tickets(root: Path, tickets: dict) -> None:
+    """Replace tickets under accounts/router.lock, retaining uncertain reservations."""
+    from wf_util import atomic_write
+    atomic_write(root / 'accounts/useful-queue.json', json.dumps(tickets) + '\n')
+
+
+def admission_limits(root: Path, interactive: list[int]) -> tuple[list[int], int, str]:
+    """Share the dispatcher's owner allocation and physical-slot limits with the queue."""
+    mode_path = root / 'watchdog/account-mode'
+    mode = mode_path.read_text().strip() if mode_path.exists() else 'primary'
+    if mode not in ('primary', 'both'):
+        raise ValueError(f'{mode_path}: expected primary or both')
+    preserved_path = root / 'watchdog/account-mode-both-preserved.json'
+    preserved = (json.loads(preserved_path.read_text())
+                 if mode == 'both' and preserved_path.exists() else {})
+    caps = []
+    for account, default in zip(ACCOUNTS, (11, 9)):
+        path = root / 'watchdog' / f'max-codex-{account}'
+        cap = int(preserved.get(account, path.read_text().strip()
+                  if path.exists() else default))
+        if cap < 0:
+            raise ValueError(f'{path}: cap must be nonnegative')
+        caps.append(cap)
+    external = external_reservation(root)
+    caps[0] = min(caps[0], max(0, admission_capacity(root) - interactive[0] - external))
+    caps[1] = max(0, caps[1] - interactive[1]) if mode == 'both' else 0
+    total_path = root / 'watchdog/max-codex'
+    total = int(preserved.get('max_codex', total_path.read_text().strip()
+                if total_path.exists() else sum(caps)))
+    if total < 0:
+        raise ValueError('max-codex must be nonnegative')
+    return caps, total, mode
 
 
 def choose_account(live: list[int], caps: list[int]) -> str:
     return "primary" if live[0] * caps[1] <= live[1] * caps[0] else "second"
 
 
-def live_count(directory: Path) -> int:
+def live_pids(directory: Path) -> set[int]:
     directory.mkdir(parents=True, exist_ok=True)
-    count = 0
+    live = set()
     for marker in directory.iterdir():
         if not marker.name.isdecimal() or int(marker.name) <= 0:
             continue
@@ -28,14 +256,89 @@ def live_count(directory: Path) -> int:
         except ProcessLookupError:
             marker.unlink(missing_ok=True)
         except PermissionError:
-            count += 1
+            live.add(int(marker.name))
         else:
-            count += 1
-    return count
+            live.add(int(marker.name))
+    return live
 
 
-def resume_account(thread: str, registry: Path, homes: dict[str, Path]) -> str:
-    matches = set()
+def host_processes(exclusions=()) -> tuple[dict[int, int], dict[int, tuple[str, bool]]]:
+    """Require a host PID view; count same-user Codex executables, not Node wrappers."""
+    namespace = [line.split()[1:] for line in Path('/proc/self/status').read_text().splitlines()
+                 if line.startswith('NSpid:')]
+    if Path('/proc/1/comm').read_text().strip() not in ('systemd', 'init') or namespace != [
+            [str(os.getpid())]]:
+        raise ValueError('host process visibility unavailable; no admission or stale cleanup')
+    parents, candidates = {}, {}
+    second_home = Path(os.environ.get('MIPSTARRE_CODEX_HOME_SECOND') or
+                       Path.home() / '.cache/mipstarre-dev/codex-home-yxy')
+    for process in Path('/proc').iterdir():
+        if not process.name.isdecimal():
+            continue
+        try:
+            if process.stat().st_uid != os.getuid():
+                continue
+            status = dict(line.split(':', 1) for line in
+                          (process / 'status').read_text().splitlines() if ':' in line)
+            pid = int(process.name)
+            parents[pid] = int(status['PPid'])
+            if status['Name'].strip() != 'codex':
+                continue
+            arguments = (process / 'cmdline').read_bytes().split(b'\0')
+            if not arguments[0] or Path(os.fsdecode(arguments[0])).name != 'codex':
+                continue
+            environment = dict(entry.split(b'=', 1) for entry in
+                               (process / 'environ').read_bytes().split(b'\0') if b'=' in entry)
+            home = Path(os.fsdecode(environment.get(b'CODEX_HOME') or
+                        environment.get(b'HOME', b'/unknown') + b'/.codex'))
+            account = 'second' if home == second_home else 'primary'
+            boundary = arguments.index(b'--') if b'--' in arguments else len(arguments)
+            interactive = not any(command in arguments[:boundary] for command in
+                                  (b'exec', b'e', b'review', b'app-server', b'mcp-server', b'exec-server'))
+            if (interactive and home == Path.home() / '.codex' and exclusions and
+                    os.readlink(process / 'cwd') in exclusions):
+                continue
+            candidates[pid] = (account, interactive)
+        except FileNotFoundError:
+            continue
+    return parents, candidates
+
+
+def occupancy(root: Path) -> tuple[list[int], list[int]]:
+    path = root / 'watchdog/primary-excluded-interactive-cwds.json'
+    exclusions = json.loads(path.read_text()) if path.exists() else []
+    allowed = ('/home/drx/FV', '/home/drx/LDT-Lean-Paper', '/home/drx')
+    if (not isinstance(exclusions, list) or any(item not in allowed for item in exclusions) or
+            len(set(exclusions)) != len(exclusions)):
+        raise ValueError('invalid owner-designated interactive CWD exclusions')
+    parents, processes = host_processes(exclusions)
+    reservations = [live_pids(root / 'accounts' / account) for account in ACCOUNTS]
+    workers = [len(live) for live in reservations]
+    interactive = [0, 0]
+    matched = set()
+    for pid, (account, is_interactive) in processes.items():
+        index = ACCOUNTS.index(account)
+        ancestor = pid
+        seen = set()
+        while ancestor not in reservations[index] and ancestor in parents and ancestor not in seen:
+            seen.add(ancestor)
+            ancestor = parents[ancestor]
+        if ancestor in reservations[index] and ancestor not in matched:
+            matched.add(ancestor)
+        elif is_interactive:
+            interactive[index] += 1
+        else:
+            workers[index] += 1
+    interactive[0] = max(1, interactive[0])
+    workers[0] += sum(ticket['slots'] - len(ticket['claims'])
+                      for ticket in queue_tickets(root).values())
+    workers[0] += sum(lease['slots'] for lease in native_leases(root).values())
+    return workers, interactive
+
+
+def session_rows(registry: Path) -> list[dict]:
+    """Share locked, malformed-row-tolerant history without discarding object metadata."""
+    rows = []
     if registry.exists():
         with registry.open(encoding="utf-8", errors="replace") as handle:
             fcntl.flock(handle, fcntl.LOCK_SH)
@@ -50,8 +353,13 @@ def resume_account(thread: str, registry: Path, homes: dict[str, Path]) -> str:
                     print(f"account routing: {registry}:{number}: "
                           "skipping malformed registry record", file=sys.stderr)
                     continue
-                if row.get("thread_id") == thread and row.get("account") in ACCOUNTS:
-                    matches.add(row["account"])
+                rows.append(row)
+    return rows
+
+
+def resume_account(thread: str, registry: Path, homes: dict[str, Path]) -> str:
+    matches = {row['account'] for row in session_rows(registry)
+               if row.get('thread_id') == thread and row.get('account') in ACCOUNTS}
     for account, home in homes.items():
         for area in ("sessions", "archived_sessions"):
             if any((home / area).rglob(f"rollout-*{thread}.jsonl")):
@@ -61,6 +369,56 @@ def resume_account(thread: str, registry: Path, homes: dict[str, Path]) -> str:
     return matches.pop()
 
 
+def resume_continuation(registry: Path, thread: str) -> dict:
+    """Carry the original snapshot and completed segments, deduplicating status appends."""
+    history = {row['name']: row for row in session_rows(registry) if row.get('thread_id') == thread}
+    prior = {}
+    for row in history.values():
+        metadata = row.get('continuation', {})
+        if not isinstance(metadata, dict) or (metadata and (
+                not metadata.get('budget_file') or not isinstance(metadata.get('budget'), dict) or
+                not {'anchor', 'attempt_limit', 'attempts', 'working_seconds', 'sessions'} <=
+                metadata['budget'].keys())):
+            raise ValueError('invalid continuation metadata')
+        if metadata:
+            prior = dict(metadata)
+        if prior:
+            prior['completed_wall_s'] = prior.get('completed_wall_s', 0) + row['wall_s']
+    return prior
+
+
+def continuation(path: Path, registry: Path, worktree: Path, issue: str) -> dict:
+    """Validate an operator checkpoint handoff without changing the old thread or budget."""
+    request = json.loads(path.read_text())
+    rows = session_rows(registry)
+    previous = next(row for row in reversed(rows) if row.get('name') == request['previous_session'])
+    if (previous.get('status') not in ('done', 'failed', 'archived') or
+            previous.get('account') not in ACCOUNTS or not previous.get('thread_id') or
+            str(previous.get('issue')) != issue):
+        raise ValueError('continuation requires a terminal, same-issue predecessor with affinity')
+    checkpoint = subprocess.check_output(['git', '-C', str(worktree), 'rev-parse', '--verify',
+        '--end-of-options', request['checkpoint'] + '^{commit}'], text=True).strip()
+    subprocess.run(['git', '-C', str(worktree), 'merge-base', '--is-ancestor',
+                    checkpoint, 'HEAD'], check=True, capture_output=True)
+    budget_path = Path(request['budget_file']).resolve(strict=True)
+    budget = json.loads(budget_path.read_text())
+    if (not budget['anchor'] or previous['name'] not in budget['sessions'] or
+            not 0 < budget['attempts'] < budget['attempt_limit'] or
+            budget['working_seconds'] < previous.get('wall_s', 0)):
+        raise ValueError('continuation requires the shared, charged, unexhausted budget')
+    prior = resume_continuation(registry, previous['thread_id'])
+    if prior and (prior['budget_file'] != str(budget_path) or
+                  prior['budget']['anchor'] != budget['anchor'] or
+                  prior['budget']['attempt_limit'] != budget['attempt_limit'] or
+                  prior['budget']['attempts'] >= budget['attempts'] or
+                  prior['budget']['working_seconds'] + prior['completed_wall_s'] >
+                  budget['working_seconds']):
+        raise ValueError('continuation must retain its original budget and accumulated charges')
+    return dict(previous_session=previous['name'], previous_thread_id=previous['thread_id'],
+                previous_account=previous['account'], checkpoint=checkpoint,
+                budget_file=str(budget_path), budget=budget)
+
+
 def reserve(root: Path, requested: str, pid: int, wait: int, dry_run: bool) -> str:
     accounts = root / "accounts"
     accounts.mkdir(parents=True, exist_ok=True)
@@ -68,24 +426,70 @@ def reserve(root: Path, requested: str, pid: int, wait: int, dry_run: bool) -> s
     while True:
         with (accounts / "router.lock").open("a") as lock:
             fcntl.flock(lock, fcntl.LOCK_EX)
-            caps = []
-            for account, default in zip(ACCOUNTS, (9, 10)):
-                path = root / "watchdog" / f"max-codex-{account}"
-                cap = int(path.read_text().strip()) if path.exists() else default
-                if cap <= 0:
-                    raise ValueError(f"{path}: cap must be positive")
-                caps.append(cap)
-            live = [live_count(accounts / account) for account in ACCOUNTS]
-            selected = choose_account(live, caps) if requested == "auto" else requested
-            index = ACCOUNTS.index(selected)
-            if dry_run or live[index] < caps[index] or time.monotonic() >= deadline:
+            if not external_admission_enabled(root):
+                raise ValueError('external admission disabled by owner gate')
+            live, interactive = occupancy(root)
+            caps, total, mode = admission_limits(root, interactive)
+            if mode == 'primary' and requested == 'second':
+                raise ValueError('second account disabled; cross-account resume is unsupported; '
+                                 'use --continue-from with a checkpoint in a fresh primary session')
+            token = os.environ.get('MIPSTARRE_QUEUE_TICKET')
+            tickets = queue_tickets(root)
+            worktree = os.environ.get('MIPSTARRE_DISPATCH_WORKTREE')
+            worktree = str(Path(worktree).resolve()) if worktree else None
+            if any(ticket['worktree'] == worktree for key, ticket in tickets.items()
+                   if key != token):
+                raise ValueError('worktree reserved by useful queue; no duplicate session')
+            if tickets:
+                caps[0] = min(10, caps[0])
+            if token:
+                ticket = tickets.get(token)
+                if (not ticket or requested != 'primary' or mode != 'primary' or
+                        ticket['worktree'] != worktree or
+                        (root / 'useful-queue/STOP').exists() or
+                        (root / 'useful-queue/HOLD').exists()):
+                    raise ValueError('queue admission stopped or ticket unavailable')
+                parents, _ = host_processes()
+                ancestor, seen = pid, set()
+                while ancestor != ticket['pid'] and ancestor in parents and ancestor not in seen:
+                    seen.add(ancestor)
+                    ancestor = parents[ancestor]
+                if (ancestor != ticket['pid'] or
+                        process_identity(ancestor) != ticket['start'] or
+                        len(ticket['claims']) >= ticket['slots'] or pid in ticket['claims']):
+                    raise ValueError('queue ticket is not an unused descendant reservation')
+                if (live[0] > caps[0] or
+                        sum(live) + sum(interactive) > total):
+                    raise ValueError('account capacity exhausted; queue claim refused')
+                if not dry_run:
+                    (accounts / 'primary' / str(pid)).touch()
+                    ticket['claims'].append(pid)
+                    write_queue_tickets(root, tickets)
+                return 'primary'
+            available = [index for index, account in enumerate(ACCOUNTS)
+                         if live[index] < caps[index] and requested in ('auto', account)]
+            if available and sum(live) + sum(interactive) < total:
+                index = min(available, key=lambda index: live[index] / caps[index])
+                selected = ACCOUNTS[index]
                 if not dry_run:
                     (accounts / selected / str(pid)).touch()
                 return selected
+            if dry_run or time.monotonic() >= deadline:
+                raise ValueError('account capacity exhausted; no reservation made')
         time.sleep(min(20, max(0, deadline - time.monotonic())))
 
 
 def main() -> None:
+    if len(sys.argv) > 1 and sys.argv[1] == 'native-lease':
+        parser = argparse.ArgumentParser(description=native_lease.__doc__)
+        parser.add_argument('root', type=Path)
+        parser.add_argument('thread')
+        parser.add_argument('pid', type=int)
+        parser.add_argument('slots', type=int)
+        parser.add_argument('--release', action='store_true')
+        args = parser.parse_args(sys.argv[2:])
+        native_lease(args.root, args.thread, args.pid, args.slots, args.release)
+        return
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("root", type=Path)
     parser.add_argument("account", choices=("auto", *ACCOUNTS))
@@ -103,17 +507,10 @@ def main() -> None:
             if args.account not in ("auto", affinity):
                 raise ValueError(f"resume belongs to {affinity}, not {args.account}")
             args.account = affinity
+        model = os.environ.get('MIPSTARRE_CODEX_MODEL') or 'gpt-6-astra'
+        if model != 'gpt-6-astra':
+            raise ValueError('owner policy requires gpt-6-astra for every role')
         selected = reserve(args.root, args.account, args.pid, args.wait, args.dry_run)
-        model = os.environ.get("MIPSTARRE_CODEX_MODEL")
-        if not model:
-            for line in (homes[selected] / "config.toml").read_text().splitlines():
-                if line.lstrip().startswith("["):
-                    break
-                match = re.fullmatch(r'''\s*model\s*=\s*(["'])([\w./:-]+)\1\s*(?:#.*)?''', line)
-                if match:
-                    model = match[2]
-        if not isinstance(model, str) or not model.strip():
-            raise ValueError("set MIPSTARRE_CODEX_MODEL or an account config model")
         print(selected)
         print(model)
     except (OSError, ValueError) as error:
