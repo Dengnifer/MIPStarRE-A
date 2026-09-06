@@ -4236,3 +4236,15 @@ bounded PR238 amendment and normal gates.
   preserves the list and normal publication gates. An authorized repair of
   the generated index is required before those gates can pass; no hook
   bypass or unrelated refresh is an acceptable substitute.
+
+- Correction from the same session: `blueprint/lean_decls` is an ignored,
+  generated local index, not a tracked file (`blueprint/.gitignore:4`). The
+  earlier empty `git diff` therefore did not establish byte identity with
+  `origin/main`, and the diagnosis requiring a separate authorized repair
+  was incorrect. Normal pre-push hooks regenerated the index, and the
+  subsequent read-only sync check exits 0; its log is
+  `~/.cache/mipstarre-dev/sessions/orc-241-20260906-01-blueprint-sync-after-hooks.log`.
+  Checked publication through `pr_open.py` succeeds as PR #249 at `8348eaa`.
+  No tracked declaration list or Lean file was changed by this follow-up.
+  Check whether a generated file is tracked before interpreting an empty
+  tracked diff as evidence of identical contents or declaring a blocker.
