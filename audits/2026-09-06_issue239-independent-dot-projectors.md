@@ -1,3 +1,13 @@
+---
+title: "Independent Pauli dot-product projectors"
+date: 2026-09-06
+purpose: >
+  Records the source comparison, proof dependencies, and validation of the
+  projectivity and completeness of the Pauli dot-product operators.
+issue: "#239"
+pr: "#250"
+---
+
 # Issue #239: independent Pauli dot-product projectors
 
 ## Scope and source
