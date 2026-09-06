@@ -1181,81 +1181,6 @@
   "pinned_comment": null
  },
  {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/246",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/246/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/246/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/246/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/246",
-  "id": 5362450212,
-  "node_id": "I_kwDOUJyJf88AAAABP6B_JA",
-  "number": 246,
-  "title": "feat(QPBT/Test): prove exact binary witness transport",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-06T02:53:38Z",
-  "updated_at": "2026-09-06T02:53:38Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/167",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 1,
-   "blocking": 0,
-   "total_blocking": 0
-  },
-  "body": "<!-- mipstarre-issue-key: 20260906-binary-witness-transport -->\n### Main-selected independent construction\n\nOwn MIPStarRE/QPBT/Test/QubitForm.lean and a packet-specific audit for exact GIVEN-WITNESS transport only. Use the completed binary-transport scout to construct the qubit witness from a supplied PauliSoundnessWitness and prove state/operator-distance identities via finite-field bit equivalence, local isometry composition and EPR shuffle. Read the binary corollary source first. Preserve the final source corollary and its existing open existence proof; do not prove it by calling unfinished pauli_soundness or add an input to its statement. Helper names/docs must distinguish the exact transport from source-level existence. This is independent algebra from existing data, not a reset of a mathematical-gap budget.\n\n### Admission and integrity\n\nPrepared under the standing8--11 useful-worker priority. Implementation starts only after its assigned read-only scout has terminated and delivered its report. The exact baseline is published main a61ee55, not an anticipated parent merge. Preserve other writers, statements, proof budgets, original packet dependencies and normal CI/review/daemon-only merge gates. No new sorry, axiom, native bypass or arbitrary bridge. Targeted Lean and kernel-axiom checks, normal hooks; main owns publication.",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/246/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/246/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/245",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/245/labels{/name}",
@@ -1458,8 +1383,8 @@
   "issue_dependencies_summary": {
    "blocked_by": 0,
    "total_blocked_by": 1,
-   "blocking": 0,
-   "total_blocking": 0
+   "blocking": 1,
+   "total_blocking": 1
   },
   "body": "<!-- mipstarre-issue-key: 20260906-controlled-unitary-algebra -->\n### Independent mathematical task\n\nExclusive write scope NEW MIPStarRE/Quantum/ControlledUnitary.lean and a packet-specific audit. Provide the minimal reusable finite controlled-unitary calculation needed by QPBT extraction: for a complete pairwise orthogonal projective measurement P_i and unitary U_i, the operator sum_i P_i tensor U_i is unitary, with both adjoint products. Read source references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1687-1750, proof of lem:qld-unitary. Search Mathlib and Quantum APIs before proving; reuse any existing theorem rather than duplicate it. Use existing Measurement/IsProjective/heteroKron and generic actual operator hypotheses, not a conclusion-shaped bridge or source theorem assumption. Do not edit Extraction/Observables.lean or reimplement issue240 Pauli observable algebra. This supplies its later swap calculation through a separate importable helper; no target wrapper integration or shared blueprint edits until actual dependency results are available.\n\n### Integrity and lifecycle\n\nMain-selected disjoint prerequisite work under the owner concurrency deadline. Base is published main a61ee55. The original extraction packets keep their parent merge gates. No new sorry, axiom, native bypass, statement weakening or implicit proof-budget reset. Source first; targeted Lean and declaration axiom checks; normal hooks, CI, independent review and daemon-only merge. Do not mark an unfinished source theorem complete. Other active writers retain their exclusive files. Addresses #123 without closing it.",
   "closed_by": null,
@@ -2243,8 +2168,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 15,
-   "completed": 3,
-   "percent_completed": 20
+   "completed": 4,
+   "percent_completed": 26
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
   "issue_dependencies_summary": {
@@ -2915,8 +2840,8 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/167",
   "issue_dependencies_summary": {
-   "blocked_by": 2,
-   "total_blocked_by": 3,
+   "blocked_by": 3,
+   "total_blocked_by": 4,
    "blocking": 1,
    "total_blocking": 1
   },
@@ -4390,9 +4315,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 206,
+  "comments": 207,
   "created_at": "2026-09-02T08:30:04Z",
-  "updated_at": "2026-09-06T13:21:16Z",
+  "updated_at": "2026-09-06T19:27:38Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
