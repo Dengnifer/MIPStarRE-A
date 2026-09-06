@@ -2403,3 +2403,79 @@ nonnegative domains.
 	constant and the power of $md$. For $\eps>1$, this final expression
 	is at least one and hence bounds the capped error.
 \end{proof}
+
+\section{Ordered polynomial-image estimates}
+
+The following auxiliary estimate is independent of the standing strategy
+assumptions of this chapter. It isolates the coefficient-polynomial argument
+in the proof of Lemma~\ref{lem:qld-4-7}, with the ordered-correlation error
+retained explicitly.
+
+\begin{lemma}[Formalization support for scalar-linearity concentration]
+	\label{lem:aux-ordered-nonlinear-mass}
+	\lean{MIPStarRE.QPBT.PolynomialImageBounds.nonlinear_mass_le_ordered_error}
+	\leanok
+	This is a formalization-only auxiliary, not a named statement of the paper.
+	Let $F$ be a finite field of cardinality $q$, let $n$ be a nonnegative integer, and let
+	$\mathcal H$ be a finite-dimensional complex Hilbert space. For every
+	$u\in F^n$, let $\{X_b^u\}_{b\in F}$ and $\{Z_c^u\}_{c\in F}$ be
+	projective measurements on $\mathcal H$. Let $J$ be a finite label set,
+	with fixed vectors $\psi_g\in\mathcal H$ and polynomials
+	$p_g\in F[\mathbf x][\alpha,\beta]$ for $g\in J$, where
+	$\mathbf x=(x_1,\ldots,x_n)$. Assume that no $p_g$ has the form
+	$\alpha r(\mathbf x)+\beta s(\mathbf x)$.
+	Write $p_g=\sum_e c_{g,e}(\mathbf x)\alpha^{e_1}\beta^{e_2}$ and set
+	\[
+		D_g=\max\bigl(\{0\}\cup
+			\{\deg c_{g,e}:c_{g,e}\ne0\}\bigr),
+		\qquad E_g=\max\{1,\deg_{\alpha,\beta}p_g\}.
+	\]
+	Define the ordered operator
+	\[
+		A_g(u,\alpha,\beta)=\sum_{b,c\in F}
+		\mathbf 1_{\alpha b+\beta c=p_g(u;\alpha,\beta)}X_b^u Z_c^u
+	\]
+	and its actual correlation error
+	\[
+		R=\E_{u\in F^n,\,\alpha,\beta\in F}
+		\sum_{g\in J}\|\psi_g-A_g(u,\alpha,\beta)\psi_g\|^2,
+	\]
+	where all averages are uniform. Then
+	\[
+		\sum_{g\in J}\|\psi_g\|^2
+		\le 2R+\frac{2}{q}\sum_{g\in J}(D_g+E_g+1)\|\psi_g\|^2.
+	\]
+	There is no normalization assumption on the vectors and no commutation
+	assumption between the two measurements. This estimate does not bound
+	$R$ from a strategy's winning probability or construct a global
+	polynomial-pair measurement.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:schwartz-zippel-total-degree, lem:pasting-measurement,
+		lem:sandwich-postprocess-projective}
+	For $\beta\ne0$, orthogonality of the $X_b^u$ and cancellation in $F$
+	identify $A_g^*A_g$ with the diagonal sandwich sum
+	\[
+		\sum_{b,c\in F}
+		\mathbf 1_{\alpha b+\beta c=p_g(u;\alpha,\beta)}Z_c^u X_b^u Z_c^u.
+	\]
+	At $\beta=0$, the ordered operator is a coarse-grained $X$ projection;
+	its Gram operator and the diagonal sandwich sum are positive contractions.
+	Their quadratic forms therefore differ by at most $\|\psi_g\|^2$.
+	Averaging this exceptional coefficient contributes at most
+	$q^{-1}\|\psi_g\|^2$.
+	Choose a nonzero coefficient $c_{g,e}$ outside the two scalar-linear
+	monomials. Its zero set has probability at most $D_g/q$. At every other
+	base point, $p_g(u;\alpha,\beta)-\alpha b-\beta c$ is nonzero
+	simultaneously for all $b,c$, and its agreement probability is at most
+	$E_g/q$. The sandwich weights are nonnegative and sum to
+	$\|\psi_g\|^2$, so averaging gives
+	\[
+		\E_{u,\alpha,\beta}\|A_g(u,\alpha,\beta)\psi_g\|^2
+		\le \frac{D_g+E_g+1}{q}\|\psi_g\|^2.
+	\]
+	Finally apply
+	$\|v\|^2\le2\|v-w\|^2+2\|w\|^2$ with
+	$v=\psi_g$ and $w=A_g\psi_g$, then average and sum over $g\in J$.
+\end{proof}
