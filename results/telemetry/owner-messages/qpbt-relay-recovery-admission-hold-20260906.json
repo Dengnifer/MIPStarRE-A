@@ -1,0 +1,16 @@
+{
+  "recorded_utc": "2026-09-06T03:26:22Z",
+  "reason": "Repeated primary relay concurrency refusals despite falling process occupancy",
+  "allocation_worker_cap": 11,
+  "standing_useful_worker_floor": 8,
+  "temporary_recovery_admission_ceiling": 6,
+  "automatic_admissions": "held",
+  "supervisors_sigstopped": [2339019, 2339020],
+  "existing_workers": "not signalled; allow bounded useful work and retries to drain",
+  "new_sessions": "only explicitly selected useful recovery work after a fresh census, not floor replenishment",
+  "account": "primary",
+  "model": "gpt-6-astra",
+  "other_owner_exempt_sessions": "untouched",
+  "server_inflight_count": null,
+  "recovery": "require successful project-work responses and bounded error observation before gradual readmission"
+}
