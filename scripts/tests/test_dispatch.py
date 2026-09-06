@@ -293,7 +293,7 @@ class DispatchCommandTests(unittest.TestCase):
         for model, effort in ((None, None), ('', 'ultra'), ('gpt-6-astra', 'ultra')):
             record = self.recorded_dispatch(model, effort=effort)
             self.assertEqual(record['requested_effort'], 'ultra')
-            self.assertEqual(record['key_label'], 'space')
+            self.assertEqual(record['key_label'], 'unknown')
             self.assertEqual(record['model'], 'gpt-6-astra')
             self.assertEqual(record['account'], 'primary')
 
@@ -563,8 +563,8 @@ class AccountRouterTests(unittest.TestCase):
                     return 'full'
             with mock.patch.object(router.os, 'kill'), ThreadPoolExecutor(18) as pool:
                 results = list(pool.map(attempt, range(100, 118)))
-            self.assertEqual(results.count('primary'), 11)
-            self.assertEqual(results.count('full'), 7)
+            self.assertEqual(results.count('primary'), 10)
+            self.assertEqual(results.count('full'), 8)
 
     def test_runtime_shim_preserves_selected_effort_and_prompt(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -676,12 +676,16 @@ class AccountRouterTests(unittest.TestCase):
             (root / 'watchdog/account-mode').write_text('both')
             for account in router.ACCOUNTS:
                 (root / "watchdog" / f"max-codex-{account}").write_text("8")
+            def attempt(pid):
+                try:
+                    return router.reserve(root, "auto", pid, 0, False)
+                except ValueError:
+                    return 'full'
             with mock.patch.object(router.os, "kill"), ThreadPoolExecutor(16) as pool:
-                selected = list(pool.map(
-                    lambda pid: router.reserve(root, "auto", pid, 0, False), range(100, 116)
-                ))
+                selected = list(pool.map(attempt, range(100, 116)))
             self.assertEqual(selected.count("primary"), 8)
-            self.assertEqual(selected.count("second"), 8)
+            self.assertEqual(selected.count("second"), 7)
+            self.assertEqual(selected.count("full"), 1)
 
     def test_model_comparison_prefers_registry_and_keeps_rollout_fallback(self) -> None:
         spec = importlib.util.spec_from_file_location(

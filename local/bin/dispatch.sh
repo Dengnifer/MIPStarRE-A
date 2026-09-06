@@ -747,10 +747,15 @@ if [ -n "${MIPSTARRE_CODEX_MODEL:-}" ]; then
   TELEM_ARGS[${#TELEM_ARGS[@]}]="$MIPSTARRE_CODEX_MODEL"
 fi
 TELEM_ARGS+=(--requested-effort "$EFFORT")
-TELEM_ARGS+=(--key-label "$([ "$ACCOUNT" = primary ] && printf space || printf unknown)")
+TELEM_KEY_LABEL="${MIPSTARRE_KEY_LABEL:-${MIPSTARRE_NATIVE_KEY_LABEL:-unknown}}"
+case "$TELEM_KEY_LABEL" in
+  relay-1|space|unknown) ;;
+  *) TELEM_KEY_LABEL=unknown ;;
+esac
+TELEM_ARGS+=(--key-label "$([ "$ACCOUNT" = primary ] && printf '%s' "$TELEM_KEY_LABEL" || printf unknown)")
 
 REPLAY_EFFORT_ARG=" --requested-effort $EFFORT"
-REPLAY_EFFORT_ARG+=" --key-label $([ "$ACCOUNT" = primary ] && printf space || printf unknown)"
+REPLAY_EFFORT_ARG+=" --key-label $([ "$ACCOUNT" = primary ] && printf '%s' "$TELEM_KEY_LABEL" || printf unknown)"
 REPLAY_CONTINUATION_ARG=""
 if [ -n "$CONTINUATION_JSON" ]; then
   printf -v REPLAY_CONTINUATION_ARG ' --continuation-json "$(cat %q)"' \

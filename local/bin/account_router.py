@@ -32,12 +32,24 @@ def native_home() -> Path:
 
 
 def key_capacity(root: Path) -> int:
-    """Read the owner allocation, not an estimate of provider throughput."""
+    """Read the required owner allocation, not an estimate of provider throughput."""
     path = root / 'watchdog/primary-key-capacity'
-    capacity = int(path.read_text()) if path.exists() else 12
+    if not path.exists():
+        raise ValueError(f'{path}: owner key capacity is required for native admission')
+    capacity = int(path.read_text())
     if capacity < 1:
         raise ValueError('primary-key-capacity must be positive')
     return capacity
+
+
+def admission_capacity(root: Path) -> int:
+    """Require an owner allocation whenever the runtime exposes its global cap."""
+    path = root / 'watchdog/primary-key-capacity'
+    if path.exists():
+        return key_capacity(root)
+    if (root / 'watchdog/max-codex').exists():
+        raise ValueError(f'{path}: owner key capacity is required for admission')
+    return 12
 
 
 def native_leases(root: Path) -> dict:
@@ -152,6 +164,20 @@ def external_reservation(root: Path) -> int:
     return external
 
 
+def external_admission_enabled(root: Path) -> bool:
+    """Honor the owner gate before any external reservation is created."""
+    gate = root / 'watchdog/primary-external-admission'
+    if gate.exists():
+        value = gate.read_text().strip()
+        if value not in ('0', '1'):
+            raise ValueError(f'{gate}: expected 0 or 1')
+        return value == '1'
+    total = root / 'watchdog/max-codex'
+    if total.exists() and int(total.read_text().strip()) == 0:
+        return False
+    return True
+
+
 def process_identity(pid: int) -> str:
     """Identify a live Linux process without mistaking PID reuse for a launch."""
     fields = Path(f'/proc/{pid}/stat').read_text().rsplit(')', 1)[1].split()
@@ -205,7 +231,7 @@ def admission_limits(root: Path, interactive: list[int]) -> tuple[list[int], int
             raise ValueError(f'{path}: cap must be nonnegative')
         caps.append(cap)
     external = external_reservation(root)
-    caps[0] = min(caps[0], max(0, key_capacity(root) - interactive[0] - external))
+    caps[0] = min(caps[0], max(0, admission_capacity(root) - interactive[0] - external))
     caps[1] = max(0, caps[1] - interactive[1]) if mode == 'both' else 0
     total_path = root / 'watchdog/max-codex'
     total = int(preserved.get('max_codex', total_path.read_text().strip()
@@ -400,6 +426,8 @@ def reserve(root: Path, requested: str, pid: int, wait: int, dry_run: bool) -> s
     while True:
         with (accounts / "router.lock").open("a") as lock:
             fcntl.flock(lock, fcntl.LOCK_EX)
+            if not external_admission_enabled(root):
+                raise ValueError('external admission disabled by owner gate')
             live, interactive = occupancy(root)
             caps, total, mode = admission_limits(root, interactive)
             if mode == 'primary' and requested == 'second':
@@ -430,7 +458,8 @@ def reserve(root: Path, requested: str, pid: int, wait: int, dry_run: bool) -> s
                         process_identity(ancestor) != ticket['start'] or
                         len(ticket['claims']) >= ticket['slots'] or pid in ticket['claims']):
                     raise ValueError('queue ticket is not an unused descendant reservation')
-                if live[0] > min(10, caps[0]) or sum(live) > total:
+                if (live[0] > caps[0] or
+                        sum(live) + sum(interactive) > total):
                     raise ValueError('account capacity exhausted; queue claim refused')
                 if not dry_run:
                     (accounts / 'primary' / str(pid)).touch()
@@ -439,7 +468,7 @@ def reserve(root: Path, requested: str, pid: int, wait: int, dry_run: bool) -> s
                 return 'primary'
             available = [index for index, account in enumerate(ACCOUNTS)
                          if live[index] < caps[index] and requested in ('auto', account)]
-            if available and sum(live) < total:
+            if available and sum(live) + sum(interactive) < total:
                 index = min(available, key=lambda index: live[index] / caps[index])
                 selected = ACCOUNTS[index]
                 if not dry_run:

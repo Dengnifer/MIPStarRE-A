@@ -61,6 +61,9 @@ Schemas (all JSONL, one object per line; timestamps ISO-8601 with offset):
   Written only by `local/bin/dispatch.sh` / `telemetry.py`. New dispatches always
   supply `account` (`primary` or `second`) and the exact resolved `model`
   passed to the CLI (environment override, otherwise selected-account config).
+  External rows use allocator accounts `primary|second`; native rows use the
+  active key label (`space` or historical `relay-1`) in both `account` and
+  `key_label`, with `dispatcher: native`.
   When the dispatcher supplies a reasoning override, `requested_effort` is its
   effective value after model-specific normalization. It records the CLI request,
   not provider-measured effort. All three fields remain optional for historical

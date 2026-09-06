@@ -52,7 +52,9 @@ defaults and shared descendant cap under the account-router lock. Python 3.10 ne
 `tomli` for this native-only TOML validation; Python 3.11 has `tomllib`.
 `watchdog/primary-key-capacity` is the owner allocation, not measured throughput. For
 the current space episode the owner allocation is five total sessions including main,
-external admission is zero, and at most four native descendants may be active.
+external admission is zero, and at most four native descendants may be active. The
+router enforces `watchdog/primary-external-admission=0` (and the owner `max-codex=0`
+fallback) before creating any external reservation.
 Native leases, external processes/reservations, interactives and reserved non-Codex
 use all consume it. Unknown/dead native leases are retained until explicit
 `native-lease ... --release` verifies the original root is no longer alive. A live

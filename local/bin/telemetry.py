@@ -583,7 +583,7 @@ def record_native(args: argparse.Namespace) -> int:
     record = {key: value for key, value in observation.items() if key != 'final'}
     record.update(name=args.name, role=args.role, issue=args.issue, pr=args.pr,
                   worktree=str(args.worktree), root_thread_id=args.root_thread_id,
-                  key_label=args.key_label, account='primary', dispatcher='native',
+                  key_label=args.key_label, account=args.key_label, dispatcher='native',
                   status=args.status, usage=None, usage_scope='unknown',
                   usage_provenance='rollout token_count.total_token_usage; not additive',
                   wire_effort=None, returned_effort=None,

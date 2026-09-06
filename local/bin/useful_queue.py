@@ -310,10 +310,11 @@ class Supervisor:
                             live, interactive = router.occupancy(self.root)
                             caps, total, mode = router.admission_limits(self.root, interactive)
                             slots = 2 if packet['kind'] == 'review' else 1
-                            if (mode != 'primary' or live[0] + slots > min(10, caps[0]) or
-                                    sum(live) + slots > total):
-                                raise ValueError('capacity: primary recovery ceiling 10 '
-                                                 'or owner limit')
+                            recovery_ceiling = min(caps[0], total)
+                            if (mode != 'primary' or live[0] + slots > recovery_ceiling or
+                                    sum(live) + sum(interactive) + slots > total):
+                                raise ValueError('capacity: primary recovery ceiling '
+                                                 f'{recovery_ceiling} or owner limit')
                             if worktree_busy(packet, self.root):
                                 raise ValueError('worktree already occupied or reserved')
                             if any((self.directory / name).exists() for name in ('STOP', 'HOLD')):
@@ -331,7 +332,8 @@ class Supervisor:
                     live, interactive = router.occupancy(self.root)
                     caps, total, mode = router.admission_limits(self.root, interactive)
                     report['census'] = dict(workers_and_reservations=live, interactive=interactive,
-                                            caps=caps, total=total, mode=mode, recovery_ceiling=10,
+                                            caps=caps, total=total, mode=mode,
+                                            recovery_ceiling=min(caps[0], total),
                                             tickets=router.queue_tickets(self.root))
                     _, clients = router.host_processes()
                     report['census']['observed_clients_including_exempt'] = {
