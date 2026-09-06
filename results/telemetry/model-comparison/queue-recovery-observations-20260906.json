@@ -1,0 +1,159 @@
+{
+  "recorded_utc": "2026-09-06T06:28:46.850331+00:00",
+  "kind": "observational useful-project episode, not benchmark or randomized comparison",
+  "sample_counts": {
+    "executions": 3,
+    "max": 2,
+    "xhigh": 1,
+    "distinct_threads": 2,
+    "distinct_implementation_episodes": 1,
+    "server_verified_project_effort_samples": 0
+  },
+  "task": "issue257 useful admission queue, PR269",
+  "head": "799cd3dc5919783fe4ad907a4589f5ff179d7e95",
+  "executions": [
+    {
+      "name": "orc-257-20260906-01",
+      "role": "orc",
+      "selected_effort": "max",
+      "selection_rationale": "Implement and validate subtle bounded admission/ticket semantics",
+      "configured_effort_evidence": "primary dispatcher/runtime argv and captured session context; not a server verification",
+      "server_verified_effort": null,
+      "cli_version": "0.152.1",
+      "cli_version_evidence": "local installation timeline; version is a confound",
+      "difficulty": "high: concurrent admission, exact identity and durable receipts",
+      "thread_id": "01a07512-0f37-7c12-8ffe-467b44bcc5e3",
+      "start": "2026-09-06T12:55:12+0800",
+      "end": "2026-09-06T13:25:12+0800",
+      "wall_seconds": 1800,
+      "exit": 124,
+      "terminal_usage": null,
+      "wrapper_usage": {
+        "input": 0,
+        "cached_input": 0,
+        "cache_write": 0,
+        "output": 0,
+        "reasoning": 0
+      },
+      "capture": "results/telemetry/sessions/orc-257-20260906-01.jsonl",
+      "capture_sha256": "53e46414b7278e33cd7c9ab559c608772760af6b30bf3020378b3fa1ff674e50",
+      "capture_bytes": 474763,
+      "raw_rollout": "/home/drx/.codex/sessions/2026/09/06/rollout-2026-09-06T12-55-12-01a07512-0f37-7c12-8ffe-467b44bcc5e3.jsonl",
+      "outcome": "Timeout with preserved implementation/tests, no terminal handoff",
+      "review_findings": null
+    },
+    {
+      "name": "orc-257-20260906-02",
+      "role": "orc",
+      "selected_effort": "max",
+      "selection_rationale": "Implement and validate subtle bounded admission/ticket semantics",
+      "configured_effort_evidence": "primary dispatcher/runtime argv and captured session context; not a server verification",
+      "server_verified_effort": null,
+      "cli_version": "0.153.4",
+      "cli_version_evidence": "local installation timeline; version is a confound",
+      "difficulty": "high: concurrent admission, exact identity and durable receipts",
+      "thread_id": "01a07512-0f37-7c12-8ffe-467b44bcc5e3",
+      "start": "2026-09-06T13:40:10+0800",
+      "end": "2026-09-06T14:00:10+0800",
+      "wall_seconds": 1200,
+      "exit": 124,
+      "terminal_usage": null,
+      "wrapper_usage": {
+        "input": 0,
+        "cached_input": 0,
+        "cache_write": 0,
+        "output": 0,
+        "reasoning": 0
+      },
+      "capture": "results/telemetry/sessions/orc-257-20260906-02.jsonl",
+      "capture_sha256": "65da3bec0331ddbfa78bc66e93899289ff87963131caee060ebc780151fb1c57",
+      "capture_bytes": 405264,
+      "raw_rollout": "/home/drx/.codex/sessions/2026/09/06/rollout-2026-09-06T12-55-12-01a07512-0f37-7c12-8ffe-467b44bcc5e3.jsonl",
+      "outcome": "Timeout with preserved implementation/tests, no terminal handoff",
+      "review_findings": null
+    },
+    {
+      "name": "orc-257-20260906-03",
+      "role": "orc",
+      "selected_effort": "xhigh",
+      "selection_rationale": "Finish checked publication of preserved validated implementation",
+      "configured_effort_evidence": "primary dispatcher/runtime argv and captured session context; not a server verification",
+      "server_verified_effort": null,
+      "cli_version": "0.153.4",
+      "cli_version_evidence": "local installation timeline; version is a confound",
+      "difficulty": "bounded mechanical publication using preserved implementation",
+      "thread_id": "01a07552-4aa3-7760-ac9e-7644d2a44959",
+      "start": "2026-09-06T14:05:21+0800",
+      "end": "2026-09-06T14:17:44+0800",
+      "wall_seconds": 743,
+      "exit": 0,
+      "terminal_usage": {
+        "input": 2353572,
+        "cached_input": 2243456,
+        "cache_write": 0,
+        "output": 13838,
+        "reasoning": 3415
+      },
+      "wrapper_usage": {
+        "input": 2353572,
+        "cached_input": 2243456,
+        "cache_write": 0,
+        "output": 13838,
+        "reasoning": 3415
+      },
+      "capture": "results/telemetry/sessions/orc-257-20260906-03.jsonl",
+      "capture_sha256": "f76cccc13e560c33bfb7d29449c67fc6201677bb1718d1b5abe8900540e71975",
+      "capture_bytes": 1205729,
+      "raw_rollout": "/home/drx/.codex/sessions/2026/09/06/rollout-2026-09-06T14-05-22-01a07552-4aa3-7760-ac9e-7644d2a44959.jsonl",
+      "outcome": "Published PR269 through normal hooks/checks; CI independently green; review/deployment not yet established",
+      "review_findings": null
+    }
+  ],
+  "validation": {
+    "initial_fixture_count": 577,
+    "consolidated_fixture_count": 555,
+    "normal_commit_hook_tests": 555,
+    "normal_commit_hook_seconds": 48.417,
+    "published_ci_seconds": 191,
+    "published_ci_conclusion": "success",
+    "independent_review": "in progress; not inferred from fixtures",
+    "production_replacements": null
+  },
+  "service_delays": [
+    {
+      "kind": "GitHub HTTPS branch discovery",
+      "milliseconds": 130196,
+      "result": "failed before push; retry via process-local fresh-DNS CONNECT tunnel retained normal TLS and gates"
+    },
+    {
+      "kind": "CLI upgrade admission outage",
+      "time_window_utc": "05:29–05:31",
+      "relationship": "separate incident affecting pre-model PR262 reviewers, not the queue timeout; no causal attribution"
+    }
+  ],
+  "shared_rollout_last_observations": [
+    {
+      "utc": "2026-09-06T05:24:26.098Z",
+      "total_tokens": 3325031,
+      "input_tokens": 3282526,
+      "cached_input_tokens": 3165440,
+      "output_tokens": 42505,
+      "reasoning_tokens": 14996
+    },
+    {
+      "utc": "2026-09-06T05:59:51.792Z",
+      "total_tokens": 5816150,
+      "input_tokens": 5749684,
+      "cached_input_tokens": 5580032,
+      "output_tokens": 66466,
+      "reasoning_tokens": 26118
+    }
+  ],
+  "interpretation": "The two max attempts built the implementation that the xhigh attempt published. Different roles, inherited work, context, source/CLI versions, hooks and transport delays prevent causal effort or quality comparisons. Shared rollout observations are cumulative: do not sum the two rows. Missing terminal counters are unknown, not measured zero. No policy optimization or mathematical conclusion follows from this episode alone.",
+  "durable_context": [
+    "../useful-cycle-recovery-20260906.md",
+    "owner-priority-20260906.md",
+    "astra-effort-20260906.md",
+    "astra-max-ultra-label-finding-20260906.md"
+  ]
+}
