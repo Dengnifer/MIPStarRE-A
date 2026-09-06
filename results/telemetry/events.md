@@ -4219,3 +4219,25 @@ boundary comment is updated in place with these final supervisor handles;
 no second comment or extra review is created. Implementer supervisor2326711
 remains live under primary/max. Persistent router semantics still await the
 bounded PR238 amendment and normal gates.
+
+## 2026-09-06 — Standing worker floor and posted-inbox policy drift (#247)
+
+- **Symptom:** `local/personas/main.md` says there is no worker-count target
+  and recommends lower effort for mechanical work; the persona and
+  `issues-prs.md` do not distinguish routine unposted decisions from items
+  already awaiting the human owner in #26.
+- **Diagnosis:** the standing owner guidance requires 8–11 useful live QPBT
+  workers excluding main, with main owning plans and meta advising only. The
+  correction recorded at 2026-09-06T02:58:41Z withdraws the 02:55:29Z delegation:
+  every already-posted #26 item, including B7, must await the human owner.
+  Issue #247 records this bounded documentation alignment.
+- **Fix:** session `orc-247-20260906-01` drafts the main-persona and
+  issues/PR-protocol alignment with its EVOLUTION entry on the issue worktree.
+  The draft preserves proof budgets, integrity gates and mandatory escalations;
+  it changes no router, credentials, runtime scripts or inbox disposition.
+  No unreviewed policy is installed into main; the owner correction already
+  applies through standing guidance. Publication, CI, independent review and
+  merge are outside this session's scope.
+- **Lesson:** replenish useful independent work ahead of completions and report
+  concrete constraints honestly; concurrency or role guidance never grants
+  approval for a posted owner decision or permission to relax budgets or gates.

@@ -750,3 +750,23 @@ with #26 reserved for human decisions.
 **Expected effect:** the main session remains responsive while independent work
 advances in parallel, failed lanes receive prompt recovery, and merge authority
 and owner escalation stay unambiguous.
+
+## 2026-09-06 — Align the useful-worker floor and posted owner decisions
+
+**Trigger:** `results/telemetry/events.md` 2026-09-06, "Standing worker floor
+and posted-inbox policy drift (#247)", and the owner correction recorded at
+2026-09-06T02:58:41Z, withdrawing the 02:55:29Z delegation.
+
+**Change:** `local/personas/main.md` assigns plans and execution to main, with
+meta guidance-only, and states the 8–11 useful-live-worker floor excluding main,
+completion anticipation, prompt replenishment and honest constraint reporting.
+It aligns session guidance with primary/gpt-6-astra/max and fan-out disabled.
+`issues-prs.md` §6 distinguishes routine decisions before escalation from every
+already-posted #26 item, including B7, which must await the human owner.
+Mandatory escalations, proof budgets, account limits and all gates remain intact.
+
+**Expected effect:** sustain useful parallel work without filler or inferred
+owner approval. This is a documentation-only proposal on the issue branch, not
+an unreviewed installation into main; the owner correction already applies via
+standing guidance. Normal publication, CI, independent review and merge remain
+required outside this session.

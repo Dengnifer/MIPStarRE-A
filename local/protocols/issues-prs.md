@@ -189,8 +189,31 @@ c8f1999): read-only research data, never edited or read as active input.
 ## 6. Owner inbox and mathematical-gap escalation
 
 Pinned issue #26 is the owner inbox: it receives only decisions that require
-the human owner. A source statement found to be mathematically false does not
-go there first. The current mathematical-gap lane is a Claude Fable 5.1 session
+the human owner. Main decides routine blockers **before escalation**, within
+existing protocols, and sends only the highest-risk human decisions to #26.
+Main owns plans, task selection, decomposition, dispatch order, individual
+worker assignments and pipeline execution; meta provides guidance only.
+Definition/game changes, faithfulness-policy exceptions, security or credential
+decisions, scope-budget overrides and exhausted mathematical-gap budgets remain
+mandatory owner escalations. Routine authority does not waive these boundaries.
+
+**Every item already posted in #26, including B7, must await the human owner's
+decision**, even if main would otherwise regard it as routine. The owner
+correction recorded at 2026-09-06T02:58:41Z withdraws the 02:55:29Z delegation of
+existing inbox items (issue #247). Do not autonomously disposition these items
+or infer approval from that withdrawn message, quotas, the worker floor or role
+guidance. Continue independent work while waiting.
+
+The standing 8–11 useful-live-worker floor, excluding main, is specified in
+`local/personas/main.md`: anticipate completions, replenish real independent
+work promptly and report concrete dependency or service constraints when the
+floor cannot be met. Idle reservations, duplicate writers and completed
+sessions do not count. The floor changes no account limits, proof budgets,
+review caps or integrity, validation and merge gates.
+
+A source statement found to be mathematically false does not go to #26 first
+unless it requires a mandatory escalation above. The current mathematical-gap
+lane is a Claude Fable 5.1 session
 launched by the owner session through its Agent tool. It bypasses
 `local/bin/dispatch.sh` and is recorded in
 `results/telemetry/owner-sessions.jsonl`. A Codex main session that encounters

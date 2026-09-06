@@ -13,6 +13,9 @@ model-agnostic and binds you identically.
   sessions (`local/bin/dispatch.sh` -- roles orc/prover/reviewer/simplifier/
   blueprint/splitter/scout), run CI and reviews, prepare daemon merge inputs,
   keep the GitHub record and telemetry honest, and evolve the protocols.
+- Main owns plans, task selection, decomposition, dispatch order, individual
+  worker assignments and pipeline execution. Meta is guidance-only; its
+  suggestions are not dispatch instructions.
 - Astra availability has been reported, so mathematical gaps use
   `dispatch.sh --role mathfix` with astra under `issues-prs.md` section 6. Each
   dispatch is self-contained and its live state is reported on #27; never send
@@ -29,7 +32,7 @@ model-agnostic and binds you identically.
   packets on #27. Reserve #26 for decisions only the human owner can make.
   Never push to GitHub anything the gate has not passed.
 
-## Parallelism (owner guidance, 2026-08-31; restored from HANDOFF)
+## Parallelism (standing owner guidance, 2026-09-06; issue #247)
 
 Run independent issues in parallel worktrees — one branch + one
 `.worktrees/<branch>` per work item, always through
@@ -40,10 +43,17 @@ worktree with a cold `.lake`. Codex sub-sessions still start only via
 the astra math-fix lane governed by `issues-prs.md` section 6. Full builds are
 ~10 min on this host and only they serialize (the machine-wide
 `.full-build-lock`); per-file `lake env lean` iteration parallelizes
-freely across worktrees. There is no worker-count target: use available
-capacity only where it shortens the formalization's critical path, and keep the
-review side responsive. Evidence binds to exact SHAs on GitHub, so parallel
-lanes cannot trample each other's records.
+freely across worktrees. Maintain **8–11 useful live QPBT workers, excluding
+main**, on real independent work that shortens the formalization's critical
+path, and keep the review side responsive. Idle reservations, duplicate writers
+and completed sessions do not count. Anticipate completions, prepare independent
+ready work and replenish promptly; never dispatch filler to meet the floor.
+When the floor cannot be met, report the actual useful-live count and the
+concrete dependency or service constraint, rather than claiming compliance.
+Account limits, proof budgets, review caps and normal integrity, validation and
+merge gates still bind; the floor authorizes no relaxation or budget reset.
+Evidence binds to exact SHAs on GitHub, so parallel lanes cannot trample each
+other's records.
 
 ## The operating cycle (per short turn)
 
@@ -62,8 +72,9 @@ actionable line in this order, using detached workers for multi-minute work:
 3. After each daemon merge, verify that stack-watch propagated the new base.
    Relaunch a child lane tail when propagation did not happen.
 4. Use `local/bin/ready_packets.py` to find ready packets without a live lane.
-   Dispatch those on the mathematical critical path; capacity is a limit, not
-   a quota.
+   Anticipate completing lanes and replenish useful independent work on the
+   mathematical critical path to maintain the standing floor. Report concrete
+   constraints when it cannot be met; do not pad the count.
 5. Record telemetry when events happen. Report merges, dispatched and live
    workers, and the next critical packet on #27 at each stage boundary or PR
    merge. Post to #26 only when a human decision is required.
@@ -95,9 +106,10 @@ merges; never merge a PR by hand or call the merge gate from the main turn.
   implementation convenience: paper-labelled statements stay source-shaped;
   genuine source defects become `docs/paper-gaps/` notes (key `qpbt`,
   traceability `\localissue{NNNN}`).
-- Model economy: reserve your highest reasoning effort for mathematics and
-  adjudication; dispatch mechanical work at lower effort. Watch quota —
-  it is a scheduling constraint (events.md 2026-08-31).
+- Session selection: primary relay only, `gpt-6-astra` at `max` for every
+  project session, with fan-out disabled. Preserve the future explicit
+  primary/both toggle. Leave FV, LDT-Lean-Paper and the old `/home/drx` session
+  untouched; their removed reservations are not permission to modify them.
 
 ## Scope control (added 2026-09-01 after the issue-0007 overbuild)
 
@@ -129,14 +141,18 @@ scaffolding work is a COST, not an achievement.  Binding rules:
 - When you notice yourself hardening the hardening (a fix whose only consumer
   is another fix), stop and report — that pattern cost this project 17 hours
   on 2026-09-01 (events.md).
-- The ONLY owner-gated control is `MIPSTARRE_INFRA_OVERRIDE`.  Every other
-  parameter, flag and gate remedy — `MIPSTARRE_FIX_CAP`, `--adjudicated`,
+- `MIPSTARRE_INFRA_OVERRIDE` remains owner-gated. For unposted routine matters,
+  operator controls — `MIPSTARRE_FIX_CAP`, `--adjudicated`,
   `--force-review`, the `MIPSTARRE_CI_*` knobs, ticking a finding with a
-  written disposition — is yours to exercise with the reason recorded in
-  `results/telemetry/events.md`.  If you are genuinely blocked on the owner
-  (credentials, the scope budget, an unresolvable mathematical decision), post a
-  BLOCKER comment on the pinned Owner inbox issue #26 with your draft adjudication;
-  park it and continue the queue without idling on a question.
+  written disposition — remain yours within their existing protocol constraints,
+  with the reason recorded in `results/telemetry/events.md`. Decide routine
+  blockers before escalation; send only the highest-risk human decisions to
+  #26 under `issues-prs.md` §6, including definition/game, faithfulness or
+  security changes and exhausted scope or mathematical-gap budgets.
+  **Every already-posted #26 item, including B7, must await the human owner.**
+  The 2026-09-06T02:58:41Z correction withdraws the earlier delegation; quotas,
+  worker-floor or role guidance confer no approval. Park such items and continue
+  independent work; do not autonomously disposition them.
 
 ## GitHub (the workflow authority as of 2026-09-01)
 
