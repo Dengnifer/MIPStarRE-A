@@ -3020,6 +3020,49 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 - State at retirement: main 3f00de0; open PRs 233,230,225,213,212,207,205,202,195,185,178; live codex worker sessions 2;
   merges recorded by the daemon so far 40. All Claude-held worktrees were released (#118 at 691b671, #174 at bece2e6).
   This owner session stops; the owner decides when an owner session returns.
+
+## 2026-09-06 — Issue 113 imported API repair
+- **PR #195 after merge `c7fe9cd` (session `orc-113-20260906-02`).**
+  `watchdog/lanes/113.build.log` in the runtime cache reports unknown exact-winning
+  theorem names and the removed measurement composition helper in `ApproxLines.lean`.
+  PR #185 renamed the exact theorems and replaced effect-level composition with
+  `Quantum.Measurement.postprocess_comp`. Both approximate modules now use those
+  existing declarations. A subsequent targeted check of `Approx.lean` also found
+  three imported declarations made private: `selectedPairBit`, `pairLabels_eq_of_win`,
+  and `selectedMsVar`. Their original definitions and proof are retained and exported;
+  no duplicate helper is introduced. Lesson: check approximate consumers when changing
+  visibility or names in the exact-winning API.
+- **Statement integrity.** The source is `lem:qld-win-implications` in
+  `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:192-264`, with the
+  projective-strategy convention at lines 160-172. Paper assumptions are admissible
+  parameters, a projective strategy winning with probability at least `1 - ε`, and
+  `ε ≥ 0`. Lean retains `AdmissibleParams`, `ProjectiveSetting P ε`, and `0 ≤ ε`.
+  The paper concludes average operator-distance bounds of order `ε`, also with
+  tensor factors interchanged. Lean retains existential universal constants and
+  the two `opFamilyDistSq ≤ C * ε` conclusions, with `swappedState` representing
+  the factor interchange. The low-degree outcome completion by `Option` is unchanged
+  and is explained in the blueprint immediately after this lemma's item list.
+  Verdict: faithful boundary encodings retained; no new assumptions, changed
+  constants, weakened conclusions, or proof holes. All theorem types remain unchanged;
+  proof edits only update declaration references and unfold function composition to
+  match the existing measurement composition theorem's lambda expression.
+- **Validation.** Targeted `lake env lean` checks pass for `Commuting`, `MagicSquare`,
+  `Consistency`, `Interchange`, `ApproxLines`, `Approx`, and the public
+  `Observables/WinImplications.lean` wrapper. Only branch-private module artifacts
+  were refreshed; no full build was launched. The four edited Lean files contain
+  no `sorry` or `axiom`; the unchanged wrapper still reports its existing `sorry`
+  warnings at lines 276, 294, and 313. `git diff --check` and the hook installation
+  check pass. Publication CI and independent review remain the parent tail's task.
+- **Checked publication of `8cca8bc`.** Normal pre-commit and checked-push gates
+  passed, including changed-file Lean checks, targeted artifact refreshes, statement
+  integrity audits, the blueprint web smoke check, and resolution of all 1272
+  blueprint declarations. The gate found no changed source-labelled public headers.
+  The subsequent SSH `git-receive-pack` transport remained silent for more than
+  three minutes; only this session's stalled SSH child was terminated. Checked-push
+  exited 128 without confirming publication. The parent tail must verify the remote
+  tip and retry checked publication before running exact-head CI and review. No
+  hooks were bypassed, no full-project build was launched, and no PR was merged.
+
 ## 2026-09-06 — Issue 201 integration validation setup
 - Session `prover-201-20260906-01` initially looked for the slot-6 handoff in the
   branch checkout, where it was absent; it was read from the primary checkout
@@ -4225,6 +4268,73 @@ no second comment or extra review is created. Implementer supervisor2326711
 remains live under primary/max. Persistent router semantics still await the
 bounded PR238 amendment and normal gates.
 
+## 2026-09-06 — PR 195 current-base mechanical recovery
+
+- Session `orc-113-20260906-07` independently fetched published main
+  `a61ee557b33a2d8a4721e92b08b6d06dcb69ed57` and refreshed branch head
+  `f1d1d3c7a1f421b255aec30c485ce593ad8e4905`. Git reported one conflict,
+  in this ledger. The resolution retains both parents' incident records;
+  incoming-only paths are retained without manual source edits.
+- GitHub's four existing full reviews are retained, including approved review
+  `5123351774` at `40cead390f610d894bb4264e0ca6789753476c6d`. This session
+  performs only preservation checks, normal checked publication, and exact-head
+  CI. It does not review, publish a review status, adjudicate, or merge PR 195.
+- Preservation and gate evidence are captured under
+  `~/.cache/mipstarre-dev/recoveries/orc-113-20260906-07/`. Fresh CI and final
+  GitHub state are not asserted by this pre-publication entry; the session's
+  terminal report records their observed results for main's adjudication.
+
+### Previous incident wording retained during the mechanical refresh
+
+The automatic merge incorporated main's revised incident wording. To retain
+both histories without replacing main's entries, the following previous
+versions are reproduced from parent `f1d1d3c7a1f4`. These are historical
+records, not new instructions or current operating-state assertions.
+
+## 2026-09-03 — Operator takeover: owner's Claude session replaces the codex main session
+- **Trigger:** owner decision (2026-09-03, after the eight-hour stall and the
+  reviewer-churn episode): the owner's Claude Fable 5.1 session, working from
+  the owner's machine over ssh, takes the operator role for about one to two
+  days. Dispatched worker sessions (orc/prover/reviewer/…) remain codex
+  sessions on ghz via `dispatch.sh` (model gpt-5.6-sol until "astra" is
+  available in codex's configuration, then astra; an hourly codex poller
+  `owner-tools/astra-poll.sh` reports the switch to #26).
+- **Handover:** the codex main session posted its exact in-flight state to
+  #27 ("Handover to owner session") and exited at 2026-09-03T23:21:32Z. The owner session
+  picks up every lane from that report. The same protocols, gates and telemetry
+  duties bind the owner session; owner-side records continue in
+  `owner-log.md`.
+- **Hand-back:** to be recorded here and in `stages.jsonl` when the owner
+  says so; the codex main session then resumes from `~/.codex/prompts/goal.md`
+  plus the #27 log.
+- **2026-09-04 budget guard vs merge commits:** a fresh-base merge of main into the 130-line issue-60 branch staged 520 inherited workflow-layer lines and the pre-commit budget refused the merge commit. The operator did not use the owner override; the merge was aborted and a hook fix (exempt merge commits) was filed and landed first, after which the fresh-base merges were redone.
+
+## 2026-09-04 — Operator hand-back: codex main session resumes from the owner session
+
+- **Trigger:** owner decision (2026-09-04T13:03:08Z): the owner's Claude 5-hour window is nearly used; the
+  owner session returns at 14:50Z. Mode 2 ran since 2026-09-03 23:11Z with the merge daemon,
+  stacked lanes and the Opus/codex prover pools; Mode 1 resumes from /tmp/qpbt-main-handoff.md
+  (archived under results/telemetry/owner-messages/).
+- **State at hand-back:** main at 4eaf968; open PRs: 171,170,169,162,161,160,158,155,154,153,152,151,150,149.
+
+## 2026-09-04 — Operator takeover: owner's Claude session replaces the codex main session
+
+- **Trigger:** owner decision (2026-09-03, after the eight-hour stall and the
+  reviewer-churn episode): the owner's Claude Fable 5.1 session, working from
+  the owner's machine over ssh, takes the operator role for about one to two
+  days. Dispatched worker sessions (orc/prover/reviewer/…) remain codex
+  sessions on ghz via `dispatch.sh` (model gpt-5.6-sol until "astra" is
+  available in codex's configuration, then astra; an hourly codex poller
+  `owner-tools/astra-poll.sh` reports the switch to #26).
+- **Handover:** the codex main session posted its exact in-flight state to
+  #27 ("Handover to owner session") and exited at 2026-09-04T14:57:57Z. The owner session
+  picks up every lane from that report. The same protocols, gates and telemetry
+  duties bind the owner session; owner-side records continue in
+  `owner-log.md`.
+- **Hand-back:** to be recorded here and in `stages.jsonl` when the owner
+  says so; the codex main session then resumes from `~/.codex/prompts/goal.md`
+  plus the #27 log.
+
 ## 2026-09-06T01:28:21Z — Owner concurrency priority: three independent critical lanes
 
 The owner explicitly directed immediate parallel execution of existing PR238,
@@ -4940,6 +5050,26 @@ or new owner disposition is performed by this archival reconciliation.
   compaction failures in existing logs rather than infer productive requests,
   RPM/TPM, server in-flight counts or recovery from process occupancy alone.
 
+## 2026-09-06 — PR 195 B7-authorized exact-head recovery
+
+- Session `orc-113-20260906-08` resumes the existing recovery author thread
+  from published head `c7adb95e1c7f7bdd6b9e971db765e5a53ac4a284`. GitHub main
+  was independently read and fetched at
+  `32a32edee16d3932525e4b1da9f84009e1fbb13b`; no prospective PR 262 merge is
+  treated as published source. The only conflict is this incident ledger,
+  resolved by retaining both parents' records without editing Lean or blueprint.
+- The four-review cap and all existing dispositions remain unchanged. This
+  recovery verifies the seven owned blobs against approved head
+  `40cead390f610d894bb4264e0ca6789753476c6d`, preserves incoming-only paths,
+  and compares the authored nontelemetry patch before normal checked publication.
+  Main owns the B7 terminal disposition; this session publishes no review or
+  adjudication and requests no PR merge or subagent.
+- The machine-wide build lock was held by CI for PR 262 when observed.
+  PR 195 CI uses the normal 14400-second lock wait and is detached rather than
+  holding an idle model session. Runtime preservation, launch, and gate evidence
+  is kept under `~/.cache/mipstarre-dev/recoveries/orc-113-20260906-08/`.
+  This pre-publication incident entry does not assert successful CI completion.
+
 
 ## 2026-09-06T04:59:15Z — Validated integration recovery and useful replenishment
 
@@ -5000,3 +5130,20 @@ and the supplied API-max versus official-Ultra distinction remain preserved
 with provenance under results/telemetry/model-comparison/, without policy change
 or a causal latency/quality claim. Boundary report5556912589 was posted once for
 the previous04:30 observation;247<-237 native dependency is recorded.
+
+## 2026-09-06 - PR195 refresh against the actual PR262 merge
+
+- Session `orc-113-20260906-09` verified through `gh_common.py` that PR262
+  merged as `b7705e02ef143e605981839009646c509f7df2ca`, then merged that
+  exact commit into clean PR195 head `1dfcbd2e8a73089b0bc75daf14cf624ca7aab07a`.
+  The only conflict was this ledger; both parents' incident text is retained.
+- The seven mathematical and blueprint blobs remain those of approved head
+  `40cead390f610d894bb4264e0ca6789753476c6d`. The three public-wrapper holes,
+  four model reviews, historical terminal disposition `5124401997`, and
+  telemetry histories are preserved. Main owns a new terminal disposition
+  after the refreshed head receives successful CI; this session publishes none.
+- Preservation evidence, checked-publication output, and detached exact-head
+  CI launch records are stored under
+  `~/.cache/mipstarre-dev/recoveries/orc-113-20260906-09/`. CI uses the normal
+  14400-second build-lock wait. This entry does not assert publication or CI
+  success before those operations finish. No additional review is launched.

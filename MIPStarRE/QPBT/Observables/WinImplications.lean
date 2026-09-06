@@ -1,4 +1,4 @@
-import MIPStarRE.QPBT.Observables.WinImplications.Consistency
+import MIPStarRE.QPBT.Observables.WinImplications.Approx
 
 /-!
 # Winning implications for strategy observables
@@ -135,7 +135,7 @@ theorem win_ms_cons :
 
 /-- Operator-distance and factor-interchanged companions to the consistency
 item of `lem:qld-win-implications`. This is the trailing clause at paper
-`14_analysis_of_the_pauli_basis_test.tex:264-266`, blueprint
+`14_analysis_of_the_pauli_basis_test.tex:227,263-264`, blueprint
 `lem:qld-win-implications`. -/
 theorem win_cons_approx :
     ∃ C : ℝ, 1 ≤ C ∧
@@ -152,12 +152,12 @@ theorem win_cons_approx :
           ((S.strategyMeasurement .bob question).effect a) 1)
         (fun question a => heteroKron 1
           ((S.strategyMeasurement .alice question).effect a))
-        S.swappedState ≤ C * ε := by
-  sorry
+        S.swappedState ≤ C * ε :=
+  WinImplications.win_cons_approx_proof
 
 /-- Operator-distance and factor-interchanged companions to the low-degree
 item of `lem:qld-win-implications`. This is the trailing clause at paper
-`14_analysis_of_the_pauli_basis_test.tex:264-266`, blueprint
+`14_analysis_of_the_pauli_basis_test.tex:227,263-264`, blueprint
 `lem:qld-win-implications`. -/
 theorem win_low_degree_approx :
     ∃ C : ℝ, 1 ≤ C ∧
@@ -174,12 +174,12 @@ theorem win_low_degree_approx :
           ((S.lineEvalMeas .bob W sample.1 sample.2).effect a) 1)
         (fun sample a => heteroKron 1
           ((S.pointMeasOption .alice W sample.2).effect a))
-        S.swappedState ≤ C * ε := by
-  sorry
+        S.swappedState ≤ C * ε :=
+  WinImplications.win_low_degree_approx_proof
 
 /-- Operator-distance and factor-interchanged companions to Pauli-basis
 consistency. This is the trailing clause of `lem:qld-win-implications`, paper
-`14_analysis_of_the_pauli_basis_test.tex:264-266`, blueprint
+`14_analysis_of_the_pauli_basis_test.tex:227,263-264`, blueprint
 `lem:qld-win-implications`. -/
 theorem win_pauli_basis_cons_approx :
     ∃ C : ℝ, 1 ≤ C ∧
@@ -192,12 +192,12 @@ theorem win_pauli_basis_cons_approx :
       opFamilyDistSq (uniformDistribution (Fin P.m → PauliScalar P))
         (fun u a => heteroKron ((S.pointMeas .bob W u).effect a) 1)
         (fun u a => heteroKron 1 ((S.pauliEvalMeas .alice W u).effect a))
-        S.swappedState ≤ C * ε := by
-  sorry
+        S.swappedState ≤ C * ε :=
+  WinImplications.win_pauli_basis_cons_approx_proof
 
 /-- Operator-distance and factor-interchanged companions to the commuting
 Pair check. This is the trailing clause of `lem:qld-win-implications`, paper
-`14_analysis_of_the_pauli_basis_test.tex:264-266`, blueprint
+`14_analysis_of_the_pauli_basis_test.tex:227,263-264`, blueprint
 `lem:qld-win-implications`. -/
 theorem win_comm_approx :
     ∃ C : ℝ, 1 ≤ C ∧
@@ -212,12 +212,12 @@ theorem win_comm_approx :
         (fun ω a => heteroKron
           ((S.pairWMeas .bob W ω.1 ω.2.1 ω.2.2.1 ω.2.2.2).effect a) 1)
         (fun ω a => heteroKron 1 ((S.pairComponentMeas .alice W ω).effect a))
-        S.swappedState ≤ C * ε := by
-  sorry
+        S.swappedState ≤ C * ε :=
+  WinImplications.win_comm_approx_proof
 
 /-- Operator-distance and factor-interchanged companions to commuting point
 consistency. This is the trailing clause of `lem:qld-win-implications`, paper
-`14_analysis_of_the_pauli_basis_test.tex:264-266`, blueprint
+`14_analysis_of_the_pauli_basis_test.tex:227,263-264`, blueprint
 `lem:qld-win-implications`. -/
 theorem win_comm_cons_approx :
     ∃ C : ℝ, 1 ≤ C ∧
@@ -238,13 +238,13 @@ theorem win_comm_cons_approx :
             (match W with | .X => ω.2.2.1 | .Z => ω.2.2.2)).effect a) 1)
         (fun ω a => heteroKron 1
           ((S.pairWMeas .alice W ω.1 ω.2.1 ω.2.2.1 ω.2.2.2).effect a))
-        S.swappedState ≤ C * ε := by
-  sorry
+        S.swappedState ≤ C * ε :=
+  WinImplications.win_comm_cons_approx_proof
 
 /-- Operator-distance and factor-interchanged companions to Magic Square
 variable consistency. This is the trailing clause of
 `lem:qld-win-implications`, paper
-`14_analysis_of_the_pauli_basis_test.tex:264-266`, blueprint
+`14_analysis_of_the_pauli_basis_test.tex:227,263-264`, blueprint
 `lem:qld-win-implications`. -/
 theorem win_ms_cons_approx :
     ∃ C : ℝ, 1 ≤ C ∧
@@ -265,8 +265,8 @@ theorem win_ms_cons_approx :
             (match W with | .X => ω.2.2.1 | .Z => ω.2.2.2)).effect a) 1)
         (fun ω a => heteroKron 1
           ((S.msVarBitMeas .alice (match W with | .X => 0 | .Z => 4) ω).effect a))
-        S.swappedState ≤ C * ε := by
-  sorry
+        S.swappedState ≤ C * ε :=
+  WinImplications.win_ms_cons_approx_proof
 
 /-- Observable self-consistency on both tensor-factor orientations. This is
 Equation `eq:pts-obs-consistency` in `lem:qld-win-implications-obs`, paper
