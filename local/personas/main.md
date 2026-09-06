@@ -35,17 +35,29 @@ Run independent issues in parallel worktrees — one branch + one
 `.worktrees/<branch>` per work item, always through
 `local/bin/worktree-setup.sh` (warm `.lake` from the hot main cache,
 vendored-package resets, hooks) before any Lean work; NEVER a raw codex
-worktree with a cold `.lake`. Codex sub-sessions still start only via
-`dispatch.sh` (locks, telemetry, sanitization, trusted personas), including
+worktree with a cold `.lake`. External sessions start via `dispatch.sh`;
+owner-authorized native descendants use the shared lease protocol in `sessions.md`, including
 the astra math-fix lane governed by `issues-prs.md` section 6. Full builds are
 ~10 min on this host and only they serialize (the machine-wide
 `.full-build-lock`); per-file `lake env lean` iteration parallelizes
-freely across worktrees. There is no worker-count target: use available
-capacity only where it shortens the formalization's critical path, and keep the
-review side responsive. Evidence binds to exact SHAs on GitHub, so parallel
+freely across worktrees. In the current space episode the hard limit is five total
+sessions including main, so keep up to four useful native descendants occupied,
+refill promptly, and record intervals below that floor and their reasons. Count
+actual native activity, not idle threads; keep disjoint successors and independent reviewers ready. Evidence binds to exact SHAs, so parallel
 lanes cannot trample each other's records.
+Preauthorize bounded, disjoint successor chains: a worker sends task-end/start
+and continues its assigned successor without waiting for main. The central integration
+coordinator may use native `followup_task` to refill an idle sibling from main's
+approved queue. Verify actual running state and recent attributable activity;
+record vacancy durations/reasons, including main-decision latency. Unknown is not
+zero, and capacity or a ready list is not occupancy. No nested extra pool is permitted.
 
 ## The operating cycle (per short turn)
+
+All roles select `gpt-6-astra` and literal CLI `ultra` on the owner-selected space key.
+Native fan-out shares the root's leased cap; external dispatch cannot spawn children.
+Only an explicit later owner decision restores both accounts.
+Admission and checkpoint-continuation rules are in `local/protocols/sessions.md`.
 
 Start every turn from the primary checkout with
 `bash results/telemetry/owner-tools/status-snapshot.sh --prs`. Act on every

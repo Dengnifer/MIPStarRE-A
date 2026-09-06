@@ -26,13 +26,13 @@ noncomputable section
 namespace WinImplications
 
 /-- Select one component of a Pair answer. -/
-private def selectedPairBit (W : PauliKind) (bits : ZMod 2 × ZMod 2) : ZMod 2 :=
+def selectedPairBit (W : PauliKind) (bits : ZMod 2 × ZMod 2) : ZMod 2 :=
   match W with
   | .X => bits.1
   | .Z => bits.2
 
 /-- Winning the commuting Pair/W branch forces equality of the selected bits. -/
-private theorem pairLabels_eq_of_win (P : AdmissibleParams) (W : PauliKind)
+theorem pairLabels_eq_of_win (P : AdmissibleParams) (W : PauliKind)
     (z : PauliSpace P) (A B : PauliAnswer P)
     (hcomm : IsCommuting (pauliSharedSplit P z).1)
     (hwin : pauliWinPredicate P

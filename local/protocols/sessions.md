@@ -21,7 +21,7 @@ so this protocol reconstructs each one explicitly:
 
 ## 1. One entry point
 
-**Every Codex session is started by `local/bin/dispatch.sh`.** Calling `codex` by
+**Every external Codex session is started by `local/bin/dispatch.sh`.** Calling `codex` by
 hand — including from inside an agent session — is a protocol violation, not a
 shortcut: the thread id, the token counts and the wall time exist only in the
 event stream that `dispatch.sh` captures, and a session started any other way
@@ -39,7 +39,45 @@ runner"). Locally the secrets are gone but the write access is not.
 An agent that needs a sub-session (an orchestrator splitting work, a prover
 asking for a scout) invokes `dispatch.sh` from inside its own session, with
 `MIPSTARRE_SESSION` set to its own name so the registry records the parent in
-the `dispatcher` field. The session prompt states this rule verbatim.
+the `dispatcher` field. External session prompts prohibit further fan-out.
+
+### Native descendants (owner amendment, 2026-09-06)
+
+Main may assign useful native Astra Ultra work without external admission. Before
+admitting either kind of worker, reserve the native root's configured descendant cap:
+`account_router.py native-lease CACHE ROOT_THREAD PID CAP`. The cap excludes the root;
+the process census separately charges the root. This command validates the live
+resume thread, process start identity, scoped space route, explicit Astra/Ultra
+defaults and shared descendant cap under the account-router lock. Python 3.10 needs
+`tomli` for this native-only TOML validation; Python 3.11 has `tomllib`.
+`watchdog/primary-key-capacity` is the owner allocation, not measured throughput. For
+the current space episode the owner allocation is five total sessions including main,
+external admission is zero, and at most four native descendants may be active. The
+router enforces `watchdog/primary-external-admission=0` (and the owner `max-codex=0`
+fallback) before creating any external reservation.
+Native leases, external processes/reservations, interactives and reserved non-Codex
+use all consume it. Unknown/dead native leases are retained until explicit
+`native-lease ... --release` verifies the original root is no longer alive. A live
+lease cannot be resized; checkpoint and refresh the process with owner coordination.
+
+Main owns task selection, one-writer worktree assignments and native replenishment.
+Main preauthorizes bounded, disjoint successor chains; after sending task-end/start,
+workers continue an available assigned successor without awaiting another decision.
+The central integration coordinator may use native `followup_task` to refill an
+idle sibling from main's approved queue during a long main turn. Count actual native
+running state plus recent attributable activity. Record vacancy durations/reasons,
+including main-decision latency; unknown is not zero and configured capacity or a
+ready list is not measured occupancy. No nested extra pool may exceed the shared cap.
+Children do not write the primary index or shared telemetry concurrently. The primary
+telemetry owner records each child using `telemetry.py native-record ROLLOUT` with
+`--name --role --issue --thread-id --root-thread-id --key-label --worktree --status`
+and optional `--pr`; effective metadata must show Astra Ultra. Root/parent IDs,
+timestamps, outcome and raw observed counters are retained. Aggregation scope is
+unknown: never sum parent and child counters without independent evidence. Native
+review uses the exact-head transport in `review.md`; it cannot bypass CI or merge gates.
+The root's inherited permission envelope is unchanged; reviewers receive read-only
+assignments, not a falsely claimed separate read-only sandbox. Historical episodes,
+attempt counts and usage survive refreshes and route changes without a budget reset.
 
 ## 2. Roles and sandboxes
 
@@ -65,12 +103,8 @@ exception: the role code `orc` maps to `local/personas/orchestrator.md`.
 Until such a file is committed, `dispatch.sh` warns and falls back to a
 one-line built-in frame — enough to run, not enough for load-bearing work.
 The `mathfix` role is the source-statement repair lane governed by
-`issues-prs.md` section 6. At present, the owner session launches that lane on
-Claude Fable 5.1 through its Agent tool and records it separately in
-`results/telemetry/owner-sessions.jsonl`; `dispatch.sh --role mathfix` is used
-only for astra after its availability is reported on #26. The per-gap attempt
-and elapsed-time budget is cumulative across both routes, and the operator
-supplies that state in each request or dispatch.
+`issues-prs.md` section 6: main selects Astra Ultra after the #26 availability report,
+supplying cumulative per-gap budgets; historical Fable records remain in `owner-sessions.jsonl`.
 
 ## 3. Naming
 
@@ -103,7 +137,7 @@ supplies that state in each request or dispatch.
 ```bash
 local/bin/dispatch.sh --role prover --issue 0042 \
   --worktree .worktrees/issue-0042-pauli-basis \
-  --effort high \
+  --effort ultra \
   -- "Close the sorry at MIPStarRE/Quantum/PauliBasis.lean:212 ..."
 ```
 
@@ -115,25 +149,48 @@ registry append; and a final report of `name`, `thread_id` and the
 last-message path.
 
 Account routing uses `--account auto|primary|second`, overriding
-`MIPSTARRE_CODEX_ACCOUNT` (default `auto`). Under a shared reservation lock,
-auto selects the smaller live/cap ratio, with primary winning ties. Live counts
-come from `$MIPSTARRE_CACHE_ROOT/accounts/<account>/<dispatcher-pid>` markers;
-each read removes stale PIDs, and exit cleanup removes the current reservation.
-Caps are positive integers in `watchdog/max-codex-primary` and
-`watchdog/max-codex-second` under that cache root (defaults 9 and 10). Full
-accounts are polled every 20 seconds for `MIPSTARRE_ACCOUNT_WAIT` seconds
-(default 1800), after which auto uses the less loaded account even above cap;
-explicit and resumed dispatches wait on their pinned account and never switch.
+`MIPSTARRE_CODEX_ACCOUNT` (default `auto`). Locked admissions read `watchdog/account-mode`
+(absent: `primary`; valid: `primary|both`). Only the owner may authorize `both`, reading
+`max_codex|primary|second` from `watchdog/account-mode-both-preserved.json` when present.
+Neither mode rewrites settings, credentials or history.
+Caps in `watchdog/max-codex-{primary,second}` default to 11 and 9; zero disables
+an account. `watchdog/max-codex` additionally caps total workers. Auto selects
+the smallest live/cap ratio among eligible accounts, with primary winning ties.
+Host `/proc` scans reconcile Codex executables and dispatcher reservations by ancestry,
+without counting Node wrappers twice. Twelve allocated primary slots reserve at least
+one for main; other interactives and unreserved workers reduce capacity. Each admission
+reads optional `watchdog/primary-excluded-interactive-cwds.json`: a duplicate-free list
+drawn only from `/home/drx/FV`, `/home/drx/LDT-Lean-Paper`, `/home/drx`; invalid lists fail.
+Only known-primary interactives qualify, never workers/reservations; absence exempts none.
+`watchdog/primary-external-reserved` reserves non-Codex key use (default zero), not
+already-observed processes. Unknown homes count against primary. Unavailable host
+visibility or unreadable live processes fail before stale cleanup; dead reservations
+are removed and permission-denied PIDs retained. Full accounts poll for
+`MIPSTARRE_ACCOUNT_WAIT` seconds (default 1800), then fail without reserving or spilling
+to second. Dry runs neither wait nor reserve and still require visibility and capacity.
 Resume affinity comes from registry account fields or rollout files in either
 home; unknown, ambiguous, or conflicting selections fail before execution.
+Primary mode rejects secondary-affinity resumes, including `auto`, without relabeling.
+`--continue-from FILE` starts a fresh primary thread from operator JSON: `previous_session`
+(terminal, same issue), `checkpoint` (ancestor of HEAD), and `budget_file` (shared path).
+The budget contains `anchor`, `attempt_limit`, `attempts`, `working_seconds`, and
+`sessions` (charged names including the predecessor); an unused attempt is required.
+Continuations retain path, anchor and limit; monotone charges include snapshot plus completed
+segments. Rows link original account/thread, checkpoint and budget. Operators enforce budgets;
+route switches grant no reset/attempt or change to old homes, captures or uncommitted work.
+Ordinary resumes recover prior provenance,
+skipping malformed/non-object history rows but rejecting invalid relevant metadata.
+Replay reads the private launch-time `.continuation.json`, never a later budget file.
+The shim rejects multi-agent enable flags and whole `features`/`agents` overrides only.
 Primary unsets inherited `CODEX_HOME`; second sets it for execution and rollout
 lookup to `MIPSTARRE_CODEX_HOME_SECOND` (default
 `~/.cache/mipstarre-dev/codex-home-yxy`). Review and autofix inherit these
-variables unchanged. New dispatch rows record the selected account and model:
-`MIPSTARRE_CODEX_MODEL` wins, otherwise a simple quoted top-level `model` ID in
-the selected home's `config.toml` is resolved and explicitly passed to the CLI.
-An unresolved model fails preflight rather than recording a guessed identity.
-Dry runs select without reserving capacity or waiting.
+variables unchanged. All roles require `gpt-6-astra` and literal CLI `ultra`, including
+resumes and mathfix. Dispatch `--effort`, `MIPSTARRE_REVIEW_EFFORT` and
+`MIPSTARRE_AUTOFIX_EFFORT` default to `ultra`; every other effort fails rather than
+being normalized. The owner's verified space login is not rewritten here; the
+historical scoped-home directory name may still contain `relay1` for continuity.
+`requested_effort` is configured, not verified; see `meta.md`. Missing dispatchers fail closed.
 
 Preconditions the dispatcher (human or orchestrator) owns:
 
@@ -159,7 +216,8 @@ bodies — is attached with `--context-file`, never pasted into the task text
 The session works in its worktree under its sandbox. The standing rules
 injected into every prompt are: read `AGENTS.md` first; treat
 `local/protocols/*.md` as normative; start no sub-session except through
-`dispatch.sh`; never review your own diff; keep runtime state out of the
+the applicable external/native protocol above; never review your own diff;
+keep runtime state out of the
 repository; and put the result, the residual risk and the hand-off in the
 final message, which is captured to
 `results/telemetry/sessions/<name>.last.md`.
@@ -335,8 +393,9 @@ fix sessions; no role name identifies one, so `dispatch.sh` cannot.
 The registry line schema is in `meta.md`. Beyond it, `dispatch.sh` records
 `turns` (completed model turns), `capture` (repo-relative path to the event
 stream) and, when resolvable, `rollout`. New dispatches record `account` and the
-explicitly resolved `model` as described in §4.1; historical rows are unchanged.
-Token usage is summed over
+explicitly resolved `model` as described in §4.1. They also record
+`requested_effort` when §4.1 produces a nonempty override; historical rows are
+unchanged. Token usage is summed over
 `turn.completed` events and normalized to
 `{input, cached_input, cache_write, output, reasoning}`; `dispatch.sh` writes
 `status: done` or `failed` at the end of a run, and `active` is reserved for
