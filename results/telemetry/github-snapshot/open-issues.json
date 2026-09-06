@@ -1,5 +1,90 @@
 [
  {
+  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/295",
+  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
+  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/295/labels{/name}",
+  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/295/comments",
+  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/295/events",
+  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/295",
+  "id": 5367313481,
+  "node_id": "I_kwDOUJyJf88AAAABP-q0SQ",
+  "number": 295,
+  "title": "Recover ordered polynomial-image bounds through public APIs",
+  "user": {
+   "login": "Dengnifer",
+   "id": 89234078,
+   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
+   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/Dengnifer",
+   "html_url": "https://github.com/Dengnifer",
+   "followers_url": "https://api.github.com/users/Dengnifer/followers",
+   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
+   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
+   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
+   "repos_url": "https://api.github.com/users/Dengnifer/repos",
+   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
+   "type": "User",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "labels": [
+   {
+    "id": 12025010884,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
+    "name": "formalization",
+    "color": "ededed",
+    "default": false,
+    "description": "Lean formalization of a mathematical statement"
+   }
+  ],
+  "state": "open",
+  "locked": false,
+  "assignees": [],
+  "milestone": null,
+  "comments": 0,
+  "created_at": "2026-09-06T19:58:36Z",
+  "updated_at": "2026-09-06T19:58:36Z",
+  "closed_at": null,
+  "assignee": null,
+  "author_association": "OWNER",
+  "active_lock_reason": null,
+  "sub_issues_summary": {
+   "total": 0,
+   "completed": 0,
+   "percent_completed": 0
+  },
+  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
+  "issue_dependencies_summary": {
+   "blocked_by": 0,
+   "total_blocked_by": 1,
+   "blocking": 0,
+   "total_blocking": 0
+  },
+  "body": "<!-- mipstarre-issue-key: qpbt-publish-preserved-polynomial-image-20260907 -->\n### Motivation\nRecover the already-proved ordered polynomial-image estimates preserved in\n`MIPStarRE/QPBT/Combining/PolynomialImageBounds.lean` in the issue118 worktree.\nThe calculations concern `eq:qld-g-prime` and the coefficient-polynomial\nargument preceding `eq:qld-g-prime-bound`, QPBT paper analysis lines 1289-1320.\nThey were validated during completed attempt13, but previously required\nsession-private validation artifacts. Current published main\n`1c223a5f5b2f5c0af9483cc99b6d3771a3385bdc` supplies the public postprocessing\nand quadratic-form APIs needed to publish this existing content.\n\n### Scope\n- Recover the same 21 public declarations: ordered and diagonal indicators,\n  projective Gram/norm identities, the uniform exceptional-coefficient bound,\n  nonlinear-coefficient selection and specialization, diagonal/ordered\n  polynomial bounds, and the mass estimate with its actual ordered-correlation\n  error on the right-hand side.\n- Preserve public statements and proof content. Use current public imports\n  and APIs; introduce no stronger inequality, new hypothesis, axiom, sorry,\n  assumed collision law, or skipped source calculation.\n- Import the recovered module from the QPBT aggregate so ordinary CI includes\n  it. Any blueprint entry must be explicitly Lean-only auxiliary and show\n  the ordered-correlation error; never mark unrestricted `lem:qld-4-7` complete.\n- Preserve issue118, its existing gaps and audits, all private artifacts,\n  and its source module. This is publication of completed proof content,\n  not another B8 mathematics attempt or witness/transport construction.\n\n### Budget And Preservation\nB8 remains at 13 attempts and 26509 working seconds. Neither that limit nor\nits original budget anchor is reset, extended, discharged, or transferred.\nStop if adopting the public APIs requires a genuinely new mathematical\nconstruction, rather than continuing B8 under this issue number.\n\nPreserved source SHA256:\n`871109bd97b6d50354dbf89f2d828cf4c4a9c2877a88b2aa4a654f764df42762`.\nPrior 21-declaration axiom receipt:\n`/tmp/issue118-attempt13-axioms-and-placements.log`, SHA256\n`1c4c69600ff7268aa218d07f4c7624dfb5b43475aec8dc7d3f3226767591872a`.\nThe older evidence is retained, not used as a substitute for fresh validation.\n\n### Validation\nUse a new issue-number branch/worktree from the pinned published main and\nthe existing cache/setup rules. Type-check the target, build its current public\ndependency closure, and query all 21 public axiom closures without the prior\nprivate artifact prefix. Verify unchanged declarations, no new proof debt,\nnormal hooks and source/blueprint audits, then checked publication and a normal\nPR. Independent CI/review and daemon-only integration remain separate gates.\n\n---\nRelated mathematical frontier: #118. This issue does not close or discharge it.",
+  "closed_by": null,
+  "reactions": {
+   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/295/reactions",
+   "total_count": 0,
+   "+1": 0,
+   "-1": 0,
+   "laugh": 0,
+   "hooray": 0,
+   "confused": 0,
+   "heart": 0,
+   "rocket": 0,
+   "eyes": 0
+  },
+  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/295/timeline",
+  "performed_via_github_app": null,
+  "state_reason": null,
+  "pinned_comment": null
+ },
+ {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/286",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/286/labels{/name}",
@@ -1556,81 +1641,6 @@
   "pinned_comment": null
  },
  {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/239",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/239/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/239/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/239/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/239",
-  "id": 5362316043,
-  "node_id": "I_kwDOUJyJf88AAAABP55zCw",
-  "number": 239,
-  "title": "feat(QPBT/Extraction): prove independent dot-product projectors",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-06T02:19:35Z",
-  "updated_at": "2026-09-06T02:19:35Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/167",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 1,
-   "blocking": 1,
-   "total_blocking": 1
-  },
-  "body": "<!-- mipstarre-issue-key: 20260906-independent-dot-projectors -->\n### Target declarations\n\nProve `tauDotProj_isProj` and `sum_tauDotProj_eq_one` in\n`MIPStarRE/QPBT/Extraction/Defs.lean`, preserving their existing signatures.\n\n### Source and independence\n\nPaper: `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1426-1429`,\nEquation `eq:def-tauwu`; blueprint `def:tau-dot-product-projector`.\nThese finite Pauli-basis coarse-graining facts quantify only over admissible\nparameters, a basis kind, a vector and an outcome. They have no GlobalPairWitness\nargument and do not require issue119's missing global-pair construction.\nUse the already-merged Pauli projectors, their projectivity, orthogonality,\nand completeness; reuse Mathlib finite-sum/postprocessing lemmas.\n\nThis independent subpacket supplies two targets of #120. It does not close\n#120, remove its #119 dependency, or advance a downstream lifecycle tail.\nPrerequisite #63 is already merged. The exact starting base is published main\na61ee557b33a2d8a4721e92b08b6d06dcb69ed57.\n\n### Ownership and acceptance\n\nExclusive write scope: Extraction/Defs.lean, the corresponding dot-projector\nblueprint node only, and a packet-specific statement-integrity audit. Do not\nedit Extraction/Observables.lean or another packet's files. No new assumptions,\nproof holes, axioms, bypasses, or weakened statements. Check target declarations'\nkernel axiom dependencies and distinguish imported unfinished declarations from\nactual proof dependencies. Targeted Lean checks and normal hooks first; complete\nCI, independent review and daemon-only merge remain mandatory for publication.\n\nMain authorizes this decomposition to exploit useful independent concurrency.\nThe original packets retain their remaining targets and integration gates.\n",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/239/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/239/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/234",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/234/labels{/name}",
@@ -2168,8 +2178,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 15,
-   "completed": 4,
-   "percent_completed": 26
+   "completed": 5,
+   "percent_completed": 33
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
   "issue_dependencies_summary": {
@@ -2925,7 +2935,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/167",
   "issue_dependencies_summary": {
-   "blocked_by": 3,
+   "blocked_by": 2,
    "total_blocked_by": 5,
    "blocking": 1,
    "total_blocking": 1
@@ -3754,9 +3764,9 @@
   "author_association": "OWNER",
   "active_lock_reason": null,
   "sub_issues_summary": {
-   "total": 24,
+   "total": 25,
    "completed": 19,
-   "percent_completed": 79
+   "percent_completed": 76
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/1",
   "issue_dependencies_summary": {
@@ -4315,9 +4325,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 207,
+  "comments": 208,
   "created_at": "2026-09-02T08:30:04Z",
-  "updated_at": "2026-09-06T19:27:38Z",
+  "updated_at": "2026-09-06T19:46:46Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
