@@ -9,6 +9,10 @@ explicitly. It also states the consistency of the pulled-apart
 measurements with the original point measurements and the self-consistency of
 the corresponding observables.
 
+The direct `AA'`--`BA''` and `BB'`--`AB''` marginal agreement estimates are
+proved from the given global polynomial-pair witness. The conclusions
+quantified over all placements remain separate proof obligations.
+
 ## References
 
 The marginal estimates formalize blueprint
@@ -22,11 +26,353 @@ open scoped BigOperators Matrix
 
 namespace MIPStarRE.QPBT
 
-open MIPStarRE.LDT MIPStarRE.Quantum
+open MIPStarRE.LDT hiding Measurement
+open MIPStarRE.Quantum DistanceCalculus
 
 noncomputable section
 
 /-! ## Absorption of expanded point measurements -/
+
+section PlacementMeasurements
+
+open scoped Classical
+
+/-- The original-player register not acted on by a placement. This only
+indexes the identity factors in the definition of `ProjectiveSetting.place`. -/
+private def complementSide : Placement → PlayerSide
+  | .AA' | .AB'' => .bob
+  | .BA'' | .BB' => .alice
+
+/-- Separate the two acted-on registers from the four identity registers.
+This is a coordinate decomposition of the placements in paper
+`14_analysis_of_the_pauli_basis_test.tex:420-450`, not a transfer of operators
+between registers in the expanded state. -/
+private def placementEquiv {P : AdmissibleParams} {epsilon : ℝ}
+    (S : ProjectiveSetting P epsilon) (placement : Placement) :
+    SixReg P S.toStrategy.ιA S.toStrategy.ιB ≃
+      (S.ExpandedLocalSpace placement.side ×
+        (S.LocalSpace (complementSide placement) ×
+          (PauliRegister P × (PauliRegister P × PauliRegister P)))) := by
+  cases placement
+  · exact
+      { toFun := fun index => ((index.1.1, index.1.2.1),
+          (index.2.1, (index.1.2.2, (index.2.2.1, index.2.2.2))))
+        invFun := fun index => ((index.1.1, (index.1.2, index.2.2.1)),
+          (index.2.1, (index.2.2.2.1, index.2.2.2.2)))
+        left_inv := fun _ => rfl
+        right_inv := fun _ => rfl }
+  · exact
+      { toFun := fun index => ((index.2.1, index.1.2.2),
+          (index.1.1, (index.1.2.1, (index.2.2.1, index.2.2.2))))
+        invFun := fun index => ((index.2.1, (index.2.2.1, index.1.2)),
+          (index.1.1, (index.2.2.2.1, index.2.2.2.2)))
+        left_inv := fun _ => rfl
+        right_inv := fun _ => rfl }
+  · exact
+      { toFun := fun index => ((index.2.1, index.2.2.1),
+          (index.1.1, (index.1.2.1, (index.1.2.2, index.2.2.2))))
+        invFun := fun index => ((index.2.1, (index.2.2.1, index.2.2.2.1)),
+          (index.1.1, (index.1.2, index.2.2.2.2)))
+        left_inv := fun _ => rfl
+        right_inv := fun _ => rfl }
+  · exact
+      { toFun := fun index => ((index.1.1, index.2.2.2),
+          (index.2.1, (index.1.2.1, (index.1.2.2, index.2.2.1))))
+        invFun := fun index => ((index.1.1, (index.2.2.1, index.2.2.2.1)),
+          (index.2.1, (index.2.2.2.2, index.1.2)))
+        left_inv := fun _ => rfl
+        right_inv := fun _ => rfl }
+
+/-- The entrywise placement agrees with tensoring by the identity and changing
+coordinates. No invariance property of the expanded state enters this equality. -/
+private theorem place_eq_reindex {P : AdmissibleParams} {epsilon : ℝ}
+    (S : ProjectiveSetting P epsilon) (placement : Placement)
+    (operator : Op (S.ExpandedLocalSpace placement.side)) :
+    S.place placement operator =
+      reindexOp (placementEquiv S placement) (heteroKron operator 1) := by
+  cases placement <;> ext row col <;>
+    simp [ProjectiveSetting.place, placementEquiv, reindexOp, heteroKron,
+      Matrix.kronecker, Matrix.one_apply, Prod.ext_iff, ite_and, mul_ite, ite_mul] <;>
+    split_ifs <;> simp_all
+
+/-- Tensoring a measurement with the identity and reindexing gives its
+six-register placement, with completeness and positivity retained. This is
+finite-dimensional support for blueprint `lem:qld-constructing-the-paulis-helper`. -/
+private noncomputable def placedMeasurement {P : AdmissibleParams} {epsilon : ℝ}
+    {Outcome : Type*} [Fintype Outcome] (S : ProjectiveSetting P epsilon)
+    (placement : Placement) (measurement : Measurement Outcome
+      (S.ExpandedLocalSpace placement.side)) :
+    Measurement Outcome (SixReg P S.toStrategy.ιA S.toStrategy.ιB) :=
+  reindexMeasurement (placementEquiv S placement) (leftPlacedMeasurement measurement)
+
+/-- The transported POVM has exactly the effects in the entrywise placement. -/
+private theorem placedMeasurement_effect {P : AdmissibleParams} {epsilon : ℝ}
+    {Outcome : Type*} [Fintype Outcome] (S : ProjectiveSetting P epsilon)
+    (placement : Placement) (measurement : Measurement Outcome
+      (S.ExpandedLocalSpace placement.side)) (answer : Outcome) :
+    (placedMeasurement S placement measurement).effect answer =
+      S.place placement (measurement.effect answer) :=
+  (place_eq_reindex S placement (measurement.effect answer)).symm
+
+/-- Tensoring with an identity and changing finite coordinates preserve
+projectivity, as needed to apply `lem:cool-closeness-fact` to a placed POVM. -/
+private theorem placedMeasurement_isProjective {P : AdmissibleParams} {epsilon : ℝ}
+    {Outcome : Type*} [Fintype Outcome] (S : ProjectiveSetting P epsilon)
+    (placement : Placement) (measurement : Measurement Outcome
+      (S.ExpandedLocalSpace placement.side))
+    (projective : MIPStarRE.QPBT.Measurement.IsProjective measurement) :
+    MIPStarRE.QPBT.Measurement.IsProjective (placedMeasurement S placement measurement) := by
+  letI : Fintype (S.LocalSpace (complementSide placement) ×
+      (PauliRegister P × (PauliRegister P × PauliRegister P))) := inferInstance
+  apply reindexMeasurement_isProjective
+  intro answer
+  have hOne : IsProj (1 : Op (S.LocalSpace (complementSide placement) ×
+      (PauliRegister P × (PauliRegister P × PauliRegister P)))) :=
+    IsStarProjection.one (Op (S.LocalSpace (complementSide placement) ×
+      (PauliRegister P × (PauliRegister P × PauliRegister P))))
+  exact MIPStarRE.LDT.MakingMeasurementsProjective.isProj_kronecker
+    (projective answer) hOne
+
+end PlacementMeasurements
+
+/-- The entrywise register placement commutes with a finite sum of effects. -/
+private theorem place_finset_sum {P : AdmissibleParams} {epsilon : ℝ}
+    {Index : Type*} (S : ProjectiveSetting P epsilon) (placement : Placement)
+    (indices : Finset Index) (family : Index → Op (S.ExpandedLocalSpace placement.side)) :
+    S.place placement (∑ index ∈ indices, family index) =
+      ∑ index ∈ indices, S.place placement (family index) := by
+  cases placement <;> ext row col <;>
+    simp [ProjectiveSetting.place, Matrix.sum_apply, Finset.sum_mul, Finset.mul_sum]
+
+namespace GlobalPairWitness
+
+/-- Evaluating a single-basis marginal is the same finite postprocessing as
+evaluating the corresponding component of the joint polynomial outcome. This
+is the coarse-graining in the proof of blueprint
+`lem:qld-constructing-the-paulis-helper`, paper
+`14_analysis_of_the_pauli_basis_test.tex:1626-1637`. -/
+theorem marginalPoly_postprocess_eval {P : AdmissibleParams} {epsilon deltaG : ℝ}
+    {S : ProjectiveSetting P epsilon} (w : GlobalPairWitness S deltaG)
+    (side : PlayerSide) (W : PauliKind) (point : Fin P.m → PauliScalar P) :
+    (w.marginalPoly side W).postprocess (fun poly => MvPolynomial.eval point poly.1) =
+      (w.Smeas side).postprocess (evalAt W point) := by
+  rw [marginalPoly, MIPStarRE.Quantum.Measurement.postprocess_comp]
+  cases W <;> rfl
+
+end GlobalPairWitness
+
+/-- Regrouping polynomial outcomes by their value at a point preserves the
+agreement operator. This is the finite-sum identity behind paper
+`14_analysis_of_the_pauli_basis_test.tex:1626-1637`, blueprint
+`lem:qld-constructing-the-paulis-helper`. -/
+theorem sum_marginalPoly_eval_mul {P : AdmissibleParams} {epsilon deltaG : ℝ}
+    {S : ProjectiveSetting P epsilon} (w : GlobalPairWitness S deltaG)
+    (placement : Placement) (W : PauliKind) (point : Fin P.m → PauliScalar P)
+    (family : PauliScalar P → Op (SixReg P S.toStrategy.ιA S.toStrategy.ιB)) :
+    (∑ answer : PauliScalar P, S.place placement
+      (((w.marginalPoly placement.side W).postprocess
+        (fun poly => MvPolynomial.eval point poly.1)).effect answer) * family answer) =
+      ∑ poly : Poly P, S.place placement ((w.marginalPoly placement.side W).effect poly) *
+        family (MvPolynomial.eval point poly.1) := by
+  classical
+  simp only [MIPStarRE.Quantum.Measurement.postprocess_effect, place_finset_sum,
+    Finset.sum_mul]
+  calc
+    _ = ∑ answer : PauliScalar P,
+        ∑ poly ∈ Finset.univ.filter (fun poly : Poly P =>
+          MvPolynomial.eval point poly.1 = answer),
+          S.place placement ((w.marginalPoly placement.side W).effect poly) *
+            family (MvPolynomial.eval point poly.1) := by
+      apply Finset.sum_congr rfl
+      intro answer _
+      apply Finset.sum_congr rfl
+      intro poly hpoly
+      rw [(Finset.mem_filter.mp hpoly).2]
+    _ = _ := Finset.sum_fiberwise _ _ _
+
+/-- Alice's evaluated marginal on `AA'` retains the witness consistency with
+Bob's expanded point measurement on `BA''`. This is the direct placement in
+paper `14_analysis_of_the_pauli_basis_test.tex:1626-1637`, supporting blueprint
+`lem:qld-constructing-the-paulis-helper`; no register transfer is used. -/
+theorem marginalPoly_pointMeas_consistent_alice {P : AdmissibleParams}
+    {epsilon deltaG : ℝ} {S : ProjectiveSetting P epsilon}
+    (w : GlobalPairWitness S deltaG) (W : PauliKind) :
+    consistencyDefect (uniformDistribution (Fin P.m → PauliScalar P))
+      (fun point answer => S.place .AA'
+        (((w.marginalPoly .alice W).postprocess
+          (fun poly => MvPolynomial.eval point poly.1)).effect answer))
+      (fun point answer => S.place .BA''
+        ((S.pointMeasExp .bob W point).effect answer)) S.psiHat ≤ deltaG := by
+  simpa only [w.marginalPoly_postprocess_eval] using w.point_consistent_alice W
+
+/-- Bob's evaluated marginal on `BB'` retains the witness consistency with
+Alice's expanded point measurement on `AB''`. This is the reverse-player
+direct placement of paper `14_analysis_of_the_pauli_basis_test.tex:1626-1637`,
+supporting blueprint `lem:qld-constructing-the-paulis-helper`; no register
+transfer is used. -/
+theorem marginalPoly_pointMeas_consistent_bob {P : AdmissibleParams}
+    {epsilon deltaG : ℝ} {S : ProjectiveSetting P epsilon}
+    (w : GlobalPairWitness S deltaG) (W : PauliKind) :
+    consistencyDefect (uniformDistribution (Fin P.m → PauliScalar P))
+      (fun point answer => S.place .BB'
+        (((w.marginalPoly .bob W).postprocess
+          (fun poly => MvPolynomial.eval point poly.1)).effect answer))
+      (fun point answer => S.place .AB''
+        ((S.pointMeasExp .alice W point).effect answer)) S.psiHat ≤ deltaG := by
+  simpa only [w.marginalPoly_postprocess_eval] using w.point_consistent_bob W
+
+/-- Alice's evaluated marginal on `AA'` is within squared distance `2 * deltaG`
+of Bob's expanded point measurement on `BA''`, with the answer sum over the
+field. This is the direct-placement agreement estimate used for both displays
+of blueprint `lem:qld-constructing-the-paulis-helper`, paper
+`14_analysis_of_the_pauli_basis_test.tex:1626-1637`. The factor two makes
+`fact:agreement` explicit; no placement transfer is assumed. -/
+theorem marginalPoly_pointMeas_approx_alice {P : AdmissibleParams}
+    {epsilon deltaG : ℝ} {S : ProjectiveSetting P epsilon}
+    (w : GlobalPairWitness S deltaG) (W : PauliKind) :
+    opFamilyDistSq (uniformDistribution (Fin P.m → PauliScalar P))
+      (fun point answer => S.place .AA'
+        (((w.marginalPoly .alice W).postprocess
+          (fun poly => MvPolynomial.eval point poly.1)).effect answer))
+      (fun point answer => S.place .BA''
+        ((S.pointMeasExp .bob W point).effect answer)) S.psiHat ≤ 2 * deltaG := by
+  have hAgreement := opFamilyDistSq_le_two_mul_consistencyDefect
+    (uniformDistribution (Fin P.m → PauliScalar P))
+    (fun point => placedMeasurement S .AA'
+      ((w.marginalPoly .alice W).postprocess
+        (fun poly => MvPolynomial.eval point poly.1)))
+    (fun point => placedMeasurement S .BA'' (S.pointMeasExp .bob W point)) S.psiHat
+  simp only [placedMeasurement_effect] at hAgreement
+  exact hAgreement.trans (mul_le_mul_of_nonneg_left
+    (marginalPoly_pointMeas_consistent_alice w W) (by norm_num))
+
+/-- Bob's evaluated marginal on `BB'` is within squared distance `2 * deltaG`
+of Alice's expanded point measurement on `AB''`. This is the reverse-player
+direct-placement estimate in paper
+`14_analysis_of_the_pauli_basis_test.tex:1626-1637`, supporting blueprint
+`lem:qld-constructing-the-paulis-helper`. It does not assert either of the
+two placements that require transfer between primed and double-primed registers. -/
+theorem marginalPoly_pointMeas_approx_bob {P : AdmissibleParams}
+    {epsilon deltaG : ℝ} {S : ProjectiveSetting P epsilon}
+    (w : GlobalPairWitness S deltaG) (W : PauliKind) :
+    opFamilyDistSq (uniformDistribution (Fin P.m → PauliScalar P))
+      (fun point answer => S.place .BB'
+        (((w.marginalPoly .bob W).postprocess
+          (fun poly => MvPolynomial.eval point poly.1)).effect answer))
+      (fun point answer => S.place .AB''
+        ((S.pointMeasExp .alice W point).effect answer)) S.psiHat ≤ 2 * deltaG := by
+  have hAgreement := opFamilyDistSq_le_two_mul_consistencyDefect
+    (uniformDistribution (Fin P.m → PauliScalar P))
+    (fun point => placedMeasurement S .BB'
+      ((w.marginalPoly .bob W).postprocess
+        (fun poly => MvPolynomial.eval point poly.1)))
+    (fun point => placedMeasurement S .AB'' (S.pointMeasExp .alice W point)) S.psiHat
+  simp only [placedMeasurement_effect] at hAgreement
+  exact hAgreement.trans (mul_le_mul_of_nonneg_left
+    (marginalPoly_pointMeas_consistent_bob w W) (by norm_num))
+
+/-- The agreement sum for Alice's marginal on `AA'` and Bob's expanded point
+measurement on `BA''` is within squared distance `2 * deltaG` of the identity.
+This proves the direct placement of Equation `eq:qld-sg-cons`, paper
+`14_analysis_of_the_pauli_basis_test.tex:1626-1634`, blueprint
+`lem:qld-constructing-the-paulis-helper`. Projectivity is obtained by applying
+finite postprocessing directly to `w.Smeas`, without using the open marginal
+projectivity theorem or any register-transfer theorem. -/
+theorem sum_marginalPoly_pointMeas_approx_id_alice {P : AdmissibleParams}
+    {epsilon deltaG : ℝ} {S : ProjectiveSetting P epsilon}
+    (w : GlobalPairWitness S deltaG) (W : PauliKind) :
+    opDistSq (uniformDistribution (Fin P.m → PauliScalar P))
+      (fun point => ∑ poly : Poly P,
+        S.place .AA' ((w.marginalPoly .alice W).effect poly) *
+          S.place .BA'' ((S.pointMeasExp .bob W point).effect
+            (MvPolynomial.eval point poly.1)))
+      (fun _ => 1) S.psiHat ≤ 2 * deltaG := by
+  let evaluated := fun point : Fin P.m → PauliScalar P =>
+    placedMeasurement S .AA' ((w.marginalPoly .alice W).postprocess
+      (fun poly => MvPolynomial.eval point poly.1))
+  have hProjective (point : Fin P.m → PauliScalar P) :
+      Measurement.IsProjective (evaluated point) := by
+    apply placedMeasurement_isProjective
+    rw [w.marginalPoly_postprocess_eval]
+    exact SandwichProduct.postprocess_isProjective
+      (w.Smeas .alice) (w.projective .alice) (evalAt W point)
+  have hDistance : opFamilyDistSq (uniformDistribution (Fin P.m → PauliScalar P))
+      (fun point answer => (evaluated point).effect answer)
+      (fun point answer => S.place .BA''
+        ((S.pointMeasExp .bob W point).effect answer)) S.psiHat ≤ 2 * deltaG := by
+    simpa only [evaluated, placedMeasurement_effect] using
+      marginalPoly_pointMeas_approx_alice w W
+  have hSum := opDistSq_sum_sub_mul_le_of_projective
+    (uniformDistribution (Fin P.m → PauliScalar P)) evaluated
+    (fun point answer => S.place .BA''
+      ((S.pointMeasExp .bob W point).effect answer)) S.psiHat (2 * deltaG)
+    hProjective hDistance Finset.univ
+  simp only [MIPStarRE.Quantum.Measurement.sum_eq_one] at hSum
+  simp only [evaluated, placedMeasurement_effect] at hSum
+  have hRegroup (point : Fin P.m → PauliScalar P) :
+      (∑ answer : PauliScalar P, S.place .AA'
+        (((w.marginalPoly .alice W).postprocess
+          (fun poly => MvPolynomial.eval point poly.1)).effect answer) *
+          S.place .BA'' ((S.pointMeasExp .bob W point).effect answer)) =
+        ∑ poly : Poly P, S.place .AA' ((w.marginalPoly .alice W).effect poly) *
+          S.place .BA'' ((S.pointMeasExp .bob W point).effect
+            (MvPolynomial.eval point poly.1)) :=
+    sum_marginalPoly_eval_mul w .AA' W point
+      (fun answer => S.place .BA'' ((S.pointMeasExp .bob W point).effect answer))
+  simp only [hRegroup] at hSum
+  rw [opDistSq, opFamilyDistSq_symm] at hSum
+  exact hSum
+
+/-- The agreement sum for Bob's marginal on `BB'` and Alice's expanded point
+measurement on `AB''` is within squared distance `2 * deltaG` of the identity.
+This proves the reverse-player direct placement of Equation `eq:qld-sg-cons`,
+paper `14_analysis_of_the_pauli_basis_test.tex:1626-1634`, blueprint
+`lem:qld-constructing-the-paulis-helper`. The other two directed placements
+remain outside this conclusion. -/
+theorem sum_marginalPoly_pointMeas_approx_id_bob {P : AdmissibleParams}
+    {epsilon deltaG : ℝ} {S : ProjectiveSetting P epsilon}
+    (w : GlobalPairWitness S deltaG) (W : PauliKind) :
+    opDistSq (uniformDistribution (Fin P.m → PauliScalar P))
+      (fun point => ∑ poly : Poly P,
+        S.place .BB' ((w.marginalPoly .bob W).effect poly) *
+          S.place .AB'' ((S.pointMeasExp .alice W point).effect
+            (MvPolynomial.eval point poly.1)))
+      (fun _ => 1) S.psiHat ≤ 2 * deltaG := by
+  let evaluated := fun point : Fin P.m → PauliScalar P =>
+    placedMeasurement S .BB' ((w.marginalPoly .bob W).postprocess
+      (fun poly => MvPolynomial.eval point poly.1))
+  have hProjective (point : Fin P.m → PauliScalar P) :
+      Measurement.IsProjective (evaluated point) := by
+    apply placedMeasurement_isProjective
+    rw [w.marginalPoly_postprocess_eval]
+    exact SandwichProduct.postprocess_isProjective
+      (w.Smeas .bob) (w.projective .bob) (evalAt W point)
+  have hDistance : opFamilyDistSq (uniformDistribution (Fin P.m → PauliScalar P))
+      (fun point answer => (evaluated point).effect answer)
+      (fun point answer => S.place .AB''
+        ((S.pointMeasExp .alice W point).effect answer)) S.psiHat ≤ 2 * deltaG := by
+    simpa only [evaluated, placedMeasurement_effect] using
+      marginalPoly_pointMeas_approx_bob w W
+  have hSum := opDistSq_sum_sub_mul_le_of_projective
+    (uniformDistribution (Fin P.m → PauliScalar P)) evaluated
+    (fun point answer => S.place .AB''
+      ((S.pointMeasExp .alice W point).effect answer)) S.psiHat (2 * deltaG)
+    hProjective hDistance Finset.univ
+  simp only [MIPStarRE.Quantum.Measurement.sum_eq_one] at hSum
+  simp only [evaluated, placedMeasurement_effect] at hSum
+  have hRegroup (point : Fin P.m → PauliScalar P) :
+      (∑ answer : PauliScalar P, S.place .BB'
+        (((w.marginalPoly .bob W).postprocess
+          (fun poly => MvPolynomial.eval point poly.1)).effect answer) *
+          S.place .AB'' ((S.pointMeasExp .alice W point).effect answer)) =
+        ∑ poly : Poly P, S.place .BB' ((w.marginalPoly .bob W).effect poly) *
+          S.place .AB'' ((S.pointMeasExp .alice W point).effect
+            (MvPolynomial.eval point poly.1)) :=
+    sum_marginalPoly_eval_mul w .BB' W point
+      (fun answer => S.place .AB'' ((S.pointMeasExp .alice W point).effect answer))
+  simp only [hRegroup] at hSum
+  rw [opDistSq, opFamilyDistSq_symm] at hSum
+  exact hSum
 
 /-- The polynomial marginal and the opposite player's expanded point
 measurement resolve the identity on average. Quantification over the directed
@@ -42,9 +388,13 @@ The source absorbs constant factors and the game error into `deltaS`. Here
 `deltaG` is the global polynomial-pair witness error, and
 `deltaConstructPaulis` records that enlargement explicitly.
 
-**Proof obligation:** issue #47 tracks the agreement calculation converting
-`GlobalPairWitness.point_consistent_alice`, its Bob-side counterpart, and the
-register-placement transfers into all four identity estimates. -/
+The two direct placements are proved in
+`sum_marginalPoly_pointMeas_approx_id_alice` and
+`sum_marginalPoly_pointMeas_approx_id_bob`.
+
+**Proof obligation:** issue #47 and the register-transfer work in issue #115
+track the remaining two directed placements and the common error enlargement.
+The independent direct-placement argument is recorded in the audit for issue #243. -/
 theorem sum_marginalPoly_pointMeas_approx_id :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (epsilon deltaG : ℝ),
