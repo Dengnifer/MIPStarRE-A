@@ -65,11 +65,8 @@ exception: the role code `orc` maps to `local/personas/orchestrator.md`.
 Until such a file is committed, `dispatch.sh` warns and falls back to a
 one-line built-in frame — enough to run, not enough for load-bearing work.
 The `mathfix` role is the source-statement repair lane governed by
-`issues-prs.md` section 6. Following the availability report on #26 and the
-September 6 owner decision, this lane uses Astra max through the dispatcher.
-Historical owner-launched Fable records remain in `owner-sessions.jsonl`.
-The per-gap attempt and working-time budget remains cumulative across routes;
-the operator supplies that state in each request or dispatch.
+`issues-prs.md` section 6: main selects Astra max/xhigh after the #26 availability report,
+supplying cumulative per-gap budgets; historical Fable records remain in `owner-sessions.jsonl`.
 
 ## 3. Naming
 
@@ -114,62 +111,47 @@ registry append; and a final report of `name`, `thread_id` and the
 last-message path.
 
 Account routing uses `--account auto|primary|second`, overriding
-`MIPSTARRE_CODEX_ACCOUNT` (default `auto`). Every admission reads
-`watchdog/account-mode` under the shared router lock: absent means `primary`;
-only `primary` and `both` are valid. Only explicit owner authorization permits
-switching to `both`. That mode reads the preserved `max_codex`, `primary`, and
-`second` capacities from `watchdog/account-mode-both-preserved.json` when present;
-neither mode rewrites settings, credentials, or historical records.
+`MIPSTARRE_CODEX_ACCOUNT` (default `auto`). Locked admissions read `watchdog/account-mode`
+(absent: `primary`; valid: `primary|both`). Only the owner may authorize `both`, reading
+`max_codex|primary|second` from `watchdog/account-mode-both-preserved.json` when present.
+Neither mode rewrites settings, credentials or history.
 Caps in `watchdog/max-codex-{primary,second}` default to 11 and 9; zero disables
 an account. `watchdog/max-codex` additionally caps total workers. Auto selects
 the smallest live/cap ratio among eligible accounts, with primary winning ties.
-Host Linux `/proc` observations reconcile Codex executables with dispatcher PID
-reservations by ancestry, avoiding Node-wrapper and reservation double counts.
-The twelve allocated primary slots reserve at least one interactive main slot;
-additional interactive or unreserved worker use reduces admission capacity.
-The September 6 owner allocation exempts exactly designated interactive CWDs:
-`/home/drx/FV`, `/home/drx/LDT-Lean-Paper`, `/home/drx`. Each admission reads
-`watchdog/primary-excluded-interactive-cwds.json`, an optional JSON list of these
-paths without duplicates. Invalid lists fail closed; absent means no exclusions.
-Only known-primary interactive processes qualify, never workers or reservations.
-`watchdog/primary-external-reserved` additionally reserves known non-Codex key
-use (default zero); do not duplicate processes already observed by the router.
-Unknown homes count conservatively against primary. An unavailable host view or
-unreadable live process fails closed before stale-marker cleanup. Observed dead
-reservations are removed; permission-denied PIDs remain counted. Full accounts
-poll for `MIPSTARRE_ACCOUNT_WAIT` seconds (default 1800); timeout fails without
-a reservation. Primary saturation never spills to second. Dry runs neither wait
-nor reserve and also fail when capacity or visibility is insufficient.
+Host `/proc` scans reconcile Codex executables and dispatcher reservations by ancestry,
+without counting Node wrappers twice. Twelve allocated primary slots reserve at least
+one for main; other interactives and unreserved workers reduce capacity. Each admission
+reads optional `watchdog/primary-excluded-interactive-cwds.json`: a duplicate-free list
+drawn only from `/home/drx/FV`, `/home/drx/LDT-Lean-Paper`, `/home/drx`; invalid lists fail.
+Only known-primary interactives qualify, never workers/reservations; absence exempts none.
+`watchdog/primary-external-reserved` reserves non-Codex key use (default zero), not
+already-observed processes. Unknown homes count against primary. Unavailable host
+visibility or unreadable live processes fail before stale cleanup; dead reservations
+are removed and permission-denied PIDs retained. Full accounts poll for
+`MIPSTARRE_ACCOUNT_WAIT` seconds (default 1800), then fail without reserving or spilling
+to second. Dry runs neither wait nor reserve and still require visibility and capacity.
 Resume affinity comes from registry account fields or rollout files in either
 home; unknown, ambiguous, or conflicting selections fail before execution.
-Primary-only mode rejects secondary-affinity resume, including `auto`; it never
-relabels the old thread. `--continue-from FILE` instead starts a fresh primary
-thread. The operator supplies JSON fields `previous_session`, `checkpoint` (an
-ancestor of the worktree HEAD), and `budget_file` (the same shared budget path).
-The predecessor must be terminal and serve the same issue. The budget contains
-`anchor`, `attempt_limit`, `attempts`, `working_seconds`, and `sessions` (charged
-session names, including the predecessor). It must have an unused attempt and
-include the predecessor's time. Subsequent continuations retain the path, anchor,
-limit, and monotone charges. The new registry row links the original account and
-thread, checkpoint, shared path and budget snapshot. The operator still owns
-charging completed working time and enforcing the mathematical budget; switching
-accounts neither creates a new budget nor authorizes another attempt. Old homes,
-captures and uncommitted proof work remain untouched.
-Required charges include the launch snapshot plus all completed thread segments.
-Ordinary resumes retain provenance, including legacy missing-link recovery.
-Telemetry replay uses the private per-session `.continuation.json` saved before
-launch, not a later budget read. The shim rejects multi-agent enable flags and
-whole `features`/`agents` table overrides, while retaining unrelated settings.
+Primary mode rejects secondary-affinity resumes, including `auto`, without relabeling.
+`--continue-from FILE` starts a fresh primary thread from operator JSON: `previous_session`
+(terminal, same issue), `checkpoint` (ancestor of HEAD), and `budget_file` (shared path).
+The budget contains `anchor`, `attempt_limit`, `attempts`, `working_seconds`, and
+`sessions` (charged names including the predecessor); an unused attempt is required.
+Continuations retain path, anchor and limit; monotone charges include snapshot plus completed
+segments. Rows link original account/thread, checkpoint and budget. Operators enforce budgets;
+route switches grant no reset/attempt or change to old homes, captures or uncommitted work.
+Ordinary resumes recover prior provenance,
+skipping malformed/non-object history rows but rejecting invalid relevant metadata.
+Replay reads the private launch-time `.continuation.json`, never a later budget file.
+The shim rejects multi-agent enable flags and whole `features`/`agents` overrides only.
 Primary unsets inherited `CODEX_HOME`; second sets it for execution and rollout
 lookup to `MIPSTARRE_CODEX_HOME_SECOND` (default
 `~/.cache/mipstarre-dev/codex-home-yxy`). Review and autofix inherit these
-variables unchanged. Every role explicitly requests `gpt-6-astra` at `max`;
-conflicting model overrides fail before reservation. Account config is preserved,
-not used to select a different active model. Omitted, `ultra`, `xhigh`, `max`, and
-other effort arguments all request `max`. The mathfix guard accepts this policy.
-New rows record the actual CLI model and `requested_effort`, not backend compute.
-No historical row is rewritten. Review and autofix fail closed if the dispatcher
-is missing; neither may fall back to an unaccounted direct launch.
+variables unchanged. All roles require `gpt-6-astra`. Main stays `max` and chooses worker
+`max|xhigh` by role, difficulty, quality and latency, including resumes and mathfix.
+Dispatch `--effort`, `MIPSTARRE_REVIEW_EFFORT` and `MIPSTARRE_AUTOFIX_EFFORT` honor that
+choice through the shim; omitted means `max`, legacy `ultra` maps to `max`, others fail.
+`requested_effort` is configured, not verified; see `meta.md`. Missing dispatchers fail closed.
 
 Preconditions the dispatcher (human or orchestrator) owns:
 

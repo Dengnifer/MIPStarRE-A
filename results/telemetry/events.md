@@ -4314,3 +4314,71 @@ bounded PR238 amendment and normal gates.
   The production router correctly failed closed. Stub-dispatch fixtures now
   substitute an empty host view in their private Python launcher; production
   admission has no test bypass. Host-scanning and quota tests remain explicit.
+
+## 2026-09-06 — PR238 F5 and per-worker effort selection
+
+- Session `orc-237-20260906-04` addresses F5 on reviewed head `64be227` and the
+  owner update recorded at 03:26 UTC: main remains max; main chooses max or
+  xhigh for each new/resumed primary-relay Astra worker. No fan-out, provider
+  probe, account change, publication, CI, review or supervisor action is authorized here.
+- F5 arose because continuation history decoded rows more strictly than account
+  affinity. Both now share the locked tolerant reader; relevant malformed
+  continuation objects still fail preflight. Initial regression-test attempts
+  exposed fixture errors (the copied dispatcher needs its own registry and
+  AGENTS file), not a reason to weaken validation. Existing proof-budget,
+  anchor, completed-segment and replay-snapshot checks remain covered.
+- Omitted effort defaults to max; the only retained alias is ultra → max.
+  Explicit max/xhigh survives dispatcher, review/fix launch and runtime shim;
+  unsupported values fail. Configured effort is not server verification;
+  server-verified effort is unknown without independent existing evidence.
+- The first segment reached its 1200-second bound at 03:47:45 UTC without
+  committing. The primary registry retains `orc-237-20260906-04` as failed,
+  exit 124, wall time 1200, at line 744. Segment `orc-237-20260906-05` resumes
+  the same thread `01a074c1-fec6-7253-b80e-e6350778a094` at 03:51:09 UTC;
+  neither the failed capture nor elapsed time is reset. Both segments were
+  configured max by the dispatcher request; the old registry's absent
+  `requested_effort` is not rewritten or treated as server verification.
+- At 03:47:29.159196 UTC the tested shim was installed through atomic replacement
+  as `codex.astra-effort-v5-pr238-20260906`. Source and runtime SHA256 are
+  `66b0b168bbfb2e89acb776a7ee8f6e8ca2048f05c925a0aa42ecd4f44ab8097b`;
+  previous SHA256 was `d391af18dd881a23b6bf6af618497b03730a6778ad91e260bfc4168d7f93341c`.
+  The prior script is preserved; `.profile` remains unchanged at SHA256
+  `803244914c7ffdb7b2a4d650eef8d0d94d7445e61fe80518a17ea6a369c9947d`.
+  Runtime evidence is under `~/.cache/mipstarre-dev/runtime-policy/237-effort-selection-20260906-04/`:
+  `installed.json` records six offline source/runtime argv comparisons (fresh
+  and resume forms for max, xhigh and legacy ultra), including exact forwarded
+  arguments. The executable was a local fake; this establishes forwarding,
+  not real CLI parsing or relay acceptance. No running shell was edited in
+  place and no unmerged router was installed into primary source.
+- Final focused validation passes 39 tests (`/tmp/pr238-focused-tests.log`),
+  including every role's fresh/resumed effort selection, F5 ordinary-resume
+  preflight with malformed/non-object history and invalid relevant metadata,
+  cumulative continuation charges, legacy provenance recovery, replay after
+  budget mutation, locks, account affinity, capacity and fan-out protections.
+  Overlapping model/effort assertions and fixture branches were consolidated,
+  not replaced by provider probes. Four shell syntax checks, three Python
+  compilation checks and `git diff --check` pass. Against the existing PR238
+  CI manifest's merge base `a61ee557b33a2d8a4721e92b08b6d06dcb69ed57`, the
+  aggregate nontelemetry diff is 787 additions + 212 deletions = 999 lines.
+- Local relay evidence: the sanitized incident at
+  `/tmp/qpbt-meta-20260905-230133/relay-throughput-limit-incident.json` records
+  eleven worker clients plus main at 03:16:48 UTC on September 6, including
+  main's remote-compaction concurrency rejection. Existing session captures
+  independently contain concurrency-error reconnect events: eight in
+  `orc-239-20260906-01.jsonl` (lines 111–137, counters reaching 4/5) and four in
+  `reviewer-pr238-20260906-03.jsonl` (lines 76–91, reaching 3/5), under
+  `~/.cache/mipstarre-dev/sessions/`. Those capture entries have no timestamps;
+  the timestamp above belongs to the incident observation, not each retry.
+  The reported 03:23 refusals and 03:24 supervisor stops are handoff observations,
+  not independently timed measurements made by this session.
+- The router counts process/reservation lifetime, not individual HTTP requests:
+  a worker waiting for tools or reconnecting still occupies its process slot.
+  Compaction is an additional request category observed in the incident, but
+  its overlap, retry timing and provider charging are unknown. The available
+  source checkout is sparse at `94311d447587411789533c47601fd8bc9d81eb48`
+  (August 28); the installed package reports `0.152.1`. Missing core retry and
+  compaction blobs and an unverified source/binary match prevent claims about
+  exact deployed retry defaults. No further research or request-layer change
+  is made. Operators should distinguish successful completions, retries and
+  compaction failures in existing logs rather than infer productive requests,
+  RPM/TPM, server in-flight counts or recovery from process occupancy alone.

@@ -8,7 +8,7 @@ if [ "$mode" = primary ] && [ "${CODEX_HOME:-$HOME/.codex}" != "$HOME/.codex" ];
   echo 'primary-only policy: preserve the old thread; use a checkpoint continuation' >&2
   exit 4
 fi
-args=(); task=0
+args=(); task=0; effort=max
 while [ "$#" -gt 0 ]; do
   argument="$1"; shift
   if [ "$argument" = -- ]; then args+=(-- "$@"); task=1; break; fi
@@ -34,7 +34,14 @@ while [ "$#" -gt 0 ]; do
   case "$normalized" in
     features=*|agents=*) echo 'whole feature/agent table overrides are forbidden' >&2; exit 4 ;;
     model=*) [ "$normalized" = model=gpt-6-astra ] || exit 4; continue ;;
-    model_reasoning_effort=*|features.multi_agent=*|agents.max_concurrent_threads_per_session=*)
+    model_reasoning_effort=*)
+      case "${normalized#*=}" in
+        max|xhigh) effort="${normalized#*=}" ;;
+        ultra) effort=max ;;
+        *) echo 'effort must be max or xhigh (legacy ultra maps to max)' >&2; exit 4 ;;
+      esac
+      continue ;;
+    features.multi_agent=*|agents.max_concurrent_threads_per_session=*)
       continue ;;
   esac
   args+=(-c "$value")
@@ -45,5 +52,5 @@ if [ "$task" -eq 1 ] && [ "${#args[@]}" -gt 0 ]; then
 
 ${args[$last]}"
 fi
-exec "$HOME/.local/bin/codex" -m gpt-6-astra -c 'model_reasoning_effort="max"' \
+exec "$HOME/.local/bin/codex" -m gpt-6-astra -c "model_reasoning_effort=\"$effort\"" \
   -c 'features.multi_agent=false' -c 'agents.max_concurrent_threads_per_session=1' "${args[@]}"

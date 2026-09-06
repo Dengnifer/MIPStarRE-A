@@ -230,11 +230,11 @@ case "$LOCK_WAIT" in
   ''|*[!0-9]*) die 2 "--lock-wait must be a whole number of seconds" ;;
 esac
 
-if [ -n "$EFFORT" ]; then
-  case "$EFFORT" in
-    *[!a-z]*) die 2 "--effort must be a bare lowercase word (e.g. low, medium, high, ultra)" ;;
-  esac
-fi
+case "$EFFORT" in
+  ''|ultra) EFFORT=max ;;
+  max|xhigh) ;;
+  *) die 2 "--effort must be max or xhigh (legacy ultra maps to max)" ;;
+esac
 
 if [ -n "$RESUME_ID" ]; then
   case "$RESUME_ID" in
@@ -648,15 +648,6 @@ if [ "$ACCOUNT" = second ]; then
   ACCOUNT_ENV+=("CODEX_HOME=${MIPSTARRE_CODEX_HOME_SECOND:-$HOME/.cache/mipstarre-dev/codex-home-yxy}")
 fi
 
-EFFORT="max"
-
-if [ "$ROLE" = "mathfix" ]; then
-  case "$MIPSTARRE_CODEX_MODEL:$EFFORT" in
-    gpt-6-astra:max) ;;
-    *) die 4 "mathfix requires gpt-6-astra at effective effort max" ;;
-  esac
-fi
-
 CODEX_ARGS=(exec)
 CODEX_ARGS[${#CODEX_ARGS[@]}]="--json"
 CODEX_ARGS[${#CODEX_ARGS[@]}]="-C"
@@ -740,9 +731,7 @@ TELEM_ARGS=(--repo-root "$REPO_ROOT" session-summarize "$PUBLISHED_CAPTURE_DIR/$
   --start "$START_TS" --end "$END_TS" --exit-code "$CODEX_EXIT"
   --dispatcher "$DISPATCHER" --worktree "$WORKTREE_ABS"
   --append-to "$REGISTRY" --shell-out "$SUMMARY_SH")
-if [ -n "$CONTINUATION_JSON" ]; then
-  TELEM_ARGS+=(--continuation-json "$CONTINUATION_JSON")
-fi
+[ -z "$CONTINUATION_JSON" ] || TELEM_ARGS+=(--continuation-json "$CONTINUATION_JSON")
 if [ -n "$PR_ID" ]; then
   TELEM_ARGS[${#TELEM_ARGS[@]}]="--pr"
   TELEM_ARGS[${#TELEM_ARGS[@]}]="$PR_ID"
@@ -751,15 +740,9 @@ if [ -n "${MIPSTARRE_CODEX_MODEL:-}" ]; then
   TELEM_ARGS[${#TELEM_ARGS[@]}]="--model"
   TELEM_ARGS[${#TELEM_ARGS[@]}]="$MIPSTARRE_CODEX_MODEL"
 fi
-if [ -n "$EFFORT" ]; then
-  TELEM_ARGS[${#TELEM_ARGS[@]}]="--requested-effort"
-  TELEM_ARGS[${#TELEM_ARGS[@]}]="$EFFORT"
-fi
+TELEM_ARGS+=(--requested-effort "$EFFORT")
 
-REPLAY_EFFORT_ARG=""
-if [ -n "$EFFORT" ]; then
-  REPLAY_EFFORT_ARG=" --requested-effort $EFFORT"
-fi
+REPLAY_EFFORT_ARG=" --requested-effort $EFFORT"
 REPLAY_CONTINUATION_ARG=""
 if [ -n "$CONTINUATION_JSON" ]; then
   printf -v REPLAY_CONTINUATION_ARG ' --continuation-json "$(cat %q)"' \

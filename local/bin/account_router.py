@@ -105,8 +105,9 @@ def occupancy(root: Path) -> tuple[list[int], list[int]]:
     return workers, interactive
 
 
-def resume_account(thread: str, registry: Path, homes: dict[str, Path]) -> str:
-    matches = set()
+def session_rows(registry: Path) -> list[dict]:
+    """Share locked, malformed-row-tolerant history without discarding object metadata."""
+    rows = []
     if registry.exists():
         with registry.open(encoding="utf-8", errors="replace") as handle:
             fcntl.flock(handle, fcntl.LOCK_SH)
@@ -121,8 +122,13 @@ def resume_account(thread: str, registry: Path, homes: dict[str, Path]) -> str:
                     print(f"account routing: {registry}:{number}: "
                           "skipping malformed registry record", file=sys.stderr)
                     continue
-                if row.get("thread_id") == thread and row.get("account") in ACCOUNTS:
-                    matches.add(row["account"])
+                rows.append(row)
+    return rows
+
+
+def resume_account(thread: str, registry: Path, homes: dict[str, Path]) -> str:
+    matches = {row['account'] for row in session_rows(registry)
+               if row.get('thread_id') == thread and row.get('account') in ACCOUNTS}
     for account, home in homes.items():
         for area in ("sessions", "archived_sessions"):
             if any((home / area).rglob(f"rollout-*{thread}.jsonl")):
@@ -132,25 +138,22 @@ def resume_account(thread: str, registry: Path, homes: dict[str, Path]) -> str:
     return matches.pop()
 
 
-def session_rows(registry: Path) -> list[dict]:
-    if not registry.exists():
-        return []
-    with registry.open() as handle:
-        fcntl.flock(handle, fcntl.LOCK_SH)
-        return [json.loads(line) for line in handle if line.strip()]
-
-
 def resume_continuation(registry: Path, thread: str) -> dict:
     """Carry the original snapshot and completed segments, deduplicating status appends."""
-    history = list({row['name']: row for row in session_rows(registry)
-                    if row.get('thread_id') == thread}.values())
-    for index in reversed(range(len(history))):
-        if history[index].get('continuation'):
-            prior = dict(history[index]['continuation'])
-            prior['completed_wall_s'] = prior.get('completed_wall_s', 0) + sum(
-                row['wall_s'] for row in history[index:])
-            return prior
-    return {}
+    history = {row['name']: row for row in session_rows(registry) if row.get('thread_id') == thread}
+    prior = {}
+    for row in history.values():
+        metadata = row.get('continuation', {})
+        if not isinstance(metadata, dict) or (metadata and (
+                not metadata.get('budget_file') or not isinstance(metadata.get('budget'), dict) or
+                not {'anchor', 'attempt_limit', 'attempts', 'working_seconds', 'sessions'} <=
+                metadata['budget'].keys())):
+            raise ValueError('invalid continuation metadata')
+        if metadata:
+            prior = dict(metadata)
+        if prior:
+            prior['completed_wall_s'] = prior.get('completed_wall_s', 0) + row['wall_s']
+    return prior
 
 
 def continuation(path: Path, registry: Path, worktree: Path, issue: str) -> dict:

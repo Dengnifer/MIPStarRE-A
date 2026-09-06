@@ -17,8 +17,9 @@ experiment.
 ## September 6, 2026 policy supersession
 
 The introductory policy descriptions are historical. Issue #237 / PR #238
-supersedes them: every project role requests `gpt-6-astra` at literal `max`
-using primary relay only. Sol and xhigh are not active selection options.
+supersedes them: every project role requests `gpt-6-astra` using primary relay only.
+The 03:26 UTC owner update keeps main at `max` and lets main select worker `max`
+or `xhigh` by role, difficulty, quality and latency. Sol is not an active option.
 Historical records remain unchanged; `requested_effort` describes the launch
 request, not a new measurement of backend compute.
 

@@ -249,7 +249,8 @@ run_agent() {
     local args
     args=(--role "$role" --issue "pr$PR_NUM" --pr "$PR_NUM"
           --worktree "$wt" --sandbox "$sandbox"
-          --persona "$persona" --persona-ref "$TRUSTED_REF" --effort max)
+          --persona "$persona" --persona-ref "$TRUSTED_REF"
+          --effort "${MIPSTARRE_AUTOFIX_EFFORT:-max}")
     if [ -n "$ctx" ] && [ -s "$ctx" ]; then
       args[${#args[@]}]="--context-file"
       args[${#args[@]}]="$ctx"

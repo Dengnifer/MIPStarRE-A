@@ -47,8 +47,9 @@ lanes cannot trample each other's records.
 
 ## The operating cycle (per short turn)
 
-All roles use primary relay, `gpt-6-astra`, and literal `max`; automatic fan-out
-is disabled. Only an explicit later owner decision restores both accounts.
+All roles use primary relay and `gpt-6-astra`; main remains `max` and selects
+worker `max` or `xhigh` by role, difficulty, quality and latency. Fan-out stays off.
+Only an explicit later owner decision restores both accounts.
 Admission and checkpoint-continuation rules are in `local/protocols/sessions.md`.
 
 Start every turn from the primary checkout with

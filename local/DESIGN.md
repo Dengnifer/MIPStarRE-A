@@ -148,15 +148,12 @@ All appends are one-line JSON; schemas documented in `protocols/meta.md`.
 
 ## Model policy
 
-- codex CLI drives orchestrator/prover/reviewer/simplifier sessions (`codex exec`,
-  `codex exec review`). Every role, including mathfix, reviewers and fixers,
-  requests `gpt-6-astra` at literal `max`. Conflicting models fail preflight;
-  all effort overrides normalize to `max`. Automatic fan-out remains disabled.
-- Account mode defaults to primary and is read on every admission. Only a later
-  explicit owner decision may restore both accounts. QPBT has twelve allocated
-  relay slots: one remains reserved for main; only owner-named interactive CWDs
-  are exempt, and other same-key processes
-  further reduce worker capacity. See `protocols/sessions.md` for reconciliation
-  and checkpoint continuations. Historical Sol/Fable measurements are unchanged.
+- All roles request `gpt-6-astra`. Main stays `max`, choosing worker `max|xhigh` by
+  role, difficulty, quality and latency. Dispatch and the shim preserve choices;
+  omitted/legacy `ultra` mean `max`, other efforts/models fail. Fan-out stays off.
+- Every admission reads account mode (default primary; restoring both requires owner approval).
+  Twelve primary slots include main; only named interactive CWDs are exempt from accounting.
+  Other same-key use reduces capacity. See `protocols/sessions.md` for reconciliation and
+  checkpoint continuations. Historical Sol/Fable measurements are unchanged.
 - Reviewer and prover roles must be **different sessions** — a session never
   reviews its own diff.

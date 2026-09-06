@@ -45,8 +45,7 @@ class DispatchCommandTests(unittest.TestCase):
     def recorded_dispatch(self, model: str | None, account: str = "auto",
                           exit_code: int = 0, empty_second_home: bool = False,
                           effort: str | None = None,
-                          config_model: str = "gpt-config-default",
-                          continue_from: bool = False, recover_resume: bool = False) -> dict[str, object]:
+                          continue_from: bool = False) -> dict[str, object]:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             repo = root / "repo"
@@ -77,9 +76,7 @@ class DispatchCommandTests(unittest.TestCase):
             home.mkdir()
             primary = home / ".codex"
             primary.mkdir()
-            (primary / "config.toml").write_text(
-                f'model = "{config_model}"\n', encoding="utf-8"
-            )
+            (primary / "config.toml").write_text('model = "gpt-config-default"\n')
             second = (home / ".cache/mipstarre-dev/codex-home-yxy"
                       if empty_second_home else root / "second")
             second.mkdir(parents=True)
@@ -107,17 +104,9 @@ class DispatchCommandTests(unittest.TestCase):
             watchdog.mkdir(parents=True)
             (watchdog / 'account-mode').write_text('both' if account == 'second' else 'primary')
 
-            dispatch_args = [
-                str(local_bin / "dispatch.sh"),
-                "--role",
-                "scout",
-                "--issue",
-                "model-record",
-                "--worktree",
-                str(repo),
-                "--no-persona",
-                "--skip-hook-check",
-            ]
+            dispatch_args = [str(local_bin / 'dispatch.sh'), '--role', 'scout',
+                             '--issue', 'model-record', '--worktree', str(repo),
+                             '--no-persona', '--skip-hook-check']
             if effort is not None:
                 dispatch_args.extend(["--effort", effort])
             if continue_from:
@@ -136,7 +125,7 @@ class DispatchCommandTests(unittest.TestCase):
                                                    budget_file=str(budget))))
                 dispatch_args.extend(['--continue-from', str(handoff)])
             dispatch_args.extend(["--", "test prompt"])
-            if recover_resume:
+            if continue_from:
                 (local_bin / 'telemetry.py').write_text('raise SystemExit(1)\n')
             result = subprocess.run(
                 dispatch_args,
@@ -146,15 +135,13 @@ class DispatchCommandTests(unittest.TestCase):
                 capture_output=True,
                 text=True,
             )
-            self.assertEqual(result.returncode, 6 if recover_resume else exit_code, result.stderr)
-            if recover_resume:
+            self.assertEqual(result.returncode, 6 if continue_from else exit_code, result.stderr)
+            if continue_from:
                 shutil.copy2(TELEMETRY, local_bin / 'telemetry.py')
                 budget.write_text('{}')
                 replay = result.stderr.split('replay it with:\n')[1].split('\n  Do not leave')[0]
                 subprocess.run(['bash', '-c', replay], cwd=repo, env=env, check=True,
                                capture_output=True, text=True)
-                record = json.loads(registry.read_text().splitlines()[-1])
-                self.assertEqual(record['continuation']['budget']['working_seconds'], 12452)
                 dispatch_args[dispatch_args.index('--continue-from'):] = [
                     '--resume', THREAD_ID, '--', 'test prompt']
                 subprocess.run(dispatch_args, cwd=repo, env=env, check=True, capture_output=True)
@@ -165,18 +152,16 @@ class DispatchCommandTests(unittest.TestCase):
             records = (repo / "results" / "telemetry" / "sessions.jsonl").read_text(
                 encoding="utf-8"
             ).splitlines()
-            self.assertEqual(len(records), 3 if recover_resume else 2 if continue_from else 1)
+            self.assertEqual(len(records), 3 if continue_from else 1)
             if continue_from:
                 self.assertEqual(json.loads(records[0]), previous)
-                if not recover_resume:
-                    self.assertEqual(json.loads(budget.read_text())['working_seconds'], 12452)
             record = json.loads(records[-1])
             self.assertEqual(record["rollout"], str(rollout))
             return record
 
     def dispatch_command(
-        self, *extra: str, model: str = "gpt-6-astra", effort: str | None = "high",
-        include_persona: bool = False,
+        self, *extra: str, model: str = "gpt-6-astra", effort: str | None = "max",
+        include_persona: bool = False, registry_rows: str = "",
     ) -> list[str]:
         with tempfile.TemporaryDirectory() as cache_root:
             fake_bin = Path(cache_root) / "bin"
@@ -202,21 +187,23 @@ class DispatchCommandTests(unittest.TestCase):
             )
             (Path(cache_root) / 'watchdog').mkdir()
             (Path(cache_root) / 'watchdog/account-mode').write_text('both')
-            dispatch_args = [
-                str(DISPATCH),
-                "--role",
-                "scout",
-                "--issue",
-                "dispatch-argv",
-                "--worktree",
-                str(REPO_ROOT),
-                "--sandbox",
-                "read-only",
-                *([] if include_persona else ["--no-persona"]),
-                "--skip-hook-check",
-                "--dry-run",
-                *extra,
-            ]
+            worktree = REPO_ROOT
+            dispatch = DISPATCH
+            if registry_rows:
+                worktree = Path(cache_root) / 'repo'
+                registry = worktree / 'results/telemetry/sessions.jsonl'
+                registry.parent.mkdir(parents=True)
+                registry.write_text(registry_rows)
+                (worktree / 'AGENTS.md').write_text('# Test repository\n')
+                subprocess.run(['git', 'init', '-q', str(worktree)], check=True)
+                dispatch = worktree / 'local/bin/dispatch.sh'
+                dispatch.parent.mkdir(parents=True)
+                for source in (DISPATCH, ROUTER, TELEMETRY):
+                    shutil.copy2(source, dispatch.parent / source.name)
+            dispatch_args = [str(dispatch), '--role', 'scout', '--issue', 'dispatch-argv',
+                             '--worktree', str(worktree), '--sandbox', 'read-only',
+                             *([] if include_persona else ['--no-persona']),
+                             '--skip-hook-check', '--dry-run', *extra]
             if effort is not None:
                 dispatch_args.extend(["--effort", effort])
             dispatch_args.extend(["--", "test prompt"])
@@ -260,13 +247,15 @@ class DispatchCommandTests(unittest.TestCase):
         self.assert_common_exec_options(argv)
         self.assertEqual(argv[17:], ["resume", "--", THREAD_ID, "<prompt>"])
 
-    def test_astra_normalizes_omitted_and_legacy_ultra_effort(self) -> None:
+    def test_astra_preserves_selected_effort_for_every_role_and_resume(self) -> None:
         for role in ('orc', 'prover', 'reviewer', 'simplifier', 'blueprint', 'splitter',
                      'scout', 'mathfix'):
-            for effort in (None, 'ultra', 'xhigh', 'max', 'high'):
+            for effort in (None, 'ultra', 'xhigh', 'max'):
                 with self.subTest(role=role, effort=effort):
-                    argv = self.dispatch_command('--role', role, effort=effort)
-                    self.assertIn('model_reasoning_effort=max', argv)
+                    for extra in ((), ('--resume', THREAD_ID)):
+                        argv = self.dispatch_command('--role', role, *extra, effort=effort)
+                        self.assertIn(f'model_reasoning_effort={effort or "max"}'
+                                      .replace('=ultra', '=max'), argv)
 
     def test_sol_is_rejected_for_every_role(self) -> None:
         for role in ('orc', 'prover', 'reviewer', 'simplifier', 'blueprint', 'splitter',
@@ -274,30 +263,16 @@ class DispatchCommandTests(unittest.TestCase):
             with self.assertRaises(subprocess.CalledProcessError):
                 self.dispatch_command('--role', role, model='gpt-5.6-sol')
 
-    def test_astra_mathfix_selects_max_effort_and_persona(self) -> None:
-        for effort in (None, "ultra", "xhigh"):
-            with self.subTest(effort=effort):
-                argv = self.dispatch_command(
-                    "--role", "mathfix", "--sandbox", "workspace-write",
-                    "--persona-ref", "main", model="gpt-6-astra", effort=effort,
-                    include_persona=True,
-                )
+    def test_astra_mathfix_selects_persona(self) -> None:
+        argv = self.dispatch_command('--role', 'mathfix', '--sandbox', 'workspace-write',
+                                     '--persona-ref', 'main', include_persona=True)
+        self.assertEqual(argv[3:7], ['-C', str(REPO_ROOT), '--sandbox', 'workspace-write'])
+        self.assertIn('persona: main:local/personas/mathfix.md', self.last_dispatch_stdout)
+        self.assertIn('# Persona: mathematical-gap repair', self.last_dispatch_stdout)
 
-                self.assertEqual(
-                    argv[3:7], ["-C", str(REPO_ROOT), "--sandbox", "workspace-write"]
-                )
-                self.assertEqual(argv[argv.index("-m") + 1], "gpt-6-astra")
-                self.assertIn("model_reasoning_effort=max", argv)
-                self.assertIn(
-                    "persona: main:local/personas/mathfix.md", self.last_dispatch_stdout
-                )
-                self.assertIn(
-                    "# Persona: mathematical-gap repair", self.last_dispatch_stdout
-                )
-
-    def test_mathfix_rejects_non_astra_or_non_xhigh_dispatches(self) -> None:
+    def test_mathfix_rejects_non_astra_dispatches(self) -> None:
         for model, effort in (("gpt-5.6-sol", "ultra"),
-                              ("test-model", "xhigh"), ("astra", "high")):
+                              ("test-model", "xhigh"), ("astra", "max")):
             with self.subTest(model=model, effort=effort):
                 with self.assertRaises(subprocess.CalledProcessError) as failure:
                     self.dispatch_command("--role", "mathfix", model=model, effort=effort)
@@ -314,33 +289,16 @@ class DispatchCommandTests(unittest.TestCase):
 
         self.assertIn("mathfix", result.stdout)
 
-    def test_registry_records_explicit_model_override(self) -> None:
-        record = self.recorded_dispatch("gpt-6-astra")
-
-        self.assertEqual(record["model"], "gpt-6-astra")
-
     def test_registry_records_effective_requested_effort(self) -> None:
-        for effort in (None, "ultra", "xhigh"):
-            with self.subTest(model="astra", effort=effort):
-                record = self.recorded_dispatch("gpt-6-astra", effort=effort)
-                self.assertEqual(record["requested_effort"], "max")
-
-        record = self.recorded_dispatch(None)
-        self.assertEqual(record["requested_effort"], "max")
-
-    def test_registry_resolves_account_config_model(self) -> None:
-        for model in (None, ""):
-            with self.subTest(model=model):
-                record = self.recorded_dispatch(model)
-
-                self.assertEqual(record["model"], "gpt-6-astra")
-                self.assertEqual(record["account"], "primary")
-
-    def test_empty_model_uses_owner_policy(self) -> None:
-        self.assertIn('gpt-6-astra', self.dispatch_command(model=''))
+        for model, effort in ((None, None), ('', 'ultra'), ('gpt-6-astra', 'xhigh'),
+                              ('gpt-6-astra', 'max')):
+            record = self.recorded_dispatch(model, effort=effort)
+            self.assertEqual(record['requested_effort'], 'xhigh' if effort == 'xhigh' else 'max')
+            self.assertEqual(record['model'], 'gpt-6-astra')
+            self.assertEqual(record['account'], 'primary')
 
     def test_secondary_checkpoint_continuation_preserves_budget_and_history(self) -> None:
-        record = self.recorded_dispatch(None, continue_from=True, recover_resume=True)
+        record = self.recorded_dispatch(None, continue_from=True)
         self.assertEqual(record['account'], 'primary')
         self.assertEqual(record['continuation']['previous_thread_id'], 'old-thread')
         self.assertEqual(record['continuation']['budget']['working_seconds'], 12452)
@@ -368,6 +326,28 @@ class DispatchCommandTests(unittest.TestCase):
         with self.assertRaises(subprocess.CalledProcessError) as failure:
             self.dispatch_command("--resume", THREAD_ID, "--account", "second")
         self.assertIn("resume belongs to primary", failure.exception.stderr)
+
+    def test_resume_preflight_tolerates_bad_rows_but_rejects_invalid_metadata(self) -> None:
+        noise = '\n{"truncated":\nnull\n[]\n42\n{"thread_id":"other","continuation":42}\n'
+        row = dict(name='prior', thread_id=THREAD_ID, account='primary', wall_s=20)
+        metadata = dict(budget_file='/shared/budget', budget=dict(anchor='original', attempts=7,
+            attempt_limit=10, working_seconds=12452, sessions=['prior']))
+        for change in ({}, {'continuation': {}}, {'continuation': metadata}):
+            argv = self.dispatch_command('--resume', THREAD_ID,
+                                         registry_rows=noise + json.dumps(row | change))
+            self.assertIn('resume', argv)
+        for invalid in (None, [], False, 42, 'bad', {'budget_file': '/shared/budget'}):
+            with self.assertRaises(subprocess.CalledProcessError) as failure:
+                self.dispatch_command('--resume', THREAD_ID,
+                    registry_rows=noise + json.dumps(row | {'continuation': invalid}))
+            self.assertEqual(failure.exception.returncode, 4)
+            self.assertIn('invalid continuation', failure.exception.stderr)
+
+    def test_unsupported_efforts_fail_before_admission(self) -> None:
+        for effort in ('high', 'low', 'unknown'):
+            with self.assertRaises(subprocess.CalledProcessError) as failure:
+                self.dispatch_command(effort=effort)
+            self.assertEqual(failure.exception.returncode, 2)
 
     def test_session_status_preserves_legacy_row_without_model(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -583,7 +563,7 @@ class AccountRouterTests(unittest.TestCase):
             self.assertEqual(results.count('primary'), 11)
             self.assertEqual(results.count('full'), 7)
 
-    def test_runtime_shim_requests_max_and_preserves_prompt(self) -> None:
+    def test_runtime_shim_preserves_selected_effort_and_prompt(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             home = Path(directory)
             binary = home / '.local/bin/codex'
@@ -593,31 +573,28 @@ class AccountRouterTests(unittest.TestCase):
             environment = dict(os.environ, HOME=directory, CODEX_HOME=str(home / '.codex'),
                                MIPSTARRE_CACHE_ROOT=str(home / 'cache'))
             shim = str(DISPATCH.with_name('codex-policy-shim.sh'))
-            for effort in (None, 'ultra', 'xhigh', 'max', 'low'):
-                arguments = [] if effort is None else ['-c', f'model_reasoning_effort="{effort}"']
-                result = subprocess.run(['bash', shim, 'exec', '-m', 'gpt-6-astra', *arguments,
+            for arguments, expected in (([], 'max'), (['-c', 'model_reasoning_effort="max"'], 'max'),
+                    (['--config=model_reasoning_effort=ultra'], 'max'),
+                    (['-cmodel_reasoning_effort=xhigh'], 'xhigh'),
+                    (['--config', "model_reasoning_effort='xhigh'"], 'xhigh')):
+                result = subprocess.run(['bash', shim, 'exec', *arguments,
+                                         '--config', 'features.multi_agent=true',
+                                         '-c', 'agents.max_concurrent_threads_per_session=2',
                                          '--', 'prompt with model_reasoning_effort=ultra'],
                     env=environment, capture_output=True, text=True, check=True)
                 argv = json.loads(result.stdout)
-                self.assertIn('model_reasoning_effort="max"', argv)
+                self.assertEqual([item for item in argv if item.startswith('model_reasoning_effort=')],
+                                 [f'model_reasoning_effort="{expected}"'])
                 self.assertIn('features.multi_agent=false', argv)
+                self.assertIn('agents.max_concurrent_threads_per_session=1', argv)
                 self.assertTrue(argv[-1].endswith('prompt with model_reasoning_effort=ultra'))
             for arguments in (['-m', 'gpt-5.6-sol'], ['-c', 'model="gpt-5.6-sol"'],
+                              ['-c', 'model_reasoning_effort=low'],
                               ['--enable', 'multi_agent'], ['--enable=foo,multi_agent'],
                               ['-c', 'features={multi_agent=true}'],
                               ['--config=agents={max_concurrent_threads_per_session=2}']):
                 self.assertEqual(subprocess.run(['bash', shim, *arguments], env=environment,
                     capture_output=True).returncode, 4)
-            for arguments in (['--config=model_reasoning_effort=ultra'],
-                              ['-cmodel_reasoning_effort=xhigh'],
-                              ['--config', 'features.multi_agent=true']):
-                result = subprocess.run(['bash', shim, 'exec', *arguments, '--', 'prompt'],
-                    env=environment, capture_output=True, text=True, check=True)
-                argv = json.loads(result.stdout)
-                settings = dict(argv[index + 1].split('=', 1) for index, arg in enumerate(argv)
-                                if arg == '-c')
-                self.assertEqual(settings['features.multi_agent'], 'false')
-                self.assertEqual(settings['agents.max_concurrent_threads_per_session'], '1')
             environment['CODEX_HOME'] = str(home / 'second')
             self.assertEqual(subprocess.run(['bash', shim, 'exec'], env=environment,
                 capture_output=True).returncode, 4)

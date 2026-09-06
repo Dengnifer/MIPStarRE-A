@@ -798,3 +798,11 @@ later owner decision; unobservable host state blocks admission.
 cumulative completed-time charges, resume provenance and durable replay snapshots.
 **Expected effect:** eleven allocated workers plus main without touching exempt
 sessions, and no budget reset or provenance loss across resumes or append failures.
+
+## 2026-09-06 — Preserve selected worker effort and tolerate historical damage
+
+**Trigger:** 03:26 UTC owner update and PR238 F5; `events.md`, "PR238 F5 and per-worker effort selection".
+**Change:** dispatch/review/autofix/shim honor main's max/xhigh choice; main stays max;
+omitted/legacy ultra map to max, other values fail. Shared history parsing tolerates
+non-record damage but validates relevant continuation metadata; budget rules persist.
+**Expected effect:** ordinary resumes recover, explicit xhigh survives, verification stays honest.
