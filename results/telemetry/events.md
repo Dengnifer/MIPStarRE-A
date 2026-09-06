@@ -5499,3 +5499,30 @@ not actual commit/publication hooks. No productive session was killed.
   remains deferred; PR280/282/207, source statements, credentials, hooks,
   gate logic and owner-inbox records were not changed by this session. No #27
   publication or model dispatch was attempted.
+
+
+## 2026-09-06 — Conservative Astra instructions and PR label publication (#291)
+
+- Owner ordered completion of the merge-liveness repair before migration. PR254
+  merged at 17:27:11Z as ad5adbed; at 17:38:56Z primary was clean and aligned
+  with GitHub at e1fba87, the checkpoint existed, and periodic service PID1664171
+  had completed checks at 17:32:59Z and 17:37:58Z. Old main was checkpointed,
+  its goal paused, and it exited normally before migration implementation.
+- The active persona still required relay, Max/Xhigh, fan-out off and a full
+  status scan each turn. Existing reviewed PR290 addresses native routing;
+  #291 is a small stacked follow-up, not a replacement of that work. It removes
+  remaining instruction conflicts, prompts bounded useful delegation and
+  follow-through, and retains permission, source, review and merge restrictions.
+- A live read at 17:46:27Z found 22 of 25 open PRs unlabeled. The creation path
+  only honored explicit labels; source-issue descriptive labels were ignored.
+  The fix inherits a narrow descriptive allowlist and refuses publication when
+  no descriptive label is supplied, inherited or retained. This refusal is a
+  new policy. Automation/approval/owner labels remain deliberate actions.
+- Basis: official OpenAI Astra guidance recommends auditing instruction files,
+  making initiative and delegation expectations explicit, and calibrating
+  validation. https://developers.openai.com/api/docs/guides/latest-model?model=gpt-6-astra
+  No provider capability or throughput conclusion is inferred from this guide.
+- Validation and post-restart outcomes are recorded separately when observed;
+  this entry does not claim a long-term occupancy improvement before measurement.
+
+- Validation outcome: five focused label regressions and all 571 workflow tests passed; `git diff --check` passed. Additive backfill verified all 22 audited open PRs while preserving their previous labels; per-PR receipts are in `owner-messages/qpbt-291-label-backfill-20260906.jsonl`.

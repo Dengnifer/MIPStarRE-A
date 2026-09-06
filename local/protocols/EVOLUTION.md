@@ -850,3 +850,20 @@ policy records disjoint successor chains and activity-based vacancy reasons.
 the current space five-total allocation without stale account labels, double
 admission, or manufactured review receipts. CLI Ultra selection is not a claim
 about backend compute equivalence.
+
+
+## 2026-09-06 — Conservative Astra prompting and descriptive PR labels (#291)
+
+**Trigger:** Owner migration/order and missing-label reports; events.md entry
+"Conservative Astra instructions and PR label publication" records the completed
+prior repair, conflicting persona instructions, and 22 unlabeled open PRs.
+
+**Change:** main.md uses bounded event-driven checks, useful shared-capacity
+delegation, autonomous follow-through and calibrated validation. issues-prs.md
+records descriptive-label inheritance and the new pre-publication classification
+requirement, plus the current permission-only owner-inbox boundary. PR290 owns
+the existing native route/lease/review implementation; its mechanics are unchanged.
+
+**Expected effect:** Fewer repeated scans and stale-instruction pauses; new or
+adopted PRs carry descriptive labels without implicitly enabling automation.
+**Outcome:** Pending focused tests, ordinary gates, and post-restart observation.
