@@ -209,12 +209,18 @@ fifth full review, fabricated carry-forward or CI/proof/merge/access bypass.
 An unresolved evidence requirement stays blocked internally, not automatically
 escalated to the human. No mathematical result is declared solved without proof.
 
-The standing 8–11 useful-live-worker floor, excluding main, is specified in
-`local/personas/main.md`: anticipate completions, replenish real independent
-work promptly and report concrete dependency or service constraints when the
-floor cannot be met. Idle reservations, duplicate writers and completed
-sessions do not count. The floor changes no account limits, proof budgets,
-review caps or integrity, validation and merge gates.
+The standing target is eleven useful live workers plus main, with a floor of
+eight and worker cap eleven (`local/personas/main.md`). Under the owner's
+2026-09-06T05:56Z guidance, main autonomously reassesses useful parallelism every
+cycle, after completion/failure, newly unblocked work or compaction, and before
+waiting or ending, without owner/meta prompts. Keep prepared useful assignments
+available to the durable replenisher and recheck current dependencies, ownership
+and service constraints; queue #257's operation requires evidence. Main owns
+selection and replenishment. Below target or floor, report the actual count,
+concrete constraint and next admission condition. Idle reservations, duplicate
+writers and completed sessions do not count. This duty changes no account
+limits, proof budgets, review caps or integrity, validation and exact-head merge
+gates.
 Main may hold replenishment for a reported concrete service constraint while
 preserving the eleven-worker allocation; bounded recovery admissions follow a
 census and useful-work evidence, not an assumed server request count.

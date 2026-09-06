@@ -4550,3 +4550,47 @@ and exact-head status rather than treating a launch command as completion.
   ledger or owner session is edited. Normal commit, checked publication and
   fresh exact-head CI apply; the author neither reviews nor merges this fix.
   Main owns the second normal workflow review and its subsequent disposition.
+
+## 2026-09-06 - PR260 attached config parser repair
+
+- **Trigger:** PR #263 independent review `5124378315`, F1 at `55ae748`,
+  identifies the inherited shim defect: `-c=model_reasoning_effort=xhigh`
+  retains a leading equals sign, selects max and forwards malformed config.
+  Session `orc-247-20260906-06` repairs the existing policy PR #260/#247.
+- **Resolution:** strip one optional equals sign after attached `-c`; preserve
+  long and split forms, selected max/xhigh, legacy ultra normalization,
+  Astra-only validation, primary-account enforcement and disabled fan-out.
+  The prior `-mMODEL`/`-m=MODEL` repair remains intact.
+- **Evidence:** before the fix, fake-executable regressions reproduce 22
+  failing cases. Coverage includes global/exec/resume positions, accepted and
+  rejected policy settings, unrelated quoted configuration with spaces and
+  embedded equals signs, and literal prompt text after `--`. No real model,
+  installed shim, queue #257 source or primary-main file is touched.
+
+## 2026-09-06 - Standing autonomous useful-parallelism reassessment
+
+- **Trigger:** the task for `orc-247-20260906-06` on #247/PR #260 records the
+  owner's 2026-09-06T05:56Z standing behavior: main reassesses useful parallelism
+  without owner or meta prompts every cycle, after completion/failure,
+  newly unblocked work or compaction, and before waiting or ending.
+- **Resolution:** integrate these triggers into the existing main persona and
+  operating cycle, cross-referenced by `issues-prs.md`. Target eleven useful
+  workers plus main, floor eight; keep prepared useful assignments available
+  to the durable replenisher and recheck current dependencies and service
+  evidence. Below target or floor, record the actual count, concrete constraint
+  and next admission condition. Main owns selection; meta provides guidance.
+- **Boundary:** this is an operating duty, not repeated reflective messages or
+  evidence that queue #257 is operational. Preserve the 05:05Z access-only
+  authority and earlier owner history, account/proof/review limits, exact-head
+  gates and fan-out off. No subagents, probes, author review or merge occurs.
+  This session's selected xhigh is configured, not server-verified effort.
+- **Validation:** all 48 dispatch and review-workflow tests pass in 15.973
+  seconds using fixtures. Shell syntax, whitespace and installed-hook checks
+  pass; prior event/amendment prefixes are byte-identical. Normal commits,
+  checked push and fresh exact-head CI follow; main owns the second normal
+  independent review after green CI. No review evidence is carried forward by
+  this author.
+- **Commit gate:** parser repair `6e4c7cf` passes the normal pre-commit suite:
+  547 tests in 51.609 seconds. Test-fixture diagnostics are expected; the suite
+  exits successfully. The policy amendment is committed separately with its
+  EVOLUTION entry under `docs(local)`.

@@ -893,3 +893,22 @@ while normal hooks, proof integrity, review caps and exact-head merge gates
 remain binding. No runtime routing changes, primary-main installation,
 subagents, new research samples, proof claims or merges are part of this
 amendment; the useful-worker floor/cap and effort-selection history are retained.
+
+## 2026-09-06 - Make useful-parallelism reassessment a standing main duty
+
+**Trigger:** `results/telemetry/events.md`, "Standing autonomous
+useful-parallelism reassessment", records the 05:56Z owner guidance supplied to
+`orc-247-20260906-06` for #247/PR #260.
+
+**Change:** `local/personas/main.md` integrates reassessment into every cycle,
+completion/failure, newly unblocked work, compaction and pre-wait/end decision;
+`issues-prs.md` states the same responsibility. Main acts without owner/meta
+prompts, targets eleven useful workers plus main with floor eight, and keeps
+bounded useful assignments available to the durable replenisher. Below target
+or floor, report current count, concrete constraint and next admission condition.
+Queue #257 remains an implementation issue whose operation requires evidence.
+
+**Expected effect:** timely useful replenishment and explicit admission
+constraints without duplicate work, idle filler or repeated reflective messages.
+The 05:05Z access-only authority, historical records, primary/Astra policy,
+fan-out prohibition, budgets, caps and exact-head gates remain binding.

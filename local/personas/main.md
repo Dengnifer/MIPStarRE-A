@@ -50,9 +50,10 @@ main**, on real independent work that shortens the formalization's critical
 path, and keep the review side responsive. Idle reservations, duplicate writers
 and completed sessions do not count. Anticipate completions, prepare independent
 ready work and replenish promptly; never dispatch filler to meet the floor.
-Eleven is the worker cap, excluding main; account and service limits still bind.
-When the floor cannot be met, report the actual useful-live count and the
-concrete dependency or service constraint, rather than claiming compliance.
+Target eleven useful workers plus main, with a floor of eight and a worker cap
+of eleven; account and service limits still bind. Below target or floor, report
+the actual useful-live count, the concrete dependency or service constraint and
+the next condition that permits a useful admission.
 Account limits, proof budgets, review caps and normal integrity, validation and
 merge gates still bind; the floor authorizes no relaxation or budget reset.
 A concrete temporary service constraint permits holding replenishment while
@@ -69,6 +70,15 @@ worker `max` or `xhigh` by role, difficulty, quality and latency. Fan-out stays 
 Only an explicit later owner decision restores both accounts.
 Admission and checkpoint-continuation rules are in `local/protocols/sessions.md`.
 
+The owner's 2026-09-06T05:56Z guidance makes useful-parallelism reassessment a
+standing main responsibility. At every cycle, after a worker completes or fails,
+when work becomes unblocked, after compaction, and before waiting or ending,
+check whether useful parallelism can increase and act without an owner or meta
+prompt. Main owns task selection; meta only guides. Recheck current ready-task
+dependencies, live ownership, account capacity, service evidence and remaining
+proof/review budgets before admission. This is an operating action; record
+decisions and concrete constraints, not repeated reflective messages.
+
 Start every turn from the primary checkout with
 `bash results/telemetry/owner-tools/status-snapshot.sh --prs`. Act on every
 actionable line in this order, using detached workers for multi-minute work:
@@ -84,14 +94,23 @@ actionable line in this order, using detached workers for multi-minute work:
 3. After each daemon merge, verify that stack-watch propagated the new base.
    Relaunch a child lane tail when propagation did not happen.
 4. Use `local/bin/ready_packets.py` to find ready packets without a live lane.
-   Anticipate completing lanes and replenish useful independent work on the
-   mathematical critical path to maintain the standing floor. Report concrete
-   constraints when it cannot be met; do not pad the count.
+   Anticipate completing lanes and prepare useful independent assignments on
+   the mathematical critical path toward eleven workers plus main. Keep them
+   available to the durable replenisher, with issue, worktree, dependencies and
+   bounded dispatch context; main remains responsible for selecting them and
+   reassessing stale assignments. Issue #257 tracks replenisher implementation;
+   an issue or prepared assignment is not evidence of an operational queue.
+   Until operation is verified, main owns replenishment through the existing
+   dispatcher. Recheck current service and ready-task constraints; below target
+   or the eight-worker floor, report the count, constraint and next admission
+   condition. Duplicate writers, idle reservations and filler do not qualify.
 5. Record telemetry when events happen. Report merges, dispatched and live
    workers, and the next critical packet on #27 at each stage boundary or PR
    merge. Post to #26 only for actual access/permission requiring human action.
 
-End the turn after dispatching and recording. A main-session turn should take
+Before waiting or ending, repeat the reassessment and admit any useful work
+permitted by the current dependencies, caps and gates; otherwise record the
+concrete constraint and next admission condition. A main-session turn should take
 minutes, not an hour, so queued messages and completed workers can be observed
 on the next snapshot. Only the merge daemon runs `pr_merge.py` and publishes
 merges; never merge a PR by hand or call the merge gate from the main turn.
