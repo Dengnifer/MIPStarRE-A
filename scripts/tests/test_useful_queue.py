@@ -214,6 +214,90 @@ class QueueTests(unittest.TestCase):
         self.assertEqual([environment[key] for key in ('MIPSTARRE_CODEX_ACCOUNT',
             'MIPSTARRE_CODEX_MODEL', 'MIPSTARRE_ACCOUNT_WAIT', 'LOCAL_REVIEW_ENABLED')],
             ['primary', 'gpt-6-astra', '0', 'false'])
+    def test_sandbox_schema_defaults_and_rejections(self):
+        for role in sorted(queue.ROLES):
+            packet = dict(self.packet, role=role)
+            self.config([packet])
+            self.assertEqual(queue.configuration(self.directory / 'queue.json')['packets'],
+                             [packet])
+            self.assertEqual(queue.packet_sandbox(packet),
+                             'read-only' if role == 'scout' else 'workspace-write')
+            for selected in ('read-only', 'workspace-write', 'danger-full-access'):
+                self.config([dict(packet, sandbox=selected)])
+                if role == 'scout' and selected != 'read-only':
+                    with self.assertRaises(ValueError):
+                        queue.configuration(self.directory / 'queue.json')
+                else:
+                    parsed = queue.configuration(self.directory / 'queue.json')['packets'][0]
+                    self.assertEqual(queue.packet_sandbox(parsed), selected)
+        for selected in ('', 'auto', '--dangerously-bypass-approvals-and-sandbox',
+                         None, True, 1, [], {}):
+            self.config([dict(self.packet, sandbox=selected)])
+            with self.subTest(selected=selected), self.assertRaises(ValueError):
+                queue.configuration(self.directory / 'queue.json')
+        for selected in ('read-only', 'workspace-write', 'danger-full-access'):
+            self.config([dict(self.review(), sandbox=selected)])
+            self.tick('held')
+        self.assertEqual(queue.packet_sandbox(self.review()), 'read-only')
+    def test_attempted_sandbox_changes_hold_without_rewriting_history(self):
+        for index, original in enumerate((self.packet, dict(self.packet,
+                                        sandbox='danger-full-access'))):
+            self.reset(f'history-{index}')
+            self.config([original])
+            self.tick('admitted', calls=1)
+            intent = self.directory / original['id'] / 'launch.json'
+            frozen = intent.read_bytes()
+            state = queue.load(self.supervisor.state_path)['packets']
+            tickets = self.tickets()
+            changed = dict(original, sandbox='read-only')
+            self.assertNotEqual(queue.fingerprint(original), queue.fingerprint(changed))
+            self.config([changed])
+            self.tick('held')
+            self.assertEqual(intent.read_bytes(), frozen)
+            self.assertEqual(queue.load(self.supervisor.state_path)['packets'], state)
+            self.assertEqual(self.tickets(), tickets)
+            self.assertEqual(state[original['id']]['attempts'], 1)
+            self.config([dict(changed, id='renamed')])
+            self.tick('held')
+            self.assertEqual(queue.load(self.supervisor.state_path)['packets'], state)
+    def test_sandbox_execution_uses_frozen_selection_and_holds_invalid_intent(self):
+        for index, (role, selected) in enumerate((('prover', None), ('scout', None),
+                ('prover', 'read-only'), ('prover', 'workspace-write'),
+                ('prover', 'danger-full-access'), ('prover', 'invalid'),
+                ('prover', 'tampered'))):
+            self.reset(f'execution-{index}')
+            packet = dict(self.packet, role=role)
+            if selected and selected not in ('invalid', 'tampered'): packet['sandbox'] = selected
+            self.config([packet])
+            self.tick('admitted', calls=1)
+            launch_path = self.directory / packet['id'] / 'launch.json'
+            launch = queue.load(launch_path)
+            self.assertEqual(launch['packet'], packet)
+            self.assertEqual(queue.load(self.supervisor.state_path)['packets'][packet['id']]
+                             ['fingerprint'], queue.fingerprint(packet))
+            if selected in ('invalid', 'tampered'):
+                launch['packet']['sandbox'] = ('danger-full-access' if selected == 'tampered'
+                                              else selected)
+                queue.save(launch_path, launch)
+            tickets = self.tickets()
+            tickets[launch['token']]['pid'] = os.getpid()
+            queue.router.write_queue_tickets(self.root, tickets)
+            self.config([dict(packet, sandbox='read-only')])
+            with mock.patch.object(queue, 'packet_gate', return_value=self.task.read_text()), \
+                 mock.patch.object(queue.subprocess, 'run',
+                                   return_value=mock.Mock(returncode=7)) as run:
+                self.assertEqual(queue.execute(self.primary, self.root, packet['id']), 1)
+            if selected in ('invalid', 'tampered'): run.assert_not_called()
+            else:
+                command = run.call_args.args[0]
+                self.assertEqual(command[0], str(self.primary / 'local/bin/dispatch.sh'))
+                self.assertEqual(command[command.index('--sandbox') + 1], selected or
+                                 ('read-only' if role == 'scout' else 'workspace-write'))
+            receipt = queue.load(launch_path.with_name('receipt.json'))
+            self.assertFalse(receipt['ok'])
+            self.assertEqual(receipt['token'], launch['token'])
+            self.config([packet])
+            self.tick('stopped')
     def test_parent_merge_binding_task_integrity_and_dirty_worktree(self):
         api = self.api()
         self.patch(queue, 'git', side_effect=self.fake_git)

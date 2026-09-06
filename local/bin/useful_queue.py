@@ -40,6 +40,18 @@ def git(worktree: Path, *args: str) -> str:
 def fingerprint(packet: dict) -> str:
     return hashlib.sha256(json.dumps({key: value for key, value in packet.items()
                                      if key != 'id'}, sort_keys=True).encode()).hexdigest()
+def packet_sandbox(packet: dict) -> str:
+    """Validate main's selection without rewriting historical packets or role defaults."""
+    if packet['kind'] == 'review':
+        if 'sandbox' in packet: raise ValueError('review sandbox is not configurable')
+        return 'read-only'
+    default = 'read-only' if packet['role'] == 'scout' else 'workspace-write'
+    selected = packet.get('sandbox', default)
+    if (not isinstance(selected, str) or
+            selected not in ('read-only', 'workspace-write', 'danger-full-access') or
+            (packet['role'] == 'scout' and selected != 'read-only')):
+        raise ValueError('invalid sandbox selection for dispatch role')
+    return selected
 def configuration(path: Path) -> dict:
     """Accept only typed packets, not commands, environments, resumes, or discovery rules."""
     config = load(path, {'version': 1, 'enabled': False, 'packets': []})
@@ -53,8 +65,10 @@ def configuration(path: Path) -> dict:
         if not isinstance(packet, dict): raise ValueError('packet must be an object')
         fields = ({'role', 'task_file', 'task_sha256'}
                   if packet.get('kind') == 'dispatch' else {'pr'})
+        if packet.get('kind') == 'dispatch' and 'sandbox' in packet: fields |= {'sandbox'}
         if set(packet) != common | fields or packet['kind'] not in ('dispatch', 'review'):
             raise ValueError('unknown or missing packet fields')
+        packet_sandbox(packet)
         if (not isinstance(packet['id'], str) or
                 not re.fullmatch(r'[a-z0-9][a-z0-9-]{0,79}', packet['id']) or
                 packet['id'] in identifiers):
@@ -292,7 +306,9 @@ class Supervisor:
                             raise ValueError('attempted packet changed; adoption required')
                         report['packets'].append(dict(id=packet['id'], status=prior['status']))
                         continue
-                    if any(entry['fingerprint'] == fingerprint(packet)
+                    # Changing permissions must not disguise a retry under a new id.
+                    if any(fingerprint(dict(entry['packet'], sandbox=None)) ==
+                           fingerprint(dict(packet, sandbox=None))
                            for entry in state['packets'].values()):
                         raise ValueError('duplicate task under a new id; adoption required')
                     if not enabled:
@@ -372,6 +388,7 @@ def execute(primary: Path, root: Path, identifier: str) -> int:
     launch_dir = supervisor.directory / identifier
     with locked(supervisor.directory / 'controller.lock'):
         launch = load(launch_dir / 'launch.json')
+        entry = load(supervisor.state_path)['packets'][identifier]
         with locked(root / 'accounts/router.lock'):
             ticket = router.queue_tickets(root).get(launch['token'])
             if (not ticket or ticket['pid'] != os.getpid() or
@@ -383,6 +400,9 @@ def execute(primary: Path, root: Path, identifier: str) -> int:
     try:
         if (supervisor.directory / 'STOP').exists() or (supervisor.directory / 'HOLD').exists():
             raise ValueError('stopped before launch')
+        sandbox = packet_sandbox(packet)
+        if entry['token'] != launch['token'] or entry['fingerprint'] != fingerprint(packet):
+            raise ValueError('frozen packet changed; adoption required')
         task = packet_gate(packet, primary, root)
         if task != launch['task']: raise ValueError('selected task changed before execution')
         environment = child_environment(root)
@@ -394,7 +414,8 @@ def execute(primary: Path, root: Path, identifier: str) -> int:
         else:
             command = [str(primary / 'local/bin/dispatch.sh'), '--account', 'primary',
                        '--role', packet['role'], '--issue', str(packet['issue']),
-                       '--worktree', packet['worktree'], '--effort', packet['effort'], '--',
+                       '--worktree', packet['worktree'], '--effort', packet['effort'],
+                       '--sandbox', sandbox, '--',
                        task + '\nComplete this one-shot packet without dispatching other sessions. '
                        'Do not merge, resume proof budgets, or dispose of owner inbox items.']
         result = subprocess.run(command, env=environment, stdin=subprocess.DEVNULL)
