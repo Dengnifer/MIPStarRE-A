@@ -8,7 +8,7 @@ if [ "$mode" = primary ] && [ "${CODEX_HOME:-$HOME/.codex}" != "$HOME/.codex" ];
   echo 'primary-only policy: preserve the old thread; use a checkpoint continuation' >&2
   exit 4
 fi
-args=(); task=0; effort=max
+args=(); task=0; effort=ultra
 while [ "$#" -gt 0 ]; do
   argument="$1"; shift
   if [ "$argument" = -- ]; then args+=(-- "$@"); task=1; break; fi
@@ -24,9 +24,14 @@ while [ "$#" -gt 0 ]; do
     --model=*)
       [ "$argument" = --model=gpt-6-astra ] || exit 4
       continue ;;
+    -m?*)
+      attached_model="${argument#-m}"; attached_model="${attached_model#=}"
+      [ "$attached_model" = gpt-6-astra ] || exit 4
+      continue ;;
     -c|--config)
       value="${1:?missing config value}"; shift ;;
-    --config=*|-c?*) value="${argument#*=}"; [ "$argument" != "${argument#-c}" ] && value="${argument#-c}" ;;
+    --config=*) value="${argument#--config=}" ;;
+    -c?*) value="${argument#-c}"; value="${value#=}" ;;
     *) args+=("$argument"); continue ;;
   esac
   normalized="${value//[[:space:]]/}"
@@ -36,9 +41,8 @@ while [ "$#" -gt 0 ]; do
     model=*) [ "$normalized" = model=gpt-6-astra ] || exit 4; continue ;;
     model_reasoning_effort=*)
       case "${normalized#*=}" in
-        max|xhigh) effort="${normalized#*=}" ;;
-        ultra) effort=max ;;
-        *) echo 'effort must be max or xhigh (legacy ultra maps to max)' >&2; exit 4 ;;
+        ultra) ;;
+        *) echo 'effort must be ultra' >&2; exit 4 ;;
       esac
       continue ;;
     features.multi_agent=*|agents.max_concurrent_threads_per_session=*)
