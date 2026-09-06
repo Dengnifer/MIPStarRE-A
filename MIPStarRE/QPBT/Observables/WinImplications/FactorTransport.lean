@@ -75,13 +75,10 @@ theorem reindexOp_mul {ι κ : Type*} [Fintype ι] [Fintype κ]
   change (M * N) (e i) (e j) = ∑ k : ι, M (e i) (e k) * N (e k) (e j)
   rw [Matrix.mul_apply, ← e.sum_comp (fun l : κ => M (e i) l * N l (e j))]
 
-/-- The state quadratic form is transported by reindexing the state and the
-operator together.  A private variant of this transport, stated for the
-inverse equivalence, lives at
-`MIPStarRE/QPBT/Games/DistanceTheorems.lean:250` and is unreachable from here;
-this public form is the one used by the interchanged conclusions of
-`lem:qld-win-implications`, blueprint `ch14_qpbt_observables.tex:701-703`.
-Promoting the private original is issue #204. -/
+/-- The real quadratic form is invariant under simultaneous reindexing of the
+state and operator. Formalization-only support for the interchanged conclusions
+of blueprint `lem:qld-win-implications`; see
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:227`. -/
 theorem stateQForm_reindexState {ι κ : Type*} [Fintype ι] [DecidableEq ι]
     [Fintype κ] [DecidableEq κ] (e : ι ≃ κ) (T : Op κ)
     (ψ : EuclideanSpace ℂ ι) :

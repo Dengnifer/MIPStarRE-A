@@ -32,10 +32,7 @@ namespace WinImplications
 /-! ## Transport of the distance functional along the factor interchange -/
 
 /-- The identity operator acts trivially on a state. Formalization-only support
-for `def:strategy-observables`, blueprint `ch14_qpbt_observables.tex:573-610`.
-`MagicSquareRigidity.applyOperatorToState_one` states the same identity; that
-module is not in the import closure of this file, so the copy is kept here.
-Consolidating the two is issue #204. -/
+for blueprint `def:strategy-observables`. -/
 theorem applyOperatorToState_one {ι : Type*} [Fintype ι] [DecidableEq ι]
     (ψ : EuclideanSpace ℂ ι) : applyOperatorToState (1 : Op ι) ψ = ψ := by
   ext i

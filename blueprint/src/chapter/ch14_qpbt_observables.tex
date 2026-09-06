@@ -1545,7 +1545,9 @@ chapters invoke exactly these variants.
 	hold, and the proof yields $\delta_{\mathrm{Anticom}}(\eps) = \sqrt{\eps}$.
 \end{lemma}
 \begin{proof}
-	\leanok \uses{lem:qld-win-implications, lem:qld-win-implications-obs, fact:data-processing, lem:twisted-commutation, def:expanded-point-measurement, def:expanded-point-trace-projection, def:expanded-observables, def:symmetric-equivalents}
+	\leanok \uses{lem:qld-win-implications, lem:qld-win-implications-obs, fact:data-processing, lem:twisted-commutation, def:expanded-point-measurement, def:expanded-point-trace-projection, def:expanded-observables, def:symmetric-equivalents,
+	lem:expanded-point-trace-half-add, lem:qld-placed-consistency-distance,
+	lem:expanded-point-measurement-properties}
 	For item~1: the original point measurements
 	$\{M^{(\mathrm{Point},W),u}_a\}$ are $\eps$-self-consistent between
 	registers $\mathsf{A}$ and $\mathsf{B}$ in $\ket{\hat{\psi}}$
@@ -1553,9 +1555,13 @@ chapters invoke exactly these variants.
 	Pauli projections $\{\tau^{W,u}_a\}$ are perfectly self-consistent
 	between registers $\mathsf{A}'$ and $\mathsf{A}''$ on the EPR ancillas,
 	and the data processing inequality (Lemma~\ref{fact:data-processing})
-	combines the two through the convolution form of
-	Definition~\ref{def:expanded-point-measurement}. For item~2:
-	by~\eqref{eq:lc-22}, each side expands as
+	bounds the consistency defect of their addition postprocessing.
+	By Lemma~\ref{lem:expanded-point-measurement-properties}, this
+	postprocessing is the expanded point measurement in convolution form;
+	Lemma~\ref{lem:qld-placed-consistency-distance} converts its consistency
+	bound to the required state-dependent distance bound. For item~2:
+	by Lemma~\ref{lem:expanded-point-trace-half-add}
+	(\eqref{eq:lc-22}), each side expands as
 	$\frac14 \big( \Id + (-1)^b \hat{X}^{r_X}(u_X) + (-1)^{b'} \hat{Z}^{r_Z}(u_Z) + (-1)^{b+b'} \hat{X}^{r_X}(u_X) \hat{Z}^{r_Z}(u_Z) \big)$
 	respectively its reverse-ordered analogue, so it suffices to commute
 	the two expanded observables. By~\eqref{eq:lc-23},
