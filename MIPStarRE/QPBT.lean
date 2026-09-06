@@ -40,6 +40,7 @@ import MIPStarRE.QPBT.Test.Completeness
 import MIPStarRE.QPBT.Test.QubitForm
 import MIPStarRE.QPBT.Test.CanonicalParams
 import MIPStarRE.QPBT.Combining.Defs
+import MIPStarRE.QPBT.Combining.ErrorBounds
 import MIPStarRE.QPBT.Combining.DirectLowDegree
 import MIPStarRE.QPBT.Combining.Linearity
 import MIPStarRE.QPBT.Combining.Linearity.Defs
