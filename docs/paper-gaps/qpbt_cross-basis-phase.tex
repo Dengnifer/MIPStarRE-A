@@ -96,9 +96,12 @@ uniform phase relation displayed above.  Its docstring carries the required
 blueprint and deliberately differs from the false cross-basis commutation
 claim in the paper; it introduces no extra hypothesis.
 
-The declaration is present but its proof remains open.  Issue~\#19 owns the
-Stage~4.2 statement and this discrepancy record; \ghissue{47} owns the
-Stage~4.3 proof from the product form and generalized Pauli commutation.
+The declaration is now proved from the product form and generalized Pauli
+commutation; this independent algebraic result is recorded in \ghissue{240}.
+Issue~\#19 records the Stage~4.2 statement and this discrepancy.  The six
+measurement and swap-map proof obligations in the same Lean file remain open
+under \ghissue{47}; neither construction of the global polynomial-pair witness
+nor the final extraction theorem is completed by this calculation.
 
 This correction changes neither the definition of the extracted observables
 nor the source-faithful consistency and extraction conclusions.  It repairs an
