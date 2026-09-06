@@ -46,6 +46,7 @@ class MergeServiceTests(unittest.TestCase):
         self.assertEqual([row["number"] for row in record["oldest_stale"]], [254])
         self.assertNotIn("stale eligible PRs: 254", record["hold_reasons"])
         self.assertIsNone(record["eligible_age_s"])
+        self.assertEqual(record["fresh_count"], 1)
 
     def test_fresh_candidate_is_the_only_merge_action(self):
         rows = [
@@ -68,6 +69,7 @@ class MergeServiceTests(unittest.TestCase):
         self.assertTrue(record["post_merge_remote_verified"])
         self.assertEqual(record["oldest_stale"][0]["number"], 254)
         self.assertNotIn("stale eligible PRs: 254", record["hold_reasons"])
+        self.assertEqual(record["fresh_count"], 1)
 
     def test_read_failure_is_recorded_as_hold(self):
         with mock.patch.object(SERVICE, "git", side_effect=RuntimeError("transport")):
@@ -77,6 +79,9 @@ class MergeServiceTests(unittest.TestCase):
                             for reason in record["hold_reasons"]))
         self.assertGreaterEqual(record["duration_s"], 0)
         self.assertEqual(record["eligible_count"], 0)
+        self.assertEqual(record["eligibility_budget_s"], SERVICE.ELIGIBILITY_BUDGET_S)
+        self.assertEqual(record["read_failure"], "RuntimeError: transport")
+        self.assertGreaterEqual(record["cadence_sleep_s"], 0)
 
     def test_interval_rejects_sub_five_seconds(self):
         parser = SERVICE.argparse.ArgumentParser()

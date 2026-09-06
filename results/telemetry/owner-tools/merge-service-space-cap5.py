@@ -30,6 +30,7 @@ GITHUB_MAIN = "refs/heads/main"
 
 
 READ_TIMEOUT_S = 30
+ELIGIBILITY_BUDGET_S = 240
 
 
 def git(*args: str) -> str:
@@ -121,11 +122,14 @@ def eligible_prs(remote: str) -> list[dict]:
     return sorted(result, key=lambda row: row["created"])
 
 
-def tick(merge: bool) -> dict:
+def tick(merge: bool, interval: int = 300) -> dict:
     started = time.monotonic()
     local = remote = None
     clean = False
     reason = None
+    eligibility_started = time.monotonic()
+    eligibility_duration = None
+    read_failure = None
     reasons: list[str] = []
     try:
         local = git("rev-parse", "main")
@@ -142,13 +146,16 @@ def tick(merge: bool) -> dict:
         if not locks_ok:
             reasons.append(lock_reason)
         signal.signal(signal.SIGALRM, _alarm)
-        signal.alarm(READ_TIMEOUT_S)
+        signal.alarm(ELIGIBILITY_BUDGET_S)
         candidate = eligible_prs(remote)
         signal.alarm(0)
+        eligibility_duration = round(time.monotonic() - eligibility_started, 3)
     except Exception as exc:
         signal.alarm(0)
         candidate = []
-        reasons.append(f"read_failure: {type(exc).__name__}: {exc}")
+        eligibility_duration = round(time.monotonic() - eligibility_started, 3)
+        read_failure = f"{type(exc).__name__}: {exc}"
+        reasons.append(f"read_failure: {read_failure}")
         clean = False
     fresh_candidates = [row for row in candidate if row.get("fresh_against_remote")]
     stale_candidates = [row for row in candidate if not row.get("fresh_against_remote")]
@@ -160,10 +167,12 @@ def tick(merge: bool) -> dict:
                   oldest_eligible=oldest, oldest_stale=stale_candidates,
                   oldest_fresh_against_remote=bool(oldest),
                   eligible_count=len(candidate), fresh_count=len(fresh_candidates),
-                  eligible_age_s=None,
+                  eligible_age_s=None, eligibility_budget_s=ELIGIBILITY_BUDGET_S,
+                  eligibility_duration_s=eligibility_duration, read_failure=read_failure,
                   external_admission=0, owner_total_limit=5,
                   native_descendant_limit=4, hold_reasons=reasons,
-                  action="hold", duration_s=round(time.monotonic() - started, 3))
+                  action="hold", duration_s=round(time.monotonic() - started, 3),
+                  cadence_sleep_s=max(0, interval - round(time.monotonic() - started, 3)))
     if not reasons and oldest and merge:
         record["action"] = "delegate-pr_merge"
         record["merge_exit"] = subprocess.run(
@@ -206,7 +215,7 @@ def main() -> int:
             raise SystemExit("space-cap5 merge service already owns its lock")
         try:
             while True:
-                record = tick(args.merge)
+                record = tick(args.merge, args.interval)
                 if args.once:
                     return 0
                 time.sleep(max(0, args.interval - float(record["duration_s"])))
