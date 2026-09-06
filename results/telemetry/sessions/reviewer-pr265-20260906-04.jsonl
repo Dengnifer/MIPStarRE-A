@@ -1,0 +1,9 @@
+{"type":"thread.started","thread_id":"01a0758e-f601-7750-89ed-5aeecebd0a97"}
+{"type":"turn.started"}
+{"type":"error","message":"Reconnecting... 1/5 (stream disconnected before completion: error sending request for url (http://relay-us7.virvm.com:39479/responses))"}
+{"type":"error","message":"Reconnecting... 2/5 (stream disconnected before completion: error sending request for url (http://relay-us7.virvm.com:39479/responses))"}
+{"type":"error","message":"Reconnecting... 3/5 (stream disconnected before completion: error sending request for url (http://relay-us7.virvm.com:39479/responses))"}
+{"type":"error","message":"Reconnecting... 4/5 (stream disconnected before completion: error sending request for url (http://relay-us7.virvm.com:39479/responses))"}
+{"type":"error","message":"Reconnecting... 5/5 (stream disconnected before completion: error sending request for url (http://relay-us7.virvm.com:39479/responses))"}
+{"type":"error","message":"stream disconnected before completion: error sending request for url (http://relay-us7.virvm.com:39479/responses)"}
+{"type":"turn.failed","error":{"message":"stream disconnected before completion: error sending request for url (http://relay-us7.virvm.com:39479/responses)"}}

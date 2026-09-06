@@ -8,9 +8,174 @@ from pathlib import Path
 import subprocess
 import sys
 import time
+import uuid
 
 
 ACCOUNTS = ("primary", "second")
+NATIVE_KEY_LABELS = ("relay-1", "space")
+DEFAULT_NATIVE_KEY_LABEL = "space"
+DEFAULT_NATIVE_HOME = Path.home() / ".cache/mipstarre-dev/codex-home-qpbt-relay1"
+
+
+def native_key_label() -> str:
+    """Return the owner-selected key label for the current native episode."""
+    label = os.environ.get("MIPSTARRE_NATIVE_KEY_LABEL", DEFAULT_NATIVE_KEY_LABEL)
+    if label not in NATIVE_KEY_LABELS:
+        raise ValueError("MIPSTARRE_NATIVE_KEY_LABEL must be relay-1 or space")
+    return label
+
+
+def native_home() -> Path:
+    """Return the scoped native home without exposing credentials in telemetry."""
+    configured = os.environ.get("MIPSTARRE_NATIVE_CODEX_HOME")
+    return Path(configured).expanduser() if configured else DEFAULT_NATIVE_HOME
+
+
+def key_capacity(root: Path) -> int:
+    """Read the required owner allocation, not an estimate of provider throughput."""
+    path = root / 'watchdog/primary-key-capacity'
+    if not path.exists():
+        raise ValueError(f'{path}: owner key capacity is required for native admission')
+    capacity = int(path.read_text())
+    if capacity < 1:
+        raise ValueError('primary-key-capacity must be positive')
+    return capacity
+
+
+def admission_capacity(root: Path) -> int:
+    """Require an owner allocation whenever the runtime exposes its global cap."""
+    path = root / 'watchdog/primary-key-capacity'
+    if path.exists():
+        return key_capacity(root)
+    if (root / 'watchdog/max-codex').exists():
+        raise ValueError(f'{path}: owner key capacity is required for admission')
+    return 12
+
+
+def native_leases(root: Path) -> dict:
+    """Retain uncertain or dead leases until an explicit, verified release."""
+    path = root / 'accounts/native-leases.json'
+    leases = json.loads(path.read_text()) if path.exists() else {}
+    if not isinstance(leases, dict):
+        raise ValueError('invalid native leases')
+    identities = set()
+    for thread, lease in leases.items():
+        if (not isinstance(lease, dict) or not isinstance(thread, str) or not thread or
+                str(uuid.UUID(thread)) != thread or
+                type(lease.get('pid')) is not int or lease['pid'] <= 0 or
+                not isinstance(lease.get('start'), str) or not lease['start'].isdecimal() or
+                type(lease.get('slots')) is not int or lease['slots'] < 1 or
+                lease.get('key_label') not in ('relay-1', 'space') or
+                (lease['pid'], lease['start']) in identities):
+            raise ValueError('invalid native lease; operator reconciliation required')
+        identities.add((lease['pid'], lease['start']))
+    return leases
+
+
+def native_process(thread: str, pid: int, slots: int) -> dict:
+    """Verify the resumed root and its explicit, shared native CLI allocation."""
+    try:
+        import tomllib
+    except ImportError:
+        import tomli as tomllib
+    if str(uuid.UUID(thread)) != thread:
+        raise ValueError('native root thread must be a canonical UUID')
+    start = process_identity(pid)
+    if host_processes()[1].get(pid) != ('primary', True):
+        raise ValueError('native lease requires an observed primary interactive root')
+    process = Path(f'/proc/{pid}')
+    environment = dict(entry.split(b'=', 1) for entry in
+                       (process / 'environ').read_bytes().split(b'\0') if b'=' in entry)
+    home = Path(os.fsdecode(environment.get(b'CODEX_HOME', b'')))
+    if home != native_home():
+        raise ValueError('native root is not on the verified scoped native route')
+    arguments = [os.fsdecode(arg) for arg in (process / 'cmdline').read_bytes().split(b'\0')
+                 if arg]
+    if not any(arguments[i:i + 2] == ['resume', thread] for i in range(len(arguments))):
+        raise ValueError('native root thread does not match its live resume command')
+    settings = {}
+    args = iter(arguments[1:])
+    for arg in args:
+        if arg in ('-m', '--model'):
+            settings['model'] = next(args)
+        elif arg in ('-c', '--config'):
+            setting = tomllib.loads(next(args))
+            for key, value in setting.items():
+                if isinstance(value, dict):
+                    settings.update((key + '.' + name, item) for name, item in value.items())
+                else:
+                    settings[key] = value
+    expected = {'model': 'gpt-6-astra', 'model_reasoning_effort': 'ultra',
+                'agents.enabled': True, 'features.multi_agent': True,
+                'agents.default_subagent_model': 'gpt-6-astra',
+                'agents.default_subagent_reasoning_effort': 'ultra',
+                'agents.max_concurrent_threads_per_session': slots}
+    if (type(slots) is not int or slots < 1 or
+            type(settings.get('agents.max_concurrent_threads_per_session')) is not int or
+            any(settings.get(key) != value for key, value in expected.items()) or
+            process_identity(pid) != start):
+        raise ValueError('native root model, effort, cap or process identity changed')
+    return dict(pid=pid, start=start, slots=slots, key_label=native_key_label(), home=home)
+
+
+def native_lease(root: Path, thread: str, pid: int, slots: int, release: bool = False) -> None:
+    """Reserve the whole configured descendant pool under the account admission lock."""
+    from wf_util import atomic_write
+    accounts = root / 'accounts'
+    accounts.mkdir(parents=True, exist_ok=True)
+    with (accounts / 'router.lock').open('a') as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        leases = native_leases(root)
+        if release:
+            lease = leases.get(thread)
+            if lease is None:
+                raise ValueError('native root has no capacity lease')
+            if pid != lease['pid'] or slots != lease['slots']:
+                raise ValueError('native lease release identity does not match its reservation')
+            try:
+                alive = process_identity(lease['pid']) == lease['start']
+            except (FileNotFoundError, ProcessLookupError):
+                alive = False
+            if alive:
+                raise ValueError('cannot release capacity while its root is live')
+            del leases[thread]
+        else:
+            lease = native_process(thread, pid, slots)
+            lease.pop('home')
+            if thread in leases:
+                if leases[thread] != lease:
+                    raise ValueError('live native capacity cannot be changed')
+                return
+            if any(row['pid'] == pid for row in leases.values()):
+                raise ValueError('native root already has a capacity lease')
+            workers, interactive = occupancy(root)
+            if workers[0] + interactive[0] + slots + external_reservation(root) > key_capacity(root):
+                raise ValueError('shared key allocation exhausted')
+            leases[thread] = lease
+        atomic_write(accounts / 'native-leases.json', json.dumps(leases) + '\n')
+
+
+def external_reservation(root: Path) -> int:
+    """Count owner-reserved non-Codex use in both native and external admission."""
+    path = root / 'watchdog/primary-external-reserved'
+    external = int(path.read_text()) if path.exists() else 0
+    if external < 0:
+        raise ValueError('primary-external-reserved must be nonnegative')
+    return external
+
+
+def external_admission_enabled(root: Path) -> bool:
+    """Honor the owner gate before any external reservation is created."""
+    gate = root / 'watchdog/primary-external-admission'
+    if gate.exists():
+        value = gate.read_text().strip()
+        if value not in ('0', '1'):
+            raise ValueError(f'{gate}: expected 0 or 1')
+        return value == '1'
+    total = root / 'watchdog/max-codex'
+    if total.exists() and int(total.read_text().strip()) == 0:
+        return False
+    return True
 
 
 def process_identity(pid: int) -> str:
@@ -65,11 +230,8 @@ def admission_limits(root: Path, interactive: list[int]) -> tuple[list[int], int
         if cap < 0:
             raise ValueError(f'{path}: cap must be nonnegative')
         caps.append(cap)
-    external_path = root / 'watchdog/primary-external-reserved'
-    external = int(external_path.read_text()) if external_path.exists() else 0
-    if external < 0:
-        raise ValueError('primary-external-reserved must be nonnegative')
-    caps[0] = min(caps[0], max(0, 12 - interactive[0] - external))
+    external = external_reservation(root)
+    caps[0] = min(caps[0], max(0, admission_capacity(root) - interactive[0] - external))
     caps[1] = max(0, caps[1] - interactive[1]) if mode == 'both' else 0
     total_path = root / 'watchdog/max-codex'
     total = int(preserved.get('max_codex', total_path.read_text().strip()
@@ -170,6 +332,7 @@ def occupancy(root: Path) -> tuple[list[int], list[int]]:
     interactive[0] = max(1, interactive[0])
     workers[0] += sum(ticket['slots'] - len(ticket['claims'])
                       for ticket in queue_tickets(root).values())
+    workers[0] += sum(lease['slots'] for lease in native_leases(root).values())
     return workers, interactive
 
 
@@ -272,6 +435,8 @@ def reserve(root: Path, requested: str, pid: int, wait: int, dry_run: bool) -> s
     while True:
         with (accounts / "router.lock").open("a") as lock:
             fcntl.flock(lock, fcntl.LOCK_EX)
+            if not external_admission_enabled(root):
+                raise ValueError('external admission disabled by owner gate')
             live, interactive = occupancy(root)
             caps, total, mode = admission_limits(root, interactive)
             if mode == 'primary' and requested == 'second':
@@ -302,7 +467,8 @@ def reserve(root: Path, requested: str, pid: int, wait: int, dry_run: bool) -> s
                         process_identity(ancestor) != ticket['start'] or
                         len(ticket['claims']) >= ticket['slots'] or pid in ticket['claims']):
                     raise ValueError('queue ticket is not an unused descendant reservation')
-                if live[0] > min(10, caps[0]) or sum(live) > total:
+                if (live[0] > caps[0] or
+                        sum(live) + sum(interactive) > total):
                     raise ValueError('account capacity exhausted; queue claim refused')
                 if not dry_run:
                     (accounts / 'primary' / str(pid)).touch()
@@ -311,7 +477,7 @@ def reserve(root: Path, requested: str, pid: int, wait: int, dry_run: bool) -> s
                 return 'primary'
             available = [index for index, account in enumerate(ACCOUNTS)
                          if live[index] < caps[index] and requested in ('auto', account)]
-            if available and sum(live) < total:
+            if available and sum(live) + sum(interactive) < total:
                 index = min(available, key=lambda index: live[index] / caps[index])
                 selected = ACCOUNTS[index]
                 if not dry_run:
@@ -323,6 +489,16 @@ def reserve(root: Path, requested: str, pid: int, wait: int, dry_run: bool) -> s
 
 
 def main() -> None:
+    if len(sys.argv) > 1 and sys.argv[1] == 'native-lease':
+        parser = argparse.ArgumentParser(description=native_lease.__doc__)
+        parser.add_argument('root', type=Path)
+        parser.add_argument('thread')
+        parser.add_argument('pid', type=int)
+        parser.add_argument('slots', type=int)
+        parser.add_argument('--release', action='store_true')
+        args = parser.parse_args(sys.argv[2:])
+        native_lease(args.root, args.thread, args.pid, args.slots, args.release)
+        return
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("root", type=Path)
     parser.add_argument("account", choices=("auto", *ACCOUNTS))
