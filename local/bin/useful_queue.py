@@ -212,13 +212,11 @@ class Supervisor:
         paths = list(self.directory.glob('*/launch.log'))
         paths += [path for path in (self.root / 'sessions').glob('*.jsonl')
                   if path.stat().st_mtime >= state['since']]
-        for path in paths:
-            key = str(path)
+        for key in state['evidence'].keys() | set(map(str, paths)):
             previous = state['evidence'].get(key, {})
-            evidence = observe(path, previous)
-            state['evidence'][key] = evidence
-            if evidence['refusals'] > previous.get('refusals', 0):
-                self.hold(f'service refusal in {path}; main must assess recovery')
+            state['evidence'][key] = observe(Path(key), previous)
+            if state['evidence'][key]['refusals'] > previous.get('refusals', 0):
+                self.hold(f'service refusal in {key}; main must assess recovery')
         for identifier, entry in state['packets'].items():
             if entry['status'] not in ('launching', 'running'): continue
             receipt = load(self.directory / identifier / 'receipt.json')

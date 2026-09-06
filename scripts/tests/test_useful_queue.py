@@ -183,6 +183,9 @@ class QueueTests(unittest.TestCase):
         self.assertEqual(self.tick()['evidence'][str(path)]['turns'], 1)
         (self.directory / 'HOLD').unlink()
         self.tick('active')
+        self.config([self.packet, dict(self.packet, id='next-packet', issue=999)])
+        path.unlink()
+        self.tick('held')
         path = self.base / 'partial'
         path.write_text('{"type":"turn.completed"')
         cursor = queue.observe(path, {})

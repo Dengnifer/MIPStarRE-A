@@ -5250,3 +5250,29 @@ the previous04:30 observation;247<-237 native dependency is recorded.
   private artifacts and detaches canonical exact-head CI with a 14400-second
   full-build-lock wait. Proxy settings apply only to publication and CI child
   commands. No implementation, review, merge-to-main or deployment is added.
+
+## 2026-09-06 - PR269 second-review missing-evidence HOLD repair
+
+- Main authorizes `orc-257-20260906-07` for only F1 of second normal review
+  `5124610152` at `523cf79c25139e6de29f62e1be43f6955d29a453`. The old
+  refresh scan omitted previously observed files once they disappeared. A
+  regression with a live launcher and another queued packet failed on the
+  reviewed source because one new process launched instead of zero.
+- Refresh now checks saved evidence paths as well as discovered files before
+  admission, using the existing observer and exception-to-HOLD handling. The
+  three-line regression preserves every existing test line. The cumulative
+  nontelemetry patch is exactly 1000 lines: 971 additions and 29 deletions.
+  All other source and incoming PR195 blobs remain unchanged, with actual
+  `928328ff4d45e5fdc2844b120329a2c241a3a58a` still the ancestor base.
+- Nine queue tests passed in 3.104 seconds; all 555 existing tests passed in
+  50.079 seconds. Both log and capture disappearance after restart produced an
+  actual HOLD file and zero new admissions while retaining ticket and cursor.
+  Exact source/test hashes and reproduction evidence are recorded in
+  `results/telemetry/pr269-terminal-f1-repair-20260906.md`.
+- Preserve 5858 seconds across the six prior implementation/publication
+  executions, plus the separately recorded 628/634-second model reviews.
+  Their timeouts, raw captures, original proof budgets and B8 anchor are not
+  reset. This is the single main-authorized bounded 900-second correction.
+  Both model-review rounds are exhausted; main retains terminal disposition
+  after normal publication and detached CI. No third review, automatic adverse
+  override, deployment, probe or merge is performed by this author session.
