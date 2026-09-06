@@ -208,53 +208,10 @@ theorem conjTranspose_mul_le_one_rightTensor {ιA ιB : Type*} [Fintype ιA] [De
 
 /-! ## Kronecker algebra of placed operators
 
-The mixed-product rule `heteroKron_mul` and the identity `heteroKron_one_one`
-are the shared tensor-placement lemmas of `MIPStarRE/QPBT/Games/Defs.lean`; the
-identities below extend them with the additive facts used by the transfer
-step. -/
-
-/-- Tensor placement is additive in the left factor. -/
-theorem heteroKron_add_left {ιA ιB : Type*} (A B : Op ιA) (C : Op ιB) :
-    heteroKron (A + B) C = heteroKron A C + heteroKron B C := by
-  ext p q
-  simp [heteroKron, Matrix.kronecker, add_mul]
-
-/-- Tensor placement is additive in the right factor. -/
-theorem heteroKron_add_right {ιA ιB : Type*} (A : Op ιA) (B C : Op ιB) :
-    heteroKron A (B + C) = heteroKron A B + heteroKron A C := by
-  ext p q
-  simp [heteroKron, Matrix.kronecker, mul_add]
-
-/-- Formalization-only auxiliary lemma for `def:tensor-product-strategy`: the
-tensor placement of possibly rectangular matrices respects differences in the
-left factor.  This is the general form of `heteroKron_sub_left` below, needed
-where the left factor is the matrix of an isometry between distinct index
-types (blueprint
-`thm:ms-rigidity`). -/
-theorem kroneckerMap_sub_left {m n p q : Type*} (A B : Matrix m n ℂ) (C : Matrix p q ℂ) :
-    Matrix.kroneckerMap (· * ·) (A - B) C =
-      Matrix.kroneckerMap (· * ·) A C - Matrix.kroneckerMap (· * ·) B C := by
-  ext p' q'
-  simp [Matrix.kroneckerMap, sub_mul]
-
-/-- Formalization-only auxiliary lemma for `def:tensor-product-strategy`: the
-tensor placement of possibly rectangular matrices respects differences in the
-right factor.  This is the general form of `heteroKron_sub_right` below. -/
-theorem kroneckerMap_sub_right {m n p q : Type*} (A : Matrix m n ℂ) (B C : Matrix p q ℂ) :
-    Matrix.kroneckerMap (· * ·) A (B - C) =
-      Matrix.kroneckerMap (· * ·) A B - Matrix.kroneckerMap (· * ·) A C := by
-  ext p' q'
-  simp [Matrix.kroneckerMap, mul_sub]
-
-/-- Tensor placement respects differences in the left factor. -/
-theorem heteroKron_sub_left {ιA ιB : Type*} (A B : Op ιA) (C : Op ιB) :
-    heteroKron (A - B) C = heteroKron A C - heteroKron B C :=
-  kroneckerMap_sub_left A B C
-
-/-- Tensor placement respects differences in the right factor. -/
-theorem heteroKron_sub_right {ιA ιB : Type*} (A : Op ιA) (B C : Op ιB) :
-    heteroKron A (B - C) = heteroKron A B - heteroKron A C :=
-  kroneckerMap_sub_right A B C
+The mixed-product rule `heteroKron_mul`, the identity `heteroKron_one_one` and
+the additive and difference identities are the shared tensor-placement lemmas of
+`MIPStarRE/QPBT/Games/Defs.lean`; the identities below extend them with the
+finite-sum and scalar facts used by the transfer step. -/
 
 /-- Tensor placement distributes over a finite sum in the left factor. -/
 theorem heteroKron_finset_sum_left {β ιA ιB : Type*} (s : Finset β)
