@@ -5050,6 +5050,22 @@ or new owner disposition is performed by this archival reconciliation.
   compaction failures in existing logs rather than infer productive requests,
   RPM/TPM, server in-flight counts or recovery from process occupancy alone.
 
+## 2026-09-06 — Explicit useful-work admissions need durable handoff reservations
+
+- Issue #257 reports completion bursts and relay concurrency refusals during
+  manually replenished work. The source at PR #238's actual merge
+  `32a32edee16d3932525e4b1da9f84009e1fbb13b` accounts for dispatcher processes
+  but has no main-selected queue intent covering the interval before dispatch
+  claims its slot. Normal review can start code and prose lanes concurrently
+  and retries a short zero-token failure, neither of which licenses treating
+  an uncertain launch as absent. The amendment adds shared durable tickets,
+  conservative two-slot review reservations and adoption holds, with default
+  admissions off and a ten-worker recovery ceiling. Process counts and test
+  fixtures remain distinct from server admission evidence. This session
+  (`orc-257-20260906-01`) changes branch source only: production history
+  reconciliation, deployment, exact-head PR CI and independent review are
+  separate operator gates; no reviewer may be spawned in this session.
+
 ## 2026-09-06 — PR 195 B7-authorized exact-head recovery
 
 - Session `orc-113-20260906-08` resumes the existing recovery author thread
@@ -5131,6 +5147,48 @@ with provenance under results/telemetry/model-comparison/, without policy change
 or a causal latency/quality claim. Boundary report5556912589 was posted once for
 the previous04:30 observation;247<-237 native dependency is recorded.
 
+## 2026-09-06 - PR269 first-review repair
+
+- Session `orc-257-20260906-04` repairs only F1-F3 from the independent
+  `reviewer-pr269-20260906-01` review of `799cd3d`. Primary `gh_common` confirmed
+  the exact findings and actual base `b7705e02ef143e605981839009646c509f7df2ca`.
+  The normal base merge conflicted only in this append-only incident log;
+  both sides' entries and all incoming owner/research paths are retained.
+- F1 canonicalizes dispatch paths before lock derivation and router identity
+  comparison. Fixtures exercise alias exclusion and valid ticket claims, plus
+  the actual dispatcher's canonical working directory. F2 reads refusal/retry
+  evidence only from structured error events and recognized diagnostic lines.
+  Clean numeric summaries, names, paths and quoted incident/tool output do not
+  hold admissions; actual refusals and uncertain launches still do. F3 preserves
+  `MIPSTARRE_LAKE_ROOT` in both queue launch environments, retaining the existing
+  dispatch validation and restricted external-directory grant.
+- The four new reproducer executions first failed on the old implementation
+  (three assertion failures and the missing Lake-root key). Repaired focused
+  suites passed 48 tests in 17.300 seconds, then 50 in 20.531 seconds after
+  consolidation. The full suite passed 555 tests in 49.559 seconds. Python AST,
+  Bash syntax, whitespace and installed-hook checks passed. The cumulative
+  nontelemetry patch is 999 added/deleted lines against actual base b7705e02,
+  without a budget override. Space comes from reusing the existing durable
+  atomic writer, consolidating protocol exposition, and removing source-string
+  assertions and repeated checks whose shell gate fixtures remain present.
+- Preserve the original 577-test pass and consolidated 555-test pass from
+  session -03 (51.243 seconds), without treating these reruns as a new episode.
+  Primary `sessions.jsonl` lines 792 and 809 retain sessions -01/-02 as failed,
+  exit 124, 1800/1200 seconds; line 812 retains -03's 743 seconds. No historical
+  usage, attempted launch, proof budget, or causal model comparison is reset.
+- After the reported credential rotation at 06:25:50.728251Z, this session
+  produced the concrete fixes and passing fixtures above. GitHub reads through
+  the existing process-local SOCKS route succeeded without an access error.
+  No credential contents were inspected. Existing registry rows 814-825 show
+  completed useful sessions alongside three timed-out sessions; their starts
+  straddle the rotation, so this is not evidence attributing recovery to it.
+  A read-only registry diagnostic initially rejected a legacy timestamp format;
+  parsing the documented timezone format succeeded without changing records.
+- Checked publication and detached canonical CI are the remaining author gates;
+  independent second review and main's disposition remain external to this
+  session. No deployment, reviewer/subagent launch, primary-main write, provider
+  probe, or merge-to-main action is authorized here.
+
 ## 2026-09-06 - PR195 refresh against the actual PR262 merge
 
 - Session `orc-113-20260906-09` verified through `gh_common.py` that PR262
@@ -5147,3 +5205,74 @@ the previous04:30 observation;247<-237 native dependency is recorded.
   `~/.cache/mipstarre-dev/recoveries/orc-113-20260906-09/`. CI uses the normal
   14400-second build-lock wait. This entry does not assert publication or CI
   success before those operations finish. No additional review is launched.
+
+## 2026-09-06 - PR269 final base refresh before second normal review
+
+- Session `orc-257-20260906-05` merges actual PR195 commit
+  `928328ff4d45e5fdc2844b120329a2c241a3a58a` into repaired PR269 parent
+  `6ca89e8280e7b41c5950d252fc8d962890ab5e80`. Only this incident ledger
+  conflicted; both parents' complete line sequences remain in order.
+- All eleven queue source, test, and documentation blobs remain exact; all
+  seven incoming mathematics and blueprint blobs equal PR195. The complete
+  nontelemetry patch is identical and remains 999 lines. Evidence is in
+  `results/telemetry/pr269-pr195-base-preservation-20260906.md`.
+- This is bounded completion of the existing episode, whose nominal two-hour
+  window was already exceeded. Historical failures, test costs and usage remain
+  cumulative; no time reset or infrastructure override is used. Changed full
+  telemetry patches are not represented as automatic review carry-forward.
+  Checked publication and detached CI are the requested author gates; main
+  retains second normal review, terminal disposition and deployment ownership.
+- The first checked-push invocation occurred before the asynchronous merge
+  commit command had completed. It refused the still-staged working tree at
+  `6ca89e8` before opening push transport. The commit subsequently completed
+  normally as `9f6df07`, including both merge-loss guards and all commit audits.
+  The commit-object audit issued during that wait checked the old HEAD and is
+  not evidence for the refresh; a new audit checks `9f6df07` explicitly.
+  Publication is retried only after the completed command and a clean checkout.
+- The next normal pre-push gate stopped because the private build tree lacked
+  incoming PR195 module `WinImplications.Approx.olean`. The source was intact;
+  the gate opened no push transport. A targeted
+  `lake build MIPStarRE.QPBT.Observables.WinImplications` prepares the incoming
+  module dependencies before retrying the same gate. No full build, shared-cache
+  write, source repair, or hook bypass is used for this preparation.
+- The targeted build completed successfully, retaining the three existing
+  public-wrapper `sorry` warnings. The following normal publication attempt
+  passed all six incoming-file Lean checks and progressed through statement
+  audits and blueprint rendering before session -05 reached its 600-second
+  timeout. On continuation, no publication process remained and GitHub still
+  reported `6ca89e8`, so publication was not claimed as successful.
+- Main authorizes session `orc-257-20260906-06` for one further bounded
+  600-second completion continuation. Primary session registry row 839 records
+  -05 as failed, exit 124, 600 seconds; rows 792/809/812/828 retain the earlier
+  1800/1200/743/1114 seconds. These 5457 prior session seconds remain cumulative,
+  and zero final usage fields on timed-out captures do not imply zero cost.
+  This continuation retries normal checked publication using the prepared
+  private artifacts and detaches canonical exact-head CI with a 14400-second
+  full-build-lock wait. Proxy settings apply only to publication and CI child
+  commands. No implementation, review, merge-to-main or deployment is added.
+
+## 2026-09-06 - PR269 second-review missing-evidence HOLD repair
+
+- Main authorizes `orc-257-20260906-07` for only F1 of second normal review
+  `5124610152` at `523cf79c25139e6de29f62e1be43f6955d29a453`. The old
+  refresh scan omitted previously observed files once they disappeared. A
+  regression with a live launcher and another queued packet failed on the
+  reviewed source because one new process launched instead of zero.
+- Refresh now checks saved evidence paths as well as discovered files before
+  admission, using the existing observer and exception-to-HOLD handling. The
+  three-line regression preserves every existing test line. The cumulative
+  nontelemetry patch is exactly 1000 lines: 971 additions and 29 deletions.
+  All other source and incoming PR195 blobs remain unchanged, with actual
+  `928328ff4d45e5fdc2844b120329a2c241a3a58a` still the ancestor base.
+- Nine queue tests passed in 3.104 seconds; all 555 existing tests passed in
+  50.079 seconds. Both log and capture disappearance after restart produced an
+  actual HOLD file and zero new admissions while retaining ticket and cursor.
+  Exact source/test hashes and reproduction evidence are recorded in
+  `results/telemetry/pr269-terminal-f1-repair-20260906.md`.
+- Preserve 5858 seconds across the six prior implementation/publication
+  executions, plus the separately recorded 628/634-second model reviews.
+  Their timeouts, raw captures, original proof budgets and B8 anchor are not
+  reset. This is the single main-authorized bounded 900-second correction.
+  Both model-review rounds are exhausted; main retains terminal disposition
+  after normal publication and detached CI. No third review, automatic adverse
+  override, deployment, probe or merge is performed by this author session.
