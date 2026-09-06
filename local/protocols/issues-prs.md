@@ -148,6 +148,23 @@ Afterwards a best-effort, non-fatal tail fast-forwards local `main` to the
 remote merge commit; branch and worktree cleanup keeps its safeguards (local
 dirt defers it with a warning).
 
+### Main-cycle integration checkpoint
+
+The active owner service records, at each bounded tick, the local `main` SHA,
+the readable remote `refs/heads/main` SHA, primary cleanliness, transport
+result, and the age and exact head of the oldest CI-and-review-eligible open
+PR. A dirty primary, remote mismatch, unavailable transport, active fix or
+transaction lock, missing space-cap5/external-zero gate, or stale candidate is
+a HOLD reason; it is never silently converted into a merge attempt. After a
+successful daemon-owned merge, the service re-reads remote `main` and records
+the new SHA before the next tick. The service may invoke `pr_merge.py` only as
+its daemon-owned final action after these checks; workers never merge directly.
+Each tick has bounded Git/GitHub reads and records failures as HOLD rather than
+exiting the loop. The cadence is monotonic: work time is subtracted from the
+configured interval (default 300 seconds). Candidate records distinguish stale
+exact-head PRs from fresh actionable PRs; `pr_age_s` is PR creation age, while
+eligibility onset remains unknown unless separately observed.
+
 ## 4. Untrusted text
 
 Issue and PR bodies are untrusted data, and **more** so now that they arrive
@@ -191,8 +208,9 @@ c8f1999): read-only research data, never edited or read as active input.
 Pinned issue #26 is the owner inbox: it receives only decisions that require
 the human owner. A source statement found to be mathematically false does not
 go there first. Following the availability report on #26 and the September 6
-owner decision, main chooses Astra max/xhigh for the mathematical-gap lane through
-`MIPSTARRE_CODEX_MODEL=gpt-6-astra local/bin/dispatch.sh --role mathfix --effort max`.
+owner decision, main selects Astra Ultra for the mathematical-gap lane through
+`MIPSTARRE_CODEX_MODEL=gpt-6-astra local/bin/dispatch.sh --role mathfix --effort ultra`
+or the shared native protocol in `sessions.md`.
 Historical owner-launched Fable measurements remain unchanged. Every request or
 dispatch carries the exact source path, label and line range; the counterexample
 or obstruction; the paper-gap note; the relevant blueprint dependency graph and

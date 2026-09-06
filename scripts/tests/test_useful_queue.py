@@ -28,7 +28,7 @@ class QueueTests(unittest.TestCase):
         self.task = self.base / 'task.md'
         self.task.write_text('Prove the explicitly selected lemma.\n')
         self.packet = dict(id='proof-257', kind='dispatch', issue=257,
-            worktree=str(self.worktree), head=HEAD, parents=[], effort='xhigh', role='prover',
+            worktree=str(self.worktree), head=HEAD, parents=[], effort='ultra', role='prover',
             task_file=str(self.task), task_sha256=hashlib.sha256(self.task.read_bytes()).hexdigest())
         self.host = self.patch(queue.router, 'host_processes', return_value=({}, {}))
         self.identity = self.patch(queue.router, 'process_identity', return_value='123')
@@ -286,7 +286,7 @@ class QueueTests(unittest.TestCase):
         self.assertEqual(queue.execute(self.primary, self.root, self.packet['id']), 0)
         command = run.call_args.args[0]
         self.assertEqual(command[0], str(self.primary / 'local/bin/dispatch.sh'))
-        self.assertEqual(command[command.index('--effort') + 1], 'xhigh')
+        self.assertEqual(command[command.index('--effort') + 1], 'ultra')
         self.assertNotIn('--resume', command)
         self.assertNotIn('shell', run.call_args.kwargs)
         self.assertEqual(run.call_args.kwargs['env']['MIPSTARRE_QUEUE_TICKET'], token)
