@@ -4,7 +4,7 @@
 
 This change proves the four remaining swap identities in
 `MIPStarRE/QPBT/Extraction/Observables.lean` for issue #121. The first four
-observable targets of that issue were already proved by issue #240 / PR #250
+observable targets of that issue were already proved by issue #240 / PR #248
 and are retained without modification. All eight named targets now have
 proofs, but their required publication, CI, review, and merge gates remain
 separate obligations.
