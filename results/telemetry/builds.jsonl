@@ -741,3 +741,4 @@
 {"ts": "2026-09-06T22:58:30+0800", "kind": "ci-build", "trigger": "ci.sh pr=290", "seconds": 93, "outcome": "success", "sha": "671d7343fd9dbe913f1a69d29f6b5995c6fa579b", "note": "branch issue-287-native-ultra-routing"}
 {"ts": "2026-09-06T23:49:07+0800", "kind": "ci-build", "trigger": "ci.sh pr=290", "seconds": 23, "outcome": "success", "sha": "a3eb4d57fb8f6a88c8898daa0fc4b69b6da6b370", "note": "branch issue-287-native-ultra-routing"}
 {"ts": "2026-09-07T01:02:56+0800", "kind": "ci-build", "trigger": "ci.sh pr=254", "seconds": 25, "outcome": "success", "sha": "d5f9dfe4421aa4c82781bdd4a629896eca2b77c9", "note": "branch issue-244-extended-line-game-construction"}
+{"ts": "2026-09-07T01:18:27+0800", "kind": "ci-build", "trigger": "ci.sh pr=254", "seconds": 23, "outcome": "success", "sha": "053e30d60b76d12a79680f88633612cad854b016", "note": "branch issue-244-extended-line-game-construction"}
