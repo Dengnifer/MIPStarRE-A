@@ -1,0 +1,8 @@
+{
+  "recorded_at": "2026-09-06T02:06:47Z",
+  "event": "owner_reasserts_meta_guidance_only",
+  "change": "Withdrew detailed meta task-to-worker directives; task planning and assignment belong to main. Monitoring instructions updated accordingly.",
+  "quota": "Owner removed three outside reservations;11 project workers plus main; queued to main, not yet claimed installed.",
+  "pending_owner_decision": "B7 remains unanswered; no approval inferred.",
+  "pipeline_actions": "none"
+}
