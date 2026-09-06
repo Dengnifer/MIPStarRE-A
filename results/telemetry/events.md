@@ -3271,6 +3271,33 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   parser-valid `F1 — moot:` disposition. The daemon's `pr178.failed` marker is
   retained pending published, verified recovery. Committing recovery telemetry
   before main integration prevents that telemetry from blocking the refresh.
+
+## 2026-09-05 — Incident: astra sessions ran at medium effort
+
+- Debug probes at 22:21Z showed that requesting `model_reasoning_effort=ultra`
+  on `gpt-6-astra` produced a response reporting `medium`; `xhigh` and `high`
+  were honoured as requested. On `gpt-5.6-sol`, `ultra` was honoured as `max`.
+  Consequently, astra sessions from the 15:46Z switch through the 22:25Z
+  handoff boundary ran at provider-reported medium effort even though local
+  configuration and dispatch output said `ultra`.
+- The immediate mitigation requested `xhigh` for astra while retaining `ultra`
+  for sol. Historical astra rows before the boundary must be interpreted using
+  the measured provider response, not their local request string.
+
+## 2026-09-05T22:40Z — Effort downgrade confirmed on both Codex endpoints
+
+- The same probes through the second account at 22:37Z matched the primary
+  endpoint: astra reported `medium` for `ultra` and `xhigh` for `xhigh`, while
+  sol reported `max` for `ultra`. The normalization rule is therefore per model,
+  not per account.
+
+## 2026-09-06 — Owner effort decision
+
+- Owner decision at 2026-09-05T22:45Z: astra requests `xhigh` on both accounts;
+  sol keeps `ultra`. Runtime profile and shim changes are temporary mitigation.
+  Durable dispatcher normalization, guard behavior, and effective-request
+  telemetry are tracked by issue #237. Requested effort must not be reported as
+  provider-measured effort.
 ## 2026-09-05 — PR233 refreshed-head gates green
 - Snapshot20:01:14Z: three workers, load49.85, lanes114/232, zero owner
   blockers. Independently verified PR233 head81bf240484c3 has CI and review
@@ -4109,6 +4136,29 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 - Owner-requested telemetry cleanup, September 5, 2026: removed the lone leftover diff3 constructed-merge-base delimiter from events.md, preserving all real entries on both sides. The owner 22:50Z report predates PR205 merge at23:14:40Z; no PR205 recovery or worker dispatch is performed from this side conversation. Existing staged session captures, handoff messages and telemetry records are retained for a normal telemetry commit and github-sync publication; no hook or integrity gate is bypassed.
 - 2026-09-05T23:17:18Z PR195 fresh-base conflict recurred after the actual PR205 merge223f01a. Previous40cead3 was published, CI-green and independently APPROVED in round4; this is new incoming-main work, not failure of that proof review. Prior orc113 supervisor1962761 is absent and its session is done. Main resumes that completed repair through dispatch.sh at astra/xhigh, delegating conflict preservation, checked publication and CI; terminal review remains main-owned with the cap preserved. No duplicate live lane, expanded scope, new independent triage or hand merge.
 - Telemetry publication validation found20 trailing-whitespace lines in seven archived Markdown handoff/final-report files. Normalized only those flagged lines to satisfy the existing pre-commit whitespace gate; every non-whitespace token and all raw JSONL captures are unchanged. The orphan diff3 delimiter is absent from the staged incident ledger. No hook setting, infrastructure override, worker state or mathematical source was changed.
+
+## 2026-09-06 — PR238 primary relay/max amendment
+
+- Session `orc-237-20260906-02` implements the owner-authorized primary-only
+  relay/Astra-max amendment. Host inspection finds this one project worker,
+  four primary interactive processes (main plus three outside the operation),
+  no secondary project worker, and stopped supervisors 2950602/2950610.
+  The current worker ceiling remains eight; preserved both-mode settings are
+  19/10/9. No process was signalled, no mathematics launched, and no failed
+  marker removed. Issue118 retains seven completed attempts, 12452 working
+  seconds and anchor `2026-09-05T19:24:00Z`; no budget state is rewritten.
+- Refresh commit `34df914` preserves all incoming-only paths; the merge-loss
+  guard passes. Relative to incoming `36805da`, the event ledger adds exactly
+  the branch's 27 lines and deletes none. That incoming commit's intentional
+  historical duplicate cleanup is retained, not mistaken for conflict loss.
+- Focused routing/dispatcher/shim regressions pass without provider calls.
+  The owner shim `codex.astra-max-v3-20260906` and profile are installed by
+  atomic replacement, preserving old files and credential/config hashes.
+  Installation evidence is in runtime
+  `runtime-policy/237-astra-max-20260906/installed.json`. Future main v2,
+  lane v18, daemon v9 and stack-watch v4 are prepared under `/tmp`, not started.
+  Main retains supervisor lifecycle and the independent exact-head review;
+  the branch router is not installed into primary before the normal gates.
 - Issue118 attempt6 completed at857681fc1cc60ec13925b1533c7269fdcf634b28: 14 theorems and3 proof-only definitions for heterogeneous pasting and complete register/answer transport; reported private Lean/axiom/downstream checks pass, no new debt, and clean worktree independently confirmed. Full source sufficiency remains OPEN: actual conditional application, mass restoration, deltaQ specialization and Apply remain. Six completed attempts total 9852 recorded working seconds, original anchor September5 19:24 UTC. Resumed the completed session through dispatch.sh as attempt7/10 at effective astra/xhigh to pursue those exact obligations; no definition/game change or source correction adopted, no duplicate live worker and no #27 micro-update.
 - 2026-09-05T23:31Z PR195 post-PR205 publication preflight found missing incoming build artifacts. The existing repair worker orc-113-20260906-06 remains live and is rebuilding only the affected module without changing source, rather than bypassing checked-push or starting a duplicate full build. Preserve the gate and existing lane ownership; this is a branch-artifact repair, not a new mathematical gap. PR238 is now CI-green at954c1bc and its existing sol lane is starting the standard independent workflow review.
 
@@ -4329,3 +4379,136 @@ records, not new instructions or current operating-state assertions.
 - **Hand-back:** to be recorded here and in `stages.jsonl` when the owner
   says so; the codex main session then resumes from `~/.codex/prompts/goal.md`
   plus the #27 log.
+
+### 2026-09-06 — PR238 publication dependency and host refresh
+
+- Checked publication of `37ec4b4` stopped at the normal Lean gate because
+  the inherited hot snapshot lacks `Sandwich/Pasting/Assembly.olean` from the
+  incoming main proofs. Build that named module, then repeat checked push;
+  no proof statement, hook, or cache-writer policy is changed.
+- At 01:26Z, host reconciliation finds three primary project workers and four
+  primary interactive processes. Main has independently admitted two workers;
+  this session did not dispatch them or modify their mathematical budgets.
+  Their versioned shim's global CLI options motivated a regression ensuring
+  worker classification finds `exec` before the prompt separator, rather than
+  assuming it is the first argument. Main plus three external interactive
+  uses still leave an eight-worker ceiling.
+  The regression also retains a genuine interactive Codex ancestor during a
+  synchronous dispatch: only wrappers are excluded, not other Codex sessions.
+
+## 2026-09-06 — PR238 allocation and review repairs
+
+- Session `orc-237-20260906-03` applies the owner's named interactive-CWD
+  exclusions and the completed independent review's F1–F4. This supersedes the
+  earlier eight-worker allocation, not any historical measurements. Main owns
+  the eleven-worker runtime caps; no excluded process, credential, mathematical
+  work, issue118 charge, PR195 evidence or review cap is changed here.
+- The fixes reject alternate multi-agent enable flags and parent-table
+  overrides; require original snapshot charges plus completed thread segments;
+  inherit and recover continuation provenance across ordinary resumes; and
+  retain a private launch-time snapshot for failed-append recovery. Offline
+  fixtures exercise the quoted 12452 + 2600 = 15052-second boundary, missing
+  legacy resume metadata, replay after budget-file mutation, and eleven slots.
+- Publication, CI, independent review, supervisor lifecycle and any further
+  main refresh remain main-owned; this repair session invokes none of them.
+- At 02:33Z the read-only host check sees four primary workers unchanged and
+  exactly three designated interactives excluded, retaining one main slot.
+  The tested shim is atomically installed as
+  `codex.astra-max-v4-pr238-review-20260906`, SHA-256
+  `d391af18dd881a23b6bf6af618497b03730a6778ad91e260bfc4168d7f93341c`.
+  The previous shim is preserved. Profile and quota-file hashes are unchanged;
+  no credential file is accessed and the unreviewed router is not installed.
+  Runtime evidence: `runtime-policy/237-review-fixes-20260906-03/installed.json`.
+- The first full suite failed eight assertions and one dispatch fixture when
+  concurrent real host occupancy saturated its unisolated temporary router.
+  The production router correctly failed closed. Stub-dispatch fixtures now
+  substitute an empty host view in their private Python launcher; production
+  admission has no test bypass. Host-scanning and quota tests remain explicit.
+
+## 2026-09-06 — PR238 F5 and per-worker effort selection
+
+- Session `orc-237-20260906-04` addresses F5 on reviewed head `64be227` and the
+  owner update recorded at 03:26 UTC: main remains max; main chooses max or
+  xhigh for each new/resumed primary-relay Astra worker. No fan-out, provider
+  probe, account change, publication, CI, review or supervisor action is authorized here.
+- F5 arose because continuation history decoded rows more strictly than account
+  affinity. Both now share the locked tolerant reader; relevant malformed
+  continuation objects still fail preflight. Initial regression-test attempts
+  exposed fixture errors (the copied dispatcher needs its own registry and
+  AGENTS file), not a reason to weaken validation. Existing proof-budget,
+  anchor, completed-segment and replay-snapshot checks remain covered.
+- Omitted effort defaults to max; the only retained alias is ultra → max.
+  Explicit max/xhigh survives dispatcher, review/fix launch and runtime shim;
+  unsupported values fail. Configured effort is not server verification;
+  server-verified effort is unknown without independent existing evidence.
+- The first segment reached its 1200-second bound at 03:47:45 UTC without
+  committing. The primary registry retains `orc-237-20260906-04` as failed,
+  exit 124, wall time 1200, at line 744. Segment `orc-237-20260906-05` resumes
+  the same thread `01a074c1-fec6-7253-b80e-e6350778a094` at 03:51:09 UTC;
+  neither the failed capture nor elapsed time is reset. Both segments were
+  configured max by the dispatcher request; the old registry's absent
+  `requested_effort` is not rewritten or treated as server verification.
+- At 03:47:29.159196 UTC the tested shim was installed through atomic replacement
+  as `codex.astra-effort-v5-pr238-20260906`. Source and runtime SHA256 are
+  `66b0b168bbfb2e89acb776a7ee8f6e8ca2048f05c925a0aa42ecd4f44ab8097b`;
+  previous SHA256 was `d391af18dd881a23b6bf6af618497b03730a6778ad91e260bfc4168d7f93341c`.
+  The prior script is preserved; `.profile` remains unchanged at SHA256
+  `803244914c7ffdb7b2a4d650eef8d0d94d7445e61fe80518a17ea6a369c9947d`.
+  Runtime evidence is under `~/.cache/mipstarre-dev/runtime-policy/237-effort-selection-20260906-04/`:
+  `installed.json` records six offline source/runtime argv comparisons (fresh
+  and resume forms for max, xhigh and legacy ultra), including exact forwarded
+  arguments. The executable was a local fake; this establishes forwarding,
+  not real CLI parsing or relay acceptance. No running shell was edited in
+  place and no unmerged router was installed into primary source.
+- Final focused validation passes 39 tests (`/tmp/pr238-focused-tests.log`),
+  including every role's fresh/resumed effort selection, F5 ordinary-resume
+  preflight with malformed/non-object history and invalid relevant metadata,
+  cumulative continuation charges, legacy provenance recovery, replay after
+  budget mutation, locks, account affinity, capacity and fan-out protections.
+  Overlapping model/effort assertions and fixture branches were consolidated,
+  not replaced by provider probes. Four shell syntax checks, three Python
+  compilation checks and `git diff --check` pass. Against the existing PR238
+  CI manifest's merge base `a61ee557b33a2d8a4721e92b08b6d06dcb69ed57`, the
+  aggregate nontelemetry diff is 787 additions + 212 deletions = 999 lines.
+- Local relay evidence: the sanitized incident at
+  `/tmp/qpbt-meta-20260905-230133/relay-throughput-limit-incident.json` records
+  eleven worker clients plus main at 03:16:48 UTC on September 6, including
+  main's remote-compaction concurrency rejection. Existing session captures
+  independently contain concurrency-error reconnect events: eight in
+  `orc-239-20260906-01.jsonl` (lines 111–137, counters reaching 4/5) and four in
+  `reviewer-pr238-20260906-03.jsonl` (lines 76–91, reaching 3/5), under
+  `~/.cache/mipstarre-dev/sessions/`. Those capture entries have no timestamps;
+  the timestamp above belongs to the incident observation, not each retry.
+  The reported 03:23 refusals and 03:24 supervisor stops are handoff observations,
+  not independently timed measurements made by this session.
+- The router counts process/reservation lifetime, not individual HTTP requests:
+  a worker waiting for tools or reconnecting still occupies its process slot.
+  Compaction is an additional request category observed in the incident, but
+  its overlap, retry timing and provider charging are unknown. The available
+  source checkout is sparse at `94311d447587411789533c47601fd8bc9d81eb48`
+  (August 28); the installed package reports `0.152.1`. Missing core retry and
+  compaction blobs and an unverified source/binary match prevent claims about
+  exact deployed retry defaults. No further research or request-layer change
+  is made. Operators should distinguish successful completions, retries and
+  compaction failures in existing logs rather than infer productive requests,
+  RPM/TPM, server in-flight counts or recovery from process occupancy alone.
+
+## 2026-09-06 — PR 195 B7-authorized exact-head recovery
+
+- Session `orc-113-20260906-08` resumes the existing recovery author thread
+  from published head `c7adb95e1c7f7bdd6b9e971db765e5a53ac4a284`. GitHub main
+  was independently read and fetched at
+  `32a32edee16d3932525e4b1da9f84009e1fbb13b`; no prospective PR 262 merge is
+  treated as published source. The only conflict is this incident ledger,
+  resolved by retaining both parents' records without editing Lean or blueprint.
+- The four-review cap and all existing dispositions remain unchanged. This
+  recovery verifies the seven owned blobs against approved head
+  `40cead390f610d894bb4264e0ca6789753476c6d`, preserves incoming-only paths,
+  and compares the authored nontelemetry patch before normal checked publication.
+  Main owns the B7 terminal disposition; this session publishes no review or
+  adjudication and requests no PR merge or subagent.
+- The machine-wide build lock was held by CI for PR 262 when observed.
+  PR 195 CI uses the normal 14400-second lock wait and is detached rather than
+  holding an idle model session. Runtime preservation, launch, and gate evidence
+  is kept under `~/.cache/mipstarre-dev/recoveries/orc-113-20260906-08/`.
+  This pre-publication incident entry does not assert successful CI completion.
