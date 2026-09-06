@@ -169,6 +169,14 @@ def tick(merge: bool) -> dict:
         record["merge_exit"] = subprocess.run(
             [sys.executable, str(ROOT / "local" / "bin" / "pr_merge.py"),
              str(oldest["number"])], timeout=3600).returncode
+        if record["merge_exit"] == 0:
+            try:
+                record["post_merge_remote_main"] = remote_main()
+                record["post_merge_remote_verified"] = True
+            except Exception as exc:
+                record["post_merge_remote_verified"] = False
+                record["hold_reasons"].append(
+                    f"post-merge remote reread failed: {type(exc).__name__}: {exc}")
     elif not oldest:
         record["hold_reasons"].append("no fresh exact-head CI/review-eligible PR")
     DAEMON.mkdir(parents=True, exist_ok=True)
