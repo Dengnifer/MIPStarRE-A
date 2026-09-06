@@ -4939,3 +4939,64 @@ or new owner disposition is performed by this archival reconciliation.
   is made. Operators should distinguish successful completions, retries and
   compaction failures in existing logs rather than infer productive requests,
   RPM/TPM, server in-flight counts or recovery from process occupancy alone.
+
+
+## 2026-09-06T04:59:15Z — Validated integration recovery and useful replenishment
+
+The unchanged normal gate, invoked only by the designated one-shot recovery
+daemon PID3054930, merged PR238 at2026-09-06T04:44:46Z as
+32a32edee16d3932525e4b1da9f84009e1fbb13b. All nine CI contexts and the fourth/final
+APPROVED review at132caf66ef70ef781256c198011bab11ae7545b5 passed. The daemon
+finished04:44:53Z; that finish time in the initial dispatch briefs was an
+observation boundary, not the GitHub merge timestamp. No fifth review or
+adjudication was used. Primary checkpoint2bb1a67 intentionally remains private;
+its complete history and dirty telemetry were backed up under
+~/.cache/mipstarre-dev/integration-recovery-20260906T044430Z/. The normal
+fast-forward tail refused divergence, without losing local history or warming
+the wrong source. Issue252 now owns a separately gated reconciliation PR;
+issue247 policy integration started only after the actual parent237 merge.
+The old merge/stack supervisors remain stopped because their pre-gate telemetry
+push and direct-GitHub/automatic-adjudication paths are not safe recovery paths.
+
+Useful floor8 was observed04:47:05Z and04:57:16Z, with all eight actual Rust
+clients recording completed useful events and zero concurrency-refusal entries
+in their current captures. It was NOT maintained continuously: completion bursts
+fell to5 at04:52:11Z while repair/review admissions and a failed worktree bootstrap
+were being replaced. A backgrounded AND-list lost the new issue257 checkout
+before nohup; after verifying no git/index-lock holder, the empty stale lock was
+archived and the untouched new checkout restored. No existing worker or branch
+work was reset. Corrected bootstrap is detached as one unit. Issue257 is the
+main-selected bounded useful-admission queue implementation, under normal review
+before installation; its existence is not yet a deployed replenishment service.
+The operational recovery ceiling is now10 within the unchanged allocation11.
+This is staged readmission on project-work evidence, not a measured relay limit.
+
+Completed independent reviews led immediately to concrete repairs: PR254 needs
+public import coverage (orc244 xhigh); PR255 needs shared binary-coordinate
+algebra rather than duplicate proofs (orc246 max). PR250 second code/prose
+review is APPROVED; PR253 first max review is APPROVED; PR248 citation-only F3
+repair has fresh green CI and a third normal xhigh review. PR256 first max
+review follows its actually green CI. Independent source-scout results selected
+issue258 reference-POVM construction (max) and issue259 real polynomial collision
+specialization (xhigh); both use already-merged definitions and do NOT activate
+the held quantitative nonencoding/global-witness tails. No idle or duplicate
+model jobs, provider probes or extra review rounds were launched for sampling.
+
+The cache scout found an outdated but complete hot snapshot, not a failed proof.
+Canonical warming of actual merged32a32ede first failed because the hot clone
+fetched only local heads and that new merge was then only remotely referenced.
+After the legitimate issue257 branch made the source reachable, the SAME
+canonical warmer was rescheduled and began building at04:51:32Z under its normal
+writer lease/full-build lock. No direct cache writes or active-worktree recloning.
+
+Owner clarification remains in force: main selects/decomposes/assigns work; meta
+guides only. Main decides routine blockers before escalation; ALL items already
+in issue26, including B7 and B8, await the human owner. The erroneous delegation
+of existing inbox items remains withdrawn. No change to review cap4, exhausted
+issue118 attempt10/10,19931 seconds, or original2026-09-05T19:24:00Z anchor.
+Main stays max; all workers stay primary/Astra with selected max/xhigh and
+fan-out off. Configured effort is not server-verified effort. Research samples
+and the supplied API-max versus official-Ultra distinction remain preserved
+with provenance under results/telemetry/model-comparison/, without policy change
+or a causal latency/quality claim. Boundary report5556912589 was posted once for
+the previous04:30 observation;247<-237 native dependency is recorded.

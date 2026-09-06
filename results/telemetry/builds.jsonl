@@ -665,3 +665,5 @@
 {"ts": "2026-09-06T12:35:54+0800", "kind": "ci-build", "trigger": "ci.sh pr=254", "seconds": 443, "outcome": "success", "sha": "0aa439066ee2d79c5c78a1a45f14d18530e5d317", "note": "branch issue-244-extended-line-game-construction"}
 {"ts": "2026-09-06T12:36:26+0800", "kind": "ci-build", "trigger": "ci.sh pr=255", "seconds": 152, "outcome": "success", "sha": "fe26d4ab1a19419594619b3e4b984eae2252f64b", "note": "branch issue-246-binary-witness-transport"}
 {"ts": "2026-09-06T12:37:27+0800", "kind": "ci-build", "trigger": "ci.sh pr=250", "seconds": 36, "outcome": "success", "sha": "b349797a6c72c90e605ab87c49d27212509b2609", "note": "branch issue-239-independent-dot-projectors"}
+{"ts": "2026-09-06T12:47:08+0800", "kind": "ci-build", "trigger": "ci.sh pr=256", "seconds": 190, "outcome": "success", "sha": "ba454653ecaa2d92821e9210b15e248c13b9c744", "note": "branch issue-243-extraction-marginal-agreement"}
+{"ts": "2026-09-06T12:50:49+0800", "kind": "ci-build", "trigger": "ci.sh pr=248", "seconds": 25, "outcome": "success", "sha": "471d47678ee91fc7e193c234d2e35ec753b5e623", "note": "branch issue-240-independent-extraction-algebra"}
