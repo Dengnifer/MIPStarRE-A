@@ -4219,3 +4219,17 @@ boundary comment is updated in place with these final supervisor handles;
 no second comment or extra review is created. Implementer supervisor2326711
 remains live under primary/max. Persistent router semantics still await the
 bounded PR238 amendment and normal gates.
+
+- 2026-09-06, issue252 exact-head operational handoff
+  (`orc-252-20260906-01`, resumed as `orc-252-20260906-02`): pre-gate
+  github-sync in `/tmp/merge-v2.sh:42` can invalidate source-head freshness.
+  Fourteen offline fixture tests passed in 2.320 seconds; retained artifacts
+  are under `~/.cache/mipstarre-dev/issue-252-exact-head-v1/`. A private clean
+  checkpoint preserves the ordinary source gate, but writer coordination and
+  authority for post-merge divergent-main reconciliation remain prerequisites.
+  The conditional daemon command, exact hashes, current 9102b74 local tip, and
+  protocol constraints are in the supplied runtime brief
+  `/tmp/qpbt-exact-head-daemon-sequencing-20260906.md`. The prior attempt timed
+  out at 900 seconds with token usage unavailable; its documentation patch
+  failed and was not installed. No production helper/gate/protocol was changed;
+  no real ref, gate, publication, supervisor, review, or B7/B8 action occurred.
