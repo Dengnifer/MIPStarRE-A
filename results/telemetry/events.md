@@ -5222,3 +5222,10 @@ the previous04:30 observation;247<-237 native dependency is recorded.
   telemetry patches are not represented as automatic review carry-forward.
   Checked publication and detached CI are the requested author gates; main
   retains second normal review, terminal disposition and deployment ownership.
+- The first checked-push invocation occurred before the asynchronous merge
+  commit command had completed. It refused the still-staged working tree at
+  `6ca89e8` before opening push transport. The commit subsequently completed
+  normally as `9f6df07`, including both merge-loss guards and all commit audits.
+  The commit-object audit issued during that wait checked the old HEAD and is
+  not evidence for the refresh; a new audit checks `9f6df07` explicitly.
+  Publication is retried only after the completed command and a clean checkout.
