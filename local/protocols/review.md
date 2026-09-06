@@ -283,8 +283,9 @@ unchecked-finding regex of `issues-prs.md` §2, `^\s*[-*]\s*\[ \]`, applied to
 the marker-bound review body for the head SHA; no match means the ledger is
 clean, and the paired `local-review/summary` status must agree.  Anything else
 must be resolved, outdated, or adjudicated by the operator under §12 (Round cap
-and operator adjudication) — the operator is the adjudicating party; the owner
-is consulted only for the escalations named in the standing briefing.  Owner
+and operator adjudication) — main is the adjudicating party; the human owner
+is consulted only for actual access/permission blockers requiring human action
+(`issues-prs.md` §6, owner decision 2026-09-06T05:05Z). Owner
 decision 2026-09-02 (EVOLUTION.md): this supersedes the GitHub-era "never merge
 without consulting the user" rule of `docs/pr_review_management.md` for this
 repository; the substantive review criteria are unchanged.
@@ -292,8 +293,8 @@ A PR that touches only the workflow layer (`local/`, `.githooks/`,
 `scripts/tests/`, `docs/`, telemetry) is adjudicated after its SECOND round
 because reviewer rounds on scaffolding did not converge (events.md
 2026-09-03); a further review is still permitted when the head changed (an
-adjudication needs an exact-head review), but it is churn the owner's
-watchdog reports.  Mathematics PRs keep the four-round cap above.
+adjudication needs an exact-head review) within the four-round ceiling, but it
+is churn the owner's watchdog reports. Mathematics PRs keep the same ceiling.
 
 Findings do **not** survive across SHAs.  Gate 4 matches the marker
 `<!-- mipstarre-review pr=N head=SHA -->` on that exact commit id, so a ledger
@@ -409,8 +410,11 @@ Untouched-code or new-mechanism findings are "out of scope -> issue #N".
 
 ## 12. Round cap and operator adjudication (2026-08-30)
 
-A PR receives at most **four** full review rounds. From the fifth round on,
-the operator may close the loop by adjudication instead of iteration:
+A PR receives at most **four** full review rounds. After the fourth, main must
+choose terminal disposition rather than dispatch a fifth full review. Workflow
+PRs normally reach adjudication after two rounds (§9). The cap is an operator
+admission rule: a script warning or `--force-review` is not permission to exceed
+it. Adjudication requires the existing exact-head evidence and gates:
 
 1. every remaining finding is either fixed, or converted to a tracked issue;
    the operator posts an **ADJUDICATION comment** on the PR — a body starting
@@ -427,6 +431,17 @@ Nothing is dropped silently: an adjudicated finding lives on as an issue.
 This mirrors the parent's combined bot-fix iteration cap with a single
 terminal review (pr-review.yml:69-72). See EVOLUTION.md for the trigger.
 
+The 2026-09-06T05:05Z owner decision explicitly withdraws the earlier human hold
+on posted B7/B8. Main may disposition B7 only after verifying the actual final
+head's CI, review and finding evidence under this protocol. This transfers
+decision authority, not review authorship: an author never reviews its own diff.
+No missing evidence may be invented, and no review from a different patch may
+be relabeled as current. If the cap is reached and exact-head evidence is absent,
+keep the gate blocked for main's internal disposition; neither a fifth full
+review nor a permission/CI/proof/merge bypass is authorized. Only actual access
+or permission needing human action goes to #26. This amendment itself publishes
+no B7 disposition and claims no review or proof result.
+
 ## 13. Evidence follows the diff: carry-forward across a fresh-base (2026-09-04)
 
 The merge gate's fresh-base rule (issues-prs.md, gate 2b) moves a PR's head
@@ -442,4 +457,6 @@ review is not a review round and is never itself a carry source), and posts the 
 `local-review/summary` — without dispatching the reviewer.  Adverse verdicts
 are carried too, so an adjudication at the new head remains possible.  Any
 change to the patch (a repair, a conflict resolution) yields a different
-patch-id and a real review.  `--force-review` bypasses the fast path.
+patch-id and requires a real review within §12's cap; at the cap, missing
+exact-head evidence remains blocked. `--force-review` bypasses the fast path,
+not the cap or any evidence requirement.

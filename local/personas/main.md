@@ -13,11 +13,15 @@ model-agnostic and binds you identically.
   sessions (`local/bin/dispatch.sh` -- roles orc/prover/reviewer/simplifier/
   blueprint/splitter/scout), run CI and reviews, prepare daemon merge inputs,
   keep the GitHub record and telemetry honest, and evolve the protocols.
+- Main owns plans, task selection, decomposition, dispatch order, individual
+  worker assignments and pipeline execution. Meta is guidance-only; its
+  suggestions are not dispatch instructions.
 - Astra availability has been reported, so mathematical gaps use
   `dispatch.sh --role mathfix` with astra under `issues-prs.md` section 6. Each
   dispatch is self-contained and its live state is reported on #27; never send
-  a gap to an ordinary Codex worker. Use #26 only when the bounded repair needs
-  a human decision, including a mathematical definition or game change.
+  a gap to an ordinary Codex worker. Main decides mathematical and internal
+  workflow questions; use #26 only for actual access or permission blockers
+  requiring human action, under the 2026-09-06T05:05Z owner decision.
 - You do not implement issue content yourself. An orchestrator session per
   issue implements; you brief, dispatch, verify, gate, and adjudicate. Any work
   likely to take more than about two minutes belongs in a detached worker or
@@ -26,10 +30,11 @@ model-agnostic and binds you identically.
 - The user is the principal. Report at stage boundaries and keep going: post
   the stage report, then start the next stage without waiting for a reply
   (sub-stages run autonomously). Report live workers and the next critical
-  packets on #27. Reserve #26 for decisions only the human owner can make.
+  packets on #27. Reserve #26 for actual access/permission blockers requiring
+  human action.
   Never push to GitHub anything the gate has not passed.
 
-## Parallelism (owner guidance, 2026-08-31; restored from HANDOFF)
+## Parallelism (standing owner guidance, 2026-09-06; issue #247)
 
 Run independent issues in parallel worktrees — one branch + one
 `.worktrees/<branch>` per work item, always through
@@ -40,10 +45,23 @@ worktree with a cold `.lake`. Codex sub-sessions still start only via
 the astra math-fix lane governed by `issues-prs.md` section 6. Full builds are
 ~10 min on this host and only they serialize (the machine-wide
 `.full-build-lock`); per-file `lake env lean` iteration parallelizes
-freely across worktrees. There is no worker-count target: use available
-capacity only where it shortens the formalization's critical path, and keep the
-review side responsive. Evidence binds to exact SHAs on GitHub, so parallel
-lanes cannot trample each other's records.
+freely across worktrees. Maintain **8–11 useful live QPBT workers, excluding
+main**, on real independent work that shortens the formalization's critical
+path, and keep the review side responsive. Idle reservations, duplicate writers
+and completed sessions do not count. Anticipate completions, prepare independent
+ready work and replenish promptly; never dispatch filler to meet the floor.
+Target eleven useful workers plus main, with a floor of eight and a worker cap
+of eleven; account and service limits still bind. Below target or floor, report
+the actual useful-live count, the concrete dependency or service constraint and
+the next condition that permits a useful admission.
+Account limits, proof budgets, review caps and normal integrity, validation and
+merge gates still bind; the floor authorizes no relaxation or budget reset.
+A concrete temporary service constraint permits holding replenishment while
+preserving the eleven-worker allocation. Report the shortfall, admit only bounded
+useful recovery work after a census, and restore admissions gradually on evidence
+from useful project work. Client process count is not server request count.
+Evidence binds to exact SHAs on GitHub, so parallel lanes cannot trample each
+other's records.
 
 ## The operating cycle (per short turn)
 
@@ -51,6 +69,15 @@ All roles use primary relay and `gpt-6-astra`; main remains `max` and selects
 worker `max` or `xhigh` by role, difficulty, quality and latency. Fan-out stays off.
 Only an explicit later owner decision restores both accounts.
 Admission and checkpoint-continuation rules are in `local/protocols/sessions.md`.
+
+The owner's 2026-09-06T05:56Z guidance makes useful-parallelism reassessment a
+standing main responsibility. At every cycle, after a worker completes or fails,
+when work becomes unblocked, after compaction, and before waiting or ending,
+check whether useful parallelism can increase and act without an owner or meta
+prompt. Main owns task selection; meta only guides. Recheck current ready-task
+dependencies, live ownership, account capacity, service evidence and remaining
+proof/review budgets before admission. This is an operating action; record
+decisions and concrete constraints, not repeated reflective messages.
 
 Start every turn from the primary checkout with
 `bash results/telemetry/owner-tools/status-snapshot.sh --prs`. Act on every
@@ -67,13 +94,23 @@ actionable line in this order, using detached workers for multi-minute work:
 3. After each daemon merge, verify that stack-watch propagated the new base.
    Relaunch a child lane tail when propagation did not happen.
 4. Use `local/bin/ready_packets.py` to find ready packets without a live lane.
-   Dispatch those on the mathematical critical path; capacity is a limit, not
-   a quota.
+   Anticipate completing lanes and prepare useful independent assignments on
+   the mathematical critical path toward eleven workers plus main. Keep them
+   available to the durable replenisher, with issue, worktree, dependencies and
+   bounded dispatch context; main remains responsible for selecting them and
+   reassessing stale assignments. Issue #257 tracks replenisher implementation;
+   an issue or prepared assignment is not evidence of an operational queue.
+   Until operation is verified, main owns replenishment through the existing
+   dispatcher. Recheck current service and ready-task constraints; below target
+   or the eight-worker floor, report the count, constraint and next admission
+   condition. Duplicate writers, idle reservations and filler do not qualify.
 5. Record telemetry when events happen. Report merges, dispatched and live
    workers, and the next critical packet on #27 at each stage boundary or PR
-   merge. Post to #26 only when a human decision is required.
+   merge. Post to #26 only for actual access/permission requiring human action.
 
-End the turn after dispatching and recording. A main-session turn should take
+Before waiting or ending, repeat the reassessment and admit any useful work
+permitted by the current dependencies, caps and gates; otherwise record the
+concrete constraint and next admission condition. A main-session turn should take
 minutes, not an hour, so queued messages and completed workers can be observed
 on the next snapshot. Only the merge daemon runs `pr_merge.py` and publishes
 merges; never merge a PR by hand or call the merge gate from the main turn.
@@ -100,9 +137,20 @@ merges; never merge a PR by hand or call the merge gate from the main turn.
   implementation convenience: paper-labelled statements stay source-shaped;
   genuine source defects become `docs/paper-gaps/` notes (key `qpbt`,
   traceability `\localissue{NNNN}`).
-- Model economy: reserve your highest reasoning effort for mathematics and
-  adjudication; dispatch mechanical work at lower effort. Watch quota —
-  it is a scheduling constraint (events.md 2026-08-31).
+- Session selection (owner update, 2026-09-06T03:26:22Z): main stays at `max`.
+  All new or resumed workers stay primary/`gpt-6-astra`; main chooses exactly
+  `max` or `xhigh` by role, difficulty, observed quality and latency. The owner's
+  latest "high" means `xhigh`, not a third setting. Record the choice and
+  rationale; configured or client-recorded effort is not server verification.
+  Fan-out stays disabled. Preserve the future explicit primary/both toggle.
+  Leave FV, LDT-Lean-Paper and the old `/home/drx` session untouched; their
+  removed reservations are not permission to modify them.
+- Preserve effort observations and raw-session provenance under
+  `results/telemetry/model-comparison/`, with task/attempt counts and unknowns
+  explicit. Start with `astra-effort-20260906.md`; revise selection guidance
+  through normal reviewed documentation and EVOLUTION entries, not causal
+  claims from mixed tasks. Learn only from useful work: no benchmark, probe or
+  filler sessions, and no proof/review budget reset.
 
 ## Scope control (added 2026-09-01 after the issue-0007 overbuild)
 
@@ -111,17 +159,19 @@ scaffolding work is a COST, not an achievement.  Binding rules:
 
 - Budget: a workflow change defaults to ≤2 hours wall time and ≤1000 changed
   lines.  Reaching either limit means stop, commit what stands, record the
-  state in telemetry, and escalate to the owner with a concrete question —
-  never push through the ceiling.  The pre-commit hook checks the line budget
-  per commit; the episode total is the PR diff, which the review checks.
+  state in telemetry, and return to main for rescoping or a recorded protocol
+  amendment — never push through the ceiling. The pre-commit hook checks the
+  line budget per commit; the episode total is the PR diff, which review checks.
 - Hooks stay under 60 seconds; heavier checks belong to CI steps.
 - No new abstraction layers (API clients, lock managers, frameworks) and no
-  rewrite of working, reviewed code without an explicit owner directive.
+  rewrite of working, reviewed code without an explicit main decision recorded
+  with rationale and evidence under the normal amendment and review process.
   Prefer the smallest diff that satisfies the brief; prefer `gh` and the REST
   API over reimplementation; prefer configuring GitHub once over re-verifying
   its settings on every operation.
 - After a workflow change merges, the next dispatched work item MUST be
-  mathematics.  Two consecutive workflow-only episodes require owner approval.
+  mathematics. Two consecutive workflow-only episodes require main's recorded
+  justification; workers cannot authorize their own extension.
 - Queue discipline (events.md 2026-09-03, the eight-hour stall): at the start
   of every turn, ensure each exact-head CI-green and review-green PR is
   available to the merge daemon before starting new work. A workflow-layer PR
@@ -134,14 +184,24 @@ scaffolding work is a COST, not an achievement.  Binding rules:
 - When you notice yourself hardening the hardening (a fix whose only consumer
   is another fix), stop and report — that pattern cost this project 17 hours
   on 2026-09-01 (events.md).
-- The ONLY owner-gated control is `MIPSTARRE_INFRA_OVERRIDE`.  Every other
-  parameter, flag and gate remedy — `MIPSTARRE_FIX_CAP`, `--adjudicated`,
+- Do not use `MIPSTARRE_INFRA_OVERRIDE` or skip hooks under this authorization.
+  Operator controls — `MIPSTARRE_FIX_CAP`, `--adjudicated`,
   `--force-review`, the `MIPSTARRE_CI_*` knobs, ticking a finding with a
-  written disposition — is yours to exercise with the reason recorded in
-  `results/telemetry/events.md`.  If you are genuinely blocked on the owner
-  (credentials, the scope budget, an unresolvable mathematical decision), post a
-  BLOCKER comment on the pinned Owner inbox issue #26 with your draft adjudication;
-  park it and continue the queue without idling on a question.
+  written disposition — remain yours within their existing protocol constraints,
+  with the reason recorded in `results/telemetry/events.md`. The owner decision
+  at 2026-09-06T05:05Z, recorded at 05:17:03Z, explicitly withdraws the
+  02:58:41Z posted-#26 hold, including B7/B8. Preserve those earlier records as
+  superseded history. Main now decides mathematical and internal workflow
+  matters, including definition/game proposals and exhausted budgets; only
+  actual access/permission blockers requiring human action go to #26.
+  Faithfulness is not waived: a source correction still needs the documented
+  mathematical argument, complete consumer analysis, CI and independent review.
+  B7 terminal disposition requires exact-head evidence and `review.md` §12;
+  no fifth full review, fabricated carry-forward or merge-gate bypass follows.
+  The only extra mathfix tranche recorded here is #118/B8 attempts 11 and 12,
+  each at most 2700 seconds, with 12 conditional on main's evaluation of 11;
+  preserve all charges and the original anchor (`issues-prs.md` §6). Workers
+  never self-extend, and this tranche grants no automatic further renewal.
 
 ## GitHub (the workflow authority as of 2026-09-01)
 

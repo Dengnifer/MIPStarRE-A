@@ -751,6 +751,48 @@ with #26 reserved for human decisions.
 advances in parallel, failed lanes receive prompt recovery, and merge authority
 and owner escalation stay unambiguous.
 
+## 2026-09-06 — Align the useful-worker floor and posted owner decisions
+
+**Trigger:** `results/telemetry/events.md` 2026-09-06, "Standing worker floor
+and posted-inbox policy drift (#247)", and the owner correction recorded at
+2026-09-06T02:58:41Z, withdrawing the 02:55:29Z delegation.
+
+**Change:** `local/personas/main.md` assigns plans and execution to main, with
+meta guidance-only, and states the 8–11 useful-live-worker floor excluding main,
+completion anticipation, prompt replenishment and honest constraint reporting.
+It aligns session guidance with primary/gpt-6-astra/max and fan-out disabled.
+`issues-prs.md` §6 distinguishes routine decisions before escalation from every
+already-posted #26 item, including B7, which must await the human owner.
+Mandatory escalations, proof budgets, account limits and all gates remain intact.
+
+**Expected effect:** sustain useful parallel work without filler or inferred
+owner approval. This is a documentation-only proposal on the issue branch, not
+an unreviewed installation into main; the owner correction already applies via
+standing guidance. Normal publication, CI, independent review and merge remain
+required outside this session.
+
+## 2026-09-06 — Select worker effort from useful-work observations
+
+**Trigger:** `results/telemetry/events.md` 2026-09-06, "Owner-selected effort
+and bounded initial comparison (#247)", the 03:26:22Z effort correction and
+03:36:00Z research priority in
+`results/telemetry/model-comparison/owner-priority-20260906.md`.
+
+**Change:** `local/personas/main.md` and `issues-prs.md` retain main at `max`
+while main selects `max` or `xhigh` for new/resumed primary Astra workers.
+They preserve the useful-worker allocation with honest temporary service
+constraints and require evidence-led, normally reviewed refinement. The initial
+`results/telemetry/model-comparison/astra-effort-20260906.md` and JSON dataset
+separate two useful review attempts from six historical configuration probes;
+neither project attempt has server-verified effort. No historical row is changed.
+
+**Expected effect:** preserve auditable effort/quality observations without
+inferring causal effects, inventing missing usage, or relaxing proof/review
+budgets. This supersedes only the earlier mandatory-max worker clause, not the
+main/meta, floor or posted-inbox authority boundaries. Issue #237 retains its
+README/runtime work; reconcile overlapping policy edits through normal
+integration only after PR #238 actually merges, never by installing this draft.
+
 ## 2026-09-06 — Normalize astra effort requests to xhigh
 
 **Trigger:** `results/telemetry/events.md` 2026-09-05, "Incident: astra sessions
@@ -806,6 +848,70 @@ sessions, and no budget reset or provenance loss across resumes or append failur
 omitted/legacy ultra map to max, other values fail. Shared history parsing tolerates
 non-record damage but validates relevant continuation metadata; budget rules persist.
 **Expected effect:** ordinary resumes recover, explicit xhigh survives, verification stays honest.
+
+## 2026-09-06 — Integrate standing policy after the routing merge
+
+**Trigger:** `results/telemetry/events.md`, "Issue247 integration after actual
+PR238 merge", and the assignment following GitHub merge `32a32ede`.
+
+**Change:** the issue branch preserves both parents' amendment histories and
+reconciles `issues-prs.md` with the now-active Astra mathfix lane. Main retains
+max/xhigh worker selection, the eleven-worker cap, useful-floor constraints and
+human authority over every posted #26 item, explicitly including B7 and B8.
+The comparison README restricts historical claims to the six recorded probes;
+an integration note links the byte-preserved API/Ultra finding and original
+meta role correction without changing policy or research sample counts.
+
+**Expected effect:** a normal PR can review the standing-owner alignment against
+the actual routing merge without importing private primary history, changing
+runtime code, inferring server effort or bypassing CI/independent review.
+
+## 2026-09-06 — Access-only escalation and bounded main authority
+
+**Trigger:** `results/telemetry/events.md`, “Access-only owner escalation
+supersedes posted B7/B8 holds”, records the owner decision at 05:05Z, received
+at 05:17:03Z, and the explicit main tranche supplied to `orc-247-20260906-04`
+for issue #247/PR #260. This supersedes the 02:58:41Z posted-inbox hold; earlier
+entries remain historical evidence, not current policy or retroactive consent.
+
+**Change:** main/mathfix/orchestrator personas and issues-prs/sessions/review/
+meta/autofix protocols route mathematical and internal workflow decisions to
+main, including posted B7/B8; only actual access/permission blockers needing
+human action go to #26. Main records rationale and evidence; workers do not
+self-extend. The ordinary ten-attempt/about-one-and-a-half-working-day limit
+remains. The explicit #118 exception is attempts 11/12 at most 2700 seconds
+each, with 12 conditional on main's evaluation of 11, preserving the supplied
+ten attempts/19931 completed seconds and 2026-09-05T19:24:00Z anchor. No new
+tranche or reset is automatic. Unchanged continuation checks still reject
+changed historical limits; authorized new dispatches carry the complete ledger.
+B7 disposition still requires exact-head CI/review/finding evidence, with no
+fifth full review or forged carry-forward. Definition/game proposals return to
+main without weakening the mathematical correction and independent-review bar.
+
+**Expected effect:** obsolete human holds no longer stall internal decisions,
+while normal hooks, proof integrity, review caps and exact-head merge gates
+remain binding. No runtime routing changes, primary-main installation,
+subagents, new research samples, proof claims or merges are part of this
+amendment; the useful-worker floor/cap and effort-selection history are retained.
+
+## 2026-09-06 - Make useful-parallelism reassessment a standing main duty
+
+**Trigger:** `results/telemetry/events.md`, "Standing autonomous
+useful-parallelism reassessment", records the 05:56Z owner guidance supplied to
+`orc-247-20260906-06` for #247/PR #260.
+
+**Change:** `local/personas/main.md` integrates reassessment into every cycle,
+completion/failure, newly unblocked work, compaction and pre-wait/end decision;
+`issues-prs.md` states the same responsibility. Main acts without owner/meta
+prompts, targets eleven useful workers plus main with floor eight, and keeps
+bounded useful assignments available to the durable replenisher. Below target
+or floor, report current count, concrete constraint and next admission condition.
+Queue #257 remains an implementation issue whose operation requires evidence.
+
+**Expected effect:** timely useful replenishment and explicit admission
+constraints without duplicate work, idle filler or repeated reflective messages.
+The 05:05Z access-only authority, historical records, primary/Astra policy,
+fan-out prohibition, budgets, caps and exact-head gates remain binding.
 
 ## 2026-09-06 — Main-selected useful-work queue with adoption holds
 

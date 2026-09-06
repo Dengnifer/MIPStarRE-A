@@ -30,11 +30,13 @@ that dispatches other sessions. Runtime state lives in `~/.cache/mipstarre-dev/`
    paper label being formalized and never authorizes adding a bridge, residual,
    repair, package, producer, or generic hypotheses bundle to it. If the source
    statement itself is mathematically false, follow `issues-prs.md` section 6.
-   Until the astra poller reports availability on #26, give the Codex main
-   session a self-contained request for the owner session's Fable 5.1 lane on
-   #27; do not dispatch an ordinary Codex worker. Afterwards, use astra through
-   `dispatch.sh --role mathfix`. Escalate immediately only when a mathematical
-   definition or game must change.
+   Astra availability has been reported; use primary Astra through
+   `dispatch.sh --role mathfix`, with main-selected max/xhigh and the cumulative
+   budget required by `issues-prs.md` §6. Do not use an ordinary prover for a
+   source defect. Return definition/game proposals or exhausted budgets to main;
+   only actual access/permission blockers requiring human action go to #26.
+   The 2026-09-06T05:05Z owner decision supersedes the posted B7/B8 holds without
+   erasing their history or relaxing faithfulness, review caps or exact-head gates.
 4. **Validation ladder**, for your checks and every instruction you write:
    `lake env lean <file>` → `rg -n "sorry|axiom" <file>` → `lake build` only
    when the change is stable. Single-file checks need no lock; a full build

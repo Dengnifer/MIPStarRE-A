@@ -4268,6 +4268,61 @@ no second comment or extra review is created. Implementer supervisor2326711
 remains live under primary/max. Persistent router semantics still await the
 bounded PR238 amendment and normal gates.
 
+## 2026-09-06 — Standing worker floor and posted-inbox policy drift (#247)
+
+- **Symptom:** `local/personas/main.md` says there is no worker-count target
+  and recommends lower effort for mechanical work; the persona and
+  `issues-prs.md` do not distinguish routine unposted decisions from items
+  already awaiting the human owner in #26.
+- **Diagnosis:** the standing owner guidance requires 8–11 useful live QPBT
+  workers excluding main, with main owning plans and meta advising only. The
+  correction recorded at 2026-09-06T02:58:41Z withdraws the 02:55:29Z delegation:
+  every already-posted #26 item, including B7, must await the human owner.
+  Issue #247 records this bounded documentation alignment.
+- **Fix:** session `orc-247-20260906-01` drafts the main-persona and
+  issues/PR-protocol alignment with its EVOLUTION entry on the issue worktree.
+  The draft preserves proof budgets, integrity gates and mandatory escalations;
+  it changes no router, credentials, runtime scripts or inbox disposition.
+  No unreviewed policy is installed into main; the owner correction already
+  applies through standing guidance. Publication, CI, independent review and
+  merge are outside this session's scope.
+- **Lesson:** replenish useful independent work ahead of completions and report
+  concrete constraints honestly; concurrency or role guidance never grants
+  approval for a posted owner decision or permission to relax budgets or gates.
+
+## 2026-09-06 — Owner-selected effort and bounded initial comparison (#247)
+
+- **Symptom:** the pending policy requires max for every worker, superseded by
+  the 03:26:22Z owner update. The comparison README still universally describes
+  historical runs as ultra despite six recorded Astra completion-metadata probes.
+- **Diagnosis:** main remains max, but selects max or xhigh for new/resumed
+  primary Astra workers; the 03:36:00Z research priority calls for observations
+  with explicit provenance and unknowns. Two committed PR238 review captures
+  provide one client-recorded xhigh and one max attempt, not server verification
+  or independent task replicates. The relay incident warrants honest temporary
+  floor exceptions, not an invented server-cap measurement.
+- **Fix:** `orc-247-20260906-02` extends the existing policy branch and adds
+  `model-comparison/astra-effort-20260906.md` plus its small JSON dataset.
+  This continuation is configured xhigh for bounded evidence curation; server
+  effort is unknown. Its still-pending terminal usage/outcome is not a sample.
+  No owner-session rows, historical reports, comparison scripts or raw logs are
+  rewritten. The issue237 author alone owns the README correction and runtime
+  enforcement; PR238 was observed open and unmerged at 03:54:46Z. Overlapping
+  persona/protocol edits await normal integration only after its actual merge.
+- **Lesson:** client context, completion metadata and backend computation are
+  different measurements. Count each canonical attempt once, distinguish tasks
+  from reviews/resumes, retain null for unknowns, and do not turn service delays
+  or unlike patch difficulty into a causal effort claim. Primary-only owner
+  decision records need main's normal telemetry preservation/publication; this
+  session neither publishes nor installs unreviewed policy into main.
+- **Validation:** dataset hashes, canonical registry/terminal usage, client
+  context, review heads/verdicts and six probe outcomes agree with their sources.
+  All relative links resolve in this checkout or primary; six require newer
+  primary files, including three owner records awaiting telemetry publication.
+  The branch retains all prior records and mathematical-gap budget text. The
+  direct diff against main also shows 91 lines of newer main-only briefs absent
+  from this old base; this lane neither deletes nor imports those briefs.
+
 ## 2026-09-06 — PR 195 current-base mechanical recovery
 
 - Session `orc-113-20260906-07` independently fetched published main
@@ -5050,6 +5105,163 @@ or new owner disposition is performed by this archival reconciliation.
   compaction failures in existing logs rather than infer productive requests,
   RPM/TPM, server in-flight counts or recovery from process occupancy alone.
 
+## 2026-09-06 — Issue247 integration after actual PR238 merge
+
+- **Trigger:** GitHub `pr-view 238` confirms merge `32a32edee16d3932525e4b1da9f84009e1fbb13b`
+  at 2026-09-06T04:44:46Z; the assignment's 04:44:53Z is its observation time.
+  Session `orc-247-20260906-03` integrates that GitHub source into its issue
+  branch only. Issue252 owns private primary-main history reconciliation.
+- **Resolution:** preserve both parents' event/amendment histories and all
+  incoming-only paths. Reconcile the active Astra mathfix lane, max/xhigh worker
+  choice, useful-worker floor/cap and B7/B8 human-inbox boundary. The reviewed
+  README's blanket historical-medium inference is narrowed to the six probes.
+  Copy the archived API/Ultra finding and original role correction byte-for-byte
+  from `9102b74`; retain the original research JSON/MD bytes and sample counts.
+- **Execution:** configured xhigh for evidence-backed documentation integration;
+  server effort and terminal usage are not inferred. The first generated
+  conflict patch was rejected for unsupported hunk headers without applying;
+  corrected apply_patch formatting resolves the conflicts. No raw session data,
+  mathematical source, runtime implementation or owner decision is rewritten.
+- **Handoff:** normal hooks, checked publication and exact-head CI use canonical
+  primary tools with a 14400-second build-lock wait. No subagent, author review,
+  PR merge call or direct primary-main installation is authorized. CI evidence
+  remains the scripts' responsibility; no success is claimed before it exists.
+
+### 2026-09-06 — PR260 deterministic CI launch recovery
+
+The initial nohup launcher queued exact-head CI for `3b0ca7f`, then its process
+and CI child disappeared while waiting for the live cache-warmer lock, without
+an exit result. No CI success is inferred from the pending statuses. The author
+records this interruption and relaunches deterministic CI in a separate OS
+session with the same 14400-second wait; the warmer and its lock stay untouched.
+No reviewer/subagent is launched. The final handoff reports the actual process
+and exact-head status rather than treating a launch command as completion.
+
+## 2026-09-06 — Access-only owner escalation supersedes posted B7/B8 holds
+
+- **Trigger and authority:** session `orc-247-20260906-04`, issue #247/PR #260,
+  receives the policy-alignment task after the owner's decision at
+  **2026-09-06T05:05Z**, recorded at **2026-09-06T05:17:03Z** in
+  `/tmp/qpbt-owner-concurrency-message.txt`. Its operative statement is:
+  “Only ACTUAL ACCESS/PERMISSION blockers go to the human owner”; mathematical
+  and internal workflow decisions belong to qpbt-main, “EXPLICITLY INCLUDING
+  posted B7/B8.” The same record explicitly withdraws the previous posted-#26
+  hold, requires rationale/evidence, preserves exact-head gates and review cap
+  four, and preserves cumulative attempts/time and original anchors. The
+  02:55:29Z delegation, 02:58:41Z withdrawal, prior B7/B8 holds and subsequent
+  effort-policy observations remain history, not erased or retroactive approval.
+  Source SHA-256 at inspection:
+  `386595c69b2ccd69cb729db1644adeede78db08460c2caad696c25adfcf4b610`.
+- **Bounded main decision:** the assignment record
+  `/tmp/qpbt-247-access-only-policy-correction-20260906.md` specifies #118/B8
+  attempts 11 and 12, each at most 2700 seconds on primary Astra max, carrying
+  ten completed attempts and 19931 completed seconds with original anchor
+  **2026-09-05T19:24:00Z**. Attempt 12 is conditional on main's evaluation of
+  11. This is at most 5400 additional allocated seconds, not completed work,
+  and not authorization for attempt 13 or unlimited renewal. This session
+  records that supplied baseline; it neither dispatches nor verifies a new
+  mathematical attempt. Assignment SHA-256:
+  `c7a5f598e11dda9f547bef10e355cba4141184f0fb2dea62f82b909f10e98620`.
+- **Diagnosis and resolution:** live main/mathfix/orchestrator personas and
+  sessions/issues-prs/review/meta/autofix protocols still routed mathematical
+  decisions to the human or retained the withdrawn hold. Align these living
+  documents with access-only escalation. Workers return decisions to main,
+  never self-extend, and stop on missing budget history. Definition/game
+  proposals require main's recorded decision and a scoped task; faithfulness,
+  correctness, sufficiency, minimality and downstream convergence still bind.
+  B7 terminal disposition requires actual exact-head evidence, not a fifth
+  full review, forged carry-forward, author review or a gate bypass.
+- **Enforcement audit:** inspected `account_router.py` continuation checks and
+  `dispatch.sh` handoffs, routing/effort policy in `sessions.md`, `review.sh`
+  round counting and patch carry-forward, `pr_merge.py` exact-head adjudication,
+  `ci.sh`, `autofix.sh`, `checked-push.sh` and `.githooks/pre-commit`. No runtime
+  implementation changes: continuation limits remain immutable and exhausted
+  continuations fail; an authorized tranche needs a separately bounded normal
+  dispatch with full predecessor/ledger context. The four-review ceiling is
+  an operator admission rule, not a newly implemented script refusal. Normal
+  hooks remain enabled; neither infrastructure override nor permission bypass
+  is authorized. Primary-main installation and routing state remain untouched.
+- **Research boundary and evidence:** preserve the 8–11 useful-worker floor,
+  eleven-worker cap, primary/Astra, main max and selected worker max/xhigh,
+  fan-out off, service-constraint reporting and all prior observations. This
+  task's xhigh is configured for explicit policy alignment with a 900-second
+  bound, not server-verified effort. No probes or duplicate effort-outcome
+  scouting are performed. Existing PR head `2de9996` has green exact-head CI
+  (942 seconds reported by `local-ci/summary`); those statuses do not validate
+  this forthcoming amendment. Checked publication and fresh CI are required;
+  no author review, mathematical proof claim or merge is made.
+- **Validation:** `python3 -m unittest scripts.tests.test_dispatch
+  scripts.tests.test_pr_review_workflow` passes all 46 tests in 14.807 seconds
+  using test fixtures, without model sessions. Focused assertions confirm
+  byte-preserved prior event/amendment prefixes, documentation-only scope,
+  the original effort-observation files untouched, explicit authority/tranche
+  values and retained floor/cap/review requirements. `git diff --check` and
+  `scripts/install_git_hooks.sh --check` pass. The cumulative nontelemetry
+  workflow diff against PR #260's base is 357 lines before this telemetry-only
+  addition; normal commit/publication hooks and new exact-head CI still apply.
+
+## 2026-09-06 - PR260 F1 attached model option validation
+
+- **Trigger:** independent review `5124360396` of PR #260 at `df9b555`
+  identifies F1: the policy shim forwards attached short model options without
+  validation. Session `orc-247-20260906-05` handles this finding only.
+- **Fix:** validate `-mMODEL` and `-m=MODEL` against `gpt-6-astra`, removing
+  accepted duplicates before execution and rejecting other values with exit 4.
+  Existing primary-account, effort and fan-out policy remains unchanged.
+- **Validation:** the new regression reproduced the bypass before the fix;
+  all 47 dispatch and review-workflow tests pass afterwards (15.532 seconds).
+  The 24 attached-option cases use only a temporary fake executable, covering
+  global, exec and resume positions, max/xhigh effort, fan-out restrictions and
+  literal prompt text. Shell syntax, whitespace and installed-hook checks pass.
+- **Boundary:** no installed shim, main checkout source, other worktree, proof
+  ledger or owner session is edited. Normal commit, checked publication and
+  fresh exact-head CI apply; the author neither reviews nor merges this fix.
+  Main owns the second normal workflow review and its subsequent disposition.
+
+## 2026-09-06 - PR260 attached config parser repair
+
+- **Trigger:** PR #263 independent review `5124378315`, F1 at `55ae748`,
+  identifies the inherited shim defect: `-c=model_reasoning_effort=xhigh`
+  retains a leading equals sign, selects max and forwards malformed config.
+  Session `orc-247-20260906-06` repairs the existing policy PR #260/#247.
+- **Resolution:** strip one optional equals sign after attached `-c`; preserve
+  long and split forms, selected max/xhigh, legacy ultra normalization,
+  Astra-only validation, primary-account enforcement and disabled fan-out.
+  The prior `-mMODEL`/`-m=MODEL` repair remains intact.
+- **Evidence:** before the fix, fake-executable regressions reproduce 22
+  failing cases. Coverage includes global/exec/resume positions, accepted and
+  rejected policy settings, unrelated quoted configuration with spaces and
+  embedded equals signs, and literal prompt text after `--`. No real model,
+  installed shim, queue #257 source or primary-main file is touched.
+
+## 2026-09-06 - Standing autonomous useful-parallelism reassessment
+
+- **Trigger:** the task for `orc-247-20260906-06` on #247/PR #260 records the
+  owner's 2026-09-06T05:56Z standing behavior: main reassesses useful parallelism
+  without owner or meta prompts every cycle, after completion/failure,
+  newly unblocked work or compaction, and before waiting or ending.
+- **Resolution:** integrate these triggers into the existing main persona and
+  operating cycle, cross-referenced by `issues-prs.md`. Target eleven useful
+  workers plus main, floor eight; keep prepared useful assignments available
+  to the durable replenisher and recheck current dependencies and service
+  evidence. Below target or floor, record the actual count, concrete constraint
+  and next admission condition. Main owns selection; meta provides guidance.
+- **Boundary:** this is an operating duty, not repeated reflective messages or
+  evidence that queue #257 is operational. Preserve the 05:05Z access-only
+  authority and earlier owner history, account/proof/review limits, exact-head
+  gates and fan-out off. No subagents, probes, author review or merge occurs.
+  This session's selected xhigh is configured, not server-verified effort.
+- **Validation:** all 48 dispatch and review-workflow tests pass in 15.973
+  seconds using fixtures. Shell syntax, whitespace and installed-hook checks
+  pass; prior event/amendment prefixes are byte-identical. Normal commits,
+  checked push and fresh exact-head CI follow; main owns the second normal
+  independent review after green CI. No review evidence is carried forward by
+  this author.
+- **Commit gate:** parser repair `6e4c7cf` passes the normal pre-commit suite:
+  547 tests in 51.609 seconds. Test-fixture diagnostics are expected; the suite
+  exits successfully. The policy amendment is committed separately with its
+  EVOLUTION entry under `docs(local)`.
+
 ## 2026-09-06 — Explicit useful-work admissions need durable handoff reservations
 
 - Issue #257 reports completion bursts and relay concurrency refusals during
@@ -5206,6 +5418,25 @@ the previous04:30 observation;247<-237 native dependency is recorded.
   14400-second build-lock wait. This entry does not assert publication or CI
   success before those operations finish. No additional review is launched.
 
+## 2026-09-06 - PR260 refreshed dependency cache at publication
+
+- Session `orc-247-20260906-08` refreshed PR260 onto actual main
+  `928328ff4d45e5fdc2844b120329a2c241a3a58a` as `23d1394`, preserving both
+  event histories, raw telemetry rows, all incoming-only paths, and the
+  approved source patch. Runtime preservation evidence has no failures.
+- The normal checked-publication gate stopped before pushing because the
+  worktree lacked PR195's `WinImplications/Approx.olean`. Its populated build
+  directory predates the newly merged dependency; this is not a proof failure.
+  Recovery uses the primary checkout's `warm-worktree.sh --build` under the
+  machine-wide lock, then retries checked publication and canonical CI.
+- The last of two workflow reviews approved `ecba3e7`. Source patch equality
+  does not establish full-patch equality: incoming main relocated inherited
+  events, and this incident adds evidence. No review is carried, dispatched,
+  or adjudicated here. Main owns terminal disposition under the owner's
+  05:05Z authority; historical B7/B8 holds remain superseded. Final runtime
+  evidence records observed publication and CI outcomes without claiming them
+  in advance. No shim installation or PR merge is performed.
+
 ## 2026-09-06 - PR269 final base refresh before second normal review
 
 - Session `orc-257-20260906-05` merges actual PR195 commit
@@ -5276,3 +5507,20 @@ the previous04:30 observation;247<-237 native dependency is recorded.
   Both model-review rounds are exhausted; main retains terminal disposition
   after normal publication and detached CI. No third review, automatic adverse
   override, deployment, probe or merge is performed by this author session.
+
+## 2026-09-06 - PR260 refresh after the actual PR269 merge
+
+- Session `orc-247-20260906-10` verifies through primary `gh_common.py` that
+  PR269 merged at 08:08:31Z as `ba299326ebde0d9f94fc9b4e9b557ce776e8f1cf`.
+  It merges that actual base into `9135b1fd35e69de37e14a07b044a464e6f1970da`.
+  Both parents' event and amendment sequences are retained; the shared dispatch
+  test combines the approved shim regressions with incoming canonical-path coverage.
+- The existing `orc-247-20260906-09` preservation packet and every preceding
+  failed-session, raw-capture and timing artifact remain historical evidence.
+  This bounded continuation adds no policy or queue feature. Normal merge-loss,
+  commit and checked-publication gates apply; canonical CI is detached with its
+  normal full-build-lock wait. Runtime evidence records the actual outcomes.
+- Two normal model-review rounds remain exhausted. Whole-patch and source
+  comparisons are evidence for main's terminal decision, not review authority.
+  This author session performs no third review, carry-forward, adjudication,
+  installation, deployment, or merge to main.
