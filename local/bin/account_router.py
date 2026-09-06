@@ -13,6 +13,72 @@ import time
 ACCOUNTS = ("primary", "second")
 
 
+def process_identity(pid: int) -> str:
+    """Identify a live Linux process without mistaking PID reuse for a launch."""
+    fields = Path(f'/proc/{pid}/stat').read_text().rsplit(')', 1)[1].split()
+    if fields[0] == 'Z':
+        raise ProcessLookupError(pid)
+    return fields[19]
+
+
+def queue_tickets(root: Path) -> dict:
+    """Read durable, never automatically expired useful-queue reservations."""
+    path = root / 'accounts/useful-queue.json'
+    tickets = json.loads(path.read_text()) if path.exists() else {}
+    if not isinstance(tickets, dict):
+        raise ValueError('invalid useful-queue reservations; operator adoption required')
+    for ticket in tickets.values():
+        if (not isinstance(ticket, dict) or type(ticket.get('slots')) is not int or
+                ticket['slots'] not in (1, 2) or type(ticket.get('pid')) is not int or
+                ticket['pid'] <= 0 or not isinstance(ticket.get('start'), str) or
+                not ticket['start'].isdecimal() or
+                not isinstance(ticket.get('worktree'), str) or
+                not Path(ticket['worktree']).is_absolute() or
+                not isinstance(ticket.get('claims'), list) or
+                any(type(pid) is not int or pid <= 0 for pid in ticket['claims']) or
+                len(set(ticket['claims'])) != len(ticket['claims']) or
+                len(ticket['claims']) > ticket['slots']):
+            raise ValueError('invalid useful-queue ticket; operator adoption required')
+    return tickets
+
+
+def write_queue_tickets(root: Path, tickets: dict) -> None:
+    """Replace tickets under accounts/router.lock, retaining uncertain reservations."""
+    from wf_util import atomic_write
+    atomic_write(root / 'accounts/useful-queue.json', json.dumps(tickets) + '\n')
+
+
+def admission_limits(root: Path, interactive: list[int]) -> tuple[list[int], int, str]:
+    """Share the dispatcher's owner allocation and physical-slot limits with the queue."""
+    mode_path = root / 'watchdog/account-mode'
+    mode = mode_path.read_text().strip() if mode_path.exists() else 'primary'
+    if mode not in ('primary', 'both'):
+        raise ValueError(f'{mode_path}: expected primary or both')
+    preserved_path = root / 'watchdog/account-mode-both-preserved.json'
+    preserved = (json.loads(preserved_path.read_text())
+                 if mode == 'both' and preserved_path.exists() else {})
+    caps = []
+    for account, default in zip(ACCOUNTS, (11, 9)):
+        path = root / 'watchdog' / f'max-codex-{account}'
+        cap = int(preserved.get(account, path.read_text().strip()
+                  if path.exists() else default))
+        if cap < 0:
+            raise ValueError(f'{path}: cap must be nonnegative')
+        caps.append(cap)
+    external_path = root / 'watchdog/primary-external-reserved'
+    external = int(external_path.read_text()) if external_path.exists() else 0
+    if external < 0:
+        raise ValueError('primary-external-reserved must be nonnegative')
+    caps[0] = min(caps[0], max(0, 12 - interactive[0] - external))
+    caps[1] = max(0, caps[1] - interactive[1]) if mode == 'both' else 0
+    total_path = root / 'watchdog/max-codex'
+    total = int(preserved.get('max_codex', total_path.read_text().strip()
+                if total_path.exists() else sum(caps)))
+    if total < 0:
+        raise ValueError('max-codex must be nonnegative')
+    return caps, total, mode
+
+
 def choose_account(live: list[int], caps: list[int]) -> str:
     return "primary" if live[0] * caps[1] <= live[1] * caps[0] else "second"
 
@@ -102,6 +168,8 @@ def occupancy(root: Path) -> tuple[list[int], list[int]]:
         else:
             workers[index] += 1
     interactive[0] = max(1, interactive[0])
+    workers[0] += sum(ticket['slots'] - len(ticket['claims'])
+                      for ticket in queue_tickets(root).values())
     return workers, interactive
 
 
@@ -195,35 +263,43 @@ def reserve(root: Path, requested: str, pid: int, wait: int, dry_run: bool) -> s
     while True:
         with (accounts / "router.lock").open("a") as lock:
             fcntl.flock(lock, fcntl.LOCK_EX)
-            mode_path = root / 'watchdog/account-mode'
-            mode = mode_path.read_text().strip() if mode_path.exists() else 'primary'
-            if mode not in ('primary', 'both'):
-                raise ValueError(f'{mode_path}: expected primary or both')
+            live, interactive = occupancy(root)
+            caps, total, mode = admission_limits(root, interactive)
             if mode == 'primary' and requested == 'second':
                 raise ValueError('second account disabled; cross-account resume is unsupported; '
                                  'use --continue-from with a checkpoint in a fresh primary session')
-            preserved_path = root / 'watchdog/account-mode-both-preserved.json'
-            preserved = (json.loads(preserved_path.read_text())
-                         if mode == 'both' and preserved_path.exists() else {})
-            caps = []
-            for account, default in zip(ACCOUNTS, (11, 9)):
-                path = root / "watchdog" / f"max-codex-{account}"
-                cap = int(preserved.get(account, path.read_text().strip()
-                          if path.exists() else default))
-                if cap < 0:
-                    raise ValueError(f"{path}: cap must be nonnegative")
-                caps.append(cap)
-            live, interactive = occupancy(root)
-            external_path = root / 'watchdog/primary-external-reserved'
-            external = int(external_path.read_text()) if external_path.exists() else 0
-            if external < 0:
-                raise ValueError('primary-external-reserved must be nonnegative')
-            interactive[0] += external
-            caps[0] = min(caps[0], max(0, 12 - interactive[0]))
-            caps[1] = max(0, caps[1] - interactive[1]) if mode == 'both' else 0
-            total_path = root / 'watchdog/max-codex'
-            total = int(preserved.get('max_codex', total_path.read_text().strip()
-                        if total_path.exists() else sum(caps)))
+            token = os.environ.get('MIPSTARRE_QUEUE_TICKET')
+            tickets = queue_tickets(root)
+            worktree = os.environ.get('MIPSTARRE_DISPATCH_WORKTREE')
+            worktree = str(Path(worktree).resolve()) if worktree else None
+            if any(ticket['worktree'] == worktree for key, ticket in tickets.items()
+                   if key != token):
+                raise ValueError('worktree reserved by useful queue; no duplicate session')
+            if tickets:
+                caps[0] = min(10, caps[0])
+            if token:
+                ticket = tickets.get(token)
+                if (not ticket or requested != 'primary' or mode != 'primary' or
+                        ticket['worktree'] != worktree or
+                        (root / 'useful-queue/STOP').exists() or
+                        (root / 'useful-queue/HOLD').exists()):
+                    raise ValueError('queue admission stopped or ticket unavailable')
+                parents, _ = host_processes()
+                ancestor, seen = pid, set()
+                while ancestor != ticket['pid'] and ancestor in parents and ancestor not in seen:
+                    seen.add(ancestor)
+                    ancestor = parents[ancestor]
+                if (ancestor != ticket['pid'] or
+                        process_identity(ancestor) != ticket['start'] or
+                        len(ticket['claims']) >= ticket['slots'] or pid in ticket['claims']):
+                    raise ValueError('queue ticket is not an unused descendant reservation')
+                if live[0] > min(10, caps[0]) or sum(live) > total:
+                    raise ValueError('account capacity exhausted; queue claim refused')
+                if not dry_run:
+                    (accounts / 'primary' / str(pid)).touch()
+                    ticket['claims'].append(pid)
+                    write_queue_tickets(root, tickets)
+                return 'primary'
             available = [index for index, account in enumerate(ACCOUNTS)
                          if live[index] < caps[index] and requested in ('auto', account)]
             if available and sum(live) < total:
