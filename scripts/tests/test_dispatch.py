@@ -394,9 +394,12 @@ class DispatchCommandTests(unittest.TestCase):
             subprocess.run(["git", "init", "-q", "-b", "main"], cwd=worktree, check=True)
             target.mkdir(parents=True)
             (worktree / ".lake").symlink_to(target, target_is_directory=True)
+            alias = root / 'alias'
+            alias.symlink_to(worktree, target_is_directory=True)
             with mock.patch.dict(os.environ, {"MIPSTARRE_LAKE_ROOT": str(target.parent)}):
-                argv = self.dispatch_command("--role", "prover", "--worktree", str(worktree),
+                argv = self.dispatch_command("--role", "prover", "--worktree", str(alias),
                                              "--sandbox", "workspace-write")
+        self.assertEqual(argv[argv.index('-C') + 1], str(worktree))
         self.assertEqual(argv[argv.index("--add-dir") + 1], str(target.resolve()))
         self.assertLess(argv.index("--add-dir"), argv.index("-o"))
 
