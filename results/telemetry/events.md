@@ -5147,6 +5147,22 @@ with provenance under results/telemetry/model-comparison/, without policy change
 or a causal latency/quality claim. Boundary report5556912589 was posted once for
 the previous04:30 observation;247<-237 native dependency is recorded.
 
+- 2026-09-06 -- Issue #268, session `orc-268-20260906-01`: reproduced both inherited
+  runtime findings from `reviewer-pr264-20260906-01` on merged baseline `b7705e02`.
+  An unnamed `{thread_id, account}` record passed `resume_account` but raised
+  `KeyError('name')` in `resume_continuation`; missing and non-executable dispatchers
+  caused `agent.sh` to launch a fake Codex executable directly. The repair skips
+  unnamed affinity records only when continuation metadata is absent or empty,
+  rejects continuation metadata without a session identity, and removes the direct
+  launch fallback. Regression fixtures preserve named-session deduplication,
+  cumulative time and attempt charges, budget anchors, dispatcher arguments and exit
+  status. These are enforcement repairs under the existing sessions protocol;
+  no protocol or installed-runtime change is required.
+  The first checked publication stalled in its SSH `ls-remote` read before
+  pushing. The session terminated only that read's SSH child and selected an
+  HTTPS retry with command-scoped Git configuration and authentication obtained
+  through `gh_common.py`; persistent remote configuration remained unchanged.
+
 ## 2026-09-06 - PR269 first-review repair
 
 - Session `orc-257-20260906-04` repairs only F1-F3 from the independent
@@ -5276,3 +5292,15 @@ the previous04:30 observation;247<-237 native dependency is recorded.
   Both model-review rounds are exhausted; main retains terminal disposition
   after normal publication and detached CI. No third review, automatic adverse
   override, deployment, probe or merge is performed by this author session.
+
+- 2026-09-06 -- PR270 integration, session `orc-268-20260906-02`: merged actual
+  main `ba299326` into the approved baseline `4b2f9d9` as `58b13db`, preserving
+  both source changes and both parents' incident records. All 53 focused tests
+  and 560 full-suite tests passed through the normal hooks. The first checked
+  publication of the integration stalled before the push, with the HTTPS
+  `ls-remote` child in TCP `SYN-SENT` to GitHub. Terminated only that read child;
+  checked push returned 2 and `gh_common.py` confirmed the PR head remained
+  `4b2f9d9`. Retry uses the existing local proxy with command-scoped Git settings.
+  No persistent transport setting, installed runtime, review count or gate changed.
+  Evidence: `~/.cache/mipstarre-dev/pr270-integration-20260906/publication.log`
+  and `publication.json`; source/full-patch comparisons are in the same directory.

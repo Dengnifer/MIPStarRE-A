@@ -329,6 +329,10 @@ class DispatchCommandTests(unittest.TestCase):
 
     def test_resume_preflight_tolerates_bad_rows_but_rejects_invalid_metadata(self) -> None:
         noise = '\n{"truncated":\nnull\n[]\n42\n{"thread_id":"other","continuation":42}\n'
+        legacy = json.dumps(dict(thread_id=THREAD_ID, account='primary'))
+        self.assertIn('resume', self.dispatch_command('--resume', THREAD_ID,
+                                                     registry_rows=legacy))
+        noise += legacy + '\n'
         row = dict(name='prior', thread_id=THREAD_ID, account='primary', wall_s=20)
         metadata = dict(budget_file='/shared/budget', budget=dict(anchor='original', attempts=7,
             attempt_limit=10, working_seconds=12452, sessions=['prior']))
@@ -406,7 +410,110 @@ class DispatchCommandTests(unittest.TestCase):
         )
 
 
+class AgentEntrypointTests(unittest.TestCase):
+    def run_agent(self, dispatcher: str, exit_code: int = 0) -> tuple:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            repo = root / 'repo'
+            local_bin = repo / 'local/bin'
+            local_bin.mkdir(parents=True)
+            agent = local_bin / 'agent.sh'
+            shutil.copy2(DISPATCH.with_name('agent.sh'), agent)
+            persona = repo / '.github/prompts/claude-code-system-prompt.md'
+            persona.parent.mkdir(parents=True)
+            persona.write_text('Fixture persona.\n')
+            subprocess.run(['git', 'init', '-qb', 'main', str(repo)], check=True)
+            subprocess.run(['git', '-C', str(repo), 'add', '.'], check=True)
+            subprocess.run(['git', '-C', str(repo), '-c', 'user.name=Test', '-c',
+                            'user.email=test@test', 'commit', '-qm', 'fixture'], check=True)
+            (local_bin / 'gh_common.py').write_text(
+                'import json\nprint(json.dumps(dict(number=268, state="open", '
+                'head=dict(ref="main"), base=dict(ref="main"))))\n')
+            fake_bin = root / 'bin'
+            fake_bin.mkdir()
+            codex_marker = root / 'codex-launched'
+            fake_codex = fake_bin / 'codex'
+            fake_codex.write_text(f'#!{sys.executable}\nfrom pathlib import Path\n'
+                                 f'Path({str(codex_marker)!r}).touch()\nraise SystemExit(91)\n')
+            fake_codex.chmod(0o755)
+            dispatch_marker = root / 'dispatch.json'
+            if dispatcher != 'missing':
+                fake_dispatch = local_bin / 'dispatch.sh'
+                fake_dispatch.write_text(f'#!{sys.executable}\nimport json, os, sys\n'
+                    'from pathlib import Path\n'
+                    f'Path({str(dispatch_marker)!r}).write_text(json.dumps(dict('
+                    'args=sys.argv[1:], model=os.environ.get("MIPSTARRE_CODEX_MODEL"))))\n'
+                    f'raise SystemExit({exit_code})\n')
+                fake_dispatch.chmod(0o755 if dispatcher == 'executable' else 0o644)
+            env = os.environ.copy()
+            env.update(HOME=str(root), MIPSTARRE_CACHE_ROOT=str(root / 'cache'),
+                       MIPSTARRE_AUTOMATION='', MIPSTARRE_AUTOFIX_ACTIVE='',
+                       MIPSTARRE_TRUSTED_REF='main', MIPSTARRE_AGENT_MODEL='gpt-6-astra',
+                       PATH=f'{fake_bin}{os.pathsep}{env.get("PATH", "")}')
+            result = subprocess.run([str(agent), '268', 'fixture task', '--role', 'scout',
+                                     '--read-only'], cwd=repo, env=env, capture_output=True,
+                                    text=True, timeout=20)
+            launched = json.loads(dispatch_marker.read_text()) if dispatch_marker.exists() else None
+            return result, codex_marker.exists(), launched
+
+    def test_unavailable_dispatcher_never_launches_codex(self) -> None:
+        for dispatcher in ('missing', 'non-executable'):
+            with self.subTest(dispatcher=dispatcher):
+                result, codex_launched, dispatched = self.run_agent(dispatcher)
+                self.assertFalse(codex_launched, result.stderr)
+                self.assertIsNone(dispatched)
+                self.assertEqual(result.returncode, 1, result.stderr)
+                self.assertIn('dispatch.sh', result.stderr)
+
+    def test_available_dispatcher_preserves_arguments_and_exit_status(self) -> None:
+        for exit_code in (0, 17):
+            with self.subTest(exit_code=exit_code):
+                result, codex_launched, dispatched = self.run_agent('executable', exit_code)
+                self.assertEqual(result.returncode, exit_code, result.stderr)
+                self.assertFalse(codex_launched)
+                self.assertEqual(dispatched['model'], 'gpt-6-astra')
+                args = dispatched['args']
+                for option, value in (('--role', 'scout'), ('--issue', 'pr268'),
+                                      ('--pr', '268'), ('--sandbox', 'read-only'),
+                                      ('--persona-ref', 'main')):
+                    self.assertEqual(args[args.index(option) + 1], value)
+                self.assertIn('fixture task', args[-1])
+                self.assertEqual(args[-2], '--')
+
+
 class AccountRouterTests(unittest.TestCase):
+    def test_resume_continuation_accepts_unnamed_legacy_affinity_in_memory(self) -> None:
+        legacy = dict(thread_id=THREAD_ID, account='primary')
+        registry = Path('/unused-registry')
+        with mock.patch.object(router, 'session_rows', return_value=[legacy]):
+            self.assertEqual(router.resume_account(THREAD_ID, registry, {}), 'primary')
+            self.assertEqual(router.resume_continuation(registry, THREAD_ID), {})
+        self.assertEqual(legacy, dict(thread_id=THREAD_ID, account='primary'))
+
+    def test_resume_continuation_keeps_named_charges_among_unnamed_rows(self) -> None:
+        metadata = dict(budget_file='/shared/budget', budget=dict(anchor='original', attempts=7,
+            attempt_limit=10, working_seconds=12452, sessions=['prior']))
+        prior = dict(name='prior', thread_id=THREAD_ID, wall_s=2600, continuation=metadata)
+        legacy = dict(thread_id=THREAD_ID, account='primary')
+        resumed = dict(name='resumed', thread_id=THREAD_ID, wall_s=50)
+        rows = [legacy, prior, legacy | {'continuation': {}}, resumed,
+                prior | {'status': 'archived'}, legacy]
+        with mock.patch.object(router, 'session_rows', return_value=rows):
+            self.assertEqual(router.resume_continuation(Path('/unused-registry'), THREAD_ID),
+                             metadata | {'completed_wall_s': 2650})
+        self.assertNotIn('completed_wall_s', metadata)
+
+    def test_unnamed_continuation_metadata_fails_closed(self) -> None:
+        for metadata in (None, [], False, 42, 'bad', {'budget_file': '/shared/budget'},
+                         dict(budget_file='/shared/budget', budget=dict(anchor='original',
+                              attempts=7, attempt_limit=10, working_seconds=12452,
+                              sessions=['prior']))):
+            row = dict(thread_id=THREAD_ID, account='primary', continuation=metadata)
+            with self.subTest(metadata=metadata), \
+                 mock.patch.object(router, 'session_rows', return_value=[row]), \
+                 self.assertRaisesRegex(ValueError, 'invalid continuation'):
+                router.resume_continuation(Path('/unused-registry'), THREAD_ID)
+
     def test_continuation_charges_completed_time_even_after_a_legacy_resume(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
