@@ -3,7 +3,9 @@ Normative supplement to sessions/review protocols (#257). Only main selects usef
 packets and binds prerequisites to closed issues, actual merged PRs and ancestry.
 No discovery, filler, merges, adjudication, budget resumes, inbox actions or shell tasks.
 Both --run and enabled:true are required; defaults disable. One admission per tick,
-watch interval >=5s, primary/Astra/max-or-xhigh only, existing fan-out/kill switches.
+watch interval >=5s, with the historical dispatcher policy limited to
+primary/Astra/max-or-xhigh; the active owner override below uses space/Astra/Ultra.
+Existing fan-out/kill switches remain binding.
 For the active QPBT owner switch recorded in
 `results/telemetry/owner-messages/qpbt-space-cap5-switch-20260906.md`, the allocation
 is five total native sessions (main plus at most four descendants) on account `space`,
