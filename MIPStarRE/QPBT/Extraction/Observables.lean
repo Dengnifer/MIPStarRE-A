@@ -224,8 +224,8 @@ theorem tildeObs_eq_heteroKron {P : AdmissibleParams} {epsilon delta : ℝ}
       intro pair hpair
       rw [(Finset.mem_filter.mp hpair).2]
 
-/-- The complex binary character agrees with the real sign used by the
-existing spectral-sum API. This formalization-only identity permits its use
+/-- The complex binary character agrees with the real sign used in spectral sums.
+This formalization-only identity permits its use
 in the involution and commutation assertions of `lem:tildew-product-form`. -/
 private theorem phaseSign_eq_complex_bitSign (value : ZMod 2) :
     phaseSign value = (MagicSquareRigidity.bitSign value : ℂ) := by

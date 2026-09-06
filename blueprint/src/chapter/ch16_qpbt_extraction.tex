@@ -96,6 +96,14 @@ The measurement $\{\hat{S}_{g_X,g_Z}\}$ reads out an $X$-polynomial and a $Z$-po
 	\uses{def:s-w-marginals, lem:qld-4-7}
 	For each $W\in\{X,Z\}$, the family $\{\hat{S}^W_g\}_g$ is a projective measurement with outcomes in $\mathrm{ideg}_{d,m}(\F_q)$.
 \end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:s-w-marginals, lem:sandwich-postprocess-projective}
+	By Definition~\ref{def:s-w-marginals}, each marginal is the finite postprocessing
+	of the joint projective measurement by the outcome map $(g_X,g_Z)\mapsto g_W$.
+	Lemma~\ref{lem:sandwich-postprocess-projective} shows that this postprocessing
+	preserves projectivity.
+\end{proof}
 
 \begin{definition}[Pauli dot-product projectors]\label{def:tau-dot-product-projector}
 	\lean{MIPStarRE.QPBT.tauDotProj}
