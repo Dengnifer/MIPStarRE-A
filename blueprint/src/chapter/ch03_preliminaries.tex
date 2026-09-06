@@ -100,7 +100,8 @@ Fix a prime power $q=p^t$. Write $\omega=e^{2\pi i/p}$, and let $\tr:\F_q\to\F_p
 \end{proof}
 
 \begin{lemma}[Schwartz--Zippel for individual degree]\label{lem:schwartz-zippel-individual}
-	\lean{MIPStarRE.LDT.Preliminaries.schwartzZippel_individualDegree}
+	\lean{MIPStarRE.LDT.Preliminaries.schwartzZippel_individualDegree,
+	  MIPStarRE.QPBT.polyFunc_eval_collision_le}
 	\leanok
 	\uses{def:polyfunc, lem:schwartz-zippel-total-degree}
 	If $g,h \in \polyfunc{m}{q}{d}$ are distinct, then

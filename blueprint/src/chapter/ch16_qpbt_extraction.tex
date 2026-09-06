@@ -261,6 +261,34 @@ Each displayed construction estimate below has its own universal constant $C_E \
 	is symmetric under exchanging $(g,h)$ with $(g',h')$: since $\mathrm{Dec}$ is linear with $\mathrm{Dec}(g_{h}) = h$ for all $h \in \F_q^M$ (Remark~\ref{rem:qld-decoding-identity}), the constraint $g' - g_{h'} = g - g_h$ implies $\mathrm{Dec}(g) - h = \mathrm{Dec}(g') - h'$, so the two constraint sets coincide. The same derivation therefore bounds the distance of the displayed expression to $(\tilde{M}^{W,\tilde{u}}_a)_{\mathrm{B}\mathrm{B}'\mathrm{B}''}$, and \eqref{eq:qld-pulling-cons} follows at the common scale $\delta_P$. Finally, since $\{\tilde{M}^{W,\tilde{u}}_a\}$ is projective, Item~2 of Lemma~\ref{fact:agreement}, data processing along the map $a \mapsto \tr(e_j a)$ (Lemma~\ref{fact:data-processing}), and Item~1 of Lemma~\ref{fact:agreement} yield $(\tilde{M}^{W,\tilde{u}}_{[\tr(e_j \cdot) = b]})_{\mathrm{A}\mathrm{A}'\mathrm{A}''} \approx_{\delta_P} (\tilde{M}^{W,\tilde{u}}_{[\tr(e_j \cdot) = b]})_{\mathrm{B}\mathrm{B}'\mathrm{B}''}$ with answer summation over $b \in \F_2$, and Lemma~\ref{lem:povm-to-obs} converts this into the claimed self-consistency of the observables $\tilde{W}^j(\tilde{u})$.
 \end{proof}
 
+% Source: references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1594--1602.
+% The same scalar estimate is used before eq:qld-nonencoding-mass.
+% tracked in issue #259
+\begin{lemma}[Formalization support for polynomial evaluation collisions]
+\label{lem:qld-poly-eval-collision}
+	\lean{MIPStarRE.QPBT.poly_eval_collision_le}
+	\leanok
+	\uses{def:admissible, def:polynomials-degree}
+	This auxiliary lemma isolates the scalar Schwartz--Zippel estimate used in
+	the proof of Lemma~\ref{lem:qld-construct-the-paulis}
+	in~\cite{Ji2020MIPStar}; it is not a separately named result of the source.
+	Let $(q,m,d)$ be admissible parameters and let
+	$g,g'\in\mathrm{ideg}_{d,m}(\F_q)$ be distinct polynomial representatives.
+	For uniformly distributed $u\in\F_q^m$,
+	\[
+		\Prb_{u\sim\F_q^m}[g(u)=g'(u)]
+		=\E_{u\in\F_q^m}\mathbf{1}[g(u)=g'(u)]
+		\leq\frac{md}{q}.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:schwartz-zippel-individual}
+	Apply Lemma~\ref{lem:schwartz-zippel-individual} to $g$ and $g'$.
+	The uniform average of the agreement indicator is the fraction of points
+	at which the two evaluations agree, and the field has cardinality $q$.
+\end{proof}
+
 \begin{lemma}[Non-encoding support estimate]
 \label{lem:qld-nonencoding-mass-bound}
 	\lean{MIPStarRE.QPBT.nonencodingMarginalMass}
