@@ -30,6 +30,7 @@ import MIPStarRE.QPBT.Observables.Anticommuting
 import MIPStarRE.QPBT.Observables.Setup
 import MIPStarRE.QPBT.Observables.Defs
 import MIPStarRE.QPBT.Observables.ExpandedDefs
+import MIPStarRE.QPBT.Observables.IdealPointConsistency
 import MIPStarRE.QPBT.Observables.PointConsistency
 import MIPStarRE.QPBT.Observables.LineMeasurement
 import MIPStarRE.QPBT.Observables.WinImplications
