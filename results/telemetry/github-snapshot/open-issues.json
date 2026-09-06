@@ -1,15 +1,15 @@
 [
  {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/235",
+  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/237",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/235/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/235/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/235/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/235",
-  "id": 5360333424,
-  "node_id": "I_kwDOUJyJf88AAAABP4AycA",
-  "number": 235,
-  "title": "docs(local): refresh goal briefing for both Codex homes",
+  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/237/labels{/name}",
+  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/237/comments",
+  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/237/events",
+  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/237",
+  "id": 5361446270,
+  "node_id": "I_kwDOUJyJf88AAAABP5Etfg",
+  "number": 237,
+  "title": "fix(local): normalize astra effort to xhigh and record effective effort",
   "user": {
    "login": "Dengnifer",
    "id": 89234078,
@@ -37,8 +37,8 @@
   "assignees": [],
   "milestone": null,
   "comments": 0,
-  "created_at": "2026-09-05T19:14:08Z",
-  "updated_at": "2026-09-05T19:14:08Z",
+  "created_at": "2026-09-05T22:52:16Z",
+  "updated_at": "2026-09-05T22:52:16Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
@@ -54,10 +54,10 @@
    "blocking": 0,
    "total_blocking": 0
   },
-  "body": "<!-- mipstarre-issue-key: owner-20260905-both-goal-briefings -->\nOwner explicitly authorizes refreshing ~/.codex/prompts/goal.md and ~/.cache/mipstarre-dev/codex-home-yxy/prompts/goal.md from the Operating cycle section in /tmp/qpbt-main-handoff-v3.md. Include snapshot-first short turns, two-minute delegation, two accounts and fan-out off, current astra defaults with sol for easy work, daemon-only merges, labelled autofix, critical-path priority, telemetry and #27/#26 duties. Preserve the substantive project mission and source-faithfulness rules. Verify state before including dynamic claims. Back up existing briefing; create missing secondary prompts directory/copy. Do not read or modify credentials, models, config, or runtime router. Sol worker; explicit external-file write authorization; no broad infrastructure changes.",
+  "body": "<!-- mipstarre-issue-key: owner-astra-effort-xhigh-20260905 -->\n### Motivation\n- Owner decision September 5, 2026 22:45 UTC: astra must request xhigh; sol keeps ultra. The 22:25 UTC handoff finding and events.md incident show both astra endpoints report medium for ultra. The profile and runtime shim mitigation do not make dispatch telemetry accurate.\n\n### Bounded implementation\n- In local/bin/dispatch.sh, resolve the effective effort per model: astra with omitted effort or ultra uses xhigh; preserve other explicit supported efforts; sol remains unchanged. Accept xhigh in the astra mathfix guard and normalize legacy ultra before validation.\n- Record effective requested effort in sessions.jsonl through the existing telemetry writer, with backward compatibility for historical rows. Do not label requested effort as measured provider effort.\n- Update local/protocols/sessions.md and append an EVOLUTION.md entry citing the September 5 22:25 UTC events.md incident and 22:45 UTC owner decision. Check related enforcement points without adding infrastructure abstractions.\n- Add focused tests in the existing workflow test suite for astra omitted/ultra/xhigh, sol unchanged, mathfix guard and effort telemetry.\n- Keep the change under 1000 lines and two hours. At most two workflow review rounds; no scope growth.\n\n### Delivery\n- Use a fresh warmed issue worktree and sol at ultra. Commit, publish only via primary checked-push/pr_open, run existing CI and independent review, and leave all merging to the daemon. No extra independent triage. Report the PR and exact-head evidence to main in the session result, not a separate #27 comment.",
   "closed_by": null,
   "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/235/reactions",
+   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/237/reactions",
    "total_count": 0,
    "+1": 0,
    "-1": 0,
@@ -68,7 +68,7 @@
    "rocket": 0,
    "eyes": 0
   },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/235/timeline",
+  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/237/timeline",
   "performed_via_github_app": null,
   "state_reason": null,
   "pinned_comment": null
@@ -143,90 +143,6 @@
    "eyes": 0
   },
   "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/234/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/232",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/232/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/232/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/232/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/232",
-  "id": 5359739801,
-  "node_id": "I_kwDOUJyJf88AAAABP3cjmQ",
-  "number": 232,
-  "title": "dispatch.sh: route codex sessions across the two accounts (per-account caps, recorded in sessions.jsonl)",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025011061,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8bdQ",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/infrastructure",
-    "name": "infrastructure",
-    "color": "ededed",
-    "default": false,
-    "description": "Foundational definitions, shared APIs, or supporting layers"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-05T17:36:10Z",
-  "updated_at": "2026-09-05T17:36:10Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 0,
-   "blocking": 0,
-   "total_blocking": 0
-  },
-  "body": "Two codex accounts are configured on ghz, each with a concurrency limit of 10: the primary home `~/.codex` and a second home `~/.cache/mipstarre-dev/codex-home-yxy` (its `auth.json` and `config.toml` link to the owner's `auth-yxy.json` and `config-yxy.toml`; endpoint api.finite-dimensional.space; serves gpt-6-astra). Since 2026-09-05 17:20Z an interim PATH shim (`~/.cache/mipstarre-dev/owner-bin/codex` v2, source `/tmp/codex-shim-v2`) routes `codex exec` sessions to the less loaded account by scanning `/proc` for live sessions and logs decisions to `~/.cache/mipstarre-dev/watchdog/account-router.log`. Owner decision (2026-09-05, \"both\"): move the routing into the dispatcher so it is deterministic, capped per account and recorded in telemetry, then retire the shim's routing part.\n\nTask (keep it small, about 150 workflow-layer lines):\n\n1. `local/bin/dispatch.sh` gains `--account auto|primary|second` (environment `MIPSTARRE_CODEX_ACCOUNT`, default `auto`). `auto` picks the account with the smaller ratio live/cap; ties go to primary. Live counts are marker files `$CACHE_ROOT/accounts/<account>/<pid>` written before `codex exec` starts and removed when it exits (trap), with stale-pid cleanup on every read. Caps come from `$CACHE_ROOT/watchdog/max-codex-primary` (default 9) and `max-codex-second` (default 10); when both accounts are full, poll every 20 s up to `MIPSTARRE_ACCOUNT_WAIT` (default 1800 s), then proceed on the less loaded one.\n2. The second account is selected by exporting `CODEX_HOME=${MIPSTARRE_CODEX_HOME_SECOND:-$HOME/.cache/mipstarre-dev/codex-home-yxy}` for that `codex exec` only (proven to work from worktrees: probe 2026-09-05 16:27Z). `primary` leaves `CODEX_HOME` unset.\n3. Every `sessions.jsonl` row gains `\"account\": \"primary\"|\"second\"` and `\"model\": \"<model id>\"` (closes #231; `results/telemetry/model-comparison/compare.py` may then read the field directly and fall back to the rollout path for older rows).\n4. `review.sh` and `autofix.sh` need no change beyond passing the environment through; document the variables in their headers.\n5. Unit tests in `scripts/tests/test_dispatch.py`: the chooser as a pure function of (live counts, caps), stale-marker cleanup, and the `--account` argument validation. Keep `test_future_astra_mathfix_selects_model_effort_and_persona` green.\n6. Protocol: one paragraph in `local/protocols/sessions.md` and an `EVOLUTION.md` entry citing the events.md entries of 2026-09-05 (two accounts, router shim) per `local/protocols/meta.md`.\n7. PR body must state the follow-up for the operator: after the merge, replace the shim by its v1 behaviour (multi-agent off only; `~/.cache/mipstarre-dev/owner-bin/codex.v1-20260904`) and set `max-codex` back to the sum of the two caps.\n\nNot in scope: changes to the codex configuration files, to `lane` scripts under /tmp, or to the merge daemon.\n",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/232/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/232/timeline",
   "performed_via_github_app": null,
   "state_reason": null,
   "pinned_comment": null
@@ -439,7 +355,7 @@
    "percent_completed": 0
   },
   "issue_dependencies_summary": {
-   "blocked_by": 1,
+   "blocked_by": 0,
    "total_blocked_by": 1,
    "blocking": 0,
    "total_blocking": 0
@@ -543,260 +459,6 @@
    "eyes": 0
   },
   "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/214/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/210",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/210/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/210/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/210/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/210",
-  "id": 5353928794,
-  "node_id": "I_kwDOUJyJf88AAAABPx54Wg",
-  "number": 210,
-  "title": "feat(QPBT/Combining): simultaneous polynomial measurements for general k via the combining reduction (NEEXP Theorem 4.43 from 4.40)",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 9,
-  "created_at": "2026-09-04T23:03:03Z",
-  "updated_at": "2026-09-05T12:15:59Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/166",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 0,
-   "blocking": 1,
-   "total_blocking": 1
-  },
-  "body": "Filed from the #134 Fable session (2026-09-04). The coordinatewise sandwich route to simultaneous polynomial measurements is false for k >= 2 (counterexample and Gram-matrix bound in docs/paper-gaps/qpbt_ld-simultaneous-sandwich.tex on the #134 branch, PR 191); only the k = 1 case is proved (exists_directSimultaneousPolynomialMeasurements_of_k_eq_one). The paper obtains general k (the ldc parameter) by the NEEXP combining reduction: one application of the k = 1 theorem in dimension m + k, then linearity and Schwartz-Zippel. Deliverables: formalize that reduction and prove exists_directSimultaneousPolynomialMeasurements (and through it exists_direct_ld_soundness) for all k, keeping the paper-labelled statements source-shaped. Estimate from the note: 8-15 definitions, 3000-5000 lines. Priority: after the chapter-15 route (which needs k = 1 only) is complete. Hard analytic packet: Fable or astra.",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/210/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/210/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/201",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/201/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/201/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/201/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/201",
-  "id": 5352274357,
-  "node_id": "I_kwDOUJyJf88AAAABPwU5tQ",
-  "number": 201,
-  "title": "fix(QPBT/Games): encode the pasting error contract as the source's polynomial bound and prove exists_pasting_error (#196 follow-up)",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 4,
-  "created_at": "2026-09-04T19:38:39Z",
-  "updated_at": "2026-09-05T12:09:12Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/163",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 1,
-   "blocking": 1,
-   "total_blocking": 1
-  },
-  "body": "The #196 worker proved consistencyDefect_sandwich_le (C0 = 8) and found that exists_pasting_error (MIPStarRE/QPBT/Games/Sandwich.lean, lem:pasting = Fact 4.35 of Natarajan-Wright NEEXP, blueprint ch12_qpbt_games.tex:533-564) is false as currently stated because the repository's shared scalar predicate encodes the source's poly(eta, delta) error as a product-form bound that must vanish when the collision error eta is zero even at fixed positive consistency error delta; a two-dimensional counterexample is recorded in docs/paper-gaps/qpbt_pasting-product-error.tex on branch issue-196-quantitative-sandwich-theorem. This is a formalization-side encoding error, not a gap in the source: the paper asks for a bound polynomial in both inputs (vanishing only at (0,0)). Deliverables: (1) correct the shared predicate to the source's meaning (a sum-form polynomial contract such as C * (eta^a + delta^b) with explicit positive exponents, used consistently by every consumer; list the consumers with rg), keeping the paper-labelled statement source-shaped; (2) prove exists_pasting_error with explicit constants (the note estimates 300-600 lines of consistency and Cauchy-Schwarz calculus on the existing distance calculus); (3) update the note's status section and the blueprint proof tag only when sorry-free; (4) no other hypothesis may be added. Stack on branch issue-196-quantitative-sandwich-theorem until PR 201-or-later for #196 merges. Codex packet.",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/201/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/201/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/174",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/174/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/174/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/174/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/174",
-  "id": 5348251750,
-  "node_id": "I_kwDOUJyJf88AAAABPsfYZg",
-  "number": 174,
-  "title": "workflow: replace blueprint line-range citations in Lean docstrings by label-anchored citations (merge-conflict and review churn)",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025011061,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8bdQ",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/infrastructure",
-    "name": "infrastructure",
-    "color": "ededed",
-    "default": false,
-    "description": "Foundational definitions, shared APIs, or supporting layers"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 1,
-  "created_at": "2026-09-04T12:48:03Z",
-  "updated_at": "2026-09-05T08:38:10Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 0,
-   "blocking": 0,
-   "total_blocking": 0
-  },
-  "body": "Every merge into main shifts blueprint line numbers, so the `blueprint `ch12_qpbt_games.tex:1168-1178`` style citations in Lean docstrings go stale on every branch (PR 152 round 1: nine findings, all stale spans; lanes 106, 111, 146 and 112 conflicted today on nothing but these ranges in CondLinear*.lean). Proposal for the workflow layer: (1) cite blueprint nodes by label (`blueprint `lem:cl-concat``) and paper passages by label or by an anchored snippet, (2) a script that resolves labels to current line ranges for reviewers (and can rewrite legacy citations once), (3) the review prompt stops flagging line drift once labels are used. Operator-decidable; to be run as an orc packet after the current wave.",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/174/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/174/timeline",
   "performed_via_github_app": null,
   "state_reason": null,
   "pinned_comment": null
@@ -1052,8 +714,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 17,
-   "completed": 14,
-   "percent_completed": 82
+   "completed": 15,
+   "percent_completed": 88
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
   "issue_dependencies_summary": {
@@ -1155,8 +817,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 8,
-   "completed": 4,
-   "percent_completed": 50
+   "completed": 5,
+   "percent_completed": 62
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
   "issue_dependencies_summary": {
@@ -1361,8 +1023,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 7,
-   "completed": 6,
-   "percent_completed": 85
+   "completed": 7,
+   "percent_completed": 100
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
   "issue_dependencies_summary": {
@@ -1706,7 +1368,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/167",
   "issue_dependencies_summary": {
-   "blocked_by": 2,
+   "blocked_by": 1,
    "total_blocked_by": 3,
    "blocking": 1,
    "total_blocking": 1
@@ -1876,7 +1538,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/166",
   "issue_dependencies_summary": {
-   "blocked_by": 2,
+   "blocked_by": 1,
    "total_blocked_by": 4,
    "blocking": 1,
    "total_blocking": 1
@@ -2046,7 +1708,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/165",
   "issue_dependencies_summary": {
-   "blocked_by": 2,
+   "blocked_by": 1,
    "total_blocked_by": 5,
    "blocking": 2,
    "total_blocking": 4
@@ -2066,91 +1728,6 @@
    "eyes": 0
   },
   "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/115/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/114",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/114/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/114/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/114/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/114",
-  "id": 5345139972,
-  "node_id": "I_kwDOUJyJf88AAAABPphdBA",
-  "number": 114,
-  "title": "feat(QPBT/Observables): prove expanded point operators",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-04T06:45:58Z",
-  "updated_at": "2026-09-04T12:03:21Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/165",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 1,
-   "blocking": 2,
-   "total_blocking": 2
-  },
-  "body": "<!-- mipstarre-issue-key: stage43-unfiled-observables-expanded-points -->\n### Target declarations\n\n- `MIPStarRE/QPBT/Observables/ExpandedDefs.lean:169` \u2014 `expPointOp_nonneg`\n- `MIPStarRE/QPBT/Observables/ExpandedDefs.lean:177` \u2014 `expPointOp_sum_eq_one`\n- `MIPStarRE/QPBT/Observables/ExpandedDefs.lean:201` \u2014 `expPointOp_eq_convolution`\n- `MIPStarRE/QPBT/Observables/ExpandedDefs.lean:209` \u2014 `pointMeasExp_isProjective`\n- `MIPStarRE/QPBT/Observables/ExpandedDefs.lean:229` \u2014 `expPointTrace_eq_half_add`\n\n### Paper and blueprint references\n\n- Expanded state, observables, measurements, and trace projection:\n  `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:364-418`.\n- `blueprint/src/chapter/ch14_qpbt_observables.tex:803-913`,\n  definitions `def:expanded-state` through\n  `def:expanded-point-trace-projection`.\n\n### Dependencies\n\n- #111 must merge for the underlying projective point measurements.\n- #64 and #68 must merge for axiom-clean binary Pauli projector and observable identities.\n- This packet has exclusive ownership of `ExpandedDefs.lean`.\n\n### Acceptance\n\n- All five target declarations are proved with unchanged signatures.\n- `lake env lean MIPStarRE/QPBT/Observables/ExpandedDefs.lean` and direct consumers are green.\n- Every fully discharged source definition/lemma receives proof-level\n  `\\leanok` according to the blueprint status convention.\n- No new `sorry`, `admit`, axiom, prohibited bypass, register-identification\n  assumption, or altered convolution is introduced.\n- Full build, declaration checking, blueprint rendering, exact-head CI, and\n  independent review pass.\n\n### Scope notes\n\nOwn only `ExpandedDefs.lean` and matching proof status. Preserve all six\nregister placements, heterogeneous player spaces, the fixed field basis, and\nthe exact half-plus-trace formula. Main locators are from `c1c0af4`.\n\n---\nStage 4.3 proof packet under #47.\n\nPrerequisites are recorded as GitHub issue dependencies (blocked_by); the bullets above are commentary.\n",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/114/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/114/timeline",
   "performed_via_github_app": null,
   "state_reason": null,
   "pinned_comment": null
@@ -3266,9 +2843,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 148,
+  "comments": 196,
   "created_at": "2026-09-02T08:30:04Z",
-  "updated_at": "2026-09-05T19:19:00Z",
+  "updated_at": "2026-09-05T23:22:12Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
