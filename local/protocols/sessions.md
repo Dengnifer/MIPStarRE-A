@@ -65,12 +65,11 @@ exception: the role code `orc` maps to `local/personas/orchestrator.md`.
 Until such a file is committed, `dispatch.sh` warns and falls back to a
 one-line built-in frame — enough to run, not enough for load-bearing work.
 The `mathfix` role is the source-statement repair lane governed by
-`issues-prs.md` section 6. At present, the owner session launches that lane on
-Claude Fable 5.1 through its Agent tool and records it separately in
-`results/telemetry/owner-sessions.jsonl`; `dispatch.sh --role mathfix` is used
-only for astra after its availability is reported on #26. The per-gap attempt
-and elapsed-time budget is cumulative across both routes, and the operator
-supplies that state in each request or dispatch.
+`issues-prs.md` section 6. Following the availability report on #26 and the
+September 6 owner decision, this lane uses Astra max through the dispatcher.
+Historical owner-launched Fable records remain in `owner-sessions.jsonl`.
+The per-gap attempt and working-time budget remains cumulative across routes;
+the operator supplies that state in each request or dispatch.
 
 ## 3. Naming
 
@@ -115,32 +114,52 @@ registry append; and a final report of `name`, `thread_id` and the
 last-message path.
 
 Account routing uses `--account auto|primary|second`, overriding
-`MIPSTARRE_CODEX_ACCOUNT` (default `auto`). Under a shared reservation lock,
-auto selects the smaller live/cap ratio, with primary winning ties. Live counts
-come from `$MIPSTARRE_CACHE_ROOT/accounts/<account>/<dispatcher-pid>` markers;
-each read removes stale PIDs, and exit cleanup removes the current reservation.
-Caps are positive integers in `watchdog/max-codex-primary` and
-`watchdog/max-codex-second` under that cache root (defaults 9 and 10). Full
-accounts are polled every 20 seconds for `MIPSTARRE_ACCOUNT_WAIT` seconds
-(default 1800), after which auto uses the less loaded account even above cap;
-explicit and resumed dispatches wait on their pinned account and never switch.
+`MIPSTARRE_CODEX_ACCOUNT` (default `auto`). Every admission reads
+`watchdog/account-mode` under the shared router lock: absent means `primary`;
+only `primary` and `both` are valid. Only explicit owner authorization permits
+switching to `both`. That mode reads the preserved `max_codex`, `primary`, and
+`second` capacities from `watchdog/account-mode-both-preserved.json` when present;
+neither mode rewrites settings, credentials, or historical records.
+Caps in `watchdog/max-codex-{primary,second}` default to 11 and 9; zero disables
+an account. `watchdog/max-codex` additionally caps total workers. Auto selects
+the smallest live/cap ratio among eligible accounts, with primary winning ties.
+Host Linux `/proc` observations reconcile Codex leaves with dispatcher PID
+reservations by ancestry, avoiding Node-wrapper and reservation double counts.
+Primary's twelve total slots always reserve at least one interactive main slot;
+additional interactive or unreserved worker use reduces admission capacity.
+`watchdog/primary-external-reserved` additionally reserves known non-Codex key
+use (default zero); do not duplicate processes already observed by the router.
+Unknown homes count conservatively against primary. An unavailable host view or
+unreadable live process fails closed before stale-marker cleanup. Observed dead
+reservations are removed; permission-denied PIDs remain counted. Full accounts
+poll for `MIPSTARRE_ACCOUNT_WAIT` seconds (default 1800); timeout fails without
+a reservation. Primary saturation never spills to second. Dry runs neither wait
+nor reserve and also fail when capacity or visibility is insufficient.
 Resume affinity comes from registry account fields or rollout files in either
 home; unknown, ambiguous, or conflicting selections fail before execution.
+Primary-only mode rejects secondary-affinity resume, including `auto`; it never
+relabels the old thread. `--continue-from FILE` instead starts a fresh primary
+thread. The operator supplies JSON fields `previous_session`, `checkpoint` (an
+ancestor of the worktree HEAD), and `budget_file` (the same shared budget path).
+The predecessor must be terminal and serve the same issue. The budget contains
+`anchor`, `attempt_limit`, `attempts`, `working_seconds`, and `sessions` (charged
+session names, including the predecessor). It must have an unused attempt and
+include the predecessor's time. Subsequent continuations retain the path, anchor,
+limit, and monotone charges. The new registry row links the original account and
+thread, checkpoint, shared path and budget snapshot. The operator still owns
+charging completed working time and enforcing the mathematical budget; switching
+accounts neither creates a new budget nor authorizes another attempt. Old homes,
+captures and uncommitted proof work remain untouched.
 Primary unsets inherited `CODEX_HOME`; second sets it for execution and rollout
 lookup to `MIPSTARRE_CODEX_HOME_SECOND` (default
 `~/.cache/mipstarre-dev/codex-home-yxy`). Review and autofix inherit these
-variables unchanged. New dispatch rows record the selected account and model:
-`MIPSTARRE_CODEX_MODEL` wins, otherwise a simple quoted top-level `model` ID in
-the selected home's `config.toml` is resolved and explicitly passed to the CLI.
-An unresolved model fails preflight rather than recording a guessed identity.
-Effort is resolved only after that model is known. For an astra model, omitted
-effort and the legacy `ultra` value both become `xhigh`; other explicit values
-are preserved. Non-astra effort is unchanged. The `mathfix` guard then requires
-astra at effective `xhigh`, so explicit `xhigh` and normalized legacy calls are
-accepted. New session rows record a nonempty effective CLI override as
-`requested_effort`; this is a request, not provider-measured effort. Omission on
-a historical row or a non-astra call with no override does not assert any
-provider value. Dry runs select without reserving capacity or waiting.
+variables unchanged. Every role explicitly requests `gpt-6-astra` at `max`;
+conflicting model overrides fail before reservation. Account config is preserved,
+not used to select a different active model. Omitted, `ultra`, `xhigh`, `max`, and
+other effort arguments all request `max`. The mathfix guard accepts this policy.
+New rows record the actual CLI model and `requested_effort`, not backend compute.
+No historical row is rewritten. Review and autofix fail closed if the dispatcher
+is missing; neither may fall back to an unaccounted direct launch.
 
 Preconditions the dispatcher (human or orchestrator) owns:
 

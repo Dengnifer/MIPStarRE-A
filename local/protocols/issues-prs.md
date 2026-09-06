@@ -190,17 +190,10 @@ c8f1999): read-only research data, never edited or read as active input.
 
 Pinned issue #26 is the owner inbox: it receives only decisions that require
 the human owner. A source statement found to be mathematically false does not
-go there first. The current mathematical-gap lane is a Claude Fable 5.1 session
-launched by the owner session through its Agent tool. It bypasses
-`local/bin/dispatch.sh` and is recorded in
-`results/telemetry/owner-sessions.jsonl`. A Codex main session that encounters
-a gap files a self-contained math-fix request on progress log #27 for the owner
-session instead of dispatching an ordinary Codex worker.
-
-After `results/telemetry/owner-tools/astra-poll.sh` reports on #26 that astra is
-available in Codex, the lane switches to astra through
-`MIPSTARRE_CODEX_MODEL=astra local/bin/dispatch.sh --role mathfix --effort xhigh`.
-Until that report, this Codex dispatch path is not used. Every request or
+go there first. Following the availability report on #26 and the September 6
+owner decision, the mathematical-gap lane uses Astra max through
+`MIPSTARRE_CODEX_MODEL=gpt-6-astra local/bin/dispatch.sh --role mathfix --effort max`.
+Historical owner-launched Fable measurements remain unchanged. Every request or
 dispatch carries the exact source path, label and line range; the counterexample
 or obstruction; the paper-gap note; the relevant blueprint dependency graph and
 Lean consumers; and the cumulative session count and elapsed working time.
@@ -223,7 +216,7 @@ A correction is adopted only when it meets all four conditions below.
 
 The operator iterates mathematics and Lean for at most ten `mathfix` sessions
 or about one and a half working days per gap, whichever comes first. The budget
-is shared across the owner-launched Fable lane and the future astra lane; a
+is shared across the historical owner-launched Fable lane and the Astra lane; a
 model or telemetry change does not reset it. If the correction requires
 changing a mathematical definition or game, the operator stops and escalates
 immediately. If the ordinary budget expires without a converged correction,

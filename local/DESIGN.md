@@ -149,14 +149,13 @@ All appends are one-line JSON; schemas documented in `protocols/meta.md`.
 ## Model policy
 
 - codex CLI drives orchestrator/prover/reviewer/simplifier sessions (`codex exec`,
-  `codex exec review`). Sol retains the legacy `ultra` request; astra uses
-  `xhigh`, normalized centrally by `dispatch.sh`. The dispatcher also admits the
-  `mathfix` role for astra only after `owner-tools/astra-poll.sh` reports
-  availability on #26.
-- Claude-side subagents: easy/mechanical tasks run on Opus-tier. The current
-  `mathfix` lane is Claude Fable 5.1, launched by the owner session through its
-  Agent tool and recorded in `results/telemetry/owner-sessions.jsonl`; Fable
-  otherwise remains reserved for hard reasoning (proof strategy, protocol
-  synthesis, adversarial verification).
+  `codex exec review`). Every role, including mathfix, reviewers and fixers,
+  requests `gpt-6-astra` at literal `max`. Conflicting models fail preflight;
+  all effort overrides normalize to `max`. Automatic fan-out remains disabled.
+- Account mode defaults to primary and is read on every admission. Only a later
+  explicit owner decision may restore both accounts. Primary has twelve total
+  relay slots: at least one is reserved for main, and other same-key processes
+  further reduce worker capacity. See `protocols/sessions.md` for reconciliation
+  and checkpoint continuations. Historical Sol/Fable measurements are unchanged.
 - Reviewer and prover roles must be **different sessions** — a session never
   reviews its own diff.

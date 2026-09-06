@@ -10,6 +10,7 @@
 #                         [--persona-ref REF]     trusted ref for personas (default: main)
 #                         [--no-persona]          dispatch with the built-in role frame only
 #                         [--resume THREAD_ID]    continue an existing codex thread
+#                         [--continue-from FILE]  fresh primary checkpoint/budget handoff JSON
 #                         [--account ACCOUNT]     auto|primary|second (default auto)
 #                         [--effort LEVEL]        model_reasoning_effort override
 #                         [--context-file FILE]   untrusted data to attach (repeatable)
@@ -159,6 +160,8 @@ PERSONA=""
 PERSONA_REF="${MIPSTARRE_PERSONA_REF:-main}"
 NO_PERSONA=0
 RESUME_ID=""
+CONTINUATION_FILE=""
+CONTINUATION_JSON=""
 ACCOUNT="${MIPSTARRE_CODEX_ACCOUNT:-auto}"
 ACCOUNT_WAIT="${MIPSTARRE_ACCOUNT_WAIT:-1800}"
 EFFORT=""
@@ -185,6 +188,7 @@ while [ "$#" -gt 0 ]; do
     --persona-ref) require_value "$1" "$#"; PERSONA_REF="$2"; shift 2 ;;
     --no-persona) NO_PERSONA=1; shift ;;
     --resume) require_value "$1" "$#"; RESUME_ID="$2"; shift 2 ;;
+    --continue-from) require_value "$1" "$#"; CONTINUATION_FILE="$2"; shift 2 ;;
     --account) require_value "$1" "$#"; ACCOUNT="$2"; shift 2 ;;
     --effort) require_value "$1" "$#"; EFFORT="$2"; shift 2 ;;
     --context-file)
@@ -410,6 +414,22 @@ fi
 # read directly.
 # ---------------------------------------------------------------------------
 
+if [ -n "$CONTINUATION_FILE" ]; then
+  [ -z "$RESUME_ID" ] && [ "$ACCOUNT" != second ] || die 4 "continuations use a fresh primary thread"
+  CONTINUATION_JSON="$(python3 - "$SCRIPT_DIR" "$CONTINUATION_FILE" "$REGISTRY" \
+    "$WORKTREE_ABS" "$ISSUE" <<'PY'
+import json, sys
+from pathlib import Path
+sys.path.insert(0, sys.argv[1])
+from account_router import continuation
+print(json.dumps(continuation(Path(sys.argv[2]), Path(sys.argv[3]), Path(sys.argv[4]), sys.argv[5])))
+PY
+  )" || die 4 "invalid continuation; preserve the checkpoint and shared budget"
+  ACCOUNT=primary
+  CONTEXT_FILES+=("$CONTINUATION_FILE")
+  TASK_PROMPT="Continue from the checkpoint and shared budget in the attached handoff; do not reset its anchor or charges. $TASK_PROMPT"
+fi
+
 builtin_frame() {
   case "$ROLE" in
     orc) printf '%s\n' "You are the orchestrator: you plan, split and dispatch work, and you never do the proof work yourself when a specialist session can." ;;
@@ -623,19 +643,12 @@ if [ "$ACCOUNT" = second ]; then
   ACCOUNT_ENV+=("CODEX_HOME=${MIPSTARRE_CODEX_HOME_SECOND:-$HOME/.cache/mipstarre-dev/codex-home-yxy}")
 fi
 
-# Astra does not honour the legacy `ultra` setting. Resolve effort only after
-# account routing, when the exact model selected from the account config is
-# known. Other explicit efforts and every non-astra request remain unchanged.
-case "$MIPSTARRE_CODEX_MODEL:$EFFORT" in
-  *astra*:|*astra*:ultra) EFFORT="xhigh" ;;
-esac
+EFFORT="max"
 
 if [ "$ROLE" = "mathfix" ]; then
   case "$MIPSTARRE_CODEX_MODEL:$EFFORT" in
-    *astra*:xhigh) ;;
-    *) die 4 "mathfix requires an astra model at effective effort xhigh.
-  Omitted effort and legacy --effort ultra normalize to xhigh for astra;
-  other models and effort levels are rejected for the math-fix lane." ;;
+    gpt-6-astra:max) ;;
+    *) die 4 "mathfix requires gpt-6-astra at effective effort max" ;;
   esac
 fi
 
@@ -645,6 +658,7 @@ CODEX_ARGS[${#CODEX_ARGS[@]}]="-C"
 CODEX_ARGS[${#CODEX_ARGS[@]}]="$WORKTREE_ABS"
 CODEX_ARGS[${#CODEX_ARGS[@]}]="--sandbox"
 CODEX_ARGS[${#CODEX_ARGS[@]}]="$SANDBOX"
+CODEX_ARGS+=(-c 'features.multi_agent=false' -c 'agents.max_concurrent_threads_per_session=1')
 if [ -n "$LAKE_WRITE_DIR" ]; then
   CODEX_ARGS[${#CODEX_ARGS[@]}]="--add-dir"
   CODEX_ARGS[${#CODEX_ARGS[@]}]="$LAKE_WRITE_DIR"
@@ -718,6 +732,9 @@ TELEM_ARGS=(--repo-root "$REPO_ROOT" session-summarize "$PUBLISHED_CAPTURE_DIR/$
   --start "$START_TS" --end "$END_TS" --exit-code "$CODEX_EXIT"
   --dispatcher "$DISPATCHER" --worktree "$WORKTREE_ABS"
   --append-to "$REGISTRY" --shell-out "$SUMMARY_SH")
+if [ -n "$CONTINUATION_JSON" ]; then
+  TELEM_ARGS+=(--continuation-json "$CONTINUATION_JSON")
+fi
 if [ -n "$PR_ID" ]; then
   TELEM_ARGS[${#TELEM_ARGS[@]}]="--pr"
   TELEM_ARGS[${#TELEM_ARGS[@]}]="$PR_ID"

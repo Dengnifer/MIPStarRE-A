@@ -58,7 +58,7 @@ TRUSTED_REF="${MIPSTARRE_TRUSTED_REF:-main}"
 DISPATCH="$ROOT/local/bin/dispatch.sh"
 GH_COMMON="$ROOT/local/bin/gh_common.py"
 AUTO_FIX_LABEL="${MIPSTARRE_AUTO_FIX_LABEL:-auto-fix-codex}"
-FIX_MODEL="${MIPSTARRE_FIX_MODEL:-}"
+FIX_MODEL="${MIPSTARRE_FIX_MODEL:-gpt-6-astra}"
 FIX_CAP="${MIPSTARRE_FIX_CAP:-5}"
 LOCK_WAIT="${MIPSTARRE_FIX_LOCK_WAIT:-900}"
 LOG_TAIL_LINES="${MIPSTARRE_LOG_TAIL_LINES:-400}"
@@ -249,7 +249,7 @@ run_agent() {
     local args
     args=(--role "$role" --issue "pr$PR_NUM" --pr "$PR_NUM"
           --worktree "$wt" --sandbox "$sandbox"
-          --persona "$persona" --persona-ref "$TRUSTED_REF")
+          --persona "$persona" --persona-ref "$TRUSTED_REF" --effort max)
     if [ -n "$ctx" ] && [ -s "$ctx" ]; then
       args[${#args[@]}]="--context-file"
       args[${#args[@]}]="$ctx"
@@ -275,20 +275,7 @@ run_agent() {
     return "$rc"
   fi
 
-  warn "local/bin/dispatch.sh not found; falling back to a direct 'codex exec'. This session will NOT appear in results/telemetry/sessions.jsonl."
-  command -v codex >/dev/null 2>&1 ||
-    die "codex CLI not found on PATH and no local/bin/dispatch.sh to delegate to"
-  set +e
-  if [ -n "$model" ]; then
-    MIPSTARRE_AUTOMATION=1 codex exec --sandbox "$sandbox" -C "$wt" \
-      -m "$model" -o "$out" -- "$(cat "$standalone")" >"$dlog"
-  else
-    MIPSTARRE_AUTOMATION=1 codex exec --sandbox "$sandbox" -C "$wt" \
-      -o "$out" -- "$(cat "$standalone")" >"$dlog"
-  fi
-  rc=$?
-  set -e
-  return "$rc"
+  die "dispatch.sh unavailable; refusing an unaccounted policy-bypassing launch"
 }
 
 # ------------------------------------------------------------------ arguments

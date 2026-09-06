@@ -4093,3 +4093,26 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 - Owner-requested telemetry cleanup, September 5, 2026: removed the lone leftover diff3 constructed-merge-base delimiter from events.md, preserving all real entries on both sides. The owner 22:50Z report predates PR205 merge at23:14:40Z; no PR205 recovery or worker dispatch is performed from this side conversation. Existing staged session captures, handoff messages and telemetry records are retained for a normal telemetry commit and github-sync publication; no hook or integrity gate is bypassed.
 - 2026-09-05T23:17:18Z PR195 fresh-base conflict recurred after the actual PR205 merge223f01a. Previous40cead3 was published, CI-green and independently APPROVED in round4; this is new incoming-main work, not failure of that proof review. Prior orc113 supervisor1962761 is absent and its session is done. Main resumes that completed repair through dispatch.sh at astra/xhigh, delegating conflict preservation, checked publication and CI; terminal review remains main-owned with the cap preserved. No duplicate live lane, expanded scope, new independent triage or hand merge.
 - Telemetry publication validation found20 trailing-whitespace lines in seven archived Markdown handoff/final-report files. Normalized only those flagged lines to satisfy the existing pre-commit whitespace gate; every non-whitespace token and all raw JSONL captures are unchanged. The orphan diff3 delimiter is absent from the staged incident ledger. No hook setting, infrastructure override, worker state or mathematical source was changed.
+
+## 2026-09-06 — PR238 primary relay/max amendment
+
+- Session `orc-237-20260906-02` implements the owner-authorized primary-only
+  relay/Astra-max amendment. Host inspection finds this one project worker,
+  four primary interactive processes (main plus three outside the operation),
+  no secondary project worker, and stopped supervisors 2950602/2950610.
+  The current worker ceiling remains eight; preserved both-mode settings are
+  19/10/9. No process was signalled, no mathematics launched, and no failed
+  marker removed. Issue118 retains seven completed attempts, 12452 working
+  seconds and anchor `2026-09-05T19:24:00Z`; no budget state is rewritten.
+- Refresh commit `34df914` preserves all incoming-only paths; the merge-loss
+  guard passes. Relative to incoming `36805da`, the event ledger adds exactly
+  the branch's 27 lines and deletes none. That incoming commit's intentional
+  historical duplicate cleanup is retained, not mistaken for conflict loss.
+- Focused routing/dispatcher/shim regressions pass without provider calls.
+  The owner shim `codex.astra-max-v3-20260906` and profile are installed by
+  atomic replacement, preserving old files and credential/config hashes.
+  Installation evidence is in runtime
+  `runtime-policy/237-astra-max-20260906/installed.json`. Future main v2,
+  lane v18, daemon v9 and stack-watch v4 are prepared under `/tmp`, not started.
+  Main retains supervisor lifecycle and the independent exact-head review;
+  the branch router is not installed into primary before the normal gates.

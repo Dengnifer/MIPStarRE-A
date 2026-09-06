@@ -600,6 +600,8 @@ def cmd_session_summarize(args: argparse.Namespace) -> int:
         capture=capture_field,
         rollout=None if args.no_rollout_scan else find_rollout(thread_id),
     )
+    if args.continuation_json:
+        record['continuation'] = json.loads(args.continuation_json)
 
     if args.append_to is not None:
         appended = append_session_record(args.append_to, record)
@@ -748,6 +750,7 @@ def _build_parser() -> argparse.ArgumentParser:
     summarize.add_argument("--role", choices=ROLES, help="agent role")
     summarize.add_argument("--model", help="explicitly selected Codex model")
     summarize.add_argument("--account", choices=("primary", "second"))
+    summarize.add_argument("--continuation-json", help="validated checkpoint and shared budget link")
     summarize.add_argument(
         "--requested-effort",
         help="effective reasoning effort requested from Codex, not provider measurement",

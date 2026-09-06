@@ -770,3 +770,23 @@ and model-comparison documentation now state the same model-specific policy.
 sol keeps its established request, legacy callers remain valid, and future
 session rows preserve what the dispatcher asked for without overstating what the
 provider executed.
+
+## 2026-09-06 — Primary relay and literal Astra max
+
+**Trigger:** issue #237 / PR #238; the owner's primary-relay/max decision and
+the incident entry "PR238 primary relay/max amendment" in `events.md`.
+
+**Change:** `account_router.py` reads primary/both mode at every admission,
+reconciles host processes with reservations, accounts for main and other key
+use within twelve primary slots, and rejects disabled accounts and saturated
+timeouts. Secondary threads require a fresh primary checkpoint continuation
+with linked history and the original shared mathematical budget. `dispatch.sh`,
+review and autofix request only `gpt-6-astra` at `max`, with fan-out disabled;
+missing dispatchers cannot trigger direct fallback. Session, model, mathfix and
+main-persona policies are synchronized. The owner-authorized profile/shim
+mitigation is installed atomically; future launcher/supervisor versions are
+prepared but not started. No credentials or historical measurements change.
+
+**Expected effect:** no secondary spillover, timeout overbooking, Sol launch,
+or effort-request ambiguity. Both-account settings survive for an explicit
+later owner decision; unobservable host state blocks admission.

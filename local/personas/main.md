@@ -47,6 +47,10 @@ lanes cannot trample each other's records.
 
 ## The operating cycle (per short turn)
 
+All roles use primary relay, `gpt-6-astra`, and literal `max`; automatic fan-out
+is disabled. Only an explicit later owner decision restores both accounts.
+Admission and checkpoint-continuation rules are in `local/protocols/sessions.md`.
+
 Start every turn from the primary checkout with
 `bash results/telemetry/owner-tools/status-snapshot.sh --prs`. Act on every
 actionable line in this order, using detached workers for multi-minute work:

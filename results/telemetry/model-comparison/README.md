@@ -14,6 +14,14 @@ subagents. This directory answers one question for the owner: **which roles can
 sol keep?** It is a rough, re-runnable descriptive comparison, not an
 experiment.
 
+## September 6, 2026 policy supersession
+
+The introductory policy descriptions are historical. Issue #237 / PR #238
+supersedes them: every project role requests `gpt-6-astra` at literal `max`
+using primary relay only. Sol and xhigh are not active selection options.
+Historical records remain unchanged; `requested_effort` describes the launch
+request, not a new measurement of backend compute.
+
 ## Re-run
 
     python3 results/telemetry/model-comparison/compare.py
