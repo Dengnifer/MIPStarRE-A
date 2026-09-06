@@ -833,7 +833,9 @@ lock state, the oldest exact-head CI/review-eligible PR age, and the concrete
 HOLD reason before delegating any merge. Space capacity 5 and external gate 0
 are required; successful daemon-owned merges re-read remote `main`. **Expected
 effect:** dirty-primary and stale-head stalls remain visible, and no worker or
-manual path can merge around the exact-head gate.
+ manual path can merge around the exact-head gate. Git/GitHub reads are bounded,
+ per-tick failures become HOLD records, cadence is monotonic, and stale and
+ fresh candidates are reported separately without claiming an eligibility onset.
 
 ## 2026-09-06 — Scoped native QPBT allocation switched to space/cap5
 

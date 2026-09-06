@@ -15,9 +15,11 @@ import fcntl
 import json
 import os
 from pathlib import Path
+import signal
 import subprocess
 import sys
 import time
+from typing import Any
 
 ROOT = Path(__file__).resolve().parents[3]
 CACHE = Path(os.environ.get("MIPSTARRE_CACHE_ROOT", Path.home() / ".cache/mipstarre-dev"))
@@ -27,8 +29,12 @@ LOG = DAEMON / "space-cap5.jsonl"
 GITHUB_MAIN = "refs/heads/main"
 
 
+READ_TIMEOUT_S = 30
+
+
 def git(*args: str) -> str:
-    return subprocess.check_output(["git", "-C", str(ROOT), *args], text=True).strip()
+    return subprocess.check_output(["git", "-C", str(ROOT), *args],
+                                   text=True, timeout=READ_TIMEOUT_S).strip()
 
 
 def remote_main() -> str:
@@ -64,7 +70,15 @@ def lock_quiet() -> tuple[bool, str]:
     return True, "no active fix locks"
 
 
-def eligible_prs() -> list[dict]:
+class ReadTimeout(RuntimeError):
+    pass
+
+
+def _alarm(_signum: int, _frame: Any) -> None:
+    raise ReadTimeout("GitHub eligibility read exceeded its bounded timeout")
+
+
+def eligible_prs(remote: str) -> list[dict]:
     sys.path.insert(0, str(ROOT / "local" / "bin"))
     import gh_common
 
@@ -93,51 +107,68 @@ def eligible_prs() -> list[dict]:
                     "VERDICT: COMMENTED" in body and "- [ ]" not in body):
                 unresolved += body.count("- [ ]")
                 if unresolved == 0:
+                    fresh = subprocess.run(
+                        ["git", "-C", str(ROOT), "merge-base", "--is-ancestor",
+                         remote, head], timeout=READ_TIMEOUT_S).returncode == 0
                     result.append(dict(number=number, head=head,
                                        created=pr["created_at"],
-                                       age_s=int((now - datetime.fromisoformat(
+                                       pr_age_s=int((now - datetime.fromisoformat(
                                            pr["created_at"].replace("Z", "+00:00"))).total_seconds()),
-                                       branch=pr["head"]["ref"], marker=marker))
+                                       branch=pr["head"]["ref"], marker=marker,
+                                       fresh_against_remote=fresh,
+                                       eligibility_age_s=None))
                     break
     return sorted(result, key=lambda row: row["created"])
 
 
 def tick(merge: bool) -> dict:
-    local = git("rev-parse", "main")
-    clean = not bool(git("status", "--porcelain", "--untracked-files=all"))
-    remote = remote_main()
-    reasons = []
-    if not clean:
-        reasons.append("primary worktree is dirty")
-    if local != remote:
-        reasons.append(f"local main {local[:12]} != remote {remote[:12]}")
-    ok, reason = runtime_gate()
-    if not ok:
-        reasons.append(reason)
-    locks_ok, lock_reason = lock_quiet()
-    if not locks_ok:
-        reasons.append(lock_reason)
-    candidate = eligible_prs()
-    oldest = candidate[0] if candidate else None
-    fresh = None
-    if oldest:
-        fresh = subprocess.run(
-            ["git", "-C", str(ROOT), "merge-base", "--is-ancestor", remote,
-             oldest["head"]], capture_output=True).returncode == 0
-        if not fresh:
-            reasons.append(f"oldest eligible PR {oldest['number']} is stale against remote main")
+    started = time.monotonic()
+    local = remote = None
+    clean = False
+    reason = None
+    reasons: list[str] = []
+    try:
+        local = git("rev-parse", "main")
+        clean = not bool(git("status", "--porcelain", "--untracked-files=all"))
+        remote = remote_main()
+        if not clean:
+            reasons.append("primary worktree is dirty")
+        if local != remote:
+            reasons.append(f"local main {local[:12]} != remote {remote[:12]}")
+        ok, reason = runtime_gate()
+        if not ok:
+            reasons.append(reason)
+        locks_ok, lock_reason = lock_quiet()
+        if not locks_ok:
+            reasons.append(lock_reason)
+        signal.signal(signal.SIGALRM, _alarm)
+        signal.alarm(READ_TIMEOUT_S)
+        candidate = eligible_prs(remote)
+        signal.alarm(0)
+    except Exception as exc:
+        signal.alarm(0)
+        candidate = []
+        reasons.append(f"read_failure: {type(exc).__name__}: {exc}")
+        clean = False
+    fresh_candidates = [row for row in candidate if row.get("fresh_against_remote")]
+    stale_candidates = [row for row in candidate if not row.get("fresh_against_remote")]
+    oldest = fresh_candidates[0] if fresh_candidates else None
+    if stale_candidates:
+        reasons.append("stale eligible PRs: " + ",".join(str(r["number"]) for r in stale_candidates))
     record = dict(ts=datetime.now(timezone.utc).isoformat(), local_main=local,
                   remote_main=remote, clean=clean, runtime=reason,
-                  oldest_eligible=oldest, oldest_fresh_against_remote=fresh,
-                  eligible_count=len(candidate),
+                  oldest_eligible=oldest, oldest_stale=stale_candidates,
+                  oldest_fresh_against_remote=bool(oldest),
+                  eligible_count=len(candidate), fresh_count=len(fresh_candidates),
+                  eligible_age_s=None,
                   external_admission=0, owner_total_limit=5,
                   native_descendant_limit=4, hold_reasons=reasons,
-                  action="hold")
-    if not reasons and oldest and fresh and merge:
+                  action="hold", duration_s=round(time.monotonic() - started, 3))
+    if not reasons and oldest and merge:
         record["action"] = "delegate-pr_merge"
         record["merge_exit"] = subprocess.run(
             [sys.executable, str(ROOT / "local" / "bin" / "pr_merge.py"),
-             str(oldest["number"])]).returncode
+             str(oldest["number"])], timeout=3600).returncode
     elif not oldest:
         record["hold_reasons"].append("no fresh exact-head CI/review-eligible PR")
     DAEMON.mkdir(parents=True, exist_ok=True)
@@ -167,10 +198,10 @@ def main() -> int:
             raise SystemExit("space-cap5 merge service already owns its lock")
         try:
             while True:
-                tick(args.merge)
+                record = tick(args.merge)
                 if args.once:
                     return 0
-                time.sleep(args.interval)
+                time.sleep(max(0, args.interval - float(record["duration_s"])))
         finally:
             fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
 
