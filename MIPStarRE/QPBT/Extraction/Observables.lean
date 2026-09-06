@@ -1,6 +1,7 @@
 import MIPStarRE.QPBT.Algebra.Decoding
 import MIPStarRE.QPBT.Combining.Witnesses
 import MIPStarRE.QPBT.Extraction.Defs
+import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.Reflections
 
 /-!
 # Pulled-apart Pauli observables
@@ -58,15 +59,15 @@ noncomputable def marginalPoly {P : AdmissibleParams} {epsilon delta : ℝ}
 /-- The single-basis marginal remains a projective measurement. This is the
 projectivity assertion implicit in blueprint
 `def:s-w-marginals`, paper
-`14_analysis_of_the_pauli_basis_test.tex:1421-1423`.
-
-**Proof obligation:** issue #47 tracks the preservation of projectivity under
-the finite postprocessing map `PauliKind.selectPoly`. -/
+`14_analysis_of_the_pauli_basis_test.tex:1421-1423`. Finite postprocessing
+preserves projectivity, independently of the construction of the joint
+measurement. -/
 theorem marginalPoly_isProjective {P : AdmissibleParams} {epsilon delta : ℝ}
     {S : ProjectiveSetting P epsilon} (w : GlobalPairWitness S delta)
     (side : PlayerSide) (W : PauliKind) :
     Measurement.IsProjective (w.marginalPoly side W) := by
-  sorry
+  exact SandwichProduct.postprocess_isProjective
+    (w.Smeas side) (w.projective side) W.selectPoly
 
 end GlobalPairWitness
 
@@ -121,14 +122,56 @@ noncomputable def tildeObs {P : AdmissibleParams} {epsilon delta : ℝ}
     phaseSign (fixedBinTrace P.model (P.model.basis j * a)) •
       tildeM w side W u a
 
+/-- Fourier regrouping of the dot-product effects after translating their
+outcomes. This is the change of variables in the product calculation at paper
+`14_analysis_of_the_pauli_basis_test.tex:1442-1450`, supporting blueprint
+`lem:tildew-product-form`. It uses only the definition of the coarse-graining,
+not its projectivity. -/
+private theorem sum_phaseSign_tauDotProj_sub {params : AdmissibleParams}
+    (kind : PauliKind) (vector : PauliRegister params)
+    (coefficient offset : PauliScalar params) :
+    (∑ value : PauliScalar params,
+      phaseSign (fixedBinTrace params.model (coefficient * value)) •
+        tauDotProj kind vector (offset - value)) =
+      phaseSign (fixedBinTrace params.model (coefficient * offset)) •
+        tauObservable kind (coefficient • vector) := by
+  classical
+  calc
+    _ = ∑ value : PauliScalar params,
+        phaseSign (fixedBinTrace params.model (coefficient * (offset - value))) •
+          tauDotProj kind vector value := by
+      symm
+      simpa using (Equiv.subLeft offset).sum_comp
+        (fun value => phaseSign (fixedBinTrace params.model (coefficient * value)) •
+          tauDotProj kind vector (offset - value))
+    _ = ∑ label : PauliRegister params,
+        phaseSign (fixedBinTrace params.model
+          (coefficient * (offset - dotProduct label vector))) • pauliProj kind label := by
+      simp only [tauDotProj, bracketOp, Finset.smul_sum]
+      rw [← Finset.sum_fiberwise Finset.univ (fun label => dotProduct label vector)
+        (fun label => phaseSign (fixedBinTrace params.model
+          (coefficient * (offset - dotProduct label vector))) • pauliProj kind label)]
+      apply Finset.sum_congr rfl
+      intro value _
+      apply Finset.sum_congr rfl
+      intro label hlabel
+      rw [(Finset.mem_filter.mp hlabel).2]
+    _ = _ := by
+      rw [tauObservable_eq_sum_pauliProj, Finset.smul_sum]
+      apply Finset.sum_congr rfl
+      intro label _
+      rw [smul_smul, smul_dotProduct, smul_eq_mul, dotProduct_comm vector label]
+      congr 1
+      rw [mul_sub, fixedBinTrace, map_sub, sub_eq_add_neg,
+        ZMod.neg_eq_self_mod_two, phaseSign_add]
+
 /-- Product form of the pulled-apart observable, Equation
 `eq:tildewj-product-form` of `lem:tildew-product-form`. Blueprint
 `lem:tildew-product-form`; paper
-`14_analysis_of_the_pauli_basis_test.tex:1442-1450`.
-
-**Proof obligation:** issue #47 tracks the finite Fourier regrouping needed to
-derive this equality from `tauObservable_eq_sum_pauliProj`. Discharge: expand
-the two finite sums and reindex the Pauli outcomes by their dot product. -/
+`14_analysis_of_the_pauli_basis_test.tex:1442-1450`. The finite Fourier
+regrouping uses `tauObservable_eq_sum_pauliProj` and the definitions of both
+marginalizations, independently of dot-product projectivity or consistency
+estimates. -/
 theorem tildeObs_eq_heteroKron {P : AdmissibleParams} {epsilon delta : ℝ}
     {S : ProjectiveSetting P epsilon} (w : GlobalPairWitness S delta)
     (side : PlayerSide) (W : PauliKind) (u : PauliRegister P)
@@ -140,35 +183,100 @@ theorem tildeObs_eq_heteroKron {P : AdmissibleParams} {epsilon delta : ℝ}
             (P.model.basis j * dotProduct (decodeFq (W.selectPoly pair)) u)) •
             (w.Smeas side).effect pair)
         (tauObservable W (P.model.basis j • u)) := by
-  sorry
+  classical
+  simp only [tildeObs, tildeM, Finset.smul_sum]
+  rw [Finset.sum_comm]
+  calc
+    _ = ∑ polynomial : Poly P,
+        heteroKron ((w.marginalPoly side W).effect polynomial)
+          (∑ value : PauliScalar P,
+            phaseSign (fixedBinTrace P.model (P.model.basis j * value)) •
+              tauDotProj W u (dotProduct (decodeFq polynomial) u - value)) := by
+      apply Finset.sum_congr rfl
+      intro polynomial _
+      rw [DistanceCalculus.heteroKron_finset_sum_right]
+      apply Finset.sum_congr rfl
+      intro value _
+      exact (Matrix.kronecker_smul _ _ _).symm
+    _ = heteroKron
+        (∑ polynomial : Poly P,
+          phaseSign (fixedBinTrace P.model
+            (P.model.basis j * dotProduct (decodeFq polynomial) u)) •
+              (w.marginalPoly side W).effect polynomial)
+        (tauObservable W (P.model.basis j • u)) := by
+      simp_rw [sum_phaseSign_tauDotProj_sub]
+      rw [DistanceCalculus.heteroKron_finset_sum_left]
+      apply Finset.sum_congr rfl
+      intro polynomial _
+      simp only [heteroKron, Matrix.kronecker, Matrix.kronecker_smul,
+        Matrix.smul_kronecker]
+    _ = _ := by
+      congr 1
+      simp only [GlobalPairWitness.marginalPoly, Measurement.postprocess_effect,
+        Finset.smul_sum]
+      rw [← Finset.sum_fiberwise Finset.univ W.selectPoly
+        (fun pair => phaseSign (fixedBinTrace P.model
+          (P.model.basis j * dotProduct (decodeFq (W.selectPoly pair)) u)) •
+            (w.Smeas side).effect pair)]
+      apply Finset.sum_congr rfl
+      intro polynomial _
+      apply Finset.sum_congr rfl
+      intro pair hpair
+      rw [(Finset.mem_filter.mp hpair).2]
+
+/-- The complex binary character agrees with the real sign used by the
+existing spectral-sum API. This formalization-only identity permits its use
+in the involution and commutation assertions of `lem:tildew-product-form`. -/
+private theorem phaseSign_eq_complex_bitSign (value : ZMod 2) :
+    phaseSign value = (MagicSquareRigidity.bitSign value : ℂ) := by
+  rcases zmod_two_eq_zero_or_one value with hvalue | hvalue <;>
+    subst value <;> norm_num [phaseSign, MagicSquareRigidity.bitSign, ZMod.val_one]
 
 /-- Every pulled-apart observable is Hermitian, as asserted in
 blueprint `lem:tildew-product-form`, paper
-`14_analysis_of_the_pauli_basis_test.tex:1450`.
-
-**Proof obligation:** issue #47 tracks this consequence of the product form.
-Discharge: use projectivity of `w.Smeas side` and Hermiticity of the generalized
-Pauli observable. -/
+`14_analysis_of_the_pauli_basis_test.tex:1450`. Both factors in the product
+form are real linear combinations of Hermitian measurement effects. -/
 theorem tildeObs_isHermitian {P : AdmissibleParams} {epsilon delta : ℝ}
     {S : ProjectiveSetting P epsilon} (w : GlobalPairWitness S delta)
     (side : PlayerSide) (W : PauliKind) (u : PauliRegister P)
     (j : Fin P.model.basisDim) :
     (tildeObs w side W u j).IsHermitian := by
-  sorry
+  classical
+  rw [tildeObs_eq_heteroKron]
+  change (heteroKron _ _)ᴴ = _
+  rw [MagicSquareRigidity.heteroKron_conjTranspose]
+  congr 1
+  · rw [Matrix.conjTranspose_sum]
+    apply Finset.sum_congr rfl
+    intro pair _
+    rw [Matrix.conjTranspose_smul, star_phaseSign]
+    congr 1
+    exact (w.projective side pair).isSelfAdjoint
+  · rw [tauObservable_eq_sum_pauliProj, Matrix.conjTranspose_sum]
+    apply Finset.sum_congr rfl
+    intro label _
+    rw [Matrix.conjTranspose_smul, star_phaseSign]
+    congr 1
+    simp [pauliProj, Pi.star_def]
 
 /-- Every pulled-apart observable squares to the identity, as asserted in
 blueprint `lem:tildew-product-form`, paper
-`14_analysis_of_the_pauli_basis_test.tex:1450`.
-
-**Proof obligation:** issue #47 tracks this consequence of the product form.
-Discharge: eliminate cross terms using the orthogonality of `w.Smeas side` and
-use that `tauObservable` is self-inverse. -/
+`14_analysis_of_the_pauli_basis_test.tex:1450`. Orthogonality and completeness
+of the joint measurement make its sign-weighted sum an involution, as is the
+generalized Pauli factor. -/
 theorem tildeObs_mul_self {P : AdmissibleParams} {epsilon delta : ℝ}
     {S : ProjectiveSetting P epsilon} (w : GlobalPairWitness S delta)
     (side : PlayerSide) (W : PauliKind) (u : PauliRegister P)
     (j : Fin P.model.basisDim) :
     tildeObs w side W u j * tildeObs w side W u j = 1 := by
-  sorry
+  classical
+  have hsquare := MagicSquareRigidity.signObs_mul_self
+    (w.Smeas side) (w.projective side)
+    (fun pair => fixedBinTrace P.model
+      (P.model.basis j * dotProduct (decodeFq (W.selectPoly pair)) u))
+  simp only [MagicSquareRigidity.signObs, ← phaseSign_eq_complex_bitSign] at hsquare
+  rw [tildeObs_eq_heteroKron, heteroKron_mul, hsquare, tauObservable_sq,
+    heteroKron_one_one]
 
 /-- The corrected twisted commutation relation for pulled-apart observables.
 This is Equation `eq:tildew-twisted-commutation` in blueprint
@@ -177,8 +285,8 @@ This is Equation `eq:tildew-twisted-commutation` in blueprint
 
 **Local fix:** the paper drops this phase when `j != j'`, which is false for
 general register vectors; see `docs/paper-gaps/qpbt_cross-basis-phase.tex`.
-Issue #47 tracks the proof. Discharge: combine both product forms with
-`tauObservable_X_mul_Z`. -/
+The sign-weighted sums of the joint projectors commute, leaving exactly the
+phase of `tauObservable_X_mul_Z`. -/
 theorem tildeObs_twisted_commutation {P : AdmissibleParams}
     {epsilon delta : ℝ} {S : ProjectiveSetting P epsilon}
     (w : GlobalPairWitness S delta) (side : PlayerSide)
@@ -187,7 +295,20 @@ theorem tildeObs_twisted_commutation {P : AdmissibleParams}
       phaseSign (fixedBinTrace P.model
         (P.model.basis j * P.model.basis j' * dotProduct u v)) •
         (tildeObs w side .Z v j' * tildeObs w side .X u j) := by
-  sorry
+  classical
+  have hcomm := MagicSquareRigidity.signObs_comm
+    (w.Smeas side) (w.projective side)
+    (fun pair => fixedBinTrace P.model
+      (P.model.basis j * dotProduct (decodeFq (PauliKind.X.selectPoly pair)) u))
+    (fun pair => fixedBinTrace P.model
+      (P.model.basis j' * dotProduct (decodeFq (PauliKind.Z.selectPoly pair)) v))
+  simp only [MagicSquareRigidity.signObs, ← phaseSign_eq_complex_bitSign] at hcomm
+  rw [tildeObs_eq_heteroKron, tildeObs_eq_heteroKron,
+    heteroKron_mul, heteroKron_mul, tauObservable_X_mul_Z,
+    MagicSquareRigidity.heteroKron_smul_right, hcomm]
+  congr 2
+  simp only [fixedBinTrace, smul_dotProduct, dotProduct_smul, smul_eq_mul,
+    mul_assoc, mul_left_comm]
 
 /-! ## Swap conjugation -/
 
