@@ -148,7 +148,7 @@ listed here; no additional mathematical discrepancy is asserted.
 | `swapUnitary_mul_conjTranspose` | Joint-projector orthogonality and Pauli involution identities. | Lines 1687–1699. |
 | `conjTranspose_mul_swapUnitary` | The reverse orthogonal-projector calculation. | Lines 1687–1699. |
 | `swapUnitary_conj_tildeObs` | The now-proved product form, diagonal projector reduction, and Pauli commutation. | Lines 1701–1713. |
-| `swapUnitary_conj_tildeM` | Expansion of dot-product effects and Pauli conjugation of their rank-one summands. | Lines 1701–1713. |
+| `swapUnitary_conj_tildeM` | Expansion of dot-product effects and Pauli conjugation of their rank-one summands. | Lines 1805–1822, `eq:qld-unitary-6`. |
 
 `exists_globalPairWitness` in `QPBT/Combining/Apply.lean` remains open, as do
 the subsequent extraction and consistency obligations. Its source-import
