@@ -277,7 +277,7 @@ private theorem stateQForm_reindex
       e.symm.sum_comp (fun i : I => (∑ k : I, M i k * ψ.ofLp k) * star (ψ.ofLp i))
 
 /-- The product POVM whose effects are Kronecker products of the two factor effects. -/
-private noncomputable def tensorMeasurement
+noncomputable def tensorMeasurement
     {α β I J : Type*} [Fintype α] [Fintype β]
     [Fintype I] [DecidableEq I] [Fintype J] [DecidableEq J]
     (A : Measurement α I) (B : Measurement β J) :
@@ -302,6 +302,37 @@ private noncomputable def tensorMeasurement
           rw [rightTensor_finset_sum, B.sum_eq_one, rightTensor_one]
           simp_rw [Matrix.mul_one]
           rw [leftTensor_finset_sum, A.sum_eq_one, leftTensor_one])
+
+/-- Relabeling the two outcomes separately commutes with taking the product POVM. -/
+theorem tensorMeasurement_postprocess
+    {FirstOutcome SecondOutcome FirstLabel SecondLabel FirstSpace SecondSpace : Type*}
+    [Fintype FirstOutcome] [DecidableEq FirstOutcome]
+    [Fintype SecondOutcome] [DecidableEq SecondOutcome]
+    [Fintype FirstLabel] [DecidableEq FirstLabel]
+    [Fintype SecondLabel] [DecidableEq SecondLabel]
+    [Fintype FirstSpace] [DecidableEq FirstSpace]
+    [Fintype SecondSpace] [DecidableEq SecondSpace]
+    (firstMeas : Measurement FirstOutcome FirstSpace)
+    (secondMeas : Measurement SecondOutcome SecondSpace)
+    (firstMap : FirstOutcome → FirstLabel) (secondMap : SecondOutcome → SecondLabel) :
+    tensorMeasurement (firstMeas.postprocess firstMap) (secondMeas.postprocess secondMap) =
+      (tensorMeasurement firstMeas secondMeas).postprocess (Prod.map firstMap secondMap) := by
+  apply MIPStarRE.Quantum.Measurement.ext
+  intro ⟨firstLabel, secondLabel⟩
+  change heteroKron
+      (∑ first ∈ Finset.univ.filter (fun first => firstMap first = firstLabel),
+        firstMeas.effect first)
+      (∑ second ∈ Finset.univ.filter (fun second => secondMap second = secondLabel),
+        secondMeas.effect second) =
+    ∑ outcomes ∈ Finset.univ.filter
+        (fun outcomes => Prod.map firstMap secondMap outcomes = (firstLabel, secondLabel)),
+      heteroKron (firstMeas.effect outcomes.1) (secondMeas.effect outcomes.2)
+  rw [heteroKron_finset_sum_left]
+  simp_rw [heteroKron_finset_sum_right, Finset.sum_filter]
+  rw [Fintype.sum_prod_type]
+  apply Finset.sum_congr rfl
+  intro first _
+  by_cases hfirst : firstMap first = firstLabel <;> simp [hfirst]
 
 /-- The product of two projective POVMs is projective. -/
 private theorem tensorMeasurement_isProjective
