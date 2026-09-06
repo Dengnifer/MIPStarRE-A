@@ -4459,3 +4459,13 @@ bounded PR238 amendment and normal gates.
   primary tools with a 14400-second build-lock wait. No subagent, author review,
   PR merge call or direct primary-main installation is authorized. CI evidence
   remains the scripts' responsibility; no success is claimed before it exists.
+
+### 2026-09-06 — PR260 deterministic CI launch recovery
+
+The initial nohup launcher queued exact-head CI for `3b0ca7f`, then its process
+and CI child disappeared while waiting for the live cache-warmer lock, without
+an exit result. No CI success is inferred from the pending statuses. The author
+records this interruption and relaunches deterministic CI in a separate OS
+session with the same 14400-second wait; the warmer and its lock stay untouched.
+No reviewer/subagent is launched. The final handoff reports the actual process
+and exact-head status rather than treating a launch command as completion.
