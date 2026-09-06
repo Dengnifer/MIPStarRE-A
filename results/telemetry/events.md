@@ -5229,3 +5229,9 @@ the previous04:30 observation;247<-237 native dependency is recorded.
   The commit-object audit issued during that wait checked the old HEAD and is
   not evidence for the refresh; a new audit checks `9f6df07` explicitly.
   Publication is retried only after the completed command and a clean checkout.
+- The next normal pre-push gate stopped because the private build tree lacked
+  incoming PR195 module `WinImplications.Approx.olean`. The source was intact;
+  the gate opened no push transport. A targeted
+  `lake build MIPStarRE.QPBT.Observables.WinImplications` prepares the incoming
+  module dependencies before retrying the same gate. No full build, shared-cache
+  write, source repair, or hook bypass is used for this preparation.
