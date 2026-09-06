@@ -297,8 +297,8 @@ theorem exists_pointObs_commutator_comm_le_alice :
           S.toStrategy.ψ‖ ^ 2) ≤ C * (ε + Real.sqrt ε) := by
   classical
   obtain ⟨C₁, hC₁, hgen⟩ := exists_pointObs_commutator_comm_le
-  obtain ⟨Cc, hCc, hcc⟩ := win_comm_cons_proof
-  obtain ⟨Cm, hCm, hcm⟩ := win_comm_proof
+  obtain ⟨Cc, hCc, hcc⟩ := win_comm_cons
+  obtain ⟨Cm, hCm, hcm⟩ := win_comm
   have hcard : (1 : ℝ) ≤ (Fintype.card PauliEdge : ℝ) := by
     exact_mod_cast (Fintype.card_pos : 0 < Fintype.card PauliEdge)
   set K : ℝ := 2 * (Fintype.card PauliEdge : ℝ) + Cm with hKdef

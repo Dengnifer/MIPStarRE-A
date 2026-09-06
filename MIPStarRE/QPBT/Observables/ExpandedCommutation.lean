@@ -247,7 +247,7 @@ theorem exists_twistedCommutator_avg_le :
                   (phaseSign (gammaValue P ω.1 ω.2.1 ω.2.2.1 ω.2.2.2) •
                     (S.pointObs .bob .Z ω.2.2.2 ω.2.1 *
                       S.pointObs .bob .X ω.2.2.1 ω.1)) :=
-            MagicSquareRigidity.heteroKron_sub_right _ _ _
+            heteroKron_sub_right _ _ _
           rw [← MagicSquareRigidity.heteroKron_smul_right]
           exact h1
         rw [hop]

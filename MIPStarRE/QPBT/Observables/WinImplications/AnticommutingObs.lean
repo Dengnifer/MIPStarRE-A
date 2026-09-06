@@ -192,7 +192,7 @@ theorem msVarObs_anticommutator_le (S : Strategy msGame) (ε : ℝ) (hε : 0 ≤
             obsOf ((S.B (.var 4)).postprocess msBitOrZero) *
               obsOf ((S.B (.var 0)).postprocess msBitOrZero))) := by
     simp only [heteroKron_mul, one_mul, sub_neg_eq_add, naimarkInflation_mul,
-      ← MagicSquareRigidity.heteroKron_add_right, naimarkInflation_add]
+      ← heteroKron_add_right, naimarkInflation_add]
   rw [hL, norm_heteroKron_one_naimarkInflation] at htrans
   have hclose := MagicSquareRigidity.msVarObsB_anticommute S ε hwin
   rw [msVarObsB_eq, msVarObsB_eq] at hclose
@@ -334,7 +334,7 @@ theorem msVarObsA_anticommutator_le (S : Strategy msGame) (ε : ℝ) (hε : 0 �
               obsOf ((S.A (.var 0)).postprocess msBitOrZero)))
         (1 : Op (S.ιB × Option MsAnswer)) := by
     simp only [heteroKron_mul, one_mul, sub_neg_eq_add, naimarkInflation_mul,
-      ← MagicSquareRigidity.heteroKron_add_left, naimarkInflation_add]
+      ← heteroKron_add_left, naimarkInflation_add]
   rw [hL, norm_heteroKron_naimarkInflation_one] at htrans
   have hclose := MagicSquareRigidity.msVarObsA_anticommute S ε hwin
   rw [msVarObsA_eq, msVarObsA_eq] at hclose
@@ -557,7 +557,7 @@ theorem opDistSq_eq_avgOver {X ι : Type*} [Fintype X] [DecidableEq X]
 /-- Every strategy value is at most one. Formalization-only support for
 `def:tensor-product-value`, blueprint `ch12_qpbt_games.tex:71-82`. -/
 theorem strategy_value_le_one {G : Game} (S : Strategy G) : S.value ≤ 1 := by
-  have h := rejectionMass_eq_one_sub_value S
+  have h := rejectionEventAverage_eq_one_sub_value S
   have hnn : (0 : ℝ) ≤ avgOver G.μ (fun questions =>
       outcomeEventWeight S questions.1 questions.2 fun a b =>
         G.decide questions.1 questions.2 a b = false) :=
@@ -662,7 +662,7 @@ theorem obs_anticommutator_avg_le {P : AdmissibleParams} {ιL ιR : Type}
         (heteroKron (OZ ω * OX ω) (1 : Op ιR) -
           heteroKron (1 : Op ιL) (V0 ω * V4 ω)) +
         heteroKron (1 : Op ιL) (V0 ω * V4 ω + V4 ω * V0 ω) := by
-      rw [MagicSquareRigidity.heteroKron_add_right]
+      rw [heteroKron_add_right]
       abel
     set t1 : ℝ := ‖applyOperatorToState (heteroKron (OX ω) (1 : Op ιR) -
       heteroKron (1 : Op ιL) (V0 ω)) χ‖ with ht1
@@ -758,8 +758,8 @@ theorem exists_pointObs_anticommutator_anticomm_le :
               S.pointObs .alice .X ω.2.2.1 ω.1) (1 : Op S.toStrategy.ιB))
           S.toStrategy.ψ‖ ^ 2) ≤ C * ε := by
   classical
-  obtain ⟨Cms, hCms, hms⟩ := win_ms_cons_proof
-  obtain ⟨Cv, hCv, hv⟩ := win_magic_square_proof
+  obtain ⟨Cms, hCms, hms⟩ := win_ms_cons
+  obtain ⟨Cv, hCv, hv⟩ := win_magic_square
   refine ⟨96 * Cms + 3551040 * Cv, by nlinarith, ?_⟩
   intro P ε S hε
   simp only [pointObs_eq_obsOf]

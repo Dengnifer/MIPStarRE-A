@@ -224,7 +224,7 @@ theorem exists_pointObs_anticommutator_anticomm_le_bob :
           S.swappedState‖ ^ 2) ≤ C * ε := by
   classical
   obtain ⟨Cms, hCms, hms⟩ := win_ms_cons_swapped_proof
-  obtain ⟨Cv, hCv, hv⟩ := win_magic_square_proof
+  obtain ⟨Cv, hCv, hv⟩ := win_magic_square
   refine ⟨96 * Cms + 3551040 * Cv, by nlinarith, ?_⟩
   intro P ε S hε
   simp only [pointObs_eq_obsOf]

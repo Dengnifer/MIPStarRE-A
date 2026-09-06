@@ -72,7 +72,7 @@ theorem pointConsistency_eq_mismatch {P : AdmissibleParams} {ε : ℝ}
         (fun u c => heteroKron 1
           (((S.toStrategy.B (q u)).postprocess (f u)).effect c))
         S.toStrategy.ψ :=
-          WinImplications.consistencyDefect_congr _ _ _ _ _ _ hA hB
+          consistencyDefect_congr _ _ _ _ _ _ hA hB
     _ = avgOver (uniformDistribution X) (fun u =>
         outcomeEventWeight S.toStrategy (q u) (q u)
           (fun A B => f u A ≠ f u B)) := h
