@@ -806,3 +806,14 @@ sessions, and no budget reset or provenance loss across resumes or append failur
 omitted/legacy ultra map to max, other values fail. Shared history parsing tolerates
 non-record damage but validates relevant continuation metadata; budget rules persist.
 **Expected effect:** ordinary resumes recover, explicit xhigh survives, verification stays honest.
+
+## 2026-09-06 — Main-selected useful-work queue with adoption holds
+
+**Trigger:** #257; `events.md`, "Explicit useful-work admissions need durable
+handoff reservations" (`orc-257-20260906-01`, continued as `-02`).
+**Change:** `useful-queue.md` and queue/router/dispatch/review guards add explicit
+one-shot packets, parent-merge bindings, ceiling ten, two-slot reviews, adoption
+holds and stop-without-kill. Runtime stays outside git; only main selects work.
+**Expected effect:** no overbooking, duplicate writers, stale/fifth-round reviews
+or blind retries. Process counts are not server admission. Normal CI/independent
+review precede deployment; this amendment does not install or start anything.

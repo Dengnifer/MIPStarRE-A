@@ -4382,3 +4382,19 @@ bounded PR238 amendment and normal gates.
   is made. Operators should distinguish successful completions, retries and
   compaction failures in existing logs rather than infer productive requests,
   RPM/TPM, server in-flight counts or recovery from process occupancy alone.
+
+## 2026-09-06 — Explicit useful-work admissions need durable handoff reservations
+
+- Issue #257 reports completion bursts and relay concurrency refusals during
+  manually replenished work. The source at PR #238's actual merge
+  `32a32edee16d3932525e4b1da9f84009e1fbb13b` accounts for dispatcher processes
+  but has no main-selected queue intent covering the interval before dispatch
+  claims its slot. Normal review can start code and prose lanes concurrently
+  and retries a short zero-token failure, neither of which licenses treating
+  an uncertain launch as absent. The amendment adds shared durable tickets,
+  conservative two-slot review reservations and adoption holds, with default
+  admissions off and a ten-worker recovery ceiling. Process counts and test
+  fixtures remain distinct from server admission evidence. This session
+  (`orc-257-20260906-01`) changes branch source only: production history
+  reconciliation, deployment, exact-head PR CI and independent review are
+  separate operator gates; no reviewer may be spawned in this session.

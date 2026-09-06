@@ -328,6 +328,9 @@ An oversized prompt has already cost this project one stalled agent
 
 ## 9. Kill switches
 
+`useful-queue.md` governs opt-in durable reservations, duplicate-worktree
+exclusion, one-shot claims and stop-without-kill semantics; no queued resumes.
+
 `LOCAL_REVIEW_ENABLED` and `LOCAL_AUTO_FIX_ENABLED` disable their subsystem
 **only** when set to the literal string `false`. Unset, empty, `0`, `no` and
 `False` all mean enabled (`DESIGN.md` invariant 4 — the parent's repo
