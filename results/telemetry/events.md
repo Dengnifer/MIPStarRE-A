@@ -5235,3 +5235,18 @@ the previous04:30 observation;247<-237 native dependency is recorded.
   `lake build MIPStarRE.QPBT.Observables.WinImplications` prepares the incoming
   module dependencies before retrying the same gate. No full build, shared-cache
   write, source repair, or hook bypass is used for this preparation.
+- The targeted build completed successfully, retaining the three existing
+  public-wrapper `sorry` warnings. The following normal publication attempt
+  passed all six incoming-file Lean checks and progressed through statement
+  audits and blueprint rendering before session -05 reached its 600-second
+  timeout. On continuation, no publication process remained and GitHub still
+  reported `6ca89e8`, so publication was not claimed as successful.
+- Main authorizes session `orc-257-20260906-06` for one further bounded
+  600-second completion continuation. Primary session registry row 839 records
+  -05 as failed, exit 124, 600 seconds; rows 792/809/812/828 retain the earlier
+  1800/1200/743/1114 seconds. These 5457 prior session seconds remain cumulative,
+  and zero final usage fields on timed-out captures do not imply zero cost.
+  This continuation retries normal checked publication using the prepared
+  private artifacts and detaches canonical exact-head CI with a 14400-second
+  full-build-lock wait. Proxy settings apply only to publication and CI child
+  commands. No implementation, review, merge-to-main or deployment is added.
