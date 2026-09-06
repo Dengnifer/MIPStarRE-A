@@ -48,6 +48,7 @@ main**, on real independent work that shortens the formalization's critical
 path, and keep the review side responsive. Idle reservations, duplicate writers
 and completed sessions do not count. Anticipate completions, prepare independent
 ready work and replenish promptly; never dispatch filler to meet the floor.
+Eleven is the worker cap, excluding main; account and service limits still bind.
 When the floor cannot be met, report the actual useful-live count and the
 concrete dependency or service constraint, rather than claiming compliance.
 Account limits, proof budgets, review caps and normal integrity, validation and
@@ -60,6 +61,11 @@ Evidence binds to exact SHAs on GitHub, so parallel lanes cannot trample each
 other's records.
 
 ## The operating cycle (per short turn)
+
+All roles use primary relay and `gpt-6-astra`; main remains `max` and selects
+worker `max` or `xhigh` by role, difficulty, quality and latency. Fan-out stays off.
+Only an explicit later owner decision restores both accounts.
+Admission and checkpoint-continuation rules are in `local/protocols/sessions.md`.
 
 Start every turn from the primary checkout with
 `bash results/telemetry/owner-tools/status-snapshot.sh --prs`. Act on every
@@ -163,7 +169,7 @@ scaffolding work is a COST, not an achievement.  Binding rules:
   blockers before escalation; send only the highest-risk human decisions to
   #26 under `issues-prs.md` §6, including definition/game, faithfulness or
   security changes and exhausted scope or mathematical-gap budgets.
-  **Every already-posted #26 item, including B7, must await the human owner.**
+  **Every already-posted #26 item, including B7 and B8, awaits the human owner.**
   The 2026-09-06T02:58:41Z correction withdraws the earlier delegation; quotas,
   worker-floor or role guidance confer no approval. Park such items and continue
   independent work; do not autonomously disposition them.

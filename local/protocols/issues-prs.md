@@ -197,7 +197,7 @@ Definition/game changes, faithfulness-policy exceptions, security or credential
 decisions, scope-budget overrides and exhausted mathematical-gap budgets remain
 mandatory owner escalations. Routine authority does not waive these boundaries.
 
-**Every item already posted in #26, including B7, must await the human owner's
+**Every item already posted in #26, including B7 and B8, awaits the human owner's
 decision**, even if main would otherwise regard it as routine. The owner
 correction recorded at 2026-09-06T02:58:41Z withdraws the 02:55:29Z delegation of
 existing inbox items (issue #247). Do not autonomously disposition these items
@@ -223,19 +223,11 @@ its dataset; refine guidance through normal reviewed amendments and EVOLUTION.
 No benchmark, probe, filler session or gate/budget relaxation follows from this.
 
 A source statement found to be mathematically false does not go to #26 first
-unless it requires a mandatory escalation above. The current mathematical-gap
-lane is a Claude Fable 5.1 session
-launched by the owner session through its Agent tool. It bypasses
-`local/bin/dispatch.sh` and is recorded in
-`results/telemetry/owner-sessions.jsonl`. A Codex main session that encounters
-a gap files a self-contained math-fix request on progress log #27 for the owner
-session instead of dispatching an ordinary Codex worker.
-
-After `results/telemetry/owner-tools/astra-poll.sh` reports on #26 that astra is
-available in Codex, the lane switches to astra through
+unless it requires a mandatory escalation above. Following the availability
+report on #26 and the September 6 owner decision, the mathematical-gap lane uses
 `local/bin/dispatch.sh --role mathfix` on primary/`gpt-6-astra`, with the exact
 `--effort max` or `--effort xhigh` chosen by main under the policy above.
-Until that report, this Codex dispatch path is not used. Every request or
+Historical owner-launched Fable measurements remain unchanged. Every request or
 dispatch carries the exact source path, label and line range; the counterexample
 or obstruction; the paper-gap note; the relevant blueprint dependency graph and
 Lean consumers; and the cumulative session count and elapsed working time.
@@ -258,7 +250,7 @@ A correction is adopted only when it meets all four conditions below.
 
 The operator iterates mathematics and Lean for at most ten `mathfix` sessions
 or about one and a half working days per gap, whichever comes first. The budget
-is shared across the owner-launched Fable lane and the future astra lane; a
+is shared across the historical owner-launched Fable lane and the Astra lane; a
 model or telemetry change does not reset it. If the correction requires
 changing a mathematical definition or game, the operator stops and escalates
 immediately. If the ordinary budget expires without a converged correction,

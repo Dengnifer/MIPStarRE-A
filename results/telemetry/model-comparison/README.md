@@ -1,6 +1,13 @@
 # codex model comparison — `gpt-5.6-sol` vs `gpt-6-astra`
 
-Both models run at the same reasoning effort: the global default `model_reasoning_effort = "ultra"` in the codex configuration on ghz applies to every dispatched session, and the owner decided (2026-09-05) not to lower it for the easy sol tasks, so the tables compare sol and astra at ultra effort throughout.
+The historical tables do not establish equal effort or stratify runs by verified
+effort. The six saved Astra probes on September 5, 2026 record requested/client
+`ultra` → completion `medium`, `max` → `max`, and `xhigh` → `xhigh`, once per
+account/effort pair. These are configuration observations, not project-quality
+samples or measurements of backend computation. They do not relabel all earlier
+Astra runs as medium or establish every historical Sol run's effort. See the
+[probe records](../owner-messages/qpbt-meta-20260905-230133/effort-probes.json)
+and [initial project observations](astra-effort-20260906.md).
 
 A side product of the model switch on 2026-09-05: `gpt-6-astra` became the
 default for codex sessions at 2026-09-05T15:46Z, and `gpt-5.6-sol` — used for
@@ -8,6 +15,19 @@ everything before that — is now kept by operator choice for "really easy"
 subagents. This directory answers one question for the owner: **which roles can
 sol keep?** It is a rough, re-runnable descriptive comparison, not an
 experiment.
+
+## September 6, 2026 policy supersession
+
+The introductory policy descriptions are historical. Issue #237 / PR #238
+supersedes them: every project role requests `gpt-6-astra` using primary relay only.
+The 03:26 UTC owner update keeps main at `max` and lets main select worker `max`
+or `xhigh` by role, difficulty, quality and latency. Sol is not an active option.
+Historical records remain unchanged; `requested_effort` describes the launch
+request, not a new measurement of backend compute.
+
+The [post-merge integration note](astra-effort-integration-20260906.md) links the
+archived API-max/official-Ultra finding without identifying those modes or
+changing the max/xhigh policy. Historical run logs and reports remain unchanged.
 
 ## Re-run
 
@@ -45,6 +65,11 @@ and reports how many rows came from each source:
 
 Models other than sol and astra appear as their own rows when they show up
 (smoke tests have used `gpt-5.6-luna` and `gpt-5`).
+
+New rows may also contain `requested_effort`, the effective override passed to
+the CLI after dispatcher normalization. It is request telemetry, not a measured
+provider response. Historical rows omit it, and the September 5 probes above
+remain the evidence for provider-reported effort in those sessions.
 
 ## Reading the tables
 
