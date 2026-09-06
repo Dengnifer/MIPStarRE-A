@@ -5292,3 +5292,15 @@ the previous04:30 observation;247<-237 native dependency is recorded.
   Both model-review rounds are exhausted; main retains terminal disposition
   after normal publication and detached CI. No third review, automatic adverse
   override, deployment, probe or merge is performed by this author session.
+
+- 2026-09-06 -- PR270 integration, session `orc-268-20260906-02`: merged actual
+  main `ba299326` into the approved baseline `4b2f9d9` as `58b13db`, preserving
+  both source changes and both parents' incident records. All 53 focused tests
+  and 560 full-suite tests passed through the normal hooks. The first checked
+  publication of the integration stalled before the push, with the HTTPS
+  `ls-remote` child in TCP `SYN-SENT` to GitHub. Terminated only that read child;
+  checked push returned 2 and `gh_common.py` confirmed the PR head remained
+  `4b2f9d9`. Retry uses the existing local proxy with command-scoped Git settings.
+  No persistent transport setting, installed runtime, review count or gate changed.
+  Evidence: `~/.cache/mipstarre-dev/pr270-integration-20260906/publication.log`
+  and `publication.json`; source/full-patch comparisons are in the same directory.
