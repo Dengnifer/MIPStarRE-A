@@ -4219,3 +4219,20 @@ boundary comment is updated in place with these final supervisor handles;
 no second comment or extra review is created. Implementer supervisor2326711
 remains live under primary/max. Persistent router semantics still await the
 bounded PR238 amendment and normal gates.
+
+## 2026-09-06 — Issue 239 publication detects a stale root environment
+
+- Session `orc-239-20260906-01`, issue #239: the first normal `pr_open.py`
+  attempt at `7cc1ea91f985f62cf38a6d39b165a6bf6dc033a5` exited 2 before
+  publication because the pre-push declaration checker could not resolve
+  existing Schmidt-mirror and related declarations in the cached root module.
+  The ignored declaration list had been regenerated normally; the targeted
+  proof and axiom checks passed. Rebuilding only the edited module was
+  insufficient to refresh the root environment. Recovery uses the primary
+  `warm-worktree.sh --build --skip-packages --lock-timeout 60` consumer helper,
+  preserving the private build directory and taking the machine-wide lock.
+  The complete declaration check and checked publication must then be rerun.
+  Evidence: `~/.cache/mipstarre-dev/sessions/orc-239-20260906-01/pr-open.log`
+  and `preflight-full-build.log`. No generated list is committed, no hook is
+  bypassed, and no shared cache is written. A proof-only change can still
+  require a root-artifact rebuild at the publication gate.

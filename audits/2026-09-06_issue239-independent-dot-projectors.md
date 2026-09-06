@@ -131,3 +131,15 @@ change is included in this packet. Logs are under
 The statement-integrity verdict remains faithful boundary hypotheses. Checked
 publication and exact-head CI are separate gates; independent review and merge
 are not performed by this preflight session.
+
+The first checked-publication attempt was rejected before creating a PR:
+the canonical generated list passed surface synchronization, but `checkdecls`
+could not resolve existing declarations in the cached root environment,
+including the Schmidt-mirror family. Refreshing only the edited module does not
+refresh every module imported by the root. A worktree-private full rebuild is
+therefore required for publication, despite the unchanged proof signatures.
+The normal consumer helper runs it under the machine-wide lock with
+`--build --skip-packages --lock-timeout 60`, without replacing the private
+build directory or writing shared packages. The next checks are the complete
+declaration list and a fresh checked-publication attempt; their logs remain in
+the session's runtime directory. No source repair or hook bypass is used.
