@@ -41,7 +41,7 @@
 #   MIPSTARRE_TRUSTED_REF      git ref the reviewer personas are read from
 #                              (default: main).  Never the branch under review.
 #   MIPSTARRE_REVIEW_MODEL     codex model for the code review
-#                              (default: gpt-5.6-sol)
+#                              (required: gpt-6-astra)
 #   MIPSTARRE_PROSE_MODEL      codex model for the blueprint prose review
 #                              (default: MIPSTARRE_REVIEW_MODEL)
 #   MIPSTARRE_CACHE_ROOT        runtime state root (default ~/.cache/mipstarre-dev)
@@ -51,7 +51,7 @@
 #   MIPSTARRE_CITATION_MAX_BYTES bytes reserved for the derived blueprint
 #                              citation map (default 30000)
 #   MIPSTARRE_REVIEW_TIMEOUT   reviewer safety timeout in seconds (default 10800)
-#   MIPSTARRE_REVIEW_EFFORT    pinned reasoning effort (default ultra)
+#   MIPSTARRE_REVIEW_EFFORT    max (default) or xhigh; legacy ultra maps to max
 #   MIPSTARRE_GITHUB_REPO      owner/repo override for gh_common.py
 #
 set -euo pipefail
@@ -81,13 +81,18 @@ GH_COMMON="$BIN_DIR/gh_common.py"
 CACHE="${MIPSTARRE_CACHE_ROOT:-$HOME/.cache/mipstarre-dev}"
 TRUSTED_REF="${MIPSTARRE_TRUSTED_REF:-main}"
 DISPATCH="$ROOT/local/bin/dispatch.sh"
-REVIEW_MODEL="${MIPSTARRE_REVIEW_MODEL:-${MIPSTARRE_CODEX_MODEL:-gpt-5.6-sol}}"
+REVIEW_MODEL="${MIPSTARRE_REVIEW_MODEL:-${MIPSTARRE_CODEX_MODEL:-gpt-6-astra}}"
 PROSE_MODEL="${MIPSTARRE_PROSE_MODEL:-$REVIEW_MODEL}"
 LOCK_WAIT="${MIPSTARRE_REVIEW_LOCK_WAIT:-1800}"
 DIFF_MAX_LINES="${MIPSTARRE_DIFF_MAX_LINES:-4000}"
 CITATION_MAX_BYTES="${MIPSTARRE_CITATION_MAX_BYTES:-30000}"
 REVIEW_TIMEOUT="${MIPSTARRE_REVIEW_TIMEOUT:-10800}"
-REVIEW_EFFORT="${MIPSTARRE_REVIEW_EFFORT:-ultra}"
+REVIEW_EFFORT="${MIPSTARRE_REVIEW_EFFORT:-max}"
+case "$REVIEW_EFFORT" in
+  ultra) REVIEW_EFFORT=max ;;
+  max|xhigh) ;;
+  *) echo 'MIPSTARRE_REVIEW_EFFORT must be max or xhigh' >&2; exit 2 ;;
+esac
 BOT_PREFIX_RE='^\[(claude|codex)-(auto|review)-fix\]'
 BLUEPRINT_CITATION_PATH="scripts/blueprint_citations.py"
 
@@ -344,20 +349,7 @@ run_agent() {
     return "$rc"
   fi
 
-  warn "local/bin/dispatch.sh not found; falling back to a direct 'codex exec'. This session will NOT appear in results/telemetry/sessions.jsonl."
-  command -v codex >/dev/null 2>&1 ||
-    die "codex CLI not found on PATH and no local/bin/dispatch.sh to delegate to"
-  set +e
-  if [ -n "$model" ]; then
-    MIPSTARRE_AUTOMATION=1 timeout --signal=TERM "$REVIEW_TIMEOUT" codex exec --sandbox "$sandbox" -C "$wt" </dev/null \
-      -m "$model" -o "$out" -- "$(cat "$standalone")" >"$dlog"
-  else
-    MIPSTARRE_AUTOMATION=1 timeout --signal=TERM "$REVIEW_TIMEOUT" codex exec --sandbox "$sandbox" -C "$wt" </dev/null \
-      -o "$out" -- "$(cat "$standalone")" >"$dlog"
-  fi
-  rc=$?
-  set -e
-  return "$rc"
+  die "dispatch.sh unavailable; refusing an unaccounted policy-bypassing launch"
 }
 
 # ------------------------------------------------------------------ arguments
