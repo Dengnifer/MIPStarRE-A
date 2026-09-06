@@ -153,7 +153,7 @@ def tick(merge: bool) -> dict:
     fresh_candidates = [row for row in candidate if row.get("fresh_against_remote")]
     stale_candidates = [row for row in candidate if not row.get("fresh_against_remote")]
     oldest = fresh_candidates[0] if fresh_candidates else None
-    if stale_candidates:
+    if stale_candidates and not fresh_candidates:
         reasons.append("stale eligible PRs: " + ",".join(str(r["number"]) for r in stale_candidates))
     record = dict(ts=datetime.now(timezone.utc).isoformat(), local_main=local,
                   remote_main=remote, clean=clean, runtime=reason,

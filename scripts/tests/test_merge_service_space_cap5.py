@@ -44,8 +44,30 @@ class MergeServiceTests(unittest.TestCase):
             record = SERVICE.tick(False)
         self.assertEqual(record["oldest_eligible"]["number"], 290)
         self.assertEqual([row["number"] for row in record["oldest_stale"]], [254])
-        self.assertIn("stale eligible PRs: 254", record["hold_reasons"])
+        self.assertNotIn("stale eligible PRs: 254", record["hold_reasons"])
         self.assertIsNone(record["eligible_age_s"])
+
+    def test_fresh_candidate_is_the_only_merge_action(self):
+        rows = [
+            {"number": 254, "head": "old", "pr_age_s": 900,
+             "fresh_against_remote": False},
+            {"number": 290, "head": "fresh", "pr_age_s": 100,
+             "fresh_against_remote": True},
+        ]
+        completed = mock.Mock(returncode=0)
+        with mock.patch.object(SERVICE, "git", side_effect=["main", "", "main"]), \
+                mock.patch.object(SERVICE, "remote_main", return_value="main"), \
+                mock.patch.object(SERVICE, "runtime_gate", return_value=(True, "ok")), \
+                mock.patch.object(SERVICE, "lock_quiet", return_value=(True, "ok")), \
+                mock.patch.object(SERVICE, "eligible_prs", return_value=rows), \
+                mock.patch.object(SERVICE.subprocess, "run", return_value=completed) as run:
+            record = SERVICE.tick(True)
+        self.assertEqual(record["action"], "delegate-pr_merge")
+        self.assertEqual(record["oldest_eligible"]["number"], 290)
+        self.assertEqual(run.call_args.args[0][-1], "290")
+        self.assertTrue(record["post_merge_remote_verified"])
+        self.assertEqual(record["oldest_stale"][0]["number"], 254)
+        self.assertNotIn("stale eligible PRs: 254", record["hold_reasons"])
 
     def test_read_failure_is_recorded_as_hold(self):
         with mock.patch.object(SERVICE, "git", side_effect=RuntimeError("transport")):
