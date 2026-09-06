@@ -138,112 +138,22 @@ noncomputable def qubitOperatorDistanceB
 
 namespace BinaryWitnessTransport
 
-/-- The fixed binary coordinate equivalence on an arbitrary register index
-type. This Lean-only construction implements the basis identification in the
-proof of `lem:pauli-binary`, including the cube-indexed soundness register. -/
-noncomputable def labelEquiv {q : ℕ} {ι : Type*} (F : FixedFieldModel q) :
-    (ι → F.K) ≃ (ι × Fin F.basisDim → ZMod 2) :=
-  (Equiv.piCongrRight (fun _ : ι => F.binaryCoordinates.toEquiv)).trans
-    (Equiv.curry ι (Fin F.basisDim) (ZMod 2)).symm
-
-/-- The coordinate equivalence evaluates to the existing fixed-basis map. -/
-theorem label_equiv_apply {q : ℕ} {ι : Type*} (F : FixedFieldModel q)
-    (label : ι → F.K) : labelEquiv F label = kappaVec F label := rfl
-
-/-- Self-duality identifies the field trace pairing with the binary dot product
-on all register coordinates, as in `eq:qudit-to-qubit-pauli-1`. -/
-private theorem trace_pairing {q : ℕ} {ι : Type*} [Fintype ι]
-    (F : FixedFieldModel q) (left right : ι → F.K) :
-    binTrace F.K (dotProduct left right) =
-      binTrace (ZMod 2) (dotProduct (labelEquiv F left) (kappaVec F right)) := by
-  simp only [dotProduct, map_sum, binTrace_mul_eq_dotProduct F,
-    Algebra.trace_self_apply, Fintype.sum_prod_type, labelEquiv,
-    Equiv.trans_apply, Equiv.curry_symm_apply, kappaVec, basisCoordVec]
-  rfl
-
-/-- Coordinate expansion preserves addition at every register position. -/
-private theorem label_equiv_add {q : ℕ} {ι : Type*} (F : FixedFieldModel q)
-    (left right : ι → F.K) :
-    labelEquiv F (left + right) = labelEquiv F left + labelEquiv F right := by
-  ext position
-  change F.binaryCoordinates (left position.1 + right position.1) position.2 =
-    F.binaryCoordinates (left position.1) position.2 +
-      F.binaryCoordinates (right position.1) position.2
-  simp
-
-/-- A tensor-product shift has the computational-basis entries of translation
-by its complete register label. -/
-private theorem shift_entry {K ι : Type*} [Field K] [DecidableEq K]
-    [Algebra (ZMod 2) K] [Fintype ι] [DecidableEq ι]
-    (label row col : ι → K) :
-    tauObservable .X label row col = if row = col + label then 1 else 0 := by
-  change (∏ position : ι,
-    if row position = col position + label position then (1 : ℂ) else 0) = _
-  rw [Fintype.prod_boole]
-  simp only [← funext_iff, ← Pi.add_apply]
-
-/-- A tensor-product phase is diagonal, with phase given by the trace pairing
-of its label and the computational-basis coordinate. -/
-private theorem phase_entry {K ι : Type*} [Field K] [DecidableEq K]
-    [Algebra (ZMod 2) K] [Fintype ι] [DecidableEq ι]
-    (label row col : ι → K) :
-    tauObservable .Z label row col =
-      if row = col then phaseSign (binTrace K (dotProduct label col)) else 0 := by
-  change (∏ position : ι, if row position = col position then
-    phaseSign (binTrace K (label position * col position)) else 0) = _
-  rw [Fintype.prod_ite_zero, prod_phaseSign_binTrace_dotProduct]
-  simp only [← funext_iff]
-
-/-- Binary coordinates transport the shift and phase observables exactly.
-This is the basis-state comparison in the proof of `lem:pauli-binary`. -/
-private theorem observable_reindex {q : ℕ} {ι : Type*}
-    [Fintype ι] [DecidableEq ι] (F : FixedFieldModel q)
-    (W : PauliKind) (label : ι → F.K) :
-    tauObservable W label =
-      Matrix.reindex (labelEquiv F).symm (labelEquiv F).symm
-        (tauObservable W (labelEquiv F label)) := by
-  classical
-  ext row col
-  simp only [Matrix.reindex_apply, Matrix.submatrix_apply, Equiv.symm_symm]
-  cases W with
-  | X =>
-      rw [shift_entry, shift_entry, ← label_equiv_add]
-      simp only [Equiv.apply_eq_iff_eq]
-  | Z =>
-      rw [phase_entry, phase_entry]
-      simp only [Equiv.apply_eq_iff_eq]
-      rw [trace_pairing F]
-      simp only [label_equiv_apply]
-
 /-- Exact forward transport of a generalized Pauli projector to the existing
-binary projector. This Lean-only arbitrary-index form of the calculation in
-`lem:pauli-binary` uses self-duality and finite Fourier inversion, without a
-soundness or projector-intertwining hypothesis. -/
+binary projector. This reorients the shared arbitrary-index calculation
+`pauliProj_reindex_quditQubitLabelEquiv` from `lem:pauli-binary`, without a
+second Fourier-inversion proof or a soundness hypothesis. -/
 theorem pauli_projector_reindex {q : ℕ} {ι : Type*}
     [Fintype ι] [DecidableEq ι] (F : FixedFieldModel q)
     (W : PauliKind) (label : ι → F.K) :
-    Matrix.reindex (labelEquiv F) (labelEquiv F) (pauliProj W label) =
+    Matrix.reindex (quditQubitLabelEquiv F) (quditQubitLabelEquiv F) (pauliProj W label) =
       qubitPauliProj W (kappaVec F label) := by
   classical
-  have hinverse : pauliProj W label =
-      Matrix.reindex (labelEquiv F).symm (labelEquiv F).symm
-        (pauliProj W (kappaVec F label)) := by
-    rw [pauliProj_eq_avg_tauObservable, pauliProj_eq_avg_tauObservable]
-    ext row col
-    simp only [Matrix.smul_apply, Matrix.sum_apply, smul_eq_mul,
-      Matrix.reindex_apply, Matrix.submatrix_apply, Equiv.symm_symm]
-    rw [Fintype.card_congr (labelEquiv (ι := ι) F)]
-    congr 1
-    apply Fintype.sum_equiv (labelEquiv F)
-    intro frequency
-    have hphase := congrArg phaseSign (trace_pairing F frequency label)
-    have hentry := congrFun (congrFun (observable_reindex F W frequency) row) col
-    simp only [Matrix.reindex_apply, Matrix.submatrix_apply, Equiv.symm_symm] at hentry
-    rw [hphase, hentry]
+  have hinverse := pauliProj_reindex_quditQubitLabelEquiv F W label
   ext row col
   simpa only [Matrix.reindex_apply, Matrix.submatrix_apply,
     Equiv.symm_symm, Equiv.apply_symm_apply] using
-    congrFun (congrFun hinverse ((labelEquiv F).symm row)) ((labelEquiv F).symm col)
+    congrFun (congrFun hinverse ((quditQubitLabelEquiv F).symm row))
+      ((quditQubitLabelEquiv F).symm col)
 
 /-- Reindexing a vector agrees with Mathlib's Euclidean permutation isometry. -/
 theorem reindex_state_eq {ι κ : Type*} [Fintype ι] [DecidableEq ι]
@@ -318,7 +228,7 @@ theorem conjugate_reindex_comp {ι κ ν : Type*}
 /-- The local label equivalence leaves the auxiliary coordinate unchanged. -/
 noncomputable def localEquiv (P : AdmissibleParams) (auxIndex : Type*) :
     (auxIndex × PauliRegister P) ≃ (auxIndex × QubitRegister P) :=
-  Equiv.prodCongr (Equiv.refl auxIndex) (labelEquiv P.model)
+  Equiv.prodCongr (Equiv.refl auxIndex) (quditQubitLabelEquiv P.model)
 
 /-- The two local coordinate equivalences, in the existing player ordering. -/
 noncomputable def jointEquiv (P : AdmissibleParams) (auxA auxB : Type*) :
@@ -335,7 +245,7 @@ theorem ideal_state_reindex (P : AdmissibleParams)
   ext position
   exact congrArg (fun state : EuclideanSpace ℂ (QubitRegister P × QubitRegister P) =>
     aux (position.1.1, position.2.1) * state (position.1.2, position.2.2))
-    (epr_reindex (labelEquiv (ι := Cube P.m) P.model))
+    (epr_reindex (quditQubitLabelEquiv (ι := Cube P.m) P.model))
 
 /-- Forward binary transport of Alice's lifted effect, including the identity
 on Bob's entire local register. -/
@@ -393,7 +303,7 @@ theorem ideal_projector_a_reindex (P : AdmissibleParams)
   ext row col
   change (if row.1.1 = col.1.1 ∧
       (localEquiv P auxB).symm row.2 = (localEquiv P auxB).symm col.2 then
-      (Matrix.reindex (labelEquiv P.model) (labelEquiv P.model)
+      (Matrix.reindex (quditQubitLabelEquiv P.model) (quditQubitLabelEquiv P.model)
         (pauliProj W label)) row.1.2 col.1.2 else 0) =
     if row.1.1 = col.1.1 ∧ row.2 = col.2 then
       qubitPauliProj W (kappaVec P.model label) row.1.2 col.1.2 else 0
@@ -411,7 +321,7 @@ theorem ideal_projector_b_reindex (P : AdmissibleParams)
   ext row col
   change (if (localEquiv P auxA).symm row.1 = (localEquiv P auxA).symm col.1 ∧
       row.2.1 = col.2.1 then
-      (Matrix.reindex (labelEquiv P.model) (labelEquiv P.model)
+      (Matrix.reindex (quditQubitLabelEquiv P.model) (quditQubitLabelEquiv P.model)
         (pauliProj W label)) row.2.2 col.2.2 else 0) =
     if row.1 = col.1 ∧ row.2.1 = col.2.1 then
       qubitPauliProj W (kappaVec P.model label) row.2.2 col.2.2 else 0

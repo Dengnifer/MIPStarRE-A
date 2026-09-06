@@ -5,6 +5,7 @@ purpose: >
   Records the exact binary-coordinate transport of a supplied Pauli soundness
   witness, its validation, and the unchanged source-level existence obligation.
 issue: "#246"
+pr: "#255"
 ---
 
 # Exact binary transport of a supplied soundness witness
@@ -181,3 +182,77 @@ A separate reviewer should first inspect the projector-reindex orientation,
 the post-composition order in `toQubit`, preservation of the auxiliary state,
 and the unchanged field-valued answer sums. The remaining validation item is
 a full build when the machine-wide lock is available.
+
+## 2026-09-06 — Shared algebra after PR255 F1
+
+This section supersedes the initial report's description of a separate
+`Fin L` implementation and its outstanding aggregate-build validation. The
+normal review of `fe26d4ab1a19419594619b3e4b984eae2252f64b` requested one
+shared binary-coordinate derivation. Exact-head CI for that reviewed commit
+completed successfully; the review identified no mathematical defect but
+required removal of the duplicated algebra before approval.
+
+The implementation in `MIPStarRE/QPBT/Algebra/PauliTheorems.lean` now accepts
+an arbitrary register index type. The public `quditQubitLabelEquiv` expands
+each label in the stored binary basis, and
+`pauliProj_reindex_quditQubitLabelEquiv` proves the inverse-oriented
+projector identity for any finite index type. The trace-pairing, addition,
+shift-entry, phase-entry, observable-transport, and Fourier-inversion
+arguments have one implementation in that algebra module.
+
+The existing `exists_qubitIsometry` proof specializes this shared identity
+to `Fin L`. The cube-indexed construction in
+`MIPStarRE/QPBT/Test/QubitForm.lean` uses the same equivalence directly;
+`BinaryWitnessTransport.pauli_projector_reindex` only reverses the shared
+identity's coordinate orientation. The former `labelEquiv` and
+`label_equiv_apply` declarations and the second algebraic derivation are
+removed, rather than retained as redundant aliases. The EPR, auxiliary-state,
+local-isometry, and distance arguments are unchanged. No extraction-register
+transport from issue #245 is introduced or duplicated.
+
+### Statement integrity
+
+- **Paper assumptions for `lem:pauli-binary`:** an admissible binary field
+  size and a register length, with the fixed self-dual binary basis.
+- **Lean assumptions:** the same `q`, `FixedFieldModel q`, and `L : ℕ` as
+  before; the latter encodes the nonnegative tensor-factor count. The public
+  theorem receives no additional assumption.
+- **Paper conclusion:** a local isomorphism preserves the EPR state and
+  identifies every generalized Pauli projector with its binary tensor-product
+  form.
+- **Lean conclusion:** the same existential Euclidean isometry, EPR identity,
+  and projector-conjugation identity, with the previously documented binary
+  factor-index correction unchanged.
+- **Verdict:** faithful boundary encoding and the existing documented local
+  factor-index correction; no statement change. The generic algebraic
+  identity is a Lean-only finite-index formulation of the same calculation.
+- For `cor:pauli-binary`, both paper and Lean assumptions and conclusions
+  remain those listed in the original audit. The source-corollary docstring,
+  public statement, and original open proof remain unchanged. In particular,
+  transport of a supplied witness does not establish soundness existence.
+
+### Validation of the shared implementation
+
+- Both edited files pass `lake env lean`. The algebra module is also rebuilt
+  before checking the consumer, so the consumer loads the generalized
+  interface rather than the earlier private declarations.
+- Fresh-source kernel checks cover the shared equivalence, shared projector
+  identity, `exists_qubitIsometry`, and all eighteen retained public
+  given-witness transport declarations. All twenty-one use only `propext`,
+  `Classical.choice`, and `Quot.sound`; none depends on `sorryAx`.
+- Byte comparisons against the reviewed head preserve the docstrings and
+  public headers of `exists_qubitIsometry` and `pauli_soundness_qubit`, as
+  well as the latter's complete open proof. The algebra file has no proof
+  hole; the consumer retains exactly its original hole, now at line 426.
+- Whitespace, the 100-character line limit, forbidden-token scans, and audit
+  YAML checks pass. No blueprint tag, declaration index, or source-gap note
+  is changed by this repair.
+- The aggregate build, checked publication to the existing PR255, and
+  exact-head CI remain separate required gates for the repair commit.
+  Their results are recorded by the normal workflow scripts, not inferred
+  from the successful CI of the preceding commit. No new review or
+  adjudication is performed by the author session.
+
+The fresh-source axiom logs are
+`~/.cache/mipstarre-dev/sessions/orc-246-20260906-02.algebra-axioms.log` and
+`~/.cache/mipstarre-dev/sessions/orc-246-20260906-02.transport-axioms.log`.
