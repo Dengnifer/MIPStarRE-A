@@ -4116,3 +4116,156 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
   lane v18, daemon v9 and stack-watch v4 are prepared under `/tmp`, not started.
   Main retains supervisor lifecycle and the independent exact-head review;
   the branch router is not installed into primary before the normal gates.
+- Issue118 attempt6 completed at857681fc1cc60ec13925b1533c7269fdcf634b28: 14 theorems and3 proof-only definitions for heterogeneous pasting and complete register/answer transport; reported private Lean/axiom/downstream checks pass, no new debt, and clean worktree independently confirmed. Full source sufficiency remains OPEN: actual conditional application, mass restoration, deltaQ specialization and Apply remain. Six completed attempts total 9852 recorded working seconds, original anchor September5 19:24 UTC. Resumed the completed session through dispatch.sh as attempt7/10 at effective astra/xhigh to pursue those exact obligations; no definition/game change or source correction adopted, no duplicate live worker and no #27 micro-update.
+- 2026-09-05T23:31Z PR195 post-PR205 publication preflight found missing incoming build artifacts. The existing repair worker orc-113-20260906-06 remains live and is rebuilding only the affected module without changing source, rather than bypassing checked-push or starting a duplicate full build. Preserve the gate and existing lane ownership; this is a branch-artifact repair, not a new mathematical gap. PR238 is now CI-green at954c1bc and its existing sol lane is starting the standard independent workflow review.
+
+## 2026-09-05T23:26:36Z — Codex meta succession and fresh effort verification
+
+The successor owner-meta session established a 15-minute Codex task heartbeat, `qpbt-track-a-meta-watch`, with oversight-only scope. Initial SSH required sandbox network escalation; subsequent authorized SSH worked. The Mac mirror remained read-only. Main was visibly Astra xhigh with Pursuing goal active; profile and worker shim mitigation were present and #237 was live. The 23:10:38 UTC snapshot counted five project workers (primary three, second two). Live GitHub data later showed PR205 merged at 23:14:40 UTC. PR195 then required another main refresh; no duplicate repair was dispatched by meta. No open #26 owner blocker was reported.
+
+The inherited owner-message chain had delivered its goal at 22:58 UTC but left two messages waiting. At 23:15 UTC the foreground tmux pane was a side conversation. The v2 idle detector does not exclude side conversations, and its old cleanup message landed there before cancellation at approximately 23:16 UTC. At 23:19:14 UTC meta terminated only the remaining verified owner-message waiter PID1943576, whose command was the old absolute-xhigh owner decision. It did not interrupt the main Codex process, the side conversation, project workers or daemon. The new heartbeat explicitly prevents messages into side conversations. The old chain must not be replayed. The side conversation subsequently reported telemetry cleanup commit36805da with normal hooks and launched github-sync; meta did not edit or stage that telemetry.
+
+The owner then requested fresh verification, preferring Astra Ultra if available and xhigh otherwise. Six tiny direct-CLI probes ran at 23:19:44–23:22:20 UTC across both configured accounts, with shim bypass, read-only sandbox, no tools and no resumed context. Each account logged ultra→medium, max→max and xhigh→xhigh at completion. Exact requested/client/log fields and usage are preserved in the accompanying sanitized files. `max` is supported by completion metadata, so the owner was asked whether maximum reasoning or the literal xhigh fallback is preferred. No config change or main relaunch was made pending that answer. This is distinct from proving backend compute or tracing the exact wire request.
+
+This packet contains the meta and local audit-helper records plus all six probe records. Tokens unavailable for the meta/helper are null; probe usage is actual CLI telemetry. Main should append the rows and event once, preserve the sanitized evidence under results/telemetry/owner-messages, record the final owner choice, and publish through its normal telemetry process. Temporary packet path: `/tmp/qpbt-meta-20260905-230133`.
+
+## 2026-09-05T23:47:05Z — Primary/max transition requires owner-approved runtime access
+
+The latest owner brief, archived as
+`owner-messages/qpbt-owner-relay-max-brief.md`, supersedes dual-account,
+xhigh, and Sol policies. All ghz sessions must use primary relay and Astra
+max; reserve one main slot within the relay's total cap of 12 and admit at
+most 11 workers, subtracting other uses. Keep secondary credentials/history
+and an explicit owner-controlled primary/both toggle. This is an owner
+decision, not a claim that fleet enforcement has been installed.
+
+The canonical snapshot at 23:42:36 UTC could not query GitHub: `socket:
+operation not permitted`. Its process count was namespace-local, not a host
+worker count (`ps` sees only the tool sandbox). Consequently the inherited
+host PIDs cannot be classified as terminal. A primary/max dispatcher dry run
+was terminated after five seconds before admission; an independent attempt
+to create the required runtime-lock directory failed with `Read-only file
+system`. The login review export and runtime shim still use xhigh. Main did
+not broaden permissions, alter credential homes, launch a worker, signal an
+unverified PID, or prune allegedly stale host reservations. Host-level
+verification/control and owner-approved runtime/GitHub access are required
+before safely enforcing the fleet transition.
+
+The local registry records the old Sol issue237 implementer done at
+23:40:30 UTC and the normal PR238 reviewer done at 23:36:15 UTC. That reviewer
+approved only the prior xhigh head. The daemon subsequently left a refresh
+conflict in issue237's events.md and pr238.failed. The issue113 and issue118
+attempt7 captures have recent writes; they are not verified live handles or
+terminal evidence. Their work and budget remain untouched. The six completed
+issue118 attempts' 9852 seconds and original anchor are retained as the
+owner-provided baseline, not a newly reconciled total.
+
+The eight sanitized meta/probe rows and packet were imported once, preserving
+historical pending/dual-account decisions as history. The current brief
+supersedes them. One bounded issue237 amendment brief was prepared at
+`local/briefs/237-relay-primary-astra-max.md`; no implementation worker has
+been admitted. One #27 boundary report is prepared at
+`owner-messages/qpbt-primary-max-boundary-20260905T234236Z.md`; publication remains pending until confirmed
+through gh_common.py. Lesson: a restricted snapshot cannot justify deleting
+host locks, restarting workers, or claiming that secondary use has stopped.
+
+The single boundary publication attempt through `gh_common.py
+ensure-pr-comment 27` failed while listing existing comments: `socket:
+operation not permitted` (exit 2). No POST was reached and no #27 publication
+is claimed. Reuse marker
+`<!-- qpbt-main-boundary:20260905T234236Z-relay-primary-max -->` after access
+is authorized, rather than creating another boundary report. Local validation
+confirmed seven byte-identical packet files, the byte-identical current owner
+brief, all eight source rows imported exactly once, valid JSON, and a clean
+`git diff --check` for the touched append-only logs.
+
+### 2026-09-05T23:49:14Z — Second access audit and issue113 terminal handoff
+
+The previous goal turn made progress by archiving the sanitized packet,
+recording the current owner policy, and preparing the bounded amendment
+brief. This continuation rechecked the same execution blocker: GitHub still
+returns `socket: operation not permitted`, runtime-lock creation still
+returns `Read-only file system`, and only namespace-local processes are
+visible. No permissions were broadened and no duplicate boundary was posted.
+
+New authoritative local evidence changes the recovery queue:
+`orc-113-20260906-06` is recorded done at 23:47:33 UTC with a terminal
+capture and local head f1d1d3c7a1f421b255aec30c485ce593ad8e4905. Its report
+records publication and nine green CI contexts, but its last GitHub result
+was open/unmerged, mergeable=false, and absent exact-head review. Main cannot
+independently refresh those remote facts yet. The fourth-round review and
+prior dispositions remain; no fifth review or duplicate repair was launched.
+The snapshot no longer lists pr195.failed; this is not evidence of a merge.
+Issue118 attempt7 has recent capture writes but no terminal event or last
+report, so its worker and budget remain untouched. The handoff and existing
+pending mode-boundary report now include this distinction. The same access
+blocker has recurred for two consecutive goal turns; the goal stays active.
+
+### 2026-09-05T23:51:06Z — Third access audit; owner action required
+
+The preceding turn made progress by recording issue113's terminal recovery
+and correcting the pending handoff. This third consecutive audit confirms
+the same execution restriction: both the canonical snapshot and a direct
+`gh_common.py pr-view 238` call fail with `socket: operation not permitted`;
+runtime-lock creation fails with `Read-only file system`; host processes
+remain unobservable. No new terminal issue118 record is available.
+
+The runtime still shows worker caps 19 total, primary 10, second 9; the
+profile and shim retain xhigh. The router still admits at timeout and rejects
+zero capacity. Thus primary-only/Astra-max deployment is incomplete, not
+merely unverified by a narrow test. Main cannot safely observe or transition
+secondary workers, delegate the reviewed amendment, install runtime changes,
+or publish the existing #27 boundary from this sandbox. All available safe
+handoff and evidence work is preserved. The blocked-audit threshold is met;
+further orchestration requires owner-approved host-process, runtime/profile,
+normal Git-workflow, and GitHub access. No worker is declared stopped, no
+budget is reset, and no permission rejection is bypassed.
+
+## 2026-09-06T01:03:31Z — Owner restores access; primary/max transition dispatched
+
+The owner resumed main with unrestricted filesystem execution and networking.
+Host process inspection and the canonical GitHub snapshot now succeed. The
+previous blocked state is superseded, not bypassed. All inherited project
+workers are terminal in dispatcher telemetry, including issue118 attempt7 at
+00:12:31 UTC. No worker was killed or restarted from a stale observation.
+
+Four interactive processes use the primary home, including main. The three
+non-project processes were left untouched and conservatively charged as other
+key use. Main saved the old caps 19/10/9, selected persistent mode primary,
+and set the interim primary and total worker ceilings to eight (12 minus main
+minus three other uses), preserving the secondary cap and all credentials.
+The old router does not yet read mode; every launch is explicitly primary.
+Only verified project supervisors 2950602 and 2950610 were SIGSTOPed to prevent
+legacy automatic admissions. No codex-paused marker was used because the old
+lane script's fallback can invoke prohibited Claude sessions.
+
+One bounded implementation worker was dispatched through primary checkout
+`dispatch.sh`: orc-237-20260906-02, supervisor2326711, thread
+01a0743a-7924-7f21-a0fd-2936af092d6c. Its actual process arguments request
+primary gpt-6-astra/max with fan-out disabled. The owner-enabled unrestricted
+execution policy permits the explicitly authorized profile/shim installation;
+no infrastructure override is granted. The timeout is 2400 seconds. The
+worker owns the existing issue237/PR238 amendment, normal checked publication
+and CI; main owns independent review and supervisor lifecycle. No self-review,
+extra triage, subagent, or manual merge is authorized.
+
+Issue118 attempt7 preserved cd1815e1cedc60060929f12cd6eaa1dcb184225d and ends
+with 2600 charged seconds. Added to the supplied six-attempt baseline 9852,
+the completed seven-attempt total is 12452 seconds. The report's earlier
+12402-second number was an in-progress reading 50 seconds before terminal
+accounting; the original 2026-09-05T19:24:00Z anchor and ten-attempt limit are
+unchanged. Scalar specialization and Apply remain open. The final source
+correction is not adopted. One current #27 report is prepared at
+`owner-messages/qpbt-primary-max-access-restored-20260906.md`, reusing the original pending boundary marker;
+publication is recorded only after gh_common.py confirms its comment ID.
+
+Publication succeeded as #27 comment5555957194, using the existing boundary
+marker. At 01:04:50 UTC main verified terminal old supervisor handles and
+restarted the unchanged daemon and stack-watcher scripts as PIDs2339019 and
+2339020. Their actual environments contain explicit primary account,
+gpt-6-astra worker/reviewer/fixer models, and max review/fix effort. The
+temporary admission hold ended without modifying a running script. The same
+boundary comment is updated in place with these final supervisor handles;
+no second comment or extra review is created. Implementer supervisor2326711
+remains live under primary/max. Persistent router semantics still await the
+bounded PR238 amendment and normal gates.
