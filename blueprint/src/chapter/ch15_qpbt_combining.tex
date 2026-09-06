@@ -2275,3 +2275,131 @@ projective measurement whose outcomes are pairs of global polynomials.
 	also mixes the terms $d/q$ and $md/q$ in the bound for $\delta_S$; the
 	weaker $md/q$ is the one recorded above.
 \end{remark}
+
+\section{Scalar error estimates}
+
+The following three formalization-only auxiliary statements concern real
+functions and numerical parameters, independently of the standing strategy
+assumptions of this chapter. They isolate calculations supporting
+Lemmas~\ref{lem:qld-xz-lines}, \ref{lem:qld-4-13}, and \ref{lem:qld-4-7}
+in \cite{Ji2020MIPStar}; they assert no measurement construction.
+Here $p(x)=\poly(x)$ means that $p:\R\to\R$ satisfies
+$0\le p(x)\le A x^r$ for all $x\ge0$, for some $A\ge1$ and $r>0$.
+Similarly, $f(x,y)=\poly(x,y)$ means
+$0\le f(x,y)\le B(x^s+y^t)$ for all $x,y\ge0$, for some $B\ge1$ and
+$s,t>0$. These are the corrected error conventions of
+\cite{gap:qpbt_polynomial-error-square-root,gap:qpbt_pasting-product-error}.
+The functions are defined on all real arguments; these bounds concern their
+nonnegative domains.
+
+\begin{theorem}[Polynomial error after conditioning]
+	\label{thm:qld-conditioned-polynomial-bound}
+	\lean{MIPStarRE.QPBT.exists_conditioned_polynomial_bound}
+	\leanok
+	Let $p(x)=\poly(x)$, let $f(x,y)=\poly(x,y)$, and fix $c\ge1$.
+	There exists $g(x,y)=\poly(x,y)$ such that for every
+	$\eps,\rho\ge0$ and every $\mu\in[1/2,1]$,
+	\[
+		\min\left\{1,\,
+			\mu f\left(\rho,
+				\frac{8p(\eps)+c(\eps+\sqrt{\eps})}{\mu}\right)+\rho
+		\right\}
+		\le g(\eps,\rho).
+	\]
+	This scalar estimate supports the pasting substitution in the proof of
+	Lemma~\ref{lem:qld-xz-lines}. The interval for $\mu$ is an explicit
+	hypothesis of this auxiliary estimate.
+\end{theorem}
+\begin{proof}
+	\leanok
+	Choose $A,r,B,s,t$ as in the polynomial bounds above, and set
+	$\alpha=\min\{r,1/2\}$, $\beta=\min\{s,1\}$, and $L=8A+2c$.
+	For $0\le\eps,\rho\le1$, the numerator in the argument of $f$ is at
+	most $L\eps^\alpha$, and division by $\mu\ge1/2$ costs at most a
+	factor of two. The polynomial bound on $f$, together with $\mu\le1$,
+	therefore gives the required inequality with
+	\[
+		g(\eps,\rho)=\bigl(B(1+(2L)^t)+1\bigr)
+			\bigl(\eps^{\alpha t}+\rho^\beta\bigr).
+	\]
+	If either $\eps>1$ or $\rho>1$, this function is at least one, which
+	bounds the minimum. All its exponents are positive.
+\end{proof}
+
+\begin{theorem}[Polynomial composition with the dimension factor]
+	\label{thm:qld-combining-polynomial-bound}
+	\lean{MIPStarRE.QPBT.exists_combining_polynomial_bound}
+	\leanok
+	Let $p(x)=\poly(x)$, let $f(x,y)=\poly(x,y)$, and fix $c\ge0$.
+	There exists $g(x,y)=\poly(x,y)$ such that for all
+	$\eps,\rho\ge0$ and all real $D\ge1$,
+	\[
+		\min\left\{1,\,
+			c\left(p(\eps)^{1/2}+\sqrt D
+				\left(f(\eps,\rho)^{1/4}
+					+p(\eps)^{1/4}+\eps^{1/4}\right)\right)
+		\right\}
+		\le D\,g(\eps,\rho).
+	\]
+	The factor $D$ is retained in this numerical consequence of the first
+	route in the proof of Lemma~\ref{lem:qld-4-13}, as explained in
+	Remark~\ref{rem:qld-4-13-source-defects}.
+\end{theorem}
+\begin{proof}
+	\leanok
+	Choose $A,r,B,s,t$ as in the polynomial bounds and put
+	$\alpha=\min\{r/4,s/4,1/4\}$ and
+	$K=1+c(A^{1/2}+B^{1/4}+A^{1/4}+1)$.
+	For $0\le\eps\le1$, use
+	$(u+v)^{1/4}\le u^{1/4}+v^{1/4}$ for nonnegative $u,v$ to bound
+	$f(\eps,\rho)^{1/4}$, compare the powers of $\eps$ with
+	$\eps^\alpha$, and use $\sqrt D\le D$. This gives the inequality
+	with $g(\eps,\rho)=K(\eps^\alpha+\rho^{t/4})$. For $\eps>1$,
+	$Dg(\eps,\rho)\ge1$, so the cap proves the same bound.
+\end{proof}
+
+\begin{theorem}[Absorption into the global polynomial-pair error]
+	\label{thm:qld-global-pair-error-bound}
+	\lean{MIPStarRE.QPBT.exists_global_pair_error_bound}
+	\leanok
+	\uses{def:admissible}
+	Let $p(x)=\poly(x)$ and $g(x,y)=\poly(x,y)$.
+	Fix $c,C\ge0$, $a\ge1$, and $0<b\le1$, and write the numerical
+	low-degree error with its constants explicit as
+	\[
+		\delta_{\mathrm{ld}}(a,b,\eta,q,n,d,k)
+		=a(dnk)^a\bigl(\eta^b+q^{-b}+2^{-bnd}\bigr).
+	\]
+	There exist $a'>1$ and $0<b'<1$, depending only on these fixed
+	functions and constants, such that for every admissible tuple
+	$(q,m,d)$ and every $\eps\ge0$, setting $\rho=md/q$ gives
+	\[
+		\begin{split}
+		\min\bigl\{1,\,
+			C\bigl(&\delta_{\mathrm{ld}}
+				(a,b,cm\,g(\eps,\rho)+\eps,q,2m+2,d,1)\\
+				&+\sqrt{p(\eps)}+\rho\bigr)\bigr\}
+		\le a'(md)^{a'}
+			\bigl(\eps^{b'}+q^{-b'}+2^{-b'md}\bigr).
+		\end{split}
+	\]
+	This is the scalar substitution in the proof of
+	Lemma~\ref{lem:qld-4-7}, including the slack $\eps$ in the
+	low-degree input. It supplies no projective measurement or comparison
+	between games.
+\end{theorem}
+\begin{proof}
+	\leanok
+	\uses{def:admissible}
+	Choose bounds $p(\eps)\le A\eps^r$ and
+	$g(\eps,\rho)\le B(\eps^s+\rho^t)$, and take
+	$b'=\min\{1/2,b,sb,tb,r/2\}$. Admissibility gives $m,d,q\ge1$.
+	For $0\le\eps\le1$, subadditivity of the $b$-th power separates the
+	low-degree input into its polynomial error and slack terms. Use
+	$\rho^{tb}=(md)^{tb}q^{-tb}$, $m\le md$, and
+	$md\le(2m+2)d\le4md$ to bound all terms by a fixed constant times
+	a fixed power of $md$ times
+	$\eps^{b'}+q^{-b'}+2^{-b'md}$. Enlarging $a'$ absorbs both the
+	constant and the power of $md$. For $\eps>1$, this final expression
+	is at least one and hence bounds the capped error.
+\end{proof}
