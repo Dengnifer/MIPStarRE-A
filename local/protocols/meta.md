@@ -55,10 +55,22 @@ Schemas (all JSONL, one object per line; timestamps ISO-8601 with offset):
   Stages: `1-skeleton`, `2-references`, `3-blueprint`, `4.1-minimal`,
   `4.2-full-skeleton`, `4.3-proofs` (extend as needed).
 - `results/telemetry/sessions.jsonl` —
-  `{name, role, issue, pr?, thread_id, start, end, wall_s,
-    usage: {input, cached_input, cache_write, output, reasoning},
+  `{name, role, model?, account?, requested_effort?, issue, pr?, thread_id,
+    start, end, wall_s, usage: {input, cached_input, cache_write, output, reasoning},
     exit, dispatcher, worktree, status: active|done|failed|archived}`
-  Written only by `local/bin/dispatch.sh` / `telemetry.py`.
+  Written only by `local/bin/dispatch.sh` / `telemetry.py`. New dispatches always
+  supply `account` (`primary` or `second`) and the exact resolved `model`
+  passed to the CLI (environment override, otherwise selected-account config).
+  When the dispatcher supplies a reasoning override, `requested_effort` is its
+  effective value after model-specific normalization. It records the CLI request,
+  not provider-measured effort. All three fields remain optional for historical
+  rows and legacy replay callers.
+- `results/telemetry/owner-sessions.jsonl` —
+  `{name, role, model, issue, pr?, worktree?, base?, start, end?, wall_s?,
+    status, tokens?, tool_uses?, findings_fixed?, commits?, note?}`.
+  Written only by the owner session and `/tmp/claude-lane-prep.sh` /
+  `/tmp/claude-lane-finish.sh`; `tokens` is the harness-reported subagent total.
+  For `role: mathfix`, `issue` identifies the gap whose shared budget is charged.
 - `results/telemetry/builds.jsonl` —
   `{ts, kind: warm|rebuild|cache-get|ci-build, trigger, seconds, outcome,
     sha?, note?}`
@@ -67,14 +79,15 @@ Schemas (all JSONL, one object per line; timestamps ISO-8601 with offset):
 
 Duties:
 
-- **Every agent session goes through `dispatch.sh`** so token usage and wall
+- **Every Codex session goes through `dispatch.sh`** so token usage and wall
   time land in `sessions.jsonl`. A session started any other way is a
   telemetry hole; if one happens, backfill a line with `dispatcher: manual`.
 - **Every full build** (warmer, CI, cold rebuild) lands in `builds.jsonl`.
 - **Stage transitions** are logged by the orchestrator (main session) at the
   moment they happen, not reconstructed later.
-- Claude-side (non-codex) subagent fleets are summarized into `stages.jsonl`
-  as `milestone` entries with token totals, since they bypass `dispatch.sh`.
+- Claude-side (non-Codex) subagent fleets are recorded in
+  `owner-sessions.jsonl` and summarized into `stages.jsonl` as `milestone`
+  entries with token totals, since they bypass `dispatch.sh`.
 
 ## Research-data invariants
 

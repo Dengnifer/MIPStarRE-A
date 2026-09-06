@@ -406,6 +406,13 @@ Required:
 - **Docstrings** on every `def`, `structure`, `class`, and significant `theorem`
 - Mathematical prose in Lean docstrings and comments should follow
   `docs/mathematical_language.md`
+- Cite blueprint nodes by their stable LaTeX label, for example blueprint
+  `lem:cl-concat`. Do not store blueprint line numbers in Lean docstrings. When
+  reviewing, derive the current span with
+  `python3 scripts/blueprint_citations.py resolve lem:cl-concat`.
+- Cite paper mirrors by a paper label when one exists, or by a repository path
+  plus a narrow anchored passage when the source has no suitable label. Paper
+  mirror line ranges are acceptable because those mirrors are immutable.
 
 When formalizing a statement from the blueprint, add corresponding `\lean{...}`
 and `\leanok` tags in the relevant `blueprint/src/chapter/*.tex` file.
@@ -680,9 +687,11 @@ agent must know:
   exact-head commit statuses (`local-ci/*`, `local-review/summary`); merges go
   through GitHub with an exact-SHA guard. Details: `local/README.md`,
   `local/protocols/issues-prs.md`.
-- **Sessions.** Dispatch, resume, and archive agent sessions only via
+- **Sessions.** Dispatch, resume, and archive Codex sessions only via
   `local/bin/dispatch.sh` (roles: orc, prover, reviewer, simplifier,
-  blueprint, splitter, scout) so token/time telemetry stays complete.
+  blueprint, splitter, scout; `mathfix` is reserved for astra after the #26
+  availability report) so token/time telemetry stays complete. Current Fable
+  5.1 math-fix sessions are owner-launched and use `owner-sessions.jsonl`.
 - **Telemetry duty.** Incidents go to `results/telemetry/events.md`;
   protocol changes follow `local/protocols/meta.md` and are ledgered in
   `local/protocols/EVOLUTION.md`.

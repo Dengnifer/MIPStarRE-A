@@ -82,7 +82,16 @@ KNOWN_STAGES = (
 KNOWN_BUILD_KINDS = ("warm", "rebuild", "cache-get", "ci-build")
 KNOWN_OUTCOMES = ("success", "failed", "partial", "skipped")
 KNOWN_STATUSES = ("active", "done", "failed", "archived")
-ROLES = ("orc", "prover", "reviewer", "simplifier", "blueprint", "splitter", "scout")
+ROLES = (
+    "orc",
+    "prover",
+    "reviewer",
+    "simplifier",
+    "blueprint",
+    "splitter",
+    "scout",
+    "mathfix",
+)
 
 TOKEN_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 
@@ -347,12 +356,21 @@ def session_record(
     status: str,
     capture: str | None,
     rollout: str | None,
+    model: str | None = None,
+    account: str | None = None,
+    requested_effort: str | None = None,
 ) -> dict[str, Any]:
     record: dict[str, Any] = {
         "name": name,
         "role": role,
-        "issue": issue,
     }
+    if model:
+        record["model"] = model
+    if account:
+        record["account"] = account
+    if requested_effort:
+        record["requested_effort"] = requested_effort
+    record["issue"] = issue
     if pr:
         record["pr"] = pr
     record.update(
@@ -564,6 +582,9 @@ def cmd_session_summarize(args: argparse.Namespace) -> int:
     record = session_record(
         name=name,
         role=role,
+        model=args.model,
+        account=args.account,
+        requested_effort=args.requested_effort,
         issue=args.issue,
         pr=args.pr,
         thread_id=thread_id,
@@ -579,6 +600,8 @@ def cmd_session_summarize(args: argparse.Namespace) -> int:
         capture=capture_field,
         rollout=None if args.no_rollout_scan else find_rollout(thread_id),
     )
+    if args.continuation_json:
+        record['continuation'] = json.loads(args.continuation_json)
 
     if args.append_to is not None:
         appended = append_session_record(args.append_to, record)
@@ -725,6 +748,13 @@ def _build_parser() -> argparse.ArgumentParser:
     summarize.add_argument("capture", type=Path, help="captured JSONL event stream")
     summarize.add_argument("--name", help="session name (default: capture file stem)")
     summarize.add_argument("--role", choices=ROLES, help="agent role")
+    summarize.add_argument("--model", help="explicitly selected Codex model")
+    summarize.add_argument("--account", choices=("primary", "second"))
+    summarize.add_argument("--continuation-json", help="validated checkpoint and shared budget link")
+    summarize.add_argument(
+        "--requested-effort",
+        help="effective reasoning effort requested from Codex, not provider measurement",
+    )
     summarize.add_argument("--issue", help="issue id or scope this session serves")
     summarize.add_argument("--pr", help="PR id, when the session works on one")
     summarize.add_argument("--start", help="ISO-8601 start timestamp with offset")

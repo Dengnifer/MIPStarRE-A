@@ -194,7 +194,7 @@ this is the source of the terminology.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{def:low-degree-encoding, def:indicator-vector, def:admissible-size, def:binary-representation, lem:downsize_field, lem:one}
+	\uses{def:low-degree-encoding, def:indicator-vector, def:admissible-size, def:binary-representation, lem:one}
 	By the definition of the indicator vector
 	(Definition~\ref{def:indicator-vector}), expanding the product over the
 	coordinates $i \in \{1, \dots, m\}$ into a sum over $y \in \{0,1\}^m$
@@ -215,25 +215,29 @@ this is the source of the terminology.
 	independently, $r_X \neq 0$ with probability $1 - q^{-1}$. If $r_X = 0$
 	or some factor vanishes, then $\gamma(\omega) = 0$. Otherwise, over the
 	uniform choice of $r_Z$, the argument of the trace is a uniformly random
-	element of $\F_q$. Since $q = 2^k$ is admissible, the trace of an
-	element of $\F_q$ equals the coordinate sum of its binary
-	representation: writing $\kappa$ for the binary representation with
-	respect to the fixed self-dual normal basis
-	(Definition~\ref{def:binary-representation}), item~2 of
-	Lemma~\ref{lem:downsize_field} gives
-	$\tr(c) = \tr(c \cdot 1) = \kappa(c) \cdot \kappa(1)$, and $\kappa(1)$
-	is the all-ones vector by Lemma~\ref{lem:one}. As $\kappa$ is a
-	bijection onto $\F_2^k$, a uniformly random element of $\F_q$ has trace
-	$0$ with probability exactly $\frac12$. Combining, the probability that
+	element of $\F_q$, and a uniformly random element of $\F_q$ has trace
+	$0$ with probability exactly $\frac12$: the first vector $e_1$ of the
+	fixed self-dual normal basis satisfies $\tr(e_1) = 1$ by
+	Lemma~\ref{lem:one}, the trace
+	(Definition~\ref{def:binary-representation}) is additive, and $\F_q$
+	has characteristic $2$, so the translation $c \mapsto c + e_1$ is an
+	involution of $\F_q$ carrying $\{c : \tr(c) = 0\}$ bijectively onto
+	$\{c : \tr(c) \neq 0\}$; the two sets therefore have the same
+	cardinality. Combining, the probability that
 	$\gamma(\omega) \neq 0$ is exactly $(1-q^{-1})^{m+1} \cdot \frac12$, and
 	the probability that $\omega$ is commuting is the complement, which is
 	at least $\frac12$.
 
-	If $m \leq q$, then
-	$(1-q^{-1})^{m+1} \geq (1-q^{-1})^{q+1} = (1-q^{-1})^{q} \cdot (1-q^{-1})$,
-	a product of two positive functions of $q$ that are nondecreasing for
-	$q \geq 2$, so it is minimized at $q = 2$, where it equals $2^{-3}$;
-	hence the anticommuting probability is at least $2^{-4}$.
+	If $m \leq q$, then $(1-q^{-1})^{m+1} \geq (1-q^{-1})^{q+1}$, and this
+	last quantity is at least $2^{-3}$ in each of the two cases permitted
+	by admissibility (Definition~\ref{def:admissible-size}): the exponent
+	$k$ with $q = 2^k$ is odd, so either $q = 2$ or $8 \mid q$. If $q = 2$,
+	then $m \leq 2$ and $(1-q^{-1})^{m+1} = 2^{-(m+1)} \geq 2^{-3}$. If
+	$q = 8j$ with $j \geq 1$, then Bernoulli's inequality gives
+	$(1-q^{-1})^{j} \geq 1 - j q^{-1} = \frac78$, while
+	$m + 1 \leq q + 1 \leq 9j$, so
+	$(1-q^{-1})^{m+1} \geq \big( (1-q^{-1})^{j} \big)^{9} \geq \big( \frac78 \big)^{9} \geq \frac18$.
+	Hence the anticommuting probability is at least $2^{-4}$.
 
 	Finally, suppose $m, d \geq 1$, and consider the first inequality of
 	the display, which bounds the anticommuting probability from below.
@@ -439,11 +443,10 @@ measurements.
 	on $\hilb_{\mathsf{A}}$ and $\hilb_{\mathsf{B}}$ respectively, and let
 	$\delta \geq 0$ satisfy the exact consistency-defect bound
 	\[
-	\operatorname{consistencyDefect}\!\left(
-		\operatorname{uniformDistribution}(\mathrm{Unit}),
-		(u,a) \mapsto Q_a \ot \Id_{\mathsf{B}},
-		(u,a) \mapsto \Id_{\mathsf{A}} \ot R_a,
-		\ket{\psi}\right) \leq \delta\,.
+		\sum_{\substack{a,b \\ a \ne b}}
+		\bra{\psi}
+		Q_a \ot R_b \ket{\psi}
+		\leq \delta\,.
 	\]
 	Then there is a projective measurement $\{P_a\}$ on $\hilb_{\mathsf{A}}$ with
 	\[
@@ -454,23 +457,24 @@ measurements.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{lem:projective-low-rank-sum, lem:Q-completeness, lem:P-Q-approx,
-		def:projective-P}
-	Work with Alice's reduced state $\rho_A$, for which the consistency
-	hypothesis gives
-	$\sum_a \operatorname{Tr}\!\left(\rho_A(Q_a-Q_a^2)\right) \leq 2\delta$.
-	When $\delta^{1/4} \leq 1/24$, rank reduction
-	(Lemma~\ref{lem:projective-low-rank-sum}) replaces $\{Q_a\}$ by a family of
-	projectors, Lemma~\ref{lem:Q-completeness} shows that this family is almost
-	complete on $\rho_A$, and the operator $P$ of
-	Definition~\ref{def:projective-P} is projective and close to it by
-	Lemma~\ref{lem:P-Q-approx}. Completing $P$ at one fixed outcome and summing the
-	two estimates gives the bound $220\,\delta^{1/4}$, the completion contributing
-	the residual mass controlled by Lemma~\ref{lem:Q-completeness}. When
-	$\delta^{1/4} > 1/24$, the bound $220\,\delta^{1/4} > 9$ exceeds the universal
-	bound $4$ on the distance between any two sub-measurements on a normalized
-	state, so the completion of the zero sub-measurement already satisfies the
-	conclusion.
+	\uses{lem:projective-low-rank-sum, lem:Q-completeness, def:projective-P,
+		lem:sqrt-Q-completeness, lem:P-projectivity, lem:P-Q-approx,
+		prop:triangle-inequality-for-approx_delta, def:left-marginal-state,
+		lem:matrix-rank-zero, lem:left-marginal-state-evaluation, lem:left-marginal-state-normalization}
+	Pass to Alice's reduced state $\rho_{\mathsf A}$. Consistency gives
+	$\sum_a \operatorname{Tr}_{\mathrm{norm}}\!\left(
+	\rho_{\mathsf A}(Q_a-Q_a^2)\right) \leq 2\delta$.
+	When $\delta^{1/4} \leq 1/24$, Lemma~\ref{lem:projective-low-rank-sum}
+	replaces $\{Q_a\}$ by projectors. Lemma~\ref{lem:Q-completeness} rules out
+	the alternative in which all ranks vanish, so the rank-sum space used by the
+	$Q/X/\widehat X/P$ construction is nonzero. Lemma~\ref{lem:sqrt-Q-completeness}
+	controls the square root of their total operator on $\rho_{\mathsf A}$.
+	Lemma~\ref{lem:P-projectivity} supplies $P$ and its total-operator identity,
+	while Lemma~\ref{lem:P-Q-approx} makes $P$ close to $Q$. Completing $P$ at one
+	fixed outcome and applying the squared-distance triangle bound gives
+	$220\,\delta^{1/4}$, with residual mass controlled by square-root completeness.
+	When $\delta^{1/4} > 1/24$, the target exceeds the universal bound $4$, so
+	completing the zero sub-measurement already proves the conclusion.
 \end{proof}
 
 \section{Strategies}
@@ -506,6 +510,8 @@ generality.
 \begin{lemma}[Reduction to a projective strategy]
 	\label{lem:projective-strategy-setup}
 	\lean{MIPStarRE.QPBT.exists_projective_padded_strategy}
+	\lean{MIPStarRE.QPBT.padWithZeros}
+	\lean{MIPStarRE.QPBT.paddedProdShuffle}
 	\leanok
 	\uses{def:admissible, def:pauli-question-distribution, def:pauli-win-predicate, def:tensor-product-strategy, def:tensor-product-value, def:projective-strategy-general}
 	Let $(q,m,d)$ be an admissible parameter tuple
@@ -524,7 +530,10 @@ generality.
 	state $\ket{0}$, adjoined to each of the two registers.
 \end{lemma}
 \begin{proof}
-	\uses{thm:naimark, def:tensor-product-value, def:tensor-product-strategy}
+	\leanok
+	\uses{thm:naimark, lem:naimark-helper, def:measurement-completion,
+		lem:bipartite-strategy-block-identities, def:tensor-product-strategy,
+		def:tensor-product-value, def:projective-strategy-general}
 	Naimark's theorem (Theorem~\ref{thm:naimark}), applied with the
 	families of all of the first player's measurements on register
 	$\mathsf{A}$ and all of the second player's on register $\mathsf{B}$,
@@ -609,6 +618,48 @@ $\{M^{(\mathrm{Point},W),u}_a\}_{a \in \F_q}$ for all $u \in \F_q^m$.
 	$M^{(\mathrm{Point},W),u}_a$ denotes.
 \end{definition}
 
+\begin{lemma}[Multiplication of point observables]
+\label{lem:point-observable-multiplication}
+\lean{MIPStarRE.QPBT.ProjectiveSetting.pointObs_mul}
+\lean{MIPStarRE.QPBT.ProjectiveSetting.pointObs_zero}
+\lean{MIPStarRE.QPBT.ProjectiveSetting.pointMeas_isProjective}
+\leanok
+\uses{def:strategy-observables}
+For a projective strategy, the answer-folded point measurement is projective.
+For either player, fixed $W$ and $u$, and all $r,s\in\F_q$, its observables satisfy
+\[
+W^r(u)W^s(u)=W^{r+s}(u),\qquad W^0(u)=\Id.
+\]
+These are formalization-only consequences of Equation~\eqref{eq:qld-strat-obs}.
+\end{lemma}
+\begin{proof}
+\leanok
+Answer folding preserves projectivity by summing orthogonal projections.
+Expanding the product of the two observable sums, orthogonality eliminates
+unequal outcomes, and additivity of the trace combines the two phase factors.
+At $r=0$, completeness of the point measurement gives the identity.
+\end{proof}
+
+\begin{lemma}[Averaging scalar multiples of an operator]
+\label{lem:operator-average-scalar-constant}
+\lean{MIPStarRE.LDT.averageOperatorOverDistribution_smul_const}
+\leanok
+Let $D$ be a finite-support distribution on a type $T$, with weights $w(t)$,
+let $c:T\to\mathbb C$, and let $A$ be a fixed finite-dimensional operator.
+Then
+\[
+\sum_{t\in\operatorname{supp}(D)} w(t)\bigl(c(t)A\bigr)
+=\left(\sum_{t\in\operatorname{supp}(D)}w(t)c(t)\right)A.
+\]
+This formalization-only identity supplies the scalar averaging rule used in
+Fourier inversion for expanded point effects.
+\end{lemma}
+\begin{proof}
+\leanok
+Use compatibility of real and complex scalar multiplication and distribute
+scalar multiplication over the finite sum.
+\end{proof}
+
 The observable $W^r(u)$ is the candidate for the generalized Pauli
 observable $\tau^W(r \cdot \mathrm{ind}_m(u))$ that the analysis eventually
 extracts from the strategy.
@@ -622,6 +673,11 @@ extracts from the strategy.
 	\lean{MIPStarRE.QPBT.win_comm_cons, MIPStarRE.QPBT.win_comm_cons_approx}
 	\lean{MIPStarRE.QPBT.win_magic_square}
 	\lean{MIPStarRE.QPBT.win_ms_cons, MIPStarRE.QPBT.win_ms_cons_approx}
+	% The conditional sampling of items 4-7: the uniform laws on commuting
+	% and on anticommuting tuples, together with their total mass one.
+	\lean{MIPStarRE.QPBT.anticommTupleDist, MIPStarRE.QPBT.commTupleDist}
+	\lean{MIPStarRE.QPBT.anticommTupleDist_isProbability}
+	\lean{MIPStarRE.QPBT.commTupleDist_isProbability}
 	\leanok
 	\uses{lem:projective-strategy-setup, def:anticommuting-tuple, def:pauli-question-distribution, def:pauli-win-predicate, def:line-point-dist, def:consistency, def:povm-distance, def:ms-game, def:tensor-product-value, def:low-degree-encoding, def:ideg-deg-polynomials}
 	Assume that $\mathcal{S}$ succeeds in $\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$
@@ -706,7 +762,7 @@ extracts from the strategy.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{fact:omega-anticomm-prob, fact:agreement, def:admissible, def:pauli-question-distribution, def:pauli-win-predicate, def:ld-win-predicate, def:ideg-deg-polynomials, def:consistency}
+	\uses{fact:omega-anticomm-prob, fact:agreement, def:admissible, def:pauli-question-distribution, def:pauli-win-predicate, def:ld-win-predicate, def:ideg-deg-polynomials, def:consistency, lem:qld-reversed-consistency, lem:qld-distance-interchange, lem:qld-placed-consistency-distance}
 	The question types are sampled according to the type graph of the Pauli
 	basis test (Definition~\ref{def:pauli-question-distribution}), which has
 	constant size, so each subtest of the win predicate
@@ -748,7 +804,8 @@ extracts from the strategy.
 	$2^{-4}$.  This replacement for the source's circular parameter reduction
 	is documented in \cite{gap:qpbt_win-implications-corrections}. Finally, that all approximations
 	also hold with $\approx_\eps$ in place of $\simeq_\eps$ is immediate
-	from Lemma~\ref{fact:agreement}.
+	from the quantitative placed form of Lemma~\ref{fact:agreement}
+	in Lemma~\ref{lem:qld-placed-consistency-distance}.
 	The forms with the tensor factors interchanged are the same subtests
 	read on the reversed ordered question pair. That pair is again sampled
 	by the type graph, whose edges are unordered
@@ -759,6 +816,162 @@ extracts from the strategy.
 	relabels the joint coordinates: it exchanges the two placements of a pair
 	of operators and carries $\ket{\psi}$ to the interchanged state, so the
 	state-dependent distance of the two families is unchanged.
+	The reversed consistency estimates are recorded in
+	Lemma~\ref{lem:qld-reversed-consistency}; the distance identity used
+	after applying Lemma~\ref{fact:agreement} is
+	Lemma~\ref{lem:qld-distance-interchange}.
+\end{proof}
+
+\begin{lemma}[Placed consistency-to-distance estimates]
+	\label{lem:qld-placed-consistency-distance}
+	\lean{MIPStarRE.QPBT.WinImplications.opFamilyDistSq_placed_le_two_mul_consistencyDefect}
+	\lean{MIPStarRE.QPBT.WinImplications.opFamilyDistSq_placed_le_of_consistencyDefect_le}
+	\leanok
+	\uses{def:consistency, def:povm-distance}
+	Let $X$ and $\mathcal A$ be finite question and outcome sets, and let
+	$\mu$ be a nonnegative weight on $X$. For each $x\in X$, let
+	$\{A_a^x\}_{a\in\mathcal A}$ and $\{B_a^x\}_{a\in\mathcal A}$ be POVMs
+	on finite-dimensional complex coordinate spaces $\mathcal H_A$ and
+	$\mathcal H_B$, respectively. For any vector
+	$\psi\in\mathcal H_A\otimes\mathcal H_B$, set
+	\[
+	D_\mu=\sum_x\mu(x)\sum_{a\in\mathcal A}
+	 \big\|(A_a^x\otimes\Id_B-\Id_A\otimes B_a^x)\psi\big\|^2,
+	\qquad
+	\mathrm{Cons}_\mu=\sum_x\mu(x)\sum_{a\ne b}
+	 \langle\psi|A_a^x\otimes B_b^x|\psi\rangle.
+	\]
+	Then $D_\mu\leq 2\,\mathrm{Cons}_\mu$. Consequently, for every
+	$c\in\mathbb R$, if $\mathrm{Cons}_\mu\leq c$, then $D_\mu\leq 2c$.
+	Neither $\mu$ nor $\psi$ needs to be normalized, and the POVMs need
+	not be projective. These are formalization-only quantitative auxiliaries
+	for the final sentence of Lemma~\ref{lem:qld-win-implications}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{fact:agreement}
+	Apply the factor-two consistency-to-distance inequality of
+	Lemma~\ref{fact:agreement} to the POVMs
+	$\{A_a^x\otimes\Id_B\}$ and $\{\Id_A\otimes B_a^x\}$ on the joint
+	space. Their off-diagonal products are $A_a^x\otimes B_b^x$,
+	giving the first inequality. The second follows from
+	$D_\mu\leq 2\,\mathrm{Cons}_\mu\leq 2c$.
+\end{proof}
+
+\begin{lemma}[Distance under tensor interchange]
+	\label{lem:qld-distance-interchange}
+	\lean{MIPStarRE.QPBT.WinImplications.opFamilyDistSq_swappedState}
+	\leanok
+	\uses{def:povm-distance}
+	Let $\mathcal H_A,\mathcal H_B$ be finite-dimensional complex coordinate
+	spaces, $\mathcal A$ a finite outcome set, and $\mu$ a finitely supported
+	nonnegative weight on a question set $X$. Let $M_a^x$ and $N_a^x$ be
+	arbitrary operators on $\mathcal H_A$ and $\mathcal H_B$, respectively.
+	For any vector $\psi\in\mathcal H_A\otimes\mathcal H_B$, let
+	$U:\mathcal H_A\otimes\mathcal H_B\to\mathcal H_B\otimes\mathcal H_A$
+	be the coordinate interchange $U(v\otimes w)=w\otimes v$. Then
+	\[
+	\sum_x\mu(x)\sum_{a\in\mathcal A}
+	 \big\|(N_a^x\otimes\Id_A-\Id_B\otimes M_a^x)U\psi\big\|^2
+	=
+	\sum_x\mu(x)\sum_{a\in\mathcal A}
+	 \big\|(M_a^x\otimes\Id_B-\Id_A\otimes N_a^x)\psi\big\|^2.
+	\]
+	This is a formalization-only auxiliary identity for the final sentence
+	of Lemma~\ref{lem:qld-win-implications}; neither normalization nor
+	positivity of the operators is required.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Conjugating by $U$ exchanges the tensor placements. The operator
+	difference on the left becomes the negative of that on the right.
+	Coordinate interchange and negation preserve the norm, so the identity
+	holds term by term in both sums.
+\end{proof}
+
+\begin{lemma}[Reversed-orientation consistency estimates]
+	\label{lem:qld-reversed-consistency}
+	\lean{MIPStarRE.QPBT.WinImplications.win_low_degree_interchanged_proof}
+	\lean{MIPStarRE.QPBT.WinImplications.win_pauli_basis_cons_interchanged_proof}
+	\lean{MIPStarRE.QPBT.WinImplications.win_comm_interchanged_proof}
+	\lean{MIPStarRE.QPBT.WinImplications.win_comm_cons_interchanged_proof}
+	\lean{MIPStarRE.QPBT.WinImplications.win_ms_cons_interchanged_proof}
+	\leanok
+	\uses{lem:projective-strategy-setup, def:admissible, def:consistency,
+		def:line-point-dist, def:low-degree-encoding, def:ideg-deg-polynomials}
+	For each of Items~\ref{enu:qld-ld}, \ref{enu:qld-pauli-basis-cons},
+	\ref{enu:qld-comm}, \ref{enu:qld-comm-cons}, and \ref{enu:qld-ms-cons},
+	there is a universal real constant $C\geq1$ with the following property.
+	For every admissible parameter tuple and projective strategy succeeding
+	in the Pauli basis test with probability at least $1-\eps$, where
+	$\eps\geq0$, the reversed consistency defect is at most $C\eps$,
+	for each $W\in\{X,Z\}$.
+	More precisely, write $L_a^x$ and $R_a^x$ for the local measurement
+	families on the left and right of the corresponding item, and $\mu$
+	for its sampling distribution. With superscripts $A,B$ indicating
+	which player's measurement is used, the assertion is
+	\[
+	\E_{x\sim\mu}\sum_{a\ne b}
+	 \langle\psi|R_a^{x,A}\otimes L_b^{x,B}|\psi\rangle
+	\leq C\eps.
+	\]
+	The low-degree item uses the completed outcome set
+	$\F_q\cup\{\bot\}$ and line-point distribution described above;
+	the Pauli basis item uses uniform points and outcomes in $\F_q$;
+	the remaining three items use binary outcomes and the respective
+	commuting or anticommuting conditional tuple distribution.
+	These auxiliary estimates give the reversed forms of precisely those
+	five items, without assuming that the strategy is symmetric.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:pauli-question-distribution, def:pauli-win-predicate,
+		def:ld-win-predicate, fact:omega-anticomm-prob}
+	Each disagreement event is rejected by the clause for the reversed
+	ordered question pair. Averaging over that clause bounds its mass by
+	the total rejection probability times the constant number of type-graph
+	edges. For the last three items, conditioning costs at most $2$, $2$,
+	and $16$, respectively, by Lemma~\ref{fact:omega-anticomm-prob}.
+	For the low-degree item the completed outcome $\bot$ is treated by
+	the same rejection clause, with zero mass on the point side.
+\end{proof}
+
+\begin{lemma}[Consistency and value part of Lemma~\ref{lem:qld-win-implications}]
+	\label{lem:qld-win-implications-exact}
+	\lean{MIPStarRE.QPBT.win_cons, MIPStarRE.QPBT.win_low_degree}
+	\lean{MIPStarRE.QPBT.win_pauli_basis_cons, MIPStarRE.QPBT.win_comm}
+	\lean{MIPStarRE.QPBT.win_comm_cons, MIPStarRE.QPBT.win_magic_square}
+	\lean{MIPStarRE.QPBT.win_ms_cons}
+	\leanok
+	\uses{lem:qld-win-implications}
+	Under the hypotheses and notation of
+	Lemma~\ref{lem:qld-win-implications}, each of its seven numbered conclusions
+	holds in the displayed tensor order: Items~\ref{enu:qld-cons}--\ref{enu:qld-comm-cons}
+	and~\ref{enu:qld-ms-cons} hold with the consistency relation
+	$\simeq_\eps$, and Item~\ref{enu:qld-ms} gives the stated average Magic
+	Square value. This assertion does not include the operator-distance or
+	tensor-interchanged conclusions in the final sentence of that lemma.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{fact:omega-anticomm-prob, lem:graph-distribution-mass,
+		def:admissible,
+		def:pauli-question-distribution, def:pauli-win-predicate,
+		def:ld-win-predicate, def:line-point-dist,
+		def:ideg-deg-polynomials, def:consistency, def:ms-game,
+		def:tensor-product-value}
+	For each consistency assertion, rewrite the defect as the mass of unequal
+	coarse-grained labels. Every such mismatch violates the corresponding clause
+	of the Pauli basis test, so its mass is bounded by rejection on the associated
+	edge of the finite type graph; for the low-degree check, first split the
+	line-point average into its axis-parallel and diagonal parts. Uniform edge
+	sampling bounds each resulting rejection average by a universal constant
+	times $\eps$. For the commuting and anticommuting items, conditioning costs
+	factors at most $2$ and $2^4$, respectively, by
+	Lemma~\ref{fact:omega-anticomm-prob}. Finally, identify one minus the value of
+	the induced Magic Square strategy with its average rejection mass, apply the
+	same anticommuting and fixed-edge bounds, and average over the Magic Square
+	question pairs to obtain Item~\ref{enu:qld-ms}.
 \end{proof}
 
 \begin{lemma}[Winning implications for observables]
@@ -952,8 +1165,6 @@ every tuple $\omega$.
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.expPointOp}
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.tauPointProj}
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.pointMeasExp}
-	\lean{MIPStarRE.QPBT.ProjectiveSetting.expPointOp_eq_convolution}
-	\lean{MIPStarRE.QPBT.ProjectiveSetting.pointMeasExp_isProjective}
 	\leanok
 	\uses{def:expanded-observables, lem:pauli-observable-expansion, def:low-degree-encoding, def:subfield-trace}
 	For $W \in \{X,Z\}$, $u \in \F_q^m$ and $a \in \F_q$, define
@@ -968,39 +1179,84 @@ every tuple $\omega$.
 	where $\{\tau^W_h\}_{h \in \F_q^{M}}$ are the joint eigenprojectors of
 	the generalized Pauli $W$-observables
 	(see Lemma~\ref{lem:pauli-observable-expansion}).
-	Expanding both tensor factors of $\hat{W}^r(u)$
-	by~\eqref{eq:qld-strat-obs} and by the Fourier expansion of the
-	generalized Pauli observables
-	(see Lemma~\ref{lem:pauli-observable-expansion}), and
-	averaging over $r$, gives the equivalent convolution form
+\end{definition}
+
+\begin{lemma}[Convolution and projectivity of expanded point measurements]
+	\label{lem:expanded-point-measurement-properties}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.expPointOp_eq_convolution}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.expPointOp_nonneg}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.expPointOp_sum_eq_one}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.pointMeasExp_isProjective}
+	\leanok
+	\uses{def:expanded-point-measurement}
+	For either player, $W \in \{X,Z\}$, $u \in \F_q^m$ and $a \in \F_q$,
+	the expanded point effects have the convolution form
 	\[
 		\hat{M}^{(\mathrm{Point},W),u}_a
 		\,=\, \sum_{\substack{a',a'' \in \F_q \\ a' + a'' = a}}
 		M^{(\mathrm{Point},W),u}_{a'} \ot \tau^{W,u}_{a''}\,.
 	\]
-	In particular each $\hat{M}^{(\mathrm{Point},W),u}_a$ is a projection
+	Each effect is positive semidefinite, and
+	$\sum_{a \in \F_q}\hat{M}^{(\mathrm{Point},W),u}_a=\Id$.
+	Moreover, each $\hat{M}^{(\mathrm{Point},W),u}_a$ is a projection
 	and $\{\hat{M}^{(\mathrm{Point},W),u}_a\}_{a \in \F_q}$ is a projective
 	measurement.
-\end{definition}
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:strategy-observables, def:expanded-observables,
+	lem:pauli-observable-expansion, prop:fourier-fact-scalar,
+	lem:operator-average-scalar-constant, lem:point-observable-multiplication,
+	lem:twisted-commutation}
+	Expand both tensor factors of $\hat{W}^r(u)$ and average over $r$.
+	Character orthogonality retains exactly the terms with $a'+a''=a$,
+	giving the convolution formula. Its summands are tensor products of
+	positive semidefinite operators, proving positivity. Summing over $a$
+	removes the convolution constraint; completeness of the strategy and
+	Pauli measurements then gives the identity.
+	For projectivity, multiplication of point observables and of Pauli
+	observables gives $\hat{W}^r(u)\hat{W}^s(u)=\hat{W}^{r+s}(u)$.
+	Squaring the Fourier average defining an effect and translating the
+	uniform summation variable therefore gives the same effect.
+	Positivity supplies self-adjointness, so each effect is a projection.
+\end{proof}
 
 \begin{definition}[Trace-coarse-grained point projections]
 	\label{def:expanded-point-trace-projection}
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.expPointTrace}
-	\lean{MIPStarRE.QPBT.ProjectiveSetting.expPointTrace_eq_half_add}
 	\leanok
-	\uses{def:expanded-point-measurement, def:expanded-observables, def:subfield-trace}
+	\uses{def:expanded-point-measurement, lem:expanded-point-measurement-properties,
+	def:expanded-observables, def:subfield-trace}
 	For fixed $u \in \F_q^m$, $r \in \F_q$ and $b \in \F_2$, define the
 	projection
 	\begin{equation}\label{eq:qld-def-mptur}
 		\hat{M}^{(\mathrm{Point},W),u,r}_b \,=\, \sum_{a \in \F_q \colon \tr(ar) = b} \hat{M}^{(\mathrm{Point},W),u}_a\,,
 	\end{equation}
-	which can be equivalently written as
-	\begin{equation}\label{eq:lc-22}
-		\hat{M}^{(\mathrm{Point},W),u,r}_b \,=\, \frac{1}{2} \Big( \Id + (-1)^b\, \hat{W}^r(u) \Big)\,.
-	\end{equation}
 	The register conventions are those of
 	Definition~\ref{def:expanded-observables}.
 \end{definition}
+
+\begin{lemma}[Trace coarse-graining identity]
+	\label{lem:expanded-point-trace-half-add}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.expPointTrace_eq_half_add}
+	\leanok
+	\uses{def:expanded-point-trace-projection, def:expanded-observables}
+	For either player, $W \in \{X,Z\}$, $u \in \F_q^m$, every $r \in \F_q$
+	(including $r=0$), and $b \in \F_2$, we have
+	\begin{equation}\label{eq:lc-22}
+		\hat{M}^{(\mathrm{Point},W),u,r}_b \,=\, \frac{1}{2} \Big( \Id + (-1)^b\, \hat{W}^r(u) \Big)\,.
+	\end{equation}
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:expanded-point-measurement-properties, prop:fourier-fact-scalar,
+	lem:operator-average-scalar-constant}
+	Fourier inversion gives
+	$\sum_a(-1)^{\tr(ar)}\hat{M}^{(\mathrm{Point},W),u}_a=\hat{W}^r(u)$.
+	The two trace classes sum to $\Id$ by completeness, and their difference
+	is this signed sum. Adding or subtracting these two identities and
+	dividing by two proves the formula.
+\end{proof}
 
 \begin{definition}[Symmetric equivalents]
 	\label{def:symmetric-equivalents}

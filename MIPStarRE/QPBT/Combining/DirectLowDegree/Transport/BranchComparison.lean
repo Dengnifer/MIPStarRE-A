@@ -5,22 +5,24 @@ import MIPStarRE.LDT.Test.StrategyBiProj.Measurements
 /-!
 # Branch comparison for the coordinate strategies of the direct low-degree game
 
-Every branch of the mature low individual degree failure probability of a
-coordinate strategy `directCoordinateProjStrat` is compared with the ordered
-type-pair branch of the direct game asking the same questions.  An accepted
-direct answer pair reads out to equal mature answers: the line answer, rebased
-to the mature line and evaluated at the mature base point, is the point
-answer, and the zero-direction convention reads the constant value at the base
-point.  Hence the mature inconsistency mass at a question pair is at most the
-rejected direct Born mass there.  The point-agreement and axis-line branches
-then compare exactly after the coordinate reindexing of `directPointEquiv`;
-the diagonal branches are treated in `Transport.DiagonalRecursion`.
+Every branch of the low individual degree failure probability of a coordinate
+strategy `directCoordinateProjStrat` is compared with the ordered type-pair
+branch of the direct game asking the same questions.  An accepted direct
+answer pair reads out to equal LDT answers: the line answer, rebased to the
+LDT line and evaluated at the LDT base point, is the point answer, and the
+zero-direction convention reads the constant value at the base point.  Hence
+the LDT inconsistency mass at a question pair is at most the rejected direct
+Born mass there.  The point-agreement and axis-line branches then compare
+exactly after the coordinate reindexing of `directPointEquiv`; the diagonal
+branches are treated in `Transport.DiagonalRecursion`.
 
 ## References
 
 - `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:214-458`
 - `references/ldt-paper/test_definition.tex:130-151`
-- `blueprint/src/chapter/ch13_qpbt_test.tex:38-121,139-166`
+- Blueprint `def:ld-question-distribution`, `lem:ld-aline-level`,
+  `lem:ld-dline-level`, `lem:ld-question-typed-cl`, `lem:alnf`, `lem:dlnf`,
+  `def:ld-win-predicate`, `rem:ld-win-zero-direction`, and `def:ld-meas`
 - `MIPStarRE/LDT/Test/StrategyFailures.lean:18-130`
 - `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`
 -/
@@ -34,7 +36,7 @@ open MIPStarRE.Quantum
 
 noncomputable section
 
-/-- Admissible field sizes are positive, so mature points over a direct
+/-- Admissible field sizes are positive, so LDT points over a direct
 parameter tuple form a nonempty type. -/
 instance (D : DirectLdParams) : NeZero D.q :=
   ⟨Nat.ne_of_gt D.toLDTParameters.hq⟩
@@ -69,7 +71,7 @@ theorem directLdBranchRejectionProbability_eq_avgOver (D : DirectLdParams)
           (types.2, directLdMap D types.2 sample) :=
   rfl
 
-/-- When every accepted direct answer pair reads out to equal mature answers,
+/-- When every accepted direct answer pair reads out to equal LDT answers,
 the bipartite consistency defect of the two readouts at a fixed question pair
 is at most the rejected direct Born mass there.  The matched mass of the
 readouts is the Born mass of the pairs with equal readouts, and the total
@@ -168,7 +170,7 @@ theorem qBipartiteConsDefect_le_directRejectedMass
 An accepted answer pair of the direct game consists of well-formed answers
 satisfying the line-versus-point clause or the consistency clause of
 `def:ld-win-predicate`.  The readouts of `Transport.Questions` evaluate the
-rebased line polynomial at the mature base point, which is the direct point
+rebased line polynomial at the LDT base point, which is the direct point
 at the canonical rebase parameter; the accepted clause forces this value to
 be the point answer.  Zero directions use the constant readout at the base
 point, where the universal clause of `rem:ld-win-zero-direction` gives the
@@ -206,7 +208,7 @@ theorem directPointAnswerReadout_eq_of_win (D : DirectLdParams) (r : Fin D.k)
         validDirectLdAnswer] at hwin
 
 /-- The axis-line acceptance clause at the canonical rebase parameter gives
-the rebased polynomial its point value at the mature base point. -/
+the rebased polynomial its point value at the LDT base point. -/
 private theorem axis_readout_of_condition (D : DirectLdParams) (r : Fin D.k)
     (line : AxisParallelLine D.toLDTParameters)
     (f : Fin D.k → Fin (D.d + 1) → DirectScalarQ D)
@@ -229,7 +231,7 @@ private theorem axis_readout_of_condition (D : DirectLdParams) (r : Fin D.k)
   rw [AxisLinePolynomial.reparamAt_apply_zero, directAxisAnswerEquiv_apply, heval]
 
 /-- The diagonal-line acceptance clause gives the readout its point value at
-the mature base point, using the canonical rebase parameter for a nonzero
+the LDT base point, using the canonical rebase parameter for a nonzero
 direction and the parameter zero for the zero direction. -/
 private theorem diagonal_readout_of_condition (D : DirectLdParams) (r : Fin D.k)
     (line : DiagonalLine D.toLDTParameters)
@@ -270,7 +272,7 @@ private theorem diagonal_readout_of_condition (D : DirectLdParams) (r : Fin D.k)
       directDiagonalAnswerEquiv_apply, heval]
 
 /-- On the axis-line branch with the line on the left, an accepted direct
-answer pair has the rebased line answer, evaluated at the mature base point,
+answer pair has the rebased line answer, evaluated at the LDT base point,
 equal to the point readout. -/
 theorem directAxisAnswerReadout_zeroCoord_eq_of_win (D : DirectLdParams)
     (r : Fin D.k) (line : AxisParallelLine D.toLDTParameters)
@@ -303,7 +305,7 @@ theorem directAxisAnswerReadout_zeroCoord_eq_of_win (D : DirectLdParams)
 
 /-- On the axis-line branch with the point on the left, an accepted direct
 answer pair has the point readout equal to the rebased line answer evaluated
-at the mature base point. -/
+at the LDT base point. -/
 theorem directPointAnswerReadout_eq_axis_zeroCoord_of_win (D : DirectLdParams)
     (r : Fin D.k) (line : AxisParallelLine D.toLDTParameters)
     (a b : DirectLdAnswer D)
@@ -334,7 +336,7 @@ theorem directPointAnswerReadout_eq_axis_zeroCoord_of_win (D : DirectLdParams)
         directLdPointQuestionOf, validDirectLdAnswer] at hwin
 
 /-- On the diagonal-line branch with the line on the left, an accepted direct
-answer pair has the rebased line answer, evaluated at the mature base point,
+answer pair has the rebased line answer, evaluated at the LDT base point,
 equal to the point readout. -/
 theorem directDiagonalAnswerReadout_zeroCoord_eq_of_win (D : DirectLdParams)
     (r : Fin D.k) (line : DiagonalLine D.toLDTParameters)
@@ -368,7 +370,7 @@ theorem directDiagonalAnswerReadout_zeroCoord_eq_of_win (D : DirectLdParams)
 
 /-- On the diagonal-line branch with the point on the left, an accepted
 direct answer pair has the point readout equal to the rebased line answer
-evaluated at the mature base point. -/
+evaluated at the LDT base point. -/
 theorem directPointAnswerReadout_eq_diagonal_zeroCoord_of_win (D : DirectLdParams)
     (r : Fin D.k) (line : DiagonalLine D.toLDTParameters)
     (a b : DirectLdAnswer D)
@@ -418,7 +420,7 @@ section PointAxisBranches
 variable (D : DirectLdParams) (S : Strategy (directLdGame D))
   (hS : S.IsProjective) (r : Fin D.k)
 
-/-- Point-agreement defect at a mature point is at most the rejected direct
+/-- Point-agreement defect at an LDT point is at most the rejected direct
 mass at the direct point question. -/
 private theorem point_defect_le (u : Point D.toLDTParameters) :
     letI := D.toLDTFieldModel
@@ -534,7 +536,7 @@ private theorem axis_point_line_defect_le
   simp only [ProjMeas.postprocess_toSubMeas, SubMeas.postprocess_comp] at h ⊢
   exact h
 
-/-- Reindex a uniform average over mature axis samples to the direct sample
+/-- Reindex a uniform average over LDT axis samples to the direct sample
 space; the averaged function depends only on the decoded point and the
 reversed coordinate index. -/
 private theorem avgOver_axis_sample_eq

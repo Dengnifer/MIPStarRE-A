@@ -2,7 +2,7 @@
 # dispatch.sh — the only sanctioned way to start a codex agent session.
 #
 # Usage:
-#   local/bin/dispatch.sh --role <orc|prover|reviewer|simplifier|blueprint|splitter|scout>
+#   local/bin/dispatch.sh --role <orc|prover|reviewer|simplifier|blueprint|splitter|scout|mathfix>
 #                         --issue <id|scope>
 #                         [--worktree DIR]        working root (default: repo root)
 #                         [--sandbox MODE]        read-only|workspace-write|danger-full-access
@@ -10,6 +10,8 @@
 #                         [--persona-ref REF]     trusted ref for personas (default: main)
 #                         [--no-persona]          dispatch with the built-in role frame only
 #                         [--resume THREAD_ID]    continue an existing codex thread
+#                         [--continue-from FILE]  fresh primary checkpoint/budget handoff JSON
+#                         [--account ACCOUNT]     auto|primary|second (default auto)
 #                         [--effort LEVEL]        model_reasoning_effort override
 #                         [--context-file FILE]   untrusted data to attach (repeatable)
 #                         [--pr ID]               PR id recorded in the registry line
@@ -47,12 +49,14 @@
 #   MIPSTARRE_SESSION (dispatching session name), MIPSTARRE_DISPATCH_LOCK_WAIT,
 #   MIPSTARRE_MAX_CONTEXT_BYTES (default 100000), MIPSTARRE_LAKE_ROOT,
 #   LOCAL_REVIEW_ENABLED.
+#   MIPSTARRE_CODEX_ACCOUNT (auto|primary|second), MIPSTARRE_ACCOUNT_WAIT
+#   (seconds, default 1800), MIPSTARRE_CODEX_HOME_SECOND (second account home).
 
 set -euo pipefail
 
 PROG="${0##*/}"
 
-ROLES="orc prover reviewer simplifier blueprint splitter scout"
+ROLES="orc prover reviewer simplifier blueprint splitter scout mathfix"
 READ_ONLY_ROLES="reviewer scout"
 
 # Prompt-size guards. The study fleet lost a session to an oversized prompt
@@ -98,6 +102,9 @@ release_locks() {
 }
 
 cleanup() {
+  if [ "${ACCOUNT_ROUTING:-0}" -eq 1 ]; then
+    rm -f "$CACHE_ROOT/accounts/primary/$$" "$CACHE_ROOT/accounts/second/$$"
+  fi
   release_locks
   # A capture file is created early to reserve the sequence number. If we die
   # before codex ever ran, release it again so the number is not burned and no
@@ -153,6 +160,10 @@ PERSONA=""
 PERSONA_REF="${MIPSTARRE_PERSONA_REF:-main}"
 NO_PERSONA=0
 RESUME_ID=""
+CONTINUATION_FILE=""
+CONTINUATION_JSON=""
+ACCOUNT="${MIPSTARRE_CODEX_ACCOUNT:-auto}"
+ACCOUNT_WAIT="${MIPSTARRE_ACCOUNT_WAIT:-1800}"
 EFFORT=""
 PR_ID=""
 DRY_RUN=0
@@ -177,6 +188,8 @@ while [ "$#" -gt 0 ]; do
     --persona-ref) require_value "$1" "$#"; PERSONA_REF="$2"; shift 2 ;;
     --no-persona) NO_PERSONA=1; shift ;;
     --resume) require_value "$1" "$#"; RESUME_ID="$2"; shift 2 ;;
+    --continue-from) require_value "$1" "$#"; CONTINUATION_FILE="$2"; shift 2 ;;
+    --account) require_value "$1" "$#"; ACCOUNT="$2"; shift 2 ;;
     --effort) require_value "$1" "$#"; EFFORT="$2"; shift 2 ;;
     --context-file)
       require_value "$1" "$#"
@@ -196,6 +209,14 @@ done
 
 TASK_PROMPT="$*"
 
+case "$ACCOUNT" in
+  auto|primary|second) ;;
+  *) die 2 "--account must be auto, primary, or second" ;;
+esac
+case "$ACCOUNT_WAIT" in
+  ''|*[!0-9]*) die 2 "MIPSTARRE_ACCOUNT_WAIT must be a whole number of seconds" ;;
+esac
+
 [ -n "$ROLE" ] || die 2 "--role is required (one of: $ROLES)"
 [ -n "$ISSUE" ] || die 2 "--issue is required (an issue id such as 0042, or a scope word)"
 [ -n "$TASK_PROMPT" ] || die 2 "a task prompt is required after --"
@@ -209,11 +230,11 @@ case "$LOCK_WAIT" in
   ''|*[!0-9]*) die 2 "--lock-wait must be a whole number of seconds" ;;
 esac
 
-if [ -n "$EFFORT" ]; then
-  case "$EFFORT" in
-    *[!a-z]*) die 2 "--effort must be a bare lowercase word (e.g. low, medium, high, ultra)" ;;
-  esac
-fi
+case "$EFFORT" in
+  ''|ultra) EFFORT=max ;;
+  max|xhigh) ;;
+  *) die 2 "--effort must be max or xhigh (legacy ultra maps to max)" ;;
+esac
 
 if [ -n "$RESUME_ID" ]; then
   case "$RESUME_ID" in
@@ -393,6 +414,27 @@ fi
 # read directly.
 # ---------------------------------------------------------------------------
 
+if [ -n "$CONTINUATION_FILE$RESUME_ID" ]; then
+  [ -z "$CONTINUATION_FILE" ] || { [ -z "$RESUME_ID" ] && [ "$ACCOUNT" != second ]; } ||
+    die 4 "continuations use a fresh primary thread"
+  CONTINUATION_JSON="$(python3 - "$SCRIPT_DIR" "$CONTINUATION_FILE" "$REGISTRY" \
+    "$WORKTREE_ABS" "$ISSUE" "$RESUME_ID" <<'PY'
+import json, sys
+from pathlib import Path
+sys.path.insert(0, sys.argv[1])
+from account_router import continuation, resume_continuation
+value = (continuation(Path(sys.argv[2]), Path(sys.argv[3]), Path(sys.argv[4]), sys.argv[5])
+         if sys.argv[2] else resume_continuation(Path(sys.argv[3]), sys.argv[6]))
+print(json.dumps(value) if value else '')
+PY
+  )" || die 4 "invalid continuation; preserve the checkpoint and shared budget"
+fi
+if [ -n "$CONTINUATION_FILE" ]; then
+  ACCOUNT=primary
+  CONTEXT_FILES+=("$CONTINUATION_FILE")
+  TASK_PROMPT="Continue from the checkpoint and shared budget in the attached handoff; do not reset its anchor or charges. $TASK_PROMPT"
+fi
+
 builtin_frame() {
   case "$ROLE" in
     orc) printf '%s\n' "You are the orchestrator: you plan, split and dispatch work, and you never do the proof work yourself when a specialist session can." ;;
@@ -402,6 +444,9 @@ builtin_frame() {
     blueprint) printf '%s\n' "You are a blueprint writer: you keep blueprint/src in sync with the Lean development and with the source paper, in mathematical prose." ;;
     splitter) printf '%s\n' "You are a splitter: you divide oversized files and oversized tasks into coherent units without changing content." ;;
     scout) printf '%s\n' "You are a scout: you search Mathlib and the repository, report what exists, and change nothing." ;;
+    mathfix) printf '%s\n' \
+      "You are a mathematical-gap specialist: derive the closest correct and sufficient repair," \
+      "verify every downstream use, and confirm it in Lean before adoption." ;;
   esac
 }
 
@@ -586,12 +631,30 @@ PROMPT_TEXT="$(cat "$PROMPT_FILE")"
 # codex invocation
 # ---------------------------------------------------------------------------
 
+if [ "$DRY_RUN" -eq 0 ] && [ "$SANDBOX" != "read-only" ]; then
+  WT_KEY="$(printf '%s' "$WORKTREE_ABS" | cksum | tr -d ' ' | cut -c1-12)"
+  WT_BASE="$(printf '%s' "$(basename "$WORKTREE_ABS")" | tr -c 'A-Za-z0-9._-' '-')"
+  acquire_lock "worktree-$WT_BASE-$WT_KEY" "$LOCK_WAIT" "worktree $WORKTREE_ABS"
+fi
+ROUTER_ARGS=("$CACHE_ROOT" "$ACCOUNT" "$$" "$ACCOUNT_WAIT" "$REGISTRY")
+if [ -n "$RESUME_ID" ]; then ROUTER_ARGS+=(--resume "$RESUME_ID"); fi
+if [ "$DRY_RUN" -eq 1 ]; then ROUTER_ARGS+=(--dry-run); fi
+ACCOUNT_ROUTING=1
+ROUTING="$(python3 "$SCRIPT_DIR/account_router.py" "${ROUTER_ARGS[@]}")"
+ACCOUNT="${ROUTING%%$'\n'*}"
+MIPSTARRE_CODEX_MODEL="${ROUTING#*$'\n'}"
+ACCOUNT_ENV=(env -u CODEX_HOME)
+if [ "$ACCOUNT" = second ]; then
+  ACCOUNT_ENV+=("CODEX_HOME=${MIPSTARRE_CODEX_HOME_SECOND:-$HOME/.cache/mipstarre-dev/codex-home-yxy}")
+fi
+
 CODEX_ARGS=(exec)
 CODEX_ARGS[${#CODEX_ARGS[@]}]="--json"
 CODEX_ARGS[${#CODEX_ARGS[@]}]="-C"
 CODEX_ARGS[${#CODEX_ARGS[@]}]="$WORKTREE_ABS"
 CODEX_ARGS[${#CODEX_ARGS[@]}]="--sandbox"
 CODEX_ARGS[${#CODEX_ARGS[@]}]="$SANDBOX"
+CODEX_ARGS+=(-c 'features.multi_agent=false' -c 'agents.max_concurrent_threads_per_session=1')
 if [ -n "$LAKE_WRITE_DIR" ]; then
   CODEX_ARGS[${#CODEX_ARGS[@]}]="--add-dir"
   CODEX_ARGS[${#CODEX_ARGS[@]}]="$LAKE_WRITE_DIR"
@@ -617,6 +680,7 @@ CODEX_ARGS[${#CODEX_ARGS[@]}]="$PROMPT_TEXT"
 
 if [ "$DRY_RUN" -eq 1 ]; then
   printf 'name: %s\n' "$NAME"
+  printf 'account: %s\n' "$ACCOUNT"
   printf 'worktree: %s\n' "$WORKTREE_ABS"
   printf 'sandbox: %s\n' "$SANDBOX"
   printf 'persona: %s\n' "$PERSONA_LABEL"
@@ -631,16 +695,10 @@ if [ "$DRY_RUN" -eq 1 ]; then
   exit 0
 fi
 
-# One writing session per worktree: parallel write sessions in one worktree
-# collide on the same files and on .lake (study-map gotcha: parallel subagents
-# must live in separate worktrees).
-if [ "$SANDBOX" != "read-only" ]; then
-  WT_KEY="$(printf '%s' "$WORKTREE_ABS" | cksum | tr -d ' ' | cut -c1-12)"
-  WT_BASE="$(printf '%s' "$(basename "$WORKTREE_ABS")" | tr -c 'A-Za-z0-9._-' '-')"
-  acquire_lock "worktree-$WT_BASE-$WT_KEY" "$LOCK_WAIT" "worktree $WORKTREE_ABS"
+if [ -n "$CONTINUATION_JSON" ]; then
+  (umask 077; set -C; printf '%s\n' "$CONTINUATION_JSON" > "$CAPTURE_DIR/$NAME.continuation.json")
 fi
-
-note "dispatching $NAME (role=$ROLE sandbox=$SANDBOX worktree=$WORKTREE_ABS)"
+note "dispatching $NAME (role=$ROLE account=$ACCOUNT sandbox=$SANDBOX worktree=$WORKTREE_ABS)"
 
 # stdin is closed: codex exec reads piped stdin as extra prompt input, which
 # would silently splice the caller's stdin into the session.
@@ -648,12 +706,13 @@ CODEX_STARTED=1
 set +e
 if [ -n "${MIPSTARRE_SESSION_TIMEOUT:-}" ]; then
   timeout --signal=TERM --kill-after=30s "$MIPSTARRE_SESSION_TIMEOUT" \
-    codex "${CODEX_ARGS[@]}" </dev/null | tee "$CAPTURE"
+    "${ACCOUNT_ENV[@]}" codex "${CODEX_ARGS[@]}" </dev/null | tee "$CAPTURE"
 else
-  codex "${CODEX_ARGS[@]}" </dev/null | tee "$CAPTURE"
+  "${ACCOUNT_ENV[@]}" codex "${CODEX_ARGS[@]}" </dev/null | tee "$CAPTURE"
 fi
 CODEX_EXIT="${PIPESTATUS[0]}"
 set -e
+rm -f "$CACHE_ROOT/accounts/$ACCOUNT/$$"
 
 END_TS="$(date +%Y-%m-%dT%H:%M:%S%z)"
 release_locks
@@ -668,21 +727,36 @@ cp "$LAST_MESSAGE" "$PUBLISHED_CAPTURE_DIR/$NAME.last.md" 2>/dev/null ||
 
 SUMMARY_SH="$RUN_TMPDIR/summary.sh"
 TELEM_ARGS=(--repo-root "$REPO_ROOT" session-summarize "$PUBLISHED_CAPTURE_DIR/$NAME.jsonl"
-  --name "$NAME" --role "$ROLE" --issue "$ISSUE"
+  --name "$NAME" --role "$ROLE" --issue "$ISSUE" --account "$ACCOUNT"
   --start "$START_TS" --end "$END_TS" --exit-code "$CODEX_EXIT"
   --dispatcher "$DISPATCHER" --worktree "$WORKTREE_ABS"
   --append-to "$REGISTRY" --shell-out "$SUMMARY_SH")
+[ -z "$CONTINUATION_JSON" ] || TELEM_ARGS+=(--continuation-json "$CONTINUATION_JSON")
 if [ -n "$PR_ID" ]; then
   TELEM_ARGS[${#TELEM_ARGS[@]}]="--pr"
   TELEM_ARGS[${#TELEM_ARGS[@]}]="$PR_ID"
 fi
+if [ -n "${MIPSTARRE_CODEX_MODEL:-}" ]; then
+  TELEM_ARGS[${#TELEM_ARGS[@]}]="--model"
+  TELEM_ARGS[${#TELEM_ARGS[@]}]="$MIPSTARRE_CODEX_MODEL"
+fi
+TELEM_ARGS+=(--requested-effort "$EFFORT")
 
-if ! python3 "$TELEMETRY_PY" "${TELEM_ARGS[@]}" >/dev/null; then
+REPLAY_EFFORT_ARG=" --requested-effort $EFFORT"
+REPLAY_CONTINUATION_ARG=""
+if [ -n "$CONTINUATION_JSON" ]; then
+  printf -v REPLAY_CONTINUATION_ARG ' --continuation-json "$(cat %q)"' \
+    "$CAPTURE_DIR/$NAME.continuation.json"
+fi
+
+if ! "${ACCOUNT_ENV[@]}" python3 "$TELEMETRY_PY" "${TELEM_ARGS[@]}" >/dev/null; then
+  printf -v REPLAY_ACCOUNT_ENV '%q ' "${ACCOUNT_ENV[@]}"
   die 6 "telemetry append failed for $NAME.
   The event stream is intact at $CAPTURE — replay it with:
-    python3 $TELEMETRY_PY session-summarize $CAPTURE --name $NAME \\
+    ${REPLAY_ACCOUNT_ENV}python3 $TELEMETRY_PY session-summarize $CAPTURE --name $NAME \\
       --role $ROLE --issue $ISSUE --start $START_TS --end $END_TS \\
-      --exit-code $CODEX_EXIT --append-to $REGISTRY
+      --exit-code $CODEX_EXIT --account $ACCOUNT --model $MIPSTARRE_CODEX_MODEL$REPLAY_EFFORT_ARG$REPLAY_CONTINUATION_ARG \\
+      --append-to $REGISTRY
   Do not leave the session unrecorded (meta.md, telemetry duties)."
 fi
 

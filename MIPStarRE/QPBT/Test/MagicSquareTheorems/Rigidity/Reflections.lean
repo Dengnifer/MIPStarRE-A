@@ -120,7 +120,8 @@ state-dependent norm. -/
 theorem norm_applyOperatorToState_isometry_mul {U : Op ι} (hU : Uᴴ * U = 1)
     (M : Op ι) (ψ : EuclideanSpace ℂ ι) :
     ‖applyOperatorToState (U * M) ψ‖ = ‖applyOperatorToState M ψ‖ := by
-  rw [applyOperatorToState_mul, norm_applyOperatorToState_of_isometry hU]
+  rw [MIPStarRE.QPBT.DistanceCalculus.applyOperatorToState_mul,
+    norm_applyOperatorToState_of_isometry hU]
 
 end StateNorm
 

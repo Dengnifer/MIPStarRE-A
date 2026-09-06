@@ -20,7 +20,7 @@ answers remain in the event masses when `msBitOrZero` and
 
 The Magic Square game is defined in
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:512-610`
-and `blueprint/src/chapter/ch13_qpbt_test.tex:201-222`.  These relations are the
+and blueprint `def:ms-game`.  These relations are the
 probabilistic input to the rigidity result cited at paper lines 612-652 from
 Coladangelo--Stark, Theorem 6.9.
 -/
@@ -276,24 +276,20 @@ noncomputable def aliceConstraintWrongFormMass (S : Strategy msGame) (i : Fin 6)
 noncomputable def bobConstraintWrongFormMass (S : Strategy msGame) (i : Fin 6) : ℝ :=
   bobEventWeight S (.constraint i) fun b => wrongConstraintAnswer b = true
 
-private theorem forward_wrong_variable_rejects (i : Fin 6) (k : Fin 3)
+/-- A malformed variable answer rejects a constraint-to-variable incidence;
+this is a formalization-only consequence of the Magic Square verifier in
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:512-610`. -/
+theorem forward_wrong_variable_rejects (i : Fin 6) (k : Fin 3)
     (a b : MsAnswer) (hb : wrongVariableAnswer b = true) :
     msWinPredicate (.constraint i) (.var (msConstraintVars i k)) a b = false := by
   cases a <;> cases b <;> simp_all [wrongVariableAnswer, msWinPredicate]
 
-private theorem reverse_wrong_variable_rejects (i : Fin 6) (k : Fin 3)
-    (a b : MsAnswer) (ha : wrongVariableAnswer a = true) :
-    msWinPredicate (.var (msConstraintVars i k)) (.constraint i) a b = false := by
-  cases a <;> cases b <;> simp_all [wrongVariableAnswer, msWinPredicate]
-
-private theorem forward_wrong_constraint_rejects (i : Fin 6) (k : Fin 3)
+/-- A malformed constraint answer rejects a constraint-to-variable incidence;
+this is a formalization-only consequence of the Magic Square verifier in
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:512-610`. -/
+theorem forward_wrong_constraint_rejects (i : Fin 6) (k : Fin 3)
     (a b : MsAnswer) (ha : wrongConstraintAnswer a = true) :
     msWinPredicate (.constraint i) (.var (msConstraintVars i k)) a b = false := by
-  cases a <;> cases b <;> simp_all [wrongConstraintAnswer, msWinPredicate]
-
-private theorem reverse_wrong_constraint_rejects (i : Fin 6) (k : Fin 3)
-    (a b : MsAnswer) (hb : wrongConstraintAnswer b = true) :
-    msWinPredicate (.var (msConstraintVars i k)) (.constraint i) a b = false := by
   cases a <;> cases b <;> simp_all [wrongConstraintAnswer, msWinPredicate]
 
 /-- Alice's wrong-form mass at every variable question is at most `36 * ε`. -/
@@ -308,7 +304,9 @@ theorem alice_variable_wrong_form_mass_le (S : Strategy msGame) (ε : ℝ)
     outcomeEventWeight S (.var (msConstraintVars i k)) (.constraint i)
         (fun a _ => wrongVariableAnswer a = true) ≤
         rejectionMass S (.var (msConstraintVars i k)) (.constraint i) :=
-      outcome_event_weight_le_rejection_mass S _ _ _ (reverse_wrong_variable_rejects i k)
+      outcome_event_weight_le_rejection_mass S _ _ _ fun a b ha =>
+        (msWinPredicate_symm _ _ _ _).trans
+          (forward_wrong_variable_rejects i k b a ha)
     _ ≤ 36 * ε :=
       rejection_mass_le S ε hwin (ms_reverse_incidence_mem_support i k)
 
@@ -352,7 +350,9 @@ theorem bob_constraint_wrong_form_mass_le (S : Strategy msGame) (ε : ℝ)
     outcomeEventWeight S (.var (msConstraintVars i 0)) (.constraint i)
         (fun _ b => wrongConstraintAnswer b = true) ≤
         rejectionMass S (.var (msConstraintVars i 0)) (.constraint i) :=
-      outcome_event_weight_le_rejection_mass S _ _ _ (reverse_wrong_constraint_rejects i 0)
+      outcome_event_weight_le_rejection_mass S _ _ _ fun a b hb =>
+        (msWinPredicate_symm _ _ _ _).trans
+          (forward_wrong_constraint_rejects i 0 b a hb)
     _ ≤ 36 * ε :=
       rejection_mass_le S ε hwin (ms_reverse_incidence_mem_support i 0)
 

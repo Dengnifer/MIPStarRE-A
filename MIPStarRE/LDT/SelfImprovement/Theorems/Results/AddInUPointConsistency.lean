@@ -28,7 +28,8 @@ selection-dependent transfer estimate, not an additional arithmetic comparison.
 ## References
 
 - `references/ldt-paper/self_improvement.tex` lines 420–437
-- `blueprint/src/chapter/ch07_self_improvement.tex` lines 155–179
+- Blueprint `eq:point-consistency-expansion` and
+  `eq:explicit-bound-for-A-consistency`
 -/
 
 namespace MIPStarRE.LDT.SelfImprovement

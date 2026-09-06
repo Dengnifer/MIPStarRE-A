@@ -3,19 +3,19 @@ import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Correspondence
 /-!
 # Question and answer transport for the directly indexed low-degree game
 
-This module reads mature low individual degree questions as canonical direct
-questions and rebases direct answers to the mature line parametrization.
+This module reads low individual degree test questions as canonical direct
+questions and rebases direct answers to the LDT line parametrization.
 
 Points and lines are decoded with the coordinate order reversed
 (`directPointEquiv`), so that the suffix-zero direction restriction of the
-mature diagonal test becomes the prefix-zero restriction of the direct game.
-A mature diagonal line reveals no coordinate index, whereas a direct diagonal
+LDT diagonal test becomes the prefix-zero restriction of the direct game.
+An LDT diagonal line reveals no coordinate index, whereas a direct diagonal
 question carries one.  The transported question uses the *leading index* of
 the decoded direction, the least coordinate at which the direction is
 nonzero.  Under the direct sampler, this is the index attached to the sampled
 direction exactly when the direction is nonzero at the sampled index
 (`directDiagonalIndexOf_prefixProjection`), an event of conditional
-probability `1 - 1/q`; on the mature side, the leading index of a decoded
+probability `1 - 1/q`; on the LDT side, the leading index of a decoded
 `j`-restricted direction is `Fin.rev j` exactly when its pivot coordinate is
 nonzero (`directDiagonalIndexOf_extendRestrictedDirection`).  Diagonal answers
 on zero-direction lines are read as the constant polynomial carrying their
@@ -25,7 +25,7 @@ value at the base point, following `rem:ld-win-zero-direction`.
 
 - `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:230-272`
 - `references/ldt-paper/test_definition.tex:49-65`
-- `blueprint/src/chapter/ch13_qpbt_test.tex:120-121`
+- `rem:ld-win-zero-direction`
 - `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`
 -/
 
@@ -38,7 +38,7 @@ open MIPStarRE.Quantum
 
 noncomputable section
 
-/-! ## Canonical line rebasing for the mature LDT interface -/
+/-! ## Canonical line rebasing of LDT lines -/
 
 /-- A chosen affine parameter expressing a point relative to its canonical
 line representative. -/
@@ -181,16 +181,16 @@ theorem directPrefixProjection_directDiagonalIndexOf (D : DirectLdParams)
   · exact (directDiagonalIndexOf_prefix_zero D v j hj).symm
   · rfl
 
-/-! ## Decoding mature points and lines -/
+/-! ## Decoding LDT points and lines -/
 
-/-- Decode a mature LDT point into the fixed direct scalar field, reversing
-the coordinate order. -/
+/-- Decode an LDT point into the fixed direct scalar field, reversing the
+coordinate order. -/
 abbrev ldtPointToDirect (D : DirectLdParams) :
     Point D.toLDTParameters → Fin D.m → DirectScalarQ D :=
   (directPointEquiv D).symm
 
-/-- The direct canonical axis question represented by a mature axis line.
-The mature coordinate index is reversed together with the point
+/-- The direct canonical axis question represented by an LDT axis line.
+The LDT coordinate index is reversed together with the point
 coordinates. -/
 noncomputable def directAxisQuestionOf (D : DirectLdParams)
     (line : AxisParallelLine D.toLDTParameters) : DirectLdQuestion D :=
@@ -199,7 +199,7 @@ noncomputable def directAxisQuestionOf (D : DirectLdParams)
   let v : Fin D.m → DirectScalarQ D := coordinateDirection i
   (.aline, ⟨lineRepMap v u, i, 0⟩)
 
-/-- The direct canonical diagonal question represented by a mature diagonal
+/-- The direct canonical diagonal question represented by an LDT diagonal
 line.  The decoded direction is kept and the direct index is its leading
 index, so the question is the canonical direct question of the direct sample
 formed by the decoded base, the leading index, and the decoded direction
@@ -210,7 +210,7 @@ noncomputable def directDiagonalQuestionOf (D : DirectLdParams)
   let v := ldtPointToDirect D line.direction
   (.dline, ⟨lineRepMap v u, directDiagonalIndexOf D v, v⟩)
 
-/-- The direct point question represented by a mature LDT point. -/
+/-- The direct point question represented by an LDT point. -/
 noncomputable def directPointQuestionOf (D : DirectLdParams)
     (u : Point D.toLDTParameters) : DirectLdQuestion D :=
   directLdPointQuestionOf D (ldtPointToDirect D u)
@@ -228,31 +228,31 @@ theorem directDiagonalQuestionOf_eq_directLdMap (D : DirectLdParams)
   unfold directDiagonalQuestionOf directLdMap
   simp only [directPrefixProjection_directDiagonalIndexOf]
 
-/-- The mature diagonal line represented by a direct sample: the encoded
+/-- The LDT diagonal line represented by a direct sample: the encoded
 point and the encoded direction. -/
-def matureDiagonalLineOf (D : DirectLdParams) (sample : DirectLdSpace D) :
+def ldtDiagonalLineOf (D : DirectLdParams) (sample : DirectLdSpace D) :
     DiagonalLine D.toLDTParameters :=
   { base := directPointEquiv D sample.point
     direction := directPointEquiv D sample.direction }
 
 /-- Round trip on generic direct samples: when the sampled direction is
-nonzero at the sampled index, the mature line of the canonical direct
+nonzero at the sampled index, the LDT line of the canonical direct
 diagonal question transports back to that question, index included. -/
-theorem directDiagonalQuestionOf_matureDiagonalLineOf (D : DirectLdParams)
+theorem directDiagonalQuestionOf_ldtDiagonalLineOf (D : DirectLdParams)
     (sample : DirectLdSpace D)
     (hgeneric : sample.direction sample.index ≠ 0) :
     directDiagonalQuestionOf D
-        (matureDiagonalLineOf D (directLdMap D .dline sample)) =
+        (ldtDiagonalLineOf D (directLdMap D .dline sample)) =
       (.dline, directLdMap D .dline sample) := by
   cases sample with
   | mk point index direction =>
-      unfold directDiagonalQuestionOf matureDiagonalLineOf directLdMap
+      unfold directDiagonalQuestionOf ldtDiagonalLineOf directLdMap
       simp only [ldtPointToDirect, Equiv.symm_apply_apply, lineRepMap_apply_self,
         directDiagonalIndexOf_prefixProjection D index direction hgeneric]
 
-/-- A mature `j`-restricted diagonal direction decodes to a direct direction
-vanishing before index `Fin.rev j`: the suffix restriction of the mature
-test is the prefix restriction of the direct game. -/
+/-- An LDT `j`-restricted diagonal direction decodes to a direct direction
+vanishing before index `Fin.rev j`: the suffix restriction of the low
+individual degree test is the prefix restriction of the direct game. -/
 theorem ldtPointToDirect_extendRestrictedDirection_prefix_zero
     (D : DirectLdParams) (j : Fin D.m)
     (free : Fin (j.val + 1) → Fq D.toLDTParameters) :
@@ -338,7 +338,7 @@ theorem ldtPointToDirect_diagonal_rebase (D : DirectLdParams)
   simp [addCoord, mulCoord]
 
 /-- Canonical direct axis questions do not depend on the chosen base point of
-the mature line. -/
+the LDT line. -/
 theorem directAxisQuestionOf_rebase (D : DirectLdParams)
     (line : AxisParallelLine D.toLDTParameters)
     (t : Fq D.toLDTParameters) :
@@ -349,7 +349,7 @@ theorem directAxisQuestionOf_rebase (D : DirectLdParams)
   rw [ldtPointToDirect_axis_rebase, lineRepMap_add_smul]
 
 /-- Canonical direct diagonal questions do not depend on the chosen base point
-of the mature line; the leading index depends only on the direction. -/
+of the LDT line; the leading index depends only on the direction. -/
 theorem directDiagonalQuestionOf_rebase (D : DirectLdParams)
     (line : DiagonalLine D.toLDTParameters)
     (t : Fq D.toLDTParameters) :
@@ -364,7 +364,7 @@ theorem directDiagonalQuestionOf_rebase (D : DirectLdParams)
         (directScalarEquiv D).symm t • ldtPointToDirect D line.direction at hrebase
   rw [hrebase, lineRepMap_add_smul]
 
-/-- The fixed scalar coding transports field addition to mature coordinate
+/-- The fixed scalar coding transports field addition to LDT coordinate
 addition. -/
 theorem directScalarEquiv_add (D : DirectLdParams)
     (x y : DirectScalarQ D) :
@@ -385,19 +385,19 @@ private theorem coordinateDirection_ne_zero
   have hi := congrFun h i
   simp [coordinateDirection] at hi
 
-/-- Canonical rebase parameter for a mature axis-parallel line. -/
+/-- Canonical rebase parameter for an LDT axis-parallel line. -/
 noncomputable def directAxisRebaseParameter (D : DirectLdParams)
     (line : AxisParallelLine D.toLDTParameters) : DirectScalarQ D :=
   directLineRepParameter (coordinateDirection (Fin.rev line.direction))
     (ldtPointToDirect D line.base)
 
-/-- Canonical rebase parameter for a mature diagonal line. -/
+/-- Canonical rebase parameter for an LDT diagonal line. -/
 noncomputable def directDiagonalRebaseParameter (D : DirectLdParams)
     (line : DiagonalLine D.toLDTParameters) : DirectScalarQ D :=
   directLineRepParameter (ldtPointToDirect D line.direction)
     (ldtPointToDirect D line.base)
 
-/-- Axis-line canonical parameters add under mature rebasing. -/
+/-- Axis-line canonical parameters add under LDT line rebasing. -/
 theorem directAxisRebaseParameter_rebase (D : DirectLdParams)
     (line : AxisParallelLine D.toLDTParameters)
     (t : Fq D.toLDTParameters) :
@@ -410,7 +410,7 @@ theorem directAxisRebaseParameter_rebase (D : DirectLdParams)
   exact directLineRepParameter_add_smul
     (coordinateDirection_ne_zero (Fin.rev line.direction)) _
 
-/-- Nonzero diagonal-line canonical parameters add under mature rebasing. -/
+/-- Nonzero diagonal-line canonical parameters add under LDT line rebasing. -/
 theorem directDiagonalRebaseParameter_rebase (D : DirectLdParams)
     (line : DiagonalLine D.toLDTParameters)
     (t : Fq D.toLDTParameters)
@@ -423,7 +423,7 @@ theorem directDiagonalRebaseParameter_rebase (D : DirectLdParams)
   rw [ldtPointToDirect_diagonal_rebase]
   exact directLineRepParameter_add_smul hdir _
 
-/-! ## Reading direct answers as mature answers -/
+/-! ## Reading direct answers as LDT answers -/
 
 /-- The constant diagonal-line answer with the given direct value. -/
 noncomputable def constantDiagonalAnswer (D : DirectLdParams)
@@ -467,7 +467,7 @@ noncomputable def directPointAnswerReadout (D : DirectLdParams) (r : Fin D.k) :
     | .dlinePolys _ => directScalarEquiv D 0
 
 /-- Read one simultaneous coordinate from a direct axis-line answer and
-rebase its polynomial from the canonical direct line to the mature line. -/
+rebase its polynomial from the canonical direct line to the LDT line. -/
 noncomputable def directAxisAnswerReadout (D : DirectLdParams) (r : Fin D.k)
     (line : AxisParallelLine D.toLDTParameters) :
     letI := D.toLDTFieldModel
@@ -483,7 +483,7 @@ noncomputable def directAxisAnswerReadout (D : DirectLdParams) (r : Fin D.k)
 
 /-- Read one simultaneous coordinate from a direct diagonal-line answer.  For
 a nonzero direction the polynomial is rebased from the canonical direct line
-to the mature line.  A zero direction is the singleton line through its base,
+to the LDT line.  A zero direction is the singleton line through its base,
 where the direct predicate accepts an answer exactly when its polynomial
 function is constant with the point's value (`rem:ld-win-zero-direction`);
 the answer is read as the constant polynomial carrying its value at the base
@@ -506,7 +506,7 @@ noncomputable def directDiagonalAnswerReadout (D : DirectLdParams) (r : Fin D.k)
     | .pointVals _ => default
     | .alinePolys _ => default
 
-/-- Axis answer readout is covariant under mature line rebasing. -/
+/-- Axis answer readout is covariant under LDT line rebasing. -/
 theorem directAxisAnswerReadout_rebase (D : DirectLdParams) (r : Fin D.k)
     (line : AxisParallelLine D.toLDTParameters)
     (t : Fq D.toLDTParameters) (answer : DirectLdAnswer D) :
@@ -524,7 +524,7 @@ theorem directAxisAnswerReadout_rebase (D : DirectLdParams) (r : Fin D.k)
       exact (AxisLinePolynomial.reparamAt_reparamAt
         (directAxisAnswerEquiv D (a r)) _ _).symm
 
-/-- Diagonal answer readout is covariant under mature line rebasing, including
+/-- Diagonal answer readout is covariant under LDT line rebasing, including
 the constant zero-direction convention. -/
 theorem directDiagonalAnswerReadout_rebase (D : DirectLdParams) (r : Fin D.k)
     (line : DiagonalLine D.toLDTParameters)

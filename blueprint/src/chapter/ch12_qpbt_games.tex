@@ -459,6 +459,47 @@ The state-dependent distance is the right tool for reasoning about the closeness
 	The claim follows by subtracting \eqref{eq:commutation-analysis-3} and \eqref{eq:commutation-analysis-4}.
 \end{proof}
 
+\begin{lemma}[Right-register commutation; formalization support]
+	\label{lem:commutation-analysis-right}
+	\lean{MIPStarRE.QPBT.opDistSq_commutator_right_le}
+	\leanok
+	\uses{def:povm-distance, def:povm-conventions}
+	There is a universal constant $C_0 \ge 1$ with the following property.
+	Let $\mu$ be a question distribution, $\ket{\psi}$ a bipartite vector,
+	and $\delta \in \mathbb{R}$. Let $\{A^x_{a,b}\}$ and $\{D^x_{a,c}\}$
+	be POVMs on the right register and $\{B^x_{a,b,c}\}$ a projective
+	measurement on the left register, with marginals
+	$B^x_{a,b}=\sum_c B^x_{a,b,c}$ and $B^x_{a,c}=\sum_b B^x_{a,b,c}$.
+	If
+	\begin{align*}
+		\mathop{\mathbb{E}}_{x\sim\mu}\sum_{a,b}
+		\big\|(B^x_{a,b}\ot\Id-\Id\ot A^x_{a,b})\ket{\psi}\big\|^2
+		&\le \delta,\\
+		\mathop{\mathbb{E}}_{x\sim\mu}\sum_{a,c}
+		\big\|(B^x_{a,c}\ot\Id-\Id\ot D^x_{a,c})\ket{\psi}\big\|^2
+		&\le \delta,
+	\end{align*}
+	then
+	\[
+		\mathop{\mathbb{E}}_{x\sim\mu}\sum_{a,b,c}
+		\big\|(\Id\ot[A^x_{a,b},D^x_{a,c}])\ket{\psi}\big\|^2
+		\le C_0\delta.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{fact:add-a-proj, fact:triangle,
+		lem:distance-left-fiber-contraction,
+		lem:distance-right-fiber-contraction,
+		lem:distance-joint-marginal-product,
+		lem:distance-joint-marginal-product-rev,
+		lem:distance-opposite-placements-commute, lem:distance-symmetry}
+	The argument of Lemma~\ref{lem:commutation-analysis} with the tensor
+	placements exchanged compares each ordered product to the left-placed
+	joint measurement. The triangle inequality and subtraction give the
+	assertion with $C_0=16$; no symmetry of the state is required.
+\end{proof}
+
 % The source (references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:465-495) leaves the
 % set Y unquantified (finiteness and nonemptiness are needed for the uniform sampling of
 % y) and places no finiteness condition on the targets R_i (needed for the post-processed
@@ -469,6 +510,7 @@ The state-dependent distance is the right tool for reasoning about the closeness
 \begin{lemma}[Sandwiched simultaneous measurement; modified from Fact 4.34 in \cite{Natarajan2018NEEXP}]\label{lem:ld-sandwich}
 	\lean{MIPStarRE.QPBT.sandwichProduct}
 	\lean{MIPStarRE.QPBT.consistencyDefect_sandwich_le}
+	\lean{MIPStarRE.QPBT.SandwichProduct.consistencyDefect_sandwich_le}
 	\leanok
 	\uses{def:consistency, def:bracket, def:povm-conventions}
 	Let $k \ge 0$ be an integer and let $\eps > 0$. Let $\mathcal X$ be a finite set and $\mu$ a distribution over $\mathcal X$, and let $\mathcal Y$ be a finite nonempty set; all statements below that sample $y \in \mathcal Y$ refer to the uniform distribution on $\mathcal Y$. For each $1 \le i \le k$ let $\mathcal R_i$ be a finite set, let $\mathcal G_i$ be a finite set of functions $g_i \colon \mathcal Y \to \mathcal R_i$, and for each $x \in \mathcal X$ let $\{G^{i,\,x}_g\}_{g \in \mathcal G_i}$ be a projective measurement. Suppose that for all $i \in \{1,\dots,k\}$ the set $\mathcal G_i$ satisfies the following property: for any two $g_i \ne g_i' \in \mathcal G_i$, the probability that $g_i(y) = g_i'(y)$ over a uniformly random $y \in \mathcal Y$ is at most $\eps$.
@@ -494,7 +536,50 @@ The state-dependent distance is the right tool for reasoning about the closeness
 	\end{equation}
 \end{lemma}
 \begin{proof}
-	The source proof is a citation: the argument is identical to the proof of Fact 4.34 in \cite{Natarajan2018NEEXP}, with the only modification being the insertion of the dependence on the question $x$ for all measurements considered. In outline, the consistency hypotheses \eqref{eq:ld-sandwich-1} allow one to insert the projective factors $G^{i,\,x}$ next to $A^x$ one index at a time, and the $\eps$-bound on the pairwise agreement of distinct functions in $\mathcal G_i$ controls the events on which two different outcomes collide at the sampled point $y$. Each of the $k$ insertions costs $(\delta+\eps)^{1/2}$ by the Cauchy--Schwarz inequality, producing the sandwich $C^x$ with total error $k(\delta+\eps)^{1/2}$.
+	\leanok
+	\uses{fact:agreement, lem:agreement-projective-left,
+		lem:ld-sandwich-measurement, lem:sandwich-codeword-defect,
+		lem:sandwich-random-postprocess,
+		lem:sandwich-root-distance-triangle,
+		lem:sandwich-postprocess-projective,
+		lem:sandwich-postprocess-compose,
+		lem:sandwich-injective-postprocess,
+		lem:sandwich-matched-tensor-sum,
+		lem:sandwich-projective-multiplier-sum,
+		lem:sandwich-tensor-projector,
+		lem:sandwich-pair-fiber-sum,
+		lem:sandwich-postprocess-effect-right,
+		lem:sandwich-joint-marginal-product,
+		lem:sandwich-fiber-contraction}
+	The source gives this argument by reference to
+	\cite[Fact~4.34]{Natarajan2018NEEXP}. First apply
+	Lemma~\ref{lem:sandwich-codeword-defect} to each coordinate: the evaluated
+	consistency bound $\delta$ and the collision bound $\eps$ give consistency
+	of the full codeword outcomes with error $\delta+\eps$. Fact~\ref{fact:agreement}
+	then bounds the squared operator-family distance for each coordinate by
+	$2(\delta+\eps)$.
+
+	Construct the POVM $C^x$ by Lemma~\ref{lem:ld-sandwich-measurement}. Induct
+	on the number of coordinates in its palindromic product. At an induction
+	step, combine the last coordinate marginal of $A^x$ with the marginal on the
+	preceding tuple. Their product is the corresponding joint projective effect
+	by Lemma~\ref{lem:sandwich-joint-marginal-product}. Replace the two outer
+	last-coordinate effects and the inner prefix in turn. The square-sum bounds
+	for the matched tensors, projective multipliers, and joint-measurement fibers,
+	together with Lemma~\ref{lem:sandwich-fiber-contraction}, make these
+	replacements contractions. The square-root triangle inequality therefore
+	gives
+	\[
+		\sqrt{D_\psi(A,C)}
+		\leq 2k\sqrt{2(\delta+\eps)}
+		\leq 4k\sqrt{\delta+\eps}.
+	\]
+	Lemma~\ref{lem:agreement-projective-left} converts this distance estimate
+	back to consistency, with a further factor at most two. Thus the explicit
+	universal choice $C_0=8$ gives the bound before evaluation. Finally apply
+	Lemma~\ref{lem:sandwich-random-postprocess} to evaluate the complete outcome
+	tuple at the independent uniform point $y$; this cannot increase the defect
+	and yields \eqref{eq:ld-sandwich-2}.
 \end{proof}
 
 \begin{remark}[Index pairing in the sandwich]\label{rem:ld-sandwich-indexing}
@@ -504,6 +589,7 @@ The state-dependent distance is the right tool for reasoning about the closeness
 \begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
 	\label{lem:ld-sandwich-measurement}
 	\lean{MIPStarRE.QPBT.sandwichProduct_isMeasurement}
+	\lean{MIPStarRE.QPBT.SandwichProduct.sandwichProduct_isMeasurement}
 	\leanok
 	\uses{def:povm-conventions}
 	This formalization-only auxiliary is not a named statement of the paper; it
@@ -519,6 +605,402 @@ The state-dependent distance is the right tool for reasoning about the closeness
 	inner indices gives $\Id$ by the inductive hypothesis, after which the
 	remaining outer pair collapses by idempotence to
 	$\sum_{g_k} G^{k,\,x}_{g_k} = \Id$.
+\end{proof}
+
+\paragraph{Formalization support for the sandwich estimate.}
+The following subordinate results isolate the finite-distribution,
+postprocessing, and operator-contraction steps used to formalize
+\cite[Fact~4.34]{Natarajan2018NEEXP}. They are not named statements of either source paper.
+
+\begin{definition}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{def:sandwich-ordered-coordinate-product}
+	\lean{MIPStarRE.QPBT.SandwichProduct.orderedCoordinateProduct}
+	\leanok
+	This formalization-only definition is the recursive form of the product in
+	\cite[Fact~4.34]{Natarajan2018NEEXP}. The empty product is $\Id$, the one-coordinate
+	product is $G^1_{g_1}$, and adjoining the last coordinate places its effect
+	on both sides of the preceding product.
+\end{definition}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:sandwich-product-average}
+	\lean{MIPStarRE.QPBT.SandwichProduct.avgOver_distribution_prod}
+	\leanok
+	This formalization-only auxiliary isolates the iterated expectation used in
+	the evaluation step of \cite[Fact~4.34]{Natarajan2018NEEXP}. For finite distributions
+	$\mu,\nu$ and a real-valued function $f$,
+	\[
+		\mathbb E_{(x,y)\sim\mu\times\nu}f(x,y)
+		=\mathbb E_{x\sim\mu}\mathbb E_{y\sim\nu}f(x,y).
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	Expand the product distribution and rearrange its finite double sum.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:sandwich-diagonal-postprocess}
+	\lean{MIPStarRE.QPBT.SandwichProduct.diagonal_postprocess_stateQForm_eq_pair_sum}
+	\leanok
+	\uses{def:distance-state-quadratic-form, def:bracket}
+	This formalization-only auxiliary isolates the relabeled diagonal overlap in
+	the first step of \cite[Fact~4.34]{Natarajan2018NEEXP}. If two measurements $A,B$ have
+	common outcome set $\mathcal A$ and $f\colon\mathcal A\to\mathcal B$, then
+	\[
+		\sum_b q_\psi(A_{[f=b]}\otimes B_{[f=b]})
+		=\sum_{a,a':\,f(a)=f(a')}q_\psi(A_a\otimes B_{a'}).
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:distance-tensor-sum-left,
+		lem:distance-tensor-sum-right, lem:distance-qform-finset-sum}
+	Expand both postprocessed effects, distribute the tensor product and
+	quadratic form over the finite sums, and collect pairs with equal labels.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:sandwich-placed-defect-expansion}
+	\lean{MIPStarRE.QPBT.SandwichProduct.consistencyDefect_placed_eq_avg_point}
+	\leanok
+	\uses{def:consistency, def:distance-state-quadratic-form}
+	This formalization-only auxiliary isolates the pointwise off-diagonal
+	expansion used in \cite[Fact~4.34]{Natarajan2018NEEXP}. For local measurement families
+	$A^x,B^x$, their consistency defect is
+	\[
+		\mathbb E_x\sum_{a\ne a'}q_\psi(A^x_a\otimes B^x_{a'}).
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:distance-consistency-term,
+		lem:distance-placed-product-qform}
+	Expand the defect and identify each tensor-placed matrix-vector term with
+	the corresponding state quadratic form.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:sandwich-evaluated-diagonal-overlap}
+	\lean{MIPStarRE.QPBT.SandwichProduct.avg_diagonal_postprocess_stateQForm_le}
+	\leanok
+	\uses{def:distance-state-quadratic-form, def:bracket}
+	This formalization-only auxiliary isolates the collision estimate in
+	\cite[Fact~4.34]{Natarajan2018NEEXP}. For a unit state, if distinct outcomes collide under
+	a random evaluation with probability at most $\eps$, then the averaged
+	diagonal overlap after evaluation is at most the original diagonal overlap
+	plus $\eps$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:sandwich-diagonal-postprocess,
+		lem:distance-qform-nonnegative, lem:distance-point-defect,
+		lem:distance-placed-product-qform}
+	Split equal and unequal original outcomes. The equal terms give the original
+	diagonal overlap; collision bounds each unequal term by $\eps$, and their
+	nonnegative total is at most one.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:sandwich-point-codeword-defect}
+	\lean{MIPStarRE.QPBT.SandwichProduct.point_codeword_defect_le_avg_evaluated_add}
+	\leanok
+	\uses{def:distance-state-quadratic-form}
+	This formalization-only auxiliary isolates the complementary form of the
+	collision estimate in \cite[Fact~4.34]{Natarajan2018NEEXP}. Let $A$ and $B$ be
+	measurements with codeword outcome set $\Gamma$, let $\ket\psi$ be a unit
+	state, and let $\eps\geq 0$. If the evaluation map satisfies
+	\[
+		\Pr_{y}\big[\operatorname{eval}(g,y)
+			=\operatorname{eval}(g',y)\big]\leq\eps
+		\qquad(g\neq g'),
+	\]
+	then the off-diagonal overlap of $A$ and $B$ is at most the averaged
+	off-diagonal overlap of their evaluated measurements plus $\eps$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:sandwich-evaluated-diagonal-overlap,
+		lem:distance-point-defect, lem:distance-placed-product-qform}
+	Express each off-diagonal overlap as the complement of its diagonal overlap
+	and apply Lemma~\ref{lem:sandwich-evaluated-diagonal-overlap}.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:sandwich-codeword-defect}
+	\lean{MIPStarRE.QPBT.SandwichProduct.consistencyDefect_codewords_le_evaluated_add}
+	\leanok
+	\uses{def:consistency, def:bracket}
+	This formalization-only auxiliary gives the quantitative first step of
+	\cite[Fact~4.34]{Natarajan2018NEEXP}. If distinct codewords collide under random evaluation
+	with probability at most $\eps$, then their full-outcome consistency defect
+	is at most their evaluated consistency defect plus $\eps$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:sandwich-product-average,
+		lem:sandwich-placed-defect-expansion,
+		lem:sandwich-point-codeword-defect}
+	Apply the pointwise codeword-defect estimate and average first over the
+	evaluation point and then over the original question.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:sandwich-random-postprocess}
+	\lean{MIPStarRE.QPBT.SandwichProduct.consistencyDefect_prod_postprocess_le}
+	\leanok
+	\uses{def:consistency, def:bracket}
+	This formalization-only auxiliary isolates the last data-processing step of
+	\cite[Fact~4.34]{Natarajan2018NEEXP}. Applying the same relabeling to both measurement
+	families, with the relabeling chosen by an independent finite sample, cannot
+	increase their consistency defect.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{fact:data-processing, lem:sandwich-product-average,
+		lem:sandwich-placed-defect-expansion}
+	Apply data processing for each fixed relabeling and average the resulting
+	inequality over the independent sample.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:sandwich-root-distance-triangle}
+	\lean{MIPStarRE.QPBT.SandwichProduct.sqrt_opFamilyDistSq_triangle}
+	\leanok
+	\uses{def:povm-distance}
+	This formalization-only auxiliary isolates the triangle inequality used for
+	the repeated replacements in \cite[Fact~4.34]{Natarajan2018NEEXP}. For three operator
+	families $A,B,C$,
+	\[
+		\sqrt{D_\psi(A,C)}
+		\leq\sqrt{D_\psi(A,B)}+\sqrt{D_\psi(B,C)},
+	\]
+	where $D_\psi$ is the explicit averaged squared distance underlying
+	Definition~\ref{def:povm-distance}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:distance-nonnegative}
+	For each outcome write $(A-C)\ket\psi=(A-B)\ket\psi+(B-C)\ket\psi$,
+	apply Cauchy--Schwarz to the averaged cross term, and take square roots.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:sandwich-postprocess-projective}
+	\lean{MIPStarRE.QPBT.SandwichProduct.postprocess_isProjective}
+	\leanok
+	\uses{def:povm-conventions, def:bracket}
+	This formalization-only auxiliary isolates a projectivity fact used in the
+	palindromic construction of \cite[Fact~4.34]{Natarajan2018NEEXP}. Every postprocessing of a
+	projective measurement is projective.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:distance-projective-orthogonality}
+	Sum the original orthogonal projectors in each fiber of the outcome map;
+	their cross products vanish and their sum is self-adjoint.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:sandwich-postprocess-compose}
+	\lean{MIPStarRE.QPBT.SandwichProduct.postprocess_postprocess_effect}
+	\leanok
+	\uses{def:bracket}
+	This formalization-only auxiliary isolates an outcome identity used to align
+	the coordinate marginals in \cite[Fact~4.34]{Natarajan2018NEEXP}. Successive
+	postprocessings by $f$ and $g$ have the same effects as postprocessing once
+	by $g\circ f$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Expand the two fiber sums and retain the unique intermediate label $f(a)$
+	for each original outcome $a$.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:sandwich-injective-postprocess}
+	\lean{MIPStarRE.QPBT.SandwichProduct.postprocess_effect_of_injective}
+	\leanok
+	\uses{def:bracket}
+	This formalization-only auxiliary isolates the reindexing step in the
+	palindromic induction of \cite[Fact~4.34]{Natarajan2018NEEXP}. If $f$ is injective, then
+	the postprocessed effect at $f(a)$ is exactly the original effect at $a$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Injectivity makes $a$ the unique member of its postprocessing fiber.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:sandwich-povm-square-sum}
+	\lean{MIPStarRE.QPBT.measurement_sum_adjoint_mul_le_one}
+	\leanok
+	\uses{def:povm-conventions}
+	This formalization-only auxiliary isolates a contraction bound underlying
+	the repeated insertion in \cite[Fact~4.34]{Natarajan2018NEEXP}. For a POVM $M$,
+	\[
+		\sum_a M_a^\dagger M_a\leq\Id.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:distance-measurement-effect-le-one,
+		lem:distance-measurement-effect-hermitian}
+	Each effect satisfies $M_a^\dagger M_a=M_a^2\leq M_a$; sum and use
+	completeness.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:sandwich-matched-tensor-sum}
+	\lean{MIPStarRE.QPBT.SandwichProduct.matched_tensor_sum_le_one}
+	\leanok
+	\uses{def:povm-conventions}
+	This formalization-only auxiliary isolates a joint-family contraction used in
+	the insertion step of \cite[Fact~4.34]{Natarajan2018NEEXP}. For two POVMs $A,B$ with the
+	same outcome set,
+	\[
+		\sum_a A_a\otimes B_a\leq\Id.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	Bound the matched sum by the full nonnegative double sum and use completeness
+	of both measurements.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:sandwich-projective-multiplier-sum}
+	\lean{MIPStarRE.QPBT.SandwichProduct.projective_mul_measurement_sum_adjoint_mul_le_one}
+	\leanok
+	\uses{def:povm-conventions}
+	This formalization-only auxiliary isolates the outer-factor contraction in
+	the palindromic insertion of \cite[Fact~4.34]{Natarajan2018NEEXP}. If $P$ is a projector
+	and $M$ is a POVM, then
+	\[
+		\sum_a(PM_a)^\dagger(PM_a)\leq\Id.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:sandwich-povm-square-sum}
+	Use $P^2=P\leq\Id$ inside each conjugation by $M_a$, then apply the POVM
+	square-sum bound.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:sandwich-tensor-projector}
+	\lean{MIPStarRE.LDT.MakingMeasurementsProjective.isProj_kronecker}
+	\leanok
+	This formalization-only auxiliary isolates the projectivity assertion used
+	when converting distance back to consistency in
+	\cite[Fact~4.34]{Natarajan2018NEEXP}. The tensor product of two projectors is a projector.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Tensor the idempotence and self-adjointness identities of the two factors.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:sandwich-pair-fiber-sum}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.measurement_fiber_sum_adjoint_mul_le_one}
+	\leanok
+	\uses{def:povm-conventions}
+	This formalization-only auxiliary isolates a marginal contraction used in the
+	joint-family comparison for \cite[Fact~4.34]{Natarajan2018NEEXP}. If $M$ is a measurement
+	with pair-valued outcomes, then for each first coordinate $a$,
+	\[
+		\sum_b M_{a,b}^\dagger M_{a,b}\leq\Id.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:distance-measurement-effect-le-one,
+		lem:distance-measurement-effect-hermitian}
+	Bound each squared effect by the effect itself, enlarge the fixed-coordinate
+	sum to the full outcome sum, and use completeness.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:sandwich-postprocess-effect-left}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.postprocess_effect_mul_effect}
+	\leanok
+	\uses{def:povm-conventions, def:bracket}
+	This formalization-only auxiliary isolates an orthogonality identity in the
+	joint-family comparison for \cite[Fact~4.34]{Natarajan2018NEEXP}. For a projective
+	measurement $M$,
+	\[
+		M_{[f=b]}M_a=\mathbf 1_{f(a)=b}M_a.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:distance-projective-orthogonality}
+	Expand the postprocessed effect and use orthogonality of distinct projective
+	effects.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:sandwich-postprocess-effect-right}
+	\lean{MIPStarRE.QPBT.SandwichProduct.effect_mul_postprocess_effect}
+	\leanok
+	\uses{def:povm-conventions, def:bracket}
+	This formalization-only auxiliary isolates the adjoint form of the preceding
+	identity in the proof of \cite[Fact~4.34]{Natarajan2018NEEXP}:
+	\[
+		M_aM_{[f=b]}=\mathbf 1_{f(a)=b}M_a.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:sandwich-postprocess-effect-left,
+		lem:distance-measurement-effect-hermitian}
+	Take adjoints in the left-handed identity and use self-adjointness.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:sandwich-joint-marginal-product}
+	\lean{MIPStarRE.QPBT.SandwichProduct.postprocess_product_eq_effect}
+	\leanok
+	\uses{def:povm-conventions, def:bracket}
+	This formalization-only auxiliary isolates the compatible-marginal identity
+	used in the palindromic insertion of \cite[Fact~4.34]{Natarajan2018NEEXP}. If the pair
+	$(f,g)$ uniquely identifies $a$, then
+	\[
+		M_{[f=f(a)]}M_{[g=g(a)]}=M_a
+	\]
+	for every projective measurement $M$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:sandwich-postprocess-effect-left}
+	Expand one marginal, apply the selection identity to each term, and use the
+	uniqueness of the common fiber.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:sandwich-fiber-contraction}
+	\lean{MIPStarRE.QPBT.SandwichProduct.opFamilyDistSq_mul_fiber_le}
+	\leanok
+	\uses{def:povm-distance}
+	This formalization-only auxiliary isolates the contraction applied at each
+	palindromic insertion in \cite[Fact~4.34]{Natarajan2018NEEXP}. Let
+	$A^x=\{A^x_a\}_a$ and $B^x=\{B^x_a\}_a$ be measurement families with a
+	common outcome set, and suppose that $D_\psi(A,B)\leq\delta$. If the
+	multipliers $S_z^x$ satisfy
+	\[
+		\sum_{z:\,\operatorname{eval}_x(z)=a}(S_z^x)^\dagger S_z^x\leq\Id
+	\]
+	for every $x,a$, then the reindexed families obey
+	\[
+		D_\psi\big((S_z^xA^x_{\operatorname{eval}_x(z)})_{x,z},
+			(S_z^xB^x_{\operatorname{eval}_x(z)})_{x,z}\big)\leq\delta.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:distance-sum-contraction}
+	Group outcomes by their evaluated value and apply the finite-family
+	contraction estimate on each fiber.
 \end{proof}
 
 % The source (references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:504-505) quantifies
@@ -554,10 +1036,298 @@ The state-dependent distance is the right tool for reasoning about the closeness
 	\begin{equation}\label{eq:pasting-3}
 		A^{x,y_1,y_2}_{a_1,\,a_2} \ot \Id \simeq_{\delta_{\mathrm{pasting}}} \Id \ot J^x_{[\operatorname{eval}_{y_1}(\cdot)=a_1,\, \operatorname{eval}_{y_2}(\cdot)=a_2]}\,.
 	\end{equation}
-	Neither the exponent nor the constant in $\poly(\eta, \delta)$ is made explicit in the source; both are universal constants inherited from the proof of Fact 4.35 in \cite{Natarajan2018NEEXP}.
+	Neither the exponent nor the constant in $\poly(\eta, \delta)$ is made explicit in the source; both are universal constants inherited from the proof of Fact 4.35 in \cite{Natarajan2018NEEXP}. The literal product-form convention for this notation is incompatible with the unrestricted error domain in the lemma; a two-dimensional counterexample and the required correction are recorded in \cite{gap:qpbt_pasting-product-error}.
 \end{lemma}
 \begin{proof}
-	Stated in the source without proof, as an import of Fact 4.35 of \cite{Natarajan2018NEEXP}. The measurement $J^x$ sandwiches the family $(G_1)^x$ between two copies of the projective family $(G_2)^x$. The consistency hypotheses \eqref{eq:pasting-1} and the self-consistency \eqref{eq:pasting-2} allow the joint measurement $A^{x,y_1,y_2}$ to be compared with the sandwiched product one factor at a time, and the $\eta$-bound on the pairwise agreement of distinct functions in $\mathcal G_2$ controls the error terms arising when two different outcomes $g_2 \ne g_2'$ agree at the sampled point $y_2$.
+	\leanok
+	\uses{lem:pasting-one-sided-explicit-error, lem:pasting-coarse-commutator,
+		lem:pasting-measurement, lem:pasting-scalar-error, lem:pasting-defect-bound}
+	Use the fixed Schmidt mirror of the second codeword family on Alice's
+	register. Its coarse consistency defect is at most $2\delta$ and its fine
+	defect at most $2\delta+\eta$. The distinct-family commutator comparison
+	then proves the conclusion without a register-exchange assumption.
+	For the universal coarse-commutator constant $C\geq1$, one may take
+	$\delta_{\mathrm{pasting}}=(3C+19)(\eta^{1/4}+\delta^{1/8})$.
+	On the unit square use Lemma~\ref{lem:pasting-scalar-error}; outside it,
+	this error is at least $1$, so Lemma~\ref{lem:pasting-defect-bound} applies.
+	Thus the polynomial notation here uses the additive correction documented
+	in \cite{gap:qpbt_pasting-product-error}, not the refuted product contract.
+\end{proof}
+
+\begin{lemma}[Universal bound for placed consistency defects]
+	\label{lem:pasting-defect-bound}
+	\lean{MIPStarRE.QPBT.consistencyDefect_placed_le_one}
+	\leanok
+	\uses{def:consistency, def:povm-conventions}
+	Let $\mu$ be a probability law on a finite question set, let $A^x_a$ and
+	$B^x_a$ be measurements on the two tensor factors with the same finite
+	outcome set, and let $\psi$ be a unit vector. Then
+	\[
+		\Exp_{x\sim\mu}\sum_{a\ne b}
+		\langle\psi|A^x_a\ot B^x_b|\psi\rangle\leq1.
+	\]
+	This is formalization support for the complementary error regime of
+	Lemma~\ref{lem:pasting}; projectivity is not required.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Completeness makes the sum over all outcome pairs equal to $1$.
+	Removing the nonnegative diagonal terms can only decrease it.
+\end{proof}
+
+\begin{lemma}[Scalar comparison for the pasting error]
+	\label{lem:pasting-scalar-error}
+	\lean{MIPStarRE.QPBT.pasting_error_sqrt_le_rpow}
+	\leanok
+	For $C\geq1$ and $0\leq\eta,\delta\leq1$, set
+	\[
+		K=C\delta+(2\sqrt{2\delta}+2\delta+2\sqrt{C\delta}+C\delta)
+		  +2\eta+2\sqrt{2(\delta+2\sqrt{2\delta}+\eta)}
+		  +2\sqrt{2(\delta+2\sqrt{2\delta})}.
+	\]
+	Then $2\delta+\sqrt K\leq(3C+19)(\eta^{1/4}+\delta^{1/8})$.
+	This is a formalization-only scalar estimate for Lemma~\ref{lem:pasting}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Put $u=\delta^{1/8}$ and $v=\eta^{1/4}$. Both lie in $[0,1]$.
+	Bound the successive square roots using these variables and compare
+	the resulting nonnegative polynomials.
+\end{proof}
+
+\begin{lemma}[Paired-entry estimate for the Schmidt mirror]
+	\label{lem:pasting-schmidt-pair}
+	\lean{MIPStarRE.QPBT.schmidt_pair_mirror_estimate}
+	\leanok
+	For $s,t\geq0$ and $u,v\in\mathbb C$,
+	\[
+		(s-t)^2|v|^2 \leq |tu-sv|^2+|su-tv|^2.
+	\]
+	This is a formalization-only auxiliary for the one-sided argument in
+	\cite{gap:qpbt_pasting-product-error}, not a named assertion of the paper.
+\end{lemma}
+\begin{proof}
+	\leanok
+	The difference between the right and left sides is
+	$(s-t)^2|u|^2+2st|u-v|^2\geq0$.
+\end{proof}
+
+\begin{lemma}[Schmidt coordinates for a square coefficient matrix]
+	\label{lem:pasting-schmidt-coordinates}
+	\lean{MIPStarRE.QPBT.exists_schmidt_coordinates, MIPStarRE.QPBT.schmidtCoordinates_spec}
+	\leanok
+	Every square complex matrix $C$ has a decomposition
+	$C=U\operatorname{diag}(s_i)V^*$ with unitary $U,V$ and $s_i\geq0$.
+	Zero singular values are allowed. This is a formalization-only construction
+	for the argument in \cite{gap:qpbt_pasting-product-error}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Diagonalize $C^*C$, normalize the images of its positive-eigenvalue
+	eigenvectors, and complete this orthonormal family on the left. The
+	zero-eigenvalue eigenvectors are annihilated by $C$.
+\end{proof}
+
+\begin{definition}[The state-dependent Schmidt mirror]
+	\label{def:pasting-schmidt-mirror}
+	\lean{MIPStarRE.QPBT.schmidtCoefficientMatrix, MIPStarRE.QPBT.schmidtCoordinates, MIPStarRE.QPBT.schmidtMirrorUnitary, MIPStarRE.QPBT.schmidtMirror}
+	\leanok
+	\uses{lem:pasting-schmidt-coordinates}
+	For any bipartite vector $\psi$, form its coefficient matrix
+	$C_{ij}=\psi_{ij}$ and choose Schmidt coordinates
+	$C=U\operatorname{diag}(s_i)V^*$ once for that vector. For a Bob operator
+	$B$, define the Alice operator
+	$\widetilde B=UV^*B^TVU^*$.
+	This auxiliary operator does not replace any measurement in the statement
+	of Lemma~\ref{lem:pasting}.
+\end{definition}
+
+\begin{lemma}[Schmidt-mirror norm estimate]
+	\label{lem:pasting-schmidt-mirror-norm}
+	\lean{MIPStarRE.QPBT.schmidt_diagonal_mirror_estimate, MIPStarRE.QPBT.schmidt_action_norm_sq, MIPStarRE.QPBT.schmidtMirror_norm_sq_le}
+	\leanok
+	\uses{def:pasting-schmidt-mirror, lem:pasting-schmidt-pair}
+	For every bipartite vector $\psi$ and Hermitian operators $H,B$,
+	\[
+		\|(\widetilde B\ot\Id-\Id\ot B)\psi\|^2
+		\leq 2\|(H\ot\Id-\Id\ot B)\psi\|^2.
+	\]
+	Neither normalization nor invertibility of the reduced state is needed.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:pasting-schmidt-coordinates, lem:pasting-schmidt-pair}
+	Vectorization identifies the squared Hilbert norm with the sum of squared
+	moduli of the coefficient-matrix entries. Unitary changes of basis preserve
+	this sum. In Schmidt coordinates, pair the entries $(i,j)$ and $(j,i)$
+	and apply Lemma~\ref{lem:pasting-schmidt-pair}.
+\end{proof}
+
+\begin{lemma}[Mirrored measurements]
+	\label{lem:pasting-schmidt-mirror-measurement}
+	\lean{MIPStarRE.QPBT.schmidtMirror_one, MIPStarRE.QPBT.schmidtMirror_mul, MIPStarRE.QPBT.schmidtMirror_adjoint, MIPStarRE.QPBT.schmidtMirror_posSemidef, MIPStarRE.QPBT.schmidtMirrorMeasurement, MIPStarRE.QPBT.schmidtMirrorMeasurement_postprocess, MIPStarRE.QPBT.schmidtMirrorMeasurement_isProjective}
+	\leanok
+	\uses{def:pasting-schmidt-mirror, def:povm-conventions}
+	The mirror is linear, unital, adjoint-preserving, positive, and satisfies
+	$\widetilde{B_1B_2}=\widetilde B_2\widetilde B_1$.
+	It maps measurements to measurements and projective measurements to
+	projective measurements, and commutes with every outcome coarse-graining.
+\end{lemma}
+\begin{proof}
+	\leanok
+	These properties follow from transposition and unitary conjugation.
+	Completeness and coarse-graining follow by linearity; idempotence is
+	preserved despite the reversal of multiplication.
+\end{proof}
+
+\begin{lemma}[Cross move with independent opposite-register effects]
+	\label{lem:pasting-distinct-cross-move}
+	\lean{MIPStarRE.QPBT.abs_cross_move_gap_le_sqrt_distinct_families}
+	\leanok
+	\uses{def:pasting-tensor-placement, def:povm-conventions}
+	Let $P,G,H$ be measurements, with $G,H$ indexed by the same codewords,
+	and let $\psi$ be a unit vector. Then
+	\begin{align*}
+	 &\left|\operatorname{Re}\sum_{a,g}\langle\psi|\Id\ot G_gP_aG_gP_a|\psi\rangle
+	   -\operatorname{Re}\sum_{g,a}\langle\psi|H_g\ot P_aG_gP_a|\psi\rangle\right|\\
+	 &\qquad\leq
+	 \sqrt{\sum_g\|(\Id\ot G_g-H_g\ot\Id)\psi\|^2}.
+	\end{align*}
+	No equality between the two codeword families is assumed.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Expand the difference as an inner product of the moved vectors with the
+	cross vectors. Measurement contraction and Cauchy--Schwarz give the bound.
+\end{proof}
+
+\begin{lemma}[Collision bounds for independent opposite-register families]
+	\label{lem:pasting-distinct-collisions}
+	\lean{MIPStarRE.QPBT.consistencyDefect_codeword_fine_le_coarse_add_distinct_families, MIPStarRE.QPBT.avgOver_pinched_collision_le_distinct_families}
+	\leanok
+	\uses{lem:pasting-collision-averaging, def:povm-conventions}
+	Let $G^x,H^x$ be measurements indexed by the same second codewords,
+	let $P^{x,y_1}$ be a measurement, and let $\psi$ be a unit vector.
+	Assume a probability law $\mathcal D$ and the conditional collision bound
+	of Lemma~\ref{lem:pasting}, with $\eta\geq0$.
+	The fine consistency defect between $H$ on Alice and $G$ on Bob is at most
+	the corresponding coarse defect plus $\eta$. Moreover,
+	\[
+	 \Exp_{\mathcal D}\sum_{g\ne h:\,g(y_2)=h(y_2)}\sum_a
+	 \langle\psi|H^x_h\ot P^{x,y_1}_aG^x_gP^{x,y_1}_a|\psi\rangle
+	 \leq\eta.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:pasting-collision-averaging}
+	The summands are nonnegative and have total mass at most one.
+	They are independent of $y_2$ after conditioning on $(x,y_1)$.
+	Apply the conditional collision bound to each off-diagonal codeword pair.
+\end{proof}
+
+\begin{lemma}[Averaged Schmidt-mirror consistency]
+	\label{lem:pasting-schmidt-mirror-consistency}
+	\lean{MIPStarRE.QPBT.consistencyDefect_schmidtMirror_le}
+	\leanok
+	\uses{lem:pasting-schmidt-mirror-norm, lem:pasting-schmidt-mirror-measurement,
+		fact:agreement}
+	For a finite question distribution, any vector $\psi$, any measurement
+	family $A$, and any projective family $B$, the consistency defect between
+	$\widetilde B$ on Alice and $B$ on Bob is at most twice that between
+	$A$ on Alice and $B$ on Bob. In particular the second forward comparison
+	of Lemma~\ref{lem:pasting} gives coarse mirror consistency at most $2\delta$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Sum the mirror norm estimate over answers and average over questions.
+	The mirror and Bob are projective, so their squared distance is twice
+	their consistency defect. The predictor's squared distance is at most
+	twice its consistency defect even without projectivity.
+\end{proof}
+
+\begin{lemma}[Fine commutators with an independent opposite-register family]
+	\label{lem:pasting-distinct-fine-commutator}
+	\lean{MIPStarRE.QPBT.pinched_coarse_sub_fine_eq_distinct_families, MIPStarRE.QPBT.commutator_mass_fine_le_distinct_families}
+	\leanok
+	\uses{lem:pasting-distinct-cross-move, lem:pasting-distinct-collisions,
+		lem:pasting-commutator-expansion, lem:pasting-ordered-product-mass}
+	Let $G^x$ be projective Bob measurements, $H^x$ any measurements on Alice
+	with the same codeword labels, and $P^{x,y_1}$ any measurement family.
+	Under the conditional collision assumption and for a unit vector, suppose
+	the coarse commutator mass is at most $K_0$, the coarse ordered-product
+	mass is at least $1-m$, and the coarse and fine squared distances between
+	$G$ on Bob and $H$ on Alice are at most $e_c,e_f$ on average. Then
+	\[
+	 K_{\mathrm{fine}}\leq K_0+m+2\eta+2\sqrt{e_f}+2\sqrt{e_c}.
+	\]
+	Pointwise, the coarse pinched cross term minus the fine one is exactly
+	\[
+	 \sum_{g\ne h:\,g(y_2)=h(y_2)}\sum_a
+	 \langle\psi|H^x_h\ot P^{x,y_1}_aG^x_gP^{x,y_1}_a|\psi\rangle.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	Expand the four commutator terms. The reversed-product masses agree,
+	and the ordered-product masses differ by at most $m$.
+	Move the rightmost effect in each cross term to $H$ on Alice, paying
+	$\sqrt{e_f}$ and $\sqrt{e_c}$. The fiber expansion gives the displayed
+	collision identity, whose averaged right side is at most $\eta$.
+\end{proof}
+
+\begin{lemma}[One-sided explicit pasting estimate]
+	\label{lem:pasting-one-sided-explicit-error}
+	\lean{MIPStarRE.QPBT.consistencyDefect_pasted_le_sqrt_one_sided}
+	\leanok
+	\uses{lem:pasting-schmidt-mirror-consistency, lem:pasting-distinct-collisions,
+		lem:pasting-distinct-fine-commutator, lem:pasting-ordered-product-mass-lower,
+		lem:pasting-pinched-reduction, lem:pasting-pinched-cauchy-schwarz}
+	In the setting of Lemma~\ref{lem:pasting}, joint self-consistency may be
+	omitted for this estimate. Assume $0\leq\delta\leq1$ and a coarse
+	commutator bound $K_0\leq C\delta$. Set
+	\begin{align*}
+	 m&=2\sqrt{2\delta}+2\delta+2\sqrt{C\delta}+C\delta,\qquad
+	 t=\delta+2\sqrt{2\delta},\\
+	 K&=C\delta+m+2\eta+2\sqrt{2(t+\eta)}+2\sqrt{2t}.
+	\end{align*}
+	Then the pasted consistency defect is at most $2\delta+\sqrt K$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	The coarse mirror defect is at most $2\delta\leq t$ on the stated
+	interval, and the fine mirror defect is at most $t+\eta$.
+	Consistency bounds squared distance by twice the defect. Apply the
+	distinct-family commutator comparison with the ordered-product mass bound,
+	then the pinched reduction. No reversed marginal comparison is used.
+\end{proof}
+
+\begin{lemma}[Conditional pasting with a register-exchanged comparison]
+	\label{lem:pasting-of-register-exchange}
+	\lean{MIPStarRE.QPBT.exists_pasting_error_of_register_exchange}
+	\leanok
+	\uses{def:consistency, def:bracket, def:povm-conventions}
+	Assume the hypotheses of Lemma~\ref{lem:pasting}, and additionally assume
+	\begin{equation}\label{eq:pasting-1-sym}
+		(G_2)^x_{[\operatorname{eval}_{y_2}(\cdot)=a_2]} \ot \Id
+		\simeq_\delta \Id \ot A^{x,y_1,y_2}_{a_2}.
+	\end{equation}
+	Then its conclusion holds. This is a conditional Lean-only result, not the
+	printed theorem. The additional comparison holds on a swap-invariant state,
+	but that property is not an explicit assumption of the source operator lemma.
+	The discrepancy and the plan to eliminate this restriction from the source
+	route are recorded in \cite{gap:qpbt_pasting-product-error}, issue \#201.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:pasting-measurement, lem:pasting-coarse-commutator,
+		lem:pasting-explicit-error, lem:pasting-scalar-error, lem:pasting-defect-bound}
+	Apply the explicit defect bound and dominate it by the universal additive
+	polynomial error using Lemma~\ref{lem:pasting-scalar-error} on the unit
+	square. Outside that square the error is at least $1$, and
+	Lemma~\ref{lem:pasting-defect-bound} suffices.
+	The full conditional argument is recorded in
+	\cite{gap:qpbt_pasting-product-error}.
 \end{proof}
 
 \begin{lemma}[Formalization support for Lemma~\ref{lem:pasting}]
@@ -579,6 +1349,497 @@ The state-dependent distance is the right tool for reasoning about the closeness
 	$(G_2)^x_{g_2}$. Summing over $g_1$ first leaves
 	$\sum_{g_2} (G_2)^x_{g_2} (G_2)^x_{g_2}$, which equals
 	$\sum_{g_2} (G_2)^x_{g_2} = \Id$ by idempotence and completeness.
+\end{proof}
+
+\begin{definition}[Formalization support for Lemma~\ref{lem:pasting}]
+	\label{def:pasting-tensor-placement}
+	\lean{MIPStarRE.QPBT.Measurement.leftPlacement, MIPStarRE.QPBT.Measurement.rightPlacement, MIPStarRE.QPBT.Measurement.leftPlacement_effect, MIPStarRE.QPBT.Measurement.rightPlacement_effect}
+	\leanok
+	\uses{def:povm-conventions, def:tensor-product-strategy}
+	This formalization-only definition presents a POVM placed on one factor of a
+	bipartite space as a POVM on that space. For a measurement $\{M_a\}_a$ on the
+	first factor the placed effects are $M_a \ot \Id$; for a measurement on the
+	second factor they are $\Id \ot M_a$. In both cases the effects are positive
+	and sum to the identity of the bipartite space, so the comparisons of
+	Lemma~\ref{lem:pasting}, whose two sides are placed families, are comparisons
+	of measurements and the consistency calculus applies to them.
+\end{definition}
+
+\begin{definition}[Formalization support for Lemma~\ref{lem:pasting}]
+	\label{def:pasting-alphabet-relabelling}
+	\lean{MIPStarRE.QPBT.Measurement.congrAlphabet, MIPStarRE.QPBT.Measurement.congrAlphabet_effect}
+	\leanok
+	\uses{def:povm-conventions}
+	This formalization-only definition relabels the outcome set of a POVM along
+	a bijection: the effect at an outcome of the new set is the effect at its
+	image. The relabelled family is a POVM. The
+	comparisons of Lemma~\ref{lem:pasting} are indexed by pairs of answers,
+	while the commutation estimate they feed is indexed by triples; the
+	 relabelling mediates between the two indexings.
+\end{definition}
+
+\begin{lemma}[Properties of outcome relabelling; formalization support]
+	\label{lem:pasting-alphabet-relabelling}
+	\lean{MIPStarRE.QPBT.Measurement.isProjective_congrAlphabet, MIPStarRE.QPBT.Measurement.postprocess_congrAlphabet}
+	\leanok
+	\uses{def:pasting-alphabet-relabelling, def:povm-conventions}
+	Let $M$ be a POVM on a finite outcome set $\alpha$, let
+	$e:\beta\to\alpha$ be a bijection, and write $N_b=M_{e(b)}$ for the
+	relabelled POVM. If $M$ is projective, then $N$ is projective.
+	For any map $f:\beta\to\gamma$ to a finite set and any $c\in\gamma$,
+	\[
+		N_{[f(\cdot)=c]}=M_{[f(e^{-1}(\cdot))=c]}.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:pasting-alphabet-relabelling, def:povm-conventions}
+	Each effect of $N$ is an effect of $M$, so projectivity is preserved.
+	Reindexing the sum over $\{b:f(b)=c\}$ by $e$ gives the stated
+	postprocessing identity.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:pasting}]
+	\label{lem:pasting-tensor-placement}
+	\lean{MIPStarRE.QPBT.Measurement.isProjective_leftPlacement, MIPStarRE.QPBT.Measurement.isProjective_rightPlacement, MIPStarRE.QPBT.Measurement.leftPlacement_postprocess, MIPStarRE.QPBT.Measurement.rightPlacement_postprocess}
+	\leanok
+	\uses{def:pasting-tensor-placement}
+	This formalization-only auxiliary collects the properties of the placement
+	used in Lemma~\ref{lem:pasting}. The placement of a projective measurement is
+	projective, and the placement of a postprocessed measurement has the same effects as the
+	postprocessing of the placed measurement.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:distance-measurement-effect-hermitian}
+	Projectivity follows from the multiplicativity of the placement together
+	with the idempotence and self-adjointness of the effects. Compatibility with
+	postprocessing is the additivity of the tensor placement applied to the sum
+	of the effects over a fibre.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:pasting}]
+	\label{lem:pasting-codeword-cross-consistency}
+	\lean{MIPStarRE.QPBT.consistencyDefect_codeword_cross_le}
+	\leanok
+	\uses{def:pasting-tensor-placement, fact:triangle-for-simeq, fact:data-processing}
+	In the setting of Lemma~\ref{lem:pasting-of-register-exchange}, write
+	$Q_{a_2} = (G_2)^x_{[\operatorname{eval}_{y_2}(\cdot)=a_2]}$ for the coarse
+	second codeword family. Then \eqref{eq:pasting-1-sym}, \eqref{eq:pasting-2}
+	and the second comparison in \eqref{eq:pasting-1} give
+	\[
+		Q_{a_2} \ot \Id \simeq_{\delta + 2\sqrt{2\delta}} \Id \ot Q_{a_2}\,.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{fact:triangle-for-simeq, fact:data-processing}
+	Coarse-graining the self-consistency \eqref{eq:pasting-2} along the second
+	answer coordinate gives the consistency of the second answer marginal with
+	its copy on the opposite factor, with the same error. The triangle estimate
+	applied to \eqref{eq:pasting-1-sym}, to that marginal and to the second
+	comparison in \eqref{eq:pasting-1} yields the assertion.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:pasting}]
+	\label{lem:pasting-coarse-commutator}
+	\lean{MIPStarRE.QPBT.exists_coarse_commutator_bound}
+	\leanok
+	\uses{def:pasting-alphabet-relabelling, lem:commutation-analysis-right,
+		fact:agreement, def:povm-distance}
+	In the setting of Lemma~\ref{lem:pasting}, write
+	$P_{a_1} = (G_1)^x_{[\operatorname{eval}_{y_1}(\cdot)=a_1]}$ and
+	$Q_{a_2} = (G_2)^x_{[\operatorname{eval}_{y_2}(\cdot)=a_2]}$ for the two
+	coarse codeword families. There is a universal constant $C \ge 1$,
+	independent of the finite sets, of the space, of the distribution, of the
+	measurements, of the state and of the error, such that the two comparisons
+	in \eqref{eq:pasting-1} give
+	\[
+		\Id \ot [P_{a_1},\, Q_{a_2}] \approx_{C \delta} 0\,.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:commutation-analysis-right, fact:agreement,
+		def:pasting-alphabet-relabelling, lem:pasting-alphabet-relabelling}
+	The two comparisons bound the consistency of each coarse family with the
+	corresponding marginal of the joint projective measurement $A$ placed on the
+	opposite factor, hence by Lemma~\ref{fact:agreement} the state-dependent
+	distances of those two pairs by $2\delta$. Relabelling the outcome sets of
+	$P$, of $Q$ and of $A$ so that the two coarse families are the two marginals
+	of a common joint outcome set, the right-register form of
+	Lemma~\ref{lem:commutation-analysis-right} applies and gives the assertion with
+	twice its constant.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:pasting}]
+	\label{lem:pasting-collision-averaging}
+	\lean{MIPStarRE.QPBT.avgOver_collision_le}
+	\leanok
+	In the setting of Lemma~\ref{lem:pasting}, let
+	$c_{x,y_1}(g_2, g_2') \ge 0$ be weights indexed by pairs of second
+	codewords, with $\sum_{g_2 \ne g_2'} c_{x,y_1}(g_2, g_2') \le 1$ for every
+	pair $(x, y_1)$. Then the average against $\mathcal D$ of the part of that
+	total carried by the colliding pairs is at most $\eta$:
+	\[
+		\E_{(x,y_1,y_2) \sim \mathcal D}
+			\sum_{\substack{g_2 \ne g_2' \\ g_2(y_2) = g_2'(y_2)}}
+				c_{x,y_1}(g_2, g_2') \le \eta\,.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	Exchange the average over $y_2$ with the sum over pairs. A pair of distinct
+	codewords contributes its weight times the mass of the second questions at
+	which the two codewords agree, which is at most $\eta$ times the marginal
+	mass of $(x, y_1)$ by the conditional collision hypothesis; a pair
+	$(x, y_1)$ of zero marginal mass contributes nothing. Bounding the total
+	weight of the pairs by one and summing the marginal over $(x, y_1)$ gives
+	the assertion.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:pasting}]
+	\label{lem:pasting-fine-coarse-cross}
+	\lean{MIPStarRE.QPBT.consistencyDefect_codeword_fine_le_coarse_add}
+	\leanok
+	\uses{lem:pasting-collision-averaging, def:pasting-tensor-placement}
+	In the setting of Lemma~\ref{lem:pasting}, write $G_{g_2} = (G_2)^x_{g_2}$
+	for the fine second codeword family and
+	$Q_{a_2} = (G_2)^x_{[\operatorname{eval}_{y_2}(\cdot)=a_2]}$ for its
+	coarse-graining, and let
+	\[
+		\epsilon_f = \E_{(x,y_1,y_2) \sim \mathcal D}
+			\sum_{g_2 \ne g_2'} \bra{\psi} G_{g_2} \ot G_{g_2'} \ket{\psi},
+		\qquad
+		\epsilon_c = \E_{(x,y_1,y_2) \sim \mathcal D}
+			\sum_{a_2 \ne a_2'} \bra{\psi} Q_{a_2} \ot Q_{a_2'} \ket{\psi}
+	\]
+	be the cross consistency defects of the two families. Then
+	$\epsilon_f \le \epsilon_c + \eta$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:pasting-collision-averaging}
+	At a fixed question both defects equal $\|\psi\|^2$ minus the corresponding
+	diagonal overlap, and the diagonal overlap of the coarse family is the sum
+	of the fine overlaps over the pairs of codewords agreeing at $y_2$.
+	Subtracting, the fine defect exceeds the coarse one exactly by the fine
+	overlaps of the distinct pairs colliding at $y_2$. Those overlaps are
+	nonnegative, being expectations of tensor products of positive operators,
+	and their total over the distinct pairs is at most one, so
+	Lemma~\ref{lem:pasting-collision-averaging} bounds their average by $\eta$.
+\end{proof}
+\begin{lemma}[Formalization support for Lemma~\ref{lem:pasting}]
+	\label{lem:pasting-pinched-collision}
+	\lean{MIPStarRE.QPBT.avgOver_pinched_collision_le}
+	\leanok
+	\uses{lem:pasting-collision-averaging, def:pasting-tensor-placement}
+	In the setting of Lemma~\ref{lem:pasting}, write $G_{g_2} = (G_2)^x_{g_2}$
+	and let $P_{a_1}$ be any measurement depending on $(x, y_1)$ only. Then the
+	colliding part of the cross term of $G$ against its pinching by $P$ is small
+	on average:
+	\[
+		\E_{(x,y_1,y_2) \sim \mathcal D}
+			\sum_{\substack{g_2 \ne g_2' \\ g_2(y_2) = g_2'(y_2)}}
+				\sum_{a_1} \bra{\psi} G_{g_2'} \ot
+					P_{a_1} G_{g_2} P_{a_1} \ket{\psi} \le \eta\,.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:pasting-collision-averaging}
+	Each summand is the expectation of a tensor product of positive operators,
+	the second factor being a conjugate of a positive operator by a self-adjoint
+	effect, so the weights are nonnegative. Summing over all pairs of codewords
+	replaces both codeword effects by the identity and leaves
+	$\sum_{a_1} \bra{\psi} \Id \ot P_{a_1}^2 \ket{\psi}$, which is at most
+	$\|\psi\|^2 = 1$ because the squares of the effects of a measurement sum to
+	at most the identity. Lemma~\ref{lem:pasting-collision-averaging} then
+	applies to these weights.
+\end{proof}
+
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:pasting}]
+	\label{lem:pasting-pinched-reduction}
+	\lean{MIPStarRE.QPBT.consistencyDefect_pasted_le_marginal_add_pinched}
+	\leanok
+	\uses{def:pasting-tensor-placement, lem:pasting-measurement}
+	In the setting of Lemma~\ref{lem:pasting}, write $G_{g_2} = (G_2)^x_{g_2}$
+	and $P_{a_1} = (G_1)^x_{[\operatorname{eval}_{y_1}(\cdot) = a_1]}$, and let
+	$\Delta_1$ be the defect of the comparison of the first answer marginal with
+	the pinched family $\sum_{g_2} G_{g_2} P_{a_1} G_{g_2}$. Then the defect of
+	the comparison of the joint answer measurement with the pasted family is at
+	most the defect of the second marginal comparison plus $\Delta_1$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:pasting-tensor-placement, lem:pasting-measurement}
+	At a fixed question each of the three defects equals $\|\psi\|^2$ minus the
+	corresponding diagonal overlap, so it suffices to compare the overlaps. Since
+	the answer effects sum to the identity, the two right-hand overlaps are
+	summed over the answer pairs, and it suffices to compare, for each answer
+	pair $(a_1, a_2)$, the operator $(G_2)^x_{[\operatorname{eval}_{y_2}(\cdot) =
+	a_2]} + \sum_{g_2} G_{g_2} P_{a_1} G_{g_2}$ with $\Id$ plus the pasted effect
+	at that pair. Their difference is
+	$\sum_{g_2(y_2) \neq a_2} G_{g_2} (\Id - P_{a_1}) G_{g_2}$, a sum of
+	conjugates of a positive operator by self-adjoint effects, hence positive;
+	the quadratic form against the answer effect is therefore monotone in the
+	required direction.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:pasting}]
+	\label{lem:pasting-pinched-cauchy-schwarz}
+	\lean{MIPStarRE.QPBT.consistencyDefect_pinched_le_marginal_add_sqrt}
+	\leanok
+	\uses{def:pasting-tensor-placement, lem:pasting-tensor-placement,
+		lem:pasting-pinched-reduction}
+	In the setting of Lemma~\ref{lem:pasting-pinched-reduction}, let $K$ be an
+	upper bound for the average over the question of
+	$\sum_{a_1, g_2} \| (\Id \ot [P_{a_1}, G_{g_2}]) \ket{\psi} \|^2$. Then
+	$\Delta_1$ is at most the defect of the first marginal comparison plus
+	$\sqrt K$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:pasting-tensor-placement}
+	Both defects equal $1$ minus the corresponding averaged overlap, so it
+	suffices to bound the difference of the two overlaps at a fixed question.
+	The second codeword effects being idempotent and summing to the identity,
+	$P_{a_1} - \sum_{g_2} G_{g_2} P_{a_1} G_{g_2}
+	= \sum_{g_2} [P_{a_1}, G_{g_2}] G_{g_2}$, and the answer effects being
+	idempotent, $A_{a_1} \ot [P_{a_1}, G_{g_2}] G_{g_2}
+	= (A_{a_1} \ot [P_{a_1}, G_{g_2}]) (A_{a_1} \ot G_{g_2})$. The commutator is
+	anti-self-adjoint, so the quadratic form of that product is the real part of
+	the inner product of the two applied vectors, and the Cauchy--Schwarz
+	inequality over the pairs $(a_1, g_2)$ bounds the difference by the product
+	of the two square roots. The second factor is at most $1$, the operators
+	$A_{a_1} \ot G_{g_2}$ being the effects of a measurement; in the first factor
+	the answer effect is dropped, which leaves the square root of the commutator
+	mass at that question. Jensen's inequality for the square root gives the
+	averaged form.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:pasting}]
+	\label{lem:pasting-cross-move}
+	\lean{MIPStarRE.QPBT.abs_cross_move_gap_le_sqrt}
+	\leanok
+	\uses{def:pasting-tensor-placement}
+	Let $P_{a_1}$ and $G_{g_2}$ be measurements placed on the second tensor
+	factor and let $\ket{\psi}$ be a unit vector. Then
+	\[
+		\Bigl| \operatorname{Re}\sum_{a_1, g_2}
+			\bra{\psi} \Id \ot G_{g_2} P_{a_1} G_{g_2} P_{a_1}
+			\ket{\psi} - \operatorname{Re}\sum_{g_2} \bra{\psi} G_{g_2} \ot \sum_{a_1} P_{a_1}
+			G_{g_2} P_{a_1} \ket{\psi} \Bigr| \le \Bigl( \sum_{g_2} \bigl\|
+			(\Id \ot G_{g_2} - G_{g_2} \ot \Id) \ket{\psi} \bigr\|^2
+		\Bigr)^{1/2}\,.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:pasting-tensor-placement}
+	Each summand on the left is the overlap of
+	$(\Id \ot P_{a_1} G_{g_2}) \ket{\psi}$ with
+	$(\Id \ot G_{g_2} P_{a_1}) \ket{\psi}$, and each summand on the right is the
+	overlap of $(G_{g_2} \ot P_{a_1}) \ket{\psi}$ with the same vector. The
+	difference of the two left vectors is the first family applied on the second
+	factor to the difference of the two placements of the second family, so the
+	Cauchy--Schwarz inequality over the pairs $(a_1, g_2)$ bounds the gap by the
+	product of two square roots. The effects of a measurement placed on one
+	factor contract total squared norm, so the first factor is at most the
+	summed squared distance between the two placements of the second family, and
+	the second factor is at most $\|\psi\|^2 = 1$.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:pasting}]
+	\label{lem:pasting-commutator-expansion}
+	\lean{MIPStarRE.QPBT.commutator_mass_eq_expansion}
+	\leanok
+	\uses{def:pasting-tensor-placement}
+	Let $P_{a_1}$ be a measurement and $G_{g_2}$ a projective measurement, both
+	placed on the second tensor factor. Then
+	\[
+		\sum_{a_1, g_2} \bigl\| (\Id \ot [P_{a_1}, G_{g_2}]) \ket{\psi} \bigr\|^2
+		= \sum_{a_1, g_2} \bigl\| (\Id \ot P_{a_1} G_{g_2}) \ket{\psi} \bigr\|^2
+			+ \operatorname{Re}\sum_{a_1} \bra{\psi} \Id \ot P_{a_1}^2 \ket{\psi}
+			- 2 \operatorname{Re}\sum_{a_1, g_2}
+				\bra{\psi} \Id \ot G_{g_2} P_{a_1} G_{g_2} P_{a_1}
+				\ket{\psi}\,.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:pasting-tensor-placement}
+	Expand the squared norm of a difference at each pair: it is the sum of the
+	two squared norms minus twice the real part of the overlap of the two
+	vectors. The second squared norm is the expectation of
+	$P_{a_1} G_{g_2} P_{a_1}$, the second family being idempotent, and summing
+	over the codewords replaces the codeword effect by the identity, which
+	leaves the expectation of $P_{a_1}^2$. The overlap of the two vectors is the
+	expectation of $G_{g_2} P_{a_1} G_{g_2} P_{a_1}$, the effects of a
+	measurement being self-adjoint.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:pasting}]
+	\label{lem:pasting-ordered-product-mass}
+	\lean{MIPStarRE.QPBT.sum_norm_ordered_product_le_one}
+	\leanok
+	\uses{def:pasting-tensor-placement}
+	Let $P_{a_1}$ and $G_{g_2}$ be measurements placed on the second tensor
+	factor and let $\ket{\psi}$ be a unit vector. Then
+	\[
+		\sum_{a_1, g_2} \bigl\| (\Id \ot P_{a_1} G_{g_2}) \ket{\psi} \bigr\|^2
+			\le 1\,.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:pasting-tensor-placement}
+	The effects of a measurement placed on one tensor factor contract total
+	squared norm, their squares summing to at most the identity. Applying this
+	to the first family at each fixed codeword bounds the inner sum by the
+	squared norm of the codeword vector, and applying it to the second family
+	bounds the remaining sum by $\|\psi\|^2 = 1$.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:pasting}]
+	\label{lem:pasting-ordered-product-mass-lower}
+	\lean{MIPStarRE.QPBT.mass_ordered_product_ge}
+	\leanok
+	\uses{def:pasting-tensor-placement, def:povm-distance}
+	Let $P_{a_1}$ and $Q_{a_2}$ be measurements placed on the second tensor
+	factor, with $Q$ projective, let $A_{a_1}$ be a projective measurement
+	placed on the first tensor factor, all three depending on a question drawn
+	from a distribution, and let $\ket{\psi}$ be a unit vector. If the averaged
+	squared distance between $A_{a_1} \ot \Id$ and $\Id \ot P_{a_1}$ is at most
+	$d$ and the averaged mass of the commutators $[P_{a_1}, Q_{a_2}]$ placed on
+	the second factor is at most $K$, then the averaged mass of the ordered
+	products satisfies
+	\[
+		\Exp \sum_{a_1, a_2}
+			\bigl\| (\Id \ot P_{a_1} Q_{a_2}) \ket{\psi} \bigr\|^2
+			\ge 1 - 2\sqrt{d} - d - 2\sqrt{K} - K\,.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:pasting-tensor-placement, def:povm-distance}
+	A projective measurement placed on one tensor factor carries the whole mass
+	of the state, so the first family has mass at least $1 - 2\sqrt{d} - d$ by
+	the perturbation estimate for the total mass of a finite family of vectors.
+	Placing the second family, projective and complete, to the left of the first
+	one preserves that mass. Restoring the order of the two placements changes
+	each vector by the corresponding commutator, and the same perturbation
+	estimate costs a further $2\sqrt{K} + K$. The averages of the square roots
+	are bounded by the square roots of the averages.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:pasting}]
+	\label{lem:pasting-pinched-collision-split}
+	\lean{MIPStarRE.QPBT.pinched_coarse_sub_fine_eq}
+	\leanok
+	\uses{def:pasting-tensor-placement}
+	Let $G_{g_2}$ be a measurement on the second tensor factor, let $Q_{a_2}$ be
+	its coarse-graining along an evaluation map, let $P_{a_1}$ be a measurement,
+	and let $\ket{\psi}$ be a state. Then
+	\[
+		\sum_{a_2} \bra{\psi} Q_{a_2} \ot
+				\sum_{a_1} P_{a_1} Q_{a_2} P_{a_1} \ket{\psi}
+			- \sum_{g_2} \bra{\psi} G_{g_2} \ot
+				\sum_{a_1} P_{a_1} G_{g_2} P_{a_1} \ket{\psi}
+			= \sum_{\substack{g_2 \neq g_2' \\ \text{colliding}}} \sum_{a_1}
+				\bra{\psi} G_{g_2'} \ot P_{a_1} G_{g_2} P_{a_1} \ket{\psi}\,,
+	\]
+	where a pair is colliding when the two codewords have the same evaluation.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:pasting-tensor-placement}
+	Each coarse effect is the sum of the fine effects over the fiber of the
+	evaluation map, and both tensor placement and the quadratic form are
+	additive, so the coarse sum is the sum over all pairs of fine codewords with
+	equal evaluations. The diagonal pairs reproduce the fine sum and the
+	remaining pairs are the colliding ones.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:pasting}]
+	\label{lem:pasting-fine-commutator-mass}
+	\lean{MIPStarRE.QPBT.commutator_mass_fine_le}
+	\leanok
+	\uses{def:pasting-tensor-placement, def:povm-distance}
+	Let $\mathcal D$ be a probability law on $(x,y_1,y_2)$, let
+	$G^x_{g_2}$ be a projective measurement, and let $P^{x,y_1}_{a_1}$ be a
+	measurement, both on the second tensor factor. Set
+	$Q^{x,y_2}_{a_2}=G^x_{[\operatorname{eval}_{y_2}(\cdot)=a_2]}$.
+	In particular, $G$ depends only on $x$, and $P$ only on $(x,y_1)$,
+	not on $y_2$. Let $\ket{\psi}$ be a unit vector and $\eta\geq0$.
+	All averages below are over $\mathcal D$, and question superscripts are
+	suppressed. Assume the conditional collision bound given $(x,y_1)$ of
+	positive probability with parameter $\eta$, and assume that the averaged coarse
+	commutator mass is at most $K_0$, that the averaged mass of the ordered
+	products $\Id \ot P_{a_1} Q_{a_2}$ is at least $1 - m$, and that the summed
+	squared distances between the two placements of the coarse and of the fine
+	family are at most $\epsilon_c$ and $\epsilon_f$ on average. Then
+	\[
+		\Exp \sum_{a_1, g_2}
+			\bigl\| (\Id \ot [P_{a_1}, G_{g_2}]) \ket{\psi} \bigr\|^2
+			\le K_0 + m + 2\eta + 2\sqrt{\epsilon_f} + 2\sqrt{\epsilon_c}\,.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:pasting-commutator-expansion, lem:pasting-cross-move,
+		lem:pasting-ordered-product-mass, lem:pasting-pinched-collision-split,
+		lem:pasting-pinched-collision}
+	Expand both commutator masses. The expectations of the squares of the first
+	family agree, the fine mass of the ordered products is at most one and the
+	coarse one is at least $1 - m$. In both cross terms the rightmost effect is
+	moved to the opposite tensor factor, at the cost of the square root of the
+	corresponding averaged squared distance; after the move the coarse
+	expression exceeds the fine one by the colliding pairs, of average at most
+	$\eta$. The averages of the square roots are bounded by the square roots of
+	the averages.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:pasting}]
+	\label{lem:pasting-explicit-error}
+	\lean{MIPStarRE.QPBT.consistencyDefect_pasted_le_sqrt}
+	\leanok
+	\uses{lem:pasting-pinched-reduction, lem:pasting-pinched-cauchy-schwarz,
+		lem:pasting-fine-commutator-mass, lem:pasting-codeword-cross-consistency,
+		lem:pasting-fine-coarse-cross, lem:pasting-ordered-product-mass-lower}
+	In the setting of Lemma~\ref{lem:pasting-of-register-exchange}, assume moreover that the averaged
+	commutator mass of the two coarse codeword families is at most $C\delta$.
+	Then the comparison \eqref{eq:pasting-3} holds with the explicit error
+	$2\delta + \sqrt{K}$, that is,
+	\[
+		A^{x,y_1,y_2}_{a_1,\,a_2} \ot \Id
+			\simeq_{2\delta + \sqrt{K}}
+			\Id \ot J^x_{[\operatorname{eval}_{y_1}(\cdot)=a_1,\,
+				\operatorname{eval}_{y_2}(\cdot)=a_2]}\,,
+	\]
+	where
+	\[
+		K = C\delta + \bigl(2\sqrt{2\delta} + 2\delta + 2\sqrt{C\delta}
+			+ C\delta\bigr) + 2\eta
+			+ 2\sqrt{2(\delta + 2\sqrt{2\delta} + \eta)}
+			+ 2\sqrt{2(\delta + 2\sqrt{2\delta})}\,.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:pasting-pinched-reduction, lem:pasting-pinched-cauchy-schwarz,
+		lem:pasting-fine-commutator-mass, lem:pasting-codeword-cross-consistency,
+		lem:pasting-fine-coarse-cross, lem:pasting-ordered-product-mass-lower}
+	The pinched reduction bounds the defect of the pasted family by the second
+	marginal comparison plus the pinched defect, and the pinched defect is
+	bounded by the first marginal comparison plus the square root of the
+	averaged fine commutator mass. The cross consistency of the coarse second
+	codeword family is at most $\delta + 2\sqrt{2\delta}$, that of the fine
+	family at most $\eta$ more, and both bound the summed squared distance
+	between the two placements of the corresponding family by twice their value.
+	With the mass of the coarse ordered products, these are the inputs of the
+	bound on the fine commutator mass.
 \end{proof}
 
 \begin{lemma}[Close strategies have close values; Fact 4.32 in \cite{Natarajan2018NEEXP}]\label{lem:close-strategies-have-close-values}
@@ -712,6 +1973,81 @@ of the paper.
 \begin{proof}
 	\leanok
 	This follows from linearity in the second argument of the inner product.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:distance-tensor-sum-left}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.heteroKron_finset_sum_left}
+	\leanok
+	This formalization-only auxiliary is not a named statement of the paper; it
+	isolates a finite-sum expansion used in the relabeling step of
+	\cite[Fact~4.34]{Natarajan2018NEEXP}. For a finite set $S$, operators $A_b$, and an
+	operator $C$,
+	\[
+		\left(\sum_{b\in S}A_b\right)\otimes C
+		=\sum_{b\in S}(A_b\otimes C).
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	Expand the tensor placement entrywise and distribute scalar multiplication
+	over the finite sum.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:distance-tensor-sum-right}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.heteroKron_finset_sum_right}
+	\leanok
+	This formalization-only auxiliary is not a named statement of the paper; it
+	isolates the corresponding finite-sum expansion used in the relabeling step
+	of \cite[Fact~4.34]{Natarajan2018NEEXP}. For a finite set $S$, an operator $A$, and
+	operators $C_b$,
+	\[
+		A\otimes\left(\sum_{b\in S}C_b\right)
+		=\sum_{b\in S}(A\otimes C_b).
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	Expand the tensor placement entrywise and distribute scalar multiplication
+	over the finite sum.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:distance-qform-finset-sum}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.stateQForm_finset_sum}
+	\leanok
+	\uses{def:distance-state-quadratic-form}
+	This formalization-only auxiliary is not a named statement of the paper; it
+	isolates the linear expansion of overlap terms in the relabeling step of
+	\cite[Fact~4.34]{Natarajan2018NEEXP}. For a finite set $S$,
+	\[
+		q_\psi\!\left(\sum_{b\in S}M_b\right)
+		=\sum_{b\in S}q_\psi(M_b).
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:distance-state-quadratic-form}
+	Apply linearity of the matrix action and of the real part of the inner
+	product.
+\end{proof}
+
+\begin{lemma}[Formalization support for Lemma~\ref{lem:ld-sandwich}]
+	\label{lem:distance-qform-nonnegative}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.stateQForm_nonneg}
+	\leanok
+	\uses{def:distance-state-quadratic-form}
+	This formalization-only auxiliary is not a named statement of the paper; it
+	isolates the positivity of the overlap terms in the relabeling step of
+	\cite[Fact~4.34]{Natarajan2018NEEXP}. If $M$ is positive semidefinite, then
+	$q_\psi(M)\geq 0$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:distance-state-quadratic-form,
+		lem:distance-quadratic-form-mono}
+	Compare $M$ with the zero operator in the quadratic-form order.
 \end{proof}
 
 \begin{lemma}[Formalization support for Fact~\ref{fact:agreement}]
@@ -1196,6 +2532,47 @@ and $V_{\le k}$, $V_{\ge k}$ are understood to be $V_{<k+1}$ and $V_{>k-1}$, res
 
 We abbreviate ``conditionally linear'' as \emph{CL}. Operationally, an $\ell$-level CL function first applies $L_1$ to $x^{V_1}$; conditioned on the value $x^{L_1}$ it selects a register subspace $V_2$ and a linear map $L_2$ and applies $L_2$ to $x^{V_2}$; and so on, finally outputting $\sum_{k=1}^{\ell} x^{L_k}$. Every $1$-level CL function is linear, and conversely every linear map on $V$ is a $1$-level CL function. Moreover, for every $\ell \ge 1$ the collection of $\ell$-level CL functions contains the collection of $(\ell-1)$-level CL functions.
 
+\begin{lemma}[Formalization support for monotonicity of CL levels]\label{lem:cl-level-mono}
+	\lean{MIPStarRE.QPBT.IsCondLinearOn.mono_level}
+	\leanok
+	\uses{def:cl-func}
+	This is the support-relative form of the containment observation following Definition~\ref{def:cl-func}. Let $S$ be a register subspace of $V$, let $L$ be an $\ell$-level CL function all of whose factor spaces are contained in $S$, and suppose $\ell \le k$. Then $L$ is also a $k$-level CL function all of whose factor spaces are contained in $S$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:cl-func}
+	Adjoin $k-\ell$ empty factor spaces with zero linear maps before the given representation. Each added linear contribution is zero, so the represented function and its support are unchanged.
+\end{proof}
+
+% Formalization-support nodes.  The two statements below are not results of the source
+% article; the first is the converse half of the observation preceding
+% Lemma~\ref{lem:cl-level-mono}, and the second isolates the transport of a conditionally
+% linear function along an injective identification of registers, so that the Lean proofs
+% of the question maps of the Pauli basis test remain traceable.
+\begin{lemma}[Formalization support for linear maps as one-level CL functions]\label{lem:cl-one-level-linear}
+	\lean{MIPStarRE.QPBT.isCondLinearOn_one_of_linear}
+	\leanok
+	\uses{def:cl-func, def:register-subspace}
+	This is the support-relative form of the converse observation following Definition~\ref{def:cl-func}. Let $L$ be a linear map on $V$. Then $L$ is a $1$-level CL function all of whose factor spaces are contained in $V$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:cl-func}
+	Take the single factor space $V_1 = V$ with first-level linear map $L_1 = L$, and take the $0$-level function on $V_{>1}$ for every value of $x^{L_1}$. Since $x^V = x$, the represented function sends $x$ to $L(x) + 0 = L(x)$.
+\end{proof}
+
+\begin{lemma}[Formalization support for reindexing a CL function]\label{lem:cl-reindex}
+	\lean{MIPStarRE.QPBT.isCondLinearOn_reindex}
+	\leanok
+	\uses{def:cl-func, def:register-subspace}
+	This is not a named statement of the source article; it isolates the transport of a CL function between register spaces used in the Lean proof of the conditional linearity of the Pauli question maps. Let $V' = \F^{n'}$ and $V = \F^{n}$, and let $f$ be an injective map of the coordinates of $V'$ into the coordinates of $V$, so that every register subspace of $V'$ is carried to a register subspace of $V$. Let $L$ be an $\ell$-level CL function on $V'$. Let $\tilde L \colon V \to V$ send $x$ to the vector whose coordinate at $f(k)$ is the $k$-th coordinate of $L\bigl( (x_{f(k)})_k \bigr)$ and whose coordinates outside the image of $f$ are zero. Then $\tilde L$ is an $\ell$-level CL function on $V$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:cl-func}
+	Induction on $\ell$. At level $0$ both functions are zero. At level $\ell \ge 1$, transport a representation of $L$ term by term: the factor space $V'_1$ is carried to its image under $f$, the first-level linear map $L_1$ to the composition of restriction along $f$ with $L_1$ followed by extension by zero off the image, and the conditional remainders are transported by the induction hypothesis, their prefix values being transported along $f$ as well. Since $f$ is injective, the coordinate at $f(k)$ of a transported vector is the $k$-th coordinate of the vector transported, so the transported representation evaluates to the transport of the value of $L$; outside the image of $f$ both sides vanish.
+\end{proof}
+
 \begin{definition}[Conditionally linear distributions]\label{def:cl-dist}
 	\lean{MIPStarRE.QPBT.clDistribution}\uses{def:cl-func}
 	Let $L, R \colon V \to V$ be conditionally linear functions. The \emph{conditionally linear distribution $\mu_{L,R}$ corresponding to $(L,R)$} is the distribution over pairs $(L(x), R(x)) \in V \times V$ for $x$ drawn uniformly at random from $V$.
@@ -1352,11 +2729,13 @@ The marginal functions, factor spaces, and linear maps of a given CL function $L
 
 The question distribution of the Pauli basis test is \emph{typed}: each question is a pair consisting of a type, drawn together with the other player's type from the edges of a fixed \emph{type graph}, and a question content, drawn from a CL distribution determined by the pair of types.
 
+% IsTypedCondLinearFamily permits an arbitrary index type T, whereas the source assumes
+% that the type set is finite. It is therefore a strict generalization and is not marked
+% \leanok; the concrete low-degree and Pauli families below use finite inductive types.
 \begin{definition}[Typed conditionally linear functions]\label{def:typed-cl-functions}
 	\lean{MIPStarRE.QPBT.IsTypedCondLinearFamily}
-	\leanok
 	\uses{def:cl-func}
-	Let $\mathcal T$ be a set (the \emph{type set}) and let $V$ be $\F^n$ for some integer $n \ge 0$. A \emph{$\mathcal T$-typed family of $\ell$-level conditionally linear functions} (implicitly, \emph{on $V$}) is a collection $\{L_t\}_{t \in \mathcal T}$ such that, for each $t \in \mathcal T$, $L_t$ is an $\ell$-level conditionally linear function on $V$. Finiteness of $\mathcal T$ plays no part in this definition, which is therefore stated, as in the linked declaration, for an arbitrary type set; it is required from Definition~\ref{def:graph-distribution} onwards, where $\mathcal T$ indexes a distribution. The source states the definition for a finite type set, and every type set occurring below is finite.
+	Let $\mathcal T$ be a set (the \emph{type set}) and let $V$ be $\F^n$ for some integer $n \ge 0$. A \emph{$\mathcal T$-typed family of $\ell$-level conditionally linear functions} (implicitly, \emph{on $V$}) is a collection $\{L_t\}_{t \in \mathcal T}$ such that, for each $t \in \mathcal T$, $L_t$ is an $\ell$-level conditionally linear function on $V$. Finiteness of $\mathcal T$ is not needed for this pointwise condition, so the definition applies to an arbitrary type set. A finite type set is required from Definition~\ref{def:graph-distribution} onwards, where $\mathcal T$ indexes a distribution. The source states the definition for a finite type set, and every type set occurring below is finite.
 \end{definition}
 
 % Nonemptiness of the edge set is stated explicitly here: with E empty, m = k = 0 and the
@@ -1388,6 +2767,18 @@ The question distribution of the Pauli basis test is \emph{typed}: each question
 	The distribution $\mu_G$ is uniform on the set of ordered pairs $(u,v) \in U \times U$ with $\{u,v\} \in E$, and that set is nonempty because $E$ is: an edge $\{u,v\} \in E$ yields the ordered pair $(u,v)$. A uniform distribution on a nonempty finite set has total mass one.
 \end{proof}
 
+\begin{lemma}[Formalization support for symmetry of the graph distribution]\label{lem:graph-distribution-symm}
+	\lean{MIPStarRE.QPBT.graphDistribution_symm}
+	\leanok
+	\uses{def:graph-distribution}
+	This is not a named statement of the source article; it records the symmetry of the graph distribution of Definition~\ref{def:graph-distribution}, which the source leaves implicit when it presents a typed game as a symmetric game. Let $G = (U, E)$ be an undirected graph with nonempty edge set $E$. Then $\mu_G(u,v) = \mu_G(v,u)$ for all $u, v \in U$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:graph-distribution}
+	The distribution $\mu_G$ is uniform on the ordered pairs $(u,v)$ with $\{u,v\} \in E$. The multisets $\{u,v\}$ and $\{v,u\}$ are equal, so $(u,v)$ belongs to that set exactly when $(v,u)$ does, and the two ordered pairs receive the same weight.
+\end{proof}
+
 % The nonempty-edge hypothesis on G is inherited from def:graph-distribution, where it is
 % needed for the graph distribution mu_G to be defined; the source
 % (references/qpbt-paper/07_types.tex:84-93) leaves it implicit here as well.
@@ -1402,3 +2793,19 @@ The question distribution of the Pauli basis test is \emph{typed}: each question
 	\uses{def:typed-cl-functions, def:graph-distribution, def:cl-dist}
 	Let $\mathcal T$ be a type set and let $L = \{L_u\}_{u \in \mathcal T}$ and $R = \{R_v\}_{v \in \mathcal T}$ be $\mathcal T$-typed families of conditionally linear functions on $V$. Let $G = (\mathcal T, E)$ be a graph with vertex set $\mathcal T$ and nonempty edge set $E$, so that the graph distribution $\mu_G$ of Definition~\ref{def:graph-distribution} is defined. The \emph{$(\mathcal T, G)$-typed conditionally linear distribution $\mu^G_{L,\,R}$ corresponding to $(L, R)$} is the distribution over pairs $\bigl( (u, x), (v, y) \bigr)$, where the type pair $(u,v)$ is drawn from the graph distribution $\mu_G$ and the content pair $(x,y)$ is drawn from $\mu_{L_u,\,R_v}$.
 \end{definition}
+
+\begin{lemma}[Formalization support for symmetry of a typed CL distribution]\label{lem:typed-cl-distribution-symm}
+	\lean{MIPStarRE.QPBT.typedCLDistribution_symm}
+	\leanok
+	\uses{def:typed-cl-distributions, def:graph-distribution, def:cl-dist}
+	This is not a named statement of the source article; it records the symmetry that the source uses when it presents a typed game built from a single family as a symmetric game. Let $L$ be a $\mathcal T$-typed family of conditionally linear functions on $V$ and let $G = (\mathcal T, E)$ have nonempty edge set $E$. Then
+	\[
+		\mu^G_{L,\,L}\bigl((u, x), (v, y)\bigr) = \mu^G_{L,\,L}\bigl((v, y), (u, x)\bigr)
+	\]
+	for all types $u, v \in \mathcal T$ and all $x, y \in V$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:graph-distribution-symm, def:cl-dist}
+	Conditioned on the type pair $(u,v)$, the mass of $\bigl((u,x),(v,y)\bigr)$ is the number of seeds $z \in V$ with $L_u(z) = x$ and $L_v(z) = y$, divided by $|V|$; that count is unchanged when the two coordinates are exchanged together with the two types. Reindexing the sum over type pairs by the exchange $(u,v) \mapsto (v,u)$ and applying Lemma~\ref{lem:graph-distribution-symm} to the edge law gives the claim.
+\end{proof}

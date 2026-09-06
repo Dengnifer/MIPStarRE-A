@@ -8,9 +8,9 @@ import MIPStarRE.LDT.Test.MainTheorem.ScalarBounds.EnvelopeBounds
 
 This module supplies the scalar half of the soundness transport for the
 directly indexed low-degree game.  Its content is purely arithmetic: the
-auxiliary sampling parameter with which the mature low individual degree
-theorem is applied to a coordinate strategy, the resulting bounds on the three
-terms of the mature error `mainFormalError`, and the absorption of the
+auxiliary sampling parameter with which the low individual degree theorem is
+applied to a coordinate strategy, the resulting bounds on the three terms of
+the LDT error `mainFormalError`, and the absorption of the
 simultaneous-measurement estimate into the error function `deltaLd` of
 `lem:ld-soundness`.
 
@@ -19,7 +19,7 @@ simultaneous-measurement estimate into the error function `deltaLd` of
 * `directLdAuxParameter D = 2560000 m³ d` is the sampling parameter handed to
   `MIPStarRE.LDT.Test.mainFormal`.  It is the multiple of the exponential scale
   `2560000 m²` of `mainFormalError` with quotient `m d`, so that the
-  exponential term of the mature error is exactly `exp (-m d)`.
+  exponential term of the LDT error is exactly `exp (-m d)`.
 
 ## Main results
 
@@ -66,8 +66,8 @@ open MIPStarRE.LDT MIPStarRE.Quantum
 
 /-- The auxiliary sampling parameter of the low-degree soundness transport.
 
-The mature low individual degree theorem is applied to each coordinate
-strategy of a directly indexed strategy with `k = 2560000 m³ d` samples.  This
+The low individual degree theorem is applied to each coordinate strategy of
+a directly indexed strategy with `k = 2560000 m³ d` samples.  This
 is the multiple of the exponential scale `2560000 m²` of `mainFormalError`
 whose quotient is `m d`, and it dominates the corrected large-sampling
 hypothesis `400 m d ≤ k` of `MIPStarRE.LDT.Test.mainFormal` uniformly in the
@@ -114,7 +114,7 @@ private theorem directLd_one_le_q (D : DirectLdParams) : (1 : ℝ) ≤ (D.q : �
   have h : 1 ≤ D.q := D.toLDTParameters.hq
   exact_mod_cast h
 
-/-! ## The three terms of the mature error -/
+/-! ## The three terms of the LDT error -/
 
 /-- With the auxiliary sampling parameter the exponential scale of
 `mainFormalError` collapses: the argument of its exponential term is exactly
@@ -139,8 +139,8 @@ the constant `3` times `ε^(1/40000)`.
 
 Formalization-only scalar bound on the first term of the error function
 displayed in `MIPStarRE/LDT/Test/MainTheorem/ScalarBounds/Definitions.lean:28-36`,
-used for the error of `lem:ld-soundness`, blueprint
-`ch13_qpbt_test.tex:139-167`. -/
+used for the error of blueprint
+`lem:ld-soundness`. -/
 theorem directLd_test_term_le {ε : ℝ} (hε : 0 ≤ ε) :
     Real.rpow (3 * ε) (1 / 40000) ≤ 3 * Real.rpow ε (1 / 40000) := by
   simp only [Real.rpow_eq_pow]
@@ -156,8 +156,8 @@ theorem directLd_test_term_le {ε : ℝ} (hε : 0 ≤ ε) :
 
 Formalization-only scalar bound on the second term of the error function
 displayed in `MIPStarRE/LDT/Test/MainTheorem/ScalarBounds/Definitions.lean:28-36`,
-used for the error of `lem:ld-soundness`, blueprint
-`ch13_qpbt_test.tex:139-167`. -/
+used for the error of blueprint
+`lem:ld-soundness`. -/
 theorem directLd_field_term_le (D : DirectLdParams) :
     Real.rpow ((D.d : ℝ) / (D.q : ℝ)) (1 / 40000) ≤
       (D.d : ℝ) * Real.rpow (D.q : ℝ) (-(1 / 40000)) := by
@@ -178,8 +178,8 @@ parameter is `exp (-m d)`, hence at most `2^(-b m d)` for every exponent
 
 Formalization-only scalar bound on the third term of the error function
 displayed in `MIPStarRE/LDT/Test/MainTheorem/ScalarBounds/Definitions.lean:28-36`;
-the exponential of `deltaLd` is the base-two decay of `lem:ld-soundness`,
-blueprint `ch13_qpbt_test.tex:139-167`. -/
+the exponential of `deltaLd` is the base-two decay of blueprint
+`lem:ld-soundness`. -/
 theorem directLd_exponential_term_le (D : DirectLdParams) {b : ℝ}
     (hb0 : 0 ≤ b) (hb1 : b ≤ 1) :
     Real.exp (-((directLdAuxParameter D : ℝ) / (2560000 * ((D.m : ℝ) ^ (2 : ℕ))))) ≤
@@ -204,12 +204,13 @@ exponent `b = 1/80000` are the inner factor of `deltaLd`; the abbreviation
 below names their sum. -/
 
 /-- The inner factor of `deltaLd` at the transport exponent `b = 1/80000`.
-This is a formalization-only abbreviation. -/
-private noncomputable def transportEnvelope (D : DirectLdParams) (ε : ℝ) : ℝ :=
+This is a formalization-only abbreviation, shared with the absorption of the
+error of `prop:ld-simultaneous-general-k`. -/
+noncomputable def transportEnvelope (D : DirectLdParams) (ε : ℝ) : ℝ :=
   Real.rpow ε (1 / 80000) + Real.rpow (D.q : ℝ) (-(1 / 80000)) +
     Real.rpow 2 (-((1 / 80000) * ((D.m * D.d : ℕ) : ℝ)))
 
-private theorem transportEnvelope_rpow_eps_le (D : DirectLdParams) (ε : ℝ) :
+theorem transportEnvelope_rpow_eps_le (D : DirectLdParams) (ε : ℝ) :
     Real.rpow ε (1 / 80000) ≤ transportEnvelope D ε := by
   have hy : (0 : ℝ) ≤ Real.rpow (D.q : ℝ) (-(1 / 80000)) :=
     Real.rpow_nonneg (by positivity) _
@@ -218,7 +219,7 @@ private theorem transportEnvelope_rpow_eps_le (D : DirectLdParams) (ε : ℝ) :
   unfold transportEnvelope
   linarith
 
-private theorem transportEnvelope_rpow_q_le (D : DirectLdParams) {ε : ℝ} (hε : 0 ≤ ε) :
+theorem transportEnvelope_rpow_q_le (D : DirectLdParams) {ε : ℝ} (hε : 0 ≤ ε) :
     Real.rpow (D.q : ℝ) (-(1 / 80000)) ≤ transportEnvelope D ε := by
   have hx : (0 : ℝ) ≤ Real.rpow ε (1 / 80000) := Real.rpow_nonneg hε _
   have hz : (0 : ℝ) ≤ Real.rpow 2 (-((1 / 80000) * ((D.m * D.d : ℕ) : ℝ))) :=
@@ -226,14 +227,14 @@ private theorem transportEnvelope_rpow_q_le (D : DirectLdParams) {ε : ℝ} (hε
   unfold transportEnvelope
   linarith
 
-private theorem transportEnvelope_nonneg (D : DirectLdParams) {ε : ℝ} (hε : 0 ≤ ε) :
+theorem transportEnvelope_nonneg (D : DirectLdParams) {ε : ℝ} (hε : 0 ≤ ε) :
     0 ≤ transportEnvelope D ε := by
   have hx : (0 : ℝ) ≤ Real.rpow ε (1 / 80000) := Real.rpow_nonneg hε _
   exact le_trans hx (transportEnvelope_rpow_eps_le D ε)
 
-/-! ## The mature error at the auxiliary sampling parameter -/
+/-! ## The LDT error at the auxiliary sampling parameter -/
 
-/-- The mature error at the auxiliary sampling parameter, written out in the
+/-- The LDT error at the auxiliary sampling parameter, written out in the
 parameters of the directly indexed game. -/
 private theorem mainFormalError_direct_eq (D : DirectLdParams) (ε : ℝ) :
     Test.mainFormalError D.toLDTParameters (directLdAuxParameter D) (3 * ε) =
@@ -260,7 +261,7 @@ private theorem mainFormalError_direct_nonneg (D : DirectLdParams) {ε : ℝ} (h
   rw [mainFormalError_direct_eq]
   exact mul_nonneg (by positivity) (directLdEnvelope_nonneg D hε)
 
-/-- The square root of the polynomial prefactor of the mature error at the
+/-- The square root of the polynomial prefactor of the LDT error at the
 auxiliary sampling parameter. -/
 private theorem sqrt_directLdPrefactor_le (D : DirectLdParams) :
     Real.sqrt (100000 * ((directLdAuxParameter D : ℝ) ^ (2 : ℕ)) * ((D.m : ℝ) ^ (4 : ℕ))) ≤
@@ -285,7 +286,7 @@ private theorem sqrt_directLdPrefactor_le (D : DirectLdParams) :
         exact mul_le_mul_of_nonneg_right (by norm_num) hX
     _ = 820000000 * (D.m : ℝ) ^ (5 : ℕ) * (D.d : ℝ) := Real.sqrt_sq hC
 
-/-- Halving the exponents: the square root of the mature envelope at the
+/-- Halving the exponents: the square root of the LDT envelope at the
 auxiliary sampling parameter is at most `3 d` times the transport envelope. -/
 private theorem sqrt_directLdEnvelope_le (D : DirectLdParams) {ε : ℝ} (hε0 : 0 < ε) :
     Real.sqrt (Real.rpow (3 * ε) (1 / 40000) +
@@ -522,7 +523,7 @@ witnesses; the low-degree test carries no information there. -/
 /-- In the regime `1 ≤ ε` the error function `deltaLd` is at least one.
 
 Formalization-only scalar bound closing the trivial regime of
-`lem:ld-soundness`, blueprint `ch13_qpbt_test.tex:139-167`, paper
+blueprint `lem:ld-soundness`, paper
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:413-458`. -/
 theorem one_le_deltaLd_of_one_le_error {a b ε : ℝ} (ha : 1 ≤ a) (hb : 0 ≤ b)
     (hε : 1 ≤ ε) {q m d k : ℕ} (hm : 1 ≤ m) (hd : 1 ≤ d) (hk : 1 ≤ k) :

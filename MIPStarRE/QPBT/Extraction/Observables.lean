@@ -12,11 +12,11 @@ canonical field model.
 
 ## References
 
-The product form and observable relations formalize `lem:tildew-product-form`
-in `blueprint/src/chapter/ch16_qpbt_extraction.tex:138-156`, from
+The product form and observable relations formalize blueprint
+`lem:tildew-product-form`, from
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1415-1456`.
-The swap identities formalize
-`lem:v-swap-conjugation`, blueprint lines 314-334 and paper lines 1687-1713.
+The swap identities formalize blueprint `lem:v-swap-conjugation`, from paper
+lines 1687-1713.
 -/
 
 open scoped BigOperators Matrix
@@ -35,7 +35,7 @@ namespace PauliKind
 /-- Select the polynomial belonging to a Pauli basis from a joint polynomial
 outcome. This is the marginalization used at paper
 `14_analysis_of_the_pauli_basis_test.tex:1421-1423` and blueprint
-`ch16_qpbt_extraction.tex:65-76`. -/
+`def:s-w-marginals`. -/
 def selectPoly {P : AdmissibleParams} (W : PauliKind) : PolyPair P -> Poly P
   | pair => match W with
     | .X => pair.1
@@ -46,8 +46,8 @@ end PauliKind
 namespace GlobalPairWitness
 
 /-- The single-basis marginal of the global polynomial-pair measurement.
-This is `def:s-w-marginals`, blueprint
-`ch16_qpbt_extraction.tex:65-76`, paper
+This is blueprint
+`def:s-w-marginals`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1421-1423`. -/
 noncomputable def marginalPoly {P : AdmissibleParams} {epsilon delta : ℝ}
     {S : ProjectiveSetting P epsilon} (w : GlobalPairWitness S delta)
@@ -56,8 +56,8 @@ noncomputable def marginalPoly {P : AdmissibleParams} {epsilon delta : ℝ}
   (w.Smeas side).postprocess W.selectPoly
 
 /-- The single-basis marginal remains a projective measurement. This is the
-projectivity assertion implicit in `def:s-w-marginals`, blueprint
-`ch16_qpbt_extraction.tex:65-76`, paper
+projectivity assertion implicit in blueprint
+`def:s-w-marginals`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1421-1423`.
 
 **Proof obligation:** issue #47 tracks the preservation of projectivity under
@@ -73,7 +73,7 @@ end GlobalPairWitness
 /-- The pulled-apart projective-measurement effect from Equation `eq:tilde_M`.
 The polynomial marginal acts on the player's expanded local space and the
 dot-product projector acts on the newly adjoined register. Blueprint
-`ch16_qpbt_extraction.tex:104-113`; paper
+`eq:tilde_M`; paper
 `14_analysis_of_the_pauli_basis_test.tex:1425-1435`. -/
 noncomputable def tildeM {P : AdmissibleParams} {epsilon delta : ℝ}
     {S : ProjectiveSetting P epsilon} (w : GlobalPairWitness S delta)
@@ -84,7 +84,7 @@ noncomputable def tildeM {P : AdmissibleParams} {epsilon delta : ℝ}
       (tauDotProj W u (dotProduct (decodeFq g) u - a))
 
 /-- Each pulled-apart effect is a projector, as asserted in
-`def:tilde-m-measurement`, blueprint `ch16_qpbt_extraction.tex:104-113`, paper
+blueprint `def:tilde-m-measurement`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1425-1435`.
 
 **Proof obligation:** issue #47 tracks the orthogonal-sum calculation using
@@ -98,7 +98,7 @@ theorem tildeM_isProj {P : AdmissibleParams} {epsilon delta : ℝ}
 
 /-- The pulled-apart effects are complete for each fixed basis and Pauli
 register vector. This is the completeness assertion in
-`def:tilde-m-measurement`, blueprint `ch16_qpbt_extraction.tex:104-113`, paper
+blueprint `def:tilde-m-measurement`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1425-1435`.
 
 **Proof obligation:** issue #47 tracks summing the orthogonal dot-product
@@ -110,8 +110,8 @@ theorem sum_tildeM_eq_one {P : AdmissibleParams} {epsilon delta : ℝ}
   sorry
 
 /-- The binary observable obtained from the trace coarse-graining of `tildeM`.
-This is Equation `eq:def-tildewj` in `def:tilde-w-observables`, blueprint
-`ch16_qpbt_extraction.tex:125-134`, paper
+This is Equation `eq:def-tildewj` in blueprint
+`def:tilde-w-observables`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1437-1442`. -/
 noncomputable def tildeObs {P : AdmissibleParams} {epsilon delta : ℝ}
     {S : ProjectiveSetting P epsilon} (w : GlobalPairWitness S delta)
@@ -123,7 +123,7 @@ noncomputable def tildeObs {P : AdmissibleParams} {epsilon delta : ℝ}
 
 /-- Product form of the pulled-apart observable, Equation
 `eq:tildewj-product-form` of `lem:tildew-product-form`. Blueprint
-`ch16_qpbt_extraction.tex:138-156`; paper
+`lem:tildew-product-form`; paper
 `14_analysis_of_the_pauli_basis_test.tex:1442-1450`.
 
 **Proof obligation:** issue #47 tracks the finite Fourier regrouping needed to
@@ -143,7 +143,7 @@ theorem tildeObs_eq_heteroKron {P : AdmissibleParams} {epsilon delta : ℝ}
   sorry
 
 /-- Every pulled-apart observable is Hermitian, as asserted in
-`lem:tildew-product-form`, blueprint `ch16_qpbt_extraction.tex:138-156`, paper
+blueprint `lem:tildew-product-form`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1450`.
 
 **Proof obligation:** issue #47 tracks this consequence of the product form.
@@ -157,7 +157,7 @@ theorem tildeObs_isHermitian {P : AdmissibleParams} {epsilon delta : ℝ}
   sorry
 
 /-- Every pulled-apart observable squares to the identity, as asserted in
-`lem:tildew-product-form`, blueprint `ch16_qpbt_extraction.tex:138-156`, paper
+blueprint `lem:tildew-product-form`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1450`.
 
 **Proof obligation:** issue #47 tracks this consequence of the product form.
@@ -172,7 +172,7 @@ theorem tildeObs_mul_self {P : AdmissibleParams} {epsilon delta : ℝ}
 
 /-- The corrected twisted commutation relation for pulled-apart observables.
 This is Equation `eq:tildew-twisted-commutation` in blueprint
-`ch16_qpbt_extraction.tex:151-155`, correcting paper
+`eq:tildew-twisted-commutation`, correcting paper
 `14_analysis_of_the_pauli_basis_test.tex:1451-1456`.
 
 **Local fix:** the paper drops this phase when `j != j'`, which is false for
@@ -193,7 +193,7 @@ theorem tildeObs_twisted_commutation {P : AdmissibleParams}
 
 /-- The swap map built from the global polynomial-pair measurement, with the
 crossed decoded arguments required by `def:v-swap-unitary`. Blueprint
-`ch16_qpbt_extraction.tex:301-310`; paper
+`def:v-swap-unitary`; paper
 `14_analysis_of_the_pauli_basis_test.tex:1687-1700`. -/
 noncomputable def swapUnitary {P : AdmissibleParams} {epsilon delta : ℝ}
     {S : ProjectiveSetting P epsilon} (w : GlobalPairWitness S delta)
@@ -204,8 +204,8 @@ noncomputable def swapUnitary {P : AdmissibleParams} {epsilon delta : ℝ}
         tauObservable .Z (decodeFq pair.1))
 
 /-- The swap map is a right unitary. This is the first exact unitarity
-calculation of `lem:v-swap-conjugation`, blueprint
-`ch16_qpbt_extraction.tex:314-334`, paper
+calculation of blueprint
+`lem:v-swap-conjugation`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1687-1699`.
 
 **Proof obligation:** issue #47 tracks the finite projector calculation.
@@ -218,8 +218,8 @@ theorem swapUnitary_mul_conjTranspose {P : AdmissibleParams}
   sorry
 
 /-- The swap map is a left unitary. This is the reverse exact unitarity
-calculation implicit in `lem:v-swap-conjugation`, blueprint
-`ch16_qpbt_extraction.tex:314-334`, paper
+calculation implicit in blueprint
+`lem:v-swap-conjugation`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1687-1699`.
 
 **Proof obligation:** issue #47 tracks the reverse projector calculation.
@@ -233,7 +233,7 @@ theorem conjTranspose_mul_swapUnitary {P : AdmissibleParams}
 
 /-- Exact conjugation of a pulled-apart observable by the swap map. This is
 Equation `eq:v-swap-obs-conjugation` in `lem:v-swap-conjugation`, blueprint
-`ch16_qpbt_extraction.tex:322-326`, paper
+`eq:v-swap-obs-conjugation`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1701-1713`.
 
 **Proof obligation:** issue #47 tracks the diagonal projector reduction.
@@ -250,7 +250,7 @@ theorem swapUnitary_conj_tildeObs {P : AdmissibleParams}
 
 /-- Exact conjugation of a pulled-apart point effect by the swap map. This is
 Equation `eq:qld-unitary-6` in `lem:v-swap-conjugation`, blueprint
-`ch16_qpbt_extraction.tex:328-332`; its calculation occurs at paper
+`eq:qld-unitary-6`; its calculation occurs at paper
 `14_analysis_of_the_pauli_basis_test.tex:1805-1822`.
 
 **Proof obligation:** issue #47 tracks the exact relabeling calculation.

@@ -17,10 +17,11 @@ An unmatched route fails the call: a test that forgets to declare one sees it.
 
 Coverage mirrors the layer's failure modes, one test each: status reduction and
 posting, comment/review idempotency and post-failure adoption, prerequisite
-edge creation and adoption, the merge topology check, label validation and
-key-marker adoption, the ``pr_merge.py`` gate ladder (fail-closed on missing CI
-evidence and on an adverse verdict), the audit snapshot, and a hygiene check
-that no live tool still reaches for the retired registry trees.
+edge creation and adoption, reviewer-round history, the merge topology check,
+label validation and key-marker adoption, the ``pr_merge.py`` gate ladder
+(fail-closed on missing CI evidence and on an adverse verdict), the audit
+snapshot, and a hygiene check that no live tool still reaches for the retired
+registry trees.
 """
 
 from __future__ import annotations
@@ -30,6 +31,7 @@ import io
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -373,6 +375,102 @@ def _git(repo: Path, *args: str) -> str:
     if proc.returncode != 0:
         raise AssertionError(f"git {' '.join(args)} failed: {proc.stderr.strip()}")
     return proc.stdout.strip()
+
+
+class ReviewRoundCounterTests(LayerTestCase):
+    """The task header counts reviewer dispatches, not carried publications."""
+
+    BRANCH = "issue-0219-review-round-counter"
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.repo = self.tmp / "review-repo"
+        self.repo.mkdir()
+        templates = self.tmp / "review-no-templates"
+        templates.mkdir()
+        _git(self.repo, "init", "-q", f"--template={templates}")
+        _git(self.repo, "symbolic-ref", "HEAD", "refs/heads/main")
+        _git(self.repo, "config", "user.email", "tests@example.invalid")
+        _git(self.repo, "config", "user.name", "MIPStarRE tests")
+        _git(self.repo, "config", "commit.gpgsign", "false")
+
+        local_bin = self.repo / "local" / "bin"
+        local_bin.mkdir(parents=True)
+        for name in ("review.sh", "gh_common.py", "wf_util.py"):
+            shutil.copy2(LOCAL_BIN / name, local_bin / name)
+        scripts = self.repo / "scripts"
+        scripts.mkdir()
+        for name in ("blueprint_citations.py", "tex_utils.py"):
+            shutil.copy2(REPO_ROOT / "scripts" / name, scripts / name)
+        (self.repo / "blueprint" / "src" / "chapter").mkdir(parents=True)
+        persona = self.repo / "local" / "personas" / "orchestrator.md"
+        persona.parent.mkdir(parents=True)
+        persona.write_text("Review workflow changes.\n", encoding="utf-8")
+        prompt = self.repo / ".github" / "prompts" / "claude-code-review-prompt.md"
+        prompt.parent.mkdir(parents=True)
+        prompt.write_text("Review the change.\n", encoding="utf-8")
+        (self.repo / "README.md").write_text("base\n", encoding="utf-8")
+        _git(self.repo, "add", "-A")
+        _git(self.repo, "commit", "-q", "--no-verify", "-m", "base commit")
+
+        _git(self.repo, "checkout", "-q", "-b", self.BRANCH)
+        (self.repo / "README.md").write_text("work\n", encoding="utf-8")
+        _git(self.repo, "commit", "-q", "--no-verify", "-am", "change readme")
+        self.head = _git(self.repo, "rev-parse", "HEAD")
+
+    @staticmethod
+    def _review(head: str, label: str, *, carried_from: str | None = None) -> dict:
+        body = f"<!-- mipstarre-review pr=7 head={head} -->\n"
+        if carried_from is not None:
+            body += f"<!-- mipstarre-review-carried from={carried_from} -->\n"
+        body += ("<!-- findings:begin -->\n"
+                 f"- [ ] F1 (changes) `x:1` — {label}\n"
+                 "<!-- findings:end -->\n")
+        return {"commit_id": head, "body": body}
+
+    def test_dry_run_counts_only_fresh_reviews(self) -> None:
+        fresh = [self._review(str(number) * 40, f"FRESH-{number}")
+                 for number in range(1, 8)]
+        carried = [
+            self._review(letter * 40, f"CARRIED-{letter}",
+                         carried_from=fresh[0]["commit_id"])
+            for letter in "abc"
+        ]
+        duplicate = self._review(fresh[1]["commit_id"], "DUPLICATE-PUBLICATION")
+        reviews = [fresh[0], fresh[1], duplicate, carried[0], fresh[2], carried[1],
+                   fresh[3], fresh[4], carried[2], fresh[5], fresh[6]]
+
+        self.gh.route(r"^pulls/7$", {
+            "number": 7, "state": "open",
+            "head": {"sha": self.head, "ref": self.BRANCH},
+            "base": {"ref": "main"},
+        })
+        self.gh.route(r"^commits/[0-9a-f]+/statuses", [
+            {"context": "local-ci/summary", "state": "success",
+             "description": "green", "created_at": "2026-09-05T00:00:00Z"},
+        ])
+        self.gh.route(r"^pulls/7/reviews", reviews)
+
+        cache = self.tmp / "review-cache"
+        env = dict(os.environ, **self.gh.env(), MIPSTARRE_CACHE_ROOT=str(cache),
+                   LOCAL_REVIEW_ENABLED="true", PYTHONDONTWRITEBYTECODE="1")
+        result = subprocess.run(
+            ["bash", str(self.repo / "local" / "bin" / "review.sh"),
+             "7", "--force-review", "--dry-run"],
+            cwd=self.repo, capture_output=True, text=True, env=env,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        run_dir = cache / "reviews" / "pr7" / self.head
+        task = (run_dir / "code-task.md").read_text(encoding="utf-8")
+        prior = (run_dir / "prior-ledger.md").read_text(encoding="utf-8")
+        self.assertIn("Review round 8 of at most 4", task)
+        self.assertNotIn("Review round 11", task)
+        self.assertIn("FRESH-5", prior)
+        self.assertIn("FRESH-6", prior)
+        self.assertIn("FRESH-7", prior)
+        self.assertNotIn("CARRIED", prior)
+        self.assertNotIn("DUPLICATE-PUBLICATION", prior)
 
 
 class MergeGateTests(LayerTestCase):

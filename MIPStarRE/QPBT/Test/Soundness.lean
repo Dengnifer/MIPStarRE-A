@@ -8,8 +8,8 @@ are intentionally proof-level obligations in the stage-4.1 skeleton.
 
 ## References
 
-The main declaration is `thm:pauli` in
-`blueprint/src/chapter/ch13_qpbt_test.tex:407-424`, with paper origin
+The main declaration is blueprint
+`thm:pauli`, with paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1426-1447`.
 -/
 
@@ -28,12 +28,12 @@ operator families are close at scale `deltaQld`.  The theorem uses the
 once-and-for-all self-dual-normal field model selected by `fixedFieldModel` for
 each admissible size, rather than a freshly quantified field identification.
 Blueprint
-`blueprint/src/chapter/ch13_qpbt_test.tex:407-424`; paper origin
+`thm:pauli`; paper origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1426-1447`.
 
 The paper's asymptotic constants are encoded by the explicit `deltaQld`
 functional; the squared operator distances use the quantitative convention of
-`def:povm-distance` (`blueprint/src/chapter/ch12_qpbt_games.tex:219-226`).
+blueprint `def:povm-distance`.
 -/
 theorem pauli_soundness :
     ∃ a b : ℝ, 1 ≤ a ∧ 0 < b ∧ b < 1 ∧

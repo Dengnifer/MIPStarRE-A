@@ -46,16 +46,34 @@ only: the "Dependencies" bullets in a packet body are commentary
 (`protocols/issues-prs.md` §1). A merged packet closes its issue and therefore
 unblocks its dependents with no edit anywhere.
 
+## Telemetry
+
+Session, stage, build, and incident records live under `results/telemetry/` as
+described in [`protocols/meta.md`](protocols/meta.md). The
+[`design-decisions.md`](../results/telemetry/design-decisions.md) register is
+the short, chronological index of owner and operator choices that shaped the
+workflow; each row points to the longer primary record. Record reasoning in the
+pointed event or owner log rather than expanding the index into a second log.
+
 ## Ground rules for agents
 
 - Read `AGENTS.md` first; the faithfulness policy and proof-integrity
   blockers are unchanged from the parent project.
 - Never run `lake update`. Never write to the hot cache. Full `lake build`
   goes through the machine-wide lock (`warm-worktree.sh`/`ci.sh` handle it).
+- Publish branches through `checked-push.sh` (used internally by `pr_open.py`,
+  `github-sync.sh`, and `autofix.sh`) so the gate finishes before push transport
+  starts.
 - One session never reviews its own diff.
 - Sessions are dispatched, resumed, and archived only via `dispatch.sh`.
 - Invoke workflow tools through the primary checkout's path
   (`/…/MIPStarRE-dev/local/bin/…`), never through a worktree's copy — a
   branch's copy can predate protocol fixes (EVOLUTION.md, 2026-08-30).
+- After merging `main` or a stack parent, preserve every incoming-only path.
+  The reference-transaction hook checks the exact merge object before the
+  branch ref moves, while the pre-commit hook checks the pending index when a
+  merge is committed later. Both run `local/bin/merge_loss_guard.py`.
+  `merge_loss_guard.py --repo <worktree> --commit HEAD` audits a merge already
+  committed by a lane whose branch copy predates the hooks.
 - Friction with any protocol → log it in `results/telemetry/events.md`;
   propose amendments per `protocols/meta.md`.

@@ -140,7 +140,7 @@ theorem pointTraceConsistency_eq_mismatch {P : AdmissibleParams} {ε : ℝ}
     intro u c
     congr 1
     unfold ProjectiveSetting.pointTraceMeas ProjectiveSetting.pointMeas fA
-    rw [measurement_postprocess_comp_effect]
+    rw [MIPStarRE.Quantum.Measurement.postprocess_comp]
     rfl
   have hB : ∀ (u : X) c,
       heteroKron (1 : Op S.toStrategy.ιA)
@@ -150,7 +150,7 @@ theorem pointTraceConsistency_eq_mismatch {P : AdmissibleParams} {ε : ℝ}
     intro u c
     congr 1
     unfold ProjectiveSetting.pointTraceMeas ProjectiveSetting.pointMeas fA
-    rw [measurement_postprocess_comp_effect]
+    rw [MIPStarRE.Quantum.Measurement.postprocess_comp]
     rfl
   calc
     _ = consistencyDefect (uniformDistribution X)

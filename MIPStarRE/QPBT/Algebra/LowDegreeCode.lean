@@ -1,3 +1,5 @@
+import Mathlib.Algebra.CharP.Two
+import Mathlib.Tactic.LinearCombination
 import MIPStarRE.LDT.Preliminaries.Polynomials
 
 /-!
@@ -8,9 +10,8 @@ and packages the resulting low-degree code as honest polynomial representatives.
 
 ## References
 
-The source-facing nodes are `def:polynomials-degree`,
-`def:low-degree-encoding`, and `def:indicator-vector` in
-`blueprint/src/chapter/ch11_qpbt_algebra.tex:321-417`; the paper origin is
+The source-facing nodes are blueprint `def:polynomials-degree`,
+`def:low-degree-encoding`, and `def:indicator-vector`; the paper origin is
 `references/qpbt-paper/04_preliminaries.tex:832-897`.
 The polynomial class `def:polyfunc` is reused from
 `MIPStarRE.LDT.Preliminaries.polyFunc` (the LDT formalization).
@@ -23,17 +24,17 @@ namespace MIPStarRE.QPBT
 
 /- The Boolean cube indexes the `2^m` qudits in the low-degree encoding. -/
 /-- The Boolean cube indexing the `2^m` qudits of the test.  This is the index
-type in `def:low-degree-encoding`, blueprint
-`blueprint/src/chapter/ch11_qpbt_algebra.tex:381-401`, paper origin
+type in blueprint
+`def:low-degree-encoding`, paper origin
 `references/qpbt-paper/04_preliminaries.tex:832-897`.
 -/
 abbrev Cube (m : ℕ) := Fin m → Bool
 
 /--
 The representative polynomial which is `1` at `y` on the Boolean cube and
-zero at the other cube points.  This is the indicator polynomial in
-`def:low-degree-encoding` (blueprint lines 381-401; paper
-`references/qpbt-paper/04_preliminaries.tex:832-897`).
+zero at the other cube points.  This is the indicator polynomial in blueprint
+`def:low-degree-encoding`; paper
+`references/qpbt-paper/04_preliminaries.tex:832-897`.
 -/
 noncomputable def indicatorPoly {K : Type*} [CommRing K] {m : ℕ} (y : Cube m) :
     MvPolynomial (Fin m) K :=
@@ -42,8 +43,7 @@ noncomputable def indicatorPoly {K : Type*} [CommRing K] {m : ℕ} (y : Cube m) 
 /--
 The multilinear low-degree encoding of a coefficient string.  Polynomial
 representatives are used, as fixed by issue #0004, rather than quotienting by
-functional equality.  Blueprint: `def:low-degree-encoding`,
-`blueprint/src/chapter/ch11_qpbt_algebra.tex:381-401`; paper origin:
+functional equality.  Blueprint: `def:low-degree-encoding`; paper origin:
 `references/qpbt-paper/04_preliminaries.tex:832-897`.
 -/
 noncomputable def lowDegreeEncoding {K : Type*} [CommRing K] {m : ℕ}
@@ -53,7 +53,7 @@ noncomputable def lowDegreeEncoding {K : Type*} [CommRing K] {m : ℕ}
 /- Evaluation shorthand for the representative polynomial in
 `def:low-degree-encoding`; it is Lean-only notation. -/
 /-- Evaluation shorthand for the low-degree encoding.  Blueprint
-`blueprint/src/chapter/ch11_qpbt_algebra.tex:381-401`, paper origin
+`def:low-degree-encoding`, paper origin
 `references/qpbt-paper/04_preliminaries.tex:832-897`.
 -/
 noncomputable def lowDegreeEnc {K : Type*} [CommRing K] {m : ℕ}
@@ -62,7 +62,7 @@ noncomputable def lowDegreeEnc {K : Type*} [CommRing K] {m : ℕ}
 
 /--
 The indicator vector `ind_m(x)` of `def:indicator-vector`.
-Blueprint: `blueprint/src/chapter/ch11_qpbt_algebra.tex:403-417`; paper origin:
+Blueprint: `def:indicator-vector`; paper origin:
 `references/qpbt-paper/04_preliminaries.tex:832-897`.
 -/
 noncomputable def indicatorVec {K : Type*} [CommRing K] {m : ℕ}
@@ -72,12 +72,61 @@ noncomputable def indicatorVec {K : Type*} [CommRing K] {m : ℕ}
 /--
 The defining dot-product identity for the encoding, corresponding to
 Equation `eq:low-degree-encoding-definition` and `def:indicator-vector` in the
-blueprint `blueprint/src/chapter/ch11_qpbt_algebra.tex:403-417`, paper origin
+blueprint, with source node `def:indicator-vector`; paper origin
 `references/qpbt-paper/04_preliminaries.tex:832-897`.
 -/
 theorem lowDegreeEnc_eq_dotProduct {K : Type*} [CommRing K] {m : ℕ}
     (a : Cube m → K) (x : Fin m → K) :
     lowDegreeEnc a x = dotProduct a (indicatorVec x) := by
   simp [lowDegreeEnc, lowDegreeEncoding, indicatorVec, dotProduct]
+
+/--
+The coordinatewise product form of an entry of the indicator vector: at a cube
+point `y` the entry is the product of `x i` over the coordinates with `y i`
+true and of `1 - x i` over the remaining ones.  Blueprint
+`def:indicator-vector`;
+paper origin: `references/qpbt-paper/04_preliminaries.tex:832-897`.
+-/
+theorem indicatorVec_apply_eq_prod {K : Type*} [CommRing K] {m : ℕ}
+    (x : Fin m → K) (y : Cube m) :
+    indicatorVec x y = ∏ i : Fin m, if y i then x i else 1 - x i := by
+  simp [indicatorVec, indicatorPoly, apply_ite]
+
+/--
+Over a commutative ring of characteristic two, the inner product of two
+indicator vectors is the product of the coordinate sums `1 + x_i + z_i`.  This
+is the product expansion of blueprint
+`def:indicator-vector`; it is the first step of
+the proof of blueprint
+`fact:omega-anticomm-prob`, paper origin
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:70-95`.
+-/
+theorem sum_indicatorVec_mul_indicatorVec {K : Type*} [CommRing K]
+    [CharP K 2] {m : ℕ} (x z : Fin m → K) :
+    ∑ y : Cube m, indicatorVec x y * indicatorVec z y
+      = ∏ i : Fin m, (1 + x i + z i) := by
+  have h2 : (2 : K) = 0 := CharTwo.two_eq_zero
+  have hfac : ∀ i : Fin m,
+      ∑ b : Bool, ((if b then x i else 1 - x i) * (if b then z i else 1 - z i))
+        = 1 + x i + z i := by
+    intro i
+    have h1 :
+        ∑ b : Bool, ((if b then x i else 1 - x i) * (if b then z i else 1 - z i))
+          = x i * z i + (1 - x i) * (1 - z i) := by
+      rw [Fintype.sum_bool]
+      simp
+    rw [h1]
+    linear_combination (x i * z i - x i - z i) * h2
+  calc ∑ y : Cube m, indicatorVec x y * indicatorVec z y
+      = ∑ y : Cube m, ∏ i : Fin m,
+          ((if y i then x i else 1 - x i) * (if y i then z i else 1 - z i)) := by
+        refine Finset.sum_congr rfl ?_
+        intro y _
+        rw [indicatorVec_apply_eq_prod x y, indicatorVec_apply_eq_prod z y,
+          ← Finset.prod_mul_distrib]
+    _ = ∏ i : Fin m, ∑ b : Bool,
+          ((if b then x i else 1 - x i) * (if b then z i else 1 - z i)) := by
+        rw [Finset.prod_univ_sum, Fintype.piFinset_univ]
+    _ = ∏ i : Fin m, (1 + x i + z i) := Finset.prod_congr rfl fun i _ => hfac i
 
 end MIPStarRE.QPBT

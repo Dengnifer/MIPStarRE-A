@@ -1,16 +1,17 @@
-import MIPStarRE.QPBT.Games.DistanceTheorems
+import MIPStarRE.QPBT.Games.Sandwich.Pasting.Assembly
+import MIPStarRE.QPBT.Games.Sandwich.Pasting.SchmidtMirror
+import MIPStarRE.QPBT.Games.Sandwich.Quantitative
 import MIPStarRE.QPBT.Games.ErrorFunctions
 
 /-! # Sandwiched measurements and pasting
 
-This module defines the ordered palindromic products used to combine
-measurements and records the two quantitative consistency statements imported
-by the QPBT analysis.
+This module records the ordered palindromic products used to combine
+measurements and the two quantitative consistency statements used in the QPBT
+analysis.
 
 ## References
 
-The source results are `lem:ld-sandwich` and `lem:pasting` in
-`blueprint/src/chapter/ch12_qpbt_games.tex:454-546`, with paper origin
+The source results are blueprint `lem:ld-sandwich` and `lem:pasting`, with paper origin
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:465-525`.
 -/
 
@@ -20,58 +21,11 @@ namespace MIPStarRE.QPBT
 
 open MIPStarRE.LDT hiding Measurement
 open MIPStarRE.Quantum
-
-/-- Recursive form of the palindromic operator product, extending a tuple by
-placing its final operator on both sides of the preceding product. -/
-private noncomputable def sandwichProductCore {ι : Type*}
-    [Fintype ι] [DecidableEq ι] :
-    (k : ℕ) → (Γ : Fin k → Type*) →
-      ((i : Fin k) → Γ i → Op ι) → ((i : Fin k) → Γ i) → Op ι
-  | 0, _, _, _ => 1
-  | 1, _, G, g => G 0 (g 0)
-  | k + 2, Γ, G, g =>
-      G (Fin.last (k + 1)) (g (Fin.last (k + 1))) *
-        sandwichProductCore (k + 1) (fun i => Γ i.castSucc)
-          (fun i a => G i.castSucc a) (fun i => g i.castSucc) *
-        G (Fin.last (k + 1)) (g (Fin.last (k + 1)))
-
-/-- The ordered product
-`G^k_{g_k} ... G^1_{g_1} ... G^k_{g_k}` of `lem:ld-sandwich`.
-
-**Local fix:** The source reverses the outcome indices, which is ill-typed when
-the outcome families differ. This definition uses the pairing corrected in
-`rem:ld-sandwich-indexing` and
-`docs/paper-gaps/qpbt_ld-sandwich-indexing.tex`; blueprint statement
-`ch12_qpbt_games.tex:454-480` and remark `ch12_qpbt_games.tex:485-487`, paper
-`references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:465-501`. Tracked in
-issue #16. The empty product is `1`. -/
-noncomputable def sandwichProduct {k : ℕ} {X ι : Type*}
-    [Fintype ι] [DecidableEq ι] {Γ : Fin k → Type*}
-    (G : (i : Fin k) → X → Γ i → Op ι) (x : X)
-    (g : (i : Fin k) → Γ i) : Op ι :=
-  sandwichProductCore k Γ (fun i a => G i x a) g
-
-/-- The two-family sandwiched product
-`(G₂)_{g₂} (G₁)_{g₁} (G₂)_{g₂}` from `eq:pasting-2a`; blueprint
-`ch12_qpbt_games.tex:517-546`, paper
-`references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:504-525`. -/
-def pastedMeasurement {ι : Type*} [Fintype ι] [DecidableEq ι]
-    {G₁ G₂ : Type*} (M₁ : G₁ → Op ι) (M₂ : G₂ → Op ι)
-    (g₁ : G₁) (g₂ : G₂) : Op ι :=
-  M₂ g₂ * M₁ g₁ * M₂ g₂
-
-/-- Evaluating a tuple of codewords at a common point. This is a
-formalization-only auxiliary for `lem:ld-sandwich`, blueprint
-`ch12_qpbt_games.tex:454-480`, paper
-`references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:465-495`. -/
-def evalFunctionTuple {k : ℕ} {Y : Type*} {R Γ : Fin k → Type*}
-    (eval : (i : Fin k) → Γ i → Y → R i) (y : Y)
-    (g : (i : Fin k) → Γ i) : (i : Fin k) → R i :=
-  fun i => eval i (g i) y
+open DistanceCalculus
 
 /-- The palindromic effects form a POVM when each constituent measurement is
 projective. This is `lem:ld-sandwich-measurement`, the measurement assertion
-implicit in `lem:ld-sandwich`; blueprint `ch12_qpbt_games.tex:489-507`, paper
+implicit in `lem:ld-sandwich`; blueprint `lem:ld-sandwich-measurement`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:484-494`. -/
 theorem sandwichProduct_isMeasurement {k : ℕ} {X ι : Type*}
     [Fintype ι] [DecidableEq ι] {Γ : Fin k → Type*}
@@ -81,113 +35,12 @@ theorem sandwichProduct_isMeasurement {k : ℕ} {X ι : Type*}
       0 ≤ sandwichProduct (fun i x' a => (G i x').effect a) x g) ∧
       (∑ g : (i : Fin k) → Γ i,
         sandwichProduct (fun i x' a => (G i x').effect a) x g) = 1 := by
-  classical
-  induction k with
-  | zero =>
-      constructor
-      · intro g
-        change 0 ≤ (1 : Op ι)
-        exact Matrix.PosSemidef.one.nonneg
-      · simp [sandwichProduct, sandwichProductCore]
-  | succ k ih =>
-      cases k with
-      | zero =>
-          constructor
-          · intro g
-            change 0 ≤ (G 0 x).effect (g 0)
-            exact (G 0 x).pos (g 0)
-          · change
-              (∑ g : (i : Fin 1) → Γ i,
-                (G 0 x).effect (g 0)) = 1
-            calc
-              (∑ g : (i : Fin 1) → Γ i, (G 0 x).effect (g 0)) =
-                  ∑ p : Γ 0 × ((i : Fin 0) → Γ i.castSucc),
-                    (G 0 x).effect (((Fin.snocEquiv Γ) p) 0) := by
-                exact Fintype.sum_equiv (Fin.snocEquiv Γ).symm _ _
-                  (by intro g; rw [Equiv.apply_symm_apply])
-              _ = ∑ a : Γ 0, (G 0 x).effect a := by
-                rw [Fintype.sum_prod_type]
-                apply Finset.sum_congr rfl
-                intro a _
-                simp only [Fintype.sum_unique]
-                congr 1
-              _ = 1 := (G 0 x).sum_eq_one
-      | succ k =>
-          have hprev := ih
-            (G := fun i x' => G i.castSucc x')
-            (hG := fun i x' => hG i.castSucc x')
-          constructor
-          · intro g
-            change 0 ≤
-              (G (Fin.last (k + 1)) x).effect (g (Fin.last (k + 1))) *
-                sandwichProductCore (k + 1) (fun i => Γ i.castSucc)
-                  (fun i a => (G i.castSucc x).effect a)
-                  (fun i => g i.castSucc) *
-                (G (Fin.last (k + 1)) x).effect (g (Fin.last (k + 1)))
-            have hinner := hprev.1 (fun i => g i.castSucc)
-            apply Matrix.nonneg_iff_posSemidef.mpr
-            have hpos :
-                (((G (Fin.last (k + 1)) x).effect (g (Fin.last (k + 1))))ᴴ *
-                  sandwichProductCore (k + 1) (fun i => Γ i.castSucc)
-                    (fun i a => (G i.castSucc x).effect a)
-                    (fun i => g i.castSucc) *
-                  (G (Fin.last (k + 1)) x).effect
-                    (g (Fin.last (k + 1)))).PosSemidef :=
-              (Matrix.nonneg_iff_posSemidef.mp hinner).conjTranspose_mul_mul_same _
-            rw [MIPStarRE.QPBT.DistanceCalculus.measurement_effect_hermitian] at hpos
-            exact hpos
-          · change
-              (∑ g : (i : Fin (k + 2)) → Γ i,
-                sandwichProductCore (k + 2) Γ
-                  (fun i a => (G i x).effect a) g) = 1
-            calc
-              (∑ g : (i : Fin (k + 2)) → Γ i,
-                  sandwichProductCore (k + 2) Γ
-                    (fun i a => (G i x).effect a) g) =
-                  ∑ p : Γ (Fin.last (k + 1)) ×
-                      ((i : Fin (k + 1)) → Γ i.castSucc),
-                    sandwichProductCore (k + 2) Γ
-                      (fun i a => (G i x).effect a) ((Fin.snocEquiv Γ) p) := by
-                exact Fintype.sum_equiv (Fin.snocEquiv Γ).symm _ _
-                  (by intro g; rw [Equiv.apply_symm_apply])
-              _ = ∑ a : Γ (Fin.last (k + 1)),
-                    ∑ g : (i : Fin (k + 1)) → Γ i.castSucc,
-                      (G (Fin.last (k + 1)) x).effect a *
-                        sandwichProductCore (k + 1) (fun i => Γ i.castSucc)
-                          (fun i b => (G i.castSucc x).effect b) g *
-                        (G (Fin.last (k + 1)) x).effect a := by
-                rw [Fintype.sum_prod_type]
-                apply Finset.sum_congr rfl
-                intro a _
-                apply Finset.sum_congr rfl
-                intro g _
-                simp [sandwichProductCore]
-              _ = ∑ a : Γ (Fin.last (k + 1)),
-                    (G (Fin.last (k + 1)) x).effect a *
-                      (∑ g : (i : Fin (k + 1)) → Γ i.castSucc,
-                        sandwichProductCore (k + 1) (fun i => Γ i.castSucc)
-                          (fun i b => (G i.castSucc x).effect b) g) *
-                      (G (Fin.last (k + 1)) x).effect a := by
-                apply Finset.sum_congr rfl
-                intro a _
-                rw [Finset.mul_sum, Finset.sum_mul]
-              _ = ∑ a : Γ (Fin.last (k + 1)),
-                    (G (Fin.last (k + 1)) x).effect a := by
-                have hprevSum := hprev.2
-                change
-                  (∑ g : (i : Fin (k + 1)) → Γ i.castSucc,
-                    sandwichProductCore (k + 1) (fun i => Γ i.castSucc)
-                      (fun i b => (G i.castSucc x).effect b) g) = 1 at hprevSum
-                apply Finset.sum_congr rfl
-                intro a _
-                rw [hprevSum, mul_one,
-                  (hG (Fin.last (k + 1)) x a).isIdempotentElem.eq]
-              _ = 1 := (G (Fin.last (k + 1)) x).sum_eq_one
+  exact SandwichProduct.sandwichProduct_isMeasurement G hG x
 
 /-- The sandwiched simultaneous-measurement estimate of `lem:ld-sandwich`.
 One universal asymptotic constant applies independently of the distribution,
 measurements, state, and error parameters. Blueprint
-`ch12_qpbt_games.tex:454-480`, paper
+`lem:ld-sandwich`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:465-501`. -/
 theorem consistencyDefect_sandwich_le :
     ∃ C₀ : ℝ, 1 ≤ C₀ ∧
@@ -219,27 +72,11 @@ theorem consistencyDefect_sandwich_le :
           if evalFunctionTuple eval xy.2 g = a then
             sandwichProduct (fun i x h => (G i x).effect h) xy.1 g else 0)) ψ ≤
         C₀ * (k : ℝ) * Real.sqrt (δ + ε) := by
-  sorry
-
-/-- The positive-mass conditional collision bound used by `lem:pasting`.
-This is a formalization-only spelling of the conditional probability in
-`blueprint/src/chapter/ch12_qpbt_games.tex:517-546`, with paper origin
-`references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:504-525`. -/
-def HasConditionalCollisionBound {X Y₁ Y₂ R₂ Γ₂ : Type*}
-    [Fintype X] [DecidableEq X] [Fintype Y₁] [DecidableEq Y₁]
-    [Fintype Y₂] [DecidableEq Y₂] [Fintype R₂] [DecidableEq R₂]
-    [Fintype Γ₂]
-    (D : Distribution ((X × Y₁) × Y₂)) (eval₂ : Γ₂ → Y₂ → R₂)
-    (η : ℝ) : Prop :=
-  ∀ x y₁, 0 < (D.map Prod.fst).weight (x, y₁) →
-    ∀ g g' : Γ₂, g ≠ g' →
-      (∑ y₂ : Y₂, D.weight ((x, y₁), y₂) *
-        if eval₂ g y₂ = eval₂ g' y₂ then 1 else 0) ≤
-        η * (D.map Prod.fst).weight (x, y₁)
+  exact SandwichProduct.consistencyDefect_sandwich_le
 
 /-- The effects obtained by sandwiching one measurement with a projective
 measurement form a POVM. This is `lem:pasting-measurement`, the measurement
-assertion for `eq:pasting-2a`; blueprint `ch12_qpbt_games.tex:548-567`, paper
+assertion for `eq:pasting-2a`; blueprint `lem:pasting-measurement`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:514-524`. -/
 theorem pastedMeasurement_isMeasurement {Γ₁ Γ₂ ι : Type*}
     [Fintype Γ₁] [Fintype Γ₂] [Fintype ι] [DecidableEq ι]
@@ -274,11 +111,133 @@ theorem pastedMeasurement_isMeasurement {Γ₁ Γ₂ ι : Type*}
         intro g₂ _
         rw [G₁.sum_eq_one, mul_one, (hG₂ g₂).isIdempotentElem.eq]
       _ = 1 := G₂.sum_eq_one
+/-- Conditional pasting estimate with an additional register-exchanged comparison.
 
-/-- Pasting two consistent measurements yields a product-form polynomial
-error. All operator families in the conclusion are the postprocessed source
-families. This is `lem:pasting`, blueprint `ch12_qpbt_games.tex:517-546`, paper
-`references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:504-525`. -/
+**Scope restriction:** this is not the printed `lem:pasting` in
+`references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:504-525`.
+The fourth comparison, `eq:pasting-1-sym`, is not a source hypothesis and does
+not follow from the other assumptions, even at zero error. The symmetric-strategy
+definition at lines 84--86 and the qualified convention at lines 174--176 do not
+establish an ambient assumption for this operator lemma. See issue #201 and
+`docs/paper-gaps/qpbt_pasting-product-error.tex`.
+
+This separate conditional theorem preserves the earlier proof. It is not used
+by `exists_pasting_error`, whose proof constructs a Schmidt mirror and needs
+no fourth comparison. Its blueprint entry displays the extra hypothesis;
+only the independently proved one-sided theorem matches the source entry.
+The lemma is proved with the
+error function `δp η δ = (3 * C + 19) * (η ^ (1/4) + δ ^ (1/8))`, where `C`
+is the constant of the coarse commutator estimate; on the unit square this
+dominates the assembled bound `2 * δ + Real.sqrt K`, and elsewhere it exceeds
+one, which bounds the defect of any two placed measurement families. -/
+theorem exists_pasting_error_of_register_exchange :
+    ∃ δp : ℝ → ℝ → ℝ, IsPolyErr₂ δp ∧
+      ∀ {X Y₁ Y₂ R₁ R₂ Γ₁ Γ₂ ι : Type*}
+        [Fintype X] [DecidableEq X] [Fintype Y₁] [DecidableEq Y₁]
+        [Fintype Y₂] [DecidableEq Y₂] [Fintype R₁] [DecidableEq R₁]
+        [Fintype R₂] [DecidableEq R₂]
+        [Fintype Γ₁] [DecidableEq Γ₁] [Fintype Γ₂] [DecidableEq Γ₂]
+        [Fintype ι] [DecidableEq ι]
+        (D : Distribution ((X × Y₁) × Y₂))
+        (eval₁ : Γ₁ → Y₁ → R₁) (eval₂ : Γ₂ → Y₂ → R₂)
+        (G₁ : X → Measurement Γ₁ ι) (G₂ : X → Measurement Γ₂ ι)
+        (A : ((X × Y₁) × Y₂) → Measurement (R₁ × R₂) ι)
+        (ψ : EuclideanSpace ℂ (ι × ι)) (η δ : ℝ),
+        D.IsProbability → ‖ψ‖ = 1 → 0 ≤ η → 0 ≤ δ →
+        (∀ x, MIPStarRE.QPBT.Measurement.IsProjective (G₂ x)) →
+        (∀ q, MIPStarRE.QPBT.Measurement.IsProjective (A q)) →
+        HasConditionalCollisionBound D eval₂ η →
+        consistencyDefect D
+          (fun q a₁ => heteroKron (((A q).postprocess Prod.fst).effect a₁) 1)
+          (fun q a₁ => heteroKron 1 (((G₁ q.1.1).postprocess
+            (fun g => eval₁ g q.1.2)).effect a₁)) ψ ≤ δ →
+        consistencyDefect D
+          (fun q a₂ => heteroKron (((A q).postprocess Prod.snd).effect a₂) 1)
+          (fun q a₂ => heteroKron 1 (((G₂ q.1.1).postprocess
+            (fun g => eval₂ g q.2)).effect a₂)) ψ ≤ δ →
+        consistencyDefect D (fun q a => heteroKron ((A q).effect a) 1)
+          (fun q a => heteroKron 1 ((A q).effect a)) ψ ≤ δ →
+        consistencyDefect D
+          (fun q a₂ => heteroKron (((G₂ q.1.1).postprocess
+            (fun g => eval₂ g q.2)).effect a₂) 1)
+          (fun q a₂ => heteroKron 1 (((A q).postprocess Prod.snd).effect a₂)) ψ ≤ δ →
+        consistencyDefect D (fun q a => heteroKron ((A q).effect a) 1)
+          (fun q a => heteroKron 1 (∑ g₁ : Γ₁, ∑ g₂ : Γ₂,
+            if (eval₁ g₁ q.1.2, eval₂ g₂ q.2) = a then
+              pastedMeasurement (fun g => (G₁ q.1.1).effect g)
+                (fun g => (G₂ q.1.1).effect g) g₁ g₂ else 0)) ψ ≤ δp η δ := by
+  classical
+  obtain ⟨C, hC1, hCbound⟩ := exists_coarse_commutator_bound
+  refine ⟨fun x y => (3 * C + 19) * (x ^ (1/4 : ℝ) + y ^ (1/8 : ℝ)), ?_, ?_⟩
+  · refine ⟨3 * C + 19, 1/4, 1/8, by linarith, by norm_num, by norm_num, ?_⟩
+    intro x y hx hy
+    exact ⟨mul_nonneg (by linarith)
+      (add_nonneg (Real.rpow_nonneg hx _) (Real.rpow_nonneg hy _)), le_rfl⟩
+  intro X Y₁ Y₂ R₁ R₂ Γ₁ Γ₂ ι _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+    D eval₁ eval₂ G₁ G₂ A ψ η δ hD hψ hη hδ hG₂ hA hcoll h₁ h₂ h₃ h₄
+  have hpm : ∀ q : (X × Y₁) × Y₂,
+      (∀ g : Γ₁ × Γ₂, 0 ≤ pastedMeasurement (fun g => (G₁ q.1.1).effect g)
+          (fun g => (G₂ q.1.1).effect g) g.1 g.2) ∧
+        (∑ g : Γ₁ × Γ₂, pastedMeasurement (fun g => (G₁ q.1.1).effect g)
+          (fun g => (G₂ q.1.1).effect g) g.1 g.2) = 1 :=
+    fun q => pastedMeasurement_isMeasurement (G₁ q.1.1) (G₂ q.1.1) (hG₂ q.1.1)
+  set Bp : ((X × Y₁) × Y₂) → Measurement (R₁ × R₂) ι := fun q =>
+    (Measurement.ofSumEqOne
+      (fun g : Γ₁ × Γ₂ => pastedMeasurement (fun g => (G₁ q.1.1).effect g)
+        (fun g => (G₂ q.1.1).effect g) g.1 g.2) (hpm q).1 (hpm q).2).postprocess
+      (fun g => (eval₁ g.1 q.1.2, eval₂ g.2 q.2)) with hBpdef
+  have heff : ∀ (q : (X × Y₁) × Y₂) (a : R₁ × R₂), (Bp q).effect a =
+      ∑ g₁ : Γ₁, ∑ g₂ : Γ₂, if (eval₁ g₁ q.1.2, eval₂ g₂ q.2) = a then
+        pastedMeasurement (fun g => (G₁ q.1.1).effect g)
+          (fun g => (G₂ q.1.1).effect g) g₁ g₂ else 0 := by
+    intro q a
+    rw [hBpdef]
+    simp only [Measurement.postprocess_effect, Measurement.ofSumEqOne]
+    rw [Finset.sum_filter, Fintype.sum_prod_type]
+  have hle1 := consistencyDefect_placed_le_one D A Bp ψ hD hψ
+  have hfam : (fun (q : (X × Y₁) × Y₂) (a : R₁ × R₂) =>
+        heteroKron (1 : Op ι) ((Bp q).effect a)) =
+      fun (q : (X × Y₁) × Y₂) (a : R₁ × R₂) => heteroKron (1 : Op ι)
+        (∑ g₁ : Γ₁, ∑ g₂ : Γ₂, if (eval₁ g₁ q.1.2, eval₂ g₂ q.2) = a then
+          pastedMeasurement (fun g => (G₁ q.1.1).effect g)
+            (fun g => (G₂ q.1.1).effect g) g₁ g₂ else 0) := by
+    funext q a
+    rw [heff q a]
+  rw [hfam] at hle1
+  rcases le_or_gt δ 1 with hδ1 | hδgt
+  · rcases le_or_gt η 1 with hη1 | hηgt
+    · refine le_trans (consistencyDefect_pasted_le_sqrt D eval₁ eval₂ G₁ G₂ A ψ
+        η δ C hD hψ hη hG₂ hA hcoll h₁ h₂ h₃ h₄
+        (hCbound D eval₁ eval₂ G₁ G₂ A ψ δ hA h₁ h₂)) ?_
+      exact pasting_error_sqrt_le_rpow C δ η hC1 hδ hδ1 hη hη1
+    · refine le_trans hle1 ?_
+      have hb : (0:ℝ) ≤ δ ^ (1/8 : ℝ) := Real.rpow_nonneg hδ _
+      have ha : (1:ℝ) ≤ η ^ (1/4 : ℝ) := by
+        calc (1:ℝ) = (1:ℝ) ^ (1/4 : ℝ) := (Real.one_rpow _).symm
+          _ ≤ η ^ (1/4 : ℝ) :=
+            Real.rpow_le_rpow zero_le_one hηgt.le (by norm_num)
+      nlinarith [mul_nonneg (sub_nonneg.mpr hC1) (sub_nonneg.mpr ha),
+        mul_nonneg (show (0:ℝ) ≤ 3 * C + 19 by linarith) hb]
+  · refine le_trans hle1 ?_
+    have ha : (0:ℝ) ≤ η ^ (1/4 : ℝ) := Real.rpow_nonneg hη _
+    have hb : (1:ℝ) ≤ δ ^ (1/8 : ℝ) := by
+      calc (1:ℝ) = (1:ℝ) ^ (1/8 : ℝ) := (Real.one_rpow _).symm
+        _ ≤ δ ^ (1/8 : ℝ) :=
+          Real.rpow_le_rpow zero_le_one hδgt.le (by norm_num)
+    nlinarith [mul_nonneg (sub_nonneg.mpr hC1) (sub_nonneg.mpr hb),
+      mul_nonneg (show (0:ℝ) ≤ 3 * C + 19 by linarith) ha]
+
+/-- The one-sided pasting assertion `lem:pasting`, with the independently justified
+additive polynomial-error correction. Paper:
+`references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:504-525`.
+
+**Local fix:** `IsPolyErr₂` uses a sum of positive powers, not the refuted product
+interpretation; see `docs/paper-gaps/qpbt_pasting-product-error.tex`, issue #201.
+
+The proof constructs the state-dependent Schmidt mirror and applies
+`consistencyDefect_pasted_le_sqrt_one_sided`. It does not use the conditional
+register-exchange theorem. The printed self-consistency assumption is retained,
+although the mirror argument only needs the two forward marginal comparisons. -/
 theorem exists_pasting_error :
     ∃ δp : ℝ → ℝ → ℝ, IsPolyErr₂ δp ∧
       ∀ {X Y₁ Y₂ R₁ R₂ Γ₁ Γ₂ ι : Type*}
@@ -311,6 +270,65 @@ theorem exists_pasting_error :
             if (eval₁ g₁ q.1.2, eval₂ g₂ q.2) = a then
               pastedMeasurement (fun g => (G₁ q.1.1).effect g)
                 (fun g => (G₂ q.1.1).effect g) g₁ g₂ else 0)) ψ ≤ δp η δ := by
-  sorry
+  classical
+  obtain ⟨C, hC1, hCbound⟩ := exists_coarse_commutator_bound
+  refine ⟨fun x y => (3 * C + 19) * (x ^ (1/4 : ℝ) + y ^ (1/8 : ℝ)), ?_, ?_⟩
+  · refine ⟨3 * C + 19, 1/4, 1/8, by linarith, by norm_num, by norm_num, ?_⟩
+    intro x y hx hy
+    exact ⟨mul_nonneg (by linarith)
+      (add_nonneg (Real.rpow_nonneg hx _) (Real.rpow_nonneg hy _)), le_rfl⟩
+  intro X Y₁ Y₂ R₁ R₂ Γ₁ Γ₂ ι _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+    D eval₁ eval₂ G₁ G₂ A ψ η δ hD hψ hη hδ hG₂ hA hcoll h₁ h₂ _h₃
+  have hpm : ∀ q : (X × Y₁) × Y₂,
+      (∀ g : Γ₁ × Γ₂, 0 ≤ pastedMeasurement (fun g => (G₁ q.1.1).effect g)
+          (fun g => (G₂ q.1.1).effect g) g.1 g.2) ∧
+        (∑ g : Γ₁ × Γ₂, pastedMeasurement (fun g => (G₁ q.1.1).effect g)
+          (fun g => (G₂ q.1.1).effect g) g.1 g.2) = 1 :=
+    fun q => pastedMeasurement_isMeasurement (G₁ q.1.1) (G₂ q.1.1) (hG₂ q.1.1)
+  set Bp : ((X × Y₁) × Y₂) → Measurement (R₁ × R₂) ι := fun q =>
+    (Measurement.ofSumEqOne
+      (fun g : Γ₁ × Γ₂ => pastedMeasurement (fun g => (G₁ q.1.1).effect g)
+        (fun g => (G₂ q.1.1).effect g) g.1 g.2) (hpm q).1 (hpm q).2).postprocess
+      (fun g => (eval₁ g.1 q.1.2, eval₂ g.2 q.2)) with hBpdef
+  have heff : ∀ (q : (X × Y₁) × Y₂) (a : R₁ × R₂), (Bp q).effect a =
+      ∑ g₁ : Γ₁, ∑ g₂ : Γ₂, if (eval₁ g₁ q.1.2, eval₂ g₂ q.2) = a then
+        pastedMeasurement (fun g => (G₁ q.1.1).effect g)
+          (fun g => (G₂ q.1.1).effect g) g₁ g₂ else 0 := by
+    intro q a
+    rw [hBpdef]
+    simp only [Measurement.postprocess_effect, Measurement.ofSumEqOne]
+    rw [Finset.sum_filter, Fintype.sum_prod_type]
+  have hle1 := consistencyDefect_placed_le_one D A Bp ψ hD hψ
+  have hfam : (fun (q : (X × Y₁) × Y₂) (a : R₁ × R₂) =>
+        heteroKron (1 : Op ι) ((Bp q).effect a)) =
+      fun (q : (X × Y₁) × Y₂) (a : R₁ × R₂) => heteroKron (1 : Op ι)
+        (∑ g₁ : Γ₁, ∑ g₂ : Γ₂, if (eval₁ g₁ q.1.2, eval₂ g₂ q.2) = a then
+          pastedMeasurement (fun g => (G₁ q.1.1).effect g)
+            (fun g => (G₂ q.1.1).effect g) g₁ g₂ else 0) := by
+    funext q a
+    rw [heff q a]
+  rw [hfam] at hle1
+  rcases le_or_gt δ 1 with hδ1 | hδgt
+  · rcases le_or_gt η 1 with hη1 | hηgt
+    · refine le_trans (consistencyDefect_pasted_le_sqrt_one_sided D eval₁ eval₂ G₁ G₂ A ψ
+        η δ C hD hψ hη hG₂ hA hcoll h₁ h₂ hδ hδ1
+        (hCbound D eval₁ eval₂ G₁ G₂ A ψ δ hA h₁ h₂)) ?_
+      exact pasting_error_sqrt_le_rpow C δ η hC1 hδ hδ1 hη hη1
+    · refine le_trans hle1 ?_
+      have hb : (0:ℝ) ≤ δ ^ (1/8 : ℝ) := Real.rpow_nonneg hδ _
+      have ha : (1:ℝ) ≤ η ^ (1/4 : ℝ) := by
+        calc (1:ℝ) = (1:ℝ) ^ (1/4 : ℝ) := (Real.one_rpow _).symm
+          _ ≤ η ^ (1/4 : ℝ) :=
+            Real.rpow_le_rpow zero_le_one hηgt.le (by norm_num)
+      nlinarith [mul_nonneg (sub_nonneg.mpr hC1) (sub_nonneg.mpr ha),
+        mul_nonneg (show (0:ℝ) ≤ 3 * C + 19 by linarith) hb]
+  · refine le_trans hle1 ?_
+    have ha : (0:ℝ) ≤ η ^ (1/4 : ℝ) := Real.rpow_nonneg hη _
+    have hb : (1:ℝ) ≤ δ ^ (1/8 : ℝ) := by
+      calc (1:ℝ) = (1:ℝ) ^ (1/8 : ℝ) := (Real.one_rpow _).symm
+        _ ≤ δ ^ (1/8 : ℝ) :=
+          Real.rpow_le_rpow zero_le_one hδgt.le (by norm_num)
+    nlinarith [mul_nonneg (sub_nonneg.mpr hC1) (sub_nonneg.mpr hb),
+      mul_nonneg (show (0:ℝ) ≤ 3 * C + 19 by linarith) ha]
 
 end MIPStarRE.QPBT

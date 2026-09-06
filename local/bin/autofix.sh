@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 #
 # autofix.sh — serialized, capped auto-fix loop for a local PR.
+# Account routing passes MIPSTARRE_CODEX_ACCOUNT, MIPSTARRE_ACCOUNT_WAIT and
+# MIPSTARRE_CODEX_HOME_SECOND through unchanged to dispatch.sh.
 #
 # Usage:
 #   local/bin/autofix.sh <pr-id> --mode {ci|blueprint|review|auto} [--dry-run]
@@ -56,7 +58,7 @@ TRUSTED_REF="${MIPSTARRE_TRUSTED_REF:-main}"
 DISPATCH="$ROOT/local/bin/dispatch.sh"
 GH_COMMON="$ROOT/local/bin/gh_common.py"
 AUTO_FIX_LABEL="${MIPSTARRE_AUTO_FIX_LABEL:-auto-fix-codex}"
-FIX_MODEL="${MIPSTARRE_FIX_MODEL:-}"
+FIX_MODEL="${MIPSTARRE_FIX_MODEL:-gpt-6-astra}"
 FIX_CAP="${MIPSTARRE_FIX_CAP:-5}"
 LOCK_WAIT="${MIPSTARRE_FIX_LOCK_WAIT:-900}"
 LOG_TAIL_LINES="${MIPSTARRE_LOG_TAIL_LINES:-400}"
@@ -247,7 +249,8 @@ run_agent() {
     local args
     args=(--role "$role" --issue "pr$PR_NUM" --pr "$PR_NUM"
           --worktree "$wt" --sandbox "$sandbox"
-          --persona "$persona" --persona-ref "$TRUSTED_REF")
+          --persona "$persona" --persona-ref "$TRUSTED_REF"
+          --effort "${MIPSTARRE_AUTOFIX_EFFORT:-max}")
     if [ -n "$ctx" ] && [ -s "$ctx" ]; then
       args[${#args[@]}]="--context-file"
       args[${#args[@]}]="$ctx"
@@ -273,20 +276,7 @@ run_agent() {
     return "$rc"
   fi
 
-  warn "local/bin/dispatch.sh not found; falling back to a direct 'codex exec'. This session will NOT appear in results/telemetry/sessions.jsonl."
-  command -v codex >/dev/null 2>&1 ||
-    die "codex CLI not found on PATH and no local/bin/dispatch.sh to delegate to"
-  set +e
-  if [ -n "$model" ]; then
-    MIPSTARRE_AUTOMATION=1 codex exec --sandbox "$sandbox" -C "$wt" \
-      -m "$model" -o "$out" -- "$(cat "$standalone")" >"$dlog"
-  else
-    MIPSTARRE_AUTOMATION=1 codex exec --sandbox "$sandbox" -C "$wt" \
-      -o "$out" -- "$(cat "$standalone")" >"$dlog"
-  fi
-  rc=$?
-  set -e
-  return "$rc"
+  die "dispatch.sh unavailable; refusing an unaccounted policy-bypassing launch"
 }
 
 # ------------------------------------------------------------------ arguments
@@ -587,7 +577,8 @@ cap_reached() {
   # would otherwise be stranded unreviewed and statusless (PR 7 review, F6).
   CAP_PUSHED=0
   for _attempt in 1 2 3; do
-    if git -C "$ROOT" push github "refs/heads/$BRANCH:refs/heads/$BRANCH"; then
+    if "$ROOT/local/bin/checked-push.sh" --repo-root "$WORKTREE" github \
+        "refs/heads/$BRANCH:refs/heads/$BRANCH"; then
       CAP_PUSHED=1
       break
     fi
@@ -872,7 +863,8 @@ if [ "$FIXED_ANY" -eq 1 ]; then
   # statuses (and the old head's stale failures standing).
   PUSHED=0
   for attempt in 1 2 3; do
-    if git -C "$ROOT" push github "refs/heads/$BRANCH:refs/heads/$BRANCH"; then
+    if "$ROOT/local/bin/checked-push.sh" --repo-root "$WORKTREE" github \
+        "refs/heads/$BRANCH:refs/heads/$BRANCH"; then
       PUSHED=1
       break
     fi

@@ -1,0 +1,10 @@
+{"type":"thread.started","thread_id":"01a07373-9ac3-7663-8448-3f3c0d127ba5"}
+{"type":"item.completed","item":{"id":"item_0","type":"error","message":"Model metadata for `gpt-6-sol` not found. Defaulting to fallback metadata; this can degrade performance and cause issues."}}
+{"type":"turn.started"}
+{"type":"error","message":"Reconnecting... 1/5 (unexpected status 404 Not Found: Model \"gpt-6-sol\" is not supported by any configured account in this group, url: http://relay-us7.virvm.com:39479/responses, request id: bf2003ad-26a1-4e64-a980-50cd9696a68f)"}
+{"type":"error","message":"Reconnecting... 2/5 (unexpected status 404 Not Found: Model \"gpt-6-sol\" is not supported by any configured account in this group, url: http://relay-us7.virvm.com:39479/responses, request id: 0f06b4c9-35be-4f84-ad41-4736f6e548e0)"}
+{"type":"error","message":"Reconnecting... 3/5 (unexpected status 404 Not Found: Model \"gpt-6-sol\" is not supported by any configured account in this group, url: http://relay-us7.virvm.com:39479/responses, request id: 76cd4839-b4f0-4d4e-8e58-e0fccf71053b)"}
+{"type":"error","message":"Reconnecting... 4/5 (unexpected status 404 Not Found: Model \"gpt-6-sol\" is not supported by any configured account in this group, url: http://relay-us7.virvm.com:39479/responses, request id: f8e528e3-07b9-410d-979c-c6adde2d3b47)"}
+{"type":"error","message":"Reconnecting... 5/5 (unexpected status 404 Not Found: Model \"gpt-6-sol\" is not supported by any configured account in this group, url: http://relay-us7.virvm.com:39479/responses, request id: ee0f00fa-d01a-42b7-bb85-fd29b3c5ce62)"}
+{"type":"error","message":"unexpected status 404 Not Found: Model \"gpt-6-sol\" is not supported by any configured account in this group, url: http://relay-us7.virvm.com:39479/responses, request id: 11c7eab4-1f42-4694-b4eb-e2f87217464a"}
+{"type":"turn.failed","error":{"message":"unexpected status 404 Not Found: Model \"gpt-6-sol\" is not supported by any configured account in this group, url: http://relay-us7.virvm.com:39479/responses, request id: 11c7eab4-1f42-4694-b4eb-e2f87217464a"}}
