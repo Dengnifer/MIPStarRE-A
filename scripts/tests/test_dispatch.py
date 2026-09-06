@@ -156,11 +156,12 @@ class DispatchCommandTests(unittest.TestCase):
             if continue_from:
                 self.assertEqual(json.loads(records[0]), previous)
             record = json.loads(records[-1])
-            self.assertEqual(record["rollout"], str(rollout))
+            self.assertEqual(record["rollout"], rollout.name)
+            self.assertIsNone(record['usage'])
             return record
 
     def dispatch_command(
-        self, *extra: str, model: str = "gpt-6-astra", effort: str | None = "max",
+        self, *extra: str, model: str = "gpt-6-astra", effort: str | None = "ultra",
         include_persona: bool = False, registry_rows: str = "",
     ) -> list[str]:
         with tempfile.TemporaryDirectory() as cache_root:
@@ -232,7 +233,7 @@ class DispatchCommandTests(unittest.TestCase):
         self.assertTrue(argv[12].endswith(".last.md"))
         self.assertEqual(
             argv[13:17],
-            ["-m", "gpt-6-astra", "-c", "model_reasoning_effort=max"],
+            ["-m", "gpt-6-astra", "-c", "model_reasoning_effort=ultra"],
         )
 
     def test_fresh_argv_keeps_all_exec_options_before_prompt(self) -> None:
@@ -250,12 +251,11 @@ class DispatchCommandTests(unittest.TestCase):
     def test_astra_preserves_selected_effort_for_every_role_and_resume(self) -> None:
         for role in ('orc', 'prover', 'reviewer', 'simplifier', 'blueprint', 'splitter',
                      'scout', 'mathfix'):
-            for effort in (None, 'ultra', 'xhigh', 'max'):
+            for effort in (None, 'ultra'):
                 with self.subTest(role=role, effort=effort):
                     for extra in ((), ('--resume', THREAD_ID)):
                         argv = self.dispatch_command('--role', role, *extra, effort=effort)
-                        self.assertIn(f'model_reasoning_effort={effort or "max"}'
-                                      .replace('=ultra', '=max'), argv)
+                        self.assertIn('model_reasoning_effort=ultra', argv)
 
     def test_sol_is_rejected_for_every_role(self) -> None:
         for role in ('orc', 'prover', 'reviewer', 'simplifier', 'blueprint', 'splitter',
@@ -272,7 +272,7 @@ class DispatchCommandTests(unittest.TestCase):
 
     def test_mathfix_rejects_non_astra_dispatches(self) -> None:
         for model, effort in (("gpt-5.6-sol", "ultra"),
-                              ("test-model", "xhigh"), ("astra", "max")):
+                              ("test-model", "ultra"), ("astra", "ultra")):
             with self.subTest(model=model, effort=effort):
                 with self.assertRaises(subprocess.CalledProcessError) as failure:
                     self.dispatch_command("--role", "mathfix", model=model, effort=effort)
@@ -290,10 +290,10 @@ class DispatchCommandTests(unittest.TestCase):
         self.assertIn("mathfix", result.stdout)
 
     def test_registry_records_effective_requested_effort(self) -> None:
-        for model, effort in ((None, None), ('', 'ultra'), ('gpt-6-astra', 'xhigh'),
-                              ('gpt-6-astra', 'max')):
+        for model, effort in ((None, None), ('', 'ultra'), ('gpt-6-astra', 'ultra')):
             record = self.recorded_dispatch(model, effort=effort)
-            self.assertEqual(record['requested_effort'], 'xhigh' if effort == 'xhigh' else 'max')
+            self.assertEqual(record['requested_effort'], 'ultra')
+            self.assertEqual(record['key_label'], 'unknown')
             self.assertEqual(record['model'], 'gpt-6-astra')
             self.assertEqual(record['account'], 'primary')
 
@@ -344,7 +344,7 @@ class DispatchCommandTests(unittest.TestCase):
             self.assertIn('invalid continuation', failure.exception.stderr)
 
     def test_unsupported_efforts_fail_before_admission(self) -> None:
-        for effort in ('high', 'low', 'unknown'):
+        for effort in ('max', 'xhigh', 'high', 'low', 'unknown'):
             with self.assertRaises(subprocess.CalledProcessError) as failure:
                 self.dispatch_command(effort=effort)
             self.assertEqual(failure.exception.returncode, 2)
@@ -452,7 +452,7 @@ class AccountRouterTests(unittest.TestCase):
             (root / '1/comm').write_text('systemd')
             (root / 'self/status').write_text(f'NSpid:\t{os.getpid()}')
             for pid, arguments in ((100, ['codex', '-m', 'gpt-6-astra', '-c',
-                                          'model_reasoning_effort=max', 'exec', '--', 'prompt']),
+                                          'model_reasoning_effort=ultra', 'exec', '--', 'prompt']),
                                    (200, ['codex', '-m', 'gpt-6-astra', '--', 'exec'])):
                 process = root / str(pid)
                 (process / 'status').write_text(f'Name:\tcodex\nPPid:\t{200 if pid == 100 else 1}')
@@ -563,8 +563,8 @@ class AccountRouterTests(unittest.TestCase):
                     return 'full'
             with mock.patch.object(router.os, 'kill'), ThreadPoolExecutor(18) as pool:
                 results = list(pool.map(attempt, range(100, 118)))
-            self.assertEqual(results.count('primary'), 11)
-            self.assertEqual(results.count('full'), 7)
+            self.assertEqual(results.count('primary'), 10)
+            self.assertEqual(results.count('full'), 8)
 
     def test_runtime_shim_preserves_selected_effort_and_prompt(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -576,11 +576,12 @@ class AccountRouterTests(unittest.TestCase):
             environment = dict(os.environ, HOME=directory, CODEX_HOME=str(home / '.codex'),
                                MIPSTARRE_CACHE_ROOT=str(home / 'cache'))
             shim = str(DISPATCH.with_name('codex-policy-shim.sh'))
-            for arguments, expected in (([], 'max'), (['-c', 'model_reasoning_effort="max"'], 'max'),
-                    (['--config=model_reasoning_effort=ultra'], 'max'),
-                    (['-cmodel_reasoning_effort=xhigh'], 'xhigh'),
-                    (['--config', "model_reasoning_effort='xhigh'"], 'xhigh')):
-                result = subprocess.run(['bash', shim, 'exec', *arguments,
+            for arguments, expected in (([], 'ultra'), (['-c', 'model_reasoning_effort="ultra"'], 'ultra'),
+                    (['--config=model_reasoning_effort=ultra'], 'ultra'),
+                    (['-m=gpt-6-astra', '-c=model_reasoning_effort=ultra'], 'ultra'),
+                    (['-cmodel_reasoning_effort=ultra'], 'ultra'),
+                    (['--config', "model_reasoning_effort='ultra'"], 'ultra')):
+                result = subprocess.run(['bash', shim, 'exec', '-mgpt-6-astra', *arguments,
                                          '--config', 'features.multi_agent=true',
                                          '-c', 'agents.max_concurrent_threads_per_session=2',
                                          '--', 'prompt with model_reasoning_effort=ultra'],
@@ -592,6 +593,10 @@ class AccountRouterTests(unittest.TestCase):
                 self.assertIn('agents.max_concurrent_threads_per_session=1', argv)
                 self.assertTrue(argv[-1].endswith('prompt with model_reasoning_effort=ultra'))
             for arguments in (['-m', 'gpt-5.6-sol'], ['-c', 'model="gpt-5.6-sol"'],
+                              ['-mgpt-5.6-sol'],
+                              ['-m=gpt-5.6-sol'], ['-c=model_reasoning_effort=xhigh'],
+                              ['-c', 'model_reasoning_effort=max'],
+                              ['--config=model_reasoning_effort=xhigh'],
                               ['-c', 'model_reasoning_effort=low'],
                               ['--enable', 'multi_agent'], ['--enable=foo,multi_agent'],
                               ['-c', 'features={multi_agent=true}'],
@@ -671,12 +676,16 @@ class AccountRouterTests(unittest.TestCase):
             (root / 'watchdog/account-mode').write_text('both')
             for account in router.ACCOUNTS:
                 (root / "watchdog" / f"max-codex-{account}").write_text("8")
+            def attempt(pid):
+                try:
+                    return router.reserve(root, "auto", pid, 0, False)
+                except ValueError:
+                    return 'full'
             with mock.patch.object(router.os, "kill"), ThreadPoolExecutor(16) as pool:
-                selected = list(pool.map(
-                    lambda pid: router.reserve(root, "auto", pid, 0, False), range(100, 116)
-                ))
+                selected = list(pool.map(attempt, range(100, 116)))
             self.assertEqual(selected.count("primary"), 8)
-            self.assertEqual(selected.count("second"), 8)
+            self.assertEqual(selected.count("second"), 7)
+            self.assertEqual(selected.count("full"), 1)
 
     def test_model_comparison_prefers_registry_and_keeps_rollout_fallback(self) -> None:
         spec = importlib.util.spec_from_file_location(
