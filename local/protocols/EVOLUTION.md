@@ -823,3 +823,75 @@ review precede deployment; this amendment does not install or start anything.
 identities, diagnostic-only refusals and preserved Lake-root export; consolidate
 duplicate protocol exposition under `useful-queue.md`. **Expected effect:** correct
 reservations and holds within the original episode cap; deployment remains gated.
+
+## 2026-09-07 — Space-cap5 merge-service checkpoint
+
+**Trigger:** `events.md`, "space-cap5 merge-service checkpoint"; legacy daemon
+v8 remains SIGSTOPped after its recorded SSH reset. **Change:** the bounded
+owner service records local/remote `main` SHAs, primary dirt, transport and
+lock state, the oldest exact-head CI/review-eligible PR age, and the concrete
+HOLD reason before delegating any merge. Space capacity 5 and external gate 0
+are required; successful daemon-owned merges re-read remote `main`. **Expected
+effect:** dirty-primary and stale-head stalls remain visible, and no worker or
+ manual path can merge around the exact-head gate. Git/GitHub reads are bounded,
+ per-tick failures become HOLD records, cadence is monotonic, and stale and
+ fresh candidates are reported separately without claiming an eligibility onset.
+
+## 2026-09-06 — Scoped native QPBT allocation switched to space/cap5
+
+**Trigger:** owner switch receipt `space-cap5-switch-20260906.json` and
+`events.md`, "space five-total native allocation". **Change:** the active QPBT
+queue now counts the main once plus at most four actual native descendants on
+the `space` account; external admission stays zero. Completion/failure/
+unblock/compaction events require prompt disjoint successor reassessment, with
+vacancy duration and concrete reasons recorded. Relay-1/cap8 observations
+remain historical and are not reclassified. **Expected effect:** no stale
+account labels or occupancy claims while preserving all proof, review, CI and
+merge gates.
+
+## 2026-09-06 — Literal Ultra and shared native accounting
+
+**Trigger:** PR287's owner-authorized native workflow repair, following the
+space/cap5 switch recorded above; historical relay-1 and cap8 observations remain
+unchanged. **Change:** external dispatch, review, autofix, shim and useful-queue
+effort checks require literal Ultra. A native root lease charges its verified
+shared descendant cap against the same owner allocation, while native telemetry
+retains unknown usage aggregation and explicit key labels. The nonce-bound native
+review transport re-derives exact-head evidence from the live root, and session
+policy records disjoint successor chains and activity-based vacancy reasons.
+**Expected effect:** native mathematics and independent review can proceed under
+the current space five-total allocation without stale account labels, double
+admission, or manufactured review receipts. CLI Ultra selection is not a claim
+about backend compute equivalence.
+
+
+## 2026-09-06 — Conservative Astra prompting and descriptive PR labels (#291)
+
+**Trigger:** Owner migration/order and missing-label reports; events.md entry
+"Conservative Astra instructions and PR label publication" records the completed
+prior repair, conflicting persona instructions, and 22 unlabeled open PRs.
+
+**Change:** main.md uses bounded event-driven checks, useful shared-capacity
+delegation, autonomous follow-through and calibrated validation. issues-prs.md
+records descriptive-label inheritance and the new pre-publication classification
+requirement, plus the current permission-only owner-inbox boundary. PR290 owns
+the existing native route/lease/review implementation; its mechanics are unchanged.
+
+**Expected effect:** Fewer repeated scans and stale-instruction pauses; new or
+adopted PRs carry descriptive labels without implicitly enabling automation.
+**Outcome:** Pending focused tests, ordinary gates, and post-restart observation.
+
+
+## 2026-09-06 — Publish the final main snapshot in an explicit sync (#291)
+
+**Trigger:** events.md "Snapshot publication regression in migration #291";
+real-Git regressions show the valid main sync returned success with local main
+ahead because it committed the record snapshot after publication.
+**Change:** github-sync.sh retains the snapshot timing and, only after a successful
+requested main push and snapshot commit, checked-pushes main once more. Branch-only
+scope is unchanged; commit/publication failures return nonzero. issues-prs.md
+documents the argument and outcome contracts.
+**Expected effect:** An explicit successful main sync leaves its own snapshot
+published, so the merge service does not stall on that avoidable local-only commit.
+**Outcome:** Nine offline tests pass; three baseline regressions demonstrate the
+old failure. Final CI/review and deployed observation remain pending.
