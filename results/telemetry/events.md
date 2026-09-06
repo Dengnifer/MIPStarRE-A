@@ -5000,3 +5000,15 @@ and the supplied API-max versus official-Ultra distinction remain preserved
 with provenance under results/telemetry/model-comparison/, without policy change
 or a causal latency/quality claim. Boundary report5556912589 was posted once for
 the previous04:30 observation;247<-237 native dependency is recorded.
+
+- 2026-09-06 -- Issue #268, session `orc-268-20260906-01`: reproduced both inherited
+  runtime findings from `reviewer-pr264-20260906-01` on merged baseline `b7705e02`.
+  An unnamed `{thread_id, account}` record passed `resume_account` but raised
+  `KeyError('name')` in `resume_continuation`; missing and non-executable dispatchers
+  caused `agent.sh` to launch a fake Codex executable directly. The repair skips
+  unnamed affinity records only when continuation metadata is absent or empty,
+  rejects continuation metadata without a session identity, and removes the direct
+  launch fallback. Regression fixtures preserve named-session deduplication,
+  cumulative time and attempt charges, budget anchors, dispatcher arguments and exit
+  status. These are enforcement repairs under the existing sessions protocol;
+  no protocol or installed-runtime change is required.
