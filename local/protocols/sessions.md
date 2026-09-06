@@ -123,7 +123,7 @@ neither mode rewrites settings, credentials, or historical records.
 Caps in `watchdog/max-codex-{primary,second}` default to 11 and 9; zero disables
 an account. `watchdog/max-codex` additionally caps total workers. Auto selects
 the smallest live/cap ratio among eligible accounts, with primary winning ties.
-Host Linux `/proc` observations reconcile Codex leaves with dispatcher PID
+Host Linux `/proc` observations reconcile Codex executables with dispatcher PID
 reservations by ancestry, avoiding Node-wrapper and reservation double counts.
 Primary's twelve total slots always reserve at least one interactive main slot;
 additional interactive or unreserved worker use reduces admission capacity.

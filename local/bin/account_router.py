@@ -35,7 +35,7 @@ def live_pids(directory: Path) -> set[int]:
 
 
 def host_processes() -> tuple[dict[int, int], dict[int, tuple[str, bool]]]:
-    """Require a host PID view; count same-user Codex leaves, not Node wrappers."""
+    """Require a host PID view; count same-user Codex executables, not Node wrappers."""
     namespace = [line.split()[1:] for line in Path('/proc/self/status').read_text().splitlines()
                  if line.startswith('NSpid:')]
     if Path('/proc/1/comm').read_text().strip() not in ('systemd', 'init') or namespace != [
@@ -64,16 +64,11 @@ def host_processes() -> tuple[dict[int, int], dict[int, tuple[str, bool]]]:
             home = Path(os.fsdecode(environment.get(b'CODEX_HOME') or
                         environment.get(b'HOME', b'/unknown') + b'/.codex'))
             account = 'second' if home == second_home else 'primary'
-            candidates[pid] = (account, b'exec' not in arguments[:3])
+            boundary = arguments.index(b'--') if b'--' in arguments else len(arguments)
+            candidates[pid] = (account, b'exec' not in arguments[:boundary])
         except FileNotFoundError:
             continue
-    ancestors = set()
-    for pid in candidates:
-        ancestor = parents.get(pid)
-        while ancestor in parents and ancestor not in ancestors:
-            ancestors.add(ancestor)
-            ancestor = parents.get(ancestor)
-    return parents, {pid: value for pid, value in candidates.items() if pid not in ancestors}
+    return parents, candidates
 
 
 def occupancy(root: Path) -> tuple[list[int], list[int]]:

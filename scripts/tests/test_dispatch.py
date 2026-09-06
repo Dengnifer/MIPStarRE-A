@@ -26,6 +26,7 @@ ROUTER = DISPATCH.with_name("account_router.py")
 SPEC = importlib.util.spec_from_file_location("account_router", ROUTER)
 router = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(router)
+HOST_PROCESS_SCAN = router.host_processes
 
 
 class DispatchCommandTests(unittest.TestCase):
@@ -401,6 +402,28 @@ class AccountRouterTests(unittest.TestCase):
         patcher = mock.patch.object(router, 'host_processes', return_value=({}, {}))
         patcher.start()
         self.addCleanup(patcher.stop)
+
+    def test_host_scan_handles_global_options_without_reading_prompt_as_command(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for name in ('1', 'self', '100', '200'):
+                (root / name).mkdir()
+            (root / '1/comm').write_text('systemd')
+            (root / 'self/status').write_text(f'NSpid:\t{os.getpid()}')
+            for pid, arguments in ((100, ['codex', '-m', 'gpt-6-astra', '-c',
+                                          'model_reasoning_effort=max', 'exec', '--', 'prompt']),
+                                   (200, ['codex', '-m', 'gpt-6-astra', '--', 'exec'])):
+                process = root / str(pid)
+                (process / 'status').write_text(f'Name:\tcodex\nPPid:\t{200 if pid == 100 else 1}')
+                (process / 'cmdline').write_bytes(b'\0'.join(arg.encode() for arg in arguments))
+                (process / 'environ').write_bytes(b'HOME=/test')
+            def mapped_path(path):
+                return root / str(path).removeprefix('/proc').lstrip('/') if str(path).startswith(
+                    '/proc') else Path(path)
+            with mock.patch.object(router, 'Path', side_effect=mapped_path), \
+                 mock.patch.dict(os.environ, {'MIPSTARRE_CODEX_HOME_SECOND': '/second'}):
+                self.assertEqual(HOST_PROCESS_SCAN()[1],
+                                 {100: ('primary', False), 200: ('primary', True)})
 
     def test_mode_changes_disabled_caps_and_preserved_both_settings(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

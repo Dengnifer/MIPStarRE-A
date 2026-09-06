@@ -4269,3 +4269,19 @@ boundary comment is updated in place with these final supervisor handles;
 no second comment or extra review is created. Implementer supervisor2326711
 remains live under primary/max. Persistent router semantics still await the
 bounded PR238 amendment and normal gates.
+
+### 2026-09-06 — PR238 publication dependency and host refresh
+
+- Checked publication of `37ec4b4` stopped at the normal Lean gate because
+  the inherited hot snapshot lacks `Sandwich/Pasting/Assembly.olean` from the
+  incoming main proofs. Build that named module, then repeat checked push;
+  no proof statement, hook, or cache-writer policy is changed.
+- At 01:26Z, host reconciliation finds three primary project workers and four
+  primary interactive processes. Main has independently admitted two workers;
+  this session did not dispatch them or modify their mathematical budgets.
+  Their versioned shim's global CLI options motivated a regression ensuring
+  worker classification finds `exec` before the prompt separator, rather than
+  assuming it is the first argument. Main plus three external interactive
+  uses still leave an eight-worker ceiling.
+  The regression also retains a genuine interactive Codex ancestor during a
+  synchronous dispatch: only wrappers are excluded, not other Codex sessions.
