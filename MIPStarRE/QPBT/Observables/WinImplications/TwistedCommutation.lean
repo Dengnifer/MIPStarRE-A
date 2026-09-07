@@ -32,16 +32,6 @@ local instance pauliEdgeNonemptyTwisted : Nonempty PauliEdge :=
 
 /-! ## The unconditional bound on a difference of reflections -/
 
-/-- An isometry preserves the state-dependent norm. Formalization-only support
-for `def:strategy-observables`, blueprint
-`ch14_qpbt_observables.tex:573-610`. -/
-theorem norm_applyOperatorToState_of_isometry {ι : Type} [Fintype ι]
-    [DecidableEq ι] {U : Op ι} (hU : Uᴴ * U = 1) (ψ : EuclideanSpace ℂ ι) :
-    ‖applyOperatorToState U ψ‖ = ‖ψ‖ := by
-  have h : ‖applyOperatorToState (U * 1) ψ‖ = ‖applyOperatorToState 1 ψ‖ :=
-    MagicSquareRigidity.norm_applyOperatorToState_isometry_mul hU 1 ψ
-  rwa [mul_one, applyOperatorToState_one] at h
-
 /-- The product of two isometries is an isometry. Formalization-only support
 for `eq:pts-obs-commutation`, paper
 `14_analysis_of_the_pauli_basis_test.tex:309-354`. -/
@@ -75,13 +65,13 @@ theorem norm_twistedCommutator_sq_le_four {P : AdmissibleParams}
     (mul_conjTranspose_mul_self (hOZ ω) (hOX ω))
   have h1 : ‖applyOperatorToState
       (heteroKron (OX ω * OZ ω) (1 : Op ιR)) χ‖ = 1 := by
-    rw [norm_applyOperatorToState_of_isometry hXZ]
+    rw [MagicSquareRigidity.norm_applyOperatorToState_of_isometry hXZ]
     exact hχ
   have h2 : ‖applyOperatorToState
       (phaseSign (gammaValue P ω.1 ω.2.1 ω.2.2.1 ω.2.2.2) •
         heteroKron (OZ ω * OX ω) (1 : Op ιR)) χ‖ = 1 := by
     rw [applyOperatorToState_smul_op, norm_smul, norm_phaseSign,
-      norm_applyOperatorToState_of_isometry hZX, hχ, one_mul]
+      MagicSquareRigidity.norm_applyOperatorToState_of_isometry hZX, hχ, one_mul]
   have hsub : ‖applyOperatorToState
       (heteroKron (OX ω * OZ ω) (1 : Op ιR) -
         phaseSign (gammaValue P ω.1 ω.2.1 ω.2.2.1 ω.2.2.2) •

@@ -500,7 +500,7 @@ theorem norm_place_AA'_heteroKron_psiHat (S : ProjectiveSetting P ε)
     applyOperatorToState_heteroKron_vecTensor,
     applyOperatorToState_heteroKron_vecTensor, vecTensor_norm_eq, vecTensor_norm_eq,
     heteroKron_one_one, WinImplications.applyOperatorToState_one,
-    WinImplications.norm_applyOperatorToState_of_isometry
+    MagicSquareRigidity.norm_applyOperatorToState_of_isometry
       (WinImplications.heteroKron_left_isometry (ιB := PauliRegister P) V hV),
     eprState_norm]
   ring
@@ -520,7 +520,7 @@ theorem norm_place_BA''_heteroKron_psiHat (S : ProjectiveSetting P ε)
     applyOperatorToState_heteroKron_vecTensor,
     applyOperatorToState_heteroKron_vecTensor, vecTensor_norm_eq, vecTensor_norm_eq,
     heteroKron_one_one, WinImplications.applyOperatorToState_one,
-    WinImplications.norm_applyOperatorToState_of_isometry
+    MagicSquareRigidity.norm_applyOperatorToState_of_isometry
       (WinImplications.heteroKron_right_isometry (ιA := PauliRegister P) V hV),
     eprState_norm]
   ring
@@ -540,7 +540,7 @@ theorem norm_place_BB'_heteroKron_psiHat (S : ProjectiveSetting P ε)
     applyOperatorToState_heteroKron_vecTensor,
     applyOperatorToState_heteroKron_vecTensor, vecTensor_norm_eq, vecTensor_norm_eq,
     heteroKron_one_one, WinImplications.applyOperatorToState_one,
-    WinImplications.norm_applyOperatorToState_of_isometry
+    MagicSquareRigidity.norm_applyOperatorToState_of_isometry
       (WinImplications.heteroKron_left_isometry (ιB := PauliRegister P) V hV),
     eprState_norm]
   ring
@@ -560,7 +560,7 @@ theorem norm_place_AB''_heteroKron_psiHat (S : ProjectiveSetting P ε)
     applyOperatorToState_heteroKron_vecTensor,
     applyOperatorToState_heteroKron_vecTensor, vecTensor_norm_eq, vecTensor_norm_eq,
     heteroKron_one_one, WinImplications.applyOperatorToState_one,
-    WinImplications.norm_applyOperatorToState_of_isometry
+    MagicSquareRigidity.norm_applyOperatorToState_of_isometry
       (WinImplications.heteroKron_right_isometry (ιA := PauliRegister P) V hV),
     eprState_norm]
   ring

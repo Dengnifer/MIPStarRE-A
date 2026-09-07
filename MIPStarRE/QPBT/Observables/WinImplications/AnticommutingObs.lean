@@ -62,22 +62,6 @@ theorem isometryTensor_id {ιA ιB : Type} [Fintype ιA] [DecidableEq ιA]
     Matrix.one_kronecker_one]
   simp [Matrix.one_apply]
 
-/-- Inflation to the ground slice is multiplicative. Formalization-only support
-for `thm:ms-rigidity`, blueprint `ch13_qpbt_test.tex:266-288`. -/
-theorem naimarkInflation_mul {ι α : Type} [Fintype ι] [DecidableEq ι]
-    [Fintype α] [DecidableEq α] (M N : Op ι) :
-    MagicSquareRigidity.naimarkInflation (α := α) M *
-        MagicSquareRigidity.naimarkInflation (α := α) N =
-      MagicSquareRigidity.naimarkInflation (α := α) (M * N) := by
-  classical
-  ext p q
-  simp only [Matrix.mul_apply, MagicSquareRigidity.naimarkInflation_apply]
-  by_cases hp : p.2 = none
-  · by_cases hq : q.2 = none
-    · simp [hp, hq, Fintype.sum_prod_type]
-    · simp [hq]
-  · simp [hp]
-
 /-- Inflation to the ground slice is additive. Formalization-only support for
 `thm:ms-rigidity`, blueprint `ch13_qpbt_test.tex:266-288`. -/
 theorem naimarkInflation_add {ι α : Type} [Fintype ι] [DecidableEq ι]
@@ -191,8 +175,8 @@ theorem msVarObs_anticommutator_le (S : Strategy msGame) (ε : ℝ) (hε : 0 ≤
               obsOf ((S.B (.var 4)).postprocess msBitOrZero) +
             obsOf ((S.B (.var 4)).postprocess msBitOrZero) *
               obsOf ((S.B (.var 0)).postprocess msBitOrZero))) := by
-    simp only [heteroKron_mul, one_mul, sub_neg_eq_add, naimarkInflation_mul,
-      ← heteroKron_add_right, naimarkInflation_add]
+    simp only [heteroKron_mul, one_mul, sub_neg_eq_add,
+      MagicSquareRigidity.naimarkInflation_mul, ← heteroKron_add_right, naimarkInflation_add]
   rw [hL, norm_heteroKron_one_naimarkInflation] at htrans
   have hclose := MagicSquareRigidity.msVarObsB_anticommute S ε hwin
   rw [msVarObsB_eq, msVarObsB_eq] at hclose
@@ -333,8 +317,8 @@ theorem msVarObsA_anticommutator_le (S : Strategy msGame) (ε : ℝ) (hε : 0 �
             obsOf ((S.A (.var 4)).postprocess msBitOrZero) *
               obsOf ((S.A (.var 0)).postprocess msBitOrZero)))
         (1 : Op (S.ιB × Option MsAnswer)) := by
-    simp only [heteroKron_mul, one_mul, sub_neg_eq_add, naimarkInflation_mul,
-      ← heteroKron_add_left, naimarkInflation_add]
+    simp only [heteroKron_mul, one_mul, sub_neg_eq_add,
+      MagicSquareRigidity.naimarkInflation_mul, ← heteroKron_add_left, naimarkInflation_add]
   rw [hL, norm_heteroKron_naimarkInflation_one] at htrans
   have hclose := MagicSquareRigidity.msVarObsA_anticommute S ε hwin
   rw [msVarObsA_eq, msVarObsA_eq] at hclose
