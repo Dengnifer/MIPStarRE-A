@@ -5645,3 +5645,7 @@ not actual commit/publication hooks. No productive session was killed.
   request5572932276. No fresh budget, ratio credit for grandfathered resumes,
   live activation, or review success is inferred. Full-context native observations
   and requested/selected/observed separation are retained in the revised design.
+
+## 2026-09-08
+
+- PR303/#301 integrated through canonical CI, independent hard control-policy Astra review, and the current Space service merge gates. Round1 review5134345720 retained three native-observation and ratio findings; the author repaired them in0deec4e with targeted counterfactual regressions and fresh normal tests/CI/review. All parked estimate, CI and native-review rows were restored once with retained stash/copies and multiplicity, prefix and mode checks. The reviewed policy enters committed main; read-only actual selector and hot-root/Space-lease checks follow final telemetry publication. No live selector result or fresh Sol child is claimed by this record; root owns the useful explicit-model dispatch after those checks. The Space switch and renewed owner completion steering preserve the13:40 episode, 15:40 historical boundary, extension request5572932276,1000-line ceiling and all cumulative proof budgets. Detailed receipt: owner-messages/qpbt-pr303-integration-20260907.json.
