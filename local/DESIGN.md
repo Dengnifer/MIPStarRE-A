@@ -121,11 +121,12 @@ documented failure modes. Sources are cited in `local/protocols/*.md`.
 - **Codex sessions**: `<role>-<issue|scope>-<yyyymmdd>-<seq>` with roles
   `orc, prover, reviewer, simplifier, blueprint, splitter, scout`, plus
   `mathfix` for astra after its availability is reported on #26.
-  Dispatched only via `local/bin/dispatch.sh`, which records the codex `thread_id`,
+  External sessions use `local/bin/dispatch.sh`, which records the codex `thread_id`,
   captures the `--json` event stream to
   `results/telemetry/sessions/<name>.jsonl`, and appends a summary line to
   `results/telemetry/sessions.jsonl`. Archiving a session = final status line
-  in the registry + worktree removal; the JSONL capture is the archive.
+  in the registry + worktree removal; the JSONL capture is the archive. Native
+  descendants use the root lease and `telemetry.py native-record` (`sessions.md`).
 
 ## Telemetry (research-paper data)
 
@@ -148,9 +149,12 @@ All appends are one-line JSON; schemas documented in `protocols/meta.md`.
 
 ## Model policy
 
-- All roles request `gpt-6-astra`. Main stays `max`, choosing worker `max|xhigh` by
-  role, difficulty, quality and latency. Dispatch and the shim preserve choices;
-  omitted/legacy `ultra` mean `max`, other efforts/models fail. Fan-out stays off.
+- All roles request `gpt-6-astra` with literal CLI `ultra`; other efforts/models
+  fail. External dispatch keeps fan-out off. Native descendants share their
+  root's verified configured cap and account allocation; neither is provider
+  throughput evidence. In the current space episode the hard limit is five total
+  sessions including main, with external admission zero and at most four native
+  descendants. No native pool may be added over a full external pool.
 - Every admission reads account mode (default primary; restoring both requires owner approval).
   Twelve primary slots include main; only named interactive CWDs are exempt from accounting.
   Other same-key use reduces capacity. See `protocols/sessions.md` for reconciliation and

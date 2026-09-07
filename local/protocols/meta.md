@@ -61,6 +61,9 @@ Schemas (all JSONL, one object per line; timestamps ISO-8601 with offset):
   Written only by `local/bin/dispatch.sh` / `telemetry.py`. New dispatches always
   supply `account` (`primary` or `second`) and the exact resolved `model`
   passed to the CLI (environment override, otherwise selected-account config).
+  External rows use allocator accounts `primary|second`; native rows use the
+  active key label (`space` or historical `relay-1`) in both `account` and
+  `key_label`, with `dispatcher: native`.
   When the dispatcher supplies a reasoning override, `requested_effort` is its
   effective value after model-specific normalization. It records the CLI request,
   not provider-measured effort. All three fields remain optional for historical
@@ -79,9 +82,17 @@ Schemas (all JSONL, one object per line; timestamps ISO-8601 with offset):
 
 Duties:
 
-- **Every Codex session goes through `dispatch.sh`** so token usage and wall
+- **Every external Codex session goes through `dispatch.sh`** so token usage and wall
   time land in `sessions.jsonl`. A session started any other way is a
   telemetry hole; if one happens, backfill a line with `dispatcher: manual`.
+- Native descendants use `telemetry.py native-record` under `sessions.md`:
+  `dispatcher: native`, root/parent IDs, key label, actual model/requested effort,
+  worktree, timestamps and status. `observed_usage` preserves raw cumulative rollout
+  counters, but `usage` remains null with `usage_scope: unknown`; parent inclusion
+  of descendants is unverified. Never convert missing usage to zero or sum these
+  observations. Private homes and credential data are not serialized. Requested
+  CLI Ultra is distinct from wire/returned Max seen in owner migration receipts;
+  absent request-specific wire evidence stays null, not inferred from configuration.
 - **Every full build** (warmer, CI, cold rebuild) lands in `builds.jsonl`.
 - **Stage transitions** are logged by the orchestrator (main session) at the
   moment they happen, not reconstructed later.
