@@ -34,9 +34,12 @@ variable {P : AdmissibleParams} {epsilon deltaQ deltaL : ℝ}
 variable {setting : ProjectiveSetting P epsilon}
 variable {points : CombinedPointsWitness setting deltaQ}
 
+/-- The unique coordinate of the one-coordinate extended direct low-degree game. -/
 private def onlyCoordinate : Fin P.extendedDirectLd.k :=
   ⟨0, by change 0 < 1; decide⟩
 
+/-- Evaluate an axis-line answer at the sampled point, returning `none` for
+invalid answer formats or evaluations. -/
 private def axisGameRead
     (sample : DirectLdSpace P.extendedDirectLd) :
     DirectLdAnswer P.extendedDirectLd → Option (PauliScalar P)
@@ -45,6 +48,8 @@ private def axisGameRead
         (coeffs onlyCoordinate)).map (extendedDirectScalarEquiv P)
   | _ => none
 
+/-- Read the unique coordinate of a point-format answer, returning `none` for
+other answer formats. -/
 private def pointGameRead :
     DirectLdAnswer P.extendedDirectLd → Option (PauliScalar P)
   | .pointVals values => some (extendedDirectScalarEquiv P (values onlyCoordinate))
