@@ -1752,7 +1752,8 @@ chapters invoke exactly these variants.
 	$\delta_{\mathrm{Line}}(\eps) = \sqrt{\eps}$.
 \end{lemma}
 \begin{proof}
-	\uses{def:expanded-line-measurement, def:expanded-point-measurement, lem:qld-win-implications, fact:data-processing, fact:add-a-proj2, fact:agreement, def:line-point-dist, def:ideg-deg-polynomials, def:pauli-win-predicate, lem:symmetric-equivalents-transfer}
+	\leanok
+	\uses{def:expanded-line-measurement, def:expanded-point-measurement, lem:qld-win-implications, fact:data-processing, fact:add-a-proj2, fact:agreement, def:line-point-dist, def:ideg-deg-polynomials, def:pauli-win-predicate, def:symmetric-equivalents}
 	Take $\{\hat{M}^{(\mathrm{Line},W),\ell}_f\}$ to be the measurement of
 	Definition~\ref{def:expanded-line-measurement}.
 	Item~\ref{enu:qld-comm-line-self-cons} follows from the fact that the
@@ -1840,6 +1841,22 @@ chapters invoke exactly these variants.
 	$\delta_{\mathrm{Line}}(\eps) = \sqrt{\eps}$. The symmetric
 	equivalents follow from
 	Lemma~\ref{lem:symmetric-equivalents-transfer}.
+
+	The formalization uses an equivalent order of the estimates. The exact
+	Pauli overlap computation identifies the inconsistency of the expanded
+	evaluation classes with that of the strategy's original completed
+	evaluation classes. Applying the winning implication and the
+	agreement estimate gives item~\ref{eq:qld-comm-line-pt-cons2} with
+	an error linear in $\eps$. Projective refinement then gives
+	item~\ref{eq:qld-comm-line-pt-cons}, also with linear error.
+	For each estimate, combining $x\leq a\eps$ with the universal bound
+	$x\leq 4$ gives $x\leq(a+4)\sqrt{\eps}$: use
+	$\eps\leq\sqrt{\eps}$ when $0\leq\eps\leq 1$ and
+	$1\leq\sqrt{\eps}$ when $\eps\geq 1$.
+	The four directed opposite-placement pairs are proved separately by
+	their explicit bipartition identities. Thus the Lean proof does not
+	rely on the symmetric-equivalent transfer lemma or the intermediate
+	sub-measurement inequality in the preceding source argument.
 \end{proof}
 
 The expanded point and line measurements constructed in this section, being
