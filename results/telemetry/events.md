@@ -5171,6 +5171,22 @@ with provenance under results/telemetry/model-comparison/, without policy change
 or a causal latency/quality claim. Boundary report5556912589 was posted once for
 the previous04:30 observation;247<-237 native dependency is recorded.
 
+- 2026-09-06 -- Issue #268, session `orc-268-20260906-01`: reproduced both inherited
+  runtime findings from `reviewer-pr264-20260906-01` on merged baseline `b7705e02`.
+  An unnamed `{thread_id, account}` record passed `resume_account` but raised
+  `KeyError('name')` in `resume_continuation`; missing and non-executable dispatchers
+  caused `agent.sh` to launch a fake Codex executable directly. The repair skips
+  unnamed affinity records only when continuation metadata is absent or empty,
+  rejects continuation metadata without a session identity, and removes the direct
+  launch fallback. Regression fixtures preserve named-session deduplication,
+  cumulative time and attempt charges, budget anchors, dispatcher arguments and exit
+  status. These are enforcement repairs under the existing sessions protocol;
+  no protocol or installed-runtime change is required.
+  The first checked publication stalled in its SSH `ls-remote` read before
+  pushing. The session terminated only that read's SSH child and selected an
+  HTTPS retry with command-scoped Git configuration and authentication obtained
+  through `gh_common.py`; persistent remote configuration remained unchanged.
+
 ## 2026-09-06 - PR269 first-review repair
 
 - Session `orc-257-20260906-04` repairs only F1-F3 from the independent
@@ -5300,6 +5316,18 @@ the previous04:30 observation;247<-237 native dependency is recorded.
   Both model-review rounds are exhausted; main retains terminal disposition
   after normal publication and detached CI. No third review, automatic adverse
   override, deployment, probe or merge is performed by this author session.
+
+- 2026-09-06 -- PR270 integration, session `orc-268-20260906-02`: merged actual
+  main `ba299326` into the approved baseline `4b2f9d9` as `58b13db`, preserving
+  both source changes and both parents' incident records. All 53 focused tests
+  and 560 full-suite tests passed through the normal hooks. The first checked
+  publication of the integration stalled before the push, with the HTTPS
+  `ls-remote` child in TCP `SYN-SENT` to GitHub. Terminated only that read child;
+  checked push returned 2 and `gh_common.py` confirmed the PR head remained
+  `4b2f9d9`. Retry uses the existing local proxy with command-scoped Git settings.
+  No persistent transport setting, installed runtime, review count or gate changed.
+  Evidence: `~/.cache/mipstarre-dev/pr270-integration-20260906/publication.log`
+  and `publication.json`; source/full-patch comparisons are in the same directory.
 
 ## 2026-09-06 - Archived primary event changes from 2b87495689367ace4146e0eeec9060da2389a646
 
@@ -5576,3 +5604,16 @@ not actual commit/publication hooks. No productive session was killed.
 - Preserved CI stash 5188e5e47bf64cdb5eb863c490044ddb39e1d54b. A post-merge warmer row made stash apply refuse; appended exactly the two verified CI deltas while retaining all746 current rows and every prior stash. Receipt: owner-messages/qpbt-291-restored-ci.json.
 
 - 2026-09-06T19:17:52.559119+00:00 — Meta migration #291 complete: PR292 merged, canonical review/CI green, all584 workflow tests passed,22 PR label backfills verified, and the deployed main sync published its post-push snapshot with clean remote equality. Main resumes the mathematical cycle on the preserved Space/Astra Ultra root+4 allocation. The design-decision index row was reformatted into its existing five columns without changing the decision. No routine meta heartbeat was reactivated.
+
+## 2026-09-07 - PR207 native admission procfs race (PR270 / #268)
+
+- PR207's round-three prose path failed before any model turn: a PID vanished
+  during `account_router.host_processes`' per-PID status read, which raised
+  `ProcessLookupError` (ESRCH), not the already-handled `FileNotFoundError`.
+  The bounded repair treats both exceptions as disappearance of that PID only.
+  PermissionError and other OSError failures still propagate; the host namespace,
+  credential, capacity, and admission rules are unchanged. Regression fixtures
+  reproduce ESRCH before the fix and retain another live process while testing
+  ENOENT, EACCES, and EIO separately. This enforces the existing vanished-PID
+  behavior and does not amend policy. Actual credential remains relay-3, Astra
+  Ultra, three shared descendants/five total including VS Code, external0.
