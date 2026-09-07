@@ -1583,6 +1583,56 @@ chapters invoke exactly these variants.
 	symmetry hypothesis on the strategy is used.
 \end{proof}
 
+\begin{lemma}[Restriction of the low-degree encoding to a line]
+	\label{lem:low-degree-encoding-line-restriction}
+	\lean{MIPStarRE.QPBT.polynomialOnLine_lowDegreeEncoding_natDegree_le_sum}
+	\lean{MIPStarRE.QPBT.polynomialOnLine_lowDegreeEncoding_natDegree_le}
+	\lean{MIPStarRE.QPBT.polynomialOnLine_lowDegreeEncoding_natDegree_le_one_of_axis}
+	\lean{MIPStarRE.QPBT.restrictToLine_lowDegreeEncoding_fitsDegree_of_axis}
+	\lean{MIPStarRE.QPBT.DegPoly.FitsDegree}
+	\lean{MIPStarRE.QPBT.eval_polynomialOnLine, MIPStarRE.QPBT.evalCoefficient_restrictToLine}
+	\lean{MIPStarRE.QPBT.evaluatesTo_restrictToLine, MIPStarRE.QPBT.evalOpt_restrictToLine}
+	\lean{MIPStarRE.QPBT.evalOpt_restrictToLine_lowDegreeEncoding}
+	\leanok
+	\uses{def:low-degree-encoding, def:indicator-vector, def:ideg-deg-polynomials, def:line}
+	Let $g_h$ be the multilinear low-degree encoding of
+	$h\in\F_q^{\{0,1\}^m}$, and let $\ell$ have base point $u_0$ and
+	direction $v$. The univariate polynomial
+	$f_\ell(t)=g_h(u_0+tv)$ has degree at most $md$.
+	If $\ell$ is axis-parallel, its degree is at most $1\leq d$; hence its
+	coefficient list, regarded as an element of $\deg_{md}(\ell)$, has
+	zero entries in every degree greater than $d$.
+	At every point $u\in\ell$, its coefficient-list evaluation is
+	$g_h(u)=h\cdot\mathrm{ind}_m(u)$. This assertion also applies when
+	$v=0$: every parameter represents the same point and gives the same
+	value.
+	More generally, if the affine polynomial $u_{0,i}+tv_i$ has degree
+	at most $b_i$ for each coordinate $i$, then $f_\ell$ has degree at
+	most $\sum_i b_i$.
+
+	This auxiliary records the restriction calculation used for honest line
+	answers in the proof of Lemma~\ref{lem:pauli-completeness} and for the
+	ancillary line measurement below. For a general multivariate polynomial
+	$g$, substitution still gives
+	$f_\ell(t)=g(u_0+tv)$; passage to its degree-$md$ coefficient list
+	preserves evaluation provided the substituted polynomial has degree at
+	most $md$.
+\end{lemma}
+
+\begin{proof}
+	\leanok
+	Each factor in an indicator polynomial from
+	Definition~\ref{def:low-degree-encoding} becomes a univariate polynomial
+	of degree at most one after affine substitution. Each product therefore
+	has degree at most $m$, and a linear combination has the same bound.
+	On an axis-parallel line only one factor can be nonconstant, giving the
+	degree bound one. The degree bounds imply that the omitted coefficients
+	vanish, so coefficient-list evaluation is ordinary polynomial
+	evaluation. Substitution then gives $g_h(u)$, which equals
+	$h\cdot\mathrm{ind}_m(u)$ by
+	Equation~\eqref{eq:low-degree-encoding-definition}.
+\end{proof}
+
 \begin{definition}[Expanded line measurements]
 	\label{def:expanded-line-measurement}
 	\lean{MIPStarRE.QPBT.polynomialOnLine, MIPStarRE.QPBT.restrictToLine}

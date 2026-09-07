@@ -1,4 +1,5 @@
 import MIPStarRE.QPBT.Observables.PointConsistency
+import MIPStarRE.QPBT.Observables.LineMeasurement.Restriction
 
 /-!
 # Expanded line measurements
@@ -22,45 +23,6 @@ open MIPStarRE.LDT hiding Measurement
 open MIPStarRE.Quantum
 
 noncomputable section
-
-/-- Substitute the affine parameterization of a canonical line into a
-multivariate polynomial. This is the polynomial `g_h(u₀ + tv)` used in
-`def:expanded-line-measurement`, paper
-`14_analysis_of_the_pauli_basis_test.tex:535-557`, blueprint
-`def:expanded-line-measurement`. -/
-noncomputable def polynomialOnLine (L : LdParams) (line : LineDesc L)
-    (g : MvPolynomial (Fin L.m) (ScalarQ L)) : Polynomial (ScalarQ L) :=
-  MvPolynomial.eval₂Hom _root_.Polynomial.C
-    (fun i : Fin L.m =>
-      (_root_.Polynomial.C (line.base i) +
-        _root_.Polynomial.X * _root_.Polynomial.C (line.direction i) :
-        Polynomial (ScalarQ L))) g
-
-/-- The degree-`m*d` coefficient list obtained by restricting `g` to `line`.
-This is the concrete restriction operation in `def:expanded-line-measurement`,
-paper `14_analysis_of_the_pauli_basis_test.tex:535-557`, blueprint
-`def:expanded-line-measurement`. -/
-noncomputable def restrictToLine (L : LdParams) (line : LineDesc L)
-    (g : MvPolynomial (Fin L.m) (ScalarQ L)) : DegPoly L (L.m * L.d) :=
-  fun i => (polynomialOnLine L line g).coeff i.val
-
-/-- Restricting a multilinear low-degree encoding to a line has degree at most
-`m*d`. This is the degree justification in `def:expanded-line-measurement`,
-paper `14_analysis_of_the_pauli_basis_test.tex:535-557`, blueprint
-`def:expanded-line-measurement`. -/
-theorem polynomialOnLine_lowDegreeEncoding_natDegree_le (L : LdParams)
-    (line : LineDesc L) (h : Cube L.m → ScalarQ L) :
-    (polynomialOnLine L line (lowDegreeEncoding h)).natDegree ≤ L.m * L.d := by
-  sorry
-
-/-- A degree-`m*d` coefficient list actually lies in the embedded degree-`d`
-subspace when all coefficients above `d` vanish. This is the coefficient
-interpretation of `deg_d(line) ⊆ deg_md(line)` in
-`def:expanded-line-measurement`, paper
-`14_analysis_of_the_pauli_basis_test.tex:548-557`. -/
-def DegPoly.FitsDegree {L : LdParams} {c : ℕ} (d : ℕ)
-    (f : DegPoly L c) : Prop :=
-  ∀ i : Fin (c + 1), d < i.val → f i = 0
 
 /-- The Pauli-register projector onto labels whose low-degree encoding
 restricts to `f` on `line`. This is `tau^{W,line}_f` in the proof of
