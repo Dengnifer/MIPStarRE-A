@@ -895,3 +895,37 @@ documents the argument and outcome contracts.
 published, so the merge service does not stall on that avoidable local-only commit.
 **Outcome:** Nine offline tests pass; three baseline regressions demonstrate the
 old failure. Final CI/review and deployed observation remain pending.
+
+## 2026-09-07 - Audit-qualified bounded model routing (#301)
+
+**Trigger:** Owner instruction and the independent C01/C02 audit/validation,
+recorded in events.md under issue #301; no blanket Sol capability claim.
+**Change:** Published-main model policy permits only root-issued exact nonsemantic
+cleanup recipes, bounded to two existing Lean files/twelve changed lines.
+Shared selectors validate class/model/Ultra, root-issued request and native
+assignment provenance; exact artifact checks retain normal CI/Astra-review/merge
+gates. Requested/selected/observed model fields are distinguished. Root/default
+Astra, allocation, permission, credential and external-zero guards are unchanged.
+**Expected effect:** Use only demonstrated bounded execution without delegating
+mathematical, blueprint-status or runtime authority to the cheaper model.
+**Outcome:** Focused tests pass; canonical CI/review/deployment remain pending.
+The shared owner episode began about 13:40Z, with a 15:40Z/1000-line boundary;
+the author's 14:06:27Z start is a subphase, not a budget reset.
+
+## 2026-09-07 - Owner supersedes cleanup-only routing (#301)
+
+**Trigger:** Owner scope comment5573256033 and renewed completion priority,
+recorded in events.md; preserved f43be38 and audit remain historical evidence.
+**Change:** Sol/Ultra becomes the routine/bounded subagent and routine-review
+default. Hard/escalated Astra requires a reason. Root identity stays Astra and
+validates both the grandfathered Astra child default and the reviewed Sol default.
+The latest Space allocation is five total/three descendants/external0, untouched
+by this implementation. Native model contexts, true new-dispatch identity and
+pre-activation grandfathering evidence remain checked; actual dispatch ratios
+report rolling and cumulative counts without filler or delaying hard jobs.
+**Expected effect:** Broader routine delegation implements owner policy without
+claiming broader capability evidence from the earlier two-case audit.
+**Outcome:** Renewed work continues the same approximately 13:40Z episode beyond
+its recorded 15:40Z boundary and extension request5572932276, not a fresh two-hour
+allocation. Old 597 tests cover the narrow draft only; revised tests and exact-head
+CI/control-policy review/publication gates are recorded separately. No activation yet.
