@@ -396,7 +396,7 @@ class ReviewRoundCounterTests(LayerTestCase):
 
         local_bin = self.repo / "local" / "bin"
         local_bin.mkdir(parents=True)
-        for name in ("review.sh", "gh_common.py", "wf_util.py"):
+        for name in ("review.sh", "gh_common.py", "wf_util.py", "model_policy.py"):
             shutil.copy2(LOCAL_BIN / name, local_bin / name)
         scripts = self.repo / "scripts"
         scripts.mkdir()

@@ -13,6 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'local/bin'))
 import account_router as router
 import native_review as review
 import telemetry
+import model_policy
 
 ROOT = '01a076bc-f4ad-7813-805b-c8b4dac71a14'
 CHILD = '01a076e7-b2ae-7e60-9090-72c3b7dce9c3'
@@ -43,7 +44,8 @@ class NativeWorkflowTests(unittest.TestCase):
         rows = [dict(type='session_meta', timestamp='2026-09-06T13:00:00.000Z',
             payload=dict(id=CHILD, source=dict(subagent=dict(thread_spawn=dict(
                 parent_thread_id=ROOT, agent_path=path))))),
-            dict(type='turn_context', payload=dict(model='gpt-6-astra', effort='ultra'))]
+            dict(type='turn_context', payload=dict(turn_id='turn',
+                                                  model='gpt-6-astra', effort='ultra'))]
         def event(kind, when=None, **kwargs):
             rows.append(dict(type='event_msg', timestamp=when or timestamp or
                              '2026-09-06T13:14:00.001Z',
@@ -66,6 +68,8 @@ class NativeWorkflowTests(unittest.TestCase):
 
     def acceptance(self, response=None):
         with mock.patch.object(review, 'verify_root', return_value=self.info), \
+                mock.patch.object(model_policy, 'load_policy', return_value=dict(
+                    schema_version=0, default_model='gpt-6-astra')), \
                 mock.patch.object(review.subprocess, 'check_output',
                                   side_effect=lambda args, **kw: 'a' * 40 if 'rev-parse' in args else ''), \
                 mock.patch.object(review, 'record_native'):
@@ -76,7 +80,8 @@ class NativeWorkflowTests(unittest.TestCase):
         self.write_rollout()
         self.acceptance(dict(nonce='nonce', thread_id=CHILD, final='FORGED APPROVED'))
         self.assertEqual((self.root / 'out.md').read_text(), self.binding + '\nCHANGES_REQUESTED')
-        observation = telemetry.native_rollout(self.rollout, CHILD)
+        observation = telemetry.native_rollout(self.rollout, CHILD, role='reviewer',
+            job_class='hard_review', hardness_reason='Control-policy fixture')
         self.assertEqual(observation['observed_usage'], dict(input_tokens=10))
         self.assertNotIn('inputs', observation)
 
@@ -85,7 +90,8 @@ class NativeWorkflowTests(unittest.TestCase):
         telemetry.record_native(argparse.Namespace(
             rollout=self.rollout, thread_id=CHILD, root_thread_id=ROOT,
             repo_root=self.root, name='reviewer-native', role='reviewer', issue='pr287',
-            pr='287', key_label='space', worktree=self.root, status='done'))
+            pr='287', key_label='space', worktree=self.root, status='done',
+            dispatch_kind='resume', job_class='hard_review', hardness_reason='Control-policy fixture'))
         row = json.loads((self.root / 'results/telemetry/sessions.jsonl').read_text())
         self.assertEqual(row['account'], 'space')
         self.assertEqual(row['key_label'], 'space')
@@ -155,6 +161,19 @@ class NativeWorkflowTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'external admission disabled'):
                 router.reserve(self.root, 'auto', 100, 0, True)
 
+    def test_space_three_descendants_fill_five_with_two_observed_interactives(self):
+        (self.root / 'watchdog').mkdir()
+        (self.root / 'watchdog/primary-key-capacity').write_text('5')
+        (self.root / 'watchdog/primary-external-admission').write_text('0')
+        info = dict(self.info, slots=3)
+        with mock.patch.object(router, 'native_process', side_effect=lambda *args: dict(info)), \
+             mock.patch.object(router, 'host_processes', return_value=(
+                 {100: 1, 200: 1}, {100: ('primary', True), 200: ('primary', True)})):
+            router.native_lease(self.root, ROOT, 100, 3)
+            self.assertEqual(router.occupancy(self.root), ([3, 0], [2, 0]))
+            with self.assertRaisesRegex(ValueError, 'external admission disabled'):
+                router.reserve(self.root, 'auto', 300, 0, False)
+
     def test_external_admission_fails_closed_without_owner_capacity(self):
         watchdog = self.root / 'watchdog'
         watchdog.mkdir()
@@ -201,6 +220,16 @@ class NativeWorkflowTests(unittest.TestCase):
                 mock.patch.object(router, 'process_identity', return_value='123'), \
                 mock.patch.object(Path, 'read_bytes', autospec=True, side_effect=data):
             self.assertEqual(router.native_process(ROOT, 100, 8)['key_label'], 'space')
+            args[4] = 'gpt-5.6-sol'
+            with self.assertRaises(ValueError):
+                router.native_process(ROOT, 100, 8)
+            args[4] = 'gpt-6-astra'
+            default_arg = args.index('agents.default_subagent_model="gpt-6-astra"')
+            args[default_arg] = 'agents.default_subagent_model="gpt-5.6-sol"'
+            with mock.patch.object(model_policy, 'load_policy', return_value=dict(
+                    schema_version=2, default_model='gpt-5.6-sol')):
+                self.assertEqual(router.native_process(ROOT, 100, 8)['slots'], 8)
+            args[default_arg] = 'agents.default_subagent_model="gpt-6-astra"'
             with self.assertRaises(ValueError):
                 router.native_process(ROOT, 100, 7)
             with self.assertRaises(ValueError):

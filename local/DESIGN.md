@@ -149,12 +149,15 @@ All appends are one-line JSON; schemas documented in `protocols/meta.md`.
 
 ## Model policy
 
-- All roles request `gpt-6-astra` with literal CLI `ultra`; other efforts/models
-  fail. External dispatch keeps fan-out off. Native descendants share their
+- Main remains `gpt-6-astra`/`ultra`. Published `local/model-policy.json`
+  selects exact `gpt-5.6-sol`/`ultra` for routine/bounded subagents, including
+  routine independent reviewers; genuinely hard/escalated work uses Astra with
+  an explicit reason. Unknown classes/models and other efforts fail closed.
+  External dispatch keeps fan-out off. Native descendants share their
   root's verified configured cap and account allocation; neither is provider
-  throughput evidence. In the current space episode the hard limit is five total
-  sessions including main, with external admission zero and at most four native
-  descendants. No native pool may be added over a full external pool.
+  throughput evidence. The current Space receipt records five total slots,
+  three native descendants and external admission zero. This model change does
+  not resize that allocation or permit an additional pool.
 - Every admission reads account mode (default primary; restoring both requires owner approval).
   Twelve primary slots include main; only named interactive CWDs are exempt from accounting.
   Other same-key use reduces capacity. See `protocols/sessions.md` for reconciliation and
