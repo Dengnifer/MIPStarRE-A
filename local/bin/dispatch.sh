@@ -167,7 +167,7 @@ ACCOUNT="${MIPSTARRE_CODEX_ACCOUNT:-auto}"
 ACCOUNT_WAIT="${MIPSTARRE_ACCOUNT_WAIT:-1800}"
 EFFORT=""
 JOB_CLASS="${MIPSTARRE_JOB_CLASS:-general}"
-JOB_SPEC="${MIPSTARRE_JOB_SPEC:-}"
+HARDNESS_REASON="${MIPSTARRE_HARDNESS_REASON:-}"
 PR_ID=""
 DRY_RUN=0
 SKIP_HOOK_CHECK=0
@@ -195,7 +195,7 @@ while [ "$#" -gt 0 ]; do
     --account) require_value "$1" "$#"; ACCOUNT="$2"; shift 2 ;;
     --effort) require_value "$1" "$#"; EFFORT="$2"; shift 2 ;;
     --job-class) require_value "$1" "$#"; JOB_CLASS="$2"; shift 2 ;;
-    --job-spec) require_value "$1" "$#"; JOB_SPEC="$2"; shift 2 ;;
+    --hardness-reason) require_value "$1" "$#"; HARDNESS_REASON="$2"; shift 2 ;;
     --context-file)
       require_value "$1" "$#"
       CONTEXT_FILES[${#CONTEXT_FILES[@]}]="$2"
@@ -269,16 +269,16 @@ TELEMETRY_DIR="$REPO_ROOT/results/telemetry"
 REGISTRY="$TELEMETRY_DIR/sessions.jsonl"
 TELEMETRY_PY="$SCRIPT_DIR/telemetry.py"
 HOOK_SCRIPT="$REPO_ROOT/scripts/install_git_hooks.sh"
-MODEL_POLICY_JSON="$(python3 "$SCRIPT_DIR/model_policy.py" --role "$ROLE" \
-  --job-class "$JOB_CLASS" --model "${MIPSTARRE_CODEX_MODEL:-auto}" --effort "$EFFORT" \
-  --worktree "${WORKTREE:-$REPO_ROOT}" \
-  ${JOB_SPEC:+--job-spec "$JOB_SPEC"})" ||
+POLICY_ARGS=(--role "$ROLE" --job-class "$JOB_CLASS"
+  --model "${MIPSTARRE_CODEX_MODEL:-auto}" --effort "$EFFORT")
+[ -z "$HARDNESS_REASON" ] || POLICY_ARGS+=(--hardness-reason "$HARDNESS_REASON")
+MODEL_POLICY_JSON="$(python3 "$SCRIPT_DIR/model_policy.py" "${POLICY_ARGS[@]}")" ||
   die 4 "model policy preflight failed"
 MIPSTARRE_CODEX_MODEL="$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["model"])' \
   "$MODEL_POLICY_JSON")"
 export MIPSTARRE_CODEX_MODEL MIPSTARRE_JOB_CLASS="$JOB_CLASS"
 export MIPSTARRE_DISPATCH_ROLE="$ROLE" MIPSTARRE_REQUESTED_EFFORT="$EFFORT"
-export MIPSTARRE_JOB_SPEC="$JOB_SPEC"
+export MIPSTARRE_HARDNESS_REASON="$HARDNESS_REASON"
 
 CACHE_ROOT="${MIPSTARRE_CACHE_ROOT:-$HOME/.cache/mipstarre-dev}"
 CAPTURE_DIR="$CACHE_ROOT/sessions"
@@ -736,12 +736,6 @@ else
 fi
 CODEX_EXIT="${PIPESTATUS[0]}"
 set -e
-if [ "$MIPSTARRE_CODEX_MODEL" = gpt-5.6-sol ] && ! python3 "$SCRIPT_DIR/model_policy.py" \
-    --role "$ROLE" --job-class "$JOB_CLASS" --model "$MIPSTARRE_CODEX_MODEL" \
-    --job-spec "$JOB_SPEC" --worktree "$WORKTREE_ABS" --result >/dev/null; then
-  note "Sol result exceeded its exact recipe; preserve work and transfer to Astra"
-  CODEX_EXIT=4
-fi
 rm -f "$CACHE_ROOT/accounts/$ACCOUNT/$$"
 
 END_TS="$(date +%Y-%m-%dT%H:%M:%S%z)"
@@ -772,6 +766,11 @@ if [ -n "${MIPSTARRE_CODEX_MODEL:-}" ]; then
 fi
 TELEM_ARGS+=(--requested-effort "$EFFORT")
 TELEM_ARGS+=(--model-policy-file "$MODEL_POLICY_FILE")
+DISPATCH_KIND=new
+[ -z "$RESUME_ID" ] || DISPATCH_KIND=resume
+TELEM_ARGS+=(--dispatch-kind "$DISPATCH_KIND")
+[ -z "${MIPSTARRE_MODEL_POLICY_ACTIVATION_AT:-}" ] ||
+  TELEM_ARGS+=(--activation-at "$MIPSTARRE_MODEL_POLICY_ACTIVATION_AT")
 TELEM_KEY_LABEL="${MIPSTARRE_KEY_LABEL:-${MIPSTARRE_NATIVE_KEY_LABEL:-unknown}}"
 case "$TELEM_KEY_LABEL" in
   relay-1|space|unknown) ;;
@@ -781,6 +780,11 @@ TELEM_ARGS+=(--key-label "$([ "$ACCOUNT" = primary ] && printf '%s' "$TELEM_KEY_
 
 REPLAY_EFFORT_ARG=" --requested-effort $EFFORT"
 printf -v REPLAY_POLICY_ARG ' --model-policy-file %q' "$MODEL_POLICY_FILE"
+REPLAY_POLICY_ARG+=" --dispatch-kind $DISPATCH_KIND"
+if [ -n "${MIPSTARRE_MODEL_POLICY_ACTIVATION_AT:-}" ]; then
+  printf -v REPLAY_ACTIVATION_ARG ' --activation-at %q' "$MIPSTARRE_MODEL_POLICY_ACTIVATION_AT"
+  REPLAY_POLICY_ARG+="$REPLAY_ACTIVATION_ARG"
+fi
 REPLAY_EFFORT_ARG+=" --key-label $([ "$ACCOUNT" = primary ] && printf '%s' "$TELEM_KEY_LABEL" || printf unknown)"
 REPLAY_CONTINUATION_ARG=""
 if [ -n "$CONTINUATION_JSON" ]; then

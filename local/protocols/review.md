@@ -392,15 +392,23 @@ parent-assigned turn after request creation; an old completion alone is insuffic
 After the child actually completes, the operator calls
 `native_review.py complete REQUEST_JSON CHILD_THREAD`. Both producer and waiting
 consumer re-read the canonical live root's rollout, verify direct parentage,
-independence, fresh assignment/current-turn completion, literal Astra Ultra,
-including every bound-turn model context (a final Astra context cannot conceal
-an earlier Sol context),
+independence, fresh assignment/current-turn completion and the request's recorded
+routine/hard model decision with Ultra, including every bound-turn model context
+(a final context cannot conceal an earlier different model),
 prompt digest and exact worktree head. The mailbox supplies only identity; its
 verdict text is never trusted. Fork-inherited parent completions cannot qualify.
 Normal `review.sh` parsing, review ledger, exact-head COMMENT/status publication,
 kill switches, round cap and merge ownership remain unchanged. A timed-out
 observation does not prove the child stopped: inspect its live handle before reuse
 or restart. Review transport deployment itself still needs independent review.
+
+Routine reviews default to Sol through `MIPSTARRE_REVIEW_JOB_CLASS=independent_review`.
+For a genuinely hard/semantic/control-policy review main sets `hard_review` and
+`MIPSTARRE_REVIEW_HARDNESS_REASON`; it selects Astra and records that reason in
+the native request. Explicit conflicting model overrides fail. The model choice
+does not change identity independence, author exclusion, CI or any merge gate.
+Existing Astra reviewers need a fresh explicit Sol spawn for future routine jobs,
+not a follow-up treated as a model switch. This control-policy PR itself requires Astra.
 
 Missing pieces degrade with a message, never silently: missing CI statuses
 block, no `worktree-setup.sh` warns about a cold build cache, no codex CLI is a

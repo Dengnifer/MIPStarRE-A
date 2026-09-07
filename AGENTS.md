@@ -688,7 +688,7 @@ agent must know:
   through GitHub with an exact-SHA guard. Details: `local/README.md`,
   `local/protocols/issues-prs.md`.
 - **Sessions.** External Codex sessions use `local/bin/dispatch.sh`; owner-authorized
-  native descendants use the audit-qualified model policy, shared lease and telemetry protocol in
+  native descendants use the owner-directed model policy, shared lease and telemetry protocol in
   `local/protocols/sessions.md` (roles: orc, prover, reviewer, simplifier,
   blueprint, splitter, scout; `mathfix` is reserved for astra after the #26
   availability report) so token/time telemetry stays complete. Current Fable

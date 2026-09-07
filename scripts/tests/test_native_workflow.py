@@ -68,7 +68,7 @@ class NativeWorkflowTests(unittest.TestCase):
     def acceptance(self, response=None):
         with mock.patch.object(review, 'verify_root', return_value=self.info), \
                 mock.patch.object(model_policy, 'load_policy', return_value=dict(
-                    schema_version=1, audit=None, qualified_job_classes={})), \
+                    schema_version=0, default_model='gpt-6-astra')), \
                 mock.patch.object(review.subprocess, 'check_output',
                                   side_effect=lambda args, **kw: 'a' * 40 if 'rev-parse' in args else ''), \
                 mock.patch.object(review, 'record_native'):
@@ -158,6 +158,19 @@ class NativeWorkflowTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'external admission disabled'):
                 router.reserve(self.root, 'auto', 100, 0, True)
 
+    def test_space_three_descendants_fill_five_with_two_observed_interactives(self):
+        (self.root / 'watchdog').mkdir()
+        (self.root / 'watchdog/primary-key-capacity').write_text('5')
+        (self.root / 'watchdog/primary-external-admission').write_text('0')
+        info = dict(self.info, slots=3)
+        with mock.patch.object(router, 'native_process', side_effect=lambda *args: dict(info)), \
+             mock.patch.object(router, 'host_processes', return_value=(
+                 {100: 1, 200: 1}, {100: ('primary', True), 200: ('primary', True)})):
+            router.native_lease(self.root, ROOT, 100, 3)
+            self.assertEqual(router.occupancy(self.root), ([3, 0], [2, 0]))
+            with self.assertRaisesRegex(ValueError, 'external admission disabled'):
+                router.reserve(self.root, 'auto', 300, 0, False)
+
     def test_external_admission_fails_closed_without_owner_capacity(self):
         watchdog = self.root / 'watchdog'
         watchdog.mkdir()
@@ -208,6 +221,12 @@ class NativeWorkflowTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 router.native_process(ROOT, 100, 8)
             args[4] = 'gpt-6-astra'
+            default_arg = args.index('agents.default_subagent_model="gpt-6-astra"')
+            args[default_arg] = 'agents.default_subagent_model="gpt-5.6-sol"'
+            with mock.patch.object(model_policy, 'load_policy', return_value=dict(
+                    schema_version=2, default_model='gpt-5.6-sol')):
+                self.assertEqual(router.native_process(ROOT, 100, 8)['slots'], 8)
+            args[default_arg] = 'agents.default_subagent_model="gpt-6-astra"'
             with self.assertRaises(ValueError):
                 router.native_process(ROOT, 100, 7)
             with self.assertRaises(ValueError):

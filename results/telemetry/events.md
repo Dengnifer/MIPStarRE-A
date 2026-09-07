@@ -5632,3 +5632,15 @@ not actual commit/publication hooks. No productive session was killed.
   An initial bootstrap overlapped unfinished worktree checkout and missed hooks;
   after checkout completed, normal bootstrap and hook checks passed. No live
   primary scripts, credentials, leases or historical records were edited.
+
+- 2026-09-07 -- Issue #301 owner scope superseded the preserved cleanup-only
+  draft f43be38 with routine/bounded Sol-first and reasoned hard Astra, including
+  routine independent Sol review and a 20:1 target within 10:1..50:1 over new
+  dispatches. Existing audit evidence is retained, not reinterpreted as a broad
+  capability study. Meta switched to Space5/native3/external0; this author did
+  not change credentials, runtime, lease or current workers. At 16:17Z the same
+  author resumed the clean checkpoint under explicit completion priority, still
+  charged to the original approximately 13:40Z episode and recorded extension
+  request5572932276. No fresh budget, ratio credit for grandfathered resumes,
+  live activation, or review success is inferred. Full-context native observations
+  and requested/selected/observed separation are retained in the revised design.

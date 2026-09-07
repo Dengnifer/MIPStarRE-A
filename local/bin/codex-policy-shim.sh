@@ -57,10 +57,11 @@ while [ "$#" -gt 0 ]; do
   args+=(-c "$value")
 done
 script_dir="$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")"
-model="$(python3 "$script_dir/model_policy.py" --role "${MIPSTARRE_DISPATCH_ROLE:-orc}" \
-  --job-class "${MIPSTARRE_JOB_CLASS:-general}" --model "$model" \
-  --effort "$effort" --field model --external --worktree "${MIPSTARRE_DISPATCH_WORKTREE:-$PWD}" \
-  ${MIPSTARRE_JOB_SPEC:+--job-spec "$MIPSTARRE_JOB_SPEC"})" || exit 4
+policy_args=(--role "${MIPSTARRE_DISPATCH_ROLE:-orc}" --job-class "${MIPSTARRE_JOB_CLASS:-general}"
+  --model "$model" --effort "$effort" --field model --external)
+[ -z "${MIPSTARRE_HARDNESS_REASON:-}" ] ||
+  policy_args+=(--hardness-reason "$MIPSTARRE_HARDNESS_REASON")
+model="$(python3 "$script_dir/model_policy.py" "${policy_args[@]}")" || exit 4
 if [ "$model" = gpt-5.6-sol ]; then
   reservation="${MIPSTARRE_CACHE_ROOT:-$HOME/.cache/mipstarre-dev}/accounts/${MIPSTARRE_DISPATCH_ACCOUNT:-invalid}/${MIPSTARRE_DISPATCH_PID:-invalid}"
   [ -f "$reservation" ] || { echo 'Sol requires dispatcher admission' >&2; exit 4; }

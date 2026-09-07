@@ -149,14 +149,14 @@ All appends are one-line JSON; schemas documented in `protocols/meta.md`.
 
 ## Model policy
 
-- Main/defaults and unqualified classes use `gpt-6-astra`/`ultra`.
-  Published `local/model-policy.json` permits exact `gpt-5.6-sol`/`ultra` only
-  for the reviewed, root-issued bounded cleanup class in `sessions.md`.
-  Unknown classes/models and other efforts fail closed; canonical review stays Astra.
+- Main remains `gpt-6-astra`/`ultra`. Published `local/model-policy.json`
+  selects exact `gpt-5.6-sol`/`ultra` for routine/bounded subagents, including
+  routine independent reviewers; genuinely hard/escalated work uses Astra with
+  an explicit reason. Unknown classes/models and other efforts fail closed.
   External dispatch keeps fan-out off. Native descendants share their
   root's verified configured cap and account allocation; neither is provider
-  throughput evidence. The current relay-3 receipt records eleven total slots,
-  nine native descendants and external admission zero. This model change does
+  throughput evidence. The current Space receipt records five total slots,
+  three native descendants and external admission zero. This model change does
   not resize that allocation or permit an additional pool.
 - Every admission reads account mode (default primary; restoring both requires owner approval).
   Twelve primary slots include main; only named interactive CWDs are exempt from accounting.

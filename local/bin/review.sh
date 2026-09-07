@@ -41,7 +41,7 @@
 #   MIPSTARRE_TRUSTED_REF      git ref the reviewer personas are read from
 #                              (default: main).  Never the branch under review.
 #   MIPSTARRE_REVIEW_MODEL     codex model for the code review
-#                              (required: gpt-6-astra)
+#                              (auto: routine Sol, justified hard Astra)
 #   MIPSTARRE_PROSE_MODEL      codex model for the blueprint prose review
 #                              (default: MIPSTARRE_REVIEW_MODEL)
 #   MIPSTARRE_CACHE_ROOT        runtime state root (default ~/.cache/mipstarre-dev)
@@ -83,8 +83,17 @@ GH_COMMON="$BIN_DIR/gh_common.py"
 CACHE="${MIPSTARRE_CACHE_ROOT:-$HOME/.cache/mipstarre-dev}"
 TRUSTED_REF="${MIPSTARRE_TRUSTED_REF:-main}"
 DISPATCH="$ROOT/local/bin/dispatch.sh"
-REVIEW_MODEL="${MIPSTARRE_REVIEW_MODEL:-${MIPSTARRE_CODEX_MODEL:-gpt-6-astra}}"
+REVIEW_MODEL="${MIPSTARRE_REVIEW_MODEL:-auto}"
 PROSE_MODEL="${MIPSTARRE_PROSE_MODEL:-$REVIEW_MODEL}"
+REVIEW_JOB_CLASS="${MIPSTARRE_REVIEW_JOB_CLASS:-independent_review}"
+REVIEW_HARDNESS_REASON="${MIPSTARRE_REVIEW_HARDNESS_REASON:-}"
+REVIEW_POLICY_ARGS=(--role reviewer --job-class "$REVIEW_JOB_CLASS")
+[ -z "$REVIEW_HARDNESS_REASON" ] ||
+  REVIEW_POLICY_ARGS+=(--hardness-reason "$REVIEW_HARDNESS_REASON")
+REVIEW_MODEL="$(python3 "$BIN_DIR/model_policy.py" "${REVIEW_POLICY_ARGS[@]}" \
+  --model "$REVIEW_MODEL" --field model)" || exit 2
+PROSE_MODEL="$(python3 "$BIN_DIR/model_policy.py" "${REVIEW_POLICY_ARGS[@]}" \
+  --model "$PROSE_MODEL" --field model)" || exit 2
 LOCK_WAIT="${MIPSTARRE_REVIEW_LOCK_WAIT:-1800}"
 DIFF_MAX_LINES="${MIPSTARRE_DIFF_MAX_LINES:-4000}"
 CITATION_MAX_BYTES="${MIPSTARRE_CITATION_MAX_BYTES:-30000}"
@@ -288,13 +297,16 @@ run_agent() {
   local role="$1" sandbox="$2" wt="$3" persona="$4" taskfile="$5"
   local standalone="$6" ctx="$7" out="$8" model="$9"
   local dlog="$out.dispatch.log" task_text last rc=0
-  model="$(python3 "$BIN_DIR/model_policy.py" --role reviewer --job-class independent_review \
+  model="$(python3 "$BIN_DIR/model_policy.py" "${REVIEW_POLICY_ARGS[@]}" \
     --model "$model" --effort "$REVIEW_EFFORT" --field model)" || return 4
   task_text="$(cat "$taskfile")"
 
   if [ -n "${MIPSTARRE_NATIVE_REVIEW_ROOT:-}" ]; then
+    local native_args=(--job-class "$REVIEW_JOB_CLASS" --model "$model")
+    [ -z "$REVIEW_HARDNESS_REASON" ] ||
+      native_args+=(--hardness-reason "$REVIEW_HARDNESS_REASON")
     python3 "$BIN_DIR/native_review.py" request "$CACHE" "$ROOT" "$HEAD_SHA" \
-      "$wt" "$standalone" "$out" "$PR_NUM" "$REVIEW_TIMEOUT" >"$dlog"
+      "$wt" "$standalone" "$out" "$PR_NUM" "$REVIEW_TIMEOUT" "${native_args[@]}" >"$dlog"
     return $?
   fi
 
@@ -304,7 +316,8 @@ run_agent() {
           --worktree "$wt" --sandbox "$sandbox"
           --persona "$persona" --persona-ref "$TRUSTED_REF"
           --effort "$REVIEW_EFFORT")
-    args+=(--job-class independent_review)
+    args+=(--job-class "$REVIEW_JOB_CLASS")
+    [ -z "$REVIEW_HARDNESS_REASON" ] || args+=(--hardness-reason "$REVIEW_HARDNESS_REASON")
     # The bounded citation map goes first so dispatch.sh's aggregate attachment
     # cap cannot let a large diff starve it from the reviewer context.
     if [ -s "$BLUEPRINT_CITATION_MAP" ]; then

@@ -1,12 +1,11 @@
-"""Isolated model-policy and exact-recipe tests; no model sessions are launched."""
+"""Isolated owner-policy regressions; no live dispatch, credential or lease changes."""
 
 import argparse
-import copy
-import hashlib
+from contextlib import redirect_stdout
+import io
 import json
 import os
 from pathlib import Path
-import subprocess
 import sys
 import tempfile
 import unittest
@@ -14,133 +13,75 @@ from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'local/bin'))
-import model_job
+import account_router
 import model_policy as policy
-import native_review
 import telemetry
 from scripts.tests import test_native_workflow as native_tests
-THREAD_ROOT, CHILD = native_tests.ROOT, native_tests.CHILD
+from scripts.tests import test_dispatch as dispatch_tests
 
-
-def qualification():
-    return dict(schema_version=1, audit=dict(reference='independent-fixture', sha256='a' * 64),
-        qualified_job_classes={policy.CLEANUP: dict(roles=['prover'], model=policy.SOL,
-            effort='ultra', rationale='C01/C02 exact adjudicated replacements', case_ids=['C01', 'C02'])})
+ACTIVE = dict(schema_version=2, default_model=policy.SOL, hard_model=policy.ASTRA, effort='ultra')
+ACTIVATION = '2026-09-06T13:00:00Z'
 
 
 class ModelPolicyTests(unittest.TestCase):
     def setUp(self):
-        temporary = tempfile.TemporaryDirectory()
-        self.addCleanup(temporary.cleanup)
-        self.root = Path(temporary.name)
-        self.worktree = self.root / 'worktree'
-        self.worktree.mkdir()
-        self.file = self.worktree / 'MIPStarRE/Test.lean'
-        self.file.parent.mkdir()
-        self.file.write_text('/-- Old wording. -/\ntheorem old_name : True := by trivial\n'
-                             'example : True := old_name\n')
-        subprocess.run(['git', 'init', '-qb', 'main', str(self.worktree)], check=True)
-        subprocess.run(['git', '-C', str(self.worktree), 'add', '.'], check=True)
-        subprocess.run(['git', '-C', str(self.worktree), '-c', 'user.name=Test', '-c',
-            'user.email=test@test', 'commit', '-qm', 'base'], check=True)
-        self.base = model_job.git(self.worktree, 'rev-parse', 'HEAD').strip()
-        blob = model_job.git(self.worktree, 'rev-parse', 'HEAD:MIPStarRE/Test.lean').strip()
-        self.recipe = dict(worktree=str(self.worktree), base_sha=self.base,
-            review_reference='Astra exact replacement specification',
-            allowed_edits=[dict(path='MIPStarRE/Test.lean', before_blob=blob,
-                hunks=[dict(old_start=1, before=['/-- Old wording. -/'],
-                            after=['/-- Prescribed wording. -/'])])])
-        self.request = dict(nonce='fixture', root_thread_id=THREAD_ROOT,
-            created='2026-09-06T13:13:00Z', pid=100, start='123', recipe=self.recipe)
-        self.request['digest'] = model_job.digest(self.request)
-        self.reference = self.root / 'model-jobs/fixture.json'
-        self.reference.parent.mkdir()
-        self.reference.write_text(json.dumps(self.request))
-        for patch in (mock.patch.dict(os.environ, MIPSTARRE_CACHE_ROOT=str(self.root),
-                                     CODEX_THREAD_ID=THREAD_ROOT),
-                      mock.patch.object(native_review, 'verify_root',
-                                        return_value=dict(pid=100, start='123'))):
-            patch.start()
-            self.addCleanup(patch.stop)
+        patch = mock.patch.object(policy, 'load_policy', return_value=ACTIVE)
+        patch.start()
+        self.addCleanup(patch.stop)
 
-    def test_qualified_selection_and_explicit_astra_fallback(self):
-        with mock.patch.object(policy, 'load_policy', return_value=qualification()):
-            selected = policy.select_model('prover', policy.CLEANUP, 'auto',
-                                            job_spec=str(self.reference))
-            self.assertEqual(selected['model'], policy.SOL)
-            self.assertEqual(selected['requested_model'], 'auto')
-            self.assertEqual(selected['case_ids'], ['C01', 'C02'])
-            self.assertEqual(policy.select_model('prover', policy.CLEANUP)['model'], policy.ASTRA)
-            self.assertEqual(policy.select_model('prover', policy.CLEANUP, policy.ASTRA,
-                job_spec=str(self.reference))['model'], policy.ASTRA)
-            with self.assertRaises(ValueError):
-                policy.observe_model('prover', policy.CLEANUP, policy.SOL, 'ultra',
-                                     job_spec=str(self.reference))
+    def test_routine_defaults_include_proofs_and_independent_reviews(self):
+        for role in policy.ROLES:
+            if role != 'mathfix':
+                for job in ('general', 'routine', 'bounded'):
+                    decision = policy.select_model(role, job)
+                    self.assertEqual(decision['model'], policy.SOL)
+                    self.assertEqual(decision['requested_model'], 'auto')
+        self.assertEqual(policy.select_model('reviewer', 'independent_review')['model'], policy.SOL)
+        self.assertEqual(policy.select_model('prover', 'review_directed_nonsemantic_cleanup')[
+            'model'], policy.SOL)
 
-    def test_unqualified_unknown_role_class_model_and_effort_fail_closed(self):
-        with mock.patch.object(policy, 'load_policy', return_value=dict(qualified_job_classes={},
-                                                                       audit=None)):
-            for role in policy.ROLES:
-                self.assertEqual(policy.select_model(role)['model'], policy.ASTRA)
-            for args in [('bad',), ('prover', 'bad'), ('reviewer', policy.CLEANUP),
-                         ('prover', 'general', policy.SOL), ('prover', 'general', 'gpt-5.6'),
-                         ('prover', 'general', 'gpt-6-sol'),
-                         ('prover', 'general', policy.ASTRA, 'max')]:
-                with self.subTest(args=args), self.assertRaises(ValueError):
-                    policy.select_model(*args)
+    def test_dispatch_command_selects_routine_sol_and_reasoned_hard_astra(self):
+        fixture = dispatch_tests.DispatchCommandTests()
+        argv = fixture.dispatch_command('--role', 'prover', '--job-class', 'bounded',
+                                        model='auto', policy_data=ACTIVE)
+        self.assertEqual(argv[argv.index('-m') + 1], policy.SOL)
+        argv = fixture.dispatch_command('--role', 'reviewer', '--job-class', 'hard_review',
+            '--hardness-reason', 'Control-policy review', model='auto', policy_data=ACTIVE)
+        self.assertEqual(argv[argv.index('-m') + 1], policy.ASTRA)
 
-    def test_request_authority_base_digest_and_exact_result(self):
-        with mock.patch.object(policy, 'load_policy', return_value=qualification()):
-            for changed in (dict(CODEX_THREAD_ID=CHILD),):
-                with mock.patch.dict(os.environ, changed), self.assertRaises(ValueError):
-                    policy.select_model('prover', policy.CLEANUP, policy.SOL,
-                                        job_spec=str(self.reference))
+    def test_hard_astra_needs_reason_and_unknown_or_conflicting_choices_fail(self):
+        for role, job in [('reviewer', 'hard_review'), ('orc', 'control_policy'),
+                          ('prover', 'source_semantic'), ('mathfix', 'hard')]:
+            decision = policy.select_model(role, job, hardness_reason='Explicit difficult obligation')
+            self.assertEqual(decision['model'], policy.ASTRA)
+            self.assertTrue(decision['hardness_reason'])
             with self.assertRaises(ValueError):
-                model_job.validate_job(str(self.reference), str(self.root))
-            output = model_job.recipe_outputs(self.recipe)['MIPStarRE/Test.lean']
-            self.file.write_text(output)
-            model_job.validate_job(str(self.reference), completed=True)
-            for text in (output.replace('Prescribed', 'Mathematically different'),
-                         output.replace(': True', '(h : False) : True')):
-                self.file.write_text(text)
-                with self.assertRaises(ValueError):
-                    model_job.validate_job(str(self.reference), completed=True)
-            self.file.write_text(output)
-            (self.worktree / 'extra').touch()
-            with self.assertRaises(ValueError):
-                model_job.validate_job(str(self.reference), completed=True)
-            bad = dict(self.request, created='changed')
-            self.reference.write_text(json.dumps(bad))
-            with self.assertRaises(ValueError):
-                model_job.read_job(str(self.reference))
+                policy.select_model(role, job)
+        for args in [('bad',), ('prover', 'bad'), ('prover', 'independent_review'),
+                     ('prover', 'routine', policy.ASTRA), ('prover', 'general', 'gpt-5.6'),
+                     ('prover', 'general', 'gpt-6-sol'), ('prover', 'general', policy.SOL, 'max')]:
+            with self.subTest(args=args), self.assertRaises(ValueError):
+                policy.select_model(*args)
 
-    def test_recipe_rejects_proof_paths_limits_and_string_changes(self):
-        for change in (dict(path='local/bin/dispatch.sh'), dict(path='../MIPStarRE/Test.lean'),
-                       dict(path='blueprint/src/chapter/test.tex'), dict(before_blob='0' * 40),
-                       dict(hunks=[dict(old_start=2, before=['theorem old_name : True := by trivial'],
-                            after=['theorem old_name (h : False) : True := by trivial'])])):
-            recipe = copy.deepcopy(self.recipe)
-            recipe['allowed_edits'][0].update(change)
-            with self.subTest(change=change), self.assertRaises(ValueError):
-                model_job.recipe_outputs(recipe)
-        renamed = copy.deepcopy(self.recipe)
-        renamed['renames'] = {'old_name': 'new_name'}
-        renamed['allowed_edits'][0]['hunks'] = [dict(old_start=2,
-            before=['theorem old_name : True := by trivial', 'example : True := old_name'],
-            after=['theorem new_name : True := by trivial', 'example : True := new_name'])]
-        self.assertIn('theorem new_name', model_job.recipe_outputs(renamed)['MIPStarRE/Test.lean'])
-        renamed['renames'] = {'True': 'False'}
+    def test_native_model_mismatch_and_missing_request_are_distinct(self):
+        observed = policy.observe_model('prover', 'bounded', policy.SOL, 'ultra')
+        self.assertIsNone(observed['requested_model'])
         with self.assertRaises(ValueError):
-            model_job.recipe_outputs(renamed)
+            policy.observe_model('prover', 'bounded', policy.ASTRA, 'ultra', policy.SOL)
+        with self.assertRaises(ValueError):
+            policy.observe_model('reviewer', 'hard_review', policy.SOL, 'ultra',
+                                 policy.ASTRA, 'Control-policy review')
 
-    def test_root_only_request_issuance(self):
-        with mock.patch.dict(os.environ, CODEX_THREAD_ID=CHILD), \
-             mock.patch('sys.argv', ['model_job.py', str(self.reference), '--root-thread-id', THREAD_ROOT]), \
-             self.assertRaises(SystemExit) as failure:
-            model_job.main()
-        self.assertEqual(failure.exception.code, 4)
+    def test_resume_affinity_uses_observation_not_requested_model(self):
+        with tempfile.TemporaryDirectory() as directory:
+            registry = Path(directory) / 'sessions.jsonl'
+            registry.write_text(json.dumps(dict(thread_id='old', model=policy.ASTRA)) + '\n')
+            with self.assertRaisesRegex(ValueError, 'unknown'):
+                account_router.resume_model('old', registry, {})
+            registry.write_text(json.dumps(dict(thread_id='old', effective_model=policy.ASTRA)) + '\n')
+            self.assertEqual(account_router.resume_model('old', registry, {}), policy.ASTRA)
 
-    def test_native_qualified_child_and_mixed_or_unbound_contexts(self):
+    def test_native_resume_does_not_turn_old_astra_into_routine_sol(self):
         fixture = native_tests.NativeWorkflowTests()
         fixture.setUp()
         self.addCleanup(fixture.doCleanups)
@@ -148,49 +89,124 @@ class ModelPolicyTests(unittest.TestCase):
         rows = [json.loads(line) for line in fixture.rollout.read_text().splitlines()]
         for row in rows:
             if row['type'] == 'turn_context':
+                row['payload']['turn_id'] = 'turn'
+        rows += [dict(type='event_msg', timestamp='2026-09-06T13:15:00Z',
+                      payload=dict(type='task_started', turn_id='resumed')),
+                 dict(type='turn_context', payload=dict(turn_id='resumed', model=policy.SOL,
+                                                       effort='ultra'))]
+        fixture.rollout.write_text(''.join(json.dumps(row) + '\n' for row in rows))
+        with self.assertRaisesRegex(ValueError, 'cannot switch'):
+            telemetry.native_rollout(fixture.rollout, native_tests.CHILD, role='prover',
+                                     job_class='routine', requested_model=policy.SOL)
+
+    def test_routine_sol_review_keeps_independence_binding_and_mixed_context_guards(self):
+        fixture = native_tests.NativeWorkflowTests()
+        fixture.setUp()
+        self.addCleanup(fixture.doCleanups)
+        fixture.request['model_policy'] = policy.select_model('reviewer', 'independent_review')
+        fixture.write_rollout()
+        rows = [json.loads(line) for line in fixture.rollout.read_text().splitlines()]
+        for row in rows:
+            if row['type'] == 'turn_context':
                 row['payload'].update(model=policy.SOL, turn_id='turn')
-            if row['type'] == 'response_item':
-                row['payload']['content'] = [dict(type='input_text',
-                    text='Native model binding: ' + self.request['digest'])]
         def write():
             fixture.rollout.write_text(''.join(json.dumps(row) + '\n' for row in rows))
         write()
-        with mock.patch.object(policy, 'load_policy', return_value=qualification()):
-            observation = telemetry.native_rollout(fixture.rollout, CHILD, role='prover',
-                job_class=policy.CLEANUP, requested_model=policy.SOL, job_spec=str(self.reference))
-            self.assertEqual(observation['effective_model'], policy.SOL)
-            with self.assertRaises(ValueError):
-                telemetry.native_rollout(fixture.rollout, CHILD, role='reviewer',
-                                         job_class='independent_review', requested_model=policy.ASTRA)
-            for row in rows:
-                if row['type'] == 'turn_context':
-                    row['payload'].pop('turn_id', None)
-            rows.insert(-1, dict(type='turn_context', payload=dict(model=policy.SOL, effort='ultra')))
-            write()
-            with self.assertRaises(ValueError):
-                telemetry.native_rollout(fixture.rollout, CHILD, role='reviewer',
-                                         job_class='independent_review', requested_model=policy.ASTRA)
-            rows.append(dict(type='turn_context', payload=dict(turn_id='turn',
-                             model=policy.ASTRA, effort='ultra')))
-            write()
-            with self.assertRaises(ValueError):
-                telemetry.native_rollout(fixture.rollout, CHILD, role='reviewer',
-                                         job_class='independent_review', requested_model=policy.ASTRA)
+        with mock.patch.object(native_tests.review, 'verify_root', return_value=fixture.info), \
+             mock.patch.object(native_tests.review.subprocess, 'check_output',
+                side_effect=lambda args, **kw: 'a' * 40 if 'rev-parse' in args else ''):
+            native_tests.review.completed_review(fixture.request, native_tests.CHILD)
+            with mock.patch.dict(fixture.request, authors=[native_tests.ROOT, native_tests.CHILD]), \
+                    self.assertRaises(ValueError):
+                native_tests.review.completed_review(fixture.request, native_tests.CHILD)
+            with mock.patch.dict(fixture.request, head='b' * 40), self.assertRaises(ValueError):
+                native_tests.review.completed_review(fixture.request, native_tests.CHILD)
+        rows.append(dict(type='turn_context', payload=dict(turn_id='turn',
+                         model=policy.ASTRA, effort='ultra')))
+        write()
+        with self.assertRaises(ValueError):
+            telemetry.native_rollout(fixture.rollout, native_tests.CHILD, role='reviewer',
+                job_class='hard_review', requested_model=policy.ASTRA, hardness_reason='Hard review')
 
-    def test_external_zero_refuses_even_a_qualified_sol_job(self):
-        import account_router
-        (self.root / 'watchdog').mkdir()
-        (self.root / 'watchdog/primary-external-admission').write_text('0')
-        with mock.patch.object(policy, 'load_policy', return_value=qualification()), \
-             mock.patch.dict(os.environ, MIPSTARRE_CODEX_MODEL=policy.SOL,
-                 MIPSTARRE_DISPATCH_ROLE='prover', MIPSTARRE_JOB_CLASS=policy.CLEANUP,
-                 MIPSTARRE_JOB_SPEC=str(self.reference)), \
-             mock.patch('sys.argv', ['account_router.py', str(self.root), 'auto', '123', '0',
-                                    str(self.root / 'registry')]), \
-             self.assertRaises(SystemExit) as failure:
-            account_router.main()
-        self.assertEqual(failure.exception.code, 4)
-        self.assertFalse(list((self.root / 'accounts').glob('*/*[0-9]')))
+    def test_grandfathering_requires_pre_activation_task_and_new_rejects_resume(self):
+        fixture = native_tests.NativeWorkflowTests()
+        fixture.setUp()
+        self.addCleanup(fixture.doCleanups)
+        fixture.write_rollout()
+        with self.assertRaisesRegex(ValueError, 'pre-activation'):
+            telemetry.native_rollout(fixture.rollout, native_tests.CHILD, grandfathered=True,
+                                     activation_at=ACTIVATION)
+        old = telemetry.native_rollout(fixture.rollout, native_tests.CHILD, grandfathered=True,
+                                      activation_at='2026-09-07T00:00:00Z')
+        self.assertEqual(old['model'], policy.ASTRA)
+        args = argparse.Namespace(rollout=fixture.rollout, thread_id=native_tests.CHILD,
+            root_thread_id=native_tests.ROOT, role='prover', job_class='hard',
+            hardness_reason='Difficult source obligation', requested_model=policy.ASTRA,
+            dispatch_kind='new', activation_at=ACTIVATION, status='done', repo_root=fixture.root,
+            name='new', issue='301', pr=None, key_label='space', worktree=fixture.root)
+        with mock.patch.object(telemetry, 'native_rollout', return_value=old | {
+                'turn_start': '2026-09-06T13:15:00Z'}), self.assertRaisesRegex(ValueError, 'resumed'):
+            telemetry.record_native(args)
+        args.dispatch_kind = 'resume'
+        with mock.patch.object(telemetry, 'native_rollout', return_value=old):
+            telemetry.record_native(args)
+        record = json.loads((fixture.root / 'results/telemetry/sessions.jsonl').read_text())
+        self.assertEqual(record['dispatch_kind'], 'new')
+
+    def test_rolling_ratio_excludes_resumes_main_old_and_resolves_unknowns(self):
+        def row(thread, model, kind='new', **kwargs):
+            return dict(thread_id=thread, root_thread_id='root', dispatch_kind=kind,
+                start='2026-09-06T13:14:00Z', activation_at=ACTIVATION,
+                selected_model=model, effective_model=model, **kwargs)
+        rows = [row(f'sol-{i:03}', policy.SOL) for i in range(20)] + [row('astra', policy.ASTRA)]
+        rows += [rows[0], row('resume', policy.ASTRA, 'resume'), row('root', policy.ASTRA),
+                 row('old', policy.ASTRA, 'grandfathered')]
+        result = policy.dispatch_ratio(rows, ACTIVATION)
+        self.assertEqual((result['sol'], result['astra'], result['ratio']), (20, 1, 20))
+        rows += [row('unknown', policy.SOL) | {'effective_model': None}, row('unknown', policy.SOL)]
+        self.assertEqual(policy.dispatch_ratio(rows, ACTIVATION)['unknown'], 0)
+        rows += [row('unknown', policy.ASTRA)]
+        self.assertEqual(policy.dispatch_ratio(rows, ACTIVATION)['unknown'], 1)
+        self.assertEqual(policy.dispatch_ratio(rows, ACTIVATION, window=10)['sampled_dispatches'], 10)
+        self.assertIsNone(policy.dispatch_ratio([row('only-sol', policy.SOL)], ACTIVATION)['ratio'])
+
+    def test_external_selected_model_is_not_fabricated_observation(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            capture, snapshot = root / 'capture.jsonl', root / 'policy.json'
+            capture.write_text(json.dumps(dict(type='thread.started', thread_id='fixture')) + '\n')
+            snapshot.write_text(json.dumps(policy.select_model('prover', 'bounded')))
+            args = telemetry._build_parser().parse_args(['--repo-root', directory,
+                'session-summarize', str(capture), '--role', 'prover', '--model', policy.SOL,
+                '--requested-effort', 'ultra', '--model-policy-file', str(snapshot),
+                '--no-rollout-scan', '--dispatch-kind', 'new', '--activation-at', ACTIVATION])
+            output = io.StringIO()
+            with redirect_stdout(output):
+                telemetry.cmd_session_summarize(args)
+            record = json.loads(output.getvalue())
+            self.assertEqual(record['selected_model'], policy.SOL)
+            self.assertEqual(record['requested_model'], 'auto')
+            self.assertIsNone(record['effective_model'])
+            capture.write_text(capture.read_text() + json.dumps(dict(type='turn_context',
+                payload=dict(model=policy.ASTRA))) + '\n')
+            output = io.StringIO()
+            with redirect_stdout(output):
+                self.assertEqual(telemetry.cmd_session_summarize(args), 4)
+            mismatch = json.loads(output.getvalue())
+            self.assertEqual(mismatch['effective_model'], policy.ASTRA)
+            self.assertEqual(mismatch['status'], 'failed')
+
+    def test_external_zero_blocks_routine_sol_without_a_new_pool(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'watchdog').mkdir()
+            (root / 'watchdog/primary-external-admission').write_text('0')
+            with mock.patch.dict(os.environ, MIPSTARRE_CODEX_MODEL=policy.SOL,
+                                 MIPSTARRE_DISPATCH_ROLE='prover'), \
+                 mock.patch('sys.argv', ['account_router.py', directory, 'auto', '123', '0',
+                                        str(root / 'registry')]), self.assertRaises(SystemExit) as error:
+                account_router.main()
+            self.assertEqual(error.exception.code, 4)
 
 
 if __name__ == '__main__':

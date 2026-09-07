@@ -42,8 +42,8 @@ the astra math-fix lane governed by `issues-prs.md` section 6. Full builds are
 ~10 min on this host and only they serialize (the machine-wide
 `.full-build-lock`); per-file `lake env lean` iteration parallelizes
 freely across worktrees. Use the current owner-verified allocation and existing
-native lease; the relay-3 receipt reserves nine descendants within eleven total.
-Keep the useful-work target nine and floor eight, without changing live leases,
+native lease; the current Space receipt reserves three descendants within five total.
+Keep useful capacity occupied without changing live leases,
 refill promptly, and record intervals below that floor and their reasons. Count
 actual native activity, not idle threads; keep disjoint successors and independent reviewers ready. Evidence binds to exact SHAs, so parallel
 lanes cannot trample each other's records.
@@ -56,12 +56,16 @@ zero, and capacity or a ready list is not occupancy. No nested extra pool is per
 
 ## The operating cycle (per short turn)
 
-Main and default children remain `gpt-6-astra` with literal CLI `ultra`.
-Use `model_policy.py` and published `local/model-policy.json` for each bounded
-assignment. Only role `prover`, class `review_directed_nonsemantic_cleanup`,
-and a main-issued literal recipe may select exact `gpt-5.6-sol`. Other classes
-remain Astra; unknown classes/models fail closed. See `sessions.md`.
-An eligible Sol child needs a NEW explicit-model native spawn with
+Main remains `gpt-6-astra`/`ultra`; routine and bounded subagent jobs default to
+exact `gpt-5.6-sol`/`ultra`, including routine existing-statement proofs and reviews.
+Use `model_policy.py` and published `local/model-policy.json` for each assignment.
+Genuinely hard, source-semantic, control-policy or escalated jobs use Astra with
+an explicit reason; file extension and role alone do not determine hardness.
+Target Sol:Astra 20:1 within 10:1..50:1 over successive NEW dispatches after
+activation. Check the rolling ratio in `sessions.md`; exclude main, grandfathered
+workers and resumes. Record short-prefix/availability deviations, never add filler
+or delay a necessary hard assignment. Unknown models/classes fail closed.
+A model change needs a NEW explicit-model native spawn with
 `fork_turns="none"` and Ultra, not follow-up to an existing Astra thread.
 No activation before normal CI, independent Astra review, service merge and
 exact runtime compatibility verification. Preserve predecessor/budget links.
@@ -126,8 +130,9 @@ merges; never merge a PR by hand or call the merge gate from the main turn.
   implementation convenience: paper-labelled statements stay source-shaped;
   genuine source defects become `docs/paper-gaps/` notes (key `qpbt`,
   traceability `\localissue{NNNN}`).
-- Existing assignments retain their model and effort. Main/defaults remain Astra
-  Ultra under the owner-verified lease. Do not infer a route, effort or cap change from
+- Existing assignments retain their model and effort; do not reuse a completed
+  Astra worker for routine future work to evade Sol-first classification.
+  Main stays Astra Ultra under the owner-verified lease. Do not infer changes from
   historical examples. Record observed usage without treating configured
   capacity as measured occupancy or summing overlapping native counters.
 - Validate according to the changed surface: focused checks during iteration,

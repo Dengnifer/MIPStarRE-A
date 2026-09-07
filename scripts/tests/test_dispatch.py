@@ -104,6 +104,7 @@ class DispatchCommandTests(unittest.TestCase):
                     "MIPSTARRE_CODEX_HOME_SECOND": "" if empty_second_home else str(second),
                     "MIPSTARRE_ACCOUNT_WAIT": "0",
                     "MIPSTARRE_CACHE_ROOT": str(root / "cache"),
+                    "MIPSTARRE_KEY_LABEL": "unknown",
                     "PATH": f"{fake_bin}{os.pathsep}{env.get('PATH', '')}",
                 }
             )
@@ -214,12 +215,18 @@ class DispatchCommandTests(unittest.TestCase):
                 copy_model_policy(dispatch.parent)
                 if policy_data is not None:
                     (dispatch.parent.parent / 'model-policy.json').write_text(json.dumps(policy_data))
+                    subprocess.run(['git', '-C', str(worktree), 'add', 'local'], check=True)
+                    subprocess.run(['git', '-C', str(worktree), '-c', 'user.name=Test', '-c',
+                        'user.email=test@test', 'commit', '-qm', 'policy fixture'], check=True)
+                    subprocess.run(['git', '-C', str(worktree), 'branch', '-M', 'main'], check=True)
             dispatch_args = [str(dispatch), '--role', 'scout', '--issue', 'dispatch-argv',
                              '--worktree', str(worktree), '--sandbox', 'read-only',
                              *([] if include_persona else ['--no-persona']),
                              '--skip-hook-check', '--dry-run', *extra]
             if effort is not None:
                 dispatch_args.extend(["--effort", effort])
+            if '--role' in extra and extra[extra.index('--role') + 1] == 'mathfix':
+                dispatch_args.extend(['--hardness-reason', 'Fixture difficult mathematical gap'])
             dispatch_args.extend(["--", "test prompt"])
             result = subprocess.run(
                 dispatch_args,
@@ -290,7 +297,7 @@ class DispatchCommandTests(unittest.TestCase):
                 with self.assertRaises(subprocess.CalledProcessError) as failure:
                     self.dispatch_command("--role", "mathfix", model=model, effort=effort)
                 self.assertEqual(failure.exception.returncode, 4)
-                self.assertIn("owner policy requires gpt-6-astra", failure.exception.stderr)
+                self.assertIn("model policy", failure.exception.stderr)
 
     def test_telemetry_accepts_mathfix_role(self) -> None:
         result = subprocess.run(

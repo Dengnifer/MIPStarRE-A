@@ -53,8 +53,11 @@ def completed_review(request: dict, thread: str) -> tuple[dict, Path]:
     if len(matches) != 1:
         raise ValueError('a unique canonical child rollout is required')
     rollout = matches[0]
-    child = native_rollout(rollout, thread, role='reviewer', job_class='independent_review',
-                           requested_model='gpt-6-astra')
+    selection = request.get('model_policy') or dict(job_class='hard_review', model='gpt-6-astra',
+        hardness_reason='Grandfathered pre-policy review request')
+    child = native_rollout(rollout, thread, role='reviewer', job_class=selection['job_class'],
+                           requested_model=selection['model'],
+                           hardness_reason=selection.get('hardness_reason'))
     assigned, turn = parse_ts(child['assigned']), parse_ts(child['turn_start'])
     ended = parse_ts(child['end'])
     created = parse_ts(request['created'])
@@ -93,11 +96,14 @@ def accept_response(request: dict, response: dict, out: Path) -> None:
         raise ValueError('native review response identity mismatch')
     thread = canonical_thread(response.get('thread_id'), 'reviewer thread')
     child, rollout = completed_review(request, thread)
+    selection = child['model_policy']
     record_native(argparse.Namespace(rollout=rollout, thread_id=thread,
         root_thread_id=request['root_thread_id'], repo_root=Path(request['repo']),
         name='reviewer-native-' + thread, role='reviewer', issue='pr' + request['pr'],
         pr=request['pr'], key_label=request['key_label'], worktree=Path(request['worktree']),
-        status='done', job_class='independent_review', requested_model='gpt-6-astra'))
+        status='done', job_class=selection['job_class'], requested_model=selection['model'],
+        hardness_reason=selection.get('hardness_reason'),
+        dispatch_kind='resume', activation_at=request.get('activation_at')))
     atomic_write(out, child['final'])
 
 
@@ -109,6 +115,8 @@ def request_review(args: argparse.Namespace) -> None:
         raise ValueError('native review author thread IDs are required')
     authors = [canonical_thread(author, 'review author') for author in authors]
     lease = verify_root(args.cache, root)
+    from model_policy import select_model
+    selection = select_model('reviewer', args.job_class, args.model, 'ultra', args.hardness_reason)
     nonce = uuid.uuid4().hex
     directory = args.cache / 'native-reviews'
     directory.mkdir(parents=True, exist_ok=True)
@@ -119,7 +127,8 @@ def request_review(args: argparse.Namespace) -> None:
                    key_label=lease['key_label'], cache=str(args.cache), repo=str(args.repo),
                    head=args.head, worktree=str(args.worktree), prompt=str(args.prompt),
                    prompt_sha256=hashlib.sha256(prompt).hexdigest(), pr=args.pr,
-                   job_class='independent_review', requested_model='gpt-6-astra')
+                   model_policy=selection,
+                   activation_at=os.environ.get('MIPSTARRE_MODEL_POLICY_ACTIVATION_AT'))
     atomic_write(path, json.dumps(request) + '\n')
     print('native_request: ' + str(path), flush=True)
     response_path = path.with_suffix('.response.json')
@@ -141,6 +150,9 @@ def main() -> None:
     for field in ('cache', 'repo', 'head', 'worktree', 'prompt', 'out', 'pr', 'timeout'):
         request.add_argument(field, type=int if field == 'timeout' else
                              str if field in ('head', 'pr') else Path)
+    request.add_argument('--job-class', default='independent_review')
+    request.add_argument('--model', default='auto')
+    request.add_argument('--hardness-reason')
     reply = sub.add_parser('complete')
     reply.add_argument('request', type=Path)
     reply.add_argument('thread')
