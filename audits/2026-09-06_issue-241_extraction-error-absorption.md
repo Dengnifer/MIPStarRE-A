@@ -16,8 +16,8 @@ The only Lean change is the proof and docstring of
 `MIPStarRE.QPBT.deltaExtract_le_deltaQld` in
 `MIPStarRE/QPBT/Extraction/Unitary.lean`. Its public statement is unchanged.
 The preceding declarations, including
-`exists_extractionWitness_ofGlobalPairWitness`, are unchanged. No blueprint
-file is modified in this packet.
+`exists_extractionWitness_ofGlobalPairWitness`, are unchanged. The blueprint
+adds statement- and proof-level `\leanok` markers and the explicit scalar-absorption proof.
 
 The source is
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1855-1858,1868-1876`.
