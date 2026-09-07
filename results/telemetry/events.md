@@ -5171,6 +5171,22 @@ with provenance under results/telemetry/model-comparison/, without policy change
 or a causal latency/quality claim. Boundary report5556912589 was posted once for
 the previous04:30 observation;247<-237 native dependency is recorded.
 
+- 2026-09-06 -- Issue #268, session `orc-268-20260906-01`: reproduced both inherited
+  runtime findings from `reviewer-pr264-20260906-01` on merged baseline `b7705e02`.
+  An unnamed `{thread_id, account}` record passed `resume_account` but raised
+  `KeyError('name')` in `resume_continuation`; missing and non-executable dispatchers
+  caused `agent.sh` to launch a fake Codex executable directly. The repair skips
+  unnamed affinity records only when continuation metadata is absent or empty,
+  rejects continuation metadata without a session identity, and removes the direct
+  launch fallback. Regression fixtures preserve named-session deduplication,
+  cumulative time and attempt charges, budget anchors, dispatcher arguments and exit
+  status. These are enforcement repairs under the existing sessions protocol;
+  no protocol or installed-runtime change is required.
+  The first checked publication stalled in its SSH `ls-remote` read before
+  pushing. The session terminated only that read's SSH child and selected an
+  HTTPS retry with command-scoped Git configuration and authentication obtained
+  through `gh_common.py`; persistent remote configuration remained unchanged.
+
 ## 2026-09-06 - PR269 first-review repair
 
 - Session `orc-257-20260906-04` repairs only F1-F3 from the independent
@@ -5300,6 +5316,18 @@ the previous04:30 observation;247<-237 native dependency is recorded.
   Both model-review rounds are exhausted; main retains terminal disposition
   after normal publication and detached CI. No third review, automatic adverse
   override, deployment, probe or merge is performed by this author session.
+
+- 2026-09-06 -- PR270 integration, session `orc-268-20260906-02`: merged actual
+  main `ba299326` into the approved baseline `4b2f9d9` as `58b13db`, preserving
+  both source changes and both parents' incident records. All 53 focused tests
+  and 560 full-suite tests passed through the normal hooks. The first checked
+  publication of the integration stalled before the push, with the HTTPS
+  `ls-remote` child in TCP `SYN-SENT` to GitHub. Terminated only that read child;
+  checked push returned 2 and `gh_common.py` confirmed the PR head remained
+  `4b2f9d9`. Retry uses the existing local proxy with command-scoped Git settings.
+  No persistent transport setting, installed runtime, review count or gate changed.
+  Evidence: `~/.cache/mipstarre-dev/pr270-integration-20260906/publication.log`
+  and `publication.json`; source/full-patch comparisons are in the same directory.
 
 ## 2026-09-06 - Archived primary event changes from 2b87495689367ace4146e0eeec9060da2389a646
 
@@ -5560,6 +5588,8 @@ not actual commit/publication hooks. No productive session was killed.
 - PR248 merged2026-09-07T08:43:05Z asae63048fbf2b699b3794afdd412bcabb71e7445e through live periodicservice2178864 and unchanged canonicalpr_merge gates, merge_exit0. Exact3201dd77 fullCI365s (build58s) was green; canonical complete-patch review carry from471d47678ee9 publishedAPPROVED5129792887 with0unresolved and nofreshreviewer. Frozenmain551ee8c remained unchanged through gates. Preserved229-byteCIrow in retainedstash6a91bdd550b57758a2a5bd2d7aff0eb4120b68c0 and matchingpr248-quiet-relay3 copies, restoredonce afterverifiedmerge and retained398-byte successfulwarmerrow; rawmultiplicities, prefixes andmodes passed. Sixexisting sourceholes remain unchanged. Three useful native relay-3/AstraUltra tasks continue within sharedcap3 andfive-total allocation/external0. Existing telemetry.record_native API recordedactual relay-3 labels without changingthe staleCLIenum or serviceguard. #297 publishedPR298 at956e10fa anditsauthor resumed156sourcework; PR207published42dc0a4 afterthe exactPauliTheorems/QubitForm artifactgate was repaired through a normal branch-private build. PR207needsoneordinary refresh afterthispublication beforecanonicalCI. NoB8budgetreset. Detailedreceipt: owner-messages/qpbt-pr248-integration-20260907.json.
 - PR207 merged2026-09-07T10:38:40Z as6b87636d741e676c6e5bd8f0db35c20f99db068a through periodicservice2178864 and canonicalpr_merge, merge_exit0. Issue115 independentlyverified closed/completed10:38:41Z. FullCI passed f06df8f382s and repaired6e2edbb461s. Round3 review5130375359 retainedoneF1 and an actualprosepublisher ProcessLookupError; no prose turn was invented. Narrowthree-fileAPIreuse repair passedfinalround4 independentCODE andPROSE; review5130951353 APPROVED0unresolved, eachcompletionacceptedonce. Frozenmain c830 remainedthroughgates. Stash38bdc5cb andcopies retainedall479buildbytes/2rows, 7343sessionbytes/7rows and202estimatebytes/1row; restoredonce withrawmultiplicity, prefix andmodechecks. CanonicalSpacebucket reviewerrows preserved andtruthfulrelay3 observations appended. The635.495-second nativehandoffgap was an operationalfailure includingmaindecisionlatency; the durablehandoff authorizespromptknownsuccessors and recordsparent-onlyreviewbinding. No occupancypercentage is inferred. Currentrelay3, AstraUltra, native3/five-total/external0 and allbudgets persist. Detailedreceipt: owner-messages/qpbt-pr207-integration-20260907.json.
 - PR213 history reconciliation: the incoming #210 episode opus-prover-210-s10-20260905T1157Z records completion with estimated times 2026-09-05T11:57Z to13:20Z. The current registry already contains the same completed episode, proof note,2551working seconds and239016tokens, with 2026-09-05T12:21Z to13:03Z from the documented14:37Z clock re-anchoring. These are one corrected episode, not two sessions or additional charges. Retained all247current raw owner rows byte-for-byte; the existing three-line #210 completion event is already present and is not duplicated. The incoming raw variant and all210incoming rows remain recoverable from f1dc470395734138ab5e8c4ff1fc485d1edce79a:results/telemetry/owner-sessions.jsonl (blobd82226d2f30f73cf7bba7ab60a6803e41500cb30), with current blob 9385f61fb09857053fc626482ebcc92b28ce909e and base blob ddf367a0d9107fac4875f882db885252afd8419d preserved. Exact stage1/2/3 copies and index receipt are retained in pr213-telemetry-stages-y6o3lle_. This specific supersession preserves the86-row clock correction and all budgets; no generic deduplication or other conflict resolution was performed.
+- PR270 merged2026-09-07T13:11:26Z asa2f52f6d15a1af57740ee73eab913e3747b47792 through the current owner service and canonicalpr_merge, merge_exit0. Exactbd3d88e fullCI and independentreview5132260906 passed; no blueprintdiff, so prosewasnotapplicable. The222-line patch preserves nameless-resume and missing-dispatcher fail-closed repairs and catches onlyProcessLookupError for vanishedprocesses; PermissionError/otherI/O stillfailclosed. Retainedstashe56be8b andcopies, restored227CIbytes+1044reviewbytesonce, retained397concurrent warmerbytes; rawmultiplicities/prefixes/modesverified. Ownercap11 release, runtime andfirst nine-worker observationare incorporated without resettingbudgets orclaimingoccupancypercentage. Actualcredentialrelay3/AstraUltra/native9/total11/external0; historicalspacebucketisnotSpace authentication. Ownerreplacedservice1089067 with1354901; absenceofoldPIDwasnotassumedto be acrash andnoredundantrestartoccurred. Oldruntime receipt is retainedashistory; current sourcehash/provenance recordedfornormalreviewworkflow. Detailedreceipt owner-messages/qpbt-pr270-integration-20260907.json.
+- PR298/#297 integrated through exact-head canonical CI, independent native CODE and PROSE, and the current service/pr_merge path. The four-file411+/39- restriction packet was unchanged by the refresh to frozen5924b3a. Parked CI/review rows were restored once with retained stash/copies, raw multiplicities, concurrent prefixes and modes checked. The supplied merge-selector-fix receipt now supplements the historical unknown-path observation. The owner Sol-routing instruction remains audit-first: current main and workers AstraUltra; no model/effort/credential/lease/cap changes or Sol activation by this coordinator. Actual relay3, native9/total11/external0 and all B8 budgets remain. Detailed receipt: owner-messages/qpbt-pr298-integration-20260907.json.
 
 
 ## 2026-09-06 — Snapshot publication regression in migration #291 (2026-09-06T18:37:46.043219+00:00)
@@ -5577,3 +5607,16 @@ not actual commit/publication hooks. No productive session was killed.
 - Preserved CI stash 5188e5e47bf64cdb5eb863c490044ddb39e1d54b. A post-merge warmer row made stash apply refuse; appended exactly the two verified CI deltas while retaining all746 current rows and every prior stash. Receipt: owner-messages/qpbt-291-restored-ci.json.
 
 - 2026-09-06T19:17:52.559119+00:00 — Meta migration #291 complete: PR292 merged, canonical review/CI green, all584 workflow tests passed,22 PR label backfills verified, and the deployed main sync published its post-push snapshot with clean remote equality. Main resumes the mathematical cycle on the preserved Space/Astra Ultra root+4 allocation. The design-decision index row was reformatted into its existing five columns without changing the decision. No routine meta heartbeat was reactivated.
+
+## 2026-09-07 - PR207 native admission procfs race (PR270 / #268)
+
+- PR207's round-three prose path failed before any model turn: a PID vanished
+  during `account_router.host_processes`' per-PID status read, which raised
+  `ProcessLookupError` (ESRCH), not the already-handled `FileNotFoundError`.
+  The bounded repair treats both exceptions as disappearance of that PID only.
+  PermissionError and other OSError failures still propagate; the host namespace,
+  credential, capacity, and admission rules are unchanged. Regression fixtures
+  reproduce ESRCH before the fix and retain another live process while testing
+  ENOENT, EACCES, and EIO separately. This enforces the existing vanished-PID
+  behavior and does not amend policy. Actual credential remains relay-3, Astra
+  Ultra, three shared descendants/five total including VS Code, external0.
