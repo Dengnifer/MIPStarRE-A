@@ -237,59 +237,6 @@ theorem tauDotProj_isProj {P : AdmissibleParams} (W : PauliKind)
   exact hdiagonal.map (Unitary.conjStarAlgAut ℂ (Op (PauliRegister P))
     ⟨basisMatrix, Matrix.mem_unitaryGroup_iff.mpr hbasis⟩)
 
-/-! The next lemma is a reusable algebraic companion to the paper-facing
-projectivity statement. It records the pairwise orthogonality needed when a
-coarse-grained Pauli measurement is later tensored with another projective
-family. -/
-
-/-- Distinct dot-product fibers give orthogonal coarse-grained Pauli projectors.
-
-This is the finite-dimensional fiber-orthogonality consequence of the same
-unitary-conjugation argument as `tauDotProj_isProj`; it adds no strategy or
-nonzero-vector hypothesis. The source definition is
-`14_analysis_of_the_pauli_basis_test.tex:1426-1429`. -/
-theorem tauDotProj_mul_eq_zero_of_ne {P : AdmissibleParams} (W : PauliKind)
-    (u : PauliRegister P) {a b : PauliScalar P} (hab : a ≠ b) :
-    tauDotProj W u a * tauDotProj W u b = 0 := by
-  classical
-  let basisMatrix : Op (PauliRegister P) := fun row label => pauliVec W label row
-  have hbasis : basisMatrix * basisMatrixᴴ = 1 := by
-    calc
-      basisMatrix * basisMatrixᴴ = ∑ label : PauliRegister P, pauliProj W label := by
-        ext row column
-        simp [basisMatrix, Matrix.mul_apply, pauliProj, Matrix.sum_apply,
-          Matrix.vecMulVec_apply]
-      _ = 1 := sum_pauliProj_eq_one W
-  let diagonalProj (c : PauliScalar P) : Op (PauliRegister P) :=
-    Matrix.diagonal (fun label => if dotProduct label u = c then (1 : ℂ) else 0)
-  have hcoarse (c : PauliScalar P) :
-      tauDotProj W u c = basisMatrix * diagonalProj c * basisMatrixᴴ := by
-    ext row column
-    simp only [tauDotProj, bracketOp, Matrix.sum_apply, pauliProj, Matrix.vecMulVec_apply]
-    rw [Matrix.mul_apply]
-    simp only [diagonalProj, Matrix.mul_diagonal]
-    simp [basisMatrix, Finset.sum_filter, mul_ite, ite_mul]
-  have hdiag : diagonalProj a * diagonalProj b = 0 := by
-    rw [Matrix.diagonal_mul_diagonal]
-    ext label column
-    by_cases hcol : label = column
-    · subst column
-      by_cases ha : dotProduct label u = a
-      · have hb : dotProduct label u ≠ b := fun h => hab (ha.symm.trans h)
-        simp [ha]
-        exact hab
-      · simp [ha]
-    · simp [hcol]
-  rw [hcoarse a, hcoarse b]
-  let U := Unitary.conjStarAlgAut ℂ (Op (PauliRegister P))
-    ⟨basisMatrix, Matrix.mem_unitaryGroup_iff.mpr hbasis⟩
-  change U (diagonalProj a) * U (diagonalProj b) = 0
-  calc
-    U (diagonalProj a) * U (diagonalProj b) = U (diagonalProj a * diagonalProj b) :=
-      (map_mul U _ _).symm
-    _ = U 0 := congrArg U hdiag
-    _ = 0 := map_zero U
-
 /-- For fixed `W` and `u`, the dot-product projectors sum to the identity.
 This is the completeness assertion of blueprint
 `lem:tau-dot-product-projective`, paper
@@ -303,6 +250,21 @@ theorem sum_tauDotProj_eq_one {P : AdmissibleParams} (W : PauliKind)
   unfold tauDotProj bracketOp
   rw [Finset.sum_fiberwise]
   exact sum_pauliProj_eq_one W
+
+open scoped MatrixOrder ComplexOrder in
+/-- Distinct dot-product fibers give orthogonal coarse-grained Pauli projectors.
+
+This formalization-only companion follows from projectivity and completeness
+using the existing projective-measurement orthogonality theorem. The source
+definition is `14_analysis_of_the_pauli_basis_test.tex:1426-1429`. -/
+theorem tauDotProj_mul_eq_zero_of_ne {P : AdmissibleParams} (W : PauliKind)
+    (u : PauliRegister P) {a b : PauliScalar P} (hab : a ≠ b) :
+    tauDotProj W u a * tauDotProj W u b = 0 := by
+  let M : Measurement (PauliScalar P) (PauliRegister P) :=
+    Measurement.ofSumEqOne (tauDotProj W u)
+      (fun c => (tauDotProj_isProj W u c).nonneg) (sum_tauDotProj_eq_one W u)
+  exact DistanceCalculus.projective_effect_mul_effect_eq_zero
+    M (tauDotProj_isProj W u) hab
 
 /-! ## Conjugation and extraction error -/
 
