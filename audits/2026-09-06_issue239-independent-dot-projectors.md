@@ -153,3 +153,27 @@ The normal consumer helper runs it under the machine-wide lock with
 build directory or writing shared packages. The next checks are the complete
 declaration list and a fresh checked-publication attempt; their logs remain in
 the session's runtime directory. No source repair or hook bypass is used.
+
+## 2026-09-07 orthogonality companion and review F1
+
+The formalization-only companion `tauDotProj_mul_eq_zero_of_ne` states that
+distinct scalar outcomes give orthogonal dot-product projectors. Its arguments
+are the same fixed parameters, basis kind, and register vector as above, with
+the necessary additional condition that the two outcomes are distinct.
+It does not require a strategy, a nonzero register vector, or a supplied
+orthogonality hypothesis.
+
+The fourth normal review, `5126499570` on head `863de2b03537`, found the
+companion's matrix-basis calculation mathematically correct but unnecessarily
+duplicated. F1 requested reuse of the already-imported measurement API. The
+repair places the companion after `sum_tauDotProj_eq_one`, forms the complete
+measurement with `Measurement.ofSumEqOne`, and applies
+`DistanceCalculus.projective_effect_mul_effect_eq_zero`. The two earlier
+paper-facing proofs and all three public signatures are unchanged; the local
+matrix-order scopes do not add a hypothesis or an import.
+
+The edited file type-checks without warnings, and fresh private-olean axiom
+checks for all three projector results yield exactly
+`[propext, Classical.choice, Quot.sound]`. Source-header and proof-hole/bypass
+checks pass. This addresses the requested code-reuse change; no new full review
+round is claimed here, and post-cap disposition remains a separate operator gate.
