@@ -43,16 +43,18 @@ the `dispatcher` field. External session prompts prohibit further fan-out.
 
 ### Native descendants (owner amendment, 2026-09-06)
 
-Main may assign useful native Astra Ultra work without external admission. Before
+Main may assign useful native work under the published model policy without
+external admission. Main remains Astra Ultra; existing defaults may stay Astra
+during transition, while reviewed future defaults and explicit child choices use Sol. Before
 admitting either kind of worker, reserve the native root's configured descendant cap:
 `account_router.py native-lease CACHE ROOT_THREAD PID CAP`. The cap excludes the root;
 the process census separately charges the root. This command validates the live
 resume thread, process start identity, scoped space route, explicit Astra/Ultra
-defaults and shared descendant cap under the account-router lock. Python 3.10 needs
+main configuration, policy-authorized child default and unchanged shared cap. Python 3.10 needs
 `tomli` for this native-only TOML validation; Python 3.11 has `tomllib`.
 `watchdog/primary-key-capacity` is the owner allocation, not measured throughput. For
-the current space episode the owner allocation is five total sessions including main,
-external admission is zero, and at most four native descendants may be active. The
+the current Space episode the owner allocation is five total slots,
+external admission is zero, and the existing native lease has three descendants. The
 router enforces `watchdog/primary-external-admission=0` (and the owner `max-codex=0`
 fallback) before creating any external reservation.
 Native leases, external processes/reservations, interactives and reserved non-Codex
@@ -71,7 +73,8 @@ ready list is not measured occupancy. No nested extra pool may exceed the shared
 Children do not write the primary index or shared telemetry concurrently. The primary
 telemetry owner records each child using `telemetry.py native-record ROLLOUT` with
 `--name --role --issue --thread-id --root-thread-id --key-label --worktree --status`
-and optional `--pr`; effective metadata must show Astra Ultra. Root/parent IDs,
+and `--job-class --requested-model`, plus `--hardness-reason` for hard Astra jobs.
+Effective bound-turn contexts must satisfy the recorded classification. Root/parent IDs,
 timestamps, outcome and raw observed counters are retained. Aggregation scope is
 unknown: never sum parent and child counters without independent evidence. Native
 review uses the exact-head transport in `review.md`; it cannot bypass CI or merge gates.
@@ -80,6 +83,45 @@ assignments, not a falsely claimed separate read-only sandbox. Historical episod
 attempt counts and usage survive refreshes and route changes without a budget reset.
 
 ## 2. Roles and sandboxes
+
+### Sol-first jobs (superseding owner amendment, 2026-09-07)
+
+Issue #301 comment5573256033 supersedes the earlier cleanup-only whitelist.
+Routine/bounded jobs default to exact `gpt-5.6-sol`/`ultra`, including routine
+existing-statement proof work, build repairs and independent reviews. Main chooses
+`--job-class hard|escalated|source_semantic|control_policy|hard_review` with an
+explicit `--hardness-reason` for genuinely difficult or escalated Astra work.
+New game/hypothesis/source-semantic decisions and control-policy reviews justify
+Astra; Lean files, prover/reviewer roles, or missing historical samples alone do not.
+Exact edit specifications remain appropriate for mechanical cleanup, not a universal
+Sol gate. The historical C01/C02 audit is retained as evidence, not a role ceiling.
+
+For a model change create a NEW explicit-model native child with Ultra and
+`fork_turns="none"`; follow-up to an Astra thread does not switch its model.
+Link predecessor thread, assignment, worktree, checkpoint and cumulative budget.
+No permission, account, root identity, lease or capacity setting changes here.
+All current-turn contexts are checked; observed models are not inferred from a
+requested argument. Independent review still binds identity, fresh assignment,
+head, prompt and actual completed turn. Hard control-policy review remains Astra.
+
+At reviewed activation, main records one timestamp and passes `--activation-at`
+to native telemetry (or `MIPSTARRE_MODEL_POLICY_ACTIVATION_AT` to the publisher).
+Use `--dispatch-kind new` only on a verified first native task; resumed tasks
+use `resume`, and pre-activation current tasks use `grandfathered`. Grandfathering
+requires actual pre-activation turn evidence, not a caller label. Main is excluded.
+`model_policy.py --ratio-registry results/telemetry/sessions.jsonl --activation-at
+TIMESTAMP` reports the last 100 distinct new dispatches, plus separate cumulative
+counts. Target 20:1 within 10:1..50:1; unknown observations are not invented,
+later known observations resolve them, and contradictory observations stay unknown.
+Zero Astra is not a measurable ratio. Record finite-prefix/availability deviations;
+never add filler or delay necessary hard work to manufacture a ratio.
+
+No live activation until normal CI, independent control-policy review, service
+merge and an explicit new Sol/Ultra runtime observation. Catalog/CLI Ultra is not
+provider-measured reasoning. External admission stays zero; deploy the shim with
+its adjacent checked helper, never as a stale standalone copy. Keep all normal
+caller, declaration, statement-integrity, proof-debt, CI/review and merge gates.
+Escalation preserves all accumulated attempts, time, work and historical evidence.
 
 Eight roles, fixed (`DESIGN.md`, "Naming and identity conventions"):
 
@@ -185,8 +227,9 @@ The shim rejects multi-agent enable flags and whole `features`/`agents` override
 Primary unsets inherited `CODEX_HOME`; second sets it for execution and rollout
 lookup to `MIPSTARRE_CODEX_HOME_SECOND` (default
 `~/.cache/mipstarre-dev/codex-home-yxy`). Review and autofix inherit these
-variables unchanged. All roles require `gpt-6-astra` and literal CLI `ultra`, including
-resumes and mathfix. Dispatch `--effort`, `MIPSTARRE_REVIEW_EFFORT` and
+variables unchanged. The published owner policy selects exact Sol for routine jobs
+and Astra for hard jobs with a reason; mathfix remains a hard role. Resumes do not
+switch model or reset budgets. Dispatch `--effort`, `MIPSTARRE_REVIEW_EFFORT` and
 `MIPSTARRE_AUTOFIX_EFFORT` default to `ultra`; every other effort fails rather than
 being normalized. The owner's verified space login is not rewritten here; the
 historical scoped-home directory name may still contain `relay1` for continuity.
