@@ -8,6 +8,11 @@ The ideal point projectors on the two halves of one EPR state have zero joint
 weight for distinct outcomes. This follows from the reality and orthogonality
 of the characteristic-two Pauli basis projectors, with no strategy hypothesis.
 
+The transpose identities are supplied by `pauliProj_transpose` in
+`Algebra.Pauli` and `ProjectiveSetting.tauPointProj_transpose` in
+`Observables.ExpandedDefs`. The latter module also supplies the actual
+measurement `ProjectiveSetting.tauPointMeas`, whose effects are `tauPointProj`.
+
 ## References
 
 - `references/qpbt-paper/04_preliminaries.tex:1101-1161`: Pauli eigenbases.
@@ -45,14 +50,6 @@ theorem star_pauliVec (W : PauliKind) (e x : ι → K) :
     simp only [star_prod, apply_ite star, star_one, star_zero]
     rfl
 
-/-- The Pauli basis projectors are symmetric matrices in characteristic two.
-This is the transpose identity needed to move a projector across an EPR pair. -/
-theorem pauliProj_transpose (W : PauliKind) (e : ι → K) :
-    (pauliProj W e)ᵀ = pauliProj W e := by
-  ext x y
-  simp only [Matrix.transpose_apply, pauliProj, Matrix.vecMulVec_apply, star_pauliVec]
-  exact mul_comm _ _
-
 /-- The Pauli basis projectors are mutually orthogonal. Completeness says that
 the square matrix of basis columns has a right inverse given by its adjoint;
 Mathlib's `mul_eq_one_comm` gives the left inverse and hence the Gram matrix. -/
@@ -84,20 +81,6 @@ open MIPStarRE.LDT hiding Measurement
 open DistanceCalculus
 
 variable {P : AdmissibleParams}
-
-/-- The complete ideal point measurement from `eq:qld-point-obs-def`.
-Its effects are the actual sums of Pauli basis projectors over point fibers. -/
-noncomputable def tauPointMeas (W : PauliKind) (u : Fin P.m → PauliScalar P) :
-    Measurement (PauliScalar P) (PauliRegister P) :=
-  Measurement.ofSumEqOne (tauPointProj W u)
-    (tauPointProj_nonneg W u) (sum_tauPointProj_eq_one W u)
-
-/-- Coarse-graining the real Pauli projectors preserves their transpose identity. -/
-theorem tauPointProj_transpose (W : PauliKind)
-    (u : Fin P.m → PauliScalar P) (a : PauliScalar P) :
-    (tauPointProj W u a)ᵀ = tauPointProj W u a := by
-  classical
-  simp only [tauPointProj, Matrix.transpose_sum, pauliProj_transpose]
 
 /-- Distinct point fibers are sums of disjoint sets of orthogonal Pauli projectors. -/
 theorem tauPointProj_mul_eq_zero_of_ne (W : PauliKind)
