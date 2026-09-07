@@ -1,0 +1,261 @@
+{
+  "event": "pr248_service_integration",
+  "observed_at": "2026-09-07T08:49:29.002552+00:00",
+  "pr": 248,
+  "issue": 240,
+  "frozen_main": "551ee8cacde2b23613537300a9faa45a0d4fc74d",
+  "head": "3201dd77932ce1f356b717500901dc372893d516",
+  "ci": {
+    "conclusion": "success",
+    "partial": false,
+    "seconds": 365,
+    "started": "2026-09-07T16:33:02+0800",
+    "finished": "2026-09-07T16:39:07+0800",
+    "steps": [
+      {
+        "step": "build",
+        "outcome": "success",
+        "seconds": 58,
+        "log_path": "/home/drx/.cache/mipstarre-dev/ci-logs/248/3201dd77932ce1f356b717500901dc372893d516/build.log",
+        "blocking": true,
+        "note": ""
+      },
+      {
+        "step": "blueprint-render",
+        "outcome": "success",
+        "seconds": 59,
+        "log_path": "/home/drx/.cache/mipstarre-dev/ci-logs/248/3201dd77932ce1f356b717500901dc372893d516/blueprint-render.log",
+        "blocking": true,
+        "note": ""
+      },
+      {
+        "step": "paper-gaps",
+        "outcome": "success",
+        "seconds": 0,
+        "log_path": "/home/drx/.cache/mipstarre-dev/ci-logs/248/3201dd77932ce1f356b717500901dc372893d516/paper-gaps.log",
+        "blocking": true,
+        "note": ""
+      },
+      {
+        "step": "blueprint-sync",
+        "outcome": "success",
+        "seconds": 122,
+        "log_path": "/home/drx/.cache/mipstarre-dev/ci-logs/248/3201dd77932ce1f356b717500901dc372893d516/blueprint-sync.log",
+        "blocking": true,
+        "note": ""
+      },
+      {
+        "step": "file-length",
+        "outcome": "success",
+        "seconds": 1,
+        "log_path": "/home/drx/.cache/mipstarre-dev/ci-logs/248/3201dd77932ce1f356b717500901dc372893d516/file-length.log",
+        "blocking": true,
+        "note": ""
+      },
+      {
+        "step": "proof-debt",
+        "outcome": "success",
+        "seconds": 31,
+        "log_path": "/home/drx/.cache/mipstarre-dev/ci-logs/248/3201dd77932ce1f356b717500901dc372893d516/proof-debt.log",
+        "blocking": true,
+        "note": ""
+      },
+      {
+        "step": "proof-evasion",
+        "outcome": "success",
+        "seconds": 94,
+        "log_path": "/home/drx/.cache/mipstarre-dev/ci-logs/248/3201dd77932ce1f356b717500901dc372893d516/proof-evasion.log",
+        "blocking": true,
+        "note": ""
+      },
+      {
+        "step": "statement-origin",
+        "outcome": "skipped",
+        "seconds": 0,
+        "log_path": "/home/drx/.cache/mipstarre-dev/ci-logs/248/3201dd77932ce1f356b717500901dc372893d516/statement-origin.log",
+        "blocking": true,
+        "note": "no changes under ldt_lean|scripts|workflow"
+      }
+    ]
+  },
+  "review": {
+    "id": 5129792887,
+    "verdict": "APPROVED",
+    "unresolved": 0,
+    "carried_from": "471d47678ee91fc7e193c234d2e35ec753b5e623",
+    "mechanism": "Canonical review.sh complete-patch carry; no fresh reviewer dispatched"
+  },
+  "merged_at": "2026-09-07T08:43:05Z",
+  "merge_commit": "ae63048fbf2b699b3794afdd412bcabb71e7445e",
+  "service": {
+    "action": "delegate-pr_merge",
+    "cadence_sleep_s": 261.489,
+    "clean": true,
+    "duration_s": 38.511,
+    "eligibility_budget_s": 240,
+    "eligibility_duration_s": 38.511,
+    "eligible_age_s": null,
+    "eligible_count": 1,
+    "external_admission": 0,
+    "fresh_count": 1,
+    "hold_reasons": [],
+    "local_main": "551ee8cacde2b23613537300a9faa45a0d4fc74d",
+    "merge_exit": 0,
+    "native_descendant_limit": 4,
+    "oldest_eligible": {
+      "branch": "issue-240-independent-extraction-algebra",
+      "created": "2026-09-06T03:17:13Z",
+      "eligibility_age_s": null,
+      "fresh_against_remote": true,
+      "head": "3201dd77932ce1f356b717500901dc372893d516",
+      "marker": true,
+      "number": 248,
+      "pr_age_s": 105909
+    },
+    "oldest_fresh_against_remote": true,
+    "oldest_stale": [],
+    "owner_total_limit": 5,
+    "post_merge_remote_main": "ae63048fbf2b699b3794afdd412bcabb71e7445e",
+    "post_merge_remote_verified": true,
+    "read_failure": null,
+    "remote_main": "551ee8cacde2b23613537300a9faa45a0d4fc74d",
+    "runtime": "space cap5/external0 verified",
+    "ts": "2026-09-07T08:42:54.692377+00:00"
+  },
+  "service_pid": 2178864,
+  "service_restarted": false,
+  "service_gates_unchanged": true,
+  "preservation": {
+    "pr": 248,
+    "merged_at": "2026-09-07T08:43:05Z",
+    "merge_commit": "ae63048fbf2b699b3794afdd412bcabb71e7445e",
+    "restored_at": "2026-09-07T08:44:52.146196+00:00",
+    "stash": "6a91bdd550b57758a2a5bd2d7aff0eb4120b68c0",
+    "stash_retained": true,
+    "files": {
+      "results/telemetry/builds.jsonl": {
+        "pre_restore_bytes": 198901,
+        "restored_bytes": 229,
+        "restored_rows": 1,
+        "post_restore_bytes": 199130,
+        "raw_multiplicities_verified": true,
+        "concurrent_prefix_retained": true,
+        "mode_retained": true,
+        "sha256": "b6940ec1a49bfd593c4779c483ef575788ca5b55e9f368a103f81dafdfcab8af"
+      },
+      "results/telemetry/sessions.jsonl": {
+        "pre_restore_bytes": 653980,
+        "restored_bytes": 0,
+        "restored_rows": 0,
+        "post_restore_bytes": 653980,
+        "raw_multiplicities_verified": true,
+        "concurrent_prefix_retained": true,
+        "mode_retained": true,
+        "sha256": "9227337cfc5bac212520fe8e69356b06f163497431508f828ab2350688336dc6"
+      }
+    }
+  },
+  "concurrent_warmer_bytes_retained": 398,
+  "existing_source_holes": 6,
+  "source_holes_unchanged": true,
+  "source_hole_scope": "MIPStarRE/QPBT/Extraction/Observables.lean",
+  "actual_credential_label": "relay-3",
+  "legacy_router_bucket": "space",
+  "model": "gpt-6-astra",
+  "requested_effort": "ultra",
+  "native_descendant_cap": 3,
+  "total_allocation": 5,
+  "external_admission": 0,
+  "native_observations": [
+    {
+      "thread_id": "01a07aef-32df-75b2-a189-9b66fe88bac7",
+      "parent_thread_id": "01a076bc-f4ad-7813-805b-c8b4dac71a14",
+      "agent_path": "/root/relay3_integration",
+      "start": "2026-09-07T08:14:51.780Z",
+      "end": null,
+      "assigned": "2026-09-07T08:41:49.757Z",
+      "turn_start": "2026-09-07T08:14:51.830Z",
+      "observed_usage": {
+        "input_tokens": 11343416,
+        "cached_input_tokens": 11214464,
+        "output_tokens": 25811,
+        "reasoning_output_tokens": 6813,
+        "total_tokens": 11369227
+      },
+      "model": "gpt-6-astra",
+      "requested_effort": "ultra",
+      "name": "orc-relay3-integration-20260907-01",
+      "role": "orc",
+      "issue": "pr248",
+      "pr": "248",
+      "worktree": "/home/drx/MIPStarRE-qpbt",
+      "actual_credential_label": "relay-3",
+      "legacy_router_bucket": "space",
+      "usage": null,
+      "usage_scope": "unknown",
+      "observed_usage_additive": false
+    },
+    {
+      "thread_id": "01a07aef-88d5-7b50-b2c6-8353de367f35",
+      "parent_thread_id": "01a076bc-f4ad-7813-805b-c8b4dac71a14",
+      "agent_path": "/root/relay3_pr248",
+      "start": "2026-09-07T08:15:13.760Z",
+      "end": null,
+      "assigned": "2026-09-07T08:43:22.299Z",
+      "turn_start": "2026-09-07T08:15:13.786Z",
+      "observed_usage": {
+        "input_tokens": 9946165,
+        "cached_input_tokens": 9788544,
+        "output_tokens": 33768,
+        "reasoning_output_tokens": 13832,
+        "total_tokens": 9979933
+      },
+      "model": "gpt-6-astra",
+      "requested_effort": "ultra",
+      "name": "prover-relay3-extraction-20260907-01",
+      "role": "prover",
+      "issue": "115",
+      "pr": "207",
+      "worktree": "/home/drx/MIPStarRE-qpbt/.worktrees/issue-115-derived-point-consistency-and-commutatio",
+      "actual_credential_label": "relay-3",
+      "legacy_router_bucket": "space",
+      "usage": null,
+      "usage_scope": "unknown",
+      "observed_usage_additive": false
+    },
+    {
+      "thread_id": "01a07aef-fef3-7a10-ba1c-55acdfa4f1ff",
+      "parent_thread_id": "01a076bc-f4ad-7813-805b-c8b4dac71a14",
+      "agent_path": "/root/relay3_honest_recovery",
+      "start": "2026-09-07T08:15:43.959Z",
+      "end": null,
+      "assigned": "2026-09-07T08:35:42.552Z",
+      "turn_start": "2026-09-07T08:15:43.994Z",
+      "observed_usage": {
+        "input_tokens": 9018086,
+        "cached_input_tokens": 8840320,
+        "output_tokens": 35886,
+        "reasoning_output_tokens": 10733,
+        "total_tokens": 9053972
+      },
+      "model": "gpt-6-astra",
+      "requested_effort": "ultra",
+      "name": "prover-relay3-honest-20260907-01",
+      "role": "prover",
+      "issue": "156",
+      "pr": null,
+      "worktree": "/home/drx/MIPStarRE-qpbt/.worktrees/issue-156-honest-pauli-current",
+      "actual_credential_label": "relay-3",
+      "legacy_router_bucket": "space",
+      "usage": null,
+      "usage_scope": "unknown",
+      "observed_usage_additive": false
+    }
+  ],
+  "metadata_note": "The CLI native-record enum is stale, but the existing record_native API accepts the true relay-3 label and retains canonical rollout validation and the normal locked session writer. No workflow or guard was modified. Service Space/native4 diagnostic labels remain historical and are superseded by the explicit owner relay-3/native3 policy.",
+  "usage": null,
+  "usage_scope": "unknown; cumulative observations are not additive",
+  "occupancy_percent": null,
+  "overnight_occupancy": null,
+  "next": "Finish telemetry checked publication, then integrate fresh PR207/#115 or PR298/#297 after ordinary refresh and exact-head CI/review gates; no full queue census."
+}
