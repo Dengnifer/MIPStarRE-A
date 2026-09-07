@@ -299,7 +299,7 @@ def host_processes(exclusions=()) -> tuple[dict[int, int], dict[int, tuple[str, 
                     os.readlink(process / 'cwd') in exclusions):
                 continue
             candidates[pid] = (account, interactive)
-        except FileNotFoundError:
+        except (FileNotFoundError, ProcessLookupError):
             continue
     return parents, candidates
 
@@ -371,7 +371,16 @@ def resume_account(thread: str, registry: Path, homes: dict[str, Path]) -> str:
 
 def resume_continuation(registry: Path, thread: str) -> dict:
     """Carry the original snapshot and completed segments, deduplicating status appends."""
-    history = {row['name']: row for row in session_rows(registry) if row.get('thread_id') == thread}
+    history = {}
+    for row in session_rows(registry):
+        if row.get('thread_id') != thread:
+            continue
+        if not row.get('name'):
+            # Legacy affinity rows have no session identity for charge deduplication.
+            if row.get('continuation', {}) != {}:
+                raise ValueError('invalid continuation metadata on unnamed registry record')
+            continue
+        history[row['name']] = row
     prior = {}
     for row in history.values():
         metadata = row.get('continuation', {})
