@@ -1501,8 +1501,9 @@ every tuple $\omega$.
 Several lemmas below conclude by asserting that all symmetric equivalents
 of the stated approximations also hold, in each case by
 Lemma~\ref{lem:symmetric-equivalents-transfer} unless the individual register
-pairs are established separately, as in Lemma~\ref{lem:qld-comm-cons}; later
-chapters invoke exactly these variants.
+pairs are established separately, as in Lemmas~\ref{lem:qld-comm-cons}
+and~\ref{lem:qld-comm-line-cons}; later chapters invoke exactly these
+variants.
 
 \begin{lemma}[Consistency and approximate commutation of the expanded point measurements]
 	\label{lem:qld-comm-cons}
@@ -1641,6 +1642,7 @@ chapters invoke exactly these variants.
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.lineMeasExp}
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.lineMeasExp_isProjective}
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.expLineOp_zero_of_not_deg_d}
+	\lean{MIPStarRE.QPBT.tauLineMeas, MIPStarRE.QPBT.ProjectiveSetting.lineTauMeas}
 	\leanok
 	% In the source this measurement is defined inside the proof of the lemma
 	% labelled lem:qld-comm-line-cons (lines 552-556); it is recorded as a
@@ -1691,6 +1693,10 @@ chapters invoke exactly these variants.
 	\lean{MIPStarRE.QPBT.deltaLine, MIPStarRE.QPBT.deltaLine_isPolyErr}
 	\lean{MIPStarRE.QPBT.expLine_self_cons, MIPStarRE.QPBT.expLine_point_cons}
 	\lean{MIPStarRE.QPBT.expLine_point_cons', MIPStarRE.QPBT.exists_deltaLine}
+	\lean{MIPStarRE.QPBT.ExpandedLineConclusions}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.lineEvalMeasExp}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.pointMeasExpOption}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.expPointEffectAtLineAnswer}
 	\leanok
 	\uses{def:expanded-point-measurement, def:expanded-line-measurement, def:expanded-state, def:line-point-dist, def:approx-question-indexed-operators, def:povm-distance, def:ideg-deg-polynomials, def:symmetric-equivalents}
 	Here $\poly(\eps)$ uses the corrected one-parameter convention: there

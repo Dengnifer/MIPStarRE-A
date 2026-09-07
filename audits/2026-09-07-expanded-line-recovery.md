@@ -155,3 +155,49 @@ Only after these checks is the proof-level blueprint marker for
 `lem:qld-comm-line-cons` added, with a description of the alternative order of
 the formalized estimates. Historical ancestry reconciliation, canonical CI,
 independent review, and service-owned integration remain separate pending gates.
+
+## Historical Reconciliation
+
+The validated recovery was committed as
+`b59b328c532aa3354e22a5437c1731ee8c5b2a06` before the ordinary merge of the saved
+`f1dc470` history. That merge exposed twelve final conflicts; all other paths
+were identical to the validated recovery. The eight owned Lean conflicts retain
+the validated recovery content, including the exact published #297 Restriction
+module. No source theorem or construction hypothesis is changed by resolution.
+
+The only unrelated Lean conflict is
+`Combining/DirectLowDegree/Transport/SeedFiber.lean`. Its incoming version adds
+thirty lines declaring `reindexState_norm_eq` and `vecTensor_norm_eq` in the
+root QPBT namespace. Those names, statements, and proofs are already present
+in the imported `State.lean`. Retaining the current SeedFiber version avoids
+duplicate declarations; both archived proof versions remain in the saved
+history. This is duplicate avoidance, not deletion of a mathematical result.
+
+The incoming chapter14 snapshot also predates several current-main and PR207
+proof nodes. Resolution retains those nodes and the #297 restriction auxiliary,
+and incorporates the valid additional #116 measurement/evaluation links and
+the cross-reference identifying its direct treatment of all four placements.
+
+One incoming prose assertion needs correction: the alternative proof displayed
+an overlap equality for each fixed outcome `a`. The proved identity is instead
+summed over the completed outcome set, as stated by
+`sum_stateQForm_evalClass_AA'_BA''_eq`. The ancillary Pauli label shifts the two
+answer labels together. This preserves their total agreement probability, but
+not the probability assigned to a fixed label: if the original answers are
+both zero, averaging a common uniform field shift spreads that agreement mass
+over the field labels. Thus a fixed-label overlap need not equal its original
+value. The recovery retains the correct summed-overlap/inconsistency argument;
+the old prose remains preserved in `f1dc470` for provenance.
+
+The designated telemetry coordinator separately resolves `events.md` and
+`owner-sessions.jsonl`. The latter retains all 247 current raw rows exactly;
+the older incoming completion of owner session #210 is already represented by
+the later clock-reanchored current record. Its historical rows and all three
+merge stages are archived, and an explicit supersession note records why
+reintroducing the older clock row would duplicate accounting. The author does
+not normalize, discard, or independently rewrite these telemetry records.
+
+The normal merge-loss guard and post-resolution source checks remain required
+before the two-parent history merge is committed. Original worktrees, refs,
+and raw inputs remain preserved throughout; no abort, reset, or force operation
+is used.
