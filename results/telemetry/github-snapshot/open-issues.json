@@ -1,5 +1,99 @@
 [
  {
+  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/305",
+  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
+  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/305/labels{/name}",
+  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/305/comments",
+  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/305/events",
+  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/305",
+  "id": 5378498672,
+  "node_id": "I_kwDOUJyJf88AAAABQJVgcA",
+  "number": 305,
+  "title": "feat(QPBT/Combining): identify axis-line point rejection",
+  "user": {
+   "login": "Dengnifer",
+   "id": 89234078,
+   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
+   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/Dengnifer",
+   "html_url": "https://github.com/Dengnifer",
+   "followers_url": "https://api.github.com/users/Dengnifer/followers",
+   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
+   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
+   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
+   "repos_url": "https://api.github.com/users/Dengnifer/repos",
+   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
+   "type": "User",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "labels": [
+   {
+    "id": 12025010884,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
+    "name": "formalization",
+    "color": "ededed",
+    "default": false,
+    "description": "Lean formalization of a mathematical statement"
+   },
+   {
+    "id": 12025012183,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8f1w",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/qpbt-analysis",
+    "name": "qpbt-analysis",
+    "color": "ededed",
+    "default": false,
+    "description": "Soundness/rigidity analysis of the Pauli basis test \u2014 self-testing bounds and error terms"
+   }
+  ],
+  "state": "open",
+  "locked": false,
+  "assignees": [],
+  "milestone": null,
+  "comments": 0,
+  "created_at": "2026-09-07T19:48:47Z",
+  "updated_at": "2026-09-07T19:48:47Z",
+  "closed_at": null,
+  "assignee": null,
+  "author_association": "OWNER",
+  "active_lock_reason": null,
+  "sub_issues_summary": {
+   "total": 0,
+   "completed": 0,
+   "percent_completed": 0
+  },
+  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/119",
+  "issue_dependencies_summary": {
+   "blocked_by": 1,
+   "total_blocked_by": 2,
+   "blocking": 0,
+   "total_blocking": 0
+  },
+  "body": "<!-- mipstarre-issue-key: qpbt-line-point-rejection-transport-20260907 -->\n## Mathematical Goal\n\nFor an existing `ExtendedLinesWitness`, prove the exact equality between the\ndirect low-degree game's `(.aline, .point)` branch rejection probability and\nthe existing completed line-point consistency defect:\n\n\u200b`\u200b`\u200b`text\ndirectLdBranchRejectionProbability P.extendedDirectLd\n    (ExtendedLineGame.strategy lines) (.aline, .point)\n  = ExtendedLineGame.completedLinePointDefect lines .AA' .BA''\n      (directALinePointDist P.extendedDirectLd)\n\u200b`\u200b`\u200b`\n\nThis is a finite-sum and postprocessing transport identity. It reuses the\narbitrary-operator state-correlation theorem from #302 and the concrete direct\ngame strategy from #244. It adds no passing-value premise, factorization\nassumption, consistency hypothesis, or source-theorem input.\n\n## Source And Existing API\n\n- `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1267-1404`,\n  especially the direct low-degree strategy application at lines 1279-1288.\n- Blueprint `lem:qld-4-7`.\n- `ExtendedLineGame.answerMeasurement`, `axisAnswer_win_iff_of_effect_ne_zero`,\n  `completedLinePointDefect`, and `strategy`.\n- `directALinePointDist` and the direct game verifier/pushforward definitions.\n- `ExtendedLineGame.stateQForm_pairState_eq_AA'_BA''` from #302.\n\n## Dependencies\n\n- #302 supplies the required expanded-state correlation transport and is open\n  as stacked PR #304.\n- #244 supplies the constructed direct-game strategy and verifier conversion;\n  it is already closed and integrated.\n\nThe GitHub dependency edges are the lifecycle record; these bullets document\ntheir mathematical role.\n\n## Completion Boundary\n\nAdd one standalone module under\n`MIPStarRE/QPBT/Combining/ExtendedLineGame/` proving the equality above from\nthe existing definitions. Add only the minimal cycle-safe re-export and brief\nor audit needed for review.\n\nThis packet does not prove the other three line-point orientations, a total\npassing-value bound, direct low-degree soundness, existence of either supplied\nwitness, `GlobalPairWitness`, or source lemma `lem:qld-4-7`. Parent #119 remains\nopen. The exhausted B8/#118 budget remains 13 attempts and 26,509 seconds.\n\n## Validation\n\n- Focused Lean checking of the new module and necessary re-export.\n- Proof-hole and prohibited-bypass scan.\n- Axiom closure of the new theorem contains only standard Lean axioms.\n- Normal hooks and checked publication from a branch stacked on PR #304.\n- Canonical CI and independent review remain coordinator-owned.",
+  "closed_by": null,
+  "reactions": {
+   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/305/reactions",
+   "total_count": 0,
+   "+1": 0,
+   "-1": 0,
+   "laugh": 0,
+   "hooray": 0,
+   "confused": 0,
+   "heart": 0,
+   "rocket": 0,
+   "eyes": 0
+  },
+  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/305/timeline",
+  "performed_via_github_app": null,
+  "state_reason": null,
+  "pinned_comment": null
+ },
+ {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/302",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/302/labels{/name}",
@@ -62,8 +156,8 @@
   "issue_dependencies_summary": {
    "blocked_by": 0,
    "total_blocked_by": 2,
-   "blocking": 0,
-   "total_blocking": 0
+   "blocking": 1,
+   "total_blocking": 1
   },
   "body": "<!-- mipstarre-issue-key: qpbt-expanded-state-correlation-20260907 -->\n## Mathematical Goal\n\nProve exact expanded-state regrouping and correlation identities supporting\nthe direct low-degree strategy used in the proof of `lem:qld-4-7`.\n\nThe state of `eq:def-psihat` is the original strategy state tensored with two\nEPR states. Under the `AA'`--`BA''` register grouping it is the existing\n`ExtendedLineGame.pairState` tensored with the unused EPR state. The analogous\n`AB''`--`BB'` grouping follows from symmetry of the EPR state. Derive the\ncorresponding equality of quadratic forms for arbitrary Hermitian operators\non the two expanded local spaces. No tensor factorization of an individual\nmeasurement effect is assumed.\n\n## Source and Existing Definitions\n\n- `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:367-372`,\n  equation `eq:def-psihat`.\n- The same source, `lem:qld-4-7`, first proof paragraph at 1279-1288.\n- Existing `ProjectiveSetting.psiHat`, `aaBaBipartition`, `abBbBipartition`,\n  general placement reindexing lemmas, and `ExtendedLineGame.pairState`.\n- Predecessor construction #244 and placement support #115, both already\n  integrated. The parent task is #119; its prior work and usage are retained.\n\n## Completion Boundary\n\nA new standalone module\n`MIPStarRE/QPBT/Combining/ExtendedLineGame/StateTransport.lean` contains the\nstate equalities and the two arbitrary-operator correlation transfers, with\nsource citations, per-file type checking, and standard-only axiom audits.\nThe module reuses existing tensor and reindexing APIs; it does not duplicate\nthe general placement operators or assume factorization of line effects.\n\nThis is an auxiliary proof, not a proof of the game's passing value, the\nexistence of `GlobalPairWitness`, or `lem:qld-4-7`. No source theorem,\nwitness field, public hypothesis, proof hole, axiom, or paper-gap claim is\nchanged. Existing issue119 and recovery worktrees remain untouched. This\nwork does not start a B8 attempt or renew any shared mathematical-gap budget.\n\n## Validation\n\n- Per-file Lean check before broader validation.\n- Axiom closure for every new public theorem: only standard Lean axioms.\n- Existing hooks, checked publication, canonical CI and independent review\n  remain required before daemon-owned integration.",
   "closed_by": null,
@@ -1594,81 +1688,6 @@
   "pinned_comment": null
  },
  {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/241",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/241/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/241/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/241/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/241",
-  "id": 5362369850,
-  "node_id": "I_kwDOUJyJf88AAAABP59FOg",
-  "number": 241,
-  "title": "feat(QPBT/Extraction): prove independent extraction error absorption",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-06T02:34:05Z",
-  "updated_at": "2026-09-06T02:34:05Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/167",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 1,
-   "blocking": 0,
-   "total_blocking": 0
-  },
-  "body": "<!-- mipstarre-issue-key: 20260906-extraction-error-absorption -->\n### Independent mathematical task\n\nExclusive write scope MIPStarRE/QPBT/Extraction/Unitary.lean ONLY for deltaExtract_le_deltaQld and a packet-specific audit. Prove its unchanged real-power estimate using deltaConstructPaulis, deltaExtract, deltaQld and admissibility from merged definitions. Do not edit exists_extractionWitness_ofGlobalPairWitness or any other packet file. Source references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1855-1858,1868-1876; blueprint lem:qld-extraction-error-form. This is scalar algebra independent of witness construction and other active proof workers. Reuse existing rpow inequalities; no extra assumptions or weakened bound. No shared blueprint edits in this parallel packet; record proposed exact links in the audit for integration.\n\n### Integrity and lifecycle\n\nMain-selected disjoint prerequisite work under the owner concurrency deadline. Base is published main a61ee55. The original extraction packets keep their parent merge gates. No new sorry, axiom, native bypass, statement weakening or implicit proof-budget reset. Source first; targeted Lean and declaration axiom checks; normal hooks, CI, independent review and daemon-only merge. Do not mark an unfinished source theorem complete. Other active writers retain their exclusive files. Addresses #123 without closing it.",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/241/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/241/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/234",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/234/labels{/name}",
@@ -2206,8 +2225,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 15,
-   "completed": 6,
-   "percent_completed": 40
+   "completed": 7,
+   "percent_completed": 46
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
   "issue_dependencies_summary": {
@@ -3042,7 +3061,7 @@
   "author_association": "OWNER",
   "active_lock_reason": null,
   "sub_issues_summary": {
-   "total": 1,
+   "total": 2,
    "completed": 0,
    "percent_completed": 0
   },
@@ -4352,9 +4371,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 42,
+  "comments": 43,
   "created_at": "2026-09-02T08:29:59Z",
-  "updated_at": "2026-09-07T15:40:24Z",
+  "updated_at": "2026-09-07T19:17:53Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
