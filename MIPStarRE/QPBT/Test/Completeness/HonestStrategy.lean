@@ -1,5 +1,6 @@
 import MIPStarRE.QPBT.Algebra.PauliTheorems
 import MIPStarRE.QPBT.Games.DistanceTheorems.TensorSupport
+import MIPStarRE.QPBT.Observables.ExpandedCommutation
 import MIPStarRE.QPBT.Observables.LineMeasurement.Restriction
 import MIPStarRE.QPBT.Test.MagicSquareTheorems
 import MIPStarRE.QPBT.Test.PauliBasisTest
@@ -112,20 +113,6 @@ theorem tauObservable_transpose (W : PauliKind) (a : ι → K) :
       by_cases h : x i = y i
       · rw [h]
       · rw [if_neg h, if_neg (fun hc => h hc.symm)]
-
-omit [Fintype K] in
-/-- Generalized Pauli observables are Hermitian. This is the self-adjointness
-of the observables `𝒪_A` and `𝒪_B` used in the proof of
-`lem:pauli-completeness`, paper
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1290-1360`.
-The field remains finite; its enumeration is chosen locally for the finite
-Fourier expansion in the proof. -/
-theorem tauObservable_conjTranspose [Finite K] (W : PauliKind) (a : ι → K) :
-    (tauObservable W a)ᴴ = tauObservable W a := by
-  letI := Fintype.ofFinite K
-  rw [tauObservable_eq_sum_pauliProj, Matrix.conjTranspose_sum]
-  refine Finset.sum_congr rfl fun e _ => ?_
-  rw [Matrix.conjTranspose_smul, star_phaseSign, pauliProj_conjTranspose]
 
 /-! ### Orthogonality of the generalized Pauli projectors
 

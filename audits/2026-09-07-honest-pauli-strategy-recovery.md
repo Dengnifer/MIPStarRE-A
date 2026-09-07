@@ -107,6 +107,14 @@ does not assert the result by discarding the finiteness used in that proof.
 No linter is disabled. Numerical blueprint citations in recovered documentation
 are replaced by the corresponding stable labels.
 
+At the refreshed main base, the self-adjointness identity
+`tauObservable_conjTranspose` is supplied by `Observables.ExpandedCommutation`.
+The honest measurement construction uses that existing public identity; its
+duplicate declaration is removed so that both modules can be imported together.
+The identity has the same finite-field hypotheses and conclusion. This use does
+not require a winning strategy or an approximate-commutation premise, and no
+hypothesis of `exists_spcc_value_one` or the strategy construction is changed.
+
 ## Fresh Validation
 
 The recovered foundation, assembly, commutation, rejection, and final
