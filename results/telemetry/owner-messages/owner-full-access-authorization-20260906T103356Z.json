@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "incorporated_on": "2026-09-07",
+  "source": "/tmp/qpbt-meta-20260905-230133/owner-full-access-authorization-20260906T103356Z.json",
+  "source_sha256": "dccea9f1af9c5e2558d120b0157b62f2adb9accbcea7e2a5b877260940c1a24b",
+  "recorded_using_ghz_utc": "2026-09-06T10:33:56Z",
+  "kind": "explicit-owner-runtime-permission",
+  "owner_quote": "I authorize the meta session to restart qpbt-main in full-access mode on ghz. Qpbt-main may use that mode for its assigned Track A workers. Keep all existing project-scope, credential, proof-integrity, review, and merge restrictions.",
+  "reviewed_thread_id": "01a0760d-31c7-7200-964d-29437ee7febe",
+  "verified_restart": {
+    "graceful_exit_ghz_utc": "2026-09-06T10:47:11Z",
+    "launch_ghz_utc": "2026-09-06T10:48:52Z",
+    "goal_resume_ghz_utc": "2026-09-06T10:49:52.643289Z",
+    "verified_ghz_utc": "2026-09-06T10:51:07Z",
+    "effective_context_utc": "2026-09-06T10:49:52.668Z",
+    "pid": 527605,
+    "sandbox": "danger-full-access",
+    "approval_policy": "on-request",
+    "approvals_reviewer": "auto_review",
+    "model": "gpt-6-astra",
+    "effort": "max",
+    "account": "primary relay",
+    "credentials_changed": false,
+    "old_safety_stopped_conversation_resumed": false
+  },
+  "correction": "The10:40 observation was an in-process setting change, not the actual10:48:52 process restart. Earlier records are retained.",
+  "separate_denied_action": "The specific #27 internal checkpoint payload was rejected; this authorization does not permit replaying it.",
+  "status": "Historical owner authorization and verified result, not a claim about the current turn's effective permissions",
+  "publication_status": "Incorporated locally; not committed or published by this operation"
+}
