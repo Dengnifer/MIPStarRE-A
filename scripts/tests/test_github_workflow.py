@@ -453,7 +453,8 @@ class ReviewRoundCounterTests(LayerTestCase):
 
         cache = self.tmp / "review-cache"
         env = dict(os.environ, **self.gh.env(), MIPSTARRE_CACHE_ROOT=str(cache),
-                   LOCAL_REVIEW_ENABLED="true", PYTHONDONTWRITEBYTECODE="1")
+                   LOCAL_REVIEW_ENABLED="true", MIPSTARRE_REVIEW_EFFORT="ultra",
+                   PYTHONDONTWRITEBYTECODE="1")
         result = subprocess.run(
             ["bash", str(self.repo / "local" / "bin" / "review.sh"),
              "7", "--force-review", "--dry-run"],
@@ -494,7 +495,8 @@ class ReviewRoundCounterTests(LayerTestCase):
                 environment = dict(os.environ, **self.gh.env(),
                     MIPSTARRE_CACHE_ROOT=str(self.tmp / f'queue-{label}'),
                     MIPSTARRE_QUEUE_TICKET='test-only', MIPSTARRE_QUEUE_EXPECTED_HEAD=self.head,
-                    LOCAL_REVIEW_ENABLED='true', PYTHONDONTWRITEBYTECODE='1')
+                    LOCAL_REVIEW_ENABLED='true', MIPSTARRE_REVIEW_EFFORT='ultra',
+                    PYTHONDONTWRITEBYTECODE='1')
                 result = subprocess.run(['bash', str(self.repo / 'local/bin/review.sh'),
                     '7', '--dry-run'], cwd=self.repo, capture_output=True, text=True,
                     env=environment)
