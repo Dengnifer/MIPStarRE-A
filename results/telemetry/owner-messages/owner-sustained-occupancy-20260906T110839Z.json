@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "incorporated_on": "2026-09-07",
+  "source": "/tmp/qpbt-meta-20260905-230133/owner-sustained-occupancy-20260906T110839Z.json",
+  "source_sha256": "cc9d1383f6fcc6aacd511804cffd8a1404206469aa4463c9e3b88c3a72aed166",
+  "verified_ghz_utc": "2026-09-06T11:08:39Z",
+  "owner_request": "The concurrency is still far from saturated. why is high concurrency so hard to enforce?! is it possible to enforce the concurrency to be over 7 in most of the times?",
+  "historical_policy": {
+    "floor_workers_excluding_main": 8,
+    "target_workers_excluding_main": 11,
+    "account": "relay only",
+    "model": "Astra only",
+    "main_owns_task_selection": true,
+    "no_filler_or_duplicate_writers": true
+  },
+  "independent_census": [
+    {"ghz_utc": "2026-09-06T10:59:11Z", "workers": 9, "main": 1},
+    {"ghz_utc": "2026-09-06T11:07:37Z", "workers": 8, "main": 1}
+  ],
+  "observer_evidence": {
+    "ts": "2026-09-06T11:08:35.605380+00:00",
+    "workers": 8,
+    "seconds_at_least_eight": 70.62875552405603,
+    "seconds_below_eight": 0.0,
+    "unknown_workers": 0,
+    "observed_replacements": 0,
+    "scope": "Short client-occupancy window, not backend utilization or sustained enforcement"
+  },
+  "measurement_corrections": [
+    "Observer v1 misattributed workers using parent cwd; its records remain historical.",
+    "Observer v2 uses explicit Codex -C worktrees; its hard-coded shortfall explanation is historical, not a live diagnosis.",
+    "Reconnects, configured capacity, idle placeholders and unverified task-observation gaps do not establish useful occupancy."
+  ],
+  "historical_shortfall": "The original held queue had not demonstrated automatic replenishment; the later relay outage is separate evidence and does not establish a concurrency-cap error.",
+  "current_policy_pointer": "results/telemetry/owner-messages/qpbt-main-current-20260906.md",
+  "status": "Historical allocation; later owner Space/five-total/native-four/external-zero instructions supersede its route and count limits",
+  "publication_status": "Incorporated locally; not committed or published by this operation"
+}
