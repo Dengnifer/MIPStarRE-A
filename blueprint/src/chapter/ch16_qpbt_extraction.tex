@@ -96,6 +96,14 @@ The measurement $\{\hat{S}_{g_X,g_Z}\}$ reads out an $X$-polynomial and a $Z$-po
 	\uses{def:s-w-marginals, lem:qld-4-7}
 	For each $W\in\{X,Z\}$, the family $\{\hat{S}^W_g\}_g$ is a projective measurement with outcomes in $\mathrm{ideg}_{d,m}(\F_q)$.
 \end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:s-w-marginals, lem:sandwich-postprocess-projective}
+	By Definition~\ref{def:s-w-marginals}, each marginal is the finite postprocessing
+	of the joint projective measurement by the outcome map $(g_X,g_Z)\mapsto g_W$.
+	Lemma~\ref{lem:sandwich-postprocess-projective} shows that this postprocessing
+	preserves projectivity.
+\end{proof}
 
 \begin{definition}[Pauli dot-product projectors]\label{def:tau-dot-product-projector}
 	\lean{MIPStarRE.QPBT.tauDotProj}
@@ -187,6 +195,7 @@ The measurement $\{\hat{S}_{g_X,g_Z}\}$ reads out an $X$-polynomial and a $Z$-po
 	where $\tr((e_j \tilde{u}) \cdot (e_{j'} \tilde{v})) = \tr(e_j e_{j'} (\tilde{u} \cdot \tilde{v}))$.
 \end{lemma}
 \begin{proof}
+	\leanok
 	\uses{def:tilde-w-observables, def:tilde-m-measurement, def:tau-dot-product-projector, def:s-w-marginals, lem:pauli-observable-expansion, lem:twisted-commutation, lem:qld-4-7}
 	Expanding $\tau^W(e_j \tilde{u}) = \sum_{h} (-1)^{\tr(e_j (\tilde{u} \cdot h))}\, \tau^W_h$ on the right-hand side of \eqref{eq:tildewj-product-form} (Lemma~\ref{lem:pauli-observable-expansion}), grouping the $h$ according to the value $a' = h \cdot \tilde{u}$ into the projectors $\tau^W_{a'}(\tilde{u})$ of \eqref{eq:def-tauwu}, collecting the pairs $(g_X,g_Z)$ with a common value $g_W = g$ into $\hat{S}^W_g$ (Definition~\ref{def:s-w-marginals}), and changing the summation variable to $a = (\mathrm{Dec}(g) \cdot \tilde{u}) - a'$ recovers, by \eqref{eq:tilde_M} and \eqref{eq:def-tildewj}, the operator $\tilde{W}^j(\tilde{u})$; this proves \eqref{eq:tildewj-product-form}. Since the $\hat{S}_{g_X,g_Z}$ are mutually orthogonal projectors summing to the identity (Lemma~\ref{lem:qld-4-7}) and $\tau^W(e_j \tilde{u})$ is a Hermitian involution, the product form exhibits $\tilde{W}^j(\tilde{u})$ as Hermitian with square $\sum_{g_X,g_Z} \hat{S}_{g_X,g_Z} \ot \Id = \Id$. For \eqref{eq:tildew-twisted-commutation}, the two sign-weighted sums of the projectors $\hat{S}_{g_X,g_Z}$ appearing in the product forms of $\tilde{X}^j(\tilde{u})$ and $\tilde{Z}^{j'}(\tilde{v})$ commute with each other, so the commutation phase is that of $\tau^X(e_j \tilde{u})$ and $\tau^Z(e_{j'} \tilde{v})$, which is $(-1)^{\tr((e_j \tilde{u}) \cdot (e_{j'} \tilde{v}))}$ by Lemma~\ref{lem:twisted-commutation}.
 \end{proof}
