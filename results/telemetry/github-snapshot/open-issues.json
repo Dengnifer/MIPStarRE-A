@@ -2077,9 +2077,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 12,
+  "comments": 13,
   "created_at": "2026-09-04T11:58:10Z",
-  "updated_at": "2026-09-07T04:01:59Z",
+  "updated_at": "2026-09-07T10:02:09Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
@@ -2394,8 +2394,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 8,
-   "completed": 6,
-   "percent_completed": 75
+   "completed": 7,
+   "percent_completed": 87
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
   "issue_dependencies_summary": {
@@ -2775,7 +2775,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/167",
   "issue_dependencies_summary": {
-   "blocked_by": 4,
+   "blocked_by": 3,
    "total_blocked_by": 5,
    "blocking": 0,
    "total_blocking": 0
@@ -3200,7 +3200,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/165",
   "issue_dependencies_summary": {
-   "blocked_by": 1,
+   "blocked_by": 0,
    "total_blocked_by": 3,
    "blocking": 3,
    "total_blocking": 3
@@ -3220,91 +3220,6 @@
    "eyes": 0
   },
   "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/116/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/115",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/115/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/115/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/115/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/115",
-  "id": 5345142794,
-  "node_id": "I_kwDOUJyJf88AAAABPphoCg",
-  "number": 115,
-  "title": "feat(QPBT/Observables): prove derived point consistency and commutation",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 5,
-  "created_at": "2026-09-04T06:46:19Z",
-  "updated_at": "2026-09-04T23:32:26Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/165",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 5,
-   "blocking": 2,
-   "total_blocking": 4
-  },
-  "body": "<!-- mipstarre-issue-key: stage43-unfiled-observables-derived-points -->\n### Target declarations\n\n- `MIPStarRE/QPBT/Observables/WinImplications.lean:457` \u2014 `pointObs_self_consistent`\n- `MIPStarRE/QPBT/Observables/WinImplications.lean:476` \u2014 `pointObs_twisted_commutation`\n- `MIPStarRE/QPBT/Observables/WinImplications.lean:495` \u2014 `pointObs_twisted_commutation_interchanged`\n- `MIPStarRE/QPBT/Observables/PointConsistency.lean:101` \u2014 `expPoint_self_cons`\n- `MIPStarRE/QPBT/Observables/PointConsistency.lean:120` \u2014 `expPointTrace_comm`\n\n### Paper and blueprint references\n\n- Observable consequences:\n  `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:268-354`;\n  `blueprint/src/chapter/ch14_qpbt_observables.tex:681-759`.\n- Expanded point consistency:\n  `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:420-505`;\n  `blueprint/src/chapter/ch14_qpbt_observables.tex:921-1057`.\n\n### Dependencies\n\n- #113 and #114 must merge first.\n- #77 and its child chain #101-#105 must close for the Magic Square rigidity\n  input used in twisted anticommutation.\n- #49 and #64/#68 must be axiom-clean.\n- This is the final serialized owner of `WinImplications.lean`.\n\n### Acceptance\n\n- All five target declarations are proved with unchanged signatures and bounds.\n- `lake env lean` is green for both target files and direct consumers.\n- Completed source nodes receive proof-level `\\leanok`.\n- No new `sorry`, `admit`, axiom, prohibited bypass, unfaithful rigidity\n  dependency, symmetry shortcut, or omitted placement is introduced.\n- Full build, declaration checking, blueprint rendering, exact-head CI, and\n  independent review pass.\n\n### Scope notes\n\nOwn only the last three holes in `WinImplications.lean` after #113, all\ntwo holes in `PointConsistency.lean`, and matching proof status. Preserve all\nfour directed opposite placements and both twisted-commutation orientations.\nMain locators are from `c1c0af4`.\n\n---\nStage 4.3 proof packet under #47.\n\nPrerequisites are recorded as GitHub issue dependencies (blocked_by); the bullets above are commentary.\n",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/115/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/115/timeline",
   "performed_via_github_app": null,
   "state_reason": null,
   "pinned_comment": null
@@ -4335,9 +4250,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 210,
+  "comments": 211,
   "created_at": "2026-09-02T08:30:04Z",
-  "updated_at": "2026-09-07T08:28:14Z",
+  "updated_at": "2026-09-07T08:54:46Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
