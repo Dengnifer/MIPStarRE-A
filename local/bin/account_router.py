@@ -516,9 +516,13 @@ def main() -> None:
             if args.account not in ("auto", affinity):
                 raise ValueError(f"resume belongs to {affinity}, not {args.account}")
             args.account = affinity
-        model = os.environ.get('MIPSTARRE_CODEX_MODEL') or 'gpt-6-astra'
-        if model != 'gpt-6-astra':
-            raise ValueError('owner policy requires gpt-6-astra for every role')
+        from model_policy import select_model
+        model = select_model(os.environ.get('MIPSTARRE_DISPATCH_ROLE', 'orc'),
+            os.environ.get('MIPSTARRE_JOB_CLASS', 'general'),
+            os.environ.get('MIPSTARRE_CODEX_MODEL') or 'auto',
+            os.environ.get('MIPSTARRE_REQUESTED_EFFORT', 'ultra'),
+            os.environ.get('MIPSTARRE_JOB_SPEC') or None,
+            worktree=os.environ.get('MIPSTARRE_DISPATCH_WORKTREE'))['model']
         selected = reserve(args.root, args.account, args.pid, args.wait, args.dry_run)
         print(selected)
         print(model)

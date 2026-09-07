@@ -13,6 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'local/bin'))
 import account_router as router
 import native_review as review
 import telemetry
+import model_policy
 
 ROOT = '01a076bc-f4ad-7813-805b-c8b4dac71a14'
 CHILD = '01a076e7-b2ae-7e60-9090-72c3b7dce9c3'
@@ -66,6 +67,8 @@ class NativeWorkflowTests(unittest.TestCase):
 
     def acceptance(self, response=None):
         with mock.patch.object(review, 'verify_root', return_value=self.info), \
+                mock.patch.object(model_policy, 'load_policy', return_value=dict(
+                    schema_version=1, audit=None, qualified_job_classes={})), \
                 mock.patch.object(review.subprocess, 'check_output',
                                   side_effect=lambda args, **kw: 'a' * 40 if 'rev-parse' in args else ''), \
                 mock.patch.object(review, 'record_native'):
@@ -201,6 +204,10 @@ class NativeWorkflowTests(unittest.TestCase):
                 mock.patch.object(router, 'process_identity', return_value='123'), \
                 mock.patch.object(Path, 'read_bytes', autospec=True, side_effect=data):
             self.assertEqual(router.native_process(ROOT, 100, 8)['key_label'], 'space')
+            args[4] = 'gpt-5.6-sol'
+            with self.assertRaises(ValueError):
+                router.native_process(ROOT, 100, 8)
+            args[4] = 'gpt-6-astra'
             with self.assertRaises(ValueError):
                 router.native_process(ROOT, 100, 7)
             with self.assertRaises(ValueError):

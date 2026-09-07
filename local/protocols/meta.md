@@ -102,6 +102,15 @@ Duties:
 
 ## Research-data invariants
 
+Model-policy records (#301) retain `requested_model`, `selected_model` when
+configured for external dispatch, `effective_model` only when observed, `job_class`,
+and `model_policy` with audit rationale and the root-issued recipe reference.
+External capture without model evidence records effective model as null, not the
+CLI argument. Native observations retain all bound current-turn contexts; mixed
+models/efforts and missing explicit Sol requests fail closed. Prior/forked contexts
+are not attributed to a new job. Requested effort remains distinct from provider
+effort; missing usage remains unknown and historical records are not rewritten.
+
 The project doubles as a study of a self-evolving formalization workflow.
 Three artifacts must therefore stay trustworthy:
 

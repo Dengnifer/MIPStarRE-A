@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "audit": {
+    "reference": "Issue #301; /tmp/qpbt-sol-routing-audit-20260907.md",
+    "sha256": "9a5c4e89bd4e61245ef7df716762deaa3071980fe0c2e3702ea8a248b307d516",
+    "matrix_sha256": "69fd336f92be6b6308c4a65c3ab566a5ad4a818e6d9c0ba5261ba0e5f3bdc05b",
+    "pin": "5924b3acec0d1ad5fe38b8a93ac5e950e2daa071",
+    "validation": "/tmp/qpbt-sol-routing-audit-validation-20260907.md",
+    "runtime_evidence": "ghz qpbt-ultra/codex-models.json advertises both exact models with ultra"
+  },
+  "qualified_job_classes": {
+    "review_directed_nonsemantic_cleanup": {
+      "roles": ["prover"],
+      "model": "gpt-5.6-sol",
+      "effort": "ultra",
+      "case_ids": ["C01", "C02"],
+      "rationale": "Only externally adjudicated literal comments or exact theorem names and listed callers. C01: PR229/6e754fc, Astra review5122284090. C02: PR185/d82bc5a Lean component, Astra review5122448776; blueprint scope/status excluded. At most two existing Lean files and twelve added plus removed lines. No independent meaning, proof, citation, scope, status, runtime or policy decisions."
+    }
+  }
+}

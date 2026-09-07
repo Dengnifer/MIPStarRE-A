@@ -25,16 +25,24 @@ TELEMETRY = REPO_ROOT / "local" / "bin" / "telemetry.py"
 PRE_COMMIT = REPO_ROOT / ".githooks" / "pre-commit"
 THREAD_ID = "019e93a5-e370-7aa1-ba77-6373dbdd6a61"
 ROUTER = DISPATCH.with_name("account_router.py")
+sys.path.insert(0, str(DISPATCH.parent))
+import model_policy
 SPEC = importlib.util.spec_from_file_location("account_router", ROUTER)
 router = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(router)
 HOST_PROCESS_SCAN = router.host_processes
 
 
+def copy_model_policy(local_bin: Path) -> None:
+    shutil.copy2(DISPATCH.with_name('model_policy.py'), local_bin / 'model_policy.py')
+    shutil.copy2(REPO_ROOT / 'local/model-policy.json', local_bin.parent / 'model-policy.json')
+
+
 def isolate_host(binary_dir: Path) -> None:
     interpreter = binary_dir / 'python3'
     interpreter.write_text(f'#!{sys.executable}\nimport os, runpy, sys\n'
         'if sys.argv[1].endswith("/account_router.py"):\n'
+        '    sys.path.insert(0, os.path.dirname(sys.argv[1]))\n'
         '    loaded = runpy.run_path(sys.argv.pop(1))\n'
         '    loaded["reserve"].__globals__["host_processes"] = lambda *args: ({}, {})\n'
         '    loaded["main"]()\n'
@@ -55,6 +63,7 @@ class DispatchCommandTests(unittest.TestCase):
             shutil.copy2(DISPATCH, local_bin / "dispatch.sh")
             shutil.copy2(TELEMETRY, local_bin / "telemetry.py")
             shutil.copy2(ROUTER, local_bin / "account_router.py")
+            copy_model_policy(local_bin)
             (repo / "AGENTS.md").write_text("# Test repository\n", encoding="utf-8")
             subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
 
@@ -163,7 +172,7 @@ class DispatchCommandTests(unittest.TestCase):
 
     def dispatch_command(
         self, *extra: str, model: str = "gpt-6-astra", effort: str | None = "ultra",
-        include_persona: bool = False, registry_rows: str = "",
+        include_persona: bool = False, registry_rows: str = "", policy_data: dict | None = None,
     ) -> list[str]:
         with tempfile.TemporaryDirectory() as cache_root:
             fake_bin = Path(cache_root) / "bin"
@@ -191,7 +200,7 @@ class DispatchCommandTests(unittest.TestCase):
             (Path(cache_root) / 'watchdog/account-mode').write_text('both')
             worktree = REPO_ROOT
             dispatch = DISPATCH
-            if registry_rows:
+            if registry_rows or policy_data is not None:
                 worktree = Path(cache_root) / 'repo'
                 registry = worktree / 'results/telemetry/sessions.jsonl'
                 registry.parent.mkdir(parents=True)
@@ -202,6 +211,9 @@ class DispatchCommandTests(unittest.TestCase):
                 dispatch.parent.mkdir(parents=True)
                 for source in (DISPATCH, ROUTER, TELEMETRY):
                     shutil.copy2(source, dispatch.parent / source.name)
+                copy_model_policy(dispatch.parent)
+                if policy_data is not None:
+                    (dispatch.parent.parent / 'model-policy.json').write_text(json.dumps(policy_data))
             dispatch_args = [str(dispatch), '--role', 'scout', '--issue', 'dispatch-argv',
                              '--worktree', str(worktree), '--sandbox', 'read-only',
                              *([] if include_persona else ['--no-persona']),

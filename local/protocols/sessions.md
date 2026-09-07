@@ -43,7 +43,8 @@ the `dispatcher` field. External session prompts prohibit further fan-out.
 
 ### Native descendants (owner amendment, 2026-09-06)
 
-Main may assign useful native Astra Ultra work without external admission. Before
+Main may assign useful native work under the published model policy without
+external admission. Main and inherited defaults remain Astra Ultra. Before
 admitting either kind of worker, reserve the native root's configured descendant cap:
 `account_router.py native-lease CACHE ROOT_THREAD PID CAP`. The cap excludes the root;
 the process census separately charges the root. This command validates the live
@@ -51,8 +52,8 @@ resume thread, process start identity, scoped space route, explicit Astra/Ultra
 defaults and shared descendant cap under the account-router lock. Python 3.10 needs
 `tomli` for this native-only TOML validation; Python 3.11 has `tomllib`.
 `watchdog/primary-key-capacity` is the owner allocation, not measured throughput. For
-the current space episode the owner allocation is five total sessions including main,
-external admission is zero, and at most four native descendants may be active. The
+the current relay-3 episode the owner allocation is eleven total slots,
+external admission is zero, and the existing native lease has nine descendants. The
 router enforces `watchdog/primary-external-admission=0` (and the owner `max-codex=0`
 fallback) before creating any external reservation.
 Native leases, external processes/reservations, interactives and reserved non-Codex
@@ -71,7 +72,8 @@ ready list is not measured occupancy. No nested extra pool may exceed the shared
 Children do not write the primary index or shared telemetry concurrently. The primary
 telemetry owner records each child using `telemetry.py native-record ROLLOUT` with
 `--name --role --issue --thread-id --root-thread-id --key-label --worktree --status`
-and optional `--pr`; effective metadata must show Astra Ultra. Root/parent IDs,
+and optional `--pr --job-class --job-spec --requested-model`. Effective bound-turn
+contexts must satisfy the model policy; canonical reviews remain Astra Ultra. Root/parent IDs,
 timestamps, outcome and raw observed counters are retained. Aggregation scope is
 unknown: never sum parent and child counters without independent evidence. Native
 review uses the exact-head transport in `review.md`; it cannot bypass CI or merge gates.
@@ -80,6 +82,43 @@ assignments, not a falsely claimed separate read-only sandbox. Historical episod
 attempt counts and usage survive refreshes and route changes without a budget reset.
 
 ## 2. Roles and sandboxes
+
+### Audit-qualified literal edits (owner amendment, 2026-09-07)
+
+Issue #301 qualifies only `prover` / `review_directed_nonsemantic_cleanup`,
+from independently checked C01/C02 components. All nine other audited classes
+remain Astra. A role label, worker-supplied recipe, or plausible wording is not
+qualification. Main must independently adjudicate an exact recipe: at most two
+existing regular tracked `MIPStarRE/*.lean` files, twelve added plus removed lines,
+fixed before-blob IDs and numbered before/after hunks. Optional `renames` lists
+only the approved theorem/lemma identifiers and their exact caller occurrences.
+No new files, imports, definitions, attributes, assumptions, conclusions, or proof
+changes beyond those references; no blueprint, citation-mapping, scope, status,
+runtime, security, routing, budget or gate decisions. Semantic classification is
+main's responsibility; a comment-only diff is not evidence of nonsemantic meaning.
+
+The live Astra root issues the recipe using `model_job.py RECIPE --root-thread-id UUID`.
+The existing lease verifier checks root identity; the command requires the root's
+`CODEX_THREAD_ID` and writes an atomic, digest-bound request under `CACHE/model-jobs`.
+`model_policy.py --role prover --job-class review_directed_nonsemantic_cleanup
+--job-spec REQUEST --worktree WORKTREE` validates that request and the clean exact base.
+It reads qualification only from published `main`, not the worker's table.
+Include the returned request's `Native model binding: DIGEST` in the root assignment.
+Create a NEW native child with explicit `gpt-5.6-sol`, Ultra, and `fork_turns="none"`;
+follow-up cannot change an existing Astra child's model. Native telemetry requires
+the explicit requested model, same-root fresh assignment binding, all current-turn
+model contexts, and exact completed artifact. External dispatch/shim keep admission
+zero and cannot establish another pool. Deploy the shim from the checked primary
+source path together with its adjacent helpers, not a stale standalone copy.
+
+The artifact must equal the authorized literal recipe, including staged and working
+content, with no unlisted paths. Caller, declaration, proof-debt and paper-integrity
+checks, fresh exact-head CI, independent Astra review and the normal merge remain
+required. Ambiguity, scope expansion, integrity failure or substantive findings
+transfer to Astra without rewriting work, history, or cumulative budgets.
+No live activation until this policy's normal gates and service merge, followed by
+exact Sol/Ultra runtime verification. Catalog/CLI effort is not provider-measured
+reasoning. No downgrade or alias substitution is authorized.
 
 Eight roles, fixed (`DESIGN.md`, "Naming and identity conventions"):
 
@@ -185,7 +224,7 @@ The shim rejects multi-agent enable flags and whole `features`/`agents` override
 Primary unsets inherited `CODEX_HOME`; second sets it for execution and rollout
 lookup to `MIPSTARRE_CODEX_HOME_SECOND` (default
 `~/.cache/mipstarre-dev/codex-home-yxy`). Review and autofix inherit these
-variables unchanged. All roles require `gpt-6-astra` and literal CLI `ultra`, including
+variables unchanged. Unqualified classes require `gpt-6-astra` and literal CLI `ultra`, including
 resumes and mathfix. Dispatch `--effort`, `MIPSTARRE_REVIEW_EFFORT` and
 `MIPSTARRE_AUTOFIX_EFFORT` default to `ultra`; every other effort fails rather than
 being normalized. The owner's verified space login is not rewritten here; the

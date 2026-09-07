@@ -393,6 +393,8 @@ After the child actually completes, the operator calls
 `native_review.py complete REQUEST_JSON CHILD_THREAD`. Both producer and waiting
 consumer re-read the canonical live root's rollout, verify direct parentage,
 independence, fresh assignment/current-turn completion, literal Astra Ultra,
+including every bound-turn model context (a final Astra context cannot conceal
+an earlier Sol context),
 prompt digest and exact worktree head. The mailbox supplies only identity; its
 verdict text is never trusted. Fork-inherited parent completions cannot qualify.
 Normal `review.sh` parsing, review ledger, exact-head COMMENT/status publication,

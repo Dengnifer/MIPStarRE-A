@@ -8,7 +8,7 @@ if [ "$mode" = primary ] && [ "${CODEX_HOME:-$HOME/.codex}" != "$HOME/.codex" ];
   echo 'primary-only policy: preserve the old thread; use a checkpoint continuation' >&2
   exit 4
 fi
-args=(); task=0; effort=ultra
+args=(); task=0; effort=ultra; model="${MIPSTARRE_CODEX_MODEL:-auto}"
 while [ "$#" -gt 0 ]; do
   argument="$1"; shift
   if [ "$argument" = -- ]; then args+=(-- "$@"); task=1; break; fi
@@ -19,14 +19,17 @@ while [ "$#" -gt 0 ]; do
       case "$feature" in *multi_agent*) echo 'fan-out must remain disabled' >&2; exit 4 ;; esac
       args+=(--enable "$feature"); continue ;;
     -m|--model)
-      [ "${1:-}" = gpt-6-astra ] || { echo 'gpt-6-astra required' >&2; exit 4; }
+      model="${1:-}"
+      case "$model" in gpt-6-astra|gpt-5.6-sol) ;; *) exit 4 ;; esac
       shift; continue ;;
     --model=*)
-      [ "$argument" = --model=gpt-6-astra ] || exit 4
+      model="${argument#--model=}"
+      case "$model" in gpt-6-astra|gpt-5.6-sol) ;; *) exit 4 ;; esac
       continue ;;
     -m?*)
       attached_model="${argument#-m}"; attached_model="${attached_model#=}"
-      [ "$attached_model" = gpt-6-astra ] || exit 4
+      case "$attached_model" in gpt-6-astra|gpt-5.6-sol) ;; *) exit 4 ;; esac
+      model="$attached_model"
       continue ;;
     -c|--config)
       value="${1:?missing config value}"; shift ;;
@@ -38,7 +41,10 @@ while [ "$#" -gt 0 ]; do
   normalized="${normalized//\"/}"; normalized="${normalized//\'/}"
   case "$normalized" in
     features=*|agents=*) echo 'whole feature/agent table overrides are forbidden' >&2; exit 4 ;;
-    model=*) [ "$normalized" = model=gpt-6-astra ] || exit 4; continue ;;
+    model=*)
+      model="${normalized#model=}"
+      case "$model" in gpt-6-astra|gpt-5.6-sol) ;; *) exit 4 ;; esac
+      continue ;;
     model_reasoning_effort=*)
       case "${normalized#*=}" in
         ultra) ;;
@@ -50,11 +56,20 @@ while [ "$#" -gt 0 ]; do
   esac
   args+=(-c "$value")
 done
+script_dir="$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")"
+model="$(python3 "$script_dir/model_policy.py" --role "${MIPSTARRE_DISPATCH_ROLE:-orc}" \
+  --job-class "${MIPSTARRE_JOB_CLASS:-general}" --model "$model" \
+  --effort "$effort" --field model --external --worktree "${MIPSTARRE_DISPATCH_WORKTREE:-$PWD}" \
+  ${MIPSTARRE_JOB_SPEC:+--job-spec "$MIPSTARRE_JOB_SPEC"})" || exit 4
+if [ "$model" = gpt-5.6-sol ]; then
+  reservation="${MIPSTARRE_CACHE_ROOT:-$HOME/.cache/mipstarre-dev}/accounts/${MIPSTARRE_DISPATCH_ACCOUNT:-invalid}/${MIPSTARRE_DISPATCH_PID:-invalid}"
+  [ -f "$reservation" ] || { echo 'Sol requires dispatcher admission' >&2; exit 4; }
+fi
 if [ "$task" -eq 1 ] && [ "${#args[@]}" -gt 0 ]; then
   last=$(( ${#args[@]} - 1 ))
   args[$last]="Complete this task in the current session. Do not use collaboration tools or spawn subagents.
 
 ${args[$last]}"
 fi
-exec "$HOME/.local/bin/codex" -m gpt-6-astra -c "model_reasoning_effort=\"$effort\"" \
+exec "$HOME/.local/bin/codex" -m "$model" -c "model_reasoning_effort=\"$effort\"" \
   -c 'features.multi_agent=false' -c 'agents.max_concurrent_threads_per_session=1' "${args[@]}"

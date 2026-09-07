@@ -53,7 +53,8 @@ def completed_review(request: dict, thread: str) -> tuple[dict, Path]:
     if len(matches) != 1:
         raise ValueError('a unique canonical child rollout is required')
     rollout = matches[0]
-    child = native_rollout(rollout, thread)
+    child = native_rollout(rollout, thread, role='reviewer', job_class='independent_review',
+                           requested_model='gpt-6-astra')
     assigned, turn = parse_ts(child['assigned']), parse_ts(child['turn_start'])
     ended = parse_ts(child['end'])
     created = parse_ts(request['created'])
@@ -96,7 +97,7 @@ def accept_response(request: dict, response: dict, out: Path) -> None:
         root_thread_id=request['root_thread_id'], repo_root=Path(request['repo']),
         name='reviewer-native-' + thread, role='reviewer', issue='pr' + request['pr'],
         pr=request['pr'], key_label=request['key_label'], worktree=Path(request['worktree']),
-        status='done'))
+        status='done', job_class='independent_review', requested_model='gpt-6-astra'))
     atomic_write(out, child['final'])
 
 
@@ -117,7 +118,8 @@ def request_review(args: argparse.Namespace) -> None:
                    task_name='review_' + nonce,
                    key_label=lease['key_label'], cache=str(args.cache), repo=str(args.repo),
                    head=args.head, worktree=str(args.worktree), prompt=str(args.prompt),
-                   prompt_sha256=hashlib.sha256(prompt).hexdigest(), pr=args.pr)
+                   prompt_sha256=hashlib.sha256(prompt).hexdigest(), pr=args.pr,
+                   job_class='independent_review', requested_model='gpt-6-astra')
     atomic_write(path, json.dumps(request) + '\n')
     print('native_request: ' + str(path), flush=True)
     response_path = path.with_suffix('.response.json')

@@ -288,6 +288,8 @@ run_agent() {
   local role="$1" sandbox="$2" wt="$3" persona="$4" taskfile="$5"
   local standalone="$6" ctx="$7" out="$8" model="$9"
   local dlog="$out.dispatch.log" task_text last rc=0
+  model="$(python3 "$BIN_DIR/model_policy.py" --role reviewer --job-class independent_review \
+    --model "$model" --effort "$REVIEW_EFFORT" --field model)" || return 4
   task_text="$(cat "$taskfile")"
 
   if [ -n "${MIPSTARRE_NATIVE_REVIEW_ROOT:-}" ]; then
@@ -302,6 +304,7 @@ run_agent() {
           --worktree "$wt" --sandbox "$sandbox"
           --persona "$persona" --persona-ref "$TRUSTED_REF"
           --effort "$REVIEW_EFFORT")
+    args+=(--job-class independent_review)
     # The bounded citation map goes first so dispatch.sh's aggregate attachment
     # cap cannot let a large diff starve it from the reviewer context.
     if [ -s "$BLUEPRINT_CITATION_MAP" ]; then

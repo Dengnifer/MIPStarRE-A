@@ -5618,3 +5618,17 @@ not actual commit/publication hooks. No productive session was killed.
   ENOENT, EACCES, and EIO separately. This enforces the existing vanished-PID
   behavior and does not amend policy. Actual credential remains relay-3, Astra
   Ultra, three shared descendants/five total including VS Code, external0.
+
+- 2026-09-07 -- Issue #301: the owner requested audit-first bounded Sol routing.
+  Independent Astra audit and validation support only C01/C02 literal Lean prose
+  or theorem-name/caller substitutions, not their surrounding proof/blueprint work.
+  The implementation retains Astra root/defaults, Ultra, native9/total11 and
+  external0; actual qualification is read from published main only after normal
+  CI, independent Astra review and service merge. Main retains semantic scope
+  adjudication and exact runtime compatibility verification; no live Sol launch
+  or effort downgrade occurred in this author episode. Requested/configured and
+  observed model metadata are distinct; missing external observation stays null.
+  Shared episode anchor is about 13:40Z, not the implementation subphase start.
+  An initial bootstrap overlapped unfinished worktree checkout and missed hooks;
+  after checkout completed, normal bootstrap and hook checks passed. No live
+  primary scripts, credentials, leases or historical records were edited.
