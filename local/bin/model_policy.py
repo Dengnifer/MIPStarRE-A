@@ -16,13 +16,13 @@ HARD = ('hard', 'escalated', 'source_semantic', 'control_policy', 'hard_review')
 
 def load_policy() -> dict:
     """Routing becomes active only with the reviewed policy on committed main."""
-    try:
-        policy = json.loads(subprocess.check_output(['git', '--no-replace-objects', '-C',
-            str(Path(__file__).resolve().parents[2]), 'show', 'main:local/model-policy.json'],
-            text=True, stderr=subprocess.PIPE,
-            env={k: v for k, v in os.environ.items() if not k.startswith('GIT_')}))
-    except subprocess.CalledProcessError:
+    command = ['git', '--no-replace-objects', '-C', str(Path(__file__).resolve().parents[2])]
+    env = {k: v for k, v in os.environ.items() if not k.startswith('GIT_')}
+    if not subprocess.check_output(command + ['ls-tree', '--name-only', 'main', '--',
+        'local/model-policy.json'], text=True, stderr=subprocess.PIPE, env=env).strip():
         return dict(schema_version=0, default_model=ASTRA)
+    policy = json.loads(subprocess.check_output(command + ['show', 'main:local/model-policy.json'],
+                                               text=True, stderr=subprocess.PIPE, env=env))
     if (not isinstance(policy, dict) or policy.get('schema_version') != 2 or
             policy.get('default_model') != SOL or policy.get('hard_model') != ASTRA or
             policy.get('effort') != 'ultra'):
@@ -141,7 +141,7 @@ def main() -> None:
                 raise ValueError('external admission disabled by owner gate')
         selection = select_model(args.role, args.job_class, args.model, args.effort,
                                  args.hardness_reason)
-    except (OSError, ValueError, TypeError, KeyError, AttributeError) as error:
+    except (OSError, ValueError, TypeError, KeyError, AttributeError, subprocess.CalledProcessError) as error:
         parser.exit(4, f'model policy: {error}\n')
     print(selection[args.field] if args.field else json.dumps(selection))
 

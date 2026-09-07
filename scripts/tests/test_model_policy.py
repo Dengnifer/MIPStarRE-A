@@ -6,6 +6,8 @@ import io
 import json
 import os
 from pathlib import Path
+import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -207,6 +209,37 @@ class ModelPolicyTests(unittest.TestCase):
                                         str(root / 'registry')]), self.assertRaises(SystemExit) as error:
                 account_router.main()
             self.assertEqual(error.exception.code, 4)
+
+    def test_post_activation_routine_shim_uses_sol_and_keeps_external_zero(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            local = root / 'local/bin'
+            local.mkdir(parents=True)
+            for name in ('model_policy.py', 'account_router.py', 'codex-policy-shim.sh'):
+                shutil.copy2(ROOT / 'local/bin' / name, local / name)
+            (local.parent / 'model-policy.json').write_text(json.dumps(ACTIVE))
+            subprocess.run(['git', 'init', '-qb', 'main', str(root)], check=True)
+            subprocess.run(['git', '-C', str(root), 'add', 'local'], check=True)
+            subprocess.run(['git', '-C', str(root), '-c', 'user.name=Test', '-c',
+                            'user.email=test@test', 'commit', '-qm', 'policy fixture'], check=True)
+            binary = root / '.local/bin/codex'
+            binary.parent.mkdir(parents=True)
+            binary.write_text('#!/usr/bin/env python3\nimport json,sys\nprint(json.dumps(sys.argv))\n')
+            binary.chmod(0o755)
+            marker = root / 'cache/accounts/primary/123'
+            marker.parent.mkdir(parents=True)
+            marker.touch()
+            env = dict(os.environ, HOME=directory, CODEX_HOME=str(root / '.codex'),
+                MIPSTARRE_CACHE_ROOT=str(root / 'cache'), MIPSTARRE_DISPATCH_ROLE='prover',
+                MIPSTARRE_JOB_CLASS='bounded', MIPSTARRE_HARDNESS_REASON='',
+                MIPSTARRE_CODEX_MODEL='auto', MIPSTARRE_DISPATCH_ACCOUNT='primary',
+                MIPSTARRE_DISPATCH_PID='123')
+            args = ['bash', str(local / 'codex-policy-shim.sh'), 'exec', '--', 'fixture']
+            result = subprocess.run(args, env=env, capture_output=True, text=True, check=True)
+            self.assertIn(policy.SOL, json.loads(result.stdout))
+            (root / 'cache/watchdog').mkdir()
+            (root / 'cache/watchdog/primary-external-admission').write_text('0')
+            self.assertEqual(subprocess.run(args, env=env, capture_output=True).returncode, 4)
 
 
 if __name__ == '__main__':

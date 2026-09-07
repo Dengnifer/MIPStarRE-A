@@ -65,7 +65,10 @@ class DispatchCommandTests(unittest.TestCase):
             shutil.copy2(ROUTER, local_bin / "account_router.py")
             copy_model_policy(local_bin)
             (repo / "AGENTS.md").write_text("# Test repository\n", encoding="utf-8")
-            subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
+            subprocess.run(["git", "init", "-q", '-b', 'main'], cwd=repo, check=True)
+            subprocess.run(['git', 'add', 'AGENTS.md'], cwd=repo, check=True)
+            subprocess.run(['git', '-c', 'user.name=Test', '-c', 'user.email=test@test',
+                            'commit', '-qm', 'initial fixture'], cwd=repo, check=True)
 
             fake_bin = root / "bin"
             fake_bin.mkdir()
@@ -185,7 +188,7 @@ class DispatchCommandTests(unittest.TestCase):
             home = Path(cache_root) / "home"
             rollout = home / ".codex/sessions/2026/09/06" / f"rollout-{THREAD_ID}.jsonl"
             rollout.parent.mkdir(parents=True)
-            rollout.touch()
+            rollout.write_text(json.dumps(dict(type='turn_context', payload=dict(model='gpt-6-astra'))))
             env = os.environ.copy()
             env.update(
                 {
@@ -207,7 +210,10 @@ class DispatchCommandTests(unittest.TestCase):
                 registry.parent.mkdir(parents=True)
                 registry.write_text(registry_rows)
                 (worktree / 'AGENTS.md').write_text('# Test repository\n')
-                subprocess.run(['git', 'init', '-q', str(worktree)], check=True)
+                subprocess.run(['git', 'init', '-q', '-b', 'main', str(worktree)], check=True)
+                subprocess.run(['git', '-C', str(worktree), 'add', 'AGENTS.md'], check=True)
+                subprocess.run(['git', '-C', str(worktree), '-c', 'user.name=Test', '-c',
+                    'user.email=test@test', 'commit', '-qm', 'initial fixture'], check=True)
                 dispatch = worktree / 'local/bin/dispatch.sh'
                 dispatch.parent.mkdir(parents=True)
                 for source in (DISPATCH, ROUTER, TELEMETRY):
@@ -225,8 +231,9 @@ class DispatchCommandTests(unittest.TestCase):
                              '--skip-hook-check', '--dry-run', *extra]
             if effort is not None:
                 dispatch_args.extend(["--effort", effort])
-            if '--role' in extra and extra[extra.index('--role') + 1] == 'mathfix':
-                dispatch_args.extend(['--hardness-reason', 'Fixture difficult mathematical gap'])
+            if '--job-class' not in extra:
+                dispatch_args.extend(['--job-class', 'control_policy', '--hardness-reason',
+                                      'Routing-control test fixture'])
             dispatch_args.extend(["--", "test prompt"])
             result = subprocess.run(
                 dispatch_args,
@@ -277,7 +284,7 @@ class DispatchCommandTests(unittest.TestCase):
                         argv = self.dispatch_command('--role', role, *extra, effort=effort)
                         self.assertIn('model_reasoning_effort=ultra', argv)
 
-    def test_sol_is_rejected_for_every_role(self) -> None:
+    def test_sol_is_rejected_for_control_policy_jobs(self) -> None:
         for role in ('orc', 'prover', 'reviewer', 'simplifier', 'blueprint', 'splitter',
                      'scout', 'mathfix'):
             with self.assertRaises(subprocess.CalledProcessError):
@@ -570,6 +577,10 @@ class AccountRouterTests(unittest.TestCase):
         patcher = mock.patch.object(router, 'host_processes', return_value=({}, {}))
         patcher.start()
         self.addCleanup(patcher.stop)
+        policy_context = mock.patch.dict(os.environ, MIPSTARRE_JOB_CLASS='control_policy',
+                                         MIPSTARRE_HARDNESS_REASON='Routing-control test fixture')
+        policy_context.start()
+        self.addCleanup(policy_context.stop)
 
     def test_host_scan_handles_global_options_without_reading_prompt_as_command(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -780,7 +791,7 @@ class AccountRouterTests(unittest.TestCase):
             second = root / ".cache/mipstarre-dev/codex-home-yxy"
             rollout = second / "sessions" / f"rollout-{THREAD_ID}.jsonl"
             rollout.parent.mkdir(parents=True)
-            rollout.touch()
+            rollout.write_text(json.dumps(dict(type='turn_context', payload=dict(model='gpt-6-astra'))))
             (second / "config.toml").write_text('model = "gpt-second-default"\n')
             (root / 'cache/watchdog').mkdir(parents=True)
             (root / 'cache/watchdog/account-mode').write_text('both')

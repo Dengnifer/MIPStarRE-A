@@ -79,7 +79,8 @@ class NativeWorkflowTests(unittest.TestCase):
         self.write_rollout()
         self.acceptance(dict(nonce='nonce', thread_id=CHILD, final='FORGED APPROVED'))
         self.assertEqual((self.root / 'out.md').read_text(), self.binding + '\nCHANGES_REQUESTED')
-        observation = telemetry.native_rollout(self.rollout, CHILD)
+        observation = telemetry.native_rollout(self.rollout, CHILD, role='reviewer',
+            job_class='hard_review', hardness_reason='Control-policy fixture')
         self.assertEqual(observation['observed_usage'], dict(input_tokens=10))
         self.assertNotIn('inputs', observation)
 
@@ -88,7 +89,8 @@ class NativeWorkflowTests(unittest.TestCase):
         telemetry.record_native(argparse.Namespace(
             rollout=self.rollout, thread_id=CHILD, root_thread_id=ROOT,
             repo_root=self.root, name='reviewer-native', role='reviewer', issue='pr287',
-            pr='287', key_label='space', worktree=self.root, status='done'))
+            pr='287', key_label='space', worktree=self.root, status='done',
+            dispatch_kind='resume', job_class='hard_review', hardness_reason='Control-policy fixture'))
         row = json.loads((self.root / 'results/telemetry/sessions.jsonl').read_text())
         self.assertEqual(row['account'], 'space')
         self.assertEqual(row['key_label'], 'space')
