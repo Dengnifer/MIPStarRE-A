@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import errno
 import json
 import fcntl
 import importlib.util
@@ -576,6 +577,46 @@ class AccountRouterTests(unittest.TestCase):
                                  {100: ('primary', False), 200: ('primary', True)})
                 self.assertEqual(HOST_PROCESS_SCAN(['/home/drx/FV'])[1], {100: ('primary', False)})
                 self.assertEqual(len(HOST_PROCESS_SCAN(['/home/drx'])[1]), 2)
+
+    def test_host_scan_skips_only_vanished_pids(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for name in ('1', 'self', '100', '200'):
+                (root / name).mkdir()
+            (root / '1/comm').write_text('systemd')
+            (root / 'self/status').write_text(f'NSpid:\t{os.getpid()}')
+            (root / '200/status').write_text('Name:\tcodex\nPPid:\t1')
+            (root / '200/cmdline').write_bytes(b'codex\0exec\0task')
+            (root / '200/environ').write_bytes(b'HOME=/home/drx')
+
+            def mapped_path(path):
+                return root / str(path).removeprefix('/proc').lstrip('/') if str(path).startswith(
+                    '/proc') else Path(path)
+
+            original_read_text = Path.read_text
+
+            def read_text(path, *args, **kwargs):
+                if path == root / '100/status':
+                    raise error
+                return original_read_text(path, *args, **kwargs)
+
+            errors = (ProcessLookupError(errno.ESRCH, 'vanished PID'),
+                      FileNotFoundError(errno.ENOENT, 'vanished PID'),
+                      PermissionError(errno.EACCES, 'denied PID'),
+                      OSError(errno.EIO, 'unreadable PID'))
+            with mock.patch.object(router, 'Path', side_effect=mapped_path) as paths, \
+                 mock.patch.object(Path, 'read_text', new=read_text), \
+                 mock.patch.dict(os.environ, {'MIPSTARRE_CODEX_HOME_SECOND': '/second'}):
+                paths.home.return_value = Path('/home/drx')
+                for error in errors:
+                    with self.subTest(error=type(error).__name__):
+                        if isinstance(error, (FileNotFoundError, ProcessLookupError)):
+                            self.assertEqual(HOST_PROCESS_SCAN(),
+                                             ({200: 1}, {200: ('primary', False)}))
+                        else:
+                            with self.assertRaises(type(error)) as failure:
+                                HOST_PROCESS_SCAN()
+                            self.assertIs(failure.exception, error)
 
     def test_mode_changes_disabled_caps_and_preserved_both_settings(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

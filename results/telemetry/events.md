@@ -5603,3 +5603,16 @@ not actual commit/publication hooks. No productive session was killed.
 - Preserved CI stash 5188e5e47bf64cdb5eb863c490044ddb39e1d54b. A post-merge warmer row made stash apply refuse; appended exactly the two verified CI deltas while retaining all746 current rows and every prior stash. Receipt: owner-messages/qpbt-291-restored-ci.json.
 
 - 2026-09-06T19:17:52.559119+00:00 — Meta migration #291 complete: PR292 merged, canonical review/CI green, all584 workflow tests passed,22 PR label backfills verified, and the deployed main sync published its post-push snapshot with clean remote equality. Main resumes the mathematical cycle on the preserved Space/Astra Ultra root+4 allocation. The design-decision index row was reformatted into its existing five columns without changing the decision. No routine meta heartbeat was reactivated.
+
+## 2026-09-07 - PR207 native admission procfs race (PR270 / #268)
+
+- PR207's round-three prose path failed before any model turn: a PID vanished
+  during `account_router.host_processes`' per-PID status read, which raised
+  `ProcessLookupError` (ESRCH), not the already-handled `FileNotFoundError`.
+  The bounded repair treats both exceptions as disappearance of that PID only.
+  PermissionError and other OSError failures still propagate; the host namespace,
+  credential, capacity, and admission rules are unchanged. Regression fixtures
+  reproduce ESRCH before the fix and retain another live process while testing
+  ENOENT, EACCES, and EIO separately. This enforces the existing vanished-PID
+  behavior and does not amend policy. Actual credential remains relay-3, Astra
+  Ultra, three shared descendants/five total including VS Code, external0.

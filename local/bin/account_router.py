@@ -299,7 +299,7 @@ def host_processes(exclusions=()) -> tuple[dict[int, int], dict[int, tuple[str, 
                     os.readlink(process / 'cwd') in exclusions):
                 continue
             candidates[pid] = (account, interactive)
-        except FileNotFoundError:
+        except (FileNotFoundError, ProcessLookupError):
             continue
     return parents, candidates
 
