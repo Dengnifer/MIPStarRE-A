@@ -547,8 +547,8 @@ def native_rollout(path: Path, thread: str, *, role: str = 'orc', job_class: str
     result = dict(thread_id=thread, parent_thread_id=spawn.get('parent_thread_id'),
                   agent_path=spawn.get('agent_path'), start=meta['timestamp'],
                   end=None, final=None, assigned=None, turn_start=None, observed_usage=None)
-    turn, first_turn = None, None
-    contexts, fallback_context, first_assignment = {}, None, None
+    turn = None
+    contexts, child_turns, first_assignment = {}, set(), None
     # Forks copy parent events with rewritten timestamps; require a child assignment.
     for row in rows:
         payload = row.get('payload', {})
@@ -558,17 +558,18 @@ def native_rollout(path: Path, thread: str, *, role: str = 'orc', job_class: str
                 contexts.setdefault(payload['turn_id'], []).append(context)
             elif turn:
                 contexts.setdefault(turn, []).append(context)
-            fallback_context = context
         elif (row.get('type') == 'response_item' and payload.get('type') == 'agent_message' and
                 payload.get('author') == spawn.get('agent_path', '').rsplit('/', 1)[0] and
                 payload.get('recipient') == spawn.get('agent_path')):
             result.update(assigned=row['timestamp'], end=None, final=None)
             first_assignment = first_assignment or row['timestamp']
-            first_turn = first_turn or turn
+            child_turns.add(turn)
         elif row.get('type') == 'event_msg':
             if payload.get('type') == 'task_started':
                 turn = payload.get('turn_id')
                 result.update(end=None, final=None, turn_start=row['timestamp'])
+                if first_assignment:
+                    child_turns.add(turn)
             elif (payload.get('type') == 'task_complete' and result['assigned'] and turn and
                   payload.get('turn_id') == turn):
                 result.update(end=row['timestamp'], final=payload.get('last_agent_message'))
@@ -585,17 +586,18 @@ def native_rollout(path: Path, thread: str, *, role: str = 'orc', job_class: str
         activation, started = parse_ts(activation_at), parse_ts(result['turn_start'])
         if not activation or not started or started >= activation:
             raise ValueError('grandfathered task requires verified pre-activation turn evidence')
-    active_contexts = contexts.get(turn) or ([fallback_context] if fallback_context else [])
-    if not active_contexts or (any(context['model'] == 'gpt-5.6-sol' for context in active_contexts)
-                               and turn not in contexts):
+    active_contexts = contexts.get(turn, [])
+    if not active_contexts:
         raise ValueError('native effective model requires bound current-turn context')
     for context in active_contexts:
         selection = observe_model(role, job_class, context['model'], context['effort'],
                                   requested_model, hardness_reason, grandfathered)
     if any(context != active_contexts[0] for context in active_contexts):
         raise ValueError('mixed current-turn model/effort contexts are not admissible')
-    initial_contexts = contexts.get(first_turn, [])
-    if initial_contexts and any(context != active_contexts[0] for context in initial_contexts):
+    if not child_turns or any(not contexts.get(child_turn) for child_turn in child_turns):
+        raise ValueError('native affinity requires bound context for every attributable child turn')
+    if any(context != active_contexts[0]
+           for child_turn in child_turns for context in contexts[child_turn]):
         raise ValueError('resuming an existing native thread cannot switch its model or effort')
     result.update(model=active_contexts[-1]['model'],
                   requested_effort=active_contexts[-1]['effort'], model_contexts=active_contexts)

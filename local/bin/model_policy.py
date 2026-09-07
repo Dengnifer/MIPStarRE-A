@@ -93,6 +93,8 @@ def dispatch_ratio(rows: list[dict], activation_at: str, window: int = 100) -> d
             continue
         starts[thread] = min(started, starts.get(thread, started))
         model, selected = row.get('effective_model'), row.get('selected_model')
+        if model in (ASTRA, SOL) and selected in (ASTRA, SOL) and model != selected:
+            conflicts.add(thread)
         if model not in (ASTRA, SOL) or model != selected:
             threads.setdefault(thread, None)
             continue

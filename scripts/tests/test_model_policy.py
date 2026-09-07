@@ -101,6 +101,43 @@ class ModelPolicyTests(unittest.TestCase):
             telemetry.native_rollout(fixture.rollout, native_tests.CHILD, role='prover',
                                      job_class='routine', requested_model=policy.SOL)
 
+    def test_all_child_turns_need_consistent_bound_contexts(self):
+        fixture = native_tests.NativeWorkflowTests()
+        fixture.setUp()
+        self.addCleanup(fixture.doCleanups)
+        fixture.write_rollout()
+        meta = json.loads(fixture.rollout.read_text().splitlines()[0])
+        cases = [([policy.SOL, policy.ASTRA, policy.SOL], policy.SOL, False),
+                 ([policy.SOL, None, policy.SOL], policy.SOL, False),
+                 ([None, policy.SOL], policy.SOL, False),
+                 ([policy.SOL, None], policy.SOL, False), ([None], policy.ASTRA, False),
+                 ([policy.ASTRA, None], policy.ASTRA, False),
+                 ([policy.SOL, policy.SOL], policy.SOL, True)]
+        for models, requested, valid in cases:
+            rows = [meta, dict(type='turn_context', payload=dict(model=policy.ASTRA, effort='ultra')),
+                    dict(type='turn_context', payload=dict(turn_id='parent', model=policy.ASTRA,
+                                                          effort='ultra'))]
+            for index, model in enumerate(models):
+                turn, ts = f'child-{index}', f'2026-09-06T13:14:{index + 1:02}Z'
+                rows.append(dict(type='event_msg', timestamp=ts,
+                    payload=dict(type='task_started', turn_id=turn)))
+                if model:
+                    rows.append(dict(type='turn_context', payload=dict(turn_id=turn,
+                                     model=model, effort='ultra')))
+                rows.append(dict(type='response_item', timestamp=ts, payload=dict(type='agent_message',
+                    author='/root', recipient='/root/review_nonce', content=[])))
+            fixture.rollout.write_text(''.join(json.dumps(row) + '\n' for row in rows))
+            with self.subTest(models=models):
+                args = dict(role='reviewer', requested_model=requested,
+                    job_class='hard_review' if requested == policy.ASTRA else 'independent_review',
+                    hardness_reason='Control-policy review' if requested == policy.ASTRA else None)
+                if valid:
+                    self.assertEqual(telemetry.native_rollout(fixture.rollout, native_tests.CHILD,
+                                     **args)['effective_model'], requested)
+                else:
+                    with self.assertRaises(ValueError):
+                        telemetry.native_rollout(fixture.rollout, native_tests.CHILD, **args)
+
     def test_routine_sol_review_keeps_independence_binding_and_mixed_context_guards(self):
         fixture = native_tests.NativeWorkflowTests()
         fixture.setUp()
@@ -171,6 +208,13 @@ class ModelPolicyTests(unittest.TestCase):
         self.assertEqual(policy.dispatch_ratio(rows, ACTIVATION)['unknown'], 1)
         self.assertEqual(policy.dispatch_ratio(rows, ACTIVATION, window=10)['sampled_dispatches'], 10)
         self.assertIsNone(policy.dispatch_ratio([row('only-sol', policy.SOL)], ACTIVATION)['ratio'])
+        good = row('contradictory', policy.SOL)
+        bad = good | {'effective_model': policy.ASTRA}
+        for observations in ([good, bad], [bad, good]):
+            with self.subTest(observations=observations):
+                result = policy.dispatch_ratio(observations, ACTIVATION)
+                self.assertEqual((result['sol'], result['astra'], result['unknown']), (0, 0, 1))
+                self.assertEqual(result['cumulative'], {policy.SOL: 0, policy.ASTRA: 0})
 
     def test_external_selected_model_is_not_fabricated_observation(self):
         with tempfile.TemporaryDirectory() as directory:

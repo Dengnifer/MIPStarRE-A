@@ -44,7 +44,8 @@ class NativeWorkflowTests(unittest.TestCase):
         rows = [dict(type='session_meta', timestamp='2026-09-06T13:00:00.000Z',
             payload=dict(id=CHILD, source=dict(subagent=dict(thread_spawn=dict(
                 parent_thread_id=ROOT, agent_path=path))))),
-            dict(type='turn_context', payload=dict(model='gpt-6-astra', effort='ultra'))]
+            dict(type='turn_context', payload=dict(turn_id='turn',
+                                                  model='gpt-6-astra', effort='ultra'))]
         def event(kind, when=None, **kwargs):
             rows.append(dict(type='event_msg', timestamp=when or timestamp or
                              '2026-09-06T13:14:00.001Z',
