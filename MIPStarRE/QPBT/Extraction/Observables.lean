@@ -353,19 +353,6 @@ theorem tildeObs_twisted_commutation {P : AdmissibleParams}
 
 /-! ## Swap conjugation -/
 
-/-- The characteristic-two Pauli observable is Hermitian. This finite spectral
-calculation supplies the adjoints used in the swap identity at paper
-`14_analysis_of_the_pauli_basis_test.tex:1687-1699`. -/
-private theorem tauObservable_conjTranspose {P : AdmissibleParams}
-    (W : PauliKind) (u : PauliRegister P) :
-    (tauObservable W u)ᴴ = tauObservable W u := by
-  rw [tauObservable_eq_sum_pauliProj, Matrix.conjTranspose_sum]
-  apply Finset.sum_congr rfl
-  intro label _
-  rw [Matrix.conjTranspose_smul, star_phaseSign]
-  congr 1
-  simp [pauliProj, Pi.star_def]
-
 /-- Each crossed Pauli product is unitary, by the two involution identities
 used at paper `14_analysis_of_the_pauli_basis_test.tex:1687-1699`. -/
 private theorem swapPauli_mul_conjTranspose {P : AdmissibleParams}

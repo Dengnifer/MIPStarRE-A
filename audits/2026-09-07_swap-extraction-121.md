@@ -123,3 +123,57 @@ The blueprint change adds proof-level `\leanok` to
 - No full build, canonical CI, independent review, or publication is claimed
   by this audit. Those gates must use the final immutable head and retain
   every explicit stack prerequisite.
+
+## Refresh of the Published Parent, 2026-09-07
+
+The preceding construction record is retained unchanged. The refresh starts
+from published PR294 head `79068dc5f55508f7faf29f1c743d80764848688d` and merges
+published PR293 head `f5c9b2c52795c4357fecf0e1e972808a796c0ca6`, which contains
+published main `a4b2a792a888027ff457ca2d0bca347e4df28892`. The ordinary merge
+is `1d142d1a7f25e11a369da5cbb14ee8278ce6fb48`. It is conflict-free and passes
+the pending and committed merge-loss guards. All incoming paths and raw
+telemetry are preserved. The normal commit hooks pass, including 584 workflow
+tests.
+
+Fresh compilation against the incoming source reveals one declaration-name
+collision: `Observables/ExpandedCommutation.lean` now exports
+`MIPStarRE.QPBT.tauObservable_conjTranspose`, while the extraction module has a
+private helper with the same name. The imported public theorem proves the
+same adjoint identity from the Pauli spectral expansion and the Hermitian
+rank-one projectors. It applies to the fixed field and register instances
+already used here. The duplicate private helper is removed, and
+`swapPauli_mul_conjTranspose` uses the existing public theorem. The eight
+issue121 target statements and proof bodies are unchanged, as are all
+imports, crossed decoder arguments, binary phases, player indices, and
+conjugation orientations. The chapter 16 blueprint is unchanged.
+
+After this repair, the targeted build of
+`MIPStarRE.QPBT.Extraction.Observables` succeeds. All eight issue121 targets,
+all five inherited issue120 targets, the imported adjoint theorem, and the
+four controlled-unitary lemmas have exactly the standard axiom closure
+`[propext, Classical.choice, Quot.sound]`. Direct source checks of
+`Extraction/Consistency.lean`, `Extraction/Unitary.lean`, and `MIPStarRE/QPBT.lean`
+pass; the first two retain their respective six and two proof obligations.
+The edited observable source has no proof holes or bypasses. Public-header
+comparison against the preceding published PR294 head finds no change.
+Blueprint web rendering, LaTeX conventions, and synchronization pass with the
+existing missing-bibliography warnings. The ignored declaration list includes
+the eight incoming main references.
+
+The statement-integrity verdict remains the given-measurement one stated
+above: a complete projective polynomial-pair measurement and the fixed
+characteristic-two Pauli operators give the two inverse identities and the
+two exact conjugation identities. Lean retains precisely the previous
+`GlobalPairWitness`, player, basis, vector, and outcome arguments. No new
+hypothesis is added and no conclusion is weakened. These exact identities do
+not prove the existence or consistency of the global witness, nor the full
+approximate extraction conclusion of `lem:qld-unitary`.
+
+Issue #120 remains open, with the open construction issue #119 as its native
+prerequisite. Issue #242 is also open; its currently published parent is
+`9b5307e0a6facc6058dab1ff2946d7f50275f5eb`, whose complete controlled-unitary
+source is retained. The closed prerequisites #63 and #240 remain recorded.
+All native dependency edges and the corresponding merge holds remain in
+force. A later published refresh of PR251 must be incorporated by an ordinary
+guarded merge; no unpublished parent is used. Checked publication, exact-head
+full CI, independent review, and merge remain distinct gates.
