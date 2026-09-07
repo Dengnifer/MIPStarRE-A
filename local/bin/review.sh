@@ -51,7 +51,9 @@
 #   MIPSTARRE_CITATION_MAX_BYTES bytes reserved for the derived blueprint
 #                              citation map (default 30000)
 #   MIPSTARRE_REVIEW_TIMEOUT   reviewer safety timeout in seconds (default 10800)
-#   MIPSTARRE_REVIEW_EFFORT    max (default) or xhigh; legacy ultra maps to max
+#   MIPSTARRE_REVIEW_EFFORT    ultra (required, default)
+#   MIPSTARRE_NATIVE_REVIEW_ROOT  root thread servicing native review requests
+#   MIPSTARRE_NATIVE_REVIEW_AUTHORS comma-separated author thread IDs (required for native)
 #   MIPSTARRE_GITHUB_REPO      owner/repo override for gh_common.py
 #
 set -euo pipefail
@@ -87,11 +89,10 @@ LOCK_WAIT="${MIPSTARRE_REVIEW_LOCK_WAIT:-1800}"
 DIFF_MAX_LINES="${MIPSTARRE_DIFF_MAX_LINES:-4000}"
 CITATION_MAX_BYTES="${MIPSTARRE_CITATION_MAX_BYTES:-30000}"
 REVIEW_TIMEOUT="${MIPSTARRE_REVIEW_TIMEOUT:-10800}"
-REVIEW_EFFORT="${MIPSTARRE_REVIEW_EFFORT:-max}"
+REVIEW_EFFORT="${MIPSTARRE_REVIEW_EFFORT:-ultra}"
 case "$REVIEW_EFFORT" in
-  ultra) REVIEW_EFFORT=max ;;
-  max|xhigh) ;;
-  *) echo 'MIPSTARRE_REVIEW_EFFORT must be max or xhigh' >&2; exit 2 ;;
+  ultra) ;;
+  *) echo 'MIPSTARRE_REVIEW_EFFORT must be ultra' >&2; exit 2 ;;
 esac
 BOT_PREFIX_RE='^\[(claude|codex)-(auto|review)-fix\]'
 BLUEPRINT_CITATION_PATH="scripts/blueprint_citations.py"
@@ -289,6 +290,12 @@ run_agent() {
   local dlog="$out.dispatch.log" task_text last rc=0
   task_text="$(cat "$taskfile")"
 
+  if [ -n "${MIPSTARRE_NATIVE_REVIEW_ROOT:-}" ]; then
+    python3 "$BIN_DIR/native_review.py" request "$CACHE" "$ROOT" "$HEAD_SHA" \
+      "$wt" "$standalone" "$out" "$PR_NUM" "$REVIEW_TIMEOUT" >"$dlog"
+    return $?
+  fi
+
   if [ -x "$DISPATCH" ]; then
     local args
     args=(--role "$role" --issue "pr$PR_NUM" --pr "$PR_NUM"
@@ -333,7 +340,7 @@ run_agent() {
       if [ "$rc" -ne 0 ] && [ "$attempt" -eq 1 ] \
          && [ -z "${MIPSTARRE_QUEUE_TICKET:-}" ] \
          && [ "$(( ended - started ))" -lt 15 ] \
-         && [ "${tokens:-0}" = "0" ]; then
+         && [ "${tokens:-unknown}" = "0" ]; then
         warn "dispatch failed pre-model (rc=$rc, $(( ended - started ))s, 0 tokens); retrying once"
         sleep 10
         continue
