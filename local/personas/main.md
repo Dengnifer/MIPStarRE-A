@@ -41,8 +41,9 @@ owner-authorized native descendants use the shared lease protocol in `sessions.m
 the astra math-fix lane governed by `issues-prs.md` section 6. Full builds are
 ~10 min on this host and only they serialize (the machine-wide
 `.full-build-lock`); per-file `lake env lean` iteration parallelizes
-freely across worktrees. In the current space episode the hard limit is five total
-sessions including main, so keep up to four useful native descendants occupied,
+freely across worktrees. Use the current owner-verified allocation and existing
+native lease; the current Space receipt reserves three descendants within five total.
+Keep useful capacity occupied without changing live leases,
 refill promptly, and record intervals below that floor and their reasons. Count
 actual native activity, not idle threads; keep disjoint successors and independent reviewers ready. Evidence binds to exact SHAs, so parallel
 lanes cannot trample each other's records.
@@ -55,7 +56,19 @@ zero, and capacity or a ready list is not occupancy. No nested extra pool is per
 
 ## The operating cycle (per short turn)
 
-All roles select `gpt-6-astra` and literal CLI `ultra` on the owner-selected space key.
+Main remains `gpt-6-astra`/`ultra`; routine and bounded subagent jobs default to
+exact `gpt-5.6-sol`/`ultra`, including routine existing-statement proofs and reviews.
+Use `model_policy.py` and published `local/model-policy.json` for each assignment.
+Genuinely hard, source-semantic, control-policy or escalated jobs use Astra with
+an explicit reason; file extension and role alone do not determine hardness.
+Target Sol:Astra 20:1 within 10:1..50:1 over successive NEW dispatches after
+activation. Check the rolling ratio in `sessions.md`; exclude main, grandfathered
+workers and resumes. Record short-prefix/availability deviations, never add filler
+or delay a necessary hard assignment. Unknown models/classes fail closed.
+A model change needs a NEW explicit-model native spawn with
+`fork_turns="none"` and Ultra, not follow-up to an existing Astra thread.
+No activation before normal CI, independent Astra review, service merge and
+exact runtime compatibility verification. Preserve predecessor/budget links.
 Native fan-out shares the root's leased cap; external dispatch cannot spawn children.
 Only an explicit later owner decision restores both accounts.
 Admission and checkpoint-continuation rules are in `local/protocols/sessions.md`.
@@ -81,7 +94,7 @@ for dispatch. Record a failed read as unknown and continue independent work.
    service merge; preserve new rows and publish them immediately afterward.
 4. At cycle start and every worker completion, assess whether another useful
    independent assignment can shorten the critical path. Refill the shared
-   four-descendant capacity promptly from ready mathematics, bounded repairs,
+   owner-authorized descendant capacity promptly from ready mathematics, bounded repairs,
    or required independent reviews. Give each worker an owned worktree,
    completion condition and available successor. No filler assignments or
    duplicate full-queue triage. Record actual vacancy and its concrete cause.
@@ -117,8 +130,9 @@ merges; never merge a PR by hand or call the merge gate from the main turn.
   implementation convenience: paper-labelled statements stay source-shaped;
   genuine source defects become `docs/paper-gaps/` notes (key `qpbt`,
   traceability `\localissue{NNNN}`).
-- All current assignments remain Astra Ultra on Space, with five total
-  sessions including main. Do not infer a route, effort or cap change from
+- Existing assignments retain their model and effort; do not reuse a completed
+  Astra worker for routine future work to evade Sol-first classification.
+  Main stays Astra Ultra under the owner-verified lease. Do not infer changes from
   historical examples. Record observed usage without treating configured
   capacity as measured occupancy or summing overlapping native counters.
 - Validate according to the changed surface: focused checks during iteration,

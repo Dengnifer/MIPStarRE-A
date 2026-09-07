@@ -5620,3 +5620,33 @@ not actual commit/publication hooks. No productive session was killed.
   ENOENT, EACCES, and EIO separately. This enforces the existing vanished-PID
   behavior and does not amend policy. Actual credential remains relay-3, Astra
   Ultra, three shared descendants/five total including VS Code, external0.
+
+- 2026-09-07 -- Issue #301: the owner requested audit-first bounded Sol routing.
+  Independent Astra audit and validation support only C01/C02 literal Lean prose
+  or theorem-name/caller substitutions, not their surrounding proof/blueprint work.
+  The implementation retains Astra root/defaults, Ultra, native9/total11 and
+  external0; actual qualification is read from published main only after normal
+  CI, independent Astra review and service merge. Main retains semantic scope
+  adjudication and exact runtime compatibility verification; no live Sol launch
+  or effort downgrade occurred in this author episode. Requested/configured and
+  observed model metadata are distinct; missing external observation stays null.
+  Shared episode anchor is about 13:40Z, not the implementation subphase start.
+  An initial bootstrap overlapped unfinished worktree checkout and missed hooks;
+  after checkout completed, normal bootstrap and hook checks passed. No live
+  primary scripts, credentials, leases or historical records were edited.
+
+- 2026-09-07 -- Issue #301 owner scope superseded the preserved cleanup-only
+  draft f43be38 with routine/bounded Sol-first and reasoned hard Astra, including
+  routine independent Sol review and a 20:1 target within 10:1..50:1 over new
+  dispatches. Existing audit evidence is retained, not reinterpreted as a broad
+  capability study. Meta switched to Space5/native3/external0; this author did
+  not change credentials, runtime, lease or current workers. At 16:17Z the same
+  author resumed the clean checkpoint under explicit completion priority, still
+  charged to the original approximately 13:40Z episode and recorded extension
+  request5572932276. No fresh budget, ratio credit for grandfathered resumes,
+  live activation, or review success is inferred. Full-context native observations
+  and requested/selected/observed separation are retained in the revised design.
+
+## 2026-09-08
+
+- PR303/#301 integrated through canonical CI, independent hard control-policy Astra review, and the current Space service merge gates. Round1 review5134345720 retained three native-observation and ratio findings; the author repaired them in0deec4e with targeted counterfactual regressions and fresh normal tests/CI/review. All parked estimate, CI and native-review rows were restored once with retained stash/copies and multiplicity, prefix and mode checks. The reviewed policy enters committed main; read-only actual selector and hot-root/Space-lease checks follow final telemetry publication. No live selector result or fresh Sol child is claimed by this record; root owns the useful explicit-model dispatch after those checks. The Space switch and renewed owner completion steering preserve the13:40 episode, 15:40 historical boundary, extension request5572932276,1000-line ceiling and all cumulative proof budgets. Detailed receipt: owner-messages/qpbt-pr303-integration-20260907.json.
