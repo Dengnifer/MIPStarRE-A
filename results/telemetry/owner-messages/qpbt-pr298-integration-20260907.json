@@ -1,0 +1,135 @@
+{
+  "observed_at": "2026-09-07T15:33:26.814273+00:00",
+  "pr": 298,
+  "issue": 297,
+  "frozen_main": "5924b3acec0d1ad5fe38b8a93ac5e950e2daa071",
+  "head": "2e8a607224977b939e2addb8a686218a1a517d8b",
+  "canonical_patch_sha256": "73092e6a4a05f3444e0bbe0dc1de104a8d79846c2f6cb956e20201cfba1d0dcb",
+  "packet": {
+    "files": 4,
+    "additions": 411,
+    "deletions": 39,
+    "source_changes_during_refresh": false
+  },
+  "ci": {
+    "started": "2026-09-07T22:03:19+0800",
+    "finished": "2026-09-07T22:12:31+0800",
+    "seconds": 552,
+    "conclusion": "success",
+    "partial": false
+  },
+  "independent_reviewers": [
+    "01a07bd3-560a-7000-924d-d3aabef3ef4e",
+    "01a07bd0-f953-7292-8059-ac93ebf46773"
+  ],
+  "both_native_completions_recorded": true,
+  "merge_commit": "32f567fbab562f90bca62372355110f608957323",
+  "merged_at": "2026-09-07T15:24:25Z",
+  "service_tick": {
+    "action": "delegate-pr_merge",
+    "cadence_sleep_s": 238.667,
+    "clean": true,
+    "duration_s": 61.333,
+    "eligibility_budget_s": 240,
+    "eligibility_duration_s": 61.333,
+    "eligible_age_s": null,
+    "eligible_count": 1,
+    "external_admission": 0,
+    "fresh_count": 1,
+    "hold_reasons": [],
+    "local_main": "5924b3acec0d1ad5fe38b8a93ac5e950e2daa071",
+    "merge_exit": 0,
+    "native_descendant_limit": 9,
+    "oldest_eligible": {
+      "branch": "issue-297-line-restriction-recovery",
+      "created": "2026-09-07T08:39:29Z",
+      "eligibility_age_s": null,
+      "fresh_against_remote": true,
+      "head": "2e8a607224977b939e2addb8a686218a1a517d8b",
+      "marker": true,
+      "number": 298,
+      "pr_age_s": 24225
+    },
+    "oldest_fresh_against_remote": true,
+    "oldest_stale": [],
+    "owner_total_limit": 11,
+    "post_merge_remote_main": "32f567fbab562f90bca62372355110f608957323",
+    "post_merge_remote_verified": true,
+    "read_failure": null,
+    "remote_main": "5924b3acec0d1ad5fe38b8a93ac5e950e2daa071",
+    "runtime": "relay-3 cap11/external0 verified",
+    "ts": "2026-09-07T15:24:08.649857+00:00"
+  },
+  "preservation": {
+    "pr": 298,
+    "merge_commit": "32f567fbab562f90bca62372355110f608957323",
+    "merged_at": "2026-09-07T15:24:25Z",
+    "restored_at": "2026-09-07T15:30:03.537026+00:00",
+    "stash": "83b5a1abe7d0f1eb36c205202587f7dbf10c88f2",
+    "stash_retained": true,
+    "files": {
+      "results/telemetry/builds.jsonl": {
+        "before_bytes": 201030,
+        "restored_bytes": 225,
+        "restored_rows": 1,
+        "after_bytes": 201255,
+        "raw_multiplicities_verified": true,
+        "concurrent_prefix_retained": true,
+        "mode_retained": true,
+        "sha256": "4abf4e7dcf3d31c9aa0953a3065e7e6d15d36addfeeeb3fe86c6b97089ed8ce6"
+      },
+      "results/telemetry/sessions.jsonl": {
+        "before_bytes": 668531,
+        "restored_bytes": 2091,
+        "restored_rows": 2,
+        "after_bytes": 670622,
+        "raw_multiplicities_verified": true,
+        "concurrent_prefix_retained": true,
+        "mode_retained": true,
+        "sha256": "22ecfefc41c9375f330be78e750e6057e8cf07561f5691661d88a67391c9251b"
+      },
+      "results/telemetry/estimates.jsonl": {
+        "before_bytes": 2293,
+        "restored_bytes": 0,
+        "restored_rows": 0,
+        "after_bytes": 2293,
+        "raw_multiplicities_verified": true,
+        "concurrent_prefix_retained": true,
+        "mode_retained": true,
+        "sha256": "8311610d7593e9d798d7faa638d812017cc1c72d36e3018728cde27cd4806abe"
+      }
+    }
+  },
+  "actual_credential_observation_rows_appended": 2,
+  "merge_gate_repair": "Gate7 first rejected an unintended parent116 closing reference in negated PR prose. The assigned owner changed only that sentence; canonical closing set became {297}, with source/head/CI/review and parent116 preserved. The service retry merged normally.",
+  "canonical_space_rows_preserved": true,
+  "source_receipts": {
+    "merge-selector-fix-20260907.json": "17d852940802e5433a258b79544489bfd41fe04747584185cc11b7543f14e95e",
+    "qpbt-sol-routing-audit-dispatch-20260907.json": "724dd3da9982a3facc50748c1a06babded0cac1d1c98679e2c34c625d63295c4",
+    "qpbt-sol-routing-audit-20260907.md": "9a5c4e89bd4e61245ef7df716762deaa3071980fe0c2e3702ea8a248b307d516",
+    "qpbt-sol-routing-matrix-20260907.json": "69fd336f92be6b6308c4a65c3ab566a5ad4a818e6d9c0ba5261ba0e5f3bdc05b",
+    "qpbt-sol-routing-audit-validation-20260907.md": "6983ffaeb0b8902d9c8edba56673f8919f20cd68993cd31685d30e2375b5b11a",
+    "qpbt-pr298-closing-metadata-repair-20260907.json": "f025fd947b72b3a42cc8b381af60612cd997fd4523b7a5127903d7cb44ede72c"
+  },
+  "owner_policy": {
+    "actual_credential": "relay-3",
+    "legacy_router_bucket": "space",
+    "main_model": "gpt-6-astra",
+    "current_worker_model": "gpt-6-astra",
+    "requested_effort": "ultra",
+    "total_allocation": 11,
+    "native_cap": 9,
+    "target": 9,
+    "floor": 8,
+    "external_admission": 0,
+    "sol": "Audit-supported bounded classes require qualification and tested enforcement before activation; no activation by this coordinator"
+  },
+  "usage": null,
+  "usage_scope": "unknown; native cumulative observations are not additive",
+  "budgets_reset": false,
+  "b8": {
+    "attempts": 13,
+    "working_seconds": 26509
+  },
+  "note": "The now-known selector-fix receipt supplements, without rewriting, the prior unknown-at-the-time record. No service or model configuration was changed by this telemetry batch."
+}
