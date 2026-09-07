@@ -61,9 +61,9 @@
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/116",
   "issue_dependencies_summary": {
    "blocked_by": 0,
-   "total_blocked_by": 0,
-   "blocking": 0,
-   "total_blocking": 0
+   "total_blocked_by": 3,
+   "blocking": 1,
+   "total_blocking": 1
   },
   "body": "<!-- mipstarre-issue-key: qpbt-line-restriction-public-recovery-20260907 -->\n### Mathematical Objective\n\nRecover the public polynomial-restriction proofs needed by the honest QPBT\nstrategy in #156 and the expanded-line construction in #116. The paper sources\nare `lem:pauli-completeness` in\n`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex`\n(in particular the line measurements at lines 1240-1280), and\n`lem:qld-comm-line-cons` in\n`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex`.\n\nThe saved honest-strategy branch contains genuine degree and evaluation proofs.\nCurrent main retains the restriction definitions but leaves\n`polynomialOnLine_lowDegreeEncoding_natDegree_le` unfinished. This packet\nrecovers those proofs on the current public API. It does not replace the full\nexpanded-line work in PR213 or claim that #116 or #156 is complete.\n\n### Scope\n\n1. Preserve the definitions and public types of `polynomialOnLine`,\n   `restrictToLine`, and `DegPoly.FitsDegree`. Move them to a public restriction\n   module only as needed to give the honest strategy a dependency-correct\n   import; `LineMeasurement.lean` must retain their public availability.\n2. Prove the existing degree bound from its unchanged hypotheses. Recover the\n   axis-line bound, degree-subspace membership, polynomial substitution\n   evaluation, coefficient-list evaluation, and their existing partial\n   evaluation consequences from the saved source and current public lemmas.\n3. Use current evaluation APIs instead of copying obsolete private helpers.\n   Keep all paper-facing statements faithful and distinguish generic\n   polynomial lemmas from source-labelled assertions.\n4. Preserve the complete old PR213 branch and both issue156 worktrees. Keep a\n   source-recovery manifest identifying the original declarations and any\n   necessary proof-only API adaptation. Do not discard their wider work.\n\n### Acceptance\n\n- The existing degree theorem has a proof with no additional hypotheses.\n- Fresh source checks of the recovered module and its public consumer pass.\n- Each recovered theorem has a freshly checked standard-only axiom closure;\n  no new proof holes, unsafe shortcuts, or load-bearing assumptions are added.\n- Blueprint links and source citations describe only what is actually proved;\n  unrestricted expanded-line consistency and honest-strategy completeness are\n  not newly marked complete by this prerequisite alone.\n- Record exact native prerequisite edges before publication, including closed\n  prerequisites. Use normal checked publication, CI, independent review, and\n  service-owned merge gates.\n\nParent: #116. This is a prerequisite of the ongoing #156 recovery, not a new\nmathematical-gap attempt and not a reset of any cumulative proof budget.",
   "closed_by": null,
@@ -1651,81 +1651,6 @@
   "pinned_comment": null
  },
  {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/240",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/240/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/240/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/240/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/240",
-  "id": 5362316118,
-  "node_id": "I_kwDOUJyJf88AAAABP55zVg",
-  "number": 240,
-  "title": "feat(QPBT/Extraction): prove independent pulled-apart algebra",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-06T02:19:36Z",
-  "updated_at": "2026-09-06T02:19:36Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/167",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 2,
-   "blocking": 2,
-   "total_blocking": 2
-  },
-  "body": "<!-- mipstarre-issue-key: 20260906-independent-extraction-algebra -->\n### Target declarations\n\nIn `MIPStarRE/QPBT/Extraction/Observables.lean`, prioritize:\n- `GlobalPairWitness.marginalPoly_isProjective`;\n- `tildeObs_eq_heteroKron`;\n- `tildeObs_isHermitian` and `tildeObs_mul_self`;\n- `tildeObs_twisted_commutation`, retaining the documented corrected phase.\n\n### Source and independence\n\nPaper: `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1421-1456`,\nEquations `eq:def-tildewj` and `eq:tilde_M` and the displayed product calculation.\nBlueprint: `def:s-w-marginals`, `lem:tildew-product-form`,\n`eq:tildew-twisted-commutation`. Read the existing\n`docs/paper-gaps/qpbt_cross-basis-phase.tex` before the commutation target.\n\nThe existing local statements take a GlobalPairWitness and use its projective\nmeasurement fields. Finite marginalization, Fourier regrouping and algebraic\nrelations do not need the missing theorem constructing that witness, nor its\nconsistency estimates. Do not replace the existence theorem with these local\nfacts, add an assumption to a source theorem, or claim soundness complete.\nUse already-merged decoder/Pauli APIs from #63 and expanded definitions from\n#114; verify actual proof dependencies while formalizing.\n\nThis subpacket supplies parts of #120/#121 while preserving their whole-packet\nintegration gates. It does not remove #119/#120 dependencies, advance their\ntails, or assume pending dot-projector proofs. Exact starting base: published\nmain a61ee557b33a2d8a4721e92b08b6d06dcb69ed57.\n\n### Ownership and acceptance\n\nExclusive write scope: Extraction/Observables.lean for the targets above,\ntheir matching blueprint nodes excluding def:tau-dot-product-projector, and\na packet-specific audit. Do not edit Extraction/Defs.lean, Combining files,\nor global-witness construction. Leave tildeM and swap targets for a subsequent\nverified integration unless they are proved directly without another lane's\nunmerged lemma; prioritize the listed independent content.\n\nPreserve all public signatures and the documented nontrivial commutation phase.\nNo new proof holes, bridge inputs, axioms, bypasses, weakened conclusions or\nsuppressed lint. Validate declaration axiom dependencies, targeted Lean checks,\nstatement integrity and normal hooks. CI, independent review and daemon-only\nmerges remain mandatory. Do not mark the unresolved final extraction theorem\nor original construction complete.\n",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/240/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/240/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/234",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/234/labels{/name}",
@@ -2263,8 +2188,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 15,
-   "completed": 5,
-   "percent_completed": 33
+   "completed": 6,
+   "percent_completed": 40
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
   "issue_dependencies_summary": {
@@ -2765,8 +2690,8 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/164",
   "issue_dependencies_summary": {
-   "blocked_by": 1,
-   "total_blocked_by": 4,
+   "blocked_by": 2,
+   "total_blocked_by": 5,
    "blocking": 1,
    "total_blocking": 1
   },
@@ -2935,7 +2860,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/167",
   "issue_dependencies_summary": {
-   "blocked_by": 3,
+   "blocked_by": 2,
    "total_blocked_by": 4,
    "blocking": 1,
    "total_blocking": 1
@@ -3020,7 +2945,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/167",
   "issue_dependencies_summary": {
-   "blocked_by": 2,
+   "blocked_by": 1,
    "total_blocked_by": 5,
    "blocking": 1,
    "total_blocking": 1
@@ -4410,9 +4335,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 209,
+  "comments": 210,
   "created_at": "2026-09-02T08:30:04Z",
-  "updated_at": "2026-09-06T21:14:09Z",
+  "updated_at": "2026-09-07T08:28:14Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
