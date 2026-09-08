@@ -293,7 +293,7 @@ theorem pauliTraceMeasurement_isConsistentOn (P : AdmissibleParams) (W : PauliKi
 /-- The honest Point/W measurement: the generalized Pauli basis measurement
 coarse-grained by the value `g_h(u)` of the low-degree encoding at the point
 `u`.  Paper
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1290-1300`. -/
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1248-1261`. -/
 noncomputable def pauliPointMeasurement (P : AdmissibleParams) (W : PauliKind)
     (u : Fin P.m → PauliScalar P) : Measurement (PauliScalar P) (PauliRegister P) :=
   (pauliBasisMeasurement W).postprocess (fun h => lowDegreeEnc h u)
@@ -316,7 +316,7 @@ theorem pauliPointMeasurement_isConsistentOn (P : AdmissibleParams) (W : PauliKi
 /-- Restrict a multivariate polynomial to an axis-parallel line, retaining the
 coefficients through degree `d`.  This is the degree-`d` answer used for the
 axis-line clause of `lem:pauli-completeness`, paper
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1290-1305`. -/
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1263-1273`. -/
 noncomputable def restrictToAxisLine (L : LdParams) (line : LineDesc L)
     (g : MvPolynomial (Fin L.m) (ScalarQ L)) : DegPoly L L.d :=
   fun i => (polynomialOnLine L line g).coeff i.val
