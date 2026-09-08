@@ -5978,3 +5978,26 @@ not actual commit/publication hooks. No productive session was killed.
 - PR #383 exact ef166338 has green canonical CI and one live routine Sol Ultra CODE/PROSE review publisher, with request receipt /tmp/qpbt-pr383-review-request-status-20260908.json; both requests remain unbound and no duplicate was started. The latest owner archive keeps occupied runtime, fresh useful output, and unverified provider API observations separate, treats successor entries as readiness plans rather than occupied slots, and preserves the read-only Claim 17-2 domain audit as an unadjudicated, non-kernel-certified proposal rather than a proof closure.
 - 2026-09-08T16:40:38Z: Completion handoff ordering and source-deadline correction. The regular 30-second lifecycle audit found at least eight useful native workers in only 26 of 65 valid sampled minutes (40 percent), including one approximately 10.5-minute gap and another longer than six minutes. The capable coordinator had a prepared-successor ledger, but detailed receipt and rollout-tail adoption could still precede activation; at 16:47Z the ledger also retained an already-published successor, an exhausted geometry successor, and descriptive input strings instead of current heads, `ready_at`, ownership, and complete dispatch payloads. Closing nine-worker snapshots therefore did not establish prompt or sustained recovery. A separate bounded geometry actor started at 16:09:28Z, first reported progress at 16:24:57Z, and retained its original 20-minute deadline of 16:29:28Z; 301.722 seconds of late read-only scouting remains charged rather than becoming a reset. Issue #418 changes only the native main/coordinator/session contract: target nine useful workers with floor eight; validate disjoint primary and alternate successors while slots are full against current heads, published inputs, available roles, current ownership, and immutable dispatch payloads; place an absolute source deadline no later than native dispatch plus the authorized limit in each activation payload; activate after real completion and minimal admission checks before detailed adoption; then reconcile the deadline with the successor current turn and verify its first useful output. Backlog recovery is labelled backlog, actual blockers and main-decision latency remain visible, and occupied runtime, fresh-output lower bounds, API usage, and proof delivery remain distinct. No lease, capacity, root identity, credential, model policy, runtime trigger, goal, proof budget, or B8 counter changed.
 - 2026-09-08T17:11:04Z: The coordinator-owned pre-merge latency batch `/tmp/qpbt-refill-latency-next-batch-20260909.json` (SHA-256 `e18dd17a73fe25148e74fdf644a7142617020c2f1c6ef52743555c93acc775dd`) records two missed baseline transitions. Completion to actual successor `task_started` took 294.078 seconds for `/root/space_sol_pr249` and 354.659 seconds for `/root/sol_prove_tilde_measurement`; both records have `ready_at: null`, and the latter explicitly records incomplete payload prevalidation before completion. The later observation of nine occupied native slots is recovery only, not acceptance of the new ordering or proof of sustained floor coverage. This issue reads the batch without editing it; only `/root/astra_refill_coordinator` owns live latency-batch writes.
+- 2026-09-08T18:22:34Z: PR #426 repaired the completion-handoff ordering
+  protocol at exact head `3963ac0aa102a4589636ab924620f8cf63aa09e3`.
+  Its canonical CI passed all nine gates in 250 seconds, and independent hard
+  review `5145399737` approved the repaired F1/F2 ordering with no findings.
+  `pr_merge.py` passed every exact-head service gate and merged the PR as
+  `90f277349f7d502eac919762db4e23c5a8a7cd86`. This merge does not establish
+  runtime acceptance: actual prevalidated completion-to-start, first-tool
+  latency, and coverage evidence remain required, and the prior failed
+  measurements remain historical evidence.
+- The PR #426 service boundary retained stash
+  `4ecdd8aef581f4a6b7a2593181027c16c65169d9`, exactly matching four pending
+  build rows and three native-session rows. After service, the primary restored
+  those suffixes before the independently appended eight-second cache-warmer
+  row while holding only the live JSONL inode locks. The composed 839-row build
+  file has SHA-256 `f76f60422d2f5422cf2efd41b14a18834f98d6e6100a72902e2f6e890267dab4`;
+  the 1,036-row session file has SHA-256
+  `57542d1d05e37c21e750e99700d8a076110889af91d2ab67192a259cc895c3bf`.
+  JSON parsing and byte checks passed under
+  `/tmp/qpbt-pr426-postservice-restore-20260908T1823Z/receipt.json`; no global
+  writer-idle wait or clean-tree bypass was used. The sole subsequent PR #363
+  CI on exact head `e90a2a689fef401652e20d5fd1de819ec293337a` completed non-partially
+  with all nine contexts green in 288 seconds (manifest SHA-256
+  `6969824f8253f8fbc4b78fe82a40caf2ce8709c7798c4e418626493e0c3491e9`).
