@@ -811,3 +811,4 @@
 {"ts": "2026-09-08T19:35:37+0800", "kind": "ci-build", "trigger": "ci.sh pr=365", "seconds": 90, "outcome": "success", "sha": "c39d7f2551f6c53f6fb50406dd3f9c8cdd3bab59", "note": "branch issue-364-native-scalar-consistency"}
 {"ts": "2026-09-08T19:43:24+0800", "kind": "ci-build", "trigger": "ci.sh pr=299", "seconds": 153, "outcome": "success", "sha": "af5980e787cf65eb516010a9646b53ae746d4c80", "note": "branch issue-156-honest-pauli-current"}
 {"ts": "2026-09-08T19:44:45+0800", "kind": "ci-build", "trigger": "ci.sh pr=361", "seconds": 143, "outcome": "success", "sha": "493733993c56d03b0e755f762661657222852839", "note": "branch issue-360-supplied-direct-soundness"}
+{"ts": "2026-09-08T19:49:05+0800", "kind": "ci-build", "trigger": "ci.sh pr=213", "seconds": 182, "outcome": "success", "sha": "b04ced12caec3c76ed015f5561f9db5b195d747b", "note": "branch issue-116-expanded-line-measurements"}
