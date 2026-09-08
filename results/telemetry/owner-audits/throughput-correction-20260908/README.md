@@ -48,3 +48,17 @@ native slots, fresh output, and the owner's separate provider-dashboard range of
 6--8 requests remain distinct quantities; quietness alone is not vacancy
 evidence. Newly published proof packets such as PRs #398 and #401 remain
 unmerged observations until their ordinary CI, review, and service gates finish.
+
+The 16:33:44Z snapshot and successor receipt preserve the same distinction at
+the next service boundary. The successor list is an authorized readiness plan,
+not a set of occupied slots, and `/root/astra_refill_coordinator` remains the
+only demonstrated native refill operator. The accompanying meta-guidance input
+records delivery to main without claiming that its requested retirement audit
+was completed.
+
+The Claim 17-2 domain report is a read-only mathematical audit, not a merged or
+kernel-certified correction. It proposes a countermodel to the enlarged public
+witness domain and explicitly records that no Lean instantiation, source edit,
+or canonical review was performed. Main retains adjudication of that proposal;
+the archive does not treat it as a verified source theorem or a completed proof
+closure.
