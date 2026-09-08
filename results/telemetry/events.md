@@ -5763,3 +5763,18 @@ not actual commit/publication hooks. No productive session was killed.
   13 attempts/26509 seconds remain cumulative and unchanged. Receipt:
   /tmp/qpbt-parameter-evaluated-line-bound-astra-status-20260908.json
   (sha256 adc49ff3bd1aafca860c6ffa3562455947743e1dfe9d0e9b7d205bb07b738655).
+- PR #350 blueprint PDF false success (#352): `leanblueprint pdf` reached an
+  undefined `\Exp` command while a non-empty PDF from an earlier render was
+  still present. The PDF command returned nonzero and its converter/compiler
+  children deadlocked, but `ci.sh` ran step bodies with `errexit` disabled and
+  did not inspect that status; after the owned children were drained, later bbl
+  and web commands succeeded and the manifest incorrectly recorded
+  `blueprint-render: success`. The repair removes the stale artifact, requires
+  an explicit zero exit, and separately requires a newly produced non-empty
+  PDF before continuing. Preserved incident copies are under
+  `/tmp/qpbt-ci-blueprint-render-failopen-20260908/` with log SHA-256
+  `172f76a182daf68f921651a1d292c5ba6b3064d44da7efe9c3104bb2c9d935ba`
+  and stale-PDF SHA-256
+  `bf3fc1b0c3fc1d326bd52bc5590fe4dd4dcba230d0e89647611c508f59c9e11a`.
+  Lesson: a retained output artifact is not evidence that the current command
+  succeeded; capture the exit status before any later subcommand can replace it.

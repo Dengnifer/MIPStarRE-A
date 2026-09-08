@@ -858,9 +858,17 @@ step_blueprint_render() {
   # pr-ci.yml:210-218.  The PDF pass is what catches undefined macros; it needs
   # a TeX installation the CI runner apt-installs and a laptop may not have.
   if command -v latexmk >/dev/null 2>&1 || command -v xelatex >/dev/null 2>&1; then
+    _pdf="blueprint/print/print.pdf"
+    if ! rm -f "$_pdf"; then
+      echo "ERROR: could not remove stale $_pdf before rendering"
+      exit 1
+    fi
     echo "+ (cd blueprint && leanblueprint pdf)"
-    ( cd blueprint && run_outside_git_env leanblueprint pdf )
-    if [ ! -s blueprint/print/print.pdf ]; then
+    if ! ( cd blueprint && run_outside_git_env leanblueprint pdf ); then
+      echo "ERROR: leanblueprint pdf failed"
+      exit 1
+    fi
+    if [ ! -s "$_pdf" ]; then
       echo "ERROR: leanblueprint pdf produced no output"
       exit 1
     fi

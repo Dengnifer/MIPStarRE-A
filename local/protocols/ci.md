@@ -61,7 +61,7 @@ blueprint-fix, everything else → never auto-fixed) ports without translation.
 | Step | Parent job | What it runs (in the worktree) | Gate |
 |---|---|---|---|
 | `build` | `build` (`pr-ci.yml:115-168`) | warm `.lake/build`, `lake exe cache get`, `lake build`, `lake build MIPStarRE.LDT.Test.AxiomAudit` (`:155-156`), `scripts/comparator/check_challenge_drift.py` (`:158-159`) | `lean ∨ comparator ∨ workflow` |
-| `blueprint-render` | `blueprint-render` (`:173-243`) | `leanblueprint pdf` + non-empty `blueprint/print/print.pdf` (`:210-218`), `texra-blueprint bbl` (`:222-223`), `texra-blueprint web` with `grep '^ERROR:'` (`:225-243`) | `blueprint_src ∨ workflow` |
+| `blueprint-render` | `blueprint-render` (`:173-243`) | remove the prior PDF, require `leanblueprint pdf` exit zero and a fresh non-empty `blueprint/print/print.pdf` (`:210-218`), `texra-blueprint bbl` (`:222-223`), `texra-blueprint web` with `grep '^ERROR:'` (`:225-243`) | `blueprint_src ∨ workflow` |
 | `paper-gaps` | `paper-gaps` (`:248-271`) | `texra-blueprint --root . paper-gaps check` | `paper_gaps ∨ workflow` |
 | `blueprint-sync` | `blueprint-sync` (`:273-317`) | `python3 -m unittest discover -s scripts/tests`, `blueprint_lean_sync.py --update-lean-decls`, `blueprint_lean_sync.py --ci`, `blueprint_axiom_audit_needed.py --base-ref` | `lean ∨ blueprint ∨ scripts ∨ workflow` |
 | `file-length` | `file-length` (`:319-340`) | `check_oversized_lean_files.py --root .` (>1000 lines) | `mip_lean ∨ scripts ∨ workflow` |
@@ -73,6 +73,13 @@ Every step is blocking. The single advisory sub-check is
 `check_duplicate_private_helpers.py`: exit 1 means "candidates reported" and is
 downgraded to a warning, any other nonzero status is a real failure — the same
 `set +e` dance as `pr-ci.yml:432-445`.
+
+The PDF subpass has two independent success conditions: `leanblueprint pdf`
+must return zero, and that invocation must create a non-empty `print.pdf` after
+the previous artifact was removed. A stale file cannot replace either
+condition. The driver checks the command status explicitly because the step
+dispatcher disables `errexit` while it captures each step's outcome; later
+successful bbl or web commands must never overwrite an earlier PDF failure.
 
 Two GitHub-only behaviours are dropped on purpose: `GITHUB_STEP_SUMMARY`
 blocks and `::error` / `::notice` / `::warning` annotations are inert outside
