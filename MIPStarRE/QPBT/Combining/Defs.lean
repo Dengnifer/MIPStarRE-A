@@ -218,7 +218,48 @@ blueprint
 theorem combineLinePolynomial_natDegree_le {K : Type*} [CommSemiring K] {c : ℕ}
     (aX bX aZ bZ uα vα uβ vβ : K) (f g : Fin (c + 1) → K) :
     (combineLinePolynomial aX bX aZ bZ uα vα uβ vβ f g).natDegree ≤ c + 1 := by
-  sorry
+  have coefficientDegree : ∀ h : Fin (c + 1) → K,
+      (linePolynomialOfCoefficients h).natDegree ≤ c := by
+    intro h
+    refine Polynomial.natDegree_sum_le_of_forall_le _ _ ?_
+    intro i _
+    refine Polynomial.natDegree_mul_le.trans ?_
+    rw [Polynomial.natDegree_C]
+    have hpow : (Polynomial.X ^ i.val : Polynomial K).natDegree ≤ i.val := by
+      refine Polynomial.natDegree_pow_le.trans ?_
+      have hX := Polynomial.natDegree_X_le (R := K)
+      calc
+        i.val * (Polynomial.X : Polynomial K).natDegree ≤ i.val * 1 :=
+          Nat.mul_le_mul_left _ hX
+        _ = i.val := by ring
+    have hi : i.val ≤ c := Nat.lt_succ_iff.mp i.isLt
+    omega
+  have affineDegree : ∀ u v : K,
+      (Polynomial.C u + Polynomial.C v * Polynomial.X).natDegree ≤ 1 := by
+    intro u v
+    refine (Polynomial.natDegree_add_le _ _).trans (max_le ?_ ?_)
+    · simp [Polynomial.natDegree_C]
+    · refine Polynomial.natDegree_mul_le.trans ?_
+      rw [Polynomial.natDegree_C]
+      simpa using Polynomial.natDegree_X_le (R := K)
+  have summandDegree : ∀ (a b u v : K) (h : Fin (c + 1) → K),
+      ((Polynomial.C u + Polynomial.C v * Polynomial.X) *
+        (linePolynomialOfCoefficients h).comp
+          (Polynomial.C a + Polynomial.C b * Polynomial.X)).natDegree ≤ c + 1 := by
+    intro a b u v h
+    refine Polynomial.natDegree_mul_le.trans ?_
+    have hfactor := affineDegree u v
+    have hcomp : ((linePolynomialOfCoefficients h).comp
+        (Polynomial.C a + Polynomial.C b * Polynomial.X)).natDegree ≤ c := by
+      refine Polynomial.natDegree_comp_le.trans ?_
+      calc
+        (linePolynomialOfCoefficients h).natDegree *
+              (Polynomial.C a + Polynomial.C b * Polynomial.X).natDegree ≤ c * 1 :=
+          Nat.mul_le_mul (coefficientDegree h) (affineDegree a b)
+        _ = c := by ring
+    omega
+  exact (Polynomial.natDegree_add_le _ _).trans
+    (max_le (summandDegree aX bX uα vα f) (summandDegree aZ bZ uβ vβ g))
 
 /-- Combine two degree-`c` line polynomials using explicit affine
 reparameterizations.  Coefficients through degree `c + 1` are extracted from
@@ -265,7 +306,23 @@ theorem combineLinePoly_spec {K : Type*} [Field K] {m c : ℕ}
           (combineLinePoly aX bX aZ bZ uα vα uβ vβ f g) t =
         (uα + t * vα) * evalCoefficient f (aX + bX * t) +
           (uβ + t * vβ) * evalCoefficient g (aZ + bZ * t) := by
-  sorry
+  intro t
+  obtain ⟨-, -, -, -, hlines⟩ := hcompat
+  refine ⟨(hlines t).1, (hlines t).2, ?_⟩
+  have hdeg := combineLinePolynomial_natDegree_le aX bX aZ bZ uα vα uβ vβ f g
+  have heval :
+      evalCoefficient (combineLinePoly aX bX aZ bZ uα vα uβ vβ f g) t =
+        (combineLinePolynomial aX bX aZ bZ uα vα uβ vβ f g).eval t := by
+    rw [Polynomial.eval_eq_sum_range' (n := c + 1 + 1) (by omega) t]
+    simp only [evalCoefficient, combineLinePoly]
+    exact Fin.sum_univ_eq_sum_range
+      (fun k =>
+        (combineLinePolynomial aX bX aZ bZ uα vα uβ vβ f g).coeff k * t ^ k)
+      (c + 1 + 1)
+  rw [heval, combineLinePolynomial]
+  simp only [Polynomial.eval_add, Polynomial.eval_mul, Polynomial.eval_C,
+    Polynomial.eval_X, Polynomial.eval_comp, linePolynomialOfCoefficients_eval]
+  ring
 
 /-- The seed event defining the `i`-th original-dimensional restricted line
 law.  It is applied before the `LineDesc` decoder, since a geometric line does
