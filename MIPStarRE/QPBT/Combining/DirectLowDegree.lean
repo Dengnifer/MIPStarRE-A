@@ -1,5 +1,6 @@
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Soundness
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Consistency
+import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.LineResampling
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Strategy
 import MIPStarRE.QPBT.Combining.DirectLowDegree.GameValue
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.PassConversion
