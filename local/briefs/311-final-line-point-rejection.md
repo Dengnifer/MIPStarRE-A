@@ -23,7 +23,8 @@ divisibility condition, or bridge hypothesis. This packet advances the
 supplied-witness passing-value route but does not bound the remaining game
 branches, construct a global measurement, or complete `lem:qld-4-7`.
 
-Completion requires focused Lean validation, standard-only axiom checks, and
-the normal publication, canonical CI, independent review, and merge gates. The
-PR remains blocked on #309 while PR310 is pending. Prior issue #309 usage and
-the B8 budget of 13 attempts / 26509 seconds remain unchanged.
+The proof depends mathematically on the expanded-state correlations from #302
+and the exact mixed-branch transports from #305, #307, and #309. These
+references record theorem provenance rather than a transient pull-request
+state. Prior issue #309 usage and the B8 budget of 13 attempts / 26509 seconds
+remain unchanged.
