@@ -1,0 +1,635 @@
+{
+  "schema": 2,
+  "updated_at": "2026-09-08T10:44:45.974Z",
+  "executable_mechanics_owner": "/root/astra_refill_coordinator",
+  "root_thread_id": "01a076bc-f4ad-7813-805b-c8b4dac71a14",
+  "authorization": {
+    "selected_by": "/root under latest explicit owner instruction",
+    "started_at": "2026-09-08T08:16:37.885Z",
+    "original_window_minutes": 30,
+    "original_deadline_at": "2026-09-08T08:46:37.885Z",
+    "explicit_extension_minutes": 15,
+    "former_extended_deadline_at": "2026-09-08T09:01:37.885Z",
+    "current_expiry": null,
+    "continuation": "Owner explicitly requires executable mechanics without expiry until a successor actually demonstrates native list_agents and followup_task; all cumulative time retained, no reset.",
+    "routine_selection_scope": "Approved QPBT direct-soundness/supplied-witness frontier and eligible PR integration queue; root retains overall scope and trusted independent review binding."
+  },
+  "capacity": {
+    "space_total": 10,
+    "native_limit": 9,
+    "floor": 8,
+    "aim": 9,
+    "external": 0
+  },
+  "observed": {
+    "at": "2026-09-08T10:42:57.527216Z",
+    "main": 1,
+    "useful_native": 9,
+    "other": 0,
+    "read_errors": 0,
+    "models": {
+      "gpt-5.6-sol/ultra": 8,
+      "gpt-6-astra/ultra": 1
+    },
+    "current_model_and_tool_outputs_verified": true,
+    "activity_receipt_writer": "existing20shelperstatus consumer",
+    "main_pin": "1785520949014bcc37684684e412b713712ef0f6"
+  },
+  "current_owners": [
+    {
+      "worker": "astra_refill_coordinator",
+      "task": "Executable replenishment planning/control",
+      "start": "2026-09-08T08:16:37.885Z",
+      "expiry": null,
+      "budget": "Original30+explicit15+owner-required cumulative continuation; no reset"
+    },
+    {
+      "worker": "space_sol_publication_finish",
+      "task": "Primary source integration, service merges, canonical publication, sole manual telemetry; no native dispatch capability"
+    },
+    {
+      "worker": "sol_ci320",
+      "task": "PR359 F1/F2 shared-helper consolidation, sourceauthor",
+      "start": "2026-09-08T10:33:55.638Z",
+      "model_output": "2026-09-08T10:34:08.347Z",
+      "tool_output": "2026-09-08T10:34:30.454Z",
+      "deadline": "2026-09-08T10:53:55.638Z",
+      "budget": "Explicit20min sourceconsolidation; all348/359 proof/admin/CI costs cumulative",
+      "scope": "Reuse existing line-description carrier/injectivity/Fintype and directLdSpacePointEquiv; preserve publicstatements/proofcontent/no newpremises",
+      "mutation_gate": "canonical359 CHANGES_REQUESTED consumer beforemutation"
+    },
+    {
+      "worker": "sol_review310_b37",
+      "task": "Read-only exact361/359 delta/caller propagation plan",
+      "start": "2026-09-08T10:34:18.793Z",
+      "model_output": "2026-09-08T10:34:25.083Z",
+      "tool_output": "2026-09-08T10:34:42.197Z",
+      "deadline": "2026-09-08T10:44:18.793Z",
+      "budget": "Explicit10min read-only; no full review verdict or source edits"
+    },
+    {
+      "worker": "sol_ci213_resume",
+      "task": "Fresh canonical344 reviewrequest prep afterF1/F2docrepair",
+      "head": "95f996e5f42dafc9c411ebf3a42e4f72ff286dd8",
+      "start": "2026-09-08T10:38:08.496Z",
+      "model_output": "2026-09-08T10:38:29.873Z",
+      "tool_output": "2026-09-08T10:39:02.252Z",
+      "deadline": "2026-09-08T10:48:08.496Z",
+      "budget": "10min normalgateprep; prior430/600fixpublication+943wallincl365sCI andallprior344/358 costs retained",
+      "review_exclusion": "344author cannot review ownnewhead"
+    },
+    {
+      "worker": "sol_refresh343_parent",
+      "task": "Normal358 publisher recovery adopting existing validatedresponse afteroldwaitertermination",
+      "start": "2026-09-08T10:38:52.596Z",
+      "model_output": "2026-09-08T10:39:03.742Z",
+      "tool_output": "2026-09-08T10:39:24.326Z",
+      "deadline": "2026-09-08T10:46:52.596Z",
+      "budget": "Explicit8min recovery; oldconsumer8min+98.187sreceipt overrun/all349/358costs retained",
+      "scope": "No fakeverdict/blindnewreview/source/CI changes or newframework; exactunsupportedgate ifexistingcanonicalroute absent"
+    },
+    {
+      "worker": "sol_refresh319_dependency",
+      "task": "PR213 preservation refresh anduniqueCI afterExpfix",
+      "start": "2026-09-08T10:23:32.645Z",
+      "model_output": "2026-09-08T10:23:52.935Z",
+      "tool_output": "2026-09-08T10:24:18.317Z",
+      "preservation_deadline": "2026-09-08T10:38:32.645Z",
+      "current_phase": "ownedcanonicalCI",
+      "budget": "15min newpinpreservation+normalCI, allsource213/priorinvalidCI52989 andold360costs retained"
+    },
+    {
+      "worker": "sol_direct_soundness_compression",
+      "task": "PR299 honest-strategy preservation refresh anduniqueCI afterExpfix",
+      "start": "2026-09-08T10:23:56.605Z",
+      "model_output": "2026-09-08T10:24:15.807Z",
+      "tool_output": "2026-09-08T10:24:30.679Z",
+      "preservation_deadline": "2026-09-08T10:38:56.605Z",
+      "current_phase": "ownedcanonicalCI",
+      "budget": "15min newpinpreservation+normalCI, allsource299/priorinvalidCI60118 andold359costs retained"
+    },
+    {
+      "worker": "space_sol_coefficient_collision",
+      "task": "Issue362 nativepointmeasurement equality andboundedscalarcorollary",
+      "start": "2026-09-08T10:16:46.018Z",
+      "model_output": "2026-09-08T10:16:59.448Z",
+      "tool_output": "2026-09-08T10:17:10.450Z",
+      "proof_deadline": "2026-09-08T10:36:46.018Z",
+      "current_phase": "typed/std3 focused+aggregate checks passed; existingcheckedpublicationhook drain",
+      "budget": "20minproof+<=10mintypedvalidation/publication; actualinflighttail retained; no newproof extension",
+      "receipt": "/tmp/qpbt-native-point-consistency-status-20260908.json"
+    }
+  ],
+  "completed_results": [
+    {
+      "pr": 358,
+      "head": "c8ede4f44295c109f6890fcea2622a78e4ed6afc",
+      "result": "Checked-published; uniqueCI alreadygreen adopted withoutduplicate",
+      "receipt": "/tmp/qpbt-axis351-af87-refresh-status-20260908.json"
+    },
+    {
+      "pr": 356,
+      "head": "99f88dcf722677bec0de5a3e635726ce46a647e4",
+      "result": "Checked-published, CI145s allgreen, independentCODE/PROSE APPROVED; rootverified canonicalPROSErc0 at08:52; servicegates primary-owned",
+      "receipt": "/tmp/qpbt-pr356-refresh-status-20260908.json"
+    },
+    {
+      "pr": 312,
+      "head": "8e65a953334f6199fedb0fddc738b9f6a5779359",
+      "result": "Preservation publication andCI completed"
+    },
+    {
+      "pr": 343,
+      "head": "d2a9acf37ebd0504c62cf7e19dedfee36a4cf727",
+      "result": "Checked-published, CI190s allgreen"
+    },
+    {
+      "pr": 319,
+      "head": "6b3996a750752d1d9db62ae2fac4e21343f8ce0a",
+      "result": "Checked-published, CI178s allgreen",
+      "receipt": "/tmp/qpbt-pr319-af87-refresh-status-20260908.json"
+    },
+    {
+      "pr": 320,
+      "head": "43f58a2ea1217e571eb8d2e95f18950887c317ab",
+      "result": "Checked-published, uniqueCI220s allgreen",
+      "receipt": "/tmp/qpbt-pr320-af87-ci-status-20260908.json"
+    },
+    {
+      "pr": 355,
+      "head": "cc4b526422a7ee342a35476e7726f64ec9f9fba6",
+      "result": "Checked-published, CI318s allgreen, directfresh234pagePDF",
+      "receipt": "/tmp/qpbt-ci-pdf-truth-fix-status-20260908.json"
+    },
+    {
+      "pr": 359,
+      "head": "180ed25f622052c571879b8aa1f833aef1e5c1fe",
+      "result": "Typed and checked-published; CI now assigned",
+      "receipt": "/tmp/qpbt-passing348-final-assembly-status-20260908.json",
+      "budget": "895s typed;1656s publication overrun retained"
+    },
+    {
+      "pr": 350,
+      "head": "bacf27c8bfd1ce4a1fcd49f84f4b756663e11000",
+      "result": "Checked-published, authorworkflowSTOP at2h walllimit; NOcanonicalCI started",
+      "budget": "Anchor07:20:05Z expired09:20:05Z;7053s usedat09:17:38/147sremaining; furtherwork requires explicitOWNERextension",
+      "receipt": "/tmp/qpbt-router-unrelated-appserver-fix-20260908.json"
+    },
+    {
+      "pr": 342,
+      "head": "092a9b96f56f22fef3c3e52176f232417b0e0360",
+      "result": "Checked-published, CI181s all9green",
+      "receipt": "/tmp/qpbt-pr342-review-request-status-20260908.json"
+    },
+    {
+      "pr": 349,
+      "head": "840dfbdb0fd2d1f569896ca72fe02acade25f378",
+      "result": "Checked-published,CI263s all9green, base343",
+      "receipt": "/tmp/qpbt-pr349-pr343-integration-status-20260908.json"
+    },
+    {
+      "issue": 360,
+      "head": "2b09f63ddb11627278976d5fcee0352806c47517",
+      "result": "Attempt1 stoppeduntyped at20min; firsttwo finaltransports hidden equality errors, thirdelaborates; attempt2 separatelyexplicitlyauthorized",
+      "receipt": "/tmp/qpbt-360-supplied-direct-soundness-checkpoint-20260908.json"
+    }
+  ],
+  "verified_completion_cycles": [
+    {
+      "completion_worker": "sol_ci213_resume",
+      "completed_at": "2026-09-08T08:34:22.226Z",
+      "successor": "space_sol_pr249",
+      "started_at": "2026-09-08T08:36:32.573Z",
+      "first_tool_output_at": "2026-09-08T08:37:12.483Z",
+      "dispatch_latency_s": 130.347,
+      "tool_recovery_latency_s": 170.257,
+      "count_before": 9,
+      "count_after_completion": 8,
+      "count_after_verified_output": 9,
+      "limitation": "exceeded60s aim; readiness/root slot decision delay retained; floor8held"
+    },
+    {
+      "completion_worker": "space_sol_pr213",
+      "completed_at": "2026-09-08T08:37:53.153Z",
+      "successor": "sol_review310_b37",
+      "dispatched_by": "root",
+      "started_at": "2026-09-08T08:39:03.677Z",
+      "first_tool_output_at": "2026-09-08T08:39:28.614Z",
+      "dispatch_latency_s": 70.524,
+      "tool_recovery_latency_s": 95.461,
+      "count_before": 9,
+      "count_after_completion": 8,
+      "count_after_verified_output": 9,
+      "limitation": "ready root binding used; observed completion-to-start still exceeded60s, no immediate-recovery claim"
+    },
+    {
+      "completion_worker": "sol_refresh319_dependency",
+      "completed_at": "2026-09-08T08:43:19.496Z",
+      "successor_task": "PR319 preservation",
+      "started_at": "2026-09-08T08:45:00.772Z",
+      "first_tool_output_at": "2026-09-08T08:45:16.357Z",
+      "dispatch_latency_s": 101.276,
+      "tool_recovery_latency_s": 116.861,
+      "dispatched_by": "root"
+    },
+    {
+      "completion_worker": "sol_refresh343_parent",
+      "completed_at": "2026-09-08T08:47:34.996Z",
+      "successor_task": "uniqueCI358",
+      "started_at": "2026-09-08T08:49:04.628Z",
+      "first_tool_output_at": "2026-09-08T08:49:58.565Z",
+      "dispatch_latency_s": 89.632,
+      "tool_recovery_latency_s": 143.569
+    },
+    {
+      "completion_worker": "space_sol_pr249",
+      "completed_at": "2026-09-08T08:49:19.659Z",
+      "successor_task": "uniqueCI320",
+      "started_at": "2026-09-08T08:49:59.049Z",
+      "first_model_output_at": "2026-09-08T08:50:12.870Z",
+      "first_tool_output_at": "2026-09-08T08:50:43.804Z",
+      "dispatch_latency_s": 39.39,
+      "model_recovery_latency_s": 53.211,
+      "tool_recovery_latency_s": 84.145,
+      "limitation": "Sub60s dispatch/modeloutput; toolresult exceeded60s"
+    },
+    {
+      "completion_worker": "sol_refresh343_parent",
+      "completed_at": "2026-09-08T08:56:34.604Z",
+      "successor_task": "PR349 preservation",
+      "started_at": "2026-09-08T08:59:12.475Z",
+      "first_model_output_at": "2026-09-08T08:59:32.912Z",
+      "first_tool_output_at": "2026-09-08T09:00:04.136Z",
+      "dispatch_latency_s": 157.871,
+      "tool_recovery_latency_s": 209.532
+    }
+  ],
+  "shortfalls": [
+    {
+      "at": "2026-09-08T08:43:16.569263Z",
+      "actual_useful_native": 7,
+      "reason": "CODE356 reviewer terminal awaiting canonicalacceptance;343 currentturn161.8s stale excluded",
+      "next_action": "primaryaccept CODE; rootbind readyPROSE; request343 genuineownedprocess/output evidence",
+      "activity_receipt_written": true
+    },
+    {
+      "at": "2026-09-08T08:45:16.724828Z",
+      "actual_useful_native": 8,
+      "reason": "343 freshagain and root PR319 successor actualtools verified; reviewer stillheld",
+      "activity_receipt_written": true
+    },
+    {
+      "at": "2026-09-08T09:00:39.994627Z",
+      "useful_native": 5,
+      "reason": "320CI,355integration,319publication terminated; next359authorcompletion left4; handoff capability defect unresolved",
+      "next_action": "Latestowner kept executabledelegate, dispatched five ready MAIN jobs and verified9 by09:07:55"
+    },
+    {
+      "at": "2026-09-08T09:01:00Z",
+      "kind": "activity_count_correction",
+      "detail": "Preceding stale8 record immediately superseded to5 after latestsampler was inspected; both observations retained, no clean-cadence claim"
+    }
+  ],
+  "invalid_handoffs": [
+    {
+      "receipt": "/tmp/qpbt-refill-handoff-ack-space-sol-20260908.json",
+      "recorded_at": "2026-09-08T08:49:30Z",
+      "claimed_effective_at": "2026-09-08T08:46:37.885Z",
+      "verdict": "Policy acknowledgment only; never accepted as executablebackdatedcontrol"
+    },
+    {
+      "receipt": "/tmp/qpbt-primary-refill-handoff-ack-20260908.json",
+      "recorded_at": "2026-09-08T08:54:00Z",
+      "tool_write_at": "2026-09-08T08:54:51.859Z",
+      "executable_refill_control_accepted": false,
+      "blocker": "Primary registry lacks collaboration.list_agents/followup_task; queuefallback exit4 primary-only policy",
+      "observed_at": "2026-09-08T09:01Z"
+    },
+    {
+      "owner": "sol_ci320",
+      "verdict": "Alternate observation-only transfer canceled; no native dispatch demonstrated"
+    }
+  ],
+  "next_handoff_requirement": "Actual supported list_agents AND followup_task by successor, with genuine approved successor activity verified; observer reads/ACK/queuedmessages alone insufficient.",
+  "sampler_journal": "/tmp/qpbt-worker-live-refill-20260908.jsonl",
+  "helper_status": "/home/drx/.cache/mipstarre-dev/owner-tools/qpbt-vacancy-trigger/status.json",
+  "primary_telemetry_writer": "space_sol_publication_finish",
+  "manual_primary_telemetry_written": false,
+  "B8": {
+    "attempts": 13,
+    "working_seconds": 26509,
+    "reset": false
+  },
+  "cumulative_raw_history": "Preserved in original rollouts, sampler journal and predecessor receipts; unknown aggregation scope is not summed.",
+  "scope_preservation": "No new/nested agentpool, model/lease/key/controller setting changes, proofstatement changes or primarymanualtelemetry by delegate.",
+  "previous_owner_snapshots": [
+    {
+      "at": "2026-09-08T09:11:01.957Z",
+      "owners": [
+        {
+          "worker": "astra_refill_coordinator",
+          "task": "Executable count-refill-verify control",
+          "start": "2026-09-08T08:16:37.885Z",
+          "budget": "Cumulative original30+explicit15+owner-required continuation, noreset"
+        },
+        {
+          "worker": "space_sol_publication_finish",
+          "task": "Source integration, canonical CI/review/merge gates, sole primary telemetry",
+          "dispatch_capability": false,
+          "receipt": "/tmp/qpbt-primary-refill-handoff-ack-20260908.json"
+        },
+        {
+          "worker": "sol_ci320",
+          "task": "Existing observer/helper validation and accurate closure receipt only; no dispatch ownership",
+          "receipt": "/tmp/qpbt-owner-vacancy-trigger-status-20260908.json",
+          "budget": "Original15min missed; explicit owner acceptance extension/history retained; no reset"
+        },
+        {
+          "worker": "sol_refresh343_parent",
+          "task": "PR349 guarded preservation integration with published343 and frozenaf87",
+          "head_before": "6101dc80863ac33016e5fc670e882f4e243da591",
+          "start": "2026-09-08T08:59:12.475Z",
+          "first_model_output": "2026-09-08T08:59:32.912Z",
+          "first_tool_output": "2026-09-08T09:00:04.136Z",
+          "model": "gpt-5.6-sol/ultra",
+          "budget": "15min active+normalCI; prior349/343/358 costs retained"
+        },
+        {
+          "worker": "sol_direct_soundness_compression",
+          "task": "One unique canonical CI359; adopt existing run/result",
+          "head": "180ed25f622052c571879b8aa1f833aef1e5c1fe",
+          "start": "2026-09-08T09:04:05.382Z",
+          "first_model_output": "2026-09-08T09:04:19.470Z",
+          "first_tool_output": "2026-09-08T09:04:36.536Z",
+          "model": "gpt-5.6-sol/ultra",
+          "budget": "All348 proof/publication overrun and119/349 history retained; no new proof attempt"
+        },
+        {
+          "worker": "sol_refresh319_dependency",
+          "task": "Fresh issue/worktree composition of published359 passing value with349 original-carrier soundness",
+          "start": "2026-09-08T09:04:24.660Z",
+          "first_model_output": "2026-09-08T09:04:42.321Z",
+          "first_tool_output": "2026-09-08T09:04:48.747Z",
+          "model": "gpt-5.6-sol/ultra",
+          "budget": "One20min composition attempt then<=10min typed validation/publication; all119/348/349/312/319 costs retained",
+          "source_contract": "/tmp/qpbt-119-direct-game-transport-contract-20260907.md",
+          "restriction": "Supplied witnesses only; original expanded carriers and three existing bounds; no passing/producer/branch-sum premise or compressed-projectivity/globalPair claim"
+        },
+        {
+          "worker": "space_sol_pr249",
+          "task": "PR344 witness nonnegativity guarded preservation refresh+uniqueCI",
+          "predecessor_prefix": "c48d74c",
+          "start": "2026-09-08T09:04:49.158Z",
+          "first_model_output": "2026-09-08T09:04:57.529Z",
+          "first_tool_output": "2026-09-08T09:05:19.771Z",
+          "model": "gpt-5.6-sol/ultra",
+          "budget": "15min active+normalCI; all344/320/328 priorcosts retained"
+        },
+        {
+          "worker": "sol_router_unrelated_appserver",
+          "task": "OwnedPR350 guardedstackintegration with355cc4b526 and356fix, router guarantees preserved",
+          "start": "2026-09-08T09:05:06.775Z",
+          "first_model_output": "2026-09-08T09:05:23.601Z",
+          "first_tool_output": "2026-09-08T09:05:45.423Z",
+          "model": "gpt-5.6-sol/ultra",
+          "budget": "Remaining ORIGINAL workflow ceiling only; priorreceipt5875/7200s and1325s remaining; verify correct episode anchor, noreset"
+        },
+        {
+          "worker": "sol_review310_b37",
+          "task": "AUTHOR ofPR342 degree-penalty guarded preservation refresh+uniqueCI",
+          "predecessor_prefix": "5dcd4fc",
+          "start": "2026-09-08T09:05:28.877Z",
+          "first_model_output": "2026-09-08T09:06:08.428Z",
+          "first_tool_output": "2026-09-08T09:06:29.209Z",
+          "model": "gpt-5.6-sol/ultra",
+          "budget": "15min active+normalCI; prior342/310/356 costs retained",
+          "review_exclusion": "Cannot independently review342 or its descendants; prior356 code/prose acceptance verified by root"
+        }
+      ]
+    },
+    {
+      "at": "2026-09-08T09:37:58.732Z",
+      "owners": [
+        {
+          "worker": "astra_refill_coordinator",
+          "task": "Sole executable count-refill-verify control; no expiry until proven capable successor",
+          "start": "2026-09-08T08:16:37.885Z",
+          "cumulative_budget": "Original30+explicit15+latestownercontinuation; no reset"
+        },
+        {
+          "worker": "space_sol_publication_finish",
+          "task": "Source integration, canonical review response consumption, service merges, sole primary telemetry; observer only for capacity",
+          "dispatch_capability": false,
+          "main_pin": "1785520949014bcc37684684e412b713712ef0f6"
+        },
+        {
+          "worker": "sol_ci320",
+          "task": "Canonical independent review342 request preparation",
+          "head": "092a9b96f56f22fef3c3e52176f232417b0e0360",
+          "start": "2026-09-08T09:30:37.247Z",
+          "first_model_output": "2026-09-08T09:30:47.898Z",
+          "first_tool_output": "2026-09-08T09:31:18.654Z",
+          "budget": "10min prep and ownedrequesthandoff; allprior320/trigger/319costs retained",
+          "receipt": "/tmp/qpbt-pr342-review-request-status-20260908.json"
+        },
+        {
+          "worker": "sol_direct_soundness_compression",
+          "task": "Canonical independent review359 request preparation; sourceauthor neverreviews ownproof",
+          "head": "180ed25f622052c571879b8aa1f833aef1e5c1fe",
+          "start": "2026-09-08T09:30:00.023Z",
+          "first_model_output": "2026-09-08T09:30:13.641Z",
+          "first_tool_output": "2026-09-08T09:30:20.849Z",
+          "budget": "10min prep/handoff; all348/359/355prep costs retained",
+          "receipt": "/tmp/qpbt-pr359-review-request-status-20260908.json"
+        },
+        {
+          "worker": "sol_refresh319_dependency",
+          "task": "Issue360 targeted elaboration attempt2",
+          "start": "2026-09-08T09:30:20.523Z",
+          "first_model_output": "2026-09-08T09:30:30.832Z",
+          "first_tool_output": "2026-09-08T09:30:45.019Z",
+          "attempt2_deadline": "2026-09-08T09:40:20.523Z",
+          "budget": "EXPLICIT ROOT extension original20+additional10=30min proofallowance; conditional10min typedvalidation remains unuseduntiltyped; no reset",
+          "receipt": "/tmp/qpbt-360-supplied-direct-soundness-checkpoint-20260908.json"
+        },
+        {
+          "worker": "sol_refresh343_parent",
+          "task": "Canonical independent review343 request preparation; author never reviewsownsource",
+          "head": "d2a9acf37ebd0504c62cf7e19dedfee36a4cf727",
+          "budget": "10min prep/handoff;349/343/358costs retained",
+          "receipt": "/tmp/qpbt-pr343-review-request-status-20260908.json"
+        },
+        {
+          "worker": "sol_review310_b37",
+          "task": "PR319 F1 docstring-only authorrepair, classify directCoefficientCollision_avg_le as Lean-only auxiliary",
+          "canonical_finding_consumed": "Rootverifiedcode.rc0 and boundrouterdispatchlog09:33",
+          "budget": "10min focusedfix/publication+normalnewheadCI; all319/342costs retained",
+          "review_exclusion": "Now319author; cannotreview ownfix or342source; preserve existing proofs/publicstatement"
+        },
+        {
+          "worker": "space_sol_pr249",
+          "task": "Resume premutationblocked344 guardedrefresh onreleased178552 pin",
+          "head_before": "c48d74cb8434dd2b20a8f22a1ba3260ddb35b159",
+          "budget": "ORIGINAL15min preservation cumulative; prior09:04:49..09:12:48 blockedattempt retained, no reset",
+          "receipt": "/tmp/qpbt-pr344-af87-refresh-status-20260908.json"
+        },
+        {
+          "worker": "sol_ci213_resume",
+          "task": "Own358 oneguardedpreservationrefresh onto newlyreleased178552 pin+uniqueCI",
+          "head_before": "c8ede4f44295c109f6890fcea2622a78e4ed6afc",
+          "start": "2026-09-08T09:34:58.004Z",
+          "first_model_output": "2026-09-08T09:35:13.015Z",
+          "first_tool_output": "2026-09-08T09:35:37.390Z",
+          "budget": "15min thisreleasedpin operation+normalCI; previous351/358/Astra/CI allcosts remaincumulative",
+          "receipt": "/tmp/qpbt-pr358-final-pin-refresh-status-20260908.json"
+        }
+      ]
+    }
+  ],
+  "held": [
+    {
+      "worker": "sol_router_unrelated_appserver",
+      "task": "319 independentreview CHANGES_REQUESTED F1",
+      "canonical_result_consumed": true,
+      "source_workflow350": "HELD at7200s walllimit; noCI started and noimplicitphase extension",
+      "reuse": "Eligible for other independentmathreview onlyafter actualassignment"
+    },
+    {
+      "worker": "space_sol_pr213",
+      "task": "320 independentreview APPROVED",
+      "canonical_result_consumed": "notyetobservedat09:33; primaryconsumerowns",
+      "reuse": "Holduntil canonicalresultconsumed"
+    },
+    {
+      "worker": "astra_review355_ci_truth",
+      "task": "355 HARD independentreview APPROVED",
+      "model": "gpt-6-astra/ultra",
+      "thread_id": "01a08056-b65c-7e33-980a-276ed0a131db",
+      "started_at": "2026-09-08T09:26:01.622Z",
+      "completed_at": "2026-09-08T09:29:03.086Z",
+      "hardness_reason": "Compilerexittruthfulness andcanonicalCIcontrolgates",
+      "canonical_result_consumed": "primary-owned; do notinfer fromFINAL"
+    }
+  ],
+  "review_requests": {
+    "319": {
+      "nonce": "a55146d650264742b1f9375d12919f2e",
+      "head": "6b3996a750752d1d9db62ae2fac4e21343f8ce0a",
+      "prompt_sha256": "bb60e981db18815e5f7a4f256e1d4b5fd3478d7f889009288ca720f34100c8a2",
+      "result": "CHANGES_REQUESTED F1; canonicalconsumer verifiedbyroot",
+      "author_repair": "sol_review310_b37"
+    },
+    "320": {
+      "nonce": "6c376720a607427cac5eda30a2e82d07",
+      "head": "43f58a2ea1217e571eb8d2e95f18950887c317ab",
+      "prompt_sha256": "52b492e321f1a90528cb8362a7ea8aa6c27df0441be8464a7be57bf55131a571",
+      "result": "APPROVED FINAL; primarycanonicalconsumer",
+      "owned_waiter": {
+        "exec": 67206,
+        "pid": 836212
+      }
+    },
+    "355": {
+      "nonce": "4f81a7c9b3f8460f8acc936834481658",
+      "head": "cc4b526422a7ee342a35476e7726f64ec9f9fba6",
+      "prompt_sha256": "8412cbd4a34566ac40dbcf5923bd886c8576288aaf584a0982bfd3473ed9b41f",
+      "result": "HardAstraAPPROVED FINAL; primarycanonicalconsumer",
+      "owned_waiter": {
+        "exec": 77851,
+        "pid": 879289
+      }
+    }
+  },
+  "budget_incidents": [
+    {
+      "scope": "350",
+      "at": "2026-09-08T09:20..09:22",
+      "incident": "Delegate initially suggested separateCIphase; rootclarified mainpersona2hWALLworkflowceiling forbids thatinterpretation. Worker receivedstopbeforeCIstarted; noCIstarted, noreset. Misclassification retained, notnormalized."
+    }
+  ],
+  "activity_consumer": {
+    "source": "/home/drx/.cache/mipstarre-dev/owner-tools/qpbt-vacancy-trigger/status.json",
+    "observer_added": false,
+    "description": "Existing20shelperstatus consumedwith<=60sfreshnessguard intoqpbt-switch activity; actualexcludedstates inreason; no dispatch or settingchanges byconsumer",
+    "completed_execs": [
+      46236,
+      52140,
+      93478,
+      65419
+    ],
+    "active_exec": 94396,
+    "interval_s": 20
+  },
+  "transition_notes": [
+    {
+      "at": "2026-09-08T09:37:58.732Z",
+      "detail": "Currenttasks supersede previoussnapshot; rawlifecycle/model/tooltimestamps remaininoriginalrollouts andexistingobserverjournal. Actualshortfallintervals retained, no uniformlysub60recovery claim."
+    }
+  ],
+  "late_outcomes": [
+    {
+      "pr": 361,
+      "head": "e359144058ca4245614ab5697d8a62589f62a860",
+      "result": "Published theorem onoriginalexpandedcarriers withthreebounds; CI288s/9green",
+      "receipt": "/tmp/qpbt-pr361-ci-status-20260908.json"
+    },
+    {
+      "pr": 344,
+      "head": "95f996e5f42dafc9c411ebf3a42e4f72ff286dd8",
+      "result": "F1/F2docrepair checked-published andCI365s/9green; proof/signaturehashes unchanged; freshreviewrequest prep active"
+    },
+    {
+      "pr": 359,
+      "head": "180ed25f622052c571879b8aa1f833aef1e5c1fe",
+      "nonce": "ccd29067edcc43d5b1ed0fc2cd3217fa",
+      "result": "Full40file hardreview CHANGES_REQUESTED F1/F2 duplicatehelpers; explicit20min repairactive"
+    },
+    {
+      "pr": 361,
+      "nonce": "747ce88d92c645d1bc11ee7540a11fdd",
+      "result": "Hard46file request unassigned and preserved; ROOT released reviewhold pending parent359repair, no overlappingfullreview"
+    },
+    {
+      "pr": 349,
+      "head": "840dfbdb0fd2d1f569896ca72fe02acade25f378",
+      "result": "CanonicalAPPROVED alreadygreen reviewid5140478330@10:22:55, duplicateconsumer skipped"
+    },
+    {
+      "pr": 358,
+      "head": "4c4f443e3a33041087b05d4f2899741aaaede00b",
+      "result": "ValidnativeAPPROVEDresponse committed10:33:15; oldpublisher alreadyterminal, exactreviewstatus absent; supportednormalpublisherrecoveryactive",
+      "receipt": "/tmp/qpbt-native-review-consumer-drain-20260908.json"
+    }
+  ],
+  "capacity_incidents": [
+    {
+      "kind": "interrupted_residents_blocked_admission",
+      "at": "2026-09-08T10:04..10:09",
+      "detail": "Actualfollowup_task returnedagent thread limit reached forfreshpr249 thenfreshrefresh343; eight running plusretainedinterruptedresident differedfromusefulcount. No lease/cap bypass or activecharge forrejectedadmission."
+    },
+    {
+      "kind": "expired_silent_turns",
+      "detail": "359 metadata5min and361CIturn hadzero newtoolcalls/no activeCI/build; safeMODELinterrupts only, source/worktree/waiters preserved; no providerfailureinferred."
+    },
+    {
+      "kind": "root_final_only_checkpoints",
+      "detail": "Bothinterruptedoldactors completedgenuineFINAL checkpoints, freeingruntimeadmission; administrativecapacityrelease cost keptseparatefrommathematicalproofwork.",
+      "receipts": [
+        "/tmp/qpbt-native-terminal-checkpoint-20260908-direct-compression.json",
+        "/tmp/qpbt-native-terminal-checkpoint-20260908-supplied-soundness.json"
+      ]
+    },
+    {
+      "kind": "provenance_reissue",
+      "detail": "359 and358 wrongmixedpassing348UUID corrected viaordinarycanonicalrequestreissue, nottrustedJSONediting. CorrectID01a07fab-e4f0-7381-94a0-ecf7e26f2a29; obsoleteunassignedrequests/history preserved. 359 old124.977sadminoverrun+silent5min+fresh5mincosts retained.",
+      "correction": "/tmp/qpbt-pr359-budget-label-correction-20260908.json"
+    }
+  ],
+  "next_ready_actions": [
+    "Canonical344 newheadreview bind onlyafteractualtrustedrequest+independentnon-author scope.",
+    "PR362 actualpublication receipt thenuniqueCI; no publicationclaim fromtypedproof alone.",
+    "PR359 repair typed+checked-published ->uniqueCI/freshindependentreview ->guarded361 parentrefresh/revalidation, preserving unassigned361request history.",
+    "Finishnormal358 responsepublisherrecovery orcheckpoint exactmissingcanonicalroute; do notforgeapproval.",
+    "Preserve350 workflow7200s hold; no source/admin phase relabeling toextend it."
+  ]
+}
