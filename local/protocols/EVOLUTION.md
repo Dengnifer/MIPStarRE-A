@@ -929,7 +929,6 @@ claiming broader capability evidence from the earlier two-case audit.
 its recorded 15:40Z boundary and extension request5572932276, not a fresh two-hour
 allocation. Old 597 tests cover the narrow draft only; revised tests and exact-head
 CI/control-policy review/publication gates are recorded separately. No activation yet.
-
 ## 2026-09-08 - Exclude allowlisted default-home app-server use (#345)
 
 **Trigger:** `results/telemetry/events.md` 2026-09-08, "Owner-approved default-home
@@ -949,3 +948,20 @@ native worker slot after normal merge and deployment. At Space `k = 10`, meta ca
 the reviewed nine-descendant lease while requiring eight actual active native workers;
 main, other processes and configured capacity do not satisfy the activity floor. All
 credential, visibility, reservation, lease, review and merge guards remain unchanged.
+
+## 2026-09-08 - Blueprint PDF exit and freshness are blocking (#352)
+
+**Trigger:** `events.md`, "PR #350 blueprint PDF false success", records a
+fatal undefined command whose nonzero PDF exit was hidden by a stale artifact
+and later successful renderer commands.
+
+**Change:** `ci.sh` removes the prior `print.pdf` and runs the checked-in
+`latexmk` configuration directly with noninteractive halt-on-error behavior.
+It stops `blueprint-render` on any compiler failure or missing fresh non-empty
+output. This bypasses the observed wrapper-success/inner-exit-12 boundary.
+Isolated fake-tool tests also cover a fresh partial PDF from that boundary.
+
+**Expected effect:** fatal TeX errors remain blocking exact-head evidence even
+when a worktree contains an older PDF or the failed compiler leaves a fresh
+partial one, while a successful fresh render keeps the existing bbl, web,
+manifest, and publication behavior.

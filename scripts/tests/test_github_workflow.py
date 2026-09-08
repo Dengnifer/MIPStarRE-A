@@ -377,6 +377,182 @@ def _git(repo: Path, *args: str) -> str:
     return proc.stdout.strip()
 
 
+class CiBlueprintRenderTests(LayerTestCase):
+    """The underlying PDF compiler must succeed and replace stale output."""
+
+    BRANCH = "issue-0352-blueprint-pdf-exit"
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.repo = self.tmp / "ci-repo"
+        self.repo.mkdir()
+        templates = self.tmp / "ci-no-templates"
+        templates.mkdir()
+        _git(self.repo, "init", "-q", f"--template={templates}")
+        _git(self.repo, "symbolic-ref", "HEAD", "refs/heads/main")
+        _git(self.repo, "config", "user.email", "tests@example.invalid")
+        _git(self.repo, "config", "user.name", "MIPStarRE tests")
+        _git(self.repo, "config", "commit.gpgsign", "false")
+
+        local_bin = self.repo / "local" / "bin"
+        local_bin.mkdir(parents=True)
+        for name in ("ci.sh", "gh_common.py", "wf_util.py"):
+            shutil.copy2(LOCAL_BIN / name, local_bin / name)
+        (self.repo / "blueprint" / "print").mkdir(parents=True)
+        (self.repo / "blueprint" / "src").mkdir()
+        (self.repo / "README.md").write_text("base\n", encoding="utf-8")
+        _git(self.repo, "add", "-A")
+        _git(self.repo, "commit", "-q", "--no-verify", "-m", "base commit")
+        _git(self.repo, "checkout", "-q", "-b", self.BRANCH)
+        (self.repo / "README.md").write_text("branch\n", encoding="utf-8")
+        _git(self.repo, "commit", "-q", "--no-verify", "-am", "branch commit")
+        self.head = _git(self.repo, "rev-parse", "HEAD")
+        _git(self.repo, "remote", "add", "origin", str(self.repo))
+        _git(self.repo, "fetch", "-q", "origin", "main")
+
+        self.tools = self.tmp / "ci-tools"
+        self.tools.mkdir()
+        leanblueprint = self.tools / "leanblueprint"
+        leanblueprint.write_text(
+            """#!/bin/sh
+printf '%s\\n' "$1" >> "$FAKE_TOOL_LOG"
+case "$1:$FAKE_PDF_MODE" in
+  pdf:failure)
+    printf '%s\\n' 'fatal TeX error' >&2
+    exit 7
+    ;;
+  pdf:no-output)
+    exit 0
+    ;;
+  pdf:success)
+    mkdir -p print
+    printf '%s' 'fresh pdf' > print/print.pdf
+    exit 0
+    ;;
+  pdf:inner-failure)
+    mkdir -p print
+    printf '%s' 'fresh partial pdf' > print/print.pdf
+    printf '%s\n' \
+      "Command 'latexmk -output-directory=../print' returned non-zero exit status 12." >&2
+    exit 0
+    ;;
+  web:*)
+    exit 0
+    ;;
+esac
+exit 9
+""",
+            encoding="utf-8",
+        )
+        leanblueprint.chmod(0o755)
+        latexmk = self.tools / "latexmk"
+        latexmk.write_text(
+            """#!/bin/sh
+printf 'latexmk:%s\n' "$*" >> "$FAKE_TOOL_LOG"
+case "$FAKE_PDF_MODE" in
+  failure)
+    printf '%s\n' 'fatal TeX error' >&2
+    exit 7
+    ;;
+  no-output)
+    exit 0
+    ;;
+  success)
+    mkdir -p ../print
+    printf '%s' 'fresh pdf' > ../print/print.pdf
+    exit 0
+    ;;
+  inner-failure)
+    mkdir -p ../print
+    printf '%s' 'fresh partial pdf' > ../print/print.pdf
+    printf '%s\n' 'fatal TeX error' >&2
+    exit 12
+    ;;
+esac
+exit 9
+""",
+            encoding="utf-8",
+        )
+        latexmk.chmod(0o755)
+        self.tool_log = self.tmp / "ci-tool.log"
+        self.pdf = self.repo / "blueprint" / "print" / "print.pdf"
+        self.gh.route(r"^pulls/7$", {
+            "number": 7,
+            "state": "open",
+            "head": {"sha": self.head, "ref": self.BRANCH},
+            "base": {"ref": "main"},
+        })
+
+    def run_blueprint(self, mode: str) -> tuple[subprocess.CompletedProcess, dict]:
+        self.pdf.write_bytes(b"stale pdf")
+        cache = self.tmp / f"ci-cache-{mode}"
+        env = dict(
+            os.environ,
+            **self.gh.env(),
+            PATH=f"{self.tools}:/usr/bin:/bin",
+            MIPSTARRE_CACHE_ROOT=str(cache),
+            FAKE_PDF_MODE=mode,
+            FAKE_TOOL_LOG=str(self.tool_log),
+            PYTHONDONTWRITEBYTECODE="1",
+        )
+        result = subprocess.run(
+            ["bash", str(self.repo / "local" / "bin" / "ci.sh"), "7",
+             "--worktree", str(self.repo), "--only", "blueprint-render", "--force-all"],
+            cwd=self.repo,
+            capture_output=True,
+            text=True,
+            env=env,
+        )
+        manifest_path = cache / "ci-manifests" / f"pr7-{self.head}.partial.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        return result, manifest
+
+    @staticmethod
+    def blueprint_step(manifest: dict) -> dict:
+        return next(step for step in manifest["steps"]
+                    if step["step"] == "blueprint-render")
+
+    @staticmethod
+    def latexmk_call() -> str:
+        return ("latexmk:-interaction=nonstopmode -halt-on-error -file-line-error "
+                "-output-directory=../print")
+
+    def test_nonzero_pdf_command_fails_despite_stale_output(self) -> None:
+        result, manifest = self.run_blueprint("failure")
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertEqual(manifest["conclusion"], "failure")
+        self.assertEqual(self.blueprint_step(manifest)["outcome"], "failure")
+        self.assertEqual(self.tool_log.read_text(encoding="utf-8").splitlines(),
+                         [self.latexmk_call()])
+        self.assertFalse(self.pdf.exists())
+
+    def test_zero_pdf_command_without_fresh_output_fails(self) -> None:
+        result, manifest = self.run_blueprint("no-output")
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertEqual(self.blueprint_step(manifest)["outcome"], "failure")
+        self.assertEqual(self.tool_log.read_text(encoding="utf-8").splitlines(),
+                         [self.latexmk_call()])
+        self.assertFalse(self.pdf.exists())
+
+    def test_zero_pdf_command_with_fresh_output_reaches_web(self) -> None:
+        result, manifest = self.run_blueprint("success")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(manifest["conclusion"], "success")
+        self.assertEqual(self.blueprint_step(manifest)["outcome"], "success")
+        self.assertEqual(self.tool_log.read_text(encoding="utf-8").splitlines(),
+                         [self.latexmk_call(), "web"])
+        self.assertEqual(self.pdf.read_bytes(), b"fresh pdf")
+
+    def test_zero_wrapper_with_fresh_partial_pdf_and_inner_failure_fails(self) -> None:
+        result, manifest = self.run_blueprint("inner-failure")
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertEqual(manifest["conclusion"], "failure")
+        self.assertEqual(self.blueprint_step(manifest)["outcome"], "failure")
+        self.assertEqual(self.tool_log.read_text(encoding="utf-8").splitlines(),
+                         [self.latexmk_call()])
+        self.assertEqual(self.pdf.read_bytes(), b"fresh partial pdf")
+
+
 class ReviewRoundCounterTests(LayerTestCase):
     """The task header counts reviewer dispatches, not carried publications."""
 
