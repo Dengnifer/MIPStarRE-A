@@ -5925,3 +5925,43 @@ not actual commit/publication hooks. No productive session was killed.
   GitHub review, or local-review summary was published. They remain non-green and
   non-mergeable. Root assigned a separate guarded workflow repair; no blind review
   rerun, fabricated result, parser edit, source change, or duplicate CI was used.
+- 2026-09-08T12:36:47+00:00: The throughput audit corrected the denominator of
+  earlier occupancy reports. Exactly 51 of 170 recorded worker-lifecycle checks
+  observed at least eight useful native workers; this is a count of samples, not a
+  percentage of time and not a measurement of provider API concurrency. The owner's
+  separate dashboard observation was 6--8 API requests, while direct current API
+  telemetry remained unavailable. The six-hour QPBT `sorry` count on `main` remained
+  47. Four new Sol Ultra construction lanes were observed with actual tools: issue
+  #367 thread 01a080e3-0e22-7530-af72-a3679688fe61, issue #368 thread
+  01a080e2-8b8b-7d00-864d-2fe522c1ef4c, issue #369 thread
+  01a080e3-7b73-7062-964f-d404b21da8e5, and issue #370 thread
+  01a080e3-e91d-70d3-9e6b-abbfc4945a91. PRs #372 and #374 carry three
+  kernel-validated tracked-site closures, but they were unmerged at this boundary
+  and therefore do not reduce the main-branch count. The meta-watch 95% floor and
+  90% coverage criteria are an operational interpretation, not API percentages or
+  an allocation change. No proof budget, B8 history, model policy, or goal was reset.
+- 2026-09-08T12:29:58+00:00: PR #319 preservation integration retained exact
+  source head 249a24a48813903ac5116fc9b1fa1dd8942508eb while merging frozen main
+  3c06c1f37ff9819d7f3bcb6d866e445b45d5ad36 as head
+  f09d5ced9965e1d677fca2187be26240ab39aef8. Pending and committed merge-loss
+  guards passed, and all three owned blobs remained byte-identical. The sole
+  exact-head CI passed all nine gates in 236 seconds. Review 5141637956 carried
+  the prior independent approval forward under the whitespace-sensitive identical
+  patch hash d2b6cb48550d99823862cc4cf6b05f9073de1a1467ad55f96fe2dea8ebfecbe7.
+  `pr_merge.py` passed every exact-head gate and merged PR #319 as
+  628e3b533ceed0d061c96d610465852bc4ad4610. The first checked-push attempt
+  failed before transport because a newly merged object file was absent; building
+  the exact imported target repaired the cache, and the normal checked publication
+  then succeeded without a hook bypass. One malformed retry command stopped at
+  usage validation and made no mutation.
+- 2026-09-08T12:35:00+00:00: The PR #319 service boundary demonstrated that
+  continuous CI does not require an unbounded writer-idle wait. Stash
+  08fdb63c5cdcc5f1b449093944af858849f1b213 preserves the finite two-row
+  pre-service suffix for PRs #296 and #319. PR #319 merged while the unrelated
+  PR #371 CI process remained active. Stash
+  05778dd2369eeae8a19dce83b3c731e8c2ac72f7 preserves the later cache-warmer
+  and PR #371 rows. The primary verified the committed 814-line prefix, parsed all
+  four JSON objects, restored them once in timestamp order through the normal
+  telemetry append lock, and retained both stashes and SHA-256 backups. Later CI
+  rows remain eligible to form the next suffix; no global append lock was held
+  through build or network work, and no clean-tree gate was weakened.
