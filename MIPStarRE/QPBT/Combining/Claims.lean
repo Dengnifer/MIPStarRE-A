@@ -1,6 +1,7 @@
 import MIPStarRE.QPBT.Combining.OrderedPoints
 import MIPStarRE.QPBT.Combining.OverlapGap
 import MIPStarRE.QPBT.Combining.Lines.CombinedMeasurement
+import MIPStarRE.QPBT.Combining.Lines.ConcreteXDeficit
 import MIPStarRE.QPBT.Combining.SubLineZDeficit
 import MIPStarRE.QPBT.Combining.UniformLinePoint
 import MIPStarRE.QPBT.Combining.Witnesses
