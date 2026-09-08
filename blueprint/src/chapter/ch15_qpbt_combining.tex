@@ -1550,9 +1550,9 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\leanok
 	\uses{lem:qld-sublines, def:line-point-dist, def:line-representative,
 		def:combine-map}
-	Let $D_{\rm dir}$ be the auxiliary distribution recorded by
-	\texttt{SubLineWitness}, whose extended-line marginal is that of
-	\texttt{directLinePointDist}. A uniform affine parameter on that
+	Let $D_{\rm dir}$ be an auxiliary subline distribution whose extended-line
+	marginal is the line marginal of the line-point law with coordinate indices
+	sampled uniformly and directly. A uniform affine parameter on that
 	extended line gives a uniform point of $\F_q^{2m+2}$, whose $x$ and $z$
 	blocks are independent uniform points of $\F_q^m$. This statement uses
 	directly sampled coordinate indices. Its transport to the source's
@@ -1754,18 +1754,18 @@ carrier. Fix admissible parameters, a projective setting $S$, projective joint
 point measurements $Q$ with self-consistency and both opposite-placement
 ordered-product squared distances at most $\delta_Q$, and complete paired-line
 measurements $T$ with the axis-degree bounds and completed evaluation
-consistency defect at most $\delta_P$. These are the hypotheses of
-\texttt{CombinedPointsWitness} and \texttt{CombinedLinesWitness}.
-Let $D_{\rm dir}$ be any \texttt{SubLineWitness}: it has mass one, the
-\texttt{directLinePointDist} extended-line marginal, incidence and affine
+consistency defect at most $\delta_P$.
+Let $D_{\rm dir}$ be any auxiliary subline distribution of mass one whose
+extended-line marginal is the line marginal of the line-point law with
+coordinate indices sampled uniformly and directly. Require incidence and affine
 compatibility with its two source lines, separate X and Z point marginal
 mixtures as in Property~2, and axis-line closure. No equality with the
 seed-indexed law $D$ is assumed or established.
 Write $A_Q$, $A_{ZX}$ and $A_Z$ for the three overlap averages displayed in
 Lemmas~\ref{lem:claim-17-1}--\ref{lem:claim-17-3}, using $D_{\rm dir}$ and
 a uniform affine parameter on each extended line. Here all line answers are
-polynomial representatives of degree at most $md$, evaluations have
-\texttt{Option} values, and completed point effects are zero at undefined
+polynomial representatives of degree at most $md$, evaluations take values in
+$\F_q\cup\{\perp\}$, and completed point effects are zero at undefined
 evaluations. The placements remain $\mathsf{A}\mathsf{A}'$ and
 $\mathsf{B}\mathsf{A}''$.
 
