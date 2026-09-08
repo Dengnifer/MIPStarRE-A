@@ -6,6 +6,7 @@ import MIPStarRE.QPBT.Combining.Lines.PolynomialCollision
 import MIPStarRE.QPBT.Combining.Lines.RestrictedAverage
 import MIPStarRE.QPBT.Combining.Lines.SubLineMixture
 import MIPStarRE.QPBT.Combining.Lines.UniformAffineCollision
+import MIPStarRE.QPBT.Combining.Lines.WeightedCollision
 import MIPStarRE.QPBT.Combining.Witnesses
 import MIPStarRE.QPBT.Combining.Lines.AffineEvaluation
 
