@@ -1,4 +1,4 @@
-import MIPStarRE.QPBT.Combining.Witnesses
+import MIPStarRE.QPBT.Combining.Lines.CombinedMeasurement
 
 /-!
 # Combined lines and restricted line distributions
