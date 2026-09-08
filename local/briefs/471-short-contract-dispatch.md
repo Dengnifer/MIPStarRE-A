@@ -31,8 +31,11 @@ SHA-256 of its exact bytes. A complete ordinary contract has this shape:
   "actor": {
     "thread_id": "canonical-uuid",
     "role": "prover",
+    "job_class": "proof",
+    "classification": "routine",
     "model": "gpt-5.6-sol",
-    "effort": "ultra"
+    "effort": "ultra",
+    "hardness_reason": null
   },
   "scope": {
     "worktree": "/absolute/owned/worktree",
@@ -97,12 +100,17 @@ Failure invalidates the candidate, records the blocker, and selects another
 prevalidated useful alternative. An already-authorized ordinary mechanical
 activation needs no new root round trip.
 
+The activator also verifies `job_class`, `hardness_reason`, and the derived
+`classification` against the current `model_policy`. A hard Astra assignment
+requires a nonempty `hardness_reason`; a missing reason or inconsistent
+classification invalidates the candidate like any other prerequisite failure.
+
 On actual `task_started`, the actor verifies the same hash and reads the full
 contract before mutation. It rechecks identity, model and effort, scope,
-inputs, ownership, and deadlines. The effective deadline is the earliest of
-the presealed absolute deadline, actual `task_started` plus
-`authorized_seconds`, and any inherited deadline. First tool use or progress
-cannot reset the clock.
+inputs, ownership, `job_class`, `hardness_reason`, derived model-policy
+classification, and deadlines. The effective deadline is the earliest of the
+presealed absolute deadline, actual `task_started` plus `authorized_seconds`,
+and any inherited deadline. First tool use or progress cannot reset the clock.
 
 ## Evidence boundary
 
