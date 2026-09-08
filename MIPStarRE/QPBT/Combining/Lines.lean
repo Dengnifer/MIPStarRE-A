@@ -1,5 +1,6 @@
 import MIPStarRE.QPBT.Combining.Lines.CombinedPointLineMarginalDefect
 import MIPStarRE.QPBT.Combining.Lines.CombinedPointLineMarginalDistance
+import MIPStarRE.QPBT.Combining.Lines.ConditionedPointLineMarginalDefect
 import MIPStarRE.QPBT.Combining.Lines.ConditionedPastingDefect
 import MIPStarRE.QPBT.Combining.Lines.ConsistencyPositivity
 import MIPStarRE.QPBT.Combining.Lines.NondegeneratePastingDistribution
