@@ -1,3 +1,4 @@
+import MIPStarRE.QPBT.Combining.Lines.ConditionedPastingDefect
 import MIPStarRE.QPBT.Combining.Lines.ConsistencyPositivity
 import MIPStarRE.QPBT.Combining.Lines.NondegeneratePastingDistribution
 import MIPStarRE.QPBT.Combining.Lines.NondegeneratePastingMass
