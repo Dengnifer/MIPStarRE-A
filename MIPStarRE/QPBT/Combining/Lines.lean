@@ -1,4 +1,5 @@
 import MIPStarRE.QPBT.Combining.Witnesses
+import MIPStarRE.QPBT.Combining.Lines.RestrictedConsistency
 import MIPStarRE.QPBT.Games.RestrictedAverage
 
 /-!
