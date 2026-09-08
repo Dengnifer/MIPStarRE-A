@@ -160,7 +160,9 @@ private theorem point_diagonal_rejectedMass_eq_read_mismatch
   · simpa [hread] using hterm
   · simpa [hread] using hterm
 
-private theorem reversed_diagonal_completed_defect_eq_read_defect
+/-- The `BB'`--`AB''` completed diagonal-line/point defect is the consistency
+defect of the reversed completed direct-game readouts on `pairState`. -/
+theorem reversed_diagonal_completed_defect_eq_read_defect
     (lines : ExtendedLinesWitness setting points deltaL) :
     completedLinePointDefect lines .BB' .AB''
         (directDLinePointDist P.extendedDirectLd) =

@@ -38,7 +38,10 @@ variable {points : CombinedPointsWitness setting deltaQ}
 private def onlyCoordinate : Fin P.extendedDirectLd.k :=
   ⟨0, by change 0 < 1; decide⟩
 
-private def axisGameRead
+/-- Read an axis-line answer by completed evaluation at the sampled point.
+Failed completed evaluation, including a zero-direction ambiguity, remains
+the `none` outcome. -/
+def axisGameRead
     (sample : DirectLdSpace P.extendedDirectLd) :
     DirectLdAnswer P.extendedDirectLd → Option (PauliScalar P)
   | .alinePolys coeffs =>
@@ -271,7 +274,9 @@ private theorem rejectedMass_eq_read_mismatch
   · simpa [hread] using hterm
   · simpa [hread] using hterm
 
-private theorem completed_defect_eq_read_defect
+/-- The `AA'`--`BA''` completed axis-line/point defect is the consistency
+defect of the corresponding completed direct-game readouts on `pairState`. -/
+theorem completed_defect_eq_read_defect
     (lines : ExtendedLinesWitness setting points deltaL) :
     completedLinePointDefect lines .AA' .BA''
         (directALinePointDist P.extendedDirectLd) =
@@ -567,7 +572,9 @@ private theorem diagonal_rejectedMass_eq_read_mismatch
   · simpa [hread] using hterm
   · simpa [hread] using hterm
 
-private theorem diagonal_completed_defect_eq_read_defect
+/-- The `AA'`--`BA''` completed diagonal-line/point defect is the consistency
+defect of the corresponding completed direct-game readouts on `pairState`. -/
+theorem diagonal_completed_defect_eq_read_defect
     (lines : ExtendedLinesWitness setting points deltaL) :
     completedLinePointDefect lines .AA' .BA''
         (directDLinePointDist P.extendedDirectLd) =
@@ -875,7 +882,9 @@ theorem place_BB'_mul_AB''_comm
     _ = setting.place .AB'' A * setting.place .BB' B :=
       congrArg₂ (fun X Y => X * Y) hleft hright
 
-private theorem reversed_axis_completed_defect_eq_read_defect
+/-- The `BB'`--`AB''` completed axis-line/point defect is the consistency
+defect of the reversed completed direct-game readouts on `pairState`. -/
+theorem reversed_axis_completed_defect_eq_read_defect
     (lines : ExtendedLinesWitness setting points deltaL) :
     completedLinePointDefect lines .BB' .AB''
         (directALinePointDist P.extendedDirectLd) =

@@ -315,7 +315,9 @@ private theorem point_rejectedMass_eq_read_mismatch
   · simpa [hread] using hterm
   · simpa [hread] using hterm
 
-private theorem point_read_effect
+/-- The completed point read of the direct-game answer measurement is the
+corresponding scalar coarse-graining of the supplied joint point measurement. -/
+theorem point_read_effect
     (lines : ExtendedLinesWitness setting points deltaL) (side : PlayerSide)
     (sample : DirectLdSpace P.extendedDirectLd) (answer : Option (PauliScalar P)) :
     (((answerMeasurement lines side
@@ -332,7 +334,9 @@ private theorem point_read_effect
     MIPStarRE.Quantum.Measurement.postprocess_comp]
   rfl
 
-private theorem point_branch_rejection_eq_consistencyDefect
+/-- The point/point branch rejection is exactly the consistency defect of the
+two completed scalar point readouts under the common uniform point question. -/
+theorem point_branch_rejection_eq_consistencyDefect
     (lines : ExtendedLinesWitness setting points deltaL) :
     directLdBranchRejectionProbability P.extendedDirectLd (strategy lines)
         (.point, .point) =
