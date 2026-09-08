@@ -4,13 +4,12 @@ import MIPStarRE.QPBT.Combining.Lines.SubLineExtended
 # Uniform points of a line and the blocks of a coordinate direction
 
 This module records the two elementary geometric inputs of the sampling
-procedure of the sub-line lemma.  First, a uniformly random point of the
-coordinate space is the same thing as a uniformly random canonical
-representative together with a uniformly random affine parameter along the
-direction: the map sending a pair to the point at that parameter on the line
-through the representative has constant fibers of size `q`, because the
-kernel of the canonical representative map is the span of the direction and
-for the zero direction that map is the identity.  Second, the two coordinate
+procedure of the sub-line lemma. First, for independent uniform inputs `y` in
+the ambient coordinate space and `t` in the scalar field, the point
+`lineRepMap v y + t • v` is uniform. This map on ambient-point--parameter pairs
+has fibers of size `q`: for nonzero `v`, `y` varies over a coset of the span of
+`v`, while its canonical representative and `t` are fixed; for zero `v`, `y`
+is fixed and `t` is free. Second, the two coordinate
 blocks of an elementary coordinate direction of the extended space are the
 corresponding elementary direction of the source space in the block that
 carries the coordinate, and zero in the other block and at the two scalar
@@ -53,10 +52,10 @@ theorem lineRepMap_zero_apply {K : Type*} [Field K] {m : ℕ}
 /-- The point at a uniformly random affine parameter on the line through the
 canonical representative of a uniformly random point is uniformly random on
 the whole coordinate space.  Every fiber of the parameterization has exactly
-`q` elements: for a nonzero direction the parameter is determined and the
-representative varies over a coset of the span of the direction, and for the
-zero direction the representative is the point itself and the parameter is
-free.  Blueprint `lem:qld-sublines`, paper
+`q` elements in the ambient-point--parameter domain: for a nonzero direction
+the parameter and canonical representative are determined, while the input
+point varies over a coset of the span of the direction. For the zero direction
+the input point is fixed and the parameter is free. Blueprint `lem:qld-sublines`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1063-1116`. -/
 theorem uniformDistribution_map_lineRepMap_add_smul {K : Type*} [Field K]
     [Fintype K] [DecidableEq K] {m : ℕ} (v : Fin m → K) :

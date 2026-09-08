@@ -2,28 +2,29 @@ import MIPStarRE.QPBT.Combining.ZEvalDeficit
 import MIPStarRE.QPBT.Combining.UniformLinePoint
 
 /-!
-# Sub-line averages of the one-point overlaps
+# Sub-line averages of the Z-point overlap
 
-The two one-point overlaps of the paired-line measurement --- with the expanded
-`X`-point effect at the `X`-point of the sampled extended point, and with the
-expanded `Z`-point effect at its `Z`-point --- depend on the sample only through
-the two source lines and one of the two source points.  Property~2 of the
-sub-line lemma identifies the law of each such triple as a mixture of products
-of two restricted line-point laws, with the fresh point of the other factor
-unused.  Summing the line answers over the fibers of the evaluation at that
-fresh point writes each overlap as the overlap of the evaluated pair-line
-measurement with the retained point effect, so that the one-point deficits of
-`MIPStarRE.QPBT.Combining.EvalDeficit` apply component by component.
+The overlap of the paired-line measurement with the expanded `Z`-point effect
+depends only on the two source lines and the `Z`-point. The separate Z marginal
+of the auxiliary `SubLineWitness` law is a mixture of products of restricted
+line-point laws, with the fresh X point unused. Summing line answers over the
+evaluation fibers at that fresh point identifies the overlap with the
+evaluated pair-line overlap, so the Z deficit estimates of
+`MIPStarRE.QPBT.Combining.ZEvalDeficit` apply component by component.
 
-The `_at` estimates and `xPointOverlapAt`, `zPointOverlapAt` retain arbitrary
+The `_at` estimates and `zPointOverlapAt` retain arbitrary
 opposite placements. The original overlap definitions and first-player
-statements are unchanged. Only the one-point mixture laws are used.
+statements are unchanged. Only the separate Z marginal mixture law is used.
+Transport of the auxiliary extended-line law to the source carrier remains
+open; see `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`, section
+"Scalar estimates on the auxiliary subline law".
 
 ## References
 
-The statements support `lem:claim-17-2` and `lem:claim-17-3` in
+The statements support the auxiliary `lem:claim-17-3-direct-real`, near
+the source `lem:claim-17-3` in
 `blueprint/src/chapter/ch15_qpbt_combining.tex`, paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1168-1239`; the
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1204-1239`; the
 mixture is Property~2 of `lem:qld-sublines`.
 -/
 
@@ -41,8 +42,7 @@ noncomputable section
 depends on the answer only through its two evaluations is summing the
 evaluation classes of the paired-line measurement against that family.  This
 is the fiber regrouping of the proofs of `lem:claim-17-1`, `lem:claim-17-2`,
-and `lem:claim-17-3`, blueprint
-`blueprint/src/chapter/ch15_qpbt_combining.tex:2651-2830`. -/
+and `lem:claim-17-3` in the blueprint. -/
 theorem regroup_line_answer_sum_at {P : AdmissibleParams} {ε δQ δP : ℝ}
     {S : ProjectiveSetting P ε} {points : CombinedPointsWitness S δQ}
     (lines : CombinedLinesWitness S points δP)
@@ -285,8 +285,9 @@ theorem SubLineWitness.avgOver_zPointOverlap_le_one (sublines : SubLineWitness P
   exact SubLineWitness.avgOver_zPointOverlap_le_one_at sublines lines .AA' .BA'' trivial
 
 /-- The deficit of the sub-line average of the `Z`-point overlap is bounded by
-the inflated line and point consistency errors.  This is the bound on the
-deficit in the proof of `lem:claim-17-3`, blueprint
+the inflated line and point consistency errors. This is the directly indexed
+auxiliary deficit estimate supporting `lem:claim-17-3-direct-real`, near
+the source `lem:claim-17-3`, blueprint
 `blueprint/src/chapter/ch15_qpbt_combining.tex`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1204-1239`. -/
 theorem SubLineWitness.one_sub_avgOver_zPointOverlap_le_at

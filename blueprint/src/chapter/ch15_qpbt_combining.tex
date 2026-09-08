@@ -1529,8 +1529,10 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\lean{MIPStarRE.QPBT.abs_overlap_gap_le_sqrt_of_opFamilyDistSq}
 	\leanok
 	\uses{def:povm-distance, def:expanded-state}
-	A complete measurement weights the overlap gap between operator families by
-	at most the square root of their state-dependent squared distance.
+	For a probability distribution and a unit state, the difference of the
+	real parts of the overlaps weighted by a complete measurement is at most
+	the square root of the state-dependent squared distance of the two
+	operator families.
 \end{lemma}
 \begin{proof}
 	\leanok
@@ -1538,7 +1540,7 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	completeness bounds the squared norm of the left factor by one.
 \end{proof}
 
-\begin{lemma}[Formalization support: a uniform point of the extended space]
+\begin{lemma}[Formalization support: a uniform point from the directly indexed law]
 	\label{lem:qld-sublines-uniform-point}
 	\lean{MIPStarRE.QPBT.uniformDistribution_map_uncurry}
 	\lean{MIPStarRE.QPBT.uniformDistribution_map_directLine_add_smul}
@@ -1548,20 +1550,27 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\leanok
 	\uses{lem:qld-sublines, def:line-point-dist, def:line-representative,
 		def:combine-map}
-	A uniform affine parameter on the sampled extended line gives a uniform
-	point of $\F_q^{2m+2}$, whose $x$ and $z$ blocks are independent uniform
-	points of $\F_q^m$.
+	Let $D_{\rm dir}$ be the auxiliary distribution recorded by
+	\texttt{SubLineWitness}, whose extended-line marginal is that of
+	\texttt{directLinePointDist}. A uniform affine parameter on that
+	extended line gives a uniform point of $\F_q^{2m+2}$, whose $x$ and $z$
+	blocks are independent uniform points of $\F_q^m$. This statement uses
+	directly sampled coordinate indices. Its transport to the source's
+	seed-indexed distribution remains open
+	(\cite{gap:qpbt_ld-dimension-divisibility}).
 \end{lemma}
 \begin{proof}
 	\leanok
-	The representative--parameter map has constant fibers of size $q$; the
-	coordinate split and scalar identification are bijections.
+	For a fixed direction $v$, the map $(y,t)\mapsto L_v(y)+tv$ on
+	ambient-point--parameter pairs has fibers of size $q$. If $v\ne0$,
+	$y$ varies over a coset while $L_v(y)$ and $t$ are fixed; if $v=0$,
+	$y$ is fixed and $t$ is free. The coordinate split and scalar
+	identification are bijections.
 \end{proof}
 
 \begin{lemma}[Replacing the combined point measurement by the ordered product]
 	\label{lem:claim-17-1}
-	\lean{MIPStarRE.QPBT.subline_replace_by_ordered_product}
-	\leanok
+	\notready
 	% claim:17-1 in the paper; the original label is recorded here as a
 	% comment for cross-reference fidelity.
 	\uses{lem:qld-sublines, lem:qld-xz-lines, lem:qld-4-10,
@@ -1585,10 +1594,8 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\end{align*}
 \end{lemma}
 \begin{proof}
-	\leanok
 	\uses{lem:qld-4-10, lem:qld-4-10-same-placement, lem:qld-sublines,
-		lem:qld-xz-lines, lem:overlap-gap-distance,
-		lem:qld-sublines-uniform-point, def:line-point-dist}
+		lem:qld-xz-lines, def:line-point-dist}
 	Write
 	$W^{x,z}_{a,b} = \hat{Q}^{x,z}_{a,b}
 	- \hat{M}^{(\mathrm{Point},Z),z}_{b}
@@ -1603,10 +1610,15 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	of $\F_q^{2m+2}$, so the coordinates $x, z$ are independent and uniform
 	in $\F_q^m$; hence
 	$\E_{x,z} \sum_{a,b}
-	\bra{\hat\psi} \Id \ot (W^{x,z}_{a,b})^2 \ket{\hat\psi}
-	\le \delta_Q$
-	by \eqref{eq:qld-q-cons-m-hat-zx}. The total error is therefore at most
-	$\sqrt{\delta_Q}$.
+	\bra{\hat\psi} \Id \ot (W^{x,z}_{a,b})^\dagger W^{x,z}_{a,b}
+	\ket{\hat\psi} \le 4\delta_Q$
+	by Lemma~\ref{lem:qld-4-10-same-placement}. The total error is
+	therefore at most $2\sqrt{\delta_Q}$, with the same asymptotic order
+	as the source claim. The adjoint is necessary because the ordered
+	product need not be Hermitian. This source proof still requires the
+	seed-indexed distribution and a complex modulus estimate; the proved
+	real-part estimate on the auxiliary distribution is stated separately
+	below. See \cite{gap:qpbt_ld-dimension-divisibility}.
 \end{proof}
 
 \begin{lemma}[Removing the $X$-point factor]
@@ -1680,7 +1692,6 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 
 \begin{lemma}[The remaining $Z$-point term is close to one]
 	\label{lem:claim-17-3}
-	\lean{MIPStarRE.QPBT.subline_Z_term_near_one}
 	\notready
 	% claim:17-3 in the paper; the original label is recorded here as a
 	% comment for cross-reference fidelity.
@@ -1737,6 +1748,71 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	$O(m(\sqrt{\delta_P} + \sqrt{\delta_Q}) + \sqrt{\eps})$, and taking the
 	square root gives the claim.
 \end{proof}
+
+The following two auxiliary statements use the directly indexed extended-line
+carrier. Fix admissible parameters, a projective setting $S$, projective joint
+point measurements $Q$ with self-consistency and both opposite-placement
+ordered-product squared distances at most $\delta_Q$, and complete paired-line
+measurements $T$ with the axis-degree bounds and completed evaluation
+consistency defect at most $\delta_P$. These are the hypotheses of
+\texttt{CombinedPointsWitness} and \texttt{CombinedLinesWitness}.
+Let $D_{\rm dir}$ be any \texttt{SubLineWitness}: it has mass one, the
+\texttt{directLinePointDist} extended-line marginal, incidence and affine
+compatibility with its two source lines, separate X and Z point marginal
+mixtures as in Property~2, and axis-line closure. No equality with the
+seed-indexed law $D$ is assumed or established.
+Write $A_Q$, $A_{ZX}$ and $A_Z$ for the three overlap averages displayed in
+Lemmas~\ref{lem:claim-17-1}--\ref{lem:claim-17-3}, using $D_{\rm dir}$ and
+a uniform affine parameter on each extended line. Here all line answers are
+polynomial representatives of degree at most $md$, evaluations have
+\texttt{Option} values, and completed point effects are zero at undefined
+evaluations. The placements remain $\mathsf{A}\mathsf{A}'$ and
+$\mathsf{B}\mathsf{A}''$.
+
+\begin{lemma}[Auxiliary real-part estimate for the ordered product]
+	\label{lem:claim-17-1-direct-real}
+	\lean{MIPStarRE.QPBT.subline_replace_by_ordered_product}
+	\leanok
+	\uses{lem:qld-4-10-same-placement, lem:overlap-gap-distance,
+		lem:qld-sublines-uniform-point}
+	There is a universal constant $C>0$ such that, for every choice of the
+	auxiliary data just stated,
+	\[
+		|\operatorname{Re} A_Q-\operatorname{Re} A_{ZX}|
+		\le C\sqrt{\delta_Q}.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	Take $C=2$. Apply the real-part overlap estimate with squared distance
+	$4\delta_Q$ and use the uniform point marginal of $D_{\rm dir}$.
+\end{proof}
+
+\begin{lemma}[Auxiliary real-part estimate for the Z correlation]
+	\label{lem:claim-17-3-direct-real}
+	\lean{MIPStarRE.QPBT.subline_Z_term_near_one}
+	\leanok
+	\uses{lem:qld-4-10-same-placement, lem:overlap-gap-distance,
+		lem:restricted-line-mixture-bounds}
+	There is a universal constant $C>0$ such that, for every choice of the
+	same auxiliary data,
+	\[
+		|\operatorname{Re} A_Z-1|\le
+		C\sqrt m\,(\delta_P^{1/4}+\delta_Q^{1/4}+\eps^{1/4}).
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	Take $C=2$. The separate Z marginal mixture bounds the deficit by
+	$2\sqrt{4m^2\delta_P}+2\sqrt{4\delta_Q}$. Since the real overlap lies
+	in $[0,1]$, its squared deficit is no larger than its deficit. Taking
+	a square root and using $m\ge1$ gives the displayed bound.
+\end{proof}
+
+Neither auxiliary result completes its source-labelled counterpart. The
+missing distribution transport and the complex overlap obligation are
+recorded in \cite{gap:qpbt_ld-dimension-divisibility}; the source statements
+and their proof obligations remain unchanged.
 
 \begin{proof}[Proof of Lemma~\ref{lem:qld-4-13}]
 	\proves{lem:qld-4-13}

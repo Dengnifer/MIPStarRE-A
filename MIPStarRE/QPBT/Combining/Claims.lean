@@ -8,15 +8,22 @@ import MIPStarRE.QPBT.Games.DistanceTheorems.TensorSupport
 /-!
 # Scalar claims for combining the Pauli bases
 
-This module states the three scalar estimates used to compare the paired line
-measurement with the joint and ordered point measurements.  The expectations
-retain the subline law and the uniform affine parameter on each extended line
-explicitly.  Line-polynomial evaluation uses the existing `Option` completion,
-so no field value is substituted when an evaluation is undefined.
+This module states three real-part estimates for the directly indexed
+`SubLineWitness` distribution, comparing the paired line measurement with the
+joint and ordered point measurements. The first and third estimates are proved;
+the second retains its existing proof obligation. The expectations retain the
+auxiliary subline law and a uniform affine parameter explicitly. Line-polynomial
+evaluation uses `Option` completion, with zero effect at undefined evaluations.
+
+These are auxiliary statements. Transport to the seed-indexed distribution of
+the paper and the complex overlap estimate in Claim 17-1 remain open, as recorded
+in `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`, section
+"Scalar estimates on the auxiliary subline law". The source-labelled blueprint
+claims remain visible without completed Lean links.
 
 ## References
 
-The claims are blueprint `lem:claim-17-1`, `lem:claim-17-2`, and
+The nearby source claims are blueprint `lem:claim-17-1`, `lem:claim-17-2`, and
 `lem:claim-17-3`, with paper origin
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1140-1209`.
 -/
@@ -255,88 +262,20 @@ private theorem completed_pair_norm_sq_sum {P : AdmissibleParams} {ε δQ : ℝ}
               ((S.pointMeasExp .bob .Z z).effect ab.2 *
                 (S.pointMeasExp .bob .X x).effect ab.1))
           S.psiHat‖ ^ 2 := by
-  classical
-  have hXnone : ((S.pointMeasExpOption .bob .X x).effect
-      (none : Option (PauliScalar P)) :
-        Op (S.ExpandedLocalSpace Placement.BA''.side)) = 0 :=
-    pointMeasExpOption_effect_none_current S .bob .X x
-  have hZnone : ((S.pointMeasExpOption .bob .Z z).effect
-      (none : Option (PauliScalar P)) :
-        Op (S.ExpandedLocalSpace Placement.BA''.side)) = 0 :=
-    pointMeasExpOption_effect_none_current S .bob .Z z
-  have hXsome : ∀ a : PauliScalar P,
-      ((S.pointMeasExpOption .bob .X x).effect (some a) :
-        Op (S.ExpandedLocalSpace Placement.BA''.side)) =
-        (S.pointMeasExp .bob .X x).effect a :=
-    fun a => pointMeasExpOption_effect_some_current S .bob .X x a
-  have hZsome : ∀ b : PauliScalar P,
-      ((S.pointMeasExpOption .bob .Z z).effect (some b) :
-        Op (S.ExpandedLocalSpace Placement.BA''.side)) =
-        (S.pointMeasExp .bob .Z z).effect b :=
-    fun b => pointMeasExpOption_effect_some_current S .bob .Z z b
-  have hQnone : ∀ o : Option (PauliScalar P) × Option (PauliScalar P),
-      (∀ ab : PauliScalar P × PauliScalar P, (some ab.1, some ab.2) ≠ o) →
-      ((((points.Q .bob x z).postprocess fun ab =>
-          (some ab.1, some ab.2)).effect o) :
-        Op (S.ExpandedLocalSpace Placement.BA''.side)) = 0 := by
-    intro o ho
-    rw [MIPStarRE.Quantum.Measurement.postprocess_effect]
-    exact Finset.sum_eq_zero fun ab hab =>
-      absurd (Finset.mem_filter.mp hab).2 (ho ab)
-  have hQsome : ∀ ab : PauliScalar P × PauliScalar P,
-      ((((points.Q .bob x z).postprocess fun cd =>
-          (some cd.1, some cd.2)).effect (some ab.1, some ab.2)) :
-        Op (S.ExpandedLocalSpace Placement.BA''.side)) =
-        (points.Q .bob x z).effect ab := by
-    intro ab
-    rw [MIPStarRE.Quantum.Measurement.postprocess_effect,
-      show (Finset.univ.filter fun cd : PauliScalar P × PauliScalar P =>
-          (some cd.1, some cd.2) = (some ab.1, some ab.2)) = {ab} by
-        ext cd
-        simp [Prod.ext_iff, eq_comm]]
-    simp
-  have hkey : ∀ (F : Option (PauliScalar P) × Option (PauliScalar P) → ℝ),
-      (∀ o2, F (none, o2) = 0) → (∀ o1, F (o1, none) = 0) →
-      (∑ o, F o) =
-        ∑ ab : PauliScalar P × PauliScalar P, F (some ab.1, some ab.2) := by
-    intro F h1 h2
-    calc
-      (∑ o : Option (PauliScalar P) × Option (PauliScalar P), F o) =
-          ∑ o1 : Option (PauliScalar P), ∑ o2 : Option (PauliScalar P),
-            F (o1, o2) := Fintype.sum_prod_type (f := F)
-      _ = (∑ o2 : Option (PauliScalar P), F (none, o2)) +
-            ∑ a : PauliScalar P, ∑ o2 : Option (PauliScalar P),
-              F (some a, o2) := Fintype.sum_option _
-      _ = ∑ a : PauliScalar P, ∑ o2 : Option (PauliScalar P),
-            F (some a, o2) := by
-          rw [Finset.sum_eq_zero fun o2 _ => h1 o2, zero_add]
-      _ = ∑ a : PauliScalar P,
-            (F (some a, none) + ∑ b : PauliScalar P, F (some a, some b)) :=
-          Finset.sum_congr rfl fun a _ => Fintype.sum_option _
-      _ = ∑ a : PauliScalar P, ∑ b : PauliScalar P, F (some a, some b) := by
-          refine Finset.sum_congr rfl fun a _ => ?_
-          rw [h2 (some a), zero_add]
-      _ = ∑ ab : PauliScalar P × PauliScalar P,
-            F (some ab.1, some ab.2) :=
-          (Fintype.sum_prod_type (f := fun ab : PauliScalar P × PauliScalar P =>
-            F (some ab.1, some ab.2))).symm
-  refine Eq.trans (hkey _ ?_ ?_) ?_
-  · intro o2
-    dsimp only
-    rw [hQnone (none, o2) (fun ab => by simp), hXnone, mul_zero, sub_self]
-    simp [applyOperatorToState]
-  · intro o1
-    dsimp only
-    rw [hQnone (o1, none) (fun ab => by simp), hZnone, zero_mul, sub_self]
-    simp [applyOperatorToState]
-  · refine Finset.sum_congr rfl fun ab _ => ?_
-    dsimp only
-    rw [hQsome ab, hZsome ab.2, hXsome ab.1]
+  exact S.completedPair_norm_sq_sum_ZX points .BA'' x z
 
 set_option maxHeartbeats 400000 in
-/-- Replacing the combined point measurement by the ordered `Z`-then-`X`
-point product costs a square-root joint-point error.  This is
-`lem:claim-17-1`, paper lines 1140--1145. -/
+-- The expanded six-register overlap expressions require additional elaboration steps.
+/-- On the directly indexed subline law, the real parts of the joint-point
+and ordered `Z`-then-`X` overlaps differ by at most a square-root point error.
+This is the auxiliary blueprint `lem:claim-17-1-direct-real`, supporting paper
+`claim:17-1`, lines 1140--1145 of the cited mirror.
+
+**Scope restriction:** The public statement uses `SubLineWitness` and real
+parts. It does not prove the source distribution transport or the complex
+modulus bound. These obligations and their discharge plan are recorded in
+`docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`, section
+"Scalar estimates on the auxiliary subline law". -/
 theorem subline_replace_by_ordered_product :
     ∃ C : ℝ, 0 < C ∧
       ∀ (P : AdmissibleParams) (ε δQ δP : ℝ)
@@ -582,9 +521,16 @@ theorem subline_remove_X_factor :
           C * (P.m : ℝ) * Real.rpow (deltaLine ε) (1 / 2 : ℝ) := by
   sorry
 
-/-- The remaining `Z`-point correlation is close to one with the fourth-root
-error from the point and line constructions.  This is `lem:claim-17-3`, paper
-lines 1204--1209. -/
+/-- On the directly indexed subline law, the real part of the `Z`-point
+correlation is close to one with the fourth-root point and line error.
+This is the auxiliary blueprint `lem:claim-17-3-direct-real`, supporting paper
+`claim:17-3`, lines 1204--1209 of the cited mirror.
+
+**Scope restriction:** This theorem retains the `SubLineWitness` carrier and
+real-part conclusion. Transport to the source distribution remains open, as
+recorded in `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`, section
+"Scalar estimates on the auxiliary subline law"; the source-labelled claim is
+not certified by this auxiliary result. -/
 theorem subline_Z_term_near_one :
     ∃ C : ℝ, 0 < C ∧
       ∀ (P : AdmissibleParams) (ε δQ δP : ℝ)
