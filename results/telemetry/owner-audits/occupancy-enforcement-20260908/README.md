@@ -9,3 +9,14 @@ Meta guided main to maintain an approved successor queue and delegate refill mec
 See `summary.json` for the bounded measurements, exact transition times, failed handoff, and final capability verification. The compact journals preserve worker identities and turn IDs without raw prompts, credentials or model content. Historical unclosed turns without recent activity are excluded. Six sampler regression tests cover completion, resume, stale activity, inherited history, interruption and root-scoped incremental reads.
 
 These observations measure current worker activity, not endpoint request concurrency or mathematical productivity. They establish bounded behavior and retain limitations rather than asserting a guarantee about all future work. Session records are in `owner-sessions.jsonl`; unavailable per-helper usage remains null. Main owns normal telemetry publication.
+
+The continuing episode is preserved in the refreshed delegate and vacancy-trigger
+receipts in this directory. `/root/astra_refill_coordinator` remains the sole
+demonstrated executable refill owner without expiry; the primary integration
+coordinator observes activity and owns manual telemetry and service gates, but its
+three observation-only handoff acknowledgments did not demonstrate native
+`list_agents` or `followup_task` capability. Activity fell below the floor during
+several completion boundaries and was restored by measured successor starts. The
+archived status snapshot preserves the latest observed count at the publication
+boundary; the journals retain the preceding observations at six, seven and eight.
+These later records do not rewrite or backdate the earlier measurements.
