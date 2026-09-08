@@ -1,5 +1,210 @@
 [
  {
+  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/403",
+  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
+  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/403/labels{/name}",
+  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/403/comments",
+  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/403/events",
+  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/403",
+  "id": 5388870395,
+  "node_id": "I_kwDOUJyJf88AAAABQTOi-w",
+  "number": 403,
+  "title": "Add combined point postprocess marginal identities",
+  "user": {
+   "login": "Dengnifer",
+   "id": 89234078,
+   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
+   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/Dengnifer",
+   "html_url": "https://github.com/Dengnifer",
+   "followers_url": "https://api.github.com/users/Dengnifer/followers",
+   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
+   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
+   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
+   "repos_url": "https://api.github.com/users/Dengnifer/repos",
+   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
+   "type": "User",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "labels": [
+   {
+    "id": 12025010884,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
+    "name": "formalization",
+    "color": "ededed",
+    "default": false,
+    "description": "Lean formalization of a mathematical statement"
+   },
+   {
+    "id": 12025012183,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8f1w",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/qpbt-analysis",
+    "name": "qpbt-analysis",
+    "color": "ededed",
+    "default": false,
+    "description": "Soundness/rigidity analysis of the Pauli basis test \u2014 self-testing bounds and error terms"
+   },
+   {
+    "id": 12025012384,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8goA",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/proof",
+    "name": "proof",
+    "color": "ededed",
+    "default": false,
+    "description": "Issue is primarily about proving an existing result"
+   },
+   {
+    "id": 12025013584,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8lUA",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/paper-2001.04383",
+    "name": "paper-2001.04383",
+    "color": "ededed",
+    "default": false,
+    "description": "MIP*=RE (arXiv:2001.04383) \u2014 the primary paper of this track"
+   }
+  ],
+  "state": "open",
+  "locked": false,
+  "assignees": [],
+  "milestone": null,
+  "comments": 0,
+  "created_at": "2026-09-08T15:45:51Z",
+  "updated_at": "2026-09-08T15:45:51Z",
+  "closed_at": null,
+  "assignee": null,
+  "author_association": "OWNER",
+  "active_lock_reason": null,
+  "sub_issues_summary": {
+   "total": 0,
+   "completed": 0,
+   "percent_completed": 0
+  },
+  "issue_dependencies_summary": {
+   "blocked_by": 0,
+   "total_blocked_by": 0,
+   "blocking": 0,
+   "total_blocking": 0
+  },
+  "body": "<!-- mipstarre-issue-key: qpbt-point-postprocess-marginals-20260908 -->\n### Motivation\n\nThe proof following `lem:qld-4-10` uses the first- and second-coordinate\nmarginals of the supplied joint point measurement.  The corresponding\nfinite-postprocessing identities occur in\n`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:917-935` and\nsupport the formalization of `lem:qld-xz-lines`.\n\n### Scope\n\n- Add `CombinedPointsWitness.postprocess_fst_effect` and\n  `CombinedPointsWitness.postprocess_snd_effect`.\n- State them for the current side-indexed `Q` measurement and exact point\n  carriers.\n- Reuse the existing measurement postprocessing API; do not introduce a new\n  generic fiber-sum lemma.\n- Do not change source-labelled theorem statements or unrelated modules.\n\n### Acceptance\n\n- Each postprocessed product effect is identified with the sum over the other\n  scalar coordinate.\n- The focused Lean module type-checks without `sorry` or new axioms.",
+  "closed_by": null,
+  "reactions": {
+   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/403/reactions",
+   "total_count": 0,
+   "+1": 0,
+   "-1": 0,
+   "laugh": 0,
+   "hooray": 0,
+   "confused": 0,
+   "heart": 0,
+   "rocket": 0,
+   "eyes": 0
+  },
+  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/403/timeline",
+  "performed_via_github_app": null,
+  "state_reason": null,
+  "pinned_comment": null
+ },
+ {
+  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/402",
+  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
+  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/402/labels{/name}",
+  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/402/comments",
+  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/402/events",
+  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/402",
+  "id": 5388737937,
+  "node_id": "I_kwDOUJyJf88AAAABQTGdkQ",
+  "number": 402,
+  "title": "Add generic marginal contraction estimate",
+  "user": {
+   "login": "Dengnifer",
+   "id": 89234078,
+   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
+   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/Dengnifer",
+   "html_url": "https://github.com/Dengnifer",
+   "followers_url": "https://api.github.com/users/Dengnifer/followers",
+   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
+   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
+   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
+   "repos_url": "https://api.github.com/users/Dengnifer/repos",
+   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
+   "type": "User",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "labels": [
+   {
+    "id": 12025010884,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
+    "name": "formalization",
+    "color": "ededed",
+    "default": false,
+    "description": "Lean formalization of a mathematical statement"
+   },
+   {
+    "id": 12025012779,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8iKw",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/sorry-elimination",
+    "name": "sorry-elimination",
+    "color": "ededed",
+    "default": false,
+    "description": "Explicitly aimed at discharging remaining `sorry` sites"
+   }
+  ],
+  "state": "open",
+  "locked": false,
+  "assignees": [],
+  "milestone": null,
+  "comments": 0,
+  "created_at": "2026-09-08T15:33:56Z",
+  "updated_at": "2026-09-08T15:33:56Z",
+  "closed_at": null,
+  "assignee": null,
+  "author_association": "OWNER",
+  "active_lock_reason": null,
+  "sub_issues_summary": {
+   "total": 0,
+   "completed": 0,
+   "percent_completed": 0
+  },
+  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/118",
+  "issue_dependencies_summary": {
+   "blocked_by": 1,
+   "total_blocked_by": 1,
+   "blocking": 0,
+   "total_blocking": 0
+  },
+  "body": "### Scope\n\nRecover the generic marginal contraction estimate used after the point-witness\nabsorption step, with the exact projectivity, orthogonality, completeness, and\ncommutation hypotheses of the existing formulation.\n\n### Source\n\n- `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:912-932`\n- `DistanceCalculus.norm_finset_sum_projector_mul_sq_le`\n- The projection contraction helper from #396 / PR #401\n\n### Acceptance criteria\n\n- Add only `norm_marginal_sub_sq_le` in a dedicated small module.\n- Preserve the generic hypotheses and factor `4` conclusion exactly.\n- Add no witness marginal theorem, bridge premise, axiom, or proof hole.\n- Kernel-check the declaration and inspect its axioms.\n\n### Dependencies\n\n- Stacks on #396 / PR #401.\n",
+  "closed_by": null,
+  "reactions": {
+   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/402/reactions",
+   "total_count": 0,
+   "+1": 0,
+   "-1": 0,
+   "laugh": 0,
+   "hooray": 0,
+   "confused": 0,
+   "heart": 0,
+   "rocket": 0,
+   "eyes": 0
+  },
+  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/402/timeline",
+  "performed_via_github_app": null,
+  "state_reason": null,
+  "pinned_comment": null
+ },
+ {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/396",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/396/labels{/name}",
@@ -71,8 +276,8 @@
   "issue_dependencies_summary": {
    "blocked_by": 1,
    "total_blocked_by": 1,
-   "blocking": 0,
-   "total_blocking": 0
+   "blocking": 1,
+   "total_blocking": 1
   },
   "body": "### Scope\n\nRecover the two point-witness absorption estimates used at the first projection\nstep of the combined-line argument, together with the single generic\nprojective-contraction inequality they require.\n\n### Source\n\n- `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:902-915`\n- Existing `CombinedPointsWitness.consistent_XZ` and `consistent_ZX` fields\n\n### Acceptance criteria\n\n- Add `CombinedPointsWitness.absorb_X_le` and `CombinedPointsWitness.absorb_Z_le`.\n- Preserve the current witness and point-construction signatures.\n- Add no axioms, proof holes, bridge hypotheses, or later line-polynomial work.\n- Type-check the dedicated helper module and inspect both declarations' axioms.\n\n### Dependencies\n\n- Stacks on the combined point witness construction from #388 / PR #392.\n",
   "closed_by": null,
@@ -591,7 +796,7 @@
    "percent_completed": 0
   },
   "issue_dependencies_summary": {
-   "blocked_by": 1,
+   "blocked_by": 0,
    "total_blocked_by": 1,
    "blocking": 2,
    "total_blocking": 2
@@ -1507,99 +1712,6 @@
    "eyes": 0
   },
   "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/370/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/369",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/369/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/369/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/369/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/369",
-  "id": 5386441427,
-  "node_id": "I_kwDOUJyJf88AAAABQQ6S0w",
-  "number": 369,
-  "title": "Prove averaged extended point consistency",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement"
-   },
-   {
-    "id": 12025012183,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8f1w",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/qpbt-analysis",
-    "name": "qpbt-analysis",
-    "color": "ededed",
-    "default": false,
-    "description": "Soundness/rigidity analysis of the Pauli basis test \u2014 self-testing bounds and error terms"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-08T12:02:49Z",
-  "updated_at": "2026-09-08T12:02:49Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 0,
-   "blocking": 1,
-   "total_blocking": 1
-  },
-  "body": "<!-- mipstarre-issue-key: qpbt-extended-q-spec-20260908 -->\n### Mathematical Goal\n\nProve the existing tracked theorem `extendedQ_spec` in\n`MIPStarRE/QPBT/Combining/Points.lean` for a supplied\n`CombinedPointsWitness`.  Preserve projectivity and the three averaged\noperator-family consistency estimates, including all opposite placements and\nthe separate ordered `XZ` and `ZX` products.\n\n### Source\n\n- `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:993-1011`\n- The data-processing calculation cited there from section 6.\n- Blueprint `lem:qld-4-12`.\n\n### Boundaries\n\nKeep the public statement and error `delta` unchanged.  Do not work on the\nwitness producer, assume contraction under arbitrary fixed coarse-graining,\nor introduce bridge hypotheses, new axioms, helper proof holes, or kernel\nbypasses.  The averaged affine coarse-graining must be justified from the\nuniform `(alpha,beta)` law and the relevant finite-field collision and\ncompleteness identities.\n\n### Validation\n\n- Type-check `MIPStarRE/QPBT/Combining/Points.lean`.\n- Scan the changed target for new proof debt and kernel bypasses.\n- Check `extendedQ_spec` uses only the standard three Lean axioms.\n- Run the installed hook checks and publish through the checked PR path.\n",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/369/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/369/timeline",
   "performed_via_github_app": null,
   "state_reason": null,
   "pinned_comment": null
@@ -6856,9 +6968,9 @@
   "author_association": "OWNER",
   "active_lock_reason": null,
   "sub_issues_summary": {
-   "total": 9,
+   "total": 10,
    "completed": 1,
-   "percent_completed": 11
+   "percent_completed": 10
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/166",
   "issue_dependencies_summary": {
