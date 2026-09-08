@@ -42,10 +42,13 @@ the astra math-fix lane governed by `issues-prs.md` section 6. Full builds are
 ~10 min on this host and only they serialize (the machine-wide
 `.full-build-lock`); per-file `lake env lean` iteration parallelizes
 freely across worktrees. Use the current owner-verified allocation and existing
-native lease; the current Space receipt reserves three descendants within five total.
-Keep useful capacity occupied without changing live leases,
-refill promptly, and record intervals below that floor and their reasons. Count
-actual native activity, not idle threads; keep disjoint successors and independent reviewers ready. Evidence binds to exact SHAs, so parallel
+native lease. Total capacity `k` means one main root plus `k - 1` native descendants,
+with no unrelated-use reservation. At the current Space `k = 10`, the desired lease is
+nine descendants and the useful-activity floor is eight active native workers; main and
+other processes do not count toward that floor. Keep useful capacity occupied without
+changing live leases, refill promptly, and record intervals below the floor and their
+reasons. Count actual native activity, not idle threads; keep disjoint successors and
+independent reviewers ready. Evidence binds to exact SHAs, so parallel
 lanes cannot trample each other's records.
 Preauthorize bounded, disjoint successor chains: a worker sends task-end/start
 and continues its assigned successor without waiting for main. The central integration

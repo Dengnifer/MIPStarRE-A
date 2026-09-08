@@ -155,12 +155,16 @@ All appends are one-line JSON; schemas documented in `protocols/meta.md`.
   an explicit reason. Unknown classes/models and other efforts fail closed.
   External dispatch keeps fan-out off. Native descendants share their
   root's verified configured cap and account allocation; neither is provider
-  throughput evidence. The current Space receipt records five total slots,
-  three native descendants and external admission zero. This model change does
-  not resize that allocation or permit an additional pool.
+  throughput evidence. Under the current Space receipt, total capacity `k`
+  means one main root plus `k - 1` native descendants and no unrelated-use
+  reservation. At `k = 10`, the desired native lease is nine, external admission
+  is zero, and the activity floor is eight actual native workers; main and other
+  processes do not count as active workers. This model change does not resize
+  that allocation or permit an additional pool.
 - Every admission reads account mode (default primary; restoring both requires owner approval).
-  Twelve primary slots include main; only named interactive CWDs are exempt from accounting.
-  Other same-key use reduces capacity. See `protocols/sessions.md` for reconciliation and
-  checkpoint continuations. Historical Sol/Fable measurements are unchanged.
+  The owner-selected primary capacity includes main. Only known-primary default-home
+  interactives and exact `app-server` commands in named CWDs are exempt; other same-key
+  use reduces capacity. See `protocols/sessions.md` for reconciliation and checkpoint
+  continuations. Historical Sol/Fable measurements are unchanged.
 - Reviewer and prover roles must be **different sessions** — a session never
   reviews its own diff.

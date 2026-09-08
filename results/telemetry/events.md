@@ -5728,3 +5728,20 @@ not actual commit/publication hooks. No productive session was killed.
   the constructed expected copies and pass `git diff --check`. Main publication
   proceeds through the canonical GitHub sync before this merge is released as a
   downstream base.
+- Owner-approved default-home app-server occupancy correction (#345): the canonical
+  host census counted PID 3286270, a VS Code ChatGPT extension `codex app-server`
+  started September 8, 2026 at 10:16:05 +0800 with effective Codex home
+  `/home/drx/.codex` and CWD `/home/drx`, as a worker. The owner receipt
+  `~/.cache/mipstarre-dev/qpbt-switch/worker-occupancy-correction-20260908.json`
+  defines total `k` as one main plus `k - 1` native descendants with no unrelated-use
+  reservation, and requires eight actually active native workers at `k = 10`. The narrow
+  repair extends the existing validated CWD exclusion only to the exact default-home
+  `app-server` command; generic workers, scoped homes, reservations, leases and unknown
+  visibility remain guarded. This branch did not signal the process, activate a lease,
+  restart main or change credentials. PID 3286270 exited naturally before the switch
+  checkpoint, after which meta bound the nine-descendant lease using the unchanged
+  published guard. A post-switch read-only check with the branch code verified root
+  PID 3846730/start187183661 at nine descendants, census `[9, 0]` workers and
+  `[1, 0]` interactives within capacity ten, external reservation zero, no live
+  `app-server`, and an unchanged lease-file timestamp and SHA-256. The router fix
+  remains unmerged and subject to normal CI, independent review and service merge.

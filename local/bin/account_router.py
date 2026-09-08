@@ -265,7 +265,7 @@ def live_pids(directory: Path) -> set[int]:
 
 
 def host_processes(exclusions=()) -> tuple[dict[int, int], dict[int, tuple[str, bool]]]:
-    """Require a host PID view; count same-user Codex executables, not Node wrappers."""
+    """Require a host PID view and classify same-user Codex executables."""
     namespace = [line.split()[1:] for line in Path('/proc/self/status').read_text().splitlines()
                  if line.startswith('NSpid:')]
     if Path('/proc/1/comm').read_text().strip() not in ('systemd', 'init') or namespace != [
@@ -295,9 +295,11 @@ def host_processes(exclusions=()) -> tuple[dict[int, int], dict[int, tuple[str, 
                         environment.get(b'HOME', b'/unknown') + b'/.codex'))
             account = 'second' if home == second_home else 'primary'
             boundary = arguments.index(b'--') if b'--' in arguments else len(arguments)
-            interactive = not any(command in arguments[:boundary] for command in
-                                  (b'exec', b'e', b'review', b'app-server', b'mcp-server', b'exec-server'))
-            if (interactive and home == Path.home() / '.codex' and exclusions and
+            command_kinds = (b'exec', b'e', b'review', b'app-server', b'mcp-server', b'exec-server')
+            command = next((arg for arg in arguments[1:boundary] if arg in command_kinds), None)
+            interactive = command is None
+            owner_excludable = interactive or command == b'app-server'
+            if (owner_excludable and home == Path.home() / '.codex' and exclusions and
                     os.readlink(process / 'cwd') in exclusions):
                 continue
             candidates[pid] = (account, interactive)

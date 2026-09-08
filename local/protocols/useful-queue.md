@@ -4,17 +4,18 @@ packets and binds prerequisites to closed issues, actual merged PRs and ancestry
 No discovery, filler, merges, adjudication, budget resumes, inbox actions or shell tasks.
 Both --run and enabled:true are required; defaults disable. One admission per tick,
 watch interval >=5s, with the historical dispatcher policy limited to
-primary/Astra/max-or-xhigh; the active owner override below uses space/Astra/Ultra.
-Existing fan-out/kill switches remain binding.
-For the active QPBT owner switch recorded in
-`results/telemetry/owner-messages/qpbt-space-cap5-switch-20260906.md`, the allocation
-is five total native sessions (main plus at most four descendants) on account `space`,
-with external admission zero. Count actual native turn activity once per process;
-ready packets, reservations, configured ceilings and idle processes do not count.
+primary/Astra/max-or-xhigh; the active owner override uses `space` and the
+model/Ultra selection in `sessions.md`. Existing fan-out/kill switches remain binding.
+For the active QPBT owner allocation, total capacity `k` means one main root plus
+`k - 1` native descendants on account `space`, with no unrelated-use reservation and
+external admission zero. At `k = 10`, the desired native lease is nine descendants and
+the useful-activity floor is eight actually active native workers. Main and other
+processes do not count toward that floor. Count actual native turn activity once per
+process; ready packets, reservations, configured ceilings and idle processes do not count.
 After each completion, failure, unblock or compaction, main promptly dispatches a
 disjoint useful successor or records the concrete vacancy reason and elapsed time.
-The earlier relay allocation of eleven workers plus main and its recovery ceiling ten
-is historical evidence and does not apply to this run. Review costs two slots,
+Earlier relay and Space-capacity allocations are historical evidence and do not apply to
+the current run. Review costs two slots,
 normal green-CI head only, cap four.
 Native descendants use the shared root lease and `telemetry.py native-record`:
 root/parent IDs, effective model and effort, key label, timestamps, status and

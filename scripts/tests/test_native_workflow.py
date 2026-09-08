@@ -174,6 +174,43 @@ class NativeWorkflowTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'external admission disabled'):
                 router.reserve(self.root, 'auto', 300, 0, False)
 
+    def test_space_nine_descendants_fit_ten_only_after_app_server_exclusion(self):
+        watchdog = self.root / 'watchdog'
+        watchdog.mkdir()
+        (watchdog / 'primary-key-capacity').write_text('10')
+        lease_info = dict(self.info, slots=9)
+        main = {100: ('primary', True)}
+        with mock.patch.object(router, 'native_process', side_effect=lambda *a: dict(lease_info)), \
+             mock.patch.object(router, 'host_processes', return_value=(
+                 {100: 1, 200: 1}, main | {200: ('primary', False)})), \
+             self.assertRaisesRegex(ValueError, 'allocation exhausted'):
+            router.native_lease(self.root, ROOT, 100, 9)
+
+        with mock.patch.object(router, 'native_process', side_effect=lambda *a: dict(lease_info)), \
+             mock.patch.object(router, 'host_processes', return_value=({100: 1}, main)), \
+             mock.patch('wf_util.atomic_write') as write:
+            router.native_lease(self.root, ROOT, 100, 9)
+        self.assertEqual(json.loads(write.call_args.args[1])[ROOT]['slots'], 9)
+        self.assertFalse((self.root / 'accounts/native-leases.json').exists())
+
+        reservation = self.root / 'accounts/primary/300'
+        reservation.parent.mkdir(parents=True, exist_ok=True)
+        reservation.touch()
+        with mock.patch.object(router, 'native_process', side_effect=lambda *a: dict(lease_info)), \
+             mock.patch.object(router, 'host_processes', return_value=({100: 1}, main)), \
+             mock.patch.object(router.os, 'kill'), \
+             self.assertRaisesRegex(ValueError, 'allocation exhausted'):
+            router.native_lease(self.root, ROOT, 100, 9)
+        reservation.unlink()
+
+        (self.root / 'accounts/native-leases.json').write_text(json.dumps({
+            CHILD: dict(pid=200, start='456', slots=1, key_label='space'),
+        }))
+        with mock.patch.object(router, 'native_process', side_effect=lambda *a: dict(lease_info)), \
+             mock.patch.object(router, 'host_processes', return_value=({100: 1}, main)), \
+             self.assertRaisesRegex(ValueError, 'allocation exhausted'):
+            router.native_lease(self.root, ROOT, 100, 9)
+
     def test_external_admission_fails_closed_without_owner_capacity(self):
         watchdog = self.root / 'watchdog'
         watchdog.mkdir()

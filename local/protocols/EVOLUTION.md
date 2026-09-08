@@ -929,3 +929,23 @@ claiming broader capability evidence from the earlier two-case audit.
 its recorded 15:40Z boundary and extension request5572932276, not a fresh two-hour
 allocation. Old 597 tests cover the narrow draft only; revised tests and exact-head
 CI/control-policy review/publication gates are recorded separately. No activation yet.
+
+## 2026-09-08 - Exclude allowlisted default-home app-server use (#345)
+
+**Trigger:** `results/telemetry/events.md` 2026-09-08, "Owner-approved default-home
+app-server occupancy correction", and the owner worker-occupancy receipt dated
+September 8, 2026.
+
+**Change:** `account_router.py` extends the existing owner-designated CWD exclusion
+only to an exact `app-server` command on the known primary default home. Tests cover
+global options, prompt boundaries, generic worker commands, scoped and secondary homes,
+unlisted CWDs, reservations, native leases and unavailable host visibility. Current
+normative allocation text now defines total `k` as one main plus `k - 1` native workers,
+with no unrelated-use reservation and an active-worker floor of
+`ceil (0.8 * (k - 1))`.
+
+**Expected effect:** the unrelated VS Code application server no longer consumes a
+native worker slot after normal merge and deployment. At Space `k = 10`, meta can bind
+the reviewed nine-descendant lease while requiring eight actual active native workers;
+main, other processes and configured capacity do not satisfy the activity floor. All
+credential, visibility, reservation, lease, review and merge guards remain unchanged.

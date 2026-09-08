@@ -53,10 +53,14 @@ resume thread, process start identity, scoped space route, explicit Astra/Ultra
 main configuration, policy-authorized child default and unchanged shared cap. Python 3.10 needs
 `tomli` for this native-only TOML validation; Python 3.11 has `tomllib`.
 `watchdog/primary-key-capacity` is the owner allocation, not measured throughput. For
-the current Space episode the owner allocation is five total slots,
-external admission is zero, and the existing native lease has three descendants. The
-router enforces `watchdog/primary-external-admission=0` (and the owner `max-codex=0`
-fallback) before creating any external reservation.
+the current Space episode, total capacity `k` means exactly one main root and `k - 1`
+native descendants, with no separate reservation for unrelated application-server use.
+At `k = 10`, the desired native lease is nine descendants and external admission is zero.
+The useful-activity floor is `ceil (0.8 * (k - 1))`, hence eight actually active native
+workers at `k = 10`; main and other processes do not count toward that floor. Configured
+capacity, reserved slots and idle threads are not activity. The router enforces
+`watchdog/primary-external-admission=0` (and the owner `max-codex=0` fallback) before
+creating any external reservation.
 Native leases, external processes/reservations, interactives and reserved non-Codex
 use all consume it. Unknown/dead native leases are retained until explicit
 `native-lease ... --release` verifies the original root is no longer alive. A live
@@ -199,11 +203,14 @@ Caps in `watchdog/max-codex-{primary,second}` default to 11 and 9; zero disables
 an account. `watchdog/max-codex` additionally caps total workers. Auto selects
 the smallest live/cap ratio among eligible accounts, with primary winning ties.
 Host `/proc` scans reconcile Codex executables and dispatcher reservations by ancestry,
-without counting Node wrappers twice. Twelve allocated primary slots reserve at least
-one for main; other interactives and unreserved workers reduce capacity. Each admission
+without counting Node wrappers twice. The explicit owner primary-key capacity includes
+main; the legacy fallback is twelve only when no global cap is exposed. Other
+interactives and unreserved workers reduce capacity. Each admission
 reads optional `watchdog/primary-excluded-interactive-cwds.json`: a duplicate-free list
 drawn only from `/home/drx/FV`, `/home/drx/LDT-Lean-Paper`, `/home/drx`; invalid lists fail.
-Only known-primary interactives qualify, never workers/reservations; absence exempts none.
+Only known-primary default-home interactives and the exact `app-server` command qualify.
+`exec`, `e`, `review`, `mcp-server`, `exec-server`, scoped-home processes, reservations
+and shared native leases remain counted; an absent list exempts nothing.
 `watchdog/primary-external-reserved` reserves non-Codex key use (default zero), not
 already-observed processes. Unknown homes count against primary. Unavailable host
 visibility or unreadable live processes fail before stale cleanup; dead reservations

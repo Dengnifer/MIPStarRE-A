@@ -608,6 +608,52 @@ class AccountRouterTests(unittest.TestCase):
                 self.assertEqual(HOST_PROCESS_SCAN(['/home/drx/FV'])[1], {100: ('primary', False)})
                 self.assertEqual(len(HOST_PROCESS_SCAN(['/home/drx'])[1]), 2)
 
+    def test_host_scan_excludes_only_allowlisted_default_home_app_server(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            rows = {
+                100: (['codex', '-c', 'features.code_mode_host=true', 'app-server',
+                       '--analytics-default-enabled'], b'HOME=/home/drx', '/home/drx'),
+                200: (['codex', 'exec', '--', 'task'], b'HOME=/home/drx', '/home/drx'),
+                300: (['codex', 'review'], b'HOME=/home/drx', '/home/drx'),
+                400: (['codex', 'app-server'], b'HOME=/home/drx', '/tmp'),
+                500: (['codex', 'app-server'], b'CODEX_HOME=/scoped', '/home/drx'),
+                600: (['codex', 'resume', THREAD_ID], b'CODEX_HOME=/scoped', '/home/drx'),
+                700: (['codex'], b'HOME=/home/drx', '/home/drx'),
+                800: (['codex', 'mcp-server'], b'HOME=/home/drx', '/home/drx'),
+                900: (['codex', 'app-server'], b'CODEX_HOME=/second', '/home/drx'),
+                1000: (['codex', 'exec', '--', 'app-server'], b'HOME=/home/drx', '/home/drx'),
+                1100: (['codex', 'exec', 'app-server'], b'HOME=/home/drx', '/home/drx'),
+            }
+            for name in ('1', 'self', *(str(pid) for pid in rows)):
+                (root / name).mkdir()
+            (root / '1/comm').write_text('systemd')
+            (root / 'self/status').write_text(f'NSpid:\t{os.getpid()}')
+            for pid, (arguments, environment, cwd) in rows.items():
+                process = root / str(pid)
+                (process / 'status').write_text('Name:\tcodex\nPPid:\t1')
+                (process / 'cmdline').write_bytes(b'\0'.join(
+                    argument.encode() for argument in arguments))
+                (process / 'environ').write_bytes(environment)
+                (process / 'cwd').symlink_to(cwd)
+
+            def mapped_path(path):
+                if str(path).startswith('/proc'):
+                    return root / str(path).removeprefix('/proc').lstrip('/')
+                return Path(path)
+
+            expected = {
+                pid: ('second' if pid == 900 else 'primary', pid in (600, 700))
+                for pid in rows
+            }
+            with mock.patch.object(router, 'Path', side_effect=mapped_path) as paths, \
+                 mock.patch.dict(os.environ, {'MIPSTARRE_CODEX_HOME_SECOND': '/second'}):
+                paths.home.return_value = Path('/home/drx')
+                self.assertEqual(HOST_PROCESS_SCAN()[1], expected)
+                excluded = HOST_PROCESS_SCAN(['/home/drx'])[1]
+                self.assertEqual(set(expected) - set(excluded), {100, 700})
+                self.assertEqual(HOST_PROCESS_SCAN(['/home/drx/FV'])[1], expected)
+
     def test_host_scan_skips_only_vanished_pids(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
