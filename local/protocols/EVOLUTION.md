@@ -945,3 +945,38 @@ effect:** a late native response can reach the canonical review record without
 manual body reconstruction or a duplicate reviewer, while every existing review
 and merge gate remains authoritative. **Outcome:** focused offline regression and
 normal CI/independent review are required before deployment.
+
+## 2026-09-08 - Activate prepared successors before receipt adoption (#418)
+
+**Trigger:** `results/telemetry/events.md`, "Completion handoff ordering and
+source-deadline correction"; the owner-directed regular lifecycle audit found
+only 26 of 65 valid sampled minutes at or above eight useful native workers,
+including gaps of approximately 10.5 minutes and more than six minutes.
+
+**Change:** `sessions.md`, `useful-queue.md`, `main.md`, `DESIGN.md`, and the
+integration-checkpoint wording in `issues-prs.md` now record the active Space
+total of ten sessions, native target nine and floor eight, with external admission
+zero. Main and the capable coordinator validate useful, disjoint primary and alternate
+successor records while slots are occupied and record `ready_at`. Operational readiness
+requires current heads or source snapshots, actually published inputs, eligible roles,
+current unique operation ownership, complete hash-bound dispatch bodies and deadline rules,
+and a separately
+validated alternate or an exact no-alternate blocker; descriptive input strings or a
+nominal successor line do not qualify. On real completion they perform
+only the remaining capacity, identity, ownership, intent, and deadline checks before
+the actual native follow-up or spawn call; detailed predecessor receipt and rollout
+adoption follows successor start verification. Each activation payload carries an
+absolute source deadline no later than its native call plus the authorized limit,
+and continuations retain earlier deadlines, so silence before first progress remains
+charged. Coordinator-owned latency evidence records the
+predecessor terminal event, `ready_at`, activation call, current successor turn,
+first useful output, source deadline, and real blockers. The historical one-shot
+executor is explicitly not the native controller and receives no code change.
+
+**Expected effect:** ready work occupies a released native slot before forensic
+adoption consumes the vacancy, without weakening source, budget, ownership,
+review, model, or capacity gates. Backlog recovery and closing snapshots cannot
+be reported as prompt or sustained coverage. **Outcome:** pending canonical CI,
+independent hard control-policy review, and normal merge. Runtime acceptance then requires
+a natural completion transition in the coordinator-owned batch with the prescribed
+ordering; sustained coverage remains a separate interval observation.
