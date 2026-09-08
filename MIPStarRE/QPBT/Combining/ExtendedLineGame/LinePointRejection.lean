@@ -365,6 +365,7 @@ theorem aline_point_rejection_eq_completedLinePointDefect
       (completed_defect_eq_read_defect lines).symm
 
 /-- Read a diagonal-line answer by completed evaluation at the sampled point.
+Other answer formats and undefined evaluations return `none`.
 Support for `lem:qld-4-7`, paper `14_analysis_of_the_pauli_basis_test.tex:1279-1288`. -/
 def diagonalGameRead
     (sample : DirectLdSpace P.extendedDirectLd) :
