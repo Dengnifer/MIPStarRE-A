@@ -1,3 +1,4 @@
+import MIPStarRE.QPBT.Combining.Lines.PolynomialCollision
 import MIPStarRE.QPBT.Combining.Witnesses
 
 /-!
