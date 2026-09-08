@@ -354,6 +354,7 @@ branch and owns the branch-name lint (`local/protocols/issues-prs.md`).
     local/bin/review.sh 7                # review PR 0007 at its current head
     local/bin/review.sh 7 --dry-run      # build diff and prompts, dispatch nothing
     LOCAL_REVIEW_ENABLED=false local/bin/review.sh 7    # confirm the kill switch
+    local/bin/review.sh 358 --resume-native-request REQUEST  # completed code lane
 
 Exit codes: `0` reviewed or intentionally skipped · `1` usage/environment ·
 `3` gate blocked (CI not green for this head) · `4` no parseable verdict.
@@ -401,6 +402,25 @@ Normal `review.sh` parsing, review ledger, exact-head COMMENT/status publication
 kill switches, round cap and merge ownership remain unchanged. A timed-out
 observation does not prove the child stopped: inspect its live handle before reuse
 or restart. Review transport deployment itself still needs independent review.
+
+A terminated publisher may be continued with
+`review.sh PR --resume-native-request REQUEST_JSON`, but only for the single
+native code lane of a diff that does not touch `blueprint/`. The command creates
+no nonce and invokes no model. It takes the ordinary per-PR review lock without
+waiting; a live publisher is a conflict, while a dead holder is reclaimed by the
+existing stale-lock rule. Under that lock it rechecks green exact-head CI, the
+round cap, the absence of an exact-head review and `local-review/summary`, the
+current clean worktree, and the final head before publication.
+
+`native_review.py accept` requires the canonical request and response files under
+the configured cache mailbox. It matches the request's PR, head, repository,
+worktree, rebuilt standalone prompt and digest, live root, complete author
+exclusion set, activation boundary, requested/effective model and literal Ultra
+policy against the current invocation, then reuses the ordinary rollout
+validation and telemetry record. The unchanged parser, lane writer, combiner and
+idempotent `gh_common.py` publisher consume the resulting final message. Queued,
+dry-run, blueprint/prose, stale, mismatched, already-published, or concurrently
+published continuations fail closed; broader multi-lane recovery is unsupported.
 
 Routine reviews default to Sol through `MIPSTARRE_REVIEW_JOB_CLASS=independent_review`.
 For a genuinely hard/semantic/control-policy review main sets `hard_review` and

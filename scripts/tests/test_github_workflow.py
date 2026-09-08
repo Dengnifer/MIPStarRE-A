@@ -409,6 +409,29 @@ class ReviewRoundCounterTests(LayerTestCase):
         prompt = self.repo / ".github" / "prompts" / "claude-code-review-prompt.md"
         prompt.parent.mkdir(parents=True)
         prompt.write_text("Review the change.\n", encoding="utf-8")
+        native = local_bin / "native_review.py"
+        native.write_text(
+            """#!/usr/bin/env python3
+import json, os, sys
+from pathlib import Path
+
+with open(os.environ['MIPSTARRE_TEST_NATIVE_LOG'], 'a', encoding='utf-8') as out:
+    out.write(json.dumps(sys.argv[1:]) + '\\n')
+if sys.argv[1] != 'accept':
+    raise SystemExit(91)
+if os.environ['MIPSTARRE_TEST_REVIEW_BODY'] == '__FAIL_ACCEPT__':
+    raise SystemExit(93)
+Path(sys.argv[3]).write_text(os.environ['MIPSTARRE_TEST_REVIEW_BODY'], encoding='utf-8')
+print('name: reviewer-native-test')
+""",
+            encoding="utf-8",
+        )
+        dispatch = local_bin / "dispatch.sh"
+        dispatch.write_text(
+            "#!/bin/sh\nprintf called > \"$MIPSTARRE_TEST_DISPATCH_LOG\"\nexit 92\n",
+            encoding="utf-8",
+        )
+        dispatch.chmod(0o755)
         (self.repo / "README.md").write_text("base\n", encoding="utf-8")
         _git(self.repo, "add", "-A")
         _git(self.repo, "commit", "-q", "--no-verify", "-m", "base commit")
@@ -427,6 +450,48 @@ class ReviewRoundCounterTests(LayerTestCase):
                  f"- [ ] F1 (changes) `x:1` — {label}\n"
                  "<!-- findings:end -->\n")
         return {"commit_id": head, "body": body}
+
+    def run_native_resume(self, label: str, body: str, *, reviews=None,
+                          summary: str | None = None,
+                          heads: list[str] | None = None
+                          ) -> tuple[subprocess.CompletedProcess, Path]:
+        self.gh.reset()
+        head_rows = heads or [self.head]
+        for index, head in enumerate(head_rows):
+            self.gh.route(r"^pulls/7$", {
+                "number": 7, "state": "open",
+                "head": {"sha": head, "ref": self.BRANCH},
+                "base": {"ref": "main"},
+            }, once=index < len(head_rows) - 1)
+        statuses = [{"context": "local-ci/summary", "state": "success"}]
+        if summary:
+            statuses.append({"context": "local-review/summary", "state": summary})
+        self.gh.route(r"^commits/[0-9a-f]+/statuses", statuses)
+        self.gh.route(r"^pulls/7/reviews", reviews or [])
+        self.gh.route(r"^pulls/7/reviews$", {"id": 99}, method="POST")
+        self.gh.route(r"^statuses/[0-9a-f]+$", {"id": 100}, method="POST")
+
+        cache = self.tmp / ("resume-" + label)
+        request = cache / "native-reviews" / ("1" * 32 + ".json")
+        request.parent.mkdir(parents=True)
+        request.write_text("{}", encoding="utf-8")
+        native_log = self.tmp / (label + "-native.jsonl")
+        dispatch_log = self.tmp / (label + "-dispatch")
+        environment = dict(
+            os.environ, **self.gh.env(), MIPSTARRE_CACHE_ROOT=str(cache),
+            MIPSTARRE_NATIVE_REVIEW_ROOT="01a076bc-f4ad-7813-805b-c8b4dac71a14",
+            MIPSTARRE_NATIVE_REVIEW_AUTHORS="01a076e7-b2ae-7e60-9090-72c3b7dce9c4",
+            MIPSTARRE_TEST_NATIVE_LOG=str(native_log),
+            MIPSTARRE_TEST_DISPATCH_LOG=str(dispatch_log),
+            MIPSTARRE_TEST_REVIEW_BODY=body, LOCAL_REVIEW_ENABLED="true",
+            MIPSTARRE_REVIEW_EFFORT="ultra", PYTHONDONTWRITEBYTECODE="1",
+        )
+        result = subprocess.run(
+            ["bash", str(self.repo / "local/bin/review.sh"), "7",
+             "--resume-native-request", str(request)],
+            cwd=self.repo, capture_output=True, text=True, env=environment,
+        )
+        return result, native_log
 
     def test_dry_run_counts_only_fresh_reviews(self) -> None:
         fresh = [self._review(str(number) * 40, f"FRESH-{number}")
@@ -502,6 +567,74 @@ class ReviewRoundCounterTests(LayerTestCase):
                     env=environment)
                 self.assertNotEqual(result.returncode, 0, result.stdout)
                 self.assertIn(expected, result.stderr)
+
+    def test_completed_native_response_publishes_without_a_new_request(self) -> None:
+        body = ("## Findings\n\n- none\n\n## Review\n\nLate response accepted.\n\n"
+                "VERDICT: APPROVED\n")
+        result, native_log = self.run_native_resume("happy", body)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        native_calls = [json.loads(line) for line in native_log.read_text().splitlines()]
+        self.assertEqual([call[0] for call in native_calls], ["accept"])
+        self.assertFalse((self.tmp / "happy-dispatch").exists())
+        reviews = self.gh.payloads("POST", r"^pulls/7/reviews$")
+        self.assertEqual(len(reviews), 1)
+        self.assertIn("VERDICT: APPROVED (code=APPROVED, prose=n/a)", reviews[0]["body"])
+        self.assertIn("<!-- no findings -->", reviews[0]["body"])
+        statuses = self.gh.payloads("POST", r"^statuses/")
+        self.assertEqual(statuses[-1]["state"], "success")
+
+    def test_native_resume_preserves_the_final_head_recheck(self) -> None:
+        body = "## Findings\n\n- none\n\n## Review\n\nClean.\n\nVERDICT: APPROVED\n"
+        moved = "c" * 40
+        result, native_log = self.run_native_resume(
+            "stale", body, heads=[self.head, self.head, moved])
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertTrue(native_log.exists())
+        self.assertEqual(self.gh.payloads("POST", r"^pulls/7/reviews$"), [])
+        self.assertEqual(self.gh.payloads("POST", r"^statuses/"), [])
+
+    def test_native_resume_rejects_invalid_or_reused_output(self) -> None:
+        result, _ = self.run_native_resume("rejected", "__FAIL_ACCEPT__")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("failed validation", result.stderr)
+        self.assertEqual(self.gh.payloads("POST", r"^pulls/7/reviews$"), [])
+        self.assertEqual(self.gh.payloads("POST", r"^statuses/"), [])
+
+        invalid = "## Findings\n\n- none\n\n## Review\n\nMissing trailer.\n"
+        result, _ = self.run_native_resume("invalid", invalid)
+        self.assertEqual(result.returncode, 4, result.stderr)
+        self.assertEqual(self.gh.payloads("POST", r"^pulls/7/reviews$"), [])
+        self.assertEqual(self.gh.payloads("POST", r"^statuses/")[-1]["state"], "failure")
+
+        prior = self._review(self.head, "already published")
+        result, native_log = self.run_native_resume("reused", invalid, reviews=[prior])
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("already consumed", result.stderr)
+        self.assertFalse(native_log.exists())
+        self.assertEqual(self.gh.payloads("POST", r"^pulls/7/reviews$"), [])
+
+    def test_native_resume_rejects_a_live_publisher_lock(self) -> None:
+        body = "## Findings\n\n- none\n\n## Review\n\nClean.\n\nVERDICT: APPROVED\n"
+        cache = self.tmp / "resume-concurrent"
+        lock = cache / "locks/review-7.lock"
+        lock.mkdir(parents=True)
+        (lock / "pid").write_text(str(os.getpid()), encoding="utf-8")
+        result, native_log = self.run_native_resume("concurrent", body)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("review lock", result.stderr)
+        self.assertFalse(native_log.exists())
+        self.assertEqual(self.gh.payloads("POST", r"^pulls/7/reviews$"), [])
+
+    def test_native_resume_honors_the_literal_false_kill_switch_first(self) -> None:
+        environment = dict(os.environ, LOCAL_REVIEW_ENABLED="false",
+                           MIPSTARRE_REVIEW_EFFORT="ultra")
+        result = subprocess.run(
+            ["bash", str(self.repo / "local/bin/review.sh"), "7",
+             "--resume-native-request", "/not/a/request"],
+            cwd=self.repo, capture_output=True, text=True, env=environment,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("LOCAL_REVIEW_ENABLED=false", result.stderr)
 
 
 class MergeGateTests(LayerTestCase):

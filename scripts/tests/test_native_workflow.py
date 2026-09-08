@@ -76,6 +76,30 @@ class NativeWorkflowTests(unittest.TestCase):
             review.accept_response(self.request, response or dict(nonce='nonce', thread_id=CHILD),
                                    self.root / 'out.md')
 
+    def existing_request(self):
+        nonce = '1' * 32
+        mailbox = self.root / 'native-reviews'
+        mailbox.mkdir(exist_ok=True)
+        policy = dict(role='reviewer', job_class='independent_review',
+                      classification='routine', requested_model='gpt-5.6-sol',
+                      model='gpt-5.6-sol', requested_effort='ultra',
+                      hardness_reason=None, policy_version=2,
+                      rationale='Owner-authorized routine/bounded Sol default')
+        request = dict(self.request, nonce=nonce, task_name='review_' + nonce,
+                       authors=[ROOT, AUTHOR], model_policy=policy,
+                       activation_at=None)
+        path = mailbox / (nonce + '.json')
+        path.write_text(json.dumps(request))
+        path.with_suffix('.response.json').write_text(json.dumps(
+            dict(nonce=nonce, thread_id=CHILD)))
+        args = argparse.Namespace(
+            cache=self.root, repo=self.root, worktree=self.root,
+            prompt=self.prompt, request=path, out=self.root / 'existing-out.md',
+            root_thread=ROOT, authors=AUTHOR, head='a' * 40, pr='287',
+            job_class='independent_review', model='gpt-5.6-sol',
+            effort='ultra', hardness_reason=None, activation_at=None)
+        return request, policy, args
+
     def test_mixed_timezones_and_untrusted_mailbox_final(self):
         self.write_rollout()
         self.acceptance(dict(nonce='nonce', thread_id=CHILD, final='FORGED APPROVED'))
@@ -96,6 +120,43 @@ class NativeWorkflowTests(unittest.TestCase):
         self.assertEqual(row['account'], 'space')
         self.assertEqual(row['key_label'], 'space')
         self.assertIsNone(row['usage'])
+
+    def test_existing_response_requires_the_exact_trust_envelope(self):
+        request, policy, args = self.existing_request()
+        with mock.patch.object(model_policy, 'select_model', return_value=policy), \
+                mock.patch.object(review, 'accept_response') as accepted:
+            review.accept_existing(args)
+            accepted.assert_called_once()
+
+        cases = {
+            'root': lambda row, response: row.update(root_thread_id=AUTHOR),
+            'authors': lambda row, response: row.update(authors=[ROOT]),
+            'model': lambda row, response: row['model_policy'].update(
+                model='gpt-6-astra'),
+            'digest': lambda row, response: row.update(prompt_sha256='0' * 64),
+            'reviewer': lambda row, response: response.update(thread_id=AUTHOR),
+        }
+        for label, mutate in cases.items():
+            with self.subTest(label=label):
+                row = json.loads(json.dumps(request))
+                response = dict(nonce=row['nonce'], thread_id=CHILD)
+                mutate(row, response)
+                args.request.write_text(json.dumps(row))
+                args.request.with_suffix('.response.json').write_text(
+                    json.dumps(response))
+                with mock.patch.object(model_policy, 'select_model',
+                                       return_value=policy), \
+                        mock.patch.object(review, 'accept_response') as accepted, \
+                        self.assertRaises(ValueError):
+                    review.accept_existing(args)
+                accepted.assert_not_called()
+
+        outside = self.root / args.request.name
+        outside.write_text(json.dumps(request))
+        outside.with_suffix('.response.json').write_text('{}')
+        args.request = outside
+        with self.assertRaisesRegex(ValueError, 'canonical cache mailbox'):
+            review.accept_existing(args)
 
     def test_freshness_assignment_and_current_completion_are_required(self):
         for options in (dict(timestamp='2026-09-06T13:13:59.999Z'), dict(assigned=False),

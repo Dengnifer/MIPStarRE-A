@@ -6,6 +6,7 @@
 #
 # Usage:
 #   local/bin/review.sh <pr-number> [--force-review] [--dry-run]
+#     [--resume-native-request REQUEST]
 #
 #   <pr-number>      GitHub PR number ("12").  Branch, base and head SHA come
 #                    from gh_common.py pr-view; the local branch tip must be
@@ -15,6 +16,9 @@
 #                    iteration cap (local/protocols/autofix.md).
 #   --dry-run        Resolve the worktree, diff and prompts, print where they
 #                    landed, and stop before dispatching an agent.
+#   --resume-native-request REQUEST
+#                    Consume one completed native code-review request without
+#                    dispatching a model or creating a replacement request.
 #
 # Local replacement for .github/workflows/pr-review.yml (gate + code-review +
 # prose-review jobs).  Protocol: local/protocols/review.md.
@@ -380,12 +384,19 @@ run_agent() {
 
 FORCE_REVIEW=0
 DRY_RUN=0
+RESUME_NATIVE_REQUEST=""
 PR_ARG=""
 
 while [ $# -gt 0 ]; do
   case "$1" in
     --force-review) FORCE_REVIEW=1 ;;
     --dry-run)      DRY_RUN=1 ;;
+    --resume-native-request)
+      [ $# -ge 2 ] || die "--resume-native-request requires a request path"
+      [ -z "$RESUME_NATIVE_REQUEST" ] || die "--resume-native-request may be given only once"
+      RESUME_NATIVE_REQUEST="$2"
+      shift
+      ;;
     -h|--help)      sed -n '2,49p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     -*)             die "unknown option: $1" ;;
     *)
@@ -395,7 +406,9 @@ while [ $# -gt 0 ]; do
   esac
   shift
 done
-[ -n "$PR_ARG" ] || die "usage: $PROG <pr-number> [--force-review] [--dry-run]"
+[ -n "$PR_ARG" ] ||
+  die "usage: $PROG <pr-number> [--force-review] [--dry-run]" \
+    "[--resume-native-request REQUEST]"
 
 command -v python3 >/dev/null 2>&1 || die "python3 is required"
 command -v git >/dev/null 2>&1 || die "git is required"
@@ -405,6 +418,14 @@ command -v git >/dev/null 2>&1 || die "git is required"
 if [ "${LOCAL_REVIEW_ENABLED:-}" = "false" ]; then
   log "LOCAL_REVIEW_ENABLED=false; skipping review of PR $PR_ARG"
   exit 0
+fi
+if [ -n "$RESUME_NATIVE_REQUEST" ]; then
+  [ "$DRY_RUN" -eq 0 ] || die "--resume-native-request cannot be combined with --dry-run"
+  [ -z "${MIPSTARRE_QUEUE_TICKET:-}" ] || die "queued reviews cannot resume a native request"
+  [ -n "${MIPSTARRE_NATIVE_REVIEW_ROOT:-}" ] ||
+    die "--resume-native-request requires MIPSTARRE_NATIVE_REVIEW_ROOT"
+  [ -n "${MIPSTARRE_NATIVE_REVIEW_AUTHORS:-}" ] ||
+    die "--resume-native-request requires MIPSTARRE_NATIVE_REVIEW_AUTHORS"
 fi
 
 # ------------------------------------------------------------- resolve the PR
@@ -498,7 +519,9 @@ fi
 
 # ---------------------------------------------------------------------- lock
 LOCK_DIR="$CACHE/locks/review-$PR_NUM.lock"
-acquire_lock "$LOCK_DIR" "$LOCK_WAIT" "review pr=$PR_NUM sha=$HEAD_SHA"
+RESUME_LOCK_WAIT="$LOCK_WAIT"
+[ -z "$RESUME_NATIVE_REQUEST" ] || RESUME_LOCK_WAIT=0
+acquire_lock "$LOCK_DIR" "$RESUME_LOCK_WAIT" "review pr=$PR_NUM sha=$HEAD_SHA"
 
 # A fix in flight rewrites the very worktree the reviewer reads.  Concurrency
 # keys differ on purpose (per-PR for reviews, per-branch for fixes), so this
@@ -591,6 +614,25 @@ sys.exit(any(row.get('commit_id') == sys.argv[2] and
 PY
     die "queued review already has publication evidence; adoption required"
 fi
+if [ -n "$RESUME_NATIVE_REQUEST" ]; then
+  [ "$ROUND" -le 4 ] || die "native review resume reached the four-round cap"
+  ghc latest-statuses "$HEAD_SHA" >"$RUN_ROOT/statuses.json" ||
+    die "native review resume cannot recheck exact-head evidence"
+  [ "$(json_get "$RUN_ROOT/statuses.json" 'local-ci/summary.state')" = success ] ||
+    die "native review resume lost green exact-head CI"
+  [ -z "$(json_get "$RUN_ROOT/statuses.json" 'local-review/summary.state')" ] ||
+    die "native review request was already consumed: exact-head summary evidence exists"
+  if python3 - "$ROUND_JSON" "$PR_NUM" "$HEAD_SHA" <<'PY'
+import json, sys
+rows, pr, head = json.load(open(sys.argv[1])), sys.argv[2], sys.argv[3]
+marker = f"<!-- mipstarre-review pr={pr} head={head} -->"
+sys.exit(0 if any(row.get('commit_id') == head and marker in (row.get('body') or '')
+                  for row in rows) else 1)
+PY
+  then
+    die "native review request was already consumed: exact-head review evidence exists"
+  fi
+fi
 
 MERGE_BASE="$(git -C "$ROOT" merge-base "$BASE" "$HEAD_SHA" 2>/dev/null || true)"
 [ -n "$MERGE_BASE" ] || die "no merge base between '$BASE' and $HEAD_SHA"
@@ -608,6 +650,10 @@ sanitize_to "$RUN_DIR/diff.patch" "$RUN_DIR/diff.sanitized.txt" "$DIFF_MAX_LINES
 
 TOUCHES_BLUEPRINT=0
 if grep -q '^blueprint/' "$RUN_DIR/files.txt"; then TOUCHES_BLUEPRINT=1; fi
+if [ -n "$RESUME_NATIVE_REQUEST" ] && [ "$TOUCHES_BLUEPRINT" -eq 1 ]; then
+  die "native review resume supports only the single code lane;" \
+    "blueprint/prose combinations require a live publisher"
+fi
 
 WORKTREE="$(resolve_worktree "$BRANCH")"
 # The reviewer also reads worktree FILES, not just the diff: dirty bytes could
@@ -717,7 +763,7 @@ PY
   done
   return 1
 }
-if [ "$FORCE_REVIEW" -eq 0 ] && carry_forward; then
+if [ -z "$RESUME_NATIVE_REQUEST" ] && [ "$FORCE_REVIEW" -eq 0 ] && carry_forward; then
   CARRIED_FROM="$(cat "$RUN_ROOT/$HEAD_SHA-carried-from")"
   CARRIED_MD="$RUN_ROOT/$HEAD_SHA-carried.md"
   if [ "$DRY_RUN" -eq 1 ]; then
@@ -1184,12 +1230,31 @@ log "running code review for PR $PR_NUM @ ${HEAD_SHA:0:12}"
 CODE_OUT="$RUN_DIR/code-last-message.md"
 rm -f "$CODE_OUT"
 CODE_RC_FILE="$RUN_DIR/code.rc"
-( rc=0
-  run_agent reviewer read-only "$WORKTREE" "$CODE_PERSONA_PATH" \
-    "$RUN_DIR/code-task.md" "$RUN_DIR/code-standalone.md" \
-    "$RUN_DIR/diff.sanitized.txt" "$CODE_OUT" "$REVIEW_MODEL" || rc=$?
-  printf '%s\n' "$rc" > "$CODE_RC_FILE" ) &
-CODE_LANE_PID=$!
+CODE_LANE_PID=""
+if [ -n "$RESUME_NATIVE_REQUEST" ]; then
+  log "resuming completed native code review request $RESUME_NATIVE_REQUEST"
+  NATIVE_ACCEPT_ARGS=(accept "$RESUME_NATIVE_REQUEST" "$CODE_OUT"
+    --cache "$CACHE" --repo "$ROOT" --head "$HEAD_SHA" --worktree "$WORKTREE"
+    --prompt "$RUN_DIR/code-standalone.md" --pr "$PR_NUM"
+    --root-thread "$MIPSTARRE_NATIVE_REVIEW_ROOT"
+    --authors "$MIPSTARRE_NATIVE_REVIEW_AUTHORS" --job-class "$REVIEW_JOB_CLASS"
+    --model "$REVIEW_MODEL" --effort "$REVIEW_EFFORT")
+  [ -z "$REVIEW_HARDNESS_REASON" ] ||
+    NATIVE_ACCEPT_ARGS+=(--hardness-reason "$REVIEW_HARDNESS_REASON")
+  CODE_RC=0
+  python3 "$BIN_DIR/native_review.py" "${NATIVE_ACCEPT_ARGS[@]}" \
+    >"$CODE_OUT.dispatch.log" || CODE_RC=$?
+  printf '%s\n' "$CODE_RC" >"$CODE_RC_FILE"
+  [ "$CODE_RC" -eq 0 ] ||
+    die "completed native review request failed validation; publishing nothing"
+else
+  ( rc=0
+    run_agent reviewer read-only "$WORKTREE" "$CODE_PERSONA_PATH" \
+      "$RUN_DIR/code-task.md" "$RUN_DIR/code-standalone.md" \
+      "$RUN_DIR/diff.sanitized.txt" "$CODE_OUT" "$REVIEW_MODEL" || rc=$?
+    printf '%s\n' "$rc" > "$CODE_RC_FILE" ) &
+  CODE_LANE_PID=$!
+fi
 
 PROSE_LANE_PID=""
 PROSE_RC_FILE="$RUN_DIR/prose.rc"
@@ -1205,7 +1270,7 @@ if [ "$TOUCHES_BLUEPRINT" -eq 1 ]; then
   PROSE_LANE_PID=$!
 fi
 
-wait "$CODE_LANE_PID" 2>/dev/null || true
+[ -z "$CODE_LANE_PID" ] || wait "$CODE_LANE_PID" 2>/dev/null || true
 CODE_RC="$(cat "$CODE_RC_FILE" 2>/dev/null || echo 1)"
 if [ "$CODE_RC" -ne 0 ] && [ ! -s "$CODE_OUT" ]; then
   [ -n "$PROSE_LANE_PID" ] && kill "$PROSE_LANE_PID" 2>/dev/null || true
