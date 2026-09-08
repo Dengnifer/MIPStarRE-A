@@ -1,4 +1,4 @@
-import MIPStarRE.QPBT.Combining.Lines.PointMarginalTransport
+import MIPStarRE.QPBT.Combining.Lines.OptionPointMarginalTransport
 
 /-!
 # Combined lines and restricted line distributions
