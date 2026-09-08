@@ -20,3 +20,31 @@ The 95% floor and 90% coverage thresholds in the meta-watch state are a meta
 interpretation for a sustained observation window, not API utilization claims
 or changes to the owner allocation. The allocation remains total 10, main 1,
 native worker slots 9, useful-worker floor 8, and external 0.
+
+The later 14:00 snapshot corrects the same-period denominator again: after
+excluding queue-alert records, 51 of 139 snapshots were at the worker floor.
+These are still change-only observations, not an elapsed-time fraction or a
+measurement of provider API concurrency. It also records the subsequent proof
+deliveries and the fact that their tracked closures remained unmerged at that
+snapshot.
+
+The PR #371 disposition preserves the original two-hour workflow interval and
+the temporary post-boundary hold. Under the standing owner decision recorded in
+issue #26 comment 5557148036, main granted a bounded, no-reset extension from
+13:57:30Z through 14:27:30Z for the already reviewed merge and guarded resume
+verification only. No source growth, new feature work, or gate relaxation was
+authorized.
+
+The 14:56:42Z watch snapshot remains an observational artifact, not a provider
+utilization certificate. The main-control receipt records one completion-to-next-
+turn latency and a later 185.063-second control-pass overrun without rewriting
+the earlier lifecycle samples. PR #372 subsequently merged through its normal
+exact-head gates; the unmerged and merged closure counts therefore remain
+separate observations at their respective timestamps.
+
+The 15:31:49Z snapshot further clarifies that fresh attributable output is a
+lower bound on productive activity, not a count of empty runtime slots. Occupied
+native slots, fresh output, and the owner's separate provider-dashboard range of
+6--8 requests remain distinct quantities; quietness alone is not vacancy
+evidence. Newly published proof packets such as PRs #398 and #401 remain
+unmerged observations until their ordinary CI, review, and service gates finish.
