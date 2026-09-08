@@ -53,6 +53,7 @@ import MIPStarRE.QPBT.Combining.ExtendedLineGame
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.StateTransport
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.LinePointRejection
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.SameLineRejection
+import MIPStarRE.QPBT.Combining.ExtendedLineGame.SameLineCoefficientBound
 import MIPStarRE.QPBT.Combining.Lines
 import MIPStarRE.QPBT.Combining.Claims
 import MIPStarRE.QPBT.Combining.Apply
