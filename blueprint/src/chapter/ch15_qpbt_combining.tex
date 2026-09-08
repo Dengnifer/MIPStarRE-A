@@ -1509,10 +1509,59 @@ on registers $\mathsf{A}\mathsf{A}'$, the second tensor factor is placed on
 registers $\mathsf{B}\mathsf{A}''$, and the sums range over
 $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 
+\begin{lemma}[Formalization support: the ordered product on one placement]
+	\label{lem:qld-4-10-same-placement}
+	\lean{MIPStarRE.QPBT.Placement.exists_isOpposite}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.orderedZX_dist_le}
+	\leanok
+	\uses{lem:qld-4-10, fact:triangle, def:povm-distance}
+	On one placement, the joint point measurement and the ordered
+	$Z$-then-$X$ product have squared distance at most $4\delta_Q$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Insert the joint measurement on the opposite placement and apply the
+	squared-distance triangle inequality to the two $\delta_Q$ bounds.
+\end{proof}
+
+\begin{lemma}[Formalization support: replacing one factor of an overlap]
+	\label{lem:overlap-gap-distance}
+	\lean{MIPStarRE.QPBT.abs_overlap_gap_le_sqrt_of_opFamilyDistSq}
+	\leanok
+	\uses{def:povm-distance, def:expanded-state}
+	A complete measurement weights the overlap gap between operator families by
+	at most the square root of their state-dependent squared distance.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Apply Cauchy--Schwarz to the outcome sum and then to the question average;
+	completeness bounds the squared norm of the left factor by one.
+\end{proof}
+
+\begin{lemma}[Formalization support: a uniform point of the extended space]
+	\label{lem:qld-sublines-uniform-point}
+	\lean{MIPStarRE.QPBT.uniformDistribution_map_uncurry}
+	\lean{MIPStarRE.QPBT.uniformDistribution_map_directLine_add_smul}
+	\lean{MIPStarRE.QPBT.avgOver_uniform_directLdSpace_line_add_smul}
+	\lean{MIPStarRE.QPBT.avgOver_directLinePointDist_line_add_smul}
+	\lean{MIPStarRE.QPBT.SubLineWitness.avgOver_projX_projZ}
+	\leanok
+	\uses{lem:qld-sublines, def:line-point-dist, def:line-representative,
+		def:combine-map}
+	A uniform affine parameter on the sampled extended line gives a uniform
+	point of $\F_q^{2m+2}$, whose $x$ and $z$ blocks are independent uniform
+	points of $\F_q^m$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	The representative--parameter map has constant fibers of size $q$; the
+	coordinate split and scalar identification are bijections.
+\end{proof}
+
 \begin{lemma}[Replacing the combined point measurement by the ordered product]
 	\label{lem:claim-17-1}
 	\lean{MIPStarRE.QPBT.subline_replace_by_ordered_product}
-	\notready
+	\leanok
 	% claim:17-1 in the paper; the original label is recorded here as a
 	% comment for cross-reference fidelity.
 	\uses{lem:qld-sublines, lem:qld-xz-lines, lem:qld-4-10,
@@ -1536,8 +1585,10 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\end{align*}
 \end{lemma}
 \begin{proof}
-	\uses{lem:qld-4-10, lem:qld-sublines, lem:qld-xz-lines,
-		def:line-point-dist}
+	\leanok
+	\uses{lem:qld-4-10, lem:qld-4-10-same-placement, lem:qld-sublines,
+		lem:qld-xz-lines, lem:overlap-gap-distance,
+		lem:qld-sublines-uniform-point, def:line-point-dist}
 	Write
 	$W^{x,z}_{a,b} = \hat{Q}^{x,z}_{a,b}
 	- \hat{M}^{(\mathrm{Point},Z),z}_{b}
