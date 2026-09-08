@@ -2,6 +2,7 @@ import MIPStarRE.QPBT.Combining.Lines.PointSelfConsistency
 import MIPStarRE.QPBT.Combining.Lines.OptionPostprocessDistance
 import MIPStarRE.QPBT.Combining.Lines.SamePlacementDistance
 import MIPStarRE.QPBT.Combining.Lines.OptionPointMarginalTransport
+import MIPStarRE.QPBT.Combining.Lines.CombinedPointLineMarginalDistance
 
 /-!
 # Combined lines and restricted line distributions
