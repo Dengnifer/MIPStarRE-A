@@ -206,7 +206,26 @@ class NativeWorkflowTests(unittest.TestCase):
                     mock.patch.object(review, 'accept_response') as accepted, \
                     self.assertRaisesRegex(ValueError, 'identity mismatch'):
                 review.accept_existing(accept_args)
-            accepted.assert_not_called()
+                accepted.assert_not_called()
+
+    def test_rebuilt_prompt_must_match_the_unchanged_canonical_prompt(self):
+        request, policy, args = self.existing_request()
+        args.rebuilt_prompt = self.root / 'rebuilt.md'
+        original = self.prompt.read_bytes()
+        for tamper in ('code', 'prose'):
+            with self.subTest(lane=tamper):
+                args.rebuilt_prompt.write_text(tamper + ' prompt drift')
+                with mock.patch.object(model_policy, 'select_model', return_value=policy), \
+                        mock.patch.object(review, 'accept_response') as accepted, \
+                        self.assertRaisesRegex(ValueError, 'rebuilt prompt digest mismatch'):
+                    review.accept_existing(args)
+                accepted.assert_not_called()
+                self.assertEqual(self.prompt.read_bytes(), original)
+        args.rebuilt_prompt.write_bytes(original)
+        with mock.patch.object(model_policy, 'select_model', return_value=policy), \
+                mock.patch.object(review, 'accept_response') as accepted:
+            review.accept_existing(args)
+            accepted.assert_called_once()
 
     def test_freshness_assignment_and_current_completion_are_required(self):
         for options in (dict(timestamp='2026-09-06T13:13:59.999Z'), dict(assigned=False),

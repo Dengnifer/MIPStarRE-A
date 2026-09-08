@@ -409,6 +409,9 @@ class ReviewRoundCounterTests(LayerTestCase):
         prompt = self.repo / ".github" / "prompts" / "claude-code-review-prompt.md"
         prompt.parent.mkdir(parents=True)
         prompt.write_text("Review the change.\n", encoding="utf-8")
+        for name in ("blueprint-prose-review-system-prompt.md",
+                     "blueprint-prose-review-prompt.md"):
+            (prompt.parent / name).write_text("Review mathematical prose.\n", encoding="utf-8")
         native = local_bin / "native_review.py"
         native.write_text(
             """#!/usr/bin/env python3
@@ -419,9 +422,17 @@ with open(os.environ['MIPSTARRE_TEST_NATIVE_LOG'], 'a', encoding='utf-8') as out
     out.write(json.dumps(sys.argv[1:]) + '\\n')
 if sys.argv[1] != 'accept':
     raise SystemExit(91)
-if os.environ['MIPSTARRE_TEST_REVIEW_BODY'] == '__FAIL_ACCEPT__':
+kind = 'prose' if Path(sys.argv[sys.argv.index('--prompt') + 1]).name == 'prose-standalone.md' else 'code'
+body = os.environ.get('MIPSTARRE_TEST_PROSE_BODY') if kind == 'prose' else None
+body = body if body is not None else os.environ['MIPSTARRE_TEST_REVIEW_BODY']
+if body == '__FAIL_ACCEPT__':
     raise SystemExit(93)
-Path(sys.argv[3]).write_text(os.environ['MIPSTARRE_TEST_REVIEW_BODY'], encoding='utf-8')
+if os.environ.get('MIPSTARRE_TEST_CHECK_PROMPTS') == '1':
+    original = Path(sys.argv[sys.argv.index('--prompt') + 1]).read_bytes()
+    rebuilt = Path(sys.argv[sys.argv.index('--rebuilt-prompt') + 1]).read_bytes()
+    if original != rebuilt:
+        raise SystemExit(94)
+Path(sys.argv[3]).write_text(body, encoding='utf-8')
 print('name: reviewer-native-test')
 """,
             encoding="utf-8",
@@ -453,7 +464,10 @@ print('name: reviewer-native-test')
 
     def run_native_resume(self, label: str, body: str, *, reviews=None,
                           summary: str | None = None,
-                          heads: list[str] | None = None
+                          heads: list[str] | None = None,
+                          prose_body: str | None = None,
+                          tamper_prompt: str | None = None,
+                          include_prose_request: bool = True
                           ) -> tuple[subprocess.CompletedProcess, Path]:
         self.gh.reset()
         head_rows = heads or [self.head]
@@ -486,12 +500,90 @@ print('name: reviewer-native-test')
             MIPSTARRE_TEST_REVIEW_BODY=body, LOCAL_REVIEW_ENABLED="true",
             MIPSTARRE_REVIEW_EFFORT="ultra", PYTHONDONTWRITEBYTECODE="1",
         )
+        arguments = ["--resume-native-request", str(request)]
+        if prose_body is not None:
+            environment['MIPSTARRE_TEST_PROSE_BODY'] = prose_body
+            environment['MIPSTARRE_TEST_CHECK_PROMPTS'] = '1'
+            # Freeze genuine prompt bytes before the resumed publisher runs.
+            prepared = subprocess.run(
+                ["bash", str(self.repo / "local/bin/review.sh"), "7", "--dry-run"],
+                cwd=self.repo, capture_output=True, text=True, env=environment)
+            self.assertEqual(prepared.returncode, 0, prepared.stderr)
+            original = cache / 'reviews/pr7' / self.head
+            (original / 'code-last-message.md').write_text('old code output')
+            (original / 'prose-last-message.md').write_text('old prose output')
+            if tamper_prompt:
+                (original / f'{tamper_prompt}-standalone.md').write_text('tampered prompt')
+            prose_request = request.with_name('2' * 32 + '.json')
+            prose_request.write_text('{}', encoding='utf-8')
+            if include_prose_request:
+                arguments += ['--resume-native-prose-request', str(prose_request)]
         result = subprocess.run(
             ["bash", str(self.repo / "local/bin/review.sh"), "7",
-             "--resume-native-request", str(request)],
+             *arguments],
             cwd=self.repo, capture_output=True, text=True, env=environment,
         )
         return result, native_log
+
+    def add_blueprint_change(self) -> None:
+        (self.repo / 'blueprint/src/chapter/test.tex').write_text('Changed prose.\n')
+        _git(self.repo, 'add', 'blueprint')
+        _git(self.repo, 'commit', '-q', '--no-verify', '-m', 'change blueprint')
+        self.head = _git(self.repo, 'rev-parse', 'HEAD')
+
+    def test_completed_combined_native_reviews_keep_both_adverse_verdicts(self) -> None:
+        self.add_blueprint_change()
+        body = ('## Findings\n\n- [ ] F1 (blocker) `x:1` - source issue\n\n'
+                '## Review\n\nBound review.\n\nVERDICT: CHANGES_REQUESTED\n')
+        result, native_log = self.run_native_resume('combined', body, prose_body=body)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        calls = [json.loads(line) for line in native_log.read_text().splitlines()]
+        self.assertEqual([call[0] for call in calls], ['accept', 'accept'])
+        self.assertNotEqual(calls[0][1], calls[1][1])
+        self.assertFalse((self.tmp / 'combined-dispatch').exists())
+        reviews = self.gh.payloads('POST', r'^pulls/7/reviews$')
+        self.assertEqual(len(reviews), 1)
+        self.assertIn('code=CHANGES_REQUESTED, prose=CHANGES_REQUESTED', reviews[0]['body'])
+        self.assertEqual(self.gh.payloads('POST', r'^statuses/')[-1]['state'], 'failure')
+        original = self.tmp / 'resume-combined/reviews/pr7' / self.head
+        self.assertEqual((original / 'code-last-message.md').read_text(), 'old code output')
+        self.assertEqual((original / 'prose-last-message.md').read_text(), 'old prose output')
+        self.assertFalse((self.repo / '.git/info/sparse-checkout').exists())
+
+    def test_combined_native_resume_fails_closed_if_either_lane_is_invalid(self) -> None:
+        self.add_blueprint_change()
+        valid = '## Findings\n\n- none\n\n## Review\n\nClean.\n\nVERDICT: APPROVED\n'
+        for label, code, prose, tamper, include in (
+            ('code-invalid', '__FAIL_ACCEPT__', valid, None, True),
+            ('prose-invalid', valid, '__FAIL_ACCEPT__', None, True),
+            ('code-unparsed', 'No verdict trailer.', valid, None, True),
+            ('prose-unparsed', valid, 'No verdict trailer.', None, True),
+            ('code-tampered', valid, valid, 'code', True),
+            ('prose-tampered', valid, valid, 'prose', True),
+            ('prose-omitted', valid, valid, None, False),
+        ):
+            with self.subTest(label=label):
+                result, _ = self.run_native_resume(label, code, prose_body=prose,
+                    tamper_prompt=tamper, include_prose_request=include)
+                self.assertNotEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(self.gh.payloads('POST', r'^pulls/7/reviews$'), [])
+                self.assertEqual(self.gh.payloads('POST', r'^statuses/'), [])
+                self.assertFalse((self.tmp / (label + '-dispatch')).exists())
+                if tamper:
+                    original = self.tmp / ('resume-' + label) / 'reviews/pr7' / self.head
+                    self.assertEqual((original / f'{tamper}-standalone.md').read_text(),
+                                     'tampered prompt')
+
+    def test_combined_native_resume_rechecks_head_before_publication(self) -> None:
+        self.add_blueprint_change()
+        valid = '## Findings\n\n- none\n\n## Review\n\nClean.\n\nVERDICT: APPROVED\n'
+        result, native_log = self.run_native_resume('combined-stale', valid,
+            prose_body=valid, heads=[self.head] * 4 + ['c' * 40])
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn('head moved', result.stderr)
+        self.assertEqual(len(native_log.read_text().splitlines()), 2)
+        self.assertEqual(self.gh.payloads('POST', r'^pulls/7/reviews$'), [])
+        self.assertEqual(self.gh.payloads('POST', r'^statuses/'), [])
 
     def test_dry_run_counts_only_fresh_reviews(self) -> None:
         fresh = [self._review(str(number) * 40, f"FRESH-{number}")
