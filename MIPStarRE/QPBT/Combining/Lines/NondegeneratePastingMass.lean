@@ -38,7 +38,8 @@ theorem nondegenerateLinePastingMass_bounds (L : LdParams) :
   have hmass : nondegenerateLinePastingMass L =
       avgOver (linePointDist L) indicator := by
     unfold nondegenerateLinePastingMass
-    rw [Distribution.sum_filter_weight_eq_avgOver, avgOver_prod]
+    rw [Distribution.sum_filter_weight_eq_avgOver,
+      SandwichProduct.avgOver_distribution_prod]
     change avgOver (linePointDist L) (fun sample =>
       avgOver (linePointDist L) (fun _ => indicator sample)) = _
     simp_rw [avgOver_const_of_isProbability _ (linePointDist_isProbability L)]

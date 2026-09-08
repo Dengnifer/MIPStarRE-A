@@ -83,21 +83,6 @@ theorem avgOver_mix {α : Type*} [DecidableEq α] (t : ℝ) (ht0 : 0 ≤ t)
     (t * μ.weight a + (1 - t) * ν.weight a) * f a) = _
   rw [hsplit, hμ, hν]
 
-/-- Formalization-only auxiliary: an average against a product law is the
-iterated average.  Blueprint `lem:restricted-line-mixture-bounds`, paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1056-1058`. -/
-theorem avgOver_prod {α β : Type*} [DecidableEq α] [DecidableEq β]
-    (μ : Distribution α) (ν : Distribution β) (f : α × β → ℝ) :
-    avgOver (Distribution.prod μ ν) f =
-      avgOver μ (fun a => avgOver ν (fun b => f (a, b))) := by
-  classical
-  unfold avgOver
-  change (∑ p ∈ μ.support ×ˢ ν.support, μ.weight p.1 * ν.weight p.2 * f p) = _
-  rw [Finset.sum_product]
-  refine Finset.sum_congr rfl fun a _ => ?_
-  rw [Finset.mul_sum]
-  exact Finset.sum_congr rfl fun b _ => by ring
-
 /-- Formalization-only auxiliary: one component of a uniform mixture carries at
 most the whole nonnegative average, scaled by its mixture weight.  Blueprint
 `lem:restricted-line-mixture-bounds`, paper
@@ -197,7 +182,8 @@ theorem avgOver_prod_restrictedLinePointDist_le {P : AdmissibleParams}
         (linePointDist P.toLdParams) (linePointDist P.toLdParams)) f := by
   classical
   have hfactor : (0 : ℝ) ≤ 2 * (P.m : ℝ) := by positivity
-  rw [avgOver_prod, avgOver_prod]
+  rw [SandwichProduct.avgOver_distribution_prod,
+    SandwichProduct.avgOver_distribution_prod]
   have hinner : ∀ s1 : LineDesc P.toLdParams × (Fin P.m → PauliScalar P),
       avgOver (restrictedLinePointDist P kindZ j) (fun s2 => f (s1, s2)) ≤
         2 * (P.m : ℝ) *
