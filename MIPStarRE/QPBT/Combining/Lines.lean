@@ -5,6 +5,7 @@ import MIPStarRE.QPBT.Combining.Lines.AxisLineResampling
 import MIPStarRE.QPBT.Combining.Lines.DiagonalResampling
 import MIPStarRE.QPBT.Combining.Lines.MixedResampling
 import MIPStarRE.QPBT.Combining.Lines.RestrictedAverage
+import MIPStarRE.QPBT.Combining.Lines.NondegeneratePastingResampling
 import MIPStarRE.QPBT.Combining.Lines.SubLineMixture
 import MIPStarRE.QPBT.Combining.Witnesses
 import MIPStarRE.QPBT.Combining.Lines.ZeroDirectionMass
