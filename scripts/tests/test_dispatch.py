@@ -25,16 +25,24 @@ TELEMETRY = REPO_ROOT / "local" / "bin" / "telemetry.py"
 PRE_COMMIT = REPO_ROOT / ".githooks" / "pre-commit"
 THREAD_ID = "019e93a5-e370-7aa1-ba77-6373dbdd6a61"
 ROUTER = DISPATCH.with_name("account_router.py")
+sys.path.insert(0, str(DISPATCH.parent))
+import model_policy
 SPEC = importlib.util.spec_from_file_location("account_router", ROUTER)
 router = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(router)
 HOST_PROCESS_SCAN = router.host_processes
 
 
+def copy_model_policy(local_bin: Path) -> None:
+    shutil.copy2(DISPATCH.with_name('model_policy.py'), local_bin / 'model_policy.py')
+    shutil.copy2(REPO_ROOT / 'local/model-policy.json', local_bin.parent / 'model-policy.json')
+
+
 def isolate_host(binary_dir: Path) -> None:
     interpreter = binary_dir / 'python3'
     interpreter.write_text(f'#!{sys.executable}\nimport os, runpy, sys\n'
         'if sys.argv[1].endswith("/account_router.py"):\n'
+        '    sys.path.insert(0, os.path.dirname(sys.argv[1]))\n'
         '    loaded = runpy.run_path(sys.argv.pop(1))\n'
         '    loaded["reserve"].__globals__["host_processes"] = lambda *args: ({}, {})\n'
         '    loaded["main"]()\n'
@@ -55,8 +63,12 @@ class DispatchCommandTests(unittest.TestCase):
             shutil.copy2(DISPATCH, local_bin / "dispatch.sh")
             shutil.copy2(TELEMETRY, local_bin / "telemetry.py")
             shutil.copy2(ROUTER, local_bin / "account_router.py")
+            copy_model_policy(local_bin)
             (repo / "AGENTS.md").write_text("# Test repository\n", encoding="utf-8")
-            subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
+            subprocess.run(["git", "init", "-q", '-b', 'main'], cwd=repo, check=True)
+            subprocess.run(['git', 'add', 'AGENTS.md'], cwd=repo, check=True)
+            subprocess.run(['git', '-c', 'user.name=Test', '-c', 'user.email=test@test',
+                            'commit', '-qm', 'initial fixture'], cwd=repo, check=True)
 
             fake_bin = root / "bin"
             fake_bin.mkdir()
@@ -95,6 +107,7 @@ class DispatchCommandTests(unittest.TestCase):
                     "MIPSTARRE_CODEX_HOME_SECOND": "" if empty_second_home else str(second),
                     "MIPSTARRE_ACCOUNT_WAIT": "0",
                     "MIPSTARRE_CACHE_ROOT": str(root / "cache"),
+                    "MIPSTARRE_KEY_LABEL": "unknown",
                     "PATH": f"{fake_bin}{os.pathsep}{env.get('PATH', '')}",
                 }
             )
@@ -163,7 +176,7 @@ class DispatchCommandTests(unittest.TestCase):
 
     def dispatch_command(
         self, *extra: str, model: str = "gpt-6-astra", effort: str | None = "ultra",
-        include_persona: bool = False, registry_rows: str = "",
+        include_persona: bool = False, registry_rows: str = "", policy_data: dict | None = None,
     ) -> list[str]:
         with tempfile.TemporaryDirectory() as cache_root:
             fake_bin = Path(cache_root) / "bin"
@@ -175,7 +188,7 @@ class DispatchCommandTests(unittest.TestCase):
             home = Path(cache_root) / "home"
             rollout = home / ".codex/sessions/2026/09/06" / f"rollout-{THREAD_ID}.jsonl"
             rollout.parent.mkdir(parents=True)
-            rollout.touch()
+            rollout.write_text(json.dumps(dict(type='turn_context', payload=dict(model='gpt-6-astra'))))
             env = os.environ.copy()
             env.update(
                 {
@@ -191,23 +204,36 @@ class DispatchCommandTests(unittest.TestCase):
             (Path(cache_root) / 'watchdog/account-mode').write_text('both')
             worktree = REPO_ROOT
             dispatch = DISPATCH
-            if registry_rows:
+            if registry_rows or policy_data is not None:
                 worktree = Path(cache_root) / 'repo'
                 registry = worktree / 'results/telemetry/sessions.jsonl'
                 registry.parent.mkdir(parents=True)
                 registry.write_text(registry_rows)
                 (worktree / 'AGENTS.md').write_text('# Test repository\n')
-                subprocess.run(['git', 'init', '-q', str(worktree)], check=True)
+                subprocess.run(['git', 'init', '-q', '-b', 'main', str(worktree)], check=True)
+                subprocess.run(['git', '-C', str(worktree), 'add', 'AGENTS.md'], check=True)
+                subprocess.run(['git', '-C', str(worktree), '-c', 'user.name=Test', '-c',
+                    'user.email=test@test', 'commit', '-qm', 'initial fixture'], check=True)
                 dispatch = worktree / 'local/bin/dispatch.sh'
                 dispatch.parent.mkdir(parents=True)
                 for source in (DISPATCH, ROUTER, TELEMETRY):
                     shutil.copy2(source, dispatch.parent / source.name)
+                copy_model_policy(dispatch.parent)
+                if policy_data is not None:
+                    (dispatch.parent.parent / 'model-policy.json').write_text(json.dumps(policy_data))
+                    subprocess.run(['git', '-C', str(worktree), 'add', 'local'], check=True)
+                    subprocess.run(['git', '-C', str(worktree), '-c', 'user.name=Test', '-c',
+                        'user.email=test@test', 'commit', '-qm', 'policy fixture'], check=True)
+                    subprocess.run(['git', '-C', str(worktree), 'branch', '-M', 'main'], check=True)
             dispatch_args = [str(dispatch), '--role', 'scout', '--issue', 'dispatch-argv',
                              '--worktree', str(worktree), '--sandbox', 'read-only',
                              *([] if include_persona else ['--no-persona']),
                              '--skip-hook-check', '--dry-run', *extra]
             if effort is not None:
                 dispatch_args.extend(["--effort", effort])
+            if '--job-class' not in extra:
+                dispatch_args.extend(['--job-class', 'control_policy', '--hardness-reason',
+                                      'Routing-control test fixture'])
             dispatch_args.extend(["--", "test prompt"])
             result = subprocess.run(
                 dispatch_args,
@@ -258,7 +284,7 @@ class DispatchCommandTests(unittest.TestCase):
                         argv = self.dispatch_command('--role', role, *extra, effort=effort)
                         self.assertIn('model_reasoning_effort=ultra', argv)
 
-    def test_sol_is_rejected_for_every_role(self) -> None:
+    def test_sol_is_rejected_for_control_policy_jobs(self) -> None:
         for role in ('orc', 'prover', 'reviewer', 'simplifier', 'blueprint', 'splitter',
                      'scout', 'mathfix'):
             with self.assertRaises(subprocess.CalledProcessError):
@@ -278,7 +304,7 @@ class DispatchCommandTests(unittest.TestCase):
                 with self.assertRaises(subprocess.CalledProcessError) as failure:
                     self.dispatch_command("--role", "mathfix", model=model, effort=effort)
                 self.assertEqual(failure.exception.returncode, 4)
-                self.assertIn("owner policy requires gpt-6-astra", failure.exception.stderr)
+                self.assertIn("model policy", failure.exception.stderr)
 
     def test_telemetry_accepts_mathfix_role(self) -> None:
         result = subprocess.run(
@@ -551,6 +577,10 @@ class AccountRouterTests(unittest.TestCase):
         patcher = mock.patch.object(router, 'host_processes', return_value=({}, {}))
         patcher.start()
         self.addCleanup(patcher.stop)
+        policy_context = mock.patch.dict(os.environ, MIPSTARRE_JOB_CLASS='control_policy',
+                                         MIPSTARRE_HARDNESS_REASON='Routing-control test fixture')
+        policy_context.start()
+        self.addCleanup(policy_context.stop)
 
     def test_host_scan_handles_global_options_without_reading_prompt_as_command(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -761,7 +791,7 @@ class AccountRouterTests(unittest.TestCase):
             second = root / ".cache/mipstarre-dev/codex-home-yxy"
             rollout = second / "sessions" / f"rollout-{THREAD_ID}.jsonl"
             rollout.parent.mkdir(parents=True)
-            rollout.touch()
+            rollout.write_text(json.dumps(dict(type='turn_context', payload=dict(model='gpt-6-astra'))))
             (second / "config.toml").write_text('model = "gpt-second-default"\n')
             (root / 'cache/watchdog').mkdir(parents=True)
             (root / 'cache/watchdog/account-mode').write_text('both')

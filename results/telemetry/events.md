@@ -4275,6 +4275,35 @@ no second comment or extra review is created. Implementer supervisor2326711
 remains live under primary/max. Persistent router semantics still await the
 bounded PR238 amendment and normal gates.
 
+## 2026-09-06 — Issue 241 publication preflight finds inherited declaration-list drift
+
+- In session `orc-241-20260906-01`, the read-only command
+  `python3 scripts/blueprint_lean_sync.py --root . --ci` exits 1 with 231
+  stale entries in `blueprint/lean_decls`. The log is
+  `~/.cache/mipstarre-dev/sessions/orc-241-20260906-01-blueprint-sync.log`.
+  The list and blueprint sources in prover commit `c4f3c9b` are byte-identical
+  to those in `origin/main` (`a61ee55`); the follow-up adds only the
+  completion tag for `lem:qld-extraction-error-form`, with no declaration
+  reference changes. The drift is therefore inherited, not introduced by
+  this completion tag. Targeted Lean checking and `leanblueprint web` pass;
+  the sole file hole remains the unrelated extraction-witness construction.
+  The task excludes rewriting inherited declaration lists, so this session
+  preserves the list and normal publication gates. An authorized repair of
+  the generated index is required before those gates can pass; no hook
+  bypass or unrelated refresh is an acceptable substitute.
+
+- Correction from the same session: `blueprint/lean_decls` is an ignored,
+  generated local index, not a tracked file (`blueprint/.gitignore:4`). The
+  earlier empty `git diff` therefore did not establish byte identity with
+  `origin/main`, and the diagnosis requiring a separate authorized repair
+  was incorrect. Normal pre-push hooks regenerated the index, and the
+  subsequent read-only sync check exits 0; its log is
+  `~/.cache/mipstarre-dev/sessions/orc-241-20260906-01-blueprint-sync-after-hooks.log`.
+  Checked publication through `pr_open.py` succeeds as PR #249 at `8348eaa`.
+  No tracked declaration list or Lean file was changed by this follow-up.
+  Check whether a generated file is tracked before interpreting an empty
+  tracked diff as evidence of identical contents or declaring a blocker.
+
 ## 2026-09-06 — Issue 239 publication detects a stale root environment
 
 - Session `orc-239-20260906-01`, issue #239: the first normal `pr_open.py`
@@ -5588,6 +5617,7 @@ not actual commit/publication hooks. No productive session was killed.
 - PR248 merged2026-09-07T08:43:05Z asae63048fbf2b699b3794afdd412bcabb71e7445e through live periodicservice2178864 and unchanged canonicalpr_merge gates, merge_exit0. Exact3201dd77 fullCI365s (build58s) was green; canonical complete-patch review carry from471d47678ee9 publishedAPPROVED5129792887 with0unresolved and nofreshreviewer. Frozenmain551ee8c remained unchanged through gates. Preserved229-byteCIrow in retainedstash6a91bdd550b57758a2a5bd2d7aff0eb4120b68c0 and matchingpr248-quiet-relay3 copies, restoredonce afterverifiedmerge and retained398-byte successfulwarmerrow; rawmultiplicities, prefixes andmodes passed. Sixexisting sourceholes remain unchanged. Three useful native relay-3/AstraUltra tasks continue within sharedcap3 andfive-total allocation/external0. Existing telemetry.record_native API recordedactual relay-3 labels without changingthe staleCLIenum or serviceguard. #297 publishedPR298 at956e10fa anditsauthor resumed156sourcework; PR207published42dc0a4 afterthe exactPauliTheorems/QubitForm artifactgate was repaired through a normal branch-private build. PR207needsoneordinary refresh afterthispublication beforecanonicalCI. NoB8budgetreset. Detailedreceipt: owner-messages/qpbt-pr248-integration-20260907.json.
 - PR207 merged2026-09-07T10:38:40Z as6b87636d741e676c6e5bd8f0db35c20f99db068a through periodicservice2178864 and canonicalpr_merge, merge_exit0. Issue115 independentlyverified closed/completed10:38:41Z. FullCI passed f06df8f382s and repaired6e2edbb461s. Round3 review5130375359 retainedoneF1 and an actualprosepublisher ProcessLookupError; no prose turn was invented. Narrowthree-fileAPIreuse repair passedfinalround4 independentCODE andPROSE; review5130951353 APPROVED0unresolved, eachcompletionacceptedonce. Frozenmain c830 remainedthroughgates. Stash38bdc5cb andcopies retainedall479buildbytes/2rows, 7343sessionbytes/7rows and202estimatebytes/1row; restoredonce withrawmultiplicity, prefix andmodechecks. CanonicalSpacebucket reviewerrows preserved andtruthfulrelay3 observations appended. The635.495-second nativehandoffgap was an operationalfailure includingmaindecisionlatency; the durablehandoff authorizespromptknownsuccessors and recordsparent-onlyreviewbinding. No occupancypercentage is inferred. Currentrelay3, AstraUltra, native3/five-total/external0 and allbudgets persist. Detailedreceipt: owner-messages/qpbt-pr207-integration-20260907.json.
 - PR270 merged2026-09-07T13:11:26Z asa2f52f6d15a1af57740ee73eab913e3747b47792 through the current owner service and canonicalpr_merge, merge_exit0. Exactbd3d88e fullCI and independentreview5132260906 passed; no blueprintdiff, so prosewasnotapplicable. The222-line patch preserves nameless-resume and missing-dispatcher fail-closed repairs and catches onlyProcessLookupError for vanishedprocesses; PermissionError/otherI/O stillfailclosed. Retainedstashe56be8b andcopies, restored227CIbytes+1044reviewbytesonce, retained397concurrent warmerbytes; rawmultiplicities/prefixes/modesverified. Ownercap11 release, runtime andfirst nine-worker observationare incorporated without resettingbudgets orclaimingoccupancypercentage. Actualcredentialrelay3/AstraUltra/native9/total11/external0; historicalspacebucketisnotSpace authentication. Ownerreplacedservice1089067 with1354901; absenceofoldPIDwasnotassumedto be acrash andnoredundantrestartoccurred. Oldruntime receipt is retainedashistory; current sourcehash/provenance recordedfornormalreviewworkflow. Detailedreceipt owner-messages/qpbt-pr270-integration-20260907.json.
+- PR298/#297 integrated through exact-head canonical CI, independent native CODE and PROSE, and the current service/pr_merge path. The four-file411+/39- restriction packet was unchanged by the refresh to frozen5924b3a. Parked CI/review rows were restored once with retained stash/copies, raw multiplicities, concurrent prefixes and modes checked. The supplied merge-selector-fix receipt now supplements the historical unknown-path observation. The owner Sol-routing instruction remains audit-first: current main and workers AstraUltra; no model/effort/credential/lease/cap changes or Sol activation by this coordinator. Actual relay3, native9/total11/external0 and all B8 budgets remain. Detailed receipt: owner-messages/qpbt-pr298-integration-20260907.json.
 
 
 ## 2026-09-06 — Snapshot publication regression in migration #291 (2026-09-06T18:37:46.043219+00:00)
@@ -5618,3 +5648,83 @@ not actual commit/publication hooks. No productive session was killed.
   ENOENT, EACCES, and EIO separately. This enforces the existing vanished-PID
   behavior and does not amend policy. Actual credential remains relay-3, Astra
   Ultra, three shared descendants/five total including VS Code, external0.
+
+- 2026-09-07 -- Issue #301: the owner requested audit-first bounded Sol routing.
+  Independent Astra audit and validation support only C01/C02 literal Lean prose
+  or theorem-name/caller substitutions, not their surrounding proof/blueprint work.
+  The implementation retains Astra root/defaults, Ultra, native9/total11 and
+  external0; actual qualification is read from published main only after normal
+  CI, independent Astra review and service merge. Main retains semantic scope
+  adjudication and exact runtime compatibility verification; no live Sol launch
+  or effort downgrade occurred in this author episode. Requested/configured and
+  observed model metadata are distinct; missing external observation stays null.
+  Shared episode anchor is about 13:40Z, not the implementation subphase start.
+  An initial bootstrap overlapped unfinished worktree checkout and missed hooks;
+  after checkout completed, normal bootstrap and hook checks passed. No live
+  primary scripts, credentials, leases or historical records were edited.
+
+- 2026-09-07 -- Issue #301 owner scope superseded the preserved cleanup-only
+  draft f43be38 with routine/bounded Sol-first and reasoned hard Astra, including
+  routine independent Sol review and a 20:1 target within 10:1..50:1 over new
+  dispatches. Existing audit evidence is retained, not reinterpreted as a broad
+  capability study. Meta switched to Space5/native3/external0; this author did
+  not change credentials, runtime, lease or current workers. At 16:17Z the same
+  author resumed the clean checkpoint under explicit completion priority, still
+  charged to the original approximately 13:40Z episode and recorded extension
+  request5572932276. No fresh budget, ratio credit for grandfathered resumes,
+  live activation, or review success is inferred. Full-context native observations
+  and requested/selected/observed separation are retained in the revised design.
+
+## 2026-09-08
+
+- PR303/#301 integrated through canonical CI, independent hard control-policy Astra review, and the current Space service merge gates. Round1 review5134345720 retained three native-observation and ratio findings; the author repaired them in0deec4e with targeted counterfactual regressions and fresh normal tests/CI/review. All parked estimate, CI and native-review rows were restored once with retained stash/copies and multiplicity, prefix and mode checks. The reviewed policy enters committed main; read-only actual selector and hot-root/Space-lease checks follow final telemetry publication. No live selector result or fresh Sol child is claimed by this record; root owns the useful explicit-model dispatch after those checks. The Space switch and renewed owner completion steering preserve the13:40 episode, 15:40 historical boundary, extension request5572932276,1000-line ceiling and all cumulative proof budgets. Detailed receipt: owner-messages/qpbt-pr303-integration-20260907.json.
+- Space cap10 activation completed at 2026-09-08T02:58:55.007754Z without a
+  credential, source, or budget reset. The existing main thread
+  01a076bc-f4ad-7813-805b-c8b4dac71a14 resumed as PID3351858/start186049483
+  on requested and observed Astra Ultra; the canonical Space lease was verified
+  at eight native descendants within ten total account slots (main1,
+  reserved-app-server1, external0). Owner readback near03:02Z found the same goal
+  active at34577828 tokens and77303 seconds, so the context transition did not
+  create a new goal or budget. Service3352034 replaced the retired cap5 service
+  and verified the unchanged clean-tree/exact-head gates. The initial terminal
+  retained `/quit`; no capacity or lease changed before the former process
+  exited, and existing native/telemetry rows were preserved. Consolidating the
+  duplicated launcher configuration and manual lease binding remains a future
+  candidate only; this observation makes no workflow or runtime change. Receipt:
+  /home/drx/.cache/mipstarre-dev/owner-tools/qpbt-cap10-activation-20260908.json
+  (sha256 bba6715f5c7ce0082cd1df73dbab4d1f29daa1fd02c2b67df8706fc9ad1638d5).
+- PR308's first two review invocations exited2 before creating a native request
+  because the resumed Astra root environment conflicted with the routine Sol
+  reviewer classification. A third pre-assignment request, nonce4e2c328c, was
+  cancelled after inspection found the activation binding absent and the root
+  exclusion duplicated; it had no reviewer or response and remains superseded.
+  The unchanged canonical publisher was restarted only for this pre-request
+  failure with the explicit reviewed Sol/Ultra environment. Fresh reviewer
+  01a07f17-7fb6-7ca3-b0fa-e4a9d4e99b17 completed bound nonce09c50846 once;
+  review5137114857 published exact-head CHANGES_REQUESTED with one real
+  documentation finding and accepted the mathematical patch. No CI was rerun,
+  no response was fabricated, and main stayed frozen atc5d519c.
+- The owner activated an 80-percent useful-activity rule for the Space total10
+  allocation: main plus at least seven genuinely active native tasks, with
+  active-other reported separately and the reserved app server not counted as
+  activity. Root's first observation found three running native lanes and
+  immediately resumed four disjoint mathematical or publication successors.
+  `qpbt-switch activity` then accepted main1/native7/other0 as observed8/10,
+  target8. Activity is reported from attributable task IDs and recent tools at
+  starts, completions, and at most60-second intervals; configured capacity is
+  never substituted for activity. A below-target report must carry the real
+  bottleneck and next action. Meta owns the installed helper and its tests; this
+  coordinator made no switch, capacity, lease, source, or helper change.
+- 2026-09-08T03:42:20.550628+00:00: Owner requested quick account/capacity switching and actual concurrency >=80% almost all time. Installed ~/.local/bin/qpbt-switch with saved key profiles, idempotent no-op, automatic checkpoint/same-UUID resume/canonical lease binding, recoverable phases, parametrized merge service and evidence-based activity reports requiring a reason/next action below target. No-op measured 0.156s on ghz. All 16 controller/isolated integration/activity tests and 17 canonical merge checks passed; installed source hashes match tested files. Automatic approval review rejected both a live restart test and interrupting the long main turn to deliver policy; neither action executed. Main remains Space/10 total/8 native, goal preserved. Occupancy instruction is queued and appended to the current handoff; actual adherence is not yet verified. Receipt: ~/.cache/mipstarre-dev/qpbt-switch/installation.json. Lesson: retain a single configurable operator command rather than dated activation scripts.
+- PR308 merged through canonical service PID3352034 at
+  2026-09-08T04:24:48.970629Z as
+  dffbbb3bcc69b226cad26ab2d2521fb94159a141 from reviewed head
+  ea7015ff054d15e19d1577903a686be641f632f8. The repaired head passed its
+  only canonical CI run in144s with all nine exact-head statuses green;
+  independent Sol/Ultra review5137259492 accepted nonceccd85b33 exactly once
+  with zero findings. Quiet stash23950ac7141476712f0a1edb9f6355f7a2327c5c
+  remains retained. All six parked telemetry files were restored byte-for-byte
+  together with the concurrent post-merge cache-warmer row; current files match
+  the constructed expected copies and pass `git diff --check`. Main publication
+  proceeds through the canonical GitHub sync before this merge is released as a
+  downstream base.
