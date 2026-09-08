@@ -20,7 +20,8 @@ hypothesis. Its conclusion is only the exact branch equality. It does not prove
 the full passing bound in `lem:qld-4-7`, construct a global measurement, or
 discharge the separate extraction-witness frontier tracked by #119.
 
-Completion requires per-file Lean validation, a standard-only axiom check, and
-the normal publication, canonical CI, independent review, and merge gates. The
-PR remains blocked on #307 while PR308 is pending. Existing #119 usage and the
-B8 budget of 13 attempts / 26509 seconds remain unchanged.
+The proof depends mathematically on the expanded-state correlation from #302
+and the forward axis-line/point transport from #305. The diagonal-line/point
+transport from #307 records stack and repository provenance; this proof does
+not use its theorem. Existing #119 usage and the B8 budget of 13 attempts /
+26509 seconds remain unchanged.
