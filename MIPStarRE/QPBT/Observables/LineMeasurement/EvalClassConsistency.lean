@@ -1,4 +1,5 @@
 import MIPStarRE.QPBT.Observables.LineMeasurement.BipartiteTransport
+import MIPStarRE.QPBT.Combining.Points.Placement
 
 /-!
 # Consistency of expanded evaluation classes with expanded points
@@ -61,7 +62,13 @@ theorem sum_stateQForm_evalClass_AA'_BA''_eq (S : ProjectiveSetting P ε)
               S.place .BA'' ((S.pointMeasExpOption .bob W u).effect
                 (evalOpt line u f))) := by
       refine Finset.sum_congr rfl fun o _ => ?_
-      rw [lineEvalMeasExp_effect, place_AA'_finset_sum, Finset.sum_mul,
+      rw [lineEvalMeasExp_effect]
+      have hplace := S.place_finsetSum .AA'
+        (Finset.univ.filter fun f : DegPoly P.toLdParams (P.m * P.d) =>
+          evalOpt line u f = o)
+        (fun f => S.expLineOp .alice W line f)
+      simp only [Placement.side] at hplace
+      erw [hplace, Finset.sum_mul,
         DistanceCalculus.stateQForm_finset_sum]
       refine Finset.sum_congr rfl fun f hf => ?_
       rw [(Finset.mem_filter.mp hf).2]
@@ -100,8 +107,14 @@ theorem sum_stateQForm_evalClass_BA''_AA'_eq (S : ProjectiveSetting P ε)
               S.place .AA' ((S.pointMeasExpOption .alice W u).effect
                 (evalOpt line u f))) := by
       refine Finset.sum_congr rfl fun o _ => ?_
-      rw [place_AA'_mul_place_BA''_comm, lineEvalMeasExp_effect,
-        place_BA''_finset_sum, Finset.sum_mul,
+      rw [S.place_comm .AA' .BA'' (by simp [Placement.IsOpposite]),
+        lineEvalMeasExp_effect]
+      have hplace := S.place_finsetSum .BA''
+        (Finset.univ.filter fun f : DegPoly P.toLdParams (P.m * P.d) =>
+          evalOpt line u f = o)
+        (fun f => S.expLineOp .bob W line f)
+      simp only [Placement.side] at hplace
+      erw [hplace, Finset.sum_mul,
         DistanceCalculus.stateQForm_finset_sum]
       refine Finset.sum_congr rfl fun f hf => ?_
       rw [(Finset.mem_filter.mp hf).2]
@@ -139,7 +152,13 @@ theorem sum_stateQForm_evalClass_AB''_BB'_eq (S : ProjectiveSetting P ε)
               S.place .BB' ((S.pointMeasExpOption .bob W u).effect
                 (evalOpt line u f))) := by
       refine Finset.sum_congr rfl fun o _ => ?_
-      rw [lineEvalMeasExp_effect, place_AB''_finset_sum, Finset.sum_mul,
+      rw [lineEvalMeasExp_effect]
+      have hplace := S.place_finsetSum .AB''
+        (Finset.univ.filter fun f : DegPoly P.toLdParams (P.m * P.d) =>
+          evalOpt line u f = o)
+        (fun f => S.expLineOp .alice W line f)
+      simp only [Placement.side] at hplace
+      erw [hplace, Finset.sum_mul,
         DistanceCalculus.stateQForm_finset_sum]
       refine Finset.sum_congr rfl fun f hf => ?_
       rw [(Finset.mem_filter.mp hf).2]
@@ -176,8 +195,14 @@ theorem sum_stateQForm_evalClass_BB'_AB''_eq (S : ProjectiveSetting P ε)
               S.place .AB'' ((S.pointMeasExpOption .alice W u).effect
                 (evalOpt line u f))) := by
       refine Finset.sum_congr rfl fun o _ => ?_
-      rw [place_AB''_mul_place_BB'_comm, lineEvalMeasExp_effect,
-        place_BB'_finset_sum, Finset.sum_mul,
+      rw [S.place_comm .AB'' .BB' (by simp [Placement.IsOpposite]),
+        lineEvalMeasExp_effect]
+      have hplace := S.place_finsetSum .BB'
+        (Finset.univ.filter fun f : DegPoly P.toLdParams (P.m * P.d) =>
+          evalOpt line u f = o)
+        (fun f => S.expLineOp .bob W line f)
+      simp only [Placement.side] at hplace
+      erw [hplace, Finset.sum_mul,
         DistanceCalculus.stateQForm_finset_sum]
       refine Finset.sum_congr rfl fun f hf => ?_
       rw [(Finset.mem_filter.mp hf).2]

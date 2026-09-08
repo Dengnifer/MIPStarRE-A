@@ -192,7 +192,9 @@ theorem exists_combinedPointsWitness :
       (∑ ab : PauliScalar P × PauliScalar P,
         (S.place p ((Q p.side xz).effect ab))ᴴ *
           S.place p ((Q p.side xz).effect ab)) ≤ 1 :=
-    fun p xz => S.sum_place_effect_conjTranspose_mul_self_le_one p _ (hQproj p.side xz)
+    fun p xz => by
+      simpa using (measurement_sum_adjoint_mul_le_one
+        (S.placedMeasurement p (Q p.side xz)))
   have hsqXZ : ∀ (p : Placement) (xz : PointPair P),
       (∑ ab : PauliScalar P × PauliScalar P,
         (S.place p ((S.pointMeasExp p.side .X xz.1).effect ab.1 *
@@ -239,16 +241,6 @@ theorem exists_combinedPointsWitness :
     · exact le_trans (hchain p₁ p₂ hopp).2.1 (le_trans hsub2 htot)
     · exact le_trans (opFamilyDistSq_uniform_le_four _ _ S.psiHat S.psiHat_norm
         (fun xz => hsqQ p₁ xz) (fun xz => hsqZX p₂ xz)) (hK8 hε1)
-
-/-- Register placement distributes over a filtered outcome sum. -/
-private theorem place_finset_sum {P : AdmissibleParams} {ε : ℝ}
-    (S : ProjectiveSetting P ε) (p : Placement) {α : Type*}
-    (s : Finset α) (A : α → Op (S.ExpandedLocalSpace p.side)) :
-    S.place p (∑ a ∈ s, A a) = ∑ a ∈ s, S.place p (A a) := by
-  classical
-  ext i j
-  cases p <;> simp [ProjectiveSetting.place, Matrix.sum_apply,
-    Finset.sum_mul, Finset.mul_sum]
 
 set_option maxHeartbeats 1600000 in
 /-- Projectivity and the three data-processed consistency guarantees for
@@ -303,7 +295,7 @@ theorem extendedQ_spec {P : AdmissibleParams} {ε δ : ℝ}
     refine le_trans ?_ (points.self_consistent p1 p2 hopposite)
     have h := opFamilyDistSq_uniform_affine_postprocess_le A B S.psiHat (fun xz => ?_)
     · simpa only [A, B, CombinedPointsWitness.extendedQ,
-        Measurement.postprocess_effect, place_finset_sum] using h
+        Measurement.postprocess_effect, S.place_finsetSum] using h
     · rw [sum_placed_measurement_eq_one, sum_placed_measurement_eq_one]
   · intro p1 p2 hopposite
     let A : ((Fin P.m → PauliScalar P) × (Fin P.m → PauliScalar P)) →
@@ -317,7 +309,7 @@ theorem extendedQ_spec {P : AdmissibleParams} {ε δ : ℝ}
     refine le_trans ?_ (points.consistent_XZ p1 p2 hopposite)
     have h := opFamilyDistSq_uniform_affine_postprocess_le A B S.psiHat (fun xz => ?_)
     · simpa only [A, B, CombinedPointsWitness.extendedQ,
-        Measurement.postprocess_effect, place_finset_sum] using h
+        Measurement.postprocess_effect, S.place_finsetSum] using h
     · rw [sum_placed_measurement_eq_one, sum_placed_measurement_products_eq_one]
   · intro p1 p2 hopposite
     let A : ((Fin P.m → PauliScalar P) × (Fin P.m → PauliScalar P)) →
@@ -331,7 +323,7 @@ theorem extendedQ_spec {P : AdmissibleParams} {ε δ : ℝ}
     refine le_trans ?_ (points.consistent_ZX p1 p2 hopposite)
     have h := opFamilyDistSq_uniform_affine_postprocess_le A B S.psiHat (fun xz => ?_)
     · simpa only [A, B, CombinedPointsWitness.extendedQ,
-        Measurement.postprocess_effect, place_finset_sum] using h
+        Measurement.postprocess_effect, S.place_finsetSum] using h
     · rw [sum_placed_measurement_eq_one]
       have htotal := sum_placed_measurement_products_eq_one S p2
         (S.pointMeasExp p2.side .Z xz.2) (S.pointMeasExp p2.side .X xz.1)

@@ -55,7 +55,7 @@ abbrev PointPair (P : AdmissibleParams) :=
 /-! ## Parseval's identity for an orthogonal system of coefficients -/
 
 /-- Formalization-only auxiliary for `lem:qld-4-10`: if the coefficient
-vectors `i ↦ c j i`, `j` ranging over a finite set, are orthogonal with common
+vectors `j ↦ c j i`, indexed by `i`, are orthogonal with common
 squared norm `N`, then the squared norms of the weighted sums
 `∑ i, c j i • v i` add up to `N` times the squared norms of the `v i`. -/
 theorem sum_norm_sum_smul_sq_of_orthogonal {I J E : Type*} [Fintype I]

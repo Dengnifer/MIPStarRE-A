@@ -13,7 +13,7 @@ Cauchy--Schwarz chain (displays `eq:qld-rw-self-cons-1` to
 consistency defect of the two placed sandwiches equals
 `(1/2) ∑_b ‖D^Z_b ψ‖^2 + (1/2) ∑_{a,b} ‖D^X_a W_b ψ‖^2`,
 by two applications of the identity
-`∑_c ⟨w, P_c Q_c w⟩ = ‖w‖^2 - (1/2) ∑_c ‖(P_c - Q_c) w‖^2` for projective
+`∑_c Re ⟨w, P_c Q_c w⟩ = ‖w‖^2 - (1/2) ∑_c ‖(P_c - Q_c) w‖^2` for projective
 measurements.  The second sum is then bounded by the self-consistency of `M^X`
 and the commutators on the two placements, since
 `D^X_a W_b = W_b D^X_a + (M^Z_b)_2 K^1_{a,b} - (M^Z_b)_1 K^2_{a,b}`, where
@@ -55,7 +55,8 @@ theorem stateQForm_conjTranspose_mul_mul {ι : Type*} [Fintype ι] [DecidableEq 
     (ψ : EuclideanSpace ℂ ι) (W M : Op ι) :
     stateQForm ψ (Wᴴ * M * W) = stateQForm (applyOperatorToState W ψ) M := by
   unfold stateQForm
-  rw [applyOperatorToState_mul', applyOperatorToState_mul']
+  rw [DistanceCalculus.applyOperatorToState_mul,
+    DistanceCalculus.applyOperatorToState_mul]
   congr 1
   change inner ℂ ψ (Matrix.toEuclideanLin Wᴴ _) =
     inner ℂ (Matrix.toEuclideanLin W ψ) _
@@ -92,18 +93,6 @@ theorem norm_applyOperatorToState_proj_effect_le {α ι : Type*} [Fintype α]
   refine MagicSquareRigidity.norm_applyOperatorToState_le ?_ v
   rw [(hM a).isSelfAdjoint.isHermitian.eq, (hM a).isIdempotentElem.eq]
   exact measurement_effect_le_one M a
-
-/-- The effects of a projective measurement are square-summable to the
-identity. -/
-theorem sum_effect_conjTranspose_mul_self_le_one_of_projective {α ι : Type*}
-    [Fintype α] [Fintype ι] [DecidableEq ι] (M : Measurement α ι)
-    (hM : MIPStarRE.QPBT.Measurement.IsProjective M) :
-    ∑ a, (M.effect a)ᴴ * M.effect a ≤ 1 := by
-  refine le_of_eq ?_
-  calc ∑ a, (M.effect a)ᴴ * M.effect a = ∑ a, M.effect a := by
-        refine Finset.sum_congr rfl fun a _ => ?_
-        rw [(hM a).isSelfAdjoint.isHermitian.eq, (hM a).isIdempotentElem.eq]
-    _ = 1 := M.sum_eq_one
 
 /-! ## The overlap of two placed sandwiches -/
 
@@ -150,7 +139,7 @@ theorem sub_mul_mul_eq_add_commutators (X₁ X₂ Z₁ Z₂ : Op ι)
 
 /-- The overlap of the two placed sandwiches, exactly: with
 `W_b = Z_1(b) Z_2(b)`,
-`∑_{a,b} ⟨ψ, R_1(a,b) R_2(a,b) ψ⟩ = ‖ψ‖^2 - (1/2) ∑_b ‖(Z_1(b) - Z_2(b)) ψ‖^2
+`∑_{a,b} Re ⟨ψ, R_1(a,b) R_2(a,b) ψ⟩ = ‖ψ‖^2 - (1/2) ∑_b ‖(Z_1(b) - Z_2(b)) ψ‖^2
   - (1/2) ∑_{a,b} ‖(X_1(a) - X_2(a)) W_b ψ‖^2`.
 This replaces the Cauchy--Schwarz chain of displays
 `eq:qld-rw-self-cons-1` to `eq:qld-rw-self-cons-4`, paper
@@ -212,7 +201,7 @@ theorem sandwich_overlap_identity (ψ : EuclideanSpace ℂ ι)
 /-- The pointwise bound on the consistency defect of the placed sandwiches:
 in terms of the distances `D^Z`, `D^X` of the two placements and the placed
 commutators `K^1`, `K^2`,
-`‖ψ‖^2 - ∑_{a,b} ⟨ψ, R_1 R_2 ψ⟩ ≤ (1/2) D^Z + (3/2) (D^X + K^1 + K^2)`. -/
+`‖ψ‖^2 - ∑_{a,b} Re ⟨ψ, R_1 R_2 ψ⟩ ≤ (1/2) D^Z + (3/2) (D^X + K^1 + K^2)`. -/
 theorem sandwich_defect_pointwise_le (ψ : EuclideanSpace ℂ ι)
     (X₁ X₂ : Measurement α ι) (Z₁ Z₂ : Measurement β ι)
     (hX₁ : MIPStarRE.QPBT.Measurement.IsProjective X₁)
@@ -248,7 +237,8 @@ theorem sandwich_defect_pointwise_le (ψ : EuclideanSpace ℂ ι)
               Z₂.effect ab.2 * X₂.effect ab.1) ψ‖ ^ 2) := by
     intro ab
     obtain ⟨a, b⟩ := ab
-    rw [← applyOperatorToState_mul', sub_mul_mul_eq_add_commutators _ _ _ _
+    rw [← DistanceCalculus.applyOperatorToState_mul,
+      sub_mul_mul_eq_add_commutators _ _ _ _
       (hXZ a b) (hZX a b) (hZZ b)]
     have hlin : applyOperatorToState
         (Z₁.effect b * Z₂.effect b * (X₁.effect a - X₂.effect a) +
@@ -260,8 +250,9 @@ theorem sandwich_defect_pointwise_le (ψ : EuclideanSpace ℂ ι)
             (X₁.effect a * Z₁.effect b - Z₁.effect b * X₁.effect a) ψ) -
           applyOperatorToState (Z₁.effect b) (applyOperatorToState
             (X₂.effect a * Z₂.effect b - Z₂.effect b * X₂.effect a) ψ) := by
-      rw [← applyOperatorToState_mul', ← applyOperatorToState_mul',
-        ← applyOperatorToState_mul', Matrix.mul_assoc]
+      rw [← DistanceCalculus.applyOperatorToState_mul,
+        ← DistanceCalculus.applyOperatorToState_mul,
+        ← DistanceCalculus.applyOperatorToState_mul, Matrix.mul_assoc]
       unfold applyOperatorToState
       simp only [map_add, map_sub, LinearMap.add_apply, LinearMap.sub_apply]
     rw [hlin]
@@ -297,7 +288,7 @@ theorem sandwich_defect_pointwise_le (ψ : EuclideanSpace ℂ ι)
     simp only [Fintype.sum_prod_type]
     refine Finset.sum_le_sum fun a _ => ?_
     exact sum_norm_mul_apply_le Z₂.effect (X₁.effect a - X₂.effect a) ψ
-      (sum_effect_conjTranspose_mul_self_le_one_of_projective Z₂ hZ₂)
+      (measurement_sum_adjoint_mul_le_one Z₂)
   have hsum := Finset.sum_le_sum fun ab (_ : ab ∈ Finset.univ) => hpt ab
   rw [← Finset.mul_sum, Finset.sum_add_distrib, Finset.sum_add_distrib] at hsum
   linarith

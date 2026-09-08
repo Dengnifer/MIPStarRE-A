@@ -1,5 +1,6 @@
 import MIPStarRE.QPBT.Observables.LineMeasurement.SelfConsistency
 import MIPStarRE.QPBT.Observables.LineMeasurement.Evaluation
+import MIPStarRE.QPBT.Combining.Points.Placement
 
 /-!
 # Overlap of expanded line and expanded point measurements
@@ -50,49 +51,11 @@ namespace ProjectiveSetting
 
 variable {P : AdmissibleParams} {ε : ℝ}
 
-/-- A register placement respects finite sums of operators.
-Formalization-only auxiliary for the register placements of
-`def:symmetric-equivalents`; the source uses this additivity without stating
-it. -/
-theorem place_finset_sum (S : ProjectiveSetting P ε) (p : Placement)
-    {γ : Type*} (s : Finset γ) (O : γ → Op (S.ExpandedLocalSpace p.side)) :
-    S.place p (∑ g ∈ s, O g) = ∑ g ∈ s, S.place p (O g) := by
-  ext i j
-  cases p <;> simp only [place, Matrix.sum_apply, Finset.sum_mul, Finset.mul_sum]
-
 /-- A register placement of the zero operator is zero. -/
 theorem place_zero (S : ProjectiveSetting P ε) (p : Placement) :
     S.place p (0 : Op (S.ExpandedLocalSpace p.side)) = 0 := by
   ext i j
   cases p <;> simp [place]
-
-/-- The `AA'` placement respects finite sums. -/
-theorem place_AA'_finset_sum (S : ProjectiveSetting P ε) {γ : Type*}
-    (s : Finset γ) (O : γ → Op (S.ExpandedLocalSpace .alice)) :
-    S.place .AA' (∑ g ∈ s, O g : Op (S.ExpandedLocalSpace .alice)) =
-      ∑ g ∈ s, S.place .AA' (O g) :=
-  place_finset_sum S .AA' s O
-
-/-- The `BA''` placement respects finite sums. -/
-theorem place_BA''_finset_sum (S : ProjectiveSetting P ε) {γ : Type*}
-    (s : Finset γ) (O : γ → Op (S.ExpandedLocalSpace .bob)) :
-    S.place .BA'' (∑ g ∈ s, O g : Op (S.ExpandedLocalSpace .bob)) =
-      ∑ g ∈ s, S.place .BA'' (O g) :=
-  place_finset_sum S .BA'' s O
-
-/-- The `AB''` placement respects finite sums. -/
-theorem place_AB''_finset_sum (S : ProjectiveSetting P ε) {γ : Type*}
-    (s : Finset γ) (O : γ → Op (S.ExpandedLocalSpace .alice)) :
-    S.place .AB'' (∑ g ∈ s, O g : Op (S.ExpandedLocalSpace .alice)) =
-      ∑ g ∈ s, S.place .AB'' (O g) :=
-  place_finset_sum S .AB'' s O
-
-/-- The `BB'` placement respects finite sums. -/
-theorem place_BB'_finset_sum (S : ProjectiveSetting P ε) {γ : Type*}
-    (s : Finset γ) (O : γ → Op (S.ExpandedLocalSpace .bob)) :
-    S.place .BB' (∑ g ∈ s, O g : Op (S.ExpandedLocalSpace .bob)) =
-      ∑ g ∈ s, S.place .BB' (O g) :=
-  place_finset_sum S .BB' s O
 
 /-- The `AA'` placement of zero is zero. -/
 theorem place_AA'_zero (S : ProjectiveSetting P ε) :
@@ -295,40 +258,6 @@ theorem stateQForm_place_AB''_mul_BB'_two (S : ProjectiveSetting P ε)
     stateQForm_vecTensor_heteroKron _ _ _ _ hAB Matrix.isHermitian_one,
     stateQForm_one_eq_norm_sq, eprState_norm]
   ring
-
-set_option synthInstance.maxSize 400 in
-/-- Operators placed on `AA'` and on `BA''` commute. -/
-theorem place_AA'_mul_place_BA''_comm (S : ProjectiveSetting P ε)
-    (X : Op (S.ExpandedLocalSpace .alice))
-    (Y : Op (S.ExpandedLocalSpace .bob)) :
-    S.place .AA' X * S.place .BA'' Y = S.place .BA'' Y * S.place .AA' X := by
-  have key : ∀ (X' : Op (S.toStrategy.ιA × PauliRegister P))
-      (Y' : Op (S.toStrategy.ιB × PauliRegister P)),
-      S.place .AA' X' * S.place .BA'' Y' = S.place .BA'' Y' * S.place .AA' X' := by
-    intro X' Y'
-    rw [← reindexOp_aaBaBipartition_left S X', ← reindexOp_aaBaBipartition_right S Y',
-      ← WinImplications.reindexOp_mul, ← WinImplications.reindexOp_mul]
-    congr 1
-    rw [heteroKron_mul, heteroKron_mul, Matrix.mul_one, Matrix.one_mul,
-      Matrix.mul_one, Matrix.one_mul]
-  exact key X Y
-
-set_option synthInstance.maxSize 400 in
-/-- Operators placed on `AB''` and on `BB'` commute. -/
-theorem place_AB''_mul_place_BB'_comm (S : ProjectiveSetting P ε)
-    (X : Op (S.ExpandedLocalSpace .alice))
-    (Y : Op (S.ExpandedLocalSpace .bob)) :
-    S.place .AB'' X * S.place .BB' Y = S.place .BB' Y * S.place .AB'' X := by
-  have key : ∀ (X' : Op (S.toStrategy.ιA × PauliRegister P))
-      (Y' : Op (S.toStrategy.ιB × PauliRegister P)),
-      S.place .AB'' X' * S.place .BB' Y' = S.place .BB' Y' * S.place .AB'' X' := by
-    intro X' Y'
-    rw [← reindexOp_abBbBipartition_left S X', ← reindexOp_abBbBipartition_right S Y',
-      ← WinImplications.reindexOp_mul, ← WinImplications.reindexOp_mul]
-    congr 1
-    rw [heteroKron_mul, heteroKron_mul, Matrix.mul_one, Matrix.one_mul,
-      Matrix.mul_one, Matrix.one_mul]
-  exact key X Y
 
 end ProjectiveSetting
 
@@ -618,7 +547,9 @@ theorem overlap_AA'_BA''_eq (S : ProjectiveSetting P ε) (W : PauliKind)
       Φ (∑ i ∈ s, X i) Y = ∑ i ∈ s, Φ (X i) Y := by
     intro s X Y
     simp only [Φ]
-    rw [place_AA'_finset_sum, Finset.sum_mul,
+    have hplace := S.place_finsetSum .AA' s X
+    simp only [Placement.side] at hplace
+    erw [hplace, Finset.sum_mul,
       DistanceCalculus.stateQForm_finset_sum]
   have hΦr : ∀ (X : Op (S.ExpandedLocalSpace .alice))
       (t : Finset (PauliScalar P × PauliScalar P))
@@ -626,7 +557,9 @@ theorem overlap_AA'_BA''_eq (S : ProjectiveSetting P ε) (W : PauliKind)
       Φ X (∑ j ∈ t, Y j) = ∑ j ∈ t, Φ X (Y j) := by
     intro X t Y
     simp only [Φ]
-    rw [place_BA''_finset_sum, Finset.mul_sum,
+    have hplace := S.place_finsetSum .BA'' t Y
+    simp only [Placement.side] at hplace
+    erw [hplace, Finset.mul_sum,
       DistanceCalculus.stateQForm_finset_sum]
   have hΨl : ∀ (s : Finset (DegPoly P.toLdParams (P.m * P.d)))
       (A : DegPoly P.toLdParams (P.m * P.d) → Op S.toStrategy.ιA)
@@ -703,7 +636,9 @@ theorem overlap_BA''_AA'_eq (S : ProjectiveSetting P ε) (W : PauliKind)
       Φ (∑ i ∈ s, X i) Y = ∑ i ∈ s, Φ (X i) Y := by
     intro s X Y
     simp only [Φ]
-    rw [place_BA''_finset_sum, Finset.sum_mul,
+    have hplace := S.place_finsetSum .BA'' s X
+    simp only [Placement.side] at hplace
+    erw [hplace, Finset.sum_mul,
       DistanceCalculus.stateQForm_finset_sum]
   have hΦr : ∀ (X : Op (S.ExpandedLocalSpace .bob))
       (t : Finset (PauliScalar P × PauliScalar P))
@@ -711,7 +646,9 @@ theorem overlap_BA''_AA'_eq (S : ProjectiveSetting P ε) (W : PauliKind)
       Φ X (∑ j ∈ t, Y j) = ∑ j ∈ t, Φ X (Y j) := by
     intro X t Y
     simp only [Φ]
-    rw [place_AA'_finset_sum, Finset.mul_sum,
+    have hplace := S.place_finsetSum .AA' t Y
+    simp only [Placement.side] at hplace
+    erw [hplace, Finset.mul_sum,
       DistanceCalculus.stateQForm_finset_sum]
   have hΨl : ∀ (s : Finset (DegPoly P.toLdParams (P.m * P.d)))
       (A : DegPoly P.toLdParams (P.m * P.d) → Op S.toStrategy.ιB)
@@ -749,7 +686,7 @@ theorem overlap_BA''_AA'_eq (S : ProjectiveSetting P ε) (W : PauliKind)
         (lineMeas_effect_isHermitian S .bob W line f')
         (tauPointProj_isHermitian W u b'') (tauLineProj_isHermitian W line f'')
       rw [stateQForm_eprState_tauPointProj_tauLineProj P W line u hu f'' b''] at hfac
-      have hcomm := place_AA'_mul_place_BA''_comm S
+      have hcomm := S.place_comm .AA' .BA'' (by simp [Placement.IsOpposite])
         (heteroKron ((S.pointMeas .alice W u).effect b') (tauPointProj W u b''))
         (heteroKron ((S.lineMeas .bob W line).effect f') (tauLineProj P W line f''))
       exact (congrArg (DistanceCalculus.stateQForm S.psiHat) hcomm.symm).trans hfac
@@ -789,7 +726,9 @@ theorem overlap_AB''_BB'_eq (S : ProjectiveSetting P ε) (W : PauliKind)
       Φ (∑ i ∈ s, X i) Y = ∑ i ∈ s, Φ (X i) Y := by
     intro s X Y
     simp only [Φ]
-    rw [place_AB''_finset_sum, Finset.sum_mul,
+    have hplace := S.place_finsetSum .AB'' s X
+    simp only [Placement.side] at hplace
+    erw [hplace, Finset.sum_mul,
       DistanceCalculus.stateQForm_finset_sum]
   have hΦr : ∀ (X : Op (S.ExpandedLocalSpace .alice))
       (t : Finset (PauliScalar P × PauliScalar P))
@@ -797,7 +736,9 @@ theorem overlap_AB''_BB'_eq (S : ProjectiveSetting P ε) (W : PauliKind)
       Φ X (∑ j ∈ t, Y j) = ∑ j ∈ t, Φ X (Y j) := by
     intro X t Y
     simp only [Φ]
-    rw [place_BB'_finset_sum, Finset.mul_sum,
+    have hplace := S.place_finsetSum .BB' t Y
+    simp only [Placement.side] at hplace
+    erw [hplace, Finset.mul_sum,
       DistanceCalculus.stateQForm_finset_sum]
   have hΨl : ∀ (s : Finset (DegPoly P.toLdParams (P.m * P.d)))
       (A : DegPoly P.toLdParams (P.m * P.d) → Op S.toStrategy.ιA)
@@ -872,7 +813,9 @@ theorem overlap_BB'_AB''_eq (S : ProjectiveSetting P ε) (W : PauliKind)
       Φ (∑ i ∈ s, X i) Y = ∑ i ∈ s, Φ (X i) Y := by
     intro s X Y
     simp only [Φ]
-    rw [place_BB'_finset_sum, Finset.sum_mul,
+    have hplace := S.place_finsetSum .BB' s X
+    simp only [Placement.side] at hplace
+    erw [hplace, Finset.sum_mul,
       DistanceCalculus.stateQForm_finset_sum]
   have hΦr : ∀ (X : Op (S.ExpandedLocalSpace .bob))
       (t : Finset (PauliScalar P × PauliScalar P))
@@ -880,7 +823,9 @@ theorem overlap_BB'_AB''_eq (S : ProjectiveSetting P ε) (W : PauliKind)
       Φ X (∑ j ∈ t, Y j) = ∑ j ∈ t, Φ X (Y j) := by
     intro X t Y
     simp only [Φ]
-    rw [place_AB''_finset_sum, Finset.mul_sum,
+    have hplace := S.place_finsetSum .AB'' t Y
+    simp only [Placement.side] at hplace
+    erw [hplace, Finset.mul_sum,
       DistanceCalculus.stateQForm_finset_sum]
   have hΨl : ∀ (s : Finset (DegPoly P.toLdParams (P.m * P.d)))
       (A : DegPoly P.toLdParams (P.m * P.d) → Op S.toStrategy.ιB)
@@ -918,7 +863,7 @@ theorem overlap_BB'_AB''_eq (S : ProjectiveSetting P ε) (W : PauliKind)
         (lineMeas_effect_isHermitian S .bob W line f')
         (tauPointProj_isHermitian W u b'') (tauLineProj_isHermitian W line f'')
       rw [stateQForm_eprState_tauLineProj_tauPointProj P W line u hu f'' b''] at hfac
-      have hcomm := place_AB''_mul_place_BB'_comm S
+      have hcomm := S.place_comm .AB'' .BB' (by simp [Placement.IsOpposite])
         (heteroKron ((S.pointMeas .alice W u).effect b') (tauPointProj W u b''))
         (heteroKron ((S.lineMeas .bob W line).effect f') (tauLineProj P W line f''))
       exact (congrArg (DistanceCalculus.stateQForm S.psiHat) hcomm.symm).trans hfac
