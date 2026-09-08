@@ -1,3 +1,4 @@
+import MIPStarRE.QPBT.Combining.Lines.ConditionalConsistency
 import MIPStarRE.QPBT.Combining.Lines.ConsistencyPositivity
 import MIPStarRE.QPBT.Combining.Lines.RestrictedAverage
 import MIPStarRE.QPBT.Combining.Lines.SubLineMixture
