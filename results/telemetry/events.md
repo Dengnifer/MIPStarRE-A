@@ -5925,3 +5925,47 @@ not actual commit/publication hooks. No productive session was killed.
   GitHub review, or local-review summary was published. They remain non-green and
   non-mergeable. Root assigned a separate guarded workflow repair; no blind review
   rerun, fabricated result, parser edit, source change, or duplicate CI was used.
+- 2026-09-08T12:36:47+00:00: The throughput audit corrected the denominator of
+  earlier occupancy reports. Exactly 51 of 170 recorded worker-lifecycle checks
+  observed at least eight useful native workers; this is a count of samples, not a
+  percentage of time and not a measurement of provider API concurrency. The owner's
+  separate dashboard observation was 6--8 API requests, while direct current API
+  telemetry remained unavailable. The six-hour QPBT `sorry` count on `main` remained
+  47. Four new Sol Ultra construction lanes were observed with actual tools: issue
+  #367 thread 01a080e3-0e22-7530-af72-a3679688fe61, issue #368 thread
+  01a080e2-8b8b-7d00-864d-2fe522c1ef4c, issue #369 thread
+  01a080e3-7b73-7062-964f-d404b21da8e5, and issue #370 thread
+  01a080e3-e91d-70d3-9e6b-abbfc4945a91. PRs #372 and #374 carry three
+  kernel-validated tracked-site closures, but they were unmerged at this boundary
+  and therefore do not reduce the main-branch count. The meta-watch 95% floor and
+  90% coverage criteria are an operational interpretation, not API percentages or
+  an allocation change. No proof budget, B8 history, model policy, or goal was reset.
+- 2026-09-08T12:29:58+00:00: PR #319 preservation integration retained exact
+  source head 249a24a48813903ac5116fc9b1fa1dd8942508eb while merging frozen main
+  3c06c1f37ff9819d7f3bcb6d866e445b45d5ad36 as head
+  f09d5ced9965e1d677fca2187be26240ab39aef8. Pending and committed merge-loss
+  guards passed, and all three owned blobs remained byte-identical. The sole
+  exact-head CI passed all nine gates in 236 seconds. Review 5141637956 carried
+  the prior independent approval forward under the whitespace-sensitive identical
+  patch hash d2b6cb48550d99823862cc4cf6b05f9073de1a1467ad55f96fe2dea8ebfecbe7.
+  `pr_merge.py` passed every exact-head gate and merged PR #319 as
+  628e3b533ceed0d061c96d610465852bc4ad4610. The first checked-push attempt
+  failed before transport because a newly merged object file was absent; building
+  the exact imported target repaired the cache, and the normal checked publication
+  then succeeded without a hook bypass. One malformed retry command stopped at
+  usage validation and made no mutation.
+- 2026-09-08T12:35:00+00:00: The PR #319 service boundary demonstrated that
+  continuous CI does not require an unbounded writer-idle wait. Stash
+  08fdb63c5cdcc5f1b449093944af858849f1b213 preserves the finite two-row
+  pre-service suffix for PRs #296 and #319. PR #319 merged while the unrelated
+  PR #371 CI process remained active. Stash
+  05778dd2369eeae8a19dce83b3c731e8c2ac72f7 preserves the later cache-warmer
+  and PR #371 rows. The primary verified the committed 814-line prefix, parsed all
+  four JSON objects, restored them once in timestamp order through the normal
+  telemetry append lock, and retained both stashes and SHA-256 backups. Later CI
+  rows remain eligible to form the next suffix; no global append lock was held
+  through build or network work, and no clean-tree gate was weakened.
+- PR #371 workflow-resume integration preserved the original issue #366 episode start at 2026-09-08T11:34:28Z and default boundary at 13:34:28Z. The fresh hard-review checks completed at 13:34:04Z, while the genuine FINAL arrived at 13:34:40Z. The initial post-boundary hold is retained as an overbroad operator interpretation. Under owner authorization comment 5557148036 on issue #26, which assigns mathematical and internal workflow budget decisions to main absent an actual access or permission blocker, main granted a bounded no-reset completion extension at 13:57:30Z through 14:27:30Z for existing normal merge and resume verification only. No source growth or new feature work was authorized. All exact-head CI and review gates remained intact, and pr_merge.py merged PR #371 as 6f73345e84cce0fba855355cd87dcc907d05f299 at 14:02:54Z.
+- PR #371 used a finite telemetry boundary rather than waiting for unrelated CI or review writers to become idle. Retained stash 502325c8d84fe50ba44646b1dbbe34517d5db933 exactly matches the validated pre-service full files (builds 824 rows, sessions 1031 rows). Retained stash f62d6be551fee66d1e7984c2a494fe8f1d51b884 preserves the independently appended service-warmer row. On merge commit 6f73345e84cce0fba855355cd87dcc907d05f299, the tracked prefixes match byte-for-byte; the restored seven-row build suffix has SHA-256 f2ea35e25a7794ef13d905b94edc33bd5272ba43f7bd24480d03f2e324150b26 and the restored three-row session suffix has SHA-256 613da6eb518f614725d881f891505fddc10ac54a90492e3ecc8104c839b1d440. Both retained stashes and full backups under /tmp/qpbt-pr371-service-boundary-20260908 remain available. No global lock was held through network or build work, no clean-tree gate was weakened, and multiplicity was preserved.
+- PR #372 preservation refresh kept MIPStarRE/QPBT/Combining/Defs.lean byte-identical (blob 5ad58efa), passed canonical CI in 197 seconds, carried independent approval under the identical-patch guard, and merged normally as 0bf326b4861ed9788730fff74a71c373dfdb55ea. The first checked push failed before transport on a missing newly merged object file; a focused target build repaired the cache and the retry passed without bypass. Retained stash c5ece5be preserves the two-row pre-service suffix and stash 569ad776 preserves the three later build rows plus the PR #390 reviewer session. The primary restored all six records once through locked JSONL appends, verified exact ordered hashes and JSON parsing, and kept unrelated PR #358 CI live through the finite boundary; continuous CI therefore did not require a global writer-idle wait.
+- The refreshed occupancy archive preserves /root/astra_refill_coordinator as the only demonstrated native list_agents/followup_task refill owner without expiry; the primary remains the sole manual telemetry and integration writer and does not claim executable refill capability. The latest lifecycle, meta-watch, and short-control receipts remain observational: 51/170 was a count of checks rather than time or API utilization, the owner-reported provider range 6--8 was not independently measured, and merged versus locally validated tracked-hole closures are recorded separately. No goal, capacity, model, credential, B8, or proof-budget history was reset.
