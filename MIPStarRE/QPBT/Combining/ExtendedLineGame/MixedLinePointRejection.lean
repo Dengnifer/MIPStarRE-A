@@ -138,7 +138,9 @@ private theorem point_diagonal_rejectedTerm_eq_read_mismatch
           rw [outcomeWeight_eq_zero_of_invalid lines _ _ _ _ (Or.inl rfl)]
           simp
 
-private theorem point_diagonal_rejectedMass_eq_read_mismatch
+/-- At a fixed point/diagonal-line question pair, rejected Born mass is
+exactly the mass of unequal completed readouts. -/
+theorem point_diagonal_rejectedMass_eq_read_mismatch
     (lines : ExtendedLinesWitness setting points deltaL)
     (sample : DirectLdSpace P.extendedDirectLd) :
     directRejectedMass P.extendedDirectLd (strategy lines)

@@ -253,7 +253,8 @@ private theorem rejectedTerm_eq_read_mismatch
           rw [outcomeWeight_eq_zero_of_invalid lines _ _ _ _ (Or.inl rfl)]
           simp
 
-private theorem rejectedMass_eq_read_mismatch
+/-- Fixed-sample axis-line/point rejection equals completed-read mismatch mass. -/
+theorem rejectedMass_eq_read_mismatch
     (lines : ExtendedLinesWitness setting points deltaL)
     (sample : DirectLdSpace P.extendedDirectLd) :
     directRejectedMass P.extendedDirectLd (strategy lines)
@@ -551,7 +552,8 @@ private theorem diagonal_rejectedTerm_eq_read_mismatch
           rw [outcomeWeight_eq_zero_of_invalid lines _ _ _ _ (Or.inr rfl)]
           simp
 
-private theorem diagonal_rejectedMass_eq_read_mismatch
+/-- Fixed-sample diagonal-line/point rejection equals completed-read mismatch mass. -/
+theorem diagonal_rejectedMass_eq_read_mismatch
     (lines : ExtendedLinesWitness setting points deltaL)
     (sample : DirectLdSpace P.extendedDirectLd) :
     directRejectedMass P.extendedDirectLd (strategy lines)
@@ -823,7 +825,8 @@ private theorem point_axis_rejectedTerm_eq_read_mismatch
           rw [outcomeWeight_eq_zero_of_invalid lines _ _ _ _ (Or.inl rfl)]
           simp
 
-private theorem point_axis_rejectedMass_eq_read_mismatch
+/-- Fixed-sample point/axis-line rejection equals completed-read mismatch mass. -/
+theorem point_axis_rejectedMass_eq_read_mismatch
     (lines : ExtendedLinesWitness setting points deltaL)
     (sample : DirectLdSpace P.extendedDirectLd) :
     directRejectedMass P.extendedDirectLd (strategy lines)
