@@ -985,3 +985,22 @@ control-policy review, and normal merge remain required. Runtime acceptance then
 requires a natural post-merge completion transition in the coordinator-owned
 batch with the prescribed ordering; sustained coverage remains a separate
 interval observation.
+
+## 2026-09-09 - Resume completed combined native reviews
+
+**Trigger:** owner assignment of the actual PR #400 consumer recovery, tracked
+in issue #475. The publisher terminated with two genuinely completed responses;
+the existing continuation rejected its blueprint diff before consumption.
+The primary coordinator retains the incident and prior costs in telemetry.
+
+**Change:** `review.sh` accepts an explicit completed prose request alongside
+the code request when the diff requires both lanes. Both trust envelopes are
+validated through `native_review.py`; the existing parser, combiner, CI, lock,
+head and publication guards remain authoritative. Resume scratch files are
+separate from canonical prompts and outputs, and independently rebuilt prompts
+must match the exact bound digest. Invalid combined evidence publishes nothing.
+
+**Expected effect:** a dead combined publisher can complete without launching
+another review or weakening the author/reviewer hold. Activation requires normal
+CI, independent hard control-policy review and merge. The PR #400 source repair
+and held reviewers remain frozen until canonical consumption succeeds.
