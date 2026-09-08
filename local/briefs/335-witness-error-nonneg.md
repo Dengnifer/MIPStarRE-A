@@ -32,8 +32,8 @@ symmetry assumption, or positivity premise is permitted.
 - Parent issue #119.
 - Closed prerequisites #244 and #302.
 - `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:689-709`.
-- `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1279-1288`.
-- Blueprint `lem:qld-4-10` and `lem:qld-4-7`.
+- `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1020-1034`.
+- Blueprint `lem:qld-4-10` and `lem:qld-4-13`.
 
 ## Validation
 

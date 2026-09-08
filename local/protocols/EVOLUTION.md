@@ -929,3 +929,19 @@ claiming broader capability evidence from the earlier two-case audit.
 its recorded 15:40Z boundary and extension request5572932276, not a fresh two-hour
 allocation. Old 597 tests cover the narrow draft only; revised tests and exact-head
 CI/control-policy review/publication gates are recorded separately. No activation yet.
+
+## 2026-09-08 - Resume completed native code-review publication (#366)
+
+**Trigger:** `results/telemetry/events.md` entries "Native review publisher
+recovery for PRs #320 and #355" and "PR #358 review-format recovery" record
+valid native responses stranded after their original `review.sh` publishers
+terminated. **Change:** `review.sh --resume-native-request` consumes one existing
+single-code-lane request through a new guarded `native_review.py accept` command,
+then reuses the normal parser, combiner, final-head check and idempotent publisher.
+The continuation rechecks the live root, complete author exclusions, model/Ultra
+policy, prompt digest, CI, clean exact head, lock and prior publication evidence;
+it creates no request or model turn and rejects prose combinations. **Expected
+effect:** a late native response can reach the canonical review record without
+manual body reconstruction or a duplicate reviewer, while every existing review
+and merge gate remains authoritative. **Outcome:** focused offline regression and
+normal CI/independent review are required before deployment.
