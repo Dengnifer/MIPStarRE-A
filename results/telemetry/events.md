@@ -5729,3 +5729,38 @@ not actual commit/publication hooks. No productive session was killed.
   the constructed expected copies and pass `git diff --check`. Main publication
   proceeds through the canonical GitHub sync before this merge is released as a
   downstream base.
+- PR341's first checked-publication attempt stopped before any branch update:
+  the normal pre-push sync guard found multiple merge bases and exited 128.
+  This was a local history-shape failure, not a network or authentication
+  failure. The scoped source commit beginning 1b5ab59 remains clean and its
+  proof/validation evidence is preserved. The author will merge the released
+  main pin through the existing worktree, rerun the standard merge-loss guard,
+  and use the normal checked `pr_open.py` path; no CI, review, duplicate source
+  commit, or primary-main publication is inferred from the failed attempt.
+- The owner corrected the Space occupancy denominator on 2026-09-08: a total
+  limit `k` consists of one main session and `k - 1` native worker slots, with
+  no extra app-server reservation. Useful occupancy therefore excludes main
+  and unrelated app servers and targets `ceil(0.8 * (k - 1))`; at total 10 the
+  target is eight useful workers across nine native slots. Meta installed the
+  corrected `qpbt-switch` and merge-service helpers after 24 tests. Historical
+  activity reports are retained unchanged but cannot certify the corrected
+  denominator. The current native lease remains eight: activation to nine is
+  blocked until the canonical router receives a narrow, normally reviewed
+  exclusion for unrelated app-server PID 3286270. Receipt:
+  `/home/drx/.cache/mipstarre-dev/qpbt-switch/worker-occupancy-correction-20260908.json`
+  (sha256 942881e910112a72d72da793ad77ace76c3a48597ff9522c6012eb9fc3ffb640).
+- 2026-09-08T06:16:34.750158+00:00: Worker-only occupancy correction completed. Owner clarified total k = one main plus k-1 shared native worker slots, no extra reservation; maintain ceil(0.8*(k-1)) useful active subagents almost all time, excluding main/other/idle activity. At total10, capacity9 and active-worker floor8. Controller and service adapter passed24 isolated tests; canonical native9 identity, lease, service, same active goal/budgets and unchanged authentication verified; repeated --limit10 was a no-op. Main chose and refilled its assignments and recorded eight active workers before the authorized checkpoint. Recorded switch interval is an occupancy exception; main is restoring saved work now. The unrelated app-server exited, making native9 admissible under the existing guard; reviewed durable router/protocol correction remains issue345. Recovery handled delayed queued input and the resume-goal dialog without losing state or relaxing checks. Receipt: ~/.cache/mipstarre-dev/qpbt-switch/worker-occupancy-final-20260908.json; original phase receipt: /home/drx/.cache/mipstarre-dev/qpbt-switch/requests/20260908T054638Z-bbee54a5/receipt.json. Main coordinator owns normal telemetry publication.
+- PR341's multiple-merge-base publication incident was resolved without a hook
+  bypass or duplicate source commit. The author guardedly merged published main
+  578ec420f578763e5c0876687b32f37eaa2ba375, preserving the public
+  `diagonalGameRead` API and the incoming docstring explanation, and obtained
+  the unique-merge-base head 255e25d9504f7f3b68d0b1d708e1731e3d879d37.
+  The normal `pr_open.py` retry then exited zero and checked-published that head
+  as PR347; its worktree and remote head were independently read back clean.
+  Exact-head CI, independent review, prerequisite integration and merge remain
+  coordinator gates, so this record claims publication only. The Astra/Ultra
+  proof phase was489.406s and normal validation/publication was934s; the prior
+  1500s proof episode, all predecessor times, unknown usage and B8's exhausted
+  13 attempts/26509 seconds remain cumulative and unchanged. Receipt:
+  /tmp/qpbt-parameter-evaluated-line-bound-astra-status-20260908.json
+  (sha256 adc49ff3bd1aafca860c6ffa3562455947743e1dfe9d0e9b7d205bb07b738655).
