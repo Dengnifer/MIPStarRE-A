@@ -3,6 +3,7 @@ import MIPStarRE.QPBT.Combining.Lines.OptionPostprocessDistance
 import MIPStarRE.QPBT.Combining.Lines.SamePlacementDistance
 import MIPStarRE.QPBT.Combining.Lines.OptionPointMarginalTransport
 import MIPStarRE.QPBT.Combining.Lines.CombinedPointLineMarginalDistance
+import MIPStarRE.QPBT.Combining.Lines.CombinedPointLineMarginalDefect
 
 /-!
 # Combined lines and restricted line distributions
