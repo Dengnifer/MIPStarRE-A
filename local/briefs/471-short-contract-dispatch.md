@@ -31,7 +31,7 @@ SHA-256 of its exact bytes. A complete ordinary contract has this shape:
   "actor": {
     "thread_id": "canonical-uuid",
     "role": "prover",
-    "job_class": "proof",
+    "job_class": "bounded",
     "classification": "routine",
     "model": "gpt-5.6-sol",
     "effort": "ultra",
