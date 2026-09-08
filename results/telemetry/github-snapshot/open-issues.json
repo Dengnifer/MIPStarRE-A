@@ -1,5 +1,425 @@
 [
  {
+  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/396",
+  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
+  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/396/labels{/name}",
+  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/396/comments",
+  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/396/events",
+  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/396",
+  "id": 5388426615,
+  "node_id": "I_kwDOUJyJf88AAAABQSzddw",
+  "number": 396,
+  "title": "Add point witness absorption estimates",
+  "user": {
+   "login": "Dengnifer",
+   "id": 89234078,
+   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
+   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/Dengnifer",
+   "html_url": "https://github.com/Dengnifer",
+   "followers_url": "https://api.github.com/users/Dengnifer/followers",
+   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
+   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
+   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
+   "repos_url": "https://api.github.com/users/Dengnifer/repos",
+   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
+   "type": "User",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "labels": [
+   {
+    "id": 12025010884,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
+    "name": "formalization",
+    "color": "ededed",
+    "default": false,
+    "description": "Lean formalization of a mathematical statement"
+   },
+   {
+    "id": 12025012779,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8iKw",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/sorry-elimination",
+    "name": "sorry-elimination",
+    "color": "ededed",
+    "default": false,
+    "description": "Explicitly aimed at discharging remaining `sorry` sites"
+   }
+  ],
+  "state": "open",
+  "locked": false,
+  "assignees": [],
+  "milestone": null,
+  "comments": 0,
+  "created_at": "2026-09-08T15:06:23Z",
+  "updated_at": "2026-09-08T15:06:23Z",
+  "closed_at": null,
+  "assignee": null,
+  "author_association": "OWNER",
+  "active_lock_reason": null,
+  "sub_issues_summary": {
+   "total": 0,
+   "completed": 0,
+   "percent_completed": 0
+  },
+  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/118",
+  "issue_dependencies_summary": {
+   "blocked_by": 1,
+   "total_blocked_by": 1,
+   "blocking": 0,
+   "total_blocking": 0
+  },
+  "body": "### Scope\n\nRecover the two point-witness absorption estimates used at the first projection\nstep of the combined-line argument, together with the single generic\nprojective-contraction inequality they require.\n\n### Source\n\n- `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:902-915`\n- Existing `CombinedPointsWitness.consistent_XZ` and `consistent_ZX` fields\n\n### Acceptance criteria\n\n- Add `CombinedPointsWitness.absorb_X_le` and `CombinedPointsWitness.absorb_Z_le`.\n- Preserve the current witness and point-construction signatures.\n- Add no axioms, proof holes, bridge hypotheses, or later line-polynomial work.\n- Type-check the dedicated helper module and inspect both declarations' axioms.\n\n### Dependencies\n\n- Stacks on the combined point witness construction from #388 / PR #392.\n",
+  "closed_by": null,
+  "reactions": {
+   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/396/reactions",
+   "total_count": 0,
+   "+1": 0,
+   "-1": 0,
+   "laugh": 0,
+   "hooray": 0,
+   "confused": 0,
+   "heart": 0,
+   "rocket": 0,
+   "eyes": 0
+  },
+  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/396/timeline",
+  "performed_via_github_app": null,
+  "state_reason": null,
+  "pinned_comment": null
+ },
+ {
+  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/395",
+  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
+  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/395/labels{/name}",
+  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/395/comments",
+  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/395/events",
+  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/395",
+  "id": 5388282887,
+  "node_id": "I_kwDOUJyJf88AAAABQSqsBw",
+  "number": 395,
+  "title": "Recover the combined line measurement constructor",
+  "user": {
+   "login": "Dengnifer",
+   "id": 89234078,
+   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
+   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/Dengnifer",
+   "html_url": "https://github.com/Dengnifer",
+   "followers_url": "https://api.github.com/users/Dengnifer/followers",
+   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
+   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
+   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
+   "repos_url": "https://api.github.com/users/Dengnifer/repos",
+   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
+   "type": "User",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "labels": [
+   {
+    "id": 12025010884,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
+    "name": "formalization",
+    "color": "ededed",
+    "default": false,
+    "description": "Lean formalization of a mathematical statement"
+   },
+   {
+    "id": 12025012384,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8goA",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/proof",
+    "name": "proof",
+    "color": "ededed",
+    "default": false,
+    "description": "Issue is primarily about proving an existing result"
+   }
+  ],
+  "state": "open",
+  "locked": false,
+  "assignees": [],
+  "milestone": null,
+  "comments": 0,
+  "created_at": "2026-09-08T14:53:51Z",
+  "updated_at": "2026-09-08T14:53:51Z",
+  "closed_at": null,
+  "assignee": null,
+  "author_association": "OWNER",
+  "active_lock_reason": null,
+  "sub_issues_summary": {
+   "total": 0,
+   "completed": 0,
+   "percent_completed": 0
+  },
+  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/118",
+  "issue_dependencies_summary": {
+   "blocked_by": 3,
+   "total_blocked_by": 3,
+   "blocking": 0,
+   "total_blocking": 0
+  },
+  "body": "<!-- mipstarre-issue-key: qpbt-combined-line-measurement-20260908 -->\n### Source\n\n- `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:882-894`\n- X-Z-X construction at the proof passage around lines 942-949\n- Blueprint label `lem:qld-xz-lines`\n\n### Objective\n\nRecover the actual paired-line POVM used by the combined-lines argument into a\ndedicated `MIPStarRE/QPBT/Combining/Lines` helper module.  The measurement has\neffects\n`M_X(f_X) * M_Z(f_Z) * M_X(f_X)`, together with its definitional effect\nidentity, its orientation as the existing one-sided pasted measurement, and the\nseparate X- and Z-axis degree-support lemmas.\n\n### Scope\n\n- Preserve the current `CombinedLinesWitness` carrier, outcomes, and degree\n  fields exactly.\n- Use the existing `pastedMeasurement_isMeasurement`,\n  `lineMeasExp_isProjective`, and `expLineOp_zero_of_not_deg_d` APIs.\n- Add no hypotheses, zero-direction restriction, point-witness premise,\n  global-pair statement, or source-theorem completion claim.\n- Recover only the five declarations preserved at protected commit\n  `0f4ef05370350f4017439ebd839ef0561f13130f`.\n- Do not work on conditioned/restored pasting, the opposite-symmetry leaf, or\n  the B8 Bob-side extended-line obstruction.\n\n### Dependencies\n\n- PR #391 / issue #389: corrected supplied-point error domain.\n- PR #392 / issue #388: combined point witness producer.\n\n### Acceptance\n\n- The dedicated helper module and the real stacked `Combining/Lines.lean`\n  type-check.\n- The five declarations have only the standard project axiom closure.\n- Focused proof-integrity, statement-integrity, hook, and checked-publication\n  guards pass.\n\n<!-- mipstarre-issue-key: qpbt-combined-line-measurement-20260908 -->",
+  "closed_by": null,
+  "reactions": {
+   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/395/reactions",
+   "total_count": 0,
+   "+1": 0,
+   "-1": 0,
+   "laugh": 0,
+   "hooray": 0,
+   "confused": 0,
+   "heart": 0,
+   "rocket": 0,
+   "eyes": 0
+  },
+  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/395/timeline",
+  "performed_via_github_app": null,
+  "state_reason": null,
+  "pinned_comment": null
+ },
+ {
+  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/394",
+  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
+  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/394/labels{/name}",
+  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/394/comments",
+  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/394/events",
+  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/394",
+  "id": 5388278607,
+  "node_id": "I_kwDOUJyJf88AAAABQSqbTw",
+  "number": 394,
+  "title": "Recover opposite-placement consistency symmetry",
+  "user": {
+   "login": "Dengnifer",
+   "id": 89234078,
+   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
+   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/Dengnifer",
+   "html_url": "https://github.com/Dengnifer",
+   "followers_url": "https://api.github.com/users/Dengnifer/followers",
+   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
+   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
+   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
+   "repos_url": "https://api.github.com/users/Dengnifer/repos",
+   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
+   "type": "User",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "labels": [
+   {
+    "id": 12025010884,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
+    "name": "formalization",
+    "color": "ededed",
+    "default": false,
+    "description": "Lean formalization of a mathematical statement"
+   },
+   {
+    "id": 12025012183,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8f1w",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/qpbt-analysis",
+    "name": "qpbt-analysis",
+    "color": "ededed",
+    "default": false,
+    "description": "Soundness/rigidity analysis of the Pauli basis test \u2014 self-testing bounds and error terms"
+   },
+   {
+    "id": 12025012384,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8goA",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/proof",
+    "name": "proof",
+    "color": "ededed",
+    "default": false,
+    "description": "Issue is primarily about proving an existing result"
+   },
+   {
+    "id": 12025013584,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8lUA",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/paper-2001.04383",
+    "name": "paper-2001.04383",
+    "color": "ededed",
+    "default": false,
+    "description": "MIP*=RE (arXiv:2001.04383) \u2014 the primary paper of this track"
+   }
+  ],
+  "state": "open",
+  "locked": false,
+  "assignees": [],
+  "milestone": null,
+  "comments": 0,
+  "created_at": "2026-09-08T14:53:31Z",
+  "updated_at": "2026-09-08T14:53:31Z",
+  "closed_at": null,
+  "assignee": null,
+  "author_association": "OWNER",
+  "active_lock_reason": null,
+  "sub_issues_summary": {
+   "total": 0,
+   "completed": 0,
+   "percent_completed": 0
+  },
+  "issue_dependencies_summary": {
+   "blocked_by": 0,
+   "total_blocked_by": 0,
+   "blocking": 0,
+   "total_blocking": 0
+  },
+  "body": "<!-- mipstarre-issue-key: qpbt-line-opposite-consistency-symmetry-20260908 -->\n### Scope\n\nRecover the standalone leaf theorem `consistencyDefect_opposite_symm` in a\ndedicated `MIPStarRE/QPBT/Combining/Lines` helper module.\n\n### Source\n\nThe theorem supports every directed opposite placement in\n`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:882-894`.\nIt exchanges the two measurements in `consistencyDefect` using commutation of\noperators placed on opposite registers.\n\n### Constraints\n\n- Preserve the protected public statement from commit `0f4ef05370350f4017439ebd839ef0561f13130f`.\n- Use the current opposite-placement commutation API.\n- Add no source hypothesis, joint law, global-pair premise, or unrelated line constructor.\n- Leave the separately owned combined-line measurement slice untouched.\n\n### Acceptance\n\n- The isolated module type-checks with a kernel proof and standard axiom closure.\n- Normal hooks and checked publication pass; CI and review remain with the primary owner.\n",
+  "closed_by": null,
+  "reactions": {
+   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/394/reactions",
+   "total_count": 0,
+   "+1": 0,
+   "-1": 0,
+   "laugh": 0,
+   "hooray": 0,
+   "confused": 0,
+   "heart": 0,
+   "rocket": 0,
+   "eyes": 0
+  },
+  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/394/timeline",
+  "performed_via_github_app": null,
+  "state_reason": null,
+  "pinned_comment": null
+ },
+ {
+  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/393",
+  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
+  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/393/labels{/name}",
+  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/393/comments",
+  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/393/events",
+  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/393",
+  "id": 5388123809,
+  "node_id": "I_kwDOUJyJf88AAAABQSg-oQ",
+  "number": 393,
+  "title": "Prove extraction marginal complement absorption",
+  "user": {
+   "login": "Dengnifer",
+   "id": 89234078,
+   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
+   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/Dengnifer",
+   "html_url": "https://github.com/Dengnifer",
+   "followers_url": "https://api.github.com/users/Dengnifer/followers",
+   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
+   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
+   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
+   "repos_url": "https://api.github.com/users/Dengnifer/repos",
+   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
+   "type": "User",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "labels": [
+   {
+    "id": 12025010884,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
+    "name": "formalization",
+    "color": "ededed",
+    "default": false,
+    "description": "Lean formalization of a mathematical statement"
+   },
+   {
+    "id": 12025012183,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8f1w",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/qpbt-analysis",
+    "name": "qpbt-analysis",
+    "color": "ededed",
+    "default": false,
+    "description": "Soundness/rigidity analysis of the Pauli basis test \u2014 self-testing bounds and error terms"
+   },
+   {
+    "id": 12025012384,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8goA",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/proof",
+    "name": "proof",
+    "color": "ededed",
+    "default": false,
+    "description": "Issue is primarily about proving an existing result"
+   },
+   {
+    "id": 12025012779,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8iKw",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/sorry-elimination",
+    "name": "sorry-elimination",
+    "color": "ededed",
+    "default": false,
+    "description": "Explicitly aimed at discharging remaining `sorry` sites"
+   },
+   {
+    "id": 12025013584,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8lUA",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/paper-2001.04383",
+    "name": "paper-2001.04383",
+    "color": "ededed",
+    "default": false,
+    "description": "MIP*=RE (arXiv:2001.04383) \u2014 the primary paper of this track"
+   }
+  ],
+  "state": "open",
+  "locked": false,
+  "assignees": [],
+  "milestone": null,
+  "comments": 0,
+  "created_at": "2026-09-08T14:39:53Z",
+  "updated_at": "2026-09-08T14:39:53Z",
+  "closed_at": null,
+  "assignee": null,
+  "author_association": "OWNER",
+  "active_lock_reason": null,
+  "sub_issues_summary": {
+   "total": 0,
+   "completed": 0,
+   "percent_completed": 0
+  },
+  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
+  "issue_dependencies_summary": {
+   "blocked_by": 0,
+   "total_blocked_by": 0,
+   "blocking": 0,
+   "total_blocking": 0
+  },
+  "body": "<!-- mipstarre-issue-key: qpbt-marginal-complement-20260908 -->\nClose `marginalPoly_sub_pointMeas_approx_zero` in\n`MIPStarRE/QPBT/Extraction/Consistency.lean`.\n\nSource: `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1637-1662`,\nEquation `eq:qld-sg-cons2` in blueprint\n`lem:qld-constructing-the-paulis-helper`.\n\nThe proof must preserve the supplied `GlobalPairWitness`, all four placements,\nthe current epsilon and deltaG hypotheses, and the existing\n`deltaConstructPaulis` error envelope. It must derive the contraction and\npoint-measurement replacement estimate without bridge hypotheses or changes to\nthe later decoding obligations.\n\nThis issue is stacked on the completed first absorption estimate in PR #384.",
+  "closed_by": null,
+  "reactions": {
+   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/393/reactions",
+   "total_count": 0,
+   "+1": 0,
+   "-1": 0,
+   "laugh": 0,
+   "hooray": 0,
+   "confused": 0,
+   "heart": 0,
+   "rocket": 0,
+   "eyes": 0
+  },
+  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/393/timeline",
+  "performed_via_github_app": null,
+  "state_reason": null,
+  "pinned_comment": null
+ },
+ {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/389",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/389/labels{/name}",
@@ -80,8 +500,8 @@
   "issue_dependencies_summary": {
    "blocked_by": 0,
    "total_blocked_by": 0,
-   "blocking": 0,
-   "total_blocking": 0
+   "blocking": 1,
+   "total_blocking": 1
   },
   "body": "<!-- mipstarre-issue-key: qpbt-combined-lines-error-domain-20260908 -->\n### Source\n\n- `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:882-894`\n- Blueprint label `lem:qld-xz-lines`\n- `docs/paper-gaps/qpbt_combined-lines-error-term.tex`\n\n### Problem\n\nThe current formalization-only helper\n`exists_combinedLinesWitness_ofPointsWitness` chooses a two-variable line-error\nfunction before universally quantifying an arbitrary scalar `deltaQ` and every\n`CombinedPointsWitness S deltaQ`. Its conclusion nevertheless bounds the line\ndefect by a function of only `epsilon` and `md/q`.\n\n`CombinedPointsWitness` uses `deltaQ` as the upper bound for its self-consistency\nand both ordered-product comparisons. With an unrestricted large `deltaQ`, those\nhypotheses do not give a quantity polynomially small in `epsilon`; the pasting\ncalculation necessarily retains the supplied point error. The helper is therefore\nstronger than both the source theorem and the available proof context.\n\n### Repair\n\n- Change only the conditional helper to accept `deltaQ : Real -> Real` and\n  `IsPolyErr deltaQ`, and require `CombinedPointsWitness S (deltaQ epsilon)`.\n- Preserve the source-facing `exists_combinedLinesWitness` statement exactly.\n- Document why the old arbitrary-scalar domain is not justified and record the\n  named construction obligations used by the preserved proof route.\n- Do not add a producer package, a new paper hypothesis, or a claim that the\n  source theorem has been proved.\n\n### Validation\n\n- Check the edited Lean statement and source-facing header.\n- Run the paper-gap note style check and focused statement-integrity audits.\n\n<!-- mipstarre-issue-key: qpbt-combined-lines-error-domain-20260908 -->",
   "closed_by": null,
@@ -173,8 +593,8 @@
   "issue_dependencies_summary": {
    "blocked_by": 1,
    "total_blocked_by": 1,
-   "blocking": 0,
-   "total_blocking": 0
+   "blocking": 2,
+   "total_blocking": 2
   },
   "body": "<!-- mipstarre-issue-key: qpbt-combined-point-producer-recovery-20260908 -->\n### Motivation\n\n`MIPStarRE.QPBT.exists_combinedPointsWitness` is the tracked construction\nobligation for `lem:qld-4-10`, paper\n`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:689-881`.\nIts public statement already matches the source-facing contract, but its proof\nbody remains `sorry` on `main`.\n\nA complete direct-space proof and its sandwich, consistency,\northonormalization, placement, commutation, and closeness helpers are preserved\nread-only at commit `0f4ef05370350f4017439ebd839ef0561f13130f`. Recover only\nthat producer proof against the current projective-setting and witness APIs.\n\n### Scope\n\n- Preserve the exact existential theorem statement and all current witness\n  fields.\n- Do not add a linearity, rounding, bridge, producer, or carrier hypothesis.\n- Recover only the necessary point-combination helper modules and producer\n  proof after verifying their current dependencies and axiom closures.\n- Stack on immutable issue-369 commit `989702f7` without modifying or\n  overwriting its `extendedQ_spec` proof.\n- Do not work on combined-line production, B8, or unrelated QPBT obligations.\n\n### Acceptance\n\n- The current stacked `Points.lean` module builds with both producer and\n  `extendedQ_spec` proofs intact.\n- `exists_combinedPointsWitness` uses only the standard project axioms and has\n  no `sorryAx` dependency.\n- Focused proof-integrity, statement-integrity, and hook checks pass.\n",
   "closed_by": null,
@@ -278,9 +698,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 0,
+  "comments": 1,
   "created_at": "2026-09-08T13:57:59Z",
-  "updated_at": "2026-09-08T13:57:59Z",
+  "updated_at": "2026-09-08T14:27:44Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
@@ -1273,126 +1693,6 @@
    "eyes": 0
   },
   "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/368/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/367",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/367/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/367/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/367/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/367",
-  "id": 5386428894,
-  "node_id": "I_kwDOUJyJf88AAAABQQ5h3g",
-  "number": 367,
-  "title": "Prove QPBT combined line polynomial bounds and specification",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement"
-   },
-   {
-    "id": 12025012183,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8f1w",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/qpbt-analysis",
-    "name": "qpbt-analysis",
-    "color": "ededed",
-    "default": false,
-    "description": "Soundness/rigidity analysis of the Pauli basis test \u2014 self-testing bounds and error terms"
-   },
-   {
-    "id": 12025012384,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8goA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/proof",
-    "name": "proof",
-    "color": "ededed",
-    "default": false,
-    "description": "Issue is primarily about proving an existing result"
-   },
-   {
-    "id": 12025012779,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8iKw",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/sorry-elimination",
-    "name": "sorry-elimination",
-    "color": "ededed",
-    "default": false,
-    "description": "Explicitly aimed at discharging remaining `sorry` sites"
-   },
-   {
-    "id": 12025013584,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8lUA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/paper-2001.04383",
-    "name": "paper-2001.04383",
-    "color": "ededed",
-    "default": false,
-    "description": "MIP*=RE (arXiv:2001.04383) \u2014 the primary paper of this track"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-08T12:01:29Z",
-  "updated_at": "2026-09-08T12:01:29Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 0,
-   "blocking": 0,
-   "total_blocking": 0
-  },
-  "body": "<!-- mipstarre-issue-key: qpbt-combine-line-polynomial-proofs-20260908 -->\n### Scope\n\nProve the existing tracked `sorry` sites\n`combineLinePolynomial_natDegree_le` and `combineLinePoly_spec` in\n`MIPStarRE/QPBT/Combining/Defs.lean`.\n\n### Source\n\n- Blueprint: `def:combine-map`, equation `eq:combine-lines`.\n- Paper: `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:984-989`.\n\nThe proof must preserve the current public statements. The degree theorem stays\nover a commutative semiring, and the evaluation theorem stays over a field with\nthe existing `IsCombineLineCompatible` domain condition.\n\n### Ownership\n\nThis issue owns only those two declarations and narrowly necessary local proof\nhelpers or imports. It does not own `combinePoly_mem_polyFunc`, which is being\nhandled independently.\n\n### Acceptance\n\n- Both assigned sites contain kernel-checked proofs without new axioms or proof\n  bypasses.\n- The edited file passes focused Lean validation.\n- The branch contains no unrelated changes.\n",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/367/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/367/timeline",
   "performed_via_github_app": null,
   "state_reason": null,
   "pinned_comment": null
@@ -6556,9 +6856,9 @@
   "author_association": "OWNER",
   "active_lock_reason": null,
   "sub_issues_summary": {
-   "total": 7,
+   "total": 9,
    "completed": 1,
-   "percent_completed": 14
+   "percent_completed": 11
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/166",
   "issue_dependencies_summary": {
@@ -6649,8 +6949,8 @@
   "issue_dependencies_summary": {
    "blocked_by": 0,
    "total_blocked_by": 4,
-   "blocking": 2,
-   "total_blocking": 2
+   "blocking": 3,
+   "total_blocking": 3
   },
   "body": "<!-- mipstarre-issue-key: stage43-unfiled-observables-line-measurements -->\n### Target declarations\n\nIn `MIPStarRE/QPBT/Observables/LineMeasurement.lean` prove:\n\n- line 54 \u2014 `polynomialOnLine_lowDegreeEncoding_natDegree_le`\n- line 102 \u2014 `expLineOp_nonneg`\n- line 110 \u2014 `expLineOp_sum_eq_one`\n- line 129 \u2014 `lineMeasExp_isProjective`\n- line 141 \u2014 `expLineOp_zero_of_not_deg_d`\n- line 250 \u2014 `expLine_self_cons`\n- line 269 \u2014 `expLine_point_cons`\n- line 286 \u2014 `expLine_point_cons'`\n\n### Paper and blueprint references\n\n- Expanded line measurement and its three consistency conclusions:\n  `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:506-679`.\n- `blueprint/src/chapter/ch14_qpbt_observables.tex:1034-1230`,\n  `def:expanded-line-measurement` and `lem:qld-comm-line-cons`.\n\n### Dependencies\n\n- #110, #115, and #106 must merge first for line distributions,\n  expanded point consistency, and low-degree line geometry.\n- #49 supplies the distance calculus used in the consistency estimates.\n- This packet has exclusive ownership of `LineMeasurement.lean`.\n\n### Acceptance\n\n- All eight target declarations are proved with unchanged signatures and constants.\n- `lake env lean MIPStarRE/QPBT/Observables/LineMeasurement.lean` and direct consumers are green.\n- Fully discharged source nodes receive proof-level `\\leanok`.\n- No new `sorry`, `admit`, axiom, prohibited bypass, degree fallback,\n  symmetry shortcut, or omitted placement is introduced.\n- Full build, declaration checking, blueprint rendering, exact-head CI, and\n  independent review pass.\n\n### Scope notes\n\nPreserve the genuine polynomial restriction, zero outside the degree bound,\nprojectivity, all four placement pairs, and both point-consistency\norientations. Own only the listed file and matching blueprint proof status.\nMain locators are from `c1c0af4`.\n\n---\nStage 4.3 proof packet under #47.\n\nPrerequisites are recorded as GitHub issue dependencies (blocked_by); the bullets above are commentary.\n",
   "closed_by": null,
@@ -7136,9 +7436,9 @@
   "author_association": "OWNER",
   "active_lock_reason": null,
   "sub_issues_summary": {
-   "total": 26,
+   "total": 27,
    "completed": 19,
-   "percent_completed": 73
+   "percent_completed": 70
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/1",
   "issue_dependencies_summary": {
