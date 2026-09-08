@@ -76,3 +76,13 @@ errors: a head was misidentified as the required mixed bound, and a follow-up
 message reached an already occupied actor. Neither event created a new admission
 or budget. The original actor scope and deadline remained in force, and no
 source statement, review gate, capacity, model policy, or B8 history changed.
+
+The second selected post-merge PR #426 handoff sample also failed the strict
+60-second completion-to-start target. The PR #400 review-request payload was
+ready 881.014 seconds before its PR #422 predecessor completed, but the
+successor turn started after 73.171 seconds, a 13.171-second miss. The first
+attributable useful workflow-guard output followed completion after 110.991
+seconds. The original sealed eight-minute preparation budget and the later
+root-directed six-minute deadline are recorded separately without backdating
+or resetting costs. This sample does not overwrite the earlier 63.076-second
+miss and does not establish sustained coverage or runtime acceptance.

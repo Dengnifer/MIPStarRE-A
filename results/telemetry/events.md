@@ -6020,3 +6020,16 @@ not actual commit/publication hooks. No productive session was killed.
   actual source effects remain historical evidence. The incident archive does
   not claim a new worker, repair the dependency, or alter any source statement,
   review gate, allocation, model policy, or B8 counter.
+- 2026-09-08T19:49:57Z: The second selected post-merge PR #426 handoff sample
+  failed the strict runtime target. The PR #400 review-request payload was
+  prepared at 19:23:01.896Z, 881.014 seconds before the PR #422 predecessor
+  completed at 19:37:42.910Z. The native call began at 19:38:56.067Z and the
+  successor turn started at 19:38:56.081Z, so completion-to-start took 73.171
+  seconds and missed the 60-second target by 13.171 seconds. First model output
+  followed completion after 93.019 seconds and the first attributable useful
+  workflow-guard output after 110.991 seconds. The original sealed eight-minute
+  budget and the later root-directed six-minute deadline remain distinct; no
+  timestamp, predecessor cost, or proof budget was reset. The earlier
+  63.076-second miss remains unchanged, and neither sample proves sustained
+  coverage or runtime acceptance. Exact prepared and result receipts are
+  archived under `owner-audits/throughput-correction-20260908/`.
