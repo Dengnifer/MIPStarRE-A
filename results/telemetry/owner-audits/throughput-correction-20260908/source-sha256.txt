@@ -9,3 +9,6 @@ b9a60298ac025df52663a45e6af6d07d1ae5e9e8f02ec82c5314ab23340328e9  results/teleme
 2601d712c487e6e21f03cf95c00348c2f4344c10350b173c4771020ea69f2d3d  results/telemetry/owner-audits/throughput-correction-20260908/qpbt-pr371-budget-disposition-20260908.json
 09d284fd2cb0adf280751971e183ae3a33fd00234dc18c5479979d5288db1414  results/telemetry/owner-audits/throughput-correction-20260908/qpbt-refill-preselected-successors-20260908.json
 2f2c190b8a29abdfd407883335a1d36eec33ffc45ec291e5b5e7d0d5370561b0  results/telemetry/owner-audits/throughput-correction-20260908/qpbt-subline-claim2-domain-audit-20260909.json
+70d849c6dddd520bab89560d0dc32b64062050b41360de4045f95035c5074694  results/telemetry/owner-audits/throughput-correction-20260908/qpbt-postmerge-prepared-365-to-422-20260909.json
+a5e807765e78760a6c9c3aa8058bdcfe531f50e88a8028b395908c1712572896  results/telemetry/owner-audits/throughput-correction-20260908/qpbt-postmerge-handoff-acceptance-20260909.json
+b916b150b4cfebad6f342359d7dca653589e99960aeb61111d62bc457305012a  results/telemetry/owner-audits/throughput-correction-20260908/qpbt-448-readiness-routing-incident-20260909.json

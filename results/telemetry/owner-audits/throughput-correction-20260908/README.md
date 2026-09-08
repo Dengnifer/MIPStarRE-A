@@ -62,3 +62,17 @@ witness domain and explicitly records that no Lean instantiation, source edit,
 or canonical review was performed. Main retains adjudication of that proposal;
 the archive does not treat it as a verified source theorem or a completed proof
 closure.
+
+The post-merge PR #426 sample records one genuinely prevalidated successor.
+The issue #422 payload was ready 751.310 seconds before the PR #365 predecessor
+completed, but the new task started 63.076 seconds after completion and therefore
+missed the strict 60-second target by 3.076 seconds. Its first attributable
+source read followed completion by 110.070 seconds. This is a failed acceptance
+sample, not a coverage or sustained-occupancy certificate; the earlier 294.078-
+and 354.659-second failures remain unchanged.
+
+The separate PR #448 routing incident preserves two independent steering
+errors: a head was misidentified as the required mixed bound, and a follow-up
+message reached an already occupied actor. Neither event created a new admission
+or budget. The original actor scope and deadline remained in force, and no
+source statement, review gate, capacity, model policy, or B8 history changed.
