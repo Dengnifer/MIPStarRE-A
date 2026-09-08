@@ -78,6 +78,19 @@ The documentation diff must remain below the workflow ceiling, pass the git
 hooks and canonical CI, and receive independent hard control-policy review at
 its exact head before normal merge.
 
+## Pre-merge baseline
+
+The coordinator-owned batch
+`/tmp/qpbt-refill-latency-next-batch-20260909.json`, observed with SHA-256
+`e18dd17a73fe25148e74fdf644a7142617020c2f1c6ef52743555c93acc775dd`, records
+two completion transitions before this correction was merged. The first took
+294.078 seconds from `task_complete` to the successor's actual `task_started`;
+the second took 354.659 seconds. Both records have `ready_at: null`, and the
+second also records `payload_prevalidation_complete_before_completion: false`.
+They are missed baseline transitions, not evidence that activation ordering is
+accepted. The later observation of nine occupied native slots is a recovery
+snapshot only and does not establish prompt or sustained floor coverage.
+
 Runtime acceptance requires a natural post-merge completion in the
 coordinator-owned latency batch with `ready_at` before completion, the actual
 activation call before detailed adoption, and the successor's current

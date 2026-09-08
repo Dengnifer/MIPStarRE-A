@@ -976,7 +976,12 @@ executor is explicitly not the native controller and receives no code change.
 **Expected effect:** ready work occupies a released native slot before forensic
 adoption consumes the vacancy, without weakening source, budget, ownership,
 review, model, or capacity gates. Backlog recovery and closing snapshots cannot
-be reported as prompt or sustained coverage. **Outcome:** pending canonical CI,
-independent hard control-policy review, and normal merge. Runtime acceptance then requires
-a natural completion transition in the coordinator-owned batch with the prescribed
-ordering; sustained coverage remains a separate interval observation.
+be reported as prompt or sustained coverage. **Outcome:** the pre-merge
+coordinator batch records two missed transitions at 294.078 and 354.659 seconds
+from predecessor completion to actual successor start; both have no `ready_at`,
+and the latter was not fully prevalidated before completion. Its later count of
+nine occupied slots is recovery, not acceptance. Canonical CI, independent hard
+control-policy review, and normal merge remain required. Runtime acceptance then
+requires a natural post-merge completion transition in the coordinator-owned
+batch with the prescribed ordering; sustained coverage remains a separate
+interval observation.
