@@ -25,32 +25,6 @@ open DistanceCalculus
 
 noncomputable section
 
-/-- The computational data of a direct line description, with its
-proof-irrelevant fields erased. -/
-private def directLineDescData (D : DirectLdParams) :
-    DirectLineDesc D →
-      ((Fin D.m → DirectScalarQ D) × Fin D.m) ⊕
-        ((Fin D.m → DirectScalarQ D) × Fin D.m ×
-          (Fin D.m → DirectScalarQ D))
-  | .axis base index _ => Sum.inl (base, index)
-  | .diagonal base index direction _ _ => Sum.inr (base, index, direction)
-
-private theorem directLineDescData_injective (D : DirectLdParams) :
-    Function.Injective (directLineDescData D) := by
-  intro x y h
-  cases x <;> cases y <;> simp only [directLineDescData, Sum.inl.injEq,
-    Sum.inr.injEq, Prod.mk.injEq] at h
-  · obtain ⟨rfl, rfl⟩ := h
-    rfl
-  · contradiction
-  · contradiction
-  · obtain ⟨rfl, rfl, rfl⟩ := h
-    rfl
-
-private noncomputable instance (D : DirectLdParams) :
-    Fintype (DirectLineDesc D) :=
-  Fintype.ofInjective (directLineDescData D) (directLineDescData_injective D)
-
 /-- The pointwise consistency defect of two direct coefficient measurements
 after evaluating both coefficient vectors at the parameter `t`. -/
 noncomputable def directCoefficientEvaluationDefect
