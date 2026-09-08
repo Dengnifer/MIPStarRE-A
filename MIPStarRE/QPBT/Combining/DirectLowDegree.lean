@@ -2,6 +2,7 @@ import MIPStarRE.QPBT.Combining.DirectLowDegree.Soundness
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Consistency
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Strategy
 import MIPStarRE.QPBT.Combining.DirectLowDegree.GameValue
+import MIPStarRE.QPBT.Combining.DirectLowDegree.RejectionBounds
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.PassConversion
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.SeedFiberValue
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Error
