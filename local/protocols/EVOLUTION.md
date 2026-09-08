@@ -936,11 +936,13 @@ CI/control-policy review/publication gates are recorded separately. No activatio
 fatal undefined command whose nonzero PDF exit was hidden by a stale artifact
 and later successful renderer commands.
 
-**Change:** `ci.sh` removes the prior `print.pdf`, checks `leanblueprint pdf`
-explicitly, and stops `blueprint-render` on any nonzero exit or missing fresh
-non-empty output. `ci.md` states both conditions. Isolated fake-tool tests cover
-nonzero, zero-without-output, and genuine-success paths.
+**Change:** `ci.sh` removes the prior `print.pdf` and runs the checked-in
+`latexmk` configuration directly with noninteractive halt-on-error behavior.
+It stops `blueprint-render` on any compiler failure or missing fresh non-empty
+output. This bypasses the observed wrapper-success/inner-exit-12 boundary.
+Isolated fake-tool tests also cover a fresh partial PDF from that boundary.
 
 **Expected effect:** fatal TeX errors remain blocking exact-head evidence even
-when a worktree contains an older PDF, while a successful fresh render keeps
-the existing bbl, web, manifest, and publication behavior.
+when a worktree contains an older PDF or the failed compiler leaves a fresh
+partial one, while a successful fresh render keeps the existing bbl, web,
+manifest, and publication behavior.

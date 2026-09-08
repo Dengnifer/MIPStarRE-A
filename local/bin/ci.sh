@@ -863,17 +863,21 @@ step_blueprint_render() {
       echo "ERROR: could not remove stale $_pdf before rendering"
       exit 1
     fi
-    echo "+ (cd blueprint && leanblueprint pdf)"
-    if ! ( cd blueprint && run_outside_git_env leanblueprint pdf ); then
-      echo "ERROR: leanblueprint pdf failed"
+    echo "+ (cd blueprint/src && latexmk -interaction=nonstopmode -halt-on-error"
+    echo "    -file-line-error -output-directory=../print)"
+    if ! ( cd blueprint/src && run_outside_git_env latexmk \
+        -interaction=nonstopmode -halt-on-error -file-line-error \
+        -output-directory=../print ); then
+      echo "ERROR: latexmk failed to render the blueprint PDF"
       exit 1
     fi
     if [ ! -s "$_pdf" ]; then
-      echo "ERROR: leanblueprint pdf produced no output"
+      echo "ERROR: latexmk produced no blueprint PDF"
       exit 1
     fi
   else
-    note_warning "no latexmk/xelatex on PATH; skipped 'leanblueprint pdf' (undefined-macro check did not run)"
+    note_warning "no latexmk/xelatex on PATH; skipped blueprint PDF rendering; \
+undefined-macro check did not run"
   fi
 
   # pr-ci.yml:222-223: web.bbl is not committed and is regenerated from the

@@ -378,7 +378,7 @@ def _git(repo: Path, *args: str) -> str:
 
 
 class CiBlueprintRenderTests(LayerTestCase):
-    """The PDF command must succeed and replace any stale output."""
+    """The underlying PDF compiler must succeed and replace stale output."""
 
     BRANCH = "issue-0352-blueprint-pdf-exit"
 
@@ -399,6 +399,7 @@ class CiBlueprintRenderTests(LayerTestCase):
         for name in ("ci.sh", "gh_common.py", "wf_util.py"):
             shutil.copy2(LOCAL_BIN / name, local_bin / name)
         (self.repo / "blueprint" / "print").mkdir(parents=True)
+        (self.repo / "blueprint" / "src").mkdir()
         (self.repo / "README.md").write_text("base\n", encoding="utf-8")
         _git(self.repo, "add", "-A")
         _git(self.repo, "commit", "-q", "--no-verify", "-m", "base commit")
@@ -428,6 +429,13 @@ case "$1:$FAKE_PDF_MODE" in
     printf '%s' 'fresh pdf' > print/print.pdf
     exit 0
     ;;
+  pdf:inner-failure)
+    mkdir -p print
+    printf '%s' 'fresh partial pdf' > print/print.pdf
+    printf '%s\n' \
+      "Command 'latexmk -output-directory=../print' returned non-zero exit status 12." >&2
+    exit 0
+    ;;
   web:*)
     exit 0
     ;;
@@ -438,7 +446,33 @@ exit 9
         )
         leanblueprint.chmod(0o755)
         latexmk = self.tools / "latexmk"
-        latexmk.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+        latexmk.write_text(
+            """#!/bin/sh
+printf 'latexmk:%s\n' "$*" >> "$FAKE_TOOL_LOG"
+case "$FAKE_PDF_MODE" in
+  failure)
+    printf '%s\n' 'fatal TeX error' >&2
+    exit 7
+    ;;
+  no-output)
+    exit 0
+    ;;
+  success)
+    mkdir -p ../print
+    printf '%s' 'fresh pdf' > ../print/print.pdf
+    exit 0
+    ;;
+  inner-failure)
+    mkdir -p ../print
+    printf '%s' 'fresh partial pdf' > ../print/print.pdf
+    printf '%s\n' 'fatal TeX error' >&2
+    exit 12
+    ;;
+esac
+exit 9
+""",
+            encoding="utf-8",
+        )
         latexmk.chmod(0o755)
         self.tool_log = self.tmp / "ci-tool.log"
         self.pdf = self.repo / "blueprint" / "print" / "print.pdf"
@@ -478,19 +512,26 @@ exit 9
         return next(step for step in manifest["steps"]
                     if step["step"] == "blueprint-render")
 
+    @staticmethod
+    def latexmk_call() -> str:
+        return ("latexmk:-interaction=nonstopmode -halt-on-error -file-line-error "
+                "-output-directory=../print")
+
     def test_nonzero_pdf_command_fails_despite_stale_output(self) -> None:
         result, manifest = self.run_blueprint("failure")
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertEqual(manifest["conclusion"], "failure")
         self.assertEqual(self.blueprint_step(manifest)["outcome"], "failure")
-        self.assertEqual(self.tool_log.read_text(encoding="utf-8").splitlines(), ["pdf"])
+        self.assertEqual(self.tool_log.read_text(encoding="utf-8").splitlines(),
+                         [self.latexmk_call()])
         self.assertFalse(self.pdf.exists())
 
     def test_zero_pdf_command_without_fresh_output_fails(self) -> None:
         result, manifest = self.run_blueprint("no-output")
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertEqual(self.blueprint_step(manifest)["outcome"], "failure")
-        self.assertEqual(self.tool_log.read_text(encoding="utf-8").splitlines(), ["pdf"])
+        self.assertEqual(self.tool_log.read_text(encoding="utf-8").splitlines(),
+                         [self.latexmk_call()])
         self.assertFalse(self.pdf.exists())
 
     def test_zero_pdf_command_with_fresh_output_reaches_web(self) -> None:
@@ -499,8 +540,17 @@ exit 9
         self.assertEqual(manifest["conclusion"], "success")
         self.assertEqual(self.blueprint_step(manifest)["outcome"], "success")
         self.assertEqual(self.tool_log.read_text(encoding="utf-8").splitlines(),
-                         ["pdf", "web"])
+                         [self.latexmk_call(), "web"])
         self.assertEqual(self.pdf.read_bytes(), b"fresh pdf")
+
+    def test_zero_wrapper_with_fresh_partial_pdf_and_inner_failure_fails(self) -> None:
+        result, manifest = self.run_blueprint("inner-failure")
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertEqual(manifest["conclusion"], "failure")
+        self.assertEqual(self.blueprint_step(manifest)["outcome"], "failure")
+        self.assertEqual(self.tool_log.read_text(encoding="utf-8").splitlines(),
+                         [self.latexmk_call()])
+        self.assertEqual(self.pdf.read_bytes(), b"fresh partial pdf")
 
 
 class ReviewRoundCounterTests(LayerTestCase):
