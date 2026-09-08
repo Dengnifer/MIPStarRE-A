@@ -1050,6 +1050,32 @@ assembled by Fourier averaging.
 	the registers modified gives all symmetric equivalents.
 \end{proof}
 
+\begin{lemma}[Consistency of the constructed paired-line measurement]
+	\label{lem:combined-line-measurement-consistency}
+	\lean{MIPStarRE.QPBT.combined_line_measurement_consistency}
+	\notready
+	\uses{lem:qld-4-10, lem:qld-comm-line-cons, lem:pasting,
+		def:expanded-line-measurement, def:consistency}
+	This is a Lean-only construction obligation. Fix a polynomially small
+	function $\delta_Q(\eps)$. There is a function
+	$\delta_P(\eps,md/q)=\poly(\eps,md/q)$, in the corrected sum sense,
+	such that for every projective strategy passing with error $\eps$ and
+	every joint point family satisfying the conclusions of
+	Lemma~\ref{lem:qld-4-10} with error $\delta_Q(\eps)$, the concrete POVM
+	\[
+		T^{\ell_X,\ell_Z}_{f_X,f_Z}
+		=\hat M^{(\mathrm{Line},X),\ell_X}_{f_X}
+		 \hat M^{(\mathrm{Line},Z),\ell_Z}_{f_Z}
+		 \hat M^{(\mathrm{Line},X),\ell_X}_{f_X}
+	\]
+	has evaluated consistency defect at most $\delta_P(\eps,md/q)$ with that
+	joint point family, averaged over two independent line-point samples,
+	for every directed opposite placement. The line-error function is chosen
+	after $\delta_Q$ and its polynomial bound. This isolates the consistency
+	part of the preceding construction while retaining its defining
+	measurement; see \cite{gap:qpbt_subline-claims-line-marginal}.
+\end{lemma}
+
 \section{Applying the classical low-degree test}
 \label{sec:apply-ldt}
 
@@ -1620,6 +1646,11 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\uses{lem:qld-sublines, lem:qld-xz-lines,
 		def:expanded-point-measurement, lem:qld-comm-line-cons,
 		def:expanded-state}
+	Let $T$ be the X-Z-X measurement defined in the proof of
+	Lemma~\ref{lem:qld-xz-lines}. The construction is part of this claim's
+	domain: its degree and evaluated consistency properties alone do not
+	imply the following estimate, as shown in
+	\cite{gap:qpbt_subline-claims-line-marginal}.
 	\begin{align*}
 		\E_{(\ell,\ell_X,\ell_Z) \sim D}\
 		\E_{(x,z,\alpha,\beta) \in \ell}

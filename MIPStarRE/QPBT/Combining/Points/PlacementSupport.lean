@@ -283,36 +283,6 @@ theorem placedMeasurement_isProjective (S : ProjectiveSetting P ε)
     rw [Matrix.star_eq_conjTranspose, ← place_conjTranspose,
       (hM a).isSelfAdjoint.isHermitian.eq]
 
-/-- A placement maps the zero operator to zero. -/
-theorem place_zero (S : ProjectiveSetting P ε) (p : Placement) :
-    S.place p (0 : Op (S.ExpandedLocalSpace p.side)) = 0 := by
-  ext i j
-  cases p <;> simp [ProjectiveSetting.place]
-
-/-- The completed expanded point measurement agrees with the original effect
-at a defined outcome. -/
-theorem pointMeasExpOption_effect_some (S : ProjectiveSetting P ε)
-    (side : PlayerSide) (W : PauliKind) (u : Fin P.m → PauliScalar P)
-    (a : PauliScalar P) :
-    (S.pointMeasExpOption side W u).effect (some a) =
-      (S.pointMeasExp side W u).effect a := by
-  classical
-  unfold ProjectiveSetting.pointMeasExpOption
-  rw [MIPStarRE.Quantum.Measurement.postprocess_effect]
-  simp [Finset.filter_eq']
-
-/-- The completed expanded point measurement has zero effect at `none`. -/
-theorem pointMeasExpOption_effect_none (S : ProjectiveSetting P ε)
-    (side : PlayerSide) (W : PauliKind) (u : Fin P.m → PauliScalar P) :
-    (S.pointMeasExpOption side W u).effect none = 0 := by
-  classical
-  unfold ProjectiveSetting.pointMeasExpOption
-  rw [MIPStarRE.Quantum.Measurement.postprocess_effect]
-  apply Finset.sum_eq_zero
-  intro a ha
-  exact absurd (Finset.mem_filter.mp ha).2 (by simp)
-
-
 end ProjectiveSetting
 
 end

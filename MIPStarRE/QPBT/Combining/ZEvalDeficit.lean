@@ -1,7 +1,7 @@
 import MIPStarRE.QPBT.Combining.Lines
 import MIPStarRE.QPBT.Combining.OrderedPoints
 import MIPStarRE.QPBT.Combining.OverlapGap
-import MIPStarRE.QPBT.Combining.Points.PlacementSupport
+import MIPStarRE.QPBT.Combining.Points.Placement
 
 /-!
 # One-point deficits of the evaluated pair-line measurement

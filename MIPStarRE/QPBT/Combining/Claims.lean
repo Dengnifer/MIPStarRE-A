@@ -1,5 +1,6 @@
 import MIPStarRE.QPBT.Combining.OrderedPoints
 import MIPStarRE.QPBT.Combining.OverlapGap
+import MIPStarRE.QPBT.Combining.Lines.CombinedMeasurement
 import MIPStarRE.QPBT.Combining.SubLineZDeficit
 import MIPStarRE.QPBT.Combining.UniformLinePoint
 import MIPStarRE.QPBT.Combining.Witnesses
@@ -542,15 +543,27 @@ theorem subline_replace_by_ordered_product :
   rw [Real.sqrt_mul (by norm_num : (0 : ℝ) ≤ 4), h4, Real.sqrt_eq_rpow]
   exact le_rfl
 
-/-- Removing the trailing `X`-point factor costs the square root of the
-line-consistency error, with the source factor `m`.  This is
-`lem:claim-17-2`, paper lines 1168--1173; the right-hand point is the corrected
+/-- Removing the trailing `X`-point factor from the constructed X-Z-X line
+measurement costs the square root of the line-consistency error, with the
+source factor `m`. This is blueprint `lem:claim-17-2`, paper
+`14_analysis_of_the_pauli_basis_test.tex:1168-1201`; the measurement is defined
+at paper lines 942--949.
+
+**Source realignment (issue #414):** The former quantification over arbitrary
+`CombinedLinesWitness` was false. The constant-polynomial counterexample and
+the restored construction domain are documented in
+`docs/paper-gaps/qpbt_subline-claims-line-marginal.tex`.
+
+**Proof obligation:** The retained proof hole is this source estimate. Discharge
+it using the concrete X-marginal identity, expanded line-point consistency, and
+the restricted X-point marginal of `SubLineWitness`. The separately developed
+`combinedLineMeasurement_sum_Z` is the required construction lemma; no marginal
+identity is assumed in this theorem. The right-hand point is the corrected
 lowercase `z` recorded in the blueprint. -/
 theorem subline_remove_X_factor :
     ∃ C : ℝ, 0 < C ∧
-      ∀ (P : AdmissibleParams) (ε δQ δP : ℝ)
-        (S : ProjectiveSetting P ε) (points : CombinedPointsWitness S δQ)
-        (lines : CombinedLinesWitness S points δP) (sublines : SubLineWitness P),
+      ∀ (P : AdmissibleParams) (ε : ℝ)
+        (S : ProjectiveSetting P ε) (sublines : SubLineWitness P),
         |avgOver sublines.D (fun sample =>
             avgOver (uniformDistribution (DirectScalarQ P.extendedDirectLd)) (fun t =>
               let u := directPointToPauli P
@@ -561,7 +574,8 @@ theorem subline_remove_X_factor :
                 (inner ℂ S.psiHat ((EuclideanSpace.equiv
                   (SixReg P S.toStrategy.ιA S.toStrategy.ιB) ℂ).symm
                     ((S.place .AA'
-                        ((lines.T .alice sample.2.1 sample.2.2).effect (fX, fZ)) *
+                        ((S.combinedLineMeasurement .alice sample.2.1
+                          sample.2.2).effect (fX, fZ)) *
                       S.place .BA''
                         (S.expPointEffectAtLineAnswer .bob .Z sample.2.2 z fZ *
                           S.expPointEffectAtLineAnswer .bob .X sample.2.1 x fX)).mulVec
@@ -575,7 +589,8 @@ theorem subline_remove_X_factor :
                 (inner ℂ S.psiHat ((EuclideanSpace.equiv
                   (SixReg P S.toStrategy.ιA S.toStrategy.ιB) ℂ).symm
                     ((S.place .AA'
-                        ((lines.T .alice sample.2.1 sample.2.2).effect (fX, fZ)) *
+                        ((S.combinedLineMeasurement .alice sample.2.1
+                          sample.2.2).effect (fX, fZ)) *
                       S.place .BA''
                         (S.expPointEffectAtLineAnswer .bob .Z sample.2.2 z fZ)).mulVec
                           S.psiHat))).re))| ≤
