@@ -4275,6 +4275,35 @@ no second comment or extra review is created. Implementer supervisor2326711
 remains live under primary/max. Persistent router semantics still await the
 bounded PR238 amendment and normal gates.
 
+## 2026-09-06 — Issue 241 publication preflight finds inherited declaration-list drift
+
+- In session `orc-241-20260906-01`, the read-only command
+  `python3 scripts/blueprint_lean_sync.py --root . --ci` exits 1 with 231
+  stale entries in `blueprint/lean_decls`. The log is
+  `~/.cache/mipstarre-dev/sessions/orc-241-20260906-01-blueprint-sync.log`.
+  The list and blueprint sources in prover commit `c4f3c9b` are byte-identical
+  to those in `origin/main` (`a61ee55`); the follow-up adds only the
+  completion tag for `lem:qld-extraction-error-form`, with no declaration
+  reference changes. The drift is therefore inherited, not introduced by
+  this completion tag. Targeted Lean checking and `leanblueprint web` pass;
+  the sole file hole remains the unrelated extraction-witness construction.
+  The task excludes rewriting inherited declaration lists, so this session
+  preserves the list and normal publication gates. An authorized repair of
+  the generated index is required before those gates can pass; no hook
+  bypass or unrelated refresh is an acceptable substitute.
+
+- Correction from the same session: `blueprint/lean_decls` is an ignored,
+  generated local index, not a tracked file (`blueprint/.gitignore:4`). The
+  earlier empty `git diff` therefore did not establish byte identity with
+  `origin/main`, and the diagnosis requiring a separate authorized repair
+  was incorrect. Normal pre-push hooks regenerated the index, and the
+  subsequent read-only sync check exits 0; its log is
+  `~/.cache/mipstarre-dev/sessions/orc-241-20260906-01-blueprint-sync-after-hooks.log`.
+  Checked publication through `pr_open.py` succeeds as PR #249 at `8348eaa`.
+  No tracked declaration list or Lean file was changed by this follow-up.
+  Check whether a generated file is tracked before interpreting an empty
+  tracked diff as evidence of identical contents or declaring a blocker.
+
 ## 2026-09-06 — Issue 239 publication detects a stale root environment
 
 - Session `orc-239-20260906-01`, issue #239: the first normal `pr_open.py`
@@ -5649,3 +5678,53 @@ not actual commit/publication hooks. No productive session was killed.
 ## 2026-09-08
 
 - PR303/#301 integrated through canonical CI, independent hard control-policy Astra review, and the current Space service merge gates. Round1 review5134345720 retained three native-observation and ratio findings; the author repaired them in0deec4e with targeted counterfactual regressions and fresh normal tests/CI/review. All parked estimate, CI and native-review rows were restored once with retained stash/copies and multiplicity, prefix and mode checks. The reviewed policy enters committed main; read-only actual selector and hot-root/Space-lease checks follow final telemetry publication. No live selector result or fresh Sol child is claimed by this record; root owns the useful explicit-model dispatch after those checks. The Space switch and renewed owner completion steering preserve the13:40 episode, 15:40 historical boundary, extension request5572932276,1000-line ceiling and all cumulative proof budgets. Detailed receipt: owner-messages/qpbt-pr303-integration-20260907.json.
+- Space cap10 activation completed at 2026-09-08T02:58:55.007754Z without a
+  credential, source, or budget reset. The existing main thread
+  01a076bc-f4ad-7813-805b-c8b4dac71a14 resumed as PID3351858/start186049483
+  on requested and observed Astra Ultra; the canonical Space lease was verified
+  at eight native descendants within ten total account slots (main1,
+  reserved-app-server1, external0). Owner readback near03:02Z found the same goal
+  active at34577828 tokens and77303 seconds, so the context transition did not
+  create a new goal or budget. Service3352034 replaced the retired cap5 service
+  and verified the unchanged clean-tree/exact-head gates. The initial terminal
+  retained `/quit`; no capacity or lease changed before the former process
+  exited, and existing native/telemetry rows were preserved. Consolidating the
+  duplicated launcher configuration and manual lease binding remains a future
+  candidate only; this observation makes no workflow or runtime change. Receipt:
+  /home/drx/.cache/mipstarre-dev/owner-tools/qpbt-cap10-activation-20260908.json
+  (sha256 bba6715f5c7ce0082cd1df73dbab4d1f29daa1fd02c2b67df8706fc9ad1638d5).
+- PR308's first two review invocations exited2 before creating a native request
+  because the resumed Astra root environment conflicted with the routine Sol
+  reviewer classification. A third pre-assignment request, nonce4e2c328c, was
+  cancelled after inspection found the activation binding absent and the root
+  exclusion duplicated; it had no reviewer or response and remains superseded.
+  The unchanged canonical publisher was restarted only for this pre-request
+  failure with the explicit reviewed Sol/Ultra environment. Fresh reviewer
+  01a07f17-7fb6-7ca3-b0fa-e4a9d4e99b17 completed bound nonce09c50846 once;
+  review5137114857 published exact-head CHANGES_REQUESTED with one real
+  documentation finding and accepted the mathematical patch. No CI was rerun,
+  no response was fabricated, and main stayed frozen atc5d519c.
+- The owner activated an 80-percent useful-activity rule for the Space total10
+  allocation: main plus at least seven genuinely active native tasks, with
+  active-other reported separately and the reserved app server not counted as
+  activity. Root's first observation found three running native lanes and
+  immediately resumed four disjoint mathematical or publication successors.
+  `qpbt-switch activity` then accepted main1/native7/other0 as observed8/10,
+  target8. Activity is reported from attributable task IDs and recent tools at
+  starts, completions, and at most60-second intervals; configured capacity is
+  never substituted for activity. A below-target report must carry the real
+  bottleneck and next action. Meta owns the installed helper and its tests; this
+  coordinator made no switch, capacity, lease, source, or helper change.
+- 2026-09-08T03:42:20.550628+00:00: Owner requested quick account/capacity switching and actual concurrency >=80% almost all time. Installed ~/.local/bin/qpbt-switch with saved key profiles, idempotent no-op, automatic checkpoint/same-UUID resume/canonical lease binding, recoverable phases, parametrized merge service and evidence-based activity reports requiring a reason/next action below target. No-op measured 0.156s on ghz. All 16 controller/isolated integration/activity tests and 17 canonical merge checks passed; installed source hashes match tested files. Automatic approval review rejected both a live restart test and interrupting the long main turn to deliver policy; neither action executed. Main remains Space/10 total/8 native, goal preserved. Occupancy instruction is queued and appended to the current handoff; actual adherence is not yet verified. Receipt: ~/.cache/mipstarre-dev/qpbt-switch/installation.json. Lesson: retain a single configurable operator command rather than dated activation scripts.
+- PR308 merged through canonical service PID3352034 at
+  2026-09-08T04:24:48.970629Z as
+  dffbbb3bcc69b226cad26ab2d2521fb94159a141 from reviewed head
+  ea7015ff054d15e19d1577903a686be641f632f8. The repaired head passed its
+  only canonical CI run in144s with all nine exact-head statuses green;
+  independent Sol/Ultra review5137259492 accepted nonceccd85b33 exactly once
+  with zero findings. Quiet stash23950ac7141476712f0a1edb9f6355f7a2327c5c
+  remains retained. All six parked telemetry files were restored byte-for-byte
+  together with the concurrent post-merge cache-warmer row; current files match
+  the constructed expected copies and pass `git diff --check`. Main publication
+  proceeds through the canonical GitHub sync before this merge is released as a
+  downstream base.
