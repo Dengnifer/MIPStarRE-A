@@ -1,5 +1,6 @@
 import MIPStarRE.QPBT.Combining.Witnesses
 import MIPStarRE.QPBT.Combining.Lines.ZeroDirectionMass
+import MIPStarRE.QPBT.Combining.Lines.DiagonalZeroDirectionMass
 
 /-!
 # Combined lines and restricted line distributions
