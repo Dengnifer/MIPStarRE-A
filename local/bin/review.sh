@@ -384,6 +384,7 @@ run_agent() {
 
 FORCE_REVIEW=0
 DRY_RUN=0
+RESUME_NATIVE=0
 RESUME_NATIVE_REQUEST=""
 PR_ARG=""
 
@@ -393,7 +394,9 @@ while [ $# -gt 0 ]; do
     --dry-run)      DRY_RUN=1 ;;
     --resume-native-request)
       [ $# -ge 2 ] || die "--resume-native-request requires a request path"
-      [ -z "$RESUME_NATIVE_REQUEST" ] || die "--resume-native-request may be given only once"
+      [ "$RESUME_NATIVE" -eq 0 ] || die "--resume-native-request may be given only once"
+      [ -n "$2" ] || die "--resume-native-request requires a nonempty request path"
+      RESUME_NATIVE=1
       RESUME_NATIVE_REQUEST="$2"
       shift
       ;;
@@ -419,7 +422,7 @@ if [ "${LOCAL_REVIEW_ENABLED:-}" = "false" ]; then
   log "LOCAL_REVIEW_ENABLED=false; skipping review of PR $PR_ARG"
   exit 0
 fi
-if [ -n "$RESUME_NATIVE_REQUEST" ]; then
+if [ "$RESUME_NATIVE" -eq 1 ]; then
   [ "$DRY_RUN" -eq 0 ] || die "--resume-native-request cannot be combined with --dry-run"
   [ -z "${MIPSTARRE_QUEUE_TICKET:-}" ] || die "queued reviews cannot resume a native request"
   [ -n "${MIPSTARRE_NATIVE_REVIEW_ROOT:-}" ] ||
@@ -520,7 +523,7 @@ fi
 # ---------------------------------------------------------------------- lock
 LOCK_DIR="$CACHE/locks/review-$PR_NUM.lock"
 RESUME_LOCK_WAIT="$LOCK_WAIT"
-[ -z "$RESUME_NATIVE_REQUEST" ] || RESUME_LOCK_WAIT=0
+[ "$RESUME_NATIVE" -eq 0 ] || RESUME_LOCK_WAIT=0
 acquire_lock "$LOCK_DIR" "$RESUME_LOCK_WAIT" "review pr=$PR_NUM sha=$HEAD_SHA"
 
 # A fix in flight rewrites the very worktree the reviewer reads.  Concurrency
@@ -614,7 +617,7 @@ sys.exit(any(row.get('commit_id') == sys.argv[2] and
 PY
     die "queued review already has publication evidence; adoption required"
 fi
-if [ -n "$RESUME_NATIVE_REQUEST" ]; then
+if [ "$RESUME_NATIVE" -eq 1 ]; then
   [ "$ROUND" -le 4 ] || die "native review resume reached the four-round cap"
   ghc latest-statuses "$HEAD_SHA" >"$RUN_ROOT/statuses.json" ||
     die "native review resume cannot recheck exact-head evidence"
@@ -650,7 +653,7 @@ sanitize_to "$RUN_DIR/diff.patch" "$RUN_DIR/diff.sanitized.txt" "$DIFF_MAX_LINES
 
 TOUCHES_BLUEPRINT=0
 if grep -q '^blueprint/' "$RUN_DIR/files.txt"; then TOUCHES_BLUEPRINT=1; fi
-if [ -n "$RESUME_NATIVE_REQUEST" ] && [ "$TOUCHES_BLUEPRINT" -eq 1 ]; then
+if [ "$RESUME_NATIVE" -eq 1 ] && [ "$TOUCHES_BLUEPRINT" -eq 1 ]; then
   die "native review resume supports only the single code lane;" \
     "blueprint/prose combinations require a live publisher"
 fi
@@ -763,7 +766,7 @@ PY
   done
   return 1
 }
-if [ -z "$RESUME_NATIVE_REQUEST" ] && [ "$FORCE_REVIEW" -eq 0 ] && carry_forward; then
+if [ "$RESUME_NATIVE" -eq 0 ] && [ "$FORCE_REVIEW" -eq 0 ] && carry_forward; then
   CARRIED_FROM="$(cat "$RUN_ROOT/$HEAD_SHA-carried-from")"
   CARRIED_MD="$RUN_ROOT/$HEAD_SHA-carried.md"
   if [ "$DRY_RUN" -eq 1 ]; then
@@ -1231,7 +1234,7 @@ CODE_OUT="$RUN_DIR/code-last-message.md"
 rm -f "$CODE_OUT"
 CODE_RC_FILE="$RUN_DIR/code.rc"
 CODE_LANE_PID=""
-if [ -n "$RESUME_NATIVE_REQUEST" ]; then
+if [ "$RESUME_NATIVE" -eq 1 ]; then
   log "resuming completed native code review request $RESUME_NATIVE_REQUEST"
   NATIVE_ACCEPT_ARGS=(accept "$RESUME_NATIVE_REQUEST" "$CODE_OUT"
     --cache "$CACHE" --repo "$ROOT" --head "$HEAD_SHA" --worktree "$WORKTREE"

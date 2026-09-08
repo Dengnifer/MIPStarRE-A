@@ -132,9 +132,13 @@ def accept_existing(args: argparse.Namespace) -> None:
     if not author_values or any(not value for value in author_values):
         raise ValueError('native review author exclusions must be nonempty')
     author_ids = [canonical_thread(value, 'review author') for value in author_values]
-    expected_authors = [root, *author_ids]
-    if len(set(expected_authors)) != len(expected_authors):
-        raise ValueError('native review author exclusions must be unique')
+    expected_authors = {root, *author_ids}
+    request_authors = request.get('authors')
+    if not isinstance(request_authors, list) or not request_authors:
+        raise ValueError('native review request authors must be a nonempty list')
+    request_author_set = {
+        canonical_thread(value, 'review author') for value in request_authors
+    }
     expected_paths = dict(cache=cache, repo=args.repo.resolve(strict=True),
                           worktree=args.worktree.resolve(strict=True),
                           prompt=args.prompt.resolve(strict=True))
@@ -144,7 +148,7 @@ def accept_existing(args: argparse.Namespace) -> None:
             raise ValueError(f'native review request {field} mismatch')
     if (request.get('nonce') != nonce or request.get('task_name') != 'review_' + nonce or
             request.get('pr') != args.pr or request.get('head') != args.head or
-            request.get('root_thread_id') != root or request.get('authors') != expected_authors):
+            request.get('root_thread_id') != root or request_author_set != expected_authors):
         raise ValueError('native review request identity mismatch')
     prompt_digest = hashlib.sha256(args.prompt.read_bytes()).hexdigest()
     if request.get('prompt_sha256') != prompt_digest:
@@ -156,7 +160,7 @@ def accept_existing(args: argparse.Namespace) -> None:
         raise ValueError('native review request model policy mismatch')
     if request.get('activation_at') != args.activation_at:
         raise ValueError('native review request activation boundary mismatch')
-    if isinstance(response, dict) and response.get('thread_id') in expected_authors:
+    if isinstance(response, dict) and response.get('thread_id') in request_author_set:
         raise ValueError('reviewer must be excluded from the review authors')
     accept_response(request, response, args.out)
     print('name: reviewer-native-' + response['thread_id'])

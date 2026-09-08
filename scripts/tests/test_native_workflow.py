@@ -18,6 +18,7 @@ import model_policy
 ROOT = '01a076bc-f4ad-7813-805b-c8b4dac71a14'
 CHILD = '01a076e7-b2ae-7e60-9090-72c3b7dce9c3'
 AUTHOR = '01a076e7-b2ae-7e60-9090-72c3b7dce9c4'
+EXTRA = '01a076e7-b2ae-7e60-9090-72c3b7dce9c5'
 
 
 class NativeWorkflowTests(unittest.TestCase):
@@ -157,6 +158,55 @@ class NativeWorkflowTests(unittest.TestCase):
         args.request = outside
         with self.assertRaisesRegex(ValueError, 'canonical cache mailbox'):
             review.accept_existing(args)
+
+    def test_generated_request_compares_complete_author_exclusion_sets(self):
+        nonce = '2' * 32
+        policy = dict(role='reviewer', job_class='independent_review',
+                      classification='routine', requested_model='gpt-5.6-sol',
+                      model='gpt-5.6-sol', requested_effort='ultra',
+                      hardness_reason=None, policy_version=2, rationale='test')
+        request_args = argparse.Namespace(
+            cache=self.root, repo=self.root, worktree=self.root, prompt=self.prompt,
+            out=self.root / 'generated-out.md', head='a' * 40, pr='287', timeout=1,
+            job_class='independent_review', model='gpt-5.6-sol', hardness_reason=None)
+        original_write = review.atomic_write
+
+        def write_with_response(path, value):
+            original_write(path, value)
+            if path.name == nonce + '.json':
+                original_write(path.with_suffix('.response.json'), json.dumps(
+                    dict(nonce=nonce, thread_id=CHILD)))
+
+        activation = '2026-09-08T00:00:00Z'
+        with mock.patch.dict(review.os.environ, {
+                'MIPSTARRE_NATIVE_REVIEW_ROOT': ROOT,
+                'MIPSTARRE_NATIVE_REVIEW_AUTHORS': f'{AUTHOR},{ROOT},{AUTHOR}',
+                'MIPSTARRE_MODEL_POLICY_ACTIVATION_AT': activation}), \
+                mock.patch.object(review, 'verify_root', return_value=self.info), \
+                mock.patch.object(model_policy, 'select_model', return_value=policy), \
+                mock.patch.object(review.uuid, 'uuid4', return_value=mock.Mock(hex=nonce)), \
+                mock.patch.object(review, 'atomic_write', side_effect=write_with_response), \
+                mock.patch.object(review, 'accept_response'):
+            review.request_review(request_args)
+
+        request_path = self.root / 'native-reviews' / (nonce + '.json')
+        self.assertEqual(json.loads(request_path.read_text())['authors'],
+                         [ROOT, AUTHOR, ROOT, AUTHOR])
+        accept_args = argparse.Namespace(**vars(request_args), request=request_path,
+            root_thread=ROOT, authors=AUTHOR, effort='ultra', activation_at=activation)
+        for authors in (AUTHOR, f'{ROOT},{AUTHOR}', f'{AUTHOR},{AUTHOR},{ROOT}'):
+            accept_args.authors = authors
+            with mock.patch.object(model_policy, 'select_model', return_value=policy), \
+                    mock.patch.object(review, 'accept_response') as accepted:
+                review.accept_existing(accept_args)
+                accepted.assert_called_once()
+        for authors in (ROOT, f'{AUTHOR},{EXTRA}'):
+            accept_args.authors = authors
+            with mock.patch.object(model_policy, 'select_model', return_value=policy), \
+                    mock.patch.object(review, 'accept_response') as accepted, \
+                    self.assertRaisesRegex(ValueError, 'identity mismatch'):
+                review.accept_existing(accept_args)
+            accepted.assert_not_called()
 
     def test_freshness_assignment_and_current_completion_are_required(self):
         for options in (dict(timestamp='2026-09-06T13:13:59.999Z'), dict(assigned=False),

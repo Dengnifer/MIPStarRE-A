@@ -636,6 +636,22 @@ print('name: reviewer-native-test')
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("LOCAL_REVIEW_ENABLED=false", result.stderr)
 
+    def test_native_resume_rejects_an_empty_request_before_dispatch(self) -> None:
+        native_log = self.tmp / "empty-native.jsonl"
+        dispatch_log = self.tmp / "empty-dispatch"
+        environment = dict(os.environ, **self.gh.env(), LOCAL_REVIEW_ENABLED="true",
+            MIPSTARRE_REVIEW_EFFORT="ultra", MIPSTARRE_TEST_NATIVE_LOG=str(native_log),
+            MIPSTARRE_TEST_DISPATCH_LOG=str(dispatch_log), PYTHONDONTWRITEBYTECODE="1")
+        result = subprocess.run(
+            ["bash", str(self.repo / "local/bin/review.sh"), "7",
+             "--resume-native-request", ""], cwd=self.repo,
+            capture_output=True, text=True, env=environment)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("requires a nonempty request path", result.stderr)
+        self.assertFalse(native_log.exists())
+        self.assertFalse(dispatch_log.exists())
+        self.assertEqual(self.gh.payloads("POST", r"^statuses/"), [])
+
 
 class MergeGateTests(LayerTestCase):
     """``pr_merge.py --check-only`` must refuse on thin evidence and pass on full.
