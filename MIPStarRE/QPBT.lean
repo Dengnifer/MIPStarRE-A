@@ -57,6 +57,7 @@ import MIPStarRE.QPBT.Combining.ExtendedLineGame.MixedLinePointRejection
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.PointPointRejection
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.EvaluatedLineComparison
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.LineNoneMass
+import MIPStarRE.QPBT.Combining.ExtendedLineGame.ParameterEvaluatedLineBound
 import MIPStarRE.QPBT.Combining.Lines
 import MIPStarRE.QPBT.Combining.Claims
 import MIPStarRE.QPBT.Combining.Apply
