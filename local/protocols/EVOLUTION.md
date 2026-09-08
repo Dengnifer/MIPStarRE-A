@@ -1004,3 +1004,15 @@ must match the exact bound digest. Invalid combined evidence publishes nothing.
 another review or weakening the author/reviewer hold. Activation requires normal
 CI, independent hard control-policy review and merge. The PR #400 source repair
 and held reviewers remain frozen until canonical consumption succeeds.
+
+**Outcome:** PR #476 passed one canonical exact-head CI run in 249 seconds with
+all nine contexts green, and independent hard review `5147206622` approved the
+control path with no findings. The service gate merged it as
+`81148545f0752ec09b3efe88332b49bb771312be`. The primary used a finite
+same-inode telemetry boundary rather than waiting for unrelated writers. The
+merged continuation then consumed the preserved PR #400 CODE and PROSE
+responses and published canonical failure review `5147250926` with seven
+unresolved findings. It launched no new model turn, edited no response or
+source, and released the old reviewer and source holds. PR #400 remains
+ineligible to merge until its isolated repair proceeds through normal checked
+publication, CI, and fresh independent review.
