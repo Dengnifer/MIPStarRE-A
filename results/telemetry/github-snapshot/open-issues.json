@@ -1,5 +1,286 @@
 [
  {
+  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/452",
+  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
+  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/452/labels{/name}",
+  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/452/comments",
+  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/452/events",
+  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/452",
+  "id": 5390841113,
+  "node_id": "I_kwDOUJyJf88AAAABQVG1GQ",
+  "number": 452,
+  "title": "Prove mixed line-point parameter resampling",
+  "user": {
+   "login": "Dengnifer",
+   "id": 89234078,
+   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
+   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/Dengnifer",
+   "html_url": "https://github.com/Dengnifer",
+   "followers_url": "https://api.github.com/users/Dengnifer/followers",
+   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
+   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
+   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
+   "repos_url": "https://api.github.com/users/Dengnifer/repos",
+   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
+   "type": "User",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "labels": [
+   {
+    "id": 12025010884,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
+    "name": "formalization",
+    "color": "ededed",
+    "default": false,
+    "description": "Lean formalization of a mathematical statement"
+   }
+  ],
+  "state": "open",
+  "locked": false,
+  "assignees": [],
+  "milestone": null,
+  "comments": 0,
+  "created_at": "2026-09-08T19:09:12Z",
+  "updated_at": "2026-09-08T19:09:12Z",
+  "closed_at": null,
+  "assignee": null,
+  "author_association": "OWNER",
+  "active_lock_reason": null,
+  "sub_issues_summary": {
+   "total": 0,
+   "completed": 0,
+   "percent_completed": 0
+  },
+  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/118",
+  "issue_dependencies_summary": {
+   "blocked_by": 0,
+   "total_blocked_by": 0,
+   "blocking": 0,
+   "total_blocking": 0
+  },
+  "body": "<!-- mipstarre-issue-key: qpbt-mixed-line-resampling-20260909 -->\n### Source\n\n- `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:950-955`\n- `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:274-287`\n\n### Scope\n\nProve the formalization-only identity `avgOver_linePointDist_resample_parameter` by combining the published axis and diagonal line-point resampling identities through the equal-mixture definition of `linePointDist`.\n\nThe theorem preserves the unconditional mixed law, including zero-direction diagonal fibers, and introduces no additional hypotheses.\n\n### Validation\n\n- Focused Lean type-check of the new module and aggregate import\n- Proof-hole and forbidden-bypass scan\n- Standard axiom audit",
+  "closed_by": null,
+  "reactions": {
+   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/452/reactions",
+   "total_count": 0,
+   "+1": 0,
+   "-1": 0,
+   "laugh": 0,
+   "hooray": 0,
+   "confused": 0,
+   "heart": 0,
+   "rocket": 0,
+   "eyes": 0
+  },
+  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/452/timeline",
+  "performed_via_github_app": null,
+  "state_reason": null,
+  "pinned_comment": null
+ },
+ {
+  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/451",
+  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
+  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/451/labels{/name}",
+  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/451/comments",
+  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/451/events",
+  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/451",
+  "id": 5390811898,
+  "node_id": "I_kwDOUJyJf88AAAABQVFC-g",
+  "number": 451,
+  "title": "Prove combined point line marginal defect bounds",
+  "user": {
+   "login": "Dengnifer",
+   "id": 89234078,
+   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
+   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/Dengnifer",
+   "html_url": "https://github.com/Dengnifer",
+   "followers_url": "https://api.github.com/users/Dengnifer/followers",
+   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
+   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
+   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
+   "repos_url": "https://api.github.com/users/Dengnifer/repos",
+   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
+   "type": "User",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "labels": [
+   {
+    "id": 12025010884,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
+    "name": "formalization",
+    "color": "ededed",
+    "default": false,
+    "description": "Lean formalization of a mathematical statement"
+   },
+   {
+    "id": 12025012183,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8f1w",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/qpbt-analysis",
+    "name": "qpbt-analysis",
+    "color": "ededed",
+    "default": false,
+    "description": "Soundness/rigidity analysis of the Pauli basis test \u2014 self-testing bounds and error terms"
+   },
+   {
+    "id": 12025012384,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8goA",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/proof",
+    "name": "proof",
+    "color": "ededed",
+    "default": false,
+    "description": "Issue is primarily about proving an existing result"
+   },
+   {
+    "id": 12025013584,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8lUA",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/paper-2001.04383",
+    "name": "paper-2001.04383",
+    "color": "ededed",
+    "default": false,
+    "description": "MIP*=RE (arXiv:2001.04383) \u2014 the primary paper of this track"
+   }
+  ],
+  "state": "open",
+  "locked": false,
+  "assignees": [],
+  "milestone": null,
+  "comments": 0,
+  "created_at": "2026-09-08T19:05:57Z",
+  "updated_at": "2026-09-08T19:05:57Z",
+  "closed_at": null,
+  "assignee": null,
+  "author_association": "OWNER",
+  "active_lock_reason": null,
+  "sub_issues_summary": {
+   "total": 0,
+   "completed": 0,
+   "percent_completed": 0
+  },
+  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/118",
+  "issue_dependencies_summary": {
+   "blocked_by": 1,
+   "total_blocked_by": 1,
+   "blocking": 0,
+   "total_blocking": 0
+  },
+  "body": "<!-- mipstarre-issue-key: combined-point-line-marginal-defect -->\n### Source\n\n- `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:936-941`\n- Historical proof evidence at commit `0f4ef05370350f4017439ebd839ef0561f13130f`,\n  `MIPStarRE/QPBT/Combining/Lines.lean:1003-1050`.\n\n### Goal\n\nProve `exists_combinedPoints_line_marginal_defect_le` from the published\ncombined-point line marginal distance estimates by deriving projectivity of\nthe completed point marginals and evaluated line measurements from their\nexisting constructors.\n\n### Scope\n\n- Preserve the universal constant and both X/Z bounds\n  `8 * deltaQ + C * (epsilon + deltaLine epsilon)`.\n- Add no projectivity, bridge, or distance-bound hypotheses.\n- Do not touch conditioned pasting, heterogeneous comparison, global-pair, or\n  B8 declarations.\n\n### Dependencies\n\n- Published point-line marginal distance proof: #445 / PR #449.\n",
+  "closed_by": null,
+  "reactions": {
+   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/451/reactions",
+   "total_count": 0,
+   "+1": 0,
+   "-1": 0,
+   "laugh": 0,
+   "hooray": 0,
+   "confused": 0,
+   "heart": 0,
+   "rocket": 0,
+   "eyes": 0
+  },
+  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/451/timeline",
+  "performed_via_github_app": null,
+  "state_reason": null,
+  "pinned_comment": null
+ },
+ {
+  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/450",
+  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
+  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/450/labels{/name}",
+  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/450/comments",
+  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/450/events",
+  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/450",
+  "id": 5390755885,
+  "node_id": "I_kwDOUJyJf88AAAABQVBoLQ",
+  "number": 450,
+  "title": "Bound nondegenerate line-pasting mass",
+  "user": {
+   "login": "Dengnifer",
+   "id": 89234078,
+   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
+   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/Dengnifer",
+   "html_url": "https://github.com/Dengnifer",
+   "followers_url": "https://api.github.com/users/Dengnifer/followers",
+   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
+   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
+   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
+   "repos_url": "https://api.github.com/users/Dengnifer/repos",
+   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
+   "type": "User",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "labels": [
+   {
+    "id": 12025010884,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
+    "name": "formalization",
+    "color": "ededed",
+    "default": false,
+    "description": "Lean formalization of a mathematical statement"
+   }
+  ],
+  "state": "open",
+  "locked": false,
+  "assignees": [],
+  "milestone": null,
+  "comments": 0,
+  "created_at": "2026-09-08T18:59:53Z",
+  "updated_at": "2026-09-08T18:59:53Z",
+  "closed_at": null,
+  "assignee": null,
+  "author_association": "OWNER",
+  "active_lock_reason": null,
+  "sub_issues_summary": {
+   "total": 0,
+   "completed": 0,
+   "percent_completed": 0
+  },
+  "issue_dependencies_summary": {
+   "blocked_by": 2,
+   "total_blocked_by": 2,
+   "blocking": 0,
+   "total_blocking": 0
+  },
+  "body": "<!-- mipstarre-issue-key: qpbt-nondegenerate-line-pasting-mass-20260909 -->\nFormalize the retained probability mass of the proof-only first-line nondegeneracy restriction used in the QPBT pasting argument at references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:950-963. Prove the exact bounds 1/2 <= mass <= 1 from the published axis zero-direction mass result and distribution averaging APIs.",
+  "closed_by": null,
+  "reactions": {
+   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/450/reactions",
+   "total_count": 0,
+   "+1": 0,
+   "-1": 0,
+   "laugh": 0,
+   "hooray": 0,
+   "confused": 0,
+   "heart": 0,
+   "rocket": 0,
+   "eyes": 0
+  },
+  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/450/timeline",
+  "performed_via_github_app": null,
+  "state_reason": null,
+  "pinned_comment": null
+ },
+ {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/446",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/446/labels{/name}",
@@ -201,8 +482,8 @@
   "issue_dependencies_summary": {
    "blocked_by": 2,
    "total_blocked_by": 2,
-   "blocking": 0,
-   "total_blocking": 0
+   "blocking": 1,
+   "total_blocking": 1
   },
   "body": "<!-- mipstarre-issue-key: qpbt-combined-point-line-marginal-distance-20260909 -->\n### Target\n\nProve `exists_combinedPoints_line_marginal_distance_le` with the two explicit\nX and Z squared-distance comparisons from `eq:pasting-q1`,\n`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:936-941`.\n\n### Dependencies\n\n- PR #442 supplies the same-placement evaluated-line to completed-point bound.\n- PR #430 supplies completed X and Z point-marginal transport.\n\n### Acceptance\n\n- Preserve the historical universal constant and both explicit bounds\n  `8 * deltaQ + C * (epsilon + deltaLine epsilon)`.\n- Cover every directed opposite placement and preserve the X/Z sample order.\n- Add no generic distance assumptions, extra hypotheses, proof holes, axioms,\n  or error absorption.\n\n---\nSub-issue of #118.",
   "closed_by": null,
@@ -1825,8 +2106,8 @@
   "issue_dependencies_summary": {
    "blocked_by": 0,
    "total_blocked_by": 0,
-   "blocking": 0,
-   "total_blocking": 0
+   "blocking": 1,
+   "total_blocking": 1
   },
   "body": "<!-- mipstarre-issue-key: qpbt-zero-direction-mass-20260908 -->\n### Motivation\n\nThe proof-only conditioning used in the QPBT paired-line construction must\nrestore the mass of zero-direction line samples under the unchanged\nline-point distribution.  The required estimate is\n`linePointDist_zero_direction_mass_le`.\n\n### Scope\n\n- Prove the diagonal and axis zero-direction mass calculations in a small\n  geometry-only module.\n- Derive the mixed-law bound `1 / (2q)` without changing the sampler.\n- Do not implement the conditional pasting theorem or downstream consumers.\n\n### Source\n\n- `def:line-point-dist` in\n  `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex`.\n- The proof-only conditioning step at\n  `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:950-963`.\n\nStack base: published point-witness head\n`2cc44385ac07b34bd0e3b023c35afd6c95ba4a87`.",
   "closed_by": null,
@@ -3831,8 +4112,8 @@
   "issue_dependencies_summary": {
    "blocked_by": 1,
    "total_blocked_by": 1,
-   "blocking": 2,
-   "total_blocking": 2
+   "blocking": 3,
+   "total_blocking": 3
   },
   "body": "<!-- mipstarre-issue-key: qpbt-restricted-line-mixture-20260908 -->\n### Target declarations\n\nProve the existing tracked hole in `MIPStarRE/QPBT/Combining/Lines.lean`:\n\n- `linePointDist_eq_mixture_restricted`\n\nIf the finite-mixture identity closes early, also prove the immediately dependent\naverage bounds in the same block without changing their signatures:\n\n- `avg_restricted_le`\n- `avg_restricted_prod_le`\n- `restricted_lines_consistency_bound`\n\nOwn only the restricted-mixture and average block in `Combining/Lines.lean`.\nDo not modify the combined-line producer, point producer, extraction, or sub-line\nconstruction declarations.\n\n### Source and dependencies\n\n- Paper: `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1038-1061`.\n- Blueprint: `lem:restricted-line-mixture-bounds`.\n- The proof must expand the finite conditional laws and the equal fibers of\n  `chiIndex`; preserve degenerate directions and exact inflation factors `2m`\n  and `4m^2`.\n- Blocked by #373, which proves positivity of the two restricted seed events used\n  by the conditional distributions.\n\n### Acceptance\n\n- Target declarations have kernel-checked proofs with unchanged statements.\n- No new `sorry`, axiom, bypass, bridge premise, or weakened probability law.\n- Focused Lean check, proof-debt scan, import check, hooks, and three-axiom\n  inspection pass after the prerequisite is integrated.\n- Publication follows exact-head local CI and independent review.\n\n---\nProof sub-issue of #118.\n",
   "closed_by": null,
@@ -9218,7 +9499,7 @@
   "author_association": "OWNER",
   "active_lock_reason": null,
   "sub_issues_summary": {
-   "total": 23,
+   "total": 25,
    "completed": 1,
    "percent_completed": 4
   },
