@@ -1,6 +1,6 @@
 {
   "schema": 2,
-  "updated_at": "2026-09-08T10:44:45.974Z",
+  "updated_at": "2026-09-08T14:53:30.910977Z",
   "executable_mechanics_owner": "/root/astra_refill_coordinator",
   "root_thread_id": "01a076bc-f4ad-7813-805b-c8b4dac71a14",
   "authorization": {
@@ -12,7 +12,7 @@
     "former_extended_deadline_at": "2026-09-08T09:01:37.885Z",
     "current_expiry": null,
     "continuation": "Owner explicitly requires executable mechanics without expiry until a successor actually demonstrates native list_agents and followup_task; all cumulative time retained, no reset.",
-    "routine_selection_scope": "Approved QPBT direct-soundness/supplied-witness frontier and eligible PR integration queue; root retains overall scope and trusted independent review binding."
+    "routine_selection_scope": "Approved QPBT mathematical frontier and eligible PR integration queue, with explicit finite proof allowances; root retains overall scope and trusted independent review binding. Passive CI and publisher watching consolidated under sole primary."
   },
   "capacity": {
     "space_total": 10,
@@ -22,6 +22,23 @@
     "external": 0
   },
   "observed": {
+    "at": "2026-09-08T14:53:30.910977Z",
+    "main": 1,
+    "useful_native": 9,
+    "other": 0,
+    "models": {"gpt-5.6-sol/ultra": 8, "gpt-6-astra/ultra": 1},
+    "current_model_and_tool_outputs_verified": true,
+    "activity_receipt_writer": "existing 20s helper status consumer, owned session77502",
+    "main_pin": "445d25872b7c53b4d52b2072f741a17d7e81b77e",
+    "shortfall_reason": null,
+    "previous_shortfall": "Seven useful workers while required390 canonical request and direct-root independent binding were pending; no reservations or completed producer392 counted.",
+    "next_action": "Enforce C3 attempt3, constructorA, symmetryB and absorption2 finite boundaries. Hand unique CI and all publishers to primary; no passive native watcher pool.",
+    "role_mix": {"proof_construction": 4, "preservation_integration": 2, "primary_integration": 1, "executable_replenishment": 1, "independent_review": 1},
+    "api_utilization_inferred": false,
+    "floor_recovered": true,
+    "first_recovery_snapshot": "2026-09-08T14:44:45.383077Z"
+  },
+  "previous_observed_20260908_104257": {
     "at": "2026-09-08T10:42:57.527216Z",
     "main": 1,
     "useful_native": 9,
@@ -36,6 +53,20 @@
     "main_pin": "1785520949014bcc37684684e412b713712ef0f6"
   },
   "current_owners": [
+    {"worker": "astra_refill_coordinator", "task": "Executable replenishment with no expiry until proven capable transfer", "start": "2026-09-08T08:16:37.885Z", "budget": "Original30+explicit15+owner continuation, all actual time cumulative"},
+    {"worker": "space_sol_publication_finish", "task": "Sole source service integration, CI and canonical publishers, manual telemetry", "current_owned_review": "PR390 session82483; nonce a995c4c9bcb048568ddece02a5f97f71"},
+    {"worker": "sol_recover_subline_claim", "task": "C3 public theorem assembly attempt3", "start": "2026-09-08T14:51:29.327Z", "model_output": "2026-09-08T14:51:34.593Z", "tool_output": "2026-09-08T14:51:51.318Z", "deadline": "2026-09-08T14:56:29.327Z", "budget": "ROOT explicit5min after old30+10; all prior drains/admin retained. Attempt2 helpers typed but wholeC3 untyped; unused<=10min validation only after whole target kernel types.", "previous_attempt": {"start": "2026-09-08T14:36:27.734Z", "deadline": "2026-09-08T14:46:27.734Z", "result": "Helpers typed; whole public target unchanged. Predeadline compiler drained after boundary; no validation allowance activated.", "duplicate_dispatch_note": "Root and delegate messages coalesced ONE attempt2, no double budget"}},
+    {"worker": "sol_prove_marginal_absorption", "task": "Second exact target marginalPoly_sub_pointMeas_approx_zero", "start": "2026-09-08T14:37:52.300Z", "model_output": "2026-09-08T14:38:09.469Z", "tool_output": "2026-09-08T14:38:21.886Z", "deadline": "2026-09-08T15:07:52.300Z", "budget": "New explicit30min second target +<=10min only if typed; PR384 first target/history retained", "scope": "Paper14:1637-1662, unchanged public hypotheses/C/error, isolated stack384"},
+    {"worker": "sol_review372_line_closures", "task": "Ordinary359 second guarded preservation;358 first operation complete", "start": "2026-09-08T14:36:54.857Z", "model_output": "2026-09-08T14:37:12.253Z", "tool_output": "2026-09-08T14:37:29.480Z", "budget": "One15min preservation operation per required released pin/packet +normal unique CI; all earlier costs retained", "completed358": {"head": "7a059bc2c02070750ee980bc86039b22abfbb7c7", "readback_at": "2026-09-08T14:51:48.593Z", "first_op_deadline": "2026-09-08T14:51:54.857Z", "ci_owner": "space_sol_publication_finish", "statuses_empty_at_readback": true}, "scope": "No371 repair, hash override, self-review, source proof change or duplicate CI; hand publishers to primary"},
+    {"worker": "space_sol_pr249", "task": "363 then365 preservation propagation from published361493733", "start": "2026-09-08T14:37:43.663Z", "model_output": "2026-09-08T14:37:59.641Z", "tool_output": "2026-09-08T14:38:21.370Z", "budget": "One15min preservation operation each +normal unique CI, all362/364 costs retained", "scope": "Existing exact plan, preserve public module/proof bytes and original carriers; no new proof"},
+    {"worker": "sol_recover_subline_distribution", "task": "Combined-line measurement constructor sliceA", "start": "2026-09-08T14:51:47.833Z", "model_output": "2026-09-08T14:52:09.363Z", "tool_output": "2026-09-08T14:52:26.514Z", "deadline": "2026-09-08T15:11:47.833Z", "budget": "ROOT explicit20min +<=10 only if typed; prior39120min and route10min+11.690s format correction retained", "scope": "Five-declaration constructor/effect/pasted identity/axis degree slice only; full55+10 pasting and B8 NOT authorized", "predecessor": "/tmp/qpbt-pr391-392-line-producer-route-status-20260908.json"},
+    {"worker": "sol_prove_combine_line_polynomial", "task": "Opposite-placement consistencyDefect symmetry sliceB", "start": "2026-09-08T14:52:07.823Z", "model_output": "2026-09-08T14:52:14.379Z", "tool_output": "2026-09-08T14:52:28.010Z", "deadline": "2026-09-08T15:02:07.823Z", "budget": "ROOT explicit10min +<=10 only if typed; prior372 and all391/392 history retained", "scope": "Single existing-proved leaf, separate module/worktree fromA; no duplicated general lemma or B8"},
+    {"worker": "sol_review377_seed_closures", "task": "Root-bound independent390 review", "start": "2026-09-08T14:44:08.886Z", "turn_id": "01a08179-f626-7a90-a707-1754b05b5bd9", "model_output": "2026-09-08T14:44:15.369Z", "tool_output": "2026-09-08T14:44:47.905Z", "effective_model": "gpt-5.6-sol", "effective_effort": "ultra", "independence": "Prior377 public canonical result consumed; request390 excludes root, originalC and Asfinisher; this reviewer is independent"}
+  ],
+  "current_review_binding": {"pr": 390, "nonce": "a995c4c9bcb048568ddece02a5f97f71", "head": "989702f7cb190609a0c8a300c5615154aa72cc8b", "prompt_sha256": "83f31b637945c5804160e7c308b1eac80bd4e9c5057dfc5bd112625c61b8f225", "prompt_digest_verified": true, "ci": "279s nonpartial green; published14:39:53", "counted_as_active": true},
+  "root_continuity_receipt": "/tmp/qpbt-main-control-next-turn-20260908.json",
+  "metric_correction": "Mixed51/170 alert+snapshot rows are not an occupancy proportion. Use snapshot-only observations/time weights and report coverage separately from API utilization.",
+  "historical_owners_20260908_104445": [
     {
       "worker": "astra_refill_coordinator",
       "task": "Executable replenishment planning/control",

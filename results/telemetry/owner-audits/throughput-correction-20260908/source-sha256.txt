@@ -2,3 +2,5 @@
 04d13d638913234f6da0f4cf853fcfd413919dbefabbd6eba5b1854749d5c0b0  results/telemetry/owner-audits/throughput-correction-20260908/qpbt-meta-watch-state-20260908T123647Z.json
 ec19c18830b78c8dbd166864f798133df10cf7d408308991ab9dfc7e198af72b  results/telemetry/owner-audits/throughput-correction-20260908/qpbt-meta-watch-state-20260908T140016Z.json
 2601d712c487e6e21f03cf95c00348c2f4344c10350b173c4771020ea69f2d3d  results/telemetry/owner-audits/throughput-correction-20260908/qpbt-pr371-budget-disposition-20260908.json
+0463be944a5e505f7bb354f3e96928e73b84b48f2a85dff8aecedd0206d1f41e  results/telemetry/owner-audits/throughput-correction-20260908/qpbt-main-control-next-turn-20260908.json
+45450de813ae63088b6b010928b8cbbb9eafd4b345e999d396b91eb49504d72e  results/telemetry/owner-audits/throughput-correction-20260908/qpbt-meta-watch-state-20260908T145642Z.json

@@ -34,3 +34,10 @@ issue #26 comment 5557148036, main granted a bounded, no-reset extension from
 13:57:30Z through 14:27:30Z for the already reviewed merge and guarded resume
 verification only. No source growth, new feature work, or gate relaxation was
 authorized.
+
+The 14:56:42Z watch snapshot remains an observational artifact, not a provider
+utilization certificate. The main-control receipt records one completion-to-next-
+turn latency and a later 185.063-second control-pass overrun without rewriting
+the earlier lifecycle samples. PR #372 subsequently merged through its normal
+exact-head gates; the unmerged and merged closure counts therefore remain
+separate observations at their respective timestamps.
