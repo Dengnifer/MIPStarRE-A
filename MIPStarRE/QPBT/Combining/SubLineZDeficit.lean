@@ -130,6 +130,40 @@ theorem regroup_line_answer_sum {P : AdmissibleParams} {ε δQ δP : ℝ}
   exact regroup_line_answer_sum_at lines .AA' .BA'' lineX lineZ x z G
 
 /-- The sub-line average of a function of the two source lines and the
+`X`-point of the sampled extended point is a mixture of averages over products
+of two restricted line-point laws, the `X`-point being the point of the first
+factor. This is the use of Property~2 of `lem:qld-sublines` in the proof of
+`lem:claim-17-2`, blueprint `blueprint/src/chapter/ch15_qpbt_combining.tex`,
+paper `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1168-1201`. -/
+theorem SubLineWitness.exists_avgOver_X_eq_mixture (P : AdmissibleParams)
+    (sublines : SubLineWitness P)
+    (F : (LineDesc P.toLdParams × LineDesc P.toLdParams) ×
+      (Fin P.m → PauliScalar P) → ℝ) :
+    ∃ components : Distribution (SubLineComponent P), components.IsProbability ∧
+      avgOver sublines.D (fun sample =>
+          avgOver (uniformDistribution (DirectScalarQ P.extendedDirectLd))
+            (fun t => F (sample.2, projX (directPointToPauli P
+              (sample.1.base + t • sample.1.direction))))) =
+        avgOver components (fun c =>
+          avgOver (Distribution.prod (restrictedLinePointDist P c.1 c.2.1)
+              (restrictedLinePointDist P c.1 c.2.2))
+            (fun w => F ((w.1.1, w.2.1), w.1.2))) := by
+  obtain ⟨components, hcomp, hX, -⟩ := sublines.source_mixture
+  refine ⟨components, hcomp, ?_⟩
+  have h1 : avgOver sublines.D (fun sample =>
+      avgOver (uniformDistribution (DirectScalarQ P.extendedDirectLd))
+        (fun t => F (sample.2, projX (directPointToPauli P
+          (sample.1.base + t • sample.1.direction))))) =
+      avgOver ((subLinePointDist P sublines.D).map subLineXProjection) F := by
+    rw [Distribution.avgOver_map, subLinePointDist, Distribution.avgOver_map,
+      avgOver_prod]
+    rfl
+  rw [h1, hX, avgOver_bind]
+  refine avgOver_congr _ _ _ fun c => ?_
+  rw [subLineXComponentDist, Distribution.avgOver_map, Distribution.prod_map_right,
+    Distribution.avgOver_map]
+
+/-- The sub-line average of a function of the two source lines and the
 `Z`-point of the sampled extended point is a mixture of averages over products
 of two restricted line-point laws, the `Z`-point being the point of the second
 factor.  This is the use of Property~2 of `lem:qld-sublines` in the proof of
