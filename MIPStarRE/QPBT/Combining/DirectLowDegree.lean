@@ -26,6 +26,7 @@ import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.Error
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.PointAgreement
 import MIPStarRE.QPBT.Combining.DirectLowDegree.SeedIndexedSoundness
 import MIPStarRE.QPBT.Combining.DirectLowDegree.ResampledCoefficientConsistency
+import MIPStarRE.QPBT.Combining.DirectLowDegree.ExtendedCoefficientLoss
 
 /-!
 # The directly indexed low-degree game
