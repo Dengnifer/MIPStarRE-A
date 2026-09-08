@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import errno
 import json
 import fcntl
 import importlib.util
@@ -24,16 +25,24 @@ TELEMETRY = REPO_ROOT / "local" / "bin" / "telemetry.py"
 PRE_COMMIT = REPO_ROOT / ".githooks" / "pre-commit"
 THREAD_ID = "019e93a5-e370-7aa1-ba77-6373dbdd6a61"
 ROUTER = DISPATCH.with_name("account_router.py")
+sys.path.insert(0, str(DISPATCH.parent))
+import model_policy
 SPEC = importlib.util.spec_from_file_location("account_router", ROUTER)
 router = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(router)
 HOST_PROCESS_SCAN = router.host_processes
 
 
+def copy_model_policy(local_bin: Path) -> None:
+    shutil.copy2(DISPATCH.with_name('model_policy.py'), local_bin / 'model_policy.py')
+    shutil.copy2(REPO_ROOT / 'local/model-policy.json', local_bin.parent / 'model-policy.json')
+
+
 def isolate_host(binary_dir: Path) -> None:
     interpreter = binary_dir / 'python3'
     interpreter.write_text(f'#!{sys.executable}\nimport os, runpy, sys\n'
         'if sys.argv[1].endswith("/account_router.py"):\n'
+        '    sys.path.insert(0, os.path.dirname(sys.argv[1]))\n'
         '    loaded = runpy.run_path(sys.argv.pop(1))\n'
         '    loaded["reserve"].__globals__["host_processes"] = lambda *args: ({}, {})\n'
         '    loaded["main"]()\n'
@@ -54,8 +63,12 @@ class DispatchCommandTests(unittest.TestCase):
             shutil.copy2(DISPATCH, local_bin / "dispatch.sh")
             shutil.copy2(TELEMETRY, local_bin / "telemetry.py")
             shutil.copy2(ROUTER, local_bin / "account_router.py")
+            copy_model_policy(local_bin)
             (repo / "AGENTS.md").write_text("# Test repository\n", encoding="utf-8")
-            subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
+            subprocess.run(["git", "init", "-q", '-b', 'main'], cwd=repo, check=True)
+            subprocess.run(['git', 'add', 'AGENTS.md'], cwd=repo, check=True)
+            subprocess.run(['git', '-c', 'user.name=Test', '-c', 'user.email=test@test',
+                            'commit', '-qm', 'initial fixture'], cwd=repo, check=True)
 
             fake_bin = root / "bin"
             fake_bin.mkdir()
@@ -94,6 +107,7 @@ class DispatchCommandTests(unittest.TestCase):
                     "MIPSTARRE_CODEX_HOME_SECOND": "" if empty_second_home else str(second),
                     "MIPSTARRE_ACCOUNT_WAIT": "0",
                     "MIPSTARRE_CACHE_ROOT": str(root / "cache"),
+                    "MIPSTARRE_KEY_LABEL": "unknown",
                     "PATH": f"{fake_bin}{os.pathsep}{env.get('PATH', '')}",
                 }
             )
@@ -162,7 +176,7 @@ class DispatchCommandTests(unittest.TestCase):
 
     def dispatch_command(
         self, *extra: str, model: str = "gpt-6-astra", effort: str | None = "ultra",
-        include_persona: bool = False, registry_rows: str = "",
+        include_persona: bool = False, registry_rows: str = "", policy_data: dict | None = None,
     ) -> list[str]:
         with tempfile.TemporaryDirectory() as cache_root:
             fake_bin = Path(cache_root) / "bin"
@@ -174,7 +188,7 @@ class DispatchCommandTests(unittest.TestCase):
             home = Path(cache_root) / "home"
             rollout = home / ".codex/sessions/2026/09/06" / f"rollout-{THREAD_ID}.jsonl"
             rollout.parent.mkdir(parents=True)
-            rollout.touch()
+            rollout.write_text(json.dumps(dict(type='turn_context', payload=dict(model='gpt-6-astra'))))
             env = os.environ.copy()
             env.update(
                 {
@@ -190,23 +204,36 @@ class DispatchCommandTests(unittest.TestCase):
             (Path(cache_root) / 'watchdog/account-mode').write_text('both')
             worktree = REPO_ROOT
             dispatch = DISPATCH
-            if registry_rows:
+            if registry_rows or policy_data is not None:
                 worktree = Path(cache_root) / 'repo'
                 registry = worktree / 'results/telemetry/sessions.jsonl'
                 registry.parent.mkdir(parents=True)
                 registry.write_text(registry_rows)
                 (worktree / 'AGENTS.md').write_text('# Test repository\n')
-                subprocess.run(['git', 'init', '-q', str(worktree)], check=True)
+                subprocess.run(['git', 'init', '-q', '-b', 'main', str(worktree)], check=True)
+                subprocess.run(['git', '-C', str(worktree), 'add', 'AGENTS.md'], check=True)
+                subprocess.run(['git', '-C', str(worktree), '-c', 'user.name=Test', '-c',
+                    'user.email=test@test', 'commit', '-qm', 'initial fixture'], check=True)
                 dispatch = worktree / 'local/bin/dispatch.sh'
                 dispatch.parent.mkdir(parents=True)
                 for source in (DISPATCH, ROUTER, TELEMETRY):
                     shutil.copy2(source, dispatch.parent / source.name)
+                copy_model_policy(dispatch.parent)
+                if policy_data is not None:
+                    (dispatch.parent.parent / 'model-policy.json').write_text(json.dumps(policy_data))
+                    subprocess.run(['git', '-C', str(worktree), 'add', 'local'], check=True)
+                    subprocess.run(['git', '-C', str(worktree), '-c', 'user.name=Test', '-c',
+                        'user.email=test@test', 'commit', '-qm', 'policy fixture'], check=True)
+                    subprocess.run(['git', '-C', str(worktree), 'branch', '-M', 'main'], check=True)
             dispatch_args = [str(dispatch), '--role', 'scout', '--issue', 'dispatch-argv',
                              '--worktree', str(worktree), '--sandbox', 'read-only',
                              *([] if include_persona else ['--no-persona']),
                              '--skip-hook-check', '--dry-run', *extra]
             if effort is not None:
                 dispatch_args.extend(["--effort", effort])
+            if '--job-class' not in extra:
+                dispatch_args.extend(['--job-class', 'control_policy', '--hardness-reason',
+                                      'Routing-control test fixture'])
             dispatch_args.extend(["--", "test prompt"])
             result = subprocess.run(
                 dispatch_args,
@@ -257,7 +284,7 @@ class DispatchCommandTests(unittest.TestCase):
                         argv = self.dispatch_command('--role', role, *extra, effort=effort)
                         self.assertIn('model_reasoning_effort=ultra', argv)
 
-    def test_sol_is_rejected_for_every_role(self) -> None:
+    def test_sol_is_rejected_for_control_policy_jobs(self) -> None:
         for role in ('orc', 'prover', 'reviewer', 'simplifier', 'blueprint', 'splitter',
                      'scout', 'mathfix'):
             with self.assertRaises(subprocess.CalledProcessError):
@@ -277,7 +304,7 @@ class DispatchCommandTests(unittest.TestCase):
                 with self.assertRaises(subprocess.CalledProcessError) as failure:
                     self.dispatch_command("--role", "mathfix", model=model, effort=effort)
                 self.assertEqual(failure.exception.returncode, 4)
-                self.assertIn("owner policy requires gpt-6-astra", failure.exception.stderr)
+                self.assertIn("model policy", failure.exception.stderr)
 
     def test_telemetry_accepts_mathfix_role(self) -> None:
         result = subprocess.run(
@@ -329,6 +356,10 @@ class DispatchCommandTests(unittest.TestCase):
 
     def test_resume_preflight_tolerates_bad_rows_but_rejects_invalid_metadata(self) -> None:
         noise = '\n{"truncated":\nnull\n[]\n42\n{"thread_id":"other","continuation":42}\n'
+        legacy = json.dumps(dict(thread_id=THREAD_ID, account='primary'))
+        self.assertIn('resume', self.dispatch_command('--resume', THREAD_ID,
+                                                     registry_rows=legacy))
+        noise += legacy + '\n'
         row = dict(name='prior', thread_id=THREAD_ID, account='primary', wall_s=20)
         metadata = dict(budget_file='/shared/budget', budget=dict(anchor='original', attempts=7,
             attempt_limit=10, working_seconds=12452, sessions=['prior']))
@@ -406,7 +437,110 @@ class DispatchCommandTests(unittest.TestCase):
         )
 
 
+class AgentEntrypointTests(unittest.TestCase):
+    def run_agent(self, dispatcher: str, exit_code: int = 0) -> tuple:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            repo = root / 'repo'
+            local_bin = repo / 'local/bin'
+            local_bin.mkdir(parents=True)
+            agent = local_bin / 'agent.sh'
+            shutil.copy2(DISPATCH.with_name('agent.sh'), agent)
+            persona = repo / '.github/prompts/claude-code-system-prompt.md'
+            persona.parent.mkdir(parents=True)
+            persona.write_text('Fixture persona.\n')
+            subprocess.run(['git', 'init', '-qb', 'main', str(repo)], check=True)
+            subprocess.run(['git', '-C', str(repo), 'add', '.'], check=True)
+            subprocess.run(['git', '-C', str(repo), '-c', 'user.name=Test', '-c',
+                            'user.email=test@test', 'commit', '-qm', 'fixture'], check=True)
+            (local_bin / 'gh_common.py').write_text(
+                'import json\nprint(json.dumps(dict(number=268, state="open", '
+                'head=dict(ref="main"), base=dict(ref="main"))))\n')
+            fake_bin = root / 'bin'
+            fake_bin.mkdir()
+            codex_marker = root / 'codex-launched'
+            fake_codex = fake_bin / 'codex'
+            fake_codex.write_text(f'#!{sys.executable}\nfrom pathlib import Path\n'
+                                 f'Path({str(codex_marker)!r}).touch()\nraise SystemExit(91)\n')
+            fake_codex.chmod(0o755)
+            dispatch_marker = root / 'dispatch.json'
+            if dispatcher != 'missing':
+                fake_dispatch = local_bin / 'dispatch.sh'
+                fake_dispatch.write_text(f'#!{sys.executable}\nimport json, os, sys\n'
+                    'from pathlib import Path\n'
+                    f'Path({str(dispatch_marker)!r}).write_text(json.dumps(dict('
+                    'args=sys.argv[1:], model=os.environ.get("MIPSTARRE_CODEX_MODEL"))))\n'
+                    f'raise SystemExit({exit_code})\n')
+                fake_dispatch.chmod(0o755 if dispatcher == 'executable' else 0o644)
+            env = os.environ.copy()
+            env.update(HOME=str(root), MIPSTARRE_CACHE_ROOT=str(root / 'cache'),
+                       MIPSTARRE_AUTOMATION='', MIPSTARRE_AUTOFIX_ACTIVE='',
+                       MIPSTARRE_TRUSTED_REF='main', MIPSTARRE_AGENT_MODEL='gpt-6-astra',
+                       PATH=f'{fake_bin}{os.pathsep}{env.get("PATH", "")}')
+            result = subprocess.run([str(agent), '268', 'fixture task', '--role', 'scout',
+                                     '--read-only'], cwd=repo, env=env, capture_output=True,
+                                    text=True, timeout=20)
+            launched = json.loads(dispatch_marker.read_text()) if dispatch_marker.exists() else None
+            return result, codex_marker.exists(), launched
+
+    def test_unavailable_dispatcher_never_launches_codex(self) -> None:
+        for dispatcher in ('missing', 'non-executable'):
+            with self.subTest(dispatcher=dispatcher):
+                result, codex_launched, dispatched = self.run_agent(dispatcher)
+                self.assertFalse(codex_launched, result.stderr)
+                self.assertIsNone(dispatched)
+                self.assertEqual(result.returncode, 1, result.stderr)
+                self.assertIn('dispatch.sh', result.stderr)
+
+    def test_available_dispatcher_preserves_arguments_and_exit_status(self) -> None:
+        for exit_code in (0, 17):
+            with self.subTest(exit_code=exit_code):
+                result, codex_launched, dispatched = self.run_agent('executable', exit_code)
+                self.assertEqual(result.returncode, exit_code, result.stderr)
+                self.assertFalse(codex_launched)
+                self.assertEqual(dispatched['model'], 'gpt-6-astra')
+                args = dispatched['args']
+                for option, value in (('--role', 'scout'), ('--issue', 'pr268'),
+                                      ('--pr', '268'), ('--sandbox', 'read-only'),
+                                      ('--persona-ref', 'main')):
+                    self.assertEqual(args[args.index(option) + 1], value)
+                self.assertIn('fixture task', args[-1])
+                self.assertEqual(args[-2], '--')
+
+
 class AccountRouterTests(unittest.TestCase):
+    def test_resume_continuation_accepts_unnamed_legacy_affinity_in_memory(self) -> None:
+        legacy = dict(thread_id=THREAD_ID, account='primary')
+        registry = Path('/unused-registry')
+        with mock.patch.object(router, 'session_rows', return_value=[legacy]):
+            self.assertEqual(router.resume_account(THREAD_ID, registry, {}), 'primary')
+            self.assertEqual(router.resume_continuation(registry, THREAD_ID), {})
+        self.assertEqual(legacy, dict(thread_id=THREAD_ID, account='primary'))
+
+    def test_resume_continuation_keeps_named_charges_among_unnamed_rows(self) -> None:
+        metadata = dict(budget_file='/shared/budget', budget=dict(anchor='original', attempts=7,
+            attempt_limit=10, working_seconds=12452, sessions=['prior']))
+        prior = dict(name='prior', thread_id=THREAD_ID, wall_s=2600, continuation=metadata)
+        legacy = dict(thread_id=THREAD_ID, account='primary')
+        resumed = dict(name='resumed', thread_id=THREAD_ID, wall_s=50)
+        rows = [legacy, prior, legacy | {'continuation': {}}, resumed,
+                prior | {'status': 'archived'}, legacy]
+        with mock.patch.object(router, 'session_rows', return_value=rows):
+            self.assertEqual(router.resume_continuation(Path('/unused-registry'), THREAD_ID),
+                             metadata | {'completed_wall_s': 2650})
+        self.assertNotIn('completed_wall_s', metadata)
+
+    def test_unnamed_continuation_metadata_fails_closed(self) -> None:
+        for metadata in (None, [], False, 42, 'bad', {'budget_file': '/shared/budget'},
+                         dict(budget_file='/shared/budget', budget=dict(anchor='original',
+                              attempts=7, attempt_limit=10, working_seconds=12452,
+                              sessions=['prior']))):
+            row = dict(thread_id=THREAD_ID, account='primary', continuation=metadata)
+            with self.subTest(metadata=metadata), \
+                 mock.patch.object(router, 'session_rows', return_value=[row]), \
+                 self.assertRaisesRegex(ValueError, 'invalid continuation'):
+                router.resume_continuation(Path('/unused-registry'), THREAD_ID)
+
     def test_continuation_charges_completed_time_even_after_a_legacy_resume(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -443,6 +577,10 @@ class AccountRouterTests(unittest.TestCase):
         patcher = mock.patch.object(router, 'host_processes', return_value=({}, {}))
         patcher.start()
         self.addCleanup(patcher.stop)
+        policy_context = mock.patch.dict(os.environ, MIPSTARRE_JOB_CLASS='control_policy',
+                                         MIPSTARRE_HARDNESS_REASON='Routing-control test fixture')
+        policy_context.start()
+        self.addCleanup(policy_context.stop)
 
     def test_host_scan_handles_global_options_without_reading_prompt_as_command(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -469,6 +607,46 @@ class AccountRouterTests(unittest.TestCase):
                                  {100: ('primary', False), 200: ('primary', True)})
                 self.assertEqual(HOST_PROCESS_SCAN(['/home/drx/FV'])[1], {100: ('primary', False)})
                 self.assertEqual(len(HOST_PROCESS_SCAN(['/home/drx'])[1]), 2)
+
+    def test_host_scan_skips_only_vanished_pids(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for name in ('1', 'self', '100', '200'):
+                (root / name).mkdir()
+            (root / '1/comm').write_text('systemd')
+            (root / 'self/status').write_text(f'NSpid:\t{os.getpid()}')
+            (root / '200/status').write_text('Name:\tcodex\nPPid:\t1')
+            (root / '200/cmdline').write_bytes(b'codex\0exec\0task')
+            (root / '200/environ').write_bytes(b'HOME=/home/drx')
+
+            def mapped_path(path):
+                return root / str(path).removeprefix('/proc').lstrip('/') if str(path).startswith(
+                    '/proc') else Path(path)
+
+            original_read_text = Path.read_text
+
+            def read_text(path, *args, **kwargs):
+                if path == root / '100/status':
+                    raise error
+                return original_read_text(path, *args, **kwargs)
+
+            errors = (ProcessLookupError(errno.ESRCH, 'vanished PID'),
+                      FileNotFoundError(errno.ENOENT, 'vanished PID'),
+                      PermissionError(errno.EACCES, 'denied PID'),
+                      OSError(errno.EIO, 'unreadable PID'))
+            with mock.patch.object(router, 'Path', side_effect=mapped_path) as paths, \
+                 mock.patch.object(Path, 'read_text', new=read_text), \
+                 mock.patch.dict(os.environ, {'MIPSTARRE_CODEX_HOME_SECOND': '/second'}):
+                paths.home.return_value = Path('/home/drx')
+                for error in errors:
+                    with self.subTest(error=type(error).__name__):
+                        if isinstance(error, (FileNotFoundError, ProcessLookupError)):
+                            self.assertEqual(HOST_PROCESS_SCAN(),
+                                             ({200: 1}, {200: ('primary', False)}))
+                        else:
+                            with self.assertRaises(type(error)) as failure:
+                                HOST_PROCESS_SCAN()
+                            self.assertIs(failure.exception, error)
 
     def test_mode_changes_disabled_caps_and_preserved_both_settings(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -613,7 +791,7 @@ class AccountRouterTests(unittest.TestCase):
             second = root / ".cache/mipstarre-dev/codex-home-yxy"
             rollout = second / "sessions" / f"rollout-{THREAD_ID}.jsonl"
             rollout.parent.mkdir(parents=True)
-            rollout.touch()
+            rollout.write_text(json.dumps(dict(type='turn_context', payload=dict(model='gpt-6-astra'))))
             (second / "config.toml").write_text('model = "gpt-second-default"\n')
             (root / 'cache/watchdog').mkdir(parents=True)
             (root / 'cache/watchdog/account-mode').write_text('both')
