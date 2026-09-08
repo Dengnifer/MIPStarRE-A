@@ -5728,3 +5728,66 @@ not actual commit/publication hooks. No productive session was killed.
   the constructed expected copies and pass `git diff --check`. Main publication
   proceeds through the canonical GitHub sync before this merge is released as a
   downstream base.
+- PR341's first checked-publication attempt stopped before any branch update:
+  the normal pre-push sync guard found multiple merge bases and exited 128.
+  This was a local history-shape failure, not a network or authentication
+  failure. The scoped source commit beginning 1b5ab59 remains clean and its
+  proof/validation evidence is preserved. The author will merge the released
+  main pin through the existing worktree, rerun the standard merge-loss guard,
+  and use the normal checked `pr_open.py` path; no CI, review, duplicate source
+  commit, or primary-main publication is inferred from the failed attempt.
+- The owner corrected the Space occupancy denominator on 2026-09-08: a total
+  limit `k` consists of one main session and `k - 1` native worker slots, with
+  no extra app-server reservation. Useful occupancy therefore excludes main
+  and unrelated app servers and targets `ceil(0.8 * (k - 1))`; at total 10 the
+  target is eight useful workers across nine native slots. Meta installed the
+  corrected `qpbt-switch` and merge-service helpers after 24 tests. Historical
+  activity reports are retained unchanged but cannot certify the corrected
+  denominator. The current native lease remains eight: activation to nine is
+  blocked until the canonical router receives a narrow, normally reviewed
+  exclusion for unrelated app-server PID 3286270. Receipt:
+  `/home/drx/.cache/mipstarre-dev/qpbt-switch/worker-occupancy-correction-20260908.json`
+  (sha256 942881e910112a72d72da793ad77ace76c3a48597ff9522c6012eb9fc3ffb640).
+- 2026-09-08T06:16:34.750158+00:00: Worker-only occupancy correction completed. Owner clarified total k = one main plus k-1 shared native worker slots, no extra reservation; maintain ceil(0.8*(k-1)) useful active subagents almost all time, excluding main/other/idle activity. At total10, capacity9 and active-worker floor8. Controller and service adapter passed24 isolated tests; canonical native9 identity, lease, service, same active goal/budgets and unchanged authentication verified; repeated --limit10 was a no-op. Main chose and refilled its assignments and recorded eight active workers before the authorized checkpoint. Recorded switch interval is an occupancy exception; main is restoring saved work now. The unrelated app-server exited, making native9 admissible under the existing guard; reviewed durable router/protocol correction remains issue345. Recovery handled delayed queued input and the resume-goal dialog without losing state or relaxing checks. Receipt: ~/.cache/mipstarre-dev/qpbt-switch/worker-occupancy-final-20260908.json; original phase receipt: /home/drx/.cache/mipstarre-dev/qpbt-switch/requests/20260908T054638Z-bbee54a5/receipt.json. Main coordinator owns normal telemetry publication.
+- PR341's multiple-merge-base publication incident was resolved without a hook
+  bypass or duplicate source commit. The author guardedly merged published main
+  578ec420f578763e5c0876687b32f37eaa2ba375, preserving the public
+  `diagonalGameRead` API and the incoming docstring explanation, and obtained
+  the unique-merge-base head 255e25d9504f7f3b68d0b1d708e1731e3d879d37.
+  The normal `pr_open.py` retry then exited zero and checked-published that head
+  as PR347; its worktree and remote head were independently read back clean.
+  Exact-head CI, independent review, prerequisite integration and merge remain
+  coordinator gates, so this record claims publication only. The Astra/Ultra
+  proof phase was489.406s and normal validation/publication was934s; the prior
+  1500s proof episode, all predecessor times, unknown usage and B8's exhausted
+  13 attempts/26509 seconds remain cumulative and unchanged. Receipt:
+  /tmp/qpbt-parameter-evaluated-line-bound-astra-status-20260908.json
+  (sha256 adc49ff3bd1aafca860c6ffa3562455947743e1dfe9d0e9b7d205bb07b738655).
+- PR310's coordinator published telemetry commit
+  00565abd6d9dcfded2c914601ecef07542d2f4d8 and snapshot
+  fcfb392b01a33ea4779e92776a96f2bd77b99fef before merging the already
+  reviewed head 542d9e038901dd1766f0fad324c97b298e9df6c4. This violated the
+  intended frozen-base ordering: the PR head contained the prior published
+  main 578ec420f578763e5c0876687b32f37eaa2ba375 but not the new snapshot.
+  `pr_merge.py` first refused the dirty primary tree and, after publication,
+  correctly refused the stale head at its fresh-base gate before any merge. This was
+  an operator sequencing error, not a transport, CI, review, or source-proof
+  failure. No history was rewritten and no guard was bypassed. Repair is one
+  guarded author refresh merge of fcfb392 into the existing PR branch, followed by
+  one exact-head CI and a fresh independent review. All telemetry produced
+  during that repair remains uncommitted and will be parked until the service merge,
+  then restored and published through the normal quiet-boundary flow.
+- PR310's first post-refresh `ci.sh` invocation exited before starting any
+  build because GitHub returned an HTTP/2 GOAWAY while the wrapper posted the
+  initial `local-ci/summary=pending` status. The request body had been written,
+  so the coordinator treated the result as ambiguous and performed two bounded
+  exact-head status readbacks separated by three seconds. Both returned an
+  empty status set; no manifest, CI log, or CI process existed. A single replay
+  then produced the only actual CI run on
+  3e5cd710da4113b0db4c7b6e90287eb6393f399b: session4488 exited zero and all
+  nine exact-head contexts published success in154s. This was a transport
+  incident, not a test failure, and no successful or in-progress run was
+  duplicated.
+- 2026-09-08T08:37:56.275566+00:00: QPBT occupancy enforcement follow-up 20260908: user reported that main did not sustain ceil(0.8*(k-1)) useful workers. Allocation was already total10/main1/native9/floor8 with no extra reservation, but the controller only recorded counts and a queue-only trigger could wait behind a long main turn. Independent lifecycle observations confirmed drops to two useful active workers. Meta guided main to preauthorize successors and delegate replenishment; main launched its own bounded refill coordinator at08:16:37Z and chose all assignments. Initial recovery to8-9 is observed; sustained completion/refill and ownership beyond08:46Z remain under verification, not claimed complete. Evidence: /tmp/qpbt-refill-delegate-status-20260908.json, /tmp/qpbt-meta-sustained-workers-20260908.jsonl, ~/.cache/mipstarre-dev/qpbt-switch/occupancy-continuity-guidance-20260908.json. Research lesson: configured capacity, fresh count receipts, and accepted queued messages are not evidence of timely replenishment. Main coordinator owns normal telemetry publication; no checkpoint-only commit or pipeline intervention by meta.
+- 2026-09-08T08:54:17.471241+00:00: QPBT occupancy replenishment verification 20260908: main-owned replenishment is demonstrated across natural completions and continuing ownership is acknowledged by the primary coordinator in qpbt-refill-handoff-ack-space-sol-20260908.json (recorded08:49:30Z, effective08:46:37.885Z). Independent samples08:32:52-08:42:59 held8-9 in all21 samples; the following13 handoff samples included4 samples at7 and ended at9. Two initial successor starts took130.347s and70.524s; first tool outputs followed at170.257s and95.461s. These exceeded the60s aim; no instantaneous-refill claim is made. Later replacements restored8 before main consumed the latest meta prompt. The old queue-only trigger remains a reminder fallback, not proof of enforcement; the active main-approved successor queue and acknowledged coordinator provide replenishment. Main extended the temporary delegate during transfer and owns continuing refills. Archive: results/telemetry/owner-audits/occupancy-enforcement-20260908/ (compact observations, tests, receipts, summary, hashes). Six independent sampler tests passed locally and on ghz. Main retains assignment and normal publication ownership. Counts describe bounded activity and do not guarantee future occupancy or mathematical productivity. No credentials, capacity, model policy, proof budget or review/merge gate changed by meta.
+- 2026-09-08T09:02:13.539967+00:00: QPBT refill handoff capability correction 20260908: later08:55:30Z trigger receipt reveals the nominated takeover context lacks collaboration tools, and direct spawned-child queue input was rejected. Its acknowledgment and polling do not establish dispatch capability. This qualifies the08:54 bounded-verification completion record: initial real refill cycles remain valid, but durable takeover verification is reopened. Meta instructed main to retain a dispatch-capable owner until an actual useful successor dispatch proves the replacement capability, and clarified main may delegate bounded queue planning while retaining ownership and review-binding gates. No global assertion about Sol capabilities is inferred from this particular context. Current raw evidence is retained as a separate snapshot; primary still owns normal publication.
