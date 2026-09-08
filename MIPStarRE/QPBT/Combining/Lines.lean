@@ -1,4 +1,4 @@
-import MIPStarRE.QPBT.Combining.Witnesses
+import MIPStarRE.QPBT.Combining.Lines.PointSelfConsistency
 
 /-!
 # Combined lines and restricted line distributions
