@@ -354,6 +354,8 @@ theorem aline_point_rejection_eq_completedLinePointDefect
         (directALinePointDist P.extendedDirectLd) :=
       (completed_defect_eq_read_defect lines).symm
 
+/-- Evaluate a completed diagonal answer at the sampled point, returning `none` for
+other answer formats or when the evaluation is undefined. -/
 private def diagonalGameRead
     (sample : DirectLdSpace P.extendedDirectLd) :
     DirectLdAnswer P.extendedDirectLd → Option (PauliScalar P)
