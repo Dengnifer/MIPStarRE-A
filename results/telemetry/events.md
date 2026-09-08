@@ -5763,3 +5763,28 @@ not actual commit/publication hooks. No productive session was killed.
   13 attempts/26509 seconds remain cumulative and unchanged. Receipt:
   /tmp/qpbt-parameter-evaluated-line-bound-astra-status-20260908.json
   (sha256 adc49ff3bd1aafca860c6ffa3562455947743e1dfe9d0e9b7d205bb07b738655).
+- PR310's coordinator published telemetry commit
+  00565abd6d9dcfded2c914601ecef07542d2f4d8 and snapshot
+  fcfb392b01a33ea4779e92776a96f2bd77b99fef before merging the already
+  reviewed head 542d9e038901dd1766f0fad324c97b298e9df6c4. This violated the
+  intended frozen-base ordering: the PR head contained the prior published
+  main 578ec420f578763e5c0876687b32f37eaa2ba375 but not the new snapshot.
+  `pr_merge.py` first refused the dirty primary tree and, after publication,
+  correctly refused the stale head at its fresh-base gate before any merge. This was
+  an operator sequencing error, not a transport, CI, review, or source-proof
+  failure. No history was rewritten and no guard was bypassed. Repair is one
+  guarded author refresh merge of fcfb392 into the existing PR branch, followed by
+  one exact-head CI and a fresh independent review. All telemetry produced
+  during that repair remains uncommitted and will be parked until the service merge,
+  then restored and published through the normal quiet-boundary flow.
+- PR310's first post-refresh `ci.sh` invocation exited before starting any
+  build because GitHub returned an HTTP/2 GOAWAY while the wrapper posted the
+  initial `local-ci/summary=pending` status. The request body had been written,
+  so the coordinator treated the result as ambiguous and performed two bounded
+  exact-head status readbacks separated by three seconds. Both returned an
+  empty status set; no manifest, CI log, or CI process existed. A single replay
+  then produced the only actual CI run on
+  3e5cd710da4113b0db4c7b6e90287eb6393f399b: session4488 exited zero and all
+  nine exact-head contexts published success in154s. This was a transport
+  incident, not a test failure, and no successful or in-progress run was
+  duplicated.
