@@ -60,6 +60,7 @@ import MIPStarRE.QPBT.Combining.ExtendedLineGame.LineNoneMass
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.ParameterEvaluatedLineBound
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.SameLineRejection
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.SameLineCoefficientBound
+import MIPStarRE.QPBT.Combining.ExtendedLineGame.AxisParameterDefectTransport
 import MIPStarRE.QPBT.Combining.Lines
 import MIPStarRE.QPBT.Combining.Claims
 import MIPStarRE.QPBT.Combining.Apply
