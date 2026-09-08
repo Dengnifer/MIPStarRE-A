@@ -34,6 +34,15 @@ successor is blocked or its activation call fails, record the exact reason and t
 prepared alternate in the same completion cycle. Do not reclaim a quiet live turn until
 assignment, budget, and ownership checks establish actual completion or stall.
 
+The root creates every new canonical native reviewer child so its direct parent matches
+the review request's root; the coordinator does not spawn that child or represent itself
+as the root. After the prior canonical consumer hold is released, the coordinator may
+mechanically follow up an eligible existing direct-root child without another root round
+trip only when a root-authorized prepared record preserves the request binding,
+independence, current head, identity, model, effort, and ordinary review gates. Until both
+the genuine response is validated and the waiting consumer accepts it, the completed
+reviewer remains idle and unavailable for follow-up; a response file alone is insufficient.
+
 The coordinator's append-only latency batch records predecessor `task_complete`,
 `ready_at`, the actual activation call, successor thread and current `task_started` turn,
 first useful output, the source deadline, and each real blocker interval. Reconcile the

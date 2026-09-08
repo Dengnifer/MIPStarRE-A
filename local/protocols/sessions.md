@@ -90,6 +90,14 @@ the prepared alternate in the same completion cycle. A quiet live turn remains o
 until assignment, budget, and owned-operation checks establish an actual completion or
 stall; silence alone does not create a vacancy.
 
+Canonical review consumption is a required admission blocker, not detailed receipt
+adoption. A completed native reviewer thread remains idle and unavailable for follow-up
+until `native_review.py complete` has validated its genuine result and created the bound
+response, and the waiting canonical consumer has accepted that response. A response file
+alone is not consumer acceptance. The held reviewer is not useful activity or an occupied
+runtime slot; fill available capacity with another eligible prepared actor or job rather
+than resuming it before the hold is released.
+
 After the activation call, reconcile the fixed deadline against the successor's actual
 current `task_started`, then verify its thread and turn, requested and observed model and
 effort, and first useful output. Time before the first tool or progress report counts;
