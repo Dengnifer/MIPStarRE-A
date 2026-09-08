@@ -1,0 +1,239 @@
+{
+  "schema": "qpbt-owner-vacancy-trigger-status-v1",
+  "recorded_at_utc": "2026-09-08T08:47:43.791419916Z",
+  "status": "operational_patched_delegate_feedback_verified_queue_fallback_only",
+  "task": "install a main-owned native vacancy and stale-count steering trigger",
+  "root": {
+    "thread_uuid": "01a076bc-f4ad-7813-805b-c8b4dac71a14",
+    "verified_pid": 3846730,
+    "verified_start_ticks": 187183661,
+    "current_identity": "3846730:187183661"
+  },
+  "helper": {
+    "path": "/home/drx/.cache/mipstarre-dev/owner-tools/qpbt_vacancy_trigger_20260908.py",
+    "sha256": "33bebc3bad0d78b7d9064b4b214f1f73dd936bed045b1b140d482f1b57974fb3",
+    "lines": 304,
+    "test_path": "/home/drx/.cache/mipstarre-dev/owner-tools/test_qpbt_vacancy_trigger_20260908.py",
+    "test_sha256": "e9cb027602b1478d25c3ba075e2ed7efd7063aa765a7dbc0721333c8d5c36c6b",
+    "transport": "existing codex queue --thread ROOT_UUID --message transport used by qpbt-switch",
+    "poll_seconds": 20,
+    "freshness_seconds": 120,
+    "debounce_seconds": 180,
+    "floor": 8,
+    "dispatches_workers": false
+  },
+  "lifecycle_contract": {
+    "direct_children_only": true,
+    "requires_unterminated_task_started": true,
+    "requires_fresh_attributable_item_completed": true,
+    "accepted_output_items": [
+      "AgentMessage",
+      "CommandExecution",
+      "FileChange",
+      "Reasoning",
+      "WebSearch"
+    ],
+    "terminal_events": [
+      "error",
+      "task_complete",
+      "turn_aborted"
+    ],
+    "excluded": [
+      "completed",
+      "idle",
+      "interrupted",
+      "unknown or malformed",
+      "root session",
+      "other-root threads",
+      "task_started or SubAgentActivity without attributable output"
+    ]
+  },
+  "tests": {
+    "command": "python3 -m unittest -v test_qpbt_vacancy_trigger_20260908.py",
+    "result": "5 passed",
+    "compile_result": "passed",
+    "log": "/tmp/qpbt-owner-vacancy-trigger-tests-20260908.log",
+    "log_sha256": "dec2b312eaddf72fa0399f24dbadeab307e946a2d6664e11d8a566f947e41189",
+    "covered": [
+      "completed recent output is excluded",
+      "fresh running output is counted while spawn metadata alone is excluded",
+      "interrupted, error, and malformed states are excluded",
+      "root and other-root sessions are excluded",
+      "PID identity changes reset an episode and repeated notifications debounce",
+      "events older than the child session birth cannot activate or close the child",
+      "activity and terminal events for another turn ID cannot affect the active turn"
+    ],
+    "fake_model_or_probe_child_started": false
+  },
+  "runtime": {
+    "pid": 492904,
+    "ppid": 1,
+    "started_at_utc": "2026-09-08T08:44:39.777546+00:00",
+    "process_alive_at_receipt": true,
+    "lock_held": true,
+    "pid_file": "/home/drx/.cache/mipstarre-dev/owner-tools/qpbt-vacancy-trigger/pid.json",
+    "lock_file": "/home/drx/.cache/mipstarre-dev/owner-tools/qpbt-vacancy-trigger/trigger.lock",
+    "state_file": "/home/drx/.cache/mipstarre-dev/owner-tools/qpbt-vacancy-trigger/state.json",
+    "status_file": "/home/drx/.cache/mipstarre-dev/owner-tools/qpbt-vacancy-trigger/status.json",
+    "journal": "/home/drx/.cache/mipstarre-dev/owner-tools/qpbt-vacancy-trigger/journal.jsonl",
+    "daemon_log": "/home/drx/.cache/mipstarre-dev/owner-tools/qpbt-vacancy-trigger/daemon.log",
+    "reversible_stop": "read pid.json, verify the helper command line, then send SIGTERM; current verified command is kill -TERM 492904",
+    "predecessor_pid": 155611,
+    "predecessor_stopped_at_utc": "2026-09-08T08:44:15.774137+00:00"
+  },
+  "live_observation": {
+    "observed_at_utc": "2026-09-08T08:06:03.089365+00:00",
+    "active_native": 4,
+    "floor": 8,
+    "status": "below_floor",
+    "active_agents": [
+      "/root/space_sol_publication_finish",
+      "/root/sol_direct_soundness_compression",
+      "/root/sol_ci320",
+      "/root/sol_refresh343_parent"
+    ],
+    "state_counts": {
+      "running": 4,
+      "task_complete": 3
+    },
+    "mutable_status_sha256_at_observation": "c2ee460e027ade3063bdd907e85896c6cb46a1d5d0487c53e5d81f217c175d1f",
+    "mutable_journal_sha256_at_observation": "ca404584883c5bdda0a36f89a5395610cbd6753c031af0196ba1e51dbc014fbf"
+  },
+  "steering_proof": {
+    "triggered_at_utc": "2026-09-08T08:03:20.716018+00:00",
+    "trigger_count": 5,
+    "floor": 8,
+    "transport_exit": 0,
+    "queue_message_id": "01a0800b-03cf-7fc0-9f47-134ccca84315",
+    "queue_output": "Queued message 01a0800b-03cf-7fc0-9f47-134ccca84315 for thread 01a076bc-f4ad-7813-805b-c8b4dac71a14.",
+    "requested_actions": [
+      "list_agents",
+      "exclude non-running or stale workers",
+      "count useful direct native workers",
+      "refill only dependency-ready work",
+      "list_agents again and verify the count"
+    ],
+    "root_rollout_consumption_observed": true,
+    "root_rollout": "/home/drx/.cache/mipstarre-dev/codex-home-qpbt-relay1/sessions/2026/09/06/rollout-2026-09-06T20-41-30-01a076bc-f4ad-7813-805b-c8b4dac71a14.jsonl",
+    "root_consumed_at_utc": "2026-09-08T08:33:00.559Z",
+    "root_consumption_ordinals": [20543, 20544],
+    "root_list_agents_response_at_utc": "2026-09-08T08:33:06.517Z",
+    "queue_to_consumption_seconds": 1779.843,
+    "limitation": "The first alert was consumed about 29m40s after queue acceptance, after delegated recovery. Root queue delivery is a fallback and is not timely replenishment enforcement during a long root turn."
+  },
+  "closed_loop_verification": {
+    "live_signal": {
+      "path": "/home/drx/.cache/mipstarre-dev/owner-tools/qpbt-vacancy-trigger/status.json",
+      "producer_pid": 492904,
+      "atomic": true,
+      "poll_seconds": 20,
+      "observed_at_utc": "2026-09-08T08:45:23.032401+00:00",
+      "active_count": 8,
+      "floor": 8,
+      "status": "healthy",
+      "contract": "The existing delegate reads lifecycle independently and uses this status as the immediate vacancy signal; only an already-approved idle direct child may be resumed. Root queue alerts remain fallback."
+    },
+    "patched_classifier": {
+      "installed": true,
+      "session_birth_filter": true,
+      "active_turn_timestamp_filter": true,
+      "active_turn_id_filter": true,
+      "compile": "passed",
+      "tests": "5 passed"
+    },
+    "initial_delegate_recovery": {
+      "delegate": "/root/astra_refill_coordinator",
+      "delegate_started_at_utc": "2026-09-08T08:16:37.885Z",
+      "count_progression": [
+        {"at": "2026-09-08T08:16:48.874740Z", "active": 2},
+        {"at": "2026-09-08T08:17:50.497859Z", "active": 4},
+        {"at": "2026-09-08T08:18:11.105341Z", "active": 6},
+        {"at": "2026-09-08T08:18:31.696303Z", "active": 7},
+        {"at": "2026-09-08T08:18:52.235810Z", "active": 9}
+      ],
+      "first_alert_to_recovery_seconds": 931.52,
+      "delegate_start_to_recovery_seconds": 134.351,
+      "causal_attribution": "The approved delegate restored occupancy before the root consumed the queued alert."
+    },
+    "real_completion_refill_cycle": {
+      "completion": "/root/sol_ci213_resume PR358 at 2026-09-08T08:34:22.226Z",
+      "approved_replacement": "/root/space_sol_pr249 PR320 at 2026-09-08T08:36:32.573Z",
+      "replacement_first_sol_ultra_output_at_utc": "2026-09-08T08:37:12.483Z",
+      "completion_to_start_seconds": 130.347,
+      "completion_to_fresh_output_seconds": 170.257,
+      "activity_count_after": 9,
+      "forced_or_probe_completion": false,
+      "within_desired_60_seconds": false
+    },
+    "handoff": {
+      "delegate": "/root/astra_refill_coordinator",
+      "primary": "/root/space_sol_publication_finish",
+      "direct_child_queue_attempts": 2,
+      "direct_child_queue_result": "rejected: direct app-server input is not allowed for unloaded spawned sub-agents",
+      "parent_delivery": "This receipt and final answer are delivered directly to the refill coordinator; direct child app-server input was unavailable, so a concrete root fallback requests post-deadline primary acknowledgment.",
+      "delegate_window_ended_at_utc": "2026-09-08T08:46:37.885Z",
+      "primary_ack_observed": false,
+      "root_nudge_sent": true,
+      "root_nudge_queued_at_utc": "2026-09-08T08:48Z",
+      "root_nudge_queue_message_id": "01a08035-6f68-7770-8cc7-426cb508c97e",
+      "root_nudge_consumption_observed": false,
+      "remaining_requirement": "Root must use native send_message to obtain the primary owner's explicit post-deadline acknowledgment; queue acceptance alone is not that acknowledgment."
+    }
+  },
+  "independent_sampler": {
+    "path": "/tmp/qpbt-worker-live-sampler-20260908.py",
+    "sha256": "f45cca6ee6aadac2bf1478bef19e85a516e0f2d48c9b9db4971d2720de4fe5eb",
+    "journal": "/tmp/qpbt-worker-live-sampler-sol-ci320-20260908.jsonl",
+    "journal_sha256": "76a5f20185247c742e2a7fc2755402be773125048cf3fe4480b410f83f2d1793",
+    "samples": [
+      {"at": "2026-09-08T08:36:12.373233Z", "confirmed_active": 8, "live_stale_excluded": 3, "read_errors": 0},
+      {"at": "2026-09-08T08:36:20.034028Z", "confirmed_active": 8, "live_stale_excluded": 3, "read_errors": 0},
+      {"at": "2026-09-08T08:47:16.877277Z", "confirmed_active": 8, "live_stale_excluded": 3, "read_errors": 0, "source_journal": "/tmp/qpbt-worker-live-refill-20260908.jsonl"}
+    ]
+  },
+  "scope": {
+    "key_or_auth_read_or_change": false,
+    "lease_or_capacity_change": false,
+    "github_or_merge_action": false,
+    "parallel_switch_framework_added": false,
+    "primary_telemetry_write": false,
+    "project_source_change": false,
+    "owner_tools_and_temp_artifacts_only": true,
+    "normal_telemetry_owner": "/root/space_sol_publication_finish"
+  },
+  "model_and_budget": {
+    "model": "gpt-5.6-sol",
+    "effort": "ultra",
+    "space_total": 10,
+    "space_native": 9,
+    "space_external": 0,
+    "useful_floor": 8,
+    "children_started": 0,
+    "b8_attempts": 13,
+    "b8_seconds": 26509,
+    "b8_reset_performed": false,
+    "task_started_at_utc": "2026-09-08T07:48:40.229053676Z",
+    "elapsed_seconds_at_receipt": 1051.546,
+    "limit_seconds": 1200,
+    "within_limit": true,
+    "closed_loop_assignment_started_at_utc": "2026-09-08T08:18:12.211Z",
+    "closed_loop_original_deadline_at_utc": "2026-09-08T08:33:12.211Z",
+    "first_exec_after_silence_at_utc": "2026-09-08T08:33:59.166Z",
+    "closed_loop_original_window_met": false,
+    "owner_extended_acceptance_minutes": 10,
+    "silent_interval_counted_as_active": false,
+    "prior_pr320_ci_handles_preserved": [
+      99624,
+      21535
+    ],
+    "prior_pr320_publication_handle_preserved": 83324,
+    "prior_proof_ci_publication_history_reset": false
+  },
+  "operator_notes": [
+    "The first live no-send scan encountered an unrelated string-valued session source; the scanner failed closed, was hardened, and the added regression passed before activation.",
+    "An initial nohup process did not survive the execution wrapper and acquired no lock or runtime state. The installed daemon was then detached with setsid and independently verified across a full poll interval.",
+    "The 08:03 alert came from a short-lived helper invocation; detached PID 155611 continued the same state until the tested classifier repair was installed as PID 492904.",
+    "The original 15-minute closed-loop window expired before tool activity resumed; no budget reset or retroactive activity claim was made.",
+    "No new switch framework, worker dispatch, process kill outside the owned helper restart, key/lease/GitHub/merge action, source change, or primary telemetry write occurred."
+  ]
+}
