@@ -425,14 +425,260 @@ theorem conjTranspose_mul_swapUnitary {P : AdmissibleParams}
     (swapUnitary w side)ᴴ * swapUnitary w side = 1 := by
   exact mul_eq_one_comm.mp (swapUnitary_mul_conjTranspose w side)
 
+/-- Conjugating a Pauli observable by one crossed Pauli product contributes
+the character of the selected decoded polynomial. This is the termwise
+commutation calculation at paper
+`14_analysis_of_the_pauli_basis_test.tex:1701-1713`. -/
+private theorem swapPauli_conj_tauObservable {P : AdmissibleParams}
+    (pair : PolyPair P) (W : PauliKind) (a : PauliRegister P) :
+    (tauObservable .X (decodeFq pair.2) * tauObservable .Z (decodeFq pair.1)) *
+        tauObservable W a *
+          (tauObservable .X (decodeFq pair.2) *
+            tauObservable .Z (decodeFq pair.1))ᴴ =
+      phaseSign (fixedBinTrace P.model
+        (dotProduct a (decodeFq (W.selectPoly pair)))) • tauObservable W a := by
+  cases W with
+  | X =>
+      simp only [PauliKind.selectPoly]
+      rw [Matrix.conjTranspose_mul, tauObservable_conjTranspose,
+        tauObservable_conjTranspose]
+      let c := phaseSign (fixedBinTrace P.model
+        (dotProduct a (decodeFq pair.1)))
+      have hcomm :
+          tauObservable .X a * tauObservable .Z (decodeFq pair.1) =
+            c • (tauObservable .Z (decodeFq pair.1) * tauObservable .X a) := by
+        exact tauObservable_X_mul_Z a (decodeFq pair.1)
+      have hreverse :
+          tauObservable .Z (decodeFq pair.1) * tauObservable .X a =
+            c • (tauObservable .X a * tauObservable .Z (decodeFq pair.1)) := by
+        calc
+          _ = 1 • (tauObservable .Z (decodeFq pair.1) * tauObservable .X a) :=
+            (one_smul ℂ _).symm
+          _ = (c * c) •
+              (tauObservable .Z (decodeFq pair.1) * tauObservable .X a) := by
+            rw [phaseSign_mul_self]
+          _ = c • (c •
+              (tauObservable .Z (decodeFq pair.1) * tauObservable .X a)) := by
+            rw [smul_smul]
+          _ = c • (tauObservable .X a * tauObservable .Z (decodeFq pair.1)) :=
+            congrArg (c • ·) hcomm.symm
+      have hsame :
+          tauObservable .X (decodeFq pair.2) * tauObservable .X a =
+            tauObservable .X a * tauObservable .X (decodeFq pair.2) := by
+        rw [tauObservable_mul, tauObservable_mul, add_comm]
+      calc
+        _ = tauObservable .X (decodeFq pair.2) *
+              (tauObservable .Z (decodeFq pair.1) * tauObservable .X a) *
+                tauObservable .Z (decodeFq pair.1) *
+                  tauObservable .X (decodeFq pair.2) := by
+            simp only [Matrix.mul_assoc]
+        _ = c • (tauObservable .X (decodeFq pair.2) * tauObservable .X a *
+              (tauObservable .Z (decodeFq pair.1) *
+                tauObservable .Z (decodeFq pair.1)) *
+                  tauObservable .X (decodeFq pair.2)) := by
+            rw [hreverse]
+            simp only [Matrix.mul_smul, Matrix.smul_mul, Matrix.mul_assoc]
+        _ = c • (tauObservable .X (decodeFq pair.2) * tauObservable .X a *
+              tauObservable .X (decodeFq pair.2)) := by
+            rw [tauObservable_sq, Matrix.mul_one]
+        _ = c • tauObservable .X a := by
+            rw [hsame, Matrix.mul_assoc, tauObservable_sq, Matrix.mul_one]
+  | Z =>
+      simp only [PauliKind.selectPoly]
+      rw [Matrix.conjTranspose_mul, tauObservable_conjTranspose,
+        tauObservable_conjTranspose]
+      let c := phaseSign (fixedBinTrace P.model
+        (dotProduct a (decodeFq pair.2)))
+      have hcomm :
+          tauObservable .X (decodeFq pair.2) * tauObservable .Z a =
+            c • (tauObservable .Z a * tauObservable .X (decodeFq pair.2)) := by
+        simpa only [c, fixedBinTrace, dotProduct_comm] using
+          (tauObservable_X_mul_Z (decodeFq pair.2) a)
+      have hsame :
+          tauObservable .Z (decodeFq pair.1) * tauObservable .Z a =
+            tauObservable .Z a * tauObservable .Z (decodeFq pair.1) := by
+        rw [tauObservable_mul, tauObservable_mul, add_comm]
+      calc
+        _ = tauObservable .X (decodeFq pair.2) *
+              (tauObservable .Z (decodeFq pair.1) * tauObservable .Z a) *
+                tauObservable .Z (decodeFq pair.1) *
+                  tauObservable .X (decodeFq pair.2) := by
+            simp only [Matrix.mul_assoc]
+        _ = tauObservable .X (decodeFq pair.2) * tauObservable .Z a *
+              (tauObservable .Z (decodeFq pair.1) *
+                tauObservable .Z (decodeFq pair.1)) *
+                  tauObservable .X (decodeFq pair.2) := by
+            rw [hsame]
+            simp only [Matrix.mul_assoc]
+        _ = tauObservable .X (decodeFq pair.2) * tauObservable .Z a *
+              tauObservable .X (decodeFq pair.2) := by
+            rw [tauObservable_sq, Matrix.mul_one]
+        _ = c • tauObservable .Z a := by
+            rw [hcomm, Matrix.smul_mul, Matrix.mul_assoc, tauObservable_sq,
+              Matrix.mul_one]
+
+/-- The observable conjugation identity translates a Pauli projector by the
+selected decoded label. Fourier inversion reduces the assertion to
+`swapPauli_conj_tauObservable`; this is the projector relabeling used at paper
+`14_analysis_of_the_pauli_basis_test.tex:1805-1822`. -/
+private theorem swapPauli_conj_pauliProj {P : AdmissibleParams}
+    (pair : PolyPair P) (W : PauliKind) (h : PauliRegister P) :
+    (tauObservable .X (decodeFq pair.2) * tauObservable .Z (decodeFq pair.1)) *
+        pauliProj W h *
+          (tauObservable .X (decodeFq pair.2) *
+            tauObservable .Z (decodeFq pair.1))ᴴ =
+      pauliProj W (h + decodeFq (W.selectPoly pair)) := by
+  rw [pauliProj_eq_avg_tauObservable, pauliProj_eq_avg_tauObservable,
+    Matrix.mul_smul, Matrix.smul_mul]
+  congr 1
+  rw [Matrix.mul_sum, Finset.sum_mul]
+  apply Finset.sum_congr rfl
+  intro b _
+  rw [Matrix.mul_smul, Matrix.smul_mul, swapPauli_conj_tauObservable,
+    smul_smul, ← phaseSign_add]
+  congr 2
+  simp [fixedBinTrace, dotProduct, mul_add, Finset.sum_add_distrib]
+
+/-- Conjugation by `swapUnitary` acts termwise on an operator controlled by
+the same projective joint measurement. Orthogonality removes both families of
+off-diagonal terms. -/
+private theorem swapUnitary_conj_diagonal {P : AdmissibleParams}
+    {epsilon delta : ℝ} {S : ProjectiveSetting P epsilon}
+    (w : GlobalPairWitness S delta) (side : PlayerSide)
+    (F : PolyPair P → Op (PauliRegister P)) :
+    conjBy (swapUnitary w side)
+        (∑ pair : PolyPair P,
+          heteroKron ((w.Smeas side).effect pair) (F pair)) =
+      ∑ pair : PolyPair P,
+        heteroKron ((w.Smeas side).effect pair)
+          ((tauObservable .X (decodeFq pair.2) *
+              tauObservable .Z (decodeFq pair.1)) * F pair *
+            (tauObservable .X (decodeFq pair.2) *
+              tauObservable .Z (decodeFq pair.1))ᴴ) := by
+  classical
+  have hself (pair : PolyPair P) :
+      ((w.Smeas side).effect pair)ᴴ = (w.Smeas side).effect pair :=
+    (w.projective side pair).isSelfAdjoint
+  simp only [conjBy, swapUnitary]
+  rw [Matrix.conjTranspose_sum]
+  simp_rw [MagicSquareRigidity.heteroKron_conjTranspose, hself]
+  rw [Finset.sum_mul]
+  calc
+    _ = (∑ pair : PolyPair P,
+          heteroKron ((w.Smeas side).effect pair)
+            ((tauObservable .X (decodeFq pair.2) *
+              tauObservable .Z (decodeFq pair.1)) * F pair)) *
+        ∑ pair : PolyPair P,
+          heteroKron ((w.Smeas side).effect pair)
+            (tauObservable .X (decodeFq pair.2) *
+              tauObservable .Z (decodeFq pair.1))ᴴ := by
+      congr 1
+      apply Finset.sum_congr rfl
+      intro pair _
+      rw [Matrix.mul_sum, Finset.sum_eq_single pair]
+      · rw [heteroKron_mul, (w.projective side pair).isIdempotentElem.eq]
+      · intro other _ hother
+        rw [heteroKron_mul, MagicSquareRigidity.mul_eq_zero_of_isProj_family
+          (w.projective side) (w.Smeas side).sum_le_one hother.symm]
+        exact Matrix.zero_kronecker _
+      · intro hpair
+        exact (hpair (Finset.mem_univ pair)).elim
+    _ = _ := by
+      rw [Finset.sum_mul]
+      apply Finset.sum_congr rfl
+      intro pair _
+      rw [Matrix.mul_sum, Finset.sum_eq_single pair]
+      · rw [heteroKron_mul, (w.projective side pair).isIdempotentElem.eq,
+          Matrix.mul_assoc]
+      · intro other _ hother
+        rw [heteroKron_mul, MagicSquareRigidity.mul_eq_zero_of_isProj_family
+          (w.projective side) (w.Smeas side).sum_le_one hother.symm]
+        exact Matrix.zero_kronecker _
+      · intro hpair
+        exact (hpair (Finset.mem_univ pair)).elim
+
+/-- Conjugating a dot-product projector at an indicator vector translates its
+Pauli labels and converts the resulting constraint to low-degree evaluation.
+This is the finite relabeling in paper
+`14_analysis_of_the_pauli_basis_test.tex:1805-1822`. -/
+private theorem swapPauli_conj_tauDotProj_indicatorVec
+    {P : AdmissibleParams} (pair : PolyPair P) (W : PauliKind)
+    (u : Fin P.m → PauliScalar P) (a : PauliScalar P) :
+    (tauObservable .X (decodeFq pair.2) * tauObservable .Z (decodeFq pair.1)) *
+        tauDotProj W (indicatorVec u)
+          (dotProduct (decodeFq (W.selectPoly pair)) (indicatorVec u) - a) *
+          (tauObservable .X (decodeFq pair.2) *
+            tauObservable .Z (decodeFq pair.1))ᴴ =
+      bracketOp (pauliProj W) (fun h => lowDegreeEnc h u) a := by
+  classical
+  letI : CharP (PauliScalar P) 2 :=
+    (Algebra.charP_iff (ZMod 2) (PauliScalar P) 2).mp (ZMod.charP 2)
+  simp only [tauDotProj, bracketOp]
+  rw [Matrix.mul_sum, Finset.sum_mul]
+  have hconstraint (h : PauliRegister P) :
+      dotProduct h (indicatorVec u) =
+          dotProduct (decodeFq (W.selectPoly pair)) (indicatorVec u) - a ↔
+        lowDegreeEnc (h + decodeFq (W.selectPoly pair)) u = a := by
+    rw [lowDegreeEnc_eq_dotProduct, add_dotProduct]
+    constructor
+    · intro hh
+      rw [hh, CharTwo.sub_eq_add]
+      calc
+        (dotProduct (decodeFq (W.selectPoly pair)) (indicatorVec u) + a) +
+              dotProduct (decodeFq (W.selectPoly pair)) (indicatorVec u) =
+            (dotProduct (decodeFq (W.selectPoly pair)) (indicatorVec u) +
+              dotProduct (decodeFq (W.selectPoly pair)) (indicatorVec u)) + a := by
+          abel
+        _ = a := by rw [CharTwo.add_self_eq_zero, zero_add]
+    · intro hh
+      calc
+        dotProduct h (indicatorVec u) =
+            dotProduct h (indicatorVec u) +
+              (dotProduct (decodeFq (W.selectPoly pair)) (indicatorVec u) +
+                dotProduct (decodeFq (W.selectPoly pair)) (indicatorVec u)) := by
+          rw [CharTwo.add_self_eq_zero, add_zero]
+        _ = (dotProduct h (indicatorVec u) +
+              dotProduct (decodeFq (W.selectPoly pair)) (indicatorVec u)) +
+                dotProduct (decodeFq (W.selectPoly pair)) (indicatorVec u) := by
+          abel
+        _ = a + dotProduct (decodeFq (W.selectPoly pair)) (indicatorVec u) := by
+          rw [hh]
+        _ = dotProduct (decodeFq (W.selectPoly pair)) (indicatorVec u) - a := by
+          rw [CharTwo.sub_eq_add, add_comm]
+  apply Finset.sum_bij
+    (fun h _ => h + decodeFq (W.selectPoly pair))
+  · intro h hh
+    rw [Finset.mem_filter] at hh ⊢
+    exact ⟨Finset.mem_univ _, (hconstraint h).mp hh.2⟩
+  · intro h₁ _ h₂ _ heq
+    exact add_right_cancel heq
+  · intro k hk
+    have hk' := (Finset.mem_filter.mp hk).2
+    have hcancel :
+        (k + decodeFq (W.selectPoly pair)) +
+            decodeFq (W.selectPoly pair) = k := by
+      funext i
+      simp only [Pi.add_apply]
+      rw [add_assoc, CharTwo.add_self_eq_zero, add_zero]
+    refine ⟨k + decodeFq (W.selectPoly pair), ?_, hcancel⟩
+    rw [Finset.mem_filter]
+    have htarget : lowDegreeEnc
+        ((k + decodeFq (W.selectPoly pair)) +
+          decodeFq (W.selectPoly pair)) u = a := by
+      rw [hcancel]
+      exact hk'
+    exact ⟨Finset.mem_univ _, (hconstraint _).mpr htarget⟩
+  · intro h _
+    exact swapPauli_conj_pauliProj pair W h
+
 /-- Exact conjugation of a pulled-apart observable by the swap map. This is
 Equation `eq:v-swap-obs-conjugation` in `lem:v-swap-conjugation`, blueprint
 `eq:v-swap-obs-conjugation`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1701-1713`.
 
-**Proof obligation:** issue #47 tracks the diagonal projector reduction.
-Discharge: substitute `tildeObs_eq_heteroKron`, eliminate off-diagonal outcomes,
-and cancel the phase using `tauObservable_X_mul_Z`. -/
+The joint measurement projectors remove the off-diagonal controlled terms.
+The remaining Pauli commutation character cancels the sign in
+`tildeObs_eq_heteroKron`. -/
 theorem swapUnitary_conj_tildeObs {P : AdmissibleParams}
     {epsilon delta : ℝ} {S : ProjectiveSetting P epsilon}
     (w : GlobalPairWitness S delta) (side : PlayerSide) (W : PauliKind)
@@ -440,17 +686,53 @@ theorem swapUnitary_conj_tildeObs {P : AdmissibleParams}
     conjBy (swapUnitary w side) (tildeObs w side W u j) =
       heteroKron (1 : Op (S.ExpandedLocalSpace side))
         (tauObservable W (P.model.basis j • u)) := by
-  sorry
+  classical
+  let T := tauObservable W (P.model.basis j • u)
+  have htilde : tildeObs w side W u j =
+      ∑ pair : PolyPair P,
+        heteroKron ((w.Smeas side).effect pair)
+          (phaseSign (fixedBinTrace P.model
+            (P.model.basis j *
+              dotProduct (decodeFq (W.selectPoly pair)) u)) • T) := by
+    rw [tildeObs_eq_heteroKron,
+      DistanceCalculus.heteroKron_finset_sum_left]
+    apply Finset.sum_congr rfl
+    intro pair _
+    rw [MagicSquareRigidity.heteroKron_smul_left,
+      MagicSquareRigidity.heteroKron_smul_right]
+  rw [htilde, swapUnitary_conj_diagonal]
+  calc
+    _ = ∑ pair : PolyPair P,
+        heteroKron ((w.Smeas side).effect pair) T := by
+      apply Finset.sum_congr rfl
+      intro pair _
+      congr 1
+      rw [Matrix.mul_smul, Matrix.smul_mul,
+        swapPauli_conj_tauObservable, smul_smul]
+      have hphase :
+          fixedBinTrace P.model
+              (dotProduct (P.model.basis j • u)
+                (decodeFq (W.selectPoly pair))) =
+            fixedBinTrace P.model
+              (P.model.basis j *
+                dotProduct (decodeFq (W.selectPoly pair)) u) := by
+        congr 1
+        rw [smul_dotProduct, smul_eq_mul,
+          dotProduct_comm u (decodeFq (W.selectPoly pair))]
+      rw [hphase, phaseSign_mul_self, one_smul]
+    _ = heteroKron (∑ pair : PolyPair P, (w.Smeas side).effect pair) T :=
+      (DistanceCalculus.heteroKron_finset_sum_left _ _ _).symm
+    _ = _ := by rw [(w.Smeas side).sum_eq_one]
 
 /-- Exact conjugation of a pulled-apart point effect by the swap map. This is
 Equation `eq:qld-unitary-6` in `lem:v-swap-conjugation`, blueprint
 `eq:qld-unitary-6`; its calculation occurs at paper
 `14_analysis_of_the_pauli_basis_test.tex:1805-1822`.
 
-**Proof obligation:** issue #47 tracks the exact relabeling calculation.
-Discharge: expand `tildeM`, conjugate each Pauli projector, and translate the
-dot-product constraint with `lowDegreeEnc_eq_dotProduct`; no unrestricted
-decoder interpolation identity is used. -/
+Conjugation translates each Pauli projector by the selected decoded label.
+Translation of the finite sum cancels that label in the dot-product constraint,
+and `lowDegreeEnc_eq_dotProduct` identifies the remaining indicator-vector
+pairing; no decoder interpolation identity is used. -/
 theorem swapUnitary_conj_tildeM {P : AdmissibleParams}
     {epsilon delta : ℝ} {S : ProjectiveSetting P epsilon}
     (w : GlobalPairWitness S delta) (side : PlayerSide) (W : PauliKind)
@@ -458,7 +740,37 @@ theorem swapUnitary_conj_tildeM {P : AdmissibleParams}
     conjBy (swapUnitary w side) (tildeM w side W (indicatorVec u) a) =
       heteroKron (1 : Op (S.ExpandedLocalSpace side))
         (bracketOp (pauliProj W) (fun h => lowDegreeEnc h u) a) := by
-  sorry
+  classical
+  have htilde : tildeM w side W (indicatorVec u) a =
+      ∑ pair : PolyPair P,
+        heteroKron ((w.Smeas side).effect pair)
+          (tauDotProj W (indicatorVec u)
+            (dotProduct (decodeFq (W.selectPoly pair)) (indicatorVec u) - a)) := by
+    simp only [tildeM, GlobalPairWitness.marginalPoly,
+      Measurement.postprocess_effect]
+    simp_rw [DistanceCalculus.heteroKron_finset_sum_left]
+    rw [← Finset.sum_fiberwise Finset.univ W.selectPoly
+      (fun pair => heteroKron ((w.Smeas side).effect pair)
+        (tauDotProj W (indicatorVec u)
+          (dotProduct (decodeFq (W.selectPoly pair)) (indicatorVec u) - a)))]
+    apply Finset.sum_congr rfl
+    intro polynomial _
+    apply Finset.sum_congr rfl
+    intro pair hpair
+    rw [(Finset.mem_filter.mp hpair).2]
+  rw [htilde, swapUnitary_conj_diagonal]
+  calc
+    _ = ∑ pair : PolyPair P,
+        heteroKron ((w.Smeas side).effect pair)
+          (bracketOp (pauliProj W) (fun h => lowDegreeEnc h u) a) := by
+      apply Finset.sum_congr rfl
+      intro pair _
+      congr 1
+      exact swapPauli_conj_tauDotProj_indicatorVec pair W u a
+    _ = heteroKron (∑ pair : PolyPair P, (w.Smeas side).effect pair)
+        (bracketOp (pauliProj W) (fun h => lowDegreeEnc h u) a) :=
+      (DistanceCalculus.heteroKron_finset_sum_left _ _ _).symm
+    _ = _ := by rw [(w.Smeas side).sum_eq_one]
 
 end
 
