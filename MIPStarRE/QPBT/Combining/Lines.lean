@@ -29,17 +29,24 @@ noncomputable section
 
 /-! ## Combined line measurements -/
 
-/-- Conditional joint X/Z line measurements for `lem:qld-xz-lines`.
+/-- Conditional joint X/Z line measurements for a polynomially controlled
+point-witness family supporting `lem:qld-xz-lines`.
 
 **Source statement:** blueprint
 `lem:qld-xz-lines`, from
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:882-894`.
 The error depends polynomially on `ε` and `md/q`, and the witness retains all
-directed opposite-placement comparisons.  This is the formalization-only form
-with an already constructed point witness; the source-facing theorem below
-supplies that witness existentially.  The proof is tracked by issue #18.
-Discharge: formalize the sandwich measurement and the pasting argument in the
-cited proof.
+directed opposite-placement comparisons.  This Lean-only conditional form takes
+the point-error function and its polynomial bound before choosing the line-error
+function.  The witness at strategy error `ε` must have error `deltaQ ε`.
+
+**Domain repair (issue #389):** The former statement quantified an arbitrary
+scalar point error after choosing `deltaP`, although the pasting estimate depends
+on that point error.  The repaired domain matches the point family supplied by
+`exists_combinedPointsWitness`.  The source-facing theorem below still supplies
+that family existentially and has an unchanged statement.  The obstruction and
+the named construction obligations are recorded in
+`docs/paper-gaps/qpbt_combined-lines-error-term.tex`.
 
 **Error contract:** the polynomial bound printed in the source is carried
 by `IsPolyErr₂`, which states the corrected sum form
@@ -49,17 +56,18 @@ of the source shorthand at `04_preliminaries.tex:22-29`.  The correction and
 the two-dimensional strategy that refutes the product form are recorded in
 `docs/paper-gaps/qpbt_pasting-product-error.tex` and tracked by issue #196.
 Here `poly(ε, md/q)` is read in that sense. -/
-theorem exists_combinedLinesWitness_ofPointsWitness :
+theorem exists_combinedLinesWitness_ofPointsWitness (deltaQ : ℝ -> ℝ)
+    (hdeltaQ : IsPolyErr deltaQ) :
     ∃ deltaP : ℝ -> ℝ -> ℝ, IsPolyErr₂ deltaP ∧
-      ∀ (P : AdmissibleParams) (ε δQ : ℝ) (S : ProjectiveSetting P ε)
-        (points : CombinedPointsWitness S δQ),
+      ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε)
+        (points : CombinedPointsWitness S (deltaQ ε)),
         Nonempty (CombinedLinesWitness S points
           (deltaP ε (((P.m * P.d : ℕ) : ℝ) / (P.q : ℝ)))) := by
   sorry
 
 /-! The source-facing declaration below supplies the point witness produced by
 `lem:qld-4-10` existentially.  The `_ofPointsWitness` companion above is the
-conditional form used by downstream calculations. -/
+conditional form for a supplied polynomially controlled point family. -/
 
 /-- The source-facing joint X/Z line measurement construction of
 `lem:qld-xz-lines`, paper lines 882--894.
