@@ -41,3 +41,10 @@ turn latency and a later 185.063-second control-pass overrun without rewriting
 the earlier lifecycle samples. PR #372 subsequently merged through its normal
 exact-head gates; the unmerged and merged closure counts therefore remain
 separate observations at their respective timestamps.
+
+The 15:31:49Z snapshot further clarifies that fresh attributable output is a
+lower bound on productive activity, not a count of empty runtime slots. Occupied
+native slots, fresh output, and the owner's separate provider-dashboard range of
+6--8 requests remain distinct quantities; quietness alone is not vacancy
+evidence. Newly published proof packets such as PRs #398 and #401 remain
+unmerged observations until their ordinary CI, review, and service gates finish.
