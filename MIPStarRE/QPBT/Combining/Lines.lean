@@ -3,6 +3,7 @@ import MIPStarRE.QPBT.Combining.Lines.AxisLineResampling
 import MIPStarRE.QPBT.Combining.Lines.DiagonalResampling
 import MIPStarRE.QPBT.Combining.Lines.MixedResampling
 import MIPStarRE.QPBT.Combining.Lines.PolynomialCollision
+import MIPStarRE.QPBT.Combining.Lines.ProductWeightedCollision
 import MIPStarRE.QPBT.Combining.Lines.RestrictedAverage
 import MIPStarRE.QPBT.Combining.Lines.SubLineMixture
 import MIPStarRE.QPBT.Combining.Lines.UniformAffineCollision
