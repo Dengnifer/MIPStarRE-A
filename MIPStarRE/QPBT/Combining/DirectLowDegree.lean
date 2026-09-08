@@ -1,5 +1,6 @@
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Soundness
 import MIPStarRE.QPBT.Combining.DirectLowDegree.CoefficientCollision
+import MIPStarRE.QPBT.Combining.DirectLowDegree.CoefficientConsistency
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Consistency
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Strategy
 import MIPStarRE.QPBT.Combining.DirectLowDegree.GameValue
