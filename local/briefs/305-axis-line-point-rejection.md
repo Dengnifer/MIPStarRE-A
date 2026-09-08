@@ -19,5 +19,5 @@ discharge the separate extraction-witness frontier tracked by #119.
 
 Completion requires per-file Lean validation, a standard-only axiom check, and
 the normal publication, canonical CI, independent review, and merge gates. The
-PR remains blocked on #302 while PR304 is pending. Existing #119 usage and the
-B8 budget of 13 attempts / 26509 seconds remain unchanged.
+expanded-state transport from #302 is integrated through merged PR304. Existing
+#119 usage and the B8 budget of 13 attempts / 26509 seconds remain unchanged.
