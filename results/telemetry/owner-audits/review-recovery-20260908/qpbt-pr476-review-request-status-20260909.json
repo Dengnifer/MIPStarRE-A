@@ -1,0 +1,44 @@
+{
+  "schema": "qpbt-pr476-hard-review-request-v1",
+  "recorded_at": "2026-09-08T21:16:47.670Z",
+  "status": "fresh_independent_hard_review_running",
+  "pr": 476,
+  "head": "4c343e6c88b7714a3bbf121b3dc23839df303e3e",
+  "ci": {
+    "conclusion": "success",
+    "seconds": 249,
+    "all_nine_statuses_green": true,
+    "manifest": "/home/drx/.cache/mipstarre-dev/ci-manifests/pr476-4c343e6c88b7714a3bbf121b3dc23839df303e3e.json"
+  },
+  "request": {
+    "nonce": "961e897d615d44a7b8e2e281cc2e9695",
+    "path": "/home/drx/.cache/mipstarre-dev/native-reviews/961e897d615d44a7b8e2e281cc2e9695.json",
+    "prompt": "/home/drx/.cache/mipstarre-dev/reviews/pr476/4c343e6c88b7714a3bbf121b3dc23839df303e3e/code-standalone.md",
+    "prompt_sha256": "16681a462623815f046cce0c4b02933e157a796a828efa1d572383c2f342fb2c",
+    "job_class": "hard_review",
+    "model": "gpt-6-astra",
+    "effort": "ultra",
+    "hardness_reason": "trusted native-review consumer and canonical publication control path for paired completed CODE and PROSE responses"
+  },
+  "authors_excluded": [
+    "01a076bc-f4ad-7813-805b-c8b4dac71a14",
+    "01a082a2-e8d7-7ab3-a512-e4afeec3b820"
+  ],
+  "reviewer": {
+    "agent": "/root/astra_review476_combined_resume",
+    "uuid": "01a082e1-7080-7ba0-ae2c-1023b26027bc",
+    "model": "gpt-6-astra",
+    "effort": "ultra",
+    "started_at": "2026-09-08T21:16:47.670Z",
+    "deadline": "2026-09-08T21:36:47.670Z"
+  },
+  "publisher": {
+    "unified_exec_session": 90489,
+    "pid": 3500358,
+    "request_pid": 3501288,
+    "lock": "/home/drx/.cache/mipstarre-dev/locks/review-476.lock",
+    "owner": "/root/space_sol_publication_finish"
+  },
+  "duplicate_request": false,
+  "next_gate": "consume only the genuine bound FINAL in the existing publisher; if canonically approved, run normal service merge before activation"
+}
