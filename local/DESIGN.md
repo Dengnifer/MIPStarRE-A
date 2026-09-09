@@ -104,6 +104,16 @@ documented failure modes. Sources are cited in `local/protocols/*.md`.
     only when Git recorded a conflict. The pending-index check and the
     pre-update reference transaction together cover manual and automatic
     merge commits.
+13. **The owner inbox is permissions-only.** Pinned issue #500 receives a
+    blocker only when owner permission is needed because the risk extends
+    beyond project development, such as owner files, the machine or its
+    accounts, spending money, or action outside this repository. Main decides
+    and records every question whose only risk is failure to finish the
+    project. Each blocker is one comment with at most ten visible
+    plain-language lines: what is stuck, lettered options, one recommendation,
+    and the literal `DECISION B<n>: <letter>` reply. Ids continue from B11;
+    details are folded, and resolution changes the marker to `status=closed`
+    and adds `RESOLVED B<n>`. Issue #26 is archived and receives no new traffic.
 
 ## Naming and identity conventions
 
@@ -120,7 +130,7 @@ documented failure modes. Sources are cited in `local/protocols/*.md`.
   operator and worker repairs use plain `fix(...)` subjects and are reviewed.
 - **Codex sessions**: `<role>-<issue|scope>-<yyyymmdd>-<seq>` with roles
   `orc, prover, reviewer, simplifier, blueprint, splitter, scout`, plus
-  `mathfix` for astra after its availability is reported on #26.
+  `mathfix` for Astra source-statement repair under `issues-prs.md` section 6.
   External sessions use `local/bin/dispatch.sh`, which records the codex `thread_id`,
   captures the `--json` event stream to
   `results/telemetry/sessions/<name>.jsonl`, and appends a summary line to

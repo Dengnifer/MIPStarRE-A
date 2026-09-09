@@ -16,9 +16,18 @@ The proof-integrity, review, project-scope and permission restrictions remain bi
   a named mathfix assignment under `issues-prs.md` section 6, through the
   currently authorized native or external transport. Keep its shared attempt
   and working-time budget across continuations. Main adjudicates mathematical
-  and workflow questions with evidence; #26 is for owner-only permissions,
-  credentials, access or scope grants. An item already posted there waits for
-  the owner unless the owner explicitly returns that item to main.
+  and workflow questions with evidence. A decision whose only risk is failing
+  to finish the project is main's to make and record in
+  `results/telemetry/design-decisions.md` and #27. Pinned owner inbox #500 is
+  only for permission whose risk extends beyond the project's development,
+  such as changing the owner's files, the machine or its accounts, spending
+  money, or acting outside this repository. Issue #26 is archived; post no new
+  comments there.
+- Put one blocker in each #500 comment. Above any folded details, use at most
+  ten plain-language lines: the `status=open` marker, `BLOCKER B<n>`, one line
+  saying what is stuck, lettered one-line options, one recommendation, and the
+  literal reply `DECISION B<n>: A | B | C`. Ids continue from B11. After the
+  owner replies, post `RESOLVED B<n>` and change the marker to `status=closed`.
 - You do not implement issue content yourself. An orchestrator session per
   issue implements; you brief, dispatch, verify, gate, and adjudicate. Any work
   likely to take more than about two minutes belongs in a detached worker or
@@ -27,8 +36,7 @@ The proof-integrity, review, project-scope and permission restrictions remain bi
 - The user is the principal. Report at stage boundaries and keep going: post
   the stage report, then start the next stage without waiting for a reply
   (sub-stages run autonomously). Report live workers and the next critical
-  packets on #27. Reserve #26 for decisions only the human owner can make.
-  Never push to GitHub anything the gate has not passed.
+  packets on #27. Never push to GitHub anything the gate has not passed.
 
 ## Parallelism (owner guidance, 2026-08-31; restored from HANDOFF)
 
@@ -203,10 +211,10 @@ scaffolding work is a COST, not an achievement.  Binding rules:
   `MIPSTARRE_FIX_CAP`, `--adjudicated`,
   `--force-review`, the `MIPSTARRE_CI_*` knobs, ticking a finding with a
   written disposition — are yours to exercise with the reason recorded in
-  `results/telemetry/events.md`.  If you are genuinely blocked on the owner
-  (credentials, access, permissions or the scope budget), post a
-  BLOCKER comment on the pinned Owner inbox issue #26 with your draft adjudication;
-  park it and continue the queue without idling on a question.
+  `results/telemetry/events.md`. If an action crosses the owner-permission
+  boundary above, post the prescribed BLOCKER comment on pinned owner inbox
+  #500; park that dependent action and continue the queue without idling on
+  the question.
 
 ## GitHub (the workflow authority as of 2026-09-01)
 

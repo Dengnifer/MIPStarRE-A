@@ -221,12 +221,35 @@ issue endpoint) — audit and recovery telemetry, never lifecycle input. The
 retired trees stay archived under `results/telemetry/registry-archive/` (commit
 c8f1999): read-only research data, never edited or read as active input.
 
-## 6. Owner inbox and mathematical-gap escalation
+## 6. Owner inbox and mathematical-gap decisions
 
-Pinned issue #26 is the owner inbox: it receives only decisions that require
-the human owner. A source statement found to be mathematically false does not
-go there first. Following the availability report on #26 and the September 6
-owner decision, main selects Astra Ultra for the mathematical-gap lane through
+Pinned issue #500 is the permissions-only owner inbox. Post there only when an
+action needs the owner's permission because its risk extends beyond the
+project's development, for example changing the owner's files, the machine or
+its accounts, spending money, or acting outside this repository. A decision
+whose only risk is failing to finish the project is main's to make and record
+in `results/telemetry/design-decisions.md` and on #27, never a blocker. Routine
+reports, watchdog and poller notes, and progress also go to #27. Issue #26 is
+archived and receives no new comments.
+
+Use one #500 comment per blocker. The visible part is at most ten lines in
+plain words and has this form; ids continue from B11.
+
+```markdown
+<!-- owner-inbox id=B<n> status=open -->
+### BLOCKER B<n> — <five-word title>
+What is stuck: one line.
+Options: A one line. B one line. (C one line.)
+Recommendation: one line.
+Reply: DECISION B<n>: A | B | C
+```
+
+Put any additional detail in a folded `<details>` block. After an owner reply,
+the operator posts `RESOLVED B<n>` and changes the marker to `status=closed`.
+
+A source statement found to be mathematically false does not create an owner
+blocker. Astra availability has been reported, so main selects Astra Ultra for
+the mathematical-gap lane through
 `MIPSTARRE_CODEX_MODEL=gpt-6-astra local/bin/dispatch.sh --role mathfix --effort ultra`
 or the shared native protocol in `sessions.md`.
 Historical owner-launched Fable measurements remain unchanged. Every request or
@@ -257,13 +280,13 @@ is shared across the historical owner-launched Fable lane and the Astra lane; a
 model or telemetry change does not reset it. Main decides mathematical
 corrections with the preceding evidence and independent review, including
 definition/game corrections that preserve the intended source semantics;
-changing the project goal is outside that authority. If the current authorized
+main must not silently change the stated project goal. If the current authorized
 budget expires, stop that lane and record the attempted statements,
 counterexamples, proof sketches and unresolved consumers on #27 and in the gap
-note. Do not reset attempts or working time. Use #26 only for an owner-only
-permission, credential, access or scope/resource grant; mathematical difficulty
-alone is not an owner decision. An already-posted #26 item waits for the owner
-unless the owner explicitly returns it to main.
+note. Do not reset attempts or working time. Main then decides and records the
+project outcome from that evidence; mathematical difficulty alone is not an
+owner decision. Use #500 only when the next action independently crosses the
+owner-permission boundary stated above.
 
 An adopted correction follows the ordinary CI and independent-review gates. The
 operator announces it in one line on progress log #27 and records it in the

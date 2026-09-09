@@ -107,18 +107,26 @@ not enough.  The obstruction must survive translation back into ordinary
 mathematics.
 
 Once a cited statement is established to be mathematically false, the repair
-and escalation procedure is governed by Section~6 of
-\path{local/protocols/issues-prs.md}.  Before asking the human owner to choose a
-replacement, a dedicated mathematical-gap session must produce a correction
-which is correct, sufficient for every paper and blueprint use, and minimal,
-then iterate it against the Lean statement and its downstream consumers.  A
-Claude Fable~5.1 session is currently launched by the owner session through its
-Agent tool; a Codex main session requests that lane on progress log~\#27 rather
-than dispatching a Codex worker.  Only after the astra poller reports
-availability on owner inbox~\#26 does the Codex route become
-\texttt{dispatch.sh --role mathfix} with astra.  A change to a mathematical
-definition or game is escalated immediately; other repairs reach the owner
-inbox only after the shared convergence budget expires.
+and decision procedure is governed by Section~6 of
+\path{local/protocols/issues-prs.md}.  A dedicated mathematical-gap session must
+produce a correction which is correct, sufficient for every paper and blueprint
+use, and minimal, then iterate it against the Lean statement and its downstream
+consumers.  Astra availability has been reported, so the current Codex route is
+\texttt{dispatch.sh --role mathfix} with Astra; historical owner-launched
+Fable~5.1 measurements remain unchanged.  Main decides and records mathematical
+nonconvergence and any required correction to a definition or game.  These
+project outcomes do not become owner blockers merely because the formalization
+might otherwise fail.
+
+Pinned owner inbox~\#500 is used only when an action needs owner permission
+because its risk extends beyond project development, such as changing owner
+files, the machine or its accounts, spending money, or acting outside this
+repository.  Each blocker is one comment with at most ten visible lines in
+plain language: one line saying what is stuck, lettered one-line options, one
+recommendation, and the literal reply
+\texttt{DECISION B<n>: <letter>}.  Ids continue from B11, additional detail is
+folded, and a resolution changes the marker to \texttt{status=closed} and adds
+\texttt{RESOLVED B<n>}.  Issue~\#26 is archived and receives no new comments.
 
 Sometimes an investigation uncovers an improvement that is not a discrepancy:
 the formalization works correctly, but it could be simplified by using an

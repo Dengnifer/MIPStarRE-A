@@ -1041,3 +1041,23 @@ unresolved findings. It launched no new model turn, edited no response or
 source, and released the old reviewer and source holds. PR #400 remains
 ineligible to merge until its isolated repair proceeds through normal checked
 publication, CI, and fresh independent review.
+
+## 2026-09-09 - Move the permissions-only owner inbox to #500
+
+**Trigger:** the owner's 2026-09-09 08:40Z design decision, recorded by pinned
+issue #500 and implemented through issue #501.
+
+**Change:** `AGENTS.md`, `local/DESIGN.md`, the main, orchestrator, and mathfix
+personas, the issue/PR and session protocols, and the paper-gap policy and
+register now route live owner-inbox traffic to #500. The inbox accepts only
+permissions whose risk extends beyond project development; main decides and
+records project-outcome questions. Each blocker is one comment with at most ten
+visible plain-language lines, lettered options, one recommendation, and the
+literal `DECISION B<n>: <letter>` reply. Ids continue from B11, details are
+folded, and resolved blockers use `status=closed` plus `RESOLVED B<n>`. Issue
+#26 is archived. Existing #26 citations in this ledger and the QPBT gap register
+remain unchanged or explicitly marked as historical provenance.
+
+**Expected effect:** owner attention is reserved for actions requiring personal
+permission, while routine status, mathematical difficulty, and project-outcome
+decisions continue without avoidable stalls and with concise decision requests.
