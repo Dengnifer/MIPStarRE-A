@@ -6320,3 +6320,37 @@ not actual commit/publication hooks. No productive session was killed.
   exited; no push gate was bypassed. A bounded retry now re-stages and commits the new
   telemetry before each canonical github-sync attempt instead of retrying an unchanged
   dirty checkout. The verified PR358 merge is unaffected by this telemetry-only failure.
+
+## 2026-09-09 - Refill approved wave and adopt owner daemon v9 (04:48Z)
+
+- The04:32:57Z plain snapshot observed17 workers. PR384's approved tail finished with
+  green CI and carried review; main refilled that wave position with approved PR473,
+  PID3450708, after verifying its checkout was clean and no lane owned it. PR343's next
+  refresh stopped when the legacy check compared against a concurrently advanced main,
+  although the canonical immutable-parent merge-loss guard had passed. Bounded operator
+  PID3437254 owns verification and minimal refresh repair; no guard was bypassed.
+- The bounded post-merge telemetry rebatch succeeded through github-sync at04:34:57Z,
+  publishing ae49c6bb33091d1d82edba0af362ede15b47fdfb. Concurrent source/session work
+  remains distinct from publication completion. New current-head findings for PR398 and
+  PR457 were opted into serialized autofix through gh_common; loops3564238 and3564239
+  were started after checking no existing loop owned either PR.
+- An owner-supplied /tmp/merge-daemon-v9.sh appeared and ran as PID3517308. Its behavior
+  merges fresh candidates before launching detached refreshes. Main read the new script
+  and stopped only its own older parent PID3107859, preserving the owner's process and
+  the older process's live refresh child. The two-parent overlap was not treated as an
+  intentional steady state. Current daemon evidence must use the owner v9's actual log,
+  not the obsolete daemon9.log from main's older script.
+- Owner v9 still selected the old lane-v17 pre-push build path. Main assigned a five-minute
+  Sol compatibility check, dispatcher PID3623150, to verify canonical build locking and
+  make only a minimal new-version correction if still needed. The assignment explicitly
+  preserves the owner's nonblocking architecture, exact-head gates, existing children,
+  and approved-wave policy; it must not become a framework or scan-only replacement.
+- PR481's author finished naturally before main sent any signal. PR488's author exceeded
+  its60-minute assignment after publishing5cb9b05d and completing CI; its process tree
+  showed no remaining external tool command. Main interrupted only its verified CLI
+  PID2124184. Dispatch retained the partial capture and recorded4517 wall seconds, exit1,
+  with no token total available. The published code and previous proof budgets were
+  preserved. Independent review remains a separate obligation, not a failed proof.
+- The closing process count at04:48:13Z was13, above the floor8, with review and repair
+  admissions queued; passive launchers were not counted as workers. No additional merge
+  is claimed in this cycle. The first verified PR358 merge remains recorded on #27.
