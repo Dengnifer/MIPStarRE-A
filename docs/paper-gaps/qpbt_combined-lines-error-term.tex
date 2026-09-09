@@ -113,6 +113,84 @@ $\delta_{\mathrm{combine}}(\eps,m,d,q)$.
   shrinking $b$, so forms~2 and~3 both suffice downstream.
 \end{enumerate}
 
+\section{The domain of the conditional Lean helper}
+
+The source statement does not take an arbitrary joint point measurement as an
+input.  It uses the family $\{\hat Q^{x,z}_{a,b}\}$ constructed by the preceding
+point lemma, whose error has the form $\delta_Q(\eps)=\poly(\eps)$.  Consequently,
+an internal theorem which accepts an already constructed point witness must retain
+the same quantitative dependency: it should first fix a function
+$\delta_Q:\mathbb R\to\mathbb R$ satisfying the one-variable polynomial-error
+predicate, then choose $\delta_P$, and at strategy error $\eps$ accept only a
+point witness with bound $\delta_Q(\eps)$.
+
+Before the repair tracked by \ghissue{389}, the Lean helper
+\path{exists_combinedLinesWitness_ofPointsWitness} instead had the quantifier
+order
+\[
+  \exists\delta_P=\poly(\eps,md/q)\quad
+  \forall\eps\ \forall\delta_Q\ \forall Q,
+  \qquad Q\text{ has point error at most }\delta_Q
+  \Longrightarrow T\text{ has line error at most }\delta_P(\eps,md/q).
+\]
+Thus the line-error function was chosen before an unrestricted scalar
+$\delta_Q$, and did not depend on it.  The fields of
+\path{CombinedPointsWitness} bound self-consistency and the two ordered-product
+comparisons by precisely this scalar; they impose no relation between an
+arbitrary $\delta_Q$ and $\eps$.  The conditioned-pasting estimate therefore
+cannot eliminate $\delta_Q$ from its conclusion.
+
+There is a concrete mathematical obstruction to the old domain.  Set
+$\eps=0$, take $m=1$ and fixed $d$, and let $q$ grow through admissible field
+sizes with $q>d+1$.  On any perfect strategy, define the supplied projective
+joint point measurement deterministically, with X answer $x^{d+1}$ and a fixed
+Z answer, identically on the two player sides.  Its self-consistency defect is
+zero, while the two ordered-product defects are finite and hence can be covered
+by a sufficiently large scalar $\delta_Q$, which the old helper quantified
+arbitrarily.  On an axis X line, however, every outcome allowed by
+\path{CombinedLinesWitness.axis_degree_X} evaluates as a polynomial of degree at
+most $d$.  Its difference from $x^{d+1}$ has at most $d+1$ roots, so even after
+mixing line outcomes the disagreement probability on that line is at least
+$1-(d+1)/q$.  Since axis lines have fixed positive weight in the line-point
+law, the resulting line consistency defect stays bounded away from zero as
+$q\to\infty$.  In contrast, the two-variable polynomial-error predicate forces
+$\delta_P(0,d/q)\to0$.  This argument diagnoses the theorem interface; no Lean
+counterexample theorem is asserted here.
+
+The repaired conditional helper has the form
+\[
+  \forall\delta_Q,\quad \delta_Q=\poly(\eps)\Longrightarrow
+  \exists\delta_P=\poly(\eps,md/q)\quad
+  \forall\eps\ \forall Q\text{ with error }\delta_Q(\eps),\quad
+  \exists T\text{ with error }\delta_P(\eps,md/q).
+\]
+This is not a new hypothesis on the paper theorem.  The source-facing Lean
+declaration \path{exists_combinedLinesWitness} preserves its original statement:
+it existentially obtains $\delta_Q$ and its point witnesses from the preceding
+point construction, then applies the conditional helper.
+
+The preserved proof route isolates four named obligations.  First,
+\path{exists_combinedLine_restored_defect_le} constructs the conditioned XZX
+line measurement and retains the numerical point error in its raw defect bound.
+Second, \path{exists_conditioned_polynomial_bound} uses the hypothesis
+$\delta_Q=\poly(\eps)$ to choose the two-variable line-error function.  Third,
+\path{nondegenerateLinePastingMass_bounds} controls the conditioning mass between
+$1/2$ and $1$.  Fourth, \path{consistencyDefect_opposite_symm} restores every
+directed opposite placement.  After these are available in the current modular
+tree, the conditional theorem can reuse their proof from protected commit
+\path{0f4ef05370350f4017439ebd839ef0561f13130f}; the source-facing theorem then
+combines it with \path{exists_combinedPointsWitness}.  Until those construction
+obligations are recovered and checked, both theorem proofs remain explicit proof
+obligations rather than bridge assumptions.
+
+At the time of this repair, \path{exists_conditioned_polynomial_bound} is already
+available in \path{MIPStarRE/QPBT/Combining/ErrorBounds.lean}.  The remaining
+proof extension is a focused modular recovery of the XZX measurement definition,
+its two axis-degree lemmas, \path{exists_combinedLine_restored_defect_le},
+\path{nondegenerateLinePastingMass_bounds}, and
+\path{consistencyDefect_opposite_symm}.  It must reuse the current pasting and
+line-measurement APIs rather than importing the protected monolithic file.
+
 \section{The source assertion and the two routes}
 
 The source proof in \cite{Ji2020MIPStar} constructs $\hat Q^{\ell}_f$ by
@@ -271,6 +349,68 @@ $m (md/q)^{c}$ is incompatible with the claimed form for the current
 exponents.  No derivation along these lines is known here, and the
 direction may be infeasible; in that case the corrected error form of
 the first direction stands.
+
+\section{Scalar and distributional scope of the formal claims}
+
+The completed formal estimates corresponding to Claims~17-1 and~17-3
+have a more limited scope than the source statements. Let
+$D_{\mathrm{dir}}$ be a probability law on extended-line and source-line
+triples whose extended-line marginal is the directly indexed law, with the
+incidence and separate point-marginal properties of the sub-line lemma.
+Write $\mathbb E_{\mathrm{dir}}$ for sampling this law and then a uniform
+affine parameter on the extended line. For the point and line families
+introduced above, define
+\begin{align*}
+ A_{\mathrm{dir}}&=\mathbb E_{\mathrm{dir}}\sum_{f_X,f_Z}
+   \langle\hat\psi,(T_{f_X,f_Z}\otimes
+     \hat Q^{x,z}_{f_X(x),f_Z(z)})\hat\psi\rangle,\\
+ B_{\mathrm{dir}}&=\mathbb E_{\mathrm{dir}}\sum_{f_X,f_Z}
+   \langle\hat\psi,(T_{f_X,f_Z}\otimes
+     M^Z_{f_Z(z)}M^X_{f_X(x)})\hat\psi\rangle,\\
+ Z_{\mathrm{dir}}&=\mathbb E_{\mathrm{dir}}\sum_{f_X,f_Z}
+   \langle\hat\psi,(T_{f_X,f_Z}\otimes M^Z_{f_Z(z)})\hat\psi\rangle.
+\end{align*}
+Here $M^W$ abbreviates the expanded point effects at $x$ or $z$, with
+placements $\mathsf{A}\mathsf{A}'$ and $\mathsf{B}\mathsf{A}''$ for the
+two tensor factors. An undefined line evaluation selects the zero point
+effect on the completed alphabet $\F_q\cup\{\bot\}$. The formal theorems give
+\[
+ |\Re A_{\mathrm{dir}}-\Re B_{\mathrm{dir}}|\le 2\sqrt{\delta_Q},
+ \qquad
+ |\Re Z_{\mathrm{dir}}-1|
+ \le 2\sqrt m\,(\delta_P^{1/4}+\delta_Q^{1/4}+\eps^{1/4}).
+\]
+
+Claim~17-1 instead bounds the complex modulus $|A-B|$ for the source
+law. The ordered product $M^Z_bM^X_a$ need not be Hermitian; a real-part
+bound alone therefore does not prove the source assertion.
+For $W_{a,b}=\hat Q_{a,b}-M^Z_bM^X_a$, its squared state norm is
+$\langle\hat\psi,(I\otimes W_{a,b}^*W_{a,b})\hat\psi\rangle$.
+The source prints $W_{a,b}^2$. The formal proof uses the adjoint square
+and inserts the opposite-placed joint measurement in the distance
+comparison, giving the same-placement bound $4\delta_Q$ and hence
+$2\sqrt{\delta_Q}$. This constant is compatible with the source's
+asymptotic error, but the real-part conclusion remains weaker.
+For Claim~17-3 the opposite-placed positive effects commute, so
+$Z_{\mathrm{dir}}$ is real; the distributional discrepancy remains.
+
+The precise verdict is that these are proved auxiliary estimates, not
+completed formalizations of the source claims. A source proof still needs
+a complex-modulus comparison for Claim~17-1 and a transport from the directly
+indexed law and completed evaluations to the source formulation.
+The latter obligation includes the dimension-divisibility issue described
+in \path{docs/paper-gaps/qpbt_ld-dimension-divisibility.tex}.
+The source blueprint entries retain their statements without completion
+marks; the real-part statements have separate formalization-support
+entries. No hypothesis has been added to either Lean theorem.%
+\footnote{Source: \path{claim:17-1}, lines~1140--1165, and
+\path{claim:17-3}, lines~1204--1209, of
+\path{references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex}.
+The declarations are \leanid{subline\_replace\_by\_ordered\_product} and
+\leanid{subline\_Z\_term\_near\_one} in
+\path{MIPStarRE/QPBT/Combining/Claims.lean}; their separate blueprint
+entries are \path{lem:claim-17-1-direct-real} and
+\path{lem:claim-17-3-direct-real}.}
 
 \section{Comparison with the blueprint}
 
