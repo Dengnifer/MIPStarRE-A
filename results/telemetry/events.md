@@ -7630,3 +7630,10 @@ not actual commit/publication hooks. No productive session was killed.
   /tmp/qpbt-main-handoff-20260909-pause.md. Main now issues /goal pause under
   the owner's order, leaving the formalization incomplete and telemetry
   uncommitted for meta/daemon publication. Resume only on the owner's word.
+
+## 2026-09-09 — Pause of track A on the owner's instruction (2026-09-09T15:55:49Z)
+
+- Owner (13:35Z): work about two more hours, update #168, then pause; the meta session resumes the main session days later on the
+  owner's explicit word. At 15:55:49Z: main at 88449102, 21 merges today through the daemon. Stopped: goal keeper, merge daemon
+  (stop file kept), stack-watch; watchdog, heartbeat and astra-poll crons commented out (estimate.sh kept); the main session paused its
+  goal after posting on #168 and #27. Running lanes and fix loops finish on their own. Resume procedure: /tmp/owner-resume.sh.
