@@ -1040,18 +1040,10 @@ postprocessing, and operator-contraction steps used to formalize
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{lem:pasting-one-sided-explicit-error, lem:pasting-coarse-commutator,
-		lem:pasting-measurement, lem:pasting-scalar-error, lem:pasting-defect-bound}
-	Use the fixed Schmidt mirror of the second codeword family on Alice's
-	register. Its coarse consistency defect is at most $2\delta$ and its fine
-	defect at most $2\delta+\eta$. The distinct-family commutator comparison
-	then proves the conclusion without a register-exchange assumption.
-	For the universal coarse-commutator constant $C\geq1$, one may take
-	$\delta_{\mathrm{pasting}}=(3C+19)(\eta^{1/4}+\delta^{1/8})$.
-	On the unit square use Lemma~\ref{lem:pasting-scalar-error}; outside it,
-	this error is at least $1$, so Lemma~\ref{lem:pasting-defect-bound} applies.
-	Thus the polynomial notation here uses the additive correction documented
-	in \cite{gap:qpbt_pasting-product-error}, not the refuted product contract.
+	\uses{lem:pasting-forward-comparisons}
+	Apply Lemma~\ref{lem:pasting-forward-comparisons} to the two marginal
+	comparisons~\eqref{eq:pasting-1}. These suffice for the pasted conclusion;
+	the self-consistency comparison~\eqref{eq:pasting-2} is not needed.
 \end{proof}
 
 \begin{lemma}[Pasting from the forward comparisons]
@@ -1069,8 +1061,16 @@ postprocessing, and operator-contraction steps used to formalize
 	\leanok
 	\uses{lem:pasting-one-sided-explicit-error, lem:pasting-coarse-commutator,
 		lem:pasting-measurement, lem:pasting-scalar-error, lem:pasting-defect-bound}
-	The Schmidt-mirror proof uses only the two forward marginal comparisons,
-	so its error estimate proves this stronger assertion directly.
+	Use the fixed Schmidt mirror of the second codeword family on Alice's
+	register. Its coarse consistency defect is at most $2\delta$ and its fine
+	defect at most $2\delta+\eta$. The distinct-family commutator comparison
+	then proves the conclusion without a register-exchange assumption.
+	For the universal coarse-commutator constant $C\geq1$, one may take
+	$\delta_{\mathrm{pasting}}=(3C+19)(\eta^{1/4}+\delta^{1/8})$.
+	On the unit square use Lemma~\ref{lem:pasting-scalar-error}; outside it,
+	this error is at least $1$, so Lemma~\ref{lem:pasting-defect-bound} applies.
+	Thus the polynomial notation here uses the additive correction documented
+	in \cite{gap:qpbt_pasting-product-error}, not the refuted product contract.
 \end{proof}
 
 \begin{definition}[Adjoining fixed basis vectors]
