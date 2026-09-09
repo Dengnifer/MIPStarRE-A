@@ -13,7 +13,9 @@ Every piece of evidence lives on GitHub, bound to the head SHA (issues-prs.md; t
 
 1. the PR is open, unmerged, not a draft;
 2. the primary worktree is clean and on the base, and the local branch tip is that
-   SHA — the merge must be of the bytes that were built here;
+   SHA — the merge must be of the bytes that were built here.  The current base
+   tip must be its ancestor, or have advanced from their merge base only under
+   ``results/telemetry``;
 3. the eight ``local-ci/<step>`` contexts (ci.sh:70) and ``local-ci/summary`` are
    ``success`` on it.  A missing context blocks: GitHub's combined state reads
    "success" for a commit carrying no statuses at all;
@@ -87,9 +89,13 @@ class GateFailure(LayerError):
 
 # --------------------------------------------------------------- small helpers
 
+def _run_git(repo_root: Path, *args: str) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(["git", *args], cwd=str(repo_root),
+                          capture_output=True, text=True, check=False)
+
+
 def git(repo_root: Path, *args: str, check: bool = True) -> str:
-    result = subprocess.run(["git", *args], cwd=str(repo_root),
-                            capture_output=True, text=True, check=False)
+    result = _run_git(repo_root, *args)
     if check and result.returncode != 0:
         raise LayerError(f"git {' '.join(args)} failed ({result.returncode}): "
                          f"{result.stderr.strip() or result.stdout.strip()}")
@@ -97,8 +103,28 @@ def git(repo_root: Path, *args: str, check: bool = True) -> str:
 
 
 def git_ok(repo_root: Path, *args: str) -> bool:
-    return subprocess.run(["git", *args], cwd=str(repo_root), capture_output=True,
-                          text=True, check=False).returncode == 0
+    return _run_git(repo_root, *args).returncode == 0
+
+
+def head_is_fresh(repo_root: Path, base_ref: str, head_sha: str) -> bool:
+    """Return whether ``head_sha`` is fresh enough to merge against ``base_ref``.
+
+    Ancestry is the fast path.  Otherwise the base may have advanced from the
+    common ancestor only under ``results/telemetry``.  Every failed Git command,
+    including a missing merge base, fails closed.  This is the daemon-facing
+    predicate used by gate 2b.
+    """
+    ancestor = _run_git(repo_root, "merge-base", "--is-ancestor", base_ref, head_sha)
+    if ancestor.returncode == 0:
+        return True
+    if ancestor.returncode != 1:
+        return False
+    merge_base_result = _run_git(repo_root, "merge-base", base_ref, head_sha)
+    merge_base = merge_base_result.stdout.strip()
+    if merge_base_result.returncode != 0 or not merge_base:
+        return False
+    return _run_git(repo_root, "diff", "--quiet", merge_base, base_ref, "--", ".",
+                    ":(exclude)results/telemetry").returncode == 0
 
 
 def _pid_alive(pid: int) -> bool:
@@ -331,19 +357,20 @@ def run_gate(repo_root: Path, number: int, *, adjudicated: bool) -> dict:
                           f"ref={branch!r} base={base!r}; all three are required.")
     passed(f"gate 1 open, not a draft: {branch} @ {head_sha[:12]} -> {base}")
     ensure_mergeable_worktree(repo_root, branch, base, head_sha)
-    # Gate 2b — the head must CONTAIN the current base tip: CI and review bind
-    # to the head alone, so a branch behind the base would merge a base/head
-    # combination nothing ever tested (round 3, F2).  Fetch first so "current"
-    # means GitHub's tip, not a stale local remote-tracking ref.
+    # Gate 2b — the head must contain the current base tip unless the base has
+    # advanced only under results/telemetry.  CI and review remain bound to the
+    # exact head.  Fetch first so "current" means GitHub's tip, not a stale
+    # local remote-tracking ref.
     if not git_ok(repo_root, "fetch", "github", base):
         raise GateFailure(f"gate 2b (fresh base): 'git fetch github {base}' failed; cannot "
                           "verify the branch is up to date with the base.")
-    if not git_ok(repo_root, "merge-base", "--is-ancestor", f"github/{base}", head_sha):
+    if not head_is_fresh(repo_root, f"github/{base}", head_sha):
         base_tip = git(repo_root, "rev-parse", "--short", f"github/{base}", check=False)
         raise GateFailure(f"gate 2b (fresh base): {base} is at {base_tip} and the PR head "
-                          f"{head_sha[:12]} does not contain it. Merge or rebase the base "
-                          "into the branch, re-run CI and review on the new head, then merge.")
-    passed(f"gate 2b head contains the current {base} tip")
+                          f"{head_sha[:12]} neither contains it nor predates only telemetry "
+                          "changes. Merge or rebase the base into the branch, re-run CI and "
+                          "review on the new head, then merge.")
+    passed(f"gate 2b head is fresh against current {base} (ancestry or telemetry-only move)")
     statuses = gh_common.latest_statuses(head_sha)  # one read; gates 3 and 4 share it
     reviews = gh_common.pr_reviews(number)
     check_ci(statuses, head_sha)

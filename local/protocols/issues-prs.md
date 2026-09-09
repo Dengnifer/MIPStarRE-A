@@ -143,7 +143,12 @@ that refuse by default:
 1. the PR is open, unmerged and not a draft (`draft is False`, not merely
    falsy), and reports a head SHA, a head ref and a base ref;
 2. the primary worktree is clean and on the base, and the local branch tip
-   equals the GitHub head SHA — the merge must be of the bytes built here;
+   equals the GitHub head SHA — the merge must be of the bytes built here. After
+   fetching the current GitHub base, the head is fresh when that base is its
+   ancestor, or when the base differs from their merge base only below
+   `results/telemetry/`, as checked by
+   `git diff --quiet <merge-base> github/main -- . ':(exclude)results/telemetry'`.
+   A missing merge base or failed Git command blocks the merge;
 3. all eight `local-ci/<step>` contexts plus `local-ci/summary` are `success` on
    that exact SHA; a **missing** context blocks, because GitHub's combined state
    reads `success` for a commit carrying no statuses at all;
@@ -180,7 +185,8 @@ its daemon-owned final action after these checks; workers never merge directly.
 Each tick has bounded Git/GitHub reads and records failures as HOLD rather than
 exiting the loop. The cadence is monotonic: work time is subtracted from the
 configured interval (default 300 seconds). Candidate records distinguish stale
-exact-head PRs from fresh actionable PRs; `pr_age_s` is PR creation age, while
+exact-head PRs from fresh actionable PRs using the same ancestry-or-telemetry-only
+rule as gate 2b; `pr_age_s` is PR creation age, while
 eligibility onset remains unknown unless separately observed.
 
 ## 4. Untrusted text

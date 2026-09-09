@@ -1041,3 +1041,24 @@ unresolved findings. It launched no new model turn, edited no response or
 source, and released the old reviewer and source holds. PR #400 remains
 ineligible to merge until its isolated repair proceeds through normal checked
 publication, CI, and fresh independent review.
+
+## 2026-09-09 - Tolerate telemetry-only base movement at merge (#498)
+
+**Trigger:** `results/telemetry/events.md`, "2026-09-09 — Meta intervention:
+stalled \"Space\" main session replaced; detached-worker architecture
+reinstated", and the later same-day approved-refresh entries. Telemetry snapshot
+commits moved `main` while exact-head CI and review lanes were completing, so
+otherwise ready pull requests became stale without a source or blueprint change.
+
+**Change:** `pr_merge.py` gate 2b and its daemon-facing freshness helper retain
+base ancestry as the fast path. When ancestry fails, they accept the head only
+if the current base differs from its merge base with the head solely below
+`results/telemetry/`. Missing merge bases and failed Git commands still refuse.
+`issues-prs.md` records the rule, `review.md` limits review carry-forward to
+refreshes still required by that rule, and the real-Git merge-gate fixture
+covers ancestry, telemetry-only base movement, and a Lean-source base change.
+
+**Expected effect:** telemetry publication no longer serializes all otherwise
+mergeable pull requests behind another refresh lane. Any Lean, blueprint, or
+other non-telemetry base change still requires refresh, exact-head CI, and
+independent review; all other merge gates are unchanged.

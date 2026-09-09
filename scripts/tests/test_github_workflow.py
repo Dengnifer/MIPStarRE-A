@@ -806,6 +806,42 @@ class MergeGateTests(LayerTestCase):
              "--repo-root", str(self.repo)],
             capture_output=True, text=True, env=env)
 
+    def _advance_main(self, relative_path: str, message: str) -> None:
+        path = self.repo / relative_path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(message + "\n", encoding="utf-8")
+        _git(self.repo, "add", relative_path)
+        _git(self.repo, "commit", "-q", "--no-verify", "-m", message)
+        _git(self.repo, "fetch", "-q", "github", "main")
+
+    def test_freshness_accepts_ancestry_and_telemetry_only_base_changes(self) -> None:
+        self.assertTrue(pr_merge.head_is_fresh(self.repo, "github/main", self.head))
+
+        self._advance_main("results/telemetry/events.md", "record telemetry")
+        self.assertTrue(pr_merge.head_is_fresh(self.repo, "github/main", self.head))
+        self._arm()
+        result = self._check_only()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("ancestry or telemetry-only move", result.stdout)
+
+    def test_freshness_rejects_non_telemetry_base_changes(self) -> None:
+        self._advance_main("MIPStarRE/QPBT/FreshnessTest.lean", "change Lean source")
+        self.assertFalse(pr_merge.head_is_fresh(self.repo, "github/main", self.head))
+        self._arm()
+        result = self._check_only()
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("gate 2b (fresh base)", result.stderr)
+        self.assertIn("neither contains it nor predates only telemetry changes", result.stderr)
+
+    def test_freshness_fails_closed_on_git_errors_and_missing_merge_base(self) -> None:
+        self.assertFalse(pr_merge.head_is_fresh(self.repo, "missing-ref", self.head))
+
+        tree = _git(self.repo, "rev-parse", "main^{tree}")
+        unrelated = subprocess.run(
+            ["git", "commit-tree", tree], cwd=self.repo, input="unrelated history\n",
+            capture_output=True, text=True, check=True).stdout.strip()
+        self.assertFalse(pr_merge.head_is_fresh(self.repo, unrelated, self.head))
+
     def test_gate_ladder_blocks_on_thin_evidence_and_passes_on_full(self) -> None:
         with self.subTest("a missing local-ci context is a block, never a pass"):
             self._arm(missing=("local-ci/statement-origin",))
