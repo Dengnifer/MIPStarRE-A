@@ -245,6 +245,40 @@ class NativeWorkflowTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'trusted review request changed'):
             self.acceptance()
 
+    def test_reviewer_followup_requires_a_fresh_direct_parent_assignment(self):
+        old = '2026-09-06T13:13:59.999Z'
+        fresh = '2026-09-06T13:14:01.002Z'
+        for sender in ('/root/coordinator', '/root'):
+            with self.subTest(sender=sender):
+                self.write_rollout(timestamp=old)
+                rows = [json.loads(line) for line in self.rollout.read_text().splitlines()]
+                rows.extend([
+                    dict(type='event_msg', timestamp='2026-09-06T13:14:01.001Z',
+                         payload=dict(type='task_started', turn_id='followup')),
+                    dict(type='turn_context', payload=dict(turn_id='followup',
+                         model='gpt-6-astra', effort='ultra')),
+                    dict(type='response_item', timestamp=fresh,
+                         payload=dict(type='agent_message', author=sender,
+                                      recipient='/root/review_nonce',
+                                      content=[dict(type='encrypted_content')])),
+                    dict(type='event_msg', timestamp='2026-09-06T13:14:01.003Z',
+                         payload=dict(type='task_complete', turn_id='followup',
+                                      last_agent_message=self.binding + '\nCHANGES_REQUESTED')),
+                ])
+                self.rollout.write_text(''.join(json.dumps(row) + '\n' for row in rows))
+                observation = telemetry.native_rollout(self.rollout, CHILD, role='reviewer',
+                    job_class='hard_review', hardness_reason='Control-policy fixture')
+                if sender == '/root':
+                    self.assertEqual(observation['assigned'], fresh)
+                    self.acceptance()
+                    self.assertEqual((self.root / 'out.md').read_text(),
+                                     self.binding + '\nCHANGES_REQUESTED')
+                else:
+                    self.assertEqual(observation['assigned'], old)
+                    with self.assertRaisesRegex(ValueError, 'fresh independently assigned'):
+                        self.acceptance()
+                    self.assertFalse((self.root / 'out.md').exists())
+
     def test_naive_or_equal_timestamps_cannot_satisfy_freshness(self):
         self.request['created'] = '2026-09-06T13:14:00'
         self.write_rollout()

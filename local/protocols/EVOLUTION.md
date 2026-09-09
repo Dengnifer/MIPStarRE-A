@@ -1016,3 +1016,23 @@ unresolved findings. It launched no new model turn, edited no response or
 source, and released the old reviewer and source holds. PR #400 remains
 ineligible to merge until its isolated repair proceeds through normal checked
 publication, CI, and fresh independent review.
+
+## 2026-09-09 - Keep canonical reviewer follow-ups parent-issued
+
+**Trigger:** User-directed repair of PR #443 review finding F1 at head
+`724373726d58130a2e81845f6e2ca652883c0304`. The reviewer reproduced a
+coordinator-issued follow-up retaining the previous parent-assignment timestamp
+and failing canonical assignment freshness.
+
+**Change:** `useful-queue.md` requires the root to issue each canonical reviewer
+follow-up after request creation and release of the prior consumer hold. The
+coordinator may prepare and hand off the payload, but cannot activate that reviewer.
+Prepared-record authorization is not authenticated delegation. Coordinator-issued
+reviewer follow-ups remain disabled until both validators implement and test such
+delegation; `native_rollout` and `completed_review` remain unchanged. A focused
+regression covers rejection of a coordinator follow-up and acceptance of a fresh
+direct-parent assignment.
+
+**Expected effect:** The documented handoff satisfies canonical assignment
+freshness without accepting arbitrary senders or weakening independent review,
+request binding, or consumer holds.

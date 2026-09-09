@@ -36,9 +36,15 @@ assignment, budget, and ownership checks establish actual completion or stall.
 
 The root creates every new canonical native reviewer child so its direct parent matches
 the review request's root; the coordinator does not spawn that child or represent itself
-as the root. After the prior canonical consumer hold is released, the coordinator may
-mechanically follow up an eligible existing direct-root child without another root round
-trip only when a root-authorized prepared record preserves the request binding,
+as the root. After the prior canonical consumer hold is released, the root must issue
+every reviewer follow-up assignment to its direct child in a fresh turn after the
+corresponding review request is created. The coordinator may prepare the payload and
+hand it to the root, but must not activate the canonical reviewer itself.
+`telemetry.py native_rollout` recognizes only direct-parent assignments, and
+`native_review.py completed_review` requires both assignment and current-turn start to
+postdate the request. A root-authorized prepared record is not authenticated delegation;
+coordinator-issued reviewer follow-ups remain disabled until authenticated delegation
+is implemented and tested in both validators. Preserve the request binding,
 independence, current head, identity, model, effort, and ordinary review gates. Until both
 the genuine response is validated and the waiting consumer accepts it, the completed
 reviewer remains idle and unavailable for follow-up; a response file alone is insufficient.

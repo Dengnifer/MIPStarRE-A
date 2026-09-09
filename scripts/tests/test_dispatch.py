@@ -190,6 +190,7 @@ class DispatchCommandTests(unittest.TestCase):
             rollout.parent.mkdir(parents=True)
             rollout.write_text(json.dumps(dict(type='turn_context', payload=dict(model='gpt-6-astra'))))
             env = os.environ.copy()
+            env.pop("MIPSTARRE_HARDNESS_REASON", None)
             env.update(
                 {
                     "MIPSTARRE_CACHE_ROOT": cache_root,
