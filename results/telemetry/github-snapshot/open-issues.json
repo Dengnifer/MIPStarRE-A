@@ -429,90 +429,6 @@
   "pinned_comment": null
  },
  {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/498",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/498/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/498/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/498/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/498",
-  "id": 5395136437,
-  "node_id": "I_kwDOUJyJf88AAAABQZM_tQ",
-  "number": 498,
-  "title": "pr_merge.py: telemetry-tolerant freshness gate (main moved only under results/telemetry)",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025011061,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8bdQ",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/infrastructure",
-    "name": "infrastructure",
-    "color": "ededed",
-    "default": false,
-    "description": "Foundational definitions, shared APIs, or supporting layers"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-09T04:53:52Z",
-  "updated_at": "2026-09-09T04:53:52Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 0,
-   "blocking": 0,
-   "total_blocking": 0
-  },
-  "body": "`local/bin/pr_merge.py` refuses a PR unless `github/main` is an ancestor of its head (line 341, \"verify the branch is up to date with the base\"). With the current volume (about sixty open PRs) this gate serializes merges to one per refresh lane (about ten to fifteen minutes) and, worse, any commit to main during a refresh, including the telemetry snapshot commits that the main session and `github-sync.sh` make, invalidates every refreshed PR: on 2026-09-09 PRs 375 and 377 finished green refresh lanes at 04:48Z and were already stale because main had moved by telemetry-only commits.\n\nTask (small, reviewed): make the freshness gate telemetry-tolerant. A head is fresh when `github/main` is an ancestor of it, OR when `git diff --quiet <merge-base(github/main, head)> github/main -- . ':(exclude)results/telemetry'` succeeds, i.e. main differs from the branch's base only under `results/telemetry/`. Apply the same rule in the daemon-facing helper (`ensure_mergeable_worktree` / `git_ok` call site) and keep every other gate (CI success on the head, review clean on the head, adjudication rules). Add a unit test in `scripts/tests/` covering: fresh by ancestry, fresh by telemetry-only difference, stale when a Lean or blueprint file differs. Document the rule in `local/protocols/issues-prs.md` and add an EVOLUTION.md entry citing the 2026-09-09 events entry on the meta intervention.\n\nOut of scope: changing how telemetry is committed, the merge daemon scripts under /tmp, or the review pipeline.\n",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/498/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/498/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/494",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/494/labels{/name}",
@@ -3249,7 +3165,7 @@
    "percent_completed": 0
   },
   "issue_dependencies_summary": {
-   "blocked_by": 1,
+   "blocked_by": 0,
    "total_blocked_by": 1,
    "blocking": 1,
    "total_blocking": 1
@@ -3539,7 +3455,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/118",
   "issue_dependencies_summary": {
-   "blocked_by": 1,
+   "blocked_by": 0,
    "total_blocked_by": 1,
    "blocking": 1,
    "total_blocking": 1
@@ -3650,7 +3566,7 @@
    "percent_completed": 0
   },
   "issue_dependencies_summary": {
-   "blocked_by": 1,
+   "blocked_by": 0,
    "total_blocked_by": 1,
    "blocking": 0,
    "total_blocking": 0
@@ -4069,7 +3985,7 @@
    "percent_completed": 0
   },
   "issue_dependencies_summary": {
-   "blocked_by": 1,
+   "blocked_by": 0,
    "total_blocked_by": 1,
    "blocking": 2,
    "total_blocking": 2
@@ -4274,7 +4190,7 @@
    "percent_completed": 0
   },
   "issue_dependencies_summary": {
-   "blocked_by": 1,
+   "blocked_by": 0,
    "total_blocked_by": 1,
    "blocking": 2,
    "total_blocking": 2
@@ -4564,7 +4480,7 @@
    "percent_completed": 0
   },
   "issue_dependencies_summary": {
-   "blocked_by": 1,
+   "blocked_by": 0,
    "total_blocked_by": 1,
    "blocking": 1,
    "total_blocking": 1
@@ -4658,7 +4574,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/118",
   "issue_dependencies_summary": {
-   "blocked_by": 3,
+   "blocked_by": 2,
    "total_blocked_by": 3,
    "blocking": 2,
    "total_blocking": 2
@@ -5013,99 +4929,6 @@
    "eyes": 0
   },
   "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/389/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/388",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/388/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/388/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/388/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/388",
-  "id": 5387674667,
-  "node_id": "I_kwDOUJyJf88AAAABQSFkKw",
-  "number": 388,
-  "title": "Recover the combined point measurement producer",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement"
-   },
-   {
-    "id": 12025012779,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8iKw",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/sorry-elimination",
-    "name": "sorry-elimination",
-    "color": "ededed",
-    "default": false,
-    "description": "Explicitly aimed at discharging remaining `sorry` sites"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-08T13:59:27Z",
-  "updated_at": "2026-09-08T13:59:27Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 1,
-   "blocking": 7,
-   "total_blocking": 8
-  },
-  "body": "<!-- mipstarre-issue-key: qpbt-combined-point-producer-recovery-20260908 -->\n### Motivation\n\n`MIPStarRE.QPBT.exists_combinedPointsWitness` is the tracked construction\nobligation for `lem:qld-4-10`, paper\n`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:689-881`.\nIts public statement already matches the source-facing contract, but its proof\nbody remains `sorry` on `main`.\n\nA complete direct-space proof and its sandwich, consistency,\northonormalization, placement, commutation, and closeness helpers are preserved\nread-only at commit `0f4ef05370350f4017439ebd839ef0561f13130f`. Recover only\nthat producer proof against the current projective-setting and witness APIs.\n\n### Scope\n\n- Preserve the exact existential theorem statement and all current witness\n  fields.\n- Do not add a linearity, rounding, bridge, producer, or carrier hypothesis.\n- Recover only the necessary point-combination helper modules and producer\n  proof after verifying their current dependencies and axiom closures.\n- Stack on immutable issue-369 commit `989702f7` without modifying or\n  overwriting its `extendedQ_spec` proof.\n- Do not work on combined-line production, B8, or unrelated QPBT obligations.\n\n### Acceptance\n\n- The current stacked `Points.lean` module builds with both producer and\n  `extendedQ_spec` proofs intact.\n- `exists_combinedPointsWitness` uses only the standard project axioms and has\n  no `sorryAx` dependency.\n- Focused proof-integrity, statement-integrity, and hook checks pass.\n",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/388/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/388/timeline",
   "performed_via_github_app": null,
   "state_reason": null,
   "pinned_comment": null
@@ -11161,9 +10984,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 245,
+  "comments": 250,
   "created_at": "2026-09-02T08:30:04Z",
-  "updated_at": "2026-09-09T11:59:26Z",
+  "updated_at": "2026-09-09T12:37:44Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",

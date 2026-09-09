@@ -7225,3 +7225,72 @@ not actual commit/publication hooks. No productive session was killed.
 - Daemon refreshes431/458. No duplicate writer or extra full-build lane was
   started while capacity is occupied. One short27 update records current
   counts. No primary key, native worker, qpbt-switch or HOLD/STOP use.
+
+### 2026-09-09T12:07:06Z - Train review and bounded remaining fixes
+
+- Required snapshot completed; previous cycle progressed. Census9 workers,
+ 4 orcs. PR507 e1dd7bb0 has complete CI and626 tests OK; independent
+  review663147 is assigned. No deployment or train invocation occurred.
+- PR499's authorized final review5153964001 approves7e4b2775; the daemon
+  retains ordinary freshness and merge gates. PR478 review5153938545 has
+  only a remaining coordinate-indexing prose finding; focused autofix is
+  assigned. PR483 review5153927883 has a real changed-file duplication;
+  autofix689113 owns it. Histories and B8 obligations are preserved.
+- Existing505,503 and failed-refresh owners remain live. A short27 line
+  records this progress; no primary key, native agent, HOLD/STOP or manual merge.
+
+### 2026-09-09T12:14:46Z - PR431 merged and CI fix approved
+
+- Required snapshot completed; previous cycle progressed. PR431 merged
+ 12:02:20Z as33029e3d54c6f9060431430a19afd182906ef87f from601d869e2beef602a6a6c6b58a1f2fb84d5b26ec.
+  Exact-head CI/review statuses were checked. PR506's canonical review5154006996
+  approves c672c4f2; the daemon retains normal freshness and merge gates.
+- New488 refresh failure contains real Lean and telemetry conflicts. Deferred
+  handle839683 admits exactly one repair only when fewer than4 orcs and fewer
+  than9 total workers are live. Count it as the pending488 owner; do not start
+  a duplicate. It exits after10 minutes without a slot, preserving the branch.
+- Existing505,507 review,503/478/483 fixes and212/443 recoveries remain owned.
+  One short27 merge update records this progress. No primary key, native agent,
+  HOLD/STOP file, qpbt-switch invocation or manual merge.
+
+### 2026-09-09T12:21:54Z - Refill reviews and publish the router simplification
+
+- Required snapshot completed. Initial7 workers prompted reviews503 and213;
+  the recovered213 head's regression log showed616 tests OK.
+- Worker505 committed24394eef with602 tests passing and9 historical skips.
+  Its only unresolved merge path was events.md. Main removed conflict markers
+  and verified both complete parent line sequences were preserved, then staged
+  that data path. Non-model tail999342 owns merge guards, commit, checked
+  publication and isolated canonical CI; no router deployment is claimed.
+- PR487's sole finding is placement-API duplication; its scope assessment
+  remains operator work, not an excuse to start a duplicate writer. Existing
+  failed-refresh owners and deferred488 handle remain intact. Short27 update
+  records the handoffs; no primary key, native agent, qpbt-switch or HOLD/STOP.
+
+### 2026-09-09T12:29:07Z - Repair the first merge-train review findings
+
+- Required snapshot completed; previous cycle progressed. Census refilled
+  from8 to9 workers, with4 orcs after admission of repair1114447.
+- Canonical review5154118210 on PR507/e1dd7bb0 found incomplete combined-build
+  coverage, incorrect refusal after ambiguous publication, and incompatible
+  train branch naming for external lake roots. One60-minute bounded repair
+  is authorized within the existing1000-line ceiling, preserving all prior
+  costs and gates. No deployment or live train execution is authorized.
+- Existing508 CI,506 review/daemon handoff,503/478/483 fixes and conflict
+  recoveries retain their owners. One short27 line records the change.
+  No primary key, native agent, HOLD/STOP, qpbt-switch or manual merge.
+
+### 2026-09-09T12:37:30Z - B9 merged and487 scope adjudicated
+
+- Required snapshot completed; previous cycle progressed. PR499 merged
+ 12:24:58Z as5140b7b251375d48230d1dfaca2ef65f196211f3 from5962af6a38fdf9294d6efa207c4fc026f011c9bc.
+  Its exact-head checks were verified; active daemon integration remains
+  governed by the existing runtime ownership.
+- PR487 has four actual reviewed heads and one duplication finding.
+  Extraction/Consistency.lean is byte-identical to current main (e2c99917).
+  Main posted an exact-head out-of-scope adjudication, prepared a conditional
+  refresh template, and added487 to the daemon list. No source refactor,
+  reviewer approval or mathematical obligation was fabricated.
+- Existing repairs, reviews and508 CI retain verified owners. One short27
+  merge update records the outcome. No main push, manual merge, primary-key
+  request, native worker or HOLD/STOP action occurred.
