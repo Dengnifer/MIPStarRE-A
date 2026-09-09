@@ -89,98 +89,6 @@ theorem directPointExtendedQuestionEquiv_apply
       rw [piCongrLeft_const_apply]
       rfl
 
-/-- Place an Alice-local measurement on `AA'` by tensoring identities and
-reindexing along the standard `AA' | BA''(B'B'')` bipartition. -/
-private noncomputable def aaPlacedMeasurement
-    {Outcome : Type*} [Fintype Outcome]
-    (setting : ProjectiveSetting P epsilon)
-    (M : Measurement Outcome (setting.ExpandedLocalSpace .alice)) :
-    Measurement Outcome (SixReg P setting.toStrategy.ιA setting.toStrategy.ιB) :=
-  reindexMeasurement
-    (aaBaBipartition P setting.toStrategy.ιA setting.toStrategy.ιB)
-    (DistanceCalculus.leftPlacedMeasurement
-      (ιB := (setting.ExpandedLocalSpace .bob) ×
-        (PauliRegister P × PauliRegister P)) M)
-
-/-- Place a Bob-local measurement on `BA''` by the corresponding nested right
-tensor placement and the standard bipartition reindexing. -/
-private noncomputable def baPlacedMeasurement
-    {Outcome : Type*} [Fintype Outcome]
-    (setting : ProjectiveSetting P epsilon)
-    (M : Measurement Outcome (setting.ExpandedLocalSpace .bob)) :
-    Measurement Outcome (SixReg P setting.toStrategy.ιA setting.toStrategy.ιB) :=
-  reindexMeasurement
-    (aaBaBipartition P setting.toStrategy.ιA setting.toStrategy.ιB)
-    (DistanceCalculus.rightPlacedMeasurement
-      (ιA := setting.ExpandedLocalSpace .alice)
-      (DistanceCalculus.leftPlacedMeasurement
-        (ιB := PauliRegister P × PauliRegister P) M))
-
-private theorem aaPlacedMeasurement_effect
-    {Outcome : Type*} [Fintype Outcome]
-    (setting : ProjectiveSetting P epsilon)
-    (M : Measurement Outcome (setting.ExpandedLocalSpace .alice)) (a : Outcome) :
-    (aaPlacedMeasurement setting M).effect a =
-      setting.place .AA' (M.effect a) := by
-  change reindexOp
-    (aaBaBipartition P setting.toStrategy.ιA setting.toStrategy.ιB)
-      (heteroKron (M.effect a) 1) = _
-  exact reindexOp_aaBaBipartition_left setting (M.effect a)
-
-private theorem baPlacedMeasurement_effect
-    {Outcome : Type*} [Fintype Outcome]
-    (setting : ProjectiveSetting P epsilon)
-    (M : Measurement Outcome (setting.ExpandedLocalSpace .bob)) (a : Outcome) :
-    (baPlacedMeasurement setting M).effect a =
-      setting.place .BA'' (M.effect a) := by
-  change reindexOp
-    (aaBaBipartition P setting.toStrategy.ιA setting.toStrategy.ιB)
-      (heteroKron 1 (heteroKron (M.effect a) 1)) = _
-  exact reindexOp_aaBaBipartition_right setting (M.effect a)
-
-private theorem leftPlacedMeasurement_isProjective
-    {Outcome I J : Type*} [Fintype Outcome] [Fintype I] [DecidableEq I]
-    [Fintype J] [DecidableEq J] (M : Measurement Outcome I)
-    (hM : MIPStarRE.QPBT.Measurement.IsProjective M) :
-    MIPStarRE.QPBT.Measurement.IsProjective
-      (DistanceCalculus.leftPlacedMeasurement (ιB := J) M) := by
-  intro a
-  change IsProj (heteroKron (M.effect a) (1 : Op J))
-  simpa only [heteroKron] using
-    MIPStarRE.LDT.MakingMeasurementsProjective.isProj_kronecker
-      (hM a) (IsStarProjection.one _)
-
-private theorem rightPlacedMeasurement_isProjective
-    {Outcome I J : Type*} [Fintype Outcome] [Fintype I] [DecidableEq I]
-    [Fintype J] [DecidableEq J] (M : Measurement Outcome J)
-    (hM : MIPStarRE.QPBT.Measurement.IsProjective M) :
-    MIPStarRE.QPBT.Measurement.IsProjective
-      (DistanceCalculus.rightPlacedMeasurement (ιA := I) M) := by
-  intro a
-  change IsProj (heteroKron (1 : Op I) (M.effect a))
-  simpa only [heteroKron] using
-    MIPStarRE.LDT.MakingMeasurementsProjective.isProj_kronecker
-      (IsStarProjection.one _) (hM a)
-
-private theorem aaPlacedMeasurement_isProjective
-    {Outcome : Type*} [Fintype Outcome]
-    (setting : ProjectiveSetting P epsilon)
-    (M : Measurement Outcome (setting.ExpandedLocalSpace .alice))
-    (hM : MIPStarRE.QPBT.Measurement.IsProjective M) :
-    MIPStarRE.QPBT.Measurement.IsProjective (aaPlacedMeasurement setting M) := by
-  apply reindexMeasurement_isProjective
-  exact leftPlacedMeasurement_isProjective M hM
-
-private theorem baPlacedMeasurement_isProjective
-    {Outcome : Type*} [Fintype Outcome]
-    (setting : ProjectiveSetting P epsilon)
-    (M : Measurement Outcome (setting.ExpandedLocalSpace .bob))
-    (hM : MIPStarRE.QPBT.Measurement.IsProjective M) :
-    MIPStarRE.QPBT.Measurement.IsProjective (baPlacedMeasurement setting M) := by
-  apply reindexMeasurement_isProjective
-  apply rightPlacedMeasurement_isProjective
-  exact leftPlacedMeasurement_isProjective M hM
-
 /-- Question-dependent coarse-graining on opposite tensor factors cannot
 increase their consistency defect. -/
 private theorem consistencyDefect_dependent_postprocess_le
@@ -449,9 +357,9 @@ theorem point_point_rejection_le
     _ = consistencyDefect (uniformDistribution
           ((Fin P.m → PauliScalar P) × (Fin P.m → PauliScalar P)))
         (fun xz values =>
-          (aaPlacedMeasurement setting (points.Q .alice xz.1 xz.2)).effect values)
+          (setting.placedMeasurement .AA' (points.Q .alice xz.1 xz.2)).effect values)
         (fun xz values =>
-          (baPlacedMeasurement setting (points.Q .bob xz.1 xz.2)).effect values)
+          (setting.placedMeasurement .BA'' (points.Q .bob xz.1 xz.2)).effect values)
         setting.psiHat := by
       unfold consistencyDefect
       apply avgOver_congr
@@ -463,7 +371,7 @@ theorem point_point_rejection_le
       by_cases hab : a = b
       · simp [hab]
       · simp only [hab, if_false, DistanceCalculus.consistency_term_eq_stateQForm]
-        rw [aaPlacedMeasurement_effect, baPlacedMeasurement_effect,
+        rw [placedMeasurement_effect, placedMeasurement_effect,
           DistanceCalculus.placed_product_stateQForm_eq]
         apply stateQForm_pairState_eq_AA'_BA''
         · exact (Matrix.nonneg_iff_posSemidef.mp
@@ -473,16 +381,16 @@ theorem point_point_rejection_le
     _ ≤ opFamilyDistSq (uniformDistribution
           ((Fin P.m → PauliScalar P) × (Fin P.m → PauliScalar P)))
         (fun xz values =>
-          (aaPlacedMeasurement setting (points.Q .alice xz.1 xz.2)).effect values)
+          (setting.placedMeasurement .AA' (points.Q .alice xz.1 xz.2)).effect values)
         (fun xz values =>
-          (baPlacedMeasurement setting (points.Q .bob xz.1 xz.2)).effect values)
+          (setting.placedMeasurement .BA'' (points.Q .bob xz.1 xz.2)).effect values)
         setting.psiHat := by
       apply consistencyDefect_le_opFamilyDistSq_of_projective
       · intro xz
-        exact aaPlacedMeasurement_isProjective setting
+        exact setting.placedMeasurement_isProjective .AA'
           (points.Q .alice xz.1 xz.2) (points.projective .alice xz.1 xz.2)
       · intro xz
-        exact baPlacedMeasurement_isProjective setting
+        exact setting.placedMeasurement_isProjective .BA''
           (points.Q .bob xz.1 xz.2) (points.projective .bob xz.1 xz.2)
     _ = opFamilyDistSq (uniformDistribution
           ((Fin P.m → PauliScalar P) × (Fin P.m → PauliScalar P)))
@@ -492,9 +400,9 @@ theorem point_point_rejection_le
           setting.place .BA'' ((points.Q .bob xz.1 xz.2).effect values))
         setting.psiHat := by
       apply DistanceCalculus.opFamilyDistSq_congr <;> intro xz values
-      · exact aaPlacedMeasurement_effect setting
+      · exact setting.placedMeasurement_effect .AA'
           (points.Q .alice xz.1 xz.2) values
-      · exact baPlacedMeasurement_effect setting
+      · exact setting.placedMeasurement_effect .BA''
           (points.Q .bob xz.1 xz.2) values
     _ ≤ deltaQ := by
       simpa only [Placement.side] using
