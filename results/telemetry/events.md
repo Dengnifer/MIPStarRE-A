@@ -6411,7 +6411,9 @@ not actual commit/publication hooks. No productive session was killed.
   a budget reset or an additional mathematical attempt; B8 remains exhausted
   at the previously recorded 13 attempts and 26509 working seconds. No
   mathematical proof attempt, additional model session, or full build ran.
+
 ## 2026-09-09 - PR424 merged and existing review findings assigned (07:28Z)
+
 - GitHub confirms PR424 merged at07:24:41Z as0ee46930fd6fbd2017e84e2115ad171c031327de
   from exact head09682990cef329ebe8fde59b23aa516dc7253a5f; all ten CI/review statuses
   are success. The daemon completed its record at07:25:53Z and published snapshot550b392f.
@@ -6424,6 +6426,27 @@ not actual commit/publication hooks. No productive session was killed.
 - B9/B10 still have no owner disposition. Main made no manual telemetry commit or push,
   daemon change, one-off merge/refresh command or proof-budget reset. The verified merge
   is reported on #27.
+
+## 2026-09-09 - PR458 failed refresh conflict repair
+
+- The daemon refresh stopped at 08:04:32Z with three conflicts in
+  `QPBT/Combining/Points/Consistency.lean`. The immutable merge parents are
+  `a1c3381b2e746909505065009d71d0b745765186` and
+  `a45258248d39dccc43d3a4a5d451ed4a1cfbc335`. Both sides replaced the same
+  duplicate operator-composition helper with `DistanceCalculus.applyOperatorToState_mul`;
+  the incoming version used the open namespace. The resolution retains the
+  qualified references and all nonconflicting changes from both parents.
+- Session `orc-422-20260909-01` preserved the original index, conflict file,
+  and merge metadata under `~/.cache/mipstarre-dev/recovery/pr458-orc-422-20260909-01/`.
+  No theorem statement, mathematical argument, proof budget, or daemon code was
+  changed. Source context: `eq:qld-rw-self-cons-1` through `eq:qld-rw-self-cons-4`
+  in `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:743-790`;
+  the pointwise defect helper retains its complete-measurement hypotheses and
+  unit upper bound, used in the same source at lines 950-963.
+- Validation and publication evidence will be recorded on the final PR head by
+  the canonical merge-loss guard, checked push, and CI tools. Independent review
+  remains with main; this repair session does not review its own changes.
+
 ## 2026-09-09 - Preserve non-closing intent and bound existing repairs (07:42Z)
 - PR404's normal unreviewed tail stopped at its diff-based pre-push audit. Bounded Sol
   recovery1075066 owns the exact graph/publication blocker, preserves all saved work,
