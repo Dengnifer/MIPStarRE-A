@@ -7597,3 +7597,36 @@ not actual commit/publication hooks. No productive session was killed.
   next gate when the owner resumes.
 -507 artifact publication and443 review were confirmed live. Main continues
   only evidence collection and checkpoint preservation until the closing reports.
+
+### 2026-09-09T15:34:00Z - Router simplification merged; retire obsolete adjudication
+
+- GitHub confirms508 merged at15:29:17Z as
+  e84305e3f6eb3db91a51dcf9e3525d883cf9ee49 fromcf541b58. The daemon's later
+ 15:31:37Z line records completion, not the authoritative merge timestamp.
+  No manual merge occurred. Installed home-command retirement remains meta's
+  responsibility; no separate live deployment was asserted by main.
+-443's current-head canonical review5156471311 on9333c607 now has11 findings,
+  including blueprint/source correspondence issues. Its old sole-baseline
+  adjudication does not apply. Removed only443 from the daemon adj-list, leaving
+  historical evidence and templates intact for inspection; no findings waived.
+
+### 2026-09-09T15:42:07Z - Closing reports and owner-directed pause handoff
+
+- Final required snapshot completed. At15:37:42Z, GitHub main was29de0332,
+  with26 PRs merged todayUTC and81 open: latest19 approved/28 changes requested/
+ 34 unreviewed; exact-head5 approved/19 adverse/57 missing. All model workers
+  had finished. Existing daemon refreshes213/478 remain for meta's shutdown.
+- Main has30 actual holes,167/197 closed:84.8percent. Seven reviewed213 sites
+  remain unmerged:88.3percent including that packet. Nine additional candidates
+  are not credited. Two docstring mentions explain the legacy raw32 count.
+  Trailing24h rate14 actual sites/day gives a2.1-day lower bound, not a forecast.
+-507 artifact work completed: clean publishedf427e121, all canonical CI steps
+  and660 tests passed. No new review launched; review and current-main freshness
+  remain gates.503 is clean, publishedc4de7948 and CI-green; review deferred.
+ 508 merged at15:29:17Z as e84305e3.312/320 closed as already integrated, not
+  counted as additional merges.443's11 findings invalidate its old adjudication.
+- Matching closing comments posted:168/5604589060 and27/5604594021. Durable
+  synopsis:results/telemetry/owner-handoffs/2026-09-09-main.md; detailed handoff:
+  /tmp/qpbt-main-handoff-20260909-pause.md. Main now issues /goal pause under
+  the owner's order, leaving the formalization incomplete and telemetry
+  uncommitted for meta/daemon publication. Resume only on the owner's word.
