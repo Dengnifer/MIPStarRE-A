@@ -1058,7 +1058,6 @@ unresolved findings. It launched no new model turn, edited no response or
 source, and released the old reviewer and source holds. PR #400 remains
 ineligible to merge until its isolated repair proceeds through normal checked
 publication, CI, and fresh independent review.
-
 ## 2026-09-09 - Keep canonical reviewer follow-ups parent-issued
 
 **Trigger:** User-directed repair of PR #443 review finding F1 at head
@@ -1078,3 +1077,39 @@ direct-parent assignment.
 **Expected effect:** The documented handoff satisfies canonical assignment
 freshness without accepting arbitrary senders or weakening independent review,
 request binding, or consumer holds.
+
+## 2026-09-09 - Tolerate telemetry-only base movement at merge (#498)
+
+**Trigger:** `results/telemetry/events.md`, "2026-09-09 — Meta intervention:
+stalled \"Space\" main session replaced; detached-worker architecture
+reinstated", and the later same-day approved-refresh entries. Telemetry snapshot
+commits moved `main` while exact-head CI and review lanes were completing, so
+otherwise ready pull requests became stale without a source or blueprint change.
+Owner comment `5599043067` at `2026-09-09T08:45:54Z` delegated the B9 decision
+to main; main authorized option B with the conservative data-and-mode scope
+recorded below.
+
+**Change:** `pr_merge.py` gate 2b and its daemon-facing freshness helper retain
+base ancestry as the fast path. When ancestry fails, they parse NUL-delimited
+raw Git changes with rename detection disabled and accept only regular
+non-executable `.md`/`.jsonl` files below `results/telemetry/` and generated
+regular non-executable `.json` files below the exact
+`results/telemetry/github-snapshot/` subtree. Python, shell, JavaScript and other
+code; executable modes and mode changes; symlinks; unknown or boundary paths;
+and all nontelemetry paths remain freshness-relevant. Additions, deletions and
+renames are checked by path and tree mode. Missing merge bases, malformed raw
+records and failed Git commands still refuse. `issues-prs.md` records the rule,
+and `review.md` limits review carry-forward to refreshes still required by it.
+
+**Scope disposition:** PR #499 review F2 names the retired Space merge service.
+Main disposition is out of scope: this repair does not revive, edit or restart
+that service. The active v9f daemon must consume the accepted
+`pr_merge.head_is_fresh` predicate in a separately checked rollout after this
+change merges; no running daemon or rollout script is changed here.
+
+**Expected effect:** telemetry publication no longer serializes all otherwise
+mergeable pull requests behind another refresh lane, while executable telemetry
+tools and unrecognized data remain protected. Any Lean, blueprint, code, mode,
+symlink, unknown-path or other non-allowlisted base change still requires
+refresh, exact-head CI and independent review; all other merge gates are
+unchanged.
