@@ -6713,3 +6713,115 @@ not actual commit/publication hooks. No productive session was killed.
   merge conflict at09:44:25Z. A bounded detached Sol recovery now owns that
   worktree; it must preserve both histories before checked publication and CI.
   The failed tail is not counted as a live worker or a successful validation.
+
+### 2026-09-09T09:52:43Z - Owner-directed failover recovery and issue501 CI handoff
+
+- Previous cycle: progress. The required --prs snapshot completed; it observed
+  eight live second-account worker processes at09:46:47Z, confirmed again at
+  this cycle's final census. Primary admission remains0 and second cap9;
+  global10 also counts the unrelated primary interactive. Queued handles are
+  not counted as workers. No primary-account request or credential change.
+- Owner09:30Z explicitly requests recovery on second, all five failed-marker
+  repairs and dispatches501/502. Each failed refresh357/443/458/470/487 has an
+  actual content-conflict record and a named recovery assignment; none was
+  cleared as a balance-only failure. Lane444 is not restarted because GitHub
+  confirms its PR448 merged09:20:34Z. Lane402's PR404 has an assigned fix loop.
+- Admission inspection found502,404 and411 waiting for primary specifically,
+  inherited from the parent environment. Main verified their exact router
+  PIDs2483729/2486942/2487155 and dispatcher identities, then terminated only
+  those pre-model admission waits. No model had started and no fix commit or
+  proof attempt was added. Replacement lane2733611 and loops2733612/2733613
+  explicitly inherit MIPSTARRE_CODEX_ACCOUNT=auto; current router handles for
+  all three now request auto. Existing live workers were not interrupted.
+  Follow-up rule: set account routing explicitly on every new detached wrapper.
+- Issue501's author committed620e06c6; the lane published PR503 at
+  989afea557f333840cf974276b634075b92b635b. GitHub reports success on all eight
+  CI steps and the CI summary; independent review2518481 is live and queued
+  for model capacity. Main corrected the generic proof-packet description,
+  removed unrelated merge-history claims, and added documentation/infrastructure
+  labels. Issue501 remains open pending review and merge.
+- PR449's fix62989f46d068b6faabb931e562846a8149aeefe8 was checked-pushed, but
+  the immediate CI read still saw0a16d9ff and failed without proving a code
+  problem. The old loop is terminal and GitHub now confirms62989f46.
+  Detached canonical CI/review tail2733614 owns the retry; build locking is
+  active. Follow-up2897361 ensures the independently classified Astra review
+  runs only after that tail finishes and canonical CI permits review. The
+  initial wrapper inherited Astra without its required hard-review class;
+  its prospective preflight failure is not a reason to rerun a successful CI.
+- Daemon1568851 and stack-watch2339020 are live. Critical502 remains an actual
+  queued dispatcher, not an active model;499,357,443,487 and proof repairs
+  occupy useful slots. One27 comment reports this owner-directed recovery and
+  the501 CI milestone. No main commit/push, manual merge, native/Fable session
+  or B8 restart occurred. Telemetry remains for daemon publication.
+
+### 2026-09-09T09:56:31Z - PR355 merged; adopt standing second-only decision B11
+
+- Previous cycle: progress. The required --prs snapshot started09:53:13Z with
+  eight live second-account workers and main71b3bff5. Actual router census
+  again reports live=[0,8], interactive=[1,1], effective caps=[0,8], global10.
+  Current capture updates confirm work from the existing recovery sessions.
+- GitHub verifies PR355 merged2026-09-09T09:48:28Z as
+  ae830b81756d3c95b34227f1f8675d4a7903ac3f from head
+  60be76f810bd52c0b631eca484f127c9870dbfb7. All eight CI steps, CI summary
+  and independent-review summary succeed on that exact head. Daemon1568851
+  reports the merge at09:49:27Z and published snapshot71b3bff5. No manual merge.
+- Owner DECISION B11:B makes second-only operation standing until further
+  notice. Primary key use is prohibited, primary admission remains0, and the
+  second cap remains9. The existing meta decision row is adopted rather than
+  duplicated. GitHub inbox comment5599535765 is already status=closed;
+  decision5599926792 and resolution5599927732 record B. Main posts no duplicate
+  resolution and makes no request to restore or probe the primary account.
+- The502 attention marker recorded09:49:52Z no commits after the old primary
+  admission wait was cancelled. Replacement lane2733611 is live and router
+  2742595 explicitly requests auto. Main verified this identity and exact marker
+  content, then removed only the stale502 marker. The five genuine failed
+  refresh markers357/443/458/470/487 keep their existing repair owners.
+- PR399's lane2485903 remains in canonical CI after checked publication.
+  PR449's canonical CI reports conclusion success and its classified review
+  successor2897361 remains serialized after tail2733614. PR503 independent
+  reviewer consumer2518481 is live and waiting on model admission. The502
+  implementation dispatcher remains queued, not falsely counted as working.
+- Daemon1568851 and stack-watch2339020 are live. No duplicate worker, proof edit,
+  native/Fable session, primary-account request, main commit/push or B8 budget
+  restart occurred. One27 comment records the verified merge and owner decision.
+  Telemetry remains uncommitted for daemon publication.
+- Final handle check found449 CI published success, while both planned review
+  launchers exited before model admission: the first lacked the required hard
+  class, the second inherited an unsupported effort. Main restarted only the
+  independent review with explicit hard_review, Ultra input, Astra model and
+  auto account; the shim supplies Astra Xhigh. --force-review is used to review
+  the new bot-fix head, preserving round history and all CI/merge gates. No
+  extra CI or proof attempt is charged to these preflight failures.
+
+### 2026-09-09T10:03:22Z - Published478 review handoff and full B11 worker allocation
+
+- Previous cycle: progress. The required --prs snapshot completed, starting
+ 09:57:50Z with eight second-account workers. PR478 publication recovery ended
+  successfully at GitHub head3bf858285397a25468fc4bcbd86d036425740b11; all nine
+  canonical CI contexts pass. Independent Astra review3093517 is assigned.
+  Source-faithful obligations are retained and B8 remains parked.
+- PR399 finished canonical CI at61224cb885573d2fe16bc7d4fd9dc40c3a675178. Its
+  lane then exited review2 on inherited unsupported effort, before model start.
+  Main assigned independent review3113710 with explicit auto account, Astra
+  hard_review and Ultra input for the Xhigh shim; no CI was repeated.
+- Main corrected a remaining allocation mismatch against the owner's explicit
+  B11:B instruction, main plus nine workers. admission_limits subtracts main
+  from the configured second total. The published worker-limit files remain
+  primary0/second9; the existing inclusive router override is now second10,
+  and global11 counts those ten second sessions plus the unrelated primary
+  interactive. Primary admission stays0. No credential, account-home or
+  primary-key change. This supersedes the inclusive second9 override that
+  admitted only eight workers.
+- Actual process and router census now agree on nine live workers, live=[0,9],
+  interactive=[1,1], effective worker caps=[0,9], global11. Recent completions
+  of212/454/478 were followed by admitted404/410/458 repairs; ongoing loops
+  retain publication and CI ownership. Queued reviews and502 are not counted
+  as live. This observation is not a sustained-coverage claim.
+- GitHub confirms repaired357 head695858c7465d0fa48dbe893f733a0aa45ebe25f4
+  and443 head054af1be5957c360f91f287ad8877cb260cd171d; their existing workers
+  own CI. Repairs487/499 are still in checked publication. Daemon1568851
+  and stack-watch2339020 remain live;496 refresh is daemon-owned.
+- One27 allocation-boundary comment records the B11 normalization and actual
+  nine-worker census. No native/Fable worker, manual merge, main commit/push,
+  new proof attempt on B8, or duplicate CI was introduced. New telemetry is
+  left for daemon publication.
