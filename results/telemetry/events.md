@@ -7637,3 +7637,8 @@ not actual commit/publication hooks. No productive session was killed.
   owner's explicit word. At 15:55:49Z: main at 88449102, 21 merges today through the daemon. Stopped: goal keeper, merge daemon
   (stop file kept), stack-watch; watchdog, heartbeat and astra-poll crons commented out (estimate.sh kept); the main session paused its
   goal after posting on #168 and #27. Running lanes and fix loops finish on their own. Resume procedure: /tmp/owner-resume.sh.
+
+- Incident (15:55Z, meta, fixed 16:00Z): the pause script's crontab step used `|` both as the sed delimiter and as alternation; sed failed
+  and the empty pipe went into `crontab -`, which wiped the crontab. Restored from the 2026-09-06 record (estimate-six-hourly-...md, the full
+  four-line crontab): watchdog, heartbeat and astra-poll rows commented with `#PAUSED-20260909`, `estimate.sh` at `0 */6` active. No other
+  rows are known to have existed. Both scripts now use `#` as the delimiter and never install an empty crontab.
