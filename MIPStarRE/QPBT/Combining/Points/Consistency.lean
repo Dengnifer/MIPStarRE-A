@@ -35,7 +35,7 @@ and the commutators on the two placements, since
 Paper `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:743-790`,
 blueprint `blueprint/src/chapter/ch15_qpbt_combining.tex:851-880`
 (`lem:qld-4-10`, first step); the identity route is explained in
-`docs/paper-gaps/qpbt_linearity-theorem-quotation.tex`.
+`docs/paper-gaps/qpbt_combined-points-direct.tex`.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder
@@ -55,7 +55,8 @@ theorem stateQForm_conjTranspose_mul_mul {ι : Type*} [Fintype ι] [DecidableEq 
     (ψ : EuclideanSpace ℂ ι) (W M : Op ι) :
     stateQForm ψ (Wᴴ * M * W) = stateQForm (applyOperatorToState W ψ) M := by
   unfold stateQForm
-  rw [applyOperatorToState_mul', applyOperatorToState_mul']
+  rw [DistanceCalculus.applyOperatorToState_mul,
+    DistanceCalculus.applyOperatorToState_mul]
   congr 1
   change inner ℂ ψ (Matrix.toEuclideanLin Wᴴ _) =
     inner ℂ (Matrix.toEuclideanLin W ψ) _
@@ -92,18 +93,6 @@ theorem norm_applyOperatorToState_proj_effect_le {α ι : Type*} [Fintype α]
   refine MagicSquareRigidity.norm_applyOperatorToState_le ?_ v
   rw [(hM a).isSelfAdjoint.isHermitian.eq, (hM a).isIdempotentElem.eq]
   exact measurement_effect_le_one M a
-
-/-- The effects of a projective measurement are square-summable to the
-identity. -/
-theorem sum_effect_conjTranspose_mul_self_le_one_of_projective {α ι : Type*}
-    [Fintype α] [Fintype ι] [DecidableEq ι] (M : Measurement α ι)
-    (hM : MIPStarRE.QPBT.Measurement.IsProjective M) :
-    ∑ a, (M.effect a)ᴴ * M.effect a ≤ 1 := by
-  refine le_of_eq ?_
-  calc ∑ a, (M.effect a)ᴴ * M.effect a = ∑ a, M.effect a := by
-        refine Finset.sum_congr rfl fun a _ => ?_
-        rw [(hM a).isSelfAdjoint.isHermitian.eq, (hM a).isIdempotentElem.eq]
-    _ = 1 := M.sum_eq_one
 
 /-! ## The overlap of two placed sandwiches -/
 
@@ -248,8 +237,8 @@ theorem sandwich_defect_pointwise_le (ψ : EuclideanSpace ℂ ι)
               Z₂.effect ab.2 * X₂.effect ab.1) ψ‖ ^ 2) := by
     intro ab
     obtain ⟨a, b⟩ := ab
-    rw [← applyOperatorToState_mul', sub_mul_mul_eq_add_commutators _ _ _ _
-      (hXZ a b) (hZX a b) (hZZ b)]
+    rw [← DistanceCalculus.applyOperatorToState_mul,
+      sub_mul_mul_eq_add_commutators _ _ _ _ (hXZ a b) (hZX a b) (hZZ b)]
     have hlin : applyOperatorToState
         (Z₁.effect b * Z₂.effect b * (X₁.effect a - X₂.effect a) +
           Z₂.effect b * (X₁.effect a * Z₁.effect b - Z₁.effect b * X₁.effect a) -
@@ -260,8 +249,9 @@ theorem sandwich_defect_pointwise_le (ψ : EuclideanSpace ℂ ι)
             (X₁.effect a * Z₁.effect b - Z₁.effect b * X₁.effect a) ψ) -
           applyOperatorToState (Z₁.effect b) (applyOperatorToState
             (X₂.effect a * Z₂.effect b - Z₂.effect b * X₂.effect a) ψ) := by
-      rw [← applyOperatorToState_mul', ← applyOperatorToState_mul',
-        ← applyOperatorToState_mul', Matrix.mul_assoc]
+      rw [← DistanceCalculus.applyOperatorToState_mul,
+        ← DistanceCalculus.applyOperatorToState_mul,
+        ← DistanceCalculus.applyOperatorToState_mul, Matrix.mul_assoc]
       unfold applyOperatorToState
       simp only [map_add, map_sub, LinearMap.add_apply, LinearMap.sub_apply]
     rw [hlin]
@@ -297,7 +287,7 @@ theorem sandwich_defect_pointwise_le (ψ : EuclideanSpace ℂ ι)
     simp only [Fintype.sum_prod_type]
     refine Finset.sum_le_sum fun a _ => ?_
     exact sum_norm_mul_apply_le Z₂.effect (X₁.effect a - X₂.effect a) ψ
-      (sum_effect_conjTranspose_mul_self_le_one_of_projective Z₂ hZ₂)
+      (measurement_sum_adjoint_mul_le_one Z₂)
   have hsum := Finset.sum_le_sum fun ab (_ : ab ∈ Finset.univ) => hpt ab
   rw [← Finset.mul_sum, Finset.sum_add_distrib, Finset.sum_add_distrib] at hsum
   linarith
