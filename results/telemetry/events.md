@@ -6620,3 +6620,96 @@ not actual commit/publication hooks. No productive session was killed.
   successor; partial CI is not claimed as published CI, and B8 remains parked.
 - Snapshot08:54:15Z showed17 live workers and final census18. No main commit/push,
   manual merge or native worker was used; new telemetry stays uncommitted.
+
+## 2026-09-09 — Primary codex account out of balance; pipeline moved to the second account (2026-09-09T09:22:57Z)
+- relay-us7 (primary key) returned 403 INSUFFICIENT_BALANCE for astra and sol from about 09:15Z; the main session's goal loop stalled
+  on it and five lane logs carry the error. The second key (api.finite-dimensional.space) answers. Meta actions: B11 posted on #500
+  (owner must top up), workers routed to the second account only (caps primary 0 / second 9), main session relaunched on the second
+  account (fan-out off, xhigh), balance-caused failed markers cleared. A goal keeper (/tmp/goal-keeper.sh) now resumes the main's
+  goal loop whenever it stalls.
+
+### 2026-09-09T09:40Z - Detached worker recovery after balance failover
+
+- This is the first goal cycle of the relaunched main session; the preceding
+  bootstrap turn completed the requested instruction reads. The required
+  status-snapshot.sh --prs ran to completion. At09:24:39Z it observed two live
+  workers, failed refreshes357/443, and their needs-attention lanes353/439.
+  Daemon1568851 and stack-watch2339020 were verified as live processes.
+- The owner/meta failover had set account-mode=second, which both the router
+  and shim reject. The preserved both-mode caps still read9/10/19. Main used
+  supported mode both with preserved caps0/9/9, matching the live primary0,
+  second9, total9 files and the09:22:57Z failover instruction. No credentials,
+  account homes, executable scripts or running sessions changed. Previous
+  preserved caps and their provenance remain recorded in history.
+- Six detached assignments started: PR357 conflict recovery2417928, PR443
+  mathematical conflict recovery2417929, and review-fix loops212/392/431/449
+  at2417960-2417963. Actual dispatcher captures confirm second-account work.
+  PR478 publication recovery and issue501 documentation continued from their
+  existing processes. Issue501 then released its slot and392 was admitted.
+- Additional serialized fix loops were launched for213/342/349/363/386/398/400/
+  410/417/442/453/454/457/469/479/481/483/492. Exact-head checks returned no
+  applicable review fix for213/349/363/386/417/442/453/457/483/492; these exits
+  are not repaired or reviewed results. The remaining loops wait on admission
+  where required. Fix counters were preserved. New findings404/411 received
+  the deliberate auto-fix-codex label and loops2485901/2485902.
+- PR499 saved B9 repair has detached successor2470737. Issue502 merge-train
+  implementation has bounded lane2478678 and an explicit reviewed-development
+  brief; it may not deploy or push main. The unreviewed PR399 tail2485903 uses
+  lane-v20 with the canonical full-build lock. No new mathematics packet was
+  split or opened. B8 remains parked with its original budgets.
+- At09:39Z seven actual worker processes were live. Router census live=[0,7],
+  interactive=[1,1], caps=[0,8], total9 explains the remaining vacancy: a
+  separate primary-account interactive session is charged globally even though
+  primary worker admission is zero. The queued eighth worker is not counted
+  as live. Main leaves the configured ceiling and unrelated session unchanged.
+  This is backlog recovery, not evidence of sustained eight-worker coverage.
+- GitHub confirms PR448 merged at09:20:34Z. One27 recovery-boundary comment
+  records the merge and current limitation. Main performed no proof edits,
+  native dispatch, manual PR merge, or main commit/push; telemetry is left for
+  daemon publication. This cycle took roughly15 minutes because bootstrap
+  reads, the sequential PR scan and routing diagnosis preceded refill; future
+  cycles should reuse the now-known queue and keep turns shorter.
+
+### 2026-09-09T09:45:23Z - Restore the eighth detached worker and assign remaining conflicts
+
+- Previous goal turn: progress, from corrected routing and concrete detached
+  assignments. This cycle's required status-snapshot.sh --prs completed;
+  its09:40:54Z census began with seven workers and five failed refresh markers.
+- The handoff's newly observed09:25Z addendum explicitly expects at least eight
+  second-account workers and forbids primary-account use. The prior global9
+  translation charged an unrelated primary interactive in addition to main,
+  reducing second-account work to seven. Main changed only the global total
+  and its preserved override to10: primary admission stays0, second cap stays9.
+  This permits main plus eight workers on second and counts the existing
+  unrelated primary interactive without admitting any primary worker.
+  Credentials, other sessions, executable scripts and per-account caps remain
+  unchanged. This supersedes the prior cycle's decision to leave total9.
+- At09:42:39Z the actual process census and router agree on eight workers,
+  live=[0,8], interactive=[1,1], limits=[0,8], total10. PR499 and PR487 workers
+  were admitted after the completed392 no-change loop released a slot.
+  This establishes recovery of the floor, not sustained coverage.
+- Refresh failures458/470/487 are genuine conflicts, respectively in events.md,
+  ConsistencyPositivity.lean, and Lines.lean plus events.md. Repairs were
+  assigned to detached processes2513250/2513251/2513252. The first458 dispatch
+  rejected a hardness-reason argument paired with bounded classification before
+  starting a model; corrected dispatcher2521193 now owns it. No failure marker
+  was deleted without a verified repaired publication.
+- The392 loop ended with no changes because local4f26f73f already fixes the
+  orthogonality docstring, while GitHub remainsa0946335. Main verified the
+  clean local branch and the differing heads, then assigned publication
+  recovery2528626. No review checkbox was ticked on unpublished evidence.
+  PR213's latest review concerns ebba143d, while its head is2e20fdbb; canonical
+  current-head tail2528627 owns refresh, CI and independent review.
+- The previous456 loop is terminal. Its replacement2521194 found no current
+  applicable review fix and exited without edits; this is not a repair claim.
+  Existing501/502/399 lanes and478 publication owner remain assigned.
+  Snapshot now lists PR503; issue501's live lane owns that publication.
+- Daemon1568851 and stack-watch2339020 are live. The existing27 recovery comment
+  receives one append-only addendum for this capacity decision and recovery,
+  rather than a second comment for the same boundary. Main leaves all telemetry
+  uncommitted for the daemon. No native workers, proof edits, manual PR merge,
+  main commit/push or B8 budget restart occurred.
+- Final handle check found PR213 tail2528627 terminal after an events.md-only
+  merge conflict at09:44:25Z. A bounded detached Sol recovery now owns that
+  worktree; it must preserve both histories before checked publication and CI.
+  The failed tail is not counted as a live worker or a successful validation.
