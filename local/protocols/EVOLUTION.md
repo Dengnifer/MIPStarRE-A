@@ -929,3 +929,115 @@ claiming broader capability evidence from the earlier two-case audit.
 its recorded 15:40Z boundary and extension request5572932276, not a fresh two-hour
 allocation. Old 597 tests cover the narrow draft only; revised tests and exact-head
 CI/control-policy review/publication gates are recorded separately. No activation yet.
+
+## 2026-09-08 - Resume completed native code-review publication (#366)
+
+**Trigger:** `results/telemetry/events.md` entries "Native review publisher
+recovery for PRs #320 and #355" and "PR #358 review-format recovery" record
+valid native responses stranded after their original `review.sh` publishers
+terminated. **Change:** `review.sh --resume-native-request` consumes one existing
+single-code-lane request through a new guarded `native_review.py accept` command,
+then reuses the normal parser, combiner, final-head check and idempotent publisher.
+The continuation rechecks the live root, complete author exclusions, model/Ultra
+policy, prompt digest, CI, clean exact head, lock and prior publication evidence;
+it creates no request or model turn and rejects prose combinations. **Expected
+effect:** a late native response can reach the canonical review record without
+manual body reconstruction or a duplicate reviewer, while every existing review
+and merge gate remains authoritative. **Outcome:** focused offline regression and
+normal CI/independent review are required before deployment.
+
+## 2026-09-08 - Activate prepared successors before receipt adoption (#418)
+
+**Trigger:** `results/telemetry/events.md`, "Completion handoff ordering and
+source-deadline correction"; the owner-directed regular lifecycle audit found
+only 26 of 65 valid sampled minutes at or above eight useful native workers,
+including gaps of approximately 10.5 minutes and more than six minutes.
+
+**Change:** `sessions.md`, `useful-queue.md`, `main.md`, `DESIGN.md`, and the
+integration-checkpoint wording in `issues-prs.md` now record the active Space
+total of ten sessions, native target nine and floor eight, with external admission
+zero. Main and the capable coordinator validate useful, disjoint primary and alternate
+successor records while slots are occupied and record `ready_at`. Operational readiness
+requires current heads or source snapshots, actually published inputs, eligible roles,
+current unique operation ownership, complete hash-bound dispatch bodies and deadline rules,
+and a separately
+validated alternate or an exact no-alternate blocker; descriptive input strings or a
+nominal successor line do not qualify. On real completion they perform
+only the remaining capacity, identity, ownership, intent, and deadline checks before
+the actual native follow-up or spawn call; detailed predecessor receipt and rollout
+adoption follows successor start verification. Each activation payload carries an
+absolute source deadline no later than its native call plus the authorized limit,
+and continuations retain earlier deadlines, so silence before first progress remains
+charged. Coordinator-owned latency evidence records the
+predecessor terminal event, `ready_at`, activation call, current successor turn,
+first useful output, source deadline, and real blockers. The historical one-shot
+executor is explicitly not the native controller and receives no code change.
+
+**Expected effect:** ready work occupies a released native slot before forensic
+adoption consumes the vacancy, without weakening source, budget, ownership,
+review, model, or capacity gates. Backlog recovery and closing snapshots cannot
+be reported as prompt or sustained coverage. **Outcome:** the pre-merge
+coordinator batch records two missed transitions at 294.078 and 354.659 seconds
+from predecessor completion to actual successor start; both have no `ready_at`,
+and the latter was not fully prevalidated before completion. Its later count of
+nine occupied slots is recovery, not acceptance. Canonical CI, independent hard
+control-policy review, and normal merge remain required. Runtime acceptance then
+requires a natural post-merge completion transition in the coordinator-owned
+batch with the prescribed ordering; sustained coverage remains a separate
+interval observation.
+
+## 2026-09-08 - Preseal ordinary successor activation messages (#471)
+
+**Trigger:** the owner decision recorded in issue #471 and the read-only proposal
+`/tmp/qpbt-ordinary-successor-prevalidation-20260909.json` with SHA-256
+`c93a44f1d711444d0428e391c2abd40ca2a8f3617c4a6126f521afa32ead727e`.
+Two selected handoffs took 63.076 and 73.171 seconds, including 27.727 and
+29.391 seconds between notification and the native call while long ordinary
+arguments were partly regenerated. Coverage remains 66.95% of 119.63 valid
+minutes; earlier 116.521- and 134.213-second misses remain failures.
+
+**Change:** `sessions.md`, `useful-queue.md`, and the #471 brief permit only
+ordinary proof and CI-handoff records to bind an immutable full-contract path
+and SHA-256 plus an exact short activation message sealed before predecessor
+completion. Activator and actor both verify the hash and current prerequisites;
+the actor reads the full contract before mutation. The budget remains anchored
+to actual native `task_started`, bounded by the presealed absolute and inherited
+deadlines. Existing full messages remain valid. Canonical review assignments
+retain literal nonce/head/prompt-digest/root bindings and consumer holds.
+
+**Expected effect:** ordinary activation can avoid regenerating long arguments
+after completion without weakening scope, ownership, model, capacity, budget,
+review, CI, merge, or telemetry guards. **Outcome:** pending exact-head CI,
+independent hard control-policy review, normal merge, and a later runtime
+observation; documentation alone does not establish improved pool coverage.
+
+## 2026-09-09 - Resume completed combined native reviews
+
+**Trigger:** owner assignment of the actual PR #400 consumer recovery, tracked
+in issue #475. The publisher terminated with two genuinely completed responses;
+the existing continuation rejected its blueprint diff before consumption.
+The primary coordinator retains the incident and prior costs in telemetry.
+
+**Change:** `review.sh` accepts an explicit completed prose request alongside
+the code request when the diff requires both lanes. Both trust envelopes are
+validated through `native_review.py`; the existing parser, combiner, CI, lock,
+head and publication guards remain authoritative. Resume scratch files are
+separate from canonical prompts and outputs, and independently rebuilt prompts
+must match the exact bound digest. Invalid combined evidence publishes nothing.
+
+**Expected effect:** a dead combined publisher can complete without launching
+another review or weakening the author/reviewer hold. Activation requires normal
+CI, independent hard control-policy review and merge. The PR #400 source repair
+and held reviewers remain frozen until canonical consumption succeeds.
+
+**Outcome:** PR #476 passed one canonical exact-head CI run in 249 seconds with
+all nine contexts green, and independent hard review `5147206622` approved the
+control path with no findings. The service gate merged it as
+`81148545f0752ec09b3efe88332b49bb771312be`. The primary used a finite
+same-inode telemetry boundary rather than waiting for unrelated writers. The
+merged continuation then consumed the preserved PR #400 CODE and PROSE
+responses and published canonical failure review `5147250926` with seven
+unresolved findings. It launched no new model turn, edited no response or
+source, and released the old reviewer and source holds. PR #400 remains
+ineligible to merge until its isolated repair proceeds through normal checked
+publication, CI, and fresh independent review.
