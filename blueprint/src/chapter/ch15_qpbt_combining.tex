@@ -1575,7 +1575,13 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 	\uses{def:line, def:line-point-dist, def:ith-restricted-line,
 		def:combine-map}
 	This formalization-only variant of Lemma~\ref{lem:qld-sublines} uses
-	uniformly sampled coordinate indices on the extended space. For every
+	uniformly sampled coordinate indices on the extended space. Throughout
+	this lemma, coordinate $i\in\{1,\ldots,n\}$ corresponds to Lean index
+	$i-1$ in \texttt{Fin n}, for $n=m$ or $n=2m+2$. Thus the unit vector
+	$e_i$ is represented by \texttt{coordinateDirection} at index $i-1$,
+	and vanishing coordinates $1,\ldots,i-1$ means vanishing at Lean indices
+	$k<i-1$. The restricted law $D_{\mathrm{v},i}$ likewise uses Lean
+	index $i-1$ in \texttt{Fin m}. For every
 	admissible $(q,m,d)$, there is a probability distribution $D_{\rm dir}$
 	on triples $(\ell,\ell_X,\ell_Z)$ with the following properties:
 	\begin{enumerate}
