@@ -1,4 +1,3 @@
-import MIPStarRE.QPBT.Combining.Lines.PolynomialCollision
 import MIPStarRE.QPBT.Combining.Witnesses
 import MIPStarRE.QPBT.Games.RestrictedAverage
 
