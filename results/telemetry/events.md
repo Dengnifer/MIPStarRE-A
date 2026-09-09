@@ -6622,3 +6622,22 @@ not actual commit/publication hooks. No productive session was killed.
   new train tests and the targeted 36 publication/workflow tests passed.
   The hook refused the commit; changes are preserved for the operator, with
   no hook bypass or model-policy repair attempted in this episode.
+
+- 2026-09-09 - Issue #502 review repair, session `orc-502-20260909-02`:
+  main authorized 60 minutes of actual work to repair canonical PR507 review
+  `5154118210` at `e1dd7bb0`. This necessary review repair retains the original
+  episode history, costs, and 1000-line total ceiling; it is not a new
+  implementation episode. F1 now builds the complete library and axiom audit in
+  one locked invocation. F2 records published, refused, and unknown outcomes,
+  including remote descendants and failed reconciliation. F3 uses single-component
+  train branches accepted by the real external Lake-root bootstrap.
+  All endpoints in train tests are isolated fixtures. The installed Lean
+  toolchain and production publication hook passed a cold-project-artifact
+  publication with dynamic `checkdecls`; separate downstream and axiom-audit
+  failures blocked publication. Initial negative tests exceeded their old
+  45-second timeout while waiting for the machine build lock; the fixture now
+  allows the existing lock wait to finish. The external-root fixture needed
+  the production `.lake` ignore convention for symlinks. Corrected targeted
+  reruns passed. No live train, deployment, main publication, child session,
+  or independent review is performed by this author; checked branch publication
+  and canonical CI precede handoff to a different reviewer session.

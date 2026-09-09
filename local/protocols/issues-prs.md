@@ -178,7 +178,7 @@ record. A precondition failure refuses the entire batch and names the member.
 The individual-head base-ancestry requirement is replaced by mandatory CI of
 the combined commit; member review evidence is neither copied nor rewritten.
 
-The tool creates `train/<UTC-stamp>` and a private worktree under the runtime
+The tool creates `train-<UTC-stamp>` and a private worktree under the runtime
 cache, merging frozen member SHAs with two-parent merge commits in argument
 order. A conflict aborts only that merge, verifies restoration of the accepted
 train, and drops that member; fewer than two accepted members refuses the batch.
@@ -186,11 +186,13 @@ The primary merge-loss guard checks each accepted merge. Existing developer
 branches and worktrees are preserved. Failed train worktrees remain for diagnosis.
 
 `ci.sh --integration-head SHA --worktree PATH --base SHA` runs all eight steps
-against the combined commit, using one locked build of `MIPStarRE.QPBT` and
-`MIPStarRE.LDT.Test.AxiomAudit`. It rejects skip flags and dirty or moved train
+against the combined commit, using one locked build of the complete `MIPStarRE`
+library and `MIPStarRE.LDT.Test.AxiomAudit`. This includes the root artifact
+needed by publication's dynamic `checkdecls` import and all downstream modules.
+It rejects skip flags and dirty or moved train
 heads, and publishes no PR evidence. Its manifest and logs stay in the runtime
 cache. Bootstrap and build telemetry are transferred to the primary telemetry
-files after publication or refusal so their appends cannot dirty the primary
+files after publication, refusal, or an unknown outcome so their appends cannot dirty the primary
 during gating. CI warming uses `--no-build` to avoid a nested build lock, and
 step execution stops at its first failing command.
 
@@ -202,7 +204,15 @@ GitHub recognizes included PRs by ancestry; the tool closes no issue by hand.
 It posts one idempotent train comment per member, records one merge event,
 fast-forwards local main and its origin alias, and removes only the train branch
 and worktree. A failure after publication is reported as such and requires
-operator reconciliation; it must not be retried as a new merge. Deployment and
+operator reconciliation; it must not be retried as a new merge. An ambiguous
+push is reconciled against remote main: equality or verified ancestry containing
+the train establishes publication. Failed reads, unavailable ancestry, and
+negative ancestry in a shallow repository retain an explicit `unknown` outcome.
+An unknown outcome is never a refusal or permission to retry. The runtime
+`publication.json`, stderr, and telemetry retain that distinction; unresolved
+worktrees and manifests remain available for operator reconciliation. Generated
+branch names are single components accepted by external Lake-root bootstrap.
+Deployment and
 daemon wiring remain separate from development of this tool (issue #502).
 
 ### Main-cycle integration checkpoint

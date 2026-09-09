@@ -144,8 +144,30 @@ def run_ci(repo: Path, data: dict) -> None:
     check_combined_ci(data)
 
 
-def record(repo: Path, data: dict, published: bool) -> None:
-    """Transfer build telemetry only after publication or refusal; never during gating."""
+def publication_outcome(repo: Path, head: str) -> str:
+    """Reconcile an ambiguous push without retrying it or assuming a failed read is absence."""
+    try:
+        rows = git(repo, "ls-remote", "github", "refs/heads/main").split()
+        if len(rows) != 2 or rows[1] != "refs/heads/main":
+            return "unknown"
+        remote = rows[0]
+        if remote == head:
+            return "published"
+        git(repo, "fetch", "--no-tags", "github", remote)
+        result = subprocess.run(["git", "merge-base", "--is-ancestor", head, remote], cwd=repo)
+        if result.returncode == 0:
+            return "published"
+        if result.returncode == 1 and git(repo, "rev-parse", "--is-shallow-repository") == "false":
+            return "refused"
+    except (LayerError, OSError, ValueError) as exc:
+        print(f"publication reconciliation failed: {exc}", file=sys.stderr)
+    return "unknown"
+
+
+def record(repo: Path, data: dict, outcome: str) -> None:
+    """Retain publication state and transfer build telemetry only after gating ends."""
+    atomic_write(Path(data["worktree"]).parent / "publication.json",
+                 json.dumps({"head": data["head"], "outcome": outcome, "ts": utcnow()}) + "\n")
     with file_lock("train-telemetry"):
         telemetry = repo / "results/telemetry"
         telemetry.mkdir(parents=True, exist_ok=True)
@@ -156,11 +178,10 @@ def record(repo: Path, data: dict, published: bool) -> None:
                 with (telemetry / "builds.jsonl").open("a", encoding="utf-8") as handle:
                     handle.write(spool.read_text(encoding="utf-8"))
                 spool.unlink()
-        if published:
-            members = ", ".join(f"#{m['number']}@{m['head']}" for m in data["members"])
-            with (telemetry / "events.md").open("a", encoding="utf-8") as handle:
-                handle.write(f"\n- {utcnow()} - Reviewed train {data['head']} merged {members}; "
-                             f"conflicting PRs dropped: {data['dropped']}.\n")
+        members = ", ".join(f"#{m['number']}@{m['head']}" for m in data["members"])
+        with (telemetry / "events.md").open("a", encoding="utf-8") as handle:
+            handle.write(f"\n- {utcnow()} - Reviewed train {data['head']}: publication {outcome}; "
+                         f"members {members}; conflicting PRs dropped: {data['dropped']}.\n")
 
 
 def run_train(repo: Path, numbers: list[int], adjudicated: set[int]) -> int:
@@ -182,10 +203,10 @@ def run_train(repo: Path, numbers: list[int], adjudicated: set[int]) -> int:
         runtime.mkdir(parents=True, exist_ok=True)
         directory = Path(tempfile.mkdtemp(prefix="train-", dir=runtime))
         worktree = directory / "worktree"
-        branch = "train/" + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
+        branch = "train-" + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
         git(repo, "worktree", "add", "-b", branch, str(worktree), base)
         print(f"train worktree: {worktree}", flush=True)
-        data, published = None, False
+        data, outcome = None, "refused"
         try:
             members, dropped = integrate(repo, worktree, members)
             if len(members) < 2:
@@ -197,16 +218,14 @@ def run_train(repo: Path, numbers: list[int], adjudicated: set[int]) -> int:
             atomic_write(path, json.dumps(data, indent=2) + "\n")
             run_ci(repo, data)
             verify_manifest(path, base, data["head"], "refs/heads/main")
+            outcome = "unknown"
             try:
                 command(repo, str(repo / "local/bin/checked-push.sh"), "--repo-root", str(repo),
                         "--train-manifest", str(path), "github", f"refs/heads/{branch}:refs/heads/main")
-            except LayerError:
-                # A transport failure can follow an accepted update. Do not report
-                # a verified published head as an unmerged train or retry the push.
-                published = git(repo, "ls-remote", "github", "refs/heads/main").split() == [
-                    data["head"], "refs/heads/main"]
+            except (LayerError, OSError):
+                outcome = publication_outcome(repo, data["head"])
                 raise
-            published = True
+            outcome = "published"
             print(f"published train {data['head']}", flush=True)
             # Preserve existing developer branches/worktrees, including conflicting members.
             git(repo, "fetch", "github", "main")
@@ -227,11 +246,11 @@ def run_train(repo: Path, numbers: list[int], adjudicated: set[int]) -> int:
                 raise LayerError("train published; comment publication incomplete: " + "; ".join(errors))
             return 0
         except (LayerError, OSError, ValueError) as exc:
-            print(f"train {'published' if published else 'refused'}; evidence: {directory}", file=sys.stderr)
+            print(f"train publication {outcome}; evidence: {directory}", file=sys.stderr)
             raise LayerError(str(exc)) from exc
         finally:
             if data is not None:
-                record(repo, data, published)
+                record(repo, data, outcome)
 
 
 def main() -> int:
@@ -250,7 +269,7 @@ def main() -> int:
             return 0
         return run_train(args.repo_root.resolve(), args.prs, set(args.adjudicated))
     except (LayerError, OSError, ValueError, KeyError) as exc:
-        print(f"pr_train.py: REFUSING: {exc}", file=sys.stderr)
+        print(f"pr_train.py: ERROR: {exc}", file=sys.stderr)
         return 1
 
 

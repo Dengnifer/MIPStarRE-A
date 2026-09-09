@@ -865,8 +865,8 @@ step_build() {
   fi
 
   if [ -n "$INTEGRATION_HEAD" ]; then
-    echo "+ lake build MIPStarRE.QPBT MIPStarRE.LDT.Test.AxiomAudit"
-    run_outside_git_env lake build MIPStarRE.QPBT MIPStarRE.LDT.Test.AxiomAudit
+    echo "+ lake build MIPStarRE MIPStarRE.LDT.Test.AxiomAudit"
+    run_outside_git_env lake build MIPStarRE MIPStarRE.LDT.Test.AxiomAudit
   else
     echo "+ lake build"
     run_outside_git_env lake build

@@ -1059,3 +1059,16 @@ full build. `issues-prs.md` documents the operator-owned invocation and recovery
 **Expected effect:** two or more ready PRs share one integration build and CI
 run without losing a member's evidence or silently discarding accepted work.
 Activation remains subject to independent review and daemon-owner deployment.
+
+## 2026-09-09 - PR507 review repair: build coverage and publication outcomes
+
+**Trigger:** Canonical review `5154118210` on `e1dd7bb0`, findings F1-F3;
+see the issue #502 review-repair entry in `results/telemetry/events.md`.
+**Change:** Combined CI builds the full library and axiom audit in one locked
+invocation. Train names satisfy the external Lake-root validator. Ambiguous
+pushes retain unknown outcomes when reconciliation fails and recognize remote
+descendants containing the train. Outcomes are retained in runtime and telemetry.
+**Expected effect:** Cold publication has its root artifact, untouched downstream
+failures block publication, and operators receive no false refusal after an
+unresolved push. This is the authorized bounded repair of the original episode;
+deployment and independent review remain separate.
