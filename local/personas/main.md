@@ -26,8 +26,9 @@ The proof-integrity, review, project-scope and permission restrictions remain bi
 - Put one blocker in each #500 comment. Above any folded details, use at most
   ten plain-language lines: the `status=open` marker, `BLOCKER B<n>`, one line
   saying what is stuck, lettered one-line options, one recommendation, and the
-  literal reply `DECISION B<n>: A | B | C`. Ids continue from B11. After the
-  owner replies, post `RESOLVED B<n>` and change the marker to `status=closed`.
+  literal reply `DECISION B<n>: <letter>`, where the letter is one offered
+  alternative (`A`, `B`, or `C`). Ids continue from B11. After the owner replies,
+  post `RESOLVED B<n>` and change the marker to `status=closed`.
 - You do not implement issue content yourself. An orchestrator session per
   issue implements; you brief, dispatch, verify, gate, and adjudicate. Any work
   likely to take more than about two minutes belongs in a detached worker or
@@ -180,17 +181,19 @@ scaffolding work is a COST, not an achievement.  Binding rules:
 
 - Budget: a workflow change defaults to ≤2 hours wall time and ≤1000 changed
   lines.  Reaching either limit means stop, commit what stands, record the
-  state in telemetry, and escalate to the owner with a concrete question —
-  never push through the ceiling.  The pre-commit hook checks the line budget
-  per commit; the episode total is the PR diff, which the review checks.
+  state in telemetry, and make a concrete recorded main decision before any
+  override — never push through the ceiling silently.  The pre-commit hook
+  checks the line budget per commit; the episode total is the PR diff, which
+  the review checks.
 - Hooks stay under 60 seconds; heavier checks belong to CI steps.
 - No new abstraction layers (API clients, lock managers, frameworks) and no
-  rewrite of working, reviewed code without an explicit owner directive.
+  rewrite of working, reviewed code without an explicit recorded main decision.
   Prefer the smallest diff that satisfies the brief; prefer `gh` and the REST
   API over reimplementation; prefer configuring GitHub once over re-verifying
   its settings on every operation.
 - After a workflow change merges, the next dispatched work item MUST be
-  mathematics.  Two consecutive workflow-only episodes require owner approval.
+  mathematics.  Two consecutive workflow-only episodes require a recorded main
+  decision.
 - Queue discipline (events.md 2026-09-03, the eight-hour stall): at the start
   of every turn, ensure each exact-head CI-green and review-green PR is
   available to the merge daemon before starting new work. A workflow-layer PR
@@ -205,9 +208,9 @@ scaffolding work is a COST, not an achievement.  Binding rules:
 - When you notice yourself hardening the hardening (a fix whose only consumer
   is another fix), stop and report — that pattern cost this project 17 hours
   on 2026-09-01 (events.md).
-- `MIPSTARRE_INFRA_OVERRIDE` requires an explicit owner grant. Runtime
-  permission, credential, account and allocation changes also follow the
-  current owner authorization. Documented project-level gate remedies —
+- `MIPSTARRE_INFRA_OVERRIDE` requires an explicit recorded main decision.
+  Runtime permission, credential, account and allocation changes still follow
+  the current owner authorization. Documented project-level gate remedies —
   `MIPSTARRE_FIX_CAP`, `--adjudicated`,
   `--force-review`, the `MIPSTARRE_CI_*` knobs, ticking a finding with a
   written disposition — are yours to exercise with the reason recorded in

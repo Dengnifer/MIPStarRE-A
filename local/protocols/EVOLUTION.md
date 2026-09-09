@@ -1048,15 +1048,18 @@ publication, CI, and fresh independent review.
 issue #500 and implemented through issue #501.
 
 **Change:** `AGENTS.md`, `local/DESIGN.md`, the main, orchestrator, and mathfix
-personas, the issue/PR and session protocols, and the paper-gap policy and
-register now route live owner-inbox traffic to #500. The inbox accepts only
-permissions whose risk extends beyond project development; main decides and
-records project-outcome questions. Each blocker is one comment with at most ten
-visible plain-language lines, lettered options, one recommendation, and the
-literal `DECISION B<n>: <letter>` reply. Ids continue from B11, details are
-folded, and resolved blockers use `status=closed` plus `RESOLVED B<n>`. Issue
-#26 is archived. Existing #26 citations in this ledger and the QPBT gap register
-remain unchanged or explicitly marked as historical provenance.
+personas, the issue/PR and session protocols, the pre-commit guidance, and the
+paper-gap policy and register now route live owner-inbox traffic to #500. The
+inbox accepts only permissions whose risk extends beyond project development;
+main decides and records project-outcome questions, including workflow-budget
+overrides and consecutive workflow-only episodes. The budget guard remains
+enforced. Each blocker is one comment with at most ten visible plain-language
+lines, lettered options, one recommendation, and the literal
+`DECISION B<n>: <letter>` reply, where the letter is an offered alternative.
+Ids continue from B11, details are folded, and resolved blockers use
+`status=closed` plus `RESOLVED B<n>`. Issue #26 is archived. Existing #26
+citations in this ledger and the QPBT gap register remain unchanged or are
+explicitly marked as historical provenance.
 
 **Expected effect:** owner attention is reserved for actions requiring personal
 permission, while routine status, mathematical difficulty, and project-outcome

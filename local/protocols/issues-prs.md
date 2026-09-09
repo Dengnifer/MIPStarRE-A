@@ -206,9 +206,11 @@ keeps its path-traversal rejection for externally sourced citations.
 location); `MIPSTARRE_GITHUB_REPO` overrides the `owner/name` otherwise read
 from the `github` remote; `MIPSTARRE_FIX_CAP` (default 5) bounds `autofix.sh`'s
 own loop only — the merge gate does not read it — and is operator-tunable with
-the reason recorded in `results/telemetry/events.md`, unlike
-`MIPSTARRE_INFRA_OVERRIDE` (the pre-commit budget), the one owner-gated control
-in the layer. `MIPSTARRE_LLM_ENABLED` and
+the reason recorded in `results/telemetry/events.md`. The pre-commit budget
+guard remains mandatory; main may authorize `MIPSTARRE_INFRA_OVERRIDE=1` only
+through a recorded project-scope decision. Neither control creates an owner
+blocker unless the proposed action independently crosses the permissions
+boundary in section 6. `MIPSTARRE_LLM_ENABLED` and
 `LOCAL_REVIEW_ENABLED` keep kill-switch semantics (DESIGN.md:73-75).
 
 `github-sync.sh` pushes explicit refs and writes an atomic, paginated read-only
@@ -241,9 +243,10 @@ plain words and has this form; ids continue from B11.
 What is stuck: one line.
 Options: A one line. B one line. (C one line.)
 Recommendation: one line.
-Reply: DECISION B<n>: A | B | C
+Reply: DECISION B<n>: <letter>
 ```
 
+The reply letter must be one of the offered alternatives (`A`, `B`, or `C`).
 Put any additional detail in a folded `<details>` block. After an owner reply,
 the operator posts `RESOLVED B<n>` and changes the marker to `status=closed`.
 
