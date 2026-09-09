@@ -6411,9 +6411,7 @@ not actual commit/publication hooks. No productive session was killed.
   a budget reset or an additional mathematical attempt; B8 remains exhausted
   at the previously recorded 13 attempts and 26509 working seconds. No
   mathematical proof attempt, additional model session, or full build ran.
-
 ## 2026-09-09 - PR424 merged and existing review findings assigned (07:28Z)
-
 - GitHub confirms PR424 merged at07:24:41Z as0ee46930fd6fbd2017e84e2115ad171c031327de
   from exact head09682990cef329ebe8fde59b23aa516dc7253a5f; all ten CI/review statuses
   are success. The daemon completed its record at07:25:53Z and published snapshot550b392f.
@@ -6426,9 +6424,7 @@ not actual commit/publication hooks. No productive session was killed.
 - B9/B10 still have no owner disposition. Main made no manual telemetry commit or push,
   daemon change, one-off merge/refresh command or proof-budget reset. The verified merge
   is reported on #27.
-
 ## 2026-09-09 - PR458 failed refresh conflict repair
-
 - The daemon refresh stopped at 08:04:32Z with three conflicts in
   `QPBT/Combining/Points/Consistency.lean`. The immutable merge parents are
   `a1c3381b2e746909505065009d71d0b745765186` and
@@ -6446,7 +6442,6 @@ not actual commit/publication hooks. No productive session was killed.
 - Validation and publication evidence will be recorded on the final PR head by
   the canonical merge-loss guard, checked push, and CI tools. Independent review
   remains with main; this repair session does not review its own changes.
-
 ## 2026-09-09 - Preserve non-closing intent and bound existing repairs (07:42Z)
 - PR404's normal unreviewed tail stopped at its diff-based pre-push audit. Bounded Sol
   recovery1075066 owns the exact graph/publication blocker, preserves all saved work,
@@ -6829,9 +6824,7 @@ not actual commit/publication hooks. No productive session was killed.
   nine-worker census. No native/Fable worker, manual merge, main commit/push,
   new proof attempt on B8, or duplicate CI was introduced. New telemetry is
   left for daemon publication.
-
 ### 2026-09-09 - Required CI command failures masked by the step subshell (#504)
-
 - Session `orc-504-20260909-01` reproduced the PR487 incident recorded in
   `~/.cache/mipstarre-dev/recoveries/pr487-b1ae4d2f-handoff.md`: both retained
   full-run manifests report success despite failing regression-suite logs.
@@ -6849,8 +6842,6 @@ not actual commit/publication hooks. No productive session was killed.
   canonical CI followed by independent review remain operator work: this
   session was instructed not to push or launch other sessions. Offline fixture
   results are not canonical CI evidence for a live PR.
-
-
 ### 2026-09-09 - PR487 CI environment contamination and masked test failure
 - Recovery session `orc-485-20260909-03` published the ordinary merge
   `b1ae4d2f9af36ebc3e35b1dd87a9342d179222b8`, preserving the source and telemetry
@@ -7299,3 +7290,75 @@ not actual commit/publication hooks. No productive session was killed.
   c375efc0; independent review1352929 is assigned (611 tests,9 historical skips).
   Short27 update records counts and limitations. No primary key, native agent,
   qpbt-switch, HOLD/STOP file or manual merge was used.
+### 2026-09-09T14:04:03Z - Close the train cleanup finding and release506
+- Required snapshot completed. PR507's second review accepts F1-F3 and raises
+  only successful external-build cleanup. Scoped autofix2928987 uses the
+  existing guarded helper and fixtures; exactly one subsequent independent
+  verification is authorized, retaining the1000-line ceiling and all history.
+- PR506 review5155343560 approves7f4102ad after read-only source inspection.
+  Its attempted escalated test rerun was rejected by automatic approval review
+  as contrary to the read-only contract; no escalation/workaround occurred.
+  The reviewer disclosed that limitation. Existing genuine canonical CI remains
+  the test evidence; no independent test execution is claimed.
+- A light read-only CI-evidence audit3301633 fills available capacity and reports
+  actual test outcomes on seven current PR heads without running tests or
+  changing records. Existing repairs remain owned. No main push, manual merge,
+  primary key, native agent, qpbt-switch or HOLD/STOP file.
+- Later completions reduced the count to6. Current-head reuse fixes492/213
+  were assigned as Sol autofix jobs2313923/2313924; the latter correctly uses
+  the canonical registered issue-116-expanded-line-current worktree. Read-only
+  scout2390764 audits five duplicate-finding scopes to prevent unrelated
+  baseline refactors, with no approval or source edits. Final census8 workers,
+ 4 orcs; the additional audit is queued/live only as actual admission permits.
+### 2026-09-09T13:41:51Z - Train repair reviewed and506 data refresh continued
+- Required snapshot completed. PR507 repair29fa79d5 is checked-published,
+  CI-green and634 tests passed; its887-line aggregate patch stays within the
+  existing ceiling. Independent review2059895 is assigned without deployment.
+- Previous449 deferral ended without a model. Recovery2090462 is assigned
+  after confirming that terminal state, preserving history and the orc limit.
+- 506 refresh stopped on its retained incident note against an empty incoming
+  section. Main removed conflict markers only; incoming complete line order
+  and the local incident note remain. The full old-HEAD line sequence is not
+  preserved because Git incorporated other upstream edits; it is not claimed.
+  Pending merge-loss guard passed. Tail2117209 commits, guards, publishes and
+  runs isolated CI without another orc session.
+- Existing owners continue; no primary key, native agent, HOLD/STOP,
+  qpbt-switch or manual merge. One short27 update records the handoffs.
+### 2026-09-09T13:33:19Z - Release the completed506 recovery to the daemon
+- Required snapshot is being consumed; previous cycle progressed. PR506 local
+  and published heads match b9ab67c3, the worktree is clean, and both CI and
+  review summaries are successful. Cleared only the obsolete pr506.failed and
+  504.needs-attention markers. The daemon immediately started refresh1962426.
+- Census9 workers,3 orcs. Existing publication, repair, review and deferred449
+  handles remain live; no duplicate or extra full-build work was started.
+  A short27 update records this handoff. No primary key, native agent,
+  HOLD/STOP, qpbt-switch or manual merge was used.
+### 2026-09-09T13:22:18Z - Release obsolete456 review and advance repaired heads
+- Required snapshot completed. The456 render fix published2d5ae7f1, replacing
+  the held85a5d78b head. Publisher1435486 was released through its final
+  stale-head guard and is now terminal; no intentional publisher hold remains.
+  Corrected456 and478 heads have green CI and clean raw tests; independent
+  review launchers1851635/1852008 are assigned.
+- The first508 autofix read its label before the label update completed and
+  did nothing. After verifying the update, restart1829227 owns the scoped
+  retirement-documentation finding. No source work or budget was reset.
+- 458's failed merge was only the primary telemetry cleanliness race. After
+  verifying current CI/review success, main cleared that transient failed
+  marker for a normal daemon retry; no merge gate or main push was invoked.
+- Clean saved483 head a1f25501 failed pre-push diff inspection; publication
+  recovery1857248 is assigned. Refill restored9 workers,3 orcs, with the
+  pending recovery bounded by the four-orc policy. One short27 update records
+  the handoffs. No primary key, native agent, qpbt-switch or HOLD/STOP file.
+### 2026-09-09T13:28:20Z - PR458 merged; resume publication and review gates
+- Required snapshot completed. PR458 merged13:15:34Z as
+ 2206ee7ffa86a0f041c24298ac272eca2ccd1062 from8fc1b718af2ef18640e9d78db9530caf1c008de5;
+  exact-head statuses were verified.
+- PR506's refreshed b9ab67c3 has green CI and637 tests OK; independent review
+  1885538 is assigned. PR443's full build succeeded, but its tail incorrectly
+  applied the merge guard to a later telemetry commit. The stopped tail was
+  corrected to audit the two real merge commits fca51b56/45410ef0; continuation
+  1885537 reuses the completed build and continues checked publication/CI.
+- PR449's failed refresh has a real Sandwich.lean conflict. Deferred owner
+  1898883 waits for fewer than3 orcs, leaving room for pending483 admission,
+  and fewer than9 workers before starting. No duplicate449 assignment.
+- Existing router-doc fix, train repair and other review/CI owners continue.
