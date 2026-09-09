@@ -1,0 +1,127 @@
+{
+  "active_agents": [
+    "/root/space_sol_publication_finish",
+    "/root/sol_direct_soundness_compression",
+    "/root/sol_refresh319_dependency",
+    "/root/sol_ci213_resume",
+    "/root/sol_refresh343_parent",
+    "/root/astra_refill_coordinator",
+    "/root/sol_resume_native_review_publication"
+  ],
+  "active_count": 7,
+  "active_threads": [
+    "01a07f4f-c9e8-7103-b007-ff6c713246e0",
+    "01a07f79-cf14-7203-9b64-6b89ce05d3ce",
+    "01a07f8c-2411-7ab2-9096-c4b95e8b89d0",
+    "01a07fb3-8433-7f21-b59c-2472ce701ff2",
+    "01a07ffd-2a9a-7a92-bce9-d4933629d26f",
+    "01a08017-2dc3-7bc3-904c-b390030026c6",
+    "01a080cc-4d59-7a12-a58c-7a6d0b9b383f"
+  ],
+  "delivery": {
+    "message": "QPBT OWNER VACANCY TRIGGER: direct lifecycle scan for root 01a076bc-f4ad-7813-805b-c8b4dac71a14 verifies 7 useful native workers, below floor 8. Fresh running agents: /root/space_sol_publication_finish,/root/sol_direct_soundness_compression,/root/sol_refresh319_dependency,/root/sol_ci213_resume,/root/sol_refresh343_parent,/root/astra_refill_coordinator,/root/sol_resume_native_review_publication. States: {'running': 7, 'stale': 1, 'task_complete': 1}. Run list_agents now; exclude completed, idle, interrupted, root, other-root threads, and turns without fresh attributable tool/model output. Count useful running workers, refill only dependency-ready work to the configured floor, then run list_agents again and report the verified count. This trigger does not dispatch workers or change leases.",
+    "output": "Queued message 01a080d6-ee6e-7e01-a575-1faeadac37ed for thread 01a076bc-f4ad-7813-805b-c8b4dac71a14.",
+    "status": "queued"
+  },
+  "floor": 8,
+  "handoff": {
+    "followup_task_ok": false,
+    "list_agents_ok": false,
+    "observation_ack": false,
+    "queue_exit": null,
+    "successful": false,
+    "useful_activity_ok": false
+  },
+  "observed_at": "2026-09-08T11:46:02.419272+00:00",
+  "root_identity": "3846730:187183661",
+  "root_thread": "01a076bc-f4ad-7813-805b-c8b4dac71a14",
+  "signature": "36abe5a1be599e4b0cab5b1611ef70111661d5f3394770ab37bec7688cb1c339",
+  "state_counts": {
+    "running": 7,
+    "stale": 1,
+    "task_complete": 1
+  },
+  "status": "below_floor",
+  "workers": [
+    {
+      "agent_path": "/root/space_sol_pr249",
+      "last_output_at": "2026-09-08T11:45:41.792000+00:00",
+      "session_started_at": "2026-09-07T18:21:49.201Z",
+      "state": "task_complete",
+      "thread_id": "01a07d1a-e2d6-7580-a2c4-5970d4bef3ab",
+      "turn_id": "01a080d1-5d55-7bf0-9036-740593ed8c7a"
+    },
+    {
+      "agent_path": "/root/space_sol_publication_finish",
+      "last_output_at": "2026-09-08T11:45:57.226000+00:00",
+      "output_age": 5.193,
+      "session_started_at": "2026-09-08T04:38:50.660Z",
+      "state": "running",
+      "thread_id": "01a07f4f-c9e8-7103-b007-ff6c713246e0",
+      "turn_id": "01a080af-9d99-7180-a6c2-4a5e971d17d6"
+    },
+    {
+      "agent_path": "/root/sol_direct_soundness_compression",
+      "last_output_at": "2026-09-08T11:45:54.552000+00:00",
+      "output_age": 7.867,
+      "session_started_at": "2026-09-08T05:24:44.493Z",
+      "state": "running",
+      "thread_id": "01a07f79-cf14-7203-9b64-6b89ce05d3ce",
+      "turn_id": "01a080c5-23e2-74b2-81a5-ab19491aa63f"
+    },
+    {
+      "agent_path": "/root/sol_refresh319_dependency",
+      "last_output_at": "2026-09-08T11:45:54.107000+00:00",
+      "output_age": 8.312,
+      "session_started_at": "2026-09-08T05:44:45.900Z",
+      "state": "running",
+      "thread_id": "01a07f8c-2411-7ab2-9096-c4b95e8b89d0",
+      "turn_id": "01a080b4-6259-7312-9b76-cfe86c22a26a"
+    },
+    {
+      "agent_path": "/root/sol_ci213_resume",
+      "last_output_at": "2026-09-08T11:45:43.860000+00:00",
+      "output_age": 18.559,
+      "session_started_at": "2026-09-08T06:27:46.422Z",
+      "state": "running",
+      "thread_id": "01a07fb3-8433-7f21-b59c-2472ce701ff2",
+      "turn_id": "01a080c1-9cc8-7990-b401-4debb99fa8fc"
+    },
+    {
+      "agent_path": "/root/sol_refresh343_parent",
+      "last_output_at": "2026-09-08T11:46:02.275000+00:00",
+      "output_age": 0.144,
+      "session_started_at": "2026-09-08T07:48:13.144Z",
+      "state": "running",
+      "thread_id": "01a07ffd-2a9a-7a92-bce9-d4933629d26f",
+      "turn_id": "01a080d0-c0cf-72f1-baa3-511f61035333"
+    },
+    {
+      "agent_path": "/root/sol_review310_b37",
+      "last_output_at": "2026-09-08T11:36:15.930000+00:00",
+      "output_age": 586.489,
+      "session_started_at": "2026-09-08T07:54:28.210Z",
+      "state": "stale",
+      "thread_id": "01a08002-e3af-7990-9d6b-a5a4807c1039",
+      "turn_id": "01a080c6-3eb2-7e00-9c69-b80866c9d1ed"
+    },
+    {
+      "agent_path": "/root/astra_refill_coordinator",
+      "last_output_at": "2026-09-08T11:45:54.532000+00:00",
+      "output_age": 7.887,
+      "session_started_at": "2026-09-08T08:16:37.884Z",
+      "state": "running",
+      "thread_id": "01a08017-2dc3-7bc3-904c-b390030026c6",
+      "turn_id": "01a08017-2ded-7021-bb87-587e0581aa9f"
+    },
+    {
+      "agent_path": "/root/sol_resume_native_review_publication",
+      "last_output_at": "2026-09-08T11:46:02.978000+00:00",
+      "output_age": 0.0,
+      "session_started_at": "2026-09-08T11:34:28.209Z",
+      "state": "running",
+      "thread_id": "01a080cc-4d59-7a12-a58c-7a6d0b9b383f",
+      "turn_id": "01a080cc-4de4-7541-863c-505015896c4e"
+    }
+  ]
+}
