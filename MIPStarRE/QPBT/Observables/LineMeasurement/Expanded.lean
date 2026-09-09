@@ -29,28 +29,16 @@ noncomputable section
 
 /-- The tensor placement of a sum of operators is the sum of the tensor
 placements, in both factors. Formalization-only auxiliary for the convolution
-of `def:expanded-line-measurement`. The same identity is proved as
-`heteroKron_sum_sum` in `MIPStarRE/QPBT/Observables/ExpandedDefs.lean`, where
-it is `private` and therefore invisible from this file; consolidating the two
-copies into the module that defines `heteroKron` is tracked by issue #204. -/
+of `def:expanded-line-measurement`, paper
+`14_analysis_of_the_pauli_basis_test.tex:552-556`. -/
 private theorem heteroKron_sum_sum {α β ι κ : Type*}
     [Fintype α] [Fintype β] (A : α → Op ι) (B : β → Op κ) :
     heteroKron (∑ x, A x) (∑ y, B y) =
       ∑ x, ∑ y, heteroKron (A x) (B y) := by
-  ext ⟨i, k⟩ ⟨j, l⟩
-  unfold heteroKron Matrix.kronecker Matrix.kroneckerMap
-  simp only [Matrix.of_apply, Matrix.sum_apply]
-  rw [Finset.sum_mul]
-  apply Finset.sum_congr rfl
-  intro x hx
-  rw [Finset.mul_sum]
+  rw [DistanceCalculus.heteroKron_finset_sum_left]
+  simp only [DistanceCalculus.heteroKron_finset_sum_right]
 
-/-- The tensor placement of a zero left factor vanishes. This zero law and its
-companion below are the two remaining linearity facts about `heteroKron` used
-by the expanded line measurements; they are stated here, in the first module
-that needs them, because the tensor-placement lemmas of
-`MIPStarRE/QPBT/Games/Defs.lean` do not yet record them. Moving them there,
-next to `heteroKron_mul` and `heteroKron_one_one`, is tracked by issue #204. -/
+/-- The tensor placement of a zero left factor vanishes. -/
 theorem heteroKron_zero_left {ι κ : Type*} (B : Op κ) :
     heteroKron (0 : Op ι) B = 0 := by
   unfold heteroKron
@@ -72,8 +60,7 @@ postprocessing preserves projectivity. This is the line analogue of the point
 measurement projectivity; both follow because postprocessing preserves
 projectivity. The line form is what the projectivity assertion of
 `def:expanded-line-measurement` needs, paper
-`14_analysis_of_the_pauli_basis_test.tex:552-556`. Stating the two uniformly
-in one place is tracked by issue #204. -/
+`14_analysis_of_the_pauli_basis_test.tex:552-556`. -/
 theorem lineMeas_isProjective (S : ProjectiveSetting P ε) (side : PlayerSide)
     (W : PauliKind) (line : LineDesc P.toLdParams) :
     MIPStarRE.QPBT.Measurement.IsProjective (S.lineMeas side W line) := by
@@ -176,7 +163,8 @@ operators. -/
 
 /-- The fine product measurement underlying the convolution definition of an
 expanded line measurement. Its outcome records the strategy and Pauli line
-polynomials separately. Paper `14_analysis_of_the_pauli_basis_test.tex:527-532`. -/
+polynomials separately. Blueprint `def:line-tau-measurement`, paper
+`14_analysis_of_the_pauli_basis_test.tex:552-558`. -/
 noncomputable def lineTauMeas (S : ProjectiveSetting P ε) (side : PlayerSide)
     (W : PauliKind) (line : LineDesc P.toLdParams) :
     Measurement (DegPoly P.toLdParams (P.m * P.d) ×
