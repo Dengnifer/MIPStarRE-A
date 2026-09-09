@@ -15,8 +15,9 @@ law. The proved estimates compare real parts; they do not establish the complex
 modulus comparisons over the source distribution in Claims 17-1 and 17-3.
 The pending Claim 17-2 analogue retains the complex modulus. The source claims
 remain separate, uncertified blueprint statements until the distribution and
-scalar transport obligations are discharged.  Line-polynomial evaluation uses the existing `Option` completion,
-so no field value is substituted when an evaluation is undefined.
+scalar transport obligations are discharged. Line-polynomial evaluation uses the
+existing `Option` completion, so no field value is substituted when an evaluation
+is undefined.
 
 ## References
 
@@ -165,6 +166,7 @@ private theorem regroup_placed_line_answer_sum {P : AdmissibleParams} {ε δQ δ
           S.place .BA'' (G (evalOpt lineX x fs.1) (evalOpt lineZ z fs.2))))
 
 set_option maxHeartbeats 400000 in
+-- The nested polynomial and completed-outcome sums require extra elaboration steps.
 /-- Formalization-only real-part estimate for the directly indexed subline law.
 
 **Scope restriction:** The conclusion bounds the absolute difference of real parts
