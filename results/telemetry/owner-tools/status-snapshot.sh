@@ -29,4 +29,4 @@ if [ "${1:-}" = "--prs" ]; then
     echo "   PR $p: $v unresolved=$u$loop"
   done
 fi
-echo "== #26 open blockers: $(timeout 20 gh issue view 26 --json comments --jq '[.comments[] | select(.body|test("owner-inbox id=B[0-9]+ status=open"))] | length' 2>/dev/null)"
+echo "== #26 open blockers: $(timeout 20 gh issue view 500 --json comments --jq '[.comments[] | select(.body|test("owner-inbox id=B[0-9]+ status=open"))] | length' 2>/dev/null)"
