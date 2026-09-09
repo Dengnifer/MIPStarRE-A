@@ -21,6 +21,7 @@ import MIPStarRE.QPBT.Games.DistributionAux
 import MIPStarRE.QPBT.Games.ErrorFunctions
 import MIPStarRE.QPBT.Games.Consistency
 import MIPStarRE.QPBT.Games.StrategyClasses
+import MIPStarRE.QPBT.Games.MeasurementCompression
 import MIPStarRE.QPBT.Games.DistanceTheorems
 import MIPStarRE.QPBT.Games.Sandwich
 import MIPStarRE.QPBT.Games.CondLinearTheorems
@@ -61,6 +62,8 @@ import MIPStarRE.QPBT.Combining.ExtendedLineGame.ParameterEvaluatedLineBound
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.SameLineRejection
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.SameLineCoefficientBound
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.DiagonalParameterDefectTransport
+import MIPStarRE.QPBT.Combining.ExtendedLineGame.AxisParameterDefectTransport
+import MIPStarRE.QPBT.Combining.WitnessErrorNonneg
 import MIPStarRE.QPBT.Combining.Lines
 import MIPStarRE.QPBT.Combining.Claims
 import MIPStarRE.QPBT.Combining.Apply
