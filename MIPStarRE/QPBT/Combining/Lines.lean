@@ -1,8 +1,9 @@
 import MIPStarRE.QPBT.Combining.Lines.ConsistencyPositivity
 import MIPStarRE.QPBT.Combining.Lines.NondegeneratePastingMass
 import MIPStarRE.QPBT.Combining.Lines.RestrictedAverage
-import MIPStarRE.QPBT.Combining.Witnesses
 import MIPStarRE.QPBT.Combining.Lines.ZeroDirectionMass
+import MIPStarRE.QPBT.Combining.Witnesses
+import MIPStarRE.QPBT.Games.RestrictedAverage
 
 /-!
 # Combined lines and restricted line distributions
