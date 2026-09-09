@@ -6338,9 +6338,7 @@ not actual commit/publication hooks. No productive session was killed.
   claimed. This worktree-local telemetry note is deliberately uncommitted so
   the validated source head remains unchanged. Handoff: obtain an independent
   review on the same head; do not reapply the stale F1/F2 repairs.
-
 ## 2026-09-09 - PR384 merged; preserve parent348 and refill reviewers (07:14Z)
-
 - GitHub confirms PR384 merged at06:52:27Z as5e23592c9df643757c7896f643b3bef42f08cc49
   from exact head481d74e7779a8f80989f2e79a92bbe08e7b7ca65, with all ten CI/review statuses
   success. Its post-merge bookkeeping hit another unpaired diff3 ancestor delimiter.
@@ -6363,9 +6361,7 @@ not actual commit/publication hooks. No productive session was killed.
   a current-head CI summary; canonical CI followed by guarded review is now queued.
 - No manual telemetry commit or publication was made. The merge and the verified PR359
   metadata action are reported on #27; B9 and B10 remain pending owner decisions.
-
 ## 2026-09-09 - Keep saved fixes moving without duplicate proof work (07:22Z)
-
 - The07:16:29Z snapshot observed12 workers. GitHub re-read confirmed PR359 still says
   Part of348 at head2c363ea7da78fc143f8a6d8f7b96d0fc2e0480ec; no further body edit was made.
 - Residual autofixes400/398/470 are terminal with saved commits but guarded publication
@@ -6378,3 +6374,25 @@ not actual commit/publication hooks. No productive session was killed.
   no absent review was treated as approval.
 - The07:20:20Z count was13. No manual telemetry commit/publication, one-off merge,
   daemon change or new owner escalation was made. The telemetry whitespace check passed.
+## 2026-09-09 - PR 481 documentation repair publication blocked
+- Session `prover-480-20260909-02` committed documentation-only repairs as
+  `56a7364330e795c33ab3b7c057b4e43bf375becd`. Focused Lean elaboration,
+  blueprint rendering, synchronization, 1433 declaration links, and targeted
+  axiom checks passed. Non-comment Lean tokens are unchanged. The existing
+  paired-line consistency obligation still depends on `sorryAx`.
+- Primary `checked-push.sh` passed its changed-file Lean and integrity checks,
+  then failed in the reverse blueprint coverage check: `git diff --merge-base
+  origin/main HEAD` reports multiple merge bases, namely
+  `86d03481953adcd8c9ea97599e942b6af4dc4360` and
+  `d9be57dedd4ea3a3321943539f0785fde00f172d`. No hook bypass, workflow edit,
+  ref adjustment, or merge was attempted. GitHub remains at `12ac3b9c`.
+- The pre-existing recovery telemetry was temporarily stashed for the clean
+  publication gate and restored; backup stash
+  `855f98137be0fb34de48b2efed86e0891280795d` is retained. This incident entry
+  is uncommitted. Exact-head canonical CI and independent review remain for
+  the owner workflow after the publication blocker is repaired.
+- The session exceeded its 30-minute wall-clock limit (started 13:04:36
+  +08:00; publication failure was collected at 13:54). This overrun is not
+  a budget reset or an additional mathematical attempt; B8 remains exhausted
+  at the previously recorded 13 attempts and 26509 working seconds. No
+  mathematical proof attempt, additional model session, or full build ran.
