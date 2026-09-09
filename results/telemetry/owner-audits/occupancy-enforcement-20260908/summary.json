@@ -1,0 +1,178 @@
+{
+  "recorded_at": "2026-09-08T08:54:17.471241+00:00",
+  "root": "01a076bc-f4ad-7813-805b-c8b4dac71a14",
+  "total_limit": 10,
+  "main": 1,
+  "native_capacity": 9,
+  "useful_worker_floor": 8,
+  "extra_reservations": 0,
+  "observation_windows": [
+    {
+      "source": "/tmp/qpbt-worker-live-observations-20260908.jsonl",
+      "samples": 31,
+      "first": "2026-09-08T07:28:54.658692+00:00",
+      "last": "2026-09-08T07:43:57.985256+00:00",
+      "min_active": 2,
+      "max_active": 7,
+      "samples_at_floor": 0,
+      "read_errors": 0
+    },
+    {
+      "source": "/tmp/qpbt-worker-live-refill-20260908.jsonl",
+      "samples": 82,
+      "first": "2026-09-08T07:50:07.043673+00:00",
+      "last": "2026-09-08T08:50:51.799047+00:00",
+      "min_active": 5,
+      "max_active": 9,
+      "samples_at_floor": 53,
+      "read_errors": 0
+    },
+    {
+      "source": "/tmp/qpbt-meta-sustained-workers-20260908.jsonl",
+      "samples": 21,
+      "first": "2026-09-08T08:32:52.246876+00:00",
+      "last": "2026-09-08T08:42:59.605262+00:00",
+      "min_active": 8,
+      "max_active": 9,
+      "samples_at_floor": 21,
+      "read_errors": 0
+    },
+    {
+      "source": "/tmp/qpbt-meta-handoff-workers-20260908.jsonl",
+      "samples": 13,
+      "first": "2026-09-08T08:43:11.166590+00:00",
+      "last": "2026-09-08T08:49:18.185180+00:00",
+      "min_active": 7,
+      "max_active": 9,
+      "samples_at_floor": 9,
+      "read_errors": 0
+    },
+    {
+      "source": "/tmp/qpbt-meta-final-workers-20260908.jsonl",
+      "samples": 1,
+      "first": "2026-09-08T08:54:14.619778+00:00",
+      "last": "2026-09-08T08:54:14.619778+00:00",
+      "min_active": 8,
+      "max_active": 8,
+      "samples_at_floor": 1,
+      "read_errors": 0
+    }
+  ],
+  "completion_cycles": [
+    {
+      "completion_worker": "sol_ci213_resume",
+      "completed_at": "2026-09-08T08:34:22.226Z",
+      "successor": "space_sol_pr249",
+      "started_at": "2026-09-08T08:36:32.573Z",
+      "first_tool_output_at": "2026-09-08T08:37:12.483Z",
+      "dispatch_latency_s": 130.347,
+      "tool_recovery_latency_s": 170.257,
+      "count_before": 9,
+      "count_after_completion": 8,
+      "count_after_verified_output": 9,
+      "limitation": "exceeded60s aim; readiness/root slot decision delay retained; floor8held"
+    },
+    {
+      "completion_worker": "space_sol_pr213",
+      "completed_at": "2026-09-08T08:37:53.153Z",
+      "successor": "sol_review310_b37",
+      "dispatched_by": "root",
+      "started_at": "2026-09-08T08:39:03.677Z",
+      "first_tool_output_at": "2026-09-08T08:39:28.614Z",
+      "dispatch_latency_s": 70.524,
+      "tool_recovery_latency_s": 95.461,
+      "count_before": 9,
+      "count_after_completion": 8,
+      "count_after_verified_output": 9,
+      "limitation": "ready root binding used; observed completion-to-start still exceeded60s, no immediate-recovery claim"
+    }
+  ],
+  "continuation_handoff": {
+    "attempted_to": "space_sol_publication_finish",
+    "root_authorized_policy_ack": true,
+    "acknowledgment_requested_by": "2026-09-08T08:43:00Z",
+    "claimed_control_after": "2026-09-08T08:46:37.885Z",
+    "policy_ack_observed": true,
+    "executable_transfer_accepted": false,
+    "blocker": "The nominated primary context exposed neither collaboration.list_agents nor collaboration.followup_task; its queue fallback exited 4.",
+    "retained_executable_owner": "/root/astra_refill_coordinator",
+    "current_expiry": null,
+    "next_handoff_requirement": "A successor must demonstrate list_agents and followup_task on approved useful work, followed by verified activity."
+  },
+  "primary_owned_handoff_ack": {
+    "schema": "qpbt-refill-handoff-ack-v1",
+    "recorded_at": "2026-09-08T08:49:30Z",
+    "from": "/root/astra_refill_coordinator",
+    "to": "/root/space_sol_publication_finish",
+    "root_authorized_policy_ack": true,
+    "acknowledged_policy": true,
+    "executable_refill_control_accepted": false,
+    "claimed_effective_at": "2026-09-08T08:46:37.885Z",
+    "effective_at": null,
+    "superseded_by": [
+      "qpbt-primary-refill-handoff-ack-20260908.json",
+      "qpbt-meta-handoff-capability-followup-20260908.json",
+      "qpbt-refill-capable-owner-status-20260908.json",
+      "qpbt-meta-occupancy-final-verification-20260908.json"
+    ],
+    "policy": {
+      "space_total": 10,
+      "native_limit": 9,
+      "useful_native_floor": 8,
+      "aim": 9,
+      "active_main": 1,
+      "active_other": 0,
+      "activity_max_interval_seconds": 60,
+      "idle_reservations_count": false,
+      "completed_workers_count": false
+    },
+    "preserved": {
+      "goal_and_counters": true,
+      "all_predecessor_budgets": true,
+      "b8_attempts": 13,
+      "b8_working_seconds": 26509,
+      "b8_reset": false,
+      "lease_or_capacity_changed": false,
+      "model_policy_changed": false,
+      "nested_pool_created": false,
+      "frozen_main": "af87d3f2f5787ea3fea793260f995ea93f47ba85",
+      "main_publication_before_next_service_merge": false
+    },
+    "mechanics": {
+      "sampler": "/tmp/qpbt-worker-live-sampler-20260908.py",
+      "journal": "/tmp/qpbt-worker-live-refill-20260908.jsonl",
+      "selection_owner": "/root",
+      "primary_telemetry_writer": "/root/space_sol_publication_finish",
+      "refill_rule": "Only root-approved dependency-ready same-turn successors after a verified real completion; count only fresh attributable work."
+    },
+    "current_handles": {
+      "pr356_review_exec_session": 94290,
+      "pr356_code_nonce_completed": "d9306f0d65294889bf6acd1cc56e2bfe",
+      "pr356_prose_nonce_completed": "8142050df0794159aa6f0244b768b866",
+      "pr356_head": "99f88dcf722677bec0de5a3e635726ce46a647e4",
+      "pr356_merge": "bbc1c70493f259a249f885df581c6190254292cd",
+      "pr358_ci_exec_session": 98640,
+      "pr358_ci_exit": 0,
+      "pr358_head": "c8ede4f44295c109f6890fcea2622a78e4ed6afc",
+      "pr358_ci_manifest": "/home/drx/.cache/mipstarre-dev/ci-manifests/pr358-c8ede4f44295c109f6890fcea2622a78e4ed6afc.json"
+    },
+    "delegate_receipt": "qpbt-refill-delegate-status-20260908.json"
+  },
+  "capability_verification": {
+    "completed_at": "2026-09-08T09:09:27.510389+00:00",
+    "confirmed_active_native": 9,
+    "read_errors": 0,
+    "executable_mechanics_owner": "/root/astra_refill_coordinator",
+    "owner_expiry": null,
+    "primary_role": "sole manual telemetry and integration coordinator",
+    "b8_attempts": 13,
+    "b8_working_seconds": 26509,
+    "budget_reset": false
+  },
+  "tests": "six independent sampler tests passed locally and on ghz",
+  "limitations": [
+    "Samples use an open current worker turn plus recent attributable progress; they are not HTTP concurrency or a proof-productivity metric.",
+    "Samples are bounded and do not prove uninterrupted future occupancy.",
+    "Main retains scope and trusted review binding; the demonstrated Astra delegate owns executable refill mechanics, and the primary coordinator owns manual telemetry and integration."
+  ]
+}

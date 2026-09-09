@@ -354,6 +354,7 @@ branch and owns the branch-name lint (`local/protocols/issues-prs.md`).
     local/bin/review.sh 7                # review PR 0007 at its current head
     local/bin/review.sh 7 --dry-run      # build diff and prompts, dispatch nothing
     LOCAL_REVIEW_ENABLED=false local/bin/review.sh 7    # confirm the kill switch
+    local/bin/review.sh 358 --resume-native-request REQUEST  # completed code lane
 
 Exit codes: `0` reviewed or intentionally skipped · `1` usage/environment ·
 `3` gate blocked (CI not green for this head) · `4` no parseable verdict.
@@ -392,13 +393,51 @@ parent-assigned turn after request creation; an old completion alone is insuffic
 After the child actually completes, the operator calls
 `native_review.py complete REQUEST_JSON CHILD_THREAD`. Both producer and waiting
 consumer re-read the canonical live root's rollout, verify direct parentage,
-independence, fresh assignment/current-turn completion, literal Astra Ultra,
+independence, fresh assignment/current-turn completion and the request's recorded
+routine/hard model decision with Ultra, including every bound-turn model context
+(a final context cannot conceal an earlier different model),
 prompt digest and exact worktree head. The mailbox supplies only identity; its
 verdict text is never trusted. Fork-inherited parent completions cannot qualify.
 Normal `review.sh` parsing, review ledger, exact-head COMMENT/status publication,
 kill switches, round cap and merge ownership remain unchanged. A timed-out
 observation does not prove the child stopped: inspect its live handle before reuse
 or restart. Review transport deployment itself still needs independent review.
+
+A terminated publisher may be continued with
+`review.sh PR --resume-native-request CODE_REQUEST_JSON`. A diff touching
+`blueprint/` also requires `--resume-native-prose-request PROSE_REQUEST_JSON`;
+the two requests must be distinct and both completed lanes must validate.
+A prose request is rejected when the diff does not touch `blueprint/`. The command creates
+no nonce and invokes no model. It takes the ordinary per-PR review lock without
+waiting; a live publisher is a conflict, while a dead holder is reclaimed by the
+existing stale-lock rule. Under that lock it rechecks green exact-head CI, the
+round cap, the absence of an exact-head review and `local-review/summary`, the
+current clean worktree, and the final head before publication.
+
+`native_review.py accept` requires the canonical request and response files under
+the configured cache mailbox. It matches the request's PR, head, repository,
+worktree, canonical standalone prompt and digest, independently rebuilt prompt,
+live root, complete author
+exclusion set, activation boundary, requested/effective model and literal Ultra
+policy against the current invocation, then reuses the ordinary rollout
+validation and telemetry record. The unchanged parser, lane writer, combiner and
+idempotent `gh_common.py` publisher consume the resulting final messages. A resume
+uses a fresh scratch directory and retains the original prompt paths inside the
+rebuilt task text, leaving canonical prompts and old outputs unchanged. It does
+not change the reviewed worktree's sparse-checkout state. A failed acceptance in
+either lane, or an unparseable completed verdict in a combined resume, publishes no review or
+summary. Queued, dry-run, stale, mismatched, already-published, or concurrently
+published continuations fail closed. Reviewer reuse and source mutation remain
+held until the canonical publisher consumes the responses; local acceptance of
+one lane alone does not release either hold.
+
+Routine reviews default to Sol through `MIPSTARRE_REVIEW_JOB_CLASS=independent_review`.
+For a genuinely hard/semantic/control-policy review main sets `hard_review` and
+`MIPSTARRE_REVIEW_HARDNESS_REASON`; it selects Astra and records that reason in
+the native request. Explicit conflicting model overrides fail. The model choice
+does not change identity independence, author exclusion, CI or any merge gate.
+Existing Astra reviewers need a fresh explicit Sol spawn for future routine jobs,
+not a follow-up treated as a model switch. This control-policy PR itself requires Astra.
 
 Missing pieces degrade with a message, never silently: missing CI statuses
 block, no `worktree-setup.sh` warns about a cold build cache, no codex CLI is a

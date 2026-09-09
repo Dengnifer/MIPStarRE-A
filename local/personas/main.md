@@ -41,21 +41,51 @@ owner-authorized native descendants use the shared lease protocol in `sessions.m
 the astra math-fix lane governed by `issues-prs.md` section 6. Full builds are
 ~10 min on this host and only they serialize (the machine-wide
 `.full-build-lock`); per-file `lake env lean` iteration parallelizes
-freely across worktrees. In the current space episode the hard limit is five total
-sessions including main, so keep up to four useful native descendants occupied,
-refill promptly, and record intervals below that floor and their reasons. Count
-actual native activity, not idle threads; keep disjoint successors and independent reviewers ready. Evidence binds to exact SHAs, so parallel
+freely across worktrees. Use the current owner-verified allocation and existing
+native lease: ten Space sessions total, the root plus at most nine descendants,
+with a useful target of nine descendants, a floor of eight, and external admission
+zero. Keep useful capacity occupied without changing live leases, refill promptly,
+and record intervals below that floor and their reasons. Count actual native activity,
+not idle threads; keep disjoint successors and independent reviewers ready. Evidence
+binds to exact SHAs, so parallel
 lanes cannot trample each other's records.
-Preauthorize bounded, disjoint successor chains: a worker sends task-end/start
-and continues its assigned successor without waiting for main. The central integration
-coordinator may use native `followup_task` to refill an idle sibling from main's
-approved queue. Verify actual running state and recent attributable activity;
-record vacancy durations/reasons, including main-decision latency. Unknown is not
-zero, and capacity or a ready list is not occupancy. No nested extra pool is permitted.
+Preauthorize bounded, disjoint successor chains and validate multiple useful successors
+while slots are occupied. Each prepared record fixes its current head or source snapshot,
+actually published inputs, eligible native identity and role, current owner, unique
+operation, CI/review/publisher handle, or worktree, predecessor, exact model and effort,
+complete hash-bound dispatch body, deadline rule, completion condition, cumulative budget,
+authorized time limit, any inherited deadline, and
+`ready_at`. A descriptive input list or nominal successor line is not ready; invalidate
+readiness when its head, dependency, ownership, role, or deadline changes. Give each
+expected completion a separately validated alternate; if none exists, record the exact
+frontier blocker and do not call the completion fully prepared. At
+activation, put an absolute source deadline no later than the native call time plus that
+limit in the payload; retain an earlier deadline for continuations. Reconcile it with
+actual `task_started` and never restart it at first tool use or progress. The central
+integration coordinator uses native `followup_task` or `spawn_agent` after real
+completion, before detailed receipt or rollout-tail adoption.
+It records the actual call, current successor turn and first useful output, then adopts
+the predecessor evidence. A blocked or failed first choice names its exact reason and
+yields to the prepared alternate in the same cycle. Waiting for start evidence or adopting
+one predecessor never delays activation for another real completion. Quiet live turns
+occupy a slot until completion or stall is established. Unknown is not zero, and capacity or a
+ready list is not occupancy. No nested extra pool is permitted.
 
 ## The operating cycle (per short turn)
 
-All roles select `gpt-6-astra` and literal CLI `ultra` on the owner-selected space key.
+Main remains `gpt-6-astra`/`ultra`; routine and bounded subagent jobs default to
+exact `gpt-5.6-sol`/`ultra`, including routine existing-statement proofs and reviews.
+Use `model_policy.py` and published `local/model-policy.json` for each assignment.
+Genuinely hard, source-semantic, control-policy or escalated jobs use Astra with
+an explicit reason; file extension and role alone do not determine hardness.
+Target Sol:Astra 20:1 within 10:1..50:1 over successive NEW dispatches after
+activation. Check the rolling ratio in `sessions.md`; exclude main, grandfathered
+workers and resumes. Record short-prefix/availability deviations, never add filler
+or delay a necessary hard assignment. Unknown models/classes fail closed.
+A model change needs a NEW explicit-model native spawn with
+`fork_turns="none"` and Ultra, not follow-up to an existing Astra thread.
+No activation before normal CI, independent Astra review, service merge and
+exact runtime compatibility verification. Preserve predecessor/budget links.
 Native fan-out shares the root's leased cap; external dispatch cannot spawn children.
 Only an explicit later owner decision restores both accounts.
 Admission and checkpoint-continuation rules are in `local/protocols/sessions.md`.
@@ -79,12 +109,18 @@ for dispatch. Record a failed read as unknown and continue independent work.
    if the old watcher is stopped or did not advance it. Publish telemetry in
    a coordinated batch before final gates, then keep main stable for the
    service merge; preserve new rows and publish them immediately afterward.
-4. At cycle start and every worker completion, assess whether another useful
-   independent assignment can shorten the critical path. Refill the shared
-   four-descendant capacity promptly from ready mathematics, bounded repairs,
-   or required independent reviews. Give each worker an owned worktree,
-   completion condition and available successor. No filler assignments or
-   duplicate full-queue triage. Record actual vacancy and its concrete cause.
+4. At cycle start, validate useful, disjoint primary and alternate successor payloads
+   while the current slots remain occupied. Bind actual current heads, published inputs,
+   available roles, current ownership, and complete hash-bound dispatch text and deadline
+   rule. At real completion, perform only the remaining admission, identity,
+   ownership and budget checks, then activate a prepared successor before reading detailed
+   predecessor receipts or tails. Verify its current `task_started` and first useful
+   output before adoption work. Give each worker an owned worktree or operation, completion
+   condition, cumulative budget, authorized limit and any inherited deadline. Materialize
+   the conservative absolute source deadline in the activation payload. Record predecessor
+   `task_complete`, `ready_at`, the actual follow-up or spawn call, successor thread and
+   turn start, first output, and concrete blocker intervals. Label recovery of an existing
+   gap as backlog; a closing snapshot does not establish sustained floor coverage.
 5. Continue authorized work after reports; routine implementation choices do
    not need another owner confirmation. Record events when they happen and
    post one #27 update at each stage boundary or merge. A pending owner-only
@@ -117,8 +153,9 @@ merges; never merge a PR by hand or call the merge gate from the main turn.
   implementation convenience: paper-labelled statements stay source-shaped;
   genuine source defects become `docs/paper-gaps/` notes (key `qpbt`,
   traceability `\localissue{NNNN}`).
-- All current assignments remain Astra Ultra on Space, with five total
-  sessions including main. Do not infer a route, effort or cap change from
+- Existing assignments retain their model and effort; do not reuse a completed
+  Astra worker for routine future work to evade Sol-first classification.
+  Main stays Astra Ultra under the owner-verified lease. Do not infer changes from
   historical examples. Record observed usage without treating configured
   capacity as measured occupancy or summing overlapping native counters.
 - Validate according to the changed surface: focused checks during iteration,

@@ -107,10 +107,12 @@ def native_process(thread: str, pid: int, slots: int) -> dict:
                     settings[key] = value
     expected = {'model': 'gpt-6-astra', 'model_reasoning_effort': 'ultra',
                 'agents.enabled': True, 'features.multi_agent': True,
-                'agents.default_subagent_model': 'gpt-6-astra',
                 'agents.default_subagent_reasoning_effort': 'ultra',
                 'agents.max_concurrent_threads_per_session': slots}
-    if (type(slots) is not int or slots < 1 or
+    from model_policy import ASTRA, load_policy
+    default_model = settings.get('agents.default_subagent_model')
+    if (default_model not in (ASTRA, load_policy()['default_model']) or
+            type(slots) is not int or slots < 1 or
             type(settings.get('agents.max_concurrent_threads_per_session')) is not int or
             any(settings.get(key) != value for key, value in expected.items()) or
             process_identity(pid) != start):
@@ -396,6 +398,21 @@ def resume_continuation(registry: Path, thread: str) -> dict:
     return prior
 
 
+def resume_model(thread: str, registry: Path, homes: dict[str, Path]) -> str:
+    """Require observed model affinity; a new default cannot relabel an old thread."""
+    observed = [row.get('effective_model') for row in session_rows(registry)
+                if row.get('thread_id') == thread and row.get('effective_model')]
+    for home in homes.values():
+        for area in ('sessions', 'archived_sessions'):
+            for rollout in (home / area).rglob(f'rollout-*{thread}.jsonl'):
+                for row in session_rows(rollout):
+                    if row.get('type') == 'turn_context' and row.get('payload', {}).get('model'):
+                        observed.append(row['payload']['model'])
+    if not observed or len(set(observed)) != 1:
+        raise ValueError('resume model is unknown or mixed; use a fresh linked assignment')
+    return observed[0]
+
+
 def continuation(path: Path, registry: Path, worktree: Path, issue: str) -> dict:
     """Validate an operator checkpoint handoff without changing the old thread or budget."""
     request = json.loads(path.read_text())
@@ -516,9 +533,15 @@ def main() -> None:
             if args.account not in ("auto", affinity):
                 raise ValueError(f"resume belongs to {affinity}, not {args.account}")
             args.account = affinity
-        model = os.environ.get('MIPSTARRE_CODEX_MODEL') or 'gpt-6-astra'
-        if model != 'gpt-6-astra':
-            raise ValueError('owner policy requires gpt-6-astra for every role')
+        from model_policy import load_policy, select_model
+        model = select_model(os.environ.get('MIPSTARRE_DISPATCH_ROLE', 'orc'),
+            os.environ.get('MIPSTARRE_JOB_CLASS', 'general'),
+            os.environ.get('MIPSTARRE_CODEX_MODEL') or 'auto',
+            os.environ.get('MIPSTARRE_REQUESTED_EFFORT', 'ultra'),
+            os.environ.get('MIPSTARRE_HARDNESS_REASON') or None)['model']
+        if args.resume and load_policy()['schema_version'] == 2 and model != resume_model(
+                args.resume, args.registry, homes):
+            raise ValueError('resume cannot switch model; create a fresh linked assignment')
         selected = reserve(args.root, args.account, args.pid, args.wait, args.dry_run)
         print(selected)
         print(model)

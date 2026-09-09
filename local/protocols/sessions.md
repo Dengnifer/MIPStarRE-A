@@ -41,18 +41,22 @@ asking for a scout) invokes `dispatch.sh` from inside its own session, with
 `MIPSTARRE_SESSION` set to its own name so the registry records the parent in
 the `dispatcher` field. External session prompts prohibit further fan-out.
 
-### Native descendants (owner amendment, 2026-09-06)
+### Native descendants (owner amendments, 2026-09-06 and 2026-09-08)
 
-Main may assign useful native Astra Ultra work without external admission. Before
+Main may assign useful native work under the published model policy without
+external admission. Main remains Astra Ultra; existing defaults may stay Astra
+during transition, while reviewed future defaults and explicit child choices use Sol. Before
 admitting either kind of worker, reserve the native root's configured descendant cap:
 `account_router.py native-lease CACHE ROOT_THREAD PID CAP`. The cap excludes the root;
 the process census separately charges the root. This command validates the live
 resume thread, process start identity, scoped space route, explicit Astra/Ultra
-defaults and shared descendant cap under the account-router lock. Python 3.10 needs
+main configuration, policy-authorized child default and unchanged shared cap. Python 3.10 needs
 `tomli` for this native-only TOML validation; Python 3.11 has `tomllib`.
 `watchdog/primary-key-capacity` is the owner allocation, not measured throughput. For
-the current space episode the owner allocation is five total sessions including main,
-external admission is zero, and at most four native descendants may be active. The
+the current Space episode the owner allocation is ten total sessions: the root plus at
+most nine native descendants. The useful target is nine descendants, the floor is eight,
+and external admission is zero. This supersedes the historical five-session episode; it
+does not resize a live lease or create another pool. The
 router enforces `watchdog/primary-external-admission=0` (and the owner `max-codex=0`
 fallback) before creating any external reservation.
 Native leases, external processes/reservations, interactives and reserved non-Codex
@@ -61,17 +65,63 @@ use all consume it. Unknown/dead native leases are retained until explicit
 lease cannot be resized; checkpoint and refresh the process with owner coordination.
 
 Main owns task selection, one-writer worktree assignments and native replenishment.
-Main preauthorizes bounded, disjoint successor chains; after sending task-end/start,
-workers continue an available assigned successor without awaiting another decision.
-The central integration coordinator may use native `followup_task` to refill an
-idle sibling from main's approved queue during a long main turn. Count actual native
-running state plus recent attributable activity. Record vacancy durations/reasons,
-including main-decision latency; unknown is not zero and configured capacity or a
-ready list is not measured occupancy. No nested extra pool may exceed the shared cap.
+While slots are occupied, main and the central integration coordinator keep useful,
+disjoint successors prepared against expected completions. A prepared record binds the
+issue, worktree or read-only scope, exact current head or source snapshot, actually
+published inputs, an eligible native identity and role, current worktree or unique
+CI/review/publisher ownership, predecessor, job class, exact model and effort, a complete
+hash-bound dispatch body, deadline rule, completion condition, cumulative budget,
+authorized time limit, and any inherited deadline. Record `ready_at` when all checks finish
+while the predecessor still occupies its slot. A prose description of expected inputs or
+one nominal successor line is not ready. A head, dependency, ownership, role, or deadline
+change invalidates readiness.
+Each expected completion has a separately validated alternate; if none exists, record the
+exact frontier blocker and do not call that completion fully prepared.
+
+On an attributable `task_complete` or equivalent terminal event, the coordinator first
+rechecks only shared-cap admission, target identity, prepared-record immutability, owned
+operation or worktree, and the remaining source budget. The activation payload carries
+an absolute source deadline no later than the native call time plus the authorized limit;
+a continuation retains an earlier inherited deadline. It then calls native `followup_task`
+or `spawn_agent` before detailed predecessor receipt adoption, rollout tail reads,
+capture hashing, broad censuses, or PR-history inspection. If the first prepared successor
+is blocked or its activation call fails, record the exact prerequisite or failure and try
+the prepared alternate in the same completion cycle. A quiet live turn remains occupied
+until assignment, budget, and owned-operation checks establish an actual completion or
+stall; silence alone does not create a vacancy.
+
+Canonical review consumption is a required admission blocker, not detailed receipt
+adoption. A completed native reviewer thread remains idle and unavailable for follow-up
+until `native_review.py complete` has validated its genuine result and created the bound
+response, and the waiting canonical consumer has accepted that response. A response file
+alone is not consumer acceptance. The held reviewer is not useful activity or an occupied
+runtime slot; fill available capacity with another eligible prepared actor or job rather
+than resuming it before the hold is released.
+
+After the activation call, reconcile the fixed deadline against the successor's actual
+current `task_started`, then verify its thread and turn, requested and observed model and
+effort, and first useful output. Time before the first tool or progress report counts;
+neither event starts a fresh budget. The coordinator owns an append-only transition batch
+containing predecessor completion, `ready_at`, the actual activation call, successor start
+and first output, the absolute source deadline, and real blocker intervals. Only after that
+activation does detailed predecessor adoption proceed.
+Waiting for successor start evidence or adopting one predecessor never serializes the
+activation-first handling of another real completion.
+An initial recovery of an old vacancy is labelled backlog, and one closing eight- or
+nine-worker snapshot is not evidence of a prompt reaction or sustained coverage. Count
+occupied runtime, fresh-output lower bounds, API usage, and proof delivery separately;
+unknown is not zero and a ready list is not occupancy. No nested extra pool may exceed
+the shared cap.
+Operational acceptance requires a natural post-merge completion whose coordinator-owned
+batch shows `ready_at` before completion, the actual activation call before detailed
+adoption, and the successor's current `task_started` and first useful output. That one
+transition establishes ordering, not sustained floor coverage; the existing interval audit
+remains the latter's evidence.
 Children do not write the primary index or shared telemetry concurrently. The primary
 telemetry owner records each child using `telemetry.py native-record ROLLOUT` with
 `--name --role --issue --thread-id --root-thread-id --key-label --worktree --status`
-and optional `--pr`; effective metadata must show Astra Ultra. Root/parent IDs,
+and `--job-class --requested-model`, plus `--hardness-reason` for hard Astra jobs.
+Effective bound-turn contexts must satisfy the recorded classification. Root/parent IDs,
 timestamps, outcome and raw observed counters are retained. Aggregation scope is
 unknown: never sum parent and child counters without independent evidence. Native
 review uses the exact-head transport in `review.md`; it cannot bypass CI or merge gates.
@@ -80,6 +130,45 @@ assignments, not a falsely claimed separate read-only sandbox. Historical episod
 attempt counts and usage survive refreshes and route changes without a budget reset.
 
 ## 2. Roles and sandboxes
+
+### Sol-first jobs (superseding owner amendment, 2026-09-07)
+
+Issue #301 comment5573256033 supersedes the earlier cleanup-only whitelist.
+Routine/bounded jobs default to exact `gpt-5.6-sol`/`ultra`, including routine
+existing-statement proof work, build repairs and independent reviews. Main chooses
+`--job-class hard|escalated|source_semantic|control_policy|hard_review` with an
+explicit `--hardness-reason` for genuinely difficult or escalated Astra work.
+New game/hypothesis/source-semantic decisions and control-policy reviews justify
+Astra; Lean files, prover/reviewer roles, or missing historical samples alone do not.
+Exact edit specifications remain appropriate for mechanical cleanup, not a universal
+Sol gate. The historical C01/C02 audit is retained as evidence, not a role ceiling.
+
+For a model change create a NEW explicit-model native child with Ultra and
+`fork_turns="none"`; follow-up to an Astra thread does not switch its model.
+Link predecessor thread, assignment, worktree, checkpoint and cumulative budget.
+No permission, account, root identity, lease or capacity setting changes here.
+All current-turn contexts are checked; observed models are not inferred from a
+requested argument. Independent review still binds identity, fresh assignment,
+head, prompt and actual completed turn. Hard control-policy review remains Astra.
+
+At reviewed activation, main records one timestamp and passes `--activation-at`
+to native telemetry (or `MIPSTARRE_MODEL_POLICY_ACTIVATION_AT` to the publisher).
+Use `--dispatch-kind new` only on a verified first native task; resumed tasks
+use `resume`, and pre-activation current tasks use `grandfathered`. Grandfathering
+requires actual pre-activation turn evidence, not a caller label. Main is excluded.
+`model_policy.py --ratio-registry results/telemetry/sessions.jsonl --activation-at
+TIMESTAMP` reports the last 100 distinct new dispatches, plus separate cumulative
+counts. Target 20:1 within 10:1..50:1; unknown observations are not invented,
+later known observations resolve them, and contradictory observations stay unknown.
+Zero Astra is not a measurable ratio. Record finite-prefix/availability deviations;
+never add filler or delay necessary hard work to manufacture a ratio.
+
+No live activation until normal CI, independent control-policy review, service
+merge and an explicit new Sol/Ultra runtime observation. Catalog/CLI Ultra is not
+provider-measured reasoning. External admission stays zero; deploy the shim with
+its adjacent checked helper, never as a stale standalone copy. Keep all normal
+caller, declaration, statement-integrity, proof-debt, CI/review and merge gates.
+Escalation preserves all accumulated attempts, time, work and historical evidence.
 
 Eight roles, fixed (`DESIGN.md`, "Naming and identity conventions"):
 
@@ -185,8 +274,9 @@ The shim rejects multi-agent enable flags and whole `features`/`agents` override
 Primary unsets inherited `CODEX_HOME`; second sets it for execution and rollout
 lookup to `MIPSTARRE_CODEX_HOME_SECOND` (default
 `~/.cache/mipstarre-dev/codex-home-yxy`). Review and autofix inherit these
-variables unchanged. All roles require `gpt-6-astra` and literal CLI `ultra`, including
-resumes and mathfix. Dispatch `--effort`, `MIPSTARRE_REVIEW_EFFORT` and
+variables unchanged. The published owner policy selects exact Sol for routine jobs
+and Astra for hard jobs with a reason; mathfix remains a hard role. Resumes do not
+switch model or reset budgets. Dispatch `--effort`, `MIPSTARRE_REVIEW_EFFORT` and
 `MIPSTARRE_AUTOFIX_EFFORT` default to `ultra`; every other effort fails rather than
 being normalized. The owner's verified space login is not rewritten here; the
 historical scoped-home directory name may still contain `relay1` for continuity.

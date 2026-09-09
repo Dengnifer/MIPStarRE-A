@@ -95,71 +95,45 @@ theorem combinePoly_eval {K : Type*} [CommSemiring K] {m : ℕ}
       u (betaVar m) * MvPolynomial.eval (u ∘ embZ m) g
   simp [combinePoly, MvPolynomial.eval_rename]
 
-/-- Formalization-only auxiliary for `def:combine-map`: a fresh variable times
-a renamed bounded polynomial keeps every individual degree at most `d`.  The
-renaming misses the fresh variable, so the degree-one contribution of the
-variable and the degree-`d` contribution of the renamed polynomial never meet
-on a common coordinate.  Blueprint
-`blueprint/src/chapter/ch15_qpbt_combining.tex:445-480`, paper
+/-- A fresh variable times an injectively renamed bounded polynomial retains
+the same individual-degree bound.  This is a formalization-only auxiliary for
+`def:combine-map`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:970-983`. -/
-private theorem X_mul_rename_mem_polyFunc {K : Type*} [CommSemiring K]
+private theorem x_mul_rename_mem_polyFunc {K : Type*} [CommSemiring K]
     {m n d : ℕ} (hd : 1 ≤ d) {e : Fin m → Fin n} (he : Function.Injective e)
     {a : Fin n} (ha : ∀ i, e i ≠ a) {p : MvPolynomial (Fin m) K}
     (hp : p ∈ polyFunc m K d) :
     MvPolynomial.X a * MvPolynomial.rename e p ∈ polyFunc n K d := by
   classical
-  have hXdeg : ∀ j : Fin n,
-      (MvPolynomial.X a : MvPolynomial (Fin n) K).degreeOf j ≤
-        if j = a then 1 else 0 := by
-    intro j
+  have hrenOutside {j : Fin n} (hj : j ∉ Set.range e) :
+      (MvPolynomial.rename e p).degreeOf j = 0 := by
+    apply Nat.le_zero.mp
     rw [MvPolynomial.degreeOf_le_iff]
     intro s hs
-    have hs1 : s ∈ ({Finsupp.single a 1} : Finset (Fin n →₀ ℕ)) := by
-      rw [MvPolynomial.X] at hs
-      exact MvPolynomial.support_monomial_subset hs
-    rw [Finset.mem_singleton] at hs1
-    subst hs1
-    by_cases h : j = a
-    · subst h; simp
-    · simp [Ne.symm h]
-  have hsupp : (MvPolynomial.rename e p).support =
-      p.support.image (Finsupp.mapDomain e) :=
-    MvPolynomial.support_rename_of_injective he
-  have hrenAll : ∀ j : Fin n, (MvPolynomial.rename e p).degreeOf j ≤ d := by
-    intro j
-    rw [MvPolynomial.degreeOf_le_iff]
-    intro s hs
-    rw [hsupp] at hs
-    obtain ⟨t, ht, rfl⟩ := Finset.mem_image.mp hs
-    by_cases h : ∃ i, e i = j
-    · obtain ⟨i, rfl⟩ := h
-      rw [Finsupp.mapDomain_apply he]
-      exact (MvPolynomial.mem_restrictDegree _ p d).mp hp t ht i
-    · have h0 : (Finsupp.mapDomain e t) j = 0 :=
-        Finsupp.mapDomain_notin_range t j (by rintro ⟨i, rfl⟩; exact h ⟨i, rfl⟩)
-      omega
-  have hrenA : (MvPolynomial.rename e p).degreeOf a ≤ 0 := by
-    rw [MvPolynomial.degreeOf_le_iff]
-    intro s hs
-    rw [hsupp] at hs
-    obtain ⟨t, ht, rfl⟩ := Finset.mem_image.mp hs
-    have h0 : (Finsupp.mapDomain e t) a = 0 :=
-      Finsupp.mapDomain_notin_range t a (by rintro ⟨i, rfl⟩; exact ha i rfl)
-    omega
+    rw [MvPolynomial.support_rename_of_injective he] at hs
+    obtain ⟨t, _, rfl⟩ := Finset.mem_image.mp hs
+    simp [Finsupp.mapDomain_notin_range _ _ hj]
+  have hrenAll (j : Fin n) : (MvPolynomial.rename e p).degreeOf j ≤ d := by
+    by_cases hj : j ∈ Set.range e
+    · obtain ⟨i, rfl⟩ := hj
+      rw [MvPolynomial.degreeOf_rename_of_injective he]
+      exact degreeOf_le_of_mem_polyFunc hp i
+    · rw [hrenOutside hj]
+      exact Nat.zero_le d
+  have haRange : a ∉ Set.range e := by
+    rintro ⟨i, hi⟩
+    exact ha i hi
   refine (MvPolynomial.mem_restrictDegree _ _ _).mpr ?_
   intro s hs j
   refine MvPolynomial.degreeOf_le_iff.mp ?_ s hs
-  refine (MvPolynomial.degreeOf_mul_le j _ _).trans ?_
-  by_cases h : j = a
-  · have h1 : (MvPolynomial.X a : MvPolynomial (Fin n) K).degreeOf j ≤ 1 := by
-      simpa [h] using hXdeg j
-    have h2 : (MvPolynomial.rename e p).degreeOf j ≤ 0 := by
-      rw [h]; exact hrenA
-    omega
-  · have h0 : (MvPolynomial.X a : MvPolynomial (Fin n) K).degreeOf j ≤ 0 := by
-      simpa [h] using hXdeg j
-    have h2 := hrenAll j
-    omega
+  by_cases hj : j = a
+  · subst j
+    rw [mul_comm]
+    exact (MvPolynomial.degreeOf_mul_X_self a _).trans (by
+      rw [hrenOutside haRange]
+      omega)
+  · rw [mul_comm, MvPolynomial.degreeOf_mul_X_of_ne _ hj]
+    exact hrenAll j
 
 /-- The combining polynomial has individual degree at most `d` when
 `hd : 1 ≤ d`.  The coordinate blocks are disjoint: `f` depends only on the
@@ -191,8 +165,8 @@ theorem combinePoly_mem_polyFunc {K : Type*} [CommSemiring K] {m d : ℕ}
   have haZ : ∀ i, embZ m i ≠ betaVar m := by
     intro i hi
     simpa using hsymm hi
-  exact Submodule.add_mem _ (X_mul_rename_mem_polyFunc hd hX haX hf)
-    (X_mul_rename_mem_polyFunc hd hZ haZ hg)
+  exact Submodule.add_mem _ (x_mul_rename_mem_polyFunc hd hX haX hf)
+    (x_mul_rename_mem_polyFunc hd hZ haZ hg)
 
 /-- Evaluate one member of a global polynomial pair at a point, selecting the
 component by Pauli basis.  This is formalization-only support for
@@ -279,25 +253,48 @@ blueprint
 theorem combineLinePolynomial_natDegree_le {K : Type*} [CommSemiring K] {c : ℕ}
     (aX bX aZ bZ uα vα uβ vβ : K) (f g : Fin (c + 1) → K) :
     (combineLinePolynomial aX bX aZ bZ uα vα uβ vβ f g).natDegree ≤ c + 1 := by
-  have key : ∀ (a b u v : K) (h : Fin (c + 1) → K),
+  have coefficientDegree : ∀ h : Fin (c + 1) → K,
+      (linePolynomialOfCoefficients h).natDegree ≤ c := by
+    intro h
+    refine Polynomial.natDegree_sum_le_of_forall_le _ _ ?_
+    intro i _
+    refine Polynomial.natDegree_mul_le.trans ?_
+    rw [Polynomial.natDegree_C]
+    have hpow : (Polynomial.X ^ i.val : Polynomial K).natDegree ≤ i.val := by
+      refine Polynomial.natDegree_pow_le.trans ?_
+      have hX := Polynomial.natDegree_X_le (R := K)
+      calc
+        i.val * (Polynomial.X : Polynomial K).natDegree ≤ i.val * 1 :=
+          Nat.mul_le_mul_left _ hX
+        _ = i.val := by ring
+    have hi : i.val ≤ c := Nat.lt_succ_iff.mp i.isLt
+    omega
+  have affineDegree : ∀ u v : K,
+      (Polynomial.C u + Polynomial.C v * Polynomial.X).natDegree ≤ 1 := by
+    intro u v
+    refine (Polynomial.natDegree_add_le _ _).trans (max_le ?_ ?_)
+    · simp [Polynomial.natDegree_C]
+    · refine Polynomial.natDegree_mul_le.trans ?_
+      rw [Polynomial.natDegree_C]
+      simpa using Polynomial.natDegree_X_le (R := K)
+  have summandDegree : ∀ (a b u v : K) (h : Fin (c + 1) → K),
       ((Polynomial.C u + Polynomial.C v * Polynomial.X) *
         (linePolynomialOfCoefficients h).comp
           (Polynomial.C a + Polynomial.C b * Polynomial.X)).natDegree ≤ c + 1 := by
     intro a b u v h
     refine Polynomial.natDegree_mul_le.trans ?_
-    have h1 := affineFactor_natDegree_le u v
-    have h2 : ((linePolynomialOfCoefficients h).comp
+    have hfactor := affineDegree u v
+    have hcomp : ((linePolynomialOfCoefficients h).comp
         (Polynomial.C a + Polynomial.C b * Polynomial.X)).natDegree ≤ c := by
       refine Polynomial.natDegree_comp_le.trans ?_
-      calc (linePolynomialOfCoefficients h).natDegree *
-            (Polynomial.C a + Polynomial.C b * Polynomial.X).natDegree
-          ≤ c * 1 :=
-            Nat.mul_le_mul (linePolynomialOfCoefficients_natDegree_le h)
-              (affineFactor_natDegree_le a b)
+      calc
+        (linePolynomialOfCoefficients h).natDegree *
+              (Polynomial.C a + Polynomial.C b * Polynomial.X).natDegree ≤ c * 1 :=
+          Nat.mul_le_mul (coefficientDegree h) (affineDegree a b)
         _ = c := by ring
     omega
   exact (Polynomial.natDegree_add_le _ _).trans
-    (max_le (key aX bX uα vα f) (key aZ bZ uβ vβ g))
+    (max_le (summandDegree aX bX uα vα f) (summandDegree aZ bZ uβ vβ g))
 
 /-- Combine two degree-`c` line polynomials using explicit affine
 reparameterizations.  Coefficients through degree `c + 1` are extracted from
@@ -354,7 +351,8 @@ theorem combineLinePoly_spec {K : Type*} [Field K] {m c : ℕ}
     rw [Polynomial.eval_eq_sum_range' (n := c + 1 + 1) (by omega) t]
     simp only [evalCoefficient, combineLinePoly]
     exact Fin.sum_univ_eq_sum_range
-      (fun k => (combineLinePolynomial aX bX aZ bZ uα vα uβ vβ f g).coeff k * t ^ k)
+      (fun k =>
+        (combineLinePolynomial aX bX aZ bZ uα vα uβ vβ f g).coeff k * t ^ k)
       (c + 1 + 1)
   rw [heval, combineLinePolynomial]
   simp only [Polynomial.eval_add, Polynomial.eval_mul, Polynomial.eval_C,
