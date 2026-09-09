@@ -178,24 +178,6 @@ def evalAt {P : AdmissibleParams} (W : PauliKind)
   | .X => MvPolynomial.eval u pair.1.1
   | .Z => MvPolynomial.eval u pair.2.1
 
-/-- Interpret a bounded coefficient list as an ordinary univariate
-polynomial.  This helper makes the line-combination definition use Mathlib's
-actual polynomial composition operation. -/
-noncomputable def linePolynomialOfCoefficients {K : Type*} [Semiring K]
-    {c : ℕ} (f : Fin (c + 1) → K) : Polynomial K :=
-  ∑ i : Fin (c + 1), Polynomial.C (f i) * Polynomial.X ^ i.val
-
-/-- Evaluating the polynomial represented by a coefficient list agrees with
-`evalCoefficient`. -/
-theorem linePolynomialOfCoefficients_eval {K : Type*} [Semiring K]
-    {c : ℕ} (f : Fin (c + 1) → K) (t : K) :
-    (linePolynomialOfCoefficients f).eval t = evalCoefficient f t := by
-  change Polynomial.eval t
-      (∑ i ∈ Finset.univ, Polynomial.C (f i) * Polynomial.X ^ i.val) =
-    ∑ i ∈ Finset.univ, f i * t ^ i.val
-  rw [Polynomial.eval_finsetSum]
-  simp
-
 /-- The univariate polynomial before coefficient extraction in
 `combineLinePoly`.  The four first scalars describe the affine parameters on
 the two projected lines; the last four are the affine `alpha` and `beta`
