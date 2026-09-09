@@ -6002,3 +6002,67 @@ not actual commit/publication hooks. No productive session was killed.
   CI on exact head `e90a2a689fef401652e20d5fd1de819ec293337a` completed non-partially
   with all nine contexts green in 288 seconds (manifest SHA-256
   `6969824f8253f8fbc4b78fe82a40caf2ce8709c7798c4e418626493e0c3491e9`).
+- 2026-09-08T19:12:11Z: The first selected post-merge PR #426 handoff sample
+  failed its strict runtime target. The issue #422 successor was fully prepared
+  at 18:53:41.259Z, 751.310 seconds before the exact PR #365 predecessor
+  completed at 19:06:12.569Z. The coordinator began the native call at
+  19:07:15.606Z and the new Sol Ultra turn started at 19:07:15.645Z, a
+  completion-to-start latency of 63.076 seconds and a 3.076-second miss. The
+  first attributable model output arrived after 88.689 seconds and the first
+  useful source read after 110.070 seconds. The 19:12 occupied/fresh 9/9
+  snapshot does not establish coverage or acceptance. Exact prepared and final
+  receipts are archived under `owner-audits/throughput-correction-20260908/`;
+  earlier 294.078- and 354.659-second failures, all predecessor costs, and the
+  issue #422 absolute 19:17:15.645Z source deadline remain unchanged.
+- A separate PR #448 readiness-routing incident misidentified a diagonal line
+  resampling head as the required mixed bound and delivered steering to an
+  already occupied ROOT446 actor. No dependent proof was admitted, no new task
+  or budget resulted, and the original 18:47:10--18:57:10 source interval and
+  actual source effects remain historical evidence. The incident archive does
+  not claim a new worker, repair the dependency, or alter any source statement,
+  review gate, allocation, model policy, or B8 counter.
+- 2026-09-08T19:49:57Z: The second selected post-merge PR #426 handoff sample
+  failed the strict runtime target. The PR #400 review-request payload was
+  prepared at 19:23:01.896Z, 881.014 seconds before the PR #422 predecessor
+  completed at 19:37:42.910Z. The native call began at 19:38:56.067Z and the
+  successor turn started at 19:38:56.081Z, so completion-to-start took 73.171
+  seconds and missed the 60-second target by 13.171 seconds. First model output
+  followed completion after 93.019 seconds and the first attributable useful
+  workflow-guard output after 110.991 seconds. The original sealed eight-minute
+  budget and the later root-directed six-minute deadline remain distinct; no
+  timestamp, predecessor cost, or proof budget was reset. The earlier
+  63.076-second miss remains unchanged, and neither sample proves sustained
+  coverage or runtime acceptance. Exact prepared and result receipts are
+  archived under `owner-audits/throughput-correction-20260908/`.
+- 2026-09-08T21:33:07Z: PR #476 deployed paired completed-response recovery at
+  exact head `4c343e6c88b7714a3bbf121b3dc23839df303e3e`. Its sole canonical CI
+  passed all nine contexts in 249 seconds and independent hard review
+  `5147206622` approved the control path with no findings. A later assigned
+  helper attempted another launch, but the canonical `ci-476.lock` refused it
+  before any job or status write, so no duplicate CI occurred. The service
+  gate merged PR #476 as `81148545f0752ec09b3efe88332b49bb771312be`.
+  The finite service boundary parked five build and four session rows under
+  same-inode locks, released the locks before service, and restored those rows
+  ahead of later appends with exact hashes, order, multiplicity, and JSON
+  validity. Unrelated review publishers remained live; no global writer-idle
+  wait or clean-tree gate relaxation was used.
+- 2026-09-08T21:36:00Z: The merged PR #476 continuation consumed PR #400's
+  preserved CODE request `48c8adbc83d749b0b79fb9faac681534` and PROSE
+  request `8aaa7139221c4975a2082d886b77714d` through the normal trust, parser,
+  combiner, CI, head, lock, and publisher gates. Canonical review `5147250926`
+  recorded two CODE and five PROSE findings at exact head
+  `37a2e268bc1ef7434e13c9b8b3daf3c02d18b94e`. No review was restarted,
+  no response was edited, and the source worktree stayed clean. The original
+  reviewer and source holds were released, while PR #400 remained correctly
+  ineligible to merge. The isolated repair `06583ccc58b1a9077a4cd330d3f3749e1979c081`
+  remains a pending source handoff for normal checked publication, CI, and a
+  fresh independent review. Exact receipts and artifacts are archived under
+  `owner-audits/review-recovery-20260908/`.
+- 2026-09-08T21:54:17.291Z: The capable refill coordinator reconciled all 19
+  canonical review requests created after PR #426 merged. The archive retains
+  the earlier 21:48:35.782Z snapshot, then adds five exact reviewer starts and
+  preserves original timestamp precision, including the PR #476 file-time
+  correction. Unknown consumer, publication, and other lifecycle endpoints
+  remain null rather than being inferred as zero latency. These are read-only
+  cache artifacts, not selected-window occupancy, API-utilization, or runtime
+  acceptance claims.
