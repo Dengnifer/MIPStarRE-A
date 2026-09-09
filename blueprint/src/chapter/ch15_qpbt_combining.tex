@@ -937,6 +937,33 @@ assembled by Fourier averaging.
 
 \section{Combined line measurements}
 
+\begin{lemma}[Formalization support for coefficient polynomial agreement]
+	\label{lem:coefficient-polynomial-agreement}
+	\lean{MIPStarRE.QPBT.evalCoefficient_collision_card_le}
+	\lean{MIPStarRE.QPBT.linePolynomialOfCoefficients_eq_ofFn,
+		MIPStarRE.QPBT.linePolynomialOfCoefficients_eval,
+		MIPStarRE.QPBT.linePolynomialOfCoefficients_injective,
+		MIPStarRE.QPBT.linePolynomialOfCoefficients_natDegree_le}
+	\leanok
+	Let $K$ be a finite integral domain, let $c\in\N$, and let
+	$f,g\in K^{c+1}$ be distinct coefficient vectors. Their polynomials
+	$p_f(T)=\sum_{i=0}^{c}f_iT^i$ and $p_g(T)=\sum_{i=0}^{c}g_iT^i$
+	agree at at most $c$ elements of $K$.
+	The coefficient representation is injective, preserves evaluation,
+	and has natural degree at most $c$.
+	This is a formalization-only auxiliary for the Schwartz--Zippel step
+	in the proof of Lemma~\ref{lem:qld-xz-lines}
+	(\texttt{14\_analysis\_of\_the\_pauli\_basis\_test.tex:955}).
+	There is no restriction $c<|K|$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	The coefficient representation is injective, preserves evaluation,
+	and gives polynomials of degree at most $c$. If the polynomials agreed
+	at more than $c$ elements, the univariate root bound applied to their
+	difference would force them to be equal, contradicting $f\ne g$.
+\end{proof}
+
 \begin{lemma}[Combined line measurements]
 	\label{lem:qld-xz-lines}
 	\lean{MIPStarRE.QPBT.CombinedLinesWitness}
