@@ -17,9 +17,14 @@ so no field value is substituted when an evaluation is undefined.
 
 ## References
 
-The claims are blueprint `lem:claim-17-1`, `lem:claim-17-2`, and
+The source claims are blueprint `lem:claim-17-1`, `lem:claim-17-2`, and
 `lem:claim-17-3`, with paper origin
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1140-1209`.
+The proved first and third estimates are Lean-only results for the directly
+indexed law, linked separately as `lem:claim-17-1-direct-real` and
+`lem:claim-17-3-direct-real`. Their scalar expressions take real parts;
+the source correspondence is discussed in
+`docs/paper-gaps/qpbt_combined-lines-error-term.tex`.
 -/
 
 open scoped BigOperators
@@ -335,9 +340,18 @@ private theorem completed_pair_norm_sq_sum {P : AdmissibleParams} {ε δQ : ℝ}
     rw [hQsome ab, hZsome ab.2, hXsome ab.1]
 
 set_option maxHeartbeats 400000 in
-/-- Replacing the combined point measurement by the ordered `Z`-then-`X`
-point product costs a square-root joint-point error.  This is
-`lem:claim-17-1`, paper lines 1140--1145. -/
+/-- Lean-only real-part replacement estimate for the directly indexed subline
+law, recorded in blueprint `lem:claim-17-1-direct-real`. Replacing the combined
+point measurement by the ordered `Z`-then-`X` product costs at most `2 * sqrt δQ`.
+
+**Scope restriction:** This is not source Claim `claim:17-1` at
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1140-1165`:
+the source bounds the complex magnitude and uses the seed-indexed subline law.
+The ordered product need not be Hermitian. The proof below controls real parts
+using the adjoint square and the same-placement bound `4 * δQ`; it supplies no
+complex-modulus conversion or transport to the source law. Those two
+correspondence obligations remain open in
+`docs/paper-gaps/qpbt_combined-lines-error-term.tex`. -/
 theorem subline_replace_by_ordered_product :
     ∃ C : ℝ, 0 < C ∧
       ∀ (P : AdmissibleParams) (ε δQ δP : ℝ)
@@ -597,9 +611,16 @@ theorem subline_remove_X_factor :
           C * (P.m : ℝ) * Real.rpow (deltaLine ε) (1 / 2 : ℝ) := by
   sorry
 
-/-- The remaining `Z`-point correlation is close to one with the fourth-root
-error from the point and line constructions.  This is `lem:claim-17-3`, paper
-lines 1204--1209. -/
+/-- Lean-only estimate for the remaining `Z`-point correlation under the directly
+indexed subline law, recorded in blueprint `lem:claim-17-3-direct-real`.
+
+**Scope restriction:** The scalar expression takes real parts. Its opposite-placed
+positive factors commute, so the underlying correlation is real, but the law is
+still the directly indexed auxiliary law of `SubLineWitness`. This does not
+establish source Claim `claim:17-3` at
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1204-1209` until
+the source-distribution transport recorded in
+`docs/paper-gaps/qpbt_combined-lines-error-term.tex` is proved. -/
 theorem subline_Z_term_near_one :
     ∃ C : ℝ, 0 < C ∧
       ∀ (P : AdmissibleParams) (ε δQ δP : ℝ)
