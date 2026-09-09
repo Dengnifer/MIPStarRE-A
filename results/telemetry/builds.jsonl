@@ -966,3 +966,5 @@
 {"ts": "2026-09-09T14:40:33+0800", "kind": "ci-build", "trigger": "ci.sh pr=448", "seconds": 108, "outcome": "success", "sha": "2aed18ea09fd85845cfdc992fc963c5e9711aeec", "note": "branch issue-444-diagonal-line-resampling"}
 {"ts": "2026-09-09T14:41:14+0800", "kind": "ci-build", "trigger": "ci.sh pr=359", "seconds": 34, "outcome": "success", "sha": "2c363ea7da78fc143f8a6d8f7b96d0fc2e0480ec", "note": "branch issue-348-supplied-extended-game-passing-value"}
 {"ts": "2026-09-09T14:41:27+0800", "kind": "ci-build", "trigger": "ci.sh pr=212", "seconds": 23, "outcome": "success", "sha": "5477202d58529285f962af426c8ac33f05f3abc3", "note": "branch issue-117-polynomial-and-joint-point-foundations"}
+{"ts": "2026-09-09T14:44:08+0800", "kind": "ci-build", "trigger": "ci.sh pr=363", "seconds": 154, "outcome": "success", "sha": "bb3072f6265a5d153d6a06292f9457b259e3d75f", "note": "branch issue-362-native-point-consistency"}
+{"ts": "2026-09-09T14:45:14+0800", "kind": "ci-build", "trigger": "ci.sh pr=410", "seconds": 20, "outcome": "success", "sha": "b58aa3086a4669a1d4272d5439f3c63fa7d151f6", "note": "branch issue-406-witness-marginal-distance"}
