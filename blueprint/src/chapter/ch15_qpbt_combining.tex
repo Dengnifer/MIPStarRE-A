@@ -1075,7 +1075,7 @@ analyzed, together with candidate repairs, in
 	\lean{MIPStarRE.QPBT.combineLinePoly}
 	\lean{MIPStarRE.QPBT.combineLinePolynomial_natDegree_le}
 	\lean{MIPStarRE.QPBT.IsCombineLineCompatible, MIPStarRE.QPBT.combineLinePoly_spec}
-	\notready
+	\leanok
 	\uses{def:polyfunc, def:line, def:ideg-deg-polynomials}
 	For $f, g \in \mathrm{ideg}_{d,m}(\F_q)$, the polynomial
 	$\mathrm{combine}_{f,g} \in \mathrm{ideg}_{d,2m+2}(\F_q)$ is defined by
@@ -1105,6 +1105,92 @@ analyzed, together with candidate repairs, in
 	polynomials of degree at most $md$ in the line parameter, and each is
 	multiplied by an affine factor of degree at most one.
 \end{definition}
+
+\begin{lemma}[Formalization support for completeness under register placement]
+	\label{lem:qld-placement-completeness}
+	\lean{MIPStarRE.QPBT.place_sum}
+	\lean{MIPStarRE.QPBT.sum_placed_measurement_eq_one}
+	\lean{MIPStarRE.QPBT.sum_placed_measurement_products_eq_one}
+	\leanok
+	\uses{def:symmetric-equivalents, def:povm-conventions}
+	This auxiliary lemma isolates the finite-sum identities used in
+	Lemma~\ref{lem:qld-4-12}; it is not a named statement of
+	\cite{Ji2020MIPStar}. Fix any register placement $p$ from
+	Definition~\ref{def:symmetric-equivalents}, and write $(A)_p$ for the
+	operator acting as $A$ on those registers and as the identity elsewhere.
+	For a finite operator family $\{A_a\}_{a\in I}$ on the corresponding
+	expanded local space,
+	\[
+		\Big(\sum_{a\in I}A_a\Big)_p=\sum_{a\in I}(A_a)_p.
+	\]
+	For any two complete measurements $\{M_a\}_{a\in I}$ and
+	$\{N_b\}_{b\in J}$ on that space, with finite outcome sets $I,J$,
+	\[
+		\sum_{a\in I}(M_a)_p=\Id,
+		\qquad
+		\sum_{(a,b)\in I\times J}(M_aN_b)_p=\Id.
+	\]
+	Neither projectivity nor commutation between the measurements is required.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:symmetric-equivalents, def:povm-conventions}
+	Each placement preserves finite sums and identity by its matrix-entry
+	formula. The first completeness identity follows by placing
+	$\sum_a M_a=\Id$. For the second, distributivity and completeness give
+	\[
+		\sum_{a,b}M_aN_b
+		=\Big(\sum_a M_a\Big)\Big(\sum_b N_b\Big)=\Id;
+	\]
+	apply preservation of sums and identity once more.
+\end{proof}
+
+\begin{lemma}[Formalization support for averaged affine coarse-graining]
+	\label{lem:qld-affine-distance-contraction}
+	\lean{MIPStarRE.QPBT.opFamilyDistSq_uniform_affine_postprocess_le}
+	\leanok
+	\uses{def:povm-distance}
+	This auxiliary lemma isolates the squared-distance calculation used in
+	Lemma~\ref{lem:qld-4-12}; it is not a named statement of the source paper.
+	Let $U$ be a nonempty finite set, let $K$ be a finite field of order $q$,
+	and let $\ket{\psi}$ be a vector in a finite-dimensional complex Hilbert
+	space. For each $u\in U$, let $\{A^u_p\}_{p\in K^2}$ and
+	$\{B^u_p\}_{p\in K^2}$ be operator families satisfying
+	$\sum_p A^u_p=\sum_p B^u_p$. For $\alpha,\beta\in K$, put
+	$h_{\alpha,\beta}(a,b)=\alpha a+\beta b$ and define
+	\[
+		A^{u,\alpha,\beta}_c=\sum_{p:h_{\alpha,\beta}(p)=c}A^u_p,
+		\qquad
+		B^{u,\alpha,\beta}_c=\sum_{p:h_{\alpha,\beta}(p)=c}B^u_p.
+	\]
+	Then, with all expectations uniform and independent,
+	\[
+		\E_{u,\alpha,\beta}\sum_{c\in K}
+		\big\|(A^{u,\alpha,\beta}_c-B^{u,\alpha,\beta}_c)\ket{\psi}\big\|^2
+		\le
+		\E_u\sum_{p\in K^2}\big\|(A^u_p-B^u_p)\ket{\psi}\big\|^2.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	Fix $u$ and put $v_p=(A^u_p-B^u_p)\ket{\psi}$. Equality of the
+	operator totals gives $\sum_p v_p=0$. For distinct $p,p'\in K^2$,
+	the equation $h_{\alpha,\beta}(p)=h_{\alpha,\beta}(p')$ is one
+	nonzero homogeneous linear equation in $\alpha,\beta$, so it has $q$
+	solutions among the $q^2$ coefficient pairs. Thus its probability is
+	$1/q$, whereas a pair collides with itself with probability one.
+	Expanding the squared norms and averaging gives
+	\[
+		\E_{\alpha,\beta}\sum_c
+		\Big\|\sum_{p:h_{\alpha,\beta}(p)=c}v_p\Big\|^2
+		=\Big(1-\frac1q\Big)\sum_p\|v_p\|^2
+		 +\frac1q\Big\|\sum_p v_p\Big\|^2
+		=\Big(1-\frac1q\Big)\sum_p\|v_p\|^2
+		\le\sum_p\|v_p\|^2.
+	\]
+	Averaging over $u$ proves the assertion. No positivity or commutativity
+	of the operator families is required.
+\end{proof}
 
 \begin{lemma}[Combined point measurement on the extended coordinates]
 	\label{lem:qld-4-12}
@@ -1150,17 +1236,31 @@ analyzed, together with candidate repairs, in
 	Furthermore, all symmetric equivalents of these approximations also hold.
 \end{lemma}
 \begin{proof}
-	\uses{lem:qld-4-10, fact:data-processing}
+	\uses{lem:qld-4-10, lem:qld-placement-completeness,
+		lem:qld-affine-distance-contraction}
 	Define
 	$\hat{Q}^{x,z,\alpha,\beta}_{c}
 	= \sum_{a,b \,:\, \alpha a + \beta b = c} \hat{Q}^{x,z}_{a,b}$,
 	a coarse-graining of the projective measurement of
-	Lemma~\ref{lem:qld-4-10}, hence itself projective. A uniformly random
-	point of $\F_q^{2m+2}$ has uniformly random coordinates $(x,z)$, so the
-	self-consistency and consistency properties follow from those of
-	$\{\hat{Q}^{x,z}_{a,b}\}$ established in Lemma~\ref{lem:qld-4-10}
-	together with Lemma~\ref{fact:data-processing}, which shows that
-	coarse-graining the outcomes preserves the $\delta_Q$ bounds.
+	Lemma~\ref{lem:qld-4-10}, hence itself projective. For each $(x,z)$,
+	the joint measurement and both ordered product families have total
+	identity: completeness gives
+	\[
+		\sum_{a,b}\hat{M}^{(\mathrm{Point},X),x}_a
+		\hat{M}^{(\mathrm{Point},Z),z}_b
+		=\Big(\sum_a\hat{M}^{(\mathrm{Point},X),x}_a\Big)
+		 \Big(\sum_b\hat{M}^{(\mathrm{Point},Z),z}_b\Big)=\Id,
+	\]
+	and the same calculation holds in the reverse order.
+	Lemma~\ref{lem:qld-placement-completeness} gives equal totals for the
+	compared families at every opposite placement. Apply
+	Lemma~\ref{lem:qld-affine-distance-contraction} to each of the three
+	comparisons of Lemma~\ref{lem:qld-4-10}. Uniform sampling of
+	$(x,z,\alpha,\beta)$ samples $(x,z)$ and both coefficients independently,
+	so the averaged squared distances retain their $\delta_Q$ bounds,
+	including all symmetric equivalents. This argument presupposes the
+	joint measurements whose existence is the separate construction in
+	Lemma~\ref{lem:qld-4-10}.
 \end{proof}
 
 \begin{lemma}[Combined line measurement on the extended coordinates]
@@ -1222,7 +1322,7 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 	\lean{MIPStarRE.QPBT.restrictedALineDist, MIPStarRE.QPBT.restrictedDLineDist}
 	\lean{MIPStarRE.QPBT.restrictedALineDist_isProbability}
 	\lean{MIPStarRE.QPBT.restrictedDLineDist_isProbability}
-	\notready
+	\leanok
 	\uses{def:line-point-dist, def:ld-question-distribution}
 	For any $i \in \{1, \dots, m\}$, the \emph{$i$-th restricted
 	axis-parallel line distribution} $D_{\mathrm{ALine},i}$ is the
@@ -2014,6 +2114,51 @@ projective measurement whose outcomes are pairs of global polynomials.
 	candidate repairs are analyzed in
 	\cite{gap:qpbt_ld-dimension-divisibility}.
 \end{remark}
+
+\begin{lemma}[Formalization support for the supplied scalar point measurement]
+	\label{lem:qld-supplied-scalar-point-measurement}
+	\lean{MIPStarRE.QPBT.ExtendedLineGame.point_values_measurement_eq_suppliedQ}
+	\leanok
+	\uses{lem:qld-4-10, lem:qld-4-12, lem:qld-4-13, def:ld-game,
+		def:bracket, def:expanded-state}
+	This is not a named statement of \cite{Ji2020MIPStar}; it identifies
+	the point measurement used in the first paragraph of the proof of
+	Lemma~\ref{lem:qld-4-7} when the point and line measurements are supplied.
+	Fix an admissible tuple $(q,m,d)$ and a projective setting as above.
+	Suppose joint point measurements $\hat{Q}^{x,z}$ and extended line
+	measurements $\hat{Q}^{\ell}$ satisfying the respective conclusions of
+	Lemmas~\ref{lem:qld-4-10} and~\ref{lem:qld-4-13} are given, with error
+	parameters $\delta_Q,\delta_L$.
+	Use them to form the directly indexed game strategy at parameters
+	$(q,2m+2,d,1)$. Let $K$ be its scalar field, and let
+	$\iota:K\simeq\F_q$ be the canonical field identification with the
+	Pauli scalar field. For $u\in K^{2m+2}$, write
+	$\iota(u)=(x,z,\alpha,\beta)$ coordinatewise, and let $A^u_s$ be
+	the answer measurement at the point question $u$ for player
+	$s\in\{\mathsf{A},\mathsf{B}\}$. Let $r$ read the singleton point
+	value tuple from an answer, returning the zero tuple on other answer
+	forms. Then the following is an exact equality of measurements on
+	$\hilb_s\ot(\C^q)^{\ot M}$, for both choices of $s$:
+	\[
+		\bigl(A^u_s\bigr)_{[\iota(r(\cdot)_0)=c]}
+		=\bigl(\hat{Q}^{x,z}_s\bigr)_{[\alpha a+\beta b=c]},
+		\qquad c\in\F_q.
+	\]
+	This identity assumes the supplied measurements and does not assert
+	the existence of the polynomial-pair measurement in
+	Lemma~\ref{lem:qld-4-7}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-4-12, def:bracket}
+	At a point question, the answer measurement first coarse-grains
+	$\hat{Q}^{x,z}_s$ by $(a,b)\mapsto\alpha a+\beta b$ and then records
+	the result $c$ as the singleton point tuple $(\iota^{-1}(c))$.
+	Compose these outcome maps with $r$ and with the map reading coordinate
+	$0$ and applying $\iota$. Since $\iota(\iota^{-1}(c))=c$, the composite
+	is exactly $(a,b)\mapsto\alpha a+\beta b$. Equality of the finite fiber
+	sums proves the measurement identity for either player.
+\end{proof}
 
 % The two lemmas below are not statements of the source; they record the
 % coordinate change for the LDT consistency conclusions and the compression of

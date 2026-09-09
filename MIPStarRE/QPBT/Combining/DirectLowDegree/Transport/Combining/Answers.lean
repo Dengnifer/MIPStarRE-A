@@ -23,7 +23,6 @@ canonical parametrizations of the line.
 
 ## Main definitions
 
-* `coefficientsOfPolynomial` — the bounded coefficient vector of a polynomial.
 * `shiftedLinePolynomial` — the affine reparametrization of a line answer.
 * `combinedAxisPolynomial` — case 2 of `def:ld-combined-strategy`.
 * `combinedDiagonalPolynomial` — case 4 of `def:ld-combined-strategy`.
@@ -47,35 +46,6 @@ open MIPStarRE.LDT.Preliminaries
 noncomputable section
 
 /-! ## Coefficient vectors and univariate polynomials -/
-
-/-- The bounded coefficient vector of a univariate polynomial.  It is a left
-inverse of `linePolynomialOfCoefficients` on polynomials of degree at most
-`n`, which is the content of `evalCoefficient_coefficientsOfPolynomial`. -/
-def coefficientsOfPolynomial {K : Type*} [Semiring K] (n : ℕ)
-    (p : Polynomial K) : Fin (n + 1) → K :=
-  fun i => p.coeff i.val
-
-/-- A polynomial of degree at most `n` is evaluated by its bounded coefficient
-vector of length `n + 1`. -/
-theorem evalCoefficient_coefficientsOfPolynomial {K : Type*} [Semiring K] {n : ℕ}
-    {p : Polynomial K} (hp : p.natDegree ≤ n) (t : K) :
-    evalCoefficient (coefficientsOfPolynomial n p) t = p.eval t := by
-  rw [Polynomial.eval_eq_sum_range' (Nat.lt_succ_of_le hp) t,
-    ← Fin.sum_univ_eq_sum_range (fun i => p.coeff i * t ^ i) (n + 1)]
-  rfl
-
-/-- The polynomial of a bounded coefficient vector has degree at most `n`. -/
-theorem linePolynomialOfCoefficients_natDegree_le {K : Type*} [Semiring K] {n : ℕ}
-    (f : Fin (n + 1) → K) :
-    (linePolynomialOfCoefficients f).natDegree ≤ n := by
-  refine Polynomial.natDegree_sum_le_of_forall_le _ _ fun i _ => ?_
-  refine le_trans (Polynomial.natDegree_C_mul_le _ _) ?_
-  calc (Polynomial.X ^ i.val : Polynomial K).natDegree
-      ≤ i.val * (Polynomial.X : Polynomial K).natDegree :=
-        Polynomial.natDegree_pow_le
-    _ ≤ i.val * 1 := Nat.mul_le_mul_left _ Polynomial.natDegree_X_le
-    _ = i.val := mul_one _
-    _ ≤ n := Nat.lt_succ_iff.mp i.isLt
 
 /-- The affine reparametrization `t ↦ evalCoefficient f (t + s)` of a bounded
 coefficient vector, as a univariate polynomial. -/
