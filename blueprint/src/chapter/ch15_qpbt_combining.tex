@@ -1204,10 +1204,12 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 	\lean{MIPStarRE.QPBT.restrictedDLineDist_isProbability}
 	\leanok
 	\uses{def:line-point-dist, def:ld-question-distribution}
-	Use coordinate indices $i\in\{0,\dots,m-1\}$ throughout this definition
-	and the following mixture estimates. Index $i$ here denotes coordinate
-	$i+1$ in the one-based notation of \cite{Ji2020MIPStar}; likewise
-	$\chi(s)$ here is one less than the paper's index function.
+	Use coordinate indices $i\in\{0,\dots,m-1\}$ throughout this definition,
+	the following mixture estimates, and the sub-line construction below. Write
+	$\bar\chi(s)=\chi(s)-1$, where $\chi$ is the one-based index function of
+	Definition~\ref{def:ld-question-distribution}. Thus $\bar\chi$ takes
+	values in $\{0,\dots,m-1\}$, and index $i$ here denotes coordinate $i+1$
+	in the one-based notation of \cite{Ji2020MIPStar}.
 	For any such $i$, the \emph{$i$-th restricted
 	axis-parallel line distribution} $D_{\mathrm{ALine},i}$ is the
 	restriction of $D_{\mathrm{ALine}}$ to pairs $(\ell, u)$ where the line
@@ -1215,11 +1217,8 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 	$\ell = (u_0, e_i)$. Similarly, the \emph{$i$-th restricted diagonal line
 	distribution} $D_{\mathrm{DLine},i}$ is the restriction of
 	$D_{\mathrm{DLine}}$ to pairs $(\ell, u)$ where the line
-	$\ell = (u_0, s, v)$ satisfies $\chi(s) = i$ and coordinates
+	$\ell = (u_0, s, v)$ satisfies $\bar\chi(s) = i$ and coordinates
 	$0, \dots, i-1$ of $v$ are $0$, with no such coordinates when $i=0$.
-	(The function $\chi$ is the one used in
-	the question distribution of the low individual degree game,
-	Definition~\ref{def:ld-question-distribution}.)
 \end{definition}
 
 \begin{lemma}[Restricted line distributions and error inflation]
@@ -1314,7 +1313,7 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 		$u$ chosen uniformly at random on $\ell$, is a mixture of
 		components indexed by a type
 		$\mathrm{v} \in \{\mathrm{ALine}, \mathrm{DLine}\}$ and indices
-		$i, j \in \{1, \dots, m\}$ with the following two properties
+		$i, j \in \{0, \dots, m-1\}$ with the following two properties
 		within the component $(\mathrm{v}, i, j)$: the pair
 		$(\ell_X, \ell_Z)$ is distributed according to the product of the
 		marginal distributions on lines of $D_{\mathrm{v},i}$ and of
@@ -1346,13 +1345,17 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 	$(\ell, u)$ from the line-point distribution over $\F_q^{2m+2}$ and write
 	$u = (u_X, u_Z, \alpha, \beta)$, so that Property~1 holds by
 	construction; all auxiliary randomness introduced below is sampled
-	independently of $(\ell, u)$. We write $\chi$ for the index function of
-	Definition~\ref{def:ld-question-distribution} at dimension $m$, whose
-	classes $\chi^{-1}(i)$ for $i \in \{1, \dots, m\}$ partition $\F_q$
-	into sets of equal size $q/m$, and $\chi_{2m+2}$ for the index function
-	at dimension $2m+2$. The function $\chi_{2m+2}$, and with it the
-	line-point distribution over $\F_q^{2m+2}$ from which $(\ell, u)$ is
-	drawn, is defined only when $2m+2$ divides $q$
+	independently of $(\ell, u)$. As in
+	Definition~\ref{def:ith-restricted-line}, write $\bar\chi$ for the
+	zero-based shift of the index function at dimension $m$. Its classes
+	$\bar\chi^{-1}(i)$ for $i \in \{0, \dots, m-1\}$ partition $\F_q$
+	into sets of equal size $q/m$. Write $\bar\chi_{2m+2}$ for the analogous
+	zero-based shift at dimension $2m+2$. For the extended-coordinate index in
+	the construction below, write $k=r-1$ when the paper writes $r$; the
+	source-line indices $i_X,i_Z$ are shifted in the same way. The function
+	$\bar\chi_{2m+2}$ is defined only when $2m+2$ divides $q$, and hence so is
+	the line-point distribution over $\F_q^{2m+2}$ from which $(\ell, u)$ is
+	drawn
 	(Definition~\ref{def:ld-question-distribution}); admissibility of
 	$(q,m,d)$ supplies only that $m$ divides $q$, and for admissible
 	parameters with $m \ge 2$ the required divisibility fails, so this
@@ -1363,17 +1366,17 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 	By a
 	\emph{fresh diagonal direction pair} we mean a pair $(s', w')$ with
 	$s'$ uniformly random in $\F_q$ and $w' \in \F_q^m$ having coordinates
-	$1, \dots, \chi(s')-1$ equal to $0$ and the remaining coordinates
+	$0, \dots, \bar\chi(s')-1$ equal to $0$ and the remaining coordinates
 	uniformly random; this is exactly the law of the coordinate--direction
 	data of the diagonal component of the line-point distribution over
 	$\F_q^m$ (Definition~\ref{def:line-point-dist}).
 
-	If $\ell$ is axis-parallel, $\ell = (v, e_j)$ with
-	$v = (v_X, v_Z, \alpha_0, \beta_0)$ and $j \in \{1, \dots, 2m+2\}$, set
+	If $\ell$ is axis-parallel, $\ell = (v, e_k)$ with
+	$v = (v_X, v_Z, \alpha_0, \beta_0)$ and $k \in \{0, \dots, 2m+1\}$, set
 	$\ell_X = (v'_X, e_{i_X})$ and $\ell_Z = (v'_Z, e_{i_Z})$ where: for
-	$1 \le j \le m$, $i_X = j$ and $i_Z$ is uniformly random in
-	$\{1,\dots,m\}$; for $m+1 \le j \le 2m$, $i_X$ is uniformly random and
-	$i_Z = j - m$; for $2m+1 \le j \le 2m+2$, both $i_X$ and $i_Z$ are
+	$0 \le k < m$, $i_X = k$ and $i_Z$ is uniformly random in
+	$\{0,\dots,m-1\}$; for $m \le k < 2m$, $i_X$ is uniformly random and
+	$i_Z = k - m$; for $2m \le k < 2m+2$, both $i_X$ and $i_Z$ are
 	uniformly random; and $v'_X, v'_Z$ are the canonical line
 	representatives of $v_X, v_Z$ for the chosen directions
 	(Definition~\ref{def:line-representative}), so that $v_X \in \ell_X$
@@ -1383,26 +1386,27 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 	the diagonal component of the line-point distribution
 	(Definition~\ref{def:ld-question-distribution} instantiated at
 	dimension $2m+2$) the direction $w = (w_X, w_Z, \gamma, \delta)$ has
-	coordinates $1, \dots, j-1$ equal to $0$, where $j = \chi_{2m+2}(s)$,
+	coordinates $0, \dots, k-1$ equal to $0$, where
+	$k = \bar\chi_{2m+2}(s)$,
 	and its remaining coordinates are uniformly random. These remaining
 	coordinates may also vanish, so $w$ need not have a nonzero coordinate
-	at index $j$ and may be the zero vector, in which case $\ell$ is a
+	at index $k$ and may be the zero vector, in which case $\ell$ is a
 	singleton (Definition~\ref{def:line}).
-	% The source proof describes w as "a direction vector whose first
-	% nonzero coordinate is j = chi(s)"
+	% In its one-based notation, the source proof describes w as "a direction
+	% vector whose first nonzero coordinate is j = chi(s)"
 	% (references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex, proof
 	% of lem:qld-sublines); the distribution delivers only the weaker
 	% property recorded here, which is the one the argument uses. The
 	% source also leaves the laws of s_X and s_Z unspecified ("chosen such
-	% that chi(s_X) = j"); the uniform choices below are needed for the
-	% exact marginals claimed in Property 2.
+	% that chi(s_X) = j" in its one-based notation); the uniform choices
+	% below are needed for the exact marginals claimed in Property 2.
 	Sample $\ell_X = (v'_X, s_X, w'_X)$ and $\ell_Z = (v'_Z, s_Z, w'_Z)$
-	where: for $1 \le j \le m$, $w'_X = w_X$ and $w'_Z = w_Z$, with $s_X$
-	uniformly random in the class $\chi^{-1}(j)$ and $s_Z$ uniformly
-	random in the class $\chi^{-1}(1)$; for $m+1 \le j \le 2m$, the pair
+	where: for $0 \le k < m$, $w'_X = w_X$ and $w'_Z = w_Z$, with $s_X$
+	uniformly random in the class $\bar\chi^{-1}(k)$ and $s_Z$ uniformly
+	random in the class $\bar\chi^{-1}(0)$; for $m \le k < 2m$, the pair
 	$(s_X, w'_X)$ is a fresh diagonal direction pair and $w'_Z = w_Z$,
-	with $s_Z$ uniformly random in the class $\chi^{-1}(j-m)$; for
-	$2m+1 \le j \le 2m+2$, both $(s_X, w'_X)$ and $(s_Z, w'_Z)$ are fresh
+	with $s_Z$ uniformly random in the class $\bar\chi^{-1}(k-m)$; for
+	$2m \le k < 2m+2$, both $(s_X, w'_X)$ and $(s_Z, w'_Z)$ are fresh
 	diagonal direction pairs, sampled independently; and $v'_X, v'_Z$ are
 	the canonical representatives of $v_X, v_Z$ for the directions
 	$w'_X, w'_Z$.
@@ -1413,8 +1417,8 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 	$u^\dagger = (u^\dagger_X, u^\dagger_Z, \alpha^\dagger,
 	\beta^\dagger)$ of $\ell$: the block $u^\dagger_X$ differs from $v_X$
 	by a multiple of the direction of $\ell_X$ when that direction is
-	inherited from $\ell$ (namely $e_j$ for axis-parallel $\ell$ with
-	$1 \le j \le m$, and $w_X$ for diagonal $\ell$ with $1 \le j \le m$),
+	inherited from $\ell$ (namely $e_k$ for axis-parallel $\ell$ with
+	$0 \le k < m$, and $w_X$ for diagonal $\ell$ with $0 \le k < m$),
 	and equals $v_X$ in all other cases, since then the corresponding
 	block of the direction of $\ell$ vanishes; in either case
 	$u^\dagger_X \in \ell_X$ because $v_X \in \ell_X$, and symmetrically
@@ -1437,37 +1441,37 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 	the procedure itself.
 
 	Condition on the component of the line-point distribution
-	(axis-parallel or diagonal) and on $j$; the mixture of Property~2 is
+	(axis-parallel or diagonal) and on $k$; the mixture of Property~2 is
 	over these choices together with the fresh index choices, and the
 	blocks $u_X, u_Z$ of $u$ are independent and uniform on $\F_q^m$,
 	independent of all direction data. In the axis-parallel case with
-	$1 \le j \le m$, the pair $(\ell_X, u_X)$ consists of the uniformly
+	$0 \le k < m$, the pair $(\ell_X, u_X)$ consists of the uniformly
 	random point $u_X$ together with the canonical axis-parallel line
-	through it in direction $e_j$, so
-	$(\ell_X, u_X) \sim D_{\mathrm{ALine},j}$, while, conditioned
+	through it in direction $e_k$, so
+	$(\ell_X, u_X) \sim D_{\mathrm{ALine},k}$, while, conditioned
 	additionally on $i_Z$, the pair $(\ell_Z, u_Z)$ consists of the
 	uniformly random point $u_Z$ together with the canonical line through
 	it in direction $e_{i_Z}$, so
 	$(\ell_Z, u_Z) \sim D_{\mathrm{ALine},i_Z}$; the two pairs are
 	functions of the disjoint independent data $u_X$ and $(u_Z, i_Z)$,
-	hence independent. In the diagonal case with $1 \le j \le m$, the
+	hence independent. In the diagonal case with $0 \le k < m$, the
 	triple $(u_X, w_X, s_X)$ has $u_X$ uniform, $w_X$ with coordinates
-	$1, \dots, j-1$ equal to $0$ and the remaining coordinates uniform,
-	and $s_X$ uniform in $\chi^{-1}(j)$, which is exactly the law
-	generating $D_{\mathrm{DLine},j}$; hence
-	$(\ell_X, u_X) \sim D_{\mathrm{DLine},j}$, and similarly
-	$(\ell_Z, u_Z) \sim D_{\mathrm{DLine},1}$ since $w_Z$ is uniform and
-	$s_Z$ is uniform in $\chi^{-1}(1)$; the two pairs are functions of the
-	disjoint independent data $(u_X, w_X, s_X)$ and $(u_Z, w_Z, s_Z)$,
+	$0, \dots, k-1$ equal to $0$ and the remaining coordinates uniform,
+	and $s_X$ uniform in $\bar\chi^{-1}(k)$, which is exactly the law
+	generating $D_{\mathrm{DLine},k}$; hence
+	$(\ell_X, u_X) \sim D_{\mathrm{DLine},k}$, and similarly
+	$(\ell_Z, u_Z) \sim D_{\mathrm{DLine},0}$ since $w_Z$ is uniform and
+	$s_Z$ is uniform in $\bar\chi^{-1}(0)$; the two pairs are functions of
+	the disjoint independent data $(u_X, w_X, s_X)$ and $(u_Z, w_Z, s_Z)$,
 	hence independent. The remaining cases are analogous: each of
 	$(\ell_X, u_X)$ and $(\ell_Z, u_Z)$ is either built from the inherited
 	direction block as above, or from a fresh axis index or fresh diagonal
 	direction pair, in which case it is distributed as the uniform mixture
-	over $i$ of $D_{\mathrm{v},i}$ for the corresponding type
-	$\mathrm{v}$; and the two pairs are always functions of disjoint
-	independent collections of the variables $u_X$, $u_Z$, the direction
-	blocks, and the fresh auxiliary choices, hence independent conditioned
-	on the component. Within each component this yields exactly the
+	over $i \in \{0, \dots, m-1\}$ of $D_{\mathrm{v},i}$ for the
+	corresponding type $\mathrm{v}$; and the two pairs are always functions of
+	disjoint independent collections of the variables $u_X$, $u_Z$, the
+	direction blocks, and the fresh auxiliary choices, hence independent
+	conditioned on the component. Within each component this yields exactly the
 	description of Property~2: the pair $(\ell_X, \ell_Z)$ is
 	product-distributed according to the line marginals of
 	$D_{\mathrm{v},i}$ and $D_{\mathrm{v},j}$, and, conditioned on
