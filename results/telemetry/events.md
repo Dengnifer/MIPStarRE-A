@@ -6381,3 +6381,29 @@ not actual commit/publication hooks. No productive session was killed.
   immediately, preserving prior source obligations and budgets. Closing count was10 at
   05:07:15Z. PR491 review was blocked by a telemetry-only dirty file; bounded preservation
   handoff PID3969229 owns safe parking and a detached canonical review, not a source edit.
+
+## 2026-09-09 - Dispatch498 and verify PR343 merge (05:21Z)
+
+- Latest owner-session04:58Z supersedes the preceding PAR2 instruction: the registered
+  v9b daemon remains at its observed PAR=1; main launches no approved-PR tails. Main's
+  unreviewed tails are limited to three building at once, and worker floor8 is maintained
+  through repair/review/proof work. Manual telemetry commits/publications are suspended
+  between merges and limited to one hourly post-merge batch. No telemetry commit was
+  made by main this cycle; these append-only records await that permitted batch.
+- Owner-requested issue498 was read in full and dispatched on Sol in warmed worktree
+  issue-498-telemetry-tolerant-freshness. Lane PID4088910 admitted prover-498-20260909-01,
+  thread01a08497-50fb-7f33-9cf7-aa36f345c263. Scope is the exact telemetry-tolerant freshness
+  rule, focused tests, issues-prs documentation and EVOLUTION entry, preserving every
+  other gate. No daemon, telemetry-publication, review-transport or Lean changes are in
+  scope. The lane will obtain independent review before daemon merge eligibility.
+- New current-head findings for363/424/443/448/453 received serialized autofix launchers
+  4115083/4115135/4115185/4115278/4115330 after their labels were enabled through gh_common.
+  The closing count at05:21:08Z was14 live workers. Passive launchers are not counted.
+- GitHub confirms PR343 merged at05:15:42Z as85b87f913c2855199f5c3075eea4ee5076f9afd1
+  from exact head f935392710a057ec3e1b6af94f1fed61d63e39ff; all ten CI/review statuses are
+  success. The daemon reported completion at05:16:37Z and proceeded to PR377's refresh.
+  The milestone is reported on #27; main did not invoke a merge.
+- Existing daemon behavior still emitted automatic post-merge telemetry/snapshot commits,
+  including1c5d5c16. Those are observed service actions, not manual main publications.
+  The automatic cadence is not changed by issue498, whose owner-approved scope excludes
+  changing telemetry publication. This limitation is kept distinct from main's new policy.
