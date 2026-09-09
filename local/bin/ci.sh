@@ -875,6 +875,13 @@ step_blueprint_render() {
       echo "ERROR: latexmk produced no blueprint PDF"
       exit 1
     fi
+    _bbl="blueprint/print/print.bbl"
+    if [ -e "$_bbl" ]; then
+      if ! cp "$_bbl" blueprint/src/web.bbl; then
+        echo "ERROR: could not refresh blueprint/src/web.bbl from $_bbl"
+        exit 1
+      fi
+    fi
   else
     note_warning "no latexmk/xelatex on PATH; skipped blueprint PDF rendering; \
 undefined-macro check did not run"

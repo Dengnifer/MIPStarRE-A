@@ -437,6 +437,10 @@ case "$1:$FAKE_PDF_MODE" in
     exit 0
     ;;
   web:*)
+    if [ "$(cat src/web.bbl 2>/dev/null)" != 'fresh bbl' ]; then
+      printf '%s\n' 'web.bbl was not refreshed' >&2
+      exit 8
+    fi
     exit 0
     ;;
 esac
@@ -460,6 +464,7 @@ case "$FAKE_PDF_MODE" in
   success)
     mkdir -p ../print
     printf '%s' 'fresh pdf' > ../print/print.pdf
+    printf '%s' 'fresh bbl' > ../print/print.bbl
     exit 0
     ;;
   inner-failure)
@@ -476,6 +481,7 @@ exit 9
         latexmk.chmod(0o755)
         self.tool_log = self.tmp / "ci-tool.log"
         self.pdf = self.repo / "blueprint" / "print" / "print.pdf"
+        self.web_bbl = self.repo / "blueprint" / "src" / "web.bbl"
         self.gh.route(r"^pulls/7$", {
             "number": 7,
             "state": "open",
@@ -485,6 +491,7 @@ exit 9
 
     def run_blueprint(self, mode: str) -> tuple[subprocess.CompletedProcess, dict]:
         self.pdf.write_bytes(b"stale pdf")
+        self.web_bbl.write_bytes(b"stale bbl")
         cache = self.tmp / f"ci-cache-{mode}"
         env = dict(
             os.environ,
@@ -542,6 +549,7 @@ exit 9
         self.assertEqual(self.tool_log.read_text(encoding="utf-8").splitlines(),
                          [self.latexmk_call(), "web"])
         self.assertEqual(self.pdf.read_bytes(), b"fresh pdf")
+        self.assertEqual(self.web_bbl.read_bytes(), b"fresh bbl")
 
     def test_zero_wrapper_with_fresh_partial_pdf_and_inner_failure_fails(self) -> None:
         result, manifest = self.run_blueprint("inner-failure")
