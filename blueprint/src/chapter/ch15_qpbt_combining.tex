@@ -1095,10 +1095,9 @@ above. See Remark~\ref{rem:linearity-import} and
 \begin{lemma}[Consistency of the constructed paired-line measurement]
 	\label{lem:combined-line-measurement-consistency}
 	\lean{MIPStarRE.QPBT.combined_line_measurement_consistency}
-	\leanok
 	\uses{lem:qld-4-10, lem:qld-comm-line-cons, lem:pasting,
 		def:expanded-line-measurement, def:consistency}
-	This is a Lean-only construction obligation. Fix a polynomially small
+	This is an open Lean-only construction obligation. Fix a polynomially small
 	function $\delta_Q(\eps)$. There is a function
 	$\delta_P(\eps,md/q)=\poly(\eps,md/q)$, in the corrected sum sense,
 	such that for every projective strategy passing with error $\eps$ and
@@ -1365,7 +1364,6 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 
 \begin{lemma}[The sub-line distribution]
 	\label{lem:qld-sublines}
-	\lean{MIPStarRE.QPBT.SubLineWitness, MIPStarRE.QPBT.exists_subLineWitness}
 	\notready
 	\uses{def:line, def:line-point-dist, def:ith-restricted-line}
 	% Statement as in the source (references/qpbt-paper/
@@ -1570,6 +1568,56 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 	immediate from the sampling procedure in the proof.
 \end{remark}
 
+\begin{lemma}[Auxiliary sub-line distribution with directly sampled indices]
+	\label{lem:qld-sublines-direct}
+	\lean{MIPStarRE.QPBT.SubLineWitness, MIPStarRE.QPBT.exists_subLineWitness}
+	\leanok
+	\uses{def:line, def:line-point-dist, def:ith-restricted-line,
+		def:combine-map}
+	This formalization-only variant of Lemma~\ref{lem:qld-sublines} uses
+	uniformly sampled coordinate indices on the extended space. For every
+	admissible $(q,m,d)$, there is a probability distribution $D_{\rm dir}$
+	on triples $(\ell,\ell_X,\ell_Z)$ with the following properties:
+	\begin{enumerate}
+		\item Its extended-line marginal is obtained by choosing the line
+		type with equal probabilities and its coordinate index uniformly in
+		$\{1,\ldots,2m+2\}$. In the axis case the direction is the
+		corresponding unit vector; in the diagonal case preceding coordinates
+		vanish and the remaining coordinates are uniform. In both cases the
+		base is the canonical representative of an independent uniform point.
+		\item Every point $u=(u_X,u_Z,\alpha,\beta)$ on a supported extended
+		line satisfies $u_X\in\ell_X$ and $u_Z\in\ell_Z$. The affine
+		parameterizations are compatible: there are scalars $a_X,b_X,a_Z,b_Z$
+		such that, writing $\ell=(v,w)$ and
+		$\ell_W=(v_W,w_W)$ for $W\in\{X,Z\}$,
+		$(v+tw)_W=v_W+(a_W+b_Wt)w_W$ for every $t\in\F_q$.
+		The $\alpha$ and $\beta$ coordinates are affine functions of $t$,
+		as required by Definition~\ref{def:combine-map}.
+		\item For a uniform affine parameter on $\ell$, the two laws of
+		$(\ell_X,\ell_Z,u_X)$ and $(\ell_X,\ell_Z,u_Z)$ are separate
+		mixtures with the same probability weights over
+		$(\mathrm{v},i,j)\in\{\mathrm{ALine},\mathrm{DLine}\}
+		\times\{1,\ldots,m\}^2$. Their components are respectively
+		$D_{\mathrm{v},i}$ times the line marginal of $D_{\mathrm{v},j}$,
+		and the line marginal of $D_{\mathrm{v},i}$ times
+		$D_{\mathrm{v},j}$. No joint conditional law of $(u_X,u_Z)$ is asserted.
+		\item If $\ell$ is axis-parallel, both projected lines are axis-parallel.
+	\end{enumerate}
+	Identification with the source's seed-indexed extended-line law remains
+	open; see \cite{gap:qpbt_subline-claims-line-marginal} and
+	\cite{gap:qpbt_ld-dimension-divisibility}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:line-representative, def:ith-restricted-line, def:combine-map}
+	Apply the subline sampling construction with the extended coordinate
+	index chosen directly. Its sampling law has mass one and the prescribed
+	extended-line marginal. The inherited direction blocks and the fresh
+	auxiliary directions give incidence, affine compatibility, and axis-line
+	closure. Separating the independent X and Z sampling data within each
+	index case gives the two marginal mixtures with common weights.
+\end{proof}
+
 The proof of Lemma~\ref{lem:qld-4-13} rests on three scalar estimates, stated
 next. In all three, $D$ is the distribution
 of Lemma~\ref{lem:qld-sublines},
@@ -1617,7 +1665,7 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\lean{MIPStarRE.QPBT.avgOver_directLinePointDist_line_add_smul}
 	\lean{MIPStarRE.QPBT.SubLineWitness.avgOver_projX_projZ}
 	\leanok
-	\uses{lem:qld-sublines, def:line-point-dist, def:line-representative,
+	\uses{lem:qld-sublines-direct, def:line-point-dist, def:line-representative,
 		def:combine-map}
 	Let $D_{\rm dir}$ be an auxiliary subline law whose extended-line
 	marginal is the line marginal of the line-point law with coordinate
@@ -1821,7 +1869,8 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 \end{proof}
 
 The following auxiliary estimates use the directly indexed extended-line
-law. Fix admissible parameters and a projective setting with error $\eps$.
+law of Lemma~\ref{lem:qld-sublines-direct}. Fix admissible parameters and a
+projective setting with error $\eps$.
 Let $D_{\rm dir}$ have mass one and extended-line marginal equal to the line
 marginal of the line-point law with coordinate indices sampled uniformly
 and directly. Require incidence and affine compatibility with the two source
@@ -1864,12 +1913,81 @@ which uses the concrete sandwich specified there.
 	distance $4\delta_Q$, using the uniform point marginal of $D_{\rm dir}$.
 \end{proof}
 
+\begin{definition}[Formalization support: the constructed paired-line POVM]
+	\label{def:combined-line-measurement}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.combinedLineMeasurement}
+	\leanok
+	\uses{def:expanded-line-measurement}
+	For either player side, define the concrete POVM used in the proof of
+	Lemma~\ref{lem:qld-xz-lines} by
+	\[
+	 T^{\ell_X,\ell_Z}_{f_X,f_Z}
+	 =\hat M^{(\mathrm{Line},X),\ell_X}_{f_X}
+	  \hat M^{(\mathrm{Line},Z),\ell_Z}_{f_Z}
+	  \hat M^{(\mathrm{Line},X),\ell_X}_{f_X}.
+	\]
+	The answers are polynomial representatives of degree at most $md$.
+	Positivity of each sandwich and completeness of the expanded projective
+	line measurements make this a POVM. This auxiliary definition asserts
+	no consistency with a joint point family.
+\end{definition}
+
+\begin{lemma}[Formalization support: the exact X marginal]
+	\label{lem:combined-line-measurement-x-marginal}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.combinedLineMeasurement_sum_Z}
+	\leanok
+	\uses{def:combined-line-measurement}
+	For either player side and every pair of lines, the constructed POVM
+	satisfies
+	\[
+	 \sum_{f_Z}T^{\ell_X,\ell_Z}_{f_X,f_Z}
+	 =\hat M^{(\mathrm{Line},X),\ell_X}_{f_X}.
+	\]
+	This auxiliary identity is used in the proof of Claim~17-2.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:combined-line-measurement}
+	Sum the middle Z effect to the identity and use projectivity of the
+	outer X effect.
+\end{proof}
+
+\begin{lemma}[Formalization support: the concrete X-overlap deficit]
+	\label{lem:concrete-x-overlap-deficit}
+	\lean{MIPStarRE.QPBT.exists_concreteXPointOverlap_deficit_le}
+	\leanok
+	\uses{def:combined-line-measurement, lem:qld-sublines-direct,
+		def:expanded-point-measurement, def:expanded-state}
+	There is a universal $K>0$ such that, for every projective setting and
+	auxiliary subline law above, the concrete measurement satisfies
+	\[
+	 1-\E_{(\ell,\ell_X,\ell_Z)\sim D_{\rm dir}}\E_{t\in\F_q}
+	 \sum_{f_X,f_Z}\operatorname{Re}
+	 \bra{\hat\psi}
+	 (T^{\ell_X,\ell_Z}_{f_X,f_Z})_{\mathsf{A}\mathsf{A}'}
+	 (\hat M^{(\mathrm{Point},X),x}_{f_X(x)})_{\mathsf{B}\mathsf{A}''}
+	 \ket{\hat\psi}
+	 \le K m^2\delta_{\mathrm{Line}}(\eps),
+	\]
+	where $\ell=(v,w)$, $x=(v+tw)_X$, and the
+	completed point effect is zero at an undefined evaluation. This is an
+	auxiliary estimate for Claim~17-2 on the directly indexed law.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:combined-line-measurement-x-marginal,
+		lem:restricted-line-mixture-bounds, lem:qld-comm-line-cons}
+	The exact X marginal reduces the overlap to expanded X-line--point
+	consistency. Apply its bound to each restricted component of the
+	separate X marginal mixture and average the resulting deficits.
+\end{proof}
+
 \begin{lemma}[Auxiliary real-part estimate for the constructed line measurement]
 	\label{lem:claim-17-2-direct-real}
 	\lean{MIPStarRE.QPBT.subline_remove_X_factor}
 	\leanok
-	\uses{lem:qld-comm-line-cons, lem:restricted-line-mixture-bounds,
-		def:expanded-line-measurement, def:expanded-point-measurement}
+	\uses{def:combined-line-measurement, lem:qld-sublines-direct,
+		def:expanded-point-measurement}
 	There is a universal $C>0$ such that, for every projective setting and
 	auxiliary subline law above, setting
 	$T^{\ell_X,\ell_Z}_{f_X,f_Z}
@@ -1883,6 +2001,8 @@ which uses the concrete sandwich specified there.
 \end{lemma}
 \begin{proof}
 	\leanok
+	\uses{def:combined-line-measurement,
+		lem:combined-line-measurement-x-marginal, lem:concrete-x-overlap-deficit}
 	Completeness of the Z-line measurement and projectivity of the X-line
 	measurement give $\sum_{f_Z}T_{f_X,f_Z}=\hat M^X_{f_X}$ exactly.
 	The separate X marginal mixture transfers expanded line-point
