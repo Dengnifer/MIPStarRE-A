@@ -12,8 +12,8 @@ binary measurements.
 
 ## References
 
-The source statement is `thm:ms-from-ac` in
-`blueprint/src/chapter/ch13_qpbt_test.tex:257-267`, from
+The source statement is blueprint
+`thm:ms-from-ac`, from
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:654-722`.
 -/
 
@@ -400,7 +400,7 @@ private theorem reflectionEffect_heteroKron_one
 
 /-- `thm:ms-from-ac`: any anticommuting pair of projective binary
 measurements, consistent on an EPR state, extends to a value-one SPCC Magic
-Square strategy. Blueprint `ch13_qpbt_test.tex:257-267`, paper
+Square strategy. Blueprint `thm:ms-from-ac`, paper
 `08_classical_and_quantum_low_degree_tests.tex:654-722`.
 
 The local index type is arbitrary, finite, and nonempty; no field model or QPBT

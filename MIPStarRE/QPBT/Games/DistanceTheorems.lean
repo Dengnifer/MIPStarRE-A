@@ -15,9 +15,8 @@ The operator-level inequalities they rest on live in
 
 ## References
 
-The source results are `fact:agreement` through
-`lem:close-strategies-have-close-values` in
-`blueprint/src/chapter/ch12_qpbt_games.tex:245-577`, with paper origin
+The source results run from blueprint `fact:agreement` through
+`lem:close-strategies-have-close-values`, with paper origin
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:295-461` and
 `:531-540`. The observable conversion lemmas come from
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:95-131`.
@@ -330,38 +329,11 @@ private theorem tensorMeasurement_isProjective
       simp [Matrix.kronecker, (hA ab.1).isSelfAdjoint.isHermitian.apply,
         (hB ab.2).isSelfAdjoint.isHermitian.apply]).isSelfAdjoint
 
-/-- Transport a POVM along an equivalence of its finite-dimensional coordinate type. -/
-private noncomputable def reindexMeasurement
-    {α I J : Type*} [Fintype α]
-    [Fintype I] [DecidableEq I] [Fintype J] [DecidableEq J]
-    (e : I ≃ J) (M : Measurement α J) : Measurement α I :=
-  Measurement.ofSumEqOne
-    (fun a => reindexOp e (M.effect a))
-    (fun a => MIPStarRE.Quantum.reindex_nonneg e.symm (M.pos a))
-    (by
-      change ∑ a : α, (Matrix.reindexAlgEquiv ℂ ℂ e.symm) (M.effect a) = 1
-      rw [← map_sum, M.sum_eq_one, map_one])
-
-/-- Reindexing a projective POVM preserves projectivity. -/
-private theorem reindexMeasurement_isProjective
-    {α I J : Type*} [Fintype α]
-    [Fintype I] [DecidableEq I] [Fintype J] [DecidableEq J]
-    (e : I ≃ J) (M : Measurement α J)
-    (hM : MIPStarRE.QPBT.Measurement.IsProjective M) :
-    MIPStarRE.QPBT.Measurement.IsProjective (reindexMeasurement e M) := by
-  intro a
-  change IsProj (reindexOp e (M.effect a))
-  refine { isIdempotentElem := ?_, isSelfAdjoint := ?_ }
-  · change (Matrix.reindexAlgEquiv ℂ ℂ e.symm) (M.effect a) *
-        (Matrix.reindexAlgEquiv ℂ ℂ e.symm) (M.effect a) =
-      (Matrix.reindexAlgEquiv ℂ ℂ e.symm) (M.effect a)
-    rw [← map_mul, (hM a).isIdempotentElem.eq]
-  · exact (Matrix.IsHermitian.ext fun i j => by
-      simp [reindexOp, Matrix.reindex_apply,
-        (hM a).isSelfAdjoint.isHermitian.apply]).isSelfAdjoint
-
-/-- The sum of the squared effects of a POVM is bounded by the identity. -/
-private theorem measurement_sum_adjoint_mul_le_one
+/-- The squared effects of a POVM sum to at most the identity. This is the
+formalization-only estimate `lem:sandwich-povm-square-sum` used in the
+contractions underlying `lem:ld-sandwich`; detailed source argument
+`references/neexp-paper/05_quantum_preliminaries.tex:930-946`. -/
+theorem measurement_sum_adjoint_mul_le_one
     {α I : Type*} [Fintype α] [Fintype I] [DecidableEq I]
     (M : Measurement α I) :
     ∑ a : α, (M.effect a)ᴴ * M.effect a ≤ 1 := by
@@ -533,8 +505,8 @@ private theorem strategy_value_eq_selected (G : Game) (S : Strategy G) :
 
 /-- Strategies on identified local spaces and the same transported state have
 close values. The asymptotic constant is universal for the game. This is
-`lem:close-strategies-have-close-values`, blueprint
-`ch12_qpbt_games.tex:569-577`, paper
+blueprint
+`lem:close-strategies-have-close-values`, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:531-540`. -/
 theorem abs_value_sub_le_of_areClose :
     ∃ C₀ : ℝ, 1 ≤ C₀ ∧ ∀ (G : Game) (S S' : Strategy G) (δ : ℝ)
@@ -649,8 +621,8 @@ theorem abs_value_sub_le_of_areClose :
       congrArg (fun x : ℝ => 4 * x) (Real.sqrt_eq_rpow δ)
 
 /-- Averaging contractions preserves state-dependent operator closeness.
-This is `lem:avg-closeness`, blueprint
-`blueprint/src/chapter/ch14_qpbt_observables.tex:304-325`, paper
+This is blueprint
+`lem:avg-closeness`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:100-113`.
 The probability hypothesis is explicit because the proof uses Jensen's
 inequality for the average. -/
@@ -782,8 +754,8 @@ theorem povm_to_obs {X α ι : Type*}
 
 /-- Passing from answer-indexed POVM effects to unit-modulus weighted
 observables costs at most the answer-alphabet cardinality. This is
-`lem:povm-to-obs`, blueprint
-`blueprint/src/chapter/ch14_qpbt_observables.tex:361-378`, paper
+blueprint
+`lem:povm-to-obs`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:115-129`. -/
 theorem povm_to_obs_of_measurements {X α ι : Type*}
     [Fintype X] [DecidableEq X] [Fintype α]
@@ -799,8 +771,8 @@ theorem povm_to_obs_of_measurements {X α ι : Type*}
 
 /-- Orthonormalization of a consistent pair of POVMs. The resulting
 Alice-side measurement is projective and remains close to the original one on
-the unit bipartite state. This imported result is `lem:ortho`, blueprint
-`blueprint/src/chapter/ch14_qpbt_observables.tex:390-410`, paper
+the unit bipartite state. This imported result is blueprint
+`lem:ortho`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:131-153`;
 the source cites KV11 and the self-contained proof [ML20]. -/
 theorem exists_projective_close_of_consistent :

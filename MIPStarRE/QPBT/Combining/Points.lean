@@ -552,7 +552,7 @@ theorem extendedQ_spec {P : AdmissibleParams} {ε δ : ℝ}
     rw [← Finset.mul_sum, (S.pointMeasExp side .X x).sum_eq_one,
       (S.pointMeasExp side .Z z).sum_eq_one, one_mul]
   refine ⟨fun side x z alpha beta =>
-      WinImplications.postprocess_isProjective _ (points.projective side x z) _,
+      SandwichProduct.postprocess_isProjective _ (points.projective side x z) _,
     ?_, ?_, ?_⟩
   · intro p1 p2 hopp
     exact opFamilyDistSq_linearCoarseGrain_le p1 p2

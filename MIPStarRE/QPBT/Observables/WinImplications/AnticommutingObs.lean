@@ -62,22 +62,6 @@ theorem isometryTensor_id {ιA ιB : Type} [Fintype ιA] [DecidableEq ιA]
     Matrix.one_kronecker_one]
   simp [Matrix.one_apply]
 
-/-- Inflation to the ground slice is multiplicative. Formalization-only support
-for `thm:ms-rigidity`, blueprint `ch13_qpbt_test.tex:266-288`. -/
-theorem naimarkInflation_mul {ι α : Type} [Fintype ι] [DecidableEq ι]
-    [Fintype α] [DecidableEq α] (M N : Op ι) :
-    MagicSquareRigidity.naimarkInflation (α := α) M *
-        MagicSquareRigidity.naimarkInflation (α := α) N =
-      MagicSquareRigidity.naimarkInflation (α := α) (M * N) := by
-  classical
-  ext p q
-  simp only [Matrix.mul_apply, MagicSquareRigidity.naimarkInflation_apply]
-  by_cases hp : p.2 = none
-  · by_cases hq : q.2 = none
-    · simp [hp, hq, Fintype.sum_prod_type]
-    · simp [hq]
-  · simp [hp]
-
 /-- Inflation to the ground slice is additive. Formalization-only support for
 `thm:ms-rigidity`, blueprint `ch13_qpbt_test.tex:266-288`. -/
 theorem naimarkInflation_add {ι α : Type} [Fintype ι] [DecidableEq ι]
@@ -145,10 +129,10 @@ theorem msVarObsB_eq (S : Strategy msGame) (j : Fin 9) :
   rfl
 
 /-- Bob's Magic Square variable observables approximately anticommute on the
-strategy state. The approximate anticommutation is proved on the projective
-dilation and read back through the ground slice. Paper
-`14_analysis_of_the_pauli_basis_test.tex:342-356`, blueprint
-`ch13_qpbt_test.tex:266-288` and `ch14_qpbt_observables.tex:761-794`. -/
+strategy state. This auxiliary estimate is proved on the projective dilation
+and read back through the ground slice. Paper
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:342-356`,
+blueprint `lem:qld-ms-anticommutator-original-state`. -/
 theorem msVarObs_anticommutator_le (S : Strategy msGame) (ε : ℝ) (hε : 0 ≤ ε)
     (hwin : 1 - ε ≤ S.value) :
     ‖applyOperatorToState
@@ -191,8 +175,8 @@ theorem msVarObs_anticommutator_le (S : Strategy msGame) (ε : ℝ) (hε : 0 ≤
               obsOf ((S.B (.var 4)).postprocess msBitOrZero) +
             obsOf ((S.B (.var 4)).postprocess msBitOrZero) *
               obsOf ((S.B (.var 0)).postprocess msBitOrZero))) := by
-    simp only [heteroKron_mul, one_mul, sub_neg_eq_add, naimarkInflation_mul,
-      ← MagicSquareRigidity.heteroKron_add_right, naimarkInflation_add]
+    simp only [heteroKron_mul, one_mul, sub_neg_eq_add,
+      MagicSquareRigidity.naimarkInflation_mul, ← heteroKron_add_right, naimarkInflation_add]
   rw [hL, norm_heteroKron_one_naimarkInflation] at htrans
   have hclose := MagicSquareRigidity.msVarObsB_anticommute S ε hwin
   rw [msVarObsB_eq, msVarObsB_eq] at hclose
@@ -284,10 +268,10 @@ theorem msVarObsA_eq (S : Strategy msGame) (j : Fin 9) :
   rfl
 
 /-- Alice's Magic Square variable observables approximately anticommute on the
-strategy state. This is the first-factor companion of the anticommutation
-input, proved on the projective dilation and read back through the ground
-slice. Paper `14_analysis_of_the_pauli_basis_test.tex:342-356`, blueprint
-`ch13_qpbt_test.tex:266-288` and `ch14_qpbt_observables.tex:761-794`. -/
+strategy state. This auxiliary estimate is proved on the projective dilation
+and read back through the ground slice on the first tensor factor. Paper
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:342-356`,
+blueprint `lem:qld-ms-anticommutator-original-state`. -/
 theorem msVarObsA_anticommutator_le (S : Strategy msGame) (ε : ℝ) (hε : 0 ≤ ε)
     (hwin : 1 - ε ≤ S.value) :
     ‖applyOperatorToState
@@ -333,8 +317,8 @@ theorem msVarObsA_anticommutator_le (S : Strategy msGame) (ε : ℝ) (hε : 0 �
             obsOf ((S.A (.var 4)).postprocess msBitOrZero) *
               obsOf ((S.A (.var 0)).postprocess msBitOrZero)))
         (1 : Op (S.ιB × Option MsAnswer)) := by
-    simp only [heteroKron_mul, one_mul, sub_neg_eq_add, naimarkInflation_mul,
-      ← MagicSquareRigidity.heteroKron_add_left, naimarkInflation_add]
+    simp only [heteroKron_mul, one_mul, sub_neg_eq_add,
+      MagicSquareRigidity.naimarkInflation_mul, ← heteroKron_add_left, naimarkInflation_add]
   rw [hL, norm_heteroKron_naimarkInflation_one] at htrans
   have hclose := MagicSquareRigidity.msVarObsA_anticommute S ε hwin
   rw [msVarObsA_eq, msVarObsA_eq] at hclose
@@ -403,7 +387,7 @@ theorem obsOf_conjTranspose_mul_self {ι : Type*} [Fintype ι] [DecidableEq ι]
     (obsOf M)ᴴ * obsOf M = 1 := by
   have hsum : M.effect 0 + M.effect 1 = 1 := by
     have := M.sum_eq_one
-    rwa [sum_over_zmodTwo] at this
+    rwa [sum_zmod_two] at this
   have h01 : M.effect 0 * M.effect 1 = 0 :=
     DistanceCalculus.projective_effect_mul_effect_eq_zero M hM (by decide)
   have h10 : M.effect 1 * M.effect 0 = 0 :=
@@ -460,7 +444,7 @@ Formalization-only support for `lem:povm-to-obs`, blueprint
 theorem sum_phaseSign_smul_effect_eq_obsOf {ι : Type*} [Fintype ι]
     [DecidableEq ι] (M : MIPStarRE.Quantum.Measurement (ZMod 2) ι) :
     ∑ b : ZMod 2, phaseSign b • M.effect b = obsOf M := by
-  rw [sum_over_zmodTwo, obsOf]
+  rw [sum_zmod_two, obsOf]
   have hzero : phaseSign (0 : ZMod 2) = 1 := by simp [phaseSign]
   have hone : phaseSign (1 : ZMod 2) = -1 := by
     have h : (1 : ZMod 2) ≠ 0 := by decide
@@ -557,7 +541,7 @@ theorem opDistSq_eq_avgOver {X ι : Type*} [Fintype X] [DecidableEq X]
 /-- Every strategy value is at most one. Formalization-only support for
 `def:tensor-product-value`, blueprint `ch12_qpbt_games.tex:71-82`. -/
 theorem strategy_value_le_one {G : Game} (S : Strategy G) : S.value ≤ 1 := by
-  have h := rejectionMass_eq_one_sub_value S
+  have h := rejectionEventAverage_eq_one_sub_value S
   have hnn : (0 : ℝ) ≤ avgOver G.μ (fun questions =>
       outcomeEventWeight S questions.1 questions.2 fun a b =>
         G.decide questions.1 questions.2 a b = false) :=
@@ -662,7 +646,7 @@ theorem obs_anticommutator_avg_le {P : AdmissibleParams} {ιL ιR : Type}
         (heteroKron (OZ ω * OX ω) (1 : Op ιR) -
           heteroKron (1 : Op ιL) (V0 ω * V4 ω)) +
         heteroKron (1 : Op ιL) (V0 ω * V4 ω + V4 ω * V0 ω) := by
-      rw [MagicSquareRigidity.heteroKron_add_right]
+      rw [heteroKron_add_right]
       abel
     set t1 : ℝ := ‖applyOperatorToState (heteroKron (OX ω) (1 : Op ιR) -
       heteroKron (1 : Op ιL) (V0 ω)) χ‖ with ht1
@@ -717,17 +701,15 @@ theorem obs_anticommutator_avg_le {P : AdmissibleParams} {ιL ιR : Type}
 /-- The observable of a binary projective measurement obtained from a strategy
 measurement by two postprocessings is a reflection. Formalization-only support
 for `eq:qld-implication-ms-anticomm`, blueprint
-`ch14_qpbt_observables.tex:761-794`. The projectivity of the underlying
-strategy measurement is unfolded here because the corresponding named lemma,
-`strategyMeasurement_isProjective`, is private at
-`MIPStarRE/QPBT/Observables/Defs.lean:788`; promoting it is issue #204. -/
+`lem:qld-win-implications-obs`. -/
 theorem msVarBitObs_conjTranspose_mul_self {P : AdmissibleParams} {ε : ℝ}
     (S : ProjectiveSetting P ε) (side : PlayerSide) (j : Fin 9)
     (ω : PauliTuple P) :
     (obsOf (S.msVarBitMeas side j ω))ᴴ *
       obsOf (S.msVarBitMeas side j ω) = 1 := by
   refine obsOf_conjTranspose_mul_self (S.msVarBitMeas side j ω) ?_
-  refine postprocess_isProjective _ (postprocess_isProjective _ ?_ _) _
+  refine SandwichProduct.postprocess_isProjective _
+    (SandwichProduct.postprocess_isProjective _ ?_ _) _
   cases side with
   | alice => exact S.isProjective.1 _
   | bob => exact S.isProjective.2 _
@@ -758,8 +740,8 @@ theorem exists_pointObs_anticommutator_anticomm_le :
               S.pointObs .alice .X ω.2.2.1 ω.1) (1 : Op S.toStrategy.ιB))
           S.toStrategy.ψ‖ ^ 2) ≤ C * ε := by
   classical
-  obtain ⟨Cms, hCms, hms⟩ := win_ms_cons_proof
-  obtain ⟨Cv, hCv, hv⟩ := win_magic_square_proof
+  obtain ⟨Cms, hCms, hms⟩ := win_ms_cons
+  obtain ⟨Cv, hCv, hv⟩ := win_magic_square
   refine ⟨96 * Cms + 3551040 * Cv, by nlinarith, ?_⟩
   intro P ε S hε
   simp only [pointObs_eq_obsOf]

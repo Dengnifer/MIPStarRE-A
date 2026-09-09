@@ -22,7 +22,8 @@ convention.
 ## References
 
 - `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:214-458`
-- `blueprint/src/chapter/ch13_qpbt_test.tex:38-121`
+- Blueprint `def:ld-question-distribution`, `lem:ld-aline-level`,
+  `lem:ld-dline-level`, `lem:ld-question-typed-cl`, `lem:alnf`, and `lem:dlnf`
 - `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`
 -/
 
@@ -34,14 +35,6 @@ open MIPStarRE.LDT
 open MIPStarRE.Quantum
 
 noncomputable section
-
-/-- Prefix restriction is idempotent. -/
-private theorem directPrefixProjection_idem (D : DirectLdParams) (i : Fin D.m)
-    (v : Fin D.m → DirectScalarQ D) :
-    directPrefixProjection i (directPrefixProjection i v) = directPrefixProjection i v := by
-  funext j
-  unfold directPrefixProjection
-  split_ifs <;> rfl
 
 /-- Canonicalizing the seeded embedding of a canonical direct sample gives the
 canonical seeded sample of the original direct sample: the seed-indexed

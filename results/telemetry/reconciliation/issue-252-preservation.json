@@ -1,0 +1,249 @@
+{
+  "private_main": "2bb1a67b788befba4634c2a646e15fd65b4c9c24",
+  "source_merge": "32a32edee16d3932525e4b1da9f84009e1fbb13b",
+  "history_merge": "5d31c3065e6ab54d99097a7dea44510d61538a89",
+  "primary_capture_utc": "2026-09-06T05:01:04.734862+00:00",
+  "snapshot_runtime": "/home/drx/.cache/mipstarre-dev/issue-252-reconciliation-20260906T044639Z/snapshot-20260906T050104734862Z",
+  "captured_paths": {
+    "results/telemetry/builds.jsonl": {
+      "sha256": "cb871a6857872349b66c07eb69f279758008d5225cbbc57d4ef648f04d5c0613",
+      "bytes": 176662,
+      "mode": 436,
+      "status": " M",
+      "result_sha256": "cb871a6857872349b66c07eb69f279758008d5225cbbc57d4ef648f04d5c0613",
+      "result_bytes": 176662,
+      "method": "exact stable snapshot copy"
+    },
+    "results/telemetry/events.md": {
+      "sha256": "83d54611d3754ec3e477b46cf365ade07e065ac58a2a1a35050559a863b9d460",
+      "bytes": 377914,
+      "mode": 384,
+      "status": " M",
+      "result_sha256": "956e7dcc5cc16afdce12222532094fd09d331eb6b864409911fdba00a7e0fc41",
+      "result_bytes": 390260,
+      "method": "preserve merged event prefix and append primary post-checkpoint suffix once"
+    },
+    "results/telemetry/sessions.jsonl": {
+      "sha256": "fca894cf3efdce1d05c27b3e55b4af88441c0194ba74f3d2325edddaa8257cf1",
+      "bytes": 535056,
+      "mode": 436,
+      "status": " M",
+      "result_sha256": "fca894cf3efdce1d05c27b3e55b4af88441c0194ba74f3d2325edddaa8257cf1",
+      "result_bytes": 535056,
+      "method": "exact stable snapshot copy"
+    },
+    "results/telemetry/sessions/orc-240-20260906-03.jsonl": {
+      "sha256": "bc4e27e860c8baed902c9e0581c764977fbd43553a9dc46a006f3a3b4ff8a1b3",
+      "bytes": 43232,
+      "mode": 436,
+      "status": "??",
+      "result_sha256": "bc4e27e860c8baed902c9e0581c764977fbd43553a9dc46a006f3a3b4ff8a1b3",
+      "result_bytes": 43232,
+      "method": "exact stable snapshot copy"
+    },
+    "results/telemetry/sessions/orc-240-20260906-03.last.md": {
+      "sha256": "cc32e5a9669ee59052584f74378a4e6a4466cc282b4cc24951122dbc5d340520",
+      "bytes": 1117,
+      "mode": 436,
+      "status": "??",
+      "result_sha256": "cc32e5a9669ee59052584f74378a4e6a4466cc282b4cc24951122dbc5d340520",
+      "result_bytes": 1117,
+      "method": "exact stable snapshot copy"
+    },
+    "results/telemetry/sessions/orc-243-20260906-02.jsonl": {
+      "sha256": "4eadc61a1314cd3e62adb2475be7a37a85e2441f932de954f8bfba02f674faa3",
+      "bytes": 234690,
+      "mode": 436,
+      "status": "??",
+      "result_sha256": "4eadc61a1314cd3e62adb2475be7a37a85e2441f932de954f8bfba02f674faa3",
+      "result_bytes": 234690,
+      "method": "exact stable snapshot copy"
+    },
+    "results/telemetry/sessions/orc-243-20260906-02.last.md": {
+      "sha256": "0c9b71e3cf765dd3fac1c66225a3e85026f35cfea9e8010aaa342d6eebbf5aca",
+      "bytes": 1655,
+      "mode": 436,
+      "status": "??",
+      "result_sha256": "0c9b71e3cf765dd3fac1c66225a3e85026f35cfea9e8010aaa342d6eebbf5aca",
+      "result_bytes": 1655,
+      "method": "exact stable snapshot copy"
+    },
+    "results/telemetry/sessions/reviewer-pr248-20260906-06.jsonl": {
+      "sha256": "1bd7ea36341d82e2f06ee62b14043b19415d0651ddd5a5deae6833d855b9c48b",
+      "bytes": 344850,
+      "mode": 436,
+      "status": "??",
+      "result_sha256": "1bd7ea36341d82e2f06ee62b14043b19415d0651ddd5a5deae6833d855b9c48b",
+      "result_bytes": 344850,
+      "method": "exact stable snapshot copy"
+    },
+    "results/telemetry/sessions/reviewer-pr248-20260906-06.last.md": {
+      "sha256": "a42fb68040f921dcd8c08b03c0299f69a04d954d9b006a45e8e93fddd988b14c",
+      "bytes": 1898,
+      "mode": 436,
+      "status": "??",
+      "result_sha256": "a42fb68040f921dcd8c08b03c0299f69a04d954d9b006a45e8e93fddd988b14c",
+      "result_bytes": 1898,
+      "method": "exact stable snapshot copy"
+    },
+    "results/telemetry/sessions/reviewer-pr250-20260906-03.jsonl": {
+      "sha256": "175e59b924b1fd82918cfa6836239b0defd003e72c2de238c5b4e491d664730d",
+      "bytes": 249729,
+      "mode": 436,
+      "status": "??",
+      "result_sha256": "175e59b924b1fd82918cfa6836239b0defd003e72c2de238c5b4e491d664730d",
+      "result_bytes": 249729,
+      "method": "exact stable snapshot copy"
+    },
+    "results/telemetry/sessions/reviewer-pr250-20260906-03.last.md": {
+      "sha256": "e960254a883c8378d05fcad569023fb483f86184526d469bda084495c16b206a",
+      "bytes": 2264,
+      "mode": 436,
+      "status": "??",
+      "result_sha256": "e960254a883c8378d05fcad569023fb483f86184526d469bda084495c16b206a",
+      "result_bytes": 2264,
+      "method": "exact stable snapshot copy"
+    },
+    "results/telemetry/sessions/reviewer-pr250-20260906-04.jsonl": {
+      "sha256": "86c62ca7d45bda892c214373e8095eac0ca37f9173c1b0b768faa1ccc963f46a",
+      "bytes": 315447,
+      "mode": 436,
+      "status": "??",
+      "result_sha256": "86c62ca7d45bda892c214373e8095eac0ca37f9173c1b0b768faa1ccc963f46a",
+      "result_bytes": 315447,
+      "method": "exact stable snapshot copy"
+    },
+    "results/telemetry/sessions/reviewer-pr250-20260906-04.last.md": {
+      "sha256": "206a45470c1d343c7cf0b08d25a633a995da58cee8c491b8708fd4fb59914b1a",
+      "bytes": 1299,
+      "mode": 436,
+      "status": "??",
+      "result_sha256": "206a45470c1d343c7cf0b08d25a633a995da58cee8c491b8708fd4fb59914b1a",
+      "result_bytes": 1299,
+      "method": "exact stable snapshot copy"
+    },
+    "results/telemetry/sessions/reviewer-pr253-20260906-01.jsonl": {
+      "sha256": "2af2fb65afc3c4683df8e91c58de1ef98c2ffad4e00aad3564a8b92cf23e7115",
+      "bytes": 335508,
+      "mode": 436,
+      "status": "??",
+      "result_sha256": "2af2fb65afc3c4683df8e91c58de1ef98c2ffad4e00aad3564a8b92cf23e7115",
+      "result_bytes": 335508,
+      "method": "exact stable snapshot copy"
+    },
+    "results/telemetry/sessions/reviewer-pr253-20260906-01.last.md": {
+      "sha256": "40f2145de3760496711966da5d829e58dfaf71071f0020889f7ff3e2c8a20c19",
+      "bytes": 2266,
+      "mode": 436,
+      "status": "??",
+      "result_sha256": "40f2145de3760496711966da5d829e58dfaf71071f0020889f7ff3e2c8a20c19",
+      "result_bytes": 2266,
+      "method": "exact stable snapshot copy"
+    },
+    "results/telemetry/sessions/reviewer-pr254-20260906-01.jsonl": {
+      "sha256": "fbf2e66b8199393ee4d2e1551641ba1476b50ff2724781f801e2f98e09800f4e",
+      "bytes": 368724,
+      "mode": 436,
+      "status": "??",
+      "result_sha256": "fbf2e66b8199393ee4d2e1551641ba1476b50ff2724781f801e2f98e09800f4e",
+      "result_bytes": 368724,
+      "method": "exact stable snapshot copy"
+    },
+    "results/telemetry/sessions/reviewer-pr254-20260906-01.last.md": {
+      "sha256": "a1c39102ca7674e2f442a072269557c0e12f08aef94bb0aa6d4c4a2ec9bf0277",
+      "bytes": 2879,
+      "mode": 436,
+      "status": "??",
+      "result_sha256": "a1c39102ca7674e2f442a072269557c0e12f08aef94bb0aa6d4c4a2ec9bf0277",
+      "result_bytes": 2879,
+      "method": "exact stable snapshot copy"
+    },
+    "results/telemetry/sessions/reviewer-pr255-20260906-01.jsonl": {
+      "sha256": "4aa027b020e21ccfe174a0716584ddfa0d52f971dcd5f32f7a00837a4998b86a",
+      "bytes": 339500,
+      "mode": 436,
+      "status": "??",
+      "result_sha256": "4aa027b020e21ccfe174a0716584ddfa0d52f971dcd5f32f7a00837a4998b86a",
+      "result_bytes": 339500,
+      "method": "exact stable snapshot copy"
+    },
+    "results/telemetry/sessions/reviewer-pr255-20260906-01.last.md": {
+      "sha256": "ffc04b99708e99145c25df318b4269959018e5f1e7915b6c61c6ba4cad60b851",
+      "bytes": 3147,
+      "mode": 436,
+      "status": "??",
+      "result_sha256": "ffc04b99708e99145c25df318b4269959018e5f1e7915b6c61c6ba4cad60b851",
+      "result_bytes": 3147,
+      "method": "exact stable snapshot copy"
+    },
+    "results/telemetry/sessions/reviewer-pr256-20260906-01.jsonl": {
+      "sha256": "3a7307bf7950daf78eb1ead396517a79247d3ef166d4de001a9882152ed82be1",
+      "bytes": 268499,
+      "mode": 436,
+      "status": "??",
+      "result_sha256": "3a7307bf7950daf78eb1ead396517a79247d3ef166d4de001a9882152ed82be1",
+      "result_bytes": 268499,
+      "method": "exact stable snapshot copy"
+    },
+    "results/telemetry/sessions/reviewer-pr256-20260906-01.last.md": {
+      "sha256": "0d05b76bc4e314377b2ed002a560766e57730bda564ec5cbb33848267f0494f4",
+      "bytes": 2743,
+      "mode": 436,
+      "status": "??",
+      "result_sha256": "0d05b76bc4e314377b2ed002a560766e57730bda564ec5cbb33848267f0494f4",
+      "result_bytes": 2743,
+      "method": "exact stable snapshot copy"
+    },
+    "results/telemetry/sessions/scout-123-nonencoding-mass-20260906-02.jsonl": {
+      "sha256": "430ace67a93e809c745eb74a1ee45b7ecea336e2626f712e91fd33b764fb2781",
+      "bytes": 17361,
+      "mode": 436,
+      "status": "??",
+      "result_sha256": "430ace67a93e809c745eb74a1ee45b7ecea336e2626f712e91fd33b764fb2781",
+      "result_bytes": 17361,
+      "method": "exact stable snapshot copy"
+    },
+    "results/telemetry/sessions/scout-123-nonencoding-mass-20260906-02.last.md": {
+      "sha256": "47d7368f2e1ef89c26230a6608daba39a0ea603a586686637fa655c565388b4a",
+      "bytes": 16207,
+      "mode": 436,
+      "status": "??",
+      "result_sha256": "47d7368f2e1ef89c26230a6608daba39a0ea603a586686637fa655c565388b4a",
+      "result_bytes": 16207,
+      "method": "exact stable snapshot copy"
+    }
+  },
+  "event_resolution": {
+    "base": "a61ee557b33a2d8a4721e92b08b6d06dcb69ed57",
+    "primary_result_prefix_bytes": 374671,
+    "incoming_insert_blocks": 3,
+    "incoming_insert_bytes": 11001,
+    "incoming_insert_lines": 163,
+    "source_event_sha256": "c41a1c5e07cacf48d40fc57e771e8ec9a3cc471e408262d13253d1b8f6950e2f",
+    "result_sha256": "92dc8f8695a8f7de9d40837d8aa29b8d4345bb0ca7e3a1bdc22fd6f4d39a553b",
+    "method": "retain private bytes as exact prefix, append every incoming insertion block verbatim without deduplication; both full originals retained by merge ancestry"
+  },
+  "later_primary_appends": "Not frozen by this copy; main owns their separate final backup/stash and delta restoration.",
+  "raw_history_audit": {
+    "roots": [
+      "2bb1a67b788befba4634c2a646e15fd65b4c9c24",
+      "32a32edee16d3932525e4b1da9f84009e1fbb13b"
+    ],
+    "scope": "Every historical telemetry blob reachable from either root; no raw-row transformation",
+    "verified_blob_count": 2305,
+    "verified_raw_bytes": 930441658,
+    "sha256_of_blob_id_and_raw_sha256_records": "c45f824184b8f7ec4865f8306606b1e6e51fdbc68a621cf187bc267dde919dfc"
+  },
+  "checks": {
+    "source_and_protocols_identical_to_frozen_remote": true,
+    "five_private_briefs_exact": [
+      "local/briefs/239-independent-dot-projectors.md",
+      "local/briefs/240-independent-extraction-algebra.md",
+      "local/briefs/241-extraction-error-absorption.md",
+      "local/briefs/242-controlled-unitary-algebra.md",
+      "local/briefs/243-extraction-marginal-agreement.md"
+    ],
+    "capture_files": 23,
+    "capture_raw_bytes": 3642647
+  }
+}

@@ -84,7 +84,7 @@ theorem commConsistency_eq_mismatch_interchanged {P : AdmissibleParams} {ε : �
     intro ω c
     congr 1
     unfold ProjectiveSetting.pairComponentMeas ProjectiveSetting.pairMeas fA qA
-    rw [measurement_postprocess_comp_effect]
+    rw [MIPStarRE.Quantum.Measurement.postprocess_comp]
     rfl
   have hB : ∀ ω c,
       heteroKron (1 : Op S.toStrategy.ιA)
@@ -175,7 +175,7 @@ theorem win_comm_approx_proof :
           ((S.pairWMeas .bob W ω.1 ω.2.1 ω.2.2.1 ω.2.2.2).effect a) 1)
         (fun ω a => heteroKron 1 ((S.pairComponentMeas .alice W ω).effect a))
         S.swappedState ≤ C * ε := by
-  obtain ⟨C₁, hC₁, h₁⟩ := win_comm_proof
+  obtain ⟨C₁, hC₁, h₁⟩ := win_comm
   obtain ⟨C₂, hC₂, h₂⟩ := win_comm_interchanged_proof
   refine ⟨2 * (C₁ + C₂), by linarith, ?_⟩
   intro P ε S hε W
@@ -188,13 +188,13 @@ theorem win_comm_approx_proof :
     (fun ω => S.pairComponentMeas .alice W ω)
     (fun ω => S.pairWMeas .bob W ω.1 ω.2.1 ω.2.2.1 ω.2.2.2)
     S.toStrategy.ψ (h₂ P ε S hε W)
-  refine ⟨approxBound_of_left hC₂ hε hforward, ?_⟩
+  refine ⟨approx_bound_of_left hC₂ hε hforward, ?_⟩
   have hswap := opFamilyDistSq_swappedState (ιA := S.toStrategy.ιA)
     (ιB := S.toStrategy.ιB) (commTupleDist P)
     (fun ω a => (S.pairComponentMeas .alice W ω).effect a)
     (fun ω a => (S.pairWMeas .bob W ω.1 ω.2.1 ω.2.2.1 ω.2.2.2).effect a)
     S.toStrategy.ψ
-  exact hswap.trans_le (approxBound_of_right hC₁ hε hreverse)
+  exact hswap.trans_le (approx_bound_of_right hC₁ hε hreverse)
 
 /-! ## Commutation consistency check -/
 
@@ -262,7 +262,7 @@ theorem commConsConsistency_eq_mismatch_interchanged {P : AdmissibleParams}
     intro ω c
     congr 1
     unfold ProjectiveSetting.pointTraceMeas ProjectiveSetting.pointMeas fB
-    rw [measurement_postprocess_comp_effect]
+    rw [MIPStarRE.Quantum.Measurement.postprocess_comp]
     rfl
   calc
     _ = consistencyDefect (commTupleDist P)
@@ -354,7 +354,7 @@ theorem win_comm_cons_approx_proof :
         (fun ω a => heteroKron 1
           ((S.pairWMeas .alice W ω.1 ω.2.1 ω.2.2.1 ω.2.2.2).effect a))
         S.swappedState ≤ C * ε := by
-  obtain ⟨C₁, hC₁, h₁⟩ := win_comm_cons_proof
+  obtain ⟨C₁, hC₁, h₁⟩ := win_comm_cons
   obtain ⟨C₂, hC₂, h₂⟩ := win_comm_cons_interchanged_proof
   refine ⟨2 * (C₁ + C₂), by linarith, ?_⟩
   intro P ε S hε W
@@ -370,14 +370,14 @@ theorem win_comm_cons_approx_proof :
     (fun ω => S.pointTraceMeas .bob W (selectedTuplePoint W ω)
       (selectedTupleScalar W ω))
     S.toStrategy.ψ (h₂ P ε S hε W)
-  refine ⟨approxBound_of_left hC₂ hε hforward, ?_⟩
+  refine ⟨approx_bound_of_left hC₂ hε hforward, ?_⟩
   have hswap := opFamilyDistSq_swappedState (ιA := S.toStrategy.ιA)
     (ιB := S.toStrategy.ιB) (commTupleDist P)
     (fun ω a => (S.pairWMeas .alice W ω.1 ω.2.1 ω.2.2.1 ω.2.2.2).effect a)
     (fun ω a => (S.pointTraceMeas .bob W (selectedTuplePoint W ω)
       (selectedTupleScalar W ω)).effect a)
     S.toStrategy.ψ
-  exact hswap.trans_le (approxBound_of_right hC₁ hε hreverse)
+  exact hswap.trans_le (approx_bound_of_right hC₁ hε hreverse)
 
 /-! ## Magic square consistency check -/
 
@@ -449,12 +449,13 @@ theorem msConsConsistency_eq_mismatch_interchanged {P : AdmissibleParams}
     intro ω c
     congr 1
     unfold ProjectiveSetting.msVarBitMeas ProjectiveSetting.msMeas fA qA
-    rw [measurement_postprocess_comp_effect]
+    rw [MIPStarRE.Quantum.Measurement.postprocess_comp]
     have hmap : (msBitOrZero ∘
         ProjectiveSetting.msAnswerOrZero (P := P) (.var (selectedMsVar W))) =
         ProjectiveSetting.pairWAnswerOrZero (P := P) := by
       funext B
       cases B <;> rfl
+    rw [Function.comp_def] at hmap
     rw [hmap]
     rfl
   have hB : ∀ ω c,
@@ -466,7 +467,7 @@ theorem msConsConsistency_eq_mismatch_interchanged {P : AdmissibleParams}
     intro ω c
     congr 1
     unfold ProjectiveSetting.pointTraceMeas ProjectiveSetting.pointMeas fB
-    rw [measurement_postprocess_comp_effect]
+    rw [MIPStarRE.Quantum.Measurement.postprocess_comp]
     rfl
   calc
     _ = consistencyDefect (anticommTupleDist P)
@@ -559,7 +560,7 @@ theorem win_ms_cons_approx_proof :
         (fun ω a => heteroKron 1
           ((S.msVarBitMeas .alice (match W with | .X => 0 | .Z => 4) ω).effect a))
         S.swappedState ≤ C * ε := by
-  obtain ⟨C₁, hC₁, h₁⟩ := win_ms_cons_proof
+  obtain ⟨C₁, hC₁, h₁⟩ := win_ms_cons
   obtain ⟨C₂, hC₂, h₂⟩ := win_ms_cons_interchanged_proof
   refine ⟨2 * (C₁ + C₂), by linarith, ?_⟩
   intro P ε S hε W
@@ -575,14 +576,14 @@ theorem win_ms_cons_approx_proof :
     (fun ω => S.pointTraceMeas .bob W (selectedTuplePoint W ω)
       (selectedTupleScalar W ω))
     S.toStrategy.ψ (h₂ P ε S hε W)
-  refine ⟨approxBound_of_left hC₂ hε hforward, ?_⟩
+  refine ⟨approx_bound_of_left hC₂ hε hforward, ?_⟩
   have hswap := opFamilyDistSq_swappedState (ιA := S.toStrategy.ιA)
     (ιB := S.toStrategy.ιB) (anticommTupleDist P)
     (fun ω a => (S.msVarBitMeas .alice (selectedMsVar W) ω).effect a)
     (fun ω a => (S.pointTraceMeas .bob W (selectedTuplePoint W ω)
       (selectedTupleScalar W ω)).effect a)
     S.toStrategy.ψ
-  exact hswap.trans_le (approxBound_of_right hC₁ hε hreverse)
+  exact hswap.trans_le (approx_bound_of_right hC₁ hε hreverse)
 
 end WinImplications
 

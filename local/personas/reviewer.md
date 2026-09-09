@@ -80,7 +80,9 @@ resolved or outdated in your own output instead of resolving a thread; and turn
 2. Read the full diff, then the changed files whole — local context decides
    whether a hypothesis is load-bearing.
 3. For each changed paper-labelled declaration, open the paper statement and the
-   blueprint entry and compare line by line.
+   blueprint entry and compare line by line. Use the attached generated
+   blueprint-citation map to resolve durable labels to the current source span;
+   do not require numeric blueprint ranges in Lean docstrings.
 4. Verify what is cheap to verify: type-check the changed file, grep for proof
    holes, check that each `\leanok` the PR adds corresponds to a `sorry`-free
    proof. Record what you could not verify.

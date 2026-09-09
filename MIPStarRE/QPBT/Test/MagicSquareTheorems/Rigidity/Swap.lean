@@ -169,7 +169,9 @@ theorem apply_binaryTauShift_left {ι : Type} [Fintype ι] [DecidableEq ι]
     rw [sum_zmod_two]
     simp +decide [tauShift, Matrix.one_apply]
 
-private theorem reflectionEffect_zero_mul_reflection
+/-- Formalization-only spectral identity for `thm:ms-rigidity`: the positive
+spectral effect of a binary observable absorbs that observable. -/
+theorem reflectionEffect_zero_mul_reflection
     {ι : Type} [Fintype ι] [DecidableEq ι]
     (Z : Op ι) (hZ : IsBinaryObservable Z) :
     reflectionEffect Z 0 * Z = reflectionEffect Z 0 := by
@@ -177,7 +179,9 @@ private theorem reflectionEffect_zero_mul_reflection
   rw [add_mul, one_mul, hZ.mul_self_eq_one]
   rw [add_comm]
 
-private theorem reflectionEffect_one_mul_reflection
+/-- Formalization-only spectral identity for `thm:ms-rigidity`: the negative
+spectral effect of a binary observable anti-absorbs that observable. -/
+theorem reflectionEffect_one_mul_reflection
     {ι : Type} [Fintype ι] [DecidableEq ι]
     (Z : Op ι) (hZ : IsBinaryObservable Z) :
     reflectionEffect Z 1 * Z = -reflectionEffect Z 1 := by
@@ -200,44 +204,54 @@ theorem binarySwap_intertwines_Z {ι : Type} [Fintype ι] [DecidableEq ι]
   rw [apply_binaryTauPhase_left]
   rcases zmod_two_eq_zero_or_one b with rfl | rfl
   · simp only [binarySwapIsometry_apply, ZMod.val_zero, pow_zero, one_mul]
-    rw [← applyOperatorToState_mul, reflectionEffect_zero_mul_reflection Z hZ]
+    rw [← MIPStarRE.QPBT.DistanceCalculus.applyOperatorToState_mul,
+      reflectionEffect_zero_mul_reflection Z hZ]
     norm_num [bitSign]
   · simp only [binarySwapIsometry_apply, ZMod.val_one, pow_one]
-    rw [← applyOperatorToState_mul, mul_assoc,
+    rw [← MIPStarRE.QPBT.DistanceCalculus.applyOperatorToState_mul, mul_assoc,
       reflectionEffect_one_mul_reflection Z hZ]
     norm_num [bitSign, ZMod.val_one, applyOperatorToState]
 
-private theorem reflectionEffect_zero_mul_X_sub_X_mul_one
+/-- Formalization-only spectral identity for `thm:ms-rigidity`: the difference
+between the positive spectral effect of a binary observable multiplied by a
+second binary observable on the right and its negative spectral effect
+multiplied by that observable on the left is half the anticommutator of the
+two observables. -/
+theorem reflectionEffect_zero_mul_X_sub_X_mul_one
     {ι : Type} [Fintype ι] [DecidableEq ι] (X Z : Op ι) :
     reflectionEffect Z 0 * X - X * reflectionEffect Z 1 =
-      (2 : ℂ)⁻¹ • (X * Z - -(Z * X)) := by
+      (2 : ℂ)⁻¹ • (X * Z + Z * X) := by
   simp only [reflectionEffect, if_pos, if_neg one_ne_zero]
   calc
     ((2 : ℂ)⁻¹ • (1 + Z)) * X - X * ((2 : ℂ)⁻¹ • (1 - Z)) =
         (2 : ℂ)⁻¹ • ((1 + Z) * X - X * (1 - Z)) := by
       rw [Matrix.smul_mul, Matrix.mul_smul]
       module
-    _ = (2 : ℂ)⁻¹ • (X * Z - -(Z * X)) := by
+    _ = (2 : ℂ)⁻¹ • (X * Z + Z * X) := by
       congr 1
       noncomm_ring
 
-private theorem X_mul_reflectionEffect_one_mul_X_sub_zero
+/-- Formalization-only spectral identity for `thm:ms-rigidity`: conjugating the
+negative spectral effect of a binary observable by a second binary observable
+returns the positive spectral effect up to half the anticommutator of the
+two observables. -/
+theorem X_mul_reflectionEffect_one_mul_X_sub_zero
     {ι : Type} [Fintype ι] [DecidableEq ι]
     (X Z : Op ι) (hX : IsBinaryObservable X) :
     X * reflectionEffect Z 1 * X - reflectionEffect Z 0 =
-      -(2 : ℂ)⁻¹ • (X * (X * Z - -(Z * X))) := by
+      -(2 : ℂ)⁻¹ • (X * (X * Z + Z * X)) := by
   simp only [reflectionEffect, if_pos, if_neg one_ne_zero]
   calc
     X * ((2 : ℂ)⁻¹ • (1 - Z)) * X - (2 : ℂ)⁻¹ • (1 + Z) =
         (2 : ℂ)⁻¹ • (X * (1 - Z) * X - (1 + Z)) := by
       rw [Matrix.mul_smul, Matrix.smul_mul]
       module
-    _ = (2 : ℂ)⁻¹ • (-(X * (X * Z - -(Z * X)))) := by
+    _ = (2 : ℂ)⁻¹ • (-(X * (X * Z + Z * X))) := by
       congr 1
       have hXXZ : X * (X * Z) = Z := by
         rw [← Matrix.mul_assoc, hX.mul_self_eq_one, one_mul]
       noncomm_ring [hX.mul_self_eq_one, hXXZ]
-    _ = -(2 : ℂ)⁻¹ • (X * (X * Z - -(Z * X))) := by
+    _ = -(2 : ℂ)⁻¹ • (X * (X * Z + Z * X)) := by
       module
 
 /-- Formalization-only transport estimate for `thm:ms-rigidity`: the failure of
@@ -252,7 +266,8 @@ theorem norm_binarySwap_intertwines_X_sub_le {ι : Type} [Fintype ι]
           (heteroKron (tauShift (K := ZMod 2) 1) (1 : Op ι))
           (binarySwapIsometry X Z hX hZ ψ)‖ ≤
       ‖applyOperatorToState (X * Z - -(Z * X)) ψ‖ := by
-  let d := applyOperatorToState (X * Z - -(Z * X)) ψ
+  rw [sub_neg_eq_add]
+  let d := applyOperatorToState (X * Z + Z * X) ψ
   have apply_sub (M N : Op ι) :
       applyOperatorToState (M - N) ψ =
         applyOperatorToState M ψ - applyOperatorToState N ψ := by
@@ -270,7 +285,7 @@ theorem norm_binarySwap_intertwines_X_sub_le {ι : Type} [Fintype ι]
     change
       (applyOperatorToState (reflectionEffect Z 0) (applyOperatorToState X ψ) -
         applyOperatorToState (X * reflectionEffect Z 1) ψ) i = _
-    rw [← applyOperatorToState_mul, ← apply_sub,
+    rw [← MIPStarRE.QPBT.DistanceCalculus.applyOperatorToState_mul, ← apply_sub,
       reflectionEffect_zero_mul_X_sub_X_mul_one]
     rw [applyOperatorToState_smul]
     rfl
@@ -289,9 +304,10 @@ theorem norm_binarySwap_intertwines_X_sub_le {ι : Type} [Fintype ι]
       (applyOperatorToState (X * reflectionEffect Z 1)
           (applyOperatorToState X ψ) -
         applyOperatorToState (reflectionEffect Z 0) ψ) i = _
-    rw [← applyOperatorToState_mul, ← apply_sub,
+    rw [← MIPStarRE.QPBT.DistanceCalculus.applyOperatorToState_mul, ← apply_sub,
       X_mul_reflectionEffect_one_mul_X_sub_zero X Z hX]
-    rw [applyOperatorToState_smul, applyOperatorToState_mul]
+    rw [applyOperatorToState_smul,
+      MIPStarRE.QPBT.DistanceCalculus.applyOperatorToState_mul]
     rfl
   apply (sq_le_sq₀ (norm_nonneg _) (norm_nonneg _)).1
   rw [EuclideanSpace.norm_sq_eq]

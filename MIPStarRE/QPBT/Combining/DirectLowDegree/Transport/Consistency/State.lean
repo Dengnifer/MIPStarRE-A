@@ -207,8 +207,8 @@ theorem strategyConsRel_consistencyDefect_le
   unfold directPointQuestionOf ldtPointToDirect
   rw [(directPointEquiv D).symm_apply_apply]
 
-/-- LDT points associated with direct parameters have a canonical zero
-witness. -/
+/-- The zero vector witnesses that the space of LDT points associated with
+directly indexed parameters is nonempty. -/
 instance directLdtPointNonempty (D : DirectLdParams) :
     Nonempty (Point D.toLDTParameters) :=
   ⟨fun _ => ⟨0, D.toLDTParameters.hq⟩⟩

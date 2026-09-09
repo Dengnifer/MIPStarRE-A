@@ -63,8 +63,7 @@ dimension is `2 * P.m + 2`; no divisibility assertion is introduced.
 
 The construction has dimension `2 * P.m + 2` without requiring
 `2 * P.m + 2 ∣ P.q`; it supplies the directly indexed line and coordinate
-spaces used in the dimension-extension argument of
-`blueprint/src/chapter/ch15_qpbt_combining.tex:1257-1293`.
+spaces used in the dimension-extension argument of blueprint `lem:qld-sublines`.
 -/
 def AdmissibleParams.extendedDirectLd (P : AdmissibleParams) : DirectLdParams where
   q := P.q
@@ -120,6 +119,16 @@ abbrev directLdSpaceIndexSplitEquiv (D : DirectLdParams) :
 def directPrefixProjection {D : DirectLdParams} (i : Fin D.m)
     (v : Fin D.m → DirectScalarQ D) : Fin D.m → DirectScalarQ D :=
   fun j => if j.val < i.val then 0 else v j
+
+/-- Zeroing the coordinates preceding a prefix index is idempotent: the
+coordinates it leaves unchanged are exactly those it does not zero. -/
+theorem directPrefixProjection_idem (D : DirectLdParams) (i : Fin D.m)
+    (v : Fin D.m → DirectScalarQ D) :
+    directPrefixProjection i (directPrefixProjection i v) =
+      directPrefixProjection i v := by
+  funext j
+  unfold directPrefixProjection
+  split_ifs <;> rfl
 
 /-- Canonical line descriptions whose coordinate index is stored directly.
 Coordinates are numbered from zero, so `index = i` represents coordinate

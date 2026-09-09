@@ -50,7 +50,7 @@ theorem win_cons_approx_proof :
         (fun question a => heteroKron 1
           ((S.strategyMeasurement .alice question).effect a))
         S.swappedState ≤ C * ε := by
-  obtain ⟨C, hC, hbound⟩ := win_cons_proof
+  obtain ⟨C, hC, hbound⟩ := win_cons
   refine ⟨2 * C, by linarith, ?_⟩
   intro P ε S hε
   have hkey := opFamilyDistSq_placed_le_of_consistencyDefect_le
@@ -215,7 +215,7 @@ theorem lowDegreeConsistency_eq_mismatch_interchanged {P : AdmissibleParams}
     intro sample c
     congr 1
     unfold ProjectiveSetting.pointMeasOption ProjectiveSetting.pointMeas qA fA
-    rw [measurement_postprocess_comp_effect]
+    rw [MIPStarRE.Quantum.Measurement.postprocess_comp]
     rfl
   have hB : ∀ (sample : X) c,
       heteroKron (1 : Op S.toStrategy.ιA)
@@ -225,7 +225,7 @@ theorem lowDegreeConsistency_eq_mismatch_interchanged {P : AdmissibleParams}
     intro sample c
     congr 1
     unfold ProjectiveSetting.lineEvalMeas ProjectiveSetting.lineMeas qB fB
-    rw [measurement_postprocess_comp_effect]
+    rw [MIPStarRE.Quantum.Measurement.postprocess_comp]
     rfl
   calc
     _ = consistencyDefect (linePointDist P.toLdParams)
@@ -303,7 +303,7 @@ theorem win_low_degree_approx_proof :
         (fun sample a => heteroKron 1
           ((S.pointMeasOption .alice W sample.2).effect a))
         S.swappedState ≤ C * ε := by
-  obtain ⟨C₁, hC₁, h₁⟩ := win_low_degree_proof
+  obtain ⟨C₁, hC₁, h₁⟩ := win_low_degree
   obtain ⟨C₂, hC₂, h₂⟩ := win_low_degree_interchanged_proof
   refine ⟨2 * (C₁ + C₂), by linarith, ?_⟩
   intro P ε S hε W
@@ -317,13 +317,13 @@ theorem win_low_degree_approx_proof :
     (fun sample => S.pointMeasOption .alice W sample.2)
     (fun sample => S.lineEvalMeas .bob W sample.1 sample.2) S.toStrategy.ψ
     (h₂ P ε S hε W)
-  refine ⟨approxBound_of_left hC₂ hε hforward, ?_⟩
+  refine ⟨approx_bound_of_left hC₂ hε hforward, ?_⟩
   have hswap := opFamilyDistSq_swappedState (ιA := S.toStrategy.ιA)
     (ιB := S.toStrategy.ιB) (linePointDist P.toLdParams)
     (fun sample a => (S.pointMeasOption .alice W sample.2).effect a)
     (fun sample a => (S.lineEvalMeas .bob W sample.1 sample.2).effect a)
     S.toStrategy.ψ
-  exact hswap.trans_le (approxBound_of_right hC₁ hε hreverse)
+  exact hswap.trans_le (approx_bound_of_right hC₁ hε hreverse)
 
 /-! ## Pauli basis consistency check -/
 
@@ -399,7 +399,7 @@ theorem pauliBasisConsistency_eq_mismatch_interchanged {P : AdmissibleParams}
     intro u c
     congr 1
     unfold ProjectiveSetting.pauliEvalMeas ProjectiveSetting.pauliMeas fA qA
-    rw [measurement_postprocess_comp_effect]
+    rw [MIPStarRE.Quantum.Measurement.postprocess_comp]
     rfl
   have hB : ∀ (u : X) c,
       heteroKron (1 : Op S.toStrategy.ιA) ((S.pointMeas .bob W u).effect c) =
@@ -462,7 +462,7 @@ theorem win_pauli_basis_cons_approx_proof :
         (fun u a => heteroKron ((S.pointMeas .bob W u).effect a) 1)
         (fun u a => heteroKron 1 ((S.pauliEvalMeas .alice W u).effect a))
         S.swappedState ≤ C * ε := by
-  obtain ⟨C₁, hC₁, h₁⟩ := win_pauli_basis_cons_proof
+  obtain ⟨C₁, hC₁, h₁⟩ := win_pauli_basis_cons
   obtain ⟨C₂, hC₂, h₂⟩ := win_pauli_basis_cons_interchanged_proof
   refine ⟨2 * (C₁ + C₂), by linarith, ?_⟩
   intro P ε S hε W
@@ -474,12 +474,12 @@ theorem win_pauli_basis_cons_approx_proof :
     (uniformDistribution (Fin P.m → PauliScalar P))
     (fun u => S.pauliEvalMeas .alice W u)
     (fun u => S.pointMeas .bob W u) S.toStrategy.ψ (h₂ P ε S hε W)
-  refine ⟨approxBound_of_left hC₂ hε hforward, ?_⟩
+  refine ⟨approx_bound_of_left hC₂ hε hforward, ?_⟩
   have hswap := opFamilyDistSq_swappedState (ιA := S.toStrategy.ιA)
     (ιB := S.toStrategy.ιB) (uniformDistribution (Fin P.m → PauliScalar P))
     (fun u a => (S.pauliEvalMeas .alice W u).effect a)
     (fun u a => (S.pointMeas .bob W u).effect a) S.toStrategy.ψ
-  exact hswap.trans_le (approxBound_of_right hC₁ hε hreverse)
+  exact hswap.trans_le (approx_bound_of_right hC₁ hε hreverse)
 
 end WinImplications
 

@@ -31,8 +31,8 @@ in which the theorem is stated are in
 
 ## References
 
-The declaration is `thm:linearity` in
-`blueprint/src/chapter/ch15_qpbt_combining.tex:104-231`.  The QPBT paper quotes
+The declaration is blueprint
+`thm:linearity`.  The QPBT paper quotes
 the theorem at
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:713-725`; the
 provider is Theorem 10 of Natarajan--Vidick, arXiv:1610.03574,
@@ -61,10 +61,10 @@ it, and binary observables `L^u` on the tensor-product Hilbert space such that
 
 This is Theorem 10 of Natarajan--Vidick,
 `references/nv-paper/fullpaper.tex:1074-1088`, hypothesis as in its display
-(7) and conclusion as in its display (8), stated as `thm:linearity` in
-`blueprint/src/chapter/ch15_qpbt_combining.tex:104-150`; the QPBT paper quotes
+(7) and conclusion as in its display (8), stated as blueprint
+`thm:linearity`; the QPBT paper quotes
 it at `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:713-725`.
-As recorded in `rem:linearity-import` (blueprint lines 233--280), this form
+As recorded in blueprint `rem:linearity-import`, this form
 imposes no upper bound on `δ`, asserts exact linearity for every pair, and
 averages closeness only over `u`.  The quotation instead adds `δ ≤ 1`, phrases
 closeness pointwise under a pair quantifier, and appends `L 0 = 1`; those three
@@ -80,8 +80,8 @@ bound `δ` is refuted by a four-point counterexample, and the bound established
 by the Fourier--Naimark argument is `2 * δ` for `stateDepDistSq`, equivalently
 `δ` for `binaryObservableDistSq`
 (`exists_exactly_linear_observables_binaryObservableDistSq`).  Documented in
-`docs/paper-gaps/qpbt_linearity-distance-normalization.tex` and
-`rem:linearity-distance-normalization` (blueprint lines 282--301).
+`docs/paper-gaps/qpbt_linearity-distance-normalization.tex` and blueprint
+`rem:linearity-distance-normalization`.
 
 The proof passes the correlation hypothesis through the operator BLR bound
 `avg_multiplicativeDefect_le_two_mul_error`, obtaining
@@ -121,8 +121,7 @@ display (8) of Theorem 10 of Natarajan--Vidick,
 `references/nv-paper/fullpaper.tex:1083-1086`, in the measurement-distance
 convention of `references/nv-paper/fullpaper.tex:876-900`, the convention in
 which the source's calculation is correct; see
-`rem:linearity-distance-normalization`
-(`blueprint/src/chapter/ch15_qpbt_combining.tex:282-301`) and
+blueprint `rem:linearity-distance-normalization` and
 `docs/paper-gaps/qpbt_linearity-distance-normalization.tex`.  It follows from
 `exists_exactly_linear_observables` by halving, through
 `binaryObservableDistSq_eq_stateDepDistSq_div_two`. -/

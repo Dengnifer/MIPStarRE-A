@@ -33,8 +33,8 @@ along that composition.
 
 ## References
 
-The rigidity statement supported here is `thm:ms-rigidity` in
-`blueprint/src/chapter/ch13_qpbt_test.tex:224-253`, from
+The rigidity statement supported here is blueprint
+`thm:ms-rigidity`, from
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652`,
 proved in Coladangelo--Stark, Theorem 6.9.  The dilation reuses the
 one-measurement Naimark lemma of
@@ -54,7 +54,7 @@ noncomputable section
 /-! ## Orthogonality inside a subnormalized family of projections -/
 
 /-- Formalization-only auxiliary lemma for the dilation of `thm:ms-rigidity`
-(blueprint `ch13_qpbt_test.tex:224-253`).  If an orthogonal projection `P` and a
+(blueprint `thm:ms-rigidity`).  If an orthogonal projection `P` and a
 positive semidefinite operator `Q` satisfy `P + Q ≤ 1`, then `P` annihilates
 `Q`.  Indeed `Tr(P Q)` is nonnegative because both operators are positive
 semidefinite, while `0 ≤ Tr(P (1 - P - Q)) = -Tr(P Q)` because `1 - P - Q` is
@@ -78,14 +78,15 @@ theorem mul_eq_zero_of_isProj_of_add_le_one {d : Type*} [Fintype d] [DecidableEq
   exact mul_eq_zero_of_nonneg_of_trace_mul_eq_zero hP.nonneg hQ (le_antisymm hle hge)
 
 /-- Formalization-only auxiliary lemma for the dilation of `thm:ms-rigidity`
-(blueprint `ch13_qpbt_test.tex:224-253`).  A finite family of orthogonal
+(blueprint `thm:ms-rigidity`).  A finite family of orthogonal
 projections whose sum is at most the identity is mutually orthogonal: for two
 distinct indices the two projections already sum to at most the identity, so the
 previous lemma applies. -/
 theorem mul_eq_zero_of_isProj_family {d α : Type*} [Fintype d] [DecidableEq d]
-    [Fintype α] [DecidableEq α] {P : α → Op d} (hP : ∀ a, IsProj (P a))
+    [Fintype α] {P : α → Op d} (hP : ∀ a, IsProj (P a))
     (hsum : ∑ a, P a ≤ 1) {a b : α} (hab : a ≠ b) :
     P a * P b = 0 := by
+  classical
   refine mul_eq_zero_of_isProj_of_add_le_one (hP a) (hP b).nonneg ?_
   refine le_trans ?_ hsum
   have hpair : ∑ c ∈ ({a, b} : Finset α), P c = P a + P b := by
@@ -95,15 +96,16 @@ theorem mul_eq_zero_of_isProj_family {d α : Type*} [Fintype d] [DecidableEq d]
     (fun c _ _ => (hP c).nonneg)
 
 /-- Formalization-only auxiliary lemma for the dilation of `thm:ms-rigidity`
-(blueprint `ch13_qpbt_test.tex:224-253`).  The sum of a mutually orthogonal
+(blueprint `thm:ms-rigidity`).  The sum of a mutually orthogonal
 family of projections is again an orthogonal projection; mutual orthogonality is
 supplied by the hypothesis that the sum is at most the identity. -/
 theorem isProj_sum_of_isProj_of_sum_le_one {d α : Type*} [Fintype d] [DecidableEq d]
-    [Fintype α] [DecidableEq α] {P : α → Op d} (hP : ∀ a, IsProj (P a))
+    [Fintype α] {P : α → Op d} (hP : ∀ a, IsProj (P a))
     (hsum : ∑ a, P a ≤ 1) :
     IsProj (∑ a, P a) := by
+  classical
   constructor
-  · show (∑ a, P a) * (∑ a, P a) = ∑ a, P a
+  · change (∑ a, P a) * (∑ a, P a) = ∑ a, P a
     rw [Finset.sum_mul]
     refine Finset.sum_congr rfl fun a _ => ?_
     rw [Matrix.mul_sum, Finset.sum_eq_single a]
@@ -111,7 +113,7 @@ theorem isProj_sum_of_isProj_of_sum_le_one {d α : Type*} [Fintype d] [Decidable
     · exact fun b _ hba => mul_eq_zero_of_isProj_family hP hsum (Ne.symm hba)
     · intro ha
       exact absurd (Finset.mem_univ a) ha
-  · show star (∑ a, P a) = ∑ a, P a
+  · change star (∑ a, P a) = ∑ a, P a
     rw [star_sum]
     exact Finset.sum_congr rfl fun a _ => (hP a).isSelfAdjoint
 
@@ -119,8 +121,8 @@ theorem isProj_sum_of_isProj_of_sum_le_one {d α : Type*} [Fintype d] [Decidable
 
 /-- The linear map sending a vector `x` of `ℂ^ι` to `x ⊗ |⊥⟩`, where `|⊥⟩` is the
 basis vector of the auxiliary register `ℂ^{Option α}` indexed by the adjoined
-point.  Formalization-only support for the dilation used by `thm:ms-rigidity`,
-blueprint `ch13_qpbt_test.tex:224-253`. -/
+point.  Formalization-only support for the dilation used by blueprint
+`thm:ms-rigidity`. -/
 def naimarkEmbeddingMap (ι α : Type) [Fintype ι] [DecidableEq ι]
     [Fintype α] [DecidableEq α] :
     EuclideanSpace ℂ ι →ₗ[ℂ] EuclideanSpace ℂ (ι × Option α) where
@@ -135,8 +137,8 @@ def naimarkEmbeddingMap (ι α : Type) [Fintype ι] [DecidableEq ι]
 
 /-- The isometric identification of a local Hilbert space `ℂ^ι` with the *ground
 slice* `ℂ^ι ⊗ |⊥⟩` of the enlarged space `ℂ^{ι × Option α}`.  This single
-embedding serves every question of the dilation supporting `thm:ms-rigidity`,
-blueprint `ch13_qpbt_test.tex:224-253`, paper
+embedding serves every question of the dilation supporting blueprint
+`thm:ms-rigidity`, paper
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652`. -/
 noncomputable def naimarkEmbedding (ι α : Type) [Fintype ι] [DecidableEq ι]
     [Fintype α] [DecidableEq α] :
@@ -153,8 +155,8 @@ theorem naimarkEmbedding_apply {ι α : Type} [Fintype ι] [DecidableEq ι]
     naimarkEmbedding ι α x p = if p.2 = none then x p.1 else 0 := rfl
 
 /-- The compression of an operator on the enlarged space to the ground slice.
-Formalization-only support for the dilation of `thm:ms-rigidity`, blueprint
-`ch13_qpbt_test.tex:224-253`. -/
+Formalization-only support for the dilation of blueprint
+`thm:ms-rigidity`. -/
 def naimarkCompression {ι α : Type} [Fintype ι] [DecidableEq ι]
     [Fintype α] [DecidableEq α] (M : Op (ι × Option α)) : Op ι :=
   M.submatrix (fun i => (i, none)) (fun j => (j, none))
@@ -195,7 +197,7 @@ theorem naimarkCompression_one {ι α : Type} [Fintype ι] [DecidableEq ι]
 
 /-- The operator on the enlarged space that acts as `M` on the ground slice and
 annihilates its orthogonal complement.  Formalization-only support for the
-dilation of `thm:ms-rigidity`, blueprint `ch13_qpbt_test.tex:224-253`. -/
+dilation of blueprint `thm:ms-rigidity`. -/
 def naimarkInflation {ι α : Type} [Fintype ι] [DecidableEq ι]
     [Fintype α] [DecidableEq α] (M : Op ι) : Op (ι × Option α) :=
   Matrix.of fun p q => if p.2 = none ∧ q.2 = none then M p.1 q.1 else 0
@@ -266,8 +268,8 @@ theorem naimarkData_isProj_sum_some {α d : Type} [Fintype α] [DecidableEq α]
 /-- The effects of the dilated measurement.  The projection attached to the
 answer `a` is the Naimark projection of `a`, except that the distinguished answer
 `a₀` also absorbs the deficiency `1 - ∑_a P_a`, which makes the family complete.
-Formalization-only construction supporting `thm:ms-rigidity`, blueprint
-`ch13_qpbt_test.tex:224-253`. -/
+Formalization-only construction supporting blueprint
+`thm:ms-rigidity`. -/
 noncomputable def naimarkDilatedEffect {α d : Type} [Fintype α] [DecidableEq α]
     [Fintype d] [DecidableEq d] (M : MIPStarRE.Quantum.Measurement α d) (a₀ a : α) :
     Op (d × Option α) :=
@@ -319,8 +321,8 @@ theorem naimarkDilatedEffect_isProj {α d : Type} [Fintype α] [DecidableEq α]
 
 /-- The dilated measurement: a complete projective measurement on the enlarged
 local space whose ground-slice compression is the original positive operator
-valued measure.  Formalization-only construction supporting `thm:ms-rigidity`,
-blueprint `ch13_qpbt_test.tex:224-253`. -/
+valued measure.  Formalization-only construction supporting blueprint
+`thm:ms-rigidity`. -/
 noncomputable def naimarkDilatedMeasurement {α d : Type} [Fintype α] [DecidableEq α]
     [Fintype d] [DecidableEq d] (M : MIPStarRE.Quantum.Measurement α d) (a₀ : α) :
     MIPStarRE.Quantum.Measurement α (d × Option α) :=
@@ -367,8 +369,8 @@ theorem naimarkCompression_naimarkDilatedEffect {α d : Type} [Fintype α] [Deci
 /-! ## The dilated state -/
 
 /-- The image of a bipartite state under the two ground embeddings.  This is the
-state of the dilated strategy supporting `thm:ms-rigidity`, blueprint
-`ch13_qpbt_test.tex:224-253`. -/
+state of the dilated strategy supporting blueprint
+`thm:ms-rigidity`. -/
 noncomputable def naimarkDilatedState (α : Type) [Fintype α] [DecidableEq α]
     {ιA ιB : Type} [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
     (ψ : EuclideanSpace ℂ (ιA × ιB)) :
@@ -394,7 +396,7 @@ theorem naimarkDilatedState_apply (α : Type) [Fintype α] [DecidableEq α]
 
 /-- The quadratic form of an operator on a pure state, written out in the
 computational basis.  Formalization-only support for the dilation of
-`thm:ms-rigidity`, blueprint `ch13_qpbt_test.tex:224-253`. -/
+blueprint `thm:ms-rigidity`. -/
 theorem inner_applyOperatorToState {ι : Type} [Fintype ι] [DecidableEq ι]
     (K : Op ι) (u : EuclideanSpace ℂ ι) :
     inner ℂ u (applyOperatorToState K u) =
@@ -448,7 +450,7 @@ spaces acquire one auxiliary register indexed by `Option MsAnswer`, the state is
 carried to the ground slice, and each question measurement is replaced by its
 Naimark dilation, the deficiency being absorbed by the answer `bit 0`.  This is
 the projective strategy on which the self-testing argument of `thm:ms-rigidity`
-operates; blueprint `ch13_qpbt_test.tex:224-253`, paper
+operates; blueprint `thm:ms-rigidity`, paper
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652`. -/
 noncomputable def msDilatedStrategy (S : Strategy msGame) : Strategy msGame where
   ιA := S.ιA × Option MsAnswer
@@ -499,7 +501,7 @@ theorem msDilatedStrategy_isProjective_B (S : Strategy msGame) (y : MsType) :
 theorem ms_dilated_strategy_outcome_weight (S : Strategy msGame) (x y : MsType)
     (a b : MsAnswer) :
     outcomeWeight (msDilatedStrategy S) x y a b = outcomeWeight S x y a b := by
-  show (inner ℂ (naimarkDilatedState MsAnswer S.ψ)
+  change (inner ℂ (naimarkDilatedState MsAnswer S.ψ)
       (applyOperatorToState
         (heteroKron (naimarkDilatedEffect (α := MsAnswer) (S.A x) (MsAnswer.bit 0) a)
           (naimarkDilatedEffect (α := MsAnswer) (S.B y) (MsAnswer.bit 0) b))
@@ -619,8 +621,8 @@ theorem ms_dilated_strategy_bob_parity_failure_mass (S : Strategy msGame) (i : F
 /-! ## Composition of the dilation with later local isometries -/
 
 /-- The matrix of a linear isometry of Euclidean spaces in the computational
-bases.  Formalization-only support for `thm:ms-rigidity`, blueprint
-`ch13_qpbt_test.tex:224-253`. -/
+bases.  Formalization-only support for blueprint
+`thm:ms-rigidity`. -/
 noncomputable def isometryMatrix {ι ι' : Type} [Fintype ι] [DecidableEq ι]
     [Fintype ι'] [DecidableEq ι']
     (φ : EuclideanSpace ℂ ι →ₗᵢ[ℂ] EuclideanSpace ℂ ι') : Matrix ι' ι ℂ :=
@@ -669,8 +671,8 @@ theorem isometryMatrix_comp {ι κ ν : Type} [Fintype ι] [DecidableEq ι]
 
 /-- Conjugating by a composite isometry is conjugating twice.  This is how the
 ground embeddings of the dilation combine with the local isometries produced by
-the self-testing argument of `thm:ms-rigidity`, blueprint
-`ch13_qpbt_test.tex:224-253`. -/
+the self-testing argument of blueprint
+`thm:ms-rigidity`. -/
 theorem conjIsometry_comp {ι κ ν : Type} [Fintype ι] [DecidableEq ι]
     [Fintype κ] [DecidableEq κ] [Fintype ν] [DecidableEq ν]
     (φ : EuclideanSpace ℂ κ →ₗᵢ[ℂ] EuclideanSpace ℂ ν)
@@ -832,7 +834,7 @@ dilated state is the leakage out of the ground slice, which is controlled in
 `Rigidity/Transfer.lean` (`ms_effect_transfer_A`, `ms_effect_transfer_B`,
 `ms_anticommutator_transfer_A`, `ms_anticommutator_transfer_B`) by the
 cell-consistency masses of the value-to-parity layer.  Blueprint
-`ch13_qpbt_test.tex:224-253`, paper
+`thm:ms-rigidity`, paper
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652`. -/
 theorem opFamilyDistSq_naimarkInflation (α : Type) [Fintype α] [DecidableEq α]
     {X γ ιA ιB : Type} [Fintype γ] [Fintype ιA] [DecidableEq ιA]

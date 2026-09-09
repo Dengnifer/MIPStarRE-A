@@ -155,7 +155,7 @@ lemma two_sqrt_two_mul_add_two_sqrt_le_four_sqrt
 
 /-- Paper-side comparison `2 δ ≤ ζ_variance` from the closing line of the proof
 of `lem:add-in-u` (`self_improvement.tex:342`,
-`blueprint/src/chapter/ch07_self_improvement.tex:494`). Since
+`lem:add-in-u`). Since
 `ζ_variance = 24 m (ε + δ + m d / q)` and `m ≥ 1`, the term `24 m δ` already
 exceeds `2 δ` whenever `eps, delta ≥ 0`. -/
 lemma two_mul_delta_le_selfImprovementVarianceError
@@ -192,8 +192,8 @@ lemma two_mul_delta_le_selfImprovementVarianceError
 /-- Arithmetic absorption used by `add_in_u_simplified_transfer_of_cs_chain`:
 the four step-bound sum `2 √(2 δ) + 2 √(ζ_variance)` is dominated by
 `addInUError = 4 ζ_variance^{1/2}` (`self_improvement.tex:341--342`,
-`blueprint/src/chapter/ch07_self_improvement.tex:492--494`). This is the
-arithmetic side condition that lets the step bounds with the paper-faithful
+blueprint `lem:add-in-u`). This is the arithmetic side condition that lets the
+step bounds with the paper-faithful
 `Real.sqrt` shape (companion issues #1089 and #1090) discharge the `hsum`
 hypothesis of `add_in_u_simplified_transfer_of_cs_chain`. -/
 lemma two_sqrt_two_delta_add_two_sqrt_selfImprovementVarianceError_le_addInUError

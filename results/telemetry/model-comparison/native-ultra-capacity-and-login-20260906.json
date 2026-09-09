@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "supersedes": "native-ultra-bootstrap-20260906.json routing warning and pending parent-count semantics only",
+  "default_login": {
+    "completed_at": "2026-09-06T12:55:50.900747Z",
+    "credential_label": "relay-1",
+    "owner_authorized": true,
+    "login_exit_code": 0,
+    "saved_key_matches_verified_relay1": true,
+    "after_login_status_exit_code": 0,
+    "scoped_main_auth_unchanged": true,
+    "private_material_included": false
+  },
+  "native_capacity": {
+    "inspection_source_commit": "94311d447587411789533c47601fd8bc9d81eb48",
+    "source_binary_identity": "Inspection source HEAD; binary equivalence not independently built",
+    "root_counted_in_native_cap": false,
+    "descendants_share_limiter": true,
+    "configured_child_capacity": 1,
+    "observed_accepted_child_count": 1,
+    "observed_refused_grandchild_attempts": 1,
+    "refusal": "collab spawn failed: agent thread limit reached",
+    "source_references": [
+      "codex-rs/core/src/agent/control.rs:111-132",
+      "codex-rs/core/src/agent/control/execution.rs:81-96",
+      "codex-rs/core/src/agent/registry.rs:136-156",
+      "codex-rs/core/src/agent/control/spawn.rs:600-621"
+    ],
+    "official_configuration_reference": "https://learn.chatgpt.com/docs/config-file/config-reference",
+    "accounting_requirement": "Charge root once through executable census and the entire native child pool once beside external workers/reservations",
+    "provider_throughput_measured": false
+  },
+  "scope_correction": {
+    "issue": 287,
+    "redundant_scoped_primary_home_rerouting": "dropped on owner update",
+    "remaining": [
+      "literal requested Ultra enforcement",
+      "shared native and external capacity",
+      "native session telemetry",
+      "independent exact-head Ultra review"
+    ],
+    "external_admission_limit": 0,
+    "useful_queue_hold_retained": true
+  }
+}

@@ -32,16 +32,6 @@ local instance pauliEdgeNonemptyTwisted : Nonempty PauliEdge :=
 
 /-! ## The unconditional bound on a difference of reflections -/
 
-/-- An isometry preserves the state-dependent norm. Formalization-only support
-for `def:strategy-observables`, blueprint
-`ch14_qpbt_observables.tex:573-610`. -/
-theorem norm_applyOperatorToState_of_isometry {ι : Type} [Fintype ι]
-    [DecidableEq ι] {U : Op ι} (hU : Uᴴ * U = 1) (ψ : EuclideanSpace ℂ ι) :
-    ‖applyOperatorToState U ψ‖ = ‖ψ‖ := by
-  have h : ‖applyOperatorToState (U * 1) ψ‖ = ‖applyOperatorToState 1 ψ‖ :=
-    MagicSquareRigidity.norm_applyOperatorToState_isometry_mul hU 1 ψ
-  rwa [mul_one, applyOperatorToState_one] at h
-
 /-- The product of two isometries is an isometry. Formalization-only support
 for `eq:pts-obs-commutation`, paper
 `14_analysis_of_the_pauli_basis_test.tex:309-354`. -/
@@ -75,13 +65,13 @@ theorem norm_twistedCommutator_sq_le_four {P : AdmissibleParams}
     (mul_conjTranspose_mul_self (hOZ ω) (hOX ω))
   have h1 : ‖applyOperatorToState
       (heteroKron (OX ω * OZ ω) (1 : Op ιR)) χ‖ = 1 := by
-    rw [norm_applyOperatorToState_of_isometry hXZ]
+    rw [MagicSquareRigidity.norm_applyOperatorToState_of_isometry hXZ]
     exact hχ
   have h2 : ‖applyOperatorToState
       (phaseSign (gammaValue P ω.1 ω.2.1 ω.2.2.1 ω.2.2.2) •
         heteroKron (OZ ω * OX ω) (1 : Op ιR)) χ‖ = 1 := by
     rw [applyOperatorToState_smul_op, norm_smul, norm_phaseSign,
-      norm_applyOperatorToState_of_isometry hZX, hχ, one_mul]
+      MagicSquareRigidity.norm_applyOperatorToState_of_isometry hZX, hχ, one_mul]
   have hsub : ‖applyOperatorToState
       (heteroKron (OX ω * OZ ω) (1 : Op ιR) -
         phaseSign (gammaValue P ω.1 ω.2.1 ω.2.2.1 ω.2.2.2) •
@@ -274,8 +264,8 @@ theorem twisted_commutation_of_halves {P : AdmissibleParams} {ιL ιR : Type}
 /-! ## The commuting half on Alice's factor -/
 
 /-- The point observables of Alice approximately commute on commuting tuples.
-This instantiates the generic commuting half at the standard placement of
-`lem:qld-win-implications-obs`.
+This auxiliary estimate is the commuting part of `lem:qld-win-implications-obs`
+in the standard tensor order.
 
 The error is `C * (ε + √ε)` rather than `C * ε` because Equation `eq:lc-11` is
 closed by the transitivity estimate for the consistency relation `≃`, which is
@@ -283,8 +273,8 @@ not additive. The detour through the Pair/W families passes through a squared
 state-dependent distance and a Cauchy--Schwarz step, so its two `O(ε)` defects
 contribute `O(√ε)`, while the defect of the step used directly contributes
 `O(ε)`. Paper
-`14_analysis_of_the_pauli_basis_test.tex:311-341`, blueprint
-`ch14_qpbt_observables.tex:761-794`. -/
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:311-341`,
+blueprint `lem:qld-point-obs-commuting-estimate`. -/
 theorem exists_pointObs_commutator_comm_le_alice :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε), 0 ≤ ε →
@@ -297,8 +287,8 @@ theorem exists_pointObs_commutator_comm_le_alice :
           S.toStrategy.ψ‖ ^ 2) ≤ C * (ε + Real.sqrt ε) := by
   classical
   obtain ⟨C₁, hC₁, hgen⟩ := exists_pointObs_commutator_comm_le
-  obtain ⟨Cc, hCc, hcc⟩ := win_comm_cons_proof
-  obtain ⟨Cm, hCm, hcm⟩ := win_comm_proof
+  obtain ⟨Cc, hCc, hcc⟩ := win_comm_cons
+  obtain ⟨Cm, hCm, hcm⟩ := win_comm
   have hcard : (1 : ℝ) ≤ (Fintype.card PauliEdge : ℝ) := by
     exact_mod_cast (Fintype.card_pos : 0 < Fintype.card PauliEdge)
   set K : ℝ := 2 * (Fintype.card PauliEdge : ℝ) + Cm with hKdef
@@ -319,7 +309,7 @@ theorem exists_pointObs_commutator_comm_le_alice :
     (fun ω => S.pointObs .alice .X ω.2.2.1 ω.1)
     (fun ω => S.pointObs .alice .Z ω.2.2.2 ω.2.1)
     S.toStrategy.ψ S.toStrategy.ψ_norm (by positivity)
-    (fun ω => postprocess_isProjective _ (S.isProjective.2 _) _)
+    (fun ω => SandwichProduct.postprocess_isProjective _ (S.isProjective.2 _) _)
     (fun ω => pointObs_eq_one_sub_two_smul S .alice .X ω.2.2.1 ω.1)
     (fun ω => pointObs_eq_one_sub_two_smul S .alice .Z ω.2.2.2 ω.2.1)
     (hcc P ε S hε .X) (hcc P ε S hε .Z)

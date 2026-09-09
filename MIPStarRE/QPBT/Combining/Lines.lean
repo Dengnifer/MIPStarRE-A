@@ -6,15 +6,17 @@ import MIPStarRE.QPBT.Combining.Witnesses
 This module states the construction of the joint X/Z line measurements, the
 mixture and error-inflation estimates for restricted line distributions, and
 the sub-line distribution used to combine the two bases.  The extended line
-in the sub-line construction uses the directly indexed carrier, so none of the
-source-facing statements requires a divisibility hypothesis at dimension
-`2 * m + 2`.
+in the sub-line construction uses the directly indexed carrier, so the
+sub-line statement is a formalization auxiliary assertion and carries no
+divisibility hypothesis at dimension `2 * m + 2`.
 
 ## References
 
-The declarations formalize `lem:qld-xz-lines`,
-`lem:restricted-line-mixture-bounds`, and `lem:qld-sublines` in
-`blueprint/src/chapter/ch15_qpbt_combining.tex:345-846`.  Their paper sources
+The declarations formalize `lem:qld-xz-lines` and
+`lem:restricted-line-mixture-bounds` in
+`blueprint/src/chapter/ch15_qpbt_combining.tex`; `exists_subLineWitness`
+instead supports `lem:qld-sublines` through the directly indexed extended-line
+carrier and probability law.  Their paper sources
 are `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:882-894`
 and `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1038-1069`.
 -/
@@ -29,15 +31,24 @@ noncomputable section
 
 /-- Conditional joint X/Z line measurements for `lem:qld-xz-lines`.
 
-**Source statement:** `lem:qld-xz-lines` in
-`blueprint/src/chapter/ch15_qpbt_combining.tex:345-443`, from
+**Source statement:** blueprint
+`lem:qld-xz-lines`, from
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:882-894`.
 The error depends polynomially on `ε` and `md/q`, and the witness retains all
 directed opposite-placement comparisons.  This is the formalization-only form
 with an already constructed point witness; the source-facing theorem below
 supplies that witness existentially.  The proof is tracked by issue #18.
 Discharge: formalize the sandwich measurement and the pasting argument in the
-cited proof. -/
+cited proof.
+
+**Error contract:** the polynomial bound printed in the source is carried
+by `IsPolyErr₂`, which states the corrected sum form
+`f x y ≤ C * (x ^ r + y ^ s)` with `1 ≤ C` and positive exponents on the
+closed nonnegative quadrant, in place of the product form `C * (x * y) ^ C`
+of the source shorthand at `04_preliminaries.tex:22-29`.  The correction and
+the two-dimensional strategy that refutes the product form are recorded in
+`docs/paper-gaps/qpbt_pasting-product-error.tex` and tracked by issue #196.
+Here `poly(ε, md/q)` is read in that sense. -/
 theorem exists_combinedLinesWitness_ofPointsWitness :
     ∃ deltaP : ℝ -> ℝ -> ℝ, IsPolyErr₂ deltaP ∧
       ∀ (P : AdmissibleParams) (ε δQ : ℝ) (S : ProjectiveSetting P ε)
@@ -56,7 +67,16 @@ conditional form used by downstream calculations. -/
 Unlike the formalization-only `_ofPointsWitness` companion, this declaration
 does not assume a `CombinedPointsWitness` as an external bridge input.  It
 quantifies the point error function and witness construction together with the
-line construction, as the preceding source lemma supplies those points. -/
+line construction, as the preceding source lemma supplies those points.
+
+**Error contract:** the polynomial bound printed in the source is carried
+by `IsPolyErr₂`, which states the corrected sum form
+`f x y ≤ C * (x ^ r + y ^ s)` with `1 ≤ C` and positive exponents on the
+closed nonnegative quadrant, in place of the product form `C * (x * y) ^ C`
+of the source shorthand at `04_preliminaries.tex:22-29`.  The correction and
+the two-dimensional strategy that refutes the product form are recorded in
+`docs/paper-gaps/qpbt_pasting-product-error.tex` and tracked by issue #196.
+Here `poly(ε, md/q)` is read in that sense. -/
 theorem exists_combinedLinesWitness :
     ∃ deltaQ : ℝ -> ℝ, IsPolyErr deltaQ ∧
       ∃ deltaP : ℝ -> ℝ -> ℝ, IsPolyErr₂ deltaP ∧
@@ -71,8 +91,8 @@ theorem exists_combinedLinesWitness :
 /-- The axis and diagonal line-point laws are uniform mixtures of their
 coordinate-index restrictions.
 
-**Source statement:** `lem:restricted-line-mixture-bounds` in
-`blueprint/src/chapter/ch15_qpbt_combining.tex:595-646`, formalizing the
+**Source statement:** blueprint
+`lem:restricted-line-mixture-bounds`, formalizing the
 unlabelled observation at
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1049-1051`.
 `Distribution.bind` is the finite uniform-mixture operation.  The proof is
@@ -90,8 +110,8 @@ theorem linePointDist_eq_mixture_restricted (L : LdParams) :
 /-- Restricting a nonnegative average from the line-point distribution to one
 fixed line kind and coordinate inflates its bound by at most `2m`.
 
-**Source statement:** item 1 of `lem:restricted-line-mixture-bounds` in
-`blueprint/src/chapter/ch15_qpbt_combining.tex:595-646`, from the unlabelled
+**Source statement:** item 1 of blueprint
+`lem:restricted-line-mixture-bounds`, from the unlabelled
 estimate at
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1052-1056`.
 The proof is tracked by issue #18.  Discharge: use
@@ -109,8 +129,8 @@ theorem avg_restricted_le {P : AdmissibleParams}
 /-- Restricting both variables of a nonnegative average over two independent
 line-point samples inflates its bound by at most `4m^2`.
 
-**Source statement:** item 2 of `lem:restricted-line-mixture-bounds` in
-`blueprint/src/chapter/ch15_qpbt_combining.tex:595-646`, from the unlabelled
+**Source statement:** item 2 of blueprint
+`lem:restricted-line-mixture-bounds`, from the unlabelled
 estimate at
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1056-1058`.
 The proof is tracked by issue #18.  Discharge: apply the one-variable mixture
@@ -133,8 +153,8 @@ theorem avg_restricted_prod_le {P : AdmissibleParams}
 point measurement on every product of restricted line distributions.
 
 **Source statement:** item 3 and Equation `eq:qld-xz-lines-restricted` of
-`lem:restricted-line-mixture-bounds` in
-`blueprint/src/chapter/ch15_qpbt_combining.tex:595-646`, from
+blueprint
+`lem:restricted-line-mixture-bounds`, from
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1058-1061`.
 Here `consistencyDefect` is the finite POVM form of the displayed expectation
 against `Id - Q` after both measurements are postprocessed by evaluation.
@@ -165,16 +185,19 @@ theorem restricted_lines_consistency_bound :
 
 /-! ## The sub-line distribution -/
 
-/-- Existence of the sub-line distribution with its two separate projected
-point marginals and axis-line closure.
+/-- Existence of the directly indexed sub-line distribution with its two
+separate projected point marginals and axis-line closure.  It supports
+`lem:qld-sublines` and `rem:qld-sublines-property-three` in
+`blueprint/src/chapter/ch15_qpbt_combining.tex`, whose source is
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1063-1069` with
+its proof at lines 1071--1116.
 
-**Source statement:** `lem:qld-sublines` and
-`rem:qld-sublines-property-three` in
-`blueprint/src/chapter/ch15_qpbt_combining.tex:647-846`, from
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1063-1069` and
-its proof at lines 1071--1116.  The witness uses the directly indexed extended
-line law described in `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`, so
-the statement has no divisibility hypothesis.  Its `source_mixture` field
+This is a formalization auxiliary assertion, not the source-labelled
+`lem:qld-sublines`.  The extended line uses the directly indexed carrier and
+line-point law of `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex` in
+place of the seed-indexed line-point distribution over `F_q^(2m+2)` of the
+source statement, so the statement carries no divisibility hypothesis and its
+transport to the source carrier remains open.  Its `source_mixture` field
 asserts only the separate X and Z marginal mixtures, not a stronger joint
 conditional law.  The proof is tracked by issue #18.  Discharge: formalize the
 two sampling cases of the cited construction for `DirectLineDesc`. -/

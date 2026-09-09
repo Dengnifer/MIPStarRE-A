@@ -9,8 +9,8 @@ for the directly indexed low-degree interface.
 
 ## References
 
-The underlying game is `def:ld-game` in
-`blueprint/src/chapter/ch13_qpbt_test.tex:17-105`, with source origin
+The underlying game is blueprint
+`def:ld-game`, with source origin
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
 -/
 
@@ -94,8 +94,8 @@ abbrev DirectLdAnswerCode (D : DirectLdParams) :=
     ((Fin D.k → Fin (D.d + 1) → DirectScalarQ D) ⊕
       (Fin D.k → Fin (D.m * D.d + 1) → DirectScalarQ D))
 
-/-- Constructor-preserving equivalence between the inductive answer type and
-its finite code. -/
+/-- The canonical code equivalence for `DirectLdAnswer`, sending point,
+axis-line, and diagonal-line answers to the three summands. -/
 noncomputable def directLdAnswerEquiv (D : DirectLdParams) :
     DirectLdAnswer D ≃ DirectLdAnswerCode D where
   toFun

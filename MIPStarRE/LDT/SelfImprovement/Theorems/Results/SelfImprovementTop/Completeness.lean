@@ -48,8 +48,7 @@ Paper anchors:
 * `references/ldt-paper/self_improvement.tex` lines 351--414 — helper-stage
   completeness `⟨ψ|Hhat ⊗ I|ψ⟩ ≥ 1 - ν - O(...)`, with the Cauchy--Schwarz
   argument fed by the input consistency hypothesis on `G` and `nu` at lines
-  366--414. The blueprint mirror is
-  `blueprint/src/chapter/ch07_self_improvement.tex` lines 101--142.
+  366--414. The blueprint mirror is `item:self-improvement-completeness`.
 * `references/ldt-paper/self_improvement.tex` lines 713--717 — projective
   transport of completeness from `Hhat` to `H` using strong self-consistency
   and the orthonormalization SDD bound.
@@ -153,9 +152,8 @@ This isolates the analytic input for the `completeness` field of
 `hhelperCompleteness` matching
 `references/ldt-paper/self_improvement.tex` lines 351--414, which is the only
 analytic step used by this construction (especially the Cauchy--Schwarz argument
-at lines 366--414 that feeds on `G`/`nu` and the strategy's input consistency). The
-blueprint mirror is `blueprint/src/chapter/ch07_self_improvement.tex` lines
-101--142.
+at lines 366--414 that feeds on `G`/`nu` and the strategy's input consistency).
+The blueprint mirror is `item:self-improvement-completeness`.
 
 The hypothesis uses the weaker `(1 - nu) - selfImprovementHelperError`
 bookkeeping expected by the final-fields chain. A future helper-completeness

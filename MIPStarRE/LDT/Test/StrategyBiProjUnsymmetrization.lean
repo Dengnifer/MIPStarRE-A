@@ -366,12 +366,6 @@ private def localPairBAEmbedding {ιA ιB : Type*} :
     ιB × ιA → LocalCarrierSum ιA ιB × LocalCarrierSum ιA ιB :=
   fun z => (Sum.inr z.1, Sum.inl z.2)
 
-/-- The role-sector embedding selecting the `rL,rR` block. -/
-private def rolePairSectorEmbedding {ιA ιB : Type*} (rL rR : Role) :
-    LocalCarrierSum ιA ιB × LocalCarrierSum ιA ιB →
-      RoleRegisterLocal ιA ιB × RoleRegisterLocal ιA ιB :=
-  fun z => ((rL, z.1), (rR, z.2))
-
 /-- Submatrices of a tensor product along product embeddings are tensor products
 of the corresponding submatrices. -/
 private lemma opTensor_submatrix_prod {ιL ιR κL κR : Type*}
@@ -393,7 +387,8 @@ private lemma trace_rolePairDirectSumCond_mul {ιA ιB : Type*}
     (Y : MIPStarRE.Quantum.Op (RoleRegisterLocal ιA ιB × RoleRegisterLocal ιA ιB)) :
     Matrix.trace (rolePairDirectSumCond rL rR X * Y) =
       Matrix.trace (X * Y.submatrix
-        (rolePairSectorEmbedding rL rR) (rolePairSectorEmbedding rL rR)) := by
+        (fun z => ((rL, z.1), (rR, z.2)))
+        (fun z => ((rL, z.1), (rR, z.2)))) := by
   classical
   let e := roleRegisterPairLocalEquiv ιA ιB
   let Y' : MIPStarRE.Quantum.Op
@@ -439,56 +434,44 @@ private lemma trace_localPairBABlock_mul_arbitrary {ιA ιB : Type*}
   simp_rw [Fintype.sum_prod_type]
   simp [localPairBABlock, localPairBAEmbedding]
 
-private noncomputable def roleRegisterRoleLocalBlock {ιA ιB : Type*}
-    (r : Role) (Y : MIPStarRE.Quantum.Op (RoleRegisterLocal ιA ιB)) :
-    MIPStarRE.Quantum.Op (LocalCarrierSum ιA ιB) :=
-  Y.submatrix (fun i => (r, i)) (fun i => (r, i))
-
 private lemma opTensor_localDirectSum_roleLocalBlock_AB_submatrix
     {ιA ιB : Type*} [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
     (A : MIPStarRE.Quantum.Op ιA) (Bfill : MIPStarRE.Quantum.Op ιB)
     (Y : MIPStarRE.Quantum.Op (RoleRegisterLocal ιA ιB)) :
-    (opTensor (localDirectSumBlock A Bfill) (roleRegisterRoleLocalBlock Role.B Y)).submatrix
+    (opTensor (localDirectSumBlock A Bfill) (MIPStarRE.LDT.roleBlock Role.B Y)).submatrix
       localPairABEmbedding localPairABEmbedding =
     opTensor A (extractRoleRegisterBobBlock Y) := by
   ext z w
-  simp [localPairABEmbedding, roleRegisterRoleLocalBlock,
+  simp [localPairABEmbedding, MIPStarRE.LDT.roleBlock,
     extractRoleRegisterBobBlock, opTensor]
 
 private lemma opTensor_localDirectSum_roleLocalBlock_BA_submatrix
     {ιA ιB : Type*} [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
     (Afill : MIPStarRE.Quantum.Op ιA) (B : MIPStarRE.Quantum.Op ιB)
     (Y : MIPStarRE.Quantum.Op (RoleRegisterLocal ιA ιB)) :
-    (opTensor (localDirectSumBlock Afill B) (roleRegisterRoleLocalBlock Role.A Y)).submatrix
+    (opTensor (localDirectSumBlock Afill B) (MIPStarRE.LDT.roleBlock Role.A Y)).submatrix
       localPairBAEmbedding localPairBAEmbedding =
     opTensor B (extractRoleRegisterAliceBlock Y) := by
   ext z w
-  simp [localPairBAEmbedding, roleRegisterRoleLocalBlock,
+  simp [localPairBAEmbedding, MIPStarRE.LDT.roleBlock,
     extractRoleRegisterAliceBlock, opTensor]
 
-private lemma opTensor_roleBlock_roleRegister_AB_submatrix
+/-- Formalization-only tensor identity for role-register unsymmetrization:
+restriction to a fixed pair of role sectors extracts the corresponding block
+from each tensor factor.  This supports the construction in
+`references/ldt-paper/inductive_step.tex:84-109`. -/
+theorem opTensor_roleBlock_roleRegister_submatrix
     {ιA ιB : Type*} [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
-    (A Afill : MIPStarRE.Quantum.Op ιA) (B Bfill : MIPStarRE.Quantum.Op ιB)
-    (Y : MIPStarRE.Quantum.Op (RoleRegisterLocal ιA ιB)) :
-    (opTensor
-        (roleBlock (localDirectSumBlock A Bfill) (localDirectSumBlock Afill B))
-        Y).submatrix
-      (rolePairSectorEmbedding Role.A Role.B) (rolePairSectorEmbedding Role.A Role.B) =
-      opTensor (localDirectSumBlock A Bfill) (roleRegisterRoleLocalBlock Role.B Y) := by
-  ext z w
-  simp [rolePairSectorEmbedding, roleRegisterRoleLocalBlock, opTensor]
-
-private lemma opTensor_roleBlock_roleRegister_BA_submatrix
-    {ιA ιB : Type*} [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
-    (A Afill : MIPStarRE.Quantum.Op ιA) (B Bfill : MIPStarRE.Quantum.Op ιB)
-    (Y : MIPStarRE.Quantum.Op (RoleRegisterLocal ιA ιB)) :
-    (opTensor
-        (roleBlock (localDirectSumBlock A Bfill) (localDirectSumBlock Afill B))
-        Y).submatrix
-      (rolePairSectorEmbedding Role.B Role.A) (rolePairSectorEmbedding Role.B Role.A) =
-      opTensor (localDirectSumBlock Afill B) (roleRegisterRoleLocalBlock Role.A Y) := by
-  ext z w
-  simp [rolePairSectorEmbedding, roleRegisterRoleLocalBlock, opTensor]
+    (X_A X_B : MIPStarRE.Quantum.Op (LocalCarrierSum ιA ιB))
+    (Y : MIPStarRE.Quantum.Op (RoleRegisterLocal ιA ιB)) (rL rR : Role) :
+    (opTensor (roleBlock X_A X_B) Y).submatrix
+        (fun z => ((rL, z.1), (rR, z.2)))
+        (fun z => ((rL, z.1), (rR, z.2))) =
+      opTensor (match rL with | .A => X_A | .B => X_B)
+        (MIPStarRE.LDT.roleBlock rR Y) := by
+  cases rL <;>
+    ext z w <;>
+    simp [MIPStarRE.LDT.roleBlock, opTensor]
 
 private lemma trace_heterogeneousSwapDensity_mul_opTensor {ιA ιB : Type*}
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
@@ -531,11 +514,11 @@ private lemma ev_roleRegisterSymmState_roleBlock_arbitrary
   rw [MIPStarRE.Quantum.normalizedTrace_smul, MIPStarRE.Quantum.normalizedTrace_smul]
   unfold MIPStarRE.Quantum.normalizedTrace
   rw [trace_rolePairDirectSumCond_mul]
-  rw [opTensor_roleBlock_roleRegister_AB_submatrix]
+  rw [opTensor_roleBlock_roleRegister_submatrix]
   rw [trace_localPairABBlock_mul_arbitrary]
   rw [opTensor_localDirectSum_roleLocalBlock_AB_submatrix]
   rw [trace_rolePairDirectSumCond_mul]
-  rw [opTensor_roleBlock_roleRegister_BA_submatrix]
+  rw [opTensor_roleBlock_roleRegister_submatrix]
   rw [trace_localPairBABlock_mul_arbitrary]
   rw [opTensor_localDirectSum_roleLocalBlock_BA_submatrix]
   rw [trace_heterogeneousSwapDensity_mul_opTensor]

@@ -238,7 +238,7 @@ theorem exists_projective_close_sandwich (hopp : p₁.IsOpposite p₂)
             (S.sandwichDefectBound p₁ p₂)) (1 / 4 : ℝ) := by
   classical
   have hψ : ‖reindexState e S.psiHat‖ = 1 := by
-    rw [norm_reindexState, psiHat_norm]
+    rw [reindexState_norm_eq, psiHat_norm]
   have hxz : ∀ xz : PointPair P,
       ∃ Pm : Measurement (PauliScalar P × PauliScalar P)
         (S.ExpandedLocalSpace p₁.side),

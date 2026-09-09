@@ -1,0 +1,317 @@
+\documentclass[11pt]{article}
+
+\usepackage{amsmath,amssymb}
+\usepackage{xurl}
+\usepackage[hidelinks]{hyperref}
+\setlength{\emergencystretch}{2em}
+
+\input{command}
+\renewcommand{\ghissue}[1]{%
+  \href{https://github.com/Dengnifer/MIPStarRE-A/issues/#1}{GitHub issue \##1}}
+
+\title{Simultaneous Polynomial Measurements Are Not Obtained Coordinatewise}
+\author{}
+\date{2026-09-05}
+
+\begin{document}
+\maketitle
+
+\section{At a glance}
+
+\begin{itemize}
+  \item \textbf{Difficulty.} Easy for simultaneity parameter $k = 1$, hard
+  for general $k$.  The coordinatewise route planned for the formalization
+  applies the single-polynomial soundness theorem to each coordinate and
+  combines the resulting measurements by the sandwich of the source's
+  Lemma~\texttt{lem:ld-sandwich}; an explicit pair of measurements refutes
+  every bound this route could produce.  The source instead cites a
+  reduction of the $k$-tuple test to the single-polynomial test in $m + k$
+  variables at degree $d + 1$; that reduction is now carried out in the
+  formalization, in the individual-degree formulation, where the degree stays
+  $d$.
+  \item \textbf{Estimated weight.} The case $k = 1$ is closed by relabeling
+  the coordinate conclusions (about 150 lines).  The combining reduction is
+  complete: a combined strategy for the directly indexed game in dimension
+  $m + k$ at degree $d$, a transfer of the success probability with the
+  constant $10$, and the extraction of $k$ polynomials from one polynomial by
+  linearity, in about a dozen new definitions and 6000 lines of formal proof.
+  \item \textbf{Mathlib/project split.} The counterexample is finite Fourier
+  analysis over $\F_{2^s}$ and a Gram-matrix estimate.  The reduction itself
+  is almost entirely project-local (game constructions and the consistency
+  calculus), with the Schwartz--Zippel lemma and multivariate polynomial
+  algebra taken from Mathlib.
+  \item \textbf{Key mathematical inputs.} Additive characters of $\F_q^2$
+  and isotropic vectors of a symmetric pairing in characteristic two; the
+  eigenvalue bound for nearly orthogonal unit vectors; the reduction proving
+  Theorem~4.43 from Theorem~4.40 in \cite{Natarajan2018NEEXP}.  Tracked in
+  \ghissue{134}.
+\end{itemize}
+
+\section{Key theorem forms}
+
+The source theorem (\texttt{lem:ld-soundness}) states that for every
+projective strategy passing the low individual degree game with parameters
+$(q,m,d,k)$ with probability at least $1 - \eps$ there are polynomial-tuple
+measurements $G^{\mathrm A}$ and $G^{\mathrm B}$, with outcomes
+$(g_1,\dots,g_k)$ of individual degree at most $d$, such that on average over
+a uniform point $u \in \F_q^m$
+\[
+  A^{\mathsf{Point},u}_{a} \ot I \simeq_{\delta_{\mathrm{ld}}}
+    I \ot G^{\mathrm B}_{[\mathrm{eval}_u(\cdot) = a]},
+  \qquad
+  G^{\mathrm A}_{[\mathrm{eval}_u(\cdot) = a]} \ot I \simeq_{\delta_{\mathrm{ld}}}
+    I \ot B^{\mathsf{Point},u}_{a},
+  \qquad
+  G^{\mathrm A}_{g} \ot I \simeq_{\delta_{\mathrm{ld}}} I \ot G^{\mathrm B}_{g},
+  \tag{source form}
+\]
+where $a = (a_1,\dots,a_k)$ and
+$\mathrm{eval}_u(g_1,\dots,g_k) = (g_1(u),\dots,g_k(u))$.
+
+The formalization planned to derive this from the case $k = 1$ as follows.
+Reading the $i$-th coordinate of every answer yields $k$ strategies for the
+game with $k = 1$, each passing with probability at least $1 - 3\eps$; the
+single-polynomial theorem gives projective measurements $G^{w,i}$ with
+\[
+  A^{\mathsf{Point},u}_{[a_i]} \ot I \simeq_{\delta}
+    I \ot G^{\mathrm B,i}_{[\mathrm{eval}_u(\cdot) = a_i]},
+  \qquad
+  G^{\mathrm A,i}_{[\mathrm{eval}_u(\cdot) = a_i]} \ot I \simeq_{\delta}
+    I \ot B^{\mathsf{Point},u}_{[a_i]},
+  \qquad
+  G^{\mathrm A,i}_{g} \ot I \simeq_{\delta} I \ot G^{\mathrm B,i}_{g},
+  \tag{coordinate form}
+\]
+where $A^{\mathsf{Point},u}_{[a_i]}$ is the $i$-th marginal of the joint
+point measurement; and the planned combination was the sandwich
+\[
+  C^{w}_{g_1,\dots,g_k}
+    = G^{w,k}_{g_k} \cdots G^{w,2}_{g_2}\, G^{w,1}_{g_1}\,
+      G^{w,2}_{g_2} \cdots G^{w,k}_{g_k},
+  \qquad
+  A^{\mathsf{Point},u}_{a} \ot I \simeq_{C k (\delta + md/q)^{1/2}}
+    I \ot C^{\mathrm B}_{[\mathrm{eval}_u(\cdot) = a]},
+  \tag{planned form}
+\]
+with a universal constant $C$, and likewise on the other side and for the
+global relation.  We show that no statement of the planned form holds: the
+coordinate form, even with $\delta = 0$ and even with both point
+measurements and all $2k$ polynomial measurements available, does not
+determine any polynomial-tuple measurement consistent with the joint point
+measurement.
+
+The formalization proves the source form for every $k$, for the directly
+indexed low-degree game of \cite{gap:qpbt_ld-dimension-divisibility} and by the
+source reduction rather than by the refuted route.  From a projective strategy for the
+directly indexed low-degree game with parameters $(q,m,d,k)$ succeeding with
+probability at least $1 - \eps$ it produces polynomial-tuple measurements
+satisfying the three relations of the source form with the error of the low
+individual degree theorem at the combined parameters $(q, m+k, d, 1)$, at the
+auxiliary parameter $2560000\,(m+k)^{3}d$ and pass bound $30\eps$, increased by
+the recovery loss $(m+k)d/q$ on the two point/polynomial relations;%
+\footnote{The declaration is
+\leanid{exists\_directSimultaneousPolynomialMeasurements\_combinedError} in
+\doclink{MIPStarRE/QPBT/Combining/DirectLowDegree/Transport/Combining/SimultaneousGeneral.lean}.}
+and, absorbing that error, the same three relations with the error function
+$\delta_{\mathrm{ld}}(\eps,q,m,d,k)$ of the source statement at the universal
+constants $a = 10^{23}$ and $b = 1/80000$.%
+\footnote{The declaration is \leanid{exists\_direct\_ld\_soundness} in
+\doclink{MIPStarRE/QPBT/Combining/DirectLowDegree/Soundness.lean}.  The case
+$k = 1$, the only one instantiated by the Pauli basis test analysis, remains
+available separately as
+\leanid{exists\_directSimultaneousPolynomialMeasurements\_of\_k\_eq\_one}
+in \doclink{MIPStarRE/QPBT/Combining/DirectLowDegree/Transport/Simultaneous.lean};
+its form with the error function $\delta_{\mathrm{ld}}$ is
+\leanid{exists\_direct\_ld\_soundness\_of\_k\_eq\_one} in
+\doclink{MIPStarRE/QPBT/Combining/DirectLowDegree/Soundness.lean}, and the
+source-shaped seed-indexed form is
+\leanid{exists\_ld\_soundness\_of\_k\_eq\_one} in
+\doclink{MIPStarRE/QPBT/Combining/DirectLowDegree/SeedIndexedSoundness.lean};
+the instantiation with $k = 1$ at dimension $2m+2$ is in the proof of
+\texttt{lem:qld-4-7}, \path{blueprint/src/chapter/ch15_qpbt_combining.tex}.}
+
+The route is the source's: the combined strategy answers each question of the
+game at the combined parameters by measuring one question of the original
+strategy and relabeling its outcome, its success probability is at least
+$1 - 10\eps$, the case $k = 1$ is applied once to it, and the $k$ polynomials
+are recovered from the single outcome polynomial by exact linearity in the
+fresh coordinates.  Two quantitative points differ from the account of the
+source assertion below, and both are forced by the individual-degree
+formulation of the game.  The degree does not rise to $d + 1$: the combined
+polynomial $(u,\alpha) \mapsto \sum_r \alpha_r g_r(u)$ has individual degree
+at most $d$ in each of the $m + k$ variables, so the theorem is applied at
+degree $d$ and its error function is evaluated there.  Correspondingly the
+recovery cost is not $(d+1)/q$ taken twice but $(m+k)d/q$: the exact-linearity
+test on the point space contributes $md/q$, and the collision of two distinct
+tuples at the sampled point contributes $kd/q$.  A reader comparing the two
+accounts should read the displayed recovery term of the source assertion as
+$(m+k)d/q$ throughout.
+
+\section{The source assertion}
+
+The proof of \texttt{lem:ld-soundness} in
+\cite[lines~413--458]{Ji2020MIPStar} treats $k = 1$ by an identification
+with the tensor-code test of \cite{Ji2021Quantum} (the identification is
+examined in \path{docs/paper-gaps/qpbt_ld-dimension-divisibility.tex}) and
+then extends to general $k$ by reference to the derivation of Theorem~4.43
+from Theorem~4.40 in \cite[lines~1409--1503]{Natarajan2018NEEXP}.  That
+derivation is not coordinatewise.  It builds two combined provers who play
+the single-polynomial test in $m + k$ variables at degree $d + 1$: on a
+point $(\alpha, u)$ the combined prover asks the original prover for the $k$
+values $(b_1,\dots,b_k)$ at $u$ and returns $\sum_i \alpha_i b_i$, and on a
+line it returns the corresponding combination of the $k$ answer polynomials.
+The degree rises by one because the combination
+$(\alpha, u) \mapsto \sum_i \alpha_i g_i(u)$ is linear in $\alpha$ and of
+degree $d$ in $u$, so its restriction to a queried subspace has degree
+$d + 1$; the single-polynomial theorem is therefore applied at degree $d + 1$
+and its error function is evaluated there.  That theorem then yields one
+measurement with outcomes $g(\alpha,u)$, and the $k$ polynomials are
+recovered from $g$ because $g$ is exactly linear in $\alpha$ with high
+probability, by the Schwartz--Zippel lemma; applied at degree $d + 1$, that
+lemma contributes the term $(d+1)/q$ twice in the recovery.  The
+simultaneity of the $k$ outputs is thus inherited from the joint answers of
+the original provers through a single application of the $k = 1$ theorem.
+
+\section{The counterexample}
+
+Let $q = 2^s$, let $d = 1$, and let $\Gamma$ be the set of univariate
+polynomials $g = g_0 + g_1 x$ over $\F_q$, so $|\Gamma| = N = q^2$.  Two
+distinct elements of $\Gamma$ agree at a uniformly random point of $\F_q$
+with probability at most $1/q$.  Bob's Hilbert space is $\C^{\Gamma}$ with
+standard basis $\{\ket{g}\}$; Alice's is a second copy, and the state is
+the maximally entangled state
+$\ket{\psi} = N^{-1/2} \sum_{g \in \Gamma} \ket{g}\ket{g}$, for which
+$(X \ot I)\ket{\psi} = (I \ot X^{\mathsf T})\ket{\psi}$ and
+$\bra{\psi} X \ot Y \ket{\psi} = N^{-1}\tr(X Y^{\mathsf T})$.
+
+Equip $\Gamma \cong \F_q^2$ with the symmetric pairing
+$\langle h, g\rangle = h_0 g_1 + h_1 g_0$ and the additive character
+$\chi(t) = (-1)^{\mathrm{tr}(t)}$, where $\mathrm{tr}$ is the absolute
+trace of $\F_q$; the pairing is nondegenerate, so
+$\phi_h = N^{-1/2} \sum_{g} \chi(\langle h, g\rangle)\ket{g}$, $h \in \Gamma$,
+is an orthonormal basis.  Evaluation at $u \in \F_q$ is represented by the
+vector $v_u = u + x$, since $\langle h, v_u\rangle = h_0 + h_1 u = h(u)$, and
+$\langle v_u, v_u\rangle = 2u = 0$ in characteristic two.  Bob's two
+coordinate measurements are
+\[
+  G^{1}_h = \ket{\phi_h}\bra{\phi_h},
+  \qquad
+  G^{2}_g = \ket{g}\bra{g},
+  \qquad
+  Q^{1,u}_{[a]} = \sum_{h(u) = a} G^1_h,
+  \qquad
+  Q^{2,u}_{[b]} = \sum_{g(u) = b} G^2_g .
+\]
+Writing $H_u = \{h : h(u) = 0\} = \F_q v_u$ and summing the character over
+the coset $\{h : h(u) = a\}$ gives the matrix elements
+\[
+  \bra{g'} Q^{1,u}_{[a]} \ket{g}
+    = \frac1N \sum_{h(u) = a} \chi(\langle h, g - g'\rangle)
+    = \frac{1}{q}\, \chi(\langle h_a, g - g'\rangle)\,
+      \mathbf 1[\,g(u) = g'(u)\,],
+\]
+where $h_a$ is any polynomial with $h_a(u) = a$: the sum over
+$H_u = \F_q v_u$ vanishes unless $\langle v_u, g - g'\rangle = 0$, that is,
+unless $g(u) = g'(u)$, because $v_u$ is isotropic.  Hence $Q^{1,u}_{[a]}$
+is block diagonal for the partition of $\Gamma$ by the value at $u$, it
+commutes with every $Q^{2,u}_{[b]}$, its diagonal entries all equal $1/q$,
+and each product $\Pi^u_{a,b} = Q^{1,u}_{[a]} Q^{2,u}_{[b]}$ is the rank-one
+projector onto the unit vector
+$\xi^u_{a,b} = q^{-1/2} \sum_{g(u) = b} \chi(\langle h_a, g\rangle)\ket{g}$.
+
+Let both players answer the point question $u$ with the joint projective
+measurement $\{\Pi^u_{a,b}\}_{a,b}$, which is real symmetric, and let Alice's
+coordinate polynomial measurements be the transposes $(G^{i})^{\mathsf T}$.
+On $\ket{\psi}$ every relation of the coordinate form holds with error
+$0$: the marginals of the joint point measurement are $Q^{1,u}_{[a]}$ and
+$Q^{2,u}_{[b]}$, which are exactly the evaluated coordinate measurements, and
+$(G^i)^{\mathsf T} \ot I$ agrees with $I \ot G^i$ on $\ket{\psi}$.  The
+collision probability is $1/q$.  The sandwich on Bob's side, evaluated at
+$u$, is
+\[
+  C^{\mathrm B}_{[\mathrm{eval}_u(\cdot) = (a,b)]}
+    = \sum_{g(u) = b} \ket{g}\bra{g}\, Q^{1,u}_{[a]}\, \ket{g}\bra{g}
+    = \frac1q\, Q^{2,u}_{[b]},
+\]
+and its consistency with the joint point measurement is
+\[
+  \sum_{a,b} \bra{\psi} \Pi^u_{a,b} \ot C^{\mathrm B}_{[\mathrm{eval}_u(\cdot) = (a,b)]}
+    \ket{\psi}
+    = \frac{1}{qN} \sum_{a,b} \tr\bigl(Q^{1,u}_{[a]} Q^{2,u}_{[b]}\bigr)
+    = \frac1q ,
+\]
+so the consistency defect is $1 - 1/q$ for every $u$, whereas the planned
+form promises at most $2C\,(1/q)^{1/2}$.  No universal constant $C$ survives
+$q \to \infty$; with the constant $C = 8$ established for the structured
+sandwich, the planned bound already fails at $q = 2^{9}$.  The same
+computation with the roles of the players exchanged refutes the planned
+bound for Alice's sandwich against Bob's point measurement, and
+$\sum_{g} \bra{\psi} (C^{\mathrm B}_g)^{\mathsf T} \ot C^{\mathrm B}_g \ket{\psi}
+= N^{-1} \sum_{g_1,g_2} |\langle g_2 | \phi_{g_1}\rangle|^4 = 1/N$ refutes it
+for the global relation.
+
+The obstruction is not specific to the sandwich.  Let
+$\{B_{g_1,g_2}\}$ be any POVM on Bob's space with polynomial-pair outcomes,
+and write $B_{g_1,g_2} = N p_{g_1,g_2}\,\rho_{g_1,g_2}$ with
+$p$ a probability distribution and $\rho$ density matrices.  Its
+consistency with the joint point measurement is
+\[
+  \E_{u} \sum_{g_1,g_2} p_{g_1,g_2}\,
+    \bra{\xi^u_{g_1(u),g_2(u)}}\, \rho_{g_1,g_2}\, \ket{\xi^u_{g_1(u),g_2(u)}}
+  \le \max_{g_1,g_2}\,
+    \lambda_{\max}\Bigl(\E_{u}\, \ket{\xi^u_{g_1(u),g_2(u)}}\!\bra{\xi^u_{g_1(u),g_2(u)}}\Bigr).
+\]
+For $u \ne u'$ the supports $\{g : g(u) = g_2(u)\}$ and
+$\{g : g(u') = g_2(u')\}$ meet exactly in $\{g_2\}$, so the $q$ unit vectors
+$\xi^u_{g_1(u),g_2(u)}$ have pairwise inner products of modulus $1/q$, and
+the largest eigenvalue of their Gram matrix is at most $1 + (q-1)/q < 2$.
+Hence the consistency of every polynomial-pair POVM with the joint point
+measurement is below $2/q$, on either side.  Consequently no argument that
+uses only the coordinate form --- with any error, any number of applications
+of the pasting or sandwich facts, and either player as reference --- can
+produce the source form for $k \ge 2$.
+
+Two remarks.  First, the pair $(\ket{\psi}, \Pi, G^1, G^2)$ is not a
+strategy for the low-degree game passing with high probability: by the same
+Gram-matrix bound no line measurement with polynomial-pair outcomes is
+consistent with the point measurements, so the source theorem is not
+contradicted; what fails is the coordinatewise route.  Second, the pasting
+fact (Fact~4.35 of \cite{Natarajan2018NEEXP}, imported as
+\texttt{lem:pasting}) does not repair the route: it requires the two
+coordinates to be evaluated at points $y_1, y_2$ whose conditional
+distribution supports a collision bound $\eta < 1$, whereas the low-degree
+game evaluates all coordinates at the same point, for which the conditional
+collision probability of any two polynomials agreeing there is $1$.
+
+\section{Comparison with the blueprint and formalization}
+
+The blueprint proof of \texttt{lem:ld-soundness} records the source route,
+including the extension from $k = 1$ to general $k$ by the derivation of
+Theorem~4.43 in \cite{Natarajan2018NEEXP}, and lists the game
+correspondence and the parameter bound as open obligations.  The present
+note added a third: the extension is the combining reduction and must be
+formalized as such.  That third obligation is now met.  The blueprint records
+the reduction in \texttt{prop:ld-simultaneous-general-k} and the nodes
+preceding it, and the directly indexed game and its transport prove the source
+form from the low individual degree theorem for every $k$.  The game
+correspondence and the parameter bound of the import remain as they were.  The
+combination of the coordinate measurements by the sandwich is defined and is a
+POVM, but it carries no consistency estimate, and by the computation above it
+cannot; nothing depends on it.
+
+\section{Conclusion}
+
+The source statement is not contradicted.  Its proof for general $k$ is a
+reduction to a single application of the $k = 1$ theorem in $m + k$
+variables, and the formalization follows that reduction; a
+coordinatewise application of the $k = 1$ theorem followed by any
+combination of the coordinate measurements provably cannot yield the
+theorem.  The application in the analysis of the Pauli basis test uses
+$k = 1$ only, for which the source form is proved from the low individual
+degree theorem directly; for general $k$ it is proved by the reduction, for
+the directly indexed game.
+
+\bibliographystyle{alpha}
+\bibliography{references}
+
+\end{document}

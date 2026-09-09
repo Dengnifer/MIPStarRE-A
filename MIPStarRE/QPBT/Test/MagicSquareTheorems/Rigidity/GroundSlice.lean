@@ -5,7 +5,7 @@ import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.Dilation
 # Contractions, isometries and the ground slice of the dilation
 
 Support for the transfer step of `thm:ms-rigidity` (blueprint
-`blueprint/src/chapter/ch13_qpbt_test.tex:224-253`, paper
+`thm:ms-rigidity`, paper
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652`):
 the calculus needed to compare the dilated projective strategy of
 `Rigidity/Dilation.lean` with the original strategy on states.
@@ -23,11 +23,11 @@ the calculus needed to compare the dilated projective strategy of
   because `(1 - Π) ⊗ 1` annihilates `(1 ⊗ Q) ψ'`.  This is the estimate that
   replaces the `≈_δ`-preservation which Naimark dilation lacks in general
   (`references/ldt-paper/orthonormalization.tex:82-101`, blueprint
-  `ch04_projective.tex:255-270`).
+  `ex:easy-but-long`).
 
 ## References
 
-`thm:ms-rigidity`, blueprint `blueprint/src/chapter/ch13_qpbt_test.tex:224-253`,
+blueprint `thm:ms-rigidity`,
 paper `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652`.
 -/
 
@@ -41,14 +41,6 @@ open MIPStarRE.Quantum MIPStarRE.QPBT.DistanceCalculus
 noncomputable section
 
 /-! ## Contractions and their action on states -/
-
-/-- Applying a product of operators is successive application. -/
-theorem applyOperatorToState_mul {ι : Type*} [Fintype ι] [DecidableEq ι]
-    (M N : Op ι) (v : EuclideanSpace ℂ ι) :
-    applyOperatorToState (M * N) v =
-      applyOperatorToState M (applyOperatorToState N v) := by
-  unfold applyOperatorToState
-  simp [Matrix.toEuclideanLin, Matrix.toLpLin_mul_same]
 
 /-- The identity acts trivially. -/
 theorem applyOperatorToState_one {ι : Type*} [Fintype ι] [DecidableEq ι]
@@ -216,54 +208,28 @@ theorem conjTranspose_mul_le_one_rightTensor {ιA ιB : Type*} [Fintype ιA] [De
 
 /-! ## Kronecker algebra of placed operators
 
-The mixed-product rule `heteroKron_mul` and the identity `heteroKron_one_one`
-are the shared tensor-placement lemmas of `MIPStarRE/QPBT/Games/Defs.lean`; the
-identities below extend them with the additive facts used by the transfer
-step. -/
+The mixed-product rule `heteroKron_mul`, the identity `heteroKron_one_one` and
+the additive and difference identities are the shared tensor-placement lemmas of
+`MIPStarRE/QPBT/Games/Defs.lean`; the identities below extend them with the
+finite-sum and scalar facts used by the transfer step. -/
 
-/-- Tensor placement is additive in the left factor. -/
-theorem heteroKron_add_left {ιA ιB : Type*} (A B : Op ιA) (C : Op ιB) :
-    heteroKron (A + B) C = heteroKron A C + heteroKron B C := by
-  ext p q
-  simp [heteroKron, Matrix.kronecker, add_mul]
-
-/-- Tensor placement is additive in the right factor. -/
-theorem heteroKron_add_right {ιA ιB : Type*} (A : Op ιA) (B C : Op ιB) :
-    heteroKron A (B + C) = heteroKron A B + heteroKron A C := by
-  ext p q
-  simp [heteroKron, Matrix.kronecker, mul_add]
-
-/-- Tensor placement respects differences in the left factor. -/
-theorem heteroKron_sub_left {ιA ιB : Type*} (A B : Op ιA) (C : Op ιB) :
-    heteroKron (A - B) C = heteroKron A C - heteroKron B C := by
-  ext p q
-  simp [heteroKron, Matrix.kronecker, sub_mul]
-
-/-- Tensor placement respects differences in the right factor. -/
-theorem heteroKron_sub_right {ιA ιB : Type*} (A : Op ιA) (B C : Op ιB) :
-    heteroKron A (B - C) = heteroKron A B - heteroKron A C := by
-  ext p q
-  simp [heteroKron, Matrix.kronecker, mul_sub]
-
-/-- Tensor placement is additive over finite sums in the left factor. -/
+/-- Tensor placement distributes over a finite sum in the left factor. -/
 theorem heteroKron_finset_sum_left {β ιA ιB : Type*} (s : Finset β)
     (A : β → Op ιA) (C : Op ιB) :
-    heteroKron (∑ b ∈ s, A b) C = ∑ b ∈ s, heteroKron (A b) C := by
-  ext p q
-  simp [heteroKron, Matrix.kronecker, Matrix.sum_apply, Finset.sum_mul]
+    heteroKron (∑ b ∈ s, A b) C = ∑ b ∈ s, heteroKron (A b) C :=
+  DistanceCalculus.heteroKron_finset_sum_left s A C
 
-/-- Tensor placement is additive over finite sums in the right factor. -/
+/-- Tensor placement distributes over a finite sum in the right factor. -/
 theorem heteroKron_finset_sum_right {β ιA ιB : Type*} (s : Finset β)
     (A : Op ιA) (C : β → Op ιB) :
-    heteroKron A (∑ b ∈ s, C b) = ∑ b ∈ s, heteroKron A (C b) := by
-  ext p q
-  simp [heteroKron, Matrix.kronecker, Matrix.sum_apply, Finset.mul_sum]
+    heteroKron A (∑ b ∈ s, C b) = ∑ b ∈ s, heteroKron A (C b) :=
+  DistanceCalculus.heteroKron_finset_sum_right s A C
 
-/-- The quadratic form is additive over finite sums of operators. -/
+/-- The state quadratic form is additive over finite sums. -/
 theorem stateQForm_finset_sum {β ι : Type*} [Fintype ι] [DecidableEq ι]
     (ψ : EuclideanSpace ℂ ι) (s : Finset β) (M : β → Op ι) :
-    stateQForm ψ (∑ b ∈ s, M b) = ∑ b ∈ s, stateQForm ψ (M b) := by
-  simp [stateQForm, applyOperatorToState]
+    stateQForm ψ (∑ b ∈ s, M b) = ∑ b ∈ s, stateQForm ψ (M b) :=
+  DistanceCalculus.stateQForm_finset_sum ψ s M
 
 /-- The average over the one-point uniform distribution is the sum over the
 outcomes. -/
@@ -432,7 +398,7 @@ theorem applyOperatorToState_rightTensor_conjIsometry {ιA ιB κA κB : Type}
 
 /-- The orthogonal projection of an enlarged local space onto its ground slice,
 namely the inflation of the identity.  Formalization-only support for the
-transfer step of `thm:ms-rigidity`, blueprint `ch13_qpbt_test.tex:224-253`. -/
+transfer step of blueprint `thm:ms-rigidity`. -/
 def groundProjection (ι α : Type) [Fintype ι] [DecidableEq ι]
     [Fintype α] [DecidableEq α] : Op (ι × Option α) :=
   naimarkInflation (α := α) (1 : Op ι)

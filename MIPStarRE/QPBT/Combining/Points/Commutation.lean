@@ -178,7 +178,7 @@ theorem sum_pairCharacter_mul_pairCharacter
   have hstar : ∀ t : ZMod 2, (starRingEnd ℂ) (phaseSign t) = phaseSign t := by
     intro t
     rw [← Complex.star_def]
-    exact star_phaseSign' t
+    exact star_phaseSign t
   simp_rw [map_mul, hstar]
   rw [Fintype.sum_prod_type]
   calc ∑ a : PauliScalar P, ∑ b : PauliScalar P,

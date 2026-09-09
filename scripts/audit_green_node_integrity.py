@@ -212,7 +212,7 @@ ALLOWED_SOURCE_UNFAITHFUL = set()
 
 
 ENV_RE = re.compile(
-    r"\\begin\{(definition|theorem|lemma|proposition|remark|corollary)\}"
+    r"\\begin\{(definition|theorem|lemma|proposition|remark|corollary|example)\}"
     r"(?:\[[^\]]*\])?\s*\\label\{([^}]*)\}",
     re.MULTILINE,
 )

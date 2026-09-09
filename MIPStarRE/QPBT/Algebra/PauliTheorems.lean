@@ -6,8 +6,8 @@ import MIPStarRE.LDT.Preliminaries.FiniteFields
 
 /-! # Pauli product, commutation, and cancellation identities
 
-The principal results are `lem:twisted-commutation` and `lem:cancellation` in
-`blueprint/src/chapter/ch11_qpbt_algebra.tex:553-660`, from
+The principal results are blueprint `lem:twisted-commutation` and
+`lem:cancellation`, from
 `references/qpbt-paper/04_preliminaries.tex:1056-1095,1124-1151`. The
 general-prime statements use the canonical character `ffChar`; binary
 declarations below are separately named QPBT specializations.
@@ -19,21 +19,21 @@ namespace MIPStarRE.QPBT
 
 open MIPStarRE.LDT MIPStarRE.LDT.Preliminaries MIPStarRE.Quantum
 
-/-- The shift observable in `lem:twisted-commutation`, blueprint
-`ch11_qpbt_algebra.tex:553-597`, paper `04_preliminaries.tex:1056-1089`. -/
+/-- The shift observable in blueprint
+`lem:twisted-commutation`, paper `04_preliminaries.tex:1056-1089`. -/
 noncomputable def primeTauShift {p : ℕ} {K : Type*} [Field K] [Fintype K]
     [DecidableEq K] [Fact p.Prime] [Algebra (ZMod p) K]
     (a : K) : Op K := fun i j => if i = j + a then 1 else 0
 
-/-- The phase observable in `lem:twisted-commutation`, blueprint
-`ch11_qpbt_algebra.tex:553-597`, paper `04_preliminaries.tex:1056-1089`. -/
+/-- The phase observable in blueprint
+`lem:twisted-commutation`, paper `04_preliminaries.tex:1056-1089`. -/
 noncomputable def primeTauPhase {p : ℕ} {K : Type*} [Field K] [Fintype K]
     [DecidableEq K] [Fact p.Prime] [Algebra (ZMod p) K]
     (b : K) : Op K := fun i j =>
   if i = j then ffChar (p := p) (F := K) (b * j) else 0
 
 /-- The multi-qudit observable in `lem:twisted-commutation`, with `false`
-denoting phase; blueprint `ch11_qpbt_algebra.tex:553-597`, paper
+denoting phase; blueprint `lem:twisted-commutation`, paper
 `04_preliminaries.tex:1073-1095,1141-1151`. -/
 noncomputable def primeTauObservable {p : ℕ} {K ι : Type*} [Field K] [Fintype K]
     [DecidableEq K] [Fact p.Prime] [Algebra (ZMod p) K]
@@ -93,8 +93,8 @@ private theorem primeTauObservable_zero {p : ℕ} {K ι : Type*} [Field K]
       have h : x ≠ y := fun hxy => hi (congr_fun hxy i)
       simp [h]
 
-/-- The product identity `eq:pauli-product-power`, blueprint
-`ch11_qpbt_algebra.tex:599-633`, paper `04_preliminaries.tex:1082-1089`. -/
+/-- The product identity blueprint
+`eq:pauli-product-power`, paper `04_preliminaries.tex:1082-1089`. -/
 theorem primeTauObservable_mul {p : ℕ} {K ι : Type*} [Field K] [Fintype K]
     [DecidableEq K] [Fact p.Prime] [Algebra (ZMod p) K] [Fintype ι]
     [DecidableEq ι] (W : Bool) (a a' : ι → K) :
@@ -150,8 +150,8 @@ private theorem primeTauObservable_pow_nat {p : ℕ} {K ι : Type*} [Field K]
               exact congrArg
                 (fun c => primeTauObservable (p := p) W c) hlabels
 
-/-- The prime-field exponent identity in `eq:pauli-product-power`, blueprint
-`ch11_qpbt_algebra.tex:599-633`, paper `04_preliminaries.tex:1082-1089`. -/
+/-- The prime-field exponent identity in blueprint
+`eq:pauli-product-power`, paper `04_preliminaries.tex:1082-1089`. -/
 theorem primeTauObservable_pow {p : ℕ} {K ι : Type*} [Field K] [Fintype K]
     [DecidableEq K] [Fact p.Prime] [Algebra (ZMod p) K] [Fintype ι]
     [DecidableEq ι] (W : Bool) (a : ι → K) (b : ZMod p) :
@@ -165,7 +165,7 @@ theorem primeTauObservable_pow {p : ℕ} {K ι : Type*} [Field K] [Fintype K]
   rw [nsmul_eq_mul, hb, mul_comm]
 
 /-- The characteristic-`p` consequence of `primeTauObservable_pow`, blueprint
-`ch11_qpbt_algebra.tex:599-633`, paper `04_preliminaries.tex:1088-1089`. -/
+`eq:pauli-product-power`, paper `04_preliminaries.tex:1088-1089`. -/
 theorem primeTauObservable_pow_char {p : ℕ} {K ι : Type*} [Field K] [Fintype K]
     [DecidableEq K] [Fact p.Prime] [Algebra (ZMod p) K] [Fintype ι]
     [DecidableEq ι] (W : Bool) (a : ι → K) :
@@ -242,7 +242,7 @@ private theorem star_primeTauObservable {p : ℕ} {K ι : Type*} [Field K]
       simpa using star_primeTauShift (p := p) (a := a i)
 
 /-- Generalized Pauli observables are unitary by their explicit shift and phase
-matrices; blueprint `ch11_qpbt_algebra.tex:599-633`, paper
+matrices; blueprint `lem:twisted-commutation`, paper
 `04_preliminaries.tex:1056-1089`. -/
 theorem primeTauObservable_isUnitary {p : ℕ} {K ι : Type*} [Field K] [Fintype K]
     [DecidableEq K] [Fact p.Prime] [Algebra (ZMod p) K] [Fintype ι]
@@ -256,8 +256,8 @@ theorem primeTauObservable_isUnitary {p : ℕ} {K ι : Type*} [Field K] [Fintype
     simpa using primeTauObservable_zero (p := p) (K := K) (ι := ι) W
 
 /-- Every eigenvalue of a generalized Pauli observable is a `p`-th root of
-unity. This is the spectral consequence of `eq:pauli-product-power`, blueprint
-`ch11_qpbt_algebra.tex:599-633`, paper `04_preliminaries.tex:1082-1089`. -/
+unity. This is the spectral consequence of blueprint
+`eq:pauli-product-power`, paper `04_preliminaries.tex:1082-1089`. -/
 theorem primeTauObservable_eigenvalue_pow_char {p : ℕ} {K ι : Type*}
     [Field K] [Fintype K] [DecidableEq K] [Fact p.Prime]
     [Algebra (ZMod p) K] [Fintype ι] [DecidableEq ι]
@@ -309,8 +309,8 @@ private theorem addChar_sum {A M ι : Type*} [AddCommMonoid A] [CommMonoid M]
   | @insert i s hi ih =>
       rw [Finset.sum_insert hi, Finset.prod_insert hi, AddChar.map_add_eq_mul, ih]
 
-/-- The source multi-qudit twisted relation `eq:twisted-fq`, blueprint
-`ch11_qpbt_algebra.tex:599-633`, paper `04_preliminaries.tex:1090-1095,1141-1151`. -/
+/-- The source multi-qudit twisted relation blueprint
+`eq:twisted-fq`, paper `04_preliminaries.tex:1090-1095,1141-1151`. -/
 theorem primeTauObservable_X_mul_Z {p : ℕ} {K ι : Type*} [Field K] [Fintype K]
     [DecidableEq K] [Fact p.Prime] [Algebra (ZMod p) K] [Fintype ι]
     [DecidableEq ι] [Nonempty ι] (a b : ι → K) :
@@ -376,8 +376,8 @@ private theorem tauObservable_eq_one_of_isEmpty {K ι : Type*} [Field K]
   subst y
   simp [tauObservable]
 
-/-- Binary specialization of `eq:pauli-product-power`, blueprint
-`ch11_qpbt_algebra.tex:599-633`, paper `04_preliminaries.tex:1082-1089`.
+/-- Binary specialization of blueprint
+`eq:pauli-product-power`, paper `04_preliminaries.tex:1082-1089`.
 
 **Scope restriction:** This characteristic-two specialization is separated
 from the general-prime identity as documented in
@@ -394,8 +394,8 @@ theorem tauObservable_mul {K ι : Type*} [Field K] [Fintype K] [DecidableEq K]
       simpa only [tauObservable_eq_primeTauObservable] using
         (primeTauObservable_mul (p := 2) false a a')
 
-/-- Binary characteristic-two specialization of `eq:pauli-product-power`,
-blueprint `ch11_qpbt_algebra.tex:599-633`, paper `04_preliminaries.tex:1088-1089`.
+/-- Binary characteristic-two specialization of blueprint
+`eq:pauli-product-power`, paper `04_preliminaries.tex:1088-1089`.
 
 **Scope restriction:** This characteristic-two specialization is separated
 from the general-prime identity as documented in
@@ -411,8 +411,8 @@ theorem tauObservable_sq {K ι : Type*} [Field K] [Fintype K] [DecidableEq K]
       simpa only [tauObservable_eq_primeTauObservable, pow_two] using
         (primeTauObservable_pow_char (p := 2) false a)
 
-/-- Binary specialization of `eq:twisted-fq`, blueprint
-`ch11_qpbt_algebra.tex:599-633`, paper `04_preliminaries.tex:1090-1095`.
+/-- Binary specialization of blueprint
+`eq:twisted-fq`, paper `04_preliminaries.tex:1090-1095`.
 
 **Scope restriction:** This characteristic-two specialization is separated
 from the general-prime identity as documented in
@@ -438,7 +438,7 @@ theorem tauObservable_X_mul_Z {K ι : Type*} [Field K] [Fintype K] [DecidableEq 
         (primeTauObservable_X_mul_Z (p := 2) a b)
 
 /-- Uniform complex expectation over a finite submodule, as used by
-`lem:cancellation`; blueprint `ch11_qpbt_algebra.tex:649-660`, paper
+blueprint `lem:cancellation`, paper
 `04_preliminaries.tex:1124-1132`. -/
 noncomputable def submoduleExpect {K ι : Type*} [Field K] [Fintype K]
     [DecidableEq K] [Fintype ι] [DecidableEq ι]
@@ -447,7 +447,7 @@ noncomputable def submoduleExpect {K ι : Type*} [Field K] [Fintype K]
   exact 𝔼 u : V, f u
 
 /-- Fourier cancellation `lem:cancellation` over an arbitrary field submodule;
-blueprint `ch11_qpbt_algebra.tex:649-660`, paper
+blueprint `lem:cancellation`, paper
 `04_preliminaries.tex:1124-1132`. -/
 theorem ffChar_dotProduct_submodule_expect_eq_zero {p : ℕ} {K ι : Type*}
     [Field K] [Fintype K] [DecidableEq K] [Fact p.Prime] [Algebra (ZMod p) K]
@@ -494,8 +494,8 @@ theorem ffChar_dotProduct_submodule_expect_eq_zero {p : ℕ} {K ι : Type*}
   simpa [submoduleExpect, ψ, φ] using
     (AddChar.expect_eq_zero_iff_ne_zero.mpr hψ)
 
-/-- Binary specialization of `lem:cancellation`, blueprint
-`ch11_qpbt_algebra.tex:649-660`, paper `04_preliminaries.tex:1124-1132`.
+/-- Binary specialization of blueprint
+`lem:cancellation`, paper `04_preliminaries.tex:1124-1132`.
 
 **Scope restriction:** This characteristic-two specialization is separated
 from the general-prime identity as documented in
@@ -574,37 +574,38 @@ private theorem conjIsometry_piLpCongrLeft_symm
       simp [h]
     simp [piLpCongrLeft_matrix_apply, hyi]
 
-/-- The label equivalence obtained by expanding each field element in the fixed
-self-dual binary basis. -/
-private noncomputable def quditQubitLabelEquiv {q : ℕ}
-    (F : FixedFieldModel q) (L : ℕ) :
-    (Fin L → F.K) ≃ (Fin L × Fin F.basisDim → ZMod 2) :=
-  (Equiv.piCongrRight (fun _ : Fin L => F.binaryCoordinates.toEquiv)).trans
-    (Equiv.curry (Fin L) (Fin F.basisDim) (ZMod 2)).symm
+/-- Expand every register label in the fixed self-dual binary basis. This
+arbitrary-index construction is the computational-basis identification in the
+proof of `lem:pauli-binary`, shared by the algebra and soundness modules. -/
+noncomputable def quditQubitLabelEquiv {q : ℕ} {ι : Type*}
+    (F : FixedFieldModel q) :
+    (ι → F.K) ≃ (ι × Fin F.basisDim → ZMod 2) :=
+  (Equiv.piCongrRight (fun _ : ι => F.binaryCoordinates.toEquiv)).trans
+    (Equiv.curry ι (Fin F.basisDim) (ZMod 2)).symm
 
 /-- The label equivalence is the uncurried form of `kappaVec`. -/
-private theorem quditQubitLabelEquiv_eq_kappaVec {q : ℕ}
-    (F : FixedFieldModel q) (L : ℕ) (u : Fin L → F.K) :
-    quditQubitLabelEquiv F L u = kappaVec F u := by
+private theorem quditQubitLabelEquiv_eq_kappaVec {q : ℕ} {ι : Type*}
+    (F : FixedFieldModel q) (u : ι → F.K) :
+    quditQubitLabelEquiv F u = kappaVec F u := by
   rfl
 
 /-- Self-duality identifies the field trace pairing with the binary coordinate
 pairing after relabeling. -/
 private theorem binTrace_dotProduct_eq_quditQubitLabelEquiv
-    {q : ℕ} (F : FixedFieldModel q) (L : ℕ) (a u : Fin L → F.K) :
+    {q : ℕ} {ι : Type*} [Fintype ι] (F : FixedFieldModel q) (a u : ι → F.K) :
     binTrace F.K (dotProduct a u) =
       binTrace (ZMod 2)
-        (dotProduct (quditQubitLabelEquiv F L a) (kappaVec F u)) := by
+        (dotProduct (quditQubitLabelEquiv F a) (kappaVec F u)) := by
   simp only [dotProduct, map_sum, binTrace_mul_eq_dotProduct F,
     Algebra.trace_self_apply, Fintype.sum_prod_type, quditQubitLabelEquiv,
     Equiv.trans_apply, Equiv.curry_symm_apply, kappaVec, basisCoordVec]
   rfl
 
 /-- The coordinate label equivalence preserves addition. -/
-private theorem quditQubitLabelEquiv_add {q : ℕ}
-    (F : FixedFieldModel q) (L : ℕ) (a b : Fin L → F.K) :
-    quditQubitLabelEquiv F L (a + b) =
-      quditQubitLabelEquiv F L a + quditQubitLabelEquiv F L b := by
+private theorem quditQubitLabelEquiv_add {q : ℕ} {ι : Type*}
+    (F : FixedFieldModel q) (a b : ι → F.K) :
+    quditQubitLabelEquiv F (a + b) =
+      quditQubitLabelEquiv F a + quditQubitLabelEquiv F b := by
   ext p
   rcases p with ⟨i, j⟩
   change F.binaryCoordinates (a i + b i) j =
@@ -641,66 +642,68 @@ private theorem tauObservable_Z_apply
 
 /-- Binary-coordinate relabeling transports both generalized Pauli observables. -/
 private theorem tauObservable_reindex_quditQubitLabelEquiv
-    {q : ℕ} (F : FixedFieldModel q) (L : ℕ)
-    (W : PauliKind) (a : Fin L → F.K) :
+    {q : ℕ} {ι : Type*} [Fintype ι] [DecidableEq ι] (F : FixedFieldModel q)
+    (W : PauliKind) (a : ι → F.K) :
     tauObservable W a =
-      Matrix.reindex (quditQubitLabelEquiv F L).symm
-        (quditQubitLabelEquiv F L).symm
-        (tauObservable W (quditQubitLabelEquiv F L a)) := by
+      Matrix.reindex (quditQubitLabelEquiv F).symm
+        (quditQubitLabelEquiv F).symm
+        (tauObservable W (quditQubitLabelEquiv F a)) := by
   classical
   ext x y
   simp only [Matrix.reindex_apply, Matrix.submatrix_apply, Equiv.symm_symm]
   cases W with
   | X =>
       rw [tauObservable_X_apply, tauObservable_X_apply]
-      have hadd := quditQubitLabelEquiv_add F L y a
+      have hadd := quditQubitLabelEquiv_add F y a
       rw [← hadd]
       by_cases hshift : x = y + a
       · rw [if_pos hshift, if_pos]
-        exact congrArg (quditQubitLabelEquiv F L) hshift
+        exact congrArg (quditQubitLabelEquiv F) hshift
       · rw [if_neg hshift, if_neg]
-        exact fun h => hshift ((quditQubitLabelEquiv F L).injective h)
+        exact fun h => hshift ((quditQubitLabelEquiv F).injective h)
   | Z =>
       rw [tauObservable_Z_apply, tauObservable_Z_apply]
       by_cases hxy : x = y
       · subst y
         rw [if_pos rfl, if_pos rfl,
           binTrace_dotProduct_eq_quditQubitLabelEquiv,
-          quditQubitLabelEquiv_eq_kappaVec F L a,
-          quditQubitLabelEquiv_eq_kappaVec F L x]
-      · have hlabels : quditQubitLabelEquiv F L x ≠
-            quditQubitLabelEquiv F L y := fun h =>
-          hxy ((quditQubitLabelEquiv F L).injective h)
+          quditQubitLabelEquiv_eq_kappaVec F a,
+          quditQubitLabelEquiv_eq_kappaVec F x]
+      · have hlabels : quditQubitLabelEquiv F x ≠
+            quditQubitLabelEquiv F y := fun h =>
+          hxy ((quditQubitLabelEquiv F).injective h)
         rw [if_neg hxy, if_neg hlabels]
 
 /-- Fourier inversion transports the Pauli projectors along the binary label
-equivalence. -/
-private theorem pauliProj_reindex_quditQubitLabelEquiv
-    {q : ℕ} (F : FixedFieldModel q) (L : ℕ)
-    (W : PauliKind) (u : Fin L → F.K) :
+equivalence for any finite register index. This is the shared algebraic
+calculation in `lem:pauli-binary`, `eq:qudit-to-qubit-pauli-1`, independent of
+the soundness existence assertion in `cor:pauli-binary`. -/
+theorem pauliProj_reindex_quditQubitLabelEquiv
+    {q : ℕ} {ι : Type*} [Fintype ι] [DecidableEq ι] (F : FixedFieldModel q)
+    (W : PauliKind) (u : ι → F.K) :
     pauliProj W u =
-      Matrix.reindex (quditQubitLabelEquiv F L).symm
-        (quditQubitLabelEquiv F L).symm
+      Matrix.reindex (quditQubitLabelEquiv F).symm
+        (quditQubitLabelEquiv F).symm
         (pauliProj W (kappaVec F u)) := by
   classical
   rw [pauliProj_eq_avg_tauObservable, pauliProj_eq_avg_tauObservable]
   ext x y
   simp only [Matrix.smul_apply, Matrix.sum_apply, smul_eq_mul,
     Matrix.reindex_apply, Matrix.submatrix_apply, Equiv.symm_symm]
-  rw [Fintype.card_congr (quditQubitLabelEquiv F L)]
+  rw [Fintype.card_congr (quditQubitLabelEquiv (ι := ι) F)]
   congr 1
-  apply Fintype.sum_equiv (quditQubitLabelEquiv F L)
+  apply Fintype.sum_equiv (quditQubitLabelEquiv F)
   intro a
   have hphase := congrArg phaseSign
-    (binTrace_dotProduct_eq_quditQubitLabelEquiv F L a u)
+    (binTrace_dotProduct_eq_quditQubitLabelEquiv F a u)
   have hentry := congrFun
-    (congrFun (tauObservable_reindex_quditQubitLabelEquiv F L W a) x) y
+    (congrFun (tauObservable_reindex_quditQubitLabelEquiv F W a) x) y
   simp only [Matrix.reindex_apply, Matrix.submatrix_apply, Equiv.symm_symm] at hentry
   rw [hphase, hentry]
 
 /-- The tensor product of binary Pauli projectors, obtained by specializing
-`pauliProj` to `ZMod 2`. This is the binary target in `lem:pauli-binary`,
-blueprint `ch11_qpbt_algebra.tex:710-741`, paper
+`pauliProj` to `ZMod 2`. This is the binary target in blueprint
+`lem:pauli-binary`, paper
 `references/qpbt-paper/04_preliminaries.tex:1163-1208`. -/
 noncomputable abbrev qubitPauliProj {ι : Type*} [Fintype ι] [DecidableEq ι]
     (W : PauliKind) (b : ι → ZMod 2) : Op (ι → ZMod 2) :=
@@ -708,7 +711,7 @@ noncomputable abbrev qubitPauliProj {ι : Type*} [Fintype ι] [DecidableEq ι]
 
 /-- `lem:pauli-binary`: the fixed binary coordinates induce an isometry that
 maps EPR states and generalized Pauli projectors to their qubit forms.
-Blueprint `ch11_qpbt_algebra.tex:710-741`, paper
+Blueprint `lem:pauli-binary`, paper
 `references/qpbt-paper/04_preliminaries.tex:1163-1208`.
 
 **Local fix:** The source's final factor index is printed as
@@ -725,11 +728,11 @@ theorem exists_qubitIsometry (q : ℕ) (F : FixedFieldModel q) (L : ℕ) :
           pauliProj W u =
             conjIsometry φ.symm.toLinearIsometry
               (qubitPauliProj W (kappaVec F u)) := by
-  let e := quditQubitLabelEquiv F L
+  let e := quditQubitLabelEquiv (ι := Fin L) F
   let φ := LinearIsometryEquiv.piLpCongrLeft 2 ℂ ℂ e
   refine ⟨φ, isometryTensor_piLpCongrLeft_epr e, ?_⟩
   intro W u
   rw [conjIsometry_piLpCongrLeft_symm]
-  exact pauliProj_reindex_quditQubitLabelEquiv F L W u
+  exact pauliProj_reindex_quditQubitLabelEquiv F W u
 
 end MIPStarRE.QPBT

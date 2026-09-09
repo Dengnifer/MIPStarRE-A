@@ -1,0 +1,1330 @@
+{
+  "schema": 1,
+  "purpose": "Historical raw-input conservation for the issue117/PR212 refresh",
+  "source_parent": "942b942dd967de97b3fc7defc397667de610f0e3",
+  "source_path": "results/telemetry/owner-sessions.jsonl",
+  "source_blob_sha": "426f6db1f8a89cf23eeed5158cda2d6cd14232f5",
+  "source_sha256": "aebf37265758fe8fa8dfc29bb9b93ef1fcfa5c6b90fc5b4a7a96816d4b65c0dd",
+  "source_raw_lines": 113,
+  "incoming_parent": "5924b3acec0d1ad5fe38b8a93ac5e950e2daa071",
+  "incoming_canonical_blob_sha": "9385f61fb09857053fc626482ebcc92b28ce909e",
+  "incoming_canonical_sha256": "e90320b89073b29ed2c42778081d4bf90b4b2f6e8ae4b8e6b45e03708cf333c0",
+  "incoming_canonical_lines": 247,
+  "raw_archive": "results/telemetry/owner-audits/raw-inputs/pr212-owner-sessions-942b942dd967.jsonl.raw",
+  "exception": "Preserve all source bytes in the noncanonical raw archive; retain valid incoming canonical ledger bytes without appending malformed or obsolete running records.",
+  "authorization": "Root disposition on 2026-09-07 for this specific old issue117 merge",
+  "do_not_ingest": true,
+  "additive_budget_claim": false,
+  "session_admission_input": false,
+  "counts": {
+    "format_only": 83,
+    "later_reconciled": 29,
+    "malformed": 1
+  },
+  "mappings": [
+    {
+      "source_line": 1,
+      "raw_line_sha256": "1d0e7b9b93c03a2970333c5b1dc588f80f45776a30cbf24364e4067e4429b968",
+      "category": "later_reconciled",
+      "name": "claude-prover-125-20260904T0822Z",
+      "start": "2026-09-04T08:22:40Z",
+      "mapping_basis": "same name and start",
+      "canonical_identity": [
+        {
+          "line": 1,
+          "name": "claude-prover-125-20260904T0822Z",
+          "start": "2026-09-04T08:22:40Z",
+          "status": "ended-unrecorded"
+        }
+      ],
+      "changed_fields": [
+        "note",
+        "status"
+      ]
+    },
+    {
+      "source_line": 2,
+      "raw_line_sha256": "694d71e1c86159e4fc3e0470de33eb9c11dae6e960200f9294d236ce9e4336e5",
+      "category": "later_reconciled",
+      "name": "claude-prover-102-20260904T0827Z",
+      "start": "2026-09-04T08:27:06Z",
+      "mapping_basis": "same name and start",
+      "canonical_identity": [
+        {
+          "line": 2,
+          "name": "claude-prover-102-20260904T0827Z",
+          "start": "2026-09-04T08:27:06Z",
+          "status": "ended-unrecorded"
+        }
+      ],
+      "changed_fields": [
+        "note",
+        "status"
+      ]
+    },
+    {
+      "source_line": 3,
+      "raw_line_sha256": "7324d4bd330e95a9742b6606fcbf7b297ff4f4d63d32437f882a1c7b899b7798",
+      "category": "later_reconciled",
+      "name": "claude-prover-131-20260904T0829Z",
+      "start": "2026-09-04T08:29:27Z",
+      "mapping_basis": "same name and start",
+      "canonical_identity": [
+        {
+          "line": 3,
+          "name": "claude-prover-131-20260904T0829Z",
+          "start": "2026-09-04T08:29:27Z",
+          "status": "ended-unrecorded"
+        }
+      ],
+      "changed_fields": [
+        "note",
+        "status"
+      ]
+    },
+    {
+      "source_line": 4,
+      "raw_line_sha256": "58fdb5e184bc1e77743437f61b2dbf2fd8f82ea9781650f5baa54cee69533a6e",
+      "category": "format_only",
+      "canonical_lines": [
+        4
+      ]
+    },
+    {
+      "source_line": 5,
+      "raw_line_sha256": "ee3257326b866cbbee2651e14c401bca75d3c3eeafb36529dd4770e3839417c6",
+      "category": "later_reconciled",
+      "name": "claude-prover-106-20260904T0904Z",
+      "start": "2026-09-04T09:04:22Z",
+      "mapping_basis": "same name and start",
+      "canonical_identity": [
+        {
+          "line": 5,
+          "name": "claude-prover-106-20260904T0904Z",
+          "start": "2026-09-04T09:04:22Z",
+          "status": "ended-unrecorded"
+        }
+      ],
+      "changed_fields": [
+        "note",
+        "status"
+      ]
+    },
+    {
+      "source_line": 6,
+      "raw_line_sha256": "8a63d6f6d6f219e4edc8373f38a2fe7a11fef6a48241465a63d32b64a8573105",
+      "category": "format_only",
+      "canonical_lines": [
+        6
+      ]
+    },
+    {
+      "source_line": 7,
+      "raw_line_sha256": "7f35bc72ce2d5b5d46db966d3539424bc0aa20631997ac019a24b6a889f7b2f4",
+      "category": "format_only",
+      "canonical_lines": [
+        7
+      ]
+    },
+    {
+      "source_line": 8,
+      "raw_line_sha256": "d9e5e1c6b091fea1d5e1b321923f5fe4f1bf73a56a3823d7a7b5664e0fc30843",
+      "category": "format_only",
+      "canonical_lines": [
+        8
+      ]
+    },
+    {
+      "source_line": 9,
+      "raw_line_sha256": "fdf4f1611310fdce025c5016911e27df08faa4c798504139416c898088616a25",
+      "category": "format_only",
+      "canonical_lines": [
+        9
+      ]
+    },
+    {
+      "source_line": 10,
+      "raw_line_sha256": "2be9f59e67c1a04de60600427e7135948c8a5c54189ddbd7bc69c5230cf7b378",
+      "category": "later_reconciled",
+      "name": "claude-prover-127-20260904T0848Z",
+      "start": "2026-09-04T08:48:20Z",
+      "mapping_basis": "same name and start",
+      "canonical_identity": [
+        {
+          "line": 10,
+          "name": "claude-prover-127-20260904T0848Z",
+          "start": "2026-09-04T08:48:20Z",
+          "status": "ended-unrecorded"
+        }
+      ],
+      "changed_fields": [
+        "note",
+        "status"
+      ]
+    },
+    {
+      "source_line": 11,
+      "raw_line_sha256": "04056a21121f7b2e800b84f3958f0d03a8162562f8eeb01f335d03df55392ef4",
+      "category": "format_only",
+      "canonical_lines": [
+        11
+      ]
+    },
+    {
+      "source_line": 12,
+      "raw_line_sha256": "860bb822a0f83fdb5fb3170ca27052fe49ea4ab425d26be089107baa08b873ca",
+      "category": "format_only",
+      "canonical_lines": [
+        12
+      ]
+    },
+    {
+      "source_line": 13,
+      "raw_line_sha256": "1317ba5628d5460b929b7f4b51c50eeeeaf68b8bc7e1c1cb246ceaada63217f7",
+      "category": "format_only",
+      "canonical_lines": [
+        13
+      ]
+    },
+    {
+      "source_line": 14,
+      "raw_line_sha256": "5f021b19459188026c2d8142470e3429cc24a26d22788b360f055c4178eae68d",
+      "category": "format_only",
+      "canonical_lines": [
+        14
+      ]
+    },
+    {
+      "source_line": 15,
+      "raw_line_sha256": "87087cb32d1652f71c8805086f1da1953c27c4c63a2196decad333407802059e",
+      "category": "later_reconciled",
+      "name": "claude-prover-128-20260904T0909Z",
+      "start": "2026-09-04T09:09:32Z",
+      "mapping_basis": "same name and start",
+      "canonical_identity": [
+        {
+          "line": 15,
+          "name": "claude-prover-128-20260904T0909Z",
+          "start": "2026-09-04T09:09:32Z",
+          "status": "ended-unrecorded"
+        }
+      ],
+      "changed_fields": [
+        "note",
+        "status"
+      ]
+    },
+    {
+      "source_line": 16,
+      "raw_line_sha256": "07542e3feb6104adc9cbc5d5d7648ed28cc97eb4550c9d1bbde56eb850fefac4",
+      "category": "format_only",
+      "canonical_lines": [
+        16
+      ]
+    },
+    {
+      "source_line": 17,
+      "raw_line_sha256": "210ddde42c4f0c8cb00aa26a74b301656c7cef6385614fd2e4b04b1dd354a4e6",
+      "category": "format_only",
+      "canonical_lines": [
+        17
+      ]
+    },
+    {
+      "source_line": 18,
+      "raw_line_sha256": "ad4e631689c658f6d24b70799b297b6ffd70e743f8ff93cb69b7be41fbcde1cb",
+      "category": "format_only",
+      "canonical_lines": [
+        18
+      ]
+    },
+    {
+      "source_line": 19,
+      "raw_line_sha256": "478245bbcba636a30105d290f8bc3cbbf8e88e46913232e3a9eaa97e10874a4e",
+      "category": "format_only",
+      "canonical_lines": [
+        19
+      ]
+    },
+    {
+      "source_line": 20,
+      "raw_line_sha256": "ad9b7c9db313c1cf5aa4f55ff90072a6d596ea03f3706e0fcb78f5f637ca67c3",
+      "category": "format_only",
+      "canonical_lines": [
+        20
+      ]
+    },
+    {
+      "source_line": 21,
+      "raw_line_sha256": "a482bc543b06b51cfdc160af9054d3355106aedf79062421d26f1fc4010fc1c3",
+      "category": "format_only",
+      "canonical_lines": [
+        21
+      ]
+    },
+    {
+      "source_line": 22,
+      "raw_line_sha256": "94890692ecd001cf129efaac7a9bb1f7317b326677828969303247ff888441f0",
+      "category": "later_reconciled",
+      "name": "claude-prover-129-20260904T0929Z",
+      "start": "2026-09-04T09:29:58Z",
+      "mapping_basis": "same name and start",
+      "canonical_identity": [
+        {
+          "line": 22,
+          "name": "claude-prover-129-20260904T0929Z",
+          "start": "2026-09-04T09:29:58Z",
+          "status": "ended-unrecorded"
+        }
+      ],
+      "changed_fields": [
+        "note",
+        "status"
+      ]
+    },
+    {
+      "source_line": 23,
+      "raw_line_sha256": "0584fd36f97e11a4deccabd6850512448d6f01077e61f5c421f6ea0d522dcdd2",
+      "category": "format_only",
+      "canonical_lines": [
+        23
+      ]
+    },
+    {
+      "source_line": 24,
+      "raw_line_sha256": "5dfd1639b9399e0d7f8138f700197e91cbea59326cd3ca2ff5fab058daf92775",
+      "category": "format_only",
+      "canonical_lines": [
+        24
+      ]
+    },
+    {
+      "source_line": 25,
+      "raw_line_sha256": "4707160bce76535085ed1d4ebf14038cc4782fea986c75644bd569acb72e5447",
+      "category": "format_only",
+      "canonical_lines": [
+        25
+      ]
+    },
+    {
+      "source_line": 26,
+      "raw_line_sha256": "2745415405eb6789f2747cae9eda56477ba3f355136bffe4a89e35d1148d8d05",
+      "category": "later_reconciled",
+      "name": "claude-prover-103-20260904T0931Z",
+      "start": "2026-09-04T09:31:22Z",
+      "mapping_basis": "same name and start",
+      "canonical_identity": [
+        {
+          "line": 26,
+          "name": "claude-prover-103-20260904T0931Z",
+          "start": "2026-09-04T09:31:22Z",
+          "status": "ended-unrecorded"
+        }
+      ],
+      "changed_fields": [
+        "note",
+        "status"
+      ]
+    },
+    {
+      "source_line": 27,
+      "raw_line_sha256": "53e2e68108a6f94a2906857049a883dc5c4ccbb70772ae49b95e504d79bae1bf",
+      "category": "format_only",
+      "canonical_lines": [
+        27
+      ]
+    },
+    {
+      "source_line": 28,
+      "raw_line_sha256": "86d09f300528140197ae12ab355664012568f4beb61e85cf1c2c1233e95b0df8",
+      "category": "format_only",
+      "canonical_lines": [
+        28
+      ]
+    },
+    {
+      "source_line": 29,
+      "raw_line_sha256": "c9aff4e0b0bf687a13447db9542ab578db5cb70ede5e4b4b4623672f43afc788",
+      "category": "format_only",
+      "canonical_lines": [
+        29
+      ]
+    },
+    {
+      "source_line": 30,
+      "raw_line_sha256": "eb2eddc4e93ffc33f0bbf93ddd2588d42d34c200b18856e5330bff8d67e1f294",
+      "category": "format_only",
+      "canonical_lines": [
+        30
+      ]
+    },
+    {
+      "source_line": 31,
+      "raw_line_sha256": "044c5557ca92ab9157714fba83a8c38cfd8b9199de60344be8acdc75f6be8765",
+      "category": "format_only",
+      "canonical_lines": [
+        31
+      ]
+    },
+    {
+      "source_line": 32,
+      "raw_line_sha256": "58e948623587e7ced4dc48b245c918f08d943acbfbe7f3ca6088f6e94a1cac9c",
+      "category": "format_only",
+      "canonical_lines": [
+        32
+      ]
+    },
+    {
+      "source_line": 33,
+      "raw_line_sha256": "2dd5e692cd79e6caa1aeb4191856b27e93d660555b1ba7d214ddb1ad28296b41",
+      "category": "later_reconciled",
+      "name": "claude-prover-107-20260904T0950Z",
+      "start": "2026-09-04T09:50:55Z",
+      "mapping_basis": "same name and start",
+      "canonical_identity": [
+        {
+          "line": 33,
+          "name": "claude-prover-107-20260904T0950Z",
+          "start": "2026-09-04T09:50:55Z",
+          "status": "ended-unrecorded"
+        }
+      ],
+      "changed_fields": [
+        "note",
+        "status"
+      ]
+    },
+    {
+      "source_line": 34,
+      "raw_line_sha256": "151dbd9fbba72214f728187355b7b334ce00f4ec4af01e2ade5146f562f25a80",
+      "category": "format_only",
+      "canonical_lines": [
+        34
+      ]
+    },
+    {
+      "source_line": 35,
+      "raw_line_sha256": "dbc2cb27d38e26143686e1705408807c0959066c378156fc4a80fe692c08727b",
+      "category": "format_only",
+      "canonical_lines": [
+        35
+      ]
+    },
+    {
+      "source_line": 36,
+      "raw_line_sha256": "7e0c2b5410a48c1da1b33088083965722dd7395940be92322c604befce877caa",
+      "category": "format_only",
+      "canonical_lines": [
+        36
+      ]
+    },
+    {
+      "source_line": 37,
+      "raw_line_sha256": "92179e694ebc110a1b14fbbbd07bdc3e47ebd2e5c6277b415bff2048c0f1f11a",
+      "category": "format_only",
+      "canonical_lines": [
+        37
+      ]
+    },
+    {
+      "source_line": 38,
+      "raw_line_sha256": "6e1ddb2015fd968d37607b93b850a251eec171a140afdb89f927de702d84f645",
+      "category": "format_only",
+      "canonical_lines": [
+        38
+      ]
+    },
+    {
+      "source_line": 39,
+      "raw_line_sha256": "d227bcb0e3f9ae643963c29644326db1711209861280d7889e3bcad4d55f5ad0",
+      "category": "format_only",
+      "canonical_lines": [
+        39
+      ]
+    },
+    {
+      "source_line": 40,
+      "raw_line_sha256": "5fb6c3f33ac27589cc2212b4b3d5203d70bc17968831da81293799a466e22352",
+      "category": "later_reconciled",
+      "name": "claude-prover-131-20260904T1013Z",
+      "start": "2026-09-04T10:13:32Z",
+      "mapping_basis": "same name and start",
+      "canonical_identity": [
+        {
+          "line": 40,
+          "name": "claude-prover-131-20260904T1013Z",
+          "start": "2026-09-04T10:13:32Z",
+          "status": "ended-unrecorded"
+        }
+      ],
+      "changed_fields": [
+        "note",
+        "status"
+      ]
+    },
+    {
+      "source_line": 41,
+      "raw_line_sha256": "b4d4433fb7358791fe1807576fb609df0ce0dabf126f2eb405dcd0ad0a5979b8",
+      "category": "format_only",
+      "canonical_lines": [
+        41
+      ]
+    },
+    {
+      "source_line": 42,
+      "raw_line_sha256": "afc3041214fa8f017778892a5d4f125c46e9364cb7b36d991275e7c818cbe351",
+      "category": "format_only",
+      "canonical_lines": [
+        42
+      ]
+    },
+    {
+      "source_line": 43,
+      "raw_line_sha256": "31f15e3c0f61e55fb98f4d1980aa6d05f445267e8cfa3786ee5e3256e0248c29",
+      "category": "format_only",
+      "canonical_lines": [
+        43
+      ]
+    },
+    {
+      "source_line": 44,
+      "raw_line_sha256": "0ef46ebecc6a5b498fd655f3c8ae6159ae09d948002136d95a97156cab1283bf",
+      "category": "format_only",
+      "canonical_lines": [
+        44
+      ]
+    },
+    {
+      "source_line": 45,
+      "raw_line_sha256": "c08b280b2fddb52a25e4b652cfcfce6152a8b7a7bbbb56a85abdf7e399179400",
+      "category": "format_only",
+      "canonical_lines": [
+        45
+      ]
+    },
+    {
+      "source_line": 46,
+      "raw_line_sha256": "c2a2273d2e400f4242eafd16eb05d42e8cd37f833b14f9ddc6882d2df485c163",
+      "category": "format_only",
+      "canonical_lines": [
+        46
+      ]
+    },
+    {
+      "source_line": 47,
+      "raw_line_sha256": "4de9c0ae3f59ea11286ced3d145abfe5b6aa9cdbb340d0303387a88ff716e654",
+      "category": "later_reconciled",
+      "name": "claude-prover-110-20260904T1034Z",
+      "start": "2026-09-04T10:34:55Z",
+      "mapping_basis": "same name and start",
+      "canonical_identity": [
+        {
+          "line": 47,
+          "name": "claude-prover-110-20260904T1034Z",
+          "start": "2026-09-04T10:34:55Z",
+          "status": "ended-unrecorded"
+        }
+      ],
+      "changed_fields": [
+        "note",
+        "status"
+      ]
+    },
+    {
+      "source_line": 48,
+      "raw_line_sha256": "19dc649c1f44e3bdb4e8739f3cdc1a44d55fc71882ab86125dc1ec08fab0b15d",
+      "category": "later_reconciled",
+      "name": "claude-prover-108-20260904T1035Z",
+      "start": "2026-09-04T10:35:05Z",
+      "mapping_basis": "same name and start",
+      "canonical_identity": [
+        {
+          "line": 48,
+          "name": "claude-prover-108-20260904T1035Z",
+          "start": "2026-09-04T10:35:05Z",
+          "status": "ended-unrecorded"
+        }
+      ],
+      "changed_fields": [
+        "note",
+        "status"
+      ]
+    },
+    {
+      "source_line": 49,
+      "raw_line_sha256": "8ddc654788494e179d10885af10f1102e3e0ddca7ecccfe235b53d18b95f0a05",
+      "category": "later_reconciled",
+      "name": "claude-prover-109-20260904T1035Z",
+      "start": "2026-09-04T10:35:13Z",
+      "mapping_basis": "same name and start",
+      "canonical_identity": [
+        {
+          "line": 49,
+          "name": "claude-prover-109-20260904T1035Z",
+          "start": "2026-09-04T10:35:13Z",
+          "status": "ended-unrecorded"
+        }
+      ],
+      "changed_fields": [
+        "note",
+        "status"
+      ]
+    },
+    {
+      "source_line": 50,
+      "raw_line_sha256": "082fb86c731e1abfb2dafccb1d457154ed6d0ed4e561f4e18f66d75da8c47b05",
+      "category": "format_only",
+      "canonical_lines": [
+        50
+      ]
+    },
+    {
+      "source_line": 51,
+      "raw_line_sha256": "227f27282296239761e8c1df61991bbf04ec4557c799cb76df6d641a1c8c8fc4",
+      "category": "format_only",
+      "canonical_lines": [
+        51
+      ]
+    },
+    {
+      "source_line": 52,
+      "raw_line_sha256": "eace1c7b77545c6861417ad6d755c63ce0d3a602babc503cd57f9e9726dc3147",
+      "category": "format_only",
+      "canonical_lines": [
+        52
+      ]
+    },
+    {
+      "source_line": 53,
+      "raw_line_sha256": "89f68850db6912a97a5d64c53d65e889c21886f63518c37f46f8d6ef76ec95e6",
+      "category": "format_only",
+      "canonical_lines": [
+        53
+      ]
+    },
+    {
+      "source_line": 54,
+      "raw_line_sha256": "03b6a2d0e6ea67fe46c6eb70bc3ddc71b3f8a64cdb81b87e3c6147997e51b24a",
+      "category": "format_only",
+      "canonical_lines": [
+        54
+      ]
+    },
+    {
+      "source_line": 55,
+      "raw_line_sha256": "63a69491771edb0b0428c591f18dd8ff37b096bffec17df1f52121c3842c54ac",
+      "category": "format_only",
+      "canonical_lines": [
+        55
+      ]
+    },
+    {
+      "source_line": 56,
+      "raw_line_sha256": "2b39df7e0d138e8fe4d5a5272a353924e507dccf560962ec7706574bc7c0837e",
+      "category": "format_only",
+      "canonical_lines": [
+        56
+      ]
+    },
+    {
+      "source_line": 57,
+      "raw_line_sha256": "aa7aeaaa3f52362a691d261bf8ab001affea8d670d0ef1f0bdfa4ce22b517930",
+      "category": "format_only",
+      "canonical_lines": [
+        57
+      ]
+    },
+    {
+      "source_line": 58,
+      "raw_line_sha256": "117e20a2e2af19dcb115f04f442075533a1bdb8aa0356a1f42e082ef81f1b776",
+      "category": "format_only",
+      "canonical_lines": [
+        58
+      ]
+    },
+    {
+      "source_line": 59,
+      "raw_line_sha256": "523d44d626ab5459e2b806c0b2533b41ca20bda956c4537b4fdc90b5c4d232d2",
+      "category": "format_only",
+      "canonical_lines": [
+        59
+      ]
+    },
+    {
+      "source_line": 60,
+      "raw_line_sha256": "04e5aceb86b8fa53a397e4daf6f701557a8fb07d3053f170a29d6d0901b46b8e",
+      "category": "format_only",
+      "canonical_lines": [
+        60
+      ]
+    },
+    {
+      "source_line": 61,
+      "raw_line_sha256": "925ea58ca21205c4ff87a335c5728a9abaea710f436d6905c65f226d2fefb19b",
+      "category": "format_only",
+      "canonical_lines": [
+        61
+      ]
+    },
+    {
+      "source_line": 62,
+      "raw_line_sha256": "43e14cb7e71e03387f30174463fdf5bbe3d3b6d9d3b22ae532223d863521567b",
+      "category": "format_only",
+      "canonical_lines": [
+        62
+      ]
+    },
+    {
+      "source_line": 63,
+      "raw_line_sha256": "866444fc59fd65955a89fc93267a19604c1640193f332f8132017ce98722abea",
+      "category": "format_only",
+      "canonical_lines": [
+        63
+      ]
+    },
+    {
+      "source_line": 64,
+      "raw_line_sha256": "c50131e6f7a00f395b931ab2b87d84e0ad4e9644d442b2e63e3ab0a36445e77c",
+      "category": "format_only",
+      "canonical_lines": [
+        64
+      ]
+    },
+    {
+      "source_line": 65,
+      "raw_line_sha256": "204e65550aec527fb76d1d1eac4bcf47c40a00c254cddf30495364b839bf3e92",
+      "category": "format_only",
+      "canonical_lines": [
+        65
+      ]
+    },
+    {
+      "source_line": 66,
+      "raw_line_sha256": "7377db94bef81bba9f2985cedd098fdeb9b0899a787df0b46489cecdd6f97122",
+      "category": "format_only",
+      "canonical_lines": [
+        66
+      ]
+    },
+    {
+      "source_line": 67,
+      "raw_line_sha256": "b99ee51531067b42e41afb4db692666d029977ceb7df38e2a79476325c9e4c33",
+      "category": "format_only",
+      "canonical_lines": [
+        67
+      ]
+    },
+    {
+      "source_line": 68,
+      "raw_line_sha256": "e2acc9bceb8ccf72951bbbd2c39af4f712885f53c09c395bb1b82849cc3de25f",
+      "category": "later_reconciled",
+      "name": "claude-prover-133-20260904T1119Z",
+      "start": "2026-09-04T11:19:53Z",
+      "mapping_basis": "same name and start",
+      "canonical_identity": [
+        {
+          "line": 68,
+          "name": "claude-prover-133-20260904T1119Z",
+          "start": "2026-09-04T11:19:53Z",
+          "status": "ended-unrecorded"
+        }
+      ],
+      "changed_fields": [
+        "note",
+        "status"
+      ]
+    },
+    {
+      "source_line": 69,
+      "raw_line_sha256": "343aa0c2964136713e00c6bf468892aabfd19a659e266ee23ab0a28229a809f8",
+      "category": "later_reconciled",
+      "name": "claude-prover-156-20260904T1120Z",
+      "start": "2026-09-04T11:20:03Z",
+      "mapping_basis": "same name and start",
+      "canonical_identity": [
+        {
+          "line": 69,
+          "name": "claude-prover-156-20260904T1120Z",
+          "start": "2026-09-04T11:20:03Z",
+          "status": "ended-unrecorded"
+        }
+      ],
+      "changed_fields": [
+        "note",
+        "status"
+      ]
+    },
+    {
+      "source_line": 70,
+      "raw_line_sha256": "1a9988ede2c99fddb1776baed9160487b0e7cdf49cc5caedda111c280825aed7",
+      "category": "format_only",
+      "canonical_lines": [
+        70
+      ]
+    },
+    {
+      "source_line": 71,
+      "raw_line_sha256": "628c514679112bda2c0de936e82fe405694e3b80bf524e8c77b709d93970c6da",
+      "category": "format_only",
+      "canonical_lines": [
+        71
+      ]
+    },
+    {
+      "source_line": 72,
+      "raw_line_sha256": "3d705984fc4edd11a50ca289cbcfe23204a9b2ccc159ea2930d6b729aaf1a508",
+      "category": "format_only",
+      "canonical_lines": [
+        72
+      ]
+    },
+    {
+      "source_line": 73,
+      "raw_line_sha256": "df9a40f6731281150e4b3f23f197ea990849133b1f1c4ad016b34734395a3f23",
+      "category": "format_only",
+      "canonical_lines": [
+        73
+      ]
+    },
+    {
+      "source_line": 74,
+      "raw_line_sha256": "e42cbd4b0045cceff10218b7491ff10bbbf7300d7800646f3e57bc84928f448e",
+      "category": "format_only",
+      "canonical_lines": [
+        74
+      ]
+    },
+    {
+      "source_line": 75,
+      "raw_line_sha256": "99bfe7d6b8b2329200adcd7f6e78c8d1b4a5d57791a0fd72911582f9b34342c4",
+      "category": "format_only",
+      "canonical_lines": [
+        75
+      ]
+    },
+    {
+      "source_line": 76,
+      "raw_line_sha256": "709e840302a642c2b6d5f878a416b57b32e78bcffba9af557ee97f6ac495c604",
+      "category": "malformed",
+      "parse_error": "Expecting value: line 1 column 109 (char 108)",
+      "canonical_lines": []
+    },
+    {
+      "source_line": 77,
+      "raw_line_sha256": "81d0b3995e429a707965bec22386204542334f69d237c890856423e6a73568dc",
+      "category": "later_reconciled",
+      "name": "claude-prover-159-20260904T1146Z",
+      "start": "2026-09-04T11:46:59Z",
+      "mapping_basis": "same name and start",
+      "canonical_identity": [
+        {
+          "line": 76,
+          "name": "claude-prover-159-20260904T1146Z",
+          "start": "2026-09-04T11:46:59Z",
+          "status": "ended-unrecorded"
+        }
+      ],
+      "changed_fields": [
+        "note",
+        "status"
+      ]
+    },
+    {
+      "source_line": 78,
+      "raw_line_sha256": "76b1af6af4a9680df5dfaa39293932390d2ecb46ade21d2f082e74a86a1fd3e5",
+      "category": "format_only",
+      "canonical_lines": [
+        77
+      ]
+    },
+    {
+      "source_line": 79,
+      "raw_line_sha256": "9152a19c4dbee04a719c8a67ef228eef22dcc8732993de813a7a0eb8c93923b7",
+      "category": "format_only",
+      "canonical_lines": [
+        78
+      ]
+    },
+    {
+      "source_line": 80,
+      "raw_line_sha256": "aabd54a73ea788576e0a8c4987c54edf6ae5ccb7eb6ae68689e4d2ef97f7df0b",
+      "category": "format_only",
+      "canonical_lines": [
+        79
+      ]
+    },
+    {
+      "source_line": 81,
+      "raw_line_sha256": "a1cc99bcdf41a847ca51a0285d19054b47ee5eb831daeed38bb905dde4ba7352",
+      "category": "format_only",
+      "canonical_lines": [
+        80
+      ]
+    },
+    {
+      "source_line": 82,
+      "raw_line_sha256": "b8307b18d7150d23d6bfc771a4b8a92dfa8ab03db966491622e76213a5a5438e",
+      "category": "later_reconciled",
+      "name": "claude-prover-105-20260904T1204Z",
+      "start": "2026-09-04T12:04:10Z",
+      "mapping_basis": "same name and start",
+      "canonical_identity": [
+        {
+          "line": 81,
+          "name": "claude-prover-105-20260904T1204Z",
+          "start": "2026-09-04T12:04:10Z",
+          "status": "killed"
+        }
+      ],
+      "changed_fields": [
+        "end",
+        "note",
+        "status"
+      ]
+    },
+    {
+      "source_line": 83,
+      "raw_line_sha256": "95b7b2169e4bb95a1b3ca2cdbeb03af27dace750cdd5f28ba9cd33ab03953557",
+      "category": "format_only",
+      "canonical_lines": [
+        82
+      ]
+    },
+    {
+      "source_line": 84,
+      "raw_line_sha256": "acaa33a8b6e4186b779a176f5128e8c246db2b04b7c3648f08855d73a4e489f7",
+      "category": "format_only",
+      "canonical_lines": [
+        83
+      ]
+    },
+    {
+      "source_line": 85,
+      "raw_line_sha256": "8f614140a6ee0005d33343a31e805b8ee3e2f115b27c6b4479f2d79ee6fbc2cd",
+      "category": "format_only",
+      "canonical_lines": [
+        84
+      ]
+    },
+    {
+      "source_line": 86,
+      "raw_line_sha256": "f7c0b3fcba62e9ca5792cf673074620126c995aa207cb772c9921a5f591735be",
+      "category": "format_only",
+      "canonical_lines": [
+        85
+      ]
+    },
+    {
+      "source_line": 87,
+      "raw_line_sha256": "d81b1e3325297608658990882044e7b51f45054dec6636e76f4e1fad1e9aa2bc",
+      "category": "format_only",
+      "canonical_lines": [
+        86
+      ]
+    },
+    {
+      "source_line": 88,
+      "raw_line_sha256": "547dd390bf09808d2f28834bf949f89f5e279de58805bcd4abdea08175ccda95",
+      "category": "format_only",
+      "canonical_lines": [
+        87
+      ]
+    },
+    {
+      "source_line": 89,
+      "raw_line_sha256": "e8ecfc0c4bb62626c56e7a33e80752a930a1f814275e019b9434db0bada1e50e",
+      "category": "format_only",
+      "canonical_lines": [
+        88
+      ]
+    },
+    {
+      "source_line": 90,
+      "raw_line_sha256": "d82d0aec480dc2514a893acd4608b174472a55cbca4ceb71b77be5a8643f750e",
+      "category": "later_reconciled",
+      "name": "claude-prover-113-20260904T1504Z",
+      "start": "2026-09-04T15:04:49Z",
+      "mapping_basis": "same name and start",
+      "canonical_identity": [
+        {
+          "line": 89,
+          "name": "claude-prover-113-20260904T1504Z",
+          "start": "2026-09-04T15:04:49Z",
+          "status": "ended-unrecorded"
+        }
+      ],
+      "changed_fields": [
+        "note",
+        "status"
+      ]
+    },
+    {
+      "source_line": 91,
+      "raw_line_sha256": "f1683057caa7a25af0a8c0866eee6ac1b9e35f4074c5731bd438ffd9f522e147",
+      "category": "later_reconciled",
+      "name": "opus-repair-pr179-r3-20260904-01",
+      "start": "2026-09-04T15:04Z",
+      "mapping_basis": "same name and start",
+      "canonical_identity": [
+        {
+          "line": 90,
+          "name": "opus-repair-pr179-r3-20260904-01",
+          "start": "2026-09-04T15:04Z",
+          "status": "ended-unrecorded"
+        },
+        {
+          "line": 93,
+          "name": "opus-repair-pr179-r3-20260904-01",
+          "start": "2026-09-04T15:04Z",
+          "status": "done"
+        }
+      ],
+      "changed_fields": [
+        "commits",
+        "end",
+        "findings_fixed",
+        "note",
+        "status",
+        "tokens",
+        "tool_uses",
+        "wall_s"
+      ]
+    },
+    {
+      "source_line": 92,
+      "raw_line_sha256": "f581c9f2f2a1f1c2be6fd10a789658a976891e0f4ecf17370c24bb7098075c1f",
+      "category": "later_reconciled",
+      "name": "opus-repair-pr184-r1-20260904-01",
+      "start": "2026-09-04T15:06Z",
+      "mapping_basis": "same name and start",
+      "canonical_identity": [
+        {
+          "line": 91,
+          "name": "opus-repair-pr184-r1-20260904-01",
+          "start": "2026-09-04T15:06Z",
+          "status": "ended-unrecorded"
+        },
+        {
+          "line": 94,
+          "name": "opus-repair-pr184-r1-20260904-01",
+          "start": "2026-09-04T15:06Z",
+          "status": "done"
+        }
+      ],
+      "changed_fields": [
+        "commits",
+        "end",
+        "findings_fixed",
+        "note",
+        "status",
+        "tokens",
+        "tool_uses",
+        "wall_s"
+      ]
+    },
+    {
+      "source_line": 93,
+      "raw_line_sha256": "5876d153646e77920b8902235e6719675dfc013e35eed7522f2e2415e760fbae",
+      "category": "later_reconciled",
+      "name": "claude-prover-172-20260904T1524Z",
+      "start": "2026-09-04T15:24:39Z",
+      "mapping_basis": "same name and start",
+      "canonical_identity": [
+        {
+          "line": 92,
+          "name": "claude-prover-172-20260904T1524Z",
+          "start": "2026-09-04T15:24:39Z",
+          "status": "ended-unrecorded"
+        }
+      ],
+      "changed_fields": [
+        "note",
+        "status"
+      ]
+    },
+    {
+      "source_line": 94,
+      "raw_line_sha256": "00332fba86a7460af3f7ddde96b663258eec4ddd8b7ee0a45084914b9185c03e",
+      "category": "format_only",
+      "canonical_lines": [
+        93
+      ]
+    },
+    {
+      "source_line": 95,
+      "raw_line_sha256": "74443d623b1b4473ff6c4eb61ff903808edf6fc8363555f51bf53e1b8e7d79fe",
+      "category": "format_only",
+      "canonical_lines": [
+        94
+      ]
+    },
+    {
+      "source_line": 96,
+      "raw_line_sha256": "b224fd339c2fe2560652a63b667b2db4606d985dda04654f83708d055c45fd63",
+      "category": "format_only",
+      "canonical_lines": [
+        95
+      ]
+    },
+    {
+      "source_line": 97,
+      "raw_line_sha256": "00dc477aaac8f730a0e667c6934cd93358eb61a30b0d3e7822d216ed11a290de",
+      "category": "format_only",
+      "canonical_lines": [
+        96
+      ]
+    },
+    {
+      "source_line": 98,
+      "raw_line_sha256": "755e4806c67d281ebc36ff04dd34bc72c2a12ddc6749f6629324af467e789518",
+      "category": "format_only",
+      "canonical_lines": [
+        97
+      ]
+    },
+    {
+      "source_line": 99,
+      "raw_line_sha256": "2b210c111d3de2e0cc8057e465e349c53ca7a742e930ec3d71bd4165a13dccdf",
+      "category": "format_only",
+      "canonical_lines": [
+        98
+      ]
+    },
+    {
+      "source_line": 100,
+      "raw_line_sha256": "7c172be581e4d47538f67d458c15f67c9b32c77de6422f5edbda18b21c505f70",
+      "category": "format_only",
+      "canonical_lines": [
+        99
+      ]
+    },
+    {
+      "source_line": 101,
+      "raw_line_sha256": "02b0c8266c3ac1a6fc79fce28370b6e3c178281b544a80ab37f734e558a67fa1",
+      "category": "later_reconciled",
+      "name": "claude-prover-115-20260904T1638Z",
+      "start": "2026-09-04T16:38:48Z",
+      "mapping_basis": "same name and start",
+      "canonical_identity": [
+        {
+          "line": 100,
+          "name": "claude-prover-115-20260904T1638Z",
+          "start": "2026-09-04T16:38:48Z",
+          "status": "ended-unrecorded"
+        }
+      ],
+      "changed_fields": [
+        "note",
+        "status"
+      ]
+    },
+    {
+      "source_line": 102,
+      "raw_line_sha256": "d06b41e83bbc70f3143e6fb78b6e82477a9033b244eb7de6a2b0ef984baeedf6",
+      "category": "format_only",
+      "canonical_lines": [
+        101
+      ]
+    },
+    {
+      "source_line": 103,
+      "raw_line_sha256": "2d1908ce5dcb60518d1666fada459a69d7d8d54b5193bb2758b9401181282ed2",
+      "category": "format_only",
+      "canonical_lines": [
+        102
+      ]
+    },
+    {
+      "source_line": 104,
+      "raw_line_sha256": "fd6001e943a1261bf855662366ae7fbbebc583bd708406c0b216b94e052af0f8",
+      "category": "format_only",
+      "canonical_lines": [
+        103
+      ]
+    },
+    {
+      "source_line": 105,
+      "raw_line_sha256": "cec88b5a43ae22d18f807092c325c2d4f3b40f66a2e1d4fe1a41d5a44babf752",
+      "category": "format_only",
+      "canonical_lines": [
+        104
+      ]
+    },
+    {
+      "source_line": 106,
+      "raw_line_sha256": "65d83f29457f1873d7e23fe747ea7a40dc5fc0ec724fe745e2ebc20ba249b742",
+      "category": "format_only",
+      "canonical_lines": [
+        105
+      ]
+    },
+    {
+      "source_line": 107,
+      "raw_line_sha256": "4b43498e4946ac6873ea7460791300cd1b4e620b8e5b37fa5eb2da8e2ace9edc",
+      "category": "later_reconciled",
+      "name": "claude-prover-116-20260904T2216Z",
+      "start": "2026-09-04T22:16:30Z",
+      "mapping_basis": "same name and start",
+      "canonical_identity": [
+        {
+          "line": 106,
+          "name": "claude-prover-116-20260904T2216Z",
+          "start": "2026-09-04T22:16:30Z",
+          "status": "ended-unrecorded"
+        }
+      ],
+      "changed_fields": [
+        "note",
+        "status"
+      ]
+    },
+    {
+      "source_line": 108,
+      "raw_line_sha256": "b8700c84bd9926fe7463f55a865ab571bbd4e1ceedaf6f86b117df73040982b7",
+      "category": "later_reconciled",
+      "name": "claude-prover-117-20260904T2216Z",
+      "start": "2026-09-04T22:16:42Z",
+      "mapping_basis": "same name and start",
+      "canonical_identity": [
+        {
+          "line": 107,
+          "name": "claude-prover-117-20260904T2216Z",
+          "start": "2026-09-04T22:16:42Z",
+          "status": "ended-unrecorded"
+        }
+      ],
+      "changed_fields": [
+        "note",
+        "status"
+      ]
+    },
+    {
+      "source_line": 109,
+      "raw_line_sha256": "a3a63a6abb481e5f3fb184ed729f8002a8bf4467ca9da46989c42f50413e4ea2",
+      "category": "later_reconciled",
+      "name": "claude-prover-199-20260904T2217Z",
+      "start": "2026-09-04T22:17:52Z",
+      "mapping_basis": "same name and start",
+      "canonical_identity": [
+        {
+          "line": 108,
+          "name": "claude-prover-199-20260904T2217Z",
+          "start": "2026-09-04T22:17:52Z",
+          "status": "done"
+        }
+      ],
+      "changed_fields": [
+        "commits",
+        "end",
+        "note",
+        "status",
+        "tokens",
+        "tool_uses",
+        "wall_s"
+      ]
+    },
+    {
+      "source_line": 110,
+      "raw_line_sha256": "2d24c2a6ecd3d8ed838d8e497ddd4873a17ec482f1a1aa209b89ab17bc38f724",
+      "category": "later_reconciled",
+      "name": "fable-prover-134-20260904T2220Z",
+      "start": "2026-09-04T22:20Z",
+      "mapping_basis": "same name and start",
+      "canonical_identity": [
+        {
+          "line": 109,
+          "name": "fable-prover-134-20260904T2220Z",
+          "start": "2026-09-04T22:20Z",
+          "status": "partial"
+        }
+      ],
+      "changed_fields": [
+        "commits",
+        "end",
+        "note",
+        "status",
+        "tokens",
+        "tool_uses",
+        "wall_s"
+      ]
+    },
+    {
+      "source_line": 111,
+      "raw_line_sha256": "b385035ca950f59f618e6332fdcde71bf343857536ecea1b82e488f32ad2ebb5",
+      "category": "later_reconciled",
+      "name": "opus-prereview-pr195-20260904T2220Z",
+      "start": "2026-09-04T22:20Z",
+      "mapping_basis": "same name and start",
+      "canonical_identity": [
+        {
+          "line": 110,
+          "name": "opus-prereview-pr195-20260904T2220Z",
+          "start": "2026-09-04T22:20Z",
+          "status": "done"
+        }
+      ],
+      "changed_fields": [
+        "commits",
+        "end",
+        "findings_fixed",
+        "status",
+        "tokens",
+        "tool_uses",
+        "wall_s"
+      ]
+    },
+    {
+      "source_line": 112,
+      "raw_line_sha256": "676bcc03e19de99e3a081c4abc9b9071beb41f6bd3953cc86b14c71564c19114",
+      "category": "later_reconciled",
+      "name": "opus-prereview-pr207-20260904T2220Z",
+      "start": "2026-09-04T22:20Z",
+      "mapping_basis": "unique same issue/pr/role/model; canonical name and start were revised",
+      "canonical_identity": [
+        {
+          "line": 112,
+          "name": "opus-prereview-pr207-20260904T2250Z",
+          "start": "2026-09-04T22:50Z",
+          "status": "done"
+        }
+      ],
+      "changed_fields": [
+        "commits",
+        "end",
+        "findings_fixed",
+        "name",
+        "note",
+        "start",
+        "status",
+        "tokens",
+        "tool_uses",
+        "wall_s"
+      ]
+    },
+    {
+      "source_line": 113,
+      "raw_line_sha256": "03608dff10b4d3a98cbc7e4c23a2908f6b2174f12a860841fad7cd26f91f6e43",
+      "category": "later_reconciled",
+      "name": "fable-mathfix-172-20260904T2238Z",
+      "start": "2026-09-04T22:38Z",
+      "mapping_basis": "same name and start",
+      "canonical_identity": [
+        {
+          "line": 111,
+          "name": "fable-mathfix-172-20260904T2238Z",
+          "start": "2026-09-04T22:38Z",
+          "status": "converged"
+        }
+      ],
+      "changed_fields": [
+        "commits",
+        "end",
+        "note",
+        "status",
+        "tokens",
+        "tool_uses",
+        "wall_s"
+      ]
+    }
+  ]
+}

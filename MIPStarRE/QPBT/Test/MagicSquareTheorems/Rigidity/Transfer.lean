@@ -14,7 +14,7 @@ the dilated projectors `P` to the ground slice (`Π` the ground projection).
 
 Naimark dilation preserves Born probabilities but not state-dependent `≈_δ`
 estimates in general (`references/ldt-paper/orthonormalization.tex:82-101`,
-blueprint `ch04_projective.tex:255-270`), so `Π P Π` and `P` need not act
+blueprint `ex:easy-but-long`), so `Π P Π` and `P` need not act
 alike on the dilated state.  Their difference on the dilated state `ψ'` is the
 *leakage* `(1 - Π) P ψ'` of `P` out of the ground slice, and the point of this
 file is that in the Magic Square game this leakage is controlled by the
@@ -37,7 +37,7 @@ dilated strategy to the original one with explicit constants.
 
 ## References
 
-`thm:ms-rigidity`, blueprint `blueprint/src/chapter/ch13_qpbt_test.tex:224-253`,
+blueprint `thm:ms-rigidity`,
 paper `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652`.
 -/
 
@@ -147,7 +147,7 @@ abbrev dilatedEffectB (S : Strategy msGame) (y : MsType) (f : MsAnswer → ZMod 
 /-- Alice's dilated variable bit approximately intertwines with Bob's dilated
 constraint bit: the summed squared defect is at most twice the reverse
 cell-mismatch mass of the original strategy.  This is the first item of
-`fact:agreement` (blueprint `ch12_qpbt_games.tex:245-254`) applied to the
+blueprint `fact:agreement`, applied to the
 dilated strategy, whose Born masses are those of the original one. -/
 theorem sum_norm_sq_intertwining_le_reverse (S : Strategy msGame) (i : Fin 6) (k : Fin 3) :
     ∑ b : ZMod 2, ‖applyOperatorToState
@@ -323,7 +323,7 @@ the distance of the conjugated original effect from `T` on the target state
 `ξ` is at most the distance of the conjugated dilated effect from `T`, plus the
 intertwining defect of the dilated effect against Bob's partner effect `Q` on
 the dilated state, plus twice the distance from `ξ` to the transported dilated
-state.  Blueprint `ch13_qpbt_test.tex:224-253`. -/
+state.  Blueprint `thm:ms-rigidity`. -/
 theorem norm_effect_transfer_term_le_A {κA κB : Type} [Fintype κA] [DecidableEq κA]
     [Fintype κB] [DecidableEq κB] (S : Strategy msGame)
     (φA : EuclideanSpace ℂ (S.ιA × Option MsAnswer) →ₗᵢ[ℂ] EuclideanSpace ℂ κA)
@@ -473,7 +473,7 @@ is at most three times the distance of the conjugated dilated bits, plus
 embedding and `φ_A`, exactly as in the witness of `exists_ms_rigidity`; the
 left-hand side is `msOperatorDistanceA S w j W` for that witness, and the
 distance on the right is `msOperatorDistanceA (msDilatedStrategy S) w' j W`.
-Blueprint `ch13_qpbt_test.tex:224-253`, paper
+Blueprint `thm:ms-rigidity`, paper
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652`. -/
 theorem ms_effect_transfer_A {κA κB : Type} [Fintype κA] [DecidableEq κA]
     [Fintype κB] [DecidableEq κB] (S : Strategy msGame)
@@ -888,7 +888,7 @@ of the dilation embedding and `φ_A`, and the distance on the right is
 `msAnticommutatorDistanceA (msDilatedStrategy S) w'`.  The transfer costs the
 leakage of both dilated observables out of the ground slice, controlled by the
 cell-consistency masses, and the state closeness.  Blueprint
-`ch13_qpbt_test.tex:224-253`, paper
+`thm:ms-rigidity`, paper
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652`. -/
 theorem ms_anticommutator_transfer_A {κA κB : Type} [Fintype κA] [DecidableEq κA]
     [Fintype κB] [DecidableEq κB] (S : Strategy msGame)
