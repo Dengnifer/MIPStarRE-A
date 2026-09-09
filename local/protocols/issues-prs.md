@@ -145,10 +145,15 @@ that refuse by default:
 2. the primary worktree is clean and on the base, and the local branch tip
    equals the GitHub head SHA — the merge must be of the bytes built here. After
    fetching the current GitHub base, the head is fresh when that base is its
-   ancestor, or when the base differs from their merge base only below
-   `results/telemetry/`, as checked by
-   `git diff --quiet <merge-base> github/main -- . ':(exclude)results/telemetry'`.
-   A missing merge base or failed Git command blocks the merge;
+   ancestor, or when every raw tree change from their merge base to the base is
+   allowlisted passive telemetry: a regular non-executable (`100644`) `.md` or
+   `.jsonl` file below `results/telemetry/`, or a generated regular
+   non-executable `.json` file below the exact
+   `results/telemetry/github-snapshot/` subtree. The check uses
+   `git diff --raw -z --no-renames` so additions, deletions and both sides of a
+   rename retain their paths and modes. Executable files, executable-mode
+   changes, symlinks, code or unknown suffixes, malformed records, paths outside
+   those boundaries, a missing merge base and every failed Git command block;
 3. all eight `local-ci/<step>` contexts plus `local-ci/summary` are `success` on
    that exact SHA; a **missing** context blocks, because GitHub's combined state
    reads `success` for a commit carrying no statuses at all;
@@ -185,8 +190,8 @@ its daemon-owned final action after these checks; workers never merge directly.
 Each tick has bounded Git/GitHub reads and records failures as HOLD rather than
 exiting the loop. The cadence is monotonic: work time is subtracted from the
 configured interval (default 300 seconds). Candidate records distinguish stale
-exact-head PRs from fresh actionable PRs using the same ancestry-or-telemetry-only
-rule as gate 2b; `pr_age_s` is PR creation age, while
+exact-head PRs from fresh actionable PRs using `pr_merge.head_is_fresh`, the
+same conservative predicate as gate 2b; `pr_age_s` is PR creation age, while
 eligibility onset remains unknown unless separately observed.
 
 ## 4. Untrusted text

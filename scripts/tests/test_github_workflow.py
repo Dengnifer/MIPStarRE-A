@@ -770,6 +770,17 @@ class MergeGateTests(LayerTestCase):
         _git(self.repo, "config", "user.name", "MIPStarRE tests")
         _git(self.repo, "config", "commit.gpgsign", "false")
         (self.repo / "README.md").write_text("base\n", encoding="utf-8")
+        fixtures = {
+            "results/telemetry/events.md": "initial event\n",
+            "results/telemetry/sessions.jsonl": '{"status":"initial"}\n',
+            "results/telemetry/github-snapshot/metadata.json": '{"schema":1}\n',
+            "results/telemetry/model-comparison/compare.py": "#!/usr/bin/env python3\n",
+        }
+        for relative_path, content in fixtures.items():
+            path = self.repo / relative_path
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(content, encoding="utf-8")
+        (self.repo / "results/telemetry/model-comparison/compare.py").chmod(0o755)
         _git(self.repo, "add", "-A")
         _git(self.repo, "commit", "-q", "--no-verify", "-m", "base commit")
         _git(self.repo, "checkout", "-q", "-b", self.BRANCH)
@@ -810,19 +821,67 @@ class MergeGateTests(LayerTestCase):
         path = self.repo / relative_path
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(message + "\n", encoding="utf-8")
-        _git(self.repo, "add", relative_path)
+        self._commit_main(message)
+
+    def _commit_main(self, message: str) -> None:
+        _git(self.repo, "add", "-A")
         _git(self.repo, "commit", "-q", "--no-verify", "-m", message)
         _git(self.repo, "fetch", "-q", "github", "main")
 
-    def test_freshness_accepts_ancestry_and_telemetry_only_base_changes(self) -> None:
-        self.assertTrue(pr_merge.head_is_fresh(self.repo, "github/main", self.head))
+    def test_freshness_accepts_ancestry_and_passive_telemetry_changes(self) -> None:
+        with mock.patch.object(pr_merge, "_run_git_raw") as raw_diff:
+            self.assertTrue(pr_merge.head_is_fresh(self.repo, "github/main", self.head))
+        raw_diff.assert_not_called()
 
         self._advance_main("results/telemetry/events.md", "record telemetry")
+        self.assertTrue(pr_merge.head_is_fresh(self.repo, "github/main", self.head))
+        self._advance_main("results/telemetry/sessions.jsonl", '{"status":"done"}')
+        self.assertTrue(pr_merge.head_is_fresh(self.repo, "github/main", self.head))
+        self._advance_main("results/telemetry/github-snapshot/metadata.json", '{"schema":2}')
         self.assertTrue(pr_merge.head_is_fresh(self.repo, "github/main", self.head))
         self._arm()
         result = self._check_only()
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn("ancestry or telemetry-only move", result.stdout)
+        self.assertIn("ancestry or passive-telemetry-only move", result.stdout)
+
+    def test_telemetry_path_allowlist_has_exact_boundaries(self) -> None:
+        allowed = (
+            "results/telemetry/events.md",
+            "results/telemetry/sessions.jsonl",
+            "results/telemetry/model-comparison/latest.md",
+            "results/telemetry/github-snapshot/open-pulls.json",
+            "results/telemetry/github-snapshot/archive/older.json",
+        )
+        rejected = (
+            "results/telemetry/model-comparison/astra-effort.json",
+            "results/telemetry/model-comparison/compare.py",
+            "results/telemetry/owner-tools/merge.sh",
+            "results/telemetry/report.js",
+            "results/telemetry/events.txt",
+            "results/telemetry/github-snapshot.json",
+            "results/telemetry/github-snapshot-old/open-pulls.json",
+            "results/telemetry-other/events.md",
+            "results/telemetry/../events.md",
+            "results/telemetry",
+        )
+        for path in allowed:
+            with self.subTest(path=path):
+                self.assertTrue(pr_merge._is_tolerated_telemetry_path(path))
+        for path in rejected:
+            with self.subTest(path=path):
+                self.assertFalse(pr_merge._is_tolerated_telemetry_path(path))
+
+    def test_freshness_rejects_mixed_telemetry_data_and_code(self) -> None:
+        (self.repo / "results/telemetry/events.md").write_text(
+            "allowed record\n", encoding="utf-8")
+        (self.repo / "results/telemetry/model-comparison/analysis.py").write_text(
+            "print('changed')\n", encoding="utf-8")
+        self._commit_main("mix telemetry data and code")
+        self.assertFalse(pr_merge.head_is_fresh(self.repo, "github/main", self.head))
+        self._arm()
+        result = self._check_only()
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("predates only tolerated passive telemetry changes", result.stderr)
 
     def test_freshness_rejects_non_telemetry_base_changes(self) -> None:
         self._advance_main("MIPStarRE/QPBT/FreshnessTest.lean", "change Lean source")
@@ -831,7 +890,52 @@ class MergeGateTests(LayerTestCase):
         result = self._check_only()
         self.assertEqual(result.returncode, 1, result.stderr)
         self.assertIn("gate 2b (fresh base)", result.stderr)
-        self.assertIn("neither contains it nor predates only telemetry changes", result.stderr)
+        self.assertIn("predates only tolerated passive telemetry changes", result.stderr)
+
+    def test_freshness_checks_deletes_without_path_elision(self) -> None:
+        (self.repo / "results/telemetry/events.md").unlink()
+        self._commit_main("delete passive telemetry")
+        self.assertTrue(pr_merge.head_is_fresh(self.repo, "github/main", self.head))
+
+        (self.repo / "results/telemetry/model-comparison/compare.py").unlink()
+        self._commit_main("delete executable telemetry code")
+        self.assertFalse(pr_merge.head_is_fresh(self.repo, "github/main", self.head))
+
+    def test_freshness_accepts_only_renames_between_allowed_data_paths(self) -> None:
+        _git(self.repo, "mv", "results/telemetry/events.md",
+             "results/telemetry/events-renamed.jsonl")
+        self._commit_main("rename passive telemetry")
+        self.assertTrue(pr_merge.head_is_fresh(self.repo, "github/main", self.head))
+
+        _git(self.repo, "mv", "results/telemetry/model-comparison/compare.py",
+             "results/telemetry/model-comparison/compare.md")
+        self._commit_main("rename executable code to a data suffix")
+        self.assertFalse(pr_merge.head_is_fresh(self.repo, "github/main", self.head))
+
+    def test_freshness_rejects_executable_mode_changes(self) -> None:
+        (self.repo / "results/telemetry/events.md").chmod(0o755)
+        self._commit_main("make telemetry record executable")
+        self.assertFalse(pr_merge.head_is_fresh(self.repo, "github/main", self.head))
+
+    def test_freshness_rejects_data_suffixed_symlinks(self) -> None:
+        (self.repo / "results/telemetry/link.md").symlink_to("events.md")
+        self._commit_main("add telemetry symlink")
+        self.assertFalse(pr_merge.head_is_fresh(self.repo, "github/main", self.head))
+
+    def test_freshness_rejects_regular_file_type_changes(self) -> None:
+        events = self.repo / "results/telemetry/events.md"
+        events.unlink()
+        events.symlink_to("sessions.jsonl")
+        self._commit_main("replace telemetry record with symlink")
+        self.assertFalse(pr_merge.head_is_fresh(self.repo, "github/main", self.head))
+
+    def test_freshness_rejects_file_directory_type_changes(self) -> None:
+        events = self.repo / "results/telemetry/events.md"
+        events.unlink()
+        events.mkdir()
+        (events / "nested.md").write_text("nested record\n", encoding="utf-8")
+        self._commit_main("replace telemetry record with directory")
+        self.assertFalse(pr_merge.head_is_fresh(self.repo, "github/main", self.head))
 
     def test_freshness_fails_closed_on_git_errors_and_missing_merge_base(self) -> None:
         self.assertFalse(pr_merge.head_is_fresh(self.repo, "missing-ref", self.head))
@@ -841,6 +945,16 @@ class MergeGateTests(LayerTestCase):
             ["git", "commit-tree", tree], cwd=self.repo, input="unrelated history\n",
             capture_output=True, text=True, check=True).stdout.strip()
         self.assertFalse(pr_merge.head_is_fresh(self.repo, unrelated, self.head))
+
+        self._advance_main("results/telemetry/events.md", "advance for raw diff")
+        failed = subprocess.CompletedProcess(["git", "diff"], 128, b"", b"failure")
+        malformed_raw = (b":100644 100644 nope nope M\0"
+                         b"results/telemetry/events.md\0")
+        malformed = subprocess.CompletedProcess(["git", "diff"], 0, malformed_raw, b"")
+        with mock.patch.object(pr_merge, "_run_git_raw", return_value=failed):
+            self.assertFalse(pr_merge.head_is_fresh(self.repo, "github/main", self.head))
+        with mock.patch.object(pr_merge, "_run_git_raw", return_value=malformed):
+            self.assertFalse(pr_merge.head_is_fresh(self.repo, "github/main", self.head))
 
     def test_gate_ladder_blocks_on_thin_evidence_and_passes_on_full(self) -> None:
         with self.subTest("a missing local-ci context is a block, never a pass"):

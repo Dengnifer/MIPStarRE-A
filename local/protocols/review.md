@@ -486,11 +486,12 @@ terminal review (pr-review.yml:69-72). See EVOLUTION.md for the trigger.
 
 ## 13. Evidence follows the diff: carry-forward across a fresh-base (2026-09-04)
 
-When `main` advances outside `results/telemetry/`, the merge gate's fresh-base
-rule (issues-prs.md, gate 2b) requires a refreshed PR head, but a merge of
-`main` into the branch does not necessarily change the PR's own patch. A
-telemetry-only advance does not require a new head. For a required refresh,
-`review.sh` therefore
+When `main` advances through any freshness-relevant path or mode, the merge
+gate's fresh-base rule (issues-prs.md, gate 2b) requires a refreshed PR head,
+but a merge of `main` into the branch does not necessarily change the PR's own
+patch. An advance containing only the narrowly allowlisted passive telemetry
+records does not require a new head. For a required refresh, `review.sh`
+therefore
 compares a whitespace-sensitive hash of the patch (the diff without its
 `index`/hunk-header lines, so hunk positions may move but no byte of content may)
 with that of every earlier reviewed head of the same PR whose review is bound to
