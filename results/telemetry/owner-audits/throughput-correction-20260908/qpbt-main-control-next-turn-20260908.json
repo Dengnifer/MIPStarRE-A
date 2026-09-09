@@ -1,0 +1,44 @@
+{
+  "schema": "qpbt-main-control-next-turn-v1",
+  "recorded_at": "2026-09-08T14:39:25.618480114Z",
+  "root_thread_id": "01a076bc-f4ad-7813-805b-c8b4dac71a14",
+  "rollout": "/home/drx/.cache/mipstarre-dev/codex-home-qpbt-relay1/sessions/2026/09/06/rollout-2026-09-06T20-41-30-01a076bc-f4ad-7813-805b-c8b4dac71a14.jsonl",
+  "previous_turn_id": "01a080d5-fbdb-7be2-a12a-f1f21f0b528d",
+  "task_complete_at": "2026-09-08T14:33:49.063Z",
+  "next_turn_id": "01a08170-810c-7082-9e6b-903f6db7cf35",
+  "next_task_started_at": "2026-09-08T14:33:49.075Z",
+  "transition_seconds": 0.012,
+  "next_turn_context_at": "2026-09-08T14:33:49.107Z",
+  "effective_model": "gpt-6-astra",
+  "effective_effort": "ultra",
+  "continuity_verified": true,
+  "new_goal_created": false,
+  "goal_status": "active",
+  "goal_counter_evidence": {
+    "pre_exit_checkpoint": {"tokens": 75660595, "elapsed_seconds": 114048},
+    "next_turn_root_reported": {"tokens": 75785737, "elapsed_seconds": 114784},
+    "provenance": "pre-exit checkpoint file and root next-turn message; cumulative goal counters retained, not rollout token totals"
+  },
+  "rollout_counter_evidence": {
+    "before_end_total_tokens": 822818044,
+    "before_end_at": "2026-09-08T14:33:49.033Z",
+    "after_start_total_tokens": 823426579,
+    "after_start_at": "2026-09-08T14:34:00.913Z",
+    "reset_observed": false,
+    "note": "Native rollout token accounting is separate from goal counters. Both retained; not interchangeable."
+  },
+  "missed_control_deadline": {
+    "planned_end": "2026-09-08T14:30:44Z",
+    "checkpoint_observed_at": "2026-09-08T14:32:47.697274Z",
+    "actual_end": "2026-09-08T14:33:49.063Z",
+    "actual_end_late_seconds": 185.063,
+    "met": false,
+    "next_control_pass_limit_seconds": 300
+  },
+  "mechanics_owner": "/root/astra_refill_coordinator",
+  "handoff": false,
+  "mechanics_expiry": null,
+  "automatic_continuation": "actual task_started immediately follows task_complete; no tmux, owner reminder, or goal recreation by delegate",
+  "occupancy_resolution_claimed": false,
+  "primary_writer": "/root/space_sol_publication_finish"
+}
