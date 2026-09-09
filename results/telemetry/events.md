@@ -6240,3 +6240,10 @@ not actual commit/publication hooks. No productive session was killed.
   The repair assignment forbids main writes; the session requested authorization
   for that mandatory append before running canonical CI. The tool has no telemetry
   destination override. Keep this boundary explicit in future bounded assignments.
+- The first checked-push gate stopped before transport because the daemon's PR358
+  merge created two best merge bases with `origin/main`; the blueprint reverse
+  coverage check uses `git diff --merge-base`, which rejects that topology.
+  The session merged published main `875b97dc7dbca734338aa44bb24ca8074984f1db`
+  into the issue branch, retaining all imports and incoming helper exports.
+  This restores a unique comparison base without changing the diff checker or
+  any theorem type or proof body. No main ref was changed by this repair.

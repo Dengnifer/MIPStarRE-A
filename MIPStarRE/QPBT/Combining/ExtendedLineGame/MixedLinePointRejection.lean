@@ -138,7 +138,9 @@ private theorem point_diagonal_rejectedTerm_eq_read_mismatch
           rw [outcomeWeight_eq_zero_of_invalid lines _ _ _ _ (Or.inl rfl)]
           simp
 
-private theorem point_diagonal_rejectedMass_eq_read_mismatch
+/-- At a fixed point/diagonal-line question pair, rejected Born mass is
+exactly the mass of unequal completed readouts. -/
+theorem point_diagonal_rejectedMass_eq_read_mismatch
     (lines : ExtendedLinesWitness setting points deltaL)
     (sample : DirectLdSpace P.extendedDirectLd) :
     directRejectedMass P.extendedDirectLd (strategy lines)
@@ -160,7 +162,9 @@ private theorem point_diagonal_rejectedMass_eq_read_mismatch
   · simpa [hread] using hterm
   · simpa [hread] using hterm
 
-private theorem reversed_diagonal_completed_defect_eq_read_defect
+/-- The `BB'`--`AB''` completed diagonal-line/point defect is the consistency
+defect of the reversed completed direct-game readouts on `pairState`. -/
+theorem reversed_diagonal_completed_defect_eq_read_defect
     (lines : ExtendedLinesWitness setting points deltaL) :
     completedLinePointDefect lines .BB' .AB''
         (directDLinePointDist P.extendedDirectLd) =
