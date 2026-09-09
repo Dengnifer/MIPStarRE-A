@@ -78,6 +78,15 @@ change invalidates readiness.
 Each expected completion has a separately validated alternate; if none exists, record the
 exact frontier blocker and do not call that completion fully prepared.
 
+An ordinary proof or CI-handoff record may retain the complete body in either the existing
+literal activation message or an immutable full contract. The contract form records an
+absolute `contract_path`, the SHA-256 of its exact bytes, and the exact short activation
+message sealed before predecessor completion. The full contract still contains every field
+above, including preserved costs and a budget rule anchored to actual native `task_started`;
+the short message contains only actor, operation id, contract path and hash, and a
+conservative absolute deadline. The #471 brief fixes the schema and example. Existing full
+messages remain valid.
+
 On an attributable `task_complete` or equivalent terminal event, the coordinator first
 rechecks only shared-cap admission, target identity, prepared-record immutability, owned
 operation or worktree, and the remaining source budget. The activation payload carries
@@ -89,6 +98,13 @@ is blocked or its activation call fails, record the exact prerequisite or failur
 the prepared alternate in the same completion cycle. A quiet live turn remains occupied
 until assignment, budget, and owned-operation checks establish an actual completion or
 stall; silence alone does not create a vacancy.
+
+For a contract-form ordinary record, the activator also verifies the full-contract hash,
+the exact presealed short message, and every admission prerequisite that could have changed
+before making the native call. It sends that short message without regenerating the full
+arguments. A missing, unreadable, or mismatched contract or message invalidates the
+candidate and selects another prepared useful alternative. No additional root round trip
+is required for this already-authorized ordinary mechanical activation.
 
 Canonical review consumption is a required admission blocker, not detailed receipt
 adoption. A completed native reviewer thread remains idle and unavailable for follow-up
@@ -105,6 +121,11 @@ neither event starts a fresh budget. The coordinator owns an append-only transit
 containing predecessor completion, `ready_at`, the actual activation call, successor start
 and first output, the absolute source deadline, and real blocker intervals. Only after that
 activation does detailed predecessor adoption proceed.
+For a contract-form ordinary task, the actor verifies the same hash and reads the full
+contract before any mutation. It rechecks its identity, model and effort, exact scope and
+ownership, current inputs, and deadline. The effective deadline is the earliest of the
+presealed absolute deadline, actual `task_started` plus the authorized duration, and any
+inherited deadline; no first-tool or progress event resets it.
 Waiting for successor start evidence or adopting one predecessor never serializes the
 activation-first handling of another real completion.
 An initial recovery of an old vacancy is labelled backlog, and one closing eight- or
@@ -125,6 +146,9 @@ Effective bound-turn contexts must satisfy the recorded classification. Root/par
 timestamps, outcome and raw observed counters are retained. Aggregation scope is
 unknown: never sum parent and child counters without independent evidence. Native
 review uses the exact-head transport in `review.md`; it cannot bypass CI or merge gates.
+Canonical review assignments never use the ordinary short-contract form. Their literal
+nonce, head, prompt digest and root assignment, direct-parent and independence checks, and
+consumer identity holds remain in the activation message and review transport unchanged.
 The root's inherited permission envelope is unchanged; reviewers receive read-only
 assignments, not a falsely claimed separate read-only sandbox. Historical episodes,
 attempt counts and usage survive refreshes and route changes without a budget reset.
