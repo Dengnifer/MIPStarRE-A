@@ -9,6 +9,7 @@ import MIPStarRE.QPBT.Combining.Lines.UniformAffineCollision
 import MIPStarRE.QPBT.Combining.Lines.WeightedCollision
 import MIPStarRE.QPBT.Combining.Witnesses
 import MIPStarRE.QPBT.Combining.Lines.AffineEvaluation
+import MIPStarRE.QPBT.Games.RestrictedAverage
 
 /-!
 # Combined lines and restricted line distributions

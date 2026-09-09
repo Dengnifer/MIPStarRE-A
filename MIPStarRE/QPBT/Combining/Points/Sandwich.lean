@@ -27,7 +27,7 @@ the self-consistency of each factor.
 Paper `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:731-748`
 (the sandwich and display `eq:qld-r-2`), blueprint
 `blueprint/src/chapter/ch15_qpbt_combining.tex:803-960` (`lem:qld-4-10`); the
-route is explained in `docs/paper-gaps/qpbt_linearity-theorem-quotation.tex`.
+route is explained in `docs/paper-gaps/qpbt_combined-points-direct.tex`.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder
@@ -98,7 +98,7 @@ point measurements, with outcomes in `F_q × F_q`.  This is the POVM of the
 first step of the proof of `lem:qld-4-10`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:731-736`,
 formed directly with field-valued outcomes rather than from the binary
-refinements; see `docs/paper-gaps/qpbt_linearity-theorem-quotation.tex`. -/
+refinements; see `docs/paper-gaps/qpbt_combined-points-direct.tex`. -/
 def sandwichPoint (S : ProjectiveSetting P ε) (side : PlayerSide)
     (x z : Fin P.m → PauliScalar P) :
     Measurement (PauliScalar P × PauliScalar P) (S.ExpandedLocalSpace side) :=
