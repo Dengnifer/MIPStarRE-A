@@ -1,4 +1,5 @@
 import MIPStarRE.QPBT.Combining.Witnesses
+import MIPStarRE.QPBT.Combining.Points.Placement
 
 /-!
 # Positivity of the consistency defect on opposite placements
@@ -38,30 +39,9 @@ private theorem stateQForm_zero_local {ι : Type*} [Fintype ι] [DecidableEq ι]
     DistanceCalculus.stateQForm ψ (0 : Op ι) = 0 := by
   simp [DistanceCalculus.stateQForm, applyOperatorToState]
 
-/-- Reindexing an operator along an equivalence preserves positivity.
-Formalization-only auxiliary for the placement bipartitions of blueprint
-`def:expanded-state`, paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:420-450`. -/
-theorem reindexOp_nonneg {ι κ : Type*} [Finite ι] [Finite κ]
-    (e : ι ≃ κ) {M : Op κ} (hM : 0 ≤ M) :
-    0 ≤ reindexOp e M := by
-  letI := Fintype.ofFinite ι
-  letI := Fintype.ofFinite κ
-  rw [Matrix.nonneg_iff_posSemidef] at hM ⊢
-  have hsub := hM.submatrix (e : ι → κ)
-  simpa [reindexOp, Matrix.reindex_apply] using hsub
-
 namespace ProjectiveSetting
 
 variable {P : AdmissibleParams} {ε : ℝ}
-
-/-- A register placement respects finite sums of operators. -/
-private theorem place_finset_sum_local (S : ProjectiveSetting P ε)
-    (p : Placement) {γ : Type*} (s : Finset γ)
-    (O : γ → Op (S.ExpandedLocalSpace p.side)) :
-    S.place p (∑ g ∈ s, O g) = ∑ g ∈ s, S.place p (O g) := by
-  ext i j
-  cases p <;> simp only [place, Matrix.sum_apply, Finset.sum_mul, Finset.mul_sum]
 
 /-- A register placement maps the zero operator to zero. -/
 private theorem place_zero_local (S : ProjectiveSetting P ε) (p : Placement) :
@@ -69,47 +49,6 @@ private theorem place_zero_local (S : ProjectiveSetting P ε) (p : Placement) :
   ext i j
   cases p <;> simp [place]
 
-set_option synthInstance.maxSize 400 in
-/-- Operators placed on `AA'` and `BA''` commute. -/
-private theorem place_AA'_mul_place_BA''_comm_local
-    (S : ProjectiveSetting P ε)
-    (X : Op (S.ExpandedLocalSpace .alice))
-    (Y : Op (S.ExpandedLocalSpace .bob)) :
-    S.place .AA' X * S.place .BA'' Y = S.place .BA'' Y * S.place .AA' X := by
-  have key : ∀ (X' : Op (S.toStrategy.ιA × PauliRegister P))
-      (Y' : Op (S.toStrategy.ιB × PauliRegister P)),
-      S.place .AA' X' * S.place .BA'' Y' =
-        S.place .BA'' Y' * S.place .AA' X' := by
-    intro X' Y'
-    rw [← reindexOp_aaBaBipartition_left S X',
-      ← reindexOp_aaBaBipartition_right S Y',
-      ← WinImplications.reindexOp_mul, ← WinImplications.reindexOp_mul]
-    congr 1
-    rw [heteroKron_mul, heteroKron_mul, Matrix.mul_one, Matrix.one_mul,
-      Matrix.mul_one, Matrix.one_mul]
-  exact key X Y
-
-set_option synthInstance.maxSize 400 in
-/-- Operators placed on `AB''` and `BB'` commute. -/
-private theorem place_AB''_mul_place_BB'_comm_local
-    (S : ProjectiveSetting P ε)
-    (X : Op (S.ExpandedLocalSpace .alice))
-    (Y : Op (S.ExpandedLocalSpace .bob)) :
-    S.place .AB'' X * S.place .BB' Y = S.place .BB' Y * S.place .AB'' X := by
-  have key : ∀ (X' : Op (S.toStrategy.ιA × PauliRegister P))
-      (Y' : Op (S.toStrategy.ιB × PauliRegister P)),
-      S.place .AB'' X' * S.place .BB' Y' =
-        S.place .BB' Y' * S.place .AB'' X' := by
-    intro X' Y'
-    rw [← reindexOp_abBbBipartition_left S X',
-      ← reindexOp_abBbBipartition_right S Y',
-      ← WinImplications.reindexOp_mul, ← WinImplications.reindexOp_mul]
-    congr 1
-    rw [heteroKron_mul, heteroKron_mul, Matrix.mul_one, Matrix.one_mul,
-      Matrix.mul_one, Matrix.one_mul]
-  exact key X Y
-
-set_option synthInstance.maxSize 400 in
 /-- Positive operators placed on `AA'` and on `BA''` have a positive product.
 Paper `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:420-450`,
 blueprint `def:expanded-state`. -/
@@ -117,25 +56,9 @@ theorem place_AA'_mul_place_BA''_nonneg (S : ProjectiveSetting P ε)
     {X : Op (S.ExpandedLocalSpace .alice)} {Y : Op (S.ExpandedLocalSpace .bob)}
     (hX : 0 ≤ X) (hY : 0 ≤ Y) :
     0 ≤ S.place .AA' X * S.place .BA'' Y := by
-  have key : ∀ (X' : Op (S.toStrategy.ιA × PauliRegister P))
-      (Y' : Op (S.toStrategy.ιB × PauliRegister P)),
-      0 ≤ X' → 0 ≤ Y' → 0 ≤ S.place .AA' X' * S.place .BA'' Y' := by
-    intro X' Y' hX' hY'
-    have hprod : S.place .AA' X' * S.place .BA'' Y' =
-        reindexOp (aaBaBipartition P S.toStrategy.ιA S.toStrategy.ιB)
-          (heteroKron X' (heteroKron Y'
-            (1 : Op (PauliRegister P × PauliRegister P)))) := by
-      rw [← reindexOp_aaBaBipartition_left S X',
-        ← reindexOp_aaBaBipartition_right S Y',
-        ← WinImplications.reindexOp_mul, heteroKron_mul, Matrix.mul_one,
-        Matrix.one_mul]
-    rw [hprod]
-    refine reindexOp_nonneg _ ?_
-    exact kronecker_nonneg hX'
-      (kronecker_nonneg hY' Matrix.PosSemidef.one.nonneg)
-  exact key X Y hX hY
+  exact Commute.mul_nonneg (S.place_nonneg .AA' hX) (S.place_nonneg .BA'' hY)
+    (S.place_comm .AA' .BA'' trivial X Y)
 
-set_option synthInstance.maxSize 400 in
 /-- Positive operators placed on `AB''` and on `BB'` have a positive product.
 Paper `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:420-450`,
 blueprint `def:expanded-state`. -/
@@ -143,23 +66,8 @@ theorem place_AB''_mul_place_BB'_nonneg (S : ProjectiveSetting P ε)
     {X : Op (S.ExpandedLocalSpace .alice)} {Y : Op (S.ExpandedLocalSpace .bob)}
     (hX : 0 ≤ X) (hY : 0 ≤ Y) :
     0 ≤ S.place .AB'' X * S.place .BB' Y := by
-  have key : ∀ (X' : Op (S.toStrategy.ιA × PauliRegister P))
-      (Y' : Op (S.toStrategy.ιB × PauliRegister P)),
-      0 ≤ X' → 0 ≤ Y' → 0 ≤ S.place .AB'' X' * S.place .BB' Y' := by
-    intro X' Y' hX' hY'
-    have hprod : S.place .AB'' X' * S.place .BB' Y' =
-        reindexOp (abBbBipartition P S.toStrategy.ιA S.toStrategy.ιB)
-          (heteroKron X' (heteroKron Y'
-            (1 : Op (PauliRegister P × PauliRegister P)))) := by
-      rw [← reindexOp_abBbBipartition_left S X',
-        ← reindexOp_abBbBipartition_right S Y',
-        ← WinImplications.reindexOp_mul, heteroKron_mul, Matrix.mul_one,
-        Matrix.one_mul]
-    rw [hprod]
-    refine reindexOp_nonneg _ ?_
-    exact kronecker_nonneg hX'
-      (kronecker_nonneg hY' Matrix.PosSemidef.one.nonneg)
-  exact key X Y hX hY
+  exact Commute.mul_nonneg (S.place_nonneg .AB'' hX) (S.place_nonneg .BB' hY)
+    (S.place_comm .AB'' .BB' trivial X Y)
 
 /-- Positive operators placed on a directed opposite pair of registers have a
 positive product.  Paper
@@ -171,13 +79,8 @@ theorem place_mul_place_nonneg (S : ProjectiveSetting P ε)
     {Y : Op (S.ExpandedLocalSpace p₂.side)}
     (hX : 0 ≤ X) (hY : 0 ≤ Y) :
     0 ≤ S.place p₁ X * S.place p₂ Y := by
-  cases p₁ <;> cases p₂ <;> simp only [Placement.IsOpposite] at hopp
-  · exact place_AA'_mul_place_BA''_nonneg S hX hY
-  · rw [← place_AA'_mul_place_BA''_comm_local S Y X]
-    exact place_AA'_mul_place_BA''_nonneg S hY hX
-  · rw [← place_AB''_mul_place_BB'_comm_local S Y X]
-    exact place_AB''_mul_place_BB'_nonneg S hY hX
-  · exact place_AB''_mul_place_BB'_nonneg S hX hY
+  exact Commute.mul_nonneg (S.place_nonneg p₁ hX) (S.place_nonneg p₂ hY)
+    (S.place_comm p₁ p₂ hopp X Y)
 
 end ProjectiveSetting
 
@@ -212,7 +115,7 @@ theorem offDiagonalPlacedProduct_nonneg {P : AdmissibleParams} {ε : ℝ}
       S.place p₁ (M₁.effect a) *
         S.place p₂ (∑ b : α, if a = b then 0 else M₂.effect b) := by
     intro a
-    rw [ProjectiveSetting.place_finset_sum_local, Finset.mul_sum]
+    rw [ProjectiveSetting.place_finsetSum, Finset.mul_sum]
     refine Finset.sum_congr rfl fun b _ => ?_
     by_cases h : a = b
     · rw [if_pos h, if_pos h, ProjectiveSetting.place_zero_local, mul_zero]
