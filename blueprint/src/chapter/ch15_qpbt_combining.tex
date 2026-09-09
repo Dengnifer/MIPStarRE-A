@@ -1219,10 +1219,6 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 
 \begin{definition}[Restricted line distributions]
 	\label{def:ith-restricted-line}
-	\lean{MIPStarRE.QPBT.restrictedALineDist, MIPStarRE.QPBT.restrictedDLineDist}
-	\lean{MIPStarRE.QPBT.restrictedALineDist_isProbability}
-	\lean{MIPStarRE.QPBT.restrictedDLineDist_isProbability}
-	\leanok
 	\uses{def:line-point-dist, def:ld-question-distribution}
 	For any $i \in \{1, \dots, m\}$, the \emph{$i$-th restricted
 	axis-parallel line distribution} $D_{\mathrm{ALine},i}$ is the
@@ -1237,12 +1233,73 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 	Definition~\ref{def:ld-question-distribution}.)
 \end{definition}
 
-\begin{lemma}[Restricted line distributions and error inflation]
-	\label{lem:restricted-line-mixture-bounds}
+\begin{definition}[Seed-bearing restricted line distributions]
+	\label{def:ith-restricted-line-refined}
+	\lean{MIPStarRE.QPBT.restrictedALineDist, MIPStarRE.QPBT.restrictedDLineDist}
+	\lean{MIPStarRE.QPBT.restrictedALineDist_isProbability}
+	\lean{MIPStarRE.QPBT.restrictedDLineDist_isProbability}
+	\leanok
+	\uses{def:line-point-dist, def:ith-restricted-line}
+	Write $\widetilde D_{\mathrm v}$ for the seed-bearing refinement of
+	$D_{\mathrm v}$ in Definition~\ref{def:line-point-dist}, where
+	$\mathrm v\in\{\mathrm{ALine},\mathrm{DLine}\}$, and let
+	$\widetilde D_{\mathrm v,i}$ be its normalized restriction to
+	$\chi(s)=i$. Equivalently, condition the corresponding CL distribution
+	on this seed event before decoding the line description. The event has
+	probability $1/m$, so each restricted law has total mass one. An axis
+	description still records $(u_0,s)$; distinct seeds in $\chi^{-1}(i)$
+	remain distinct outcomes. A diagonal description records $(u_0,s,v)$,
+	with $v_j=0$ for $j<i$. The maps
+	\[
+		((u_0,s),u)\longmapsto ((u_0,e_{\chi(s)}),u),\qquad
+		((u_0,s,v),u)\longmapsto ((u_0,s,v),u)
+	\]
+	push these refined restrictions forward to the source restrictions
+	$D_{\mathrm{ALine},i}$ and $D_{\mathrm{DLine},i}$, respectively.
+	Only the axis map forgets the residual seed. The formalized definitions
+	here are the refined restrictions, not their source push-forwards.
+\end{definition}
+
+\begin{lemma}[Mixtures and nonnegative averages on seed-bearing lines]
+	\label{lem:restricted-line-refined-mixture-bounds}
 	\lean{MIPStarRE.QPBT.linePointDist_eq_mixture_restricted}
 	\lean{MIPStarRE.QPBT.avg_restricted_le, MIPStarRE.QPBT.avg_restricted_prod_le}
-	\lean{MIPStarRE.QPBT.restricted_lines_consistency_bound}
 	\leanok
+	\uses{def:ith-restricted-line-refined, def:line-point-dist}
+	Each refined law is a uniform mixture of its restrictions:
+	\[
+		\widetilde D_{\mathrm v}
+		=\frac1m\sum_{i=1}^m\widetilde D_{\mathrm v,i}.
+	\]
+	For admissible $(q,m,d)$, put
+	$\widetilde D_{\mathrm{Line}}
+	=\tfrac12(\widetilde D_{\mathrm{ALine}}+\widetilde D_{\mathrm{DLine}})$.
+	If a nonnegative real-valued function has average at most $\delta$
+	under $\widetilde D_{\mathrm{Line}}$, its average under any
+	$\widetilde D_{\mathrm v,i}$ is at most $2m\delta$. If a nonnegative
+	function of two line-point samples has average at most $\delta$ under
+	$\widetilde D_{\mathrm{Line}}\times\widetilde D_{\mathrm{Line}}$,
+	its average under any
+	$\widetilde D_{\mathrm v_1,i}\times\widetilde D_{\mathrm v_2,j}$
+	is at most $4m^2\delta$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Every fiber of $\chi$ has size $q/m$. Partitioning the uniform seed by
+	these fibers proves the mixture identities, retaining the seed when
+	decoding. Each restriction has weight $1/(2m)$ in the full mixture;
+	nonnegativity bounds its average by $2m$ times the full average. Apply
+	this argument successively to the two coordinates for the product bound.
+\end{proof}
+
+Pushing the mixture identities forward, and composing nonnegative functions
+with the seed-forgetting maps, gives the same identities and bounds for the
+source laws. This accounts for the first two items of the following source
+observation; it does not identify coefficient answers with functions on lines.
+
+\begin{lemma}[Restricted line distributions and error inflation]
+	\label{lem:restricted-line-mixture-bounds}
+	\notready
 	% Source: unlabelled prose in the paper --- the discussion following
 	% def:ith-restricted-line at lines 1049-1061 of
 	% references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex.
@@ -1279,7 +1336,6 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 	\end{enumerate}
 \end{lemma}
 \begin{proof}
-	\leanok
 	\uses{lem:qld-xz-lines, def:line-point-dist, def:consistency}
 	The line-point distribution places weight $\tfrac{1}{2}$ on each of the
 	axis-parallel and diagonal components and, within each component, uniform
@@ -1294,6 +1350,66 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 	side of \eqref{eq:qld-xz-lines-restricted}, averaged over
 	$D_{\mathrm{Line}} \times D_{\mathrm{Line}}$, is at most $\delta_P$.
 \end{proof}
+
+\begin{lemma}[Auxiliary restricted consistency with completed answers]
+	\label{lem:restricted-lines-completed-consistency}
+	\lean{MIPStarRE.QPBT.restricted_lines_consistency_bound}
+	\leanok
+	\uses{def:ith-restricted-line-refined,
+		lem:restricted-line-refined-mixture-bounds, lem:qld-4-10,
+		def:consistency, def:expanded-state}
+	There is a universal constant $C>0$ with the following property.
+	Fix admissible parameters, a projective setting, and projective joint
+	point measurements $Q$ satisfying the self-consistency and both
+	ordered-product comparisons of Lemma~\ref{lem:qld-4-10} with error
+	$\delta_Q$. Let $T$ be complete paired-line measurements on seed-bearing
+	descriptions, with coefficient-polynomial answers of degree at most $md$
+	and the degree-$d$ support bounds on axis lines.
+
+	For a description $\lambda=(u_0,s,v)$ and a coefficient polynomial $f$,
+	let $\widehat{\mathrm{ev}}_{\lambda,u}(f)\in\F_q\sqcup\{\perp\}$ be
+	$a$ if at least one parameter $t$ satisfies $u=u_0+tv$ and every such
+	parameter satisfies $f(t)=a$; otherwise let it be $\perp$.
+	For axis descriptions use $v=e_{\chi(s)}$. Postprocess $T$ by the pair
+	of these evaluations to obtain $T^{\mathrm{ev}}$, with outcomes in
+	$(\F_q\sqcup\{\perp\})^2$. Extend $Q$ to $Q^+$ on this alphabet by
+	setting its effect to zero whenever either component is $\perp$.
+	Assume that the consistency defect between $T^{\mathrm{ev}}$ and
+	$Q^+$ is at most $\delta_P$ under
+	$\widetilde D_{\mathrm{Line}}\times\widetilde D_{\mathrm{Line}}$
+	for every directed pair of opposite placements. Then, for every such
+	pair $p_1,p_2$, every pair of line types $\mathrm v_1,\mathrm v_2$,
+	and every $i,j\in\{1,\ldots,m\}$,
+	\[
+		\E_{(\lambda_X,x)\sim\widetilde D_{\mathrm v_1,i}}
+		\E_{(\lambda_Z,z)\sim\widetilde D_{\mathrm v_2,j}}
+		\sum_{c\in(\F_q\sqcup\{\perp\})^2}
+		\operatorname{Re}\bra{\hat\psi}
+		(T^{\mathrm{ev}}_c)_{p_1}
+		\bigl(\Id-(Q^+_c)_{p_2}\bigr)\ket{\hat\psi}
+		\le C m^2\delta_P.
+	\]
+	Here $T^{\mathrm{ev}}$ depends on $(\lambda_X,\lambda_Z,x,z)$ and
+	$Q^+$ on $(x,z)$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:restricted-line-refined-mixture-bounds, def:consistency}
+	Take $C=4$. The consistency defect of complete measurements on opposite
+	placements is a nonnegative average. Apply the product estimate of
+	Lemma~\ref{lem:restricted-line-refined-mixture-bounds}; completeness of
+	$Q^+$ identifies its off-diagonal sum with the displayed expression.
+\end{proof}
+
+This auxiliary estimate does not certify
+\eqref{eq:qld-xz-lines-restricted}, whose answers are polynomial functions
+on lines and whose point outcomes lie in $\F_q^2$. On a zero-direction
+line, the coefficient polynomial $f(t)=t$ has undefined completed evaluation,
+whereas a function on the singleton line has a value there. The auxiliary
+hypotheses do not require such coefficient answers to have zero effect.
+The conversion to function-valued answers, together with the corresponding
+measurement transport to the source laws, remains open in issue~\#387 and
+PR~\#400. The source statement and proof above therefore remain uncertified.
 
 \begin{lemma}[The sub-line distribution]
 	\label{lem:qld-sublines}
