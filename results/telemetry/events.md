@@ -6221,3 +6221,57 @@ not actual commit/publication hooks. No productive session was killed.
   These are minimal source-preserving repairs, not new hypotheses or proof attempts.
 - Other mathematical work continues while the scoped owner question waits. Main made no
   manual telemetry commit/publication, one-off merge or daemon change this cycle.
+
+## 2026-09-09 - Review-cap conflict and saved-repair recovery (06:20Z)
+
+- PR355's minimal bibliography fix is published at c8ad5efbb37a901710f39ae7dd07670b15044100
+  with all nine CI contexts green. Main inspected the two-file patch and its regression
+  evidence. The existing check_review gate requires a current-head canonical review even
+  for adjudication, but the changed patch cannot use honest carry-forward and two full
+  workflow rounds are already complete. Owner question B10 requests one final-review
+  exception; no fabricated review, third unauthorized round, or gate change was used.
+- PR359's merge failure is a real dependency hold: open child353, implemented by unreviewed
+  PR357. Main started its normal unreviewed tail PID379035 in the verified clean worktree;
+  no approved-PR refresh or one-off merge was run. B9 remains pending independently.
+- At06:17:34Z actual worker count dropped to7. Finished/skipped publication pipelines did
+  not provide ready reviewer successors: saved fixes363/448/487 failed guarded pushes,
+  while424/443 failed commit guards. Main launched bounded Sol preservation/publication
+  recoveries PIDs419411-419415 at06:19:26Z, without redoing their mathematical proofs.
+  The shortfall is recorded rather than calling queued launchers live workers.
+- By the closing check, all five recovery dispatches had admitted their Sol workers and
+  the actual count returned to12. B9 and B10 remain scoped owner questions, not a reason
+  to stop independent mathematics. The deficiency and refill are reported on #27.
+
+## 2026-09-09 - Restrict work to existing backlog; PR375 merged (06:28Z)
+
+- Owner06:15Z directs no new packet lanes until the open-PR count is below50. A fresh
+  paginated GitHub read found95 open PRs. Main applied the restriction immediately:
+  only existing-PR reviews, fixes and recoveries, plus the already-authorized498 lane.
+- PR359's current merge log shows all proof/review gates passed; its sole blocker is
+  open child issue353. The API confirms the child set is [353]. Existing PR357's tail
+  stopped on an import-only conflict, so bounded Sol recovery PID447992 now owns that
+  exact conflict. Main did not close or re-parent the child to evade the dependency gate.
+- Current findings on existing PRs410/417 received serialized autofix PIDs469821/469822.
+  No duplicate fix loop or new packet was started. The cycle's initial worker count was11.
+- GitHub confirms PR375 merged at06:11:53Z asb2a2747cb5a4bc773931531b041a4b9234c930a8
+  from exact head046c3abdcf2d624de49399c4131d316275fd648e; all ten CI/review statuses are
+  success. The daemon performed the merge. Main reports it and the backlog restriction
+  on #27 and makes no manual telemetry commit or publication this cycle.
+
+## 2026-09-09 - Owner removes backlog cutoff and adopts v9d telemetry handling (06:39Z)
+
+- Owner06:20Z supersedes the below50 restriction: ready-packet provers are permitted
+  again after existing reviews and repairs. The earlier60 count was truncated. Main
+  retains the latest policy rather than the superseded cutoff; no new packet was needed
+  this cycle because actionable existing-PR work remained.
+- The registered service is /tmp/merge-daemon-v9d.sh, logging to daemon10.log. The owner
+  assigns dirty-telemetry handling immediately before merges to that service. Main does
+  not push telemetry between merges or alter the service.
+- Re-reading pr359.merge.log confirms two distinct facts: its explicit gate refusal is
+  open child353, and the wrapper subsequently recovered a stash-pop conflict. The new
+  telemetry handling does not remove the dependency. PR357's worker continues preserving
+  the additive import merge needed to finish that actual child, without re-parenting it.
+- Earlier autofix launches213/342 were terminal without admitted fix workers. After
+  checking no live loop owned them, main retried them as PIDs570153/570154; both admitted
+  their provers. The closing count was14. B9 and B10 were re-read and still have no owner
+  disposition; only their dependent actions remain held. No manual telemetry commit.
