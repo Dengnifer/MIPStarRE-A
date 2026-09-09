@@ -161,6 +161,22 @@ The measurement $\{\hat{S}_{g_X,g_Z}\}$ reads out an $X$-polynomial and a $Z$-po
 	$\sum_{a\in\F_q}\tilde{M}^{W,\tilde{u}}_a=\Id$. Thus
 	$\{\tilde{M}^{W,\tilde{u}}_a\}_{a\in\F_q}$ is a projective measurement.
 \end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:tilde-m-measurement, lem:s-w-marginals-projective,
+		lem:tau-dot-product-projective}
+	Each tensor summand in \eqref{eq:tilde_M} is a projector. For distinct
+	polynomials $g,g'$, the marginal projectors satisfy
+	$\hat{S}^W_g\hat{S}^W_{g'}=0$, so the corresponding tensor summands
+	are orthogonal. Their sum is therefore self-adjoint and idempotent.
+	For completeness, interchange the sums over $a$ and $g$. For each $g$,
+	the map $a\mapsto\mathrm{Dec}(g)\cdot\tilde{u}-a$ permutes $\F_q$,
+	so Lemma~\ref{lem:tau-dot-product-projective} gives
+	\[
+		\sum_a\tilde{M}^{W,\tilde{u}}_a
+		=\sum_g\hat{S}^W_g\ot\Id=\Id.
+	\]
+\end{proof}
 
 \begin{definition}[Pulled-apart Pauli observables]\label{def:tilde-w-observables}
 	\lean{MIPStarRE.QPBT.tildeObs}
