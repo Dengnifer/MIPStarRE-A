@@ -162,7 +162,8 @@ def _is_tolerated_telemetry_change(header: bytes, raw_path: bytes) -> bool:
 def _base_advance_is_tolerated(repo_root: Path, merge_base: str, base_ref: str) -> bool:
     """Check every base-side tree change against the passive telemetry policy."""
     result = _run_git_raw(repo_root, "diff", "--raw", "-z", "--no-renames",
-                          "--no-abbrev", merge_base, base_ref, "--")
+                          "--ignore-submodules=none", "--no-abbrev", merge_base,
+                          base_ref, "--")
     if result.returncode != 0:
         return False
     if not result.stdout:

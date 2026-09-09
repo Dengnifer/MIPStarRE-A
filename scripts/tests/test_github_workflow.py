@@ -1106,6 +1106,20 @@ class MergeGateTests(LayerTestCase):
         self._commit_main("add telemetry symlink")
         self.assertFalse(pr_merge.head_is_fresh(self.repo, "github/main", self.head))
 
+    def test_freshness_rejects_gitlinks_despite_inherited_ignore_setting(self) -> None:
+        _git(self.repo, "config", "diff.ignoreSubmodules", "all")
+        _git(self.repo, "update-index", "--add", "--cacheinfo",
+             f"160000,{self.head},results/telemetry/tool.md")
+        _git(self.repo, "-c", "diff.ignoreSubmodules=none", "commit", "-q",
+             "--no-verify", "-m", "add telemetry gitlink")
+        _git(self.repo, "fetch", "-q", "github", "main")
+
+        self.assertFalse(pr_merge.head_is_fresh(self.repo, "github/main", self.head))
+        self._arm()
+        result = self._check_only()
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("gate 2b (fresh base)", result.stderr)
+
     def test_freshness_rejects_regular_file_type_changes(self) -> None:
         events = self.repo / "results/telemetry/events.md"
         events.unlink()
