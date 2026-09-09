@@ -6354,3 +6354,30 @@ not actual commit/publication hooks. No productive session was killed.
 - The closing process count at04:48:13Z was13, above the floor8, with review and repair
   admissions queued; passive launchers were not counted as workers. No additional merge
   is claimed in this cycle. The first verified PR358 merge remains recorded on #27.
+
+## 2026-09-09 - PR473 merged; preserve the registered owner daemon (05:07Z)
+
+- GitHub confirms PR473 merged at04:58:11Z as149c22fb706bff47e1a755f515c96db1b7663082
+  from ae2e0843631d097f70ba08ddb5a2f1ac1d5636f0. All ten exact-head CI/review statuses
+  are success. The next dispatch was mathematical review for PR488, followed by491 and355,
+  so workflow work did not displace the required mathematical successor.
+- Approved tails483 and487 were started in clean registered worktrees, PIDs3701320/3701321,
+  delayed0/120 seconds. New conflicts on320/359 received isolated repair assignments
+  PIDs3738610/3738611. New findings on213/342 received serialized autofix loops3777355/3777356.
+- The five-minute daemon-lock worker stopped editing at its deadline and performed only
+  final reads; it made no service change. Main prepared a one-line persistent locked v9
+  copy, but the originally observed parent disappeared during a concurrent owner restart.
+  Starting that copy without first re-enumerating current session leaders created an
+  extra daemon PID3777334. Main immediately stopped its own extra instance. No refresh
+  child was stopped and no one-off merge/refresh script was invoked.
+- The owner registry then identified3736298 (/tmp/merge-daemon-v9b.sh, daemon10.log) as
+  current, while older session-leading parent3729228 was still alive. Main verified both
+  identities and terminated only the older parent, leaving the registered owner daemon
+  unchanged. The unused locked copy remains an artifact, not the active service.
+  Lesson: loss of a previously observed PID is not sufficient evidence that no replacement
+  exists; reread the authoritative daemon PID and live session leaders before any restart.
+- Worker count reached8 at05:03:31Z. Router accounting agreed with the observed process
+  count and showed spare capacity; new mathematical prose repairs400/481 were dispatched
+  immediately, preserving prior source obligations and budgets. Closing count was10 at
+  05:07:15Z. PR491 review was blocked by a telemetry-only dirty file; bounded preservation
+  handoff PID3969229 owns safe parking and a detached canonical review, not a source edit.
