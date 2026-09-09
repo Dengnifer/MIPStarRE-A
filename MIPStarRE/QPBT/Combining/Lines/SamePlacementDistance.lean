@@ -26,7 +26,8 @@ noncomputable section
 
 /-- On either placement, an evaluated expanded-line measurement is close to
 the completed expanded-point measurement. This is the intermediate comparison
-in `eq:pasting-q1`, obtained from items 1 and 3 of the two consistency lemmas. -/
+in `eq:pasting-q1`, obtained from items 1 and 3 of the two consistency lemmas.
+Blueprint `thm:line-point-same-placement-distance`. -/
 theorem exists_expLine_point_same_placement_distance_le :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε)
