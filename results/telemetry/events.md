@@ -7379,3 +7379,207 @@ not actual commit/publication hooks. No productive session was killed.
   1898883 waits for fewer than3 orcs, leaving room for pending483 admission,
   and fewer than9 workers before starting. No duplicate449 assignment.
 - Existing router-doc fix, train repair and other review/CI owners continue.
+
+### 2026-09-09T14:16:27Z - Merge506 and refill with reviews
+
+- Required snapshot completed. PR506 merged at14:05:33Z as
+  2d038ed7e7bee491f52b35cbdfe1fd1ad3439eb7 from
+  7f4102ad2bd75c5aaf54a759889665a3908e2982, with current CI and review approval.
+  The CI failure-propagation fix is now on main; older green runs still need
+  their raw test results checked before reuse.
+- Started bounded Sol autofix loops456/478 for their latest concrete review
+  findings. Started independent Astra reviews460/465 after verifying their
+  clean published heads and raw604-test successes. Review409 was retried after
+  restoring its missing local base branch at the existing remote-tracking SHA;
+  its published head has616 tests OK. No source or PR-base change was made.
+- PR508's documentation fix e9623e6a passed612 tests,9 skipped; independent
+  review3813209 is running. Issue502/PR507's guarded Lake-root cleanup fix is
+  complete in the worktree and its autofix publication/checks continue; no live
+  merge-train deployment was performed. PR503 refreshed to f117722d with CI
+  pending under its existing recovery owner. PR213 publication is confirmed;
+  retried CI3813903 after the earlier GitHub-head propagation race.
+- Observed8 live second-account workers,2 orcs, with409 entering review. No
+  primary-key routing, new HOLD/STOP files, duplicate repair owner, or manual
+  PR merge. Existing source obligations and cumulative review budgets remain.
+
+### 2026-09-09T14:23:44Z - Advance train and inbox verification
+
+- Snapshot completed; previous cycle classified as progress. PR507's cleanup
+  fix80089187 is published and clean. CI3852943 retries the confirmed GitHub
+  head after a propagation race, then runs the one authorized final review.
+- PR503's clean refreshf117722d passed637 workflow tests and110 integrity
+  tests; actual workflow log checked. Review3873852 is assigned under the
+  recorded one-review exception, preserving both previous rounds and costs.
+- PR443/487 have new data-only conflicts after refresh; old owners were
+  verified terminal. Bounded Sol recoveries3855551/3855552 are admitted, with
+  both-parent preservation and no source expansion or review waiver.
+- Completed CI audit confirms470's old run had616 tests with4 failures.
+  Full CI3873853 retries its clean publishedd59cda08 with isolated metadata.
+  Audit recommendations for491/492 remain subject to the earlier baseline
+  scope audit and existing saved fixes, not automatic new proof refactors.
+- Final census8 live workers, all second account,2 orcs;507 review follows CI.
+  Owner handoff schedule read: normal work until15:15Z; dispatch nothing new
+  during15:15-15:45Z; report estimates on168 and27 by15:50Z, then pause.
+
+### 2026-09-09T14:28:13Z - Refill reviews and release approved refresh
+
+- Previous cycle made progress. Required snapshot observed six live workers;
+  started independent reviews213/483 on clean published headse127e8b7/acdda3ff
+  after verifying actual616/632-test successes. Code and prose lanes admitted
+  through the second-account router; final census9 workers,2 orcs.
+- Reviews5155662046 and5155651366 approved460/465. The daemon's465 refresh
+  then failed before edits because the conventional worktree path was absent.
+  Verified the old handle terminal and registered a symlink to the existing
+  clean /tmp worktree atd202314f; cleared only465/463 failure markers.
+- PR508's corrected head e9623e6a received approval5155680251. PR507's
+  cleanup head80089187 passed all CI contexts and635 actual workflow tests;
+  its previously authorized final independent reviewer is now active.
+- Existing443/487 recovery and503 review owners continue. No new source
+  changes, primary-key routing, manual merge, or review counter reset.
+
+### 2026-09-09T14:33:56Z - Train approval and bounded refresh handoffs
+
+- Required snapshot completed; prior cycle classified as progress. PR507 at
+  80089187 received final approval5155750523 with zero unresolved findings,
+  after635 workflow tests and current CI success. It awaits daemon merge and
+  deployment; the current daemon has no merge-train invocation yet.
+- PR508's approved refresh stopped only on EVOLUTION.md/events.md conflicts.
+  Its prior handle was terminal; bounded Sol recovery3927720 is active.
+  PR465 has a real Lines.lean conflict; Astra source-preserving recovery
+  3927721 is queued, with30-minute active bound and15:05Z checkpoint deadline.
+- Restored460's missing conventional alias to its existing clean worktree and
+  cleared only460/455 failed markers. The daemon retried it at14:32:17Z.
+- The last470 retry inherited explicit Sol review settings into fixture repos
+  whose pre-activation model policy expects automatic selection. Corrected
+  runner reported19 failures honestly. CI3927696 now removes all review-model
+  settings as well as the five invoking-model fields; no source change or
+  failure waiver. Actual raw results remain required before review.
+- Final census9 second-account workers,3 orcs;465 is the fourth assigned orc.
+  No further repair admission until one of these four assignments completes.
+  Existing503/213/483 reviews and456 autofix remain owned. No manual merge.
+
+### 2026-09-09T14:49:22Z - Owner's seven tails and wind-down order
+
+- Required snapshot completed. Prior interrupted cycle made progress:507's
+  unstarted predecessor465 queue was cancelled only after verifying no model
+  child, and priority507 recovery3975567 replaced it. The507 refresh combines
+  accepted train validation with499 freshness and506 step failure propagation;
+  one independent verification is authorized after genuine CI, preserving all
+  earlier costs, reviews and the1000-line ceiling.465 remains checkpointed.
+- Owner14:40Z orders212/312/320/449/470/488/503 tails, three at a time. Fresh
+  inspection found six current CI summaries successful;488 was pending.470's
+  fully isolated retry passed616 tests and review3981109 was already owned.
+  StreamA4012899 handles212,449,503; streamB4012900 handles312,488; streamC
+  4012901 waits for470 then handles320.312/320 lack test logs because their
+  current diffs require no test steps; canonical manifests confirm true skips.
+- The first tail predicate overrequired test logs on those passive diffs.
+  Corrected predicate checks full matching manifests and blocking-step states;
+  finishing tails4047116/4047117 preserve three-stream sequencing.320's review
+  reports an empty diff, so no approval was fabricated. Its completed stream
+  now advances449 via4076153; later same-head stages reuse existing evidence
+  and the canonical review lock.212 review and488 CI continue.
+-503's new exact-head review5155843043 has one blocker-comment identity finding;
+  its queued tail uses one bounded autofix and a subsequent independent review.
+  This replaces the stale assumption that503 is currently approved.
+- Repaired409's missing conventional worktree alias and released only409/407
+  failure markers. No source edits or manual merge. The four orc assignments
+  are443/487/508/507; no fifth repair is admitted.
+- Every new target and model-launching command in the seven-tail helper checks
+  the15:15Z cutoff. By15:50Z prepare identical estimate numbers on168 and27,
+  then honor the owner's pause and remain idle for the meta session.
+
+### 2026-09-09T15:03:00Z - Router publication and closing estimate preparation
+
+- Snapshot completed; previous cycle made progress. PR508 recovery preserved
+  reviewed code and both data histories but stopped at1050 guarded lines.
+  Main authorized exactly its immutable staged merge tree's50-line excess
+  under the owner's delegation of project-only scope decisions; all other
+  hooks remain active. Publication tail4163808 is running. First launcher
+  stopped before edits on an unsupported guard flag, corrected before retry.
+- Read-only estimate scout4123257 prepares issue168 numbers and checks whether
+  312/320 content already lives on main; no report is posted by the scout.
+  Three owner-selected streams continue through212/449/488 and their remaining
+  handoffs.503's queued fix remains blocked on its new canonical finding.
+- Completed work lowered the census to7; assigned478's published correction
+  headb1ec661b to independent review after checking actual CI results and its
+  clean worktree.507 recovery and daemon443 review remain live. Cutoff checks
+  remain15:15Z for new dispatches; final reports are due15:50Z.
+
+### 2026-09-09T15:07:00Z - Advance503 before cutoff and retain stacked evidence
+
+- Required snapshot ran; prior cycle made progress. Cancelled only the queued
+  duplicate449 review4188890 after verifying4076479 holds the actual review
+  lock and the duplicate has no model child. StreamA advanced to503's bounded
+  marker-identity autofix, now active asprover-pr503-20260909-02. No live review
+  was interrupted. Census9 second-account workers,1 orc at15:05:30Z.
+-212's new review has2 findings;470's new review has1. Their old approvals are
+  historical, not current merge evidence.213 is approved and in daemon CI;
+ 443 has current CI at9333c607 and daemon review.487 at570806ac is CI-green
+  but targets unmerged stack baseissue-468-conditioned-point-line-marginals;
+  the daemon cannot merge that child from main. No base rewrite or manual merge.
+-508's fixed refresh committedcf541b58 and checked publication continues.
+ 507's active recovery is checking its compiled state. Read-only168 estimate
+  audit is still live and collecting canonical counts; draft raw-site measure
+  is32 remaining of197 and15 fewer than24h ago, pending its final audit.
+- No final estimate or pause is claimed yet. The verified main pane isqpbt:0.0;
+  after closing reports, the owner-authorized /goal pause can be issued there.
+  New main dispatches remain forbidden after15:15Z; meta owns daemon shutdown.
+
+### 2026-09-09T15:15:00Z - Enter owner-directed wind-down
+
+- Required snapshot completed. Prior cycle made progress. At15:10:55Z the
+  direct GitHub query measured84 open PRs: latest reviews22 approved,28 changes
+  requested,34 unreviewed; exact-head reviews5 approved,18 adverse,61 missing.
+ 27 latest reviews were stale.25 PRs merged todayUTC. These are preliminary
+  closing counts, saved in/tmp/qpbt-closing-github-state.json for refresh.
+-507 recovery committedf427e121, preserved both parents, and passed660 tests
+  with929/1000 source lines. Missing Points.Absorption.olean blocked checked
+  publication. Artifact-only worker75012 admitted before cutoff, with no
+  source edits or descendants and a15:40Z checkpoint deadline.
+-508's refreshedcf541b58 is published, passed CI, and entered independent
+  review before cutoff.456's publishedd85bc2bf received CI retry75014 after a
+  confirmed head-propagation race. No post-CI review launcher was added.
+-483's attempted blueprint autofix75013 refused at cumulative9/5 iterations;
+  no counter reset or additional fix exception. First review467 launcher79056
+  was assigned before15:15Z after actual CI success was checked, filling the
+  remaining pre-cutoff review handoff with20-second admission wait.
+- From15:15Z, main dispatches nothing new. Existing503 fix,507 artifact work,
+  reviews,CI and estimate audit may finish or checkpoint. Closing reports on
+ 168/27 remain due by15:50Z, followed by /goal pause and owner-controlled idle.
+
+### 2026-09-09T15:20:00Z - Wind-down checkpoints and site-count audit
+
+- Required snapshot ran without any new dispatch.312 received current-head
+  approval5156235168.467's pre-cutoff launcher stopped on its missing local
+  stack base; it was not retried after15:15Z.456's published-head CI passed.
+- The capped483 loop unexpectedly continued through its terminal publication/
+  CI path and would force another review. Main signalled only parent75013
+  after verifying no model child, preserving existing CI77604. CI completed
+  successfully onacdda3ff and the parent is now terminal; no new review launched.
+- Independently checked github/mainb3b84fbb:32 raw sorry-containing lines,
+ 30 direct holes (Combining10,Extraction8,Observables7,Test4,Games1). The two
+  remaining matches are docstring mentions. Historical197-site arithmetic is
+ 83.8percent implemented; it is not a theorem-completion percentage. At15:17Z
+  the rolling24h base had46 raw/44 direct sites, giving14 raw sites/day and
+  a2.3-day mechanical lower bound. Refresh the moving window before closing.
+- Existing507 artifact work,508 review,503 fix and estimate audit retain live
+  owners. No main merge or new dispatch after cutoff; uncommitted telemetry
+  remains for the daemon/meta session. Closing reports and pause remain pending.
+
+### 2026-09-09T15:26:17Z - Close already-integrated records during wind-down
+
+- Required snapshot completed; no new dispatch. Estimate audit finished and
+  independently distinguished30 direct holes from32 textual matches. Using
+  the stated197-obligation denominator gives84.8percent main-only progress;
+  seven additional reviewed213 sites give88.3percent including that unmerged
+  packet. Nine further candidates are uncredited pending source/review checks.
+- Verified312 original commit0e3b86c22b87702601bda4204674738c683d9351 and320
+  original commitdeedcacd6f059594abd62d9d3fe73f6efa37798b are ancestors of
+  github/mainb3b84fbb.312 has no QPBT diff, only brief/telemetry;320 has an
+  entirely empty three-dot diff. Closed both redundant PR records through
+  gh_common with explicit already-integrated comments5604375159/5604376714.
+  Neither closure claims a new merge, approval or completed site.
+- At15:26:17Z only two model workers remain:507 artifact publication and443
+  review. Other results and counts will be refreshed before identical168/27
+  closing reports. Draft resumption handoff is
+  /tmp/qpbt-main-handoff-20260909-pause.md; budgets and saved work are preserved.
