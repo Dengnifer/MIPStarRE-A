@@ -60,60 +60,6 @@ private theorem placedAAMeasurement_effect {P : AdmissibleParams} {ε : ℝ}
       (heteroKron (M.effect a) 1) = S.place .AA' (M.effect a)
   exact ProjectiveSetting.reindexOp_aaBaBipartition_left S (M.effect a)
 
-/-- A product-distribution average is the corresponding iterated average. -/
-private theorem avgOver_prod_current {α β : Type*}
-    [DecidableEq α] [DecidableEq β]
-    (μ : Distribution α) (ν : Distribution β) (f : α × β → ℝ) :
-    avgOver (Distribution.prod μ ν) f =
-      avgOver μ (fun a => avgOver ν (fun b => f (a, b))) := by
-  classical
-  unfold avgOver
-  change (∑ p ∈ μ.support ×ˢ ν.support,
-    μ.weight p.1 * ν.weight p.2 * f p) = _
-  rw [Finset.sum_product]
-  refine Finset.sum_congr rfl fun a _ => ?_
-  rw [Finset.mul_sum]
-  exact Finset.sum_congr rfl fun b _ => by ring
-
-/-- The completed point measurement has zero effect at `none`. -/
-private theorem pointMeasExpOption_effect_none_current
-    {P : AdmissibleParams} {ε : ℝ} (S : ProjectiveSetting P ε)
-    (side : PlayerSide) (W : PauliKind) (u : Fin P.m → PauliScalar P) :
-    (S.pointMeasExpOption side W u).effect none = 0 := by
-  classical
-  unfold ProjectiveSetting.pointMeasExpOption
-  rw [MIPStarRE.Quantum.Measurement.postprocess_effect]
-  apply Finset.sum_eq_zero
-  intro a ha
-  exact absurd (Finset.mem_filter.mp ha).2 (by simp)
-
-/-- The completed point measurement agrees with the original measurement at
-a `some` outcome. -/
-private theorem pointMeasExpOption_effect_some_current
-    {P : AdmissibleParams} {ε : ℝ} (S : ProjectiveSetting P ε)
-    (side : PlayerSide) (W : PauliKind) (u : Fin P.m → PauliScalar P)
-    (a : PauliScalar P) :
-    (S.pointMeasExpOption side W u).effect (some a) =
-      (S.pointMeasExp side W u).effect a := by
-  classical
-  unfold ProjectiveSetting.pointMeasExpOption
-  rw [MIPStarRE.Quantum.Measurement.postprocess_effect]
-  simp [Finset.filter_eq']
-
-/-- Evaluating a completed point effect through a line answer gives the
-explicit zero-completed effect used in the claim statements. -/
-private theorem pointMeasExpOption_effect_evalOpt_current
-    {P : AdmissibleParams} {ε : ℝ} (S : ProjectiveSetting P ε)
-    (side : PlayerSide) (W : PauliKind) (line : LineDesc P.toLdParams)
-    (u : Fin P.m → PauliScalar P)
-    (f : DegPoly P.toLdParams (P.m * P.d)) :
-    (S.pointMeasExpOption side W u).effect (evalOpt line u f) =
-      S.expPointEffectAtLineAnswer side W line u f := by
-  unfold ProjectiveSetting.expPointEffectAtLineAnswer
-  cases evalOpt line u f with
-  | none => exact pointMeasExpOption_effect_none_current S side W u
-  | some a => exact pointMeasExpOption_effect_some_current S side W u a
-
 private theorem rpow_quarter_nonneg (x : ℝ) : 0 ≤ Real.rpow x (1 / 4 : ℝ) := by
   change 0 ≤ x ^ (1 / 4 : ℝ)
   rcases lt_or_ge x 0 with hx | hx
@@ -242,104 +188,6 @@ private theorem regroup_placed_line_answer_sum {P : AdmissibleParams} {ε δQ δ
         (S.place .AA' ((lines.T .alice lineX lineZ).effect fs) *
           S.place .BA'' (G (evalOpt lineX x fs.1) (evalOpt lineZ z fs.2))))
 
-/-- Completing both outcome coordinates with `none` does not change the
-squared distance sum between the joint and ordered point families. -/
-private theorem completed_pair_norm_sq_sum {P : AdmissibleParams} {ε δQ : ℝ}
-    {S : ProjectiveSetting P ε} (points : CombinedPointsWitness S δQ)
-    (x z : Fin P.m → PauliScalar P) :
-    (∑ o : Option (PauliScalar P) × Option (PauliScalar P),
-        ‖applyOperatorToState
-          (S.place .BA'' (((points.Q .bob x z).postprocess (fun ab =>
-              (some ab.1, some ab.2))).effect (o.1, o.2)) -
-            S.place .BA''
-              ((S.pointMeasExpOption .bob .Z z).effect o.2 *
-                (S.pointMeasExpOption .bob .X x).effect o.1))
-          S.psiHat‖ ^ 2) =
-      ∑ ab : PauliScalar P × PauliScalar P,
-        ‖applyOperatorToState
-          (S.place .BA'' ((points.Q .bob x z).effect ab) -
-            S.place .BA''
-              ((S.pointMeasExp .bob .Z z).effect ab.2 *
-                (S.pointMeasExp .bob .X x).effect ab.1))
-          S.psiHat‖ ^ 2 := by
-  classical
-  have hXnone : ((S.pointMeasExpOption .bob .X x).effect
-      (none : Option (PauliScalar P)) :
-        Op (S.ExpandedLocalSpace Placement.BA''.side)) = 0 :=
-    pointMeasExpOption_effect_none_current S .bob .X x
-  have hZnone : ((S.pointMeasExpOption .bob .Z z).effect
-      (none : Option (PauliScalar P)) :
-        Op (S.ExpandedLocalSpace Placement.BA''.side)) = 0 :=
-    pointMeasExpOption_effect_none_current S .bob .Z z
-  have hXsome : ∀ a : PauliScalar P,
-      ((S.pointMeasExpOption .bob .X x).effect (some a) :
-        Op (S.ExpandedLocalSpace Placement.BA''.side)) =
-        (S.pointMeasExp .bob .X x).effect a :=
-    fun a => pointMeasExpOption_effect_some_current S .bob .X x a
-  have hZsome : ∀ b : PauliScalar P,
-      ((S.pointMeasExpOption .bob .Z z).effect (some b) :
-        Op (S.ExpandedLocalSpace Placement.BA''.side)) =
-        (S.pointMeasExp .bob .Z z).effect b :=
-    fun b => pointMeasExpOption_effect_some_current S .bob .Z z b
-  have hQnone : ∀ o : Option (PauliScalar P) × Option (PauliScalar P),
-      (∀ ab : PauliScalar P × PauliScalar P, (some ab.1, some ab.2) ≠ o) →
-      ((((points.Q .bob x z).postprocess fun ab =>
-          (some ab.1, some ab.2)).effect o) :
-        Op (S.ExpandedLocalSpace Placement.BA''.side)) = 0 := by
-    intro o ho
-    rw [MIPStarRE.Quantum.Measurement.postprocess_effect]
-    exact Finset.sum_eq_zero fun ab hab =>
-      absurd (Finset.mem_filter.mp hab).2 (ho ab)
-  have hQsome : ∀ ab : PauliScalar P × PauliScalar P,
-      ((((points.Q .bob x z).postprocess fun cd =>
-          (some cd.1, some cd.2)).effect (some ab.1, some ab.2)) :
-        Op (S.ExpandedLocalSpace Placement.BA''.side)) =
-        (points.Q .bob x z).effect ab := by
-    intro ab
-    rw [MIPStarRE.Quantum.Measurement.postprocess_effect,
-      show (Finset.univ.filter fun cd : PauliScalar P × PauliScalar P =>
-          (some cd.1, some cd.2) = (some ab.1, some ab.2)) = {ab} by
-        ext cd
-        simp [Prod.ext_iff, eq_comm]]
-    simp
-  have hkey : ∀ (F : Option (PauliScalar P) × Option (PauliScalar P) → ℝ),
-      (∀ o2, F (none, o2) = 0) → (∀ o1, F (o1, none) = 0) →
-      (∑ o, F o) =
-        ∑ ab : PauliScalar P × PauliScalar P, F (some ab.1, some ab.2) := by
-    intro F h1 h2
-    calc
-      (∑ o : Option (PauliScalar P) × Option (PauliScalar P), F o) =
-          ∑ o1 : Option (PauliScalar P), ∑ o2 : Option (PauliScalar P),
-            F (o1, o2) := Fintype.sum_prod_type (f := F)
-      _ = (∑ o2 : Option (PauliScalar P), F (none, o2)) +
-            ∑ a : PauliScalar P, ∑ o2 : Option (PauliScalar P),
-              F (some a, o2) := Fintype.sum_option _
-      _ = ∑ a : PauliScalar P, ∑ o2 : Option (PauliScalar P),
-            F (some a, o2) := by
-          rw [Finset.sum_eq_zero fun o2 _ => h1 o2, zero_add]
-      _ = ∑ a : PauliScalar P,
-            (F (some a, none) + ∑ b : PauliScalar P, F (some a, some b)) :=
-          Finset.sum_congr rfl fun a _ => Fintype.sum_option _
-      _ = ∑ a : PauliScalar P, ∑ b : PauliScalar P, F (some a, some b) := by
-          refine Finset.sum_congr rfl fun a _ => ?_
-          rw [h2 (some a), zero_add]
-      _ = ∑ ab : PauliScalar P × PauliScalar P,
-            F (some ab.1, some ab.2) :=
-          (Fintype.sum_prod_type (f := fun ab : PauliScalar P × PauliScalar P =>
-            F (some ab.1, some ab.2))).symm
-  refine Eq.trans (hkey _ ?_ ?_) ?_
-  · intro o2
-    dsimp only
-    rw [hQnone (none, o2) (fun ab => by simp), hXnone, mul_zero, sub_self]
-    simp [applyOperatorToState]
-  · intro o1
-    dsimp only
-    rw [hQnone (o1, none) (fun ab => by simp), hZnone, zero_mul, sub_self]
-    simp [applyOperatorToState]
-  · refine Finset.sum_congr rfl fun ab _ => ?_
-    dsimp only
-    rw [hQsome ab, hZsome ab.2, hXsome ab.1]
-
 set_option maxHeartbeats 400000 in
 /-- On the directly indexed subline law, the real parts of the joint-point
 and ordered `Z`-then-`X` overlaps differ by at most a square-root point error.
@@ -426,7 +274,7 @@ theorem subline_replace_by_ordered_product :
                     (projZ (directPointToPauli P
                       (s.1.1.base + s.2 • s.1.1.direction))) o.1 o.2))) := by
     intro G
-    rw [avgOver_prod_current]
+    rw [SandwichProduct.avgOver_distribution_prod]
     refine avgOver_congr _ _ _ fun sample => ?_
     refine avgOver_congr _ _ _ fun t => ?_
     exact (regroup_placed_line_answer_sum lines sample.2.1 sample.2.2 _ _ (G _ _)).symm
@@ -478,7 +326,8 @@ theorem subline_replace_by_ordered_product :
                       (projX (directPointToPauli P
                         (s.1.1.base + s.2 • s.1.1.direction)))).effect ab.1))
               S.psiHat‖ ^ 2) :=
-        avgOver_congr _ _ _ fun s => completed_pair_norm_sq_sum points _ _
+        avgOver_congr _ _ _ fun s =>
+          S.completedPair_norm_sq_sum_ZX points .BA'' _ _
       _ = avgOver sublines.D (fun sample =>
             avgOver (uniformDistribution (DirectScalarQ P.extendedDirectLd))
               (fun t => ∑ ab : PauliScalar P × PauliScalar P,
@@ -496,7 +345,7 @@ theorem subline_replace_by_ordered_product :
                           (projX (directPointToPauli P
                             (sample.1.base + t • sample.1.direction)))).effect ab.1))
                   S.psiHat‖ ^ 2)) :=
-        avgOver_prod_current _ _ _
+        SandwichProduct.avgOver_distribution_prod _ _ _
       _ = avgOver (uniformDistribution
             ((Fin P.m → PauliScalar P) × (Fin P.m → PauliScalar P)))
           (fun xz => ∑ ab : PauliScalar P × PauliScalar P,
@@ -543,7 +392,7 @@ theorem subline_replace_by_ordered_product :
           (projX (directPointToPauli P
             (s.1.1.base + s.2 • s.1.1.direction)))).effect o.1))
     S.psiHat hprob S.psiHat_norm (4 * δQ) hdist
-  simp only [← pointMeasExpOption_effect_evalOpt_current]
+  simp only [← S.pointMeasExpOption_effect_evalOpt]
   rw [hside (fun x z o1 o2 => ((points.Q .bob x z).postprocess fun ab =>
       (some ab.1, some ab.2)).effect (o1, o2)),
     hside (fun x z o1 o2 => (S.pointMeasExpOption .bob .Z z).effect o2 *
@@ -656,12 +505,12 @@ theorem subline_remove_X_factor :
     μ A B R RB S.psiHat hprob S.psiHat_norm
     (fun s fs => by
       dsimp only [B]
-      rw [← pointMeasExpOption_effect_evalOpt_current]
+      rw [← S.pointMeasExpOption_effect_evalOpt]
       exact S.place_isProj .BA''
         (S.pointMeasExpOption_isProj .bob .X _ _))
     (fun s fs => by
       dsimp only [R]
-      rw [← pointMeasExpOption_effect_evalOpt_current]
+      rw [← S.pointMeasExpOption_effect_evalOpt]
       exact S.place_isProj .BA''
         (S.pointMeasExpOption_isProj .bob .Z _ _))
     (fun s fs => by
@@ -697,7 +546,7 @@ theorem subline_remove_X_factor :
                       S.psiHat))).re)) =
       avgOver μ (fun s => ∑ fs, stateQForm S.psiHat
         ((A s).effect fs * RB s fs)) := by
-    rw [avgOver_prod_current]
+    rw [SandwichProduct.avgOver_distribution_prod]
     refine avgOver_congr _ _ _ fun sample => ?_
     refine avgOver_congr _ _ _ fun t => ?_
     change (∑ fX, ∑ fZ, stateQForm S.psiHat
@@ -729,7 +578,7 @@ theorem subline_remove_X_factor :
                     S.psiHat))).re)) =
       avgOver μ (fun s => ∑ fs, stateQForm S.psiHat
         ((A s).effect fs * R s fs)) := by
-    rw [avgOver_prod_current]
+    rw [SandwichProduct.avgOver_distribution_prod]
     refine avgOver_congr _ _ _ fun sample => ?_
     refine avgOver_congr _ _ _ fun t => ?_
     change (∑ fX, ∑ fZ, stateQForm S.psiHat
@@ -750,7 +599,7 @@ theorem subline_remove_X_factor :
             (fun t => concreteXPointOverlap S
               (sample.2, projX (directPointToPauli P
                 (sample.1.base + t • sample.1.direction))))) := by
-    rw [avgOver_prod_current]
+    rw [SandwichProduct.avgOver_distribution_prod]
     refine avgOver_congr _ _ _ fun sample => ?_
     refine avgOver_congr _ _ _ fun t => ?_
     simp only [A, B, concreteXPointOverlap,
@@ -843,7 +692,7 @@ theorem subline_Z_term_near_one :
           (fun t => zPointOverlap lines (sample.2, projZ (directPointToPauli P
             (sample.1.base + t • sample.1.direction))))) := by
     refine avgOver_congr _ _ _ fun sample => avgOver_congr _ _ _ fun t => ?_
-    simp only [zPointOverlap, ← pointMeasExpOption_effect_evalOpt_current]
+    simp only [zPointOverlap, ← S.pointMeasExpOption_effect_evalOpt]
     rfl
   rw [hLHS]
   set L := avgOver sublines.D (fun sample =>
