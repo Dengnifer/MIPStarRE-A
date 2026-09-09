@@ -844,114 +844,36 @@ assembled by Fourier averaging.
 	conclusions.
 \end{lemma}
 \begin{proof}
-	\uses{lem:qld-comm-cons, def:expanded-point-trace-projection,
-		fact:add-a-proj, fact:agreement, lem:ortho, thm:linearity,
-		lem:avg-closeness, lem:cancellation, def:povm-distance}
-	Throughout the proof every intermediate error is a $\poly(\eps)$ function
-	that may differ from one use of $\approx_\delta$ to the next. For
-	$\omega = (x,z,r,s) \in \F_q^m \times \F_q^m \times \F_q \times \F_q$
-	and $a, b \in \F_2$ define the sandwich POVM
-	$\hat{R}^{\omega}_{a,b}
-	= \hat{M}^{(\mathrm{Point},Z),z,s}_{b}
-	\hat{M}^{(\mathrm{Point},X),x,r}_{a}
-	\hat{M}^{(\mathrm{Point},Z),z,s}_{b}$
-	from the binary refinements of
-	Definition~\ref{def:expanded-point-trace-projection}; by the approximate
-	commutation of Lemma~\ref{lem:qld-comm-cons}, projectivity, and
-	Lemma~\ref{fact:add-a-proj}, on average over $\omega$ one has
-	$\hat{R}^{\omega}_{a,b}
-	\approx_{\sqrt{\delta_{\mathrm{acom}}}}
-	\hat{M}^{(\mathrm{Point},Z),z,s}_{b}
-	\hat{M}^{(\mathrm{Point},X),x,r}_{a}$,
-	and a Cauchy--Schwarz chain with successive errors
-	$\delta_{\mathrm{acom}}^{1/4}$, $\delta_{\mathrm{acom}}^{1/4}$,
-	$\sqrt{\eps}$, $\eps$ establishes the self-consistency
-	$(\hat{R}^{\omega}_{a,b})_{\mathsf{A}\mathsf{A}'} \simeq_\delta
-	(\hat{R}^{\omega}_{a,b})_{\mathsf{B}\mathsf{A}''}$, hence the
-	corresponding $\approx_\delta$ relation by Lemma~\ref{fact:agreement}.
-	The orthonormalization lemma (Lemma~\ref{lem:ortho}) then produces
-	projective measurements $\{\hat{L}^{\omega}_{a,b}\}$ with
-	$\hat{L}^{\omega}_{a,b} \approx_\delta \hat{R}^{\omega}_{a,b}$ on
-	average over $\omega$. Next, the refined point measurements satisfy the
-	exact linearity
-	$\sum_{b+b'=c} \hat{M}^{(\mathrm{Point},W),u,r}_{b}
-	\hat{M}^{(\mathrm{Point},W),u,r'}_{b'}
-	= \hat{M}^{(\mathrm{Point},W),u,r+r'}_{c}$
-	(a direct consequence of projectivity of
-	$\{\hat{M}^{(\mathrm{Point},W),u}_a\}$), which transfers, on average over
-	$x, z, r, r', s, s'$, to an approximate linearity of the
-	$\{\hat{R}^{\omega}_{a,b}\}$ in the index pair $(r,s)$ and then to the
-	$\{\hat{L}^{\omega}_{a,b}\}$. Consequently the binary observables
-	$\mathcal{O}^{\omega}
-	= \sum_{a,b \in \F_2} (-1)^{a+b} \hat{L}^{\omega}_{a,b}$
-	satisfy
-	$\mathcal{O}^{x,z,r,s} \mathcal{O}^{x,z,r',s'}
-	\approx_\delta \mathcal{O}^{x,z,r+r',s+s'}$
-	on average over $x, z, r, r', s, s'$. Identify $\F_q \cong \F_2^t$ so
-	that the pair $(r,s)$ ranges over $\F_2^{2t}$, and let $\rho$ be the
-	reduced density operator of $\ket{\hat\psi}$ on the registers carrying
-	the $\mathcal{O}^{\omega}$, so that $\Tr(S\rho)$ is the expectation
-	value of $S$ in $\ket{\hat\psi}$ for every operator $S$ on those
-	registers. For fixed $(x,z)$ let $\delta_{x,z}$ denote the
-	conditional average, given $(x,z)$, of the squared linearity defect
-	$\lVert (\mathcal{O}^{x,z,r,s} \mathcal{O}^{x,z,r',s'}
-	- \mathcal{O}^{x,z,r+r',s+s'}) \ket{\hat\psi} \rVert^2$, so that
-	$\E_{x,z}\, \delta_{x,z} = O(\delta)$; expanding the square, using
-	unitarity of the observables, and relabelling the averaged index pair
-	shows that, for each $(x,z)$, the correlation hypothesis of
-	Theorem~\ref{thm:linearity} holds in the form
-	$\E\, \Tr(\mathcal{O}^{x,z,r,s} \mathcal{O}^{x,z,r',s'}
-	\mathcal{O}^{x,z,r+r',s+s'} \rho)
-	= 1 - \tfrac{1}{2}\delta_{x,z}$,
-	the average being over $(r,s)$ and $(r',s')$ uniform in $\F_2^{2t}$.
-	Since Theorem~\ref{thm:linearity} imposes no upper bound on its error
-	parameter, it applies for every fixed $(x,z)$ with
-	$\delta := \tfrac{1}{2}\delta_{x,z}$ and yields binary observables
-	$\{\mathcal{L}^{x,z,r,s}\}$, exactly linear in $(r,s)$ for all pairs,
-	acting on an extension by an ancilla register in a pure state, with
-	$\E_{r,s}\, d\big(\mathcal{L}^{x,z,r,s},\ \mathcal{O}^{x,z,r,s} \ot
-	\Id\big)^2 \le \delta_{x,z}$
-	in the state-dependent distance of the extended state; taking the
-	expectation over $(x,z)$ shows that the two families are
-	$\delta$-close, in the sense of Definition~\ref{def:povm-distance},
-	on average over $x, z, r, s$, the averaged form of closeness being
-	the one Theorem~\ref{thm:linearity} supplies and the only one used
-	below (Remark~\ref{rem:linearity-import}).
-	% Import obligation (see rem:linearity-import): the ancilla register
-	% and its pure state produced by thm:linearity may depend on (x,z);
-	% following the source ("By assuming that |hat psi> has sufficiently
-	% many ancilla zero qubits, we do not need to extend the state
-	% further", references/qpbt-paper/
-	% 14_analysis_of_the_pauli_basis_test.tex:832), they are to be
-	% absorbed, uniformly in (x,z), into zero-state padding of the
-	% strategy state, so that the L^{x,z,r,s} act on hilb ot (C^q)^{ot M}
-	% as the statement requires. The source assumes this padding without
-	% construction; the absorption is an unresolved obligation of the
-	% import, not established here.
-	The ancilla register and its state are absorbed into zero-state
-	padding of the strategy state, an obligation of the import recorded
-	in Remark~\ref{rem:linearity-import}. Define
-	$\hat{Q}^{x,z}_{a,b}
-	= \E_{r,s} (-1)^{\tr(ra+sb)} \mathcal{L}^{x,z,r,s}$
-	for $a, b \in \F_q$: exact linearity makes each $\hat{Q}^{x,z}_{a,b}$ a
-	projection, and the family sums to the identity because
-	$\sum_{a,b} \hat{Q}^{x,z}_{a,b} = \mathcal{L}^{x,z,0,0} = \Id$, the
-	latter identity because exact linearity at $(r,s) = (r',s') = (0,0)$
-	makes $\mathcal{L}^{x,z,0,0}$ an idempotent unitary; so
-	$\{\hat{Q}^{x,z}_{a,b}\}$ is a
-	projective measurement recovering $\F_q$-valued outcomes from the binary
-	data by Fourier averaging over $(r,s)$. Its self-consistency
-	\eqref{eq:qld-q-self-cons} follows from Lemma~\ref{lem:avg-closeness}
-	together with the self-consistency of the $\{\mathcal{O}^{\omega}\}$;
-	the consistency \eqref{eq:qld-q-cons-m-hat-zx} follows from a Fourier
-	computation that replaces $\mathcal{L}$ by $\mathcal{O}$, then by
-	$\hat{R}$, then by the ordered product of refined point measurements, and
-	finally resolves the averages over $r$ and $s$ using
-	Lemma~\ref{lem:cancellation}; and \eqref{eq:qld-q-cons-m-hat-xz} follows
-	by inserting one application of the approximate commutation of
-	Lemma~\ref{lem:qld-comm-cons} into the same chain. Repeating the argument
-	with the tensor factors on registers $\mathsf{B}\mathsf{B}'$ and
-	$\mathsf{A}\mathsf{B}''$ gives all symmetric equivalents.
+	\leanok
+	\uses{lem:qld-comm-cons, def:expanded-point-measurement,
+		lem:ortho, fact:triangle, def:povm-distance,
+		def:symmetric-equivalents}
+	For each pair $x,z$, form the field-valued sandwich POVM
+	\[
+		R^{x,z}_{a,b}
+		=\hat M^{(\mathrm{Point},Z),z}_b
+		 \hat M^{(\mathrm{Point},X),x}_a
+		 \hat M^{(\mathrm{Point},Z),z}_b,
+		\qquad a,b\in\F_q.
+	\]
+	Completeness and projectivity of the point measurements make this a
+	POVM. Their field-valued approximate commutation bounds its distance
+	from the ordered product, and their opposite-placement consistency
+	bounds the off-diagonal agreement defect of the two sandwich POVMs.
+	Apply the orthonormalization lemma (Lemma~\ref{lem:ortho}) separately
+	on Alice's and Bob's expanded local spaces for each point pair.
+	Averaging the resulting distances gives projective measurements close
+	to the sandwiches. The squared-distance triangle inequality then gives
+	self-consistency and both ordered-product comparisons. Tensor-register
+	exchange gives the other two directed opposite-placement comparisons.
+	The error terms are bounded by $K\eps^{1/8}$ for a universal $K$:
+	for $0\leq\eps\leq1$ use monotonicity of the fractional powers, and
+	for $\eps>1$ use the uniform bound $4$ for these squared distances.
+	This construction stays on the original expanded local spaces. It
+	does not use the source's binary refinements followed by quantum
+	linearity, whose additional state-padding requirement is discussed in
+	Remark~\ref{rem:linearity-import} and
+	\cite{gap:qpbt_linearity-theorem-quotation}.
 \end{proof}
 
 \section{Combined line measurements}
@@ -1050,10 +972,45 @@ assembled by Fourier averaging.
 	the registers modified gives all symmetric equivalents.
 \end{proof}
 
+\begin{definition}[The constructed paired-line POVM]
+	\label{def:combined-line-measurement}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.combinedLineMeasurement}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.combinedLineMeasurement_effect}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.combinedLineMeasurement_axis_degree_X}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.combinedLineMeasurement_axis_degree_Z}
+	\leanok
+	\uses{def:expanded-line-measurement}
+	For either player, define
+	$T^{\ell_X,\ell_Z}_{f_X,f_Z}
+	=\hat M^{(\mathrm{Line},X),\ell_X}_{f_X}
+	 \hat M^{(\mathrm{Line},Z),\ell_Z}_{f_Z}
+	 \hat M^{(\mathrm{Line},X),\ell_X}_{f_X}$.
+	This is a POVM. If $\ell_W$ is axis-parallel, effects whose
+	$W$-polynomial answer has degree greater than $d$ vanish.
+	This construction, from the proof of Lemma~\ref{lem:qld-xz-lines},
+	asserts no consistency estimate.
+\end{definition}
+
+\begin{lemma}[The exact $X$ marginal of the paired-line POVM]
+	\label{lem:combined-line-measurement-x-marginal}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.combinedLineMeasurement_sum_Z}
+	\leanok
+	\uses{def:combined-line-measurement, def:expanded-line-measurement}
+	For every line pair and every $f_X$,
+	\[
+		\sum_{f_Z} T^{\ell_X,\ell_Z}_{f_X,f_Z}
+		=\hat M^{(\mathrm{Line},X),\ell_X}_{f_X}.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	Sum the middle $Z$ effect to the identity and use projectivity of the
+	outer $X$ effect.
+\end{proof}
+
 \begin{lemma}[Consistency of the constructed paired-line measurement]
 	\label{lem:combined-line-measurement-consistency}
 	\lean{MIPStarRE.QPBT.combined_line_measurement_consistency}
-	\notready
 	\uses{lem:qld-4-10, lem:qld-comm-line-cons, lem:pasting,
 		def:expanded-line-measurement, def:consistency}
 	This is a Lean-only construction obligation. Fix a polynomially small
@@ -1073,7 +1030,7 @@ assembled by Fourier averaging.
 	for every directed opposite placement. The line-error function is chosen
 	after $\delta_Q$ and its polynomial bound. This isolates the consistency
 	part of the preceding construction while retaining its defining
-	measurement; see \cite{gap:qpbt_subline-claims-line-marginal}.
+	measurement. Its proof remains unfinished; see \cite{gap:qpbt_subline-claims-line-marginal}.
 \end{lemma}
 
 \section{Applying the classical low-degree test}
@@ -1248,7 +1205,7 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 	\lean{MIPStarRE.QPBT.restrictedALineDist, MIPStarRE.QPBT.restrictedDLineDist}
 	\lean{MIPStarRE.QPBT.restrictedALineDist_isProbability}
 	\lean{MIPStarRE.QPBT.restrictedDLineDist_isProbability}
-	\notready
+	\leanok
 	\uses{def:line-point-dist, def:ld-question-distribution}
 	For any $i \in \{1, \dots, m\}$, the \emph{$i$-th restricted
 	axis-parallel line distribution} $D_{\mathrm{ALine},i}$ is the
@@ -1268,7 +1225,7 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 	\lean{MIPStarRE.QPBT.linePointDist_eq_mixture_restricted}
 	\lean{MIPStarRE.QPBT.avg_restricted_le, MIPStarRE.QPBT.avg_restricted_prod_le}
 	\lean{MIPStarRE.QPBT.restricted_lines_consistency_bound}
-	\notready
+	\leanok
 	% Source: unlabelled prose in the paper --- the discussion following
 	% def:ith-restricted-line at lines 1049-1061 of
 	% references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex.
@@ -1305,6 +1262,7 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 	\end{enumerate}
 \end{lemma}
 \begin{proof}
+	\leanok
 	\uses{lem:qld-xz-lines, def:line-point-dist, def:consistency}
 	The line-point distribution places weight $\tfrac{1}{2}$ on each of the
 	axis-parallel and diagonal components and, within each component, uniform
@@ -1322,7 +1280,6 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 
 \begin{lemma}[The sub-line distribution]
 	\label{lem:qld-sublines}
-	\lean{MIPStarRE.QPBT.SubLineWitness, MIPStarRE.QPBT.exists_subLineWitness}
 	\notready
 	\uses{def:line, def:line-point-dist, def:ith-restricted-line}
 	% Statement as in the source (references/qpbt-paper/
@@ -1535,6 +1492,38 @@ on registers $\mathsf{A}\mathsf{A}'$, the second tensor factor is placed on
 registers $\mathsf{B}\mathsf{A}''$, and the sums range over
 $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 
+\begin{lemma}[Auxiliary directly indexed subline distribution]
+	\label{lem:qld-sublines-direct}
+	\lean{MIPStarRE.QPBT.SubLineWitness, MIPStarRE.QPBT.exists_subLineWitness}
+	\leanok
+	\uses{def:ith-restricted-line, def:line-representative, def:combine-map}
+	Define the directly indexed extended line-point law as follows.
+	Choose the line kind with equal probabilities, an index
+	$j\in\{1,\ldots,2m+2\}$ uniformly, and a point $u\in\F_q^{2m+2}$
+	uniformly. For an axis line take direction $e_j$; for a diagonal line
+	choose a uniform vector and zero its coordinates before $j$.
+	Replace $u$ by its canonical representative to describe the line,
+	retaining $u$ as its sampled point.
+	There exists a probability distribution $D_{\mathrm{dir}}$ on
+	$(\ell,\ell_X,\ell_Z)$ whose extended-line marginal is the line
+	marginal of this law, satisfying the incidence, separate projected
+	marginal mixture, and axis-closure properties stated in
+	Lemma~\ref{lem:qld-sublines}. Its line parametrizations also supply the
+	affine compatibility in Definition~\ref{def:combine-map}.
+	This auxiliary samples $j$ directly, rather than as $\chi_{2m+2}(s)$
+	for a uniform scalar seed $s$. It does not identify $D_{\mathrm{dir}}$
+	with the source distribution $D$; that source correspondence remains
+	unresolved as explained in \cite{gap:qpbt_ld-dimension-divisibility}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Sample the auxiliary source lines by the blockwise procedure described
+	above, starting from the directly sampled extended index. The separate
+	$X$ and $Z$ marginals are mixtures of the restricted product laws.
+	Incidence, affine compatibility, and axis closure follow from the
+	coordinate-block formulas.
+\end{proof}
+
 \begin{lemma}[Formalization support: the ordered product on one placement]
 	\label{lem:qld-4-10-same-placement}
 	\lean{MIPStarRE.QPBT.Placement.exists_isOpposite}
@@ -1555,8 +1544,9 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\lean{MIPStarRE.QPBT.abs_overlap_gap_le_sqrt_of_opFamilyDistSq}
 	\leanok
 	\uses{def:povm-distance, def:expanded-state}
-	A complete measurement weights the overlap gap between operator families by
-	at most the square root of their state-dependent squared distance.
+	A complete measurement weights the real part of the overlap gap between
+	operator families by at most the square root of their state-dependent
+	squared distance. This auxiliary does not bound the complex modulus.
 \end{lemma}
 \begin{proof}
 	\leanok
@@ -1564,7 +1554,7 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	completeness bounds the squared norm of the left factor by one.
 \end{proof}
 
-\begin{lemma}[Formalization support: a uniform point of the extended space]
+\begin{lemma}[Auxiliary uniform point under the directly indexed law]
 	\label{lem:qld-sublines-uniform-point}
 	\lean{MIPStarRE.QPBT.uniformDistribution_map_uncurry}
 	\lean{MIPStarRE.QPBT.uniformDistribution_map_directLine_add_smul}
@@ -1572,9 +1562,10 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\lean{MIPStarRE.QPBT.avgOver_directLinePointDist_line_add_smul}
 	\lean{MIPStarRE.QPBT.SubLineWitness.avgOver_projX_projZ}
 	\leanok
-	\uses{lem:qld-sublines, def:line-point-dist, def:line-representative,
-		def:combine-map}
-	A uniform affine parameter on the sampled extended line gives a uniform
+	\uses{lem:qld-sublines-direct, def:line-representative, def:combine-map}
+	For any directly indexed witness $D_{\mathrm{dir}}$ of
+	Lemma~\ref{lem:qld-sublines-direct}, a uniform affine parameter on the
+	sampled extended line gives a uniform
 	point of $\F_q^{2m+2}$, whose $x$ and $z$ blocks are independent uniform
 	points of $\F_q^m$.
 \end{lemma}
@@ -1584,10 +1575,107 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	coordinate split and scalar identification are bijections.
 \end{proof}
 
+\begin{remark}[Scalar conventions and source targets]
+	\label{rem:subline-real-part-scope}
+	In the next three source claims, scalar approximation bounds the
+	complex modulus of the difference. The following auxiliary notation
+	separates the results proved for real parts under $D_{\mathrm{dir}}$.
+	For any directly indexed witness, and any point and line families
+	satisfying the conclusions of Lemmas~\ref{lem:qld-4-10}
+	and~\ref{lem:qld-xz-lines} with errors $\delta_Q,\delta_P$, define
+	\[
+		A_F(D_{\mathrm{dir}})
+		=\E_{D_{\mathrm{dir}}}\E_{t\in\F_q}\sum_{f_X,f_Z}
+		\bra{\hat\psi}T^{\ell_X,\ell_Z}_{f_X,f_Z}
+		\ot F^{x,z}_{f_X(x),f_Z(z)}\ket{\hat\psi},
+		\quad (x,z,\alpha,\beta)=\ell(t).
+	\]
+	Write $A_Q,A_{ZX},A_Z$ for $F=Q$, $F=M^ZM^X$, and $F=M^Z$.
+	The averages include all line-polynomial answers with the optional
+	evaluation convention: point effects are zero at an undefined
+	evaluation, and $Q$ is completed by zero on either undefined coordinate.
+	The next three auxiliary entries do not certify the source claims.
+	In particular, a bound on $\lvert\operatorname{Re}(A_Q-A_{ZX})\rvert$
+	does not bound $\lvert A_Q-A_{ZX}\rvert$; no reality assertion for
+	the ordered product has been established. Both this scalar difference
+	and the distribution difference are recorded in
+	\cite{gap:qpbt_subline-claims-line-marginal}.
+\end{remark}
+
+\begin{lemma}[Auxiliary real-part ordered-product estimate]
+	\label{lem:claim-17-1-re-direct}
+	\lean{MIPStarRE.QPBT.subline_replace_by_ordered_product_re_direct}
+	\leanok
+	\uses{lem:qld-sublines-direct, lem:qld-sublines-uniform-point,
+		lem:qld-4-10-same-placement, lem:overlap-gap-distance,
+		lem:qld-4-10, lem:qld-xz-lines}
+	Under the hypotheses and conventions of
+	Remark~\ref{rem:subline-real-part-scope}, there is a universal $C>0$
+	such that
+	$\lvert\operatorname{Re}(A_Q(D_{\mathrm{dir}})
+	-A_{ZX}(D_{\mathrm{dir}}))\rvert\leq C\sqrt{\delta_Q}$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Regroup by optional point evaluations and apply
+	Lemma~\ref{lem:overlap-gap-distance}. Completing the point outcomes
+	adds zero terms, and Lemma~\ref{lem:qld-sublines-uniform-point}
+	transports the squared-distance average to independent uniform $x,z$.
+	Lemma~\ref{lem:qld-4-10-same-placement} bounds it by $4\delta_Q$,
+	so $C=2$ suffices.
+\end{proof}
+
+\begin{lemma}[Internal real-part $X$-factor removal obligation]
+	\label{lem:claim-17-2-re-direct}
+	\lean{MIPStarRE.QPBT.subline_remove_X_factor_re_direct}
+	\uses{lem:qld-sublines-direct, def:combined-line-measurement,
+		lem:combined-line-measurement-x-marginal, lem:qld-comm-line-cons}
+	For every admissible projective setting and every directly indexed
+	subline witness, let $T$ be the concrete POVM of
+	Definition~\ref{def:combined-line-measurement}. With the scalar and
+	optional-evaluation conventions of
+	Remark~\ref{rem:subline-real-part-scope}, there is a universal $C>0$
+	such that
+	\[
+		\lvert\operatorname{Re}(A_{ZX}(D_{\mathrm{dir}})
+		-A_Z(D_{\mathrm{dir}}))\rvert
+		\leq Cm\sqrt{\delta_{\mathrm{Line}}(\eps)}.
+	\]
+	No joint-point family or evaluated paired-line consistency estimate
+	is assumed here. This is an unfinished internal obligation, not the
+	complex-modulus source claim. Its intended proof uses the exact $X$
+	marginal, expanded line-point consistency, and the separate restricted
+	$X$ marginal of $D_{\mathrm{dir}}$.
+\end{lemma}
+
+\begin{lemma}[Auxiliary real-part $Z$-correlation estimate]
+	\label{lem:claim-17-3-re-direct}
+	\lean{MIPStarRE.QPBT.subline_Z_term_near_one_re_direct}
+	\leanok
+	\uses{lem:qld-sublines-direct, lem:restricted-line-mixture-bounds,
+		lem:qld-4-10, lem:qld-xz-lines}
+	Under the hypotheses and conventions of
+	Remark~\ref{rem:subline-real-part-scope}, there is a universal $C>0$
+	such that
+	\[
+		\lvert\operatorname{Re}A_Z(D_{\mathrm{dir}})-1\rvert
+		\leq C\sqrt m
+		(\delta_P^{1/4}+\delta_Q^{1/4}+\eps^{1/4}).
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	The separate restricted $Z$ marginal and point comparisons bound
+	$1-\operatorname{Re}A_Z$ by
+	$2\sqrt{4m^2\delta_P}+2\sqrt{4\delta_Q}$.
+	Since $0\leq\operatorname{Re}A_Z\leq1$, its deficit is at most the
+	square root of this bound. Splitting the square root and using $m\geq1$
+	gives the displayed estimate with $C=2$.
+\end{proof}
+
 \begin{lemma}[Replacing the combined point measurement by the ordered product]
 	\label{lem:claim-17-1}
-	\lean{MIPStarRE.QPBT.subline_replace_by_ordered_product}
-	\leanok
+	\notready
 	% claim:17-1 in the paper; the original label is recorded here as a
 	% comment for cross-reference fidelity.
 	\uses{lem:qld-sublines, lem:qld-xz-lines, lem:qld-4-10,
@@ -1611,33 +1699,38 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\end{align*}
 \end{lemma}
 \begin{proof}
-	\leanok
 	\uses{lem:qld-4-10, lem:qld-4-10-same-placement, lem:qld-sublines,
-		lem:qld-xz-lines, lem:overlap-gap-distance,
-		lem:qld-sublines-uniform-point, def:line-point-dist}
+		lem:qld-xz-lines, def:line-point-dist}
 	Write
 	$W^{x,z}_{a,b} = \hat{Q}^{x,z}_{a,b}
 	- \hat{M}^{(\mathrm{Point},Z),z}_{b}
 	\hat{M}^{(\mathrm{Point},X),x}_{a}$
-	and apply the Cauchy--Schwarz inequality to the difference of the two
-	sides. The first factor is at most $1$ because
+	and apply the complex Cauchy--Schwarz inequality to the difference.
+	Completeness of $T$ bounds the first factor by $1$. For the squared
+	second factor, use
 	$\sum_{f_X,f_Z \,:\, f_X(x)=a,\ f_Z(z)=b}
-	T^{\ell_X,\ell_Z}_{f_X,f_Z} \le \Id$
-	for every $x, z, a, b$. For the second factor, note that when $\ell$ is
-	drawn from the line-point distribution over $\F_q^{2m+2}$, a uniformly
-	random point $(x,z,\alpha,\beta)$ on $\ell$ is a uniformly random point
-	of $\F_q^{2m+2}$, so the coordinates $x, z$ are independent and uniform
-	in $\F_q^m$; hence
-	$\E_{x,z} \sum_{a,b}
-	\bra{\hat\psi} \Id \ot (W^{x,z}_{a,b})^2 \ket{\hat\psi}
-	\le \delta_Q$
-	by \eqref{eq:qld-q-cons-m-hat-zx}. The total error is therefore at most
-	$\sqrt{\delta_Q}$.
+	T^{\ell_X,\ell_Z}_{f_X,f_Z}\leq\Id$ to obtain
+	\[
+		\E_{x,z}\sum_{a,b}
+		\bra{\hat\psi}\Id\ot
+		(W^{x,z}_{a,b})^\dagger W^{x,z}_{a,b}\ket{\hat\psi}
+		\leq 4\delta_Q.
+	\]
+	Here uniformity of the extended point makes $x,z$ independent and
+	uniform, and the same-placement bound is
+	Lemma~\ref{lem:qld-4-10-same-placement}. Thus the error is at most
+	$2\sqrt{\delta_Q}$, with the stated asymptotic order.
+	The adjoint is necessary because $W$ need not be self-adjoint; the
+	source's $W^2$ and $\delta_Q$ in this intermediate calculation are
+	replaced by $W^\dagger W$ and $4\delta_Q$.
+	This is a mathematical argument, not a completed Lean proof of the
+	source claim: the available scalar estimate controls only real parts
+	under $D_{\mathrm{dir}}$. See
+	\cite{gap:qpbt_subline-claims-line-marginal}.
 \end{proof}
 
 \begin{lemma}[Removing the $X$-point factor]
 	\label{lem:claim-17-2}
-	\lean{MIPStarRE.QPBT.subline_remove_X_factor}
 	\notready
 	% claim:17-2 in the paper; the original label is recorded here as a
 	% comment for cross-reference fidelity. The source right-hand side
@@ -1674,7 +1767,7 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 \end{lemma}
 \begin{proof}
 	\uses{lem:qld-comm-line-cons, lem:qld-sublines, lem:qld-xz-lines,
-		lem:restricted-line-mixture-bounds, def:ith-restricted-line,
+		lem:combined-line-measurement-x-marginal, lem:restricted-line-mixture-bounds, def:ith-restricted-line,
 		def:expanded-line-measurement}
 	By Cauchy--Schwarz, the difference of the two sides is bounded by the
 	square root of the deficit
@@ -1711,7 +1804,6 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 
 \begin{lemma}[The remaining $Z$-point term is close to one]
 	\label{lem:claim-17-3}
-	\lean{MIPStarRE.QPBT.subline_Z_term_near_one}
 	\notready
 	% claim:17-3 in the paper; the original label is recorded here as a
 	% comment for cross-reference fidelity.

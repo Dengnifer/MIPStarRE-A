@@ -10,6 +10,9 @@ The first scalar estimate in the combining argument samples an extended line
 from the sub-line witness and then a uniform affine parameter on that line.
 This module records that the resulting extended point is uniform and hence
 that its two source coordinate blocks are independent uniform points.
+The law is the directly indexed law of `SubLineWitness`, not the source's
+seed-indexed extended-line law. The distinction is recorded in
+`docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`.
 
 ## References
 

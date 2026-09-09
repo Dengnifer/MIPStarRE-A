@@ -7,15 +7,15 @@ import MIPStarRE.LDT.Preliminaries.SwitchSandwichPrep.InnerProduct
 The scalar estimates used to combine the two Pauli bases compare averaged
 overlaps whose left factor is one complete measurement and whose right factors
 are operator families at small state-dependent distance.  This module records
-the corresponding Cauchy--Schwarz estimate.  The right-hand families are
+the corresponding Cauchy--Schwarz estimate for real parts. The right-hand families are
 arbitrary, so the estimate covers an ordered product of point effects, which
-is not itself a measurement.
+is not itself a measurement. No complex-modulus estimate is asserted here.
 
 ## References
 
 The estimate is `lem:overlap-gap-distance` in
 `blueprint/src/chapter/ch15_qpbt_combining.tex`; it is the Cauchy--Schwarz
-step at paper
+real-part auxiliary to the step at paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1147-1166`.
 -/
 
@@ -27,7 +27,7 @@ open MIPStarRE.LDT hiding Measurement
 open MIPStarRE.Quantum MIPStarRE.QPBT.DistanceCalculus
 
 /-- Replacing one operator family inside an overlap weighted on the left by a
-complete measurement changes the average by at most the square root of the
+complete measurement changes the real part of the average by at most the square root of the
 state-dependent squared distance between the two families. -/
 theorem abs_overlap_gap_le_sqrt_of_opFamilyDistSq {X α ι : Type*}
     [Fintype α] [Fintype ι] [DecidableEq ι]

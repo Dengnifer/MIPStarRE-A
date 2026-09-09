@@ -6066,3 +6066,15 @@ not actual commit/publication hooks. No productive session was killed.
   remain null rather than being inferred as zero latency. These are read-only
   cache artifacts, not selected-window occupancy, API-utilization, or runtime
   acceptance claims.
+- 2026-09-09: PR469's first autofix stopped because its contract did not permit
+  paper realignment. Session `orc-466-20260909-01`, with narrow realignment
+  authorization, separated the directly indexed real-part auxiliaries from
+  the unchanged complex-modulus source targets and removed unsupported
+  completion certification. The existing source-distribution gap was not
+  attempted and no mathematical budget was reset. PR478 still exposed only
+  head `25fa5893` at the dependency checks, so no unpublished correction was
+  copied from its active checkout. Reusing the regrouping API initially hit
+  a Lean heartbeat limit because placement and postprocessing were composed
+  in the opposite order; matching the existing API's order fixed the check
+  without increasing the limit. The author audit records the remaining
+  obligations in `audits/2026-09-09-pr469-review-repair.md`.

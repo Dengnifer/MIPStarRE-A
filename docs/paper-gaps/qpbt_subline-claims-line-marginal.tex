@@ -21,7 +21,7 @@
 \textbf{Difficulty.} The domain correction is elementary; the remaining
 formal estimate requires the project's state-dependent Cauchy--Schwarz and
 restricted-distribution arguments. \textbf{Estimated weight.} The correction
-affects two Lean modules and their blueprint correspondence. It retains the
+affects the scalar claims and their blueprint correspondence. It retains the
 unfinished scalar estimate and isolates the existing pasting consistency
 obligation. \textbf{Mathlib/project split.} Finite sums, positivity, and real
 square roots use Mathlib; the measurement construction and subline law use
@@ -135,47 +135,93 @@ admissible at arbitrarily small positive $\eps$, so excluding zero or
 enlarging a universal constant cannot repair the claim. No polynomially
 vanishing error depending on $\eps$ alone absorbs this difference.
 
+\section{Scalar and distribution differences}
+
+The construction-domain correction does not resolve two other differences.
+Let $A_Q(T)$ denote the correlation obtained from $A(T)$ by replacing the
+ordered product $M^ZM^X$ with the combined point effect $Q$. Claim 17-1
+bounds $|A_Q(T)-A(T)|$, and Claim 17-2 bounds $|A(T)-B(T)|$.
+These are moduli of complex numbers. The available Lean scalar arguments
+instead concern
+$|\operatorname{Re}(A_Q(T)-A(T))|$ and
+$|\operatorname{Re}(A(T)-B(T))|$. The ordered product need not be
+self-adjoint, and its weighted correlation has not been proved real.
+Consequently a real-part bound is a weaker conclusion, not a faithful
+encoding of the complex-modulus claim. The real counterexample above also
+refutes this weaker claim on the formerly enlarged construction domain.
+
+The distribution in the Lean record is also different. Denote it by
+$D_{\mathrm{dir}}$. Its extended-line marginal samples a coordinate index
+uniformly in $\{1,\ldots,2m+2\}$, whereas the source chooses a scalar seed
+$s$ and uses $\chi_{2m+2}(s)$. The source's balanced seed partition requires
+$2m+2$ to divide $q$, which is not supplied by admissibility. The directly
+indexed law has proved incidence, separate $X$ and $Z$ marginal mixtures,
+and axis closure, but these facts do not identify it with the source law
+$D$. The unresolved source-distribution problem is documented in
+\path{docs/paper-gaps/qpbt_ld-dimension-divisibility.tex}. The present
+correction makes no mathematical attempt to resolve that problem.
+
+There is also an intermediate correction in the proof of Claim 17-1.
+For $W=Q-M^ZM^X$, the squared norm is expressed by $W^\dagger W$, not by
+$W^2$. Inserting the opposite-placement joint measurement between the two
+families and using the squared-distance triangle inequality gives an
+average bound $4\delta_Q$ on one placement. Cauchy--Schwarz therefore gives
+$2\sqrt{\delta_Q}$ rather than $\sqrt{\delta_Q}$, with the same asymptotic
+order as the source claim. This calculation does not supply the missing
+Lean complex-modulus proof or the source-distribution correspondence.
+
 \section{Blueprint and formal comparison}
 
-The repaired declaration evaluates the concrete sandwich directly and
-retains the original universal constant, factor $m$, square-root error,
-placements, and subline averages. Its scalar convention remains the
-absolute difference of real parts; the counterexample above is real and
-already refutes that weaker scalar assertion. The blueprint now specifies
-the sandwich in the statement of its Claim 17-2 node. It remains marked as
-unfinished.\footnote{The declaration is
-\leanid{MIPStarRE.QPBT.subline\_remove\_X\_factor} in
-\path{MIPStarRE/QPBT/Combining/Claims.lean}; the blueprint node is
-\path{lem:claim-17-2}.}
+The source statements remain visible in blueprint nodes
+\path{lem:claim-17-1}, \path{lem:claim-17-2}, and
+\path{lem:claim-17-3}, with their complex-modulus conclusions and source
+law $D$ unchanged. They have no Lean completion certification. The
+directly indexed subline construction and its uniform-point consequence
+have separate auxiliary entries, as do the three real-part estimates.
+The first and third estimates are proved; the second remains an internal
+proof obligation.\footnote{The auxiliary declarations in
+\path{MIPStarRE/QPBT/Combining/Claims.lean} are
+\leanid{subline\_replace\_by\_ordered\_product\_re\_direct},
+\leanid{subline\_remove\_X\_factor\_re\_direct}, and
+\leanid{subline\_Z\_term\_near\_one\_re\_direct}.
+Their blueprint labels append \path{-re-direct} to the corresponding
+claim label. The review repair is tracked by \ghissue{466}.}
 
 The abstract combined-line witness record remains unchanged. Its fields
-faithfully express the existential conclusion of the combined-lines lemma,
-but do not characterize the construction used in its proof. The internal
-consistency obligation now refers to the concrete sandwich. Both witness
-existence proofs construct their records with that measurement. A later
-argument needing the exact construction can use the consistency obligation
-and the same explicit record; merely choosing an unspecified existential
-witness does not recover its defining formula.\footnote{The Lean-only
-obligation is \leanid{combined\_line\_measurement\_consistency} in
-\path{MIPStarRE/QPBT/Combining/Lines.lean}. Its hypotheses explicitly supply
-a polynomially controlled point family. It retains the previously
-unfinished consistency proof, to be discharged by the source's point-to-line
-comparisons and pasting argument. The source-facing
-\leanid{exists\_combinedLinesWitness} has an unchanged statement.}
+express degree support and evaluated consistency, but do not characterize
+the construction used in the source proof. The internal consistency
+obligation refers to the concrete sandwich. Both witness existence
+proofs construct their records with that measurement. Merely choosing an
+unspecified existential witness does not recover its defining formula.
 
-The retained Claim 17-2 proof obligation is to combine the concrete
-X-marginal identity, expanded line-point consistency, and the restricted
-X-point marginal of the subline law. No marginal identity, equality, or
-producer is added to the public hypotheses. The separate concrete marginal
-lemma is not duplicated in this correction.
+There are two retained proof holes in the affected claim and line modules:
+\begin{itemize}
+\item \leanid{subline\_remove\_X\_factor\_re\_direct} is the internal
+real-part estimate for the concrete sandwich. Its intended discharge
+combines \leanid{combinedLineMeasurement\_sum\_Z}, expanded line-point
+consistency, and the restricted $X$ marginal of the directly indexed law.
+It is not an extra hypothesis in another theorem.
+\item \leanid{combined\_line\_measurement\_consistency}, in
+\path{MIPStarRE/QPBT/Combining/Lines.lean}, is the existing point-to-line
+consistency obligation for the concrete sandwich. Its intended discharge
+is the source's point-to-line comparison and pasting argument. The point
+error function and its polynomial bound are chosen before the line error
+function.
+\end{itemize}
+No new proof hole or bridge assumption is introduced by this separation.
+For the source claims, a future formalization must establish the
+complex-modulus estimates and resolve the source-distribution problem;
+the auxiliary results must not be used as source completion evidence in
+the meantime.
 
 \section{Conclusion}
 
-The discrepancy lies in the formal quantification over arbitrary witnesses,
-not in the paper's constructed-measurement assertion. The counterexample
-forces a domain correction. Using the defined sandwich restores the source
-domain and its original error bound, while retaining the scalar and
-consistency proof obligations explicitly.
+The sandwich construction repairs the formerly enlarged measurement
+domain. The scalar and distribution differences remain unresolved.
+The real-part estimates under $D_{\mathrm{dir}}$ are useful auxiliaries,
+but they do not certify the source's complex-modulus claims under $D$.
+The blueprint now records that distinction explicitly, preserving the
+source targets and the two named internal proof obligations.
 
 \bibliographystyle{alpha}
 \bibliography{references}

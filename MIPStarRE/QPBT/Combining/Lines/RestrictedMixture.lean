@@ -142,7 +142,7 @@ theorem Distribution.bind_uniform_restrict_eq {α ι : Type*} [DecidableEq α]
 uniform.  This is a public copy of the private
 `MIPStarRE.QPBT.map_uniformDistribution_seed` in
 `MIPStarRE/QPBT/Test/LowDegreeGameTheorems.lean`, which belongs to another
-packet; the duplication is tracked by issue #204.  Formalization-only
+module; the duplication is tracked by issue #204.  Formalization-only
 auxiliary for blueprint `def:ith-restricted-line`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1038-1048`. -/
 theorem uniformDistribution_map_ldSeed (L : LdParams) :
