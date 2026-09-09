@@ -50,8 +50,12 @@ notation of Definition~\ref{def:bracket}; for instance
 $T^{\ell_X,\ell_Z}_{[\mathrm{eval}_x(\cdot)=a,\ \mathrm{eval}_z(\cdot)=b]}
 = \sum_{f_X,f_Z \,:\, f_X(x)=a,\ f_Z(z)=b} T^{\ell_X,\ell_Z}_{f_X,f_Z}$.
 For a line $\ell$ (Definition~\ref{def:line}) and $k \in \N$ we write
-$\deg_k(\ell)$ for the set of polynomial functions on $\ell$ of degree at most
-$k$ in the line parameter, and
+$\deg_k(\ell)$ for the univariate polynomial representatives of degree at most
+$k$ in the line parameter, each given by its $k+1$ coefficients, with the
+parameterization and evaluation convention of
+Definition~\ref{def:ideg-deg-polynomials}. Distinct representatives remain
+distinct outcomes even when they induce the same function on $\F_q$; for
+example, $0$ and $t^q-t$ are distinct when $k\geq q$. We write
 $\mathrm{ideg}_{d,m}(\F_q) = \polyfunc{m}{q}{d}$
 (Definition~\ref{def:polyfunc}) for the $m$-variate polynomial representatives
 over $\F_q$ of individual degree at most $d$. Elements of
@@ -807,6 +811,182 @@ linearity theorem and its source application separately.
 	$\mathcal{O}^u$ is used. The hypothesis then bounds the average by $\eta$.
 \end{proof}
 
+The following auxiliary entries record the direct field-valued construction
+used in the formalization of Lemma~\ref{lem:qld-4-10}; they are not separately
+named results of \cite{Ji2020MIPStar}. They replace the binary sandwich and
+linearity argument in its proof as explained in
+\cite{gap:qpbt_linearity-theorem-quotation}.
+For a placement $i$ and fixed points $(x,z)$, write
+$X_{i,a}=(\hat M^{(\mathrm{Point},X),x}_a)_i$ and
+$Z_{i,b}=(\hat M^{(\mathrm{Point},Z),z}_b)_i$, and put $[A,B]=AB-BA$.
+All expectations over $(x,z)$ below are uniform on $\F_q^m\times\F_q^m$.
+
+\begin{definition}[The field-valued point sandwich]
+	\label{def:combined-point-sandwich}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.sandwichPoint}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.sandwichPoint_effect}
+	\leanok
+	\uses{def:expanded-point-measurement, def:povm-conventions}
+	For either player, define the POVM with outcomes $(a,b)\in\F_q^2$ by
+	\[
+		R^{x,z}_{a,b}=\hat M^{(\mathrm{Point},Z),z}_b
+		\hat M^{(\mathrm{Point},X),x}_a\hat M^{(\mathrm{Point},Z),z}_b.
+	\]
+	Positivity follows by writing each effect as
+	$(\hat M^X_a\hat M^Z_b)^\dagger(\hat M^X_a\hat M^Z_b)$;
+	projectivity and completeness give $\sum_{a,b}R^{x,z}_{a,b}=\Id$.
+	Write $R_{i,a,b}=Z_{i,b}X_{i,a}Z_{i,b}$ for its placed effects.
+	This is the field-valued version of the binary sandwich in the first
+	step of the source proof.
+	% Source: references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:731--736.
+\end{definition}
+
+\begin{lemma}[Field-valued point commutation]
+	\label{lem:combined-point-commutation}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.sum_norm_place_expPointOp_commutator_sq}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.expPoint_comm}
+	\leanok
+	\uses{def:expanded-point-measurement, def:expanded-observables,
+		def:expanded-state, def:symmetric-equivalents}
+	Write $U_{i,r}$ and $V_{i,s}$ for the expanded $X$ and $Z$ observables
+	at $x,z$, respectively, placed on $i$. For every placement and point pair,
+	\[
+		\sum_{a,b}\|[X_{i,a},Z_{i,b}]\ket{\hat\psi}\|^2
+		=\E_{r,s\in\F_q}\|[U_{i,r},V_{i,s}]\ket{\hat\psi}\|^2.
+	\]
+	There is a universal $C\geq1$ such that, for every admissible parameter
+	tuple, projective strategy in the chapter's setting, and placement $i$,
+	\[
+		\E_{x,z}\sum_{a,b}\|[X_{i,a},Z_{i,b}]\ket{\hat\psi}\|^2
+		\leq C\sqrt\eps.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:expanded-point-measurement, lem:cancellation,
+		lem:qld-win-implications-obs}
+	Expand the point projectors in the trace characters and apply character
+	orthogonality to obtain Parseval's identity. The expanded observable
+	commutator is the strategy's twisted commutator tensored with a unitary
+	Pauli operator. Lemma~\ref{lem:qld-win-implications-obs} therefore bounds
+	its average by $C\sqrt\eps$.
+\end{proof}
+
+\begin{lemma}[Point sandwich and ordered-product comparisons]
+	\label{lem:combined-point-sandwich-comparisons}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.sandwichPoint_ordered_dist_le}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.ordered_cross_dist_le}
+	\leanok
+	\uses{def:combined-point-sandwich, def:expanded-state,
+		def:symmetric-equivalents}
+	There are universal constants $C_1,C_2\geq1$ such that, for every
+	strategy in the chapter's setting, every placement $i$, and every
+	placement $j$ opposite to $i$,
+	\begin{align*}
+		\E_{x,z}\sum_{a,b}\|(R_{i,a,b}-Z_{i,b}X_{i,a})\ket{\hat\psi}\|^2
+		&\leq C_1\sqrt\eps,\\
+		\E_{x,z}\sum_{a,b}\|(Z_{i,b}X_{i,a}-X_{j,a}Z_{j,b})\ket{\hat\psi}\|^2
+		&\leq C_2\eps.
+	\end{align*}
+	These are the field-valued comparisons used in place of the binary
+	calculations in the first step of the source proof.
+	% Source: references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:737--770.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:combined-point-commutation, fact:add-a-proj,
+		lem:qld-comm-cons, lem:sandwich-povm-square-sum, fact:triangle}
+	Use $R_{i,a,b}-Z_{i,b}X_{i,a}=Z_{i,b}[X_{i,a},Z_{i,b}]$
+	and contract the left projector for the first estimate. For the second,
+	move the two factors to the opposite placement one at a time, using
+	point self-consistency and square-summability, then apply the triangle
+	inequality.
+\end{proof}
+
+\begin{definition}[The point sandwich defect bound]
+	\label{def:combined-point-sandwich-defect}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.sandwichDefectBound}
+	\leanok
+	\uses{def:expanded-point-measurement, def:expanded-state}
+	For two placements $i,j$ and a point pair $(x,z)$, set
+	\[
+	\begin{split}
+		c_{x,z}^{i,j}={}&\frac12\sum_b\|(Z_{i,b}-Z_{j,b})\ket{\hat\psi}\|^2\\
+		&+\frac32\left(\sum_a\|(X_{i,a}-X_{j,a})\ket{\hat\psi}\|^2
+		+\sum_{a,b}\|[X_{i,a},Z_{i,b}]\ket{\hat\psi}\|^2\right.\\
+		&\hspace{4em}\left.+\sum_{a,b}\|[X_{j,a},Z_{j,b}]\ket{\hat\psi}\|^2\right).
+	\end{split}
+	\]
+\end{definition}
+
+\begin{lemma}[Consistency of the point sandwiches]
+	\label{lem:combined-point-sandwich-consistency}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.sandwichDefectBound_nonneg}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.sandwich_offDiagonal_le_sandwichDefectBound}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.avg_sandwichDefectBound_le}
+	\leanok
+	\uses{def:combined-point-sandwich, def:combined-point-sandwich-defect,
+		def:symmetric-equivalents}
+	The bound $c_{x,z}^{i,j}$ is nonnegative for all placements.
+	If $i,j$ are opposite, then for each point pair
+	\[
+		\sum_{(a,b)\ne(a',b')}
+		\bra{\hat\psi}R_{i,a,b}R_{j,a',b'}\ket{\hat\psi}
+		\leq c_{x,z}^{i,j}.
+	\]
+	There is a universal $C\geq1$ such that, for all strategies in the
+	chapter's setting and all opposite placements,
+	$\E_{x,z}c_{x,z}^{i,j}\leq C(\eps+\sqrt\eps)$.
+	This replaces the source's binary sandwich consistency calculation.
+	% Source: references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:743--780.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:combined-point-sandwich-defect, fact:agreement,
+		fact:add-a-proj, lem:sandwich-povm-square-sum,
+		lem:combined-point-commutation, lem:qld-comm-cons}
+	Put $W_b=Z_{i,b}Z_{j,b}$ and $D^X_a=X_{i,a}-X_{j,a}$.
+	Twice expanding the squared distance between projective measurements
+	writes the off-diagonal mass as
+	$\frac12\sum_b\|(Z_{i,b}-Z_{j,b})\ket{\hat\psi}\|^2
+	+\frac12\sum_{a,b}\|D^X_aW_b\ket{\hat\psi}\|^2$.
+	Substitute
+	$D^X_aW_b=W_bD^X_a+Z_{j,b}[X_{i,a},Z_{i,b}]
+	-Z_{i,b}[X_{j,a},Z_{j,b}]$ and use contraction and the squared
+	three-term triangle inequality. Averaging uses point self-consistency
+	and Lemma~\ref{lem:combined-point-commutation}.
+\end{proof}
+
+\begin{lemma}[Orthonormalization of the point sandwiches]
+	\label{lem:combined-point-sandwich-rounding}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.exists_projective_close_sandwich_alice}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.exists_projective_close_sandwich_bob}
+	\leanok
+	\uses{def:combined-point-sandwich, def:combined-point-sandwich-defect,
+		def:povm-conventions}
+	For each of the ordered placement pairs
+	$(i,j)=(AA',BA'')$ and $(BA'',AA')$, there are projective measurements
+	$\{Q^{x,z}_{a,b}\}_{a,b\in\F_q}$ on the original expanded local space
+	of the player at $i$ such that
+	\[
+		\E_{x,z}\sum_{a,b}\|((Q^{x,z}_{a,b})_i-R_{i,a,b})\ket{\hat\psi}\|^2
+		\leq220\bigl(\E_{x,z}c_{x,z}^{i,j}\bigr)^{1/4}.
+	\]
+	This is the field-valued counterpart of the source's application of
+	orthonormalization to the binary sandwich.
+	% Source: references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:782--786.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:combined-point-sandwich-consistency, lem:ortho-explicit-constant,
+		lem:distance-averaged-square-root}
+	Regroup the registers as $AA'\mid BA''(B'B'')$ or
+	$BA''\mid AA'(B'B'')$, respectively. For each point pair apply
+	Lemma~\ref{lem:ortho-explicit-constant} with defect bound $c_{x,z}^{i,j}$.
+	Average and apply the square-root averaging inequality twice to obtain
+	$\E c^{1/4}\leq(\E c)^{1/4}$.
+\end{proof}
+
 \begin{lemma}[Combined point measurements]
 	\label{lem:qld-4-10}
 	\lean{MIPStarRE.QPBT.CombinedPointsWitness}
@@ -854,6 +1034,9 @@ linearity theorem and its source application separately.
 \begin{proof}
 	\leanok
 	\uses{lem:qld-comm-cons, lem:qld-win-implications-obs,
+		def:combined-point-sandwich, lem:combined-point-commutation,
+		lem:combined-point-sandwich-comparisons,
+		lem:combined-point-sandwich-consistency, lem:combined-point-sandwich-rounding,
 		def:expanded-point-measurement, lem:expanded-point-measurement-properties,
 		def:expanded-observables, lem:cancellation, fact:add-a-proj,
 		fact:agreement, lem:ortho-explicit-constant,
@@ -930,10 +1113,12 @@ linearity theorem and its source application separately.
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.combinedLineMeasurement}
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.combinedLineMeasurement_effect}
 	\leanok
-	\uses{def:expanded-line-measurement, def:povm-conventions}
+	\uses{def:expanded-line-measurement, def:povm-conventions, def:ideg-deg-polynomials}
 	For either player with space $\hilb$ and lines $\ell_X,\ell_Z$, define
 	the measurement on $\hilb\ot(\C^q)^{\ot M}$ with outcomes
-	$(f_X,f_Z)\in\deg_{md}(\ell_X)\times\deg_{md}(\ell_Z)$ by
+	$(f_X,f_Z)\in\deg_{md}(\ell_X)\times\deg_{md}(\ell_Z)$, using the
+	coefficient-representative convention of
+	Definition~\ref{def:ideg-deg-polynomials}, by
 	\[
 		T^{\ell_X,\ell_Z}_{f_X,f_Z}
 		=\hat M^{(\mathrm{Line},X),\ell_X}_{f_X}
