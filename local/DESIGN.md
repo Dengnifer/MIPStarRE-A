@@ -155,9 +155,10 @@ All appends are one-line JSON; schemas documented in `protocols/meta.md`.
   an explicit reason. Unknown classes/models and other efforts fail closed.
   External dispatch keeps fan-out off. Native descendants share their
   root's verified configured cap and account allocation; neither is provider
-  throughput evidence. The current Space receipt records five total slots,
-  three native descendants and external admission zero. This model change does
-  not resize that allocation or permit an additional pool.
+  throughput evidence. The current Space allocation is ten total sessions: the root plus
+  at most nine native descendants, with a useful target of nine, a floor of eight, and
+  external admission zero. This model policy does not resize that allocation or permit an
+  additional pool.
 - Every admission reads account mode (default primary; restoring both requires owner approval).
   Twelve primary slots include main; only named interactive CWDs are exempt from accounting.
   Other same-key use reduces capacity. See `protocols/sessions.md` for reconciliation and
