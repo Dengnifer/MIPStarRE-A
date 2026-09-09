@@ -1,0 +1,46 @@
+{
+  "schema": "qpbt-primary-refill-handoff-ack-v1",
+  "recorded_at": "2026-09-08T08:54:00Z",
+  "agent": "/root/space_sol_publication_finish",
+  "thread_id": "01a07f4f-c9e8-7103-b007-ff6c713246e0",
+  "acknowledged_policy": true,
+  "executable_refill_control_accepted": false,
+  "capabilities": {
+    "collaboration_list_agents_available": false,
+    "collaboration_followup_task_available": false,
+    "observer_reads_available": true,
+    "activity_reporting_available": true,
+    "sole_primary_telemetry_and_integration_available": true
+  },
+  "exact_blocker": "This turn's tool registry exposes no collaboration.list_agents or collaboration.followup_task tool. A local codex queue fallback to existing root/delegate threads returned exit 4: primary-only policy: preserve the old thread; use a checkpoint continuation.",
+  "validated_fallback_owner": {
+    "selected_by": "/root",
+    "agent": "/root/sol_ci320",
+    "role": "approved refill mechanics continuation after focused trigger tests"
+  },
+  "retained_primary_role": {
+    "agent": "/root/space_sol_publication_finish",
+    "scope": "sole primary telemetry, CI/review publisher, service merge, restoration and publication coordination",
+    "current_gate": "PR356 APPROVED; quiet preservation and service merge",
+    "frozen_main": "af87d3f2f5787ea3fea793260f995ea93f47ba85"
+  },
+  "policy": {
+    "space_total": 10,
+    "native_limit": 9,
+    "useful_native_floor": 8,
+    "activity_max_interval_seconds": 60,
+    "root_owns_proof_selection": true,
+    "root_owns_direct_review_binding": true,
+    "lease_or_capacity_changed": false,
+    "model_policy_changed": false,
+    "budget_reset": false,
+    "b8_attempts": 13,
+    "b8_working_seconds": 26509
+  },
+  "evidence": {
+    "delegate_receipt": "/tmp/qpbt-refill-delegate-status-20260908.json",
+    "sampler_journal": "/tmp/qpbt-worker-live-refill-20260908.jsonl",
+    "trigger_status": "/home/drx/.cache/mipstarre-dev/owner-tools/qpbt-vacancy-trigger/status.json",
+    "prior_ack_receipt": "/tmp/qpbt-refill-handoff-ack-space-sol-20260908.json"
+  }
+}
