@@ -6227,3 +6227,16 @@ not actual commit/publication hooks. No productive session was killed.
   accumulated telemetry through a separate bounded operation using github-sync.sh, with
   staged owner records preserved. Lesson: correct a narrowing assignment promptly and
   restore existing functionality before extending diagnostics or adding infrastructure.
+
+## 2026-09-09 - PR312 merge repair validation environment
+
+- Session `orc-311-20260909-01` retained both imports in the sole QPBT re-export
+  conflict, preserving the staged incoming paths and approved rejection proofs.
+  The first pre-commit run failed one model-policy test under inherited dispatch
+  variables. The isolated test and all 616 tests passed with `MIPSTARRE_CODEX_MODEL`,
+  `MIPSTARRE_JOB_CLASS`, and `MIPSTARRE_HARDNESS_REASON` unset for validation only.
+  No model, account, credential, service, or hook configuration changed.
+- Canonical `ci.sh` unconditionally appends build telemetry in the primary checkout.
+  The repair assignment forbids main writes; the session requested authorization
+  for that mandatory append before running canonical CI. The tool has no telemetry
+  destination override. Keep this boundary explicit in future bounded assignments.
