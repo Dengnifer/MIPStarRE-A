@@ -848,8 +848,8 @@ assembled by Fourier averaging.
 	\uses{lem:qld-comm-cons, fact:agreement, lem:ortho,
 		def:expanded-point-measurement, def:povm-distance}
 	On each original expanded local space, form the $\F_q^2$-valued sandwich
-	POVM $R^{x,z}_{a,b}=M^{(\mathrm{Point},Z),z}_{b}
-	M^{(\mathrm{Point},X),x}_{a}M^{(\mathrm{Point},Z),z}_{b}$.
+	POVM $R^{x,z}_{a,b}=\hat{M}^{(\mathrm{Point},Z),z}_{b}
+	\hat{M}^{(\mathrm{Point},X),x}_{a}\hat{M}^{(\mathrm{Point},Z),z}_{b}$.
 	The field-valued commutation estimate compares this POVM with both ordered
 	products.  An exact overlap identity and the point-measurement consistency
 	bounds give self-consistency of the two opposite placements.  Applying
@@ -868,22 +868,72 @@ assembled by Fourier averaging.
 	\label{lem:supplied-combined-point-line-marginals}
 	\lean{MIPStarRE.QPBT.exists_combinedPoints_line_marginal_distance_le}
 	\leanok
-	\uses{lem:qld-comm-line-cons, def:line-point-dist, def:povm-distance}
+	\uses{lem:qld-comm-line-cons, def:expanded-point-measurement,
+		def:symmetric-equivalents, def:line-point-dist, def:povm-distance}
 	There is a universal constant $C\geq 1$ with the following property.  For
-	every supplied combined-point witness $Q$ with error $\delta_Q$ and every
-	pair of opposite placements, sample $(\ell_X,x)$ and $(\ell_Z,z)$
-	independently from the line-point distribution.  After completing each
-	coordinate marginal with the zero outcome, the $X$ marginal at $(x,z)$ is
+	every real $\delta_Q$, let $\{\hat{Q}^{x,z}_{a,b}\}_{a,b\in\F_q}$ be
+	projective measurements on each player's expanded local space.  Assume
+	that for every ordered pair of opposite placements $(p_1,p_2)$ in
+	Definition~\ref{def:symmetric-equivalents}, the following exact bounds hold,
+	where $x,z\in\F_q^m$ are independently uniform:
+	\begin{align*}
+		\E_{x,z}\sum_{a,b\in\F_q}
+		\big\lVert\bigl((\hat{Q}^{x,z}_{a,b})_{p_1}
+		-(\hat{Q}^{x,z}_{a,b})_{p_2}\bigr)\ket{\hat\psi}\big\rVert^2
+		&\leq\delta_Q\,,\\
+		\E_{x,z}\sum_{a,b\in\F_q}
+		\big\lVert\bigl((\hat{Q}^{x,z}_{a,b})_{p_1}
+		-(\hat{M}^{(\mathrm{Point},X),x}_{a}
+		\hat{M}^{(\mathrm{Point},Z),z}_{b})_{p_2}\bigr)
+		\ket{\hat\psi}\big\rVert^2
+		&\leq\delta_Q\,,\\
+		\E_{x,z}\sum_{a,b\in\F_q}
+		\big\lVert\bigl((\hat{Q}^{x,z}_{a,b})_{p_1}
+		-(\hat{M}^{(\mathrm{Point},Z),z}_{b}
+		\hat{M}^{(\mathrm{Point},X),x}_{a})_{p_2}\bigr)
+		\ket{\hat\psi}\big\rVert^2
+		&\leq\delta_Q\,.
+	\end{align*}
+	Then, for every such pair $(p_1,p_2)$, sample $(\ell_X,x)$ and $(\ell_Z,z)$
+	independently from the line-point distribution.  After adjoining a
+	zero-effect outcome to each coordinate marginal, the $X$ marginal of
+	$\hat Q$ at $(x,z)$ on $p_1$ is
 	within squared operator-family distance
 	\[
 		8\delta_Q+C\bigl(\eps+\delta_{\mathrm{Line}}(\eps)\bigr)
 	\]
-	of the evaluation of the $X$-line measurement at the first sample, and the
-	$Z$ marginal satisfies the same bound against the evaluation of the
-	$Z$-line measurement at the second sample.  The witness $Q$, its error, and
+	of the completed evaluation of the expanded $X$-line measurement on $p_2$
+	at the first sample, and the $Z$ marginal satisfies the same bound against
+	the completed evaluation of the expanded $Z$-line measurement on $p_2$
+	at the second sample.  The family $\hat Q$, its error, and
 	the two independently sampled line-point pairs are retained as inputs; this
 	is an auxiliary comparison and does not construct the combined line POVM.
 \end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-comm-cons, lem:qld-comm-line-cons, fact:triangle,
+		def:expanded-point-measurement, def:line-point-dist, def:povm-distance}
+	Projectivity and orthogonality of the joint and expanded point measurements,
+	together with commutation across opposite placements, give a marginal
+	contraction estimate: the $X$ marginal on $p_1$ is within squared distance
+	$4\delta_Q$ of the expanded $X$-point measurement on $p_2$, using the
+	$ZX$ bound above.  The $Z$ marginal satisfies the corresponding estimate
+	using the $XZ$ bound.  These estimates follow by splitting each marginal
+	difference into its component absorbed by the opposite point projections
+	and its remainder, bounding each by the ordered-product error, and applying
+	the squared triangle inequality.
+	The point marginal of the line-point distribution is uniform, so both
+	estimates hold under the independent line-point sampling.  Adjoining a
+	zero-effect outcome preserves the distances.
+	Item~3 of Lemma~\ref{lem:qld-comm-line-cons} and expanded-point
+	self-consistency from Lemma~\ref{lem:qld-comm-cons}, joined through the
+	opposite placement by the triangle inequality, bound the distance between
+	the completed expanded point and evaluated line measurements on $p_2$ by
+	$C_0(\eps+\delta_{\mathrm{Line}}(\eps))$ for a universal $C_0\geq1$.
+	A final squared triangle inequality gives
+	$8\delta_Q+2C_0(\eps+\delta_{\mathrm{Line}}(\eps))$ for both marginals.
+	Take $C=2C_0$.
+\end{proof}
 
 \section{Combined line measurements}
 
