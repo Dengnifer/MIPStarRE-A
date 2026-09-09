@@ -35,7 +35,7 @@ and the commutators on the two placements, since
 Paper `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:743-790`,
 blueprint `blueprint/src/chapter/ch15_qpbt_combining.tex:851-880`
 (`lem:qld-4-10`, first step); the identity route is explained in
-`docs/paper-gaps/qpbt_linearity-theorem-quotation.tex`.
+`docs/paper-gaps/qpbt_combined-points-direct.tex`.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder
