@@ -5305,7 +5305,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/118",
   "issue_dependencies_summary": {
-   "blocked_by": 4,
+   "blocked_by": 3,
    "total_blocked_by": 4,
    "blocking": 1,
    "total_blocking": 1
@@ -5547,7 +5547,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/118",
   "issue_dependencies_summary": {
-   "blocked_by": 2,
+   "blocked_by": 1,
    "total_blocked_by": 2,
    "blocking": 2,
    "total_blocking": 2
@@ -5753,7 +5753,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/167",
   "issue_dependencies_summary": {
-   "blocked_by": 1,
+   "blocked_by": 0,
    "total_blocked_by": 1,
    "blocking": 0,
    "total_blocking": 0
@@ -5874,7 +5874,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/118",
   "issue_dependencies_summary": {
-   "blocked_by": 1,
+   "blocked_by": 0,
    "total_blocked_by": 1,
    "blocking": 3,
    "total_blocking": 3
@@ -5894,212 +5894,6 @@
    "eyes": 0
   },
   "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/376/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/373",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/373/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/373/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/373/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/373",
-  "id": 5386547198,
-  "node_id": "I_kwDOUJyJf88AAAABQRAv_g",
-  "number": 373,
-  "title": "proof(QPBT/Combining): discharge restricted seed mass",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement"
-   },
-   {
-    "id": 12025012183,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8f1w",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/qpbt-analysis",
-    "name": "qpbt-analysis",
-    "color": "ededed",
-    "default": false,
-    "description": "Soundness/rigidity analysis of the Pauli basis test \u2014 self-testing bounds and error terms"
-   },
-   {
-    "id": 12025012384,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8goA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/proof",
-    "name": "proof",
-    "color": "ededed",
-    "default": false,
-    "description": "Issue is primarily about proving an existing result"
-   },
-   {
-    "id": 12025012779,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8iKw",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/sorry-elimination",
-    "name": "sorry-elimination",
-    "color": "ededed",
-    "default": false,
-    "description": "Explicitly aimed at discharging remaining `sorry` sites"
-   },
-   {
-    "id": 12025013584,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8lUA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/paper-2001.04383",
-    "name": "paper-2001.04383",
-    "color": "ededed",
-    "default": false,
-    "description": "MIP*=RE (arXiv:2001.04383) \u2014 the primary paper of this track"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-08T12:13:43Z",
-  "updated_at": "2026-09-08T12:13:43Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/118",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 0,
-   "blocking": 3,
-   "total_blocking": 3
-  },
-  "body": "<!-- mipstarre-issue-key: qpbt-restricted-seed-mass-20260908 -->\n### Target declarations\n\nProve the existing tracked holes in `MIPStarRE/QPBT/Combining/Defs.lean`:\n\n- `restrictedALineSeedEvent_positive`\n- `restrictedDLineSeedEvent_positive`\n\nA tightly local helper may be added if needed. Preserve both public statements for every `LdParams` and `i : Fin L.m`; do not add assumptions or alter the probability law.\n\n### Source and existing evidence\n\n- Paper: `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1038-1048`, `def:ith-restricted-line`.\n- The preserved issue-118 worktree contains an unpublished proof through a concrete seed-fiber witness; this packet extracts and revalidates only that proof against current `main`.\n- Relevant API: `chiIndex_seedOfIndexResidue`, `LdParams.seedFiberCard_pos`, and `clDistribution`.\n\n### Acceptance\n\n- Both target declarations contain kernel-checked proofs with unchanged statements.\n- No new `sorry`, axiom, bypass, conditional hypothesis, or distribution change.\n- Focused Lean check, target proof-debt scan, import check, hooks, and three-axiom inspection pass.\n- Publication follows the exact-head local CI and independent-review workflow.\n\n---\nProof extraction sub-issue of #118.",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/373/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/373/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/370",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/370/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/370/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/370/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/370",
-  "id": 5386454059,
-  "node_id": "I_kwDOUJyJf88AAAABQQ7EKw",
-  "number": 370,
-  "title": "feat(QPBT/Extraction): land tilde measurement algebra",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-08T12:04:11Z",
-  "updated_at": "2026-09-08T12:04:11Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/167",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 0,
-   "blocking": 1,
-   "total_blocking": 1
-  },
-  "body": "<!-- mipstarre-issue-key: qpbt-tilde-measurement-algebra-recovery -->\n### Target declarations\n\n- `MIPStarRE/QPBT/Extraction/Observables.lean`: `tildeM_isProj`\n- `MIPStarRE/QPBT/Extraction/Observables.lean`: `sum_tildeM_eq_one`\n\n### Source and scope\n\n- Paper: `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1421-1435`,\n  Equation `eq:tilde_M`.\n- Reuse the completed local proof evidence preserved on #120 / PR #293, but\n  transplant only the two theorem bodies onto current main.\n- These are algebraic consequences of a supplied `GlobalPairWitness`; this\n  issue does not construct that witness or claim the source global-pair theorem.\n\n### Acceptance\n\n- Preserve both public theorem statements, heterogeneous carriers, and all\n  zero-vector cases with no additional premises.\n- Use the existing marginal projectivity, dot-product projector, finite-sum,\n  and heterogeneous Kronecker APIs.\n- Add no axiom, proof bypass, helper with `sorry`, or unrelated extraction work.\n- Focused Lean checks, proof-hole scan, axiom audit, hooks, checked publication,\n  exact-head CI, and independent review are required.\n\n---\nRecovery packet under #167; the preserved #120 / PR #293 branch remains untouched.\n",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/370/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/370/timeline",
   "performed_via_github_app": null,
   "state_reason": null,
   "pinned_comment": null
@@ -9796,8 +9590,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 18,
-   "completed": 7,
-   "percent_completed": 38
+   "completed": 8,
+   "percent_completed": 44
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
   "issue_dependencies_summary": {
@@ -10718,8 +10512,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 36,
-   "completed": 1,
-   "percent_completed": 2
+   "completed": 2,
+   "percent_completed": 5
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/166",
   "issue_dependencies_summary": {
@@ -11858,9 +11652,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 222,
+  "comments": 224,
   "created_at": "2026-09-02T08:30:04Z",
-  "updated_at": "2026-09-09T05:08:45Z",
+  "updated_at": "2026-09-09T05:40:29Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
@@ -11942,9 +11736,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 48,
+  "comments": 49,
   "created_at": "2026-09-02T08:29:59Z",
-  "updated_at": "2026-09-09T01:18:07Z",
+  "updated_at": "2026-09-09T06:05:38Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
