@@ -34,3 +34,55 @@ issue #26 comment 5557148036, main granted a bounded, no-reset extension from
 13:57:30Z through 14:27:30Z for the already reviewed merge and guarded resume
 verification only. No source growth, new feature work, or gate relaxation was
 authorized.
+
+The 14:56:42Z watch snapshot remains an observational artifact, not a provider
+utilization certificate. The main-control receipt records one completion-to-next-
+turn latency and a later 185.063-second control-pass overrun without rewriting
+the earlier lifecycle samples. PR #372 subsequently merged through its normal
+exact-head gates; the unmerged and merged closure counts therefore remain
+separate observations at their respective timestamps.
+
+The 15:31:49Z snapshot further clarifies that fresh attributable output is a
+lower bound on productive activity, not a count of empty runtime slots. Occupied
+native slots, fresh output, and the owner's separate provider-dashboard range of
+6--8 requests remain distinct quantities; quietness alone is not vacancy
+evidence. Newly published proof packets such as PRs #398 and #401 remain
+unmerged observations until their ordinary CI, review, and service gates finish.
+
+The 16:33:44Z snapshot and successor receipt preserve the same distinction at
+the next service boundary. The successor list is an authorized readiness plan,
+not a set of occupied slots, and `/root/astra_refill_coordinator` remains the
+only demonstrated native refill operator. The accompanying meta-guidance input
+records delivery to main without claiming that its requested retirement audit
+was completed.
+
+The Claim 17-2 domain report is a read-only mathematical audit, not a merged or
+kernel-certified correction. It proposes a countermodel to the enlarged public
+witness domain and explicitly records that no Lean instantiation, source edit,
+or canonical review was performed. Main retains adjudication of that proposal;
+the archive does not treat it as a verified source theorem or a completed proof
+closure.
+
+The post-merge PR #426 sample records one genuinely prevalidated successor.
+The issue #422 payload was ready 751.310 seconds before the PR #365 predecessor
+completed, but the new task started 63.076 seconds after completion and therefore
+missed the strict 60-second target by 3.076 seconds. Its first attributable
+source read followed completion by 110.070 seconds. This is a failed acceptance
+sample, not a coverage or sustained-occupancy certificate; the earlier 294.078-
+and 354.659-second failures remain unchanged.
+
+The separate PR #448 routing incident preserves two independent steering
+errors: a head was misidentified as the required mixed bound, and a follow-up
+message reached an already occupied actor. Neither event created a new admission
+or budget. The original actor scope and deadline remained in force, and no
+source statement, review gate, capacity, model policy, or B8 history changed.
+
+The second selected post-merge PR #426 handoff sample also failed the strict
+60-second completion-to-start target. The PR #400 review-request payload was
+ready 881.014 seconds before its PR #422 predecessor completed, but the
+successor turn started after 73.171 seconds, a 13.171-second miss. The first
+attributable useful workflow-guard output followed completion after 110.991
+seconds. The original sealed eight-minute preparation budget and the later
+root-directed six-minute deadline are recorded separately without backdating
+or resetting costs. This sample does not overwrite the earlier 63.076-second
+miss and does not establish sustained coverage or runtime acceptance.
