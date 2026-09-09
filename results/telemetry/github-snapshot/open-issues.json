@@ -1,5 +1,98 @@
 [
  {
+  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/504",
+  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
+  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/504/labels{/name}",
+  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/504/comments",
+  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/504/events",
+  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/504",
+  "id": 5398253580,
+  "node_id": "I_kwDOUJyJf88AAAABQcLQDA",
+  "number": 504,
+  "title": "fix(local): propagate failures from canonical CI commands",
+  "user": {
+   "login": "Dengnifer",
+   "id": 89234078,
+   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
+   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/Dengnifer",
+   "html_url": "https://github.com/Dengnifer",
+   "followers_url": "https://api.github.com/users/Dengnifer/followers",
+   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
+   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
+   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
+   "repos_url": "https://api.github.com/users/Dengnifer/repos",
+   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
+   "type": "User",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "labels": [
+   {
+    "id": 12015972630,
+    "node_id": "LA_kwDOUJyJf88AAAACzDUxFg",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/bug",
+    "name": "bug",
+    "color": "d73a4a",
+    "default": true,
+    "description": "Something isn't working"
+   },
+   {
+    "id": 12025011061,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8bdQ",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/infrastructure",
+    "name": "infrastructure",
+    "color": "ededed",
+    "default": false,
+    "description": "Foundational definitions, shared APIs, or supporting layers"
+   }
+  ],
+  "state": "open",
+  "locked": false,
+  "assignees": [],
+  "milestone": null,
+  "comments": 0,
+  "created_at": "2026-09-09T10:32:28Z",
+  "updated_at": "2026-09-09T10:32:28Z",
+  "closed_at": null,
+  "assignee": null,
+  "author_association": "OWNER",
+  "active_lock_reason": null,
+  "sub_issues_summary": {
+   "total": 0,
+   "completed": 0,
+   "percent_completed": 0
+  },
+  "issue_dependencies_summary": {
+   "blocked_by": 0,
+   "total_blocked_by": 0,
+   "blocking": 0,
+   "total_blocking": 0
+  },
+  "body": "<!-- mipstarre-issue-key: ci-step-subshell-errexit-20260909 -->\nCanonical CI can publish a successful gate after a required command fails.\n\nPR487 provides concrete evidence: two full runs at\n`b1ae4d2f9af36ebc3e35b1dd87a9342d179222b8` logged regression-test failures but\npublished `local-ci/blueprint-sync=success` and a successful summary. The\noperator's receipt is\n`~/.cache/mipstarre-dev/recoveries/pr487-b1ae4d2f-handoff.md`; the first and\nsecond full manifests and logs are retained beside it. A later isolated partial\nrun passed all 616 tests, but that does not repair the driver's propagation bug.\n\n`local/bin/ci.sh` disables errexit in the parent while collecting each step's\nexit code, then invokes `run_step_body` in a subshell without reenabling it.\nIn `step_blueprint_sync`, a failed unittest command is followed by successful\nsync commands, so the subshell returns success. A read-only shell reproduction\nreturned zero after `false` followed by a successful command; enabling errexit\ninside the subshell returned nonzero before the later command ran.\n\nScope: fix the shared step runner so required failures propagate while the\nparent still records the failure, releases locks and continues collecting other\nstep results. Preserve deliberately advisory commands and missing-tool/error\nclassification. Inspect the other step functions for effects of the same caller.\nUse the smallest change consistent with existing shell patterns; no new runner\nframework, account/model policy, mathematical statements or daemon changes.\n\nAdd focused regression coverage that executes the driver with a failing required\ncommand followed by a succeeding command and checks both step and overall\nfailure. Include a successful case and evidence that later independent steps\nand lock cleanup still work. Keep fixtures isolated from live GitHub and model\nendpoints. Do not replace behavior coverage by checking source text.\n\nBudget: at most two hours and 1000 changed lines, with a target below 250 lines.\nPreserve all existing work. Use a prepared worktree and normal checked branch\npublication, canonical CI and independent review. The main session may not edit\nor push the primary implementation; the merge daemon remains the only merger.\n\nOperational mitigation: PR487's pre-model review was held and a complete\ncanonical run started with the five invoking-session metadata variables removed,\nmatching the environment that passed the targeted 616-test rerun. Review must\nwait for its complete, actually successful evidence. Do not claim partial CI as\nfull CI or silently trust a masked-success log.",
+  "closed_by": null,
+  "reactions": {
+   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/504/reactions",
+   "total_count": 0,
+   "+1": 0,
+   "-1": 0,
+   "laugh": 0,
+   "hooray": 0,
+   "confused": 0,
+   "heart": 0,
+   "rocket": 0,
+   "eyes": 0
+  },
+  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/504/timeline",
+  "performed_via_github_app": null,
+  "state_reason": null,
+  "pinned_comment": null
+ },
+ {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/502",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/502/labels{/name}",
@@ -5964,100 +6057,6 @@
   "pinned_comment": null
  },
  {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/353",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/353/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/353/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/353/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/353",
-  "id": 5383590721,
-  "node_id": "I_kwDOUJyJf88AAAABQOMTQQ",
-  "number": 353,
-  "title": "feat(QPBT/Combining): transport diagonal parameter defect",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement"
-   },
-   {
-    "id": 12025012183,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8f1w",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/qpbt-analysis",
-    "name": "qpbt-analysis",
-    "color": "ededed",
-    "default": false,
-    "description": "Soundness/rigidity analysis of the Pauli basis test \u2014 self-testing bounds and error terms"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-08T07:25:56Z",
-  "updated_at": "2026-09-08T07:25:56Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/348",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 2,
-   "blocking": 0,
-   "total_blocking": 0
-  },
-  "body": "<!-- mipstarre-issue-key: qpbt-diagonal-parameter-defect-transport-20260908 -->\nThe same-line coefficient rejection bound and the independently evaluated\nline bound encode the diagonal evaluation defect through different public\ndefinitions. The first postprocesses `Qline` by `diagonalRead` and coefficient\nevaluation; the second uses the direct low-degree strategy answer measurement\nand its diagonal-answer reader.\n\nProve their exact equality by composing postprocessings, applying the published\n`diagonalRead_eval` theorem, and identifying `consistencyDefect` with the\ncorresponding mismatch average over the same diagonal-line marginal and\nindependent uniform parameter. Zero diagonal directions remain in the law.\n\nThis is a Lean-only transport lemma supporting the passing-value calculation\nunder #348. It adds no projectivity, nonzero-direction, producer, or branch-sum\nhypothesis and does not claim the source QPBT theorem.\n\nDependencies: #328 and #341.\n",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/353/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/353/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/348",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/348/labels{/name}",
@@ -6122,8 +6121,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 2,
-   "completed": 1,
-   "percent_completed": 50
+   "completed": 2,
+   "percent_completed": 100
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/119",
   "issue_dependencies_summary": {
@@ -11257,9 +11256,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 239,
+  "comments": 241,
   "created_at": "2026-09-02T08:30:04Z",
-  "updated_at": "2026-09-09T10:03:30Z",
+  "updated_at": "2026-09-09T10:47:58Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
