@@ -211,18 +211,34 @@ proof establishes the lemma only for padded strategies, which is a
 conditional statement of exactly the kind excluded from paper-facing
 declarations by \path{docs/paper-gaps/proof-gap-protocol.tex}.
 
-The ancilla cannot be removed afterwards.  Compressing the family along the
-ancilla returns the Fourier-square POVM: since $\{C^v\}$ dilates
+Compression need not preserve projectivity. Compressing the Fourier-derived
+projective measurement along the ancilla returns the Fourier-square POVM:
+since $\{C^v\}$ dilates
 $\{B^v\}$, one has
 $\langle\mathrm{anc}_t|\,\hat{Q}^{x,z}_{a,b}\,|\mathrm{anc}_t\rangle
 =\E_{r,s}(-1)^{\tr(ra+sb)}\sum_v(-1)^{v\cdot(r,s)}B^v
 =B^{(a,b)}=\bigl(\widehat{O}^{x,z,(a,b)}\bigr)^2$,
 where $\widehat{O}^{x,z,(a,b)}=\E_{r,s}(-1)^{\tr(ra+sb)}O^{x,z,r,s}$ is the
-Fourier coefficient of the original family.  This is a POVM on $H$, but it is
-projective only when the original family is already exactly linear.  Thus no
-choice of ancilla and no compression produces the projective measurement the
-lemma asserts from the output of the linearity theorem; the projectivity is
-purchased precisely by the extra dimensions.
+Fourier coefficient of the original family. The observables $L^u$ themselves
+compress to $\sum_v(-1)^{v\cdot u}B^v$, not to individual effects $B^v$.
+The provider's proof of Theorem~10 (\texttt{thm:qblr}),
+\path{references/nv-paper/fullpaper.tex:1095--1102}, guarantees that
+$\{B^v\}$ is a POVM on $H$, not that it is projective. For example, for
+$t=1$ and $O^0=Z$, $O^1=X$, where $X,Z$ are the Pauli matrices,
+$(Z+X)^2=(Z-X)^2=2I$, so both Fourier squares equal $I/2$ and are not
+projections. Changing the Naimark dilation does not change these compressed
+effects. Thus this compression alone does not in general give the projective
+measurement on $H$ required by the lemma.
+
+Conversely, projectivity of the Fourier squares does not imply exact
+linearity of the original family. For $t=1$ and $O^u=Z$ for every $u$,
+the Fourier coefficients are $Z$ at zero and zero elsewhere, so the
+Fourier-square POVM is $\{I,0\}$. Nevertheless,
+$O^uO^v=I\ne Z=O^{u+v}$. With
+$\rho=\operatorname{diag}(1-\eta,\eta)$, $0<\eta<1/2$, the averaged
+correlation is $1-2\eta$, allowing arbitrarily small positive error.
+The obstruction is therefore the absence of a general projectivity guarantee
+under compression, not a necessity of exact linearity for $O$.
 
 \paragraph{A direct construction on the original space.}
 The formal statement of Lemma~4.10 quantifies over every projective strategy
@@ -348,8 +364,9 @@ The companion declaration
 equivalent squared binary-measurement bound $\delta$.  The declaration
 \path{exists_exactly_linear_observables_commonAncilla} in the same file states
 the common-ancilla form: the ancillary space and vector are chosen first,
-depending on $t$ alone, and the conclusion is asserted for every space,
-weight, error, and family satisfying the hypothesis.  All three are proved.
+depending on $t$ alone, and the conclusion is asserted for every
+finite-dimensional complex space, weight, error, and family satisfying the
+hypothesis. All three are proved.
 They neither assume $\delta\leq1$ nor assert pointwise closeness, and the
 first records the correction to the provider's printed operator bound.  The
 normalization analysis was carried out in \ghissue{124} and the statement
@@ -365,7 +382,7 @@ orthonormalization with the concavity step.  The declaration
 \path{MIPStarRE/QPBT/Combining/Points.lean} is the source-facing statement of
 Lemma~4.10, with the source's hypotheses and conclusion, and it is proved
 without \texttt{sorry} by this route; the blueprint entry
-\path{lem:qld-4-10} carries statement- and proof-level \leanok, and the
+\path{lem:qld-4-10} carries statement- and proof-level \verb|\leanok|, and the
 supporting declarations are recorded there as formalization-support lemmas.
 The chapter-16 extraction declarations consume the concrete
 \path{GlobalPairWitness}; they do not assume a fiberwise linearity hypothesis
@@ -384,8 +401,8 @@ operator error at most $2\delta$, equivalently mean squared binary-measurement
 error at most $\delta$, and its ancilla depends only on the index length, so
 the fiberwise application is uniform.  What the source additionally assumes,
 zero-state padding of the strategy, is not a property of an arbitrary
-projective strategy and cannot be dispensed with in the source's route, since
-the ancilla is what makes the Fourier-averaged family projective.  The combined
+projective strategy. Compression does not in general remove the need for this
+padding in the source's route, since it need not preserve projectivity. The combined
 point measurements are therefore constructed on the original space directly:
 Parseval's identity transfers the approximate commutation to the
 $\F_q$-valued point measurements without loss, the sandwich POVM is then

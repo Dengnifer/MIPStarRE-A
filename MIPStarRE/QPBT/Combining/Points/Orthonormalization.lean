@@ -209,7 +209,8 @@ exhibited by the bipartition `e`, there is, for every point pair, a projective
 measurement on the local space of the first placement whose placed distance to
 the placed sandwich is at most `220` times the fourth root of the consistency
 bound; on average over the point pair the distance is at most `220` times the
-fourth root of the averaged bound.  This is the application of `lem:ortho` in
+fourth root of the averaged bound. Both distances are squared distances.
+This formalization-only auxiliary implements the application of `lem:ortho` in
 the proof of `lem:qld-4-10`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:786-790`,
 carried out for each point pair and averaged by Jensen's inequality. -/
@@ -229,6 +230,11 @@ theorem exists_projective_close_sandwich (hopp : p₁.IsOpposite p₂)
     ∃ Q : PointPair P →
         Measurement (PauliScalar P × PauliScalar P) (S.ExpandedLocalSpace p₁.side),
       (∀ xz, MIPStarRE.QPBT.Measurement.IsProjective (Q xz)) ∧
+        (∀ xz, ∑ ab : PauliScalar P × PauliScalar P, ‖applyOperatorToState
+          (S.place p₁ ((Q xz).effect ab) -
+            S.place p₁ ((S.sandwichPoint p₁.side xz.1 xz.2).effect ab))
+          S.psiHat‖ ^ 2 ≤
+          220 * Real.rpow (S.sandwichDefectBound p₁ p₂ xz) (1 / 4 : ℝ)) ∧
         opFamilyDistSq (uniformDistribution (PointPair P))
           (fun xz (ab : PauliScalar P × PauliScalar P) =>
             S.place p₁ ((Q xz).effect ab))
@@ -266,7 +272,7 @@ theorem exists_projective_close_sandwich (hopp : p₁.IsOpposite p₂)
     rw [opFamilyDistSq_reindex_left_eq S p₁ p₂ e he₁] at hdist
     exact hdist
   choose Q hQ using hxz
-  refine ⟨Q, fun xz => (hQ xz).1, ?_⟩
+  refine ⟨Q, fun xz => (hQ xz).1, fun xz => (hQ xz).2, ?_⟩
   unfold opFamilyDistSq
   calc avgOver (uniformDistribution (PointPair P)) (fun xz =>
         ∑ ab : PauliScalar P × PauliScalar P, ‖applyOperatorToState
@@ -293,6 +299,11 @@ theorem exists_projective_close_sandwich_alice (S : ProjectiveSetting P ε) :
     ∃ Q : PointPair P →
         Measurement (PauliScalar P × PauliScalar P) (S.ExpandedLocalSpace .alice),
       (∀ xz, MIPStarRE.QPBT.Measurement.IsProjective (Q xz)) ∧
+        (∀ xz, ∑ ab : PauliScalar P × PauliScalar P, ‖applyOperatorToState
+          (S.place .AA' ((Q xz).effect ab) -
+            S.place .AA' ((S.sandwichPoint .alice xz.1 xz.2).effect ab))
+          S.psiHat‖ ^ 2 ≤
+          220 * Real.rpow (S.sandwichDefectBound .AA' .BA'' xz) (1 / 4 : ℝ)) ∧
         opFamilyDistSq (uniformDistribution (PointPair P))
           (fun xz (ab : PauliScalar P × PauliScalar P) =>
             S.place .AA' ((Q xz).effect ab))
@@ -311,6 +322,11 @@ theorem exists_projective_close_sandwich_bob (S : ProjectiveSetting P ε) :
     ∃ Q : PointPair P →
         Measurement (PauliScalar P × PauliScalar P) (S.ExpandedLocalSpace .bob),
       (∀ xz, MIPStarRE.QPBT.Measurement.IsProjective (Q xz)) ∧
+        (∀ xz, ∑ ab : PauliScalar P × PauliScalar P, ‖applyOperatorToState
+          (S.place .BA'' ((Q xz).effect ab) -
+            S.place .BA'' ((S.sandwichPoint .bob xz.1 xz.2).effect ab))
+          S.psiHat‖ ^ 2 ≤
+          220 * Real.rpow (S.sandwichDefectBound .BA'' .AA' xz) (1 / 4 : ℝ)) ∧
         opFamilyDistSq (uniformDistribution (PointPair P))
           (fun xz (ab : PauliScalar P × PauliScalar P) =>
             S.place .BA'' ((Q xz).effect ab))

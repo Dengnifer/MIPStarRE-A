@@ -305,10 +305,15 @@ and makes the sandwich projective by the orthonormalization lemma.
 	is the source's assumption that $\ket{\hat\psi}$ ``has sufficiently
 	many ancilla zero qubits'', an assumption on the strategy that is not
 	part of the setting of Lemma~\ref{lem:qld-4-10}, and it cannot be
-	discharged afterwards, because the compression of the exactly linear
-	family along $\ket{\mathrm{anc}}$ is the Fourier-square POVM
-	$B^v = (\widehat{\mathcal{O}}^v)^2$, which is projective only when the
-	original family is already exactly linear. Lemma~\ref{lem:qld-4-10} is
+	discharged in general by compression. The Fourier-derived projective
+	measurement of the exactly linear family compresses along
+	$\ket{\mathrm{anc}}$ to the Fourier-square POVM
+	$B^v = (\widehat{\mathcal{O}}^v)^2$, which need not be projective.
+	The compressed observables themselves are
+	$\sum_v (-1)^{v\cdot u} B^v$. Projectivity of $\{B^v\}$ does not imply
+	exact linearity of the original family: a constant observable
+	$\mathcal{O}^u=\operatorname{diag}(1,-1)$ has Fourier squares $I$ at zero
+	and zero elsewhere, but is not exactly linear. Lemma~\ref{lem:qld-4-10} is
 	therefore proved on the original space by a route that does not pass
 	through Theorem~\ref{thm:linearity}; see its proof and
 	\cite{gap:qpbt_linearity-theorem-quotation}.
@@ -322,9 +327,10 @@ and makes the sandwich projective by the orthonormalization lemma.
 	This formalization-only auxiliary is not a named statement of
 	\cite{Natarajan2017Linearity}; it records that the ancilla of
 	Theorem~\ref{thm:linearity} depends only on the index length. For every
-	positive integer $t$ there are a Hilbert space $\hilb'_t$ and a pure state
-	$\ket{\mathrm{anc}_t} \in \hilb'_t$ such that, for every Hilbert space
-	$\hilb$, every density operator $\rho$ on $\hilb$, every $\delta \ge 0$,
+	positive integer $t$ there are a finite-dimensional complex Hilbert space
+	$\hilb'_t$ and a pure state $\ket{\mathrm{anc}_t} \in \hilb'_t$ such that,
+	for every finite-dimensional complex Hilbert space $\hilb$, every density
+	operator $\rho$ on $\hilb$, every $\delta \ge 0$,
 	and every family of binary observables $\{\mathcal{O}^u\}_{u \in \F_2^t}$
 	on $\hilb$ satisfying the correlation hypothesis of
 	Theorem~\ref{thm:linearity}, there are binary observables
@@ -974,9 +980,11 @@ and makes the sandwich projective by the orthonormalization lemma.
 	\uses{lem:qld-sandwich, lem:qld-placement-transfer, def:consistency,
 		fact:agreement, lem:qld-comm-cons, lem:qld-point-commutation-field}
 	This formalization-only auxiliary is not a named statement of the paper;
-	it replaces the Cauchy--Schwarz chain of displays
-	\eqref{eq:qld-rw-self-cons-1}--\eqref{eq:qld-rw-self-cons-4} of the
-	source by an exact identity. Let $P_1, P_2$ denote the two placements of an
+	it replaces the Cauchy--Schwarz calculation in the first step of the proof
+	of Lemma~4.10 of \cite{Ji2020MIPStar}
+	(\texttt{references/qpbt-paper/14\_analysis\_of\_the\_pauli\_basis\_test.tex},
+	lines~747--778) by an exact identity.
+	Let $P_1, P_2$ denote the two placements of an
 	operator $P$ on a pair of opposite register pairs, let
 	$W_b = (\hat{M}^Z_b)_1 (\hat{M}^Z_b)_2$, and let
 	$D^W_c = (\hat{M}^W_c)_1 - (\hat{M}^W_c)_2$. Then, for fixed $(x,z)$,
@@ -1161,8 +1169,10 @@ and makes the sandwich projective by the orthonormalization lemma.
 	\eqref{eq:qld-q-self-cons}, with all symmetric equivalents. When
 	$\eps \le 1$ the error terms $\eps$, $\sqrt{\eps}$, and
 	$(\eps + \sqrt{\eps})^{1/4}$ are bounded by multiples of $\eps^{1/8}$;
-	when $\eps > 1$ the state-dependent distance between two families of
-	operators whose squares sum to at most the identity is at most $4$. Hence
+	when $\eps > 1$, any two operator families satisfying
+	$\sum_a A_a^\dagger A_a \le \Id$ and
+	$\sum_a B_a^\dagger B_a \le \Id$ for every question have averaged squared
+	state-dependent distance at most $4$ on the unit state $\ket{\hat\psi}$. Hence
 	$\delta_Q(\eps) = K \eps^{1/8}$ for a universal constant $K$.
 \end{proof}
 
@@ -1320,8 +1330,7 @@ analyzed, together with candidate repairs, in
 
 \begin{lemma}[Combined point measurement on the extended coordinates]
 	\label{lem:qld-4-12}
-	\lean{MIPStarRE.QPBT.CombinedPointsWitness.extendedQ}
-	\lean{MIPStarRE.QPBT.extendedQ_spec}
+	\lean{MIPStarRE.QPBT.exists_extendedQ}
 	\leanok
 	\uses{lem:qld-4-10, def:expanded-state, def:expanded-point-measurement,
 		def:povm-distance, def:symmetric-equivalents}
@@ -1362,6 +1371,8 @@ analyzed, together with candidate repairs, in
 	Furthermore, all symmetric equivalents of these approximations also hold.
 \end{lemma}
 \begin{proof}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.extendedQ}
+	\lean{MIPStarRE.QPBT.extendedQ_spec}
 	\leanok
 	\uses{lem:qld-4-10, fact:data-processing}
 	Define
@@ -1448,6 +1459,10 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 	$1, \dots, i-1$ of $v$ are $0$. (The function $\chi$ is the one used in
 	the question distribution of the low individual degree game,
 	Definition~\ref{def:ld-question-distribution}.)
+	Here the paper's one-based indexing is retained: the index $i$ corresponds
+	to the Lean index $i_0:\mathrm{Fin}\,m$ with $i_0.\mathrm{val}=i-1$.
+	Thus $\chi(s)=i$ means \texttt{chiIndex}$(s)=i_0$, and the vanishing
+	coordinates correspond to Lean indices $j$ with $j.\mathrm{val}<i_0.\mathrm{val}$.
 \end{definition}
 
 \begin{lemma}[Restricted line distributions and error inflation]

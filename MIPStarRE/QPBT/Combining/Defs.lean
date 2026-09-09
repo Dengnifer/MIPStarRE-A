@@ -210,41 +210,6 @@ noncomputable def combineLinePolynomial {K : Type*} [CommSemiring K] {c : ℕ}
       (linePolynomialOfCoefficients g).comp
         (Polynomial.C aZ + Polynomial.C bZ * Polynomial.X)
 
-/-- Formalization-only auxiliary: a bounded coefficient list of length `c + 1`
-represents a univariate polynomial of degree at most `c`.  This is the degree
-input of the bound accompanying Equation `eq:combine-lines` in
-`def:combine-map`, blueprint
-`blueprint/src/chapter/ch15_qpbt_combining.tex:459-479`, paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:984-989`. -/
-private theorem linePolynomialOfCoefficients_natDegree_le {K : Type*}
-    [Semiring K] {c : ℕ} (f : Fin (c + 1) → K) :
-    (linePolynomialOfCoefficients f).natDegree ≤ c := by
-  refine Polynomial.natDegree_sum_le_of_forall_le _ _ ?_
-  intro i _
-  refine Polynomial.natDegree_mul_le.trans ?_
-  rw [Polynomial.natDegree_C]
-  have h1 : (Polynomial.X ^ i.val : Polynomial K).natDegree ≤ i.val := by
-    refine Polynomial.natDegree_pow_le.trans ?_
-    have hX := Polynomial.natDegree_X_le (R := K)
-    calc i.val * (Polynomial.X : Polynomial K).natDegree ≤ i.val * 1 :=
-          Nat.mul_le_mul_left _ hX
-      _ = i.val := by ring
-  have h2 : i.val ≤ c := Nat.lt_succ_iff.mp i.isLt
-  omega
-
-/-- Formalization-only auxiliary: the affine reparameterization factors of
-Equation `eq:combine-lines` have degree at most one.  Blueprint
-`blueprint/src/chapter/ch15_qpbt_combining.tex:459-479`, paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:984-989`. -/
-private theorem affineFactor_natDegree_le {K : Type*} [CommSemiring K]
-    (u v : K) :
-    (Polynomial.C u + Polynomial.C v * Polynomial.X).natDegree ≤ 1 := by
-  refine (Polynomial.natDegree_add_le _ _).trans (max_le ?_ ?_)
-  · simp [Polynomial.natDegree_C]
-  · refine Polynomial.natDegree_mul_le.trans ?_
-    rw [Polynomial.natDegree_C]
-    simpa using Polynomial.natDegree_X_le (R := K)
-
 /-- The polynomial underlying `combineLinePoly` has degree at most `c + 1`.
 This is the degree assertion accompanying Equation `eq:combine-lines` in
 blueprint
