@@ -924,7 +924,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/118",
   "issue_dependencies_summary": {
-   "blocked_by": 4,
+   "blocked_by": 3,
    "total_blocked_by": 4,
    "blocking": 0,
    "total_blocking": 0
@@ -1028,91 +1028,6 @@
    "eyes": 0
   },
   "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/477/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/474",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/474/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/474/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/474/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/474",
-  "id": 5391710985,
-  "node_id": "I_kwDOUJyJf88AAAABQV77CQ",
-  "number": 474,
-  "title": "Prove the concrete restricted X overlap deficit",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025012384,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8goA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/proof",
-    "name": "proof",
-    "color": "ededed",
-    "default": false,
-    "description": "Issue is primarily about proving an existing result"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-08T20:43:53Z",
-  "updated_at": "2026-09-08T20:43:53Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/118",
-  "issue_dependencies_summary": {
-   "blocked_by": 3,
-   "total_blocked_by": 3,
-   "blocking": 1,
-   "total_blocking": 1
-  },
-  "body": "<!-- mipstarre-issue-key: concrete-x-overlap-deficit-20260909 -->\n### Goal\n\nProve the restricted concrete X-overlap deficit estimate needed by corrected Claim 17-2.\n\n### Scope\n\n- Use `ProjectiveSetting.combinedLineMeasurement_sum_Z`, the X subline mixture law, restricted-average inflation, and `expLine_point_cons`.\n- Keep the concrete `S.combinedLineMeasurement` domain and source error scale.\n- Do not edit Claim 17-2 or introduce bridge, equality, deficit, or arbitrary-witness assumptions.\n\n### Source\n\n- `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1168-1201`\n\n### Validation\n\n- Focused Lean check, proof-integrity scan, standard-three axiom audit, and hooks.\n\n---\nParent: #118\n",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/474/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/474/timeline",
   "performed_via_github_app": null,
   "state_reason": null,
   "pinned_comment": null
@@ -1264,7 +1179,7 @@
   "issue_dependencies_summary": {
    "blocked_by": 2,
    "total_blocked_by": 2,
-   "blocking": 2,
+   "blocking": 1,
    "total_blocking": 2
   },
   "body": "<!-- mipstarre-issue-key: subline-x-mixture-20260909 -->\n### Goal\n\nProve the X-coordinate analogue of `SubLineWitness.exists_avgOver_Z_eq_mixture` from the existing `SubLineWitness.source_mixture` field.\n\n### Scope\n\n- Add only the grounded X marginal averaging lemma needed by corrected Claim 17-2.\n- Preserve the current `SubLineWitness` and Claim 17-2 statements.\n- Do not add hypotheses, witness fields, conditional bridges, or unrelated pasting results.\n\n### Source\n\n- `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1168-1201`\n- Existing Z analogue in `MIPStarRE/QPBT/Combining/SubLineZDeficit.lean`\n\n### Validation\n\n- Focused Lean check of the new module.\n- Proof-hole and standard-three axiom audit.\n\n---\nParent: #118\n",
@@ -3520,7 +3435,7 @@
   "issue_dependencies_summary": {
    "blocked_by": 2,
    "total_blocked_by": 2,
-   "blocking": 4,
+   "blocking": 3,
    "total_blocking": 4
   },
   "body": "<!-- mipstarre-issue-key: qpbt-claim17-2-domain-repair-20260909 -->\n### Motivation\n\nThe public `subline_remove_X_factor` quantifies over every\n`CombinedLinesWitness`, but paper Claim `claim:17-2` uses the particular X-Z-X\nmeasurement defined at lines 942-949 of\n`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex`.\nAn independent mathematical audit found a counterexample to the enlarged\ndomain: a POVM uniform over constant polynomial pairs has ordered overlap\n`q^(-2)` and Z-only overlap `q^(-1)`, even at zero strategy error. Its degree\nand consistency fields hold with `deltaP = 1`. This counterexample is a\nmathematical calculation, not a kernel-certified Lean instance.\n\n### Scope\n\n- State C2 directly for `S.combinedLineMeasurement`, with the unchanged source\n  error `C * m * sqrt(deltaLine epsilon)` and no extra marginal hypothesis.\n- Retain the concrete measurement in the internal combined-line construction;\n  name and track any retained source consistency obligation.\n- Add a mathematical paper-gap note, blueprint clarification, and statement\n  integrity audit. Keep the existing unfinished C2 proof visible.\n- Preserve the abstract witness record and Claims 17-1 and 17-3. Do not\n  duplicate the separately owned concrete X-marginal lemma.\n\n### Source and Dependencies\n\nSource: `claim:17-2`, lines 1168-1201; construction lines 942-949; blueprint\n`lem:claim-17-2`.\n\nStart from PR #400, head `37a2e268bc1ef7434e13c9b8b3daf3c02d18b94e`, and the\nnecessary published PR #398 constructor dependency,\n`19ec21353f4bcaecb59441b81aa08358ab73f933`. The earlier proof attempt is #405.\nThis is source realignment, not a renewed full pasting attempt.\n\n### Validation\n\nFocused Lean checks, proof-debt and statement-integrity checks, blueprint\nrendering and declaration links, and normal publication gates. Independent\nreview must be performed by another session.",
@@ -3810,7 +3725,7 @@
   "issue_dependencies_summary": {
    "blocked_by": 0,
    "total_blocked_by": 0,
-   "blocking": 4,
+   "blocking": 3,
    "total_blocking": 4
   },
   "body": "<!-- mipstarre-issue-key: qpbt-combined-line-z-marginal -->\n### Target\n- Add `ProjectiveSetting.combinedLineMeasurement_sum_Z` in a standalone module\n  importing `MIPStarRE.QPBT.Combining.Lines.CombinedMeasurement`.\n\n### Source and scope\n- Base: published PR #398 head `19ec21353f4bcaecb59441b81aa08358ab73f933`.\n- Source: `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:942-963`.\n- Prove the exact X-outer marginal identity by Z-measurement completeness and\n  X-effect projectivity. This is a formalization-only constructor identity.\n\n### Acceptance\n- Preserve the exact heterogeneous carriers and existing constructor.\n- Do not claim a Z-first marginal, commutation relation, consistency estimate,\n  new witness hypothesis, or any global-pair/pasting theorem.\n- Focused Lean, standard-axiom, hooks, checked publication, and one primary CI\n  handoff pass.\n",
@@ -4303,7 +4218,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/118",
   "issue_dependencies_summary": {
-   "blocked_by": 2,
+   "blocked_by": 1,
    "total_blocked_by": 3,
    "blocking": 2,
    "total_blocking": 2
@@ -4555,109 +4470,6 @@
    "eyes": 0
   },
   "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/393/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/389",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/389/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/389/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/389/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/389",
-  "id": 5387676002,
-  "node_id": "I_kwDOUJyJf88AAAABQSFpYg",
-  "number": 389,
-  "title": "Repair combined-lines helper error domain",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement"
-   },
-   {
-    "id": 12025012183,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8f1w",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/qpbt-analysis",
-    "name": "qpbt-analysis",
-    "color": "ededed",
-    "default": false,
-    "description": "Soundness/rigidity analysis of the Pauli basis test \u2014 self-testing bounds and error terms"
-   },
-   {
-    "id": 12025012384,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8goA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/proof",
-    "name": "proof",
-    "color": "ededed",
-    "default": false,
-    "description": "Issue is primarily about proving an existing result"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-08T13:59:34Z",
-  "updated_at": "2026-09-08T13:59:34Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/118",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 0,
-   "blocking": 1,
-   "total_blocking": 1
-  },
-  "body": "<!-- mipstarre-issue-key: qpbt-combined-lines-error-domain-20260908 -->\n### Source\n\n- `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:882-894`\n- Blueprint label `lem:qld-xz-lines`\n- `docs/paper-gaps/qpbt_combined-lines-error-term.tex`\n\n### Problem\n\nThe current formalization-only helper\n`exists_combinedLinesWitness_ofPointsWitness` chooses a two-variable line-error\nfunction before universally quantifying an arbitrary scalar `deltaQ` and every\n`CombinedPointsWitness S deltaQ`. Its conclusion nevertheless bounds the line\ndefect by a function of only `epsilon` and `md/q`.\n\n`CombinedPointsWitness` uses `deltaQ` as the upper bound for its self-consistency\nand both ordered-product comparisons. With an unrestricted large `deltaQ`, those\nhypotheses do not give a quantity polynomially small in `epsilon`; the pasting\ncalculation necessarily retains the supplied point error. The helper is therefore\nstronger than both the source theorem and the available proof context.\n\n### Repair\n\n- Change only the conditional helper to accept `deltaQ : Real -> Real` and\n  `IsPolyErr deltaQ`, and require `CombinedPointsWitness S (deltaQ epsilon)`.\n- Preserve the source-facing `exists_combinedLinesWitness` statement exactly.\n- Document why the old arbitrary-scalar domain is not justified and record the\n  named construction obligations used by the preserved proof route.\n- Do not add a producer package, a new paper hypothesis, or a claim that the\n  source theorem has been proved.\n\n### Validation\n\n- Check the edited Lean statement and source-facing header.\n- Run the paper-gap note style check and focused statement-integrity audits.\n\n<!-- mipstarre-issue-key: qpbt-combined-lines-error-domain-20260908 -->",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/389/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/389/timeline",
   "performed_via_github_app": null,
   "state_reason": null,
   "pinned_comment": null
@@ -8540,9 +8352,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 21,
+  "comments": 22,
   "created_at": "2026-09-04T11:58:10Z",
-  "updated_at": "2026-09-09T10:07:48Z",
+  "updated_at": "2026-09-09T15:43:47Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
@@ -9573,8 +9385,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 36,
-   "completed": 8,
-   "percent_completed": 22
+   "completed": 10,
+   "percent_completed": 27
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/166",
   "issue_dependencies_summary": {
@@ -10713,9 +10525,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 266,
+  "comments": 267,
   "created_at": "2026-09-02T08:30:04Z",
-  "updated_at": "2026-09-09T15:27:17Z",
+  "updated_at": "2026-09-09T15:43:49Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
