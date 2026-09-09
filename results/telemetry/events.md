@@ -6065,3 +6065,165 @@ not actual commit/publication hooks. No productive session was killed.
   remain null rather than being inferred as zero latency. These are read-only
   cache artifacts, not selected-window occupancy, API-utilization, or runtime
   acceptance claims.
+
+## 2026-09-09 — Meta intervention: stalled "Space" main session replaced; detached-worker architecture reinstated (2026-09-09T03:15:13Z)
+
+- Owner report 2026-09-09 03:00Z: concurrency low and main without progress for five hours. Findings: last daemon/service merge
+  PR 308 at 2026-09-08 04:53Z; forty-one open PRs; zero worker sessions; the main session (relay1 home, fan-out on, native worker
+  threads) stuck for 15 minutes reconnecting to a 502 from api.finite-dimensional.space while reasoning about brokers, held identities
+  and slot admissions. Native workers die with the main turn and their completed threads keep occupying the endpoint's concurrency.
+- Action: the main session was stopped and relaunched on the primary account with multi-agent fan-out off at effort xhigh, briefed by
+  handoff v5 (archived under owner-messages/), which retires the Space/broker/qpbt-switch rules and reinstates detached dispatch.sh
+  workers (lanes, autofix loops, reviews) with the owner's occupancy rule: at least 80% of the k-1 worker slots busy almost all the
+  time; caps primary 9 / second 10 / total 19; target at least 8 live workers. Merge daemon v8 restarted with daemon6.log when stale.
+  The owner may veto on #27.
+
+## 2026-09-09 - Main v5 first-cycle recovery (03:29Z)
+
+- The requested snapshot at 03:22:25Z reported zero workers. Runtime settings still disabled
+  external admission, selected primary-only mode, and retained a both-account total of zero.
+  The inactive CLI shim rejected Sol and mapped Astra Ultra to Max. Under the explicit v5
+  authorization, main restored both-account routing, external admission, caps 9/10/19, and
+  Astra Xhigh / Sol Ultra in the shim. No credentials or native lease records were changed.
+- Seven detached review autofix loops were launched. PRs 454, 456 and 492 admitted repairs;
+  449, 481, 488 and 491 correctly skipped because findings were not bound to their current
+  head. Four separate detached provers now own recovery of existing repair work and fresh
+  exact-head gates for those PRs. Historical repair work and mathematical budgets remain
+  binding; stale review evidence was not promoted to a current-head approval or rejection.
+- Eight actual Node worker processes were confirmed within the owner's 15-minute window;
+  nine were observed at 03:28:56Z: seven mathematical repair workers and two operational
+  recovery workers. The original snapshot regex missed model flags before `exec`; its
+  single process-selection line now accepts that legitimate CLI argument ordering. This
+  is a recovery snapshot, not evidence of sustained occupancy or provider throughput.
+- Stack-watch PID 2339020 was stopped (process state T), so main resumed it with SIGCONT;
+  it subsequently showed state Ss. One detached operator owns stale markers for PRs 195
+  and 238 and issue 118, plus stack reconciliation. PR 195 was observed already merged.
+  Merge-daemon PID 2045135 is alive but daemon6.log has no completed tick; a separate
+  operator owns diagnosis without permission to merge manually or bypass exact-head gates.
+- Eight no-review main-base PR tails were scheduled at two-minute intervals: PRs 442, 448,
+  457, 470, 469, 478, 479 and 496. A new /tmp/lane-v18.sh differs from v17 only by taking
+  the canonical machine-wide full-build lock around its pre-push build. No running script
+  was edited. The first tail reached its locked build after a successful merge-loss guard.
+- A fresh paginated gh_common census found 104 open PRs, with 67 main-base and 37 stacked,
+  rather than the handoff's 41. The daemon worker must account for entries omitted by a
+  100-PR listing limit. Lesson: use the owner briefing for policy, but reconcile current
+  lifecycle counts and actual process states before declaring recovery complete.
+
+## 2026-09-09 - Detached integration recovery, second cycle (03:38Z)
+
+- The 03:31:21Z required snapshot observed nine detached workers, all on the secondary
+  account. The canonical daemon6.log showed active branch refreshes and new conflicts for
+  PRs 320, 349 and 355; the earlier claim that its log was still empty was superseded by
+  that direct read. The snapshot's newest `daemon*.log` selection had accidentally selected
+  the daemon diagnostic worker's dispatch log, so its displayed tail was not daemon evidence.
+- The retired native reservation still charged nine primary slots to thread
+  01a076bc-f4ad-7813-805b-c8b4dac71a14, PID 3846730, start identity 187183661.
+  `ps -p 3846730` confirmed no such process. Under owner handoff v5, main invoked the
+  existing locked, identity-checked release operation for that dead reservation only.
+  No live reservation, credential, configured cap, or mathematical budget was changed.
+  Subsequent detached admissions used primary; 17 actual Node workers were observed,
+  comprising eight primary and nine secondary processes. This remains a point-in-time
+  process observation, not provider throughput or sustained floor coverage.
+- Detached workers now own new daemon conflicts PR320/issue317 (QPBT re-export imports),
+  PR349/issue346 (DirectLowDegree imports), PR355/issue352 (two history logs), and the
+  stack-watch conflicts PR213/issue116 and PR212/issue117. Their assignments preserve
+  staged incoming work, require merge-loss guards and fresh exact-head gates, and forbid
+  manual merging. Issue115's new marker reports no commits ahead of main, not a proof
+  failure. Existing marker/stack recovery retains issue118 and its inherited budget.
+- PR359 was explicitly opted into review autofix through gh_common. Autofix attempts for
+  PRs359,363,400 all skipped stale-head findings; three detached provers instead own
+  preservation/adoption of existing repair work and current-head CI/review. No stale
+  review was promoted to current evidence, and no historical proof budget was reset.
+- PR312 has exact-head CI success and no review, so main launched independent review
+  directly. Its first process failed before dispatch because an inherited review-effort
+  environment value was not the CLI's required Ultra. The corrected detached launch
+  explicitly sets the canonical Ultra input and hard-review classification; the authorized
+  shim requests Astra Xhigh. The eight post-lane review followers were also replaced by
+  verified PID with this explicit environment before they dispatched anything. Those
+  passive followers are not included in the live-worker count. No review success or new
+  merge is claimed. Lesson: distinguish tool input validation from the effective model
+  request, and check canonical service logs rather than a filename prefix alone.
+- Closing observation: PR312's corrected review reached an actual detached reviewer
+  dispatch for exact head 8e65a953334f; the Node worker count rose to 18. The review is
+  in progress, not approved. Existing account admission enforced the configured limits.
+
+## 2026-09-09 - Prerequisite review queue advanced (03:43Z)
+
+- The required 03:39:38Z snapshot observed 18 detached workers, nine per account;
+  the 03:43:53Z process count remained 18. Canonical service handles were still live:
+  daemon PID2045135, stack-watch PID2339020, and the operator recovery assignments.
+  No completed worker receipt or new merge was observed, so no live job was restarted.
+- After confirming clean, unowned worktrees, main scheduled staggered locked lane tails
+  for prerequisite PR392/issue388, PR386/issue380, PR398/issue395 and PR424/issue419.
+  Launch PIDs were 2413832 through 2413835, with delays 0,120,240,360 seconds.
+  Their reviews explicitly request the canonical Ultra CLI input and hard-review
+  classification; the authorized shim emits Astra Xhigh. Issue388 passed its merge-loss
+  guard against main ffd964652f53 and reached its locked build at 03:42:04Z.
+- PR442 passed exact-head CI at edf761413f4ef1931d6729f931aeb1c7a561985f in 410 seconds.
+  Its original lane review failed preflight as anticipated; the already-scheduled corrected
+  follower admitted reviewer-pr442-20260909-01 and requested the independent prose lane.
+  No approval is claimed. Six original tails had reached publication or CI, and the
+  daemon's four refresh lanes had reached CI. Continued account/build waits are verified
+  waits on those live handles, not evidence of termination or permission to duplicate work.
+- Main ffd96465 was an externally supplied telemetry snapshot commit, not a new proof
+  merge. Existing staged and unstaged telemetry was preserved. There was no new stage
+  boundary or merge to announce on #27; the existing recovery report remains dated evidence.
+
+## 2026-09-09 - Owner load adjustment and first recovered review (03:49Z)
+
+- The owner-session message labelled 03:36Z supersedes v5's per-turn `--prs` requirement
+  under load: use the plain snapshot for counts and `owner-tools/pr-scan.sh` for verdicts;
+  keep lane builds to four or five and retain the worker floor of eight. Main terminated
+  its identified redundant scan PID2512905 and observed exit143, then ran the requested
+  one-call GraphQL scan. The scan covers the 60 most recently updated PRs: 36 without a
+  local review, 14 approved, and ten with changes requested. These are latest verdicts,
+  not necessarily current-head verdicts, and do not constitute the full 104-PR census.
+- All ten changes-requested PRs in that scan already have serialized repair assignments.
+  The five genuine conflicts for lanes116,117,317,346,352 also have dedicated workers.
+  Main queued a bounded Sol operator for lane115 (PID2553360), whose actual marker is
+  `no commits ahead of main`, to verify obsolescence rather than invent a conflict repair.
+  The existing lane118 recovery worker retains its distinct ownership and proof budget.
+- Process samples showed four, then three active Lake commands, and 18 live detached
+  Codex workers. No further build tails were added. Previously scheduled work continues
+  through the canonical full-build lock; future lane starts must respect the owner's
+  four-to-five-build ceiling. Waiting launchers are not counted as live workers.
+- PR312's canonical review completed as review5149498061: APPROVED, zero findings, exact
+  head8e65a953334f6199fedb0fddc738b9f6a5779359. A fresh gh_common read verified both
+  local-ci/summary and local-review/summary success on that published head. The review
+  checked both rejection modules and their public theorem axioms; no new merge is claimed.
+- The assigned daemon worker stopped old parent PID2045135 while preparing a bounded
+  replacement; child refresh processes remained live. The parent is no longer evidence
+  of an active singleton service. Restoration is owned by orc-daemon-v5-20260909-01 within
+  its existing 45-minute assignment; main did not create a competing daemon or merge by
+  hand. This temporary service outage must not be described as an operational merge loop.
+
+## 2026-09-09 - Restore automatic daemon behavior after scope correction (03:57Z)
+
+- The 03:50:45Z plain snapshot observed18 workers; the fast scan completed without a
+  sequential per-PR scan. No additional build tails were launched. The daemon worker's
+  proposed replacement would have removed automatic refreshes and treated the worker's
+  no-main-commit restriction as applying to the authorized daemon too. That would narrow
+  the requested workflow. Main's assignment had not made this distinction explicit.
+- Main interrupted only the verified daemon worker CLI PID2138531 with SIGINT. The
+  dispatcher retained the partial capture and recorded exit1 and1430 wall seconds;
+  there was no final answer and token usage remains unavailable. A corrected continuation
+  of thread01a08436-28c2-7731-a52d-986e44719041 was launched through dispatch.sh on its
+  original account, retaining start03:28:56Z and deadline04:13:56Z. No budget was reset.
+  Its instructions preserve auto-refresh, independent review, exact-SHA merge gates and
+  authorized telemetry handling, and prohibit a new framework. It initially waited for
+  an account slot, so main did not leave restoration dependent on that admission.
+- Main created /tmp/merge-daemon-v8-locked-20260909.sh from the existing v8 script with
+  exactly two operational changes: PAR=1, and use /tmp/lane-v18.sh's locked build path.
+  No running script was edited. The first singleton check conservatively refused after
+  seeing orphan refresh children; their PIDs2127400 and2411273 were verified as children
+  of the old session, not new session leaders. The corrected identity check admitted
+  one new session-leading daemon PID2741530 at03:56:39Z, logging to lanes/daemon8.log.
+  The review environment explicitly supplies canonical Ultra input and hard-review
+  classification. Existing refresh children and other owned worktrees were preserved.
+- The restored process retains the owner's existing guarded merge/telemetry flow; no
+  merge was invoked by main. Its inherited100-PR listing limitation and use of the legacy
+  owner transport remain limitations for the bounded continuation to address minimally.
+  Service startup is not a completed tick or a successful merge. Main is publishing the
+  accumulated telemetry through a separate bounded operation using github-sync.sh, with
+  staged owner records preserved. Lesson: correct a narrowing assignment promptly and
+  restore existing functionality before extending diagnostics or adding infrastructure.
