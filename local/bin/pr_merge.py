@@ -13,7 +13,9 @@ Every piece of evidence lives on GitHub, bound to the head SHA (issues-prs.md; t
 
 1. the PR is open, unmerged, not a draft;
 2. the primary worktree is clean and on the base, and the local branch tip is that
-   SHA — the merge must be of the bytes that were built here;
+   SHA — the merge must be of the bytes that were built here.  The current base
+   tip must be its ancestor, or have advanced from their merge base only through
+   passive telemetry records allowed by ``head_is_fresh``;
 3. the eight ``local-ci/<step>`` contexts (ci.sh:70) and ``local-ci/summary`` are
    ``success`` on it.  A missing context blocks: GitHub's combined state reads
    "success" for a commit carrying no statuses at all;
@@ -74,6 +76,14 @@ DISPOSITION_RE = re.compile(
 #: prefixes; gate 6 reports how many such commits the PR carries.
 FIX_COMMIT_PREFIXES = ("[codex-auto-fix]", "[codex-review-fix]")
 
+#: Gate 2b tolerates only passive telemetry records.  Git tree modes are part of
+#: the policy: executable regular files, symlinks, submodules and unknown types
+#: remain freshness-relevant even when their path has a data-looking suffix.
+NONEXECUTABLE_FILE_MODE = b"100644"
+MISSING_FILE_MODE = b"000000"
+TELEMETRY_PATH_PARTS = ("results", "telemetry")
+GITHUB_SNAPSHOT_PATH_PARTS = TELEMETRY_PATH_PARTS + ("github-snapshot",)
+
 #: GitHub's nine auto-closing keywords, exactly (close/closes/closed, fix/fixes/fixed,
 #: resolve/resolves/resolved) — the gate must see every issue GitHub will close on
 #: merge.  ``Addresses`` keeps an issue open and imposes no dependency
@@ -87,9 +97,18 @@ class GateFailure(LayerError):
 
 # --------------------------------------------------------------- small helpers
 
+def _run_git(repo_root: Path, *args: str) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(["git", *args], cwd=str(repo_root),
+                          capture_output=True, text=True, check=False)
+
+
+def _run_git_raw(repo_root: Path, *args: str) -> subprocess.CompletedProcess[bytes]:
+    return subprocess.run(["git", *args], cwd=str(repo_root),
+                          capture_output=True, check=False)
+
+
 def git(repo_root: Path, *args: str, check: bool = True) -> str:
-    result = subprocess.run(["git", *args], cwd=str(repo_root),
-                            capture_output=True, text=True, check=False)
+    result = _run_git(repo_root, *args)
     if check and result.returncode != 0:
         raise LayerError(f"git {' '.join(args)} failed ({result.returncode}): "
                          f"{result.stderr.strip() or result.stdout.strip()}")
@@ -97,8 +116,104 @@ def git(repo_root: Path, *args: str, check: bool = True) -> str:
 
 
 def git_ok(repo_root: Path, *args: str) -> bool:
-    return subprocess.run(["git", *args], cwd=str(repo_root), capture_output=True,
-                          text=True, check=False).returncode == 0
+    return _run_git(repo_root, *args).returncode == 0
+
+
+def _is_tolerated_telemetry_path(path: str) -> bool:
+    """Return whether *path* is an allowlisted passive telemetry data path."""
+    if any(ord(char) < 32 or ord(char) == 127 for char in path):
+        return False
+    parts = tuple(path.split("/"))
+    if (len(parts) < 3 or parts[:2] != TELEMETRY_PATH_PARTS
+            or any(part in ("", ".", "..") for part in parts)):
+        return False
+    suffix = Path(parts[-1]).suffix
+    if suffix in (".md", ".jsonl"):
+        return True
+    return (len(parts) >= 4 and parts[:3] == GITHUB_SNAPSHOT_PATH_PARTS
+            and suffix == ".json")
+
+
+def _is_tolerated_telemetry_change(header: bytes, raw_path: bytes) -> bool:
+    """Classify one ``git diff --raw -z --no-renames`` record."""
+    try:
+        path = raw_path.decode("utf-8")
+    except UnicodeDecodeError:
+        return False
+    fields = header.split()
+    if len(fields) != 5 or not fields[0].startswith(b":"):
+        return False
+    old_mode, new_mode = fields[0][1:], fields[1]
+    old_object, new_object = fields[2], fields[3]
+    status = fields[4]
+    hex_digits = b"0123456789abcdef"
+    if (len(old_object) != len(new_object) or len(old_object) not in (40, 64)
+            or any(byte not in hex_digits for byte in old_object + new_object)):
+        return False
+    expected_modes = {
+        b"A": (MISSING_FILE_MODE, NONEXECUTABLE_FILE_MODE),
+        b"D": (NONEXECUTABLE_FILE_MODE, MISSING_FILE_MODE),
+        b"M": (NONEXECUTABLE_FILE_MODE, NONEXECUTABLE_FILE_MODE),
+    }
+    return (expected_modes.get(status) == (old_mode, new_mode)
+            and _is_tolerated_telemetry_path(path))
+
+
+def _base_advance_is_tolerated(repo_root: Path, merge_base: str, base_ref: str) -> bool:
+    """Check every base-side tree change against the passive telemetry policy."""
+    result = _run_git_raw(repo_root, "diff", "--raw", "-z", "--no-renames",
+                          "--ignore-submodules=none", "--no-abbrev", merge_base,
+                          base_ref, "--")
+    if result.returncode != 0:
+        return False
+    if not result.stdout:
+        return True
+    records = result.stdout.split(b"\0")
+    if records[-1] != b"":
+        return False
+    records.pop()
+    if len(records) % 2 != 0:
+        return False
+    paths: list[str] = []
+    for index in range(0, len(records), 2):
+        if not _is_tolerated_telemetry_change(records[index], records[index + 1]):
+            return False
+        try:
+            paths.append(records[index + 1].decode("utf-8"))
+        except UnicodeDecodeError:
+            return False
+
+    # A file/directory replacement appears in a recursive raw diff as a deletion
+    # plus additions below the deleted path, rather than as one mode-changing row.
+    path_set = set(paths)
+    if len(path_set) != len(paths):
+        return False
+    for path in paths:
+        parts = path.split("/")
+        if any("/".join(parts[:end]) in path_set for end in range(1, len(parts))):
+            return False
+    return True
+
+
+def head_is_fresh(repo_root: Path, base_ref: str, head_sha: str) -> bool:
+    """Return whether ``head_sha`` is fresh enough to merge against ``base_ref``.
+
+    Ancestry is the fast path.  Otherwise every base-side change must be a regular,
+    non-executable ``.md`` or ``.jsonl`` file below ``results/telemetry``, or a
+    generated ``.json`` file below ``results/telemetry/github-snapshot``.  Every
+    failed Git command, malformed record and unknown path or mode fails closed.
+    This is the daemon-facing predicate used by gate 2b.
+    """
+    ancestor = _run_git(repo_root, "merge-base", "--is-ancestor", base_ref, head_sha)
+    if ancestor.returncode == 0:
+        return True
+    if ancestor.returncode != 1:
+        return False
+    merge_base_result = _run_git(repo_root, "merge-base", base_ref, head_sha)
+    merge_base = merge_base_result.stdout.strip()
+    if merge_base_result.returncode != 0 or not merge_base:
+        return False
+    return _base_advance_is_tolerated(repo_root, merge_base, base_ref)
 
 
 def _pid_alive(pid: int) -> bool:
@@ -332,23 +447,27 @@ def run_gate(repo_root: Path, number: int, *, adjudicated: bool,
                           f"ref={branch!r} base={base!r}; all three are required.")
     passed(f"gate 1 open, not a draft: {branch} @ {head_sha[:12]} -> {base}")
     ensure_mergeable_worktree(repo_root, branch, base, head_sha)
-    # Gate 2b — the head must CONTAIN the current base tip: CI and review bind
-    # to the head alone, so a branch behind the base would merge a base/head
-    # combination nothing ever tested (round 3, F2).  Fetch first so "current"
-    # means GitHub's tip, not a stale local remote-tracking ref.
+    # Gate 2b — the head must contain the current base tip unless the base has
+    # advanced only through allowlisted passive telemetry records.  CI and review
+    # remain bound to the exact head.  Fetch first so "current" means GitHub's
+    # tip, not a stale local remote-tracking ref.  Trains instead require the
+    # frozen integration base to remain unchanged, even for passive telemetry.
     if not git_ok(repo_root, "fetch", "github", base):
         raise GateFailure(f"gate 2b (fresh base): 'git fetch github {base}' failed; cannot "
                           "verify the branch is up to date with the base.")
     if integration_base is not None:
         if base != "main" or git(repo_root, "rev-parse", "github/main") != integration_base:
             raise GateFailure("gate 2b (train): main changed from the frozen integration base")
-    elif not git_ok(repo_root, "merge-base", "--is-ancestor", f"github/{base}", head_sha):
+    elif not head_is_fresh(repo_root, f"github/{base}", head_sha):
         base_tip = git(repo_root, "rev-parse", "--short", f"github/{base}", check=False)
         raise GateFailure(f"gate 2b (fresh base): {base} is at {base_tip} and the PR head "
-                          f"{head_sha[:12]} does not contain it. Merge or rebase the base "
-                          "into the branch, re-run CI and review on the new head, then merge.")
-    passed("gate 2b combined-commit CI required" if integration_base else
-           f"gate 2b head contains the current {base} tip")
+                          f"{head_sha[:12]} neither contains it nor predates only tolerated "
+                          "passive telemetry changes. Merge or rebase the base into the "
+                          "branch, re-run CI and review on the new head, then merge.")
+    passed("gate 2b frozen integration base unchanged; combined-commit CI required"
+           if integration_base is not None else
+           f"gate 2b head is fresh against current {base} "
+           "(ancestry or passive-telemetry-only move)")
     statuses = gh_common.latest_statuses(head_sha)  # one read; gates 3 and 4 share it
     reviews = gh_common.pr_reviews(number)
     check_ci(statuses, head_sha)

@@ -78,10 +78,9 @@ class TrainTests(unittest.TestCase):
                         '[ -d "$MIPSTARRE_CACHE_ROOT/.full-build-lock" ] || exit 92\n'
                         '[ "${TRAIN_FAIL_BUILD:-}" != 1 ] || exit 23\n')
         self.write_tool("leanblueprint", "#!/bin/sh\nexit 0\n")
-        self.write_tool("latexmk", "#!/bin/sh\nexit 0\n")
+        self.write_tool("latexmk", '#!/bin/sh\nmkdir -p ../print\nprintf pdf > ../print/print.pdf\n')
         self.write_tool("texra-blueprint", "#!/bin/sh\nexit 0\n")
-        self.write_tool("leanblueprint", '#!/bin/sh\nmkdir -p print\nprintf pdf > print/print.pdf\n')
-        self.write("blueprint/.keep", "")
+        self.write("blueprint/src/.keep", "")
         for name in ("blueprint_lean_sync", "check_oversized_lean_files",
                      "audit_paper_facing_proof_debt", "audit_lean_axiom_declarations",
                      "audit_conclusion_shaped_hypotheses", "audit_unfaithful_markers",
@@ -201,6 +200,15 @@ class TrainTests(unittest.TestCase):
         self.assertEqual(self.remote_main(), self.base)
         rows = (self.repo / "results/telemetry/builds.jsonl").read_text().splitlines()
         self.assertEqual(json.loads(rows[0])["outcome"], "failure")
+
+    def test_failed_pdf_refuses_even_with_partial_output(self) -> None:
+        self.write_tool("latexmk", '#!/bin/sh\nmkdir -p ../print\n'
+                        'printf partial > ../print/print.pdf\nexit 23\n')
+        result = self.train(1, 3)
+        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("'blueprint-render': 'failure'", result.stderr)
+        self.assertEqual(self.remote_main(), self.base)
+        self.assertFalse(any(row["method"] != "GET" for row in self.gh.calls()))
 
     def test_live_build_lock_refuses_without_breaking_it(self) -> None:
         lock = self.cache / ".full-build-lock"

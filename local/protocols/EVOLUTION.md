@@ -930,6 +930,23 @@ its recorded 15:40Z boundary and extension request5572932276, not a fresh two-ho
 allocation. Old 597 tests cover the narrow draft only; revised tests and exact-head
 CI/control-policy review/publication gates are recorded separately. No activation yet.
 
+## 2026-09-08 - Blueprint PDF exit and freshness are blocking (#352)
+
+**Trigger:** `events.md`, "PR #350 blueprint PDF false success", records a
+fatal undefined command whose nonzero PDF exit was hidden by a stale artifact
+and later successful renderer commands.
+
+**Change:** `ci.sh` removes the prior `print.pdf` and runs the checked-in
+`latexmk` configuration directly with noninteractive halt-on-error behavior.
+It stops `blueprint-render` on any compiler failure or missing fresh non-empty
+output. This bypasses the observed wrapper-success/inner-exit-12 boundary.
+Isolated fake-tool tests also cover a fresh partial PDF from that boundary.
+
+**Expected effect:** fatal TeX errors remain blocking exact-head evidence even
+when a worktree contains an older PDF or the failed compiler leaves a fresh
+partial one, while a successful fresh render keeps the existing bbl, web,
+manifest, and publication behavior.
+
 ## 2026-09-08 - Resume completed native code-review publication (#366)
 
 **Trigger:** `results/telemetry/events.md` entries "Native review publisher
@@ -1072,3 +1089,49 @@ descendants containing the train. Outcomes are retained in runtime and telemetry
 failures block publication, and operators receive no false refusal after an
 unresolved push. This is the authorized bounded repair of the original episode;
 deployment and independent review remain separate.
+
+## 2026-09-09 - Tolerate telemetry-only base movement at merge (#498)
+
+**Trigger:** `results/telemetry/events.md`, "2026-09-09 — Meta intervention:
+stalled \"Space\" main session replaced; detached-worker architecture
+reinstated", and the later same-day approved-refresh entries. Telemetry snapshot
+commits moved `main` while exact-head CI and review lanes were completing, so
+otherwise ready pull requests became stale without a source or blueprint change.
+Owner comment `5599043067` at `2026-09-09T08:45:54Z` delegated the B9 decision
+to main; main authorized option B with the conservative data-and-mode scope
+recorded below.
+
+**Change:** `pr_merge.py` gate 2b and its daemon-facing freshness helper retain
+base ancestry as the fast path. When ancestry fails, they parse NUL-delimited
+raw Git changes with rename detection disabled and accept only regular
+non-executable `.md`/`.jsonl` files below `results/telemetry/` and generated
+regular non-executable `.json` files below the exact
+`results/telemetry/github-snapshot/` subtree. Python, shell, JavaScript and other
+code; executable modes and mode changes; symlinks; unknown or boundary paths;
+and all nontelemetry paths remain freshness-relevant. Additions, deletions and
+renames are checked by path and tree mode. Missing merge bases, malformed raw
+records and failed Git commands still refuse. `issues-prs.md` records the rule,
+and `review.md` limits review carry-forward to refreshes still required by it.
+
+**Scope disposition:** PR #499 review F2 names the retired Space merge service.
+Main disposition is out of scope: this repair does not revive, edit or restart
+that service. The active v9f daemon must consume the accepted
+`pr_merge.head_is_fresh` predicate in a separately checked rollout after this
+change merges; no running daemon or rollout script is changed here.
+
+**Expected effect:** telemetry publication no longer serializes all otherwise
+mergeable pull requests behind another refresh lane, while executable telemetry
+tools and unrecognized data remain protected. Any Lean, blueprint, code, mode,
+symlink, unknown-path or other non-allowlisted base change still requires
+refresh, exact-head CI and independent review; all other merge gates are
+unchanged.
+
+## 2026-09-09 - PR507 bounded refresh composition
+
+**Trigger:** main's priority recovery instruction for issue #502; see the
+`orc-502-20260909-03` entry in `results/telemetry/events.md`.
+**Change:** preserve the train's exact frozen-base condition while composing
+the reviewed ordinary-PR telemetry freshness predicate and PR506's step-failure
+explanation. No allowlist, member gate, publication, or cleanup rule changes.
+**Expected effect:** ordinary telemetry movement remains tolerated; any train
+base movement still refuses. Independent verification follows genuine green CI.
