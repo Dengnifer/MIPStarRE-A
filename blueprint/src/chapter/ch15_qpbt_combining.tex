@@ -956,6 +956,33 @@ assembled by Fourier averaging.
 
 \section{Combined line measurements}
 
+\begin{theorem}[Resampling a line parameter]
+	\label{thm:line-parameter-resampling}
+	\lean{MIPStarRE.QPBT.avgOver_lineRepMap_resample_parameter}
+	\leanok
+	\uses{def:line-representative}
+	This auxiliary identity isolates the conditional sampling used in the
+	proof of Lemma~\ref{lem:qld-xz-lines}; it is not a named statement of
+	\cite{Ji2020MIPStar}. Let $K$ be a finite field, $m \geq 0$, and
+	$v \in K^m$, and write $R_v = L^{\lnf}_v$ for the canonical line
+	representative map of Definition~\ref{def:line-representative}.
+	For every $f : K^m \times K^m \to \mathbb{R}$,
+	\[
+		\mathbb{E}_{u \in K^m} f(R_v(u),u)
+		= \mathbb{E}_{u \in K^m}\mathbb{E}_{t \in K}
+		f(R_v(u),R_v(u)+tv),
+	\]
+	where all averages are uniform. The identity includes $v=0$.
+\end{theorem}
+\begin{proof}
+	\leanok
+	\uses{def:line-representative}
+	The point $R_v(u)+tv$ is uniform on $K^m$: each point has exactly
+	$|K|$ preimages under $(u,t) \mapsto R_v(u)+tv$. Moreover,
+	$R_v(R_v(u)+tv)=R_v(u)$. Applying these two identities to $f$ gives
+	the result. When $v=0$, $R_v$ is the identity and $t$ is free.
+\end{proof}
+
 \begin{lemma}[Combined line measurements]
 	\label{lem:qld-xz-lines}
 	\lean{MIPStarRE.QPBT.CombinedLinesWitness}

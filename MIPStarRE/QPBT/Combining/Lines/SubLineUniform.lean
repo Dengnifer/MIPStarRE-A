@@ -120,6 +120,28 @@ theorem uniformDistribution_map_lineRepMap_add_smul {K : Type*} [Field K]
         exact (directLineRepParameter_spec v x).symm
     rw [himg, Finset.card_image_of_injective _ hinj, Finset.card_univ]
 
+/-- Resampling a uniform affine parameter in a fixed direction preserves the
+joint average of the canonical line representative and the point, including
+the zero direction. Formalization-only auxiliary for blueprint
+`thm:line-parameter-resampling`, supporting the conditional sampling in
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:950-955`. -/
+theorem avgOver_lineRepMap_resample_parameter {K : Type*} [Field K]
+    [Fintype K] [DecidableEq K] {m : ℕ} (direction : Fin m → K)
+    (value : (Fin m → K) → (Fin m → K) → ℝ) :
+    avgOver (uniformDistribution (Fin m → K))
+        (fun point => value (lineRepMap direction point) point) =
+      avgOver (uniformDistribution (Fin m → K)) (fun point =>
+        avgOver (uniformDistribution K) (fun param =>
+          value (lineRepMap direction point)
+            (lineRepMap direction point + param • direction))) := by
+  have hmap := uniformDistribution_map_lineRepMap_add_smul direction
+  have havg := congrArg (fun dist => avgOver dist
+    (fun point => value (lineRepMap direction point) point)) hmap
+  simp only [Distribution.avgOver_map, lineRepMap_add_smul, lineRepMap_apply_self] at havg
+  rw [avgOver_uniform_prod (fun point param => value (lineRepMap direction point)
+    (lineRepMap direction point + param • direction))] at havg
+  exact havg.symm
+
 /-! ## Injectivity of the two block embeddings -/
 
 /-- The `X`-block coordinate embedding of `def:combine-map` is injective.
