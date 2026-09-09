@@ -19,7 +19,7 @@ elementary estimate collapsing the error terms `ε`, `√ε`, and
 Paper `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:838-881`
 (self-consistency and consistency with `M̂` in the proof of `lem:qld-4-10`),
 blueprint `blueprint/src/chapter/ch15_qpbt_combining.tex:803-960`; the route
-is explained in `docs/paper-gaps/qpbt_linearity-theorem-quotation.tex`.
+is explained in `docs/paper-gaps/qpbt_combined-points-direct.tex`.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder

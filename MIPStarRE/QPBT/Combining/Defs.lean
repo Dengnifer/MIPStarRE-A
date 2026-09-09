@@ -359,7 +359,7 @@ private theorem clDistribution_seedEvent_pos (L : LdParams) (i : Fin L.m)
     ⟨(CL z0, ldPointCL L z0), Finset.mem_filter.mpr ⟨?_, ?_⟩, ?_⟩
   · refine Finset.mem_image.mpr ⟨z0, ?_, rfl⟩
     simp
-  · show chiIndex L (CL z0).seed = i
+  · change chiIndex L (CL z0).seed = i
     rw [hseed]
     exact chiIndex_seedOfIndexResidue L i _
   · refine Finset.sum_pos'

@@ -35,7 +35,7 @@ Paper `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:786-790`
 (the application of the orthonormalization lemma), blueprint
 `blueprint/src/chapter/ch15_qpbt_combining.tex:870-878` (`lem:qld-4-10`), and
 `blueprint/src/chapter/ch14_qpbt_observables.tex:395-464` (`lem:ortho`); the
-route is explained in `docs/paper-gaps/qpbt_linearity-theorem-quotation.tex`.
+route is explained in `docs/paper-gaps/qpbt_combined-points-direct.tex`.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder

@@ -18,7 +18,7 @@ The placements are those of blueprint `def:symmetric-equivalents`, paper
 The crosswise EPR exchange is proved independently in blueprint
 `lem:qld-placement-transfer` using only the symmetry of the EPR vectors;
 its use for `lem:qld-4-10` is analyzed in
-`docs/paper-gaps/qpbt_linearity-theorem-quotation.tex`.
+`docs/paper-gaps/qpbt_combined-points-direct.tex`.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder
