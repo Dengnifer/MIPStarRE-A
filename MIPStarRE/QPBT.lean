@@ -41,6 +41,7 @@ import MIPStarRE.QPBT.Test.QubitForm
 import MIPStarRE.QPBT.Test.CanonicalParams
 import MIPStarRE.QPBT.Combining.Defs
 import MIPStarRE.QPBT.Combining.ErrorBounds
+import MIPStarRE.QPBT.Combining.PassingError
 import MIPStarRE.QPBT.Combining.DirectLowDegree
 import MIPStarRE.QPBT.Combining.Linearity
 import MIPStarRE.QPBT.Combining.Linearity.Defs
@@ -62,6 +63,8 @@ import MIPStarRE.QPBT.Combining.ExtendedLineGame.ParameterEvaluatedLineBound
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.SameLineRejection
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.SameLineCoefficientBound
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.AxisParameterDefectTransport
+import MIPStarRE.QPBT.Combining.ExtendedLineGame.DiagonalParameterDefectTransport
+import MIPStarRE.QPBT.Combining.ExtendedLineGame.PassingValue
 import MIPStarRE.QPBT.Combining.WitnessErrorNonneg
 import MIPStarRE.QPBT.Combining.Lines
 import MIPStarRE.QPBT.Combining.Claims
