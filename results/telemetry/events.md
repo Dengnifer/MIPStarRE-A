@@ -6311,3 +6311,12 @@ not actual commit/publication hooks. No productive session was killed.
   followed by current-head repair findings and missing reviews. The remaining approved
   successors473/483/487 are retained for the next wave rather than duplicating six live
   approved-tail launchers or daemon-owned work.
+- Subsequent current-head reviews requested changes for PR386 (two findings), PR479
+  (two) and PR496 (one). After confirming no loop already ran, main enabled their labels
+  through gh_common and started serialized autofix PIDs3393282-3393284. These are repair
+  assignments, not additional lane tails. First-merge report: #27 comment5595789727.
+- The post-merge publisher PID3346545 committed its batch but failed all five guarded
+  push attempts because concurrently completed sessions appended new telemetry. It
+  exited; no push gate was bypassed. A bounded retry now re-stages and commits the new
+  telemetry before each canonical github-sync attempt instead of retrying an unchanged
+  dirty checkout. The verified PR358 merge is unaffected by this telemetry-only failure.
