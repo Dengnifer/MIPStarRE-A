@@ -91,7 +91,7 @@ by the triangle inequality (`chain_bounds`).  The source's route through the
 binary refinements and the quantum linearity theorem is not used, because
 that route needs zero-state padding of the strategy, which is not part of the
 setting; see `rem:linearity-import` and
-`docs/paper-gaps/qpbt_linearity-theorem-quotation.tex`.  The error is
+`docs/paper-gaps/qpbt_combined-points-direct.tex`.  The error is
 `K ε^{1/8}` for a universal constant `K`. -/
 theorem exists_combinedPointsWitness :
     ∃ deltaQ : ℝ -> ℝ, IsPolyErr deltaQ ∧
