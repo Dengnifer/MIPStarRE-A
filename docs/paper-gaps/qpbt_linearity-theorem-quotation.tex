@@ -11,7 +11,7 @@
 
 \title{The Quoted Quantum Linearity Theorem in the Pauli Basis Analysis}
 \author{}
-\date{2026-09-04}
+\date{2026-09-09}
 
 \begin{document}
 \maketitle
@@ -29,15 +29,20 @@
   \item \textbf{Estimated weight.} The corrected single-family theorem and its
   two distance formulations are proved.  The remaining task is a finite
   common-extension construction that makes the auxiliary space uniform over
-  the outer parameters.
+  the outer parameters in the source's linearity argument.  The combined-point
+  conclusion is now proved independently, by rounding a field-valued sandwich
+  POVM on the original expanded spaces; it has no remaining extension obligation.
   \item \textbf{Mathlib/project split.} Finite direct sums, extensions of
   operators, and squared norms are standard linear algebra.  The proved
   Fourier--Naimark stability theorem and the two state-dependent distance
-  conventions are project-level results.
+  conventions are project-level results.  The replacement combined-point proof
+  uses project-local character orthogonality, measurement contraction, and
+  projective rounding, with Mathlib finite sums, inner products, and real powers.
   \item \textbf{Key mathematical inputs.} Theorem~10 of
   \cite{Natarajan2017Linearity}, the operator BLR identity, finite averaging,
   and extension by the identity on orthogonal summands.  The remaining
-  common-extension reduction is tracked in \ghissue{19}.
+  common-extension reduction is tracked in \ghissue{19}; it is not an input to
+  the completed combined-point construction of \ghissue{395}.
 \end{itemize}
 
 \section{Key theorem forms}
@@ -80,7 +85,7 @@ a counterexample to the printed operator bound are given in
 In particular, $L^0=I$: exact linearity gives $(L^0)^2=L^0$, while an
 observable is invertible.
 
-The chapter needs a parameterized version.  For each pair $(x,z)$ it applies
+The source argument uses a parameterized version.  For each pair $(x,z)$ it applies
 the theorem to $(r,s)\mapsto O^{x,z,r,s}$.  If $\delta_{x,z}$ is the mean
 squared multiplicative defect on that fiber, the corresponding correlation
 error is $\delta_{x,z}/2$.  The corrected theorem therefore gives mean squared
@@ -90,6 +95,35 @@ actual nonnegative error on each fiber, no assumption that a fiber error is at
 most one, and no good--bad fiber split, is needed.  One must still formulate
 the finite common-extension step that makes the auxiliary space uniform over
 $(x,z)$.
+
+There is a different way to obtain the combined-point conclusion.  Let
+$q=2^t$ and let $\psi$ be the normalized state of a projective strategy
+winning the Pauli basis test with probability at least $1-\varepsilon$,
+with admissible field and degree parameters.  Its expanded state
+$\Psi=\hat\psi$ is $\psi$ on $AB$ tensored with maximally entangled states
+on $A'A''$ and $B'B''$, each ancillary register having dimension $q^M$,
+where $M=2^m$.  The opposite placement pairs are $AA',BA''$ and
+$BB',AB''$, in either direction; their operators commute because their
+registers are disjoint.  For operator families indexed by point pairs and
+outcomes define
+\[
+  D_\Psi^2(A,B)=\mathbb E_{x,z}\sum_{a,b\in\mathbb F_q}
+    \|(A^{x,z}_{a,b}-B^{x,z}_{a,b})\Psi\|^2.
+\]
+Write $X^x_{i,a}$ and $Z^z_{i,b}$ for the expanded field-valued point
+projectors on a placement $i$.  For each player one can construct projective
+measurements $Q^{x,z}$ on its original expanded local space such that, for
+every directed pair of opposite placements $i,j$,
+\[
+  D_\Psi^2(Q_i,Q_j),\quad
+  D_\Psi^2(Q_i,X_jZ_j),\quad
+  D_\Psi^2(Q_i,Z_jX_j)
+  \ \leq K\varepsilon^{1/8}.
+\]
+Here the products are indexed by $(a,b)$ and $K\geq1$ is universal,
+independent of the field, the point dimension, and the Hilbert-space
+dimensions.  This is the conclusion of Lemma~\path{lem:qld-4-10}, with an
+explicit admissible polynomial error; no common ancillary extension is assumed.
 
 \section{Comparison with the quoted statement}
 
@@ -130,6 +164,131 @@ observables do.  Averaging then yields the conclusion used later in the
 chapter.  This is an open reduction, not a counterexample to the quoted theorem
 or to the source's eventual combined-measurement conclusion.
 
+\section{Direct construction of the combined point measurement}
+
+The proof of Lemma~\path{lem:qld-4-10} in \cite{Ji2020MIPStar}, mirrored at
+\path{references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:728--881}
+first forms a sandwich of binary refinements, rounds it, and then uses quantum
+linearity and Fourier inversion to recover field-valued outcomes.  The
+linearity application at lines~831--832 assumes sufficient zero ancillas.
+The following replacement starts with field-valued outcomes and uses the
+same orthonormalization principle without that application.
+
+\paragraph{Dimension-independent Parseval transfer.}
+Put $\chi(c)=(-1)^{\operatorname{tr}(c)}$, where
+$\operatorname{tr}:\mathbb F_q\to\mathbb F_2$ is the field trace.  At a fixed
+point pair and placement, suppress $x,z,i$ and write $U_r,V_s$ for the
+expanded $X$ and $Z$ observables.  The Fourier formula for the expanded
+point effects, at source lines~384--418, is
+$X_a=\mathbb E_r\chi(ar)U_r$ and $Z_b=\mathbb E_s\chi(bs)V_s$.
+With $[A,B]=AB-BA$, character orthogonality gives
+\[
+ \sum_{a,b}\|[X_a,Z_b]\Psi\|^2
+ =\sum_{a,b}\left\|\frac{1}{q^2}\sum_{r,s}
+       \chi(ar+bs)[U_r,V_s]\Psi\right\|^2
+ =\mathbb E_{r,s}\|[U_r,V_s]\Psi\|^2.
+\]
+Indeed the sum over $(a,b)$ of the product of two character coefficients is
+$q^2$ when $(r,s)=(r',s')$ and zero otherwise.  This cancels two of the four
+inverse powers of $q$ from the squared Fourier normalization, leaving the
+uniform average, not an unnormalized sum.  The expanded observable
+commutator is the original twisted commutator tensored with a unitary Pauli
+operator.  Appending the normalized EPR pairs preserves its norm.  The
+estimate used in Lemma~\path{lem:qld-comm-cons}, source lines~466--505,
+therefore bounds the average of either side by $C\sqrt\varepsilon$ for a
+universal $C$.\footnote{The identities and the estimate are
+\path{sum_norm_place_expPointOp_commutator_sq} and
+\path{expPoint_comm} in
+\path{MIPStarRE/QPBT/Combining/Points/Commutation.lean}.}
+
+\paragraph{Sandwich consistency.}
+For fixed $(x,z)$ and opposite placements $1,2$, put
+$R_{i,a,b}=Z_{i,b}X_{i,a}Z_{i,b}$.  Positivity follows by writing each effect
+as $(X_{i,a}Z_{i,b})^\dagger(X_{i,a}Z_{i,b})$, and summing over $a$ and then
+$b$ gives the identity.  Opposite placements commute exactly.  Define
+$D^X_a=X_{1,a}-X_{2,a}$, $D^Z_b=Z_{1,b}-Z_{2,b}$,
+$W_b=Z_{1,b}Z_{2,b}$ and $K^i_{a,b}=[X_{i,a},Z_{i,b}]$.
+For projective measurements $P,Q$ and a vector $w$, expansion of the square
+gives
+$\sum_c\operatorname{Re}\langle w,P_cQ_cw\rangle
+=\|w\|^2-\frac12\sum_c\|(P_c-Q_c)w\|^2$.
+Applying this first to $X_1,X_2$ in $W_b\Psi$ and then to $Z_1,Z_2$ in
+$\Psi$ yields the exact consistency-defect identity
+\[
+  1-\sum_{a,b}\langle\Psi,R_{1,a,b}R_{2,a,b}\Psi\rangle
+  =\frac12\sum_b\|D^Z_b\Psi\|^2
+   +\frac12\sum_{a,b}\|D^X_aW_b\Psi\|^2.
+\]
+This is also the off-diagonal outcome mass, since both POVMs are complete.
+The decomposition
+$D^X_aW_b=W_bD^X_a+Z_{2,b}K^1_{a,b}-Z_{1,b}K^2_{a,b}$,
+the inequality $\|u+v-w\|^2\leq3(\|u\|^2+\|v\|^2+\|w\|^2)$, and
+projective contraction bound the defect by the nonnegative quantity
+\[
+ c_{x,z}=\frac12\sum_b\|D^Z_b\Psi\|^2
+  +\frac32\left(\sum_a\|D^X_a\Psi\|^2
+       +\sum_{a,b}\|K^1_{a,b}\Psi\|^2
+       +\sum_{a,b}\|K^2_{a,b}\Psi\|^2\right).
+\]
+Here $\sum_b W_b^\dagger W_b\leq I$ ensures that the first term in the
+decomposition does not incur an outcome-count factor.  Point
+self-consistency is $O(\varepsilon)$ and the Parseval estimate is
+$O(\sqrt\varepsilon)$, so
+$\mathbb E_{x,z}c_{x,z}\leq C_0(\varepsilon+\sqrt\varepsilon)$ for a
+universal $C_0\geq1$.\footnote{The exact identity, pointwise inequality,
+and average are proved in
+\path{MIPStarRE/QPBT/Combining/Points/Consistency.lean} as
+\path{sandwich_overlap_identity}, \path{sandwich_defect_pointwise_le}, and
+\path{avg_sandwichDefectBound_le}.  The function $c$ is
+\path{ProjectiveSetting.sandwichDefectBound}.}
+
+\paragraph{Rounding and averaging.}
+The explicit orthonormalization lemma says that two opposite POVMs of
+consistency defect at most $c\geq0$ admit a projective measurement on the
+first POVM's space with squared distance at most $220c^{1/4}$ from it.
+Apply it separately for each $(x,z)$, first with the bipartition
+$AA'\mid BA''(B'B'')$ and then with $BA''\mid AA'(B'B'')$.
+These are regroupings of the existing registers, not extensions.  Choose
+the resulting measurements for each point pair.  Two applications of the
+square-root averaging inequality give
+$\mathbb E c^{1/4}\leq(\mathbb E c)^{1/4}$, whence on each chosen placement
+\[
+ D_\Psi^2(Q_i,R_i)
+ \leq220\bigl[C_0(\varepsilon+\sqrt\varepsilon)\bigr]^{1/4}.
+\]
+The crosswise exchange $A'\leftrightarrow B''$, $A''\leftrightarrow B'$
+fixes the joint state of the two EPR pairs and the strategy state.  It carries these bounds to
+$AB''$ and $BB'$ without assuming symmetry of the strategy.\footnote{The
+rounding result is \path{projective_rounding_with_explicit_constant},
+blueprint \path{lem:ortho-explicit-constant}.  Its application and averaging
+are \path{exists_projective_close_sandwich} and
+\path{avgOver_rpow_quarter_le} in
+\path{MIPStarRE/QPBT/Combining/Points/Orthonormalization.lean}; the EPR
+exchange is in the neighboring \path{Placement.lean}.}
+
+\paragraph{The three conclusions and the error.}
+Since $R_i-Z_iX_i=Z_i[X_i,Z_i]$, projective contraction bounds
+$D_\Psi^2(R_i,Z_iX_i)$ by $O(\sqrt\varepsilon)$.
+Transporting the two factors separately to an opposite placement gives
+$D_\Psi^2(Z_iX_i,X_jZ_j)=O(\varepsilon)$: each move uses point
+self-consistency and square-summability of the other factor.  The triangle
+inequality along these comparisons, with one commutation for the other
+product order, proves all three desired distances with a universal multiple
+of
+$[C_0(\varepsilon+\sqrt\varepsilon)]^{1/4}
+ +\sqrt\varepsilon+\varepsilon$.
+For $0\leq\varepsilon\leq1$ this is bounded by
+$K\varepsilon^{1/8}$.  For $\varepsilon>1$, each relevant family has
+$\sum_a A_a^\dagger A_a\leq I$, so its squared distance from another such
+family on a unit vector is at most $4$.  Increasing $K$ to at least $4$
+proves the same bound for every possible error, including zero.\footnote{The
+ordered-product bounds are in
+\path{MIPStarRE/QPBT/Combining/Points/Sandwich.lean};
+\path{chain_bounds} and the scalar estimates are in
+\path{MIPStarRE/QPBT/Combining/Points/Closeness.lean}.  The conclusion is
+\path{exists_combinedPointsWitness} in
+\path{MIPStarRE/QPBT/Combining/Points.lean}.}
+
 \section{Blueprint and formalization status}
 
 Theorem~\path{thm:linearity} and
@@ -153,6 +312,15 @@ operator bound.  Both are linked from Theorem~\path{thm:linearity}.  The
 normalization analysis was carried out in \ghissue{124} and the statement
 repair in \ghissue{129}; both are closed.  No Lean declaration yet supplies
 the finite common-extension construction for the family indexed by $(x,z)$.
+That construction is no longer needed for Lemma~\path{lem:qld-4-10}:
+\path{exists_combinedPointsWitness} proves its source-faithful statement on
+the original expanded spaces by the direct argument above.  Its hypotheses
+remain a projective strategy with the prescribed winning probability and
+admissible field parameters; its conclusions retain projectivity, both ordered
+products, and every directed opposite placement.  The blueprint proof of
+\path{lem:qld-4-10} now records this argument and is marked complete.  The
+linearity theorem and its common-extension remark describe the separate source
+argument, not a dependency of that completed proof.
 The complete QPBT audit status is recorded in
 \path{docs/paper-gaps/qpbt-gap-register.md}.
 
@@ -171,8 +339,12 @@ relation that absorbs constant factors; that defect is the provider's own and
 is treated separately.  The single-family theorem is now
 proved with mean squared operator error at most $2\delta$, equivalently mean
 squared binary-measurement error at most $\delta$.  Its use for the family
-indexed by $(x,z)$ still requires an explicit finite common-extension argument;
-that is the remaining open formal reduction.
+indexed by $(x,z)$ still requires an explicit finite common-extension argument.
+The combined-point theorem, however, is proved by a different, dimension-independent
+argument with error $K\varepsilon^{1/8}$ on the original expanded local spaces.
+There is no remaining statement discrepancy or proof obligation for that
+construction; the common-extension obligation belongs only to the unused
+linearity argument.
 
 \bibliographystyle{alpha}
 \bibliography{references}
