@@ -1,4 +1,5 @@
 import MIPStarRE.QPBT.Combining.Points.Orthonormalization
+import MIPStarRE.QPBT.Observables.LineMeasurement.SquareRootError
 
 /-!
 # Closeness estimates for the combined point measurements
@@ -32,16 +33,6 @@ noncomputable section
 
 /-! ## The trivial bound -/
 
-/-- A square-summable family of operators has total squared norm at most one on
-a unit vector. -/
-theorem sum_norm_apply_sq_le_one {α ι : Type*} [Fintype α] [Fintype ι]
-    [DecidableEq ι] (A : α → Op ι) (ψ : EuclideanSpace ℂ ι) (hψ : ‖ψ‖ = 1)
-    (hA : ∑ a, (A a)ᴴ * A a ≤ 1) :
-    ∑ a, ‖applyOperatorToState (A a) ψ‖ ^ 2 ≤ 1 := by
-  have h := sum_norm_mul_apply_le A 1 ψ hA
-  simp only [mul_one, WinImplications.applyOperatorToState_one, hψ] at h
-  simpa using h
-
 /-- The state-dependent distance of two square-summable families is at most
 `4` on a unit vector, under a uniform distribution. -/
 theorem opFamilyDistSq_uniform_le_four {X α ι : Type*} [Fintype X] [DecidableEq X]
@@ -53,33 +44,8 @@ theorem opFamilyDistSq_uniform_le_four {X α ι : Type*} [Fintype X] [DecidableE
   calc avgOver (uniformDistribution X) (fun x =>
         ∑ a, ‖applyOperatorToState (A x a - B x a) ψ‖ ^ 2)
       ≤ avgOver (uniformDistribution X) (fun _ => (4 : ℝ)) := by
-        refine avgOver_mono _ _ _ fun x => ?_
-        have hA' := sum_norm_apply_sq_le_one (A x) ψ hψ (hA x)
-        have hB' := sum_norm_apply_sq_le_one (B x) ψ hψ (hB x)
-        have hpt : ∀ a, ‖applyOperatorToState (A x a - B x a) ψ‖ ^ 2 ≤
-            2 * ‖applyOperatorToState (A x a) ψ‖ ^ 2 +
-              2 * ‖applyOperatorToState (B x a) ψ‖ ^ 2 := by
-          intro a
-          have hsub : applyOperatorToState (A x a - B x a) ψ =
-              applyOperatorToState (A x a) ψ - applyOperatorToState (B x a) ψ := by
-            simp [applyOperatorToState]
-          rw [hsub]
-          have := norm_sub_le (applyOperatorToState (A x a) ψ)
-            (applyOperatorToState (B x a) ψ)
-          nlinarith [norm_nonneg (applyOperatorToState (A x a) ψ),
-            norm_nonneg (applyOperatorToState (B x a) ψ),
-            norm_nonneg (applyOperatorToState (A x a) ψ -
-              applyOperatorToState (B x a) ψ),
-            sq_nonneg (‖applyOperatorToState (A x a) ψ‖ -
-              ‖applyOperatorToState (B x a) ψ‖)]
-        calc ∑ a, ‖applyOperatorToState (A x a - B x a) ψ‖ ^ 2
-            ≤ ∑ a, (2 * ‖applyOperatorToState (A x a) ψ‖ ^ 2 +
-                2 * ‖applyOperatorToState (B x a) ψ‖ ^ 2) :=
-              Finset.sum_le_sum fun a _ => hpt a
-          _ = 2 * ∑ a, ‖applyOperatorToState (A x a) ψ‖ ^ 2 +
-                2 * ∑ a, ‖applyOperatorToState (B x a) ψ‖ ^ 2 := by
-              rw [Finset.sum_add_distrib, Finset.mul_sum, Finset.mul_sum]
-          _ ≤ 4 := by linarith
+        exact avgOver_mono _ _ _ fun x =>
+          sum_norm_sub_apply_sq_le_four (A x) (B x) ψ hψ (hA x) (hB x)
     _ = 4 := avgOver_uniform_const _
 
 /-- The effects of a projective measurement, placed on a register pair, are
