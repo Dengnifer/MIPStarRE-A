@@ -1,4 +1,4 @@
-import MIPStarRE.QPBT.Combining.Witnesses
+import MIPStarRE.QPBT.Combining.PointsDataProcessing
 
 /-!
 # Combining the point measurements
@@ -55,6 +55,17 @@ theorem exists_combinedPointsWitness :
         Nonempty (CombinedPointsWitness S (deltaQ ε)) := by
   sorry
 
+/-- Register placement distributes over a filtered outcome sum. -/
+private theorem place_finset_sum {P : AdmissibleParams} {ε : ℝ}
+    (S : ProjectiveSetting P ε) (p : Placement) {α : Type*}
+    (s : Finset α) (A : α → Op (S.ExpandedLocalSpace p.side)) :
+    S.place p (∑ a ∈ s, A a) = ∑ a ∈ s, S.place p (A a) := by
+  classical
+  ext i j
+  cases p <;> simp [ProjectiveSetting.place, Matrix.sum_apply,
+    Finset.sum_mul, Finset.mul_sum]
+
+set_option maxHeartbeats 1600000 in
 /-- Projectivity and the three data-processed consistency guarantees for
 `CombinedPointsWitness.extendedQ`.  This is `lem:qld-4-12`, paper lines
 993--1011; the `XZ` and `ZX` source products remain separate. -/
@@ -93,7 +104,54 @@ theorem extendedQ_spec {P : AdmissibleParams} {ε δ : ℝ}
             (S.pointMeasExp p2.side .Z question.1.2).effect ab.2 *
               (S.pointMeasExp p2.side .X question.1.1).effect ab.1))
         S.psiHat <= δ := by
-  sorry
+  classical
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · intro side x z alpha beta
+    exact SandwichProduct.postprocess_isProjective _ (points.projective side x z) _
+  · intro p1 p2 hopposite
+    let A : ((Fin P.m → PauliScalar P) × (Fin P.m → PauliScalar P)) →
+        (PauliScalar P × PauliScalar P) → Op (SixReg P S.toStrategy.ιA S.toStrategy.ιB) :=
+      fun xz ab => S.place p1 ((points.Q p1.side xz.1 xz.2).effect ab)
+    let B : ((Fin P.m → PauliScalar P) × (Fin P.m → PauliScalar P)) →
+        (PauliScalar P × PauliScalar P) → Op (SixReg P S.toStrategy.ιA S.toStrategy.ιB) :=
+      fun xz ab => S.place p2 ((points.Q p2.side xz.1 xz.2).effect ab)
+    refine le_trans ?_ (points.self_consistent p1 p2 hopposite)
+    have h := opFamilyDistSq_uniform_affine_postprocess_le A B S.psiHat (fun xz => ?_)
+    · simpa only [A, B, CombinedPointsWitness.extendedQ,
+        Measurement.postprocess_effect, place_finset_sum] using h
+    · rw [sum_placed_measurement_eq_one, sum_placed_measurement_eq_one]
+  · intro p1 p2 hopposite
+    let A : ((Fin P.m → PauliScalar P) × (Fin P.m → PauliScalar P)) →
+        (PauliScalar P × PauliScalar P) → Op (SixReg P S.toStrategy.ιA S.toStrategy.ιB) :=
+      fun xz ab => S.place p1 ((points.Q p1.side xz.1 xz.2).effect ab)
+    let B : ((Fin P.m → PauliScalar P) × (Fin P.m → PauliScalar P)) →
+        (PauliScalar P × PauliScalar P) → Op (SixReg P S.toStrategy.ιA S.toStrategy.ιB) :=
+      fun xz ab => S.place p2
+        ((S.pointMeasExp p2.side .X xz.1).effect ab.1 *
+          (S.pointMeasExp p2.side .Z xz.2).effect ab.2)
+    refine le_trans ?_ (points.consistent_XZ p1 p2 hopposite)
+    have h := opFamilyDistSq_uniform_affine_postprocess_le A B S.psiHat (fun xz => ?_)
+    · simpa only [A, B, CombinedPointsWitness.extendedQ,
+        Measurement.postprocess_effect, place_finset_sum] using h
+    · rw [sum_placed_measurement_eq_one, sum_placed_measurement_products_eq_one]
+  · intro p1 p2 hopposite
+    let A : ((Fin P.m → PauliScalar P) × (Fin P.m → PauliScalar P)) →
+        (PauliScalar P × PauliScalar P) → Op (SixReg P S.toStrategy.ιA S.toStrategy.ιB) :=
+      fun xz ab => S.place p1 ((points.Q p1.side xz.1 xz.2).effect ab)
+    let B : ((Fin P.m → PauliScalar P) × (Fin P.m → PauliScalar P)) →
+        (PauliScalar P × PauliScalar P) → Op (SixReg P S.toStrategy.ιA S.toStrategy.ιB) :=
+      fun xz ab => S.place p2
+        ((S.pointMeasExp p2.side .Z xz.2).effect ab.2 *
+          (S.pointMeasExp p2.side .X xz.1).effect ab.1)
+    refine le_trans ?_ (points.consistent_ZX p1 p2 hopposite)
+    have h := opFamilyDistSq_uniform_affine_postprocess_le A B S.psiHat (fun xz => ?_)
+    · simpa only [A, B, CombinedPointsWitness.extendedQ,
+        Measurement.postprocess_effect, place_finset_sum] using h
+    · rw [sum_placed_measurement_eq_one]
+      have htotal := sum_placed_measurement_products_eq_one S p2
+        (S.pointMeasExp p2.side .Z xz.2) (S.pointMeasExp p2.side .X xz.1)
+      rw [Fintype.sum_prod_type, Finset.sum_comm] at htotal
+      simpa only [B, Fintype.sum_prod_type] using htotal.symm
 
 end
 
