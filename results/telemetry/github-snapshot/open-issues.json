@@ -6728,7 +6728,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/119",
   "issue_dependencies_summary": {
-   "blocked_by": 1,
+   "blocked_by": 0,
    "total_blocked_by": 1,
    "blocking": 1,
    "total_blocking": 1
@@ -6841,91 +6841,6 @@
    "eyes": 0
   },
   "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/345/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/340",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/340/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/340/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/340/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/340",
-  "id": 5382201547,
-  "node_id": "I_kwDOUJyJf88AAAABQM3gyw",
-  "number": 340,
-  "title": "feat(QPBT/Games): add ground-slice POVM compression",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-08T04:49:33Z",
-  "updated_at": "2026-09-08T04:49:33Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/119",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 0,
-   "blocking": 1,
-   "total_blocking": 1
-  },
-  "body": "<!-- mipstarre-issue-key: qpbt-119-ground-slice-povm-compression -->\n### Target declarations\n\n- `MIPStarRE.Quantum.Measurement.compressAt`\n- `MIPStarRE.Quantum.Measurement.compressAt_postprocess`\n- `MIPStarRE.QPBT.Measurement.compressAt_dilatedMeasurement`\n- `MIPStarRE.QPBT.consistencyDefect_padState_compressAt`\n\n### Mathematical purpose\n\nDirect low-degree soundness applied after Naimark projectivization returns\npolynomial POVMs on ancillary product spaces.  Compressing each effect to the\ndistinguished ancillary coordinate gives a POVM on the original local space.\nFor the state padded at those coordinates, the off-diagonal consistency defect\nis exactly unchanged.\n\nThis is the downstream pullback used after the first paragraph of\n`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1279-1289` in\nthe proof of `lem:qld-4-7`.  The implementation reuses\n`Measurement.ofSumEqOne`, `Matrix.PosSemidef.submatrix`,\n`stateQForm_padState`, and `dilatedMeasurement_compression`.\n\n### Acceptance\n\n- Ground-slice compression uses one fixed ancillary coordinate, not an average\n  over diagonal blocks.\n- Compression commutes with deterministic outcome postprocessing.\n- Compressing `dilatedMeasurement` at `none` recovers the source POVM.\n- `consistencyDefect` on a padded state equals the defect of the two compressed\n  POVM families on the original state.\n- No projectivity claim is made for compressed POVMs, and no source theorem,\n  proof body, theorem header, or hypothesis is changed.\n- Focused Lean checks and the standard proof-integrity scan pass.\n\n### Scope\n\nAdd only the reusable compression module, its aggregate import, and the issue\nbrief.  This packet does not prove `lem:qld-4-7`, construct its final projective\nmeasurement, or add any producer/passing-value assumption.\n\n---\nChild proof packet under #119.",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/340/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/340/timeline",
   "performed_via_github_app": null,
   "state_reason": null,
   "pinned_comment": null
@@ -10718,8 +10633,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 27,
-   "completed": 11,
-   "percent_completed": 40
+   "completed": 12,
+   "percent_completed": 44
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/166",
   "issue_dependencies_summary": {

@@ -943,3 +943,4 @@
 {"ts": "2026-09-09T13:11:33+0800", "kind": "ci-build", "trigger": "ci.sh pr=398", "seconds": 200, "outcome": "success", "sha": "6104310167dc08db99c4fc0ea1458b1f9b4a557a", "note": "branch issue-395-combined-line-measurement"}
 {"ts": "2026-09-09T13:11:35+0800", "kind": "ci-build", "trigger": "ci.sh pr=487", "seconds": 72, "outcome": "success", "sha": "a2dc917bd7d8fa426fa7e6c5985974a922fa226f", "note": "branch issue-485-completed-point-self-consistency"}
 {"ts": "2026-09-09T13:14:12+0800", "kind": "ci-build", "trigger": "ci.sh pr=375", "seconds": 20, "outcome": "success", "sha": "aab44f2112aeb78eeacbc2ae6a8b81b6ce3ea14c", "note": "branch issue-370-tilde-measurement-algebra"}
+{"ts": "2026-09-09T13:16:09+0800", "kind": "ci-build", "trigger": "ci.sh pr=359", "seconds": 130, "outcome": "success", "sha": "3c5dab86a546475fbe9d487cdff66f54196efd0f", "note": "branch issue-348-supplied-extended-game-passing-value"}
