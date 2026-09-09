@@ -1,5 +1,89 @@
 [
  {
+  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/505",
+  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
+  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/505/labels{/name}",
+  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/505/comments",
+  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/505/events",
+  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/505",
+  "id": 5398747896,
+  "node_id": "I_kwDOUJyJf88AAAABQcpa-A",
+  "number": 505,
+  "title": "account_router.py: remove the Space-era admission machinery (SIGSTOP holds starved the pipeline)",
+  "user": {
+   "login": "Dengnifer",
+   "id": 89234078,
+   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
+   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/Dengnifer",
+   "html_url": "https://github.com/Dengnifer",
+   "followers_url": "https://api.github.com/users/Dengnifer/followers",
+   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
+   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
+   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
+   "repos_url": "https://api.github.com/users/Dengnifer/repos",
+   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
+   "type": "User",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "labels": [
+   {
+    "id": 12025011061,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8bdQ",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/infrastructure",
+    "name": "infrastructure",
+    "color": "ededed",
+    "default": false,
+    "description": "Foundational definitions, shared APIs, or supporting layers"
+   }
+  ],
+  "state": "open",
+  "locked": false,
+  "assignees": [],
+  "milestone": null,
+  "comments": 0,
+  "created_at": "2026-09-09T11:22:38Z",
+  "updated_at": "2026-09-09T11:22:38Z",
+  "closed_at": null,
+  "assignee": null,
+  "author_association": "OWNER",
+  "active_lock_reason": null,
+  "sub_issues_summary": {
+   "total": 0,
+   "completed": 0,
+   "percent_completed": 0
+  },
+  "issue_dependencies_summary": {
+   "blocked_by": 0,
+   "total_blocked_by": 0,
+   "blocking": 0,
+   "total_blocking": 0
+  },
+  "body": "`local/bin/account_router.py` (553 lines) still carries the retired \"Space\" machinery: native leases, `primary-key-capacity` and external-admission gates, `useful-queue` tickets with HOLD/STOP files, and a supervisor. On 2026-09-09 between 10:20Z and 11:20Z five dispatch routers sat SIGSTOPped (the stop comes from `~/.local/bin/qpbt-switch`, line 331) behind a `useful-queue/HOLD` file dated 09-06, while the second account had six free slots: the pipeline ran with four workers for an hour. The meta session resumed the routers and removed the HOLD file.\n\nTask (workflow layer, reviewed; keep it small): reduce the router to what the pipeline uses: `reserve <root> <auto|primary|second> <pid> <wait>` that (1) reads caps from `watchdog/max-codex-primary` and `max-codex-second` (a missing file means 0), (2) counts live reservations as marker files `accounts/<account>/<pid>` whose pid is alive (stale markers removed), (3) picks the account with the smaller live/cap ratio among those with free capacity (ties to primary), waits up to `<wait>` seconds polling every 10 s otherwise, and (4) prints the account. Delete native leases, admission capacity, external admission, useful-queue tickets, HOLD/STOP handling and every SIGSTOP/SIGCONT path; `qpbt-switch` must not stop dispatch processes (retire the command or reduce it to reporting). Keep `resume affinity` only if a test still needs it. Update the unit tests in `scripts/tests/` accordingly and add one test for the cap/ratio choice. Protocol note in `local/protocols/sessions.md`; EVOLUTION.md entry citing the 2026-09-09 events entries.\n",
+  "closed_by": null,
+  "reactions": {
+   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/505/reactions",
+   "total_count": 0,
+   "+1": 0,
+   "-1": 0,
+   "laugh": 0,
+   "hooray": 0,
+   "confused": 0,
+   "heart": 0,
+   "rocket": 0,
+   "eyes": 0
+  },
+  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/505/timeline",
+  "performed_via_github_app": null,
+  "state_reason": null,
+  "pinned_comment": null
+ },
+ {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/504",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/504/labels{/name}",
@@ -340,90 +424,6 @@
    "eyes": 0
   },
   "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/500/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/498",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/498/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/498/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/498/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/498",
-  "id": 5395136437,
-  "node_id": "I_kwDOUJyJf88AAAABQZM_tQ",
-  "number": 498,
-  "title": "pr_merge.py: telemetry-tolerant freshness gate (main moved only under results/telemetry)",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025011061,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8bdQ",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/infrastructure",
-    "name": "infrastructure",
-    "color": "ededed",
-    "default": false,
-    "description": "Foundational definitions, shared APIs, or supporting layers"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-09T04:53:52Z",
-  "updated_at": "2026-09-09T04:53:52Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 0,
-   "blocking": 0,
-   "total_blocking": 0
-  },
-  "body": "`local/bin/pr_merge.py` refuses a PR unless `github/main` is an ancestor of its head (line 341, \"verify the branch is up to date with the base\"). With the current volume (about sixty open PRs) this gate serializes merges to one per refresh lane (about ten to fifteen minutes) and, worse, any commit to main during a refresh, including the telemetry snapshot commits that the main session and `github-sync.sh` make, invalidates every refreshed PR: on 2026-09-09 PRs 375 and 377 finished green refresh lanes at 04:48Z and were already stale because main had moved by telemetry-only commits.\n\nTask (small, reviewed): make the freshness gate telemetry-tolerant. A head is fresh when `github/main` is an ancestor of it, OR when `git diff --quiet <merge-base(github/main, head)> github/main -- . ':(exclude)results/telemetry'` succeeds, i.e. main differs from the branch's base only under `results/telemetry/`. Apply the same rule in the daemon-facing helper (`ensure_mergeable_worktree` / `git_ok` call site) and keep every other gate (CI success on the head, review clean on the head, adjudication rules). Add a unit test in `scripts/tests/` covering: fresh by ancestry, fresh by telemetry-only difference, stale when a Lean or blueprint file differs. Document the rule in `local/protocols/issues-prs.md` and add an EVOLUTION.md entry citing the 2026-09-09 events entry on the meta intervention.\n\nOut of scope: changing how telemetry is committed, the merge daemon scripts under /tmp, or the review pipeline.\n",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/498/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/498/timeline",
   "performed_via_github_app": null,
   "state_reason": null,
   "pinned_comment": null
@@ -2727,7 +2727,7 @@
    "percent_completed": 0
   },
   "issue_dependencies_summary": {
-   "blocked_by": 2,
+   "blocked_by": 1,
    "total_blocked_by": 2,
    "blocking": 0,
    "total_blocking": 0
@@ -3270,91 +3270,6 @@
    "eyes": 0
   },
   "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/428/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/427",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/427/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/427/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/427/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/427",
-  "id": 5389724130,
-  "node_id": "I_kwDOUJyJf88AAAABQUCp4g",
-  "number": 427,
-  "title": "Prove coefficient polynomial collision bound",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-08T17:09:49Z",
-  "updated_at": "2026-09-08T17:09:49Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/118",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 0,
-   "blocking": 1,
-   "total_blocking": 1
-  },
-  "body": "<!-- mipstarre-issue-key: qpbt-polynomial-collision-20260909 -->\nAdd the coefficient-vector polynomial identity and finite root-count bound used\nby the Schwartz-Zippel step in `lem:qld-xz-lines`, paper\n`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:950-955`.\n\nScope is limited to `polynomial_ofFn_eval_eq_evalCoefficient` and\n`evalCoefficient_collision_card_le` in a scalar-polynomial helper module. The\nbound has no `degree < q` assumption and changes no sampler, witness, or pasting\nstatement.",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/427/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/427/timeline",
   "performed_via_github_app": null,
   "state_reason": null,
   "pinned_comment": null
@@ -4369,7 +4284,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/118",
   "issue_dependencies_summary": {
-   "blocked_by": 1,
+   "blocked_by": 0,
    "total_blocked_by": 1,
    "blocking": 1,
    "total_blocking": 1
@@ -4585,100 +4500,6 @@
    "eyes": 0
   },
   "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/403/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/402",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/402/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/402/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/402/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/402",
-  "id": 5388737937,
-  "node_id": "I_kwDOUJyJf88AAAABQTGdkQ",
-  "number": 402,
-  "title": "Add generic marginal contraction estimate",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement"
-   },
-   {
-    "id": 12025012779,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8iKw",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/sorry-elimination",
-    "name": "sorry-elimination",
-    "color": "ededed",
-    "default": false,
-    "description": "Explicitly aimed at discharging remaining `sorry` sites"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-08T15:33:56Z",
-  "updated_at": "2026-09-08T15:33:56Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/118",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 1,
-   "blocking": 1,
-   "total_blocking": 1
-  },
-  "body": "### Scope\n\nRecover the generic marginal contraction estimate used after the point-witness\nabsorption step, with the exact projectivity, orthogonality, completeness, and\ncommutation hypotheses of the existing formulation.\n\n### Source\n\n- `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:912-932`\n- `DistanceCalculus.norm_finset_sum_projector_mul_sq_le`\n- The projection contraction helper from #396 / PR #401\n\n### Acceptance criteria\n\n- Add only `norm_marginal_sub_sq_le` in a dedicated small module.\n- Preserve the generic hypotheses and factor `4` conclusion exactly.\n- Add no witness marginal theorem, bridge premise, axiom, or proof hole.\n- Kernel-check the declaration and inspect its axioms.\n\n### Dependencies\n\n- Stacks on #396 / PR #401.\n",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/402/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/402/timeline",
   "performed_via_github_app": null,
   "state_reason": null,
   "pinned_comment": null
@@ -10116,8 +9937,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 36,
-   "completed": 5,
-   "percent_completed": 13
+   "completed": 7,
+   "percent_completed": 19
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/166",
   "issue_dependencies_summary": {
@@ -11256,9 +11077,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 241,
+  "comments": 248,
   "created_at": "2026-09-02T08:30:04Z",
-  "updated_at": "2026-09-09T10:47:58Z",
+  "updated_at": "2026-09-09T12:23:10Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
