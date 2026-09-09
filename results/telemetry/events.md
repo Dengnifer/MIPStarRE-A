@@ -5925,3 +5925,143 @@ not actual commit/publication hooks. No productive session was killed.
   GitHub review, or local-review summary was published. They remain non-green and
   non-mergeable. Root assigned a separate guarded workflow repair; no blind review
   rerun, fabricated result, parser edit, source change, or duplicate CI was used.
+- 2026-09-08T12:36:47+00:00: The throughput audit corrected the denominator of
+  earlier occupancy reports. Exactly 51 of 170 recorded worker-lifecycle checks
+  observed at least eight useful native workers; this is a count of samples, not a
+  percentage of time and not a measurement of provider API concurrency. The owner's
+  separate dashboard observation was 6--8 API requests, while direct current API
+  telemetry remained unavailable. The six-hour QPBT `sorry` count on `main` remained
+  47. Four new Sol Ultra construction lanes were observed with actual tools: issue
+  #367 thread 01a080e3-0e22-7530-af72-a3679688fe61, issue #368 thread
+  01a080e2-8b8b-7d00-864d-2fe522c1ef4c, issue #369 thread
+  01a080e3-7b73-7062-964f-d404b21da8e5, and issue #370 thread
+  01a080e3-e91d-70d3-9e6b-abbfc4945a91. PRs #372 and #374 carry three
+  kernel-validated tracked-site closures, but they were unmerged at this boundary
+  and therefore do not reduce the main-branch count. The meta-watch 95% floor and
+  90% coverage criteria are an operational interpretation, not API percentages or
+  an allocation change. No proof budget, B8 history, model policy, or goal was reset.
+- 2026-09-08T12:29:58+00:00: PR #319 preservation integration retained exact
+  source head 249a24a48813903ac5116fc9b1fa1dd8942508eb while merging frozen main
+  3c06c1f37ff9819d7f3bcb6d866e445b45d5ad36 as head
+  f09d5ced9965e1d677fca2187be26240ab39aef8. Pending and committed merge-loss
+  guards passed, and all three owned blobs remained byte-identical. The sole
+  exact-head CI passed all nine gates in 236 seconds. Review 5141637956 carried
+  the prior independent approval forward under the whitespace-sensitive identical
+  patch hash d2b6cb48550d99823862cc4cf6b05f9073de1a1467ad55f96fe2dea8ebfecbe7.
+  `pr_merge.py` passed every exact-head gate and merged PR #319 as
+  628e3b533ceed0d061c96d610465852bc4ad4610. The first checked-push attempt
+  failed before transport because a newly merged object file was absent; building
+  the exact imported target repaired the cache, and the normal checked publication
+  then succeeded without a hook bypass. One malformed retry command stopped at
+  usage validation and made no mutation.
+- 2026-09-08T12:35:00+00:00: The PR #319 service boundary demonstrated that
+  continuous CI does not require an unbounded writer-idle wait. Stash
+  08fdb63c5cdcc5f1b449093944af858849f1b213 preserves the finite two-row
+  pre-service suffix for PRs #296 and #319. PR #319 merged while the unrelated
+  PR #371 CI process remained active. Stash
+  05778dd2369eeae8a19dce83b3c731e8c2ac72f7 preserves the later cache-warmer
+  and PR #371 rows. The primary verified the committed 814-line prefix, parsed all
+  four JSON objects, restored them once in timestamp order through the normal
+  telemetry append lock, and retained both stashes and SHA-256 backups. Later CI
+  rows remain eligible to form the next suffix; no global append lock was held
+  through build or network work, and no clean-tree gate was weakened.
+- PR #371 workflow-resume integration preserved the original issue #366 episode start at 2026-09-08T11:34:28Z and default boundary at 13:34:28Z. The fresh hard-review checks completed at 13:34:04Z, while the genuine FINAL arrived at 13:34:40Z. The initial post-boundary hold is retained as an overbroad operator interpretation. Under owner authorization comment 5557148036 on issue #26, which assigns mathematical and internal workflow budget decisions to main absent an actual access or permission blocker, main granted a bounded no-reset completion extension at 13:57:30Z through 14:27:30Z for existing normal merge and resume verification only. No source growth or new feature work was authorized. All exact-head CI and review gates remained intact, and pr_merge.py merged PR #371 as 6f73345e84cce0fba855355cd87dcc907d05f299 at 14:02:54Z.
+- PR #371 used a finite telemetry boundary rather than waiting for unrelated CI or review writers to become idle. Retained stash 502325c8d84fe50ba44646b1dbbe34517d5db933 exactly matches the validated pre-service full files (builds 824 rows, sessions 1031 rows). Retained stash f62d6be551fee66d1e7984c2a494fe8f1d51b884 preserves the independently appended service-warmer row. On merge commit 6f73345e84cce0fba855355cd87dcc907d05f299, the tracked prefixes match byte-for-byte; the restored seven-row build suffix has SHA-256 f2ea35e25a7794ef13d905b94edc33bd5272ba43f7bd24480d03f2e324150b26 and the restored three-row session suffix has SHA-256 613da6eb518f614725d881f891505fddc10ac54a90492e3ecc8104c839b1d440. Both retained stashes and full backups under /tmp/qpbt-pr371-service-boundary-20260908 remain available. No global lock was held through network or build work, no clean-tree gate was weakened, and multiplicity was preserved.
+- PR #372 preservation refresh kept MIPStarRE/QPBT/Combining/Defs.lean byte-identical (blob 5ad58efa), passed canonical CI in 197 seconds, carried independent approval under the identical-patch guard, and merged normally as 0bf326b4861ed9788730fff74a71c373dfdb55ea. The first checked push failed before transport on a missing newly merged object file; a focused target build repaired the cache and the retry passed without bypass. Retained stash c5ece5be preserves the two-row pre-service suffix and stash 569ad776 preserves the three later build rows plus the PR #390 reviewer session. The primary restored all six records once through locked JSONL appends, verified exact ordered hashes and JSON parsing, and kept unrelated PR #358 CI live through the finite boundary; continuous CI therefore did not require a global writer-idle wait.
+- The refreshed occupancy archive preserves /root/astra_refill_coordinator as the only demonstrated native list_agents/followup_task refill owner without expiry; the primary remains the sole manual telemetry and integration writer and does not claim executable refill capability. The latest lifecycle, meta-watch, and short-control receipts remain observational: 51/170 was a count of checks rather than time or API utilization, the owner-reported provider range 6--8 was not independently measured, and merged versus locally validated tracked-hole closures are recorded separately. No goal, capacity, model, credential, B8, or proof-budget history was reset.
+- 2026-09-08T15:42:08Z: PR #390 preserved reviewed source head 989702f7cb19 byte-for-byte across published main 51f49fa47e81 as e4d2ef7dd99a. Its first checked-push attempt stopped before transport on a missing merged object file; a focused target build repaired the cache and the normal retry passed without bypass. One canonical CI passed all nine contexts in 242 seconds, review 5143769596 carried the earlier independent APPROVED verdict under the whitespace-sensitive identical-patch guard, and `pr_merge.py` passed every service gate before merging as 1d214035d20a574aaa438163e746a4888bc7cda3.
+- The PR #390 boundary parked exactly one parsed CI-build row with suffix SHA-256 83804f978980e1bea8e82f301266cf11626e2ae9adf0b33936bf088c91604ae0 while holding only the actual JSONL inode lock. The tracked 830-row prefix was restored in place with the inode preserved, service merged, and the parked row was reinserted before the independently appended 111-second service-warmer row. This finite snapshot did not wait for unrelated CI writers or weaken a clean-tree gate. The latest owner metrics keep occupied native runtime slots, fresh productive output, and the unverified owner-reported API range 6--8 separate: fresh-output counts are lower bounds, not empty-slot evidence. PRs #398 and #401 are additional published, unmerged standard-axiom proof packets and do not by themselves establish a main-branch debt reduction.
+- PR #358 late native response publication initially outlived its review.sh publisher. The reviewed single-code-lane resume path reclaimed the stale lock, revalidated the exact 7a059bc2 head, CI, reviewer identity, prompt digest, author exclusions, and clean worktree, and published APPROVED review 5144183188 with zero findings. No response text, parser, source, CI, or review request was replaced.
+- PRs #213 and #299 each have genuine completed CODE and PROSE responses but dead original publishers and no exact-head local-review summary. The deployed resume interface intentionally supports only one code lane and rejects blueprint/prose combinations, so the primary failed closed instead of fabricating a combined verdict or starting duplicate reviews. Receipts /tmp/qpbt-pr213-publisher-blocker-20260908.json and /tmp/qpbt-pr299-publisher-blocker-20260908.json preserve the exact blocker; PR #299 remains CHANGES_REQUESTED by its genuine prose response until owner resolves canonical publication.
+- PR #374 preserved combinePoly_mem_polyFunc unchanged across published main a1b589ea as head 104e8f0e. Two checked-push attempts stopped before transport on missing inherited CoefficientCollision and PointsDataProcessing object files; focused normal target builds populated the refreshed worktree cache and the third checked push passed without bypass. One canonical CI passed all nine contexts in 306 seconds, review 5144368104 carried the prior independent approval by identical patch hash, and pr_merge.py passed every service gate before merging as 1b24dcf30eae34a485207554c336ae352f7ed1b4.
+- The PR #374 service boundary parked one parsed row from each of builds, estimates, and sessions under exclusive locks on the actual JSONL inodes, rewrote only the committed prefixes in place, and restored each parked suffix before any later suffix after merge. Receipts under /tmp/qpbt-pr374-service-boundary-20260908 and /tmp/qpbt-pr374-postservice-restore-20260908 verify exact prefix hashes, order, multiplicity, JSON parsing, and inode preservation. No append lock was held through service and no global writer-idle wait or clean-tree bypass was used.
+- PR #383 exact ef166338 has green canonical CI and one live routine Sol Ultra CODE/PROSE review publisher, with request receipt /tmp/qpbt-pr383-review-request-status-20260908.json; both requests remain unbound and no duplicate was started. The latest owner archive keeps occupied runtime, fresh useful output, and unverified provider API observations separate, treats successor entries as readiness plans rather than occupied slots, and preserves the read-only Claim 17-2 domain audit as an unadjudicated, non-kernel-certified proposal rather than a proof closure.
+- 2026-09-08T16:40:38Z: Completion handoff ordering and source-deadline correction. The regular 30-second lifecycle audit found at least eight useful native workers in only 26 of 65 valid sampled minutes (40 percent), including one approximately 10.5-minute gap and another longer than six minutes. The capable coordinator had a prepared-successor ledger, but detailed receipt and rollout-tail adoption could still precede activation; at 16:47Z the ledger also retained an already-published successor, an exhausted geometry successor, and descriptive input strings instead of current heads, `ready_at`, ownership, and complete dispatch payloads. Closing nine-worker snapshots therefore did not establish prompt or sustained recovery. A separate bounded geometry actor started at 16:09:28Z, first reported progress at 16:24:57Z, and retained its original 20-minute deadline of 16:29:28Z; 301.722 seconds of late read-only scouting remains charged rather than becoming a reset. Issue #418 changes only the native main/coordinator/session contract: target nine useful workers with floor eight; validate disjoint primary and alternate successors while slots are full against current heads, published inputs, available roles, current ownership, and immutable dispatch payloads; place an absolute source deadline no later than native dispatch plus the authorized limit in each activation payload; activate after real completion and minimal admission checks before detailed adoption; then reconcile the deadline with the successor current turn and verify its first useful output. Backlog recovery is labelled backlog, actual blockers and main-decision latency remain visible, and occupied runtime, fresh-output lower bounds, API usage, and proof delivery remain distinct. No lease, capacity, root identity, credential, model policy, runtime trigger, goal, proof budget, or B8 counter changed.
+- 2026-09-08T17:11:04Z: The coordinator-owned pre-merge latency batch `/tmp/qpbt-refill-latency-next-batch-20260909.json` (SHA-256 `e18dd17a73fe25148e74fdf644a7142617020c2f1c6ef52743555c93acc775dd`) records two missed baseline transitions. Completion to actual successor `task_started` took 294.078 seconds for `/root/space_sol_pr249` and 354.659 seconds for `/root/sol_prove_tilde_measurement`; both records have `ready_at: null`, and the latter explicitly records incomplete payload prevalidation before completion. The later observation of nine occupied native slots is recovery only, not acceptance of the new ordering or proof of sustained floor coverage. This issue reads the batch without editing it; only `/root/astra_refill_coordinator` owns live latency-batch writes.
+- 2026-09-08T18:22:34Z: PR #426 repaired the completion-handoff ordering
+  protocol at exact head `3963ac0aa102a4589636ab924620f8cf63aa09e3`.
+  Its canonical CI passed all nine gates in 250 seconds, and independent hard
+  review `5145399737` approved the repaired F1/F2 ordering with no findings.
+  `pr_merge.py` passed every exact-head service gate and merged the PR as
+  `90f277349f7d502eac919762db4e23c5a8a7cd86`. This merge does not establish
+  runtime acceptance: actual prevalidated completion-to-start, first-tool
+  latency, and coverage evidence remain required, and the prior failed
+  measurements remain historical evidence.
+- The PR #426 service boundary retained stash
+  `4ecdd8aef581f4a6b7a2593181027c16c65169d9`, exactly matching four pending
+  build rows and three native-session rows. After service, the primary restored
+  those suffixes before the independently appended eight-second cache-warmer
+  row while holding only the live JSONL inode locks. The composed 839-row build
+  file has SHA-256 `f76f60422d2f5422cf2efd41b14a18834f98d6e6100a72902e2f6e890267dab4`;
+  the 1,036-row session file has SHA-256
+  `57542d1d05e37c21e750e99700d8a076110889af91d2ab67192a259cc895c3bf`.
+  JSON parsing and byte checks passed under
+  `/tmp/qpbt-pr426-postservice-restore-20260908T1823Z/receipt.json`; no global
+  writer-idle wait or clean-tree bypass was used. The sole subsequent PR #363
+  CI on exact head `e90a2a689fef401652e20d5fd1de819ec293337a` completed non-partially
+  with all nine contexts green in 288 seconds (manifest SHA-256
+  `6969824f8253f8fbc4b78fe82a40caf2ce8709c7798c4e418626493e0c3491e9`).
+- 2026-09-08T19:12:11Z: The first selected post-merge PR #426 handoff sample
+  failed its strict runtime target. The issue #422 successor was fully prepared
+  at 18:53:41.259Z, 751.310 seconds before the exact PR #365 predecessor
+  completed at 19:06:12.569Z. The coordinator began the native call at
+  19:07:15.606Z and the new Sol Ultra turn started at 19:07:15.645Z, a
+  completion-to-start latency of 63.076 seconds and a 3.076-second miss. The
+  first attributable model output arrived after 88.689 seconds and the first
+  useful source read after 110.070 seconds. The 19:12 occupied/fresh 9/9
+  snapshot does not establish coverage or acceptance. Exact prepared and final
+  receipts are archived under `owner-audits/throughput-correction-20260908/`;
+  earlier 294.078- and 354.659-second failures, all predecessor costs, and the
+  issue #422 absolute 19:17:15.645Z source deadline remain unchanged.
+- A separate PR #448 readiness-routing incident misidentified a diagonal line
+  resampling head as the required mixed bound and delivered steering to an
+  already occupied ROOT446 actor. No dependent proof was admitted, no new task
+  or budget resulted, and the original 18:47:10--18:57:10 source interval and
+  actual source effects remain historical evidence. The incident archive does
+  not claim a new worker, repair the dependency, or alter any source statement,
+  review gate, allocation, model policy, or B8 counter.
+- 2026-09-08T19:49:57Z: The second selected post-merge PR #426 handoff sample
+  failed the strict runtime target. The PR #400 review-request payload was
+  prepared at 19:23:01.896Z, 881.014 seconds before the PR #422 predecessor
+  completed at 19:37:42.910Z. The native call began at 19:38:56.067Z and the
+  successor turn started at 19:38:56.081Z, so completion-to-start took 73.171
+  seconds and missed the 60-second target by 13.171 seconds. First model output
+  followed completion after 93.019 seconds and the first attributable useful
+  workflow-guard output after 110.991 seconds. The original sealed eight-minute
+  budget and the later root-directed six-minute deadline remain distinct; no
+  timestamp, predecessor cost, or proof budget was reset. The earlier
+  63.076-second miss remains unchanged, and neither sample proves sustained
+  coverage or runtime acceptance. Exact prepared and result receipts are
+  archived under `owner-audits/throughput-correction-20260908/`.
+- 2026-09-08T21:33:07Z: PR #476 deployed paired completed-response recovery at
+  exact head `4c343e6c88b7714a3bbf121b3dc23839df303e3e`. Its sole canonical CI
+  passed all nine contexts in 249 seconds and independent hard review
+  `5147206622` approved the control path with no findings. A later assigned
+  helper attempted another launch, but the canonical `ci-476.lock` refused it
+  before any job or status write, so no duplicate CI occurred. The service
+  gate merged PR #476 as `81148545f0752ec09b3efe88332b49bb771312be`.
+  The finite service boundary parked five build and four session rows under
+  same-inode locks, released the locks before service, and restored those rows
+  ahead of later appends with exact hashes, order, multiplicity, and JSON
+  validity. Unrelated review publishers remained live; no global writer-idle
+  wait or clean-tree gate relaxation was used.
+- 2026-09-08T21:36:00Z: The merged PR #476 continuation consumed PR #400's
+  preserved CODE request `48c8adbc83d749b0b79fb9faac681534` and PROSE
+  request `8aaa7139221c4975a2082d886b77714d` through the normal trust, parser,
+  combiner, CI, head, lock, and publisher gates. Canonical review `5147250926`
+  recorded two CODE and five PROSE findings at exact head
+  `37a2e268bc1ef7434e13c9b8b3daf3c02d18b94e`. No review was restarted,
+  no response was edited, and the source worktree stayed clean. The original
+  reviewer and source holds were released, while PR #400 remained correctly
+  ineligible to merge. The isolated repair `06583ccc58b1a9077a4cd330d3f3749e1979c081`
+  remains a pending source handoff for normal checked publication, CI, and a
+  fresh independent review. Exact receipts and artifacts are archived under
+  `owner-audits/review-recovery-20260908/`.
+- 2026-09-08T21:54:17.291Z: The capable refill coordinator reconciled all 19
+  canonical review requests created after PR #426 merged. The archive retains
+  the earlier 21:48:35.782Z snapshot, then adds five exact reviewer starts and
+  preserves original timestamp precision, including the PR #476 file-time
+  correction. Unknown consumer, publication, and other lifecycle endpoints
+  remain null rather than being inferred as zero latency. These are read-only
+  cache artifacts, not selected-window occupancy, API-utilization, or runtime
+  acceptance claims.
