@@ -24,11 +24,15 @@ The proof-integrity, review, project-scope and permission restrictions remain bi
   money, or acting outside this repository. Issue #26 is archived; post no new
   comments there.
 - Put one blocker in each #500 comment. Above any folded details, use at most
-  ten plain-language lines: the `status=open` marker, `BLOCKER B<n>`, one line
-  saying what is stuck, lettered one-line options, one recommendation, and the
-  literal reply `DECISION B<n>: <letter>`, where the letter is one offered
-  alternative (`A`, `B`, or `C`). Ids continue from B11. After the owner replies,
-  post `RESOLVED B<n>` and change the marker to `status=closed`.
+  ten plain-language lines: `BLOCKER B<n>`, one line saying what is stuck,
+  lettered one-line options, one recommendation, and the literal reply
+  `DECISION B<n>: <letter>`, where the letter is one offered alternative (`A`,
+  `B`, or `C`). Ids continue from B11. Key both creation and resolution with the
+  unchanged `<!-- owner-inbox id=B<n> -->` marker passed to
+  `gh_common.py ensure-pr-comment`; keep `<!-- owner-inbox-status=open -->` as a
+  separate body field. After the owner replies, update that same comment, set
+  the body field to `<!-- owner-inbox-status=closed -->`, and add
+  `RESOLVED B<n>`.
 - You do not implement issue content yourself. An orchestrator session per
   issue implements; you brief, dispatch, verify, gate, and adjudicate. Any work
   likely to take more than about two minutes belongs in a detached worker or

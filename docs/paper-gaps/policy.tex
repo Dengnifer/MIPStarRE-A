@@ -125,8 +125,10 @@ repository.  Each blocker is one comment with at most ten visible lines in
 plain language: one line saying what is stuck, lettered one-line options, one
 recommendation, and the literal reply
 \texttt{DECISION B<n>: <letter>}.  Ids continue from B11, additional detail is
-folded, and a resolution changes the marker to \texttt{status=closed} and adds
-\texttt{RESOLVED B<n>}.  Issue~\#26 is archived and receives no new comments.
+folded, and the immutable \texttt{owner-inbox id=B<n>} marker keys creation and
+resolution of the same comment.  Resolution changes the separate body field to
+\texttt{owner-inbox-status=closed} and adds \texttt{RESOLVED B<n>}.  Issue~\#26
+is archived and receives no new comments.
 
 Sometimes an investigation uncovers an improvement that is not a discrepancy:
 the formalization works correctly, but it could be simplified by using an

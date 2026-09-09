@@ -249,7 +249,8 @@ Use one #500 comment per blocker. The visible part is at most ten lines in
 plain words and has this form; ids continue from B11.
 
 ```markdown
-<!-- owner-inbox id=B<n> status=open -->
+<!-- owner-inbox id=B<n> -->
+<!-- owner-inbox-status=open -->
 ### BLOCKER B<n> — <five-word title>
 What is stuck: one line.
 Options: A one line. B one line. (C one line.)
@@ -258,8 +259,20 @@ Reply: DECISION B<n>: <letter>
 ```
 
 The reply letter must be one of the offered alternatives (`A`, `B`, or `C`).
-Put any additional detail in a folded `<details>` block. After an owner reply,
-the operator posts `RESOLVED B<n>` and changes the marker to `status=closed`.
+Put any additional detail in a folded `<details>` block. The first HTML comment
+is an immutable identity marker; pass it unchanged as the marker argument on
+both creation and resolution:
+
+```bash
+python3 local/bin/gh_common.py ensure-pr-comment 500 \
+  "<!-- owner-inbox id=B<n> -->" --body-file BLOCKER.md
+```
+
+`BLOCKER.md` starts with the separate `<!-- owner-inbox-status=open -->` line,
+not the identity marker. After an owner reply, update that same body file to
+`<!-- owner-inbox-status=closed -->`, add `RESOLVED B<n>`, and rerun the command
+with the unchanged identity marker. This PATCHes the original comment instead
+of creating a second comment for the blocker.
 
 A source statement found to be mathematically false does not create an owner
 blocker. Astra availability has been reported, so main selects Astra Ultra for

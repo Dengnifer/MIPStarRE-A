@@ -1073,8 +1073,10 @@ overrides and consecutive workflow-only episodes. The budget guard remains
 enforced. Each blocker is one comment with at most ten visible plain-language
 lines, lettered options, one recommendation, and the literal
 `DECISION B<n>: <letter>` reply, where the letter is an offered alternative.
-Ids continue from B11, details are folded, and resolved blockers use
-`status=closed` plus `RESOLVED B<n>`. Issue #26 is archived. Existing #26
+Ids continue from B11 and details are folded. The immutable
+`<!-- owner-inbox id=B<n> -->` marker keys both creation and resolution through
+`ensure-pr-comment`; a separate body field records open or closed status, and a
+resolved blocker adds `RESOLVED B<n>`. Issue #26 is archived. Existing #26
 citations in this ledger and the QPBT gap register remain unchanged or are
 explicitly marked as historical provenance.
 
