@@ -1,5 +1,6 @@
 import MIPStarRE.QPBT.Games.StrategyClasses
 import MIPStarRE.QPBT.Games.DistanceTheorems.Support
+import MIPStarRE.QPBT.Games.Sandwich.Support
 import MIPStarRE.QPBT.Observables.LineDefs
 import MIPStarRE.QPBT.Test.PauliBasisTest
 
@@ -17,12 +18,10 @@ for the completed line-evaluation classes.
 
 The ambient strategy convention and the observable `W^r(u)` are in
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:160-190`,
-corresponding to `def:strategy-observables` in
-`blueprint/src/chapter/ch14_qpbt_observables.tex:480-503`. The typed question
-and answer forms come from `def:pauli-question-distribution` and
-`def:pauli-win-predicate`, paper
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1225`
-and blueprint `blueprint/src/chapter/ch13_qpbt_test.tex:310-392`.
+corresponding to blueprint `def:strategy-observables`. The typed question
+and answer forms come from blueprint `def:pauli-question-distribution` and
+`def:pauli-win-predicate`, with paper origin
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:964-1225`.
 -/
 
 open scoped BigOperators Matrix ComplexOrder
@@ -46,7 +45,7 @@ inductive PlayerSide where
 Section `sec:commutation`. The structure retains the distinct player spaces and
 measurement families of `Strategy`. Paper
 `14_analysis_of_the_pauli_basis_test.tex:160-172`; blueprint
-`ch14_qpbt_observables.tex:385-475`. -/
+`sec:commutation`. -/
 structure ProjectiveSetting (P : AdmissibleParams) (ε : ℝ) where
   toStrategy : Strategy (pauliBasisTest P)
   isProjective : toStrategy.IsProjective
@@ -84,7 +83,7 @@ def strategyMeasurement (S : ProjectiveSetting P ε) (side : PlayerSide)
 /-- Embed a point into the full Pauli question space in basis `W`. This is the
 point-question content from `def:pauli-question-distribution`, paper
 `08_classical_and_quantum_low_degree_tests.tex:997-1008`, blueprint
-`ch13_qpbt_test.tex:310-354`. -/
+`def:pauli-question-distribution`. -/
 def contentOfPoint (P : AdmissibleParams) (W : PauliKind)
     (u : Fin P.m → PauliScalar P) : PauliSpace P :=
   embedLd P W fun i =>
@@ -97,7 +96,7 @@ def contentOfPoint (P : AdmissibleParams) (W : PauliKind)
 Axis lines clear the direction block, whereas diagonal lines retain their
 canonical projected direction. Paper
 `08_classical_and_quantum_low_degree_tests.tex:997-1008`; blueprint
-`ch13_qpbt_test.tex:310-354` and `rem:deg-line-representatives`. -/
+`def:pauli-question-distribution` and `rem:deg-line-representatives`. -/
 def contentOfLine (P : AdmissibleParams) (W : PauliKind)
     (line : LineDesc P.toLdParams) : PauliSpace P :=
   embedLd P W fun i =>
@@ -113,7 +112,7 @@ def contentOfLine (P : AdmissibleParams) (W : PauliKind)
 Square questions. This is the type-4 content of
 `def:pauli-question-distribution`, paper
 `08_classical_and_quantum_low_degree_tests.tex:1030-1120`, blueprint
-`ch13_qpbt_test.tex:310-354`. -/
+`def:pauli-question-distribution`. -/
 def contentOfTuple (P : AdmissibleParams)
     (uX uZ : Fin P.m → PauliScalar P) (rX rZ : PauliScalar P) : PauliSpace P :=
   fun i =>
@@ -127,7 +126,7 @@ def contentOfTuple (P : AdmissibleParams)
 
 /-- The typed point question in basis `W`, from the strategy notation at paper
 `14_analysis_of_the_pauli_basis_test.tex:174-190` and
-`def:pauli-question-distribution`, blueprint `ch13_qpbt_test.tex:310-354`. -/
+blueprint `def:pauli-question-distribution`. -/
 def pointQuestion (P : AdmissibleParams) (W : PauliKind)
     (u : Fin P.m → PauliScalar P) : PauliQuestion P :=
   (.point W, contentOfPoint P W u)
@@ -165,7 +164,7 @@ def msQuestion (P : AdmissibleParams) (t : MsType)
 /-- A typed question occurs in the Pauli-test distribution when it is the first
 or second component of a question pair in the support. This is the support
 condition satisfied by the typed question embeddings; blueprint
-`def:pauli-question-distribution`, `ch13_qpbt_test.tex:310-354`, paper
+`def:pauli-question-distribution`, paper
 `08_classical_and_quantum_low_degree_tests.tex:964-1120`. -/
 def QuestionAppearsInSupport (P : AdmissibleParams) (question : PauliQuestion P) : Prop :=
   ∃ other : PauliQuestion P,
@@ -180,7 +179,10 @@ private theorem pauliToLd_embedLd (P : AdmissibleParams) (W : PauliKind)
   funext i
   rcases i with ((j | x) | j) <;> cases W <;> rfl
 
-set_option maxRecDepth 10000 in
+-- The support rewrites below elaborate the `Fintype` instance of
+-- `PauliEdge × PauliSpace P`, whose nested sigma/sum instance chain exceeds the
+-- default recursion depth.
+set_option maxRecDepth 2000 in
 /-- A fixed point of a conditioning map occurs in the Pauli sampler through
 the corresponding self-loop. -/
 private theorem questionAppearsInSupport_of_fixed (P : AdmissibleParams)
@@ -203,8 +205,8 @@ private theorem questionAppearsInSupport_of_fixed (P : AdmissibleParams)
   simpa only [sample, edge, hfixed] using himage
 
 /-- Point embeddings occur in the typed Pauli question support. This is the
-support well-formedness companion to `def:pauli-question-distribution`,
-blueprint `ch13_qpbt_test.tex:310-354`, paper
+support well-formedness companion to blueprint
+`def:pauli-question-distribution`, paper
 `08_classical_and_quantum_low_degree_tests.tex:997-1008`. -/
 theorem pointQuestion_appears_in_support (P : AdmissibleParams) (W : PauliKind)
     (u : Fin P.m → PauliScalar P) :
@@ -215,7 +217,7 @@ theorem pointQuestion_appears_in_support (P : AdmissibleParams) (W : PauliKind)
 
 /-- Canonical axis and diagonal line embeddings occur in the typed Pauli
 question support. This is the line companion to
-`def:pauli-question-distribution`, blueprint `ch13_qpbt_test.tex:310-354`,
+blueprint `def:pauli-question-distribution`,
 paper `08_classical_and_quantum_low_degree_tests.tex:997-1008`. -/
 theorem lineQuestion_appears_in_support (P : AdmissibleParams) (W : PauliKind)
     (line : LineDesc P.toLdParams) :
@@ -266,8 +268,8 @@ theorem lineQuestion_appears_in_support (P : AdmissibleParams) (W : PauliKind)
       · exact congrFun hprojection j
 
 /-- Pair embeddings occur in the typed Pauli question support. This is the
-Pair companion to `def:pauli-question-distribution`, blueprint
-`ch13_qpbt_test.tex:310-354`, paper
+Pair companion to blueprint
+`def:pauli-question-distribution`, paper
 `08_classical_and_quantum_low_degree_tests.tex:1030-1057`. -/
 theorem pairQuestion_appears_in_support (P : AdmissibleParams)
     (uX uZ : Fin P.m → PauliScalar P) (rX rZ : PauliScalar P) :
@@ -277,8 +279,8 @@ theorem pairQuestion_appears_in_support (P : AdmissibleParams)
   rcases i with ((((j | j) | x) | j) | x) | x <;> rfl
 
 /-- Pair/W embeddings occur in the typed Pauli question support. This is the
-Pair/W companion to `def:pauli-question-distribution`, blueprint
-`ch13_qpbt_test.tex:310-354`, paper
+Pair/W companion to blueprint
+`def:pauli-question-distribution`, paper
 `08_classical_and_quantum_low_degree_tests.tex:1030-1057`. -/
 theorem pairWQuestion_appears_in_support (P : AdmissibleParams) (W : PauliKind)
     (uX uZ : Fin P.m → PauliScalar P) (rX rZ : PauliScalar P) :
@@ -288,8 +290,8 @@ theorem pairWQuestion_appears_in_support (P : AdmissibleParams) (W : PauliKind)
   rcases i with ((((j | j) | x) | j) | x) | x <;> rfl
 
 /-- Magic Square embeddings occur in the typed Pauli question support. This is
-the Magic Square companion to `def:pauli-question-distribution`, blueprint
-`ch13_qpbt_test.tex:310-354`, paper
+the Magic Square companion to blueprint
+`def:pauli-question-distribution`, paper
 `08_classical_and_quantum_low_degree_tests.tex:1059-1120`. -/
 theorem msQuestion_appears_in_support (P : AdmissibleParams) (t : MsType)
     (uX uZ : Fin P.m → PauliScalar P) (rX rZ : PauliScalar P) :
@@ -299,8 +301,8 @@ theorem msQuestion_appears_in_support (P : AdmissibleParams) (t : MsType)
   rcases i with ((((j | j) | x) | j) | x) | x <;> rfl
 
 /-- Pauli/W embeddings occur in the typed Pauli question support. This is the
-zero-content companion to `def:pauli-question-distribution`, blueprint
-`ch13_qpbt_test.tex:310-354`, paper
+zero-content companion to blueprint
+`def:pauli-question-distribution`, paper
 `08_classical_and_quantum_low_degree_tests.tex:1006-1008`. -/
 theorem pauliQuestion_appears_in_support (P : AdmissibleParams) (W : PauliKind) :
     QuestionAppearsInSupport P (MIPStarRE.QPBT.pauliQuestion P W) := by
@@ -320,7 +322,7 @@ def pointAnswerOrZero {P : AdmissibleParams} : PauliAnswer P → PauliScalar P
 list. Axis answers are padded from degree `d` to degree `m*d`. This realizes
 the coefficient convention of `def:ideg-deg-polynomials`, paper
 `14_analysis_of_the_pauli_basis_test.tex:51-62`, blueprint
-`ch14_qpbt_observables.tex:51-118`. -/
+`def:ideg-deg-polynomials`. -/
 def lineAnswerOrZero (P : AdmissibleParams) (line : LineDesc P.toLdParams) :
     PauliAnswer P → DegPoly P.toLdParams (P.m * P.d) :=
   match line with
@@ -387,7 +389,7 @@ noncomputable def lineMeas (S : ProjectiveSetting P ε) (side : PlayerSide)
 only strategy-side family whose outcome uses `Option`; `none` is precisely the
 non-evaluating class of `def:ideg-deg-polynomials`, paper
 `14_analysis_of_the_pauli_basis_test.tex:51-62`, blueprint
-`ch14_qpbt_observables.tex:51-118`. -/
+`def:ideg-deg-polynomials`. -/
 noncomputable def lineEvalMeas (S : ProjectiveSetting P ε) (side : PlayerSide)
     (W : PauliKind) (line : LineDesc P.toLdParams)
     (u : Fin P.m → PauliScalar P) :
@@ -459,81 +461,6 @@ noncomputable def wrongFormMass (S : ProjectiveSetting P ε) (side : PlayerSide)
             (heteroKron 1
               (wrongFormEffect questions.2.1 (S.toStrategy.B questions.2)))
             S.toStrategy.ψ)).re
-
-/-- A left-local sum of effects has Born mass equal to the corresponding sum
-of joint outcome weights. -/
-private theorem leftEffectMass_eq {G : Game} (S : Strategy G)
-    (x : G.QuestionA) (y : G.QuestionB) (p : G.AnswerA → Bool) :
-    (inner ℂ S.ψ
-      (applyOperatorToState
-        (heteroKron
-          (∑ a ∈ Finset.univ.filter (fun a => p a = false), (S.A x).effect a) 1)
-        S.ψ)).re =
-      ∑ a ∈ Finset.univ.filter (fun a => p a = false),
-        ∑ b : G.AnswerB, outcomeWeight S x y a b := by
-  classical
-  let invalid := Finset.univ.filter (fun a : G.AnswerA => p a = false)
-  have hop :
-      heteroKron (∑ a ∈ invalid, (S.A x).effect a) 1 =
-        ∑ a ∈ invalid, ∑ b : G.AnswerB,
-          heteroKron ((S.A x).effect a) ((S.B y).effect b) := by
-    ext i j
-    simp only [Matrix.sum_apply, heteroKron, Matrix.kronecker,
-      Matrix.kroneckerMap_apply]
-    simp_rw [← Finset.mul_sum]
-    rw [show (∑ b : G.AnswerB, (S.B y).effect b i.2 j.2) =
-        (1 : Op S.ιB) i.2 j.2 by
-      simpa only [Matrix.sum_apply] using
-        congrFun (congrFun (S.B y).sum_eq_one i.2) j.2]
-    rw [Finset.sum_mul]
-  change (inner ℂ S.ψ
-      (applyOperatorToState
-        (heteroKron (∑ a ∈ invalid, (S.A x).effect a) 1) S.ψ)).re = _
-  rw [hop]
-  simp [outcomeWeight, applyOperatorToState, invalid]
-
-/-- A right-local sum of effects has Born mass equal to the corresponding sum
-of joint outcome weights. -/
-private theorem rightEffectMass_eq {G : Game} (S : Strategy G)
-    (x : G.QuestionA) (y : G.QuestionB) (p : G.AnswerB → Bool) :
-    (inner ℂ S.ψ
-      (applyOperatorToState
-        (heteroKron 1
-          (∑ b ∈ Finset.univ.filter (fun b => p b = false), (S.B y).effect b))
-        S.ψ)).re =
-      ∑ a : G.AnswerA,
-        ∑ b ∈ Finset.univ.filter (fun b => p b = false),
-          outcomeWeight S x y a b := by
-  classical
-  let invalid := Finset.univ.filter (fun b : G.AnswerB => p b = false)
-  have hop :
-      heteroKron 1 (∑ b ∈ invalid, (S.B y).effect b) =
-        ∑ a : G.AnswerA, ∑ b ∈ invalid,
-          heteroKron ((S.A x).effect a) ((S.B y).effect b) := by
-    ext i j
-    simp only [Matrix.sum_apply, heteroKron, Matrix.kronecker,
-      Matrix.kroneckerMap_apply]
-    have hA : (∑ a : G.AnswerA, (S.A x).effect a i.1 j.1) =
-        (1 : Op S.ιA) i.1 j.1 := by
-      simpa only [Matrix.sum_apply] using
-        congrFun (congrFun (S.A x).sum_eq_one i.1) j.1
-    calc
-      (1 : Op S.ιA) i.1 j.1 *
-          (∑ b ∈ invalid, (S.B y).effect b i.2 j.2) =
-          (∑ a : G.AnswerA, (S.A x).effect a i.1 j.1) *
-            (∑ b ∈ invalid, (S.B y).effect b i.2 j.2) := by rw [hA]
-      _ = ∑ a : G.AnswerA, (S.A x).effect a i.1 j.1 *
-          (∑ b ∈ invalid, (S.B y).effect b i.2 j.2) := by rw [Finset.sum_mul]
-      _ = ∑ a : G.AnswerA, ∑ b ∈ invalid,
-          (S.A x).effect a i.1 j.1 * (S.B y).effect b i.2 j.2 := by
-            apply Finset.sum_congr rfl
-            intro a ha
-            rw [Finset.mul_sum]
-  change (inner ℂ S.ψ
-      (applyOperatorToState
-        (heteroKron 1 (∑ b ∈ invalid, (S.B y).effect b)) S.ψ)).re = _
-  rw [hop]
-  simp [outcomeWeight, applyOperatorToState, invalid]
 
 /-- Expand the Alice wrong-form effect into its joint Born weights. -/
 private theorem leftWrongFormEffectMass_eq {P : AdmissibleParams}
@@ -639,59 +566,6 @@ private theorem rightInvalidMass_le_rejection {P : AdmissibleParams}
       intro b hb hbInvalid
       split <;> simp [outcomeWeight_nonneg]
 
-/-- The average rejection mass is one minus the strategy value. -/
-private theorem rejectionMass_eq_one_sub_value {G : Game} (S : Strategy G) :
-    avgOver G.μ (fun questions =>
-      ∑ a, ∑ b,
-        if G.decide questions.1 questions.2 a b then 0
-        else outcomeWeight S questions.1 questions.2 a b) =
-      1 - S.value := by
-  classical
-  rw [show avgOver G.μ (fun questions =>
-      ∑ a, ∑ b,
-        if G.decide questions.1 questions.2 a b then 0
-        else outcomeWeight S questions.1 questions.2 a b) =
-      avgOver G.μ (fun questions =>
-        1 - ∑ a, ∑ b,
-          if G.decide questions.1 questions.2 a b then
-            outcomeWeight S questions.1 questions.2 a b else 0) by
-    apply avgOver_congr
-    intro questions
-    calc
-      (∑ a, ∑ b,
-          if G.decide questions.1 questions.2 a b then 0
-          else outcomeWeight S questions.1 questions.2 a b) =
-          ∑ a, ∑ b,
-            (outcomeWeight S questions.1 questions.2 a b -
-              if G.decide questions.1 questions.2 a b then
-                outcomeWeight S questions.1 questions.2 a b else 0) := by
-        apply Finset.sum_congr rfl
-        intro a ha
-        apply Finset.sum_congr rfl
-        intro b hb
-        split <;> simp
-      _ = (∑ a, ∑ b, outcomeWeight S questions.1 questions.2 a b) -
-          ∑ a, ∑ b,
-            if G.decide questions.1 questions.2 a b then
-              outcomeWeight S questions.1 questions.2 a b else 0 := by
-        rw [show (∑ a, ∑ b,
-            (outcomeWeight S questions.1 questions.2 a b -
-              if G.decide questions.1 questions.2 a b then
-                outcomeWeight S questions.1 questions.2 a b else 0)) =
-            ∑ a, ((∑ b, outcomeWeight S questions.1 questions.2 a b) -
-              ∑ b, if G.decide questions.1 questions.2 a b then
-                outcomeWeight S questions.1 questions.2 a b else 0) by
-          apply Finset.sum_congr rfl
-          intro a ha
-          rw [Finset.sum_sub_distrib]]
-        rw [Finset.sum_sub_distrib]
-      _ = 1 - ∑ a, ∑ b,
-          if G.decide questions.1 questions.2 a b then
-            outcomeWeight S questions.1 questions.2 a b else 0 := by
-        rw [outcomeWeight_sum_eq_one]]
-  rw [avgOver_sub, avgOver_const_of_isProbability G.μ G.μ_prob]
-  rfl
-
 /-- Wrong-form mass on either player side is bounded by the winning error. -/
 private theorem wrongFormMass_le_error (S : ProjectiveSetting P ε)
     (side : PlayerSide) : S.wrongFormMass side ≤ ε := by
@@ -736,53 +610,12 @@ theorem wrongFormMass_bob_le_error (S : ProjectiveSetting P ε) :
 character `phaseSign` and the fixed trace of `P.model`. This is
 `def:strategy-observables`, paper
 `14_analysis_of_the_pauli_basis_test.tex:174-190`, blueprint
-`ch14_qpbt_observables.tex:480-503`. -/
+`def:strategy-observables`. -/
 noncomputable def pointObs (S : ProjectiveSetting P ε) (side : PlayerSide)
     (W : PauliKind) (r : PauliScalar P) (u : Fin P.m → PauliScalar P) :
     Op (S.LocalSpace side) :=
   ∑ a : PauliScalar P,
     phaseSign (fixedBinTrace P.model (a * r)) • (S.pointMeas side W u).effect a
-
-/-- Regrouping the outcomes of a projective POVM preserves projectivity. -/
-private theorem postprocess_isProjective {α β ι : Type*}
-    [Fintype α] [DecidableEq α] [Fintype β] [DecidableEq β]
-    [Fintype ι] [DecidableEq ι]
-    (M : MIPStarRE.Quantum.Measurement α ι) (hM : Measurement.IsProjective M)
-    (f : α → β) : Measurement.IsProjective (M.postprocess f) := by
-  classical
-  intro b
-  refine ⟨?_, ?_⟩
-  · change (M.postprocess f).effect b * (M.postprocess f).effect b =
-      (M.postprocess f).effect b
-    let fiber : Finset α := Finset.univ.filter fun a => f a = b
-    calc
-      (M.postprocess f).effect b * (M.postprocess f).effect b =
-          (∑ a ∈ fiber, M.effect a) * (∑ a' ∈ fiber, M.effect a') := by
-            rw [MIPStarRE.Quantum.Measurement.postprocess_effect]
-      _ = ∑ a ∈ fiber, ∑ a' ∈ fiber, M.effect a * M.effect a' := by
-            rw [Finset.sum_mul]
-            simp_rw [Finset.mul_sum]
-      _ = ∑ a ∈ fiber, ∑ a' ∈ fiber, if a' = a then M.effect a else 0 := by
-            refine Finset.sum_congr rfl ?_
-            intro a ha
-            refine Finset.sum_congr rfl ?_
-            intro a' ha'
-            by_cases haa' : a' = a
-            · subst a'
-              simp [(hM a).isIdempotentElem.eq]
-            · have hne : a ≠ a' := fun h => haa' h.symm
-              simp [DistanceCalculus.projective_effect_mul_effect_eq_zero M hM hne,
-                haa']
-      _ = ∑ a ∈ fiber, M.effect a := by
-            refine Finset.sum_congr rfl ?_
-            intro a ha
-            simp [fiber, ha]
-      _ = (M.postprocess f).effect b := by
-            rw [MIPStarRE.Quantum.Measurement.postprocess_effect]
-  · change star ((M.postprocess f).effect b) = (M.postprocess f).effect b
-    change ((M.postprocess f).effect b)ᴴ = (M.postprocess f).effect b
-    exact (Matrix.nonneg_iff_posSemidef.mp
-      ((M.postprocess f).pos b)).isHermitian.eq
 
 /-- Select projectivity of the strategy POVM on either local space. -/
 private theorem strategyMeasurement_isProjective
@@ -793,30 +626,33 @@ private theorem strategyMeasurement_isProjective
   | bob => exact S.isProjective.2 question
 
 /-- The typed point measurement remains projective after answer folding. -/
-private theorem pointMeas_isProjective (S : ProjectiveSetting P ε)
+theorem pointMeas_isProjective (S : ProjectiveSetting P ε)
     (side : PlayerSide) (W : PauliKind) (u : Fin P.m → PauliScalar P) :
     Measurement.IsProjective (S.pointMeas side W u) := by
-  apply postprocess_isProjective
+  apply SandwichProduct.postprocess_isProjective
   exact strategyMeasurement_isProjective S side _
 
-/-- The point observable squares to the identity. This is the assertion that
-the operator in `def:strategy-observables` has eigenvalues in `{+1,-1}`;
-paper `14_analysis_of_the_pauli_basis_test.tex:174-190`, blueprint
-`ch14_qpbt_observables.tex:480-503`. -/
-theorem pointObs_sq_eq_one (S : ProjectiveSetting P ε) (side : PlayerSide)
-    (W : PauliKind) (r : PauliScalar P) (u : Fin P.m → PauliScalar P) :
-    S.pointObs side W r u * S.pointObs side W r u = 1 := by
+/-- The point observables form an additive representation, as follows from
+`eq:qld-strat-obs`, paper `14_analysis_of_the_pauli_basis_test.tex:174-190`.
+This multiplication law is a formalization-only consequence of that definition. -/
+theorem pointObs_mul (S : ProjectiveSetting P ε) (side : PlayerSide)
+    (W : PauliKind) (r s : PauliScalar P)
+    (u : Fin P.m → PauliScalar P) :
+    S.pointObs side W r u * S.pointObs side W s u =
+      S.pointObs side W (r + s) u := by
   classical
   let M := S.pointMeas side W u
   have hM : Measurement.IsProjective M := pointMeas_isProjective S side W u
   change (∑ a : PauliScalar P,
       phaseSign (fixedBinTrace P.model (a * r)) • M.effect a) *
       (∑ a : PauliScalar P,
-        phaseSign (fixedBinTrace P.model (a * r)) • M.effect a) = 1
+        phaseSign (fixedBinTrace P.model (a * s)) • M.effect a) =
+    ∑ a : PauliScalar P,
+      phaseSign (fixedBinTrace P.model (a * (r + s))) • M.effect a
   calc
     _ = ∑ a : PauliScalar P, ∑ b : PauliScalar P,
         (phaseSign (fixedBinTrace P.model (a * r)) *
-          phaseSign (fixedBinTrace P.model (b * r))) •
+          phaseSign (fixedBinTrace P.model (b * s))) •
             (M.effect a * M.effect b) := by
       rw [Finset.sum_mul]
       apply Finset.sum_congr rfl
@@ -825,21 +661,38 @@ theorem pointObs_sq_eq_one (S : ProjectiveSetting P ε) (side : PlayerSide)
       apply Finset.sum_congr rfl
       intro b hb
       rw [Matrix.smul_mul, Matrix.mul_smul, smul_smul]
-    _ = ∑ a : PauliScalar P, M.effect a := by
+    _ = ∑ a : PauliScalar P,
+        phaseSign (fixedBinTrace P.model (a * (r + s))) • M.effect a := by
       apply Finset.sum_congr rfl
       intro a ha
       rw [Finset.sum_eq_single a]
       · rw [(hM a).isIdempotentElem.eq]
-        by_cases htrace : fixedBinTrace P.model (a * r) = 0
-        · simp [phaseSign, htrace]
-        · simp [phaseSign, htrace]
+        congr 1
+        rw [mul_add, fixedBinTrace, map_add, phaseSign_add]
       · intro b hb hba
         have hab : a ≠ b := fun h => hba h.symm
         rw [DistanceCalculus.projective_effect_mul_effect_eq_zero M hM hab]
         simp
       · intro ha'
         exact (ha' (Finset.mem_univ a)).elim
-    _ = 1 := M.sum_eq_one
+
+/-- The zero-label point observable is the identity by measurement completeness. -/
+theorem pointObs_zero (S : ProjectiveSetting P ε) (side : PlayerSide)
+    (W : PauliKind) (u : Fin P.m → PauliScalar P) :
+    S.pointObs side W 0 u = 1 := by
+  classical
+  simpa [pointObs, fixedBinTrace, phaseSign] using (S.pointMeas side W u).sum_eq_one
+
+/-- The point observable squares to the identity. This is the assertion that
+the operator in `def:strategy-observables` has eigenvalues in `{+1,-1}`;
+paper `14_analysis_of_the_pauli_basis_test.tex:174-190`, blueprint
+`def:strategy-observables`. -/
+theorem pointObs_sq_eq_one (S : ProjectiveSetting P ε) (side : PlayerSide)
+    (W : PauliKind) (r : PauliScalar P) (u : Fin P.m → PauliScalar P) :
+    S.pointObs side W r u * S.pointObs side W r u = 1 := by
+  haveI : CharP (PauliScalar P) 2 :=
+    (Algebra.charP_iff (ZMod 2) (PauliScalar P) 2).mp (ZMod.charP 2)
+  rw [pointObs_mul, CharTwo.add_self_eq_zero, pointObs_zero]
 
 /-- The point observable is Hermitian. This is the self-adjoint part of the
 observable assertion following `eq:qld-strat-obs`, paper
@@ -853,13 +706,7 @@ theorem pointObs_isHermitian (S : ProjectiveSetting P ε) (side : PlayerSide)
   rw [Matrix.conjTranspose_sum]
   apply Finset.sum_congr rfl
   intro a ha
-  rw [Matrix.conjTranspose_smul]
-  have hphase : star (phaseSign (fixedBinTrace P.model (a * r))) =
-      phaseSign (fixedBinTrace P.model (a * r)) := by
-    by_cases htrace : fixedBinTrace P.model (a * r) = 0
-    · simp [phaseSign, htrace]
-    · simp [phaseSign, htrace]
-  rw [hphase]
+  rw [Matrix.conjTranspose_smul, star_phaseSign]
   rw [(Matrix.nonneg_iff_posSemidef.mp
     ((S.pointMeas side W u).pos a)).isHermitian.eq]
 

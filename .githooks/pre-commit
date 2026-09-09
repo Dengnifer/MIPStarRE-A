@@ -3,6 +3,7 @@ set -eu
 
 ROOT="$(git rev-parse --show-toplevel)"
 cd "$ROOT"
+HOOK_ROOT="$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)"
 GIT_LOCAL_ENV_VARS="$(git rev-parse --local-env-vars)"
 
 run_without_git_local_env() (
@@ -12,6 +13,17 @@ run_without_git_local_env() (
   unset $GIT_LOCAL_ENV_VARS
   "$@"
 )
+
+# A merge commit can be syntactically valid while its index has been reset to
+# the first-parent tree.  That failure mode silently discarded clean incoming
+# additions on issue-109 and issue-110 (issue #222).  Check the pending index
+# before every other gate, including the documented blanket hook bypass: a
+# missing incoming path is valid only when the branch deleted a base path.
+MERGE_HEAD_PATH="$(git rev-parse --git-path MERGE_HEAD)"
+if [ -f "$MERGE_HEAD_PATH" ]; then
+  echo "MIPStarRE pre-commit: checking the merge result for silent incoming loss."
+  python3 "$HOOK_ROOT/local/bin/merge_loss_guard.py" --repo "$ROOT"
+fi
 
 # Scope-control guard (EVOLUTION.md 2026-09-01, the issue-0007 overbuild):
 # workflow scaffolding is budgeted at <=1000 changed lines per commit (400 until the owner raised it on 2026-09-05).  This is
@@ -29,7 +41,6 @@ run_without_git_local_env() (
 # main content counts zero while the PR's cumulative workflow diff and any
 # side-branch content beyond main still count.  Any other side-branch merge
 # stays budgeted against HEAD.
-MERGE_HEAD_PATH="$(git rev-parse --git-path MERGE_HEAD)"
 if [ -f "$MERGE_HEAD_PATH" ] &&
     git merge-base --is-ancestor MERGE_HEAD refs/remotes/github/main 2>/dev/null; then
   BUDGET_BASE="$(git rev-parse MERGE_HEAD)"
@@ -47,7 +58,7 @@ fi
 INFRA_CHANGED="$(git diff --cached --numstat $BUDGET_BASE -- local/ .githooks/ \
   scripts/tests/test_dispatch.py scripts/tests/test_github_workflow.py \
   scripts/tests/test_lake_root.py scripts/tests/test_pre_push_hook.py \
-  scripts/tests/test_ready_packets.py \
+  scripts/tests/test_ready_packets.py scripts/tests/test_merge_loss_guard.py \
   | awk '{added=$1; deleted=$2; if (added != "-") total+=added+deleted} END {print total+0}')"
 if [ "${INFRA_CHANGED:-0}" -gt 1000 ] && [ "${MIPSTARRE_INFRA_OVERRIDE:-}" != "1" ]; then
   echo "MIPStarRE pre-commit: staged workflow-layer change is ${INFRA_CHANGED} lines (budget: 1000)."

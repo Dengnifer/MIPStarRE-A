@@ -8,7 +8,7 @@ in the quantitative sandwich argument.
 
 ## References
 
-Blueprint `blueprint/src/chapter/ch12_qpbt_games.tex:469-568`; paper
+Blueprint `lem:ld-sandwich` and `lem:ld-sandwich-measurement`; paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:465-501`.
 -/
 

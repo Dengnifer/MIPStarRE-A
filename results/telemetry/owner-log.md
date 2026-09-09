@@ -195,3 +195,15 @@ and retire; no takeover is scheduled. The merge daemon, stack-watch,
 - 00:35Z: owner: subagent ratio codex : Opus : Fable = 5:5:1 from now on (running tasks continue). Applied: no new Fable session until the three running ones (#116, #201, #117 ancilla) finish; then at most one at a time, reserved for math-fix and the hardest analytic packets.
 - 01:15Z: the Claude usage limit cut off six subagents at about 00:45Z (Fable #116, #117 ancilla, #201; Opus #135, #105, #210); after the reset all six were resumed from their transcripts with their worktree state intact. During the outage the codex lanes finished: PRs 189 and 188 merged; PRs 193 and 203 adjudicated at their caps; repair rounds launched for PRs 197, 152, 202, 206, 209, 211; PR 192 (rigidity statement) to an Opus repair (12 findings, 3 blockers about statement faithfulness of the corrected theorem); #134 merge conflict with main handed to its codex worker.
 - 02:20Z: owner task done by the operator: reindexState_norm_eq and vecTensor_norm_eq hoisted from Transport/SeedFiber.lean into State.lean and the private copies in Rigidity/IdealTarget.lean removed; branch issue-204-hoist-norm-lemmas (commit e8e8048, cut from the #105 head, registered as stacked on 105), full lake build MIPStarRE.QPBT green (8842 jobs), not pushed. Lesson: a hand-made worktree needs .lake/packages linked to the store before any lake command (lake otherwise clones Mathlib).
+
+## 2026-09-05 — Hand-back to a gpt-6-astra main session (2026-09-05T15:45:27Z)
+
+Owner command: astra is ready; create a new astra session in tmux qpbt and hand the main session over to it, then
+check for 1.5 hours. Probe: gpt-6-astra answers through the relay (the id is gpt-6-astra, not gpt-5.6-astra).
+Handoff: results/telemetry/owner-messages/handoff-to-codex-main-*.md (v3, overrides older helper references).
+
+## 2026-09-05 — Owner session retires (2026-09-05T18:29:15Z)
+
+Watch of the astra main session complete; guidance recorded in events.md and in /tmp/qpbt-main-handoff-v3.md (archived copy
+in results/telemetry/owner-messages/). Mode 1 continues under the gpt-6-astra main session; both codex accounts are in use
+through the router shim until #232 lands; the main session relaunches on the second account at low context. No owner action pending.

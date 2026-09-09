@@ -199,7 +199,7 @@ theorem expLine_point_cons :
               S.place p₂ (S.expPointEffectAtLineAnswer p₂.side W
                 sample.1 sample.2 f))
           S.psiHat ≤ C * deltaLine ε := by
-  obtain ⟨C₁, hC₁, h₁⟩ := WinImplications.win_low_degree_proof
+  obtain ⟨C₁, hC₁, h₁⟩ := win_low_degree
   obtain ⟨C₂, hC₂, h₂⟩ := WinImplications.win_low_degree_interchanged_proof
   refine ⟨2 * (C₁ + C₂) + 4, by linarith, ?_⟩
   intro P ε S p₁ p₂ hopp W
@@ -266,7 +266,7 @@ theorem expLine_point_cons' :
           (fun sample a => S.place p₂
             ((S.pointMeasExpOption p₂.side W sample.2).effect a))
           S.psiHat ≤ C * deltaLine ε := by
-  obtain ⟨C₁, hC₁, h₁⟩ := WinImplications.win_low_degree_proof
+  obtain ⟨C₁, hC₁, h₁⟩ := win_low_degree
   obtain ⟨C₂, hC₂, h₂⟩ := WinImplications.win_low_degree_interchanged_proof
   refine ⟨2 * (C₁ + C₂) + 4, by linarith, ?_⟩
   intro P ε S p₁ p₂ hopp W

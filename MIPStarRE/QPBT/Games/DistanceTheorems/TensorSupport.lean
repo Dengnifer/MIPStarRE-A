@@ -12,7 +12,8 @@ used in data processing and the commutator estimate.
 ## References
 
 - `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:397-461`
-- `blueprint/src/chapter/ch12_qpbt_games.tex:381-445`
+- Blueprint `fact:triangle-for-simeq`, `fact:data-processing`, and
+  `lem:commutation-analysis`
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder

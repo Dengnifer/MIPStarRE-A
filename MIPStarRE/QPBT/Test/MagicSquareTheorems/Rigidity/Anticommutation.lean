@@ -145,8 +145,8 @@ second constraint with sign `sJ`.  The reflections `Pa` and `Ra` are the
 counterparts of `P` and `R` on the other player, and `P` is close to `X` because
 the two constraints share the cell that `X` and `P` are attached to.  The
 conclusion rewrites the product `Y * Q` as the signed product of the two
-remaining reflections.  Formalization-only support for `thm:ms-rigidity`,
-blueprint `ch13_qpbt_test.tex:224-253`. -/
+remaining reflections.  Formalization-only support for blueprint
+`thm:ms-rigidity`. -/
 private theorem normCloseOn_step {ιA ιB : Type} [Fintype ιA] [DecidableEq ιA]
     [Fintype ιB] [DecidableEq ιB] {ψ : EuclideanSpace ℂ (ιA × ιB)} {δ : ℝ}
     {X Y W P Q R Pa Ra : Op (ιA × ιB)} {sI sJ : ℂ}
@@ -281,7 +281,7 @@ and fifth variables approximately anticommute on the dilated state, in the
 unsquared state-dependent norm and at the scale `624 * sqrt ε`.  For comparison,
 the source states the corresponding post-isometry relation for the squared
 distance: the last display of
-`thm:ms-rigidity`, blueprint `ch13_qpbt_test.tex:244-249`, paper
+blueprint `thm:ms-rigidity`, paper
 `08_classical_and_quantum_low_degree_tests.tex:640-646`, reads
 `⟨ψ|(M - N)ᴴ (M - N)|ψ⟩ ≤ O(sqrt ε)`.  The squared-distance form on the
 dilated state is `msVarObsA_anticommute_dilated_opDistSq` below, obtained from

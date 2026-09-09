@@ -26,9 +26,8 @@ mass has been shown to be small.
 ## References
 
 - `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:131-153`
-- `blueprint/src/chapter/ch14_qpbt_observables.tex:390-423` (`lem:ortho`)
-- `blueprint/src/chapter/ch14_qpbt_observables.tex:425-470`
-  (`lem:ortho-explicit-constant`, the statement proved in this module)
+- Blueprint `lem:ortho`
+- Blueprint `lem:ortho-explicit-constant`, the statement proved in this module
 - `references/ldt-paper/orthonormalization.tex`
 -/
 

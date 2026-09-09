@@ -28,13 +28,21 @@ def IsPolyErr (f : ℝ → ℝ) : Prop :=
   ∃ C r : ℝ, 1 ≤ C ∧ 0 < r ∧ ∀ x, 0 ≤ x →
     0 ≤ f x ∧ f x ≤ C * Real.rpow x r
 
-/-- The two-parameter polynomial bound used by `lem:pasting`: on positive
-arguments, one universal positive constant is both the prefactor and exponent.
-This is the convention of `04_preliminaries.tex:26-29`, applied at
-`06_nonlocal_games_and_mipstar.tex:518-524`; blueprint
-`ch12_qpbt_games.tex:517-546`. -/
+/-- A nonnegative two-parameter error function bounded by a sum of positive
+real powers.
+
+**Local fix:** The prefactor and the two exponents are quantified separately,
+and the bound is imposed on the closed nonnegative quadrant. The shorthand at
+`04_preliminaries.tex:22-29` reads `poly` of several arguments as a single
+power of their product, which forces the pasting error of `lem:pasting` at
+`06_nonlocal_games_and_mipstar.tex:504-525` to tend to zero with the collision
+error at every fixed positive consistency error; a two-dimensional strategy
+refutes the resulting statement. A sum of separate positive powers vanishes
+exactly when both errors vanish, and bounds the terms the imported proof of
+Fact 4.35 produces. The correction is documented in
+`docs/paper-gaps/qpbt_pasting-product-error.tex` and tracked by issue #196. -/
 def IsPolyErr₂ (f : ℝ → ℝ → ℝ) : Prop :=
-  ∃ C : ℝ, 0 < C ∧ ∀ x y, 0 < x → 0 < y →
-    0 ≤ f x y ∧ f x y ≤ C * Real.rpow (x * y) C
+  ∃ C r s : ℝ, 1 ≤ C ∧ 0 < r ∧ 0 < s ∧ ∀ x y, 0 ≤ x → 0 ≤ y →
+    0 ≤ f x y ∧ f x y ≤ C * (Real.rpow x r + Real.rpow y s)
 
 end MIPStarRE.QPBT

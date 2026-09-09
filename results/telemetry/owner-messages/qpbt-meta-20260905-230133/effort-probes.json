@@ -1,0 +1,188 @@
+[
+  {
+    "name": "codex-meta-probe-20260905T231944Z-primary-ultra",
+    "role": "owner-effort-probe",
+    "model": "gpt-6-astra",
+    "account": "primary",
+    "requested_effort": "ultra",
+    "worktree": "/tmp/qpbt-owner-effort-20260905T231944Z/primary-ultra",
+    "start": "2026-09-05T23:19:44.679946+00:00",
+    "raw_cli": "/home/drx/.local/bin/codex",
+    "shim_bypassed": true,
+    "ephemeral": true,
+    "exit_code": 0,
+    "end": "2026-09-05T23:19:58.233524+00:00",
+    "wall_s": 13.553578,
+    "thread_id": "01a073de-eed9-7da2-bd28-8b36d991561c",
+    "cli_usage": {
+      "input_tokens": 9379,
+      "cached_input_tokens": 3712,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 5,
+      "reasoning_output_tokens": 0
+    },
+    "completion_log_effort": [
+      "medium"
+    ],
+    "client_trace_effort": [
+      "ultra"
+    ],
+    "transmitted_effort": null,
+    "measurement_note": "Completion-event telemetry field, distinct from configured client effort. Wire body and backend computation not observed. No configuration_update or resumed context; fresh ephemeral request."
+  },
+  {
+    "name": "codex-meta-probe-20260905T231944Z-second-ultra",
+    "role": "owner-effort-probe",
+    "model": "gpt-6-astra",
+    "account": "second",
+    "requested_effort": "ultra",
+    "worktree": "/tmp/qpbt-owner-effort-20260905T231944Z/second-ultra",
+    "start": "2026-09-05T23:19:44.681458+00:00",
+    "raw_cli": "/home/drx/.local/bin/codex",
+    "shim_bypassed": true,
+    "ephemeral": true,
+    "exit_code": 0,
+    "end": "2026-09-05T23:19:58.034607+00:00",
+    "wall_s": 13.353149,
+    "thread_id": "01a073de-eed9-7031-b4a0-94c0f349615d",
+    "cli_usage": {
+      "input_tokens": 9389,
+      "cached_input_tokens": 3712,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 5,
+      "reasoning_output_tokens": 0
+    },
+    "completion_log_effort": [
+      "medium"
+    ],
+    "client_trace_effort": [
+      "ultra"
+    ],
+    "transmitted_effort": null,
+    "measurement_note": "Completion-event telemetry field, distinct from configured client effort. Wire body and backend computation not observed. No configuration_update or resumed context; fresh ephemeral request."
+  },
+  {
+    "name": "codex-meta-probe-20260905T231944Z-primary-xhigh",
+    "role": "owner-effort-probe",
+    "model": "gpt-6-astra",
+    "account": "primary",
+    "requested_effort": "xhigh",
+    "worktree": "/tmp/qpbt-owner-effort-20260905T231944Z/primary-xhigh",
+    "start": "2026-09-05T23:19:58.240799+00:00",
+    "raw_cli": "/home/drx/.local/bin/codex",
+    "shim_bypassed": true,
+    "ephemeral": true,
+    "exit_code": 0,
+    "end": "2026-09-05T23:20:13.192457+00:00",
+    "wall_s": 14.951658,
+    "thread_id": "01a073df-2878-71d1-ae56-5d781971e882",
+    "cli_usage": {
+      "input_tokens": 9379,
+      "cached_input_tokens": 3712,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 5,
+      "reasoning_output_tokens": 0
+    },
+    "completion_log_effort": [
+      "xhigh"
+    ],
+    "client_trace_effort": [
+      "xhigh"
+    ],
+    "transmitted_effort": null,
+    "measurement_note": "Completion-event telemetry field, distinct from configured client effort. Wire body and backend computation not observed. No configuration_update or resumed context; fresh ephemeral request."
+  },
+  {
+    "name": "codex-meta-probe-20260905T231944Z-second-xhigh",
+    "role": "owner-effort-probe",
+    "model": "gpt-6-astra",
+    "account": "second",
+    "requested_effort": "xhigh",
+    "worktree": "/tmp/qpbt-owner-effort-20260905T231944Z/second-xhigh",
+    "start": "2026-09-05T23:19:58.241062+00:00",
+    "raw_cli": "/home/drx/.local/bin/codex",
+    "shim_bypassed": true,
+    "ephemeral": true,
+    "exit_code": 0,
+    "end": "2026-09-05T23:20:12.891508+00:00",
+    "wall_s": 14.650446,
+    "thread_id": "01a073df-2888-79c0-b440-9217a8debdf6",
+    "cli_usage": {
+      "input_tokens": 9389,
+      "cached_input_tokens": 3712,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 5,
+      "reasoning_output_tokens": 0
+    },
+    "completion_log_effort": [
+      "xhigh"
+    ],
+    "client_trace_effort": [
+      "xhigh"
+    ],
+    "transmitted_effort": null,
+    "measurement_note": "Completion-event telemetry field, distinct from configured client effort. Wire body and backend computation not observed. No configuration_update or resumed context; fresh ephemeral request."
+  },
+  {
+    "name": "codex-meta-probe-20260905T232203Z-primary-max",
+    "role": "owner-effort-probe",
+    "model": "gpt-6-astra",
+    "account": "primary",
+    "requested_effort": "max",
+    "worktree": "/tmp/qpbt-owner-effort-20260905T232203Z/primary-max",
+    "start": "2026-09-05T23:22:03.505846+00:00",
+    "raw_cli": "/home/drx/.local/bin/codex",
+    "shim_bypassed": true,
+    "ephemeral": true,
+    "exit_code": 0,
+    "end": "2026-09-05T23:22:18.661380+00:00",
+    "wall_s": 15.155534,
+    "thread_id": "01a073e1-0cd5-7293-ba4b-0479b245c471",
+    "cli_usage": {
+      "input_tokens": 9377,
+      "cached_input_tokens": 3712,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 27,
+      "reasoning_output_tokens": 20
+    },
+    "completion_log_effort": [
+      "max"
+    ],
+    "client_trace_effort": [
+      "max"
+    ],
+    "transmitted_effort": null,
+    "measurement_note": "Completion-event telemetry field, distinct from configured client effort. Wire body and backend computation not observed. No configuration_update or resumed context; fresh ephemeral request."
+  },
+  {
+    "name": "codex-meta-probe-20260905T232203Z-second-max",
+    "role": "owner-effort-probe",
+    "model": "gpt-6-astra",
+    "account": "second",
+    "requested_effort": "max",
+    "worktree": "/tmp/qpbt-owner-effort-20260905T232203Z/second-max",
+    "start": "2026-09-05T23:22:03.506148+00:00",
+    "raw_cli": "/home/drx/.local/bin/codex",
+    "shim_bypassed": true,
+    "ephemeral": true,
+    "exit_code": 0,
+    "end": "2026-09-05T23:22:19.864224+00:00",
+    "wall_s": 16.358076,
+    "thread_id": "01a073e1-0cd2-7ff0-a1b5-92f0a01f8377",
+    "cli_usage": {
+      "input_tokens": 9387,
+      "cached_input_tokens": 3712,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 22,
+      "reasoning_output_tokens": 15
+    },
+    "completion_log_effort": [
+      "max"
+    ],
+    "client_trace_effort": [
+      "max"
+    ],
+    "transmitted_effort": null,
+    "measurement_note": "Completion-event telemetry field, distinct from configured client effort. Wire body and backend computation not observed. No configuration_update or resumed context; fresh ephemeral request."
+  }
+]

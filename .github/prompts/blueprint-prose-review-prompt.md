@@ -73,6 +73,14 @@ For each mismatch, cite both the blueprint line and the Lean line, and
 describe the mathematical discrepancy precisely. Do NOT accept "close
 enough" — sync means equivalence, not similarity.
 
+Lean docstrings store blueprint references by label (for example, blueprint
+`lem:cl-concat`), not by numeric blueprint line range. Resolve those labels to
+the current file and statement/proof span with `scripts/blueprint_citations.py`
+or the attached generated map; do not flag line drift when a label resolves to
+the intended node, and do not require the derived range to be copied back into
+the docstring. Unknown, duplicate, or mathematically incorrect labels
+remain synchronization findings.
+
 ### A.2 — `\leanok` accuracy
 
 `\leanok` on a `\begin{definition}`/`\begin{theorem}`/`\begin{lemma}`

@@ -32,10 +32,7 @@ namespace WinImplications
 /-! ## Transport of the distance functional along the factor interchange -/
 
 /-- The identity operator acts trivially on a state. Formalization-only support
-for `def:strategy-observables`, blueprint `ch14_qpbt_observables.tex:573-610`.
-`MagicSquareRigidity.applyOperatorToState_one` states the same identity; that
-module is not in the import closure of this file, so the copy is kept here.
-Consolidating the two is issue #204. -/
+for blueprint `def:strategy-observables`. -/
 theorem applyOperatorToState_one {ι : Type*} [Fintype ι] [DecidableEq ι]
     (ψ : EuclideanSpace ℂ ι) : applyOperatorToState (1 : Op ι) ψ = ψ := by
   ext i
@@ -247,14 +244,14 @@ theorem win_symm_msvar_point (P : AdmissibleParams) (W : PauliKind)
 /-- Enlarging the constant of a distance bound proved with the first of two
 admissible constants. Formalization-only support for the trailing clause of
 `lem:qld-win-implications`, blueprint `ch14_qpbt_observables.tex:699-701`. -/
-theorem approxBound_of_left {C₁ C₂ ε x : ℝ} (hC₂ : 1 ≤ C₂) (hε : 0 ≤ ε)
+theorem approx_bound_of_left {C₁ C₂ ε x : ℝ} (hC₂ : 1 ≤ C₂) (hε : 0 ≤ ε)
     (h : x ≤ 2 * (C₁ * ε)) : x ≤ 2 * (C₁ + C₂) * ε := by
   nlinarith
 
 /-- Enlarging the constant of a distance bound proved with the second of two
 admissible constants. Formalization-only support for the trailing clause of
 `lem:qld-win-implications`, blueprint `ch14_qpbt_observables.tex:699-701`. -/
-theorem approxBound_of_right {C₁ C₂ ε x : ℝ} (hC₁ : 1 ≤ C₁) (hε : 0 ≤ ε)
+theorem approx_bound_of_right {C₁ C₂ ε x : ℝ} (hC₁ : 1 ≤ C₁) (hε : 0 ≤ ε)
     (h : x ≤ 2 * (C₂ * ε)) : x ≤ 2 * (C₁ + C₂) * ε := by
   nlinarith
 

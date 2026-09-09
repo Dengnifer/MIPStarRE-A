@@ -9,7 +9,7 @@
 
 \title{The Exponent Comparison in the Canonical Pauli Basis Test Bound}
 \author{}
-\date{2026-09-02}
+\date{2026-09-05}
 
 \begin{document}
 \maketitle
@@ -17,17 +17,34 @@
 \section{At a glance}
 
 \begin{itemize}
-  \item \textbf{Difficulty.} Low.  One intermediate inequality in the source
-  does not follow from the canonical parameter definition, but the claimed
-  soundness bound follows by estimating the same term directly.
-  \item \textbf{Estimated weight.} The remaining formal argument is an
-  elementary real-analytic estimate of roughly 30--60 lines.
-  \item \textbf{Mathlib/project split.} Mathlib supplies inequalities for real
-  powers, exponentials, and logarithms; the project-specific step unfolds the
-  canonical parameters and soundness function.
-  \item \textbf{Key mathematical inputs.} The function
-  $(\log R)^{a+b}R^{-b}$ is bounded for $R\geq 4$, and the canonical lower and
-  upper bounds on $m$ transfer this estimate to the third soundness term.
+  \item \textbf{Difficulty.} Low and resolved.  One intermediate inequality
+  in the source uses $k\leq m$ to compare the field exponent $k$ with the
+  block parameter $m$.  This does not follow from the canonical parameter
+  definition, but the claimed soundness bound follows by estimating the same
+  term directly.
+  \item \textbf{Estimated weight.} The completed replacement occupies roughly
+  40--60 lines of formal proof: one reusable real-analytic lemma and its
+  specialization in the canonical parameter calculation.  No work remains for
+  this comparison.
+  \item \textbf{Mathlib/project split.} Mathlib supplies the Taylor lower bound
+  $y^n/n!\leq e^y$ and monotonicity of real powers.%
+  \footnote{These are
+  \leanid{Real.pow\_div\_factorial\_le\_exp} in
+  \path{Mathlib/Analysis/Complex/Exponential.lean} and
+  \leanid{Real.rpow\_le\_rpow\_of\_exponent\_le} in
+  \path{Mathlib/Analysis/SpecialFunctions/Pow/Real.lean}.}
+  The project packages these facts as an explicit polynomial--exponential
+  envelope and applies it after unfolding the canonical parameters and
+  soundness function.
+  \item \textbf{Key mathematical inputs.} For a real exponent $s$, a rate
+  $t>0$, and $x\geq1$, put
+  $n=\lceil s\rceil_{+}=\max(\lceil s\rceil,0)$.  The Taylor bound at
+  $y=(t\ln 2)x$ gives
+  \[
+    x^s2^{-tx}\leq \frac{n!}{(t\ln 2)^n}.
+  \]
+  Its canonical specialization gives the explicit constant used to control
+  the third soundness term.
   Tracked in
   \href{https://github.com/Dengnifer/MIPStarRE-A/issues/16}{GitHub issue \#16};
   the parent blueprint task is \localissue{0002}.
@@ -41,67 +58,103 @@ failure-probability parameter.  The soundness function is
   \delta_{\mathrm{qld}}(\eps,m,d,q)
     = a(md)^a\bigl(\eps^b+q^{-b}+2^{-bmd}\bigr).
 \]
-For $R\geq4$, let $c$ be the least even integer at least $(a+b)/b$, set
+Write $\log_2$ for the base-two logarithm and $\ln$ for the natural logarithm.
+For an integer $R\geq4$, let $c$ be the least even integer at least $(a+b)/b$, set
 $k=c\lceil\log_2\log_2 R\rceil+1$ and $q=2^k$, and let $j$ be determined by
 $2^j\leq c\lceil\log_2 R\rceil+1<2^{j+1}$. The remaining canonical parameters
 are $m=2^j$ and $d=1$. In particular,
-$m\geq (c/2)\log_2 R\geq\log_2 R$. The required estimate for the third summand is
+$m\geq (c/2)\log_2 R\geq\log_2 R$.
+The canonical-parameter lemma asserts that there are universal constants
+$a'\geq1$ and $0<b'\leq1$ such that, for every integer $R\geq4$ and
+$\eps\geq0$,
 \[
-  a m^a 2^{-bm} \leq C'(\log R)^{-b},
+  \delta_{\mathrm{qld}}(\eps,m,d,q)
+    \leq a'\bigl((\log_2 R)^{a'}\eps^{b'}+(\log_2 R)^{-b'}\bigr).
+  \tag{\texttt{lem:delta-bound}}
 \]
-for a constant $C'$ depending only on $a$ and $b$.  This estimate, together
-with the source bounds for the first two summands, gives the asserted
-polylogarithmic bound for $\delta_{\mathrm{qld}}$.
+For the third summand, put
+\[
+  n=\lceil a+b\rceil_{+}=\max(\lceil a+b\rceil,0)
+  \qquad\text{and}\qquad
+  C=\frac{n!}{(b\ln 2)^n}.
+\]
+The required estimate is
+\[
+  a m^a 2^{-bm} \leq aC(\log_2 R)^{-b}.
+\]
+The constant $C$ depends only on $a$ and $b$.  This estimate, together with
+the source bounds for the first two summands, gives the asserted
+polylogarithmic bound for $\delta_{\mathrm{qld}}$ with $b'=b$ and
+$a'=a((2c)^a+C)$.
 
 \section{The source comparison}
 
 The canonical parameters are defined in \cite[lines~1503--1514]{Ji2020MIPStar},
-and the bound and its proof occupy lines~1520--1562. At line~1543 the proof
-replaces $2^{-bmd}$ by $q^{-b}$ using the assertion $k\leq m$.%
+and the bound and its proof occupy lines~1520--1562.  At line~1543 the proof
+uses%
 \footnote{Tracked in
 \href{https://github.com/Dengnifer/MIPStarRE-A/issues/16}{GitHub issue \#16}.
 The canonical parameter definition is at
 \path{references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex},
 lines~1503--1514; the bound and its proof are at lines~1520--1562, with the
 disputed comparison at line~1543.}
+\[
+  2^{-bmd}\leq q^{-b}
+  \qquad\text{because}\qquad
+  k\leq m.
+  \tag{\text{source line 1543}}
+\]
 That comparison does not follow from the stated parameter choice.  For example,
 the allowed values $a=1$ and $b=1/2$ give $c=4$, and $R=5$ gives $k=9$ but
 $m=8$.  Thus the displayed justification is false even though the lemma's
 conclusion remains valid.
 
-The third term can instead be bounded independently of $q$.  Since $d=1$ and
-$m\geq (c/2)\log R\geq\log R$,
+The third term can instead be bounded independently of $q$.  More generally,
+for real $s$, $t>0$, and $x\geq1$, let
+$n=\lceil s\rceil_{+}=\max(\lceil s\rceil,0)$.  Since $x^s\leq x^n$, the
+Taylor lower bound $y^n/n!\leq e^y$, applied at $y=(t\ln 2)x$, gives
 \[
-  2^{-bm}\leq R^{-b}.
+  x^s2^{-tx}
+    \leq x^n2^{-tx}
+    \leq \frac{n!}{(t\ln 2)^n}.
 \]
-The accompanying upper bound $m\leq 2c\log R$ therefore gives
+Now take $s=a+b$, $t=b$, and $x=m$.  Since $a+b>0$, the constant in this
+bound is the quantity $C$ above.  Moreover, $m\geq\log_2 R\geq1$ and $b>0$,
+so $m^{-b}\leq(\log_2 R)^{-b}$.  Hence
 \[
   a m^a2^{-bm}
-    \leq a(2c)^a(\log R)^aR^{-b}
-    = a(2c)^a\bigl((\log R)^{a+b}R^{-b}\bigr)(\log R)^{-b}.
+    =a\bigl(m^{a+b}2^{-bm}\bigr)m^{-b}
+    \leq aC(\log_2 R)^{-b}.
 \]
-The parenthesized factor is bounded on $R\geq4$: it is continuous and tends
-to zero as $R$ tends to infinity.  Absorbing its supremum into the universal
-constant yields the required estimate.
+This is the required estimate with an explicit constant; no supremum argument
+is needed.
 
 \section{Comparison with the blueprint and formalization}
 
 The blueprint makes explicit the nonnegative failure-probability domain
 implicit in the Pauli basis test soundness theorem and otherwise retains the
 source statement.
-The formal theorem records the same faithful boundary hypothesis and
-conclusion; its docstring marks the corrected intermediate argument and cites
-this note.%
-\footnote{The formal statement is
-\leanid{exists\_deltaQld\_introParams\_bound} in
+The blueprint proof records the Taylor envelope above as a separate
+formalization-support lemma and uses the same explicit constant $C$.
+
+The formal development proves the general envelope and specializes it in the
+canonical parameter calculation.  The canonical soundness bound is now fully
+proved, so no formal proof obligation remains; its additional nonnegativity
+premise is only the faithful domain condition on the failure parameter.%
+\footnote{The envelope is
+\leanid{MIPStarRE.LDT.rpow\_mul\_two\_rpow\_neg\_le} in
+\doclink{MIPStarRE/LDT/Basic/RpowBounds.lean}; its specialization proves
+\leanid{MIPStarRE.QPBT.exists\_deltaQld\_introParams\_bound} in
 \doclink{MIPStarRE/QPBT/Test/CanonicalParams.lean}.}
 
 \section{Conclusion}
 
 The source's comparison $k\leq m$ is false for some permitted constants and
-values of $R$.  It is not needed: for nonnegative failure parameters, the
-canonical lower bound on $m$ controls the third soundness term directly and
-proves the same final estimate after enlarging the universal constant.
+values of $R$.  This is a local defect in the proof, not a gap in the lemma's
+statement: the Taylor envelope bounds $m^{a+b}2^{-bm}$ uniformly, and the
+canonical lower bound $m\geq\log_2 R$ supplies the remaining negative power.
+This replacement is now formalized and proves the source conclusion after
+enlarging the universal constant.
 
 \bibliographystyle{alpha}
 \bibliography{references}

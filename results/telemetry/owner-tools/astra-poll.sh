@@ -8,9 +8,15 @@ export PATH="$HOME/.local/bin:$HOME/.elan/bin:/usr/local/bin:/usr/bin:/bin"
 STATE="$HOME/.cache/mipstarre-dev/watchdog"; mkdir -p "$STATE"
 OUT="$STATE/astra.txt"; LOG="$STATE/astra-poll.log"
 CFG="$HOME/.codex/config.toml"
-answer=$(cd "$HOME" && timeout 300 codex exec --sandbox read-only -m gpt-5.6-sol \
-  "Read the file $CFG. If it defines a model, model_provider, or profile whose name or model id contains the substring 'astra', reply with exactly one line: ASTRA=<the exact model id to pass to codex -m>. Otherwise reply with exactly one line: ASTRA=none. No other text." 2>/dev/null \
-  | grep -o 'ASTRA=[^[:space:]]*' | tail -1)
+# Real availability check first: ask the relay for the astra model itself (codex must run
+# inside a trusted git checkout on ghz; $HOME is not one, which made every earlier poll "unknown").
+REPO="$HOME/MIPStarRE-qpbt"
+answer=""
+for cand in $(grep -o -E '[A-Za-z0-9._-]*astra[A-Za-z0-9._-]*' "$CFG" 2>/dev/null | sort -u) gpt-6-astra gpt-5.6-astra; do
+  if (cd "$REPO" && timeout 240 codex exec --sandbox read-only --skip-git-repo-check -m "$cand" \
+        "Reply with exactly one line: PROBE-OK" 2>/dev/null | grep -q "PROBE-OK"); then answer="ASTRA=$cand"; break; fi
+done
+[ -n "$answer" ] || answer="ASTRA=none"
 [ -n "$answer" ] || answer="ASTRA=unknown"
 printf '%s %s\n' "$(date -u +%FT%TZ)" "$answer" >> "$LOG"
 printf '%s\n' "$answer" > "$OUT"
@@ -21,6 +27,6 @@ if [ ! -f "$STATE/astra-announced" ]; then
   gh api repos/Dengnifer/MIPStarRE-A/issues/26/comments \
     -f body="### NOTE — astra model detected ($(date -u +%Y-%m-%d\ %H:%MZ))
 <!-- astra-poll -->
-**What happened:** the hourly poller found \`${answer#ASTRA=}\` configured in codex on ghz. The owner session will switch subagent dispatches to it at the next dispatch (no action needed from the owner unless the id is wrong)." >/dev/null 2>&1 \
+**What happened:** the hourly poller reached \`${answer#ASTRA=}\` through the codex relay on ghz. The owner session will switch subagent dispatches to it at the next dispatch (no action needed from the owner unless the id is wrong)." >/dev/null 2>&1 \
     && touch "$STATE/astra-announced"
 fi

@@ -30,25 +30,8 @@ noncomputable section
 
 /-! ## Algebraic preliminaries -/
 
-/-- The binary phase is its own inverse. Paper
-`references/qpbt-paper/04_preliminaries.tex:1052-1081`. -/
-theorem phaseSign_mul_self (t : ZMod 2) : phaseSign t * phaseSign t = 1 := by
-  by_cases h : t = 0 <;> simp [phaseSign, h]
-
-/-- The binary phase is a real scalar. Paper
-`references/qpbt-paper/04_preliminaries.tex:1052-1081`. Two private copies of
-this statement exist, at `MIPStarRE/QPBT/Algebra/Pauli.lean:95` and
-`MIPStarRE/QPBT/Observables/ExpandedDefs.lean:688`; neither is reachable from
-here, and promoting one of them is issue #204. The primed name marks the public
-copy and disappears with that promotion. -/
-theorem star_phaseSign' (t : ZMod 2) : star (phaseSign t) = phaseSign t := by
-  by_cases h : t = 0 <;> simp [phaseSign, h]
-
-/-- The generalized Pauli observables are self-adjoint. A private copy of this
-statement, phrased through `Matrix.IsHermitian`, lives at
-`MIPStarRE/QPBT/Observables/ExpandedDefs.lean:692` and is unreachable from
-here; this form is the one used by `lem:qld-comm-cons`, and promoting the
-private original is issue #204. Blueprint `ch11_qpbt_algebra.tex:587-634`,
+/-- The generalized Pauli observables are self-adjoint. This identity supports
+`lem:qld-comm-cons`. Blueprint `lem:twisted-commutation`,
 paper `references/qpbt-paper/04_preliminaries.tex:1052-1096`. -/
 theorem tauObservable_conjTranspose {K ι : Type*} [Field K] [Finite K]
     [DecidableEq K] [Algebra (ZMod 2) K] [Fintype ι] [DecidableEq ι]
@@ -57,7 +40,7 @@ theorem tauObservable_conjTranspose {K ι : Type*} [Field K] [Finite K]
   cases nonempty_fintype K
   rw [tauObservable_eq_sum_pauliProj, Matrix.conjTranspose_sum]
   refine Finset.sum_congr rfl (fun e _ => ?_)
-  rw [Matrix.conjTranspose_smul, star_phaseSign']
+  rw [Matrix.conjTranspose_smul, star_phaseSign]
   congr 1
   exact (Matrix.posSemidef_vecMulVec_self_star (pauliVec W e)).isHermitian.eq
 
@@ -149,7 +132,7 @@ theorem expObs_commutator (S : ProjectiveSetting P ε) (side : PlayerSide)
       tauZ P ω from rfl]
   rw [tauZ_mul_tauX, MagicSquareRigidity.heteroKron_smul_right,
     ← WinImplications.heteroKron_smul_left,
-    WinImplications.heteroKron_sub_left, twistedCommutator]
+    ← heteroKron_sub_left, twistedCommutator]
 
 /-- The commutator of two trace-coarse-grained expanded point projections is a
 unit-modulus multiple of one quarter of the factorized commutator. This is the
@@ -235,7 +218,7 @@ theorem exists_twistedCommutator_avg_le :
                   (phaseSign (gammaValue P ω.1 ω.2.1 ω.2.2.1 ω.2.2.2) •
                     (S.pointObs .alice .Z ω.2.2.2 ω.2.1 *
                       S.pointObs .alice .X ω.2.2.1 ω.1)) 1 :=
-            (WinImplications.heteroKron_sub_left _ _ _).symm
+            heteroKron_sub_left _ _ _
           rw [← WinImplications.heteroKron_smul_left]
           exact h1
         rw [hop]
@@ -261,7 +244,7 @@ theorem exists_twistedCommutator_avg_le :
                   (phaseSign (gammaValue P ω.1 ω.2.1 ω.2.2.1 ω.2.2.2) •
                     (S.pointObs .bob .Z ω.2.2.2 ω.2.1 *
                       S.pointObs .bob .X ω.2.2.1 ω.1)) :=
-            MagicSquareRigidity.heteroKron_sub_right _ _ _
+            heteroKron_sub_right _ _ _
           rw [← MagicSquareRigidity.heteroKron_smul_right]
           exact h1
         rw [hop]

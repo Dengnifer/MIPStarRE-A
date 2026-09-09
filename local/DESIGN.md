@@ -96,6 +96,14 @@ documented failure modes. Sources are cited in `local/protocols/*.md`.
 11. **Faithfulness policy is unchanged.** AGENTS.md's faithful-formalization
     rules, anti-pattern catalog, and statement-integrity audits apply to QPBT
     exactly as to LDT.
+12. **Merge inputs do not disappear silently.** Before a merge commit, the
+    merge-loss guard compares the staged result with the pre-merge branch,
+    every best merge base, and `MERGE_HEAD`. An incoming path may be absent
+    only when the branch deleted a path present at a merge base. An
+    unambiguous incoming-only change may return to the unchanged branch blob
+    only when Git recorded a conflict. The pending-index check and the
+    pre-update reference transaction together cover manual and automatic
+    merge commits.
 
 ## Naming and identity conventions
 
@@ -113,19 +121,22 @@ documented failure modes. Sources are cited in `local/protocols/*.md`.
 - **Codex sessions**: `<role>-<issue|scope>-<yyyymmdd>-<seq>` with roles
   `orc, prover, reviewer, simplifier, blueprint, splitter, scout`, plus
   `mathfix` for astra after its availability is reported on #26.
-  Dispatched only via `local/bin/dispatch.sh`, which records the codex `thread_id`,
+  External sessions use `local/bin/dispatch.sh`, which records the codex `thread_id`,
   captures the `--json` event stream to
   `results/telemetry/sessions/<name>.jsonl`, and appends a summary line to
   `results/telemetry/sessions.jsonl`. Archiving a session = final status line
-  in the registry + worktree removal; the JSONL capture is the archive.
+  in the registry + worktree removal; the JSONL capture is the archive. Native
+  descendants use the root lease and `telemetry.py native-record` (`sessions.md`).
 
 ## Telemetry (research-paper data)
 
 All appends are one-line JSON; schemas documented in `protocols/meta.md`.
 
 - `results/telemetry/sessions.jsonl` — one line per agent session: name, role,
-  issue/pr, thread_id, start/end, wall seconds, token usage (input, cached,
-  output, reasoning), exit status, dispatcher.
+  selected account and model, effective requested effort (all optional on legacy
+  rows), issue/pr, thread_id, start/end, wall seconds, token usage (input,
+  cached, output, reasoning), exit status, dispatcher. Requested effort is a CLI
+  input, not provider-measured effort.
 - `results/telemetry/stages.jsonl` — one line per project stage/substage
   transition with timestamps and manual token/agent tallies.
 - `results/telemetry/builds.jsonl` — one line per full build / cache event:
@@ -138,14 +149,19 @@ All appends are one-line JSON; schemas documented in `protocols/meta.md`.
 
 ## Model policy
 
-- codex CLI (`gpt-5.6-sol`, ultra effort) drives orchestrator/prover/reviewer/
-  simplifier sessions (`codex exec`, `codex exec review`); `dispatch.sh` also
-  admits the `mathfix` role for astra only after `owner-tools/astra-poll.sh`
-  reports availability on #26.
-- Claude-side subagents: easy/mechanical tasks run on Opus-tier. The current
-  `mathfix` lane is Claude Fable 5.1, launched by the owner session through its
-  Agent tool and recorded in `results/telemetry/owner-sessions.jsonl`; Fable
-  otherwise remains reserved for hard reasoning (proof strategy, protocol
-  synthesis, adversarial verification).
+- Main remains `gpt-6-astra`/`ultra`. Published `local/model-policy.json`
+  selects exact `gpt-5.6-sol`/`ultra` for routine/bounded subagents, including
+  routine independent reviewers; genuinely hard/escalated work uses Astra with
+  an explicit reason. Unknown classes/models and other efforts fail closed.
+  External dispatch keeps fan-out off. Native descendants share their
+  root's verified configured cap and account allocation; neither is provider
+  throughput evidence. The current Space allocation is ten total sessions: the root plus
+  at most nine native descendants, with a useful target of nine, a floor of eight, and
+  external admission zero. This model policy does not resize that allocation or permit an
+  additional pool.
+- Every admission reads account mode (default primary; restoring both requires owner approval).
+  Twelve primary slots include main; only named interactive CWDs are exempt from accounting.
+  Other same-key use reduces capacity. See `protocols/sessions.md` for reconciliation and
+  checkpoint continuations. Historical Sol/Fable measurements are unchanged.
 - Reviewer and prover roles must be **different sessions** — a session never
   reviews its own diff.

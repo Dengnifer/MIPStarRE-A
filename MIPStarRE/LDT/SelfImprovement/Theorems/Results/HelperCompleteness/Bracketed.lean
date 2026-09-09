@@ -36,8 +36,8 @@ the per-outcome point average gives the paper identity
 where `H^u_h = A^u_{h(u)} · T_h · A^u_{h(u)}` is
 `sandwichedPolynomialOutcomeOperatorAt`. This is the algebraic opening of the
 helper-stage completeness chain at
-`references/ldt-paper/self_improvement.tex`, lines 354--356, mirrored at
-`blueprint/src/chapter/ch07_self_improvement.tex`, lines 103--106.
+`references/ldt-paper/self_improvement.tex`, lines 354--356, mirrored in
+blueprint `item:self-improvement-completeness`.
 
 The conclusion is exact (not approximate) and depends on no input-consistency
 or SDP hypotheses. The remaining helper-completeness ingredients --- the
@@ -157,8 +157,8 @@ where `H^u_h = A^u_{h(u)} · T_h · A^u_{h(u)}` is
 `T_{[h(u) = a]} = Σ_{h : h u = a} T_h` is the inner fiber sum.
 
 This is the identity `eq:bracketize-the-expression` of
-`references/ldt-paper/self_improvement.tex`, lines 356--358 (mirrored at
-`blueprint/src/chapter/ch07_self_improvement.tex`, lines 110--113), at a fixed
+`references/ldt-paper/self_improvement.tex`, lines 356--358 (mirrored by
+blueprint `eq:group-by-point-value`), at a fixed
 point `u` (before averaging). The conclusion is exact (not approximate) and
 depends on no input-consistency, SDP, or self-consistency hypotheses; it is
 purely an algebraic regrouping of `Σ_h H^u_h` by the value of `h` at `u`.
@@ -224,8 +224,8 @@ bracketing identity `helper_pointwise_sandwich_sum_eq_bracketed`:
 
 where `T_{[h(u) = a]} = Σ_{h : h u = a} T_h`. This is the second equality in the
 displayed completeness chain at
-`references/ldt-paper/self_improvement.tex`, lines 354--358 (mirrored at
-`blueprint/src/chapter/ch07_self_improvement.tex`, lines 103--113), composed
+`references/ldt-paper/self_improvement.tex`, lines 354--358 (mirrored by
+blueprint `item:self-improvement-completeness` and `eq:group-by-point-value`), composed
 with the bracketing reindexing `eq:bracketize-the-expression`. The conclusion
 is exact (not approximate) and depends on no input-consistency, SDP, or
 self-consistency hypotheses. -/

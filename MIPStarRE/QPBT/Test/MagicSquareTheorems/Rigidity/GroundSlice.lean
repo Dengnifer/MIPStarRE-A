@@ -5,7 +5,7 @@ import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.Dilation
 # Contractions, isometries and the ground slice of the dilation
 
 Support for the transfer step of `thm:ms-rigidity` (blueprint
-`blueprint/src/chapter/ch13_qpbt_test.tex:224-253`, paper
+`thm:ms-rigidity`, paper
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652`):
 the calculus needed to compare the dilated projective strategy of
 `Rigidity/Dilation.lean` with the original strategy on states.
@@ -23,11 +23,11 @@ the calculus needed to compare the dilated projective strategy of
   because `(1 - Π) ⊗ 1` annihilates `(1 ⊗ Q) ψ'`.  This is the estimate that
   replaces the `≈_δ`-preservation which Naimark dilation lacks in general
   (`references/ldt-paper/orthonormalization.tex:82-101`, blueprint
-  `ch04_projective.tex:255-270`).
+  `ex:easy-but-long`).
 
 ## References
 
-`thm:ms-rigidity`, blueprint `blueprint/src/chapter/ch13_qpbt_test.tex:224-253`,
+blueprint `thm:ms-rigidity`,
 paper `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652`.
 -/
 
@@ -208,53 +208,10 @@ theorem conjTranspose_mul_le_one_rightTensor {ιA ιB : Type*} [Fintype ιA] [De
 
 /-! ## Kronecker algebra of placed operators
 
-The mixed-product rule `heteroKron_mul` and the identity `heteroKron_one_one`
-are the shared tensor-placement lemmas of `MIPStarRE/QPBT/Games/Defs.lean`; the
-identities below extend them with the additive facts used by the transfer
-step. -/
-
-/-- Tensor placement is additive in the left factor. -/
-theorem heteroKron_add_left {ιA ιB : Type*} (A B : Op ιA) (C : Op ιB) :
-    heteroKron (A + B) C = heteroKron A C + heteroKron B C := by
-  ext p q
-  simp [heteroKron, Matrix.kronecker, add_mul]
-
-/-- Tensor placement is additive in the right factor. -/
-theorem heteroKron_add_right {ιA ιB : Type*} (A : Op ιA) (B C : Op ιB) :
-    heteroKron A (B + C) = heteroKron A B + heteroKron A C := by
-  ext p q
-  simp [heteroKron, Matrix.kronecker, mul_add]
-
-/-- Formalization-only auxiliary lemma for `def:tensor-product-strategy`: the
-tensor placement of possibly rectangular matrices respects differences in the
-left factor.  This is the general form of `heteroKron_sub_left` below, needed
-where the left factor is the matrix of an isometry between distinct index
-types (`thm:ms-rigidity`, blueprint
-`blueprint/src/chapter/ch13_qpbt_test.tex:224-253`). -/
-theorem kroneckerMap_sub_left {m n p q : Type*} (A B : Matrix m n ℂ) (C : Matrix p q ℂ) :
-    Matrix.kroneckerMap (· * ·) (A - B) C =
-      Matrix.kroneckerMap (· * ·) A C - Matrix.kroneckerMap (· * ·) B C := by
-  ext p' q'
-  simp [Matrix.kroneckerMap, sub_mul]
-
-/-- Formalization-only auxiliary lemma for `def:tensor-product-strategy`: the
-tensor placement of possibly rectangular matrices respects differences in the
-right factor.  This is the general form of `heteroKron_sub_right` below. -/
-theorem kroneckerMap_sub_right {m n p q : Type*} (A : Matrix m n ℂ) (B C : Matrix p q ℂ) :
-    Matrix.kroneckerMap (· * ·) A (B - C) =
-      Matrix.kroneckerMap (· * ·) A B - Matrix.kroneckerMap (· * ·) A C := by
-  ext p' q'
-  simp [Matrix.kroneckerMap, mul_sub]
-
-/-- Tensor placement respects differences in the left factor. -/
-theorem heteroKron_sub_left {ιA ιB : Type*} (A B : Op ιA) (C : Op ιB) :
-    heteroKron (A - B) C = heteroKron A C - heteroKron B C :=
-  kroneckerMap_sub_left A B C
-
-/-- Tensor placement respects differences in the right factor. -/
-theorem heteroKron_sub_right {ιA ιB : Type*} (A : Op ιA) (B C : Op ιB) :
-    heteroKron A (B - C) = heteroKron A B - heteroKron A C :=
-  kroneckerMap_sub_right A B C
+The mixed-product rule `heteroKron_mul`, the identity `heteroKron_one_one` and
+the additive and difference identities are the shared tensor-placement lemmas of
+`MIPStarRE/QPBT/Games/Defs.lean`; the identities below extend them with the
+finite-sum and scalar facts used by the transfer step. -/
 
 /-- Tensor placement distributes over a finite sum in the left factor. -/
 theorem heteroKron_finset_sum_left {β ιA ιB : Type*} (s : Finset β)
@@ -441,7 +398,7 @@ theorem applyOperatorToState_rightTensor_conjIsometry {ιA ιB κA κB : Type}
 
 /-- The orthogonal projection of an enlarged local space onto its ground slice,
 namely the inflation of the identity.  Formalization-only support for the
-transfer step of `thm:ms-rigidity`, blueprint `ch13_qpbt_test.tex:224-253`. -/
+transfer step of blueprint `thm:ms-rigidity`. -/
 def groundProjection (ι α : Type) [Fintype ι] [DecidableEq ι]
     [Fintype α] [DecidableEq α] : Op (ι × Option α) :=
   naimarkInflation (α := α) (1 : Op ι)

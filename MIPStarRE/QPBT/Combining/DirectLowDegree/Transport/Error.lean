@@ -139,8 +139,8 @@ the constant `3` times `ε^(1/40000)`.
 
 Formalization-only scalar bound on the first term of the error function
 displayed in `MIPStarRE/LDT/Test/MainTheorem/ScalarBounds/Definitions.lean:28-36`,
-used for the error of `lem:ld-soundness`, blueprint
-`ch13_qpbt_test.tex:139-167`. -/
+used for the error of blueprint
+`lem:ld-soundness`. -/
 theorem directLd_test_term_le {ε : ℝ} (hε : 0 ≤ ε) :
     Real.rpow (3 * ε) (1 / 40000) ≤ 3 * Real.rpow ε (1 / 40000) := by
   simp only [Real.rpow_eq_pow]
@@ -156,8 +156,8 @@ theorem directLd_test_term_le {ε : ℝ} (hε : 0 ≤ ε) :
 
 Formalization-only scalar bound on the second term of the error function
 displayed in `MIPStarRE/LDT/Test/MainTheorem/ScalarBounds/Definitions.lean:28-36`,
-used for the error of `lem:ld-soundness`, blueprint
-`ch13_qpbt_test.tex:139-167`. -/
+used for the error of blueprint
+`lem:ld-soundness`. -/
 theorem directLd_field_term_le (D : DirectLdParams) :
     Real.rpow ((D.d : ℝ) / (D.q : ℝ)) (1 / 40000) ≤
       (D.d : ℝ) * Real.rpow (D.q : ℝ) (-(1 / 40000)) := by
@@ -178,8 +178,8 @@ parameter is `exp (-m d)`, hence at most `2^(-b m d)` for every exponent
 
 Formalization-only scalar bound on the third term of the error function
 displayed in `MIPStarRE/LDT/Test/MainTheorem/ScalarBounds/Definitions.lean:28-36`;
-the exponential of `deltaLd` is the base-two decay of `lem:ld-soundness`,
-blueprint `ch13_qpbt_test.tex:139-167`. -/
+the exponential of `deltaLd` is the base-two decay of blueprint
+`lem:ld-soundness`. -/
 theorem directLd_exponential_term_le (D : DirectLdParams) {b : ℝ}
     (hb0 : 0 ≤ b) (hb1 : b ≤ 1) :
     Real.exp (-((directLdAuxParameter D : ℝ) / (2560000 * ((D.m : ℝ) ^ (2 : ℕ))))) ≤
@@ -204,12 +204,13 @@ exponent `b = 1/80000` are the inner factor of `deltaLd`; the abbreviation
 below names their sum. -/
 
 /-- The inner factor of `deltaLd` at the transport exponent `b = 1/80000`.
-This is a formalization-only abbreviation. -/
-private noncomputable def transportEnvelope (D : DirectLdParams) (ε : ℝ) : ℝ :=
+This is a formalization-only abbreviation, shared with the absorption of the
+error of `prop:ld-simultaneous-general-k`. -/
+noncomputable def transportEnvelope (D : DirectLdParams) (ε : ℝ) : ℝ :=
   Real.rpow ε (1 / 80000) + Real.rpow (D.q : ℝ) (-(1 / 80000)) +
     Real.rpow 2 (-((1 / 80000) * ((D.m * D.d : ℕ) : ℝ)))
 
-private theorem transportEnvelope_rpow_eps_le (D : DirectLdParams) (ε : ℝ) :
+theorem transportEnvelope_rpow_eps_le (D : DirectLdParams) (ε : ℝ) :
     Real.rpow ε (1 / 80000) ≤ transportEnvelope D ε := by
   have hy : (0 : ℝ) ≤ Real.rpow (D.q : ℝ) (-(1 / 80000)) :=
     Real.rpow_nonneg (by positivity) _
@@ -218,7 +219,7 @@ private theorem transportEnvelope_rpow_eps_le (D : DirectLdParams) (ε : ℝ) :
   unfold transportEnvelope
   linarith
 
-private theorem transportEnvelope_rpow_q_le (D : DirectLdParams) {ε : ℝ} (hε : 0 ≤ ε) :
+theorem transportEnvelope_rpow_q_le (D : DirectLdParams) {ε : ℝ} (hε : 0 ≤ ε) :
     Real.rpow (D.q : ℝ) (-(1 / 80000)) ≤ transportEnvelope D ε := by
   have hx : (0 : ℝ) ≤ Real.rpow ε (1 / 80000) := Real.rpow_nonneg hε _
   have hz : (0 : ℝ) ≤ Real.rpow 2 (-((1 / 80000) * ((D.m * D.d : ℕ) : ℝ))) :=
@@ -226,7 +227,7 @@ private theorem transportEnvelope_rpow_q_le (D : DirectLdParams) {ε : ℝ} (hε
   unfold transportEnvelope
   linarith
 
-private theorem transportEnvelope_nonneg (D : DirectLdParams) {ε : ℝ} (hε : 0 ≤ ε) :
+theorem transportEnvelope_nonneg (D : DirectLdParams) {ε : ℝ} (hε : 0 ≤ ε) :
     0 ≤ transportEnvelope D ε := by
   have hx : (0 : ℝ) ≤ Real.rpow ε (1 / 80000) := Real.rpow_nonneg hε _
   exact le_trans hx (transportEnvelope_rpow_eps_le D ε)
@@ -522,7 +523,7 @@ witnesses; the low-degree test carries no information there. -/
 /-- In the regime `1 ≤ ε` the error function `deltaLd` is at least one.
 
 Formalization-only scalar bound closing the trivial regime of
-`lem:ld-soundness`, blueprint `ch13_qpbt_test.tex:139-167`, paper
+blueprint `lem:ld-soundness`, paper
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:413-458`. -/
 theorem one_le_deltaLd_of_one_le_error {a b ε : ℝ} (ha : 1 ≤ a) (hb : 0 ≤ b)
     (hε : 1 ≤ ε) {q m d k : ℕ} (hm : 1 ≤ m) (hd : 1 ≤ d) (hk : 1 ≤ k) :

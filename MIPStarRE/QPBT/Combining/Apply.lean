@@ -42,6 +42,15 @@ alphabet documented in `docs/paper-gaps/qpbt_combined-lines-error-term.tex`.
 Their conversion to the source's verifier game remains open. This declaration takes
 an already constructed point witness; the companion obligation below supplies that
 witness existentially.
+
+**Error contract:** the polynomial bound printed in the source is carried
+by `IsPolyErr₂`, which states the corrected sum form
+`f x y ≤ C * (x ^ r + y ^ s)` with `1 ≤ C` and positive exponents on the
+closed nonnegative quadrant, in place of the product form `C * (x * y) ^ C`
+of the source shorthand at `04_preliminaries.tex:22-29`.  The correction and
+the two-dimensional strategy that refutes the product form are recorded in
+`docs/paper-gaps/qpbt_pasting-product-error.tex` and tracked by issue #196.
+Here `poly(m^2 * epsilon, md / q)` is read in that sense.
 -/
 theorem exists_extendedLinesWitness_ofPointsWitness :
     ∃ deltaCombine : ℝ → ℝ → ℝ, IsPolyErr₂ deltaCombine ∧
@@ -60,7 +69,16 @@ printed in `lem:qld-4-13`, paper lines 1020--1034.
 
 The `_ofPointsWitness` companion assumes a point witness, while this declaration
 supplies one existentially. Both declarations use the directly indexed questions,
-law, and completed answer alphabet, so neither is the source-facing paper statement. -/
+law, and completed answer alphabet, so neither is the source-facing paper statement.
+
+**Error contract:** the polynomial bound printed in the source is carried
+by `IsPolyErr₂`, which states the corrected sum form
+`f x y ≤ C * (x ^ r + y ^ s)` with `1 ≤ C` and positive exponents on the
+closed nonnegative quadrant, in place of the product form `C * (x * y) ^ C`
+of the source shorthand at `04_preliminaries.tex:22-29`.  The correction and
+the two-dimensional strategy that refutes the product form are recorded in
+`docs/paper-gaps/qpbt_pasting-product-error.tex` and tracked by issue #196.
+Here `poly(m^2 * epsilon, md / q)` is read in that sense. -/
 theorem exists_extendedLinesWitness :
     ∃ deltaQ : ℝ → ℝ, IsPolyErr deltaQ ∧
       ∃ deltaCombine : ℝ → ℝ → ℝ, IsPolyErr₂ deltaCombine ∧
@@ -83,6 +101,15 @@ constructed point witness; the obligation below supplies it existentially. Relat
 its game to the source's seed-bearing game requires the transport and soundness
 obligations in
 `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`.
+
+**Error contract:** the polynomial bound printed in the source is carried
+by `IsPolyErr₂`, which states the corrected sum form
+`f x y ≤ C * (x ^ r + y ^ s)` with `1 ≤ C` and positive exponents on the
+closed nonnegative quadrant, in place of the product form `C * (x * y) ^ C`
+of the source shorthand at `04_preliminaries.tex:22-29`.  The correction and
+the two-dimensional strategy that refutes the product form are recorded in
+`docs/paper-gaps/qpbt_pasting-product-error.tex` and tracked by issue #196.
+Here `poly(epsilon, md / q)` is read in that sense.
 -/
 theorem exists_extendedLinesWitness_established_ofPointsWitness :
     ∃ C : ℝ, 0 < C ∧
@@ -103,7 +130,16 @@ Its question carrier and line-point law are documented in
 `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`; its `Option`-completed answer
 alphabet is documented in `docs/paper-gaps/qpbt_combined-lines-error-term.tex`.
 Transport to `lem:qld-4-13` must convert this completed comparison to the source's
-sum over field answers, including degenerate zero-direction singleton lines. -/
+sum over field answers, including degenerate zero-direction singleton lines.
+
+**Error contract:** the polynomial bound printed in the source is carried
+by `IsPolyErr₂`, which states the corrected sum form
+`f x y ≤ C * (x ^ r + y ^ s)` with `1 ≤ C` and positive exponents on the
+closed nonnegative quadrant, in place of the product form `C * (x * y) ^ C`
+of the source shorthand at `04_preliminaries.tex:22-29`.  The correction and
+the two-dimensional strategy that refutes the product form are recorded in
+`docs/paper-gaps/qpbt_pasting-product-error.tex` and tracked by issue #196.
+Here `poly(epsilon, md / q)` is read in that sense. -/
 theorem exists_extendedLinesWitness_established :
     ∃ deltaQ : ℝ → ℝ, IsPolyErr deltaQ ∧
       ∃ C : ℝ, 0 < C ∧
@@ -121,9 +157,14 @@ constants and contains no divisibility hypothesis or residual construction input
 
 The argument uses low-degree soundness at dimension `2 * m + 2`.  The current
 direct carrier realizes the required dimension without assuming
-`2 * m + 2 ∣ q`, but it does not itself prove the game-correspondence and
-auxiliary-parameter estimates required by the soundness import; those obligations
-are exposed by `exists_direct_ld_soundness` and documented in
+`2 * m + 2 ∣ q`.  `exists_direct_ld_soundness` proves that soundness statement
+for the directly indexed game by applying `MIPStarRE.LDT.Test.mainFormal` and
+verifying `400 M d <= N` at each LDT application dimension `M`, with sampling
+count `N = 2560000 M^3 d`.  The source import at seed-indexed dimension `M`
+instead chooses `K = M^3 d` for a tensor-code theorem requiring
+`K >= 12 M (d + 1)`.  The direct proof establishes neither that bound nor the
+claimed tensor-code game correspondence.  Both source-import obligations
+remain open and are documented in
 `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`.  Absorption of the established
 combined-lines prefactor into the final universal constants is to use
 `deltaQld_mono` on its stated source parameter domain.

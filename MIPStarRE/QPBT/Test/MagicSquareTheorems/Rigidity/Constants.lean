@@ -20,10 +20,10 @@ rigidity conclusions are phrased.
 
 ## References
 
-`thm:ms-rigidity`, blueprint `blueprint/src/chapter/ch13_qpbt_test.tex:224-253`,
+blueprint `thm:ms-rigidity`,
 paper `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652`.
-The distance conventions are `def:povm-distance`, blueprint
-`ch12_qpbt_games.tex:219-237`, paper `06_nonlocal_games_and_mipstar.tex:258-285`.
+The distance conventions are blueprint
+`def:povm-distance`, paper `06_nonlocal_games_and_mipstar.tex:258-285`.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder

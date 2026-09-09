@@ -17,10 +17,11 @@ An unmatched route fails the call: a test that forgets to declare one sees it.
 
 Coverage mirrors the layer's failure modes, one test each: status reduction and
 posting, comment/review idempotency and post-failure adoption, prerequisite
-edge creation and adoption, the merge topology check, label validation and
-key-marker adoption, the ``pr_merge.py`` gate ladder (fail-closed on missing CI
-evidence and on an adverse verdict), the audit snapshot, and a hygiene check
-that no live tool still reaches for the retired registry trees.
+edge creation and adoption, reviewer-round history, the merge topology check,
+label validation and key-marker adoption, the ``pr_merge.py`` gate ladder
+(fail-closed on missing CI evidence and on an adverse verdict), the audit
+snapshot, and a hygiene check that no live tool still reaches for the retired
+registry trees.
 """
 
 from __future__ import annotations
@@ -30,6 +31,7 @@ import io
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -373,6 +375,374 @@ def _git(repo: Path, *args: str) -> str:
     if proc.returncode != 0:
         raise AssertionError(f"git {' '.join(args)} failed: {proc.stderr.strip()}")
     return proc.stdout.strip()
+
+
+class ReviewRoundCounterTests(LayerTestCase):
+    """The task header counts reviewer dispatches, not carried publications."""
+
+    BRANCH = "issue-0219-review-round-counter"
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.repo = self.tmp / "review-repo"
+        self.repo.mkdir()
+        templates = self.tmp / "review-no-templates"
+        templates.mkdir()
+        _git(self.repo, "init", "-q", f"--template={templates}")
+        _git(self.repo, "symbolic-ref", "HEAD", "refs/heads/main")
+        _git(self.repo, "config", "user.email", "tests@example.invalid")
+        _git(self.repo, "config", "user.name", "MIPStarRE tests")
+        _git(self.repo, "config", "commit.gpgsign", "false")
+
+        local_bin = self.repo / "local" / "bin"
+        local_bin.mkdir(parents=True)
+        for name in ("review.sh", "gh_common.py", "wf_util.py", "model_policy.py"):
+            shutil.copy2(LOCAL_BIN / name, local_bin / name)
+        scripts = self.repo / "scripts"
+        scripts.mkdir()
+        for name in ("blueprint_citations.py", "tex_utils.py"):
+            shutil.copy2(REPO_ROOT / "scripts" / name, scripts / name)
+        (self.repo / "blueprint" / "src" / "chapter").mkdir(parents=True)
+        persona = self.repo / "local" / "personas" / "orchestrator.md"
+        persona.parent.mkdir(parents=True)
+        persona.write_text("Review workflow changes.\n", encoding="utf-8")
+        prompt = self.repo / ".github" / "prompts" / "claude-code-review-prompt.md"
+        prompt.parent.mkdir(parents=True)
+        prompt.write_text("Review the change.\n", encoding="utf-8")
+        for name in ("blueprint-prose-review-system-prompt.md",
+                     "blueprint-prose-review-prompt.md"):
+            (prompt.parent / name).write_text("Review mathematical prose.\n", encoding="utf-8")
+        native = local_bin / "native_review.py"
+        native.write_text(
+            """#!/usr/bin/env python3
+import json, os, sys
+from pathlib import Path
+
+with open(os.environ['MIPSTARRE_TEST_NATIVE_LOG'], 'a', encoding='utf-8') as out:
+    out.write(json.dumps(sys.argv[1:]) + '\\n')
+if sys.argv[1] != 'accept':
+    raise SystemExit(91)
+kind = 'prose' if Path(sys.argv[sys.argv.index('--prompt') + 1]).name == 'prose-standalone.md' else 'code'
+body = os.environ.get('MIPSTARRE_TEST_PROSE_BODY') if kind == 'prose' else None
+body = body if body is not None else os.environ['MIPSTARRE_TEST_REVIEW_BODY']
+if body == '__FAIL_ACCEPT__':
+    raise SystemExit(93)
+if os.environ.get('MIPSTARRE_TEST_CHECK_PROMPTS') == '1':
+    original = Path(sys.argv[sys.argv.index('--prompt') + 1]).read_bytes()
+    rebuilt = Path(sys.argv[sys.argv.index('--rebuilt-prompt') + 1]).read_bytes()
+    if original != rebuilt:
+        raise SystemExit(94)
+Path(sys.argv[3]).write_text(body, encoding='utf-8')
+print('name: reviewer-native-test')
+""",
+            encoding="utf-8",
+        )
+        dispatch = local_bin / "dispatch.sh"
+        dispatch.write_text(
+            "#!/bin/sh\nprintf called > \"$MIPSTARRE_TEST_DISPATCH_LOG\"\nexit 92\n",
+            encoding="utf-8",
+        )
+        dispatch.chmod(0o755)
+        (self.repo / "README.md").write_text("base\n", encoding="utf-8")
+        _git(self.repo, "add", "-A")
+        _git(self.repo, "commit", "-q", "--no-verify", "-m", "base commit")
+
+        _git(self.repo, "checkout", "-q", "-b", self.BRANCH)
+        (self.repo / "README.md").write_text("work\n", encoding="utf-8")
+        _git(self.repo, "commit", "-q", "--no-verify", "-am", "change readme")
+        self.head = _git(self.repo, "rev-parse", "HEAD")
+
+    @staticmethod
+    def _review(head: str, label: str, *, carried_from: str | None = None) -> dict:
+        body = f"<!-- mipstarre-review pr=7 head={head} -->\n"
+        if carried_from is not None:
+            body += f"<!-- mipstarre-review-carried from={carried_from} -->\n"
+        body += ("<!-- findings:begin -->\n"
+                 f"- [ ] F1 (changes) `x:1` — {label}\n"
+                 "<!-- findings:end -->\n")
+        return {"commit_id": head, "body": body}
+
+    def run_native_resume(self, label: str, body: str, *, reviews=None,
+                          summary: str | None = None,
+                          heads: list[str] | None = None,
+                          prose_body: str | None = None,
+                          tamper_prompt: str | None = None,
+                          include_prose_request: bool = True
+                          ) -> tuple[subprocess.CompletedProcess, Path]:
+        self.gh.reset()
+        head_rows = heads or [self.head]
+        for index, head in enumerate(head_rows):
+            self.gh.route(r"^pulls/7$", {
+                "number": 7, "state": "open",
+                "head": {"sha": head, "ref": self.BRANCH},
+                "base": {"ref": "main"},
+            }, once=index < len(head_rows) - 1)
+        statuses = [{"context": "local-ci/summary", "state": "success"}]
+        if summary:
+            statuses.append({"context": "local-review/summary", "state": summary})
+        self.gh.route(r"^commits/[0-9a-f]+/statuses", statuses)
+        self.gh.route(r"^pulls/7/reviews", reviews or [])
+        self.gh.route(r"^pulls/7/reviews$", {"id": 99}, method="POST")
+        self.gh.route(r"^statuses/[0-9a-f]+$", {"id": 100}, method="POST")
+
+        cache = self.tmp / ("resume-" + label)
+        request = cache / "native-reviews" / ("1" * 32 + ".json")
+        request.parent.mkdir(parents=True)
+        request.write_text("{}", encoding="utf-8")
+        native_log = self.tmp / (label + "-native.jsonl")
+        dispatch_log = self.tmp / (label + "-dispatch")
+        environment = dict(
+            os.environ, **self.gh.env(), MIPSTARRE_CACHE_ROOT=str(cache),
+            MIPSTARRE_NATIVE_REVIEW_ROOT="01a076bc-f4ad-7813-805b-c8b4dac71a14",
+            MIPSTARRE_NATIVE_REVIEW_AUTHORS="01a076e7-b2ae-7e60-9090-72c3b7dce9c4",
+            MIPSTARRE_TEST_NATIVE_LOG=str(native_log),
+            MIPSTARRE_TEST_DISPATCH_LOG=str(dispatch_log),
+            MIPSTARRE_TEST_REVIEW_BODY=body, LOCAL_REVIEW_ENABLED="true",
+            MIPSTARRE_REVIEW_EFFORT="ultra", PYTHONDONTWRITEBYTECODE="1",
+        )
+        arguments = ["--resume-native-request", str(request)]
+        if prose_body is not None:
+            environment['MIPSTARRE_TEST_PROSE_BODY'] = prose_body
+            environment['MIPSTARRE_TEST_CHECK_PROMPTS'] = '1'
+            # Freeze genuine prompt bytes before the resumed publisher runs.
+            prepared = subprocess.run(
+                ["bash", str(self.repo / "local/bin/review.sh"), "7", "--dry-run"],
+                cwd=self.repo, capture_output=True, text=True, env=environment)
+            self.assertEqual(prepared.returncode, 0, prepared.stderr)
+            original = cache / 'reviews/pr7' / self.head
+            (original / 'code-last-message.md').write_text('old code output')
+            (original / 'prose-last-message.md').write_text('old prose output')
+            if tamper_prompt:
+                (original / f'{tamper_prompt}-standalone.md').write_text('tampered prompt')
+            prose_request = request.with_name('2' * 32 + '.json')
+            prose_request.write_text('{}', encoding='utf-8')
+            if include_prose_request:
+                arguments += ['--resume-native-prose-request', str(prose_request)]
+        result = subprocess.run(
+            ["bash", str(self.repo / "local/bin/review.sh"), "7",
+             *arguments],
+            cwd=self.repo, capture_output=True, text=True, env=environment,
+        )
+        return result, native_log
+
+    def add_blueprint_change(self) -> None:
+        (self.repo / 'blueprint/src/chapter/test.tex').write_text('Changed prose.\n')
+        _git(self.repo, 'add', 'blueprint')
+        _git(self.repo, 'commit', '-q', '--no-verify', '-m', 'change blueprint')
+        self.head = _git(self.repo, 'rev-parse', 'HEAD')
+
+    def test_completed_combined_native_reviews_keep_both_adverse_verdicts(self) -> None:
+        self.add_blueprint_change()
+        body = ('## Findings\n\n- [ ] F1 (blocker) `x:1` - source issue\n\n'
+                '## Review\n\nBound review.\n\nVERDICT: CHANGES_REQUESTED\n')
+        result, native_log = self.run_native_resume('combined', body, prose_body=body)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        calls = [json.loads(line) for line in native_log.read_text().splitlines()]
+        self.assertEqual([call[0] for call in calls], ['accept', 'accept'])
+        self.assertNotEqual(calls[0][1], calls[1][1])
+        self.assertFalse((self.tmp / 'combined-dispatch').exists())
+        reviews = self.gh.payloads('POST', r'^pulls/7/reviews$')
+        self.assertEqual(len(reviews), 1)
+        self.assertIn('code=CHANGES_REQUESTED, prose=CHANGES_REQUESTED', reviews[0]['body'])
+        self.assertEqual(self.gh.payloads('POST', r'^statuses/')[-1]['state'], 'failure')
+        original = self.tmp / 'resume-combined/reviews/pr7' / self.head
+        self.assertEqual((original / 'code-last-message.md').read_text(), 'old code output')
+        self.assertEqual((original / 'prose-last-message.md').read_text(), 'old prose output')
+        self.assertFalse((self.repo / '.git/info/sparse-checkout').exists())
+
+    def test_combined_native_resume_fails_closed_if_either_lane_is_invalid(self) -> None:
+        self.add_blueprint_change()
+        valid = '## Findings\n\n- none\n\n## Review\n\nClean.\n\nVERDICT: APPROVED\n'
+        for label, code, prose, tamper, include in (
+            ('code-invalid', '__FAIL_ACCEPT__', valid, None, True),
+            ('prose-invalid', valid, '__FAIL_ACCEPT__', None, True),
+            ('code-unparsed', 'No verdict trailer.', valid, None, True),
+            ('prose-unparsed', valid, 'No verdict trailer.', None, True),
+            ('code-tampered', valid, valid, 'code', True),
+            ('prose-tampered', valid, valid, 'prose', True),
+            ('prose-omitted', valid, valid, None, False),
+        ):
+            with self.subTest(label=label):
+                result, _ = self.run_native_resume(label, code, prose_body=prose,
+                    tamper_prompt=tamper, include_prose_request=include)
+                self.assertNotEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(self.gh.payloads('POST', r'^pulls/7/reviews$'), [])
+                self.assertEqual(self.gh.payloads('POST', r'^statuses/'), [])
+                self.assertFalse((self.tmp / (label + '-dispatch')).exists())
+                if tamper:
+                    original = self.tmp / ('resume-' + label) / 'reviews/pr7' / self.head
+                    self.assertEqual((original / f'{tamper}-standalone.md').read_text(),
+                                     'tampered prompt')
+
+    def test_combined_native_resume_rechecks_head_before_publication(self) -> None:
+        self.add_blueprint_change()
+        valid = '## Findings\n\n- none\n\n## Review\n\nClean.\n\nVERDICT: APPROVED\n'
+        result, native_log = self.run_native_resume('combined-stale', valid,
+            prose_body=valid, heads=[self.head] * 4 + ['c' * 40])
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn('head moved', result.stderr)
+        self.assertEqual(len(native_log.read_text().splitlines()), 2)
+        self.assertEqual(self.gh.payloads('POST', r'^pulls/7/reviews$'), [])
+        self.assertEqual(self.gh.payloads('POST', r'^statuses/'), [])
+
+    def test_dry_run_counts_only_fresh_reviews(self) -> None:
+        fresh = [self._review(str(number) * 40, f"FRESH-{number}")
+                 for number in range(1, 8)]
+        carried = [
+            self._review(letter * 40, f"CARRIED-{letter}",
+                         carried_from=fresh[0]["commit_id"])
+            for letter in "abc"
+        ]
+        duplicate = self._review(fresh[1]["commit_id"], "DUPLICATE-PUBLICATION")
+        reviews = [fresh[0], fresh[1], duplicate, carried[0], fresh[2], carried[1],
+                   fresh[3], fresh[4], carried[2], fresh[5], fresh[6]]
+
+        self.gh.route(r"^pulls/7$", {
+            "number": 7, "state": "open",
+            "head": {"sha": self.head, "ref": self.BRANCH},
+            "base": {"ref": "main"},
+        })
+        self.gh.route(r"^commits/[0-9a-f]+/statuses", [
+            {"context": "local-ci/summary", "state": "success",
+             "description": "green", "created_at": "2026-09-05T00:00:00Z"},
+        ])
+        self.gh.route(r"^pulls/7/reviews", reviews)
+
+        cache = self.tmp / "review-cache"
+        env = dict(os.environ, **self.gh.env(), MIPSTARRE_CACHE_ROOT=str(cache),
+                   LOCAL_REVIEW_ENABLED="true", MIPSTARRE_REVIEW_EFFORT="ultra",
+                   PYTHONDONTWRITEBYTECODE="1")
+        result = subprocess.run(
+            ["bash", str(self.repo / "local" / "bin" / "review.sh"),
+             "7", "--force-review", "--dry-run"],
+            cwd=self.repo, capture_output=True, text=True, env=env,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        run_dir = cache / "reviews" / "pr7" / self.head
+        task = (run_dir / "code-task.md").read_text(encoding="utf-8")
+        prior = (run_dir / "prior-ledger.md").read_text(encoding="utf-8")
+        self.assertIn("Review round 8 of at most 4", task)
+        self.assertNotIn("Review round 11", task)
+        self.assertIn("FRESH-5", prior)
+        self.assertIn("FRESH-6", prior)
+        self.assertIn("FRESH-7", prior)
+        self.assertNotIn("CARRIED", prior)
+        self.assertNotIn("DUPLICATE-PUBLICATION", prior)
+
+
+    def test_queue_refuses_fifth_round_and_existing_head_publication(self) -> None:
+        for label, reviews, statuses, expected in (
+            ('cap', [self._review(str(number) * 40, 'prior') for number in range(1, 5)],
+             [], 'four-round cap'),
+            ('partial', [self._review(self.head, 'already published')], [],
+             'publication evidence'),
+            ('summary', [], [{'context': 'local-review/summary', 'state': 'pending'}],
+             'summary evidence'),
+        ):
+            with self.subTest(label=label):
+                self.gh.reset()
+                self.gh.route(r'^pulls/7$', {
+                    'number': 7, 'state': 'open', 'head': {'sha': self.head, 'ref': self.BRANCH},
+                    'base': {'ref': 'main'},
+                })
+                self.gh.route(r'^commits/[0-9a-f]+/statuses', statuses + [
+                    {'context': 'local-ci/summary', 'state': 'success'}])
+                self.gh.route(r'^pulls/7/reviews', reviews)
+                environment = dict(os.environ, **self.gh.env(),
+                    MIPSTARRE_CACHE_ROOT=str(self.tmp / f'queue-{label}'),
+                    MIPSTARRE_QUEUE_TICKET='test-only', MIPSTARRE_QUEUE_EXPECTED_HEAD=self.head,
+                    LOCAL_REVIEW_ENABLED='true', MIPSTARRE_REVIEW_EFFORT='ultra',
+                    PYTHONDONTWRITEBYTECODE='1')
+                result = subprocess.run(['bash', str(self.repo / 'local/bin/review.sh'),
+                    '7', '--dry-run'], cwd=self.repo, capture_output=True, text=True,
+                    env=environment)
+                self.assertNotEqual(result.returncode, 0, result.stdout)
+                self.assertIn(expected, result.stderr)
+
+    def test_completed_native_response_publishes_without_a_new_request(self) -> None:
+        body = ("## Findings\n\n- none\n\n## Review\n\nLate response accepted.\n\n"
+                "VERDICT: APPROVED\n")
+        result, native_log = self.run_native_resume("happy", body)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        native_calls = [json.loads(line) for line in native_log.read_text().splitlines()]
+        self.assertEqual([call[0] for call in native_calls], ["accept"])
+        self.assertFalse((self.tmp / "happy-dispatch").exists())
+        reviews = self.gh.payloads("POST", r"^pulls/7/reviews$")
+        self.assertEqual(len(reviews), 1)
+        self.assertIn("VERDICT: APPROVED (code=APPROVED, prose=n/a)", reviews[0]["body"])
+        self.assertIn("<!-- no findings -->", reviews[0]["body"])
+        statuses = self.gh.payloads("POST", r"^statuses/")
+        self.assertEqual(statuses[-1]["state"], "success")
+
+    def test_native_resume_preserves_the_final_head_recheck(self) -> None:
+        body = "## Findings\n\n- none\n\n## Review\n\nClean.\n\nVERDICT: APPROVED\n"
+        moved = "c" * 40
+        result, native_log = self.run_native_resume(
+            "stale", body, heads=[self.head, self.head, moved])
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertTrue(native_log.exists())
+        self.assertEqual(self.gh.payloads("POST", r"^pulls/7/reviews$"), [])
+        self.assertEqual(self.gh.payloads("POST", r"^statuses/"), [])
+
+    def test_native_resume_rejects_invalid_or_reused_output(self) -> None:
+        result, _ = self.run_native_resume("rejected", "__FAIL_ACCEPT__")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("failed validation", result.stderr)
+        self.assertEqual(self.gh.payloads("POST", r"^pulls/7/reviews$"), [])
+        self.assertEqual(self.gh.payloads("POST", r"^statuses/"), [])
+
+        invalid = "## Findings\n\n- none\n\n## Review\n\nMissing trailer.\n"
+        result, _ = self.run_native_resume("invalid", invalid)
+        self.assertEqual(result.returncode, 4, result.stderr)
+        self.assertEqual(self.gh.payloads("POST", r"^pulls/7/reviews$"), [])
+        self.assertEqual(self.gh.payloads("POST", r"^statuses/")[-1]["state"], "failure")
+
+        prior = self._review(self.head, "already published")
+        result, native_log = self.run_native_resume("reused", invalid, reviews=[prior])
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("already consumed", result.stderr)
+        self.assertFalse(native_log.exists())
+        self.assertEqual(self.gh.payloads("POST", r"^pulls/7/reviews$"), [])
+
+    def test_native_resume_rejects_a_live_publisher_lock(self) -> None:
+        body = "## Findings\n\n- none\n\n## Review\n\nClean.\n\nVERDICT: APPROVED\n"
+        cache = self.tmp / "resume-concurrent"
+        lock = cache / "locks/review-7.lock"
+        lock.mkdir(parents=True)
+        (lock / "pid").write_text(str(os.getpid()), encoding="utf-8")
+        result, native_log = self.run_native_resume("concurrent", body)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("review lock", result.stderr)
+        self.assertFalse(native_log.exists())
+        self.assertEqual(self.gh.payloads("POST", r"^pulls/7/reviews$"), [])
+
+    def test_native_resume_honors_the_literal_false_kill_switch_first(self) -> None:
+        environment = dict(os.environ, LOCAL_REVIEW_ENABLED="false",
+                           MIPSTARRE_REVIEW_EFFORT="ultra")
+        result = subprocess.run(
+            ["bash", str(self.repo / "local/bin/review.sh"), "7",
+             "--resume-native-request", "/not/a/request"],
+            cwd=self.repo, capture_output=True, text=True, env=environment,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("LOCAL_REVIEW_ENABLED=false", result.stderr)
+
+    def test_native_resume_rejects_an_empty_request_before_dispatch(self) -> None:
+        native_log = self.tmp / "empty-native.jsonl"
+        dispatch_log = self.tmp / "empty-dispatch"
+        environment = dict(os.environ, **self.gh.env(), LOCAL_REVIEW_ENABLED="true",
+            MIPSTARRE_REVIEW_EFFORT="ultra", MIPSTARRE_TEST_NATIVE_LOG=str(native_log),
+            MIPSTARRE_TEST_DISPATCH_LOG=str(dispatch_log), PYTHONDONTWRITEBYTECODE="1")
+        result = subprocess.run(
+            ["bash", str(self.repo / "local/bin/review.sh"), "7",
+             "--resume-native-request", ""], cwd=self.repo,
+            capture_output=True, text=True, env=environment)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("requires a nonempty request path", result.stderr)
+        self.assertFalse(native_log.exists())
+        self.assertFalse(dispatch_log.exists())
+        self.assertEqual(self.gh.payloads("POST", r"^statuses/"), [])
 
 
 class MergeGateTests(LayerTestCase):

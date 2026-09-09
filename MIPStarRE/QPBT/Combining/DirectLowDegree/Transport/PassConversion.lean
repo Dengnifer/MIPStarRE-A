@@ -21,7 +21,9 @@ value at least `1 - ε` has coordinate strategies of LDT failure at most
 
 - `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:214-458`
 - `references/ldt-paper/test_definition.tex:130-151`
-- `blueprint/src/chapter/ch13_qpbt_test.tex:38-121,139-166`
+- Blueprint `def:ld-question-distribution`, `lem:ld-aline-level`,
+  `lem:ld-dline-level`, `lem:ld-question-typed-cl`, `lem:alnf`, `lem:dlnf`,
+  `def:ld-win-predicate`, `rem:ld-win-zero-direction`, and `def:ld-meas`
 - `MIPStarRE/LDT/Test/StrategyFailures.lean:18-130`
 - `MIPStarRE/LDT/Test/MainTheorem/MainFormal.lean:300-311`
 - `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`
@@ -37,12 +39,6 @@ open MIPStarRE.Quantum
 noncomputable section
 
 /-! ## The failure comparison and the pass hypothesis -/
-
-private theorem sum_ldType (f : LdType → ℝ) :
-    ∑ t : LdType, f t = f .point + f .aline + f .dline := by
-  change (Finset.univ : Finset LdType).sum f = _
-  rw [show (Finset.univ : Finset LdType) = {.point, .aline, .dline} by decide]
-  simp [add_assoc]
 
 /-- The uniformly weighted rejection is one ninth of the sum over the nine
 ordered type pairs. -/

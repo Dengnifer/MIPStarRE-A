@@ -1,0 +1,11 @@
+{
+  "recorded_at": "2026-09-05T23:26:36Z",
+  "automation": "qpbt-track-a-meta-watch",
+  "queue_cancelled_at": "2026-09-05T23:19:14Z",
+  "primary_dirty_first_observed": "2026-09-05T23:10:38Z",
+  "comparison_caveat_missing_first_observed": "2026-09-05T23:14:04Z",
+  "caveat_corrected_at": null,
+  "owner_effort_choice": "pending max versus literal xhigh fallback",
+  "delivery_state": "main message deferred while side conversation foreground",
+  "pending": "Incorporate packet into telemetry; deliver verified effort results and final owner choice to main; do not replay stale conflict requests."
+}

@@ -25,7 +25,7 @@ because that embedding is an isometry.
 
 ## References
 
-`thm:ms-rigidity`, blueprint `blueprint/src/chapter/ch13_qpbt_test.tex:224-253`,
+blueprint `thm:ms-rigidity`,
 paper `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652`;
 the cited robust self-test is Coladangelo--Stark, arXiv:1709.09267v2,
 Theorem 6.9, `references/cs-paper/self-testing.tex:660-730`.

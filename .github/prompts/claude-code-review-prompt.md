@@ -63,6 +63,12 @@ that determines whether the PR can be approved with outstanding issues.
 8. 🟡 **Documentation**: Do new definitions and key theorems have docstrings? Are module-level
    doc comments present for new files? Do docstrings explain mathematical meaning, not just
    Lean syntax? Missing documentation must be added before approval.
+   Blueprint citations in Lean docstrings are stored by label (for example,
+   blueprint `lem:cl-concat`), while their current file and line span are
+   derived with `scripts/blueprint_citations.py`. If the label resolves to the
+   intended node, do not flag line drift or demand a stored numeric blueprint
+   range. Unknown, duplicate, or mathematically incorrect labels still require
+   correction.
 9. 🟡 **Blueprint coverage for changed declarations**: If the PR has the label
    `enforce-blueprint-coverage` and changes a public paper-facing `def`,
    `theorem`, or `lemma` under `MIPStarRE/`, the corresponding blueprint item
