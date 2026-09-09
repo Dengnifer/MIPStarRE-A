@@ -1,5 +1,182 @@
 [
  {
+  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/505",
+  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
+  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/505/labels{/name}",
+  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/505/comments",
+  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/505/events",
+  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/505",
+  "id": 5398747896,
+  "node_id": "I_kwDOUJyJf88AAAABQcpa-A",
+  "number": 505,
+  "title": "account_router.py: remove the Space-era admission machinery (SIGSTOP holds starved the pipeline)",
+  "user": {
+   "login": "Dengnifer",
+   "id": 89234078,
+   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
+   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/Dengnifer",
+   "html_url": "https://github.com/Dengnifer",
+   "followers_url": "https://api.github.com/users/Dengnifer/followers",
+   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
+   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
+   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
+   "repos_url": "https://api.github.com/users/Dengnifer/repos",
+   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
+   "type": "User",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "labels": [
+   {
+    "id": 12025011061,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8bdQ",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/infrastructure",
+    "name": "infrastructure",
+    "color": "ededed",
+    "default": false,
+    "description": "Foundational definitions, shared APIs, or supporting layers"
+   }
+  ],
+  "state": "open",
+  "locked": false,
+  "assignees": [],
+  "milestone": null,
+  "comments": 0,
+  "created_at": "2026-09-09T11:22:38Z",
+  "updated_at": "2026-09-09T11:22:38Z",
+  "closed_at": null,
+  "assignee": null,
+  "author_association": "OWNER",
+  "active_lock_reason": null,
+  "sub_issues_summary": {
+   "total": 0,
+   "completed": 0,
+   "percent_completed": 0
+  },
+  "issue_dependencies_summary": {
+   "blocked_by": 0,
+   "total_blocked_by": 0,
+   "blocking": 0,
+   "total_blocking": 0
+  },
+  "body": "`local/bin/account_router.py` (553 lines) still carries the retired \"Space\" machinery: native leases, `primary-key-capacity` and external-admission gates, `useful-queue` tickets with HOLD/STOP files, and a supervisor. On 2026-09-09 between 10:20Z and 11:20Z five dispatch routers sat SIGSTOPped (the stop comes from `~/.local/bin/qpbt-switch`, line 331) behind a `useful-queue/HOLD` file dated 09-06, while the second account had six free slots: the pipeline ran with four workers for an hour. The meta session resumed the routers and removed the HOLD file.\n\nTask (workflow layer, reviewed; keep it small): reduce the router to what the pipeline uses: `reserve <root> <auto|primary|second> <pid> <wait>` that (1) reads caps from `watchdog/max-codex-primary` and `max-codex-second` (a missing file means 0), (2) counts live reservations as marker files `accounts/<account>/<pid>` whose pid is alive (stale markers removed), (3) picks the account with the smaller live/cap ratio among those with free capacity (ties to primary), waits up to `<wait>` seconds polling every 10 s otherwise, and (4) prints the account. Delete native leases, admission capacity, external admission, useful-queue tickets, HOLD/STOP handling and every SIGSTOP/SIGCONT path; `qpbt-switch` must not stop dispatch processes (retire the command or reduce it to reporting). Keep `resume affinity` only if a test still needs it. Update the unit tests in `scripts/tests/` accordingly and add one test for the cap/ratio choice. Protocol note in `local/protocols/sessions.md`; EVOLUTION.md entry citing the 2026-09-09 events entries.\n",
+  "closed_by": null,
+  "reactions": {
+   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/505/reactions",
+   "total_count": 0,
+   "+1": 0,
+   "-1": 0,
+   "laugh": 0,
+   "hooray": 0,
+   "confused": 0,
+   "heart": 0,
+   "rocket": 0,
+   "eyes": 0
+  },
+  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/505/timeline",
+  "performed_via_github_app": null,
+  "state_reason": null,
+  "pinned_comment": null
+ },
+ {
+  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/504",
+  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
+  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/504/labels{/name}",
+  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/504/comments",
+  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/504/events",
+  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/504",
+  "id": 5398253580,
+  "node_id": "I_kwDOUJyJf88AAAABQcLQDA",
+  "number": 504,
+  "title": "fix(local): propagate failures from canonical CI commands",
+  "user": {
+   "login": "Dengnifer",
+   "id": 89234078,
+   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
+   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/Dengnifer",
+   "html_url": "https://github.com/Dengnifer",
+   "followers_url": "https://api.github.com/users/Dengnifer/followers",
+   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
+   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
+   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
+   "repos_url": "https://api.github.com/users/Dengnifer/repos",
+   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
+   "type": "User",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "labels": [
+   {
+    "id": 12015972630,
+    "node_id": "LA_kwDOUJyJf88AAAACzDUxFg",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/bug",
+    "name": "bug",
+    "color": "d73a4a",
+    "default": true,
+    "description": "Something isn't working"
+   },
+   {
+    "id": 12025011061,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8bdQ",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/infrastructure",
+    "name": "infrastructure",
+    "color": "ededed",
+    "default": false,
+    "description": "Foundational definitions, shared APIs, or supporting layers"
+   }
+  ],
+  "state": "open",
+  "locked": false,
+  "assignees": [],
+  "milestone": null,
+  "comments": 0,
+  "created_at": "2026-09-09T10:32:28Z",
+  "updated_at": "2026-09-09T10:32:28Z",
+  "closed_at": null,
+  "assignee": null,
+  "author_association": "OWNER",
+  "active_lock_reason": null,
+  "sub_issues_summary": {
+   "total": 0,
+   "completed": 0,
+   "percent_completed": 0
+  },
+  "issue_dependencies_summary": {
+   "blocked_by": 0,
+   "total_blocked_by": 0,
+   "blocking": 0,
+   "total_blocking": 0
+  },
+  "body": "<!-- mipstarre-issue-key: ci-step-subshell-errexit-20260909 -->\nCanonical CI can publish a successful gate after a required command fails.\n\nPR487 provides concrete evidence: two full runs at\n`b1ae4d2f9af36ebc3e35b1dd87a9342d179222b8` logged regression-test failures but\npublished `local-ci/blueprint-sync=success` and a successful summary. The\noperator's receipt is\n`~/.cache/mipstarre-dev/recoveries/pr487-b1ae4d2f-handoff.md`; the first and\nsecond full manifests and logs are retained beside it. A later isolated partial\nrun passed all 616 tests, but that does not repair the driver's propagation bug.\n\n`local/bin/ci.sh` disables errexit in the parent while collecting each step's\nexit code, then invokes `run_step_body` in a subshell without reenabling it.\nIn `step_blueprint_sync`, a failed unittest command is followed by successful\nsync commands, so the subshell returns success. A read-only shell reproduction\nreturned zero after `false` followed by a successful command; enabling errexit\ninside the subshell returned nonzero before the later command ran.\n\nScope: fix the shared step runner so required failures propagate while the\nparent still records the failure, releases locks and continues collecting other\nstep results. Preserve deliberately advisory commands and missing-tool/error\nclassification. Inspect the other step functions for effects of the same caller.\nUse the smallest change consistent with existing shell patterns; no new runner\nframework, account/model policy, mathematical statements or daemon changes.\n\nAdd focused regression coverage that executes the driver with a failing required\ncommand followed by a succeeding command and checks both step and overall\nfailure. Include a successful case and evidence that later independent steps\nand lock cleanup still work. Keep fixtures isolated from live GitHub and model\nendpoints. Do not replace behavior coverage by checking source text.\n\nBudget: at most two hours and 1000 changed lines, with a target below 250 lines.\nPreserve all existing work. Use a prepared worktree and normal checked branch\npublication, canonical CI and independent review. The main session may not edit\nor push the primary implementation; the merge daemon remains the only merger.\n\nOperational mitigation: PR487's pre-model review was held and a complete\ncanonical run started with the five invoking-session metadata variables removed,\nmatching the environment that passed the targeted 616-test rerun. Review must\nwait for its complete, actually successful evidence. Do not claim partial CI as\nfull CI or silently trust a masked-success log.",
+  "closed_by": null,
+  "reactions": {
+   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/504/reactions",
+   "total_count": 0,
+   "+1": 0,
+   "-1": 0,
+   "laugh": 0,
+   "hooray": 0,
+   "confused": 0,
+   "heart": 0,
+   "rocket": 0,
+   "eyes": 0
+  },
+  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/504/timeline",
+  "performed_via_github_app": null,
+  "state_reason": null,
+  "pinned_comment": null
+ },
+ {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/502",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/502/labels{/name}",
@@ -4276,7 +4453,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/118",
   "issue_dependencies_summary": {
-   "blocked_by": 1,
+   "blocked_by": 0,
    "total_blocked_by": 1,
    "blocking": 1,
    "total_blocking": 1
@@ -4492,100 +4669,6 @@
    "eyes": 0
   },
   "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/403/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/402",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/402/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/402/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/402/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/402",
-  "id": 5388737937,
-  "node_id": "I_kwDOUJyJf88AAAABQTGdkQ",
-  "number": 402,
-  "title": "Add generic marginal contraction estimate",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement"
-   },
-   {
-    "id": 12025012779,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8iKw",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/sorry-elimination",
-    "name": "sorry-elimination",
-    "color": "ededed",
-    "default": false,
-    "description": "Explicitly aimed at discharging remaining `sorry` sites"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-08T15:33:56Z",
-  "updated_at": "2026-09-08T15:33:56Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/118",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 1,
-   "blocking": 1,
-   "total_blocking": 1
-  },
-  "body": "### Scope\n\nRecover the generic marginal contraction estimate used after the point-witness\nabsorption step, with the exact projectivity, orthogonality, completeness, and\ncommutation hypotheses of the existing formulation.\n\n### Source\n\n- `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:912-932`\n- `DistanceCalculus.norm_finset_sum_projector_mul_sq_le`\n- The projection contraction helper from #396 / PR #401\n\n### Acceptance criteria\n\n- Add only `norm_marginal_sub_sq_le` in a dedicated small module.\n- Preserve the generic hypotheses and factor `4` conclusion exactly.\n- Add no witness marginal theorem, bridge premise, axiom, or proof hole.\n- Kernel-check the declaration and inspect its axioms.\n\n### Dependencies\n\n- Stacks on #396 / PR #401.\n",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/402/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/402/timeline",
   "performed_via_github_app": null,
   "state_reason": null,
   "pinned_comment": null
@@ -5964,100 +6047,6 @@
   "pinned_comment": null
  },
  {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/353",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/353/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/353/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/353/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/353",
-  "id": 5383590721,
-  "node_id": "I_kwDOUJyJf88AAAABQOMTQQ",
-  "number": 353,
-  "title": "feat(QPBT/Combining): transport diagonal parameter defect",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement"
-   },
-   {
-    "id": 12025012183,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8f1w",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/qpbt-analysis",
-    "name": "qpbt-analysis",
-    "color": "ededed",
-    "default": false,
-    "description": "Soundness/rigidity analysis of the Pauli basis test \u2014 self-testing bounds and error terms"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-08T07:25:56Z",
-  "updated_at": "2026-09-08T07:25:56Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/348",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 2,
-   "blocking": 0,
-   "total_blocking": 0
-  },
-  "body": "<!-- mipstarre-issue-key: qpbt-diagonal-parameter-defect-transport-20260908 -->\nThe same-line coefficient rejection bound and the independently evaluated\nline bound encode the diagonal evaluation defect through different public\ndefinitions. The first postprocesses `Qline` by `diagonalRead` and coefficient\nevaluation; the second uses the direct low-degree strategy answer measurement\nand its diagonal-answer reader.\n\nProve their exact equality by composing postprocessings, applying the published\n`diagonalRead_eval` theorem, and identifying `consistencyDefect` with the\ncorresponding mismatch average over the same diagonal-line marginal and\nindependent uniform parameter. Zero diagonal directions remain in the law.\n\nThis is a Lean-only transport lemma supporting the passing-value calculation\nunder #348. It adds no projectivity, nonzero-direction, producer, or branch-sum\nhypothesis and does not claim the source QPBT theorem.\n\nDependencies: #328 and #341.\n",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/353/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/353/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/348",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/348/labels{/name}",
@@ -6122,8 +6111,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 2,
-   "completed": 1,
-   "percent_completed": 50
+   "completed": 2,
+   "percent_completed": 100
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/119",
   "issue_dependencies_summary": {
@@ -10117,8 +10106,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 36,
-   "completed": 5,
-   "percent_completed": 13
+   "completed": 6,
+   "percent_completed": 16
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/166",
   "issue_dependencies_summary": {
@@ -11257,9 +11246,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 239,
+  "comments": 241,
   "created_at": "2026-09-02T08:30:04Z",
-  "updated_at": "2026-09-09T10:03:30Z",
+  "updated_at": "2026-09-09T10:47:58Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
