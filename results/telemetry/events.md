@@ -7243,3 +7243,31 @@ not actual commit/publication hooks. No productive session was killed.
   remains operator work, not an excuse to start a duplicate writer. Existing
   failed-refresh owners and deferred488 handle remain intact. Short27 update
   records the handoffs; no primary key, native agent, qpbt-switch or HOLD/STOP.
+
+### 2026-09-09T12:29:07Z - Repair the first merge-train review findings
+
+- Required snapshot completed; previous cycle progressed. Census refilled
+  from8 to9 workers, with4 orcs after admission of repair1114447.
+- Canonical review5154118210 on PR507/e1dd7bb0 found incomplete combined-build
+  coverage, incorrect refusal after ambiguous publication, and incompatible
+  train branch naming for external lake roots. One60-minute bounded repair
+  is authorized within the existing1000-line ceiling, preserving all prior
+  costs and gates. No deployment or live train execution is authorized.
+- Existing508 CI,506 review/daemon handoff,503/478/483 fixes and conflict
+  recoveries retain their owners. One short27 line records the change.
+  No primary key, native agent, HOLD/STOP, qpbt-switch or manual merge.
+
+### 2026-09-09T12:37:30Z - B9 merged and487 scope adjudicated
+
+- Required snapshot completed; previous cycle progressed. PR499 merged
+ 12:24:58Z as5140b7b251375d48230d1dfaca2ef65f196211f3 from5962af6a38fdf9294d6efa207c4fc026f011c9bc.
+  Its exact-head checks were verified; active daemon integration remains
+  governed by the existing runtime ownership.
+- PR487 has four actual reviewed heads and one duplication finding.
+  Extraction/Consistency.lean is byte-identical to current main (e2c99917).
+  Main posted an exact-head out-of-scope adjudication, prepared a conditional
+  refresh template, and added487 to the daemon list. No source refactor,
+  reviewer approval or mathematical obligation was fabricated.
+- Existing repairs, reviews and508 CI retain verified owners. One short27
+  merge update records the outcome. No main push, manual merge, primary-key
+  request, native worker or HOLD/STOP action occurred.
