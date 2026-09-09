@@ -1058,3 +1058,17 @@ unresolved findings. It launched no new model turn, edited no response or
 source, and released the old reviewer and source holds. PR #400 remains
 ineligible to merge until its isolated repair proceeds through normal checked
 publication, CI, and fresh independent review.
+
+## 2026-09-09 - Simplify dispatcher worker reservations (#505)
+
+**Trigger:** `results/telemetry/events.md`, 2026-09-09T11:22Z stale-HOLD incident
+and the issue #505 implementation entry for `orc-505-20260909-01`.
+**Change:** `sessions.md` and `DESIGN.md` define marker-only reservations using
+the two worker caps, missing as zero, ratio selection and 10-second polling.
+The router and shim drop retired gates; native lease and queue entrypoints are
+retired, and `useful-queue.md` becomes historical. Resume/model affinity,
+telemetry, fan-out restrictions and publication/review gates remain enforced.
+**Expected effect:** free configured worker slots are usable without the retired
+Space admission machinery. Installed qpbt-switch retirement belongs to the meta
+session; this branch changes neither that command nor live caps. Runtime effect
+is unverified until checked publication, independent review and deployment.

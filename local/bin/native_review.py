@@ -10,7 +10,6 @@ import subprocess
 import time
 import uuid
 
-from account_router import native_leases, native_process
 from telemetry import native_rollout, now_ts, parse_ts, record_native
 from wf_util import atomic_write
 
@@ -29,14 +28,7 @@ def canonical_thread(value: object, field: str) -> str:
 
 
 def verify_root(cache: Path, thread: str) -> dict:
-    canonical_thread(thread, 'native root thread')
-    lease = native_leases(cache).get(thread)
-    if not lease:
-        raise ValueError('native review requires a live, capacity-leased root')
-    observed = native_process(thread, lease['pid'], lease['slots'])
-    if any(observed[key] != value for key, value in lease.items()):
-        raise ValueError('native review root lease identity changed')
-    return observed
+    raise ValueError('native capacity leases are retired; use external review dispatch')
 
 
 def completed_review(request: dict, thread: str) -> tuple[dict, Path]:

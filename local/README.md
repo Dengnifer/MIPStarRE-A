@@ -49,7 +49,7 @@ unblocks its dependents with no edit anywhere.
 
 ## Telemetry
 
-Optional useful-work queue: [protocol and rollout](protocols/useful-queue.md).
+Retired useful-work queue: [historical protocol](protocols/useful-queue.md).
 
 Session, stage, build, and incident records live under `results/telemetry/` as
 described in [`protocols/meta.md`](protocols/meta.md). The
