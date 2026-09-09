@@ -171,19 +171,18 @@ Astra; Lean files, prover/reviewer roles, or missing historical samples alone do
 Exact edit specifications remain appropriate for mechanical cleanup, not a universal
 Sol gate. The historical C01/C02 audit is retained as evidence, not a role ceiling.
 
-For a model change create a NEW explicit-model native child with Ultra and
-`fork_turns="none"`; follow-up to an Astra thread does not switch its model.
-Link predecessor thread, assignment, worktree, checkpoint and cumulative budget.
-No permission, account, root identity, lease or capacity setting changes here.
-All current-turn contexts are checked; observed models are not inferred from a
-requested argument. Independent review still binds identity, fresh assignment,
-head, prompt and actual completed turn. Hard control-policy review remains Astra.
+For a model change, create a new explicit-model external assignment with Ultra;
+`dispatch.sh --resume` does not switch an existing thread's model. Link the
+predecessor thread, assignment, worktree, checkpoint and cumulative budget.
+Observed models are not inferred from a requested argument. Independent review
+still binds a different session to the exact head and trusted prompt. Hard
+control-policy review remains Astra.
 
-At reviewed activation, main records one timestamp and passes `--activation-at`
-to native telemetry (or `MIPSTARRE_MODEL_POLICY_ACTIVATION_AT` to the publisher).
-Use `--dispatch-kind new` only on a verified first native task; resumed tasks
-use `resume`, and pre-activation current tasks use `grandfathered`. Grandfathering
-requires actual pre-activation turn evidence, not a caller label. Main is excluded.
+At reviewed activation, main records one timestamp in
+`MIPSTARRE_MODEL_POLICY_ACTIVATION_AT`. External dispatch records `new` or
+`resume` automatically; historical pre-activation native tasks remain
+`grandfathered`. Grandfathering requires actual pre-activation turn evidence,
+not a caller label. Main is excluded.
 `model_policy.py --ratio-registry results/telemetry/sessions.jsonl --activation-at
 TIMESTAMP` reports the last 100 distinct new dispatches, plus separate cumulative
 counts. Target 20:1 within 10:1..50:1; unknown observations are not invented,
@@ -193,8 +192,9 @@ never add filler or delay necessary hard work to manufacture a ratio.
 
 No live activation until normal CI, independent control-policy review, service
 merge and an explicit new Sol/Ultra runtime observation. Catalog/CLI Ultra is not
-provider-measured reasoning. External admission uses the worker caps in section 4; deploy the shim with
-its adjacent checked helper, never as a stale standalone copy. Keep all normal
+provider-measured reasoning. External admission uses the worker caps in section 4.
+Deploy the shim with its adjacent checked helper, never as a stale standalone
+copy. Keep all normal
 caller, declaration, statement-integrity, proof-debt, CI/review and merge gates.
 Escalation preserves all accumulated attempts, time, work and historical evidence.
 
@@ -331,7 +331,7 @@ bodies — is attached with `--context-file`, never pasted into the task text
 The session works in its worktree under its sandbox. The standing rules
 injected into every prompt are: read `AGENTS.md` first; treat
 `local/protocols/*.md` as normative; start no sub-session except through
-the applicable external/native protocol above; never review your own diff;
+external `dispatch.sh`; never review your own diff;
 keep runtime state out of the
 repository; and put the result, the residual risk and the hand-off in the
 final message, which is captured to

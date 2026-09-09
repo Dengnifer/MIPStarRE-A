@@ -1072,3 +1072,18 @@ telemetry, fan-out restrictions and publication/review gates remain enforced.
 Space admission machinery. Installed qpbt-switch retirement belongs to the meta
 session; this branch changes neither that command nor live caps. Runtime effect
 is unverified until checked publication, independent review and deployment.
+
+## 2026-09-09 - Complete native review retirement (#505)
+
+**Trigger:** PR #508 review F1 found that a stale
+`MIPSTARRE_NATIVE_REVIEW_ROOT` export still diverted `review.sh` into the
+disabled lease-backed handler, while active operator prose still required the
+retired native pool. This is the review-facing remainder of the
+`results/telemetry/events.md` 2026-09-09T11:22Z stale-HOLD incident.
+**Change:** `review.sh` sends every new review through external `dispatch.sh`
+and clears inherited native-review variables after warning. `review.md`, the
+main persona, and active workflow summaries now direct new work through marker-
+reserved external dispatch; the former native review procedure remains marked
+as historical. **Expected effect:** stale shell configuration cannot strand a
+review in the retired lease verifier, and operators no longer receive mutually
+exclusive native-lease and external-capacity instructions.

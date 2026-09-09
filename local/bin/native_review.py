@@ -1,4 +1,4 @@
-"""Bridge independent native reviews into review.sh's unchanged exact-head publisher."""
+"""Historical native-review transport retained for archived review evidence."""
 
 import argparse
 import hashlib
@@ -28,7 +28,11 @@ def canonical_thread(value: object, field: str) -> str:
 
 
 def verify_root(cache: Path, thread: str) -> dict:
-    raise ValueError('native capacity leases are retired; use external review dispatch')
+    """Reject the retired lease-backed review path before reading runtime state."""
+    raise ValueError(
+        'native capacity leases are retired; unset legacy variables and use '
+        'external review dispatch'
+    )
 
 
 def completed_review(request: dict, thread: str) -> tuple[dict, Path]:

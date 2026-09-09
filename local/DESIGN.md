@@ -125,8 +125,9 @@ documented failure modes. Sources are cited in `local/protocols/*.md`.
   captures the `--json` event stream to
   `results/telemetry/sessions/<name>.jsonl`, and appends a summary line to
   `results/telemetry/sessions.jsonl`. Archiving a session = final status line
-  in the registry + worktree removal; the JSONL capture is the archive. Native
-  descendants use the root lease and `telemetry.py native-record` (`sessions.md`).
+  in the registry + worktree removal; the JSONL capture is the archive.
+  Historical native-descendant rows remain readable, but lease-backed native
+  dispatch is retired (`sessions.md`, issue #505).
 
 ## Telemetry (research-paper data)
 
