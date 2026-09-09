@@ -95,6 +95,46 @@ theorem combinePoly_eval {K : Type*} [CommSemiring K] {m : ℕ}
       u (betaVar m) * MvPolynomial.eval (u ∘ embZ m) g
   simp [combinePoly, MvPolynomial.eval_rename]
 
+/-- A fresh variable times an injectively renamed bounded polynomial retains
+the same individual-degree bound.  This is a formalization-only auxiliary for
+`def:combine-map`, paper
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:970-983`. -/
+private theorem x_mul_rename_mem_polyFunc {K : Type*} [CommSemiring K]
+    {m n d : ℕ} (hd : 1 ≤ d) {e : Fin m → Fin n} (he : Function.Injective e)
+    {a : Fin n} (ha : ∀ i, e i ≠ a) {p : MvPolynomial (Fin m) K}
+    (hp : p ∈ polyFunc m K d) :
+    MvPolynomial.X a * MvPolynomial.rename e p ∈ polyFunc n K d := by
+  classical
+  have hrenOutside {j : Fin n} (hj : j ∉ Set.range e) :
+      (MvPolynomial.rename e p).degreeOf j = 0 := by
+    apply Nat.le_zero.mp
+    rw [MvPolynomial.degreeOf_le_iff]
+    intro s hs
+    rw [MvPolynomial.support_rename_of_injective he] at hs
+    obtain ⟨t, _, rfl⟩ := Finset.mem_image.mp hs
+    simp [Finsupp.mapDomain_notin_range _ _ hj]
+  have hrenAll (j : Fin n) : (MvPolynomial.rename e p).degreeOf j ≤ d := by
+    by_cases hj : j ∈ Set.range e
+    · obtain ⟨i, rfl⟩ := hj
+      rw [MvPolynomial.degreeOf_rename_of_injective he]
+      exact degreeOf_le_of_mem_polyFunc hp i
+    · rw [hrenOutside hj]
+      exact Nat.zero_le d
+  have haRange : a ∉ Set.range e := by
+    rintro ⟨i, hi⟩
+    exact ha i hi
+  refine (MvPolynomial.mem_restrictDegree _ _ _).mpr ?_
+  intro s hs j
+  refine MvPolynomial.degreeOf_le_iff.mp ?_ s hs
+  by_cases hj : j = a
+  · subst j
+    rw [mul_comm]
+    exact (MvPolynomial.degreeOf_mul_X_self a _).trans (by
+      rw [hrenOutside haRange]
+      omega)
+  · rw [mul_comm, MvPolynomial.degreeOf_mul_X_of_ne _ hj]
+    exact hrenAll j
+
 /-- The combining polynomial has individual degree at most `d` when
 `hd : 1 ≤ d`.  The coordinate blocks are disjoint: `f` depends only on the
 `x` variables and `g` only on the `z` variables, so multiplication by `alpha`
@@ -111,7 +151,22 @@ theorem combinePoly_mem_polyFunc {K : Type*} [CommSemiring K] {m d : ℕ}
     (hd : 1 ≤ d) {f g : MvPolynomial (Fin m) K}
     (hf : f ∈ polyFunc m K d) (hg : g ∈ polyFunc m K d) :
     combinePoly f g ∈ polyFunc (2 * m + 2) K d := by
-  sorry
+  have hsymm : Function.Injective (finCombineEquiv m).symm :=
+    (finCombineEquiv m).symm.injective
+  have hX : Function.Injective (embX m) := by
+    intro i j hij
+    simpa using hsymm hij
+  have hZ : Function.Injective (embZ m) := by
+    intro i j hij
+    simpa using hsymm hij
+  have haX : ∀ i, embX m i ≠ alphaVar m := by
+    intro i hi
+    simpa using hsymm hi
+  have haZ : ∀ i, embZ m i ≠ betaVar m := by
+    intro i hi
+    simpa using hsymm hi
+  exact Submodule.add_mem _ (x_mul_rename_mem_polyFunc hd hX haX hf)
+    (x_mul_rename_mem_polyFunc hd hZ haZ hg)
 
 /-- Evaluate one member of a global polynomial pair at a point, selecting the
 component by Pauli basis.  This is formalization-only support for
