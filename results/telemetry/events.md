@@ -7244,3 +7244,26 @@ not actual commit/publication hooks. No productive session was killed.
 - Daemon refreshes431/458. No duplicate writer or extra full-build lane was
   started while capacity is occupied. One short27 update records current
   counts. No primary key, native worker, qpbt-switch or HOLD/STOP use.
+
+## 2026-09-09 - PR443 publication blocked after concurrent main advance
+
+- Session `orc-439-20260909-04` completed preservation merge `fca51b56` and
+  its focused and full builds, but checked publication failed after main
+  advanced: reverse blueprint coverage requires a unique merge base.
+  Ordinary merge of immutable `ed2caf063ceb0cec0a0c0639d3bba91b4b5a19ac`
+  produced `45410ef026d238c9b2f7c4d8836d13fafd7b8206`, preserving both
+  histories and restoring a unique base. Pending and committed merge-loss
+  guards passed for both merges, including the two-base preservation check.
+- The new main contains the generic `evalCoefficient_collision_card_le` in
+  `Algebra.Coefficients`. Retained `polynomial_ofFn_eval_eq_evalCoefficient`
+  and the unchanged uniform affine-collision signature, using that existing
+  generic bound instead of redeclaring its specialization. Focused build of
+  `Lines.UniformAffineCollision` passed all 8776 jobs with no new proof hole.
+- The second checked push stopped before transport because stale compiled
+  `Combining.Defs` still declares `linePolynomialOfCoefficients`, now supplied
+  by `Algebra.Coefficients`. Rebuild downstream modules under the usual build
+  protocol before retrying checked publication and complete canonical CI.
+  No repaired head is published: GitHub still reports `054af1be` at 20:35 +0800.
+  Both requested markers remain. The 20:37:02 admission deadline, all review
+  rounds and budgets remain binding. Detailed logs and the continuing handoff
+  are in `sessions/orc-439-20260909-04.recovery.md` under the runtime cache.
