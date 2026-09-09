@@ -7097,3 +7097,10 @@ not actual commit/publication hooks. No productive session was killed.
   acquire the unchanged full-build lock, inspect the actual616-test result,
   and obtain green exact-head gates before independent review. No third
   full CI run is started within this continuation's45-minute admission bound.
+
+## 2026-09-09 — Dispatch routers SIGSTOPped behind a stale HOLD file; pipeline ran at four workers for an hour (2026-09-09T11:22Z)
+- From about 10:20Z five `account_router.py` processes (children of orc dispatches) were in state T: `qpbt-switch` stops routers as its
+  "hold" mechanism (line 331) and a `useful-queue/HOLD` file dated 2026-09-06 ("publication access failure") was still present, while the
+  second account had six free slots. The meta session sent SIGCONT to the routers (workers 4 -> 8 within a minute), removed the HOLD file
+  (kept as HOLD.removed-by-meta), found the queue supervisor already dead, and filed issue #505 to strip the Space-era admission
+  machinery from the router. The main session must never run qpbt-switch. (Entry rewritten: the first append mangled its backticks.)
