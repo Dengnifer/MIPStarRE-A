@@ -6221,9 +6221,7 @@ not actual commit/publication hooks. No productive session was killed.
   These are minimal source-preserving repairs, not new hypotheses or proof attempts.
 - Other mathematical work continues while the scoped owner question waits. Main made no
   manual telemetry commit/publication, one-off merge or daemon change this cycle.
-
 ## 2026-09-09 - Review-cap conflict and saved-repair recovery (06:20Z)
-
 - PR355's minimal bibliography fix is published at c8ad5efbb37a901710f39ae7dd07670b15044100
   with all nine CI contexts green. Main inspected the two-file patch and its regression
   evidence. The existing check_review gate requires a current-head canonical review even
@@ -6241,9 +6239,7 @@ not actual commit/publication hooks. No productive session was killed.
 - By the closing check, all five recovery dispatches had admitted their Sol workers and
   the actual count returned to12. B9 and B10 remain scoped owner questions, not a reason
   to stop independent mathematics. The deficiency and refill are reported on #27.
-
 ## 2026-09-09 - Restrict work to existing backlog; PR375 merged (06:28Z)
-
 - Owner06:15Z directs no new packet lanes until the open-PR count is below50. A fresh
   paginated GitHub read found95 open PRs. Main applied the restriction immediately:
   only existing-PR reviews, fixes and recoveries, plus the already-authorized498 lane.
@@ -6257,9 +6253,7 @@ not actual commit/publication hooks. No productive session was killed.
   from exact head046c3abdcf2d624de49399c4131d316275fd648e; all ten CI/review statuses are
   success. The daemon performed the merge. Main reports it and the backlog restriction
   on #27 and makes no manual telemetry commit or publication this cycle.
-
 ## 2026-09-09 - Owner removes backlog cutoff and adopts v9d telemetry handling (06:39Z)
-
 - Owner06:20Z supersedes the below50 restriction: ready-packet provers are permitted
   again after existing reviews and repairs. The earlier60 count was truncated. Main
   retains the latest policy rather than the superseded cutoff; no new packet was needed
@@ -6275,3 +6269,35 @@ not actual commit/publication hooks. No productive session was killed.
   checking no live loop owned them, main retried them as PIDs570153/570154; both admitted
   their provers. The closing count was14. B9 and B10 were re-read and still have no owner
   disposition; only their dependent actions remain held. No manual telemetry commit.
+## 2026-09-09 - PR 481 bounded repair recovery
+- At head `12ac3b9c9d0d7b3ef1c5894a231fc952749a87dd`, the prior repair
+  worktrees were clean and their changes already adopted. Focused Lean and
+  axiom checks passed. The first CI attempt lost the build-lock race; the
+  locked retry passed all gates in 333 seconds. Independent Astra
+  `source_semantic` prose review requested four documentation/status repairs.
+  Code-review admission was delayed, and that lane was stopped after the
+  60-minute worker limit without a final verdict; the runner exited 4 and
+  published review failure. No source edits or budget resets were made.
+  Evidence, historical budget, pending findings and exact head are recorded
+  in `results/telemetry/pr481-recovery-20260909.md`. The report and this entry
+  remain uncommitted to preserve the tested head. Lesson: account for reviewer
+  admission time within a bounded recovery; green CI is not completed review.
+- PR213 history reconciliation: the incoming #210 episode opus-prover-210-s10-20260905T1157Z records completion with estimated times 2026-09-05T11:57Z to13:20Z. The current registry already contains the same completed episode, proof note,2551working seconds and239016tokens, with 2026-09-05T12:21Z to13:03Z from the documented14:37Z clock re-anchoring. These are one corrected episode, not two sessions or additional charges. Retained all247current raw owner rows byte-for-byte; the existing three-line #210 completion event is already present and is not duplicated. The incoming raw variant and all210incoming rows remain recoverable from f1dc470395734138ab5e8c4ff1fc485d1edce79a:results/telemetry/owner-sessions.jsonl (blobd82226d2f30f73cf7bba7ab60a6803e41500cb30), with current blob 9385f61fb09857053fc626482ebcc92b28ce909e and base blob ddf367a0d9107fac4875f882db885252afd8419d preserved. Exact stage1/2/3 copies and index receipt are retained in pr213-telemetry-stages-y6o3lle_. This specific supersession preserves the86-row clock correction and all budgets; no generic deduplication or other conflict resolution was performed.
+
+## 2026-09-09 - Completed repair handoffs continue (06:47Z)
+
+- PR424's saved seven-file repair is published at11ae9bed29a3beb3725d6ce54677ff3046ea45df
+  with green canonical CI and a clean worktree. Main queued independent forced review
+  PID654985 after confirming there was no live reviewer or fixer; this reviews the bot-fix
+  head without weakening any other gate.
+- PR481's completed prose repair is blocked only at guarded publication by multiple merge
+  bases. Bounded preservation recovery PID654986 owns the graph/publication issue, not a
+  repeat of its mathematical or documentation work. All prior source edits and budgets
+  remain intact.
+- B9 and B10 were re-read without an owner response. The current #357 worker remains the
+  owned action for child353 blocking #359; no duplicate implementation was launched.
+  The closing observed count was12, above floor8. No manual telemetry commit, publication,
+  daemon edit or one-off merge/refresh command was made this cycle.
+- The final whitespace check found one unpaired diff3 ancestor delimiter in the primary
+  telemetry log, with no unresolved Git index entry. Main removed only that delimiter,
+  preserving all event text and history on both sides; no generic deduplication was used.
