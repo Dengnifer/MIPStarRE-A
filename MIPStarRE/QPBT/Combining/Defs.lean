@@ -196,6 +196,35 @@ theorem linePolynomialOfCoefficients_eval {K : Type*} [Semiring K]
   rw [Polynomial.eval_finsetSum]
   simp
 
+/-- The bounded coefficient vector of a univariate polynomial.  For polynomials
+of degree at most `n`, it preserves evaluation by
+`evalCoefficient_coefficientsOfPolynomial`. -/
+def coefficientsOfPolynomial {K : Type*} [Semiring K] (n : ℕ)
+    (p : Polynomial K) : Fin (n + 1) → K :=
+  fun i => p.coeff i.val
+
+/-- A polynomial of degree at most `n` is evaluated by its bounded coefficient
+vector of length `n + 1`. -/
+theorem evalCoefficient_coefficientsOfPolynomial {K : Type*} [Semiring K] {n : ℕ}
+    {p : Polynomial K} (hp : p.natDegree ≤ n) (t : K) :
+    evalCoefficient (coefficientsOfPolynomial n p) t = p.eval t := by
+  rw [Polynomial.eval_eq_sum_range' (Nat.lt_succ_of_le hp) t,
+    ← Fin.sum_univ_eq_sum_range (fun i => p.coeff i * t ^ i) (n + 1)]
+  rfl
+
+/-- The polynomial of a bounded coefficient vector has degree at most `n`. -/
+theorem linePolynomialOfCoefficients_natDegree_le {K : Type*} [Semiring K] {n : ℕ}
+    (f : Fin (n + 1) → K) :
+    (linePolynomialOfCoefficients f).natDegree ≤ n := by
+  refine Polynomial.natDegree_sum_le_of_forall_le _ _ fun i _ => ?_
+  refine le_trans (Polynomial.natDegree_C_mul_le _ _) ?_
+  calc (Polynomial.X ^ i.val : Polynomial K).natDegree
+      ≤ i.val * (Polynomial.X : Polynomial K).natDegree :=
+        Polynomial.natDegree_pow_le
+    _ ≤ i.val * 1 := Nat.mul_le_mul_left _ Polynomial.natDegree_X_le
+    _ = i.val := mul_one _
+    _ ≤ n := Nat.lt_succ_iff.mp i.isLt
+
 /-- The univariate polynomial before coefficient extraction in
 `combineLinePoly`.  The four first scalars describe the affine parameters on
 the two projected lines; the last four are the affine `alpha` and `beta`
@@ -218,22 +247,6 @@ blueprint
 theorem combineLinePolynomial_natDegree_le {K : Type*} [CommSemiring K] {c : ℕ}
     (aX bX aZ bZ uα vα uβ vβ : K) (f g : Fin (c + 1) → K) :
     (combineLinePolynomial aX bX aZ bZ uα vα uβ vβ f g).natDegree ≤ c + 1 := by
-  have coefficientDegree : ∀ h : Fin (c + 1) → K,
-      (linePolynomialOfCoefficients h).natDegree ≤ c := by
-    intro h
-    refine Polynomial.natDegree_sum_le_of_forall_le _ _ ?_
-    intro i _
-    refine Polynomial.natDegree_mul_le.trans ?_
-    rw [Polynomial.natDegree_C]
-    have hpow : (Polynomial.X ^ i.val : Polynomial K).natDegree ≤ i.val := by
-      refine Polynomial.natDegree_pow_le.trans ?_
-      have hX := Polynomial.natDegree_X_le (R := K)
-      calc
-        i.val * (Polynomial.X : Polynomial K).natDegree ≤ i.val * 1 :=
-          Nat.mul_le_mul_left _ hX
-        _ = i.val := by ring
-    have hi : i.val ≤ c := Nat.lt_succ_iff.mp i.isLt
-    omega
   have affineDegree : ∀ u v : K,
       (Polynomial.C u + Polynomial.C v * Polynomial.X).natDegree ≤ 1 := by
     intro u v
@@ -255,7 +268,7 @@ theorem combineLinePolynomial_natDegree_le {K : Type*} [CommSemiring K] {c : ℕ
       calc
         (linePolynomialOfCoefficients h).natDegree *
               (Polynomial.C a + Polynomial.C b * Polynomial.X).natDegree ≤ c * 1 :=
-          Nat.mul_le_mul (coefficientDegree h) (affineDegree a b)
+          Nat.mul_le_mul (linePolynomialOfCoefficients_natDegree_le h) (affineDegree a b)
         _ = c := by ring
     omega
   exact (Polynomial.natDegree_add_le _ _).trans
@@ -312,13 +325,8 @@ theorem combineLinePoly_spec {K : Type*} [Field K] {m c : ℕ}
   have hdeg := combineLinePolynomial_natDegree_le aX bX aZ bZ uα vα uβ vβ f g
   have heval :
       evalCoefficient (combineLinePoly aX bX aZ bZ uα vα uβ vβ f g) t =
-        (combineLinePolynomial aX bX aZ bZ uα vα uβ vβ f g).eval t := by
-    rw [Polynomial.eval_eq_sum_range' (n := c + 1 + 1) (by omega) t]
-    simp only [evalCoefficient, combineLinePoly]
-    exact Fin.sum_univ_eq_sum_range
-      (fun k =>
-        (combineLinePolynomial aX bX aZ bZ uα vα uβ vβ f g).coeff k * t ^ k)
-      (c + 1 + 1)
+        (combineLinePolynomial aX bX aZ bZ uα vα uβ vβ f g).eval t :=
+    evalCoefficient_coefficientsOfPolynomial hdeg t
   rw [heval, combineLinePolynomial]
   simp only [Polynomial.eval_add, Polynomial.eval_mul, Polynomial.eval_C,
     Polynomial.eval_X, Polynomial.eval_comp, linePolynomialOfCoefficients_eval]

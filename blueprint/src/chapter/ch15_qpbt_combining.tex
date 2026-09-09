@@ -1106,6 +1106,53 @@ analyzed, together with candidate repairs, in
 	multiplied by an affine factor of degree at most one.
 \end{definition}
 
+\begin{lemma}[Formalization support for averaged affine coarse-graining]
+	\label{lem:qld-affine-distance-contraction}
+	\lean{MIPStarRE.QPBT.opFamilyDistSq_uniform_affine_postprocess_le}
+	\leanok
+	\uses{def:povm-distance}
+	This auxiliary lemma isolates the squared-distance calculation used in
+	Lemma~\ref{lem:qld-4-12}; it is not a named statement of the source paper.
+	Let $U$ be a nonempty finite set, let $K$ be a finite field of order $q$,
+	and let $\ket{\psi}$ be a vector in a finite-dimensional complex Hilbert
+	space. For each $u\in U$, let $\{A^u_p\}_{p\in K^2}$ and
+	$\{B^u_p\}_{p\in K^2}$ be operator families satisfying
+	$\sum_p A^u_p=\sum_p B^u_p$. For $\alpha,\beta\in K$, put
+	$h_{\alpha,\beta}(a,b)=\alpha a+\beta b$ and define
+	\[
+		A^{u,\alpha,\beta}_c=\sum_{p:h_{\alpha,\beta}(p)=c}A^u_p,
+		\qquad
+		B^{u,\alpha,\beta}_c=\sum_{p:h_{\alpha,\beta}(p)=c}B^u_p.
+	\]
+	Then, with all expectations uniform and independent,
+	\[
+		\E_{u,\alpha,\beta}\sum_{c\in K}
+		\big\|(A^{u,\alpha,\beta}_c-B^{u,\alpha,\beta}_c)\ket{\psi}\big\|^2
+		\le
+		\E_u\sum_{p\in K^2}\big\|(A^u_p-B^u_p)\ket{\psi}\big\|^2.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	Fix $u$ and put $v_p=(A^u_p-B^u_p)\ket{\psi}$. Equality of the
+	operator totals gives $\sum_p v_p=0$. For distinct $p,p'\in K^2$,
+	the equation $h_{\alpha,\beta}(p)=h_{\alpha,\beta}(p')$ is one
+	nonzero homogeneous linear equation in $\alpha,\beta$, so it has $q$
+	solutions among the $q^2$ coefficient pairs. Thus its probability is
+	$1/q$, whereas a pair collides with itself with probability one.
+	Expanding the squared norms and averaging gives
+	\[
+		\E_{\alpha,\beta}\sum_c
+		\Big\|\sum_{p:h_{\alpha,\beta}(p)=c}v_p\Big\|^2
+		=\Big(1-\frac1q\Big)\sum_p\|v_p\|^2
+		 +\frac1q\Big\|\sum_p v_p\Big\|^2
+		=\Big(1-\frac1q\Big)\sum_p\|v_p\|^2
+		\le\sum_p\|v_p\|^2.
+	\]
+	Averaging over $u$ proves the assertion. No positivity or commutativity
+	of the operator families is required.
+\end{proof}
+
 \begin{lemma}[Combined point measurement on the extended coordinates]
 	\label{lem:qld-4-12}
 	\lean{MIPStarRE.QPBT.CombinedPointsWitness.extendedQ}
@@ -1150,17 +1197,30 @@ analyzed, together with candidate repairs, in
 	Furthermore, all symmetric equivalents of these approximations also hold.
 \end{lemma}
 \begin{proof}
-	\uses{lem:qld-4-10, fact:data-processing}
+	\uses{lem:qld-4-10, lem:qld-affine-distance-contraction}
 	Define
 	$\hat{Q}^{x,z,\alpha,\beta}_{c}
 	= \sum_{a,b \,:\, \alpha a + \beta b = c} \hat{Q}^{x,z}_{a,b}$,
 	a coarse-graining of the projective measurement of
-	Lemma~\ref{lem:qld-4-10}, hence itself projective. A uniformly random
-	point of $\F_q^{2m+2}$ has uniformly random coordinates $(x,z)$, so the
-	self-consistency and consistency properties follow from those of
-	$\{\hat{Q}^{x,z}_{a,b}\}$ established in Lemma~\ref{lem:qld-4-10}
-	together with Lemma~\ref{fact:data-processing}, which shows that
-	coarse-graining the outcomes preserves the $\delta_Q$ bounds.
+	Lemma~\ref{lem:qld-4-10}, hence itself projective. For each $(x,z)$,
+	the joint measurement and both ordered product families have total
+	identity: completeness gives
+	\[
+		\sum_{a,b}\hat{M}^{(\mathrm{Point},X),x}_a
+		\hat{M}^{(\mathrm{Point},Z),z}_b
+		=\Big(\sum_a\hat{M}^{(\mathrm{Point},X),x}_a\Big)
+		 \Big(\sum_b\hat{M}^{(\mathrm{Point},Z),z}_b\Big)=\Id,
+	\]
+	and the same calculation holds in the reverse order. Register placement
+	preserves sums and identity, so the compared families have equal totals
+	for every opposite placement. Apply
+	Lemma~\ref{lem:qld-affine-distance-contraction} to each of the three
+	comparisons of Lemma~\ref{lem:qld-4-10}. Uniform sampling of
+	$(x,z,\alpha,\beta)$ samples $(x,z)$ and both coefficients independently,
+	so the averaged squared distances retain their $\delta_Q$ bounds,
+	including all symmetric equivalents. This argument presupposes the
+	joint measurements whose existence is the separate construction in
+	Lemma~\ref{lem:qld-4-10}.
 \end{proof}
 
 \begin{lemma}[Combined line measurement on the extended coordinates]
