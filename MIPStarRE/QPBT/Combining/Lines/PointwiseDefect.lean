@@ -39,35 +39,10 @@ theorem consistencyDefect_integrand_le_one {P : AdmissibleParams} {ε : ℝ}
   rw [h]
   have hproduct (answer : Outcome) :
       0 ≤ S.place p1 (first.effect answer) * S.place p2 (second.effect answer) := by
-    have hfirst := first.pos answer
-    have hsecond := second.pos answer
-    have hone : 0 ≤ (1 : Op (PauliRegister P × PauliRegister P)) :=
-      Matrix.PosSemidef.one.nonneg
-    cases p1 <;> cases p2 <;> simp only [Placement.IsOpposite] at hopp
-    · rw [ProjectiveSetting.place_AA'_eq, ProjectiveSetting.place_BA''_eq,
-        ← WinImplications.reindexOp_mul, heteroKron_mul]
-      simp only [mul_one, one_mul]
-      exact ProjectiveSetting.reindexOp_nonneg _
-        (MIPStarRE.Quantum.kronecker_nonneg hfirst
-          (MIPStarRE.Quantum.kronecker_nonneg hsecond hone))
-    · rw [ProjectiveSetting.place_BA''_eq, ProjectiveSetting.place_AA'_eq,
-        ← WinImplications.reindexOp_mul, heteroKron_mul]
-      simp only [mul_one, one_mul]
-      exact ProjectiveSetting.reindexOp_nonneg _
-        (MIPStarRE.Quantum.kronecker_nonneg hsecond
-          (MIPStarRE.Quantum.kronecker_nonneg hfirst hone))
-    · rw [ProjectiveSetting.place_BB'_eq, ProjectiveSetting.place_AB''_eq,
-        ← WinImplications.reindexOp_mul, heteroKron_mul]
-      simp only [mul_one, one_mul]
-      exact ProjectiveSetting.reindexOp_nonneg _
-        (MIPStarRE.Quantum.kronecker_nonneg hsecond
-          (MIPStarRE.Quantum.kronecker_nonneg hfirst hone))
-    · rw [ProjectiveSetting.place_AB''_eq, ProjectiveSetting.place_BB'_eq,
-        ← WinImplications.reindexOp_mul, heteroKron_mul]
-      simp only [mul_one, one_mul]
-      exact ProjectiveSetting.reindexOp_nonneg _
-        (MIPStarRE.Quantum.kronecker_nonneg hfirst
-          (MIPStarRE.Quantum.kronecker_nonneg hsecond hone))
+    exact Commute.mul_nonneg
+      (S.place_nonneg p1 (first.pos answer))
+      (S.place_nonneg p2 (second.pos answer))
+      (S.place_comm p1 p2 hopp _ _)
   have hdiag : 0 ≤ ∑ answer : Outcome, DistanceCalculus.stateQForm S.psiHat
       (S.place p1 (first.effect answer) * S.place p2 (second.effect answer)) :=
     Finset.sum_nonneg fun answer _ => DistanceCalculus.stateQForm_nonneg _
