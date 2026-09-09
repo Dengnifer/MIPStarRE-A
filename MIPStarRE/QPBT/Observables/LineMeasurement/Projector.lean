@@ -375,34 +375,11 @@ theorem sum_stateQForm_eprState_tauLineProj_one (P : AdmissibleParams)
     ∑ f : DegPoly P.toLdParams (P.m * P.d),
         DistanceCalculus.stateQForm (eprState (PauliRegister P))
           (heteroKron (tauLineProj P W line f) (1 : Op (PauliRegister P))) = 1 := by
-  have hsumop :
-      (∑ f : DegPoly P.toLdParams (P.m * P.d),
-          heteroKron (tauLineProj P W line f) (1 : Op (PauliRegister P))) =
-        heteroKron (∑ f : DegPoly P.toLdParams (P.m * P.d), tauLineProj P W line f)
-          (1 : Op (PauliRegister P)) := by
-    ext i j
-    rcases i with ⟨i₁, i₂⟩
-    rcases j with ⟨j₁, j₂⟩
-    unfold heteroKron Matrix.kronecker Matrix.kroneckerMap
-    simp only [Matrix.of_apply, Matrix.sum_apply]
-    rw [Finset.sum_mul]
-  rw [← show DistanceCalculus.stateQForm (eprState (PauliRegister P))
-      (∑ f : DegPoly P.toLdParams (P.m * P.d),
-        heteroKron (tauLineProj P W line f) (1 : Op (PauliRegister P))) =
-        ∑ f : DegPoly P.toLdParams (P.m * P.d),
-          DistanceCalculus.stateQForm (eprState (PauliRegister P))
-            (heteroKron (tauLineProj P W line f) (1 : Op (PauliRegister P))) by
-    simp [DistanceCalculus.stateQForm, applyOperatorToState]]
-  rw [hsumop, sum_tauLineProj_eq_one, heteroKron_one_one]
-  unfold DistanceCalculus.stateQForm
-  rw [WinImplications.applyOperatorToState_one]
-  calc
-    (inner ℂ (eprState (PauliRegister P))
-        (eprState (PauliRegister P))).re =
-      ‖eprState (PauliRegister P)‖ ^ 2 := by
-        simpa using (inner_self_eq_norm_sq (𝕜 := ℂ)
-          (eprState (PauliRegister P)))
-    _ = 1 := by rw [eprState_norm]; norm_num
+  rw [← DistanceCalculus.stateQForm_finset_sum,
+    ← DistanceCalculus.heteroKron_finset_sum_left,
+    sum_tauLineProj_eq_one, heteroKron_one_one,
+    stateQForm_one_eq_norm_sq, eprState_norm]
+  norm_num
 
 /-- The diagonal overlap of the two Pauli line measurements on an EPR pair is
 one. Thus the ancillary measurement contributes no consistency defect. This
