@@ -19,7 +19,9 @@ crosswise EPR exchange and its invariance are the separate blueprint auxiliaries
 `def:epr-cross-swap` and `lem:epr-cross-swap-invariance`.  This involution is
 distinct from `U_σ U_θ` in `lem:symmetric-equivalents-transfer` and does not
 establish that full transfer lemma.  It requires no symmetry of the strategy;
-its use for `lem:qld-4-10` is analyzed in
+its use for `lem:qld-4-10` is explained in
+`docs/paper-gaps/qpbt_combined-points-direct.tex`, and its distinction from the
+source transfer is analyzed in
 `docs/paper-gaps/qpbt_linearity-theorem-quotation.tex`.
 -/
 
@@ -286,8 +288,9 @@ theorem placedMeasurement_isProjective (S : ProjectiveSetting P ε)
 /-! ## The crosswise exchange of the two EPR pairs -/
 
 /-- The involution of the six registers exchanging `A'` with `B''` and `A''`
-with `B'`, and fixing the strategy registers `A` and `B`.
-This is blueprint `def:epr-cross-swap`, a formalization-only auxiliary. -/
+with `B'`, while fixing `A` and `B`.  This involution exchanges the two EPR
+pairs and reverses the order within each pair.  This is blueprint
+`def:epr-cross-swap`, a formalization-only auxiliary. -/
 def eprCrossSwap (P : AdmissibleParams) (ιA ιB : Type*) :
     SixReg P ιA ιB ≃ SixReg P ιA ιB where
   toFun := fun ⟨⟨a, a', a''⟩, b, b', b''⟩ => ((a, (b'', b')), (b, (a'', a')))
